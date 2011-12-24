@@ -2,8 +2,9 @@
 This will test the interface to SliceViewer widgets.
 
 Note: the SliceViewerPythonInterfaceTest.py offers
-more tests of specific functions. Might be merged together with
-this in the future?
+more tests of specific functions. This module
+tests (primarily) the plotSlice() helper methods that is available
+only within mantidplot.py
 """
 import sys
 import os
@@ -71,7 +72,7 @@ class MantidPlotSliceViewerTest(unittest.TestCase):
 		svw2 = getSliceViewer('uniform')
 		assert svw2 is not None
 		self.assertEqual(svw2.getSlicer().getWorkspaceName(), "uniform") 
-		
+
 	def test_getSliceViewer_failure(self):
 		""" Retrieving an open SliceViewer, cases where it fails """
 		self.assertRaises(Exception, getSliceViewer, 'nonexistent')
@@ -80,3 +81,4 @@ class MantidPlotSliceViewerTest(unittest.TestCase):
 		
 # Run the unit tests
 mantidplottests.runTests(MantidPlotSliceViewerTest)
+

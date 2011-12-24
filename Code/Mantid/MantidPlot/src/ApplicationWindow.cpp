@@ -203,7 +203,7 @@ void file_uncompress(const char  *file);
 
 
 ApplicationWindow::ApplicationWindow(bool factorySettings)
-: QMainWindow(), Scripted(ScriptingLangManager::newEnv(this))
+: QMainWindow(), Scripted(ScriptingLangManager::newEnv(this)), m_exitCode(0)
 {
   QCoreApplication::setOrganizationName("ISIS");
   QCoreApplication::setApplicationName("MantidPlot");
@@ -1592,6 +1592,28 @@ void ApplicationWindow::customColumnActions()
   if (selectedCols == 2)
     actionSwapColumns->setEnabled(true);
 }
+
+
+/** Set the exit code to be returned by the application at
+ * exit. Used by MantidPlot unit tests to signal failure.
+ *
+ * @param code :: int code, non-zero for failure
+ */
+void ApplicationWindow::setExitCode(int code)
+{
+  m_exitCode = code;
+}
+
+/** Get the exit code to be returned by the application at
+ * exit. Used by MantidPlot unit tests to signal failure.
+ *
+ * @return code :: int code, non-zero for failure
+ */
+int ApplicationWindow::getExitCode()
+{
+  return m_exitCode;
+}
+
 
 void ApplicationWindow::customToolBars(MdiSubWindow* w)
 {

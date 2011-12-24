@@ -6,6 +6,7 @@ import sys
 import os
 import unittest
 import time
+import qti
 
 def runTests(classname):
     """ Run the test suite in the class.
@@ -22,5 +23,14 @@ def runTests(classname):
         sys.path.append( os.path.join(src, "TestingTools/unittest-xml-reporting/src") )
         import xmlrunner
         runner = xmlrunner.XMLTestRunner(output='Testing')
+	
     #Run using either runner
-    runner.run(suite)
+    res = runner.run(suite)
+    
+    # Set Mantid exit code
+    if not res.wasSuccessful():
+        qti.app.setExitCode(1)
+    else:
+        qti.app.setExitCode(0)
+    
+    return res

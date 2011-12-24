@@ -961,6 +961,8 @@ sipClass=sipFindClass(sipCpp->className());
 %End
 
 public:
+  void setExitCode(int code);
+
   enum MatrixToTableConversion{Direct, XYZ, YXZ};
   Table* table(const QString&);
 %MethodCode
