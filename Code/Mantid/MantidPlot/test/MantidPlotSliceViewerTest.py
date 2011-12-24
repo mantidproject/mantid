@@ -10,6 +10,7 @@ import sys
 import os
 import unittest
 import mantidplottests
+from mantidplottests import screenshot
 import time
 
 CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace='mdw')
@@ -31,6 +32,7 @@ class MantidPlotSliceViewerTest(unittest.TestCase):
 		""" Basic plotSlice() usage """
 		svw = plotSlice('uniform')
 		self.assertEqual(svw.getSlicer().getWorkspaceName(), "uniform") 
+		screenshot(svw, "SliceViewer", "Basic SliceViewer view")
 		
 	def test_closingWindowIsSafe(self):
 		svw = plotSlice('uniform', label='closing!')
