@@ -7,6 +7,19 @@ import os
 import unittest
 import time
 import qti
+from PyQt4 import Qt
+
+def screenshot(widget, filename, description):
+    """ Take a screenshot of the widget for displaying
+    in a html report
+    
+    @param widget :: QWidget to grab
+    @param filename :: Save to this file (no extension!)
+    @param description :: Short descriptive text of what the 
+            screenshot should look like
+    """
+    pix = Qt.QPixmap.grabWidget(widget)
+    pix.save
 
 def runTests(classname):
     """ Run the test suite in the class.
