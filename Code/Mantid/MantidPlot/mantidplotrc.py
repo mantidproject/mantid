@@ -33,18 +33,6 @@ if __name__ == '__main__':
             if name.startswith('_') : continue
             if inspect.isclass(obj) or inspect.ismodule(obj):
                 continue
-            #see if this is an algorithm
-            #This is Slow
-            algname = name
-            if algname.endswith('Dialog'):
-                algname = algname[:-6] #strip the dialog of the algorithm
-            try:
-                alg=mantid.createUnmanagedAlgorithm(algname)
-                keywords.append(name + _ScopeInspector_GetAlgorithmSpec(alg))
-                continue
-            except: #this was not an algorithm name
-                pass
-            #no not an algothim continue as before
             if inspect.isfunction(obj) or inspect.isbuiltin(obj):
                 keywords.append(name + _ScopeInspector_GetFunctionSpec(obj))
                 continue
@@ -62,36 +50,43 @@ if __name__ == '__main__':
 
         return keywords;
 
-    def _ScopeInspector_GetAlgorithmSpec(alg):
-        props = mtd._getPropertyOrder(alg)
-        calltip = "("
-        for prop_name in props:
-            prop = alg.getProperty(prop_name)
-            if prop.direction == Direction.Output and \
-               not issubclass(type(prop), IWorkspaceProperty):
-                # Output properties should not appear as input arguments if they are not workspaces
-                continue
-            if len(prop.isValid) > 0:
-                # Not valid by default, thus input is mandatory
-                calltip += prop.name + ','
-            else:
-                # Valid by default, therefore optional
-                calltip += "[" + prop.name + '],'
-        # Strip off the final ,
-        calltip = calltip.rstrip(',')
-        calltip += ")"
-        return calltip
-        
     def _ScopeInspector_GetFunctionSpec(func):
         try:
             argspec = inspect.getargspec(func)
         except TypeError:
             return ' '
+        # Algorithm functions have varargs set not args
         args = argspec[0]
-        # For methods strip the self argument
-        if hasattr(func, 'im_func'):
-            args = args[1:]
-        defs = argspec[3]
+        if args != []:
+            # For methods strip the self argument
+            if hasattr(func, 'im_func'):
+                args = args[1:]
+            defs = argspec[3]
+        elif argspec[1] is not None:
+            # Get from varargs/keywords
+            arg_str = argspec[1].strip().lstrip('\b')
+            defs = []
+            # Keyword args
+            kwargs = argspec[2]
+            if kwargs is not None:
+                kwargs = kwargs.strip().lstrip('\b\b')
+                if kwargs == 'kwargs':
+                    kwargs = '**' + kwargs + '=None'
+                arg_str += ',%s' % kwargs
+            # Any default argument appears in the string
+            # on the rhs of an equal
+            for arg in arg_str.split(','):
+                arg = arg.strip()
+                if '=' in arg:
+                    arg_token = arg.split('=')
+                    args.append(arg_token[0])
+                    defs.append(arg_token[1])
+                else:
+                    args.append(arg)
+            if len(defs) == 0: defs = None
+        else:
+            return ' '
+
         if defs is None:
             calltip = ','.join(args)
             calltip = '(' + calltip + ')'
