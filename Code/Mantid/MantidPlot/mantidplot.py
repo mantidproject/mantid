@@ -166,7 +166,8 @@ def getSliceViewer(source, label=""):
 #-----------------------------------------------------------------------------
 def closeAllSliceViewers():
     """
-    Closes all open SliceViewer windows.
+    Closes all currently open SliceViewer windows. This might be useful to 
+    clean up your desktop after opening many windows.
     """
     import mantidqtpython
     mantidqtpython.MantidQt.Factory.WidgetFactory.Instance().closeAllSliceViewerWindows()
