@@ -90,6 +90,10 @@ def screenshot(widget, filename, description):
             widget = widget._getHeldObject()
         
         # First save the screenshot
+        widget.show()
+        widget.resize(widget.size())
+        Qt.QCoreApplication.processEvents()
+        
         pix = Qt.QPixmap.grabWidget(widget)
         pix.save(os.path.join(dest, filename+".png"))
         
