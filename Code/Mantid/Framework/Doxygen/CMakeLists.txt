@@ -31,12 +31,19 @@ if(DOXYGEN_FOUND)
   endif ( QHELP_EXECUTABLE )
 
   # configure doxygen
+  add_custom_command ( OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/../../doxygen/html/Mantid_Logo_Transparent.png
+                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different  ${CMAKE_SOURCE_DIR}/Images/Mantid_Logo_Transparent.png ${CMAKE_CURRENT_BINARY_DIR}/../../doxygen/html/Mantid_Logo_Transparent.png
+		       DEPENDS  ${CMAKE_SOURCE_DIR}/Images/Mantid_Logo_Transparent.png
+                     )
+  #COPY_IF_DIFFERENT ( ${CMAKE_SOURCE_DIR}/Images/ ${CMAKE_CURRENT_BINARY_DIR}/../../doxygen/html/ 
+  #                   Mantid_Logo_Transparent.png )
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Mantid_template.doxyfile
-                 ${CMAKE_CURRENT_BINARY_DIR}/Mantid_cmake.doxyfile @ONLY)
+                 ${CMAKE_CURRENT_BINARY_DIR}/Mantid.doxyfile @ONLY)
   add_custom_target( doxygen # not being added to 'all'
-                     ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Mantid_cmake.doxyfile
+                     ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Mantid.doxyfile
 		     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 		     COMMENT "Generating API documentation with Doxygen" VERBATIM
+		     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/Mantid.doxyfile ${CMAKE_CURRENT_BINARY_DIR}/../../doxygen/html/Mantid_Logo_Transparent.png
 		   )
 endif(DOXYGEN_FOUND)
 
