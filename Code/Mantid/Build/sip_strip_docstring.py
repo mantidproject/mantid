@@ -51,6 +51,11 @@ def process_sip(filename):
             # Copy to output
             if not in_docstring:
                 outlines.append(lines[i])
+                if line.startswith("//*wiki*"):
+                    # Manually add wiki markup
+                    s = lines[i].strip()
+                    s = s[8:].strip()
+                    wikilines.append(s)
 
     # Give back the generated lines
     return (outlines, wikilines)
