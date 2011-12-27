@@ -73,8 +73,19 @@ Then, the contents of that section are replaced
     
 
 
+def get_screenshot_dir():
+    """ Returns the directory for screenshots,
+    or NONE if not set """
+    dest = os.getenv('MANTID_SCREENSHOT_REPORT')
+    if not dest is None:
+        # Create the report directory if needed
+        if not os.path.exists(dest):
+            os.mkdir(dest)
+    return dest
+            
 
-def screenshot(widget, filename, description):
+
+def screenshot(widget, filename, description, png_exists=False):
     """ Take a screenshot of the widget for displaying in a html report.
     
     The MANTID_SCREENSHOT_REPORT environment variable must be set 
@@ -84,26 +95,27 @@ def screenshot(widget, filename, description):
     @param filename :: Save to this file (no extension!)
     @param description :: Short descriptive text of what the 
             screenshot should look like
+    @param png_exists :: if True, then the 'filename' already
+            exists. Don't grab a screenshot, but add to the report.
     """
-    dest = os.getenv('MANTID_SCREENSHOT_REPORT')
+    dest = get_screenshot_dir()
     if not dest is None:
-        # Create the report directory if needed
-        if not os.path.exists(dest):
-            os.mkdir(dest)
-            
         report = os.path.join(dest, "index.html")
         
-        # Find the widget if handled with a proxy
-        if hasattr(widget, "_getHeldObject"):
-            widget = widget._getHeldObject()
-        
-        # First save the screenshot
-        widget.show()
-        widget.resize(widget.size())
-        Qt.QCoreApplication.processEvents()
-        
-        pix = Qt.QPixmap.grabWidget(widget)
-        pix.save(os.path.join(dest, filename+".png"))
+        if png_exists:
+            pass
+        else:
+            # Find the widget if handled with a proxy
+            if hasattr(widget, "_getHeldObject"):
+                widget = widget._getHeldObject()
+            
+            # First save the screenshot
+            widget.show()
+            widget.resize(widget.size())
+            Qt.QCoreApplication.processEvents()
+            
+            pix = Qt.QPixmap.grabWidget(widget)
+            pix.save(os.path.join(dest, filename+".png"))
         
         # Modify the section in the HTML page
         section_text = '<h2>%s</h2>' % filename
@@ -111,6 +123,7 @@ def screenshot(widget, filename, description):
         section_text += '<img src="%s.png" alt="%s"></img>' % (filename, description)
         
         _replace_report_text(report, filename, section_text)
+
 
 def runTests(classname):
     """ Run the test suite in the class.

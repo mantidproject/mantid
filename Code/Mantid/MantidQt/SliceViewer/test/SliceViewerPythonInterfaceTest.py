@@ -313,4 +313,5 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         sv.setFastRender(False)
         self.assertFalse(sv.getFastRender(), "Fast rendering mode is set to false")
         
-    
+
+        

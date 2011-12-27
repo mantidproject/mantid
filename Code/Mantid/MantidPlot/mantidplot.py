@@ -272,7 +272,7 @@ class SliceViewerWindowProxy(QtProxyObject):
     def __init__(self, toproxy):
         QtProxyObject.__init__(self, toproxy)
         # List of methods in slicer to pass-through
-        self.slicer_methods = ["setWorkspace", "getWorkspaceName", "showControls", "openFromXML", "setXYDim", "setXYDim", "getDimX", "getDimY", "setSlicePoint", "setSlicePoint", "getSlicePoint", "getSlicePoint", "setXYLimits", "getXLimits", "getYLimits", "zoomBy", "setXYCenter", "resetZoom", "loadColorMap", "setColorScale", "setColorScaleMin", "setColorScaleMax", "setColorScaleLog", "getColorScaleMin", "getColorScaleMax", "getColorScaleLog", "setColorScaleAutoFull", "setColorScaleAutoSlice"]
+        self.slicer_methods = ["setWorkspace", "getWorkspaceName", "showControls", "openFromXML", "saveImage", "setXYDim", "setXYDim", "getDimX", "getDimY", "setSlicePoint", "setSlicePoint", "getSlicePoint", "getSlicePoint", "setXYLimits", "getXLimits", "getYLimits", "zoomBy", "setXYCenter", "resetZoom", "loadColorMap", "setColorScale", "setColorScaleMin", "setColorScaleMax", "setColorScaleLog", "getColorScaleMin", "getColorScaleMax", "getColorScaleLog", "setColorScaleAutoFull", "setColorScaleAutoSlice", "setFastRender", "getFastRender"]
 
     def __getattr__(self, attr):
         """

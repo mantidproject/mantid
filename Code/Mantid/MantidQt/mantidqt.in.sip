@@ -163,6 +163,7 @@ public:
   QString getWorkspaceName() const;
   void showControls(bool visible);
   void openFromXML(const QString & xml)   throw (std::invalid_argument, std::runtime_error);
+  void saveImage(const QString & filename = QString());
 
   void setXYDim(int indexX, int indexY)     throw (std::invalid_argument);
   void setXYDim(const QString & dimX, const QString & dimY)     throw (std::invalid_argument, std::runtime_error);

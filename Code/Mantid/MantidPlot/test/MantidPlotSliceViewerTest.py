@@ -98,6 +98,18 @@ class MantidPlotSliceViewerTest(unittest.TestCase):
         svw = plotSlice('uniform', label='alabel')
         self.assertRaises(Exception, getSliceViewer, 'uniform', 'different_label')
         
+    def test_saveImage(self):
+        """ Save the rendered image """
+        svw = plotSlice('uniform')
+        svw.setSlicePoint(2,6.0)
+        dest = get_screenshot_dir()
+        if not dest is None:
+            filename = "SliceViewerSaveImage"
+            svw.saveImage(os.path.join(dest, filename+".png") )
+            # Add to the HTML report
+            screenshot(None, filename, "SliceViewer: result of saveImage(). Should be only the 2D plot with a color bar (no GUI elements)",
+                       png_exists=True)
+        
 # Run the unit tests
 mantidplottests.runTests(MantidPlotSliceViewerTest)
 

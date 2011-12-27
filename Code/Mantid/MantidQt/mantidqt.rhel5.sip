@@ -121,6 +121,7 @@ public:
 
   void openFromXML(const QString & xml)   throw (std::invalid_argument, std::runtime_error);
 
+  void saveImage(const QString & filename = QString());
 
   void setXYDim(int indexX, int indexY)     throw (std::invalid_argument);
 

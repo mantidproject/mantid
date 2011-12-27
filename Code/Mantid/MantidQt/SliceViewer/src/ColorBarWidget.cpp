@@ -74,6 +74,21 @@ MantidColorMap & ColorBarWidget::getColorMap()
 { return m_colorMap;
 }
 
+//-------------------------------------------------------------------------------------------------
+/** Turn "rendering mode" on/off, where GUI widgets are hidden
+ * for the purposes of rendering an image.
+ *
+ * @param rendering :: true if you are going to render
+ */
+void ColorBarWidget::setRenderMode(bool rendering)
+{
+  bool visible = !rendering;
+  this->ui.valMin->setVisible(visible);
+  this->ui.valMax->setVisible(visible);
+  this->ui.checkLog->setVisible(visible);
+
+}
+
 
 //-------------------------------------------------------------------------------------------------
 /** Send a double-clicked event but only when clicking the color bar */

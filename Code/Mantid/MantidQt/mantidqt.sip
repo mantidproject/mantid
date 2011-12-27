@@ -225,6 +225,7 @@ void SliceViewer::openFromXML(const QString & xml)
    
 %End
 
+  void saveImage(const QString & filename = QString());
 
   void setXYDim(int indexX, int indexY)     throw (std::invalid_argument);
 %Docstring
