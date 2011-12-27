@@ -135,8 +135,8 @@ INPUT = @CMAKE_CURRENT_SOURCE_DIR@/../Algorithms/inc \
 	@CMAKE_CURRENT_SOURCE_DIR@/../../Vates/VatesAPI/inc \
 	@CMAKE_CURRENT_SOURCE_DIR@/../../Vates/VatesAPI/src \
 	@CMAKE_CURRENT_SOURCE_DIR@/../../Vates/VatesSimpleGui/QtWidgets \
-	@CMAKE_CURRENT_SOURCE_DIR@/../../Vates/VatesSimpleGui/StandAloneExec/inc /
-	@CMAKE_CURRENT_SOURCE_DIR@/../../Vates/VatesSimpleGui/StandAloneExec/src /
+	@CMAKE_CURRENT_SOURCE_DIR@/../../Vates/VatesSimpleGui/StandAloneExec/inc \
+	@CMAKE_CURRENT_SOURCE_DIR@/../../Vates/VatesSimpleGui/StandAloneExec/src \
 	@CMAKE_CURRENT_SOURCE_DIR@/../../Vates/VatesSimpleGui/ViewWidgets
 
 
