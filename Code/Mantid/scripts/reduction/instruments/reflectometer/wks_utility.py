@@ -1,7 +1,8 @@
-from numpy import zeros
+from numpy import zeros, arctan2
 from pylab import *
 import matplotlib.pyplot as plt
 from mantidsimple import *
+import math
 
 def getProtonCharge(st=None):
     """
@@ -41,18 +42,18 @@ def getS1h(mt=None):
         returns the height and units of the slit #1 
     """
     if mt != None:
-        _h,units = getSh(mt,'s1t','s1b') 
-        return _h,units
-    return None,''
+        _h, units = getSh(mt, 's1t', 's1b') 
+        return _h, units
+    return None, ''
     
 def getS2h(mt=None):
     """    
         returns the height and units of the slit #2 
     """
     if mt != None:
-        _h,units = getSh(mt,'s2t','s2b') 
-        return _h,units
-    return None,None
+        _h, units = getSh(mt, 's2t', 's2b') 
+        return _h, units
+    return None, None
 
 def getPixelXPixelY(mt1, maxX=304, maxY=256):
     """
@@ -91,7 +92,7 @@ def getPixelXTOF(mt1, maxX=304, maxY=256):
             pixelX_vs_tof[y, :] += _array
     return pixelX_vs_tof
 
-def createIntegratedWorkspace(mt1, outputWorkspace, 
+def createIntegratedWorkspace(mt1, outputWorkspace,
                               fromXpixel, toXpixel,
                               fromYpixel, toYpixel,
                               maxX=304, maxY=256):
@@ -126,3 +127,96 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
     CreateWorkspace(outputWorkspace, DataX=_tof_axis, DataY=_y_axis, DataE=_y_error_axis, Nspec=maxY)
     mt2 = mtd[outputWorkspace]
     return mt2
+
+def angleUnitConversion(value, from_units='degree', to_units='rad'):
+    """
+        This function converts the angle units
+        
+    """
+    
+    if (from_units == to_units):
+        return value;
+
+    from_factor = 1;
+    #convert everything into rad
+    if (from_units == 'degree'):
+        from_factor = 1.745329252e-2;
+    value_rad = from_factor * value;
+    
+    if (to_units == 'rad'):
+        return value_rad;
+    else:
+        to_factor = 57.2957795;
+        return to_factor * value_rad;
+    
+def convertToThetaVsLambda(_tof_axis,
+                           _pixel_axis,
+                           central_pixel,
+                           pixel_size=0.0007,
+                           theta= -1,
+                           dSD= -1,
+                           dMD= -1):
+    """
+    This function converts the pixel/tof array
+    to theta/lambda
+    
+    """
+    h = 6.626e-34 #m^2 kg s^-1
+    m = 1.675e-27 #kg
+
+    #convert tof_axis into seconds
+    _tof_axis = _tof_axis * 1e-6
+
+    vel_array = dMD / _tof_axis         #mm/ms = m/s
+    _lambda = h / (m * vel_array)  #m
+    _lambda = _lambda * 1e10  #angstroms
+  
+    d_vec = (_pixel_axis - central_pixel) * pixel_size
+    theta_vec = arctan2(d_vec,dSD) + theta
+
+    dico = {'lambda_vec': _lambda, 'theta_vec': theta_vec}
+    
+    return dico
+
+def convertToRvsQ(_tof_axis,
+                  _pixel_axis_of_peak,
+                  data_of_peak,
+                  central_pixel, 
+                  pixel_size=0.0007,
+                  theta=-1,
+                  dSD=-1,
+                  dMD=-1):
+    """
+    This function converts the pixel/tof array to the R(Q) array
+    
+    """
+
+    h = 6.626e-34 #m^2 kg s^-1
+    m = 1.675e-27 #kg
+
+    ##convert tof_axis into seconds
+    #_tof_axis = _tof_axis * 1e-6
+
+#    vel_array = dMD / _tof_axis         #mm/ms = m/s
+#    _lambda = h / (m * vel_array)  #m
+#    _lambda = _lambda * 1e10  #angstroms
+  
+    d_vec = (_pixel_axis_of_peak - central_pixel) * pixel_size
+    theta_vec = arctan2(d_vec,dSD) + theta
+    
+    #create Q axis
+    nbr_pixel = shape(_pixel_axis_of_peak)[0]
+    nbr_tof = shape(_tof_axis)[0]
+    q_array = zeros(nbr_tof)
+    
+#    print 'dMD: ' , dMD
+    _const = float(4) * math.pi * m * dMD / h
+#    print '_const: ' , _const
+#    print 'theta: ' , theta
+#    print _tof_axis
+    
+    for t in range(nbr_tof):
+        _Q = _const * sin(theta) / _tof_axis[t]
+        q_array[t] = _Q
+    
+    return q_array

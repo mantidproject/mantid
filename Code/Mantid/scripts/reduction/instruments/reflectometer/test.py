@@ -12,13 +12,7 @@ mt = mtd['wp1']
 
 sample = mt.getInstrument().getSample()
 source = mt.getInstrument().getSource()
-
-print 'distance sample-source:'
-print sample.getDistance(source)
-print
-print 'distance detector(#38912) - source'
 detector = mt.getDetector(38912)
-print detector.getDistance(source)
 
 dDS_2d = zeros((256,304))
 for x in range(304):
@@ -27,6 +21,23 @@ for x in range(304):
         detector = mt.getDetector(_index)
         dDS_2d[y,x] = sample.getDistance(detector)
 
-plt.imshow(dDS_2d)
+fig1 = plt.figure(1,(6,6))
+fig1.clf()
+
+ax = fig1.add_subplot(2,2,1)
+ax.imshow(dDS_2d, origin='lower', aspect='auto')
 colorbar()
+
+#I want to be able to change the axis label
+ax = fig1.add_subplot(2,2,4)
+ax.imshow(dDS_2d, origin='lower', aspect='auto')
+colorbar()
+
+
+
+
+
+
+
+
 show()

@@ -7,8 +7,8 @@ import wks_utility
 #This will activate or not the various 2d or 1d plots
 bPlot = True
 
-h=6.626e-34  #m^2 kg s^-1
-m=1.675e-27     #kg
+h = 6.626e-34  #m^2 kg s^-1
+m = 1.675e-27     #kg
 
 #dimension of the detector (256 by 304 pixels)
 maxX = 304
@@ -22,8 +22,8 @@ Xrange = [115, 210]
 
 
 nexus_path = '/mnt/hgfs/j35/results/'
-list_data = ['66420',
-             '66421',
+list_data = ['66421',
+             '66420',
              '66422',
              '66423',
              '66424',
@@ -67,6 +67,18 @@ mt = mtd['EventData']
 
 #get the proton charge in picoCoulomb
 proton_charge = wks_utility.getProtonCharge(mt) #ex: 30961787025.2
+mt_run = mt.getRun()
+ths_value = mt_run.getProperty('ths').value[0]
+ths_units = mt_run.getProperty('ths').units
+tthd_value = mt_run.getProperty('tthd').value[0]
+tthd_units = mt_run.getProperty('tthd').units
+
+ths_rad = wks_utility.angleUnitConversion(value=ths_value,
+                              from_units=ths_units,
+                              to_units='rad')
+tthd_rad = wks_utility.angleUnitConversion(value=tthd_value,
+                               from_units=tthd_units,
+                               to_units='rad')
 
 #rebin data
 rebin(InputWorkspace='EventData',
@@ -80,19 +92,22 @@ mt = mtd['HistoData']
 sample = mt.getInstrument().getSample()
 source = mt.getInstrument().getSource()
 dSM = sample.getDistance(source)
-print 'distance Sample-Moderator is %f' %dSM
-dPS_array = zeros((maxY,maxX))
+dPS_array = zeros((maxY, maxX))
 for x in range(maxX):
     for y in range(maxY):
-        _index = 256*x+y
+        _index = maxY * x + y
         detector = mt.getDetector(_index)
-        dPS_array[y,x] = sample.getDistance(detector)
-dSD_array = dPS_array + dSM
-if bPlot:
-    fig3 = figure()
-    plt.imshow(dSD_array)
-    colorbar()
+        dPS_array[y, x] = sample.getDistance(detector)
+dMP_array = dPS_array + dSM
+dSD = dPS_array[maxY / 2, maxX / 2]
+dMD = dSD + dSM
+#if bPlot:
+#    fig3 = figure()
+#    plt.imshow(dMP_array)
+#    colorbar()
          
+#print 'distance SD: ' , dSD 
+#print      
 
 #Normalized by Current (proton charge)
 NormaliseByCurrent(InputWorkspace='HistoData', OutputWorkspace='HistoData')
@@ -122,7 +137,7 @@ if bPlot:
 # used to be the center of the peak-min and peak-max values, now
 # we gonna used a weighted calculation
 old_method_cpix = (list_data_peak[0][0] + list_data_peak[0][1]) / 2
-print 'data central pixel using old method: %f' %old_method_cpix
+#print 'data central pixel using old method: %f' % old_method_cpix
 
 #integrated over tof
 pixelXtof_1d = pixelXtof_data.sum(axis=1)
@@ -135,10 +150,10 @@ _den = 0
 start_pixel = list_data_peak[0][0]
 for i in range(sz):
     _num += (start_pixel * pixelXtof_roi[i])
-    start_pixel=start_pixel+1
+    start_pixel = start_pixel + 1
     _den += pixelXtof_roi[i]
 data_cpix = _num / _den    
-print 'data central pixel using new method: %f' %data_cpix
+#print 'data central pixel using new method: %f' % data_cpix
              
 #We need to create a new EventWorkspace of only the xRange of pixels of 
 #interest and normalize by the proton charge
@@ -279,7 +294,7 @@ toYpixel = list_norm_back[0][1]
 # used to be the center of the peak-min and peak-max values, now
 # we gonna used a weighted calculation
 old_method_cpix = (list_norm_peak[0][0] + list_norm_peak[0][1]) / 2
-print 'norm central pixel using old method: %f' %old_method_cpix
+print 'norm central pixel using old method: %f' % old_method_cpix
 
 #integrated over tof
 pixelXtof_1d = pixelXtof_norm.sum(axis=1)
@@ -292,10 +307,10 @@ _den = 0
 start_pixel = list_data_peak[0][0]
 for i in range(sz):
     _num += (start_pixel * pixelXtof_roi[i])
-    start_pixel=start_pixel+1
+    start_pixel = start_pixel + 1
     _den += pixelXtof_roi[i]
 norm_cpix = _num / _den    
-print 'norm central pixel using new method: %f' %data_cpix
+print 'norm central pixel using new method: %f' % data_cpix
 
 
 
@@ -366,18 +381,16 @@ if bPlot:
     subplot(2, 2, 4)
     plt.plot(_tof_axis, _y_axis, 'gx', label='After background sub.')
 
-
-
 #### divide data by normalize histo workspace
 Divide(LHSWorkspace='DataWks',
          RHSWorkspace='NormWks',
          OutputWorkspace='NormalizedWks')
 
+mt = mtd['NormalizedWks']
+_tof_axis = mt.readX(0)[:]
+_y_axis = zeros((maxY, len(_tof_axis)))
 if bPlot:
     figure()
-    mt = mtd['NormalizedWks']
-    _tof_axis = mt.readX(0)[:]
-    _y_axis = zeros((maxY, len(_tof_axis)))
     for x in range(maxY):
         _y_axis[x, :] = mt.readY(x)[:]
 #    subplot(2, 2, 1)
@@ -387,33 +400,38 @@ if bPlot:
     ylabel('Pixel X')
     title('Normalized data')
 
+#### go from pixel/tof to theta/lambda
+    theta = tthd_rad - ths_rad
+    _pixel_axis = range(maxY)    
+
+figure()
+subplot(2, 2, 1)
+plt.imshow(log(_y_axis), aspect='auto', origin='lower')
+xlabel('TOF bins')
+ylabel('Pixel')
+title('3d view after data/normalization')
+
+subplot(2, 2, 2)
+tof_axis = mt.readX(0)[:]
+print tof_axis
+counts_vs_tof = zeros(len(tof_axis))
+for x in range(maxY):
+    counts_vs_tof += mt.readY(x)[:]
+index_tof_min = wks_utility.getIndex(TOFrange[0], tof_axis)
+index_tof_max = wks_utility.getIndex(TOFrange[1], tof_axis)
+_tof_axis = tof_axis[index_tof_min:index_tof_max]
+_y_axis = counts_vs_tof[index_tof_min:index_tof_max]
+
+plt.plot(_tof_axis, _y_axis, 'b', label='data/normalization')
+xlabel('TOF (microS)')
+ylabel('Counts')
 
 
 
 
 
 
-#if bPlot:
-#    figure()
-#    subplot(2,2,1)
-#    mt=mtd['NormalizedWks']
-#    pixelXpixelY = wks_utility.getPixelXPixelY(mt, maxX=maxX, maxY=maxY)
-#    plt.imshow(log(pixelXpixelY), aspect='auto', origin='lower')
-#    xlabel('Pixel X')
-#    ylabel('Pixel Y')
-#    title('Pixel Y vs Pixel X of normalized data')
-#    
-#    subplot(2,2,2)
-#    mt4 = mtd['NormalizedWks']
-#    tof_axis = mt4.readX(0)[:]
-#    counts_vs_tof = zeros(len(tof_axis))
-#    for x in range(maxY):
-#        counts_vs_tof += mt4.readY(x)[:]
-#    index_tof_min = wks_utility.getIndex(TOFrange[0], tof_axis)
-#    index_tof_max = wks_utility.getIndex(TOFrange[1], tof_axis)
-#    _tof_axis = tof_axis[index_tof_min:index_tof_max]
-#    _y_axis = counts_vs_tof[index_tof_min:index_tof_max]
-#    plt.plot(_tof_axis, _y_axis, 'gx', label='Normalized data')
+
 
 if bPlot: #show plots
     legend()
