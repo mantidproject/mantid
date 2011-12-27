@@ -100,7 +100,8 @@ set ( SRC_FILES
 	src/Logarithm.cpp
 	src/MaskBins.cpp
 	src/MaskDetectorsIf.cpp
-	src/Max.cpp
+    src/Max.cpp
+    src/MaxMin.cpp
 	src/MedianDetectorTest.cpp
 	src/MergeRuns.cpp
 	src/Minus.cpp
@@ -279,6 +280,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MaskBins.h
 	inc/MantidAlgorithms/MaskDetectorsIf.h
 	inc/MantidAlgorithms/Max.h
+    inc/MantidAlgorithms/MaxMin.h
 	inc/MantidAlgorithms/MedianDetectorTest.h
 	inc/MantidAlgorithms/MergeRuns.h
 	inc/MantidAlgorithms/Minus.h
