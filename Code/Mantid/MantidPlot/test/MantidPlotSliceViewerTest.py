@@ -14,6 +14,7 @@ from mantidplottests import *
 import time
 
 CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace='mdw')
+CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace='empty')
 FakeMDEventData("mdw",  UniformParams="1e5")
 FakeMDEventData("mdw",  PeakParams="1e4, 2,4,6, 1.5")
 BinMD("mdw", "uniform",  1, "x,0,10,30", "y,0,10,30", "z,0,10,30", IterateEvents="1", Parallel="0")
@@ -43,6 +44,11 @@ class MantidPlotSliceViewerTest(unittest.TestCase):
             QTest.mouseMove(sv)
             Qt.QCoreApplication.processEvents()
         screenshot(svw, "SliceViewer", "SliceViewer with mouse at center, showing coordinates.")
+        
+    def test_plotSlice_empty(self):
+        """ Plot slice on an empty workspace """
+        svw = plotSlice('empty')
+        self.assertEqual(svw.getSlicer().getWorkspaceName(), "empty")
         
         
     def test_closingWindowIsSafe(self):

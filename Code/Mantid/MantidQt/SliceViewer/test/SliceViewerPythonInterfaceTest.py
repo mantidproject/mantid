@@ -31,6 +31,7 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         FakeMDEventData("mdw",  PeakParams="1e3, 1, 2, 3, 1.0")
         BinMD("mdw", "uniform",  AxisAligned=1, AlignedDimX="x,0,10,30",  AlignedDimY="y,0,10,30",  AlignedDimZ="z,0,10,30", IterateEvents="1", Parallel="0")
         CreateWorkspace('workspace2d', '1,2,3', '2,3,4')
+        CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z', Units='m,m,m',SplitInto='5',SplitThreshold=100, MaxRecursionDepth='20',OutputWorkspace='empty')
         # Get the factory to create the SliceViewerWindow in C++
         self.svw = mantidqtpython.MantidQt.Factory.WidgetFactory.Instance().createSliceViewerWindow("uniform", "")
         # Retrieve the SliceViewer widget alone.
@@ -105,8 +106,8 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
     def test_getWorkspace(self):
         sv = self.sv
         self.assertEqual(sv.getWorkspaceName(), "uniform")
-        assert (sv is not None) 
-    
+        assert (sv is not None)
+        
     def test_setWorkspace_MDEventWorkspace(self):
         sv = self.sv
         sv.setWorkspace('mdw')

@@ -251,9 +251,12 @@ public:
     MDEventWorkspace2Lean::sptr ws = MDEventsTestHelper::makeMDEW<2>(10, 0.0, 10.0);
     std::vector<Mantid::Geometry::MDDimensionExtents> ext;
 
-    // If nothing in the workspace, the extents given are invalid.
+    // If nothing in the workspace, the extents given are the dimensions in the workspace
     ext = ws->getMinimumExtents(2);
-    TS_ASSERT( ext[0].min > ext[0].max )
+    TS_ASSERT_DELTA( ext[0].min, 0.0, 1e-5 );
+    TS_ASSERT_DELTA( ext[0].max, 10.0, 1e-5 );
+    TS_ASSERT_DELTA( ext[1].min, 0.0, 1e-5 );
+    TS_ASSERT_DELTA( ext[1].max, 10.0, 1e-5 );
 
     std::vector< MDLeanEvent<2> > events;
     // Make an event in the middle of each box
