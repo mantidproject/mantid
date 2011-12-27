@@ -23,7 +23,7 @@ def process_sip(filename):
     
     root = os.path.split(os.path.abspath(filename))[0] 
     # Read and split into a buncha lines
-    lines = open(filename, 'r').read().split('\n')
+    lines = open(filename, 'r').read().splitlines()
     in_docstring = False
     outlines = []
     wikilines = []
@@ -36,10 +36,18 @@ def process_sip(filename):
             else:
                 # Save the docstring
                 wikilines.append(" " + lines[i])
+                # Class-separator line = this is the second line of a new class docstring
+                if line.startswith("==="):
+                    # Make a wiki-markup header
+                    wikilines[-1] = " "
+                    wikilines[-2] = "=== %s ===" % (wikilines[-2].strip())
         else:
             # Not in a docstring.
             if line.startswith("%docstring"):
                 in_docstring = True
+                # Add a blank line separating doc strings if not present
+                if len(wikilines) > 0 and wikilines[-1].strip() != "":
+                    wikilines.append(" ")
             # Copy to output
             if not in_docstring:
                 outlines.append(lines[i])
