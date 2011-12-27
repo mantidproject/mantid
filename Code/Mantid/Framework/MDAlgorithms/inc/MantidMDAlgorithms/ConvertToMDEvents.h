@@ -121,11 +121,11 @@ namespace MDAlgorithms
  
    /// helper function which does exatly what it says
    void check_max_morethen_min(const std::vector<double> &min,const std::vector<double> &max);
-   /// the variable which describes the number of the dimensions, currently used by algorithm. Changes in input properties can change this number;
+   /// the variable which describes the number of the dimensions, currently used by algorithm. Calculated from number of input properties and input workspace;
    size_t n_activated_dimensions;
   
    /// pointer to input workspace;
-   Mantid::DataObjects::Workspace2D_sptr inWS2D;
+   Mantid::API::MatrixWorkspace_sptr inWS2D;
    // the variable which keeps preprocessed positions of the detectors if any availible (TODO: should it be a table ws?);
     static preprocessed_detectors det_loc;  
     /// minimal and maximal values for the workspace dimensions:
@@ -207,9 +207,9 @@ namespace MDAlgorithms
     // known conversion modes ID-s       (symbolic representation of correspondent enum)
     std::vector<std::string> ConvModes;
 
-    // the ID of the unit, which is used in the expression to converty to QND. All other related elastic units should be converted to this one. 
+    /// the ID of the unit, which is used in the expression to converty to QND. All other related elastic units should be converted to this one. 
     std::string  native_elastic_unitID; // currently it is Q
-    // the ID of the unit, which is used in the expression to converty to QND. All other related inelastic units should be converted to this one. 
+    /// the ID of the unit, which is used in the expression to converty to QND. All other related inelastic units should be converted to this one. 
     std::string  native_inelastic_unitID; // currently it is energy transfer (DeltaE)
 
     // The Units (different for different Q and dE mode), for input workspace, for the selected sub algorihm to work with. 

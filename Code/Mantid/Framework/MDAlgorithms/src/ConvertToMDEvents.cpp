@@ -259,11 +259,11 @@ void ConvertToMDEvents::exec(){
     // in case of subsequent calls
     this->algo_id="";
     // -------- Input workspace 
-    MatrixWorkspace_sptr inMatrixWS = getProperty("InputWorkspace");
-    if(!inMatrixWS){
+    this->inWS2D = getProperty("InputWorkspace");
+    if(!inWS2D){
         convert_log.error()<<" can not obtain input matrix workspace from analysis data service\n";
     }
-    inWS2D                           = boost::dynamic_pointer_cast<Workspace2D>(inMatrixWS);
+    //inWS2D                           = boost::dynamic_pointer_cast<Workspace2D>(inMatrixWS);
     // ------- Is there any output workspace?
     // shared pointer to target workspace
     API::IMDEventWorkspace_sptr spws = getProperty("OutputWorkspace");
@@ -272,6 +272,7 @@ void ConvertToMDEvents::exec(){
         create_new_ws = true;
     }
 
+    //identify if u,v are present among input parameters and use defaults if not
     bool u_default(true),v_default(true);
     std::vector<double> ut = getProperty("u");
     if(!ut.empty()){
@@ -287,7 +288,6 @@ void ConvertToMDEvents::exec(){
     }
     if(u_default){  ut.assign(3,0);     ut[0]=1;    }
     if(v_default){  vt.assign(3,0);     vt[1]=1;    }
-
     Kernel::V3D u(ut[0],ut[1],ut[2]),v(vt[0],vt[1],vt[2]);
 
     // set up target coordinate system
@@ -563,7 +563,7 @@ ConvertToMDEvents::parseQMode(const std::string &Q_mode_req,const Strings &ws_di
 
 /** function processes the input arguments and tries to establish what algorithm should be deployed; 
     *
-    * @param inWS2D         -- input 2D workspace
+    * @param inWS         -- input workspace (2D or Events)
     * @param Q_mode_req     -- what to do with Q-dimensions e.g. calculate either mod|Q| or Q3D;
     * @param dE_mode_req    -- desirable dE analysis mode (elastic, direct/indirect)
     * @param dim_requested  -- vector of other dimension names requested by the algorithm
@@ -573,7 +573,7 @@ ConvertToMDEvents::parseQMode(const std::string &Q_mode_req,const Strings &ws_di
     * @return: dim_uinits_requested -- dimension units for the target workspace
 */
 std::string 
-ConvertToMDEvents::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS2D,const std::string &Q_mode_req, 
+ConvertToMDEvents::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS,const std::string &Q_mode_req, 
                                  const std::string &dE_mode_req,const std::vector<std::string> &other_dim_names,
                                  std::vector<std::string> &dim_names_requested,std::vector<std::string> &dim_units_requested)
 {
@@ -582,7 +582,7 @@ ConvertToMDEvents::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS2D,const s
    std::string the_algID;
 
    // identify the matrix conversion part of subalgorithm as function of user input and workspace Matrix parameters (axis)
-   the_algID = identifyMatrixAlg(inWS2D, Q_mode_req, dE_mode_req,ws_dim_names,ws_dim_units);
+   the_algID = identifyMatrixAlg(inWS, Q_mode_req, dE_mode_req,ws_dim_names,ws_dim_units);
    if(the_algID.find("Unknown")!=std::string::npos){
        convert_log.error()<<" Input parameters indentify uncomplete algorithm ID: "<<the_algID<<std::endl;
        throw(std::logic_error("can not parse input parameters propertly"));
@@ -590,7 +590,7 @@ ConvertToMDEvents::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS2D,const s
 
    // retrieve additional dimension names and dimension units, which can be derived from the workspace properties;
    std::vector<std::string> all_add_dim_names,all_add_dim_units;
-   this->getAddDimensionNames(inWS2D,all_add_dim_names,all_add_dim_units);
+   this->getAddDimensionNames(inWS,all_add_dim_names,all_add_dim_units);
 
    // check if additional dimension names can satisfy the user requests:
    std::vector<std::string> add_dim_names,add_dim_units;
@@ -628,7 +628,7 @@ ConvertToMDEvents::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS2D,const s
     int emode = getEMode(this);
     if((emode == 1)||(emode == 2)||(the_algID.find("TOD")!=std::string::npos))
     {        
-        if(!inWS2D->run().hasProperty("Ei")){
+        if(!inWS->run().hasProperty("Ei")){
             convert_log.error()<<" Conversion sub-algorithm with ID: "<<the_algID<<" needs input energy to be present among run properties\n";
             throw(std::invalid_argument(" Needs Input energy to be present "));
         }
@@ -675,16 +675,16 @@ ConvertToMDEvents::getAddDimensionNames(MatrixWorkspace_const_sptr inMatrixWS,st
 
 /** The matrix to convert neutron momentums into the fractional coordinate system   */
 std::vector<double>
-ConvertToMDEvents::getTransfMatrix(API::MatrixWorkspace_sptr inWS2D,const Kernel::V3D &u, const Kernel::V3D &v)const
+ConvertToMDEvents::getTransfMatrix(API::MatrixWorkspace_sptr inWS,const Kernel::V3D &u, const Kernel::V3D &v)const
 {
   
     // Set the matrix based on UB etc.
-    Geometry::OrientedLattice Latt = inWS2D->sample().getOrientedLattice();
+    Geometry::OrientedLattice Latt = inWS->sample().getOrientedLattice();
 
     // thansform the lattice above into the notional coordinate system related to projection vectors u,v;
     Kernel::Matrix<double> umat = Latt.setUFromVectors(u,v);
 
-    Kernel::Matrix<double> gon =inWS2D->run().getGoniometer().getR();
+    Kernel::Matrix<double> gon =inWS->run().getGoniometer().getR();
 
   // Obtain the transformation matrix:
     Kernel::Matrix<double> mat = umat*gon ; //*(2*M_PI)?;

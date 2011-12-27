@@ -59,7 +59,7 @@ struct preprocessed_detectors{
 
 /** helper function, does preliminary calculations of the detectors positions to convert results into k-dE space ;
       and places the resutls into static cash to be used in subsequent calls to this algorithm */
-void DLLExport processDetectorsPositions(const DataObjects::Workspace2D_const_sptr inputWS,preprocessed_detectors &det,Kernel::Logger& convert_log);
+void DLLExport processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS,preprocessed_detectors &det,Kernel::Logger& convert_log);
 } // end MDAlgorithms
 }
 #endif
