@@ -51,7 +51,6 @@ public:
   Mantid::Kernel::VMD getSlicePoint() const { return m_slicePoint; }
   int getDimX() const;
   int getDimY() const;
-  bool getFastRender() const;
 
   /// Methods for Python bindings
   QString getWorkspaceName() const;
@@ -68,6 +67,7 @@ public:
   double getColorScaleMin() const;
   double getColorScaleMax() const;
   bool getColorScaleLog() const;
+  bool getFastRender() const;
   void setXYLimits(double xleft, double xright, double ybottom, double ytop);
   QwtDoubleInterval getXLimits() const;
   QwtDoubleInterval getYLimits() const;

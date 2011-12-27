@@ -304,4 +304,13 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         self.assertEqual(sv.getColorScaleMin(), 27.0)
         self.assertEqual(sv.getColorScaleMax(), 81.0)
             
+    #==========================================================================
+    #======================= Screenshots etc. =================================
+    #==========================================================================
+    def test_setFastRender(self):
+        sv = self.sv
+        self.assertTrue(sv.getFastRender(), "Fast rendering mode is TRUE by default")
+        sv.setFastRender(False)
+        self.assertFalse(sv.getFastRender(), "Fast rendering mode is set to false")
+        
     
