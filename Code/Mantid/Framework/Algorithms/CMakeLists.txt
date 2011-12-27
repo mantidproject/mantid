@@ -103,7 +103,8 @@ set ( SRC_FILES
     src/Max.cpp
     src/MaxMin.cpp
 	src/MedianDetectorTest.cpp
-	src/MergeRuns.cpp
+    src/MergeRuns.cpp
+    src/Min.cpp
 	src/Minus.cpp
 	src/MonteCarloAbsorption.cpp
 	src/MultipleScatteringCylinderAbsorption.cpp
@@ -283,6 +284,7 @@ set ( INC_FILES
     inc/MantidAlgorithms/MaxMin.h
 	inc/MantidAlgorithms/MedianDetectorTest.h
 	inc/MantidAlgorithms/MergeRuns.h
+    inc/MantidAlgorithms/Min.h
 	inc/MantidAlgorithms/Minus.h
 	inc/MantidAlgorithms/MonteCarloAbsorption.h
 	inc/MantidAlgorithms/MultipleScatteringCylinderAbsorption.h

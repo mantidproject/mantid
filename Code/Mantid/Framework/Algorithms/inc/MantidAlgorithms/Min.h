@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_MAX_H_
-#define MANTID_ALGORITHMS_MAX_H_
+#ifndef MANTID_ALGORITHMS_MIN_H_
+#define MANTID_ALGORITHMS_MIN_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -10,8 +10,8 @@ namespace Mantid
 {
 namespace Algorithms
 {
-/** Takes a 2D workspace as input and find the maximum in each 1D spectrum.
-    The algorithm creates a new 1D workspace containing all maxima as well as their X boundaries
+/** Takes a 2D workspace as input and find the minimum in each 1D spectrum.
+    The algorithm creates a new 1D workspace containing all minima as well as their X boundaries
     and error. This is used in particular for single crystal as a quick way to find strong peaks.
 
     Required Properties:
@@ -22,7 +22,7 @@ namespace Algorithms
 
     Optional Properties (assume that you count from zero):
     <UL>
-    <LI> Range_lower - The X value to search from (default 0)</LI>
+    <LI> Range_lower - The X value to search from (default min)</LI>
     <LI> Range_upper - The X value to search to (default max)</LI>
     <LI> StartSpectrum - Start spectrum number (default 0)</LI>
     <LI> EndSpectrum - End spectrum number  (default max)</LI>
@@ -50,15 +50,15 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport Max : public API::Algorithm
+class DLLExport Min : public API::Algorithm
 {
 public:
   /// Default constructor
-  Max() : API::Algorithm() {};
+  Min() : API::Algorithm() {};
   /// Destructor
-  virtual ~Max() {};
+  virtual ~Min() {};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "Max";}
+  virtual const std::string name() const { return "Min";}
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return (1);}
   /// Algorithm's category for identification overriding a virtual method
@@ -75,4 +75,4 @@ private:
 } // namespace Algorithm
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHMS_MAX_H_*/
+#endif /*MANTID_ALGORITHMS_MIN_H_*/

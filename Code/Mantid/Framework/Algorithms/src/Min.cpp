@@ -7,7 +7,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/Max.h"
+#include "MantidAlgorithms/Min.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidAPI/Progress.h"
@@ -18,22 +18,22 @@ namespace Algorithms
 {
 
 // Register the class into the algorithm factory
-DECLARE_ALGORITHM(Max)
+DECLARE_ALGORITHM(Min)
 
 using namespace Kernel;
 using namespace API;
 
 /// Set the documentation strings
-void Max::initDocs()
+void Min::initDocs()
 {
-  this->setWikiSummary("Takes a 2D workspace as input and find the maximum in each 1D spectrum. The algorithm creates a new 1D workspace containing all maxima as well as their X boundaries and error. This is used in particular for single crystal as a quick way to find strong peaks.");
-  this->setOptionalMessage("Takes a 2D workspace as input and find the maximum in each 1D spectrum. The algorithm creates a new 1D workspace containing all maxima as well as their X boundaries and error. This is used in particular for single crystal as a quick way to find strong peaks.");
+  this->setWikiSummary("Takes a 2D workspace as input and find the minimum in each 1D spectrum. The algorithm creates a new 1D workspace containing all minima as well as their X boundaries and error. This is used in particular for single crystal as a quick way to find strong peaks.");
+  this->setOptionalMessage("Takes a 2D workspace as input and find the minimum in each 1D spectrum. The algorithm creates a new 1D workspace containing all minima as well as their X boundaries and error. This is used in particular for single crystal as a quick way to find strong peaks.");
 }
 
 /** Initialisation method.
  *
  */
-void Max::init()
+void Min::init()
 {
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,new HistogramValidator<>),
       "The name of the Workspace2D to take as input");
@@ -58,7 +58,7 @@ void Max::init()
  *
  *  @throw runtime_error Thrown if algorithm cannot execute
  */
-void Max::exec()
+void Min::exec()
 {
   // Try and retrieve the optional properties
   double m_MinRange = getProperty("RangeLower");
@@ -72,18 +72,19 @@ void Max::exec()
 
 
   // sub-algorithme does all of the actual work - do not set the output workspace
-  IAlgorithm_sptr maxAlgo = createSubAlgorithm("MaxMin", 0., 1.);
-  maxAlgo->setProperty("InputWorkspace", inworkspace);
-  maxAlgo->setProperty("RangeLower", m_MinRange);
-  maxAlgo->setProperty("RangeUpper", m_MaxRange);
-  maxAlgo->setProperty("StartWorkspaceIndex", m_MinSpec);
-  maxAlgo->setProperty("EndWorkspaceIndex", m_MaxSpec);
-  maxAlgo->setProperty("ShowMin",false);
-  maxAlgo->execute();
+  IAlgorithm_sptr minAlgo = createSubAlgorithm("MaxMin", 0., 1.);
+  minAlgo->setProperty("InputWorkspace", inworkspace);
+  minAlgo->setProperty("RangeLower", m_MinRange);
+  minAlgo->setProperty("RangeUpper", m_MaxRange);
+  minAlgo->setProperty("StartWorkspaceIndex", m_MinSpec);
+  minAlgo->setProperty("EndWorkspaceIndex", m_MaxSpec);
+  minAlgo->setProperty("ShowMin",true);
+  minAlgo->execute();
   // just grab the child's output workspace
-  MatrixWorkspace_sptr outputWS = maxAlgo->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr outputWS = minAlgo->getProperty("OutputWorkspace");
 
   this->setProperty("OutputWorkspace", outputWS);
+
 }
 
 } // namespace Algorithms
