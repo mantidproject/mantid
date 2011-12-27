@@ -14,6 +14,14 @@ import time
 import qti
 from PyQt4 import Qt
 
+# Try to import QTest. Not available on Windows?
+try:
+    from PyQt4.QtTest import QTest
+    qtest = True
+except:
+    qtest = False
+    print "QTest not available"
+    
 
      
 #======================================================================
