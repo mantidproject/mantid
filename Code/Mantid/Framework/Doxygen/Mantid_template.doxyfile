@@ -7,7 +7,6 @@ DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = @CMAKE_PROJECT_NAME@
 PROJECT_NUMBER         = 
 OUTPUT_DIRECTORY       = @CMAKE_CURRENT_BINARY_DIR@/../../doxygen
-#                        @PROJECT_BINARY_DIR@/Doc
 CREATE_SUBDIRS         = YES
 OUTPUT_LANGUAGE        = English
 BRIEF_MEMBER_DESC      = YES
