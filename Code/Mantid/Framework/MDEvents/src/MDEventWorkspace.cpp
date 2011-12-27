@@ -186,14 +186,6 @@ namespace MDEvents
   std::vector<Mantid::Geometry::MDDimensionExtents> MDEventWorkspace)::getMinimumExtents(size_t depth)
   {
     std::vector<Mantid::Geometry::MDDimensionExtents> out(nd);
-
-    // Starting point with min > max...
-    for (size_t d=0; d<nd; d++)
-    {
-      out[d].min = this->getDimension(d)->getMaximum();
-      out[d].max = this->getDimension(d)->getMinimum();
-    }
-
     std::vector<IMDBox<MDE,nd>*> boxes;
     // Get all the end (leaf) boxes
     this->data->getBoxes(boxes, depth, true);
