@@ -35,8 +35,6 @@ if(DOXYGEN_FOUND)
                        COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different  ${CMAKE_SOURCE_DIR}/Images/Mantid_Logo_Transparent.png ${CMAKE_CURRENT_BINARY_DIR}/../../doxygen/html/Mantid_Logo_Transparent.png
 		       DEPENDS  ${CMAKE_SOURCE_DIR}/Images/Mantid_Logo_Transparent.png
                      )
-  #COPY_IF_DIFFERENT ( ${CMAKE_SOURCE_DIR}/Images/ ${CMAKE_CURRENT_BINARY_DIR}/../../doxygen/html/ 
-  #                   Mantid_Logo_Transparent.png )
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Mantid_template.doxyfile
                  ${CMAKE_CURRENT_BINARY_DIR}/Mantid.doxyfile @ONLY)
   add_custom_target( doxygen # not being added to 'all'
@@ -46,12 +44,3 @@ if(DOXYGEN_FOUND)
 		     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/Mantid.doxyfile ${CMAKE_CURRENT_BINARY_DIR}/../../doxygen/html/Mantid_Logo_Transparent.png
 		   )
 endif(DOXYGEN_FOUND)
-
-##### diff Mantid.doxyfile Mantid.doxyfile_web
-#                                        > DETAILS_AT_TOP         = NO
-#                                        > OPTIMIZE_FOR_FORTRAN   = NO
-#                                        > OPTIMIZE_OUTPUT_VHDL   = NO
-#                                        > SORT_GROUP_NAMES       = NO
-#                                        > GENERATE_DOCSET        = NO
-#                                        > DOCSET_FEEDNAME        = "Doxygen generated docs"
-#                                        > DOCSET_BUNDLE_ID       = org.doxygen.Project
