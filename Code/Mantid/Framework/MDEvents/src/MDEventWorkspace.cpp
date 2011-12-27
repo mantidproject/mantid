@@ -208,10 +208,10 @@ namespace MDEvents
     // Fix any missing dimensions (for empty workspaces)
     for (size_t d=0; d<nd; d++)
     {
-      if (out[d].min > out[d].max)
+      if (out[d].min == std::numeric_limits<coord_t>::max())
       {
-        out[d].min = this->getDimension(0)->getMinimum();
-        out[d].max = this->getDimension(0)->getMaximum();
+        out[d].min = this->getDimension(d)->getMinimum();
+        out[d].max = this->getDimension(d)->getMaximum();
       }
     }
     return out;
