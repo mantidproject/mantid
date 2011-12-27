@@ -8,7 +8,8 @@ namespace Mantid
   namespace VATES
   {
      /** 
-    @class ADSWorkspaceProvider. Type for fetching and disposing of workspaces using the Mantid Analysis Data Service Instance under-the-hood.
+    @class ADSWorkspaceProvider
+    Type for fetching and disposing of workspaces using the Mantid Analysis Data Service Instance under-the-hood.
 
     @author Owen Arnold, Tessella plc
     @date 22/08/2011

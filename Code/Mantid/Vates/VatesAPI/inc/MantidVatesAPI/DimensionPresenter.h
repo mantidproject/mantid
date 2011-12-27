@@ -11,7 +11,7 @@ namespace Mantid
     //Forward declarations.
     class DimensionView;
 
-    /** @class DimensionPresenter.
+    /** @class DimensionPresenter
 
     MVP presenter for a IMDDimension model.
 

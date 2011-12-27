@@ -12,7 +12,8 @@ namespace Mantid
   {
 
     /** 
-    @class MDHWLoadingPresenter, Abstract presenter encapsulating common operations used by all MDHW type loading. Reduces template bloat.
+    @class MDHWLoadingPresenter
+    Abstract presenter encapsulating common operations used by all MDHW type loading. Reduces template bloat.
     @author Owen Arnold, Tessella plc
     @date 16/08/2011
 

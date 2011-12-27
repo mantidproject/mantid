@@ -18,7 +18,8 @@ namespace Mantid
   {
 
     /** 
-    @class MDEWRebinningPresenter, concrete MDRebinningPresenter using centre piece rebinning directly on MDEWs producing Histogrammed MDWs.
+    @class MDEWRebinningPresenter
+    Concrete MDRebinningPresenter using centre piece rebinning directly on MDEWs producing Histogrammed MDWs.
     @author Owen Arnold, Tessella plc
     @date 10/08/2011
 

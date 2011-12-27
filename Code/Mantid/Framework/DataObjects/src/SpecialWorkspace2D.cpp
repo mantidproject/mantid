@@ -386,7 +386,7 @@ namespace DataObjects
 } // namespace DataObjects
 
 
-///\cond TEMPLATE
+/// @cond TEMPLATE
 
 namespace Mantid
 {
@@ -427,3 +427,5 @@ namespace Mantid
 
   } // namespace Kernel
 } // namespace Mantid
+
+/// @endcond TEMPLATE

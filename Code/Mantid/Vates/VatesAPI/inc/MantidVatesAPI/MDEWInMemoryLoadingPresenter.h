@@ -10,7 +10,8 @@ namespace Mantid
   namespace VATES
   {
     /** 
-    @class MDEWInMemoryLoadingPresenter. Presenter for loading MDEWs directly from the ADS, does not touch the disk.
+    @class MDEWInMemoryLoadingPresenter
+    Presenter for loading MDEWs directly from the ADS, does not touch the disk.
     @author Owen Arnold, Tessella plc
     @date 08/09/2011
 

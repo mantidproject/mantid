@@ -11,7 +11,8 @@ namespace Mantid
   {
 
      /** 
-    @class MDRebinningView, Abstract view for controlling multi-dimensional rebinning.
+    @class MDRebinningView
+    Abstract view for controlling multi-dimensional rebinning.
     @author Owen Arnold, Tessella plc
     @date 03/06/2011
 

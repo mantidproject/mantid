@@ -12,7 +12,8 @@ namespace Mantid
   {
 
     /** 
-    @class MDEWLoadingPresenter, Abstract presenter encapsulating common operations used by all MDEW type loading. Reduces template bloat.
+    @class MDEWLoadingPresenter
+    Abstract presenter encapsulating common operations used by all MDEW type loading. Reduces template bloat.
     @author Owen Arnold, Tessella plc
     @date 16/08/2011
 

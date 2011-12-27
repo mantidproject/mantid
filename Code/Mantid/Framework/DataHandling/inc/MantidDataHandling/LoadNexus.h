@@ -14,7 +14,7 @@ namespace Mantid
 {
   namespace DataHandling
   {
-    /** @class LoadNexus LoadNeXus.h DataHandling/LoadNeXus.h
+    /** @class LoadNexus
 
     Loads a file in NeXus format and stores it in a 2D workspace 
     (Workspace2D class). LoadNexus is an algorithm and as such inherits

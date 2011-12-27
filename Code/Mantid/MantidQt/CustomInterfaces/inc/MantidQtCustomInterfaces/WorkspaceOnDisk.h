@@ -7,7 +7,8 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    /** @class WorkspaceOnDisk : A workspace memento refering to a workspace in the Analysis Data Service.
+    /** @class WorkspaceOnDisk
+    A workspace memento refering to a workspace in the Analysis Data Service.
 
     Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 

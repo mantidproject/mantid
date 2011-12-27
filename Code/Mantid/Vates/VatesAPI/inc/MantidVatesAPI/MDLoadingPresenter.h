@@ -14,7 +14,8 @@ namespace Mantid
     class ProgressAction;
     class vtkDataSetFactory;
      /** 
-    @class MDLoadingPresenter, Abstract presenters for loading conversion of MDEW workspaces into render-able vtk objects.
+    @class MDLoadingPresenter
+    Abstract presenters for loading conversion of MDEW workspaces into render-able vtk objects.
     @author Owen Arnold, Tessella plc
     @date 05/08/2011
 
