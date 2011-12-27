@@ -15,11 +15,8 @@ using Mantid::Geometry::IMDDimension_const_sptr;
 //-------------------------------------------------------------------------
 /// Constructor
 QwtRasterDataMD::QwtRasterDataMD()
-: m_slicePoint(NULL)
+: m_slicePoint(NULL), m_fast(true)
 {
-  timesRequested = 0;
-  m_minVal = DBL_MAX;
-  m_maxVal = -DBL_MAX;
   m_range = QwtDoubleInterval(0.0, 1.0);
   m_nd = 0;
   m_dimX = 0;
@@ -44,13 +41,12 @@ QwtRasterData* QwtRasterDataMD::copy() const
   out->m_dimX = this->m_dimX;
   out->m_dimY = this->m_dimY;
   out->m_nd = this->m_nd;
-  out->m_minVal = this->m_minVal;
-  out->m_maxVal = this->m_maxVal;
   out->m_range = this->m_range;
   out->m_slicePoint = new coord_t[m_nd];
   for (size_t d=0; d<m_nd; d++)
     out->m_slicePoint[d] = this->m_slicePoint[d];
   out->m_ws = this->m_ws;
+  out->m_fast = this->m_fast;
   return out;
 }
 
@@ -103,6 +99,15 @@ QwtDoubleInterval QwtRasterDataMD::range() const
   return m_range;
 }
 
+//------------------------------------------------------------------------------------------------------
+/** Set to use "fast" rendering mode"
+ * @param fast :: if true, will guess at the number of pixels to render based
+ * on workspace resolution
+ */
+void QwtRasterDataMD::setFastMode(bool fast)
+{
+  this->m_fast = fast;
+}
 
 //------------------------------------------------------------------------------------------------------
 /** Return how many pixels this area should be rendered as
@@ -113,6 +118,9 @@ QwtDoubleInterval QwtRasterDataMD::range() const
 QSize QwtRasterDataMD::rasterHint(const QwtDoubleRect &area) const
 {
   if (!m_ws) return QSize();
+  // Slow mode? Don't give a raster hint. This will be 1 pixel per point
+  if (!m_fast) return QSize();
+  // Fast mode: use the bin size to guess at the pixel density
   IMDDimension_const_sptr m_X = m_ws->getDimension(m_dimX);
   IMDDimension_const_sptr m_Y = m_ws->getDimension(m_dimY);
   int w = 2 * int(area.width() / m_X->getBinWidth());

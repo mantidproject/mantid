@@ -51,6 +51,7 @@ public:
   Mantid::Kernel::VMD getSlicePoint() const { return m_slicePoint; }
   int getDimX() const;
   int getDimY() const;
+  bool getFastRender() const;
 
   /// Methods for Python bindings
   QString getWorkspaceName() const;
@@ -97,6 +98,7 @@ public slots:
   void helpLineViewer();
   void setColorScaleAutoFull();
   void setColorScaleAutoSlice();
+  void setFastRender(bool fast);
   // Slots that will be automatically connected via QMetaObject.connectSlotsByName
   void on_btnClearLine_clicked();
 
@@ -192,6 +194,9 @@ private:
 
   /// Cached double for infinity
   double m_inf;
+
+  /// "Fast" rendering mode
+  bool m_fastRender;
 };
 
 } // namespace SliceViewer

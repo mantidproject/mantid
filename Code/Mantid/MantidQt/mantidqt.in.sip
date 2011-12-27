@@ -191,6 +191,9 @@ public:
   void setColorScaleAutoFull();
   void setColorScaleAutoSlice() ;
 
+  void setFastRender(bool fast);
+  bool getFastRender() const;
+
 };
 
 

@@ -493,6 +493,37 @@ void SliceViewer::setColorScaleAutoSlice()
 %End
 
 
+  void setFastRender(bool fast);
+%Docstring
+void SliceViewer::setFastRender(bool fast)
+------------------------------------------
+    Sets whether the image should be rendered in "fast" mode, where
+    the workspace's resolution is used to guess how many pixels to render.
+   
+    If false, each pixel on screen will be rendered. This is the most
+    accurate view but the slowest.
+   
+    This redraws the screen.
+   
+    @param fast :: true to use "fast" rendering mode.
+   
+%End
+
+  bool getFastRender() const;
+%Docstring
+bool SliceViewer::getFastRender()
+---------------------------------
+    Return true if the image is in "fast" rendering mode.
+   
+    In "fast" mode, the workspace's resolution is used to guess how many
+    pixels to render. If false, each pixel on screen will be rendered.
+    This is the most accurate view but the slowest.
+   
+    @return True if the image is in "fast" rendering mode.
+   
+%End
+
+
 };
 
 

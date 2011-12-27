@@ -76,7 +76,8 @@ SliceViewer::SliceViewer(QWidget *parent)
       m_dimensions(), m_data(NULL),
       m_X(), m_Y(),
       m_dimX(0), m_dimY(1),
-      m_logColor(false)
+      m_logColor(false),
+      m_fastRender(true)
 {
 	ui.setupUi(this);
 
@@ -202,6 +203,13 @@ void SliceViewer::initMenus()
   action = new QAction(QPixmap(), "Zoom &Out", this);
   action->setShortcut(Qt::Key_Minus + Qt::ControlModifier);
   connect(action, SIGNAL(triggered()), this, SLOT(zoomOutSlot()));
+  m_menuView->addAction(action);
+
+  action = new QAction(QPixmap(), "&Fast Rendering Mode", this);
+  action->setShortcut(Qt::Key_F + Qt::ControlModifier);
+  action->setCheckable(true);
+  action->setChecked(true);
+  connect(action, SIGNAL(toggled(bool)), this, SLOT(setFastRender(bool)));
   m_menuView->addAction(action);
 
   // --------------- Color options Menu ----------------------------------------
@@ -885,7 +893,6 @@ void SliceViewer::showInfoAt(double x, double y)
 void SliceViewer::updateDisplay(bool resetAxes)
 {
   if (!m_ws) return;
-  m_data->timesRequested = 0;
   size_t oldX = m_dimX;
   size_t oldY = m_dimY;
 
@@ -1188,6 +1195,37 @@ double SliceViewer::getColorScaleMax() const
 bool SliceViewer::getColorScaleLog() const
 {
   return m_colorBar->getLog();
+}
+
+//------------------------------------------------------------------------------------
+/** Sets whether the image should be rendered in "fast" mode, where
+ * the workspace's resolution is used to guess how many pixels to render.
+ *
+ * If false, each pixel on screen will be rendered. This is the most
+ * accurate view but the slowest.
+ *
+ * This redraws the screen.
+ *
+ * @param fast :: true to use "fast" rendering mode.
+ */
+void SliceViewer::setFastRender(bool fast)
+{
+  m_fastRender = fast;
+  m_data->setFastMode(m_fastRender);
+  this->updateDisplay();
+}
+
+/** Return true if the image is in "fast" rendering mode.
+ *
+ * In "fast" mode, the workspace's resolution is used to guess how many
+ * pixels to render. If false, each pixel on screen will be rendered.
+ * This is the most accurate view but the slowest.
+ *
+ * @return True if the image is in "fast" rendering mode.
+ */
+bool SliceViewer::getFastRender() const
+{
+  return m_fastRender;
 }
 
 //------------------------------------------------------------------------------------
