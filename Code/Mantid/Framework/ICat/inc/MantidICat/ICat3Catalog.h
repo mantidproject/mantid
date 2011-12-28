@@ -2,7 +2,7 @@
 #define MANTID_ICAT_ICAT3CATALOG_H_
 
 #include "MantidAPI/ICatalog.h"
-#include "MantidICat/SearchParam.h"
+#include "MantidICat/CatalogSearchParam.h"
 #include "MantidICat/ErrorHandling.h"
 
 namespace Mantid
@@ -45,7 +45,7 @@ namespace Mantid
       /// logout from isis catalog
       virtual void logout();
       /// search isis data
-      virtual void search(const CSearchParam& inputs, Mantid::API::ITableWorkspace_sptr& ws_sptr);
+      virtual void search(const CatalogSearchParam& inputs, Mantid::API::ITableWorkspace_sptr& ws_sptr);
       /// logged in user's investigations search
       virtual void myData(Mantid::API::ITableWorkspace_sptr& mydataws_sptr);
       /// get datasets

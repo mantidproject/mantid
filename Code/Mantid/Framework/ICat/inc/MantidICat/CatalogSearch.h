@@ -1,25 +1,42 @@
-#ifndef MANTID_ICAT_CMYDATASEARCH_H_
-#define MANTID_ICAT_CMYDATASEARCH_H_
+#ifndef MANTID_ICAT_CSEARCH_H_
+#define MANTID_ICAT_CSEARCH_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include"MantidICat/ICatHelper.h"
+#include "MantidICat/CatalogSearchParam.h"
+
+
+
 
 namespace Mantid
 {
   namespace ICat
   {
 
-    /** CMyDataSearch is a class responsible for searching investigations of the logged in user.
-     * This algorithm does Icat search and returns the investigations record
+    /** CatalogSearch is a class responsible for SearchByRunNumber algorithm.
+    This algorithm does the basic search and returns the investigations record
 
     Required Properties:
     <UL>
-    <LI>  OutputWorkspace - name of the OutputWorkspace which contains myinvestigations search
-    <LI>  isValid         - Boolean option used to check the validity of login session
+    <LI> Investigation name -The name of the investigation to search
+    <LI> Investigation Abstract - The abstract of the investigation to be searched
+    <LI> Sample - The name of the sample
+    <LI> Investigators surname Investigators name
+    <LI> DataFile Name -The name of teh data file
+    <LI> StartRun - The the start run number for search </LI>
+    <LI> EndRun - The end run number for search </LI>
+    <LI> Rb Number - The RB number of the investigation
+    <LI> Investigation Type - The tye of the investigation
+    <LI> Instruments - The list of instruments used for search </LI>
+    <LI> StartDate - The start date used for search </LI>
+    <LI> EndDate - The end date used for search </LI>
+    <LI> Keywords - The keyswords used for search </LI>
+    <LI> Case Sensitive - The case ensitive boolean flag used for search </LI>
     </UL>
 
     @author Sofia Antony, ISIS Rutherford Appleton Laboratory 
-    @date 04/08/2010
+    @date 07/07/2010
     Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
@@ -41,17 +58,17 @@ namespace Mantid
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 
      */
-    class DLLExport CMyDataSearch: public API::Algorithm
+    class DLLExport CatalogSearch: public API::Algorithm
     {
     public:
       ///constructor
-      CMyDataSearch():API::Algorithm(){}
+      CatalogSearch():API::Algorithm(){}
       ///destructor
-      ~CMyDataSearch()
+      ~CatalogSearch()
       {
       }
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "CatalogMyDataSearch"; }
+      virtual const std::string name() const { return "CatalogSearch"; }
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
@@ -64,8 +81,11 @@ namespace Mantid
       /// Overwrites Algorithm exec method
       void exec();
 
-    };
+      /// get all inputs for the algorithm
+      void getInputProperties(CatalogSearchParam& params);
 
+
+    };
   }
 }
 

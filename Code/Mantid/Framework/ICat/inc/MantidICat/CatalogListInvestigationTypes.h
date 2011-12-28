@@ -1,5 +1,5 @@
-#ifndef MANTID_ICAT_LISTINVESTIGATIONTYPES_H_
-#define MANTID_ICAT_LISTINVESTIGATIONTYPES_H_
+#ifndef MANTID_ICAT_CATALOGLISTINVESTIGATIONTYPES_H_
+#define MANTID_ICAT_CATALOGLISTINVESTIGATIONTYPES_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -12,7 +12,7 @@ namespace Mantid
   namespace ICat
   {
 
-    /** CListInvestigationTypes class is responsible for loading  investigation types from ICat server .
+    /** CatalogListInvestigationTypes class is responsible for loading  investigation types from ICat server .
      This class written as a Mantid algorithm. This algorithm is used to populate the 
 	   ICat Search Interface investigation types box  
 
@@ -38,13 +38,13 @@ namespace Mantid
      File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
      Code Documentation is available at: <http://doxygen.mantidproject.org>
      */
-    class DLLExport CListInvestigationTypes:public API::Algorithm
+    class DLLExport CatalogListInvestigationTypes:public API::Algorithm
     {
     public:
       /// constructor
-      CListInvestigationTypes():API::Algorithm(){}
+      CatalogListInvestigationTypes():API::Algorithm(){}
       /// destructor
-      ~CListInvestigationTypes(){}
+      ~CatalogListInvestigationTypes(){}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "CatalogListInvestigationTypes"; }
       /// Algorithm's version for identification overriding a virtual method

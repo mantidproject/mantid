@@ -2,11 +2,11 @@
 #define DOWNLOADDATAFILE_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidICat/DownloadDataFile.h"
+#include "MantidICat/CatalogDownloadDataFile.h"
 #include "MantidICat/Session.h"
-#include "MantidICat/Login.h"
-#include "MantidICat/GetDataFiles.h"
-#include "MantidICat/Search.h"
+#include "MantidICat/CatalogLogin.h"
+#include "MantidICat/CatalogGetDataFiles.h"
+#include "MantidICat/CatalogSearch.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -17,7 +17,7 @@
 using namespace Mantid;
 using namespace Mantid::ICat;
 using namespace Mantid::API;
-class DownloadDataFileTest: public CxxTest::TestSuite
+class CatalogDownloadDataFileTest: public CxxTest::TestSuite
 {
 public:
 	void testInit()
@@ -214,7 +214,7 @@ public:
 			throw Mantid::Kernel::Exception::FileError("Error on creating File","download_time.txt");
 		}
 
-		CDownloadDataFile downloadobj1;
+		CatalogDownloadDataFile downloadobj1;
 		clock_t start=clock();
 		downloadobj1.testDownload("http://download.mantidproject.org/videos/Installation.htm","test.htm");
 		clock_t end=clock();
@@ -231,9 +231,9 @@ public:
 	}
 
 private:
-	    CSearch searchobj;
-	    CGetDataFiles invstObj;
-		CDownloadDataFile downloadobj;
-		Login loginobj;
+	    CatalogSearch searchobj;
+	    CatalogGetDataFiles invstObj;
+		CatalogDownloadDataFile downloadobj;
+		CatalogLogin loginobj;
 };
 #endif

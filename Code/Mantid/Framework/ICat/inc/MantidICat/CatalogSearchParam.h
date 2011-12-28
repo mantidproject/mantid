@@ -29,13 +29,13 @@ namespace Mantid
       Code Documentation is available at: <http://doxygen.mantidproject.org>
 
      */
-    class CSearchParam
+    class CatalogSearchParam
     {
     public:
       /// constructor
-      CSearchParam();
+      CatalogSearchParam();
       /// Destructor
-      ~CSearchParam();
+      ~CatalogSearchParam();
       /**This method  sets start date
        *@param startRun :: start run number
        */

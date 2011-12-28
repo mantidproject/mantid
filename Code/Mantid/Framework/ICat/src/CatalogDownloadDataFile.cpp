@@ -1,4 +1,4 @@
-#include "MantidICat/DownloadDataFile.h"
+#include "MantidICat/CatalogDownloadDataFile.h"
 #include "MantidICat/Session.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -37,10 +37,10 @@ namespace Mantid
     using namespace Kernel;
     using namespace API;
 
-    DECLARE_ALGORITHM(CDownloadDataFile)
+    DECLARE_ALGORITHM(CatalogDownloadDataFile)
 
     /// Sets documentation strings for this algorithm
-    void CDownloadDataFile::initDocs()
+    void CatalogDownloadDataFile::initDocs()
     {
       this->setWikiSummary("Downloads the given data files from the data server ");
       this->setOptionalMessage("Downloads the given data files from the data server");
@@ -48,7 +48,7 @@ namespace Mantid
 
 
     /// declaring algorithm properties
-    void CDownloadDataFile::init()
+    void CatalogDownloadDataFile::init()
     {
       declareProperty(new ArrayProperty<int64_t> ("FileIds"),"List of fileids to download from the data server");
       declareProperty(new ArrayProperty<std::string> ("FileNames"),"List of filenames to download from the data server");
@@ -56,7 +56,7 @@ namespace Mantid
           Direction::Output),"A list of containing  locations of files downloaded from data server");
     }
     /// Execute the algorithm
-    void CDownloadDataFile::exec()
+    void CatalogDownloadDataFile::exec()
     {
 
       ICatalog_sptr catalog_sptr;
@@ -135,7 +135,7 @@ namespace Mantid
      * @param url :: url of the file to download.
      * @param fileName :: name of the file to be saved to disk
      */
-    void CDownloadDataFile::downloadFileOverInternet(const std::string & url,const std::string& fileName)
+    void CatalogDownloadDataFile::downloadFileOverInternet(const std::string & url,const std::string& fileName)
     {
       //download using Poco HttpClient session and save to local disk
       doDownloadandSavetoLocalDrive(url,fileName);
@@ -148,7 +148,7 @@ namespace Mantid
      * @param fileName ::  file name
      * @returns true if the file is a data file
      */
-    bool CDownloadDataFile::isDataFile(const std::string & fileName)
+    bool CatalogDownloadDataFile::isDataFile(const std::string & fileName)
     {
       std::basic_string <char>::size_type dotIndex;
       //const std::basic_string <char>::size_type npos = -1;
@@ -167,7 +167,7 @@ namespace Mantid
      * @param URL- URL of the file to down load
      * @param fileName ::  file name
      */
-    void CDownloadDataFile::doDownloadandSavetoLocalDrive(const std::string& URL,const std::string& fileName)
+    void CatalogDownloadDataFile::doDownloadandSavetoLocalDrive(const std::string& URL,const std::string& fileName)
     {
       clock_t start;
       //use HTTP  Get method to download the data file from the server to local disk
@@ -211,7 +211,7 @@ namespace Mantid
      * @param rs :: input stream
      * @param fileName :: name of the output file
      */
-    void CDownloadDataFile::saveFiletoDisk(std::istream& rs,const std::string& fileName)
+    void CatalogDownloadDataFile::saveFiletoDisk(std::istream& rs,const std::string& fileName)
     {
       std::string filepath ( Kernel::ConfigService::Instance().getString("defaultsave.directory"));
       filepath += fileName;
@@ -237,7 +237,7 @@ namespace Mantid
      * @param URL :: URL of the file to download
      * @param fileName :: name of the file
      */
-    void CDownloadDataFile::testDownload(const std::string& URL,const std::string& fileName)
+    void CatalogDownloadDataFile::testDownload(const std::string& URL,const std::string& fileName)
     {
       doDownloadandSavetoLocalDrive(URL,fileName);
 
@@ -245,7 +245,7 @@ namespace Mantid
     /** This method replaces backward slash with forward slash for linux compatibility.
      * @param inputString :: input string
      */
-    void CDownloadDataFile::replaceBackwardSlash(std::string& inputString)
+    void CatalogDownloadDataFile::replaceBackwardSlash(std::string& inputString)
     {
       std::basic_string <char>::iterator iter;
       for(iter=inputString.begin();iter!=inputString.end();++iter)

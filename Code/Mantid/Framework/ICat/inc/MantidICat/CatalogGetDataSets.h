@@ -1,18 +1,28 @@
-#ifndef MANTID_ICAT_LOGOUT_H_
-#define MANTID_ICAT_LOGOUT_H_
+#ifndef MANTID_ICAT_CATALOGGETDATASETS_H_
+#define MANTID_ICAT_CATALOGGETDATASETS_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ITableWorkspace.h"
+
+
 
 namespace Mantid
 {
   namespace ICat
   {
+    /** CatalogGetDataSets is a class responsible for GetDataSets algorithm.
+   This algorithm  gives the datsets for a given investigations record
 
-  /** This class is responsible for disconnecting from the ICat DB .This class written as a Mantid algorithm.
-    
-    @author Sofia Antony, STFC Rutherford Appleton Laboratory
-    @date 23/07/2010
-    Copyright &copy; 2010 STFC Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Required Properties:
+    <UL>
+    <LI> InvestigationId - The id of the investigation to display</LI>
+    <LI> InputWorkspace -  Input workspace which saved last search</LI>
+	  <LI> OutputWorkspace - The putput workspace to store  </LI>
+    </UL>
+
+    @author Sofia Antony, ISIS Rutherford Appleton Laboratory 
+    @date 07/07/2010
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -31,16 +41,18 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-    */
-    class DLLExport CLogout: public API::Algorithm
+
+     */
+    class DLLExport CatalogGetDataSets:public API::Algorithm
     {
     public:
-      /// Constructor
-      CLogout() : API::Algorithm() {}
-      /// Destructor
-      ~CLogout(){}
+      /// constructor for CatalogGetDataSets
+      CatalogGetDataSets():API::Algorithm(){}
+      /// destructor for CatalogGetDataSets
+      ~CatalogGetDataSets(){}
+
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "CatalogLogout"; }
+      virtual const std::string name() const { return "CatalogGetDataSets"; }
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
@@ -49,13 +61,12 @@ namespace Mantid
     private:
       /// Sets documentation strings for this algorithm
       virtual void initDocs();
+      /// Overwrites Algorithm init method.
       void init();
+      /// Overwrites Algorithm exec method
       void exec();
-      /// logout method
-      void doLogout();
-    };
 
+    };
   }
 }
-
 #endif

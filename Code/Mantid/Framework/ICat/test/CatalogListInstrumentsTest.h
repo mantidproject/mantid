@@ -1,18 +1,18 @@
-#ifndef MYDATASEARCH_H_
-#define MYDATASEARCH_H_
+#ifndef LISTINSTRUMENTS_H_
+# define LISTINSTRUMENTS_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidICat/MyDataSearch.h"
+#include "MantidICat/CatalogListInstruments.h"
 #include "MantidICat/Session.h"
-#include "MantidICat/Login.h"
-#include "MantidDataObjects/WorkspaceSingleValue.h"
+#include "MantidICat/CatalogLogin.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"// why this is required to register table workspace.
 #include "ICatTestHelper.h"
 
 
 using namespace Mantid;
 using namespace Mantid::ICat;
 
-class MyDataSearchTest: public CxxTest::TestSuite
+class CatalogListInstrumentsTest: public CxxTest::TestSuite
 {
 public:
   /// Skip all unit tests if ICat server is down
@@ -24,35 +24,36 @@ public:
 	void testInit()
 	{
 		Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
-		CMyDataSearch mydata;
-		TS_ASSERT_THROWS_NOTHING( mydata.initialize());
-		TS_ASSERT( mydata.isInitialized() );
+		TS_ASSERT_THROWS_NOTHING( instrList.initialize());
+		TS_ASSERT( instrList.isInitialized() );
 	}
-	void testMyDataSearch()
+
+	void testListInstruments()
 	{
 		/*std::string s;
 		std::getline(std::cin,s);*/
-
-		CMyDataSearch mydata;
-		Login loginobj;
+	
 		Session::Instance();
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
 		loginobj.setPropertyValue("Username", "mantid_test");
 		loginobj.setPropertyValue("Password", "mantidtestuser");
-	
-		
+			
 		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
 		TS_ASSERT( loginobj.isExecuted() );
 
-		if ( !mydata.isInitialized() ) mydata.initialize();
-			
-		mydata.setPropertyValue("OutputWorkspace","MyInvestigations");
-				
-		TS_ASSERT_THROWS_NOTHING(mydata.execute());
-		TS_ASSERT( mydata.isExecuted() );
+		if (!instrList.isInitialized() ) instrList.initialize();
+		//instrList.setPropertyValue("OutputWorkspace","instrument_list");
+						
+		TS_ASSERT_THROWS_NOTHING(instrList.execute());
+		TS_ASSERT( instrList.isExecuted() );
+
 
 	}
-			
+private:
+	CatalogListInstruments instrList;
+	CatalogLogin loginobj;
 };
+
+ 
 #endif

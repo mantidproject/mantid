@@ -7,7 +7,7 @@ namespace ICatTestHelper
   bool skipTests()
   {
     Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
-    Mantid::ICat::Login loginobj;
+    Mantid::ICat::CatalogLogin loginobj;
     loginobj.initialize();
     loginobj.setPropertyValue("Username", "mantid_test");
     loginobj.setPropertyValue("Password", "mantidtestuser");

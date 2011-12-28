@@ -1,4 +1,4 @@
-#include "MantidICat/Logout.h"
+#include "MantidICat/CatalogLogout.h"
 #include "MantidAPI/CatalogFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"

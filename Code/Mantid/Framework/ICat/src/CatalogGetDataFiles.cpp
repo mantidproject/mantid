@@ -1,4 +1,4 @@
-#include "MantidICat/GetDataFiles.h"
+#include "MantidICat/CatalogGetDataFiles.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -16,17 +16,17 @@ namespace Mantid
     using namespace API;
     using std::size_t;
 
-    DECLARE_ALGORITHM(CGetDataFiles)
+    DECLARE_ALGORITHM(CatalogGetDataFiles)
 
     /// Sets documentation strings for this algorithm
-    void CGetDataFiles::initDocs()
+    void CatalogGetDataFiles::initDocs()
     {
       this->setWikiSummary("Gets the files associated to the selected investigation . ");
       this->setOptionalMessage("Gets the files associated to the selected investigation .");
     }
 
     /// Initialising the algorithm
-    void CGetDataFiles::init()
+    void CatalogGetDataFiles::init()
     {
       BoundedValidator<int64_t>* mustBePositive = new BoundedValidator<int64_t>();
       mustBePositive->setLower(0);
@@ -39,7 +39,7 @@ namespace Mantid
     }
 
     //execute the algorithm
-    void CGetDataFiles::exec()
+    void CatalogGetDataFiles::exec()
     {
       ICatalog_sptr catalog_sptr;
       try
@@ -73,7 +73,7 @@ namespace Mantid
     /**This method filters log files from the workspace
      *@param ws_sptr :: shared pointer to workspace
      */
-    void CGetDataFiles::filterLogFiles( API::ITableWorkspace_sptr& ws_sptr)
+    void CatalogGetDataFiles::filterLogFiles( API::ITableWorkspace_sptr& ws_sptr)
     {
       if(!ws_sptr)
       {
@@ -97,7 +97,7 @@ namespace Mantid
      * @param fileName :: name of the  file
      * @return bool - returns true if it's a raw file or nexus file
      */
-    bool CGetDataFiles::isDataFile(const std::string& fileName)
+    bool CatalogGetDataFiles::isDataFile(const std::string& fileName)
     {
       std::basic_string <char>::size_type dotIndex;
       //find the position of '.' in raw/nexus file name

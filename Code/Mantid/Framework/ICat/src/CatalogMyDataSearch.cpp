@@ -1,9 +1,8 @@
-#include "MantidICat/ListInstruments.h"
+#include "MantidICat/CatalogMyDataSearch.h"
 #include "MantidAPI/CatalogFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidAPI/ICatalog.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidICat/ErrorHandling.h"
 
 namespace Mantid
@@ -13,30 +12,31 @@ namespace Mantid
     using namespace Kernel;
     using namespace API;
 
-    DECLARE_ALGORITHM(CListInstruments)
+    DECLARE_ALGORITHM(CatalogMyDataSearch)
 
     /// Sets documentation strings for this algorithm
-    void CListInstruments::initDocs()
+    void CatalogMyDataSearch::initDocs()
     {
-      this->setWikiSummary("Lists the name of instruments from Information catalog. ");
-      this->setOptionalMessage("Lists the name of instruments from Information catalog.");
+      this->setWikiSummary("This algorithm  loads the logged in users investigations . ");
+      this->setOptionalMessage("This algorithm  loads the logged in users investigations .");
     }
 
-    /// Init method
-    void CListInstruments::init()
+    /// Initialisation method.
+    void CatalogMyDataSearch::init()
     {
-      declareProperty( new ArrayProperty<std::string>("InstrumentList",std::vector<std::string>(),new NullValidator<std::vector<std::string> >,
-          Direction::Output),"A list containing instrument names");
+      declareProperty(new WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Direction::Output),
+          "The name of the workspace to store the result of MyData search ");
       declareProperty("IsValid",true,"Boolean option used to check the validity of login session", Direction::Output);
     }
 
-    /// exec method
-    void CListInstruments::exec()
+    /// Execution method.
+    void CatalogMyDataSearch::exec()
     {
+
+
       ICatalog_sptr catalog_sptr;
       try
       {
-
         catalog_sptr=CatalogFactory::Instance().create(ConfigService::Instance().getFacility().catalogName());
 
       }
@@ -48,20 +48,20 @@ namespace Mantid
       {
         throw std::runtime_error("Error when getting the catalog information from the Facilities.xml file");
       }
-      std::vector<std::string> intruments;
+
+      API::ITableWorkspace_sptr outputws = WorkspaceFactory::Instance().createTable("TableWorkspace");
       try
       {
-        catalog_sptr->listInstruments(intruments);
+        catalog_sptr->myData(outputws);
       }
-      catch(SessionException& e )
+      catch(SessionException& e)
       {
         setProperty("IsValid",false);
         throw std::runtime_error(e.what());
       }
-      setProperty("InstrumentList",intruments);
-    }
+      setProperty("OutputWorkspace",outputws);
 
+    }
 
   }
 }
-

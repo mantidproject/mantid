@@ -1,4 +1,4 @@
-#include "MantidICat/GetDataSets.h"
+#include "MantidICat/CatalogGetDataSets.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -15,17 +15,17 @@ namespace Mantid
     using namespace API;
     using std::size_t;
 
-    DECLARE_ALGORITHM(CGetDataSets)
+    DECLARE_ALGORITHM(CatalogGetDataSets)
 
     /// Sets documentation strings for this algorithm
-    void CGetDataSets::initDocs()
+    void CatalogGetDataSets::initDocs()
     {
       this->setWikiSummary("Gets the datasets associated to the selected investigation. ");
       this->setOptionalMessage("Gets the datasets associated to the selected investigation.");
     }
 
     /// Initialisation methods
-    void CGetDataSets::init()
+    void CatalogGetDataSets::init()
     {
       BoundedValidator<int64_t>* mustBePositive = new BoundedValidator<int64_t>();
       mustBePositive->setLower(0);
@@ -35,7 +35,7 @@ namespace Mantid
     }
 
     /// exec methods
-    void CGetDataSets::exec()
+    void CatalogGetDataSets::exec()
     {
       ICatalog_sptr catalog_sptr;
       try

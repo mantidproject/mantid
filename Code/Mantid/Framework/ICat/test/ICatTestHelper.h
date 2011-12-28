@@ -1,7 +1,7 @@
 #ifndef ICATTESTHELPER_H_
 #define ICATTESTHELPER_H_
 
-#include "MantidICat/Login.h"
+#include "MantidICat/CatalogLogin.h"
 #include "MantidICat/Session.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidICat/ICatExport.h"

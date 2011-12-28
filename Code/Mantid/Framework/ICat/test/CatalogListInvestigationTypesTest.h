@@ -2,9 +2,9 @@
 # define LISTINVESTIGATIONTYPES_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidICat/ListInvestigationTypes.h"
+#include "MantidICat/CatalogListInvestigationTypes.h"
 #include "MantidICat/Session.h"
-#include "MantidICat/Login.h"
+#include "MantidICat/CatalogLogin.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"// why this is required to register table workspace.
 #include "ICatTestHelper.h"
 
@@ -12,7 +12,7 @@
 using namespace Mantid;
 using namespace Mantid::ICat;
 
-class ListInvestigationTypesTest: public CxxTest::TestSuite
+class CatalogListInvestigationTypesTest: public CxxTest::TestSuite
 {
 public:
   /// Skip all unit tests if ICat server is down
@@ -49,8 +49,8 @@ public:
 
 	}
 private:
-	CListInvestigationTypes invstTypesList;
-	Login loginobj;
+	CatalogListInvestigationTypes invstTypesList;
+	CatalogLogin loginobj;
 };
 
  

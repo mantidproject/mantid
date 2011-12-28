@@ -2,12 +2,12 @@
 #define LOGINTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidICat/Login.h"
+#include "MantidICat/CatalogLogin.h"
 #include "MantidICat/Session.h"
 #include "ICatTestHelper.h"
 
 using namespace Mantid::ICat;
-class LoginTest: public CxxTest::TestSuite
+class CatalogLoginTest: public CxxTest::TestSuite
 {
 public:
   /// Skip all unit tests if ICat server is down
@@ -20,7 +20,7 @@ public:
 	{    
 		Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
 
-		Login loginobj;
+		CatalogLogin loginobj;
 		TS_ASSERT_THROWS_NOTHING( loginobj.initialize());
 		TS_ASSERT( loginobj.isInitialized() );
 	}
@@ -29,7 +29,7 @@ public:
 		/*std::string s;
 		std::getline(std::cin,s);*/
 		Session::Instance();
-		Login loginobj;
+		CatalogLogin loginobj;
 
 	   if ( !loginobj.isInitialized() ) loginobj.initialize();
 
@@ -48,7 +48,7 @@ public:
 	void testLoginFail()
 	{
 		
-		Login loginobj;
+		CatalogLogin loginobj;
 		Session::Instance();
 
 	   if ( !loginobj.isInitialized() ) loginobj.initialize();

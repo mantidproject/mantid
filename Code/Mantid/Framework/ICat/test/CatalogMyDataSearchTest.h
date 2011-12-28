@@ -1,18 +1,18 @@
-#ifndef LISTINSTRUMENTS_H_
-# define LISTINSTRUMENTS_H_
+#ifndef MYDATASEARCH_H_
+#define MYDATASEARCH_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidICat/ListInstruments.h"
+#include "MantidICat/CatalogMyDataSearch.h"
 #include "MantidICat/Session.h"
-#include "MantidICat/Login.h"
-#include "MantidDataObjects/WorkspaceSingleValue.h"// why this is required to register table workspace.
+#include "MantidICat/CatalogLogin.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "ICatTestHelper.h"
 
 
 using namespace Mantid;
 using namespace Mantid::ICat;
 
-class ListInstrumentsTest: public CxxTest::TestSuite
+class CatalogMyDataSearchTest: public CxxTest::TestSuite
 {
 public:
   /// Skip all unit tests if ICat server is down
@@ -24,36 +24,35 @@ public:
 	void testInit()
 	{
 		Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
-		TS_ASSERT_THROWS_NOTHING( instrList.initialize());
-		TS_ASSERT( instrList.isInitialized() );
+		CatalogMyDataSearch mydata;
+		TS_ASSERT_THROWS_NOTHING( mydata.initialize());
+		TS_ASSERT( mydata.isInitialized() );
 	}
-
-	void testListInstruments()
+	void testMyDataSearch()
 	{
 		/*std::string s;
 		std::getline(std::cin,s);*/
-	
+
+		CatalogMyDataSearch mydata;
+		CatalogLogin loginobj;
 		Session::Instance();
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
 		loginobj.setPropertyValue("Username", "mantid_test");
 		loginobj.setPropertyValue("Password", "mantidtestuser");
-			
+	
+		
 		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
 		TS_ASSERT( loginobj.isExecuted() );
 
-		if (!instrList.isInitialized() ) instrList.initialize();
-		//instrList.setPropertyValue("OutputWorkspace","instrument_list");
-						
-		TS_ASSERT_THROWS_NOTHING(instrList.execute());
-		TS_ASSERT( instrList.isExecuted() );
-
+		if ( !mydata.isInitialized() ) mydata.initialize();
+			
+		mydata.setPropertyValue("OutputWorkspace","MyInvestigations");
+				
+		TS_ASSERT_THROWS_NOTHING(mydata.execute());
+		TS_ASSERT( mydata.isExecuted() );
 
 	}
-private:
-	CListInstruments instrList;
-	Login loginobj;
+			
 };
-
- 
 #endif

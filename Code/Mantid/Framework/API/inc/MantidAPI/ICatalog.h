@@ -8,7 +8,7 @@ namespace Mantid
 //forward declarations
 namespace ICat
 {
-class CSearchParam;
+class CatalogSearchParam;
 }
 
 namespace API
@@ -50,7 +50,7 @@ public:
   /// logout from catalog
   virtual void logout()=0;
   ///Search investigations
-  virtual void search(const ICat::CSearchParam&,ITableWorkspace_sptr &)=0;
+  virtual void search(const ICat::CatalogSearchParam&,ITableWorkspace_sptr &)=0;
   /// search logged in users data
   virtual void myData(ITableWorkspace_sptr &)=0;
   /// get datasets.

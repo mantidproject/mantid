@@ -1,4 +1,4 @@
-#include "MantidICat/Search.h"
+#include "MantidICat/CatalogSearch.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -18,17 +18,17 @@ namespace Mantid
     using namespace Kernel;
     using namespace API;
 
-    DECLARE_ALGORITHM(CSearch)
+    DECLARE_ALGORITHM(CatalogSearch)
 
     /// Sets documentation strings for this algorithm
-    void CSearch::initDocs()
+    void CatalogSearch::initDocs()
     {
       this->setWikiSummary("Searches investigations ");
       this->setOptionalMessage("Searches investigations");
     }
 
     /// Initialisation method.
-    void CSearch::init()
+    void CatalogSearch::init()
     {
       BoundedValidator<double>* mustBePositive = new BoundedValidator<double>();
       mustBePositive->setLower(0.0);
@@ -53,7 +53,7 @@ namespace Mantid
 
     }
     /// Execution method.
-    void CSearch::exec()
+    void CatalogSearch::exec()
     {
       ICatalog_sptr catalog_sptr;
       try
@@ -71,7 +71,7 @@ namespace Mantid
       }
 
       //get the inputs
-      CSearchParam params;
+      CatalogSearchParam params;
       getInputProperties(params);
       //create output workspace
       ITableWorkspace_sptr ws_sptr = WorkspaceFactory::Instance().createTable("TableWorkspace");
@@ -85,7 +85,7 @@ namespace Mantid
     /**This method gets the input properties for the algorithm.
      * @param params :: reference to inputs object
      */
-    void CSearch::getInputProperties(CSearchParam& params)
+    void CatalogSearch::getInputProperties(CatalogSearchParam& params)
     {
       double dstartRun=getProperty("StartRun");
       if(dstartRun<0)

@@ -2,17 +2,17 @@
 #define GETIDATASETS_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidICat/GetDataSets.h"
+#include "MantidICat/CatalogGetDataSets.h"
 #include "MantidICat/Session.h"
-#include "MantidICat/Login.h"
-#include "MantidICat/Search.h"
+#include "MantidICat/CatalogLogin.h"
+#include "MantidICat/CatalogSearch.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "ICatTestHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::ICat;
 
-class GetDataSetsTest: public CxxTest::TestSuite
+class CatalogGetDataSetsTest: public CxxTest::TestSuite
 {
 public:
   /// Skip all unit tests if ICat server is down
@@ -61,9 +61,9 @@ public:
 		TS_ASSERT( datasets.isExecuted() );
 	}
 private:
-	Login loginobj;
-	CSearch searchobj;
-	//CGetDataFiles datafiles;
-	CGetDataSets datasets;
+	CatalogLogin loginobj;
+	CatalogSearch searchobj;
+	//CatalogGetDataFiles datafiles;
+	CatalogGetDataSets datasets;
 };
 #endif

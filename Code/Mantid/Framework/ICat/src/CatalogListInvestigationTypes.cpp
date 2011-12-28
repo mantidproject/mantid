@@ -1,10 +1,10 @@
-#include "MantidICat/MyDataSearch.h"
+#include "MantidICat/CatalogListInvestigationTypes.h"
 #include "MantidAPI/CatalogFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidAPI/ICatalog.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidICat/ErrorHandling.h"
-
 namespace Mantid
 {
   namespace ICat
@@ -12,33 +12,30 @@ namespace Mantid
     using namespace Kernel;
     using namespace API;
 
-    DECLARE_ALGORITHM(CMyDataSearch)
+    DECLARE_ALGORITHM(CatalogListInvestigationTypes)
 
     /// Sets documentation strings for this algorithm
-    void CMyDataSearch::initDocs()
+    void CatalogListInvestigationTypes::initDocs()
     {
-      this->setWikiSummary("This algorithm  loads the logged in users investigations . ");
-      this->setOptionalMessage("This algorithm  loads the logged in users investigations .");
+      this->setWikiSummary("Lists the name of investigationtypes from the Information catalog. ");
+      this->setOptionalMessage("Lists the name of investigationtypes from the Information catalog.");
     }
 
-    /// Initialisation method.
-    void CMyDataSearch::init()
+    /// Init method
+    void CatalogListInvestigationTypes::init()
     {
-      declareProperty(new WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Direction::Output),
-          "The name of the workspace to store the result of MyData search ");
+      declareProperty( new ArrayProperty<std::string>("InvestigationTypes",std::vector<std::string>(),new NullValidator<std::vector<std::string> >,
+          Direction::Output),"List of investigation types obtained from Catalog");
       declareProperty("IsValid",true,"Boolean option used to check the validity of login session", Direction::Output);
     }
 
-    /// Execution method.
-    void CMyDataSearch::exec()
+    /// exec method
+    void CatalogListInvestigationTypes::exec()
     {
-
-
       ICatalog_sptr catalog_sptr;
       try
       {
         catalog_sptr=CatalogFactory::Instance().create(ConfigService::Instance().getFacility().catalogName());
-
       }
       catch(Kernel::Exception::NotFoundError&)
       {
@@ -48,19 +45,17 @@ namespace Mantid
       {
         throw std::runtime_error("Error when getting the catalog information from the Facilities.xml file");
       }
-
-      API::ITableWorkspace_sptr outputws = WorkspaceFactory::Instance().createTable("TableWorkspace");
+      std::vector<std::string> investTypes;
       try
       {
-        catalog_sptr->myData(outputws);
+        catalog_sptr->listInvestigationTypes(investTypes);
       }
       catch(SessionException& e)
       {
         setProperty("IsValid",false);
         throw std::runtime_error(e.what());
       }
-      setProperty("OutputWorkspace",outputws);
-
+      setProperty("InvestigationTypes",investTypes);
     }
 
   }

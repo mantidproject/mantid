@@ -52,7 +52,7 @@ namespace Mantid
      * @param inputs :: reference to class containing search inputs
      * @param outputws :: shared pointer to output workspace
      */
-    void CICatHelper::doISISSearch(const CSearchParam& inputs,API::ITableWorkspace_sptr &outputws)
+    void CICatHelper::doISISSearch(const CatalogSearchParam& inputs,API::ITableWorkspace_sptr &outputws)
     {
       //ICAt proxy object
       ICATPortBindingProxy icat;
@@ -921,7 +921,7 @@ namespace Mantid
      * @param inputs :: reference to class containing search inputs
      * @param outputws :: shared pointer to output workspace
      */
-    void CICatHelper::doAdvancedSearch(CSearchParam& inputs,API::ITableWorkspace_sptr &outputws)
+    void CICatHelper::doAdvancedSearch(CatalogSearchParam& inputs,API::ITableWorkspace_sptr &outputws)
     {
 
       //ICAt proxy object
@@ -1181,7 +1181,7 @@ namespace Mantid
         CErrorHandling::throwErrorMessages(icat);
       }
 
-      // Login to icat
+      // CatalogLogin to icat
       ns1__login login;
       ns1__loginResponse loginResponse;
 

@@ -1,4 +1,4 @@
-#include "MantidICat/Login.h"
+#include "MantidICat/CatalogLogin.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/MaskedProperty.h"
 #include "MantidAPI/CatalogFactory.h"
@@ -13,10 +13,10 @@ namespace Mantid
     using namespace Kernel;
     using namespace API;
 
-    DECLARE_ALGORITHM(Login)
+    DECLARE_ALGORITHM(CatalogLogin)
 
     /// Sets documentation strings for this algorithm
-    void Login::initDocs()
+    void CatalogLogin::initDocs()
     {
       this->setWikiSummary("Connects to information catalog using user name and password. ");
       this->setOptionalMessage("Connects to information catalog using user name and password.");
@@ -24,7 +24,7 @@ namespace Mantid
 
 
     /// Init method to declare algorithm properties
-    void Login::init()
+    void CatalogLogin::init()
     {
       declareProperty("Username","", new Kernel::MandatoryValidator<std::string>(),
           "The name of the logged in user");
@@ -34,7 +34,7 @@ namespace Mantid
       //declareProperty("DBServer","","Parameter that will identify the ICat DB server URL");
     }
     /// execute the algorithm
-    void Login::exec()
+    void CatalogLogin::exec()
     {
       std::string username=getProperty("Username");
       std::string password=getProperty("Password");

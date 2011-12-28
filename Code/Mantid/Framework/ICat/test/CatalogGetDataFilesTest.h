@@ -2,17 +2,17 @@
 #define GETINVESTIGATION_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidICat/GetDataFiles.h"
+#include "MantidICat/CatalogGetDataFiles.h"
 #include "MantidICat/Session.h"
-#include "MantidICat/Login.h"
-#include "MantidICat/Search.h"
+#include "MantidICat/CatalogLogin.h"
+#include "MantidICat/CatalogSearch.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "ICatTestHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::ICat;
 
-class GetDataFilesTest: public CxxTest::TestSuite
+class CatalogGetDataFilesTest: public CxxTest::TestSuite
 {
 public:
   /// Skip all unit tests if ICat server is down
@@ -61,8 +61,8 @@ public:
 		TS_ASSERT( invstObj.isExecuted() );
 	}
 private:
-	Login loginobj;
-	CSearch searchobj;
-	CGetDataFiles invstObj;
+	CatalogLogin loginobj;
+	CatalogSearch searchobj;
+	CatalogGetDataFiles invstObj;
 };
 #endif

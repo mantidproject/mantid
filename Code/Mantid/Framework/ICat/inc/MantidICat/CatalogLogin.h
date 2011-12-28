@@ -1,5 +1,5 @@
-#ifndef MANTID_ICAT_LOGIN_H_
-#define MANTID_ICAT_LOGIN_H_
+#ifndef MANTID_ICAT_CATALOGLOGIN_H_
+#define MANTID_ICAT_CATALOGLOGIN_H_
 
 #include "MantidAPI/Algorithm.h"
 
@@ -8,8 +8,8 @@ namespace Mantid
 {
   namespace ICat
   {
-    /**  Login class for logging into ICat DB .This class written as a Mantid algorithm.
-     This class uses Gsoap generated ProxyObject to connect to ICat and uses Login API .
+    /**  CatalogLogin class for logging into ICat DB .This class written as a Mantid algorithm.
+     This class uses Gsoap generated ProxyObject to connect to ICat and uses CatalogLogin API .
 
 	   Required Properties:
      <UL>
@@ -39,13 +39,13 @@ namespace Mantid
      File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
      Code Documentation is available at: <http://doxygen.mantidproject.org>
      */
-    class DLLExport Login: public API::Algorithm
+    class DLLExport CatalogLogin: public API::Algorithm
     {
     public:
       /// constructor
-      Login():API::Algorithm(){}
+      CatalogLogin():API::Algorithm(){}
       /// Destructor
-      ~Login(){}
+      ~CatalogLogin(){}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "CatalogLogin"; }
       /// Algorithm's version for identification overriding a virtual method

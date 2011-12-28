@@ -1,23 +1,26 @@
-#ifndef MANTID_ICAT_LISTINSTRUMENTS_H_
-#define MANTID_ICAT_LISTINSTRUMENTS_H_
+#ifndef MANTID_ICAT_GETINVESTIGATION_H_
+#define MANTID_ICAT_GETINVESTIGATION_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
-
 
 
 namespace Mantid
 {
   namespace ICat
   {
+    /**CatalogGetDataFiles is a class responsible for GetInvestigation algorithm.
+    This algorithm does the basic search and returns the investigations record
+    Required Properties:
+    <UL>
+    <LI> InvestigationId - The id of the investigation to display</LI>
+    <LI> InputWorkspace -  Input workspace which saved last search</LI>
+	  <LI> OutputWorkspace - The putput workspace to store  </LI>
+    </UL>
 
-    /** CListInstruments class is responsible for loading  instruments list from ICat DB .
-    This class written as a Mantid algorithm. This algorithm is used to poulate the
-    ICat Search Interface instrument box
-
-    @author Sofia Antony, STFC Rutherford Appleton Laboratory
-    @date 09/07/2010
-    Copyright &copy; 2010 STFC Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    @author Sofia Antony, ISIS Rutherford Appleton Laboratory 
+    @date 07/07/2010
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -36,16 +39,19 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-    */
-    class DLLExport CListInstruments:public API::Algorithm
+
+     */
+    class DLLExport CatalogGetDataFiles:public API::Algorithm
     {
     public:
-      /// constructor
-      CListInstruments():API::Algorithm(){}
-      /// destructor
-      ~CListInstruments(){}
+
+      /// Constructor
+      CatalogGetDataFiles():API::Algorithm(){}
+      /// Destructor
+      ~CatalogGetDataFiles(){}
+
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "CatalogListInstruments"; }
+      virtual const std::string name() const { return "CatalogGetDataFiles"; }
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
@@ -54,10 +60,19 @@ namespace Mantid
     private:
       /// Sets documentation strings for this algorithm
       virtual void initDocs();
-      /// Overwrites Algorithm init method.
+      /// Overwrites Algorithm method.
       void init();
-      /// Overwrites Algorithm exec method
+      /// Overwrites Algorithm method
       void exec();
+      /// do datafile search
+      API::ITableWorkspace_sptr doDataFilesSearch();
+      /// This method returns true if  the given file name is raw file or nexus file otherwise false
+      bool isDataFile(const std::string& fileName);
+
+      /// This method filters the log files from the workspace
+      void filterLogFiles(API::ITableWorkspace_sptr& ws_sptr);
+
+
     };
   }
 }

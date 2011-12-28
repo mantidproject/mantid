@@ -185,7 +185,7 @@ namespace MantidQt
           }
           else
           {
-            throw std::runtime_error("Please Login to the information catalog using the login menu provided to do the investigation search.");
+            throw std::runtime_error("Please CatalogLogin to the information catalog using the login menu provided to do the investigation search.");
           }
         }
         else

@@ -2,15 +2,15 @@
 #define SEARCHBYADVANCED_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidICat/Search.h"
+#include "MantidICat/CatalogSearch.h"
 #include "MantidICat/Session.h"
-#include "MantidICat/Login.h"
+#include "MantidICat/CatalogLogin.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "ICatTestHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::ICat;
-class SearchTest: public CxxTest::TestSuite
+class CatalogSearchTest: public CxxTest::TestSuite
 {
 public:
   /// Skip all unit tests if ICat server is down
@@ -19,7 +19,7 @@ public:
     return ICatTestHelper::skipTests();
   }
 
-  SearchTest()
+  CatalogSearchTest()
   {
     Mantid::API::FrameworkManager::Instance();
   }
@@ -28,16 +28,16 @@ public:
 	{
 	  Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
 
-		CSearch searchobj;
-		Login loginobj;
+		CatalogSearch searchobj;
+		CatalogLogin loginobj;
 		TS_ASSERT_THROWS_NOTHING( searchobj.initialize());
 		TS_ASSERT( searchobj.isInitialized() );
 	}
 	void testSearchByRunNumberandInstrument()
 	{
 		
-		CSearch searchobj;
-		Login loginobj;
+		CatalogSearch searchobj;
+		CatalogLogin loginobj;
 		ICat::Session::Instance();
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
@@ -62,8 +62,8 @@ public:
 	void testSearchByKeywords()
 	{
 		
-		CSearch searchobj;
-		Login loginobj;
+		CatalogSearch searchobj;
+		CatalogLogin loginobj;
 		ICat::Session::Instance();
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
@@ -86,8 +86,8 @@ public:
 	}
 	void testSearchByStartDateEndDate()
 	{
-		CSearch searchobj;
-		Login loginobj;
+		CatalogSearch searchobj;
+		CatalogLogin loginobj;
 		ICat::Session::Instance();
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
@@ -109,7 +109,7 @@ public:
 	}
 	void testSearchByRunNumberInvalidInput()
 	{		
-		Login loginobj;
+		CatalogLogin loginobj;
 		ICat::Session::Instance();
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
@@ -120,7 +120,7 @@ public:
 		
 		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
 		TS_ASSERT( loginobj.isExecuted() );
-		CSearch searchobj;
+		CatalogSearch searchobj;
 		if ( !searchobj.isInitialized() ) searchobj.initialize();
 		
 		// start run number > end run number
@@ -137,8 +137,8 @@ public:
 
 	void testSearchByInvalidDates1()
 	{
-		CSearch searchobj;
-		Login loginobj;
+		CatalogSearch searchobj;
+		CatalogLogin loginobj;
 		ICat::Session::Instance();
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
@@ -161,8 +161,8 @@ public:
 	void xtestSearchByInvalidDates2()
 	{
 
-		CSearch searchobj;
-		Login loginobj;
+		CatalogSearch searchobj;
+		CatalogLogin loginobj;
 		ICat::Session::Instance();
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
