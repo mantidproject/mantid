@@ -76,13 +76,13 @@ function(add_cppcheck _name)
 
     if (CPPCHECK_GENERATE_XML )
       add_custom_target( cppcheck_${_name}
-                         COMMAND ${CPPCHECK_EXECUTABLE} ${CPPCHECK_ARGS} --xml ${_files} 2> ${CMAKE_BINARY_DIR}/cppcheck-${_name}.xml 
+                         COMMAND ${CPPCHECK_EXECUTABLE} ${CPPCHECK_TEMPLATE_ARG} ${CPPCHECK_ARGS} --xml --xml-version=2 ${_files} 2> ${CMAKE_BINARY_DIR}/cppcheck-${_name}.xml 
                          DEPENDS ${_files}
                          COMMENT "cppcheck_${_name}: Running cppcheck to generate cppcheck-${_name}.xml"
                          )
     else (CPPCHECK_GENERATE_XML )
       add_custom_target( cppcheck_${_name}
-                         COMMAND ${CPPCHECK_EXECUTABLE} ${CPPCHECK_ARGS} ${_files}
+                         COMMAND ${CPPCHECK_EXECUTABLE} ${CPPCHECK_TEMPLATE_ARG} ${CPPCHECK_ARGS} ${_files}
                          DEPENDS ${_files}
                          COMMENT "cppcheck_${_name}: Running cppcheck on ${_name} source files"
                          )
