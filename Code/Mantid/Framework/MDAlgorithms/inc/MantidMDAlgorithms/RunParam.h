@@ -221,7 +221,10 @@ namespace Mantid
        void readData(const std::string file);
        void writeData(const std::string file);
 
+       /// @endcond
+
     private:
+       /// @cond
        double m_ei;
        double m_psi;
        double m_elo;
