@@ -67,7 +67,6 @@ function(add_cppcheck _name) # additional arguments are files to ignore
   foreach (f ${ARGN})
     list ( APPEND _cppcheck_ignores "-i" ${CMAKE_CURRENT_SOURCE_DIR}/${f} )
   endforeach()
-  message ( status " IGNORES ${_cppcheck_ignores}")
 
   if(CPPCHECK_EXECUTABLE)
     get_target_property(_cppcheck_sources "${_name}" SOURCES)
