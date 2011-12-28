@@ -8,8 +8,8 @@ namespace Mantid
   {
     /**
     Constructor
-    @parameter view : MVP view.
-    @parameter geometryPresenter : parent presenter wrapping all dimensions.
+    @param view : MVP view.
+    @param geometryPresenter : parent presenter wrapping all dimensions.
     */
     DimensionPresenter::DimensionPresenter(DimensionView* view, GeometryPresenter * geometryPresenter) : m_geometryPresenter(geometryPresenter), m_view(view), m_lastIsIntegrated(false)
     {
@@ -17,7 +17,7 @@ namespace Mantid
 
     /**
     Accept a model. In this schenario the model overrules any settings on the view.
-    @parameter model : The model to manage/contain.
+    @param model : The model to manage/contain.
     */
     void DimensionPresenter::acceptModelStrongly(Mantid::Geometry::IMDDimension_sptr model)
     {
@@ -28,7 +28,7 @@ namespace Mantid
 
     /**
     Accept a model. In this schenario the model does not overrule settings on the view relating to nbins/max/mins.
-    @parameter model : The model to manage/contain.
+    @param model : The model to manage/contain.
     */
     void DimensionPresenter::acceptModelWeakly(Mantid::Geometry::IMDDimension_sptr model)
     {
@@ -196,7 +196,7 @@ namespace Mantid
 
     /**
     Setter for the mapping to use.
-    @parameter mapping to use.
+    @param mapping to use.
     */
     void DimensionPresenter::setMapping(std::string mapping)
     {

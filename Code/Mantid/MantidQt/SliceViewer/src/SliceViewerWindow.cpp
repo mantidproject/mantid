@@ -108,6 +108,8 @@ SliceViewerWindow::SliceViewerWindow(const QString& wsName, const QString& label
   QObject::connect( m_liner, SIGNAL(changedPlanarWidth(double)),
             this, SLOT(changePlanarWidth(double)) );
 
+  this->initMenus();
+
   // Set the current workspace
   this->updateWorkspace();
 }
@@ -115,6 +117,15 @@ SliceViewerWindow::SliceViewerWindow(const QString& wsName, const QString& label
 
 SliceViewerWindow::~SliceViewerWindow()
 {
+}
+
+
+//------------------------------------------------------------------------------------------------
+/** Build the menus */
+void SliceViewerWindow::initMenus()
+{
+  // Make File->Close() close the window
+  connect(m_slicer->m_actionFileClose, SIGNAL(triggered()), this, SLOT(close()));
 }
 
 //------------------------------------------------------------------------------------------------

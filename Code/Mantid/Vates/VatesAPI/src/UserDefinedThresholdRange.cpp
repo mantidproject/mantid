@@ -72,7 +72,7 @@ namespace Mantid
 
     /**
     Determine whether the signal is withing range.
-    @parameter signal value
+    @param signal value
     @return true if the signal is in the range defined by this object.
     */
     bool UserDefinedThresholdRange::inRange(const signal_t& signal)

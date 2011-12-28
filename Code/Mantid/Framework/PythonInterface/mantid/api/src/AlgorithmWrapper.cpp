@@ -99,7 +99,7 @@ namespace Mantid
 
     /**
      * Private exec for this algorithm. Expected to be
-     * overridden in the subclass by a function named PyExec"
+     * overridden in the subclass by a function named PyExec
      */
     void AlgorithmWrapper::exec()
     {

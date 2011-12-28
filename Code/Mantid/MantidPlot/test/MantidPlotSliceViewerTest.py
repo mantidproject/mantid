@@ -14,6 +14,7 @@ from mantidplottests import *
 import time
 
 CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace='mdw')
+CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace='empty')
 FakeMDEventData("mdw",  UniformParams="1e5")
 FakeMDEventData("mdw",  PeakParams="1e4, 2,4,6, 1.5")
 BinMD("mdw", "uniform",  1, "x,0,10,30", "y,0,10,30", "z,0,10,30", IterateEvents="1", Parallel="0")
@@ -43,6 +44,11 @@ class MantidPlotSliceViewerTest(unittest.TestCase):
             QTest.mouseMove(sv)
             Qt.QCoreApplication.processEvents()
         screenshot(svw, "SliceViewer", "SliceViewer with mouse at center, showing coordinates.")
+        
+    def test_plotSlice_empty(self):
+        """ Plot slice on an empty workspace """
+        svw = plotSlice('empty')
+        self.assertEqual(svw.getSlicer().getWorkspaceName(), "empty")
         
         
     def test_closingWindowIsSafe(self):
@@ -91,6 +97,18 @@ class MantidPlotSliceViewerTest(unittest.TestCase):
         self.assertRaises(Exception, getSliceViewer, 'nonexistent')
         svw = plotSlice('uniform', label='alabel')
         self.assertRaises(Exception, getSliceViewer, 'uniform', 'different_label')
+        
+    def test_saveImage(self):
+        """ Save the rendered image """
+        svw = plotSlice('uniform')
+        svw.setSlicePoint(2,6.0)
+        dest = get_screenshot_dir()
+        if not dest is None:
+            filename = "SliceViewerSaveImage"
+            svw.saveImage(os.path.join(dest, filename+".png") )
+            # Add to the HTML report
+            screenshot(None, filename, "SliceViewer: result of saveImage(). Should be only the 2D plot with a color bar (no GUI elements)",
+                       png_exists=True)
         
 # Run the unit tests
 mantidplottests.runTests(MantidPlotSliceViewerTest)

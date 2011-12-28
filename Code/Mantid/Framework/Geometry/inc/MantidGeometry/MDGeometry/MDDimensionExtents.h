@@ -33,8 +33,8 @@ namespace Geometry
     /** Empty constructor - reset everything.
      *  */
     MDDimensionExtents() :
-      min( std::numeric_limits<coord_t>::max() ),
-      max( -std::numeric_limits<coord_t>::max() )
+      min( 1e100 ),
+      max( -1e100 )
     { }
 
     // ---- Public members ----------

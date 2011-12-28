@@ -75,6 +75,7 @@ namespace SliceViewer
     void setSnap(double spacing);
     void setSnapEnabled(bool enabled);
     void setSnapLength(double spacing);
+    void setShowHandles(bool shown);
 
     ///@return the snap-to X interval
     double getSnapX()
@@ -150,6 +151,9 @@ namespace SliceViewer
     double m_snapY;
     /// Snap to length of the line
     double m_snapLength;
+
+    /// Are the mouse handles visible?
+    bool m_showHandles;
 
   };
 

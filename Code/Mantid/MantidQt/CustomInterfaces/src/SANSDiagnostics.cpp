@@ -1183,7 +1183,6 @@ namespace MantidQt
 
     /**Execute sumrowcolumn algorithm 
     * @param values a vector containing the values for hvmin,hvmax
-    * @param periodNum - number of the  period to load
     * @param ipws - name of the i/p workspace
     * @param opws - name of the o/p workspace
     * @param orientation - orientation of the detector

@@ -1758,7 +1758,7 @@ bool FitPropertyBrowser::isFitEnabled()const
 }
 
 /** 
- * Slot. Adds a tie. Full expression to be entered <name>=<formula>
+ * Slot. Adds a tie. Full expression to be entered \<name\>=\<formula\>
  */
 void FitPropertyBrowser::addTie()
 {
@@ -1898,7 +1898,7 @@ void FitPropertyBrowser::hasConstraints(QtProperty* parProp,
 }
 
 /** Returns the tie property for a parameter property, or NULL
- * @param The :: parameter property
+ * @param parProp :: parameter property
  */
 QtProperty* FitPropertyBrowser::getTieProperty(QtProperty* parProp)const
 {
@@ -2537,7 +2537,7 @@ void FitPropertyBrowser::setTextPlotGuess(const QString text)
 * Currently only called by the custom interface for the muon analysis fit browser.
 * It adds the name of a loaded workspace to a drop down property box . 
 *
-* @params wsName :: The workspace name to be added.
+* @param wsName :: The workspace name to be added.
 */
 void FitPropertyBrowser::manualAddWorkspace(const QString& wsName)
 {
@@ -2599,7 +2599,7 @@ void FitPropertyBrowser::workspaceChange(const QString& wsName)
 * Shows the correct workspace in the fit property browser and
 * then updates the PeakPickerTool to another workspace.
 *
-* @params wsName :: The name of the workspace the PeakPickerTool is 
+* @param wsName :: The name of the workspace the PeakPickerTool is
 *                   to be assigned to.
 */
 void FitPropertyBrowser::updatePPTool(const QString & wsName)

@@ -181,6 +181,7 @@ SliceViewer
 %End
 
 public:
+  //*WIKI* ==== Basics ====
   void setWorkspace(const QString & wsName)   throw (std::runtime_error);
 %Docstring
 void SliceViewer::setWorkspace(const QString & wsName)
@@ -225,7 +226,39 @@ void SliceViewer::openFromXML(const QString & xml)
    
 %End
 
+  void saveImage(const QString & filename = QString());
+  void setFastRender(bool fast);
+%Docstring
+void SliceViewer::setFastRender(bool fast)
+------------------------------------------
+    Sets whether the image should be rendered in "fast" mode, where
+    the workspace's resolution is used to guess how many pixels to render.
+   
+    If false, each pixel on screen will be rendered. This is the most
+    accurate view but the slowest.
+   
+    This redraws the screen.
+   
+    @param fast :: true to use "fast" rendering mode.
+   
+%End
 
+  bool getFastRender() const;
+%Docstring
+bool SliceViewer::getFastRender()
+---------------------------------
+    Return true if the image is in "fast" rendering mode.
+   
+    In "fast" mode, the workspace's resolution is used to guess how many
+    pixels to render. If false, each pixel on screen will be rendered.
+    This is the most accurate view but the slowest.
+   
+    @return True if the image is in "fast" rendering mode.
+   
+%End
+
+
+  //*WIKI* ==== X/Y Dimension ====
   void setXYDim(int indexX, int indexY)     throw (std::invalid_argument);
 %Docstring
 void SliceViewer::setXYDim(int indexX, int indexY)
@@ -273,6 +306,7 @@ int SliceViewer::getDimY()
 %End
 
 
+  //*WIKI* ==== Slice Point ====
   void setSlicePoint(int dim, double value)     throw (std::invalid_argument);
 %Docstring
 void SliceViewer::setSlicePoint(int dim, double value)
@@ -321,6 +355,8 @@ double SliceViewer::getSlicePoint(const QString & dim)
    
 %End
 
+
+  //*WIKI* ==== View Limits ====
   void setXYLimits(double xleft, double xright, double ybottom, double ytop);
 %Docstring
 void SliceViewer::setXYLimits(double xleft, double xright, double ybottom, double ytop)
@@ -391,6 +427,7 @@ void SliceViewer::resetZoom()
 %End
 
 
+  //*WIKI* ==== Color Map and Scale ====
   void loadColorMap(QString filename);
 %Docstring
 void SliceViewer::loadColorMap(QString filename)

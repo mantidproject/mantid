@@ -252,6 +252,11 @@ void AxisInteractor::clearSelections()
   }
 }
 
+/**
+ * This function uses the requested axis coordinate to find the graphical
+ * point on the axis scale. The indicator is then updated to that point.
+ * @param value the axis coordinate to update the indicator to
+ */
 void AxisInteractor::updateIndicator(double value)
 {
   QPoint *pos = this->scalePicker->getLocation(value);

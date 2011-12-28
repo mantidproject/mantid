@@ -113,6 +113,7 @@ class SliceViewer : QWidget
 
 
 public:
+  //*WIKI* ==== Basics ====
   void setWorkspace(const QString & wsName)   throw (std::runtime_error);
 
   QString getWorkspaceName() const;
@@ -121,7 +122,13 @@ public:
 
   void openFromXML(const QString & xml)   throw (std::invalid_argument, std::runtime_error);
 
+  void saveImage(const QString & filename = QString());
+  void setFastRender(bool fast);
 
+  bool getFastRender() const;
+
+
+  //*WIKI* ==== X/Y Dimension ====
   void setXYDim(int indexX, int indexY)     throw (std::invalid_argument);
 
   void setXYDim(const QString & dimX, const QString & dimY)     throw (std::invalid_argument, std::runtime_error);
@@ -131,6 +138,7 @@ public:
   int getDimY() const;
 
 
+  //*WIKI* ==== Slice Point ====
   void setSlicePoint(int dim, double value)     throw (std::invalid_argument);
 
   void setSlicePoint(const QString & dim, double value)   throw (std::invalid_argument, std::runtime_error);
@@ -139,6 +147,8 @@ public:
 
   double getSlicePoint(const QString & dim) const   throw (std::invalid_argument, std::runtime_error);
 
+
+  //*WIKI* ==== View Limits ====
   void setXYLimits(double xleft, double xright, double ybottom, double ytop);
 
   QwtDoubleInterval getXLimits() const;
@@ -152,6 +162,7 @@ public:
   void resetZoom();
 
 
+  //*WIKI* ==== Color Map and Scale ====
   void loadColorMap(QString filename);
 
   void setColorScale(double min, double max, bool log)      throw (std::invalid_argument);
@@ -220,5 +231,4 @@ private:
 
 }; // end namespace
 }; // end namespace
-
 

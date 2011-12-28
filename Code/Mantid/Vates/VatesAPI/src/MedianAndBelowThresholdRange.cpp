@@ -97,7 +97,7 @@ namespace Mantid
 
     /**
     Setter for IMDWorkspace.
-    @parameter: workspace : The workspace to extract ranges from.
+    @param workspace : The workspace to extract ranges from.
     */
     void MedianAndBelowThresholdRange::setWorkspace(Mantid::API::Workspace_sptr workspace)
     {
@@ -111,7 +111,7 @@ namespace Mantid
 
     /**
     Determine whether the signal is withing range.
-    @parameter signal value
+    @param signal value
     @return true if the signal is in the range defined by this object.
     */
     bool MedianAndBelowThresholdRange::inRange(const signal_t& signal)

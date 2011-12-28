@@ -197,7 +197,7 @@ Mantid::API::Workspace_sptr MantidDockWidget::getSelectedWorkspace() const
 
 /**
 * Add an item to the tree list
-* @ws_name The name of the workspace
+* @param ws_name The name of the workspace
 * @param workspace :: A pointer to the workspace
 */
 void MantidDockWidget::addTreeEntry(const QString & ws_name, Mantid::API::Workspace_sptr workspace)
@@ -221,7 +221,7 @@ void MantidDockWidget::addTreeEntry(const QString & ws_name, Mantid::API::Worksp
 
 /**
 * Replace an item in the tree list
-* @ws_name The name of the workspace
+* @param ws_name The name of the workspace
 * @param workspace :: A pointer to the workspace
 */
 void MantidDockWidget::replaceTreeEntry(const QString & ws_name, Mantid::API::Workspace_sptr workspace)
@@ -875,7 +875,7 @@ void MantidDockWidget::addMatrixWorkspaceMenuItems(QMenu *menu, Mantid::API::Mat
 /**
  * Add the actions that are appropriate for a MDEventWorkspace
  * @param menu :: The menu to store the items
- * @param matrixWS :: The workspace related to the menu
+ * @param WS :: The workspace related to the menu
  */
 void MantidDockWidget::addMDEventWorkspaceMenuItems(QMenu *menu, Mantid::API::IMDEventWorkspace_const_sptr WS) const
 {
@@ -918,7 +918,7 @@ void MantidDockWidget::addMDHistoWorkspaceMenuItems(QMenu *menu, Mantid::API::IM
 
 /** Add the actions that are appropriate for a PeaksWorkspace
  * @param menu :: The menu to store the items
- * @param matrixWS :: The workspace related to the menu
+ * @param WS :: The workspace related to the menu
  */
 void MantidDockWidget::addPeaksWorkspaceMenuItems(QMenu *menu, Mantid::API::IPeaksWorkspace_const_sptr WS) const
 {
@@ -1038,7 +1038,7 @@ void MantidDockWidget::excludeItemFromSort(MantidTreeWidgetItem *item)
 
 /**
 * Saves a workspace based on the program the user chooses to save to.
-* @param programSave :: A string containing the name of the program
+* @param name :: A string containing the name of the program
 */
 
 void MantidDockWidget::saveToProgram(const QString & name)
