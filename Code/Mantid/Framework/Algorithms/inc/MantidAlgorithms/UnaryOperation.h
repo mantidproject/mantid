@@ -54,7 +54,7 @@ namespace Mantid
       virtual ~UnaryOperation();
 
       /// Algorithm's category for identification
-      virtual const std::string category() const { return "CorrectionFunctions;Arithmetic";}
+      virtual const std::string category() const { return "Arithmetic";}
 
     protected:
       // Overridden Algorithm methods

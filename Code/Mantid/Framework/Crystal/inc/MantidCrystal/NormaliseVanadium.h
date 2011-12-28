@@ -56,7 +56,7 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Crystal"; }
+  virtual const std::string category() const { return "Crystal;CorrectionFunctions\\NormalisationCorrections"; }
 
 protected:
   /** A virtual function in which additional properties of an algorithm should be declared. 

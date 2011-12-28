@@ -11,7 +11,7 @@ from mantidsimple import *
 
 class FindSNSNeXus(PythonAlgorithm):
     def category(self):
-        return "Deprecated"
+        return "Deprecated;PythonAlgorithms"
 
     def name(self):
         return "FindSNSNeXus"

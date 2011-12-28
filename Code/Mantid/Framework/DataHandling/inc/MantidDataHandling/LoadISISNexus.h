@@ -89,7 +89,7 @@ namespace Mantid
             /// Algorithm's version for identification overriding a virtual method
             virtual int version() const { return 1; }
             /// Algorithm's category for identification overriding a virtual method
-            virtual const std::string category() const { return "DataHandling"; }
+            virtual const std::string category() const { return "DataHandling\\Nexus"; }
 
         private:
             /// Overwrites Algorithm method.

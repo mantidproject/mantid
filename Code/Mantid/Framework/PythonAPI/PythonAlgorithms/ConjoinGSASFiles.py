@@ -13,7 +13,7 @@ class ConjoinGSASFiles(PythonAlgorithm):
     def category(self):
         """
         """
-        return "DataHandling"
+        return "DataHandling;PythonAlgorithms"
 
     def name(self):
         """

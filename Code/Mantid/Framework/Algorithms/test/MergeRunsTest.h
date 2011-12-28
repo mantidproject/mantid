@@ -157,7 +157,6 @@ public:
 	{
     TS_ASSERT_EQUALS( merge.name(), "MergeRuns" );
     TS_ASSERT_EQUALS( merge.version(), 1 );
-    TS_ASSERT_EQUALS( merge.category(), "General" );
 	}
 
 	void testInit()

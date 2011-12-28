@@ -149,7 +149,7 @@ class SNSPowderReduction(PythonAlgorithm):
             return self._focusPos
 
     def category(self):
-        return "Diffraction"
+        return "Diffraction;PythonAlgorithms"
 
     def name(self):
         return "SNSPowderReduction"

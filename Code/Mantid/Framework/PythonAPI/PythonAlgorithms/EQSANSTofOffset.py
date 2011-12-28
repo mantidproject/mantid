@@ -23,7 +23,7 @@ class EQSANSTofOffset(PythonAlgorithm):
     CHOPPER_LOCATION = [5700.,7800.,9497.,9507.]
     
     def category(self):
-        return "SANS"
+        return "SANS;PythonAlgorithms"
 
     def name(self):
         return "EQSANSTofOffset"

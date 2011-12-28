@@ -9,7 +9,7 @@ from MantidFramework import *
 class MergeCalFiles(PythonAlgorithm):
 
   def category(self):
-    return "General"
+    return "DataHandling\\Text;Diffraction;PythonAlgorithms"
 
   def name(self):
     return "MergeCalFiles"
