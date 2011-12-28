@@ -164,7 +164,7 @@ void CompositeFunction::setParameter(const std::string& name, const double& valu
 /**
  * Sets a new description to a parameter by name.
  * @param name :: The name of the parameter.
- * @param value :: The new description
+ * @param description :: The new description
  */
 void CompositeFunction::setParameterDescription(const std::string& name, const std::string& description)
 {
@@ -717,6 +717,7 @@ void CompositeFunction::addTie(ParameterTie* tie)
  * Declare a new parameter. To used in the implementation'c constructor.
  * @param name :: The parameter name.
  * @param initValue :: The initial value for the parameter
+ * @param description :: Parameter documentation
  */
 void CompositeFunction::declareParameter(const std::string& name, double initValue, const std::string& description)
 {

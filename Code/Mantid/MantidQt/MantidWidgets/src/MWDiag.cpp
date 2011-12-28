@@ -518,6 +518,7 @@ QString MWDiag::openFileDialog(const bool save, const QStringList &exts)
 
 /**raises the window containing the results summary, run the Python scripts that
 *  have been created and, optionally on success, save the values on the form 
+*  @param outWS :: the workspace for placing the information in
 *  @param saveSettings :: if the Python executes successfully and this parameter is true the settings are saved
 *  @return this method catches most exceptions and this return is main way that errors are reported
 */

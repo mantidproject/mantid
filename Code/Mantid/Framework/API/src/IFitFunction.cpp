@@ -250,7 +250,7 @@ void IFitFunction::addPenaltyDeriv(Jacobian *out)const
 //}
 //
 /**
- * Operator <<
+ * Operator \<\<
  * @param ostr :: The output stream
  * @param f :: The IFitFunction
  */

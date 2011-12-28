@@ -595,7 +595,6 @@ void SANSRunWindow::trimPyMarkers(QString & txt)
 }
 /** Issues a Python command to load the user file and returns any output if
 *  there are warnings or errors
-*  @param errors [out] the output produced by the string
 *  @return the output printed by the Python commands
 */
 bool SANSRunWindow::loadUserFile()
@@ -2799,7 +2798,7 @@ void SANSRunWindow::fillDetectNames(QComboBox *output)
 }
 /** Checks if the workspace is a group and returns the first member of group, throws
 *  if nothing can be retrived
-*  @param workspace [in] the group to examine
+*  @param in [in] the group to examine
 *  @param member [in] entry or period number of the requested workspace, these start at 1
 *  @return the first member of the passed group
 *  @throw NotFoundError if a workspace can't be returned

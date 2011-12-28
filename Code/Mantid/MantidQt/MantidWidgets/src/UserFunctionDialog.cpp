@@ -497,6 +497,7 @@ bool UserFunctionDialog::isBuiltin(const QString& cat)const
 
 /**
  * Constructor
+ * @param parent :: The parent for this dialog
  * @param category :: The initial suggestion for the category 
  */
 InputFunctionNameDialog::InputFunctionNameDialog(QWidget *parent,const QString& category)
@@ -538,6 +539,7 @@ InputFunctionNameDialog::InputFunctionNameDialog(QWidget *parent,const QString& 
  * Return the entered category and function name and comment
  * @param category :: A string to recieve the category
  * @param name :: A string to recieve the function name
+ * @param comment ::
  */
 void InputFunctionNameDialog::getFunctionName(QString& category,QString& name,QString& comment)
 {

@@ -66,7 +66,7 @@ namespace API
 
   //---------------------------------------------------------------------------------------
   /** Clone this ExperimentInfo class into a new one
-   * @param other :: the source from which to copy ExperimentInfo */
+   */
   ExperimentInfo * ExperimentInfo::cloneExperimentInfo()
   {
     ExperimentInfo * out = new ExperimentInfo();
@@ -454,7 +454,6 @@ namespace API
   /** Return workspace start date as an ISO 8601 string. If this info not stored in workspace the
   *   method returns current date.
   *
-  *  @param workspace :: workspace to get information from
   *  @return workspace start date as a string
   */
   std::string ExperimentInfo::getWorkspaceStartDate()

@@ -131,6 +131,7 @@ namespace OperatorOverloads
  *
  *  @param lhs :: left hand side workspace shared pointer
  *  @param rhs :: right hand side workspace shared pointer
+ *  @param tolerance :: acceptable difference for floating point numbers
  *  @return bool, true if workspaces match
  */
 bool equals(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs, double tolerance)
