@@ -94,6 +94,7 @@ namespace VATES
    *
    * @param timestep :: index of the time step (4th dimension) in the workspace.
    *        Set to 0 for a 3D workspace.
+   * @param do4D :: if true, create a 4D dataset, else to 3D
    * @return the vtkDataSet created
    */
   vtkDataSet* vtkThresholdingHexahedronFactory::create3Dor4D(size_t timestep, bool do4D) const

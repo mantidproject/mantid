@@ -595,7 +595,7 @@ void SANSRunWindow::trimPyMarkers(QString & txt)
 }
 /** Issues a Python command to load the user file and returns any output if
 *  there are warnings or errors
-*  @param[out] errors the output produced by the string
+*  @param errors[out] the output produced by the string
 *  @return the output printed by the Python commands
 */
 bool SANSRunWindow::loadUserFile()
@@ -1059,8 +1059,7 @@ void SANSRunWindow::componentLOQDistances(Mantid::API::MatrixWorkspace_sptr work
 
 /**
  * Set the state of processing.
- * @param running :: If we are processing then some interaction is disabled
- * @param type :: The reduction type, 0 = 1D and 1 = 2D
+ * @param action :: can be loading, 1D or 2D reduction
  */
 void SANSRunWindow::setProcessingState(const States action)
 {
@@ -1620,7 +1619,7 @@ void SANSRunWindow::forceDataReload(bool force)
 /**
  * Browse for a file and set the text of the given edit box
  * @param box_title :: The title field for the display box
- * @param A :: QLineEdit box to use for the file path
+ * @param file_field :: QLineEdit box to use for the file path
  * @param file_filter :: An optional file filter
  */
 bool SANSRunWindow::browseForFile(const QString & box_title, QLineEdit* file_field, QString file_filter)
@@ -1910,7 +1909,7 @@ QString SANSRunWindow::readSampleObjectGUIChanges()
 }
 /**
  * Run the analysis script
- * @param type :: The data reduction type, 1D or 2D
+ * @param typeStr :: The data reduction type, 1D or 2D
  */
 void SANSRunWindow::handleReduceButtonClick(const QString & typeStr)
 {
@@ -2666,7 +2665,7 @@ void SANSRunWindow::resetDefaultOutput(const QString & wsName)
 /** Passes information about the selected transmission runs to the Python objects
 *  @param trans run widget box with the selected transmission (run with a sample present) file
 *  @param direct run widget box with the selected direct (run with no sample present) file
-*  @para assignFn this is different for can or sample
+*  @param assignFn this is different for can or sample
 */
 bool SANSRunWindow::assignMonitorRun(MantidWidgets::MWRunFiles & trans, MantidWidgets::MWRunFiles & direct, const QString & assignFn)
 {
@@ -2772,7 +2771,7 @@ bool SANSRunWindow::assignDetBankRun(MantidWidgets::MWRunFiles & runFile, const 
 }
 /** Gets the detectors that the instrument has and fills the
 *  combination box with these, there must exactly two detectors
-*  @parma output[out] this combination box will be cleared and filled with the new names
+*  @param output[out] this combination box will be cleared and filled with the new names
 *  @throw runtime_error if there aren't exactly two detectors 
 */
 void SANSRunWindow::fillDetectNames(QComboBox *output)
@@ -2798,8 +2797,8 @@ void SANSRunWindow::fillDetectNames(QComboBox *output)
 }
 /** Checks if the workspace is a group and returns the first member of group, throws
 *  if nothing can be retrived
-*  @param[in] workspace the group to examine
-*  @param[in] member entry or period number of the requested workspace, these start at 1
+*  @param workspace[in] the group to examine
+*  @param member[in] entry or period number of the requested workspace, these start at 1
 *  @return the first member of the passed group
 *  @throw NotFoundError if a workspace can't be returned
 */

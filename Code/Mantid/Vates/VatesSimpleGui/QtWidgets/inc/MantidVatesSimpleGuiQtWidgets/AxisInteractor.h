@@ -140,6 +140,7 @@ public:
    */
   /// Set the flag for showing the SliceViewer
   void setShowSliceView(double state);
+  /// Update the indicator to the value requested
   void updateIndicator(double value);
   /// Update the requested indicator to the given position.
   void updateRequestedIndicator(const QString &name, double value);

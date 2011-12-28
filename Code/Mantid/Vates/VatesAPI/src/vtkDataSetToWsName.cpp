@@ -13,7 +13,7 @@ namespace Mantid
   {
     /**
     Static creational method to run functionality in one method call.
-    @param dataSet : input dataset containing field data.
+    @param dataset : input dataset containing field data.
     @return extracted workspace name.
     */
     std::string vtkDataSetToWsName::exec(vtkDataSet* dataset)

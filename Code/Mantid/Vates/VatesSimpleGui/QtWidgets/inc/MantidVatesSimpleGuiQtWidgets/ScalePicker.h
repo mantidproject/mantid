@@ -106,6 +106,7 @@ private:
    * position.
    * @param scale the associated QwtScaleWidget
    * @param pos the x,y coordinates of the mouse click event
+   * @param createIndicator if true, create an indicator, else do nothing
    */
   void mouseClicked(const QwtScaleWidget *scale, const QPoint &pos,
                     bool createIndicator = true);
