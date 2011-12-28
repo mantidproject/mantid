@@ -165,7 +165,8 @@ void FindPeaks::exec()
 
 //=================================================================================================
 /** Use the Mariscotti method to find the start positions to fit gaussian peaks
- * @param peakCenters: vector of the center x-positions specified to perform fits.
+ * @param peakCenters :: vector of the center x-positions specified to perform fits.
+ * @param backgroundtype :: background function type name
  */
 void FindPeaks::findPeaksGivenStartingPoints(std::vector<double> peakCenters, std::string backgroundtype)
 {
@@ -516,8 +517,9 @@ long long FindPeaks::computePhi(const int& w) const
  *
  *  @param input ::    The input workspace
  *  @param spectrum :: The spectrum index of the peak (is actually the WorkspaceIndex)
- *  @param center_guess: A guess of the X-value of the center of the peak, in whatever units of the X-axis of the workspace.
- *  @param FWHM_guess: A guess of the full-width-half-max of the peak, in # of bins.
+ *  @param center_guess :: A guess of the X-value of the center of the peak, in whatever units of the X-axis of the workspace.
+ *  @param FWHM_guess :: A guess of the full-width-half-max of the peak, in # of bins.
+ *  @param backgroundtype :: The background function type name
 */
 void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const double center_guess, const int FWHM_guess,
     std::string backgroundtype)
@@ -571,6 +573,7 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
  *  @param i0 ::       Channel number of peak candidate i0 - the higher side of the peak (right side)
  *  @param i2 ::       Channel number of peak candidate i2 - the lower side of the peak (left side)
  *  @param i4 ::       Channel number of peak candidate i4 - the center of the peak
+ *  @param backgroundtype :: The background function type name
  */
 
 void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i0, const int i2, const int i4,

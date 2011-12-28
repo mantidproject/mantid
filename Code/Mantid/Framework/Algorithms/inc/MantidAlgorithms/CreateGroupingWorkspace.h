@@ -14,7 +14,7 @@ namespace Algorithms
    *  an instrument name,
    *  or an instrument IDF file.
    *
-   *  Optionally uses bank names to create the groups.");
+   *  Optionally uses bank names to create the groups.
    * 
    * @author Janik Zikovsky
    * @date 2011-05-02

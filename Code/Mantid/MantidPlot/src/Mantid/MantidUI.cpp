@@ -3039,7 +3039,6 @@ MultiLayer* MantidUI::drawSingleColorFillPlot(const QString & wsName, Graph::Cur
     @param i1 :: Last index
     @param errs :: If true include the errors to the graph
     @param distr :: if true, workspace is a distribution
-    @param tableVisible :: Visibility flag for the Table with the plotted data.
  */
 MultiLayer* MantidUI::plotSpectraRange(const QString& wsName, int i0, int i1, bool errs, bool distr)
 {

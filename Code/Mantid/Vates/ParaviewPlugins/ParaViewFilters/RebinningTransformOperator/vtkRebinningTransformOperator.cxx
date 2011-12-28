@@ -167,7 +167,7 @@ const char* vtkRebinningTransformOperator::getAppliedGeometryXML() const
 }
 
 /** Setter for the algorithm progress..
-@param progress
+@param progress the current progress value
 */
 void vtkRebinningTransformOperator::updateAlgorithmProgress(double progress)
 {

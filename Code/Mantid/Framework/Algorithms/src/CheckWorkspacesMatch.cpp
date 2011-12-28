@@ -413,8 +413,8 @@ bool CheckWorkspacesMatch::checkAxes(API::MatrixWorkspace_const_sptr ws1, API::M
 }
 
 /// Checks that the spectra maps match
-/// @param map1 :: the first sp det map
-/// @param map2 :: the second sp det map
+/// @param ws1 :: the first sp det map
+/// @param ws2 :: the second sp det map
 /// @retval true The maps match
 /// @retval false The maps do not match
 bool CheckWorkspacesMatch::checkSpectraMap(MatrixWorkspace_const_sptr ws1, MatrixWorkspace_const_sptr ws2)
