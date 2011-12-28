@@ -64,33 +64,33 @@ const Kernel::DblMatrix& Goniometer::getR() const
 /// The angle units shown is degrees
 std::string Goniometer::axesInfo()
 {
-  if (initFromR==true) 
-  {
-    return std::string("Goniometer was initialized from a rotation matrix. No information about axis is available.\n");
-  }
-  else
-  {
-    std::stringstream info;
-    std::vector<GoniometerAxis>::iterator it;
-    std::string strCW("CW"),strCCW("CCW"),sense;
-    double angle;
-
-    if (motors.size() == 0) 
+    if (initFromR==true)
     {
-      info<<"No axis is found\n";
+        return std::string("Goniometer was initialized from a rotation matrix. No information about axis is available.\n");
     }
     else
     {
-      info<<"Name \t Direction \t Sense \t Angle \n";
-      for(it=motors.begin(); it<motors.end(); ++it)
-      {
-        sense=((*it).sense==CCW)?strCCW:strCW;
-        angle=((*it).angleunit==angDegrees)?((*it).angle): ((*it).angle*rad2deg); 
-        info<<(*it).name<<"\t"<<(*it).rotationaxis<<"\t"<<sense<<"\t"<<angle<<std::endl;
-      }  
+        std::stringstream info;
+        std::vector<GoniometerAxis>::iterator it;
+        std::string strCW("CW"),strCCW("CCW"),sense;
+
+        if (motors.size() == 0)
+        {
+            info<<"No axis is found\n";
+        }
+        else
+        {
+            double angle;
+            info<<"Name \t Direction \t Sense \t Angle \n";
+            for(it=motors.begin(); it<motors.end(); ++it)
+            {
+                sense=((*it).sense==CCW)?strCCW:strCW;
+                angle=((*it).angleunit==angDegrees)?((*it).angle): ((*it).angle*rad2deg);
+                info<<(*it).name<<"\t"<<(*it).rotationaxis<<"\t"<<sense<<"\t"<<angle<<std::endl;
+            }
+        }
+        return info.str();
     }
-    return info.str();
-  }
 }
 
 /**Add an additional axis to the goniometer, closer to the sample
@@ -172,7 +172,7 @@ const GoniometerAxis Goniometer::getAxis( size_t axisnumber) const
   return motors.at(axisnumber);//it will throw out of range exception if axisnumber is not in range
 }
 
-/// Get GoniometerAxis obfject using motor name
+/// Get GoniometerAxis object using motor name
 /// @param axisname :: axis name
 GoniometerAxis Goniometer::getAxis( std::string axisname)
 {
@@ -180,11 +180,11 @@ GoniometerAxis Goniometer::getAxis( std::string axisname)
   std::vector<GoniometerAxis>::iterator it;
   for(it=motors.begin(); it<motors.end(); ++it)
   {
-    if(axisname.compare((*it).name)==0)
-    {
-      return (*it);
-      found=true;
-    }
+      if(axisname.compare((*it).name)==0)
+      {
+          found=true;
+          return (*it);
+      }
   }
   if(found==false)
   {

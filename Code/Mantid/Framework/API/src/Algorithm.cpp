@@ -210,13 +210,12 @@ namespace Mantid
               g_log.error()<<ex.what()<<std::endl;
               m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
               m_running = false;
-              return false;
               if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
               {
                 m_runningAsync = false;
                 throw;
               }
-
+              return false;
 
             }
             catch(Exception::NotFoundError&ex )
@@ -225,13 +224,12 @@ namespace Mantid
               g_log.error()<<ex.what()<<std::endl;
               m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
               m_running = false;
-              return false;
               if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
               {
                 m_runningAsync = false;
                 throw;
               }
-
+              return false;
 
             }
             catch (std::runtime_error &ex)
@@ -240,12 +238,12 @@ namespace Mantid
               g_log.error()<<ex.what()<<std::endl;
               m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
               m_running = false;
-              return false;
               if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
               {
                 m_runningAsync = false;
                 throw;
               }
+              return false;
 
             }
             catch(CancelException& ex)
@@ -254,12 +252,12 @@ namespace Mantid
               g_log.error()<<ex.what()<<std::endl;
               m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
               m_running = false;
-              return false;
               if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
               {
                 m_runningAsync = false;
                 throw;
               }
+              return false;
 
 
             }
@@ -269,13 +267,12 @@ namespace Mantid
               g_log.error()<<ex.what()<<std::endl;
               m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
               m_running = false;
-              return false;
               if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
               {
                 m_runningAsync = false;
                 throw;
               }
-
+              return false;
             }
 
             //}

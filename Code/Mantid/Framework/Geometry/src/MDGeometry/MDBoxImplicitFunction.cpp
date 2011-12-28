@@ -56,7 +56,7 @@ namespace Geometry
   {
     size_t nd = min.size();
     if (max.size() != nd) throw std::invalid_argument("MDBoxImplicitFunction::ctor(): Min and max vector sizes must match!");
-    if (nd <= 0 || nd > 100) throw std::invalid_argument("MDBoxImplicitFunction::ctor(): Invalid number of dimensions!");
+    if (nd == 0 || nd > 100) throw std::invalid_argument("MDBoxImplicitFunction::ctor(): Invalid number of dimensions!");
 
     for (size_t d=0; d<nd; d++)
     {

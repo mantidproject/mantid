@@ -90,9 +90,9 @@ namespace Algorithms
     // 2. Check validity
     bool userL1 = true;
     if (l1 <= 0){
-      userL1 = false;
+        userL1 = false;
     } else {
-      g_log.information() << "L1 = " << l1 << "  # Detector = " << std::endl;
+        g_log.information() << "L1 = " << l1 << "  # Detector = " << std::endl;
     }
 
     if (specids.size() != l2s.size() || l2s.size() != tths.size() || phis.size() != l2s.size()){

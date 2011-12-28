@@ -211,7 +211,7 @@ namespace Mantid
       absoluteBB.zMin() += localPos.Z(); 
       absoluteBB.zMax() += localPos.Z();
 
-      if(Coord_system.size()>0){
+      if(!Coord_system.empty()){
         absoluteBB.realign(&Coord_system);
       }  
   }

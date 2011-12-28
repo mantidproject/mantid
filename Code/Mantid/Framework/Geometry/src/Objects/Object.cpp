@@ -142,7 +142,6 @@ namespace Mantid
     int Object::setObject(const int ON, const std::string& Ln)
     {
       // Split line
-      std::string part;
       const boost::regex letters("[a-zA-Z]"); // Does the string now contain junk...
       if (Mantid::Kernel::Strings::StrLook(Ln, letters))
         return 0;
@@ -284,7 +283,7 @@ namespace Mantid
       Rule* TA, *TB; //Tmp. for storage
 
       int Rcount(0);
-      while (Rst.size())
+      while (!Rst.empty())
       {
         Rule* T1 = Rst.front();
         Rst.pop_front();
@@ -603,7 +602,7 @@ namespace Mantid
       Rst.push_back(TopRule);
       Rule* TA, *TB; //Temp. for storage
 
-      while (Rst.size())
+      while (!Rst.empty())
       {
         Rule* T1 = Rst.front();
         Rst.pop_front();

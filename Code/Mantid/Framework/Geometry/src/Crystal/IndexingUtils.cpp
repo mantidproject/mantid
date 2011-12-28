@@ -554,7 +554,7 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
                                               0.75f * required_tolerance,
                                               degrees_per_step );
 
-  if ( max_indexed <= 0 )
+  if ( max_indexed == 0 )
   {
    throw std::invalid_argument("Find_UB(): Could not find any a,b,c vectors to index Qs");
   }
@@ -1531,12 +1531,10 @@ double IndexingUtils::GetFirstMaxIndex( const double magnitude_fft[],
       i++;
   }
 
-  double sum   = 0;
-  double w_sum = 0;
   if ( found_max )
   {
-    sum   = 0;
-    w_sum = 0;
+    double sum   = 0;
+    double w_sum = 0;
     for ( size_t j = i-2; j <= i+2; j++ )
     {
       sum   += (double)j * magnitude_fft[j];

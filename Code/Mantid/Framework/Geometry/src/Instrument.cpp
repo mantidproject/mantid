@@ -340,7 +340,7 @@ namespace Mantid
           }
           else
           {
-			std::string imame = comp->getName(); // added for dubugging
+            //std::string imame = comp->getName(); // added for debugging
             nodeQueue.push_back(comp);
           }
         }
