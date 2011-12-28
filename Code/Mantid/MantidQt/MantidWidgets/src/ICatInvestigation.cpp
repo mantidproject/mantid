@@ -248,7 +248,6 @@ namespace MantidQt
 
     /** this method gets called when an item on the investigation tree widget is  clicked
      *@param item :: selected item
-     *@param int ::
      */
     void ICatInvestigation::investigationClicked(QTreeWidgetItem* item, int)
     {
@@ -289,7 +288,7 @@ namespace MantidQt
 
     }
     /**This method populates the investigation table widget
-     *@param ws_sptr :: shared pointer to workspace
+     *@param dataws_sptr :: shared pointer to workspace
      *@param  type - string used to identify datasets or data files
      *@param bEnable :: flag to enable sorting
      */

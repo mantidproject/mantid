@@ -30,7 +30,7 @@ MantidColorMap::MantidColorMap() : QwtColorMap(QwtColorMap::Indexed), m_scale_ty
 //-------------------------------------------------------------------------------------------------
 /**
  * Constructor with filename and type
- * @param 
+ * @param filename :: color map file to load
  * @param type :: The scale type, currently Linear or Log10 
  */
 MantidColorMap::MantidColorMap(const QString & filename, GraphOptions::ScaleType type) : 

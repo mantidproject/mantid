@@ -65,7 +65,6 @@ namespace Mantid
        /// Destructor
        ~RunParam();
 
-       /// @cond
        /// return incident energy of run
        double getEi();
        /// return psi of run
@@ -220,8 +219,6 @@ namespace Mantid
 
        void readData(const std::string file);
        void writeData(const std::string file);
-
-       /// @endcond
 
     private:
        /// @cond

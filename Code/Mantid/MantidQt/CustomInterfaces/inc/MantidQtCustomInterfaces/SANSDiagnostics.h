@@ -19,7 +19,7 @@ namespace CustomInterfaces
   and minimum and maximum detector id
   
   @author Sofia Antony, Rutherford Appleton Laboratory
-  @date03/02/2011
+  @date 03/02/2011
 
 
   Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -73,7 +73,7 @@ namespace CustomInterfaces
 /** 
     The SANSDiagnostics is responsible for the diagnostics tab of SANS interface.
     @author Sofia Antony, Rutherford Appleton Laboratory
-    @date27/01/2011
+    @date 27/01/2011
     
     Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 

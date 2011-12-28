@@ -166,8 +166,8 @@ namespace Mantid
 
     /**
      * Equality test for two objects implementing the ISpectraDetectorMap interface. 
-     * @lhs A reference to the lhs
-     * @rhs A reference to the rhs
+     * @param lhs A reference to the lhs
+     * @param rhs A reference to the rhs
      * @returns True if the objects are considered equal, false otherwise
      */
     inline bool operator==(const ISpectraDetectorMap& lhs, const ISpectraDetectorMap& rhs)
@@ -185,8 +185,8 @@ namespace Mantid
     }
     /**
      * Inequality test for two objects of type ISpectraDetectorMap
-     * @lhs A reference to the lhs
-     * @rhs A reference to the rhs
+     * @param lhs A reference to the lhs
+     * @param rhs A reference to the rhs
      * @returns True if the objects are not considerd equal, false otherwise
      */
     inline bool operator!=(const ISpectraDetectorMap& lhs, const ISpectraDetectorMap& rhs)

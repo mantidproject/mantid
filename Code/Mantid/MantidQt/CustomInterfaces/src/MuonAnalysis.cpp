@@ -1432,9 +1432,9 @@ void MuonAnalysis::createPlotWS(const std::string& groupName, const std::string&
 /**
 * Normalise the data.
 *
-* @params x :: Data x of the workspace.
-* @params y :: Data y of the workspace.
-* @params workspace :: Name of the workspace to perform the normalisation to.
+* @param x :: Data x of the workspace.
+* @param y :: Data y of the workspace.
+* @param workspace :: Name of the workspace to perform the normalisation to.
 */
 void MuonAnalysis::normalise(const std::vector<double>& x, const std::vector<double>& y, QString workspace)
 {
@@ -1827,6 +1827,8 @@ bool MuonAnalysis::isGroupingSet()
 /**
  * Apply grouping specified in xml file to workspace
  *
+ * @param inputWS :: The input workspace to apply grouping
+ * @param outputWS :: The resulting workspace
  * @param filename :: Name of grouping file
  */
 bool MuonAnalysis::applyGroupingToWS( const std::string& inputWS,  const std::string& outputWS, 
@@ -2584,7 +2586,7 @@ void MuonAnalysis::checkAppendingNextRun()
 *   This sets up an appending lot of files so that when the user hits enter
 *   all files within the range will open. 
 *
-*   @params setAppendingRun :: The number to increase the run by, this can be
+*   @param inc :: The number to increase the run by, this can be
 *   -1 if previous has been selected.
 */
 void MuonAnalysis::setAppendingRun(int inc)
@@ -2671,7 +2673,7 @@ void MuonAnalysis::setAppendingRun(int inc)
 /**
 *   Opens up the next file if clicked next or previous on the muon analysis
 *
-*   @params amountToChange :: if clicked next then you need to open the next
+*   @param amountToChange :: if clicked next then you need to open the next
 *   file so 1 is passed, -1 is passed if previous was clicked by the user.
 */
 void MuonAnalysis::changeRun(int amountToChange)
@@ -2752,10 +2754,10 @@ void MuonAnalysis::changeRun(int amountToChange)
 *   Seperates the a given file into instrument, code and size of the code. 
 *   i.e MUSR0002419 becomes MUSR, 7, 2419
 *
-*   @params currentFile :: This is the file to convert in QString format and once
+*   @param currentFile :: This is the file to convert in QString format and once
 *   finished will be returned containing the instrument used i.e MUSR or ELF.
-*   @params runNumberSize :: Size of the code
-*   @params runNumber :: contains the code as an integer, preceeding 0's are lost.
+*   @param runNumberSize :: Size of the code
+*   @param runNumber :: contains the code as an integer, preceeding 0's are lost.
 */
 void MuonAnalysis::separateMuonFile(QString &currentFile, int &runNumberSize, int &runNumber)
 {
@@ -2783,8 +2785,8 @@ void MuonAnalysis::separateMuonFile(QString &currentFile, int &runNumberSize, in
 *   Adds the 0's back onto the file code which were lost when converting 
 *   it to an integer.
 *   
-*   @params size :: The size of the original file code before conversion
-*   @params limitedCode :: This is the code after it was incremented or 
+*   @param size :: The size of the original file code before conversion
+*   @param limitedCode :: This is the code after it was incremented or
 *   decremented and then converted back into a QString 
 */
 void MuonAnalysis::getFullCode(int size, QString & limitedCode)
@@ -2800,7 +2802,7 @@ void MuonAnalysis::getFullCode(int size, QString & limitedCode)
 * Everytime the tab is changed this is called to decide whether the peakpicker 
 * tool needs to be associated with a plot or deleted from a plot
 *
-* @params tabNumber :: The index value of the current tab (3 = data analysis)
+* @param tabNumber :: The index value of the current tab (3 = data analysis)
 */
 void MuonAnalysis::changeTab(int tabNumber)
 {
@@ -2834,7 +2836,7 @@ void MuonAnalysis::changeTab(int tabNumber)
 *   Emits a signal containing the fitBrowser and the name of the 
 *   workspace we want to attach a peak picker tool to 
 *
-*   @params workspaceName :: The QString name of the workspace the user wishes 
+*   @param workspaceName :: The QString name of the workspace the user wishes
 *   to attach a plot picker tool to.
 */
 void MuonAnalysis::assignPeakPickerTool(const QString & workspaceName)
@@ -2852,7 +2854,7 @@ void MuonAnalysis::assignPeakPickerTool(const QString & workspaceName)
 * Set up the string that will contain all the data needed for changing the data.
 * [wsName, axisLabel, connectType, plotType, Errors, Color]
 *
-* @params plotDetails :: The workspace name of the plot to be created and axis label. 
+* @param plotDetails :: The workspace name of the plot to be created and axis label.
 */
 void MuonAnalysis::changeDataPlotType(const QStringList & plotDetails)
 {
@@ -2863,7 +2865,7 @@ void MuonAnalysis::changeDataPlotType(const QStringList & plotDetails)
 /**
 * Group the fitted workspaces that are created from the 'fit' algorithm
 *
-* @params workspaceName :: The workspaceName that the fit has been done against
+* @param workspaceName :: The workspaceName that the fit has been done against
 */
 void MuonAnalysis::groupFittedWorkspaces(QString workspaceName)
 {

@@ -100,7 +100,7 @@ QwtDoubleInterval QwtRasterDataMD::range() const
 }
 
 //------------------------------------------------------------------------------------------------------
-/** Set to use "fast" rendering mode"
+/** Set to use "fast" rendering mode
  * @param fast :: if true, will guess at the number of pixels to render based
  * on workspace resolution
  */

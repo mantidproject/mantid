@@ -134,7 +134,7 @@ void MuonAnalysisResultTableTab::selectAllFittings()
 * given workspace list and checks to see if a fit has been done to the data set and if so
 * adds it to a new workspace list.
 *
-* @params wsList :: A list containing all the data set workspaces that have been loaded
+* @param wsList :: A list containing all the data set workspaces that have been loaded
 *                   by muon analysis.
 */
 void MuonAnalysisResultTableTab::populateTables(const QStringList& wsList)
@@ -161,7 +161,7 @@ void MuonAnalysisResultTableTab::populateTables(const QStringList& wsList)
 /**
 * Populates the items (log values) into their table.
 *
-* @params wsList :: a workspace list containing ONLY the workspaces that have parameter
+* @param wsList :: a workspace list containing ONLY the workspaces that have parameter
 *                   tables associated with it.
 */
 void MuonAnalysisResultTableTab::populateLogsAndValues(const QVector<QString>& fittedWsList)
@@ -264,7 +264,7 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QVector<QString>& f
 /**
 * Populates the items (fitted workspaces) into their table.
 *
-* @params wsList :: a workspace list containing ONLY the workspaces that have parameter
+* @param wsList :: a workspace list containing ONLY the workspaces that have parameter
 *                   tables associated with it.
 */
 void MuonAnalysisResultTableTab::populateFittings(const QVector<QString>& fittedWsList)
