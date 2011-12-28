@@ -50,7 +50,7 @@ std::string loadFile(const std::string & filename)
  * @param replace_with :: ... and replace them with this.
  * @return the modified string.
  */
-std::string replace(const std::string input, const std::string find_what, const std::string replace_with)
+std::string replace(const std::string &input, const std::string &find_what, const std::string &replace_with)
 {
   std::string output = input;
   std::string::size_type pos=0;
@@ -210,7 +210,7 @@ int confirmStr(const std::string& S,const std::string& fullPhrase)
 */
 int getPartLine(std::istream& fh,std::string& Out,std::string& Excess,const int spc)
 {
-  std::string Line;
+  //std::string Line;
   if (fh.good())
     {
       char* ss=new char[spc+1];
@@ -660,7 +660,7 @@ std::string toString(const T value)
   @return 0 on success and -ve on failure
 */
 template<template<typename T,typename A> class V,typename T,typename A>
-int writeFile(const std::string& Fname,const T step, const V<T,A>& Y)
+int writeFile(const std::string& Fname,const T &step, const V<T,A>& Y)
 {
   V<T,A> Ex;   // Empty vector
   V<T,A> X;    // Empty vector
@@ -721,15 +721,15 @@ int writeFile(const std::string& Fname,const V<T,A>& X,const V<T,A>& Y,const V<T
   for(;eCount<Epts;eCount++)
     {
       FX<<(*xPt)<<" "<<(*yPt)<<" "<<(*ePt)<<std::endl;
-      xPt++;
-      yPt++;
-      ePt++;
+      ++xPt;
+      ++yPt;
+      ++ePt;
     }
   for(;eCount<Npts;eCount++)
     {
       FX<<(*xPt)<<" "<<(*yPt)<<" 0.0"<<std::endl;
-      xPt++;
-      yPt++;
+      ++xPt;
+      ++yPt;
     }
   FX.close();
   return 0;
@@ -962,7 +962,7 @@ template DLLExport int convPartNum(const std::string&,int&);
 
 template DLLExport int setValues(const std::string&,const std::vector<int>&,std::vector<double>&);
 
-template DLLExport int writeFile(const std::string&,const double,const std::vector<double>&);
+template DLLExport int writeFile(const std::string&,const double&,const std::vector<double>&);
 template DLLExport int writeFile(const std::string&,const std::vector<double>&,const std::vector<double>&,const std::vector<double>&);
 template DLLExport int writeFile(const std::string&,const std::vector<double>&,const std::vector<double>&);
 template DLLExport int writeFile(const std::string&,const std::vector<float>&,const std::vector<float>&);
@@ -972,6 +972,6 @@ template DLLExport int writeFile(const std::string&,const std::vector<float>&,co
 
 }  // NAMESPACE Strings
 
-}  // Namespace Kernel
+}  // NAMESPACE Kernel
 
 }  // NAMESPACE Mantid

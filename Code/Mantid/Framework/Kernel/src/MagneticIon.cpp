@@ -607,7 +607,7 @@ int initializeMap()
   return 0;
 }
 
-MagneticIon getMagneticIon(const std::string symbol,const uint16_t charge)
+MagneticIon getMagneticIon(const std::string & symbol,const uint16_t charge)
 {
   initializeMap();
   std::stringstream what;
@@ -628,7 +628,7 @@ MagneticIon getMagneticIon(const std::string symbol,const uint16_t charge)
   }
 }
 
-std::vector <double> getJL(const std::string symbol,const uint16_t charge, const uint16_t l)
+std::vector <double> getJL(const std::string & symbol,const uint16_t charge, const uint16_t l)
 {
   MagneticIon temp(getMagneticIon(symbol,charge));
   std::vector <double> v(8,0.);  

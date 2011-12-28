@@ -38,8 +38,8 @@ namespace PhysicalConstants
   static std::map<std::string,MagneticIon> ion_map;
   int initializeMap();
 
-  MANTID_KERNEL_DLL MagneticIon getMagneticIon(const std::string symbol,const uint16_t charge);
-  MANTID_KERNEL_DLL std::vector <double> getJL(const std::string symbol,const uint16_t charge, const uint16_t l = 0);
+  MANTID_KERNEL_DLL MagneticIon getMagneticIon(const std::string &symbol,const uint16_t charge);
+  MANTID_KERNEL_DLL std::vector <double> getJL(const std::string &symbol,const uint16_t charge, const uint16_t l = 0);
 
 } // namespace PhysicalConstants
 } // namespace Mantid
