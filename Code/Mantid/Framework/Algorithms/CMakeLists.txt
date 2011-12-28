@@ -448,6 +448,7 @@ set ( TEST_FILES
 	test/InterpolatingRebinTest.h
 	test/LogarithmTest.h
 	test/MaskBinsTest.h
+    test/MaxMinTest.h
 	test/MedianDetectorTestTest.h
 	test/MergeRunsTest.h
 	test/MinusTest.h
