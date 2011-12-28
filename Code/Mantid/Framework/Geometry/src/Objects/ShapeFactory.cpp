@@ -241,7 +241,7 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
     // Translate algebra string defined by the user into something Mantid can
     // understand
 
-    std::string algebra;  // to hold algebra in a way Mantid can understand
+    //std::string algebra;  // to hold algebra in a way Mantid can understand
     std::map<std::string,std::string>::iterator iter;
     size_t found;
     std::map<size_t,std::string, std::greater<size_t> > allFound;
@@ -270,7 +270,7 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
       std::map<size_t,std::string, std::greater<size_t> >::iterator iter2;
       for( iter2 = allFound.begin(); iter2 != allFound.end(); ++iter2 )
       {
-        std::string  kuse = iter2->second;
+        //std::string  kuse = iter2->second;
         algebraFromUser.replace(iter2->first, (iter2->second).size(), idMatching[iter2->second]);
       }
     }

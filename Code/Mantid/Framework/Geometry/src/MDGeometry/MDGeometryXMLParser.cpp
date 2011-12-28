@@ -20,7 +20,7 @@ namespace Mantid
     struct findID : public std::unary_function <Mantid::Geometry::IMDDimension_sptr, bool>
     {
       const std::string m_id;
-      findID(const std::string id) : m_id(id){ }
+      findID(const std::string & id) : m_id(id){ }
 
       bool operator ()(const Mantid::Geometry::IMDDimension_sptr obj) const
       {
