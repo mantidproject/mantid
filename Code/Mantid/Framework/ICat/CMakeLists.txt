@@ -76,8 +76,9 @@ include_directories ( inc )
 target_link_libraries ( ICat ${MANTIDLIBS} ${OPENSSL_LIBRARIES} )
 
 if ( CXXTEST_FOUND )
+  add_library ( ICatTestHelper "test/ICatTestHelper.cpp")
   cxxtest_add_test ( ICatTest ${TEST_FILES} )
-  target_link_libraries( ICatTest ICat )
+  target_link_libraries( ICatTest ICat ICatTestHelper )
   add_dependencies ( FrameworkTests ICatTest )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET ICatTest PROPERTY FOLDER "UnitTests" )

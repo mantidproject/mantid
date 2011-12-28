@@ -6,6 +6,7 @@
 #include "MantidICat/Session.h"
 #include "MantidICat/Login.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"// why this is required to register table workspace.
+#include "ICatTestHelper.h"
 
 
 using namespace Mantid;
@@ -14,6 +15,12 @@ using namespace Mantid::ICat;
 class ListInvestigationTypesTest: public CxxTest::TestSuite
 {
 public:
+  /// Skip all unit tests if ICat server is down
+  bool skipTests()
+  {
+    return ICatTestHelper::skipTests();
+  }
+
 	void testInit()
 	{
 		Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");

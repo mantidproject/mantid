@@ -7,6 +7,7 @@
 #include "MantidICat/Login.h"
 #include "MantidICat/Search.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
+#include "ICatTestHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::ICat;
@@ -14,6 +15,12 @@ using namespace Mantid::ICat;
 class GetDataSetsTest: public CxxTest::TestSuite
 {
 public:
+  /// Skip all unit tests if ICat server is down
+  bool skipTests()
+  {
+    return ICatTestHelper::skipTests();
+  }
+
 	void testInit()
 	{
 		Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");

@@ -179,8 +179,16 @@ namespace CxxTest
         return _suite;
     }
 
-    bool StaticSuiteDescription::setUp() { return true; }
-    bool StaticSuiteDescription::tearDown() { return true; }
+    bool StaticSuiteDescription::setUp()
+    {
+      // Set up failed if we are skipping tests
+      return !suite()->skipTests();
+    }
+
+    bool StaticSuiteDescription::tearDown()
+    {
+      return true;
+    }
 
     CommonDynamicSuiteDescription::CommonDynamicSuiteDescription() {}
     CommonDynamicSuiteDescription::CommonDynamicSuiteDescription( const char *argFile, unsigned argLine,
