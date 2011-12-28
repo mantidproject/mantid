@@ -76,8 +76,12 @@ include_directories ( inc )
 target_link_libraries ( ICat ${MANTIDLIBS} ${OPENSSL_LIBRARIES} )
 
 if ( CXXTEST_FOUND )
+  # Test Helper Library 
   add_library ( ICatTestHelper "test/ICatTestHelper.cpp")
+  set_target_properties ( ICatTestHelper PROPERTIES COMPILE_DEFINITIONS IN_MANTID_ICAT )
   target_link_libraries( ICatTestHelper ICat  )
+  
+  # The actual test suite
   cxxtest_add_test ( ICatTest ${TEST_FILES} )
   target_link_libraries( ICatTest ICat ICatTestHelper )
   add_dependencies ( FrameworkTests ICatTest )
