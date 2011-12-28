@@ -1043,7 +1043,6 @@ using namespace DataObjects;
     status=NXinitgroupdir(fileID); // just in case
     while( (status=NXgetnextentry(fileID,nxname,nxclass,&nxdatatype)) == NX_OK )
     {
-      std::string nxName=nxname;
       status=NXopendata(fileID,nxname);
       // FIXME: Is the correct ?
       //if(checkAttributeName("signal"))

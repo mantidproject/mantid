@@ -817,7 +817,7 @@ namespace Mantid
       int nPeriod=1;
       int execPercentage=0;
       bool bgroupPassed=true;
-      bool bgroupFailed=false;
+      bool bgroupFailed;
 
       WorkspaceGroup_sptr wsgrp1_sptr; 
       WorkspaceGroup_sptr wsgrp2_sptr;
@@ -860,10 +860,11 @@ namespace Mantid
           std::vector<Mantid::Kernel::Property*>::const_iterator itr;
           for (itr=props.begin();itr!=props.end();++itr)
           {
-            int outWSCount=0;
+
 
             if(isWorkspaceProperty(*itr) )
-            {             
+            {
+                int outWSCount=0;
               if(isInputWorkspaceProperty(*itr))
               {
 
