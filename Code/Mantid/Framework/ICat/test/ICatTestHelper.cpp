@@ -4,7 +4,7 @@
 namespace ICatTestHelper
 {
   /// Skip all unit tests if ICat server is down
-  EXPORT_OPT_MANTID_ICAT bool skipTests()
+  bool skipTests()
   {
     Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
     Mantid::ICat::Login loginobj;
