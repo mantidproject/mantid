@@ -1,9 +1,10 @@
 #include "ICatTestHelper.h"
+#include "MantidKernel/System.h"
 
 namespace ICatTestHelper
 {
   /// Skip all unit tests if ICat server is down
-  bool skipTests()
+  DLLExport bool skipTests()
   {
     Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
     Mantid::ICat::Login loginobj;
