@@ -305,10 +305,12 @@ namespace MDEvents
       // Set the matrix based on UB etc.
       Kernel::Matrix<double> ub = in_ws->mutableSample().getOrientedLattice().getUB();
       Kernel::Matrix<double> gon = in_ws->mutableRun().getGoniometerMatrix();
-      // As per Busing and Levy 1967, q_lab_frame = Goniometer * UB * HKL
-      // Therefore, HKL = (Goniometer * UB)^-1 * q_lab_frame
+      // As per Busing and Levy 1967, q_lab_frame = 2pi * Goniometer * UB * HKL
+      // Therefore, HKL = (2*pi * Goniometer * UB)^-1 * q_lab_frame
       mat = gon * ub;
       mat.Invert();
+      // Divide by 2 PI to account for our new convention, |Q| = 2pi / wl (December 2011, JZ)
+      mat /= (2 * M_PI);
       dimensionNames[0] = "H";
       dimensionNames[1] = "K";
       dimensionNames[2] = "L";
