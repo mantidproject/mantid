@@ -117,6 +117,12 @@ namespace DataHandling
         "For EventWorkspaces, preserve the events when saving (default).\n"
         "If false, will save the 2D histogram version of the workspace with the current binning parameters.");
     setPropertySettings("PreserveEvents", new EnabledWhenWorkspaceIsType<EventWorkspace>(this, "InputWorkspace", true));
+
+    declareProperty("CompressNexus", false,
+        "For EventWorkspaces, compress the Nexus data field (default False).\n"
+        "This will make smaller files but takes much longer.");
+    setPropertySettings("CompressNexus", new EnabledWhenWorkspaceIsType<EventWorkspace>(this, "InputWorkspace", true));
+
   }
 
 
@@ -457,10 +463,12 @@ namespace DataHandling
     }
     PARALLEL_CHECK_INTERUPT_REGION
 
+    /*Default = DONT compress - much faster*/
+    bool CompressNexus = getProperty("CompressNexus");
 
     // Write out to the NXS file.
     nexusFile->writeNexusProcessedDataEventCombined(m_eventWorkspace, indices, tofs, weights, errorSquareds, pulsetimes,
-        false /*DONT compress - much faster*/);
+        CompressNexus);
 
     // Free mem.
     delete [] tofs;

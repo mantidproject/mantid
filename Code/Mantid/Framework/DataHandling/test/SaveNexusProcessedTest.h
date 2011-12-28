@@ -242,11 +242,12 @@ public:
    * @param makeDifferentTypes :: mix event types
    * @param clearfiles :: clear files after saving
    * @param PreserveEvents :: save as event list
+   * @param CompressNexus :: compress
    * @return
    */
   static EventWorkspace_sptr do_testExec_EventWorkspaces(std::string filename_root, EventType type,
       std::string & outputFile,  bool makeDifferentTypes, bool clearfiles,
-      bool PreserveEvents=true)
+      bool PreserveEvents=true, bool CompressNexus=false)
   {
     std::vector< std::vector<int> > groups(5);
     groups[0].push_back(10);
@@ -291,6 +292,7 @@ public:
     outputFile = alg.getPropertyValue("Filename");
     alg.setPropertyValue("Title", title);
     alg.setProperty("PreserveEvents", PreserveEvents);
+    alg.setProperty("CompressNexus", CompressNexus);
 
     // Clear the existing file, if any
     if( Poco::File(outputFile).exists() ) Poco::File(outputFile).remove();
@@ -333,6 +335,11 @@ public:
   {
     std::string outputFile;
     do_testExec_EventWorkspaces("SaveNexusProcessed_EventTo2D", TOF, outputFile, false, clearfiles, false /* DONT preserve events */);
+  }
+  void testExec_EventWorkspace_CompressNexus()
+  {
+    std::string outputFile;
+    do_testExec_EventWorkspaces("SaveNexusProcessed_EventTo2D", TOF, outputFile, false, clearfiles, true /* DONT preserve events */, true /* Compress */);
   }
 
   void xtestExec_LoadedEventWorkspace()  /** Disabled because it takes >3 seconds */
