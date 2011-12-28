@@ -57,11 +57,17 @@ mark_as_advanced(CPPCHECK_EXECUTABLE)
 set ( CPPCHECK_ARGS "--enable=all" CACHE STRING "Arguments for running cppcheck" )
 set ( CPPCHECK_GENERATE_XML OFF CACHE BOOL "Generate xml output files from cppcheck" )
 
-function(add_cppcheck _name)
+function(add_cppcheck _name) # additional arguments are files to ignore
   if(NOT TARGET ${_name})
     message(FATAL_ERROR
             "add_cppcheck given a target name that does not exist: '${_name}' !")
   endif()
+
+  set (_cppcheck_ignores)
+  foreach (f ${ARGN})
+    list ( APPEND _cppcheck_ignores "-i" ${CMAKE_CURRENT_SOURCE_DIR}/${f} )
+  endforeach()
+  message ( status " IGNORES ${_cppcheck_ignores}")
 
   if(CPPCHECK_EXECUTABLE)
     get_target_property(_cppcheck_sources "${_name}" SOURCES)
@@ -74,15 +80,18 @@ function(add_cppcheck _name)
       endif()
     endforeach()
 
+    set ( _cppcheck_args )
+    list ( APPEND _cppcheck_args ${CPPCHECK_TEMPLATE_ARG} ${CPPCHECK_ARGS} ${_cppcheck_ignores} )
+
     if (CPPCHECK_GENERATE_XML )
       add_custom_target( cppcheck_${_name}
-                         COMMAND ${CPPCHECK_EXECUTABLE} ${CPPCHECK_TEMPLATE_ARG} ${CPPCHECK_ARGS} --xml --xml-version=2 ${_files} 2> ${CMAKE_BINARY_DIR}/cppcheck-${_name}.xml 
+                         COMMAND ${CPPCHECK_EXECUTABLE} ${_cppcheck_args} --xml --xml-version=2 ${_files} 2> ${CMAKE_BINARY_DIR}/cppcheck-${_name}.xml 
                          DEPENDS ${_files}
                          COMMENT "cppcheck_${_name}: Running cppcheck to generate cppcheck-${_name}.xml"
                          )
     else (CPPCHECK_GENERATE_XML )
       add_custom_target( cppcheck_${_name}
-                         COMMAND ${CPPCHECK_EXECUTABLE} ${CPPCHECK_TEMPLATE_ARG} ${CPPCHECK_ARGS} ${_files}
+                         COMMAND ${CPPCHECK_EXECUTABLE} ${_cppcheck_args} ${_files}
                          DEPENDS ${_files}
                          COMMENT "cppcheck_${_name}: Running cppcheck on ${_name} source files"
                          )
