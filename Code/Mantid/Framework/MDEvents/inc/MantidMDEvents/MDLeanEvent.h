@@ -195,7 +195,7 @@ namespace MDEvents
 
     //---------------------------------------------------------------------------------------------
     /** Set the squared error  of the event
-     * @param newerrorSquaredl :: the error squared value  */
+     * @param newerrorSquared :: the error squared value  */
     void setErrorSquared(const float newerrorSquared)
     {
       errorSquared = newerrorSquared;

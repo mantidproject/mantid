@@ -727,6 +727,7 @@ void ComboBoxDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
  * Set the appropriate geometry for the widget
  * @param editor :: The editor in question
  * @param option :: The style option
+ * @param index :: The index for the model given
  */
 void ComboBoxDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, 
 					   const QModelIndex &) const

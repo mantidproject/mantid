@@ -237,7 +237,7 @@ namespace MantidQt
     /**
     * Return a layout containing suitable widgets for the given property
     * @param prop A pointer to the algorithm property
-    * @param layout A layout where the widgets are to be placed
+    * @param propertyLayout A layout where the widgets are to be placed
     * @param parent The parent widget
     */
     int LoadDialog::createWidgetsForProperty(const Mantid::Kernel::Property* prop,

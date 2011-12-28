@@ -70,7 +70,7 @@ bool MWRunFiles::isForRunFiles() const
 
 /**
 * Sets whether this widget is for run file searching or not
-* @param True :: if this widget searches for run files, false otherwise
+* @param mode :: True if this widget searches for run files, false otherwise
 */
 void MWRunFiles::isForRunFiles(const bool mode)
 {
@@ -206,7 +206,7 @@ QString MWRunFiles::getAlgorithmProperty() const
 
 /**
 * Sets an algorithm name that can be tied to this widget
-* @param name :: The name of the algorithm and property in the form [AlgorithmName|PropertyName]
+* @param text :: The name of the algorithm and property in the form [AlgorithmName|PropertyName]
 */
 void MWRunFiles::setAlgorithmProperty(const QString & text)
 {
@@ -369,7 +369,7 @@ void MWRunFiles::setUserInput(const QVariant & value)
 /**
  * Flag a problem with the file the user entered, an empty string means no error but
  * there may be an error with the entry box if enabled. Errors passed here are shown first
- * @param A message to include or "" for no error
+ * @param message :: A message to include or "" for no error
  */
 void MWRunFiles::setFileProblem(const QString & message)
 {

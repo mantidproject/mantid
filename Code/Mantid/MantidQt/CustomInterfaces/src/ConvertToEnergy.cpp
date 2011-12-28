@@ -245,11 +245,6 @@ void ConvertToEnergy::instrumentSelectChanged(const QString& name)
   std::cout << "ConvertToEnergy::instrumentSelectChanged() - leaving" << std::endl;
 }
 
-///**
-// * Gets the path to the selected instrument's Instrument Definition File (IDF), if the instrument has a parameter file.
-// * @param prefix :: the instrument's name from the QComboBox
-// * @return A string containing the path to the IDF, or an empty string if no parameter file exists.
-// */
 //QString ConvertToEnergy::getIDFPath(const QString& prefix)
 //{
 //  QString paramfile_dir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("parameterDefinition.directory"));

@@ -100,6 +100,8 @@ protected:
 /**
  * Constructor
  * @param parent :: The parent widget - must be an ApplicationWindow
+ * @param mantidui :: The UI form for MantidPlot
+ * @param customFittings :: If true, use custom fittings
  */
 FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject* mantidui, bool customFittings)
 :QDockWidget("Fit Function",parent),
@@ -1872,6 +1874,8 @@ void FitPropertyBrowser::deleteTie()
 
 /** Does a parameter have a tie
  * @param parProp :: The property for a function parameter
+ * @param hasTie :: Parameter has a tie
+ * @param hasBounds :: Parameter has bounds
  */
 void FitPropertyBrowser::hasConstraints(QtProperty* parProp,
                                         bool& hasTie,

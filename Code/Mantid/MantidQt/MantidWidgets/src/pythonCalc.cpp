@@ -30,7 +30,7 @@ pythonCalc::pythonCalc(QWidget *interface) : MantidWidget(interface),
 }
 /** Looks for error reports from the object passed to it.  If the map returned by the
 *  the objects invalid() method isn't empty it places displays red stars and throws
-*  @param pythonGenerat :: the object with an invalid() map that contains a list of bad controls and error messages
+*  @param validLbls :: the object with an invalid() map that contains a list of bad controls and error messages
 *  @return a description of any error
 */
 QString pythonCalc::checkNoErrors(const QHash<const QWidget * const, QLabel *> &validLbls) const

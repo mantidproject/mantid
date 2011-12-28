@@ -665,7 +665,6 @@ namespace MDEvents
    * output MDHistoWorkspace.
    * This needs to be in the space of the INPUT MDEventWorkspace
    *
-   * @param nd :: number of dimensions in the workspace being sliced.
    * @param chunkMin :: the minimum index in each dimension to consider "valid" (inclusive).
    *        NULL to use the entire range.
    * @param chunkMax :: the maximum index in each dimension to consider "valid" (exclusive)

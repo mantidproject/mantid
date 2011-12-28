@@ -18,6 +18,7 @@ namespace MDEvents
   /** Constructor
    *
    * @param workspace :: MDHistoWorkspace_sptr being iterated
+   * @param function :: The implicit function to use
    * @return
    */
   MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(MDHistoWorkspace_const_sptr workspace, Mantid::Geometry::MDImplicitFunction * function)
@@ -29,6 +30,7 @@ namespace MDEvents
   /** Constructor
    *
    * @param workspace :: MDHistoWorkspace_sptr being iterated
+   * @param function :: The implicit function to use
    * @return
    */
   MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(const MDHistoWorkspace * workspace, Mantid::Geometry::MDImplicitFunction * function)

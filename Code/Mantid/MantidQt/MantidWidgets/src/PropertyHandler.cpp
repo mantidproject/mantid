@@ -845,7 +845,6 @@ void PropertyHandler::updateParameters()
 /**
 * Change the type of the function (replace the function)
 * @param prop :: The "Type" property with new value
-* @param fnName :: New function name (type) or full initialization expression
 */
 Mantid::API::IFitFunction* PropertyHandler::changeType(QtProperty* prop)
 {
