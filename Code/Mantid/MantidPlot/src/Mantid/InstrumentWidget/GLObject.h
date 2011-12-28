@@ -41,6 +41,7 @@ public:
   static const std::string type() {return "GLObject";}
   /// Construct a GLObject in direct rendering mode (withDisplayList=false)
   /// or using a display list (withDisplayList=true).
+  /// @param withDisplayList: rendering mode
   /// @param name: name of the object
   GLObject(bool withDisplayList,const std::string& name="");
   /// Destructor

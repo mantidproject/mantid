@@ -523,7 +523,6 @@ void PeakPickerTool::xMax(double x)
 
 /**
  * Slot. Reacts on the index change in the Fit Browser.
- * @param i :: The new function index.
  */
 void PeakPickerTool::currentChanged()
 {
@@ -532,7 +531,6 @@ void PeakPickerTool::currentChanged()
 
 /**
  * Slot. Reacts on the function deletion in the Fit Browser.
- * @param f :: The address of the deleted function.
  */
 void PeakPickerTool::functionRemoved()
 {
@@ -870,7 +868,7 @@ void PeakPickerTool::clear()
 }
 
 /** Set the tool tip text
- * @param tst :: The tip text
+ * @param txt :: The tip text
  */
 void PeakPickerTool::setToolTip(const QString& txt)
 {

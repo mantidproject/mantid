@@ -132,7 +132,7 @@ void GLActorCollection::addActor(GLActor* a)
 
 /**
  * Remove the input actor from the collection
- * @param a :: input actor to be removed from the list
+ * @param :: input actor to be removed from the list
  */
 void GLActorCollection::removeActor(GLActor*)
 {

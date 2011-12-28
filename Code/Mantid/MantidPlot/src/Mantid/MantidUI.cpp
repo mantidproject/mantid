@@ -2595,7 +2595,7 @@ void MantidUI::showLogFileWindow()
 
 /** Create a Table form specified spectra in a MatrixWorkspace
     @param tableName :: Table name
-    @param workspace :: Shared pointer to the workspace
+    @param workspaceName :: Shared pointer to the workspace
     @param indexList :: A list of spectra indices to go to the table
     @param errs :: If true include the errors into the table
     @param binCentres :: If true the X column will contain the bin centres, i.e. (x_i+1 + x_i)/2.
@@ -2823,6 +2823,7 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,std::set<int> >& t
     @param wsName :: Workspace name
     @param indexList :: A list of spectra indices to be shown in the graph
     @param errs :: If true include the errors on the graph
+    @param distr :: if true, workspace is a distribution
  */
 MultiLayer* MantidUI::plotSpectraList(const QString& wsName, const std::set<int>& indexList, bool errs, bool distr)
 {
@@ -2842,6 +2843,8 @@ MultiLayer* MantidUI::plotSpectraList(const QString& wsName, const std::set<int>
 /** Create a 1d graph form a set of workspace-spectrum pairs
     @param toPlot :: A list of spectra indices to be shown in the graph
     @param errs :: If true include the errors to the graph
+    @param distr :: if true, workspace is a distribution
+    @param style :: curve style for plot
  */
 MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs, bool distr, Graph::CurveType style)
 {
@@ -2956,8 +2959,8 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
 /**
  * Draw a color fill plot for each of the listed workspaces. Unfortunately the plotting is 
  * initimately linked to MantidMatrix so that one of these needs to be created first
- * @param wsNames :: For each workspace listed create a 2D colorfill plot 
- * @param curveType :: The curve type for each of the plots
+ * @param ui :: the sequential fitting UI form
+ * @param fitbrowser :: pointer to the fit property browser
  */
 void MantidUI::showSequentialPlot(Ui::SequentialFitDialog* ui, MantidQt::MantidWidgets::FitPropertyBrowser* fitbrowser)
 {
@@ -3032,12 +3035,10 @@ MultiLayer* MantidUI::drawSingleColorFillPlot(const QString & wsName, Graph::Cur
 
 /** Create a 1d graph form specified spectra in a MatrixWorkspace
     @param wsName :: Workspace name
-    @param workspace :: Shared pointer to the workspace
     @param i0 :: Starting index
     @param i1 :: Last index
     @param errs :: If true include the errors to the graph
-    @param binCentres ::  If the workspace is a histogram binCentres defines the way the plot is drawn.
-         If true it is a line going through the bin centres. Otherwise it will be made of horizontal steps
+    @param distr :: if true, workspace is a distribution
     @param tableVisible :: Visibility flag for the Table with the plotted data.
  */
 MultiLayer* MantidUI::plotSpectraRange(const QString& wsName, int i0, int i1, bool errs, bool distr)
@@ -3057,6 +3058,7 @@ MultiLayer* MantidUI::plotSpectraRange(const QString& wsName, int i0, int i1, bo
 /**  Create a graph and plot the selected rows of a MantidMatrix
      @param m :: Mantid matrix
      @param errs :: True if the errors to be plotted
+     @param distr :: if true, workspace is a distribution
  */
 MultiLayer* MantidUI::plotSelectedRows(const MantidMatrix * const m, bool errs, bool distr)
 {
@@ -3159,6 +3161,7 @@ void MantidUI::savedatainNexusFormat(const std::string& fileName,const std::stri
 /** Loads data from nexus file
  * @param wsName :: Name of the workspace to be created
  * @param fileName :: name of the nexus file
+ * @param project :: if true, load stops GUI execution
  */
 void MantidUI::loaddataFromNexusFile(const std::string& wsName,const std::string& fileName,bool project)
 {
@@ -3178,6 +3181,7 @@ void MantidUI::loaddataFromNexusFile(const std::string& wsName,const std::string
 /** Loads data from raw file
  * @param wsName :: Name of the workspace to be created
  * @param fileName :: name of the raw file
+ * @param project :: if true, load stops GUI execution
  */
 void MantidUI::loadadataFromRawFile(const std::string& wsName,const std::string& fileName,bool project)
 {

@@ -15,8 +15,8 @@ using namespace MantidQt::API;
 /**
  *  @param wsName :: The workspace name.
  *  @param g :: The Graph widget which will display the curve
- *  @param index :: The index of the spectrum or bin in the workspace
  *  @param err :: True if the errors are to be plotted
+ *  @param distr :: True if this is a distribution
  *  @param style :: Graph style
  *  @throw std::invalid_argument if the index is out of range for the given workspace
  */
@@ -41,7 +41,6 @@ MantidMDCurve::MantidMDCurve(const MantidMDCurve& c)
 
 /**
  *  @param g :: The Graph widget which will display the curve
- *  @param distr :: True if this is a distribution
  *  @param style :: The graph style to use
  */
 void MantidMDCurve::init(Graph* g, bool, Graph::CurveType style)

@@ -21,7 +21,7 @@ using namespace MantidQt::API;
  *  @param index :: The index of the spectrum or bin in the workspace
  *  @param err :: True if the errors are to be plotted
  *  @param distr :: True if it is a distribution
- *  @param sytle :: CurveType style to use
+ *  @param style :: CurveType style to use
  *..@throw Mantid::Kernel::Exception::NotFoundError if the workspace cannot be found
  *  @throw std::invalid_argument if the index is out of range for the given workspace
  */
@@ -39,7 +39,7 @@ MantidMatrixCurve::MantidMatrixCurve(const QString&,const QString& wsName,Graph*
  *  @param index :: The index of the spectrum or bin in the workspace
  *  @param err :: True if the errors are to be plotted
  *  @param distr :: True if it is a distribution
- *  @param sytle :: CurveType style to use
+ *  @param style :: CurveType style to use
  *  @throw std::invalid_argument if the index is out of range for the given workspace
  */
 MantidMatrixCurve::MantidMatrixCurve(const QString& wsName,Graph* g,int index,bool err,bool distr, Graph::CurveType style)
@@ -66,9 +66,8 @@ MantidMatrixCurve::MantidMatrixCurve(const MantidMatrixCurve& c)
 }
 
 /**
- *  @param workspace :: The source workspace for the curve's data
  *  @param g :: The Graph widget which will display the curve
- *  @param distrib :: True for a distribution
+ *  @param distr :: True for a distribution
  *  @param style :: The curve type to use
  */
 void MantidMatrixCurve::init(Graph* g,bool distr,Graph::CurveType style)

@@ -184,6 +184,7 @@ void UnwrappedSurface::calcAssemblies(boost::shared_ptr<const Mantid::Geometry::
 /**
   * Draw the unwrapped instrument onto the screen
   * @param widget :: The widget to draw it on.
+  * @param picking :: True if detector is being drawn in the picking mode.
   */
 void UnwrappedSurface::drawSurface(MantidGLWidget *widget,bool picking)const
 {

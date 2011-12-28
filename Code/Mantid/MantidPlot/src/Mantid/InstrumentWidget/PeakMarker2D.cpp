@@ -17,8 +17,7 @@ const int PeakMarker2D::g_defaultMarkerSize = 5;
 /**
  * Constructor.
  * @param centre :: Centre of the marker. Represents the peak position.
- * @param symbol :: Symbol to draw. One of: Circle, Diamond, or Square
- * @param markerSize :: Optional size of marker's symbol.
+ * @param style :: marker symbol style
  */
 PeakMarker2D::PeakMarker2D(const QPointF& centre,Style style):
 m_symbol(style.symbol),

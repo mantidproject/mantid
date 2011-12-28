@@ -173,7 +173,7 @@ unsigned long vtkSQWEventReader::GetMTime()
 
 /**
   Update/Set the progress.
-  @parameter progress : progress increment.
+  @param progress : progress increment.
 */
 void vtkSQWEventReader::updateAlgorithmProgress(double progress)
 {

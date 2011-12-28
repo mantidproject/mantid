@@ -74,7 +74,7 @@ namespace Mantid
 
     /**
     Constructor
-    @cutOff : cutoff radius
+    @param cutOff : cutoff radius
     */
     LinearWeighting::LinearWeighting(const double cutOff) : WeightingStrategy(cutOff)
     {
@@ -191,8 +191,8 @@ namespace Mantid
 
     /**
     Constructor
-    @cutOff : radius cut-off.
-    @sigma : gaussian sigma value.
+    @param cutOff : radius cut-off.
+    @param sigma : gaussian sigma value.
     */
     GaussianWeightingnD::GaussianWeightingnD(double cutOff, double sigma) : WeightingStrategy(cutOff)
     {

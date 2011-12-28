@@ -413,6 +413,7 @@ createCylInstrumentWithDetInGivenPosisions(const std::vector<double>& L2, const 
    *
    * @param num_banks: number of rectangular banks to create
    * @param pixels :: number of pixels in each direction.
+   * @param pixelSpacing :: padding between pixels
    */
   Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels, double pixelSpacing)
   {
@@ -476,6 +477,7 @@ createCylInstrumentWithDetInGivenPosisions(const std::vector<double>& L2, const 
    *
    * @param num_banks: number of rectangular banks to create
    * @param pixels :: number of pixels in each direction.
+   * @param pixelSpacing :: padding between pixels
    */
   Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels, double pixelSpacing)
   {

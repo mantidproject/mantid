@@ -85,7 +85,6 @@ void GLColor::getUB3(unsigned char* c)const
 
 /**
  * This method executes opengl color commands based on the method provided.
- * @param pm :: type of opengl color to be used
  */
 void GLColor::paint()const
 {

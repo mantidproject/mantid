@@ -9,10 +9,8 @@ using namespace Geometry;
 
 /**
 * This is a constructor for CompAssembly Actor
-* @param objs :: list of objects that are used by IObjCompenent actors and will be filled with the new objects
-* @param id :: ComponentID of this object of CompAssembly
-* @param ins :: Instrument
-* @param withDisplayList :: true to create a display list for the compassembly and its subcomponents
+* @param instrActor :: the instrument actor
+* @param compID :: the component ID
 */
 ICompAssemblyActor::ICompAssemblyActor(const InstrumentActor& instrActor,const Mantid::Geometry::ComponentID& compID)
   :ComponentActor(instrActor,compID),
