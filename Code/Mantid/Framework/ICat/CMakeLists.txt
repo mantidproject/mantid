@@ -77,6 +77,7 @@ target_link_libraries ( ICat ${MANTIDLIBS} ${OPENSSL_LIBRARIES} )
 
 if ( CXXTEST_FOUND )
   add_library ( ICatTestHelper "test/ICatTestHelper.cpp")
+  target_link_libraries( ICatTestHelper ICat  )
   cxxtest_add_test ( ICatTest ${TEST_FILES} )
   target_link_libraries( ICatTest ICat ICatTestHelper )
   add_dependencies ( FrameworkTests ICatTest )
