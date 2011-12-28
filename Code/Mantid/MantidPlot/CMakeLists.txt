@@ -761,7 +761,7 @@ add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp
 							${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS} 
 							${RES_FILES} ${MANTID_RC_FILE}
 )
-
+add_cppcheck   ( MantidPlot )
 
 # Library dependencies
 target_link_libraries ( MantidPlot 

@@ -133,6 +133,7 @@ endif(UNITY_BUILD)
 ADD_PRECOMPILED_HEADER( inc/MantidMDAlgorithms/PrecompiledHeader.h MantidMDAlgorithms src/PrecompiledHeader.cpp SRC_FILES INC_FILES )
 # Add the target for this directory
 add_library ( MDAlgorithms ${SRC_FILES} ${INC_FILES})
+add_cppcheck( MDAlgorithms )
 # Set the name of the generated library
 set_target_properties ( MDAlgorithms PROPERTIES OUTPUT_NAME MantidMDAlgorithms 
                                                 COMPILE_DEFINITIONS IN_MANTID_MDALGORITHMS )

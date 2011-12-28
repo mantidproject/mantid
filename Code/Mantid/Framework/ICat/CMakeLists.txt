@@ -65,6 +65,7 @@ add_definitions ( -DWITH_OPENSSL -DWITH_NONAMESPACES )
 ADD_PRECOMPILED_HEADER( inc/MantidICat/PrecompiledHeader.h MantidICat src/PrecompiledHeader.cpp SRC_FILES INC_FILES )
 # Add the target for this directory
 add_library ( ICat ${SRC_FILES} ${INC_FILES})
+add_cppcheck( ICat src/GSoapGenerated.cpp src/GSoapGenerated)
 # Set the name of the generated library
 set_target_properties ( ICat PROPERTIES OUTPUT_NAME MantidICat 
                                         COMPILE_DEFINITIONS IN_MANTID_ICAT )

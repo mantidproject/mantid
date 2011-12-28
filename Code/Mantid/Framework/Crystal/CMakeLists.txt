@@ -86,6 +86,7 @@ endif(UNITY_BUILD)
 
 # Add the target for this directory
 add_library ( Crystal ${SRC_FILES} ${INC_FILES})
+add_cppcheck( Crystal )
 # Set the name of the generated library
 set_target_properties ( Crystal PROPERTIES OUTPUT_NAME MantidCrystal )
 # Add to the 'Framework' group in VS

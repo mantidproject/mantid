@@ -312,6 +312,7 @@ endif(UNITY_BUILD)
 ADD_PRECOMPILED_HEADER( inc/MantidDataHandling/PrecompiledHeader.h MantidDataHandling src/PrecompiledHeader.cpp SRC_FILES INC_FILES )
 # Add the target for this directory
 add_library ( DataHandling ${SRC_FILES} ${INC_FILES})
+add_cppcheck( DataHandling )
 # Set the name of the generated library
 set_target_properties ( DataHandling PROPERTIES OUTPUT_NAME MantidDataHandling )
 # Add to the 'Framework' group in VS

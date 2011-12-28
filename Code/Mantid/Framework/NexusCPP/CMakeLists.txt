@@ -17,6 +17,7 @@ add_definitions ( -DIN_NEXUS_CPP_LIBRARY )
 
 # Add the target for this directory
 add_library ( NexusCPP ${SRC_FILES} ${INC_FILES})
+add_cppcheck( NexusCPP )
 # Set the name of the generated library
 set_target_properties ( NexusCPP PROPERTIES OUTPUT_NAME MantidNexusCPP 
                                             COMPILE_DEFINITIONS IN_MANTID_NEXUSCPP )

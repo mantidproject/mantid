@@ -95,6 +95,7 @@ endif(UNITY_BUILD)
 ADD_PRECOMPILED_HEADER( inc/MantidDataObjects/PrecompiledHeader.h MantidDataObjects src/PrecompiledHeader.cpp SRC_FILES INC_FILES )
 # Add the target for this directory
 add_library ( DataObjects ${SRC_FILES} ${INC_FILES})
+add_cppcheck( DataObjects )
 # Set the name of the generated library
 set_target_properties ( DataObjects PROPERTIES OUTPUT_NAME MantidDataObjects 
                                                COMPILE_DEFINITIONS IN_MANTID_DATA_OBJECTS )

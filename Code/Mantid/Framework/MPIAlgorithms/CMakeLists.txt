@@ -12,6 +12,7 @@ set ( TEST_FILES test/BroadcastWorkspaceTest.h
 
 # Add the target for this directory
 add_library ( MPIAlgorithms ${SRC_FILES} ${INC_FILES} )
+add_cppcheck( MPIAlgorithms )
 # Set the name of the generated library
 set_target_properties ( MPIAlgorithms PROPERTIES OUTPUT_NAME MantidMPIAlgorithms )
 # Add to the 'Framework' group in VS

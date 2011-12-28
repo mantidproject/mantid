@@ -107,6 +107,7 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/SliceViewer ) # to find the ui
 
 # This creates the target library, just for python bindings
 add_library ( mantidqtpython MODULE ${SIP_SRC} )
+add_cppcheck( mantidqtpython )
 
 if(WIN32)
 	# Windows: Python library name needs to end in .pyd for Windows

@@ -278,6 +278,7 @@ endif(UNITY_BUILD)
 ADD_PRECOMPILED_HEADER ( inc/MantidKernel/PrecompiledHeader.h MantidKernel src/PrecompiledHeader.cpp SRC_FILES INC_FILES )
 # Add the target for this directory
 add_library ( Kernel ${SRC_FILES} ${INC_FILES} )
+add_cppcheck( Kernel )
 # Set the name of the generated library
 set_target_properties ( Kernel PROPERTIES OUTPUT_NAME MantidKernel 
                                           COMPILE_DEFINITIONS "IN_MANTID_KERNEL;PSAPI_VERSION=1" )
