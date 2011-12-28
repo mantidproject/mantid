@@ -34,7 +34,7 @@ class UnaryOperationTest : public CxxTest::TestSuite
 public:
   void testCategory()
   {
-    TS_ASSERT_EQUALS( helper.category(), "CorrectionFunctions" )
+    TS_ASSERT_EQUALS( helper.category(), "CorrectionFunctions;Arithmetic" )
   }
   
   void testInputPropName()

@@ -17,7 +17,7 @@ public:
     alg = new IdentifyNoisyDetectors();
     TS_ASSERT_EQUALS(alg->name(), "IdentifyNoisyDetectors");
     TS_ASSERT_EQUALS(alg->version(), 1);
-    TS_ASSERT_EQUALS(alg->category(), "General");
+    TS_ASSERT_EQUALS(alg->category(), "Diagnostics");
     delete alg;
   }
 
