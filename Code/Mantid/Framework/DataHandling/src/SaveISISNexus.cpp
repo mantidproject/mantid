@@ -328,6 +328,7 @@ void SaveISISNexus::saveFloatOpen(const char* name,void* data, int size)
   * Save a vector of string in a dataset.
   * @param name :: Name of the data set
   * @param str_vec :: The vector to save
+  * @param max_str_size :: The maximum string size
   * @return The line size
   */
 int SaveISISNexus::saveStringVectorOpen(const char* name,const std::vector<std::string>& str_vec,int max_str_size)
@@ -367,7 +368,7 @@ int SaveISISNexus::saveStringVectorOpen(const char* name,const std::vector<std::
 /**
   * Save a string in a dataset.
   * @param name :: Name of the data set
-  * @param str_vec :: The vector to save
+  * @param str :: The vector to save
   */
 void SaveISISNexus::saveString(const char* name,const std::string& str)
 {
@@ -379,7 +380,7 @@ void SaveISISNexus::saveString(const char* name,const std::string& str)
 /**
   * Save a string in a dataset.
   * @param name :: Name of the data set
-  * @param str_vec :: The vector to save
+  * @param str :: The vector to save
   */
 void SaveISISNexus::saveStringOpen(const char* name,const std::string& str)
 {
@@ -758,7 +759,7 @@ void SaveISISNexus::sample()
 }
 
 /**
-  * Create and write run logs form <RawFilename>_ICPstatus.txt log file
+  * Create and write run logs form \<RawFilename\>_ICPstatus.txt log file
   */
 void SaveISISNexus::runlog()
 {

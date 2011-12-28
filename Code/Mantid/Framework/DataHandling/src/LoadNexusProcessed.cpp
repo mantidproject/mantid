@@ -204,6 +204,7 @@ void LoadNexusProcessed::exec()
 /** Load the event_workspace field
  *
  * @param wksp_cls
+ * @param xbins
  * @param progressStart
  * @param progressRange
  * @return

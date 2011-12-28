@@ -51,7 +51,6 @@ public:
     /** Get a value to a Jacobian matrix element.
     *   @param iY :: The index of the data point.
     *   @param iP :: The index of the parameter. It does not depend on the number of fixed parameters in a particular fit.
-    *   @param value :: The derivative value.
     */
     double get(size_t iY, size_t iP)
     {

@@ -90,7 +90,8 @@ namespace Mantid
 
     /**
     Culling method to direct the removal of hkl values off peaks where they cannot sit.
-    @peakCandidates : Potential peaks containing sets of possible hkl values.
+    @param peakCandidates : Potential peaks containing sets of possible hkl values.
+    @param unitcell : the unit cell for lattice
     */
     void IndexSXPeaks::cullHKLs(std::vector<PeakCandidate>& peakCandidates, Mantid::Geometry::UnitCell& unitcell)
     {
@@ -110,7 +111,7 @@ namespace Mantid
 
     /**
     Check that not all peaks are colinear and throw if they are not.
-    @param PeakCandidates : Potential peaks
+    @param peakCandidates : Potential peaks
     @throws runtime_error if all colinear peaks have been provided
     */
     void IndexSXPeaks::validateNotColinear(std::vector<PeakCandidate>& peakCandidates) const

@@ -136,6 +136,7 @@ namespace Crystal
    * @param h
    * @param k
    * @param l
+   * @param doFilter if true, skip unacceptable d-spacings
    */
   void PredictPeaks::doHKL(const double h, const double k, const double l, bool doFilter)
   {

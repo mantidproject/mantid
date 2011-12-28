@@ -36,6 +36,7 @@ class PartialJacobian: public API::Jacobian
 public:
   /** Constructor
    * @param J :: A pointer to the overall Jacobian
+   * @param iY0 :: Data array offset index (declared) for a particular function
    * @param iP0 :: The parameter index (declared) offset for a particular function
    * @param iap0 :: The active parameter index (declared) offset for a particular function
    */
@@ -157,7 +158,6 @@ void MultiBG::setWorkspace(boost::shared_ptr<const API::Workspace> ws, bool)
 }
 /**
  * Sets workspaces to member functions. Constructs the data set for fitting.
- * @param ws :: Pointer to a workspace, not used. Workspaces are taken either from member functions or slicing.
  * @param slicing :: A map between member functions and workspaces or empty string. Format:
  *   "f0,Workspace0,i0;f1,Workspace1,i1;f2,Workspace2,i2;..."
  */
@@ -304,8 +304,6 @@ void MultiBG::setSlicing(const std::string& slicing)
  * Creates a workspace containing values calculated with this function. It takes a workspace and ws index
  * of a spectrum which this function may have been fitted to. The output contains the original spectrum 
  * (wi = 0), the calculated values (ws = 1), and the difference between them (ws = 2).
- * @param inWS :: input workspace
- * @param wi :: workspace index
  * @param sd :: optional standard deviations of the parameters for calculating the error bars
  * @return created workspase
  */

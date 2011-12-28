@@ -134,8 +134,6 @@ int LoadTOFRawNexus::fileCheck(const std::string& filePath)
  *
  * @param nexusfilename :: nxs file path
  * @param entry_name :: name of the entry
- * @param numPixels :: returns # of pixels
- * @param numBins :: returns # of bins (length of Y vector, add one to get the number of X points)
  * @param bankNames :: returns the list of bank names
  */
 void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::string & entry_name,
@@ -278,7 +276,6 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
  * @param entry_name :: NXentry name
  * @param bankName :: NXdata bank name
  * @param WS :: workspace to modify
- * @param workspaceIndex :: workspaceIndex of the first spectrum. This will be incremented by the # of pixels in the bank.
  */
 void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::string & entry_name,
     const std::string &bankName, Mantid::API::MatrixWorkspace_sptr WS)

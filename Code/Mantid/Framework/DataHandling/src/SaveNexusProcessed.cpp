@@ -131,6 +131,7 @@ namespace DataHandling
   /** Get the list of workspace indices to use
    *
    * @param spec :: returns the list of workspace indices
+   * @param matrixWorkspace :: pointer to a MatrixWorkspace
    */
   void SaveNexusProcessed::getSpectrumList(std::vector<int> & spec, MatrixWorkspace_const_sptr matrixWorkspace)
   {

@@ -653,7 +653,6 @@ size_t GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API
 *  @param inputWS :: user selected input workspace for the algorithm
 *  @param outputWS :: user selected output workspace for the algorithm
 *  @param outIndex :: the next spectra index available after the grouped spectra
-*  @param groupedMap :: The new spectra map that is being built
 */
 void GroupDetectors2::moveOthers(const std::set<int64_t> &unGroupedSet, API::MatrixWorkspace_const_sptr inputWS, API::MatrixWorkspace_sptr outputWS, 
          size_t outIndex)
@@ -794,7 +793,7 @@ void GroupDetectors2::GroupXmlReader::startDocument()
 /**
 * This function is called at the start of each element. It checks whether the element signals the start of a group,
 * the values in a group, or can be ignored.
-* @param localName the name of the element. for example in <group name="a">, this would be "group"
+* @param localName the name of the element. for example in \<group name="a"\>, this would be "group"
 * @param attr the attributes of the element, in the above example this would be an object linking "name" and "a".
 */
 void GroupDetectors2::GroupXmlReader::startElement(const Poco::XML::XMLString &, const Poco::XML::XMLString& localName, const Poco::XML::XMLString&, const Poco::XML::Attributes& attr)
@@ -811,7 +810,7 @@ void GroupDetectors2::GroupXmlReader::startElement(const Poco::XML::XMLString &,
 }
 /**
 * This function is called at the end of each element. It only matters here when signifying the end of a group.
-* @param localName the name of the element ending. For example, in </group> this would be "group".
+* @param localName the name of the element ending. For example, in \</group\> this would be "group".
 */
 void GroupDetectors2::GroupXmlReader::endElement(const Poco::XML::XMLString&, const Poco::XML::XMLString& localName, const Poco::XML::XMLString&)
 {

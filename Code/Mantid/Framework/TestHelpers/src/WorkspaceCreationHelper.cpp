@@ -719,6 +719,7 @@ namespace WorkspaceCreationHelper
   /// @param L2        -- the sample to detector flight path
   /// @param polar     -- the detector polar angle
   /// @param azimutal  -- the detector azimuthal
+  /// @param numBins   -- the number of histogram bins for the workspace
   /// @param Emin      -- minimal energy transfer
   /// @param Emax      -- maxinal energy transfer
   /// @param Ei        -- input beam energy

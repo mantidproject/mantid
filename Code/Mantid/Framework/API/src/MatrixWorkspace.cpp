@@ -778,7 +778,7 @@ namespace Mantid
     }
 
     /** Get the effective detector for the given spectrum
-    *  @param  index The workspace index for which the detector is required
+    *  @param  workspaceIndex The workspace index for which the detector is required
     *  @return A single detector object representing the detector(s) contributing
     *          to the given spectrum number. If more than one detector contributes then
     *          the returned object's concrete type will be DetectorGroup.

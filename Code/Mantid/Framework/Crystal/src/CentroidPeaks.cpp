@@ -67,7 +67,6 @@ namespace Crystal
 
   //----------------------------------------------------------------------------------------------
   /** Integrate the peaks of the workspace using parameters saved in the algorithm class
-   * @param inWS ::  2D Workspace to integrate
    */
   void CentroidPeaks::integrate()
   {
@@ -224,7 +223,6 @@ namespace Crystal
 
   //----------------------------------------------------------------------------------------------
   /** Integrate the peaks of the workspace using parameters saved in the algorithm class
-   * @param inWS ::  2D Workspace to integrate
    */
   void CentroidPeaks::integrateEvent()
   {
