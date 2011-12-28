@@ -14,6 +14,7 @@ flags = _dlopen.setup_dlopen() # Ensure the library is open with the correct fla
 from _kernel import *
 dlopen.restore_flags(flags)
 
+from validators import *
 ###############################################################################
 # Make the singleton objects available as named variables 
 ###############################################################################

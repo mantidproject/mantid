@@ -16,6 +16,8 @@ set ( EXPORT_FILES
   src/StlContainers.cpp
   src/Logger.cpp
   src/Unit.cpp
+  src/IValidator.cpp
+  src/BoundedValidator.cpp
 )  
 
 set ( SRC_FILES
@@ -47,6 +49,7 @@ set ( PY_FILES
   dlopen.py
   funcreturns.py
   plugins.py
+  validators.py
 )
 
 #############################################################################################
