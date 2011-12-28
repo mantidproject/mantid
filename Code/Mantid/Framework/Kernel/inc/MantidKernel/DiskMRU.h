@@ -68,7 +68,7 @@ namespace Kernel
   public:
     /** Typedef defines that we will keep the objects with these 2 orderings:
      * 1. sequenced = the order they were added.
-     * 2. a hashed, unique index = the "id" number".
+     * 2. a hashed, unique index = the "id" number.
      */
     typedef boost::multi_index::multi_index_container<
       const ISaveable *,

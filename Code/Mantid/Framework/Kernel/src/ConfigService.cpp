@@ -988,7 +988,7 @@ std::vector<std::string> ConfigServiceImpl::getKeys(const std::string& keyName) 
  *  changed key list so that when the program calls saveConfig the properties file will
  *  be the same and not contain the key no more
  *
- *  @param keyName :: The key that is to be deleted
+ *  @param rootName :: The key that is to be deleted
  */
 void ConfigServiceImpl::remove(const std::string& rootName) const
 {
@@ -1007,7 +1007,7 @@ void ConfigServiceImpl::remove(const std::string& rootName) const
 
 /** Checks to see whether the given key exists.
  *
- *  @param keyName :: The case sensitive key that you are looking to see if exists.
+ *  @param rootName :: The case sensitive key that you are looking to see if exists.
  *  @returns Boolean value denoting whether the exists or not.
  */
 bool ConfigServiceImpl::hasProperty(const std::string& rootName) const
@@ -1556,7 +1556,7 @@ void ConfigServiceImpl::updateFacilities(const std::string& fName)
 
 /**
  * Returns instruments with given name
- * @param  iName Instrument name
+ * @param  instrumentName Instrument name
  * @return the instrument information object
  * @throw NotFoundError if iName was not found
  */
@@ -1614,7 +1614,7 @@ const FacilityInfo& ConfigServiceImpl::getFacility() const
 
 /**
  * Get a facility
- * @param fName :: Facility name
+ * @param faciliyName :: Facility name
  * @return the facility information object
  * @throw NotFoundException if the facility is not found
  */

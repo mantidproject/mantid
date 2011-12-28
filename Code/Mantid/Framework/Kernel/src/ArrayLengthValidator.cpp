@@ -54,7 +54,7 @@ namespace Kernel
 
   /**
     Function to set the length
-    @params  value:: size_t type
+    @param  value:: size_t type
    */
   template <typename TYPE>
   void ArrayLengthValidator<TYPE>::setLength(const size_t &value)

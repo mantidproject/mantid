@@ -367,6 +367,8 @@ namespace Geometry
    *
    *  @param comp :: To set position/location off
    *  @param pElem ::  Poco::XML element that points a location element in the XML doc
+   *  @param angleConvertConst :: constant for converting deg to rad
+   *  @param deltaOffsets :: radial position offsets
    *
    *  @throw logic_error Thrown if second argument is not a pointer to a 'location' XML element
    */
@@ -474,6 +476,8 @@ namespace Geometry
   *
   *  @param comp :: To set position/location off
   *  @param pElem ::  Poco::XML element that points a location element in the XML doc
+  *  @param angleConvertConst :: constant for converting deg to rad
+  *  @param deltaOffsets :: radial position offsets
   *
   *  @return  Thrown if second argument is not a pointer to a 'location' XML element
   */
@@ -1813,13 +1817,13 @@ namespace Geometry
 
 
 
-  /** Takes as input a <type> element containing a <combine-components-into-one-shape>, and
-  *   adjust the <type> element by replacing its containing <component> elements with <cuboid>'s
-  *   (note for now this will only work for <cuboid>'s and when necessary this can be extended).
+  /** Takes as input a \<type\> element containing a <combine-components-into-one-shape>, and
+  *   adjust the \<type\> element by replacing its containing \<component\> elements with \<cuboid\>'s
+  *   (note for now this will only work for \<cuboid\>'s and when necessary this can be extended).
   *
-  *  @param pElem ::  Poco::XML <type> element that we want to adjust
-  *  @param isTypeAssembly[in] :: tell whether any other type, but the special one treated here, is assembly or not
-  *  @param getTypeElement[in] :: contain pointers to all types but the onces treated here
+  *  @param pElem ::  Poco::XML \<type\> element that we want to adjust
+  *  @param isTypeAssembly [in] :: tell whether any other type, but the special one treated here, is assembly or not
+  *  @param getTypeElement [in] :: contain pointers to all types but the onces treated here
   *
   *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
   */
@@ -1941,9 +1945,10 @@ namespace Geometry
   }
 
 
-  /// Returns a translated and rotated <cuboid> element
+  /// Returns a translated and rotated \<cuboid\> element
   /// @param comp coordinate system to translate and rotate cuboid to
-  /// @param cuboidEle containing one <cuboid> element
+  /// @param cuboidEle containing one \<cuboid\> element
+  /// @param cuboidName name of the \<cuboid\> element
   /// @return XML string of translated and rotated cuboid
   std::string InstrumentDefinitionParser::translateRotateXMLcuboid(ICompAssembly* comp, Poco::XML::Element* cuboidEle,
                                                                   std::string& cuboidName)
@@ -2069,12 +2074,13 @@ namespace Geometry
 
 
   //-----------------------------------------------------------------------------------------------------------------------
-  /** The input <location> element may contain other nested <location> elements. This method returns the parent appended
+  /** The input \<location\> element may contain other nested \<location\> elements. This method returns the parent appended
       which its child components and also name of type of the last child component.
   *
   *  @param parent :: CompAssembly to append to
   *  @param pLocElem ::  Poco::XML element that points to a location element
   *  @param getTypeElement :: contain pointers to all types
+  *  @param endAssembly :: pointer to last child assembly
   *  @return Returns shape type name
   *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
   */

@@ -341,6 +341,7 @@ namespace WorkspaceCreationHelper
    *
    * @param numBanks :: number of rectangular banks
    * @param numPixels :: each bank will be numPixels*numPixels
+   * @param clearEvents :: if true, erase the events from list
    * @return The EventWorkspace
    */
   Mantid::DataObjects::EventWorkspace_sptr createEventWorkspaceWithFullInstrument(int numBanks, int numPixels, bool clearEvents)
@@ -515,6 +516,7 @@ namespace WorkspaceCreationHelper
    *
    * @param numbins :: # of bins to set. This is also = # of events per EventList
    * @param numpixels :: number of pixels
+   * @param bin_delta :: a constant offset to shift the bin bounds by
    * @return EventWorkspace
    */
   EventWorkspace_sptr CreateRandomEventWorkspace(size_t numbins, size_t numpixels, double bin_delta)
@@ -714,8 +716,9 @@ namespace WorkspaceCreationHelper
   }
 
   /// Create a workspace with all components needed for inelastic analysis and 3 detectors in specific places
-  /// @param numPixels --- numbed of detectors
-  /// @param numBins   -- number of energy bins;
+  /// @param L2        -- the sample to detector flight path
+  /// @param polar     -- the detector polar angle
+  /// @param azimutal  -- the detector azimuthal
   /// @param Emin      -- minimal energy transfer
   /// @param Emax      -- maxinal energy transfer
   /// @param Ei        -- input beam energy

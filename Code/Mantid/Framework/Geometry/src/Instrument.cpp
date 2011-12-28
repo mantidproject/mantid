@@ -795,8 +795,6 @@ namespace Mantid
      * @param samplePos: position of the sample
      * @param det: Geometry object representing the detector (position of the pixel)
      * @param offset: value (close to zero) that changes the factor := factor * (1+offset).
-     * @param vulcancorrection:  boolean to use l2 from Rectangular Detector parent
-     * @return conversion factor for pixel
      */
     double Instrument::calcConversion(const double l1,
                           const Kernel::V3D &beamline,
@@ -866,7 +864,6 @@ namespace Mantid
     //------------------------------------------------------------------------------------------------
     /** Get several instrument parameters used in tof to D-space conversion
      *
-     * @param instrument
      * @param l1 :: primary flight path (source-sample distance)
      * @param beamline :: vector of the direction and length of the beam (source to samepl)
      * @param beamline_norm :: 2 * the length of beamline

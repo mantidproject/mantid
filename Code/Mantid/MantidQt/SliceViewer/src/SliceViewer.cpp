@@ -1001,7 +1001,7 @@ void SliceViewer::updateDisplay(bool resetAxes)
  *
  * @param index :: index of the dimension
  * @param dim :: shown dimension, 0=X, 1=Y, -1 sliced
- * @param dim :: previous shown dimension, 0=X, 1=Y, -1 sliced
+ * @param oldDim :: previous shown dimension, 0=X, 1=Y, -1 sliced
  */
 void SliceViewer::changedShownDim(int index, int dim, int oldDim)
 {
@@ -1076,7 +1076,7 @@ int SliceViewer::getDimY() const
  * To be called from Python, primarily.
  *
  * @param indexX :: index of the X dimension, from 0 to NDims-1.
- * @param indexX :: index of the Y dimension, from 0 to NDims-1.
+ * @param indexY :: index of the Y dimension, from 0 to NDims-1.
  * @throw std::invalid_argument if an index is invalid or repeated.
  */
 void SliceViewer::setXYDim(int indexX, int indexY)

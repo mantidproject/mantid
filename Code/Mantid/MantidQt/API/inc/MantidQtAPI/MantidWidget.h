@@ -51,7 +51,7 @@ namespace MantidQt
     virtual QVariant getUserInput() const { return QVariant(); }
     /**
      * Sets a value on a mantid widget through a common interface
-     * @param :: value The value as a QVariant
+     * @param value :: The value as a QVariant
      */
     virtual void setUserInput(const QVariant & value)  { Q_UNUSED(value); }
 

@@ -496,6 +496,8 @@ void AlgorithmDialog::untie(const QString & property)
  * If given, a validator label will be added for the given input widget
  * @param readHistory :: If true then a history value will be retrieved
  * @param otherWidget1 :: An associated widget that should be hidden if the main one is hidden too.
+ * @param otherWidget2 :: An associated widget that should be hidden if the main one is hidden too.
+ * @param otherWidget3 :: An associated widget that should be hidden if the main one is hidden too.
  *
  * @return A NULL pointer if a valid label was successfully add to a passed parent_layout otherwise it
  *          returns a pointer to the QLabel instance marking the validity
@@ -601,7 +603,7 @@ QString getFileDialogFilter(const std::set<std::string> & exts)
 /**
  * Open a file selection box. The type of dialog, i.e. load/save will depend on the
  * property type
- * @param The :: property name that this is associated with. 
+ * @param propName :: The property name that this is associated with.
  */
 QString AlgorithmDialog::openFileDialog(const QString & propName)
 {
@@ -752,7 +754,7 @@ void AlgorithmDialog::fillAndSetComboBox(const QString & propName, QComboBox* op
  * Takes the given property and QCheckBox pointer and sets the state based on either
  * the history or property value
  * @param propName :: The name of the property
- * @param 
+ * @param checkBox :: checkbox to set property value from
  * @returns A newed QCheckBox
  */
 void AlgorithmDialog::setCheckBoxState(const QString & propName, QCheckBox* checkBox) const
@@ -786,7 +788,7 @@ void AlgorithmDialog::setCheckBoxState(const QString & propName, QCheckBox* chec
 /**
  * Set the input for a text box based on either the history or a script value
  * @param propName :: The name of the property
- * @param field :: The QLineEdit field
+ * @param textField :: The QLineEdit field
  */
 void AlgorithmDialog::fillLineEdit(const QString & propName, QLineEdit* textField)
 {
@@ -849,7 +851,6 @@ QPushButton* AlgorithmDialog::createHelpButton(const QString & helpText) const
 /**
  * Create a button that when clicked will put the name of the input workspace into the
  * output box.
- * @param inputBox :: The input combo box that contains the input workspace names
  * @param outputEdit :: The output text box that should contain the output name
  * @returns A new QPushButton linked to the appropriate widgets.
  */
@@ -1019,7 +1020,7 @@ void AlgorithmDialog::setPresetValues(const QHash<QString,QString> & presetValue
 /** 
  * Set list of enabled and disabled parameter names
  * @param enabled:: A list of parameter names to keep enabled
- * @param disbaled:: A list of parameter names whose widgets should be disabled
+ * @param disabled:: A list of parameter names whose widgets should be disabled
  */
 void AlgorithmDialog::addEnabledAndDisableLists(const QStringList & enabled, const QStringList & disabled)
 {
@@ -1113,7 +1114,7 @@ QString AlgorithmDialog::getValue(QWidget *widget)
  * Set a value for a widget. The function needs to know about the types of widgets
  * that are being used. Currently it knows about QComboBox, QLineEdit and QCheckBox
  * @param widget :: A pointer to the widget
- * @param property :: The property name
+ * @param propName :: The property name
  */
 void AlgorithmDialog::setPreviousValue(QWidget *widget, const QString & propName)
 {

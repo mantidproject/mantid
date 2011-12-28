@@ -58,7 +58,7 @@ namespace Kernel
   /** Return the fraction of the CPU used (CPUTime/wall-clock time).
    * This can be > 1 on multi-CPU systems.
    *
-   * @param reset :: true to reset both timers
+   * @param doReset :: true to reset both timers
    * @return
    */
   float CPUTimer::CPUfraction(bool doReset)

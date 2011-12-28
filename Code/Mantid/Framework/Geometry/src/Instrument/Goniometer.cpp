@@ -95,7 +95,9 @@ std::string Goniometer::axesInfo()
 
 /**Add an additional axis to the goniometer, closer to the sample
   @param name :: GoniometerAxis name
-  @param axisx, axisy axisz :: the x, y, z components of the rotation axis
+  @param axisx :: the x component of the rotation axis
+  @param axisy :: the y component of the rotation axis
+  @param axisz :: the z component of the rotation axis
   @param angle :: rotation angle, 0 by default
   @param sense :: rotation sense (CW or CCW), CCW by default
   @param angUnit :: units for angle of type#AngleUnit, angDegrees by default 

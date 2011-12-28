@@ -46,7 +46,7 @@ ShapeFactory::ShapeFactory()
 /** Creates a geometric object directly from a XML shape string
  *
  *  @param shapeXML :: XML shape string
- *  @param addTypeTag :: true to wrap a <type> tag around the XML supplied (default)
+ *  @param addTypeTag :: true to wrap a \<type\> tag around the XML supplied (default)
  *  @return A shared pointer to a geometric shape (defaults to an 'empty' shape if XML tags contain no geo. info.) 
  */
 boost::shared_ptr<Object> ShapeFactory::createShape(std::string shapeXML, bool addTypeTag)

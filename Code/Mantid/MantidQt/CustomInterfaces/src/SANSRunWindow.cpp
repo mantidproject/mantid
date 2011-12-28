@@ -595,7 +595,7 @@ void SANSRunWindow::trimPyMarkers(QString & txt)
 }
 /** Issues a Python command to load the user file and returns any output if
 *  there are warnings or errors
-*  @param errors[out] the output produced by the string
+*  @param errors [out] the output produced by the string
 *  @return the output printed by the Python commands
 */
 bool SANSRunWindow::loadUserFile()
@@ -1141,7 +1141,9 @@ bool SANSRunWindow::isUserFileLoaded() const
 
 /**
  * Create the mask strings for spectra and times
- * @exec_script Create userfile type execution script
+ * @param exec_script Create userfile type execution script
+ * @param importCommand
+ * @param mType
  */
 void SANSRunWindow::addUserMaskStrings(QString& exec_script,const QString& importCommand, enum MaskType mType)
 {  
@@ -2771,7 +2773,7 @@ bool SANSRunWindow::assignDetBankRun(MantidWidgets::MWRunFiles & runFile, const 
 }
 /** Gets the detectors that the instrument has and fills the
 *  combination box with these, there must exactly two detectors
-*  @param output[out] this combination box will be cleared and filled with the new names
+*  @param output [out] this combination box will be cleared and filled with the new names
 *  @throw runtime_error if there aren't exactly two detectors 
 */
 void SANSRunWindow::fillDetectNames(QComboBox *output)
@@ -2797,8 +2799,8 @@ void SANSRunWindow::fillDetectNames(QComboBox *output)
 }
 /** Checks if the workspace is a group and returns the first member of group, throws
 *  if nothing can be retrived
-*  @param workspace[in] the group to examine
-*  @param member[in] entry or period number of the requested workspace, these start at 1
+*  @param workspace [in] the group to examine
+*  @param member [in] entry or period number of the requested workspace, these start at 1
 *  @return the first member of the passed group
 *  @throw NotFoundError if a workspace can't be returned
 */

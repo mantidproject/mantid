@@ -228,7 +228,8 @@ namespace Geometry
   //----------------------------------------------------------------------------------------------
   /** Copy constructor
    *
-   * @param other :: MDPlane to copy */
+   * @param other :: MDPlane to copy
+   */
   MDPlane::MDPlane(const MDPlane & other)
   : m_nd(other.m_nd), m_inequality(other.m_inequality)
   {
@@ -241,7 +242,8 @@ namespace Geometry
   //----------------------------------------------------------------------------------------------
   /** Assignment operator
    *
-   * @param other :: MDPlane to copy */
+   * @param other :: MDPlane to copy
+   */
   MDPlane & MDPlane::operator=(const MDPlane & other)
   {
     if (this != &other) // protect against invalid self-assignment

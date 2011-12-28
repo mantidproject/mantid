@@ -75,7 +75,6 @@ namespace Kernel
   /** Tell the MRU that we are loading the given item.
    *
    * @param item :: item that is
-   * @param memory :: memory that the object will use.
    */
   void DiskMRU::loading(const ISaveable * item)
   {
