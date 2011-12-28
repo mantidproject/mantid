@@ -89,7 +89,7 @@ public:
 
     /// Returns typeid for the pointer type to the data element in the column
     virtual const std::type_info& get_pointer_type_info()const = 0;
-    /// Is the column to be read-only? @retur true by default.
+    /// Is the column to be read-only? @return true by default.
     virtual bool getReadOnly() const
     { return true; }
 

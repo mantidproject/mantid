@@ -492,7 +492,7 @@ Instrument_const_sptr SmoothNeighbours::fetchInstrument() const
 /**
 Translate the radius into meters.
 @param radiusUnits : The name of the radius units
-@param enteredUnits : The numerical value of the radius in whatever units have been specified
+@param enteredRadius : The numerical value of the radius in whatever units have been specified
 */
 double SmoothNeighbours::translateToMeters(const std::string radiusUnits, const double& enteredRadius)
 {

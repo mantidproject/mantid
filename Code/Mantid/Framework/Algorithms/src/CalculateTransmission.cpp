@@ -214,6 +214,7 @@ API::MatrixWorkspace_sptr CalculateTransmission::extractSpectrum(API::MatrixWork
 }
 /** Calculate a workspace that contains the result of the fit to the transmission fraction that was calculated
 *  @param raw [in] the workspace with the unfitted transmission ratio data
+*  @param rebinParams [in] the parameters for rebinning
 *  @param fitMethod [in] string can either be Log or Linear
 *  @return a workspace that contains the evaluation of the fit
 *  @throw runtime_error if the Linear or ExtractSpectrum algorithm fails during execution

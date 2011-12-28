@@ -60,7 +60,7 @@ namespace Mantid
 
     /**
     Calculate the weight at distance from epicenter. Always returns 1
-    @param distance : 
+    @param distance : unused argument
     @return 1
     */
     double FlatWeighting::weightAt(const Mantid::Kernel::V3D&)

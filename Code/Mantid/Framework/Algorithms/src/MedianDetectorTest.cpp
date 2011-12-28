@@ -221,6 +221,7 @@ namespace Mantid
      * Takes a single valued histogram workspace and assesses which histograms are within the limits. 
      * Those that are not are masked on the input workspace.
      * @param countWorkspace :: Input/Output Integrated workspace to diagnose
+     * @param maskWS :: A mask workspace to apply
      * @param average :: The expected number of counts, spectra within defined threshold won't fail
      * @param badIndices :: If an index is in this list then it will not be included in the tests
      * @return The number of detectors that failed the tests, not including those skipped
