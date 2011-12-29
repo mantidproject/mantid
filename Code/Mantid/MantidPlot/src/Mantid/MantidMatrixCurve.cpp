@@ -279,9 +279,11 @@ void MantidMatrixCurve::afterReplaceHandle(const std::string& wsName,const boost
 */
 QString MantidMatrixCurve::saveToString()
 {
-	QString s;
-	s="MantidMatrixCurve\t"+m_wsName+"\tsp\t"+QString::number(m_index)+"\t"+QString::number(m_drawErrorBars)+"\n";
-	return s;
+  QString s;
+  s="MantidMatrixCurve\t"+m_wsName+"\tsp\t"+QString::number(m_index)+"\t"+QString::number(m_drawErrorBars);
+  if (d_skip_symbols > 1) s += "\t"+QString::number(d_skip_symbols);
+  s += "\n";
+  return s;
 }
 
 /// Returns the workspace index if a spectrum is plotted and -1 if it is a bin.

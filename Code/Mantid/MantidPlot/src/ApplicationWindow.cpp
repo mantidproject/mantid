@@ -11094,7 +11094,8 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
       if( !curvelst[1].isEmpty()&& !curvelst[2].isEmpty())
       {
         try {
-          new MantidMatrixCurve(curvelst[1],ag,curvelst[3].toInt(),curvelst[4].toInt());
+          PlotCurve *c = new MantidMatrixCurve(curvelst[1],ag,curvelst[3].toInt(),curvelst[4].toInt());
+          if ( curvelst.size() > 5 && !curvelst[5].isEmpty() ) c->setSkipSymbolsCount(curvelst[5].toInt());
         } catch (Mantid::Kernel::Exception::NotFoundError &) {
           // Get here if workspace name is invalid - shouldn't be possible, but just in case
           closeWindow(plot);
