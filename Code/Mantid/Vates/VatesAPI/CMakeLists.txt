@@ -160,6 +160,7 @@ add_definitions( -DIN_MANTID_VATESAPI )
 ADD_PRECOMPILED_HEADER( inc/MantidVatesAPI/PrecompiledHeader.h MantidVatesAPI src/PrecompiledHeader.cpp SRC_FILES INC_FILES )
 # Add the target for this directory
 add_library( VatesAPI ${SRC_FILES} ${INC_FILES} )
+add_cppcheck( VatesAPI )
 # Set the name of the generated library
 set_target_properties( VatesAPI PROPERTIES OUTPUT_NAME MantidVatesAPI )
 # Add to the 'Framework' group in VS
