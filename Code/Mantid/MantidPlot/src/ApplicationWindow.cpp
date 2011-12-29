@@ -11088,7 +11088,7 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
       ag->enableAutoscaling(autoscale2DPlots);
 
     }
-    else if( s.contains("MantidCurve")) //1D plot curves
+    else if( s.contains("MantidMatrixCurve")) //1D plot curves
     {
       QStringList curvelst=s.split("\t");
       if( !curvelst[1].isEmpty()&& !curvelst[2].isEmpty())
