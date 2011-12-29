@@ -98,7 +98,8 @@ function(add_cppcheck _name) # additional arguments are files to ignore
 
     # set the standard arguments
     set ( _cppcheck_args )
-    list ( APPEND _cppcheck_args ${CPPCHECK_TEMPLATE_ARG} ${CPPCHECK_ARGS} "-I" "${CMAKE_CURRENT_SOURCE_DIR}/inc" )
+    list ( APPEND _cppcheck_args ${CPPCHECK_TEMPLATE_ARG} ${CPPCHECK_ARGS} )
+    list ( APPEND _cppcheck_args "-I" ${CMAKE_CURRENT_SOURCE_DIR} "-I" "${CMAKE_CURRENT_SOURCE_DIR}/inc" )
 
     # add the target
     if (CPPCHECK_GENERATE_XML )
