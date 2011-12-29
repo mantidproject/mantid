@@ -57,7 +57,7 @@ if(CPPCHECK_EXECUTABLE)
   string ( TOUPPER ${CPPCHECK_VERSION} CPPCHECK_VERSION )
   string ( REPLACE "CPPCHECK" "" CPPCHECK_VERSION ${CPPCHECK_VERSION} )
   string ( STRIP ${CPPCHECK_VERSION} CPPCHECK_VERSION )
-  message ( STATUS "cppcheck version ${CPPCHECK_VERSION}" )
+  message ( STATUS "cppcheck version: ${CPPCHECK_VERSION}" )
 endif()
 
 mark_as_advanced(CPPCHECK_EXECUTABLE)
@@ -78,12 +78,16 @@ function(add_cppcheck _name) # additional arguments are files to ignore
   if(CPPCHECK_EXECUTABLE)
     get_target_property(_cppcheck_sources "${_name}" SOURCES)
     set(_files)
+    set(_files_absolute)
     foreach(_source ${_cppcheck_sources})
       get_source_file_property(_cppcheck_lang "${_source}" LANGUAGE)
       get_source_file_property(_cppcheck_loc "${_source}" LOCATION)
       if("${_cppcheck_lang}" MATCHES "CXX")
         list(FIND _cppcheck_ignores "${_cppcheck_loc}" _cppcheck_ignore_index)
         if (_cppcheck_ignore_index LESS 0)
+          list(APPEND _files_absolute "${_cppcheck_loc}")
+          string ( REPLACE ${CMAKE_SOURCE_DIR} "" _cppcheck_loc "${_cppcheck_loc}" )
+          string ( REGEX REPLACE "^/" "" _cppcheck_loc "${_cppcheck_loc}" )
           list(APPEND _files "${_cppcheck_loc}")
 	endif (_cppcheck_ignore_index LESS 0)
       endif()
@@ -99,13 +103,15 @@ function(add_cppcheck _name) # additional arguments are files to ignore
     if (CPPCHECK_GENERATE_XML )
       add_custom_target( cppcheck_${_name}
                          COMMAND ${CPPCHECK_EXECUTABLE} ${_cppcheck_args} --xml --xml-version=2 ${_files} 2> ${CMAKE_BINARY_DIR}/cppcheck-${_name}.xml 
-                         DEPENDS ${_files}
+                         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+                         DEPENDS ${_files_absolute}
                          COMMENT "cppcheck_${_name}: Running cppcheck to generate cppcheck-${_name}.xml"
                          )
     else (CPPCHECK_GENERATE_XML )
       add_custom_target( cppcheck_${_name}
                          COMMAND ${CPPCHECK_EXECUTABLE} ${_cppcheck_args} ${_files}
-                         DEPENDS ${_files}
+                         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+                         DEPENDS ${_files_absolute}
                          COMMENT "cppcheck_${_name}: Running cppcheck on ${_name} source files"
                          )
     endif (CPPCHECK_GENERATE_XML )
