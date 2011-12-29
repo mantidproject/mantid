@@ -243,7 +243,7 @@ namespace Mantid
         if (i == m_dimensions.end())
           break;
         matches.push_back(*i);
-        i++;
+        ++i;
       }
       return matches;
     }
@@ -263,7 +263,7 @@ namespace Mantid
         if (i == m_dimensions.end())
           break;
         matches.push_back(*i);
-        i++;
+        ++i;
       }
       return matches;
     }

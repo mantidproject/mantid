@@ -60,7 +60,7 @@ namespace Mantid
         std::map<std::string, std::string> entries = file->getEntries();
         bool hasEvents = false;
         std::map<std::string, std::string>::iterator it;
-        for (it = entries.begin(); it != entries.end(); it++)
+        for (it = entries.begin(); it != entries.end(); ++it)
         {
           if (it->first.find("_events") != std::string::npos)
           {
