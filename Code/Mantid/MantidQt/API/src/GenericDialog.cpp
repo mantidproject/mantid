@@ -50,7 +50,7 @@ GenericDialog::~GenericDialog()
 {
   // Delete all the mappers
   QHash<QString, QSignalMapper *>::iterator it;
-  for(it = m_mappers.begin(); it != m_mappers.end(); it++)
+  for(it = m_mappers.begin(); it != m_mappers.end(); ++it)
     delete it.value();
 }
 

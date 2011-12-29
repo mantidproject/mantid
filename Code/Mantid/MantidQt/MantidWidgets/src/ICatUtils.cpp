@@ -233,7 +233,7 @@ namespace MantidQt
       }
       catch (Mantid::Kernel::Exception::NotFoundError& e)
       {
-        throw e;
+        throw;
       }
       return instrlist;
 
@@ -246,7 +246,7 @@ namespace MantidQt
       }
       catch (Mantid::Kernel::Exception::NotFoundError&e)
       {
-        throw e;
+        throw;
       }
 
     }
