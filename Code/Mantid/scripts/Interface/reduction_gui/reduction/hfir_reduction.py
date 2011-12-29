@@ -3,6 +3,7 @@
     This is a fake version of the Reducer for testing purposes.
 """
 import time
+import os
 from scripter import BaseReductionScripter
 
 class HFIRReductionScripter(BaseReductionScripter):
@@ -32,7 +33,13 @@ class HFIRReductionScripter(BaseReductionScripter):
             if item.state() is not None:
                 script += str(item.state())
         
-        script += "SaveIqAscii()\n"
+        xml_process = "None"
+        if file_name is None:
+            xml_process = os.path.join(self._output_directory, "HFIRSANS_process.xml")
+            xml_process = os.path.normpath(xml_process)
+            self.to_xml(xml_process)
+            
+        script += "SaveIqAscii(process=%r)\n" % xml_process
         script += "Reduce1D()\n"
         
         if file_name is not None:
