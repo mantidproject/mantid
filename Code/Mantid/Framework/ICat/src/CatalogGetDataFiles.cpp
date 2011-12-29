@@ -1,3 +1,9 @@
+/*WIKI*
+
+This algorithm retrieves the files associated to selected investigation from the information catalog and saves the file search results to mantid workspace.
+
+*WIKI*/
+
 #include "MantidICat/CatalogGetDataFiles.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -21,8 +27,8 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void CatalogGetDataFiles::initDocs()
     {
-      this->setWikiSummary("Gets the files associated to the selected investigation . ");
-      this->setOptionalMessage("Gets the files associated to the selected investigation .");
+      this->setWikiSummary("Gets the files associated to the selected investigation.");
+      this->setOptionalMessage("Gets the files associated to the selected investigation.");
     }
 
     /// Initialising the algorithm

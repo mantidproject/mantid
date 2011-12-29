@@ -1,3 +1,9 @@
+/*WIKI*
+
+This algorithm searches for the investigations and stores the search results in a table workspace.
+
+*WIKI*/
+
 #include "MantidICat/CatalogSearch.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -23,7 +29,7 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void CatalogSearch::initDocs()
     {
-      this->setWikiSummary("Searches investigations ");
+      this->setWikiSummary("Searches investigations");
       this->setOptionalMessage("Searches investigations");
     }
 

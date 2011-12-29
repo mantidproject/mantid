@@ -1,4 +1,11 @@
-#include "MantidICat/CatalogDownloadDataFile.h"
+/*WIKI*
+
+This algorithm gets the location strings for the selected files from the data archive;
+if the data archive is not accessible, it downloads the files from the data server.
+
+*WIKI*/
+
+#include "MantidICat/CatalogDownloadDataFiles.h"
 #include "MantidICat/Session.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -37,10 +44,10 @@ namespace Mantid
     using namespace Kernel;
     using namespace API;
 
-    DECLARE_ALGORITHM(CatalogDownloadDataFile)
+    DECLARE_ALGORITHM(CatalogDownloadDataFiles)
 
     /// Sets documentation strings for this algorithm
-    void CatalogDownloadDataFile::initDocs()
+    void CatalogDownloadDataFiles::initDocs()
     {
       this->setWikiSummary("Downloads the given data files from the data server ");
       this->setOptionalMessage("Downloads the given data files from the data server");
@@ -48,7 +55,7 @@ namespace Mantid
 
 
     /// declaring algorithm properties
-    void CatalogDownloadDataFile::init()
+    void CatalogDownloadDataFiles::init()
     {
       declareProperty(new ArrayProperty<int64_t> ("FileIds"),"List of fileids to download from the data server");
       declareProperty(new ArrayProperty<std::string> ("FileNames"),"List of filenames to download from the data server");
@@ -56,7 +63,7 @@ namespace Mantid
           Direction::Output),"A list of containing  locations of files downloaded from data server");
     }
     /// Execute the algorithm
-    void CatalogDownloadDataFile::exec()
+    void CatalogDownloadDataFiles::exec()
     {
 
       ICatalog_sptr catalog_sptr;
@@ -135,7 +142,7 @@ namespace Mantid
      * @param url :: url of the file to download.
      * @param fileName :: name of the file to be saved to disk
      */
-    void CatalogDownloadDataFile::downloadFileOverInternet(const std::string & url,const std::string& fileName)
+    void CatalogDownloadDataFiles::downloadFileOverInternet(const std::string & url,const std::string& fileName)
     {
       //download using Poco HttpClient session and save to local disk
       doDownloadandSavetoLocalDrive(url,fileName);
@@ -148,7 +155,7 @@ namespace Mantid
      * @param fileName ::  file name
      * @returns true if the file is a data file
      */
-    bool CatalogDownloadDataFile::isDataFile(const std::string & fileName)
+    bool CatalogDownloadDataFiles::isDataFile(const std::string & fileName)
     {
       std::basic_string <char>::size_type dotIndex;
       //const std::basic_string <char>::size_type npos = -1;
@@ -167,7 +174,7 @@ namespace Mantid
      * @param URL- URL of the file to down load
      * @param fileName ::  file name
      */
-    void CatalogDownloadDataFile::doDownloadandSavetoLocalDrive(const std::string& URL,const std::string& fileName)
+    void CatalogDownloadDataFiles::doDownloadandSavetoLocalDrive(const std::string& URL,const std::string& fileName)
     {
       clock_t start;
       //use HTTP  Get method to download the data file from the server to local disk
@@ -211,7 +218,7 @@ namespace Mantid
      * @param rs :: input stream
      * @param fileName :: name of the output file
      */
-    void CatalogDownloadDataFile::saveFiletoDisk(std::istream& rs,const std::string& fileName)
+    void CatalogDownloadDataFiles::saveFiletoDisk(std::istream& rs,const std::string& fileName)
     {
       std::string filepath ( Kernel::ConfigService::Instance().getString("defaultsave.directory"));
       filepath += fileName;
@@ -237,7 +244,7 @@ namespace Mantid
      * @param URL :: URL of the file to download
      * @param fileName :: name of the file
      */
-    void CatalogDownloadDataFile::testDownload(const std::string& URL,const std::string& fileName)
+    void CatalogDownloadDataFiles::testDownload(const std::string& URL,const std::string& fileName)
     {
       doDownloadandSavetoLocalDrive(URL,fileName);
 
@@ -245,7 +252,7 @@ namespace Mantid
     /** This method replaces backward slash with forward slash for linux compatibility.
      * @param inputString :: input string
      */
-    void CatalogDownloadDataFile::replaceBackwardSlash(std::string& inputString)
+    void CatalogDownloadDataFiles::replaceBackwardSlash(std::string& inputString)
     {
       std::basic_string <char>::iterator iter;
       for(iter=inputString.begin();iter!=inputString.end();++iter)

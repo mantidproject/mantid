@@ -32,13 +32,13 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport CLogout: public API::Algorithm
+    class DLLExport CatalogLogout: public API::Algorithm
     {
     public:
       /// Constructor
-      CLogout() : API::Algorithm() {}
+      CatalogLogout() : API::Algorithm() {}
       /// Destructor
-      ~CLogout(){}
+      ~CatalogLogout(){}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "CatalogLogout"; }
       /// Algorithm's version for identification overriding a virtual method

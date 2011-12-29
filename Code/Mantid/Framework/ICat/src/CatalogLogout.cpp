@@ -1,3 +1,9 @@
+/*WIKI*
+
+This algorithm disconnects the logged in user from the information catalog.
+
+*WIKI*/
+
 #include "MantidICat/CatalogLogout.h"
 #include "MantidAPI/CatalogFactory.h"
 #include "MantidKernel/ConfigService.h"
@@ -10,22 +16,22 @@ namespace Mantid
   {
     using namespace Kernel;
     using namespace API;
-    DECLARE_ALGORITHM(CLogout)
+    DECLARE_ALGORITHM(CatalogLogout)
 
     /// Sets documentation strings for this algorithm
-    void CLogout::initDocs()
+    void CatalogLogout::initDocs()
     {
-      this->setWikiSummary("Disconnects from information catalog . ");
-      this->setOptionalMessage("Disconnects from information catalog .");
+      this->setWikiSummary("Disconnects from information catalog.");
+      this->setOptionalMessage("Disconnects from information catalog.");
     }
 
     /// Init method to declare algorithm properties
-    void CLogout::init()
+    void CatalogLogout::init()
     {
     }
 
     /// execute the algorithm
-    void CLogout::exec()
+    void CatalogLogout::exec()
     {
       ICatalog_sptr catalog_sptr;
       try

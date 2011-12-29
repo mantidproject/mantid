@@ -1,3 +1,9 @@
+/*WIKI*
+
+This algorithm retrieves logged in users investigations data from the information catalog and stores it in mantid workspace.
+
+*WIKI*/
+
 #include "MantidICat/CatalogMyDataSearch.h"
 #include "MantidAPI/CatalogFactory.h"
 #include "MantidKernel/ConfigService.h"
@@ -17,8 +23,8 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void CatalogMyDataSearch::initDocs()
     {
-      this->setWikiSummary("This algorithm  loads the logged in users investigations . ");
-      this->setOptionalMessage("This algorithm  loads the logged in users investigations .");
+      this->setWikiSummary("This algorithm loads the logged in users' investigations.");
+      this->setOptionalMessage("This algorithm loads the logged in users' investigations.");
     }
 
     /// Initialisation method.

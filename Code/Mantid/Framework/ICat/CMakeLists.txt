@@ -1,5 +1,5 @@
 set ( SRC_FILES
-	src/CatalogDownloadDataFile.cpp
+	src/CatalogDownloadDataFiles.cpp
 	src/CatalogGetDataFiles.cpp
 	src/CatalogGetDataSets.cpp
 	src/CatalogListInstruments.cpp
@@ -19,7 +19,7 @@ set ( SRC_FILES
 set ( SRC_UNITY_IGNORE_FILES )
 
 set ( INC_FILES
-	inc/MantidICat/CatalogDownloadDataFile.h
+	inc/MantidICat/CatalogDownloadDataFiles.h
 	inc/MantidICat/CatalogGetDataFiles.h
 	inc/MantidICat/CatalogGetDataSets.h
 	inc/MantidICat/CatalogListInstruments.h
@@ -41,7 +41,7 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
-	test/CatalogDownloadDataFileTest.h
+	test/CatalogDownloadDataFilesTest.h
 	test/CatalogGetDataFilesTest.h
 	test/CatalogGetDataSetsTest.h
 	test/CatalogListInstrumentsTest.h

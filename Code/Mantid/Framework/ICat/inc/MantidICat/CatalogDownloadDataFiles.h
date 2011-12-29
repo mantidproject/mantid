@@ -1,5 +1,5 @@
-#ifndef MANTID_ICAT_CATALOGDOWNLOADDATAFILE_H_
-#define MANTID_ICAT_CATALOGDOWNLOADDATAFILE_H_
+#ifndef MANTID_ICAT_CATALOGDOWNLOADDATAFILES_H_
+#define MANTID_ICAT_CATALOGDOWNLOADDATAFILES_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -15,7 +15,7 @@ namespace Mantid
 {
   namespace ICat
   {
-    /** CatalogDownloadDataFile class is responsible for GetDataFile algorithms.
+    /** CatalogDownloadDataFiles class is responsible for GetDataFile algorithms.
     This algorithm  gets the location string for a given file from ISIS archive file using ICat API.
     If the file is not able to open from isis archive,it will call another ICat api to get the URL for the file.
     Then uses POCO http methods to download over internet.
@@ -49,13 +49,13 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
      */
-    class DLLExport CatalogDownloadDataFile : public API::Algorithm
+    class DLLExport CatalogDownloadDataFiles : public API::Algorithm
     {
     public:
       /// Constructor
-      CatalogDownloadDataFile():API::Algorithm(),m_prog(0.0){}
+      CatalogDownloadDataFiles():API::Algorithm(),m_prog(0.0){}
       /// Destructor
-      ~CatalogDownloadDataFile(){}
+      ~CatalogDownloadDataFiles(){}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "CatalogDownloadDataFiles"; }
       /// Algorithm's version for identification overriding a virtual method

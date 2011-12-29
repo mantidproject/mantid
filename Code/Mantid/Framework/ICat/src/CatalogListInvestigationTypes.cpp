@@ -1,3 +1,10 @@
+/*WIKI*
+
+This algorithm retrieves the investigation types from the information
+catalog and saves investigation types lists to a mantid internal data structure.
+
+*WIKI*/
+
 #include "MantidICat/CatalogListInvestigationTypes.h"
 #include "MantidAPI/CatalogFactory.h"
 #include "MantidKernel/ConfigService.h"
@@ -17,8 +24,8 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void CatalogListInvestigationTypes::initDocs()
     {
-      this->setWikiSummary("Lists the name of investigationtypes from the Information catalog. ");
-      this->setOptionalMessage("Lists the name of investigationtypes from the Information catalog.");
+      this->setWikiSummary("Lists the name of investigation types from the Information catalog. ");
+      this->setOptionalMessage("Lists the name of investigation types from the Information catalog.");
     }
 
     /// Init method

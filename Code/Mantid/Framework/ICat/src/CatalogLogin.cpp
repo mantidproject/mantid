@@ -1,3 +1,9 @@
+/*WIKI*
+
+This algorithm connects the logged in user to the information catalog like ISIS ICat3Catalog, SNS VFS, etc.
+
+*WIKI*/
+
 #include "MantidICat/CatalogLogin.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/MaskedProperty.h"
@@ -27,7 +33,7 @@ namespace Mantid
     void CatalogLogin::init()
     {
       declareProperty("Username","", new Kernel::MandatoryValidator<std::string>(),
-          "The name of the logged in user");
+          "The name/federal ID of the logged in user");
       declareProperty(new MaskedProperty<std::string>("Password","",new Kernel::MandatoryValidator<std::string>()),
           "The password of the logged in user ");
 

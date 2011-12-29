@@ -1,3 +1,9 @@
+/*WIKI*
+This algorithm retrieves the instrument names from the information
+catalog and saves instrument lists to a mantid internal data structure.
+
+*WIKI*/
+
 #include "MantidICat/CatalogListInstruments.h"
 #include "MantidAPI/CatalogFactory.h"
 #include "MantidKernel/ConfigService.h"
