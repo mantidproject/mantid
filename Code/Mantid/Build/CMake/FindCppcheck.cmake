@@ -51,6 +51,13 @@ if(CPPCHECK_EXECUTABLE)
     add_custom_target(cppcheck)
     set_target_properties(cppcheck PROPERTIES EXCLUDE_FROM_ALL TRUE)
   endif()
+  execute_process ( COMMAND ${CPPCHECK_EXECUTABLE} --version
+                    OUTPUT_VARIABLE CPPCHECK_VERSION
+		    OUTPUT_STRIP_TRAILING_WHITESPACE )
+  string ( TOUPPER ${CPPCHECK_VERSION} CPPCHECK_VERSION )
+  string ( REPLACE "CPPCHECK" "" CPPCHECK_VERSION ${CPPCHECK_VERSION} )
+  string ( STRIP ${CPPCHECK_VERSION} CPPCHECK_VERSION )
+  message ( STATUS "cppcheck version ${CPPCHECK_VERSION}" )
 endif()
 
 mark_as_advanced(CPPCHECK_EXECUTABLE)
@@ -80,7 +87,7 @@ function(add_cppcheck _name) # additional arguments are files to ignore
     endforeach()
 
     set ( _cppcheck_args )
-    list ( APPEND _cppcheck_args ${CPPCHECK_TEMPLATE_ARG} ${CPPCHECK_ARGS} ${_cppcheck_ignores} )
+    list ( APPEND _cppcheck_args ${CPPCHECK_TEMPLATE_ARG} ${CPPCHECK_ARGS} ${_cppcheck_ignores} "--error-exitcode=0" )
 
     if (CPPCHECK_GENERATE_XML )
       add_custom_target( cppcheck_${_name}
