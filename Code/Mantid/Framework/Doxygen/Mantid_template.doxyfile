@@ -155,7 +155,8 @@ EXCLUDE                = @CMAKE_CURRENT_SOURCE_DIR@/../ICat/src/GSoapGenerated \
 			 @CMAKE_CURRENT_SOURCE_DIR@/../MDEvents/src/generate_mdevent_declarations.py \
 			 @CMAKE_CURRENT_SOURCE_DIR@/../Kernel/inc/MantidKernel/ANN \
 			 @CMAKE_CURRENT_SOURCE_DIR@/../Kernel/src/ANN \
-			 @CMAKE_CURRENT_SOURCE_DIR@/../Kernel/src/ANN_complete.cpp
+			 @CMAKE_CURRENT_SOURCE_DIR@/../Kernel/src/ANN_complete.cpp \
+			 @CMAKE_CURRENT_SOURCE_DIR@/../../Vates/ParaviewPlugins
 
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       = 
