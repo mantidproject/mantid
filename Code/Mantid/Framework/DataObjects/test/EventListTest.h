@@ -1176,6 +1176,10 @@ public:
       this->fake_uniform_data();
       el.switchTo(static_cast<EventType>(this_type));
       size_t old_num = this->el.getNumberEvents();
+      // Initial X values
+      TS_ASSERT_DELTA( this->el.readX()[0], 0.0, 1e-4);
+      TS_ASSERT_DELTA( this->el.readX()[1], MAX_TOF, 1e-4);
+
       //Do convert
       this->el.convertTof( 2.5, 1 );
       //Unchanged size
@@ -1183,6 +1187,9 @@ public:
       //Original tofs were 100, 5100, 10100, etc.)
       TSM_ASSERT_EQUALS(this_type, this->el.getEvent(0).tof(), 251.0);
       TSM_ASSERT_EQUALS(this_type, this->el.getEvent(1).tof(), 12751.0);
+      // Modified X values
+      TS_ASSERT_DELTA( this->el.readX()[0], 1.0, 1e-4);
+      TS_ASSERT_DELTA( this->el.readX()[1], MAX_TOF * 2.5 + 1.0, 1e-4);
     }
   }
 
@@ -1729,6 +1736,12 @@ public:
       //tof steps of 5 microseconds, starting at 100 ns, up to 20 msec
       el += TofEvent( tof, rand()%1000);
     }
+    // Create an X axis
+    MantidVec X;
+    X.resize(2);
+    X[0] = 0;
+    X[1] = MAX_TOF;
+    el.dataX() = X;
   }
 
   /** Create a uniform event list with each event weight of 2.0, error 2.5 */
