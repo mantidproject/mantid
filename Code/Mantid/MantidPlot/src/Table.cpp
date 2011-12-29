@@ -3007,7 +3007,7 @@ void Table::restore(const QStringList& lst)
   loadHeader(l);
 
   setColWidths((*i).right((*i).length()-9).split("\t", QString::SkipEmptyParts));
-  i++;
+  ++i;
 
   l = (*i++).split("\t");
   if (l[0] == "com")
@@ -3018,16 +3018,16 @@ void Table::restore(const QStringList& lst)
     commands.clear();
     for (int col=0; col<numCols(); col++)
       commands << "";
-    for (; i != lst.end() && *i != "</com>"; i++)
+    for (; i != lst.end() && *i != "</com>"; ++i)
     {
       int col = (*i).mid(9,(*i).length()-11).toInt();
       QString formula;
-      for (i++; i!=lst.end() && *i != "</col>"; i++)
+      for (i++; i!=lst.end() && *i != "</col>"; ++i)
         formula += *i + "\n";
       formula.truncate(formula.length()-1);
       commands[col] = formula;
     }
-    i++;
+    ++i;
   }
 
   l = (*i++).split("\t");

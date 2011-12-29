@@ -1364,7 +1364,7 @@ void  MantidUI::copyWorkspacestoVector(const QList<QTreeWidgetItem*> &selectedIt
 {
   //iterate through each of the selected workspaces
   QList<QTreeWidgetItem*>::const_iterator itr;
-  for(itr=selectedItems.begin();itr!=selectedItems.end();itr++)
+  for(itr=selectedItems.begin();itr!=selectedItems.end();++itr)
   {
     std::string inputWSName=(*itr)->text(0).toStdString();
     inputWSVec.push_back(inputWSName);
@@ -2392,7 +2392,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
     if (filter == 2 || filter ==3)
     {
       std::vector<Mantid::Kernel::Property*> ps =ws->run().getLogData();
-      for(std::vector<Mantid::Kernel::Property*>::const_iterator it=ps.begin();it!=ps.end();it++)
+      for(std::vector<Mantid::Kernel::Property*>::const_iterator it=ps.begin();it!=ps.end();++it)
         if ((*it)->name().find("period ") == 0)
         {
           try
@@ -2467,7 +2467,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
   std::map<DateAndTime, double>::iterator it = time_value_map.begin();
   if (it!=time_value_map.end())
   {
-    for (; it!=time_value_map.end(); it++)
+    for (; it!=time_value_map.end(); ++it)
     {
       lastTime = it->first;
       lastValue = it->second;
@@ -2614,7 +2614,7 @@ Table* MantidUI::createTableFromSpectraList(const QString& tableName, const QStr
   int nspec = static_cast<int>(workspace->getNumberHistograms());
   //Loop through the list of index and remove all the indexes that are out of range
 
-  for(QList<int>::iterator it=indexList.begin();it!=indexList.end();it++)
+  for(QList<int>::iterator it=indexList.begin();it!=indexList.end();++it)
   {
     if ((*it) > nspec || (*it) < 0) indexList.erase(it);
   }
@@ -2719,7 +2719,7 @@ MultiLayer* MantidUI::createGraphFromTable(Table* t, int type)
   if (!t) return NULL;
   QStringList  lst=t->colNames();
   QStringList::const_iterator itr;
-  for (itr=lst.begin();itr!=lst.end();itr++)
+  for (itr=lst.begin();itr!=lst.end();++itr)
   {
     //remove the X names from the column list and pass the X removed list
     //to multilayerPlot
@@ -2887,7 +2887,7 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
   g->newLegend("");
   MantidMatrixCurve* mc(NULL);
 
-  for(QMultiMap<QString,int>::const_iterator it=toPlot.begin();it!=toPlot.end();it++)
+  for(QMultiMap<QString,int>::const_iterator it=toPlot.begin();it!=toPlot.end();++it)
   {
     try {
       mc = new MantidMatrixCurve(it.key(),g,it.value(),errs,distr,style);
@@ -3326,7 +3326,7 @@ void MantidUI::memoryImage()
   int row = 0;
   int col = 0;
   QImage image(colNum,rowNum,QImage::Format_Mono);
-  for(vector<mem_block>::iterator b=mem.begin();b!=mem.end();b++)
+  for(vector<mem_block>::iterator b=mem.begin();b!=mem.end();++b)
   {
     int n = b->size/1024;
     for(int i=0;i<n;i++)
@@ -3356,7 +3356,7 @@ void MantidUI::memoryImage2()
   int row = 0;
   int col = 0;
   QImage image(colNum,rowNum,QImage::Format_Mono);
-  for(vector<mem_block>::iterator b=mem.begin();b!=mem.end();b++)
+  for(vector<mem_block>::iterator b=mem.begin();b!=mem.end();++b)
   {
     int n = b->size/1024;
     for(int i=0;i<n;i++)

@@ -107,7 +107,7 @@ void AlgorithmMonitor::cancel(AlgorithmID id)
 void AlgorithmMonitor::cancelAll()
 {
     const std::deque<IAlgorithm_sptr>& algs = Mantid::API::AlgorithmManager::Instance().algorithms();
-    for(std::deque<IAlgorithm_sptr>::const_iterator a = algs.begin();a!=algs.end();a++)
+    for(std::deque<IAlgorithm_sptr>::const_iterator a = algs.begin();a!=algs.end();++a)
         if ( std::find(m_algorithms.begin(),m_algorithms.end(),(**a).getAlgorithmID()) ) (**a).cancel();
 
 }
@@ -177,7 +177,7 @@ void MonitorDlg::update()
       m_tree->setItemWidget(algItem,1,algProgress);
       m_tree->setItemWidget(algItem,2,cancelButton);
        const std::vector< Mantid::Kernel::Property* >& prop_list = alg->getProperties();
-        for(std::vector< Mantid::Kernel::Property* >::const_iterator prop=prop_list.begin();prop!=prop_list.end();prop++)
+        for(std::vector< Mantid::Kernel::Property* >::const_iterator prop=prop_list.begin();prop!=prop_list.end();++prop)
 	  {
 		  QStringList lstr;
 		  Mantid::Kernel::MaskedProperty<std::string> * maskedProp = dynamic_cast<Mantid::Kernel::MaskedProperty<std::string> *>(*prop);
