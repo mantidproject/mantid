@@ -72,7 +72,7 @@ function(add_cppcheck _name) # additional arguments are files to ignore
 
   set (_cppcheck_ignores)
   foreach (f ${ARGN})
-    list ( APPEND _cppcheck_ignores "-i" ${CMAKE_CURRENT_SOURCE_DIR}/${f} )
+      list ( APPEND _cppcheck_ignores ${CMAKE_CURRENT_SOURCE_DIR}/${f} )
   endforeach()
 
   if(CPPCHECK_EXECUTABLE)
@@ -82,12 +82,19 @@ function(add_cppcheck _name) # additional arguments are files to ignore
       get_source_file_property(_cppcheck_lang "${_source}" LANGUAGE)
       get_source_file_property(_cppcheck_loc "${_source}" LOCATION)
       if("${_cppcheck_lang}" MATCHES "CXX")
-        list(APPEND _files "${_cppcheck_loc}")
+        list(FIND _cppcheck_ignores "${_cppcheck_loc}" _cppcheck_ignore_index)
+        if (_cppcheck_ignore_index LESS 0)
+          list(APPEND _files "${_cppcheck_loc}")
+	endif (_cppcheck_ignore_index LESS 0)
       endif()
     endforeach()
 
+    if ( NOT _files)
+      return() # nothing to check
+    endif ( NOT _files)
+
     set ( _cppcheck_args )
-    list ( APPEND _cppcheck_args ${CPPCHECK_TEMPLATE_ARG} ${CPPCHECK_ARGS} ${_cppcheck_ignores} "--error-exitcode=0" )
+    list ( APPEND _cppcheck_args ${CPPCHECK_TEMPLATE_ARG} ${CPPCHECK_ARGS} )
 
     if (CPPCHECK_GENERATE_XML )
       add_custom_target( cppcheck_${_name}
