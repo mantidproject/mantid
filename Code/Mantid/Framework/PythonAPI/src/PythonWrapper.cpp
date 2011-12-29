@@ -47,8 +47,8 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
   boost::python::def("mantid_build_version", mantid_version);
   MantidVecHelper::initializeDependencies(); // This initializes numpy if it is available
   // Export some frequently used stl containers
-  vector_proxy<Mantid::Kernel::DateAndTime>::wrap("cpp_list_dateandtime");
-  vector_proxy<int>::wrap("cpp_list_int");
+  Mantid::PythonAPI::vector_proxy<Mantid::Kernel::DateAndTime>::wrap("cpp_list_dateandtime");
+  Mantid::PythonAPI::vector_proxy<int>::wrap("cpp_list_int");
   vector_proxy<long>::wrap("cpp_list_long");
   vector_proxy<double>::wrap("cpp_list_dbl");
   vector_proxy<bool>::wrap("cpp_list_bool");

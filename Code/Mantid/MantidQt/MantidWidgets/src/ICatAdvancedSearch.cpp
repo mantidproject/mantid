@@ -525,7 +525,7 @@ namespace MantidQt
     /* This method updates the search result to search tree
      * @param ws_sptr :: workspace shared pointer
      */
-    void ICatAdvancedSearch::updatesearchResults(ITableWorkspace_sptr& ws_sptr )
+    void ICatAdvancedSearch::updatesearchResults(Mantid::API::ITableWorkspace_sptr& ws_sptr )
     {
       //ICatUtils utils;
       if(!m_utils_sptr)

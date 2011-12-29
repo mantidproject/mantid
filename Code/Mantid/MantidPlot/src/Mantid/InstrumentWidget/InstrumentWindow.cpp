@@ -691,7 +691,7 @@ void InstrumentWindow::saveSettings()
  * @param ws_name :: Name of the deleted workspace.
  * @param ws :: Pointer to the workspace to be deleted
  */
-void InstrumentWindow::deleteHandle(const std::string & ws_name, boost::shared_ptr<Mantid::API::Workspace> ws)
+void InstrumentWindow::deleteHandle(const std::string & ws_name, const boost::shared_ptr<Mantid::API::Workspace> ws)
 {
   if (ws_name == m_workspaceName.toStdString())
   {

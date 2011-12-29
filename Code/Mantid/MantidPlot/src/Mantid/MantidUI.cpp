@@ -1654,7 +1654,7 @@ void MantidUI::executeDownloadDataFiles(const std::vector<std::string>& filenNam
 }
 
 
-void MantidUI::handleLoadDAEFinishedNotification(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification>& pNf)
+void MantidUI::handleLoadDAEFinishedNotification(const Poco::AutoPtr<Algorithm::FinishedNotification>& pNf)
 {
   std::string wsNAme = pNf->algorithm()->getProperty("OutputWorkspace");
   emit needToCreateLoadDAEMantidMatrix(QString::fromStdString(wsNAme));
@@ -1695,22 +1695,22 @@ void MantidUI::showAlgMonitor()
   m_algMonitor->showDialog();
 }
 
-void MantidUI::handleAddWorkspace(WorkspaceAddNotification_ptr pNf)
+void MantidUI::handleAddWorkspace(Mantid::API::WorkspaceAddNotification_ptr pNf)
 {
   emit workspace_added(QString::fromStdString(pNf->object_name()),(pNf->object()));
 }
 
-void MantidUI::handleReplaceWorkspace(WorkspaceAfterReplaceNotification_ptr pNf)
+void MantidUI::handleReplaceWorkspace(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf)
 {
   emit workspace_replaced(QString::fromStdString(pNf->object_name()),(pNf->object()));
 }
 
-void MantidUI::handleDeleteWorkspace(WorkspaceDeleteNotification_ptr pNf)
+void MantidUI::handleDeleteWorkspace(Mantid::API::WorkspaceDeleteNotification_ptr pNf)
 {
   emit workspace_removed(QString::fromStdString(pNf->object_name()));
 }
 
-void MantidUI::handleClearADS(ClearADSNotification_ptr)
+void MantidUI::handleClearADS(Mantid::API::ClearADSNotification_ptr)
 {
   emit workspaces_cleared();
 }
@@ -1719,7 +1719,7 @@ void MantidUI::handleAlgorithmFactoryUpdates(Mantid::API::AlgorithmFactoryUpdate
 {
   emit algorithms_updated();
 }
-void MantidUI::handleRenameWorkspace(WorkspaceRenameNotification_ptr pNf)
+void MantidUI::handleRenameWorkspace(Mantid::API::WorkspaceRenameNotification_ptr pNf)
 {
   emit workspace_renamed(QString::fromStdString(pNf->object_name()), QString::fromStdString(pNf->new_objectname()));
 }
@@ -2800,7 +2800,7 @@ void MantidUI::setUpBinGraph(MultiLayer* ml, const QString& Name, Mantid::API::M
   g->setAntialiasing(false);
 }
 
-MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,std::set<int> >& toPlot, bool errs, bool distr)
+MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString, set<int> >& toPlot, bool errs, bool distr)
 {
   // Convert the list into a map (with the same workspace as key in each case)
   QMultiMap<QString,int> pairs;

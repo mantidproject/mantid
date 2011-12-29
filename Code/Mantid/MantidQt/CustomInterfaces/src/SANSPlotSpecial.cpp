@@ -465,7 +465,7 @@ void SANSPlotSpecial::setupTable()
   m_units["(S/V)"] = "cm^-1";
 }
 
-QwtPlotCurve* SANSPlotSpecial::plotMiniplot(QwtPlotCurve* curve, Mantid::API::MatrixWorkspace_sptr workspace,
+QwtPlotCurve* SANSPlotSpecial::plotMiniplot(QwtPlotCurve* curve, boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace,
   size_t workspaceIndex)
 {
   bool data = ( curve == m_dataCurve );

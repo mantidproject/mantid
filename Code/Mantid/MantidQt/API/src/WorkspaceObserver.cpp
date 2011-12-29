@@ -13,7 +13,7 @@ namespace MantidQt
     // Observer callback
     //---------------------------------------------------------------------------
 
-    void ObserverCallback::handleDelete(const std::string &name, boost::shared_ptr<Mantid::API::Workspace> workspace)
+    void ObserverCallback::handleDelete(const std::string &name, Mantid::API::Workspace_sptr workspace)
     {
       m_observer->deleteHandle(name, workspace);
     }
@@ -23,7 +23,7 @@ namespace MantidQt
       m_observer->addHandle(name, workspace);
     }
 
-    void ObserverCallback::handleAfterReplace(const std::string &name, boost::shared_ptr<Mantid::API::Workspace> workspace)
+    void ObserverCallback::handleAfterReplace(const std::string &name, Mantid::API::Workspace_sptr workspace)
     {
       m_observer->afterReplaceHandle(name, workspace);
     }

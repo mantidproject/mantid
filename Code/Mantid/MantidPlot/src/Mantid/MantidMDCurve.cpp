@@ -183,7 +183,7 @@ QString MantidMDCurve::saveToString()
 	return s;
 }
 
-void MantidMDCurve::afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
+void MantidMDCurve::afterReplaceHandle(const std::string& wsName, const boost::shared_ptr<Mantid::API::Workspace> ws)
 {
   (void) ws;
 

@@ -39,7 +39,7 @@ AlgorithmMonitor::~AlgorithmMonitor()
   wait();
 }
 
-void AlgorithmMonitor::add(IAlgorithm_sptr alg)
+void AlgorithmMonitor::add(Mantid::API::IAlgorithm_sptr alg)
 {
     lock();
     alg->addObserver(m_finishedObserver);
@@ -97,7 +97,7 @@ void AlgorithmMonitor::showDialog()
   }
 }
 
-void AlgorithmMonitor::cancel(AlgorithmID id)
+void AlgorithmMonitor::cancel(Mantid::API::AlgorithmID id)
 {
     IAlgorithm_sptr a = Mantid::API::AlgorithmManager::Instance().getAlgorithm(id);
     if (!a.get()) return;

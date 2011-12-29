@@ -26,7 +26,7 @@ namespace MantidQt
     //----------------------
     ///Constructor
     ICatInvestigation::ICatInvestigation(long long investId,const QString &ProposalId,
-        const QString &Title,const QString &Instrument,const QString &RunRange,ITableWorkspace_sptr& ws2_sptr,QWidget *par) :
+        const QString &Title,const QString &Instrument,const QString &RunRange,Mantid::API::ITableWorkspace_sptr& ws2_sptr,QWidget *par) :
         QWidget(par),m_invstId(investId),m_ProposalId(ProposalId),m_Title(Title),
         m_Instrument(Instrument),m_RunRange(RunRange),m_downloadedFileList()
     {
