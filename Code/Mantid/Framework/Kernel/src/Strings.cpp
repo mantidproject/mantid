@@ -188,7 +188,7 @@ int confirmStr(const std::string& S,const std::string& fullPhrase)
 {
   const size_t nS(S.length());
   const size_t nC(fullPhrase.length());
-  if (nS>nC || nS<=0)    
+  if (nS>nC || nS==0)    
     return 0;           
   for(size_t i=0;i<nS;i++)
     if (S[i]!=fullPhrase[i])
