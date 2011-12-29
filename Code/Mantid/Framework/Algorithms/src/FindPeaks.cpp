@@ -750,7 +750,7 @@ void FindPeaks::fitPeakOneStep(const API::MatrixWorkspace_sptr &input, const int
       {
         // An acceptable fit.  Record it if it has a smaller chi^2
         if (chi2 < mincost){
-          if (bestparams.size() > 0)
+          if (!bestparams.empty())
             bestparams.clear();
           for (size_t i = 0; i < params.size(); i ++){
             bestparams.push_back(params[i]);

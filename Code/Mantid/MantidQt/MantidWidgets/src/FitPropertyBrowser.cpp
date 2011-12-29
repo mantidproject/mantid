@@ -1765,8 +1765,8 @@ void FitPropertyBrowser::addTie()
   QtBrowserItem * ci = m_browser->currentItem();
   QtProperty* paramProp = ci->property();
   PropertyHandler* h = getHandler()->findHandler(paramProp);
-  if (!h->isParameter(paramProp)) return;
   if (!h) return;
+  if (!h->isParameter(paramProp)) return;
 
   const Mantid::API::IFitFunction* f = h->function();
   if (!f) return;

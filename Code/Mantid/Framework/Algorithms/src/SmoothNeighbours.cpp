@@ -271,7 +271,7 @@ void SmoothNeighbours::findNeighboursRectangular()
     }
   }
 
-  if (detList.size() == 0)
+  if (detList.empty())
     throw std::runtime_error("This instrument does not have any RectangularDetector's. SmoothNeighbours cannot operate on this instrument at this time.");
 
   // Resize the vector we are setting

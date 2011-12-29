@@ -87,7 +87,7 @@ void SumSpectra::exec()
     m_MinSpec = 0;
   }
 
-  if (indices_list.size() == 0)
+  if (indices_list.empty())
   {
     //If no list was given and no max, just do all.
     if ( isEmpty(m_MaxSpec) ) m_MaxSpec = numberOfSpectra-1;
