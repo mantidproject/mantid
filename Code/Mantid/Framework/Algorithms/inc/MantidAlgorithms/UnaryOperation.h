@@ -60,7 +60,9 @@ namespace Mantid
       // Overridden Algorithm methods
       virtual void init();
       virtual void exec();
-
+      virtual void execEvent();
+      template<class T>
+          void unaryOperationEventHelper(std::vector<T>& wevector);
       /// The name of the input workspace property
       virtual const std::string inputPropName() const { return "InputWorkspace";}
       /// The name of the output workspace property
