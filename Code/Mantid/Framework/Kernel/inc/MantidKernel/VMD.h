@@ -70,7 +70,9 @@ namespace Kernel
 
     //-------------------------------------------------------------------------------------------
     /** 2D Constructor
-     * @param valX :: value at this dimension*/
+     * @param val0 :: value at first dimension
+     * @param val1 :: value at second dimension
+     */
     VMD(double val0, double val1)
     : nd(2)
     {
@@ -81,7 +83,10 @@ namespace Kernel
 
     //-------------------------------------------------------------------------------------------
     /** 3D Constructor
-     * @param valX :: value at this dimension*/
+     * @param val0 :: value at first dimension
+     * @param val1 :: value at second dimension
+     * @param val2 :: value at third dimension
+     */
     VMD(double val0, double val1, double val2)
     : nd(3)
     {
@@ -93,7 +98,11 @@ namespace Kernel
 
     //-------------------------------------------------------------------------------------------
     /** 4D Constructor
-     * @param valX :: value at this dimension*/
+     * @param val0 :: value at first dimension
+     * @param val1 :: value at second dimension
+     * @param val2 :: value at third dimension
+     * @param val3 :: value at fourth dimension
+     */
     VMD(double val0, double val1, double val2, double val3)
     : nd(4)
     {
@@ -106,7 +115,12 @@ namespace Kernel
 
     //-------------------------------------------------------------------------------------------
     /** 5D Constructor
-     * @param valX :: value at this dimension*/
+     * @param val0 :: value at first dimension
+     * @param val1 :: value at second dimension
+     * @param val2 :: value at third dimension
+     * @param val3 :: value at fourth dimension
+     * @param val4 :: value at fifth dimension
+     */
     VMD(double val0, double val1, double val2, double val3, double val4)
     : nd(5)
     {
@@ -120,7 +134,13 @@ namespace Kernel
 
     //-------------------------------------------------------------------------------------------
     /** 6D Constructor
-     * @param valX :: value at this dimension*/
+     * @param val0 :: value at first dimension
+     * @param val1 :: value at second dimension
+     * @param val2 :: value at third dimension
+     * @param val3 :: value at fourth dimension
+     * @param val4 :: value at fifth dimension
+     * @param val5 :: value at sixth dimension
+     */
     VMD(double val0, double val1, double val2, double val3, double val4, double val5)
     : nd(6)
     {

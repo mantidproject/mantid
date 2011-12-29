@@ -130,6 +130,7 @@ namespace DataObjects
   /** Return the special value (Y) in the workspace at the given detector ID
    *
    * @param detectorID :: detector ID to look up
+   * @param value :: holder for the Y value
    * @return the Y value for that detector ID.
    * @throw std::invalid_argument if the detector ID was not found
    */

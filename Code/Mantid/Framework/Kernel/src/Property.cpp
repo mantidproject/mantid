@@ -49,10 +49,6 @@ Property::~Property()
     delete m_settings;
 }
 
-/** Copy assignment operator. Does nothing.
-* @param right :: The right hand side value
-* @return pointer to this
-*/
 //Property& Property::operator=( const Property& right )
 //{
 //  UNUSED_ARG(right);

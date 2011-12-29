@@ -848,7 +848,7 @@ std::string getWord( std::ifstream &in ,  bool consumeEOL )
 /** Read up to the eol
  *
  * @param in :: stream input
- * @param consumeEOL :: set to true to remove the new lines at the end of the line
+ * @param ConsumeEOL :: set to true to remove the new lines at the end of the line
  */
 void readToEndOfLine( std::ifstream& in ,  bool ConsumeEOL )
 {
@@ -859,12 +859,13 @@ void readToEndOfLine( std::ifstream& in ,  bool ConsumeEOL )
   getWord( in ,  true );
 }
 /**  function parses a path, placed into input string "path" and returns vector of the folders contributed into the path 
-*  @param in :: path -- the string containing input path, 
+*  @param path :: the string containing input path,
      found in path string, if they are separated by \ or / symbols. 
      Treats special symbols, if defined in the input string as path-es
      returns 0 for empty input string
+   @param path_components :: holder for the individual folders in the path
 
-     used to genrate path in hdf file, so the resulting path has to obey hdf constrains;
+     used to generate path in hdf file, so the resulting path has to obey hdf constrains;
 */
 size_t split_path(const std::string &path, std::vector<std::string> &path_components)
 {

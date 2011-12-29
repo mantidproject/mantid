@@ -39,7 +39,6 @@ float Timer::elapsed(bool reset)
 
 /** Returns the wall-clock time elapsed in seconds since the Timer object's creation, or the last call to elapsed
  *
- * @param reset :: set to true to reset the clock (default)
  * @return time in seconds
  */
 float Timer::elapsed_no_reset() const

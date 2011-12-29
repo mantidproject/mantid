@@ -564,7 +564,7 @@ namespace Geometry
 
   //------------------------------------------------------------------------------------------------
   /** Append to an open XML string
-   * @param xml :: string to append to. */
+   * @param xmlStream :: string to append to. */
   void Component::appendXML(std::ostream& xmlStream) const
   {
     xmlStream << "<pos>";

@@ -31,9 +31,9 @@ namespace Mantid
 
     /**
      * Returns a map of the spectrum numbers to the distances for the nearest neighbours.
-     * @param component :: IComponent pointer to Detector object
-     * @param noNeighbours :: Number of neighbours to search for
+     * @param spectrum :: Spectrum ID of the central pixel
      * @param force :: flag to indicate that the nearest neighbours map should be rebult by force. Otherwise will only call build when different.
+     * @param noNeighbours :: Number of neighbours to search for
      * @return map of Detector ID's to distance
      * @throw NotFoundError if component is not recognised as a detector
      */
@@ -48,7 +48,7 @@ namespace Mantid
    
     /**
      * Returns a map of the spectrum numbers to the distances for the nearest neighbours.
-     * @param component :: IComponent pointer to Detector object
+     * @param spectrum :: Spectrum ID of the central pixel
      * @param radius :: cut-off distance for detector list to returns
      * @return map of Detector ID's to distance
      * @throw NotFoundError if component is not recognised as a detector

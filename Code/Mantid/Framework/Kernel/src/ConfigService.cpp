@@ -1614,7 +1614,7 @@ const FacilityInfo& ConfigServiceImpl::getFacility() const
 
 /**
  * Get a facility
- * @param faciliyName :: Facility name
+ * @param facilityName :: Facility name
  * @return the facility information object
  * @throw NotFoundException if the facility is not found
  */

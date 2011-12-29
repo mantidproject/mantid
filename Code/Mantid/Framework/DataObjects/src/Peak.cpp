@@ -141,7 +141,7 @@ namespace DataObjects
   //----------------------------------------------------------------------------------------------
   /** Constructor making a Peak from IPeak interface
    *
-   * @param ipeak :: const reference to an IPeak object
+   * @param peak :: const reference to an IPeak object
    * @return
    */
   Peak::Peak(const Peak & peak):
@@ -683,7 +683,7 @@ namespace DataObjects
   // -------------------------------------------------------------------------------------
   /** Helper function for displaying/sorting peaks in MantidPlot
    *
-   * @param name :: name of the column in the table workspace
+   * @param name_in :: name of the column in the table workspace
    * @return a double representing that value (if that's possible)
    * @throw std::runtime_error if you asked for a column that can't convert to double.
    */

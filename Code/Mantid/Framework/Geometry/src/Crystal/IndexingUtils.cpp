@@ -2147,6 +2147,7 @@ int IndexingUtils::NumberIndexed_3D( const V3D               & a_dir,
                         to count the peak as indexed by UB.
   @param miller_indices This vector returns a list of Miller Indices, with 
                         one entry for each given Q vector. 
+  @param ave_error      The average error from all lattice directions.
 
   @return A non-negative integer giving the number of peaks indexed by UB,
           within the specified tolerance on h,k,l. 
@@ -2298,7 +2299,7 @@ int IndexingUtils::GetIndexedPeaks_1D( const V3D              & direction,
   @param required_tolerance  The maximum allowed error (as a faction of
                              the corresponding Miller index) for a peak
                              q_vector to be counted as indexed.
-  @param index_vals          List of the Miller indices (h,k,l) of peaks
+  @param miller_indices      List of the Miller indices (h,k,l) of peaks
                              that were indexed in all specified directions.
   @param indexed_qs          List of Qxyz value for the peaks that were
                              indexed indexed in all specified directions.
@@ -2385,7 +2386,7 @@ int IndexingUtils::GetIndexedPeaks_3D( const V3D              & direction_1,
   @param required_tolerance  The maximum allowed error (as a faction of
                              the corresponding Miller index) for a peak
                              q_vector to be counted as indexed.
-  @param index_vals          List of the Miller indices (h,k,l) of peaks
+  @param miller_indices      List of the Miller indices (h,k,l) of peaks
                              that were indexed in all specified directions.
   @param indexed_qs          List of Qxyz value for the peaks that were
                              indexed indexed in all specified directions.
@@ -2516,6 +2517,8 @@ std::vector<V3D> IndexingUtils::MakeHemisphereDirections( int n_steps )
   which form the specified angle with the specified axis. 
 
   @param n_steps   The number of vectors to generate around the circle. 
+  @param axis      The specified axis
+  @param angle_degrees  The specified angle
 
   @return A std::vector containing direction vectors forming the same angle
           with the axis.

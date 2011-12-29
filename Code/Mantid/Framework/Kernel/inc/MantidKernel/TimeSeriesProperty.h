@@ -481,8 +481,8 @@ public:
 
   //-----------------------------------------------------------------------------------------------
   /** Adds vectors of values to the map. Should be much faster than repeated calls to addValue.
-   *  @param time :: The time as a boost::posix_time::ptime value
-   *  @param value :: The associated value
+   *  @param times :: The time as a boost::posix_time::ptime value
+   *  @param values :: The associated value
    */
   void addValues(const std::vector<Kernel::DateAndTime> &times,
       const std::vector<TYPE> & values)

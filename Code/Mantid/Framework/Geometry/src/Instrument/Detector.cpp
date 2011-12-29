@@ -24,6 +24,7 @@ Detector::Detector(const Detector* base, const ParameterMap * map)
 
 /** Constructor
  *  @param name :: The name of the component
+ *  @param id :: Index for the component
  *  @param parent :: The parent component
  */
 Detector::Detector(const std::string& name, int id, IComponent* parent) :
@@ -33,6 +34,7 @@ Detector::Detector(const std::string& name, int id, IComponent* parent) :
 
 /** Constructor
  *  @param name :: The name of the component
+ *  @param id :: Index for the component
  *  @param shape ::  A pointer to the object describing the shape of this component
  *  @param parent :: The parent component
  */
