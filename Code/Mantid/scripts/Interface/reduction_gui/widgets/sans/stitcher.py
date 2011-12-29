@@ -440,7 +440,7 @@ class StitcherWidget(BaseWidget):
                 if not fname.endswith('.xml'):
                     fname += ".xml"
             
-            self._stitcher.save_combined(fname)
+                self._stitcher.save_combined(fname)
     
     def set_state(self, state):
         """

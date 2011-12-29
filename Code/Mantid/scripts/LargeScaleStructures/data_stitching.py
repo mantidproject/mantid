@@ -119,8 +119,16 @@ class DataSet(object):
         """
         self.load()
         
+        # Keep track of dQ
+        dq = mtd[self._ws_name].readDx(0)
+        
         Scale(InputWorkspace=self._ws_name, OutputWorkspace=self._ws_scaled,
               Operation="Multiply", Factor=self._scale)
+        
+        # Put back dQ
+        dq_scaled = mtd[self._ws_scaled].dataDx(0)
+        for i in range(len(dq)):
+            dq_scaled[i] = dq[i]
             
         y_scaled = mtd[self._ws_scaled].dataY(0)
         e_scaled = mtd[self._ws_scaled].dataE(0)
@@ -283,8 +291,8 @@ class Stitcher(object):
         if file_path is not None:
             SaveCanSAS1D(Filename=file_path, InputWorkspace=iq)
         
-    def trim_zeros(self, x, y, e):
-        zipped = zip(x,y,e)
+    def trim_zeros(self, x, y, e, dx):
+        zipped = zip(x,y,e,dx)
         trimmed = []
         
         data_started = False        
@@ -302,8 +310,8 @@ class Stitcher(object):
                 data_started = True
                 zipped.append(trimmed[i])
         
-        x,y,e = zip(*zipped)
-        return list(x), list(y), list(e)
+        x,y,e,dx = zip(*zipped)
+        return list(x), list(y), list(e), list(dx)
         
     def get_scaled_data(self):
         """
@@ -313,15 +321,18 @@ class Stitcher(object):
             return
         
         ws_combined = "combined_Iq"
+        
+        # Copy over dQ
         CloneWorkspace(InputWorkspace=self._data_sets[0].get_scaled_ws(),
                        OutputWorkspace=ws_combined)
 
         x = mtd[ws_combined].dataX(0)
+        dx = mtd[ws_combined].dataDx(0)
         y = mtd[ws_combined].dataY(0)
         e = mtd[ws_combined].dataE(0)
         if len(x)!=len(y) and len(x)!=len(e):
             raise RuntimeError, "Stitcher expected distributions but got histo"
-        x, y, e = self.trim_zeros(x, y, e)
+        x, y, e, dx = self.trim_zeros(x, y, e, dx)
         
         for d in self._data_sets[1:]:
             ws = d.get_scaled_ws()
@@ -329,24 +340,27 @@ class Stitcher(object):
                 _x = mtd[ws].dataX(0)
                 _y = mtd[ws].dataY(0)
                 _e = mtd[ws].dataE(0)
+                _dx = mtd[ws].dataDx(0)
                 if len(_x)!=len(_y) and len(_x)!=len(_e):
                     raise RuntimeError, "Stitcher expected distributions but got histo"
-                _x, _y, _e = self.trim_zeros(_x, _y, _e)
+                _x, _y, _e, _dx = self.trim_zeros(_x, _y, _e, _dx)
                 x.extend(_x)
                 y.extend(_y)
                 e.extend(_e)
+                dx.extend(_dx)
         
-        zipped = zip(x,y,e)
+        zipped = zip(x,y,e,dx)
         def cmp(p1,p2):
             if p2[0]==p1[0]:
                 return 0
             return -1 if p2[0]>p1[0] else 1
         combined = sorted(zipped, cmp)
-        x,y,e = zip(*combined)
+        x,y,e,dx = zip(*combined)
         
         xtmp = mtd[ws_combined].dataX(0)
         ytmp = mtd[ws_combined].dataY(0)
         etmp = mtd[ws_combined].dataE(0)
+        dxtmp = mtd[ws_combined].dataDx(0)
         
         # Use the space we have in the current data vectors
         npts = len(ytmp)
@@ -355,19 +369,23 @@ class Stitcher(object):
                 xtmp[i] = x[i]
                 ytmp[i] = y[i]
                 etmp[i] = e[i]
+                dxtmp[i] = dx[i]
             if len(x)>npts:
                 xtmp.extend(x[npts:])
                 ytmp.extend(y[npts:])
                 etmp.extend(e[npts:])
+                dxtmp.extend(dx[npts:])
         else:
             for i in range(len(x)):
                 xtmp[i] = x[i]
                 ytmp[i] = y[i]
                 etmp[i] = e[i]
+                dxtmp[i] = dx[i]
             for i in range(len(x),npts):
                 xtmp[i] = xtmp[len(x)-1]+1.0
                 ytmp[i] = 0.0
                 etmp[i] = 0.0
+                dxtmp[i] = 0.0
             CropWorkspace(InputWorkspace=ws_combined, OutputWorkspace=ws_combined, XMin=0.0, XMax=xtmp[len(x)-1])
         return ws_combined
         
