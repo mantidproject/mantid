@@ -142,7 +142,7 @@ set_property ( TARGET MDAlgorithms PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc ../MDEvents/inc)
 
-target_link_libraries ( MDAlgorithms ${MANTIDLIBS} MDEvents CurveFitting)
+target_link_libraries ( MDAlgorithms ${MANTIDLIBS} MDEvents)
 
 # Create test file projects
 if ( CXXTEST_FOUND )
