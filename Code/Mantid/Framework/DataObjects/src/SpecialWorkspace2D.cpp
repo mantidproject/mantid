@@ -49,7 +49,7 @@ namespace DataObjects
     for (size_t wi=0; wi<m_noVectors; wi++)
     {
       std::set<detid_t> dets = getSpectrum(wi)->getDetectorIDs();
-      if (dets.size() > 0)
+      if (!dets.empty())
       {
         detid_t detID = *dets.begin();
         detID_to_WI[detID] = int(wi);
@@ -318,7 +318,7 @@ namespace DataObjects
       if (ids1.size() != ids2.size()){
         g_log.debug() << "Spectra " << ispec << ": 2 Workspaces have different number of detectors " << ids1.size() << " vs. " << ids2.size() << std::endl;
         return false;
-      } else if (ids1.size() == 0){
+      } else if (ids1.empty()){
         g_log.debug() << "Spectra " << ispec << ": 2 Workspaces both have 0 detectors. " << std::endl;
         return false;
       } else if (*ids1.begin() != *ids2.begin()){
