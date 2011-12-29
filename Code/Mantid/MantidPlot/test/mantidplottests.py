@@ -48,11 +48,11 @@ Then, the contents of that section are replaced
     # Find the text in each section
     for line in lines:
         if line.startswith("<!-- "):
-            # All lines should!
+            # All lines should go <!-- Section -->
             n = line.find(" ", 5)
             if n > 0:
                 current_section = line[5:n].strip()
-                current_text = line[n+3:]
+                current_text = line[n+4:]
                 sections[current_section] = current_text
             
     # Replace the section

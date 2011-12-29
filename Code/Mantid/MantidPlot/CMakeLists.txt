@@ -812,6 +812,7 @@ endforeach ( PYFILE ${PYTHON_INSTALL_FILES} )
 # List of .py files than must be run WITHIN MantidPlot.
 set ( MANTIDPLOT_TEST_PY_FILES 
 	MantidPlotSliceViewerTest.py
+	MantidPlot1DPlotTest.py
 )
 
 if ( 0 )

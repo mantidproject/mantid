@@ -31,7 +31,10 @@ def plot(source, *args, **kwargs):
 
 #-----------------------------------------------------------------------------
 def plotSpectrum(source, indices, error_bars = False, type = -1):
-    """Open a 1D Plot of a spectrum in a workspace
+    """Open a 1D Plot of a spectrum in a workspace.
+    
+    This plots one or more spectra, with X as the bin boundaries,
+    and Y as the counts in each bin.
     
     @param source :: workspace or name of a workspace
     @param indices :: workspace index or list of workspace indices to plot
@@ -47,10 +50,16 @@ def plotSpectrum(source, indices, error_bars = False, type = -1):
 
 #-----------------------------------------------------------------------------
 def plotBin(source, indices, error_bars = False, type = 0):
-    """Create a 1D Plot of a bin or bins in a workspace
+    """Create a 1D Plot of bin count vs spectrum in a workspace.
+    
+    This puts the spectrum number as the X variable, and the
+    count in the particular bin # (in 'indices') as the Y value.
+    
+    If indices is a list, then several lines are created, one
+    for each bin index.
     
     @param source :: workspace or name of a workspace
-    @param indices :: workspace index or list of workspace indices to plot
+    @param indices :: bin number to plot
     @param error_bars :: bool, set to True to add error bars.
     """
     return __doPlotting(source,indices,error_bars,type)
