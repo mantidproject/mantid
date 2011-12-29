@@ -22,7 +22,7 @@ namespace Mantid
      * @param spectraMap :: A reference to the spectra-detector mapping
      * @param ignoreMaskedDetectors :: flag indicating that masked detectors should be ignored.
      */
-    NearestNeighbours::NearestNeighbours(Instrument_const_sptr instrument,
+    NearestNeighbours::NearestNeighbours(boost::shared_ptr<const Instrument> instrument,
                                          const ISpectraDetectorMap & spectraMap, bool ignoreMaskedDetectors) : 
       m_instrument(instrument), m_spectraMap(spectraMap), m_noNeighbours(8), m_cutoff(-DBL_MAX), m_scale(), m_radius(0), m_bIgnoreMaskedDetectors(ignoreMaskedDetectors)
     {
@@ -245,7 +245,7 @@ namespace Mantid
      * @returns A map of spectra number to detector pointer
      */
     std::map<specid_t, IDetector_const_sptr>
-    NearestNeighbours::getSpectraDetectors(Instrument_const_sptr instrument,
+    NearestNeighbours::getSpectraDetectors(boost::shared_ptr<const Instrument> instrument,
                                            const ISpectraDetectorMap & spectraMap)
     {
       std::map<specid_t, IDetector_const_sptr> spectra;

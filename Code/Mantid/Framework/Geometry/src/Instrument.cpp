@@ -37,7 +37,7 @@ namespace Mantid
      *  @param instr :: instrument for parameter inclusion
      *  @param map :: parameter map to include
      */
-    Instrument::Instrument(const Instrument_const_sptr instr, ParameterMap_sptr map)
+    Instrument::Instrument(const boost::shared_ptr<const Instrument> instr, boost::shared_ptr<ParameterMap> map)
       : CompAssembly(instr.get(), map.get() ),
       m_sourceCache(instr->m_sourceCache), m_sampleCache(instr->m_sampleCache),
       m_defaultViewAxis(instr->m_defaultViewAxis),
@@ -146,7 +146,7 @@ namespace Mantid
      *  The holding instrument is then the 'neutronic' one, and is used in all algorithms.
      *  @param physInst A pointer to the physical instrument object.
      */
-    void Instrument::setPhysicalInstrument(Instrument_const_sptr physInst)
+    void Instrument::setPhysicalInstrument(boost::shared_ptr<const Instrument> physInst)
     {
       if ( !m_isParametrized )
         m_physicalInstrument = physInst;
@@ -837,7 +837,7 @@ namespace Mantid
                           const Kernel::V3D &beamline,
                           const double beamline_norm,
                           const Kernel::V3D &samplePos,
-                          const Instrument_const_sptr &instrument,
+                          const boost::shared_ptr<const Instrument> &instrument,
                           const std::vector<detid_t> &detectors,
                           const std::map<detid_t,double> &offsets)
     {

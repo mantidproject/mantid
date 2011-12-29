@@ -153,7 +153,7 @@ namespace DataObjects
    * @param workspaceIndex
    * @return
    */
-  detid_t SpecialWorkspace2D::getDetectorID(const size_t workspaceIndex) const
+  detid_t SpecialWorkspace2D::getDetectorID(const std::size_t workspaceIndex) const
   {
     if (size_t(workspaceIndex) > detectorIDs.size())
       throw std::invalid_argument("SpecialWorkspace2D::getDetectorID(): Invalid workspaceIndex given.");

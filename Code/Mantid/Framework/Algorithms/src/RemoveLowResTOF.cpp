@@ -222,7 +222,7 @@ void RemoveLowResTOF::execEvent()
   this->runMaskDetectors();
 }
 
-double RemoveLowResTOF::calcTofMin(const size_t workspaceIndex)
+double RemoveLowResTOF::calcTofMin(const std::size_t workspaceIndex)
 {
   const Kernel::V3D& sourcePos = m_instrument->getSource()->getPos();
   const Kernel::V3D& samplePos = m_instrument->getSample()->getPos();

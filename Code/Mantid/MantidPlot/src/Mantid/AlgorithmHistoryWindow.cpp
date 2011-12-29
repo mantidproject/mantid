@@ -169,7 +169,7 @@ AlgHistScriptButton::AlgHistScriptButton(QString title,QWidget* w):QPushButton(t
 AlgHistScriptButton::~AlgHistScriptButton()
 {
 }
-AlgorithmHistoryWindow::AlgorithmHistoryWindow(QWidget *parent,const boost::shared_ptr<const Mantid::API::Workspace> wsptr):
+AlgorithmHistoryWindow::AlgorithmHistoryWindow(QWidget *parent,const boost::shared_ptr<const Workspace> wsptr):
 MantidDialog(parent),m_algHist(wsptr->getHistory().getAlgorithmHistories()),m_histPropWindow(NULL),m_execSumGrpBox(NULL),m_envHistGrpBox(NULL),m_wsName(wsptr->getName().c_str())
 {
   setWindowTitle(tr("Algorithm History"));

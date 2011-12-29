@@ -689,9 +689,9 @@ void InstrumentWindow::saveSettings()
 /** 
  * Closes the window if the associated workspace is deleted.
  * @param ws_name :: Name of the deleted workspace.
- * @param ws :: Pointer to the workspace to be deleted
+ * @param workspace_ptr :: Pointer to the workspace to be deleted
  */
-void InstrumentWindow::deleteHandle(const std::string & ws_name, const boost::shared_ptr<Mantid::API::Workspace> ws)
+void InstrumentWindow::deleteHandle(const std::string & ws_name, const boost::shared_ptr<Workspace> workspace_ptr)
 {
   if (ws_name == m_workspaceName.toStdString())
   {
@@ -699,7 +699,7 @@ void InstrumentWindow::deleteHandle(const std::string & ws_name, const boost::sh
     close();
     return;
   }
-  Mantid::API::IPeaksWorkspace_sptr pws = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(ws);
+  Mantid::API::IPeaksWorkspace_sptr pws = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(workspace_ptr);
   if (pws)
   {
     m_InstrumentDisplay->getSurface()->peaksWorkspaceDeleted(pws);
@@ -709,7 +709,7 @@ void InstrumentWindow::deleteHandle(const std::string & ws_name, const boost::sh
 }
 
 void InstrumentWindow::afterReplaceHandle(const std::string& wsName,
-					  const boost::shared_ptr<Mantid::API::Workspace>)
+            const boost::shared_ptr<Workspace>)
 {
   //Replace current workspace
   if (wsName == m_workspaceName.toStdString())

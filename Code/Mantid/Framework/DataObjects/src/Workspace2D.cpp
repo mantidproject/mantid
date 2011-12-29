@@ -41,7 +41,7 @@ namespace Mantid
     *  @param XLength :: The number of X data points/bin boundaries in each vector (must all be the same)
     *  @param YLength :: The number of data/error points in each vector (must all be the same)
     */
-    void Workspace2D::init(const size_t &NVectors, const size_t &XLength, const size_t &YLength)
+    void Workspace2D::init(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength)
     {
       m_noVectors = NVectors;
       data.resize(m_noVectors);

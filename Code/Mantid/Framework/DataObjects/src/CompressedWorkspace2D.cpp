@@ -40,7 +40,7 @@ AbsManagedWorkspace2D()
 *  @param YLength :: The number of data/error points in each vector (must all be the same)
 *  @throw std::runtime_error if unable to open a temporary file
 */
-void CompressedWorkspace2D::init(const size_t &NVectors, const size_t &XLength, const size_t &YLength)
+void CompressedWorkspace2D::init(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength)
 {
   g_log.information("Creating a CompressedWorkspace2D");
 
@@ -97,7 +97,7 @@ be loaded from storage and loads it.
 @param newBlock :: Returned data block address
 @param startIndex :: Starting spectrum index in the block
 */
-void CompressedWorkspace2D::readDataBlock(ManagedDataBlock2D *newBlock,size_t startIndex)const
+void CompressedWorkspace2D::readDataBlock(ManagedDataBlock2D *newBlock,std::size_t startIndex)const
 {
   // You only need to read it if it hasn't been loaded before
   if (!newBlock->isLoaded())
@@ -130,7 +130,7 @@ size_t CompressedWorkspace2D::getMemorySize() const
  *  @param startIndex :: The starting index of the block
  *  @return pointer to the compressed block
  */
-CompressedWorkspace2D::CompressedPointer CompressedWorkspace2D::compressBlock(ManagedDataBlock2D* block,size_t startIndex) const
+CompressedWorkspace2D::CompressedPointer CompressedWorkspace2D::compressBlock(ManagedDataBlock2D* block,std::size_t startIndex) const
 {
   //std::cerr<<"compress "<<startIndex<<'\n';
   size_t j = 0;
@@ -170,7 +170,7 @@ CompressedWorkspace2D::CompressedPointer CompressedWorkspace2D::compressBlock(Ma
  *  @param block :: Pointer to the destination decompressed block
  *  @param startIndex :: The starting index of the block
  */
-void CompressedWorkspace2D::uncompressBlock(ManagedDataBlock2D* block,size_t startIndex)const
+void CompressedWorkspace2D::uncompressBlock(ManagedDataBlock2D* block,std::size_t startIndex)const
 {
   uLongf nBuff = static_cast<uLongf>(m_outBuffer.size());
   CompressedPointer p = m_compressedData[startIndex];
