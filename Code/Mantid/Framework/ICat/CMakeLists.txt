@@ -83,15 +83,15 @@ include_directories ( inc )
 target_link_libraries ( ICat ${MANTIDLIBS} ${OPENSSL_LIBRARIES} )
 
 if ( CXXTEST_FOUND )
-  # Test Helper Library 
-  add_library ( ICatTestHelper "test/ICatTestHelper.cpp")
-  set_target_properties ( ICatTestHelper PROPERTIES COMPILE_DEFINITIONS IN_MANTID_ICAT )
-  target_link_libraries( ICatTestHelper ICat  )
-  
+  # This variable is used within the cxxtest_add_test macro to build this helper class into the test executable.
+  # It will go out of scope at the end of this file so doesn't need un-setting
+  set ( TESTHELPER_SRCS test/ICatTestHelper.cpp )
+
   # The actual test suite
   cxxtest_add_test ( ICatTest ${TEST_FILES} )
-  target_link_libraries( ICatTest ICat ICatTestHelper )
+  target_link_libraries( ICatTest ICat )
   add_dependencies ( FrameworkTests ICatTest )
+  
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET ICatTest PROPERTY FOLDER "UnitTests" )
 endif ()
