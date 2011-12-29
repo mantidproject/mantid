@@ -110,7 +110,7 @@ namespace GPUAlgorithms
     checkError("Platform::get() failed");
 
     std::vector<cl::Platform>::iterator i;
-    if(platforms.size() > 0)
+    if(!platforms.empty())
     {
       for(i = platforms.begin(); i != platforms.end(); ++i)
       {
@@ -135,7 +135,7 @@ namespace GPUAlgorithms
     if (verbose) std::cout<<"Getting device info\n";
     std::vector<cl::Device> devices = context.getInfo<CL_CONTEXT_DEVICES>();
     checkError("Context::getInfo() failed");
-    if (devices.size() == 0)
+    if (devices.empty())
       throw std::runtime_error("OpenCL Error: No device available");
 
 

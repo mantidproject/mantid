@@ -123,7 +123,7 @@ namespace MDEvents
       } // For each file
       this->m_alg->fileMutex.unlock();
 
-      if (events.size() > 0)
+      if (!events.empty())
       {
         // Add all the events from the same box
         outWS->addEvents( events );
@@ -499,7 +499,7 @@ namespace MDEvents
       //bc->fileMutex.unlock();
       this->m_alg->fileMutex.unlock();
 
-      if (events.size() > 0)
+      if (!events.empty())
       {
         // Add all the events from the same box
         outBox->addEvents( events );
