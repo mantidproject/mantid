@@ -282,14 +282,18 @@ class Stitcher(object):
             raise RuntimeError, "Stitcher: invalid reference ID"
         self._reference = id
 
-    def save_combined(self, file_path=None):
+    def save_combined(self, file_path=None, as_canSAS=True):
         """
             Save the resulting scaled I(Q) curves in one data file
             @param file_path: file to save data in
         """
         iq = self.get_scaled_data()        
         if file_path is not None:
-            SaveCanSAS1D(Filename=file_path, InputWorkspace=iq)
+            if as_canSAS:
+                SaveCanSAS1D(Filename=file_path, InputWorkspace=iq)
+            else:
+                SaveAscii(Filename=file_path, InputWorkspace=iq, 
+                          Separator="\t", CommentIndicator="# ", WriteXError=True)
         
     def trim_zeros(self, x, y, e, dx):
         zipped = zip(x,y,e,dx)
