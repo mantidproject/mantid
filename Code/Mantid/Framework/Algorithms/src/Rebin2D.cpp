@@ -126,21 +126,21 @@ namespace Mantid
      * Calculate the Y and E values for the given possible overlap
      * @param inputWS :: A pointer to the inputWS
      * @param oldYBins :: A reference to the set of Y bin boundaries on the input WS
-     * @param newBin :: A reference to a polygon to test for overlap
+     * @param outputPoly :: A reference to a polygon to test for overlap
      * @returns A pair of Y and E values
      */
     std::pair<double,double> 
     Rebin2D::calculateYE(API::MatrixWorkspace_const_sptr inputWS,
-                         const MantidVec & oldYBins, const ConvexPolygon & newBin) const
+                         const MantidVec & oldYBins, const ConvexPolygon & outputPoly) const
     {
       const MantidVec & oldXBins = inputWS->readX(0);
       // Build a list intersection locations in terms of workspace indices
       // along with corresponding weights from that location
-      std::vector<BinWithWeight> overlaps = findIntersections(oldXBins, oldYBins, newBin);
+      std::vector<BinWithWeight> overlaps = findIntersections(oldXBins, oldYBins, outputPoly);
       std::pair<double,double> binValues(0,0);
       if( inputWS->isDistribution() )
       {
-        const double newWidth = newBin[3].X() - newBin[0].X(); // For distribution
+        const double newWidth = outputPoly[3].X() - outputPoly[0].X(); // For distribution
         binValues = calculateDistYE(inputWS, overlaps, newWidth);
       }
       else
@@ -245,8 +245,8 @@ namespace Mantid
     /**
      * Setup the output workspace 
      * @param parent :: A pointer to the input workspace
-     * @param newXBins[out] :: An output vector to be filled with the new X bin boundaries
-     * @param newYBins[out] :: An output vector to be filled with the new Y bin boundaries
+     * @param newXBins [out] :: An output vector to be filled with the new X bin boundaries
+     * @param newYBins [out] :: An output vector to be filled with the new Y bin boundaries
      * @return A pointer to the output workspace
      */
     MatrixWorkspace_sptr Rebin2D::createOutputWorkspace(MatrixWorkspace_const_sptr parent,

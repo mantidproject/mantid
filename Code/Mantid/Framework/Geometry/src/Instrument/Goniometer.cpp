@@ -32,7 +32,7 @@ Goniometer::Goniometer(const Goniometer& other):R(other.R),motors(other.motors),
 }
 
 /// Constructor from a rotation matrix
-/// @param rot :: #DblMatrix matrix that is going to be the internal rotation matrix of the goniometer. Cannot push additional axes
+/// @param rot :: DblMatrix matrix that is going to be the internal rotation matrix of the goniometer. Cannot push additional axes
 Goniometer::Goniometer(DblMatrix rot)
 {
   DblMatrix ide(3,3),rtr(3,3);

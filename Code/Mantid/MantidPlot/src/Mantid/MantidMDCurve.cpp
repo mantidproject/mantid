@@ -41,10 +41,12 @@ MantidMDCurve::MantidMDCurve(const MantidMDCurve& c)
 
 /**
  *  @param g :: The Graph widget which will display the curve
+ *  @param distr :: True if this is a distribution
  *  @param style :: The graph style to use
  */
-void MantidMDCurve::init(Graph* g, bool, Graph::CurveType style)
+void MantidMDCurve::init(Graph* g, bool distr, Graph::CurveType style)
 {
+  UNUSED_ARG(distr);
   IMDWorkspace_const_sptr ws = boost::dynamic_pointer_cast<IMDWorkspace>(
               AnalysisDataService::Instance().retrieve(m_wsName.toStdString()) );
   if(!ws)

@@ -17,6 +17,7 @@ namespace API
    *
    * @param name ::          The name of the property
    * @param exts ::          The allowed/suggested extensions
+   * @param optional ::      If ture, the property is optional
    */
   MultipleFileProperty::MultipleFileProperty(const std::string & name,
       const std::vector<std::string> & exts, bool optional)

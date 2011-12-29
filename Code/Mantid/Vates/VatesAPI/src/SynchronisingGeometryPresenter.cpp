@@ -70,7 +70,7 @@ namespace Mantid
     {
     }
 
-    void SynchronisingGeometryPresenter::swap(const MappingType::key_type& keyA, const MappingType::key_type& keyB)
+    void SynchronisingGeometryPresenter::swap(const GeometryPresenter::MappingType::key_type& keyA, const GeometryPresenter::MappingType::key_type& keyB)
     {
       DimPresenter_sptr temp = m_mapping[keyA];
       

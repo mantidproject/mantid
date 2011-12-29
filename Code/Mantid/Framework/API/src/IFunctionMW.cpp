@@ -46,7 +46,6 @@ namespace API
     }
   }
   /** Set the workspace
-    * @param ws :: A shared pointer to a workspace. Must be a MatrixWorkspace.
     * @param slicing :: A string identifying the data to be fitted. Format for IFunctionMW:
     *  "WorkspaceIndex=int,StartX=double,EndX=double". StartX and EndX are optional.
   */

@@ -42,7 +42,7 @@ namespace MDAlgorithms
 //-----------------------------------------------
 template<size_t nd,Q_state Q, AnalMode MODE, CnvrtUnits CONV>
 void 
-ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
+ConvertToMDEvents::processQND(API::IMDEventWorkspace *const pOutWs)
 {
     // service variable used for efficient filling of the MD event WS  -> should be moved to configuration;
     size_t SPLIT_LEVEL(1024);
@@ -54,7 +54,7 @@ ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
     pProg = std::auto_ptr<API::Progress>(new API::Progress(this,0.0,1.0,numSpec));
 
 
-    MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *const pWs = dynamic_cast<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *>(piWS);
+    MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *const pWs = dynamic_cast<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *>(pOutWs);
     if(!pWs){
         convert_log.error()<<"ConvertToMDEvents: can not cast input worspace pointer into pointer to proper target workspace\n"; 
         throw(std::bad_cast());
