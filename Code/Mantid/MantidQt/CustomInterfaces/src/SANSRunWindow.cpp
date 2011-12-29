@@ -1029,7 +1029,7 @@ void SANSRunWindow::addTimeMasksToTable(const QString & mask_string, const QStri
  * @param lsda :: The result of the sample-detector bank 1 distance
  * @param lsdb :: The result of the sample-detector bank 2 distance
  */
-void SANSRunWindow::componentLOQDistances(Mantid::API::MatrixWorkspace_sptr workspace, double & lms, double & lsda, double & lsdb)
+void SANSRunWindow::componentLOQDistances(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, double & lms, double & lsda, double & lsdb)
 {
   Instrument_const_sptr instr = workspace->getInstrument();
   if( !instr ) return;
@@ -1440,8 +1440,9 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
  * Set SANS2D geometry info
  * @param workspace :: The workspace
  * @param logs :: The log information
+ * @param wscode :: ?????
 */
-void SANSRunWindow::setSANS2DGeometry(Mantid::API::MatrixWorkspace_sptr workspace, const QString & logs, int wscode)
+void SANSRunWindow::setSANS2DGeometry(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, const QString & logs, int wscode)
 {  
   double unitconv = 1000.;
 
@@ -1485,8 +1486,9 @@ void SANSRunWindow::setSANS2DGeometry(Mantid::API::MatrixWorkspace_sptr workspac
 /**
  * Set LOQ geometry information
  * @param workspace :: The workspace to operate on
+ * @param wscode :: ?????
  */
-void SANSRunWindow::setLOQGeometry(Mantid::API::MatrixWorkspace_sptr workspace, int wscode)
+void SANSRunWindow::setLOQGeometry(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, int wscode)
 {
   double dist_ms(0.0), dist_mdb(0.0), dist_hab(0.0);
   //Sample

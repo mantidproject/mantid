@@ -553,7 +553,7 @@ PropertyHandler* PropertyHandler::parentHandler()const
   return ph;
 }
 // Return the child's handler
-PropertyHandler* PropertyHandler::getHandler(size_t i)const
+PropertyHandler* PropertyHandler::getHandler(std::size_t i)const
 {
   if (!m_cf || i >= m_cf->nFunctions()) return 0;
   PropertyHandler* ph = static_cast<PropertyHandler*>(m_cf->getFunction(i)->getHandler());

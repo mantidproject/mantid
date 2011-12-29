@@ -319,12 +319,4 @@ protected:
 
 }
 }
-
-// The main page of the doxygen
-/** @mainpage MantidQt
- * A library containing a set of Qt dialog widgets that are specialized to particular algorithms. There
- * is also a basic dialog that provides default functionality
- */
-
-
 #endif //MANTIDQT_API_ALGORITHMDIALOG_H_

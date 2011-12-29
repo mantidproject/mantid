@@ -110,7 +110,7 @@ Instrument_const_sptr MWDiag::getInstrument(const QString & name)
   return inst_ws->getInstrument();
 }
 
-QString MWDiag::getSetting(const QString & settingName, Instrument_const_sptr instrument,
+QString MWDiag::getSetting(const QString & settingName, boost::shared_ptr<const Mantid::Geometry::Instrument> instrument,
                            const QString & idfName) const
 {
   QString value;

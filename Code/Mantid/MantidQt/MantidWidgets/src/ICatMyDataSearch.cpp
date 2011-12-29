@@ -47,7 +47,7 @@ namespace MantidQt
     {
       m_applicationWindow= par;
     }
-    bool ICatMyDataSearch::executeMyDataSearch(ITableWorkspace_sptr& ws_sptr)
+    bool ICatMyDataSearch::executeMyDataSearch(Mantid::API::ITableWorkspace_sptr& ws_sptr)
     {
       Mantid::API::IAlgorithm_sptr alg;
       try

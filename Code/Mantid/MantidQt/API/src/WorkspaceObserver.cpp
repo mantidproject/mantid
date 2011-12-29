@@ -18,7 +18,7 @@ namespace MantidQt
       m_observer->deleteHandle(name, workspace);
     }
 
-    void ObserverCallback::handleAdd(const std::string &name, boost::shared_ptr<Mantid::API::Workspace> workspace)
+    void ObserverCallback::handleAdd(const std::string &name, Mantid::API::Workspace_sptr workspace)
     {
       m_observer->addHandle(name, workspace);
     }
