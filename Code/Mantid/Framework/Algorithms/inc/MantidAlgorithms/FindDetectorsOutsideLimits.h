@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/DetectorDiagnostic.h"
+#include "MantidDataObjects/SpecialWorkspace2D.h"
 
 namespace Mantid
 {
