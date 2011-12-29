@@ -154,11 +154,11 @@ void ModeratorTzero::exec()
 
   // do the shift in X
   const int64_t numHists = static_cast<int64_t>(inputWS->getNumberHistograms());
-  //Progress prog(this,0.0,1.0,numHists); //report progress of algorithm
-  //PARALLEL_FOR2(inputWS, outputWS)
+  Progress prog(this,0.0,1.0,numHists); //report progress of algorithm
+  PARALLEL_FOR2(inputWS, outputWS)
   for (int64_t i=0; i < numHists; ++i)
   {
-	//PARALLEL_START_INTERUPT_REGION
+	PARALLEL_START_INTERUPT_REGION
     // Calculate the time t_f from sample to detector 'i'
     double t_f = CalculateTf(sample,inputWS,i);
 	// shift the time of flights
@@ -180,11 +180,10 @@ void ModeratorTzero::exec()
     //Copy y and e data
     outputWS->dataY(i) = inputWS->dataY(i);
     outputWS->dataE(i) = inputWS->dataE(i);
-
-	//prog.report();
-	//PARALLEL_END_INTERUPT_REGION
+	prog.report();
+	PARALLEL_END_INTERUPT_REGION
   }
-  //PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERUPT_REGION
 
   // Copy units
   if (inputWS->getAxis(0)->unit().get())
@@ -232,10 +231,10 @@ void ModeratorTzero::execEvent(){
 
   // Loop over the spectra
   Progress prog(this,0.0,1.0,numHists); //report progress of algorithm
-  //PARALLEL_FOR1(outputWS)
+  PARALLEL_FOR1(outputWS)
   for (int64_t i = 0; i < int64_t(numHists); ++i)
   {
-	//PARALLEL_START_INTERUPT_REGION
+	PARALLEL_START_INTERUPT_REGION
 	EventList &evlist=outputWS->getEventList(i);
 	if( evlist.getNumberEvents() > 0 ) //don't bother with empty lists
 	{
@@ -244,16 +243,16 @@ void ModeratorTzero::execEvent(){
 	  if(t_f > 0)
 	  {
 		//Calculate new time of flight, TOF'=scaling*(TOF-t_f-intercept)+t_f = scaling*TOF + (1-scaling)*t_f - scaling*intercept
-		g_log.debug() << evlist.dataX()[0] << " " << evlist.dataX()[1] << std::endl;
+		g_log.debug() << "dataX before: "<< evlist.dataX()[0] << " " << evlist.dataX()[1] << std::endl;
 		evlist.convertTof(this->scaling, (1-this->scaling)*t_f - this->scaling*intercept);
 		g_log.debug() << this->scaling << " " << (1-this->scaling)*t_f - this->scaling*intercept << std::endl;
-		g_log.debug() << evlist.dataX()[0] << " " << evlist.dataX()[1] << std::endl;
+		g_log.debug() << "dataX after: "<< evlist.dataX()[0] << " " << evlist.dataX()[1] << std::endl;
 	  }
 	}
     prog.report();
-    //PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERUPT_REGION
   }
-  //PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERUPT_REGION
   outputWS->clearMRU(); // Clears the Most Recent Used lists */
 } // end of void ModeratorTzero::execEvent()
 
