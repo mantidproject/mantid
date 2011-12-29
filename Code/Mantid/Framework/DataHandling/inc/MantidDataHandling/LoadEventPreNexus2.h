@@ -104,9 +104,9 @@ public:
   /// Virtual destructor
   virtual ~LoadEventPreNexus2();
   /// Algorithm's name
-  virtual const std::string name() const { return "LoadEventPreNexus2"; }
+  virtual const std::string name() const { return "LoadEventPreNexus"; }
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  virtual int version() const { return (2); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "DataHandling\\PreNexus"; }
   /// Algorithm's aliases
@@ -130,6 +130,7 @@ private:
 
   Mantid::API::Progress * prog;
 
+  DataObjects::EventWorkspace_sptr localWorkspace; //< Output EventWorkspace
   std::vector<int64_t> spectra_list; ///<the list of Spectra
 
   /// The times for each pulse.
@@ -206,6 +207,13 @@ private:
   void procEventsLinear(DataObjects::EventWorkspace_sptr & workspace, std::vector<DataObjects::TofEvent> ** arrayOfVectors, DasEvent * event_buffer, size_t current_event_buffer_size, size_t fileOffset);
 
   void setProtonCharge(DataObjects::EventWorkspace_sptr & workspace);
+
+  void addToWorkspaceLog(std::string logtitle, size_t mindex);
+
+  void processImbedLogs();
+
+  void debugOutput(bool doit, size_t mindex);
+
 };
 
   }
