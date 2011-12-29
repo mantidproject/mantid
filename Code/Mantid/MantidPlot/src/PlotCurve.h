@@ -69,6 +69,11 @@ public:
   QString saveCurveLayout();
   void restoreCurveLayout(const QStringList& lst);
 
+  //! Set the number of symbols not to be drawn: useful for large data sets
+  void setSkipSymbolsCount(int count);
+  //! Returns the number of symbols not to be drawn
+  int skipSymbolsCount() {return d_skip_symbols;}
+
   // remove this curve form the graph (and delete from memory)
   void removeMe(){emit removeMe(this);}
 
@@ -88,11 +93,16 @@ signals:
 protected:
   virtual void drawCurve(QPainter *p, int style, const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from, int to) const;
   void drawSideLines(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from, int to) const;
+
+  virtual void drawSymbols(QPainter *p, const QwtSymbol &,
+      const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from, int to) const;
+
   void computeWaterfallOffsets();
 
   int d_type;
   double d_x_offset, d_y_offset;
   bool d_side_lines;
+  int d_skip_symbols;
   bool m_isDistribution;
   // x and y units
   boost::shared_ptr<Mantid::Kernel::Unit> m_xUnits;

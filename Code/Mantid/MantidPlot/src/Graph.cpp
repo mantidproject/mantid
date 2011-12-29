@@ -4814,6 +4814,15 @@ void Graph::setCurveBrush(int index, const QBrush& b)
   c->setBrush(b);
 }
 
+void Graph::setCurveSkipSymbolsCount(int index, int count)
+{
+  PlotCurve *c = dynamic_cast<PlotCurve*>(curve(index));
+  if (!c)
+    return;
+
+  c->setSkipSymbolsCount(count);
+}
+
 BoxCurve* Graph::openBoxDiagram(Table *w, const QStringList& l, int fileVersion)
 {
   if (!w)

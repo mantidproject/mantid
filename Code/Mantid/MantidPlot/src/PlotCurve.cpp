@@ -37,13 +37,15 @@
 #include <QPainter>
 #include <qwt_symbol.h>
 #include <qwt_plot_canvas.h>
+#include <qwt_painter.h>
 
 PlotCurve::PlotCurve(const QString& name) : QwtPlotCurve(name),
-  d_type(0), d_x_offset(0.0), d_y_offset(0.0), d_side_lines(false)
+    d_type(0), d_x_offset(0.0), d_y_offset(0.0), d_side_lines(false), d_skip_symbols(1)
 {}
 
 PlotCurve::PlotCurve(const PlotCurve& c) : QObject(), QwtPlotCurve(c.title().text()),
-  d_type(c.d_type), d_x_offset(c.d_x_offset), d_y_offset(c.d_y_offset), d_side_lines(c.d_side_lines)
+    d_type(c.d_type), d_x_offset(c.d_x_offset), d_y_offset(c.d_y_offset), d_side_lines(c.d_side_lines),
+    d_skip_symbols(c.d_skip_symbols)
 {}
 
 QString PlotCurve::saveCurveLayout()
@@ -185,6 +187,53 @@ void PlotCurve::drawCurve(QPainter *p, int style, const QwtScaleMap &xMap, const
   if(d_side_lines)
     drawSideLines(p, xMap, yMap, from, to);
   QwtPlotCurve::drawCurve(p, style, xMap, yMap, from, to);
+}
+
+void PlotCurve::setSkipSymbolsCount(int count)
+{
+  if (count < 1 || count > dataSize())
+    return;
+
+  d_skip_symbols = count;
+}
+
+/*!
+ \brief Draw symbols
+ \param painter Painter
+ \param symbol Curve symbol
+ \param xMap x map
+ \param yMap y map
+ \param from index of the first point to be painted
+ \param to index of the last point to be painted
+
+ \sa setSymbol(), draw(), drawCurve()
+ */
+void PlotCurve::drawSymbols(QPainter *painter, const QwtSymbol &symbol, const QwtScaleMap &xMap,
+    const QwtScaleMap &yMap, int from, int to) const
+{
+  if (d_skip_symbols < 2)
+  {
+    QwtPlotCurve::drawSymbols(painter, symbol, xMap, yMap, from, to);
+    return;
+  }
+
+  painter->setBrush(symbol.brush());
+  //QtiPlot has added method to QwtPainter: painter->setPen(QwtPainter::scaledPen(symbol.pen()));
+  painter->setPen(symbol.pen());
+
+  const QwtMetricsMap &metricsMap = QwtPainter::metricsMap();
+
+  QRect rect;
+  rect.setSize(metricsMap.screenToLayout(symbol.size()));
+
+  for (int i = from; i <= to; i += d_skip_symbols)
+  {
+    const int xi = xMap.transform(x(i));
+    const int yi = yMap.transform(y(i));
+
+    rect.moveCenter(QPoint(xi, yi));
+    symbol.draw(painter, rect);
+  }
 }
 
 void PlotCurve::drawSideLines(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from, int to) const
@@ -823,6 +872,7 @@ void DataCurve::clone(DataCurve* c)
   d_labels_align = c->labelsAlignment();
   d_labels_x_offset = c->labelsXOffset();
   d_labels_y_offset = c->labelsYOffset();
+  d_skip_symbols = c->skipSymbolsCount();
 
   if (!c->labelsColumnName().isEmpty())
   {
@@ -836,10 +886,14 @@ QString DataCurve::saveToString()
   if (!validCurveType())
     return QString();
 
-  if (d_labels_list.isEmpty() || type() == Graph::Function || type() == Graph::Box)
-    return QString();
+  QString s = QString::null;
+  if (d_skip_symbols > 1)
+    s += "<SkipPoints>" + QString::number(d_skip_symbols) + "</SkipPoints>\n";
 
-  QString s = "<CurveLabels>\n";
+  if (d_labels_list.isEmpty() || type() == Graph::Function || type() == Graph::Box)
+    return s;
+
+  s = "<CurveLabels>\n";
   s += "\t<column>" + d_labels_column + "</column>\n";
   s += "\t<color>" + d_labels_color.name() + "</color>\n";
   s += "\t<whiteOut>" + QString::number(d_white_out_labels) + "</whiteOut>\n";

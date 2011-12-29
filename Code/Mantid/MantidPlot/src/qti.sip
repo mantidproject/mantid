@@ -692,6 +692,7 @@ public:
   void setCurveSymbol(int, const QwtSymbol&);
   void setCurvePen(int, const QPen&);
   void setCurveBrush(int, const QBrush&);
+  void setCurveSkipSymbolsCount(int, int);
 
 	void addFunction(const QString&, double, double, int=100);
 %MethodCode

@@ -676,6 +676,7 @@ public slots:
   void setCurveSymbol(int index, const QwtSymbol& s);
   void setCurvePen(int index, const QPen& p);
   void setCurveBrush(int index, const QBrush& b);
+  void setCurveSkipSymbolsCount(int index, int count);
 
   //! \name Resizing
   //@{

@@ -11358,6 +11358,10 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
       }
       lst.pop_back();
       ag->restoreCurveLabels(curveID - 1, lst);
+    } else if (s.contains("<SkipPoints>")){
+      PlotCurve *c = (PlotCurve *)ag->curve(curveID - 1);
+      if (c)
+        c->setSkipSymbolsCount(s.remove("<SkipPoints>").remove("</SkipPoints>").toInt());
     } else if (s == "<Function>"){//version 0.9.5
       curveID++;
       QStringList lst;
