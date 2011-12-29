@@ -14,7 +14,11 @@ using namespace Mantid::API;
 const QString deltaECalc::tempWS = "mono_sample_temporyWS";
 
 /** Read the data the user supplied to create Python code to do their calculation
+* @param interface :: handle to the widget for the interface
 * @param userSettings :: the form that the user filled in
+* @param removalBg :: if true, remove background
+* @param TOFWinSt :: start of TOF range for background
+* @param TOFWinEnd :: end of TOF range for background
 * @throw invalid_argument where problems with user data prevent the calculation from proceeding
 */
 deltaECalc::deltaECalc(QWidget * const interface, const Ui::ConvertToEnergy &userSettings, 
@@ -24,8 +28,11 @@ deltaECalc::deltaECalc(QWidget * const interface, const Ui::ConvertToEnergy &use
 }
 
 /** Adds user values from the GUI into the Python script
-* @param inputFiles :: a coma separated list of data file names
-* @param whiteB :: The filename of the white beam run
+* @param runFiles :: a comma separated list of data file names
+* @param whiteBeam :: The filename of the white beam run
+* @param absRunFiles :: run files for absolute normalization
+* @param absWhiteBeam :: run file for absolute white beam normalization
+* @param saveName :: filename for output saving
 */
 void deltaECalc::createProcessingScript(const QStringList &runFiles, const QString &whiteBeam,
 					const QStringList &absRunFiles, const QString &absWhiteBeam,

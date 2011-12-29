@@ -429,6 +429,8 @@ namespace MDEvents
      * @param alg :: MergeMD Algorithm - used to pass parameters etc. around
      * @param blockNum :: Which block to load?
      * @param outWS :: Output workspace
+     * @param boxesById :: list of boxes with IDs
+     * @param parallelSplit :: if true, split the boxes via parallel mechanism
      */
     MergeMDLoadToBoxTask(MergeMD * alg, size_t blockNum, typename MDEventWorkspace<MDE, nd>::sptr outWS,
         typename std::vector<IMDBox<MDE,nd> *> & boxesById, bool parallelSplit)

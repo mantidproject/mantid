@@ -526,7 +526,13 @@ using namespace DataObjects;
   /** Write out a combined chunk of event data
    *
    * @param ws :: an EventWorkspace
-   *  */
+   * @param indices :: array of event list indexes
+   * @param tofs :: array of TOFs
+   * @param weights :: array of event weights
+   * @param errorSquareds :: array of event squared errors
+   * @param pulsetimes :: array of pulsetimes
+   * @param compress :: if true, compress the entry
+   */
   int NexusFileIO::writeNexusProcessedDataEventCombined( const DataObjects::EventWorkspace_const_sptr& ws,
       std::vector<int64_t> & indices,
       double * tofs, float * weights, float * errorSquareds, int64_t * pulsetimes,
@@ -626,6 +632,10 @@ using namespace DataObjects;
   //-------------------------------------------------------------------------------------
   /** Write out the event list data, no matter what the underlying event type is
    * @param events :: vector of TofEvent or WeightedEvent, etc.
+   * @param writeTOF :: if true, write the TOF values
+   * @param writePulsetime :: if true, write the pulse time values
+   * @param writeWeight :: if true, write the event weights
+   * @param writeError :: if true, write the errors
    */
   template<class T>
   void NexusFileIO::writeEventListData( std::vector<T> events, bool writeTOF, bool writePulsetime, bool writeWeight, bool writeError) const

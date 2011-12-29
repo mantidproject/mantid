@@ -23,42 +23,42 @@ namespace MDEvents
 
   //-----------------------------------------------------------------------------------------------
   /** Constructor
-   * @param controller :: BoxController that controls how boxes split
+   * @param splitter :: BoxController that controls how boxes split
    * @param depth :: splitting depth of the new box.
    */
-  TMDE(MDBox)::MDBox(BoxController_sptr controller, const size_t depth)
+  TMDE(MDBox)::MDBox(BoxController_sptr splitter, const size_t depth)
     : IMDBox<MDE, nd>(),
       m_dataBusy(false), m_dataModified(false), m_dataAdded(false),
       m_fileIndexStart(0), m_fileNumEvents(0),
       m_onDisk(false), m_inMemory(true)
 
   {
-    if (controller->getNDims() != nd)
+    if (splitter->getNDims() != nd)
       throw std::invalid_argument("MDBox::ctor(): controller passed has the wrong number of dimensions.");
-    this->m_BoxController = controller;
+    this->m_BoxController = splitter;
     this->m_depth = depth;
     // Give it a fresh ID from the controller.
-    this->setId( controller->getNextId() );
+    this->setId( splitter->getNextId() );
   }
 
   //-----------------------------------------------------------------------------------------------
   /** Constructor
-   * @param controller :: BoxController that controls how boxes split
+   * @param splitter :: BoxController that controls how boxes split
    * @param depth :: splitting depth of the new box.
-   * @param extents :: vector defining the extents
+   * @param extentsVector :: vector defining the extents
    */
-  TMDE(MDBox)::MDBox(BoxController_sptr controller, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector)
+  TMDE(MDBox)::MDBox(BoxController_sptr splitter, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector)
       : IMDBox<MDE, nd>(extentsVector),
         m_dataBusy(false), m_dataModified(false), m_dataAdded(false),
         m_fileIndexStart(0), m_fileNumEvents(0),
         m_onDisk(false), m_inMemory(true)
   {
-    if (controller->getNDims() != nd)
+    if (splitter->getNDims() != nd)
       throw std::invalid_argument("MDBox::ctor(): controller passed has the wrong number of dimensions.");
-    this->m_BoxController = controller;
+    this->m_BoxController = splitter;
     this->m_depth = depth;
     // Give it a fresh ID from the controller.
-    this->setId( controller->getNextId() );
+    this->setId( splitter->getNextId() );
   }
 
 
@@ -403,7 +403,8 @@ namespace MDEvents
 
   //-----------------------------------------------------------------------------------------------
   /** Calculate the centroid of this box.
-   * @param centroid[out] :: nd-sized array that will be set to the centroid. */
+   * @param centroid [out] :: nd-sized array that will be set to the centroid.
+   */
   TMDE(
   void MDBox)::calculateCentroid(coord_t * centroid) const
   {

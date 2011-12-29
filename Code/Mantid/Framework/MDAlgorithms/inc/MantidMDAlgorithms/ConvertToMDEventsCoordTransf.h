@@ -53,9 +53,9 @@ struct COORD_TRANSFORMER
      *
      * In addition it caluclates the property-dependant coordinates 
      *
+     * @param Coord        -- subalgorithm specific number of variables, calculated from properties and placed into specific place of the Coord vector;
      * @param n_ws_variabes -- subalgorithm specific number of variables, calculated from the workspace data
      *
-     * @return Coord        -- subalgorithm specific number of variables, calculated from properties and placed into specific place of the Coord vector;
      * @return true         -- if all Coord are within the range requested by algorithm. false otherwise
      *
      * has to be specialized
@@ -66,9 +66,9 @@ struct COORD_TRANSFORMER
 
    
     /** template generalizes the code to calculate Y-variables within the detector's loop of processQND workspace
+     * @param Coord  -- current Y coordinate, placed in the position of the Coordinate vector, specific for particular subalgorithm.
      * @param i    -- index of external loop, identifying current y-coordinate
      * 
-     * @return Coord  -- current Y coordinate, placed in the position of the Coordinate vector, specific for particular subalgorithm.    
      * @return true   -- if all Coord are within the range requested by algorithm. false otherwise   
      * 
      *  some default implementations possible (e.g mode Q3D,ragged  Any_Mode( Direct, indirect,elastic), 
@@ -81,7 +81,7 @@ struct COORD_TRANSFORMER
      * @param i    -- index of external loop, identifying generic y-coordinate
      * @param j    -- index of internal loop, identifying generic x-coordinate
      * 
-     * @return Coord --Subalgorithm specific number of coordinates, placed in the proper position of the Coordinate vector   
+     * @param Coord --Subalgorithm specific number of coordinates, placed in the proper position of the Coordinate vector
      * @return true  -- if all Coord are within the range requested by algorithm. false otherwise   
      *
      * has to be specialized

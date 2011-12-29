@@ -42,6 +42,7 @@ namespace MDEvents
   //-----------------------------------------------------------------------------------------------
   /** Constructor with a box controller.
    * @param bc :: BoxController
+   * @param depth :: recursive split depth
    * @param extentsVector :: size of the box
    */
   TMDE(MDGridBox)::MDGridBox(BoxController_sptr bc, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector)
@@ -777,14 +778,9 @@ namespace MDEvents
    *
    * @param ts :: optional ThreadScheduler * that will be used to parallelize
    *        recursive splitting. Set to NULL to do it serially.
-   * @param newBoxes :: optional pointer to a vector that will be filled with the
-   *        newly created boxes.
-   * @param newBoxesMutex :: must specify this mutex for parallel splitting of boxes.
-   *        The mutex protects the newBoxes vector.
    */
   TMDE(
-  void MDGridBox)::splitAllIfNeeded(ThreadScheduler * ts
-      /*,std::vector<IMDBox<MDE,nd>*> * newBoxes, Mantid::Kernel::Mutex * newBoxesMutex */ )
+  void MDGridBox)::splitAllIfNeeded(ThreadScheduler * ts)
   {
     DiskMRU & mru = this->m_BoxController->getDiskMRU();
     mru.setNumberOfObjects( this->m_BoxController->getMaxId() );
@@ -1004,15 +1000,6 @@ namespace MDEvents
 
 
 
-//  //-----------------------------------------------------------------------------------------------
-//  /** General (non-axis-aligned) centerpoint binning method.
-//   * TODO: TEST THIS!
-//   *
-//   * @param bin :: a MDBin object giving the limits, aligned with the axes of the workspace,
-//   *        of where the non-aligned bin MIGHT be present.
-//   * @param function :: a ImplicitFunction that will evaluate true for any coordinate that is
-//   *        contained within the (non-axis-aligned) bin.
-//   */
 //  TMDE(
 //  void MDGridBox)::generalBin(MDBin<MDE,nd> & bin, Mantid::API::ImplicitFunction & function) const
 //  {
@@ -1208,8 +1195,8 @@ namespace MDEvents
    * @param radiusTransform :: nd-to-1 coordinate transformation that converts from these
    *        dimensions to the distance (squared) from the center of the sphere.
    * @param radiusSquared :: radius^2 below which to integrate
-   * @param[out] signal :: set to the integrated signal
-   * @param[out] errorSquared :: set to the integrated squared error.
+   * @param signal [out] :: set to the integrated signal
+   * @param errorSquared [out] :: set to the integrated squared error.
    */
   TMDE(
   void MDGridBox)::integrateSphere(CoordTransform & radiusTransform, const coord_t radiusSquared, signal_t & signal, signal_t & errorSquared) const

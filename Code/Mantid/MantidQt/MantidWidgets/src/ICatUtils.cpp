@@ -128,7 +128,10 @@ namespace MantidQt
 
     }
     /**This method is called when an investigation is selected  from investigations list
+     *@param tablewidget :: pointer to the current table widget
      *@param item ::  table widget item
+     *@param parent :: the parent widget for item
+     *@param ws_sptr :: pointer to a table workspace
      */
     void ICatUtils::investigationSelected(QTableWidget* tablewidget,QTableWidgetItem* item,
         QWidget* parent,Mantid::API::ITableWorkspace_sptr ws_sptr )
