@@ -140,7 +140,7 @@ namespace Mantid
           this->getLogger().warning() << "Unable to load event_frame_number - filtering events by time will not work " << std::endl;
         }
         file.openPath("/"+entry_name);
-        if (event_frame_number.size() > 0)   // ISIS indirection - see above comments
+        if (!event_frame_number.empty())   // ISIS indirection - see above comments
         {
           Kernel::TimeSeriesProperty<double>* pcharge = new Kernel::TimeSeriesProperty<double>("proton_charge");
           std::vector<double> pval;

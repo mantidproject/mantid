@@ -1356,7 +1356,7 @@ bool LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename, API::Mat
 
 
     // Use the first pulse as the run_start time.
-    if (temp.size() > 0)
+    if (!temp.empty())
     {
       Kernel::DateAndTime run_start = localWorkspace->getFirstPulseTime();
       // add the start of the run as a ISO8601 date/time string. The start = first non-zero time.
@@ -1397,7 +1397,7 @@ void LoadEventNexus::createSpectraMapping(const std::string &nxsfile,
     // Only build the map for the single bank
     std::vector<IDetector_const_sptr> dets;
     WS->getInstrument()->getDetectorsInBank(dets, bankName);
-    if (dets.size() > 0)
+    if (!dets.empty())
     {
       SpectraDetectorMap *singlebank = new API::SpectraDetectorMap;
       // Make an event list for each.

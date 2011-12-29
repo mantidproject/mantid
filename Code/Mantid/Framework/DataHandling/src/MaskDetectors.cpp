@@ -148,7 +148,7 @@ void MaskDetectors::exec()
     }
   }
   
-  if ( indexList.size() == 0 )
+  if ( indexList.empty() )
   {
       g_log.warning("No spectra affected.");
       return;
