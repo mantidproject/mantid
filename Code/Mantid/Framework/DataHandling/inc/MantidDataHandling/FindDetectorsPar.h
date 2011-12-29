@@ -5,7 +5,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include <fstream>
-/** An algorithm to calculate the angular coordinates of the workspace's detectors, as they can be viewed from a sample (par or phx data)
+/**
+    An algorithm to calculate the angular coordinates of the workspace's detectors, as they can be viewed from a sample (par or phx data)
 
     Properties:
     <UL>
@@ -24,11 +25,9 @@
     <UL><LI> azimuthal_width       - A column  containing the detectors azimuthal angular width</LI></UL>
     <UL><LI> polar_width           - A column  containing the detectors polar angular width</LI></UL>
 
-  When OutputTable workspace name is empty, the tabled workspace is not defined. To get access to the resulting arrays, 
-  the algorithm user has to deploy accessors (getAzimuthal(), getPolar() etc.), defined below, which allows avoiding the
-  transformation of these arrays into strings. 
-
-
+    When OutputTable workspace name is empty, the tabled workspace is not defined. To get access to the resulting arrays,
+    the algorithm user has to deploy accessors (getAzimuthal(), getPolar() etc.), defined below, which allows avoiding the
+    transformation of these arrays into strings.
 
     @author Alex Buts ISIS; initially extracted from Stuart Campbell's SaveNXSPE algorithm,
     @date 17/05/2012
@@ -69,12 +68,12 @@ namespace DataHandling
 *     par(5,ndet)         contents of array
 *
 *         1st column      sample-detector distance
-*         2nd  "          scattering angle (deg)
-*         3rd  "          azimuthal angle (deg)
+*         2nd  &quot;          scattering angle (deg)
+*         3rd  &quot;          azimuthal angle (deg)
 *                     (west bank = 0 deg, north bank = -90 deg etc.)
 *                     (Note the reversed sign convention cf .phx files)
-*         4th  "          width (m)
-*         5th  "          height (m)
+*         4th  &quot;          width (m)
+*         5th  &quot;          height (m)
 *-----------------------------------------------------------------------
 *2) load an ASCII phx file
 *
@@ -84,10 +83,10 @@ namespace DataHandling
 *     Recall that only the 3,4,5,6 columns in the file (rows in the
 *     output of this routine) contain useful information
 *         3rd column      scattering angle (deg)
-*         4th  "          azimuthal angle (deg)
+*         4th  &quot;          azimuthal angle (deg)
 *                     (west bank = 0 deg, north bank = 90 deg etc.)
-*         5th  "          angular width (deg)
-*         6th  "          angular height (deg)
+*         5th  &quot;          angular width (deg)
+*         6th  &quot;          angular height (deg)
 *-----------------------------------------------------------------------
 */
 enum fileTypes{

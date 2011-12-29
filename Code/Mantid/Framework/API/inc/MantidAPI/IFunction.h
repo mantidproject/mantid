@@ -243,7 +243,7 @@ public:
   virtual const std::string category() const { return "General";}
 
   /// Function you want to fit to. 
-  /// @param out :: The buffer for writing the calculated values. Must be big enough to accept dataSize() values
+  /// @param domain :: The buffer for writing the calculated values. Must be big enough to accept dataSize() values
   virtual void function(FunctionDomain& domain)const = 0;
   /// Derivatives of function with respect to active parameters
   virtual void functionDeriv(FunctionDomain& domain, Jacobian& jacobian);

@@ -525,10 +525,6 @@ namespace DataObjects
    * This requires that a non-empty spectra-detector map
    * Can do it in parallel, though my time tests show it takes MORE time in parallel :(
    * This calls doneAddingEventLists() to finalize after the end.
-   *
-   * @param parallel: set to true to perform this padding in parallel, which
-   *        may increase speed, though my tests show it slows it down.
-   *
    */
   void EventWorkspace::padSpectra()
   {

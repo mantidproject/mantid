@@ -13,6 +13,7 @@ namespace DataObjects
   //----------------------------------------------------------------------------------------------
   /** Constructor
    * @param peaks :: vector of peaks
+   * @param name :: name for the column
    */
   PeakColumn::PeakColumn(std::vector<Peak> & peaks, std::string name) :
       peaks(peaks)

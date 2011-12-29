@@ -30,8 +30,9 @@ namespace API
   Kernel::Logger& IFunctionMD::g_log = Kernel::Logger::get("IFunctionMD");
 
   /** Set the workspace
-    * @param ws :: A shared pointer to a workspace.
-  */
+   * @param ws :: A shared pointer to a workspace.
+   * @param copyData :: If true, copy the data to WS
+   */
   void IFunctionMD::setWorkspace(boost::shared_ptr<const Workspace> ws,bool copyData)
   {
     try
