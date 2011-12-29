@@ -417,6 +417,23 @@ private:
   QwtSymbol(const QwtSymbol&);
 };
 
+class ImageSymbol : QwtSymbol
+{
+%TypeHeaderCode
+#include <plot2D/ImageSymbol.h>
+%End
+
+public:
+  ImageSymbol(const QString& fileName);
+  ImageSymbol(const QPixmap& pixmap, const QString& fileName = QString());
+
+  QPixmap pixmap();
+  QString imagePath();
+
+private:
+  ImageSymbol(const ImageSymbol&);
+};
+
 
 class ArrowMarker // : QwtPlotMarker
 {

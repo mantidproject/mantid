@@ -124,6 +124,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/UserFunction.cpp
                    src/VectorCurve.cpp
                    src/origin/OPJFile.cpp
+                   src/plot2D/ImageSymbol.cpp
                    src/plot2D/ScaleEngine.cpp
                    src/analysis/fft2D.cpp
                    src/lib/src/CollapsiveGroupBox.cpp
@@ -348,6 +349,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/VectorCurve.h
                    src/analysis/fft2D.h
                    src/origin/OPJFile.h
+                   src/plot2D/ImageSymbol.h
                    src/plot2D/ScaleEngine.h
                    src/lib/include/CollapsiveGroupBox.h
                    src/lib/include/ColorBox.h
