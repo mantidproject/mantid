@@ -21,6 +21,7 @@
 #include "MantidKernel/Quat.h"
 
 #include "MantidPythonAPI/stl_proxies.h"
+#include "MantidKernel/Memory.h"
 
 namespace Mantid
 {
@@ -82,6 +83,17 @@ namespace PythonAPI
         .def(self == self)
         .def(self != self)
         .def(self_ns::str(self))
+        ;
+
+      // MemoryStats class
+      class_< MemoryStats >("MemoryStats", init<>("Construct MemoryStats object."))
+            .def("update", &MemoryStats::update)
+            .def("totalMem", &MemoryStats::totalMem)
+            .def("availMem", &MemoryStats::availMem)
+            .def("residentMem", &MemoryStats::residentMem)
+            .def("virtualMem", &MemoryStats::virtualMem)
+            .def("reservedMem", &MemoryStats::reservedMem)
+            .def("getFreeRatio", &MemoryStats::getFreeRatio)
         ;
     }
 
