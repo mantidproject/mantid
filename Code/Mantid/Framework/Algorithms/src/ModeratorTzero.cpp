@@ -171,6 +171,8 @@ void ModeratorTzero::exec()
       {
       	outbins[j] = this->scaling*inbins[j] + offset;
       }
+      g_log.debug() << "inbins[0]=" << inbins[0] << " outbins[0]=" << outbins[0] << std::endl;
+      g_log.debug() << "inbins[last] " << inbins[inbins.size()-1] << " outbins[last]" << outbins[inbins.size()-1] << std::endl;
     }else
     {
       outputWS->dataX(i) = inputWS->dataX(i);
@@ -234,7 +236,7 @@ void ModeratorTzero::execEvent(){
   for (int64_t i = 0; i < int64_t(numHists); ++i)
   {
 	//PARALLEL_START_INTERUPT_REGION
-	EventList evlist=outputWS->getEventList(i);
+	EventList &evlist=outputWS->getEventList(i);
 	if( evlist.getNumberEvents() > 0 ) //don't bother with empty lists
 	{
 	  // Calculate the time from sample to detector 'i'
@@ -242,9 +244,10 @@ void ModeratorTzero::execEvent(){
 	  if(t_f > 0)
 	  {
 		//Calculate new time of flight, TOF'=scaling*(TOF-t_f-intercept)+t_f = scaling*TOF + (1-scaling)*t_f - scaling*intercept
-		evlist.scaleTof(this->scaling);
-		const double offset = (1-this->scaling)*t_f - this->scaling*intercept; //Will also fix the histogram bins
-		evlist.addTof(offset);
+		g_log.debug() << evlist.dataX()[0] << " " << evlist.dataX()[1] << std::endl;
+		evlist.convertTof(this->scaling, (1-this->scaling)*t_f - this->scaling*intercept);
+		g_log.debug() << this->scaling << " " << (1-this->scaling)*t_f - this->scaling*intercept << std::endl;
+		g_log.debug() << evlist.dataX()[0] << " " << evlist.dataX()[1] << std::endl;
 	  }
 	}
     prog.report();
