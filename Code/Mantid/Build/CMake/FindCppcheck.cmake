@@ -96,9 +96,11 @@ function(add_cppcheck _name) # additional arguments are files to ignore
       return() # nothing to check
     endif ( NOT _files)
 
+    # set the standard arguments
     set ( _cppcheck_args )
-    list ( APPEND _cppcheck_args ${CPPCHECK_TEMPLATE_ARG} ${CPPCHECK_ARGS} )
+    list ( APPEND _cppcheck_args ${CPPCHECK_TEMPLATE_ARG} ${CPPCHECK_ARGS} "-I" "${CMAKE_CURRENT_SOURCE_DIR}/inc" )
 
+    # add the target
     if (CPPCHECK_GENERATE_XML )
       add_custom_target( cppcheck_${_name}
                          COMMAND ${CPPCHECK_EXECUTABLE} ${_cppcheck_args} --xml --xml-version=2 ${_files} 2> ${CMAKE_BINARY_DIR}/cppcheck-${_name}.xml 
