@@ -217,7 +217,6 @@ namespace Mantid
           message << "Can't open Calibration File: " << filename;
           g_log.error(message.str());
           throw std::runtime_error(message.str());
-          message.str("");
         }
       }
       else
