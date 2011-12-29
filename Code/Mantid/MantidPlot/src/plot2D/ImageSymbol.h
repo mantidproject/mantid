@@ -32,16 +32,16 @@
 class ImageSymbol: public QwtSymbol
 {
 public:
-	ImageSymbol(const QString& fileName);
-	ImageSymbol(const QPixmap& pixmap, const QString& fileName = QString());
+  ImageSymbol(const QString& fileName);
+  ImageSymbol(const QPixmap& pixmap, const QString& fileName = QString());
 
-	virtual ImageSymbol *clone() const;
-	virtual void draw(QPainter *p, const QRect &r) const;
+  virtual ImageSymbol *clone() const;
+  virtual void draw(QPainter *p, const QRect &r) const;
 
-	QPixmap pixmap(){return d_pixmap;};
-	QString imagePath(){return d_image_path;};
+  QPixmap pixmap(){return d_pixmap;};
+  QString imagePath(){return d_image_path;};
 
 private:
-	QString d_image_path;
-	QPixmap d_pixmap;
+  QString d_image_path;
+  QPixmap d_pixmap;
 };
