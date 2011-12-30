@@ -14,8 +14,10 @@ from mantidsimple import *
 TEST_DIR = ""
 data_search_dirs = ConfigService()["datasearch.directories"].split(';')
 for item in data_search_dirs:
-    if item.endswith("AutoTestData/"):
-        TEST_DIR = item.replace("AutoTestData", "Data/SANS2D")
+    if item.endswith("SANS2D/"):
+        TEST_DIR = item
+if len(TEST_DIR)==0:
+    raise RuntimeError, "Could not locate test data directory: [...]/Data/SANS2D"
 
 def _diff_iq(x,y): return x-y
 def _add(x,y): return x+y
@@ -172,15 +174,15 @@ class TestCommands(unittest.TestCase):
         DirectBeamCenter("BioSANS_empty_cell.xml")
         Reduce1D()
         center = ReductionSingleton()._beam_finder.get_beam_center()
-        self.assertAlmostEqual(center[0], 16.6038, 0.0001)
-        self.assertAlmostEqual(center[1], 96.771, 0.0001)
+        self.assertAlmostEqual(center[0], 16.6038, delta=0.0001)
+        self.assertAlmostEqual(center[1], 96.771, delta=0.0001)
         
     def test_hand_beam_center(self):
         HFIRSANS()
         SetBeamCenter(1.1, 2.2)
         center = ReductionSingleton()._beam_finder.get_beam_center()
-        self.assertAlmostEqual(center[0], 1.1, 0.0001)
-        self.assertAlmostEqual(center[1], 2.2, 0.0001)
+        self.assertAlmostEqual(center[0], 1.1, delta=0.0001)
+        self.assertAlmostEqual(center[1], 2.2, delta=0.0001)
         
     def test_load_run(self):
         HFIRSANS()
@@ -308,8 +310,8 @@ class TestCommands(unittest.TestCase):
         Reduce1D()
         
         data = mtd["BioSANS_test_data_Iq"].dataY(0)
-        self.assertAlmostEqual(data[0], 0.00418831, 0.00001)
-        self.assertAlmostEqual(data[10], 0.0042193, 0.00001)
+        self.assertAlmostEqual(data[0], 0.00418831, delta=0.00001)
+        self.assertAlmostEqual(data[10], 0.0042193, delta=0.00001)
 
     def test_transmission_by_hand(self):
         HFIRSANS()
@@ -489,24 +491,76 @@ class TestCommands(unittest.TestCase):
         for i in range(len(res)):
             self.assertAlmostEqual(res[i], ref[i], 5, "result point %d: %g, found %g" % (i, ref[i], res[i]))
         
-    def test_bck_transmission_beam_center(self):
+    def test_transmission_beam_center(self):
         HFIRSANS()
         DataPath(TEST_DIR)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml", "test_data")
         SensitivityCorrection("BioSANS_flood_data.xml", dark_current="BioSANS_dark_current.xml")
         DarkCurrent("BioSANS_dark_current.xml")
+        DirectBeamTransmission(sample_file="BioSANS_sample_trans.xml", empty_file="BioSANS_empty_trans.xml", beam_radius=10.0)
+        SetTransmissionBeamCenter(100,15)
+        AzimuthalAverage(binning="0.01,0.001,0.11", error_weighting=True)
+        Reduce1D()
+                
+        data = mtd["test_data_Iq"].dataY(0)
+        self.assertAlmostEqual(data[0], 0.195821, delta=0.00001)
+        self.assertAlmostEqual(data[10], 0.256210, delta=0.00001)
+        self.assertAlmostEqual(data[20], 0.257666, delta=0.00001)
+        
+    def test_bck_transmission_default_beam_center(self):
+        HFIRSANS()
+        DataPath(TEST_DIR)
+        DirectBeamCenter("BioSANS_empty_cell.xml")
+        AppendDataFile("BioSANS_test_data.xml", "test_data")
+        DarkCurrent("BioSANS_dark_current.xml")
         Background("BioSANS_test_data.xml")
         SetTransmission(0.6,0.1)
-        SetBckTransmission(0.6,0.1)
+        BckDirectBeamTransmission(sample_file="BioSANS_sample_trans.xml", empty_file="BioSANS_empty_trans.xml", beam_radius=10.0)
+        AzimuthalAverage(binning="0.01,0.001,0.11", error_weighting=True)
+        Reduce1D()
+                
+        data = mtd["test_data_Iq"].dataY(0)
+        self.assertAlmostEqual(data[0], -0.0682723, delta=0.00001)
+        self.assertAlmostEqual(data[10], -0.068800, delta=0.00001)
+        self.assertAlmostEqual(data[20], -0.066403, delta=0.00001)
+        
+    def test_bck_transmission_set_beam_center(self):
+        HFIRSANS()
+        DataPath(TEST_DIR)
+        DirectBeamCenter("BioSANS_empty_cell.xml")
+        AppendDataFile("BioSANS_test_data.xml", "test_data")
+        DarkCurrent("BioSANS_dark_current.xml")
+        Background("BioSANS_test_data.xml")
+        SetTransmission(0.6,0.1)
+        BckDirectBeamTransmission(sample_file="BioSANS_sample_trans.xml", empty_file="BioSANS_empty_trans.xml", beam_radius=10.0)
+        SetBckTransmissionBeamCenter(100,15)
+        AzimuthalAverage(binning="0.01,0.001,0.11", error_weighting=True)
+        Reduce1D()
+                
+        data = mtd["test_data_Iq"].dataY(0)
+        self.assertAlmostEqual(data[0], 0.1787709, delta=0.00001)
+        self.assertAlmostEqual(data[10], 0.1801518, delta=0.00001)
+        self.assertAlmostEqual(data[20], 0.1738586, delta=0.00001)
+        
+    def test_bck_transmission_direct_beam_center(self):
+        HFIRSANS()
+        DataPath(TEST_DIR)
+        #DirectBeamCenter("BioSANS_empty_cell.xml")
+        SetBeamCenter(100,15)
+        AppendDataFile("BioSANS_test_data.xml", "test_data")
+        DarkCurrent("BioSANS_dark_current.xml")
+        Background("BioSANS_test_data.xml")
+        SetTransmission(0.6,0.1)
+        BckDirectBeamTransmission(sample_file="BioSANS_sample_trans.xml", empty_file="BioSANS_empty_trans.xml", beam_radius=10.0)
         BckTransmissionDirectBeamCenter("BioSANS_empty_cell.xml")
         AzimuthalAverage(binning="0.01,0.001,0.11", error_weighting=True)
         Reduce1D()
                 
         data = mtd["test_data_Iq"].dataY(0)
-        self.assertAlmostEqual(data[0], 0.0,10)
-        self.assertAlmostEqual(data[10], 0.0,10)
-        self.assertAlmostEqual(data[20], 0.0,10)
+        self.assertAlmostEqual(data[0], -0.046791, delta=0.00001)
+        self.assertAlmostEqual(data[10], -0.047874, delta=0.00001)
+        self.assertAlmostEqual(data[20], -0.047785, delta=0.00001)
         
 if __name__ == '__main__':
     unittest.main()
