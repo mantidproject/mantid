@@ -259,9 +259,8 @@ public:
     dbuf.toWrite(data[2]);
     dbuf.toWrite(data[3]);
     dbuf.toWrite(data[4]);
-    // Things are written out
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 0);
-    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,1,2,3,4,");
+    // Nothing gets written out
+    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "");
   }
 
 
