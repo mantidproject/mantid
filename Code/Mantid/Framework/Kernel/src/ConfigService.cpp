@@ -306,14 +306,12 @@ ConfigServiceImpl::ConfigServiceImpl() :
   g_log.debug() << "ConfigService created." << std::endl;
   g_log.debug() << "Configured Mantid.properties directory of application as " << getPropertiesDir()
       << std::endl;
-  g_log.information() << "This is Mantid Version " << MantidVersion::version() << std::endl;
+  g_log.information() << "This is Mantid Version "
+                      << MantidVersion::version() << "-" << MantidVersion::revision() << std::endl;
   g_log.information() << "Properties file(s) loaded: " << propertiesFilesList << std::endl;
   g_log.information() << "Logging to: " << m_logFilePath << std::endl;
 
   this->setParaViewPluginPath();
-
-  // Make sure the log path is shown somewhere.
-  //std::cout << "Logging to: " << m_logFilePath << std::endl;
 }
 
 /** Private Destructor
