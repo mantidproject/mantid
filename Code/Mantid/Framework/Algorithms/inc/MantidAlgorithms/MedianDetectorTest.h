@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/DetectorDiagnostic.h"
-#include "MantidDataObjects/SpecialWorkspace2D.h"
 
 namespace Mantid
 {
@@ -84,9 +83,9 @@ namespace Mantid
       API::MatrixWorkspace_sptr getSolidAngles(int firstSpec, int lastSpec);
       /// Do the tests and mask those that fail
       int doDetectorTests(const API::MatrixWorkspace_sptr countWorkspace, 
-          DataObjects::SpecialWorkspace2D_sptr maskWS,
-          const double average,
-          const std::set<int> & badIndices);
+			  API::MatrixWorkspace_sptr maskWS,
+			  const double average, 
+			  const std::set<int> & badIndices);
 
       /// Input workspace
       API::MatrixWorkspace_sptr m_inputWS;

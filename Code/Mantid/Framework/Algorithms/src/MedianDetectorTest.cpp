@@ -46,7 +46,7 @@ namespace Mantid
                                 new HistogramValidator<>),
         "Name of the input workspace" );
       declareProperty(
-        new WorkspaceProperty<DataObjects::SpecialWorkspace2D>("OutputWorkspace","",Direction::Output),
+        new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
         "A MaskWorkspace where 0 denotes a masked spectra. Any spectra containing"
         "a zero is also masked on the output");
 
@@ -90,39 +90,43 @@ namespace Mantid
      */
     void MedianDetectorTest::exec()
     {
-      // 1. Get input arguments
       retrieveProperties();
 
-      // 2. Adds the counts from all the bins and puts them in one total bin
+      
+
+      //Adds the counts from all the bins and puts them in one total bin
       MatrixWorkspace_sptr counts = integrateSpectra(m_inputWS, m_minSpec, m_maxSpec, 
                                                      m_rangeLower, m_rangeUpper, true);
       counts = convertToRate(counts); 
 
-      // FIXME: The next section that calculates the solid angle is commented out until
-      //        the SolidAngle algorithm is corrected to return the correct number.
-      //        (see http://trac.mantidproject.org/mantid/ticket/2596)
-
+          // FIXME: The next section that calculates the solid angle is commented out until 
+          //        the SolidAngle algorithm is corrected to return the correct number.
+          //        (see http://trac.mantidproject.org/mantid/ticket/2596)
+          
       //MatrixWorkspace_sptr angles = getSolidAngles(m_minSpec, m_maxSpec);
 
       //Gets the count rate per solid angle (in steradians), if it exists, for each spectrum
       //this calculation is optional, it depends on angle information existing
       //if ( angles.use_count() == 1 )
       //{
-      //if some numbers in angles are zero we will get the infinity flag value
-      // in the output work space which needs to be dealt with later
-      //counts = counts/angles;
+                //if some numbers in angles are zero we will get the infinity flag value 
+                // in the output work space which needs to be dealt with later
+          //counts = counts/angles;     
       //}
-
+      
       // End of Solid Angle commented out section
            
 
-      // 3. An average of the data, the median is less influenced by a small number of huge values than the mean
+      // An average of the data, the median is less influenced by a small number of huge values than the mean
       std::set<int> badIndices;
       double average = calculateMedian(counts, badIndices);
 
-      // 4. Initialize output masking workspace
-      Geometry::Instrument_const_sptr myinstrument = m_inputWS->getInstrument();
-      DataObjects::SpecialWorkspace2D_sptr maskWS(new DataObjects::SpecialWorkspace2D(myinstrument));
+      // Create a workspace for the output
+      MatrixWorkspace_sptr maskWS = WorkspaceFactory::Instance().create(counts); 
+      // Make sure the output is simple
+      maskWS->isDistribution(false);
+      maskWS->setYUnit("");
+      maskWS->instrumentParameters().clear();
 
       int numFailed = doDetectorTests(counts, maskWS, average, badIndices);
 
@@ -223,8 +227,8 @@ namespace Mantid
      * @return The number of detectors that failed the tests, not including those skipped
      */
     int MedianDetectorTest::doDetectorTests(const API::MatrixWorkspace_sptr countWorkspace,
-        DataObjects::SpecialWorkspace2D_sptr maskWS,
-        const double average, const std::set<int> & badIndices)
+                                            API::MatrixWorkspace_sptr maskWS, 
+                                            const double average, const std::set<int> & badIndices)
     {
       g_log.information("Applying the criteria to find failing detectors");
   
@@ -238,87 +242,83 @@ namespace Mantid
       const int numSpec(m_maxSpec - m_minSpec);
       const int progStep = static_cast<int>(ceil(numSpec/30.0));
 
+      const double live_value(1.0);
       int numLow(0), numHigh(0);
-      size_t numBadPixels = 0;
       
       //set the workspace to have no units
       countWorkspace->isDistribution(false);
       countWorkspace->setYUnit("");
-
-      double liveValue = 1.0;
-      double deadValue = 0.0;
 
       PARALLEL_FOR1(countWorkspace)
       for (int i = 0; i <= numSpec; ++i)
       {
         PARALLEL_START_INTERUPT_REGION
           
-        // i. update the progressbar information
+        // update the progressbar information
         if (i % progStep == 0)
         {
           progress(advanceProgress(progStep*static_cast<double>(RTMarkDetects)/numSpec));
         }
 
 
-        // ii. If the value is not in the badIndices set then assume it is good
-        //     else skip tests for it
+        // If the value is not in the badIndices set then assume it is good
+        // else skip tests for it
         if( badIndices.count(i) == 1 )
         {
-          // Bad pixel
-          maskWS->dataY(i)[0] = deadValue;
-          numBadPixels ++;
-
-        } else {
-          //Good pixel: do tests
-
-          const double sig = minSigma*countWorkspace->readE(i)[0];
-
-          // (a) Check the significance value is okay
-          if( boost::math::isinf(std::abs(sig)) || boost::math::isinf(sig) )
+          maskWS->maskWorkspaceIndex(i);
+          continue;
+        }
+        //Do tests
+        const double sig = minSigma*countWorkspace->readE(i)[0];
+        // Check the significance value is okay
+        if( boost::math::isinf(std::abs(sig)) || boost::math::isinf(sig) )
+        {
+          PARALLEL_CRITICAL(MedianDetectorTest_failed_a)
           {
-            // sig is infinity
-            PARALLEL_CRITICAL(MedianDetectorTest_failed_a)
+            maskWS->maskWorkspaceIndex(i);
+            ++numLow;
+          }
+          continue;
+        }
+
+        const double yIn = countWorkspace->dataY(i)[0];
+        if ( yIn <= lowLim )
+        {
+          // compare the difference against the size of the errorbar -statistical significance check
+          if(average - yIn > sig)
+          {
+            PARALLEL_CRITICAL(MedianDetectorTest_failed_b)
             {
-              maskWS->dataY(i)[0] = deadValue;
+              maskWS->maskWorkspaceIndex(i);
               ++numLow;
             }
-          } else {
-            // sig is not infinity
-            const double yIn = countWorkspace->dataY(i)[0];
-            if ( (yIn <= lowLim) && (average - yIn > sig))
+            continue;
+          }
+        }
+        if (yIn >= highLim)
+        {
+          // compare the difference against the size of the errorbar -statistical significance check
+          if(yIn - average > sig)
+          {
+            PARALLEL_CRITICAL(MedianDetectorTest_failed_c)
             {
-              // compare the difference against the size of the errorbar -statistical significance check
-              PARALLEL_CRITICAL(MedianDetectorTest_failed_b)
-              {
-                maskWS->dataY(i)[0] = deadValue;
-                ++numLow;
-              }
+              maskWS->maskWorkspaceIndex(i);
+              ++numHigh;
             }
-            else if ( (yIn >= highLim) && (yIn - average > sig) )
-            {
-              // compare the difference against the size of the errorbar -statistical significance check
-              PARALLEL_CRITICAL(MedianDetectorTest_failed_c)
-              {
-                maskWS->dataY(i)[0] = deadValue;
-                ++numHigh;
-              }
-            } else {
-              // Reaching here passes the tests
-              maskWS->dataY(i)[0] = liveValue;
-
-            } // IF-ELSE: test
-          } // IF-ELSE: Sig is infinity?
-        } // IF-ELSE: Bad/good pixels
+            continue;
+          }
+        }
+        // Reaching here passes the tests
+        maskWS->dataY(i)[0] = live_value;
         
         PARALLEL_END_INTERUPT_REGION
-      } // ENDFOR
+      }
       PARALLEL_CHECK_INTERUPT_REGION
 
       // Log finds
       g_log.information() << "-- Detector tests --\n " 
                           << "Number recording low: " << numLow << "\n"
-                          << "Number recording high: " << numHigh << "\n"
-                          << "Number bad pixels: << " << numBadPixels << std::endl;
+                          << "Number recording high: " << numHigh << "\n";
       
       return (numLow + numHigh);
     }
