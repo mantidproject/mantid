@@ -88,10 +88,7 @@ namespace Algorithms
     spec2index_map * spec2indexmap = workspace->getSpectrumToWorkspaceIndexMap();
 
     // 2. Check validity
-    bool userL1 = true;
-    if (l1 <= 0){
-        userL1 = false;
-    } else {
+    if (l1 > 0){
         g_log.information() << "L1 = " << l1 << "  # Detector = " << std::endl;
     }
 
