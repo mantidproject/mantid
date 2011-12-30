@@ -170,7 +170,7 @@ def getSliceViewer(source, label=""):
         raise Exception("Please specify only one workspace.")
     else:
         svw = mantidqtpython.MantidQt.Factory.WidgetFactory.Instance().getSliceViewerWindow(workspace_names[0], label)
-        return SliceViewerWindowProxy(svw)
+        return proxies.SliceViewerWindowProxy(svw)
 
 
 #-----------------------------------------------------------------------------

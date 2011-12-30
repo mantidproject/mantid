@@ -805,7 +805,11 @@ foreach ( PYFILE ${PYTHON_INSTALL_FILES} )
   configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} COPYONLY ) 
 endforeach ( PYFILE ${PYTHON_INSTALL_FILES} )
 
-file ( COPY mantidplot DESTINATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} )
+add_custom_command ( TARGET MantidPlot POST_BUILD
+                     COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory
+                       ${CMAKE_CURRENT_SOURCE_DIR}/mantidplot
+                       ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/mantidplot
+)
 
 ###########################################################################
 # MantidPlot Python Unit Tests
