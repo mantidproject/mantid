@@ -49,7 +49,7 @@ class DLLExport Power: public UnaryOperation
 {
 public:
   /// Default constructor
-  Power() : UnaryOperation()  {} ;
+  Power() ;
   /// Destructor
   virtual ~Power() {};
   /// Algorithm's name for identification

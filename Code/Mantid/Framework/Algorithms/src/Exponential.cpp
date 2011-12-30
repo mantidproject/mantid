@@ -28,6 +28,10 @@ namespace Mantid
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(Exponential)
     
+    Exponential::Exponential(): UnaryOperation()
+    {
+      this->useHistogram=true;
+    }
     /// Sets documentation strings for this algorithm
     void Exponential::initDocs()
     {
