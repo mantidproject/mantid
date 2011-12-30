@@ -12,6 +12,7 @@ import os
 import unittest
 import time
 import qti
+import proxies
 from PyQt4 import QtGui, QtCore
 
 # Try to import QTest. Not available on Windows?
