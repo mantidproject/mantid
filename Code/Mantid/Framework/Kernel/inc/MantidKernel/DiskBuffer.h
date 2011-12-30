@@ -143,9 +143,17 @@ namespace Kernel
     void setFileLength(const uint64_t length)
     { m_fileLength = length; }
 
+    //-------------------------------------------------------------------------------------------
+    /** @return the file-access mutex */
+    Kernel::Mutex & getFileMutex()
+    { return m_fileMutex; }
+
 
   protected:
     inline void writeOldObjects();
+
+    /// Mutex for accessing the file being buffered
+    Kernel::Mutex m_fileMutex;
 
     // ----------------------- To-write buffer --------------------------------------
     /// Do we use the write buffer?

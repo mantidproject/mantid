@@ -475,10 +475,6 @@ namespace API
     /// Do we use the DiskBuffer at all?
     bool m_useWriteBuffer;
 
-  public:
-    /// Mutex for locking access to the file, for file-back-end MDBoxes.
-    Mantid::Kernel::Mutex fileMutex;
-
   private:
     /// Number of bytes in a single MDLeanEvent<> of the workspace.
     size_t m_bytesPerEvent;

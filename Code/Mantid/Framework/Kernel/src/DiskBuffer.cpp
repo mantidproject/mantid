@@ -142,6 +142,9 @@ namespace Kernel
     writeBuffer_t couldNotWrite;
     size_t memoryNotWritten = 0;
 
+    // Prevent simultaneous file access (e.g. write while loading)
+    m_fileMutex.lock();
+
     // Iterate through the map
     writeBuffer_t::iterator it = m_writeBuffer.begin();
     writeBuffer_t::iterator it_end = m_writeBuffer.end();
@@ -174,6 +177,8 @@ namespace Kernel
     // Exchange with the new map you built out of the not-written blocks.
     m_writeBuffer.swap(couldNotWrite);
     m_writeBufferUsed = memoryNotWritten;
+
+    m_fileMutex.unlock();
   }
 
 

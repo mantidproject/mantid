@@ -178,17 +178,19 @@ namespace MDEvents
       ::NeXus::File * file = this->m_BoxController->getFile();
       if (file)
       {
-        this->m_BoxController->fileMutex.lock();
+        // Mutex for disk access (prevent read/write at the same time)
+        Kernel::Mutex & mutex = this->m_BoxController->getDiskBuffer().getFileMutex();
+        mutex.lock();
         // Note that this APPENDS any events to the existing event list
         //  (in the event that addEvent() was called for a box that was on disk)
         try
         {
           MDE::loadVectorFromNexusSlab(data, file, m_fileIndexStart, m_fileNumEvents);
-          this->m_BoxController->fileMutex.unlock();
+          mutex.unlock();
         }
         catch (std::exception &)
         {
-          this->m_BoxController->fileMutex.unlock();
+          mutex.unlock();
           throw;
         }
         m_inMemory = true;
