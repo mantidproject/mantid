@@ -73,7 +73,7 @@ namespace Algorithms
     API::MatrixWorkspace_sptr oprawws;
     Mantid::DataObjects::SpecialWorkspace2D_sptr outputws;
 
-    std::string outputwsname = getPropertyValue("OutputWorkspace");
+    // std::string outputwsname = getPropertyValue("OutputWorkspace");
     // std::string inputws1name = getPropertyValue("InputWorkspace1");
 
     outputws = getProperty("OutputWorkspace");
