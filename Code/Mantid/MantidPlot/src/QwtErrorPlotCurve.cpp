@@ -102,7 +102,9 @@ void QwtErrorPlotCurve::drawErrorBars(QPainter *painter, const QwtScaleMap &xMap
   else if (d_master_curve->type() == Graph::HorizontalBars)
     d_yOffset = ((QwtBarCurve *) d_master_curve)->dataOffset();
 
-  for (int i = from; i <= to; i++)
+  int skipPoints = d_master_curve->skipSymbolsCount();
+
+  for (int i = from; i <= to; i += skipPoints)
   {
     const int xi = xMap.transform(x(i) + d_xOffset);
     const int yi = yMap.transform(y(i) + d_yOffset);
