@@ -76,7 +76,7 @@ namespace Kernel
     m_mutex.lock();
 
     // And put it in the queue of stuff to write.
-    std::cout << "DiskBuffer adding ID " << item->getId() << " to current size " << m_writeBuffer.size() << std::endl;
+//    std::cout << "DiskBuffer adding ID " << item->getId() << " to current size " << m_writeBuffer.size() << std::endl;
     std::pair<writeBuffer_t::iterator,bool> result = m_writeBuffer.insert(item);
 
     // Result.second is FALSE if the item was already there

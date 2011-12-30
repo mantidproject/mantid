@@ -76,7 +76,7 @@ namespace MDEvents
     if (!bc)
       throw std::runtime_error("MDGridBox::ctor(): No BoxController specified in box.");
 
-    std::cout << "Splitting MDBox ID " << box->getId() << " with " << box->getNPoints() << " events into MDGridBox" << std::endl;
+//    std::cout << "Splitting MDBox ID " << box->getId() << " with " << box->getNPoints() << " events into MDGridBox" << std::endl;
 
     // Steal the ID from the parent box that is being split.
     this->setId( box->getId() );
@@ -559,23 +559,6 @@ namespace MDEvents
 
       // OK, now we have an array saying which vertex is contained by which plane.
 
-
-//      if (1)
-//      {
-//        for (size_t p=0; p<numPlanes; p++)
-//        {
-//          std::cout << "Plane " << p << " normal " << Strings::join(function->getPlane(p).getNormal(), function->getPlane(p).getNormal()+2, ",") << std::endl;
-//          for (size_t y=0; y<5; y++)
-//          {
-//            for (size_t x=0; x<5; x++)
-//            {
-//              std::cout <<  vertexContained[p*numVertices + y*5 + x] << " ";
-//            }
-//            std::cout << std::endl;
-//          }
-//        }
-//      }
-
       // This is the number of vertices for each box, e.g. 8 in 3D
       size_t verticesPerBox = 1 << nd;
 
@@ -657,7 +640,6 @@ namespace MDEvents
 
           if (numPlanesWithAllVertexes == numPlanes)
           {
-//            std::cout << " is fully contained." << std::endl;
             // All planes have all vertexes
             // The box is FULLY CONTAINED
             // So we can get ALL children and don't need to check the implicit function
@@ -665,7 +647,6 @@ namespace MDEvents
           }
           else
           {
-//            std::cout << " is touching." << std::endl;
             // There is a chance the box is touching. Keep checking with implicit functions
             box->getBoxes(outBoxes, maxDepth, leafOnly, function);
           }
