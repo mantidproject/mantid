@@ -791,7 +791,7 @@ endif( WIN32 )
 # Now copy the required python files into the build destination
 ###########################################################################
 
-set ( PYTHON_INSTALL_FILES qtiplotrc.py qtiUtil.py mantidplot.py mantidplotrc.py )
+set ( PYTHON_INSTALL_FILES qtiplotrc.py qtiUtil.py mantidplotrc.py )
 foreach ( PYFILE ${PYTHON_INSTALL_FILES} )
   # Command to copy when MantidPlot rebuilds. Does not work if the .py files ONLY were modified!
   add_custom_command ( TARGET MantidPlot POST_BUILD 
@@ -804,6 +804,8 @@ foreach ( PYFILE ${PYTHON_INSTALL_FILES} )
   # Perform a copy at cmake run time
   configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} COPYONLY ) 
 endforeach ( PYFILE ${PYTHON_INSTALL_FILES} )
+
+file ( COPY mantidplot DESTINATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} )
 
 ###########################################################################
 # MantidPlot Python Unit Tests
@@ -868,6 +870,7 @@ install ( TARGETS MantidPlot RUNTIME DESTINATION ${BIN_DIR}
                              BUNDLE DESTINATION .
 )
 install ( FILES ${PYTHON_INSTALL_FILES} DESTINATION ${BIN_DIR} )
+install ( DIRECTORY mantidplot DESTINATION ${BIN_DIR} )
 
 if ( APPLE )
   configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/FixBundle.cmake.in
