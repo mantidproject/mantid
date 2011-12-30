@@ -292,6 +292,8 @@ public slots:
   void setCurveLineColor(int curveIndex, QColor qColor);
   void setCurveLineStyle(int curveIndex, Qt::PenStyle style);
   void setCurveLineWidth(int curveIndex, double width);
+  void setGrayScale();
+  void setIndexedColors();
   //@}
 
   //! \name Output: Copy/Export/Print

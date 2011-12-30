@@ -689,6 +689,9 @@ public:
   void setCurveLineColor(int, QColor);
   void setCurveLineStyle(int, Qt::PenStyle);
   void setCurveLineWidth(int, double);
+  void setGrayScale();
+  void setIndexedColors();
+
   void setCurveSymbol(int, const QwtSymbol&);
   void setCurvePen(int, const QPen&);
   void setCurveBrush(int, const QBrush&);
