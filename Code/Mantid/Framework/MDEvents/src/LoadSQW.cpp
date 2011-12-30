@@ -194,7 +194,7 @@ namespace Mantid
       // For tracking when to split boxes
       size_t eventsAdded = 0;
       BoxController_sptr bc = ws->getBoxController();
-      DiskBuffer & mru = bc->getDiskBuffer();
+      DiskBuffer & dbuf = bc->getDiskBuffer();
 
       for (int blockNum=0; blockNum < numBlocks; blockNum++)
       {
@@ -267,7 +267,7 @@ namespace Mantid
           tp.joinAll();
 
           // Flush the cache - this will save things out to disk
-          mru.flushCache();
+          dbuf.flushCache();
           // Flush memory
           Mantid::API::MemoryManager::Instance().releaseFreeMemory();
           eventsAdded = 0;

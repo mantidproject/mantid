@@ -13,7 +13,7 @@ namespace Kernel
   /** Constructor
    */
   DiskMRU::DiskMRU()
-  : m_useMRU(true),
+  : m_useWriteBuffer(true),
     m_mru_byId( m_mru.get<1>() ),
     m_mruSize(100),
     m_mruUsed(0),
@@ -41,7 +41,7 @@ namespace Kernel
    * @return
    */
   DiskMRU::DiskMRU(uint64_t m_mruSize, uint64_t m_writeBufferSize, uint64_t smallBufferSize)
-  : m_useMRU(m_mruSize > 0),
+  : m_useWriteBuffer(m_mruSize > 0),
     m_mru_byId( m_mru.get<1>() ),
     m_mruSize(m_mruSize),
     m_mruUsed(0),
@@ -81,7 +81,7 @@ namespace Kernel
     if (item == NULL) return;
     m_mruMutex.lock();
 
-    if (m_useMRU)
+    if (m_useWriteBuffer)
     {
       // Place the item in the MRU list
       std::pair<mru_t::iterator,bool> p;
@@ -159,7 +159,7 @@ namespace Kernel
           m_writeBufferUsed += item->getMRUMemorySize();
         }
       }
-    } // end (not using the mru)
+    } // end (not using the dbuf)
 
 
     if (m_useWriteBuffer)

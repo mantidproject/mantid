@@ -394,7 +394,7 @@ using namespace boost::python;
             .def("getAverageDepth", &BoxController::getAverageDepth)
             .def("isFileBacked", &BoxController::isFileBacked)
             .def("getFilename", &BoxController::getFilename, return_value_policy< copy_const_reference >())
-            .def("useMRU", &BoxController::useMRU)
+            .def("useWriteBuffer", &BoxController::useWriteBuffer)
         ;
   }
 

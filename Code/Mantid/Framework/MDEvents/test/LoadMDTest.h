@@ -242,8 +242,8 @@ public:
     {
       // Force a flush of the read-write cache
       BoxController_sptr bc = ws->getBoxController();
-      DiskBuffer & mru = bc->getDiskBuffer();
-      mru.flushCache();
+      DiskBuffer & dbuf = bc->getDiskBuffer();
+      dbuf.flushCache();
 
       typename std::vector<IMDBox<MDE,nd>*> boxes;
       ws->getBox()->getBoxes(boxes, 1000, false);

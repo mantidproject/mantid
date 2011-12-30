@@ -273,7 +273,7 @@ namespace MDEvents
     }
 
     // Complete the file-back-end creation.
-    DiskBuffer & mru = bc->getDiskBuffer(); UNUSED_ARG(mru);
+    DiskBuffer & dbuf = bc->getDiskBuffer(); UNUSED_ARG(dbuf);
     g_log.notice() << "Setting cache to 400 MB write." << std::endl;
     bc->setCacheParameters(sizeof(MDE), 400000000/sizeof(MDE));
 
@@ -395,7 +395,7 @@ namespace MDEvents
     bc->setSplitThreshold(5000);
 
     // Complete the file-back-end creation.
-    DiskBuffer & mru = bc->getDiskBuffer(); UNUSED_ARG(mru);
+    DiskBuffer & dbuf = bc->getDiskBuffer(); UNUSED_ARG(dbuf);
     g_log.notice() << "Setting cache to 400 MB write." << std::endl;
     bc->setCacheParameters(sizeof(MDE), 400000000/sizeof(MDE));
 

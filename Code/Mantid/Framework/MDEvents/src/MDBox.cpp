@@ -80,7 +80,7 @@ namespace MDEvents
   void MDBox)::clear()
   {
     // Make sure the object is not in any of the disk MRUs, and mark any space it used as free
-    if (this->m_BoxController->useMRU())
+    if (this->m_BoxController->useWriteBuffer())
       this->m_BoxController->getDiskBuffer().objectDeleted(this, m_fileNumEvents);
     // Clear all contents
     this->m_signal = 0.0;
@@ -255,7 +255,7 @@ namespace MDEvents
       // Data vector is no longer busy.
       this->m_dataBusy = false;
       // If no write buffer is used, save it immediately if needed.
-      if (!this->m_BoxController->useMRU())
+      if (!this->m_BoxController->useWriteBuffer())
         this->save();
     }
   }
@@ -280,11 +280,11 @@ namespace MDEvents
 
       // This is the new size of the event list, possibly appended (if used AddEvent) or changed otherwise (non-const access)
       size_t newNumEvents = data.size();
-      DiskBuffer & mru = this->m_BoxController->getDiskBuffer();
+      DiskBuffer & dbuf = this->m_BoxController->getDiskBuffer();
       if (newNumEvents != m_fileNumEvents)
       {
         // Event list changed size. The MRU can tell us where it best fits now.
-        m_fileIndexStart = mru.relocate(m_fileIndexStart, m_fileNumEvents, newNumEvents);
+        m_fileIndexStart = dbuf.relocate(m_fileIndexStart, m_fileNumEvents, newNumEvents);
         m_fileNumEvents = newNumEvents;
         if (newNumEvents > 0)
         {

@@ -13,7 +13,6 @@ set ( SRC_FILES
 	src/DateValidator.cpp
 	src/DirectoryValidator.cpp
 	src/DiskBuffer.cpp
-	src/DiskMRU.cpp
 	src/DllOpen.cpp
 	src/EmptyValues.cpp
 	src/EnabledWhenProperty.cpp
@@ -110,7 +109,6 @@ set ( INC_FILES
 	inc/MantidKernel/DateValidator.h
 	inc/MantidKernel/DirectoryValidator.h
 	inc/MantidKernel/DiskBuffer.h
-	inc/MantidKernel/DiskMRU.h
 	inc/MantidKernel/DllConfig.h
 	inc/MantidKernel/DllOpen.h
 	inc/MantidKernel/DocumentationHeader.h

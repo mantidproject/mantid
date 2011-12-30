@@ -196,14 +196,14 @@ public:
   void test_MRU_access()
   {
     BoxController a(2);
-    DiskBuffer & mru = a.getDiskBuffer();
+    DiskBuffer & dbuf = a.getDiskBuffer();
     // Set the cache parameters
 
     // Can't have 0-sized events
     TS_ASSERT_THROWS_ANYTHING( a.setCacheParameters(0, 4560) );
     a.setCacheParameters(40, 123);
 
-    TS_ASSERT_EQUALS( mru.getWriteBufferSize(), 123);
+    TS_ASSERT_EQUALS( dbuf.getWriteBufferSize(), 123);
   }
 
 

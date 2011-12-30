@@ -35,7 +35,7 @@ namespace API
      * @return BoxController instance
      */
     BoxController(size_t nd)
-    :nd(nd), m_maxId(0), m_file(NULL), m_diskMRU(), m_useMRU(true)
+    :nd(nd), m_maxId(0), m_file(NULL), m_diskMRU(), m_useWriteBuffer(true)
     {
       // TODO: Smarter ways to determine all of these values
       m_maxDepth = 5;
@@ -366,17 +366,17 @@ namespace API
     void closeFile(bool deleteFile = false);
 
     //-----------------------------------------------------------------------------------
-    /** Return the disk MRU for disk caching */
+    /** Return the DiskBuffer for disk caching */
     const Mantid::Kernel::DiskBuffer & getDiskBuffer() const
     { return m_diskMRU; }
 
-    /** Return the disk MRU for disk caching */
+    /** Return the DiskBuffer for disk caching */
     Mantid::Kernel::DiskBuffer & getDiskBuffer()
     { return m_diskMRU; }
 
-    /** Return true if the MRU should be used */
-    bool useMRU() const
-    { return m_useMRU; }
+    /** Return true if the DiskBuffer should be used */
+    bool useWriteBuffer() const
+    { return m_useWriteBuffer; }
 
     //-----------------------------------------------------------------------------------
     /** Set the memory-caching parameters for a file-backed
@@ -392,7 +392,7 @@ namespace API
       // Save the values
       m_diskMRU.setWriteBufferSize(writeBufferSize);
       // If all caches are 0, don't use the MRU at all
-      m_useMRU = !(writeBufferSize==0);
+      m_useWriteBuffer = !(writeBufferSize==0);
       m_bytesPerEvent = bytesPerEvent;
     }
 
@@ -473,7 +473,7 @@ namespace API
     mutable Mantid::Kernel::DiskBuffer m_diskMRU;
 
     /// Do we use the DiskBuffer at all?
-    bool m_useMRU;
+    bool m_useWriteBuffer;
 
   public:
     /// Mutex for locking access to the file, for file-back-end MDBoxes.

@@ -359,8 +359,6 @@ namespace Mantid
         BoxController_sptr bc = ws->getBoxController();
 
         // ---------------------------------------- MEMORY FOR CACHE ------------------------------------
-        DiskBuffer & mru = bc->getDiskBuffer();
-
         // How much memory for the cache?
         if (FileBackEnd)
         {

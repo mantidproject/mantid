@@ -22,7 +22,7 @@ void export_BoxController()
     .def("isFileBacked", &BoxController::isFileBacked, "Return True if the MDEventWorkspace is backed by a file ")
     .def("getFilename", &BoxController::getFilename, return_value_policy< copy_const_reference >(),
          "Return  the full path to the file open as the file-based back end.")
-    .def("useMRU", &BoxController::useMRU, "Return true if the MRU should be used")
+    .def("useWriteBuffer", &BoxController::useWriteBuffer, "Return true if the MRU should be used")
   ;
 }
 

@@ -164,7 +164,7 @@ namespace Kernel
     void setMruSize(uint64_t buffer)
     {
       m_mruSize = buffer;
-      m_useMRU = (buffer > 0);
+      m_useWriteBuffer = (buffer > 0);
     }
 
     /// @return the size of the in-memory MRU, in number of events
@@ -221,7 +221,7 @@ namespace Kernel
 
     // ----------------------- In-memory buffer --------------------------------------
     /// Do we use the MRU buffer?
-    bool m_useMRU;
+    bool m_useWriteBuffer;
 
     /// The MRU list container
     mru_t m_mru;
