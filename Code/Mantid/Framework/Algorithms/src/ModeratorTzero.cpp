@@ -272,12 +272,12 @@ void ModeratorTzero::execEvent(){
 	}
 
 	// Get final energy E_f, final velocity v_f
-	double E_f, v_f, t_f;
+    double t_f;
 	std::vector< double >  wsProp=det->getNumberParameter("Efixed");
-	if ( wsProp.size() > 0 )
+    if ( !wsProp.empty() )
 	{
-	  E_f = wsProp.at(0); //[E_f]=meV
-	  v_f = convFact * sqrt(E_f);
+      double E_f = wsProp.at(0); //[E_f]=meV
+      double v_f = convFact * sqrt(E_f);
 	  g_log.debug() << "detector: " << i << " E_f:="<< E_f << " v_f=" << v_f << std::endl;
 	  //obtain L_f, calculate t_f
 	  double L_f;
@@ -285,7 +285,7 @@ void ModeratorTzero::execEvent(){
 	  {
 	    L_f = det->getDistance(*sample);
 	    t_f = L_f / v_f;
-	    g_log.debug() << "dectector " << i << " L_f=" << L_f << " t_f=" << t_f << std::endl;
+        g_log.debug() << "detector " << i << " L_f=" << L_f << " t_f=" << t_f << std::endl;
 	  }
 	  catch (Exception::NotFoundError &)
 	  {
