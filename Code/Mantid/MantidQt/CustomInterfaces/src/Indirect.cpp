@@ -356,8 +356,8 @@ void Indirect::closeEvent(QCloseEvent* close)
 void Indirect::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf)
 {
   std::string key = pNf->key();
-  std::string preValue = pNf->preValue();
-  std::string curValue = pNf->curValue();
+  // std::string preValue = pNf->preValue(); // Unused
+  // std::string curValue = pNf->curValue(); // Unused
 
   if ( key == "datasearch.directories" || key == "defaultsave.directory" )
   {
