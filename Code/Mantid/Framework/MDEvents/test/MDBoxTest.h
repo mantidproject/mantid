@@ -8,7 +8,7 @@
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/CPUTimer.h"
-#include "MantidKernel/DiskMRU.h"
+#include "MantidKernel/DiskBuffer.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidMDEvents/CoordTransformDistance.h"
@@ -570,7 +570,7 @@ public:
 
     // Create and open the test NXS file
     ::NeXus::File * file = do_saveAndOpenNexus(c);
-    c.setOnDisk(false); // Avoid touching MRU
+    c.setOnDisk(false); // Avoid touching DiskBuffer
     c.loadNexus(file);
     TS_ASSERT_EQUALS( c.getNPoints(), 1000);
     const std::vector<MDLeanEvent<3> > & events = c.getEvents();
@@ -610,11 +610,11 @@ public:
     // Create a box with a controller for the back-end
     BoxController_sptr bc(new BoxController(3));
 
-    // Handle the disk MRU values
-    bc->setCacheParameters(sizeof(MDLeanEvent<3>), 100000, 10000, 0);
-    DiskMRU & mru = bc->getDiskMRU();
+    // Handle the disk DiskBuffer values
+    bc->setCacheParameters(sizeof(MDLeanEvent<3>), 10000);
+    DiskBuffer & mru = bc->getDiskBuffer();
     // It is empty now
-    TS_ASSERT_EQUALS( mru.getMruUsed(), 0);
+    TS_ASSERT_EQUALS( mru.getWriteBufferUsed(), 0);
 
     // Create and open the test NXS file
     MDBox<MDLeanEvent<3>,3> c(bc, 0);
@@ -641,13 +641,13 @@ public:
     TS_ASSERT_DELTA( events[50].getSignal(), 50.0, 1e-5);
     TS_ASSERT_DELTA( events[990].getErrorSquared(), 990.5, 1e-5);
 
-    // MRU has something now
-    TS_ASSERT_EQUALS( mru.getMruUsed(), 1000);
     // The box's data is busy
     TS_ASSERT( c.dataBusy() );
     // Done with the data.
     c.releaseEvents();
     TS_ASSERT( !c.dataBusy() );
+    // Something in the to-write buffer
+    TS_ASSERT_EQUALS( mru.getWriteBufferUsed(), 1000);
 
     // OK, using this fake way, let's keep it in memory
     c.setOnDisk(false);
@@ -671,19 +671,19 @@ public:
 
   //-----------------------------------------------------------------------------------------
   /** Set up the file back end and test accessing data.
-   * This time, use no MRU so that reading/loading is done within the object itself */
+   * This time, use no DiskBuffer so that reading/loading is done within the object itself */
   void test_fileBackEnd_noMRU()
   {
     // Create a box with a controller for the back-end
     BoxController_sptr bc(new BoxController(3));
 
-    // Handle the disk MRU values
-    bc->setCacheParameters(sizeof(MDLeanEvent<3>), 0, 0, 0);
-    // MRU won't be used
+    // Handle the disk DiskBuffer values
+    bc->setCacheParameters(sizeof(MDLeanEvent<3>), 0);
+    // DiskBuffer won't be used
     TS_ASSERT( !bc->useMRU());
-    DiskMRU & mru = bc->getDiskMRU();
+    DiskBuffer & mru = bc->getDiskBuffer();
     // It is empty now
-    TS_ASSERT_EQUALS( mru.getMruUsed(), 0);
+    TS_ASSERT_EQUALS( mru.getWriteBufferUsed(), 0);
 
     // Create and open the test NXS file
     MDBox<MDLeanEvent<3>,3> c(bc, 0);
@@ -710,13 +710,14 @@ public:
     TS_ASSERT_DELTA( events[50].getSignal(), 50.0, 1e-5);
     TS_ASSERT_DELTA( events[990].getErrorSquared(), 990.5, 1e-5);
 
-    TSM_ASSERT_EQUALS( "MRU has nothing still - it wasn't used",  mru.getMruUsed(), 0);
+    TSM_ASSERT_EQUALS( "DiskBuffer has nothing still - it wasn't used",  mru.getWriteBufferUsed(), 0);
     TSM_ASSERT("Data is busy", c.dataBusy() );
     TSM_ASSERT("Data is in memory", c.getInMemory() );
     // Done with the data.
     c.releaseEvents();
     TSM_ASSERT("Data is no longer busy", !c.dataBusy() );
     TSM_ASSERT("Data is not in memory", !c.getInMemory() );
+    TSM_ASSERT_EQUALS( "DiskBuffer has nothing still - it wasn't used",  mru.getWriteBufferUsed(), 0);
 
     file->close();
     do_deleteNexusFile();
@@ -731,11 +732,11 @@ public:
     // Create a box with a controller for the back-end
     BoxController_sptr bc(new BoxController(3));
 
-    // Handle the disk MRU values
-    bc->setCacheParameters(sizeof(MDLeanEvent<3>), 100000, 10000, 0);
-    DiskMRU & mru = bc->getDiskMRU();
+    // Handle the disk DiskBuffer values
+    bc->setCacheParameters(sizeof(MDLeanEvent<3>), 10000);
+    DiskBuffer & mru = bc->getDiskBuffer();
     // It is empty now
-    TS_ASSERT_EQUALS( mru.getMruUsed(), 0);
+    TS_ASSERT_EQUALS( mru.getWriteBufferUsed(), 0);
 
     // A new empty box.
     MDBox<MDLeanEvent<3>,3> c(bc, 0);
@@ -787,11 +788,11 @@ public:
     // Create a box with a controller for the back-end
     BoxController_sptr bc(new BoxController(3));
 
-    // Handle the disk MRU values
-    bc->setCacheParameters(sizeof(MDLeanEvent<3>), 100000, 10000, 0);
-    DiskMRU & mru = bc->getDiskMRU();
+    // Handle the disk DiskBuffer values
+    bc->setCacheParameters(sizeof(MDLeanEvent<3>), 10000);
+    DiskBuffer & mru = bc->getDiskBuffer();
     // It is empty now
-    TS_ASSERT_EQUALS( mru.getMruUsed(), 0);
+    TS_ASSERT_EQUALS( mru.getWriteBufferUsed(), 0);
 
     // A new empty box.
     MDBox<MDLeanEvent<3>,3> c(bc, 0);
@@ -877,8 +878,8 @@ public:
   {
     // Create a box with a controller for the back-end
     BoxController_sptr bc(new BoxController(3));
-    bc->setCacheParameters(sizeof(MDLeanEvent<3>), 0, 10000, 0);
-    DiskMRU & mru = bc->getDiskMRU();
+    bc->setCacheParameters(sizeof(MDLeanEvent<3>),10000);
+    DiskBuffer & mru = bc->getDiskBuffer();
 
     // Create and open the test NXS file
     MDBox<MDLeanEvent<3>,3> c(bc, 0);

@@ -145,6 +145,11 @@ namespace MDEvents
     bool dataAdded() const
     { return m_dataAdded; }
 
+    /** Set the dataBusy flag.
+     * @param value :: true if the data is "busy" (someone has a reference to it).   */
+    void setDataBusy(const bool value)
+    { m_dataBusy = value; }
+
 
     std::vector< MDE > & getEvents();
 

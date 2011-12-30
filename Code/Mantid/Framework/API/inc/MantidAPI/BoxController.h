@@ -1,7 +1,7 @@
 #ifndef BOXCONTROLLER_H_
 #define BOXCONTROLLER_H_
 
-#include "MantidKernel/DiskMRU.h"
+#include "MantidKernel/DiskBuffer.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/ThreadPool.h"
@@ -367,11 +367,11 @@ namespace API
 
     //-----------------------------------------------------------------------------------
     /** Return the disk MRU for disk caching */
-    const Mantid::Kernel::DiskMRU & getDiskMRU() const
+    const Mantid::Kernel::DiskBuffer & getDiskBuffer() const
     { return m_diskMRU; }
 
     /** Return the disk MRU for disk caching */
-    Mantid::Kernel::DiskMRU & getDiskMRU()
+    Mantid::Kernel::DiskBuffer & getDiskBuffer()
     { return m_diskMRU; }
 
     /** Return true if the MRU should be used */
@@ -383,20 +383,16 @@ namespace API
      * MDEventWorkspace.
      *
      * @param bytesPerEvent :: sizeof(MDLeanEvent) that is in the workspace
-     * @param mruSize :: number of EVENTS to keep in the MRU.
      * @param writeBufferSize :: number of EVENTS to accumulate before performing a disk write.
-     * @param smallBufferSize :: number of EVENTS to allow to stay in memory for small objects.
      */
-    void setCacheParameters(size_t bytesPerEvent, uint64_t mruSize, uint64_t writeBufferSize, uint64_t smallBufferSize)
+    void setCacheParameters(size_t bytesPerEvent,uint64_t writeBufferSize)
     {
       if (bytesPerEvent == 0)
         throw std::invalid_argument("Size of an event cannot be == 0.");
       // Save the values
-      m_diskMRU.setMruSize(mruSize);
       m_diskMRU.setWriteBufferSize(writeBufferSize);
-      m_diskMRU.setSmallBufferSize(smallBufferSize);
       // If all caches are 0, don't use the MRU at all
-      m_useMRU = !(mruSize==0 && writeBufferSize==0 && smallBufferSize==0);
+      m_useMRU = !(writeBufferSize==0);
       m_bytesPerEvent = bytesPerEvent;
     }
 
@@ -474,9 +470,9 @@ namespace API
     ::NeXus::File * m_file;
 
     /// Instance of the disk-caching MRU list.
-    mutable Mantid::Kernel::DiskMRU m_diskMRU;
+    mutable Mantid::Kernel::DiskBuffer m_diskMRU;
 
-    /// Do we use the DiskMRU at all?
+    /// Do we use the DiskBuffer at all?
     bool m_useMRU;
 
   public:

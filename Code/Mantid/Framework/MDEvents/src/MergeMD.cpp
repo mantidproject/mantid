@@ -273,10 +273,9 @@ namespace MDEvents
     }
 
     // Complete the file-back-end creation.
-    DiskMRU & mru = bc->getDiskMRU(); UNUSED_ARG(mru);
-    g_log.notice() << "Setting cache to 0 MB read, 400 MB write, 2000 MB small objects." << std::endl;
-    bc->setCacheParameters(sizeof(MDE), 0, 400000000/sizeof(MDE), 2000000000/sizeof(MDE));
-    g_log.notice() << "Threshold for small boxes: " << bc->getDiskMRU().getSmallThreshold() << " events." << std::endl;
+    DiskBuffer & mru = bc->getDiskBuffer(); UNUSED_ARG(mru);
+    g_log.notice() << "Setting cache to 400 MB write." << std::endl;
+    bc->setCacheParameters(sizeof(MDE), 400000000/sizeof(MDE));
 
 
     return outWS;
@@ -396,9 +395,9 @@ namespace MDEvents
     bc->setSplitThreshold(5000);
 
     // Complete the file-back-end creation.
-    DiskMRU & mru = bc->getDiskMRU(); UNUSED_ARG(mru);
-    g_log.notice() << "Setting cache to 2000 MB read, 400 MB write, 0 MB small objects." << std::endl;
-    bc->setCacheParameters(sizeof(MDE), 2000000000/sizeof(MDE), 400000000/sizeof(MDE), 0/sizeof(MDE));
+    DiskBuffer & mru = bc->getDiskBuffer(); UNUSED_ARG(mru);
+    g_log.notice() << "Setting cache to 400 MB write." << std::endl;
+    bc->setCacheParameters(sizeof(MDE), 400000000/sizeof(MDE));
 
     return ws;
   }
@@ -527,7 +526,7 @@ namespace MDEvents
             tp.joinAll();
 
           // Flush out any items to write.
-          bc->getDiskMRU().flushCache();
+          bc->getDiskBuffer().flushCache();
         }
       } // there was something loaded
 

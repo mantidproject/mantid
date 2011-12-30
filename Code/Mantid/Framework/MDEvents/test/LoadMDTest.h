@@ -242,37 +242,20 @@ public:
     {
       // Force a flush of the read-write cache
       BoxController_sptr bc = ws->getBoxController();
-      DiskMRU & mru = bc->getDiskMRU();
+      DiskBuffer & mru = bc->getDiskBuffer();
       mru.flushCache();
 
       typename std::vector<IMDBox<MDE,nd>*> boxes;
       ws->getBox()->getBoxes(boxes, 1000, false);
-      uint64_t threshold = uint64_t(memory*1024*1024*0.45) / (boxes.size() * sizeof(MDE));
-
-      TSM_ASSERT_EQUALS("Threshold size for small buffer agrees.", mru.getSmallThreshold(), threshold );
-      uint64_t memoryInSmall = 0;
       for (size_t i=0; i<boxes.size(); i++)
       {
         MDBox<MDE,nd>*box = dynamic_cast<MDBox<MDE,nd>*>(boxes[i]);
         if (box)
         {
-          if (box->getNPoints() < threshold)
-          {
-            TSM_ASSERT("Small box should be in memory", box->getInMemory());
-            TSM_ASSERT("Small box should not be cached to disk", !box->getOnDisk());
-            memoryInSmall += box->getNPoints();
-          }
-          else
-          {
-            TSM_ASSERT("Large box should not be in memory", !box->getInMemory());
-            TSM_ASSERT("Large box should be cached to disk", box->getOnDisk());
-          }
+          TSM_ASSERT("Large box should not be in memory", !box->getInMemory());
+          TSM_ASSERT("Large box should be cached to disk", box->getOnDisk());
         }
       }
-
-      TSM_ASSERT_EQUALS("Memory used in small buffer agrees.", memoryInSmall, mru.getSmallBufferUsed() );
-      TSM_ASSERT("Test was correctly done, and some memory was in the small.", memoryInSmall > 0 );
-      std::cout << "Expected threshold of " << threshold << ". Memory in small buffer " << mru.getSmallBufferUsed() << std::endl;
     }
 
     // Remove workspace from the data service.

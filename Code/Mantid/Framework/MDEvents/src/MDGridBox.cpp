@@ -76,6 +76,8 @@ namespace MDEvents
     if (!bc)
       throw std::runtime_error("MDGridBox::ctor(): No BoxController specified in box.");
 
+    std::cout << "Splitting MDBox ID " << box->getId() << " with " << box->getNPoints() << " events into MDGridBox" << std::endl;
+
     // Steal the ID from the parent box that is being split.
     this->setId( box->getId() );
 
@@ -139,7 +141,7 @@ namespace MDEvents
     bc->getIdMutex().unlock();
 
     // Now distribute the events that were in the box before
-    std::vector<MDE> & events = box->getEvents();
+    const std::vector<MDE> & events = box->getConstEvents();
 
     // Add all the events, with no bounds checking
     typename std::vector<MDE>::const_iterator it = events.begin();
@@ -150,9 +152,9 @@ namespace MDEvents
     // Copy the cached numbers from the incoming box. This is quick - don't need to refresh cache
     this->nPoints = box->getNPoints();
 
-    // Clear the old box. This releases it from the DiskMRU if needed
+    // Clear the old box.
     box->clear();
-    box->releaseEvents();
+    box->setDataBusy(false);
   }
 
 
@@ -782,9 +784,6 @@ namespace MDEvents
   TMDE(
   void MDGridBox)::splitAllIfNeeded(ThreadScheduler * ts)
   {
-    DiskMRU & mru = this->m_BoxController->getDiskMRU();
-    mru.setNumberOfObjects( this->m_BoxController->getMaxId() );
-
     for (size_t i=0; i < numBoxes; ++i)
     {
       MDBox<MDE, nd> * box = dynamic_cast<MDBox<MDE, nd> *>(boxes[i]);
@@ -819,18 +818,21 @@ namespace MDEvents
         {
           // This box does NOT have enough events to be worth splitting
           if (box->dataAdded() && this->m_BoxController->isFileBacked() &&
-              !mru.shouldStayInMemory(box->getId(), box->getNPoints()) )
+              !box->getOnDisk())
           {
             // The box is NOT on disk but the workspace is file-backed.
             // Therefore, it is likely a NEW MDBox that was just created by splitting.
-            // We then check if it is BIG enough to bother caching to disk = !shouldStayInMemory()
             // Mark that it is to be on disk from now on
             box->setOnDisk(true);
             // Set it "modified" so that it gets written out upon saving
             box->setDataModified(true);
-            // Make the MRU track it in the buffer. It is using up memory!
-            this->m_BoxController->getDiskMRU().loading(box);
-            // So the MRU will cache it to the WriteBuffer when it falls out of the cache.
+
+            //Mark the box as "to-write" in DiskBuffer.
+            this->m_BoxController->getDiskBuffer().toWrite(box);
+
+//            // Make the MRU track it in the buffer. It is using up memory!
+//            this->m_BoxController->getDiskBuffer().loading(box);
+//            // So the MRU will cache it to the WriteBuffer when it falls out of the cache.
           }
         }
       }
@@ -887,7 +889,9 @@ namespace MDEvents
     if (index < numBoxes) // avoid segfaults for floating point round-off errors.
       boxes[index]->addEvent(event);
     else
-      std::cout << "\nEvent at " << event.getCenter(0) << " is skipped because index is " << index << "\n";
+    {
+      //std::cout << "\nEvent at " << event.getCenter(0) << " is skipped because index is " << index << "\n";
+    }
 
   }
 

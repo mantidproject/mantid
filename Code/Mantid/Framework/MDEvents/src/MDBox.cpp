@@ -1,9 +1,9 @@
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
-#include "MantidKernel/DiskMRU.h"
+#include "MantidKernel/DiskBuffer.h"
 
-using Mantid::Kernel::DiskMRU;
+using Mantid::Kernel::DiskBuffer;
 using namespace Mantid::API;
 
 namespace Mantid
@@ -81,7 +81,7 @@ namespace MDEvents
   {
     // Make sure the object is not in any of the disk MRUs, and mark any space it used as free
     if (this->m_BoxController->useMRU())
-      this->m_BoxController->getDiskMRU().objectDeleted(this, m_fileNumEvents);
+      this->m_BoxController->getDiskBuffer().objectDeleted(this, m_fileNumEvents);
     // Clear all contents
     this->m_signal = 0.0;
     this->m_errorSquared = 0.0;
@@ -181,8 +181,16 @@ namespace MDEvents
         this->m_BoxController->fileMutex.lock();
         // Note that this APPENDS any events to the existing event list
         //  (in the event that addEvent() was called for a box that was on disk)
-        MDE::loadVectorFromNexusSlab(data, file, m_fileIndexStart, m_fileNumEvents);
-        this->m_BoxController->fileMutex.unlock();
+        try
+        {
+          MDE::loadVectorFromNexusSlab(data, file, m_fileIndexStart, m_fileNumEvents);
+          this->m_BoxController->fileMutex.unlock();
+        }
+        catch (std::exception &)
+        {
+          this->m_BoxController->fileMutex.unlock();
+          throw;
+        }
         m_inMemory = true;
       }
     }
@@ -200,14 +208,13 @@ namespace MDEvents
     {
       // Load and concatenate the events if needed
       this->loadEvents();
-      // After loading, or each time you request it:
-      // Touch the MRU to say you just used it.
-      if (this->m_BoxController->useMRU())
-        this->m_BoxController->getDiskMRU().loading(this);
       // The data vector is busy - can't release the memory yet
       this->m_dataBusy = true;
       // This access to data was NOT const, so it might have changed. We assume it has by setting m_dataModified to true.
       this->m_dataModified = true;
+
+      // Tell the to-write buffer to write out the object (when no longer busy)
+      this->m_BoxController->getDiskBuffer().toWrite(this);
     }
     // else: do nothing if the events are already in memory.
     return data;
@@ -224,13 +231,12 @@ namespace MDEvents
     {
       // Load and concatenate the events if needed
       this->loadEvents();
-      // After loading, or each time you request it:
-      // Touch the MRU to say you just used it.
-      if (this->m_BoxController->useMRU())
-        this->m_BoxController->getDiskMRU().loading(this);
       // The data vector is busy - can't release the memory yet
       this->m_dataBusy = true;
       // This access to data was const. Don't change the m_dataModified flag.
+
+      // Tell the to-write buffer to write out the object (when no longer busy)
+      this->m_BoxController->getDiskBuffer().toWrite(this);
     }
     // else: do nothing if the events are already in memory.
     return data;
@@ -248,8 +254,7 @@ namespace MDEvents
     {
       // Data vector is no longer busy.
       this->m_dataBusy = false;
-      // If not using the MRU, then immediately save it back (if it changed)
-      //    or clear memory if unchanged.
+      // If no write buffer is used, save it immediately if needed.
       if (!this->m_BoxController->useMRU())
         this->save();
     }
@@ -258,7 +263,7 @@ namespace MDEvents
 
   //-----------------------------------------------------------------------------------------------
   /** Call to save the data (if needed) and release the memory used.
-   * Called from the DiskMRU.
+   * Called from the DiskBuffer.
    */
   TMDE(
   void MDBox)::save() const
@@ -267,13 +272,15 @@ namespace MDEvents
     //  or when you added events to a cached data
     if (m_dataModified || m_dataAdded)
     {
+      std::cout << "MDBox ID " << this->getId() << " being saved." << std::endl;
+
       // This will load and append events ONLY if needed.
       if (m_dataAdded)
         this->loadEvents();
 
       // This is the new size of the event list, possibly appended (if used AddEvent) or changed otherwise (non-const access)
       size_t newNumEvents = data.size();
-      DiskMRU & mru = this->m_BoxController->getDiskMRU();
+      DiskBuffer & mru = this->m_BoxController->getDiskBuffer();
       if (newNumEvents != m_fileNumEvents)
       {
         // Event list changed size. The MRU can tell us where it best fits now.

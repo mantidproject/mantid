@@ -12,7 +12,7 @@ namespace Kernel
   /** FreeBlock: a simple class that holds the position
     and size of block of free space in a file.
 
-    This is used by the DiskMRU class to track and defrag free space.
+    This is used by the DiskBuffer class to track and defrag free space.
     
     @author Janik Zikovsky, SNS
     @date 2011-08-04
