@@ -418,7 +418,7 @@ namespace MDEvents
     m_axisAligned = getProperty("AxisAligned");
 
     // Refer to the original workspace. Make sure that is possible
-    m_originalWS = m_inWS->getOriginalWorkspace();
+    m_originalWS = boost::dynamic_pointer_cast<IMDWorkspace>(m_inWS->getOriginalWorkspace());
     if (m_originalWS)
     {
       if (m_axisAligned)

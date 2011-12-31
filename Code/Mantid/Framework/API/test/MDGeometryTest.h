@@ -10,6 +10,7 @@
 #include <iostream>
 #include "MantidKernel/VMD.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidTestHelpers/FakeObjects.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -72,7 +73,40 @@ public:
   {
     MDGeometry g;
     TS_ASSERT(!g.hasOriginalWorkspace());
+    boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
+    g.setOriginalWorkspace(ws);
+    TS_ASSERT(g.hasOriginalWorkspace());
   }
+
+  /** If a MDGeometry workspace holds a pointer to an original workspace
+   * that gets deleted, remove the pointer and allow it to be destructed.
+   */
+  void test_OriginalWorkspace_gets_deleted()
+  {
+    MDGeometry g;
+    {
+      boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
+      AnalysisDataService::Instance().addOrReplace("MDGeometryTest_originalWS", ws);
+      g.setOriginalWorkspace(ws);
+      TS_ASSERT(g.hasOriginalWorkspace());
+    }
+    // Workspace is still valid even if it went out of scope
+    TS_ASSERT(g.getOriginalWorkspace())
+
+    // Create a different workspace and delete that
+    boost::shared_ptr<WorkspaceTester> ws2(new WorkspaceTester());
+    AnalysisDataService::Instance().addOrReplace("MDGeometryTest_some_other_ws", ws2);
+    AnalysisDataService::Instance().remove("MDGeometryTest_some_other_ws");
+    TSM_ASSERT("Different workspace does not get deleted incorrectly", g.hasOriginalWorkspace())
+
+    // Delete the right workspace (e.g. DeleteWorkspace algo)
+    AnalysisDataService::Instance().remove("MDGeometryTest_originalWS");
+    TSM_ASSERT("Original workspace reference was deleted.", !g.hasOriginalWorkspace());
+    TSM_ASSERT("Original workspace reference is cleared.", !g.getOriginalWorkspace());
+
+
+  }
+
 
 };
 
