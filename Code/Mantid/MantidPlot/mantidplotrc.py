@@ -18,7 +18,7 @@ if __name__ == '__main__':
 
     # Make MantidPlot Python API available to main user scripts.
     # For modules imported into a main script users will need to do this too
-    from mantidplot import *
+    from mantidplotpy import *
     
 
     # Define a helper class for the autocomplete

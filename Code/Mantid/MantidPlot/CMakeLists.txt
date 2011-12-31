@@ -807,8 +807,8 @@ endforeach ( PYFILE ${PYTHON_INSTALL_FILES} )
 
 add_custom_command ( TARGET MantidPlot POST_BUILD
                      COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory
-                       ${CMAKE_CURRENT_SOURCE_DIR}/mantidplot
-                       ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/mantidplot
+                       ${CMAKE_CURRENT_SOURCE_DIR}/mantidplotpy
+                       ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/mantidplotpy
 )
 
 ###########################################################################
@@ -874,7 +874,7 @@ install ( TARGETS MantidPlot RUNTIME DESTINATION ${BIN_DIR}
                              BUNDLE DESTINATION .
 )
 install ( FILES ${PYTHON_INSTALL_FILES} DESTINATION ${BIN_DIR} )
-install ( DIRECTORY mantidplot DESTINATION ${BIN_DIR} )
+install ( DIRECTORY mantidplotpy DESTINATION ${BIN_DIR} )
 
 if ( APPLE )
   configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/FixBundle.cmake.in
