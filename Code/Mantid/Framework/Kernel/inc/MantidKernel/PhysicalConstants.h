@@ -6,9 +6,9 @@
 #define M_PI 3.1415926535897932384626433832795 
 #endif
 //NAN is not defined in visual c++
-#ifdef _MSC_VER
-#define INFINITY (DBL_MAX+DBL_MAX)
-#define NAN (INFINITY-INFINITY)
+#ifndef NAN
+#include<limits>
+#define NAN std::numeric_limits<double>::quiet_nan()
 #endif
 namespace Mantid
 {
