@@ -22,6 +22,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
+#include <boost/math/special_functions/fpclassify.hpp>
 
 using Mantid::Kernel::DateAndTime;
 using Mantid::Kernel::TimeSeriesProperty;
@@ -686,13 +687,6 @@ namespace Mantid
       return xmax;
     }
 
-    namespace {
-      bool isANumber(const double d)
-      {
-        return d == d && fabs(d) != std::numeric_limits<double>::infinity();
-      }
-    }
-
     void MatrixWorkspace::getXMinMax(double &xmin, double &xmax) const
     {
       // set to crazy values to start
@@ -708,7 +702,7 @@ namespace Mantid
         const MantidVec& dataX = this->readX(workspaceIndex); // force using const version
         xfront = dataX.front();
         xback = dataX.back();
-        if (isANumber(xfront) && isANumber(xback))
+        if (boost::math::isfinite(xfront) && boost::math::isfinite(xback))
         {
           if (xfront < xmin)
             xmin = xfront;

@@ -419,7 +419,7 @@ float getVAXnum(const float A)
 {
   union 
    {
-     char a[4];
+     //char a[4];
      float f;
      int ival;
    } Bd;
