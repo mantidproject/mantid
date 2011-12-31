@@ -7,6 +7,7 @@
 #include <limits>
 #include <sstream>
 #include <stdexcept>
+#include "MantidKernel/PhysicalConstants.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 
 namespace Mantid
