@@ -938,6 +938,45 @@ public:
   }
 
 
+  void test_UB_to_from_V3D()
+  {
+    V3D a_dir( 2, 0, 0 );
+    V3D b_dir( 0, 3, 0 );
+    V3D c_dir( 0, 0, 4 );
+
+    Matrix<double> UB(3,3,false);
+   
+    IndexingUtils::GetUB( UB, a_dir, b_dir, c_dir );
+
+    for ( size_t row = 0; row < 3; row++ )
+    {
+      for ( size_t col = 0; col < 3; col++ )
+      {
+        if ( row == col )
+        {
+          TS_ASSERT_DELTA( UB[row][col], 1.0/(double(row+2)), 1e-10 );
+        }
+        else
+        {
+          TS_ASSERT_DELTA( UB[row][col], 0, 1e-10 );
+        }
+      }
+    }
+
+    V3D a;
+    V3D b;
+    V3D c;
+
+    IndexingUtils::GetABC( UB, a, b, c );
+
+    a = a - a_dir;
+    b = b - b_dir;
+    c = c - c_dir;
+
+    TS_ASSERT_DELTA( a.norm(), 0, 1e-10 );
+    TS_ASSERT_DELTA( b.norm(), 0, 1e-10 );
+    TS_ASSERT_DELTA( c.norm(), 0, 1e-10 );
+  }
 };
 
 #endif  /* MANTID_GEOMETRY_INDEXING_UTILS_TEST_H_ */

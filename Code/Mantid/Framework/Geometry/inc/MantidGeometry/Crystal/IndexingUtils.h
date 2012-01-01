@@ -239,12 +239,25 @@ class MANTID_GEOMETRY_DLL IndexingUtils
 
 
   /// Choose the direction in a list of directions, that is most nearly 
-  //  perpendicular to planes with the specified spacing in reciprocal space.
+  /// perpendicular to planes with the specified spacing in reciprocal space.
   static int SelectDirection(        Kernel::V3D & best_direction,
                               const  std::vector<Kernel::V3D> q_vectors,
                               const  std::vector<Kernel::V3D> direction_list,
                                      double plane_spacing,
                                      double required_tolerance );
+
+  /// Get the UB matix corresponding to the real space edge vectors a, b, c
+  static bool GetUB(       Kernel::DblMatrix  & UB,
+                     const Kernel::V3D        & a_dir,
+                     const Kernel::V3D        & b_dir,
+                     const Kernel::V3D        & c_dir  );
+
+  /// Get the real space edge vectors a, b, c corresponding to the UB matrix
+  static bool GetABC( const Kernel::DblMatrix  & UB,
+                            Kernel::V3D        & a_dir,
+                            Kernel::V3D        & b_dir,
+                            Kernel::V3D        & c_dir  );
+
 };
 
 

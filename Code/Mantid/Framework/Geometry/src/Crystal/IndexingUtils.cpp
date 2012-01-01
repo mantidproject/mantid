@@ -896,6 +896,11 @@ double IndexingUtils::Optimize_Direction(          V3D          & best_vec,
     @param required_tolerance The maximum distance from an integer that the
                               calculated h,k,l values can have if a peak 
                               is to be considered indexed.
+
+  @throws std::invalid_argument exception if the UB matrix is not a 3X3 matrix.
+  @throws std::runtime_error exception if the matrix inversion fails and UB 
+                             can't be formed
+
  */
 double IndexingUtils::ScanFor_UB(      DblMatrix         & UB,
                                  const std::vector<V3D>  & q_vectors,
@@ -904,6 +909,11 @@ double IndexingUtils::ScanFor_UB(      DblMatrix         & UB,
                                        double degrees_per_step,
                                        double required_tolerance )
 {
+  if ( UB.numRows() != 3 || UB.numCols() != 3 )
+  {
+   throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");
+  }
+
   V3D a_dir;
   V3D b_dir;
   V3D c_dir;
@@ -1031,10 +1041,10 @@ double IndexingUtils::ScanFor_UB(      DblMatrix         & UB,
     }
   }
 
-  UB.setRow( 0, a_dir );
-  UB.setRow( 1, b_dir );
-  UB.setRow( 2, c_dir );
-  UB.Invert();
+  if ( !GetUB( UB, a_dir, b_dir, c_dir ) )
+  {
+    throw std::runtime_error( "UB could not be formed, invert matrix failed");
+  }
 
   return min_error;
 }
@@ -1569,6 +1579,10 @@ double IndexingUtils::GetFirstMaxIndex( const double magnitude_fft[],
     @return true if a UB matrix was set, and false if it not possible to
             choose a,b,c (i.e. UB) from the list of directions, starting
             with the specified a_index.
+
+  @throws std::invalid_argument exception if the UB matrix is not a 3X3 matrix.
+  @throws std::runtime_error exception if the matrix inversion fails and UB 
+                             can't be formed
  */
 bool IndexingUtils::FormUB_From_abc_Vectors( DblMatrix         & UB,
                                        const std::vector<V3D>  & directions,
@@ -1577,6 +1591,11 @@ bool IndexingUtils::FormUB_From_abc_Vectors( DblMatrix         & UB,
                                              double              max_d )
 
 {
+  if ( UB.numRows() != 3 || UB.numCols() != 3 )
+  {
+   throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");
+  }
+
   size_t index = a_index;
   V3D a_dir = directions[ index ];
   index++;
@@ -1646,10 +1665,10 @@ bool IndexingUtils::FormUB_From_abc_Vectors( DblMatrix         & UB,
     return false;
   }
                                      // now build the UB matrix from a,b,c
-  UB.setRow( 0, a_dir );
-  UB.setRow( 1, b_dir );
-  UB.setRow( 2, c_dir );
-  UB.Invert();
+  if ( !GetUB( UB, a_dir, b_dir, c_dir ) )
+  {
+    throw std::runtime_error( "UB could not be formed, invert matrix failed");
+  }
 
   return true;
 }
@@ -1674,6 +1693,11 @@ bool IndexingUtils::FormUB_From_abc_Vectors( DblMatrix         & UB,
     @return true if a UB matrix was set, and false if it not possible to
             choose a,b,c (i.e. UB) from the list of directions, starting
             with the specified a_index.
+
+    @throws std::invalid_argument exception if the UB matrix is not a 3X3 matrix.
+    @throws std::runtime_error exception if the matrix inversion fails and UB 
+                               can't be formed
+
  */
 bool IndexingUtils::FormUB_From_abc_Vectors( DblMatrix         & UB,
                                        const std::vector<V3D>  & directions,
@@ -1681,6 +1705,11 @@ bool IndexingUtils::FormUB_From_abc_Vectors( DblMatrix         & UB,
                                              double              req_tolerance,
                                              double              min_vol )
 {
+   if ( UB.numRows() != 3 || UB.numCols() != 3 )
+   {
+    throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");
+   }
+
    int    num_indexed = 0;
    int    max_indexed = 0;
    V3D    a_dir(0,0,0);
@@ -1733,10 +1762,10 @@ bool IndexingUtils::FormUB_From_abc_Vectors( DblMatrix         & UB,
     c_dir = c_dir * (-1.0);
   } 
                                      // now build the UB matrix from a,b,c
-  UB.setRow( 0, a_dir );
-  UB.setRow( 1, b_dir );
-  UB.setRow( 2, c_dir );
-  UB.Invert();
+  if ( !GetUB( UB, a_dir, b_dir, c_dir ) )
+  {
+    throw std::runtime_error( "UB could not be formed, invert matrix failed");
+  }
 
   return true;
 }
@@ -2674,5 +2703,86 @@ int IndexingUtils::SelectDirection(       V3D & best_direction,
   best_direction.normalize();
 
   return num_indexed;
+}
+
+
+/**
+  Get the UB matrix corresponding to the real space edge vectors a,b,c.
+  The inverse of the matrix with vectors a,b,c as rows will be stored in UB.
+  
+  @param  UB      A 3x3 matrix that will be set to the UB matrix.
+  @param  a_dir   The real space edge vector for sida a of the unit cell
+  @param  b_dir   The real space edge vector for sida b of the unit cell
+  @param  c_dir   The real space edge vector for sida c of the unit cell
+
+  @return true if UB was set to the new matrix and false if UB could not be
+          set since the matrix with a,b,c as rows could not be inverted.
+ */
+bool IndexingUtils::GetUB(       DblMatrix  & UB,
+                           const V3D        & a_dir,
+                           const V3D        & b_dir,
+                           const V3D        & c_dir  )
+{
+  if ( UB.numRows() != 3 || UB.numCols() != 3 )
+  {
+   throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");
+  }
+
+  UB.setRow( 0, a_dir );
+  UB.setRow( 1, b_dir );
+  UB.setRow( 2, c_dir );
+  try
+  {
+    UB.Invert();
+  }
+  catch (...)
+  {
+    return false;
+  }
+  return true;
+}
+
+
+/**
+  Get the real space edge vectors a,b,c corresponding to the UB matrix.
+  The rows of the inverse of the matrix with will be stored in a_dir, 
+  b_dir, c_dir.
+  
+  @param  UB      A 3x3 matrix containing a UB matrix.
+  @param  a_dir   Will be set to the real space edge vector for sida a 
+                  of the unit cell
+  @param  b_dir   Will be set to the real space edge vector for sida b 
+                  of the unit cell
+  @param  c_dir   Will be set to the real space edge vector for sida c
+                  of the unit cell
+
+  @return true if the inverse of the matrix UB could be found and the
+          a_dir, b_dir and c_dir vectors have been set to the rows of
+          UB inverse.
+ */
+bool IndexingUtils::GetABC( const DblMatrix  & UB,
+                                  V3D        & a_dir,
+                                  V3D        & b_dir,
+                                  V3D        & c_dir  )
+{
+  if ( UB.numRows() != 3 || UB.numCols() != 3 )
+  {
+   throw std::invalid_argument("GetABC(): UB matrix NULL or not 3X3");
+  }
+
+  DblMatrix UB_inverse( UB );
+  try
+  {
+    UB_inverse.Invert();
+  }
+  catch (...)
+  {
+    return false;
+  }
+  a_dir( UB_inverse[0][0], UB_inverse[0][1], UB_inverse[0][2] );
+  b_dir( UB_inverse[1][0], UB_inverse[1][1], UB_inverse[1][2] );
+  c_dir( UB_inverse[2][0], UB_inverse[2][1], UB_inverse[2][2] );
+
+  return true;
 }
 
