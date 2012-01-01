@@ -258,6 +258,12 @@ class MANTID_GEOMETRY_DLL IndexingUtils
                             Kernel::V3D        & b_dir,
                             Kernel::V3D        & c_dir  );
 
+  /// Check if a,b,c cell has angles satifying Niggli condition within epsilon
+  static bool HasNiggliAngles( const Kernel::V3D  & a_dir,
+                               const Kernel::V3D  & b_dir,
+                               const Kernel::V3D  & c_dir,
+                                     double         epsilon  );
+
 };
 
 

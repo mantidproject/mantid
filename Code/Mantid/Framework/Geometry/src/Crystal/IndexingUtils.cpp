@@ -2711,9 +2711,9 @@ int IndexingUtils::SelectDirection(       V3D & best_direction,
   The inverse of the matrix with vectors a,b,c as rows will be stored in UB.
   
   @param  UB      A 3x3 matrix that will be set to the UB matrix.
-  @param  a_dir   The real space edge vector for sida a of the unit cell
-  @param  b_dir   The real space edge vector for sida b of the unit cell
-  @param  c_dir   The real space edge vector for sida c of the unit cell
+  @param  a_dir   The real space edge vector for side a of the unit cell
+  @param  b_dir   The real space edge vector for side b of the unit cell
+  @param  c_dir   The real space edge vector for side c of the unit cell
 
   @return true if UB was set to the new matrix and false if UB could not be
           set since the matrix with a,b,c as rows could not be inverted.
@@ -2749,11 +2749,11 @@ bool IndexingUtils::GetUB(       DblMatrix  & UB,
   b_dir, c_dir.
   
   @param  UB      A 3x3 matrix containing a UB matrix.
-  @param  a_dir   Will be set to the real space edge vector for sida a 
+  @param  a_dir   Will be set to the real space edge vector for side a 
                   of the unit cell
-  @param  b_dir   Will be set to the real space edge vector for sida b 
+  @param  b_dir   Will be set to the real space edge vector for side b 
                   of the unit cell
-  @param  c_dir   Will be set to the real space edge vector for sida c
+  @param  c_dir   Will be set to the real space edge vector for side c
                   of the unit cell
 
   @return true if the inverse of the matrix UB could be found and the
@@ -2784,5 +2784,44 @@ bool IndexingUtils::GetABC( const DblMatrix  & UB,
   c_dir( UB_inverse[2][0], UB_inverse[2][1], UB_inverse[2][2] );
 
   return true;
+}
+
+/**
+    Check if a,b,c cell has angles satifying Niggli condition within epsilon.
+    Specifically, check if all angles are strictly less than 90 degrees,
+    or all angles are greater than or equal to 90 degrees.  The inequality
+    requirements are relaxed by an amount specified by the paramter epsilon
+    to accommodate some experimental and/or rounding error in the calculated
+    angles.
+
+    @param a_dir    Vector in the direction of the real cell edge vector 'a'
+    @param b_dir    Vector in the direction of the real cell edge vector 'b'
+    @param c_dir    Vector in the direction of the real cell edge vector 'c'
+    @param epsilon  Tolerance (in degrees) around 90 degrees.  For example
+                    an angle theta will be considered strictly less than 90
+                    degrees, if it is less than 90+epsilon.
+    @return true if all angles are less than 90 degrees, or if all angles
+            are greater than or equal to 90 degrees.  
+ */
+bool IndexingUtils::HasNiggliAngles( const V3D    & a_dir,
+                                     const V3D    & b_dir,
+                                     const V3D    & c_dir,
+                                           double   epsilon  )
+{
+  double alpha = b_dir.angle( c_dir ) * 180.0/PI;
+  double beta  = c_dir.angle( a_dir ) * 180.0/PI;
+  double gamma = a_dir.angle( b_dir ) * 180.0/PI;
+
+  if ( alpha < 90+epsilon && beta < 90+epsilon && gamma < 90+epsilon )
+  {
+    return true;
+  }
+
+  if ( alpha >= 90-epsilon && beta >= 90-epsilon && gamma >= 90-epsilon )
+  {
+    return true;
+  }
+
+  return false;
 }
 

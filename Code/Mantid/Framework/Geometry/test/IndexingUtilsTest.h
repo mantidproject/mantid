@@ -977,6 +977,34 @@ public:
     TS_ASSERT_DELTA( b.norm(), 0, 1e-10 );
     TS_ASSERT_DELTA( c.norm(), 0, 1e-10 );
   }
+
+
+  void test_HasNiggleAngles()
+  {
+    V3D  a(1,0,0);
+    V3D  b(0,1,0);
+    V3D  c(0,0,1);
+
+    TS_ASSERT_EQUALS( IndexingUtils::HasNiggliAngles(a, b, c, 0.001 ), true);
+
+    V3D  b1( 0.1, 1, 0 ); 
+    V3D  c1(-0.1, 0, 1 ); 
+
+    TS_ASSERT_EQUALS( IndexingUtils::HasNiggliAngles(a, b1, c1, 0.001), false);
+
+    V3D  a2( 1,   0.1, 0.1 );
+    V3D  b2( 0.1, 1,   0.1 );
+    V3D  c2( 0.1, 0.1, 1   );
+
+    TS_ASSERT_EQUALS( IndexingUtils::HasNiggliAngles(a2, b2, c2, 0.001), true);
+
+    V3D  a3(  1,   -0.1, -0.1 );
+    V3D  b3( -0.1,  1,   -0.1 );
+    V3D  c3( -0.1, -0.1,  1   );
+
+    TS_ASSERT_EQUALS( IndexingUtils::HasNiggliAngles(a2, b2, c2, 0.001), true);
+  }
+
 };
 
 #endif  /* MANTID_GEOMETRY_INDEXING_UTILS_TEST_H_ */
