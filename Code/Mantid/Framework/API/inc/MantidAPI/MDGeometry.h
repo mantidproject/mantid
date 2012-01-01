@@ -127,6 +127,9 @@ namespace API
     /// Poco delete notification observer object
     Poco::NObserver<MDGeometry, Mantid::API::WorkspaceDeleteNotification> m_delete_observer;
 
+    /// Set to True when the m_delete_observer is observing workspace deletions.
+    bool m_observingDelete;
+
 
   };
 

@@ -15,12 +15,12 @@ namespace API
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  MDGeometry::MDGeometry()
-  :m_transformFromOriginal(NULL), m_transformToOriginal(NULL),
-   m_delete_observer(*this, &MDGeometry::deleteNotificationReceived)
+  MDGeometry::MDGeometry() :
+   m_originalWorkspace(),
+   m_transformFromOriginal(NULL), m_transformToOriginal(NULL),
+   m_delete_observer(*this, &MDGeometry::deleteNotificationReceived),
+   m_observingDelete(false)
   {
-    // Watch for workspace deletions
-    API::AnalysisDataService::Instance().notificationCenter.addObserver(m_delete_observer);
   }
     
   //----------------------------------------------------------------------------------------------
@@ -32,8 +32,11 @@ namespace API
       delete m_transformFromOriginal;
     if (m_transformToOriginal)
       delete m_transformToOriginal;
-    // Stop watching once object is deleted
-    API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_delete_observer);
+    if (m_observingDelete)
+    {
+      // Stop watching once object is deleted
+      API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_delete_observer);
+    }
   }
 
   
@@ -222,6 +225,13 @@ namespace API
   void MDGeometry::setOriginalWorkspace(boost::shared_ptr<Workspace> ws)
   {
     m_originalWorkspace = ws;
+    // Watch for workspace deletions
+    if (!m_observingDelete)
+    {
+        API::AnalysisDataService::Instance().notificationCenter.addObserver(m_delete_observer);
+        m_observingDelete = true;
+    }
+
   }
 
 
