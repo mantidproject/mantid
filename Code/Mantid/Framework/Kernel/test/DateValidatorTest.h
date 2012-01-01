@@ -33,7 +33,7 @@ public:
 		TS_ASSERT_EQUALS( v.isValid("12/101/2009"),
 		"Invalid Date:Month part of the Date parameter must be between 1 and 12")
 
-		TS_ASSERT_EQUALS( v.isValid("12/10/2012"),
+        TS_ASSERT_EQUALS( v.isValid("12/10/2112"),
 		"Invalid Date:Year part of the Date parameter can not be greater than the current year")
    
   }
