@@ -92,17 +92,17 @@ class LOOP{
             //pH->wsCreator[i] = &MDEventWSWrapper::createEmptyEventWS<i>;
           //  fpVoidMethod fp     = &MDEventWSWrapper::createEmptyEventWS<i>;
           //  fpVoidMethod fp     = std::bind1st(std::mem_fun(&(*pH)::createEmptyEventWS<i>));
-            pH->wsCreator.push_back(std::bind(std::mem_fun(&MDEventWSWrapper::createEmptyEventWS<i>),pH));
+            pH->wsCreator.push_back(boost::bind(std::mem_fun(&MDEventWSWrapper::createEmptyEventWS<i>),pH));
 
           //  fpVoidMethod fp1    = &MDEventWSWrapper::add_MDData<i>;
-            pH->mdEvSummator.push_back(std::bind(std::mem_fun(&MDEventWSWrapper::add_MDData<i>),pH));
+            pH->mdEvSummator.push_back(boost::bind(std::mem_fun(&MDEventWSWrapper::add_MDData<i>),pH));
 
             // vftable definition
             //fpVoidMethod fp2     =  &MDEventWSWrapper::split_Box<i>;
-            pH->boxSplitter.push_back(std::bind(std::mem_fun(&MDEventWSWrapper::split_Box<i>),pH));//   = fp2;
+            pH->boxSplitter.push_back(boost::bind(std::mem_fun(&MDEventWSWrapper::split_Box<i>),pH));//   = fp2;
 
             //fpVoidMethod fp3      = &MDEventWSWrapper::refresh_Cache<i>;
-            pH->cashRefresher.push_back(std::bind(std::mem_fun(&MDEventWSWrapper::refresh_Cache<i>),pH));
+            pH->cashRefresher.push_back(boost::bind(std::mem_fun(&MDEventWSWrapper::refresh_Cache<i>),pH));
 
     }
 };
@@ -110,7 +110,7 @@ template<>
 class LOOP<0>{
   public:
     static inline void EXEC(MDEventWSWrapper *pH){           
-            fpVoidMethod fp = (std::bind(std::mem_fun(&MDEventWSWrapper::throwNotInitiatedError),pH));
+            fpVoidMethod fp = (boost::bind(std::mem_fun(&MDEventWSWrapper::throwNotInitiatedError),pH));
             pH->wsCreator.push_back(fp);
             pH->mdEvSummator.push_back(fp);
             pH->boxSplitter.push_back(fp);
