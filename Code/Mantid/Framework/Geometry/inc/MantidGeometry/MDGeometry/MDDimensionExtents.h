@@ -22,6 +22,10 @@ namespace Geometry
 #ifdef min
 #undef min
 #endif
+// the statement to exclude using macro max(a,b) in visual C++ uder win
+#ifdef max
+#undef max
+#endif
 
   //===============================================================================================
   /** Simple class that holds the extents (min/max)

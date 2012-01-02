@@ -1,10 +1,10 @@
 /*WIKI* 
-    Transfrom a workspace into MD Event workspace with components defined by user. 
+    Transfrom a workspace into MD Event workspace with dimensions defined by user. 
    
-    Gateway for 3 subalgorithms, combined together to convert matrix workspace into multidimensional events workspace. 
-    Depending on user input and the input workspace, the algorithm transform matrix workspace intnto 1 to 4 dimemsional MDEvent workspace and 
-    adds to this workspace additional dimensions, which are described by the workspace properties. 
-    Intended to cover wide range of cases; 
+    Gateway for set of subalgorithms, combined together to convert inpuy matrix workspace with any units or event workspace into  multidimensional events workspace. 
+
+    Depending on the user input and the data, find in the input workspace, the algorithms transform the input workspace into 1 to 4 dimemsional MDEvent workspace and 
+    adds to this workspace additional dimensions, which are described by the workspace properties and requested by user. 
 
 *WIKI*/
 
@@ -258,6 +258,10 @@ ConvertToMDEvents::init()
 void ConvertToMDEvents::exec(){
     // in case of subsequent calls
     this->algo_id="";
+    // initiate class which would deal with any dimension workspaces
+    if(!pWSWrapper.get()){
+        pWSWrapper = std::auto_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
+    }
     // -------- Input workspace 
     this->inWS2D = getProperty("InputWorkspace");
     if(!inWS2D){
@@ -331,11 +335,17 @@ void ConvertToMDEvents::exec(){
       
    
      if(create_new_ws){
-         spws = ws_creator[n_activated_dimensions](this);
+         spws = pWSWrapper->createEmptyMDWS(n_activated_dimensions, targ_dim_names,targ_dim_units, dim_min, dim_max);
          if(!spws){
              g_log.error()<<"can not create target event workspace with :"<<n_activated_dimensions<<" dimensions\n";
              throw(std::invalid_argument("can not create target workspace"));
-         } 
+         }
+         // Build up the box controller
+          Mantid::API::BoxController_sptr bc = pWSWrapper->getBoxController();
+         // Build up the box controller, using the properties in BoxControllerSettingsAlgorithm 
+         this->setBoxController(bc);
+         // split boxes;
+         pWSWrapper->splitBox();
       }
 
 
@@ -348,6 +358,9 @@ void ConvertToMDEvents::exec(){
         throw(std::invalid_argument("undefined subalgoritm requested "));
     }
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(spws));
+
+    // free the algorithm from the responsibility for the workspace to allow it to be deleted if necessary
+    pWSWrapper->release_workspace();
     return;
    
 }
@@ -453,7 +466,7 @@ ConvertToMDEvents::parseConvMode(const std::string &Q_MODE_ID,const std::string 
         double factor,power;
         const Kernel::Unit_sptr pThisUnit=Kernel::UnitFactory::Instance().create(ws_dim_units[0]);
         if(pThisUnit->quickConversion(natural_units,factor,power)){
-            CONV_MODE_ID = ConvModes[ConvertFast];
+            CONV_MODE_ID = ConvModes[ConvFast];
         }else{
             if(ws_dim_units[0].compare("TOF")==0){ // may be it is TOF?
                 CONV_MODE_ID = ConvModes[ConvFromTOF];
@@ -737,30 +750,28 @@ ConvertToMDEvents::fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_
 // }
 //----------------------------------------------------------------------------------------------
 // AUTOINSTANSIATION OF EXISTING CODE:
-// Templated loop over some templated arguments
-template< size_t i, Q_state Q, AnalMode MODE, CnvrtUnits CONV >
+//// Templated loop over some templated arguments
+//template< size_t i, Q_state Q, AnalMode MODE, CnvrtUnits CONV >
+//class LOOP_ND{
+//  public:
+//    static inline void EXEC(ConvertToMDEvents *pH){
+//            LOOP_ND< i-1 , Q, MODE,CONV>::EXEC(pH);
+//            std::stringstream num;
+//            num << i;
+//            std::string Key = pH->Q_modes[Q]+pH->dE_modes[MODE]+pH->ConvModes[CONV]+num.str();
+//
+//            pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,&ConvertToMDEvents::processQND<i,Q,MODE,CONV>));
+//    }
+//};
+template< Q_state Q, AnalMode MODE, CnvrtUnits CONV >
 class LOOP_ND{
   public:
     static inline void EXEC(ConvertToMDEvents *pH){
-            LOOP_ND< i-1 , Q, MODE,CONV>::EXEC(pH);
-            std::stringstream num;
-            num << i;
-            std::string Key = pH->Q_modes[Q]+pH->dE_modes[MODE]+pH->ConvModes[CONV]+num.str();
-
-            pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,&ConvertToMDEvents::processQND<i,Q,MODE,CONV>));
-    }
-};
-template< Q_state Q, AnalMode MODE, CnvrtUnits CONV >
-class LOOP_ND<2,Q,MODE,CONV>{
-  public:
-    static inline void EXEC(ConvertToMDEvents *pH){
             
-            std::stringstream num;
-            num << 2;
-            std::string Key = pH->Q_modes[Q]+pH->dE_modes[MODE]+pH->ConvModes[CONV]+num.str();
+            std::string Key = pH->Q_modes[Q]+pH->dE_modes[MODE]+pH->ConvModes[CONV];
 
             pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,
-                                   &ConvertToMDEvents::processQND<2,Q,MODE,CONV>));
+                                   &ConvertToMDEvents::processQND<Q,MODE,CONV>));
 //#ifdef _DEBUG
             //std::cout<<" Ending group by instansiating algorithm with ID: "<<Key<<std::endl;
 //#endif
@@ -768,21 +779,7 @@ class LOOP_ND<2,Q,MODE,CONV>{
     }
 };
 
-template<size_t i>
-class LOOP{
-  public:
-    static inline void EXEC(ConvertToMDEvents *pH){
-            LOOP< i-1 >::EXEC(pH);
-            pH->ws_creator.insert(std::pair<size_t,pWSCreator>(i,&ConvertToMDEvents::createEmptyEventWS<i>));
-    }
-};
-template<>
-class LOOP<2>{
-  public:
-    static inline void EXEC(ConvertToMDEvents *pH){           
-            pH->ws_creator.insert(std::pair<size_t,pWSCreator>(2,&ConvertToMDEvents::createEmptyEventWS<2>));
-    }
-};
+
 /** Constructor 
  *  needs to pick up all known algorithms. 
 */
@@ -804,46 +801,44 @@ native_inelastic_unitID("DeltaE")
      dE_modes[Elastic]   = "Elastic";
      // possible unit conversion modes
      ConvModes[ConvertNo]  ="CnvNo";
-     ConvModes[ConvertFast]="CnvFast";
+     ConvModes[ConvFast]="CnvFast";
      ConvModes[ConvByTOF]  ="CnvByTOF";
      ConvModes[ConvFromTOF]="CnvFromTOF";
 
 // Subalgorithm factories:
 // NoQ --> any Analysis mode will do as it does not depend on it; we may want to convert unuts
-    LOOP_ND<MAX_NDIM,NoQ,ANY_Mode,ConvertNo>::EXEC(this);
-    LOOP_ND<MAX_NDIM,NoQ,ANY_Mode,ConvertFast>::EXEC(this);
-    LOOP_ND<MAX_NDIM,NoQ,ANY_Mode,ConvFromTOF>::EXEC(this);
-    LOOP_ND<MAX_NDIM,NoQ,ANY_Mode,ConvByTOF>::EXEC(this);
+    LOOP_ND<NoQ,ANY_Mode,ConvertNo>::EXEC(this);
+    LOOP_ND<NoQ,ANY_Mode,ConvFast>::EXEC(this);
+    LOOP_ND<NoQ,ANY_Mode,ConvFromTOF>::EXEC(this);
+    LOOP_ND<NoQ,ANY_Mode,ConvByTOF>::EXEC(this);
 // MOD Q
-    LOOP_ND<MAX_NDIM,modQ,Direct,ConvertNo>::EXEC(this);
-    LOOP_ND<MAX_NDIM,modQ,Indir,ConvertNo>::EXEC(this);
-    LOOP_ND<MAX_NDIM,modQ,Elastic,ConvertNo>::EXEC(this);
-    LOOP_ND<MAX_NDIM,modQ,Direct,ConvertFast>::EXEC(this);
-    LOOP_ND<MAX_NDIM,modQ,Indir,ConvertFast>::EXEC(this);
-    LOOP_ND<MAX_NDIM,modQ,Elastic,ConvertFast>::EXEC(this);
-    LOOP_ND<MAX_NDIM,modQ,Direct,ConvFromTOF>::EXEC(this);
-    LOOP_ND<MAX_NDIM,modQ,Indir,ConvFromTOF>::EXEC(this);
-    LOOP_ND<MAX_NDIM,modQ,Elastic,ConvFromTOF>::EXEC(this);
-    LOOP_ND<MAX_NDIM,modQ,Direct,ConvByTOF>::EXEC(this);
-    LOOP_ND<MAX_NDIM,modQ,Indir,ConvByTOF>::EXEC(this);
-    LOOP_ND<MAX_NDIM,modQ,Elastic,ConvByTOF>::EXEC(this);
+    LOOP_ND<modQ,Direct,ConvertNo>::EXEC(this);
+    LOOP_ND<modQ,Indir,ConvertNo>::EXEC(this);
+    LOOP_ND<modQ,Elastic,ConvertNo>::EXEC(this);
+    LOOP_ND<modQ,Direct,ConvFast>::EXEC(this);
+    LOOP_ND<modQ,Indir,ConvFast>::EXEC(this);
+    LOOP_ND<modQ,Elastic,ConvFast>::EXEC(this);
+    LOOP_ND<modQ,Direct,ConvFromTOF>::EXEC(this);
+    LOOP_ND<modQ,Indir,ConvFromTOF>::EXEC(this);
+    LOOP_ND<modQ,Elastic,ConvFromTOF>::EXEC(this);
+    LOOP_ND<modQ,Direct,ConvByTOF>::EXEC(this);
+    LOOP_ND<modQ,Indir,ConvByTOF>::EXEC(this);
+    LOOP_ND<modQ,Elastic,ConvByTOF>::EXEC(this);
 
  // Q3D
-    LOOP_ND<MAX_NDIM,Q3D,Direct,ConvertNo>::EXEC(this);
-    LOOP_ND<MAX_NDIM,Q3D,Indir,ConvertNo>::EXEC(this);
-    LOOP_ND<MAX_NDIM,Q3D,Elastic,ConvertNo>::EXEC(this);
-    LOOP_ND<MAX_NDIM,Q3D,Direct,ConvertFast>::EXEC(this);
-    LOOP_ND<MAX_NDIM,Q3D,Indir,ConvertFast>::EXEC(this);
-    LOOP_ND<MAX_NDIM,Q3D,Elastic,ConvertFast>::EXEC(this);
-    LOOP_ND<MAX_NDIM,Q3D,Direct,ConvFromTOF>::EXEC(this);
-    LOOP_ND<MAX_NDIM,Q3D,Indir,ConvFromTOF>::EXEC(this);
-    LOOP_ND<MAX_NDIM,Q3D,Elastic,ConvFromTOF>::EXEC(this);
-    LOOP_ND<MAX_NDIM,Q3D,Direct,ConvByTOF>::EXEC(this);
-    LOOP_ND<MAX_NDIM,Q3D,Indir,ConvByTOF>::EXEC(this);
-    LOOP_ND<MAX_NDIM,Q3D,Elastic,ConvByTOF>::EXEC(this);
+    LOOP_ND<Q3D,Direct,ConvertNo>::EXEC(this);
+    LOOP_ND<Q3D,Indir,ConvertNo>::EXEC(this);
+    LOOP_ND<Q3D,Elastic,ConvertNo>::EXEC(this);
+    LOOP_ND<Q3D,Direct,ConvFast>::EXEC(this);
+    LOOP_ND<Q3D,Indir,ConvFast>::EXEC(this);
+    LOOP_ND<Q3D,Elastic,ConvFast>::EXEC(this);
+    LOOP_ND<Q3D,Direct,ConvFromTOF>::EXEC(this);
+    LOOP_ND<Q3D,Indir,ConvFromTOF>::EXEC(this);
+    LOOP_ND<Q3D,Elastic,ConvFromTOF>::EXEC(this);
+    LOOP_ND<Q3D,Direct,ConvByTOF>::EXEC(this);
+    LOOP_ND<Q3D,Indir,ConvByTOF>::EXEC(this);
+    LOOP_ND<Q3D,Elastic,ConvByTOF>::EXEC(this);
 
-    // workspace factory
-    LOOP<MAX_NDIM>::EXEC(this);
 }
 
 //

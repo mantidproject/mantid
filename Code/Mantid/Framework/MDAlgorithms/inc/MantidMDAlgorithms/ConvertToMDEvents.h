@@ -10,12 +10,14 @@
 
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Progress.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidMDEvents/MDEvent.h"
-#include "MantidMDEvents/BoxControllerSettingsAlgorithm.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidMDAlgorithms/ConvertToMDEventsDetInfo.h"
+
+#include "MantidMDEvents/MDEventWSWrapper.h"
+#include "MantidMDEvents/MDEvent.h"
+#include "MantidMDEvents/BoxControllerSettingsAlgorithm.h"
+
 
 
 namespace Mantid
@@ -66,7 +68,7 @@ namespace MDAlgorithms
    };
   /**  known analysis modes, arranged according to emodes 
     *  It is importent to assign enums proper numbers, as direct correspondence between enums and their emodes 
-    *  used by external units conversion algorithms and this algorithm, so the agreement should be the stame     */
+    *  used by the external units conversion algorithms and this algorithm, so the agreement should be the stame     */
   enum AnalMode{  
       Elastic = 0,  //< int emode = 0; Elastic analysis
       Direct  = 1,  //< emode=1; Direct inelastic analysis mode
@@ -78,7 +80,7 @@ namespace MDAlgorithms
   enum CnvrtUnits
   {
       ConvertNo,   //< no, input workspace has the same units as output workspace or in units used by Q-dE algorithms naturally
-      ConvertFast, //< the input workspace has different units from the requested and fast conversion is possible
+      ConvFast, //< the input workspace has different units from the requested and fast conversion is possible
       ConvByTOF,   //< conversion possible via TOF
       ConvFromTOF  //< Input workspace units are the TOF 
   };
@@ -159,8 +161,8 @@ namespace MDAlgorithms
 
    /// map to select an algorithm as function of the key, which describes it
     std::map<std::string, pMethod> alg_selector;
-   /// map to select an workspace, as function of the dimensions number
-    std::map<size_t, pWSCreator> ws_creator;
+   /// the pointer to class which is responsible for adding data to N-dimensional workspace;
+    std::auto_ptr<MDEvents::MDEventWSWrapper> pWSWrapper;
 
     // strictly for testing!!!
     void setAlgoID(const std::string &newID){
@@ -180,26 +182,17 @@ namespace MDAlgorithms
    /** generic template to convert to any Dimensions workspace;
     * @param pOutWs -- pointer to initated target workspace, which should accomodate new events
     */
-    template<size_t nd,Q_state Q, AnalMode MODE, CnvrtUnits CONV>
+    template<Q_state Q, AnalMode MODE, CnvrtUnits CONV>
     void processQND(API::IMDEventWorkspace *const pOutWs);
     /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
     /// presumably will be completely inlined
      template<Q_state Q, AnalMode MODE, CnvrtUnits CONV> 
      friend struct COORD_TRANSFORMER;
      /// helper class to orginize metaloop on number of dimensions
-     template< size_t i, Q_state Q, AnalMode MODE, CnvrtUnits CONV >
+     template<Q_state Q, AnalMode MODE, CnvrtUnits CONV >
      friend class LOOP_ND;
-     /// helper class to generate methaloop on MD workspaces
-     template< size_t i>
-     friend class LOOP;
-
-
-    /** template to build empty MDevent workspace with box controller and other palavra
-      * 
-      * The box controller parameters are obtained from host class BoxControllerSettingsAlgorithm.            */
-    template<size_t nd>
-    API::IMDEventWorkspace_sptr  createEmptyEventWS(void);
-
+  
+ 
     /// known momentum analysis mode ID-s (symbolic representation of correspondent enum);
     std::vector<std::string> Q_modes;
     /// known energy transfer modes ID-s (symbolic representation of correspondent enum)
