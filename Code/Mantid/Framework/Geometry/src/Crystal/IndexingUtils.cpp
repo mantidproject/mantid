@@ -310,7 +310,8 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
 /** 
     STATIC method Find_UB: This method will attempt to calculate the matrix 
   that most nearly indexes the specified q_vectors, given only a range of 
-  possible unit cell edge lengths. 
+  possible unit cell edge lengths.  If successful, the matrix should 
+  correspond to the Niggli reduced cell.
      The resolution of the search through possible orientations is specified
   by the degrees_per_step parameter.  Approximately 1-3 degrees_per_step is
   usually adequate.  NOTE: This is an expensive calculation which takes 
@@ -525,6 +526,9 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
     }
   }
 
+  if ( MakeNiggliUB( UB, temp_UB ) )
+    UB = temp_UB;
+
   return fit_error;
 }
 
@@ -533,7 +537,8 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
     STATIC method Find_UB: This method will attempt to calculate the matrix 
   that most nearly indexes the specified q_vectors, using FFTs to find 
   patterns in projected Q-vectors, given only a range of possible unit cell
-  edge lengths. 
+  edge lengths. If successful, the resulting matrix should correspond to 
+  the Niggli reduced cell.
     The resolution of the search through possible orientations is specified
   by the degrees_per_step parameter.  One to two degrees per step is usually 
   adequate.
@@ -639,10 +644,10 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
     throw std::invalid_argument("Find_UB(): Could not form UB matrix from a,b,c vectors");
   }
 
+  Matrix<double> temp_UB(3,3,false);
   double fit_error = 0;
   if ( q_vectors.size() >= 5 )                 // repeatedly refine UB
   {
-    Matrix<double> temp_UB(3,3,false);
     std::vector<V3D> miller_ind;
     std::vector<V3D> indexed_qs;
     miller_ind.reserve( q_vectors.size() );
@@ -666,6 +671,9 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
       }
     }
   }
+
+  if ( MakeNiggliUB( UB, temp_UB ) )
+    UB = temp_UB;
 
   return fit_error;
 }
