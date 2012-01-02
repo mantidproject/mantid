@@ -10,14 +10,14 @@ using namespace Mantid::MDEvents;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-class MDEventsWSWrapperTest : public CxxTest::TestSuite
+class MDEventWSWrapperTest : public CxxTest::TestSuite
 {
     std::auto_ptr<MDEventWSWrapper> pWSWrap;
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MDEventsWSWrapperTest *createSuite() { return new MDEventsWSWrapperTest(); }
-  static void destroySuite( MDEventsWSWrapperTest *suite ) { delete suite; }
+  static MDEventWSWrapperTest *createSuite() { return new MDEventWSWrapperTest(); }
+  static void destroySuite( MDEventWSWrapperTest *suite ) { delete suite; }
 
   void test_construct()
   {
