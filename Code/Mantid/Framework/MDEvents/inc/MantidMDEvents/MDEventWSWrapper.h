@@ -71,7 +71,7 @@ public:
     void refreshCache(){ cashRefresher[n_dimensions]();}
 private:
     /// maximal nuber of dimensions, currently supported by the class;
-   static const int MAX_N_DIM=8;
+   static const size_t MAX_N_DIM=8;
    /// actual number of dimensions, initiated in current MD workspace 0 if not initated;
    size_t n_dimensions;
    /// logger -> to provide logging, for MD dataset file operations
