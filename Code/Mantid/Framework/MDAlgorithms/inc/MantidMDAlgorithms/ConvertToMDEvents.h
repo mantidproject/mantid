@@ -121,8 +121,6 @@ namespace MDAlgorithms
     static Mantid::Kernel::Logger& convert_log;
 
  
-   /// helper function which does exatly what it says
-   void check_max_morethen_min(const std::vector<double> &min,const std::vector<double> &max);
    /// the variable which describes the number of the dimensions, currently used by algorithm. Calculated from number of input properties and input workspace;
    size_t n_activated_dimensions;
   
@@ -215,6 +213,10 @@ namespace MDAlgorithms
     // 
     std::vector<double> rotMatrix;  // should it be the Quat?
 
+   /// helper function which does exatly what it says
+   void checkMaxMoreThenMin(const std::vector<double> &min,const std::vector<double> &max)const;
+   /// helper function which verifies if projection vectors are specified and if their values are correct when present.
+   void checkUVsettings(const std::vector<double> &ut,const std::vector<double> &vt,Kernel::V3D &u,Kernel::V3D &v)const;
  };
  
 } // namespace Mantid
