@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidMDEvents/MDEventWSWrapper.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
 
 
 using namespace Mantid::MDEvents;
@@ -46,6 +47,37 @@ public:
   void test_AddEventsData()
   {
 
+        const size_t n_dims(5),n_MDev(2);
+        Mantid::API::BoxController_sptr bc;
+         Mantid::MDEvents::Strings targ_dim_names(n_dims,"mdn"),targ_dim_units(n_dims,"Momentum");
+         std::vector<double> dim_min(n_dims,-1),dim_max(n_dims,1);
+
+         TSM_ASSERT_THROWS_NOTHING("should be fine",pWSWrap->createEmptyMDWS(5, targ_dim_names,targ_dim_units,dim_min,dim_max));
+
+         // Build up the box controller
+         TSM_ASSERT_THROWS_NOTHING("should be fine", bc = pWSWrap->getBoxController());
+
+         // set default BC values
+         TSM_ASSERT_THROWS_NOTHING("should be fine",  bc->setSplitThreshold(5));
+         TSM_ASSERT_THROWS_NOTHING("should be fine",  bc->setMaxDepth( 20 ));
+         TSM_ASSERT_THROWS_NOTHING("should be fine",  bc->setSplitInto(10));
+
+         TSM_ASSERT_THROWS_NOTHING("should be fine",pWSWrap->splitBox());
+
+       // allocate temporary buffer for MD Events data
+         std::vector<Mantid::coord_t>  allCoord(n_dims*n_MDev,0.5);
+         allCoord[0]=-0.5;
+        
+         std::vector<float>    sig_err(2*n_MDev,2);
+         std::vector<uint16_t> run_index(n_MDev,2);
+         std::vector<uint32_t> det_ids(n_MDev,5);
+
+
+         TSM_ASSERT_THROWS_NOTHING("should be fine",pWSWrap->addMDData(sig_err,run_index,det_ids,allCoord,n_MDev));
+
+         TSM_ASSERT_THROWS_NOTHING("should be fine",pWSWrap->refreshCache());
+
+         TSM_ASSERT_EQUALS("all points should be added successfully",n_MDev,pWSWrap->pWorkspace()->getNPoints());
   }
 
 };

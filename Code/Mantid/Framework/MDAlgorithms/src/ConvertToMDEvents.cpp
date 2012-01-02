@@ -702,10 +702,10 @@ ConvertToMDEvents::getTransfMatrix(API::MatrixWorkspace_sptr inWS,const Kernel::
     the particular workspace.
 
     @param Coord             -- vector of coordinates for current multidimensional event
-    @param nd                -- number of event's dimensions
+    @param nd                -- number of the event's dimensions
     @param n_ws_properties   -- number of dimensions, provided by the workspace itself. E.g., processed inelastic matrix
                                 workspace with provides 4 dimensions, matrix workspace in elastic mode -- 3 dimensions, powder 
-                                -- 2 for elastic and 3 for inelastic mode. Number of these properties is determined by the deployed algorithm
+                                -- 1 for elastic and 2 for inelastic mode. Number of these properties is determined by the deployed algorithm
                                 The coordinates, obtained from the workspace placed first in the array of coordinates, and the coordinates, 
                                 obtained from dimensions placed after them. 
     *@returns        -- true if all coordinates are within the range allowed for the algorithm and false otherwise
