@@ -40,7 +40,7 @@ namespace MDAlgorithms
 //-----------------------------------------------
 template<Q_state Q, AnalMode MODE, CnvrtUnits CONV>
 void 
-ConvertToMDEvents::processQND(API::IMDEventWorkspace *const pOutWs)
+ConvertToMDEvents::processQND()
 {
     // service variable used for efficient filling of the MD event WS  -> should be moved to configuration;
     size_t SPLIT_LEVEL(1024);

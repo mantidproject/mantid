@@ -90,18 +90,18 @@ class LOOP{
             LOOP< i-1 >::EXEC(pH);
             // why does it not work as one row?
             //pH->wsCreator[i] = &MDEventWSWrapper::createEmptyEventWS<i>;
-            fpVoidMethod fp     = &MDEventWSWrapper::createEmptyEventWS<i>;
-            pH->wsCreator[i]    =fp;
+          //  fpVoidMethod fp     = &MDEventWSWrapper::createEmptyEventWS<i>;
+            pH->wsCreator.push_back(&(MDEventWSWrapper::createEmptyEventWS<i>));
 
-            fpVoidMethod fp1    = &MDEventWSWrapper::add_MDData<i>;
-            pH->mdEvSummator[i] = fp1;
+          //  fpVoidMethod fp1    = &MDEventWSWrapper::add_MDData<i>;
+            pH->mdEvSummator.push_back(&(MDEventWSWrapper::add_MDData<i>));
 
             // vftable definition
-            fpVoidMethod fp2     =  &MDEventWSWrapper::split_Box<i>;
-            pH->boxSplitter[i]   = fp2;
+            //fpVoidMethod fp2     =  &MDEventWSWrapper::split_Box<i>;
+            pH->boxSplitter.push_back(&(MDEventWSWrapper::split_Box<i>));//   = fp2;
 
-            fpVoidMethod fp3      = &MDEventWSWrapper::refresh_Cache<i>;
-            pH->cashRefresher[i]  =  fp3;
+            //fpVoidMethod fp3      = &MDEventWSWrapper::refresh_Cache<i>;
+            pH->cashRefresher.push_back( &(MDEventWSWrapper::refresh_Cache<i>));
 
     }
 };
@@ -110,19 +110,19 @@ class LOOP<0>{
   public:
     static inline void EXEC(MDEventWSWrapper *pH){           
             fpVoidMethod fp = &MDEventWSWrapper::throwNotInitiatedError;
-            pH->wsCreator[0]    = fp;
-            pH->mdEvSummator[0] = fp;
-            pH->boxSplitter[0]  = fp;
-            pH->cashRefresher[0]= fp;
+            pH->wsCreator.push_back(fp);
+            pH->mdEvSummator.push_back(fp);
+            pH->boxSplitter.push_back(fp);
+            pH->cashRefresher.push_back(fp);
     }
 };
 
 MDEventWSWrapper::MDEventWSWrapper():n_dimensions(0)
 {
-    wsCreator.resize(MAX_N_DIM+1);
-    mdEvSummator.resize(MAX_N_DIM+1);
-    boxSplitter.resize(MAX_N_DIM+1);
-    cashRefresher.resize(MAX_N_DIM+1);
+    wsCreator.reserve(MAX_N_DIM+1);
+    mdEvSummator.reserve(MAX_N_DIM+1);
+    boxSplitter.reserve(MAX_N_DIM+1);
+    cashRefresher.reserve(MAX_N_DIM+1);
     LOOP<MAX_N_DIM>::EXEC(this);
 }
 

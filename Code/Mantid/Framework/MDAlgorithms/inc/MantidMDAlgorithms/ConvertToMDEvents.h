@@ -55,9 +55,7 @@ namespace MDAlgorithms
 */
   class ConvertToMDEvents;
   // signature for an algorithm processing n-dimension event workspace
-  typedef boost::function<void (ConvertToMDEvents*, API::IMDEventWorkspace *const)> pMethod;
-  // signature for a fucntion, creating n-dimension workspace  
-  typedef boost::function<API::IMDEventWorkspace_sptr (ConvertToMDEvents* )> pWSCreator;
+  typedef boost::function<void (ConvertToMDEvents* )> pMethod;
  // vectors of strings are here everywhere
   typedef  std::vector<std::string> Strings;
   /// known sates for algorithms, caluclating Q-values
@@ -181,7 +179,7 @@ namespace MDAlgorithms
     * @param pOutWs -- pointer to initated target workspace, which should accomodate new events
     */
     template<Q_state Q, AnalMode MODE, CnvrtUnits CONV>
-    void processQND(API::IMDEventWorkspace *const pOutWs);
+    void processQND();
     /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
     /// presumably will be completely inlined
      template<Q_state Q, AnalMode MODE, CnvrtUnits CONV> 

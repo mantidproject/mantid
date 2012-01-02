@@ -341,7 +341,7 @@ void ConvertToMDEvents::exec(){
     // call selected algorithm
     pMethod algo =  alg_selector[algo_id];
     if(algo){
-        algo(this,spws.get());
+        algo(this);
     }else{
         g_log.error()<<"requested undefined subalgorithm :"<<algo_id<<std::endl;
         throw(std::invalid_argument("undefined subalgoritm requested "));
