@@ -149,8 +149,8 @@ QString PointGroupBox::write3DElement(const QString & elem_name) const
 /**
  * Take the arguments given and form a string using the
  * current algebra
- * @param Left-hand side of binary operation
- * @param Right-hand side of binary operation
+ * @param left Left-hand side of binary operation
+ * @param right Right-hand side of binary operation
  * @returns A string representing the result of the operation on the arguments
  */
 QString Operation::toString(QString left, QString right) const

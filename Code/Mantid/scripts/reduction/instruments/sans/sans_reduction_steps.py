@@ -343,16 +343,18 @@ class DirectBeamTransmission(BaseTransmission):
         loader = reducer._data_loader.clone(data_file=filepath)
         if self._beam_finder is not None:
             loader.set_beam_center(self._beam_finder.get_beam_center())
-        loader.execute(reducer, sample_ws)
+        l_text = loader.execute(reducer, sample_ws)
         output_str += "   Sample: %s\n" % extract_workspace_name(self._sample_file)
+        output_str += "   %s\n" % l_text
         
         empty_ws = "__transmission_empty"
         filepath = find_data(self._empty_file, instrument=reducer.instrument.name())
         loader = reducer._data_loader.clone(data_file=filepath)
         if self._beam_finder is not None:
             loader.set_beam_center(self._beam_finder.get_beam_center())
-        loader.execute(reducer, empty_ws)
-        output_str += "   Empty: %s" % extract_workspace_name(self._empty_file)
+        l_text = loader.execute(reducer, empty_ws)
+        output_str += "   Empty: %s\n" % extract_workspace_name(self._empty_file)
+        output_str += "   %s\n" % l_text
         
         # Subtract dark current
         if self._use_sample_dc:
@@ -385,7 +387,9 @@ class DirectBeamTransmission(BaseTransmission):
                    '<radius val="%12.10f" />' % (self._beam_radius*pixel_size_x/1000.0) + \
                  '</infinite-cylinder>\n'
                  
-        det_finder = FindDetectorsInShape(Workspace=workspace, ShapeXML=cylXML)
+        # Use the transmission workspaces to find the list of monitor pixels
+        # since the beam center may be at a different location
+        det_finder = FindDetectorsInShape(Workspace=sample_ws, ShapeXML=cylXML)
         det_list = det_finder.getPropertyValue("DetectorList")
         
         first_det_str = det_list.split(',')[0]
@@ -416,8 +420,9 @@ class DirectBeamTransmission(BaseTransmission):
         RebinToWorkspace(empty_mon_ws, sample_mon_ws, OutputWorkspace=empty_mon_ws)
 
         # Clean up
-        reducer._data_loader.__class__.delete_workspaces(empty_ws)
-        reducer._data_loader.__class__.delete_workspaces(sample_ws)
+        for ws in [empty_ws, sample_ws]:
+            if mtd.workspaceExists(ws):
+                mtd.deleteWorkspace(ws)          
             
         return sample_mon_ws, empty_mon_ws, first_det, output_str
         

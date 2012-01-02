@@ -22,7 +22,7 @@ namespace Mantid
      * @param spectraMap :: A reference to the spectra-detector mapping
      * @param ignoreMaskedDetectors :: flag indicating that masked detectors should be ignored.
      */
-    NearestNeighbours::NearestNeighbours(Instrument_const_sptr instrument,
+    NearestNeighbours::NearestNeighbours(boost::shared_ptr<const Instrument> instrument,
                                          const ISpectraDetectorMap & spectraMap, bool ignoreMaskedDetectors) : 
       m_instrument(instrument), m_spectraMap(spectraMap), m_noNeighbours(8), m_cutoff(-DBL_MAX), m_scale(), m_radius(0), m_bIgnoreMaskedDetectors(ignoreMaskedDetectors)
     {
@@ -31,9 +31,9 @@ namespace Mantid
 
     /**
      * Returns a map of the spectrum numbers to the distances for the nearest neighbours.
-     * @param component :: IComponent pointer to Detector object
-     * @param noNeighbours :: Number of neighbours to search for
+     * @param spectrum :: Spectrum ID of the central pixel
      * @param force :: flag to indicate that the nearest neighbours map should be rebult by force. Otherwise will only call build when different.
+     * @param noNeighbours :: Number of neighbours to search for
      * @return map of Detector ID's to distance
      * @throw NotFoundError if component is not recognised as a detector
      */
@@ -48,7 +48,7 @@ namespace Mantid
    
     /**
      * Returns a map of the spectrum numbers to the distances for the nearest neighbours.
-     * @param component :: IComponent pointer to Detector object
+     * @param spectrum :: Spectrum ID of the central pixel
      * @param radius :: cut-off distance for detector list to returns
      * @return map of Detector ID's to distance
      * @throw NotFoundError if component is not recognised as a detector
@@ -245,7 +245,7 @@ namespace Mantid
      * @returns A map of spectra number to detector pointer
      */
     std::map<specid_t, IDetector_const_sptr>
-    NearestNeighbours::getSpectraDetectors(Instrument_const_sptr instrument,
+    NearestNeighbours::getSpectraDetectors(boost::shared_ptr<const Instrument> instrument,
                                            const ISpectraDetectorMap & spectraMap)
     {
       std::map<specid_t, IDetector_const_sptr> spectra;

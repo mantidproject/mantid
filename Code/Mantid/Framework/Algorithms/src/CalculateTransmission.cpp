@@ -213,8 +213,9 @@ API::MatrixWorkspace_sptr CalculateTransmission::extractSpectrum(API::MatrixWork
   return childAlg->getProperty("OutputWorkspace");
 }
 /** Calculate a workspace that contains the result of the fit to the transmission fraction that was calculated
-*  @param[in] fitMethod string can either be Log or Linear
-*  @param[in] WS the workspace with the unfitted transmission ratio data
+*  @param raw [in] the workspace with the unfitted transmission ratio data
+*  @param rebinParams [in] the parameters for rebinning
+*  @param fitMethod [in] string can either be Log or Linear
 *  @return a workspace that contains the evaluation of the fit
 *  @throw runtime_error if the Linear or ExtractSpectrum algorithm fails during execution
 */
@@ -324,7 +325,7 @@ API::MatrixWorkspace_sptr CalculateTransmission::fitData(API::MatrixWorkspace_sp
   return childAlg->getProperty("OutputWorkspace");
 }
 /** Calls rebin as sub-algorithm
-*  @param rebinParams this string is passed to rebin as the "Params" property
+*  @param binParams this string is passed to rebin as the "Params" property
 *  @param ws the workspace to rebin
 *  @return the resultant rebinned workspace
 *  @throw runtime_error if the rebin algorithm fails during execution

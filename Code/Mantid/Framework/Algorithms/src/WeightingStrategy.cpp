@@ -47,11 +47,6 @@ namespace Mantid
 
     /**
     Calculate the weight at distance from epicenter. Always returns 1 for this implementation
-    @param adjX : The number of Y (vertical) adjacent pixels to average together
-    @param ix : current index x
-    @param adjY : The number of X (vertical) adjacent pixels to average together
-    @param iy : current index y
-    @return weight which is always 1
     */
     double FlatWeighting::weightAt(const double&,const double&, const double&, const double&)
     {
@@ -60,7 +55,6 @@ namespace Mantid
 
     /**
     Calculate the weight at distance from epicenter. Always returns 1
-    @param distance : 
     @return 1
     */
     double FlatWeighting::weightAt(const Mantid::Kernel::V3D&)
@@ -74,7 +68,7 @@ namespace Mantid
 
     /**
     Constructor
-    @cutOff : cutoff radius
+    @param cutOff : cutoff radius
     */
     LinearWeighting::LinearWeighting(const double cutOff) : WeightingStrategy(cutOff)
     {
@@ -163,8 +157,7 @@ namespace Mantid
     }
 
     /**
-    Calculate the weight at distance from epicenter. Always throws.
-    @param distance : 
+    Calculate the weight at distance from epicenter. Always throws. 
     @throw runtime_error if used
     */
     double NullWeighting::weightAt(const Mantid::Kernel::V3D&)
@@ -174,10 +167,6 @@ namespace Mantid
 
     /**
     Calculate the weight at distance from epicenter. Always throws.
-    @param adjX : The number of Y (vertical) adjacent pixels to average together
-    @param ix : current index x
-    @param adjY : The number of X (vertical) adjacent pixels to average together
-    @param iy : current index y
     @throws runtime_error if called
     */
     double NullWeighting::weightAt(const double&,const double&, const double&, const double&)
@@ -191,8 +180,8 @@ namespace Mantid
 
     /**
     Constructor
-    @cutOff : radius cut-off.
-    @sigma : gaussian sigma value.
+    @param cutOff : radius cut-off.
+    @param sigma : gaussian sigma value.
     */
     GaussianWeightingnD::GaussianWeightingnD(double cutOff, double sigma) : WeightingStrategy(cutOff)
     {
@@ -244,7 +233,7 @@ namespace Mantid
 
     /**
     calculateGaussian method so that same gaussian calculation can be run by different consuming methods.
-    @param r^2/cutOff^2
+    @param normalisedDistanceSq : r^2/cutOff^2
     @return exp(-(r^2/cutOff^2)/(2*sigma^2))
     */
     inline double GaussianWeightingnD::calculateGaussian(const double normalisedDistanceSq)

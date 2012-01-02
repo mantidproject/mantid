@@ -14,7 +14,7 @@ If the OutputWorkspace does NOT already exist, a default one is created. This is
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/CPUTimer.h"
-#include "MantidKernel/DiskMRU.h"
+#include "MantidKernel/DiskBuffer.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/ThreadPool.h"
@@ -128,8 +128,8 @@ namespace Mantid
       }
 
       bc = pWs->getBoxController();
-      bc->setCacheParameters( sizeof(MDEvent<4>), 0, 1000000, 10000000);
-      std::cout << "File backed? " << bc->isFileBacked() << ". Cache " << bc->getDiskMRU().getMemoryStr() << std::endl;
+      bc->setCacheParameters( sizeof(MDEvent<4>), 1000000);
+      std::cout << "File backed? " << bc->isFileBacked() << ". Cache " << bc->getDiskBuffer().getMemoryStr() << std::endl;
 
       //Persist the workspace.
       API::IMDEventWorkspace_sptr i_out = getProperty("OutputWorkspace");
@@ -194,7 +194,7 @@ namespace Mantid
       // For tracking when to split boxes
       size_t eventsAdded = 0;
       BoxController_sptr bc = ws->getBoxController();
-      DiskMRU & mru = bc->getDiskMRU();
+      DiskBuffer & dbuf = bc->getDiskBuffer();
 
       for (int blockNum=0; blockNum < numBlocks; blockNum++)
       {
@@ -267,7 +267,7 @@ namespace Mantid
           tp.joinAll();
 
           // Flush the cache - this will save things out to disk
-          mru.flushCache();
+          dbuf.flushCache();
           // Flush memory
           Mantid::API::MemoryManager::Instance().releaseFreeMemory();
           eventsAdded = 0;

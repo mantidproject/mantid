@@ -279,6 +279,7 @@ endif ()
 ADD_PRECOMPILED_HEADER( inc/MantidGeometry/PrecompiledHeader.h MantidGeometry src/PrecompiledHeader.cpp SRC_FILES INC_FILES )
 # Add the target for this directory
 add_library ( Geometry ${SRC_FILES} ${INC_FILES} )
+add_cppcheck( Geometry )
 # Set the name of the generated library
 set_target_properties ( Geometry PROPERTIES OUTPUT_NAME MantidGeometry 
                                             COMPILE_DEFINITIONS IN_MANTID_GEOMETRY )

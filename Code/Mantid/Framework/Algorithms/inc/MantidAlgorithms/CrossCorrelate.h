@@ -61,7 +61,7 @@ public:
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Utility"; }
+  virtual const std::string category() const { return "Utility;Arithmetic"; }
 
 private:
   /// Sets documentation strings for this algorithm

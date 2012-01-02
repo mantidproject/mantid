@@ -39,7 +39,7 @@ namespace Mantid
     *  @param XLength :: The number of X data points/bin boundaries
     *  @param YLength :: The number of data/error points
     */
-    void WorkspaceSingleValue::init(const size_t &NVectors, const size_t &XLength, const size_t &YLength)
+    void WorkspaceSingleValue::init(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength)
     {
       (void) NVectors; (void) XLength; (void) YLength; //Avoid compiler warning
     }

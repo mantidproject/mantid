@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include "MantidKernel/Atom.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include <boost/math/special_functions/fpclassify.hpp>
 
 namespace Mantid
 {
@@ -13,15 +14,15 @@ namespace PhysicalConstants
 
 using std::string;
 
-/// constant to use for garbage numbers
-static const double NAN = std::numeric_limits<double>::quiet_NaN();
-
 /// Get the corresponding neutronic atom
 const NeutronAtom getNeutronNoExceptions(const uint16_t z, const uint16_t a)
 {
-  try {
+  try
+  {
     return getNeutronAtom(z, a);
-  } catch (std::runtime_error & ) {
+  }
+  catch (std::runtime_error & )
+  {
     return NeutronAtom(z, a,
 		       NAN, NAN, NAN, NAN,
 		       NAN, NAN, NAN, NAN); // set to junk value
@@ -3186,18 +3187,13 @@ static const size_t NUM_ATOMS = 2845;
 
 // ---------- END DO NOT EDIT AREA----------
 
-/// Check to see if we have non-valid atom
-inline bool AtomIsNaN(const double number)
-{
-  return (number != number);
-}
 
 /// Check if two atoms are not valid.
 bool AtomEqualsWithNaN(const double left, const double right)
 {
   if (left == right)
     return true;
-  if (AtomIsNaN(left) && AtomIsNaN(right))
+  if ((boost::math::isnan)(left) && (boost::math::isnan)(right))
     return true;
   return false;
 }

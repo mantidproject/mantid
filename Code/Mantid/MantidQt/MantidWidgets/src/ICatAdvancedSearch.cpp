@@ -185,7 +185,7 @@ namespace MantidQt
           }
           else
           {
-            throw std::runtime_error("Please Login to the information catalog using the login menu provided to do the investigation search.");
+            throw std::runtime_error("Please CatalogLogin to the information catalog using the login menu provided to do the investigation search.");
           }
         }
         else
@@ -525,7 +525,7 @@ namespace MantidQt
     /* This method updates the search result to search tree
      * @param ws_sptr :: workspace shared pointer
      */
-    void ICatAdvancedSearch::updatesearchResults(ITableWorkspace_sptr& ws_sptr )
+    void ICatAdvancedSearch::updatesearchResults(Mantid::API::ITableWorkspace_sptr& ws_sptr )
     {
       //ICatUtils utils;
       if(!m_utils_sptr)

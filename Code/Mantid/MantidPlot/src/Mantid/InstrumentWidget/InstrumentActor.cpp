@@ -26,7 +26,7 @@ double InstrumentActor::m_tolerance = 0.00001;
 
 /**
  * Constructor
- * @param workspace :: Workspace
+ * @param wsName :: Workspace
  */
 InstrumentActor::InstrumentActor(const QString wsName): 
 m_workspace(boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()))),

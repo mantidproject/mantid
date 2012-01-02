@@ -103,7 +103,7 @@ namespace Mantid
     * @param instrument :: A shared pointer to the base instrument, it will throw if a parametrized one is given
     * @param filename :: The input filename
     */
-    void UpdateInstrumentFromFile::updateFromRaw(Instrument_sptr instrument, const std::string & filename)
+    void UpdateInstrumentFromFile::updateFromRaw(boost::shared_ptr<Geometry::Instrument> instrument, const std::string & filename)
     {
       ISISRAW2 iraw;
       if (iraw.readFromFile(filename.c_str(),false) != 0)
@@ -136,7 +136,7 @@ namespace Mantid
     * @param instrument :: A shared pointer to the base instrument
     * @param filename :: The input filename
     */
-    void UpdateInstrumentFromFile::updateFromNeXus(Instrument_sptr instrument, const std::string & filename)
+    void UpdateInstrumentFromFile::updateFromNeXus(boost::shared_ptr<Geometry::Instrument> instrument, const std::string & filename)
     {
       try
       {

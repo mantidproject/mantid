@@ -48,7 +48,7 @@ namespace Mantid
     {
     public:
       /// Default constructor
-      Exponential() : UnaryOperation() {};
+      Exponential();
       /// Destructor
       virtual ~Exponential() {};
       /// Algorithm's name for identification overriding a virtual method

@@ -15,7 +15,7 @@ using Mantid::Geometry::IObjComponent;
 /**
  * Constructor for tree model to display instrument tree
  */
-InstrumentTreeModel::InstrumentTreeModel(boost::shared_ptr<const Mantid::Geometry::Instrument> instrument,
+InstrumentTreeModel::InstrumentTreeModel(boost::shared_ptr<const Instrument> instrument,
                                          QObject *parent) :
   QAbstractItemModel(parent),
   m_instrument(instrument)

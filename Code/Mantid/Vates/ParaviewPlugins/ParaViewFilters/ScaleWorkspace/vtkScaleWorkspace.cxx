@@ -71,7 +71,7 @@ void vtkScaleWorkspace::SetXScaling(double xScaling)
 
 /**
 Setter for the Y Scaling factor
-@param xScaling : scaling factor in y
+@param yScaling : scaling factor in y
 */
 void vtkScaleWorkspace::SetYScaling(double yScaling)
 {
@@ -84,7 +84,7 @@ void vtkScaleWorkspace::SetYScaling(double yScaling)
 
 /**
 Setter for the Z Scaling factor
-@param xScaling : scaling factor in z
+@param zScaling : scaling factor in z
 */
 void vtkScaleWorkspace::SetZScaling(double zScaling)
 {

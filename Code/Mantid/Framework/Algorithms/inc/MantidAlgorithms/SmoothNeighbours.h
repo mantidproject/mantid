@@ -24,7 +24,7 @@ namespace Mantid
     public:
       /**
       Constructor
-      @cutoff : radius cutoff for filtering
+      @param cutoff : radius cutoff for filtering
       */
       RadiusFilter(double cutoff) : m_cutoff(cutoff)
       {

@@ -446,7 +446,6 @@ void LoadRKH::binCenter(const MantidVec oldBoundaries, MantidVec & toCenter) con
   VectorHelper::convertToBinCentre(oldBoundaries, toCenter);
 }
 /**This method does a quick file check by checking the no.of bytes read nread params and header buffer
- *  @param filePath- path of the file including name.
  *  @param nread :: no.of bytes read
  *  @param header :: The first 100 bytes of the file as a union
  *  @return true if the given file is of type which can be loaded by this algorithm

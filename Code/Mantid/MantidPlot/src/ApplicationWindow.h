@@ -1122,7 +1122,7 @@ private:
   void ICatIsisSearch();
   /// Handler for ICatMyData serch menu
   void ICatMyDataSearch();
-  // Handler for ICat Logout
+  // Handler for ICat CatalogLogout
   void ICatLogout();
 
   void ICatAdvancedSearch();

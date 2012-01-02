@@ -81,7 +81,6 @@ namespace DataObjects
   //---------------------------------------------------------------------------------------------
   /** Clone a shared pointer
    *
-   * @param other :: other PeaksWorkspace to copy from
    * @return copy of the peaksworkspace
    */
   boost::shared_ptr<PeaksWorkspace> PeaksWorkspace::clone()

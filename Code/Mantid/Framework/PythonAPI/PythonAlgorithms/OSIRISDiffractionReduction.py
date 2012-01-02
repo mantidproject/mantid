@@ -55,6 +55,6 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         self.setProperty("OutputWorkspace", mtd[reducer.result_workspace()])
         
     def category(self):
-        return 'Diffraction'
+        return 'Diffraction;PythonAlgorithms'
 
 mtd.registerPyAlgorithm(OSIRISDiffractionReduction())

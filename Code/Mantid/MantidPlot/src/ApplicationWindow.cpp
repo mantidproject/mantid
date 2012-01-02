@@ -11088,13 +11088,14 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
       ag->enableAutoscaling(autoscale2DPlots);
 
     }
-    else if( s.contains("MantidCurve")) //1D plot curves
+    else if( s.contains("MantidMatrixCurve")) //1D plot curves
     {
       QStringList curvelst=s.split("\t");
       if( !curvelst[1].isEmpty()&& !curvelst[2].isEmpty())
       {
         try {
-          new MantidMatrixCurve(curvelst[1],ag,curvelst[3].toInt(),curvelst[4].toInt());
+          PlotCurve *c = new MantidMatrixCurve(curvelst[1],ag,curvelst[3].toInt(),curvelst[4].toInt());
+          if ( curvelst.size() > 5 && !curvelst[5].isEmpty() ) c->setSkipSymbolsCount(curvelst[5].toInt());
         } catch (Mantid::Kernel::Exception::NotFoundError &) {
           // Get here if workspace name is invalid - shouldn't be possible, but just in case
           closeWindow(plot);
@@ -11358,6 +11359,10 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
       }
       lst.pop_back();
       ag->restoreCurveLabels(curveID - 1, lst);
+    } else if (s.contains("<SkipPoints>")){
+      PlotCurve *c = (PlotCurve *)ag->curve(curveID - 1);
+      if (c)
+        c->setSkipSymbolsCount(s.remove("<SkipPoints>").remove("</SkipPoints>").toInt());
     } else if (s == "<Function>"){//version 0.9.5
       curveID++;
       QStringList lst;

@@ -6,7 +6,7 @@ TODO: Enter wiki description here.
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid
 {
@@ -38,7 +38,7 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport IDLRebin : public API::Algorithm
+  class DLLExport IDLRebin : public API::Algorithm, public API::DeprecatedAlgorithm
   {
   public:
     IDLRebin();

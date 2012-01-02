@@ -18,7 +18,7 @@ class FindCurrentLiveNexusFile(PythonAlgorithm):
         return
 
     def category(self):
-        return "DataHandling"
+        return "DataHandling;PythonAlgorithms"
 
     def name(self):
         return "FindCurrentLiveNexusFile"

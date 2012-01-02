@@ -232,7 +232,7 @@ void ManageUserDirectories::selectSaveDir()
 
 }
 /** Opens a manage directories dialog and gives it focus
-*  @param the :: parent window, probably the window that called it
+*  @param parent :: the parent window, probably the window that called it
 */
 void ManageUserDirectories::openUserDirsDialog(QWidget * parent)
 {

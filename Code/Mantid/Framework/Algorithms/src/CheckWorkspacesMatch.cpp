@@ -44,7 +44,7 @@ using namespace DataObjects;
  * @param props :: The list of properties for this algorithms. Ignored as we know what they are.
  * returns True if everything executed correctly
  */
-bool CheckWorkspacesMatch::processGroups(WorkspaceGroup_sptr group1, const std::vector<Property*>& props)
+bool CheckWorkspacesMatch::processGroups(boost::shared_ptr<API::WorkspaceGroup> group1, const std::vector<Property*>& props)
 {
   // We don't need these here has we know what the properties are called
   UNUSED_ARG(group1); UNUSED_ARG(props);
@@ -413,8 +413,8 @@ bool CheckWorkspacesMatch::checkAxes(API::MatrixWorkspace_const_sptr ws1, API::M
 }
 
 /// Checks that the spectra maps match
-/// @param map1 :: the first sp det map
-/// @param map2 :: the second sp det map
+/// @param ws1 :: the first sp det map
+/// @param ws2 :: the second sp det map
 /// @retval true The maps match
 /// @retval false The maps do not match
 bool CheckWorkspacesMatch::checkSpectraMap(MatrixWorkspace_const_sptr ws1, MatrixWorkspace_const_sptr ws2)

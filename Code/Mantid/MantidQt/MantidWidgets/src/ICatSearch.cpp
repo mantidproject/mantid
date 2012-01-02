@@ -141,7 +141,7 @@ namespace MantidQt
     /* This method updates the search result to search tree
      * @param ws_sptr :: workspace shared pointer
      */
-    void ICatSearch::updatesearchResults(ITableWorkspace_sptr& ws_sptr )
+    void ICatSearch::updatesearchResults(Mantid::API::ITableWorkspace_sptr& ws_sptr )
     {
       if(!m_utils_sptr)
       {
@@ -252,7 +252,7 @@ namespace MantidQt
     /**This method executes the search by run number algorithm
      *@param ws_sptr :: shared pointer to outputworkspace
      */
-    bool  ICatSearch::executeSearch(ITableWorkspace_sptr& ws_sptr)
+    bool  ICatSearch::executeSearch(Mantid::API::ITableWorkspace_sptr& ws_sptr)
     {
       //before starting new search investigations clear the old one.
       m_utils_sptr->clearSearch(m_uiForm.searchtableWidget,"investigations");

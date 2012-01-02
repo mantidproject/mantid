@@ -89,38 +89,6 @@ namespace Geometry
 
 
 //  //----------------------------------------------------------------------------------------------
-//  /** Constructor with N points on the plane's surface.
-//   *
-//   * A hyperplane is defined as:
-//   *  a1*x1 + a2*x2 + ... = b
-//   *
-//   * We have N "x" points describing points on the surface
-//   *  a1*x11 + a2*x12 + ... = b
-//   *  a1*x21 + a2*x22 + ... = b
-//   *
-//   * Let us reset the origin by offsetting all points by - x1 so that the first point is 0,0,0...
-//   * This allows us to set b = 0
-//   *  0 + 0 = 0
-//   *  a1 * (x21-x11) + a2 * (x22-x12) + ... = 0
-//   *  a1 * (x31-x11) + a2 * (x32-x12) + ... = 0
-//   *
-//   * We can divide by a1 to reduce the problems to N-1 equations with N-1 variables
-//   *  1 * (x21-x11) + a2/a1 * (x22-x12) + ... = 0
-//   *  1 * (x31-x11) + a2/a1 * (x32-x12) + ... = 0
-//   *      ...
-//   *
-//   * Or, expressed as a matrix A x = B
-//   *
-//   * A x = | x22 x23 | | a2/a1 | = B = | -x21 |
-//   *       | x32 x33 | | a3/a1 |       | -x31 |
-//   *
-//   * (where i've offset x22 etc. already)
-//   * We can take a1 = 1 since it doesn't matter: we'll calculate b later.
-//   *
-//   * @param points :: vector of N points with N dimensions.
-//   * @param insidePoint :: coordinate of a point that is known to be inside the plane described
-//   * @throws GSL error if the matrix cannot be solved (singular, etc.)
-//   */
 //  MDPlane::MDPlane(const std::vector<Mantid::Kernel::VMD> & points, const VMD & insidePoint)
 //  {
 //    if (points.size() <= 0)
@@ -228,7 +196,8 @@ namespace Geometry
   //----------------------------------------------------------------------------------------------
   /** Copy constructor
    *
-   * @param other :: MDPlane to copy */
+   * @param other :: MDPlane to copy
+   */
   MDPlane::MDPlane(const MDPlane & other)
   : m_nd(other.m_nd), m_inequality(other.m_inequality)
   {
@@ -241,7 +210,8 @@ namespace Geometry
   //----------------------------------------------------------------------------------------------
   /** Assignment operator
    *
-   * @param other :: MDPlane to copy */
+   * @param other :: MDPlane to copy
+   */
   MDPlane & MDPlane::operator=(const MDPlane & other)
   {
     if (this != &other) // protect against invalid self-assignment

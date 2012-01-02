@@ -1798,7 +1798,7 @@ void AlgorithmDockWidget::update()
 
   m_findAlg->clear();
   std::string prevName = "";
-  for(AlgNamesType::const_iterator i=names.begin();i!=names.end();i++)
+  for(AlgNamesType::const_iterator i=names.begin();i!=names.end();++i)
   {
     if (i->name != prevName)
       m_findAlg->addItem(QString::fromStdString(i->name));
@@ -1812,7 +1812,7 @@ void AlgorithmDockWidget::update()
   QMap<QString,QTreeWidgetItem*> categories;// keeps track of categories added to the tree
   QMap<QString,QTreeWidgetItem*> algorithms;// keeps track of algorithms added to the tree (needed in case there are different versions of an algorithm)
 
-  for(AlgNamesType::const_iterator i=names.begin();i!=names.end();i++)
+  for(AlgNamesType::const_iterator i=names.begin();i!=names.end();++i)
   {
     QString algName = QString::fromStdString(i->name);
     QString catName = QString::fromStdString(i->category);

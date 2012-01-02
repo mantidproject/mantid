@@ -148,10 +148,10 @@ def Background(datafile):
 def NoBackground():
     ReductionSingleton().set_background(None) 
 
-def SaveIqAscii(reducer=None):
+def SaveIqAscii(reducer=None, process=None):
     if reducer is None:
         reducer = ReductionSingleton()
-    reducer.set_save_Iq(sans_reduction_steps.SaveIqAscii())
+    reducer.set_save_Iq(sans_reduction_steps.SaveIqAscii(process=process))
 
 def NoSaveIq():
     ReductionSingleton().set_save_Iq(None)

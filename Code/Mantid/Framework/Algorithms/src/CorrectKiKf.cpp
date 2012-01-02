@@ -138,7 +138,7 @@ void CorrectKiKf::exec()
         if (!det->isMonitor())
         {
           std::vector< double >  wsProp=det->getNumberParameter("Efixed");
-          if ( wsProp.size() > 0 )
+          if ( !wsProp.empty() )
           {
             Efi=wsProp.at(0);
             g_log.debug() << i << " Ef: "<< Efi<<" (from parameter file)\n";     
@@ -276,7 +276,7 @@ void CorrectKiKf::execEvent()
         if (!det->isMonitor())
         {
           std::vector< double >  wsProp=det->getNumberParameter("Efixed");
-          if ( wsProp.size() > 0 )
+          if ( !wsProp.empty() )
           {
             Efi=wsProp.at(0);
             g_log.debug() << i << " Ef: "<< Efi<<" (from parameter file)\n";     

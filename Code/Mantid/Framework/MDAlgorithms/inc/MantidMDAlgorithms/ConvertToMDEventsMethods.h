@@ -40,7 +40,7 @@ namespace MDAlgorithms
 //-----------------------------------------------
 template<Q_state Q, AnalMode MODE, CnvrtUnits CONV>
 void 
-ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
+ConvertToMDEvents::processQND(API::IMDEventWorkspace *const pOutWs)
 {
     // service variable used for efficient filling of the MD event WS  -> should be moved to configuration;
     size_t SPLIT_LEVEL(1024);
@@ -50,9 +50,8 @@ ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
     const size_t numSpec  = inWS2D->getNumberHistograms();
     // progress reporter
     pProg = std::auto_ptr<API::Progress>(new API::Progress(this,0.0,1.0,numSpec));
-  
- 
-    // initiate the class which is does the conversion of workspace data into MD WS coordinates;
+
+    // initiate the templated class which does the conversion of workspace data into MD WS coordinates;
     COORD_TRANSFORMER<Q,MODE,CONV> trn(this); 
     // one of the dimensions has to be X-ws dimension -> need to add check for that;
 
@@ -69,6 +68,7 @@ ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
 
     // take at least bufSize for efficiency
     size_t buf_size     = ((specSize>SPLIT_LEVEL)?specSize:SPLIT_LEVEL);
+    // allocate temporary buffer for MD Events data
     std::vector<coord_t>  allCoord(n_dims*buf_size);
     std::vector<coord_t>  Coord(n_dims);
     std::vector<float>    sig_err(2*buf_size);

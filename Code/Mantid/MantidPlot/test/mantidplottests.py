@@ -12,7 +12,8 @@ import os
 import unittest
 import time
 import qti
-from PyQt4 import Qt
+import proxies
+from PyQt4 import QtGui, QtCore
 
 # Try to import QTest. Not available on Windows?
 try:
@@ -48,11 +49,11 @@ Then, the contents of that section are replaced
     # Find the text in each section
     for line in lines:
         if line.startswith("<!-- "):
-            # All lines should!
+            # All lines should go <!-- Section -->
             n = line.find(" ", 5)
             if n > 0:
                 current_section = line[5:n].strip()
-                current_text = line[n+3:]
+                current_text = line[n+4:]
                 sections[current_section] = current_text
             
     # Replace the section
@@ -112,9 +113,9 @@ def screenshot(widget, filename, description, png_exists=False):
             # First save the screenshot
             widget.show()
             widget.resize(widget.size())
-            Qt.QCoreApplication.processEvents()
+            QtCore.QCoreApplication.processEvents()
             
-            pix = Qt.QPixmap.grabWidget(widget)
+            pix = QtGui.QPixmap.grabWidget(widget)
             pix.save(os.path.join(dest, filename+".png"))
         
         # Modify the section in the HTML page

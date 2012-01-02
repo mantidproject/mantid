@@ -79,7 +79,7 @@ namespace Factory
   {
 
     std::vector<QPointer<MantidQt::SliceViewer::SliceViewerWindow> >::iterator it;
-    for (it = m_windows.begin(); it != m_windows.end(); it++)
+    for (it = m_windows.begin(); it != m_windows.end(); ++it)
     {
       QPointer<MantidQt::SliceViewer::SliceViewerWindow> window = *it;
       if (window)
@@ -100,7 +100,7 @@ namespace Factory
   void WidgetFactory::closeAllSliceViewerWindows()
   {
     std::vector<QPointer<MantidQt::SliceViewer::SliceViewerWindow> >::iterator it;
-    for (it = m_windows.begin(); it != m_windows.end(); it++)
+    for (it = m_windows.begin(); it != m_windows.end(); ++it)
     {
       QPointer<MantidQt::SliceViewer::SliceViewerWindow> window = *it;
       if (window)

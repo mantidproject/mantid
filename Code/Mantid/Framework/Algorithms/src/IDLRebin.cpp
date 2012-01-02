@@ -172,7 +172,6 @@ DECLARE_ALGORITHM(IDLRebin)
           g_log.error() << "Cannot locate Event with TOF = " << eventtof << " ... Exceeds max search limit: " << searchlimit << std::endl;
           g_log.error() << "Final index = " << ist << ", " << ied << "   TOF = " << tofs[ist] << ",  " << tofs[ied] << std::endl;
           throw std::invalid_argument("Debug Stop");
-          break;
         }
 
       } // while

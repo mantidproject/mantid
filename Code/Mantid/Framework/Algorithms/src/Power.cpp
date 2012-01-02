@@ -31,6 +31,10 @@ namespace Algorithms
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Power)
 
+Power::Power():UnaryOperation()
+{
+  this->useHistogram=true;
+}
 /// Sets documentation strings for this algorithm
 void Power::initDocs()
 {

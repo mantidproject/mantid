@@ -143,6 +143,7 @@ endif(UNITY_BUILD)
 ADD_PRECOMPILED_HEADER( inc/MantidMDEvents/PrecompiledHeader.h MantidMDEvents src/PrecompiledHeader.cpp SRC_FILES INC_FILES )
 # Add the target for this directory
 add_library ( MDEvents ${SRC_FILES} ${INC_FILES})
+add_cppcheck( MDEvents )
 # Set the name of the generated library
 set_target_properties ( MDEvents PROPERTIES OUTPUT_NAME MantidMDEvents 
                                                  COMPILE_DEFINITIONS IN_MANTID_MDEVENT )

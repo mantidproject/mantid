@@ -150,7 +150,7 @@ namespace MDAlgorithms
 //        prog.report("Saving");
 //        if (!it1.next()) break;
 //      }
-//      //bc->getDiskMRU().flushCache();
+//      //bc->getDiskBuffer().flushCache();
 //      // Flush the data writes to disk.
 //      box1->flushData();
 //    }

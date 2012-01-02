@@ -70,7 +70,7 @@ namespace Mantid
     {
     }
 
-    void SynchronisingGeometryPresenter::swap(const MappingType::key_type& keyA, const MappingType::key_type& keyB)
+    void SynchronisingGeometryPresenter::swap(const GeometryPresenter::MappingType::key_type& keyA, const GeometryPresenter::MappingType::key_type& keyB)
     {
       DimPresenter_sptr temp = m_mapping[keyA];
       
@@ -243,7 +243,7 @@ namespace Mantid
         if (i == m_dimensions.end())
           break;
         matches.push_back(*i);
-        i++;
+        ++i;
       }
       return matches;
     }
@@ -263,7 +263,7 @@ namespace Mantid
         if (i == m_dimensions.end())
           break;
         matches.push_back(*i);
-        i++;
+        ++i;
       }
       return matches;
     }
@@ -412,7 +412,7 @@ namespace Mantid
 
     /**
     Determine if dimension presenter is mapped to x axis.
-    @param pDimensionPresenter : The dimension presenter to which the comparison should be made.
+    @param dimensionPresenter : The dimension presenter to which the comparison should be made.
     @return true if dimesion presenter matches exising mapping.
     */
     bool SynchronisingGeometryPresenter::isXDimensionPresenter(DimPresenter_sptr dimensionPresenter) const
@@ -422,7 +422,7 @@ namespace Mantid
 
     /**
     Determine if dimension presenter is mapped to y axis.
-    @param pDimensionPresenter : The dimension presenter to which the comparison should be made.
+    @param dimensionPresenter : The dimension presenter to which the comparison should be made.
     @return true if dimesion presenter matches exising mapping.
     */
     bool SynchronisingGeometryPresenter::isYDimensionPresenter(DimPresenter_sptr dimensionPresenter) const
@@ -432,7 +432,7 @@ namespace Mantid
 
     /**
     Determine if dimension presenter is mapped to z axis.
-    @param pDimensionPresenter : The dimension presenter to which the comparison should be made.
+    @param dimensionPresenter : The dimension presenter to which the comparison should be made.
     @return true if dimesion presenter matches exising mapping.
     */
     bool SynchronisingGeometryPresenter::isZDimensionPresenter(DimPresenter_sptr dimensionPresenter) const
@@ -442,7 +442,7 @@ namespace Mantid
 
     /**
     Determine if dimension presenter is mapped to t axis.
-    @param pDimensionPresenter : The dimension presenter to which the comparison should be made.
+    @param dimensionPresenter : The dimension presenter to which the comparison should be made.
     @return true if dimesion presenter matches exising mapping.
     */
     bool SynchronisingGeometryPresenter::isTDimensionPresenter(DimPresenter_sptr dimensionPresenter) const

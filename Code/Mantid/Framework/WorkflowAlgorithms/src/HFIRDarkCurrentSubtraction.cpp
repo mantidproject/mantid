@@ -163,7 +163,7 @@ double HFIRDarkCurrentSubtraction::getCountingTime(MatrixWorkspace_sptr inputWS)
 
 /// Zero out the timer and monitor channels from the dark current workspace
 /// so that we can keep them in the data workspace after subtraction
-/// @param inputWS :: dark current workspace to clean up
+/// @param scaledDarkWS :: dark current workspace to clean up
 void HFIRDarkCurrentSubtraction::cleanupDarkCurrent(MatrixWorkspace_sptr scaledDarkWS)
 {
   // Set time and monitor channels to zero, so that we subtract only detectors

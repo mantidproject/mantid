@@ -128,7 +128,7 @@ namespace Geometry
     private:
       /// Global rotation matrix of the goniometer
       Kernel::DblMatrix R;
-      /// Motors vector contains #GoniometerAxis objects, the last one is the closest to the sample
+      /// Motors vector contains GoniometerAxis objects, the last one is the closest to the sample
       std::vector<GoniometerAxis> motors;
       /// Flag to specify if the goniometer is initialized from a rotation matrix
       bool initFromR;

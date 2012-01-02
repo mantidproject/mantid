@@ -116,7 +116,7 @@ void MDGeometryBuilderXML<CheckDimensionPolicy>::applyPolicyChecking(IMDDimensio
 
 /**
  Add an x dimension.
- @param dimensionToAdd :: The dimension to add to the geometry.
+ @param dimension :: The dimension to add to the geometry.
  @return true if addition was successful.
  */
 template <typename CheckDimensionPolicy>
@@ -137,7 +137,7 @@ bool MDGeometryBuilderXML<CheckDimensionPolicy>::addXDimension(IMDDimension_cons
 
 /**
  Add an y dimension.
- @param dimensionToAdd :: The dimension to add to the geometry.
+ @param dimension :: The dimension to add to the geometry.
  @return true if addition was successful.
  */
 template <typename CheckDimensionPolicy>
@@ -158,7 +158,7 @@ bool MDGeometryBuilderXML<CheckDimensionPolicy>::addYDimension(IMDDimension_cons
 
 /**
  Add an z dimension.
- @param dimensionToAdd :: The dimension to add to the geometry.
+ @param dimension :: The dimension to add to the geometry.
  @return true if addition was successful.
  */
 template <typename CheckDimensionPolicy>
@@ -178,7 +178,7 @@ bool MDGeometryBuilderXML<CheckDimensionPolicy>::addZDimension(IMDDimension_cons
 
 /**
  Add an t dimension.
- @param dimensionToAdd :: The dimension to add to the geometry.
+ @param dimension :: The dimension to add to the geometry.
  @return true if addition was successful.
  */
 template <typename CheckDimensionPolicy>

@@ -172,7 +172,7 @@ unsigned long vtkEventNexusReader::GetMTime()
 
 /**
   Update/Set the progress.
-  @parameter progress : progress increment.
+  @param progress : progress increment.
 */
 void vtkEventNexusReader::updateAlgorithmProgress(double progress)
 {

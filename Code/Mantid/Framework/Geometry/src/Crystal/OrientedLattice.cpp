@@ -28,8 +28,11 @@ namespace Geometry
   }
 
   /** Constructor
-  @param _a, _b, _c :: lattice parameters \f$ a, b, c \f$ \n
-  with \f$\alpha = \beta = \gamma = 90^\circ \f$*/      
+  @param _a :: lattice parameter \f$ a \f$ with \f$\alpha = \beta = \gamma = 90^\circ \f$
+  @param _b :: lattice parameter \f$ b \f$ with \f$\alpha = \beta = \gamma = 90^\circ \f$
+  @param _c :: lattice parameter \f$ c \f$ with \f$\alpha = \beta = \gamma = 90^\circ \f$
+  @param Umatrix :: orientation matrix U
+  */
   OrientedLattice::OrientedLattice(const double _a,const double _b,const double _c,DblMatrix Umatrix):UnitCell(_a,_b,_c)
   {
     if (Umatrix.isRotation()==true)
@@ -41,8 +44,14 @@ namespace Geometry
   }
 
   /** Constructor
-  @param _a, _b, _c, _alpha, _beta, _gamma :: lattice parameters\n
+  @param _a :: lattice parameter \f$ a \f$
+  @param _b :: lattice parameter \f$ b \f$
+  @param _c :: lattice parameter \f$ c \f$
+  @param _alpha :: lattice parameter \f$ \alpha \f$
+  @param _beta :: lattice parameter \f$ \beta \f$
+  @param _gamma :: lattice parameter \f$ \gamma \f$
   @param angleunit :: units for angle, of type #AngleUnits. Default is degrees.
+  @param Umatrix :: orientation matrix U
   */
   OrientedLattice::OrientedLattice(const double _a,const double _b,const double _c,const double _alpha,const double _beta,const double _gamma,DblMatrix Umatrix, const int angleunit):UnitCell(_a,_b,_c,_alpha,_beta,_gamma,angleunit)
   {

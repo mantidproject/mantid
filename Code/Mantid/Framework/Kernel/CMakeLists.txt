@@ -12,7 +12,7 @@ set ( SRC_FILES
 	src/DateAndTime.cpp
 	src/DateValidator.cpp
 	src/DirectoryValidator.cpp
-	src/DiskMRU.cpp
+	src/DiskBuffer.cpp
 	src/DllOpen.cpp
 	src/EmptyValues.cpp
 	src/EnabledWhenProperty.cpp
@@ -108,7 +108,7 @@ set ( INC_FILES
 	inc/MantidKernel/DateAndTime.h
 	inc/MantidKernel/DateValidator.h
 	inc/MantidKernel/DirectoryValidator.h
-	inc/MantidKernel/DiskMRU.h
+	inc/MantidKernel/DiskBuffer.h
 	inc/MantidKernel/DllConfig.h
 	inc/MantidKernel/DllOpen.h
 	inc/MantidKernel/DocumentationHeader.h
@@ -133,6 +133,7 @@ set ( INC_FILES
 	inc/MantidKernel/Interpolation.h
 	inc/MantidKernel/LibraryManager.h
 	inc/MantidKernel/LibraryWrapper.h
+	inc/MantidKernel/ListAnyValidator.h
 	inc/MantidKernel/ListValidator.h
 	inc/MantidKernel/LogFilter.h
 	inc/MantidKernel/LogParser.h
@@ -146,8 +147,8 @@ set ( INC_FILES
 	inc/MantidKernel/MatrixProperty.h
 	inc/MantidKernel/Memory.h
 	inc/MantidKernel/MersenneTwister.h
-	inc/MantidKernel/MultiThreaded.h
 	inc/MantidKernel/MultiFileNameParser.h
+	inc/MantidKernel/MultiThreaded.h
 	inc/MantidKernel/NeutronAtom.h
 	inc/MantidKernel/NexusTestHelper.h
 	inc/MantidKernel/NullValidator.h
@@ -187,7 +188,6 @@ set ( INC_FILES
 	inc/MantidKernel/VectorHelper.h
 	inc/MantidKernel/VisibleWhenProperty.h
 	inc/MantidKernel/cow_ptr.h
-	inc/MantidKernel/ListAnyValidator.h
 )
 
 set ( TEST_FILES
@@ -205,7 +205,7 @@ set ( TEST_FILES
 	test/DateAndTimeTest.h
 	test/DateValidatorTest.h
 	test/DirectoryValidatorTest.h
-	test/DiskMRUTest.h
+	test/DiskBufferTest.h
 	test/DynamicFactoryTest.h
 	test/EnabledWhenPropertyTest.h
 	test/EnvironmentHistoryTest.h
@@ -219,6 +219,7 @@ set ( TEST_FILES
 	test/IPropertySettingsTest.h
 	test/ISaveableTest.h
 	test/InterpolationTest.h
+	test/ListAnyValidatorTest.h
 	test/ListValidatorTest.h
 	test/LogFilterTest.h
 	test/LogParserTest.h
@@ -265,7 +266,6 @@ set ( TEST_FILES
 	test/VMDTest.h
 	test/VectorHelperTest.h
 	test/VisibleWhenPropertyTest.h
-	test/ListAnyValidatorTest.h
 )
 
 if(UNITY_BUILD)
@@ -278,6 +278,7 @@ endif(UNITY_BUILD)
 ADD_PRECOMPILED_HEADER ( inc/MantidKernel/PrecompiledHeader.h MantidKernel src/PrecompiledHeader.cpp SRC_FILES INC_FILES )
 # Add the target for this directory
 add_library ( Kernel ${SRC_FILES} ${INC_FILES} )
+add_cppcheck( Kernel )
 # Set the name of the generated library
 set_target_properties ( Kernel PROPERTIES OUTPUT_NAME MantidKernel 
                                           COMPILE_DEFINITIONS "IN_MANTID_KERNEL;PSAPI_VERSION=1" )

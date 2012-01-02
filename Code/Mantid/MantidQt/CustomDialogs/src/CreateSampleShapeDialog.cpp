@@ -587,7 +587,7 @@ BinaryTreeWidgetItem::BinaryTreeWidgetItem(int type)
 
 /**
  * Construct an item with a string list of column texts to add
- * @param A :: list of strings to appear as the column texts
+ * @param strings :: A list of strings to appear as the column texts
  * @param type :: Qt or User defined 
  */
 BinaryTreeWidgetItem::BinaryTreeWidgetItem(const QStringList & strings, int type) 
@@ -679,6 +679,8 @@ ComboBoxDelegate::ComboBoxDelegate(QWidget *parent) : QItemDelegate(parent)
 /**
  * Create an editor for a tree item
  * @param parent :: The parent widget
+ * @param index :: unused argument
+ * @param option :: unused argument
  */
 QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &,
 					  const QModelIndex &) const
@@ -710,7 +712,6 @@ void ComboBoxDelegate::setEditorData(QWidget *editor, const QModelIndex &index) 
  * @param model :: The model in question
  * @param index :: The index for the model given
  */
-
 void ComboBoxDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
 				   const QModelIndex &index) const
 {
@@ -726,6 +727,7 @@ void ComboBoxDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
  * Set the appropriate geometry for the widget
  * @param editor :: The editor in question
  * @param option :: The style option
+ * @param index :: The index for the model given
  */
 void ComboBoxDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, 
 					   const QModelIndex &) const

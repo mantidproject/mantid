@@ -81,6 +81,7 @@ endforeach ( PYFILE )
 #############################################################################################
 
 add_library ( PythonAPIModule ${SRC_FILES} ${INC_FILES} ${PYTHON_INSTALL_FILES} )
+add_cppcheck( PythonAPIModule )
 set_python_properties( PythonAPIModule _api )
 set_target_output_directory ( PythonAPIModule ${OUTPUT_DIR} .pyd )
 

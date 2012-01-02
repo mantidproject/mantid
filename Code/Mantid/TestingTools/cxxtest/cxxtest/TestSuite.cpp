@@ -13,6 +13,10 @@ namespace CxxTest
     TestSuite::~TestSuite() {}
     void TestSuite::setUp() {}
     void TestSuite::tearDown() {}
+    bool TestSuite::skipTests()
+    {
+      return false;
+    }
 
     //
     // Test-aborting stuff

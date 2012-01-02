@@ -158,8 +158,11 @@ namespace WorkflowAlgorithms
         int irow = 0;
         m_reductionTable->find(key, irow, 0);
         m_reductionTable->removeRow(irow);
-      } else g_log.error() << "Entry " << key << " already exists: " << oldValue
-          << std::endl << "   appending: " << value << std::endl;
+      } else {
+    	  g_log.notice() << "Entry " << key << " already exists: " << oldValue
+          << std::endl << "   skipping adding " << value << std::endl;
+    	  return;
+      }
     }
 
     TableRow row = m_reductionTable->appendRow();
@@ -184,8 +187,11 @@ namespace WorkflowAlgorithms
         int irow = 0;
         m_reductionTable->find(key, irow, 0);
         m_reductionTable->removeRow(irow);
-      } else g_log.error() << "Entry " << key << " already exists: " << oldValue
-            << std::endl << "   adding: " << value << std::endl;
+      } else {
+    	  g_log.notice() << "Entry " << key << " already exists: " << oldValue
+            << std::endl << "   skipping adding " << value << std::endl;
+    	  return;
+      }
     }
 
     TableRow row = m_reductionTable->appendRow();
@@ -210,8 +216,11 @@ namespace WorkflowAlgorithms
         int irow = 0;
         m_reductionTable->find(key, irow, 0);
         m_reductionTable->removeRow(irow);
-      } else g_log.error() << "Entry " << key << " already exists: " << oldValue
-            << std::endl << "   adding: " << value << std::endl;
+      } else {
+    	  g_log.notice() << "Entry " << key << " already exists: " << oldValue
+            << std::endl << "   skipping adding " << value << std::endl;
+      	  return;
+      }
     }
 
     TableRow row = m_reductionTable->appendRow();

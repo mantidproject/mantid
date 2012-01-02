@@ -308,6 +308,7 @@ public:
   //---------------------------------------------------------------------------------------------------
   /** Constructor
    *
+   * @param alg :: Handle to the main algorithm
    * @param top_entry_name :: The pathname of the top level NXentry to use
    * @param entry_name :: The pathname of the bank to load
    * @param entry_type :: The classtype of the entry to load
@@ -936,7 +937,7 @@ void LoadEventNexus::makeMapToEventLists()
 //-----------------------------------------------------------------------------
 /**
  * Load events from the file
- * @param prop :: A pointer to the progress reporting object
+ * @param prog :: A pointer to the progress reporting object
  * @param monitors :: If true the events from the monitors are loaded and not the main banks
  */
 void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
@@ -1233,6 +1234,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, Mantid:
  *  @param nexusfilename :: Used to pick the instrument.
  *  @param localWorkspace :: MatrixWorkspace in which to put the instrument geometry
  *  @param top_entry_name :: entry name at the top of the NXS file
+ *  @param alg :: Handle of an algorithm for logging access
  *  @return true if successful
  */
 bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, MatrixWorkspace_sptr localWorkspace,
@@ -1316,7 +1318,8 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, MatrixW
  *
  *  @param nexusfilename :: Used to pick the instrument.
  *  @param localWorkspace :: MatrixWorkspace in which to put the logs
- *  @param[out] pulseTimes :: vector of pulse times to fill
+ *  @param pulseTimes [out] :: vector of pulse times to fill
+ *  @param alg :: Handle of an algorithm for logging access
  *  @return true if successful
  */
 bool LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
@@ -1353,7 +1356,7 @@ bool LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename, API::Mat
 
 
     // Use the first pulse as the run_start time.
-    if (temp.size() > 0)
+    if (!temp.empty())
     {
       Kernel::DateAndTime run_start = localWorkspace->getFirstPulseTime();
       // add the start of the run as a ISO8601 date/time string. The start = first non-zero time.
@@ -1380,6 +1383,7 @@ bool LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename, API::Mat
  * with the associated spectra axis)
  * @param nxsfile :: The name of a nexus file to load the mapping from
  * @param workspace :: The workspace to contain the spectra mapping
+ * @param monitorsOnly :: Load only the monitors is true
  * @param bankName :: An optional bank name for loading a single bank
  */
 void LoadEventNexus::createSpectraMapping(const std::string &nxsfile, 
@@ -1393,7 +1397,7 @@ void LoadEventNexus::createSpectraMapping(const std::string &nxsfile,
     // Only build the map for the single bank
     std::vector<IDetector_const_sptr> dets;
     WS->getInstrument()->getDetectorsInBank(dets, bankName);
-    if (dets.size() > 0)
+    if (!dets.empty())
     {
       SpectraDetectorMap *singlebank = new API::SpectraDetectorMap;
       // Make an event list for each.
@@ -1501,9 +1505,11 @@ void LoadEventNexus::runLoadMonitors()
 /**
  * Load a spectra mapping from the given file. This currently checks for the existence of
  * an isis_vms_compat block in the file, if it exists it pulls out the spectra mapping listed there
- * @param file :: A filename
+ * @param filename :: A filename
+ * @param inst :: The current instrument
  * @param monitorsOnly :: If true then only the monitor spectra are loaded
  * @param entry_name :: name of the NXentry to open.
+ * @param g_log :: Handle to the logger
  * @returns A pointer to a new map or NULL if the block does not exist
  */
 Geometry::ISpectraDetectorMap * LoadEventNexus::loadSpectraMapping(const std::string & filename, Geometry::Instrument_const_sptr inst,
@@ -1612,6 +1618,7 @@ void LoadEventNexus::setTimeFilters(const bool monitors)
  * Check if time_of_flight can be found in the file and load it 
  * @param nexusfilename :: The name of the ISIS nexus event file.
  * @param WS :: The event workspace which events will be modified.
+ * @param entry_name :: An NXentry tag in the file
  * @param classType :: The type of the events: either detector or monitor
  */
 void LoadEventNexus::loadTimeOfFlight(const std::string &nexusfilename, DataObjects::EventWorkspace_sptr WS,

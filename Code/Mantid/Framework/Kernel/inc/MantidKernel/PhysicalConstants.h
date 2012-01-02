@@ -1,11 +1,15 @@
 #ifndef MANTID_PHYSICALCONSTANTS_H_
 #define MANTID_PHYSICALCONSTANTS_H_
-//#include <cmath>
+#include <cfloat>
 
 #ifndef M_PI 
 #define M_PI 3.1415926535897932384626433832795 
 #endif
-
+//NAN is not defined in visual c++
+#ifdef _MSC_VER
+#define INFINITY (DBL_MAX+DBL_MAX)
+#define NAN (INFINITY-INFINITY)
+#endif
 namespace Mantid
 {
 

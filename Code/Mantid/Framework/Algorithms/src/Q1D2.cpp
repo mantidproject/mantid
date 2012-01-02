@@ -205,7 +205,6 @@ void Q1D2::exec()
 
 /** Creates the output workspace, its size, units, etc.
 *  @param binParams the bin boundary specification using the same same syntax as param the Rebin algorithm
-*  @param specMap a spectra map that the new workspace should use and take owner ship of
 *  @return A pointer to the newly-created workspace
 */
 API::MatrixWorkspace_sptr Q1D2::setUpOutputWorkspace(const std::vector<double> & binParams) const
@@ -232,13 +231,13 @@ API::MatrixWorkspace_sptr Q1D2::setUpOutputWorkspace(const std::vector<double> &
 
 
 /** Calculate the normalization term for each output bin
-*  @param[in] offSet the inex number of the first bin in the input wavelengths that is actually being used
-*  @param[in] specInd the spectrum to calculate
-*  @param[in] pixelAdj if not NULL this is workspace contains single bins with the adjustments, e.g. detector efficencies, for the given spectrum index
-*  @param[in] binNorms pointer to a contigious array of doubles that are the wavelength correction from waveAdj workspace, can be NULL
-*  @param[in] binNormEs pointer to a contigious array of doubles which corrospond to the corrections and are their errors, can be NULL
-*  @param[out] norm normalization for each bin, including soild angle, pixel correction, the proportion that is not masked and the normalization workspace
-*  @param[out] normETo2 this pointer must point to the end of the norm array, it will be filled with the total of the error on the normalization
+*  @param wavStart [in] the index number of the first bin in the input wavelengths that is actually being used
+*  @param specInd [in] the spectrum to calculate
+*  @param pixelAdj [in] if not NULL this is workspace contains single bins with the adjustments, e.g. detector efficencies, for the given spectrum index
+*  @param binNorms [in] pointer to a contigious array of doubles that are the wavelength correction from waveAdj workspace, can be NULL
+*  @param binNormEs [in] pointer to a contigious array of doubles which corrospond to the corrections and are their errors, can be NULL
+*  @param norm [out] normalization for each bin, including soild angle, pixel correction, the proportion that is not masked and the normalization workspace
+*  @param normETo2 [out] this pointer must point to the end of the norm array, it will be filled with the total of the error on the normalization
 */
 void Q1D2::calculateNormalization(const size_t wavStart, const size_t specInd, API::MatrixWorkspace_const_sptr pixelAdj, double const * const binNorms, double const * const binNormEs, const MantidVec::iterator norm, const MantidVec::iterator normETo2) const
 {

@@ -37,6 +37,71 @@ static bool CompareMagnitude( const V3D & v1, const V3D & v2 )
 }
 
 
+/**
+   Comparator function for sorting list of UB matrices based on the sum
+   of the lengths of the corresponding real space cell edge lengths 
+   |a|+|b|+|C|
+ */
+static bool CompareABCsum( const DblMatrix & UB_1, const DblMatrix & UB_2 )
+{
+  V3D a1;
+  V3D b1;
+  V3D c1;
+  V3D a2;
+  V3D b2;
+  V3D c2;
+  IndexingUtils::GetABC( UB_1, a1, b1, c1 );
+  IndexingUtils::GetABC( UB_2, a2, b2, c2 );
+
+  double sum_1 = a1.norm() + b1.norm() + c1.norm();
+  double sum_2 = a2.norm() + b2.norm() + c2.norm();
+
+  return (sum_1 < sum_2);
+}
+
+
+/**
+   Get the cell angles for the unit cell corresponding to matrix UB
+   and calculate the sum of the differences of the cell angles from 90
+   degrees.
+   @param UB   the UB matrix
+   @return The sum of the difference of the cell angles from 90 degrees.
+ */
+static double GetDiffFrom90Sum( const DblMatrix & UB )
+{
+  V3D a;
+  V3D b;
+  V3D c;
+
+  if ( !IndexingUtils::GetABC( UB, a, b, c ) )
+    return -1;
+
+  double alpha = b.angle( c ) * 180.0/PI;
+  double beta  = c.angle( a ) * 180.0/PI;
+  double gamma = a.angle( b ) * 180.0/PI;
+
+  double sum = fabs( alpha - 90.0 ) +
+               fabs( beta  - 90.0 ) +
+               fabs( gamma - 90.0 );
+
+  return sum;
+}
+
+
+/**
+   Comparator to sort a list of UBs in decreasing order based on 
+   the difference of cell angles from 90 degrees.
+*/
+static bool CompareDiffFrom90( const DblMatrix & UB_1, const DblMatrix & UB_2 )
+{
+  double sum_1 = GetDiffFrom90Sum( UB_1 );
+  double sum_2 = GetDiffFrom90Sum( UB_2 );
+
+  return ( sum_2 < sum_1 );
+}
+
+
+
 /** 
   STATIC method Find_UB: Calculates the matrix that most nearly indexes 
   the specified q_vectors, given the lattice parameters.  The sum of the 
@@ -245,7 +310,8 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
 /** 
     STATIC method Find_UB: This method will attempt to calculate the matrix 
   that most nearly indexes the specified q_vectors, given only a range of 
-  possible unit cell edge lengths. 
+  possible unit cell edge lengths.  If successful, the matrix should 
+  correspond to the Niggli reduced cell.
      The resolution of the search through possible orientations is specified
   by the degrees_per_step parameter.  Approximately 1-3 degrees_per_step is
   usually adequate.  NOTE: This is an expensive calculation which takes 
@@ -460,6 +526,9 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
     }
   }
 
+  if ( MakeNiggliUB( UB, temp_UB ) )
+    UB = temp_UB;
+
   return fit_error;
 }
 
@@ -468,7 +537,8 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
     STATIC method Find_UB: This method will attempt to calculate the matrix 
   that most nearly indexes the specified q_vectors, using FFTs to find 
   patterns in projected Q-vectors, given only a range of possible unit cell
-  edge lengths. 
+  edge lengths. If successful, the resulting matrix should correspond to 
+  the Niggli reduced cell.
     The resolution of the search through possible orientations is specified
   by the degrees_per_step parameter.  One to two degrees per step is usually 
   adequate.
@@ -554,7 +624,7 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
                                               0.75f * required_tolerance,
                                               degrees_per_step );
 
-  if ( max_indexed <= 0 )
+  if ( max_indexed == 0 )
   {
    throw std::invalid_argument("Find_UB(): Could not find any a,b,c vectors to index Qs");
   }
@@ -574,10 +644,10 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
     throw std::invalid_argument("Find_UB(): Could not form UB matrix from a,b,c vectors");
   }
 
+  Matrix<double> temp_UB(3,3,false);
   double fit_error = 0;
   if ( q_vectors.size() >= 5 )                 // repeatedly refine UB
   {
-    Matrix<double> temp_UB(3,3,false);
     std::vector<V3D> miller_ind;
     std::vector<V3D> indexed_qs;
     miller_ind.reserve( q_vectors.size() );
@@ -601,6 +671,9 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
       }
     }
   }
+
+  if ( MakeNiggliUB( UB, temp_UB ) )
+    UB = temp_UB;
 
   return fit_error;
 }
@@ -896,6 +969,11 @@ double IndexingUtils::Optimize_Direction(          V3D          & best_vec,
     @param required_tolerance The maximum distance from an integer that the
                               calculated h,k,l values can have if a peak 
                               is to be considered indexed.
+
+  @throws std::invalid_argument exception if the UB matrix is not a 3X3 matrix.
+  @throws std::runtime_error exception if the matrix inversion fails and UB 
+                             can't be formed
+
  */
 double IndexingUtils::ScanFor_UB(      DblMatrix         & UB,
                                  const std::vector<V3D>  & q_vectors,
@@ -904,6 +982,11 @@ double IndexingUtils::ScanFor_UB(      DblMatrix         & UB,
                                        double degrees_per_step,
                                        double required_tolerance )
 {
+  if ( UB.numRows() != 3 || UB.numCols() != 3 )
+  {
+   throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");
+  }
+
   V3D a_dir;
   V3D b_dir;
   V3D c_dir;
@@ -1031,10 +1114,10 @@ double IndexingUtils::ScanFor_UB(      DblMatrix         & UB,
     }
   }
 
-  UB.setRow( 0, a_dir );
-  UB.setRow( 1, b_dir );
-  UB.setRow( 2, c_dir );
-  UB.Invert();
+  if ( !GetUB( UB, a_dir, b_dir, c_dir ) )
+  {
+    throw std::runtime_error( "UB could not be formed, invert matrix failed");
+  }
 
   return min_error;
 }
@@ -1531,12 +1614,10 @@ double IndexingUtils::GetFirstMaxIndex( const double magnitude_fft[],
       i++;
   }
 
-  double sum   = 0;
-  double w_sum = 0;
   if ( found_max )
   {
-    sum   = 0;
-    w_sum = 0;
+    double sum   = 0;
+    double w_sum = 0;
     for ( size_t j = i-2; j <= i+2; j++ )
     {
       sum   += (double)j * magnitude_fft[j];
@@ -1571,6 +1652,10 @@ double IndexingUtils::GetFirstMaxIndex( const double magnitude_fft[],
     @return true if a UB matrix was set, and false if it not possible to
             choose a,b,c (i.e. UB) from the list of directions, starting
             with the specified a_index.
+
+  @throws std::invalid_argument exception if the UB matrix is not a 3X3 matrix.
+  @throws std::runtime_error exception if the matrix inversion fails and UB 
+                             can't be formed
  */
 bool IndexingUtils::FormUB_From_abc_Vectors( DblMatrix         & UB,
                                        const std::vector<V3D>  & directions,
@@ -1579,6 +1664,11 @@ bool IndexingUtils::FormUB_From_abc_Vectors( DblMatrix         & UB,
                                              double              max_d )
 
 {
+  if ( UB.numRows() != 3 || UB.numCols() != 3 )
+  {
+   throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");
+  }
+
   size_t index = a_index;
   V3D a_dir = directions[ index ];
   index++;
@@ -1648,10 +1738,10 @@ bool IndexingUtils::FormUB_From_abc_Vectors( DblMatrix         & UB,
     return false;
   }
                                      // now build the UB matrix from a,b,c
-  UB.setRow( 0, a_dir );
-  UB.setRow( 1, b_dir );
-  UB.setRow( 2, c_dir );
-  UB.Invert();
+  if ( !GetUB( UB, a_dir, b_dir, c_dir ) )
+  {
+    throw std::runtime_error( "UB could not be formed, invert matrix failed");
+  }
 
   return true;
 }
@@ -1676,6 +1766,11 @@ bool IndexingUtils::FormUB_From_abc_Vectors( DblMatrix         & UB,
     @return true if a UB matrix was set, and false if it not possible to
             choose a,b,c (i.e. UB) from the list of directions, starting
             with the specified a_index.
+
+    @throws std::invalid_argument exception if the UB matrix is not a 3X3 matrix.
+    @throws std::runtime_error exception if the matrix inversion fails and UB 
+                               can't be formed
+
  */
 bool IndexingUtils::FormUB_From_abc_Vectors( DblMatrix         & UB,
                                        const std::vector<V3D>  & directions,
@@ -1683,6 +1778,11 @@ bool IndexingUtils::FormUB_From_abc_Vectors( DblMatrix         & UB,
                                              double              req_tolerance,
                                              double              min_vol )
 {
+   if ( UB.numRows() != 3 || UB.numCols() != 3 )
+   {
+    throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");
+   }
+
    int    num_indexed = 0;
    int    max_indexed = 0;
    V3D    a_dir(0,0,0);
@@ -1735,10 +1835,10 @@ bool IndexingUtils::FormUB_From_abc_Vectors( DblMatrix         & UB,
     c_dir = c_dir * (-1.0);
   } 
                                      // now build the UB matrix from a,b,c
-  UB.setRow( 0, a_dir );
-  UB.setRow( 1, b_dir );
-  UB.setRow( 2, c_dir );
-  UB.Invert();
+  if ( !GetUB( UB, a_dir, b_dir, c_dir ) )
+  {
+    throw std::runtime_error( "UB could not be formed, invert matrix failed");
+  }
 
   return true;
 }
@@ -2149,6 +2249,7 @@ int IndexingUtils::NumberIndexed_3D( const V3D               & a_dir,
                         to count the peak as indexed by UB.
   @param miller_indices This vector returns a list of Miller Indices, with 
                         one entry for each given Q vector. 
+  @param ave_error      The average error from all lattice directions.
 
   @return A non-negative integer giving the number of peaks indexed by UB,
           within the specified tolerance on h,k,l. 
@@ -2300,7 +2401,7 @@ int IndexingUtils::GetIndexedPeaks_1D( const V3D              & direction,
   @param required_tolerance  The maximum allowed error (as a faction of
                              the corresponding Miller index) for a peak
                              q_vector to be counted as indexed.
-  @param index_vals          List of the Miller indices (h,k,l) of peaks
+  @param miller_indices      List of the Miller indices (h,k,l) of peaks
                              that were indexed in all specified directions.
   @param indexed_qs          List of Qxyz value for the peaks that were
                              indexed indexed in all specified directions.
@@ -2387,7 +2488,7 @@ int IndexingUtils::GetIndexedPeaks_3D( const V3D              & direction_1,
   @param required_tolerance  The maximum allowed error (as a faction of
                              the corresponding Miller index) for a peak
                              q_vector to be counted as indexed.
-  @param index_vals          List of the Miller indices (h,k,l) of peaks
+  @param miller_indices      List of the Miller indices (h,k,l) of peaks
                              that were indexed in all specified directions.
   @param indexed_qs          List of Qxyz value for the peaks that were
                              indexed indexed in all specified directions.
@@ -2518,6 +2619,8 @@ std::vector<V3D> IndexingUtils::MakeHemisphereDirections( int n_steps )
   which form the specified angle with the specified axis. 
 
   @param n_steps   The number of vectors to generate around the circle. 
+  @param axis      The specified axis
+  @param angle_degrees  The specified angle
 
   @return A std::vector containing direction vectors forming the same angle
           with the axis.
@@ -2673,5 +2776,266 @@ int IndexingUtils::SelectDirection(       V3D & best_direction,
   best_direction.normalize();
 
   return num_indexed;
+}
+
+
+/**
+  Get the UB matrix corresponding to the real space edge vectors a,b,c.
+  The inverse of the matrix with vectors a,b,c as rows will be stored in UB.
+  
+  @param  UB      A 3x3 matrix that will be set to the UB matrix.
+  @param  a_dir   The real space edge vector for side a of the unit cell
+  @param  b_dir   The real space edge vector for side b of the unit cell
+  @param  c_dir   The real space edge vector for side c of the unit cell
+
+  @return true if UB was set to the new matrix and false if UB could not be
+          set since the matrix with a,b,c as rows could not be inverted.
+ */
+bool IndexingUtils::GetUB(       DblMatrix  & UB,
+                           const V3D        & a_dir,
+                           const V3D        & b_dir,
+                           const V3D        & c_dir  )
+{
+  if ( UB.numRows() != 3 || UB.numCols() != 3 )
+  {
+   throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");
+  }
+
+  UB.setRow( 0, a_dir );
+  UB.setRow( 1, b_dir );
+  UB.setRow( 2, c_dir );
+  try
+  {
+    UB.Invert();
+  }
+  catch (...)
+  {
+    return false;
+  }
+  return true;
+}
+
+
+/**
+  Get the real space edge vectors a,b,c corresponding to the UB matrix.
+  The rows of the inverse of the matrix with will be stored in a_dir, 
+  b_dir, c_dir.
+  
+  @param  UB      A 3x3 matrix containing a UB matrix.
+  @param  a_dir   Will be set to the real space edge vector for side a 
+                  of the unit cell
+  @param  b_dir   Will be set to the real space edge vector for side b 
+                  of the unit cell
+  @param  c_dir   Will be set to the real space edge vector for side c
+                  of the unit cell
+
+  @return true if the inverse of the matrix UB could be found and the
+          a_dir, b_dir and c_dir vectors have been set to the rows of
+          UB inverse.
+ */
+bool IndexingUtils::GetABC( const DblMatrix  & UB,
+                                  V3D        & a_dir,
+                                  V3D        & b_dir,
+                                  V3D        & c_dir  )
+{
+  if ( UB.numRows() != 3 || UB.numCols() != 3 )
+  {
+   throw std::invalid_argument("GetABC(): UB matrix NULL or not 3X3");
+  }
+
+  DblMatrix UB_inverse( UB );
+  try
+  {
+    UB_inverse.Invert();
+  }
+  catch (...)
+  {
+    return false;
+  }
+  a_dir( UB_inverse[0][0], UB_inverse[0][1], UB_inverse[0][2] );
+  b_dir( UB_inverse[1][0], UB_inverse[1][1], UB_inverse[1][2] );
+  c_dir( UB_inverse[2][0], UB_inverse[2][1], UB_inverse[2][2] );
+
+  return true;
+}
+
+/**
+    Check if a,b,c cell has angles satifying Niggli condition within epsilon.
+    Specifically, check if all angles are strictly less than 90 degrees,
+    or all angles are greater than or equal to 90 degrees.  The inequality
+    requirements are relaxed by an amount specified by the paramter epsilon
+    to accommodate some experimental and/or rounding error in the calculated
+    angles.
+
+    @param a_dir    Vector in the direction of the real cell edge vector 'a'
+    @param b_dir    Vector in the direction of the real cell edge vector 'b'
+    @param c_dir    Vector in the direction of the real cell edge vector 'c'
+    @param epsilon  Tolerance (in degrees) around 90 degrees.  For example
+                    an angle theta will be considered strictly less than 90
+                    degrees, if it is less than 90+epsilon.
+    @return true if all angles are less than 90 degrees, or if all angles
+            are greater than or equal to 90 degrees.  
+ */
+bool IndexingUtils::HasNiggliAngles( const V3D    & a_dir,
+                                     const V3D    & b_dir,
+                                     const V3D    & c_dir,
+                                           double   epsilon  )
+{
+  double alpha = b_dir.angle( c_dir ) * 180.0/PI;
+  double beta  = c_dir.angle( a_dir ) * 180.0/PI;
+  double gamma = a_dir.angle( b_dir ) * 180.0/PI;
+
+  if ( alpha < 90+epsilon && beta < 90+epsilon && gamma < 90+epsilon )
+  {
+    return true;
+  }
+
+  if ( alpha >= 90-epsilon && beta >= 90-epsilon && gamma >= 90-epsilon )
+  {
+    return true;
+  }
+
+  return false;
+}
+
+
+/**
+ *  Try to find a UB that is equivalent to the original UB, but corresponds
+ * to a Niggli reduced cell with the smallest sum of edge lengths and 
+ * with angles that are farthest from 90 degrees.
+ *
+ * @param UB      The original UB 
+ * @param newUB   Returns the newUB
+ *
+ * @return True if a possibly constructive change was made and newUB has been
+ * set to a new matrix.  It returns false if no constructive change was found
+ * and newUB is just set to the original UB.
+ */
+
+bool IndexingUtils::MakeNiggliUB( const DblMatrix  & UB,
+                                        DblMatrix  & newUB )
+{
+  V3D a;
+  V3D b;
+  V3D c;
+  
+  if ( !GetABC( UB, a, b, c ) )
+  {
+    return false;
+  }
+
+  V3D v1;
+  V3D v2;
+  V3D v3;
+                                  // first make a list of linear combinations
+                                  // of vectors a,b,c with coefficients up to 5
+   std::vector<V3D> directions;
+   int N_coeff = 5;
+   for ( int i = -N_coeff; i <= N_coeff; i++ )
+   {
+     for ( int j = -N_coeff; j <= N_coeff; j++ )
+     {
+       for ( int k = -N_coeff; k <= N_coeff; k++ )
+       {
+         if ( i != 0 || j != 0 || k != 0 )
+         {
+           v1 = a * i;
+           v2 = b * j;
+           v3 = c * k;
+           V3D sum(v1);
+           sum += v2;
+           sum += v3; 
+           directions.push_back( sum );
+         }
+       }
+     }
+   }
+                                // next sort the list of linear combinations
+                                // in order of increasing length
+  std::sort( directions.begin(), directions.end(), CompareMagnitude );
+
+                                // next form a list of possible UB matrices
+                                // using sides from the list of linear 
+                                // combinations, using shorter directions first.
+                                // Keep trying more until 25 UBs are found.
+                                // Only keep UBs corresponding to cells with
+                                // at least a minimum cell volume
+  std::vector<DblMatrix> UB_list;
+
+  size_t num_needed = 25;
+  size_t max_to_try = 5;
+  while ( UB_list.size() < num_needed && max_to_try < directions.size() )
+  {
+    max_to_try *= 2;
+    size_t num_to_try = std::min( max_to_try, directions.size() );
+
+    V3D acrossb;
+    double vol     = 0;
+    double min_vol = .1f;      // what should this be? 0.1 works OK, but...?
+    for ( size_t i = 0; i < num_to_try-2; i++ )
+    {
+      a = directions[i];
+      for ( size_t j = i+1; j < num_to_try-1; j++ )
+      {
+        b = directions[j];
+        acrossb = a.cross_prod(b);
+        for ( size_t k = j+1; k < num_to_try; k++ )
+        {
+          c = directions[k];
+          vol = acrossb.scalar_prod( c );
+          if ( vol > min_vol && HasNiggliAngles( a, b, c, 0.01 ) )
+          {
+            Matrix<double> new_tran(3,3,false);
+            GetUB( new_tran, a, b, c );
+            UB_list.push_back( new_tran );
+          }
+        }
+      }
+    }
+  }
+                                // if no valid UBs could be formed, return
+                                // false and the original UB
+  if ( UB_list.size() <= 0 )
+  {
+    newUB = UB;
+    return false;
+  }
+                                // now sort the UB's in order of increasing
+                                // total side length |a|+|b|+|c|
+  std::sort( UB_list.begin(), UB_list.end(), CompareABCsum );
+
+                                // keep only those UB's with total side length
+                                // within .1% of the first one.  This can't
+                                // be much larger or "bad" UBs are made for
+                                // some tests with 5% noise
+  double length_tol = 0.001;
+  double total_length;
+  double next_length;
+
+  std::vector<DblMatrix> short_list;
+  short_list.push_back( UB_list[0] );
+  GetABC( short_list[0], a, b, c );
+  total_length = a.norm() + b.norm() + c.norm();
+
+  bool got_short_list = false;
+  size_t i = 1;
+  while ( i < UB_list.size() && !got_short_list )
+  {
+    GetABC( UB_list[i], v1, v2, v3 );
+    next_length = v1.norm() + v2.norm() + v3.norm();
+    if ( fabs(next_length - total_length)/total_length < length_tol )
+      short_list.push_back( UB_list[i] );
+    else
+      got_short_list = true;  
+    i++;
+  }
+                              // now sort on the basis of difference of cell
+                              // angles from 90 degrees and return the one
+                              // with angles most different from 90
+  std::sort( short_list.begin(), short_list.end(), CompareDiffFrom90 );
+
+  newUB = short_list[0];
+
+  return true;
 }
 

@@ -456,6 +456,7 @@ namespace Mantid
     //-----------------------------------------------------------------------------------------------
     /** Removes the property from properties map.
      *  @param name ::  name of the property to be removed.
+     *  @param delproperty :: if true, delete the named property
      */
     void PropertyManager::removeProperty(const std::string &name, const bool delproperty)
     {

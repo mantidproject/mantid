@@ -444,46 +444,47 @@ void DateAndTime::set_from_ISO8601_string(const std::string str)
     else
     {
       //Look for a + or - indicating time zone offset
-      size_t n_plus,n_minus,n5;
+      size_t n_plus,n_minus;
       n_plus = time.find('+', n);
       n_minus = time.find('-', n);
       if ((n_plus != std::string::npos) || (n_minus != std::string::npos))
       {
-        //Either a - or a + was found
-        if (n_plus != std::string::npos)
-        {
-          positive_offset = true;
-          n5 = n_plus;
-        }
-        else
-        {
-          positive_offset = false;
-          n5 = n_minus;
-        }
+          size_t n5;
+          //Either a - or a + was found
+          if (n_plus != std::string::npos)
+          {
+              positive_offset = true;
+              n5 = n_plus;
+          }
+          else
+          {
+              positive_offset = false;
+              n5 = n_minus;
+          }
 
-        //Now, parse the offset time
-        std::string offset_str = time.substr(n5+1, time.size()-n5-1);
+          //Now, parse the offset time
+          std::string offset_str = time.substr(n5+1, time.size()-n5-1);
 
-        //Take out the offset from time string
-        time = time.substr(0, n5);
+          //Take out the offset from time string
+          time = time.substr(0, n5);
 
-        //Separate into minutes and hours
-        size_t n6;
-        std::string hours_str("0"), minutes_str("0");
-        n6 = offset_str.find(':');
-        if ((n6 != std::string::npos))
-        {
-          //Yes, minutes offset are specified
-          minutes_str = offset_str.substr(n6+1, offset_str.size()-n6-1);
-          hours_str = offset_str.substr(0, n6);
-        }
-        else
-          //Just hours
-          hours_str = offset_str;
+          //Separate into minutes and hours
+          size_t n6;
+          std::string hours_str("0"), minutes_str("0");
+          n6 = offset_str.find(':');
+          if ((n6 != std::string::npos))
+          {
+              //Yes, minutes offset are specified
+              minutes_str = offset_str.substr(n6+1, offset_str.size()-n6-1);
+              hours_str = offset_str.substr(0, n6);
+          }
+          else
+              //Just hours
+              hours_str = offset_str;
 
-        //Convert to a time_duration
-        tz_offset = boost::posix_time::hours( boost::lexical_cast<long>(hours_str)) +
-            boost::posix_time::minutes( boost::lexical_cast<long>(minutes_str));
+          //Convert to a time_duration
+          tz_offset = boost::posix_time::hours( boost::lexical_cast<long>(hours_str)) +
+                  boost::posix_time::minutes( boost::lexical_cast<long>(minutes_str));
 
       }
     }

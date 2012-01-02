@@ -34,6 +34,7 @@ namespace Mantid
     *  @param constraint :: The constraint associated with this parameter
     *  @param penaltyFactor :: The level of penalty associated with the constraint
     *  @param fitFunc :: What fit function this applies to
+    *  @param angleConvertConst :: angle conversion constant?????
     */
     XMLlogfile::XMLlogfile(const std::string& logfileID, const std::string& value, const boost::shared_ptr<Kernel::Interpolation>& interpolation, 
       const std::string& formula, const std::string& formulaUnit, const std::string& resultUnit, const std::string& paramName, 

@@ -15,8 +15,11 @@ namespace API
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  MDGeometry::MDGeometry()
-  :m_transformFromOriginal(NULL), m_transformToOriginal(NULL)
+  MDGeometry::MDGeometry() :
+   m_originalWorkspace(),
+   m_transformFromOriginal(NULL), m_transformToOriginal(NULL),
+   m_delete_observer(*this, &MDGeometry::deleteNotificationReceived),
+   m_observingDelete(false)
   {
   }
     
@@ -29,6 +32,11 @@ namespace API
       delete m_transformFromOriginal;
     if (m_transformToOriginal)
       delete m_transformToOriginal;
+    if (m_observingDelete)
+    {
+      // Stop watching once object is deleted
+      API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_delete_observer);
+    }
   }
 
   
@@ -208,15 +216,46 @@ namespace API
   }
 
   /// @return the original workspace to which the basis vectors relate
-  boost::shared_ptr<IMDWorkspace> MDGeometry::getOriginalWorkspace() const
+  boost::shared_ptr<Workspace> MDGeometry::getOriginalWorkspace() const
   {
     return m_originalWorkspace;
   }
 
   /// Set the original workspace to which the basis vectors relate
-  void MDGeometry::setOriginalWorkspace(boost::shared_ptr<IMDWorkspace> ws)
+  void MDGeometry::setOriginalWorkspace(boost::shared_ptr<Workspace> ws)
   {
     m_originalWorkspace = ws;
+    // Watch for workspace deletions
+    if (!m_observingDelete)
+    {
+        API::AnalysisDataService::Instance().notificationCenter.addObserver(m_delete_observer);
+        m_observingDelete = true;
+    }
+
+  }
+
+
+  //---------------------------------------------------------------------------------------------------
+  /** Function called when observer objects receives a notification that
+   * a workspace has been deleted.
+   *
+   * This checks if the "original workspace" in this object is being deleted,
+   * and removes the reference to it to allow it to be destructed properly.
+   *
+   * @param notice :: notification of workspace deletion
+   */
+  void MDGeometry::deleteNotificationReceived(Mantid::API::WorkspaceDeleteNotification_ptr notice)
+  {
+    if (bool(m_originalWorkspace))
+    {
+      // Compare the pointer being deleted to the one stored as the original.
+      Workspace_sptr deleted = notice->object();
+      if (this->m_originalWorkspace == deleted)
+      {
+        // Clear the reference
+        m_originalWorkspace.reset();
+      }
+    }
   }
 
   //---------------------------------------------------------------------------------------------------

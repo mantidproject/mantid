@@ -453,7 +453,7 @@ void LineViewer::setPlanarWidth(double width)
 }
 
 /** Set the number of bins in the line
- * @param nbins :: # of bins */
+ * @param numBins :: # of bins */
 void LineViewer::setNumBins(size_t numBins)
 {
   m_numBins = numBins;

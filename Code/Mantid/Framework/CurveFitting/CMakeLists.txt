@@ -37,7 +37,6 @@ set ( SRC_FILES
 	src/SimplexMinimizer.cpp
 	src/SpecialFunctionHelper.cpp
 	src/SplineBackground.cpp
-	src/StretchExp.cpp
 	src/UserFunction.cpp
 	src/UserFunction1D.cpp
 )
@@ -132,6 +131,7 @@ endif(UNITY_BUILD)
 ADD_PRECOMPILED_HEADER( inc/MantidCurveFitting/PrecompiledHeader.h MantidCurveFitting src/PrecompiledHeader.cpp SRC_FILES INC_FILES )
 # Add the target for this directory
 add_library ( CurveFitting ${SRC_FILES} ${INC_FILES})
+add_cppcheck( CurveFitting )
 # Set the name of the generated library
 set_target_properties ( CurveFitting PROPERTIES OUTPUT_NAME MantidCurveFitting )
 # Add to the 'Framework' group in VS

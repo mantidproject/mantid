@@ -52,7 +52,7 @@ namespace Algorithms
   /// Algorithm's category for identification
   const string ShiftLogTime::category() const
   {
-    return "General";
+    return "DataHandling\\Logs";
   }
 
   //----------------------------------------------------------------------------------------------

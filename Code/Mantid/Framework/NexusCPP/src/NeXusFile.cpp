@@ -913,7 +913,7 @@ string File::getStrData() {
   catch (Exception& e)
   {
     delete[] value;
-    throw e;
+    throw;
   }
 
   res = string(value, info.dims[0]);
@@ -1180,7 +1180,7 @@ string File::getStrAttr(const AttrInfo & info) {
   {
     //Avoid memory leak
     delete [] value;
-    throw e; //re-throw
+    throw; //re-throw
   }
 
   //res = string(value, info.length);

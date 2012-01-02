@@ -73,7 +73,7 @@ namespace Mantid
       /// Algorithm's category for identification
       virtual const std::string category() const
       {
-        return "DataHandling\\Nexus;Inelastic";
+        return "DataHandling\\Nexus;DataHandling\\SPE;Inelastic";
       }
 
     private:

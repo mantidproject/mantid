@@ -123,7 +123,7 @@ namespace MDEvents
       } // For each file
       this->m_alg->fileMutex.unlock();
 
-      if (events.size() > 0)
+      if (!events.empty())
       {
         // Add all the events from the same box
         outWS->addEvents( events );
@@ -273,10 +273,9 @@ namespace MDEvents
     }
 
     // Complete the file-back-end creation.
-    DiskMRU & mru = bc->getDiskMRU(); UNUSED_ARG(mru);
-    g_log.notice() << "Setting cache to 0 MB read, 400 MB write, 2000 MB small objects." << std::endl;
-    bc->setCacheParameters(sizeof(MDE), 0, 400000000/sizeof(MDE), 2000000000/sizeof(MDE));
-    g_log.notice() << "Threshold for small boxes: " << bc->getDiskMRU().getSmallThreshold() << " events." << std::endl;
+    DiskBuffer & dbuf = bc->getDiskBuffer(); UNUSED_ARG(dbuf);
+    g_log.notice() << "Setting cache to 400 MB write." << std::endl;
+    bc->setCacheParameters(sizeof(MDE), 400000000/sizeof(MDE));
 
 
     return outWS;
@@ -396,9 +395,9 @@ namespace MDEvents
     bc->setSplitThreshold(5000);
 
     // Complete the file-back-end creation.
-    DiskMRU & mru = bc->getDiskMRU(); UNUSED_ARG(mru);
-    g_log.notice() << "Setting cache to 2000 MB read, 400 MB write, 0 MB small objects." << std::endl;
-    bc->setCacheParameters(sizeof(MDE), 2000000000/sizeof(MDE), 400000000/sizeof(MDE), 0/sizeof(MDE));
+    DiskBuffer & dbuf = bc->getDiskBuffer(); UNUSED_ARG(dbuf);
+    g_log.notice() << "Setting cache to 400 MB write." << std::endl;
+    bc->setCacheParameters(sizeof(MDE), 400000000/sizeof(MDE));
 
     return ws;
   }
@@ -429,6 +428,8 @@ namespace MDEvents
      * @param alg :: MergeMD Algorithm - used to pass parameters etc. around
      * @param blockNum :: Which block to load?
      * @param outWS :: Output workspace
+     * @param boxesById :: list of boxes with IDs
+     * @param parallelSplit :: if true, split the boxes via parallel mechanism
      */
     MergeMDLoadToBoxTask(MergeMD * alg, size_t blockNum, typename MDEventWorkspace<MDE, nd>::sptr outWS,
         typename std::vector<IMDBox<MDE,nd> *> & boxesById, bool parallelSplit)
@@ -499,7 +500,7 @@ namespace MDEvents
       //bc->fileMutex.unlock();
       this->m_alg->fileMutex.unlock();
 
-      if (events.size() > 0)
+      if (!events.empty())
       {
         // Add all the events from the same box
         outBox->addEvents( events );
@@ -525,7 +526,7 @@ namespace MDEvents
             tp.joinAll();
 
           // Flush out any items to write.
-          bc->getDiskMRU().flushCache();
+          bc->getDiskBuffer().flushCache();
         }
       } // there was something loaded
 

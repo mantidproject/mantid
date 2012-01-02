@@ -20,7 +20,7 @@ namespace Mantid
     struct findID : public std::unary_function <Mantid::Geometry::IMDDimension_sptr, bool>
     {
       const std::string m_id;
-      findID(const std::string id) : m_id(id){ }
+      findID(const std::string & id) : m_id(id){ }
 
       bool operator ()(const Mantid::Geometry::IMDDimension_sptr obj) const
       {
@@ -155,7 +155,7 @@ namespace Mantid
 
      /**
      Constructor
-     @param dataSet : vtkDataSet to process
+     @param xmlToProcess : vtkDataSet to process
      */
       MDGeometryXMLParser::MDGeometryXMLParser(const std::string& xmlToProcess) : m_executed(false), m_xmlToProcess(xmlToProcess)
       {
@@ -302,7 +302,7 @@ namespace Mantid
 
       /**
       Setter for the root element.
-      @parameter elementName : name of the element containing xml dimensions. Usually "Dimensions" unless xml snippet passed in directly, in which case do not set.
+      @param elementName : name of the element containing xml dimensions. Usually "Dimensions" unless xml snippet passed in directly, in which case do not set.
      */
       void MDGeometryXMLParser::SetRootNodeCheck(std::string elementName)
       {
@@ -311,7 +311,7 @@ namespace Mantid
 
        /**
       Assignement operator
-      @parameter other : existing MDGeometryXMLParser to assign from.
+      @param other : existing MDGeometryXMLParser to assign from.
       */
       MDGeometryXMLParser& MDGeometryXMLParser::operator=(const MDGeometryXMLParser& other)
       {
@@ -331,7 +331,7 @@ namespace Mantid
       
       /**
       Copy constructor
-      @parameter other : existing MDGeometryXMLParser to assign from.
+      @param other : existing MDGeometryXMLParser to assign from.
       */
       MDGeometryXMLParser::MDGeometryXMLParser(const MDGeometryXMLParser& other) :
           m_executed(other.m_executed),
@@ -347,7 +347,7 @@ namespace Mantid
 
       /**
       Determines whether query dimension is the x dimension.
-      @parameter candiate : query dimension.
+      @param candidate : query dimension.
       @return true if matches.
       */
       bool MDGeometryXMLParser::isXDimension(Mantid::Geometry::IMDDimension_sptr candidate) const
@@ -366,7 +366,7 @@ namespace Mantid
 
       /**
       Determines whether query dimension is the y dimension.
-      @parameter candiate : query dimension.
+      @param candidate : query dimension.
       @return true if matches.
       */
       bool MDGeometryXMLParser::isYDimension(Mantid::Geometry::IMDDimension_sptr candidate) const
@@ -385,7 +385,7 @@ namespace Mantid
 
       /**
       Determines whether query dimension is the z dimension.
-      @parameter candiate : query dimension.
+      @param candidate : query dimension.
       @return true if matches.
       */
       bool MDGeometryXMLParser::isZDimension(Mantid::Geometry::IMDDimension_sptr candidate) const
@@ -404,7 +404,7 @@ namespace Mantid
 
       /**
       Determines whether query dimension is the t dimension.
-      @parameter candiate : query dimension.
+      @param candidate : query dimension.
       @return true if matches.
       */
       bool MDGeometryXMLParser::isTDimension(Mantid::Geometry::IMDDimension_sptr candidate) const

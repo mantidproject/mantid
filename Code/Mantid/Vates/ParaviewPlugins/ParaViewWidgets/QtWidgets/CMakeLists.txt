@@ -27,6 +27,7 @@ qt4_wrap_cpp( MOCCED_FILES ${HDR_FILES} )
 
 project( MantidParaViewQtWidgets )
 add_library( MantidParaViewQtWidgets ${SRC_FILES} ${MOCCED_FILES} ${INC_FILES} ) 
+add_cppcheck( MantidParaViewQtWidgets )
 # Add to the 'Vates' group in VS
 set_property( TARGET MantidParaViewQtWidgets PROPERTY FOLDER "MantidVates" )
 target_link_libraries( MantidParaViewQtWidgets ${QT_LIBRARIES} 

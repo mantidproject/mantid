@@ -54,6 +54,7 @@ namespace MDEventsTestHelper
    * @param max :: extent of each dimension (max)
    * @param numEventsPerBox :: will create one MDLeanEvent in the center of each sub-box.
    *        0 = don't split box, don't add events
+   * @param dimSplit :: ?????
    * @return
    */
   template<typename MDE, size_t nd>
@@ -136,8 +137,11 @@ namespace MDEventsTestHelper
   /** Generate an empty MDBox with 2 dimensions, splitting in (default) 10x10 boxes.
    * Box size is 10x10.
    *
-   * @param split0, split1 :: for uneven splitting
-   * */
+   * @param split0 :: for uneven splitting
+   * @param split1 :: for uneven splitting
+   * @param dimensionMin :: minimum dimesion extent
+   * @param dimensionMax :: maximum dimesion extent
+   */
   template <size_t nd>
   static MDGridBox<MDLeanEvent<nd>,nd> * makeMDGridBox(size_t split0=10, size_t split1=10, coord_t dimensionMin=0.0, coord_t dimensionMax=10.0)
   {

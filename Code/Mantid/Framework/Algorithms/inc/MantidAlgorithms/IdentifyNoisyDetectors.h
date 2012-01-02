@@ -41,7 +41,7 @@ class DLLExport IdentifyNoisyDetectors : public API::Algorithm
     virtual ~IdentifyNoisyDetectors() {} ///< Empty destructor
 
     virtual const std::string name() const { return "IdentifyNoisyDetectors"; } ///< @return the algorithms name
-    virtual const std::string category() const { return "General"; } ///< @return the algorithms category
+    virtual const std::string category() const { return "Diagnostics"; } ///< @return the algorithms category
     virtual int version() const { return (1); } ///< @return version number of algorithm
 
   private:

@@ -210,13 +210,12 @@ namespace Mantid
               g_log.error()<<ex.what()<<std::endl;
               m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
               m_running = false;
-              return false;
               if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
               {
                 m_runningAsync = false;
                 throw;
               }
-
+              return false;
 
             }
             catch(Exception::NotFoundError&ex )
@@ -225,13 +224,12 @@ namespace Mantid
               g_log.error()<<ex.what()<<std::endl;
               m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
               m_running = false;
-              return false;
               if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
               {
                 m_runningAsync = false;
                 throw;
               }
-
+              return false;
 
             }
             catch (std::runtime_error &ex)
@@ -240,12 +238,12 @@ namespace Mantid
               g_log.error()<<ex.what()<<std::endl;
               m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
               m_running = false;
-              return false;
               if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
               {
                 m_runningAsync = false;
                 throw;
               }
+              return false;
 
             }
             catch(CancelException& ex)
@@ -254,12 +252,12 @@ namespace Mantid
               g_log.error()<<ex.what()<<std::endl;
               m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
               m_running = false;
-              return false;
               if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
               {
                 m_runningAsync = false;
                 throw;
               }
+              return false;
 
 
             }
@@ -269,13 +267,12 @@ namespace Mantid
               g_log.error()<<ex.what()<<std::endl;
               m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
               m_running = false;
-              return false;
               if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
               {
                 m_runningAsync = false;
                 throw;
               }
-
+              return false;
             }
 
             //}
@@ -687,7 +684,7 @@ namespace Mantid
     *  @param duration :: a double defining the length of duration of the algorithm
     *  @param  uexecCount an unsigned int for defining the excution order of algorithm
     */
-    void Algorithm::fillHistory(Mantid::Kernel::DateAndTime start,double duration,size_t uexecCount)
+    void Algorithm::fillHistory(Mantid::Kernel::DateAndTime start,double duration,std::size_t uexecCount)
     {
       // Create two vectors to hold a list of pointers to the input & output workspaces (InOut's go in both)
       std::vector<Workspace_sptr> inputWorkspaces, outputWorkspaces;
@@ -820,7 +817,7 @@ namespace Mantid
       int nPeriod=1;
       int execPercentage=0;
       bool bgroupPassed=true;
-      bool bgroupFailed=false;
+      bool bgroupFailed;
 
       WorkspaceGroup_sptr wsgrp1_sptr; 
       WorkspaceGroup_sptr wsgrp2_sptr;
@@ -863,10 +860,11 @@ namespace Mantid
           std::vector<Mantid::Kernel::Property*>::const_iterator itr;
           for (itr=props.begin();itr!=props.end();++itr)
           {
-            int outWSCount=0;
+
 
             if(isWorkspaceProperty(*itr) )
-            {             
+            {
+                int outWSCount=0;
               if(isInputWorkspaceProperty(*itr))
               {
 

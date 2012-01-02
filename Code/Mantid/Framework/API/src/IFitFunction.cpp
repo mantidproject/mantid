@@ -31,11 +31,6 @@ void IFitFunction::functionDeriv(Jacobian* out)
   throw ("No derivative IFitFunction provided");
 }
 
-
-
-///** Update active parameters. Ties are applied.
-// *  @param in :: Pointer to an array with active parameters values. Must be at least nActive() doubles long.
-// */
 //void IFitFunction::updateActive(const double* in)
 //{
 //  if (in)
@@ -46,11 +41,6 @@ void IFitFunction::functionDeriv(Jacobian* out)
 //  applyTies();
 //}
 //
-///**
-// * Sets active parameter i to value. Ties are not applied.
-// * @param i :: The index of active parameter to set
-// * @param value :: The new value for the parameter
-// */
 //void IFitFunction::setActiveParameter(size_t i,double value)
 //{
 //  size_t j = indexOfActive(i);
@@ -62,22 +52,11 @@ void IFitFunction::functionDeriv(Jacobian* out)
 //  size_t j = indexOfActive(i);
 //  return getParameter(j);
 //}
-
-///** Create a new tie. IFitFunctions can have their own types of ties.
-// * @param parName :: The parameter name for this tie
-// * @return a new parameter tie
-// */
 //ParameterTie* IFitFunction::createTie(const std::string& parName)
 //{
 //  return new ParameterTie(this,parName);
 //}
 //
-///**
-// * Ties a parameter to other parameters
-// * @param parName :: The name of the parameter to tie.
-// * @param expr ::    A math expression 
-// * @return newly ties parameters
-// */
 //ParameterTie* IFitFunction::tie(const std::string& parName,const std::string& expr)
 //{
 //  ParameterTie* tie = this->createTie(parName);
@@ -94,10 +73,6 @@ void IFitFunction::functionDeriv(Jacobian* out)
 //  return tie;
 //}
 //
-///** Removes the tie off a parameter. The parameter becomes active
-// * This method can be used when constructing and editing the IFitFunction in a GUI
-// * @param parName :: The name of the parameter which ties will be removed.
-// */
 //void IFitFunction::removeTie(const std::string& parName)
 //{
 //  size_t i = parameterIndex(parName);
@@ -168,89 +143,8 @@ void IFitFunction::addPenaltyDeriv(Jacobian *out)const
 
 }
 
-///**
-// * Writes a string that can be used in Fit.IFitFunction to create a copy of this IFitFunction
-// * @return string representation of the function
-// */
-//std::string IFitFunction::asString()const
-//{
-//  std::ostringstream ostr;
-//  ostr << "name="<<this->name();
-//  std::vector<std::string> attr = this->getAttributeNames();
-//  for(size_t i=0;i<attr.size();i++)
-//  {
-//    std::string attName = attr[i];
-//    std::string attValue = this->getAttribute(attr[i]).value();
-//    if (!attValue.empty())
-//    {
-//      ostr<<','<<attName<<'='<<attValue;
-//    }
-//  }
-//  for(size_t i=0;i<nParams();i++)
-//  {
-//    ostr<<','<<parameterName(i)<<'='<<getParameter(i);
-//  }
-//  std::string constraints;
-//  for(size_t i=0;i<nParams();i++)
-//  {
-//    const IConstraint* c = getConstraint(i);
-//    if (c)
-//    {
-//      std::string tmp = c->asString();
-//      if (!tmp.empty())
-//      {
-//        if (!constraints.empty())
-//        {
-//          constraints += ",";
-//        }
-//        constraints += tmp;
-//      }
-//    }
-//  }
-//  if (!constraints.empty())
-//  {
-//    ostr << ",constraints=(" << constraints << ")";
-//  }
-//
-//  std::string ties;
-//  for(size_t i=0;i<nParams();i++)
-//  {
-//    const ParameterTie* tie = getTie(i);
-//    if (tie)
-//    {
-//      std::string tmp = tie->asString(this);
-//      if (!tmp.empty())
-//      {
-//        if (!ties.empty())
-//        {
-//          ties += ",";
-//        }
-//        ties += tmp;
-//      }
-//    }
-//  }
-//  if (!ties.empty())
-//  {
-//    ostr << ",ties=(" << ties << ")";
-//  }
-//  return ostr.str();
-//}
-//
-///** Set a function handler
-// * @param handler :: A new handler
-// */
-//void IFitFunction::setHandler(FitFunctionHandler* handler)
-//{
-//  m_handler = handler;
-//  if (handler && handler->function() != this)
-//  {
-//    throw std::runtime_error("Function handler points to a different function");
-//  }
-//  m_handler->init();
-//}
-//
 /**
- * Operator <<
+ * Operator \<\<
  * @param ostr :: The output stream
  * @param f :: The IFitFunction
  */

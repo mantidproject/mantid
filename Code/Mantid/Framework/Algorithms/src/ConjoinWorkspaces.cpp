@@ -398,7 +398,7 @@ void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API
 /**
  * Determine the minimum and maximum spectra ids.
  *
- * @param axis The axis to search through.
+ * @param ws the workspace to search
  * @param min The minimum id (output).
  * @param max The maximum id (output).
  */

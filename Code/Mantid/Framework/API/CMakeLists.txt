@@ -272,6 +272,7 @@ endif ()
 ADD_PRECOMPILED_HEADER( inc/MantidAPI/PrecompiledHeader.h MantidAPI src/PrecompiledHeader.cpp SRC_FILES INC_FILES )
 # Add the target for this directory
 add_library ( API ${SRC_FILES} ${INC_FILES})
+add_cppcheck ( API )
 # Set the name of the generated library
 set_target_properties ( API PROPERTIES OUTPUT_NAME MantidAPI 
                                        COMPILE_DEFINITIONS IN_MANTID_API )

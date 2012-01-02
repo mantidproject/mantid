@@ -5,7 +5,7 @@ import math
 class PearlMCAbsorption(PythonAlgorithm):
 
     def category(self):
-        return "CorrectionFunctions\\AbsorptionCorrections"
+        return "CorrectionFunctions\\AbsorptionCorrections;PythonAlgorithms"
 
     def PyInit(self):
         # Input file

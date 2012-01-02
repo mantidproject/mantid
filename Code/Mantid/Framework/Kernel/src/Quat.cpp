@@ -571,7 +571,6 @@ Quat::getRotation(bool check_normalisation,bool throw_on_errors)const
 void Quat::setQuat(double mat[16])
 {
 	double tr,s,q[4];
-	int i,j,k;
 	int nxt[3]={1,2,0};
 	tr=mat[0]+mat[5]+mat[10];
 	if(tr>0.0)
@@ -583,11 +582,11 @@ void Quat::setQuat(double mat[16])
 		b=(mat[8]-mat[2])*s;
 		c=(mat[1]-mat[4])*s;
 	}else{
-		i=0;
+        int i = 0;
 		if(mat[5]>mat[0])i=1;
 		if(mat[10]>mat[i*5])i=2;
-		j=nxt[i];
-		k=nxt[j];
+        int j=nxt[i];
+        int k=nxt[j];
 		s=sqrt(mat[i*5]-(mat[j*5]+mat[k*5])+1.0);
 		q[i]=s*0.5;
 		if(s!=0.0)s=0.5/s;

@@ -142,7 +142,7 @@ unsigned long vtkPeaksReader::GetMTime()
 
 /**
   Update/Set the progress.
-  @parameter progress : progress increment.
+  @param progress : progress increment.
 */
 void vtkPeaksReader::updateAlgorithmProgress(double progress)
 {

@@ -17,7 +17,7 @@ class ConjoinSpectra(PythonAlgorithm):
     """
    
     def category(self):
-        return "Transforms\\Merging"
+        return "Transforms\\Merging;PythonAlgorithms"
 
     def name(self):
         return "ConjoinSpectra"

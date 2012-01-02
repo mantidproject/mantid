@@ -68,7 +68,7 @@ namespace Kernel
   public:
     /** Typedef defines that we will keep the objects with these 2 orderings:
      * 1. sequenced = the order they were added.
-     * 2. a hashed, unique index = the "id" number".
+     * 2. a hashed, unique index = the "id" number.
      */
     typedef boost::multi_index::multi_index_container<
       const ISaveable *,
@@ -164,7 +164,7 @@ namespace Kernel
     void setMruSize(uint64_t buffer)
     {
       m_mruSize = buffer;
-      m_useMRU = (buffer > 0);
+      m_useWriteBuffer = (buffer > 0);
     }
 
     /// @return the size of the in-memory MRU, in number of events
@@ -221,7 +221,7 @@ namespace Kernel
 
     // ----------------------- In-memory buffer --------------------------------------
     /// Do we use the MRU buffer?
-    bool m_useMRU;
+    bool m_useWriteBuffer;
 
     /// The MRU list container
     mru_t m_mru;

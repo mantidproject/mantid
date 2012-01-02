@@ -62,7 +62,7 @@ namespace Mantid
 
     /**
     * Scale and return
-    * @param fraction :: The scale factor
+    * @param factor :: The scale factor
     * @returns A new V2D object scaled by the given factor
     */
     V2D V2D::operator*(const double factor) const
@@ -72,7 +72,7 @@ namespace Mantid
 
     /**
     * Scale this vector
-    * @param fraction :: The scale factor
+    * @param factor :: The scale factor
     * @returns A reference to this object that has been scaled by the given factor
     */
     V2D& V2D::operator*=(const double factor)

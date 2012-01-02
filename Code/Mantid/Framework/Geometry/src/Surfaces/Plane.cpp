@@ -395,7 +395,7 @@ Plane::getBoundingBox(double& xmax, double &ymax, double &zmax, double &xmin, do
 	if(LineIntersectionWithPlane(vertex4,vertex8,edge12)==1)listOfPoints.push_back(edge12);
 	//now sort the vertices to find the  mins and max
 //	std::cout<<listOfPoints.size()<<std::endl;
-	if(listOfPoints.size()>0){
+    if(!listOfPoints.empty()){
 		xmin=ymin=zmin=DBL_MAX;
 		xmax=ymax=zmax=-DBL_MAX;
 		for(std::vector<V3D>::const_iterator it=listOfPoints.begin();it!=listOfPoints.end();++it){

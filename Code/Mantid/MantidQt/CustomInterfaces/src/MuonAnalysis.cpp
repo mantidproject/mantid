@@ -910,13 +910,14 @@ void MuonAnalysis::inputFileChanged_MWRunFiles()
 
   m_previousFilename = m_uiForm.mwRunFiles->getFirstFilename();
 
-  int difference(0);
   int appendSeparator(-1);
   appendSeparator = m_previousFilename.find("-");
 
   if (appendSeparator != -1)
   {
-    //if a range has been selected then opent hem all
+    int difference(0);
+
+    //if a range has been selected then open them all
     //first split into files
     QString currentFile = m_uiForm.mwRunFiles->getText();//m_previousFilename; // m_uiForm.mwRunFiles->getFirstFilename();
     

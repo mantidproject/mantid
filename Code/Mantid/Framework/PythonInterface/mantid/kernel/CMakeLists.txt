@@ -16,6 +16,8 @@ set ( EXPORT_FILES
   src/StlContainers.cpp
   src/Logger.cpp
   src/Unit.cpp
+  src/IValidator.cpp
+  src/BoundedValidator.cpp
 )  
 
 set ( SRC_FILES
@@ -47,6 +49,7 @@ set ( PY_FILES
   dlopen.py
   funcreturns.py
   plugins.py
+  validators.py
 )
 
 #############################################################################################
@@ -76,6 +79,7 @@ endforeach ( PYFILE )
 #############################################################################################
 
 add_library ( PythonKernelModule ${SRC_FILES} ${BOOST_PYTHON_SRC} ${INC_FILES} ${PYTHON_INSTALL_FILES} )
+add_cppcheck( PythonKernelModule )
 set_python_properties( PythonKernelModule _kernel )
 set_target_output_directory ( PythonKernelModule ${OUTPUT_DIR} .pyd )
 # Add the required dependencies

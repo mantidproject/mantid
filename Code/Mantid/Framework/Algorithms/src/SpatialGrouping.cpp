@@ -221,7 +221,7 @@ void SpatialGrouping::exec()
 * This method will, using the NearestNeighbours methods, expand our view on the nearby detectors from
 * the standard eight closest that are recorded in the graph.
 * @param nearest :: neighbours found in previous requests
-* @param det :: pointer to the central detector, for calculating distances
+* @param spec :: pointer to the central detector, for calculating distances
 * @param noNeighbours :: number of neighbours that must be found (in total, including those already found)
 * @param bbox :: BoundingBox object representing the search region
 * @return true if neighbours were found matching the parameters, false otherwise
@@ -287,12 +287,12 @@ bool SpatialGrouping::expandNet(std::map<specid_t,Mantid::Kernel::V3D> & nearest
 /**
 * This method will trim the result set down to the specified number required by sorting
 * the results and removing those that are the greatest distance away.
-* @param input :: map of values that need to be sorted, will be modified by the method
+* @param nearest :: map of values that need to be sorted, will be modified by the method
 * @param noNeighbours :: number of elements that should be kept
 */
-void SpatialGrouping::sortByDistance(std::map<detid_t,Mantid::Kernel::V3D> & input, const size_t & noNeighbours)
+void SpatialGrouping::sortByDistance(std::map<detid_t,Mantid::Kernel::V3D> & nearest, const size_t & noNeighbours)
 {
-  std::vector<std::pair<detid_t,Mantid::Kernel::V3D> > order(input.begin(), input.end());
+  std::vector<std::pair<detid_t,Mantid::Kernel::V3D> > order(nearest.begin(), nearest.end());
 
   std::sort(order.begin(), order.end(), compareIDPair);
 
@@ -302,7 +302,7 @@ void SpatialGrouping::sortByDistance(std::map<detid_t,Mantid::Kernel::V3D> & inp
 
   for ( size_t i = 1; i <= lose; i++ )
   {
-    input.erase(order[current-i].first);
+    nearest.erase(order[current-i].first);
   }
 
 }
@@ -311,7 +311,6 @@ void SpatialGrouping::sortByDistance(std::map<detid_t,Mantid::Kernel::V3D> & inp
 * of the detector
 * @param det :: input detector
 * @param bndbox :: reference to BoundingBox object (changed by this function)
-* @param scale :: reference to V3D object (changed by this function)
 */
 void SpatialGrouping::createBox(boost::shared_ptr<const Geometry::IDetector> det, Geometry::BoundingBox & bndbox)
 { 

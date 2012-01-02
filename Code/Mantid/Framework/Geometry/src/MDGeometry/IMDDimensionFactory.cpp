@@ -76,7 +76,7 @@ Mantid::Geometry::IMDDimension* IMDDimensionFactory::create() const
 /**Creation method of factory using xml with overrides.
  @param nBins : overrriden number of bins
  @param min : overriden minimum
- @parm max : overriden maximum
+ @param max : overriden maximum
  @return IMDDimension generated.
 */
 Mantid::Geometry::IMDDimension* IMDDimensionFactory::create(int nBins, double min, double max) const

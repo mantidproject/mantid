@@ -143,9 +143,10 @@ namespace Mantid
     * Generic to MDWorkspaces.
     * Called by python overloads for _binary_op (see api_exports.cpp)
     *
-    * @param lhs :: The input workspace
-    * @param rhs :: The input value
+    * @param inputWS :: The input workspace
+    * @param value :: The input value
     * @param op :: The operation
+    * @param name :: The output name
     * @param inplace :: If true, then the lhs argument is replaced by the result of the operation.
     * @param reverse :: If true then the double is the lhs argument
     * @return A shared pointer to the result workspace

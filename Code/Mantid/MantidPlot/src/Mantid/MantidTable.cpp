@@ -15,10 +15,9 @@ using namespace MantidQt::API;
  *
  * @param env :: scripting environment (?)
  * @param ws :: ITableWorkspace to reproduce
- * @param label
+ * @param label ::
  * @param parent :: parent window
- * @param name
- * @param f :: flags (?)
+ * @param transpose ::
  * @return the MantidTable created
  */
 MantidTable::MantidTable(ScriptingEnv *env, Mantid::API::ITableWorkspace_sptr ws, const QString &label, 
@@ -289,7 +288,7 @@ void MantidTable::sortColumn(int col, int order)
 
 //------------------------------------------------------------------------------------------------
 /**\brief Sort the specified columns.
- * @param cols :: the columns to be sorted
+ * @param s :: the columns to be sorted
  * @param type :: 0 means sort individually (as in sortColumn()), anything else means together
  * @param order :: 0 means ascending, anything else means descending
  * @param leadCol :: for sorting together, the column which determines the permutation

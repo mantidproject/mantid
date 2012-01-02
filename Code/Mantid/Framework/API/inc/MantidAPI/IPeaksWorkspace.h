@@ -74,7 +74,7 @@ namespace API
 
     //---------------------------------------------------------------------------------------------
     /** Add a peak to the list
-     * @param peak :: Peak object to add (copy) into this.
+     * @param ipeak :: Peak object to add (copy) into this.
      */
     virtual void addPeak(const IPeak& ipeak) = 0;
 

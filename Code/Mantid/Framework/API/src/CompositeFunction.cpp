@@ -164,7 +164,7 @@ void CompositeFunction::setParameter(const std::string& name, const double& valu
 /**
  * Sets a new description to a parameter by name.
  * @param name :: The name of the parameter.
- * @param value :: The new description
+ * @param description :: The new description
  */
 void CompositeFunction::setParameterDescription(const std::string& name, const std::string& description)
 {
@@ -573,7 +573,7 @@ void CompositeFunction::replaceFunction(size_t i,IFunction* f)
  * @param i :: The index of the function
  * @return function at the requested index
  */
-IFunction* CompositeFunction::getFunction(size_t i)const
+IFunction* CompositeFunction::getFunction(std::size_t i)const
 {
   if ( i >= nFunctions() )
   {
@@ -587,7 +587,7 @@ IFunction* CompositeFunction::getFunction(size_t i)const
  * @param i :: The parameter index
  * @return function index of the requested parameter
  */
-size_t CompositeFunction::functionIndex(size_t i)const
+size_t CompositeFunction::functionIndex(std::size_t i)const
 {
   if( i >= nParams() )
   {
@@ -601,7 +601,7 @@ size_t CompositeFunction::functionIndex(size_t i)const
  * @param i :: The active parameter index
  * @return active function index of the requested parameter
  */
-size_t CompositeFunction::functionIndexActive(size_t i)const
+size_t CompositeFunction::functionIndexActive(std::size_t i)const
 {
   if( i >= nParams() )
     throw std::out_of_range("Function parameter index out of range.");
@@ -717,6 +717,7 @@ void CompositeFunction::addTie(ParameterTie* tie)
  * Declare a new parameter. To used in the implementation'c constructor.
  * @param name :: The parameter name.
  * @param initValue :: The initial value for the parameter
+ * @param description :: Parameter documentation
  */
 void CompositeFunction::declareParameter(const std::string& name, double initValue, const std::string& description)
 {

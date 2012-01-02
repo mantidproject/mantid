@@ -22,6 +22,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
+#include <boost/math/special_functions/fpclassify.hpp>
 
 using Mantid::Kernel::DateAndTime;
 using Mantid::Kernel::TimeSeriesProperty;
@@ -67,7 +68,7 @@ namespace Mantid
     *  @param XLength :: The number of X data points/bin boundaries in each vector (must all be the same)
     *  @param YLength :: The number of data/error points in each vector (must all be the same)
     */
-    void MatrixWorkspace::initialize(const size_t &NVectors, const size_t &XLength, const size_t &YLength)
+    void MatrixWorkspace::initialize(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength)
     {
       // Check validity of arguments
       if (NVectors == 0 || XLength == 0 || YLength == 0)
@@ -686,13 +687,6 @@ namespace Mantid
       return xmax;
     }
 
-    namespace {
-      bool isANumber(const double d)
-      {
-        return d == d && fabs(d) != std::numeric_limits<double>::infinity();
-      }
-    }
-
     void MatrixWorkspace::getXMinMax(double &xmin, double &xmax) const
     {
       // set to crazy values to start
@@ -708,7 +702,7 @@ namespace Mantid
         const MantidVec& dataX = this->readX(workspaceIndex); // force using const version
         xfront = dataX.front();
         xback = dataX.back();
-        if (isANumber(xfront) && isANumber(xback))
+        if (boost::math::isfinite(xfront) && boost::math::isfinite(xback))
         {
           if (xfront < xmin)
             xmin = xfront;
@@ -778,7 +772,7 @@ namespace Mantid
     }
 
     /** Get the effective detector for the given spectrum
-    *  @param  index The workspace index for which the detector is required
+    *  @param  workspaceIndex The workspace index for which the detector is required
     *  @return A single detector object representing the detector(s) contributing
     *          to the given spectrum number. If more than one detector contributes then
     *          the returned object's concrete type will be DetectorGroup.
@@ -893,7 +887,7 @@ namespace Mantid
     *  @throw IndexError If the argument given is outside the range of axes held by this workspace
     *  @return Pointer to Axis object
     */
-    Axis* MatrixWorkspace::getAxis(const size_t& axisIndex) const
+    Axis* MatrixWorkspace::getAxis(const std::size_t& axisIndex) const
     {
       if ( axisIndex >= m_axes.size() )
       {
@@ -910,7 +904,7 @@ namespace Mantid
     *  @throw IndexError If the axisIndex given is outside the range of axes held by this workspace
     *  @throw std::runtime_error If the new axis is not of the correct length (within one of the old one)
     */
-    void MatrixWorkspace::replaceAxis(const size_t& axisIndex, Axis* const newAxis)
+    void MatrixWorkspace::replaceAxis(const std::size_t& axisIndex, Axis* const newAxis)
     {
       // First check that axisIndex is in range
       if ( axisIndex >= m_axes.size() )
@@ -996,7 +990,7 @@ namespace Mantid
      * Mask a given workspace index, setting the data and error values to zero
      * @param index :: The index within the workspace to mask
      */
-    void MatrixWorkspace::maskWorkspaceIndex(const size_t index)
+    void MatrixWorkspace::maskWorkspaceIndex(const std::size_t index)
     {
       if( index >= this->getNumberHistograms() )
       {
@@ -1199,7 +1193,7 @@ namespace Mantid
     * @param index :: The index within the workspace to search within (default = 0)
     * @returns An index that 
     */
-    size_t MatrixWorkspace::binIndexOf(const double xValue, const size_t index) const
+    size_t MatrixWorkspace::binIndexOf(const double xValue, const std::size_t index) const
     {
       if( index >= getNumberHistograms() )
       {

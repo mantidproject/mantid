@@ -112,6 +112,7 @@ void ObjCompAssemblyActor::generateTexture(unsigned char* data, unsigned int& id
 
 /**
   * Set colour to a detector.
+  * @param data :: pointer to color array
   * @param i :: Index of the detector in ObjCompAssembly
   * @param c :: The colour
   */

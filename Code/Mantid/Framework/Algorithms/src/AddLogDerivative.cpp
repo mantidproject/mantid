@@ -117,7 +117,7 @@ namespace Algorithms
       values = dVal;
     }
 
-    if (times.size() == 0)
+    if (times.empty())
       throw std::runtime_error("Log " + input->name() + " did not have enough non-repeated time values to make this derivative.");
 
     // Convert time in sec to DateAndTime

@@ -44,7 +44,7 @@ separate_arguments ( PYQT4_SIP_FLAGS )
 
 if ( ${SIP_VERSION} MATCHES "04[0-9][a-f].*" )
 	# SIP version is at least 4.10 (040a or higher in hex)
-	message ( STATUS "Sip version is ${SIP_VERSION}. Using mantidqt sip with docstring." )
+	# message ( STATUS "Sip version is ${SIP_VERSION}. Using mantidqt sip with docstring." )
 	set ( SIP_SPEC ${CMAKE_CURRENT_SOURCE_DIR}/mantidqt.sip )
 else ()
 	# Pre 4.0 sip version (RHEL5 build). 
@@ -107,6 +107,7 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/SliceViewer ) # to find the ui
 
 # This creates the target library, just for python bindings
 add_library ( mantidqtpython MODULE ${SIP_SRC} )
+add_cppcheck( mantidqtpython )
 
 if(WIN32)
 	# Windows: Python library name needs to end in .pyd for Windows

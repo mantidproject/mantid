@@ -27,22 +27,10 @@ using Mantid::Geometry::RectangularDetector;
 using Mantid::Geometry::IDetector;
 using Mantid::Geometry::Object;
 
-
-/**
- * This is default constructor for CompAssembly Actor
- * @param withDisplayList :: true to create a display list for the compassembly and its subcomponents
- */
-//CompAssemblyActor::CompAssemblyActor(bool withDisplayList):
-//    ICompAssemblyActor(withDisplayList)
-//{
-//}
-
 /**
  * This is a constructor for CompAssembly Actor
- * @param objs :: list of objects that are used by IObjCompenent actors and will be filled with the new objects
- * @param id :: ComponentID of this object of CompAssembly
- * @param ins :: Instrument
- * @param withDisplayList :: true to create a display list for the compassembly and its subcomponents
+ * @param instrActor :: the current instrument actor
+ * @param compID :: the current component ID
  */
 CompAssemblyActor::CompAssemblyActor(const InstrumentActor& instrActor,const Mantid::Geometry::ComponentID& compID):
     ICompAssemblyActor(instrActor,compID)

@@ -161,7 +161,7 @@ void MuonAnalysisResultTableTab::populateTables(const QStringList& wsList)
 /**
 * Populates the items (log values) into their table.
 *
-* @param wsList :: a workspace list containing ONLY the workspaces that have parameter
+* @param fittedWsList :: a workspace list containing ONLY the workspaces that have parameter
 *                   tables associated with it.
 */
 void MuonAnalysisResultTableTab::populateLogsAndValues(const QVector<QString>& fittedWsList)
@@ -264,8 +264,8 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QVector<QString>& f
 /**
 * Populates the items (fitted workspaces) into their table.
 *
-* @param wsList :: a workspace list containing ONLY the workspaces that have parameter
-*                   tables associated with it.
+* @param fittedWsList :: a workspace list containing ONLY the workspaces that have parameter
+*                        tables associated with it.
 */
 void MuonAnalysisResultTableTab::populateFittings(const QVector<QString>& fittedWsList)
 {

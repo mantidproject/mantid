@@ -124,6 +124,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/UserFunction.cpp
                    src/VectorCurve.cpp
                    src/origin/OPJFile.cpp
+                   src/plot2D/ImageSymbol.cpp
                    src/plot2D/ScaleEngine.cpp
                    src/analysis/fft2D.cpp
                    src/lib/src/CollapsiveGroupBox.cpp
@@ -348,6 +349,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/VectorCurve.h
                    src/analysis/fft2D.h
                    src/origin/OPJFile.h
+                   src/plot2D/ImageSymbol.h
                    src/plot2D/ScaleEngine.h
                    src/lib/include/CollapsiveGroupBox.h
                    src/lib/include/ColorBox.h
@@ -635,7 +637,6 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
 set ( MANTID_MOC_FILES src/Mantid/AlgMonitor.h
                        src/Mantid/AlgorithmHistoryWindow.h
                        src/Mantid/FirstTimeSetup.h
-                       src/Mantid/FlowLayout.h
                        src/Mantid/IFunctionWrapper.h
                        src/Mantid/ImportWorkspaceDlg.h
                        src/Mantid/LoadDAEDlg.h
@@ -761,7 +762,7 @@ add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp
 							${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS} 
 							${RES_FILES} ${MANTID_RC_FILE}
 )
-
+add_cppcheck   ( MantidPlot )
 
 # Library dependencies
 target_link_libraries ( MantidPlot 
@@ -790,7 +791,7 @@ endif( WIN32 )
 # Now copy the required python files into the build destination
 ###########################################################################
 
-set ( PYTHON_INSTALL_FILES qtiplotrc.py qtiUtil.py mantidplot.py mantidplotrc.py )
+set ( PYTHON_INSTALL_FILES qtiplotrc.py qtiUtil.py mantidplotrc.py )
 foreach ( PYFILE ${PYTHON_INSTALL_FILES} )
   # Command to copy when MantidPlot rebuilds. Does not work if the .py files ONLY were modified!
   add_custom_command ( TARGET MantidPlot POST_BUILD 
@@ -804,6 +805,12 @@ foreach ( PYFILE ${PYTHON_INSTALL_FILES} )
   configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} COPYONLY ) 
 endforeach ( PYFILE ${PYTHON_INSTALL_FILES} )
 
+add_custom_command ( TARGET MantidPlot POST_BUILD
+                     COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory
+                       ${CMAKE_CURRENT_SOURCE_DIR}/mantidplotpy
+                       ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/mantidplotpy
+)
+
 ###########################################################################
 # MantidPlot Python Unit Tests
 ###########################################################################
@@ -811,6 +818,7 @@ endforeach ( PYFILE ${PYTHON_INSTALL_FILES} )
 # List of .py files than must be run WITHIN MantidPlot.
 set ( MANTIDPLOT_TEST_PY_FILES 
 	MantidPlotSliceViewerTest.py
+	MantidPlot1DPlotTest.py
 )
 
 if ( 0 )
@@ -866,6 +874,7 @@ install ( TARGETS MantidPlot RUNTIME DESTINATION ${BIN_DIR}
                              BUNDLE DESTINATION .
 )
 install ( FILES ${PYTHON_INSTALL_FILES} DESTINATION ${BIN_DIR} )
+install ( DIRECTORY mantidplotpy DESTINATION ${BIN_DIR} )
 
 if ( APPLE )
   configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/FixBundle.cmake.in

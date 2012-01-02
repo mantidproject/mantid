@@ -381,8 +381,10 @@ ConvertToMDEvents::check_max_morethen_min(const std::vector<double> &min,const s
   *  If additional algorithms can be generated through algorithm template, this function shluld be modified accordingly
   *
   * @param inMatrixWS -- const pointer to const matrix workspace, which provides information about availible axis
-  *
-  * @returns out_dim_names -- the vector of strings, with each string identify the dimensions names, derived from current workspace by the algorithm
+  * @param Q_mode_req     -- what to do with Q-dimensions e.g. calculate either mod|Q| or Q3D;
+  * @param dE_mode_req    -- desirable dE analysis mode (elastic, direct/indirect)
+  * @param out_dim_names -- the vector of strings, with each string identify the dimensions names, derived from current workspace by the algorithm
+  * @param out_dim_units -- vector of units for target workspace, if inelastic, one of the dimension units have to be DeltaE
 */
 std::string 
 ConvertToMDEvents::identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS, const std::string &Q_mode_req, const std::string &dE_mode_req,
@@ -436,7 +438,6 @@ ConvertToMDEvents::identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS,
   * 
   *@param Q_MODE_ID     -- the momentum conversion mode. Unit conversion depends on it
   *@param natural_units -- units, expected by the subalgorithm from input workspace. All other untis have to be transformed into these. 
-  *@param ws_dim_names  -- vector of input workspace dimensions names 
   *@param ws_dim_units  -- vector of input workspace dimensions units ID-s
   *
   *@returns CONV_MODE_ID -- the string identifier, which says what energy mode is deployed. Current  
@@ -483,14 +484,11 @@ ConvertToMDEvents::parseConvMode(const std::string &Q_MODE_ID,const std::string 
   * 
   *@param Q_MODE_ID     -- the momentum conversion mode. Energy conversion depends on it
   *@param dE_mode_req   -- What conversion algorithm user wants to deploy (direct/indirect elastic)
-  *@param ws_dim_names  -- vector of input workspace dimensions names 
   *@param ws_dim_units  -- vector of input workspace dimensions units ID-s
-  *
-  *@returns out_dim_names -- vector of names for target workspace, if inelastic, one of the dimension units have to be DeltaE
-  *@returns out_dim_units -- vector of units for target workspace, if inelastic, one of the dimension units have to be DeltaE
-  *@returns ndE_dims      -- number of additional dimensions, if inelastic, it would be one dimension more.
-  *@returns natural_units -- name of the units, the algorithm expects to work with. 
-  *@returns emode        -- the integer number of the mode, (0 -- elastic, 1/2-Direct/Indirect) used by unit conversion procedute
+  *@param out_dim_names [out] -- vector of names for target workspace, if inelastic, one of the dimension units have to be DeltaE
+  *@param out_dim_units [out] -- vector of units for target workspace, if inelastic, one of the dimension units have to be DeltaE
+  *@param ndE_dims [out]      -- number of additional dimensions, if inelastic, it would be one dimension more.
+  *@param natural_units [out] -- name of the units, the algorithm expects to work with.
 */
 std::string 
 ConvertToMDEvents::parseDEMode(const std::string &Q_MODE_ID,const std::string &dE_mode_req,const Strings &ws_dim_units,Strings &out_dim_names,Strings &out_dim_units, 
@@ -529,10 +527,9 @@ ConvertToMDEvents::parseDEMode(const std::string &Q_MODE_ID,const std::string &d
   *@param Q_mode_req    -- What conversion algorithm user wants to deploy (Q3d, modQ, no Q)
   *@param ws_dim_names  -- vector of input workspace dimensions names 
   *@param ws_dim_units  -- vector of input workspace dimensions units ID-s
-  *
-  *@returns out_dim_names -- vector of dimension names for momentuns in target workspace 
-  *@returns out_dim_units -- vector of units for target workspace
-  *@returns nQ_dims       -- number of Q or other dimensions. When converting into Q, it is 1 or 3 dimensions, if NoQ -- workspace dimensions are copied. 
+  *@param out_dim_names [out] -- vector of dimension names for momentuns in target workspace
+  *@param out_dim_units [out] -- vector of units for target workspace
+  *@param nQ_dims [out]       -- number of Q or other dimensions. When converting into Q, it is 1 or 3 dimensions, if NoQ -- workspace dimensions are copied.
 */
 std::string 
 ConvertToMDEvents::parseQMode(const std::string &Q_mode_req,const Strings &ws_dim_names,const Strings &ws_dim_units,Strings &out_dim_names,Strings &out_dim_units, int &nQ_dims)
@@ -579,11 +576,9 @@ ConvertToMDEvents::parseQMode(const std::string &Q_mode_req,const Strings &ws_di
     * @param inWS           -- input workspace (2D or Events)
     * @param Q_mode_req     -- what to do with Q-dimensions e.g. calculate either mod|Q| or Q3D;
     * @param dE_mode_req    -- desirable dE analysis mode (elastic, direct/indirect)
-    * @param dim_requested  -- vector of other dimension names requested by the algorithm
-    *
-    * @return the_algID             -- the string, identifying one of the known algorithms; if unknown, should fail. 
-    * @return: dim_names_requested  -- dimension names for the target workspace
-    * @return: dim_uinits_requested -- dimension units for the target workspace
+    * @param other_dim_names  -- vector of other dimension names requested by the algorithm
+    * @param dim_names_requested [out]  -- dimension names for the target workspace
+    * @param dim_units_requested [out] -- dimension units for the target workspace
 */
 std::string 
 ConvertToMDEvents::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS,const std::string &Q_mode_req, 
@@ -657,9 +652,8 @@ ConvertToMDEvents::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS,const std
  * TODO: Currenly logically wrong (at least for inelastic)  Specific processed properties have to be introudced
  * 
  * @param inMatrixWS -- shared pointer to input workspace for analysis
- * 
- * @returns add_dim_names -- the ID-s for the dimension names, which can be obtained from the workspace
- * @returns add_dim_unit  -- the Units ID-s (if any) existing dimensions
+ * @param add_dim_names [out] -- the ID-s for the dimension names, which can be obtained from the workspace
+ * @param add_dim_units [out] -- the Units ID-s (if any) existing dimensions
 */
 void
 ConvertToMDEvents::getAddDimensionNames(MatrixWorkspace_const_sptr inMatrixWS,std::vector<std::string> &add_dim_names,std::vector<std::string> &add_dim_units)const

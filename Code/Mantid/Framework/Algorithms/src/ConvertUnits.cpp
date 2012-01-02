@@ -267,7 +267,6 @@ void ConvertUnits::fillOutputHist(const API::MatrixWorkspace_const_sptr inputWS,
 }
 
 /** Convert the workspace units according to a simple output = a * (input^b) relationship
- *  @param numberOfSpectra :: The number of Spectra
  *  @param outputWS :: the output workspace
  *  @param factor :: the conversion factor a to apply
  *  @param power :: the Power b to apply to the conversion
@@ -351,7 +350,6 @@ void ConvertUnits::convertQuickly(API::MatrixWorkspace_sptr outputWS, const doub
 }
 
 /** Convert the workspace units using TOF as an intermediate step in the conversion
- * @param numberOfSpectra :: The number of Spectra
  * @param fromUnit :: The unit of the input workspace
  * @param outputWS :: The output workspace
  */

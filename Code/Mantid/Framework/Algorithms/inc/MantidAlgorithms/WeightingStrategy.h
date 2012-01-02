@@ -50,7 +50,7 @@ namespace Algorithms
       @param distance : difference between the central detector location and the nearest neighbour
       @return calculated weight
       */
-      virtual double weightAt(const Mantid::Kernel::V3D& ) = 0;
+      virtual double weightAt(const Mantid::Kernel::V3D& distance) = 0;
 
       /**
       Calculate the weight at distance from epicenter.

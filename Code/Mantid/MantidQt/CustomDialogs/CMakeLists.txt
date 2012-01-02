@@ -64,6 +64,7 @@ endif(UNITY_BUILD)
 # Use a precompiled header where they are supported
 ADD_PRECOMPILED_HEADER( inc/MantidQtCustomDialogs/PrecompiledHeader.h MantidQtCustomDialogs src/PrecompiledHeader.cpp ALL_SRC INC_FILES )
 add_library ( CustomDialogs ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
+add_cppcheck( CustomDialogs )
 # Set the name of the generated library
 set_target_properties ( CustomDialogs PROPERTIES OUTPUT_NAME MantidQtCustomDialogs )
 

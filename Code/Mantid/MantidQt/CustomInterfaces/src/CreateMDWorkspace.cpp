@@ -115,13 +115,13 @@ void CreateMDWorkspace::addWorkspaceClicked()
 Adds a memento to the existing data, if it's id has not already been used in the data list.
 @param candidate : candidate memento to add.
 */
-void CreateMDWorkspace::addUniqueMemento(WorkspaceMemento_sptr candiate)
+void CreateMDWorkspace::addUniqueMemento(WorkspaceMemento_sptr candidate)
 {
-  IdComparitor comparitor(candiate);
+  IdComparitor comparitor(candidate);
   WorkspaceMementoCollection::iterator pos = std::find_if(m_data.begin(), m_data.end(), comparitor);
   if(pos == m_data.end())
   {
-    m_data.push_back(candiate);
+    m_data.push_back(candidate);
     m_model->update();
   }
   else

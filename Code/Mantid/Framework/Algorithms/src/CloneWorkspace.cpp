@@ -83,6 +83,7 @@ void CloneWorkspace::exec()
       outputWorkspace->setX(i,inputMatrix->refX(i));
       outputWorkspace->dataY(i) = inputMatrix->readY(i);
       outputWorkspace->dataE(i) = inputMatrix->readE(i);
+      outputWorkspace->dataDx(i) = inputMatrix->readDx(i);
 
       prog.report();
   

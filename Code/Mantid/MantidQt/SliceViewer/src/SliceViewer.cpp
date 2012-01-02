@@ -450,7 +450,7 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
 
   // For showing the original coordinates
   ui.frmMouseInfo->setVisible(false);
-  IMDWorkspace_sptr origWS = m_ws->getOriginalWorkspace();
+  IMDWorkspace_sptr origWS = boost::dynamic_pointer_cast<IMDWorkspace>(m_ws->getOriginalWorkspace());
   if (origWS)
   {
     CoordTransform * toOrig = m_ws->getTransformToOriginal();
@@ -919,7 +919,7 @@ void SliceViewer::showInfoAt(double x, double y)
   ui.lblInfoSignal->setText(QString::number(signal, 'g', 4));
 
   // Now show the coords in the original workspace
-  IMDWorkspace_sptr origWS = m_ws->getOriginalWorkspace();
+  IMDWorkspace_sptr origWS = boost::dynamic_pointer_cast<IMDWorkspace>(m_ws->getOriginalWorkspace());
   if (origWS)
   {
     CoordTransform * toOrig = m_ws->getTransformToOriginal();
@@ -1001,7 +1001,7 @@ void SliceViewer::updateDisplay(bool resetAxes)
  *
  * @param index :: index of the dimension
  * @param dim :: shown dimension, 0=X, 1=Y, -1 sliced
- * @param dim :: previous shown dimension, 0=X, 1=Y, -1 sliced
+ * @param oldDim :: previous shown dimension, 0=X, 1=Y, -1 sliced
  */
 void SliceViewer::changedShownDim(int index, int dim, int oldDim)
 {
@@ -1076,7 +1076,7 @@ int SliceViewer::getDimY() const
  * To be called from Python, primarily.
  *
  * @param indexX :: index of the X dimension, from 0 to NDims-1.
- * @param indexX :: index of the Y dimension, from 0 to NDims-1.
+ * @param indexY :: index of the Y dimension, from 0 to NDims-1.
  * @throw std::invalid_argument if an index is invalid or repeated.
  */
 void SliceViewer::setXYDim(int indexX, int indexY)

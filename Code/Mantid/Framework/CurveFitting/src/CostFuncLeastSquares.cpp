@@ -35,6 +35,7 @@ DECLARE_COSTFUNCTION(CostFuncLeastSquares,Least squares)
   /// @param inverseError :: Array of inverse error values
   /// @param yCal :: Calculated y
   /// @param jacobian :: Output jacobian 
+  /// @param outDerivs :: Output derivatives
   /// @param p :: The number of parameters 
   /// @param n :: The number of points 
   void CostFuncLeastSquares::deriv(const double* yData, const double* inverseError, const double* yCal, 

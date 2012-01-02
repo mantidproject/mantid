@@ -165,7 +165,7 @@ void LoadLog::init()
   size_t numCols = static_cast<size_t>(cols.size()-1);
   if (names.size() != numCols)
     throw std::invalid_argument("The Names parameter should have one fewer entry as the number of columns in a SNS-style text log file.");
-  if ((units.size() > 0) && (units.size() != numCols))
+  if ((!units.empty()) && (units.size() != numCols))
     throw std::invalid_argument("The Units parameter should have either 0 entries or one fewer entry as the number of columns in a SNS-style text log file.");
 
   // Ok, create all the logs

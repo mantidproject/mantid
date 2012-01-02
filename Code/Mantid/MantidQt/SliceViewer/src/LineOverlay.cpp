@@ -113,7 +113,7 @@ namespace SliceViewer
   }
 
   /** Set the snap-to-grid spacing in the Y direction.
-   * @param spacing :: spacing */
+   * @param enabled :: enable spacing */
   void LineOverlay::setSnapEnabled(bool enabled)
   {
     m_snapEnabled = enabled;
@@ -352,7 +352,7 @@ namespace SliceViewer
 
   //-----------------------------------------------------------------------------------------------
   /** Handle the mouse move event when the line is being dragged
-   * @param mouse event info */
+   * @param event mouse event info */
   void LineOverlay::handleDrag(QMouseEvent * event)
   {
     // Is the shift key pressed?
@@ -429,7 +429,7 @@ namespace SliceViewer
 
   //-----------------------------------------------------------------------------------------------
   /** Event when the mouse moves
-   * @param mouse event info */
+   * @param event mouse event info */
   void LineOverlay::mouseMoveEvent(QMouseEvent * event)
   {
     if (event->buttons() & Qt::MidButton)
@@ -483,7 +483,7 @@ namespace SliceViewer
 
   //-----------------------------------------------------------------------------------------------
   /** Event when the mouse button is pressed down
-   * @param mouse event info */
+   * @param event mouse event info */
   void LineOverlay::mousePressEvent(QMouseEvent * event)
   {
 
@@ -518,7 +518,7 @@ namespace SliceViewer
 
   //-----------------------------------------------------------------------------------------------
   /** Event when the mouse moves
-   * @param mouse event info */
+   * @param event mouse event info */
   void LineOverlay::mouseReleaseEvent(QMouseEvent * event)
   {
     if (!(event->buttons() & Qt::MidButton))

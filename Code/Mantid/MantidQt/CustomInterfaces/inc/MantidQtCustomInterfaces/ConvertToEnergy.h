@@ -81,8 +81,8 @@ namespace MantidQt
       void saveSettings();
       void setDefaultInstrument(const QString & name);
       void instrumentSelectChanged(const QString& name);
-      /// Find path to instrument's _Definition.xml file (and check there is a parameter file).
-      QString getIDFPath(const QString& prefix);
+      ///// Find path to instrument's _Definition.xml file (and check there is a parameter file).
+      //QString getIDFPath(const QString& prefix);
       /// Find the DeltaEMode (Direct or Indirect) of the instrument.
       DeltaEMode instrumentDeltaEMode(const QString& defFile);
       /// Change the user interface to show the relevant sections for the instrument type.

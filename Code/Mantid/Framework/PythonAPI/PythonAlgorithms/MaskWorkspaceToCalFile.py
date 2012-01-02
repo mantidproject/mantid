@@ -9,7 +9,7 @@ from MantidFramework import *
 class MaskWorkspaceToCalFile(PythonAlgorithm):
 
 	def category(self):
-		return "General"
+		return "DataHandling\\Text;Diffraction;PythonAlgorithms"
 
 	def name(self):
 		return "MaskWorkspaceToCalFile"

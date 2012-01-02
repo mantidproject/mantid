@@ -129,6 +129,7 @@ namespace Kernel
     /** Signal to the scheduler that a task is complete.
      *
      * @param task :: the Task that was completed.
+     * @param threadnum :: unused argument
      */
     virtual void finished(Task * task, size_t threadnum)
     {

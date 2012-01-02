@@ -13,7 +13,7 @@ COMPRESS_TOL_TOF = .01
 class SNSSingleCrystalReduction(PythonAlgorithm):
 
     def category(self):
-        return "Diffraction"
+        return "Diffraction;PythonAlgorithms"
 
     def name(self):
         return "SNSSingleCrystalReduction"

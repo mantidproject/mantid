@@ -26,7 +26,7 @@ public:
   
   void testCategory()
   {
-    TS_ASSERT_EQUALS( expon.category(), "CorrectionFunctions" )
+    TS_ASSERT_EQUALS( expon.category(), "CorrectionFunctions;Arithmetic" )
   }
   
   void testInit()

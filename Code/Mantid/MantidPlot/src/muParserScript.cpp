@@ -467,7 +467,7 @@ QVariant muParserScript::eval()
 	double val = 0.0;
 	try {
 		current = this;
-		for (QStringList::iterator i=muCode.begin(); i != muCode.end(); i++) {
+		for (QStringList::iterator i=muCode.begin(); i != muCode.end(); ++i) {
 			parser.SetExpr(i->ascii());
 			val = parser.Eval();
 		}
@@ -486,7 +486,7 @@ bool muParserScript::exec()
 		return false;
 	try {
 		current = this;
-		for (QStringList::iterator i=muCode.begin(); i != muCode.end(); i++) {
+		for (QStringList::iterator i=muCode.begin(); i != muCode.end(); ++i) {
 			parser.SetExpr(i->ascii());
 			parser.Eval();
 		}

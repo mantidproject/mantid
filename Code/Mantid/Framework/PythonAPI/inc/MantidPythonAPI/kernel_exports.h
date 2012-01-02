@@ -103,7 +103,7 @@ namespace Mantid
 
       /**
        * Replace the current list of data search paths with the given ones
-       * @param value :: A semi-colon separated list of paths
+       * @param values :: A semi-colon separated list of paths
        */
       void setDataSearchDirs(const boost::python::list &values)
       {

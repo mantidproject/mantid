@@ -103,15 +103,15 @@ namespace Mantid
 
     /** Set the object that describes the sample shape. It is assumed that this is defined such
      * that its centre is at [0,0,0]
-     * @param object :: The object describing the shape
+     * @param shape :: The object describing the shape
      * @throw An std::invalid_argument error if the object does 
      * not have a valid shape
      */
-    void Sample::setShape(const Object & object)
+    void Sample::setShape(const Object & shape)
     {
-      if( object.hasValidShape() )
+      if( shape.hasValidShape() )
       {
-        m_shape = object;
+        m_shape = shape;
       }
       else
       {
@@ -188,7 +188,7 @@ namespace Mantid
 
     /** Attach an OrientedLattice onto this sample
      *
-     * @param env :: A pointer to a OrientedLattice.
+     * @param latt :: A pointer to a OrientedLattice.
      */
     void Sample::setOrientedLattice(OrientedLattice * latt)
     {

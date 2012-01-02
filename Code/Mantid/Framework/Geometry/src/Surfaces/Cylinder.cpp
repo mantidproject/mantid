@@ -432,7 +432,7 @@ void Cylinder::getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmi
 		listOfPoints.push_back(zminPoint);
 		listOfPoints.push_back(zmaxPoint);
 	}	
-	if(listOfPoints.size()>0){
+    if(!listOfPoints.empty()){
 		xmin=ymin=zmin=DBL_MAX;
 		xmax=ymax=zmax=DBL_MIN;
 		for(std::vector<V3D>::const_iterator it=listOfPoints.begin();it!=listOfPoints.end();++it){

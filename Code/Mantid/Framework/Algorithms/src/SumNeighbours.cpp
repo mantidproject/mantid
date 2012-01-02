@@ -174,7 +174,7 @@ void SumNeighbours::exec()
     }
   }
 
-  if (detList.size() == 0)
+  if (detList.empty())
     throw std::runtime_error("This instrument does not have any RectangularDetector's. SumNeighbours cannot operate on this instrument at this time.");
 
   // Build a map to sort by the detectorID

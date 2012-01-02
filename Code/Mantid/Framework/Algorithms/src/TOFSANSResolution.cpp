@@ -14,6 +14,8 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VectorHelper.h"
 
+#include "boost/math/special_functions/fpclassify.hpp"
+
 namespace Mantid
 {
 namespace Algorithms
@@ -164,7 +166,7 @@ void TOFSANSResolution::exec()
 
     for (itev = el.getWeightedEvents().begin(); itev != itev_end; ++itev)
     {
-      if ( itev->m_weight != itev->m_weight ) continue;
+      if ( boost::math::isnan(itev->m_weight) ) continue;
       if (std::abs(itev->m_weight) == std::numeric_limits<double>::infinity()) continue;
       if ( !isEmpty(min_wl) && itev->m_tof < min_wl ) continue;
       if ( !isEmpty(max_wl) && itev->m_tof > max_wl ) continue;

@@ -938,6 +938,7 @@ namespace MantidQt
    /** This method applys time channel masks to the detector bank selected.
       * @param wsName - name of the workspace.
       * @param bMask - boolean flag to indicate the mask check box selected
+      * @param time_pixel - time channel to mask
       */
     void SANSDiagnostics::maskDetector(const QString& wsName,bool bMask,bool time_pixel)
     {

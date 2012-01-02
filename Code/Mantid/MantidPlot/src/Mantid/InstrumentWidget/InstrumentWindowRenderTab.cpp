@@ -274,6 +274,7 @@ void InstrumentWindowRenderTab::flipUnwrappedView(bool on)
  * @param minValue :: A new minimum value.
  * @param maxValue :: A new maximum value.
  * @param minPositive :: A new minimum positive value for the log scale. 
+ * @param autoscaling :: Flag to set autoscaling of the color
  */
 void InstrumentWindowRenderTab::setupColorBar(const MantidColorMap& cmap,double minValue,double maxValue,double minPositive,bool autoscaling)
 {

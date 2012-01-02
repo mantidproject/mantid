@@ -303,8 +303,10 @@ namespace Mantid
 
     /**
      * Write the header information for the given workspace
+     * @param format :: The string containing the header formatting
      * @param os :: The stream to use to write the information
      * @param workspace :: A shared pointer to MatrixWorkspace
+     * @param primaryflightpath :: Value for the moderator to sample distance
      */
     void SaveGSS::writeHeaders(const std::string &format, std::ostream& os,
         Mantid::API::MatrixWorkspace_const_sptr& workspace, double primaryflightpath) const

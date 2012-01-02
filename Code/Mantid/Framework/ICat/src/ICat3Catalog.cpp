@@ -111,7 +111,7 @@ namespace Mantid
      *@param inputs :: reference to a class conatains search inputs
      *@param ws_sptr :: -shared pointer to search results workspace
      */
-    void ICat3Catalog::search(const CSearchParam& inputs, Mantid::API::ITableWorkspace_sptr& ws_sptr)
+    void ICat3Catalog::search(const CatalogSearchParam& inputs, Mantid::API::ITableWorkspace_sptr& ws_sptr)
     {
       CICatHelper helper;
       helper.doISISSearch(inputs,ws_sptr);

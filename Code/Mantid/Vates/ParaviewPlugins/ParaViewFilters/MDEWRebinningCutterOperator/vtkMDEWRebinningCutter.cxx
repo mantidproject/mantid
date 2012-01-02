@@ -167,7 +167,7 @@ const char* vtkMDEWRebinningCutter::getAppliedGeometryXML() const
 }
 
 /** Setter for the algorithm progress..
-@parameter progress
+@param progress the current progress value
 */
 void vtkMDEWRebinningCutter::updateAlgorithmProgress(double progress)
 {

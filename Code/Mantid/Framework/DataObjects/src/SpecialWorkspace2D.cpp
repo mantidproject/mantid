@@ -49,7 +49,7 @@ namespace DataObjects
     for (size_t wi=0; wi<m_noVectors; wi++)
     {
       std::set<detid_t> dets = getSpectrum(wi)->getDetectorIDs();
-      if (dets.size() > 0)
+      if (!dets.empty())
       {
         detid_t detID = *dets.begin();
         detID_to_WI[detID] = int(wi);
@@ -130,6 +130,7 @@ namespace DataObjects
   /** Return the special value (Y) in the workspace at the given detector ID
    *
    * @param detectorID :: detector ID to look up
+   * @param value :: holder for the Y value
    * @return the Y value for that detector ID.
    * @throw std::invalid_argument if the detector ID was not found
    */
@@ -152,7 +153,7 @@ namespace DataObjects
    * @param workspaceIndex
    * @return
    */
-  detid_t SpecialWorkspace2D::getDetectorID(const size_t workspaceIndex) const
+  detid_t SpecialWorkspace2D::getDetectorID(const std::size_t workspaceIndex) const
   {
     if (size_t(workspaceIndex) > detectorIDs.size())
       throw std::invalid_argument("SpecialWorkspace2D::getDetectorID(): Invalid workspaceIndex given.");
@@ -318,7 +319,7 @@ namespace DataObjects
       if (ids1.size() != ids2.size()){
         g_log.debug() << "Spectra " << ispec << ": 2 Workspaces have different number of detectors " << ids1.size() << " vs. " << ids2.size() << std::endl;
         return false;
-      } else if (ids1.size() == 0){
+      } else if (ids1.empty()){
         g_log.debug() << "Spectra " << ispec << ": 2 Workspaces both have 0 detectors. " << std::endl;
         return false;
       } else if (*ids1.begin() != *ids2.begin()){

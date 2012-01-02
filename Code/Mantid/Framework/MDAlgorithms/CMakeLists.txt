@@ -133,6 +133,7 @@ endif(UNITY_BUILD)
 ADD_PRECOMPILED_HEADER( inc/MantidMDAlgorithms/PrecompiledHeader.h MantidMDAlgorithms src/PrecompiledHeader.cpp SRC_FILES INC_FILES )
 # Add the target for this directory
 add_library ( MDAlgorithms ${SRC_FILES} ${INC_FILES})
+add_cppcheck( MDAlgorithms )
 # Set the name of the generated library
 set_target_properties ( MDAlgorithms PROPERTIES OUTPUT_NAME MantidMDAlgorithms 
                                                 COMPILE_DEFINITIONS IN_MANTID_MDALGORITHMS )
@@ -141,7 +142,7 @@ set_property ( TARGET MDAlgorithms PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc ../MDEvents/inc)
 
-target_link_libraries ( MDAlgorithms ${MANTIDLIBS} MDEvents CurveFitting)
+target_link_libraries ( MDAlgorithms ${MANTIDLIBS} MDEvents)
 
 # Create test file projects
 if ( CXXTEST_FOUND )
@@ -154,10 +155,10 @@ if ( CXXTEST_FOUND )
                         ../TestHelpers/src/BinaryOperationMDTestHelper.cpp )
   if ( GMOCK_FOUND AND GTEST_FOUND )
     cxxtest_add_test ( MDAlgorithmsTest ${TEST_FILES} ${GMOCK_TEST_FILES})
-    target_link_libraries( MDAlgorithmsTest MDAlgorithms DataHandling ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
+    target_link_libraries( MDAlgorithmsTest MDAlgorithms DataHandling CurveFitting ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
   else ()
     cxxtest_add_test ( MDAlgorithmsTest ${TEST_FILES} )
-    target_link_libraries( MDAlgorithmsTest MDAlgorithms DataHandling )
+    target_link_libraries( MDAlgorithmsTest MDAlgorithms DataHandling CurveFitting )
   endif ()
   add_dependencies ( FrameworkTests MDAlgorithmsTest )
   # Add to the 'FrameworkTests' group in VS

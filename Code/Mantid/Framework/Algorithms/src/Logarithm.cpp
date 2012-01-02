@@ -26,6 +26,11 @@ namespace Algorithms
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Logarithm)
 
+Logarithm::Logarithm():UnaryOperation(),log_Min(0),is_natural(true)
+{
+  this->useHistogram=true;
+}
+
 void Logarithm::defineProperties()
 {
   declareProperty("Filler", 0.0,

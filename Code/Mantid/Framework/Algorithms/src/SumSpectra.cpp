@@ -87,7 +87,7 @@ void SumSpectra::exec()
     m_MinSpec = 0;
   }
 
-  if (indices_list.size() == 0)
+  if (indices_list.empty())
   {
     //If no list was given and no max, just do all.
     if ( isEmpty(m_MaxSpec) ) m_MaxSpec = numberOfSpectra-1;
@@ -199,7 +199,7 @@ void SumSpectra::exec()
 
 
 /** Executes the algorithm
- *
+ *@param localworkspace :: the input workspace
  *@param indices :: set of indices to sum up
  */
 void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace, std::set<int> &indices)

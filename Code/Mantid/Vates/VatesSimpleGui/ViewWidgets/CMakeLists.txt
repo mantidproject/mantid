@@ -76,6 +76,7 @@ ${RES_FILES}
 add_definitions( -DIN_MANTID_VATES_SIMPLEGUI_VIEWWIDGETS )
 # Add the target for this directory
 add_library( VatesSimpleGuiViewWidgets ${ALL_FILES} )
+add_cppcheck( VatesSimpleGuiViewWidgets )
 # Set the name of the generated library
 set_target_properties( VatesSimpleGuiViewWidgets PROPERTIES OUTPUT_NAME MantidVatesSimpleGuiViewWidgets )
 # Add to the 'VatesSimpleGui' group in VS

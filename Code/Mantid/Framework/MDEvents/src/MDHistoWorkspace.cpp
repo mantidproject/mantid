@@ -152,8 +152,9 @@ namespace MDEvents
   //----------------------------------------------------------------------------------------------
   /** Apply an implicit function to each point; if false, set to the given value.
    *
+  * @param function :: the implicit function to apply
   * @param signal :: signal value to set when function evaluates to false
-  * @param error :: error value to set when function evaluates to false
+  * @param errorSquared :: error value to set when function evaluates to false
   */
   void MDHistoWorkspace::applyImplicitFunction(Mantid::Geometry::MDImplicitFunction * function, signal_t signal, signal_t errorSquared)
   {
@@ -475,7 +476,7 @@ namespace MDEvents
    * Error propagation of \f$ f = a * b \f$  is given by:
    * \f$ df^2 = f^2 * (da^2 / a^2 + db^2 / b^2) \f$
    *
-   * @param b :: workspace on the RHS of the operation
+   * @param b_ws :: workspace on the RHS of the operation
    * */
   void MDHistoWorkspace::multiply(const MDHistoWorkspace & b_ws)
   {
@@ -573,7 +574,8 @@ namespace MDEvents
    * Error propagation of \f$ f = a / b \f$  is given by:
    * \f$ df^2 = f^2 * (da^2 / a^2 + db^2 / b^2) \f$
    *
-   * @param b_ws :: WorkspaceSingleValue (signal and error) as the RHS argument
+   * @param signal :: signal to apply
+   * @param error :: error (not squared) to apply
    **/
   void MDHistoWorkspace::divide(const signal_t signal, const signal_t error)
   {

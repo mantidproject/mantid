@@ -82,7 +82,7 @@ void PDFFT::exec() {
 	double qmax = getProperty("Qmax");
 	double qmin = getProperty("Qmin");
   std::string typeSofQ = getProperty("InputSofQType");
-  std::string typeGofR = getProperty("PDFType");
+  //std::string typeGofR = getProperty("PDFType");
 
   // b) Process input, including defaults
   double deltar;

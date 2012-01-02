@@ -311,8 +311,6 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
    * "proton_charge" time series log. This is then saved in the log entry
    * using setProtonCharge().
    * If "proton_charge" is not found, the value is set to 0.0.
-   * @param start The start of the integration time
-   * @param end The end of the integration time
    * @return :: the total charge in microAmp*hours.
    */  
   double Run::integrateProtonCharge()

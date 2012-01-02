@@ -57,7 +57,7 @@ void MuonRemoveExpDecay::exec()
   //Create output workspace with same dimensions as input
   API::MatrixWorkspace_sptr outputWS = API::WorkspaceFactory::Instance().create(inputWS);
 
-  if (Spectra.size() == 0)
+  if (Spectra.empty())
   {
     Progress prog(this, 0.0, 1.0, numSpectra);
     //Do all the spectra	

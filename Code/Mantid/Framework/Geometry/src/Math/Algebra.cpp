@@ -278,63 +278,63 @@ Algebra::setFunctionObjStr(const std::string& A)
       else if (A[ipt]=='-' || isdigit(A[ipt]) )
         {
 	  int N;
-	  int neg(0);
 	  int nCount=Mantid::Kernel::Strings::convPartNum(A.substr(ipt,std::string::npos),N);
-	  if (nCount)
-	    {
-	      if (N<0)
-	        {
-		  N*=-1;
-		  neg=1;
-		}
-	      std::map<int,std::string>::iterator mc=SurfMap.find(N);
-	      if (mc==SurfMap.end())
-	        {
-		  if (!bigFlag)
-		    {
-		      SurfMap[N]=nLiteral;
-		      cx<<nLiteral;
-		      nLiteral[0]= (nLiteral[0]=='z') ? 'A' : static_cast<char>(static_cast<int>(nLiteral[0])+1);
-		      bigFlag=(nLiteral[0]=='Z') ? 1 : 0;
-		    }
-		  else
-		    {
-		      std::ostringstream lcx;
-		      lcx<<"%"<<bigFlag;
-		      SurfMap[N]=lcx.str();
-		      cx<<lcx.str();
-		      bigFlag++;
-		    }
-		}
-	      else
-	        {
-		  cx<<mc->second;
-		}
-	      // Add negation note:
-	      if (neg)
-		cx<<"\'";
-	      // Add to the number
-	      ipt+=nCount;
-	    }
-	  else
-	    {
-	      std::cout<<"Algebra::setFunction: ncount==0"<<std::endl;
-	      exit(1);
-	    }
-	}
+      if (nCount)
+      {
+          int neg(0);
+          if (N<0)
+          {
+              N*=-1;
+              neg=1;
+          }
+          std::map<int,std::string>::iterator mc=SurfMap.find(N);
+          if (mc==SurfMap.end())
+          {
+              if (!bigFlag)
+              {
+                  SurfMap[N]=nLiteral;
+                  cx<<nLiteral;
+                  nLiteral[0]= (nLiteral[0]=='z') ? 'A' : static_cast<char>(static_cast<int>(nLiteral[0])+1);
+                  bigFlag=(nLiteral[0]=='Z') ? 1 : 0;
+              }
+              else
+              {
+                  std::ostringstream lcx;
+                  lcx<<"%"<<bigFlag;
+                  SurfMap[N]=lcx.str();
+                  cx<<lcx.str();
+                  bigFlag++;
+              }
+          }
+          else
+          {
+              cx<<mc->second;
+          }
+          // Add negation note:
+          if (neg)
+              cx<<"\'";
+          // Add to the number
+          ipt+=nCount;
+      }
+      else
+      {
+          std::cout<<"Algebra::setFunction: ncount==0"<<std::endl;
+          exit(1);
+      }
+      }
       else if (A[ipt]==':')
-        {
-	  cx<<"+";
-	  ipt++;
-	}
+      {
+          cx<<"+";
+          ipt++;
+      }
       else if (A[ipt]=='#')
-        {
-	  cx<<"#";
-	  ipt++;
-	}
+      {
+          cx<<"#";
+          ipt++;
+      }
       else         // Space
-	ipt++;
-    }
+          ipt++;
+  }
   setFunction(cx.str());
   return 0;
 }

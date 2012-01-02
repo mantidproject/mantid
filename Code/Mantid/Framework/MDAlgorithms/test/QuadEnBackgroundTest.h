@@ -1,5 +1,3 @@
-//TODO: Rewrite away from the old MDWorkspace. There are no MDPoint's or MDCell's anymore
-
 #ifndef QUADENBACKGROUNDTEST_H_
 #define QUADENBACKGROUNDTEST_H_
 //

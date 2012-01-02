@@ -37,7 +37,6 @@ LineIntersectVisit::Accept(const Surface& Surf)
 {
   (void) Surf; //Avoid compiler warning
   throw std::runtime_error("LineIntersectVisit::Accept Surface");
-  return;
 }
 
 void

@@ -37,7 +37,7 @@ namespace Mantid
      *  @param instr :: instrument for parameter inclusion
      *  @param map :: parameter map to include
      */
-    Instrument::Instrument(const Instrument_const_sptr instr, ParameterMap_sptr map)
+    Instrument::Instrument(const boost::shared_ptr<const Instrument> instr, boost::shared_ptr<ParameterMap> map)
       : CompAssembly(instr.get(), map.get() ),
       m_sourceCache(instr->m_sourceCache), m_sampleCache(instr->m_sampleCache),
       m_defaultViewAxis(instr->m_defaultViewAxis),
@@ -146,7 +146,7 @@ namespace Mantid
      *  The holding instrument is then the 'neutronic' one, and is used in all algorithms.
      *  @param physInst A pointer to the physical instrument object.
      */
-    void Instrument::setPhysicalInstrument(Instrument_const_sptr physInst)
+    void Instrument::setPhysicalInstrument(boost::shared_ptr<const Instrument> physInst)
     {
       if ( !m_isParametrized )
         m_physicalInstrument = physInst;
@@ -340,7 +340,7 @@ namespace Mantid
           }
           else
           {
-			std::string imame = comp->getName(); // added for dubugging
+            //std::string imame = comp->getName(); // added for debugging
             nodeQueue.push_back(comp);
           }
         }
@@ -795,8 +795,6 @@ namespace Mantid
      * @param samplePos: position of the sample
      * @param det: Geometry object representing the detector (position of the pixel)
      * @param offset: value (close to zero) that changes the factor := factor * (1+offset).
-     * @param vulcancorrection:  boolean to use l2 from Rectangular Detector parent
-     * @return conversion factor for pixel
      */
     double Instrument::calcConversion(const double l1,
                           const Kernel::V3D &beamline,
@@ -839,7 +837,7 @@ namespace Mantid
                           const Kernel::V3D &beamline,
                           const double beamline_norm,
                           const Kernel::V3D &samplePos,
-                          const Instrument_const_sptr &instrument,
+                          const boost::shared_ptr<const Instrument> &instrument,
                           const std::vector<detid_t> &detectors,
                           const std::map<detid_t,double> &offsets)
     {
@@ -866,7 +864,6 @@ namespace Mantid
     //------------------------------------------------------------------------------------------------
     /** Get several instrument parameters used in tof to D-space conversion
      *
-     * @param instrument
      * @param l1 :: primary flight path (source-sample distance)
      * @param beamline :: vector of the direction and length of the beam (source to samepl)
      * @param beamline_norm :: 2 * the length of beamline

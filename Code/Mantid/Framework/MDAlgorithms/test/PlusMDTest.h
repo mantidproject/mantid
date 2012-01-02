@@ -77,7 +77,7 @@ public:
           "UpdateFileBackEnd", "1");
 
       Mantid::API::BoxController_sptr bc = ws->getBoxController();
-      std::cout << bc->getDiskMRU().getFreeSpaceMap().size() << " entries in the free space map" << std::endl;
+      std::cout << bc->getDiskBuffer().getFreeSpaceMap().size() << " entries in the free space map" << std::endl;
       ::NeXus::File * file = bc->getFile();
       // The file should have an entry of 20000 points too (with some error due to the free space blocks). This means the file back-end was updated
       TS_ASSERT_DELTA(file->getInfo().dims[0], 20000, 100);

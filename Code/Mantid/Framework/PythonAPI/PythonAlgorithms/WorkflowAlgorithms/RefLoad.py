@@ -15,7 +15,7 @@ class RefLoad(PythonAlgorithm):
     """
     
     def category(self):
-        return "Workflow\\Reflectometry"
+        return "Workflow\\Reflectometry;PythonAlgorithms"
 
     def name(self):
         return "RefLoad"

@@ -8,6 +8,7 @@ using namespace MantidQt::MantidWidgets;
  * Constructor.
  * @param old_params Parameter names to rename
  * @param new_params Renamed parameters
+ * @param parent The parent widget for the dialog
  */
 RenameParDialog::RenameParDialog(
         const std::vector<std::string>& old_params,

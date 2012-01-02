@@ -13,9 +13,8 @@ namespace Mantid
 
     /**
     Determines whether the provided column has the same name and type as expected.
-    @param expectedName : expected column name
-    @param expectedType : expected column type
-    @param col : ref to column to check
+    @param expected : expected column name
+    @param candidate : ref to column to check
     @return true if all expectations are met.
     */
     bool MementoTableWorkspace::expectedColumn(Mantid::API::Column_const_sptr expected, Mantid::API::Column_const_sptr candidate)

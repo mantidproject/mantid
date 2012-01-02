@@ -107,6 +107,7 @@ namespace VectorHelper
    * Data type is converted at the same type.
    * @param begin :: iterator at the beginning of the data
    * @param end :: iterator at the end of the data
+   * @param dims_array :: array to hold size of dimensions
    * @return :: a pointer to an array of type T.
    */
   template< typename T, typename _ForwardIterator >
@@ -124,6 +125,7 @@ namespace VectorHelper
    * Data type is converted at the same type.
    * @param begin :: iterator at the beginning of the data
    * @param end :: iterator at the end of the data
+   * @param dims_array :: array to hold size of dimensions
    * @return :: a pointer to an array of type T.
    */
   template< typename T, typename _ForwardIterator >

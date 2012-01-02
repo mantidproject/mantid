@@ -598,9 +598,9 @@ PolyBase::solveCubic(std::complex<double>& AnsA,std::complex<double>& AnsB,
 
 {
   double q,r;        /* solution parameters */
-  double s,t,termR,termI,discrim;
-  double q3,r13;
-  std::pair<std::complex<double>,std::complex<double> > SQ;
+  double termR,discrim;
+  double r13;
+  //std::pair<std::complex<double>,std::complex<double> > SQ;
 
   const double b = afCoeff[2];
   const double c = afCoeff[1];
@@ -616,6 +616,7 @@ PolyBase::solveCubic(std::complex<double>& AnsA,std::complex<double>& AnsB,
 
   if (discrim > 1e-13)  /* one root real, two are complex */
     { 
+      double s, t, termI;
       s = r + sqrt(discrim);
       s = ((s < 0) ? -pow(-s, (1.0/3.0)) : pow(s, (1.0/3.0)));
       t = r - sqrt(discrim);
@@ -633,6 +634,7 @@ PolyBase::solveCubic(std::complex<double>& AnsA,std::complex<double>& AnsB,
 
   if (discrim<1e-13) // All roots real 
     {
+      double q3;
       q = -q;
       q3 = q*q*q;
       q3 = acos(-r/sqrt(q3));

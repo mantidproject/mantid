@@ -46,7 +46,7 @@ namespace Algorithms
   }
 
   const string RemovePromptPulse::category() const {
-    return "General";
+    return "CorrectionFunctions\\BackgroundCorrections";
   }
 
   //----------------------------------------------------------------------------------------------

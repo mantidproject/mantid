@@ -45,7 +45,7 @@ namespace Algorithms {
 class DLLExport Logarithm : public UnaryOperation
 {
 public:
-    Logarithm(void):UnaryOperation(),log_Min(0),is_natural(true){};
+    Logarithm();
     virtual ~Logarithm(void){};
     /// Algorithm's name for identification
     virtual const std::string name() const { return "Logarithm";}
