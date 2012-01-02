@@ -360,7 +360,7 @@ void ConvertToMDEvents::exec(){
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(spws));
 
     // free the algorithm from the responsibility for the workspace to allow it to be deleted if necessary
-    pWSWrapper->release_workspace();
+    pWSWrapper->releaseWorkspace();
     return;
    
 }
@@ -574,9 +574,9 @@ ConvertToMDEvents::parseQMode(const std::string &Q_mode_req,const Strings &ws_di
     return Q_MODE_ID;
 }
 
-/** function processes the input arguments and tries to establish what algorithm should be deployed; 
+/** function processes the input arguments and tries to establish what subalgorithm should be deployed; 
     *
-    * @param inWS         -- input workspace (2D or Events)
+    * @param inWS           -- input workspace (2D or Events)
     * @param Q_mode_req     -- what to do with Q-dimensions e.g. calculate either mod|Q| or Q3D;
     * @param dE_mode_req    -- desirable dE analysis mode (elastic, direct/indirect)
     * @param dim_requested  -- vector of other dimension names requested by the algorithm
@@ -631,15 +631,15 @@ ConvertToMDEvents::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS,const std
         convert_log.error()<<"Algorithm with ID:"<<the_algID<<" should produce at least 3 dimensions and it requested to provie just:"<<nDims<<" dims \n";
         throw(std::logic_error("can not parse input parameters propertly"));
     }
-    // we have currenlty instanciated only 8 input dimensions. See algorithm constructor to change that. 
-    if(nDims>8){
-        convert_log.error()<<"Can not currently produce more then 8 dimesnions, requested: "<<nDims<<std::endl;
+    // we have currenlty instanciated only N input dimensions. See algorithm constructor to change that. 
+    if(nDims>pWSWrapper->getMaxNDim()){
+        convert_log.error()<<"Can not currently deal with more then: "<<pWSWrapper->getMaxNDim()<< " dimesnions, but requested: "<<nDims<<std::endl;
         throw(std::invalid_argument(" Too many dimensions requested "));
     }
 
     // any inelastic mode or unit conversion involing TOF needs Ei to be among the input workspace properties
     int emode = getEMode(this);
-    if((emode == 1)||(emode == 2)||(the_algID.find("TOD")!=std::string::npos))
+    if((emode == 1)||(emode == 2)||(the_algID.find("TOF")!=std::string::npos))
     {        
         if(!inWS->run().hasProperty("Ei")){
             convert_log.error()<<" Conversion sub-algorithm with ID: "<<the_algID<<" needs input energy to be present among run properties\n";
@@ -647,8 +647,6 @@ ConvertToMDEvents::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS,const std
         }
     }
 
-    //TODO: temporary, we will redefine the algorithm ID not to depend on dimension number in a future
-    the_algID  = the_algID+boost::lexical_cast<std::string>(nDims);
     this->n_activated_dimensions = nDims;
 
     return the_algID;

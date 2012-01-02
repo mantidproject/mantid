@@ -50,8 +50,7 @@ ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
     const size_t numSpec  = inWS2D->getNumberHistograms();
     // progress reporter
     pProg = std::auto_ptr<API::Progress>(new API::Progress(this,0.0,1.0,numSpec));
-
-
+  
  
     // initiate the class which is does the conversion of workspace data into MD WS coordinates;
     COORD_TRANSFORMER<Q,MODE,CONV> trn(this); 
@@ -59,19 +58,25 @@ ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
 
     // copy experiment info into target workspace
     API::ExperimentInfo_sptr ExperimentInfo(inWS2D->cloneExperimentInfo());
-    uint16_t runIndex     = this->pWSWrapper->workspace->addExperimentInfo(ExperimentInfo);
+    // run index;
+    uint16_t runIndex   = this->pWSWrapper->pWorkspace()->addExperimentInfo(ExperimentInfo);
+    // number of dimesnions
+    size_t n_dims       = this->pWSWrapper->nDimensions();
+
     
     const size_t specSize = this->inWS2D->blocksize();    
     size_t nValidSpectra  = det_loc.det_id.size();
 
+    // take at least bufSize for efficiency
     size_t buf_size     = ((specSize>SPLIT_LEVEL)?specSize:SPLIT_LEVEL);
-    std::vector<coord_t>  Coord(nd*buf_size);
+    std::vector<coord_t>  allCoord(n_dims*buf_size);
+    std::vector<coord_t>  Coord(n_dims);
     std::vector<float>    sig_err(2*buf_size);
     std::vector<uint16_t> run_index(buf_size);
-    std::vector<uint32_t> det_id(buf_size);
+    std::vector<uint32_t> det_ids(buf_size);
 
 
-    if(!trn.calcGenericVariables(Coord,nd))return; // if any property dimension is outside of the data range requested
+    if(!trn.calcGenericVariables(Coord,n_dims))return; // if any property dimension is outside of the data range requested
     //External loop over the spectra:
     for (int64_t i = 0; i < int64_t(nValidSpectra); ++i)
     {
@@ -95,11 +100,17 @@ ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
             //  ADD RESULTING EVENTS TO THE WORKSPACE
             float ErrSq = float(Error[j]*Error[j]);
 
-            //pWs->addEvent(MDEvents::MDEvent<nd>(float(Signal[j]),ErrSq,runIndex,det_id,&Coord[0]));
+            // coppy all data into data buffer for future transformation into events;
+            sig_err[2*n_added_events+0]=float(Signal[j]);
+            sig_err[2*n_added_events+1]=ErrSq;
+            run_index[n_added_events]  = runIndex;
+            det_ids[n_added_events]    = det_id;
+            allCoord.insert(allCoord.end(),Coord.begin(),Coord.end());
+
             n_added_events++;
         } // end spectra loop
         if(n_added_events>SPLIT_LEVEL){
-              pWSWrapper->addMDData(sig_err,run_index,det_id,Coord,n_added_events);
+              pWSWrapper->addMDData(sig_err,run_index,det_ids,allCoord,n_added_events);
  
               n_added_events=0;
               pProg->report(i);
@@ -107,7 +118,7 @@ ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
        } // end detectors loop;
 
  
- //       pWs->refreshCache();
+        pWSWrapper->refreshCache();
         pProg->report();          
 
 }
