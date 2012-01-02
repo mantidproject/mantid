@@ -37,6 +37,71 @@ static bool CompareMagnitude( const V3D & v1, const V3D & v2 )
 }
 
 
+/**
+   Comparator function for sorting list of UB matrices based on the sum
+   of the lengths of the corresponding real space cell edge lengths 
+   |a|+|b|+|C|
+ */
+static bool CompareABCsum( const DblMatrix & UB_1, const DblMatrix & UB_2 )
+{
+  V3D a1;
+  V3D b1;
+  V3D c1;
+  V3D a2;
+  V3D b2;
+  V3D c2;
+  IndexingUtils::GetABC( UB_1, a1, b1, c1 );
+  IndexingUtils::GetABC( UB_2, a2, b2, c2 );
+
+  double sum_1 = a1.norm() + b1.norm() + c1.norm();
+  double sum_2 = a2.norm() + b2.norm() + c2.norm();
+
+  return (sum_1 < sum_2);
+}
+
+
+/**
+   Get the cell angles for the unit cell corresponding to matrix UB
+   and calculate the sum of the differences of the cell angles from 90
+   degrees.
+   @param UB   the UB matrix
+   @return The sum of the difference of the cell angles from 90 degrees.
+ */
+static double GetDiffFrom90Sum( const DblMatrix & UB )
+{
+  V3D a;
+  V3D b;
+  V3D c;
+
+  if ( !IndexingUtils::GetABC( UB, a, b, c ) )
+    return -1;
+
+  double alpha = b.angle( c ) * 180.0/PI;
+  double beta  = c.angle( a ) * 180.0/PI;
+  double gamma = a.angle( b ) * 180.0/PI;
+
+  double sum = fabs( alpha - 90.0 ) +
+               fabs( beta  - 90.0 ) +
+               fabs( gamma - 90.0 );
+
+  return sum;
+}
+
+
+/**
+   Comparator to sort a list of UBs in decreasing order based on 
+   the difference of cell angles from 90 degrees.
+*/
+static bool CompareDiffFrom90( const DblMatrix & UB_1, const DblMatrix & UB_2 )
+{
+  double sum_1 = GetDiffFrom90Sum( UB_1 );
+  double sum_2 = GetDiffFrom90Sum( UB_2 );
+
+  return ( sum_2 < sum_1 );
+}
+
+
+
 /** 
   STATIC method Find_UB: Calculates the matrix that most nearly indexes 
   the specified q_vectors, given the lattice parameters.  The sum of the 
@@ -2823,5 +2888,146 @@ bool IndexingUtils::HasNiggliAngles( const V3D    & a_dir,
   }
 
   return false;
+}
+
+
+/**
+ *  Try to find a UB that is equivalent to the original UB, but corresponds
+ * to a Niggli reduced cell with the smallest sum of edge lengths and 
+ * with angles that are farthest from 90 degrees.
+ *
+ * @param UB      The original UB 
+ * @param newUB   Returns the newUB
+ *
+ * @return True if a possibly constructive change was made and newUB has been
+ * set to a new matrix.  It returns false if no constructive change was found
+ * and newUB is just set to the original UB.
+ */
+
+bool IndexingUtils::MakeNiggliUB( const DblMatrix  & UB,
+                                        DblMatrix  & newUB )
+{
+  V3D a;
+  V3D b;
+  V3D c;
+  
+  if ( !GetABC( UB, a, b, c ) )
+  {
+    return false;
+  }
+
+  V3D v1;
+  V3D v2;
+  V3D v3;
+                                  // first make a list of linear combinations
+                                  // of vectors a,b,c with coefficients up to 5
+   std::vector<V3D> directions;
+   int N_coeff = 5;
+   for ( int i = -N_coeff; i <= N_coeff; i++ )
+   {
+     for ( int j = -N_coeff; j <= N_coeff; j++ )
+     {
+       for ( int k = -N_coeff; k <= N_coeff; k++ )
+       {
+         if ( i != 0 || j != 0 || k != 0 )
+         {
+           v1 = a * i;
+           v2 = b * j;
+           v3 = c * k;
+           V3D sum(v1);
+           sum += v2;
+           sum += v3; 
+           directions.push_back( sum );
+         }
+       }
+     }
+   }
+                                // next sort the list of linear combinations
+                                // in order of increasing length
+  std::sort( directions.begin(), directions.end(), CompareMagnitude );
+
+                                // next form a list of possible UB matrices
+                                // using sides from the list of linear 
+                                // combinations, using shorter directions first.
+                                // Keep trying more until 25 UBs are found.
+                                // Only keep UBs corresponding to cells with
+                                // at least a minimum cell volume
+  std::vector<DblMatrix> UB_list;
+
+  size_t num_needed = 25;
+  size_t max_to_try = 5;
+  while ( UB_list.size() < num_needed && max_to_try < directions.size() )
+  {
+    max_to_try *= 2;
+    size_t num_to_try = std::min( max_to_try, directions.size() );
+
+    V3D acrossb;
+    double vol     = 0;
+    double min_vol = .1f;      // what should this be? 0.1 works OK, but...?
+    for ( size_t i = 0; i < num_to_try-2; i++ )
+    {
+      a = directions[i];
+      for ( size_t j = i+1; j < num_to_try-1; j++ )
+      {
+        b = directions[j];
+        acrossb = a.cross_prod(b);
+        for ( size_t k = j+1; k < num_to_try; k++ )
+        {
+          c = directions[k];
+          vol = acrossb.scalar_prod( c );
+          if ( vol > min_vol && HasNiggliAngles( a, b, c, 0.01 ) )
+          {
+            Matrix<double> new_tran(3,3,false);
+            GetUB( new_tran, a, b, c );
+            UB_list.push_back( new_tran );
+          }
+        }
+      }
+    }
+  }
+                                // if no valid UBs could be formed, return
+                                // false and the original UB
+  if ( UB_list.size() <= 0 )
+  {
+    newUB = UB;
+    return false;
+  }
+                                // now sort the UB's in order of increasing
+                                // total side length |a|+|b|+|c|
+  std::sort( UB_list.begin(), UB_list.end(), CompareABCsum );
+
+                                // keep only those UB's with total side length
+                                // within .1% of the first one.  This can't
+                                // be much larger or "bad" UBs are made for
+                                // some tests with 5% noise
+  double length_tol = 0.001;
+  double total_length;
+  double next_length;
+
+  std::vector<DblMatrix> short_list;
+  short_list.push_back( UB_list[0] );
+  GetABC( short_list[0], a, b, c );
+  total_length = a.norm() + b.norm() + c.norm();
+
+  bool got_short_list = false;
+  size_t i = 1;
+  while ( i < UB_list.size() && !got_short_list )
+  {
+    GetABC( UB_list[i], v1, v2, v3 );
+    next_length = v1.norm() + v2.norm() + v3.norm();
+    if ( fabs(next_length - total_length)/total_length < length_tol )
+      short_list.push_back( UB_list[i] );
+    else
+      got_short_list = true;  
+    i++;
+  }
+                              // now sort on the basis of difference of cell
+                              // angles from 90 degrees and return the one
+                              // with angles most different from 90
+  std::sort( short_list.begin(), short_list.end(), CompareDiffFrom90 );
+
+  newUB = short_list[0];
+
+  return true;
 }
 

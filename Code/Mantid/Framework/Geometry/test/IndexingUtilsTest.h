@@ -75,6 +75,19 @@ public:
   }
 
 
+  static Matrix<double> getSiliconUB()
+  {
+    Matrix<double> UB(3,3,false);
+    V3D row_0( -0.147196, -0.141218,  0.304286 );
+    V3D row_1(  0.106642,  0.120341,  0.090518 );
+    V3D row_2( -0.261273,  0.258426, -0.006190 );
+    UB.setRow( 0, row_0 );
+    UB.setRow( 1, row_1 );
+    UB.setRow( 2, row_2 );
+    return UB;
+  }
+
+
   static void ShowLatticeParameters( Matrix<double> UB )
   {
     Matrix<double> UB_inv(3,3,false);
@@ -1005,6 +1018,22 @@ public:
     TS_ASSERT_EQUALS( IndexingUtils::HasNiggliAngles(a2, b2, c2, 0.001), true);
   }
 
+
+  void test_MakeNiggliUB()
+  {
+    double answer[3][3] = { { -0.147196, -0.141218,  0.304286 },
+                            {  0.106642,  0.120341,  0.090518 },
+                            { -0.261273,  0.258426, -0.006190 } };
+
+    Matrix<double> UB = getSiliconUB();
+    Matrix<double> newUB(3,3,false);  
+
+    IndexingUtils::MakeNiggliUB( UB, newUB );
+
+    for ( size_t row = 0; row < 3; row++ )
+      for ( size_t col = 0; col < 3; col++ )
+        TS_ASSERT_DELTA( newUB[row][col], answer[row][col], 1e-5 );  
+  }
 };
 
 #endif  /* MANTID_GEOMETRY_INDEXING_UTILS_TEST_H_ */

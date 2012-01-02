@@ -264,6 +264,9 @@ class MANTID_GEOMETRY_DLL IndexingUtils
                                const Kernel::V3D  & c_dir,
                                      double         epsilon  );
 
+  /// Construct a newUB corresponding to a Niggli cell from the given UB
+  static bool MakeNiggliUB( const Kernel::DblMatrix  & UB,
+                                  Kernel::DblMatrix  & newUB );
 };
 
 
