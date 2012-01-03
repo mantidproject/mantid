@@ -581,9 +581,6 @@ void MultiSliceView::showCutInSliceViewer(const QString &name)
     src1 = smModel->getItemAtIndex<pqPipelineSource *>(0);
   }
 
-  this->printProxyProps(src1);
-
-
   // Get the current dataset characteristics
   const char *inGeomXML = vtkSMPropertyHelper(src1->getProxy(),
                                              "InputGeometryXML").GetAsString();
@@ -615,8 +612,7 @@ void MultiSliceView::showCutInSliceViewer(const QString &name)
 
   MDImplicitFunction_sptr impplane(new MDPlaneImplicitFunction(3, orient,
                                                                origin));
-  rks.setImplicitFunction(impplane);
-  //std::cout << rks.createXMLString() << std::endl;
+  rks.setImplicitFunction(impplane);;
   QString titleAddition = name;
 
   // Use the WidgetFactory to create the slice viewer window
