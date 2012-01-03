@@ -138,11 +138,14 @@ namespace Algorithms
     std::vector<std::string> vgroups;
     boost::split( vgroups, GroupNames, boost::algorithm::detail::is_any_ofF<char>(",/*"));
 
-    // Assign incremental number to each group
+    // Trim and assign incremental number to each group
     std::map<std::string,int> group_map;
     int index=0;
-    for (std::vector<std::string>::const_iterator it=vgroups.begin();it!=vgroups.end();++it)
+    for (std::vector<std::string>::iterator it=vgroups.begin();it!=vgroups.end();++it) 
+    {
+      boost::trim(*it);
       group_map[(*it)]=++index;
+    }
 
     // Find Detectors that belong to groups
     if (group_map.size() > 0)

@@ -86,7 +86,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InstrumentFilename", "CNCS_Definition.xml") );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("GroupNames", "bank1,bank2,bank3,bank4") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("GroupNames", "bank1,bank2, bank3,bank4") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );

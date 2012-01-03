@@ -119,8 +119,11 @@ namespace Mantid
       // Assign incremental number to each group
       std::map<std::string,int> group_map;
       int index=0;
-      for (std::vector<std::string>::const_iterator it=vgroups.begin();it!=vgroups.end();++it)
+      for (std::vector<std::string>::iterator it=vgroups.begin();it!=vgroups.end();++it)
+      {
+        boost::trim(*it);
         group_map[(*it)]=++index;
+      }
 
       // Not needed anymore
       vgroups.clear();
