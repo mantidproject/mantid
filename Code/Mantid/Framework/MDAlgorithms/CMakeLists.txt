@@ -8,7 +8,6 @@ set ( SRC_FILES
 	src/CompositeFunctionBuilder.cpp
 	src/CompositeImplicitFunction.cpp
 	src/CompositeImplicitFunctionParser.cpp
-	src/ConvertToQ3DdE.cpp
 	src/ConvertToMDEvents.cpp
 	src/DivideMD.cpp
 	src/EqualToMD.cpp
@@ -76,7 +75,6 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/Vector3DParameter.h
 	inc/MantidMDAlgorithms/Vector3DParameterParser.h
 	inc/MantidMDAlgorithms/XorMD.h
-	inc/MantidMDAlgorithms/ConvertToQ3DdE.h
 	inc/MantidMDAlgorithms/ConvertToMDEvents.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsMethods.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsCoordTransf.h

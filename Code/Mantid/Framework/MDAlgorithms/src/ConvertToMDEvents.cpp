@@ -109,7 +109,8 @@ ConvertToMDEvents::getAxisUnits(ConvertToMDEvents const *const pHost){
   *
   *@param pHost the pointer to the algorithm to work with
   *
-  *@returns the reference to the structure. Throws if the structure has not been defined
+  *@returns the reference to the structure with information about the preprocessed detectors. 
+  *         Throws if the structure has not been defined
 */
 preprocessed_detectors & 
 ConvertToMDEvents::getPrepDetectors(ConvertToMDEvents const *const pHost)
@@ -125,7 +126,8 @@ ConvertToMDEvents::getPrepDetectors(ConvertToMDEvents const *const pHost)
   *
   *@param pHost the pointer to the algorithm to work with
   *
-  *@returns the energy. Throws if the energy property is not defined or can not be retrieved from the workspace
+  *@returns the incident energy of the neutrons. 
+  *         Throws if the energy property is not defined or can not be retrieved from the workspace
 */
 double
 ConvertToMDEvents::getEi(ConvertToMDEvents const *const pHost)
@@ -197,7 +199,6 @@ void
 ConvertToMDEvents::init()
 {
       CompositeWorkspaceValidator<> *ws_valid = new CompositeWorkspaceValidator<>;
-      ws_valid->add(new HistogramValidator<>);
       ws_valid->add(new InstrumentValidator<>);
       // the validator which checks if the workspace has axis and any units
       ws_valid->add(new WorkspaceUnitValidator<>(""));
@@ -267,7 +268,6 @@ void ConvertToMDEvents::exec(){
     if(!inWS2D){
         convert_log.error()<<" can not obtain input matrix workspace from analysis data service\n";
     }
-    //inWS2D                           = boost::dynamic_pointer_cast<Workspace2D>(inMatrixWS);
     // ------- Is there any output workspace?
     // shared pointer to target workspace
     API::IMDEventWorkspace_sptr spws = getProperty("OutputWorkspace");
@@ -277,23 +277,11 @@ void ConvertToMDEvents::exec(){
     }
 
     //identify if u,v are present among input parameters and use defaults if not
-    bool u_default(true),v_default(true);
+    Kernel::V3D u,v;
     std::vector<double> ut = getProperty("u");
-    if(!ut.empty()){
-        if(ut.size()==3){ u_default =false;
-        }else{convert_log.warning() <<" u projection vector specified but its dimensions are not equal to 3, using default values [1,0,0]\n";
-        }
-    }
     std::vector<double> vt = getProperty("v");
-    if(!vt.empty()){
-        if(vt.size()==3){ v_default  =false;
-        }else{ convert_log.warning() <<" v projection vector specified but its dimensions are not equal to 3, using default values [0,1,0]\n";
-        }
-    }
-    if(u_default){  ut.assign(3,0);     ut[0]=1;    }
-    if(v_default){  vt.assign(3,0);     vt[1]=1;    }
-    Kernel::V3D u(ut[0],ut[1],ut[2]),v(vt[0],vt[1],vt[2]);
-
+    this->checkUVsettings(ut,vt,u,v);
+    
     // set up target coordinate system
     this ->rotMatrix = getTransfMatrix(inWS2D,u,v);
 
@@ -316,10 +304,11 @@ void ConvertToMDEvents::exec(){
         dim_max = getProperty("MaxValues");
         // verify that the number min/max values is equivalent to the number of dimensions defined by properties
         if(dim_min.size()!=dim_max.size()||dim_min.size()!=n_activated_dimensions){
-            g_log.error()<<" number of specified min dimension values:"<<dim_min.size()<<", number of max values: "<<dim_max.size()<<
-                           " and total number of target dimensions"<<n_activated_dimensions<<" are not consistent\n";
+            g_log.error()<<" number of specified min dimension values: "<<dim_min.size()<<", number of max values: "<<dim_max.size()<<
+                           " and total number of target dimensions: "<<n_activated_dimensions<<" are not consistent\n";
             throw(std::invalid_argument("wrong number of dimension limits"));
         }
+        this->checkMaxMoreThenMin(dim_min,dim_max);
 
    // the output dimensions and almost everything else will be determined by the dimensions of the target workspace
    // user input is mainly ignored
@@ -352,7 +341,7 @@ void ConvertToMDEvents::exec(){
     // call selected algorithm
     pMethod algo =  alg_selector[algo_id];
     if(algo){
-        algo(this,spws.get());
+        algo(this);
     }else{
         g_log.error()<<"requested undefined subalgorithm :"<<algo_id<<std::endl;
         throw(std::invalid_argument("undefined subalgoritm requested "));
@@ -366,7 +355,8 @@ void ConvertToMDEvents::exec(){
 }
 
 void 
-ConvertToMDEvents::check_max_morethen_min(const std::vector<double> &min,const std::vector<double> &max){
+ConvertToMDEvents::checkMaxMoreThenMin(const std::vector<double> &min,const std::vector<double> &max)const
+{
     for(size_t i=0; i<min.size();i++){
         if(max[i]<=min[i]){
             convert_log.error()<<" min value "<<min[i]<<" not less then max value"<<max[i]<<" in direction: "<<i<<std::endl;
@@ -702,10 +692,10 @@ ConvertToMDEvents::getTransfMatrix(API::MatrixWorkspace_sptr inWS,const Kernel::
     the particular workspace.
 
     @param Coord             -- vector of coordinates for current multidimensional event
-    @param nd                -- number of event's dimensions
+    @param nd                -- number of the event's dimensions
     @param n_ws_properties   -- number of dimensions, provided by the workspace itself. E.g., processed inelastic matrix
                                 workspace with provides 4 dimensions, matrix workspace in elastic mode -- 3 dimensions, powder 
-                                -- 2 for elastic and 3 for inelastic mode. Number of these properties is determined by the deployed algorithm
+                                -- 1 for elastic and 2 for inelastic mode. Number of these properties is determined by the deployed algorithm
                                 The coordinates, obtained from the workspace placed first in the array of coordinates, and the coordinates, 
                                 obtained from dimensions placed after them. 
     *@returns        -- true if all coordinates are within the range allowed for the algorithm and false otherwise
@@ -733,7 +723,33 @@ ConvertToMDEvents::fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_
      }
      return true;
 }
-
+//
+void 
+ConvertToMDEvents::checkUVsettings(const std::vector<double> &ut,const std::vector<double> &vt,Kernel::V3D &u,Kernel::V3D &v)const
+{
+//identify if u,v are present among input parameters and use defaults if not
+    bool u_default(true),v_default(true);
+    if(!ut.empty()){
+        if(ut.size()==3){ u_default =false;
+        }else{convert_log.warning() <<" u projection vector specified but its dimensions are not equal to 3, using default values [1,0,0]\n";
+        }
+    }
+    if(!vt.empty()){
+        if(vt.size()==3){ v_default  =false;
+        }else{ convert_log.warning() <<" v projection vector specified but its dimensions are not equal to 3, using default values [0,1,0]\n";
+        }
+    }
+    if(u_default){  
+        u[0] = 1;         u[1] = 0;        u[2] = 0;
+    }else{
+        u[0] = ut[0];     u[1] = ut[1];    u[2] = ut[2];
+    }
+    if(v_default){
+        v[0] = 0;         v[1] = 1;        v[2] = 0;
+    }else{
+        v[0] = vt[0];     v[1] = vt[1];    v[2] = vt[2];
+    }
+}
 // TEMPLATES INSTANTIATION: User encouraged to specialize its own specific algorithm 
 //e.g.
 // template<> void ConvertToMDEvents::processQND<2,modQ,Elastic,ConvertNo>( API::IMDEventWorkspace *const)

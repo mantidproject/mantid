@@ -36,13 +36,10 @@ namespace MDEvents
   */
 /// vectors of strings are often used here 
 typedef  std::vector<std::string> Strings;
-  // signature for an algorithm processing n-dimension event workspace
- // typedef boost::function<void (ConvertToMDEvents*, API::IMDEventWorkspace *const)> pMethod;
 
-
-/// signature for a function which implement void method 
+/// signature for a function which implement void method of this workspace
 class MDEventWSWrapper;
-typedef boost::function<void (MDEventWSWrapper*)> fpVoidMethod;
+typedef boost::function<void () > fpVoidMethod;
 
 class DLLExport MDEventWSWrapper
 {
@@ -67,14 +64,14 @@ public:
 //****> the methods below provide the equivalent of vftable for MDEvent workspace write interface. 
 //      It should probably be moved to that interface if no substantial performance loss is identified (and seems there are no)
    /// to access to splitBox method of multidimensional workspace
-    void splitBox(){boxSplitter[n_dimensions](this);}
+    void splitBox(){boxSplitter[n_dimensions]();}
     /** returns the MDevent ws box controller for access and modifications */
     Mantid::API::BoxController_sptr getBoxController(){return workspace->getBoxController();}
     /// refresh cash on md event workspace
-    void refreshCache(){ cashRefresher[n_dimensions](this);}
+    void refreshCache(){ cashRefresher[n_dimensions]();}
 private:
     /// maximal nuber of dimensions, currently supported by the class;
-   static const int MAX_N_DIM=8;
+   static const size_t MAX_N_DIM=8;
    /// actual number of dimensions, initiated in current MD workspace 0 if not initated;
    size_t n_dimensions;
    /// logger -> to provide logging, for MD dataset file operations

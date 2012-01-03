@@ -55,9 +55,7 @@ namespace MDAlgorithms
 */
   class ConvertToMDEvents;
   // signature for an algorithm processing n-dimension event workspace
-  typedef boost::function<void (ConvertToMDEvents*, API::IMDEventWorkspace *const)> pMethod;
-  // signature for a fucntion, creating n-dimension workspace  
-  typedef boost::function<API::IMDEventWorkspace_sptr (ConvertToMDEvents* )> pWSCreator;
+  typedef boost::function<void (ConvertToMDEvents* )> pMethod;
  // vectors of strings are here everywhere
   typedef  std::vector<std::string> Strings;
   /// known sates for algorithms, caluclating Q-values
@@ -121,8 +119,6 @@ namespace MDAlgorithms
     static Mantid::Kernel::Logger& convert_log;
 
  
-   /// helper function which does exatly what it says
-   void check_max_morethen_min(const std::vector<double> &min,const std::vector<double> &max);
    /// the variable which describes the number of the dimensions, currently used by algorithm. Calculated from number of input properties and input workspace;
    size_t n_activated_dimensions;
   
@@ -183,7 +179,7 @@ namespace MDAlgorithms
     * @param pOutWs -- pointer to initated target workspace, which should accomodate new events
     */
     template<Q_state Q, AnalMode MODE, CnvrtUnits CONV>
-    void processQND(API::IMDEventWorkspace *const pOutWs);
+    void processQND();
     /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
     /// presumably will be completely inlined
      template<Q_state Q, AnalMode MODE, CnvrtUnits CONV> 
@@ -215,6 +211,10 @@ namespace MDAlgorithms
     // 
     std::vector<double> rotMatrix;  // should it be the Quat?
 
+   /// helper function which does exatly what it says
+   void checkMaxMoreThenMin(const std::vector<double> &min,const std::vector<double> &max)const;
+   /// helper function which verifies if projection vectors are specified and if their values are correct when present.
+   void checkUVsettings(const std::vector<double> &ut,const std::vector<double> &vt,Kernel::V3D &u,Kernel::V3D &v)const;
  };
  
 } // namespace Mantid
