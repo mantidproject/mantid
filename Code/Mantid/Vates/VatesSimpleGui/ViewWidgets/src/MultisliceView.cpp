@@ -620,10 +620,18 @@ void MultiSliceView::showCutInSliceViewer(const QString &name)
   // Set the slice points, etc, using the XML definition of the plane function
   w->getSlicer()->openFromXML( QString::fromStdString(rks.createXMLString()) );
   w->show();
-
-  //TODO: Connect to application windows shutdown signal to close the slice viewer with the window.
 }
 
+/**
+ * This function closes user requested SliceViewer windows when the view is
+ * closed. The function is a no-op (except for factory creation) when no
+ * SliceViewer windows were requested.
+ */
+void MultiSliceView::closeSubWindows()
+{
+  MantidQt::Factory::WidgetFactory::Instance()->closeAllSliceViewerWindows();
 }
-}
-}
+
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid

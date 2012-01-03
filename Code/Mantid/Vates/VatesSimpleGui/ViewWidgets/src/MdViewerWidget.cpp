@@ -387,6 +387,7 @@ void MdViewerWidget::checkForUpdates()
 
 void MdViewerWidget::switchViews(ModeControlWidget::Views v)
 {
+  this->currentView->closeSubWindows();
   this->removeProxyTabWidgetConnections();
   this->hiddenView = this->setMainViewWidget(this->ui.viewWidget, v);
   this->hiddenView->hide();
@@ -530,6 +531,6 @@ void MdViewerWidget::onRotationPoint()
   this->rotPointDialog->activateWindow();
 }
 
-}
-}
-}
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid
