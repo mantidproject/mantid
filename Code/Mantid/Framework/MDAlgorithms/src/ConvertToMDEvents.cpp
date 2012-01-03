@@ -762,9 +762,9 @@ ConvertToMDEvents::checkUVsettings(const std::vector<double> &ut,const std::vect
 }
 // TEMPLATES INSTANTIATION: User encouraged to specialize its own specific algorithm 
 //e.g.
-// template<> void ConvertToMDEvents::processQND<2,modQ,Elastic,ConvertNo>( API::IMDEventWorkspace *const)
+// template<> void ConvertToMDEvents::processQND<modQ,Elastic,ConvertNo>()
 // {
-//   User specific code for target 2D workspace, processed to obtain modQ in elastic mode, without unit conversion:
+//   User specific code for workspace  processed to obtain modQ in elastic mode, without unit conversion:
 // }
 //----------------------------------------------------------------------------------------------
 // AUTOINSTANSIATION OF EXISTING CODE:
@@ -774,15 +774,18 @@ class LOOP_ND{
   public:
     static inline void EXEC(ConvertToMDEvents *pH){
             LOOP_ND<Q, MODE,CnvrtUnits(int(CONV)-1)>::EXEC(pH);
- 
+        
             std::string Key = pH->Q_modes[Q]+pH->dE_modes[MODE]+pH->ConvModes[CONV];
 
             pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,&ConvertToMDEvents::processQND<Q,MODE,CONV>));
-#ifdef _DEBUG
-            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
-#endif
+//#ifdef _DEBUG
+//            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
+//#endif
     }
 };
+
+
+
 template< Q_state Q, AnalMode MODE>
 class LOOP_ND<Q,MODE,ConvertNo>{
   public:
@@ -792,9 +795,9 @@ class LOOP_ND<Q,MODE,ConvertNo>{
 
             pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,
                                    &ConvertToMDEvents::processQND<Q,MODE,ConvertNo>));
-#ifdef _DEBUG
-            std::cout<<" Ending group by instansiating algorithm with ID: "<<Key<<std::endl;
-#endif
+//#ifdef _DEBUG
+//            std::cout<<" Ending group by instansiating algorithm with ID: "<<Key<<std::endl;
+//#endif
 
     }
 };
@@ -812,18 +815,18 @@ ConvModes(4),
 native_elastic_unitID("Momentum"), 
 native_inelastic_unitID("DeltaE")
 {
-     Q_modes[modQ]="|Q|";
-     Q_modes[Q3D] ="QxQyQz";    
-     Q_modes[NoQ] ="";    // no Q dimension (does it have any interest&relevance to ISIS/SNS?) 
+     Q_modes[modQ] = "|Q|";
+     Q_modes[Q3D]  = "QxQyQz";    
+     Q_modes[NoQ]  = "";    // no Q dimension (does it have any interest&relevance to ISIS/SNS?) 
      dE_modes[ANY_Mode]  = ""; // no Q uses it to run without conversion. 
      dE_modes[Direct]    = "Direct";
      dE_modes[Indir]     = "Indirect";
      dE_modes[Elastic]   = "Elastic";
      // possible unit conversion modes
-     ConvModes[ConvertNo]  ="CnvNo";
-     ConvModes[ConvFast]="CnvFast";
-     ConvModes[ConvByTOF]  ="CnvByTOF";
-     ConvModes[ConvFromTOF]="CnvFromTOF";
+     ConvModes[ConvertNo]  = "CnvNo";
+     ConvModes[ConvFast]   = "CnvFast";
+     ConvModes[ConvByTOF]  = "CnvByTOF";
+     ConvModes[ConvFromTOF]= "CnvFromTOF";
 
 // Subalgorithm factories:
 // NoQ --> any Analysis mode will do as it does not depend on it; we may want to convert unuts
