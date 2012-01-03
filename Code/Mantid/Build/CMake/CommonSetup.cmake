@@ -167,6 +167,8 @@ if ( CPPCHECK_EXECUTABLE )
         Vates
       )
 
+  set ( CPPCHECK_USE_INCLUDE_DIRS OFF CACHE BOOL "Use specified include directories. WARNING: cppcheck will run significantly slower." )
+
   set ( CPPCHECK_INCLUDE_DIRS
         Framework/Algorithms/inc
         Framework/GPUAlgorithms/inc
@@ -201,12 +203,9 @@ if ( CPPCHECK_EXECUTABLE )
       )
 
   set ( CPPCHECK_EXCLUDES
-        Framework/ICat/inc/MantidICat/GSoapGenerated/soapH.h
-        Framework/ICat/inc/MantidICat/GSoapGenerated/soapICATPortBindingProxy.h
-        Framework/ICat/inc/MantidICat/GSoapGenerated/soapStub.h
+        Framework/ICat/inc/MantidICat/GSoapGenerated/
+        Framework/ICat/src/GSoapGenerated/
         Framework/ICat/src/GSoapGenerated.cpp
-        Framework/ICat/src/GSoapGenerated/soapC.cpp
-        Framework/ICat/src/GSoapGenerated/soapICATPortBindingProxy.cpp
 	Framework/Kernel/src/ANN/
 	Framework/Kernel/src/ANN_complete.cpp
       )
@@ -234,7 +233,9 @@ if ( CPPCHECK_EXECUTABLE )
       list ( APPEND _cppcheck_includes -I ${_tmpdir} )
     endif ()
   endforeach()
-  list ( APPEND _cppcheck_args ${_cppcheck_includes} )
+  if (CPPCHECK_USE_INCLUDE_DIRS)
+    list ( APPEND _cppcheck_args ${_cppcheck_includes} )
+  endif (CPPCHECK_USE_INCLUDE_DIRS)
 
   set (_cppcheck_excludes)
   foreach( _file ${CPPCHECK_EXCLUDES} )
