@@ -50,14 +50,11 @@ namespace Mantid
 {
 namespace MDAlgorithms
 {
-// the parameter, which specifies maximal default number of dimensions, the algorithm accepts. See constructor. 
-   static const int MAX_NDIM=8;
-
 
 // logger for loading workspaces  
    Kernel::Logger& ConvertToMDEvents::convert_log =Kernel::Logger::get("MD-Algorithms");
 
-// the variable describes the locations of the preprocessed detectors, which can be stored and reused it the algorithm runs for more once;
+// the variable describes the locations of the preprocessed detectors, which can be stored and reused if the algorithm runs more then once;
 preprocessed_detectors ConvertToMDEvents::det_loc;
 
 // Register the algorithm into the AlgorithmFactory
@@ -71,7 +68,8 @@ void ConvertToMDEvents::initDocs()
     this->setOptionalMessage("Create a MDEventWorkspace with selected dimensions, e.g. the reciprocal space of momentums (Qx, Qy, Qz) or momentums modules |Q|, energy transfer dE if availible and any other user specified log values which can be treated as dimensions. If the OutputWorkspace exists, then events are added to it.");
 }
 /** Helper Static function to obtain the natural units for input workspace. 
-  *  Natural units are the units, which subalgorithm is working with without any initial transformation.
+  *  Natural units are the units, which subalgorithm is working with without any initial unit transformation.
+  *  Other units have to be transfromed into natural untis first
   *
   *@param pHost the pointer to the algorithm to work with
   *
@@ -199,25 +197,27 @@ void
 ConvertToMDEvents::init()
 {
       CompositeWorkspaceValidator<> *ws_valid = new CompositeWorkspaceValidator<>;
+      //
       ws_valid->add(new InstrumentValidator<>);
       // the validator which checks if the workspace has axis and any units
       ws_valid->add(new WorkspaceUnitValidator<>(""));
 
 
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,ws_valid),
-        "An input Matrix Workspace 2D has to have units, which can be used as one of the dimensions ");
+        "An input Matrix Workspace (Matrix 2D or Event) with units along X-axis and defined instrument with sample ");
    
      declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output),
-        "Name of the output MDEventWorkspace. If the workspace already exists, then the events will be added to it.");
+        "Name of the output MDEventWorkspace. If the workspace already exists, new MD events will be added to it (this may be not very efficient for HDD-based workspaces)");
 
      
      /// this variable describes default possible ID-s for Q-dimensions   
      declareProperty("QDimensions",Q_modes[modQ],new ListValidator(Q_modes),
-                              "You can to trsansfer sourcs workspace dimensions into target worskpace or process mod(Q) (1 dimension) or QxQyQz (3 dimensions) in Q space",Direction::InOut);        
+         "You can to transfer source workspace dimensions into target worskpace directly (NoQ) or transform into mod(Q) (1 dimension) or QxQyQz (3 dimensions) in Q space",Direction::InOut);        
 
      /// this variable describes implemented modes for energy transfer analysis
      declareProperty("dEAnalysisMode",dE_modes[Direct],new ListValidator(dE_modes),
-                              "You can to trsansfer sourcs workspace dimensions into target worskpace or process mod(Q) (1 dimension) or QxQyQz (3 dimensions) in Q space",Direction::InOut);        
+        "You can analyze neutron energy transfer in direct, indirect or elastic mode. The analysis mode has to correspond to experimenal set up."
+        " Inelastic modes add to the target workspace one additional dimension",Direction::InOut);        
 
      
     declareProperty(new ArrayProperty<std::string>("OtherDimensions",Direction::Input),
@@ -229,25 +229,26 @@ ConvertToMDEvents::init()
  
 
     declareProperty(new ArrayProperty<double>("MinValues"),
-        "An array of size 1+N_OtherDimensions if the first dimension (QDimensions property) is equal to |Q| or \n"
-        "3+N_OtherDimensions if first (3) dimensions (QDimensions property) equal  QxQyQz or \n"
-        "(1-2)+N_OtherDimesnions if QDimesnins property is emtpty. \n"
-        " In last case the workspace dimensions are defined by presense and units of the input workspace axis\n\n"
+        "An array of size: \n"
+        "a) 1+N_OtherDimensions if the first dimension (QDimensions property) is equal to |Q| or \n"
+        "b) 3+N_OtherDimensions if the first (3) dimensions (QDimensions property) equal  QxQyQz or \n"
+        "c) (1 or 2)+N_OtherDimesnions if QDimesnins property is emtpty. \n"
+        " In case c) the target workspace dimensions are defined by the units of the input workspace axis\n\n"
          " This array contains minimal values for all dimensions.\n"
          " Momentum values expected to be in [A^-1] and energy transfer (if any) expressed in [meV]\n"
-         " All other values are in uints they are expressed in their log files\n"
+         " All other values are in uints they are in their log files\n"
          " Values lower then the specified one will be ignored\n"
-         " If a minimal output workspace range is higer then specified, the workspace range will be used intstead)" );
+         " If a minimal target workspace range is higer then the one specified here, the target workspace range will be used intstead" );
 
    declareProperty(new ArrayProperty<double>("MaxValues"),
-         "An array of the same size as MinValues array"
-         " Values higher then the specified by the array will be ignored\n"
-        " If a maximal output workspace ranges is lower, then one of specified, the workspace range will be used instead)" );
+         "An array of the same size and the same units as MinValues array"
+         "Values higher then the specified by this array will be ignored\n"
+         "If a maximal target workspace range is lower, then one of specified here, the target workspace range will be used instead" );
     
     declareProperty(new ArrayProperty<double>("u"),
      "Optional: first  base vector (in hkl) defining fractional coordinate system for neutron diffraction; default value is [1,0,0] or powder mode");
     declareProperty(new ArrayProperty<double>("v"),
-        "Optional: second base vector (in hkl) defining fractional coordinate system for neutron diffraction; default value is [0,1,0] or powder mode");  
+      "Optional: second base vector (in hkl) defining fractional coordinate system for neutron diffraction; default value is [0,1,0] or powder mode");  
 
    // Box controller properties. These are the defaults
     this->initBoxControllerProps("5" /*SplitInto*/, 1500 /*SplitThreshold*/, 20 /*MaxRecursionDepth*/);
@@ -670,20 +671,29 @@ ConvertToMDEvents::getAddDimensionNames(MatrixWorkspace_const_sptr inMatrixWS,st
 
 /** The matrix to convert neutron momentums into the fractional coordinate system   */
 std::vector<double>
-ConvertToMDEvents::getTransfMatrix(API::MatrixWorkspace_sptr inWS,const Kernel::V3D &u, const Kernel::V3D &v)const
+ConvertToMDEvents::getTransfMatrix(API::MatrixWorkspace_sptr inWS,const Kernel::V3D &u, const Kernel::V3D &v,bool is_powder)const
 {
   
-    // Set the matrix based on UB etc.
-    Geometry::OrientedLattice Latt = inWS->sample().getOrientedLattice();
+    Kernel::Matrix<double> mat(3,3);
+    mat.identityMatrix();
 
-    // thansform the lattice above into the notional coordinate system related to projection vectors u,v;
-    Kernel::Matrix<double> umat = Latt.setUFromVectors(u,v);
+    if(!is_powder){
+        try{
+           // set the transformation matrix on the basis of the oriented lattice
+           Geometry::OrientedLattice Latt = inWS->sample().getOrientedLattice();
 
-    Kernel::Matrix<double> gon =inWS->run().getGoniometer().getR();
+          // thansform the lattice above into the notional coordinate system related to projection vectors u,v;
+           Kernel::Matrix<double> umat = Latt.setUFromVectors(u,v);
 
-  // Obtain the transformation matrix:
-    Kernel::Matrix<double> mat = umat*gon ; //*(2*M_PI)?;
-    mat.Invert();
+           Kernel::Matrix<double> gon =inWS->run().getGoniometer().getR();
+
+          // Obtain the transformation matrix:
+           mat = umat*gon ; //*(2*M_PI)?;
+           mat.Invert();
+        }catch(std::runtime_error &){
+            convert_log.warning()<<" Can not obtain transformation matrix from the input workspace: "<<inWS->name()<<" as no oriented lattice has been defined. Use unit transformation matrix anyway\n";
+        }
+    }
     std::vector<double> rotMat = mat.get_vector();
     return rotMat;
 }
