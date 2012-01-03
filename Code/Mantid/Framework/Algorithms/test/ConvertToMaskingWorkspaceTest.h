@@ -35,8 +35,8 @@ public:
   {
     // 1. Construct input workspace
     // a) Workspace
-    int numhist = 20;
-    int numbins = 1;
+    const int numhist = 20;
+    const int numbins = 1;
     double x0 = 100.0;
     double deltax = 20.0;
     DataObjects::Workspace2D_sptr inputWS =
@@ -49,8 +49,8 @@ public:
 
     // c) Instrument
     Geometry::Instrument_sptr instrument(new Geometry::Instrument);
-    specid_t specids[numhist];
-    detid_t detids[numhist];
+    specid_t specids[20];
+    detid_t detids[20];
     for (size_t i = 0; i < static_cast<size_t>(numhist); i ++){
       specids[i] = static_cast<specid_t>(i)+1;
       detids[i] = static_cast<detid_t>(i+1000);
