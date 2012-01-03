@@ -234,11 +234,14 @@ if ( CPPCHECK_EXECUTABLE )
     list( APPEND _cppcheck_xml_args --xml --xml-version=2 2> ${CMAKE_BINARY_DIR}/cppcheck.xml )
   endif (CPPCHECK_GENERATE_XML)
 
-add_custom_target ( cppcheck_byhand
-                    COMMAND ${CPPCHECK_EXECUTABLE} ${_cppcheck_args} . ${_cppcheck_xml_args}
-                    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-                    COMMENT "Running cppcheck"
-                  )
+  if (NOT TARGET cppcheck)
+    add_custom_target ( cppcheck
+                        COMMAND ${CPPCHECK_EXECUTABLE} ${_cppcheck_args} . ${_cppcheck_xml_args}
+                        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+                        COMMENT "Running cppcheck"
+                      )
+    set_target_properties(cppcheck PROPERTIES EXCLUDE_FROM_ALL TRUE)
+  endif()
 endif ( CPPCHECK_EXECUTABLE )
 
 

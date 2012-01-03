@@ -46,7 +46,6 @@ set ( TEST_PY_FILES test/EQSANSQ2DTest.py test/EQSANSSensitivityCorrectionTest.p
 ADD_PRECOMPILED_HEADER( inc/MantidWorkflowAlgorithms/PrecompiledHeader.h MantidWorkflowAlgorithms src/PrecompiledHeader.cpp SRC_FILES INC_FILES )
 # Add the target for this directory
 add_library ( WorkflowAlgorithms ${SRC_FILES} ${INC_FILES})
-add_cppcheck( WorkflowAlgorithms )
 # Set the name of the generated library
 set_target_properties ( WorkflowAlgorithms PROPERTIES OUTPUT_NAME MantidWorkflowAlgorithms )
 # Add to the 'Framework' group in VS

@@ -46,19 +46,19 @@ if(CPPCHECK_EXECUTABLE OR CPPCHECK_MARK_AS_ADVANCED)
 	mark_as_advanced(CPPCHECK_ROOT_DIR)
 endif()
 
-if(CPPCHECK_EXECUTABLE)
-  if(NOT TARGET cppcheck)
-    add_custom_target(cppcheck)
-    set_target_properties(cppcheck PROPERTIES EXCLUDE_FROM_ALL TRUE)
-  endif()
-  execute_process ( COMMAND ${CPPCHECK_EXECUTABLE} --version
-                    OUTPUT_VARIABLE CPPCHECK_VERSION
-		    OUTPUT_STRIP_TRAILING_WHITESPACE )
-  string ( TOUPPER ${CPPCHECK_VERSION} CPPCHECK_VERSION )
-  string ( REPLACE "CPPCHECK" "" CPPCHECK_VERSION ${CPPCHECK_VERSION} )
-  string ( STRIP ${CPPCHECK_VERSION} CPPCHECK_VERSION )
-  message ( STATUS "cppcheck version: ${CPPCHECK_VERSION}" )
-endif()
+#if(CPPCHECK_EXECUTABLE)
+#  if(NOT TARGET cppcheck)
+#    add_custom_target(cppcheck)
+#    set_target_properties(cppcheck PROPERTIES EXCLUDE_FROM_ALL TRUE)
+#  endif()
+#  execute_process ( COMMAND ${CPPCHECK_EXECUTABLE} --version
+#                    OUTPUT_VARIABLE CPPCHECK_VERSION
+#		    OUTPUT_STRIP_TRAILING_WHITESPACE )
+#  string ( TOUPPER ${CPPCHECK_VERSION} CPPCHECK_VERSION )
+#  string ( REPLACE "CPPCHECK" "" CPPCHECK_VERSION ${CPPCHECK_VERSION} )
+#  string ( STRIP ${CPPCHECK_VERSION} CPPCHECK_VERSION )
+#  message ( STATUS "cppcheck version: ${CPPCHECK_VERSION}" )
+#endif()
 
 mark_as_advanced(CPPCHECK_EXECUTABLE)
 set ( CPPCHECK_ARGS "--enable=all" CACHE STRING "Arguments for running cppcheck" )

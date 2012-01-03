@@ -23,7 +23,6 @@ set ( KERNEL_FILES
 
 # Add the target for this directory
 add_library ( GPUAlgorithms ${SRC_FILES} ${INC_FILES} )
-add_cppcheck( GPUAlgorithms )
 # Set the name of the generated library
 set_target_properties ( GPUAlgorithms PROPERTIES OUTPUT_NAME MantidGPUAlgorithms )
 # Add to the 'Framework' group in VS

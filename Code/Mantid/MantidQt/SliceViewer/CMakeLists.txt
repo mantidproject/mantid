@@ -80,7 +80,6 @@ add_definitions ( -DIN_MANTIDQT_SLICEVIEWER )
 
 # This creates the target library
 add_library ( MantidQtSliceViewer ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
-add_cppcheck( MantidQtSliceViewer )
 
 # ... and links to other required libs
 target_link_libraries ( MantidQtSliceViewer MantidQtAPI QtPropertyBrowser ${QT_LIBRARIES} ${QWT_LIBRARIES} )

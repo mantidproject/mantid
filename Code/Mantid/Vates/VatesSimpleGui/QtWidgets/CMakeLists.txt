@@ -60,7 +60,6 @@ ${RES_FILES}
 add_definitions( -DIN_MANTID_VATES_SIMPLEGUI_QTWIDGETS )
 # Add the target for this directory
 add_library( VatesSimpleGuiQtWidgets ${ALL_FILES} )
-add_cppcheck( VatesSimpleGuiQtWidgets )
 # Set the name of the generated library
 set_target_properties( VatesSimpleGuiQtWidgets PROPERTIES OUTPUT_NAME MantidVatesSimpleGuiQtWidgets )
 # Add to the 'VatesSimpleGui' group in VS
