@@ -773,7 +773,7 @@ template< Q_state Q, AnalMode MODE, CnvrtUnits CONV >
 class LOOP_ND{
   public:
     static inline void EXEC(ConvertToMDEvents *pH){
-            LOOP_ND<Q, MODE,CnvrtUnits(int(CONV)-1)>::EXEC(pH);
+            LOOP_ND<Q, MODE,static_cast<CnvrtUnits>(static_cast<int>(CONV)-1)>::EXEC(pH);
         
             std::string Key = pH->Q_modes[Q]+pH->dE_modes[MODE]+pH->ConvModes[CONV];
 
