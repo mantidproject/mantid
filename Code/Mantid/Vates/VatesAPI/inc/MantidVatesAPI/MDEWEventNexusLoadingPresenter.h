@@ -8,7 +8,8 @@ namespace Mantid
   namespace VATES
   {
     /** 
-    @class MDEWEventNexusLoadingPresenter. For loading conversion of MDEW workspaces into render-able vtk objects.
+    @class MDEWEventNexusLoadingPresenter
+    For loading conversion of MDEW workspaces into render-able vtk objects.
     @author Owen Arnold, Tessella plc
     @date 09/08/2011
 

@@ -97,6 +97,8 @@ class LineViewer : QWidget
 #include "SliceViewer/inc/MantidQtSliceViewer/LineViewer.h"
 %End
 
+
+
 };
 
 
@@ -109,7 +111,9 @@ class SliceViewer : QWidget
 #include "SliceViewer/inc/MantidQtSliceViewer/SliceViewer.h"
 %End
 
+
 public:
+  //*WIKI* ==== Basics ====
   void setWorkspace(const QString & wsName)   throw (std::runtime_error);
 
   QString getWorkspaceName() const;
@@ -118,7 +122,13 @@ public:
 
   void openFromXML(const QString & xml)   throw (std::invalid_argument, std::runtime_error);
 
+  void saveImage(const QString & filename = QString());
+  void setFastRender(bool fast);
 
+  bool getFastRender() const;
+
+
+  //*WIKI* ==== X/Y Dimension ====
   void setXYDim(int indexX, int indexY)     throw (std::invalid_argument);
 
   void setXYDim(const QString & dimX, const QString & dimY)     throw (std::invalid_argument, std::runtime_error);
@@ -128,6 +138,7 @@ public:
   int getDimY() const;
 
 
+  //*WIKI* ==== Slice Point ====
   void setSlicePoint(int dim, double value)     throw (std::invalid_argument);
 
   void setSlicePoint(const QString & dim, double value)   throw (std::invalid_argument, std::runtime_error);
@@ -136,6 +147,8 @@ public:
 
   double getSlicePoint(const QString & dim) const   throw (std::invalid_argument, std::runtime_error);
 
+
+  //*WIKI* ==== View Limits ====
   void setXYLimits(double xleft, double xright, double ybottom, double ytop);
 
   QwtDoubleInterval getXLimits() const;
@@ -149,6 +162,7 @@ public:
   void resetZoom();
 
 
+  //*WIKI* ==== Color Map and Scale ====
   void loadColorMap(QString filename);
 
   void setColorScale(double min, double max, bool log)      throw (std::invalid_argument);
@@ -198,20 +212,23 @@ class WidgetFactory
 #include <QVector>
 %End
 
+
+
 public:
   static MantidQt::Factory::WidgetFactory* Instance();
   MantidQt::SliceViewer::SliceViewerWindow* createSliceViewerWindow(const QString& wsName, const QString& label);
   MantidQt::SliceViewer::SliceViewerWindow* getSliceViewerWindow(const QString& wsName, const QString& label)   throw (std::runtime_error);
+  void closeAllSliceViewerWindows();
+
+
   MantidQt::SliceViewer::SliceViewer* createSliceViewer(const QString& wsName);
 
 
 private:
   WidgetFactory();
 
-
 };
 
 }; // end namespace
 }; // end namespace
-
 

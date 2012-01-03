@@ -7,6 +7,8 @@
 #include <limits>
 #include <sstream>
 #include <stdexcept>
+#include "MantidKernel/PhysicalConstants.h"
+#include <boost/math/special_functions/fpclassify.hpp>
 
 namespace Mantid
 {
@@ -93,7 +95,6 @@ NeutronAtom::NeutronAtom(const NeutronAtom& other):
              abs_scatt_xs(other.abs_scatt_xs)
 {}
 
-static const double NAN = std::numeric_limits<double>::quiet_NaN();
 
 /**
  * DO NOT USE THIS! This constructor generates a complete garbage NeutronAtom
@@ -523,17 +524,11 @@ static NeutronAtom ATOMS[] = {H, H1, H2, H3, He, He3, He4, Li, Li6, Li7, Be, B, 
 /** The total number of atoms in the array. */
 static const size_t NUM_ATOMS = 371;
 
-
-inline bool NeutronAtomIsNaN(const double number)
-{
-  return (number != number);
-}
-
 bool NeutronAtomEqualsWithNaN(const double left, const double right)
 {
   if (left == right)
     return true;
-  if (NeutronAtomIsNaN(left) && NeutronAtomIsNaN(right))
+  if ((boost::math::isnan)(left) && (boost::math::isnan)(right))
     return true;
   return false;
 }

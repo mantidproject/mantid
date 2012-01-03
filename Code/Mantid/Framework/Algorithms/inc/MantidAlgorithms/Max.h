@@ -70,15 +70,6 @@ private:
   void init();
   void exec();
 
-  /// The value in X to start the search from
-  double m_MinRange;
-  /// The value in X to finish the search at
-  double m_MaxRange;
-  /// The spectrum to start the integration from
-  int m_MinSpec;
-  /// The spectrum to finish the integration at
-  int m_MaxSpec;
-
 };
 
 } // namespace Algorithm

@@ -49,7 +49,7 @@ namespace PropertyNexus
   }
 
 
-  /** Make a string/vector<string> property */
+  /** Make a string/vector\<string\> property */
   Property * makeStringProperty(::NeXus::File * file, const std::string & name,  std::vector<Kernel::DateAndTime> & times)
   {
     std::vector<std::string> values;

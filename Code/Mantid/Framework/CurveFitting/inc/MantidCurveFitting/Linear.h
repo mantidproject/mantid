@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid
 {
@@ -58,7 +59,7 @@ namespace CurveFitting
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class DLLExport Linear : public API::Algorithm
+class DLLExport Linear : public API::Algorithm, public API::DeprecatedAlgorithm
 {
 public:
   /// Constructor
@@ -70,7 +71,7 @@ public:
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Deprecated"; }
+  virtual const std::string category() const { return "Optimization\\FitFunctions"; }
 
 private:
   /// Sets documentation strings for this algorithm

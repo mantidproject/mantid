@@ -152,7 +152,7 @@ namespace MDEvents
     { return detectorId;  }
 
     /** Sets the detectorId of this event
-     * @param index :: new runIndex value. */
+     * @param id :: new runIndex value. */
     void setDetectorId(int32_t id)
     { detectorId = id; }
 

@@ -110,7 +110,7 @@ namespace MDEvents
     {
       progress(0.01, "Flushing Cache");
       // First, flush to disk. This writes all the event data to disk!
-      bc->getDiskMRU().flushCache();
+      bc->getDiskBuffer().flushCache();
 
       // Use the open file
       file = bc->getFile();
@@ -290,8 +290,8 @@ namespace MDEvents
               // Move forward in the file.
               start += numEvents;
             }
-
-            mdbox->releaseEvents();
+            // Like releaseEvents(), but without saving to disk.
+            mdbox->setDataBusy(false);
           }
         }
 
@@ -325,7 +325,7 @@ namespace MDEvents
     // ------------------------- Save Free Blocks --------------------------------------------------
     // Get a vector of the free space blocks to save to the file
     std::vector<uint64_t> freeSpaceBlocks;
-    bc->getDiskMRU().getFreeSpaceVector(freeSpaceBlocks);
+    bc->getDiskBuffer().getFreeSpaceVector(freeSpaceBlocks);
     if (freeSpaceBlocks.size() == 0)
       freeSpaceBlocks.resize(2, 0); // Needs a minimum size
     std::vector<int> free_dims(2,2); free_dims[0] = int(freeSpaceBlocks.size()/2);

@@ -52,7 +52,7 @@ namespace Mantid
      * @param map A pointer to the ParameterMap
      * @returns A pointer to a parameterized component
      */
-    IComponent_sptr ParComponentFactory::create(IComponent_const_sptr base,
+    IComponent_sptr ParComponentFactory::create(boost::shared_ptr<const IComponent> base,
             const ParameterMap * map)
     {
       // RectangularDetectorPixel subclasses Detector so it has to be checked before.

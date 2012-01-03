@@ -50,7 +50,7 @@ std::string loadFile(const std::string & filename)
  * @param replace_with :: ... and replace them with this.
  * @return the modified string.
  */
-std::string replace(const std::string input, const std::string find_what, const std::string replace_with)
+std::string replace(const std::string &input, const std::string &find_what, const std::string &replace_with)
 {
   std::string output = input;
   std::string::size_type pos=0;
@@ -188,7 +188,7 @@ int confirmStr(const std::string& S,const std::string& fullPhrase)
 {
   const size_t nS(S.length());
   const size_t nC(fullPhrase.length());
-  if (nS>nC || nS<=0)    
+  if (nS>nC || nS==0)    
     return 0;           
   for(size_t i=0;i<nS;i++)
     if (S[i]!=fullPhrase[i])
@@ -210,7 +210,7 @@ int confirmStr(const std::string& S,const std::string& fullPhrase)
 */
 int getPartLine(std::istream& fh,std::string& Out,std::string& Excess,const int spc)
 {
-  std::string Line;
+  //std::string Line;
   if (fh.good())
     {
       char* ss=new char[spc+1];
@@ -419,7 +419,7 @@ float getVAXnum(const float A)
 {
   union 
    {
-     char a[4];
+     //char a[4];
      float f;
      int ival;
    } Bd;
@@ -660,7 +660,7 @@ std::string toString(const T value)
   @return 0 on success and -ve on failure
 */
 template<template<typename T,typename A> class V,typename T,typename A>
-int writeFile(const std::string& Fname,const T step, const V<T,A>& Y)
+int writeFile(const std::string& Fname,const T &step, const V<T,A>& Y)
 {
   V<T,A> Ex;   // Empty vector
   V<T,A> X;    // Empty vector
@@ -721,15 +721,15 @@ int writeFile(const std::string& Fname,const V<T,A>& X,const V<T,A>& Y,const V<T
   for(;eCount<Epts;eCount++)
     {
       FX<<(*xPt)<<" "<<(*yPt)<<" "<<(*ePt)<<std::endl;
-      xPt++;
-      yPt++;
-      ePt++;
+      ++xPt;
+      ++yPt;
+      ++ePt;
     }
   for(;eCount<Npts;eCount++)
     {
       FX<<(*xPt)<<" "<<(*yPt)<<" 0.0"<<std::endl;
-      xPt++;
-      yPt++;
+      ++xPt;
+      ++yPt;
     }
   FX.close();
   return 0;
@@ -848,7 +848,7 @@ std::string getWord( std::ifstream &in ,  bool consumeEOL )
 /** Read up to the eol
  *
  * @param in :: stream input
- * @param consumeEOL :: set to true to remove the new lines at the end of the line
+ * @param ConsumeEOL :: set to true to remove the new lines at the end of the line
  */
 void readToEndOfLine( std::ifstream& in ,  bool ConsumeEOL )
 {
@@ -859,12 +859,13 @@ void readToEndOfLine( std::ifstream& in ,  bool ConsumeEOL )
   getWord( in ,  true );
 }
 /**  function parses a path, placed into input string "path" and returns vector of the folders contributed into the path 
-*  @param in :: path -- the string containing input path, 
+*  @param path :: the string containing input path,
      found in path string, if they are separated by \ or / symbols. 
      Treats special symbols, if defined in the input string as path-es
      returns 0 for empty input string
+   @param path_components :: holder for the individual folders in the path
 
-     used to genrate path in hdf file, so the resulting path has to obey hdf constrains;
+     used to generate path in hdf file, so the resulting path has to obey hdf constrains;
 */
 size_t split_path(const std::string &path, std::vector<std::string> &path_components)
 {
@@ -962,7 +963,7 @@ template DLLExport int convPartNum(const std::string&,int&);
 
 template DLLExport int setValues(const std::string&,const std::vector<int>&,std::vector<double>&);
 
-template DLLExport int writeFile(const std::string&,const double,const std::vector<double>&);
+template DLLExport int writeFile(const std::string&,const double&,const std::vector<double>&);
 template DLLExport int writeFile(const std::string&,const std::vector<double>&,const std::vector<double>&,const std::vector<double>&);
 template DLLExport int writeFile(const std::string&,const std::vector<double>&,const std::vector<double>&);
 template DLLExport int writeFile(const std::string&,const std::vector<float>&,const std::vector<float>&);
@@ -972,6 +973,6 @@ template DLLExport int writeFile(const std::string&,const std::vector<float>&,co
 
 }  // NAMESPACE Strings
 
-}  // Namespace Kernel
+}  // NAMESPACE Kernel
 
 }  // NAMESPACE Mantid

@@ -37,7 +37,7 @@ namespace MDEvents
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
-    virtual const std::string category() const { return "MDEvents";}
+    virtual const std::string category() const { return "MDAlgorithms";}
     
   private:
     /// Sets documentation strings for this algorithm
@@ -66,6 +66,8 @@ namespace MDEvents
     Kernel::V3D beamline;
     /// Path length between source and sample
     double beamline_norm;
+    /// Path length between source and sample
+    size_t failedDetectorLookupCount;
     /// Beam direction (unit vector)
     Kernel::V3D beamDir;
     /// Sample position

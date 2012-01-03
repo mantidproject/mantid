@@ -15,7 +15,8 @@ namespace Mantid
     class ProgressAction;
     class vtkDataSetFactory;
      /** 
-    @class MDRebinningPresenter, Abstract presenters for multi-dimensional rebinning of various types.
+    @class MDRebinningPresenter
+    Abstract presenters for multi-dimensional rebinning of various types.
     @author Owen Arnold, Tessella plc
     @date 03/06/2011
 

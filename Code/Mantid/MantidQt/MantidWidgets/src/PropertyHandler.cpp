@@ -553,7 +553,7 @@ PropertyHandler* PropertyHandler::parentHandler()const
   return ph;
 }
 // Return the child's handler
-PropertyHandler* PropertyHandler::getHandler(size_t i)const
+PropertyHandler* PropertyHandler::getHandler(std::size_t i)const
 {
   if (!m_cf || i >= m_cf->nFunctions()) return 0;
   PropertyHandler* ph = static_cast<PropertyHandler*>(m_cf->getFunction(i)->getHandler());
@@ -845,7 +845,6 @@ void PropertyHandler::updateParameters()
 /**
 * Change the type of the function (replace the function)
 * @param prop :: The "Type" property with new value
-* @param fnName :: New function name (type) or full initialization expression
 */
 Mantid::API::IFitFunction* PropertyHandler::changeType(QtProperty* prop)
 {

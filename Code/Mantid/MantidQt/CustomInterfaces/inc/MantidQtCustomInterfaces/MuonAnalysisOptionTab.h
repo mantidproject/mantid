@@ -87,6 +87,11 @@ public slots:
   ///
   void runOptionStepSizeText();
 
+signals:
+
+  ///
+  void settingsTabUpdatePlot();
+
 private:
 
   ///
@@ -94,6 +99,11 @@ private:
 
   /// group defaults are saved to
   const QString& m_settingsGroup;
+
+private slots:
+  
+  ///
+  void muonAnalysisHelpSettingsClicked();
 };
 
 }

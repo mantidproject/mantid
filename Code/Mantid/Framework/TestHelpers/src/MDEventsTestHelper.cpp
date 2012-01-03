@@ -197,10 +197,11 @@ namespace MDEventsTestHelper
 
   /** Creates a fake MDHistoWorkspace
    *
-   * @param signal :: signal and error squared in every point
+   * @param signal :: signal in every point
    * @param numDims :: number of dimensions to create. They will range from 0 to max
    * @param numBins :: bins in each dimensions
    * @param max :: max position in each dimension
+   * @param errorSquared :: error squared in every point
    * @return the MDHisto
    */
   Mantid::MDEvents::MDHistoWorkspace_sptr makeFakeMDHistoWorkspace(double signal, size_t numDims, size_t numBins,

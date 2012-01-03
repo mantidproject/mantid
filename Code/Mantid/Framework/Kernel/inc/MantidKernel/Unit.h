@@ -450,6 +450,8 @@ class Phi : public Degrees
   virtual Unit * clone() const { return new Phi(*this); }
 };
 
+/// @endcond
+
 //=================================================================================================
 //=================================================================================================
 /// Momentum in Angstrom^-1
@@ -477,9 +479,6 @@ protected:
   double factorFrom; ///< Constant factor for from conversion
   bool   do_sfpFrom; ///< Apply the sfpFrom value
 };
-
-
-/// @endcond
 
 } // namespace Units
 

@@ -140,7 +140,7 @@ namespace Mantid
           this->getLogger().warning() << "Unable to load event_frame_number - filtering events by time will not work " << std::endl;
         }
         file.openPath("/"+entry_name);
-        if (event_frame_number.size() > 0)   // ISIS indirection - see above comments
+        if (!event_frame_number.empty())   // ISIS indirection - see above comments
         {
           Kernel::TimeSeriesProperty<double>* pcharge = new Kernel::TimeSeriesProperty<double>("proton_charge");
           std::vector<double> pval;
@@ -224,12 +224,12 @@ namespace Mantid
      * @param file :: A reference to the NeXus file handle opened such that the
      * next call can be to open the named group
      * @param entry_name :: The name of the log entry
-     * @param_entry_class :: The class type of the log entry
+     * @param entry_class :: The class type of the log entry
      * @param workspace :: A pointer to the workspace to store the logs
      */
     void LoadNexusLogs::loadLogs(::NeXus::File & file, const std::string & entry_name, 
                                const std::string & entry_class, 
-                               MatrixWorkspace_sptr workspace) const
+                               boost::shared_ptr<API::MatrixWorkspace> workspace) const
     {
       file.openGroup(entry_name, entry_class);
       std::map<std::string,std::string> entries = file.getEntries();
@@ -260,7 +260,7 @@ namespace Mantid
      */
     void LoadNexusLogs::loadNXLog(::NeXus::File & file, const std::string & entry_name, 
                                   const std::string & entry_class,
-                                  MatrixWorkspace_sptr workspace) const
+                                  boost::shared_ptr<API::MatrixWorkspace> workspace) const
     {
       file.openGroup(entry_name, entry_class);
       // Validate the NX log class.
@@ -296,7 +296,7 @@ namespace Mantid
      * @param workspace :: A pointer to the workspace to store the logs
      */
     void LoadNexusLogs::loadSELog(::NeXus::File & file, const std::string & entry_name, 
-                                MatrixWorkspace_sptr workspace) const
+                                boost::shared_ptr<API::MatrixWorkspace> workspace) const
     {
       // Open the entry
       file.openGroup(entry_name, "IXseblock");

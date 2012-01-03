@@ -138,9 +138,9 @@ namespace Geometry
     /// If appropriate, creates a second instrument containing neutronic detector positions
     void createNeutronicInstrument();
 
-    /// Takes as input a <type> element containing a <combine-components-into-one-shape>, and
-    /// adjust the <type> element by replacing its containing <component> elements with <cuboid>'s
-    /// (note for now this will only work for <cuboid>'s and when necessary this can be extended).
+    /// Takes as input a \<type\> element containing a <combine-components-into-one-shape>, and
+    /// adjust the \<type\> element by replacing its containing \<component\> elements with \<cuboid\>'s
+    /// (note for now this will only work for \<cuboid\>'s and when necessary this can be extended).
     void adjust(Poco::XML::Element* pElem, std::map<std::string,bool>& isTypeAssembly,
                 std::map<std::string,Poco::XML::Element*>& getTypeElement);
 
@@ -155,7 +155,7 @@ private:
       Poco::XML::Element* pLocElem, std::map<std::string,Poco::XML::Element*>& getTypeElement,
       Geometry::ICompAssembly*& endAssembly);
 
-    /// Returns a translated and rotated <cuboid> element
+    /// Returns a translated and rotated \<cuboid\> element
     std::string translateRotateXMLcuboid(Geometry::ICompAssembly* comp, Poco::XML::Element* cuboidEle,
                                   std::string& cuboidName);
 

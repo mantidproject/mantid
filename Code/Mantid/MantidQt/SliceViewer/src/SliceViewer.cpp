@@ -76,7 +76,8 @@ SliceViewer::SliceViewer(QWidget *parent)
       m_dimensions(), m_data(NULL),
       m_X(), m_Y(),
       m_dimX(0), m_dimY(1),
-      m_logColor(false)
+      m_logColor(false),
+      m_fastRender(true)
 {
 	ui.setupUi(this);
 
@@ -181,7 +182,39 @@ void SliceViewer::saveSettings()
 /** Create the menus */
 void SliceViewer::initMenus()
 {
+  // ---------------------- Build the menu bar -------------------------
+
+  // Find the top-level parent
+  QWidget * widget = this;
+  while (widget && widget->parentWidget()) widget = widget->parentWidget() ;
+  QMainWindow * parentWindow = dynamic_cast<QMainWindow *>(widget);
+
+  QMenuBar * bar;
+  if (parentWindow)
+    // Use the QMainWindow menu bar
+    bar = parentWindow->menuBar();
+  else
+  {
+    // Widget is not in a QMainWindow. Make a menu bar
+    bar = new QMenuBar(this, "Main Menu Bar");
+    ui.verticalLayout->insertWidget(0, bar );
+  }
+
+
   QAction * action;
+
+  // --------------- File Menu ----------------------------------------
+  m_menuFile = new QMenu("&File", this);
+  action = new QAction(QPixmap(), "&Close", this);
+  connect(action, SIGNAL(triggered()), this, SLOT(close()));
+  m_actionFileClose = action;
+  m_menuFile->addAction(action);
+
+  action = new QAction(QPixmap(), "&Save to image file", this);
+  action->setShortcut(Qt::Key_S + Qt::ControlModifier);
+  connect(action, SIGNAL(triggered()), this, SLOT(saveImage()));
+  m_menuFile->addAction(action);
+
 
   // --------------- View Menu ----------------------------------------
   m_menuView = new QMenu("&View", this);
@@ -202,6 +235,13 @@ void SliceViewer::initMenus()
   action = new QAction(QPixmap(), "Zoom &Out", this);
   action->setShortcut(Qt::Key_Minus + Qt::ControlModifier);
   connect(action, SIGNAL(triggered()), this, SLOT(zoomOutSlot()));
+  m_menuView->addAction(action);
+
+  action = new QAction(QPixmap(), "&Fast Rendering Mode", this);
+  action->setShortcut(Qt::Key_F + Qt::ControlModifier);
+  action->setCheckable(true);
+  action->setChecked(true);
+  connect(action, SIGNAL(toggled(bool)), this, SLOT(setFastRender(bool)));
   m_menuView->addAction(action);
 
   // --------------- Color options Menu ----------------------------------------
@@ -250,25 +290,8 @@ void SliceViewer::initMenus()
   m_menuLine->addAction(action);
 
 
-  // ---------------------- Build the menu bar -------------------------
-
-  // Find the top-level parent
-  QWidget * widget = this;
-  while (widget && widget->parentWidget()) widget = widget->parentWidget() ;
-  QMainWindow * parentWindow = dynamic_cast<QMainWindow *>(widget);
-
-  QMenuBar * bar;
-  if (parentWindow)
-    // Use the QMainWindow menu bar
-    bar = parentWindow->menuBar();
-  else
-  {
-    // Widget is not in a QMainWindow. Make a menu bar
-    bar = new QMenuBar(this, "Main Menu Bar");
-    ui.verticalLayout->insertWidget(0, bar );
-  }
-
   // Add all the needed menus
+  bar->addMenu( m_menuFile );
   bar->addMenu( m_menuView );
   bar->addMenu( m_menuColorOptions );
   bar->addMenu( m_menuLine );
@@ -427,7 +450,7 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
 
   // For showing the original coordinates
   ui.frmMouseInfo->setVisible(false);
-  IMDWorkspace_sptr origWS = m_ws->getOriginalWorkspace();
+  IMDWorkspace_sptr origWS = boost::dynamic_pointer_cast<IMDWorkspace>(m_ws->getOriginalWorkspace());
   if (origWS)
   {
     CoordTransform * toOrig = m_ws->getTransformToOriginal();
@@ -670,6 +693,46 @@ void SliceViewer::loadColorMapSlot()
   this->loadColorMap(QString());
 }
 
+//------------------------------------------------------------------------------------
+/** Save the rendered 2D slice to an image file.
+ *
+ * @param filename :: full path to the file to save, including extension
+ *        (e.g. .png). If not specified or empty, then a dialog will prompt
+ *        the user to pick a file.
+ */
+void SliceViewer::saveImage(const QString & filename)
+{
+  QString fileselection;
+  if (filename.isEmpty())
+  {
+    fileselection = QFileDialog::getSaveFileName(this, tr("Pick a file to which to save the image"),
+        QFileInfo(m_lastSavedFile).absoluteFilePath(),
+        tr("PNG files(*.png *.png)"));
+    // User cancelled if filename is still empty
+    if( fileselection.isEmpty() ) return;
+    m_lastSavedFile = fileselection;
+  }
+  else
+    fileselection = filename;
+
+  // Switch to full resolution rendering
+  bool oldFast = this->getFastRender();
+  this->setFastRender(false);
+  // Hide the line overlay handles
+  this->m_lineOverlay->setShowHandles(false);
+  this->m_colorBar->setRenderMode(true);
+
+  // Grab it and save
+  QCoreApplication::processEvents();
+  QCoreApplication::processEvents();
+  QPixmap pix = QPixmap::grabWidget(this->ui.frmPlot);
+  pix.save(fileselection);
+
+  // Back to previous mode
+  this->m_lineOverlay->setShowHandles(true);
+  this->m_colorBar->setRenderMode(false);
+  this->setFastRender(oldFast);
+}
 
 
 //=================================================================================================
@@ -856,7 +919,7 @@ void SliceViewer::showInfoAt(double x, double y)
   ui.lblInfoSignal->setText(QString::number(signal, 'g', 4));
 
   // Now show the coords in the original workspace
-  IMDWorkspace_sptr origWS = m_ws->getOriginalWorkspace();
+  IMDWorkspace_sptr origWS = boost::dynamic_pointer_cast<IMDWorkspace>(m_ws->getOriginalWorkspace());
   if (origWS)
   {
     CoordTransform * toOrig = m_ws->getTransformToOriginal();
@@ -885,7 +948,6 @@ void SliceViewer::showInfoAt(double x, double y)
 void SliceViewer::updateDisplay(bool resetAxes)
 {
   if (!m_ws) return;
-  m_data->timesRequested = 0;
   size_t oldX = m_dimX;
   size_t oldY = m_dimY;
 
@@ -939,7 +1001,7 @@ void SliceViewer::updateDisplay(bool resetAxes)
  *
  * @param index :: index of the dimension
  * @param dim :: shown dimension, 0=X, 1=Y, -1 sliced
- * @param dim :: previous shown dimension, 0=X, 1=Y, -1 sliced
+ * @param oldDim :: previous shown dimension, 0=X, 1=Y, -1 sliced
  */
 void SliceViewer::changedShownDim(int index, int dim, int oldDim)
 {
@@ -1014,7 +1076,7 @@ int SliceViewer::getDimY() const
  * To be called from Python, primarily.
  *
  * @param indexX :: index of the X dimension, from 0 to NDims-1.
- * @param indexX :: index of the Y dimension, from 0 to NDims-1.
+ * @param indexY :: index of the Y dimension, from 0 to NDims-1.
  * @throw std::invalid_argument if an index is invalid or repeated.
  */
 void SliceViewer::setXYDim(int indexX, int indexY)
@@ -1188,6 +1250,37 @@ double SliceViewer::getColorScaleMax() const
 bool SliceViewer::getColorScaleLog() const
 {
   return m_colorBar->getLog();
+}
+
+//------------------------------------------------------------------------------------
+/** Sets whether the image should be rendered in "fast" mode, where
+ * the workspace's resolution is used to guess how many pixels to render.
+ *
+ * If false, each pixel on screen will be rendered. This is the most
+ * accurate view but the slowest.
+ *
+ * This redraws the screen.
+ *
+ * @param fast :: true to use "fast" rendering mode.
+ */
+void SliceViewer::setFastRender(bool fast)
+{
+  m_fastRender = fast;
+  m_data->setFastMode(m_fastRender);
+  this->updateDisplay();
+}
+
+/** Return true if the image is in "fast" rendering mode.
+ *
+ * In "fast" mode, the workspace's resolution is used to guess how many
+ * pixels to render. If false, each pixel on screen will be rendered.
+ * This is the most accurate view but the slowest.
+ *
+ * @return True if the image is in "fast" rendering mode.
+ */
+bool SliceViewer::getFastRender() const
+{
+  return m_fastRender;
 }
 
 //------------------------------------------------------------------------------------

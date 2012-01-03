@@ -22,7 +22,7 @@ namespace EQSANSInstrument
   double readInstrumentParameter(const std::string& parameter, API::MatrixWorkspace_sptr dataWS)
   {
     std::vector<double> pars = dataWS->getInstrument()->getNumberParameter(parameter);
-    if (pars.size()==0)
+    if (pars.empty())
       throw Kernel::Exception::InstrumentDefinitionError("Unable to find [" + parameter + "] instrument parameter");
     return pars[0];
   }

@@ -730,8 +730,6 @@ Unit * DeltaE_inWavenumber::clone() const
 // =====================================================================================================
 /* Momentum in Angstrom^-1. It is 2*Pi/wavelength
  * =====================================================================================================
- *
- * This is identical to the above (Energy Transfer in meV) with one division by meVtoWavenumber.
  */
 DECLARE_UNIT(Momentum)
 

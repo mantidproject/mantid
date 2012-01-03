@@ -6,6 +6,8 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include <Poco/NObserver.h>
 
 
 namespace Mantid
@@ -77,8 +79,8 @@ namespace API
 
     // --------------------------------------------------------------------------------------------
     bool hasOriginalWorkspace() const;
-    boost::shared_ptr<IMDWorkspace> getOriginalWorkspace() const;
-    void setOriginalWorkspace(boost::shared_ptr<IMDWorkspace> ws);
+    boost::shared_ptr<Workspace> getOriginalWorkspace() const;
+    void setOriginalWorkspace(boost::shared_ptr<Workspace> ws);
     Mantid::API::CoordTransform * getTransformFromOriginal() const;
     void setTransformFromOriginal(Mantid::API::CoordTransform * transform);
     Mantid::API::CoordTransform * getTransformToOriginal() const;
@@ -100,11 +102,15 @@ namespace API
 
 
   protected:
+
+    /// Function called when observer objects recieves a notification
+    void deleteNotificationReceived(Mantid::API::WorkspaceDeleteNotification_ptr notice);
+
     /// Vector of the dimensions used, in the order X Y Z t, etc.
     std::vector<Mantid::Geometry::IMDDimension_sptr> m_dimensions;
 
     /// Pointer to the original workspace, if this workspace is a coordinate transformation from an original workspace.
-    boost::shared_ptr<IMDWorkspace> m_originalWorkspace;
+    boost::shared_ptr<Workspace> m_originalWorkspace;
 
     /// Vector of the basis vector (in the original workspace) for each dimension of this workspace.
     std::vector<Mantid::Kernel::VMD> m_basisVectors;
@@ -117,6 +123,12 @@ namespace API
 
     /// Coordinate Transformation that goes from this workspace's coordinates to the original workspace coordinates.
     Mantid::API::CoordTransform * m_transformToOriginal;
+
+    /// Poco delete notification observer object
+    Poco::NObserver<MDGeometry, Mantid::API::WorkspaceDeleteNotification> m_delete_observer;
+
+    /// Set to True when the m_delete_observer is observing workspace deletions.
+    bool m_observingDelete;
 
 
   };

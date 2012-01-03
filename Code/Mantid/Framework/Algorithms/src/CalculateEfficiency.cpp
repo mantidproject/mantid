@@ -251,7 +251,7 @@ void CalculateEfficiency::normalizeDetectors(MatrixWorkspace_sptr rebinnedWS,
     }
 
     // If we identified pixels to be masked, mask them now
-    if ( dets_to_mask.size()>0 )
+    if ( !dets_to_mask.empty() )
     {
       // Mask detectors that were found to be outside the acceptable efficiency band
       IAlgorithm_sptr mask = createSubAlgorithm("MaskDetectors", 0.8, 1.0);

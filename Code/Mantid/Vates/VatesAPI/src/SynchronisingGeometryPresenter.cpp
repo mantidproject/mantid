@@ -70,7 +70,7 @@ namespace Mantid
     {
     }
 
-    void SynchronisingGeometryPresenter::swap(const MappingType::key_type& keyA, const MappingType::key_type& keyB)
+    void SynchronisingGeometryPresenter::swap(const GeometryPresenter::MappingType::key_type& keyA, const GeometryPresenter::MappingType::key_type& keyB)
     {
       DimPresenter_sptr temp = m_mapping[keyA];
       
@@ -94,7 +94,7 @@ namespace Mantid
 
     /**
     Handles dimension realignment. When a dimension presenter is handling a realignment, its is necessary for this to be synchronsied with other non-integrated dimensions.
-    @parameter pDimensionPresenter : dimension presenter on which realignement has been requested.
+    @param pDimensionPresenter : dimension presenter on which realignement has been requested.
     */
     void SynchronisingGeometryPresenter::dimensionRealigned(DimensionPresenter* pDimensionPresenter)
     {
@@ -128,7 +128,7 @@ namespace Mantid
 
     /**
     Ensure that for the collaped mapeed dimension, it's mapped placeholder is erased (marked as empty).
-    @parameter expiredMappedDimension : mapped dimension presenter which has been collapsed, and may currently occupy a x, y, z, t mapping.
+    @param expiredMappedDimension : mapped dimension presenter which has been collapsed, and may currently occupy a x, y, z, t mapping.
     */
     void SynchronisingGeometryPresenter::eraseMappedPresenter(DimPresenter_sptr expiredMappedDimension)
     {
@@ -140,7 +140,7 @@ namespace Mantid
 
     /**
     With the priority mapping of x before y, y before z, and z before t. Ensure that a candidate mapped dimension presenter is set to occupy a vacent mapping.
-    @parameter candidateMappedDimension : Dimension presenter to which a mapping is requested.
+    @param candidateMappedDimension : Dimension presenter to which a mapping is requested.
     */
     void SynchronisingGeometryPresenter::insertMappedPresenter(DimPresenter_sptr candidateMappedDimension)
     {
@@ -168,7 +168,7 @@ namespace Mantid
 
     /**
     Handles the change of a managed dimension presenter to be expanded (from collapsed). 
-    @parameter pDimensionPresenter : dimension which is now expanded.
+    @param pDimensionPresenter : dimension which is now expanded.
     */
     void SynchronisingGeometryPresenter::dimensionExpanded(DimensionPresenter* pDimensionPresenter)
     {
@@ -183,7 +183,7 @@ namespace Mantid
 
     /**
     Handles the change of a managed dimension presenter to be collapsed (from expanded). 
-    @parameter pDimensionPresenter : dimension which is now collapsed.
+    @param pDimensionPresenter : dimension which is now collapsed.
     */
     void SynchronisingGeometryPresenter::dimensionCollapsed(DimensionPresenter* pDimensionPresenter)
     { 
@@ -203,7 +203,7 @@ namespace Mantid
 
     /**
     Handles dimension resize request. Can either be collapsed or expanded. This is worked out internally.
-    @parameter pDimensionPresenter : dimension which is now collapsed/expanded.
+    @param pDimensionPresenter : dimension which is now collapsed/expanded.
     */
     void SynchronisingGeometryPresenter::dimensionResized(DimensionPresenter* pDimensionPresenter)
     {
@@ -243,7 +243,7 @@ namespace Mantid
         if (i == m_dimensions.end())
           break;
         matches.push_back(*i);
-        i++;
+        ++i;
       }
       return matches;
     }
@@ -263,7 +263,7 @@ namespace Mantid
         if (i == m_dimensions.end())
           break;
         matches.push_back(*i);
-        i++;
+        ++i;
       }
       return matches;
     }
@@ -316,7 +316,7 @@ namespace Mantid
     ii) Creates a DimensionPresenter for each of those views and binds the pair together. (although DimensionPresenters are owned by this and DimensionViews are owned by GeometryViews)
     iv) Replicates the mappings on the original source input. These are read/writable at a later point.
 
-    @parameter view : the GeoemtryView to direct.
+    @param view : the GeoemtryView to direct.
     */
     void SynchronisingGeometryPresenter::acceptView(GeometryView* view)
     {
@@ -412,7 +412,7 @@ namespace Mantid
 
     /**
     Determine if dimension presenter is mapped to x axis.
-    @parameter pDimensionPresenter : The dimension presenter to which the comparison should be made.
+    @param dimensionPresenter : The dimension presenter to which the comparison should be made.
     @return true if dimesion presenter matches exising mapping.
     */
     bool SynchronisingGeometryPresenter::isXDimensionPresenter(DimPresenter_sptr dimensionPresenter) const
@@ -422,7 +422,7 @@ namespace Mantid
 
     /**
     Determine if dimension presenter is mapped to y axis.
-    @parameter pDimensionPresenter : The dimension presenter to which the comparison should be made.
+    @param dimensionPresenter : The dimension presenter to which the comparison should be made.
     @return true if dimesion presenter matches exising mapping.
     */
     bool SynchronisingGeometryPresenter::isYDimensionPresenter(DimPresenter_sptr dimensionPresenter) const
@@ -432,7 +432,7 @@ namespace Mantid
 
     /**
     Determine if dimension presenter is mapped to z axis.
-    @parameter pDimensionPresenter : The dimension presenter to which the comparison should be made.
+    @param dimensionPresenter : The dimension presenter to which the comparison should be made.
     @return true if dimesion presenter matches exising mapping.
     */
     bool SynchronisingGeometryPresenter::isZDimensionPresenter(DimPresenter_sptr dimensionPresenter) const
@@ -442,7 +442,7 @@ namespace Mantid
 
     /**
     Determine if dimension presenter is mapped to t axis.
-    @parameter pDimensionPresenter : The dimension presenter to which the comparison should be made.
+    @param dimensionPresenter : The dimension presenter to which the comparison should be made.
     @return true if dimesion presenter matches exising mapping.
     */
     bool SynchronisingGeometryPresenter::isTDimensionPresenter(DimPresenter_sptr dimensionPresenter) const

@@ -6,14 +6,14 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/Logger.h"
-#include "MantidICat/SearchParam.h"
+#include "MantidICat/CatalogSearchParam.h"
 
 
 namespace Mantid
 {
   namespace ICat
   {
-    /**  CSearchHelper is a utility class used in Mantid ICat3 based information catalog
+    /**  CatalogSearchHelper is a utility class used in Mantid ICat3 based information catalog
      class to connect  ICat API services using the gsoap generated proxy class and retrieve data from ICat services.
 
      @author Sofia Antony, ISIS Rutherford Appleton Laboratory 
@@ -53,7 +53,7 @@ namespace Mantid
       int doSearch(ICATPortBindingProxy& icat,boost::shared_ptr<ns1__searchByAdvanced>& request,ns1__searchByAdvancedResponse& response);
 
       /// method to search isis basic search
-      void doISISSearch(const CSearchParam& input,API::ITableWorkspace_sptr &outputws);
+      void doISISSearch(const CatalogSearchParam& input,API::ITableWorkspace_sptr &outputws);
 
       /// calls getInvestigationIncludes api's
       int getDataFiles(long long invId,ns1__investigationInclude inclide,API::ITableWorkspace_sptr& responsews_sptr);
@@ -74,7 +74,7 @@ namespace Mantid
       void doMyDataSearch(API::ITableWorkspace_sptr& ws_sptr);
 
       /// do advanced search 
-      void doAdvancedSearch(CSearchParam& inputs,API::ITableWorkspace_sptr &outputws);
+      void doAdvancedSearch(CatalogSearchParam& inputs,API::ITableWorkspace_sptr &outputws);
 
       // do login
       void doLogin(const std::string& name,const std::string& password,const std::string& url);

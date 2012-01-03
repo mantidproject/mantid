@@ -1,12 +1,23 @@
 /*WIKI* 
 
+This algorithm loads a [[MDEventWorkspace]] that was previously
+saved using the [[SaveMD]] algorithm to a .nxs file format.
 
+If the workspace is too large to fit into memory,
+You can load the workspace as a [[MDWorkspace#File-Backed MDWorkspaces|file-backed MDWorkspace]]
+by checking the FileBackEnd option. This will load the box structure
+(allowing for some visualization with no speed penalty) but leave the
+events on disk until requested. Processing file-backed MDWorkspaces
+is signficantly slower than in-memory workspaces due to frequeny file access!
 
-Load a .nxs file into a MDEventWorkspace.
+For file-backed workspaces, the Memory option allows you to specify a cache
+size, in MB, to keep events in memory before caching to disk.
 
-
+Finally, the BoxStructureOnly and MetadataOnly options are for special situations
+and used by other algorithms, they should not be needed in daily use.
 
 *WIKI*/
+
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -58,8 +69,8 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void LoadMD::initDocs()
     {
-      this->setWikiSummary("Load a .nxs file into a MDEventWorkspace.");
-      this->setOptionalMessage("Load a .nxs file into a MDEventWorkspace.");
+      this->setWikiSummary("Load a MDEventWorkspace in .nxs format.");
+      this->setOptionalMessage("Load a MDEventWorkspace in .nxs format.");
     }
 
     //----------------------------------------------------------------------------------------------
@@ -348,13 +359,10 @@ namespace Mantid
         BoxController_sptr bc = ws->getBoxController();
 
         // ---------------------------------------- MEMORY FOR CACHE ------------------------------------
-        DiskMRU & mru = bc->getDiskMRU();
-        // For the small objects buffer
-        mru.setNumberOfObjects(numBoxes);
-
         // How much memory for the cache?
         if (FileBackEnd)
         {
+          // TODO: Clean up, only a write buffer now
           double mb = getProperty("Memory");
           if (mb < 0)
           {
@@ -368,20 +376,13 @@ namespace Mantid
           // Express the cache memory in units of number of events.
           uint64_t cacheMemory = (uint64_t(mb) * 1024 * 1024) / sizeof(MDE);
 
-          // Split the memory 45-45-10
-          uint64_t mruMemory = uint64_t(double(cacheMemory) * 0.45);
-          uint64_t smallBufferMemory = uint64_t(double(cacheMemory) * 0.45);
-
-          double writeBufferMB = mb/10;
-          //if (writeBufferMB < 1) writeBufferMB = 1;
+          double writeBufferMB = mb;
           uint64_t writeBufferMemory = (uint64_t(writeBufferMB) * 1024 * 1024) / sizeof(MDE);
 
           // Set these values in the diskMRU
-          bc->setCacheParameters(sizeof(MDE), mruMemory, writeBufferMemory, smallBufferMemory);
+          bc->setCacheParameters(sizeof(MDE), writeBufferMemory);
 
-          g_log.information() << "Setting a memory cache size of " << mb << " MB, or " << cacheMemory << " events." << std::endl;
-          g_log.information() << "MRU: " << mruMemory << " events; WriteBuffer: " << writeBufferMemory << " events; Small objects: " << smallBufferMemory << " events." << std::endl;
-          g_log.information() << "Boxes with fewer than " << mru.getSmallThreshold() << " events will not be cached to disk." << std::endl;
+          g_log.information() << "Setting a DiskBuffer cache size of " << mb << " MB, or " << cacheMemory << " events." << std::endl;
         }
 
 
@@ -423,10 +424,9 @@ namespace Mantid
                 // Save the index in the file in the box data
                 box->setFileIndex(uint64_t(indexStart), uint64_t(numEvents));
 
-                if (!FileBackEnd || mru.shouldStayInMemory(i, numEvents) )
+                if (!FileBackEnd)
                 {
                   // Load if NOT using the file as the back-end,
-                  // or if the box is small enough to keep in memory always
                   box->loadNexus(file);
                   box->setOnDisk(false);
                   box->setInMemory(true);

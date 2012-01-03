@@ -938,6 +938,7 @@ namespace MantidQt
    /** This method applys time channel masks to the detector bank selected.
       * @param wsName - name of the workspace.
       * @param bMask - boolean flag to indicate the mask check box selected
+      * @param time_pixel - time channel to mask
       */
     void SANSDiagnostics::maskDetector(const QString& wsName,bool bMask,bool time_pixel)
     {
@@ -1183,7 +1184,6 @@ namespace MantidQt
 
     /**Execute sumrowcolumn algorithm 
     * @param values a vector containing the values for hvmin,hvmax
-    * @param periodNum - number of the  period to load
     * @param ipws - name of the i/p workspace
     * @param opws - name of the o/p workspace
     * @param orientation - orientation of the detector

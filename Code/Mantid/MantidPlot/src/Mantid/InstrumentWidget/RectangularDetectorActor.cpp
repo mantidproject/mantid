@@ -23,7 +23,8 @@ static const bool VERBOSE = false;
 /**
  * Constructor.
  *
- * @param withDisplayList :: true to create a display list
+ * @param instrActor :: the instrument actor
+ * @param compID :: the component ID
  */
 RectangularDetectorActor::RectangularDetectorActor(const InstrumentActor& instrActor, const Mantid::Geometry::ComponentID& compID)
 :

@@ -617,7 +617,7 @@ void LoadRaw3::separateOrexcludeMonitors(DataObjects::Workspace2D_sptr localWork
   DataObjects::Workspace2D_sptr monitorWorkspace;
   FILE *file(NULL);
   getmonitorSpectrumList(localWorkspace, monitorSpecList);
-  if (bseparate && monitorSpecList.size() > 0)
+  if (bseparate && !monitorSpecList.empty())
   {
     Property *ws = getProperty("OutputWorkspace");
     std::string localWSName = ws->value();
@@ -639,7 +639,7 @@ void LoadRaw3::separateOrexcludeMonitors(DataObjects::Workspace2D_sptr localWork
   // Get the time channel array(s) and store in a vector inside a shared pointer
   m_timeChannelsVec = getTimeChannels(m_noTimeRegimes,m_lengthIn);
   //read raw file
-  if (bseparate && monitorSpecList.size() > 0)
+  if (bseparate && !monitorSpecList.empty())
   {
    	  readData(file, 0);
   }
@@ -647,14 +647,14 @@ void LoadRaw3::separateOrexcludeMonitors(DataObjects::Workspace2D_sptr localWork
   for (specid_t i = 0; i < m_numberOfSpectra; ++i)
   {
     int64_t histToRead = i + 1;
-    if (bseparate && monitorSpecList.size() > 0)
+    if (bseparate && !monitorSpecList.empty())
     {
       if (!readData(file, histToRead))
       {
         throw std::runtime_error("Error reading raw file");
       }
     }
-    if ((bseparate && monitorSpecList.size() > 0) || bexclude)
+    if ((bseparate && !monitorSpecList.empty()) || bexclude)
     {
       if (isMonitor(monitorSpecList, static_cast<specid_t>(i) + 1))
       {
@@ -676,7 +676,7 @@ void LoadRaw3::separateOrexcludeMonitors(DataObjects::Workspace2D_sptr localWork
     }
 
   }
-  if ((bseparate && monitorwsList.size() > 0) || bexclude)
+  if ((bseparate && !monitorwsList.empty()) || bexclude)
   {
     localWorkspace->setMonitorList(monitorwsList);
     // RJT: Comment this out on removal of method from Workspace2D. This whole method doesn't do

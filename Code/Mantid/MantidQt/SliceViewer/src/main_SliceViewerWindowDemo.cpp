@@ -20,6 +20,8 @@
 // Little hack to avoid repeating code
 #include "main_common.cpp"
 
+using MantidQt::SliceViewer::SliceViewerWindow;
+
 /** Main application
  *
  * @param argc :: ignored
@@ -32,7 +34,7 @@ int main( int argc, char ** argv )
   app.setApplicationName("SliceViewerWindow demo");
   IMDWorkspace_sptr mdew = makeDemoData();
 
-  SliceViewerWindow * mainWin = new SliceViewerWindow("mdew", NULL);
+  SliceViewerWindow * mainWin = new SliceViewerWindow("mdew");
   //mainWin->getSlicer()->getLineOverlay()->setSnap(0.5);
 //  mainWin->getSlicer()->getLineOverlay()->setSnapLength(0.1);
   mainWin->move(100, 100);
@@ -42,7 +44,6 @@ int main( int argc, char ** argv )
   app.exec();
 
   mainWin->close();
-  delete mainWin;
   return 0;
 }
 

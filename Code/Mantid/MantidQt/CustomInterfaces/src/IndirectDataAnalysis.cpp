@@ -80,8 +80,8 @@ void IndirectDataAnalysis::closeEvent(QCloseEvent*)
 void IndirectDataAnalysis::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf)
 {
   std::string key = pNf->key();
-  std::string preValue = pNf->preValue();
-  std::string curValue = pNf->curValue();
+  // std::string preValue = pNf->preValue();  // Unused
+  // std::string curValue = pNf->curValue();  // Unused
 
   if ( key == "defaultsave.directory" )
   {
@@ -2235,7 +2235,7 @@ void IndirectDataAnalysis::confitPlotGuess(QtProperty*)
     confitPlotInput();
   }
 
-  std::string inputName = m_cfInputWS->getName();
+  // std::string inputName = m_cfInputWS->getName();  // Unused
 
   const size_t binIndexLow = m_cfInputWS->binIndexOf(m_cfDblMng->value(m_cfProp["StartX"]));
   const size_t binIndexHigh = m_cfInputWS->binIndexOf(m_cfDblMng->value(m_cfProp["EndX"]));

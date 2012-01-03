@@ -51,8 +51,9 @@ namespace Factory
     virtual ~WidgetFactory();
 
     MantidQt::SliceViewer::SliceViewerWindow* createSliceViewerWindow(const QString& wsName, const QString& label);
-    void getAllSliceViewerWindows(std::vector<MantidQt::SliceViewer::SliceViewerWindow*>& output);
     MantidQt::SliceViewer::SliceViewerWindow* getSliceViewerWindow(const QString& wsName, const QString& label);
+    void closeAllSliceViewerWindows();
+
     MantidQt::SliceViewer::SliceViewer* createSliceViewer(const QString& wsName);
 
   private:

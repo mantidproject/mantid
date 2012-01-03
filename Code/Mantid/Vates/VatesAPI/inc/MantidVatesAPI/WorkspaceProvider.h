@@ -11,9 +11,12 @@ namespace Mantid
   {
 
     /** 
-    @class WorkspaceProvider. Abstract type for fetching and disposing of workspaces. ADS instance is a singleton and therfore very hard
-    to fake in testing. Attempting to test the behaviour of types using the ADS directly was causing code-bloat. Use this abstract type instead, which can
-    be mocked in testing. Concrete types can use the ADS under-the-hood.
+    @class WorkspaceProvider
+    Abstract type for fetching and disposing of workspaces. ADS instance is a
+    singleton and therfore very hard to fake in testing. Attempting to test the
+    behaviour of types using the ADS directly was causing code-bloat. Use this
+    abstract type instead, which can be mocked in testing. Concrete types can
+    use the ADS under-the-hood.
 
     @author Owen Arnold, Tessella plc
     @date 22/08/2011

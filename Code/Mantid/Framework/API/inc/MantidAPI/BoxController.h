@@ -1,7 +1,7 @@
 #ifndef BOXCONTROLLER_H_
 #define BOXCONTROLLER_H_
 
-#include "MantidKernel/DiskMRU.h"
+#include "MantidKernel/DiskBuffer.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/ThreadPool.h"
@@ -35,7 +35,7 @@ namespace API
      * @return BoxController instance
      */
     BoxController(size_t nd)
-    :nd(nd), m_maxId(0), m_file(NULL), m_diskMRU(), m_useMRU(true)
+    :nd(nd), m_maxId(0), m_file(NULL), m_diskMRU(), m_useWriteBuffer(true)
     {
       // TODO: Smarter ways to determine all of these values
       m_maxDepth = 5;
@@ -366,37 +366,33 @@ namespace API
     void closeFile(bool deleteFile = false);
 
     //-----------------------------------------------------------------------------------
-    /** Return the disk MRU for disk caching */
-    const Mantid::Kernel::DiskMRU & getDiskMRU() const
+    /** Return the DiskBuffer for disk caching */
+    const Mantid::Kernel::DiskBuffer & getDiskBuffer() const
     { return m_diskMRU; }
 
-    /** Return the disk MRU for disk caching */
-    Mantid::Kernel::DiskMRU & getDiskMRU()
+    /** Return the DiskBuffer for disk caching */
+    Mantid::Kernel::DiskBuffer & getDiskBuffer()
     { return m_diskMRU; }
 
-    /** Return true if the MRU should be used */
-    bool useMRU() const
-    { return m_useMRU; }
+    /** Return true if the DiskBuffer should be used */
+    bool useWriteBuffer() const
+    { return m_useWriteBuffer; }
 
     //-----------------------------------------------------------------------------------
     /** Set the memory-caching parameters for a file-backed
      * MDEventWorkspace.
      *
      * @param bytesPerEvent :: sizeof(MDLeanEvent) that is in the workspace
-     * @param mruSize :: number of EVENTS to keep in the MRU.
      * @param writeBufferSize :: number of EVENTS to accumulate before performing a disk write.
-     * @param smallBufferSize :: number of EVENTS to allow to stay in memory for small objects.
      */
-    void setCacheParameters(size_t bytesPerEvent, uint64_t mruSize, uint64_t writeBufferSize, uint64_t smallBufferSize)
+    void setCacheParameters(size_t bytesPerEvent,uint64_t writeBufferSize)
     {
       if (bytesPerEvent == 0)
         throw std::invalid_argument("Size of an event cannot be == 0.");
       // Save the values
-      m_diskMRU.setMruSize(mruSize);
       m_diskMRU.setWriteBufferSize(writeBufferSize);
-      m_diskMRU.setSmallBufferSize(smallBufferSize);
       // If all caches are 0, don't use the MRU at all
-      m_useMRU = !(mruSize==0 && writeBufferSize==0 && smallBufferSize==0);
+      m_useWriteBuffer = !(writeBufferSize==0);
       m_bytesPerEvent = bytesPerEvent;
     }
 
@@ -474,14 +470,10 @@ namespace API
     ::NeXus::File * m_file;
 
     /// Instance of the disk-caching MRU list.
-    mutable Mantid::Kernel::DiskMRU m_diskMRU;
+    mutable Mantid::Kernel::DiskBuffer m_diskMRU;
 
-    /// Do we use the DiskMRU at all?
-    bool m_useMRU;
-
-  public:
-    /// Mutex for locking access to the file, for file-back-end MDBoxes.
-    Mantid::Kernel::Mutex fileMutex;
+    /// Do we use the DiskBuffer at all?
+    bool m_useWriteBuffer;
 
   private:
     /// Number of bytes in a single MDLeanEvent<> of the workspace.

@@ -232,6 +232,7 @@ namespace Mantid
     /**
     Mantid properties for rebinning algorithm require formatted information.
     @param basis : basis vector.
+    @param length : length of vector?
     @param dimension : dimension to extract property value for.
     @return true available, false otherwise.
     */

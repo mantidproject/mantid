@@ -16,7 +16,7 @@ import numpy
 class LoadNISTSANS(PythonAlgorithm):
     
     def category(self):
-        return "SANS"
+        return "SANS;PythonAlgorithms;DataHandling"
 
     def name(self):
         return "LoadNISTSANS"

@@ -442,7 +442,7 @@ namespace Mantid
     *  @param i :: The index of the histogram in the file
     *  @param localWorkspace :: The workspace
     */
-      void LoadISISNexus::loadData(size_t period, size_t hist, size_t& i, DataObjects::Workspace2D_sptr localWorkspace)
+      void LoadISISNexus::loadData(std::size_t period, std::size_t hist, std::size_t& i, DataObjects::Workspace2D_sptr localWorkspace)
     {
       openNexusData("counts");
 
@@ -665,7 +665,7 @@ namespace Mantid
     *   @param ws :: The workspace to load the logs to.
     *   @param period :: The period of this workspace
     */
-    void LoadISISNexus::loadLogs(DataObjects::Workspace2D_sptr ws,size_t period)
+    void LoadISISNexus::loadLogs(DataObjects::Workspace2D_sptr ws,std::size_t period)
     {
 
       std::string stime = getNexusString("start_time");

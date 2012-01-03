@@ -437,10 +437,15 @@ class StitcherWidget(BaseWidget):
                                                            "Data Files (*.xml)")
             fname = str(QtCore.QFileInfo(fname_qstr).filePath())
             if len(fname)>0:
-                if not fname.endswith('.xml'):
-                    fname += ".xml"
-            
-            self._stitcher.save_combined(fname)
+                if fname.endswith('.xml'):
+                    self._stitcher.save_combined(fname, as_canSAS=True)
+                elif fname.endswith('.txt'):
+                    self._stitcher.save_combined(fname, as_canSAS=False)
+                else:
+                    fname_tmp = fname + ".xml"
+                    self._stitcher.save_combined(fname_tmp, as_canSAS=True)
+                    fname_tmp = fname + ".txt"
+                    self._stitcher.save_combined(fname_tmp, as_canSAS=False)
     
     def set_state(self, state):
         """

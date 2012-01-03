@@ -84,7 +84,7 @@ static const string PID_PARAM("SpectrumList");
 static const string PARALLEL_PARAM("UseParallelProcessing");
 static const string BLOCK_SIZE_PARAM("LoadingBlockSize");
 static const string OUT_PARAM("OutputWorkspace");
-static const string PULSE_EXT("pulseid.dat");
+static const string PULSE_EXT(".dat");
 static const string EVENT_EXT("event.dat");
 /// Default number of items to read in from any of the files.
 static const size_t DEFAULT_BLOCK_SIZE = 1000000; // 100,000
@@ -223,7 +223,7 @@ void LoadEventPreNexus2::init()
 {
   // which files to use
   declareProperty(new FileProperty(EVENT_PARAM, "", FileProperty::Load, EVENT_EXT),
-      "The name of the neutron event file to read, including its full or relative path. The file typically ends in neutron_event.dat (N.B. case sensitive if running on Linux).");
+      "The name of the neutron event file to read, including its full or relative path. In most cases, the file typically ends in neutron_event.dat (N.B. case sensitive if running on Linux).");
   declareProperty(new FileProperty(PULSEID_PARAM, "", FileProperty::OptionalLoad, PULSE_EXT),
       "File containing the accelerator pulse information; the filename will be found automatically if not specified.");
   declareProperty(new FileProperty(MAP_PARAM, "", FileProperty::OptionalLoad, ".dat"),
@@ -314,7 +314,7 @@ void LoadEventPreNexus2::exec()
   // 3. Create otuput Workspace
   prog->report("Creating output workspace");
   // a. prep the output workspace
-  EventWorkspace_sptr localWorkspace = EventWorkspace_sptr(new EventWorkspace());
+  localWorkspace = EventWorkspace_sptr(new EventWorkspace());
   // b. Make sure to initialize. We can use dummy numbers for arguments, for event workspace it doesn't matter
   localWorkspace->initialize(1,1,1);
   // c. Set the units
@@ -356,10 +356,24 @@ void LoadEventPreNexus2::exec()
   this->setProperty<IEventWorkspace_sptr>(OUT_PARAM, localWorkspace);
 
   // 9. Fast frequency sample environment data
+  this->processImbedLogs();
+
+  // -1. Cleanup
+  delete prog;
+
+  return;
+} // exec()
+
+/*
+ * Process imbed logs (marked by bad pixel IDs)
+ */
+void LoadEventPreNexus2::processImbedLogs(){
+
   std::vector<size_t> numpixels;
   std::set<PixelType>::iterator pit;
   std::map<PixelType, size_t>::iterator mit;
   for (pit=this->wrongdetids.begin(); pit!=this->wrongdetids.end(); ++pit){
+
     // a. pixel ID -> index
     PixelType pid = *pit;
     mit = this->wrongdetidmap.find(pid);
@@ -367,6 +381,9 @@ void LoadEventPreNexus2::exec()
     if (mindex > this->wrongdetid_abstimes.size()){
       g_log.error() << "Wrong Index " << mindex << " for Pixel " << pid << std::endl;
       throw std::invalid_argument("Wrong array index for pixel from map");
+    } else {
+      g_log.notice() << "Processing imbed log marked by Pixel " << pid <<
+          " with size = " << this->wrongdetid_abstimes[mindex].size() << std::endl;
     }
 
     // b. Create output workspace2D
@@ -376,14 +393,31 @@ void LoadEventPreNexus2::exec()
     DataObjects::Workspace2D_sptr ws2d = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, nbins, nbins));
     // iii. set data
-    double y0 = 0;
+    double y0 = 1.0;
+    size_t numzerodiffs = 0;
+    size_t numlessdiffs = 0;
+    size_t index = 0;
     for (size_t k = 0; k < nbins; k ++){
-      ws2d->dataX(0)[k] = static_cast<double>(this->wrongdetid_abstimes[mindex][k]);
-      ws2d->dataY(0)[k] = y0;
-      y0 = 1.0-y0;
-    }
+      if (this->wrongdetid_abstimes[mindex][k] > this->wrongdetid_abstimes[mindex][k-1]){
+        y0 = 1.0;
+        ws2d->dataX(0)[index] = static_cast<double>(this->wrongdetid_abstimes[mindex][k]);
+        ws2d->dataY(0)[index] = y0;
 
-    // c. Set up otuput Workspace2D
+        if (ws2d->dataX(0)[index] < 1.0E-9){
+          g_log.error() << "Bad cast @ point " << k << " = " << ws2d->dataX(0)[k] << " / " <<
+              this->wrongdetid_abstimes[mindex][k] << std::endl;
+        }
+
+        index ++;
+
+      } else if (this->wrongdetid_abstimes[mindex][k] == this->wrongdetid_abstimes[mindex][k-1]) {
+        numzerodiffs ++;
+      } else {
+        numlessdiffs ++;
+      }
+    } // ENDFOR: k
+
+    // c. Set up output Workspace2D
     std::stringstream ssws;
     ssws << "OutputPixel" << pid << "Workspace";
     std::string outputtitle = ssws.str();
@@ -395,52 +429,116 @@ void LoadEventPreNexus2::exec()
         "Set the output sample environment data record");
     this->setProperty(outputtitle, ws2d);
 
+    // d. Add this to log
+    this->addToWorkspaceLog(wsname, mindex);
+
     // z. Check workspace
+    g_log.notice() << "For log @ " << wsname << ":  " << (nbins-numzerodiffs) << " events are individual" << std::endl;
+    g_log.notice() << "For log @ " << wsname << ":  " << numzerodiffs << " events have same pulse time" << std::endl;
+    g_log.notice() << "For log @ " << wsname << ":  " << numlessdiffs << " events are earlier than previous one" << std::endl;
     //    TODO  This will be removed later
-    g_log.error() << "Test Only!  Delete this section later!" << std::endl;
-    size_t maxcounts = 3;
-    size_t counts = 0;
-    std::set<int64_t> deltas;
-    // i.  do statistic
-    size_t numzerodeltat = 0;
-    size_t numfreq = 0;
-    int64_t sumdeltat = 0;
-    for (size_t k = 1; k < nbins; k ++){
-      int64_t deltat = this->wrongdetid_abstimes[mindex][k]-this->wrongdetid_abstimes[mindex][k-1];
-      deltas.insert(deltat);
-      if (deltat == 0){
-        numzerodeltat ++;
-        if (counts < maxcounts)
-        {
-          g_log.error() << "Delta T = 0:  T = " << this->wrongdetid_abstimes[mindex][k] << std::endl;
-          counts ++;
-        }
-      } else {
-        numfreq ++;
-        sumdeltat += deltat;
-      }
-    }
-    double frequency = 1.0/(static_cast<double>(sumdeltat)/static_cast<double>(numfreq)*1.0E-9);
-    size_t numpt = this->wrongdetid_abstimes[mindex].size();
-    g_log.notice() << "Frequency = " << frequency << "  Number of pixels with zero Delta T = " << numzerodeltat << std::endl;
-    int64_t t0 = this->wrongdetid_abstimes[mindex][0];
-    int64_t tf = this->wrongdetid_abstimes[mindex][numpt-1];
-    g_log.notice() << "T0 = " << t0 << ", Tf = " << tf << "  Delta T = " << tf-t0 << " ns"<< std::endl;
-    g_log.notice() << "Theoretical number of events = " << static_cast<double>(tf-t0)*frequency*1.0E-9 << std::endl;
-    g_log.notice() << "Number of various delta T = " << deltas.size() << std::endl;
-    std::set<int64_t>::iterator dtit;
-    for (dtit=deltas.begin(); dtit!=deltas.end(); ++dtit){
-      g_log.notice() << *dtit <<", ";
-    }
-    g_log.notice() << std::endl;
+    this->debugOutput(false, mindex);
+
+    g_log.notice() << "End of Processing This Log " << std::endl << std::endl;
 
   } //ENDFOR pit
 
-  // -1. Cleanup
-  delete prog;
+
+}
+
+
+/*
+ * Add absolute time series to log
+ * @params
+ * - mindex:  index of the the series in the list
+ */
+void LoadEventPreNexus2::addToWorkspaceLog(std::string logtitle, size_t mindex){
+
+  // 1. Set data structure and constants
+  size_t nbins = this->wrongdetid_abstimes[mindex].size();
+  TimeSeriesProperty<double>* property = new TimeSeriesProperty<double>(logtitle);
+
+  // 2. Set data
+  double y0 = 1.0;
+  int msize = property->size();
+  for (size_t k = 0; k < nbins; k ++){
+    // a) Add log
+    if (this->wrongdetid_abstimes[mindex][k] > this->wrongdetid_abstimes[mindex][k-1]){
+      property->addValue(Kernel::DateAndTime(this->wrongdetid_abstimes[mindex][k]), y0);
+    }
+
+    // b) Figure whether it is a good add or not
+    if (property->size() <= msize){
+      g_log.error() << "Cannot add entry " << k << ": Time = " <<
+          this->wrongdetid_abstimes[mindex][k] << ", ";
+      if (k > 0){
+        g_log.error() << " Previous time = " << this->wrongdetid_abstimes[mindex][k-1] << std::endl;
+      } else {
+        g_log.error() << " This is the first entry to add to log!" << std::endl;
+      }
+    }
+    msize = property->size();
+
+    // c) Update log
+    y0 = 1.0 - y0;
+  } // ENDFOR
+
+  this->localWorkspace->mutableRun().addProperty(property, false);
+
+  g_log.notice() << "Size of Property " << property->name() << " = " << property->size() <<
+      " vs Original Log Size = " << nbins << std::endl;
 
   return;
-} // exec()
+}
+
+/*
+ * Some output for debug purpose
+ */
+void LoadEventPreNexus2::debugOutput(bool doit, size_t mindex){
+
+  if (!doit){
+    return;
+  }
+
+  size_t nbins = this->wrongdetid_abstimes[mindex].size();
+  size_t maxcounts = 3;
+  size_t counts = 0;
+  std::set<int64_t> deltas;
+  // i.  do statistic
+  size_t numzerodeltat = 0;
+  size_t numfreq = 0;
+  int64_t sumdeltat = 0;
+  for (size_t k = 1; k < nbins; k ++){
+    int64_t deltat = this->wrongdetid_abstimes[mindex][k]-this->wrongdetid_abstimes[mindex][k-1];
+    deltas.insert(deltat);
+    if (deltat == 0){
+      numzerodeltat ++;
+      if (counts < maxcounts)
+      {
+        g_log.error() << "Delta T = 0:  T = " << this->wrongdetid_abstimes[mindex][k] << std::endl;
+        counts ++;
+      }
+    } else {
+      numfreq ++;
+      sumdeltat += deltat;
+    }
+  }
+  double frequency = 1.0/(static_cast<double>(sumdeltat)/static_cast<double>(numfreq)*1.0E-9);
+  size_t numpt = this->wrongdetid_abstimes[mindex].size();
+  g_log.notice() << "Frequency = " << frequency << "  Number of pixels with zero Delta T = " << numzerodeltat << std::endl;
+  int64_t t0 = this->wrongdetid_abstimes[mindex][0];
+  int64_t tf = this->wrongdetid_abstimes[mindex][numpt-1];
+  g_log.notice() << "T0 = " << t0 << ", Tf = " << tf << "  Delta T = " << tf-t0 << " ns"<< std::endl;
+  g_log.notice() << "Theoretical number of events = " << static_cast<double>(tf-t0)*frequency*1.0E-9 << std::endl;
+  g_log.notice() << "Number of various delta T = " << deltas.size() << std::endl;
+  std::set<int64_t>::iterator dtit;
+  for (dtit=deltas.begin(); dtit!=deltas.end(); ++dtit){
+    g_log.notice() << *dtit <<", ";
+  }
+  g_log.notice() << std::endl;
+
+  return;
+}
 
 /**
  * Returns the name of the property to be considered as the Filename for Load

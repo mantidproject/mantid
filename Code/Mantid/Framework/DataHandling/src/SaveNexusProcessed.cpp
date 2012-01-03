@@ -1,37 +1,39 @@
 /*WIKI* 
 
-
 The algorithm SaveNexusProcessed will write a Nexus data file from the named workspace.
+This can later be loaded using [[LoadNexusProcessed]].
+
 The file name can be an absolute or relative path and should have the extension
-.nxs, .nx5 or .xml.
-Warning - using XML format can be extremely slow for large data sets and generate very large files.
+.nxs, .nx5 or .xml. Warning - using XML format can be extremely slow for large data sets and generate very large files.
 Both the extensions nxs and nx5 will generate HDF5 files.
 
-The optional parameters can be used to control which spectra are saved into the file (not yet implemented).
-If spectrum_min and spectrum_max are given, then only that range to data will be loaded.
+The optional parameters can be used to control which spectra are saved into the file.
+If WorkspaceIndexMin and WorkspaceIndexMax are given, then only that range to data will be loaded.
 
 A Mantid Nexus file may contain several workspace entries each labelled with an integer starting at 1.
 If the file already contains n workspaces, the new one will be labelled n+1.
 
+=== Time series data ===
 
-===Time series data===
 TimeSeriesProperty data within the workspace will be saved as NXlog sections in  the Nexus file.
 Only floating point logs are stored and loaded at present.
 
-===Subalgorithms used===
+=== EventWorkspaces ===
 
-None
+This algorithm will save [[EventWorkspace]]s with full event data, unless
+you uncheck ''PreserveEvents'', in which case the histogram version of
+the workspace is saved.
 
-
-
-
+Optionally, you can check ''CompressNexus'', which will compress the event
+data. '''Warning!''' This can be ''very'' slow, and only gives approx. 40% compression
+because event data is typically denser than histogram data. ''CompressNexus'' is
+off by default.
 
 *WIKI*/
+
+
 // SaveNexusProcessed
 // @author Ronald Fowler, based on SaveNexus
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/EnabledWhenWorkspaceIsType.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
@@ -102,13 +104,13 @@ namespace DataHandling
 
     declareProperty("WorkspaceIndexMin", 0, mustBePositive->clone(), 
         "Index number of first spectrum to write, only for single\n"
-        "period data. Not yet implemented");
+        "period data.");
     declareProperty("WorkspaceIndexMax", Mantid::EMPTY_INT(), mustBePositive->clone(),
         "Index of last spectrum to write, only for single period\n"
-        "data. Not yet implemented");
+        "data.");
     declareProperty(new ArrayProperty<int>("WorkspaceIndexList"),
         "List of spectrum numbers to read, only for single period\n"
-        "data. Not yet implemented");
+        "data.");
     //declareProperty("EntryNumber", 0, mustBePositive);
     declareProperty("Append",false,"Determines whether .nxs file needs to be\n"
         "over written or appended");
@@ -117,12 +119,19 @@ namespace DataHandling
         "For EventWorkspaces, preserve the events when saving (default).\n"
         "If false, will save the 2D histogram version of the workspace with the current binning parameters.");
     setPropertySettings("PreserveEvents", new EnabledWhenWorkspaceIsType<EventWorkspace>(this, "InputWorkspace", true));
+
+    declareProperty("CompressNexus", false,
+        "For EventWorkspaces, compress the Nexus data field (default False).\n"
+        "This will make smaller files but takes much longer.");
+    setPropertySettings("CompressNexus", new EnabledWhenWorkspaceIsType<EventWorkspace>(this, "InputWorkspace", true));
+
   }
 
 
   /** Get the list of workspace indices to use
    *
    * @param spec :: returns the list of workspace indices
+   * @param matrixWorkspace :: pointer to a MatrixWorkspace
    */
   void SaveNexusProcessed::getSpectrumList(std::vector<int> & spec, MatrixWorkspace_const_sptr matrixWorkspace)
   {
@@ -457,10 +466,12 @@ namespace DataHandling
     }
     PARALLEL_CHECK_INTERUPT_REGION
 
+    /*Default = DONT compress - much faster*/
+    bool CompressNexus = getProperty("CompressNexus");
 
     // Write out to the NXS file.
     nexusFile->writeNexusProcessedDataEventCombined(m_eventWorkspace, indices, tofs, weights, errorSquareds, pulsetimes,
-        false /*DONT compress - much faster*/);
+        CompressNexus);
 
     // Free mem.
     delete [] tofs;

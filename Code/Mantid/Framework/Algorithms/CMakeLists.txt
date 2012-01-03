@@ -74,6 +74,7 @@ set ( SRC_FILES
 	src/FilterBadPulses.cpp
 	src/FilterByLogValue.cpp
 	src/FilterByTime.cpp
+	src/FilterEventsHighFrequency.cpp
 	src/FindCenterOfMassPosition.cpp
 	src/FindCenterOfMassPosition2.cpp
 	src/FindDeadDetectors.cpp
@@ -100,10 +101,13 @@ set ( SRC_FILES
 	src/Logarithm.cpp
 	src/MaskBins.cpp
 	src/MaskDetectorsIf.cpp
-	src/Max.cpp
+    src/Max.cpp
+    src/MaxMin.cpp
 	src/MedianDetectorTest.cpp
-	src/MergeRuns.cpp
+    src/MergeRuns.cpp
+    src/Min.cpp
 	src/Minus.cpp
+	src/ModeratorTzero.cpp
 	src/MonteCarloAbsorption.cpp
 	src/MultipleScatteringCylinderAbsorption.cpp
 	src/Multiply.cpp
@@ -169,7 +173,6 @@ set ( SRC_FILES
 	src/Unwrap.cpp
 	src/UnwrapMonitor.cpp
 	src/UnwrapSNS.cpp
-	src/FilterEventsHighFrequency.cpp
 	src/WeightedMean.cpp
 	src/WeightingStrategy.cpp
 	src/XDataConverter.cpp
@@ -251,6 +254,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/FilterBadPulses.h
 	inc/MantidAlgorithms/FilterByLogValue.h
 	inc/MantidAlgorithms/FilterByTime.h
+	inc/MantidAlgorithms/FilterEventsHighFrequency.h
 	inc/MantidAlgorithms/FindCenterOfMassPosition.h
 	inc/MantidAlgorithms/FindCenterOfMassPosition2.h
 	inc/MantidAlgorithms/FindDeadDetectors.h
@@ -279,9 +283,12 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MaskBins.h
 	inc/MantidAlgorithms/MaskDetectorsIf.h
 	inc/MantidAlgorithms/Max.h
+    inc/MantidAlgorithms/MaxMin.h
 	inc/MantidAlgorithms/MedianDetectorTest.h
 	inc/MantidAlgorithms/MergeRuns.h
+    inc/MantidAlgorithms/Min.h
 	inc/MantidAlgorithms/Minus.h
+	inc/MantidAlgorithms/ModeratorTzero.h
 	inc/MantidAlgorithms/MonteCarloAbsorption.h
 	inc/MantidAlgorithms/MultipleScatteringCylinderAbsorption.h
 	inc/MantidAlgorithms/Multiply.h
@@ -347,7 +354,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Unwrap.h
 	inc/MantidAlgorithms/UnwrapMonitor.h
 	inc/MantidAlgorithms/UnwrapSNS.h
-	inc/MantidAlgorithms/FilterEventsHighFrequency.h
 	inc/MantidAlgorithms/WeightedMean.h
 	inc/MantidAlgorithms/WeightingStrategy.h
 	inc/MantidAlgorithms/XDataConverter.h
@@ -422,6 +428,7 @@ set ( TEST_FILES
 	test/FilterBadPulsesTest.h
 	test/FilterByLogValueTest.h
 	test/FilterByTimeTest.h
+	test/FilterEventsHighFrequencyTest.h
 	test/FindCenterOfMassPosition2Test.h
 	test/FindCenterOfMassPositionTest.h
 	test/FindDeadDetectorsTest.h
@@ -444,9 +451,11 @@ set ( TEST_FILES
 	test/InterpolatingRebinTest.h
 	test/LogarithmTest.h
 	test/MaskBinsTest.h
+    test/MaxMinTest.h
 	test/MedianDetectorTestTest.h
 	test/MergeRunsTest.h
 	test/MinusTest.h
+	test/ModeratorTzeroTest.h
 	test/MonteCarloAbsorptionTest.h
 	test/MultipleScatteringCylinderAbsorptionTest.h
 	test/MultiplyRangeTest.h
@@ -505,7 +514,6 @@ set ( TEST_FILES
 	test/UnaryOperationTest.h
 	test/UnwrapSNSTest.h
 	test/UnwrapTest.h
-	test/FilterEventsHighFrequencyTest.h
 	test/WeightedMeanTest.h
 	test/WeightingStrategyTest.h
 	test/WorkspaceCreationHelperTest.h

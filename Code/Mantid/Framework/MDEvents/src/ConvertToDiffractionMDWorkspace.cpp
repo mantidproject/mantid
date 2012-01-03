@@ -135,7 +135,17 @@ namespace MDEvents
       out_events.reserve( el.getNumberEvents() );
 
       // Get the detector (might be a detectorGroup for multiple detectors)
-      IDetector_const_sptr det = in_ws->getDetector(workspaceIndex);
+      // or might return an exception if the detector is not in the instrument definition
+      IDetector_const_sptr det;
+      try
+      {
+        det = in_ws->getDetector(workspaceIndex);
+      }
+      catch (Exception::NotFoundError &)
+      {
+        this->failedDetectorLookupCount++;
+        return;
+      }
 
       // Vector between the sample and the detector
       V3D detPos = det->getPos() - samplePos;
@@ -295,10 +305,12 @@ namespace MDEvents
       // Set the matrix based on UB etc.
       Kernel::Matrix<double> ub = in_ws->mutableSample().getOrientedLattice().getUB();
       Kernel::Matrix<double> gon = in_ws->mutableRun().getGoniometerMatrix();
-      // As per Busing and Levy 1967, q_lab_frame = Goniometer * UB * HKL
-      // Therefore, HKL = (Goniometer * UB)^-1 * q_lab_frame
+      // As per Busing and Levy 1967, q_lab_frame = 2pi * Goniometer * UB * HKL
+      // Therefore, HKL = (2*pi * Goniometer * UB)^-1 * q_lab_frame
       mat = gon * ub;
       mat.Invert();
+      // Divide by 2 PI to account for our new convention, |Q| = 2pi / wl (December 2011, JZ)
+      mat /= (2 * M_PI);
       dimensionNames[0] = "H";
       dimensionNames[1] = "K";
       dimensionNames[2] = "L";
@@ -385,6 +397,7 @@ namespace MDEvents
     ThreadPool tp(ts);
 
     // To track when to split up boxes
+    this->failedDetectorLookupCount = 0;
     size_t eventsAdded = 0;
     size_t lastNumBoxes = ws->getBoxController()->getTotalNumMDBoxes();
     if (DODEBUG) std::cout << cputim << ": initial setup. There are " << lastNumBoxes << " MDBoxes.\n";
@@ -434,6 +447,18 @@ namespace MDEvents
         lastNumBoxes = ws->getBoxController()->getTotalNumMDBoxes();
         if (DODEBUG) std::cout << cputim << ": Performing the splitting. There are now " << lastNumBoxes << " boxes.\n";
         eventsAdded = 0;
+      }
+    }
+
+    if (this->failedDetectorLookupCount > 0)
+    {
+      if (this->failedDetectorLookupCount == 1)
+      {
+        g_log.warning()<<"Unable to find a detector for " << this->failedDetectorLookupCount << " spectrum. It has been skipped." << std::endl;
+      }
+      else
+      {
+        g_log.warning()<<"Unable to find detectors for " << this->failedDetectorLookupCount << " spectra. They have been skipped." << std::endl;
       }
     }
 

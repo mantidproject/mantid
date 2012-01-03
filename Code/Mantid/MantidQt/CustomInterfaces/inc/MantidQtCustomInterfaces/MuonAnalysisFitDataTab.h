@@ -7,14 +7,8 @@
 #include "ui_MuonAnalysis.h"
 #include "MantidQtAPI/UserSubWindow.h"
 
-#include "MantidQtMantidWidgets/pythonCalc.h"
-#include "MantidQtMantidWidgets/MWRunFiles.h"
-#include "MantidQtMantidWidgets/MWDiag.h"
-
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
-
-#include <QTableWidget>
 
 namespace Ui
 {
@@ -64,9 +58,13 @@ public:
 
   /// Constructor
   MuonAnalysisFitDataTab(Ui::MuonAnalysis& uiForm) : m_uiForm(uiForm) {}
+  void init();
 
   void makeRawWorkspace(const std::string & wsName);
   void groupRawWorkspace(const std::vector<std::string> & inputWorkspaces, const std::string & groupName);
+  void groupFittedWorkspaces(QString workspaceName);
+  
+  QStringList getAllPlotDetails(const QStringList & plotDetails);
 
 signals:
 
@@ -79,6 +77,8 @@ private:
   Ui::MuonAnalysis& m_uiForm;
 
 private slots:
+  
+  void muonAnalysisHelpDataAnalysisClicked();
 
 };
 

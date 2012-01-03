@@ -30,12 +30,16 @@ namespace SliceViewer
  */
 SliceViewerWindow::SliceViewerWindow(const QString& wsName, const QString& label, Qt::WFlags f)
  : QMainWindow(NULL, f),
-   WorkspaceObserver()
+   WorkspaceObserver(),
+   m_lastLinerWidth(0)
 {
   // Set the window icon
   QIcon icon;
   icon.addFile(QString::fromUtf8(":/SliceViewer/icons/SliceViewerWindow_icon.png"), QSize(), QIcon::Normal, QIcon::Off);
   this->setWindowIcon(icon);
+
+  // Avoid memory leaks by deleting when closing
+  this->setAttribute(Qt::WA_DeleteOnClose);
 
   // Get the workspace
   m_wsName = wsName.toStdString();
@@ -104,6 +108,8 @@ SliceViewerWindow::SliceViewerWindow(const QString& wsName, const QString& label
   QObject::connect( m_liner, SIGNAL(changedPlanarWidth(double)),
             this, SLOT(changePlanarWidth(double)) );
 
+  this->initMenus();
+
   // Set the current workspace
   this->updateWorkspace();
 }
@@ -111,6 +117,15 @@ SliceViewerWindow::SliceViewerWindow(const QString& wsName, const QString& label
 
 SliceViewerWindow::~SliceViewerWindow()
 {
+}
+
+
+//------------------------------------------------------------------------------------------------
+/** Build the menus */
+void SliceViewerWindow::initMenus()
+{
+  // Make File->Close() close the window
+  connect(m_slicer->m_actionFileClose, SIGNAL(triggered()), this, SLOT(close()));
 }
 
 //------------------------------------------------------------------------------------------------
@@ -208,11 +223,13 @@ void SliceViewerWindow::showLineViewer(bool visible)
     if (m_liner->width() > 0)
       m_lastLinerWidth = m_liner->width();
     m_liner->setVisible(false);
-    QApplication::processEvents();
-    this->resize(w, this->height());
+
+    // Save this value for resizing with the single shot timer
+    m_desiredWidth = w;
     // This call is necessary to allow resizing smaller than would be allowed if both left/right widgets were visible.
-    QApplication::processEvents();
-    this->resize(w, this->height());
+    // This needs 2 calls ro resizeWindow() to really work!
+    QTimer::singleShot(0, this, SLOT(resizeWindow()));
+    QTimer::singleShot(0, this, SLOT(resizeWindow()));
   }
   else
   {
@@ -223,6 +240,14 @@ void SliceViewerWindow::showLineViewer(bool visible)
 
 }
 
+
+//------------------------------------------------------------------------------------------------
+/** Special slot called to resize the window
+ * after some events have been processed. */
+void SliceViewerWindow::resizeWindow()
+{
+  this->resize(m_desiredWidth, this->height());
+}
 
 //------------------------------------------------------------------------------------------------
 /** Using the positions from the LineOverlay, set the values in the LineViewer,

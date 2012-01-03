@@ -170,7 +170,6 @@ IAlgorithm* FrameworkManagerImpl::exec(const std::string& algName, const std::st
  *
  * @param algorithmName
  * @param count :: number of arguments given.
- * @param variable number of extra arguments, all string.
  * @return the algorithm created
  */
 IAlgorithm_sptr FrameworkManagerImpl::exec(const std::string& algorithmName, int count, ...)

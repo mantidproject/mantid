@@ -50,7 +50,7 @@ GenericDialog::~GenericDialog()
 {
   // Delete all the mappers
   QHash<QString, QSignalMapper *>::iterator it;
-  for(it = m_mappers.begin(); it != m_mappers.end(); it++)
+  for(it = m_mappers.begin(); it != m_mappers.end(); ++it)
     delete it.value();
 }
 
@@ -79,7 +79,9 @@ bool haveInputWS(const std::vector<Property*> & prop_list)
 
 //---------------------------------------------------------------------------------------------------------------
 /** Layout a checkbox for a bool property
- * @param prop :: Property to create controls for*/
+ * @param prop :: Property to create controls for
+ * @param row :: insertion location for checkbox
+ */
 void GenericDialog::layoutBoolProperty(PropertyWithValue<bool>* prop, int row)
 {
   QString propName = QString::fromStdString(prop->name());
@@ -100,7 +102,9 @@ void GenericDialog::layoutBoolProperty(PropertyWithValue<bool>* prop, int row)
 
 //---------------------------------------------------------------------------------------------------------------
 /** Layout a combobox for a property with options
- * @param prop :: Property to create controls for */
+ * @param prop :: Property to create controls for
+ * @param row :: insertion location for checkbox
+ */
 void GenericDialog::layoutOptionsProperty(Property* prop, int row)
 {
   QString propName = QString::fromStdString(prop->name());
@@ -140,7 +144,9 @@ void GenericDialog::layoutOptionsProperty(Property* prop, int row)
 
 //---------------------------------------------------------------------------------------------------------------
 /** Layout a textbox for a property with options
- * @param prop :: Property to create controls for */
+ * @param prop :: Property to create controls for
+ * @param row :: insertion location for checkbox
+ */
 void GenericDialog::layoutTextProperty(Property* prop, int row)
 {
   QString propName = QString::fromStdString(prop->name());
@@ -441,7 +447,7 @@ void GenericDialog::browseClicked(const QString & propName)
 //--------------------------------------------------------------------------------------
 /** This slot is called when a browse button for multiple files is clicked.
  *
-* @param widget :: The widget that is associated with the button that was clicked. In this case they are always QLineEdit widgets
+* @param propName :: The widget that is associated with the button that was clicked. In this case they are always QLineEdit widgets
 */
 void GenericDialog::browseMultipleClicked(const QString & propName)
 {

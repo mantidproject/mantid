@@ -57,7 +57,7 @@ namespace Mantid
             /// overwrite IFunction base class methods
             std::string name()const{return "QuadEnBackground";}
         protected:
-            /// function to return the calculated signal at cell r, given the energy dependent model applied to points
+            /// function to calculate the background at box r, given the energy dependent model applied to MDEvents
             virtual double functionMD(Mantid::API::IMDIterator& r) const;
         };
 

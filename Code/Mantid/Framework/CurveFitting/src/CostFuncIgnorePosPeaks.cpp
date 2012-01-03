@@ -45,6 +45,7 @@ DECLARE_COSTFUNCTION(CostFuncIgnorePosPeaks,Ignore positive peaks)
   /// @param inverseError :: Array of inverse error values
   /// @param yCal :: Calculated y
   /// @param jacobian :: Output jacobian 
+  /// @param outDerivs :: Output derivaties
   /// @param p :: The number of parameters 
   /// @param n :: The number of points 
   void CostFuncIgnorePosPeaks::deriv(const double* yData, const double* inverseError, const double* yCal, 

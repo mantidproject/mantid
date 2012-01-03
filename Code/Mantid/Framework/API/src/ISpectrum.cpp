@@ -77,11 +77,11 @@ namespace API
 
 
   /// Sets the x data
+  /// @param X :: vector of X data
   void ISpectrum::setX(const MantidVecPtr::ptr_type& X)
   { refX=X; }
 
   /// Sets the x data error
-  /// @param X :: vector of X data
   /// @param Dx :: vector of X error data
   void ISpectrum::setDx(const MantidVecPtr::ptr_type& Dx)
   {refDx=Dx;}
@@ -140,7 +140,7 @@ namespace API
 
   /** Add a set of detector IDs to the set of detector IDs
    *
-   * @param detID :: set of detector IDs to insert in set.
+   * @param detIDs :: set of detector IDs to insert in set.
    */
   void ISpectrum::addDetectorIDs(const std::set<detid_t> detIDs)
   {
@@ -150,7 +150,7 @@ namespace API
 
   /** Add a vector of detector IDs to the set of detector IDs
    *
-   * @param detID :: vector of detector IDs to insert in set.
+   * @param detIDs :: vector of detector IDs to insert in set.
    */
   void ISpectrum::addDetectorIDs(const std::vector<detid_t> detIDs)
   {

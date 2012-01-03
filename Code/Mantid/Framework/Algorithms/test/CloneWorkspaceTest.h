@@ -37,7 +37,7 @@ public:
 
   void testCategory()
   {
-    TS_ASSERT_EQUALS( cloner.category(), "General" );
+    TS_ASSERT_EQUALS( cloner.category(), "Utility\\Workspaces" );
   }
 
   void testInit()

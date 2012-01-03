@@ -29,7 +29,7 @@ std::size_t ParameterReference::getIndex() const
 }
 
 /// Reset the reference
-void ParameterReference::reset(IFunction* fun, size_t index)
+void ParameterReference::reset(IFunction* fun, std::size_t index)
 {
   IFunction* fLocal = fun;
   size_t iLocal = index;

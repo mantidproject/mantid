@@ -225,7 +225,7 @@ void He3TubeEfficiency::correctForEfficiency(std::size_t spectraIndex)
  * @throw out_of_range if twice tube thickness is greater than tube diameter
  * @return the exponential contribution for the given detector
  */
-double He3TubeEfficiency::calculateExponential(std::size_t spectraIndex, Geometry::IDetector_const_sptr idet)
+double He3TubeEfficiency::calculateExponential(std::size_t spectraIndex, boost::shared_ptr<const Geometry::IDetector> idet)
 {
   // Get the parameters for the current associated tube
   double pressure = this->getParameter("TubePressure", spectraIndex,
@@ -273,7 +273,7 @@ double He3TubeEfficiency::calculateExponential(std::size_t spectraIndex, Geometr
  * @param detAxis :: An output parameter that contains the detector axis vector
  */
 void He3TubeEfficiency::getDetectorGeometry(\
-    Geometry::IDetector_const_sptr det,
+    boost::shared_ptr<const Geometry::IDetector> det,
     double & detRadius, Kernel::V3D & detAxis)
 {
   boost::shared_ptr<const Geometry::Object> shape_sptr = det->shape();
@@ -413,7 +413,7 @@ void He3TubeEfficiency::logErrors() const
  * @return the value of the detector property
  */
 double He3TubeEfficiency::getParameter(std::string wsPropName, std::size_t currentIndex,
-    std::string detPropName, Geometry::IDetector_const_sptr idet)
+    std::string detPropName, boost::shared_ptr<const Geometry::IDetector> idet)
 {
   std::vector<double> wsProp = this->getProperty(wsPropName);
 

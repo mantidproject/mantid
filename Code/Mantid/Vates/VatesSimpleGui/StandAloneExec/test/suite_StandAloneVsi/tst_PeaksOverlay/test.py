@@ -7,7 +7,7 @@ def main():
     switch_mode("splatterPlot")
     check_mode_buttons(std=True, ms=True, ts=True, sp=False)
 
-    set_ptw_lineedit_property(":ScrollArea.Number of Points_QLineEdit", 10000)
+    set_ptw_lineedit_property(10000, "Number of Points")
     apply_ptw_settings()
 
     open_file("TOPAZ_3680_10_sec_40.peaks")

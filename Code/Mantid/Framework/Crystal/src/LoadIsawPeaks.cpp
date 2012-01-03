@@ -87,7 +87,7 @@ namespace Crystal
 
   //-----------------------------------------------------------------------------------------------
   /** Reads the header of a .peaks file
-   *
+   * @param outWS :: the workspace in which to place the information
    * @param in :: stream of the input file
    * @return the first word on the next line
    */
@@ -159,9 +159,9 @@ namespace Crystal
   /** Read one peak in a line of an ISAW peaks file.
    *
    * @param outWS :: workspace to add peaks to
-   * @param lastSt[in,out] :: last word (the one at the start of the line)
+   * @param lastStr [in,out] :: last word (the one at the start of the line)
    * @param in :: input stream
-   * @param[out] seqNum :: the sequence number of the peak
+   * @param seqNum [out] :: the sequence number of the peak
    * @param bankName :: the bank number from the ISAW file.
    * @return the Peak the Peak object created
    */
@@ -299,7 +299,7 @@ namespace Crystal
 
   //-----------------------------------------------------------------------------------------------
   /** Append the peaks from a .peaks file into the workspace
-   *
+   * @param outWS :: the workspace in which to place the information
    * @param filename :: path to the .peaks file
    */
   void LoadIsawPeaks::appendFile( PeaksWorkspace_sptr outWS, std::string filename)

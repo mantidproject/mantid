@@ -22,6 +22,10 @@ namespace Geometry
 #ifdef min
 #undef min
 #endif
+// the statement to exclude using macro max(a,b) in visual C++ uder win
+#ifdef max
+#undef max
+#endif
 
   //===============================================================================================
   /** Simple class that holds the extents (min/max)
@@ -33,8 +37,8 @@ namespace Geometry
     /** Empty constructor - reset everything.
      *  */
     MDDimensionExtents() :
-      min( std::numeric_limits<coord_t>::max() ),
-      max( -std::numeric_limits<coord_t>::max() )
+      min( 1e100 ),
+      max( -1e100 )
     { }
 
     // ---- Public members ----------

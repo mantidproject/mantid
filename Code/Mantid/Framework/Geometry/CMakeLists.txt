@@ -1,6 +1,7 @@
 set ( SRC_FILES
 	src/ComponentParser.cpp
 	src/Crystal/IndexingUtils.cpp
+	src/Crystal/ReducedCell.cpp
 	src/Crystal/OrientedLattice.cpp
 	src/Crystal/ReflectionCondition.cpp
 	src/Crystal/UnitCell.cpp
@@ -89,6 +90,7 @@ set ( SRC_UNITY_IGNORE_FILES src/Instrument/CompAssembly.cpp
 set ( INC_FILES
 	inc/MantidGeometry/ComponentParser.h
 	inc/MantidGeometry/Crystal/IndexingUtils.h
+	inc/MantidGeometry/Crystal/ReducedCell.h
 	inc/MantidGeometry/Crystal/OrientedLattice.h
 	inc/MantidGeometry/Crystal/ReflectionCondition.h
 	inc/MantidGeometry/Crystal/UnitCell.h
@@ -190,6 +192,7 @@ set ( TEST_FILES
 	test/IMDDimensionFactoryTest.h
 	test/IMDDimensionTest.h
 	test/IndexingUtilsTest.h
+        test/ReducedCellTest.h
 	test/InstrumentDefinitionParserTest.h
 	test/InstrumentRayTracerTest.h
 	test/InstrumentTest.h

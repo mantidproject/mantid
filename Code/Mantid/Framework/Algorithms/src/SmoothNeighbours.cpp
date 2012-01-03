@@ -271,7 +271,7 @@ void SmoothNeighbours::findNeighboursRectangular()
     }
   }
 
-  if (detList.size() == 0)
+  if (detList.empty())
     throw std::runtime_error("This instrument does not have any RectangularDetector's. SmoothNeighbours cannot operate on this instrument at this time.");
 
   // Resize the vector we are setting
@@ -492,7 +492,7 @@ Instrument_const_sptr SmoothNeighbours::fetchInstrument() const
 /**
 Translate the radius into meters.
 @param radiusUnits : The name of the radius units
-@param enteredUnits : The numerical value of the radius in whatever units have been specified
+@param enteredRadius : The numerical value of the radius in whatever units have been specified
 */
 double SmoothNeighbours::translateToMeters(const std::string radiusUnits, const double& enteredRadius)
 {

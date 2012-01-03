@@ -95,7 +95,7 @@ namespace Mantid
 
     /**
      * Set the list of illegal characeters
-     * @param A string containing the characters, as one long string, that are not to be accepted by the ADS
+     * @param illegalChars A string containing the characters, as one long string, that are not to be accepted by the ADS
      * NOTE: This only affects further additions to the ADS
      */
     void AnalysisDataServiceImpl::setIllegalCharacterList(const std::string & illegalChars)

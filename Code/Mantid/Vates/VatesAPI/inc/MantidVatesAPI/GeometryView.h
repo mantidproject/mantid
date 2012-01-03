@@ -10,7 +10,8 @@ namespace Mantid
     class QString;
 
     /** 
-    @class GeometryView, Abstract view for controlling multi-dimensional geometries.
+    @class GeometryView
+    Abstract view for controlling multi-dimensional geometries.
     @author Owen Arnold, Tessella plc
     @date 03/06/2011
 

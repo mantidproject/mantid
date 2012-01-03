@@ -279,7 +279,7 @@ namespace Mantid
           } catch (std::exception& ex)
           {
             g_log.error() << "Error in rebin function: " << ex.what() << std::endl;
-            throw ex;
+            throw;
           }
 
           // Populate the output workspace X values

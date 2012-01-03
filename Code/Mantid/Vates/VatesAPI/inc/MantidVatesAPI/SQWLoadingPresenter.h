@@ -8,7 +8,8 @@ namespace Mantid
   namespace VATES
   {
     /** 
-    @class SQWLoadingPresenter, MVP loading presenter for .*sqw file types.
+    @class SQWLoadingPresenter
+    MVP loading presenter for .*sqw file types.
     @author Owen Arnold, Tessella plc
     @date 16/08/2011
 

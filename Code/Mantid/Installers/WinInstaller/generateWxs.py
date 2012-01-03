@@ -597,7 +597,8 @@ desktopQTIPlot = addTo(QTIPlotEXE,'Shortcut',{'Id':'desktopQTIPlot','Directory':
 addFileV('qtiplotrc', 'qtirc.py', 'qtiplotrc.py', CODEDIR + '/Mantid/MantidPlot/qtiplotrc.py', MantidDlls)
 addFileV('qtiplotutil', 'qtiUtil.py', 'qtiUtil.py', CODEDIR + '/Mantid/MantidPlot/qtiUtil.py', MantidDlls)
 addFileV('mantidplotrc', 'mtdrc.py', 'mantidplotrc.py', CODEDIR + '/Mantid/MantidPlot/mantidplotrc.py', MantidDlls)
-addFileV('mantidplot', 'mtdplot.py', 'mantidplot.py', CODEDIR + '/Mantid/MantidPlot/mantidplot.py', MantidDlls)
+#addFileV('mantidplot', 'mtdplot.py', 'mantidplot.py', CODEDIR + '/Mantid/MantidPlot/mantidplot.py', MantidDlls)
+mantidplot = addCompList('mtdpltmod',CODEDIR + '/Mantid/MantidPlot/mantidplotpy','mantidplotpy',binDir)[0]
 
 # Remove files that may have been created
 files_to_remove = ['qtiplotrc.pyc','qtiUtil.pyc','mantidplotrc.pyc','mantidplot.pyc','MantidFramework.pyc','MantidHeader.pyc',\
@@ -752,6 +753,7 @@ addCRef('MantidDLLs',MantidExec)
 addCRefs(pythonDLLs, MantidExec)
 addCRefs(pythonLib,MantidExec)
 addCRefs(pythonScripts,MantidExec)
+addCRefs(mantidplot,MantidExec)
 addCRef('Plugins',MantidExec)
 addCRef('UserAlgorithms',MantidExec)
 addCRef('Documents',MantidExec)

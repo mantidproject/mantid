@@ -52,7 +52,7 @@ MemoryInfo MemoryManagerImpl::getMemoryInfo()
     @param isCompressedOK :: The address of a boolean indicating if the compression succeeded or not
     @return true is managed workspace is needed
  */
-bool MemoryManagerImpl::goForManagedWorkspace(size_t NVectors, size_t XLength, size_t YLength, bool* isCompressedOK)
+bool MemoryManagerImpl::goForManagedWorkspace(std::size_t NVectors, std::size_t XLength, std::size_t YLength, bool* isCompressedOK)
 {
   int AlwaysInMemory;// Check for disabling flag
   if (Kernel::ConfigService::Instance().getValue("ManagedWorkspace.AlwaysInMemory", AlwaysInMemory)

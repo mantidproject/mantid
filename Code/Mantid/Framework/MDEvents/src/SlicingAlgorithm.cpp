@@ -418,7 +418,7 @@ namespace MDEvents
     m_axisAligned = getProperty("AxisAligned");
 
     // Refer to the original workspace. Make sure that is possible
-    m_originalWS = m_inWS->getOriginalWorkspace();
+    m_originalWS = boost::dynamic_pointer_cast<IMDWorkspace>(m_inWS->getOriginalWorkspace());
     if (m_originalWS)
     {
       if (m_axisAligned)
@@ -665,7 +665,6 @@ namespace MDEvents
    * output MDHistoWorkspace.
    * This needs to be in the space of the INPUT MDEventWorkspace
    *
-   * @param nd :: number of dimensions in the workspace being sliced.
    * @param chunkMin :: the minimum index in each dimension to consider "valid" (inclusive).
    *        NULL to use the entire range.
    * @param chunkMax :: the maximum index in each dimension to consider "valid" (exclusive)

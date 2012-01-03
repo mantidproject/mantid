@@ -13,6 +13,8 @@
 #include <QRgb>
 #include <limits>
 
+#include <boost/math/special_functions/fpclassify.hpp>
+
 //--------------------------------------
 // Public member functions
 //--------------------------------------
@@ -30,7 +32,7 @@ MantidColorMap::MantidColorMap() : QwtColorMap(QwtColorMap::Indexed), m_scale_ty
 //-------------------------------------------------------------------------------------------------
 /**
  * Constructor with filename and type
- * @param 
+ * @param filename :: color map file to load
  * @param type :: The scale type, currently Linear or Log10 
  */
 MantidColorMap::MantidColorMap(const QString & filename, GraphOptions::ScaleType type) : 
@@ -198,7 +200,7 @@ void MantidColorMap::setupDefaultMap()
 double MantidColorMap::normalize(const QwtDoubleInterval &interval, double value) const
 {
   // nan numbers have the property that nan != nan, treat nan as being invalid
-  if( interval.isNull() || m_num_colors == 0 || value != value )
+  if( interval.isNull() || m_num_colors == 0 || boost::math::isnan(value) )
     return m_nan;
 
   const double width = interval.width();

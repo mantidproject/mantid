@@ -201,7 +201,7 @@ void SaveWorkspaces::saveSettings() const
 }
 /**
  * Called in response to a close event
- * @parma event The event object
+ * @param event The event object
  */
 void SaveWorkspaces::closeEvent(QCloseEvent* event)
 {

@@ -70,6 +70,7 @@ public:
    * Expose createSubAlgorithm to python so that a python algorithm can
    * create a sub-algorithm that will not log itself.
    * @param algo_name :: Name of the algorithm to create
+   * @param version :: Version number, -1 is default
    */
   /// Creates and instance of an algorithm
   boost::shared_ptr<Mantid::API::IAlgorithm> _createSubAlgorithm(const std::string& algo_name, const int version=-1)

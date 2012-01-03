@@ -52,7 +52,6 @@ class PropertyHandler;
  * Class FitPropertyBrowser implements QtPropertyBrowser to display 
  * and control fitting function parameters and settings.
  * 
- * @autor Roman Tolchenov, Tessella Support Services plc
  * @date 13/11/2009
  */
 

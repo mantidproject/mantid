@@ -66,27 +66,40 @@ file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh  "#!/bin/csh\n"
 )
 
 file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_make_all_links.sh "#!/bin/sh\n"
-                                                         "ln -s $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot $RPM_INSTALL_PREFIX0/${BIN_DIR}/mantidplot\n"
+                                                         "if [ ! -e $RPM_INSTALL_PREFIX0/${BIN_DIR}/mantidplot ]; then\n"
+                                                         "  ln -s $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot $RPM_INSTALL_PREFIX0/${BIN_DIR}/mantidplot\n"
+                                                         "fi\n"
                                                          "ln -s $RPM_INSTALL_PREFIX0/${ETC_DIR}/mantid.sh /etc/profile.d/mantid.sh\n"
                                                          "ln -s $RPM_INSTALL_PREFIX0/${ETC_DIR}/mantid.csh /etc/profile.d/mantid.csh\n"
 )
 
 file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_make_links.sh "#!/bin/sh\n"
-                                                         "ln -s $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot $RPM_INSTALL_PREFIX0/${BIN_DIR}/mantidplot\n"
+                                                         "if [ ! -e $RPM_INSTALL_PREFIX0/${BIN_DIR}/mantidplot ]; then\n"
+                                                         "  ln -s $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot $RPM_INSTALL_PREFIX0/${BIN_DIR}/mantidplot\n"
+                                                         "fi"
 )
 
 file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_all_links.sh "#!/bin/sh\n"
-                                                             "rm -f $RPM_INSTALL_PREFIX0/${BIN_DIR}/mantidplot\n"
+                                                             "if [ ! -f $RPM_INSTALL_PREFIX0/${PVPLUGINS_DIR}/libMantidParaViewSplatterPlotSMPlugin.so ];then\n"
+                                                             "  rm -f $RPM_INSTALL_PREFIX0/${BIN_DIR}/mantidplot\n"
+                                                             "fi\n"
                                                              "if [ -f /etc/profile.d/mantid.sh ]; then\n"
-							     "  rm /etc/profile.d/mantid.sh\n"
-							     "fi\n"
+                                                             "  rm /etc/profile.d/mantid.sh\n"
+                                                             "fi\n"
                                                              "if [ -f /etc/profile.d/mantid.csh ]; then\n"
-							     "  rm /etc/profile.d/mantid.csh\n"
-							     "fi\n"
+                                                             "  rm /etc/profile.d/mantid.csh\n"
+                                                             "fi\n"
 )
 
 file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_links.sh "#!/bin/sh\n"
-                                                             "rm -f $RPM_INSTALL_PREFIX0/${BIN_DIR}/mantidplot\n"
+                                                             "if [ ! -f $RPM_INSTALL_PREFIX0/${PVPLUGINS_DIR}/libMantidParaViewSplatterPlotSMPlugin.so ];then\n"
+                                                             "  rm -f $RPM_INSTALL_PREFIX0/${BIN_DIR}/mantidplot\n"
+                                                             "fi\n"
+)
+
+file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_empty_install.sh "#!/bin/sh\n"
+                                                             "find $RPM_INSTALL_PREFIX0 -mindepth 1 -type d -empty -delete\n"
+                                                             "rmdir --ignore-fail-on-non-empty -p $RPM_INSTALL_PREFIX0\n"
 )
 
 # Note: On older versions of CMake, this line may mean that to do a "make package" without being root
@@ -107,7 +120,9 @@ if ( ENVVARS_ON_INSTALL )
   set ( CPACK_RPM_PRE_INSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_all_links.sh )
   set ( CPACK_RPM_POST_INSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_make_all_links.sh )
   set ( CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_all_links.sh )
+  set ( CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_empty_install.sh )
 else ( ENVVARS_ON_INSTALL )
   set ( CPACK_RPM_POST_INSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_make_links.sh )
   set ( CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_links.sh )
+  set ( CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_empty_install.sh )
 endif ()

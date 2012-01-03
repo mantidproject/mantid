@@ -80,7 +80,7 @@ namespace Algorithms
     std::vector<int> workspaceIndices = getProperty("WorkspaceIndexList");
     int64_t num_to_do = static_cast<int64_t>(workspaceIndices.size());
     bool doAll = false;
-    if (workspaceIndices.size() == 0)
+    if (workspaceIndices.empty())
     {
       doAll = true;
       num_to_do = in_ws->getNumberHistograms();

@@ -174,7 +174,7 @@ namespace Algorithms
  * @param outname :: The workspace name
  * @param peakOpt :: Location of optimized peak
  * @param rb_param :: Bin boundary string
- * @param groupWS :: GroupingWorkspace for this detector only.
+ * @param groupWSName :: GroupingWorkspace for this detector only.
  *  */
 
   double DiffractionEventCalibrateDetectors::intensity(double x, double y, double z, double rotx, double roty, double rotz,

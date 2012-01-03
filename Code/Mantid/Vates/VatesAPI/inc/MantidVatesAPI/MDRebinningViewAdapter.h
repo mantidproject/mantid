@@ -10,7 +10,8 @@ namespace Mantid
   {
 
     /** 
-    @class MDRebinningViewAdapter, adapter for non-MDRebinningView types that need to be used as MDRebinningViews. See Adapter pattern.
+    @class MDRebinningViewAdapter
+    Adapter for non-MDRebinningView types that need to be used as MDRebinningViews. See Adapter pattern.
     @author Owen Arnold, Tessella plc
     @date 07/09/2011
 

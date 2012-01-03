@@ -39,6 +39,7 @@ public:
 private:
   void setLineViewerValues(QPointF start2D, QPointF end2D, double width);
   void resizeEvent(QResizeEvent * event);
+  void initMenus();
 
 signals:
   void needToClose();
@@ -54,10 +55,12 @@ protected slots:
   void showLineViewer(bool);
   void changeStartOrEnd(Mantid::Kernel::VMD, Mantid::Kernel::VMD);
   void changePlanarWidth(double);
+  void resizeWindow();
 
 protected:
   void deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
   void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
+
 
   /// The SliceViewer
   MantidQt::SliceViewer::SliceViewer * m_slicer;
@@ -79,6 +82,8 @@ protected:
   /// Width of the LineViewer last time it was open
   int m_lastLinerWidth;
 
+  /// Window width
+  int m_desiredWidth;
 };
 
 

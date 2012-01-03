@@ -60,6 +60,7 @@ public:
   void setViewRange(double min, double max);
   void setViewRange(QwtDoubleInterval range);
   void setLog(bool log);
+  void setRenderMode(bool rendering);
 
   double getMinimum() const;
   double getMaximum() const;

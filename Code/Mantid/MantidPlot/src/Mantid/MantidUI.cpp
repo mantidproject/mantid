@@ -1364,7 +1364,7 @@ void  MantidUI::copyWorkspacestoVector(const QList<QTreeWidgetItem*> &selectedIt
 {
   //iterate through each of the selected workspaces
   QList<QTreeWidgetItem*>::const_iterator itr;
-  for(itr=selectedItems.begin();itr!=selectedItems.end();itr++)
+  for(itr=selectedItems.begin();itr!=selectedItems.end();++itr)
   {
     std::string inputWSName=(*itr)->text(0).toStdString();
     inputWSVec.push_back(inputWSName);
@@ -1654,7 +1654,7 @@ void MantidUI::executeDownloadDataFiles(const std::vector<std::string>& filenNam
 }
 
 
-void MantidUI::handleLoadDAEFinishedNotification(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification>& pNf)
+void MantidUI::handleLoadDAEFinishedNotification(const Poco::AutoPtr<Algorithm::FinishedNotification>& pNf)
 {
   std::string wsNAme = pNf->algorithm()->getProperty("OutputWorkspace");
   emit needToCreateLoadDAEMantidMatrix(QString::fromStdString(wsNAme));
@@ -1695,22 +1695,22 @@ void MantidUI::showAlgMonitor()
   m_algMonitor->showDialog();
 }
 
-void MantidUI::handleAddWorkspace(WorkspaceAddNotification_ptr pNf)
+void MantidUI::handleAddWorkspace(Mantid::API::WorkspaceAddNotification_ptr pNf)
 {
   emit workspace_added(QString::fromStdString(pNf->object_name()),(pNf->object()));
 }
 
-void MantidUI::handleReplaceWorkspace(WorkspaceAfterReplaceNotification_ptr pNf)
+void MantidUI::handleReplaceWorkspace(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf)
 {
   emit workspace_replaced(QString::fromStdString(pNf->object_name()),(pNf->object()));
 }
 
-void MantidUI::handleDeleteWorkspace(WorkspaceDeleteNotification_ptr pNf)
+void MantidUI::handleDeleteWorkspace(Mantid::API::WorkspaceDeleteNotification_ptr pNf)
 {
   emit workspace_removed(QString::fromStdString(pNf->object_name()));
 }
 
-void MantidUI::handleClearADS(ClearADSNotification_ptr)
+void MantidUI::handleClearADS(Mantid::API::ClearADSNotification_ptr)
 {
   emit workspaces_cleared();
 }
@@ -1719,7 +1719,7 @@ void MantidUI::handleAlgorithmFactoryUpdates(Mantid::API::AlgorithmFactoryUpdate
 {
   emit algorithms_updated();
 }
-void MantidUI::handleRenameWorkspace(WorkspaceRenameNotification_ptr pNf)
+void MantidUI::handleRenameWorkspace(Mantid::API::WorkspaceRenameNotification_ptr pNf)
 {
   emit workspace_renamed(QString::fromStdString(pNf->object_name()), QString::fromStdString(pNf->new_objectname()));
 }
@@ -2392,7 +2392,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
     if (filter == 2 || filter ==3)
     {
       std::vector<Mantid::Kernel::Property*> ps =ws->run().getLogData();
-      for(std::vector<Mantid::Kernel::Property*>::const_iterator it=ps.begin();it!=ps.end();it++)
+      for(std::vector<Mantid::Kernel::Property*>::const_iterator it=ps.begin();it!=ps.end();++it)
         if ((*it)->name().find("period ") == 0)
         {
           try
@@ -2467,7 +2467,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
   std::map<DateAndTime, double>::iterator it = time_value_map.begin();
   if (it!=time_value_map.end())
   {
-    for (; it!=time_value_map.end(); it++)
+    for (; it!=time_value_map.end(); ++it)
     {
       lastTime = it->first;
       lastValue = it->second;
@@ -2595,7 +2595,7 @@ void MantidUI::showLogFileWindow()
 
 /** Create a Table form specified spectra in a MatrixWorkspace
     @param tableName :: Table name
-    @param workspace :: Shared pointer to the workspace
+    @param workspaceName :: Shared pointer to the workspace
     @param indexList :: A list of spectra indices to go to the table
     @param errs :: If true include the errors into the table
     @param binCentres :: If true the X column will contain the bin centres, i.e. (x_i+1 + x_i)/2.
@@ -2614,7 +2614,7 @@ Table* MantidUI::createTableFromSpectraList(const QString& tableName, const QStr
   int nspec = static_cast<int>(workspace->getNumberHistograms());
   //Loop through the list of index and remove all the indexes that are out of range
 
-  for(QList<int>::iterator it=indexList.begin();it!=indexList.end();it++)
+  for(QList<int>::iterator it=indexList.begin();it!=indexList.end();++it)
   {
     if ((*it) > nspec || (*it) < 0) indexList.erase(it);
   }
@@ -2719,7 +2719,7 @@ MultiLayer* MantidUI::createGraphFromTable(Table* t, int type)
   if (!t) return NULL;
   QStringList  lst=t->colNames();
   QStringList::const_iterator itr;
-  for (itr=lst.begin();itr!=lst.end();itr++)
+  for (itr=lst.begin();itr!=lst.end();++itr)
   {
     //remove the X names from the column list and pass the X removed list
     //to multilayerPlot
@@ -2800,7 +2800,7 @@ void MantidUI::setUpBinGraph(MultiLayer* ml, const QString& Name, Mantid::API::M
   g->setAntialiasing(false);
 }
 
-MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,std::set<int> >& toPlot, bool errs, bool distr)
+MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString, set<int> >& toPlot, bool errs, bool distr)
 {
   // Convert the list into a map (with the same workspace as key in each case)
   QMultiMap<QString,int> pairs;
@@ -2823,6 +2823,7 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,std::set<int> >& t
     @param wsName :: Workspace name
     @param indexList :: A list of spectra indices to be shown in the graph
     @param errs :: If true include the errors on the graph
+    @param distr :: if true, workspace is a distribution
  */
 MultiLayer* MantidUI::plotSpectraList(const QString& wsName, const std::set<int>& indexList, bool errs, bool distr)
 {
@@ -2842,6 +2843,8 @@ MultiLayer* MantidUI::plotSpectraList(const QString& wsName, const std::set<int>
 /** Create a 1d graph form a set of workspace-spectrum pairs
     @param toPlot :: A list of spectra indices to be shown in the graph
     @param errs :: If true include the errors to the graph
+    @param distr :: if true, workspace is a distribution
+    @param style :: curve style for plot
  */
 MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs, bool distr, Graph::CurveType style)
 {
@@ -2884,7 +2887,7 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
   g->newLegend("");
   MantidMatrixCurve* mc(NULL);
 
-  for(QMultiMap<QString,int>::const_iterator it=toPlot.begin();it!=toPlot.end();it++)
+  for(QMultiMap<QString,int>::const_iterator it=toPlot.begin();it!=toPlot.end();++it)
   {
     try {
       mc = new MantidMatrixCurve(it.key(),g,it.value(),errs,distr,style);
@@ -2956,8 +2959,8 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
 /**
  * Draw a color fill plot for each of the listed workspaces. Unfortunately the plotting is 
  * initimately linked to MantidMatrix so that one of these needs to be created first
- * @param wsNames :: For each workspace listed create a 2D colorfill plot 
- * @param curveType :: The curve type for each of the plots
+ * @param ui :: the sequential fitting UI form
+ * @param fitbrowser :: pointer to the fit property browser
  */
 void MantidUI::showSequentialPlot(Ui::SequentialFitDialog* ui, MantidQt::MantidWidgets::FitPropertyBrowser* fitbrowser)
 {
@@ -3032,13 +3035,10 @@ MultiLayer* MantidUI::drawSingleColorFillPlot(const QString & wsName, Graph::Cur
 
 /** Create a 1d graph form specified spectra in a MatrixWorkspace
     @param wsName :: Workspace name
-    @param workspace :: Shared pointer to the workspace
     @param i0 :: Starting index
     @param i1 :: Last index
     @param errs :: If true include the errors to the graph
-    @param binCentres ::  If the workspace is a histogram binCentres defines the way the plot is drawn.
-         If true it is a line going through the bin centres. Otherwise it will be made of horizontal steps
-    @param tableVisible :: Visibility flag for the Table with the plotted data.
+    @param distr :: if true, workspace is a distribution
  */
 MultiLayer* MantidUI::plotSpectraRange(const QString& wsName, int i0, int i1, bool errs, bool distr)
 {
@@ -3057,6 +3057,7 @@ MultiLayer* MantidUI::plotSpectraRange(const QString& wsName, int i0, int i1, bo
 /**  Create a graph and plot the selected rows of a MantidMatrix
      @param m :: Mantid matrix
      @param errs :: True if the errors to be plotted
+     @param distr :: if true, workspace is a distribution
  */
 MultiLayer* MantidUI::plotSelectedRows(const MantidMatrix * const m, bool errs, bool distr)
 {
@@ -3159,6 +3160,7 @@ void MantidUI::savedatainNexusFormat(const std::string& fileName,const std::stri
 /** Loads data from nexus file
  * @param wsName :: Name of the workspace to be created
  * @param fileName :: name of the nexus file
+ * @param project :: if true, load stops GUI execution
  */
 void MantidUI::loaddataFromNexusFile(const std::string& wsName,const std::string& fileName,bool project)
 {
@@ -3178,6 +3180,7 @@ void MantidUI::loaddataFromNexusFile(const std::string& wsName,const std::string
 /** Loads data from raw file
  * @param wsName :: Name of the workspace to be created
  * @param fileName :: name of the raw file
+ * @param project :: if true, load stops GUI execution
  */
 void MantidUI::loadadataFromRawFile(const std::string& wsName,const std::string& fileName,bool project)
 {
@@ -3323,7 +3326,7 @@ void MantidUI::memoryImage()
   int row = 0;
   int col = 0;
   QImage image(colNum,rowNum,QImage::Format_Mono);
-  for(vector<mem_block>::iterator b=mem.begin();b!=mem.end();b++)
+  for(vector<mem_block>::iterator b=mem.begin();b!=mem.end();++b)
   {
     int n = b->size/1024;
     for(int i=0;i<n;i++)
@@ -3353,7 +3356,7 @@ void MantidUI::memoryImage2()
   int row = 0;
   int col = 0;
   QImage image(colNum,rowNum,QImage::Format_Mono);
-  for(vector<mem_block>::iterator b=mem.begin();b!=mem.end();b++)
+  for(vector<mem_block>::iterator b=mem.begin();b!=mem.end();++b)
   {
     int n = b->size/1024;
     for(int i=0;i<n;i++)

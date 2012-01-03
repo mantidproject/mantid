@@ -36,7 +36,7 @@ void AlgorithmInputHistoryImpl::clearAlgorithmInput(const QString & algName)
 /**
  * Retrieve an old parameter value 
  * @param algName :: The name of the algorithm
- * @param The :: name of the property
+ * @param propName :: The name of the property
  */
 QString AlgorithmInputHistoryImpl::previousInput(const QString & algName, const QString & propName) const
 {

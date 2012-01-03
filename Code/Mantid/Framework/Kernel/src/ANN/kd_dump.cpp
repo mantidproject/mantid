@@ -372,13 +372,10 @@ static ANNkd_ptr annReadTree(
 	int					&next_idx)				// next index (modified)
 {
 	char tag[STRING_LEN];						// tag (leaf, split, shrink)
-	int n_pts;									// number of points in leaf
 	int cd;										// cut dimension
 	ANNcoord cv;								// cut value
 	ANNcoord lb;								// low bound
 	ANNcoord hb;								// high bound
-	int n_bnds;									// number of bounding sides
-	int sd;										// which side
 
 	in >> tag;									// input node tag
 
@@ -389,7 +386,7 @@ static ANNkd_ptr annReadTree(
 	//	Read a leaf
 	//------------------------------------------------------------------
 	if (strcmp(tag, "leaf") == 0) {				// leaf node
-
+        int n_pts;								// number of points in leaf
 		in >> n_pts;							// input number of points
 		int old_idx = next_idx;					// save next_idx
 		if (n_pts == 0) {						// trivial leaf
@@ -422,11 +419,12 @@ static ANNkd_ptr annReadTree(
 		if (tree_type != BD_TREE) {
 			annError("Shrinking node not allowed in kd-tree", ANNabort);
 		}
-
+        int n_bnds;								// number of bounding sides
 		in >> n_bnds;							// number of bounding sides
 												// allocate bounds array
 		ANNorthHSArray bds = new ANNorthHalfSpace[n_bnds];
 		for (int i = 0; i < n_bnds; i++) {
+            int sd;								// which side
 			in >> cd >> cv >> sd;				// input bounding halfspace
 												// copy to array
 			bds[i] = ANNorthHalfSpace(cd, cv, sd);

@@ -52,7 +52,7 @@ struct UNITS_CONVERSION
 
 // Fast conversion:
 template<>
-struct UNITS_CONVERSION<ConvertFast>
+struct UNITS_CONVERSION<ConvFast>
 {
 
     void setUpConversion(ConvertToMDEvents const *const pHost)

@@ -96,20 +96,20 @@ namespace Mantid
     /**
      * Calculate the Y and E values for the given possible overlap
      * @param inputWS :: A pointer to the inputWS
-     * @param newPoly :: A reference to a polygon to test for overlap
+     * @param outputPoly :: A reference to a polygon to test for overlap
      * @returns A pair of Y and E values
      */
     std::pair<double,double> 
     SofQW2::calculateYE(API::MatrixWorkspace_const_sptr inputWS,
-                        const ConvexPolygon & newPoly) const
+                        const ConvexPolygon & outputPoly) const
     {
       // Build a list intersection locations in terms of workspace indices
       // along with corresponding weights from that location
-      std::vector<BinWithWeight> overlaps = findIntersections(inputWS, newPoly);
+      std::vector<BinWithWeight> overlaps = findIntersections(inputWS, outputPoly);
       std::pair<double,double> binValues(0,0);
       if( inputWS->isDistribution() )
       {
-        const double newWidth = newPoly[3].X() - newPoly[0].X(); // For distribution
+        const double newWidth = outputPoly[3].X() - outputPoly[0].X(); // For distribution
         binValues = calculateDistYE(inputWS, overlaps, newWidth);
       }
       else
@@ -173,18 +173,17 @@ namespace Mantid
 
     /**
      * Find the overlap of the inputWS with the given polygon
-     * @param oldAxis1 :: Axis 1 bin boundaries from the input grid
-     * @param oldAxis2 :: Axis 2 bin boundaries from the input grid
-     * @param newPoly :: The new polygon to test
+     * @param inputWS :: A pointer to the inputWS
+     * @param poly :: The new polygon to test
      * @returns A list of intersection locations with weights of the overlap
      */
     std::vector<SofQW2::BinWithWeight> 
     SofQW2::findIntersections(API::MatrixWorkspace_const_sptr inputWS,
-                              const Geometry::ConvexPolygon & newPoly) const
+                              const Geometry::ConvexPolygon & poly) const
     {
       const MantidVec & oldAxis1 = inputWS->readX(0);
       // Find the X boundaries
-      const double xn_lo(newPoly[0].X()), xn_hi(newPoly[2].X());
+      const double xn_lo(poly[0].X()), xn_hi(poly[2].X());
       MantidVec::const_iterator start_it = std::upper_bound(oldAxis1.begin(), oldAxis1.end(), xn_lo);
       MantidVec::const_iterator end_it = std::upper_bound(oldAxis1.begin(), oldAxis1.end(), xn_hi);
       size_t start_index(0), end_index(oldAxis1.size() - 1);
@@ -196,7 +195,7 @@ namespace Mantid
       {
         end_index = end_it - oldAxis1.begin();
       }
-      const double yn_lo(newPoly[0].Y()), yn_hi(newPoly[1].Y());
+      const double yn_lo(poly[0].Y()), yn_hi(poly[1].Y());
 
       std::vector<BinWithWeight> overlaps;
       overlaps.reserve(5); // Have a guess at a possible limit
@@ -215,7 +214,7 @@ namespace Mantid
               V2D(xo_hi, qold.upperRight), V2D(xo_lo, qold.upperLeft));
           try
           {
-            ConvexPolygon overlap = intersectionByLaszlo(newPoly, oldPoly);
+            ConvexPolygon overlap = intersectionByLaszlo(poly, oldPoly);
             overlaps.push_back(BinWithWeight(itr->wsIndex,j,itr->weight*overlap.area()/oldPoly.area()));
           }
           catch(Geometry::NoIntersectionException &)
@@ -227,7 +226,7 @@ namespace Mantid
 
     /**
      * Init variables caches
-     * @param :: Workspace pointer
+     * @param workspace :: Workspace pointer
      */
     void SofQW2::initCachedValues(API::MatrixWorkspace_const_sptr workspace)
     {

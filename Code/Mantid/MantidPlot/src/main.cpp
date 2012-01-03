@@ -215,7 +215,9 @@ int main( int argc, char ** argv )
     splash.finish(mw);
 
     app.connect( &app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()) );
-    return app.exec();
+    app.exec();
+    // Return the exit code (for MantidPlot unit tests)
+    return mw->getExitCode();
   }
   catch(std::exception& e)
   {

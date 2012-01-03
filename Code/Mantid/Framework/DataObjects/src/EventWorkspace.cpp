@@ -90,7 +90,7 @@ namespace DataObjects
     *  @param XLength :: The number of X data points/bin boundaries in each vector (ignored)
     *  @param YLength :: The number of data/error points in each vector (ignored)
    */
-  void EventWorkspace::init(const size_t &NVectors, const size_t &XLength, const size_t &YLength)
+  void EventWorkspace::init(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength)
   {
     (void) YLength; //Avoid compiler warning
 
@@ -136,7 +136,7 @@ namespace DataObjects
    *          Default: -1, meaning copy all.
    *
    */
-  void EventWorkspace::copyDataFrom(const EventWorkspace& source, size_t sourceStartWorkspaceIndex, size_t sourceEndWorkspaceIndex)
+  void EventWorkspace::copyDataFrom(const EventWorkspace& source, std::size_t sourceStartWorkspaceIndex, std::size_t sourceEndWorkspaceIndex)
   {
     //Start with nothing.
     this->clearData(); //properly de-allocates memory!
@@ -450,7 +450,7 @@ namespace DataObjects
    * @param workspace_index :: The histogram workspace index number.
    * @returns A reference to the eventlist
    */
-  EventList& EventWorkspace::getEventList(const size_t workspace_index)
+  EventList& EventWorkspace::getEventList(const std::size_t workspace_index)
   {
     EventList * result = data[workspace_index];
     if (!result)
@@ -464,7 +464,7 @@ namespace DataObjects
    * @param workspace_index :: The workspace index number.
    * @returns A const reference to the eventlist
    */
-  const EventList& EventWorkspace::getEventList(const size_t workspace_index) const
+  const EventList& EventWorkspace::getEventList(const std::size_t workspace_index) const
   {
     EventList * result = data[workspace_index];
     if (!result)
@@ -479,7 +479,7 @@ namespace DataObjects
    * @param workspace_index :: index into WS
    * @return an EventList pointer at the given workspace index number
    */
-  EventList * EventWorkspace::getEventListPtr(const size_t workspace_index)
+  EventList * EventWorkspace::getEventListPtr(const std::size_t workspace_index)
   {
     return data[workspace_index];
   }
@@ -494,7 +494,7 @@ namespace DataObjects
    * @param workspace_index :: The workspace index number.
    * @return An event list (new or existing) at the index provided
    */
-  EventList& EventWorkspace::getOrAddEventList(const size_t workspace_index)
+  EventList& EventWorkspace::getOrAddEventList(const std::size_t workspace_index)
   {
     size_t old_size = data.size();
     if (workspace_index >= old_size)
@@ -525,10 +525,6 @@ namespace DataObjects
    * This requires that a non-empty spectra-detector map
    * Can do it in parallel, though my time tests show it takes MORE time in parallel :(
    * This calls doneAddingEventLists() to finalize after the end.
-   *
-   * @param parallel: set to true to perform this padding in parallel, which
-   *        may increase speed, though my tests show it slows it down.
-   *
    */
   void EventWorkspace::padSpectra()
   {
@@ -628,7 +624,7 @@ namespace DataObjects
   /// Note: the MRUlist should be cleared before calling getters for the Y or E data
   /// @param index :: the workspace index to return
   /// @returns A reference to the vector of binned X values
-  MantidVec& EventWorkspace::dataX(const size_t index)
+  MantidVec& EventWorkspace::dataX(const std::size_t index)
   {
     if (index >= this->m_noVectors)
       throw std::range_error("EventWorkspace::dataX, histogram number out of range");
@@ -639,7 +635,7 @@ namespace DataObjects
   /// Note: the MRUlist should be cleared before calling getters for the Y or E data
   /// @param index :: the workspace index to return
   /// @returns A reference to the vector of binned error values
-  MantidVec& EventWorkspace::dataDx(const size_t index)
+  MantidVec& EventWorkspace::dataDx(const std::size_t index)
   {
     if (index >= this->m_noVectors)
       throw std::range_error("EventWorkspace::dataDx, histogram number out of range");
@@ -650,7 +646,7 @@ namespace DataObjects
   /// Note: these non-const access methods will throw NotImplementedError
   /// @param index :: the workspace index to return
   /// @returns A reference to the vector of binned Y values
-  MantidVec& EventWorkspace::dataY(const size_t index)
+  MantidVec& EventWorkspace::dataY(const std::size_t index)
   {
     if (index >= this->m_noVectors)
       throw std::range_error("EventWorkspace::dataY, histogram number out of range");
@@ -661,7 +657,7 @@ namespace DataObjects
   /// Note: these non-const access methods will throw NotImplementedError
   /// @param index :: the workspace index to return
   /// @returns A reference to the vector of binned error values
-  MantidVec& EventWorkspace::dataE(const size_t index)
+  MantidVec& EventWorkspace::dataE(const std::size_t index)
   {
     if (index >= this->m_noVectors)
       throw std::range_error("EventWorkspace::dataE, histogram number out of range");
@@ -675,7 +671,7 @@ namespace DataObjects
   //---------------------------------------------------------------------------
   /** @return the const data X vector at a given workspace index
    * @param index :: workspace index   */
-  const MantidVec& EventWorkspace::dataX(const size_t index) const
+  const MantidVec& EventWorkspace::dataX(const std::size_t index) const
   {
     if (index >= this->m_noVectors)
       throw std::range_error("EventWorkspace::dataX, histogram number out of range");
@@ -684,7 +680,7 @@ namespace DataObjects
 
   /** @return the const data X error vector at a given workspace index
    * @param index :: workspace index   */
-  const MantidVec& EventWorkspace::dataDx(const size_t index) const
+  const MantidVec& EventWorkspace::dataDx(const std::size_t index) const
   {
     if (index >= this->m_noVectors)
       throw std::range_error("EventWorkspace::dataDx, histogram number out of range");
@@ -696,7 +692,7 @@ namespace DataObjects
   //---------------------------------------------------------------------------
   /** @return the const data Y vector at a given workspace index
    * @param index :: workspace index   */
-  const MantidVec& EventWorkspace::dataY(const size_t index) const
+  const MantidVec& EventWorkspace::dataY(const std::size_t index) const
   {
     if (index >= this->m_noVectors)
       throw std::range_error("EventWorkspace::dataY, histogram number out of range");
@@ -708,7 +704,7 @@ namespace DataObjects
   //---------------------------------------------------------------------------
   /** @return the const data E (error) vector at a given workspace index
    * @param index :: workspace index   */
-  const MantidVec& EventWorkspace::dataE(const size_t index) const
+  const MantidVec& EventWorkspace::dataE(const std::size_t index) const
   {
     if (index >= this->m_noVectors)
       throw std::range_error("EventWorkspace::dataE, histogram number out of range");
@@ -719,7 +715,7 @@ namespace DataObjects
   //---------------------------------------------------------------------------
   /** @return a pointer to the X data vector at a given workspace index
    * @param index :: workspace index   */
-  Kernel::cow_ptr<MantidVec> EventWorkspace::refX(const size_t index) const
+  Kernel::cow_ptr<MantidVec> EventWorkspace::refX(const std::size_t index) const
   {
     if (index >= this->m_noVectors)
       throw std::range_error("EventWorkspace::refX, histogram number out of range");

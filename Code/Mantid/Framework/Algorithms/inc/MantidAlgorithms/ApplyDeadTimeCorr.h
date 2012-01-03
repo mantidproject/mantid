@@ -46,7 +46,7 @@ namespace Algorithms
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
-    virtual const std::string category() const { return "Muon";}
+    virtual const std::string category() const { return "Muon;CorrectionFunctions\\EfficiencyCorrections";}
     
   private:
     /// Initialise the properties

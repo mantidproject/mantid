@@ -127,12 +127,6 @@ private slots:
 
   ///
   void muonAnalysisHelpGroupingClicked();
-
-  ///
-  void muonAnalysisHelpPlottingClicked();
-
-  ///
-  void muonAnalysisHelpDataAnalysisClicked();
   
   ///
   void runFirstGoodBinFront();
@@ -161,7 +155,7 @@ private slots:
   /// Update the pair plot based on changes on the group page.
   void settingsTabUpdatePlot();
 
-  /// Assigns a peak picker tool to the workspace (@param::workspace name)
+  /// Assigns a peak picker tool to the workspace
   void assignPeakPickerTool(const QString &);
 
   /// Change the data style and color

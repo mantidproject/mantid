@@ -272,7 +272,7 @@ MisMatch<T> & MisMatch<T>::operator=(const MisMatch<T> &)
 {
   /**
     Copy assignment
-    @param A :: MisMatch to copy
+    @param rhs :: MisMatch to copy
   */
   throw NotImplementedError("MisMatch<T>::operator=");
 }

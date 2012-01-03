@@ -82,7 +82,7 @@ namespace Algorithms
        Temp=(dynamic_cast<Kernel::TimeSeriesProperty<double> *>(inputWS->run().getProperty(Tstring)))->getStatistics().mean;
      else
        Temp=boost::lexical_cast<double>(Tstring);
-     double oneOverT=1.0/(Temp*PhysicalConstants::meVtoKelvin);
+     double oneOverT=PhysicalConstants::meVtoKelvin/Temp;
      // Run the exponential correction algorithm explicitly to enable progress reporting
      IAlgorithm_sptr expcor = createSubAlgorithm("OneMinusExponentialCor",0.0,1.0);
      expcor->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);

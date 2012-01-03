@@ -24,6 +24,7 @@ namespace CxxTest
         virtual ~TestSuite();
         virtual void setUp();
         virtual void tearDown();
+        virtual bool skipTests();
     };
     
     class AbortTest {};

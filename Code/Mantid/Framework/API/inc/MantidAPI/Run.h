@@ -143,6 +143,7 @@ namespace Mantid
       /**
        * Remove a named log entry
        * @param name :: The name of the entry to remove
+       * @param delproperty :: If true, delete the log entry
        */
       void removeLogData(const std::string &name, const bool delproperty=true) { return removeProperty(name, delproperty); }
       //@}

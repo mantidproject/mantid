@@ -77,9 +77,7 @@ static void addPeak(size_t num, double x, double y, double z, double radius)
 IMDWorkspace_sptr makeDemoData(bool binned = false)
 {
   // Create a fake workspace
-  size_t numBins;
-
-  numBins=100;
+  //size_t numBins = 100;
 
   // ---- Start with empty MDEW ----
   FrameworkManager::Instance().exec("CreateMDWorkspace", 16,

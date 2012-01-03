@@ -13,7 +13,7 @@ class ReactorSANSResolution(PythonAlgorithm):
     """
     
     def category(self):
-        return "SANS"
+        return "SANS;PythonAlgorithms"
 
     def name(self):
         return "ReactorSANSResolution"

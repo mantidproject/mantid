@@ -204,6 +204,7 @@ void LoadNexusProcessed::exec()
 /** Load the event_workspace field
  *
  * @param wksp_cls
+ * @param xbins
  * @param progressStart
  * @param progressRange
  * @return
@@ -1430,7 +1431,7 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped
  *Validates the optional 'spectra to read' properties, if they have been set
  * @param numberofspectra :: number of spectrum
  */
-void LoadNexusProcessed::checkOptionalProperties(const size_t numberofspectra )
+void LoadNexusProcessed::checkOptionalProperties(const std::size_t numberofspectra )
 {
   //read in the settings passed to the algorithm
   m_spec_list = getProperty("SpectrumList");
@@ -1476,7 +1477,7 @@ void LoadNexusProcessed::checkOptionalProperties(const size_t numberofspectra )
  * @param numberofspectra :: number of spectrums
  * @return the size of a workspace
  */
-size_t LoadNexusProcessed::calculateWorkspacesize(const size_t numberofspectra)
+size_t LoadNexusProcessed::calculateWorkspacesize(const std::size_t numberofspectra)
 {
   // Calculate the size of a workspace, given its number of spectra to read
   int total_specs;

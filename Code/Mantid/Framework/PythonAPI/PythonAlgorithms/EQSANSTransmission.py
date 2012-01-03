@@ -43,7 +43,7 @@ class EQSANSTransmission(PythonAlgorithm):
     min_transmission_peak_to_bg_ratio = 5
     
     def category(self):
-        return "SANS"
+        return "SANS;PythonAlgorithms"
 
     def name(self):
         return "EQSANSTransmission"

@@ -8,7 +8,6 @@ set ( SRC_FILES
 	src/CompositeFunctionBuilder.cpp
 	src/CompositeImplicitFunction.cpp
 	src/CompositeImplicitFunctionParser.cpp
-	src/ConvertToQ3DdE.cpp
 	src/ConvertToMDEvents.cpp
 	src/DivideMD.cpp
 	src/EqualToMD.cpp
@@ -35,6 +34,7 @@ set ( SRC_FILES
 	src/UnaryOperationMD.cpp
 	src/Vector3DParameterParser.cpp
 	src/XorMD.cpp
+	src/processDetectorsPositions.cpp
 )
 
 #set ( SRC_UNITY_IGNORE_FILES src/IDynamicRebinning.cpp
@@ -49,11 +49,6 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CompositeFunctionBuilder.h
 	inc/MantidMDAlgorithms/CompositeImplicitFunction.h
 	inc/MantidMDAlgorithms/CompositeImplicitFunctionParser.h
-	inc/MantidMDAlgorithms/ConvertToQ3DdE.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsMethods.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsCoordTransf.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h
-	inc/MantidMDAlgorithms/ConvertToMDEvents.h
 	inc/MantidMDAlgorithms/DivideMD.h
 	inc/MantidMDAlgorithms/EqualToMD.h
 	inc/MantidMDAlgorithms/ExponentialMD.h
@@ -80,6 +75,12 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/Vector3DParameter.h
 	inc/MantidMDAlgorithms/Vector3DParameterParser.h
 	inc/MantidMDAlgorithms/XorMD.h
+	inc/MantidMDAlgorithms/ConvertToMDEvents.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsMethods.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsCoordTransf.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h
+    inc/MantidMDAlgorithms/ConvertToMDEventsDetInfo.h 	
+	
 )
 
 # Test files. Other source files required.
@@ -138,7 +139,7 @@ set_property ( TARGET MDAlgorithms PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc ../MDEvents/inc)
 
-target_link_libraries ( MDAlgorithms ${MANTIDLIBS} MDEvents CurveFitting)
+target_link_libraries ( MDAlgorithms ${MANTIDLIBS} MDEvents)
 
 # Create test file projects
 if ( CXXTEST_FOUND )
@@ -151,10 +152,10 @@ if ( CXXTEST_FOUND )
                         ../TestHelpers/src/BinaryOperationMDTestHelper.cpp )
   if ( GMOCK_FOUND AND GTEST_FOUND )
     cxxtest_add_test ( MDAlgorithmsTest ${TEST_FILES} ${GMOCK_TEST_FILES})
-    target_link_libraries( MDAlgorithmsTest MDAlgorithms DataHandling ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
+    target_link_libraries( MDAlgorithmsTest MDAlgorithms DataHandling CurveFitting ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
   else ()
     cxxtest_add_test ( MDAlgorithmsTest ${TEST_FILES} )
-    target_link_libraries( MDAlgorithmsTest MDAlgorithms DataHandling )
+    target_link_libraries( MDAlgorithmsTest MDAlgorithms DataHandling CurveFitting )
   endif ()
   add_dependencies ( FrameworkTests MDAlgorithmsTest )
   # Add to the 'FrameworkTests' group in VS

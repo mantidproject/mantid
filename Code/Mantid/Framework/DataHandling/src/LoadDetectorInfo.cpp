@@ -541,7 +541,7 @@ void LoadDetectorInfo::adjustXs(const std::vector<detid_t> &detIDs, const std::v
   {// simplist case to code, adjust the bins in each spectrum
     adjustXsUnCommon(offsets, spectraList, specs2index, missingDetectors);
   }
-  if ( missingDetectors.size() > 0 )
+  if ( !missingDetectors.empty() )
   {
     g_log.warning() << "The following detector IDs were read in the input file but aren't associated with any spectra: " << detIDs[missingDetectors[0]] << std::endl;
     for ( std::vector<int>::size_type i = 0; i < missingDetectors.size(); ++i )

@@ -421,7 +421,7 @@ void PeakIntegration::sumneighbours(std::string det_name, int x0, int y0, int Su
     }
   }
 
-  if (detList.size() == 0)
+  if (detList.empty())
     throw std::runtime_error("This instrument does not have any RectangularDetector's. PeakIntegration cannot operate on this instrument at this time.");
 
   int TOFmin=0, TOFmax=0;
@@ -642,7 +642,7 @@ int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0, int 
     }
   }
 
-  if (detList.size() == 0)
+  if (detList.empty())
     throw std::runtime_error("This instrument does not have any RectangularDetector's. PeakIntegration cannot operate on this instrument at this time.");
 
   //Loop through the RectangularDetector's we listed before.

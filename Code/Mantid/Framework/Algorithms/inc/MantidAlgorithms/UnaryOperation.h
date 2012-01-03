@@ -54,13 +54,15 @@ namespace Mantid
       virtual ~UnaryOperation();
 
       /// Algorithm's category for identification
-      virtual const std::string category() const { return "CorrectionFunctions";}
+      virtual const std::string category() const { return "Arithmetic";}
 
     protected:
       // Overridden Algorithm methods
       virtual void init();
       virtual void exec();
-
+      virtual void execEvent();
+      template<class T>
+          void unaryOperationEventHelper(std::vector<T>& wevector);
       /// The name of the input workspace property
       virtual const std::string inputPropName() const { return "InputWorkspace";}
       /// The name of the output workspace property
@@ -79,6 +81,9 @@ namespace Mantid
        *  @param EOut :: A reference to the output error
        */
       virtual void performUnaryOperation(const double XIn, const double YIn, const double EIn, double& YOut, double& EOut) = 0;
+
+      /// flag to use histogram representation instead of events for certain algorithms
+      bool useHistogram;
     };
 
   } // namespace Algorithm

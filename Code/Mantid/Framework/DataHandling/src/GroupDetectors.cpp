@@ -159,7 +159,7 @@ void GroupDetectors::exec()
     WS->getIndicesFromDetectorIDs(detectorList, indexList);
   }
 
-  if ( indexList.size() == 0 )
+  if ( indexList.empty() )
   {
       g_log.warning("Nothing to group");
       return;

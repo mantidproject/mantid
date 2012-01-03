@@ -4006,7 +4006,7 @@ void Graph::restoreFunction(const QStringList& lst)
   double start = 0.0, end = 0.0;
 
   QStringList::const_iterator line = lst.begin();
-  for (line++; line != lst.end(); line++){
+  for (line++; line != lst.end(); ++line){
     QString s = *line;
     if (s.contains("<Type>"))
       type = (FunctionCurve::FunctionType)s.remove("<Type>").remove("</Type>").stripWhiteSpace().toInt();
@@ -4042,7 +4042,7 @@ void Graph::restoreFunction(const QStringList& lst)
   c_keys[n_curves-1] = d_plot->insertCurve(c);
 
   QStringList l;
-  for (line++; line != lst.end(); line++)
+  for (line++; line != lst.end(); ++line)
     l << *line;
   c->restoreCurveLayout(l);
 
@@ -4814,6 +4814,15 @@ void Graph::setCurveBrush(int index, const QBrush& b)
   c->setBrush(b);
 }
 
+void Graph::setCurveSkipSymbolsCount(int index, int count)
+{
+  PlotCurve *c = dynamic_cast<PlotCurve*>(curve(index));
+  if (!c)
+    return;
+
+  c->setSkipSymbolsCount(count);
+}
+
 BoxCurve* Graph::openBoxDiagram(Table *w, const QStringList& l, int fileVersion)
 {
   if (!w)
@@ -5390,6 +5399,141 @@ void Graph::setCurveLineWidth(int curveIndex, double width)
     replot();
     emit modifiedGraph();
   }
+}
+
+void Graph::setGrayScale()
+{
+  if (isPiePlot())
+    return;
+
+  int curves = d_plot->curvesList().size(); //QtiPlot: d_curves.size();
+  int dv = int(255 / double(curves));
+  // QtiPlot: int i = 0;
+  QColor color = Qt::black;
+  int hue = color.hue();
+  for (int i = 0; i < curves; i++) // QtiPlot: foreach (QwtPlotItem *it, d_curves)
+  {
+    QwtPlotItem * it = plotItem(i);
+    if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram)
+    {
+      ((Spectrogram *) it)->setGrayScale();
+      continue;
+    }
+
+    PlotCurve *c = (PlotCurve *) it;
+    if (c->type() == ErrorBars)
+      continue;
+
+    QPen pen = c->pen();
+    if (i)
+    {
+      int v = i * dv;
+      if (v > 255)
+        v = 0;
+      color = QColor::fromHsv(hue, 0, v);
+    }
+    pen.setColor(color);
+    c->setPen(pen);
+
+    QBrush brush = c->brush();
+    if (brush.style() != Qt::NoBrush)
+    {
+      brush.setColor(color);
+      c->setBrush(brush);
+    }
+
+    QwtSymbol symbol = c->symbol();
+    pen = symbol.pen();
+    pen.setColor(color);
+    symbol.setPen(pen);
+    if (symbol.brush().style() != Qt::NoBrush)
+      symbol.setBrush(QBrush(color));
+    c->setSymbol(symbol);
+    // QtiPlot: i++;
+  }
+
+  for (int i = 0; i < curves; i++) // QtiPlot: foreach (QwtPlotItem *it, d_curves)
+  {
+    QwtPlotItem * it = plotItem(i);
+    if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram)
+      continue;
+
+    PlotCurve *c = (PlotCurve *) it;
+    if (c->type() == ErrorBars)
+    {
+      QwtErrorPlotCurve *er = (QwtErrorPlotCurve *) it; // QtiPlot: ErrorBarsCurve *er = (ErrorBarsCurve *) it;
+      DataCurve* mc = er->masterCurve();
+      if (mc)
+        er->setColor(mc->pen().color());
+    }
+  }
+
+  replot();
+  emit modifiedGraph();
+}
+
+void Graph::setIndexedColors()
+{
+  QList<QColor> colors(ColorBox::defaultColors());
+// QtiPlot:
+//  MultiLayer *ml = multiLayer();
+//  if (ml && ml->applicationWindow())
+//    colors = ml->applicationWindow()->indexedColors();
+//  else
+//    colors = ColorBox::defaultColors();
+
+  // QtiPlot: int i = 0;
+  int curves = d_plot->curvesList().size();
+  for (int i = 0; i < curves; i++) // QtiPlot: foreach (QwtPlotItem *it, d_curves)
+  {
+    QwtPlotItem * it = plotItem(i);
+    if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram)
+      continue;
+
+    PlotCurve *c = (PlotCurve *) it;
+    if (c->type() == ErrorBars)
+      continue;
+
+    QPen pen = c->pen();
+    QColor color = colors[i];
+    pen.setColor(color);
+    c->setPen(pen);
+
+    QBrush brush = c->brush();
+    if (brush.style() != Qt::NoBrush)
+    {
+      brush.setColor(color);
+      c->setBrush(brush);
+    }
+
+    QwtSymbol symbol = c->symbol();
+    pen = symbol.pen();
+    pen.setColor(color);
+    symbol.setPen(pen);
+    if (symbol.brush().style() != Qt::NoBrush)
+      symbol.setBrush(QBrush(color));
+    c->setSymbol(symbol);
+    // QtiPlot: i++;
+  }
+
+  for (int i = 0; i < curves; i++) // QtiPlot: foreach (QwtPlotItem *it, d_curves)
+  {
+    QwtPlotItem * it = plotItem(i);
+    if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram)
+      continue;
+
+    PlotCurve *c = (PlotCurve *) it;
+    if (c->type() == ErrorBars)
+    {
+      QwtErrorPlotCurve *er = (QwtErrorPlotCurve *) it; // QtiPlot: ErrorBarsCurve *er = (ErrorBarsCurve *) it;
+      DataCurve* mc = er->masterCurve();
+      if (mc)
+        er->setColor(mc->pen().color());
+    }
+  }
+
+  replot();
+  emit modifiedGraph();
 }
 
 DataCurve* Graph::masterCurve(QwtErrorPlotCurve *er)

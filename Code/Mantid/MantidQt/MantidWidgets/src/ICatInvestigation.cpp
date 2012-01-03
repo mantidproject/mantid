@@ -26,7 +26,7 @@ namespace MantidQt
     //----------------------
     ///Constructor
     ICatInvestigation::ICatInvestigation(long long investId,const QString &ProposalId,
-        const QString &Title,const QString &Instrument,const QString &RunRange,ITableWorkspace_sptr& ws2_sptr,QWidget *par) :
+        const QString &Title,const QString &Instrument,const QString &RunRange,Mantid::API::ITableWorkspace_sptr& ws2_sptr,QWidget *par) :
         QWidget(par),m_invstId(investId),m_ProposalId(ProposalId),m_Title(Title),
         m_Instrument(Instrument),m_RunRange(RunRange),m_downloadedFileList()
     {
@@ -248,7 +248,6 @@ namespace MantidQt
 
     /** this method gets called when an item on the investigation tree widget is  clicked
      *@param item :: selected item
-     *@param int ::
      */
     void ICatInvestigation::investigationClicked(QTreeWidgetItem* item, int)
     {
@@ -289,7 +288,7 @@ namespace MantidQt
 
     }
     /**This method populates the investigation table widget
-     *@param ws_sptr :: shared pointer to workspace
+     *@param dataws_sptr :: shared pointer to workspace
      *@param  type - string used to identify datasets or data files
      *@param bEnable :: flag to enable sorting
      */

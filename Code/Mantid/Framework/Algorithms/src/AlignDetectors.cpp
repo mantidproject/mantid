@@ -56,7 +56,6 @@ void AlignDetectors::initDocs()
  * for all pixel IDs in a workspace.
  * @param inputWS the workspace containing the instrument geometry of interest.
  * @param offsetsWS map between pixelID and offset (from the calibration file)
- * @param vulcancorrection:  boolean to use l2 from Rectangular Detector parent
  * @return map of conversion factors between TOF and dSpacing
  */
 std::map<detid_t, double> * AlignDetectors::calcTofToD_ConversionMap(Mantid::API::MatrixWorkspace_const_sptr inputWS,

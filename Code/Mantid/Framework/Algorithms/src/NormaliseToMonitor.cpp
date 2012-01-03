@@ -333,7 +333,7 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getMonitorWorkspace(API::MatrixWor
  *  @param index :: The index of the spectrum to extract
  *  @returns A workspace containing the single spectrum requested
  */
-API::MatrixWorkspace_sptr NormaliseToMonitor::extractMonitorSpectrum(API::MatrixWorkspace_sptr WS, const size_t index)
+API::MatrixWorkspace_sptr NormaliseToMonitor::extractMonitorSpectrum(API::MatrixWorkspace_sptr WS, const std::size_t index)
 {
   IAlgorithm_sptr childAlg = createSubAlgorithm("ExtractSingleSpectrum");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);

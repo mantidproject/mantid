@@ -23,7 +23,7 @@ class ConvertVULCANCalFile(PythonAlgorithm):
     def category(self):
         """ Mantid required
         """
-        return "Diffraction"
+        return "Diffraction;PythonAlgorithms"
 
     def name(self):
         """ Mantid require

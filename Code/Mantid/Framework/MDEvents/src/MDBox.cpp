@@ -1,9 +1,9 @@
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
-#include "MantidKernel/DiskMRU.h"
+#include "MantidKernel/DiskBuffer.h"
 
-using Mantid::Kernel::DiskMRU;
+using Mantid::Kernel::DiskBuffer;
 using namespace Mantid::API;
 
 namespace Mantid
@@ -23,42 +23,42 @@ namespace MDEvents
 
   //-----------------------------------------------------------------------------------------------
   /** Constructor
-   * @param controller :: BoxController that controls how boxes split
+   * @param splitter :: BoxController that controls how boxes split
    * @param depth :: splitting depth of the new box.
    */
-  TMDE(MDBox)::MDBox(BoxController_sptr controller, const size_t depth)
+  TMDE(MDBox)::MDBox(BoxController_sptr splitter, const size_t depth)
     : IMDBox<MDE, nd>(),
       m_dataBusy(false), m_dataModified(false), m_dataAdded(false),
       m_fileIndexStart(0), m_fileNumEvents(0),
       m_onDisk(false), m_inMemory(true)
 
   {
-    if (controller->getNDims() != nd)
+    if (splitter->getNDims() != nd)
       throw std::invalid_argument("MDBox::ctor(): controller passed has the wrong number of dimensions.");
-    this->m_BoxController = controller;
+    this->m_BoxController = splitter;
     this->m_depth = depth;
     // Give it a fresh ID from the controller.
-    this->setId( controller->getNextId() );
+    this->setId( splitter->getNextId() );
   }
 
   //-----------------------------------------------------------------------------------------------
   /** Constructor
-   * @param controller :: BoxController that controls how boxes split
+   * @param splitter :: BoxController that controls how boxes split
    * @param depth :: splitting depth of the new box.
-   * @param extents :: vector defining the extents
+   * @param extentsVector :: vector defining the extents
    */
-  TMDE(MDBox)::MDBox(BoxController_sptr controller, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector)
+  TMDE(MDBox)::MDBox(BoxController_sptr splitter, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector)
       : IMDBox<MDE, nd>(extentsVector),
         m_dataBusy(false), m_dataModified(false), m_dataAdded(false),
         m_fileIndexStart(0), m_fileNumEvents(0),
         m_onDisk(false), m_inMemory(true)
   {
-    if (controller->getNDims() != nd)
+    if (splitter->getNDims() != nd)
       throw std::invalid_argument("MDBox::ctor(): controller passed has the wrong number of dimensions.");
-    this->m_BoxController = controller;
+    this->m_BoxController = splitter;
     this->m_depth = depth;
     // Give it a fresh ID from the controller.
-    this->setId( controller->getNextId() );
+    this->setId( splitter->getNextId() );
   }
 
 
@@ -80,8 +80,8 @@ namespace MDEvents
   void MDBox)::clear()
   {
     // Make sure the object is not in any of the disk MRUs, and mark any space it used as free
-    if (this->m_BoxController->useMRU())
-      this->m_BoxController->getDiskMRU().objectDeleted(this, m_fileNumEvents);
+    if (this->m_BoxController->useWriteBuffer())
+      this->m_BoxController->getDiskBuffer().objectDeleted(this, m_fileNumEvents);
     // Clear all contents
     this->m_signal = 0.0;
     this->m_errorSquared = 0.0;
@@ -178,11 +178,21 @@ namespace MDEvents
       ::NeXus::File * file = this->m_BoxController->getFile();
       if (file)
       {
-        this->m_BoxController->fileMutex.lock();
+        // Mutex for disk access (prevent read/write at the same time)
+        Kernel::Mutex & mutex = this->m_BoxController->getDiskBuffer().getFileMutex();
+        mutex.lock();
         // Note that this APPENDS any events to the existing event list
         //  (in the event that addEvent() was called for a box that was on disk)
-        MDE::loadVectorFromNexusSlab(data, file, m_fileIndexStart, m_fileNumEvents);
-        this->m_BoxController->fileMutex.unlock();
+        try
+        {
+          MDE::loadVectorFromNexusSlab(data, file, m_fileIndexStart, m_fileNumEvents);
+          mutex.unlock();
+        }
+        catch (std::exception &)
+        {
+          mutex.unlock();
+          throw;
+        }
         m_inMemory = true;
       }
     }
@@ -200,14 +210,13 @@ namespace MDEvents
     {
       // Load and concatenate the events if needed
       this->loadEvents();
-      // After loading, or each time you request it:
-      // Touch the MRU to say you just used it.
-      if (this->m_BoxController->useMRU())
-        this->m_BoxController->getDiskMRU().loading(this);
       // The data vector is busy - can't release the memory yet
       this->m_dataBusy = true;
       // This access to data was NOT const, so it might have changed. We assume it has by setting m_dataModified to true.
       this->m_dataModified = true;
+
+      // Tell the to-write buffer to write out the object (when no longer busy)
+      this->m_BoxController->getDiskBuffer().toWrite(this);
     }
     // else: do nothing if the events are already in memory.
     return data;
@@ -224,13 +233,12 @@ namespace MDEvents
     {
       // Load and concatenate the events if needed
       this->loadEvents();
-      // After loading, or each time you request it:
-      // Touch the MRU to say you just used it.
-      if (this->m_BoxController->useMRU())
-        this->m_BoxController->getDiskMRU().loading(this);
       // The data vector is busy - can't release the memory yet
       this->m_dataBusy = true;
       // This access to data was const. Don't change the m_dataModified flag.
+
+      // Tell the to-write buffer to write out the object (when no longer busy)
+      this->m_BoxController->getDiskBuffer().toWrite(this);
     }
     // else: do nothing if the events are already in memory.
     return data;
@@ -248,9 +256,8 @@ namespace MDEvents
     {
       // Data vector is no longer busy.
       this->m_dataBusy = false;
-      // If not using the MRU, then immediately save it back (if it changed)
-      //    or clear memory if unchanged.
-      if (!this->m_BoxController->useMRU())
+      // If no write buffer is used, save it immediately if needed.
+      if (!this->m_BoxController->useWriteBuffer())
         this->save();
     }
   }
@@ -258,7 +265,7 @@ namespace MDEvents
 
   //-----------------------------------------------------------------------------------------------
   /** Call to save the data (if needed) and release the memory used.
-   * Called from the DiskMRU.
+   * Called from the DiskBuffer.
    */
   TMDE(
   void MDBox)::save() const
@@ -267,17 +274,19 @@ namespace MDEvents
     //  or when you added events to a cached data
     if (m_dataModified || m_dataAdded)
     {
+//      std::cout << "MDBox ID " << this->getId() << " being saved." << std::endl;
+
       // This will load and append events ONLY if needed.
       if (m_dataAdded)
         this->loadEvents();
 
       // This is the new size of the event list, possibly appended (if used AddEvent) or changed otherwise (non-const access)
       size_t newNumEvents = data.size();
-      DiskMRU & mru = this->m_BoxController->getDiskMRU();
+      DiskBuffer & dbuf = this->m_BoxController->getDiskBuffer();
       if (newNumEvents != m_fileNumEvents)
       {
         // Event list changed size. The MRU can tell us where it best fits now.
-        m_fileIndexStart = mru.relocate(m_fileIndexStart, m_fileNumEvents, newNumEvents);
+        m_fileIndexStart = dbuf.relocate(m_fileIndexStart, m_fileNumEvents, newNumEvents);
         m_fileNumEvents = newNumEvents;
         if (newNumEvents > 0)
         {
@@ -403,7 +412,8 @@ namespace MDEvents
 
   //-----------------------------------------------------------------------------------------------
   /** Calculate the centroid of this box.
-   * @param centroid[out] :: nd-sized array that will be set to the centroid. */
+   * @param centroid [out] :: nd-sized array that will be set to the centroid.
+   */
   TMDE(
   void MDBox)::calculateCentroid(coord_t * centroid) const
   {

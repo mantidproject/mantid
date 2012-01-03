@@ -158,6 +158,8 @@ bool WorkspaceGroup::isEmpty() const
 } // namespace API
 } // namespace Mantid
 
+/// @cond TEMPLATE
+
 namespace Mantid
 {
   namespace Kernel
@@ -198,5 +200,5 @@ namespace Mantid
   } // namespace Kernel
 } // namespace Mantid
 
-///\endcond TEMPLATE
+/// @endcond TEMPLATE
 

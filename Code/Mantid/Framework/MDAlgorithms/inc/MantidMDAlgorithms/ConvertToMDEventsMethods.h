@@ -34,15 +34,13 @@ namespace MDAlgorithms
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-// predefenition of the class, which does all coordinate transformation
-//template<Q_state Q, AnalMode MODE, CnvrtUnits CONV> 
-//struct COORD_TRANSFORMER;
+
 
 
 //-----------------------------------------------
-template<size_t nd,Q_state Q, AnalMode MODE, CnvrtUnits CONV>
+template<Q_state Q, AnalMode MODE, CnvrtUnits CONV>
 void 
-ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
+ConvertToMDEvents::processQND()
 {
     // service variable used for efficient filling of the MD event WS  -> should be moved to configuration;
     size_t SPLIT_LEVEL(1024);
@@ -53,25 +51,32 @@ ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
     // progress reporter
     pProg = std::auto_ptr<API::Progress>(new API::Progress(this,0.0,1.0,numSpec));
 
-
-    MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *const pWs = dynamic_cast<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *>(piWS);
-    if(!pWs){
-        convert_log.error()<<"ConvertToMDEvents: can not cast input worspace pointer into pointer to proper target workspace\n"; 
-        throw(std::bad_cast());
-    }
+    // initiate the templated class which does the conversion of workspace data into MD WS coordinates;
     COORD_TRANSFORMER<Q,MODE,CONV> trn(this); 
     // one of the dimensions has to be X-ws dimension -> need to add check for that;
 
     // copy experiment info into target workspace
     API::ExperimentInfo_sptr ExperimentInfo(inWS2D->cloneExperimentInfo());
-    uint16_t runIndex = pWs->addExperimentInfo(ExperimentInfo);
+    // run index;
+    uint16_t runIndex   = this->pWSWrapper->pWorkspace()->addExperimentInfo(ExperimentInfo);
+    // number of dimesnions
+    size_t n_dims       = this->pWSWrapper->nDimensions();
+
     
-    const size_t specSize = inWS2D->blocksize();    
-    std::vector<coord_t> Coord(nd);
-    size_t nValidSpectra = det_loc.det_id.size();
+    const size_t specSize = this->inWS2D->blocksize();    
+    size_t nValidSpectra  = det_loc.det_id.size();
+
+    // take at least bufSize for efficiency
+    size_t buf_size     = ((specSize>SPLIT_LEVEL)?specSize:SPLIT_LEVEL);
+    // allocate temporary buffer for MD Events data
+    std::vector<coord_t>  allCoord(n_dims*buf_size);
+    std::vector<coord_t>  Coord(n_dims);
+    std::vector<float>    sig_err(2*buf_size);
+    std::vector<uint16_t> run_index(buf_size);
+    std::vector<uint32_t> det_ids(buf_size);
 
 
-    if(!trn.calcGenericVariables(Coord,nd))return; // if any property dimension is outside of the data range requested
+    if(!trn.calcGenericVariables(Coord,n_dims))return; // if any property dimension is outside of the data range requested
     //External loop over the spectra:
     for (int64_t i = 0; i < int64_t(nValidSpectra); ++i)
     {
@@ -94,58 +99,31 @@ ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
            if(!trn.calcMatrixCoord(X,i,j,Coord))continue; // skip ND outside the range
             //  ADD RESULTING EVENTS TO THE WORKSPACE
             float ErrSq = float(Error[j]*Error[j]);
-            pWs->addEvent(MDEvents::MDEvent<nd>(float(Signal[j]),ErrSq,runIndex,det_id,&Coord[0]));
+
+            // coppy all data into data buffer for future transformation into events;
+            sig_err[2*n_added_events+0]=float(Signal[j]);
+            sig_err[2*n_added_events+1]=ErrSq;
+            run_index[n_added_events]  = runIndex;
+            det_ids[n_added_events]    = det_id;
+            allCoord.insert(allCoord.end(),Coord.begin(),Coord.end());
+
             n_added_events++;
         } // end spectra loop
-
-         // This splits up all the boxes according to split thresholds and sizes.
-         //Kernel::ThreadScheduler * ts = new ThreadSchedulerFIFO();
-         //ThreadPool tp(NULL);
-          if(n_added_events>SPLIT_LEVEL){
-                pWs->splitAllIfNeeded(NULL);
-                n_added_events=0;
-                pProg->report(i);
+        if(n_added_events>SPLIT_LEVEL){
+              pWSWrapper->addMDData(sig_err,run_index,det_ids,allCoord,n_added_events);
+ 
+              n_added_events=0;
+              pProg->report(i);
           }
-          //tp.joinAll();        
        } // end detectors loop;
 
-       // FINALIZE:
-       if(n_added_events>0){
-         pWs->splitAllIfNeeded(NULL);
-         n_added_events=0;
-        }
-        pWs->refreshCache();
+ 
+        pWSWrapper->refreshCache();
         pProg->report();          
 
 }
 
-/// helper function to create empty MDEventWorkspace with nd dimensions 
-template<size_t nd>
-API::IMDEventWorkspace_sptr
-ConvertToMDEvents::createEmptyEventWS(void)
-{
-
-       boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> > ws = 
-       boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>, nd> >(new MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>, nd>());
     
-      // Give all the dimensions
-      for (size_t d=0; d<nd; d++)
-      {
-        Geometry::MDHistoDimension * dim = new Geometry::MDHistoDimension(this->targ_dim_names[d], this->targ_dim_names[d], this->targ_dim_units[d], 
-                                                                          this->dim_min[d], this->dim_max[d], 10);
-        ws->addDimension(Geometry::MDHistoDimension_sptr(dim));
-      }
-      ws->initialize();
-
-      // Build up the box controller
-     Mantid::API::BoxController_sptr bc = ws->getBoxController();
-    // Build up the box controller, using the properties in BoxControllerSettingsAlgorithm 
-     this->setBoxController(bc);
-    // We always want the box to be split (it will reject bad ones)
-     ws->splitBox();
-     return ws;
-}
-     
 
 
 } // endNamespace MDAlgorithms

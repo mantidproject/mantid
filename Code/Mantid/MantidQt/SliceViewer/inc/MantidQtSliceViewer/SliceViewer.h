@@ -35,6 +35,8 @@ namespace SliceViewer
  */
 class EXPORT_OPT_MANTIDQT_SLICEVIEWER SliceViewer : public QWidget
 {
+  friend class SliceViewerWindow;
+
   Q_OBJECT
 
 public:
@@ -67,6 +69,7 @@ public:
   double getColorScaleMin() const;
   double getColorScaleMax() const;
   bool getColorScaleLog() const;
+  bool getFastRender() const;
   void setXYLimits(double xleft, double xright, double ybottom, double ytop);
   QwtDoubleInterval getXLimits() const;
   QwtDoubleInterval getYLimits() const;
@@ -97,8 +100,10 @@ public slots:
   void helpLineViewer();
   void setColorScaleAutoFull();
   void setColorScaleAutoSlice();
+  void setFastRender(bool fast);
   // Slots that will be automatically connected via QMetaObject.connectSlotsByName
   void on_btnClearLine_clicked();
+  void saveImage(const QString & filename = QString());
 
   // Synced checkboxes
   void LineMode_toggled(bool);
@@ -185,13 +190,20 @@ private:
   bool m_logColor;
 
   /// Menus
-  QMenu *m_menuColorOptions, *m_menuView, *m_menuHelp, *m_menuLine;
+  QMenu *m_menuColorOptions, *m_menuView, *m_menuHelp, *m_menuLine, *m_menuFile;
+  QAction *m_actionFileClose;
 
   /// Synced menu/buttons
   MantidQt::API::SyncedCheckboxes *m_syncLineMode, *m_syncSnapToGrid;
 
   /// Cached double for infinity
   double m_inf;
+
+  /// "Fast" rendering mode
+  bool m_fastRender;
+
+  /// Last path that was saved using saveImage()
+  QString m_lastSavedFile;
 };
 
 } // namespace SliceViewer

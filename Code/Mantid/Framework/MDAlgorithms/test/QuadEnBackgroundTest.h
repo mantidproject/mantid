@@ -1,12 +1,10 @@
-//TODO: Rewrite away from the old MDWorkspace. There are no MDPoint's or MDCell's anymore
-
 #ifndef QUADENBACKGROUNDTEST_H_
 #define QUADENBACKGROUNDTEST_H_
 //
 #include <cxxtest/TestSuite.h>
 //
 #include "MantidMDAlgorithms/QuadEnBackground.h"
-#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/CompositeFunctionMD.h"
 #include "MantidCurveFitting/GenericFit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ProgressText.h"
@@ -298,15 +296,88 @@ public:
         TS_ASSERT_DELTA(row.Double(1),0.10,0.02);
 
 
-        removeWS(testWrkspc);
-        removeWS(testWrkspc2);
-        removeWS(testWrkspc3);
+
         removeWS("out2_Parameters");
         removeWS("out3_Parameters");
 
     }
+    void testGenericFitandCompositeFunctionMD()
+     {
+         // test GenericFit with Composite fucntionMD
+         // Use same data as alg3 test above but with two functions to fit.
+         // The functions are identical but values are tied so that the problem is well defined.
+         GenericFit alg1;
+         TS_ASSERT_THROWS_NOTHING(alg1.initialize());
+         TS_ASSERT( alg1.isInitialized() );
+         // set up fitting functions
+         QuadEnBackground* fn1 = new QuadEnBackground();
+         fn1->initialize();
+         QuadEnBackground* fn2 = new QuadEnBackground();
+         fn2->initialize();
+         CompositeFunctionMD* compFn = new CompositeFunctionMD();
+         compFn->initialize();
+         compFn->addFunction(fn1);
+         compFn->addFunction(fn2);
+
+         // tie some parameters so that fit is still well defined despite using
+         // two identical fit functions
+         compFn->tie("f0.Constant","0.0");
+         compFn->tie("f1.Linear","-0.1");
+         compFn->tie("f0.Quadratic","0.0");
+
+         alg1.setPropertyValue("InputWorkspace", testWrkspc3);
+
+         alg1.setPropertyValue("Function",*compFn);
+         alg1.setPropertyValue("Output","outcf");
+
+         TS_ASSERT_THROWS_NOTHING(
+             TS_ASSERT( alg1.execute() )
+             )
+         TS_ASSERT( alg1.isExecuted() );
+         std::string algStat = alg1.getPropertyValue("OutputStatus");
+         TS_ASSERT( algStat.compare("success")==0 );
+         // test the output from fit is as expected - since 3 variables and 3 data points expect 0 Chi2
+         double chisq = alg1.getProperty("OutputChi2overDoF");
+         TS_ASSERT_DELTA( chisq, 0.0, 0.001 );
+
+         TWS_type outParams1 = getTWS("outcf_Parameters");
+         TS_ASSERT(outParams1);
+         TS_ASSERT_EQUALS(outParams1->rowCount(),7);
+         TS_ASSERT_EQUALS(outParams1->columnCount(),3);
+
+         TableRow row = outParams1->getFirstRow();
+         TS_ASSERT_EQUALS(row.String(0),"f0.Constant");
+         TS_ASSERT_EQUALS(row.Double(1),0.0);
+         row = outParams1->getRow(1);
+         TS_ASSERT_EQUALS(row.String(0),"f0.Linear");
+         TS_ASSERT_DELTA(row.Double(1),0.6,0.02);
+         row = outParams1->getRow(2);
+         TS_ASSERT_EQUALS(row.String(0),"f0.Quadratic");
+         TS_ASSERT_DELTA(row.Double(1),0.0,0.00001);
+         row = outParams1->getRow(3);
+         TS_ASSERT_EQUALS(row.String(0),"f1.Constant");
+         TS_ASSERT_DELTA(row.Double(1),1.0,0.01);
+         row = outParams1->getRow(4);
+         TS_ASSERT_EQUALS(row.String(0),"f1.Linear");
+         TS_ASSERT_DELTA(row.Double(1),-0.1,0.00001);
+         row = outParams1->getRow(5);
+         TS_ASSERT_EQUALS(row.String(0),"f1.Quadratic");
+         TS_ASSERT_DELTA(row.Double(1),0.1,0.001);
+         row = outParams1->getRow(6);
+         TS_ASSERT_EQUALS(row.String(0),"Cost function value");
+         TS_ASSERT_DELTA(row.Double(1),0.00084,0.0004);
+         //for( int i = 0 ; i<outParams1->rowCount();i++)
+         //{
+         //  row = outParams1->getRow(i);
+         //  std::cout << row.String(0) << "  " << row.Double(1) << "\n";
+         //}
+
+     }
     void testTidyUp()
     {
+       removeWS(testWrkspc);
+       removeWS(testWrkspc2);
+       removeWS(testWrkspc3);
     }
 
     TWS_type getTWS(const std::string& name)

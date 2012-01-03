@@ -21,10 +21,10 @@ struct DLLExport SXPeak
   /**
   Constructor
   @param t : tof
-  @param t2 : 2 * theta angle
+  @param th2 : 2 * theta angle
   @param phi : psi angle
   @param intensity : peak intensity
-  @param specral : contributing spectra
+  @param spectral : contributing spectra
   @param Ltot : detector-sample absolute distance
   @param detectorId : id of the contributing detector
   */
@@ -208,7 +208,7 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return (1);}
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Crystal";}
+  virtual const std::string category() const { return "Crystal;Optimization\\FindPeaks";}
 
 private:
   void initDocs();

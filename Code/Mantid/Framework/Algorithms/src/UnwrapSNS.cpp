@@ -282,7 +282,6 @@ void UnwrapSNS::execEvent()
 /** Calculates the total flightpath for the given detector.
  *  This is L1+L2 normally, but is the source-detector distance for a monitor.
  *  @param spectrum ::  The workspace index
- *  @param L1 ::        The primary flightpath
  *  @param isMonitor :: Output: true is this detector is a monitor
  *  @return The flightpath (Ld) for the detector linked to spectrum
  *  @throw Kernel::Exception::InstrumentDefinitionError if the detector position can't be obtained

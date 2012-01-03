@@ -9,7 +9,8 @@ namespace Mantid
   {
 
      /** 
-    @class MDLoadingViewAdapter, Templated type for wrapping non-MDLoadingView types. Adapter pattern.
+    @class MDLoadingViewAdapter
+    Templated type for wrapping non-MDLoadingView types. Adapter pattern.
     @author Owen Arnold, Tessella plc
     @date 07/09/2011
 

@@ -23,7 +23,9 @@ namespace SliceViewer
   : QWidget( parent->canvas() ),
     m_plot(parent),
     m_snapEnabled(false),
-    m_snapX(0.1), m_snapY(0.1), m_snapLength(0)
+    m_snapX(0.1), m_snapY(0.1), m_snapLength(0),
+    m_showHandles(true)
+
   {
     m_creation = true; // Will create with the mouse
     m_middleButton = false;
@@ -111,7 +113,7 @@ namespace SliceViewer
   }
 
   /** Set the snap-to-grid spacing in the Y direction.
-   * @param spacing :: spacing */
+   * @param enabled :: enable spacing */
   void LineOverlay::setSnapEnabled(bool enabled)
   {
     m_snapEnabled = enabled;
@@ -124,6 +126,13 @@ namespace SliceViewer
     m_snapLength = spacing;
   }
 
+
+  /** Sets whether to show the mouse handles
+   * @param shown :: if false, the mouse handles are invisible */
+  void LineOverlay::setShowHandles(bool shown)
+  {
+    m_showHandles = shown;
+  }
 
   //----------------------------------------------------------------------------------------------
   /// @return point A's position in plot coordinates
@@ -206,9 +215,12 @@ namespace SliceViewer
     int size = 8;
     QPoint center = transform(coords);
     QRect marker(center.x()-size/2, center.y()-size/2, size, size);
-    painter.setPen(QColor(255,0,0));
-    painter.setBrush(brush);
-    painter.drawRect(marker);
+    if (this->m_showHandles)
+    {
+      painter.setPen(QColor(255,0,0));
+      painter.setBrush(brush);
+      painter.drawRect(marker);
+    }
     return marker;
   }
 
@@ -340,7 +352,7 @@ namespace SliceViewer
 
   //-----------------------------------------------------------------------------------------------
   /** Handle the mouse move event when the line is being dragged
-   * @param mouse event info */
+   * @param event mouse event info */
   void LineOverlay::handleDrag(QMouseEvent * event)
   {
     // Is the shift key pressed?
@@ -417,7 +429,7 @@ namespace SliceViewer
 
   //-----------------------------------------------------------------------------------------------
   /** Event when the mouse moves
-   * @param mouse event info */
+   * @param event mouse event info */
   void LineOverlay::mouseMoveEvent(QMouseEvent * event)
   {
     if (event->buttons() & Qt::MidButton)
@@ -471,7 +483,7 @@ namespace SliceViewer
 
   //-----------------------------------------------------------------------------------------------
   /** Event when the mouse button is pressed down
-   * @param mouse event info */
+   * @param event mouse event info */
   void LineOverlay::mousePressEvent(QMouseEvent * event)
   {
 
@@ -506,7 +518,7 @@ namespace SliceViewer
 
   //-----------------------------------------------------------------------------------------------
   /** Event when the mouse moves
-   * @param mouse event info */
+   * @param event mouse event info */
   void LineOverlay::mouseReleaseEvent(QMouseEvent * event)
   {
     if (!(event->buttons() & Qt::MidButton))

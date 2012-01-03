@@ -100,6 +100,8 @@ protected:
 /**
  * Constructor
  * @param parent :: The parent widget - must be an ApplicationWindow
+ * @param mantidui :: The UI form for MantidPlot
+ * @param customFittings :: If true, use custom fittings
  */
 FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject* mantidui, bool customFittings)
 :QDockWidget("Fit Function",parent),
@@ -1758,15 +1760,15 @@ bool FitPropertyBrowser::isFitEnabled()const
 }
 
 /** 
- * Slot. Adds a tie. Full expression to be entered <name>=<formula>
+ * Slot. Adds a tie. Full expression to be entered \<name\>=\<formula\>
  */
 void FitPropertyBrowser::addTie()
 {
   QtBrowserItem * ci = m_browser->currentItem();
   QtProperty* paramProp = ci->property();
   PropertyHandler* h = getHandler()->findHandler(paramProp);
-  if (!h->isParameter(paramProp)) return;
   if (!h) return;
+  if (!h->isParameter(paramProp)) return;
 
   const Mantid::API::IFitFunction* f = h->function();
   if (!f) return;
@@ -1872,6 +1874,8 @@ void FitPropertyBrowser::deleteTie()
 
 /** Does a parameter have a tie
  * @param parProp :: The property for a function parameter
+ * @param hasTie :: Parameter has a tie
+ * @param hasBounds :: Parameter has bounds
  */
 void FitPropertyBrowser::hasConstraints(QtProperty* parProp,
                                         bool& hasTie,
@@ -1898,7 +1902,7 @@ void FitPropertyBrowser::hasConstraints(QtProperty* parProp,
 }
 
 /** Returns the tie property for a parameter property, or NULL
- * @param The :: parameter property
+ * @param parProp :: parameter property
  */
 QtProperty* FitPropertyBrowser::getTieProperty(QtProperty* parProp)const
 {
@@ -2537,7 +2541,7 @@ void FitPropertyBrowser::setTextPlotGuess(const QString text)
 * Currently only called by the custom interface for the muon analysis fit browser.
 * It adds the name of a loaded workspace to a drop down property box . 
 *
-* @params wsName :: The workspace name to be added.
+* @param wsName :: The workspace name to be added.
 */
 void FitPropertyBrowser::manualAddWorkspace(const QString& wsName)
 {
@@ -2599,7 +2603,7 @@ void FitPropertyBrowser::workspaceChange(const QString& wsName)
 * Shows the correct workspace in the fit property browser and
 * then updates the PeakPickerTool to another workspace.
 *
-* @params wsName :: The name of the workspace the PeakPickerTool is 
+* @param wsName :: The name of the workspace the PeakPickerTool is
 *                   to be assigned to.
 */
 void FitPropertyBrowser::updatePPTool(const QString & wsName)

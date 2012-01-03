@@ -100,12 +100,12 @@ DECLARE_ALGORITHM(StripVanadiumPeaks2)
     } else if (unit == "MomentumTransfer"){
       g_log.error() << "Unit MomentumTransfer (Q-space) is NOT supported by StripVanadiumPeaks now.\n";
       throw std::invalid_argument("Q-space is not supported");
-      peakpositions = "2.9359, 4.1520, 5.0851, 5.8716, 6.5648, 7.1915, 7.7676, 8.3045, 8.8074, 9.2837, 9.7368, 10.1703, 10.5849, 11.3702, 11.7443, 12.1040, 12.4568";
+      // Comment out next line as it won't be reached.
+      //peakpositions = "2.9359, 4.1520, 5.0851, 5.8716, 6.5648, 7.1915, 7.7676, 8.3045, 8.8074, 9.2837, 9.7368, 10.1703, 10.5849, 11.3702, 11.7443, 12.1040, 12.4568";
 
     } else {
       g_log.error() << "Unit " << unit << " Is NOT supported by StripVanadiumPeaks, which only supports d-spacing" << std::endl;
       throw std::invalid_argument("Not supported unit");
-
     }
 
     // Call StripPeak

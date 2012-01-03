@@ -42,6 +42,7 @@ namespace MDEvents
   //-----------------------------------------------------------------------------------------------
   /** Constructor with a box controller.
    * @param bc :: BoxController
+   * @param depth :: recursive split depth
    * @param extentsVector :: size of the box
    */
   TMDE(MDGridBox)::MDGridBox(BoxController_sptr bc, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector)
@@ -74,6 +75,8 @@ namespace MDEvents
     BoxController_sptr bc = box->getBoxController();
     if (!bc)
       throw std::runtime_error("MDGridBox::ctor(): No BoxController specified in box.");
+
+//    std::cout << "Splitting MDBox ID " << box->getId() << " with " << box->getNPoints() << " events into MDGridBox" << std::endl;
 
     // Steal the ID from the parent box that is being split.
     this->setId( box->getId() );
@@ -138,7 +141,7 @@ namespace MDEvents
     bc->getIdMutex().unlock();
 
     // Now distribute the events that were in the box before
-    std::vector<MDE> & events = box->getEvents();
+    const std::vector<MDE> & events = box->getConstEvents();
 
     // Add all the events, with no bounds checking
     typename std::vector<MDE>::const_iterator it = events.begin();
@@ -149,9 +152,9 @@ namespace MDEvents
     // Copy the cached numbers from the incoming box. This is quick - don't need to refresh cache
     this->nPoints = box->getNPoints();
 
-    // Clear the old box. This releases it from the DiskMRU if needed
+    // Clear the old box.
     box->clear();
-    box->releaseEvents();
+    box->setDataBusy(false);
   }
 
 
@@ -556,23 +559,6 @@ namespace MDEvents
 
       // OK, now we have an array saying which vertex is contained by which plane.
 
-
-//      if (1)
-//      {
-//        for (size_t p=0; p<numPlanes; p++)
-//        {
-//          std::cout << "Plane " << p << " normal " << Strings::join(function->getPlane(p).getNormal(), function->getPlane(p).getNormal()+2, ",") << std::endl;
-//          for (size_t y=0; y<5; y++)
-//          {
-//            for (size_t x=0; x<5; x++)
-//            {
-//              std::cout <<  vertexContained[p*numVertices + y*5 + x] << " ";
-//            }
-//            std::cout << std::endl;
-//          }
-//        }
-//      }
-
       // This is the number of vertices for each box, e.g. 8 in 3D
       size_t verticesPerBox = 1 << nd;
 
@@ -654,7 +640,6 @@ namespace MDEvents
 
           if (numPlanesWithAllVertexes == numPlanes)
           {
-//            std::cout << " is fully contained." << std::endl;
             // All planes have all vertexes
             // The box is FULLY CONTAINED
             // So we can get ALL children and don't need to check the implicit function
@@ -662,7 +647,6 @@ namespace MDEvents
           }
           else
           {
-//            std::cout << " is touching." << std::endl;
             // There is a chance the box is touching. Keep checking with implicit functions
             box->getBoxes(outBoxes, maxDepth, leafOnly, function);
           }
@@ -777,18 +761,10 @@ namespace MDEvents
    *
    * @param ts :: optional ThreadScheduler * that will be used to parallelize
    *        recursive splitting. Set to NULL to do it serially.
-   * @param newBoxes :: optional pointer to a vector that will be filled with the
-   *        newly created boxes.
-   * @param newBoxesMutex :: must specify this mutex for parallel splitting of boxes.
-   *        The mutex protects the newBoxes vector.
    */
   TMDE(
-  void MDGridBox)::splitAllIfNeeded(ThreadScheduler * ts
-      /*,std::vector<IMDBox<MDE,nd>*> * newBoxes, Mantid::Kernel::Mutex * newBoxesMutex */ )
+  void MDGridBox)::splitAllIfNeeded(ThreadScheduler * ts)
   {
-    DiskMRU & mru = this->m_BoxController->getDiskMRU();
-    mru.setNumberOfObjects( this->m_BoxController->getMaxId() );
-
     for (size_t i=0; i < numBoxes; ++i)
     {
       MDBox<MDE, nd> * box = dynamic_cast<MDBox<MDE, nd> *>(boxes[i]);
@@ -823,18 +799,21 @@ namespace MDEvents
         {
           // This box does NOT have enough events to be worth splitting
           if (box->dataAdded() && this->m_BoxController->isFileBacked() &&
-              !mru.shouldStayInMemory(box->getId(), box->getNPoints()) )
+              !box->getOnDisk())
           {
             // The box is NOT on disk but the workspace is file-backed.
             // Therefore, it is likely a NEW MDBox that was just created by splitting.
-            // We then check if it is BIG enough to bother caching to disk = !shouldStayInMemory()
             // Mark that it is to be on disk from now on
             box->setOnDisk(true);
             // Set it "modified" so that it gets written out upon saving
             box->setDataModified(true);
-            // Make the MRU track it in the buffer. It is using up memory!
-            this->m_BoxController->getDiskMRU().loading(box);
-            // So the MRU will cache it to the WriteBuffer when it falls out of the cache.
+
+            //Mark the box as "to-write" in DiskBuffer.
+            this->m_BoxController->getDiskBuffer().toWrite(box);
+
+//            // Make the MRU track it in the buffer. It is using up memory!
+//            this->m_BoxController->getDiskBuffer().loading(box);
+//            // So the MRU will cache it to the WriteBuffer when it falls out of the cache.
           }
         }
       }
@@ -891,7 +870,9 @@ namespace MDEvents
     if (index < numBoxes) // avoid segfaults for floating point round-off errors.
       boxes[index]->addEvent(event);
     else
-      std::cout << "\nEvent at " << event.getCenter(0) << " is skipped because index is " << index << "\n";
+    {
+      //std::cout << "\nEvent at " << event.getCenter(0) << " is skipped because index is " << index << "\n";
+    }
 
   }
 
@@ -1004,15 +985,6 @@ namespace MDEvents
 
 
 
-//  //-----------------------------------------------------------------------------------------------
-//  /** General (non-axis-aligned) centerpoint binning method.
-//   * TODO: TEST THIS!
-//   *
-//   * @param bin :: a MDBin object giving the limits, aligned with the axes of the workspace,
-//   *        of where the non-aligned bin MIGHT be present.
-//   * @param function :: a ImplicitFunction that will evaluate true for any coordinate that is
-//   *        contained within the (non-axis-aligned) bin.
-//   */
 //  TMDE(
 //  void MDGridBox)::generalBin(MDBin<MDE,nd> & bin, Mantid::API::ImplicitFunction & function) const
 //  {
@@ -1208,8 +1180,8 @@ namespace MDEvents
    * @param radiusTransform :: nd-to-1 coordinate transformation that converts from these
    *        dimensions to the distance (squared) from the center of the sphere.
    * @param radiusSquared :: radius^2 below which to integrate
-   * @param[out] signal :: set to the integrated signal
-   * @param[out] errorSquared :: set to the integrated squared error.
+   * @param signal [out] :: set to the integrated signal
+   * @param errorSquared [out] :: set to the integrated squared error.
    */
   TMDE(
   void MDGridBox)::integrateSphere(CoordTransform & radiusTransform, const coord_t radiusSquared, signal_t & signal, signal_t & errorSquared) const

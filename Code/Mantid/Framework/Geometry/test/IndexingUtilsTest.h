@@ -75,6 +75,19 @@ public:
   }
 
 
+  static Matrix<double> getSiliconUB()
+  {
+    Matrix<double> UB(3,3,false);
+    V3D row_0( -0.147196, -0.141218,  0.304286 );
+    V3D row_1(  0.106642,  0.120341,  0.090518 );
+    V3D row_2( -0.261273,  0.258426, -0.006190 );
+    UB.setRow( 0, row_0 );
+    UB.setRow( 1, row_1 );
+    UB.setRow( 2, row_2 );
+    return UB;
+  }
+
+
   static void ShowLatticeParameters( Matrix<double> UB )
   {
     Matrix<double> UB_inv(3,3,false);
@@ -178,9 +191,9 @@ public:
   {
     Matrix<double> UB(3,3,false);
 
-    double correct_UB[] = { -0.1015550,  0.0992964, -0.0155078,
-                             0.1274830,  0.0150210, -0.0839671,
-                            -0.0507717, -0.0432269, -0.0645173 };
+    double correct_UB[] = { -0.0177661, -0.0992964,  0.0155078,
+                             0.0585369, -0.0150210,  0.0839671,
+                            -0.1585160,  0.0432269,  0.0645173 };
 
     std::vector<V3D> q_vectors = getNatroliteQs();
 
@@ -938,6 +951,89 @@ public:
   }
 
 
+  void test_UB_to_from_V3D()
+  {
+    V3D a_dir( 2, 0, 0 );
+    V3D b_dir( 0, 3, 0 );
+    V3D c_dir( 0, 0, 4 );
+
+    Matrix<double> UB(3,3,false);
+   
+    IndexingUtils::GetUB( UB, a_dir, b_dir, c_dir );
+
+    for ( size_t row = 0; row < 3; row++ )
+    {
+      for ( size_t col = 0; col < 3; col++ )
+      {
+        if ( row == col )
+        {
+          TS_ASSERT_DELTA( UB[row][col], 1.0/(double(row+2)), 1e-10 );
+        }
+        else
+        {
+          TS_ASSERT_DELTA( UB[row][col], 0, 1e-10 );
+        }
+      }
+    }
+
+    V3D a;
+    V3D b;
+    V3D c;
+
+    IndexingUtils::GetABC( UB, a, b, c );
+
+    a = a - a_dir;
+    b = b - b_dir;
+    c = c - c_dir;
+
+    TS_ASSERT_DELTA( a.norm(), 0, 1e-10 );
+    TS_ASSERT_DELTA( b.norm(), 0, 1e-10 );
+    TS_ASSERT_DELTA( c.norm(), 0, 1e-10 );
+  }
+
+
+  void test_HasNiggleAngles()
+  {
+    V3D  a(1,0,0);
+    V3D  b(0,1,0);
+    V3D  c(0,0,1);
+
+    TS_ASSERT_EQUALS( IndexingUtils::HasNiggliAngles(a, b, c, 0.001 ), true);
+
+    V3D  b1( 0.1, 1, 0 ); 
+    V3D  c1(-0.1, 0, 1 ); 
+
+    TS_ASSERT_EQUALS( IndexingUtils::HasNiggliAngles(a, b1, c1, 0.001), false);
+
+    V3D  a2( 1,   0.1, 0.1 );
+    V3D  b2( 0.1, 1,   0.1 );
+    V3D  c2( 0.1, 0.1, 1   );
+
+    TS_ASSERT_EQUALS( IndexingUtils::HasNiggliAngles(a2, b2, c2, 0.001), true);
+
+    V3D  a3(  1,   -0.1, -0.1 );
+    V3D  b3( -0.1,  1,   -0.1 );
+    V3D  c3( -0.1, -0.1,  1   );
+
+    TS_ASSERT_EQUALS( IndexingUtils::HasNiggliAngles(a2, b2, c2, 0.001), true);
+  }
+
+
+  void test_MakeNiggliUB()
+  {
+    double answer[3][3] = { { -0.147196, -0.141218,  0.304286 },
+                            {  0.106642,  0.120341,  0.090518 },
+                            { -0.261273,  0.258426, -0.006190 } };
+
+    Matrix<double> UB = getSiliconUB();
+    Matrix<double> newUB(3,3,false);  
+
+    IndexingUtils::MakeNiggliUB( UB, newUB );
+
+    for ( size_t row = 0; row < 3; row++ )
+      for ( size_t col = 0; col < 3; col++ )
+        TS_ASSERT_DELTA( newUB[row][col], answer[row][col], 1e-5 );  
+  }
 };
 
 #endif  /* MANTID_GEOMETRY_INDEXING_UTILS_TEST_H_ */

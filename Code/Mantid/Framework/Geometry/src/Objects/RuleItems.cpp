@@ -939,18 +939,18 @@ void SurfPoint::getBoundingBox(double &xmax,double &ymax,double &zmax,double &xm
     if(((gXmax<=xmax && gXmax>=xmin)&&(gYmin<=ymax && gYmin>=ymin)&&(gZmax<=zmax && gZmax>=zmin))&&(gXmax!=xmax||gYmin!=ymin||gZmax!=zmax)) listOfPoints.push_back(V3D(gXmax,gYmin,gZmax));
     if(((gXmin<=xmax && gXmin>=xmin)&&(gYmin<=ymax && gYmin>=ymin)&&(gZmax<=zmax && gZmax>=zmin))&&(gXmin!=xmin||gYmin!=ymin||gZmax!=zmax)) listOfPoints.push_back(V3D(gXmin,gYmin,gZmax));
 
-    if(listOfPoints.size()>0){
-      xmin=ymin=zmin=DBL_MAX;
-      xmax=ymax=zmax=-DBL_MAX;
-      for(std::vector<V3D>::const_iterator it=listOfPoints.begin();it!=listOfPoints.end();++it){
-        //			std::cout<<(*it)<<std::endl;
-        if((*it)[0]<xmin)xmin=(*it)[0];
-        if((*it)[1]<ymin)ymin=(*it)[1];
-        if((*it)[2]<zmin)zmin=(*it)[2];
-        if((*it)[0]>xmax)xmax=(*it)[0];
-        if((*it)[1]>ymax)ymax=(*it)[1];
-        if((*it)[2]>zmax)zmax=(*it)[2];
-      }
+    if(!listOfPoints.empty()){
+        xmin=ymin=zmin=DBL_MAX;
+        xmax=ymax=zmax=-DBL_MAX;
+        for(std::vector<V3D>::const_iterator it=listOfPoints.begin();it!=listOfPoints.end();++it){
+            //			std::cout<<(*it)<<std::endl;
+            if((*it)[0]<xmin)xmin=(*it)[0];
+            if((*it)[1]<ymin)ymin=(*it)[1];
+            if((*it)[2]<zmin)zmin=(*it)[2];
+            if((*it)[0]>xmax)xmax=(*it)[0];
+            if((*it)[1]>ymax)ymax=(*it)[1];
+            if((*it)[2]>zmax)zmax=(*it)[2];
+        }
     }
   }
 }
@@ -1188,7 +1188,7 @@ void CompObj::getBoundingBox(double &xmax, double &ymax, double &zmax, double &x
   if(((gXmax<=xmax && gXmax>=xmin)&&(gYmin<=ymax && gYmin>=ymin)&&(gZmax<=zmax && gZmax>=zmin))&&(gXmax!=xmax||gYmin!=ymin||gZmax!=zmax)) listOfPoints.push_back(V3D(gXmax,gYmin,gZmax));
   if(((gXmin<=xmax && gXmin>=xmin)&&(gYmin<=ymax && gYmin>=ymin)&&(gZmax<=zmax && gZmax>=zmin))&&(gXmin!=xmin||gYmin!=ymin||gZmax!=zmax)) listOfPoints.push_back(V3D(gXmin,gYmin,gZmax));
 
-  if(listOfPoints.size()>0){
+  if(!listOfPoints.empty()){
     xmin=ymin=zmin=DBL_MAX;
     xmax=ymax=zmax=-DBL_MAX;
     for(std::vector<V3D>::const_iterator it=listOfPoints.begin();it!=listOfPoints.end();++it){
@@ -1628,7 +1628,7 @@ void CompGrp::getBoundingBox(double &xmax, double &ymax, double &zmax, double &x
   if(((gXmax<=xmax && gXmax>=xmin)&&(gYmin<=ymax && gYmin>=ymin)&&(gZmax<=zmax && gZmax>=zmin))&&(gXmax!=xmax||gYmin!=ymin||gZmax!=zmax)) listOfPoints.push_back(V3D(gXmax,gYmin,gZmax));
   if(((gXmin<=xmax && gXmin>=xmin)&&(gYmin<=ymax && gYmin>=ymin)&&(gZmax<=zmax && gZmax>=zmin))&&(gXmin!=xmin||gYmin!=ymin||gZmax!=zmax)) listOfPoints.push_back(V3D(gXmin,gYmin,gZmax));
 
-  if(listOfPoints.size()>0){
+  if(!listOfPoints.empty()){
     xmin=ymin=zmin=DBL_MAX;
     xmax=ymax=zmax=-DBL_MAX;
     for(std::vector<V3D>::const_iterator it=listOfPoints.begin();it!=listOfPoints.end();++it){

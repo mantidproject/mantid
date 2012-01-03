@@ -46,7 +46,7 @@ Workspace2D_sptr SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(std
    * @param workspace :: The workspace to insert the instrument into
    */
   void SANSInstrumentCreationHelper::runLoadInstrument(const std::string & inst_name,
-      Workspace2D_sptr workspace)
+      Mantid::DataObjects::Workspace2D_sptr workspace)
   {
     // Determine the search directory for XML instrument definition files (IDFs)
     std::string directoryName = Mantid::Kernel::ConfigService::Instance().getInstrumentDirectory();
@@ -72,7 +72,7 @@ Workspace2D_sptr SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(std
    * @param nxbins: number of bins in X
    * @param nybins: number of bins in Y
    */
-  void SANSInstrumentCreationHelper::runLoadMappingTable(Workspace2D_sptr workspace, int nxbins, int nybins)
+  void SANSInstrumentCreationHelper::runLoadMappingTable(Mantid::DataObjects::Workspace2D_sptr workspace, int nxbins, int nybins)
   {
     // Get the number of monitor channels
     size_t nMonitors(0);

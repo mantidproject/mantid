@@ -28,7 +28,7 @@ namespace PhysicalConstants
     /// The charge of the ion, or 0 for neutral atom. Note thet all charges are not negative
     uint16_t charge;
     
-    /// A vector containing A, a, B, b, C, c D, e for each <j0>, <j2>, <j4>, and <j6> 
+    /// A vector containing A, a, B, b, C, c D, e for each \<j0\>, \<j2\>, \<j4\>, and \<j6\>
     std::vector <double> j0;
     std::vector <double> j2;
     std::vector <double> j4;
@@ -38,8 +38,8 @@ namespace PhysicalConstants
   static std::map<std::string,MagneticIon> ion_map;
   int initializeMap();
 
-  MANTID_KERNEL_DLL MagneticIon getMagneticIon(const std::string symbol,const uint16_t charge);
-  MANTID_KERNEL_DLL std::vector <double> getJL(const std::string symbol,const uint16_t charge, const uint16_t l = 0);
+  MANTID_KERNEL_DLL MagneticIon getMagneticIon(const std::string &symbol,const uint16_t charge);
+  MANTID_KERNEL_DLL std::vector <double> getJL(const std::string &symbol,const uint16_t charge, const uint16_t l = 0);
 
 } // namespace PhysicalConstants
 } // namespace Mantid

@@ -199,7 +199,7 @@ namespace DataHandling
     }
 
 
-    if (detList.size() == 0)
+    if (detList.empty())
       throw std::runtime_error("This instrument does not have any RectangularDetector's. LoadIsawDetCal cannot operate on this instrument at this time.");
 
     while(std::getline(input, line)) 

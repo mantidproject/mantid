@@ -203,8 +203,8 @@ public:
     BoxController_sptr bc(new BoxController(3));
     bc->setSplitInto(5);
     // Handle the disk MRU values
-    bc->setCacheParameters(sizeof(MDLeanEvent<3>), 100000, 10000, 0);
-    DiskMRU & mru = bc->getDiskMRU();
+    bc->setCacheParameters(sizeof(MDLeanEvent<3>), 10000);
+    DiskBuffer & dbuf = bc->getDiskBuffer();
     // Make a box from 0-10 in 3D
     MDBox<MDLeanEvent<3>,3> * c = new MDBox<MDLeanEvent<3>,3>(bc, 0);
     for (size_t d=0; d<3; d++) c->setExtents(d, 0, 10);
@@ -214,13 +214,13 @@ public:
     TSM_ASSERT_EQUALS( "1000 events (on file)", c->getNPoints(), 1000);
 
     // At this point the MDBox is set to be on disk
-    TSM_ASSERT_EQUALS( "No free blocks to start with", mru.getFreeSpaceMap().size(), 0);
+    TSM_ASSERT_EQUALS( "No free blocks to start with", dbuf.getFreeSpaceMap().size(), 0);
 
     // Construct the grid box by splitting the MDBox
     MDGridBox<MDLeanEvent<3>,3> * gb = new MDGridBox<MDLeanEvent<3>,3>(c);
     TSM_ASSERT_EQUALS( "Grid box also has 1000 points", gb->getNPoints(), 1000);
     TSM_ASSERT_EQUALS( "Grid box has 125 children (5x5x5)", gb->getNumChildren(), 125);
-    TSM_ASSERT_EQUALS( "The old spot in the file is now free", mru.getFreeSpaceMap().size(), 1);
+    TSM_ASSERT_EQUALS( "The old spot in the file is now free", dbuf.getFreeSpaceMap().size(), 1);
 
     // Get a child
     MDBox<MDLeanEvent<3>,3> * b = dynamic_cast<MDBox<MDLeanEvent<3>,3> *>(gb->getChild(22));
@@ -962,10 +962,10 @@ public:
     BoxController_sptr bc = b->getBoxController();
     bc->setSplitThreshold(100);
     bc->setMaxDepth(4);
-    bc->setCacheParameters(1, 10000, 1000, 20000);
+    bc->setCacheParameters(1, 1000);
     bc->setFile(file, filename, 0);
-    DiskMRU & mru = bc->getDiskMRU();
-    mru.setFileLength(0);
+    DiskBuffer & dbuf = bc->getDiskBuffer();
+    dbuf.setFileLength(0);
 
     size_t num_repeat = 10;
     if (DODEBUG) num_repeat = 20;
@@ -1004,10 +1004,10 @@ public:
     }
     TSM_ASSERT_EQUALS("All new boxes were set to be cached to disk.", numOnDisk, 10000);
     uint64_t minimumSaved = 10000*(num_repeat-2);
-    TSM_ASSERT_LESS_THAN("Length of the file makes sense", minimumSaved, mru.getFileLength());
+    TSM_ASSERT_LESS_THAN("Length of the file makes sense", minimumSaved, dbuf.getFileLength());
     TSM_ASSERT_LESS_THAN("Most of the boxes' events were cached to disk (some remain in memory because of the MRU cache)", minimumSaved, eventsOnDisk);
     TSM_ASSERT_LESS_THAN("And the events were properly saved sequentially in the files.", minimumSaved, maxFilePos);
-    std::cout << mru.getMemoryStr() << std::endl;
+    std::cout << dbuf.getMemoryStr() << std::endl;
     file->close();
     if (Poco::File(filename).exists()) Poco::File(filename).remove();
   }

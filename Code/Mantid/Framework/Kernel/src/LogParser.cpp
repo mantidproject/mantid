@@ -200,7 +200,7 @@ namespace Mantid
         if (!Kernel::TimeSeriesProperty<double>::isTimeString(str)) 
         {
           //if the line doesn't start with a time treat it as a continuation of the previous data
-          if (change_times.size() == 0 || isNumeric)
+          if (change_times.empty() || isNumeric)
           {// if there are no previous data
             std::string mess = "Cannot parse log file "+logFName+". Line:"+str;
             g_log.error(mess);
@@ -228,7 +228,7 @@ namespace Mantid
           change_times[stime] = sdata;
       }
 
-      if (change_times.size() == 0) return 0;
+      if (change_times.empty()) return 0;
 
       if (isNumeric)
       {

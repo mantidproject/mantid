@@ -46,7 +46,6 @@ namespace API
     }
   }
   /** Set the workspace
-    * @param ws :: A shared pointer to a workspace. Must be a MatrixWorkspace.
     * @param slicing :: A string identifying the data to be fitted. Format for IFunctionMW:
     *  "WorkspaceIndex=int,StartX=double,EndX=double". StartX and EndX are optional.
   */
@@ -185,8 +184,8 @@ void IFunctionMW::functionDerivMW(Jacobian* out, const double* xValues, const si
 /** Initialize the function providing it the workspace
  * @param workspace :: The workspace to set
  * @param wi :: The workspace index
- * @param xMin :: The lower bin index
- * @param xMax :: The upper bin index
+ * @param startX :: The lower bin index
+ * @param endX :: The upper bin index
  */
 void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,size_t wi,double startX, double endX)
 {

@@ -180,6 +180,7 @@ namespace MDEvents
    * @param depth :: recursion depth to which to search. This will determine the resolution
    *        to which the extents will be found.
    * @return a vector of the minimum extents that still contain all the events in the workspace.
+   *         If the workspace is empty, then this will be the size of the overall workspace
    */
   TMDE(
   std::vector<Mantid::Geometry::MDDimensionExtents> MDEventWorkspace)::getMinimumExtents(size_t depth)
@@ -201,6 +202,16 @@ namespace MDEvents
           if (x.max > out[d].max) out[d].max = x.max;
           if (x.min < out[d].min) out[d].min = x.min;
         }
+      }
+    }
+
+    // Fix any missing dimensions (for empty workspaces)
+    for (size_t d=0; d<nd; d++)
+    {
+      if (out[d].min > out[d].max)
+      {
+        out[d].min = this->getDimension(d)->getMinimum();
+        out[d].max = this->getDimension(d)->getMaximum();
       }
     }
     return out;
@@ -240,18 +251,10 @@ namespace MDEvents
 
     if (m_BoxController->getFile())
     {
-      mess << "File backed: MRU: ";
-      double avail, used;
-      avail = double(m_BoxController->getDiskMRU().getMruSize() * sizeof(MDE)) / (1024*1024);
-      used = double(m_BoxController->getDiskMRU().getMruUsed() * sizeof(MDE)) / (1024*1024);
-      mess << std::setprecision(1) << std::fixed ;
-      mess << used << " of " << avail << " MB. ";
-      avail = double(m_BoxController->getDiskMRU().getWriteBufferSize() * sizeof(MDE)) / (1024*1024);
-      used = double(m_BoxController->getDiskMRU().getWriteBufferUsed() * sizeof(MDE)) / (1024*1024);
+      mess << "File backed: ";
+      double avail = double(m_BoxController->getDiskBuffer().getWriteBufferSize() * sizeof(MDE)) / (1024*1024);
+      double used = double(m_BoxController->getDiskBuffer().getWriteBufferUsed() * sizeof(MDE)) / (1024*1024);
       mess << "Write buffer: " << used << " of " << avail << " MB. ";
-      avail = double(m_BoxController->getDiskMRU().getSmallBufferSize() * sizeof(MDE)) / (1024*1024);
-      used = double(m_BoxController->getDiskMRU().getSmallBufferUsed() * sizeof(MDE)) / (1024*1024);
-      mess << "Small objects: " << used << " of " << avail << " MB. ";
       out.push_back(mess.str()); mess.str("");
 
       mess << "File";
@@ -364,8 +367,7 @@ namespace MDEvents
     {
       // File-backed workspace
       // How much is in the cache?
-      total = this->m_BoxController->getDiskMRU().getMruUsed() * sizeof(MDE);
-      total += this->m_BoxController->getDiskMRU().getWriteBufferUsed() * sizeof(MDE);
+      total = this->m_BoxController->getDiskBuffer().getWriteBufferUsed() * sizeof(MDE);
     }
     else
     {

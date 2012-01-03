@@ -118,7 +118,7 @@ void Background::initLayout()
 
 /**
  * Called in response to a show() event
- * @param event :: The event details
+ * @param e :: The event details
  */
 void Background::showEvent(QShowEvent* e)
 {
@@ -131,7 +131,7 @@ void Background::showEvent(QShowEvent* e)
 
 /**
  * Called in response to a close event
- * @parma event The event details
+ * @param event The event details
  */
 void Background::closeEvent(QCloseEvent* event)
 {

@@ -417,6 +417,23 @@ private:
   QwtSymbol(const QwtSymbol&);
 };
 
+class ImageSymbol : QwtSymbol
+{
+%TypeHeaderCode
+#include <plot2D/ImageSymbol.h>
+%End
+
+public:
+  ImageSymbol(const QString& fileName);
+  ImageSymbol(const QPixmap& pixmap, const QString& fileName = QString());
+
+  QPixmap pixmap();
+  QString imagePath();
+
+private:
+  ImageSymbol(const ImageSymbol&);
+};
+
 
 class ArrowMarker // : QwtPlotMarker
 {
@@ -637,8 +654,8 @@ public:
   sipRes = PyString_FromString(sipCpp->pieLegendText());
 %End
 
-  bool insertCurve(Table*, const QString&, int=1);
-  bool insertCurve(Table*, const QString&, const QString&, int=1);
+  bool insertCurve(Table*, const QString&, int style = 1, int startRow = 0, int endRow = -1);
+  bool insertCurve(Table*, const QString&, const QString&, int style = 1, int startRow = 0, int endRow = -1);
   bool insertCurve(QString, int, bool=false, Graph::CurveType style = Graph::Unspecified);
   void insertCurve(Graph*, int);
   bool addCurves(Table*, SIP_PYTUPLE, int=0, double=1, int=3, int=0, int=-1);
@@ -672,9 +689,13 @@ public:
   void setCurveLineColor(int, QColor);
   void setCurveLineStyle(int, Qt::PenStyle);
   void setCurveLineWidth(int, double);
+  void setGrayScale();
+  void setIndexedColors();
+
   void setCurveSymbol(int, const QwtSymbol&);
   void setCurvePen(int, const QPen&);
   void setCurveBrush(int, const QBrush&);
+  void setCurveSkipSymbolsCount(int, int);
 
 	void addFunction(const QString&, double, double, int=100);
 %MethodCode
@@ -961,6 +982,8 @@ sipClass=sipFindClass(sipCpp->className());
 %End
 
 public:
+  void setExitCode(int code);
+
   enum MatrixToTableConversion{Direct, XYZ, YXZ};
   Table* table(const QString&);
 %MethodCode

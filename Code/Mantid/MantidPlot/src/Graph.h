@@ -292,6 +292,8 @@ public slots:
   void setCurveLineColor(int curveIndex, QColor qColor);
   void setCurveLineStyle(int curveIndex, Qt::PenStyle style);
   void setCurveLineWidth(int curveIndex, double width);
+  void setGrayScale();
+  void setIndexedColors();
   //@}
 
   //! \name Output: Copy/Export/Print
@@ -676,6 +678,7 @@ public slots:
   void setCurveSymbol(int index, const QwtSymbol& s);
   void setCurvePen(int index, const QPen& p);
   void setCurveBrush(int index, const QBrush& b);
+  void setCurveSkipSymbolsCount(int index, int count);
 
   //! \name Resizing
   //@{

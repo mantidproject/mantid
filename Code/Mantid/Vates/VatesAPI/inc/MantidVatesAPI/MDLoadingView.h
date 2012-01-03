@@ -9,7 +9,8 @@ namespace Mantid
   {
 
      /** 
-    @class MDLoadingView, Abstract view for MDEW file loading and display.
+    @class MDLoadingView
+    Abstract view for MDEW file loading and display.
     @author Owen Arnold, Tessella plc
     @date 05/08/2011
 

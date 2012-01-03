@@ -74,7 +74,7 @@ DLLExport std::string join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::st
 }
 
 /// Return a string with all matching occurence-strings
-MANTID_KERNEL_DLL std::string replace(const std::string input, const std::string find_what, const std::string replace_with);
+MANTID_KERNEL_DLL std::string replace(const std::string &input, const std::string &find_what, const std::string &replace_with);
 /// Return a string with all occurrences of the characters in the input replaced by the replace string 
 MANTID_KERNEL_DLL std::string replaceAll(const std::string & input, const std::string & charStr, const std::string & substitute);
 
@@ -131,7 +131,7 @@ MANTID_KERNEL_DLL std::vector<std::string> StrParts(std::string Ln);
 
 /// Write a set of containers to a file
 template<template<typename T,typename A> class V,typename T,typename A>
-int writeFile(const std::string& Fname,const T step,const V<T,A>& Y);
+int writeFile(const std::string& Fname,const T & step,const V<T,A>& Y);
 template<template<typename T,typename A> class V,typename T,typename A> 
 int writeFile(const std::string& Fname,const V<T,A>& X,const V<T,A>& Y);
 template<template<typename T,typename A> class V,typename T,typename A>

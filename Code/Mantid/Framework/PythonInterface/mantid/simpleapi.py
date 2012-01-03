@@ -178,7 +178,7 @@ def create_algorithm(algorithm, version, _algm_object):
             arg_list.append("%s=None" % p)
 
     # Build the function argument string from the tokens we found 
-    arg_str = ', '.join(arg_list)
+    arg_str = ','.join(arg_list)
     # Calling help(...) will put a * in front of the first parameter name, so we use \b
     signature = "\b%s" % arg_str
     # Getting the code object for the algorithm wrapper
@@ -189,7 +189,7 @@ def create_algorithm(algorithm, version, _algm_object):
        (signature, "\b\bVersion=%d" % version), f.co_filename, f.co_name, f.co_firstlineno, f.co_lnotab, f.co_freevars)
     # Replace the code object of the wrapper function
     algorithm_wrapper.func_code = c  
-    
+
     globals()[algorithm] = algorithm_wrapper
     
     # Register aliases
@@ -279,7 +279,7 @@ def create_algorithm_dialog(algorithm, version, _algm_object):
     arg_list = []
     for p in _algm_object.mandatoryProperties():
         arg_list.append("%s=None" % p)
-    arg_str = ', '.join(arg_list)
+    arg_str = ','.join(arg_list)
     signature = "\b%s" % arg_str
     f = algorithm_wrapper.func_code
     c = f.__new__(f.__class__, f.co_argcount, f.co_nlocals, f.co_stacksize, f.co_flags, f.co_code, f.co_consts, f.co_names,\
@@ -361,6 +361,19 @@ def Load(*args, **kwargs):
     _set_properties(algm, **kwargs)
     algm.execute()
     return gather_returns('Load', lhs, algm, ignore='LoaderName')
+
+# Have a better load signature for autocomplete
+_signature = "\bFilename"
+# Getting the code object for Load
+_f = Load.func_code
+# Creating a new code object nearly identical, but with the two variable names replaced
+# by the property list.
+_c = _f.__new__(_f.__class__, _f.co_argcount, _f.co_nlocals, _f.co_stacksize, _f.co_flags, _f.co_code, _f.co_consts, _f.co_names,\
+       (_signature, "kwargs"), _f.co_filename, _f.co_name, _f.co_firstlineno, _f.co_lnotab, _f.co_freevars)
+# Replace the code object of the wrapper function
+Load.func_code = _c
+######################################################################
+
 
 def LoadDialog(*args, **kwargs):
     """Popup a dialog for the Load algorithm. More help on the Load function

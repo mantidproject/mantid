@@ -39,8 +39,8 @@ MantidCurve::MantidCurve(bool err) : PlotCurve(), WorkspaceObserver(), m_drawErr
 /**
 Helper method to apply a chosen style.
 @param style : The chosen graph type style
-@parm ml : pointer to multilayer object
-@param linewidth: ref to linewidth, which may be internally adjusted
+@param ml : pointer to multilayer object
+@param lineWidth: ref to linewidth, which may be internally adjusted
 */
 void MantidCurve::applyStyleChoice(Graph::CurveType style, MultiLayer* ml, int& lineWidth)
 {

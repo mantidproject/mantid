@@ -1,7 +1,10 @@
+:+X_QToolButton	{text='+X' type='QToolButton' unnamed='1' visible='1' window=':_VsgMainWindow'}
+:-X_QToolButton	{text='-X' type='QToolButton' unnamed='1' visible='1' window=':_VsgMainWindow'}
 :Automatic Color Scaling_QCheckBox	{name='autoColorScaleCheckBox' text='Automatic Color Scaling' type='QCheckBox' visible='1' window=':_VsgMainWindow'}
 :CurrentTimeIndex_pqSpinBox	{name='CurrentTimeIndex' type='pqSpinBox' visible='1' window=':_VsgMainWindow'}
 :CurrentTime_QLineEdit	{name='CurrentTime' type='QLineEdit' visible='1' window=':_VsgMainWindow'}
 :File_QMenu	{title='File' type='QMenu' unnamed='1' visible='1' window=':_VsgMainWindow'}
+:Next Frame_QToolButton	{text='Next Frame' type='QToolButton' unnamed='1' visible='1' window=':_VsgMainWindow'}
 :Open File:  (open multiple files with <ctrl> key.).Cancel_QPushButton	{name='Cancel' text='Cancel' type='QPushButton' visible='1' window=':Open File:  (open multiple files with <ctrl> key.)_pqFileDialog'}
 :Open File:  (open multiple files with <ctrl> key.).Favorites_QListView	{name='Favorites' type='QListView' visible='1' window=':Open File:  (open multiple files with <ctrl> key.)_pqFileDialog'}
 :Open File:  (open multiple files with <ctrl> key.).FileName_QLineEdit	{name='FileName' type='QLineEdit' visible='1' window=':Open File:  (open multiple files with <ctrl> key.)_pqFileDialog'}
@@ -12,6 +15,8 @@
 :Open File:  (open multiple files with <ctrl> key.).Parents_QComboBox	{name='Parents' type='QComboBox' visible='1' window=':Open File:  (open multiple files with <ctrl> key.)_pqFileDialog'}
 :Open File:  (open multiple files with <ctrl> key.).Recent_QListView	{name='Recent' type='QListView' visible='1' window=':Open File:  (open multiple files with <ctrl> key.)_pqFileDialog'}
 :Open File:  (open multiple files with <ctrl> key.)_pqFileDialog	{name='FileOpenDialog' type='pqFileDialog' visible='1' windowTitle='Open File:  (open multiple files with <ctrl> key.)'}
+:Play_QToolButton	{text='Play' type='QToolButton' unnamed='1' visible='1' window=':_VsgMainWindow'}
+:Previous Frame_QToolButton	{text='Previous Frame' type='QToolButton' unnamed='1' visible='1' window=':_VsgMainWindow'}
 :Reset Camera_QToolButton	{text='Reset Camera' type='QToolButton' unnamed='1' visible='1' window=':_VsgMainWindow'}
 :ScrollArea.Bins_QLabel	{container=':objectInspector.ScrollArea_QScrollArea' text='Bins' type='QLabel' unnamed='1' visible='1'}
 :ScrollArea.Bins_QLabel_2	{container=':objectInspector.ScrollArea_QScrollArea' occurrence='2' text='Bins' type='QLabel' unnamed='1' visible='1'}
@@ -72,6 +77,7 @@
 :objectInspector.Delete_QPushButton	{container=':qt_tabwidget_stackedwidget.objectInspector_pqObjectInspectorWidget' name='Delete' text='Delete' type='QPushButton' visible='1'}
 :objectInspector.ScrollArea_QScrollArea	{container=':qt_tabwidget_stackedwidget.objectInspector_pqObjectInspectorWidget' name='ScrollArea' type='QScrollArea' visible='1'}
 :parallelProjButton_QToolButton	{name='parallelProjButton' type='QToolButton' visible='1' window=':_VsgMainWindow'}
+:qt_spinbox_lineedit_QLineEdit	{name='qt_spinbox_lineedit' type='QLineEdit' visible='1' window=':_VsgMainWindow'}
 :qt_tabwidget_stackedwidget.objectInspector_pqObjectInspectorWidget	{container=':splitter.qt_tabwidget_stackedwidget_QStackedWidget' name='objectInspector' type='pqObjectInspectorWidget' visible='1'}
 :renderFrame.Viewport_pqQVTKWidget	{container=':splitter_2.renderFrame_QFrame' name='Viewport' type='pqQVTKWidget' visible='1'}
 :splatterPlotButton_QPushButton	{name='splatterPlotButton' type='QPushButton' visible='1' window=':_VsgMainWindow'}

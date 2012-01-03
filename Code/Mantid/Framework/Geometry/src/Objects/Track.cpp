@@ -24,11 +24,11 @@ namespace Mantid
 
     /**
     * Constructor
-    * @param startPoint :: Initial point
-    * @param direction :: Directional vector. It must be unit vector.
+    * @param startPt :: Initial point
+    * @param unitVector :: Directional vector. It must be unit vector.
     */ 
-    Track::Track(const V3D& startPoint, const V3D& direction) : 
-    m_startPoint(startPoint),m_unitVector(direction)
+    Track::Track(const V3D& startPt, const V3D& unitVector) :
+    m_startPoint(startPt),m_unitVector(unitVector)
     {}
 
     /**
@@ -152,29 +152,29 @@ namespace Mantid
      * The points are kept in order
      * @param directionFlag :: A flag indicating if the direction of travel is entering/leaving
      * an object. +1 is entering, -1 is leaving.
-     * @param point :: Point of intersection
+     * @param endPoint :: Point of intersection
      * @param compID :: ID of the component that this link is about (Default=NULL)
      */
-    void Track::addPoint(const int directionFlag, const V3D& point, const ComponentID compID) 
+    void Track::addPoint(const int directionFlag, const V3D& endPoint, const ComponentID compID)
     {
-      IntersectionPoint newPoint(directionFlag, point, point.distance(m_startPoint), compID);
+      IntersectionPoint newPoint(directionFlag, endPoint, endPoint.distance(m_startPoint), compID);
       PType::iterator lowestPtr = std::lower_bound(m_surfPoints.begin(), m_surfPoints.end(), newPoint);
       m_surfPoints.insert(lowestPtr, newPoint);
     }
 
     /**
     * This adds a whole segment to the track : This currently assumes that links are added in order
-    * @param startPoint :: first Point
-    * @param endPoint :: second Point
-    * @param distAlongTrack :: Distance along track
+    * @param firstPoint :: first Point
+    * @param secondPoint :: second Point
+    * @param distanceAlongTrack :: Distance along track
     * @param compID :: ID of the component that this link is about (Default=NULL)
     * @retval Index of link within the track
     */
-    int Track::addLink(const V3D& startPoint, const V3D& endPoint,
-      const double distAlongTrack, const ComponentID compID)
+    int Track::addLink(const V3D& firstPoint, const V3D& secondPoint,
+      const double distanceAlongTrack, const ComponentID compID)
     {
       // Process First Point
-      Link newLink(startPoint,endPoint,distAlongTrack,compID);
+      Link newLink(firstPoint,secondPoint,distanceAlongTrack,compID);
       int index(0);
       if( m_links.empty() )
       {

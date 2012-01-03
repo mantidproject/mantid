@@ -107,7 +107,7 @@ namespace DataObjects
 
     //---------------------------------------------------------------------------------------------
     /** Add a peak to the list
-     * @param peak :: Peak object to add (copy) into this.
+     * @param ipeak :: Peak object to add (copy) into this.
      */
     void addPeak(const API::IPeak& ipeak)
     {

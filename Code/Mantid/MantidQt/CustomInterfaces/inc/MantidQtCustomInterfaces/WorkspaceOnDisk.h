@@ -7,7 +7,8 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    /** @class WorkspaceOnDisk : A workspace memento refering to a workspace in the Analysis Data Service.
+    /** @class WorkspaceOnDisk
+    A workspace memento refering to a workspace in the Analysis Data Service.
 
     Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -57,9 +58,8 @@ namespace MantidQt
       @throw if workspace has been moved since instantiation.
       */
       virtual Mantid::API::MatrixWorkspace_sptr fetchIt() const;
-
-      virtual std::string statusReport() const;
-
+      ///Clean-up operations
+      virtual void cleanUp();
       /// Destructor
       virtual ~WorkspaceOnDisk();
     private:
@@ -67,8 +67,8 @@ namespace MantidQt
       void dumpIt(const std::string& name);
       /// Path + name of file containing workspace to use.
       std::string m_fileName;
-      /// Status report message.
-      std::string m_statusReportMessage;
+      // Id of the workspace in the ADS.
+      std::string m_adsID;
     };
 
   }

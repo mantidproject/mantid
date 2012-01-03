@@ -55,7 +55,7 @@ namespace Mantid
 
     /**
      * Option to set if file finder should be case sensitive
-     * @param case :: If true then set to case sensitive
+     * @param cs :: If true then set to case sensitive
      */
     void FileFinderImpl::setCaseSensitive(const bool cs) 
     {
@@ -259,6 +259,7 @@ namespace Mantid
      * a run number prefixed with an instrument name/short name. If the instrument
      * name is absent the default one is used.
      * @param hint :: The name hint
+     * @param facility :: The current facility object
      * @return The file name
      * @throw NotFoundError if a required default is not set
      * @throw std::invalid_argument if the argument is malformed or run number is too long

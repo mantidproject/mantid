@@ -148,7 +148,7 @@ namespace Algorithms
     }
 
     // Find Detectors that belong to groups
-    if (group_map.size() > 0)
+    if (!group_map.empty())
     {
       // Find Detectors that belong to groups
       typedef boost::shared_ptr<const Geometry::ICompAssembly> sptr_ICompAss;
@@ -274,7 +274,7 @@ namespace Algorithms
 
 
 
-    if (detIDtoGroup.size() != 0)
+    if (!detIDtoGroup.empty())
     {
       size_t numNotFound = 0;
 

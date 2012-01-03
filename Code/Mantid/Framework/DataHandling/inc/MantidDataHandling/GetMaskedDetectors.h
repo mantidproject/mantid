@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid
 {
@@ -41,7 +42,7 @@ namespace DataHandling
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport GetMaskedDetectors : public API::Algorithm
+class DLLExport GetMaskedDetectors : public API::Algorithm, public API::DeprecatedAlgorithm
 {
 public:
   GetMaskedDetectors();
@@ -52,7 +53,7 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1;};
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Deprecated";}
+  virtual const std::string category() const { return "Transforms\\Masking";}
 
 private:
   /// Sets documentation strings for this algorithm

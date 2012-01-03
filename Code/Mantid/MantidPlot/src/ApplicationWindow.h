@@ -170,6 +170,9 @@ public:
   const QList<QMenu*> & getCustomMenus() const; //Mantid
   ScriptingWindow* getScriptWindowHandle() { return scriptingWindow; }
   bool getMenuSettingsFlag(const QString & menu_item);
+
+  void setExitCode(int code);
+  int getExitCode();
   //-------------------
   //@}
 
@@ -1119,7 +1122,7 @@ private:
   void ICatIsisSearch();
   /// Handler for ICatMyData serch menu
   void ICatMyDataSearch();
-  // Handler for ICat Logout
+  // Handler for ICat CatalogLogout
   void ICatLogout();
 
   void ICatAdvancedSearch();
@@ -1410,6 +1413,9 @@ private:
   QHash<QString, ScriptingEnv*> m_script_envs;
   /// Store a list of environments that cannot be used
   QSet<QString> m_bad_script_envs;
+
+  /// Exit code to set at application end
+  int m_exitCode;
 
 public:
   MantidUI *mantidUI;

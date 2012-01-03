@@ -12,6 +12,7 @@ If no value is provided for either NaNValue, InfinityValue or BigValueThreshold 
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ReplaceSpecialValues.h"
 #include "MantidKernel/Exception.h"
+#include "boost/math/special_functions/fpclassify.hpp"
 #include <limits>
 #include <cmath>
 
@@ -99,7 +100,7 @@ void ReplaceSpecialValues::performUnaryOperation(const double XIn, const double 
 
 bool ReplaceSpecialValues::checkIfNan(const double& value) const
 {
-  return (value != value);
+  return (boost::math::isnan(value));
 }
 
 bool ReplaceSpecialValues::checkIfInfinite(const double& value) const

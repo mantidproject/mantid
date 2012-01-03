@@ -154,7 +154,6 @@ void Indirect::helpClicked()
 /**
 * This function will control the actions needed for the Indirect interface when the
 * "Run" button is clicked by the user.
-* @param tryToSave :: whether to try and save the output. Generally true, false when user has clicked on the "Rebin" button instead of "Run"
 */
 void Indirect::runClicked()
 {
@@ -357,8 +356,8 @@ void Indirect::closeEvent(QCloseEvent* close)
 void Indirect::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf)
 {
   std::string key = pNf->key();
-  std::string preValue = pNf->preValue();
-  std::string curValue = pNf->curValue();
+  // std::string preValue = pNf->preValue(); // Unused
+  // std::string curValue = pNf->curValue(); // Unused
 
   if ( key == "datasearch.directories" || key == "defaultsave.directory" )
   {

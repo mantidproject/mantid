@@ -124,6 +124,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/UserFunction.cpp
                    src/VectorCurve.cpp
                    src/origin/OPJFile.cpp
+                   src/plot2D/ImageSymbol.cpp
                    src/plot2D/ScaleEngine.cpp
                    src/analysis/fft2D.cpp
                    src/lib/src/CollapsiveGroupBox.cpp
@@ -348,6 +349,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/VectorCurve.h
                    src/analysis/fft2D.h
                    src/origin/OPJFile.h
+                   src/plot2D/ImageSymbol.h
                    src/plot2D/ScaleEngine.h
                    src/lib/include/CollapsiveGroupBox.h
                    src/lib/include/ColorBox.h
@@ -635,7 +637,6 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
 set ( MANTID_MOC_FILES src/Mantid/AlgMonitor.h
                        src/Mantid/AlgorithmHistoryWindow.h
                        src/Mantid/FirstTimeSetup.h
-                       src/Mantid/FlowLayout.h
                        src/Mantid/IFunctionWrapper.h
                        src/Mantid/ImportWorkspaceDlg.h
                        src/Mantid/LoadDAEDlg.h
@@ -762,7 +763,6 @@ add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp
 							${RES_FILES} ${MANTID_RC_FILE}
 )
 
-
 # Library dependencies
 target_link_libraries ( MantidPlot 
                         ${CORE_MANTIDLIBS}
@@ -790,7 +790,7 @@ endif( WIN32 )
 # Now copy the required python files into the build destination
 ###########################################################################
 
-set ( PYTHON_INSTALL_FILES qtiplotrc.py qtiUtil.py mantidplot.py mantidplotrc.py )
+set ( PYTHON_INSTALL_FILES qtiplotrc.py qtiUtil.py mantidplotrc.py )
 foreach ( PYFILE ${PYTHON_INSTALL_FILES} )
   # Command to copy when MantidPlot rebuilds. Does not work if the .py files ONLY were modified!
   add_custom_command ( TARGET MantidPlot POST_BUILD 
@@ -804,6 +804,67 @@ foreach ( PYFILE ${PYTHON_INSTALL_FILES} )
   configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} COPYONLY ) 
 endforeach ( PYFILE ${PYTHON_INSTALL_FILES} )
 
+add_custom_command ( TARGET MantidPlot POST_BUILD
+                     COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory
+                       ${CMAKE_CURRENT_SOURCE_DIR}/mantidplotpy
+                       ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/mantidplotpy
+)
+
+###########################################################################
+# MantidPlot Python Unit Tests
+###########################################################################
+
+# List of .py files than must be run WITHIN MantidPlot.
+set ( MANTIDPLOT_TEST_PY_FILES 
+	MantidPlotSliceViewerTest.py
+	MantidPlot1DPlotTest.py
+)
+
+if ( 0 )
+	message (STATUS "Your CMAKE_SYSTEM string is '${CMAKE_SYSTEM}'")
+	message (STATUS "Your CMAKE_SYSTEM_NAME string is '${CMAKE_SYSTEM_NAME}'")
+	message (STATUS "Your CMAKE_BINARY_DIR string is '${CMAKE_BINARY_DIR}'")
+	message (STATUS "Your BIN_DIR string is '${BIN_DIR}'")
+	message (STATUS "Your CMAKE_LIBRARY_OUTPUT_DIRECTORY string is '${CMAKE_LIBRARY_OUTPUT_DIRECTORY}'")
+	message (STATUS "Your CMAKE_CFG_INTDIR string is '${CMAKE_CFG_INTDIR}'")
+	message (STATUS "Your CMAKE_CURRENT_BINARY_DIR string is '${CMAKE_CURRENT_BINARY_DIR}'")
+endif ()
+
+
+# Check system version
+if ( ${CMAKE_SYSTEM} MATCHES ".*\\.el5" )
+  	# This is RHEL5. GUI tests hang on this platform for some reason
+  	message ( "RHEL5 hangs on GUI tests. Disabling MantidPlot python tests." ) 
+else ()
+	# Find the path to the built MantidPlot app. Need different paths for MAC for some reason.
+	set (MANTIDPLOT_PATH  "${CMAKE_BINARY_DIR}/${BIN_DIR}/MantidPlot" )
+	
+	# Screenshots destination
+	if ("$ENV{WORKSPACE}" STREQUAL "")
+		set (SCREENSHOTS_DIR "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/screenshots" )	
+	else ()
+		set (SCREENSHOTS_DIR "$ENV{WORKSPACE}/screenshots" )	
+	endif ()
+	
+	# Add an environment property MANTID_SOURCE so that the script can find the source of xmlrunner
+	set (TEST_ENVIRONMENT "MANTID_SOURCE=${CMAKE_SOURCE_DIR};MANTID_SCREENSHOT_REPORT=${SCREENSHOTS_DIR}" )
+	
+	# Fixes for Darwin (MacOS)
+	if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+		set (MANTIDPLOT_PATH  "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${BIN_DIR}/MantidPlot" )
+		# Append to the path and set MANTIDPATH for MacOS' MantidPlot to run
+		set (TEST_ENVIRONMENT "PATH=$ENV{PATH}:${CMAKE_LIBRARY_OUTPUT_DIRECTORY};MANTIDPATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY};MANTID_SOURCE=${CMAKE_SOURCE_DIR};MANTID_SCREENSHOT_REPORT=${SCREENSHOTS_DIR}" )
+	endif ()
+
+	# Make a ctest target for each file
+	foreach  ( PYFILE ${MANTIDPLOT_TEST_PY_FILES} )
+	 	# Add the test. Name of test = name of the file
+		ADD_TEST( ${PYFILE} ${MANTIDPLOT_PATH} -xq ${CMAKE_CURRENT_SOURCE_DIR}/test/${PYFILE} )
+		# Set the previously-built environment
+		set_tests_properties( ${PYFILE} PROPERTIES ENVIRONMENT "${TEST_ENVIRONMENT}")
+	endforeach ()
+endif()
+
 ###########################################################################
 # Installation settings
 ###########################################################################
@@ -812,6 +873,7 @@ install ( TARGETS MantidPlot RUNTIME DESTINATION ${BIN_DIR}
                              BUNDLE DESTINATION .
 )
 install ( FILES ${PYTHON_INSTALL_FILES} DESTINATION ${BIN_DIR} )
+install ( DIRECTORY mantidplotpy DESTINATION ${BIN_DIR} )
 
 if ( APPLE )
   configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/FixBundle.cmake.in

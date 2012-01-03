@@ -183,7 +183,7 @@ void MantidGLWidget::resizeGL(int width, int height)
 
 /**
  * Handle an event when a mouse button is pressed.
- * @prarm event A pointer to the QMouseEvent
+ * @param event A pointer to the QMouseEvent
  */
 void MantidGLWidget::mousePressEvent(QMouseEvent *event)
 {
@@ -192,7 +192,7 @@ void MantidGLWidget::mousePressEvent(QMouseEvent *event)
 
 /**
  * Handle an event where the cursor is moved with the mouse
- * @prarm event A pointer to the QMouseEvent
+ * @param event A pointer to the QMouseEvent
  */
 void MantidGLWidget::mouseMoveEvent(QMouseEvent *event)
 {

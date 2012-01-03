@@ -1348,11 +1348,11 @@ void MultiLayer::dropOntoMatrixCurve(Graph *g, MantidMatrixCurve* originalCurve,
   QMultiMap<QString,std::set<int> > toPlot = tree->chooseSpectrumFromSelected();
 
   // Iterate through the selected workspaces adding a set of curves from each
-  for(QMultiMap<QString,std::set<int> >::const_iterator it=toPlot.begin();it!=toPlot.end();it++)
+  for(QMultiMap<QString,std::set<int> >::const_iterator it=toPlot.begin();it!=toPlot.end();++it)
   {
     std::set<int>::iterator setIt = it.value().begin();
 
-    for( ; setIt != it.value().end(); setIt++)
+    for( ; setIt != it.value().end(); ++setIt)
     {
       try {
         new MantidMatrixCurve(it.key(),g,(*setIt),errorBars);

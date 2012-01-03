@@ -93,8 +93,13 @@ public:
     if ( !conj->isInitialized() ) conj->initialize();
 
     // Get the two input workspaces for later
-    MatrixWorkspace_const_sptr in1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("top"));
-    MatrixWorkspace_const_sptr in2 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("bottom"));
+    MatrixWorkspace_sptr in1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("top"));
+    MatrixWorkspace_sptr in2 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("bottom"));
+
+    // Mask a spectrum and check it is carried over
+    const size_t maskTop(5), maskBottom(10);
+    in1->maskWorkspaceIndex(maskTop);
+    in2->maskWorkspaceIndex(maskBottom);
 
     // Check it fails if properties haven't been set
     TS_ASSERT_THROWS( conj->execute(), std::runtime_error );
@@ -124,6 +129,10 @@ public:
     TS_ASSERT_EQUALS( output->readE(10)[321], in2->readE(0)[321] );
     TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(5), in1->getAxis(1)->spectraNo(5) );
     TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(12), in2->getAxis(1)->spectraNo(2) );
+
+    //Check masking
+    TS_ASSERT_EQUALS(output->getDetector(maskTop)->isMasked(), true);
+    TS_ASSERT_EQUALS(output->getDetector(10 + maskBottom)->isMasked(), true);
 
     // Check that 2nd input workspace no longer exists
     TS_ASSERT_THROWS( AnalysisDataService::Instance().retrieve("bottom"), Exception::NotFoundError );

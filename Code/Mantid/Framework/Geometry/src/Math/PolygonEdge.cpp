@@ -24,7 +24,7 @@ namespace Mantid
     /**
      * Create a point a given fraction along this edge
      * @param fraction :: The fraction of the current edge
-     * @param returns A point on the edge
+     * @returns A point on the edge
      */
     Kernel::V2D PolygonEdge::point(const double fraction) const
     {
@@ -78,7 +78,7 @@ namespace Mantid
     * Calculate the orientation type of this edge with another.
     * @param focusEdge :: A reference to the PolygonEdge to test
     * @param refEdge :: A reference to another PolygonEdge object to compare with
-    * @param t[Out] :: If an intersection is found this value is set to the ratio
+    * @param t [Out] :: If an intersection is found this value is set to the ratio
     * of the dot products between the normal to the other line
     * @returns An enumeration denoting the orientation type
     */
@@ -109,7 +109,7 @@ namespace Mantid
     * Calculate the crossing point of this edge with another
     * @param edgeOne :: The first polygon edge
     * @param edgeTwo :: The second polygon edge
-    * @param crossPoint[Out] :: If found the point of intersection is filled here
+    * @param crossPoint [Out] :: If found the point of intersection is filled here
     */
     PolygonEdge::Orientation crossingPoint(const PolygonEdge & edgeOne, const PolygonEdge & edgeTwo, V2D & crossPoint)
     {
@@ -165,7 +165,8 @@ namespace Mantid
      * Return if the edges aim at each other
      * @param a :: First edge
      * @param b :: Second edge
-     * @param pclass :: The point classification of a point on edge a
+     * @param aclass :: The point classification of a point on edge a
+     * @param crossType :: The edge orientation classification
      */
     bool edgeAimsAt(const PolygonEdge &a, const PolygonEdge &b, PointClassification aclass, PolygonEdge::Orientation crossType)
     {

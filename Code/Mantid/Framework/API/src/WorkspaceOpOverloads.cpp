@@ -27,7 +27,7 @@ namespace OperatorOverloads
    *  @param lhsAsOutput :: If true, indicates that the lhs input is the same workspace as the output one
    *  @param child :: If true the algorithm is run as a child
    *  @param name :: If child is true and this is not an inplace operation then this name is used as output
-   *  @param A :: flag indicating whether to rethrow exceptions
+   *  @param rethrow :: A flag indicating whether to rethrow exceptions
    *  @return The result in a workspace shared pointer
    */
   template<typename LHSType, typename RHSType, typename ResultType>
@@ -131,6 +131,7 @@ namespace OperatorOverloads
  *
  *  @param lhs :: left hand side workspace shared pointer
  *  @param rhs :: right hand side workspace shared pointer
+ *  @param tolerance :: acceptable difference for floating point numbers
  *  @return bool, true if workspaces match
  */
 bool equals(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs, double tolerance)

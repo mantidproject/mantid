@@ -1433,8 +1433,10 @@ namespace Mantid
 
       std::map<int,int> Gmap; // get map of literals and frequency
       G.getLiterals(Gmap);
-      if (!Gmap.size())
+      if (Gmap.empty())
+      {
         return std::pair<Acomp,Acomp>(Acomp(),Acomp());
+      }
       // Make two lists.
       // U == set of elements in F (item to be divided) (this)
       // V == set of elements in G 
@@ -1642,7 +1644,7 @@ namespace Mantid
         }
         if (bLevel)
           throw std::invalid_argument("Acomp::setString error in line Ln\"" + Ln + "\"");
-        std::string Part= Ln.substr(sPos,ePos-sPos);
+        //std::string Part= Ln.substr(sPos,ePos-sPos);
         CM.setString(Ln.substr(sPos+2,ePos-sPos-3));
         CM.complement();
         Ln.replace(sPos,ePos-sPos,"("+CM.display()+")");
@@ -1768,7 +1770,7 @@ namespace Mantid
       @return Full string of the output in abc+efg type form
       */
     {
-      std::string out;
+      //std::string out;
       std::stringstream cx;
       std::vector<int>::const_iterator ic;
       int sign,val;      // sign and value of unit
@@ -1811,7 +1813,7 @@ namespace Mantid
       @return Full string of print line
       */
     {
-      std::string out;
+      //std::string out;
       std::stringstream cx;
       std::vector<int>::const_iterator ic;
       int sign,val;      // sign and value of unit

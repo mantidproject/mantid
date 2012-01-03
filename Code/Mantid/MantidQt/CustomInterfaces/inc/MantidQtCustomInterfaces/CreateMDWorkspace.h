@@ -39,7 +39,7 @@ namespace MantidQt
       /// Run a confirmation dialog.
       int runConfirmation(const std::string& message);
       /// Checks the candidate is unique, then adds it to the existing data.
-      void addUniqueMemento(WorkspaceMemento_sptr candiate);
+      void addUniqueMemento(WorkspaceMemento_sptr candidate);
 
     private slots:
 
@@ -47,7 +47,13 @@ namespace MantidQt
 
       void addFileClicked();
 
+      void setUBMatrixClicked();
+
       void removeSelectedClicked();
+
+      void findUBMatrixClicked();
+
+      void createMDWorkspaceClicked();
 
     private:
       Ui::CreateMDWorkspace  m_uiForm;

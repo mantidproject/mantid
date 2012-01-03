@@ -44,7 +44,7 @@ ManagedWorkspace2D::ManagedWorkspace2D() :
  *  @param YLength :: The number of data/error points in each vector (must all be the same)
  *  @throw std::runtime_error if unable to open a temporary file
  */
-void ManagedWorkspace2D::init(const size_t &NVectors, const size_t &XLength, const size_t &YLength)
+void ManagedWorkspace2D::init(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength)
 {
   AbsManagedWorkspace2D::init(NVectors,XLength,YLength);
 
@@ -174,7 +174,7 @@ ManagedWorkspace2D::~ManagedWorkspace2D()
      @param newBlock :: Returned data block address
      @param startIndex :: Starting spectrum index in the block
 */
-void ManagedWorkspace2D::readDataBlock(ManagedDataBlock2D *newBlock,size_t startIndex)const
+void ManagedWorkspace2D::readDataBlock(ManagedDataBlock2D *newBlock,std::size_t startIndex)const
 {
   // You only need to read it if it hasn't been loaded before
   if (!newBlock->isLoaded())

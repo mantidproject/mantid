@@ -8,7 +8,7 @@
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/CPUTimer.h"
-#include "MantidKernel/DiskMRU.h"
+#include "MantidKernel/DiskBuffer.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidMDEvents/CoordTransformDistance.h"
@@ -570,7 +570,7 @@ public:
 
     // Create and open the test NXS file
     ::NeXus::File * file = do_saveAndOpenNexus(c);
-    c.setOnDisk(false); // Avoid touching MRU
+    c.setOnDisk(false); // Avoid touching DiskBuffer
     c.loadNexus(file);
     TS_ASSERT_EQUALS( c.getNPoints(), 1000);
     const std::vector<MDLeanEvent<3> > & events = c.getEvents();
@@ -610,11 +610,11 @@ public:
     // Create a box with a controller for the back-end
     BoxController_sptr bc(new BoxController(3));
 
-    // Handle the disk MRU values
-    bc->setCacheParameters(sizeof(MDLeanEvent<3>), 100000, 10000, 0);
-    DiskMRU & mru = bc->getDiskMRU();
+    // Handle the disk DiskBuffer values
+    bc->setCacheParameters(sizeof(MDLeanEvent<3>), 10000);
+    DiskBuffer & dbuf = bc->getDiskBuffer();
     // It is empty now
-    TS_ASSERT_EQUALS( mru.getMruUsed(), 0);
+    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 0);
 
     // Create and open the test NXS file
     MDBox<MDLeanEvent<3>,3> c(bc, 0);
@@ -641,13 +641,13 @@ public:
     TS_ASSERT_DELTA( events[50].getSignal(), 50.0, 1e-5);
     TS_ASSERT_DELTA( events[990].getErrorSquared(), 990.5, 1e-5);
 
-    // MRU has something now
-    TS_ASSERT_EQUALS( mru.getMruUsed(), 1000);
     // The box's data is busy
     TS_ASSERT( c.dataBusy() );
     // Done with the data.
     c.releaseEvents();
     TS_ASSERT( !c.dataBusy() );
+    // Something in the to-write buffer
+    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 1000);
 
     // OK, using this fake way, let's keep it in memory
     c.setOnDisk(false);
@@ -661,7 +661,7 @@ public:
     // Flush out the cache
     c.setOnDisk(true);
     // This should NOT call the write method since we had const access. Hard to test though!
-    mru.flushCache();
+    dbuf.flushCache();
 
     file->close();
     do_deleteNexusFile();
@@ -671,19 +671,19 @@ public:
 
   //-----------------------------------------------------------------------------------------
   /** Set up the file back end and test accessing data.
-   * This time, use no MRU so that reading/loading is done within the object itself */
+   * This time, use no DiskBuffer so that reading/loading is done within the object itself */
   void test_fileBackEnd_noMRU()
   {
     // Create a box with a controller for the back-end
     BoxController_sptr bc(new BoxController(3));
 
-    // Handle the disk MRU values
-    bc->setCacheParameters(sizeof(MDLeanEvent<3>), 0, 0, 0);
-    // MRU won't be used
-    TS_ASSERT( !bc->useMRU());
-    DiskMRU & mru = bc->getDiskMRU();
+    // Handle the disk DiskBuffer values
+    bc->setCacheParameters(sizeof(MDLeanEvent<3>), 0);
+    // DiskBuffer won't be used
+    TS_ASSERT( !bc->useWriteBuffer());
+    DiskBuffer & dbuf = bc->getDiskBuffer();
     // It is empty now
-    TS_ASSERT_EQUALS( mru.getMruUsed(), 0);
+    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 0);
 
     // Create and open the test NXS file
     MDBox<MDLeanEvent<3>,3> c(bc, 0);
@@ -710,13 +710,14 @@ public:
     TS_ASSERT_DELTA( events[50].getSignal(), 50.0, 1e-5);
     TS_ASSERT_DELTA( events[990].getErrorSquared(), 990.5, 1e-5);
 
-    TSM_ASSERT_EQUALS( "MRU has nothing still - it wasn't used",  mru.getMruUsed(), 0);
+    TSM_ASSERT_EQUALS( "DiskBuffer has nothing still - it wasn't used",  dbuf.getWriteBufferUsed(), 0);
     TSM_ASSERT("Data is busy", c.dataBusy() );
     TSM_ASSERT("Data is in memory", c.getInMemory() );
     // Done with the data.
     c.releaseEvents();
     TSM_ASSERT("Data is no longer busy", !c.dataBusy() );
     TSM_ASSERT("Data is not in memory", !c.getInMemory() );
+    TSM_ASSERT_EQUALS( "DiskBuffer has nothing still - it wasn't used",  dbuf.getWriteBufferUsed(), 0);
 
     file->close();
     do_deleteNexusFile();
@@ -731,11 +732,11 @@ public:
     // Create a box with a controller for the back-end
     BoxController_sptr bc(new BoxController(3));
 
-    // Handle the disk MRU values
-    bc->setCacheParameters(sizeof(MDLeanEvent<3>), 100000, 10000, 0);
-    DiskMRU & mru = bc->getDiskMRU();
+    // Handle the disk DiskBuffer values
+    bc->setCacheParameters(sizeof(MDLeanEvent<3>), 10000);
+    DiskBuffer & dbuf = bc->getDiskBuffer();
     // It is empty now
-    TS_ASSERT_EQUALS( mru.getMruUsed(), 0);
+    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 0);
 
     // A new empty box.
     MDBox<MDLeanEvent<3>,3> c(bc, 0);
@@ -761,7 +762,7 @@ public:
     c.releaseEvents();
 
     // Flushing the cache will write out the events.
-    mru.flushCache();
+    dbuf.flushCache();
 
     // Now let's pretend we re-load that data into another box
     MDBox<MDLeanEvent<3>,3> c2(bc, 0);
@@ -787,11 +788,11 @@ public:
     // Create a box with a controller for the back-end
     BoxController_sptr bc(new BoxController(3));
 
-    // Handle the disk MRU values
-    bc->setCacheParameters(sizeof(MDLeanEvent<3>), 100000, 10000, 0);
-    DiskMRU & mru = bc->getDiskMRU();
+    // Handle the disk DiskBuffer values
+    bc->setCacheParameters(sizeof(MDLeanEvent<3>), 10000);
+    DiskBuffer & dbuf = bc->getDiskBuffer();
     // It is empty now
-    TS_ASSERT_EQUALS( mru.getMruUsed(), 0);
+    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 0);
 
     // A new empty box.
     MDBox<MDLeanEvent<3>,3> c(bc, 0);
@@ -819,7 +820,7 @@ public:
     c.releaseEvents();
 
     // Flushing the cache will write out the events.
-    mru.flushCache();
+    dbuf.flushCache();
 
     // The size on disk should have been changed (but not the position since that was the only free spot)
     TS_ASSERT_EQUALS( c.getFileIndexStart(), 500);
@@ -841,12 +842,12 @@ public:
     events2[1499].setSignal(789.0);
     // And we finish and write it out
     c2.releaseEvents();
-    mru.flushCache();
+    dbuf.flushCache();
     // The new event list should have ended up at the end of the file
     TS_ASSERT_EQUALS( c2.getFileIndexStart(), 2000);
     TS_ASSERT_EQUALS( c2.getFileNumEvents(), 1500);
     // The file has now grown.
-    TS_ASSERT_EQUALS( mru.getFileLength(), 3500);
+    TS_ASSERT_EQUALS( dbuf.getFileLength(), 3500);
 
     // This counts the number of events actually in the file.
     TS_ASSERT_EQUALS( file->getInfo().dims[0], 3500);
@@ -877,8 +878,8 @@ public:
   {
     // Create a box with a controller for the back-end
     BoxController_sptr bc(new BoxController(3));
-    bc->setCacheParameters(sizeof(MDLeanEvent<3>), 0, 10000, 0);
-    DiskMRU & mru = bc->getDiskMRU();
+    bc->setCacheParameters(sizeof(MDLeanEvent<3>),10000);
+    DiskBuffer & dbuf = bc->getDiskBuffer();
 
     // Create and open the test NXS file
     MDBox<MDLeanEvent<3>,3> c(bc, 0);
@@ -911,7 +912,7 @@ public:
     c.releaseEvents();
 
     // Flush the cache to write out the modified data
-    mru.flushCache();
+    dbuf.flushCache();
     TSM_ASSERT("Data is not flagged as modified because it was written out to disk.", !c.dataModified());
     TSM_ASSERT("Data is not flagged as added because it was written out", !c.dataAdded());
     TSM_ASSERT_EQUALS("Now there are 1001 events on file", c.getFileNumEvents(), 1001);
@@ -933,7 +934,7 @@ public:
     TSM_ASSERT_EQUALS("Still 1001 events on file", c.getFileNumEvents(), 1001);
     TSM_ASSERT_EQUALS("But the number of points had grown.", c.getNPoints(), 1002);
     c.releaseEvents();
-    mru.flushCache();
+    dbuf.flushCache();
     TSM_ASSERT("Data is not flagged as modified because it was written out to disk.", !c.dataModified());
     TSM_ASSERT_EQUALS("Now there are 1002 events on file", c.getFileNumEvents(), 1002);
     TSM_ASSERT_EQUALS("And the block must have been moved since it grew", c.getFilePosition(), 3001);
@@ -948,7 +949,7 @@ public:
     TSM_ASSERT_EQUALS("Still 1002 events on file", c.getFileNumEvents(), 1002);
     TSM_ASSERT_EQUALS("But the number of points had grown.", c.getNPoints(), 1003);
     c.releaseEvents();
-    mru.flushCache();
+    dbuf.flushCache();
     TSM_ASSERT_EQUALS("Now there are 1003 events on file", c.getFileNumEvents(), 1003);
     TSM_ASSERT_EQUALS("And the block must have been moved since it grew", c.getFilePosition(), 2000);
     TSM_ASSERT("And the data is no longer in memory.", !c.getInMemory());
