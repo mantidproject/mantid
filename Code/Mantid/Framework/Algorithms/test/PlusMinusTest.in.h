@@ -74,25 +74,25 @@ public:
 
   void test_CompoundAssignment()
   {
-    MatrixWorkspace_sptr a = WorkspaceCreationHelper::CreateWorkspaceSingleValue(3);
+    Workspace2D_sptr a = WorkspaceCreationHelper::Create2DWorkspace(10,10);
     const Workspace_const_sptr b = a;
-    MatrixWorkspace_sptr c = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2);
+    Workspace2D_sptr c = WorkspaceCreationHelper::Create2DWorkspace(10,10);
     if (DO_PLUS)
     {
       a += 5;
-      TS_ASSERT_EQUALS(a->readY(0)[0],8);
+      TS_ASSERT_EQUALS(a->readY(0)[0],7);
       TS_ASSERT_EQUALS(a,b);
       a += c;
-      TS_ASSERT_EQUALS(a->readY(0)[0],10);
+      TS_ASSERT_EQUALS(a->readY(0)[0],9);
       TS_ASSERT_EQUALS(a,b);
     }
     else
     {
       a -= 5;
-      TS_ASSERT_EQUALS(a->readY(0)[0],-2);
+      TS_ASSERT_EQUALS(a->readY(0)[0],-3);
       TS_ASSERT_EQUALS(a,b);
       a -= c;
-      TS_ASSERT_EQUALS(a->readY(0)[0],-4);
+      TS_ASSERT_EQUALS(a->readY(0)[0],-5);
       TS_ASSERT_EQUALS(a,b);
     }
   }
@@ -254,15 +254,15 @@ public:
   {
     int nBins = 10;
     MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.2);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceFib(nBins);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspaceBinned(1,nBins);
     if (DO_PLUS)
-    {
       MatrixWorkspace_sptr out = performTest(work_in1,work_in2,
           false /*in place*/, false /*not event*/,
-          -1,-1, false, true /*algorithmWillCommute*/);
-    }
+          -1, -1, false, true /*algorithmWillCommute*/);
     else
-      performTest_fails(work_in1,work_in2);
+      performTest(work_in1,work_in2,
+          false /*in place*/, false /*not event*/,
+          0.2, 2.0493, false, true /*algorithmWillCommute*/);
   }
 
   void test_2D_SingleValue()
@@ -296,7 +296,9 @@ public:
       TS_ASSERT_EQUALS( out->blocksize(), nBins);
     }
     else
-      performTest_fails(work_in1,work_in2);
+      MatrixWorkspace_sptr out = performTest(work_in1,work_in2,
+          false /*in place*/, false /*not event*/,
+          2.455, 2.5406, false, true /*algorithmWillCommute*/);
   }
 
   void test_2D_SingleValueNoError()

@@ -92,6 +92,8 @@ namespace Mantid
       void exec();
 
     protected:
+      bool handleSpecialDivideMinus();
+
       /// Execution method for event workspaces, to be overridden as needed.
       virtual void execEvent( DataObjects::EventWorkspace_const_sptr lhs, DataObjects::EventWorkspace_const_sptr rhs );
 
