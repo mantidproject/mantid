@@ -237,6 +237,14 @@ void MultiLayer::setActiveGraph(Graph* g)
 	if (!g || active_graph == g)
 		return;
 
+  // Make sure the passed in Graph belongs to this object
+  bool found = false;
+  foreach(Graph *gr, graphsList)
+  {
+    if (gr == g) found = true;
+  }
+  if (!found) return;
+
 	active_graph = g;
 	active_graph->setFocus();
 

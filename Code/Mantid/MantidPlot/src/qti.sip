@@ -1068,12 +1068,6 @@ public:
 
 	Matrix* importImage(const QString&);
 	MultiLayer* plotSpectrogram(Matrix*, Graph::CurveType = Graph::ColorMap) /PyName=plot/;
-	MultiLayer* plot(const QString&, double, double, int = 100);
-%MethodCode
-  QStringList l;
-  l << *a0;
-  sipRes = sipCpp->newFunctionPlot(l, a1, a2, a3);
-%End
 
     Graph3D* newPlot3D();
     Graph3D* plotXYZ(Table* table, const QString&, int = 0) /PyName=plot3D/;
