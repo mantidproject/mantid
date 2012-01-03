@@ -200,6 +200,8 @@ if ( CPPCHECK_EXECUTABLE )
         Framework/ICat/src/GSoapGenerated.cpp
         Framework/ICat/src/GSoapGenerated/soapC.cpp
         Framework/ICat/src/GSoapGenerated/soapICATPortBindingProxy.cpp
+	Framework/Kernel/src/ANN/
+	Framework/Kernel/src/ANN_complete.cpp
       )
 
   # setup the standard arguments
