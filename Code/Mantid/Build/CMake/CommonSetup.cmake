@@ -156,9 +156,89 @@ if ( CMAKE_COMPILER_IS_GNUCXX )
 endif ()
 
 ###########################################################################
-# The inital stuff for cppcheck
+# Setup cppcheck
 ###########################################################################
 find_package ( Cppcheck )
+if ( CPPCHECK_EXECUTABLE )
+  set ( CPPCHECK_INCLUDE_DIRS
+        Framework/Algorithms/inc
+        Framework/GPUAlgorithms/inc
+        Framework/PythonInterface/inc
+        Framework/NexusCPP/inc
+        Framework/Nexus/inc
+        Framework/MPIAlgorithms/inc
+        Framework/MDAlgorithms/inc
+        Framework/DataHandling/inc
+        Framework/WorkflowAlgorithms/inc
+        Framework/MDEvents/inc
+        Framework/DataObjects/inc
+        Framework/Geometry/inc
+        Framework/ICat/inc
+        Framework/CurveFitting/inc
+        Framework/API/inc
+        Framework/TestHelpers/inc
+        Framework/Crystal/inc
+        Framework/PythonAPI/inc
+        Framework/Kernel/inc
+        Vates/VatesAPI/inc
+        Vates/VatesSimpleGui/ViewWidgets/inc
+        Vates/VatesSimpleGui/StandAloneExec/inc
+        Vates/VatesSimpleGui/QtWidgets/inc
+        MantidQt/MantidWidgets/inc
+        MantidQt/CustomDialogs/inc
+        MantidQt/DesignerPlugins/inc
+        MantidQt/CustomInterfaces/inc
+        MantidQt/API/inc
+        MantidQt/Factory/inc
+        MantidQt/SliceViewer/inc
+      )
+
+  set ( CPPCHECK_EXCLUDES
+        Framework/ICat/inc/MantidICat/GSoapGenerated/soapH.h
+        Framework/ICat/inc/MantidICat/GSoapGenerated/soapICATPortBindingProxy.h
+        Framework/ICat/inc/MantidICat/GSoapGenerated/soapStub.h
+        Framework/ICat/src/GSoapGenerated.cpp
+        Framework/ICat/src/GSoapGenerated/soapC.cpp
+        Framework/ICat/src/GSoapGenerated/soapICATPortBindingProxy.cpp
+      )
+
+  # setup the standard arguments
+  set (_cppcheck_args)
+  list ( APPEND _cppcheck_args ${CPPCHECK_TEMPLATE_ARG} ${CPPCHECK_ARGS} )
+  if ( CPPCHECK_NUM_THREADS GREATER 0)
+    list ( APPEND _cppcheck_args -j ${CPPCHECK_NUM_THREADS} )
+  endif ( CPPCHECK_NUM_THREADS GREATER 0)
+
+  set (_cppcheck_includes)
+  foreach( _dir ${CPPCHECK_INCLUDE_DIRS} )
+    set ( _tmpdir "${CMAKE_SOURCE_DIR}/${_dir}" )
+    if ( EXISTS ${_tmpdir} )
+      list ( APPEND _cppcheck_includes -I ${_tmpdir} )
+    endif ()
+  endforeach()
+  list ( APPEND _cppcheck_args ${_cppcheck_includes} )
+
+  set (_cppcheck_excludes)
+  foreach( _file ${CPPCHECK_EXCLUDES} )
+    set ( _tmp "${CMAKE_SOURCE_DIR}/${_file}" )
+    if ( EXISTS ${_tmp} )
+      list ( APPEND _cppcheck_excludes -i ${_tmp} )
+    endif ()
+  endforeach()
+  list ( APPEND _cppcheck_args ${_cppcheck_excludes} )
+
+  set (_cppcheck_xml_args)
+  if (CPPCHECK_GENERATE_XML)
+    list( APPEND _cppcheck_xml_args --xml --xml-version=2 2> ${CMAKE_BINARY_DIR}/cppcheck.xml )
+  endif (CPPCHECK_GENERATE_XML)
+
+add_custom_target ( cppcheck_byhand
+                    COMMAND ${CPPCHECK_EXECUTABLE} ${_cppcheck_args} . ${_cppcheck_xml_args}
+                    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+                    COMMENT "Running cppcheck"
+                  )
+endif ( CPPCHECK_EXECUTABLE )
+
 
 ###########################################################################
 # Set up the unit tests target
