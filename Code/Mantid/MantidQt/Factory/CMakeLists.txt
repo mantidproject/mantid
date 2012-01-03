@@ -38,7 +38,6 @@ add_definitions ( -DIN_MANTIDQT_FACTORY )
 
 # This creates the target library
 add_library ( MantidQtFactory ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
-add_cppcheck( MantidQtFactory )
 
 # ... and links to other required libs
 target_link_libraries ( MantidQtFactory MantidQtAPI QtPropertyBrowser MantidQtSliceViewer ${QT_LIBRARIES} ${QWT_LIBRARIES} )

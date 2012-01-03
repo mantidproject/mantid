@@ -540,7 +540,6 @@ endif(UNITY_BUILD)
 ADD_PRECOMPILED_HEADER( inc/MantidAlgorithms/PrecompiledHeader.h MantidAlgorithms src/PrecompiledHeader.cpp SRC_FILES INC_FILES )
 # Add the target for this directory
 add_library ( Algorithms ${SRC_FILES} ${INC_FILES})
-add_cppcheck ( Algorithms )
 # Set the name of the generated library
 set_target_properties ( Algorithms PROPERTIES OUTPUT_NAME MantidAlgorithms )
 # Add to the 'Framework' group in VS

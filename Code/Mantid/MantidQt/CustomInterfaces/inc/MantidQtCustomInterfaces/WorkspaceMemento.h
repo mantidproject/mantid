@@ -42,6 +42,11 @@ namespace MantidQt
     class DLLExport WorkspaceMemento
     {
     public:
+      //Status enumeration type.
+      enum Status{NoOrientedLattice=0, Ready};
+
+      /// Constructor for the workspace memento.
+      WorkspaceMemento();
       /**
       Getter for the id of the workspace
       @return the id of the workspace
@@ -66,7 +71,15 @@ namespace MantidQt
       /**
       Generates a status report based on the workspace state.
       */
-      virtual std::string statusReport() const = 0;
+      std::string statusReport()
+      {
+        return m_statusReport;
+      }
+      /// Perform any clean up operations of the underlying workspace
+      virtual void cleanUp() = 0;
+      /// Sets the status report overrideing it with the provided message.
+      void setReport(const Status status);
+
       /// Destructor
       virtual ~WorkspaceMemento(){};
 
@@ -76,19 +89,15 @@ namespace MantidQt
       Common implementation of report generation.
       @param ws : workspace to report on.
       */
-      std::string generateReport(Mantid::API::MatrixWorkspace_sptr ws)
-      {
-        std::string msg;
-        if(!ws->sample().hasOrientedLattice())
-        {
-          msg = "Has no Oriented Lattice";
-        }
-        else
-        {
-          msg = "Ready!";
-        }
-        return msg;
-      }
+      void generateReport(Mantid::API::MatrixWorkspace_sptr ws);
+
+    private:
+
+      /// Extract a friendly status.
+      void interpretStatus(const Status arg);
+
+      /// Status report.
+      std::string m_statusReport;
 
     };
 

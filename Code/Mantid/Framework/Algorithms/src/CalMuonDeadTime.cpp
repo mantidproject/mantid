@@ -60,6 +60,14 @@ void CalMuonDeadTime::exec()
   const double lastgooddata = getProperty("LastGoodData");
 
 
+  // Seem to have to do this to avoid MantidPlot to crash when
+  // running this algorithm where the "DataFitted" WS already exists 
+
+  std::string dataFittedName = getPropertyValue("DataFitted");
+  if (API::AnalysisDataService::Instance().doesExist(dataFittedName))
+    API::AnalysisDataService::Instance().remove(dataFittedName);
+
+
   // Get number of good frames from Run object. This also serves as
   // a test to see if valid input workspace has been provided
 
@@ -84,7 +92,8 @@ void CalMuonDeadTime::exec()
 
 
   // Start created a temperary workspace with data we are going to fit
-  // against. First step is to crop to only include data from firstgooddata
+  // against. First step is to crop to only include data between firstgooddata
+  // and lastgooddata
 
   std::string wsName = "TempForMuonCalDeadTime";
   API::IAlgorithm_sptr cropWS;
@@ -94,6 +103,8 @@ void CalMuonDeadTime::exec()
   cropWS->setProperty("XMin", firstgooddata); 
   cropWS->setProperty("XMax", lastgooddata); 
   cropWS->executeAsSubAlg();
+
+  // get cropped input workspace
 
   boost::shared_ptr<API::MatrixWorkspace> wsCrop =
         cropWS->getProperty("OutputWorkspace");
@@ -111,6 +122,8 @@ void CalMuonDeadTime::exec()
   convertToPW->setPropertyValue("OutputWorkspace", wsName); 
   convertToPW->executeAsSubAlg();
 
+  // get pointworkspace
+
   boost::shared_ptr<API::MatrixWorkspace> wsFitAgainst =
         convertToPW->getProperty("OutputWorkspace");
 
@@ -122,10 +135,25 @@ void CalMuonDeadTime::exec()
     {
       const double time = wsFitAgainst->dataX(i)[t];  // mid-point time value because point WS
       const double decayFac = exp(time/muonDecay);
-      wsFitAgainst->dataY(i)[t] = wsCrop->dataY(i)[t]*decayFac; 
-      wsFitAgainst->dataX(i)[t] = wsCrop->dataY(i)[t]; 
-      wsFitAgainst->dataE(i)[t] = wsCrop->dataE(i)[t]*decayFac; 
+      if ( wsCrop->dataY(i)[t] > 0 )
+      {
+        wsFitAgainst->dataY(i)[t] = wsCrop->dataY(i)[t]*decayFac; 
+        wsFitAgainst->dataX(i)[t] = wsCrop->dataY(i)[t]; 
+        wsFitAgainst->dataE(i)[t] = wsCrop->dataE(i)[t]*decayFac; 
+      }
+      else
+      {
+        // For the Muon data which I have looked at when zero counts
+        // the errors are zero which is likely nonsense. Hence to get
+        // around this problem treat such counts to be 0.1 with standard
+        // of one........ 
+
+        wsFitAgainst->dataY(i)[t] = 0.1*decayFac; 
+        wsFitAgainst->dataX(i)[t] = 0.1; 
+        wsFitAgainst->dataE(i)[t] = decayFac; 
+      }
     }
+
 
   }  
 

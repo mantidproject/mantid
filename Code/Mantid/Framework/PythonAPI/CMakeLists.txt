@@ -90,11 +90,9 @@ endforeach ( PYFILE )
 ###########################################################################
 
 add_library ( PythonAPI ${SRC_FILES} ${INC_FILES} ${BOOST_SRC} ${PYTHON_INSTALL_FILES} )
-add_cppcheck( PythonAPI )
 if ( UNIX )
   set ( DLOPEN_SRC src/dlopen.c )
   add_library ( dlopen ${DLOPEN_SRC} )
-  add_cppcheck( dlopen )
 if ( APPLE )
   # and in .so on the Mac
   # Need to remove OpenMP

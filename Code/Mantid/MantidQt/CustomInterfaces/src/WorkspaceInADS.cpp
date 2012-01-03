@@ -22,9 +22,9 @@ namespace MantidQt
       {
         throw std::invalid_argument("WorkspaceInADS:: Workspace is not a matrix workspace : " + wsName );
       }
-      //Generate an initial report.
-      m_statusReportMessage = generateReport(ws);
+      generateReport(ws);
     }
+
 
     /**
     Getter for the id of the workspace
@@ -51,15 +51,6 @@ namespace MantidQt
     bool WorkspaceInADS::checkStillThere() const
     {
       return Mantid::API::AnalysisDataService::Instance().doesExist(m_wsName);
-    }
-
-    /**
-    Gets a friendly status report on the state of the workspace memento.
-    @return a formatted string containing the report.
-    */
-    std::string WorkspaceInADS::statusReport() const
-    {
-      return m_statusReportMessage;
     }
 
     /**

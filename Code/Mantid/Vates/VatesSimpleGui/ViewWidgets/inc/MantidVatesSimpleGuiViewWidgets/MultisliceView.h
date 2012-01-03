@@ -65,6 +65,8 @@ public:
   /// Default constructor.
   virtual ~MultiSliceView();
 
+  /// ViewBase::closeSubWindows
+  void closeSubWindows();
   /**
    * ViewBase::destroyView
    */

@@ -58,7 +58,6 @@ endforeach ( PYFILE )
 #############################################################################################
 
 add_library ( PythonGeometryModule ${SRC_FILES} ${INC_FILES} ${PYTHON_INSTALL_FILES} )
-add_cppcheck( PythonGeometryModule )
 set_python_properties( PythonGeometryModule _geometry )
 set_target_output_directory ( PythonGeometryModule ${OUTPUT_DIR} .pyd )
 # Add the required dependencies

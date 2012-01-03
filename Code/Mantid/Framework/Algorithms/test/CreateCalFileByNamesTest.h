@@ -55,7 +55,7 @@ public:
     outputFile = "./INES_CreateCalFileByNamesTest.cal";
     testerCAL.setPropertyValue("GroupingFileName", outputFile);
     outputFile = testerCAL.getPropertyValue("GroupingFileName");
-    testerCAL.setPropertyValue("GroupNames", "bank1A,bank2B,bank3C,bank4D,bank5E,bank6F,bank7G,bank8H,bank9I");
+    TS_ASSERT_THROWS_NOTHING(testerCAL.setPropertyValue("GroupNames", "bank1A, bank2B,bank3C, bank4D,bank5E,bank6F, bank7G,bank8H,bank9I"));
 
     TS_ASSERT_THROWS_NOTHING(testerCAL.execute());
     TS_ASSERT_THROWS_NOTHING(testerCAL.isExecuted());

@@ -128,6 +128,11 @@ namespace Mantid
         // either or both workspace are "other"
         // Use the default behaviour
         BinaryOperation::checkRequirements();
+
+        // Except that commutation is possible
+        // If LHS is smaller, e.g. single-value, flip sides to put it on the right
+        m_flipSides = (m_lhs->size() < m_rhs->size());
+
       }
     }
 
