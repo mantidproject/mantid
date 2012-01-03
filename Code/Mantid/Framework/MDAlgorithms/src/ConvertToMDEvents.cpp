@@ -768,31 +768,33 @@ ConvertToMDEvents::checkUVsettings(const std::vector<double> &ut,const std::vect
 // }
 //----------------------------------------------------------------------------------------------
 // AUTOINSTANSIATION OF EXISTING CODE:
-//// Templated loop over some templated arguments
-//template< size_t i, Q_state Q, AnalMode MODE, CnvrtUnits CONV >
-//class LOOP_ND{
-//  public:
-//    static inline void EXEC(ConvertToMDEvents *pH){
-//            LOOP_ND< i-1 , Q, MODE,CONV>::EXEC(pH);
-//            std::stringstream num;
-//            num << i;
-//            std::string Key = pH->Q_modes[Q]+pH->dE_modes[MODE]+pH->ConvModes[CONV]+num.str();
-//
-//            pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,&ConvertToMDEvents::processQND<i,Q,MODE,CONV>));
-//    }
-//};
+// Templated loop over some templated arguments
 template< Q_state Q, AnalMode MODE, CnvrtUnits CONV >
 class LOOP_ND{
   public:
     static inline void EXEC(ConvertToMDEvents *pH){
-            
+            LOOP_ND<Q, MODE,CnvrtUnits(int(CONV)-1)>::EXEC(pH);
+ 
             std::string Key = pH->Q_modes[Q]+pH->dE_modes[MODE]+pH->ConvModes[CONV];
 
+            pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,&ConvertToMDEvents::processQND<Q,MODE,CONV>));
+#ifdef _DEBUG
+            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
+#endif
+    }
+};
+template< Q_state Q, AnalMode MODE>
+class LOOP_ND<Q,MODE,ConvertNo>{
+  public:
+    static inline void EXEC(ConvertToMDEvents *pH){
+            
+            std::string Key = pH->Q_modes[Q]+pH->dE_modes[MODE]+pH->ConvModes[ConvertNo];
+
             pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,
-                                   &ConvertToMDEvents::processQND<Q,MODE,CONV>));
-//#ifdef _DEBUG
-            //std::cout<<" Ending group by instansiating algorithm with ID: "<<Key<<std::endl;
-//#endif
+                                   &ConvertToMDEvents::processQND<Q,MODE,ConvertNo>));
+#ifdef _DEBUG
+            std::cout<<" Ending group by instansiating algorithm with ID: "<<Key<<std::endl;
+#endif
 
     }
 };
@@ -825,38 +827,16 @@ native_inelastic_unitID("DeltaE")
 
 // Subalgorithm factories:
 // NoQ --> any Analysis mode will do as it does not depend on it; we may want to convert unuts
-    LOOP_ND<NoQ,ANY_Mode,ConvertNo>::EXEC(this);
-    LOOP_ND<NoQ,ANY_Mode,ConvFast>::EXEC(this);
     LOOP_ND<NoQ,ANY_Mode,ConvFromTOF>::EXEC(this);
-    LOOP_ND<NoQ,ANY_Mode,ConvByTOF>::EXEC(this);
+ 
 // MOD Q
-    LOOP_ND<modQ,Direct,ConvertNo>::EXEC(this);
-    LOOP_ND<modQ,Indir,ConvertNo>::EXEC(this);
-    LOOP_ND<modQ,Elastic,ConvertNo>::EXEC(this);
-    LOOP_ND<modQ,Direct,ConvFast>::EXEC(this);
-    LOOP_ND<modQ,Indir,ConvFast>::EXEC(this);
-    LOOP_ND<modQ,Elastic,ConvFast>::EXEC(this);
     LOOP_ND<modQ,Direct,ConvFromTOF>::EXEC(this);
     LOOP_ND<modQ,Indir,ConvFromTOF>::EXEC(this);
     LOOP_ND<modQ,Elastic,ConvFromTOF>::EXEC(this);
-    LOOP_ND<modQ,Direct,ConvByTOF>::EXEC(this);
-    LOOP_ND<modQ,Indir,ConvByTOF>::EXEC(this);
-    LOOP_ND<modQ,Elastic,ConvByTOF>::EXEC(this);
-
  // Q3D
-    LOOP_ND<Q3D,Direct,ConvertNo>::EXEC(this);
-    LOOP_ND<Q3D,Indir,ConvertNo>::EXEC(this);
-    LOOP_ND<Q3D,Elastic,ConvertNo>::EXEC(this);
-    LOOP_ND<Q3D,Direct,ConvFast>::EXEC(this);
-    LOOP_ND<Q3D,Indir,ConvFast>::EXEC(this);
-    LOOP_ND<Q3D,Elastic,ConvFast>::EXEC(this);
     LOOP_ND<Q3D,Direct,ConvFromTOF>::EXEC(this);
     LOOP_ND<Q3D,Indir,ConvFromTOF>::EXEC(this);
     LOOP_ND<Q3D,Elastic,ConvFromTOF>::EXEC(this);
-    LOOP_ND<Q3D,Direct,ConvByTOF>::EXEC(this);
-    LOOP_ND<Q3D,Indir,ConvByTOF>::EXEC(this);
-    LOOP_ND<Q3D,Elastic,ConvByTOF>::EXEC(this);
-
 }
 
 //

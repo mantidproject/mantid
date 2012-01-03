@@ -75,12 +75,12 @@ namespace MDAlgorithms
   };
   /** enum describes if there is need to convert workspace units and different unit conversion modes 
    * this modes are identified by algorithm from workpace parameters and user input.   */
-  enum CnvrtUnits
+  enum CnvrtUnits   // here the numbers are specified to enable proper metaloop on conversion
   {
-      ConvertNo,   //< no, input workspace has the same units as output workspace or in units used by Q-dE algorithms naturally
-      ConvFast, //< the input workspace has different units from the requested and fast conversion is possible
-      ConvByTOF,   //< conversion possible via TOF
-      ConvFromTOF  //< Input workspace units are the TOF 
+      ConvertNo  =0,   //< no, input workspace has the same units as output workspace or in units used by Q-dE algorithms naturally
+      ConvFast   =1, //< the input workspace has different units from the requested and fast conversion is possible
+      ConvByTOF  =2,   //< conversion possible via TOF
+      ConvFromTOF=3  //< Input workspace units are the TOF 
   };
 /// predefenition of the class, which does all coordinate transformations, Linux compilers need this. 
   template<Q_state Q, AnalMode MODE, CnvrtUnits CONV> 
