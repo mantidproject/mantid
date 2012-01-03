@@ -189,6 +189,8 @@ namespace Mantid
     // Concrete instantations
     template IMDWorkspace_sptr performBinaryOp(const IMDWorkspace_sptr, const IMDWorkspace_sptr, const std::string& , const std::string & name,
         bool, bool);
+    template MatrixWorkspace_sptr performBinaryOp(const MatrixWorkspace_sptr, const MatrixWorkspace_sptr, const std::string& , const std::string & name,
+        bool, bool);
     template WorkspaceGroup_sptr performBinaryOp(const IMDWorkspace_sptr, const WorkspaceGroup_sptr, const std::string& , const std::string & name,
         bool, bool);
     template WorkspaceGroup_sptr performBinaryOp(const WorkspaceGroup_sptr, const IMDWorkspace_sptr, const std::string& , const std::string & name,
@@ -204,6 +206,8 @@ namespace Mantid
 
     // Double variants
     template IMDWorkspace_sptr performBinaryOpWithDouble(const IMDWorkspace_sptr, const double, const std::string& op,
+        const std::string &, bool, bool);
+    template MatrixWorkspace_sptr performBinaryOpWithDouble(const MatrixWorkspace_sptr, const double, const std::string& op,
         const std::string &, bool, bool);
     template IMDHistoWorkspace_sptr performBinaryOpWithDouble(const IMDHistoWorkspace_sptr, const double, const std::string& op,
         const std::string &, bool, bool);
