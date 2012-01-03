@@ -14,6 +14,7 @@ GetDetOffsetsMultiPeaks("InputW","OutputW",0.01,2.0,1.8,2.2,"output.cal")
 
 *WIKI*/
 #include "MantidAlgorithms/GetDetOffsetsMultiPeaks.h"
+#include "MantidAlgorithms/GSLFunctions.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/SpectraDetectorMap.h"
@@ -57,8 +58,18 @@ namespace Mantid
     /// Destructor
     GetDetOffsetsMultiPeaks::~GetDetOffsetsMultiPeaks()
     {}
-
-
+  
+    static double gsl_costFunction(const gsl_vector *v, void *params)
+    {
+      std::string *p = (std::string *)params;
+      std::string inname = p[0];
+      std::string peakPositions = p[2];
+      const int64_t wi = boost::lexical_cast<int64_t>(p[1]);
+      double offset = gsl_vector_get(v, 0);
+      Mantid::Algorithms::GetDetOffsetsMultiPeaks u;
+      return u.fitSpectra(wi, offset, inname, peakPositions);
+    }
+  
     //-----------------------------------------------------------------------------------------
     /** Initialisation method. Declares properties to be used in algorithm.
      */
@@ -77,6 +88,8 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<>("MaskWorkspace","Mask",Direction::Output),
           "An output workspace containing the mask.");
       declareProperty("MaxOffset", 1.0, "Maximum absolute value of offsets; default is 1");
+      //Disable default gsl error handler (which is to call abort!)
+      gsl_set_error_handler_off();
     }
 
     //-----------------------------------------------------------------------------------------
@@ -98,12 +111,78 @@ namespace Mantid
 
       // Fit all the spectra with a gaussian
       Progress prog(this, 0, 1.0, nspec);
-      PARALLEL_FOR1(inputW)
+      PRAGMA_OMP(parallel for schedule(dynamic, 1) )
       for (int wi=0;wi<nspec;++wi)
       {
         PARALLEL_START_INTERUPT_REGION
         // Fit the peak
-        double offset=fitSpectra(wi);
+        std::string par[3];
+        std::string inname = getProperty("InputWorkspace");
+        par[0] = inname;
+        std::ostringstream strwi;
+        strwi<<wi;
+        par[1] = strwi.str();
+        std::string peakPositions = getProperty("DReference");
+        par[2] = peakPositions;
+  
+        const gsl_multimin_fminimizer_type *T =
+        gsl_multimin_fminimizer_nmsimplex;
+        gsl_multimin_fminimizer *s = NULL;
+        gsl_vector *ss, *x;
+        gsl_multimin_function minex_func;
+  
+        // finally do the fitting
+  
+        size_t nopt = 1;
+        size_t iter = 0;
+        int status = 0;
+        double size;
+   
+        /* Starting point */
+        x = gsl_vector_alloc (nopt);
+        gsl_vector_set_all (x, 0.0);
+  
+        /* Set initial step sizes to 0.001 */
+        ss = gsl_vector_alloc (nopt);
+        gsl_vector_set_all (ss, 0.001);
+  
+        /* Initialize method and iterate */
+        minex_func.n = nopt;
+        minex_func.f = &Mantid::Algorithms::gsl_costFunction;
+        minex_func.params = &par;
+  
+        s = gsl_multimin_fminimizer_alloc (T, nopt);
+        gsl_multimin_fminimizer_set (s, &minex_func, x, ss);
+  
+        do
+        {
+          iter++;
+          status = gsl_multimin_fminimizer_iterate(s);
+          if (status)
+            break;
+  
+          size = gsl_multimin_fminimizer_size (s);
+          status = gsl_multimin_test_size (size, 1e-4);
+  
+        }
+        while (status == GSL_CONTINUE && iter < 50 && s->fval != 1000.0);
+  
+        // Output summary to log file
+        if (s->fval == 1000.0) 
+        {
+          gsl_vector_set (s->x, 0, 0.0);
+        }
+  
+        std::string reportOfDiffractionEventCalibrateDetectors = gsl_strerror(status);
+        if (s->fval == 1000.0) reportOfDiffractionEventCalibrateDetectors = "No events";
+  
+        g_log.debug() << " Workspace Index = " << wi << 
+          " Method used = " << " Simplex" << 
+          " Iteration = " << iter << 
+          " Status = " << reportOfDiffractionEventCalibrateDetectors << 
+          " Minimize Sum = " << s->fval << 
+          " Offset   = " << gsl_vector_get (s->x, 0) << "  \n";
+        double offset = gsl_vector_get (s->x, 0);
         double mask=1.0;
         if (std::abs(offset) > maxOffset)
         { 
@@ -126,6 +205,9 @@ namespace Mantid
             else maskWS->dataY((*pixel_to_wi)[*it])[0] = mask;
           }
         }
+        gsl_vector_free(x);
+        gsl_vector_free(ss);
+        gsl_multimin_fminimizer_free (s);
         prog.report();
         PARALLEL_END_INTERUPT_REGION
       }
@@ -156,48 +238,41 @@ namespace Mantid
     *  @param s :: The Workspace Index to fit
     *  @return The calculated offset value
     */
-    double GetDetOffsetsMultiPeaks::fitSpectra(const int64_t s)
-    {
-       g_log.information("Calling FindPeaks as a sub-algorithm");
-       double offset = 1000.0;
 
-       API::IAlgorithm_sptr findpeaks = createSubAlgorithm("FindPeaks",0.0,0.2);
-       findpeaks->setProperty("InputWorkspace", inputW);
-       findpeaks->setProperty<int>("FWHM",7);
-       findpeaks->setProperty<int>("Tolerance",4);
-       // FindPeaks will do the checking on the validity of WorkspaceIndex
-       findpeaks->setProperty("WorkspaceIndex",static_cast<int>(s));
+    double GetDetOffsetsMultiPeaks::fitSpectra(const int64_t s, double offset, std::string inname, std::string peakPositions)
+    {
+      MatrixWorkspace_sptr inputW = boost::dynamic_pointer_cast<MatrixWorkspace>
+           (AnalysisDataService::Instance().retrieve(inname));
+
+      API::IAlgorithm_sptr findpeaks = createSubAlgorithm("FindPeaks",0.0,0.2);
+      findpeaks->setProperty("InputWorkspace", inputW);
+      findpeaks->setProperty<int>("FWHM",7);
+      findpeaks->setProperty<int>("Tolerance",4);
+      // FindPeaks will do the checking on the validity of WorkspaceIndex
+      findpeaks->setProperty("WorkspaceIndex",static_cast<int>(s));
   
       //Get the specified peak positions, which is optional
-      std::string peakPositions = getProperty("DReference");
       findpeaks->setProperty("PeakPositions", peakPositions);
       findpeaks->setProperty<std::string>("BackgroundType", "Linear");
       findpeaks->setProperty<bool>("HighBackground", true);
       findpeaks->executeAsSubAlg();
       ITableWorkspace_sptr peakslist = findpeaks->getProperty("PeaksList");
       std::vector<double> peakPos = Kernel::VectorHelper::splitStringIntoVector<double>(peakPositions);
-      double errsumold = 1000.0;
+      double errsum = 0.0;
+      double maxD = inputW->readX(s).back();
       for (int i = 0; i < peakslist->rowCount(); ++i)
       {
-        double errsum = 0.0;
         // Get references to the data
         const double centre = peakslist->getRef<double>("centre",i);
-        double tryoffset = 0;
-        if(centre > 0) tryoffset = peakPos[i]-centre;
-        for (int j = 0; j < peakslist->rowCount(); ++j)
-        {
-          const double centrej = peakslist->getRef<double>("centre",j);
-          if(centrej > 0) errsum += std::fabs(peakPos[j]-(centrej+tryoffset));
-        }
         //See formula in AlignDetectors
-        tryoffset = tryoffset/(peakPos[i]-tryoffset);
-        if (errsum < errsumold && std::abs(tryoffset) < maxOffset)
-        {
-          offset = tryoffset;
-          errsumold = errsum;
-        }
+        double offsetAD = offset*peakPos[i]/(1+offset);
+        if(centre > 0 && centre < maxD) 
+          errsum += std::fabs(peakPos[i]-(centre+offsetAD));
+        else
+          errsum += 1.0;
       }
-      return offset;
+      peakPos.clear();
+      return errsum;
     }
 
 
