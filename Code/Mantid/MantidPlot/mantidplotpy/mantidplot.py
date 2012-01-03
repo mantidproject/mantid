@@ -9,9 +9,11 @@ except ImportError:
     raise ImportError('The "mantidplot" module can only be used from within MantidPlot.')
 
 # Grab a few Mantid things so that we can recognise workspace variables
-from MantidFramework import WorkspaceProxy, WorkspaceGroup, MatrixWorkspace, mtd, ProxyObject
+from MantidFramework import WorkspaceProxy, WorkspaceGroup, MatrixWorkspace, mtd
 import proxies
-from PyQt4 import QtCore
+
+from PyQt4 import QtCore, QtGui
+from PyQt4.QtCore import Qt
 
 #-------------------------- Wrapped MantidPlot functions -----------------
 
