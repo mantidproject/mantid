@@ -82,10 +82,10 @@ namespace MantidQt
         IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadRaw");
         alg->initialize();
         alg->setProperty("Filename", m_fileName);
-        alg->setProperty("OutputWorkspace", m_adsID);
+        alg->setProperty("OutputWorkspace", "_temp");
         alg->execute();
 
-        return boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(m_adsID));
+        return boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("_temp"));
       }
 
       /**
