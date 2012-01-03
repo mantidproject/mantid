@@ -49,7 +49,7 @@ namespace CustomInterfaces
 {
 
 //Add this class to the list of specialised dialogs in this namespace
-//DECLARE_SUBWINDOW(CreateMDWorkspace); //TODO: Enable this to use it via mantid plot. Not ready for this yet!
+DECLARE_SUBWINDOW(CreateMDWorkspace); //TODO: Enable this to use it via mantid plot. Not ready for this yet!
 
   /**
   Helper type to perform comparisons between WorkspaceMementos
@@ -64,7 +64,7 @@ namespace CustomInterfaces
     {
       std::vector<std::string> strs;
       std::string id =  m_benchmark->getId();
-      boost::split(strs, id, boost::is_any_of("/"));
+      boost::split(strs, id, boost::is_any_of("/,\\"));
 
       std::stringstream streamPattern;
       streamPattern << "(" << strs.back() << ")$";
@@ -96,6 +96,7 @@ void CreateMDWorkspace::initLayout()
   connect(m_uiForm.btn_remove_workspace, SIGNAL(clicked()), this, SLOT(removeSelectedClicked()));
   connect(m_uiForm.btn_set_ub_matrix, SIGNAL(clicked()), this, SLOT(setUBMatrixClicked()));
   connect(m_uiForm.btn_find_ub_matrix, SIGNAL(clicked()), this, SLOT(findUBMatrixClicked()));
+  connect(m_uiForm.btn_create, SIGNAL(clicked()), this, SLOT(createMDWorkspaceClicked()));
   //Set MVC Model
   m_uiForm.tableView->setModel(m_model);
 }
@@ -135,6 +136,7 @@ void CreateMDWorkspace::setUBMatrixClicked()
     if ( pyOutput == "1" )
     {
       memento->setReport(WorkspaceMemento::Ready);
+      memento->cleanUp();
       m_model->update();
     }
   }
@@ -189,8 +191,15 @@ void CreateMDWorkspace::addFileClicked()
   std::string name = fileName.toStdString();
   if(!name.empty())
   {
-    WorkspaceMemento_sptr candidate(new WorkspaceOnDisk(name));
-    addUniqueMemento(candidate);
+    try
+    {
+      WorkspaceMemento_sptr candidate(new WorkspaceOnDisk(name));
+      addUniqueMemento(candidate);
+    }
+    catch(std::invalid_argument& arg)
+    {
+      this->runConfirmation(arg.what());
+    }
   }
 }
 
@@ -239,6 +248,11 @@ int CreateMDWorkspace::runConfirmation(const std::string& message)
   msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
   msgBox.setDefaultButton(QMessageBox::Cancel);
   return msgBox.exec();
+}
+
+void CreateMDWorkspace::createMDWorkspaceClicked()
+{
+  //Launch dialog
 }
 
 

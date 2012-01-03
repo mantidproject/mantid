@@ -26,7 +26,6 @@ namespace MantidQt
     }
 
 
-
     /**
     Getter for the id of the workspace
     @return the id of the workspace

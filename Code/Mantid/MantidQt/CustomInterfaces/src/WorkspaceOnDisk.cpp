@@ -21,14 +21,16 @@ namespace MantidQt
           std::string msg = "WorkspaceOnDisk:: Unknown File extension on: " + fileName;
           throw std::invalid_argument(msg);
         }
+
         if(!checkStillThere())
         {
           throw std::runtime_error("WorkspaceOnDisk:: File doesn't exist");
         }
 
         std::vector<std::string> strs;
-        boost::split(strs, m_fileName, boost::is_any_of("/"));
+        boost::split(strs, m_fileName, boost::is_any_of("/,\\"));
         m_adsID = strs.back();
+        m_adsID = m_adsID.substr(0, m_adsID.find('.'));
 
         //Generate an initial report.
         Mantid::API::MatrixWorkspace_sptr ws = fetchIt();
@@ -81,11 +83,19 @@ namespace MantidQt
 
         IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadRaw");
         alg->initialize();
+        alg->setRethrows(true);
         alg->setProperty("Filename", m_fileName);
-        alg->setProperty("OutputWorkspace", "_temp");
+        alg->setPropertyValue("OutputWorkspace", m_adsID);
         alg->execute();
 
-        return boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("_temp"));
+        Mantid::API::Workspace_sptr ws = AnalysisDataService::Instance().retrieve(m_adsID);
+        
+        Mantid::API::WorkspaceGroup_sptr gws = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+        if(gws != NULL)
+        {
+          throw std::invalid_argument("This raw file corresponds to a WorkspaceGroup. Cannot process groups like this. Import via MantidPlot instead.");
+        }
+        return boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
       }
 
       /**

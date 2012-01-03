@@ -53,6 +53,8 @@ namespace MantidQt
 
       void findUBMatrixClicked();
 
+      void createMDWorkspaceClicked();
+
     private:
       Ui::CreateMDWorkspace  m_uiForm;
       WorkspaceMementoCollection m_data;
