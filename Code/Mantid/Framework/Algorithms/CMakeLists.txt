@@ -31,6 +31,7 @@ set ( SRC_FILES
 	src/ConvertToDistribution.cpp
 	src/ConvertToEventWorkspace.cpp
 	src/ConvertToHistogram.cpp
+	src/ConvertToMaskingWorkspace.cpp
 	src/ConvertToMatrixWorkspace.cpp
 	src/ConvertToPointData.cpp
 	src/ConvertUnits.cpp
@@ -84,10 +85,11 @@ set ( SRC_FILES
 	src/FlatPlateAbsorption.cpp
 	src/GeneralisedSecondDifference.cpp
 	src/GeneratePythonScript.cpp
-	src/GetDetectorOffsets.cpp
 	src/GetDetOffsetsMultiPeaks.cpp
+	src/GetDetectorOffsets.cpp
 	src/GetEi.cpp
 	src/GetEi2.cpp
+	src/GetTimeSeriesLogInformation.cpp
 	src/GhostCorrection.cpp
 	src/GravitySANSHelper.cpp
 	src/GroupWorkspaces.cpp
@@ -101,11 +103,11 @@ set ( SRC_FILES
 	src/Logarithm.cpp
 	src/MaskBins.cpp
 	src/MaskDetectorsIf.cpp
-    src/Max.cpp
-    src/MaxMin.cpp
+	src/Max.cpp
+	src/MaxMin.cpp
 	src/MedianDetectorTest.cpp
-    src/MergeRuns.cpp
-    src/Min.cpp
+	src/MergeRuns.cpp
+	src/Min.cpp
 	src/Minus.cpp
 	src/ModeratorTzero.cpp
 	src/MonteCarloAbsorption.cpp
@@ -211,6 +213,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ConvertToDistribution.h
 	inc/MantidAlgorithms/ConvertToEventWorkspace.h
 	inc/MantidAlgorithms/ConvertToHistogram.h
+	inc/MantidAlgorithms/ConvertToMaskingWorkspace.h
 	inc/MantidAlgorithms/ConvertToMatrixWorkspace.h
 	inc/MantidAlgorithms/ConvertToPointData.h
 	inc/MantidAlgorithms/ConvertUnits.h
@@ -265,10 +268,11 @@ set ( INC_FILES
 	inc/MantidAlgorithms/GSLFunctions.h
 	inc/MantidAlgorithms/GeneralisedSecondDifference.h
 	inc/MantidAlgorithms/GeneratePythonScript.h
-	inc/MantidAlgorithms/GetDetectorOffsets.h
 	inc/MantidAlgorithms/GetDetOffsetsMultiPeaks.h
+	inc/MantidAlgorithms/GetDetectorOffsets.h
 	inc/MantidAlgorithms/GetEi.h
 	inc/MantidAlgorithms/GetEi2.h
+	inc/MantidAlgorithms/GetTimeSeriesLogInformation.h
 	inc/MantidAlgorithms/GhostCorrection.h
 	inc/MantidAlgorithms/GravitySANSHelper.h
 	inc/MantidAlgorithms/GroupWorkspaces.h
@@ -283,10 +287,10 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MaskBins.h
 	inc/MantidAlgorithms/MaskDetectorsIf.h
 	inc/MantidAlgorithms/Max.h
-    inc/MantidAlgorithms/MaxMin.h
+	inc/MantidAlgorithms/MaxMin.h
 	inc/MantidAlgorithms/MedianDetectorTest.h
 	inc/MantidAlgorithms/MergeRuns.h
-    inc/MantidAlgorithms/Min.h
+	inc/MantidAlgorithms/Min.h
 	inc/MantidAlgorithms/Minus.h
 	inc/MantidAlgorithms/ModeratorTzero.h
 	inc/MantidAlgorithms/MonteCarloAbsorption.h
@@ -391,6 +395,7 @@ set ( TEST_FILES
 	test/ConvertToDistributionTest.h
 	test/ConvertToEventWorkspaceTest.h
 	test/ConvertToHistogramTest.h
+	test/ConvertToMaskingWorkspaceTest.h
 	test/ConvertToMatrixWorkspaceTest.h
 	test/ConvertToPointDataTest.h
 	test/ConvertUnitsTest.h
@@ -437,9 +442,10 @@ set ( TEST_FILES
 	test/FlatBackgroundTest.h
 	test/FlatPlateAbsorptionTest.h
 	test/GeneratePythonScriptTest.h
-	test/GetDetectorOffsetsTest.h
 	test/GetDetOffsetsMultiPeaksTest.h
+	test/GetDetectorOffsetsTest.h
 	test/GetEiTest.h
+	test/GetTimeSeriesLogInformationTest.h
 	test/GhostCorrectionTest.h
 	test/GroupWorkspacesTest.h
 	test/HRPDSlabCanAbsorptionTest.h
@@ -451,7 +457,7 @@ set ( TEST_FILES
 	test/InterpolatingRebinTest.h
 	test/LogarithmTest.h
 	test/MaskBinsTest.h
-    test/MaxMinTest.h
+	test/MaxMinTest.h
 	test/MedianDetectorTestTest.h
 	test/MergeRunsTest.h
 	test/MinusTest.h
