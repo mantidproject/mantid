@@ -97,10 +97,10 @@ PythonScripting::PythonScripting(ApplicationWindow *parent)
 #endif
 
   // Observe ADS updates
-  observeAdd();
-  observeAfterReplace();
-  observeDelete();
-  observeADSClear();
+  //observeAdd();
+  //observeAfterReplace();
+  //observeDelete();
+  //observeADSClear();
 }
 
 PythonScripting::~PythonScripting()
