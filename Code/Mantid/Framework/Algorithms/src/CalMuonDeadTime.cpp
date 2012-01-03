@@ -149,7 +149,7 @@ void CalMuonDeadTime::exec()
         // of one........ 
 
         wsFitAgainst->dataY(i)[t] = 0.1*decayFac; 
-        wsFitAgainst->dataX(i)[t] = 1.0; 
+        wsFitAgainst->dataX(i)[t] = 0.1; 
         wsFitAgainst->dataE(i)[t] = decayFac; 
       }
     }
