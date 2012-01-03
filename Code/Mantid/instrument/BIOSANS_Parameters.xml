@@ -44,6 +44,10 @@
   <value val="2018.0, 3426.9, 5449.1, 7473.8, 9497.2, 11527.1, 13546.6, 15568.2, 17594.6" />
 </parameter>
 
+<parameter name="source-distance-offset">
+  <value val="-171.0"/>
+</parameter>
+
 </component-link>
 
 </parameter-file>
