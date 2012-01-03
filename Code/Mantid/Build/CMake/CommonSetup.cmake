@@ -160,6 +160,13 @@ endif ()
 ###########################################################################
 find_package ( Cppcheck )
 if ( CPPCHECK_EXECUTABLE )
+  set ( CPPCHECK_SOURCE_DIRS
+        Framework
+        MantidPlot
+        MantidQt
+        Vates
+      )
+
   set ( CPPCHECK_INCLUDE_DIRS
         Framework/Algorithms/inc
         Framework/GPUAlgorithms/inc
@@ -211,6 +218,15 @@ if ( CPPCHECK_EXECUTABLE )
     list ( APPEND _cppcheck_args -j ${CPPCHECK_NUM_THREADS} )
   endif ( CPPCHECK_NUM_THREADS GREATER 0)
 
+  # process list of include/exclude directories
+  set (_cppcheck_source_dirs)
+  foreach (_dir ${CPPCHECK_SOURCE_DIRS} )
+    set ( _tmpdir "${CMAKE_SOURCE_DIR}/${_dir}" )
+    if ( EXISTS ${_tmpdir} )
+      list ( APPEND _cppcheck_source_dirs ${_tmpdir} )
+    endif ()
+  endforeach()
+
   set (_cppcheck_includes)
   foreach( _dir ${CPPCHECK_INCLUDE_DIRS} )
     set ( _tmpdir "${CMAKE_SOURCE_DIR}/${_dir}" )
@@ -229,11 +245,15 @@ if ( CPPCHECK_EXECUTABLE )
   endforeach()
   list ( APPEND _cppcheck_args ${_cppcheck_excludes} )
 
+  # put the finishing bits on the final command call
   set (_cppcheck_xml_args)
   if (CPPCHECK_GENERATE_XML)
-    list( APPEND _cppcheck_xml_args --xml --xml-version=2 2> ${CMAKE_BINARY_DIR}/cppcheck.xml )
+    list( APPEND _cppcheck_xml_args --xml --xml-version=2 ${_cppcheck_source_dirs} 2> ${CMAKE_BINARY_DIR}/cppcheck.xml )
+  else (CPPCHECK_GENERATE_XML)
+    list( APPEND _cppcheck_xml_args  ${_cppcheck_source_dirs} )
   endif (CPPCHECK_GENERATE_XML)
 
+  # generate the target
   if (NOT TARGET cppcheck)
     add_custom_target ( cppcheck
                         COMMAND ${CPPCHECK_EXECUTABLE} ${_cppcheck_args} . ${_cppcheck_xml_args}
