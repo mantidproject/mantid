@@ -581,9 +581,6 @@ void MultiSliceView::showCutInSliceViewer(const QString &name)
     src1 = smModel->getItemAtIndex<pqPipelineSource *>(0);
   }
 
-  this->printProxyProps(src1);
-
-
   // Get the current dataset characteristics
   const char *inGeomXML = vtkSMPropertyHelper(src1->getProxy(),
                                              "InputGeometryXML").GetAsString();
@@ -615,8 +612,7 @@ void MultiSliceView::showCutInSliceViewer(const QString &name)
 
   MDImplicitFunction_sptr impplane(new MDPlaneImplicitFunction(3, orient,
                                                                origin));
-  rks.setImplicitFunction(impplane);
-  //std::cout << rks.createXMLString() << std::endl;
+  rks.setImplicitFunction(impplane);;
   QString titleAddition = name;
 
   // Use the WidgetFactory to create the slice viewer window
@@ -624,10 +620,18 @@ void MultiSliceView::showCutInSliceViewer(const QString &name)
   // Set the slice points, etc, using the XML definition of the plane function
   w->getSlicer()->openFromXML( QString::fromStdString(rks.createXMLString()) );
   w->show();
-
-  //TODO: Connect to application windows shutdown signal to close the slice viewer with the window.
 }
 
+/**
+ * This function closes user requested SliceViewer windows when the view is
+ * closed. The function is a no-op (except for factory creation) when no
+ * SliceViewer windows were requested.
+ */
+void MultiSliceView::closeSubWindows()
+{
+  MantidQt::Factory::WidgetFactory::Instance()->closeAllSliceViewerWindows();
 }
-}
-}
+
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid

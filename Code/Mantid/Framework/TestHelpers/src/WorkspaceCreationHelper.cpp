@@ -524,13 +524,24 @@ namespace WorkspaceCreationHelper
     EventWorkspace_sptr retVal(new EventWorkspace);
     retVal->initialize(numpixels,numbins,numbins-1);
 
+    // and X-axis for references:
+     NumericAxis *pAxis0 = new NumericAxis(numbins);
+ 
+   
+   
+  
     //Create the original X axis to histogram on.
     //Create the x-axis for histogramming.
     Kernel::cow_ptr<MantidVec> axis;
     MantidVec& xRef = axis.access();
     xRef.resize(numbins);
-    for (int i = 0; i < static_cast<int>(numbins); ++i)
-      xRef[i] = i*bin_delta;
+    for (int i = 0; i < static_cast<int>(numbins); ++i){
+       xRef[i] = i*bin_delta;
+       pAxis0->setValue(i,xRef[i]);
+    }
+     pAxis0->setUnit("TOF");
+
+   
 
     //Make up some data for each pixels
     for (size_t i=0; i< numpixels; i++)
@@ -546,6 +557,7 @@ namespace WorkspaceCreationHelper
     }
     retVal->doneAddingEventLists();
     retVal->setAllX(axis);
+    retVal->replaceAxis(0,pAxis0); 
 
 
     return retVal;

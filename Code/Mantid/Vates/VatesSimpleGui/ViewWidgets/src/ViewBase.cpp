@@ -388,6 +388,14 @@ double ViewBase::getCurrentTimeStep()
   return scene->getAnimationTime();
 }
 
+/**
+ * This function will close view generated sub-windows. Most views will not
+ * reimplement this function, so the default is to do nothing.
+ */
+void ViewBase::closeSubWindows()
+{
+}
+
 } // namespace SimpleGui
 } // namespace Vates
 } // namespace Mantid

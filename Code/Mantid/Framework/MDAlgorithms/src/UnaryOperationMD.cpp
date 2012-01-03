@@ -67,9 +67,27 @@ namespace Mantid
       m_in = getProperty( inputPropName() );
       m_out = getProperty( outputPropName() );
 
-      // Can't do log(123)
+      // For MatrixWorkspace's ...
       if (boost::dynamic_pointer_cast<MatrixWorkspace>(m_in))
-        throw std::invalid_argument("UnaryOperationMD: can't have a MatrixWorkspace (e.g. WorkspaceSingleValue) as the argument of " + this->name() + ".");
+      {
+        // Pass-through to the same function without "MD"
+        std::string matrixAlg = this->name();
+        matrixAlg = matrixAlg.substr(0, matrixAlg.size()-2);
+        IAlgorithm_sptr alg = this->createSubAlgorithm(matrixAlg);
+        // Copy all properties from THIS to the non-MD version
+        std::vector< Property*> props = this->getProperties();
+        for (size_t i=0; i<props.size(); i++)
+        {
+          Property* prop = props[i];
+          alg->setPropertyValue(prop->name(), prop->value());
+        }
+        alg->execute();
+        // Copy the output too
+        MatrixWorkspace_sptr outMW = alg->getProperty("OutputWorkspace");
+        IMDWorkspace_sptr out = boost::dynamic_pointer_cast<IMDWorkspace>(outMW);
+        setProperty("OutputWorkspace", out);
+        return;
+      }
 
       // Check for validity
       m_in_event = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_in);

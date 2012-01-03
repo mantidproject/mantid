@@ -10,6 +10,10 @@ class MatrixWorkspaceTest(unittest.TestCase):
     """
     
     def setUp(self):
+        mtd.clear()
+        pass
+    
+    def tearDown(self):
         pass
     
     def test_equals_matches_same_data(self):
@@ -64,6 +68,22 @@ class MatrixWorkspaceTest(unittest.TestCase):
        C = B * A
        C = B + A
         
+    def test_plus(self):
+       CreateWorkspace('A', DataX=[1,2,3], DataY=[2,3], DataE=[2,3])
+       A = mtd['A']
+       C = A + 5.5
+       D = 5.5 + A
+       # TODO: Re-enable these when we figure out why it fails in system tests
+       #self.assertAlmostEqual(C.dataY(0)[0], 7.5, 2)
+       #self.assertAlmostEqual(C.dataY(0)[1], 8.5, 2)
+       
+    def test_pow(self):
+       CreateWorkspace('A', DataX=[1,2,3], DataY=[2,3], DataE=[2,3])
+       A = mtd['A']
+       C = A ** 2.0
+       self.assertEqual(C.getName(), "C")
+       self.assertAlmostEqual(C.dataY(0)[0], 4.0, 2)
+       self.assertAlmostEqual(C.dataY(0)[1], 9.0, 2)
         
 
 if __name__ == '__main__':

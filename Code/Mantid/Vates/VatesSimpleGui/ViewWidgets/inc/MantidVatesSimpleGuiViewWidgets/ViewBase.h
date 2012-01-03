@@ -64,6 +64,8 @@ public:
 
   /// Poll the view to set status for mode control buttons.
   virtual void checkView();
+  /// Close view generated sub-windows.
+  virtual void closeSubWindows();
   /**
    * Function used to correct post-accept visibility issues. Most
    * views won't need to do anything.
