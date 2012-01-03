@@ -94,8 +94,54 @@ void CreateMDWorkspace::initLayout()
   connect(m_uiForm.btn_add_workspace, SIGNAL(clicked()), this, SLOT(addWorkspaceClicked()));
   connect(m_uiForm.btn_add_file, SIGNAL(clicked()), this, SLOT(addFileClicked()));
   connect(m_uiForm.btn_remove_workspace, SIGNAL(clicked()), this, SLOT(removeSelectedClicked()));
+  connect(m_uiForm.btn_set_ub_matrix, SIGNAL(clicked()), this, SLOT(setUBMatrixClicked()));
+  connect(m_uiForm.btn_find_ub_matrix, SIGNAL(clicked()), this, SLOT(findUBMatrixClicked()));
   //Set MVC Model
   m_uiForm.tableView->setModel(m_model);
+}
+
+void CreateMDWorkspace::findUBMatrixClicked()
+{
+  runConfirmation("Not yet implemented!");
+}
+
+/*
+Event handler for setting the UB Matrix
+*/
+void CreateMDWorkspace::setUBMatrixClicked()
+{
+  QTableView* view = m_uiForm.tableView;
+  QModelIndexList indexes = view->selectionModel()->selection().indexes();
+  if(indexes.size() > 0)
+  {
+    int index = indexes.front().row();
+    WorkspaceMemento_sptr memento = m_data[index];
+    Mantid::API::MatrixWorkspace_sptr ws = memento->fetchIt();
+    std::string id = memento->getId();
+    std::string command = "SetUBDialog(Workspace='" + id + "')";
+
+    QString pyInput =
+      "from mantidsimple import *\n"
+      "import sys\n"
+      "try:\n"
+      "    SetUBDialog(Workspace='%1')\n"
+      "    print 1\n"
+      "except:\n"
+      "    print 0\n";
+
+    pyInput = pyInput.arg(QString(id.c_str()));
+    QString pyOutput = runPythonCode(pyInput).trimmed();
+
+    if ( pyOutput == "1" )
+    {
+      memento->setReport(WorkspaceMemento::Ready);
+      m_model->update();
+    }
+  }
+  else
+  {
+    runConfirmation("Nothing selected");
+  }
 }
 
 /*

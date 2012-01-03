@@ -19,6 +19,7 @@ set ( SRC_FILES
 	src/background.cpp
 	src/deltaECalc.cpp
     src/WorkspaceInADS.cpp
+	src/WorkspaceMemento.cpp
     src/WorkspaceOnDisk.cpp
 )
 
