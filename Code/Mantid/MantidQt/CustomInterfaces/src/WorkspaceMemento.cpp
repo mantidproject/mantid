@@ -82,6 +82,24 @@ namespace MantidQt
       m_ub[8] = ub22;
     }
 
+    /**
+    Setter for the goniometer matrix
+    @param goniometer matrix.
+    */
+    void WorkspaceMemento::setGoniometer(const Mantid::Kernel::DblMatrix& matrix)
+    {
+      m_goniometer = matrix;
+    }
+
+    /**
+    Getter for the goniometer matrix
+    @return goniometer matrix
+    */
+    Mantid::Kernel::DblMatrix WorkspaceMemento::getGoniometer() const
+    {
+      return m_goniometer;
+    }
+
     /*
     Getter for the ubmatrix
     @return vector of elements. indexed by row then by column. i.e. First 3 entries are from the first row and span all columns.

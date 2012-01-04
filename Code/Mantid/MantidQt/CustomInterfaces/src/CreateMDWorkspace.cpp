@@ -50,7 +50,7 @@ namespace CustomInterfaces
 {
 
 //Add this class to the list of specialised dialogs in this namespace
-DECLARE_SUBWINDOW(CreateMDWorkspace); //TODO: Enable this to use it via mantid plot. Not ready for this yet!
+//DECLARE_SUBWINDOW(CreateMDWorkspace); //TODO: Enable this to use it via mantid plot. Not ready for this yet!
 
   /**
   Helper type to perform comparisons between WorkspaceMementos
@@ -98,6 +98,7 @@ void CreateMDWorkspace::initLayout()
   connect(m_uiForm.btn_set_ub_matrix, SIGNAL(clicked()), this, SLOT(setUBMatrixClicked()));
   connect(m_uiForm.btn_find_ub_matrix, SIGNAL(clicked()), this, SLOT(findUBMatrixClicked()));
   connect(m_uiForm.btn_create, SIGNAL(clicked()), this, SLOT(createMDWorkspaceClicked()));
+  connect(m_uiForm.btn_set_goniometer, SIGNAL(clicked()), this, SLOT(setGoniometerClicked()));
   //Set MVC Model
   m_uiForm.tableView->setModel(m_model);
 }
@@ -298,6 +299,38 @@ void CreateMDWorkspace::addFileClicked()
     }
   }
 }
+
+/**
+Handler for setting the goniometer.
+*/
+void CreateMDWorkspace::setGoniometerClicked()
+{
+  try
+  {
+    WorkspaceMemento_sptr memento = getFirstSelected();
+    Mantid::API::MatrixWorkspace_sptr ws = memento->fetchIt();
+    QString id = QString(memento->getId().c_str());
+
+    QString pyInput =
+      "from mantidsimple import *\n"
+      "import sys\n"
+      "try:\n"
+      "    wsName='%1'\n"
+      "    SetGoniometer(Workspace=wsName)\n"
+      "    print 'SUCCESS'\n"
+      "except:\n"
+      "    print 'FAIL'\n";
+
+    pyInput = pyInput.arg(id);
+    QString pyOutput = runPythonCode(pyInput).trimmed();
+
+  }
+  catch(std::invalid_argument& ex)
+  {
+    runConfirmation(ex.what());
+  }
+}
+
 
 /*
 Remove any selected workspace mementos

@@ -2,6 +2,7 @@
 #define MANTID_CUSTOMINTERFACES_MEMENTO_H_
 
 #include "MantidKernel/System.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include <string>
 #include <vector>
@@ -77,6 +78,10 @@ namespace MantidQt
       void setUB(const double& ub00, const double&  ub01, const double&  ub02, const double&  ub10, const double&  ub11, const double&  ub12, const double&  ub20, const double&  ub21, const double&  ub22);
       /// Getter for a ub matrix.
       std::vector<double> getUB() const;
+      /// Sets the goniometer matrix
+      void setGoniometer(const Mantid::Kernel::DblMatrix& matrix); 
+      /// Getter for the goniometer matrix
+      Mantid::Kernel::DblMatrix getGoniometer() const;
       /// Destructor
       virtual ~WorkspaceMemento(){};
       /// Common implementation for generating status
@@ -87,8 +92,11 @@ namespace MantidQt
       /// Extract a friendly status.
       std::string interpretStatus(const Status arg) const;
 
-      //Vector of elements describing a UB matrix.
+      // Vector of elements describing a UB matrix.
       std::vector<double> m_ub;
+
+      // Goniometer matrix
+      Mantid::Kernel::DblMatrix m_goniometer;
 
     };
 
