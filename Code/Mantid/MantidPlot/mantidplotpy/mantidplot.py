@@ -15,6 +15,10 @@ import proxies
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt
 
+# Import into the global namespace qti classes that:
+#   (a) don't need a proxy & (b) can be constructed from python
+from qti import PlotSymbol, ImageSymbol, ArrowMarker, ImageMarker
+
 #-------------------------- Wrapped MantidPlot functions -----------------
 
 # Overload for consistency with qtiplot table(..) & matrix(..) commands
@@ -35,7 +39,7 @@ def table(name):
     Returns:
         A handle to the table.
     """
-    return proxies.QtProxyObject(qti.app.table(name))
+    return proxies.MDIWindow(qti.app.table(name))
 
 def newTable(name=None,rows=30,columns=2):
     """Create a table.
@@ -49,9 +53,9 @@ def newTable(name=None,rows=30,columns=2):
         A handle to the created table.
     """
     if name is None:
-        return proxies.QtProxyObject(qti.app.newTable())
+        return proxies.MDIWindow(qti.app.newTable())
     else:
-        return proxies.QtProxyObject(qti.app.newTable(name,rows,columns))
+        return proxies.MDIWindow(qti.app.newTable(name,rows,columns))
 
 def matrix(name):
     """Get a handle on a matrix.
@@ -62,7 +66,7 @@ def matrix(name):
     Returns:
         A handle to the matrix.
     """
-    return proxies.QtProxyObject(qti.app.matrix(name))
+    return proxies.MDIWindow(qti.app.matrix(name))
 
 def newMatrix(name=None,rows=32,columns=32):
     """Create a matrix (N.B. This is not the same as a 'MantidMatrix').
@@ -76,9 +80,9 @@ def newMatrix(name=None,rows=32,columns=32):
         A handle to the created matrix.
     """
     if name is None:
-        return proxies.QtProxyObject(qti.app.newMatrix())
+        return proxies.MDIWindow(qti.app.newMatrix())
     else:
-        return proxies.QtProxyObject(qti.app.newMatrix(name,rows,columns))
+        return proxies.MDIWindow(qti.app.newMatrix(name,rows,columns))
 
 def graph(name):
     """Get a handle on a graph widget.
@@ -117,7 +121,7 @@ def note(name):
     Returns:
         A handle to the note.
     """
-    return proxies.QtProxyObject(qti.app.note(name))
+    return proxies.MDIWindow(qti.app.note(name))
 
 def newNote(name=None):
     """Create a note.
@@ -129,9 +133,9 @@ def newNote(name=None):
         A handle to the created note.
     """
     if name is None:
-        return proxies.QtProxyObject(qti.app.newNote())
+        return proxies.MDIWindow(qti.app.newNote())
     else:
-        return proxies.QtProxyObject(qti.app.newNote(name))
+        return proxies.MDIWindow(qti.app.newNote(name))
 
 #-----------------------------------------------------------------------------
 # Intercept qtiplot "plot" command and forward to plotSpectrum for a workspace
@@ -237,7 +241,7 @@ def importImage(filename):
     Returns:
         A handle to the matrix containing the image data.
     """
-    return proxies.QtProxyObject(qti.app.importImage(filename))
+    return proxies.MDIWindow(qti.app.importImage(filename))
 
 #-----------------------------------------------------------------------------
 def newPlot3D():
@@ -248,6 +252,96 @@ def plot3D(*args):
         return proxies.Graph3D(qti.app.plot3D(*args))
     else:
         return proxies.Graph3D(qti.app.plot3D(args[0]._getHeldObject(),*args[1:]))
+
+#-----------------------------------------------------------------------------
+#-------------------------- Project/Folder functions -----------------------
+#-----------------------------------------------------------------------------
+def windows():
+    """Get a list of the open windows."""
+    f = qti.app.windows()
+    ret = []
+    for item in f:
+        ret.append(proxies.MDIWindow(item))
+    return ret
+
+def activeFolder():
+    """Get a handle to the currently active folder."""
+    return proxies.Folder(qti.app.activeFolder())
+
+# These methods don't seem to work
+#def appendProject(filename, parentFolder=None):
+#    if parentFolder is not None:
+#        parentFolder = parentFolder._getHeldObject()
+#    return proxies.Folder(qti.app.appendProject(filename,parentFolder))
+#
+#def saveFolder(folder, filename, compress=False):
+#    qti.app.saveFolder(folder._getHeldObject(),filename,compress)
+
+def rootFolder():
+    """Get a handle to the top-level folder."""
+    return proxies.Folder(qti.app.rootFolder())
+
+def addFolder(name,parentFolder=None):
+    """Create a new folder.
+    
+    Args:
+        name: The name of the folder to create.
+        parentFolder: If given, make the new folder a subfolder of this one.
+        
+    Returns:
+        A handle to the newly created folder.
+    """
+    if parentFolder is not None:
+        parentFolder = parentFolder._getHeldObject()
+    return proxies.Folder(qti.app.addFolder(name,parentFolder))
+
+def deleteFolder(folder):
+    """Delete the referenced folder"""
+    return qti.app.deleteFolder(folder._getHeldObject())
+
+def changeFolder(folder, force=False):
+    """Changes the current folder.
+    
+    Args:
+        folder: A reference to the folder to change to.
+        force: Whether to do stuff even if the new folder is already the active one (default: no).
+    
+    Returns:
+        True on success.
+    """
+    return qti.app.changeFolder(folder._getHeldObject(),force)
+
+def copyFolder(source, destination):
+    """Copy a folder (and its contents) into another.
+    
+    Returns:
+        True on success.
+    """
+    return qti.app.copyFolder(source._getHeldObject(),destination._getHeldObject())
+
+def openTemplate(filename):
+    """Load a previously saved window template"""
+    return proxies.MDIWindow(qti.app.openTemplate(filename))
+
+def saveAsTemplate(window, filename):
+    """Save the characteristics of the given window to file"""
+    qti.app.saveAsTemplate(window._getHeldObject(), filename)
+
+def setWindowName(window, name):
+    """Set the given window to have the given name"""
+    qti.app.setWindowName(window._getHeldObject(), name)
+
+def setPreferences(layer):
+    qti.app.setPreferences(graph._getHeldObject())
+
+def clone(window):
+    return proxies.MDIWindow(qti.app.clone(window._getHeldObject()))
+
+def tableToMatrix(table):
+    return proxies.MDIWindow(qti.app.tableToMatrix(table._getHeldObject()))
+
+def matrixToTable(matrix, conversionType=qti.app.Direct):
+    return proxies.MDIWindow(qti.app.matrixToTable(matrix._getHeldObject(),conversionType))
 
 #-----------------------------------------------------------------------------
 #-------------------------- Wrapped MantidUI functions -----------------------
@@ -275,7 +369,7 @@ def getInstrumentView(name, tab=-1):
     Returns:
         A handle to the created instrument view widget.
     """
-    return proxies.QtProxyObject(qti.app.mantidUI.getInstrumentView(name,tab))
+    return proxies.MDIWindow(qti.app.mantidUI.getInstrumentView(name,tab))
 
 def importMatrixWorkspace(name, firstIndex=None, lastIndex=None, showDialog=False, visible=False):
     """Create a MantidMatrix object from the named workspace.
@@ -307,7 +401,7 @@ def importTableWorkspace(name, visible=False):
     Returns:
         A handle to the newly created table.
     """
-    return proxies.QtProxyObject(qti.app.mantidUI.importTableWorkspace(name,False,visible))
+    return proxies.MDIWindow(qti.app.mantidUI.importTableWorkspace(name,False,visible))
 
 #-----------------------------------------------------------------------------
 #-------------------------- SliceViewer functions ----------------------------
@@ -400,6 +494,14 @@ def closeAllSliceViewers():
 # Legacy function
 plotTimeBin = plotBin
 
+# import 'safe' methods (i.e. no proxy required) of ApplicationWindow into the global namespace
+# Only 1 at the moment!
+appImports = [
+        'saveProjectAs'
+        ]
+for name in appImports:
+    globals()[name] = getattr(qti.app,name)
+        
 # Ensure these functions are available as without the qti.app.mantidUI prefix
 MantidUIImports = [
     'getSelectedWorkspaceName'
