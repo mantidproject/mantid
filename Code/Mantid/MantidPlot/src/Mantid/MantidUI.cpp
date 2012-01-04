@@ -440,10 +440,9 @@ void MantidUI::importWorkspace(const QString& wsName, bool showDlg, bool makeVis
 {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   MantidMatrix* mm = importMatrixWorkspace(wsName,-1, -1, showDlg,makeVisible);
-  appWindow()->addListViewItem(mm);
   if (!mm)
-  {Table * t=importTableWorkspace(wsName,showDlg,makeVisible);
-  appWindow()->addListViewItem(t);
+  {
+    Table * t=importTableWorkspace(wsName,showDlg,makeVisible);
   }
   QApplication::restoreOverrideCursor();
 }
@@ -467,7 +466,6 @@ void MantidUI::importTransposed()
   {
     ws = boost::dynamic_pointer_cast<ITableWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
     Table *t = importTableWorkspace(wsName,true,true,true);
-    appWindow()->addListViewItem(t);
   }
   QApplication::restoreOverrideCursor();
 }
@@ -1802,7 +1800,6 @@ InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName, int tab)
   insWin->selectTab(tab);
 
   appWindow()->addMdiSubWindow(insWin);
-  appWindow()->addListViewItem(insWin);
 
   connect(insWin,SIGNAL(plotSpectra(const QString&,const std::set<int>&)),this,
       SLOT(plotSpectraList(const QString&,const std::set<int>&)));

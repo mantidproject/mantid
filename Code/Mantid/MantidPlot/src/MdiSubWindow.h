@@ -53,6 +53,12 @@ public:
   {}
   void setWidget(QWidget* w)
   {
+    if (w == NULL)
+    {// removing widget
+      m_widget = NULL;
+      return;
+    }
+
     if (m_widget)
     {
       throw std::runtime_error("Widget already set");
@@ -170,6 +176,7 @@ public:
 
 	FloatingWindow* getFloatingWindow() const;
   QMdiSubWindow* getDockedWindow() const;
+  QWidget* getWrapperWindow() const;
 
 	void setNormal();
 	void setMinimized();
@@ -193,8 +200,10 @@ public slots:
 	//! Notifies the main application that the window has been modified
 	void notifyChanges(){emit modifiedWindow(this);};
 	virtual void print(){};
-  void goFloat();
-  void goMdi();
+
+  bool close();
+  void hide();
+  void show();
 
 signals:
 	//! Emitted when the window was closed
@@ -247,9 +256,9 @@ private:
 typedef QList<MdiSubWindow*> MDIWindowList;
 
 /**
- * Floating wrapper widget for a MdiSubWindow.
+ * Floating wrapper window for a MdiSubWindow.
  */
-class FloatingWindow: public QMainWindow //MdiSubWindowParent_t
+class FloatingWindow: public QMainWindow
 {
   Q_OBJECT
 public:
@@ -258,6 +267,14 @@ public:
   void removeStaysOnTopFlag();
   MdiSubWindow* mdiSubWindow() {return static_cast<MdiSubWindow*>(widget());}
   void setMdiSubWindow(MdiSubWindow* sw) {setWidget(sw);}
+  void removeMdiSubWindow()
+  {
+    MdiSubWindowParent_t* wrapper = dynamic_cast<MdiSubWindowParent_t*>(centralWidget());
+    if (wrapper)
+    {
+      wrapper->setWidget(NULL);
+    }
+  }
 protected:
 
   void setWidget(QWidget* w)

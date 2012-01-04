@@ -604,13 +604,32 @@ void ConfigDialog::initAppPage()
   QGroupBox *floatBox = new QGroupBox();
   floatLayout->addWidget(floatBox);
   QGridLayout *floatPageLayout = new QGridLayout(floatBox);
+  
   boxFloatingGraph = new QCheckBox("Floating Graphs");
-  boxFloatingGraph->setChecked(app->settings.value("/General/FloatingWindows/Graphs",false).toBool());
+  boxFloatingGraph->setChecked(app->settings.value("/General/FloatingWindows/MultiLayer",false).toBool());
   floatPageLayout->addWidget(boxFloatingGraph,0,0);
+
   boxFloatingTable = new QCheckBox("Floating Tables");
-  boxFloatingTable->setChecked(app->settings.value("/General/FloatingWindows/Tables",false).toBool());
+  boxFloatingTable->setChecked(app->settings.value("/General/FloatingWindows/Table",false).toBool());
   floatPageLayout->addWidget(boxFloatingTable,1,0);
-  floatPageLayout->setRowStretch(2,1);
+
+  boxFloatingInstrumentWindow = new QCheckBox("Floating Instrument views");
+  boxFloatingInstrumentWindow->setChecked(app->settings.value("/General/FloatingWindows/InstrumentWindow",false).toBool());
+  floatPageLayout->addWidget(boxFloatingInstrumentWindow,2,0);
+  
+  boxFloatingMantidMatrix = new QCheckBox("Floating MantidMatrix");
+  boxFloatingMantidMatrix->setChecked(app->settings.value("/General/FloatingWindows/MantidMatrix",false).toBool());
+  floatPageLayout->addWidget(boxFloatingMantidMatrix,3,0);
+  
+  boxFloatingNote = new QCheckBox("Floating Notes");
+  boxFloatingNote->setChecked(app->settings.value("/General/FloatingWindows/Note",false).toBool());
+  floatPageLayout->addWidget(boxFloatingNote,4,0);
+  
+  boxFloatingMatrix = new QCheckBox("Floating Matrix");
+  boxFloatingMatrix->setChecked(app->settings.value("/General/FloatingWindows/Matrix",false).toBool());
+  floatPageLayout->addWidget(boxFloatingMatrix,5,0);
+  
+  floatPageLayout->setRowStretch(6,1);
   appTabWidget->addTab(floatingWindowsPage, QString());
 
 	connect( boxLanguage, SIGNAL( activated(int) ), this, SLOT( switchToLanguage(int) ) );
@@ -2028,8 +2047,12 @@ void ConfigDialog::apply()
 	// general page: colors tab
 	app->setAppColors(btnWorkspace->color(), btnPanels->color(), btnPanelsText->color());
   // general page: floating windows tab
-  app->settings.setValue("/General/FloatingWindows/Graphs",boxFloatingGraph->isChecked());
-  app->settings.setValue("/General/FloatingWindows/Tables",boxFloatingTable->isChecked());
+  app->settings.setValue("/General/FloatingWindows/MultiLayer",boxFloatingGraph->isChecked());
+  app->settings.setValue("/General/FloatingWindows/Table",boxFloatingTable->isChecked());
+  app->settings.setValue("/General/FloatingWindows/InstrumentWindow",boxFloatingInstrumentWindow->isChecked());
+  app->settings.setValue("/General/FloatingWindows/MantidMatrix",boxFloatingMantidMatrix->isChecked());
+  app->settings.setValue("/General/FloatingWindows/Note",boxFloatingNote->isChecked());
+  app->settings.setValue("/General/FloatingWindows/Matrix",boxFloatingMatrix->isChecked());
 	// 3D plots page
 	QStringList plot3DColors = QStringList() << btnToColor->color().name() << btnLabels->color().name();
 	plot3DColors << btnMesh->color().name() << btnGrid->color().name() << btnFromColor->color().name();

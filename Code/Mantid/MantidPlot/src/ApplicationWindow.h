@@ -183,7 +183,7 @@ public:
   QList<QToolBar *> toolBarsList();
 
   MdiSubWindow *activeWindow(WindowType type = NoWindow);
-  void addMdiSubWindow(MdiSubWindow *w, bool show_normal = true);
+  void addMdiSubWindow(MdiSubWindow *w, bool showNormal = true);
 
   int matrixUndoStackSize(){return d_matrix_undo_stack_size;};
   void setMatrixUndoStackSize(int size);
@@ -666,7 +666,6 @@ public slots:
   void dragMoveEvent( QDragMoveEvent* e );//Mantid
   void dropEvent( QDropEvent* e );
   void customEvent( QEvent* e);
-  bool eventFilter(QObject *obj, QEvent *event);
   //@}
 
   //! \name Dialogs
@@ -1034,9 +1033,7 @@ public slots:
   QMdiSubWindow* addMdiSubWindowAsDocked(MdiSubWindow* w);
   void mdiWindowActivated(MdiSubWindow* w);
   void changeToFloating(MdiSubWindow* w);
-  void changeToDocked(FloatingWindow* w);
-  void setStaysOnTopFlag(FloatingWindow* w);
-  void removeStaysOnTopFlag(FloatingWindow* w);
+  void changeToDocked(MdiSubWindow* w);
   void removeFloatingWindow(FloatingWindow* w);
   FloatingWindow* getActiveFloating() const;
   void showActiveWindowInTitle(); // temporary
@@ -1045,12 +1042,14 @@ public slots:
   bool isMenuBarShared() const {return m_sharedMenuBar != NULL;}
   void shareMenuBar(bool yes);
 #endif
+  void changeActiveToFloating();
+  void changeActiveToDocked();
 
 signals:
   void modified();
   void resultsContextMenu();
   void shutting_down();
-  void changeToMDI(FloatingWindow*);
+  //void changeToMDI(MdiSubWindow*);
 
 protected:
   virtual bool event(QEvent * e);
