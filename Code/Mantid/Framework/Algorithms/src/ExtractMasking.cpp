@@ -100,6 +100,11 @@ namespace Mantid
           if( inputDet->isMasked() )
           {
             inputIsMasked = true;
+            detid_t id = inputDet->getID();
+            PARALLEL_CRITICAL(name)
+            {
+              detectorList.push_back(id);
+            }
           }
         }
         catch(Kernel::Exception::NotFoundError &)
@@ -111,7 +116,6 @@ namespace Mantid
         {
           outSpec->dataY()[0] = 0.0;
           outSpec->dataE()[0] = 0.0;
-          detectorList.push_back(inputDet->getID());
         }
         else
         {
