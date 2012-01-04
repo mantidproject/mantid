@@ -71,7 +71,7 @@ void Differentiation::output()
 	for (int i = 1; i < d_n-1; i++)
 		result[i]=0.5*((d_y[i+1]-d_y[i])/(d_x[i+1]-d_x[i]) + (d_y[i]-d_y[i-1])/(d_x[i]-d_x[i-1]));
 
-    ApplicationWindow *app = (ApplicationWindow *)parent();
+    ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
     QLocale locale = app->locale();
     QString tableName = app->generateUniqueName(QString(objectName()));
     QString dataSet;

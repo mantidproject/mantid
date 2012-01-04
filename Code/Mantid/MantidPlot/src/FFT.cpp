@@ -95,7 +95,7 @@ QString FFT::fftCurve()
 		gsl_fft_real_wavetable *real=gsl_fft_real_wavetable_alloc(d_n);
 
 		if(!work || !real){
-			QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot") + " - " + tr("Error"),
+			QMessageBox::critical(dynamic_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
                         tr("Could not allocate memory, operation aborted!"));
             d_init_err = true;
             // Cleanup variables before returning
@@ -118,7 +118,7 @@ QString FFT::fftCurve()
 		gsl_fft_complex_workspace *workspace = gsl_fft_complex_workspace_alloc (d_n);
 
 		if(!workspace || !wavetable){
-			QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot") + " - " + tr("Error"),
+			QMessageBox::critical(dynamic_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
                         tr("Could not allocate memory, operation aborted!"));
             d_init_err = true;
             // Cleanup local variables before returning
@@ -155,7 +155,7 @@ QString FFT::fftCurve()
 			aMax = a;
 	}
 
-	ApplicationWindow *app = (ApplicationWindow *)parent();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
 	QLocale locale = app->locale();
 	int prec = app->d_decimal_digits;
 
@@ -185,7 +185,7 @@ QString FFT::fftTable()
 	gsl_fft_complex_workspace *workspace = gsl_fft_complex_workspace_alloc (d_n);
 
 	if(!amp || !wavetable || !workspace){
-		QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot") + " - " + tr("Error"),
+		QMessageBox::critical(dynamic_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
                         tr("Could not allocate memory, operation aborted!"));
         d_init_err = true;
         return "";
@@ -229,7 +229,7 @@ QString FFT::fftTable()
 			aMax = a;
 	}
 
-    ApplicationWindow *app = (ApplicationWindow *)parent();
+    ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
     QLocale locale = app->locale();
 	int prec = app->d_decimal_digits;
 
@@ -263,7 +263,7 @@ void FFT::output()
 
 void FFT::output(const QString &text)
 {
-    ApplicationWindow *app = (ApplicationWindow *)parent();
+    ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
     QString tableName = app->generateUniqueName(QString(objectName()));
     d_result_table = app->newHiddenTable(tableName, d_explanation, d_n, 5, text);
 
@@ -339,7 +339,7 @@ bool FFT::setDataFromTable(Table *t, const QString& realColName, const QString& 
 				d_y[i2+1] = d_table->cell(i, d_imag_col);
 		}
 	} else {
-		QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot") + " - " + tr("Error"),
+		QMessageBox::critical(dynamic_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
                         tr("Could not allocate memory, operation aborted!"));
         d_init_err = true;
 		return false;

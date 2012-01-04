@@ -1228,7 +1228,7 @@ AxesDialog::AxesDialog( QWidget* parent, Qt::WFlags fl )
 
 void AxesDialog::initScalesPage()
 {
-  ApplicationWindow *app = (ApplicationWindow *)parent();
+  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
   scalesPage = new QWidget();
 
   QGroupBox * middleBox = new QGroupBox(QString());
@@ -1476,14 +1476,14 @@ void AxesDialog::initGridPage()
   rightLayout->addWidget( new QLabel(tr( "Thickness" )), 3, 0 );
 
   boxWidthMajor = new DoubleSpinBox('f');
-  boxWidthMajor->setLocale(((ApplicationWindow *)parent())->locale());
+  boxWidthMajor->setLocale(dynamic_cast<ApplicationWindow *>(this->parent())->locale());
   boxWidthMajor->setSingleStep(0.1);
   boxWidthMajor->setRange(0.1, 20);
   boxWidthMajor->setValue(1);
   rightLayout->addWidget( boxWidthMajor, 3, 1);
 
   boxWidthMinor = new DoubleSpinBox('f');
-  boxWidthMinor->setLocale(((ApplicationWindow *)parent())->locale());
+  boxWidthMinor->setLocale(dynamic_cast<ApplicationWindow *>(this->parent())->locale());
   boxWidthMinor->setSingleStep(0.1);
   boxWidthMinor->setRange(0.1, 20);
   boxWidthMinor->setValue(1);
@@ -2247,7 +2247,7 @@ void AxesDialog::updateGrid()
 
   case 2:
   {
-    ApplicationWindow *app = (ApplicationWindow *)parent();
+    ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
     if (!app)
       return;
 
@@ -2575,7 +2575,7 @@ bool AxesDialog::updatePlot()
 
 void AxesDialog::setGraph(Graph *g)
 {
-  ApplicationWindow *app = (ApplicationWindow *)this->parent();
+  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
   if (!app)
     return;
 
@@ -3129,7 +3129,7 @@ void AxesDialog::showAxis(int axis, int type, const QString& labelsColName, bool
     int majTicksType, int minTicksType, bool labelsOn, const QColor& c, int format,
     int prec, int rotation, int baselineDist, const QString& formula, const QColor& labelsColor)
 {
-  ApplicationWindow *app = (ApplicationWindow *)this->parent();
+  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
   if (!app)
     return;
 
