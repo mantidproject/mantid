@@ -62,7 +62,8 @@ namespace MDAlgorithms
   enum Q_state{
        NoQ,     //< no Q transformatiom, just copying values along X axis (may be with units transformation)
        modQ,    //< calculate mod Q
-       Q3D      //< calculate 3 component of Q in fractional coordinate system.
+       Q3D,      //< calculate 3 component of Q in fractional coordinate system.
+       NQStates  // number of various recognized Q-analysis modes used to terminate Q-state algorithms metalooop.
    };
   /**  known analysis modes, arranged according to emodes 
     *  It is importent to assign enums proper numbers, as direct correspondence between enums and their emodes 
@@ -71,16 +72,17 @@ namespace MDAlgorithms
       Elastic = 0,  //< int emode = 0; Elastic analysis
       Direct  = 1,  //< emode=1; Direct inelastic analysis mode
       Indir   = 2,  //< emode=2; InDirect inelastic analysis mode
-      ANY_Mode      //< couples with NoQ, means just copying existing data (may be douing units conversion)
+      ANY_Mode      //< couples with NoQ, means just copying existing data (may be douing units conversion), also used to terminate AnalMode algorithms metaloop
   };
   /** enum describes if there is need to convert workspace units and different unit conversion modes 
    * this modes are identified by algorithm from workpace parameters and user input.   */
   enum CnvrtUnits   // here the numbers are specified to enable proper metaloop on conversion
   {
-      ConvertNo  =0,   //< no, input workspace has the same units as output workspace or in units used by Q-dE algorithms naturally
-      ConvFast   =1, //< the input workspace has different units from the requested and fast conversion is possible
-      ConvByTOF  =2,   //< conversion possible via TOF
-      ConvFromTOF=3  //< Input workspace units are the TOF 
+      ConvertNo,   //< no, input workspace has the same units as output workspace or in units used by Q-dE algorithms naturally
+      ConvFast , //< the input workspace has different units from the requested and fast conversion is possible
+      ConvByTOF,   //< conversion possible via TOF
+      ConvFromTOF,  //< Input workspace units are the TOF 
+      NConvUintsStates // number of various recognized unit conversion modes used to terminate CnvrtUnits algorithms metalooop.
   };
 /// predefenition of the class, which does all coordinate transformations, Linux compilers need this. 
   template<Q_state Q, AnalMode MODE, CnvrtUnits CONV> 
@@ -136,7 +138,7 @@ namespace MDAlgorithms
    /** function returns the list of the property names, which can be treated as additional dimensions present in current matrix workspace */
   void getAddDimensionNames(API::MatrixWorkspace_const_sptr inMatrixWS,std::vector<std::string> &add_dim_names,std::vector<std::string> &add_dim_units)const;
      
-   /** function parses arguments entered by user, and identifies, which subalgorithm should be deployed on WS matrix as function of the input artuments and the WS format */
+   /** function parses arguments entered by user, and identifies, which subalgorithm should be deployed on WS  as function of the input artuments and the WS format */
    std::string identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS,const std::string &Q_mode_req, const std::string &dE_mode_req,
                                  std::vector<std::string> &out_dim_names,std::vector<std::string> &out_dim_units);
 
@@ -185,8 +187,8 @@ namespace MDAlgorithms
     /// presumably will be completely inlined
      template<Q_state Q, AnalMode MODE, CnvrtUnits CONV> 
      friend struct COORD_TRANSFORMER;
-     /// helper class to orginize metaloop on number of dimensions
-     template<Q_state Q, AnalMode MODE, CnvrtUnits CONV >
+     /// helper class to orginize metaloop on various algorithm options
+     template<Q_state Q,size_t N_ALGORITHMS >
      friend class LOOP_ND;
   
  
