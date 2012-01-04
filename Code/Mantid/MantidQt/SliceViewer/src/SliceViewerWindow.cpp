@@ -47,7 +47,7 @@ SliceViewerWindow::SliceViewerWindow(const QString& wsName, const QString& label
 
   // Watch for the deletion of the associated workspace
   observeAfterReplace();
-  observeDelete();
+  observePreDelete();
   observeADSClear();
 
   // Set up the window
@@ -320,7 +320,7 @@ void SliceViewerWindow::changePlanarWidth(double width)
 
 //------------------------------------------------------------------------------------------------
 /** Signal to close this window if the workspace has just been deleted */
-void SliceViewerWindow::deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
+void SliceViewerWindow::preDeleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
 {
   Mantid::API::IMDWorkspace * ws_ptr = dynamic_cast<Mantid::API::IMDWorkspace*>(ws.get());
   if (!ws_ptr) return;

@@ -85,7 +85,7 @@ namespace MantidWidgets
 
   private:
     void handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr pNf);
-    void handleRemEvent(Mantid::API::WorkspaceDeleteNotification_ptr pNf);
+    void handleRemEvent(Mantid::API::WorkspacePostDeleteNotification_ptr pNf);
 
     bool checkEligibility(const QString & name, Mantid::API::Workspace_sptr object) const;
     void refresh();
@@ -93,7 +93,7 @@ namespace MantidWidgets
   private:
     /// Poco Observers for ADS Notifications
     Poco::NObserver<WorkspaceSelector, Mantid::API::WorkspaceAddNotification> m_addObserver;
-    Poco::NObserver<WorkspaceSelector, Mantid::API::WorkspaceDeleteNotification> m_remObserver;
+    Poco::NObserver<WorkspaceSelector, Mantid::API::WorkspacePostDeleteNotification> m_remObserver;
 
     bool m_init;
 

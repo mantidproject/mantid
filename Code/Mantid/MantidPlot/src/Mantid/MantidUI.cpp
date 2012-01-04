@@ -1567,7 +1567,7 @@ bool MantidUI::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg, const boo
     { 
       QCoreApplication::processEvents(); 
     } 
-    result.wait(); 
+    result.wait();
 
     try 
     { 
@@ -1705,7 +1705,7 @@ void MantidUI::handleReplaceWorkspace(Mantid::API::WorkspaceAfterReplaceNotifica
   emit workspace_replaced(QString::fromStdString(pNf->object_name()),(pNf->object()));
 }
 
-void MantidUI::handleDeleteWorkspace(Mantid::API::WorkspaceDeleteNotification_ptr pNf)
+void MantidUI::handleDeleteWorkspace(Mantid::API::WorkspacePostDeleteNotification_ptr pNf)
 {
   emit workspace_removed(QString::fromStdString(pNf->object_name()));
 }

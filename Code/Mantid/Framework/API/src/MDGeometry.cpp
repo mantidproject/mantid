@@ -244,7 +244,7 @@ namespace API
    *
    * @param notice :: notification of workspace deletion
    */
-  void MDGeometry::deleteNotificationReceived(Mantid::API::WorkspaceDeleteNotification_ptr notice)
+  void MDGeometry::deleteNotificationReceived(Mantid::API::WorkspacePreDeleteNotification_ptr notice)
   {
     if (bool(m_originalWorkspace))
     {

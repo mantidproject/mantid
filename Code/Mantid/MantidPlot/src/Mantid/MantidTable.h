@@ -33,7 +33,7 @@ protected slots:
   void fillTableTransposed();
 
 protected:
-  void deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
+  void preDeleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
   void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
 
   // Reimplemented methods for custom sorting of TableWorkspaces

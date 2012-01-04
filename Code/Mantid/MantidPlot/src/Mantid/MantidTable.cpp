@@ -38,7 +38,7 @@ m_transposed(transpose)
 
   connect(this,SIGNAL(needToClose()),this,SLOT(closeTable()));
   connect(this,SIGNAL(needToUpdate()),this,SLOT(fillTable()));
-  observeDelete();
+  observePreDelete();
   observeAfterReplace();
 }
 
@@ -185,7 +185,7 @@ void MantidTable::closeTable()
 }
 
 //------------------------------------------------------------------------------------------------
-void MantidTable::deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
+void MantidTable::preDeleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
 {
   Mantid::API::ITableWorkspace* ws_ptr = dynamic_cast<Mantid::API::ITableWorkspace*>(ws.get());
   if (!ws_ptr) return;

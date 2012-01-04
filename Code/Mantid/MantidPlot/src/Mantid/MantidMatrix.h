@@ -165,7 +165,7 @@ public:
   Spectrogram* plotSpectrogram(Graph* plot ,ApplicationWindow* app,Graph::CurveType type,bool project,ProjectData*prjdata);
 
   void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
-  void deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
+  void preDeleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
   void clearADSHandle();
 
 signals:
