@@ -450,7 +450,7 @@ class SANSInstrumentWidget(BaseWidget):
         m.detector_ids = self._masked_detectors
         if self._in_mantidplot:
             if mtd.workspaceExists(self.mask_ws):
-                masked_detectors = GetMaskedDetectors(self.mask_ws)
+                masked_detectors = ExtractMasking(InputWorkspace=self.mask_ws, OutputWorkspace="__edited_mask")
                 ids_str = masked_detectors.getPropertyValue("DetectorList")
                 m.detector_ids = map(int, ids_str.split(','))
 
