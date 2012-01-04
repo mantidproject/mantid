@@ -113,8 +113,8 @@ namespace Mantid
     void LoadSpec::exec()
     {
 	  std::string filename = getProperty("Filename");
-	  std::string separator = " "; //separator can be 1 or more spaces
-	  std::ifstream file(filename.c_str());
+      //std::string separator = " "; //separator can be 1 or more spaces
+      std::ifstream file(filename.c_str());
 
 	  file.seekg (0, std::ios::end);
 	  Progress progress(this,0,1,static_cast<int>(file.tellg()));
@@ -126,8 +126,8 @@ namespace Mantid
 	  //size_t iLine=0;    // line number
 	  int nSpectra = 0;
 	  int nBins = 0; //number of rows
-	  std::string first_character;
-	  std::string axes_infos;
+      //std::string first_character;
+      //std::string axes_infos;
 
 	  //bool numeric = true;
 	  std::vector<double> input;
