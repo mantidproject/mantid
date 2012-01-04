@@ -4,6 +4,8 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
+    typedef WorkspaceMemento::Status Status;
+
     /// Constructor
     WorkspaceMemento::WorkspaceMemento() : m_ub(0)
     {
@@ -23,7 +25,7 @@ namespace MantidQt
     Common implementation of status generation.
     @return status.
     */
-    const WorkspaceMemento::Status WorkspaceMemento::generateStatus() const
+    const Status WorkspaceMemento::generateStatus() const
     {
       Status status;
       if(m_ub.empty())
