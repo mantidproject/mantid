@@ -779,9 +779,8 @@ class LOOP_ND{
 private:
     enum{
         CONV = NumAlgorithms%NConvUintsStates,           // internal oop over conversion modes, the variable changes first
-        MODE = (NumAlgorithms/NConvUintsStates)%ANY_Mode, // one level up loop over momentum conversion modes
-        NumAlgorithms = NumAlgorithms+1
-      
+        MODE = (NumAlgorithms/NConvUintsStates)%ANY_Mode // one level up loop over momentum conversion mode  
+    
     };
   public:
     static inline void EXEC(ConvertToMDEvents *pH){
@@ -793,7 +792,7 @@ private:
 //#ifdef _DEBUG
 //            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
 //#endif
-            LOOP_ND<Q, NumAlgorithms>::EXEC(pH);
+            LOOP_ND<Q, NumAlgorithms+1>::EXEC(pH);
     }
 };
 
@@ -802,9 +801,9 @@ template< size_t NumAlgorithms>
 class LOOP_ND<NoQ,NumAlgorithms>{
 private:
     enum{
-        CONV = NumAlgorithms%NConvUintsStates,       // internal Loop over conversion modes, the variable changes first
+        CONV = NumAlgorithms%NConvUintsStates       // internal Loop over conversion modes, the variable changes first
         //MODE => noQ -- no mode conversion ANY_Mode, 
-        NumAlgorithms = NumAlgorithms+1
+ 
       
     };
   public:
@@ -817,22 +816,22 @@ private:
 //#ifdef _DEBUG
 //            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
 //#endif
-            LOOP_ND<NoQ,NumAlgorithms>::EXEC(pH);
+            LOOP_ND<NoQ,NumAlgorithms+1>::EXEC(pH);
     }
 };
 
 // Q3d, modQ terminator
 template<Q_state Q >
-class LOOP_ND<Q,ANY_Mode*NConvUintsStates>{
+class LOOP_ND<Q,static_cast<size_t>(ANY_Mode*NConvUintsStates) >{
   public:
-      static inline void EXEC(ConvertToMDEvents *pH){} 
+      static inline void EXEC(ConvertToMDEvents *pH){UNUSED_ARG(pH);} 
 };
 
 // any mode terminator
 template<>
-class LOOP_ND<NoQ,NConvUintsStates>{
+class LOOP_ND<NoQ,static_cast<size_t>(NConvUintsStates) >{
   public:
-      static inline void EXEC(ConvertToMDEvents *pH){} 
+      static inline void EXEC(ConvertToMDEvents *pH){UNUSED_ARG(pH);} 
 };
 
 
