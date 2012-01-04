@@ -120,7 +120,7 @@ void AssociationsDialog::updateCurves()
 
 void AssociationsDialog::changePlotAssociation(int curve, const QString& text)
 {
-	DataCurve *c = (DataCurve *)graph->curve(curve); //c_keys[curve]);
+	DataCurve *c = dynamic_cast<DataCurve *>(graph->curve(curve)); //c_keys[curve]);
 	if (!c)
         return;
 
@@ -131,15 +131,15 @@ void AssociationsDialog::changePlotAssociation(int curve, const QString& text)
 	if (lst.count() == 1){
 		c->setTitle(lst[0]);
 		if (graph->curveType(curve) == Graph::Box)
-			((BoxCurve*)c)->loadData();
+			dynamic_cast<BoxCurve*>(c)->loadData();
 		else if (graph->curveType(curve) == Graph::Pie)
-			((QwtPieCurve*)c)->loadData();
+			dynamic_cast<QwtPieCurve*>(c)->loadData();
 	} else if (lst.count() == 2){
 		c->setXColumnName(lst[0].remove("(X)"));
 		c->setTitle(lst[1].remove("(Y)"));
 		c->loadData();
 	} else if (lst.count() == 3){//curve with error bars
-		QwtErrorPlotCurve *er = (QwtErrorPlotCurve *)c;
+		QwtErrorPlotCurve *er = dynamic_cast<QwtErrorPlotCurve *>(c);
 		QString xColName = lst[0].remove("(X)");
 		QString yColName = lst[1].remove("(Y)");
 		QString erColName = lst[2].remove("(xErr)").remove("(yErr)");
@@ -157,7 +157,7 @@ void AssociationsDialog::changePlotAssociation(int curve, const QString& text)
 		else
 			er->loadData();
 	} else if (lst.count() == 4) {
-		VectorCurve *v = (VectorCurve *)c;
+		VectorCurve *v = dynamic_cast<VectorCurve *>(c);
 		v->setXColumnName(lst[0].remove("(X)"));
 		v->setTitle(lst[1].remove("(Y)"));
 
@@ -189,7 +189,7 @@ void AssociationsDialog::initTablesList(QList<MdiSubWindow *> lst, int curve)
 tables = lst;
 active_table = 0;
 
-if (curve < 0 || curve >= (int)associations->count())
+if (curve < 0 || curve >= static_cast<int>(associations->count()))
 	curve = 0;
 
 associations->setCurrentRow (curve);
@@ -201,7 +201,7 @@ Table * AssociationsDialog::findTable(int index)
 	QStringList lst= text.split(":", QString::SkipEmptyParts);
 	foreach(MdiSubWindow *w, tables){
 		if (w->objectName() == lst[0])
-			return (Table *)w;
+			return dynamic_cast<Table *>(w);
 	}
 	return 0;
 }
@@ -269,13 +269,13 @@ else if (n == 1){//box plots
 QCheckBox *it = 0;
 for (int i=0; i < table->rowCount(); i++ )
 	{
-	it = (QCheckBox *)table->cellWidget(i, 1);
+	it = dynamic_cast<QCheckBox *>(table->cellWidget(i, 1));
 	if (table->item(i, 0)->text() == xColName)
 		it->setChecked(true);
 	else
 		it->setChecked(false);
 
-	it = (QCheckBox *)table->cellWidget(i, 2);
+	it = dynamic_cast<QCheckBox *>(table->cellWidget(i, 2));
 	if (table->item(i,0)->text() == yColName)
 		it->setChecked(true);
 	else
@@ -315,7 +315,7 @@ if (n > 2){
 }
 
 for (int i=0; i < table->rowCount(); i++){
-	it = (QCheckBox *)table->cellWidget(i, 3);
+	it = dynamic_cast<QCheckBox *>(table->cellWidget(i, 3));
 	if (xerr || vectors){
 		if (table->item(i,0)->text() == errColName || table->item(i,0)->text() == xEndColName)
 			it->setChecked(true);
@@ -324,7 +324,7 @@ for (int i=0; i < table->rowCount(); i++){
     } else
 		it->setChecked(false);
 
-	it = (QCheckBox *)table->cellWidget(i, 4);
+	it = dynamic_cast<QCheckBox *>(table->cellWidget(i, 4));
 	if (yerr || vectors){
 		if (table->item(i,0)->text() == errColName || table->item(i,0)->text() == yEndColName)
 			it->setChecked(true);
@@ -338,7 +338,7 @@ for (int i=0; i < table->rowCount(); i++){
 void AssociationsDialog::uncheckCol(int col)
 {
 for (int i=0; i < table->rowCount(); i++ ){
-	QCheckBox *it = (QCheckBox *)table->cellWidget(i, col);
+	QCheckBox *it = dynamic_cast<QCheckBox *>(table->cellWidget(i, col));
 	if (it)
 		it->setChecked(false);
 	}
@@ -355,10 +355,10 @@ void AssociationsDialog::setGraph(Graph *g)
         if (it->rtti() != QwtPlotItem::Rtti_PlotCurve)
             continue;
 
-        if (((const DataCurve *)it)->type() != Graph::Function){
-            QString s = ((const DataCurve *)it)->plotAssociation();
-            if (((const DataCurve *)it)->table()){
-                QString table = ((const DataCurve *)it)->table()->objectName();
+        if (dynamic_cast<const DataCurve *>(it)->type() != Graph::Function){
+            QString s = dynamic_cast<const DataCurve *>(it)->plotAssociation();
+            if (dynamic_cast<const DataCurve *>(it)->table()){
+                QString table = dynamic_cast<const DataCurve *>(it)->table()->objectName();
                 plotAssociationsList << table + ": " + s.remove(table + "_");
             }
         }
@@ -438,14 +438,14 @@ if (!it)
 	return false;
 
 if (e->type() == QEvent::MouseButtonPress){
-	if (((QCheckBox*)it)->isChecked())
+	if (dynamic_cast<QCheckBox*>(it)->isChecked())
 		return true;
 
 	int col = 0, row = 0;
 	for (int j=1; j<table->columnCount(); j++){
 		for (int i=0; i < table->rowCount(); i++ ){
-			QCheckBox* cb = (QCheckBox*)table->cellWidget(i, j);
-			if ( cb == (QCheckBox *)object){
+			QCheckBox* cb = dynamic_cast<QCheckBox*>(table->cellWidget(i, j));
+			if ( cb == dynamic_cast<QCheckBox *>(object)){
 				row = i;
 				col = j;
 				break;
@@ -454,7 +454,7 @@ if (e->type() == QEvent::MouseButtonPress){
 		}
 
 	uncheckCol(col);
-	((QCheckBox*)it)->setChecked(true);
+	dynamic_cast<QCheckBox*>(it)->setChecked(true);
 
 	updatePlotAssociation(row, col);
 	return true;

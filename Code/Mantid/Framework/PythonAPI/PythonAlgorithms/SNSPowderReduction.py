@@ -190,6 +190,8 @@ class SNSPowderReduction(PythonAlgorithm):
                              Description="Relative time to start filtering by in seconds. Applies only to sample.")
         self.declareProperty("FilterByTimeMax", 0.,
                              Description="Relative time to stop filtering by in seconds. Applies only to sample.")
+        self.declareProperty("FilterCharacterizations", False,
+                             Description="Filter the characterization runs using above parameters. This only works for event files.")
         self.declareListProperty("Binning", [0.,0.,0.],
                              Description="Positive is linear bins, negative is logorithmic")
         self.declareProperty("BinInDspace", True,
@@ -455,7 +457,18 @@ class SNSPowderReduction(PythonAlgorithm):
         wavelength = wavelength.getStatistics().mean
 
         self.log().information("frequency: " + str(frequency) + "Hz center wavelength:" + str(wavelength) + "Angstrom")
-        return self._config.getInfo(frequency, wavelength)        
+        return self._config.getInfo(frequency, wavelength)
+
+    def _getMin(self, wksp):
+        minWksp = "__" + str(wksp)+"_min"
+        Min(wksp, minWksp)
+        minWksp = mtd[minWksp]
+        minValue = 0.
+        for i in range(minWksp.getNumberHistograms()):
+          if minValue > minWksp.dataY(i)[0]:
+            minValue = minWksp.dataY(i)[0]
+        mtd.deleteWorkspace(str(minWksp))
+        return minValue
 
     def _save(self, wksp, info, normalized):
         filename = os.path.join(self._outDir, str(wksp))
@@ -553,7 +566,10 @@ class SNSPowderReduction(PythonAlgorithm):
             if canRun > 0:
                 temp = mtd["%s_%d" % (self._instrument, canRun)]
                 if temp is None:
-                    canRun = self._loadData(canRun, SUFFIX, (0., 0.))
+                    if self.getProperty("FilterCharacterizations"):
+                        canRun = self._loadData(canRun, SUFFIX, filterWall)
+                    else:
+                        canRun = self._loadData(canRun, SUFFIX, (0., 0.))
                     canRun = self._focus(canRun, calib, info, preserveEvents=preserveEvents)
                 else:
                     canRun = temp
@@ -571,12 +587,18 @@ class SNSPowderReduction(PythonAlgorithm):
             if vanRun > 0:
                 temp = mtd["%s_%d" % (self._instrument, vanRun)]
                 if temp is None:
-                    vanRun = self._loadData(vanRun, SUFFIX, (0., 0.))
+                    if self.getProperty("FilterCharacterizations"):
+                        vanRun = self._loadData(vanRun, SUFFIX, filterWall)
+                    else:
+                        vanRun = self._loadData(vanRun, SUFFIX, (0., 0.))
                     vnoiseRun = info.vnoise # noise run for the vanadium
                     vanRun = self._focus(vanRun, calib, info, preserveEvents=False, normByCurrent = (vnoiseRun <= 0))
 
                     if (vnoiseRun > 0):
-                        vnoiseRun = self._loadData(vnoiseRun, SUFFIX, (0., 0.))
+                        if self.getProperty("FilterCharacterizations"):
+                            vnoiseRun = self._loadData(vnoiseRun, SUFFIX, filterWall)
+                        else:
+                            vnoiseRun = self._loadData(vnoiseRun, SUFFIX, (0., 0.))
                         vnoiseRun = self._focus(vnoiseRun, calib, info, preserveEvents=False,
                                                normByCurrent=False, filterBadPulsesOverride=False)
                         ConvertUnits(InputWorkspace=vnoiseRun, OutputWorkspace=vnoiseRun, Target="TOF")
@@ -601,7 +623,10 @@ class SNSPowderReduction(PythonAlgorithm):
 
                     vbackRun = self.getProperty("VanadiumBackgroundNumber")
                     if vbackRun > 0:
-                        vbackRun = self._loadData(vbackRun, SUFFIX, (0., 0.))
+                        if self.getProperty("FilterCharacterizations"):
+                            vbackRun = self._loadData(vbackRun, SUFFIX, filterWall)
+                        else:
+                            vbackRun = self._loadData(vbackRun, SUFFIX, (0., 0.))
                         vbackRun = self._focus(vbackRun, calib, info, preserveEvents=False)
                         vanRun -= vbackRun
 
@@ -636,10 +661,18 @@ class SNSPowderReduction(PythonAlgorithm):
             else:
                 normalized = False
 
-            # write out the files
             if not "histo" in self.getProperty("Extension") and preserveEvents:
                 CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
                            Tolerance=COMPRESS_TOL_TOF) # 5ns
+
+            # make sure there are no negative values - gsas hates them
+            minY = self._getMin(samRun)
+            if minY < 0.:
+                self.log().notice("Minimum y = " + str(minY) + " adding to all y-values")
+                minY *= -1.
+                samRun += minY
+
+            # write out the files
             self._save(samRun, info, normalized)
             samRun = str(samRun)
             mtd.releaseFreeMemory()

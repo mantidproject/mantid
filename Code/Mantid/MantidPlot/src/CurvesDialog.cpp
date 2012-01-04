@@ -214,7 +214,7 @@ void CurvesDialog::showCurveRangeDialog()
   if (curve < 0)
     curve = 0;
 
-  ApplicationWindow *app = (ApplicationWindow *)this->parent();
+  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
   if (app)
   {
     app->showCurveRangeDialog(d_graph, curve);
@@ -228,7 +228,7 @@ void CurvesDialog::showPlotAssociations()
   if (curve < 0)
     curve = 0;
 
-  ApplicationWindow *app = (ApplicationWindow *)this->parent();
+  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
   close();
 
   if (app)
@@ -237,7 +237,7 @@ void CurvesDialog::showPlotAssociations()
 
 void CurvesDialog::showFunctionDialog()
 {
-  ApplicationWindow *app = (ApplicationWindow *)this->parent();
+  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
   int currentRow = contents->currentRow();
   close();
 
@@ -283,7 +283,7 @@ void CurvesDialog::contextMenuEvent(QContextMenuEvent *e)
 
 void CurvesDialog::init()
 {
-  ApplicationWindow *app = (ApplicationWindow *)this->parent();
+  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
   if (app){
     bool currentFolderOnly = app->d_show_current_folder;
     boxShowCurrentFolder->setChecked(currentFolderOnly);
@@ -377,7 +377,7 @@ void CurvesDialog::addCurves()
 
 bool CurvesDialog::addCurve(const QString& name)
 {
-  ApplicationWindow *app = (ApplicationWindow *)this->parent();
+  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
   if (!app)
     return false;
 
@@ -553,7 +553,7 @@ void CurvesDialog::updateCurveRange()
 
 void CurvesDialog::showCurrentFolder(bool currentFolder)
 {
-  ApplicationWindow *app = (ApplicationWindow *)this->parent();
+  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
   if (!app)
     return;
 
@@ -583,7 +583,7 @@ void CurvesDialog::showCurrentFolder(bool currentFolder)
 
 void CurvesDialog::closeEvent(QCloseEvent* e)
 {
-  ApplicationWindow *app = (ApplicationWindow *)this->parent();
+  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
   if (app)
   {
     app->d_add_curves_dialog_size = this->size();

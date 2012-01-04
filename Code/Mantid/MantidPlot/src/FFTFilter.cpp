@@ -70,7 +70,7 @@ void FFTFilter::setFilterType(int type)
 {
     if (type < 1 || type > 4)
     {
-        QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot") + " - " + tr("Error"),
+        QMessageBox::critical(dynamic_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
         tr("Unknown filter type. Valid values are: 1 - Low pass, 2 - High Pass, 3 - Band Pass, 4 - Band block."));
         d_init_err = true;
         return;
@@ -92,7 +92,7 @@ void FFTFilter::setBand(double lowFreq, double highFreq)
         return;
     else if (lowFreq == highFreq)
     {
-        QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot") + " - " + tr("Error"),
+        QMessageBox::critical(dynamic_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
         tr("Please enter different values for the band limits."));
         d_init_err = true;
         return;
@@ -125,7 +125,7 @@ void FFTFilter::calculateOutputData(double *x, double *y)
 	gsl_fft_real_transform (y, 1, d_n, real, work);
 	gsl_fft_real_wavetable_free (real);
 
-    ApplicationWindow *app = (ApplicationWindow *)parent();
+    ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
     QLocale locale = app->locale();
 
     d_explanation = locale.toString(d_low_freq) + " ";

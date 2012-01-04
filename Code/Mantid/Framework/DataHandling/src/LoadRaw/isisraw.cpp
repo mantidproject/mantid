@@ -140,10 +140,19 @@ int ISISRAW::addItems()
 // create one bound to a CRPT
 /// stuff
 ISISRAW::ISISRAW(ISISCRPT_STRUCT* crpt) : m_crpt(crpt),m_ntc1(0),m_nsp1(0), m_nper(0),
-																mdet(0),monp(0),spec(0),delt(0),len2(0),code(0),
-																tthe(0),ut(0),crat(0),modn(0),mpos(0),timr(0),udet(0),
-																t_tcb1(0),u_dat(0),ddes(0),dat1(0)
+    frmt_ver_no(0),data_format(0),ver2(0),r_number(0),ver3(0),
+    i_det(0),i_mon(0),i_use(0),mdet(0),monp(0),spec(0),delt(0),len2(0),code(0),tthe(0),ut(0),
+    ver4(0),ver5(0),crat(0),modn(0),mpos(0),timr(0),udet(0),ver6(0),t_ntrg(0),t_nfpp(0),t_nper(0),
+    t_nsp1(0),t_ntc1(0),t_pre1(0),t_tcb1(0),ver7(0),u_dat(0),ver8(0),ddes(0),dat1(0)
 {
+    memset(r_title, ' ', sizeof(r_title));
+    memset(i_inst, ' ', sizeof(i_inst));
+    for(int i=0; i<256; i++)
+    {
+        t_pmap[i] = 1; // period number for each basic period
+    }
+    memset(t_tcm1, 0, sizeof(t_tcm1));		// time channel mode
+    memset(t_tcp1, 0, sizeof(t_tcp1));	// time channel parameters
 	e_nse = 0;
 	e_seblock = 0;
 	u_len = 0;
@@ -156,10 +165,19 @@ ISISRAW::ISISRAW(ISISCRPT_STRUCT* crpt) : m_crpt(crpt),m_ntc1(0),m_nsp1(0), m_np
 // create one bound to a CRPT
 /// stuff
 ISISRAW::ISISRAW(ISISCRPT_STRUCT* crpt, bool doUpdateFromCRPT) : m_crpt(crpt),m_ntc1(0),m_nsp1(0), m_nper(0),
-																mdet(0),monp(0),spec(0),delt(0),len2(0),code(0),
-																tthe(0),ut(0),crat(0),modn(0),mpos(0),timr(0),udet(0),
-																t_tcb1(0),u_dat(0),ddes(0),dat1(0)
+    frmt_ver_no(0),data_format(0),ver2(0),r_number(0),ver3(0),
+    i_det(0),i_mon(0),i_use(0),mdet(0),monp(0),spec(0),delt(0),len2(0),code(0),tthe(0),ut(0),
+    ver4(0),ver5(0),crat(0),modn(0),mpos(0),timr(0),udet(0),ver6(0),t_ntrg(0),t_nfpp(0),t_nper(0),
+    t_nsp1(0),t_ntc1(0),t_pre1(0),t_tcb1(0),ver7(0),u_dat(0),ver8(0),ddes(0),dat1(0)
 {
+    memset(r_title, ' ', sizeof(r_title));
+    memset(i_inst, ' ', sizeof(i_inst));
+    for(int i=0; i<256; i++)
+    {
+        t_pmap[i] = 1; // period number for each basic period
+    }
+    memset(t_tcm1, 0, sizeof(t_tcm1));		// time channel mode
+    memset(t_tcp1, 0, sizeof(t_tcp1));	// time channel parameters
 	e_nse = 0;
 	e_seblock = 0;
 	u_len = 0;
@@ -183,7 +201,7 @@ int ISISRAW::updateFromCRPT()
 #ifndef REAL_CRPT
         return 0;
 #else
-	int i, j;
+    int i;
 	char buffer[256];
 	spacePadCopy(hdr.inst_abrv, m_crpt->inst_abrv, sizeof(hdr.inst_abrv));
 	sprintf(buffer, "%05d", m_crpt->run_number);
@@ -197,7 +215,7 @@ int ISISRAW::updateFromCRPT()
 	spacePadCopy(hdr.hd_dur, buffer, sizeof(hdr.hd_dur));
 
 	// section 1
-	frmt_ver_no = 2;			// format version number VER1 (=2)
+    frmt_ver_no = 2;			// format version number VER1 (=2)
 	data_format = 0;		// data section format (0 = by TC, 1 = by spectrum)
 	// section 2
 	ver2 = 1;			// run section version number VER2 (=1)
@@ -321,7 +339,6 @@ int ISISRAW::updateFromCRPT()
 	daep.a_pars = 4;	// 32bit dae memory
 	daep.mem_size = daep.a_pars * (m_crpt->nsp1 + 1) * (m_crpt->ntc1 + 1) * m_crpt->nper_daq;
 
-// TODO
 	daep.ppp_good_high = m_crpt->good_ppp_high;
 	daep.ppp_good_low = m_crpt->good_ppp_low;
 	daep.ppp_raw_high = m_crpt->total_ppp_high;
@@ -1056,8 +1073,6 @@ int ISISRAW::readFromFile(const char* filename, bool read_data)
 int ISISRAW::writeToFile(const char* filename)
 {
 	unsigned char zero_pad[512];
-	int npad;
-	long pos;
 	memset(zero_pad, 0, sizeof(zero_pad));
 	remove(filename);
 #ifdef MS_VISUAL_STUDIO
@@ -1075,10 +1090,10 @@ int ISISRAW::writeToFile(const char* filename)
 		fflush(output_file);
 		// we need to pad to a multiple of 512 bytes for VMS compatibility
 		fseek(output_file, 0, SEEK_END);
-		pos = ftell(output_file);
+        long pos = ftell(output_file);
 		if (pos % 512 > 0)
 		{
-			npad = 512 - pos % 512;
+            int npad = 512 - pos % 512;
 			fwrite(zero_pad, 1, npad, output_file);
 		}
 		fclose(output_file);

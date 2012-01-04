@@ -216,8 +216,8 @@ struct	ieee_double {
 
 /* Vax double precision floating point */
 struct  vax_double {
-	unsigned int	mantissa4 : 16;
-	unsigned int	mantissa3 : 16;
+//	unsigned int	mantissa4 : 16;
+//	unsigned int	mantissa3 : 16;
 	unsigned int	mantissa2 : 16;
 	unsigned int	sign      : 1;
 	unsigned int	exp       : 8;
@@ -240,8 +240,8 @@ struct  vax_double {
 	unsigned int	exp       : 8;  ///<exponential
 	unsigned int	sign      : 1;  ///<sign
 	unsigned int	mantissa2 : 16;  ///<mantissa 2
-	unsigned int	mantissa3 : 16;  ///<mantissa 3
-	unsigned int	mantissa4 : 16;  ///<mantissa 4
+//	unsigned int	mantissa3 : 16;  ///<mantissa 3
+//	unsigned int	mantissa4 : 16;  ///<mantissa 4
 };
 
 #endif /* WORDS_BIGENDIAN */
@@ -396,12 +396,11 @@ void  vaxf_to_local(float *val, const int *n, int *errcode)
 
 void  local_to_vaxf(float *val, const int *n, int *errcode)
 {
-        int i;
         *errcode=0;
 #if defined(VAXFP)
         /* nothing required */
 #elif defined(IEEEFP)
-        for(i=0; i<*n; i++)
+        for(int i=0; i<*n; i++)
         {
                 if (ieee_to_vax_float(i+val) != 0)
                 {

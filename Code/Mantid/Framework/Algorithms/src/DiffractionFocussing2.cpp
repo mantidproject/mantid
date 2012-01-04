@@ -401,6 +401,7 @@ void DiffractionFocussing2::execEvent()
 
     int chunkSize = 200;
 
+    // cppcheck-suppress syntaxError
     PRAGMA_OMP(parallel for schedule(dynamic, 1) )
     for (int wiChunk=0;wiChunk<(totalHistProcess/chunkSize)+1;wiChunk++)
     {

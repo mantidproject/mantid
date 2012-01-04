@@ -623,8 +623,13 @@ ConvertToMDEvents::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS,const std
         throw(std::invalid_argument(" Too many dimensions requested "));
     }
 
+    int emode;
     // any inelastic mode or unit conversion involing TOF needs Ei to be among the input workspace properties
-    int emode = getEMode(this);
+    if (!Q_mode_req.empty()){
+        emode = getEMode(this);
+    }else{
+        emode = -1;
+    }
     if((emode == 1)||(emode == 2)||(the_algID.find("TOF")!=std::string::npos))
     {        
         if(!inWS->run().hasProperty("Ei")){
@@ -769,37 +774,64 @@ ConvertToMDEvents::checkUVsettings(const std::vector<double> &ut,const std::vect
 //----------------------------------------------------------------------------------------------
 // AUTOINSTANSIATION OF EXISTING CODE:
 // Templated loop over some templated arguments
-template< Q_state Q, AnalMode MODE, CnvrtUnits CONV >
+template<Q_state Q, size_t NumAlgorithms=0>
 class LOOP_ND{
+private:
+    enum{
+        CONV = NumAlgorithms%NConvUintsStates,           // internal oop over conversion modes, the variable changes first
+        MODE = (NumAlgorithms/NConvUintsStates)%ANY_Mode // one level up loop over momentum conversion mode  
+    
+    };
   public:
     static inline void EXEC(ConvertToMDEvents *pH){
-            LOOP_ND<Q, MODE,static_cast<CnvrtUnits>(static_cast<int>(CONV)-1)>::EXEC(pH);
-        
+                
             std::string Key = pH->Q_modes[Q]+pH->dE_modes[MODE]+pH->ConvModes[CONV];
 
-            pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,&ConvertToMDEvents::processQND<Q,MODE,CONV>));
+            pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,
+                &ConvertToMDEvents::processQND<Q,static_cast<AnalMode>(MODE),static_cast<CnvrtUnits>(CONV)>));
 //#ifdef _DEBUG
 //            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
 //#endif
+            LOOP_ND<Q, NumAlgorithms+1>::EXEC(pH);
     }
 };
 
-
-
-template< Q_state Q, AnalMode MODE>
-class LOOP_ND<Q,MODE,ConvertNo>{
+// Templated loop specialization for the noQ case
+template< size_t NumAlgorithms>
+class LOOP_ND<NoQ,NumAlgorithms>{
+private:
+    enum{
+        CONV = NumAlgorithms%NConvUintsStates       // internal Loop over conversion modes, the variable changes first
+        //MODE => noQ -- no mode conversion ANY_Mode, 
+ 
+      
+    };
   public:
     static inline void EXEC(ConvertToMDEvents *pH){
-            
-            std::string Key = pH->Q_modes[Q]+pH->dE_modes[MODE]+pH->ConvModes[ConvertNo];
+                
+            std::string Key = pH->Q_modes[NoQ]+pH->dE_modes[ANY_Mode]+pH->ConvModes[CONV];
 
             pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,
-                                   &ConvertToMDEvents::processQND<Q,MODE,ConvertNo>));
+                                   &ConvertToMDEvents::processQND<NoQ,ANY_Mode,static_cast<CnvrtUnits>(CONV)>));
 //#ifdef _DEBUG
-//            std::cout<<" Ending group by instansiating algorithm with ID: "<<Key<<std::endl;
+//            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
 //#endif
-
+            LOOP_ND<NoQ,NumAlgorithms+1>::EXEC(pH);
     }
+};
+
+// Q3d, modQ terminator
+template<Q_state Q >
+class LOOP_ND<Q,static_cast<size_t>(ANY_Mode*NConvUintsStates) >{
+  public:
+      static inline void EXEC(ConvertToMDEvents *pH){UNUSED_ARG(pH);} 
+};
+
+// any mode terminator
+template<>
+class LOOP_ND<NoQ,static_cast<size_t>(NConvUintsStates) >{
+  public:
+      static inline void EXEC(ConvertToMDEvents *pH){UNUSED_ARG(pH);} 
 };
 
 
@@ -807,9 +839,9 @@ class LOOP_ND<Q,MODE,ConvertNo>{
  *  needs to pick up all known algorithms. 
 */
 ConvertToMDEvents::ConvertToMDEvents():
-Q_modes(3),
+Q_modes(NQStates),
 dE_modes(4),
-ConvModes(4),
+ConvModes(NConvUintsStates),
 // The conversion subalgorithm processes data in these units; 
 // Change of the units have to be accompanied by correspondent change in conversion subalgorithm
 native_elastic_unitID("Momentum"), 
@@ -830,16 +862,14 @@ native_inelastic_unitID("DeltaE")
 
 // Subalgorithm factories:
 // NoQ --> any Analysis mode will do as it does not depend on it; we may want to convert unuts
-    LOOP_ND<NoQ,ANY_Mode,ConvFromTOF>::EXEC(this);
+   LOOP_ND<NoQ,0>::EXEC(this);
  
 // MOD Q
-    LOOP_ND<modQ,Direct,ConvFromTOF>::EXEC(this);
-    LOOP_ND<modQ,Indir,ConvFromTOF>::EXEC(this);
-    LOOP_ND<modQ,Elastic,ConvFromTOF>::EXEC(this);
+    LOOP_ND<modQ,0>::EXEC(this);
+
  // Q3D
-    LOOP_ND<Q3D,Direct,ConvFromTOF>::EXEC(this);
-    LOOP_ND<Q3D,Indir,ConvFromTOF>::EXEC(this);
-    LOOP_ND<Q3D,Elastic,ConvFromTOF>::EXEC(this);
+    LOOP_ND<Q3D,0>::EXEC(this);
+  
 }
 
 //

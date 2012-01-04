@@ -83,7 +83,7 @@ ConfigDialog::ConfigDialog( QWidget* parent, Qt::WFlags fl )
     : QDialog( parent, fl )
 {
 	// get current values from app window
-	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 	plot3DTitleFont = app->plot3DTitleFont;
 	plot3DNumbersFont = app->plot3DNumbersFont;
 	plot3DAxesFont = app->plot3DAxesFont;
@@ -179,7 +179,7 @@ void ConfigDialog::setCurrentPage(int index)
 
 void ConfigDialog::initTablesPage()
 {
-	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 	tables = new QWidget();
 
 	QHBoxLayout * topLayout = new QHBoxLayout();
@@ -245,7 +245,7 @@ void ConfigDialog::initTablesPage()
 
 void ConfigDialog::initPlotsPage()
 {
-	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 
 	plotsTabWidget = new QTabWidget();
 
@@ -355,7 +355,7 @@ void ConfigDialog::showFrameWidth(bool ok)
 
 void ConfigDialog::initPlots3DPage()
 {
-	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 	plots3D = new QWidget();
 
 	QGroupBox * topBox = new QGroupBox();
@@ -441,7 +441,7 @@ void ConfigDialog::initPlots3DPage()
 
 void ConfigDialog::initAppPage()
 {
-	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 
 	appTabWidget = new QTabWidget(generalDialog);
 	appTabWidget->setUsesScrollButtons(false);
@@ -1152,7 +1152,7 @@ void ConfigDialog::initCurveFittingTab()
     }
   }
 
-  ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
   
   // Set the correct default property
   QString setting = //QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("curvefitting.autoBackground"));
@@ -1227,7 +1227,7 @@ void ConfigDialog::initCurveFittingTab()
 
 void ConfigDialog::initOptionsPage()
 {
-  ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 
   plotOptions = new QWidget();
 
@@ -1304,7 +1304,7 @@ void ConfigDialog::initOptionsPage()
 
 void ConfigDialog::initAxesPage()
 {
-	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 
   plotAxes = new QWidget();
 
@@ -1382,7 +1382,7 @@ void ConfigDialog::initAxesPage()
 
 void ConfigDialog::initCurvesPage()
 {
-	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 
 	curves = new QWidget();
 
@@ -1429,7 +1429,7 @@ void ConfigDialog::initCurvesPage()
 
 void ConfigDialog::initFittingPage()
 {
-	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 	fitPage = new QWidget();
 
 	groupBoxFittingCurve = new QGroupBox();
@@ -1503,7 +1503,7 @@ void ConfigDialog::initFittingPage()
 
 void ConfigDialog::initConfirmationsPage()
 {
-	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 	confirm = new QWidget();
 
 	groupBoxConfirm = new QGroupBox();
@@ -1552,7 +1552,7 @@ void ConfigDialog::initConfirmationsPage()
 
 void ConfigDialog::initFileLocationsPage()
 {
-	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 	fileLocationsPage = new QWidget();
 
 	QGroupBox *gb = new QGroupBox();
@@ -1607,7 +1607,7 @@ void ConfigDialog::initFileLocationsPage()
 void ConfigDialog::languageChange()
 {
   setWindowTitle( tr( "MantidPlot - Choose default settings" ) ); //Mantid
-	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 
 	// pages list
 	itemsList->clear();
@@ -1872,7 +1872,7 @@ void ConfigDialog::accept()
 
 void ConfigDialog::apply()
 {
-	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 	if (!app)
 		return;
 
@@ -2096,7 +2096,7 @@ void ConfigDialog::updateCurveFitSettings()
     setting += std::string(" ") + args.toStdString();
   }
 
-  ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 
   //mantid_config.setString("curvefitting.autoBackground", setting);
   app->mantidUI->fitFunctionBrowser()->setAutoBackgroundName(QString::fromStdString(setting));
@@ -2144,7 +2144,7 @@ void ConfigDialog::updateMantidOptionsTab()
     mantid_config.setString("algorithms.categories.hidden",hiddenCategoryString);
   
     //update the algorithm tree
-    ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+    ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
     app->mantidUI->updateAlgorithms();
   }
 }
@@ -2372,14 +2372,14 @@ void ConfigDialog::gotoMantidDirectories()
 
 void ConfigDialog::switchToLanguage(int param)
 {
-	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 	app->switchToLanguage(param);
 	languageChange();
 }
 
 void ConfigDialog::insertLanguagesList()
 {
-	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 	if(!app)
 		return;
 
@@ -2431,7 +2431,7 @@ void ConfigDialog::showPointsBox(bool)
 
 void ConfigDialog::chooseTranslationsFolder()
 {
-	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 	if (!app)
 		return;
 
@@ -2449,7 +2449,7 @@ void ConfigDialog::chooseTranslationsFolder()
 
 void ConfigDialog::chooseHelpFolder()
 {
-	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 	if (!app)
 		return;
 
@@ -2462,7 +2462,7 @@ void ConfigDialog::chooseHelpFolder()
 // #ifdef SCRIPTING_PYTHON
 // void ConfigDialog::choosePythonConfigFolder()
 // {
-// 	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+// 	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 // 	if (!app)
 // 		return;
 

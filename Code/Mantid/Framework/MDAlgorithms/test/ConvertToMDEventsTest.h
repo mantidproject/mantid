@@ -565,6 +565,28 @@ void testSetUpThrow()
 }
 
 
+void testExecNoQ()
+{
+
+     Mantid::API::MatrixWorkspace_sptr ws2D = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("testWSProcessed"));
+     API::NumericAxis *pAxis = new API::NumericAxis(3);
+     pAxis->setUnit("dSpacing");
+
+     ws2D->replaceAxis(0,pAxis);
+
+    pAlg->setPropertyValue("InputWorkspace","testWSProcessed");
+    pAlg->setPropertyValue("QDimensions","");
+    pAlg->setPropertyValue("OtherDimensions","phi,chi");
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", ""));
+    //
+    pAlg->setPropertyValue("MinValues","-10,0,-10");
+    pAlg->setPropertyValue("MaxValues"," 10,20,40");
+    pAlg->setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(pAlg->execute());
+    AnalysisDataService::Instance().remove("OutputWorkspace");
+
+}
+
 void testExecModQ()
 {
 
@@ -586,6 +608,7 @@ void testExecModQ()
     AnalysisDataService::Instance().remove("OutputWorkspace");
 
 }
+
 void testExecQ3D()
 {
     pAlg->setPropertyValue("InputWorkspace","testWSProcessed");
