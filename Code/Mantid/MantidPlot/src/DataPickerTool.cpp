@@ -95,7 +95,7 @@ void DataPickerTool::append(const QPoint &pos)
 		setSelection(NULL, 0);
 		return;
 	}
-	setSelection((QwtPlotCurve *)d_graph->plotWidget()->curve(curve), point_index);
+	setSelection(dynamic_cast<QwtPlotCurve *>(d_graph->plotWidget()->curve(curve)), point_index);
 	if (!d_selected_curve) return;
 
 	QwtPlotPicker::append(transform(QwtDoublePoint(d_selected_curve->x(d_selected_point),
@@ -121,7 +121,7 @@ void DataPickerTool::setSelection(QwtPlotCurve *curve, int point_index)
     d_restricted_move_pos = QPoint(plot()->transform(xAxis(), d_selected_curve->x(d_selected_point)),
                                     plot()->transform(yAxis(), d_selected_curve->y(d_selected_point)));
 
-    if (((PlotCurve *)d_selected_curve)->type() == Graph::Function) {
+    if (dynamic_cast<PlotCurve *>(d_selected_curve)->type() == Graph::Function) {
          QLocale locale = d_app->locale();
          emit statusText(QString("%1[%2]: x=%3; y=%4")
 			.arg(d_selected_curve->title().text())
@@ -129,10 +129,10 @@ void DataPickerTool::setSelection(QwtPlotCurve *curve, int point_index)
 			.arg(locale.toString(d_selected_curve->x(d_selected_point), 'G', d_app->d_decimal_digits))
 			.arg(locale.toString(d_selected_curve->y(d_selected_point), 'G', d_app->d_decimal_digits)));
     } else {
-        int row = ((DataCurve*)d_selected_curve)->tableRow(d_selected_point);
+        int row = dynamic_cast<DataCurve*>(d_selected_curve)->tableRow(d_selected_point);
 
-        Table *t = ((DataCurve*)d_selected_curve)->table();
-        int xCol = t->colIndex(((DataCurve*)d_selected_curve)->xColumnName());
+        Table *t = dynamic_cast<DataCurve*>(d_selected_curve)->table();
+        int xCol = t->colIndex(dynamic_cast<DataCurve*>(d_selected_curve)->xColumnName());
         int yCol = t->colIndex(d_selected_curve->title().text());
 
         emit statusText(QString("%1[%2]: x=%3; y=%4")
