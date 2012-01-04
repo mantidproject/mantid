@@ -193,7 +193,7 @@ public:
   /// Returns true if the fit should be done against binned (bunched) data.  	
   bool rawData()const;
 
-  void deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
+  void postDeleteHandle(const std::string& wsName);
   void addHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
 
   /// Add a workspace property

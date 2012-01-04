@@ -9,7 +9,7 @@
 #include <boost/lexical_cast.hpp>
 
 /// No arg Constructor
-ISISRAW2::ISISRAW2() : ISISRAW(NULL,false),outbuff(0), m_bufferSize(0), g_log(Mantid::Kernel::Logger::get("ISISRAW2"))
+ISISRAW2::ISISRAW2() : ISISRAW(NULL,false), ndes(0), outbuff(0), m_bufferSize(0), g_log(Mantid::Kernel::Logger::get("ISISRAW2"))
 {
   // Determine the size of the output buffer to create from the config service.
   g_log.debug() << "Determining ioRaw buffer size\n";

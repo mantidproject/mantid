@@ -418,7 +418,7 @@ class HandleMonitor(ReductionStep):
             stepsize = mtd[ws].getInstrument().getNumberParameter(
                 'Workflow.Monitor.RebinStep')[0]
         except IndexError:
-            print "Monitor is not being rebinned."
+            mtd.sendLogMessage("Monitor is not being rebinned.")
         else:
             Rebin(ws+'_mon', ws+'_mon', stepsize)
 

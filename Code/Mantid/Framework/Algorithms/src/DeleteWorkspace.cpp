@@ -34,7 +34,7 @@ namespace Mantid
     void DeleteWorkspace::init()
     {
       declareProperty(new API::WorkspaceProperty<API::Workspace> ("Workspace", "", 
-								  Kernel::Direction::Input), "Name of the workspace to delete.");
+                      Kernel::Direction::Input), "Name of the workspace to delete.");
     }
 
     /// Execute the algorithm 
@@ -44,15 +44,7 @@ namespace Mantid
       using API::AnalysisDataServiceImpl; 
       AnalysisDataServiceImpl & dataStore = AnalysisDataService::Instance();
       const std::string wsName = getProperty("Workspace");
-      // Check just in case something else has deleted it in between the property check and execute
-      if( dataStore.doesExist(wsName) )
-      {
-        dataStore.remove(wsName);
-      }
-      else
-      {
-        g_log.warning() << "Workspace \"" << wsName << "\" does not exist in the analysis data service.\n";
-      }
+      dataStore.remove(wsName); // Logs if it doesn't exist
     }
 
   }

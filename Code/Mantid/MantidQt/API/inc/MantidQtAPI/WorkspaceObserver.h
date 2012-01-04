@@ -40,14 +40,17 @@ namespace MantidQt
 
     signals:
       /// Delete signal handler
-      void deleteRequested(const std::string &name, Mantid::API::Workspace_sptr workspace);
+      void preDeleteRequested(const std::string &name, Mantid::API::Workspace_sptr workspace);
+      void postDeleteRequested(const std::string &name);
       void addRequested(const std::string &name, Mantid::API::Workspace_sptr workspace);
       void afterReplaced(const std::string &name, Mantid::API::Workspace_sptr workspace);
       void adsCleared();
 
     private slots:
-      /// Delete slot
-      void handleDelete(const std::string &name,  Mantid::API::Workspace_sptr workspace);
+      /// Pre Delete slot
+      void handlePreDelete(const std::string &name, Mantid::API::Workspace_sptr workspace);
+      /// Post Delete slot
+      void handlePostDelete(const std::string &name);
       /// Add slot
       void handleAdd(const std::string &name,  Mantid::API::Workspace_sptr workspace);
       /// Replace slot
@@ -100,7 +103,9 @@ namespace MantidQt
       /// Destructor
       virtual ~WorkspaceObserver();
       /// Observe workspace deletes
-      void observeDelete(bool on = true);
+      void observePreDelete(bool on = true);
+      /// Observe workspace deletes
+      void observePostDelete(bool on = true);
       /// Observe replacements
       void observeAfterReplace(bool on = true);
       /// Observe additions
@@ -112,13 +117,20 @@ namespace MantidQt
       /** Handler of the delete notifications. Could be overriden in inherited classes.
       The default handler is provided (doing nothing).
       @param wsName :: The name of the deleted workspace.
-      @param ws :: The shared pointer to the workspace to be deleted.
       */
-      virtual void deleteHandle(const std::string& wsName,
-        const Mantid::API::Workspace_sptr ws)
+      virtual void preDeleteHandle(const std::string& wsName, const Mantid::API::Workspace_sptr ws)
       {
         Q_UNUSED(wsName);
         Q_UNUSED(ws);
+      }
+
+      /** Handler of the delete notifications. Could be overriden in inherited classes.
+      The default handler is provided (doing nothing).
+      @param wsName :: The name of the deleted workspace.
+      */
+      virtual void postDeleteHandle(const std::string& wsName)
+      {
+        Q_UNUSED(wsName);
       }
       /** Handler of the add notifications. Could be overriden in inherited classes.
       The default handler is provided (doing nothing).
@@ -151,15 +163,25 @@ namespace MantidQt
       }
 
     protected:
-      /** Poco notification handler for DataService::DeleteNotification.
+      /** Poco notification handler for DataService::PostDeleteNotification.
       @param pNf :: The pointer to the notification.
       */
-      void _deleteHandle(Mantid::API::WorkspaceDeleteNotification_ptr pNf)
+      void _preDeleteHandle(Mantid::API::WorkspacePreDeleteNotification_ptr pNf)
       {
-        m_proxy->deleteRequested(pNf->object_name(), pNf->object());
+        m_proxy->preDeleteRequested(pNf->object_name(), pNf->object());
       }
       /// Poco::NObserver for DataServise::DeleteNotification.
-      Poco::NObserver<WorkspaceObserver, Mantid::API::WorkspaceDeleteNotification> m_deleteObserver;
+      Poco::NObserver<WorkspaceObserver, Mantid::API::WorkspacePreDeleteNotification> m_preDeleteObserver;
+
+      /** Poco notification handler for DataService::PostDeleteNotification.
+      @param pNf :: The pointer to the notification.
+      */
+      void _postDeleteHandle(Mantid::API::WorkspacePostDeleteNotification_ptr pNf)
+      {
+        m_proxy->postDeleteRequested(pNf->object_name());
+      }
+      /// Poco::NObserver for DataServise::DeleteNotification.
+      Poco::NObserver<WorkspaceObserver, Mantid::API::WorkspacePostDeleteNotification> m_postDeleteObserver;
 
       /** Poco notification handler for DataService::DeleteNotification.
       @param pNf :: The pointer to the notification.
@@ -193,7 +215,7 @@ namespace MantidQt
       friend class ObserverCallback;
       ObserverCallback *m_proxy;
 
-      bool m_del_observed, m_add_observed, m_repl_observed, m_clr_observed;
+      bool m_predel_observed, m_postdel_observed, m_add_observed, m_repl_observed, m_clr_observed;
     };
 
 

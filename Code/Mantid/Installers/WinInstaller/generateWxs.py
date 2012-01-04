@@ -594,10 +594,7 @@ QTIPlotEXE = addFileV('QTIPlotEXE','MPlot.exe','MantidPlot.exe',MANTIDRELEASE + 
 startmenuQTIPlot = addTo(QTIPlotEXE,'Shortcut',{'Id':'startmenuQTIPlot','Directory':'ProgramMenuDir','Name':'MPlot','LongName':'MantidPlot','WorkingDirectory':'MantidBin','Icon':'MantidPlot.exe'})
 desktopQTIPlot = addTo(QTIPlotEXE,'Shortcut',{'Id':'desktopQTIPlot','Directory':'DesktopFolder','Name':'MPlot','LongName':'MantidPlot','WorkingDirectory':'MantidBin','Icon':'MantidPlot.exe','IconIndex':'0'})
     
-addFileV('qtiplotrc', 'qtirc.py', 'qtiplotrc.py', CODEDIR + '/Mantid/MantidPlot/qtiplotrc.py', MantidDlls)
-addFileV('qtiplotutil', 'qtiUtil.py', 'qtiUtil.py', CODEDIR + '/Mantid/MantidPlot/qtiUtil.py', MantidDlls)
 addFileV('mantidplotrc', 'mtdrc.py', 'mantidplotrc.py', CODEDIR + '/Mantid/MantidPlot/mantidplotrc.py', MantidDlls)
-#addFileV('mantidplot', 'mtdplot.py', 'mantidplot.py', CODEDIR + '/Mantid/MantidPlot/mantidplot.py', MantidDlls)
 mantidplot = addCompList('mtdpltmod',CODEDIR + '/Mantid/MantidPlot/mantidplotpy','mantidplotpy',binDir)[0]
 
 # Remove files that may have been created

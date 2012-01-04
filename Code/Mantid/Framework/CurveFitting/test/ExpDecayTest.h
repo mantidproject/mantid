@@ -107,6 +107,12 @@ public:
     TS_ASSERT_DELTA( out->getParameter("Height"), 5 ,0.0001);
     TS_ASSERT_DELTA( out->getParameter("Lifetime"), 3 ,0.001);
 
+    // check it categories
+    const std::vector<std::string> categories = out->categories();
+    TS_ASSERT( categories.size() == 2 );
+    TS_ASSERT( categories[0] == "General" );
+    TS_ASSERT( categories[1] == "Muon" );
+
     AnalysisDataService::Instance().remove(wsName);
 
   }

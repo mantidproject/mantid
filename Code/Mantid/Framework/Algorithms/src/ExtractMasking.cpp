@@ -14,6 +14,8 @@ The spectra containing 0 are also marked as masked and the instrument link is pr
 #include "MantidAlgorithms/ExtractMasking.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/NullValidator.h"
 
 namespace Mantid
 {
@@ -34,6 +36,7 @@ namespace Mantid
     using Kernel::Direction;
     using Geometry::IDetector_const_sptr;
     using namespace API;
+    using namespace Kernel;
 
     //--------------------------------------------------------------------------
     // Private methods
@@ -51,6 +54,10 @@ namespace Mantid
       declareProperty(
           new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","", Direction::Output),
           "A workspace containing the masked spectra as zeroes and ones.");
+
+      declareProperty(
+          new ArrayProperty<detid_t>("DetectorList",new NullValidator<std::vector<detid_t> >, Direction::Output),
+          "A comma separated list or array containing a list of masked detector ID's" );
     }
 
     /**
@@ -68,6 +75,9 @@ namespace Mantid
       Progress prog(this,0.0,1.0,nHist);
       MantidVecPtr xValues;
       xValues.access() = MantidVec(1, 0.0);
+
+      // List masked of detector IDs
+      std::vector<detid_t> detectorList;
 
       PARALLEL_FOR2(inputWS, outputWS)
       for( int i = 0; i < nHist; ++i )
@@ -90,6 +100,11 @@ namespace Mantid
           if( inputDet->isMasked() )
           {
             inputIsMasked = true;
+            detid_t id = inputDet->getID();
+            PARALLEL_CRITICAL(name)
+            {
+              detectorList.push_back(id);
+            }
           }
         }
         catch(Kernel::Exception::NotFoundError &)
@@ -114,6 +129,7 @@ namespace Mantid
       PARALLEL_CHECK_INTERUPT_REGION
 
       setProperty("OutputWorkspace", outputWS);
+      setProperty("DetectorList", detectorList);
     }
     
   }

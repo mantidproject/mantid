@@ -1,5 +1,7 @@
 #include "MantidQtCustomInterfaces/WorkspaceOnDisk.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include <iostream>
 #include <fstream>
 #include <boost/regex.hpp>
@@ -34,10 +36,11 @@ namespace MantidQt
 
         //Generate an initial report.
         Mantid::API::MatrixWorkspace_sptr ws = fetchIt();
-        Mantid::API::Sample sample = ws->mutableSample();
-
-        generateReport(ws);
-
+        if(ws->mutableSample().hasOrientedLattice())
+        {
+          std::vector<double> ub = ws->mutableSample().getOrientedLattice().getUB().get_vector();
+          this->setUB(ub[0], ub[1], ub[2], ub[3], ub[4], ub[5], ub[6], ub[7], ub[8]);
+        }
         cleanUp();
       }
 

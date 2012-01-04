@@ -571,7 +571,7 @@ boost::shared_ptr<Mantid::API::Workspace> FrameworkManagerProxy::retrieveWorkspa
  * @param notice :: A pointer to a WorkspaceDeleteNotification object
  */
 void FrameworkManagerProxy::
-deleteNotificationReceived(Mantid::API::WorkspaceDeleteNotification_ptr notice)
+deleteNotificationReceived(Mantid::API::WorkspacePostDeleteNotification_ptr notice)
 {
   /// This function may be overridden in Python
   workspaceRemoved(notice->object_name());  

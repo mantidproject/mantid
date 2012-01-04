@@ -3,6 +3,11 @@
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/HFIRInstrument.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Property.h"
+#include "MantidKernel/PropertyWithValue.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "Poco/StringTokenizer.h"
+#include "Poco/NumberParser.h"
 
 namespace Mantid
 {
@@ -76,6 +81,35 @@ void getDefaultBeamCenter(API::MatrixWorkspace_sptr dataWS, double& pixel_x, dou
     getPixelFromCoordinate(0.0, 0.0, dataWS, pixel_x, pixel_y);
 }
 
+double getSourceToSampleDistance(API::MatrixWorkspace_sptr dataWS)
+{
+  Mantid::Kernel::Property* prop = dataWS->run().getProperty("number-of-guides");
+  Mantid::Kernel::PropertyWithValue<int>* dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<int>* >(prop);
+  const int nguides = *dp;
+
+  std::vector<std::string> pars = dataWS->getInstrument()->getStringParameter("aperture-distances");
+  if (pars.size()==0)
+    throw Kernel::Exception::InstrumentDefinitionError("Unable to find [aperture-distances] instrument parameter");
+
+  double SSD = 0;
+  Poco::StringTokenizer tok(pars[0],",",Poco::StringTokenizer::TOK_IGNORE_EMPTY);
+  if (tok.count()>0 && tok.count()<10 && nguides>=0 && nguides<9)
+  {
+    const std::string distance_as_string = tok[8-nguides];
+    if (!Poco::NumberParser::tryParseFloat(distance_as_string, SSD))
+      throw Kernel::Exception::InstrumentDefinitionError("Bad value for source-to-sample distance");
+  }
+  else
+    throw Kernel::Exception::InstrumentDefinitionError("Unable to get source-to-sample distance");
+
+  // Check for an offset
+  if (dataWS->getInstrument()->hasParameter("source-distance-offset"))
+  {
+    const double offset = readInstrumentParameter("source-distance-offset", dataWS);
+    SSD += offset;
+  }
+  return SSD;
+}
 } // namespace HFIRInstrument
 } // namespace WorkflowAlgorithms
 } // namespace Mantid

@@ -138,7 +138,7 @@ void WorkspaceSelector::handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr
   }
 }
 
-void WorkspaceSelector::handleRemEvent(Mantid::API::WorkspaceDeleteNotification_ptr pNf)
+void WorkspaceSelector::handleRemEvent(Mantid::API::WorkspacePostDeleteNotification_ptr pNf)
 {
   QString name = QString::fromStdString(pNf->object_name());
   int index = findText(name);

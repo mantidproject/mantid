@@ -236,11 +236,15 @@ public:
   virtual void initialize(){this->init();}
 
   /// The categories the Fit function belong to.
-  /// Categories must be listed as a comma separated list.
+  /// Categories must be listed as a semi colon separated list.
   /// For example: "General, Muon\\Custom" which adds 
   /// a function to the category "General" and the sub-category
   /// "Muon\\Custom" 
   virtual const std::string category() const { return "General";}
+  /// Function to return all of the categories that contain this algorithm
+  virtual const std::vector<std::string> categories() const;
+  /// Function to return the sperator token for the category string. A default implementation ';' is provided
+  virtual const std::string categorySeperator() const {return ";";}
 
   /// Function you want to fit to. 
   /// @param domain :: The buffer for writing the calculated values. Must be big enough to accept dataSize() values

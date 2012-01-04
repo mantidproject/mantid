@@ -117,7 +117,7 @@ void WorkspaceGroup::print() const
  * Callback for a workspace delete notification
  * @param notice :: A pointer to a workspace delete notificiation object
  */
-void WorkspaceGroup::workspaceDeleteHandle(Mantid::API::WorkspaceDeleteNotification_ptr notice)
+void WorkspaceGroup::workspaceDeleteHandle(Mantid::API::WorkspacePostDeleteNotification_ptr notice)
 {
   const std::string deletedName = notice->object_name();
   if( !this->contains(deletedName)) return;

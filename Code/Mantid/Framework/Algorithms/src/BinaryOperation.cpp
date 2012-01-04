@@ -9,6 +9,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/Timer.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
@@ -55,6 +56,76 @@ namespace Mantid
 
 
     //--------------------------------------------------------------------------------------------
+    /** Special handling for 1-WS and 1/WS.
+     *
+     * @return true if the operation was handled; exec() should then return
+     */
+    bool BinaryOperation::handleSpecialDivideMinus()
+    {
+      // Is the LHS operand a single number?
+      WorkspaceSingleValue_const_sptr lhs_singleVal = boost::dynamic_pointer_cast<const WorkspaceSingleValue>(m_lhs);
+      WorkspaceSingleValue_const_sptr rhs_singleVal = boost::dynamic_pointer_cast<const WorkspaceSingleValue>(m_rhs);
+
+      if (lhs_singleVal)
+      {
+        MatrixWorkspace_sptr out;
+        if (this->name() == "Divide" && !bool(rhs_singleVal))
+        {
+          std::cout << "Special DIVIDE of " << this->getPropertyValue(inputPropName2()) << " by " << this->getPropertyValue(inputPropName1()) << "\n";
+          // x / workspace = Power(workspace, -1) * x
+          // workspace ^ -1
+          IAlgorithm_sptr pow = this->createSubAlgorithm("Power", 0.0, 0.5, true);
+          pow->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_rhs));
+          pow->setProperty("Exponent", -1.0);
+          pow->setPropertyValue("OutputWorkspace", this->getPropertyValue("OutputWorkspace"));
+          pow->executeAsSubAlg();
+          out = pow->getProperty("OutputWorkspace");
+
+          // Multiply by x
+          IAlgorithm_sptr mult = this->createSubAlgorithm("Multiply", 0.5, 1.0, true);
+          mult->setProperty(inputPropName1(), out); //(workspace^-1)
+          mult->setProperty(inputPropName2(), boost::const_pointer_cast<MatrixWorkspace>(m_lhs));  // (1.0) or other number
+          mult->setProperty(outputPropName(), out);
+          mult->executeAsSubAlg();
+          out = mult->getProperty("OutputWorkspace");
+        }
+        else if (this->name() == "Minus")
+        {
+          std::cout << "Special MINUS\n";
+          // x - workspace = x + (workspace * -1)
+          MatrixWorkspace_sptr minusOne = WorkspaceFactory::Instance().create("WorkspaceSingleValue",1,1,1);
+          minusOne->dataY(0)[0] = -1.0;
+          minusOne->dataE(0)[0] = 0.0;
+
+          // workspace * -1
+          IAlgorithm_sptr mult = this->createSubAlgorithm("Multiply", 0.0, 0.5, true);
+          mult->setProperty(inputPropName1(), boost::const_pointer_cast<MatrixWorkspace>(m_rhs));
+          mult->setProperty(inputPropName2(), minusOne);
+          mult->setPropertyValue("OutputWorkspace", this->getPropertyValue("OutputWorkspace"));
+          mult->executeAsSubAlg();
+          out = mult->getProperty("OutputWorkspace");
+
+          // Multiply by x
+          IAlgorithm_sptr plus = this->createSubAlgorithm("Plus", 0.5, 1.0, true);
+          plus->setProperty(inputPropName1(), out); //(workspace^-1)
+          plus->setProperty(inputPropName2(), boost::const_pointer_cast<MatrixWorkspace>(m_lhs));  // (1.0) or other number
+          plus->setProperty(outputPropName(), out);
+          plus->executeAsSubAlg();
+          out = plus->getProperty("OutputWorkspace");
+        }
+
+        // If something was done, return the output and finish now
+        if (out)
+        {
+          setProperty("OutputWorkspace", out);
+          return true;
+        }
+      }
+      // Process normally
+      return false;
+    }
+
+    //--------------------------------------------------------------------------------------------
     /** Executes the algorithm. Will call execEvent() if appropriate.
      *
      *  @throw runtime_error Thrown if algorithm cannot execute
@@ -65,6 +136,10 @@ namespace Mantid
       m_lhs = getProperty(inputPropName1());
       m_rhs = getProperty(inputPropName2());
       m_AllowDifferentNumberSpectra = getProperty("AllowDifferentNumberSpectra");
+
+      // Special handling for 1-WS and 1/WS.
+      if (this->handleSpecialDivideMinus())
+        return;
 
       // Cast to EventWorkspace pointers
       m_elhs = boost::dynamic_pointer_cast<const EventWorkspace>(m_lhs);

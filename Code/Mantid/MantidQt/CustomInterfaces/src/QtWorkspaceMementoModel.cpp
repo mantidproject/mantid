@@ -63,7 +63,7 @@ namespace CustomInterfaces
         switch (section) 
         {
         case 0:
-          return "Location Type";
+          return "Id/File name";
         case 1:
           return "Location";
         case 2:

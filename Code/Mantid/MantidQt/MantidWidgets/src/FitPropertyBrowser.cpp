@@ -406,7 +406,7 @@ m_mantidui(mantidui)
   {
     observeAdd();
   }
-  observeDelete();
+  observePostDelete();
 
   init();
 
@@ -1540,7 +1540,7 @@ void FitPropertyBrowser::addHandle(const std::string& wsName,const boost::shared
 }
 
 /// workspace was removed
-void FitPropertyBrowser::deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace>)
+void FitPropertyBrowser::postDeleteHandle(const std::string& wsName)
 {
   QStringList oldWorkspaces = m_workspaceNames;
   QString oldName = QString::fromStdString(workspaceName());

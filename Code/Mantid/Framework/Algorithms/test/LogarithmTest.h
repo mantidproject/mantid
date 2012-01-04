@@ -90,6 +90,38 @@ public:
 
   }
 
+  void testEvents()
+  {
+    //evin has 0 events per bin in pixel0, 1 in pixel 1, 2 in pixel2, ...
+    EventWorkspace_sptr evin=WorkspaceCreationHelper::CreateEventWorkspace(5,3,1000,0,1,4),evout;
+    AnalysisDataService::Instance().add("test_ev_log", evin);
+
+    Logarithm alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace","test_ev_log"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace","test_ev_log_out"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filler","123"));
+    alg.execute();
+    TS_ASSERT( alg.isExecuted() );
+
+    TS_ASSERT_THROWS_NOTHING( evout = boost::dynamic_pointer_cast<EventWorkspace>(
+                                AnalysisDataService::Instance().retrieve("test_ev_log_out")));
+
+    TS_ASSERT( !evout ); //should not be an event workspace
+
+    MatrixWorkspace_sptr histo_out;
+    TS_ASSERT_THROWS_NOTHING(histo_out = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_ev_log_out")));
+    TS_ASSERT (histo_out); //this should be a 2d workspace
+
+    TS_ASSERT_DELTA(histo_out->readY(0)[0],123,1e-10);
+    for(size_t i=1;i<5;++i)
+    {
+      TS_ASSERT_DELTA(histo_out->readY(i)[0],std::log(static_cast<double>(i)),1e-10);
+    }
+    AnalysisDataService::Instance().remove("test_ev_log");
+    AnalysisDataService::Instance().remove("test_ev_log_out");
+  }
 };
 
 #endif           /* MANTID_ALGORITHM_LOGTEST_H_ */

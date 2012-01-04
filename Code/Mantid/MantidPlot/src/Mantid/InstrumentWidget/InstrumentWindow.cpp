@@ -156,7 +156,7 @@ InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, 
   setAttribute(Qt::WA_DeleteOnClose);
 
   // Watch for the deletion of the associated workspace
-  observeDelete();
+  observePreDelete();
   observeAfterReplace();
   observeADSClear();
 
@@ -691,7 +691,7 @@ void InstrumentWindow::saveSettings()
  * @param ws_name :: Name of the deleted workspace.
  * @param workspace_ptr :: Pointer to the workspace to be deleted
  */
-void InstrumentWindow::deleteHandle(const std::string & ws_name, const boost::shared_ptr<Workspace> workspace_ptr)
+void InstrumentWindow::preDeleteHandle(const std::string & ws_name, const boost::shared_ptr<Workspace> workspace_ptr)
 {
   if (ws_name == m_workspaceName.toStdString())
   {

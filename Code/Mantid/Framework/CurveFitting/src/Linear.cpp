@@ -35,7 +35,9 @@ using namespace Mantid::API;
 
 
 Linear::Linear() : API::Algorithm(), m_minX(0), m_maxX(0), m_progress(NULL)
-{}
+{
+  useAlgorithm("Fit");
+}
 
 Linear::~Linear() {if(m_progress) delete m_progress;m_progress=NULL;}
 

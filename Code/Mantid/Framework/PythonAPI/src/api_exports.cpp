@@ -318,6 +318,7 @@ using namespace boost::python;
 
     //Operator overloads dispatch through the above structure. The typedefs save some typing
     typedef IMDWorkspace_sptr(*binary_fn_md_md)(const API::IMDWorkspace_sptr, const API::IMDWorkspace_sptr, const std::string &,const std::string &,bool, bool);
+    typedef MatrixWorkspace_sptr(*binary_fn_mw_mw)(const API::MatrixWorkspace_sptr, const API::MatrixWorkspace_sptr, const std::string &,const std::string &,bool, bool);
     typedef WorkspaceGroup_sptr(*binary_fn_md_gp)(const API::IMDWorkspace_sptr, const API::WorkspaceGroup_sptr, const std::string &,const std::string &,bool, bool);
     typedef WorkspaceGroup_sptr(*binary_fn_gp_md)(const API::WorkspaceGroup_sptr, const API::IMDWorkspace_sptr, const std::string &,const std::string &,bool, bool);
     typedef WorkspaceGroup_sptr(*binary_fn_gp_gp)(const API::WorkspaceGroup_sptr, const API::WorkspaceGroup_sptr, const std::string &,const std::string &,bool, bool);
@@ -325,17 +326,20 @@ using namespace boost::python;
     typedef IMDHistoWorkspace_sptr(*binary_fn_mh_mh)(const API::IMDHistoWorkspace_sptr, const API::IMDHistoWorkspace_sptr, const std::string &,const std::string &,bool, bool);
 
     typedef IMDWorkspace_sptr(*binary_fn_md_db)(const API::IMDWorkspace_sptr, double, const std::string&,const std::string &,bool,bool);
+    typedef MatrixWorkspace_sptr(*binary_fn_mw_db)(const API::MatrixWorkspace_sptr, double, const std::string&,const std::string &,bool,bool);
     typedef IMDHistoWorkspace_sptr(*binary_fn_mh_db)(const API::IMDHistoWorkspace_sptr, double, const std::string&,const std::string &,bool,bool);
     typedef WorkspaceGroup_sptr(*binary_fn_gp_db)(const API::WorkspaceGroup_sptr, double, const std::string&,const std::string &,bool,bool);
 
       // Binary operations helpers
     def("_binary_op", (binary_fn_md_md)&PythonAPI::performBinaryOp);
+    def("_binary_op", (binary_fn_mw_mw)&PythonAPI::performBinaryOp);
     def("_binary_op", (binary_fn_md_gp)&PythonAPI::performBinaryOp);
     def("_binary_op", (binary_fn_gp_md)&PythonAPI::performBinaryOp);
     def("_binary_op", (binary_fn_gp_gp)&PythonAPI::performBinaryOp);
     def("_binary_op", (binary_fn_mh_mh)&PythonAPI::performBinaryOp);
 
     def("_binary_op", (binary_fn_md_db)&PythonAPI::performBinaryOpWithDouble);
+    def("_binary_op", (binary_fn_mw_db)&PythonAPI::performBinaryOpWithDouble);
     def("_binary_op", (binary_fn_mh_db)&PythonAPI::performBinaryOpWithDouble);
     def("_binary_op", (binary_fn_gp_db)&PythonAPI::performBinaryOpWithDouble);
 

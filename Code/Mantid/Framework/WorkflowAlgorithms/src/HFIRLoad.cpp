@@ -145,13 +145,22 @@ void HFIRLoad::exec()
 
   // Compute beam diameter at the detector
   double src_to_sample = 0.0;
-  Mantid::Kernel::Property* prop = dataWS->run().getProperty("source-sample-distance");
-  Mantid::Kernel::PropertyWithValue<double>* dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double>* >(prop);
-  src_to_sample = *dp;
+
+  try
+  {
+    src_to_sample = HFIRInstrument::getSourceToSampleDistance(dataWS);
+    dataWS->mutableRun().addProperty("source-sample-distance", src_to_sample, "mm", true);
+    m_output_message += "   Computed SSD from number of guides: " + Poco::NumberFormatter::format(src_to_sample/1000.0, 3) + " \n";
+  } catch (...) {
+    Mantid::Kernel::Property* prop = dataWS->run().getProperty("source-sample-distance");
+    Mantid::Kernel::PropertyWithValue<double>* dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double>* >(prop);
+    src_to_sample = *dp;
+    m_output_message += "   Could not compute SSD from number of guides, taking: " + Poco::NumberFormatter::format(src_to_sample/1000.0, 3) + " \n";
+  };
 
   double sample_apert = 0.0;
-  prop = dataWS->run().getProperty("sample-aperture-diameter");
-  dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double>* >(prop);
+  Mantid::Kernel::Property* prop = dataWS->run().getProperty("sample-aperture-diameter");
+  Mantid::Kernel::PropertyWithValue<double>* dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double>* >(prop);
   sample_apert = *dp;
 
   double source_apert = 0.0;

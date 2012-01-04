@@ -31,7 +31,9 @@ using namespace Kernel;
 using namespace API;
 
 /// (Empty) Constructor
-GetMaskedDetectors::GetMaskedDetectors() {}
+GetMaskedDetectors::GetMaskedDetectors() {
+  useAlgorithm("ExtractMasking");
+}
 
 /// Destructor
 GetMaskedDetectors::~GetMaskedDetectors() {}
