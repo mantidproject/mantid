@@ -17,6 +17,7 @@
 //Geometry
 #include <MantidGeometry/Crystal/UnitCell.h>
 #include <MantidGeometry/Crystal/OrientedLattice.h>
+#include <MantidGeometry/Instrument/Goniometer.h>
 #include <MantidGeometry/Instrument/ObjComponent.h>
 #include <MantidGeometry/Instrument/ObjCompAssembly.h>
 #include <MantidGeometry/Instrument/Component.h>
@@ -275,12 +276,46 @@ namespace Mantid
       .def( "setUFromVectors", ( &OrientedLatticeWrapper::setUFromVectors ) )
         ;
     }
+
+    namespace
+    {
+      PyObject *getR(Geometry::Goniometer &self)
+      {
+        return MantidVecHelper::createPythonWrapper(self.getR(), true);
+      }
+    }
+
+    void export_goniometer()
+    {
+      class_< Geometry::GoniometerAxis, boost::noncopyable>("GoniometerAxis", no_init)
+        .add_property("name", &Geometry::GoniometerAxis::name)
+        .add_property("rotationaxis", &Geometry::GoniometerAxis::rotationaxis)
+        .add_property("angle", &Geometry::GoniometerAxis::angle)
+        .add_property("sense", &Geometry::GoniometerAxis::sense)
+        .add_property("angleunit", &Geometry::GoniometerAxis::angleunit)
+        ;
+
+      class_< Geometry::Goniometer>( "Goniometer", no_init )  
+      .def( init< Geometry::Goniometer const & >(( arg("other") )) )    
+      .def( "getR", &getR )
+      .def( "axesInfo", &Geometry::Goniometer::axesInfo )  
+      .def( "pushAxis", &Geometry::Goniometer::pushAxis, ( arg("name"), arg("axisx"), arg("axisy"), arg("axisz"), arg("angle"), arg("CCW"), arg("angleUnit")=(int)(Geometry::angDegrees) ) )
+      .def( "setRotationAngle", (void ( Geometry::Goniometer::* )( std::string, double) ) (&Geometry::Goniometer::setRotationAngle), (arg("name"), arg("value") ) )
+      .def( "setRotationAngle", (void ( Geometry::Goniometer::* )( size_t, double) ) (&Geometry::Goniometer::setRotationAngle), (arg("axisnumber"), arg("value") ) )
+      .def( "getAxis", (Geometry::GoniometerAxis (Geometry::Goniometer::* )(std::string) ) (&Geometry::Goniometer::getAxis), (arg("axisname") ) )
+      .def( "getNumberAxes", (size_t ( Geometry::Goniometer::* )( std::string) ) (&Geometry::Goniometer::getNumberAxes), (arg("axisname") ) )
+      .def( "makeUniversalGoniometer", (void ( Geometry::Goniometer::*)() ) (&Geometry::Goniometer::makeUniversalGoniometer) )
+      .def( "getEulerAngles", (std::vector<double> ( Geometry::Goniometer::* )(std::string) ) (&Geometry::Goniometer::getEulerAngles), (arg("convention")=(std::string)("XYZ") ) )
+      ;
+    }
+
     void export_geometry_namespace()
     {
       export_components();
       export_instrument();
       export_unit_cell();
       export_oriented_lattice();
+      export_goniometer();
     }
 
   }
