@@ -61,6 +61,8 @@ namespace Mantid
     Algorithm::~Algorithm()
     {
       g_log.release();
+      // Free up any memory available.
+      Mantid::API::MemoryManager::Instance().releaseFreeMemory();
     }
 
 
@@ -196,10 +198,7 @@ namespace Mantid
                 if(wsGrpSptr)
                 {        //this must be a group - test for that
                   g_log.debug()<<" one of the inputs is a workspace group - call processGroups"<<std::endl;
-
                   return processGroups(wsGrpSptr,Prop);
-
-
                 }
               }
 
@@ -379,7 +378,8 @@ namespace Mantid
 
       m_notificationCenter.postNotification(new FinishedNotification(this,isExecuted()));
       // Only gets to here if algorithm ended normally
-
+      // Free up any memory available.
+      Mantid::API::MemoryManager::Instance().releaseFreeMemory();
       return isExecuted();
     }
 

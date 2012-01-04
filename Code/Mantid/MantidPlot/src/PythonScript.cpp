@@ -456,9 +456,7 @@ QString PythonScript::constructErrorMsg()
       filename = PyString_AsString(frame->f_code->co_filename);
       excit = excit->tb_next;
     }
-    //Py_DECREF(traceback);
   }
-
 
   //Exception value
 
