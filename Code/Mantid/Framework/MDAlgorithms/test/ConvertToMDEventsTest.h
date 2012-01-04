@@ -603,6 +603,31 @@ void testExecQ3D()
     AnalysisDataService::Instance().remove("OutputWorkspace"); 
 }
 
+void testEventWS()
+{
+  int numHist=10;
+   Mantid::API::MatrixWorkspace_sptr ws2D = boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::CreateRandomEventWorkspace(100, numHist, 0.1));
+   ws2D->setInstrument( ComponentCreationHelper::createTestInstrumentCylindrical(numHist) );
+   // any inelastic units or unit conversion using TOF needs Ei to be present among properties. 
+   ws2D->mutableRun().addProperty("Ei",13.,"meV",true);
+
+   AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
+
+// set up algorithm
+   TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace","testWSProcessed"));
+   TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OtherDimensions",""));
+   TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions", "QxQyQz"));
+   TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Elastic"));
+   pAlg->setPropertyValue("MinValues","-10,-10,-10");
+   pAlg->setPropertyValue("MaxValues"," 10, 10, 10");
+
+   pAlg->setRethrows(false);
+   pAlg->execute();
+   TSM_ASSERT("Shoud finish succesfully",pAlg->isExecuted());
+   AnalysisDataService::Instance().remove("OutputWorkspace"); 
+
+
+}
 
 ConvertToMDEventsTest(){
      pAlg = std::auto_ptr<Convert2AnyTestHelper>(new Convert2AnyTestHelper());

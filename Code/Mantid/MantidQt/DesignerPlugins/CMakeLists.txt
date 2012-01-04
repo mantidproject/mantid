@@ -36,7 +36,6 @@ if(UNITY_BUILD)
 endif(UNITY_BUILD)
 
 add_library ( DesignerPlugins ${SRC_FILES} ${INC_FILES} ${MOCCED_FILES} )
-add_cppcheck( DesignerPlugins )
 
 # Change the destination of the target as Qt expects this in a directory called "designer"
 SET_TARGET_OUTPUT_DIRECTORY( DesignerPlugins ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/designer )

@@ -22,6 +22,7 @@ int getDetectorFromPixel(const int& pixel_x, const int& pixel_y, API::MatrixWork
 void getCoordinateFromPixel(const double& pixel_x, const double& pixel_y, API::MatrixWorkspace_sptr dataWS, double& x, double& y);
 void getPixelFromCoordinate(const double& x, const double& y, API::MatrixWorkspace_sptr dataWS, double& pixel_x, double& pixel_y);
 void getDefaultBeamCenter(API::MatrixWorkspace_sptr dataWS, double& pixel_x, double& pixel_y);
+double getSourceToSampleDistance(API::MatrixWorkspace_sptr dataWS);
 
 } // namespace HFIRInstrument
 } // namespace WorkflowAlgorithms

@@ -75,12 +75,12 @@ namespace MDAlgorithms
   };
   /** enum describes if there is need to convert workspace units and different unit conversion modes 
    * this modes are identified by algorithm from workpace parameters and user input.   */
-  enum CnvrtUnits
+  enum CnvrtUnits   // here the numbers are specified to enable proper metaloop on conversion
   {
-      ConvertNo,   //< no, input workspace has the same units as output workspace or in units used by Q-dE algorithms naturally
-      ConvFast, //< the input workspace has different units from the requested and fast conversion is possible
-      ConvByTOF,   //< conversion possible via TOF
-      ConvFromTOF  //< Input workspace units are the TOF 
+      ConvertNo  =0,   //< no, input workspace has the same units as output workspace or in units used by Q-dE algorithms naturally
+      ConvFast   =1, //< the input workspace has different units from the requested and fast conversion is possible
+      ConvByTOF  =2,   //< conversion possible via TOF
+      ConvFromTOF=3  //< Input workspace units are the TOF 
   };
 /// predefenition of the class, which does all coordinate transformations, Linux compilers need this. 
   template<Q_state Q, AnalMode MODE, CnvrtUnits CONV> 
@@ -122,7 +122,7 @@ namespace MDAlgorithms
    /// the variable which describes the number of the dimensions, currently used by algorithm. Calculated from number of input properties and input workspace;
    size_t n_activated_dimensions;
   
-   /// pointer to input workspace;
+   /// pointer to the input workspace;
    Mantid::API::MatrixWorkspace_sptr inWS2D;
    // the variable which keeps preprocessed positions of the detectors if any availible (TODO: should it be a table ws?);
     static preprocessed_detectors det_loc;  
@@ -153,7 +153,8 @@ namespace MDAlgorithms
    bool fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_t n_ws_properties);
 
    /** function provides the linear representation for the transformation matrix, which translate momentums from laboratory to notional (fractional) coordinate system */
-   std::vector<double> getTransfMatrix(API::MatrixWorkspace_sptr inWS2D,const Kernel::V3D &u=Kernel::V3D(1,0,0), const Kernel::V3D &v=Kernel::V3D(0,1,0))const;
+   std::vector<double> getTransfMatrix(API::MatrixWorkspace_sptr inWS2D,const Kernel::V3D &u=Kernel::V3D(1,0,0), const Kernel::V3D &v=Kernel::V3D(0,1,0), 
+                                       bool is_powder=false)const;
 
    /// map to select an algorithm as function of the key, which describes it
     std::map<std::string, pMethod> alg_selector;
@@ -213,7 +214,8 @@ namespace MDAlgorithms
 
    /// helper function which does exatly what it says
    void checkMaxMoreThenMin(const std::vector<double> &min,const std::vector<double> &max)const;
-   /// helper function which verifies if projection vectors are specified and if their values are correct when present.
+   /** helper function which verifies if projection vectors are specified and if their values are correct when present.
+    * sets defaults [1,0,0] and [0,1,0] if not present or any error. */
    void checkUVsettings(const std::vector<double> &ut,const std::vector<double> &vt,Kernel::V3D &u,Kernel::V3D &v)const;
  };
  

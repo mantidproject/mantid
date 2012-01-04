@@ -9,7 +9,6 @@ add_definitions ( -DIN_MANTID_MATLAB_API -DMATLAB_MEX_FILE=1 )
 include_directories ( inc )
 include_directories ( ${MATLAB_INCLUDE_DIR} ${MATLAB_EXTERN_SRC} )
 add_library ( MatlabAPI ${SRC_FILES} ${INC_FILES})
-add_cppcheck( MatlabAPI )
 # Set the name of the generated library
 set_target_properties ( MatlabAPI PROPERTIES OUTPUT_NAME MantidMatlabAPI )
 # Add to the 'Framework' group in VS

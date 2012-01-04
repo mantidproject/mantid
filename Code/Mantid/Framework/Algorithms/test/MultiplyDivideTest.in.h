@@ -72,15 +72,28 @@ public:
 
   void testCompoundAssignment()
   {
+
     MatrixWorkspace_sptr a = WorkspaceCreationHelper::CreateWorkspaceSingleValue(3);
     const Workspace_const_sptr b = a;
     MatrixWorkspace_sptr c = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2);
-    a /= 5;
-    TS_ASSERT_EQUALS(a->readY(0)[0],0.6);
-    TS_ASSERT_EQUALS(a,b);
-    a /= c;
-    TS_ASSERT_EQUALS(a->readY(0)[0],0.3);
-    TS_ASSERT_EQUALS(a,b);
+    if (DO_DIVIDE)
+    {
+      a /= 5;
+      TS_ASSERT_EQUALS(a->readY(0)[0], 0.6)
+      TS_ASSERT_EQUALS(a,b);
+      a /= c;
+      TS_ASSERT_EQUALS(a->readY(0)[0], 0.3);
+      TS_ASSERT_EQUALS(a,b);
+    }
+    else
+    {
+      a *= 5;
+      TS_ASSERT_EQUALS(a->readY(0)[0],15.0)
+      TS_ASSERT_EQUALS(a,b);
+      a *= c;
+      TS_ASSERT_EQUALS(a->readY(0)[0],30.0);
+      TS_ASSERT_EQUALS(a,b);
+    }
   }
 
   //========================================= 2D and 1D Workspaces ==================================
@@ -198,13 +211,14 @@ public:
     performTest(work_in1,work_in2);
   }
 
-  void test_SingleValue_1D_failsIfDivide()
+  void test_SingleValue_1D()
   {
     int nBins = 10;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.2);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceFib(nBins);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(10.0);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace(1,nBins);
     if (DO_DIVIDE)
-      performTest_fails(work_in1,work_in2);
+      performTest(work_in1,work_in2,false,
+          5.0, 3.8729, false, true /*commutes*/);
     else
       performTest(work_in1,work_in2,false,-1,-1,false,true); // will commute L and R
   }
@@ -221,13 +235,14 @@ public:
     }
   }
 
-  void test_SingleValue_2D_failsIfDivide()
+  void test_SingleValue_2D()
   {
     int nHist = 5,nBins=300;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(4.455);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(10.0);
     MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspaceBinned(nHist,nBins);
     if (DO_DIVIDE)
-      performTest_fails(work_in1,work_in2);
+      performTest(work_in1,work_in2,false,
+          5.0, 3.8729, false, true /*commutes*/);
     else
       performTest(work_in1,work_in2,false,-1,-1,false,true); // will commute L and R
   }
@@ -472,25 +487,27 @@ public:
       performTest(work_in1,work_in2, true, 4.0, sqrt(12.0), false, false, true /* in-place */);
   }
 
-  void test_SingleValue_Event_failsForDivide()
+  void test_SingleValue_Event()
   {
     int nHist = 10,nBins=20;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.0);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(10.0);
     MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,100,0.0,1.0,2);
     if (DO_DIVIDE)
-      performTest_fails(work_in1,work_in2);
+      performTest(work_in1,work_in2, false /*NOT events*/,
+          5.0, 3.8729, false, true /*commutes*/);
     else
-      performTest(work_in1,work_in2, true, 4.0, sqrt(12.0), false, true /* will commute */);
+      performTest(work_in1,work_in2, true, 20.0, 14.8323, false, true /* will commute */);
   }
 
-  void test_SingleValue_Event_inPlace_failsForDivide()
+  void test_SingleValue_Event_inPlace()
   {
     // Doing in-place on a single value is silly since it just gets overwritten, but it works!
     int nHist = 10,nBins=20;
     MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.0);
     MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,100,0.0,1.0,2);
     if (DO_DIVIDE)
-      performTest_fails(work_in1,work_in2);
+      performTest(work_in1,work_in2, false /*NOT events*/,
+          1.0, 1.0, false, true /*commutes*/);
     else
       performTest(work_in1,work_in2, true, 4.0, sqrt(12.0), false, true /* will commute */, true);
   }

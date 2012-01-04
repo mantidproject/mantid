@@ -127,6 +127,9 @@ class LoadRun(ReductionStep):
             return l.getPropertyValue("OutputMessage")
 
         # Check whether we have a list of files that need merging
+        #   Make sure we process a list of files written as a string
+        if type(data_file)==str:
+            data_file = find_data(data_file, instrument=reducer.instrument.name(), allow_multiple=True)
         if type(data_file)==list:
             for i in range(len(data_file)):
                 output_str += "Loaded %s\n" % data_file[i]

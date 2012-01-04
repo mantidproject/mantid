@@ -74,25 +74,25 @@ public:
 
   void test_CompoundAssignment()
   {
-    MatrixWorkspace_sptr a = WorkspaceCreationHelper::CreateWorkspaceSingleValue(3);
+    Workspace2D_sptr a = WorkspaceCreationHelper::Create2DWorkspace(10,10);
     const Workspace_const_sptr b = a;
-    MatrixWorkspace_sptr c = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2);
+    Workspace2D_sptr c = WorkspaceCreationHelper::Create2DWorkspace(10,10);
     if (DO_PLUS)
     {
       a += 5;
-      TS_ASSERT_EQUALS(a->readY(0)[0],8);
+      TS_ASSERT_EQUALS(a->readY(0)[0],7);
       TS_ASSERT_EQUALS(a,b);
       a += c;
-      TS_ASSERT_EQUALS(a->readY(0)[0],10);
+      TS_ASSERT_EQUALS(a->readY(0)[0],9);
       TS_ASSERT_EQUALS(a,b);
     }
     else
     {
       a -= 5;
-      TS_ASSERT_EQUALS(a->readY(0)[0],-2);
+      TS_ASSERT_EQUALS(a->readY(0)[0],-3);
       TS_ASSERT_EQUALS(a,b);
       a -= c;
-      TS_ASSERT_EQUALS(a->readY(0)[0],-4);
+      TS_ASSERT_EQUALS(a->readY(0)[0],-5);
       TS_ASSERT_EQUALS(a,b);
     }
   }
@@ -210,7 +210,11 @@ public:
     MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(1,nBins);
     MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(nHist,nBins);
     if (DO_PLUS)
-      performTest(work_in1,work_in2);
+    {
+      performTest(work_in1,work_in2,
+          false /*in place*/, false /*not event*/,
+          -1,-1, false, true /*algorithmWillCommute*/);
+    }
     else
       performTest_fails(work_in1,work_in2);
   }
@@ -250,11 +254,15 @@ public:
   {
     int nBins = 10;
     MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.2);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceFib(nBins);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspaceBinned(1,nBins);
     if (DO_PLUS)
-      performTest(work_in1,work_in2);
+      MatrixWorkspace_sptr out = performTest(work_in1,work_in2,
+          false /*in place*/, false /*not event*/,
+          -1, -1, false, true /*algorithmWillCommute*/);
     else
-      performTest_fails(work_in1,work_in2);
+      performTest(work_in1,work_in2,
+          false /*in place*/, false /*not event*/,
+          0.2, 2.0493, false, true /*algorithmWillCommute*/);
   }
 
   void test_2D_SingleValue()
@@ -280,9 +288,17 @@ public:
     MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(4.455);
     MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspaceBinned(nHist,nBins);
     if (DO_PLUS)
-      performTest(work_in1,work_in2);
+    {
+      MatrixWorkspace_sptr out = performTest(work_in1,work_in2,
+          false /*in place*/, false /*not event*/,
+          -1,-1, false, true /*algorithmWillCommute*/);
+      TS_ASSERT_EQUALS( out->getNumberHistograms(), nHist);
+      TS_ASSERT_EQUALS( out->blocksize(), nBins);
+    }
     else
-      performTest_fails(work_in1,work_in2);
+      MatrixWorkspace_sptr out = performTest(work_in1,work_in2,
+          false /*in place*/, false /*not event*/,
+          2.455, 2.5406, false, true /*algorithmWillCommute*/);
   }
 
   void test_2D_SingleValueNoError()
@@ -321,7 +337,13 @@ public:
     MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,100,0.0,1.0,2);
     // Become a WS2D
     if (DO_PLUS)
-      performTest(work_in1, work_in2, false, false /*output is NOT event*/ );
+    {
+      MatrixWorkspace_sptr out = performTest(work_in1,work_in2,
+          false /*in place*/, false /*not event*/,
+          -1,-1, false, true /*algorithmWillCommute*/);
+      TS_ASSERT_EQUALS( out->getNumberHistograms(), nHist);
+      TS_ASSERT_EQUALS( out->blocksize(), nBins);
+    }
     else
       performTest_fails(work_in1,work_in2);
 
@@ -398,7 +420,14 @@ public:
       MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(1, nBins);
       MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,100,0.0,1.0,2);
       if (DO_PLUS)
-        performTest(work_in1,work_in2, inplace!=0, false /*not event*/, 4.0, 2.0); // Commutes if doing it with event workspace
+      {
+        // Commutes unless doing it inplace, inplace = fails
+        if (inplace!=0)
+          performTest_fails(work_in1,work_in2, inplace!=0);
+        else
+          performTest(work_in1,work_in2, inplace!=0, false /*not event*/, 4.0, 2.0,
+              false, true /*algorithmWillCommute*/);
+      }
       else
         performTest_fails(work_in1,work_in2, inplace!=0);
     }
@@ -612,7 +641,7 @@ public:
    * @param expectedValue
    * @param expectedError
    * @param allWorkspacesSameName :: do A = A + A
-   * @return
+   * @return the created workspace
    */
   MatrixWorkspace_sptr performTest(const MatrixWorkspace_sptr work_in1, const MatrixWorkspace_sptr work_in2, bool doInPlace = false,
       bool outputIsEvent = false, double expectedValue=-1.0, double expectedError=-1.0,
@@ -689,9 +718,13 @@ public:
       }
 
       if (algorithmWillCommute)
+      {
         checkData(work_in2, work_in1, work_out1, 0, expectedValue, expectedError);
+      }
       else
+      {
         checkData(work_in1, work_in2, work_out1, 0, expectedValue, expectedError);
+      }
 
       AnalysisDataService::Instance().remove(wsNameOut);
     }
@@ -759,6 +792,9 @@ public:
     TSM_ASSERT_LESS_THAN( message, 0, work_out1->getNumberHistograms());
     TSM_ASSERT_LESS_THAN( message, 0, work_out1->blocksize());
     TSM_ASSERT_EQUALS( message, work_in1->getNumberHistograms(), work_out1->getNumberHistograms());
+    // Number of histograms/bins is unchanged (relative to LHS argument)
+    TSM_ASSERT_EQUALS( message, work_out1->getNumberHistograms(), work_in1->getNumberHistograms());
+    TSM_ASSERT_EQUALS( message, work_out1->blocksize(), work_in1->blocksize());
 
     if (expectedValue == -1.0 && expectedError == -1.0)
     {

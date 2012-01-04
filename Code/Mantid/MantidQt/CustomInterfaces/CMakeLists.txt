@@ -19,6 +19,7 @@ set ( SRC_FILES
 	src/background.cpp
 	src/deltaECalc.cpp
     src/WorkspaceInADS.cpp
+	src/WorkspaceMemento.cpp
     src/WorkspaceOnDisk.cpp
 )
 
@@ -104,7 +105,6 @@ endif(UNITY_BUILD)
 # Use a precompiled header where they are supported
 ADD_PRECOMPILED_HEADER( inc/MantidQtCustomInterfaces/PrecompiledHeader.h MantidQtCustomInterfaces src/PrecompiledHeader.cpp ALL_SRC INC_FILES )
 add_library ( CustomInterfaces ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
-add_cppcheck( CustomInterfaces )
 
 # Set the name of the generated library
 set_target_properties ( CustomInterfaces PROPERTIES OUTPUT_NAME MantidQtCustomInterfaces )

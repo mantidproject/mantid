@@ -64,15 +64,31 @@ def find_data(file, instrument='', allow_multiple=False):
     
     # If we allow multiple files, users may use ; as a separator,
     # which is incompatible with the FileFinder
+    n_files = 1
     if allow_multiple:
         file=file.replace(';',',')
+        toks = file.split(',')
+        n_files = len(toks)
     
     instrument = str(instrument)
     file_path = FileFinder.getFullPath(file)
     if os.path.isfile(file_path):
         return file_path
 
-    # Second, assume a run number    
+    # Second, assume a run number, without instrument name to take care of list of full paths
+    try:
+        f = FileFinder.findRuns(file)
+        if os.path.isfile(f[0]): 
+            if allow_multiple:
+                # Mantid returns its own list object type, so make a real list out if it   
+                if len(f)==n_files:         
+                    return [i for i in f] 
+            else: return f[0]
+    except:
+        # FileFinder couldn't make sense of the the supplied information
+        pass
+
+    # Third, assume a run number    
     try:
         # FileFinder doesn't like dashes...
         instrument=instrument.replace('-','')
@@ -80,11 +96,12 @@ def find_data(file, instrument='', allow_multiple=False):
         if os.path.isfile(f[0]): 
             if allow_multiple:
                 # Mantid returns its own list object type, so make a real list out if it
-                return [i for i in f] 
+                if len(f)==n_files:
+                    return [i for i in f] 
             else: return f[0]
     except:
         # FileFinder couldn't make sense of the the supplied information
         pass
 
     # If we didn't find anything, raise an exception
-    raise RuntimeError, "Could not find a file for [%s]" % str(file)
+    raise RuntimeError, "Could not find a file for %s" % str(file)

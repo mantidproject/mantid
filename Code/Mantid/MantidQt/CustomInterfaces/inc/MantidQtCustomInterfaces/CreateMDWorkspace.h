@@ -47,7 +47,13 @@ namespace MantidQt
 
       void addFileClicked();
 
+      void setUBMatrixClicked();
+
       void removeSelectedClicked();
+
+      void findUBMatrixClicked();
+
+      void createMDWorkspaceClicked();
 
     private:
       Ui::CreateMDWorkspace  m_uiForm;

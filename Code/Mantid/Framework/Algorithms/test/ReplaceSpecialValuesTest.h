@@ -12,6 +12,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using namespace Mantid::DataObjects;
 
 class ReplaceSpecialValuesTest : public CxxTest::TestSuite
 {
@@ -255,6 +256,44 @@ public:
     inputWS->dataY(3)[1] = nan;
 
     return inputWS;
+  }
+
+  void testEvents()
+  {
+    EventWorkspace_sptr evin=WorkspaceCreationHelper::CreateEventWorkspace(1,5,10,0,1,3),evout;
+    AnalysisDataService::Instance().add("test_ev_rep", evin);
+    EventList *evlist=evin->getEventListPtr(0);
+    evlist->switchTo(WEIGHTED);
+    evlist->getWeightedEvents().at(0).m_weight=static_cast<float>(0.01);
+    evlist->getWeightedEvents().at(1).m_weight=std::numeric_limits<float>::infinity();
+    evlist->getWeightedEvents().at(2).m_weight=std::numeric_limits<float>::quiet_NaN();
+
+    Mantid::Algorithms::ReplaceSpecialValues alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace","test_ev_rep"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace","test_ev_rep_out"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NaNValue","7"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NaNError","8"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InfinityValue","9"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InfinityError","10"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BigNumberThreshold","0.1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BigNumberValue","-11"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BigNumberError","-12"));
+
+    alg.execute();
+    TS_ASSERT( alg.isExecuted() );
+
+    TS_ASSERT_THROWS_NOTHING( evout = boost::dynamic_pointer_cast<EventWorkspace>(
+                                AnalysisDataService::Instance().retrieve("test_ev_rep_out")));
+
+    TS_ASSERT( evout ); //should be an event workspace
+    TS_ASSERT_DELTA(evout->getEventList(0).getEvent(0).m_weight,0.01,1e-8);
+    TS_ASSERT_EQUALS(evout->getEventList(0).getEvent(1).m_weight,9);
+    TS_ASSERT_EQUALS(evout->getEventList(0).getEvent(2).m_weight,7);
+    TS_ASSERT_EQUALS(evout->getEventList(0).getEvent(3).m_weight,-11);
+    AnalysisDataService::Instance().remove("test_ev_rep");
+    AnalysisDataService::Instance().remove("test_ev_rep_out");
   }
 
 private:

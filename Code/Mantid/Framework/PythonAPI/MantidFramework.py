@@ -481,6 +481,8 @@ class ProxyObject(object):
         self.__obj = obj
 
 
+
+    
 # Prefix for temporary objects within workspace binary operations
 _binary_op_prefix = '__binary_tmp'
 # A list of temporary workspaces created by algebraic operations
@@ -685,16 +687,27 @@ class WorkspaceProxy(ProxyObject):
         return self.__do_operation('Xor', rhs, inplace=False, reverse=False,
                                    lhs_vars=lhs)
         
-        
+
+    def __pow__(self, y):
+        """ Raise a workspace to a power. Equivalent of x**y.
+         
+        Args:
+            x :: workspace or other type.
+            y :: exponent
+        """
+        lhs = lhs_info()
+        return self.__do_unary_operation("PowerMD", lhs, Exponent=y)
         
 
-    def __do_unary_operation(self, op, lhs_vars):
+    def __do_unary_operation(self, op, lhs_vars, **kwargs):
         """
         Perform the unary operation
 
-        @param op :: name of the algorithm to run
-        @param lhs_vars :: is expected to be a tuple containing the number of lhs variables and
+        Args:
+            op :: name of the algorithm to run
+            lhs_vars :: is expected to be a tuple containing the number of lhs variables and
                 their names as the first and second element respectively
+            kwargs :: additional properties to give to algorithm
         """
         global _binary_op_tmps
 
@@ -713,6 +726,8 @@ class WorkspaceProxy(ProxyObject):
         alg = mtd.createAlgorithm(op)
         alg.setPropertyValue("InputWorkspace", self.getName())
         alg.setPropertyValue("OutputWorkspace", output_name)
+        for (key,value) in kwargs.items():
+            alg.setPropertyValue(key,str(value))
         alg.execute()
         resultws = alg.workspace()
 
@@ -823,7 +838,7 @@ class RunProxy(ProxyObject):
             raise TypeError("Not working for %s" % str(type(value)))
         prop = self._getHeldObject().getProperty(key)
         self.__properties[key] = prop
-            
+
 
 #-------------------------------------------------------------------------------
 

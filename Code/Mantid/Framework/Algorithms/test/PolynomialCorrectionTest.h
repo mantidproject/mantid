@@ -10,6 +10,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using namespace Mantid::DataObjects;
 
 class PolynomialCorrectionTest : public CxxTest::TestSuite
 {
@@ -127,7 +128,35 @@ public:
     AnalysisDataService::Instance().remove(wsNameOut);
   }
   
-  
+  void testEvents()
+  {
+    EventWorkspace_sptr evin=WorkspaceCreationHelper::CreateEventWorkspace(1,5,10,0,1,3),evout;
+    AnalysisDataService::Instance().add("test_ev_polyc", evin);
+
+    Mantid::Algorithms::PolynomialCorrection alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace","test_ev_polyc"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace","test_ev_polyc_out"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Coefficients","3.0,2.0,1.0") );
+
+    alg.execute();
+    TS_ASSERT( alg.isExecuted() );
+
+    TS_ASSERT_THROWS_NOTHING( evout = boost::dynamic_pointer_cast<EventWorkspace>(
+                                AnalysisDataService::Instance().retrieve("test_ev_polyc_out")));
+
+    TS_ASSERT( evout ); //should be an event workspace
+    for (size_t i=0;i<5;++i)
+    {
+      double t=static_cast<double>(i)+0.5;
+      double w=3.0+t*2.0+t*t;
+      TS_ASSERT_DELTA(evout->getEventList(0).getEvent(i).m_weight,w,w*1e-6);
+    }
+
+    AnalysisDataService::Instance().remove("test_ev_polyc");
+    AnalysisDataService::Instance().remove("test_ev_polyc_out");
+  }
 private:
   Mantid::Algorithms::PolynomialCorrection poly;
 

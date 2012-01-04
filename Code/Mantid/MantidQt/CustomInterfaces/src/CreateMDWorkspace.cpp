@@ -49,7 +49,7 @@ namespace CustomInterfaces
 {
 
 //Add this class to the list of specialised dialogs in this namespace
-//DECLARE_SUBWINDOW(CreateMDWorkspace); //TODO: Enable this to use it via mantid plot. Not ready for this yet!
+DECLARE_SUBWINDOW(CreateMDWorkspace); //TODO: Enable this to use it via mantid plot. Not ready for this yet!
 
   /**
   Helper type to perform comparisons between WorkspaceMementos
@@ -64,7 +64,7 @@ namespace CustomInterfaces
     {
       std::vector<std::string> strs;
       std::string id =  m_benchmark->getId();
-      boost::split(strs, id, boost::is_any_of("/"));
+      boost::split(strs, id, boost::is_any_of("/,\\"));
 
       std::stringstream streamPattern;
       streamPattern << "(" << strs.back() << ")$";
@@ -94,8 +94,56 @@ void CreateMDWorkspace::initLayout()
   connect(m_uiForm.btn_add_workspace, SIGNAL(clicked()), this, SLOT(addWorkspaceClicked()));
   connect(m_uiForm.btn_add_file, SIGNAL(clicked()), this, SLOT(addFileClicked()));
   connect(m_uiForm.btn_remove_workspace, SIGNAL(clicked()), this, SLOT(removeSelectedClicked()));
+  connect(m_uiForm.btn_set_ub_matrix, SIGNAL(clicked()), this, SLOT(setUBMatrixClicked()));
+  connect(m_uiForm.btn_find_ub_matrix, SIGNAL(clicked()), this, SLOT(findUBMatrixClicked()));
+  connect(m_uiForm.btn_create, SIGNAL(clicked()), this, SLOT(createMDWorkspaceClicked()));
   //Set MVC Model
   m_uiForm.tableView->setModel(m_model);
+}
+
+void CreateMDWorkspace::findUBMatrixClicked()
+{
+  runConfirmation("Not yet implemented!");
+}
+
+/*
+Event handler for setting the UB Matrix
+*/
+void CreateMDWorkspace::setUBMatrixClicked()
+{
+  QTableView* view = m_uiForm.tableView;
+  QModelIndexList indexes = view->selectionModel()->selection().indexes();
+  if(indexes.size() > 0)
+  {
+    int index = indexes.front().row();
+    WorkspaceMemento_sptr memento = m_data[index];
+    Mantid::API::MatrixWorkspace_sptr ws = memento->fetchIt();
+    std::string id = memento->getId();
+    std::string command = "SetUBDialog(Workspace='" + id + "')";
+
+    QString pyInput =
+      "from mantidsimple import *\n"
+      "import sys\n"
+      "try:\n"
+      "    SetUBDialog(Workspace='%1')\n"
+      "    print 1\n"
+      "except:\n"
+      "    print 0\n";
+
+    pyInput = pyInput.arg(QString(id.c_str()));
+    QString pyOutput = runPythonCode(pyInput).trimmed();
+
+    if ( pyOutput == "1" )
+    {
+      memento->setReport(WorkspaceMemento::Ready);
+      memento->cleanUp();
+      m_model->update();
+    }
+  }
+  else
+  {
+    runConfirmation("Nothing selected");
+  }
 }
 
 /*
@@ -143,8 +191,15 @@ void CreateMDWorkspace::addFileClicked()
   std::string name = fileName.toStdString();
   if(!name.empty())
   {
-    WorkspaceMemento_sptr candidate(new WorkspaceOnDisk(name));
-    addUniqueMemento(candidate);
+    try
+    {
+      WorkspaceMemento_sptr candidate(new WorkspaceOnDisk(name));
+      addUniqueMemento(candidate);
+    }
+    catch(std::invalid_argument& arg)
+    {
+      this->runConfirmation(arg.what());
+    }
   }
 }
 
@@ -193,6 +248,11 @@ int CreateMDWorkspace::runConfirmation(const std::string& message)
   msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
   msgBox.setDefaultButton(QMessageBox::Cancel);
   return msgBox.exec();
+}
+
+void CreateMDWorkspace::createMDWorkspaceClicked()
+{
+  //Launch dialog
 }
 
 

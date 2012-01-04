@@ -97,10 +97,10 @@ PythonScripting::PythonScripting(ApplicationWindow *parent)
 #endif
 
   // Observe ADS updates
-  observeAdd();
-  observeAfterReplace();
-  observeDelete();
-  observeADSClear();
+  //observeAdd();
+  //observeAfterReplace();
+  //observeDelete();
+  //observeADSClear();
 }
 
 PythonScripting::~PythonScripting()
@@ -193,8 +193,7 @@ bool PythonScripting::start()
     //Get the refresh protection flag
     Mantid::Kernel::ConfigService::Instance().getValue("pythonalgorithms.refresh.allowed", refresh_allowed);
 
-    if( loadInitFile(mantidbin.absoluteFilePath("qtiplotrc.py")) &&
-        loadInitFile(mantidbin.absoluteFilePath("mantidplotrc.py")) )
+    if( loadInitFile(mantidbin.absoluteFilePath("mantidplotrc.py")) )
     {
       d_initialized = true;
     }
