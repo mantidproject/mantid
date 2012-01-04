@@ -264,8 +264,7 @@ namespace Mantid
         Mantid::MDEvents::BinMD hist_alg;
         hist_alg.initialize();
 
-        hist_alg.setPropertyValue("InputWorkspace", wsName);
-        std::string id; 
+        hist_alg.setPropertyValue("InputWorkspace", wsName); 
 
         if(m_view->getApplyClip())
         {

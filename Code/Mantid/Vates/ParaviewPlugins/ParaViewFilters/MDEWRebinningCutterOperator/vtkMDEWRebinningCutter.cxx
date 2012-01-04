@@ -382,11 +382,10 @@ double vtkMDEWRebinningCutter::GetInputMaxThreshold()
 unsigned long vtkMDEWRebinningCutter::GetMTime()
 {
   unsigned long mTime = this->Superclass::GetMTime();
-  unsigned long time;
 
   if (this->m_clipFunction != NULL)
   {
-
+    unsigned long time;
     time = this->m_clipFunction->GetMTime();
     if(time > mTime)
     {
