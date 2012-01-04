@@ -25,7 +25,11 @@ class QtProxyObject(QtCore.QObject):
         # Connect to track the destroyed
         QtCore.QObject.connect( self.__obj, QtCore.SIGNAL("destroyed()"),
                                 self._heldObjectDestroyed)
-        
+
+    def __del__(self):
+        # Disconnect the signal or you get a segfault on quitting MantidPlot
+        QtCore.QObject.disconnect( self.__obj, QtCore.SIGNAL("destroyed()"), self._heldObjectDestroyed )
+
     def _heldObjectDestroyed(self):
         """Slot called when the held object is destroyed.
         Sets it to None, preventing segfaults """
@@ -169,6 +173,29 @@ class Layer(QtProxyObject):
         """
         return self._getHeldObject().addCurves(table._getHeldObject(),columnName,style,lineWidth,symbolSize,startRow,endRow)
 
+    def newLegend(self, text):
+        """Create a new legend.
+        
+        Args:
+            text: The text of the legend.
+        
+        Returns:
+            A handle to the newly created legend widget.
+        """
+        return QtProxyObject(self._getHeldObject().newLegend(text))
+
+    def legend(self):
+        """Get a handle to the layer's legend widget."""
+        return QtProxyObject(self._getHeldObject().legend())
+
+    def grid(self):
+        """Get a handle to the grid object for this layer."""
+        return QtProxyObject(self._getHeldObject().grid())
+
+    def spectrogram(self):
+        """If the layer contains a spectrogram, get a handle to the spectrogram object."""
+        return QtProxyObject(self._getHeldObject().spectrogram())
+
 #-----------------------------------------------------------------------------
 class Graph3D(QtProxyObject):
     """Proxy for the qti.Graph3D object.
@@ -193,6 +220,16 @@ class Graph3D(QtProxyObject):
             matrix: A reference to the matrix.
         """
         self._getHeldObject().setMatrix(matrix._getHeldObject())
+
+#-----------------------------------------------------------------------------
+class Spectrogram(QtProxyObject):
+    """Proxy for the qti.Spectrogram object.
+    """
+    def __init__(self, toproxy):
+        QtProxyObject.__init__(self,toproxy)
+
+    def matrix(self):
+        return QtProxyObject(self._getHeldObject().matrix())
 
 #-----------------------------------------------------------------------------
 class MantidMatrix(QtProxyObject):
@@ -270,5 +307,6 @@ class SliceViewerWindowProxy(QtProxyObject):
         Might allow tab-completion to work under ipython
         """
         return self.slicer_methods
+
 
 
