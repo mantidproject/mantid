@@ -325,7 +325,7 @@ void FunctionDialog::acceptFunction()
 	formulas+=formula;
 	if (!error)
 	{
-		ApplicationWindow *app = (ApplicationWindow *)this->parent();
+		ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
 		app->updateFunctionLists(type,formulas);
 		if (!graph)
 			app->newFunctionPlot(formulas, start, end, boxPoints->value(), "x", type);
@@ -425,7 +425,7 @@ void FunctionDialog::acceptParametric()
 	formulas+=yformula;
 	if (!error)
 	{
-		ApplicationWindow *app = (ApplicationWindow *)this->parent();
+		ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
 		app->updateFunctionLists(type,formulas);
 		if (!graph)
 			app->newFunctionPlot(formulas, start, end, boxParPoints->value(), boxParameter->text(), type);
@@ -525,7 +525,7 @@ void FunctionDialog::acceptPolar()
 	formulas+=tformula;
 	if (!error)
 	{
-		ApplicationWindow *app = (ApplicationWindow *)this->parent();
+		ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
 		app->updateFunctionLists(type,formulas);
 
 		if (!graph)

@@ -73,7 +73,7 @@ IntDialog::IntDialog(QWidget* parent, Graph *g, Qt::WFlags fl )
 	boxSteps->setValue(20);
 	gl1->addWidget(boxSteps, 3, 1);
 
-	QLocale locale = ((ApplicationWindow *)parent)->locale();
+	QLocale locale = dynamic_cast<ApplicationWindow *>(this->parent())->locale();
 	gl1->addWidget(new QLabel(tr("Tolerance")), 4, 0);
 	boxTol = new DoubleSpinBox();
 	boxTol->setLocale(locale);
@@ -119,7 +119,7 @@ void IntDialog::accept()
 {
     QString formula = boxName->text().remove("\n");
 	Integration *i = new Integration(formula, boxVariable->text(),
-                    (ApplicationWindow *)this->parent(), d_graph, boxStart->value(), boxEnd->value());
+										dynamic_cast<ApplicationWindow *>(this->parent()), d_graph, boxStart->value(), boxEnd->value());
 	i->setTolerance(boxTol->text().toDouble());
 	i->setMaximumIterations(boxSteps->value());
 	i->setMethodOrder(boxOrder->value());

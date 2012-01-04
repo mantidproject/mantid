@@ -1,4 +1,4 @@
-/*WIKI* 
+/*WIKI*
 
 
 
@@ -101,6 +101,7 @@ void CompressEvents::exec()
 
     // Loop over the histograms (detector spectra)
     // Don't parallelize the loop if we are going to parallelize each event list.
+    // cppcheck-suppress syntaxError
     PRAGMA_OMP( parallel for schedule(dynamic) if (!parallel_in_each) )
     for (int i = 0; i < noSpectra; ++i)
     {
