@@ -332,6 +332,7 @@ namespace MDEvents
 
     // Run the chunks in parallel. There is no overlap in the output workspace so it is
     // thread safe to write to it..
+    // cppcheck-suppress syntaxError
     PRAGMA_OMP( parallel for schedule(dynamic,1) if (doParallel) )
     for(int chunk=0; chunk < int(binDimensions[chunkDimension]->getNBins()); chunk += chunkNumBins)
     {
