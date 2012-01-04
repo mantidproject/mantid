@@ -10,6 +10,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <Poco/StringTokenizer.h>
+
 #include <sstream>
 #include <iostream> 
 
