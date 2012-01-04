@@ -5,6 +5,8 @@ reference to None, thus ensuring that further attempts at access do not cause a 
 """
 
 from PyQt4 import QtCore
+from PyQt4.QtCore import Qt
+from MantidFramework import WorkspaceProxy
 
 #-----------------------------------------------------------------------------
 #--------------------------- Proxy Objects -----------------------------------
@@ -28,7 +30,8 @@ class QtProxyObject(QtCore.QObject):
 
     def __del__(self):
         # Disconnect the signal or you get a segfault on quitting MantidPlot
-        QtCore.QObject.disconnect( self.__obj, QtCore.SIGNAL("destroyed()"), self._heldObjectDestroyed )
+        if self.__obj is not None:
+            QtCore.QObject.disconnect( self.__obj, QtCore.SIGNAL("destroyed()"), self._heldObjectDestroyed )
 
     def _heldObjectDestroyed(self):
         """Slot called when the held object is destroyed.
@@ -128,7 +131,7 @@ class Layer(QtProxyObject):
         """Add a curve from a workspace, table or another Layer to the plot
         
         Args:
-            The first argument should be a reference to a table or layer, or a workspace name.
+            The first argument should be a reference to a workspace, table or layer, or a workspace name.
             Subsequent arguments vary according to the type of the first.
         
         Returns:
@@ -136,6 +139,8 @@ class Layer(QtProxyObject):
         """
         if isinstance(args[0],str):
             return self._getHeldObject().insertCurve(*args)
+        elif isinstance(args[0],WorkspaceProxy):
+            return self._getHeldObject().insertCurve(args[0].getName(),*args[1:])
         else:
             return self._getHeldObject().insertCurve(args[0]._getHeldObject(),*args[1:])
     
@@ -172,6 +177,23 @@ class Layer(QtProxyObject):
             A boolean indicating success or failure.
         """
         return self._getHeldObject().addCurves(table._getHeldObject(),columnName,style,lineWidth,symbolSize,startRow,endRow)
+
+    def addErrorBars(self, yColName, errTable, errColName, type=1, width=1, cap=8, color=Qt.black, through=True, minus=True, plus=True):
+        """Add error bars to a plot that was created from a table column.
+        
+        Args:
+            yColName: The name of the column pertaining to the curve's data values.
+            errTable: A reference to the table holding the error values.
+            errColName: The name of the column containing the error values.
+            type: The orientation of the error bars - horizontal (0) or vertical (1, the default).
+            width: The line width of the error bars (default: 1).
+            cap: The length of the cap on the error bars (default: 8).
+            color: The color of error bars (default: black).
+            through: Whether the error bars are drawn through the symbol (default: yes).
+            minus: Whether these errors should be shown as negative errors (default: yes).
+            plus: Whether these errors should be shown as positive errors (default: yes).
+        """
+        self._getHeldObject().addErrorBars(yColName,errTable._getHeldObject(),errColName,type,width,cap,color,through,minus,plus)
 
     def newLegend(self, text):
         """Create a new legend.
@@ -229,6 +251,7 @@ class Spectrogram(QtProxyObject):
         QtProxyObject.__init__(self,toproxy)
 
     def matrix(self):
+        """Get a handle to the data source."""
         return QtProxyObject(self._getHeldObject().matrix())
 
 #-----------------------------------------------------------------------------
