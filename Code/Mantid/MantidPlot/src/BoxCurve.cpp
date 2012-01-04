@@ -337,7 +337,7 @@ void BoxCurve::loadData()
 		QString s = d_table->text(i, ycol);
         if (!s.isEmpty()){
             bool valid_data = true;
-            Y[size] = ((Plot *)plot())->locale().toDouble(s, &valid_data);
+            Y[size] = (dynamic_cast<Plot *>(plot()))->locale().toDouble(s, &valid_data);
             if (valid_data)
                 size++;
         }

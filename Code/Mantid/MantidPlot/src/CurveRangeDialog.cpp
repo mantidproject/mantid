@@ -98,7 +98,7 @@ void CurveRangeDialog::setCurveToModify(Graph *g, int curve)
 		return;
 
 	d_graph = g;
-	d_curve = (DataCurve *)d_graph->curve(curve);
+    d_curve = dynamic_cast<DataCurve *>(d_graph->curve(curve));
 	if (!d_curve)
 		return;
 
