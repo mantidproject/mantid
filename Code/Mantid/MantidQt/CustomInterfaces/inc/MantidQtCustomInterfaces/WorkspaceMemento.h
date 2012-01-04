@@ -85,7 +85,7 @@ namespace MantidQt
       /// Destructor
       virtual ~WorkspaceMemento(){};
       /// Common implementation for generating status
-      const Status generateStatus() const;
+      Status generateStatus() const;
 
     private:
 

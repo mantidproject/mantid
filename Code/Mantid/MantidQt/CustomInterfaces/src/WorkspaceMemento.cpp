@@ -25,7 +25,7 @@ namespace MantidQt
     Common implementation of status generation.
     @return status.
     */
-    const Status WorkspaceMemento::generateStatus() const
+    Status WorkspaceMemento::generateStatus() const
     {
       Status status;
       if(m_ub.empty())
