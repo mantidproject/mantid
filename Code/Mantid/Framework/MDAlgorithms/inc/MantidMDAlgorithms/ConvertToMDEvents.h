@@ -177,7 +177,6 @@ namespace MDAlgorithms
   private: 
    //--------------------------------------------------------------------------------------------------
    /** generic template to convert to any Dimensions workspace;
-    * @param pOutWs -- pointer to initated target workspace, which should accomodate new events
     */
     template<Q_state Q, AnalMode MODE, CnvrtUnits CONV>
     void processQND();

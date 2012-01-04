@@ -43,6 +43,7 @@ BOOST_PYTHON_MODULE(MantidPythonAPI)
 BOOST_PYTHON_MODULE(libMantidPythonAPI)
 #endif
 {
+  /// @cond
   using namespace Mantid::PythonAPI;
   boost::python::def("mantid_build_version", mantid_version);
   MantidVecHelper::initializeDependencies(); // This initializes numpy if it is available
@@ -54,7 +55,7 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
   vector_proxy<bool>::wrap("cpp_list_bool");
   vector_proxy<std::string>::wrap("cpp_list_str");
   set_proxy<std::string>::wrap("cpp_set_string");
-
+  /// @endcond
   // Export Mantid API
   export_kernel_namespace();
   export_geometry_namespace();
