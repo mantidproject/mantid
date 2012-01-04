@@ -46,6 +46,12 @@ public:
     TSM_ASSERT("Should have fetched the workspace", result);
   }
 
+  void testNoExistingUB()
+  {
+    WorkspaceOnDisk memento(getSuitableFileNamePath());
+    TS_ASSERT_EQUALS(WorkspaceMemento::NoOrientedLattice, memento.generateStatus());
+  }
+
 };
 
 #endif

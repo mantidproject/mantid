@@ -40,6 +40,8 @@ namespace MantidQt
       int runConfirmation(const std::string& message);
       /// Checks the candidate is unique, then adds it to the existing data.
       void addUniqueMemento(WorkspaceMemento_sptr candidate);
+      /// Get the first selected memento.
+      WorkspaceMemento_sptr getFirstSelected();
 
     private slots:
 
