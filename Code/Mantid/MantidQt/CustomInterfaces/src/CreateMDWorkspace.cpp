@@ -118,10 +118,19 @@ void CreateMDWorkspace::findUBMatrixClicked()
     // Find the peaks workspace in detector space
     command = "from mantidsimple import *\n"
       "import sys\n"
-      "FindSXPeaksDialog(InputWorkspace='%1', OutputWorkspace='%1_peaks')";
+      "try:\n"
+      "    FindSXPeaksDialog(InputWorkspace='%1', OutputWorkspace='%1_peaks')\n"
+      "    print 'SUCCESS'\n"
+      "except:\n"
+      "    print 'FAIL'";
     args = QString(memento->getId().c_str());
     command = command.arg(args);
-    runPythonCode(command).trimmed();
+    result = runPythonCode(command).trimmed();
+    if(result == "FAIL")
+    {
+      runConfirmation("Aborted during PeakFinding.");
+      return;
+    }
 
     // Calculate the u matrix and then copy the ub matrix result from the peaksworkspace to the matrix workspace
     command = "try:\n"
@@ -132,17 +141,16 @@ void CreateMDWorkspace::findUBMatrixClicked()
       "    alpha = alg.getProperty('alpha')\n"
       "    beta = alg.getProperty('beta')\n"
       "    gamma = alg.getProperty('gamma')\n"
-      "    CopySample(InputWorkspace='%1_peaks', OutputWorkspace='%1' CopyLattice=True, CopyName=False, CopyMaterial=False, CopyEnvironment=False)\n"
-      "    print '%(a)s, %(b)s, %(c)s, %(alpha)s, %(beta)s, %(gamma)s' % {'a': a, 'b' : b, 'c' : c, 'alpha' : alpha, 'beta' : beta, 'gamma' : gamma}"
+      "    CopySample(InputWorkspace='%1_peaks',OutputWorkspace='%1',CopyName='0',CopyMaterial='0',CopyEnvironment='0',CopyShape='0',CopyLattice='1')\n"
+      "    print '%(a)s, %(b)s, %(c)s, %(alpha)s, %(beta)s, %(gamma)s' % {'a': a, 'b' : b, 'c' : c, 'alpha' : alpha, 'beta' : beta, 'gamma' : gamma}\n"
       "except:\n"
-      "    print 0";
+      "    print 'FAIL'";
 
     command = command.arg(args);
     result = runPythonCode(command).trimmed();
-    if(result == "0")
+    if(result == "FAIL")
     {
-      //Handle error
-      runConfirmation("Error calculating and copying the UB matrix. Exiting...");
+      runConfirmation("Aborted during calculating and copying the UB matrix.");
       return;
     }
     else
