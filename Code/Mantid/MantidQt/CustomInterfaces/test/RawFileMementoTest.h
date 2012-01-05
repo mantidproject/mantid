@@ -2,7 +2,7 @@
 #define CUSTOM_INTERFACES_WORKSPACE_ON_DISK_TEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidQtCustomInterfaces/WorkspaceOnDisk.h"
+#include "MantidQtCustomInterfaces/RawFileMemento.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"

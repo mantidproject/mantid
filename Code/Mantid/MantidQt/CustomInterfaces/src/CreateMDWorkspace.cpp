@@ -5,7 +5,7 @@
 #include "MantidQtCustomInterfaces/CreateMDWorkspace.h"
 #include "MantidQtCustomInterfaces/WorkspaceMemento.h"
 #include "MantidQtCustomInterfaces/WorkspaceInADS.h"
-#include "MantidQtCustomInterfaces/WorkspaceOnDisk.h"
+#include "MantidQtCustomInterfaces/RawFileMemento.h"
 #include "MantidQtCustomInterfaces/WorkspaceMemento.h"
 
 #include "MantidAPI/WorkspaceFactory.h"

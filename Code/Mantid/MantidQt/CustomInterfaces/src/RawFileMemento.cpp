@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/WorkspaceOnDisk.h"
+#include "MantidQtCustomInterfaces/RawFileMemento.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
