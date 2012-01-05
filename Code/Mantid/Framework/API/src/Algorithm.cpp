@@ -817,7 +817,6 @@ namespace Mantid
       int nPeriod=1;
       int execPercentage=0;
       bool bgroupPassed=true;
-      bool bgroupFailed;
 
       WorkspaceGroup_sptr wsgrp1_sptr; 
       WorkspaceGroup_sptr wsgrp2_sptr;
@@ -921,7 +920,6 @@ namespace Mantid
           }
           // status of each execution is checking 
           bgroupPassed=bgroupPassed&&bStatus;
-          bgroupFailed=bgroupFailed||bStatus;
           execPercentage+=10;
           progress(double((execPercentage)/execTotal));
           //if a workspace execution fails
