@@ -86,14 +86,20 @@ namespace MantidQt
       virtual ~WorkspaceMemento(){};
       /// Common implementation for generating status
       Status generateStatus() const;
+      /// Apply actions wrapped up in the memento back to the original workspace
+      virtual void applyActions() = 0;
+      
+    protected:
+
+      // Vector of elements describing a UB matrix.
+      std::vector<double> m_ub;
 
     private:
 
       /// Extract a friendly status.
       std::string interpretStatus(const Status arg) const;
 
-      // Vector of elements describing a UB matrix.
-      std::vector<double> m_ub;
+      
 
       // Goniometer matrix
       Mantid::Kernel::DblMatrix m_goniometer;

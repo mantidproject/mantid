@@ -51,6 +51,11 @@ public:
   {
     throw std::runtime_error("Not implemented");
   }
+
+  virtual void applyActions()
+  {
+    throw std::runtime_error("Not implemented");
+  }
 };
 
 

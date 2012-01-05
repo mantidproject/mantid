@@ -50,7 +50,7 @@ namespace CustomInterfaces
 {
 
 //Add this class to the list of specialised dialogs in this namespace
-//DECLARE_SUBWINDOW(CreateMDWorkspace); //TODO: Enable this to use it via mantid plot. Not ready for this yet!
+DECLARE_SUBWINDOW(CreateMDWorkspace); 
 
   /**
   Helper type to perform comparisons between WorkspaceMementos
@@ -308,6 +308,11 @@ void CreateMDWorkspace::setGoniometerClicked()
   try
   {
     WorkspaceMemento_sptr memento = getFirstSelected();
+    if(memento->locationType() != WorkspaceInADS::locType())
+    {
+      runConfirmation("Currently, Goniometer settings may only be applied to Workspace in memory");
+      return;
+    }
     Mantid::API::MatrixWorkspace_sptr ws = memento->fetchIt();
     QString id = QString(memento->getId().c_str());
 

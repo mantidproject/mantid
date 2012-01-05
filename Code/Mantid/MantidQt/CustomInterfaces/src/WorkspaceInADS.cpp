@@ -48,7 +48,7 @@ namespace MantidQt
     */
     std::string WorkspaceInADS::locationType() const
     {
-      return "In Memory";
+      return locType();
     }
 
     /**
@@ -79,6 +79,14 @@ namespace MantidQt
     /// Destructor
     WorkspaceInADS::~WorkspaceInADS()
     {
+    }
+
+    /*
+    Apply actions. Load workspace and apply all actions to it.
+    */
+    void WorkspaceInADS::applyActions()
+    {
+      //Do nothing.
     }
   }
 }

@@ -62,6 +62,19 @@ namespace MantidQt
       virtual void cleanUp();
       /// Destructor
       virtual ~WorkspaceOnDisk();
+
+      /*
+      Location type associated with this type.
+      @return string describing location
+      */
+      static std::string locType()
+      {
+        return "On Disk";
+      }
+
+      //Apply actions wrapped up in this memento.
+      virtual void applyActions();
+
     private:
       /// Helper method to delete a workspace out of memory after loading.
       void dumpIt(const std::string& name);

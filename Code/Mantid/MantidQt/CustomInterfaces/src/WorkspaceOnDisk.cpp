@@ -59,7 +59,7 @@ namespace MantidQt
       */
       std::string WorkspaceOnDisk::locationType() const
       {
-        return "On Disk";
+        return locType();
       }
 
       /**
@@ -84,15 +84,17 @@ namespace MantidQt
 
         checkStillThere();
 
-        IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadRaw");
-        alg->initialize();
-        alg->setRethrows(true);
-        alg->setProperty("Filename", m_fileName);
-        alg->setPropertyValue("OutputWorkspace", m_adsID);
-        alg->execute();
+        if(!AnalysisDataService::Instance().doesExist(m_adsID))
+        {
+          IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadRaw");
+          alg->initialize();
+          alg->setRethrows(true);
+          alg->setProperty("Filename", m_fileName);
+          alg->setPropertyValue("OutputWorkspace", m_adsID);
+          alg->execute();
+        }
+        Workspace_sptr ws = AnalysisDataService::Instance().retrieve(m_adsID);
 
-        Mantid::API::Workspace_sptr ws = AnalysisDataService::Instance().retrieve(m_adsID);
-        
         Mantid::API::WorkspaceGroup_sptr gws = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
         if(gws != NULL)
         {
@@ -123,6 +125,22 @@ namespace MantidQt
       void WorkspaceOnDisk::cleanUp()
       {
           dumpIt(m_adsID);
+      }
+
+      /*
+      Apply actions. Load workspace and apply all actions to it.
+      */
+      void WorkspaceOnDisk::applyActions()
+      {
+        Mantid::API::MatrixWorkspace_sptr ws = fetchIt();
+        
+        Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SetUB");
+        alg->initialize();
+        alg->setRethrows(true);
+        alg->setPropertyValue("Workspace", this->m_adsID);
+        alg->setProperty("UB", m_ub);
+        alg->execute();
+
       }
 
   }

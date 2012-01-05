@@ -64,8 +64,21 @@ namespace MantidQt
       {
       }
 
+      /*
+      Location type associated with this type.
+      @return string describing location
+      */
+      static std::string locType()
+      {
+        return "In Memory";
+      }
+
       /// Destructor
       virtual ~WorkspaceInADS();
+
+      //Apply actions wrapped up in this memento.
+      virtual void applyActions();
+
     private:
       /// Id/name of the workspace in the ADS
       std::string m_wsName;
