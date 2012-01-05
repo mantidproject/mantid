@@ -1,6 +1,7 @@
 #include "MantidQtCustomInterfaces/WorkspaceOnDisk.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include <iostream>
 #include <fstream>

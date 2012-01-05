@@ -1,5 +1,6 @@
 #include "MantidQtCustomInterfaces/WorkspaceInADS.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 
 using namespace Mantid::API;
