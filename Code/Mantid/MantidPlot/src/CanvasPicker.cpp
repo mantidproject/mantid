@@ -311,3 +311,8 @@ bool CanvasPicker::selectMarker(const QMouseEvent *e)
 	}
 	return false;
 }
+
+Graph *CanvasPicker::plot()
+{
+	return dynamic_cast<Graph *>(parent());
+}

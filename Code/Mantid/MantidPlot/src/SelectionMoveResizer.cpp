@@ -253,7 +253,7 @@ const QRect SelectionMoveResizer::handlerRect(QRect rect, Operation op)
 	}
 }
 
-QRect SelectionMoveResizer::operateOn(const QRect in)
+QRect SelectionMoveResizer::operateOn(const QRect &in)
 {
 	QRect boundary_out = d_bounding_rect;
 	switch (d_op) {
@@ -511,4 +511,14 @@ bool SelectionMoveResizer::eventFilter(QObject *o, QEvent *e)
 		default:
 			return false;
 	}
+}
+
+void SelectionMoveResizer::removeWidget(QObject* w)
+{
+	removeAll((QWidget*) w);
+}
+
+void SelectionMoveResizer::removeLegend(QObject* w)
+{
+	removeAll((LegendWidget*) w);
 }

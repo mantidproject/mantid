@@ -67,7 +67,7 @@ private:
 	 *
 	 * %Note that contrary to the method name, this does NOT return the Plot I operate on.
 	 */
-	Graph *plot() { return (Graph *)parent(); }
+	Graph *plot();
 
 	/**
 	 * \brief The Plot I handle user interaction for.
