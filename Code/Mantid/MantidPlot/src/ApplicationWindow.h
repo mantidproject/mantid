@@ -89,7 +89,7 @@ class AssociationsDialog;
 class MantidMatrix;
 class FloatingWindow;
 
-// On Mac and Ubuntu 11 Unity the menubar must be shared between the main window and other floating windows.
+// On Mac (and Ubuntu 11 Unity) the menubar must be shared between the main window and other floating windows.
 #ifndef Q_OS_WIN32
   #define SHARED_MENUBAR
 #endif
@@ -1036,7 +1036,6 @@ public slots:
   void changeToDocked(MdiSubWindow* w);
   void removeFloatingWindow(FloatingWindow* w);
   FloatingWindow* getActiveFloating() const;
-  void showActiveWindowInTitle(); // temporary
   QMenuBar* myMenuBar();
 #ifdef SHARED_MENUBAR
   bool isMenuBarShared() const {return m_sharedMenuBar != NULL;}

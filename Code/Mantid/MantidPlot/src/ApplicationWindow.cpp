@@ -215,13 +215,11 @@ blockWindowActivation(false),
 #ifdef SHARED_MENUBAR
   if (settings.value("/General/SharedMenuBar",false).toBool())
   {
-    std::cerr << "Shared" << std::endl;
     m_sharedMenuBar = new QMenuBar(NULL);
     setMenuBar(m_sharedMenuBar);
   }
   else
   {
-    std::cerr << "Not shared" << std::endl;
     m_sharedMenuBar = NULL;
   }
 #endif
@@ -442,9 +440,6 @@ void ApplicationWindow::init(bool factorySettings)
     showFirstTimeSetup();
   }
 
-  QTimer *timer = new QTimer(this);
-  connect(timer,SIGNAL(timeout()),this,SLOT(showActiveWindowInTitle()));
-  timer->start(100);
 }
 
 void ApplicationWindow::showLogWindowContextMenu(const QPoint & p)
@@ -5938,7 +5933,6 @@ void ApplicationWindow::renameWindow(Q3ListViewItem *item, int, const QString &t
 bool ApplicationWindow::setWindowName(MdiSubWindow *w, const QString &text)
 {
 
-  std::cerr << "setWindowName:" << text.toStdString() << std::endl;
   if (!w)
     return false;
 
@@ -8368,35 +8362,15 @@ void ApplicationWindow::activateWindow(MdiSubWindow *w)
 
   if( d_active_window == w ) return;
 
-  //FloatingWindow* fw = getActiveFloating();
-  //if (fw)
-  //{
-  //  blockWindowActivation = true;
-  //  removeStaysOnTopFlag(fw);
-  //  blockWindowActivation = false;
-  //}
-  
   d_active_window = w;
 
   if (!w) return;
 
-  //fw = getActiveFloating();
-  //if (fw)
-  //{
-  //  blockWindowActivation = true;
-  //  setStaysOnTopFlag(fw);
-  //  blockWindowActivation = false;
-  //}
-
   QMdiSubWindow* qw = dynamic_cast<QMdiSubWindow*>(w->parent());
-  //if (qw)
-  //{
-    w->setNormal();
-  //}
+  w->setNormal();
 
   updateWindowLists(w);
 
-  //----------------------------------------------------
   customToolBars(w);
   customMenu(w);
 
@@ -8418,7 +8392,16 @@ void ApplicationWindow::activateWindow(MdiSubWindow *w)
     f->setActiveWindow(w);
 
   blockWindowActivation = true;
-  w->parentWidget()->setFocus();
+  //w->parentWidget()->setFocus();
+  FloatingWindow* fw = d_active_window->getFloatingWindow();
+  if (fw)
+  {
+    fw->activateWindow();
+  }
+  else
+  {
+    QMainWindow::activateWindow();
+  }
   blockWindowActivation = false;
 
   emit modified();
@@ -8946,24 +8929,6 @@ void ApplicationWindow::windowsMenuActivated( int id )
   if ( w )
   {
     this->activateWindow(w);
-    //QMdiSubWindow* mdi = dynamic_cast<QMdiSubWindow*>(w->parent());
-    //if (mdi)
-    //{
-    //  mdi->showNormal();
-    //  mdi->setFocus();
-    //  if(hidden(w)){
-    //    hiddenWindows->takeAt(hiddenWindows->indexOf(w));
-    //    setListView(w->objectName(), tr("Normal"));
-    //  }
-    //}
-    //else
-    //{// floating window
-    //  QMdiSubWindow* mdi = dynamic_cast<QMdiSubWindow*>(d_active_window->parent());
-    //  if (mdi)
-    //  {
-    //    mdi->clearFocus();
-    //  }
-    //}
   }
 }
 
@@ -17410,19 +17375,6 @@ void ApplicationWindow::mdiWindowActivated(MdiSubWindow* w)
  */
 void ApplicationWindow::updateOnTopFlags()
 {
-}
-
-void ApplicationWindow::showActiveWindowInTitle()
-{
-  if (d_active_window)
-  {
-    QString title = d_active_window->name();
-    this->setWindowTitle(title);
-  }
-  else
-  {
-    this->setWindowTitle("No active window");
-  }
 }
 
 /**

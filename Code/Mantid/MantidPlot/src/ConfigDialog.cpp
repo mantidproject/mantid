@@ -605,27 +605,27 @@ void ConfigDialog::initAppPage()
   floatLayout->addWidget(floatBox);
   QGridLayout *floatPageLayout = new QGridLayout(floatBox);
   
-  boxFloatingGraph = new QCheckBox("Floating Graphs");
+  boxFloatingGraph = new QCheckBox("Graphs");
   boxFloatingGraph->setChecked(app->settings.value("/General/FloatingWindows/MultiLayer",false).toBool());
   floatPageLayout->addWidget(boxFloatingGraph,0,0);
 
-  boxFloatingTable = new QCheckBox("Floating Tables");
+  boxFloatingTable = new QCheckBox("Tables");
   boxFloatingTable->setChecked(app->settings.value("/General/FloatingWindows/Table",false).toBool());
   floatPageLayout->addWidget(boxFloatingTable,1,0);
 
-  boxFloatingInstrumentWindow = new QCheckBox("Floating Instrument views");
+  boxFloatingInstrumentWindow = new QCheckBox("Instrument views");
   boxFloatingInstrumentWindow->setChecked(app->settings.value("/General/FloatingWindows/InstrumentWindow",false).toBool());
   floatPageLayout->addWidget(boxFloatingInstrumentWindow,2,0);
   
-  boxFloatingMantidMatrix = new QCheckBox("Floating MantidMatrix");
+  boxFloatingMantidMatrix = new QCheckBox("Mantid Matrices");
   boxFloatingMantidMatrix->setChecked(app->settings.value("/General/FloatingWindows/MantidMatrix",false).toBool());
   floatPageLayout->addWidget(boxFloatingMantidMatrix,3,0);
   
-  boxFloatingNote = new QCheckBox("Floating Notes");
+  boxFloatingNote = new QCheckBox("Notes");
   boxFloatingNote->setChecked(app->settings.value("/General/FloatingWindows/Note",false).toBool());
   floatPageLayout->addWidget(boxFloatingNote,4,0);
   
-  boxFloatingMatrix = new QCheckBox("Floating Matrix");
+  boxFloatingMatrix = new QCheckBox("Matrices");
   boxFloatingMatrix->setChecked(app->settings.value("/General/FloatingWindows/Matrix",false).toBool());
   floatPageLayout->addWidget(boxFloatingMatrix,5,0);
   

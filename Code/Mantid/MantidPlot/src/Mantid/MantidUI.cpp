@@ -357,13 +357,13 @@ bool MantidUI::menuAboutToShow(MdiSubWindow *w)
 
   if (w && w->isA("MantidMatrix"))
   {
-    appWindow()->menuBar()->insertItem(tr("3D &Plot"), appWindow()->plot3DMenu);
+    appWindow()->myMenuBar()->insertItem(tr("3D &Plot"), appWindow()->plot3DMenu);
     appWindow()->actionCopySelection->setEnabled(true);
     appWindow()->actionPasteSelection->setEnabled(false);
     appWindow()->actionClearSelection->setEnabled(false);
     appWindow()->plotMatrixBar->setEnabled (true);
 
-    appWindow()->menuBar()->insertItem(tr("&Workspace"),menuMantidMatrix);
+    appWindow()->myMenuBar()->insertItem(tr("&Workspace"),menuMantidMatrix);
     return true;
   }
 
@@ -1857,7 +1857,7 @@ void MantidUI::mantidMenuAboutToShow()
 
 void MantidUI::insertMenu()
 {
-  appWindow()->menuBar()->insertItem(tr("Man&tid"), mantidMenu);
+  appWindow()->myMenuBar()->insertItem(tr("Man&tid"), mantidMenu);
 }
 
 void MantidUI::clearAllMemory()
