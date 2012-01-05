@@ -64,7 +64,7 @@ namespace MDAlgorithms
   int SetMDUsingMask::version() const { return 1;};
   
   /// Algorithm's category for identification. @see Algorithm::category
-  const std::string SetMDUsingMask::category() const { return "Arithmetic";}
+  const std::string SetMDUsingMask::category() const { return "MDAlgorithms\\MDArithmetic";}
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm

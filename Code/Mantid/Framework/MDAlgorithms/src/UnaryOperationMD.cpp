@@ -38,7 +38,7 @@ namespace Mantid
     int UnaryOperationMD::version() const { return 1;};
 
     /// Algorithm's category for identification. @see Algorithm::category
-    const std::string UnaryOperationMD::category() const { return "Arithmetic";}
+    const std::string UnaryOperationMD::category() const { return "MDAlgorithms\\MDArithmetic";}
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.
