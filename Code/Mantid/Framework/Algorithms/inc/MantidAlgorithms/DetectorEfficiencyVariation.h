@@ -63,29 +63,22 @@ namespace Mantid
       virtual int version() const { return (1);}
 
     protected:
-	// Overridden Algorithm methods
-	void init();
-	void exec();
-      
-	/// Loads and checks the values passed to the algorithm
-	void retrieveProperties( API::MatrixWorkspace_sptr &whiteBeam1,
-				 API::MatrixWorkspace_sptr &whiteBeam2, double &vari,
-				 int &minSpec, int &maxSpec );
-	/// Apply the detector test criterion
-	int doDetectorTests(API::MatrixWorkspace_const_sptr counts1, 
-			    API::MatrixWorkspace_const_sptr counts2,
-			    const double average, double variation,
-			    const std::set<int> & badIndices);
+      // Overridden Algorithm methods
+      void init();
+      void exec();
 
-	/// the number of numbers on each line of the output file
-	static const int LINESIZE = 10;
+      /// Loads and checks the values passed to the algorithm
+      void retrieveProperties( API::MatrixWorkspace_sptr &whiteBeam1,
+          API::MatrixWorkspace_sptr &whiteBeam2, double &vari,
+          int &minSpec, int &maxSpec );
+      /// Apply the detector test criterion
+      int doDetectorTests(API::MatrixWorkspace_const_sptr counts1,
+          API::MatrixWorkspace_const_sptr counts2,
+          const double average, double variation);
 
     private:
       /// Sets documentation strings for this algorithm
       virtual void initDocs();
-      /// when this is set to false reading and writing to the detector map is disabled, 
-      /// this is done if there is no map in the workspace
-      bool m_usableMaskMap;
     };
 
   } // namespace Algorithm

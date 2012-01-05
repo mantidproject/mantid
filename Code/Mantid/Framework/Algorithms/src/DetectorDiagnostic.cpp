@@ -46,13 +46,10 @@ namespace Mantid
      */
     MatrixWorkspace_sptr 
     DetectorDiagnostic::integrateSpectra(MatrixWorkspace_sptr inputWS, 
-					 const int indexMin,
-					 const int indexMax,
-					 const double lower, 
-					 const double upper,
-					 const bool outputWorkspace2D)
+        const int indexMin, const int indexMax, const double lower, const double upper,
+        const bool outputWorkspace2D)
     {
-      g_log.information() << "Integrating input spectra.\n";
+      g_log.debug() << "Integrating input spectra.\n";
       // If the input spectra only has one bin, assume it has been integrated already
       // but we need to pass it to the algorithm so that a copy of the input workspace is
       // actually created to use for further calculations
@@ -65,6 +62,7 @@ namespace Mantid
       // pass inputed values straight to this integration trusting the checking done there
       childAlg->setProperty("RangeLower",  lower );
       childAlg->setProperty("RangeUpper", upper);
+      childAlg->setPropertyValue("IncludePartialBins", "1");
       childAlg->executeAsSubAlg();
 
       // Convert to 2D if desired, and if the input was an EventWorkspace.
@@ -88,23 +86,18 @@ namespace Mantid
      *  detectors and the results of divide by zero (infinite and NaN).  
      * The median is an average that is less affected by small numbers of very large values.
      * @param input :: A histogram workspace with one entry in each bin
-     * @param badIndices :: [Output] A set filled with indices to skip when performing tests
+     * @param excludeZeroes :: If true then zeroes will not be included in the median calculation
      * @return The median value of the histograms in the workspace that was passed to it
-     * @throw out_of_range if a value is incountered that is unbelievibly high or negative
+     * @throw out_of_range if a value is negative
      */
-    double DetectorDiagnostic::calculateMedian(const API::MatrixWorkspace_sptr input, 
-					       std::set<int> & badIndices)
+    double DetectorDiagnostic::calculateMedian(const API::MatrixWorkspace_sptr input, bool excludeZeroes)
     {
-      g_log.information("Calculating the median count rate of the spectra");
+      g_log.debug("Calculating the median count rate of the spectra");
 
-      // The median should only include "good" spectra, i.e. those not INF, NAN or without
-      // a detector
-      std::vector<double> goodValues;
+      std::vector<double> medianInput;
       const int nhists = static_cast<int>(input->getNumberHistograms());
       // The maximum possible length is that of workspace length
-      goodValues.reserve(nhists);
-      // Track the indices or the bad detectors so that we don't need to double check later
-      badIndices.clear();      
+      medianInput.reserve(nhists);
 
       PARALLEL_FOR1(input)
       for (int i = 0; i < nhists; ++i)
@@ -118,46 +111,27 @@ namespace Mantid
         }
         catch (Kernel::Exception::NotFoundError&)
         {
-          PARALLEL_CRITICAL(DetectorDiagnostic_median_a)
-          {
-            badIndices.insert(i);
-          }
           // Catch if no detector. Next line tests whether this happened - test placed
           // outside here because Mac Intel compiler doesn't like 'continue' in a catch
           // in an openmp block.
         }
-        // If no detector found, skip onto the next spectrum
-        if ( !det ) continue;
+        // If the detector is either not found, a monitor or is masked do not include it
+        if ( !det || det->isMonitor() || det->isMasked() ) continue;
 	
-        if( det->isMonitor() || det->isMasked() )
-        {
-          PARALLEL_CRITICAL(DetectorDiagnostic_median_b)
-          {
-            badIndices.insert(i);
-          }
-          continue;
-        }
-
         const double yValue = input->readY(i)[0];
-        // We shouldn't have negative numbers of counts, probably a SolidAngle correction problem
-        if ( yValue  < 0 )
+        if ( yValue  < 0.0 )
         {
-          g_log.debug() << "Negative count rate found for spectrum index " << i << std::endl;
           throw std::out_of_range("Negative number of counts found, could be corrupted raw counts or solid angle data");
         }
-        // There has been a divide by zero, likely to be due to a detector with zero solid angle
-        if( boost::math::isinf(yValue) || boost::math::isnan(yValue) )
+        if( boost::math::isnan(yValue) || boost::math::isinf(yValue) ||
+            (excludeZeroes && yValue < DBL_EPSILON)) // NaNs/Infs
         {
-          PARALLEL_CRITICAL(DetectorDiagnostic_median_c)
-          {
-            badIndices.insert(i);
-          }
           continue;
         }
         // Now we have a good value
         PARALLEL_CRITICAL(DetectorDiagnostic_median_d)
         {
-          goodValues.push_back(yValue);
+          medianInput.push_back(yValue);
         }
 
         PARALLEL_END_INTERUPT_REGION
@@ -165,8 +139,8 @@ namespace Mantid
       PARALLEL_CHECK_INTERUPT_REGION
 
       // We need a sorted array to calculate the median
-      std::sort(goodValues.begin(), goodValues.end());
-      double median = gsl_stats_median_from_sorted_data( &goodValues[0], 1, goodValues.size() );
+      std::sort(medianInput.begin(), medianInput.end());
+      double median = gsl_stats_median_from_sorted_data( &medianInput[0], 1, medianInput.size() );
 
       if ( median < 0 || median > DBL_MAX/10.0 )
       {

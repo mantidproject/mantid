@@ -126,7 +126,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(work_out = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("testdead_out")));
 
     const int numFailed2 = alg.getProperty("NumberOfFailures");
-    TS_ASSERT_EQUALS(numFailed2, 11); 
+    TS_ASSERT_EQUALS(numFailed2, 10);
 
     //Check the dead detectors found agrees with what was setup above
     for (int i=0; i< sizey; i++)
@@ -138,7 +138,7 @@ public:
       TS_ASSERT_THROWS_NOTHING(det = work_out->getDetector(i));
       bool maskExpected(false);
       // Spectra set up with yVeryDead fail low counts or yStrange fail on high
-      if ( i%2 == 0 || i == 19 )
+      if ( i%2 == 0 )
       {
         valExpected = maskValue;
         maskExpected = true;
@@ -159,7 +159,7 @@ public:
   void testExec_Event()
   {
     // Make a workspace with 50 pixels, 200 events per pixel.
-    EventWorkspace_sptr work_in = WorkspaceCreationHelper::CreateEventWorkspace2();
+    EventWorkspace_sptr work_in = WorkspaceCreationHelper::CreateEventWorkspace(50, 100, 100, 0.0, 1.0, 2, 1);
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(10);
     work_in->setInstrument(inst);
     DateAndTime run_start("2010-01-01");

@@ -79,20 +79,19 @@ namespace Mantid
       // The different steps of the calculation, all called by exec()
       /// Loads and checks the values passed to the algorithm
       void retrieveProperties();
-      /// Calculates the sum of soild angles of detectors for each histogram
+      /// Calculates the sum of solid angles of detectors for each histogram
       API::MatrixWorkspace_sptr getSolidAngles(int firstSpec, int lastSpec);
+      /// Mask the outlier values to get a better median value
+      void maskOutliers(const double median, API::MatrixWorkspace_sptr countsWS);
       /// Do the tests and mask those that fail
-      int doDetectorTests(const API::MatrixWorkspace_sptr countWorkspace, 
-			  API::MatrixWorkspace_sptr maskWS,
-			  const double average, 
-			  const std::set<int> & badIndices);
+      int doDetectorTests(const API::MatrixWorkspace_sptr countsWS, const double median);
 
       /// Input workspace
       API::MatrixWorkspace_sptr m_inputWS;
       /// The proportion of the median value below which a detector is considered under-reading
-      double m_Low;
+      double m_loFrac;
       /// The factor of the median value above which a detector is considered over-reading
-      double m_High;
+      double m_hiFrac;
       ///The index of the first spectrum to calculate
       int m_minSpec;
       /// The index of the last spectrum to calculate
@@ -101,9 +100,6 @@ namespace Mantid
       double m_rangeLower;
       /// End point for integration
       double m_rangeUpper;
-
-      /// the number of numbers on each line of the output file
-      static const int g_file_linesize = 10;
 
     };
 

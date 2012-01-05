@@ -159,7 +159,6 @@ void MaskDetectors::exec()
   std::vector<size_t>::const_iterator wit;
   for (wit = indexList.begin(); wit != indexList.end(); ++wit)
   {
-    //std::cout << "Masking wi " << *wit << std::endl;
     WS->maskWorkspaceIndex(*wit);
 
     //Progress
@@ -213,17 +212,17 @@ void MaskDetectors::appendToIndexListFromWS(std::vector<size_t>& indexList, cons
 {
   // Convert the vector of properties into a set for easy searching
   std::set<int64_t> existingIndices(indexList.begin(), indexList.end());
-  int numHistograms = getProperty("EndWorkspaceIndex");
-  if (numHistograms == EMPTY_INT() ) numHistograms = static_cast<int>(maskedWorkspace->getNumberHistograms());
-  int startHistograms = getProperty("StartWorkspaceIndex");
+  int endIndex = getProperty("EndWorkspaceIndex");
+  if (endIndex == EMPTY_INT() ) endIndex = static_cast<int>(maskedWorkspace->getNumberHistograms() - 1);
+  int startIndex = getProperty("StartWorkspaceIndex");
 
   
-  for (int64_t i = startHistograms; i < numHistograms; ++i)
+  for (int64_t i = startIndex; i <= endIndex; ++i)
   {
     IDetector_const_sptr det;
     try
     {
-      det = maskedWorkspace->getDetector(i-startHistograms);
+      det = maskedWorkspace->getDetector(i-startIndex);
     }
     catch(Exception::NotFoundError &)
     {

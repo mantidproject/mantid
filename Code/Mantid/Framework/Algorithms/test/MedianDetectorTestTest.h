@@ -68,21 +68,20 @@ public:
     const size_t numberOfSpectra = outputMat->getNumberHistograms();
     TS_ASSERT_EQUALS(numberOfSpectra, (int)Nhist);
     const int numFailed = alg.getProperty("NumberOfFailures");
-    TS_ASSERT_EQUALS(numFailed, 84);
+    TS_ASSERT_EQUALS(numFailed, 83);
     // the numbers below are threshold values that were found by trial and error running these tests
     const int firstGoodSpec = 36;
     const int lastGoodSpec = 95;
-    for (int lHist = 1; lHist <= firstGoodSpec; lHist++)
+    for (int lHist = 1; lHist < firstGoodSpec; lHist++)
     {
       TS_ASSERT_EQUALS(outputMat->readY(lHist).front(), BAD_VAL )
     }
-    for (int lHist=firstGoodSpec+1; lHist < THEMASKED-1; lHist++)
+    for (int lHist=firstGoodSpec; lHist < THEMASKED-1; lHist++)
     {
       TS_ASSERT_EQUALS(
         outputMat->readY(lHist).front(), GOOD_VAL );
     }
-    TS_ASSERT_EQUALS(
-        outputMat->readY(THEMASKED-1).front(), BAD_VAL )
+    TS_ASSERT_EQUALS(outputMat->readY(THEMASKED-1).front(), BAD_VAL )
     for (int lHist=THEMASKED; lHist <= lastGoodSpec; lHist++)
     {
       TS_ASSERT_EQUALS(
