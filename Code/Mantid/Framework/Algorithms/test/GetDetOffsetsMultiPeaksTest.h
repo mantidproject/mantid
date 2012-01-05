@@ -135,6 +135,7 @@ public:
         E[i] = 0.001;
       }
     }
+    AnalysisDataService::Instance().addOrReplace("temp_event_ws", WS);
   }
 
   void test_performance()
