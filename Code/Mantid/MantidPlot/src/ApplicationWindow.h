@@ -40,6 +40,7 @@ Description          : QtiPlot's main window
 #include <QBuffer>
 #include <QLocale>
 #include <QSet>
+#include <QSettings>
 #include "Table.h"
 #include "ScriptingEnv.h"
 #include "Scripted.h"
@@ -86,7 +87,12 @@ class ImageMarker;
 class TextEditor;
 class AssociationsDialog;
 class MantidMatrix;
+class FloatingWindow;
 
+// On Mac (and Ubuntu 11 Unity) the menubar must be shared between the main window and other floating windows.
+#ifdef Q_OS_MAC
+  #define SHARED_MENUBAR
+#endif
 
 namespace MantidQt
 {
@@ -180,6 +186,7 @@ public:
   QList<QToolBar *> toolBarsList();
 
   MdiSubWindow *activeWindow(WindowType type = NoWindow);
+  void addMdiSubWindow(MdiSubWindow *w, bool showNormal = true);
 
   int matrixUndoStackSize(){return d_matrix_undo_stack_size;};
   void setMatrixUndoStackSize(int size);
@@ -1024,10 +1031,32 @@ public slots:
   /// slot to execute download datafiles algorithm - called  from ICat interface
   void executeDownloadDataFiles(const std::vector<std::string>&,const std::vector<int64_t>&);
 
+  /// Activate a subwindow (docked or floating) other than current active one
+  void activateNewWindow();
+
+  FloatingWindow* addMdiSubWindowAsFloating(MdiSubWindow* w, QPoint pos = QPoint(0,0));
+  QMdiSubWindow* addMdiSubWindowAsDocked(MdiSubWindow* w);
+  void mdiWindowActivated(MdiSubWindow* w);
+  void changeToFloating(MdiSubWindow* w);
+  void changeToDocked(MdiSubWindow* w);
+  void removeFloatingWindow(FloatingWindow* w);
+  FloatingWindow* getActiveFloating() const;
+  QMenuBar* myMenuBar();
+#ifdef SHARED_MENUBAR
+  bool isMenuBarShared() const {return m_sharedMenuBar != NULL;}
+  void shareMenuBar(bool yes);
+#endif
+  void changeActiveToFloating();
+  void changeActiveToDocked();
+
 signals:
   void modified();
   void resultsContextMenu();
   void shutting_down();
+  //void changeToMDI(MdiSubWindow*);
+
+protected:
+  virtual bool event(QEvent * e);
 
 private:
   virtual QMenu * createPopupMenu(){return NULL;};
@@ -1042,6 +1071,7 @@ private:
   void openInstrumentWindow(const QStringList &list);
   /// this method saves the data on project save
   void savedatainNexusFormat(const std::string& wsName,const std::string & fileName);
+  void updateOnTopFlags();
 
 
   private slots:
@@ -1414,10 +1444,20 @@ private:
   /// Store a list of environments that cannot be used
   QSet<QString> m_bad_script_envs;
 
+  // Floating windows
+  QList<FloatingWindow*> m_floatingWindows;
+  // To block activating new window when a floating window is in process of resetting flags
+  bool blockWindowActivation;
+
+#ifdef SHARED_MENUBAR
+  QMenuBar* m_sharedMenuBar; ///< Pointer to the shared menubar
+#endif
+
   /// Exit code to set at application end
   int m_exitCode;
 
 public:
   MantidUI *mantidUI;
+  QSettings settings;
 };
 #endif

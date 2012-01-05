@@ -116,7 +116,7 @@ MultiLayer::MultiLayer(ApplicationWindow* parent, int layers, int rows, int cols
 	buttonsLine = new QHBoxLayout();
 	buttonsLine->addLayout(layerButtonsBox);
 	buttonsLine->addStretch();
-		buttonsLine->addLayout(waterfallBox);
+	buttonsLine->addLayout(waterfallBox);
 
 	canvas = new QWidget();
 
@@ -124,7 +124,12 @@ MultiLayer::MultiLayer(ApplicationWindow* parent, int layers, int rows, int cols
 	mainWidget->setAutoFillBackground(true);
 	mainWidget->setBackgroundRole(QPalette::Window);
 
+	//setAutoFillBackground(true);
+	//setBackgroundRole(QPalette::Window);
+
 	QVBoxLayout* layout = new QVBoxLayout(mainWidget);
+	//QVBoxLayout* layout = new QVBoxLayout(this);
+
 	layout->addLayout(buttonsLine);
 	layout->addWidget(canvas, 1);
 	layout->setMargin(0);
@@ -145,10 +150,14 @@ MultiLayer::MultiLayer(ApplicationWindow* parent, int layers, int rows, int cols
 	for (int i = 0; i < layers; i++)
 		addLayer();
 
-	setFocusPolicy(Qt::StrongFocus);
-	setFocus();
+	//setFocusPolicy(Qt::StrongFocus);
+	//setFocus();
 
   setAcceptDrops(true);
+}
+
+MultiLayer::~MultiLayer()
+{
 }
 
 Graph *MultiLayer::layer(int num)
@@ -221,7 +230,7 @@ void MultiLayer::activateGraph(LayerButton* button)
 		if (btn == button)
 		{
 			active_graph = (Graph*) graphsList.at(i);
-			active_graph->setFocus();
+			//active_graph->setFocus();
 			active_graph->raise();//raise layer on top of the layers stack
 			button->setOn(true);
       if( d_layers_selector )
@@ -246,7 +255,7 @@ void MultiLayer::setActiveGraph(Graph* g)
   if (!found) return;
 
 	active_graph = g;
-	active_graph->setFocus();
+	//active_graph->setFocus();
 
 	if (d_layers_selector)
   {
@@ -309,8 +318,8 @@ void MultiLayer::resizeLayers (QResizeEvent *re)
 	if (d_is_waterfall_plot)
 		updateWaterfalls();
 
-	emit modifiedPlot();
-	repaint();
+	//emit modifiedPlot();
+	//repaint();
 	QApplication::restoreOverrideCursor();
 }
 
@@ -979,8 +988,11 @@ void MultiLayer::connectLayer(Graph *g)
 
 bool MultiLayer::eventFilter(QObject *object, QEvent *e)
 {
-	if(e->type() == QEvent::Resize && object == (QObject *)canvas)
-		resizeLayers((QResizeEvent *)e);
+  if(e->type() == QEvent::Resize && object == (QObject *)canvas)
+  {
+    resizeLayers((QResizeEvent *)e);
+    return true;
+  }
   else if (e->type() == QEvent::MouseButtonPress )
   {
     if( object == (QObject *)canvas)
@@ -1018,7 +1030,7 @@ bool MultiLayer::eventFilter(QObject *object, QEvent *e)
     {
       removeLayerSelectionFrame();
     }
-}
+  }
 
 	return MdiSubWindow::eventFilter(object, e);
 }

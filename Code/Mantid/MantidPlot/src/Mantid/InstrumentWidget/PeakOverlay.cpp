@@ -3,6 +3,8 @@
 
 #include <QPainter>
 #include <QList>
+#include <cmath>
+#include <algorithm>
 
 QList<PeakMarker2D::Style> PeakOverlay::g_defaultStyles;
 

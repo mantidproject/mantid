@@ -170,7 +170,7 @@ Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
   c_keys = QVector<int>();
 
   setFocusPolicy(Qt::StrongFocus);
-  setFocusProxy(d_plot);
+  //setFocusProxy(d_plot);
   setMouseTracking(true );
 
 

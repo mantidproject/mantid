@@ -85,7 +85,7 @@ void Table::init(int rows, int cols)
       this, SLOT(moveColumn(int, int, int)));
 
   setFocusPolicy(Qt::StrongFocus);
-  setFocus();
+  //setFocus();
 
   for (int i=0; i<cols; i++){
     commands << "";
@@ -113,6 +113,8 @@ void Table::init(int rows, int cols)
 
   d_table->verticalHeader()->setResizeEnabled(false);
   d_table->verticalHeader()->installEventFilter(this);
+
+  d_table->installEventFilter(this);
 
   setWidget(d_table);
 
@@ -2664,6 +2666,7 @@ bool Table::eventFilter(QObject *object, QEvent *e)
       emit showContextMenu(false);
     else if (d_table->numCols() > 0 && d_table->numRows() > 0)
       emit showContextMenu(true);
+    return true;
   }
 
   return MdiSubWindow::eventFilter(object, e);
