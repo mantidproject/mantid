@@ -207,11 +207,11 @@ ApplicationWindow::ApplicationWindow(bool factorySettings)
 Scripted(ScriptingLangManager::newEnv(this)),
 blockWindowActivation(false),
 #ifdef Q_OS_MAC // Mac
-  settings(QSettings::IniFormat,QSettings::UserScope, "ISIS", "MantidPlot")
+  settings(QSettings::IniFormat,QSettings::UserScope, "ISIS", "MantidPlot"),
 #else
-  settings("ISIS", "MantidPlot")
+  settings("ISIS", "MantidPlot"),
 #endif
-: QMainWindow(), Scripted(ScriptingLangManager::newEnv(this)), m_exitCode(0)
+m_exitCode(0)
 {
   QCoreApplication::setOrganizationName("ISIS");
   QCoreApplication::setApplicationName("MantidPlot");
