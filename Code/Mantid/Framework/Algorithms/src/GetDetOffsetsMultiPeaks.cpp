@@ -115,67 +115,83 @@ namespace Mantid
       for (int wi=0;wi<nspec;++wi)
       {
         PARALLEL_START_INTERUPT_REGION
-        // Fit the peak
-        std::string par[3];
-        std::string inname = getProperty("InputWorkspace");
-        par[0] = inname;
-        std::ostringstream strwi;
-        strwi<<wi;
-        par[1] = strwi.str();
-        std::string peakPositions = getProperty("DReference");
-        par[2] = peakPositions;
-  
-        const gsl_multimin_fminimizer_type *T =
-        gsl_multimin_fminimizer_nmsimplex;
-        gsl_multimin_fminimizer *s = NULL;
-        gsl_vector *ss, *x;
-        gsl_multimin_function minex_func;
-  
-        // finally do the fitting
-  
-        size_t nopt = 1;
-        size_t iter = 0;
-        int status = 0;
-        double size;
-   
-        /* Starting point */
-        x = gsl_vector_alloc (nopt);
-        gsl_vector_set_all (x, 0.0);
-  
-        /* Set initial step sizes to 0.001 */
-        ss = gsl_vector_alloc (nopt);
-        gsl_vector_set_all (ss, 0.001);
-  
-        /* Initialize method and iterate */
-        minex_func.n = nopt;
-        minex_func.f = &Mantid::Algorithms::gsl_costFunction;
-        minex_func.params = &par;
-  
-        s = gsl_multimin_fminimizer_alloc (T, nopt);
-        gsl_multimin_fminimizer_set (s, &minex_func, x, ss);
-  
-        do
+        double offset = 0.0;
+        const int YLength = static_cast<int>(inputW->readY(wi).size());
+        const MantidVec& Y = inputW->readY(wi);
+        double sumY = 0.0;
+        for (int i = 0; i < YLength; i++) sumY += Y[i];
+        if (sumY < 1.e-30)
         {
-          iter++;
-          status = gsl_multimin_fminimizer_iterate(s);
-          if (status)
-            break;
-  
-          size = gsl_multimin_fminimizer_size (s);
-          status = gsl_multimin_test_size (size, 1e-4);
-  
+          // Dead detector will be masked
+          offset=1000.;
         }
-        while (status == GSL_CONTINUE && iter < 50);
-  
-        // Output summary to log file
-        std::string reportOfDiffractionEventCalibrateDetectors = gsl_strerror(status);
-        g_log.debug() << " Workspace Index = " << wi << 
-          " Method used = " << " Simplex" << 
-          " Iteration = " << iter << 
-          " Status = " << reportOfDiffractionEventCalibrateDetectors << 
-          " Minimize Sum = " << s->fval << 
-          " Offset   = " << gsl_vector_get (s->x, 0) << "  \n";
-        double offset = gsl_vector_get (s->x, 0);
+        else
+        {
+          // Fit the peak
+          std::string par[3];
+          std::string inname = getProperty("InputWorkspace");
+          par[0] = inname;
+          std::ostringstream strwi;
+          strwi<<wi;
+          par[1] = strwi.str();
+          std::string peakPositions = getProperty("DReference");
+          par[2] = peakPositions;
+    
+          const gsl_multimin_fminimizer_type *T =
+          gsl_multimin_fminimizer_nmsimplex;
+          gsl_multimin_fminimizer *s = NULL;
+          gsl_vector *ss, *x;
+          gsl_multimin_function minex_func;
+    
+          // finally do the fitting
+    
+          size_t nopt = 1;
+          size_t iter = 0;
+          int status = 0;
+          double size;
+     
+          /* Starting point */
+          x = gsl_vector_alloc (nopt);
+          gsl_vector_set_all (x, 0.0);
+    
+          /* Set initial step sizes to 0.001 */
+          ss = gsl_vector_alloc (nopt);
+          gsl_vector_set_all (ss, 0.001);
+    
+          /* Initialize method and iterate */
+          minex_func.n = nopt;
+          minex_func.f = &Mantid::Algorithms::gsl_costFunction;
+          minex_func.params = &par;
+    
+          s = gsl_multimin_fminimizer_alloc (T, nopt);
+          gsl_multimin_fminimizer_set (s, &minex_func, x, ss);
+    
+          do
+          {
+            iter++;
+            status = gsl_multimin_fminimizer_iterate(s);
+            if (status)
+              break;
+    
+            size = gsl_multimin_fminimizer_size (s);
+            status = gsl_multimin_test_size (size, 1e-4);
+    
+          }
+          while (status == GSL_CONTINUE && iter < 50);
+    
+          // Output summary to log file
+          std::string reportOfDiffractionEventCalibrateDetectors = gsl_strerror(status);
+          g_log.debug() << " Workspace Index = " << wi << 
+            " Method used = " << " Simplex" << 
+            " Iteration = " << iter << 
+            " Status = " << reportOfDiffractionEventCalibrateDetectors << 
+            " Minimize Sum = " << s->fval << 
+            " Offset   = " << gsl_vector_get (s->x, 0) << "  \n";
+          offset = gsl_vector_get (s->x, 0);
+          gsl_vector_free(x);
+          gsl_vector_free(ss);
+          gsl_multimin_fminimizer_free (s);
+        }
         double mask=1.0;
         if (std::abs(offset) > maxOffset)
         { 
@@ -198,9 +214,6 @@ namespace Mantid
             else maskWS->dataY((*pixel_to_wi)[*it])[0] = mask;
           }
         }
-        gsl_vector_free(x);
-        gsl_vector_free(ss);
-        gsl_multimin_fminimizer_free (s);
         prog.report();
         PARALLEL_END_INTERUPT_REGION
       }
@@ -248,6 +261,7 @@ namespace Mantid
       findpeaks->setProperty("PeakPositions", peakPositions);
       findpeaks->setProperty<std::string>("BackgroundType", "Linear");
       findpeaks->setProperty<bool>("HighBackground", true);
+      findpeaks->setProperty<int>("MaxGuessedPeakWidth",2);
       findpeaks->executeAsSubAlg();
       ITableWorkspace_sptr peakslist = findpeaks->getProperty("PeaksList");
       std::vector<double> peakPos = Kernel::VectorHelper::splitStringIntoVector<double>(peakPositions);
