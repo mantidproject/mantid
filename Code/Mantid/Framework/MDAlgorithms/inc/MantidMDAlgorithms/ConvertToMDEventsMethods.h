@@ -8,8 +8,7 @@ namespace Mantid
 {
 namespace MDAlgorithms
 {
-/** The macrodefinitions for ConvertToMDEvents function, making the conversion into the MD events and dynamic factories, dealing with 
-   * creation and managment of new MD Event workspaces as function of number of dimesnions.
+/** The macrodefinitions for ConvertToMDEvents function, making the conversion from  into the MD events 
    *
    * @date 11-10-2011
 
@@ -34,16 +33,16 @@ namespace MDAlgorithms
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
+// service variable used for efficient filling of the MD event WS  -> should be moved to configuration;
+#define SPLIT_LEVEL  1024
 
 
 
 //-----------------------------------------------
+// Method to process histohram workspace
 template<Q_state Q, AnalMode MODE, CnvrtUnits CONV>
-void 
-ConvertToMDEvents::processQND()
+void ConvertToMDEvents::processQND_HWS()
 {
-    // service variable used for efficient filling of the MD event WS  -> should be moved to configuration;
-    size_t SPLIT_LEVEL(1024);
     // counder for the number of events
     size_t n_added_events(0);
     // amount of work
@@ -66,14 +65,14 @@ ConvertToMDEvents::processQND()
     const size_t specSize = this->inWS2D->blocksize();    
     size_t nValidSpectra  = det_loc.det_id.size();
 
-    // take at least bufSize for efficiency
+    // take at least bufSize amout of data in one run for efficiency
     size_t buf_size     = ((specSize>SPLIT_LEVEL)?specSize:SPLIT_LEVEL);
     // allocate temporary buffer for MD Events data
-    std::vector<coord_t>  allCoord(n_dims*buf_size);
-    std::vector<coord_t>  Coord(n_dims);
-    std::vector<float>    sig_err(2*buf_size);
-    std::vector<uint16_t> run_index(buf_size);
-    std::vector<uint32_t> det_ids(buf_size);
+    std::vector<coord_t>  allCoord(n_dims*buf_size); // MD events coordinates buffer
+    std::vector<coord_t>  Coord(n_dims);             // coordinates for single event
+    std::vector<float>    sig_err(2*buf_size);       // array for signal and error. 
+    std::vector<uint16_t> run_index(buf_size);       // Buffer run index for each event 
+    std::vector<uint32_t> det_ids(buf_size);         // Buffer of det Id-s for each event
 
 
     if(!trn.calcGenericVariables(Coord,n_dims))return; // if any property dimension is outside of the data range requested
@@ -109,7 +108,7 @@ ConvertToMDEvents::processQND()
 
             n_added_events++;
         } // end spectra loop
-        if(n_added_events>SPLIT_LEVEL){
+        if(n_added_events>=buf_size){
               pWSWrapper->addMDData(sig_err,run_index,det_ids,allCoord,n_added_events);
  
               n_added_events=0;
@@ -123,7 +122,13 @@ ConvertToMDEvents::processQND()
 
 }
 
+// Method to process event workspace
+template<Q_state Q, AnalMode MODE, CnvrtUnits CONV>
+void ConvertToMDEvents::processQND_EWS()
+{
+}
     
+
 
 
 } // endNamespace MDAlgorithms

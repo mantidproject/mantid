@@ -407,12 +407,14 @@ ConvertToMDEvents::identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS,
     }          
 
 
-    std::string Q_MODE_ID,DE_MODE_ID,CONV_MODE_ID;
+    std::string Q_MODE_ID,DE_MODE_ID,CONV_MODE_ID,WS_ID;
     int nQ_dims(0),ndE_dims(0);
-
+    // identify, what kind of input workspace is there:
+    WS_ID = parseWSType(inMatrixWS);
+    this->algo_id =WS_ID;
     // identify Q_mode
     Q_MODE_ID = parseQMode (Q_mode_req,ws_dim_names,ws_dim_units,out_dim_names,out_dim_units,nQ_dims);  
-    this->algo_id = Q_MODE_ID;
+    this->algo_id += Q_MODE_ID;
     // identify dE mode    
     DE_MODE_ID= parseDEMode(Q_MODE_ID,dE_mode_req,ws_dim_units,out_dim_names,out_dim_units,ndE_dims,subalgorithm_units);
     // identify conversion mode;
@@ -560,6 +562,33 @@ ConvertToMDEvents::parseQMode(const std::string &Q_mode_req,const Strings &ws_di
 
     }
     return Q_MODE_ID;
+}
+
+/** identify what kind of input workspace is provided as input argument
+ *
+ *@param inMatrixWS  a pointer to the workspace, obtained from analysis data service
+ *
+ *@returns   -- the ID of the workspace of one of the supported types. Throws if can not dynamiucally cast the pointer to the workspace:
+*/
+std::string 
+ConvertToMDEvents::parseWSType(API::MatrixWorkspace_const_sptr inMatrixWS)const
+{
+    
+    Workspace2D_const_sptr pWS2D = boost::static_pointer_cast<const DataObjects::Workspace2D>(inMatrixWS);
+    if(pWS2D){
+        return SupportedWS[Workspace2DType];
+    }
+    IEventWorkspace_const_sptr pWSEv= boost::static_pointer_cast<const IEventWorkspace>(inMatrixWS);
+    if(pWSEv){
+        return SupportedWS[EventWSType];
+    }
+    convert_log.error()<<" Unsupported workspace type provided. Currently supported types are:\n";
+    for(int i=0;i<NInWSTypes;i++){
+        convert_log.error()<<" WS ID: "<<SupportedWS[i];
+    }
+    convert_log.error()<<std::endl;
+    throw(std::invalid_argument("Unsupported worspace type provided"));
+    return "";
 }
 
 /** function processes the input arguments and tries to establish what subalgorithm should be deployed; 
@@ -773,7 +802,7 @@ ConvertToMDEvents::checkUVsettings(const std::vector<double> &ut,const std::vect
 // }
 //----------------------------------------------------------------------------------------------
 // AUTOINSTANSIATION OF EXISTING CODE:
-// Templated loop over some templated arguments
+// Templated loop over dependant templated arguments
 template<Q_state Q, size_t NumAlgorithms=0>
 class LOOP_ND{
 private:
@@ -785,10 +814,16 @@ private:
   public:
     static inline void EXEC(ConvertToMDEvents *pH){
                 
-            std::string Key = pH->Q_modes[Q]+pH->dE_modes[MODE]+pH->ConvModes[CONV];
+            std::string Key0=pH->Q_modes[Q]+pH->dE_modes[MODE]+pH->ConvModes[CONV];
 
+            std::string Key;
+            Key = pH->SupportedWS[Workspace2DType]+Key0;
             pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,
-                &ConvertToMDEvents::processQND<Q,static_cast<AnalMode>(MODE),static_cast<CnvrtUnits>(CONV)>));
+                &ConvertToMDEvents::processQND_HWS<Q,static_cast<AnalMode>(MODE),static_cast<CnvrtUnits>(CONV)>));
+
+            Key = pH->SupportedWS[EventWSType]+Key0;
+            pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,
+                &ConvertToMDEvents::processQND_EWS<Q,static_cast<AnalMode>(MODE),static_cast<CnvrtUnits>(CONV)>));
 //#ifdef _DEBUG
 //            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
 //#endif
@@ -809,10 +844,18 @@ private:
   public:
     static inline void EXEC(ConvertToMDEvents *pH){
                 
-            std::string Key = pH->Q_modes[NoQ]+pH->dE_modes[ANY_Mode]+pH->ConvModes[CONV];
+            std::string Key0 = pH->Q_modes[NoQ]+pH->dE_modes[ANY_Mode]+pH->ConvModes[CONV];
+            std::string Key;
 
+            Key = pH->SupportedWS[Workspace2DType]+Key0;
             pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,
-                                   &ConvertToMDEvents::processQND<NoQ,ANY_Mode,static_cast<CnvrtUnits>(CONV)>));
+                &ConvertToMDEvents::processQND_HWS<NoQ,ANY_Mode,static_cast<CnvrtUnits>(CONV)>));
+
+            Key = pH->SupportedWS[EventWSType]+Key0;
+            pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,
+                &ConvertToMDEvents::processQND_EWS<NoQ,ANY_Mode,static_cast<CnvrtUnits>(CONV)>));
+
+
 //#ifdef _DEBUG
 //            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
 //#endif
@@ -842,6 +885,7 @@ ConvertToMDEvents::ConvertToMDEvents():
 Q_modes(NQStates),
 dE_modes(4),
 ConvModes(NConvUintsStates),
+SupportedWS(NInWSTypes),
 // The conversion subalgorithm processes data in these units; 
 // Change of the units have to be accompanied by correspondent change in conversion subalgorithm
 native_elastic_unitID("Momentum"), 
@@ -859,6 +903,9 @@ native_inelastic_unitID("DeltaE")
      ConvModes[ConvFast]   = "CnvFast";
      ConvModes[ConvByTOF]  = "CnvByTOF";
      ConvModes[ConvFromTOF]= "CnvFromTOF";
+     //
+     SupportedWS[Workspace2DType] = "WS2D";
+     SupportedWS[EventWSType]     = "WSEvent";
 
 // Subalgorithm factories:
 // NoQ --> any Analysis mode will do as it does not depend on it; we may want to convert unuts
