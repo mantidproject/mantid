@@ -68,7 +68,6 @@ void SaveFocusedXYE::exec()
   const size_t nHist=inputWS->getNumberHistograms();
   const bool isHistogram = inputWS->isHistogramData();
   std::string filename = getProperty("Filename");
-  std::string inputWSName = getProperty("InputWorkspace");
  
   std::size_t pos=filename.find_first_of(".");
   std::string ext;

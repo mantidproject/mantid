@@ -231,7 +231,7 @@ int isisds_send_command(SOCKET s, const char* command, const void* data, ISISDSD
         (void) isisds_type_code; // Avoid compiler warning
         (void) isisds_type_name; // Avoid compiler warning
 
-	int i, n, len_data;
+  int n, len_data;
 	isisds_command_header_t comm;
 	memset(&comm, 0, sizeof(comm));
 	if (dims_array == NULL)
@@ -242,6 +242,7 @@ int isisds_send_command(SOCKET s, const char* command, const void* data, ISISDSD
 	}
 	else
 	{
+    int i;
 		len_data = 1;
 		comm.ndims = ndims;
 		for(i=0; i<ndims; i++)

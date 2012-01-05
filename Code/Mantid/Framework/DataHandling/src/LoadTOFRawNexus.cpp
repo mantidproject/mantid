@@ -258,9 +258,9 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
           std::vector<int> dims = file->getInfo().dims;
           file->closeData();
 
-          size_t newPixels = 1;
           if (!dims.empty())
           {
+            size_t newPixels = 1;
             for (size_t i=0; i < dims.size(); i++)
               newPixels *= dims[i];
             numPixels += newPixels;

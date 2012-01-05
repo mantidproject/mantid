@@ -367,16 +367,19 @@ namespace Mantid
     void LoadRawHelper::setWorkspaceProperty(const std::string& propertyName, const std::string& title,
       WorkspaceGroup_sptr grpws_sptr, DataObjects::Workspace2D_sptr ws_sptr,int64_t numberOfPeriods, bool bMonitor)
     {
+      UNUSED_ARG(bMonitor);
       Property *ws = getProperty("OutputWorkspace");
-          if(!ws) return;
-          if(!grpws_sptr) return;
-          if(!ws_sptr)return;
+      if(!ws) return;
+      if(!grpws_sptr) return;
+      if(!ws_sptr)return;
+      // FIXME: This isn't used, so is it really necessary?
+      /*
       std::string wsName = ws->value();
       if (bMonitor)
-          {
+      {
         wsName += "_Monitors";
-          }
-      
+      }
+      */
       ws_sptr->setTitle(title);
       ws_sptr->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
       if (numberOfPeriods > 1)
