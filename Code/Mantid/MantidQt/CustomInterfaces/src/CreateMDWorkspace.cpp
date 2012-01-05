@@ -289,7 +289,7 @@ void CreateMDWorkspace::addFileClicked()
   {
     try
     {
-      WorkspaceMemento_sptr candidate(new WorkspaceOnDisk(name));
+      WorkspaceMemento_sptr candidate(new RawFileMemento(name));
       addUniqueMemento(candidate);
     }
     catch(std::invalid_argument& arg)

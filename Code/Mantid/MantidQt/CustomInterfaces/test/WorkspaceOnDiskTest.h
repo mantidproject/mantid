@@ -12,7 +12,7 @@ using namespace MantidQt::CustomInterfaces;
 //using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 
-class WorkspaceOnDiskTest : public CxxTest::TestSuite
+class RawFileMementoTest : public CxxTest::TestSuite
 {
 private:
 
@@ -26,23 +26,23 @@ public:
   void testConstructorThrowsWithWrongExtension()
   {
     std::string badFile = "MAR11001.rrr"; //Fictional extension
-    TSM_ASSERT_THROWS("Unknown extension, should throw.", new WorkspaceOnDisk(badFile), std::invalid_argument);
+    TSM_ASSERT_THROWS("Unknown extension, should throw.", new RawFileMemento(badFile), std::invalid_argument);
   }
 
   void testFileExists()
   {
-    WorkspaceOnDisk memento(getSuitableFileNamePath());
+    RawFileMemento memento(getSuitableFileNamePath());
     TSM_ASSERT("File should be present", memento.checkStillThere()); 
   }
 
   void testConstructThrowsWhenFileDoesntExist()
   {
-    TSM_ASSERT_THROWS("Unknown file, should throw.", new WorkspaceOnDisk("MadeUp.raw"), std::runtime_error);
+    TSM_ASSERT_THROWS("Unknown file, should throw.", new RawFileMemento("MadeUp.raw"), std::runtime_error);
   }
 
   void testFetchItSucceedsWhenFileExists()
   {
-    WorkspaceOnDisk memento(getSuitableFileNamePath());
+    RawFileMemento memento(getSuitableFileNamePath());
     TSM_ASSERT("File should be present", memento.checkStillThere()); 
     MatrixWorkspace_sptr result = boost::dynamic_pointer_cast<MatrixWorkspace>(memento.fetchIt());
     TSM_ASSERT("Should have fetched the workspace", result);
@@ -50,13 +50,13 @@ public:
 
   void testNoExistingUB()
   {
-    WorkspaceOnDisk memento(getSuitableFileNamePath());
+    RawFileMemento memento(getSuitableFileNamePath());
     TS_ASSERT_EQUALS(WorkspaceMemento::NoOrientedLattice, memento.generateStatus());
   }
 
   void testApplyActions()
   {
-    WorkspaceOnDisk memento(getSuitableFileNamePath());
+    RawFileMemento memento(getSuitableFileNamePath());
     memento.setUB(0,0,2,0,4,0,-8,0,0);
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(memento.applyActions());
     std::vector<double> ub = ws->sample().getOrientedLattice().getUB().get_vector();

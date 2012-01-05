@@ -17,19 +17,19 @@ namespace MantidQt
       Constructor
       @param fileName : path + name of the file to load
       */
-      WorkspaceOnDisk::WorkspaceOnDisk(std::string fileName) : m_fileName(fileName)
+      RawFileMemento::RawFileMemento(std::string fileName) : m_fileName(fileName)
       {
         boost::regex pattern("(RAW)$", boost::regex_constants::icase); 
 
         if(!boost::regex_search(fileName, pattern))
         {
-          std::string msg = "WorkspaceOnDisk:: Unknown File extension on: " + fileName;
+          std::string msg = "RawFileMemento:: Unknown File extension on: " + fileName;
           throw std::invalid_argument(msg);
         }
 
         if(!checkStillThere())
         {
-          throw std::runtime_error("WorkspaceOnDisk:: File doesn't exist");
+          throw std::runtime_error("RawFileMemento:: File doesn't exist");
         }
 
         std::vector<std::string> strs;
@@ -51,7 +51,7 @@ namespace MantidQt
       Getter for the id of the workspace
       @return the id of the workspace
       */
-      std::string WorkspaceOnDisk::getId() const
+      std::string RawFileMemento::getId() const
       {
         return m_adsID;
       }
@@ -60,7 +60,7 @@ namespace MantidQt
       Getter for the type of location where the workspace is stored
       @ return the location type
       */
-      std::string WorkspaceOnDisk::locationType() const
+      std::string RawFileMemento::locationType() const
       {
         return locType();
       }
@@ -69,7 +69,7 @@ namespace MantidQt
       Check that the workspace has not been deleted since instantiating this memento
       @return true if still in specified location
       */
-      bool WorkspaceOnDisk::checkStillThere() const
+      bool RawFileMemento::checkStillThere() const
       {
         std::ifstream ifile;
         ifile.open(m_fileName.c_str(), std::ifstream::in);
@@ -81,7 +81,7 @@ namespace MantidQt
       @returns the matrix workspace
       @throw if workspace has been moved since instantiation.
       */
-      Mantid::API::Workspace_sptr WorkspaceOnDisk::fetchIt() const
+      Mantid::API::Workspace_sptr RawFileMemento::fetchIt() const
       {
         checkStillThere();
 
@@ -106,7 +106,7 @@ namespace MantidQt
       Dump the workspace out of memory:
       @name : name of the workspace to clean-out.
       */
-      void WorkspaceOnDisk::dumpIt(const std::string& name)
+      void RawFileMemento::dumpIt(const std::string& name)
       {
         if(AnalysisDataService::Instance().doesExist(name))
         {
@@ -115,12 +115,12 @@ namespace MantidQt
       }
 
       /// Destructor
-      WorkspaceOnDisk::~WorkspaceOnDisk()
+      RawFileMemento::~RawFileMemento()
       {
       }
 
       /// Clean up.
-      void WorkspaceOnDisk::cleanUp()
+      void RawFileMemento::cleanUp()
       {
           dumpIt(m_adsID);
       }
@@ -128,7 +128,7 @@ namespace MantidQt
       /*
       Apply actions. Load workspace and apply all actions to it.
       */
-      Mantid::API::Workspace_sptr WorkspaceOnDisk::applyActions()
+      Mantid::API::Workspace_sptr RawFileMemento::applyActions()
       {
         Mantid::API::Workspace_sptr ws = fetchIt();
         

@@ -7,8 +7,8 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    /** @class WorkspaceOnDisk
-    A workspace memento refering to a workspace in the Analysis Data Service.
+    /** @class RawFileMemento
+    A workspace memento refering to a Raw File on disk
 
     Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -30,13 +30,13 @@ namespace MantidQt
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport WorkspaceOnDisk : public WorkspaceMemento
+    class DLLExport RawFileMemento : public WorkspaceMemento
     {
     public:
       /**
       @param fileName : path + name of the file holding the workspace
       */
-      WorkspaceOnDisk(std::string fileName);
+      RawFileMemento(std::string fileName);
       /**
       Getter for the id of the workspace
       @return the id of the workspace
@@ -61,7 +61,7 @@ namespace MantidQt
       ///Clean-up operations
       virtual void cleanUp();
       /// Destructor
-      virtual ~WorkspaceOnDisk();
+      virtual ~RawFileMemento();
 
       /*
       Location type associated with this type.
