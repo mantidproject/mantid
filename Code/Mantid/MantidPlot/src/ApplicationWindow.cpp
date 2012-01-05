@@ -8392,7 +8392,6 @@ void ApplicationWindow::activateWindow(MdiSubWindow *w)
     f->setActiveWindow(w);
 
   blockWindowActivation = true;
-  //w->parentWidget()->setFocus();
   FloatingWindow* fw = d_active_window->getFloatingWindow();
   if (fw)
   {
@@ -8401,6 +8400,7 @@ void ApplicationWindow::activateWindow(MdiSubWindow *w)
   else
   {
     QMainWindow::activateWindow();
+    d_active_window->setFocus();
   }
   blockWindowActivation = false;
 
