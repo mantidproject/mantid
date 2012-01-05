@@ -973,7 +973,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   double bestcenter = 0;
   double bestheight = 0;
 
-  for (unsigned int iwidth = minGuessedPeakWidth; iwidth < maxGuessedPeakWidth; iwidth += stepGuessedPeakWidth){
+  for (unsigned int iwidth = minGuessedPeakWidth; iwidth <= maxGuessedPeakWidth; iwidth += stepGuessedPeakWidth){
     // a) Set up sub algorithm Fit
     IAlgorithm_sptr gfit;
     try
