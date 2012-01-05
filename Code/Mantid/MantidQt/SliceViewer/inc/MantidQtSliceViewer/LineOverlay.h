@@ -141,7 +141,7 @@ namespace SliceViewer
     QPointF m_dragStart_PointB;
 
     /// Marker that the middle mouse button is pressed (panning)
-    bool m_middleButton;
+    bool m_rightButton;
 
     /// Is snap-to-grid enabled?
     bool m_snapEnabled;
