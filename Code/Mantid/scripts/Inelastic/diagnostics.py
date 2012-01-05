@@ -11,200 +11,173 @@ masking and also passed to MaskDetectors to match masking there.
 from mantidsimple import *
 import CommonFunctions as common
 
-def diagnose(white_run, sample_run=None, other_white=None, remove_zero=None, 
-             tiny=None, large=None, median_lo=None, median_hi=None, signif=None, 
-             bkgd_threshold=None, bkgd_range=None, variation=None,
-             bleed_test=False, bleed_maxrate=None, bleed_pixels=None,
-             hard_mask=None, print_results=False, inst_name=None):
-    """
-    Run diagnostics on the provided run and white beam files.
+class ArgumentParser(object):
+    
+    def __init__(self, keywords):
+        self.start_index = None # Make this more general for anything that is missing!
+        self.end_index = None
+        for key, value in keywords.iteritems():
+            setattr(self, key, value)
+            
+        
 
-    There are 4 possible tests, depending on the input given:
-      White beam diagnosis
-      Background tests
-      Second white beam
-      Bleed test
-    
-    Required inputs:
-    
-      white_run  - The run number or filepath of the white beam run
-    
-    Optional inputs:
-      sample_run - The run number or filepath of the sample run for the background test (default = None)
-      other_white   - If provided an addional set of tests is performed on this file. (default = None)
-      remove_zero - If true then zeroes in the data will count as failed (default = False)
-      tiny          - Minimum threshold for acceptance (default = 1e-10)
-      large         - Maximum threshold for acceptance (default = 1e10)
-      median_lo     - Fraction of median to consider counting low (default = 0.1)
-      median_hi     - Fraction of median to consider counting high (default = 3.0)
-      signif           - Counts within this number of multiples of the 
-                      standard dev will be kept (default = 3.3)
-      bkgd_threshold - High threshold for background removal in multiples of median (default = 5.0)
-      bkgd_range - The background range as a list of 2 numbers: [min,max]. 
-                   If not present then they are taken from the parameter file. (default = None)
-      variation  - The number of medians the ratio of the first/second white beam can deviate from
-                   the average by (default=1.1)
-      bleed_test - If true then the CreatePSDBleedMask algorithm is run
-      bleed_maxrate - If the bleed test is on then this is the maximum framerate allowed in a tube
-      bleed_pixels - If the bleed test is on then this is the number of pixels ignored within the
-                     bleed test diagnostic
-      hard_mask  - A file specifying those spectra that should be masked without testing
-      print_results - If True then the results are printed to std out
-      inst_name  - The name of the instrument to perform the diagnosis.
-                   If it is not provided then the default instrument is used (default = None)
+def diagnose(white_int, **kwargs):
     """
-    # Set the default instrument so that Mantid can search for the runs correctly, 
-    # but switch it back at the end
-    def_inst = mtd.settings["default.instrument"]
-    if inst_name == None:
-        inst_name = def_inst
-    elif inst_name != def_inst:
-        mtd.settings["default.instrument"] = inst_name
-    else: pass
+        Run diagnostics on the provided workspaces.
 
+        Required inputs:
+        
+          white_int  - A workspace, run number or filepath of a white beam run. If a run/file is given it
+                       simply loaded and integrated. A workspace is assumed to be prepared in it's integrated form
+        
+        Optional inputs:
+          start_index    - The index to start the diag
+          end_index    - The index to finish the diag
+          background_int - A workspace, run number or filepath of a sample run that has been integrated over the background region.
+                          If a run/file is given it simply loaded and integrated across the whole range
+          sample_counts - A workspace containing the total integrated counts from a sample run
+          second_white - If provided an additional set of tests is performed on this.
+          hard_mask  - A file specifying those spectra that should be masked without testing 
+          tiny        - Minimum threshold for acceptance 
+          huge       - Maximum threshold for acceptance
+          van_out_lo  - Lower bound defining outliers as fraction of median value 
+          van_out_hi  - Upper bound defining outliers as fraction of median value 
+          van_lo      - Fraction of median to consider counting low for the white beam diag 
+          van_hi      - Fraction of median to consider counting high for the white beam diag 
+          van_sig     - Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the
+                        difference with respect to the median value must also exceed this number of error bars 
+          samp_zero    - If true then zeroes in background are masked also
+          samp_lo      - Fraction of median to consider counting low for the background  diag 
+          samp_hi      - Fraction of median to consider counting high for the background diag
+          samp_sig     - Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the\n"
+                      "difference with respect to the median value must also exceed this number of error bars
+          variation  - The number of medians the ratio of the first/second white beam can deviate from
+                       the average by 
+          bleed_test - If true then the CreatePSDBleedMask algorithm is run
+          bleed_maxrate - If the bleed test is on then this is the maximum framerate allowed in a tube
+          bleed_pixels - If the bleed test is on then this is the number of pixels ignored within the
+                         bleed test diagnostic
+          print_results - If True then the results are printed to the screen
+    """
+    # Grab the arguments
+    parser = ArgumentParser(kwargs)
+    start_index = parser.start_index
+    end_index = parser.end_index
+    
     # Load the hard mask file if necessary
     hard_mask_spectra = ''
-    if hard_mask is not None:
+    if kwargs.get('hard_mask', None) is not None:
         hard_mask_spectra = common.load_mask(hard_mask)
 
     # Map the test number to the results
     # Each element is the mask workspace name then the number of failures
     test_results = [ [None, None], [None, None], [None, None], [None, None]]
-
-    ##
-    ## Accumulate the masking on this workspace
-    ##
-    # What shall we call the output
-    lhs_names = lhs_info('names')
-    if len(lhs_names) > 0:
-        diag_total_mask = lhs_names[0]
-    else:
-        diag_total_mask = 'diag_total_mask'
+    
 
     ##
     ## White beam Test
     ##
     white_counts = None
-    if white_run is not None and str(white_run) != '':
-        # Load and integrate
-        data_ws = common.load_run(white_run)
-        # Make sure we have a matrix workspace otherwise Integration() returns all zeros.
-        ConvertToMatrixWorkspace(data_ws, data_ws)
-        white_counts = Integration(data_ws, "__counts_white-beam").workspace()
-        MaskDetectors(white_counts, SpectraList=hard_mask_spectra)
+    if white_int is not None and str(white_int) != '':
+        # Hard mask
+        MaskDetectors(white_int, SpectraList=hard_mask_spectra)
         # Run first white beam tests
-        __white_masks, num_failed = \
-                      _do_white_test(white_counts, tiny, large, median_lo, median_hi, signif)
+        __white_masks, num_failed = _do_white_test(white_int, parser.tiny, parser.huge, 
+                                                   parser.van_out_lo, parser.van_out_hi,
+                                                   parser.van_lo, parser.van_hi, 
+                                                   parser.van_sig, start_index, end_index)
         test_results[0] = [str(__white_masks), num_failed]
-        diag_total_mask = CloneWorkspace(__white_masks, diag_total_mask).workspace()
+        _add_masking(white_int, __white_masks, start_index, end_index)
+        DeleteWorkspace(__white_masks)
     else:
         raise RuntimeError('Invalid input for white run "%s"' % str(white_run))
 
-    ##
-    ## Second white beam Test
-    ##
-    second_white_counts = None
-    if other_white is not None and str(other_white) != '':
-        # Load and integrate
-        data_ws = common.load_run(other_white)
-        second_white_counts = Integration(data_ws, "__counts_white-beam2").workspace()
-        MaskDetectors(white_counts, SpectraList=hard_mask_spectra)
-        # Run tests
-        __second_white_masks, num_failed = \
-                             _do_second_white_test(white_counts, second_white_counts,
-                                                   tiny, large, median_lo, median_hi,
-                                                   signif,variation)
-        test_results[1] = [str(__second_white_masks), num_failed]
-        # Accumulate
-        diag_total_mask += __second_white_masks
-
-    ##
-    ## Tests on the sample(s)
-    ##
-    if sample_run is not None and sample_run != '':
-        if type(sample_run) != list:
-            sample_run = [sample_run]
-        __bkgd_masks = None
-        __bleed_masks = None
-        bkgd_failures = 0
-        bleed_failures = 0
-        for sample in sample_run:
-            ## Background test
-            __bkgd_masks_i, failures = _do_background_test(sample, white_counts, second_white_counts,
-                                                           bkgd_range, bkgd_threshold, remove_zero, signif,
-                                                           hard_mask_spectra)
-            bkgd_failures += failures
-            __bkgd_masks = _accumulate(__bkgd_masks,__bkgd_masks_i)
-                
-            ## PSD Bleed Test
-            if type(bleed_test) == bool and bleed_test == True:
-                __bleed_masks_i, failures = _do_bleed_test(sample, bleed_maxrate, bleed_pixels)
-                bleed_failures += failures
-                __bleed_masks = _accumulate(__bleed_masks, __bleed_masks_i)
-
-        ## End of sample loop
-        test_results[2] = [str(__bkgd_masks), bkgd_failures]
-        diag_total_mask += __bkgd_masks
-        if __bleed_masks is not None:
-            test_results[3] = [str(__bleed_masks), bleed_failures]
-            diag_total_mask += __bleed_masks
-
-    ## End of background test
-
-    # Remove temporary workspaces
-    mtd.deleteWorkspace(str(white_counts))
-    if second_white_counts is not None:
-        mtd.deleteWorkspace(str(second_white_counts))
+    #
+    # Zero total count check for sample counts
+    #
+    if hasattr(parser, 'sample_counts'):
+        _add_masking(parser.sample_counts, white_int)
+        maskZero = FindDetectorsOutsideLimits(InputWorkspace=parser.sample_counts, OutputWorkspace='maskZero',
+                                              StartWorkspaceIndex=start_index, EndWorkspaceIndex=end_index,
+                                              LowThreshold=1e-10, HighThreshold=1e100).workspace()
+        _add_masking(white_int, maskZero, start_index, end_index)
+        DeleteWorkspace(maskZero)
+        
+    #
+    # Background check
+    #
+    if hasattr(parser, 'background_int'):
+        _add_masking(parser.background_int, white_int)
+        __bkgd_mask, failures = _do_background_test(parser.background_int, parser.samp_lo, 
+                                                    parser.samp_hi, parser.samp_sig, parser.samp_zero, start_index, end_index)
+        _add_masking(white_int, __bkgd_mask, start_index, end_index)
+        DeleteWorkspace(__bkgd_mask)
     
-    # Revert our default instrument changes if necessary
-    if inst_name != def_inst:
-        mtd.settings["default.instrument"] = def_inst
-
-    if print_results:
+    #
+    # Bleed test
+    #
+    if hasattr(parser, 'bleed_test') and parser.bleed_test:
+        if not hasattr(parser, 'sample_run'):
+            raise RuntimeError("Bleed test requested but the sample_run keyword has not been provided")
+        _bleed_masks, failures = _do_bleed_test(parser.sample_run, parser.bleed_maxrate, parser.bleed_pixels)
+        _add_masking(white_int, __bleed_masks)
+        DeleteWorkspace(_bleed_masks)
+    
+    if hasattr(parser, 'print_results') and parser.print_results:
         print_test_summary(test_results)
-    
-    # This will be a MaskWorkspace which contains the accumulation of all of the masks
-    return diag_total_mask
 
 #-------------------------------------------------------------------------------
 
-def _do_white_test(white_counts, tiny, large, median_lo, median_hi, signif):
+def _add_masking(input_ws, mask_ws, start_index=None, end_index=None):
+    """
+    Mask the Detectors on the input workspace that are masked 
+    on the mask_ws. Avoids a current bug in using MaskDetectors with a MaskedWorkspace in a loop 
+    """
+    #MaskDetectors(input_ws, MaskedWorkspace=mask_ws, StartWorkspaceIndex=start_index, EndWorkspaceIndex=end_index)
+    masked = ExtractMasking(mask_ws, '__tmp')
+    MaskDetectors(input_ws, DetectorList=masked.getPropertyValue("DetectorList"))
+    DeleteWorkspace(masked.workspace())
+
+#-------------------------------------------------------------------------------
+
+def _do_white_test(white_int, tiny, large, out_lo, out_hi, median_lo, median_hi, sigma, 
+                   start_index=None, end_index=None):
     """
     Run the diagnostic tests on the integrated white beam run
 
     Required inputs:
     
-      white_counts  - A workspace containing the integrated counts from a
-                      white beam vanadium run
-      tiny          - Minimum threshold for acceptance
-      large         - Maximum threshold for acceptance
-      median_lo     - Fraction of median to consider counting low
-      median_hi     - Fraction of median to consider counting high
-      signif        - Counts within this number of multiples of the 
-                      standard dev will be kept (default = 3.3)
+      white_int - An integrated workspace
+      tiny      - Minimum threshold for acceptance
+      large     - Maximum threshold for acceptance
+      out_lo    - Lower bound defining outliers as fraction of median value (default = 0.01)
+      out_hi    - Upper bound defining outliers as fraction of median value (default = 100.)
+      median_lo - Fraction of median to consider counting low
+      median_hi - Fraction of median to consider counting high
+      sigma     - Error criterion as a multiple of error bar
+                      
     """
     mtd.sendLogMessage('Running first white beam test')
 
-    # What shall we call the output
-    lhs_names = lhs_info('names')
-    if len(lhs_names) > 0:
-        ws_name = lhs_names[0]
-    else:
-        ws_name = '__do_white_test'
-
     # Make sure we are a MatrixWorkspace
-    ConvertToMatrixWorkspace(white_counts, white_counts)
+    ConvertToMatrixWorkspace(white_int, white_int)
     
     # The output workspace will have the failed detectors masked
-    range_check = FindDetectorsOutsideLimits(white_counts, ws_name, HighThreshold=large, LowThreshold=tiny)
-    median_test = MedianDetectorTest(white_counts, ws_name, SignificanceTest=signif,
-                                     LowThreshold=median_lo, HighThreshold=median_hi)
+    white_masks = FindDetectorsOutsideLimits(white_int, OutputWorkspace='white_masks', StartWorkspaceIndex=start_index,
+                                             EndWorkspaceIndex=end_index,
+                                             HighThreshold=large, LowThreshold=tiny)
+    MaskDetectors(white_int, MaskedWorkspace=white_masks.workspace(),StartWorkspaceIndex=start_index, EndWorkspaceIndex=end_index)
+    num_failed = white_masks['NumberOfFailures'].value
+    DeleteWorkspace(white_masks.workspace())
 
-    num_failed = range_check['NumberOfFailures'].value + median_test['NumberOfFailures'].value
+    white_masks = MedianDetectorTest(white_int, OutputWorkspace='white_masks', StartWorkspaceIndex=start_index,
+                                     EndWorkspaceIndex=end_index, SignificanceTest=sigma,
+                                     LowThreshold=median_lo, HighThreshold=median_hi, 
+                                     LowOutlier=out_lo, HighOutlier=out_hi, ExcludeZeroesFromMedian=False)
+    MaskDetectors(white_int, MaskedWorkspace=white_masks.workspace(), StartWorkspaceIndex=start_index, EndWorkspaceIndex=end_index)
+    num_failed += white_masks['NumberOfFailures'].value
 
-    maskWS = median_test.workspace()
-    MaskDetectors(white_counts, MaskedWorkspace=maskWS)
-    return maskWS, num_failed
+    return white_masks.workspace(), num_failed
 
 #-------------------------------------------------------------------------------
 
@@ -259,75 +232,24 @@ def _do_second_white_test(white_counts, comp_white_counts, tiny, large, median_l
 
 #------------------------------------------------------------------------------
 
-def _do_background_test(sample_run, white_counts, comp_white_counts, bkgd_range,
-                        bkgd_threshold, remove_zero, signif, hard_mask_spectra):
+def _do_background_test(background_int, median_lo, median_hi, sigma, mask_zero, 
+                        start_index=None, end_index=None):
     """
-    Run the background tests on the integrated sample run normalised by an
-    integrated white beam run
+    Run the background tests
 
     Required inputs:
-    
-      sample_run          - The run number or filepath of the sample run
-      white_counts        - A workspace containing the integrated counts from a
-                            white beam vanadium run
-      comp_white_counts - A second workspace containing the integrated counts from a
-                            different white beam vanadium run
-      bkgd_range          - The background range as a list of 2 numbers: [min,max]. 
-                            If not present then they are taken from the parameter file.
-      bkgd_threshold      - High threshold for background removal in multiples of median
-      remove_zero         - If true then zeroes in the data will count as failed (default = False)
-      signif              - Counts within this number of multiples of the 
-                            standard dev will be kept (default = 3.3)
-      prev_ma sks         - If present then this masking is applied to the sample run before the
-                            test is applied. It is expected as a MaskWorkspace
+      background_int - An integrated workspace
+      median_lo - Fraction of median to consider counting low
+      median_hi - Fraction of median to consider counting high
+      sigma     - Error criterion as a multiple of error bar
+      mask_zero - If True, zero background counts will be considered a fail
+
     """
     mtd.sendLogMessage('Running background count test')
-    # Load and integrate the sample using the defined background range. If none is given use the
-    # instrument defaults
-    data_ws = common.load_runs(sample_run)
-    instrument = data_ws.getInstrument()
-    if bkgd_range is None:
-        min_value = float(instrument.getNumberParameter('bkgd-range-min')[0])
-        max_value = float(instrument.getNumberParameter('bkgd-range-max')[0])
-    elif len(bkgd_range) != 2:
-        raise ValueError("The provided background range is incorrect. A list of 2 numbers is required.")
-    else:
-        min_value = bkgd_range[0]
-        if min_value is None:
-            float(instrument.getNumberParameter('bkgd-range-min')[0])
-        max_value = bkgd_range[1]
-        if max_value is None:
-            float(instrument.getNumberParameter('bkgd-range-max')[0])
-
-    # Get the total counts
-    sample_counts = Integration(data_ws, '__counts_mono-sample', RangeLower=min_value, \
-                                RangeUpper=max_value).workspace()
-
-    # Apply hard mask spectra and previous masking first
-    MaskDetectors(sample_counts, SpectraList=hard_mask_spectra, MaskedWorkspace=white_counts)
-    
-    # If we have another white beam then compute the harmonic mean of the counts
-    # The harmonic mean: 1/av = (1/Iwbv1 + 1/Iwbv2)/2
-    # We'll resuse the comp_white_counts workspace as we don't need it anymore
-    white_count_mean = white_counts
-    if comp_white_counts is not None:
-        MaskDetectors(sample_counts, MaskedWorkspace=comp_white_counts)
-        white_count_mean = (comp_white_counts * white_counts)/(comp_white_counts + white_counts)
-
-    # Make sure we have matrix workspaces before this division
-    ConvertToMatrixWorkspace(white_count_mean, white_count_mean)
-    ConvertToMatrixWorkspace(sample_counts, sample_counts)
-        
-    # Normalise the sample run
-    sample_counts = Divide(sample_counts, white_count_mean, sample_counts).workspace()
-    if comp_white_counts is not None:
-        mtd.deleteWorkspace(str(white_count_mean))
 
     # If we need to remove zeroes as well then set the the low threshold to a tiny positive number
-    if remove_zero:
-        low_threshold = 1e-40
-    else:
-        low_threshold = -1.0
+    if mask_zero:
+        median_lo = 1e-40
 
     # What shall we call the output
     lhs_names = lhs_info('names')
@@ -336,13 +258,13 @@ def _do_background_test(sample_run, white_counts, comp_white_counts, bkgd_range,
     else:
         ws_name = '__do_background_test'
 
-    median_test = MedianDetectorTest(sample_counts, ws_name, SignificanceTest=signif,\
-                                     LowThreshold=low_threshold, HighThreshold=bkgd_threshold)
-    # Remove temporary
-    mtd.deleteWorkspace(str(sample_counts))
+    mask_bkgd = MedianDetectorTest(InputWorkspace=background_int,  OutputWorkspace='mask_bkgd', 
+                                   StartWorkspaceIndex=start_index, EndWorkspaceIndex=end_index,
+                                   SignificanceTest=sigma, 
+                                   LowThreshold=median_lo, HighThreshold=median_hi, 
+                                   LowOutlier=0.0, HighOutlier=1e100, ExcludeZeroesFromMedian=True)
 
-    num_failed = median_test['NumberOfFailures'].value
-    return median_test.workspace(), num_failed
+    return mask_bkgd.workspace(), mask_bkgd['NumberOfFailures'].value
 
 #-------------------------------------------------------------------------------
 
@@ -376,23 +298,6 @@ def _do_bleed_test(sample_run, max_framerate, ignored_pixels):
     num_failed = bleed_test['NumberOfFailures'].value
     return bleed_test.workspace(), num_failed
 
-#-------------------------------------------------------------------------------
-
-def _accumulate(lhs, rhs):
-    """Essentially performs lhs += rhs for workspaces
-    but checks if the lhs is None first and just assigns the workspace over
-    """
-    if lhs is None:
-        lhs_names = lhs_info('names')
-        if len(lhs_names) == 0: 
-            raise RuntimeError('diagnostics._accumulate called without assignment of return value')
-        lhs = RenameWorkspace(rhs, lhs_names[0]).workspace()
-    else:
-        lhs += rhs
-        mtd.deleteWorkspace(str(rhs))                
-
-    return lhs
-    
 #-------------------------------------------------------------------------------
 
 def print_test_summary(test_results):
@@ -460,11 +365,6 @@ def get_failed_spectra_list(diag_workspace):
     if type(diag_workspace) == str:
         diag_workspace = mtd[diag_workspace]
 
-    if hasattr(diag_workspace, "getAxis") == False:
-        raise ValueError("Invalid input to get_failed_spectra_list. "
-                         "A workspace handle or name is expected")
-        
-    spectra_axis = diag_workspace.getAxis(1)
     failed_spectra = []
     for i in range(diag_workspace.getNumberHistograms()):
 	try:
@@ -472,6 +372,6 @@ def get_failed_spectra_list(diag_workspace):
 	except RuntimeError:
             continue
 	if det.isMasked():
-            failed_spectra.append(spectra_axis.spectraNumber(i))
+            failed_spectra.append(diag_workspace.getSpectrum(i).getSpectrumNo())
 
     return failed_spectra
