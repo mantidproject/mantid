@@ -136,10 +136,9 @@ using namespace Mantid::Kernel;
   */
 static void unrollCell(const mxArray *prhs, const mxArray* new_prhs[], int& new_nrhs)
 {
-	size_t j;
 	if (mxIsCell(prhs))
 	{
-		for(j=0; j < mxGetNumberOfElements(prhs); j++)
+    for(size_t j=0; j < mxGetNumberOfElements(prhs); j++)
 		{
 			unrollCell(mxGetCell(prhs, static_cast<int>(j)), new_prhs, new_nrhs);
 		}
