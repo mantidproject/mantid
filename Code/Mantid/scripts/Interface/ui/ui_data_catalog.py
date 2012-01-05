@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/data_catalog.ui'
 #
-# Created: Wed Nov 16 13:57:36 2011
+# Created: Thu Jan  5 16:52:14 2012
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -23,6 +23,7 @@ class Ui_Frame(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.data_set_table.sizePolicy().hasHeightForWidth())
         self.data_set_table.setSizePolicy(sizePolicy)
+        self.data_set_table.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
         self.data_set_table.setObjectName("data_set_table")
         self.data_set_table.setColumnCount(0)
         self.data_set_table.setRowCount(0)

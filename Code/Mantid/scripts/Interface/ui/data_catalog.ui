@@ -28,6 +28,9 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="selectionBehavior">
+      <enum>QAbstractItemView::SelectRows</enum>
+     </property>
     </widget>
    </item>
    <item>
