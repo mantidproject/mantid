@@ -43,6 +43,7 @@ set ( TEST_FILES
 # Python unit tests
 set ( TEST_PY_FILES 
 	test/ImportTest.py
+	test/GoniometerTest.py
 	test/PythonAlgorithmTest.py
 	test/MDHistoWorkspaceTest.py
 	test/NumpyTest.py

@@ -293,7 +293,7 @@ namespace Mantid
        .export_values(); 
 
 
-      class_< Geometry::GoniometerAxis, boost::noncopyable>("GoniometerAxis", no_init)
+      class_< Geometry::GoniometerAxis>("GoniometerAxis", no_init)
         .add_property("name", &Geometry::GoniometerAxis::name)
         .add_property("rotationaxis", &Geometry::GoniometerAxis::rotationaxis)
         .add_property("angle", &Geometry::GoniometerAxis::angle)
