@@ -206,12 +206,12 @@ ApplicationWindow::ApplicationWindow(bool factorySettings)
 : QMainWindow(), 
 Scripted(ScriptingLangManager::newEnv(this)),
 blockWindowActivation(false),
+m_exitCode(0),
 #ifdef Q_OS_MAC // Mac
-  settings(QSettings::IniFormat,QSettings::UserScope, "ISIS", "MantidPlot"),
+  settings(QSettings::IniFormat,QSettings::UserScope, "ISIS", "MantidPlot")
 #else
-  settings("ISIS", "MantidPlot"),
+  settings("ISIS", "MantidPlot")
 #endif
-m_exitCode(0)
 {
   QCoreApplication::setOrganizationName("ISIS");
   QCoreApplication::setApplicationName("MantidPlot");
@@ -15966,7 +15966,7 @@ void ApplicationWindow::cascade()
   QList<QMdiSubWindow*> windows = d_workspace->subWindowList(QMdiArea::StackingOrder);
   foreach (QMdiSubWindow *w, windows){
     w->setActiveWindow();
-    static_cast<MdiSubWindow*>(w)->setNormal();
+    dynamic_cast<MdiSubWindow*>(w)->setNormal();
     w->setGeometry(x, y, w->geometry().width(), w->geometry().height());
     w->raise();
     x += xoffset;

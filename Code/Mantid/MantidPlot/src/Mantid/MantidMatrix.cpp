@@ -718,6 +718,8 @@ QwtDoubleRect MantidMatrix::boundingRect()
 }
 
 //----------------------------------------------------------------------------
+MantidMatrixFunction::MantidMatrixFunction(MantidMatrix* wsm):m_matrix(wsm){}
+
 void MantidMatrixFunction::init()
 {
  if (!m_matrix->workspace()->getAxis(1))
