@@ -113,7 +113,8 @@ MantidQt::SliceViewer::SliceViewer* SliceViewerWindow::getSlicer()
     This is the main widget for controlling the 2D views
     and slice points.
    
-    @return a pointer to the SliceViewer widget.
+    Returns:
+        a pointer to the SliceViewer widget.
    
 %End
 
@@ -125,7 +126,8 @@ MantidQt::SliceViewer::LineViewer* SliceViewerWindow::getLiner()
     This is the widget for controlling the 1D line integration
     settings.
    
-    @return a pointer to the LineViewer widget.
+    Returns:
+        a pointer to the LineViewer widget.
    
 %End
 
@@ -190,8 +192,11 @@ void SliceViewer::setWorkspace(const QString & wsName)
     The workspace should be a MDHistoWorkspace or a MDEventWorkspace,
     with at least 2 dimensions.
    
-    @param wsName :: name of the MDWorkspace to look for
-    @throw std::runtime_error if the workspace is not found or is a MatrixWorkspace
+    Args:
+        wsName :: name of the MDWorkspace to look for
+    
+    Raises:
+        std::runtime_error if the workspace is not found or is a MatrixWorkspace
    
 %End
 
@@ -199,7 +204,9 @@ void SliceViewer::setWorkspace(const QString & wsName)
 %Docstring
 QString SliceViewer::getWorkspaceName()
 ---------------------------------------
-    @return the name of the workspace selected, or a blank string
+    
+    Returns:
+        the name of the workspace selected, or a blank string
     if no workspace is set.
    
 %End
@@ -210,7 +217,8 @@ void SliceViewer::showControls(bool visible)
 --------------------------------------------
     Programmatically show/hide the controls (sliders etc)
    
-    @param visible :: true if you want to show the controls.
+    Args:
+        visible :: true if you want to show the controls.
    
 %End
 
@@ -221,8 +229,11 @@ void SliceViewer::openFromXML(const QString & xml)
     Opens a workspace and sets the view and slice points
     given the XML from the MultiSlice view in XML format.
    
-    @param xml :: string describing workspace, slice point, etc.
-    @throw std::runtime_error if error in parsing XML
+    Args:
+        xml :: string describing workspace, slice point, etc.
+    
+    Raises:
+        std::runtime_error if error in parsing XML
    
 %End
 
@@ -239,7 +250,8 @@ void SliceViewer::setFastRender(bool fast)
    
     This redraws the screen.
    
-    @param fast :: true to use "fast" rendering mode.
+    Args:
+        fast :: true to use "fast" rendering mode.
    
 %End
 
@@ -253,7 +265,8 @@ bool SliceViewer::getFastRender()
     pixels to render. If false, each pixel on screen will be rendered.
     This is the most accurate view but the slowest.
    
-    @return True if the image is in "fast" rendering mode.
+    Returns:
+        True if the image is in "fast" rendering mode.
    
 %End
 
@@ -269,9 +282,12 @@ void SliceViewer::setXYDim(int indexX, int indexY)
    
     To be called from Python, primarily.
    
-    @param indexX :: index of the X dimension, from 0 to NDims-1.
-    @param indexX :: index of the Y dimension, from 0 to NDims-1.
-    @throw std::invalid_argument if an index is invalid or repeated.
+    Args:
+        indexX :: index of the X dimension, from 0 to NDims-1.
+        indexY :: index of the Y dimension, from 0 to NDims-1.
+    
+    Raises:
+        std::invalid_argument if an index is invalid or repeated.
    
 %End
 
@@ -281,9 +297,12 @@ void SliceViewer::setXYDim(const QString & dimX, const QString & dimY)
 ----------------------------------------------------------------------
     Set the dimensions that will be shown as the X and Y axes
    
-    @param dimX :: name of the X dimension. Must match the workspace dimension names.
-    @param dimY :: name of the Y dimension. Must match the workspace dimension names.
-    @throw std::runtime_error if the dimension name is not found.
+    Args:
+        dimX :: name of the X dimension. Must match the workspace dimension names.
+        dimY :: name of the Y dimension. Must match the workspace dimension names.
+    
+    Raises:
+        std::runtime_error if the dimension name is not found.
    
 %End
 
@@ -291,7 +310,9 @@ void SliceViewer::setXYDim(const QString & dimX, const QString & dimY)
 %Docstring
 int SliceViewer::getDimX()
 --------------------------
-    @return the index of the dimension that is currently
+    
+    Returns:
+        the index of the dimension that is currently
     being shown as the X axis of the plot.
    
 %End
@@ -300,7 +321,9 @@ int SliceViewer::getDimX()
 %Docstring
 int SliceViewer::getDimY()
 --------------------------
-    @return the index of the dimension that is currently
+    
+    Returns:
+        the index of the dimension that is currently
     being shown as the Y axis of the plot.
    
 %End
@@ -314,8 +337,9 @@ void SliceViewer::setSlicePoint(int dim, double value)
     Sets the slice point in the given dimension:
     that is, what is the position of the plane in that dimension
    
-    @param dim :: index of the dimension to change
-    @param value :: value of the slice point, in the units of the given dimension.
+    Args:
+        dim :: index of the dimension to change
+        value :: value of the slice point, in the units of the given dimension.
            This should be within the range of min/max for that dimension.
    
 %End
@@ -327,8 +351,9 @@ void SliceViewer::setSlicePoint(const QString & dim, double value)
     Sets the slice point in the given dimension:
     that is, what is the position of the plane in that dimension
    
-    @param dim :: name of the dimension to change
-    @param value :: value of the slice point, in the units of the given dimension.
+    Args:
+        dim :: name of the dimension to change
+        value :: value of the slice point, in the units of the given dimension.
            This should be within the range of min/max for that dimension.
    
 %End
@@ -339,8 +364,12 @@ double SliceViewer::getSlicePoint(int dim)
 ------------------------------------------
     Returns the slice point in the given dimension
    
-    @param dim :: index of the dimension
-    @return slice point for that dimension. Value has not significance for the X or Y display dimensions.
+    Args:
+        dim :: index of the dimension
+    
+    Returns:
+        slice point for that dimension. Value has no significance for the
+            X or Y display dimensions.
    
 %End
 
@@ -350,8 +379,12 @@ double SliceViewer::getSlicePoint(const QString & dim)
 ------------------------------------------------------
     Returns the slice point in the given dimension
    
-    @param dim :: name of the dimension
-    @return slice point for that dimension. Value has not significance for the X or Y display dimensions.
+    Args:
+        dim :: name of the dimension
+    
+    Returns:
+        slice point for that dimension. Value has no significance for the
+            X or Y display dimensions.
    
 %End
 
@@ -369,10 +402,11 @@ void SliceViewer::setXYLimits(double xleft, double xright, double ybottom, doubl
     You can flip the direction of the scale if you specify,
     e.g., xleft > xright.
    
-    @param xleft   :: x-value on the left side of the graph
-    @param xright  :: x-value on the right side of the graph
-    @param ybottom :: y-value on the bottom of the graph
-    @param ytop    :: y-value on the top of the graph
+    Args:
+        xleft   :: x-value on the left side of the graph
+        xright  :: x-value on the right side of the graph
+        ybottom :: y-value on the bottom of the graph
+        ytop    :: y-value on the top of the graph
    
 %End
 
@@ -380,14 +414,18 @@ void SliceViewer::setXYLimits(double xleft, double xright, double ybottom, doubl
 %Docstring
 QwtDoubleInterval SliceViewer::getXLimits()
 -------------------------------------------
-    @return Returns the [left, right] limits of the view in the X axis. 
+    
+    Returns:
+        Returns the [left, right] limits of the view in the X axis. 
 %End
 
   QwtDoubleInterval getYLimits() const;
 %Docstring
 QwtDoubleInterval SliceViewer::getYLimits()
 -------------------------------------------
-    @return Returns the [bottom, top] limits of the view in the Y axis. 
+    
+    Returns:
+        Returns the [bottom, top] limits of the view in the Y axis. 
 %End
 
   void zoomBy(double factor);
@@ -396,7 +434,8 @@ void SliceViewer::zoomBy(double factor)
 ---------------------------------------
     Zoom in or out, keeping the center of the plot in the same position.
    
-    @param factor :: double, if > 1 : zoom in by this factor.
+    Args:
+        factor :: double, if > 1 : zoom in by this factor.
                      if < 1 : it will zoom out.
    
 %End
@@ -410,8 +449,9 @@ void SliceViewer::setXYCenter(double x, double y)
     Use setXYLimits() to modify the size of the plot by setting the X/Y edges,
     or you can use zoomBy() to zoom in/out
    
-    @param x :: new position of the center in X
-    @param y :: new position of the center in Y
+    Args:
+        x :: new position of the center in X
+        y :: new position of the center in Y
    
 %End
 
@@ -434,7 +474,8 @@ void SliceViewer::loadColorMap(QString filename)
 ------------------------------------------------
     Load a color map from a file
    
-    @param filename :: file to open; empty to ask via a dialog box.
+    Args:
+        filename :: file to open; empty to ask via a dialog box.
    
 %End
 
@@ -444,10 +485,13 @@ void SliceViewer::setColorScale(double min, double max, bool log)
 -----------------------------------------------------------------
     Set the color scale limits and log mode via a method call.
    
-    @param min :: minimum value corresponding to the lowest color on the map
-    @param max :: maximum value corresponding to the highest color on the map
-    @param log :: true for a log color scale, false for linear
-    @throw std::invalid_argument if max < min or if the values are
+    Args:
+        min :: minimum value corresponding to the lowest color on the map
+        max :: maximum value corresponding to the highest color on the map
+        log :: true for a log color scale, false for linear
+    
+    Raises:
+        std::invalid_argument if max < min or if the values are
            inconsistent with a log color scale
    
 %End
@@ -458,8 +502,11 @@ void SliceViewer::setColorScaleMin(double min)
 ----------------------------------------------
     Set the minimum value corresponding to the lowest color on the map
    
-    @param min :: minimum value corresponding to the lowest color on the map
-    @throw std::invalid_argument if max < min or if the values are
+    Args:
+        min :: minimum value corresponding to the lowest color on the map
+    
+    Raises:
+        std::invalid_argument if max < min or if the values are
            inconsistent with a log color scale
    
 %End
@@ -470,8 +517,11 @@ void SliceViewer::setColorScaleMax(double max)
 ----------------------------------------------
     Set the maximum value corresponding to the lowest color on the map
    
-    @param max :: maximum value corresponding to the lowest color on the map
-    @throw std::invalid_argument if max < min or if the values are
+    Args:
+        max :: maximum value corresponding to the lowest color on the map
+    
+    Raises:
+        std::invalid_argument if max < min or if the values are
            inconsistent with a log color scale
    
 %End
@@ -482,8 +532,12 @@ void SliceViewer::setColorScaleLog(bool log)
 --------------------------------------------
     Set whether the color scale is logarithmic
    
-    @param log :: true for a log color scale, false for linear
-    @throw if the min/max values are inconsistent with a log color scale
+    Args:
+        log :: true for a log color scale, false for linear
+    
+    Raises:
+        std::invalid_argument if the min/max values are inconsistent
+           with a log color scale
    
 %End
 
@@ -491,21 +545,27 @@ void SliceViewer::setColorScaleLog(bool log)
 %Docstring
 double SliceViewer::getColorScaleMin()
 --------------------------------------
-    @return the value that corresponds to the lowest color on the color map 
+    
+    Returns:
+        the value that corresponds to the lowest color on the color map 
 %End
 
   double getColorScaleMax() const;
 %Docstring
 double SliceViewer::getColorScaleMax()
 --------------------------------------
-    @return the value that corresponds to the highest color on the color map 
+    
+    Returns:
+        the value that corresponds to the highest color on the color map 
 %End
 
   bool getColorScaleLog() const;
 %Docstring
 bool SliceViewer::getColorScaleLog()
 ------------------------------------
-    @return True if the color scale is in logarithmic mode 
+    
+    Returns:
+        True if the color scale is in logarithmic mode 
 %End
 
   void setColorScaleAutoFull();
@@ -596,8 +656,11 @@ MantidQt::SliceViewer::SliceViewer* WidgetFactory::createSliceViewer(const QStri
    
     Use WidgetFactory::createSliceViewerWindow to create a window combining both.
    
-    @param wsName :: name of the workspace to show. Optional, blank for no workspace.
-    @return the created SliceViewer *
+    Args:
+        wsName :: name of the workspace to show. Optional, blank for no workspace.
+    
+    Returns:
+        the created SliceViewer *
    
 %End
 

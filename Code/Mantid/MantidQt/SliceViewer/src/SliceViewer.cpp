@@ -1137,7 +1137,8 @@ void SliceViewer::setSlicePoint(int dim, double value)
 /** Returns the slice point in the given dimension
  *
  * @param dim :: index of the dimension
- * @return slice point for that dimension. Value has not significance for the X or Y display dimensions.
+ * @return slice point for that dimension. Value has no significance for the
+ *         X or Y display dimensions.
  */
 double SliceViewer::getSlicePoint(int dim) const
 {
@@ -1166,7 +1167,8 @@ void SliceViewer::setSlicePoint(const QString & dim, double value)
 /** Returns the slice point in the given dimension
  *
  * @param dim :: name of the dimension
- * @return slice point for that dimension. Value has not significance for the X or Y display dimensions.
+ * @return slice point for that dimension. Value has no significance for the
+ *         X or Y display dimensions.
  */
 double SliceViewer::getSlicePoint(const QString & dim) const
 {
@@ -1225,7 +1227,8 @@ void SliceViewer::setColorScaleMax(double max)
 /** Set whether the color scale is logarithmic
  *
  * @param log :: true for a log color scale, false for linear
- * @throw if the min/max values are inconsistent with a log color scale
+ * @throw std::invalid_argument if the min/max values are inconsistent
+ *        with a log color scale
  */
 void SliceViewer::setColorScaleLog(bool log)
 {
