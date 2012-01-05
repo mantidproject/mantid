@@ -930,9 +930,9 @@ namespace Mantid
       }
       else if (m_interval || m_bmspeclist)
       {
-        int msize = 0;
         if (m_interval)
         {
+          int msize = 0;
           std::vector<specid_t>::const_iterator itr1;
           for (itr1 = monitorSpecList.begin(); itr1 != monitorSpecList.end(); ++itr1)
           {

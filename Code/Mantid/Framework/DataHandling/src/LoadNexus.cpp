@@ -102,8 +102,12 @@ namespace Mantid
       // within the first NXentry.
       // If so, assume it is a Muon Nexus file (version 1) and pass to the LoadMuonNexus algorithm
       // Otherwise try LoadIsisNexus.
-      std::string dataName="analysis", muonTD="muonTD", pulsedTD="pulsedTD";
-      std::string value;
+
+      // FIXME: The following variable isn't used, but the above comments
+      // imply it should be.
+      //std::string dataName="analysis";
+
+      std::string muonTD="muonTD", pulsedTD="pulsedTD";
       std::vector<std::string> entryName,definition;
       int count= Mantid::NeXus::getNexusEntryTypes(m_filename,entryName,definition);
       if(count<=-1)

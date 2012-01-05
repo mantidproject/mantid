@@ -64,6 +64,7 @@ typedef struct
 	int ver_minor;
 	int pid;
 	int access_type; /* 0 =dae, 1 = crpt */
+  // cppcheck-suppress unusedStructMember
 	int pad[1];
 	char user[32];
 	char host[64];
@@ -134,7 +135,6 @@ SOCKET isisds_send_open(const char* host, ISISDSAccessMode access_type)
 	int setkeepalive = 1;
 	struct hostent *hostp;
 	struct sockaddr_in address;
-	int n;
 	char *comm, *comm_data;
 /*	int len_comm_data; */
 	isisds_open_t op;
@@ -169,7 +169,7 @@ SOCKET isisds_send_open(const char* host, ISISDSAccessMode access_type)
 	strncpy(op.user, "faa", sizeof(op.user));
 	strncpy(op.host, "localhost", sizeof(op.host));
 	op.len = sizeof(op);
-	if ( (n = send(s, (char*)&op, sizeof(op), 0)) != sizeof(op) )
+  if ( (send(s, (char*)&op, sizeof(op), 0)) != sizeof(op) )
 	{
 		closesocket(s);
 		return INVALID_SOCKET;
@@ -202,9 +202,8 @@ SOCKET isisds_send_open(const char* host, ISISDSAccessMode access_type)
  */
 int isisds_recv_open(SOCKET s, ISISDSAccessMode* access_type)
 {
-	int n;
 	isisds_open_t op;
-	if ( (n = recv_all(s, (char*)&op, sizeof(op), 0)) != sizeof(op) )
+  if ( (recv_all(s, (char*)&op, sizeof(op), 0)) != sizeof(op) )
 	{
 		return -1;
 	}
