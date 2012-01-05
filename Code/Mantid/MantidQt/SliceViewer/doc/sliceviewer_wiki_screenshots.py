@@ -16,15 +16,19 @@ ConvertToDiffractionMDWorkspace(InputWorkspace=ws+"_nxs", OutputWorkspace='HKL',
 import numpy
 from PyQt4 import Qt
 
-svw = plotSlice("hkl", slicepoint=[0,0, -19], colorscalelog=True, limits=[-6.5,-3.5, -2.5,0.5])
+svw = plotSlice("hkl", slicepoint=[0,0, -5], colorscalelog=True, limits=[-6.5,-3.5, -2.5,0.5])
+svw.setColorScaleAutoSlice()
 
 n = 0
-for L in numpy.arange(-5.1, -4.9, 0.01):
+for L in numpy.arange(-5.07, -4.9, 0.01):
 	svw.setSlicePoint(2, L)
+	Qt.QApplication.processEvents()
 	pix = Qt.QPixmap.grabWidget(svw._getHeldObject())
 	pix.save("/home/8oz/Code/Mantid/Code/Mantid/MantidQt/SliceViewer/doc/anim%02d.png" % n)
 	n = n + 1
 	
 import os
 # This requires imagemagick. Converts to a nifty animated gif.
-os.system("convert /home/8oz/Code/Mantid/Code/Mantid/MantidQt/SliceViewer/doc/anim*png /home/8oz/Code/Mantid/Code/Mantid/MantidQt/SliceViewer/doc/SliceViewer_SlicePoint_Animation.gif")
+os.system("convert /home/8oz/Code/Mantid/Code/Mantid/MantidQt/SliceViewer/doc/anim*.png /home/8oz/Code/Mantid/Code/Mantid/MantidQt/SliceViewer/doc/SliceViewer_SlicePoint_Animation.gif")
+
+closeAllSliceViewers()
