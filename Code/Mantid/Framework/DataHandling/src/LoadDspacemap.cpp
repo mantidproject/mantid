@@ -222,7 +222,6 @@ namespace DataHandling
 
     detid2det_map::const_iterator it;
     int numfinds = 0;
-    int nummisses = 0;
     g_log.notice() << "Input number of detectors = " << allDetectors.size() << std::endl;
 
     // Get detector information
@@ -350,7 +349,6 @@ namespace DataHandling
       }
       catch (std::invalid_argument & )
       {
-        nummisses += 1;
         g_log.notice() << "Misses Detector ID = " << detectorID << std::endl;
       }
     } // for

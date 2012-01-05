@@ -68,7 +68,7 @@ class PropChanger: public IPropertySettings
     // auxiliary function to obtain list of monitor's ID-s (allowed_values) from the host workspace;
    void  monitor_id_reader()const;
 public:
-    PropChanger(const IPropertyManager * algo,const std::string WSProperty,const std::string MonWSProperty,const std::string AllowAnySpectra):
+    PropChanger(const IPropertyManager * algo,const std::string &WSProperty,const std::string &MonWSProperty,const std::string &AllowAnySpectra):
       host_ws_name(WSProperty),host_monws_name(MonWSProperty), allow_any_spectra(AllowAnySpectra),host_algo(algo),is_enabled(true){}
   // if input to "
    bool isEnabled()const{

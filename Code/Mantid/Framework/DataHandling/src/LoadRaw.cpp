@@ -269,6 +269,7 @@ Kernel::Property*  LoadRaw::createPeriodLog(int period)const
      */
     bool LoadRaw::isAscii(const std::string & filename) const
     {
+      bool nonAscii = true;
       FILE* file = fopen(filename.c_str(), "rb");
       char data[256];
       char *pend = &data[fread(data, 1, sizeof(data), file)];
@@ -281,11 +282,14 @@ Kernel::Property*  LoadRaw::createPeriodLog(int period)const
         unsigned long ch = (unsigned long)*p;
         if( !(ch <= 0x7F) )
         {
-          return false;
+          nonAscii = false;
+          break;
+          //return false;
         }
-        
       }
-      return true;
+
+      fclose(file);
+      return nonAscii;
     }
 
     /// Validates the optional 'spectra to read' properties, if they have been set

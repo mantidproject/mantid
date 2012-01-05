@@ -63,7 +63,7 @@ namespace Crystal
     if (!ws)
       throw std::invalid_argument("Workspace given as input is invalid or not a PeaksWorkspace.");
 
-    std::string filename = getPropertyValue("Filename");
+    //std::string filename = getPropertyValue("Filename");
 
     throw std::runtime_error("NOT YET IMPLEMENTED."); //TODO!
     //ws->write(filename);

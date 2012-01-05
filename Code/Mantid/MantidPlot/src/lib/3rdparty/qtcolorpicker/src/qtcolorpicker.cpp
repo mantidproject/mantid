@@ -633,6 +633,7 @@ QColor ColorPickerPopup::color(int index) const
     if (index < 0 || index > (int) items.count() - 1)
         return QColor();
 
+    // cppcheck-suppress cstyleCast
     ColorPickerPopup *that = (ColorPickerPopup *)this;
     return that->items.at(index)->color();
 }
@@ -655,25 +656,25 @@ void ColorPickerPopup::exec()
 */
 void ColorPickerPopup::updateSelected()
 {
-    QLayoutItem *layoutItem;
-    int i = 0;
-    while ((layoutItem = grid->itemAt(i)) != 0) {
-	QWidget *w = layoutItem->widget();
-	if (w && w->inherits("ColorPickerItem")) {
-	    ColorPickerItem *litem = reinterpret_cast<ColorPickerItem *>(layoutItem->widget());
-	    if (litem != sender())
-		litem->setSelected(false);
-	}
-	++i;
+  QLayoutItem *layoutItem;
+  int i = 0;
+  while ((layoutItem = grid->itemAt(i)) != 0) {
+    QWidget *w = layoutItem->widget();
+    if (w && w->inherits("ColorPickerItem")) {
+      ColorPickerItem *litem = reinterpret_cast<ColorPickerItem *>(layoutItem->widget());
+      if (litem != sender())
+        litem->setSelected(false);
     }
+    ++i;
+  }
 
-    if (sender() && sender()->inherits("ColorPickerItem")) {
-	ColorPickerItem *item = (ColorPickerItem *)sender();
-	lastSel = item->color();
-	emit selected(item->color());
-    }
+  if (sender() && sender()->inherits("ColorPickerItem")) {
+    ColorPickerItem *item = dynamic_cast<ColorPickerItem *>(sender());
+    lastSel = item->color();
+    emit selected(item->color());
+  }
 
-    hide();
+  hide();
 }
 
 /*! \internal
@@ -821,26 +822,26 @@ QColor ColorPickerPopup::lastSelected() const
 */
 void ColorPickerPopup::showEvent(QShowEvent *)
 {
-    bool foundSelected = false;
-    for (int i = 0; i < grid->columnCount(); ++i) {
-	for (int j = 0; j < grid->rowCount(); ++j) {
-	    QWidget *w = widgetAt[j][i];
-	    if (w && w->inherits("ColorPickerItem")) {
-		if (((ColorPickerItem *)w)->isSelected()) {
-		    w->setFocus();
-		    foundSelected = true;
-		    break;
-		}
-	    }
-	}
+  bool foundSelected = false;
+  for (int i = 0; i < grid->columnCount(); ++i) {
+    for (int j = 0; j < grid->rowCount(); ++j) {
+      QWidget *w = widgetAt[j][i];
+      if (w && w->inherits("ColorPickerItem")) {
+        if ((static_cast<ColorPickerItem *>(w))->isSelected()) {
+          w->setFocus();
+          foundSelected = true;
+          break;
+        }
+      }
     }
+  }
 
-    if (!foundSelected) {
-	if (items.count() == 0)
-	    setFocus();
-	else
-	    widgetAt[0][0]->setFocus();
-    }
+  if (!foundSelected) {
+    if (items.count() == 0)
+      setFocus();
+    else
+      widgetAt[0][0]->setFocus();
+  }
 }
 
 /*!

@@ -933,7 +933,7 @@ namespace Mantid
 
       double TotBoundaryIntensities = 0;
       int nBoundaryCells = 0;
-      double T=0;
+
       for (int row = Attr[0]; row < Attr[0] + Attr[2]; row++)
         for (int col = Attr[1]; col < Attr[1] + Attr[3]; col++)
         {
@@ -951,7 +951,6 @@ namespace Mantid
           double intensity = histogram[chan];
           double variance = histoerrs[chan] * histoerrs[chan];
           
-          T+=intensity;
           yvalB.push_back(intensity);
           errB.push_back(1);
 

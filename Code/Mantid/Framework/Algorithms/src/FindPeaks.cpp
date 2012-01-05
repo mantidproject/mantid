@@ -1011,7 +1011,6 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
     // e) Fit and get result
     gfit->executeAsSubAlg();
 
-    std::string fitStatus = gfit->getProperty("OutputStatus");
     std::vector<double> params = gfit->getProperty("Parameters");
     std::vector<std::string> paramnames = gfit->getProperty("ParameterNames");
 

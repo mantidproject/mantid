@@ -296,7 +296,6 @@ namespace Mantid
           g_log.warning() << "Cannot open file "<<data.name<<"\n";
           return data;
         }
-        std::string ext = data.name.substr(i);
         try
         {
           API::IAlgorithm_sptr load = createSubAlgorithm("Load");
