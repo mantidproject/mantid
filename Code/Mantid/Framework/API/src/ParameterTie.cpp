@@ -80,7 +80,6 @@ namespace API
       throw std::runtime_error("Error in expresseion "+expr);
     }
 
-    std::string parName = m_function1->parameterName(m_function1->getParameterIndex(*this));
     // Create the template m_expression
     boost::regex rx("\\b(([[:alpha:]]|_)([[:alnum:]]|_|\\.)*)\\b(?!(\\s*\\())");
     std::string input = expr;

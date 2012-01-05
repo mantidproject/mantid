@@ -111,6 +111,7 @@ namespace Mantid
 
       // Fit all the spectra with a gaussian
       Progress prog(this, 0, 1.0, nspec);
+      // cppcheck-suppress syntaxError
       PRAGMA_OMP(parallel for schedule(dynamic, 1) )
       for (int wi=0;wi<nspec;++wi)
       {

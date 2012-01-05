@@ -859,11 +859,11 @@ namespace Mantid
           std::vector<Mantid::Kernel::Property*>::const_iterator itr;
           for (itr=props.begin();itr!=props.end();++itr)
           {
-
-
+            // cppcheck-suppress variableScope
+            int outWSCount=0;
             if(isWorkspaceProperty(*itr) )
             {
-                int outWSCount=0;
+
               if(isInputWorkspaceProperty(*itr))
               {
 

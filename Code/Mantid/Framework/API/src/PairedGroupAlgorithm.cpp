@@ -39,8 +39,6 @@ namespace Mantid
       std::vector<std::string> lhsWSGrp;
       std::vector<std::string> rhsWSGrp;
       bool bgroupExecStatus=true;
-      //flag used for checking failure of  all memebrs of the group
-      bool bgroupFailed=false;
       WorkspaceGroup_sptr outWSGrp= WorkspaceGroup_sptr(new WorkspaceGroup(false)); // Do not observe ADS notifications while constructing the group
       //get the lhs and rhs group vectors from properties
       getGroupNames(props,lhsWSGrp,rhsWSGrp);
@@ -86,7 +84,6 @@ namespace Mantid
               throw std::runtime_error("Execution failed for the algorithm "+this->name());
             }
             bgroupExecStatus=bgroupExecStatus&bStatus;
-            bgroupFailed=bgroupFailed || bStatus;
           }
         }
       }
@@ -102,15 +99,15 @@ namespace Mantid
         }
       
         for (;rhsItr!=rhsWSGrp.end();++rhsItr)
-        {	++nPeriod;
-        setTheProperties(alg,props,(*lhsItr),(*rhsItr),nPeriod,outWSGrp,blhsEqual,brhsEqual,bSimilarNames);
-        bStatus=alg->execute();
-        if(!bStatus)
         {
-          throw std::runtime_error("Execution failed for the algorithm "+this->name());
-        }
-        bgroupExecStatus=bgroupExecStatus&bStatus;
-        bgroupFailed=bgroupFailed || bStatus;
+          ++nPeriod;
+          setTheProperties(alg,props,(*lhsItr),(*rhsItr),nPeriod,outWSGrp,blhsEqual,brhsEqual,bSimilarNames);
+          bStatus=alg->execute();
+          if(!bStatus)
+          {
+            throw std::runtime_error("Execution failed for the algorithm "+this->name());
+          }
+          bgroupExecStatus=bgroupExecStatus&bStatus;
         }
       }
       else if (rhsWSGrp.size()==1)//if RHS is not a group workspace and LHS is a group workspace
@@ -124,22 +121,22 @@ namespace Mantid
          
         }
         for (;lhsItr!=lhsWSGrp.end();++lhsItr)
-        {	++nPeriod;
-        setTheProperties(alg,props,(*lhsItr),(*rhsItr),nPeriod,outWSGrp,blhsEqual,brhsEqual,bSimilarNames);
-        bStatus=alg->execute();
-        if(!bStatus)
         {
-          throw std::runtime_error("Execution failed for the algorithm "+this->name());
-        }
-        bgroupExecStatus=bgroupExecStatus && bStatus;
-        bgroupFailed=bgroupFailed || bStatus;
+          ++nPeriod;
+          setTheProperties(alg,props,(*lhsItr),(*rhsItr),nPeriod,outWSGrp,blhsEqual,brhsEqual,bSimilarNames);
+          bStatus=alg->execute();
+          if(!bStatus)
+          {
+            throw std::runtime_error("Execution failed for the algorithm "+this->name());
+          }
+          bgroupExecStatus=bgroupExecStatus && bStatus;
         }
       }
 
       if(bgroupExecStatus)
-	    {
+      {
         setExecuted(true);
-	    }
+      }
       outWSGrp->observeADSNotifications(true);
       m_notificationCenter.postNotification(new FinishedNotification(this,this->isExecuted()));
       return bStatus;
