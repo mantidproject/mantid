@@ -50,7 +50,7 @@ namespace MantidQt
       */
       std::string WorkspaceOnDisk::getId() const
       {
-        return m_fileName;
+        return m_adsID;
       }
 
       /**
@@ -84,15 +84,13 @@ namespace MantidQt
 
         checkStillThere();
 
-        if(!AnalysisDataService::Instance().doesExist(m_adsID))
-        {
-          IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadRaw");
-          alg->initialize();
-          alg->setRethrows(true);
-          alg->setProperty("Filename", m_fileName);
-          alg->setPropertyValue("OutputWorkspace", m_adsID);
-          alg->execute();
-        }
+        IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadRaw");
+        alg->initialize();
+        alg->setRethrows(true);
+        alg->setProperty("Filename", m_fileName);
+        alg->setPropertyValue("OutputWorkspace", m_adsID);
+        alg->execute();
+
         Workspace_sptr ws = AnalysisDataService::Instance().retrieve(m_adsID);
 
         Mantid::API::WorkspaceGroup_sptr gws = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);

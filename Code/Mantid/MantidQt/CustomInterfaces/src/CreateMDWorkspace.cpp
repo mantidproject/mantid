@@ -214,24 +214,22 @@ void CreateMDWorkspace::setUBMatrixClicked()
     QString pyInput =
       "from mantidsimple import *\n"
       "import sys\n"
-      "try:\n"
-      "    wsName='%1'\n"
-      "    SetUBDialog(Workspace=wsName)\n"
-      "    ws = mtd[wsName]\n"
-      "    lattice = ws.getSample().getOrientedLattice()\n"
-      "    ub = lattice.getUB()\n"
-      "    print '%(u00)d, %(u01)d, %(u02)d, %(u10)d, %(u11)d, %(u12)d, %(u20)d, %(u21)d, %(u22)d' "
-      "    % {'u00': ub[0][0], 'u01' : ub[0][1], 'u02' : ub[0][2], 'u10': ub[1][0], 'u11' : ub[1][1], 'u12' : ub[1][2], 'u20' : ub[2][0], 'u21' : ub[2][1], 'u22' : ub[2][2]}\n"
-      "except:\n"
-      "    print 'FAIL'\n";
+      "wsName='%1'\n"
+      "SetUBDialog(Workspace=wsName)\n"
+      "msg = 'ws is: ' + wsName\n"
+      "mtd.sendLogMessage(msg)\n"
+      "ws = mtd[wsName]\n"
+      "lattice = ws.getSample().getOrientedLattice()\n"
+      "ub = lattice.getUB()\n"
+      "print '%(u00)d, %(u01)d, %(u02)d, %(u10)d, %(u11)d, %(u12)d, %(u20)d, %(u21)d, %(u22)d' "
+      "% {'u00': ub[0][0], 'u01' : ub[0][1], 'u02' : ub[0][2], 'u10': ub[1][0], 'u11' : ub[1][1], 'u12' : ub[1][2], 'u20' : ub[2][0], 'u21' : ub[2][1], 'u22' : ub[2][2]}\n";
 
     pyInput = pyInput.arg(id);
     QString pyOutput = runPythonCode(pyInput).trimmed();
 
-    if ( pyOutput != "FAIL" )
+    QStringList ub = pyOutput.split(',');
+    if (ub.size() == 9 )
     {
-      std::cout << pyOutput.toStdString() << std::endl;
-      QStringList ub = pyOutput.split(',');
       memento->setUB(ub[0].toDouble(), ub[1].toDouble(), ub[2].toDouble(), ub[3].toDouble(), ub[4].toDouble(), ub[5].toDouble(), ub[6].toDouble(),  ub[7].toDouble(),  ub[8].toDouble());
       memento->cleanUp(); 
       m_model->update();
@@ -321,7 +319,7 @@ void CreateMDWorkspace::setGoniometerClicked()
       "import sys\n"
       "try:\n"
       "    wsName='%1'\n"
-      "    SetGoniometer(Workspace=wsName)\n"
+      "    SetGoniometerDialog(Workspace=wsName)\n"
       "    print 'SUCCESS'\n"
       "except:\n"
       "    print 'FAIL'\n";
