@@ -287,6 +287,12 @@ namespace Mantid
 
     void export_goniometer()
     {
+      enum_< Geometry::RotationSense>("RotationSense")
+       .value("CW", Geometry::CW)
+       .value("CCW", Geometry::CCW)
+       .export_values(); 
+
+
       class_< Geometry::GoniometerAxis, boost::noncopyable>("GoniometerAxis", no_init)
         .add_property("name", &Geometry::GoniometerAxis::name)
         .add_property("rotationaxis", &Geometry::GoniometerAxis::rotationaxis)
@@ -299,11 +305,11 @@ namespace Mantid
       .def( init< Geometry::Goniometer const & >(( arg("other") )) )    
       .def( "getR", &getR )
       .def( "axesInfo", &Geometry::Goniometer::axesInfo )  
-      .def( "pushAxis", &Geometry::Goniometer::pushAxis, ( arg("name"), arg("axisx"), arg("axisy"), arg("axisz"), arg("angle"), arg("CCW"), arg("angleUnit")=(int)(Geometry::angDegrees) ) )
-      .def( "setRotationAngle", (void ( Geometry::Goniometer::* )( std::string, double) ) (&Geometry::Goniometer::setRotationAngle), (arg("name"), arg("value") ) )
-      .def( "setRotationAngle", (void ( Geometry::Goniometer::* )( size_t, double) ) (&Geometry::Goniometer::setRotationAngle), (arg("axisnumber"), arg("value") ) )
-      .def( "getAxis", (Geometry::GoniometerAxis (Geometry::Goniometer::* )(std::string) ) (&Geometry::Goniometer::getAxis), (arg("axisname") ) )
-      .def( "getNumberAxes", (size_t ( Geometry::Goniometer::* )( std::string) ) (&Geometry::Goniometer::getNumberAxes), (arg("axisname") ) )
+      .def( "pushAxis", (void ( Geometry::Goniometer::* ) ( std::string, double, double, double, double, int, int)  )(&Geometry::Goniometer::pushAxis), ( arg("name"), arg("axisX"), arg("axisY"), arg("axisZ"), arg("angle"), arg("sense")=(int)(Geometry::CCW), arg("angleUnit")=(int)(Geometry::angDegrees) ) )
+      .def( "setRotationAngle", (void ( Geometry::Goniometer::* )( std::string, double) ) (&Geometry::Goniometer::setRotationAngle), (arg("name"), arg("angle") ) )
+      .def( "setRotationAngle", (void ( Geometry::Goniometer::* )( size_t, double) ) (&Geometry::Goniometer::setRotationAngle), (arg("axisNumber"), arg("angle") ) )
+      .def( "getAxis", (Geometry::GoniometerAxis (Geometry::Goniometer::* )(std::string) ) (&Geometry::Goniometer::getAxis), (arg("name") ) )
+      .def( "getNumberAxes", &Geometry::Goniometer::getNumberAxes, (arg("axisname") ) )
       .def( "makeUniversalGoniometer", (void ( Geometry::Goniometer::*)() ) (&Geometry::Goniometer::makeUniversalGoniometer) )
       .def( "getEulerAngles", (std::vector<double> ( Geometry::Goniometer::* )(std::string) ) (&Geometry::Goniometer::getEulerAngles), (arg("convention")=(std::string)("XYZ") ) )
       ;
