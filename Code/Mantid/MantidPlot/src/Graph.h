@@ -165,7 +165,7 @@ public:
                  Box, VectXYAM, VerticalSteps, ColorMap, GrayScale, ColorMapContour, Contour, Function, ImagePlot,User};
 
   //! Returns a pointer to the parent MultiLayer object.
-  MultiLayer *multiLayer(){return dynamic_cast<MultiLayer *>(this->parent()->parent()->parent());};
+  MultiLayer *multiLayer(){return (MultiLayer *) this->parent()->parent()->parent();};
 
   //! Change the active tool, deleting the old one if it exists.
   void setActiveTool(PlotToolInterface *tool);

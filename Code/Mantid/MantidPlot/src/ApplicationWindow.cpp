@@ -2134,7 +2134,7 @@ void ApplicationWindow::changeMatrixName(const QString& oldName, const QString& 
       QList<Graph *> layers = dynamic_cast<MultiLayer*>(w)->layersList();
       foreach(Graph *g, layers){
         for (int i=0; i<g->curves(); i++){
-          QwtPlotItem *sp = dynamic_cast<QwtPlotItem*>(g)->plotItem(i);
+          QwtPlotItem *sp = dynamic_cast<QwtPlotItem*>(g->plotItem(i));
           if (sp && sp->rtti() == QwtPlotItem::Rtti_PlotSpectrogram && sp->title().text() == oldName)
             sp->setTitle(newName);
         }
@@ -2159,11 +2159,11 @@ void ApplicationWindow::remove3DMatrixPlots(Matrix *m)
       foreach(Graph *g, layers){
         for (int i=0; i<g->curves(); i++){
           if (g->curveType(i) == Graph::Histogram){
-            QwtHistogram *h = dynamic_cast<QwtHistogram*>(g)->plotItem(i);
+            QwtHistogram *h = dynamic_cast<QwtHistogram*>(g->plotItem(i));
             if (h && h->matrix() == m)
               g->removeCurve(i);
           } else {
-            Spectrogram *sp = dynamic_cast<Spectrogram*>(g)->plotItem(i);
+            Spectrogram *sp = dynamic_cast<Spectrogram*>(g->plotItem(i));
             if (sp && sp->rtti() == QwtPlotItem::Rtti_PlotSpectrogram && sp->matrix() == m)
               g->removeCurve(i);
           }
@@ -2191,11 +2191,11 @@ void ApplicationWindow::updateMatrixPlots(MdiSubWindow *window)
       foreach(Graph *g, layers){
         for (int i=0; i<g->curves(); i++){
           if (g->curveType(i) == Graph::Histogram){
-            QwtHistogram *h = dynamic_cast<QwtHistogram*>(g)->plotItem(i);
+            QwtHistogram *h = dynamic_cast<QwtHistogram*>(g->plotItem(i));
             if (h && h->matrix() == m)
               h->loadData();
           } else {
-            Spectrogram *sp = dynamic_cast<Spectrogram*>(g)->plotItem(i);
+            Spectrogram *sp = dynamic_cast<Spectrogram*>(g->plotItem(i));
             if (sp && sp->rtti() == QwtPlotItem::Rtti_PlotSpectrogram && sp->matrix() == m)
               sp->updateData(m);
           }
@@ -7182,7 +7182,7 @@ void ApplicationWindow::showCurveWorksheet(Graph *g, int curveIndex)
     if (sp->matrix())
       sp->matrix()->showMaximized();
   } else if (dynamic_cast<PlotCurve*>(it)->type() == Graph::Function)
-    g->createTabledynamic_cast<PlotCurve*>(it);
+    g->createTable(dynamic_cast<PlotCurve*>(it));
   else {
     showTable(it->title().text());
     if (g->activeTool() && g->activeTool()->rtti() == PlotToolInterface::Rtti_DataPicker)
@@ -8059,7 +8059,7 @@ void ApplicationWindow::clearSelection()
     return;
 
   if (m->inherits("Table"))
-    dynamic_cast<Table*>(w)->clearSelection();
+    dynamic_cast<Table*>(m)->clearSelection();
   else if (m->isA("Matrix"))
     dynamic_cast<Matrix*>(m)->clearSelection();
   else if (m->isA("MultiLayer")){
@@ -8101,7 +8101,7 @@ void ApplicationWindow::copySelection()
     return;
 
     if (m->inherits("Table"))
-    dynamic_cast<Table*>(w)->copySelection();
+    dynamic_cast<Table*>(m)->copySelection();
   else if (m->isA("Matrix"))
     dynamic_cast<Matrix*>(m)->copySelection();
   else if (m->isA("MultiLayer")){
@@ -8145,7 +8145,7 @@ void ApplicationWindow::cutSelection()
     return;
 
   if (m->inherits("Table"))
-    dynamic_cast<Table*>(w)->cutSelection();
+    dynamic_cast<Table*>(m)->cutSelection();
   else if (m->isA("Matrix"))
     dynamic_cast<Matrix*>(m)->cutSelection();
   else if(m->isA("MultiLayer")){
@@ -8213,7 +8213,7 @@ void ApplicationWindow::pasteSelection()
     return;
 
   if (m->inherits("Table"))
-    dynamic_cast<Table*>(w)->pasteSelection();
+    dynamic_cast<Table*>(m)->pasteSelection();
   else if (m->isA("Matrix"))
     dynamic_cast<Matrix*>(m)->pasteSelection();
   else if (m->isA("Note"))
@@ -13952,7 +13952,7 @@ void ApplicationWindow::deleteFitTables()
 
   foreach(QWidget *ml, *mLst){
     if (ml->isA("MultiLayer")){
-      QList<Graph *> layers = (dynamic_cast<MultiLayer*>(m)l)->layersList();
+      QList<Graph *> layers = dynamic_cast<MultiLayer*>(ml)->layersList();
       foreach(Graph *g, layers){
         QList<QwtPlotCurve *> curves = g->fitCurvesList();
         foreach(QwtPlotCurve *c, curves){
