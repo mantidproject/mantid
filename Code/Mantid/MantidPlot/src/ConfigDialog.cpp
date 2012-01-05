@@ -604,32 +604,36 @@ void ConfigDialog::initAppPage()
   QGroupBox *floatBox = new QGroupBox();
   floatLayout->addWidget(floatBox);
   QGridLayout *floatPageLayout = new QGridLayout(floatBox);
+
+  QLabel* comment = new QLabel("Select types of windows to be floating by default.\n"
+    "You can use Windows menu to make a window floating or docked.");
+  floatPageLayout->addWidget(comment,0,0);
   
   boxFloatingGraph = new QCheckBox("Graphs");
   boxFloatingGraph->setChecked(app->settings.value("/General/FloatingWindows/MultiLayer",false).toBool());
-  floatPageLayout->addWidget(boxFloatingGraph,0,0);
+  floatPageLayout->addWidget(boxFloatingGraph,1,0);
 
   boxFloatingTable = new QCheckBox("Tables");
   boxFloatingTable->setChecked(app->settings.value("/General/FloatingWindows/Table",false).toBool());
-  floatPageLayout->addWidget(boxFloatingTable,1,0);
+  floatPageLayout->addWidget(boxFloatingTable,2,0);
 
   boxFloatingInstrumentWindow = new QCheckBox("Instrument views");
   boxFloatingInstrumentWindow->setChecked(app->settings.value("/General/FloatingWindows/InstrumentWindow",false).toBool());
-  floatPageLayout->addWidget(boxFloatingInstrumentWindow,2,0);
+  floatPageLayout->addWidget(boxFloatingInstrumentWindow,3,0);
   
   boxFloatingMantidMatrix = new QCheckBox("Mantid Matrices");
   boxFloatingMantidMatrix->setChecked(app->settings.value("/General/FloatingWindows/MantidMatrix",false).toBool());
-  floatPageLayout->addWidget(boxFloatingMantidMatrix,3,0);
+  floatPageLayout->addWidget(boxFloatingMantidMatrix,4,0);
   
   boxFloatingNote = new QCheckBox("Notes");
   boxFloatingNote->setChecked(app->settings.value("/General/FloatingWindows/Note",false).toBool());
-  floatPageLayout->addWidget(boxFloatingNote,4,0);
+  floatPageLayout->addWidget(boxFloatingNote,5,0);
   
   boxFloatingMatrix = new QCheckBox("Matrices");
   boxFloatingMatrix->setChecked(app->settings.value("/General/FloatingWindows/Matrix",false).toBool());
-  floatPageLayout->addWidget(boxFloatingMatrix,5,0);
+  floatPageLayout->addWidget(boxFloatingMatrix,6,0);
   
-  floatPageLayout->setRowStretch(6,1);
+  floatPageLayout->setRowStretch(7,1);
   appTabWidget->addTab(floatingWindowsPage, QString());
 
 	connect( boxLanguage, SIGNAL( activated(int) ), this, SLOT( switchToLanguage(int) ) );
