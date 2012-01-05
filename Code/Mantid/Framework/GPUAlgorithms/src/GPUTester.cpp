@@ -94,7 +94,6 @@ namespace GPUAlgorithms
 
     /* ------------------Create memory object for output ---------------  */
     float * outputValues = new float[numValues];
-    float * expectedValues = new float[numValues];
 
     cl::Buffer outputBuffer = cl::Buffer(context,
         CL_MEM_WRITE_ONLY, bufferSize,

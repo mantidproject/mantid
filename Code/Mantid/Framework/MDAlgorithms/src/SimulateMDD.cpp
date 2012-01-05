@@ -81,7 +81,6 @@ namespace Mantid
       const double fgparaP1 = getProperty("ForegroundModelP1");
       const double fgparaP2 = getProperty("ForegroundModelP2");
       const double fgparaP3 = getProperty("ForegroundModelP3");
-      std::string inputMDoutput = getProperty("OutputMDWorkspace");
 
       //boost::shared_ptr<Mantid::API::Workspace> inputWS = getProperty("InputWorkspaceTMP");
       imdwCut = boost::dynamic_pointer_cast<Mantid::API::IMDWorkspace>(AnalysisDataService::Instance().retrieve(inputMDwrkspc));
@@ -102,10 +101,10 @@ namespace Mantid
         //                weightSq=1./pow(imdwCut->getCell(i).getError(),2);
         //                residual+=pow(cellBg[i]-imdwCut->getCell(i).getSignal(),2)*weightSq;
         // get sig/err ignoring cell volume.
-        double sig=0,err2=0,err=0;
         size_t numEvents=it->getNumEvents();
         if(numEvents>0)
         {
+          double sig=0,err2=0,err=0;
           for(size_t j=0;j<numEvents;j++)
           {
             sig+= it->getInnerSignal(j);
@@ -133,11 +132,11 @@ namespace Mantid
       // loop over bins of workspace
       do
       {
-        double bgsum=0.;
-        double eps,phi;
         size_t numEvents = it->getNumEvents();
         if(numEvents)
         {
+          double bgsum=0.;
+          double eps,phi;
           // Assume that the energy (centre point) is in coordinate.t of first point vertex
           if( ! bgmodel.compare("QuadEnTrans"))
           {
