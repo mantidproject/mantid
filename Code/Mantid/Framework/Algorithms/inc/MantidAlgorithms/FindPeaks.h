@@ -107,6 +107,10 @@ private:
   bool singleSpectrum; ///<flag for if only a single spectrum is present
   bool mHighBackground; ///<flag for find relatively weak peak in high background
 
+  unsigned int minGuessedPeakWidth;
+  unsigned int maxGuessedPeakWidth;
+  unsigned int stepGuessedPeakWidth;
+
 };
 
 } // namespace Algorithms
