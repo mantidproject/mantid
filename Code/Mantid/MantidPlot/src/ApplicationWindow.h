@@ -90,7 +90,7 @@ class MantidMatrix;
 class FloatingWindow;
 
 // On Mac (and Ubuntu 11 Unity) the menubar must be shared between the main window and other floating windows.
-#ifndef Q_OS_MAC
+#ifdef Q_OS_MAC
   #define SHARED_MENUBAR
 #endif
 
