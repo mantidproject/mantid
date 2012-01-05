@@ -56,6 +56,7 @@ protected slots:
   void changeStartOrEnd(Mantid::Kernel::VMD, Mantid::Kernel::VMD);
   void changePlanarWidth(double);
   void resizeWindow();
+  void lineViewer_changedFixedBinWidth(bool fixed, double binWidth);
 
 protected:
   void preDeleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);

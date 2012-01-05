@@ -107,6 +107,8 @@ SliceViewerWindow::SliceViewerWindow(const QString& wsName, const QString& label
             this, SLOT(changeStartOrEnd(Mantid::Kernel::VMD, Mantid::Kernel::VMD)) );
   QObject::connect( m_liner, SIGNAL(changedPlanarWidth(double)),
             this, SLOT(changePlanarWidth(double)) );
+  QObject::connect( m_liner, SIGNAL(changedFixedBinWidth(bool,double)),
+            this, SLOT(lineViewer_changedFixedBinWidth(bool,double)) );
 
   this->initMenus();
 
@@ -189,6 +191,22 @@ void SliceViewerWindow::slicerWorkspaceChanged()
   m_ws = m_slicer->getWorkspace();
   // Propagate the change to Liner
   m_liner->setWorkspace(m_ws);
+}
+
+//------------------------------------------------------------------------------------------------
+/** Slot called when the LineViewer is setting a fixed bin width mode
+ *
+ * @param fixed :: True for fixed bin width
+ * @param binwidth :: desired width
+ */
+void SliceViewerWindow::lineViewer_changedFixedBinWidth(bool fixed, double binWidth)
+{
+  if (fixed)
+    // Enable the snap-to-length
+    m_slicer->getLineOverlay()->setSnapLength(binWidth);
+  else
+    // Disable the snap-to-length
+    m_slicer->getLineOverlay()->setSnapLength(0.0);
 }
 
 //------------------------------------------------------------------------------------------------
