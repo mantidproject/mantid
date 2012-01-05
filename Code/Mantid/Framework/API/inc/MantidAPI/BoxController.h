@@ -35,7 +35,7 @@ namespace API
      * @return BoxController instance
      */
     BoxController(size_t nd)
-    :nd(nd), m_maxId(0), m_file(NULL), m_diskMRU(), m_useWriteBuffer(true)
+    :nd(nd), m_maxId(0), m_file(NULL), m_diskBuffer(), m_useWriteBuffer(true)
     {
       // TODO: Smarter ways to determine all of these values
       m_maxDepth = 5;
@@ -352,7 +352,7 @@ namespace API
     {
       m_file = file;
       m_filename = filename;
-      m_diskMRU.setFileLength(fileLength);
+      m_diskBuffer.setFileLength(fileLength);
     }
 
     /** @return true if the MDEventWorkspace is backed by a file */
@@ -368,11 +368,11 @@ namespace API
     //-----------------------------------------------------------------------------------
     /** Return the DiskBuffer for disk caching */
     const Mantid::Kernel::DiskBuffer & getDiskBuffer() const
-    { return m_diskMRU; }
+    { return m_diskBuffer; }
 
     /** Return the DiskBuffer for disk caching */
     Mantid::Kernel::DiskBuffer & getDiskBuffer()
-    { return m_diskMRU; }
+    { return m_diskBuffer; }
 
     /** Return true if the DiskBuffer should be used */
     bool useWriteBuffer() const
@@ -390,7 +390,7 @@ namespace API
       if (bytesPerEvent == 0)
         throw std::invalid_argument("Size of an event cannot be == 0.");
       // Save the values
-      m_diskMRU.setWriteBufferSize(writeBufferSize);
+      m_diskBuffer.setWriteBufferSize(writeBufferSize);
       // If all caches are 0, don't use the MRU at all
       m_useWriteBuffer = !(writeBufferSize==0);
       m_bytesPerEvent = bytesPerEvent;
@@ -470,7 +470,7 @@ namespace API
     ::NeXus::File * m_file;
 
     /// Instance of the disk-caching MRU list.
-    mutable Mantid::Kernel::DiskBuffer m_diskMRU;
+    mutable Mantid::Kernel::DiskBuffer m_diskBuffer;
 
     /// Do we use the DiskBuffer at all?
     bool m_useWriteBuffer;
