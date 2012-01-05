@@ -3,7 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Workspace.h"
 #include <string>
 #include <vector>
 #include <boost/shared_ptr.hpp>
@@ -69,7 +69,7 @@ namespace MantidQt
       @returns the matrix workspace
       @throw if workspace has been moved since instantiation.
       */
-      virtual Mantid::API::MatrixWorkspace_sptr fetchIt() const = 0;
+      virtual Mantid::API::Workspace_sptr  fetchIt() const = 0;
       /// Generates a status report based on the workspace state.
       std::string statusReport() const;
       /// Perform any clean up operations of the underlying workspace
@@ -87,7 +87,7 @@ namespace MantidQt
       /// Common implementation for generating status
       Status generateStatus() const;
       /// Apply actions wrapped up in the memento back to the original workspace
-      virtual void applyActions() = 0;
+      virtual Mantid::API::Workspace_sptr applyActions() = 0;
       
     protected:
 

@@ -6,6 +6,8 @@
 #include <fstream>
 #include <boost/regex.hpp>
 
+using namespace Mantid::API;
+
 namespace MantidQt
 {
   namespace CustomInterfaces
@@ -35,7 +37,7 @@ namespace MantidQt
         m_adsID = m_adsID.substr(0, m_adsID.find('.'));
 
         //Generate an initial report.
-        Mantid::API::MatrixWorkspace_sptr ws = fetchIt();
+        MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(fetchIt());
         if(ws->mutableSample().hasOrientedLattice())
         {
           std::vector<double> ub = ws->mutableSample().getOrientedLattice().getUB().get_vector();
@@ -78,10 +80,8 @@ namespace MantidQt
       @returns the matrix workspace
       @throw if workspace has been moved since instantiation.
       */
-      Mantid::API::MatrixWorkspace_sptr WorkspaceOnDisk::fetchIt() const
+      Mantid::API::Workspace_sptr WorkspaceOnDisk::fetchIt() const
       {
-        using namespace Mantid::API;
-
         checkStillThere();
 
         IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadRaw");
@@ -98,7 +98,7 @@ namespace MantidQt
         {
           throw std::invalid_argument("This raw file corresponds to a WorkspaceGroup. Cannot process groups like this. Import via MantidPlot instead.");
         }
-        return boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+        return ws;
       }
 
       /**
@@ -107,7 +107,6 @@ namespace MantidQt
       */
       void WorkspaceOnDisk::dumpIt(const std::string& name)
       {
-        using Mantid::API::AnalysisDataService;
         if(AnalysisDataService::Instance().doesExist(name))
         {
           AnalysisDataService::Instance().remove(name);
@@ -128,9 +127,9 @@ namespace MantidQt
       /*
       Apply actions. Load workspace and apply all actions to it.
       */
-      void WorkspaceOnDisk::applyActions()
+      Mantid::API::Workspace_sptr WorkspaceOnDisk::applyActions()
       {
-        Mantid::API::MatrixWorkspace_sptr ws = fetchIt();
+        Mantid::API::Workspace_sptr ws = fetchIt();
         
         Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SetUB");
         alg->initialize();
@@ -139,6 +138,7 @@ namespace MantidQt
         alg->setProperty("UB", m_ub);
         alg->execute();
 
+        return AnalysisDataService::Instance().retrieve(m_adsID);
       }
 
   }

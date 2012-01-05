@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidQtCustomInterfaces/WorkspaceOnDisk.h"
 #include "MantidAPI/FileFinder.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 
 using namespace MantidQt::CustomInterfaces;
@@ -43,7 +44,7 @@ public:
   {
     WorkspaceOnDisk memento(getSuitableFileNamePath());
     TSM_ASSERT("File should be present", memento.checkStillThere()); 
-    MatrixWorkspace_sptr result = memento.fetchIt();
+    MatrixWorkspace_sptr result = boost::dynamic_pointer_cast<MatrixWorkspace>(memento.fetchIt());
     TSM_ASSERT("Should have fetched the workspace", result);
   }
 
@@ -57,8 +58,8 @@ public:
   {
     WorkspaceOnDisk memento(getSuitableFileNamePath());
     memento.setUB(0,0,2,0,4,0,-8,0,0);
-    memento.applyActions();
-    std::vector<double> ub = memento.fetchIt()->sample().getOrientedLattice().getUB().get_vector();
+    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(memento.applyActions());
+    std::vector<double> ub = ws->sample().getOrientedLattice().getUB().get_vector();
     TS_ASSERT_EQUALS(0, ub[0]);
     TS_ASSERT_EQUALS(0, ub[1]);
     TS_ASSERT_EQUALS(2, ub[2]);
@@ -68,8 +69,6 @@ public:
     TS_ASSERT_EQUALS(-8, ub[6]);
     TS_ASSERT_EQUALS(0, ub[7]);
     TS_ASSERT_EQUALS(0, ub[8]);
-
-
   }
 
 };

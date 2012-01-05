@@ -2,6 +2,8 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 
+using namespace Mantid::API;
+
 namespace MantidQt
 {
   namespace CustomInterfaces
@@ -12,7 +14,7 @@ namespace MantidQt
     */
     WorkspaceInADS::WorkspaceInADS(std::string wsName) : m_wsName(wsName)
     {
-      using namespace Mantid::API;
+      
       if(!checkStillThere())
       {
         throw std::runtime_error("WorkspaceInADS:: Workspace does not exist in the ADS: " + wsName);
@@ -65,15 +67,14 @@ namespace MantidQt
     @returns the matrix workspace
     @throw if workspace has been moved since instantiation.
     */
-    Mantid::API::MatrixWorkspace_sptr WorkspaceInADS::fetchIt() const
+    Workspace_sptr WorkspaceInADS::fetchIt() const
     {
-      using namespace Mantid::API;
       if(!checkStillThere())
       {
         std::string msg("WorkspaceInADS is attempting to fetch a workspace out of the ADS that has been removed or renamed. Original name: " + m_wsName);
         throw std::runtime_error(msg);
       }
-      return boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(m_wsName));
+      return AnalysisDataService::Instance().retrieve(m_wsName);
     }
 
     /// Destructor
@@ -84,9 +85,10 @@ namespace MantidQt
     /*
     Apply actions. Load workspace and apply all actions to it.
     */
-    void WorkspaceInADS::applyActions()
+    Workspace_sptr WorkspaceInADS::applyActions()
     {
-      //Do nothing.
+      //Do nothing because everything should already have been applied to the workspace in the ADS. Just return it for consistency.
+      return AnalysisDataService::Instance().retrieve(m_wsName);
     }
   }
 }

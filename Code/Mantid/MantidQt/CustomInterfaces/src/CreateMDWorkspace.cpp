@@ -43,6 +43,7 @@
 #include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
 
+using namespace Mantid::API;
 
 namespace MantidQt
 {
@@ -208,7 +209,7 @@ void CreateMDWorkspace::setUBMatrixClicked()
   try
   {
     WorkspaceMemento_sptr memento = getFirstSelected();
-    Mantid::API::MatrixWorkspace_sptr ws = memento->fetchIt();
+    Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>( memento->fetchIt() );
     QString id = QString(memento->getId().c_str());
 
     QString pyInput =
@@ -311,7 +312,7 @@ void CreateMDWorkspace::setGoniometerClicked()
       runConfirmation("Currently, Goniometer settings may only be applied to Workspace in memory");
       return;
     }
-    Mantid::API::MatrixWorkspace_sptr ws = memento->fetchIt();
+    Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>( memento->fetchIt() );
     QString id = QString(memento->getId().c_str());
 
     QString pyInput =

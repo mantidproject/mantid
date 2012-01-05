@@ -52,10 +52,10 @@ namespace MantidQt
       virtual bool checkStillThere() const;
       /**
       Getter for the workspace itself
-      @returns the matrix workspace
+      @returns the workspace
       @throw if workspace has been moved since instantiation.
       */
-      virtual Mantid::API::MatrixWorkspace_sptr fetchIt() const;
+      virtual Mantid::API::Workspace_sptr fetchIt() const;
 
       /*
       Do nothing clean-up method.
@@ -77,7 +77,7 @@ namespace MantidQt
       virtual ~WorkspaceInADS();
 
       //Apply actions wrapped up in this memento.
-      virtual void applyActions();
+      virtual Mantid::API::Workspace_sptr applyActions();
 
     private:
       /// Id/name of the workspace in the ADS

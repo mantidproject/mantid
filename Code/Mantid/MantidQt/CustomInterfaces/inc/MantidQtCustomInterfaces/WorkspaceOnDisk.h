@@ -54,10 +54,10 @@ namespace MantidQt
       virtual bool checkStillThere() const;
       /**
       Getter for the workspace itself
-      @returns the matrix workspace
+      @returns the  workspace
       @throw if workspace has been moved since instantiation.
       */
-      virtual Mantid::API::MatrixWorkspace_sptr fetchIt() const;
+      virtual Mantid::API::Workspace_sptr fetchIt() const;
       ///Clean-up operations
       virtual void cleanUp();
       /// Destructor
@@ -73,7 +73,7 @@ namespace MantidQt
       }
 
       //Apply actions wrapped up in this memento.
-      virtual void applyActions();
+      virtual Mantid::API::Workspace_sptr  applyActions();
 
     private:
       /// Helper method to delete a workspace out of memory after loading.

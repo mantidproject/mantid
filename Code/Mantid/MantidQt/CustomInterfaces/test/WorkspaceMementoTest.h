@@ -42,7 +42,7 @@ public:
     throw std::runtime_error("Not implemented");
   }
 
-  virtual Mantid::API::MatrixWorkspace_sptr fetchIt() const
+  virtual Mantid::API::Workspace_sptr fetchIt() const
   {
     throw std::runtime_error("Not implemented");
   }
@@ -52,7 +52,7 @@ public:
     throw std::runtime_error("Not implemented");
   }
 
-  virtual void applyActions()
+  virtual Mantid::API::Workspace_sptr applyActions()
   {
     throw std::runtime_error("Not implemented");
   }
