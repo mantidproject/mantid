@@ -191,7 +191,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
 
-
 using namespace Qwt3D;
 using namespace MantidQt::API;
 

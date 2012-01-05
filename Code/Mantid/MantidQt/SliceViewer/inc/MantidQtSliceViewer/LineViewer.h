@@ -28,7 +28,7 @@ public:
     void setEnd(Mantid::Kernel::VMD end);
     void setWidth(Mantid::Kernel::VMD width);
     void setPlanarWidth(double width);
-    void setNumBins(size_t numBins);
+    void setNumBins(int numBins);
     void setFixedBinWidthMode(bool fixedWidth, double binWidth);
 
     void showPreview();
@@ -38,6 +38,15 @@ public:
     Mantid::Kernel::VMD getWidth() const;
     double getFixedBinWidth() const;
     bool getFixedBinWidthMode() const;
+    int getNumBins() const;
+    double getBinWidth() const;
+
+    // For python
+    void setStartXY(double x, double y);
+    void setEndXY(double x, double y);
+    void setWidth(double width);
+    void setWidth(int dim, double width);
+    void setWidth(const QString & dim, double width);
 
 private:
     void createDimensionWidgets();

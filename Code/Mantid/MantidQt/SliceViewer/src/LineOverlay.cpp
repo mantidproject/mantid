@@ -134,6 +134,17 @@ namespace SliceViewer
     m_showHandles = shown;
   }
 
+  /** Sets whether we are in "creation" mode
+   * For use by python directly specifying the position
+   *
+   * @param creation :: True for creation mode.
+   */
+  void LineOverlay::setCreationMode(bool creation)
+  {
+    m_creation = creation;
+    this->update();
+  }
+
   //----------------------------------------------------------------------------------------------
   /// @return point A's position in plot coordinates
   const QPointF & LineOverlay::getPointA() const

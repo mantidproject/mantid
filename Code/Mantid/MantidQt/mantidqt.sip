@@ -155,8 +155,221 @@ LineViewer
 
     It is connected to the SliceViewer.
 
-    It does not currently have any methods exposed to Python.
+%End
 
+public:
+void apply()   throw (std::runtime_error);
+%Docstring
+void LineViewer::apply()
+------------------------
+    Perform the 1D integration using the current parameters.
+    
+    Raises:
+        std::runtime_error if an error occurs.
+    
+%End
+
+void showPreview();
+%Docstring
+void LineViewer::showPreview()
+------------------------------
+    Calculate and show the preview (non-integrated) line,
+    using the current parameters. 
+%End
+
+void showFull();
+%Docstring
+void LineViewer::showFull()
+---------------------------
+    Calculate and show the full (integrated) line, using the latest
+    integrated workspace. The apply() method must have been called
+    before calling this. 
+%End
+
+
+//*WIKI* ==== Start/End Points ====
+void setStartXY(double x, double y)   throw (std::runtime_error);
+%Docstring
+void LineViewer::setStartXY(double x, double y)
+-----------------------------------------------
+    Set the start point of the line to integrate
+   
+    Args:
+        x :: position of the start in the "X" dimension
+           (as shown in the SliceViewer).
+        y :: position of the start in the "Y" dimension
+           (as shown in the SliceViewer).
+   
+%End
+
+void setEndXY(double x, double y)   throw (std::runtime_error);
+%Docstring
+void LineViewer::setEndXY(double x, double y)
+---------------------------------------------
+    Set the start point of the line to integrate
+   
+    Args:
+        x :: position of the start in the "X" dimension
+           (as shown in the SliceViewer).
+        y :: position of the start in the "Y" dimension
+           (as shown in the SliceViewer).
+   
+%End
+
+
+//*WIKI* ==== Width ====
+void setWidth(double width);
+%Docstring
+void LineViewer::setWidth(double width)
+---------------------------------------
+    Set the width to integrate to be the same in all dimensions
+   
+    This sets the planar width and all the other dimensions' widths
+    to the same value.
+   
+    Args:
+        width :: width of integration, in the units of all dimensions
+   
+%End
+
+void setWidth(int dim, double width)   throw (std::invalid_argument, std::runtime_error);
+%Docstring
+void LineViewer::setWidth(int dim, double width)
+------------------------------------------------
+    Set the width to integrate in a particular dimension.
+   
+    Integration is performed perpendicular to the XY plane, from -width below
+    to +width above the center.
+    Use setPlanarWidth() to set the width along the XY plane.
+   
+    Args:
+        dim :: index of the dimension to change
+        width :: width of integration, in the units of the dimension.
+    
+    Raises:
+        std::invalid_argument if the index is invalid
+   
+%End
+
+void setWidth(const QString & dim, double width)   throw (std::invalid_argument, std::runtime_error);
+%Docstring
+void LineViewer::setWidth(const QString & dim, double width)
+------------------------------------------------------------
+    Set the width to integrate in a particular dimension.
+   
+    Integration is performed perpendicular to the XY plane, from -width below
+    to +width above the center.
+    Use setPlanarWidth() to set the width along the XY plane.
+   
+    Args:
+        dim :: name of the dimension to change
+        width :: width of integration, in the units of the dimension.
+    
+    Raises:
+        std::runtime_error if the name is not found in the workspace
+   
+%End
+
+void setPlanarWidth(double width);
+%Docstring
+void LineViewer::setPlanarWidth(double width)
+---------------------------------------------
+    Set the width of the line in the planar dimension only.
+    Other dimensions' widths will follow unless they were manually changed
+    
+    Args:
+        width :: width in the plane. 
+%End
+
+double getPlanarWidth() const;
+%Docstring
+double LineViewer::getPlanarWidth()
+-----------------------------------
+    
+    Returns:
+        the width in the plane, or the width in dimension 0 if not restricted to a plane 
+%End
+
+
+//*WIKI* ==== Binning ====
+void setNumBins(int numBins)   throw (std::invalid_argument);
+%Docstring
+void LineViewer::setNumBins(int numBins)
+----------------------------------------
+    Set the number of bins in the line.
+    
+    Args:
+        numBins :: # of bins
+    
+    Raises:
+        std::invalid_argument if numBins < 1
+    
+%End
+
+void setFixedBinWidthMode(bool fixedWidth, double binWidth)   throw (std::invalid_argument);
+%Docstring
+void LineViewer::setFixedBinWidthMode(bool fixedWidth, double binWidth)
+-----------------------------------------------------------------------
+    Sets the fixed bin width mode on or off.
+   
+    In fixed bin width mode, the width of each bin along the line length
+    is constant, and the number of bins is adjusted to as the line
+    gets longer.
+    If off, then you use a fixed number of bins, and the bin width is
+    then simply: width = length / number_of_bins.
+   
+    Args:
+        fixedWidth :: if True, then keep the bin width fixed.
+        binWidth :: for fixed bin width mode, this specified the desired
+           bin width. Must be > 0. Ignored for non-fixed-bin-width mode.
+    
+    Raises:
+        std::invalid_argument if binWidth <= 0
+   
+%End
+
+double getFixedBinWidth() const;
+%Docstring
+double LineViewer::getFixedBinWidth()
+-------------------------------------
+    For fixed-bin-width mode, get the desired fixed bin width.
+    
+    Returns:
+        the desired fixed bin width
+   
+%End
+
+bool getFixedBinWidthMode() const;
+%Docstring
+bool LineViewer::getFixedBinWidthMode()
+---------------------------------------
+    Is the LineViewer in fixed-bin-width mode?
+    
+    Returns:
+        True if in fixed bin width mode.
+   
+%End
+
+int getNumBins() const;
+%Docstring
+int LineViewer::getNumBins()
+----------------------------
+    Get the number of bins
+   
+    Returns:
+        the number of bins in the line to integrate (int)
+   
+%End
+
+double getBinWidth() const;
+%Docstring
+double LineViewer::getBinWidth()
+--------------------------------
+    Get the width of each bin
+   
+    Returns:
+        the width of each bin (double)
+   
 %End
 
 
@@ -270,6 +483,7 @@ bool SliceViewer::getFastRender()
    
 %End
 
+  void toggleLineMode(bool);
 
   //*WIKI* ==== X/Y Dimension ====
   void setXYDim(int indexX, int indexY)     throw (std::invalid_argument);
@@ -341,6 +555,9 @@ void SliceViewer::setSlicePoint(int dim, double value)
         dim :: index of the dimension to change
         value :: value of the slice point, in the units of the given dimension.
            This should be within the range of min/max for that dimension.
+    
+    Raises:
+        std::invalid_argument if the index is invalid
    
 %End
 
@@ -355,6 +572,9 @@ void SliceViewer::setSlicePoint(const QString & dim, double value)
         dim :: name of the dimension to change
         value :: value of the slice point, in the units of the given dimension.
            This should be within the range of min/max for that dimension.
+    
+    Raises:
+        std::runtime_error if the name is not found in the workspace
    
 %End
 
@@ -370,6 +590,9 @@ double SliceViewer::getSlicePoint(int dim)
     Returns:
         slice point for that dimension. Value has no significance for the
             X or Y display dimensions.
+    
+    Raises:
+        std::invalid_argument if the index is invalid
    
 %End
 
@@ -385,6 +608,9 @@ double SliceViewer::getSlicePoint(const QString & dim)
     Returns:
         slice point for that dimension. Value has no significance for the
             X or Y display dimensions.
+    
+    Raises:
+        std::runtime_error if the name is not found in the workspace
    
 %End
 
@@ -588,6 +814,7 @@ void SliceViewer::setColorScaleAutoSlice()
     view limits)
    
 %End
+
 
 
 };

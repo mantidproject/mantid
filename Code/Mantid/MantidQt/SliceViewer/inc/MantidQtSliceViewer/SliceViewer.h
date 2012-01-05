@@ -75,6 +75,7 @@ public:
   QwtDoubleInterval getYLimits() const;
   void setXYCenter(double x, double y);
   void openFromXML(const QString & xml);
+  void toggleLineMode(bool);
 
 signals:
   /// Signal emitted when the X/Y index of the shown dimensions is changed

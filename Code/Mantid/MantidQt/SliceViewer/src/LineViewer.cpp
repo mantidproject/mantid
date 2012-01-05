@@ -236,7 +236,9 @@ void LineViewer::readTextboxes()
 }
 
 //-----------------------------------------------------------------------------------------------
-/** Perform the 1D integration using the current parameters */
+/** Perform the 1D integration using the current parameters.
+ * @throw std::runtime_error if an error occurs.
+ * */
 void LineViewer::apply()
 {
   if (m_allDimsFree)
@@ -533,16 +535,22 @@ void LineViewer::setPlanarWidth(double width)
     m_planeWidth = width;
   }
   updateStartEnd();
+  // Emit the signal that the width changed
+  emit changedPlanarWidth(width);
 }
 
-/** Set the number of bins in the line
- * @param numBins :: # of bins */
-void LineViewer::setNumBins(size_t numBins)
+/** Set the number of bins in the line.
+ * @param numBins :: # of bins
+ * @throw std::invalid_argument if numBins < 1
+ * */
+void LineViewer::setNumBins(int numBins)
 {
-  m_numBins = numBins;
-  ui.spinNumBins->blockSignals(true);
+  if (numBins < 1)
+    throw std::invalid_argument("LineViewer::setNumBins(): must be > 0");
+  m_numBins = size_t(numBins);
+  //ui.spinNumBins->blockSignals(true);
   ui.spinNumBins->setValue( int(numBins) );
-  ui.spinNumBins->blockSignals(false);
+  //ui.spinNumBins->blockSignals(false);
 }
 
 /** Set the free dimensions - dimensions that are allowed to change
@@ -628,6 +636,115 @@ void LineViewer::setFixedBinWidthMode(bool fixedWidth, double binWidth)
 }
 
 // ==============================================================================================
+// ================================== Methods for Python ==========================================
+// ==============================================================================================
+/** Set the start point of the line to integrate
+ *
+ * @param x :: position of the start in the "X" dimension
+ *        (as shown in the SliceViewer).
+ * @param y :: position of the start in the "Y" dimension
+ *        (as shown in the SliceViewer).
+ */
+void LineViewer::setStartXY(double x, double y)
+{
+  if (m_allDimsFree)
+    throw std::runtime_error("LineViewer::setStartXY(): cannot use with all dimensions free.");
+  m_start[m_freeDimX] = x;
+  m_start[m_freeDimY] = y;
+  updateStartEnd();
+  // Send the signal that the positions changed
+  emit changedStartOrEnd(m_start, m_end);
+}
+
+/** Set the start point of the line to integrate
+ *
+ * @param x :: position of the start in the "X" dimension
+ *        (as shown in the SliceViewer).
+ * @param y :: position of the start in the "Y" dimension
+ *        (as shown in the SliceViewer).
+ */
+void LineViewer::setEndXY(double x, double y)
+{
+  if (m_allDimsFree)
+    throw std::runtime_error("LineViewer::setEndXY(): cannot use with all dimensions free.");
+  m_end[m_freeDimX] = x;
+  m_end[m_freeDimY] = y;
+  updateStartEnd();
+  // Send the signal that the positions changed
+  emit changedStartOrEnd(m_start, m_end);
+}
+
+/** Set the width to integrate to be the same in all dimensions
+ *
+ * This sets the planar width and all the other dimensions' widths
+ * to the same value.
+ *
+ * @param width :: width of integration, in the units of all dimensions
+ */
+void LineViewer::setWidth(double width)
+{
+  if (!m_ws) return;
+  for (int i=0; i<int(m_ws->getNumDims()); i++)
+    m_width[i] = width;
+  this->setPlanarWidth(width);
+}
+
+/** Set the width to integrate in a particular dimension.
+ *
+ * Integration is performed perpendicular to the XY plane, from -width below
+ * to +width above the center.
+ * Use setPlanarWidth() to set the width along the XY plane.
+ *
+ * @param dim :: index of the dimension to change
+ * @param width :: width of integration, in the units of the dimension.
+ * @throw std::invalid_argument if the index is invalid
+ */
+void LineViewer::setWidth(int dim, double width)
+{
+  if (!m_ws) return;
+  if (dim >= int(m_ws->getNumDims()) || dim < 0)
+    throw std::invalid_argument("There is no dimension # " + Strings::toString(dim) + " in the workspace.");
+  m_width[dim] = width;
+  updateStartEnd();
+}
+
+/** Set the width to integrate in a particular dimension.
+ *
+ * Integration is performed perpendicular to the XY plane, from -width below
+ * to +width above the center.
+ * Use setPlanarWidth() to set the width along the XY plane.
+ *
+ * @param dim :: name of the dimension to change
+ * @param width :: width of integration, in the units of the dimension.
+ * @throw std::runtime_error if the name is not found in the workspace
+ */
+void LineViewer::setWidth(const QString & dim, double width)
+{
+  if (!m_ws) return;
+  int index = int(m_ws->getDimensionIndexByName(dim.toStdString()));
+  return this->setWidth(index, width);
+}
+
+/** Get the number of bins
+ *
+ * @return the number of bins in the line to integrate (int)
+ */
+int LineViewer::getNumBins() const
+{
+  return int(m_numBins);
+}
+
+/** Get the width of each bin
+ *
+ * @return the width of each bin (double)
+ */
+double LineViewer::getBinWidth() const
+{
+  return m_binWidth;
+}
+
+
+// ==============================================================================================
 // ================================== Rendering =================================================
 // ==============================================================================================
 
@@ -677,7 +794,8 @@ void LineViewer::calculateCurve(IMDWorkspace_sptr ws, VMD start, VMD end,
 }
 
 
-/** Calculate and show the preview (non-integrated) line */
+/** Calculate and show the preview (non-integrated) line,
+ * using the current parameters. */
 void LineViewer::showPreview()
 {
   calculateCurve(m_ws, m_start, m_end, 100, m_previewCurve);
@@ -693,7 +811,9 @@ void LineViewer::showPreview()
 }
 
 
-/** Calculate and show the full (integrated) line */
+/** Calculate and show the full (integrated) line, using the latest
+ * integrated workspace. The apply() method must have been called
+ * before calling this. */
 void LineViewer::showFull()
 {
   if (!m_sliceWS) return;

@@ -210,7 +210,10 @@ void SliceViewerWindow::lineViewer_changedFixedBinWidth(bool fixed, double binWi
 }
 
 //------------------------------------------------------------------------------------------------
-/** Slot called when the line viewer should be shown/hidden */
+/** Show or hide the LineViewer widget (on the right of the SliceViewer)
+ *
+ * @param visible :: True to show the LineViewer widget.
+ */
 void SliceViewerWindow::showLineViewer(bool visible)
 {
   int linerWidth = m_liner->width();

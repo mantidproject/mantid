@@ -12,7 +12,8 @@ import os
 import unittest
 import time
 import qti
-import proxies
+import datetime
+from mantidplotpy import proxies
 from PyQt4 import QtGui, QtCore
 
 # Try to import QTest. Not available on Windows?
@@ -120,7 +121,8 @@ def screenshot(widget, filename, description, png_exists=False):
         
         # Modify the section in the HTML page
         section_text = '<h2>%s</h2>' % filename
-        section_text += '%s<br />' % (description)
+        now = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
+        section_text += '%s (%s)<br />' % (description, now)
         section_text += '<img src="%s.png" alt="%s"></img>' % (filename, description)
         
         _replace_report_text(report, filename, section_text)

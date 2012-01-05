@@ -76,6 +76,7 @@ namespace SliceViewer
     void setSnapEnabled(bool enabled);
     void setSnapLength(double spacing);
     void setShowHandles(bool shown);
+    void setCreationMode(bool creation);
 
     ///@return the snap-to X interval
     double getSnapX()
@@ -88,6 +89,7 @@ namespace SliceViewer
     ///@return true if the line is in creation mode (waiting for first click)
     bool getCreationMode() const
     { return m_creation; }
+
 
   signals:
     /// Signal sent while the line is being dragged
