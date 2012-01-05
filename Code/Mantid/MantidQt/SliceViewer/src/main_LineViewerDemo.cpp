@@ -50,7 +50,7 @@ int main( int argc, char ** argv )
   app.setApplicationName("Application Example");
   QMainWindow * mainWin = new QMainWindow();
 
-  IMDEventWorkspace_sptr mdew = makeDemoData();
+  IMDWorkspace_sptr mdew = makeDemoData();
 
   QFrame * frame = new QFrame(mainWin);
   mainWin->setCentralWidget(frame);
@@ -65,6 +65,7 @@ int main( int argc, char ** argv )
   line->setStart(VMD(-1,0,0));
   line->setEnd(VMD(+1,0,0));
   line->setWidth(VMD(+0.3,0,0.3));
+  line->setPlanarWidth(0.2);
   line->setNumBins(1000);
   line->setFreeDimensions(false, 0, 1);
   line->showPreview();

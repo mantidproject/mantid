@@ -1,12 +1,12 @@
-#include "MantidQtSliceViewer/LineViewer.h"
-#include <qwt_plot_curve.h>
-#include "MantidKernel/VMD.h"
-#include "MantidGeometry/MDGeometry/MDTypes.h"
-#include "MantidAPI/IAlgorithm.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include <QIntValidator>
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidKernel/VMD.h"
+#include "MantidQtSliceViewer/LineViewer.h"
+#include <QIntValidator>
+#include <qwt_plot_curve.h>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -22,9 +22,13 @@ LineViewer::LineViewer(QWidget *parent)
  : QWidget(parent),
    m_planeWidth(0),
    m_numBins(100),
-   m_allDimsFree(false), m_freeDimX(0), m_freeDimY(1)
+   m_allDimsFree(false), m_freeDimX(0), m_freeDimY(1),
+   m_fixedBinWidthMode(false), m_fixedBinWidth(0.1), m_binWidth(0.1)
 {
 	ui.setupUi(this);
+
+	// Other setup
+  ui.textBinWidth->setValidator(new QDoubleValidator(ui.textBinWidth));
 
 	// --------- Create the plot -----------------
   m_plotLayout = new QHBoxLayout(ui.frmPlot);
@@ -51,7 +55,8 @@ LineViewer::LineViewer(QWidget *parent)
   QObject::connect(ui.chkAdaptiveBins, SIGNAL(  stateChanged(int)), this, SLOT(adaptiveBinsChanged()));
   QObject::connect(ui.spinNumBins, SIGNAL(valueChanged(int)), this, SLOT(numBinsChanged()));
   QObject::connect(ui.textPlaneWidth, SIGNAL(textEdited(QString)), this, SLOT(widthTextEdited()));
-
+  QObject::connect(ui.radNumBins, SIGNAL(toggled(bool)), this, SLOT(on_radNumBins_toggled()));
+  QObject::connect(ui.textBinWidth, SIGNAL(editingFinished()), this, SLOT(on_textBinWidth_changed()));
 }
 
 LineViewer::~LineViewer()
@@ -161,6 +166,39 @@ void LineViewer::updateStartEnd()
     m_widthText[d]->setText(QString::number(m_width[d]));
   }
   ui.textPlaneWidth->setText(QString::number(m_planeWidth));
+
+  // Now show the width
+  this->updateBinWidth();
+}
+
+//-----------------------------------------------------------------------------------------------
+/** Calculate the number of bins (fixed-bin-width mode)
+ * or show the bin width (fixed-#-bins mode) */
+void LineViewer::updateBinWidth()
+{
+  // If partially initialized, vectors might be wrong
+  if (m_start.getNumDims() != m_end.getNumDims())
+    return;
+  double length = (m_start - m_end).norm();
+  if (m_fixedBinWidthMode)
+  {
+    // Fixed bin width. Find the number of bins.
+    m_numBins = size_t(length / m_fixedBinWidth + 0.5);
+    if (m_numBins < 1) m_numBins = 1;
+    // Show the # of bins
+    ui.spinNumBins->blockSignals(true);
+    ui.spinNumBins->setValue(int(m_numBins));
+    ui.spinNumBins->blockSignals(false);
+    // Show the fixed bin width
+    m_binWidth = length / double(m_numBins);
+    ui.textBinWidth->setText(QString::number(m_fixedBinWidth));
+  }
+  else
+  {
+    // Fixed number of bins mode
+    m_binWidth = length / double(m_numBins);
+    ui.textBinWidth->setText(QString::number(m_binWidth));
+  }
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -353,6 +391,8 @@ void LineViewer::widthTextEdited()
 void LineViewer::numBinsChanged()
 {
   m_numBins = ui.spinNumBins->value();
+  // Show the bin width
+  this->updateBinWidth();
   //TODO: Don't always auto-apply
   this->apply();
 }
@@ -364,6 +404,34 @@ void LineViewer::adaptiveBinsChanged()
   this->apply();
 }
 
+/** Slot called when the num bins/bin width radio choice changes */
+void LineViewer::on_radNumBins_toggled()
+{
+  setFixedBinWidthMode(ui.radNumBins->isChecked(), m_fixedBinWidth);
+}
+
+
+/** Slot called when the desired fixed bin width text box
+ * is edited and the user pressed Return or lost focus.
+ */
+void LineViewer::on_textBinWidth_changed()
+{
+  if (m_fixedBinWidthMode)
+  {
+    bool ok;
+    double width = ui.textBinWidth->text().toDouble(&ok);
+    if (ok && width > 0)
+    {
+      // Change the desired bin size and update necessary GUI
+      this->setFixedBinWidthMode(m_fixedBinWidthMode, width);
+    }
+    else
+    {
+      // Bad number! Reset to the old value
+      this->updateBinWidth();
+    }
+  }
+}
 
 // ==============================================================================================
 // ================================== External Getters ==========================================
@@ -380,6 +448,21 @@ Mantid::Kernel::VMD LineViewer::getWidth() const
   return m_width;
 }
 
+/** For fixed-bin-width mode, get the desired fixed bin width.
+ * @return the desired fixed bin width
+ */
+double LineViewer::getFixedBinWidth() const
+{
+  return m_fixedBinWidth;
+}
+
+/** Is the LineViewer in fixed-bin-width mode?
+ * @return True if in fixed bin width mode.
+ */
+bool LineViewer::getFixedBinWidthMode() const
+{
+  return m_fixedBinWidthMode;
+}
 
 // ==============================================================================================
 // ================================== External Setters ==========================================
@@ -494,6 +577,55 @@ void LineViewer::setFreeDimensions(size_t dimX, size_t dimY)
   this->updateFreeDimensions();
 }
 
+/** Sets the fixed bin width mode on or off.
+ *
+ * In fixed bin width mode, the width of each bin along the line length
+ * is constant, and the number of bins is adjusted to as the line
+ * gets longer.
+ * If off, then you use a fixed number of bins, and the bin width is
+ * then simply: width = length / number_of_bins.
+ *
+ * @param fixedWidth :: if True, then keep the bin width fixed.
+ * @param binWidth :: for fixed bin width mode, this specified the desired
+ *        bin width. Must be > 0. Ignored for non-fixed-bin-width mode.
+ * @throw std::invalid_argument if binWidth <= 0
+ */
+void LineViewer::setFixedBinWidthMode(bool fixedWidth, double binWidth)
+{
+  if (binWidth <= 0)
+    throw std::invalid_argument("LineViewer::setFixedBinWidthMode(): binWidth must be > 0");
+
+  m_fixedBinWidthMode = fixedWidth;
+  if (m_fixedBinWidthMode)
+  {
+    m_fixedBinWidth = binWidth;
+    ui.textBinWidth->setReadOnly(false);
+    ui.textBinWidth->setToolTip("Desired bin width (will adjust the number of bins).");
+    ui.spinNumBins->setReadOnly(true);
+    ui.spinNumBins->setToolTip("Current number of bins (calculated from the fixed bin width)");
+  }
+  else
+  {
+    ui.textBinWidth->setReadOnly(true);
+    ui.textBinWidth->setToolTip("Current bin width, given the number of bins.");
+    ui.spinNumBins->setReadOnly(false);
+    ui.spinNumBins->setToolTip("Desired number of bins.");
+  }
+
+  // Show in GUI
+  ui.radNumBins->blockSignals(true);
+  ui.radNumBins->setChecked(!m_fixedBinWidthMode);
+  ui.radBinWidth->setChecked(m_fixedBinWidthMode);
+  ui.radNumBins->blockSignals(false);
+
+  // Signal the LineOverlay to used fixed bin width
+  emit changedFixedBinWidth(fixedWidth, binWidth);
+  // Show the start/end, and update # of bins
+  this->updateStartEnd();
+
+  //TODO: Don't always auto-apply
+  this->apply();
+}
 
 // ==============================================================================================
 // ================================== Rendering =================================================
