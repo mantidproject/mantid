@@ -174,7 +174,7 @@ namespace MDAlgorithms
                                        bool is_powder=false)const;
 
    /// map to select an algorithm as function of the key, which describes it
-    std::map<std::string, pMethod> alg_selector;
+   std::map<std::string, pMethod> alg_selector;
    /// the pointer to class which is responsible for adding data to N-dimensional workspace;
     std::auto_ptr<MDEvents::MDEventWSWrapper> pWSWrapper;
 
@@ -195,10 +195,10 @@ namespace MDAlgorithms
    //--------------------------------------------------------------------------------------------------
    /** generic template to convert to any Dimensions workspace from a histohram workspace   */
     template<Q_state Q, AnalMode MODE, CnvrtUnits CONV>
-    void processQND_HWS();
+    void processQNDHWS();
    /** generic template to convert to any Dimensions workspace from an Event workspace   */
     template<Q_state Q, AnalMode MODE, CnvrtUnits CONV>
-    void processQND_EWS();
+    void processQNDEWS();
 
     /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
     /// presumably will be completely inlined

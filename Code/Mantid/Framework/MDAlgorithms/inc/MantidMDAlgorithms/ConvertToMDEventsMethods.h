@@ -41,7 +41,7 @@ namespace MDAlgorithms
 //-----------------------------------------------
 // Method to process histohram workspace
 template<Q_state Q, AnalMode MODE, CnvrtUnits CONV>
-void ConvertToMDEvents::processQND_HWS()
+void ConvertToMDEvents::processQNDHWS()
 {
     // counder for the number of events
     size_t n_added_events(0);
@@ -68,7 +68,8 @@ void ConvertToMDEvents::processQND_HWS()
     // take at least bufSize amout of data in one run for efficiency
     size_t buf_size     = ((specSize>SPLIT_LEVEL)?specSize:SPLIT_LEVEL);
     // allocate temporary buffer for MD Events data
-    std::vector<coord_t>  allCoord(n_dims*buf_size); // MD events coordinates buffer
+    std::vector<coord_t>  allCoord(0); // MD events coordinates buffer
+    allCoord.reserve(n_dims*buf_size);
     std::vector<coord_t>  Coord(n_dims);             // coordinates for single event
     std::vector<float>    sig_err(2*buf_size);       // array for signal and error. 
     std::vector<uint16_t> run_index(buf_size);       // Buffer run index for each event 
@@ -116,6 +117,11 @@ void ConvertToMDEvents::processQND_HWS()
           }
        } // end detectors loop;
 
+       if(n_added_events>0){
+              pWSWrapper->addMDData(sig_err,run_index,det_ids,allCoord,n_added_events);
+ 
+              n_added_events=0;
+        }
  
         pWSWrapper->refreshCache();
         pProg->report();          
@@ -124,7 +130,7 @@ void ConvertToMDEvents::processQND_HWS()
 
 // Method to process event workspace
 template<Q_state Q, AnalMode MODE, CnvrtUnits CONV>
-void ConvertToMDEvents::processQND_EWS()
+void ConvertToMDEvents::processQNDEWS()
 {
 }
     

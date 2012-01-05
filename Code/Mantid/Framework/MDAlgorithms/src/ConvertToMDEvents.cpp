@@ -53,7 +53,6 @@ namespace MDAlgorithms
 
 // logger for loading workspaces  
    Kernel::Logger& ConvertToMDEvents::convert_log =Kernel::Logger::get("MD-Algorithms");
-
 // the variable describes the locations of the preprocessed detectors, which can be stored and reused if the algorithm runs more then once;
 preprocessed_detectors ConvertToMDEvents::det_loc;
 
@@ -819,14 +818,16 @@ private:
             std::string Key;
             Key = pH->SupportedWS[Workspace2DType]+Key0;
             pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,
-                &ConvertToMDEvents::processQND_HWS<Q,static_cast<AnalMode>(MODE),static_cast<CnvrtUnits>(CONV)>));
-
+                &ConvertToMDEvents::processQNDHWS<Q,static_cast<AnalMode>(MODE),static_cast<CnvrtUnits>(CONV)>));
+#ifdef _DEBUG
+            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
+#endif
             Key = pH->SupportedWS[EventWSType]+Key0;
             pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,
-                &ConvertToMDEvents::processQND_EWS<Q,static_cast<AnalMode>(MODE),static_cast<CnvrtUnits>(CONV)>));
-//#ifdef _DEBUG
-//            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
-//#endif
+                &ConvertToMDEvents::processQNDEWS<Q,static_cast<AnalMode>(MODE),static_cast<CnvrtUnits>(CONV)>));
+#ifdef _DEBUG
+            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
+#endif
             LOOP_ND<Q, NumAlgorithms+1>::EXEC(pH);
     }
 };
@@ -849,21 +850,24 @@ private:
 
             Key = pH->SupportedWS[Workspace2DType]+Key0;
             pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,
-                &ConvertToMDEvents::processQND_HWS<NoQ,ANY_Mode,static_cast<CnvrtUnits>(CONV)>));
+                &ConvertToMDEvents::processQNDHWS<NoQ,ANY_Mode,static_cast<CnvrtUnits>(CONV)>));
+#ifdef _DEBUG
+            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
+#endif
 
             Key = pH->SupportedWS[EventWSType]+Key0;
             pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,
-                &ConvertToMDEvents::processQND_EWS<NoQ,ANY_Mode,static_cast<CnvrtUnits>(CONV)>));
+                &ConvertToMDEvents::processQNDEWS<NoQ,ANY_Mode,static_cast<CnvrtUnits>(CONV)>));
+#ifdef _DEBUG
+            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
+#endif
 
 
-//#ifdef _DEBUG
-//            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
-//#endif
             LOOP_ND<NoQ,NumAlgorithms+1>::EXEC(pH);
     }
 };
 
-// Q3d, modQ terminator
+// Q3d and modQ terminator
 template<Q_state Q >
 class LOOP_ND<Q,static_cast<size_t>(ANY_Mode*NConvUintsStates) >{
   public:
@@ -886,7 +890,7 @@ Q_modes(NQStates),
 dE_modes(4),
 ConvModes(NConvUintsStates),
 SupportedWS(NInWSTypes),
-// The conversion subalgorithm processes data in these units; 
+// The conversion subalgorithm processes input data expressed in these units; 
 // Change of the units have to be accompanied by correspondent change in conversion subalgorithm
 native_elastic_unitID("Momentum"), 
 native_inelastic_unitID("DeltaE")
@@ -903,7 +907,7 @@ native_inelastic_unitID("DeltaE")
      ConvModes[ConvFast]   = "CnvFast";
      ConvModes[ConvByTOF]  = "CnvByTOF";
      ConvModes[ConvFromTOF]= "CnvFromTOF";
-     //
+     // possible input workspace ID-s
      SupportedWS[Workspace2DType] = "WS2D";
      SupportedWS[EventWSType]     = "WSEvent";
 
