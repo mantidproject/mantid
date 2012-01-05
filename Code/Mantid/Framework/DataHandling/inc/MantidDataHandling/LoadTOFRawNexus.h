@@ -20,24 +20,6 @@ namespace DataHandling
 {
 /**
  Loads a NeXus file that conforms to the TOFRaw instrument definition format and stores it in a 2D workspace.
- LoadTOFRawNeXus is an algorithm and as such inherits  from the Algorithm class, via DataHandlingCommand, and overrides
- the init() & exec() methods.
-
- Required Properties:
- <UL>
- <LI> Filename - The name of and path to the input NeXus file </LI>
- <LI> OutputWorkspace - The name of the workspace in which to store the imported data
- (a multiperiod file will store higher periods in workspaces called OutputWorkspace_PeriodNo)</LI>
- </UL>
-
- Optional Properties:
- <UL>
- <LI> SpectrumMin  - The  starting spectrum number</LI>
- <LI> SpectrumMax  - The  final spectrum number (inclusive)</LI>
- <LI> SpectrumList - An ArrayProperty of spectra to load</LI>
- </UL>
-
- @author Stuart Campbell, ORNL
 
  Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -88,10 +70,8 @@ public:
   int fileCheck(const std::string& filePath);
 
 protected:
-  /// Overwrites Algorithm method.
   void init();
-
-  /// Overwrites Algorithm method
+  void initDocs();
   void exec();
 
   /// Validate the optional input properties
