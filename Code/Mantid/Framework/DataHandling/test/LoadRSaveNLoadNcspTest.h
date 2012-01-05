@@ -202,7 +202,6 @@ private:
   LoadNexus algToBeTested2;
   std::string inputFile;
   int entryNumber;
-  Workspace2D myworkspace;
 
   std::string myOutputSpace;
 
