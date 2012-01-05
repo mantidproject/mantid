@@ -165,17 +165,10 @@ namespace Mantid
           status = gsl_multimin_test_size (size, 1e-4);
   
         }
-        while (status == GSL_CONTINUE && iter < 50 && s->fval != 1000.0);
+        while (status == GSL_CONTINUE && iter < 50);
   
         // Output summary to log file
-        if (s->fval == 1000.0) 
-        {
-          gsl_vector_set (s->x, 0, 0.0);
-        }
-  
         std::string reportOfDiffractionEventCalibrateDetectors = gsl_strerror(status);
-        if (s->fval == 1000.0) reportOfDiffractionEventCalibrateDetectors = "No events";
-  
         g_log.debug() << " Workspace Index = " << wi << 
           " Method used = " << " Simplex" << 
           " Iteration = " << iter << 
@@ -268,8 +261,8 @@ namespace Mantid
         double offsetAD = offset*peakPos[i]/(1+offset);
         if(centre > 0 && centre < maxD) 
           errsum += std::fabs(peakPos[i]-(centre+offsetAD));
-        else
-          errsum += 1.0;
+        //else
+          //errsum += 1.0;
       }
       peakPos.clear();
       return errsum;
