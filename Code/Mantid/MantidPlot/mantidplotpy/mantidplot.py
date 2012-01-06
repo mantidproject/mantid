@@ -8,8 +8,7 @@ try:
 except ImportError:
     raise ImportError('The "mantidplot" module can only be used from within MantidPlot.')
 
-# Grab a few Mantid things so that we can recognise workspace variables
-from MantidFramework import WorkspaceProxy, WorkspaceGroup, MatrixWorkspace, mtd
+
 import proxies
 
 from PyQt4 import QtCore, QtGui
@@ -18,6 +17,23 @@ from PyQt4.QtCore import Qt
 # Import into the global namespace qti classes that:
 #   (a) don't need a proxy & (b) can be constructed from python
 from qti import PlotSymbol, ImageSymbol, ArrowMarker, ImageMarker
+
+#-------------------------- Mantid Python access functions----------------
+# Grab a few Mantid things so that we can recognise workspace variables
+# While we have 2 APIs we need to figure out which to use so add a little bit of indirection
+def get_analysis_data_service():
+    """Returns an object that can be used to get a workspace by name from Mantid
+    
+    Returns:
+        A object that acts like a dictionary to retrieve workspaces
+    """
+    import sys
+    if 'mantid.api' in sys.modules:
+        import mantid
+        return mantid.AnalysisDataService.Instance()
+    else:
+        import MantidFramework
+        return MantidFramework.mtd
 
 #-------------------------- Wrapped MantidPlot functions -----------------
 
@@ -28,7 +44,7 @@ def workspace(name):
     Args:
         name: The name of the workspace in the Analysis Data Service.
     """
-    return mtd[name]
+    return get_analysis_data_service()[name]
 
 def table(name):
     """Get a handle on a table.
@@ -149,12 +165,11 @@ def plot(source, *args, **kwargs):
     Returns:
         A handle to the created Graph widget.
     """
-    if isinstance(source,WorkspaceProxy):
-        return plotSpectrum(source, *args, **kwargs)
-    else:
+    if hasattr(source, '_getHeldObject') and isinstance(source._getHeldObject(), QtCore.QObject):
         return proxies.Graph(qti.app.plot(source._getHeldObject(), *args, **kwargs))
-
-
+    else:
+        plotSpectrum(source, *args, **kwargs)
+        
 #-----------------------------------------------------------------------------
 def plotSpectrum(source, indices, error_bars = False, type = -1):
     """Open a 1D Plot of a spectrum in a workspace.
@@ -217,14 +232,15 @@ def stemPlot(source, index, power=None, startPoint=None, endPoint=None):
         startPoint=0
     if endPoint==None:
         endPoint=-1
-    # If the source is a workspace, create a table from the specified index
-    if isinstance(source,WorkspaceProxy):
+    
+    if isinstance(source,proxies.QtProxyObject):
+        source = source._getHeldObject()
+    elif hasattr(source, 'getName'):
+        # If the source is a workspace, create a table from the specified index
         wsName = source.getName()
         source = qti.app.mantidUI.workspaceToTable(wsName,wsName,[index],False,True)
         # The C++ stemPlot method takes the name of the column, so get that
         index = source.colName(2)
-    elif isinstance(source,proxies.QtProxyObject):
-        source = source._getHeldObject()
     # Get column name if necessary
     if isinstance(index, int):
         index = source.colName(index)
@@ -563,23 +579,22 @@ def __getWorkspaceNames(source):
         for w in source:
             names = __getWorkspaceNames(w)
             ws_names += names
-    elif isinstance(source,WorkspaceProxy):
-        wspace = source._getHeldObject()
+    elif hasattr(source, 'getName'):
+        if hasattr(source, '_getHeldObject'):
+            wspace = source._getHeldObject()
+        else:
+            wspace = source
         if wspace == None:
             return []
-        if isinstance(wspace,WorkspaceGroup):
-            grp_names = source.getNames()
+        if hasattr(wspace, 'getNames'):
+            grp_names = wspace.getNames()
             for n in grp_names:
                 if n != wspace.getName():
                     ws_names.append(n)
-        elif isinstance(wspace,MatrixWorkspace):
-            ws_names.append(wspace.getName())
         else:
-            # Other non-matrix workspaces
             ws_names.append(wspace.getName())
-            pass
     elif isinstance(source,str):
-        w = mtd[source]
+        w = get_analysis_data_service()[source]
         if w != None:
             names = __getWorkspaceNames(w)
             for n in names:
@@ -680,7 +695,7 @@ def __tryPlot(workspace_names, indices, error_bars, type):
 def __doPlotting(source, indices, error_bars,type):
     if isinstance(source, list) or isinstance(source, tuple):
         return __PlotList(source, indices, error_bars,type)
-    elif isinstance(source, str) or isinstance(source, WorkspaceProxy):
+    elif isinstance(source, str) or hasattr(source, 'getName'):
         return __PlotSingle(source, indices, error_bars,type)
     else:
         raise TypeError("Source is not a workspace name or a workspace variable")

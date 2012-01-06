@@ -28,7 +28,7 @@ double InstrumentActor::m_tolerance = 0.00001;
  * Constructor
  * @param wsName :: Workspace
  */
-InstrumentActor::InstrumentActor(const QString wsName): 
+InstrumentActor::InstrumentActor(const QString &wsName):
 m_workspace(boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()))),
 m_autoscaling(true),
 m_maskedColor(100,100,100),

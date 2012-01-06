@@ -1,3 +1,8 @@
+/*WIKI
+ *
+ *
+ *WIKI*/
+
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -16,9 +21,9 @@ DECLARE_FUNCTION(StretchExp)
 
 StretchExp::StretchExp()
 {
-  declareParameter("Height", 1.0);
-  declareParameter("Lifetime", 1.0);
-  declareParameter("Stretching",1.0);
+  declareParameter("Height", 1.0, "Height at time zero");
+  declareParameter("Lifetime", 1.0, "Relaxation time of the standard exponential");
+  declareParameter("Stretching",1.0, "Stretching exponent");
 }
 
 

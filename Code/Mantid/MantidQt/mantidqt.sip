@@ -67,6 +67,9 @@ namespace MantidQt
 namespace SliceViewer
 {
 
+//*WIKI* == Classes ==
+//*WIKI* Here follows a list of the classes exposed to python and the methods you can execute on them.
+
 
 /***************************************************************************/
 /***************************************************************************/

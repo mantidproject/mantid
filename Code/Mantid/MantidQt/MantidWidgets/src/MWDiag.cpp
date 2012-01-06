@@ -51,17 +51,17 @@ void MWDiag::loadSettings()
 
   m_designWidg.leIFile->setText(getSetting("input mask"));
   m_designWidg.leOFile->setText(getSetting("output file"));
-  m_designWidg.leSignificance->setText(getSetting("significance", instrument, "signif"));
-  m_designWidg.leHighAbs->setText(getSetting("high abs", instrument, "large"));
-  m_designWidg.leLowAbs->setText(getSetting("low abs", instrument, "tiny"));
-  m_designWidg.leHighMed->setText(getSetting("high median", instrument, "median_hi"));
-  m_designWidg.leLowMed->setText(getSetting("low median", instrument, "median_lo"));
+  m_designWidg.leSignificance->setText(getSetting("significance", instrument, "diag_samp_sig"));
+  m_designWidg.leHighAbs->setText(getSetting("high abs", instrument, "diag_huge"));
+  m_designWidg.leLowAbs->setText(getSetting("low abs", instrument, "diag_tiny"));
+  m_designWidg.leHighMed->setText(getSetting("high median", instrument, "diag_samp_hi"));
+  m_designWidg.leLowMed->setText(getSetting("low median", instrument, "diag_samp_lo"));
   m_designWidg.leVariation->setText(getSetting("variation", instrument, "variation"));
   m_designWidg.leStartTime->setText(getSetting("TOF start", instrument, "bkgd-range-min"));
   m_designWidg.leEndTime->setText(getSetting("TOF end", instrument, "bkgd-range-max"));
   m_designWidg.leAcceptance->setText(getSetting("back criteria", instrument, "bkgd_threshold"));
-  m_designWidg.bleed_maxrate->setText(getSetting("bleed_max_framerate", instrument, "bleed_max_framerate"));
-  m_designWidg.ignored_pixels->setText(getSetting("bleed_ignored_pixels", instrument, "bleed_ignored_pixels"));
+  m_designWidg.bleed_maxrate->setText(getSetting("bleed_max_framerate", instrument, "diag_bleed_maxrate"));
+  m_designWidg.ignored_pixels->setText(getSetting("bleed_ignored_pixels", instrument, "diag_bleed_pixels"));
 
   // Boolean settings
   // Background tests
@@ -69,11 +69,11 @@ void MWDiag::loadSettings()
   bool checked = static_cast<bool>(value.toUInt());
   m_designWidg.ckDoBack->setChecked(checked);
   // Zero removal
-  value = getSetting("no zero background", instrument, "remove_zero");
+  value = getSetting("no zero background", instrument, "diag_samp_zero");
   checked = static_cast<bool>(value.toUInt());
   m_designWidg.ckZeroCounts->setChecked(checked);
   // Bleed test
-  value = getSetting("bleed_test", instrument, "bleed_test");
+  value = getSetting("bleed_test", instrument, "diag_bleed_test");
   checked = static_cast<bool>(value.toUInt());
   m_designWidg.bleed_group->setChecked(checked);
 }
@@ -389,23 +389,25 @@ QString MWDiag::createDiagnosticScript() const
   QString bleed_maxrate = m_designWidg.bleed_maxrate->text();
   QString bleed_pixels = m_designWidg.ignored_pixels->text();
 
-  QString diagCall = 
-    "diag_total_mask = diagnostics.diagnose(";
+  QString diagCall =
+    "from DirectEnergyConversion import setup_reducer\n"
+    "from mantidsimple import mtd\n"
+    "reducer = setup_reducer(mtd.settings['default.instrument'])\n"
+    "diag_total_mask = reducer.diagnose(";
   
   if( m_designWidg.ckDoBack->isChecked() )
   {
     // Do the background check so we need all fields
     diagCall += 
-      "white_run=" + whiteBeam + ","
-      "sample_run=" + sampleRun + ","
-      "other_white=" + whiteBeam2 + ","
-      "remove_zero=" + removeZeroes + ","
+      "white=" + whiteBeam + ","
+      "sample=" + sampleRun + ","
+      "samp_zero=" + removeZeroes + ","
       "tiny=" + lowCounts + ","
-      "large=" + highCounts + ","
-      "median_lo=" + lowMedian + ","
-      "median_hi=" + highMedian + ","
-      "signif=" + significance + ","
-      "bkgd_threshold=" + acceptance + ","
+      "huge=" + highCounts + ","
+      "van_lo=" + lowMedian + ","
+      "van_hi=" + highMedian + ","
+      "van_sig=" + significance + ","
+      "samp_hi=" + acceptance + ","
       "bkgd_range=" + bkgdRange + ","
       "variation=" + variation + ","
       "hard_mask=" + hard_mask_file;
@@ -415,12 +417,11 @@ QString MWDiag::createDiagnosticScript() const
     // No background check so don't need all of the fields
     diagCall += 
       "white_run=" + whiteBeam + ","
-      "other_white=" + whiteBeam2 + ","
       "tiny=" + lowCounts + ","
-      "large=" + highCounts + ","
-      "median_lo=" + lowMedian + ","
-      "median_hi=" + highMedian + ","
-      "signif=" + significance + ","
+      "huge=" + highCounts + ","
+      "van_lo=" + lowMedian + ","
+      "van_hi=" + highMedian + ","
+      "van_sig=" + significance + ","
       "hard_mask=" + hard_mask_file;
   }
   
@@ -439,16 +440,7 @@ QString MWDiag::createDiagnosticScript() const
 
   // Print results argument and Closing  argument bracket
   diagCall += ", print_results=True)\n";
-
-  QString pyCode = 
-    "import diagnostics\n"
-    "try:\n"
-    "    " + diagCall + "\n"
-    "except RuntimeError, exc:\n"
-    "    print 'Exception:'\n"
-    "    print str(exc)\n";
-  
-  return pyCode;
+  return diagCall;
 }
 
 /**

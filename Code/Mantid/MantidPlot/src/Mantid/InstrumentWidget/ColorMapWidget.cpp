@@ -228,7 +228,7 @@ void ColorMapWidget::mousePressEvent(QMouseEvent* e)
   {
     m_dragging = true;
     m_y = e->y();
-    m_dtype = m_y > height()/2 ? Bottom : Top;
+    m_dtype = (m_y > height()/2) ? Bottom : Top;
     QApplication::setOverrideCursor(Qt::ClosedHandCursor);
   }
 }
