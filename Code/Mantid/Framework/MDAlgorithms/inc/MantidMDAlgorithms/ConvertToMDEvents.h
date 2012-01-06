@@ -58,6 +58,8 @@ namespace MDAlgorithms
   typedef boost::function<void (ConvertToMDEvents* )> pMethod;
  // vectors of strings are here everywhere
   typedef  std::vector<std::string> Strings;
+
+
   /// known sates for algorithms, caluclating Q-values
   enum Q_state{
        NoQ,     //< no Q transformatiom, just copying values along X axis (may be with units transformation)
@@ -84,8 +86,20 @@ namespace MDAlgorithms
       ConvFromTOF,  //< Input workspace units are the TOF 
       NConvUintsStates // number of various recognized unit conversion modes used to terminate CnvrtUnits algorithms metalooop.
   };
+  enum InputWSType  // Algorithm recognizes 2 input workspace types with different interface. 
+  {
+      Workspace2DType, //< 2D matirix workspace
+      EventWSType,     //< Event worskapce
+      NInWSTypes
+  };
+// way to treat the X-coorinate in the workspace:
+    enum XCoordType
+    {
+        Histohram, // typical for Matrix workspace -- deploys central average 0.5(X[i]+X[i+1]); other types of averaging are possible if needed 
+        Axis       // typical for events
+    };
 /// predefenition of the class, which does all coordinate transformations, Linux compilers need this. 
-  template<Q_state Q, AnalMode MODE, CnvrtUnits CONV> 
+  template<Q_state Q, AnalMode MODE, CnvrtUnits CONV,XCoordType XTYPE> 
   struct COORD_TRANSFORMER;
   
   class DLLExport ConvertToMDEvents  : public MDEvents::BoxControllerSettingsAlgorithm
@@ -120,13 +134,15 @@ namespace MDAlgorithms
   /// logger -> to provide logging, for MD dataset file operations
     static Mantid::Kernel::Logger& convert_log;
 
- 
-   /// the variable which describes the number of the dimensions, currently used by algorithm. Calculated from number of input properties and input workspace;
-   size_t n_activated_dimensions;
-  
    /// pointer to the input workspace;
    Mantid::API::MatrixWorkspace_sptr inWS2D;
-   // the variable which keeps preprocessed positions of the detectors if any availible (TODO: should it be a table ws?);
+
+   // THE VARIABLES BELOW DESCRIBE TARGET M-DIMENSIONAL  WORKSPACE:
+   /// the variable which describes the number of the dimensions, in the target workspace. 
+   /// Calculated from number of input properties and the operations, performed on input workspace;
+   size_t n_activated_dimensions;
+  
+   /// the variable which keeps preprocessed positions of the detectors if any availible (TODO: should it be a table ws and separate algorithm?);
     static preprocessed_detectors det_loc;  
     /// minimal and maximal values for the workspace dimensions:
     std::vector<double>      dim_min,dim_max;
@@ -142,11 +158,16 @@ namespace MDAlgorithms
    std::string identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS,const std::string &Q_mode_req, const std::string &dE_mode_req,
                                  std::vector<std::string> &out_dim_names,std::vector<std::string> &out_dim_units);
 
-   /// Parts of the identifyMatrixAlg, separated for unit testing:
+   // Parts of the identifyMatrixAlg, separated for unit testing:
+   // identify Q - mode
    std::string parseQMode(const std::string &Q_mode_req,const Strings &ws_dim_names,const Strings &ws_dim_units,Strings &out_dim_names,Strings &out_dim_units, int &nQdims);
+   // identify energy transfer mode
    std::string parseDEMode(const std::string &Q_MODE_ID,const std::string &dE_mode_req,const Strings &ws_dim_units,Strings &out_dim_names, 
                                  Strings &out_dim_units, int &ndE_dims,std::string &natural_units);
+   // indentify input units conversion mode
    std::string parseConvMode(const std::string &Q_MODE_ID,const std::string &natural_units,const Strings &ws_dim_units);
+   // identify what kind of input workspace is there:
+   std::string parseWSType(API::MatrixWorkspace_const_sptr inMatrixWS)const;
 
    /** identifies conversion subalgorithm to run on a workspace */
    std::string identifyTheAlg(API::MatrixWorkspace_const_sptr inMatrixWS,const std::string &Q_mode_req, const std::string &dE_mode_req,
@@ -159,7 +180,7 @@ namespace MDAlgorithms
                                        bool is_powder=false)const;
 
    /// map to select an algorithm as function of the key, which describes it
-    std::map<std::string, pMethod> alg_selector;
+   std::map<std::string, pMethod> alg_selector;
    /// the pointer to class which is responsible for adding data to N-dimensional workspace;
     std::auto_ptr<MDEvents::MDEventWSWrapper> pWSWrapper;
 
@@ -178,13 +199,16 @@ namespace MDAlgorithms
     }
   private: 
    //--------------------------------------------------------------------------------------------------
-   /** generic template to convert to any Dimensions workspace;
-    */
+   /** generic template to convert to any Dimensions workspace from a histohram workspace   */
     template<Q_state Q, AnalMode MODE, CnvrtUnits CONV>
-    void processQND();
+    void processQNDHWS();
+   /** generic template to convert to any Dimensions workspace from an Event workspace   */
+    template<Q_state Q, AnalMode MODE, CnvrtUnits CONV>
+    void processQNDEWS();
+
     /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
     /// presumably will be completely inlined
-     template<Q_state Q, AnalMode MODE, CnvrtUnits CONV> 
+     template<Q_state Q, AnalMode MODE, CnvrtUnits CONV,XCoordType XTYPE> 
      friend struct COORD_TRANSFORMER;
      /// helper class to orginize metaloop on various algorithm options
      template<Q_state Q,size_t N_ALGORITHMS >
@@ -195,8 +219,10 @@ namespace MDAlgorithms
     std::vector<std::string> Q_modes;
     /// known energy transfer modes ID-s (symbolic representation of correspondent enum)
     std::vector<std::string> dE_modes;
-    // known conversion modes ID-s       (symbolic representation of correspondent enum)
+    /// known conversion modes ID-s       (symbolic representation of correspondent enum)
     std::vector<std::string> ConvModes;
+    /// supported input workspace types  (names of supported workspace types)
+    std::vector<std::string> SupportedWS;
 
     /// the ID of the unit, which is used in the expression to converty to QND. All other related elastic units should be converted to this one. 
     std::string  native_elastic_unitID; // currently it is Q

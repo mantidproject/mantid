@@ -54,24 +54,24 @@ namespace Mantid
     protected:
       /// Get the total counts for each spectra
       API::MatrixWorkspace_sptr integrateSpectra(API::MatrixWorkspace_sptr inputWS, const int indexMin,
-						 const int indexMax, const double lower,
-						 const double upper, const bool outputWorkspace2D = false);
+          const int indexMax, const double lower,
+          const double upper, const bool outputWorkspace2D = false);
 
       /// Calculate the median of the given workspace. This assumes that the input workspace contains 
       /// integrated counts
-      double calculateMedian(API::MatrixWorkspace_sptr input, std::set<int> & skippedIndices);
+      double calculateMedian(API::MatrixWorkspace_sptr input, bool excludeZeroes);
       /// Convert to a distribution
       API::MatrixWorkspace_sptr convertToRate(API::MatrixWorkspace_sptr workspace);
 
       /** @name Progress reporting */
       //@{
       /// For the progress bar, estimates of how many additions, 
-      /// or equilivent, member functions will do for each spectrum
+      /// or equivalent, member functions will do for each spectrum
       enum RunTime
       {
         /// An estimate of how much work SolidAngle will do for each spectrum
         RTGetSolidAngle = 15000,
-        /// Estimate of the work required from Integtrate for each spectrum
+        /// Estimate of the work required from Integrate for each spectrum
         RTGetTotalCounts = 5000,
         /// Work required by the ConvertToDistribution algorithm
         RTGetRate = 100,

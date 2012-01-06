@@ -49,7 +49,7 @@ Workspace2D_sptr SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(std
       Mantid::DataObjects::Workspace2D_sptr workspace)
   {
     // Determine the search directory for XML instrument definition files (IDFs)
-    std::string directoryName = Mantid::Kernel::ConfigService::Instance().getInstrumentDirectory();
+    //std::string directoryName = Mantid::Kernel::ConfigService::Instance().getInstrumentDirectory();
 
     // For Nexus Mantid processed, Instrument XML file name is read from nexus
     std::string instrumentID = inst_name;

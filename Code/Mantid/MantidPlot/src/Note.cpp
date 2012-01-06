@@ -38,7 +38,7 @@
 #include "MantidKernel/ConfigService.h"
 
 Note::Note(const QString& label, ApplicationWindow* parent, const QString& name, Qt::WFlags f)
-  : MdiSubWindow(label, parent, name, f)
+  : MdiSubWindow(parent, label, name, f)
 {
   init();
 }

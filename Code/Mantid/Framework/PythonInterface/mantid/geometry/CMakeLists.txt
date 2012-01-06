@@ -62,3 +62,9 @@ set_python_properties( PythonGeometryModule _geometry )
 set_target_output_directory ( PythonGeometryModule ${OUTPUT_DIR} .pyd )
 # Add the required dependencies
 target_link_libraries ( PythonGeometryModule PythonKernelModule ${PYTHON_DEPS} )
+
+###########################################################################
+# Installation settings
+###########################################################################
+install ( TARGETS PythonGeometryModule DESTINATION ${BIN_DIR}/mantid/geometry )
+

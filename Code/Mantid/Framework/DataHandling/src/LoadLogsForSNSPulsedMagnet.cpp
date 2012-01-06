@@ -204,6 +204,7 @@ struct Pulse
   uint64_t event_index;
 
   /// The proton charge for the pulse.
+  // cppcheck-suppress unusedStructMember
   double pCurrent;
 };
 #pragma pack(pop)

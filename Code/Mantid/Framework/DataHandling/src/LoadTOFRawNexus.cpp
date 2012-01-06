@@ -1,8 +1,21 @@
 /*WIKI* 
 
+This algorithm loads a NeXus file that conforms to the TOFRaw format and stores
+it in a 2D workspace. The TOFRaw format is used at SNS and consists of a histogram
+representation with common bin boundaries.
+
+Some NXS files have multiple data fields giving binning in other units
+(e.g. d-spacing or momentum). You can choose which binning to use by entering
+the '''Signal''' parameter. The default value is 1, which normally will
+correspond to TOF. The "Y" units will still be in ''counts''.
+
+The typical meanings of Signal are as follows (note that these may change!):
+
+* Signal 1: Time of flight. The data field containing the bin boundaries is ''time_of_flight''
+* Signal 5: q.  The data field containing the bin boundaries is ''momentum_transfer''
+* Signal 6: d-spacing.  The data field containing the bin boundaries is ''dspacing''
 
 *WIKI*/
-// Includes
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/LoadAlgorithmFactory.h"
@@ -33,6 +46,14 @@ LoadTOFRawNexus::LoadTOFRawNexus()
 }
 
 //-------------------------------------------------------------------------------------------------
+/** Documentation strings */
+void LoadTOFRawNexus::initDocs()
+{
+  this->setWikiSummary("Loads a NeXus file confirming to the TOFRaw format");
+  this->setOptionalMessage("Loads a NeXus file confirming to the TOFRaw format");
+}
+
+//-------------------------------------------------------------------------------------------------
 /// Initialisation method.
 void LoadTOFRawNexus::init()
 {
@@ -41,7 +62,8 @@ void LoadTOFRawNexus::init()
   exts.push_back(".nxs");
   declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
       "The name of the NeXus file to load");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "", Direction::Output));
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "", Direction::Output),
+      "The name of the Workspace2D to create.");
   declareProperty("Signal", 1,
       "Number of the signal to load from the file. Default is 1 = time_of_flight.\n"
       "Some NXS files have multiple data fields giving binning in other units (e.g. d-spacing or momentum).\n"
@@ -236,9 +258,9 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
           std::vector<int> dims = file->getInfo().dims;
           file->closeData();
 
-          size_t newPixels = 1;
           if (!dims.empty())
           {
+            size_t newPixels = 1;
             for (size_t i=0; i < dims.size(); i++)
               newPixels *= dims[i];
             numPixels += newPixels;

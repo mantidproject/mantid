@@ -1177,7 +1177,7 @@ void Indirect::plotRaw()
 
     QString pyInput =
       "from mantidsimple import *\n"
-      "from mantidplot import *\n"
+      "from mantidplotpy import *\n"
       "import os.path as op\n"
       "file = r'" + rawFile + "'\n"
       "name = op.splitext( op.split(file)[1] )[0]\n"
@@ -1285,7 +1285,7 @@ void Indirect::calibCreate()
 
     if ( m_uiForm.cal_ckPlotResult->isChecked() )
     {
-      reducer += "from mantidplot import *\n"
+      reducer += "from mantidplotpy import *\n"
         "plotTimeBin(result, 0)\n";
     }
 
@@ -1561,7 +1561,7 @@ void Indirect::sOfQwInputType(const QString& input)
 void Indirect::sOfQwPlotInput()
 {
   QString pyInput = "from mantidsimple import *\n"
-    "from mantidplot import *\n";
+    "from mantidplotpy import *\n";
 
   //...
   if ( m_uiForm.sqw_cbInput->currentText() == "File" )

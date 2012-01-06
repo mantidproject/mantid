@@ -13,7 +13,7 @@ else:
 
 ## Other imports
 from mantidsimple import *
-from mantidplot import *
+from mantidplotpy import *
 from IndirectCommon import getEfixed, createQaxis
 import math, os.path
 

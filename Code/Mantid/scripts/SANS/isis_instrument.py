@@ -280,18 +280,18 @@ class ISISInstrument(instrument.Instrument):
         self.SAMPLE_Z_CORR = 0
         
         # Detector position information for SANS2D
+        # why are these not defined in SANS2D
         self.FRONT_DET_RADIUS = 306.0
         self.FRONT_DET_DEFAULT_SD_M = 4.0
         self.FRONT_DET_DEFAULT_X_M = 1.1
         self.REAR_DET_DEFAULT_SD_M = 4.0
 
         # LOG files for SANS2D will have these encoder readings  
+        # why are these not defined in SANS2D
         self.FRONT_DET_X = 0.0
         self.FRONT_DET_Z = 0.0
         self.FRONT_DET_ROT = 0.0
         self.REAR_DET_Z = 0.0
-        
-        # Rear_Det_X  Will Be Needed To Calc Relative X Translation Of Front Detector 
         self.REAR_DET_X = 0
 
         #spectrum number of the monitor used to as the incidient in the transmission calculations
@@ -609,28 +609,43 @@ class SANS2D(ISISInstrument):
             @return: the locations of (in the new coordinates) beam center, center of detector bank
         """
 
-        if self.cur_detector().name() == 'front-detector':
-            rotateDet = (-self.FRONT_DET_ROT - self.cur_detector().rot_corr)
-            RotateInstrumentComponent(ws, self.cur_detector().name(), X="0.", Y="1.0", Z="0.", Angle=rotateDet)
-            RotRadians = math.pi*(self.FRONT_DET_ROT + self.cur_detector().rot_corr)/180.
-            xshift = (self.REAR_DET_X + self.other_detector().x_corr - self.FRONT_DET_X - self.cur_detector().x_corr + self.FRONT_DET_RADIUS*math.sin(RotRadians) )/1000. - self.FRONT_DET_DEFAULT_X_M - xbeam
-            yshift = (self.cur_detector().y_corr/1000.  - ybeam)
-            # default in instrument description is 23.281m - 4.000m from sample at 19,281m !
-            # need to add ~58mm to det1 to get to centre of detector, before it is rotated.
-            zshift = (self.FRONT_DET_Z + self.cur_detector().z_corr + self.FRONT_DET_RADIUS*(1 - math.cos(RotRadians)) )/1000.
-            zshift -= self.FRONT_DET_DEFAULT_SD_M
-            MoveInstrumentComponent(ws, self.cur_detector().name(), X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
-            beam_cen = [0.0, 0.0]
-            det_cen = [0.0, 0.0]
-        else:
-            xshift = -xbeam
-            yshift = -ybeam
-            zshift = (self.REAR_DET_Z + self.cur_detector().z_corr)/1000.
-            zshift -= self.REAR_DET_DEFAULT_SD_M
-            mantid.sendLogMessage("::SANS:: Setup move "+str(xshift*1000.)+" "+str(yshift*1000.)+" "+str(zshift*1000.))
-            MoveInstrumentComponent(ws, self.cur_detector().name(), X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
-            beam_cen = [0.0,0.0]
-            det_cen = [xshift, yshift]
+        # Store the name of the current detector since temporarily
+        # below set current detector to manual to move both front and rear
+        # detectors
+        temp = self.cur_detector().name()
+
+
+        # Deal with front detector
+        
+        self.setDetector('front-detector')
+        # rotate front detector according to value in log file and correction value provided in user file
+        rotateDet = (-self.FRONT_DET_ROT - self.cur_detector().rot_corr)
+        RotateInstrumentComponent(ws, self.cur_detector().name(), X="0.", Y="1.0", Z="0.", Angle=rotateDet)       
+        RotRadians = math.pi*(self.FRONT_DET_ROT + self.cur_detector().rot_corr)/180.
+        # x-position of rear detector is an indicator of the beam position...
+        xshift = (self.REAR_DET_X + self.other_detector().x_corr - self.FRONT_DET_X - self.cur_detector().x_corr + self.FRONT_DET_RADIUS*math.sin(RotRadians) )/1000. - self.FRONT_DET_DEFAULT_X_M - xbeam
+        yshift = (self.cur_detector().y_corr/1000.  - ybeam)
+        # Note don't understand the comment below
+        # default in instrument description is 23.281m - 4.000m from sample at 19,281m !
+        # need to add ~58mm to det1 to get to centre of detector, before it is rotated.
+        zshift = (self.FRONT_DET_Z + self.cur_detector().z_corr + self.FRONT_DET_RADIUS*(1 - math.cos(RotRadians)) )/1000.
+        zshift -= self.FRONT_DET_DEFAULT_SD_M
+        MoveInstrumentComponent(ws, self.cur_detector().name(), X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
+        
+        
+        # deal with rear detector
+        
+        self.setDetector('rear-detector')        
+        xshift = -xbeam
+        yshift = -ybeam
+        zshift = (self.REAR_DET_Z + self.cur_detector().z_corr)/1000.
+        zshift -= self.REAR_DET_DEFAULT_SD_M
+        mantid.sendLogMessage("::SANS:: Setup move "+str(xshift*1000.)+" "+str(yshift*1000.)+" "+str(zshift*1000.))
+        MoveInstrumentComponent(ws, self.cur_detector().name(), X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
+            
+        # set the current detector back to that it was at the start of this method    
+        self.setDetector(temp)    
+            
             
         super(SANS2D, self).move_components(ws)
         
@@ -652,6 +667,14 @@ class SANS2D(ISISInstrument):
             MoveInstrumentComponent(ws, component, Z=z_move, 
                                     RelativePosition=True)
             mantid.sendLogMessage('::SANS:: Monitor 4 is at z = ' + str(z_new) )
+            
+        # Are these returned values used anywhere?    
+        if self.cur_detector().name() == 'front-detector':
+            beam_cen = [0.0, 0.0]
+            det_cen = [0.0, 0.0]
+        else:
+            beam_cen = [0.0,0.0]
+            det_cen = [-xbeam, -ybeam]            
 
         return beam_cen, det_cen
         

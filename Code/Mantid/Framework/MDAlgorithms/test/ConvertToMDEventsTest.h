@@ -360,7 +360,7 @@ void testGetWS4DimIDFine(){
 
     TSM_ASSERT_EQUALS("Inelastic workspace will produce 4 dimensions",4,dim_names.size());
     TSM_ASSERT_EQUALS("Last dimension of Inelastic transformation should be DeltaE","DeltaE",dim_units[3]);
-    TSM_ASSERT_EQUALS("Alg ID would be: ","QxQyQzDirectCnvNo",Alg_ID);
+    TSM_ASSERT_EQUALS("Alg ID would be: ","WS2DQxQyQzDirectCnvNo",Alg_ID);
 }
 void testGetWS3DimIDFine(){
     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4,10,true);
@@ -377,7 +377,7 @@ void testGetWS3DimIDFine(){
 
     TSM_ASSERT_EQUALS("Inelastic workspace will produce 3 dimensions",3,dim_names.size());
     TSM_ASSERT_EQUALS("Last dimension of Elastic transformation should be ","Momentum",dim_units[2]);
-    TSM_ASSERT_EQUALS("Alg ID would be: ","QxQyQzElasticCnvByTOF",Alg_ID);
+    TSM_ASSERT_EQUALS("Alg ID would be: ","WS2DQxQyQzElasticCnvByTOF",Alg_ID);
 
 }
 void testGetWSDimNames2AxisNoQ(){
@@ -447,7 +447,7 @@ void testIdentifyMatrixAlg_1()
     ws2D->replaceAxis(1,pAx);
 
 
-    TS_ASSERT_EQUALS("CnvNo",pAlg->identifyMatrixAlg(ws2D,"","",dim_names,dim_units));
+    TS_ASSERT_EQUALS("WS2DCnvNo",pAlg->identifyMatrixAlg(ws2D,"","",dim_names,dim_units));
     TS_ASSERT_EQUALS(ws_dim_names[0],dim_names[0]);
     TS_ASSERT_EQUALS(ws_dim_names[1],dim_names[1]);
 
@@ -489,7 +489,7 @@ void testIdentifyMatrixAlg_2()
     pAx = new API::NumericAxis(3);
     pAx->setUnit("TOF");
     ws2D->replaceAxis(0,pAx);
-    TS_ASSERT_EQUALS("|Q|ElasticCnvFromTOF",pAlg->identifyMatrixAlg(ws2D,"|Q|","Elastic",dim_names,dim_units));
+    TS_ASSERT_EQUALS("WS2D|Q|ElasticCnvFromTOF",pAlg->identifyMatrixAlg(ws2D,"|Q|","Elastic",dim_names,dim_units));
 
     TSM_ASSERT_EQUALS("One dim name came from Q (this can be logically wrong)",1,dim_names.size());
     TS_ASSERT_EQUALS(dim_names[0],"|Q|");
@@ -506,7 +506,7 @@ void testIdentifyMatrixAlg_3()
     pAx->setUnit("DeltaE");
     ws2D->replaceAxis(0,pAx);
 
-    TS_ASSERT_EQUALS("|Q|DirectCnvNo",pAlg->identifyMatrixAlg(ws2D,"|Q|","Direct",dim_names,dim_units));
+    TS_ASSERT_EQUALS("WS2D|Q|DirectCnvNo",pAlg->identifyMatrixAlg(ws2D,"|Q|","Direct",dim_names,dim_units));
     TSM_ASSERT_EQUALS("One dimension comes from Q",2,dim_names.size());
     TS_ASSERT_EQUALS(dim_names[0],"|Q|");
     TS_ASSERT_EQUALS(dim_names[1],"DeltaE");
@@ -522,7 +522,7 @@ void testIdentifyMatrixAlg_4()
     pAx->setUnit("DeltaE");
     ws2D->replaceAxis(0,pAx);
 
-    TS_ASSERT_EQUALS("|Q|IndirectCnvNo",pAlg->identifyMatrixAlg(ws2D,"|Q|","Indirect",dim_names,dim_units));
+    TS_ASSERT_EQUALS("WS2D|Q|IndirectCnvNo",pAlg->identifyMatrixAlg(ws2D,"|Q|","Indirect",dim_names,dim_units));
     TSM_ASSERT_EQUALS("One dim name came from Q (this can be wrong)",2,dim_names.size());
     TS_ASSERT_EQUALS(dim_names[0],"|Q|");
     TS_ASSERT_EQUALS(dim_names[1],"DeltaE");
@@ -537,7 +537,7 @@ void testIdentifyMatrixAlg_5()
     pAx->setUnit("DeltaE");
     ws2D->replaceAxis(0,pAx);
 
-    TS_ASSERT_EQUALS("QxQyQzIndirectCnvNo",pAlg->identifyMatrixAlg(ws2D,"QxQyQz","Indirect",dim_names,dim_units));
+    TS_ASSERT_EQUALS("WS2DQxQyQzIndirectCnvNo",pAlg->identifyMatrixAlg(ws2D,"QxQyQz","Indirect",dim_names,dim_units));
     TSM_ASSERT_EQUALS("One dim name came from Q (this can be wrong)",4,dim_names.size());
     TS_ASSERT_EQUALS(dim_names[0],"Q_x");
     TS_ASSERT_EQUALS(dim_names[1],"Q_y");
@@ -575,6 +575,8 @@ void testExecNoQ()
      ws2D->replaceAxis(0,pAxis);
 
     pAlg->setPropertyValue("InputWorkspace","testWSProcessed");
+    pAlg->setPropertyValue("OutputWorkspace","WS3DNoQ");
+    pAlg->setPropertyValue("UsePreprocessedDetectors","0");
     pAlg->setPropertyValue("QDimensions","");
     pAlg->setPropertyValue("OtherDimensions","phi,chi");
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", ""));
@@ -596,8 +598,10 @@ void testExecModQ()
 
      ws2D->replaceAxis(0,pAxis);
 
+    pAlg->setPropertyValue("OutputWorkspace","WS3DmodQ");
     pAlg->setPropertyValue("InputWorkspace","testWSProcessed");
     pAlg->setPropertyValue("QDimensions","|Q|");
+    pAlg->setPropertyValue("UsePreprocessedDetectors","0");
     pAlg->setPropertyValue("OtherDimensions","phi,chi");
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Elastic"));
     //
@@ -611,8 +615,10 @@ void testExecModQ()
 
 void testExecQ3D()
 {
+    pAlg->setPropertyValue("OutputWorkspace","WS5DQ3D");
     pAlg->setPropertyValue("InputWorkspace","testWSProcessed");
     pAlg->setPropertyValue("OtherDimensions","phi,chi");
+    pAlg->setPropertyValue("UsePreprocessedDetectors","0");
      
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions", "QxQyQz"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Direct"));
@@ -626,31 +632,6 @@ void testExecQ3D()
     AnalysisDataService::Instance().remove("OutputWorkspace"); 
 }
 
-void testEventWS()
-{
-  int numHist=10;
-   Mantid::API::MatrixWorkspace_sptr ws2D = boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::CreateRandomEventWorkspace(100, numHist, 0.1));
-   ws2D->setInstrument( ComponentCreationHelper::createTestInstrumentCylindrical(numHist) );
-   // any inelastic units or unit conversion using TOF needs Ei to be present among properties. 
-   ws2D->mutableRun().addProperty("Ei",13.,"meV",true);
-
-   AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
-
-// set up algorithm
-   TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace","testWSProcessed"));
-   TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OtherDimensions",""));
-   TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions", "QxQyQz"));
-   TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Elastic"));
-   pAlg->setPropertyValue("MinValues","-10,-10,-10");
-   pAlg->setPropertyValue("MaxValues"," 10, 10, 10");
-
-   pAlg->setRethrows(false);
-   pAlg->execute();
-   TSM_ASSERT("Shoud finish succesfully",pAlg->isExecuted());
-   AnalysisDataService::Instance().remove("OutputWorkspace"); 
-
-
-}
 
 ConvertToMDEventsTest(){
      pAlg = std::auto_ptr<Convert2AnyTestHelper>(new Convert2AnyTestHelper());

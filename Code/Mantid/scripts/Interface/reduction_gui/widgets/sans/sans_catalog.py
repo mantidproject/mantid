@@ -51,12 +51,25 @@ class SANSCatalogWidget(BaseWidget):
         self._settings.data_updated.connect(self._data_updated)
 
     def initialize_content(self):
+        self.copyAction = QtGui.QAction("Copy",  self)
+        self.copyAction.setShortcut("Ctrl+C")
+        self.addAction(self.copyAction)
+        
+        self.connect(self.copyAction, QtCore.SIGNAL("triggered()"), self.copyCells)
+        self._content.data_set_table.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.connect(self._content.data_set_table, QtCore.SIGNAL("customContextMenuRequested(QPoint)"), self.tableWidgetContext)
         self.connect(self._content.refresh_button, QtCore.SIGNAL("clicked()"), self._update_content)
         self.connect(self._content.browse_button, QtCore.SIGNAL("clicked()"), self._browse_directory)
         self.connect(self._content.directory_edit, QtCore.SIGNAL("returnPressed()"), self._update_content)        
         self._content.directory_edit.setText(self._settings.data_path)
         self._update_content(False)
         
+    def tableWidgetContext(self, point):
+        '''Create a menu for the tableWidget and associated actions'''
+        tw_menu = QtGui.QMenu("Menu", self)
+        tw_menu.addAction(self.copyAction)
+        tw_menu.exec_(self.mapToGlobal(point))
+    
     def is_running(self, is_running):
         """
             Enable/disable controls depending on whether a reduction is running or not
@@ -87,6 +100,28 @@ class SANSCatalogWidget(BaseWidget):
             else:
                 print "SANSCatalogWidget: Could not access local data catalog"
             
+    def copyCells(self):
+        indices = self._content.data_set_table.selectedIndexes()
+        if len(indices)==0:
+            return
+        
+        col_count = self._content.data_set_table.columnCount()
+        rows = []
+        for r in indices:
+            if r.row() not in rows:
+                rows.append(r.row())
+        
+        selected_text = ""
+        for row in rows:
+            for i in range(col_count): 
+                data = self._content.data_set_table.item(row,i)
+                if data is not None:
+                    selected_text += str(data.text())
+                if i<col_count-1:
+                    selected_text += '\t'
+            selected_text += '\n'
+                        
+        QtGui.QApplication.clipboard().setText(selected_text)
         
     def _update_content(self, process_files=True):
         self._settings.data_path = str(self._content.directory_edit.text())

@@ -458,8 +458,9 @@ namespace Mantid
             if (ext->find("*") != std::string::npos)
             {
               continue;
-              std::set < std::string > files;
-              Kernel::Glob::glob(pathPattern, files, globOption);
+              // FIXME: Does this need to be before continue?
+              //std::set < std::string > files;
+              //Kernel::Glob::glob(pathPattern, files, globOption);
             }
             else
             {

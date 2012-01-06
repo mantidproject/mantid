@@ -84,6 +84,13 @@ void FindPeaks::init()
   declareProperty("HighBackground", true,
       "Relatively weak peak in high background");
 
+  declareProperty("MinGuessedPeakWidth", 2,
+      "Minimum guessed peak width for fit. It is in unit of number of pixels.");
+  declareProperty("MaxGuessedPeakWidth", 10,
+      "Maximum guessed peak width for fit. It is in unit of number of pixels.");
+  declareProperty("GuessedPeakWidthStep", 2,
+      "Step of guessed peak width. It is in unit of number of pixels.");
+
   // The found peaks in a table
   declareProperty(new WorkspaceProperty<API::ITableWorkspace>("PeaksList","",Direction::Output),
     "The name of the TableWorkspace in which to store the list of peaks found" );
@@ -118,10 +125,10 @@ void FindPeaks::init()
  */
 void FindPeaks::exec()
 {
-  // Retrieve the input workspace
+  // 1. Retrieve the input workspace
   inputWS = getProperty("InputWorkspace");
   
-  // If WorkspaceIndex has been set it must be valid
+  // 2. If WorkspaceIndex has been set it must be valid
   index = getProperty("WorkspaceIndex");
   singleSpectrum = !isEmpty(index);
   if ( singleSpectrum && index >= static_cast<int>(inputWS->getNumberHistograms()) )
@@ -133,16 +140,34 @@ void FindPeaks::exec()
       "FindPeaks WorkspaceIndex property");
   }
 
-  //Get some properties
+  // 3. Get some properties
+  // a) Peak width
+  // TODO  Understand how fwhm is used!
   this->fwhm = getProperty("FWHM");
+  int t1 = getProperty("MinGuessedPeakWidth");
+  int t2 = getProperty("MaxGuessedPeakWidth");
+  int t3 = getProperty("GuessedPeakWidthStep");
+  if (t1 <= 0 || t2 <= 0 || t3 <= 0 || t1 > t2)
+  {
+    g_log.error() << "Input guessed peak width setup is not correct! Must be 0 < min guessed < max guessed" <<
+        " Input is 0 <? " << t1 << " <? " << t2 << ".  And step size " << t3 << " >0 ?" << std::endl;
+    throw std::invalid_argument("Input guessed peak width setup error!");
+  }
 
-  //Get the specified peak positions, which is optional
+  minGuessedPeakWidth = static_cast<unsigned int>(t1);
+  maxGuessedPeakWidth = static_cast<unsigned int>(t2);
+  stepGuessedPeakWidth = static_cast<unsigned int>(t3);
+
+  // b) Get the specified peak positions, which is optional
   std::string peakPositions = getProperty("PeakPositions");
 
+  // c) Background
   std::string backgroundtype = getProperty("BackgroundType");
 
+  // d) Choice of fitting approach
   mHighBackground = getProperty("HighBackground");
 
+  // 4. Fit
   if (peakPositions.size() > 0)
   {
     //Split the string and turn it into a vector.
@@ -158,8 +183,11 @@ void FindPeaks::exec()
     this->findPeaksUsingMariscotti(backgroundtype);
   }
 
+  // 5. Output
   g_log.information() << "Total of " << m_peaks->rowCount() << " peaks found and successfully fitted." << std::endl;
   setProperty("PeaksList",m_peaks);
+
+  return;
 }
 
 
@@ -658,7 +686,7 @@ void FindPeaks::fitPeakOneStep(const API::MatrixWorkspace_sptr &input, const int
   std::vector<double> bestparams;
 
   // 1. Loop around
-  for (unsigned int width = 2; width <= 10; width +=2)
+  for (unsigned int width = minGuessedPeakWidth; width <= maxGuessedPeakWidth; width +=stepGuessedPeakWidth)
   {
 
     // a) Set up sub algorithm Fit
@@ -807,11 +835,12 @@ void FindPeaks::fitPeakOneStep(const API::MatrixWorkspace_sptr &input, const int
  * @param in_bg2: guessed value of a2
  * @param backgroundtype: type of background (linear or quadratic)
  */
-void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, const int spectrum, const int& i0, const int& i2, const int& i4,
+void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, const int spectrum,
+    const int& i0, const int& i2, const int& i4,
     const unsigned int& i_min, const unsigned int& i_max,
     const double& in_bg0, const double& in_bg1, const double& in_bg2, std::string& backgroundtype){
 
-  g_log.information("Fitting Peak in high-background approach");
+  g_log.debug("Fitting Peak in high-background approach");
 
   const MantidVec &X = input->readX(spectrum);
   const MantidVec &Y = input->readY(spectrum);
@@ -944,7 +973,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   double bestcenter = 0;
   double bestheight = 0;
 
-  for (unsigned int iwidth = 2; iwidth < 10; iwidth ++){
+  for (unsigned int iwidth = minGuessedPeakWidth; iwidth <= maxGuessedPeakWidth; iwidth += stepGuessedPeakWidth){
     // a) Set up sub algorithm Fit
     IAlgorithm_sptr gfit;
     try
@@ -982,7 +1011,6 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
     // e) Fit and get result
     gfit->executeAsSubAlg();
 
-    std::string fitStatus = gfit->getProperty("OutputStatus");
     std::vector<double> params = gfit->getProperty("Parameters");
     std::vector<std::string> paramnames = gfit->getProperty("ParameterNames");
 

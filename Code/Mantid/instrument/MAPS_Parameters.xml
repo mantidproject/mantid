@@ -73,7 +73,101 @@
   <value val="50.9415"/>
 </parameter>
 
-<!-- Diagnostic test defaults -->
+<!-- Diagnostic defaults -->
+
+<!-- Perform diag by bank. These are the spectrum numbers -->
+<parameter name="diag_spectra" type="string">
+  <value val="(1,17280);(17281,18432);(18433,32256);(32257,41472)"/>
+</parameter>
+
+<!-- Absolute lo threshold for vanadium diag (tiny) -->
+<parameter name="diag_tiny">
+  <value val="1e-10"/>
+</parameter>
+
+<!-- Absolute hi threshold for vanadium diag (huge) -->
+<parameter name="diag_huge">
+  <value val="1e10"/>
+</parameter>
+
+<!-- Remove zeroes in background (s_zero)-->
+<parameter name="diag_samp_zero">
+  <value val="0.0"/>
+</parameter>
+
+<!-- Fraction of median to consider counting low for the white beam diag (sv_lo)-->
+<parameter name="diag_samp_lo">
+  <value val="0.0"/>
+</parameter>
+
+<!-- Fraction of median to consider counting high for the white beam diag (sv_hi)-->
+<parameter name="diag_samp_hi">
+  <value val="1.5"/>
+</parameter>
+
+<!-- Error criterion as a multiple of error bar for background (sv_sig) -->
+<parameter name="diag_samp_sig">
+  <value val="3.3"/>
+</parameter>
+
+<!-- Lower bound defining outliers as fraction of median value (v_out_lo)-->
+<parameter name="diag_van_out_lo">
+  <value val="0.01"/>
+</parameter>
+
+<!-- Upper bound defining outliers as fraction of median value (v_out_hi)-->
+<parameter name="diag_van_out_hi">
+  <value val="100."/>
+</parameter>
+
+<!-- Fraction of median to consider counting low for the white beam diag (vv_lo)-->
+<parameter name="diag_van_lo">
+  <value val="0.1"/>
+</parameter>
+
+<!-- Fraction of median to consider counting high for the white beam diag (vv_hi)-->
+<parameter name="diag_van_hi">
+  <value val="2.0"/>
+</parameter>
+
+<!-- Error criterion as a multiple of error bar for background (vv_sig) -->
+<parameter name="diag_van_sig">
+  <value val="0.0"/>
+</parameter>
+
+<!-- True if background is to be checked -->
+<parameter name="check_background">
+  <value val="1.0"/>
+</parameter>
+
+<!-- True if the bleed tests should be run -->
+<parameter name="diag_bleed_test">
+  <value val="0.0"/>
+</parameter>
+
+<!--  -->
+
+<!-- Absolute units conversion average -->
+
+<parameter name="monovan_lo_bound">
+  <value val="0.01"/>
+</parameter>
+
+<parameter name="monovan_hi_bound">
+  <value val="100"/>
+</parameter>
+
+<parameter name="monovan_lo_frac">
+  <value val="0.8"/>
+</parameter>
+
+<parameter name="monovan_hi_frac">
+  <value val="1.2"/>
+</parameter>
+
+<!-- -->
+
+<!-- To be removed -->
 
 <parameter name="remove_zero">
   <value val="1.0"/>
@@ -99,43 +193,12 @@
   <value val="3.3"/>
 </parameter>
 
-<parameter name="check_background">
-  <value val="1.0"/>
-</parameter>
-
 <parameter name="bkgd_threshold">
   <value val="5.0"/>
 </parameter>
 
 <parameter name="variation">
   <value val="1.1"/>
-</parameter>
-
-<!--  -->
-<!-- Absolute units conversion average -->
-
-<parameter name="monovan_lo_bound">
-  <value val="0.01"/>
-</parameter>
-
-<parameter name="monovan_hi_bound">
-  <value val="100"/>
-</parameter>
-
-<parameter name="monovan_lo_frac">
-  <value val="0.8"/>
-</parameter>
-
-<parameter name="monovan_hi_frac">
-  <value val="1.2"/>
-</parameter>
-
-<!--  -->
-<!-- PSD bleed test -->
-<!-- PSD bleed test -->
-
-<parameter name="bleed_test">
-  <value val="0.0"/>
 </parameter>
 
 </component-link>

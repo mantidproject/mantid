@@ -842,7 +842,7 @@ else ()
 	else ()
 		set (SCREENSHOTS_DIR "$ENV{WORKSPACE}/screenshots" )	
 	endif ()
-	
+
 	# Add an environment property MANTID_SOURCE so that the script can find the source of xmlrunner
 	set (TEST_ENVIRONMENT "MANTID_SOURCE=${CMAKE_SOURCE_DIR};MANTID_SCREENSHOT_REPORT=${SCREENSHOTS_DIR}" )
 	

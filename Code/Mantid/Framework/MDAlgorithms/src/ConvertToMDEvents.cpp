@@ -53,7 +53,6 @@ namespace MDAlgorithms
 
 // logger for loading workspaces  
    Kernel::Logger& ConvertToMDEvents::convert_log =Kernel::Logger::get("MD-Algorithms");
-
 // the variable describes the locations of the preprocessed detectors, which can be stored and reused if the algorithm runs more then once;
 preprocessed_detectors ConvertToMDEvents::det_loc;
 
@@ -256,116 +255,126 @@ ConvertToMDEvents::init()
 }
 
  //----------------------------------------------------------------------------------------------
-  /* Execute the algorithm.   */
-void ConvertToMDEvents::exec(){
-    // in case of subsequent calls
-    this->algo_id="";
-    // initiate class which would deal with any dimension workspaces
-    if(!pWSWrapper.get()){
-        pWSWrapper = std::auto_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
+/* Execute the algorithm.   */
+void ConvertToMDEvents::exec()
+{
+  // in case of subsequent calls
+  this->algo_id="";
+  // initiate class which would deal with any dimension workspaces
+  if(!pWSWrapper.get())
+  {
+    pWSWrapper = std::auto_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
+  }
+  // -------- Input workspace
+  this->inWS2D = getProperty("InputWorkspace");
+  if(!inWS2D)
+  {
+    convert_log.error()<<" can not obtain input matrix workspace from analysis data service\n";
+  }
+  // ------- Is there any output workspace?
+  // shared pointer to target workspace
+  API::IMDEventWorkspace_sptr spws = getProperty("OutputWorkspace");
+  bool create_new_ws(false);
+  if(!spws)
+  {
+    create_new_ws = true;
+  }
+
+  //identify if u,v are present among input parameters and use defaults if not
+  Kernel::V3D u,v;
+  std::vector<double> ut = getProperty("u");
+  std::vector<double> vt = getProperty("v");
+  this->checkUVsettings(ut,vt,u,v);
+
+  // set up target coordinate system
+  this ->rotMatrix = getTransfMatrix(inWS2D,u,v);
+
+  // if new workspace is created, its properties are determened by the user's input
+  if (create_new_ws)
+  {
+    // what dimension names requested by the user by:
+    //a) Q selector:
+    std::string Q_mod_req                    = getProperty("QDimensions");
+    //b) the energy exchange mode
+    std::string dE_mod_req                   = getProperty("dEAnalysisMode");
+    //c) other dim property;
+    std::vector<std::string> other_dim_names = getProperty("OtherDimensions");
+
+    // Identify the algorithm to deploy and identify/set the dimension names to use
+    algo_id = identifyTheAlg(inWS2D,Q_mod_req,dE_mod_req,other_dim_names,targ_dim_names,targ_dim_units);
+
+    // set the min and max values for the dimensions from the input porperties
+    dim_min = getProperty("MinValues");
+    dim_max = getProperty("MaxValues");
+    // verify that the number min/max values is equivalent to the number of dimensions defined by properties
+    if(dim_min.size()!=dim_max.size()||dim_min.size()!=n_activated_dimensions)
+    {
+      g_log.error()<<" number of specified min dimension values: "<<dim_min.size()<<", number of max values: "<<dim_max.size()<<
+                     " and total number of target dimensions: "<<n_activated_dimensions<<" are not consistent\n";
+      throw(std::invalid_argument("wrong number of dimension limits"));
     }
-    // -------- Input workspace 
-    this->inWS2D = getProperty("InputWorkspace");
-    if(!inWS2D){
-        convert_log.error()<<" can not obtain input matrix workspace from analysis data service\n";
+    this->checkMaxMoreThenMin(dim_min,dim_max);
+
+    // the output dimensions and almost everything else will be determined by the dimensions of the target workspace
+    // user input is mainly ignored
+  }
+  else
+  {
+    dim_min.assign(n_activated_dimensions,-1);
+    dim_max.assign(n_activated_dimensions,1);
+    throw(Kernel::Exception::NotImplementedError("Adding to existing MD workspace not Yet Implemented"));
+  }
+
+  bool reuse_preprocecced_detectors = getProperty("UsePreprocessedDetectors");
+  if(!(reuse_preprocecced_detectors&&det_loc.is_defined()))processDetectorsPositions(inWS2D,det_loc,convert_log);
+
+  if(create_new_ws)
+  {
+    spws = pWSWrapper->createEmptyMDWS(n_activated_dimensions, targ_dim_names,targ_dim_units, dim_min, dim_max);
+    if(!spws)
+    {
+      g_log.error()<<"can not create target event workspace with :"<<n_activated_dimensions<<" dimensions\n";
+      throw(std::invalid_argument("can not create target workspace"));
     }
-    // ------- Is there any output workspace?
-    // shared pointer to target workspace
-    API::IMDEventWorkspace_sptr spws = getProperty("OutputWorkspace");
-    bool create_new_ws(false);
-    if(!spws){
-        create_new_ws = true;
-    }
+    // Build up the box controller
+    Mantid::API::BoxController_sptr bc = pWSWrapper->getBoxController();
+    // Build up the box controller, using the properties in BoxControllerSettingsAlgorithm
+    this->setBoxController(bc);
+    // split boxes;
+    pWSWrapper->splitBox();
+  }
 
-    //identify if u,v are present among input parameters and use defaults if not
-    Kernel::V3D u,v;
-    std::vector<double> ut = getProperty("u");
-    std::vector<double> vt = getProperty("v");
-    this->checkUVsettings(ut,vt,u,v);
-    
-    // set up target coordinate system
-    this ->rotMatrix = getTransfMatrix(inWS2D,u,v);
+  // call selected algorithm
+  pMethod algo =  alg_selector[algo_id];
+  if(algo)
+  {
+    algo(this);
+  }
+  else
+  {
+    g_log.error()<<"requested undefined subalgorithm :"<<algo_id<<std::endl;
+    throw(std::invalid_argument("undefined subalgoritm requested "));
+  }
+  setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(spws));
 
-
-    // if new workspace is created, its properties are determened by the user's input
-    if (create_new_ws){
-        // what dimension names requested by the user by:
-       //a) Q selector:
-        std::string Q_mod_req                    = getProperty("QDimensions");  
-        //b) the energy exchange mode
-        std::string dE_mod_req                   = getProperty("dEAnalysisMode");
-        //c) other dim property;
-        std::vector<std::string> other_dim_names = getProperty("OtherDimensions");
-
-        // Identify the algorithm to deploy and identify/set the dimension names to use
-        algo_id = identifyTheAlg(inWS2D,Q_mod_req,dE_mod_req,other_dim_names,targ_dim_names,targ_dim_units);
-
-        // set the min and max values for the dimensions from the input porperties
-        dim_min = getProperty("MinValues");
-        dim_max = getProperty("MaxValues");
-        // verify that the number min/max values is equivalent to the number of dimensions defined by properties
-        if(dim_min.size()!=dim_max.size()||dim_min.size()!=n_activated_dimensions){
-            g_log.error()<<" number of specified min dimension values: "<<dim_min.size()<<", number of max values: "<<dim_max.size()<<
-                           " and total number of target dimensions: "<<n_activated_dimensions<<" are not consistent\n";
-            throw(std::invalid_argument("wrong number of dimension limits"));
-        }
-        this->checkMaxMoreThenMin(dim_min,dim_max);
-
-   // the output dimensions and almost everything else will be determined by the dimensions of the target workspace
-   // user input is mainly ignored
-    }else{ 
-         throw(Kernel::Exception::NotImplementedError("Adding to existing MD workspace not Yet Implemented"));
-          dim_min.assign(n_activated_dimensions,-1);
-          dim_max.assign(n_activated_dimensions,1);
-    }
-    
-
-    bool reuse_preprocecced_detectors = getProperty("UsePreprocessedDetectors");
-    if(!(reuse_preprocecced_detectors&&det_loc.is_defined()))processDetectorsPositions(inWS2D,det_loc,convert_log);
-      
-   
-     if(create_new_ws){
-         spws = pWSWrapper->createEmptyMDWS(n_activated_dimensions, targ_dim_names,targ_dim_units, dim_min, dim_max);
-         if(!spws){
-             g_log.error()<<"can not create target event workspace with :"<<n_activated_dimensions<<" dimensions\n";
-             throw(std::invalid_argument("can not create target workspace"));
-         }
-         // Build up the box controller
-          Mantid::API::BoxController_sptr bc = pWSWrapper->getBoxController();
-         // Build up the box controller, using the properties in BoxControllerSettingsAlgorithm 
-         this->setBoxController(bc);
-         // split boxes;
-         pWSWrapper->splitBox();
-      }
-
-
-    // call selected algorithm
-    pMethod algo =  alg_selector[algo_id];
-    if(algo){
-        algo(this);
-    }else{
-        g_log.error()<<"requested undefined subalgorithm :"<<algo_id<<std::endl;
-        throw(std::invalid_argument("undefined subalgoritm requested "));
-    }
-    setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(spws));
-
-    // free the algorithm from the responsibility for the workspace to allow it to be deleted if necessary
-    pWSWrapper->releaseWorkspace();
-    return;
-   
+  // free the algorithm from the responsibility for the workspace to allow it to be deleted if necessary
+  pWSWrapper->releaseWorkspace();
+  return;
 }
 
 void 
 ConvertToMDEvents::checkMaxMoreThenMin(const std::vector<double> &min,const std::vector<double> &max)const
 {
-    for(size_t i=0; i<min.size();i++){
-        if(max[i]<=min[i]){
-            convert_log.error()<<" min value "<<min[i]<<" not less then max value"<<max[i]<<" in direction: "<<i<<std::endl;
-            throw(std::invalid_argument("min limit not smaller then max limit"));
-        }
+  for(size_t i=0; i<min.size();i++)
+  {
+    if(max[i]<=min[i])
+    {
+      convert_log.error()<<" min value "<<min[i]<<" not less then max value"<<max[i]<<" in direction: "<<i<<std::endl;
+      throw(std::invalid_argument("min limit not smaller then max limit"));
     }
+  }
 }
- 
+
 /**  
   *  The dimensions, which can be obtained from workspace are determined by the availible algorithms.
   *  E.g. an inelastic algorithm can transform matrix workspace into 2D-4D workpsace depending on what requested.
@@ -407,12 +416,14 @@ ConvertToMDEvents::identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS,
     }          
 
 
-    std::string Q_MODE_ID,DE_MODE_ID,CONV_MODE_ID;
+    std::string Q_MODE_ID,DE_MODE_ID,CONV_MODE_ID,WS_ID;
     int nQ_dims(0),ndE_dims(0);
-
+    // identify, what kind of input workspace is there:
+    WS_ID = parseWSType(inMatrixWS);
+    this->algo_id =WS_ID;
     // identify Q_mode
     Q_MODE_ID = parseQMode (Q_mode_req,ws_dim_names,ws_dim_units,out_dim_names,out_dim_units,nQ_dims);  
-    this->algo_id = Q_MODE_ID;
+    this->algo_id += Q_MODE_ID;
     // identify dE mode    
     DE_MODE_ID= parseDEMode(Q_MODE_ID,dE_mode_req,ws_dim_units,out_dim_names,out_dim_units,ndE_dims,subalgorithm_units);
     // identify conversion mode;
@@ -560,6 +571,34 @@ ConvertToMDEvents::parseQMode(const std::string &Q_mode_req,const Strings &ws_di
 
     }
     return Q_MODE_ID;
+}
+
+/** identify what kind of input workspace is provided as input argument
+ *
+ *@param inMatrixWS  a pointer to the workspace, obtained from analysis data service
+ *
+ *@returns   -- the ID of the workspace of one of the supported types. Throws if can not dynamiucally cast the pointer to the workspace:
+*/
+std::string 
+ConvertToMDEvents::parseWSType(API::MatrixWorkspace_const_sptr inMatrixWS)const
+{
+    const DataObjects::EventWorkspace *pWSEv= dynamic_cast<const DataObjects::EventWorkspace *>(inMatrixWS.get());
+    if(pWSEv){
+        return SupportedWS[EventWSType];
+    }
+
+    const DataObjects::Workspace2D *pMWS2D = dynamic_cast<const DataObjects::Workspace2D *>(inMatrixWS.get());
+    if(pMWS2D){
+        return SupportedWS[Workspace2DType];
+    }
+ 
+    convert_log.error()<<" Unsupported workspace type provided. Currently supported types are:\n";
+    for(int i=0;i<NInWSTypes;i++){
+        convert_log.error()<<" WS ID: "<<SupportedWS[i];
+    }
+    convert_log.error()<<std::endl;
+    throw(std::invalid_argument("Unsupported worspace type provided"));
+    return "";
 }
 
 /** function processes the input arguments and tries to establish what subalgorithm should be deployed; 
@@ -773,7 +812,7 @@ ConvertToMDEvents::checkUVsettings(const std::vector<double> &ut,const std::vect
 // }
 //----------------------------------------------------------------------------------------------
 // AUTOINSTANSIATION OF EXISTING CODE:
-// Templated loop over some templated arguments
+// Templated loop over dependant templated arguments
 template<Q_state Q, size_t NumAlgorithms=0>
 class LOOP_ND{
 private:
@@ -785,14 +824,22 @@ private:
   public:
     static inline void EXEC(ConvertToMDEvents *pH){
                 
-            std::string Key = pH->Q_modes[Q]+pH->dE_modes[MODE]+pH->ConvModes[CONV];
+            std::string Key0=pH->Q_modes[Q]+pH->dE_modes[MODE]+pH->ConvModes[CONV];
 
+            std::string Key;
+            Key = pH->SupportedWS[Workspace2DType]+Key0;
             pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,
-                &ConvertToMDEvents::processQND<Q,static_cast<AnalMode>(MODE),static_cast<CnvrtUnits>(CONV)>));
-//#ifdef _DEBUG
-//            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
-//#endif
-            LOOP_ND<Q, NumAlgorithms+1>::EXEC(pH);
+                &ConvertToMDEvents::processQNDHWS<Q,static_cast<AnalMode>(MODE),static_cast<CnvrtUnits>(CONV)>));
+/*#ifdef _DEBUG
+            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
+#endif*/
+            Key = pH->SupportedWS[EventWSType]+Key0;
+            pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,
+                &ConvertToMDEvents::processQNDEWS<Q,static_cast<AnalMode>(MODE),static_cast<CnvrtUnits>(CONV)>));
+/*#ifdef _DEBUG
+            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
+#endif   */ 
+         LOOP_ND<Q, NumAlgorithms+1>::EXEC(pH);
     }
 };
 
@@ -809,18 +856,29 @@ private:
   public:
     static inline void EXEC(ConvertToMDEvents *pH){
                 
-            std::string Key = pH->Q_modes[NoQ]+pH->dE_modes[ANY_Mode]+pH->ConvModes[CONV];
+            std::string Key0 = pH->Q_modes[NoQ]+pH->dE_modes[ANY_Mode]+pH->ConvModes[CONV];
+            std::string Key;
 
+            Key = pH->SupportedWS[Workspace2DType]+Key0;
             pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,
-                                   &ConvertToMDEvents::processQND<NoQ,ANY_Mode,static_cast<CnvrtUnits>(CONV)>));
+                &ConvertToMDEvents::processQNDHWS<NoQ,ANY_Mode,static_cast<CnvrtUnits>(CONV)>));
 //#ifdef _DEBUG
 //            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
 //#endif
+
+            Key = pH->SupportedWS[EventWSType]+Key0;
+            pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,
+                &ConvertToMDEvents::processQNDEWS<NoQ,ANY_Mode,static_cast<CnvrtUnits>(CONV)>));
+//#ifdef _DEBUG
+//            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
+//#endif
+
+
             LOOP_ND<NoQ,NumAlgorithms+1>::EXEC(pH);
     }
 };
 
-// Q3d, modQ terminator
+// Q3d and modQ terminator
 template<Q_state Q >
 class LOOP_ND<Q,static_cast<size_t>(ANY_Mode*NConvUintsStates) >{
   public:
@@ -842,7 +900,8 @@ ConvertToMDEvents::ConvertToMDEvents():
 Q_modes(NQStates),
 dE_modes(4),
 ConvModes(NConvUintsStates),
-// The conversion subalgorithm processes data in these units; 
+SupportedWS(NInWSTypes),
+// The conversion subalgorithm processes input data expressed in these units; 
 // Change of the units have to be accompanied by correspondent change in conversion subalgorithm
 native_elastic_unitID("Momentum"), 
 native_inelastic_unitID("DeltaE")
@@ -859,6 +918,9 @@ native_inelastic_unitID("DeltaE")
      ConvModes[ConvFast]   = "CnvFast";
      ConvModes[ConvByTOF]  = "CnvByTOF";
      ConvModes[ConvFromTOF]= "CnvFromTOF";
+     // possible input workspace ID-s
+     SupportedWS[Workspace2DType] = "WS2D";
+     SupportedWS[EventWSType]     = "WSEvent";
 
 // Subalgorithm factories:
 // NoQ --> any Analysis mode will do as it does not depend on it; we may want to convert unuts

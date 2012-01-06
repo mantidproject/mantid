@@ -40,8 +40,6 @@ void GroupWorkspaces::exec()
   {
     throw std::runtime_error("Select atleast two workspaces to group ");
   }
-  // output groupworkspace name
-  std::string newGroup = getPropertyValue("OutputWorkspace");
   //creates workspace group pointer
   WorkspaceGroup_sptr outgrp_sptr = WorkspaceGroup_sptr(new WorkspaceGroup);
 

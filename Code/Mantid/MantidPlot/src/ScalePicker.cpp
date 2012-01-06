@@ -145,6 +145,11 @@ void ScalePicker::refresh()
     }
 }
 
+QwtPlot *ScalePicker::plot()
+{
+  return dynamic_cast<QwtPlot *>(parent());
+}
+
 QRect ScalePicker::scaleTicksRect(const QwtScaleWidget *scale) const
 {
 	int majTickLength = scale->scaleDraw()->majTickLength();

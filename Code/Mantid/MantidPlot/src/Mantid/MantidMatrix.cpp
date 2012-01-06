@@ -48,7 +48,7 @@ using namespace MantidQt::API;
 
 //Mantid::Kernel::Logger & MantidMatrix::g_log=Mantid::Kernel::Logger::get("MantidMatrix");
 MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_sptr ws, ApplicationWindow* parent, const QString& label, const QString& name, int start, int end)
-  : MdiSubWindow(label, parent, name, 0),
+  : MdiSubWindow(parent, label, name, 0),
     WorkspaceObserver(),
     y_start(0.0),y_end(0.0),
     m_histogram(false),
@@ -134,6 +134,7 @@ bool MantidMatrix::eventFilter(QObject *object, QEvent *e)
 {
   // if it's context menu on any of the views
   if (e->type() == QEvent::ContextMenu && (object == m_table_viewY || object == m_table_viewX || object == m_table_viewE)){
+    e->accept();
     emit showContextMenu();
     return true;
   }
@@ -717,6 +718,8 @@ QwtDoubleRect MantidMatrix::boundingRect()
 }
 
 //----------------------------------------------------------------------------
+MantidMatrixFunction::MantidMatrixFunction(MantidMatrix* wsm):m_matrix(wsm){}
+
 void MantidMatrixFunction::init()
 {
  if (!m_matrix->workspace()->getAxis(1))

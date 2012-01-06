@@ -31,22 +31,48 @@
 
 #include <QMdiSubWindow>
 #include <QDockWidget>
+#include <QVBoxLayout>
+#include <QMainWindow>
+
+#include <stdexcept>
 
 class QEvent;
 class QCloseEvent;
 class QString;
 class Folder;
 class ApplicationWindow;
+class FloatingWindow;
 
-// Experimental, Janik Zikovsky, Nov 17 2011. Floatable MDI windows
-//#define MDISUBWINDOW_FLOATABLE 0
-#undef MDISUBWINDOW_FLOATABLE
-#ifndef MDISUBWINDOW_FLOATABLE
-/// Define the parent class of MdiSubWindow to make it easier to change
-  typedef QMdiSubWindow MdiSubWindowParent_t;
-#else
-  typedef QDockWidget MdiSubWindowParent_t;
-#endif
+class MdiSubWindowParent_t: public QWidget
+{
+  Q_OBJECT
+public:
+  MdiSubWindowParent_t(QWidget* parent, Qt::WFlags f = 0):
+  QWidget(parent,f),
+  m_widget(NULL)
+  {}
+  void setWidget(QWidget* w)
+  {
+    if (w == NULL)
+    {// removing widget
+      m_widget = NULL;
+      return;
+    }
+
+    if (m_widget)
+    {
+      throw std::runtime_error("Widget already set");
+    }
+    QVBoxLayout* layout = new QVBoxLayout(this);
+    layout->setContentsMargins(0,0,0,0);
+    layout->addWidget(w);
+    m_widget = w;
+  }
+  QWidget* widget() {return m_widget;}
+  const QWidget* widget() const {return m_widget;}
+protected:
+  QWidget* m_widget;
+};
 
 /**
  * \brief Base class of all MDI client windows.
@@ -67,13 +93,13 @@ public:
 
 	//! Constructor
 	/**
+	 * @param parent :: parent window as ApplicationWindow
 	 * @param label :: window label
-	 * @param parent :: parent widget
 	 * @param name :: window name
 	 * @param f :: window flags
 	 * \sa setCaptionPolicy(), captionPolicy()
 	 */
-	MdiSubWindow(const QString& label = QString(), ApplicationWindow *app = 0, const QString& name = QString(), Qt::WFlags f = 0);
+	MdiSubWindow(ApplicationWindow *app, const QString& label = QString(), const QString& name = QString(), Qt::WFlags f = 0);
 
 	//! Possible window captions.
 	enum CaptionPolicy{
@@ -148,7 +174,9 @@ public:
 	//! Initializes the pointer to the parent folder of the window
 	void setFolder(Folder* f){d_folder = f;};
 
-	
+	FloatingWindow* getFloatingWindow() const;
+  QMdiSubWindow* getDockedWindow() const;
+  QWidget* getWrapperWindow() const;
 
 	void setNormal();
 	void setMinimized();
@@ -172,6 +200,10 @@ public slots:
 	//! Notifies the main application that the window has been modified
 	void notifyChanges(){emit modifiedWindow(this);};
 	virtual void print(){};
+
+  bool close();
+  void hide();
+  void show();
 
 signals:
 	//! Emitted when the window was closed
@@ -217,8 +249,45 @@ private:
 	QString d_birthdate;
     //! Stores the size the window had before a change state event to minimized.
 	QSize d_min_restore_size;
+
+  friend class FloatingWindow;
 };
 
 typedef QList<MdiSubWindow*> MDIWindowList;
+
+/**
+ * Floating wrapper window for a MdiSubWindow.
+ */
+class FloatingWindow: public QMainWindow
+{
+  Q_OBJECT
+public:
+  FloatingWindow(ApplicationWindow* appWindow, Qt::WindowFlags f = 0);
+  void setStaysOnTopFlag();
+  void removeStaysOnTopFlag();
+  MdiSubWindow* mdiSubWindow() {return static_cast<MdiSubWindow*>(widget());}
+  void setMdiSubWindow(MdiSubWindow* sw) {setWidget(sw);}
+  void removeMdiSubWindow()
+  {
+    MdiSubWindowParent_t* wrapper = dynamic_cast<MdiSubWindowParent_t*>(centralWidget());
+    if (wrapper)
+    {
+      wrapper->setWidget(NULL);
+    }
+  }
+protected:
+
+  void setWidget(QWidget* w)
+  {
+    MdiSubWindowParent_t* wrapper = new MdiSubWindowParent_t(this);
+    wrapper->setWidget(w);
+    setCentralWidget(wrapper);
+  }
+  QWidget* widget() {return static_cast<MdiSubWindowParent_t*>(centralWidget())->widget();}
+
+  virtual bool event(QEvent * e);
+  ApplicationWindow* d_app;
+  Qt::WindowFlags m_flags;
+};
 
 #endif

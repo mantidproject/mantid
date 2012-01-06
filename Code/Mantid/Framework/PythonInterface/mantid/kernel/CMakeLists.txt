@@ -83,3 +83,8 @@ set_python_properties( PythonKernelModule _kernel )
 set_target_output_directory ( PythonKernelModule ${OUTPUT_DIR} .pyd )
 # Add the required dependencies
 target_link_libraries ( PythonKernelModule ${PYTHON_DEPS} )
+
+###########################################################################
+# Installation settings
+###########################################################################
+install ( TARGETS PythonKernelModule DESTINATION ${BIN_DIR}/mantid/kernel )

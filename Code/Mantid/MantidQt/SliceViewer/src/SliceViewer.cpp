@@ -581,6 +581,19 @@ void SliceViewer::LineMode_toggled(bool checked)
 }
 
 //------------------------------------------------------------------------------------
+/** Toggle "line-drawing" mode (to draw 1D lines using the mouse)
+ *
+ * @param lineMode :: True to go into line mode, False to exit it.
+ */
+void SliceViewer::toggleLineMode(bool lineMode)
+{
+  // This should send events to start line mode
+  m_syncLineMode->toggle(lineMode);
+  m_lineOverlay->setCreationMode(false);
+}
+
+
+//------------------------------------------------------------------------------------
 /// Slot called to clear the line in the line overlay
 void SliceViewer::on_btnClearLine_clicked()
 {
@@ -1125,6 +1138,7 @@ void SliceViewer::setXYDim(const QString & dimX, const QString & dimY)
  * @param dim :: index of the dimension to change
  * @param value :: value of the slice point, in the units of the given dimension.
  *        This should be within the range of min/max for that dimension.
+ * @throw std::invalid_argument if the index is invalid
  */
 void SliceViewer::setSlicePoint(int dim, double value)
 {
@@ -1137,7 +1151,9 @@ void SliceViewer::setSlicePoint(int dim, double value)
 /** Returns the slice point in the given dimension
  *
  * @param dim :: index of the dimension
- * @return slice point for that dimension. Value has not significance for the X or Y display dimensions.
+ * @return slice point for that dimension. Value has no significance for the
+ *         X or Y display dimensions.
+ * @throw std::invalid_argument if the index is invalid
  */
 double SliceViewer::getSlicePoint(int dim) const
 {
@@ -1154,6 +1170,7 @@ double SliceViewer::getSlicePoint(int dim) const
  * @param dim :: name of the dimension to change
  * @param value :: value of the slice point, in the units of the given dimension.
  *        This should be within the range of min/max for that dimension.
+ * @throw std::runtime_error if the name is not found in the workspace
  */
 void SliceViewer::setSlicePoint(const QString & dim, double value)
 {
@@ -1166,7 +1183,9 @@ void SliceViewer::setSlicePoint(const QString & dim, double value)
 /** Returns the slice point in the given dimension
  *
  * @param dim :: name of the dimension
- * @return slice point for that dimension. Value has not significance for the X or Y display dimensions.
+ * @return slice point for that dimension. Value has no significance for the
+ *         X or Y display dimensions.
+ * @throw std::runtime_error if the name is not found in the workspace
  */
 double SliceViewer::getSlicePoint(const QString & dim) const
 {
@@ -1225,7 +1244,8 @@ void SliceViewer::setColorScaleMax(double max)
 /** Set whether the color scale is logarithmic
  *
  * @param log :: true for a log color scale, false for linear
- * @throw if the min/max values are inconsistent with a log color scale
+ * @throw std::invalid_argument if the min/max values are inconsistent
+ *        with a log color scale
  */
 void SliceViewer::setColorScaleLog(bool log)
 {

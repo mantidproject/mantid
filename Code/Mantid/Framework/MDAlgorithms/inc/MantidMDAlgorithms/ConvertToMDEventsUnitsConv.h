@@ -29,10 +29,19 @@ namespace Mantid
 {
 namespace MDAlgorithms
 {
+
+// How to treat X-coordinates:
+// for histohram we take centerpiece average
+template<XCoordType TYPE>
+double XValue(const MantidVec& X,size_t j){return static_cast<double>(0.5*(X[j]+X[j+1]));}
+// for axis type -- just value
+template <>
+double XValue<Axis>(const MantidVec& X,size_t j){return static_cast<double>(X[j]);}
 // DO UNITS CONVERSION --
 
+
 //  general procedure does nothing (non-converts units)
-template<CnvrtUnits CONV> 
+template<CnvrtUnits CONV,XCoordType Type> 
 struct UNITS_CONVERSION
 { 
     /** Set up all variables necessary for units conversion at the beginning of the conversion loop
@@ -45,14 +54,14 @@ struct UNITS_CONVERSION
     /// Convert current X variable into the units requested;
     inline coord_t  getXConverted(const MantidVec& X,size_t j)const
     {
-        return coord_t(0.5*(X[j]+X[j+1]));
+        return XValue<Type>(X,j);
     }
 
 };
 
 // Fast conversion:
-template<>
-struct UNITS_CONVERSION<ConvFast>
+template<XCoordType Type>
+struct UNITS_CONVERSION<ConvFast,Type>
 {
 
     void setUpConversion(ConvertToMDEvents const *const pHost)
@@ -70,8 +79,7 @@ struct UNITS_CONVERSION<ConvFast>
     // convert X coordinate using power series
     inline coord_t  getXConverted(const MantidVec& X,size_t j)const
     {
-        coord_t X0=coord_t(0.5*(X[j]+X[j+1]));
-        return (factor*std::pow(X0,power));
+        return (factor*std::pow(XValue<Type>(X,j),power));
     }
 private:
     // variables for units conversion:
@@ -80,8 +88,8 @@ private:
 };
 
 // Convert from TOF:
-template<>
-struct UNITS_CONVERSION<ConvFromTOF>
+template<XCoordType Type>
+struct UNITS_CONVERSION<ConvFromTOF,Type>
 {
 
     void setUpConversion(ConvertToMDEvents const *const pHost)
@@ -111,8 +119,8 @@ struct UNITS_CONVERSION<ConvFromTOF>
         pWSUnit->initialize(L1,pL2[i],pTwoTheta[i],emode,efix,delta);
     }
     inline coord_t  getXConverted(const MantidVec& X,size_t j)const{
-        double X0=(0.5*(X[j]+X[j+1]));        
-        return (coord_t)pWSUnit->singleFromTOF(X0);
+   
+        return (coord_t)pWSUnit->singleFromTOF(XValue<Type>(X,j));
     }
 private:
     // variables for units conversion:
@@ -131,8 +139,8 @@ private:
 };
 
 // Convert By TOF:
-template<>
-struct UNITS_CONVERSION<ConvByTOF>
+template<XCoordType Type>
+struct UNITS_CONVERSION<ConvByTOF,Type>
 {
 
     void setUpConversion(ConvertToMDEvents const *const pHost)
@@ -167,8 +175,7 @@ struct UNITS_CONVERSION<ConvByTOF>
     }
     //
     inline coord_t  getXConverted(const MantidVec& X,size_t j)const{
-        double X0=(0.5*(X[j]+X[j+1]));  
-        double tof  = pSourceWSUnit->singleToTOF(X0);
+        double tof  = pSourceWSUnit->singleToTOF(XValue<Type>(X,j));
         return (coord_t)pWSUnit->singleFromTOF(tof);
     }
 private:

@@ -397,7 +397,7 @@ def mtdGlobalHelp():
     for alg in algs:
         print "  %s" % alg
     print "For help with a specific command type: help('cmd')"
-    if mtd.__gui__:
+    if HAVE_GUI:
         print "Note: Each command also has a counterpart with the word 'Dialog' appended ",
         print "to it, which when run will bring up a property input dialog for that algorithm." 
 
@@ -1035,7 +1035,7 @@ class IAlgorithmProxy(ProxyObject):
         dialog box call. If the dialog is canceled do a sys.exit, otherwise 
         return the algorithm ready to execute.
         """
-        if not mtd.__gui__:
+        if not HAVE_GUI:
             raise RuntimeError("Can only display properties dialog in gui mode")
 
         # generic setup
@@ -1085,7 +1085,6 @@ class MantidPyFramework(FrameworkManager):
     
     __is_initialized = False
     __config_service = None
-    __gui__ = False
     
     def __init__(self):
         # Call base class constructor
@@ -1137,16 +1136,13 @@ class MantidPyFramework(FrameworkManager):
     
     #### methods ###########################################################
 
-    def initialise(self, GUI=None):
+    def initialise(self):
         """
         Initialise the framework
         """
         if self.__is_initialized == True:
             return
-        if GUI is None:
-            self.__gui__ = HAVE_GUI
-        else:
-            self.__gui__ = GUI
+        self.__gui__ = HAVE_GUI
 
         # Run through init steps 
         self._importSimpleAPIToMain()
@@ -1237,7 +1233,7 @@ class MantidPyFramework(FrameworkManager):
                 ialg.__async__ = False
             else:
                 ialg = self.createManagedAlgorithm(ialg, version) 
-                ialg.__async__ = mtd.__gui__
+                ialg.__async__ = HAVE_GUI
         ialg.setRethrows(True) # Ensure the console rethrows. Async ones rethrow anyway
         return IAlgorithmProxy(ialg, self)
 

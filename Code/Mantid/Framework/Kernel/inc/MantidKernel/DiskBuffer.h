@@ -29,9 +29,6 @@ namespace Kernel
     It also stores a list of "free" blocks in the output file,
     to allow new blocks to fill them later.
 
-    It is a simplification of the DiskBuffer class.
-
-    
     @date 2011-12-30
 
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory

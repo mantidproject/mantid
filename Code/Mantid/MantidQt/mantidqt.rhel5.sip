@@ -98,6 +98,45 @@ class LineViewer : QWidget
 %End
 
 
+public:
+void apply()   throw (std::runtime_error);
+
+void showPreview();
+
+void showFull();
+
+
+//*WIKI* ==== Start/End Points ====
+void setStartXY(double x, double y)   throw (std::runtime_error);
+
+void setEndXY(double x, double y)   throw (std::runtime_error);
+
+
+//*WIKI* ==== Width ====
+void setWidth(double width);
+
+void setWidth(int dim, double width)   throw (std::invalid_argument, std::runtime_error);
+
+void setWidth(const QString & dim, double width)   throw (std::invalid_argument, std::runtime_error);
+
+void setPlanarWidth(double width);
+
+double getPlanarWidth() const;
+
+
+//*WIKI* ==== Binning ====
+void setNumBins(int numBins)   throw (std::invalid_argument);
+
+void setFixedBinWidthMode(bool fixedWidth, double binWidth)   throw (std::invalid_argument);
+
+double getFixedBinWidth() const;
+
+bool getFixedBinWidthMode() const;
+
+int getNumBins() const;
+
+double getBinWidth() const;
+
 
 };
 
@@ -127,6 +166,7 @@ public:
 
   bool getFastRender() const;
 
+  void toggleLineMode(bool);
 
   //*WIKI* ==== X/Y Dimension ====
   void setXYDim(int indexX, int indexY)     throw (std::invalid_argument);
@@ -182,6 +222,7 @@ public:
   void setColorScaleAutoFull();
 
   void setColorScaleAutoSlice() ;
+
 
 
 };

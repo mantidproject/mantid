@@ -70,7 +70,7 @@ ScriptingEnv *PythonScripting::constructor(ApplicationWindow *parent)
 
 /** Constructor */
 PythonScripting::PythonScripting(ApplicationWindow *parent)
-  : ScriptingEnv(parent, langName), m_globals(NULL), m_locals(NULL), m_math(NULL),
+  : ScriptingEnv(parent, langName), m_globals(NULL), m_math(NULL),
     m_sys(NULL), refresh_allowed(0), m_workspaceHandles()
 {
   // MG (Russell actually found this for OS X): We ship SIP and PyQt4 with Mantid and we need to
@@ -145,10 +145,7 @@ bool PythonScripting::start()
       shutdown();
       return false;
     }
-    PyDict_SetItemString(m_globals, "__builtins__", PyEval_GetBuiltins());
 
-    // Fresh locals, although I'm not sure we need to use this anymore as we want a single scope
-    m_locals = PyDict_New();
     //Create a new dictionary for the math functions
     m_math = PyDict_New();
 
@@ -221,7 +218,6 @@ bool PythonScripting::start()
 void PythonScripting::shutdown()
 {
   Py_XDECREF(m_math);
-  Py_XDECREF(m_locals);
   Py_Finalize();
 }
 

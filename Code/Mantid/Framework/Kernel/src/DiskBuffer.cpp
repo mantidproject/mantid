@@ -65,14 +65,6 @@ namespace Kernel
     if (item == NULL) return;
     if (!m_useWriteBuffer) return;
 
-//    {
-//      // No write-buffer. Write immediately
-//      // Avoid simultaneous saving to file for parallel threads
-//      m_mutex.lock();
-//      item->save();
-//      m_mutex.unlock();
-//    }
-
     m_mutex.lock();
 
     // And put it in the queue of stuff to write.
@@ -95,8 +87,8 @@ namespace Kernel
   //---------------------------------------------------------------------------------------------
   /** Call this method when an object that might be in the cache
    * is getting deleted.
-   * The object is removed from the MRU and the to-write buffer (if present).
-   * The space it uses on disk is marked as free
+   * The object is removed from the to-write buffer (if present).
+   * The space it uses on disk is marked as free.
    *
    * @param item :: ISaveable object that is getting deleted.
    * @param sizeOnFile :: size that the object used on file. This amount of space is marked as "free"

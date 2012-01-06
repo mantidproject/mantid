@@ -1746,7 +1746,7 @@ void IndirectDataAnalysis::furyfitRun()
 
   if ( m_uiForm.furyfit_ckPlotOutput->isChecked() )
   {
-    QString pyInput = "from mantidplot import *\n"
+    QString pyInput = "from mantidplotpy import *\n"
       "plotSpectrum('" + QString::fromStdString(output) + "_Workspace', [0,1,2])\n";
     QString pyOutput = runPythonCode(pyInput);
   }

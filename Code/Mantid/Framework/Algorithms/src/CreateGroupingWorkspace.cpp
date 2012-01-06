@@ -217,7 +217,6 @@ namespace Algorithms
   void CreateGroupingWorkspace::exec()
   {
     MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
-    std::string InputWorkspace = getPropertyValue("InputWorkspace");
     std::string InstrumentName = getPropertyValue("InstrumentName");
     std::string InstrumentFilename = getPropertyValue("InstrumentFilename");
     std::string OldCalFilename = getPropertyValue("OldCalFilename");

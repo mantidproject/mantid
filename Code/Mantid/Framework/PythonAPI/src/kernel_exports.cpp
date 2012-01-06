@@ -48,6 +48,7 @@ namespace PythonAPI
         .def("norm2", &V3D::norm2)
         .def(self + self)
         .def(self += self)
+          // cppcheck-suppress duplicateExpression
         .def(self - self)
         .def(self -= self)
         .def(self * self)
@@ -58,7 +59,9 @@ namespace PythonAPI
         .def(self *= int())
         .def(self * double())
         .def(self *= double())
+          // cppcheck-suppress duplicateExpression
         .def(self < self)
+          // cppcheck-suppress duplicateExpression
         .def(self == self)
         .def(self_ns::str(self))
         ;
@@ -76,11 +79,14 @@ namespace PythonAPI
         .def("imagK", &Quat::imagK)
         .def(self + self)
         .def(self += self)
+          // cppcheck-suppress duplicateExpression
         .def(self - self)
         .def(self -= self)
         .def(self * self)
         .def(self *= self)
+          // cppcheck-suppress duplicateExpression
         .def(self == self)
+          // cppcheck-suppress duplicateExpression
         .def(self != self)
         .def(self_ns::str(self))
         ;
@@ -180,8 +186,11 @@ namespace PythonAPI
 
     class_<Mantid::Kernel::DateAndTime>("DateAndTime", no_init)
         .def("__str__", &Mantid::Kernel::DateAndTime::to_ISO8601_string)
+        // cppcheck-suppress duplicateExpression
         .def(self == self)
+        // cppcheck-suppress duplicateExpression
         .def(self != self)
+        // cppcheck-suppress duplicateExpression
         .def(self < self)
         .def(self + int64_t())
         .def(self += int64_t())

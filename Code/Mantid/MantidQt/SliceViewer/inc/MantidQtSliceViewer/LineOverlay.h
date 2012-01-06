@@ -76,6 +76,7 @@ namespace SliceViewer
     void setSnapEnabled(bool enabled);
     void setSnapLength(double spacing);
     void setShowHandles(bool shown);
+    void setCreationMode(bool creation);
 
     ///@return the snap-to X interval
     double getSnapX()
@@ -88,6 +89,7 @@ namespace SliceViewer
     ///@return true if the line is in creation mode (waiting for first click)
     bool getCreationMode() const
     { return m_creation; }
+
 
   signals:
     /// Signal sent while the line is being dragged
@@ -141,7 +143,7 @@ namespace SliceViewer
     QPointF m_dragStart_PointB;
 
     /// Marker that the middle mouse button is pressed (panning)
-    bool m_middleButton;
+    bool m_rightButton;
 
     /// Is snap-to-grid enabled?
     bool m_snapEnabled;

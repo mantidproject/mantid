@@ -1,10 +1,13 @@
-#include "MantidQtCustomInterfaces/WorkspaceOnDisk.h"
+#include "MantidQtCustomInterfaces/EventNexusFileMemento.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/IEventWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include <iostream>
 #include <fstream>
 #include <boost/regex.hpp>
+
+using namespace Mantid::API;
 
 namespace MantidQt
 {
@@ -14,19 +17,19 @@ namespace MantidQt
       Constructor
       @param fileName : path + name of the file to load
       */
-      WorkspaceOnDisk::WorkspaceOnDisk(std::string fileName) : m_fileName(fileName)
+      EventNexusFileMemento::EventNexusFileMemento(std::string fileName) : m_fileName(fileName)
       {
-        boost::regex pattern("(RAW)$", boost::regex_constants::icase); 
+        boost::regex pattern("(NXS)$", boost::regex_constants::icase); 
 
         if(!boost::regex_search(fileName, pattern))
         {
-          std::string msg = "WorkspaceOnDisk:: Unknown File extension on: " + fileName;
+          std::string msg = "EventNexusFileMemento:: Unknown File extension on: " + fileName;
           throw std::invalid_argument(msg);
         }
 
         if(!checkStillThere())
         {
-          throw std::runtime_error("WorkspaceOnDisk:: File doesn't exist");
+          throw std::runtime_error("EventNexusFileMemento:: File doesn't exist");
         }
 
         std::vector<std::string> strs;
@@ -35,7 +38,7 @@ namespace MantidQt
         m_adsID = m_adsID.substr(0, m_adsID.find('.'));
 
         //Generate an initial report.
-        Mantid::API::MatrixWorkspace_sptr ws = fetchIt();
+        IEventWorkspace_sptr ws = boost::dynamic_pointer_cast<IEventWorkspace>(fetchIt());
         if(ws->mutableSample().hasOrientedLattice())
         {
           std::vector<double> ub = ws->mutableSample().getOrientedLattice().getUB().get_vector();
@@ -48,25 +51,25 @@ namespace MantidQt
       Getter for the id of the workspace
       @return the id of the workspace
       */
-      std::string WorkspaceOnDisk::getId() const
+      std::string EventNexusFileMemento::getId() const
       {
-        return m_fileName;
+        return m_adsID;
       }
 
       /**
       Getter for the type of location where the workspace is stored
       @ return the location type
       */
-      std::string WorkspaceOnDisk::locationType() const
+      std::string EventNexusFileMemento::locationType() const
       {
-        return "On Disk";
+        return locType();
       }
 
       /**
       Check that the workspace has not been deleted since instantiating this memento
       @return true if still in specified location
       */
-      bool WorkspaceOnDisk::checkStillThere() const
+      bool EventNexusFileMemento::checkStillThere() const
       {
         std::ifstream ifile;
         ifile.open(m_fileName.c_str(), std::ifstream::in);
@@ -78,36 +81,33 @@ namespace MantidQt
       @returns the matrix workspace
       @throw if workspace has been moved since instantiation.
       */
-      Mantid::API::MatrixWorkspace_sptr WorkspaceOnDisk::fetchIt() const
+      Mantid::API::Workspace_sptr EventNexusFileMemento::fetchIt() const
       {
-        using namespace Mantid::API;
-
         checkStillThere();
 
-        IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadRaw");
+        IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadEventNexus");
         alg->initialize();
         alg->setRethrows(true);
         alg->setProperty("Filename", m_fileName);
         alg->setPropertyValue("OutputWorkspace", m_adsID);
         alg->execute();
 
-        Mantid::API::Workspace_sptr ws = AnalysisDataService::Instance().retrieve(m_adsID);
-        
+        Workspace_sptr ws = AnalysisDataService::Instance().retrieve(m_adsID);
+
         Mantid::API::WorkspaceGroup_sptr gws = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
         if(gws != NULL)
         {
           throw std::invalid_argument("This raw file corresponds to a WorkspaceGroup. Cannot process groups like this. Import via MantidPlot instead.");
         }
-        return boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+        return ws;
       }
 
       /**
       Dump the workspace out of memory:
       @name : name of the workspace to clean-out.
       */
-      void WorkspaceOnDisk::dumpIt(const std::string& name)
+      void EventNexusFileMemento::dumpIt(const std::string& name)
       {
-        using Mantid::API::AnalysisDataService;
         if(AnalysisDataService::Instance().doesExist(name))
         {
           AnalysisDataService::Instance().remove(name);
@@ -115,14 +115,31 @@ namespace MantidQt
       }
 
       /// Destructor
-      WorkspaceOnDisk::~WorkspaceOnDisk()
+      EventNexusFileMemento::~EventNexusFileMemento()
       {
       }
 
       /// Clean up.
-      void WorkspaceOnDisk::cleanUp()
+      void EventNexusFileMemento::cleanUp()
       {
           dumpIt(m_adsID);
+      }
+
+      /*
+      Apply actions. Load workspace and apply all actions to it.
+      */
+      Mantid::API::Workspace_sptr EventNexusFileMemento::applyActions()
+      {
+        Mantid::API::Workspace_sptr ws = fetchIt();
+        
+        Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SetUB");
+        alg->initialize();
+        alg->setRethrows(true);
+        alg->setPropertyValue("Workspace", this->m_adsID);
+        alg->setProperty("UB", m_ub);
+        alg->execute();
+
+        return AnalysisDataService::Instance().retrieve(m_adsID);
       }
 
   }

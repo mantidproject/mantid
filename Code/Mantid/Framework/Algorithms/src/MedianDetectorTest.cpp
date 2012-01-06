@@ -33,7 +33,7 @@ namespace Mantid
 
     /// Default constructor
     MedianDetectorTest::MedianDetectorTest() :
-      DetectorDiagnostic(), m_inputWS(), m_Low(0.1), m_High(1.5), m_minSpec(0), 
+      DetectorDiagnostic(), m_inputWS(), m_loFrac(0.1), m_hiFrac(1.5), m_minSpec(0),
       m_maxSpec(EMPTY_INT()), m_rangeLower(0.0), m_rangeUpper(0.0)
     {
     };
@@ -53,17 +53,16 @@ namespace Mantid
       BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
       mustBePositive->setLower(0);
       declareProperty("SignificanceTest", 3.3, mustBePositive,
-                      "Set this to a nonzero value and detectors in spectra with a total\n"
-                      "number of counts is within this number of standard deviations from the\n"
-                      "median will not be labelled bad (default 3.3)" );
+                      "Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the\n"
+                      "difference with respect to the median value must also exceed this number of error bars");
       declareProperty("LowThreshold", 0.1,
-                      "Detectors corresponding to spectra with total counts equal to or less\n"
-                      "than this proportion of the median number of counts will be identified\n"
-                      "as reading badly (default 0.1)" );
+                      "Lower acceptable bound as fraction of median value" );
       declareProperty("HighThreshold", 1.5,
-                      "Detectors corresponding to spectra with total counts equal to or more\n"
-                      "than this number of the median will be identified as reading badly\n"
-                      "(default 1.5)" );
+                      "Upper acceptable bound as fraction of median value");
+      declareProperty("LowOutlier", 0.01, "Lower bound defining outliers as fraction of median value");
+      declareProperty("HighOutlier", 100., "Upper bound defining outliers as fraction of median value");
+      declareProperty("ExcludeZeroesFromMedian", false, "If false (default) zeroes will be included in "
+                      "the median calculation, otherwise they will not be included but they will be left unmasked");
       BoundedValidator<int> *mustBePosInt = new BoundedValidator<int>();
       mustBePosInt->setLower(0);
       declareProperty("StartWorkspaceIndex", 0, mustBePosInt,
@@ -85,57 +84,37 @@ namespace Mantid
 
     /** Executes the algorithm that includes calls to SolidAngle and Integration
      *
-     *  @throw invalid_argument if there is an incapatible property value and so the algorithm can't continue
+     *  @throw invalid_argument if there is an incompatible property value and so the algorithm can't continue
      *  @throw runtime_error if algorithm cannot execute
      */
     void MedianDetectorTest::exec()
     {
       retrieveProperties();
+      // Ensures we have a workspace with a single bin. It will contain any input masking and will be used to record any
+      // required masking from this algorithm
+      MatrixWorkspace_sptr countsWS = integrateSpectra(m_inputWS, m_minSpec, m_maxSpec,
+                                                       m_rangeLower, m_rangeUpper, true);
 
-      
-
-      //Adds the counts from all the bins and puts them in one total bin
-      MatrixWorkspace_sptr counts = integrateSpectra(m_inputWS, m_minSpec, m_maxSpec, 
-                                                     m_rangeLower, m_rangeUpper, true);
-      counts = convertToRate(counts); 
-
-          // FIXME: The next section that calculates the solid angle is commented out until 
-          //        the SolidAngle algorithm is corrected to return the correct number.
-          //        (see http://trac.mantidproject.org/mantid/ticket/2596)
-          
-      //MatrixWorkspace_sptr angles = getSolidAngles(m_minSpec, m_maxSpec);
-
-      //Gets the count rate per solid angle (in steradians), if it exists, for each spectrum
-      //this calculation is optional, it depends on angle information existing
-      //if ( angles.use_count() == 1 )
-      //{
-                //if some numbers in angles are zero we will get the infinity flag value 
-                // in the output work space which needs to be dealt with later
-          //counts = counts/angles;     
-      //}
-      
-      // End of Solid Angle commented out section
-           
-
-      // An average of the data, the median is less influenced by a small number of huge values than the mean
-      std::set<int> badIndices;
-      double average = calculateMedian(counts, badIndices);
-
-      // Create a workspace for the output
-      MatrixWorkspace_sptr maskWS = WorkspaceFactory::Instance().create(counts); 
       // Make sure the output is simple
-      maskWS->isDistribution(false);
-      maskWS->setYUnit("");
-      maskWS->instrumentParameters().clear();
+      countsWS->setYUnit("");
+      countsWS->instrumentParameters();
 
-      int numFailed = doDetectorTests(counts, maskWS, average, badIndices);
+      // 1. Calculate the median
+      const bool excludeZeroes = getProperty("ExcludeZeroesFromMedian");
+      double median = calculateMedian(countsWS, excludeZeroes);
+      g_log.information() << "Median value = " << median << "\n";
+      // 2. Mask outliers
+      maskOutliers(median, countsWS);
+      // 3. Recalulate the median
+      median = calculateMedian(countsWS, excludeZeroes);
+      g_log.information() << "Median value with outliers removed = " << median << "\n";
 
-      g_log.notice() << "Median test results:\n"
-                     << "\tNumber of failures - " << numFailed << "\n"
-                     << "\tNumber of skipped spectra - " << badIndices.size() << "\n";
+      int numFailed = doDetectorTests(countsWS, median);
+      g_log.information() << "Median test results:\n"
+                       << "\tNumber of failures - " << numFailed << "\n";
 
       setProperty("NumberOfFailures", numFailed);
-      setProperty("OutputWorkspace", maskWS);
+      setProperty("OutputWorkspace", countsWS);
     }
 
     /** Loads and checks the values passed to the algorithm
@@ -166,9 +145,9 @@ namespace Mantid
         m_maxSpec = maxSpecIndex;
       }
 
-      m_Low = getProperty("LowThreshold");
-      m_High = getProperty("HighThreshold");
-      if ( !(m_Low < m_High) )
+      m_loFrac = getProperty("LowThreshold");
+      m_hiFrac = getProperty("HighThreshold");
+      if ( m_loFrac > m_hiFrac )
       {
         throw std::invalid_argument("The threshold for reading high must be greater than the low threshold");
       }
@@ -186,10 +165,10 @@ namespace Mantid
      */
     API::MatrixWorkspace_sptr MedianDetectorTest::getSolidAngles(int firstSpec, int lastSpec )
     {
-      g_log.information("Calculating soild angles");
+      g_log.debug("Calculating solid angles");
       // get percentage completed estimates for now, t0 and when we've finished t1
       double t0 = m_fracDone, t1 = advanceProgress(RTGetSolidAngle);
-      IAlgorithm_sptr childAlg = createSubAlgorithm("SolidAngle", t0, t1);
+      IAlgorithm_sptr childAlg = createSubAlgorithm("SolidAngle", t0, t1, true);
       childAlg->setProperty( "InputWorkspace", m_inputWS);
       childAlg->setProperty( "StartWorkspaceIndex", firstSpec );
       childAlg->setProperty( "EndWorkspaceIndex", lastSpec );
@@ -217,6 +196,34 @@ namespace Mantid
       return childAlg->getProperty("OutputWorkspace");
     }
 
+    /**
+     * Mask the outlier values to get a better median value.
+     * @param median The median value calculated from the current counts
+     * @param countsWS The counts workspace. Any outliers will be masked here
+     */
+    void MedianDetectorTest::maskOutliers(const double median, API::MatrixWorkspace_sptr countsWS)
+    {
+      // Fractions of the median
+      const double out_lo = getProperty("LowOutlier");
+      const double out_hi = getProperty("HighOutlier");
+      const int64_t nhist = static_cast<int64_t>(countsWS->getNumberHistograms());
+      // Mask outliers
+      PARALLEL_FOR1(countsWS)
+      for(int64_t i = 0; i < nhist; ++i)
+      {
+        const double value = countsWS->readY(i)[0];
+        if( (value < out_lo*median) && (value > 0.0) )
+        {
+          countsWS->maskWorkspaceIndex(i);
+        }
+        if( value > out_hi*median )
+        {
+          countsWS->maskWorkspaceIndex(i);
+        }
+      }
+    }
+
+
     /** 
      * Takes a single valued histogram workspace and assesses which histograms are within the limits. 
      * Those that are not are masked on the input workspace.
@@ -226,14 +233,10 @@ namespace Mantid
      * @param badIndices :: If an index is in this list then it will not be included in the tests
      * @return The number of detectors that failed the tests, not including those skipped
      */
-    int MedianDetectorTest::doDetectorTests(const API::MatrixWorkspace_sptr countWorkspace,
-                                            API::MatrixWorkspace_sptr maskWS, 
-                                            const double average, const std::set<int> & badIndices)
+    int MedianDetectorTest::doDetectorTests(const API::MatrixWorkspace_sptr countsWS,
+                                            const double median)
     {
-      g_log.information("Applying the criteria to find failing detectors");
-  
-      const double lowLim = (average*m_Low);
-      const double highLim = (average*m_High);
+      g_log.debug("Applying the criteria to find failing detectors");
       // A spectra can't fail if the statistics show its value is consistent with the mean value, 
       // check the error and how many errorbars we are away
       const double minSigma = getProperty("SignificanceTest");
@@ -243,13 +246,9 @@ namespace Mantid
       const int progStep = static_cast<int>(ceil(numSpec/30.0));
 
       const double live_value(1.0);
-      int numLow(0), numHigh(0);
+      int numFailed(0);
       
-      //set the workspace to have no units
-      countWorkspace->isDistribution(false);
-      countWorkspace->setYUnit("");
-
-      PARALLEL_FOR1(countWorkspace)
+      PARALLEL_FOR1(countsWS)
       for (int i = 0; i <= numSpec; ++i)
       {
         PARALLEL_START_INTERUPT_REGION
@@ -260,67 +259,64 @@ namespace Mantid
           progress(advanceProgress(progStep*static_cast<double>(RTMarkDetects)/numSpec));
         }
 
-
-        // If the value is not in the badIndices set then assume it is good
-        // else skip tests for it
-        if( badIndices.count(i) == 1 )
+        IDetector_const_sptr det;
+        try
         {
-          maskWS->maskWorkspaceIndex(i);
+          det = countsWS->getDetector(i);
+        }
+        catch(Exception::NotFoundError &)
+        {}
+        // Mark non-existant detectors as dead
+        if( !det )
+        {
+          countsWS->maskWorkspaceIndex(i);
           continue;
         }
-        //Do tests
-        const double sig = minSigma*countWorkspace->readE(i)[0];
-        // Check the significance value is okay
-        if( boost::math::isinf(std::abs(sig)) || boost::math::isinf(sig) )
+        if( det->isMasked() )
         {
-          PARALLEL_CRITICAL(MedianDetectorTest_failed_a)
-          {
-            maskWS->maskWorkspaceIndex(i);
-            ++numLow;
-          }
+          countsWS->dataY(i)[0] = 0.0;
+          continue;
+        }
+        if( det->isMonitor() )
+        {
+          // Don't include in calculation but don't mask it
+          countsWS->dataY(i)[0] = live_value;
+        }
+
+        const double signal = countsWS->dataY(i)[0];
+        // Mask out NaN and infinite
+        if( boost::math::isinf(signal) || boost::math::isnan(signal) )
+        {
+          countsWS->maskWorkspaceIndex(i);
+          PARALLEL_ATOMIC
+          ++numFailed;
           continue;
         }
 
-        const double yIn = countWorkspace->dataY(i)[0];
-        if ( yIn <= lowLim )
+        const double error = minSigma*countsWS->readE(i)[0];
+
+        if( (signal < median*m_loFrac && (signal-median < -error)) ||
+            (signal > median*m_hiFrac && (signal-median > error)) )
         {
-          // compare the difference against the size of the errorbar -statistical significance check
-          if(average - yIn > sig)
-          {
-            PARALLEL_CRITICAL(MedianDetectorTest_failed_b)
-            {
-              maskWS->maskWorkspaceIndex(i);
-              ++numLow;
-            }
-            continue;
-          }
+          countsWS->maskWorkspaceIndex(i);
+          PARALLEL_ATOMIC
+          ++numFailed;
         }
-        if (yIn >= highLim)
+        else
         {
-          // compare the difference against the size of the errorbar -statistical significance check
-          if(yIn - average > sig)
-          {
-            PARALLEL_CRITICAL(MedianDetectorTest_failed_c)
-            {
-              maskWS->maskWorkspaceIndex(i);
-              ++numHigh;
-            }
-            continue;
-          }
+          // Reaching here passes the tests
+          countsWS->dataY(i)[0] = live_value;
         }
-        // Reaching here passes the tests
-        maskWS->dataY(i)[0] = live_value;
+
         
         PARALLEL_END_INTERUPT_REGION
       }
       PARALLEL_CHECK_INTERUPT_REGION
 
       // Log finds
-      g_log.information() << "-- Detector tests --\n " 
-                          << "Number recording low: " << numLow << "\n"
-                          << "Number recording high: " << numHigh << "\n";
+      g_log.information() << numFailed << " spectra failed the median tests.\n";
       
-      return (numLow + numHigh);
+      return numFailed;
     }
 
 
