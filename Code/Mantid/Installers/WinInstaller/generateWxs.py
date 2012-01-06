@@ -525,6 +525,9 @@ addFileV('MantidGeometry','MGeo.dll','MantidGeometry.dll',MANTIDRELEASE + '/Mant
 addFileV('MantidKernel','MKern.dll','MantidKernel.dll',MANTIDRELEASE + '/MantidKernel.dll',MantidDlls)
 addFileV('MantidNexusCPP','MNxsCPP.dll','MantidNexusCPP.dll',MANTIDRELEASE + '/MantidNexusCPP.dll',MantidDlls)
 
+# New-style Python API
+mantidpy = addCompList('mtdpymod',MANTIDRELEASE + '/mantid','mantid',binDir, exclude_suffix=['.pyc'])[0]
+
 # Add qt API  library
 addFileV('MantidQtAPI','MQTAPI.dll','MantidQtAPI.dll',MANTIDRELEASE + '/MantidQtAPI.dll',MantidDlls)
 addFileV('MantidWidgets','MWid.dll','MantidWidgets.dll',MANTIDRELEASE + '/MantidWidgets.dll',MantidDlls)
@@ -749,6 +752,7 @@ MantidExec = addFeature('MantidExecAndDlls','Mantid binaries','The main executab
 addCRef('MantidDLLs',MantidExec)
 addCRefs(pythonDLLs, MantidExec)
 addCRefs(pythonLib,MantidExec)
+addCRefs(mantidpy, MantidExec)
 addCRefs(pythonScripts,MantidExec)
 addCRefs(mantidplot,MantidExec)
 addCRef('Plugins',MantidExec)

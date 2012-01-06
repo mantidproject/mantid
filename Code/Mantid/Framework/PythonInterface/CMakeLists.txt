@@ -125,3 +125,11 @@ if (PYUNITTEST_FOUND)
   set_property ( TARGET VanillaPythonInterfaceTest.py PROPERTY FOLDER "UnitTests" )
 endif ()
 
+###########################################################################
+# Installation settings
+###########################################################################
+
+install ( DIRECTORY mantid DESTINATION ${BIN_DIR} 
+          PATTERN "*.pyc" EXCLUDE 
+          PATTERN "CMakeLists.txt" EXCLUDE 
+          PATTERN "src" EXCLUDE )

@@ -1,7 +1,7 @@
 from mantidsimple import *
 
 try: # mantidplot can only be imported within mantidplot
-    from mantidplot import * # we want to be able to run from mantid script
+    from mantidplotpy import * # we want to be able to run from mantid script
 except ImportError:
     print "Could not import MantidPlot module. Plotting is disabled."
     pass
