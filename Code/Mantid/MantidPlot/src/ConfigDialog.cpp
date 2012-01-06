@@ -708,8 +708,6 @@ void ConfigDialog::initMantidOptionsTab()
   //create a checkbox for invisible workspaces options
   m_invisibleWorkspaces = new QCheckBox("Show Invisible Workspaces");
   m_invisibleWorkspaces->setChecked(false);
-  //m_invisibleWorkspaces->setGeometry(QRect(10, 10, 150, 18));
-  //grid->addWidget(frame,0,0);
   grid->addWidget(m_invisibleWorkspaces,0,0);
 
   QString setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("MantidOptions.InvisibleWorkspaces"));
@@ -730,6 +728,15 @@ void ConfigDialog::initMantidOptionsTab()
 
   grid->addWidget(treeCategories,1,0);
   refreshTreeCategories();
+
+  // Default Python API check box
+  m_defaultToNewPython = new QCheckBox("Use new-style Python by default (requires a restart of MantidPlot to take effect)");
+  QSettings settings;
+  int apiVersion = settings.value("Mantid/Python/APIVersion", 1).toInt();
+
+  if( apiVersion == 2 ) m_defaultToNewPython->setChecked(true);
+  else m_defaultToNewPython->setChecked(false);
+  grid->addWidget(m_defaultToNewPython, 2,0);
 }
 
 
@@ -2166,6 +2173,12 @@ void ConfigDialog::updateMantidOptionsTab()
     ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
     app->mantidUI->updateAlgorithms();
   }
+
+  // Default Python API
+  QSettings settings;
+  int apiVersion(1);
+  if( m_defaultToNewPython->isChecked() ) apiVersion = 2;
+  settings.setValue("Mantid/Python/APIVersion", apiVersion);
 }
 
 QStringList ConfigDialog::treeChecking(QTreeWidgetItem *parent)

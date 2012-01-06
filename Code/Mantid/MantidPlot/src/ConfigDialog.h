@@ -200,6 +200,7 @@ private:
   QCheckBox *m_sendToPrograms;
   QTreeWidget *treeCategories;
   QTreeWidget *treePrograms;
+  QCheckBox *m_defaultToNewPython;
 
 
   QPushButton* buttonAxesFont, *buttonNumbersFont, *buttonLegendFont, *buttonTitleFont, *fontsBtn;
