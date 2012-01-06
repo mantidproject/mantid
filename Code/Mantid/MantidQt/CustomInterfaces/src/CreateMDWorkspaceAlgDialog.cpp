@@ -47,9 +47,11 @@ QString CreateMDWorkspaceAlgDialog::getMinExtents() const
   return m_uiForm.txt_min_values->text();
 }
 
-bool CreateMDWorkspaceAlgDialog::getPreprocessedEvents() const
+QString CreateMDWorkspaceAlgDialog::getPreprocessedDetectors() const
 {
-  return m_uiForm.ck_use_preprocessed_detectors->isChecked();
+  QString result;
+  m_uiForm.ck_use_preprocessed_detectors->isChecked() ? result = "1" : result = "0";
+  return result;
 }
 
 QString CreateMDWorkspaceAlgDialog::getLocation() const

@@ -20,7 +20,7 @@ public:
   QString getMaxExtents() const;
   QString getMinExtents() const;
   QString getLocation() const;
-  bool getPreprocessedEvents() const;
+  QString getPreprocessedDetectors() const;
 
 private slots:
 

@@ -453,7 +453,7 @@ void CreateMDWorkspace::createMDWorkspaceClicked()
   QString minExtents = algDlg.getMinExtents();
   QString analysisMode = algDlg.getAnalysisMode();
   QString otherDimensions = algDlg.getOtherDimensions();
-  bool preProcessedEvents = algDlg.getPreprocessedEvents();
+  QString preProcessedDetectors = algDlg.getPreprocessedDetectors();
   QString location = algDlg.getLocation();
   if(location.isEmpty())
   {
@@ -469,14 +469,14 @@ void CreateMDWorkspace::createMDWorkspaceClicked()
     Workspace_sptr ws = currentMemento->applyActions();
 
     QString command = "try:\n"
-      "    ConvertToMDEvents(InputWorkspace='%1',OutputWorkspace='%1_md',OtherDimensions='%2',dEAnalysisMode='%3',QDimensions='%4',MinValues='%5',MaxValues='%6')\n"
-      "    SaveMD(InputWorkspace='%1_md', Filename='%7/%1_md.nxs',MakeFileBacked='1')\n"
+      "    ConvertToMDEvents(InputWorkspace='%1',OutputWorkspace='%1_md',OtherDimensions='%2',dEAnalysisMode='%3',QDimensions='%4',MinValues='%5',MaxValues='%6',UsePreprocessedDetectors='%7')\n"
+      "    SaveMD(InputWorkspace='%1_md', Filename='%8/%1_md.nxs',MakeFileBacked='1')\n"
       "    mtd.deleteWorkspace('%1_md')\n"
       "except:\n"
       "    print 'FAIL'";
 
     QString id(currentMemento->getId().c_str());
-    command = command.arg(id, otherDimensions, analysisMode, qDimension, minExtents, maxExtents, location);
+    command = command.arg(id, otherDimensions, analysisMode, qDimension, minExtents, maxExtents, preProcessedDetectors, location);
     QString pyOutput = runPythonCode(command).trimmed();
     if(pyOutput == "FAIL")
     {
