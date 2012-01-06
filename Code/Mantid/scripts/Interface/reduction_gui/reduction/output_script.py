@@ -6,7 +6,7 @@ try:
     from MantidFramework import *
     mtd.initialise()
     from reduction.command_interface import *
-    import mantidplot
+    import mantidplotpy
     IS_IN_MANTIDPLOT = True
 except:
     pass
@@ -23,6 +23,6 @@ class Output(BaseScriptElement):
             self.log_text = ReductionSingleton().log_text
             try:
                 for item in ReductionSingleton().output_workspaces:
-                    mantidplot.plotSpectrum(item, 0, True)
+                    mantidplotpy.plotSpectrum(item, 0, True)
             except:
                 raise RuntimeError, "Could not plot resulting output\n  %s" % sys.exc_value

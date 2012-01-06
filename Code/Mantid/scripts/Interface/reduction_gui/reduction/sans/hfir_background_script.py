@@ -21,7 +21,7 @@ except:
 # Check whether we are running in MantidPlot
 IS_IN_MANTIDPLOT = False
 try:
-    import mantidplot
+    import mantidplotpy
     IS_IN_MANTIDPLOT = True
 except:
     pass

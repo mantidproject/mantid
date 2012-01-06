@@ -15,7 +15,7 @@ from SANSadd2 import *
 
 # disable plotting if running outside Mantidplot
 try:
-    import mantidplot
+    import mantidplotpy
 except:
     #this should happen when this is called from outside Mantidplot and only then, the result is that attempting to plot will raise an exception
     pass
@@ -396,7 +396,7 @@ def CompWavRanges(wavelens, plot=True):
         _refresh_singleton()
 
     if plot:
-        mantidplot.plotSpectrum(calculated, 0)
+        mantidplotpy.plotSpectrum(calculated, 0)
     
     #return just the workspace name of the full range
     return calculated[0]
@@ -429,7 +429,7 @@ def PhiRanges(phis, plot=True):
         _refresh_singleton()
     
     if plot:
-        mantidplot.plotSpectrum(calculated, 0)
+        mantidplotpy.plotSpectrum(calculated, 0)
     
     #return just the workspace name of the full range
     return calculated[0]
@@ -575,16 +575,16 @@ def PlotResult(workspace, canvas=None):
 
     try:
         if numSpecs == 1:
-            graph = mantidplot.plotSpectrum(workspace,0)
+            graph = mantidplotpy.plotSpectrum(workspace,0)
         else:        
-            graph = mantidplot.importMatrixWorkspace(workspace.getName()).plotGraph2D()
+            graph = mantidplotpy.importMatrixWorkspace(workspace.getName()).plotGraph2D()
 
     except NameError:
         issueWarning('Plot functions are not available, is this being run from outside Mantidplot?')
         
     if not canvas is None:
         #we were given a handle to an existing graph, use it
-        mantidplot.mergePlots(canvas, graph)
+        mantidplotpy.mergePlots(canvas, graph)
         graph = canvas
     
     return graph
@@ -743,7 +743,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
         try :
             if not graph_handle:
                 #once we have a plot it will be updated automatically when the workspaces are updated
-                graph_handle = mantidplot.plotSpectrum(centre.QUADS, 0)
+                graph_handle = mantidplotpy.plotSpectrum(centre.QUADS, 0)
             graph_handle.activeLayer().setTitle(
                         centre.status_str(it, resX, resY))
         except :
