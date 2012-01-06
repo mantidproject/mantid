@@ -69,13 +69,16 @@ namespace
  */
 PythonScript::PythonScript(PythonScripting *env, const QString &code, QObject *context, 
          const QString &name, bool interactive, bool reportProgress)
-  : Script(env, code, context, name, interactive, reportProgress), PyCode(NULL), localDict(env->globalDict()),
+  : Script(env, code, context, name, interactive, reportProgress), PyCode(NULL), localDict(NULL),
     stdoutSave(NULL), stderrSave(NULL), isFunction(false), m_isInitialized(false)
 {
   ROOT_CODE_OBJECT = NULL;
   CURRENT_SCRIPT_OBJECT = this;
 
-  setContext(Context);
+  GILHolder gil;
+  PyObject *pymodule = PyImport_AddModule("__main__");
+  localDict = PyDict_Copy(PyModule_GetDict(pymodule));
+  setQObject(Context, "self");
   updatePath(Name, true);
 }
 
@@ -87,6 +90,7 @@ PythonScript::~PythonScript()
   this->disconnect();
   updatePath(Name, false);
   Py_XDECREF(PyCode);
+  Py_XDECREF(localDict);
 }
 
 /**
@@ -170,7 +174,7 @@ bool PythonScript::compile(bool for_eval)
     if( PyCode )
     {
       PyObject *tmp = PyDict_New();
-      Py_XDECREF(PyEval_EvalCode((PyCodeObject*)PyCode, env()->globalDict(), tmp));
+      Py_XDECREF(PyEval_EvalCode((PyCodeObject*)PyCode, localDict, tmp));
       Py_DECREF(PyCode);
       PyCode = PyDict_GetItemString(tmp,"__doit__");
       Py_XINCREF(PyCode);
@@ -212,7 +216,7 @@ QVariant PythonScript::eval()
     pyret = PyObject_Call(PyCode, empty_tuple, localDict);
     Py_DECREF(empty_tuple);
   } else
-    pyret = PyEval_EvalCode((PyCodeObject*)PyCode, env()->globalDict(), localDict);
+    pyret = PyEval_EvalCode((PyCodeObject*)PyCode, localDict, localDict);
   endStdoutRedirect();
   if (!pyret){
     if (PyErr_ExceptionMatches(PyExc_ValueError) ||
@@ -379,12 +383,11 @@ PyObject* PythonScript::executeScript(PyObject* return_tuple)
   {
     if( return_tuple )
     {
-      pyret = PyObject_Call(PyCode, return_tuple,env()->globalDict());
+      pyret = PyObject_Call(PyCode, return_tuple,localDict);
     }
     else
     {
-
-      pyret = PyEval_EvalCode((PyCodeObject*)PyCode, env()->globalDict(), localDict);
+      pyret = PyEval_EvalCode((PyCodeObject*)PyCode, localDict, localDict);
     }
   }
   // Given that C++ has no mechanism to move through a code block first if an exception is thrown, some code needs to

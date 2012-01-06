@@ -88,8 +88,6 @@ public:
   const QString mathFunctionDoc (const QString &name) const;
   /// Return the global dictionary for this environment
   PyObject *globalDict() { return m_globals; }
-  /// Return the local dictionary for the enviroment. 
-  PyObject *localDict() { return m_locals; }
   /// Return the sys dictionary for this environment
   PyObject *sysDict() { return m_sys; }
   /// The language name
@@ -126,8 +124,6 @@ private:
 private:
   /// The global dictionary
   PyObject *m_globals;
-  /// The locals dictionary
-  PyObject *m_locals;
   /// A dictionary of math functions
   PyObject *m_math;
   /// The dictionary of the sys module
