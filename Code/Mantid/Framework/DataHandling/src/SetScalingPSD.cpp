@@ -211,14 +211,13 @@ namespace DataHandling
               }
               Kernel::V3D detPos = det->getPos();
               Kernel::V3D shift=truPos-detPos;
-              double scale=1.0;
 
               // scaling applied to dets that are not monitors and have sequential IDs
               if(detIdLast==detIndex-1 && !det->isMonitor())
               {
                   Kernel::V3D diffI=detPos-detPosLast;
                   Kernel::V3D diffT=truPos-truPosLast;
-                  scale=diffT.norm()/diffI.norm();
+                  double scale=diffT.norm()/diffI.norm();
                   Kernel::V3D scaleDir=diffT/diffT.norm();
                   // Wish to store the scaling in a map, if we already have a scaling
                   // for this detector (i.e. from the other side) we average the two
@@ -268,12 +267,12 @@ namespace DataHandling
               }
               Kernel::V3D detPos = det->getPos();
               Kernel::V3D shift=truepos[i]-detPos;
-              double scale;
+
               if(detIdLast==detIndex-1 && !det->isMonitor()) 
               {
                   Kernel::V3D diffI=detPos-detPosLast;
                   Kernel::V3D diffT=truepos[i]-truPosLast;
-                  scale=diffT.norm()/diffI.norm();
+                  double scale=diffT.norm()/diffI.norm();
                   Kernel::V3D scaleDir=diffT/diffT.norm();
                   scaleMap[detIndex]=scale;
                   its=scaleMap.find(detIndex-1);

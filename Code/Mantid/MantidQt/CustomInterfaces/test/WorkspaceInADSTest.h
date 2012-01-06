@@ -55,7 +55,7 @@ public:
     AnalysisDataService::Instance().addOrReplace("ws", ws);
     WorkspaceInADS memento("ws");
     TS_ASSERT(memento.checkStillThere());
-    Mantid::API::MatrixWorkspace_sptr result = memento.fetchIt();
+    MatrixWorkspace_sptr result = boost::dynamic_pointer_cast<MatrixWorkspace>( memento.fetchIt() );
     TS_ASSERT(result != NULL);
   }
 

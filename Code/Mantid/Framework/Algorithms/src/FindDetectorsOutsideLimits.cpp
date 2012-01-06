@@ -15,6 +15,9 @@ Uses the [[Integration]] algorithm to sum the spectra.
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MultiThreaded.h"
+
+#include <boost/math/special_functions/fpclassify.hpp>
+
 #include <fstream>
 #include <cmath>
 
@@ -36,6 +39,7 @@ namespace Mantid
     using namespace Kernel;
     using namespace API;
     using namespace DataObjects;
+    using Geometry::IDetector_const_sptr;
 
     /// Initialisation method.
     void FindDetectorsOutsideLimits::init()
@@ -44,7 +48,7 @@ namespace Mantid
           new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
           "Name of the input workspace2D" );
       declareProperty(
-          new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
+        new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
           "Each histogram from the input workspace maps to a histogram in this\n"
           "workspace with one value that indicates if there was a dead detector" );
       declareProperty("HighThreshold", 0.0,
@@ -53,6 +57,14 @@ namespace Mantid
       declareProperty("LowThreshold", 0.0,
           "Spectra whose total number of counts are equal to or below this value\n"
           "will be marked bad (default 0)" );
+      BoundedValidator<int> *mustBePosInt = new BoundedValidator<int>();
+      mustBePosInt->setLower(0);
+      declareProperty("StartWorkspaceIndex", 0, mustBePosInt,
+                      "The index number of the first spectrum to include in the calculation\n"
+                      "(default 0)" );
+      declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePosInt->clone(),
+                      "The index number of the last spectrum to include in the calculation\n"
+                      "(default the last histogram)" );
       declareProperty("RangeLower", EMPTY_DBL(),
           "No bin with a boundary at an x value less than this will be used\n"
           "in the summation that decides if a detector is 'bad' (default: the\n"
@@ -64,8 +76,8 @@ namespace Mantid
       declareProperty("NumberOfFailures", 0, Direction::Output);
     }
 
-    /** Executes the algorithm
-     *
+    /** 
+     * Executes the algorithm
      *  @throw runtime_error Thrown if the algorithm cannot execute
      *  @throw invalid_argument is the LowThreshold property is greater than HighThreshold
      */
@@ -75,72 +87,107 @@ namespace Mantid
       double highThreshold = getProperty("HighThreshold");
       if ( highThreshold <= lowThreshold )
       {
-        g_log.error() << name() << ": Lower limit (" << lowThreshold <<
-            ") >= the higher limit (" << highThreshold <<
-            "), all detectors in the spectrum would be marked bad";
         throw std::invalid_argument("The high threshold must be higher than the low threshold");
       }
 
       MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+      int minIndex = getProperty("StartWorkspaceIndex");
+      int maxIndex = getProperty("EndWorkspaceIndex");
+      const int inputLength = static_cast<int>(inputWS->getNumberHistograms());
+      if( maxIndex == EMPTY_INT() ) maxIndex = inputLength - 1;
+      if( maxIndex < minIndex )
+      {
+        std::ostringstream os;
+        os << "Invalid workspace indices. Min=" << minIndex << ",Max=" << maxIndex;
+        throw std::invalid_argument(os.str());
+      }
+
+      if( minIndex > inputLength || maxIndex > inputLength )
+      {
+        std::ostringstream os;
+        os << "Workspace indices must be lower than workspace size. Size=" << inputLength << ", Min=" << minIndex << ",Max=" << maxIndex;
+        throw std::invalid_argument(os.str());
+      }
+
+
       const double rangeLower = getProperty("RangeLower");
       const double rangeUpper = getProperty("RangeUpper");
-
       // Get the integrated input workspace; converting to a Workspace2D
-      MatrixWorkspace_sptr integratedWorkspace = 
-          integrateSpectra(inputWS, 0, EMPTY_INT(), rangeLower, rangeUpper, true);
-
-      EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>( integratedWorkspace);
-      if (ew)
+      MatrixWorkspace_sptr countsWS = integrateSpectra(inputWS, minIndex, maxIndex,
+                                                       rangeLower, rangeUpper, true);
+      if (boost::dynamic_pointer_cast<EventWorkspace>(countsWS))
         throw std::runtime_error("Error! Integration output is not a Workspace2D.");
 
-      //set the workspace to have no units
-      integratedWorkspace->isDistribution(false);
-      integratedWorkspace->setYUnit("");
-
+      // This will become the output workspace
+      countsWS->isDistribution(false);
+      countsWS->setYUnit("");
+      countsWS->instrumentParameters();
 
       const double liveValue(1.0);
-      // iterate over the data values setting the live and dead values
-      const int numSpec = static_cast<int>(integratedWorkspace->getNumberHistograms());
-      const int progStep = static_cast<int>(ceil(numSpec / 100.0));
 
-      // Keep track of those reading low/high
-      int numLow(0), numHigh(0);
+      const int diagLength = static_cast<int>(countsWS->getNumberHistograms());
+      const int progStep = static_cast<int>(std::ceil(diagLength / 100.0));
 
-      for (int i = 0; i < numSpec; ++i)
+      int numFailed(0);
+      PARALLEL_FOR1(countsWS)
+      for (int i = 0; i < diagLength; ++i)
       {
         if (i % progStep == 0)
         {
-          progress(static_cast<double>(i)/numSpec);
+          progress(static_cast<double>(i)/diagLength);
           interruption_point();
         }
-
-        const double & yValue = integratedWorkspace->readY(i)[0];
-        if ( yValue <= lowThreshold )
+        IDetector_const_sptr det;
+        try
         {
-          integratedWorkspace->maskWorkspaceIndex(i);
-          ++numLow;
+          det = countsWS->getDetector(i);
+        }
+        catch(Exception::NotFoundError&)
+        {
+        }
+        // Mark no detector spectra as failed
+        if( !det )
+        {
+          countsWS->maskWorkspaceIndex(i);
+          PARALLEL_ATOMIC
+          ++numFailed;
+          continue;
+        }
+        if( det->isMasked() ) continue;
+        if( det->isMonitor() )
+        {
+          // Don't include but don't mask either
+          countsWS->dataY(i)[0] = liveValue;
           continue;
         }
 
-        if ( yValue >= highThreshold )
+        const double & yValue = countsWS->readY(i)[0];
+        // Mask out NaN and infinite
+        if( boost::math::isinf(yValue) || boost::math::isnan(yValue) )
         {
-          integratedWorkspace->maskWorkspaceIndex(i);
-          ++numHigh;
+          countsWS->maskWorkspaceIndex(i);
+          PARALLEL_ATOMIC
+          ++numFailed;
           continue;
         }
 
-        // Value passed the tests, flag it.
-        integratedWorkspace->dataY(i)[0] = liveValue;
+        if ( yValue <= lowThreshold || yValue >= highThreshold)
+        {
+          countsWS->maskWorkspaceIndex(i);
+          PARALLEL_ATOMIC
+          ++numFailed;
+        }
+        else
+        {
+          // Value passed the tests, flag it.
+          countsWS->dataY(i)[0] = liveValue;
+        }
       }
         
-      const int totalNumFailed(numLow+numHigh);
-      g_log.notice() << "Found a total of " << totalNumFailed << " failing "
-                     << "spectra (" << numLow << " reading low and " << numHigh
-                     << " reading high)" << std::endl;
-  
-      setProperty("NumberOfFailures", totalNumFailed);
+      g_log.information() << numFailed << " spectra fell outside the given limits.\n";
+      setProperty("NumberOfFailures", numFailed);
       // Assign it to the output workspace property
-      setProperty("OutputWorkspace", integratedWorkspace);
+      setProperty("OutputWorkspace", countsWS);
     }
 
   }

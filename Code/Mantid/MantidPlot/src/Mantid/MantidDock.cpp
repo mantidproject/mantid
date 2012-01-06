@@ -880,7 +880,8 @@ void MantidDockWidget::addMatrixWorkspaceMenuItems(QMenu *menu, Mantid::API::Mat
 void MantidDockWidget::addMDEventWorkspaceMenuItems(QMenu *menu, Mantid::API::IMDEventWorkspace_const_sptr WS) const
 {
   (void) WS;
-  menu->addAction(m_showBoxData); // Show MD Box data
+
+  //menu->addAction(m_showBoxData); // Show MD Box data (for debugging only)
   menu->addAction(m_showVatesGui); // Show the Vates simple interface
   if (!MantidQt::API::InterfaceManager::Instance().hasVatesLibraries())
   {

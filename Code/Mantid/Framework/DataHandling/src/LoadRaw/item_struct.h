@@ -6,6 +6,7 @@
 
 /// structure to hold a dae item
 template <typename T>
+// cppcheck-suppress noConstructor
 class item_struct
 {
 public:

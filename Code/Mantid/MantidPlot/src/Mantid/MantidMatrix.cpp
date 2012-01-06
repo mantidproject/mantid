@@ -134,6 +134,7 @@ bool MantidMatrix::eventFilter(QObject *object, QEvent *e)
 {
   // if it's context menu on any of the views
   if (e->type() == QEvent::ContextMenu && (object == m_table_viewY || object == m_table_viewX || object == m_table_viewE)){
+    e->accept();
     emit showContextMenu();
     return true;
   }
@@ -717,6 +718,8 @@ QwtDoubleRect MantidMatrix::boundingRect()
 }
 
 //----------------------------------------------------------------------------
+MantidMatrixFunction::MantidMatrixFunction(MantidMatrix* wsm):m_matrix(wsm){}
+
 void MantidMatrixFunction::init()
 {
  if (!m_matrix->workspace()->getAxis(1))

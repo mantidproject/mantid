@@ -412,8 +412,6 @@ class SliceViewerWindowProxy(QtProxyObject):
     """
     def __init__(self, toproxy):
         QtProxyObject.__init__(self, toproxy)
-        # List of methods in slicer to pass-through
-        self.slicer_methods = ["setWorkspace", "getWorkspaceName", "showControls", "openFromXML", "saveImage", "setXYDim", "setXYDim", "getDimX", "getDimY", "setSlicePoint", "setSlicePoint", "getSlicePoint", "getSlicePoint", "setXYLimits", "getXLimits", "getYLimits", "zoomBy", "setXYCenter", "resetZoom", "loadColorMap", "setColorScale", "setColorScaleMin", "setColorScaleMax", "setColorScaleLog", "getColorScaleMin", "getColorScaleMax", "getColorScaleLog", "setColorScaleAutoFull", "setColorScaleAutoSlice", "setFastRender", "getFastRender"]
 
     def __getattr__(self, attr):
         """
@@ -424,9 +422,11 @@ class SliceViewerWindowProxy(QtProxyObject):
         
         # Pass-through to the contained SliceViewer widget.
         sv = self._getHeldObject().getSlicer()
-        if attr in self.slicer_methods:
+        # But only those attributes that are methods on the SliceViewer
+        if attr in SliceViewerProxy.slicer_methods:
             return getattr(sv, attr)
         else:
+            # Otherwise, pass through to the stored object
             return getattr(self._getHeldObject(), attr)
 
     def __str__(self):
@@ -449,7 +449,98 @@ class SliceViewerWindowProxy(QtProxyObject):
         Returns the list of attributes for this object.
         Might allow tab-completion to work under ipython
         """
-        return self.slicer_methods
+        return SliceViewerProxy.slicer_methods + ['showLine']
+
+    def getLiner(self):
+        """
+        Returns the LineViewer widget that is part of this 
+        SliceViewerWindow
+        """
+        return LineViewerProxy(self._getHeldObject().getLiner())
+    
+    def getSlicer(self):
+        """
+        Returns the SliceViewer widget that is part of this 
+        SliceViewerWindow
+        """
+        return SliceViewerProxy(self._getHeldObject().getSlicer())
+    
+    def showLine(self, start, end, width=None, planar_width=0.1, dim_widths=None,
+                 num_bins=100):
+        """Opens the LineViewer and define a 1D line along which to integrate.
+        
+        The line is created in the same XY dimensions and at the same slice
+        point as is currently shown in the SliceViewer.
+        
+        Args:
+            start :: (X,Y) coordinates of the start point in the XY dimensions
+                of the current slice.
+            end :: (X,Y) coordinates of the end point in the XY dimensions
+                of the current slice.
+            width :: if specified, sets all the widths (planar and other
+                dimensions) to this integration width.
+            planar_width :: sets the XY-planar (perpendicular to the line)
+                integration width. Default 0.1.
+            dim_widths :: list with one width value for each dimension in the
+                workspace (including the XY dimensions, which are ignored).
+                e.g. [0,1,2,3] in a XYZT workspace.
+            num_bins :: number of bins by which to divide the line.
+                Default 100.
+            
+        Returns:
+            The LineViewer object of the SliceViewerWindow. There are methods
+            available to modify the line drawn.
+        """
+        # First show the lineviewer 
+        self.getSlicer().toggleLineMode(True)
+        liner = self.getLiner()
+        
+        # Start and end point
+        liner.setStartXY(start[0], start[1])
+        liner.setEndXY(end[0], end[1])
+        
+        # Set the width.
+        if not width is None:
+            liner.setWidth(width)
+        else:
+            liner.setPlanarWidth(planar_width)
+            if not dim_widths is None:
+                for d in xrange(len(dim_widths)):
+                    liner.setWidth(d, dim_widths[i])
+        # Bins
+        liner.setNumBins(num_bins)
+        liner.apply()
+
+        # Return the proxy to the LineViewer widget        
+        return liner
+        
 
 
 
+#-----------------------------------------------------------------------------
+class SliceViewerProxy(QtProxyObject):
+    """Proxy for a C++ SliceViewer widget.
+    """
+    # These are the exposed python method names
+    slicer_methods = ["setWorkspace", "getWorkspaceName", "showControls", "openFromXML", "saveImage", "setFastRender", "getFastRender", "toggleLineMode", "setXYDim", "setXYDim", "getDimX", "getDimY", "setSlicePoint", "setSlicePoint", "getSlicePoint", "getSlicePoint", "setXYLimits", "getXLimits", "getYLimits", "zoomBy", "setXYCenter", "resetZoom", "loadColorMap", "setColorScale", "setColorScaleMin", "setColorScaleMax", "setColorScaleLog", "getColorScaleMin", "getColorScaleMax", "getColorScaleLog", "setColorScaleAutoFull", "setColorScaleAutoSlice"]
+    
+    def __init__(self, toproxy):
+        QtProxyObject.__init__(self, toproxy)
+        
+    def __dir__(self):
+        """Returns the list of attributes for this object.   """
+        return self.slicer_methods()
+    
+
+#-----------------------------------------------------------------------------
+class LineViewerProxy(QtProxyObject):
+    """Proxy for a C++ LineViewer widget.
+    """
+    def __init__(self, toproxy):
+        QtProxyObject.__init__(self, toproxy)
+        
+    def __dir__(self):
+        """Returns the list of attributes for this object.   """
+        return ["apply", "showPreview", "showFull", "setStartXY", "setEndXY", "setWidth", "setWidth", "setPlanarWidth", "getPlanarWidth", "setNumBins", "setFixedBinWidthMode", "getFixedBinWidth", "getFixedBinWidthMode", "getNumBins", "getBinWidth"]
+    
+    

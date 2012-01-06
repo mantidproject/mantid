@@ -88,7 +88,7 @@ double getSourceToSampleDistance(API::MatrixWorkspace_sptr dataWS)
   const int nguides = *dp;
 
   std::vector<std::string> pars = dataWS->getInstrument()->getStringParameter("aperture-distances");
-  if (pars.size()==0)
+  if (pars.empty())
     throw Kernel::Exception::InstrumentDefinitionError("Unable to find [aperture-distances] instrument parameter");
 
   double SSD = 0;

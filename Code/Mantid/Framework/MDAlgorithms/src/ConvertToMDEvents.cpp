@@ -255,116 +255,126 @@ ConvertToMDEvents::init()
 }
 
  //----------------------------------------------------------------------------------------------
-  /* Execute the algorithm.   */
-void ConvertToMDEvents::exec(){
-    // in case of subsequent calls
-    this->algo_id="";
-    // initiate class which would deal with any dimension workspaces
-    if(!pWSWrapper.get()){
-        pWSWrapper = std::auto_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
+/* Execute the algorithm.   */
+void ConvertToMDEvents::exec()
+{
+  // in case of subsequent calls
+  this->algo_id="";
+  // initiate class which would deal with any dimension workspaces
+  if(!pWSWrapper.get())
+  {
+    pWSWrapper = std::auto_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
+  }
+  // -------- Input workspace
+  this->inWS2D = getProperty("InputWorkspace");
+  if(!inWS2D)
+  {
+    convert_log.error()<<" can not obtain input matrix workspace from analysis data service\n";
+  }
+  // ------- Is there any output workspace?
+  // shared pointer to target workspace
+  API::IMDEventWorkspace_sptr spws = getProperty("OutputWorkspace");
+  bool create_new_ws(false);
+  if(!spws)
+  {
+    create_new_ws = true;
+  }
+
+  //identify if u,v are present among input parameters and use defaults if not
+  Kernel::V3D u,v;
+  std::vector<double> ut = getProperty("u");
+  std::vector<double> vt = getProperty("v");
+  this->checkUVsettings(ut,vt,u,v);
+
+  // set up target coordinate system
+  this ->rotMatrix = getTransfMatrix(inWS2D,u,v);
+
+  // if new workspace is created, its properties are determened by the user's input
+  if (create_new_ws)
+  {
+    // what dimension names requested by the user by:
+    //a) Q selector:
+    std::string Q_mod_req                    = getProperty("QDimensions");
+    //b) the energy exchange mode
+    std::string dE_mod_req                   = getProperty("dEAnalysisMode");
+    //c) other dim property;
+    std::vector<std::string> other_dim_names = getProperty("OtherDimensions");
+
+    // Identify the algorithm to deploy and identify/set the dimension names to use
+    algo_id = identifyTheAlg(inWS2D,Q_mod_req,dE_mod_req,other_dim_names,targ_dim_names,targ_dim_units);
+
+    // set the min and max values for the dimensions from the input porperties
+    dim_min = getProperty("MinValues");
+    dim_max = getProperty("MaxValues");
+    // verify that the number min/max values is equivalent to the number of dimensions defined by properties
+    if(dim_min.size()!=dim_max.size()||dim_min.size()!=n_activated_dimensions)
+    {
+      g_log.error()<<" number of specified min dimension values: "<<dim_min.size()<<", number of max values: "<<dim_max.size()<<
+                     " and total number of target dimensions: "<<n_activated_dimensions<<" are not consistent\n";
+      throw(std::invalid_argument("wrong number of dimension limits"));
     }
-    // -------- Input workspace 
-    this->inWS2D = getProperty("InputWorkspace");
-    if(!inWS2D){
-        convert_log.error()<<" can not obtain input matrix workspace from analysis data service\n";
+    this->checkMaxMoreThenMin(dim_min,dim_max);
+
+    // the output dimensions and almost everything else will be determined by the dimensions of the target workspace
+    // user input is mainly ignored
+  }
+  else
+  {
+    dim_min.assign(n_activated_dimensions,-1);
+    dim_max.assign(n_activated_dimensions,1);
+    throw(Kernel::Exception::NotImplementedError("Adding to existing MD workspace not Yet Implemented"));
+  }
+
+  bool reuse_preprocecced_detectors = getProperty("UsePreprocessedDetectors");
+  if(!(reuse_preprocecced_detectors&&det_loc.is_defined()))processDetectorsPositions(inWS2D,det_loc,convert_log);
+
+  if(create_new_ws)
+  {
+    spws = pWSWrapper->createEmptyMDWS(n_activated_dimensions, targ_dim_names,targ_dim_units, dim_min, dim_max);
+    if(!spws)
+    {
+      g_log.error()<<"can not create target event workspace with :"<<n_activated_dimensions<<" dimensions\n";
+      throw(std::invalid_argument("can not create target workspace"));
     }
-    // ------- Is there any output workspace?
-    // shared pointer to target workspace
-    API::IMDEventWorkspace_sptr spws = getProperty("OutputWorkspace");
-    bool create_new_ws(false);
-    if(!spws){
-        create_new_ws = true;
-    }
+    // Build up the box controller
+    Mantid::API::BoxController_sptr bc = pWSWrapper->getBoxController();
+    // Build up the box controller, using the properties in BoxControllerSettingsAlgorithm
+    this->setBoxController(bc);
+    // split boxes;
+    pWSWrapper->splitBox();
+  }
 
-    //identify if u,v are present among input parameters and use defaults if not
-    Kernel::V3D u,v;
-    std::vector<double> ut = getProperty("u");
-    std::vector<double> vt = getProperty("v");
-    this->checkUVsettings(ut,vt,u,v);
-    
-    // set up target coordinate system
-    this ->rotMatrix = getTransfMatrix(inWS2D,u,v);
+  // call selected algorithm
+  pMethod algo =  alg_selector[algo_id];
+  if(algo)
+  {
+    algo(this);
+  }
+  else
+  {
+    g_log.error()<<"requested undefined subalgorithm :"<<algo_id<<std::endl;
+    throw(std::invalid_argument("undefined subalgoritm requested "));
+  }
+  setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(spws));
 
-
-    // if new workspace is created, its properties are determened by the user's input
-    if (create_new_ws){
-        // what dimension names requested by the user by:
-       //a) Q selector:
-        std::string Q_mod_req                    = getProperty("QDimensions");  
-        //b) the energy exchange mode
-        std::string dE_mod_req                   = getProperty("dEAnalysisMode");
-        //c) other dim property;
-        std::vector<std::string> other_dim_names = getProperty("OtherDimensions");
-
-        // Identify the algorithm to deploy and identify/set the dimension names to use
-        algo_id = identifyTheAlg(inWS2D,Q_mod_req,dE_mod_req,other_dim_names,targ_dim_names,targ_dim_units);
-
-        // set the min and max values for the dimensions from the input porperties
-        dim_min = getProperty("MinValues");
-        dim_max = getProperty("MaxValues");
-        // verify that the number min/max values is equivalent to the number of dimensions defined by properties
-        if(dim_min.size()!=dim_max.size()||dim_min.size()!=n_activated_dimensions){
-            g_log.error()<<" number of specified min dimension values: "<<dim_min.size()<<", number of max values: "<<dim_max.size()<<
-                           " and total number of target dimensions: "<<n_activated_dimensions<<" are not consistent\n";
-            throw(std::invalid_argument("wrong number of dimension limits"));
-        }
-        this->checkMaxMoreThenMin(dim_min,dim_max);
-
-   // the output dimensions and almost everything else will be determined by the dimensions of the target workspace
-   // user input is mainly ignored
-    }else{ 
-         throw(Kernel::Exception::NotImplementedError("Adding to existing MD workspace not Yet Implemented"));
-          dim_min.assign(n_activated_dimensions,-1);
-          dim_max.assign(n_activated_dimensions,1);
-    }
-    
-
-    bool reuse_preprocecced_detectors = getProperty("UsePreprocessedDetectors");
-    if(!(reuse_preprocecced_detectors&&det_loc.is_defined()))processDetectorsPositions(inWS2D,det_loc,convert_log);
-      
-   
-     if(create_new_ws){
-         spws = pWSWrapper->createEmptyMDWS(n_activated_dimensions, targ_dim_names,targ_dim_units, dim_min, dim_max);
-         if(!spws){
-             g_log.error()<<"can not create target event workspace with :"<<n_activated_dimensions<<" dimensions\n";
-             throw(std::invalid_argument("can not create target workspace"));
-         }
-         // Build up the box controller
-          Mantid::API::BoxController_sptr bc = pWSWrapper->getBoxController();
-         // Build up the box controller, using the properties in BoxControllerSettingsAlgorithm 
-         this->setBoxController(bc);
-         // split boxes;
-         pWSWrapper->splitBox();
-      }
-
-
-    // call selected algorithm
-    pMethod algo =  alg_selector[algo_id];
-    if(algo){
-        algo(this);
-    }else{
-        g_log.error()<<"requested undefined subalgorithm :"<<algo_id<<std::endl;
-        throw(std::invalid_argument("undefined subalgoritm requested "));
-    }
-    setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(spws));
-
-    // free the algorithm from the responsibility for the workspace to allow it to be deleted if necessary
-    pWSWrapper->releaseWorkspace();
-    return;
-   
+  // free the algorithm from the responsibility for the workspace to allow it to be deleted if necessary
+  pWSWrapper->releaseWorkspace();
+  return;
 }
 
 void 
 ConvertToMDEvents::checkMaxMoreThenMin(const std::vector<double> &min,const std::vector<double> &max)const
 {
-    for(size_t i=0; i<min.size();i++){
-        if(max[i]<=min[i]){
-            convert_log.error()<<" min value "<<min[i]<<" not less then max value"<<max[i]<<" in direction: "<<i<<std::endl;
-            throw(std::invalid_argument("min limit not smaller then max limit"));
-        }
+  for(size_t i=0; i<min.size();i++)
+  {
+    if(max[i]<=min[i])
+    {
+      convert_log.error()<<" min value "<<min[i]<<" not less then max value"<<max[i]<<" in direction: "<<i<<std::endl;
+      throw(std::invalid_argument("min limit not smaller then max limit"));
     }
+  }
 }
- 
+
 /**  
   *  The dimensions, which can be obtained from workspace are determined by the availible algorithms.
   *  E.g. an inelastic algorithm can transform matrix workspace into 2D-4D workpsace depending on what requested.

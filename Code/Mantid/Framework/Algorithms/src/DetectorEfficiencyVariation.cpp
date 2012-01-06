@@ -42,36 +42,31 @@ namespace Mantid
 
     using namespace Kernel;
     using namespace API;
-    using Geometry::IDetector_sptr;
+    using Geometry::IDetector_const_sptr;
 
     /// Default constructor initialises all data members and runs the base class constructor
     DetectorEfficiencyVariation::DetectorEfficiencyVariation() : 
-      DetectorDiagnostic(), m_usableMaskMap(true)
+      DetectorDiagnostic()
     {}
 
     /// Initialize the algorithm
     void DetectorEfficiencyVariation::init()
     {
-      HistogramValidator<MatrixWorkspace> *val =
-        new HistogramValidator<MatrixWorkspace>;
-      declareProperty(
-        new WorkspaceProperty<MatrixWorkspace>("WhiteBeamBase", "",
-                                               Direction::Input,val),
-        "Name of a white beam vanadium workspace" );
+      HistogramValidator<MatrixWorkspace> *val = new HistogramValidator<MatrixWorkspace>;
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>("WhiteBeamBase", "",Direction::Input,val),
+          "Name of a white beam vanadium workspace" );
       // The histograms, the detectors in each histogram and their first and last bin boundary must match
       declareProperty(
-        new WorkspaceProperty<MatrixWorkspace>("WhiteBeamCompare","",Direction::Input,
-                                               val->clone()),
-        "Name of a matching second white beam vanadium run from the same\n"
-        "instrument" );
+          new WorkspaceProperty<MatrixWorkspace>("WhiteBeamCompare","",Direction::Input,
+              val->clone()),
+              "Name of a matching second white beam vanadium run from the same\n"
+              "instrument" );
       declareProperty(
-        new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
-        "A MaskWorkpace where each spectra that failed the test is masked" );
+          new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
+          "A MaskWorkpace where each spectra that failed the test is masked" );
 
       BoundedValidator<double> *moreThanZero = new BoundedValidator<double>();
-      // Variation can't be zero as we take its reciprocal, 
-      // so I've set the minimum to something below which double precession arithmetic might start to fail
-      moreThanZero->setLower(1e-280);
+      moreThanZero->setLower(0.0);
       declareProperty("Variation", 1.1, moreThanZero,
                       "Identify spectra whose total number of counts has changed by more\n"
                       "than this factor of the median change between the two input workspaces" );
@@ -129,12 +124,11 @@ namespace Mantid
         g_log.error() << "The two white beam workspaces size must match.";
         throw;
       }
-      std::set<int> badIndices;
-      double average = calculateMedian(countRatio, badIndices);
+      double average = calculateMedian(countRatio, false); // Include zeroes
       g_log.notice() << name() << ": The median of the ratio of the integrated counts is: " 
                      << average << std::endl;
       // 
-      int numFailed = doDetectorTests(counts1, counts2, average, variation, badIndices);
+      int numFailed = doDetectorTests(counts1, counts2, average, variation);
 
       g_log.notice() << "Tests failed " << numFailed << " spectra. "
                      << "These have been masked on the OutputWorkspace\n";
@@ -199,13 +193,12 @@ namespace Mantid
      * @param average :: The computed median
      * @param variation :: The allowed variation in terms of number of medians, i.e those spectra where
      * the ratio of the counts outside this range will fail the tests and will be masked on counts1
-     * @param badIndices :: A set of indexs that mark bad spectra to skip in the tests
      * @return number of detectors for which tests failed
      */
     int DetectorEfficiencyVariation::doDetectorTests(API::MatrixWorkspace_const_sptr counts1, 
                                                      API::MatrixWorkspace_const_sptr counts2,
-                                                     const double average, double variation,
-                                                     const std::set<int> & badIndices)
+                                                     const double average, double variation
+)
     {
       // DIAG in libISIS did this.  A variation of less than 1 doesn't make sense in this algorithm
       if ( variation < 1 )
@@ -218,7 +211,7 @@ namespace Mantid
       double lowest = average/variation;
 
       const int numSpec = static_cast<int>(counts1->getNumberHistograms());
-      const int progStep = static_cast<int>(ceil(numSpec/30.0));
+      const int progStep = static_cast<int>(std::ceil(numSpec/30.0));
 
       // Create a workspace for the output
       MatrixWorkspace_sptr maskWS = WorkspaceFactory::Instance().create(counts1); 
@@ -232,7 +225,6 @@ namespace Mantid
       for (int i = 0; i < numSpec; ++i)
       {
         PARALLEL_START_INTERUPT_REGION
-
         // move progress bar
         if (i % progStep == 0)
         {
@@ -241,22 +233,41 @@ namespace Mantid
           interruption_point();
         }
 
-        // If the index is marked as bad then just give it the dead value as
-        // it means that either there is no detector, it's masked already or it is NAN/INF
-        if( badIndices.count(i) == 1)
+        IDetector_const_sptr det;
+        try
         {
+          det = counts1->getDetector(i);
+        }
+        catch(Exception::NotFoundError &)
+        {}
+        if(!det || det->isMonitor()) continue;
+        if( det->isMasked() )
+        {
+          // Ensure it is masked on the output
           maskWS->maskWorkspaceIndex(i);
           continue;
         }
+        const double signal1 = counts1->readY(i)[0];
+        const double signal2 = counts2->readY(i)[0];
+
+        // Mask out NaN and infinite
+        if( boost::math::isinf(signal1) || boost::math::isnan(signal1) ||
+            boost::math::isinf(signal2) || boost::math::isnan(signal2))
+        {
+          maskWS->maskWorkspaceIndex(i);
+          PARALLEL_ATOMIC
+          ++numFailed;
+          continue;
+        }
+
+
         // Check the ratio is within the given range
-        const double ratio = counts1->readY(i)[0]/counts2->readY(i)[0];
+        const double ratio = signal1/signal2;
         if( ratio < lowest || ratio > largest )
         {
-          PARALLEL_CRITICAL(detEfficVar_critical_a)
-          {
-            maskWS->maskWorkspaceIndex(i);
-            ++numFailed;
-          }
+          maskWS->maskWorkspaceIndex(i);
+          PARALLEL_ATOMIC
+          ++numFailed;
         }
         else
         {

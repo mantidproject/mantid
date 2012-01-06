@@ -140,7 +140,15 @@ def newNote(name=None):
 #-----------------------------------------------------------------------------
 # Intercept qtiplot "plot" command and forward to plotSpectrum for a workspace
 def plot(source, *args, **kwargs):
-    """Create a new plot given a workspace, table or matrix."""
+    """Create a new plot given a workspace, table or matrix.
+    
+    Args:
+        source: what to plot; if it is a Workspace, will
+                call plotSpectrum()
+    
+    Returns:
+        A handle to the created Graph widget.
+    """
     if isinstance(source,WorkspaceProxy):
         return plotSpectrum(source, *args, **kwargs)
     else:
@@ -154,9 +162,10 @@ def plotSpectrum(source, indices, error_bars = False, type = -1):
     This plots one or more spectra, with X as the bin boundaries,
     and Y as the counts in each bin.
     
-    @param source :: workspace or name of a workspace
-    @param indices :: workspace index or list of workspace indices to plot
-    @param error_bars :: bool, set to True to add error bars.
+    Args:
+        source :: workspace or name of a workspace
+        indices :: workspace index or list of workspace indices to plot
+        error_bars :: bool, set to True to add error bars.
     """
     workspace_names = __getWorkspaceNames(source)
     index_list = __getWorkspaceIndices(indices)
@@ -176,9 +185,13 @@ def plotBin(source, indices, error_bars = False, type = 0):
     If indices is a list, then several lines are created, one
     for each bin index.
     
-    @param source :: workspace or name of a workspace
-    @param indices :: bin number to plot
-    @param error_bars :: bool, set to True to add error bars.
+    Args:
+        source :: workspace or name of a workspace
+        indices :: bin number to plot
+        error_bars :: bool, set to True to add error bars.
+
+    Returns:
+        A handle to the created Graph widget.
     """
     return __doPlotting(source,indices,error_bars,type)
 
@@ -413,27 +426,29 @@ def plotSlice(source, label="", xydim=None, slicepoint=None,
                     limits=None, **kwargs):
     """Opens the SliceViewer with the given MDWorkspace(s).
     
-    @param source :: one workspace, or a list of workspaces
+    Args:
+        source :: one workspace, or a list of workspaces
         
-    The following are optional keyword arguments:
-    @param label :: label for the window title
-    @param xydim :: indexes or names of the dimensions to plot,
+    Optional Keyword Args:
+        label :: label for the window title
+        xydim :: indexes or names of the dimensions to plot,
             as an (X,Y) list or tuple.
             See SliceViewer::setXYDim()
-    @param slicepoint :: list with the slice point in each dimension. Must be the 
+        slicepoint :: list with the slice point in each dimension. Must be the 
             same length as the number of dimensions of the workspace.
             See SliceViewer::setSlicePoint()
-    @param colormin :: value of the minimum color in the scale
+        colormin :: value of the minimum color in the scale
             See SliceViewer::setColorScaleMin()
-    @param colormax :: value of the maximum color in the scale
+        colormax :: value of the maximum color in the scale
             See SliceViewer::setColorScaleMax()
-    @param colorscalelog :: value of the maximum color in the scale
+        colorscalelog :: value of the maximum color in the scale
             See SliceViewer::setColorScaleLog()
-    @param limits :: list with the (xleft, xright, ybottom, ytop) limits
+        limits :: list with the (xleft, xright, ybottom, ytop) limits
             to the view to show.
             See SliceViewer::setXYLimits()
         
-    @return a (list of) handle(s) to the SliceViewerWindow widgets that were open.
+    Returns:
+        a (list of) handle(s) to the SliceViewerWindow widgets that were open.
             Use SliceViewerWindow.getSlicer() to get access to the functions of the
             SliceViewer, e.g. setting the view and slice point.
     """ 
@@ -468,9 +483,12 @@ def getSliceViewer(source, label=""):
     by the MultiSlice view in VATES Simple Interface.
     Will raise an exception if not found.
     
-    @param source :: name of the workspace that was open
-    @param label :: additional label string that was used to identify the window.
-    @return a handle to the SliceViewerWindow object that was created before. 
+    Args:
+        source :: name of the workspace that was open
+        label :: additional label string that was used to identify the window.
+        
+    Returns:
+        a handle to the SliceViewerWindow object that was created before. 
     """
     import mantidqtpython
     workspace_names = __getWorkspaceNames(source)
@@ -534,8 +552,11 @@ def __getWorkspaceNames(source):
     of workspaces, or a list of names, and converts
     it to a list of workspace names.
     
-        @param source :: input list or workspace group
-        @return list of workspace names 
+    Args:
+        source :: input list or workspace group
+        
+    Returns:
+        list of workspace names 
     """
     ws_names = []
     if isinstance(source, list) or isinstance(source,tuple):
@@ -573,10 +594,12 @@ def __doSliceViewer(wsname, label="", xydim=None, slicepoint=None,
                     limits=None):
     """Open a single SliceViewerWindow for the workspace, and shows it
     
-    @param wsname :: name of the workspace
+    Args:
+        wsname :: name of the workspace
     See plotSlice() for full list of keyword parameters.
-
-    @return SliceViewerWindow widget
+        
+    Returns:
+        A handle to the created SliceViewerWindow widget
     """
     import mantidqtpython
     from PyQt4 import QtCore

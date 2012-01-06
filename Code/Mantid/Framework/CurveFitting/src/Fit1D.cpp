@@ -31,6 +31,7 @@ using API::Algorithm;
 using API::Progress;
 
 /// The implementation of Jacobian
+// cppcheck-suppress noConstructor
 class JacobianImpl: public Jacobian
 {
     /// The pointer to the GSL's internal jacobian matrix
@@ -733,7 +734,8 @@ void Fit1D::exec()
  *   @param fit :: A pointer to the Fit1D class
  *   @param fixed :: A list of comma separated names of the fixed parameters.
  */
-FitData::FitData(Fit1D* fit, const std::string& fixed):fit1D(fit)
+FitData::FitData(Fit1D* fit, const std::string& fixed) : n(0), X(NULL),
+  Y(NULL), sigmaData(NULL), fit1D(fit), forSimplexLSwrap(NULL), parameters(NULL)
 {
     typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
     boost::char_separator<char> sep(",");

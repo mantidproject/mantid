@@ -553,6 +553,7 @@ namespace // anonymous
   /// Checks if a double is not infinity or a NaN
   bool isANumber(const double& d)
   {
+    // cppcheck-suppress duplicateExpression
     return d == d && fabs(d) != std::numeric_limits<double>::infinity();
   }
 }

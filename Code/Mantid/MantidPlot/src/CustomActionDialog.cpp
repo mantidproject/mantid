@@ -195,7 +195,7 @@ void CustomActionDialog::updateDisplayList()
 {
 	itemsList->clear();
 
-	QList<QAction *> actionsList = ((ApplicationWindow *)parentWidget())->customActionsList();
+    QList<QAction *> actionsList = (dynamic_cast<ApplicationWindow *>(parentWidget()))->customActionsList();
 	foreach(QAction *action, actionsList){//add existing actions to the list widget
 	    QString text = action->text();
         QString shortcut = action->shortcut().toString();
@@ -214,7 +214,7 @@ void CustomActionDialog::updateDisplayList()
 QAction* CustomActionDialog::addAction()
 {
 	QAction *action = NULL;
-    ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+    ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parentWidget());
     if (!app)
         return action;
 
@@ -370,7 +370,7 @@ void CustomActionDialog::removeAction()
 	if (!action)
 		return;
 	
-	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+    ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parentWidget());
     QFile f(app->customActionsDirPath + "/" + action->text() + ".qca");
     f.remove();
 	

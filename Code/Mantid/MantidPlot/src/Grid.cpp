@@ -125,7 +125,7 @@ void Grid::drawLines(QPainter *painter, const QRect &rect,
 
 void Grid::load(const QStringList& grid)
 {
-	Plot *d_plot = (Plot *)plot();
+    Plot *d_plot = dynamic_cast<Plot *>(plot());
 	if (!d_plot)
 		return;
 

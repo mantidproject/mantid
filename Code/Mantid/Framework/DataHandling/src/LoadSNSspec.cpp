@@ -114,7 +114,6 @@ namespace Mantid
     void LoadSNSspec::exec()
     {
 	  std::string filename = getProperty("Filename");
-	  std::string separator = " "; //separator can be 1 or more spaces
 	  std::ifstream file(filename.c_str());
 
 	  file.seekg (0, std::ios::end);
@@ -127,8 +126,6 @@ namespace Mantid
 	  //size_t iLine=0;    // line number
 	  int nSpectra = 0;
 	  int nBins = 0; //number of rows
-	  std::string first_character;
-	  std::string axes_infos;
 
 	  //bool numeric = true;
 	  std::vector<double> input;
@@ -137,13 +134,13 @@ namespace Mantid
 	  //as there is one per set of data
 	  int spectra_nbr = 0;
 	  while(getline(file,str))
-	  {
-     if (str.empty() ) continue;
-		 if (str[0] == '#' && str[1] == 'L')
-		 {
-		   spectra_nbr++;
-		 }
-	  }
+    {
+      if (str.empty() ) continue;
+      if (str[0] == '#' && str[1] == 'L')
+      {
+        spectra_nbr++;
+      }
+    }
 
 	  spectra.resize(spectra_nbr);
 	  file.clear(); //end of file has been reached so we need to clear file state
@@ -155,20 +152,20 @@ namespace Mantid
 	    progress.report(static_cast<int>(file.tellg()));
 
 	    //line with data, need to be parsed by white spaces
-	    if (!str.empty() && str[0] != '#')
-	    {
-	      typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-		  boost::char_separator<char> sep(" ");
-		  tokenizer tok(str, sep);
-		  for (tokenizer::iterator beg=tok.begin(); beg!=tok.end(); ++beg)
-		  {
-		    std::stringstream ss;
-		    ss << *beg;
-		    double d;
-		    ss >> d;
-  		    input.push_back(d);
-		  }
-	    }
+      if (!str.empty() && str[0] != '#')
+      {
+        typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+        boost::char_separator<char> sep(" ");
+        tokenizer tok(str, sep);
+        for (tokenizer::iterator beg=tok.begin(); beg!=tok.end(); ++beg)
+        {
+          std::stringstream ss;
+          ss << *beg;
+          double d;
+          ss >> d;
+          input.push_back(d);
+        }
+      }
 
 	    if (str.empty())
 	    {
@@ -195,26 +192,26 @@ namespace Mantid
 	    if (spectra_nbr == 0)
 	      throw "Undefined number of spectra";
 
-		if (working_with_spectrum_nbr == (spectra_nbr-1))
-		{
-		  for(int j=0; j<static_cast<int>(input.size()-1); j++)
-		  {
-		    spectra[working_with_spectrum_nbr].dataX().push_back(input[j]);
-			j++;
-			spectra[working_with_spectrum_nbr].dataY().push_back(input[j]);
-			j++;
-			spectra[working_with_spectrum_nbr].dataE().push_back(input[j]);
-			nBins = j/3;
-		  }
-	    }
-	  }
-	  catch (...)
-	  {
-   	  }
+      if (working_with_spectrum_nbr == (spectra_nbr-1))
+      {
+        for(int j=0; j<static_cast<int>(input.size()-1); j++)
+        {
+          spectra[working_with_spectrum_nbr].dataX().push_back(input[j]);
+          j++;
+          spectra[working_with_spectrum_nbr].dataY().push_back(input[j]);
+          j++;
+          spectra[working_with_spectrum_nbr].dataE().push_back(input[j]);
+          nBins = j/3;
+        }
+      }
+    }
+    catch (...)
+    {
+    }
 
-	  try
-	  {
-	    nSpectra = spectra_nbr;
+    try
+    {
+      nSpectra = spectra_nbr;
 	    MatrixWorkspace_sptr localWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>
 	    (WorkspaceFactory::Instance().create("Workspace2D",nSpectra,nBins,nBins));
 

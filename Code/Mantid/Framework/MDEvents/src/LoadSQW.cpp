@@ -632,7 +632,6 @@ namespace Mantid
       LoadSQW::parse_data_locations(std::streamoff data_start)
     {
       std::vector<char> data_buffer(12);
-      unsigned int i;
 
       //std::streamoff end_location = data_start;
       std::streamoff shift = data_start-this->m_fileStream.tellg();
@@ -690,7 +689,7 @@ namespace Mantid
 
         this->m_mdImageSize = 1;
         unsigned int nAxisPoints;
-        for(i=0;i<npax;i++){
+        for(unsigned int i=0;i<npax;i++){
           this->m_fileStream.read(&data_buffer[0],4);
 
           nAxisPoints = *((uint32_t*)(&data_buffer[0])); 

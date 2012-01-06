@@ -120,11 +120,14 @@ namespace Mantid
         */
         double SimulateResolution::bose(const double eps, const double temp) const
         {
-            double kB = 0.08617347;
+
             if( temp<0. )
                 return( (eps>=0)?(eps):(0.) );
             else
-                return( (kB*temp)*pop(eps/(kB*temp)) );
+            {
+              double kB = 0.08617347;
+              return( (kB*temp)*pop(eps/(kB*temp)) );
+            }
         }
 
         /**
@@ -133,7 +136,7 @@ namespace Mantid
         double SimulateResolution::formTable(const double qsqr) const
         {
           UNUSED_ARG(qsqr);
-            return 0.0; //to do - implement this look up table
+          return 0.0; //to do - implement this look up table
         }
         /**
         * gausdev function from tobyfit
@@ -149,15 +152,17 @@ namespace Mantid
         */
         double SimulateResolution::pop(const double y) const
         {
-            double by2=0.5, by6=1./6., by60=1./60., by42=1./42., by40=1./40.;
             if ( (fabs(y) > 0.1 ) )
             {
                 double ans = (fabs(y)) / (1.0 - (exp(-(fabs(y)))));
                 return( (y<0)? ( ans*(exp(-fabs(y)))) : (ans) );
             }
             else
-                return( 1.0 + by2*y*( 1.0 + by6*y*( 1.0 - by60*(y*y)
-                *(1.0-by42*(y*y)*(1.0-by40*(y*y) )))) );
+            {
+              double by2=0.5, by6=1./6., by60=1./60., by42=1./42., by40=1./40.;
+              return( 1.0 + by2*y*( 1.0 + by6*y*( 1.0 - by60*(y*y)
+                                                  *(1.0-by42*(y*y)*(1.0-by40*(y*y) )))) );
+            }
         }
         /**
         * tridev function from tobyfit

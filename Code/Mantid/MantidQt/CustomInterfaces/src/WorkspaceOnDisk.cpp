@@ -1,10 +1,13 @@
 #include "MantidQtCustomInterfaces/WorkspaceOnDisk.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include <iostream>
 #include <fstream>
 #include <boost/regex.hpp>
+
+using namespace Mantid::API;
 
 namespace MantidQt
 {
@@ -35,7 +38,7 @@ namespace MantidQt
         m_adsID = m_adsID.substr(0, m_adsID.find('.'));
 
         //Generate an initial report.
-        Mantid::API::MatrixWorkspace_sptr ws = fetchIt();
+        MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(fetchIt());
         if(ws->mutableSample().hasOrientedLattice())
         {
           std::vector<double> ub = ws->mutableSample().getOrientedLattice().getUB().get_vector();
@@ -50,7 +53,7 @@ namespace MantidQt
       */
       std::string WorkspaceOnDisk::getId() const
       {
-        return m_fileName;
+        return m_adsID;
       }
 
       /**
@@ -59,7 +62,7 @@ namespace MantidQt
       */
       std::string WorkspaceOnDisk::locationType() const
       {
-        return "On Disk";
+        return locType();
       }
 
       /**
@@ -78,10 +81,8 @@ namespace MantidQt
       @returns the matrix workspace
       @throw if workspace has been moved since instantiation.
       */
-      Mantid::API::MatrixWorkspace_sptr WorkspaceOnDisk::fetchIt() const
+      Mantid::API::Workspace_sptr WorkspaceOnDisk::fetchIt() const
       {
-        using namespace Mantid::API;
-
         checkStillThere();
 
         IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadRaw");
@@ -91,14 +92,14 @@ namespace MantidQt
         alg->setPropertyValue("OutputWorkspace", m_adsID);
         alg->execute();
 
-        Mantid::API::Workspace_sptr ws = AnalysisDataService::Instance().retrieve(m_adsID);
-        
+        Workspace_sptr ws = AnalysisDataService::Instance().retrieve(m_adsID);
+
         Mantid::API::WorkspaceGroup_sptr gws = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
         if(gws != NULL)
         {
           throw std::invalid_argument("This raw file corresponds to a WorkspaceGroup. Cannot process groups like this. Import via MantidPlot instead.");
         }
-        return boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+        return ws;
       }
 
       /**
@@ -107,7 +108,6 @@ namespace MantidQt
       */
       void WorkspaceOnDisk::dumpIt(const std::string& name)
       {
-        using Mantid::API::AnalysisDataService;
         if(AnalysisDataService::Instance().doesExist(name))
         {
           AnalysisDataService::Instance().remove(name);
@@ -123,6 +123,23 @@ namespace MantidQt
       void WorkspaceOnDisk::cleanUp()
       {
           dumpIt(m_adsID);
+      }
+
+      /*
+      Apply actions. Load workspace and apply all actions to it.
+      */
+      Mantid::API::Workspace_sptr WorkspaceOnDisk::applyActions()
+      {
+        Mantid::API::Workspace_sptr ws = fetchIt();
+        
+        Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SetUB");
+        alg->initialize();
+        alg->setRethrows(true);
+        alg->setPropertyValue("Workspace", this->m_adsID);
+        alg->setProperty("UB", m_ub);
+        alg->execute();
+
+        return AnalysisDataService::Instance().retrieve(m_adsID);
       }
 
   }

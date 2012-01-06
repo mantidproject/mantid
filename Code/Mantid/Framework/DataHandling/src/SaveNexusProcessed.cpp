@@ -443,20 +443,16 @@ namespace DataHandling
       // This is where it will land in the output array.
       // It is okay to write in parallel since none should step on each other.
       size_t offset = indices[wi];
-      std::string eventType;
 
       switch (el.getEventType())
       {
       case TOF:
-        eventType = "TOF";
         appendEventListData( el.getEvents(), offset, tofs, weights, errorSquareds, pulsetimes);
         break;
       case WEIGHTED:
-        eventType = "WEIGHTED";
         appendEventListData( el.getWeightedEvents(), offset, tofs, weights, errorSquareds, pulsetimes);
         break;
       case WEIGHTED_NOTIME:
-        eventType = "WEIGHTED_NOTIME";
         appendEventListData( el.getWeightedEventsNoTime(), offset, tofs, weights, errorSquareds, pulsetimes);
         break;
       }

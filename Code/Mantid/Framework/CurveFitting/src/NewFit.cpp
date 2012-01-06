@@ -175,9 +175,9 @@ namespace CurveFitting
   {
 
     // Try to retrieve optional properties
-    const int maxInterations = getProperty("MaxIterations");
+    //const int maxInterations = getProperty("MaxIterations");
 
-    Progress prog(this,0.0,1.0,maxInterations?maxInterations:1);
+    //Progress prog(this,0.0,1.0,maxInterations?maxInterations:1);
 
     std::string funIni = getProperty("Function");
     API::IFunctionMW* tmp = dynamic_cast<API::IFunctionMW*>( API::FunctionFactory::Instance().createInitialized(funIni) );
@@ -189,6 +189,8 @@ namespace CurveFitting
 
     return;
 
+    // FIXME: The following code is never executed, so can it be removed?
+    /*
     prog.report("Setting workspace");
     API::Workspace_sptr ws = getProperty("InputWorkspace");
     m_function->setWorkspace(ws);
@@ -212,7 +214,7 @@ namespace CurveFitting
       g_log.error("Number of data points less than number of parameters to be fitted.");
       throw std::runtime_error("Number of data points less than number of parameters to be fitted.");
     }
-
+    */
     // finally do the fitting
 
     // Comment out the following 4 lines as the variables are not used.

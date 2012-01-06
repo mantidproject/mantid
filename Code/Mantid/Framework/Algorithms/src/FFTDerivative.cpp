@@ -285,7 +285,7 @@ void FFTDerivative::execRealFFT()
     transWS = fft->getProperty("OutputWorkspace");
 
     size_t m2 = transWS->readY(0).size() / 2;
-    size_t my = m2 + (transWS->readY(0).size() % 2 ? 1 : 0);
+    size_t my = m2 + ((transWS->readY(0).size() % 2) ? 1 : 0);
     size_t mx = my + (transWS->isHistogramData() ? 1 : 0);
 
     if (!outWS)

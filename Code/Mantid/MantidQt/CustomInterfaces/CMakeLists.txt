@@ -18,9 +18,9 @@ set ( SRC_FILES
 	src/SANSRunWindow.cpp
 	src/background.cpp
 	src/deltaECalc.cpp
-    src/WorkspaceInADS.cpp
+  src/WorkspaceInADS.cpp
 	src/WorkspaceMemento.cpp
-    src/WorkspaceOnDisk.cpp
+  src/WorkspaceOnDisk.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -115,7 +115,7 @@ target_link_libraries ( CustomInterfaces MantidQtAPI MantidWidgets QtPropertyBro
 
 if ( CXXTEST_FOUND )
   
-  include_directories( ../../Framework/TestHelpers/inc ../../Framework/DataObjects/inc )
+  include_directories( ../../Framework/TestHelpers/inc ../../Framework/DataObjects/inc ../../Framework/Crystal/inc )
 
   if ( GMOCK_FOUND AND GTEST_FOUND )
     cxxtest_add_test ( CustomInterfacesTest ${TEST_FILES} ${GMOCK_TEST_FILES} )

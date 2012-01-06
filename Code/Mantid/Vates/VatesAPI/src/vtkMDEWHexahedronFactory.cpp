@@ -85,6 +85,7 @@ namespace Mantid
     hexPointList->SetNumberOfIds(8);
 
     // This can be parallelized
+    // cppcheck-suppress syntaxError
     PRAGMA_OMP( parallel for schedule (dynamic) )
     for (int ii=0; ii<int(boxes.size()); ii++)
     {

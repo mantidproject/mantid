@@ -260,7 +260,7 @@ namespace Mantid
       catch (std::runtime_error & e)
       {
         g_log.error() << "MatrixWorkspace::rebuildSpectraMapping() error:" << std::endl;
-        throw e;
+        throw &e;
       }
 
     }

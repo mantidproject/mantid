@@ -607,7 +607,6 @@ namespace API
     }
 
     // Now the instrument source
-    std::string instrument_source = "";
     instrumentXml = "";
     instrumentName = "";
 

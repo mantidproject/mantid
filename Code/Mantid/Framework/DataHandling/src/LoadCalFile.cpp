@@ -100,7 +100,6 @@ namespace DataHandling
   Geometry::Instrument_const_sptr LoadCalFile::getInstrument3Ways(Algorithm * alg)
   {
     MatrixWorkspace_sptr inWS = alg->getProperty("InputWorkspace");
-    std::string InputWorkspace = alg->getPropertyValue("InputWorkspace");
     std::string InstrumentName = alg->getPropertyValue("InstrumentName");
     std::string InstrumentFilename = alg->getPropertyValue("InstrumentFilename");
 

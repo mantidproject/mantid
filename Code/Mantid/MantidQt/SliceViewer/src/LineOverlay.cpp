@@ -28,7 +28,7 @@ namespace SliceViewer
 
   {
     m_creation = true; // Will create with the mouse
-    m_middleButton = false;
+    m_rightButton = false;
     m_dragHandle = HandleNone;
 
     m_pointA = QPointF(0.0, 0.0);
@@ -54,7 +54,7 @@ namespace SliceViewer
   void LineOverlay::reset()
   {
     m_creation = true; // Will create with the mouse
-    m_middleButton = false;
+    m_rightButton = false;
     m_dragHandle = HandleNone;
     this->update();
   }
@@ -132,6 +132,17 @@ namespace SliceViewer
   void LineOverlay::setShowHandles(bool shown)
   {
     m_showHandles = shown;
+  }
+
+  /** Sets whether we are in "creation" mode
+   * For use by python directly specifying the position
+   *
+   * @param creation :: True for creation mode.
+   */
+  void LineOverlay::setCreationMode(bool creation)
+  {
+    m_creation = creation;
+    this->update();
   }
 
   //----------------------------------------------------------------------------------------------
@@ -229,8 +240,8 @@ namespace SliceViewer
   void LineOverlay::paintEvent(QPaintEvent */*event*/)
   {
     // Don't paint until created
-    // Also, don't paint while middle-click dragging (panning) the underlying pic
-    if (m_creation || m_middleButton)
+    // Also, don't paint while right-click dragging (panning) the underlying pic
+    if (m_creation || m_rightButton)
       return;
 
     QPainter painter(this);
@@ -432,8 +443,8 @@ namespace SliceViewer
    * @param event mouse event info */
   void LineOverlay::mouseMoveEvent(QMouseEvent * event)
   {
-    if (event->buttons() & Qt::MidButton)
-      m_middleButton = true;
+    if (event->buttons() & Qt::RightButton)
+      m_rightButton = true;
 
     // --- Initial creation mode - wait for first click ----
     if (m_creation)
@@ -521,8 +532,8 @@ namespace SliceViewer
    * @param event mouse event info */
   void LineOverlay::mouseReleaseEvent(QMouseEvent * event)
   {
-    if (!(event->buttons() & Qt::MidButton))
-      m_middleButton = false;
+    if (!(event->buttons() & Qt::RightButton))
+      m_rightButton = false;
 
     if (m_dragHandle != HandleNone)
     {

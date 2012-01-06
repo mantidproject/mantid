@@ -124,6 +124,7 @@ namespace MDEvents
     if (BackgroundStartRadius < PeakRadius)
       BackgroundStartRadius = PeakRadius;
 
+    // cppcheck-suppress syntaxError
     PRAGMA_OMP(parallel for schedule(dynamic, 10) )
     for (int i=0; i < int(peakWS->getNumberPeaks()); ++i)
     {

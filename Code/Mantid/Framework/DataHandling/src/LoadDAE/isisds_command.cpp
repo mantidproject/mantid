@@ -64,6 +64,7 @@ typedef struct
 	int ver_minor;
 	int pid;
 	int access_type; /* 0 =dae, 1 = crpt */
+  // cppcheck-suppress unusedStructMember
 	int pad[1];
 	char user[32];
 	char host[64];
@@ -134,7 +135,6 @@ SOCKET isisds_send_open(const char* host, ISISDSAccessMode access_type)
 	int setkeepalive = 1;
 	struct hostent *hostp;
 	struct sockaddr_in address;
-	int n;
 	char *comm, *comm_data;
 /*	int len_comm_data; */
 	isisds_open_t op;
@@ -169,7 +169,7 @@ SOCKET isisds_send_open(const char* host, ISISDSAccessMode access_type)
 	strncpy(op.user, "faa", sizeof(op.user));
 	strncpy(op.host, "localhost", sizeof(op.host));
 	op.len = sizeof(op);
-	if ( (n = send(s, (char*)&op, sizeof(op), 0)) != sizeof(op) )
+  if ( (send(s, (char*)&op, sizeof(op), 0)) != sizeof(op) )
 	{
 		closesocket(s);
 		return INVALID_SOCKET;
@@ -202,9 +202,8 @@ SOCKET isisds_send_open(const char* host, ISISDSAccessMode access_type)
  */
 int isisds_recv_open(SOCKET s, ISISDSAccessMode* access_type)
 {
-	int n;
 	isisds_open_t op;
-	if ( (n = recv_all(s, (char*)&op, sizeof(op), 0)) != sizeof(op) )
+  if ( (recv_all(s, (char*)&op, sizeof(op), 0)) != sizeof(op) )
 	{
 		return -1;
 	}
@@ -231,7 +230,7 @@ int isisds_send_command(SOCKET s, const char* command, const void* data, ISISDSD
         (void) isisds_type_code; // Avoid compiler warning
         (void) isisds_type_name; // Avoid compiler warning
 
-	int i, n, len_data;
+  int n, len_data;
 	isisds_command_header_t comm;
 	memset(&comm, 0, sizeof(comm));
 	if (dims_array == NULL)
@@ -242,6 +241,7 @@ int isisds_send_command(SOCKET s, const char* command, const void* data, ISISDSD
 	}
 	else
 	{
+    int i;
 		len_data = 1;
 		comm.ndims = ndims;
 		for(i=0; i<ndims; i++)

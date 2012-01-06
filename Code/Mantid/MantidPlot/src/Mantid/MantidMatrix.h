@@ -48,7 +48,7 @@ class ProjectData;
 class MantidMatrixFunction: public UserHelperFunction
 {
 public:
-  MantidMatrixFunction(MantidMatrix* wsm):m_matrix(wsm){}
+  MantidMatrixFunction(MantidMatrix* wsm);
   double operator()(double x, double y);
   double getMinPositiveValue()const;
   void init();

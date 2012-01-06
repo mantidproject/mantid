@@ -296,6 +296,7 @@ namespace registry
 
   registration const& lookup(type_info key)
   {
+    // cppcheck-suppress unreachableCode
       return *get(key);
   }
 

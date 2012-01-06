@@ -441,7 +441,6 @@ std::string LoadLog::getThreeColumnName() const
   }
   // append .log to get the .log file name
   std::string logfileName=rawID+".log";	
-  int count=0;
   if (Poco::File(logfileName).exists())
   {
     //validate the file
@@ -453,6 +452,7 @@ std::string LoadLog::getThreeColumnName() const
 
     //check if first 19 characters of a string is data-time string according to yyyy-mm-ddThh:mm:ss
     std::string aLine;
+    int count=0;
     kind l_kind(LoadLog::empty);
     while(Mantid::Kernel::extractToEOL(inLogFile,aLine))
     {			 
@@ -523,7 +523,6 @@ std::set<std::string> LoadLog::getLogfilenamesfromADS()
   std::string logFile;
   std::set<std::string>logfilesList;
   Poco::Path logpath(m_filename);
-  std::string p=logpath.home();
   size_t pos =m_filename.find_last_of("/");
   if(pos==std::string::npos)
   {
@@ -557,7 +556,7 @@ std::set<std::string> LoadLog::getLogfilenamesfromADS()
 std::set<std::string> LoadLog::createthreecolumnFileLogProperty(const std::string& logfile,API::Run& run)
 {    
   std::set<std::string> blockFileNameList;
-  std::string sdata,str;
+  std::string str;
   std::string propname;
   Mantid::Kernel::TimeSeriesProperty<double>* logd=0;
   Mantid::Kernel::TimeSeriesProperty<std::string>* logs=0;
@@ -593,7 +592,6 @@ std::set<std::string> LoadLog::createthreecolumnFileLogProperty(const std::strin
     line>>blockcolumn;
     std::string valuecolumn;
     line>>valuecolumn;
-    sdata=valuecolumn;
 
     /////column two in .log file is called block column
     /////if any .txt file with rawfilename_blockcolumn.txt exists

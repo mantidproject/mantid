@@ -205,6 +205,7 @@ void Qxy::exec()
         double & outputBinY = outputWorkspace->dataY(yIndex)[xIndex];
         double & outputBinE = outputWorkspace->dataE(yIndex)[xIndex];
         // all bins start out at Nan and hence pass the odd conditional below
+        // cppcheck-suppress duplicateExpression
         if ( outputBinY != outputBinY )
         {
           outputBinY = outputBinE = 0;

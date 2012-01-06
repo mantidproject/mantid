@@ -60,7 +60,7 @@ public:
 	void refresh();
 
 	//! Return my parent casted to QwtPlot.
-	QwtPlot *plot() { return (QwtPlot *)parent(); }
+	QwtPlot *plot();
 
 	void deselect();
 	
