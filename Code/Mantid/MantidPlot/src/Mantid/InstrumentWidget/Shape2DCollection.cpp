@@ -13,12 +13,16 @@
 
 Shape2DCollection::Shape2DCollection():
 Shape2D(),
+m_wx(0),
+m_wy(0),
+m_h(0),
 m_creating(false),
 m_editing(false),
 m_moving(false),
 m_x(0),
 m_y(0),
 m_currentShape(NULL),
+m_currentCP(0),
 m_leftButtonPressed(false),
 m_overridingCursor(false)
 {
