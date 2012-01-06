@@ -1150,6 +1150,7 @@ class PythonScripting
 %End
 public:
   void write(const QString&);
+  // 'Fake' methods needed for IPython import
   void flush();
   void set_parent(SIP_PYOBJECT);
 private:
@@ -1162,6 +1163,7 @@ class PythonScript
 %End
 public:
   void write(const QString&);
+  // 'Fake' method needed for IPython import
   void flush();
 private:
   PythonScript(const PythonScript&);

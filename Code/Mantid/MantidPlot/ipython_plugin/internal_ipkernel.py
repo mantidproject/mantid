@@ -10,9 +10,6 @@ The code has been modified slightly to achieve compatiblity with IPython v0.11.
 # Imports
 #-----------------------------------------------------------------------------
 
-import subprocess
-import sys
-
 from IPython.lib.kernel import connect_qtconsole
 from IPython.zmq.ipkernel import IPKernelApp
 

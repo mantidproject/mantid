@@ -9,14 +9,10 @@ if not hasattr(sys, 'argv'):
 
 #import resources # Initialize Qt resources from file resources.py
 
-try:
-    import IPython, pygments
-    from internal_ipkernel import InternalIPKernel
-    IPYTHON_LOADED = True
-except:
-    print "Failed to import IPython"
-    IPYTHON_LOADED = False
-
+IPYTHON_LOADED = False
+import IPython, pygments
+from internal_ipkernel import InternalIPKernel
+IPYTHON_LOADED = True
 
 class MantidPlot_IPython(object):
 

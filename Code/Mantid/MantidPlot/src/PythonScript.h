@@ -55,7 +55,7 @@ class PythonScript : public Script, MantidQt::API::WorkspaceObserver
   { 
     emit print(text); 
   }
-  
+  /// 'Fake' method needed for IPython import
   void flush() {}
 
   /// Emit a new line signal

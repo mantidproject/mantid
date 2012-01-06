@@ -52,7 +52,9 @@ public:
   virtual bool isRunning() const;
   /// Write text to std out
   void write(const QString &text) { emit print(text); }
+  /// 'Fake' method needed for IPython import
   void flush() {}
+  /// 'Fake' method needed for IPython import
   void set_parent(PyObject*) {}
   /// Create a new code lexer for Python
   QsciLexer * createCodeLexer() const;
