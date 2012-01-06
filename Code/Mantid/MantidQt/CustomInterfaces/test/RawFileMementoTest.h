@@ -73,6 +73,7 @@ public:
     RawFileMemento memento(getSuitableFileNamePath());
     memento.setUB(0,0,2,0,4,0,-8,0,0);
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(memento.applyActions());
+    TS_ASSERT(ws->getNumberHistograms() > 1);
     std::vector<double> ub = ws->sample().getOrientedLattice().getUB().get_vector();
     TS_ASSERT_EQUALS(0, ub[0]);
     TS_ASSERT_EQUALS(0, ub[1]);

@@ -47,6 +47,20 @@ public:
     TSM_ASSERT("Should have fetched the workspace", result);
   }
 
+  void testFetchMinimalData()
+  {
+    EventNexusFileMemento memento(getSuitableFileNamePath());
+    IEventWorkspace_sptr result = boost::dynamic_pointer_cast<IEventWorkspace>(memento.fetchIt(MinimalData));
+    TS_ASSERT_EQUALS(0, result->getNumberEvents());
+  }
+
+  void testFetchEverything()
+  {
+    EventNexusFileMemento memento(getSuitableFileNamePath());
+    IEventWorkspace_sptr result = boost::dynamic_pointer_cast<IEventWorkspace>(memento.fetchIt(Everything));
+    TS_ASSERT(result->getNumberEvents() > 1);
+  }
+
   void testNoExistingUB()
   {
     EventNexusFileMemento memento(getSuitableFileNamePath());
@@ -58,6 +72,7 @@ public:
     EventNexusFileMemento memento(getSuitableFileNamePath());
     memento.setUB(0,0,2,0,4,0,-8,0,0);
     IEventWorkspace_sptr ws = boost::dynamic_pointer_cast<IEventWorkspace>(memento.applyActions());
+    TS_ASSERT(ws->getNumberEvents() > 1);
     std::vector<double> ub = ws->sample().getOrientedLattice().getUB().get_vector();
     TS_ASSERT_EQUALS(0, ub[0]);
     TS_ASSERT_EQUALS(0, ub[1]);

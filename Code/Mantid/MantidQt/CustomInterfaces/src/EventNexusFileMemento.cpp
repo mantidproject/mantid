@@ -93,7 +93,7 @@ namespace MantidQt
         alg->setPropertyValue("OutputWorkspace", m_adsID);
         if(protocol == MinimalData)
         {
-          //Peform as speed up here to fetch the minimum amount of data.
+          alg->setProperty("MetaDataOnly", true);
         }
         alg->execute();
 
