@@ -27,8 +27,7 @@ def pylab_kernel(gui):
     #        Can only %run one file. I think qtiplotrc should go away anyway.
     #        Weird things happen if I run this under a debug build
     kernel.initialize(['python', '--pylab=%s' % gui,
-        "--c='%run mantidplotrc.py'"])
-        #"--c='from MantidFramework import *;mtd.initialise();from mantidsimple import *'"])
+        "--c='%run -m mantidplotrc'"])
     return kernel
 
 
