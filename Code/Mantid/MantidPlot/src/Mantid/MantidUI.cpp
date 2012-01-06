@@ -3,7 +3,7 @@
 #include "MantidMatrix.h"
 #include "MantidDock.h"
 #include "ImportWorkspaceDlg.h"
-#include "AlgMonitor.h"
+#include "AlgorithmMonitor.h"
 #include "MantidSampleLogDialog.h"
 #include "AlgorithmHistoryWindow.h"
 #include "MantidMatrixCurve.h"

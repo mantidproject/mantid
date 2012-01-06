@@ -8,7 +8,7 @@
 #include "UnwrappedSphere.h"
 #include "Projection3D.h"
 #include "../MantidUI.h"
-#include "../AlgMonitor.h"
+#include "../AlgorithmMonitor.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/IPeaksWorkspace.h"

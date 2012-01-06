@@ -14,10 +14,11 @@ from mantidplottests import *
 import time
 
 CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace='mdw')
-CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace='empty')
 FakeMDEventData("mdw",  UniformParams="1e5")
 FakeMDEventData("mdw",  PeakParams="1e4, 2,4,6, 1.5")
 BinMD("mdw", "uniform",  1, "x,0,10,30", "y,0,10,30", "z,0,10,30", IterateEvents="1", Parallel="0")
+CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace='empty')
+CreateMDWorkspace(Dimensions='4',Extents='0,10,0,10,0,10,0,10',Names='x,y,z,e',Units='m,m,m,meV',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace='md4')
 
 
 class MantidPlotSliceViewerTest(unittest.TestCase):
@@ -64,6 +65,17 @@ class MantidPlotSliceViewerTest(unittest.TestCase):
         self.assertEqual(svw.getDimX(), 2) 
         self.assertEqual(svw.getDimY(), 0) 
         
+    def test_plot4D_workspace(self):
+        svw = plotSlice('md4')
+        svw.setSlicePoint(2, 2.5)
+        svw.setSlicePoint(3, 7.5)
+        self.assertAlmostEqual(svw.getSlicePoint(2), 2.5, 3) 
+        self.assertAlmostEqual(svw.getSlicePoint(3), 7.5, 3) 
+        screenshot(svw, "SliceViewer_4D", "SliceViewer open to a 4D workspace; z=2.5, e=7.5.")
+        svw.setXYDim("z", "e")
+        self.assertEqual(svw.getDimX(), 2) 
+        self.assertEqual(svw.getDimY(), 3) 
+
     def test_plotSlice_arguments(self):
         """ Pass arguments to plotSlice """
         svw = plotSlice('uniform', label='test_label', xydim=[1,2], 

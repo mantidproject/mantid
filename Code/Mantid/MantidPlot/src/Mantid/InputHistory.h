@@ -82,11 +82,12 @@ private:
 	///Private Destructor
 	virtual ~InputHistoryImpl();
 
-    /// For debugging
-    void printAll();
+  /// For debugging
+  // cppcheck-suppress unusedPrivateFunction
+  void printAll();
 
-    /// Keeps algorithm parameters.
-    QMap< QString,QList< PropertyData > > m_history;
+  /// Keeps algorithm parameters.
+  QMap< QString,QList< PropertyData > > m_history;
 
 };
 

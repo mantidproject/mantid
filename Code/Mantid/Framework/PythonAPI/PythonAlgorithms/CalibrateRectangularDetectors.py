@@ -6,7 +6,7 @@ Here are examples of input and output from PG3 and SNAP:
 
 [[Image:SNAP_Calibrate.png]]
 
-The purpose of this algorithm is to calibrate the detector pixels and write a calibration file.  The calibration file name contains the instrument, run number, and date of calibration.  A binary Dspacemap file that converts from TOF to d-space including the calculated offsets is also an output option.  If one peak is not in the spectra of all the detectors, you can specify the first n detectors to be calibrated with one peak and the next n detectors to be calibrated with the second peak.  
+-The purpose of this algorithm is to calibrate the detector pixels and write a calibration file.  The calibration file name contains the instrument, run number, and date of calibration.  A binary Dspacemap file that converts from TOF to d-space including the calculated offsets is also an output option.  For crosscorrelation option:  If one peak is not in the spectra of all the detectors, you can specify the first n detectors to be calibrated with one peak and the next n detectors to be calibrated with the second peak.  If a color fill plot of the calibrated workspace does not look good, do a color fill plot of the workspace that ends in cc to see if the CrossCorrelationPoints and/or PeakHalfWidth should be increased or decreased.  Also plot the reference spectra from the cc workspace.
 
 
 *WIKI*"""
@@ -35,6 +35,10 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         #self.declareProperty("FileType", "Event NeXus",
         #                     Validator=ListValidator(types))
         self.declareListProperty("RunNumber", [0], Validator=ArrayBoundedValidator(Lower=0))
+        extensions = [ "_histo.nxs", "_event.nxs", "_neutron_event.dat",
+                      "_neutron0_event.dat", "_neutron1_event.dat", "_neutron0_event.dat and _neutron1_event.dat"]
+        self.declareProperty("Extension", "_event.nxs",
+                             Validator=ListValidator(extensions))
         self.declareProperty("CompressOnRead", False,
                              Description="Compress the event list when reading in the data")
         self.declareProperty("XPixelSum", 1,
@@ -47,7 +51,21 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                              Description="Reference DIFC for resolution removal. Zero skips the correction")
         self.declareProperty("MaxOffset", 1.0,
                              Description="Maximum absolute value of offsets; default is 1")
-        self.declareProperty("PeakPositions", "", Description="d-space position of reference peaks.")
+        self.declareProperty("CrossCorrelation", True,
+                             Description="CrossCorrelation if True; minimize using many peaks if False.")
+        self.declareProperty("Peak1", 0.0,
+                             Description="d-space position of reference peak for cross correlation.")
+        self.declareProperty("Peak2", 0.0,
+                             Description="Optional: d-space position of second reference peak for cross correlation.")
+        self.declareProperty("DetectorsPeak1", 0,
+                             Description="Number of detector banks for Peak1 for cross correlation.  Default is all.")
+        self.declareProperty("DetectorsPeak2", 0,
+                             Description="Optional: Number of detector banks for Peak2 for cross correlation.")
+        self.declareProperty("PeakHalfWidth", 0.05,
+                             Description="Half width of d-space around peaks for cross correlation. Default is 0.05")
+        self.declareProperty("CrossCorrelationPoints", 100,
+                             Description="Number of points to find peak from cross correlation.  Default is 100")
+        self.declareProperty("PeakPositions", "", Description="d-space position of reference peaks for many peaks option.")
         self.declareListProperty("Binning", [0.,0.,0.],
                              Description="Min, Step, and Max of d-space bins.  Logarithmic binning is used if Step is negative.")
         self.declareProperty("DiffractionFocusWorkspace", False, Description="Diffraction focus by detectors.  Default is False")
@@ -75,33 +93,57 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
 #                                    RunNumber=runnumber, Extension=extension)
         return result["ResultPath"].value
 
+    def _addNeXusLogs(self, wksp, nxsfile, reloadInstr):
+        try:
+            LoadNexusLogs(Workspace=wksp, Filename=nxsfile)
+            if reloadInstr:
+                LoadInstrument(Workspace=wksp, InstrumentName=self._instrument, RewriteSpectraMap=False)
+            return True
+        except:
+            return False
+
 
     def _loadPreNeXusData(self, runnumber, extension):
-        # find the file to load
-        filename = self._findData(runnumber, extension)
-
         # generate the workspace name
-        (path, name) = os.path.split(filename)
-        name = name.split('.')[0]
-        (name, num) = name.split('_neutron')
-        num = num.replace('_event', '') # TODO should do something with this
+        name = "%s_%d" % (self._instrument, runnumber)
+        filename = name + extension
+        print filename
 
-        # load the prenexus file
-        alg = LoadEventPreNexus(EventFilename=filename, OutputWorkspace=name)
-        wksp = alg['OutputWorkspace']
+        try: # first just try loading the file
+            alg = LoadEventPreNexus(EventFilename=filename, OutputWorkspace=name)
+            wksp = alg['OutputWorkspace']
+        except:
+            # find the file to load
+            filename = self._findData(runnumber, extension)
+            # load the prenexus file
+            alg = LoadEventPreNexus(EventFilename=filename, OutputWorkspace=name)
+            wksp = alg['OutputWorkspace']
 
         # add the logs to it
-        nxsfile = self._findData(runnumber, ".nxs")
-        LoadLogsFromSNSNexus(Workspace=wksp, Filename=nxsfile)
+        reloadInstr = (str(self._instrument) == "SNAP")
+
+        nxsfile = "%s_%d_event.nxs" % (self._instrument, runnumber)
+        if self._addNeXusLogs(wksp, nxsfile, reloadInstr):
+            return wksp
+
+        nxsfile = "%s_%d_histo.nxs" % (self._instrument, runnumber)
+        if self._addNeXusLogs(wksp, nxsfile, reloadInstr):
+            return wksp
+
+        nxsfile = self._findData(runnumber, "_event.nxs")
+        if self._addNeXusLogs(wksp, nxsfile, reloadInstr):
+            return wksp
+
+        nxsfile = self._findData(runnumber, "_histo.nxs")
+        if self._addNeXusLogs(wksp, nxsfile, reloadInstr):
+            return wksp
+
         # TODO filter out events using timemin and timemax
 
         return wksp
 
-    def _loadNeXusData(self, runnumber, extension, **kwargs):
-        if self.getProperty("CompressOnRead"):
-            kwargs["CompressTolerance"] = COMPRESS_TOL_TOF
-        else:
-            kwargs["Precount"] = True
+    def _loadEventNeXusData(self, runnumber, extension, **kwargs):
+        kwargs["Precount"] = True
         name = "%s_%d" % (self._instrument, runnumber)
         filename = name + extension
 
@@ -114,17 +156,27 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
 
         # find the file to load
         filename = self._findData(runnumber, extension)
-        if len(filename) <= 0:
-            raise RuntimeError("Failed to find event nexus file for run %s" % str(runnumber))
-
-        # generate the workspace name
-        (path, name) = os.path.split(filename)
-        name = name.split('.')[0] # remove the extension
-        if "_event" in name:
-            name = name[0:-1*len("_event")]
 
         # TODO use timemin and timemax to filter what events are being read
         alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, **kwargs)
+
+        return alg.workspace()
+
+    def _loadHistoNeXusData(self, runnumber, extension):
+        name = "%s_%d" % (self._instrument, runnumber)
+        filename = name + extension
+
+        try: # first just try loading the file
+            alg = LoadTOFRawNexus(Filename=filename, OutputWorkspace=name)
+
+            return alg.workspace()
+        except:
+            pass
+
+        # find the file to load
+        filename = self._findData(runnumber, extension)
+
+        alg = LoadTOFRawNexus(Filename=filename, OutputWorkspace=name)
 
         return alg.workspace()
 
@@ -132,19 +184,29 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         filter = {}
         if filterWall is not None:
             if filterWall[0] > 0.:
-                filter["FilterByTime_Start"] = filterWall[0]
+                filter["FilterByTimeStart"] = filterWall[0]
             if filterWall[1] > 0.:
-                filter["FilterByTime_Stop"] = filterWall[1]
+                filter["FilterByTimeStop"] = filterWall[1]
 
         if  runnumber is None or runnumber <= 0:
             return None
 
-        if extension.endswith(".nxs"):
-            return self._loadNeXusData(runnumber, extension, **filter)
+        if extension.endswith("_event.nxs"):
+            return self._loadEventNeXusData(runnumber, extension, **filter)
+        elif extension.endswith("_histo.nxs"):
+            return self._loadHistoNeXusData(runnumber, extension)
+        elif "and" in extension:
+            wksp0 = self._loadPreNeXusData(runnumber, "_neutron0_event.dat")
+            RenameWorkspace(InputWorkspace=wksp0,OutputWorkspace="tmp")
+            wksp1 = self._loadPreNeXusData(runnumber, "_neutron1_event.dat")
+            Plus(LHSWorkspace=wksp1, RHSWorkspace="tmp",OutputWorkspace=wksp1)
+            wksp1.getRun()['gd_prtn_chrg'] = wksp1.getRun()['gd_prtn_chrg'].value/2
+            mtd.deleteWorkspace("tmp")
+            return wksp1;
         else:
             return self._loadPreNeXusData(runnumber, extension)
 
-    def _calibrate(self, wksp, calib, filterLogs=None):
+    def _cccalibrate(self, wksp, calib, filterLogs=None):
         if wksp is None:
             return None
         LRef = self.getProperty("UnwrapRef")
@@ -183,12 +245,120 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                                      MinimumValue=filterLogs[1], MaximumValue=filterLogs[2])
             except KeyError, e:
                 raise RuntimeError("Failed to find log '%s' in workspace '%s'" \
-                                   % (filterLogs[0], str(wksp)))            
+                                   % (filterLogs[0], str(wksp)))
         if not self.getProperty("CompressOnRead"):
             CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
 
         ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="dSpacing")
         SortEvents(InputWorkspace=wksp, SortBy="X Value")
+        # Sum pixelbin X pixelbin blocks of pixels
+        if self._xpixelbin*self._ypixelbin>1:
+                SumNeighbours(InputWorkspace=wksp, OutputWorkspace=wksp, SumX=self._xpixelbin, SumY=self._ypixelbin)
+        # Bin events in d-Spacing
+        Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,Params=str(self._peakmin)+","+str(abs(self._binning[1]))+","+str(self._peakmax))
+        #Find good peak for reference
+        ymax = 0
+        for s in range(0,wksp.getNumberHistograms()):
+            y_s = wksp.readY(s)
+            midBin = wksp.blocksize()/2
+            if y_s[midBin] > ymax:
+                    refpixel = s
+                    ymax = y_s[midBin]
+        print "Reference spectra=",refpixel
+        # Remove old calibration files
+        cmd = "rm "+calib
+        os.system(cmd)
+        # Cross correlate spectra using interval around peak at peakpos (d-Spacing)
+        if self._lastpixel == 0:
+            self._lastpixel = wksp.getNumberHistograms()-1
+        else:
+            self._lastpixel = wksp.getNumberHistograms()*self._lastpixel/self._lastpixel2-1
+        CrossCorrelate(InputWorkspace=wksp, OutputWorkspace=str(wksp)+"cc", ReferenceSpectra=refpixel,
+            WorkspaceIndexMin=0, WorkspaceIndexMax=self._lastpixel, XMin=self._peakmin, XMax=self._peakmax)
+        # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
+        GetDetectorOffsets(InputWorkspace=str(wksp)+"cc", OutputWorkspace=str(wksp)+"offset", Step=abs(self._binning[1]),
+            DReference=self._peakpos1, XMin=-self._ccnumber, XMax=self._ccnumber, MaxOffset=self._maxoffset, MaskWorkspace=str(wksp)+"mask")
+        mtd.deleteWorkspace(str(wksp)+"cc")
+        mtd.releaseFreeMemory()
+        Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,Params=str(self._peakmin2)+","+str(abs(self._binning[1]))+","+str(self._peakmax2))
+        if self._peakpos2 > 0.0:
+            #Find good peak for reference
+            ymax = 0
+            for s in range(0,wksp.getNumberHistograms()):
+                y_s = wksp.readY(s)
+                midBin = wksp.blocksize()/2
+                if y_s[midBin] > ymax:
+                        refpixel = s
+                        ymax = y_s[midBin]
+            print "Reference spectra=",refpixel
+            CrossCorrelate(InputWorkspace=wksp, OutputWorkspace=str(wksp)+"cc2", ReferenceSpectra=refpixel,
+                WorkspaceIndexMin=self._lastpixel+1, WorkspaceIndexMax=wksp.getNumberHistograms()-1, XMin=self._peakmin2, XMax=self._peakmax2)
+            # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
+            GetDetectorOffsets(InputWorkspace=str(wksp)+"cc2", OutputWorkspace=str(wksp)+"offset2", Step=abs(self._binning[1]),
+                DReference=self._peakpos2, XMin=-self._ccnumber, XMax=self._ccnumber, MaxOffset=self._maxoffset, MaskWorkspace=str(wksp)+"mask2")
+            Plus(LHSWorkspace=str(wksp)+"offset", RHSWorkspace=str(wksp)+"offset2",OutputWorkspace=str(wksp)+"offset")
+            Plus(LHSWorkspace=str(wksp)+"mask", RHSWorkspace=str(wksp)+"mask2",OutputWorkspace=str(wksp)+"mask")
+            mtd.deleteWorkspace(str(wksp)+"cc2")
+            mtd.deleteWorkspace(str(wksp)+"offset2")
+            mtd.deleteWorkspace(str(wksp)+"mask2")
+            mtd.releaseFreeMemory()
+        CreateGroupingWorkspace(InputWorkspace=wksp, GroupNames=groups, OutputWorkspace=str(wksp)+"group")
+        lcinst = str(self._instrument)
+        
+        if "dspacemap" in self._outTypes:
+            #write Dspacemap file
+            SaveDspacemap(InputWorkspace=str(wksp)+"offset",
+                DspacemapFile=self._outDir+lcinst+"_dspacemap_d"+str(wksp).strip(self._instrument+"_")+strftime("_%Y_%m_%d.dat"))
+        if "calibration" in self._outTypes:
+            SaveCalFile(OffsetsWorkspace=str(wksp)+"offset",GroupingWorkspace=str(wksp)+"group",MaskWorkspace=str(wksp)+"mask",Filename=calib)
+        return wksp
+
+    def _multicalibrate(self, wksp, calib, filterLogs=None):
+        if wksp is None:
+            return None
+        LRef = self.getProperty("UnwrapRef")
+        DIFCref = self.getProperty("LowResRef")
+        if (LRef > 0.) or (DIFCref > 0.): # super special Jason stuff
+            if LRef > 0:
+                UnwrapSNS(InputWorkspace=wksp, OutputWorkspace=wksp, LRef=LRef)
+            if DIFCref > 0:
+                RemoveLowResTOF(InputWorkspace=wksp, OutputWorkspace=wksp, ReferenceDIFC=DIFCref)
+        if self._grouping == "All":
+            if str(self._instrument) == "PG3":
+                groups = "POWGEN"
+            elif str(self._instrument) == "NOM":
+                groups = "NOMAD"
+            else:
+                groups = str(self._instrument)
+        elif str(self._instrument) == "SNAP" and self._grouping == "Group":
+                groups = "East,West"
+        else:
+            groups = ""
+            numrange = 200
+            if str(self._instrument) == "SNAP":
+                numrange = 19
+            for num in xrange(1,numrange):
+                comp = wksp.getInstrument().getComponentByName("%s%d" % (self._grouping, num) )
+                if not comp == None:
+                    groups+=("%s%d," % (self._grouping, num) )
+        # take care of filtering events
+        if self._filterBadPulses and not self.getProperty("CompressOnRead") and not "histo" in self.getProperty("Extension"):
+            FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp)
+        if filterLogs is not None:
+            try:
+                logparam = wksp.getRun()[filterLogs[0]]
+                if logparam is not None:
+                    FilterByLogValue(InputWorkspace=wksp, OutputWorkspace=wksp, LogName=filterLogs[0],
+                                     MinimumValue=filterLogs[1], MaximumValue=filterLogs[2])
+            except KeyError, e:
+                raise RuntimeError("Failed to find log '%s' in workspace '%s'" \
+                                   % (filterLogs[0], str(wksp)))            
+        if not self.getProperty("CompressOnRead") and not "histo" in self.getProperty("Extension"):
+            CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
+
+        ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="dSpacing")
+        if not "histo" in self.getProperty("Extension"):
+            SortEvents(InputWorkspace=wksp, SortBy="X Value")
         # Sum pixelbin X pixelbin blocks of pixels
         if self._xpixelbin*self._ypixelbin>1:
                 SumNeighbours(InputWorkspace=wksp, OutputWorkspace=wksp, SumX=self._xpixelbin, SumY=self._ypixelbin)
@@ -220,7 +390,8 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         if self._diffractionfocus:
             DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp,
                 GroupingWorkspace=str(wksp)+"group")
-        SortEvents(InputWorkspace=wksp, SortBy="X Value")
+        if not "histo" in self.getProperty("Extension"):
+            SortEvents(InputWorkspace=wksp, SortBy="X Value")
         Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=self._binning)
         return wksp
 
@@ -230,7 +401,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         globals()["FindSNSNeXus"] = mantidsimple.FindSNSNeXus
 
         # get generic information
-        SUFFIX = "_event.nxs"
+        SUFFIX = self.getProperty("Extension")
         self._binning = self.getProperty("Binning")
         if len(self._binning) != 1 and len(self._binning) != 3:
             raise RuntimeError("Can only specify (width) or (start,width,stop) for binning. Found %d values." % len(self._binning))
@@ -244,7 +415,18 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         self._xpixelbin = self.getProperty("XPixelSum")
         self._ypixelbin = self.getProperty("YPixelSum")
         self._peakpos = self.getProperty("PeakPositions")
+        self._peakpos1 = self.getProperty("Peak1")
+        self._peakpos2 = self.getProperty("Peak2")
+        pixelbin2 = self._xpixelbin*self._ypixelbin
+        self._lastpixel = self.getProperty("DetectorsPeak1")
+        self._lastpixel2 = (self.getProperty("DetectorsPeak1")+self.getProperty("DetectorsPeak2"))
+        peakhalfwidth = self.getProperty("PeakHalfWidth")
+        self._ccnumber = self.getProperty("CrossCorrelationPoints")
         self._maxoffset = self.getProperty("MaxOffset")
+        self._peakmin = self._peakpos1-peakhalfwidth
+        self._peakmax = self._peakpos1+peakhalfwidth
+        self._peakmin2 = self._peakpos2-peakhalfwidth
+        self._peakmax2 = self._peakpos2+peakhalfwidth
         self._diffractionfocus = self.getProperty("DiffractionFocusWorkspace")
         self._filterBadPulses = self.getProperty("FilterBadPulses")
         filterLogs = self.getProperty("FilterByLogValue")
@@ -266,7 +448,10 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             if str(self._instrument) == "SNAP":
             	alg = CloneWorkspace(samRun, "tmp")
         	origRun = alg['OutputWorkspace']
-            samRun = self._calibrate(samRun, calib, filterLogs)
+            if self.getProperty("CrossCorrelation"):
+                samRun = self._cccalibrate(samRun, calib, filterLogs)
+            else:
+                samRun = self._multicalibrate(samRun, calib, filterLogs)
             if self._xpixelbin*self._ypixelbin>1:
                	mtd.deleteWorkspace(str(samRun))
             	if str(self._instrument) == "SNAP":

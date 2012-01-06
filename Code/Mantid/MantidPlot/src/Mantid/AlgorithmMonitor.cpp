@@ -1,4 +1,4 @@
-#include "AlgMonitor.h"
+#include "AlgorithmMonitor.h"
 #include "MantidUI.h"
 #include "MantidDock.h"
 #include "MantidAPI/AlgorithmManager.h"

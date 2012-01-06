@@ -151,7 +151,7 @@ if ( CMAKE_COMPILER_IS_GNUCXX )
 endif ()
 
 set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
-                   src/Mantid/AlgMonitor.cpp
+                   src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/AlgorithmHistoryWindow.cpp
                    src/Mantid/FirstTimeSetup.cpp
                    src/Mantid/FitParameterTie.cpp
@@ -367,7 +367,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
 )
 
 set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
-                   src/Mantid/AlgMonitor.h
+                   src/Mantid/AlgorithmMonitor.h
                    src/Mantid/AlgorithmHistoryWindow.h
                    src/Mantid/FirstTimeSetup.h
                    src/Mantid/FitParameterTie.h
@@ -634,7 +634,7 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/lib/3rdparty/qtcolorpicker/src/qtcolorpicker.h
 )
 
-set ( MANTID_MOC_FILES src/Mantid/AlgMonitor.h
+set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/AlgorithmHistoryWindow.h
                        src/Mantid/FirstTimeSetup.h
                        src/Mantid/IFunctionWrapper.h

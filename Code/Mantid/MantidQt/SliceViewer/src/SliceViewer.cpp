@@ -143,7 +143,6 @@ SliceViewer::SliceViewer(QWidget *parent)
 /// Destructor
 SliceViewer::~SliceViewer()
 {
-//  std::cout << "SliceViewer " << this << " deleted" << std::endl;
   delete m_data;
   saveSettings();
   // Don't delete Qt objects, I think these are auto-deleted
@@ -349,7 +348,7 @@ void SliceViewer::updateDimensionSliceWidgets()
   {
     for (size_t d=m_dimWidgets.size(); d<m_ws->getNumDims(); d++)
     {
-      DimensionSliceWidget * widget = new DimensionSliceWidget(this /*TODO set to this */);
+      DimensionSliceWidget * widget = new DimensionSliceWidget(this);
 
       ui.verticalLayoutControls->insertWidget(int(d), widget);
 
@@ -376,6 +375,8 @@ void SliceViewer::updateDimensionSliceWidgets()
   for (size_t d=0; d<m_dimensions.size(); d++)
   {
     DimensionSliceWidget * widget = m_dimWidgets[d];
+    widget->blockSignals(true);
+
     widget->setDimension( int(d), m_dimensions[d] );
     // Default slicing layout
     if (d == m_dimX)
@@ -391,6 +392,8 @@ void SliceViewer::updateDimensionSliceWidgets()
     if (w > maxLabelWidth) maxLabelWidth = w;
     w = widget->ui.lblUnits->sizeHint().width();
     if (w > maxUnitsWidth) maxUnitsWidth = w;
+
+    widget->blockSignals(false);
   }
 
   // Make the labels all the same width
@@ -411,6 +414,8 @@ void SliceViewer::updateDimensionSliceWidgets()
 void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
 {
   m_ws = ws;
+  m_data->setWorkspace(ws);
+
   // Emit the signal that we changed the workspace
   emit workspaceChanged();
 
@@ -438,7 +443,6 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
   // Build up the widgets
   this->updateDimensionSliceWidgets();
 
-  m_data->setWorkspace(ws);
   // Find the full range. And use it
   findRangeFull();
   m_colorBar->setViewRange(m_colorRangeFull);

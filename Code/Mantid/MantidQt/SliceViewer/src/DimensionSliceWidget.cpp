@@ -102,8 +102,12 @@ void DimensionSliceWidget::setShownDim(int dim)
 {
   m_insideSetShownDim = true;
   m_shownDim = dim;
+  ui.btnX->blockSignals(true);
+  ui.btnY->blockSignals(true);
   ui.btnX->setChecked( m_shownDim == 0 );
   ui.btnY->setChecked( m_shownDim == 1 );
+  ui.btnX->blockSignals(false);
+  ui.btnY->blockSignals(false);
   bool slicing = m_shownDim == -1;
   ui.horizontalSlider->setVisible( slicing );
   ui.doubleSpinBox->setVisible( slicing );

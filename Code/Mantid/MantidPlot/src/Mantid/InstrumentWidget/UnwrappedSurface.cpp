@@ -22,7 +22,7 @@
 UnwrappedDetector::UnwrappedDetector(const unsigned char* c,
                      boost::shared_ptr<const Mantid::Geometry::IDetector> det
                      ):
-detector(det)
+u(0), v(0), width(0), height(0), uscale(0), vscale(0), detector(det)
 {
   color[0] = *c;
   color[1] = *(c+1);
