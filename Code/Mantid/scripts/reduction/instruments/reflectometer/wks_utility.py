@@ -4,6 +4,9 @@ import matplotlib.pyplot as plt
 from mantidsimple import *
 import math
 
+h = 6.626e-34 #m^2 kg s^-1
+m = 1.675e-27 #kg
+
 def getProtonCharge(st=None):
     """
         Returns the proton charge of the given workspace in picoCoulomb
@@ -178,7 +181,7 @@ def convertToThetaVsLambda(_tof_axis,
     
     return dico
 
-def convertToRvsQ(_tof_axis,
+def _convertToRvsQ(_tof_axis,
                   _pixel_axis_of_peak,
                   data_of_peak,
                   central_pixel, 
@@ -218,5 +221,26 @@ def convertToRvsQ(_tof_axis,
     for t in range(nbr_tof):
         _Q = _const * sin(theta) / _tof_axis[t]
         q_array[t] = _Q
+    
+    return q_array
+
+
+def convertToRvsQ(dMD=-1,theta=-1,tof=None):
+    """
+    This function converts the pixel/TOF array to the R(Q) array
+    using Q = (4.Pi.Mn)/h  *  L.sin(theta/2)/TOF
+    with    L: distance central_pixel->source
+            TOF: TOF of pixel
+            theta: angle of detector
+    """
+    _const = float(4) * math.pi * m * dMD / h
+    sz_tof = shape(tof)[0]
+    q_array = zeros(sz_tof-1)
+    for t in range(sz_tof-1):
+        tof1 = tof[t]
+        tof2 = tof[t+1]
+        tofm = (tof1+tof2)/2.
+        _Q = _const * sin(theta) / (tofm*1e-6)
+        q_array[t] = _Q*1e-10
     
     return q_array
