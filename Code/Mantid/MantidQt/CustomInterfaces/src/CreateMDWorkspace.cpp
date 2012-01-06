@@ -8,6 +8,7 @@
 #include "MantidQtCustomInterfaces/RawFileMemento.h"
 #include "MantidQtCustomInterfaces/EventNexusFileMemento.h"
 #include "MantidQtCustomInterfaces/WorkspaceMemento.h"
+#include "MantidQtCustomInterfaces/CreateMDWorkspaceAlgDialog.h"
 
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -101,7 +102,6 @@ void CreateMDWorkspace::initLayout()
   connect(m_uiForm.btn_remove_workspace, SIGNAL(clicked()), this, SLOT(removeSelectedClicked()));
   connect(m_uiForm.btn_set_ub_matrix, SIGNAL(clicked()), this, SLOT(setUBMatrixClicked()));
   connect(m_uiForm.btn_find_ub_matrix, SIGNAL(clicked()), this, SLOT(findUBMatrixClicked()));
-  connect(m_uiForm.btn_create, SIGNAL(clicked()), this, SLOT(createMDWorkspaceClicked()));
   connect(m_uiForm.btn_set_goniometer, SIGNAL(clicked()), this, SLOT(setGoniometerClicked()));
   //Set MVC Model
   m_uiForm.tableView->setModel(m_model);
@@ -416,13 +416,36 @@ void CreateMDWorkspace::createMDWorkspaceClicked()
   //Launch dialog
 
   //1) Run a top-level dialog similar to ConvertToMDEvents. Extract all required arguments.
+  CreateMDWorkspaceAlgDialog algDlg;
+  algDlg.setModal(true);
+  int result = algDlg.exec();
+  if(result != QDialog::Accepted)
+  {
+    return;
+  }
   
+  QString qDimension = algDlg.getQDimension();
+  QString maxExtents = algDlg.getMaxExtents();
+  QString minExtents = algDlg.getMinExtents();
+  QString analysisMode = algDlg.getAnalysisMode();
+  QString otherDimensions = algDlg.getOtherDimensions();
+  bool preProcessedEvents = algDlg.getPreprocessedEvents();
+
   //2) Run ConvertToMDEvents on each workspace.
   for(WorkspaceMementoCollection::size_type i = 0; i < m_data.size(); i++)
   {
-    //Workspace_sptr ws = m_data[i]->applyActions();
+    WorkspaceMemento_sptr currentMemento = m_data[i];
+    Workspace_sptr ws = currentMemento->applyActions();
+
+    //
     //QString command = ""
     //  "";
+
+    //ConvertToMDEvents
+    //SaveMD
+    
+
+    currentMemento->cleanUp();
   }
 
 

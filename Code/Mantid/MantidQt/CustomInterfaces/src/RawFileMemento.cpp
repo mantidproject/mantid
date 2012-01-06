@@ -132,13 +132,15 @@ namespace MantidQt
       {
         Mantid::API::Workspace_sptr ws = fetchIt();
         
-        Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SetUB");
-        alg->initialize();
-        alg->setRethrows(true);
-        alg->setPropertyValue("Workspace", this->m_adsID);
-        alg->setProperty("UB", m_ub);
-        alg->execute();
-
+        if(m_ub.size() == 9)
+        {
+          Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SetUB");
+          alg->initialize();
+          alg->setRethrows(true);
+          alg->setPropertyValue("Workspace", this->m_adsID);
+          alg->setProperty("UB", m_ub);
+          alg->execute();
+        }
         return AnalysisDataService::Instance().retrieve(m_adsID);
       }
 
