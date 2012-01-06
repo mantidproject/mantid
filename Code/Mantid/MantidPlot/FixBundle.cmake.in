@@ -5,9 +5,10 @@ set ( bundle ${CMAKE_INSTALL_PREFIX}/MantidPlot.app )
 file ( GLOB pyqt_libs ${bundle}/Contents/MacOS/PyQt4/*.so )
 file ( GLOB_RECURSE qtplugins ${bundle}/Contents/Frameworks/plugins/*.dylib )
 file ( GLOB_RECURSE mtdqtplugins ${bundle}/plugins/*.dylib )
+file ( GLOB RECURSE pythonlibs ${bundle}/Contents/MacOS/mantid/*.so )
 set ( other_libs ${bundle}/Contents/MacOS/libMantidPythonAPI.so
-				 ${bundle}/Contents/MacOS/mantidqtpython.so  
-                 ${pyqt_libs} ${qtplugins} ${mtdqtplugins}
+                 ${bundle}/Contents/MacOS/mantidqtpython.so
+                 ${pythonlibs} ${pyqt_libs} ${qtplugins} ${mtdqtplugins}
 )
 
 set ( dirs "@CMAKE_LIBRARY_OUTPUT_DIRECTORY@" "@CMAKE_LIBRARY_PATH@" /Library/Frameworks /opt/intel/lib )
