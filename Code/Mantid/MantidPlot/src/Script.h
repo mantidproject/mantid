@@ -84,6 +84,8 @@ class Script : public QObject
     if( Env->supportsProgressReporting() && m_interactive ) m_report_progress = on; 
     else m_report_progress = false;
   }
+  bool redirectStdOut() const { return m_redirectOutput; }
+  void redirectStdOut(bool on) { m_redirectOutput = on; }
   // Set the line offset of the current code
   void setLineOffset(int offset) { m_line_offset = offset; } 
   // The current line offset
@@ -134,6 +136,7 @@ private:
 
 private:
   int m_line_offset;
+  bool m_redirectOutput; // Should the output be redirected?
 };
 
 

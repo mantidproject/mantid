@@ -808,6 +808,12 @@ add_custom_command ( TARGET MantidPlot POST_BUILD
                        ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/mantidplotpy
 )
 
+add_custom_command ( TARGET MantidPlot POST_BUILD
+                     COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory
+                       ${CMAKE_CURRENT_SOURCE_DIR}/ipython_plugin
+                       ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/ipython_plugin
+)
+
 ###########################################################################
 # MantidPlot Python Unit Tests
 ###########################################################################
@@ -872,6 +878,7 @@ install ( TARGETS MantidPlot RUNTIME DESTINATION ${BIN_DIR}
 )
 install ( FILES mantidplotrc.py DESTINATION ${BIN_DIR} )
 install ( DIRECTORY mantidplotpy DESTINATION ${BIN_DIR} )
+install ( DIRECTORY ipython_plugin DESTINATION ${BIN_DIR} )
 
 if ( APPLE )
   configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/FixBundle.cmake.in

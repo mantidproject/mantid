@@ -296,8 +296,8 @@ bool PythonScript::exec()
     env()->setIsRunning(false);
     return false;
   }
-  // Redirect the output
-  beginStdoutRedirect();
+  // Redirect the output, if required
+  if ( redirectStdOut() ) beginStdoutRedirect();
 
   if( reportProgress() )
   {
@@ -326,7 +326,7 @@ bool PythonScript::exec()
   /// Return value is non-NULL if everything succeeded
   pyret = executeScript(empty_tuple);
   // Restore output
-  endStdoutRedirect();
+  if ( redirectStdOut() ) endStdoutRedirect();
   /// Disable trace
   PyEval_SetTrace(NULL, NULL);
 

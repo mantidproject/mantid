@@ -35,8 +35,8 @@
 Script::Script(ScriptingEnv *env, const QString &code, QObject *context, 
 	       const QString &name, bool interactive, bool reportProgress)
   : Env(env), Code(code), Name(name), m_interactive(interactive),
-    m_report_progress(reportProgress), compiled(notCompiled), 
-    m_line_offset(-1)
+    m_report_progress(reportProgress), compiled(notCompiled),
+    m_line_offset(-1), m_redirectOutput(true)
 { 
   Env->incref(); 
   Context = context; 

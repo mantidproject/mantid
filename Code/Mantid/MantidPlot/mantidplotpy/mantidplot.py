@@ -178,9 +178,9 @@ def plotSpectrum(source, indices, error_bars = False, type = -1):
     and Y as the counts in each bin.
     
     Args:
-        source :: workspace or name of a workspace
-        indices :: workspace index or list of workspace indices to plot
-        error_bars :: bool, set to True to add error bars.
+        source: workspace or name of a workspace
+        indices: workspace index, or tuple or list of workspace indices to plot
+        error_bars: bool, set to True to add error bars.
     """
     workspace_names = __getWorkspaceNames(source)
     index_list = __getWorkspaceIndices(indices)
@@ -197,13 +197,13 @@ def plotBin(source, indices, error_bars = False, type = 0):
     This puts the spectrum number as the X variable, and the
     count in the particular bin # (in 'indices') as the Y value.
     
-    If indices is a list, then several lines are created, one
+    If indices is a tuple or list, then several curves are created, one
     for each bin index.
     
     Args:
-        source :: workspace or name of a workspace
-        indices :: bin number to plot
-        error_bars :: bool, set to True to add error bars.
+        source: workspace or name of a workspace
+        indices: bin number(s) to plot
+        error_bars: bool, set to True to add error bars.
 
     Returns:
         A handle to the created Graph widget.

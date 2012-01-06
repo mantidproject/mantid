@@ -441,6 +441,8 @@ void ApplicationWindow::init(bool factorySettings)
     results->setTextColor(Qt::black);
   }
 
+  actionIPythonConsole->setVisible(testForIPython());
+
   // Need to show first time setup dialog?
   Mantid::Kernel::ConfigServiceImpl& config = Mantid::Kernel::ConfigService::Instance();
   std::string facility = config.getString("default.facility");
@@ -1156,6 +1158,7 @@ void ApplicationWindow::initMainMenu()
   view->insertSeparator();
   view->addAction(actionShowScriptWindow);//Mantid
   view->addAction(actionShowScriptInterpreter);
+  view->addAction(actionIPythonConsole);
   view->insertSeparator();
 
   mantidUI->addMenuItems(view);
@@ -13000,6 +13003,7 @@ void ApplicationWindow::createActions()
 #endif
   actionShowScriptWindow->setToggleAction(true);
   connect(actionShowScriptWindow, SIGNAL(activated()), this, SLOT(showScriptWindow()));
+
   actionShowScriptInterpreter = new QAction(getQPixmap("python_xpm"), tr("Toggle Script &Interpreter"), this);
 #ifdef __APPLE__
   actionShowScriptInterpreter->setShortcut(tr("Ctrl+4")); // F4 is used by the window manager on Mac
@@ -13008,6 +13012,14 @@ void ApplicationWindow::createActions()
 #endif
   actionShowScriptInterpreter->setToggleAction(true);
   connect(actionShowScriptInterpreter, SIGNAL(activated()), this, SLOT(showScriptInterpreter()));
+
+  actionIPythonConsole = new QAction(getQPixmap("python_xpm"), tr("Launch IPython Console"), this);
+#ifdef __APPLE__
+  actionIPythonConsole->setShortcut(tr("Ctrl+5")); // F4 is used by the window manager on Mac
+#else
+  actionIPythonConsole->setShortcut(tr("F5"));
+#endif
+  connect(actionIPythonConsole, SIGNAL(activated()), this, SLOT(launchIPythonConsole()));
 #endif
 
   actionShowCurvePlotDialog = new QAction(tr("&Plot details..."), this);
@@ -15887,6 +15899,17 @@ void ApplicationWindow::showScriptInterpreter()
 
 }
 
+bool ApplicationWindow::testForIPython()
+{
+  return runPythonScript("from ipython_plugin import MantidPlot_IPython",true,false);
+}
+
+void ApplicationWindow::launchIPythonConsole()
+{
+  // MantidPlot_IPython will already be imported in the testForIPython method
+  runPythonScript("MantidPlot_IPython().launch_console()",true,false);
+}
+
 /**
   Turns perspective mode on or off
  */
@@ -16706,9 +16729,9 @@ void ApplicationWindow::closeGraph(const QString & wsName)
   }
 }
 
-void ApplicationWindow::runPythonScript(const QString & code, bool quiet)
+bool ApplicationWindow::runPythonScript(const QString & code, bool quiet, bool redirect)
 {
-  if( code.isEmpty() || scriptingEnv()->isRunning() ) return;
+  if( code.isEmpty() || scriptingEnv()->isRunning() ) return false;
 
   if( m_iface_script == NULL )
   {
@@ -16725,13 +16748,26 @@ void ApplicationWindow::runPythonScript(const QString & code, bool quiet)
     // Output a message to say we've started
     scriptPrint("Script execution started.", false, true);
   }
+  const bool cachedEmit = m_iface_script->emitErrors();
+  if (!redirect)
+  {
+    m_iface_script->redirectStdOut(false);
+    // The redirect option was introduced for IPython, where was also don't want errors to go to the console window
+    m_iface_script->setEmitErrors(false);
+  }
   bool success = m_iface_script->exec();
+  if (!redirect)
+  {
+    m_iface_script->redirectStdOut(true);
+    m_iface_script->setEmitErrors(cachedEmit);
+  }
   if(success && !quiet)
   {
     scriptPrint("Script execution completed successfully.", false, true);
   }
-}
 
+  return success;
+}
 
 /**
 * Makes sure that it is dealing with a graph and then tells the plotDialog class 
