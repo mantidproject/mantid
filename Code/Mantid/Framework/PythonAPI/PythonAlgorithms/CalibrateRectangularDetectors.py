@@ -35,6 +35,10 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         #self.declareProperty("FileType", "Event NeXus",
         #                     Validator=ListValidator(types))
         self.declareListProperty("RunNumber", [0], Validator=ArrayBoundedValidator(Lower=0))
+        extensions = [ "_histo.nxs", "_event.nxs", "_neutron_event.dat",
+                      "_neutron0_event.dat", "_neutron1_event.dat", "_neutron0_event.dat and _neutron1_event.dat"]
+        self.declareProperty("Extension", "_event.nxs",
+                             Validator=ListValidator(extensions))
         self.declareProperty("CompressOnRead", False,
                              Description="Compress the event list when reading in the data")
         self.declareProperty("XPixelSum", 1,
@@ -75,33 +79,57 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
 #                                    RunNumber=runnumber, Extension=extension)
         return result["ResultPath"].value
 
+    def _addNeXusLogs(self, wksp, nxsfile, reloadInstr):
+        try:
+            LoadNexusLogs(Workspace=wksp, Filename=nxsfile)
+            if reloadInstr:
+                LoadInstrument(Workspace=wksp, InstrumentName=self._instrument, RewriteSpectraMap=False)
+            return True
+        except:
+            return False
+
 
     def _loadPreNeXusData(self, runnumber, extension):
-        # find the file to load
-        filename = self._findData(runnumber, extension)
-
         # generate the workspace name
-        (path, name) = os.path.split(filename)
-        name = name.split('.')[0]
-        (name, num) = name.split('_neutron')
-        num = num.replace('_event', '') # TODO should do something with this
+        name = "%s_%d" % (self._instrument, runnumber)
+        filename = name + extension
+        print filename
 
-        # load the prenexus file
-        alg = LoadEventPreNexus(EventFilename=filename, OutputWorkspace=name)
-        wksp = alg['OutputWorkspace']
+        try: # first just try loading the file
+            alg = LoadEventPreNexus(EventFilename=filename, OutputWorkspace=name)
+            wksp = alg['OutputWorkspace']
+        except:
+            # find the file to load
+            filename = self._findData(runnumber, extension)
+            # load the prenexus file
+            alg = LoadEventPreNexus(EventFilename=filename, OutputWorkspace=name)
+            wksp = alg['OutputWorkspace']
 
         # add the logs to it
-        nxsfile = self._findData(runnumber, ".nxs")
-        LoadLogsFromSNSNexus(Workspace=wksp, Filename=nxsfile)
+        reloadInstr = (str(self._instrument) == "SNAP")
+
+        nxsfile = "%s_%d_event.nxs" % (self._instrument, runnumber)
+        if self._addNeXusLogs(wksp, nxsfile, reloadInstr):
+            return wksp
+
+        nxsfile = "%s_%d_histo.nxs" % (self._instrument, runnumber)
+        if self._addNeXusLogs(wksp, nxsfile, reloadInstr):
+            return wksp
+
+        nxsfile = self._findData(runnumber, "_event.nxs")
+        if self._addNeXusLogs(wksp, nxsfile, reloadInstr):
+            return wksp
+
+        nxsfile = self._findData(runnumber, "_histo.nxs")
+        if self._addNeXusLogs(wksp, nxsfile, reloadInstr):
+            return wksp
+
         # TODO filter out events using timemin and timemax
 
         return wksp
 
-    def _loadNeXusData(self, runnumber, extension, **kwargs):
-        if self.getProperty("CompressOnRead"):
-            kwargs["CompressTolerance"] = COMPRESS_TOL_TOF
-        else:
-            kwargs["Precount"] = True
+    def _loadEventNeXusData(self, runnumber, extension, **kwargs):
+        kwargs["Precount"] = True
         name = "%s_%d" % (self._instrument, runnumber)
         filename = name + extension
 
@@ -114,17 +142,27 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
 
         # find the file to load
         filename = self._findData(runnumber, extension)
-        if len(filename) <= 0:
-            raise RuntimeError("Failed to find event nexus file for run %s" % str(runnumber))
-
-        # generate the workspace name
-        (path, name) = os.path.split(filename)
-        name = name.split('.')[0] # remove the extension
-        if "_event" in name:
-            name = name[0:-1*len("_event")]
 
         # TODO use timemin and timemax to filter what events are being read
         alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, **kwargs)
+
+        return alg.workspace()
+
+    def _loadHistoNeXusData(self, runnumber, extension):
+        name = "%s_%d" % (self._instrument, runnumber)
+        filename = name + extension
+
+        try: # first just try loading the file
+            alg = LoadTOFRawNexus(Filename=filename, OutputWorkspace=name)
+
+            return alg.workspace()
+        except:
+            pass
+
+        # find the file to load
+        filename = self._findData(runnumber, extension)
+
+        alg = LoadTOFRawNexus(Filename=filename, OutputWorkspace=name)
 
         return alg.workspace()
 
@@ -132,15 +170,25 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         filter = {}
         if filterWall is not None:
             if filterWall[0] > 0.:
-                filter["FilterByTime_Start"] = filterWall[0]
+                filter["FilterByTimeStart"] = filterWall[0]
             if filterWall[1] > 0.:
-                filter["FilterByTime_Stop"] = filterWall[1]
+                filter["FilterByTimeStop"] = filterWall[1]
 
         if  runnumber is None or runnumber <= 0:
             return None
 
-        if extension.endswith(".nxs"):
-            return self._loadNeXusData(runnumber, extension, **filter)
+        if extension.endswith("_event.nxs"):
+            return self._loadEventNeXusData(runnumber, extension, **filter)
+        elif extension.endswith("_histo.nxs"):
+            return self._loadHistoNeXusData(runnumber, extension)
+        elif "and" in extension:
+            wksp0 = self._loadPreNeXusData(runnumber, "_neutron0_event.dat")
+            RenameWorkspace(InputWorkspace=wksp0,OutputWorkspace="tmp")
+            wksp1 = self._loadPreNeXusData(runnumber, "_neutron1_event.dat")
+            Plus(LHSWorkspace=wksp1, RHSWorkspace="tmp",OutputWorkspace=wksp1)
+            wksp1.getRun()['gd_prtn_chrg'] = wksp1.getRun()['gd_prtn_chrg'].value/2
+            mtd.deleteWorkspace("tmp")
+            return wksp1;
         else:
             return self._loadPreNeXusData(runnumber, extension)
 
@@ -173,7 +221,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 if not comp == None:
                     groups+=("%s%d," % (self._grouping, num) )
         # take care of filtering events
-        if self._filterBadPulses and not self.getProperty("CompressOnRead"):
+        if self._filterBadPulses and not self.getProperty("CompressOnRead") and not "histo" in self.getProperty("Extension"):
             FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp)
         if filterLogs is not None:
             try:
@@ -184,11 +232,12 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             except KeyError, e:
                 raise RuntimeError("Failed to find log '%s' in workspace '%s'" \
                                    % (filterLogs[0], str(wksp)))            
-        if not self.getProperty("CompressOnRead"):
+        if not self.getProperty("CompressOnRead") and not "histo" in self.getProperty("Extension"):
             CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
 
         ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="dSpacing")
-        SortEvents(InputWorkspace=wksp, SortBy="X Value")
+        if not "histo" in self.getProperty("Extension"):
+            SortEvents(InputWorkspace=wksp, SortBy="X Value")
         # Sum pixelbin X pixelbin blocks of pixels
         if self._xpixelbin*self._ypixelbin>1:
                 SumNeighbours(InputWorkspace=wksp, OutputWorkspace=wksp, SumX=self._xpixelbin, SumY=self._ypixelbin)
@@ -220,7 +269,8 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         if self._diffractionfocus:
             DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp,
                 GroupingWorkspace=str(wksp)+"group")
-        SortEvents(InputWorkspace=wksp, SortBy="X Value")
+        if not "histo" in self.getProperty("Extension"):
+            SortEvents(InputWorkspace=wksp, SortBy="X Value")
         Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=self._binning)
         return wksp
 
@@ -230,7 +280,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         globals()["FindSNSNeXus"] = mantidsimple.FindSNSNeXus
 
         # get generic information
-        SUFFIX = "_event.nxs"
+        SUFFIX = self.getProperty("Extension")
         self._binning = self.getProperty("Binning")
         if len(self._binning) != 1 and len(self._binning) != 3:
             raise RuntimeError("Can only specify (width) or (start,width,stop) for binning. Found %d values." % len(self._binning))
