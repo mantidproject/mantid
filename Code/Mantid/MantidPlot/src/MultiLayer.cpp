@@ -1275,7 +1275,7 @@ bool MultiLayer::focusNextPrevChild ( bool next )
 
 void MultiLayer::dragEnterEvent( QDragEnterEvent * event )
 {
-  QObject * workspaceTree = this->parent()->parent()->parent()->findChild<QObject*>("WorkspaceTree");
+  QObject * workspaceTree = applicationWindow()->findChild<QObject*>("WorkspaceTree");
   if ( event->source() == workspaceTree)
   {
     event->acceptProposedAction();

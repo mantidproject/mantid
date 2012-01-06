@@ -17157,11 +17157,8 @@ void ApplicationWindow::setGeometry(MdiSubWindow* usr_win,QWidget* user_interfac
   QRect iface_geom = QRect(frame.topLeft() + user_interface->geometry().topLeft(),
       frame.bottomRight() + user_interface->geometry().bottomRight());
   usr_win->setGeometry(iface_geom);
-  //d_workspace->addSubWindow(usr_win);
-  //usr_win->show();
   addMdiSubWindow(usr_win);
   usr_win->setName(user_interface->windowTitle());
-
 }
 void ApplicationWindow::ICatLogout()
 {
