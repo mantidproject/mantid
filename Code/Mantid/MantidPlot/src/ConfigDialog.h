@@ -1,31 +1,31 @@
 /***************************************************************************
-    File                 : ConfigDialog.h
-    Project              : QtiPlot
-    --------------------------------------------------------------------
-    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
-    Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
-    Description          : Preferences dialog
+File                 : ConfigDialog.h
+Project              : QtiPlot
+--------------------------------------------------------------------
+Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
+Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
+Description          : Preferences dialog
 
- ***************************************************************************/
+***************************************************************************/
 
 /***************************************************************************
- *                                                                         *
- *  This program is free software; you can redistribute it and/or modify   *
- *  it under the terms of the GNU General Public License as published by   *
- *  the Free Software Foundation; either version 2 of the License, or      *
- *  (at your option) any later version.                                    *
- *                                                                         *
- *  This program is distributed in the hope that it will be useful,        *
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
- *  GNU General Public License for more details.                           *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the Free Software           *
- *   Foundation, Inc., 51 Franklin Street, Fifth Floor,                    *
- *   Boston, MA  02110-1301  USA                                           *
- *                                                                         *
- ***************************************************************************/
+*                                                                         *
+*  This program is free software; you can redistribute it and/or modify   *
+*  it under the terms of the GNU General Public License as published by   *
+*  the Free Software Foundation; either version 2 of the License, or      *
+*  (at your option) any later version.                                    *
+*                                                                         *
+*  This program is distributed in the hope that it will be useful,        *
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+*  GNU General Public License for more details.                           *
+*                                                                         *
+*   You should have received a copy of the GNU General Public License     *
+*   along with this program; if not, write to the Free Software           *
+*   Foundation, Inc., 51 Franklin Street, Fifth Floor,                    *
+*   Boston, MA  02110-1301  USA                                           *
+*                                                                         *
+***************************************************************************/
 #ifndef ConfigDialog_H
 #define ConfigDialog_H
 
@@ -54,96 +54,93 @@ class QStringList;
 
 namespace MantidQt
 {
-namespace MantidWidgets
-{
-  class InstrumentSelector;
-}
+  namespace MantidWidgets
+  {
+    class InstrumentSelector;
+  }
 }
 
 //! Preferences dialog
 class ConfigDialog : public QDialog
 {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-	//! Constructor
-	/**
-	 * @param parent :: parent widget (must be the application window!=
-	 * @param fl :: window flags
-	 */
-    ConfigDialog( QWidget* parent, Qt::WFlags fl = 0 );
-	void setColumnSeparator(const QString& sep);
+  //! Constructor
+  /**
+  * @param parent :: parent widget (must be the application window!=
+  * @param fl :: window flags
+  */
+  ConfigDialog( QWidget* parent, Qt::WFlags fl = 0 );
+  void setColumnSeparator(const QString& sep);
   void gotoMantidDirectories();
 
-private slots:
+  private slots:
     virtual void languageChange();
-	void insertLanguagesList();
+    void insertLanguagesList();
 
-	void accept();
-	void apply();
+    void accept();
+    void apply();
 
-	void setCurrentPage(int index);
+    void setCurrentPage(int index);
 
-	//table fonts
-	void pickTextFont();
-	void pickHeaderFont();
+    //table fonts
+    void pickTextFont();
+    void pickHeaderFont();
 
-	//graph fonts
-	void pickAxesFont();
-	void pickNumbersFont();
-	void pickLegendFont();
-	void pickTitleFont();
+    //graph fonts
+    void pickAxesFont();
+    void pickNumbersFont();
+    void pickLegendFont();
+    void pickTitleFont();
 
-	void enableScaleFonts();
-	void showFrameWidth(bool ok);
+    void enableScaleFonts();
+    void showFrameWidth(bool ok);
 
-	//application
-	void pickApplicationFont();
+    //application
+    void pickApplicationFont();
 
-	//2D curves
-	int curveStyle();
-	void pick3DTitleFont();
-	void pick3DNumbersFont();
-	void pick3DAxesFont();
+    //2D curves
+    int curveStyle();
+    void pick3DTitleFont();
+    void pick3DNumbersFont();
+    void pick3DAxesFont();
 
-	//Fitting
-	void showPointsBox(bool);
+    //Fitting
+    void showPointsBox(bool);
 
-	void switchToLanguage(int param);
+    void switchToLanguage(int param);
 
-	void chooseTranslationsFolder();
-	void chooseHelpFolder();
-// #ifdef SCRIPTING_PYTHON
-// 	void choosePythonConfigFolder();
-// #endif
+    void chooseTranslationsFolder();
+    void chooseHelpFolder();
 
-  //Mantid
-  void addPythonScriptsDirs();
-  void addPythonAlgorithmsDirs();
-  void addInstrumentDir();
-  void addParameterDir();
-  void treeClicked();
-  void addDialog();
-  void editDialog();
-  void deleteDialog();
+    //Mantid
+    void addPythonScriptsDirs();
+    void addPythonAlgorithmsDirs();
+    void addInstrumentDir();
+    void addParameterDir();
+    void treeClicked();
+    void addDialog();
+    void editDialog();
+    void deleteDialog();
 
 private:
-	void initPlotsPage();
+  void initPlotsPage();
   void initOptionsPage();
- 
+
   void initAxesPage();
-	void initAppPage();
+  void initAppPage();
   // Mantid
   void initMantidPage();
   void initDirSearchTab();
   void initCurveFittingTab();
-	
+
   void initCurvesPage();
-	void initPlots3DPage();
-	void initTablesPage();
-	void initConfirmationsPage();
-	void initFileLocationsPage();
-	void initFittingPage();
+  void initPlots3DPage();
+  void initTablesPage();
+  void initConfirmationsPage();
+  void initFileLocationsPage();
+  void initFittingPage();
 
   void updateDirSearchSettings();
   void updateCurveFitSettings();
@@ -155,28 +152,28 @@ private:
   void refreshTreeCategories();
   void populateProgramTree();
   void updateProgramTree();
- 
+
   QTreeWidgetItem* createCheckedTreeItem(QString name,bool checkBoxState);
   QStringList buildHiddenCategoryString(QTreeWidgetItem *parent = 0);
   QStringList treeChecking(QTreeWidgetItem *parent = 0); 
-  
+
   std::map<std::string,std::map<std::string,std::string> > m_sendToSettings;
 
-	QFont textFont, headerFont, axesFont, numbersFont, legendFont, titleFont, appFont;
-	QFont plot3DTitleFont, plot3DNumbersFont, plot3DAxesFont;
+  QFont textFont, headerFont, axesFont, numbersFont, legendFont, titleFont, appFont;
+  QFont plot3DTitleFont, plot3DNumbersFont, plot3DAxesFont;
 
-	QCheckBox *boxScaleLayersOnPrint, *boxPrintCropmarks, *boxUpdateSeparators, *linearFit2PointsBox;
+  QCheckBox *boxScaleLayersOnPrint, *boxPrintCropmarks, *boxUpdateSeparators, *linearFit2PointsBox;
   QTabWidget *plotsTabWidget, *appTabWidget, *mtdTabWidget;
-	ColorButton *btnBackground3D, *btnMesh, *btnAxes, *btnLabels, *btnNumbers;
-	ColorButton *btnFromColor, *btnToColor, *btnGrid;
-	QPushButton	*btnTitleFnt, *btnLabelsFnt, *btnNumFnt;
+  ColorButton *btnBackground3D, *btnMesh, *btnAxes, *btnLabels, *btnNumbers;
+  ColorButton *btnFromColor, *btnToColor, *btnGrid;
+  QPushButton	*btnTitleFnt, *btnLabelsFnt, *btnNumFnt;
   QPushButton *deleteButton, *editButton, *addButton;
-	ColorButton *buttonBackground, *buttonText, *buttonHeader;
+  ColorButton *buttonBackground, *buttonText, *buttonHeader;
   QPushButton *buttonOk, *buttonCancel, *buttonApply;
-	QPushButton* buttonTextFont, *buttonHeaderFont;
-	QStackedWidget * generalDialog;
-	QWidget *appColors, *tables, *plotOptions, *plotAxes, *plotTicks, *plotFonts, *confirm, *plotPrint;
-	QWidget *application, *curves, *plots3D, *fitPage, *numericFormatPage, *floatingWindowsPage;
+  QPushButton* buttonTextFont, *buttonHeaderFont;
+  QStackedWidget * generalDialog;
+  QWidget *appColors, *tables, *plotOptions, *plotAxes, *plotTicks, *plotFonts, *confirm, *plotPrint;
+  QWidget *application, *curves, *plots3D, *fitPage, *numericFormatPage, *floatingWindowsPage;
   //Mantid
   QWidget *instrumentPage;
   QComboBox *facility;
@@ -204,53 +201,53 @@ private:
   QTreeWidget *treeCategories;
   QTreeWidget *treePrograms;
 
-  
-	QPushButton* buttonAxesFont, *buttonNumbersFont, *buttonLegendFont, *buttonTitleFont, *fontsBtn;
-	QCheckBox *boxSearchUpdates, *boxOrthogonal, *logBox, *plotLabelBox, *scaleErrorsBox;
+
+  QPushButton* buttonAxesFont, *buttonNumbersFont, *buttonLegendFont, *buttonTitleFont, *fontsBtn;
+  QCheckBox *boxSearchUpdates, *boxOrthogonal, *logBox, *plotLabelBox, *scaleErrorsBox;
   QCheckBox *boxSharedMenuBar;
-	QCheckBox *boxTitle, *boxFrame, *boxPlots3D, *boxPlots2D, *boxTables, *boxNotes, *boxFolders,*boxInstrWindow;
-	QCheckBox *boxSave, *boxBackbones, *boxShowLegend, *boxSmoothMesh;
+  QCheckBox *boxTitle, *boxFrame, *boxPlots3D, *boxPlots2D, *boxTables, *boxNotes, *boxFolders,*boxInstrWindow;
+  QCheckBox *boxSave, *boxBackbones, *boxShowLegend, *boxSmoothMesh;
   QCheckBox *boxAllAxes;
   QLabel *lblXLogLin, *lblYLogLin, *lblZLogLin;
   QComboBox *cbXLog,  *cbYLog, *cbZLog;
-	QCheckBox *boxAutoscaling, *boxShowProjection, *boxMatrices, *boxScaleFonts, *boxResize, *boxAspectRatio;
-	QComboBox *boxMajTicks, *boxMinTicks, *boxStyle, *boxCurveStyle, *boxSeparator, *boxLanguage, *boxDecimalSeparator;
+  QCheckBox *boxAutoscaling, *boxShowProjection, *boxMatrices, *boxScaleFonts, *boxResize, *boxAspectRatio;
+  QComboBox *boxMajTicks, *boxMinTicks, *boxStyle, *boxCurveStyle, *boxSeparator, *boxLanguage, *boxDecimalSeparator;
   QCheckBox *boxFloatingGraph, *boxFloatingTable, *boxFloatingInstrumentWindow, *boxFloatingMantidMatrix, *boxFloatingNote, *boxFloatingMatrix;
-	QSpinBox *boxMinutes, *boxLineWidth, *boxFrameWidth, *boxResolution, *boxMargin, *boxPrecision, *boxAppPrecision;
-	QSpinBox *boxSymbolSize, *boxMinTicksLength, *boxMajTicksLength, *generatePointsBox;
-	DoubleSpinBox *boxCurveLineWidth;
-	ColorButton *btnWorkspace, *btnPanels, *btnPanelsText;
-	QListWidget * itemsList;
-	QLabel *labelFrameWidth, *lblLanguage, *lblWorkspace, *lblPanels, *lblPageHeader;
-	QLabel *lblPanelsText, *lblFonts, *lblStyle, *lblDecimalSeparator, *lblAppPrecision;
-	QGroupBox *groupBoxConfirm;
-	QGroupBox *groupBoxTableFonts, *groupBoxTableCol;
-	QLabel *lblSeparator, *lblTableBackground, *lblTextColor, *lblHeaderColor;
-	QLabel *lblSymbSize, *lblAxesLineWidth, *lblCurveStyle, *lblResolution, *lblPrecision;
-	QGroupBox *groupBox3DFonts, *groupBox3DCol;
-	QLabel *lblMargin, *lblMajTicks, *lblMajTicksLength, *lblLineWidth, *lblMinTicks, *lblMinTicksLength, *lblPoints, *lblPeaksColor;
-	QGroupBox *groupBoxFittingCurve, *groupBoxFitParameters;
-	QRadioButton *samePointsBtn, *generatePointsBtn;
-    QGroupBox *groupBoxMultiPeak;
-	ColorBox *boxPeaksColor;
-	QLabel *lblScriptingLanguage, *lblInitWindow;
-	QComboBox *boxScriptingLanguage, *boxInitWindow;
-	QCheckBox *boxAntialiasing, *boxAutoscale3DPlots, *boxTableComments, *boxThousandsSeparator;
-	QCheckBox *boxPromptRenameTables, *boxBackupProject, *boxLabelsEditing;
-	QWidget *fileLocationsPage;
-	QLabel *lblTranslationsPath, *lblHelpPath, *lblUndoStackSize, *lblEndOfLine;
-	QLineEdit *translationsPathLine, *helpPathLine;
-	QSpinBox *undoStackSizeBox;
-	QComboBox *boxEndLine;
+  QSpinBox *boxMinutes, *boxLineWidth, *boxFrameWidth, *boxResolution, *boxMargin, *boxPrecision, *boxAppPrecision;
+  QSpinBox *boxSymbolSize, *boxMinTicksLength, *boxMajTicksLength, *generatePointsBox;
+  DoubleSpinBox *boxCurveLineWidth;
+  ColorButton *btnWorkspace, *btnPanels, *btnPanelsText;
+  QListWidget * itemsList;
+  QLabel *labelFrameWidth, *lblLanguage, *lblWorkspace, *lblPanels, *lblPageHeader;
+  QLabel *lblPanelsText, *lblFonts, *lblStyle, *lblDecimalSeparator, *lblAppPrecision;
+  QGroupBox *groupBoxConfirm;
+  QGroupBox *groupBoxTableFonts, *groupBoxTableCol;
+  QLabel *lblSeparator, *lblTableBackground, *lblTextColor, *lblHeaderColor;
+  QLabel *lblSymbSize, *lblAxesLineWidth, *lblCurveStyle, *lblResolution, *lblPrecision;
+  QGroupBox *groupBox3DFonts, *groupBox3DCol;
+  QLabel *lblMargin, *lblMajTicks, *lblMajTicksLength, *lblLineWidth, *lblMinTicks, *lblMinTicksLength, *lblPoints, *lblPeaksColor;
+  QGroupBox *groupBoxFittingCurve, *groupBoxFitParameters;
+  QRadioButton *samePointsBtn, *generatePointsBtn;
+  QGroupBox *groupBoxMultiPeak;
+  ColorBox *boxPeaksColor;
+  QLabel *lblScriptingLanguage, *lblInitWindow;
+  QComboBox *boxScriptingLanguage, *boxInitWindow;
+  QCheckBox *boxAntialiasing, *boxAutoscale3DPlots, *boxTableComments, *boxThousandsSeparator;
+  QCheckBox *boxPromptRenameTables, *boxBackupProject, *boxLabelsEditing;
+  QWidget *fileLocationsPage;
+  QLabel *lblTranslationsPath, *lblHelpPath, *lblUndoStackSize, *lblEndOfLine;
+  QLineEdit *translationsPathLine, *helpPathLine;
+  QSpinBox *undoStackSizeBox;
+  QComboBox *boxEndLine;
   QCheckBox* cbApplyToMantid;
 
-  
+
 
 #ifdef SCRIPTING_PYTHON
-	QLabel *lblPythonConfigDir;
-	QLineEdit *pythonConfigDirLine;
+  QLabel *lblPythonConfigDir;
+  QLineEdit *pythonConfigDirLine;
 #endif
-	QCheckBox *boxUpdateTableValues;
+  QCheckBox *boxUpdateTableValues;
 };
 
 #endif // CONFIGDIALOG_H
