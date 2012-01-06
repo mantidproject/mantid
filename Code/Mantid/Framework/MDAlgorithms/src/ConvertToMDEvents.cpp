@@ -572,15 +572,16 @@ ConvertToMDEvents::parseQMode(const std::string &Q_mode_req,const Strings &ws_di
 std::string 
 ConvertToMDEvents::parseWSType(API::MatrixWorkspace_const_sptr inMatrixWS)const
 {
-    
-    Workspace2D_const_sptr pWS2D = boost::static_pointer_cast<const DataObjects::Workspace2D>(inMatrixWS);
-    if(pWS2D){
-        return SupportedWS[Workspace2DType];
-    }
-    IEventWorkspace_const_sptr pWSEv= boost::static_pointer_cast<const IEventWorkspace>(inMatrixWS);
+    const DataObjects::EventWorkspace *pWSEv= dynamic_cast<const DataObjects::EventWorkspace *>(inMatrixWS.get());
     if(pWSEv){
         return SupportedWS[EventWSType];
     }
+
+    const DataObjects::Workspace2D *pMWS2D = dynamic_cast<const DataObjects::Workspace2D *>(inMatrixWS.get());
+    if(pMWS2D){
+        return SupportedWS[Workspace2DType];
+    }
+ 
     convert_log.error()<<" Unsupported workspace type provided. Currently supported types are:\n";
     for(int i=0;i<NInWSTypes;i++){
         convert_log.error()<<" WS ID: "<<SupportedWS[i];
@@ -819,16 +820,16 @@ private:
             Key = pH->SupportedWS[Workspace2DType]+Key0;
             pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,
                 &ConvertToMDEvents::processQNDHWS<Q,static_cast<AnalMode>(MODE),static_cast<CnvrtUnits>(CONV)>));
-#ifdef _DEBUG
+/*#ifdef _DEBUG
             std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
-#endif
+#endif*/
             Key = pH->SupportedWS[EventWSType]+Key0;
             pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,
                 &ConvertToMDEvents::processQNDEWS<Q,static_cast<AnalMode>(MODE),static_cast<CnvrtUnits>(CONV)>));
-#ifdef _DEBUG
+/*#ifdef _DEBUG
             std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
-#endif
-            LOOP_ND<Q, NumAlgorithms+1>::EXEC(pH);
+#endif   */ 
+         LOOP_ND<Q, NumAlgorithms+1>::EXEC(pH);
     }
 };
 
@@ -851,16 +852,16 @@ private:
             Key = pH->SupportedWS[Workspace2DType]+Key0;
             pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,
                 &ConvertToMDEvents::processQNDHWS<NoQ,ANY_Mode,static_cast<CnvrtUnits>(CONV)>));
-#ifdef _DEBUG
-            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
-#endif
+//#ifdef _DEBUG
+//            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
+//#endif
 
             Key = pH->SupportedWS[EventWSType]+Key0;
             pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,
                 &ConvertToMDEvents::processQNDEWS<NoQ,ANY_Mode,static_cast<CnvrtUnits>(CONV)>));
-#ifdef _DEBUG
-            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
-#endif
+//#ifdef _DEBUG
+//            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
+//#endif
 
 
             LOOP_ND<NoQ,NumAlgorithms+1>::EXEC(pH);

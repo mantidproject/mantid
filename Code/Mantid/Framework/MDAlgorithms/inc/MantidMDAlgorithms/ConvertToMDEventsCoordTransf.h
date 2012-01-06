@@ -44,7 +44,7 @@ namespace MDAlgorithms
 * 
 *  Generic template defines interface to 3 functions which perform these three steps. 
 */
-template<Q_state Q,AnalMode MODE,CnvrtUnits CONV>
+template<Q_state Q,AnalMode MODE,CnvrtUnits CONV,XCoordType Type>
 struct COORD_TRANSFORMER
 {
       COORD_TRANSFORMER(ConvertToMDEvents *){}
@@ -103,8 +103,8 @@ private:
 // ---->    NoQ
 // NoQ,ANY_Mode -- no units conversion. This templates just copies the data into MD events and not doing any momentum transformations
 //
-template<AnalMode MODE,CnvrtUnits CONV> 
-struct COORD_TRANSFORMER<NoQ,MODE,CONV>
+template<AnalMode MODE,CnvrtUnits CONV,XCoordType Type> 
+struct COORD_TRANSFORMER<NoQ,MODE,CONV,Type>
 {
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)    
     {
@@ -149,7 +149,7 @@ private:
      // pointer to MD workspace convertor
      ConvertToMDEvents *pHost;
      // class which would convert units
-     UNITS_CONVERSION<CONV> CONV_UNITS_FROM;
+     UNITS_CONVERSION<CONV,Type> CONV_UNITS_FROM;
 };
 //
 ////----------------------------------------------------------------------------------------------------------------------
@@ -173,8 +173,8 @@ inline double k_trans<Indir>(double Ei, double E_tr){
 
 //  ----->  modQ
 // modQ,Inelastic 
-template<AnalMode MODE,CnvrtUnits CONV> 
-struct COORD_TRANSFORMER<modQ,MODE,CONV>
+template<AnalMode MODE,CnvrtUnits CONV,XCoordType Type> 
+struct COORD_TRANSFORMER<modQ,MODE,CONV,Type>
 { 
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
     {
@@ -247,11 +247,11 @@ private:
     // Calling Mantid algorithm
     ConvertToMDEvents *pHost;
     // class that performs untis conversion;
-    UNITS_CONVERSION<CONV> CONV_UNITS_FROM;
+    UNITS_CONVERSION<CONV,Type> CONV_UNITS_FROM;
 };
 // modQ,Elastic 
-template<CnvrtUnits CONV> 
-struct COORD_TRANSFORMER<modQ,Elastic,CONV>
+template<CnvrtUnits CONV,XCoordType Type> 
+struct COORD_TRANSFORMER<modQ,Elastic,CONV,Type>
 { 
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
     {
@@ -314,13 +314,13 @@ private:
     // Calling Mantid algorithm
     ConvertToMDEvents *pHost;
     // class that performs untis conversion;
-    UNITS_CONVERSION<CONV> CONV_UNITS_FROM;
+    UNITS_CONVERSION<CONV,Type> CONV_UNITS_FROM;
 };
 
 
 // Direct/Indirect tramsformatiom, this template describes 3D Q analysis mode. 
-template<AnalMode MODE,CnvrtUnits CONV> 
-struct COORD_TRANSFORMER<Q3D,MODE,CONV>
+template<AnalMode MODE,CnvrtUnits CONV,XCoordType Type> 
+struct COORD_TRANSFORMER<Q3D,MODE,CONV,Type>
 {
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
     {
@@ -386,16 +386,16 @@ private:
     // Calling Mantid algorithm
     ConvertToMDEvents *pHost;
     // class that performs untis conversion;
-    UNITS_CONVERSION<CONV> CONV_UNITS_FROM;
+    UNITS_CONVERSION<CONV,Type> CONV_UNITS_FROM;
 };
 
 // Elastic
-template<CnvrtUnits CONV> 
-struct COORD_TRANSFORMER<Q3D,Elastic,CONV>
+template<CnvrtUnits CONV,XCoordType Type> 
+struct COORD_TRANSFORMER<Q3D,Elastic,CONV,Type>
 {
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
     {
-        // tree inital coordinates came from workspace and all are interconnnected. All additional are defined by properties:
+        // three inital coordinates came from workspace and all are interconnnected. All additional are defined by properties:
         if(!pHost->fillAddProperties(Coord,nd,3))return false;
          // 
         rotMat = pHost->getTransfMatrix();
@@ -445,7 +445,7 @@ private:
     // pointer to the algoritm, which calls all these transformations
     ConvertToMDEvents *pHost;
     // class that performs untis conversion;
-    UNITS_CONVERSION<CONV> CONV_UNITS_FROM;
+    UNITS_CONVERSION<CONV,Type> CONV_UNITS_FROM;
 };
 
 

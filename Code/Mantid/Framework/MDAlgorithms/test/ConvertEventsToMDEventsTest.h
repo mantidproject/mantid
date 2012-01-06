@@ -41,8 +41,8 @@ static void destroySuite(ConvertEventsToMDEventsTest * suite) { delete suite; }
 void testEventWS()
 {
 // set up algorithm
-   TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace","testWSProcessed"));
-  TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace","testMDEvWorkspace"));
+   TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace","testEvWS"));
+   TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace","testMDEvWorkspace"));
    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OtherDimensions",""));
    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions", "QxQyQz"));
    pAlg->setPropertyValue("UsePreprocessedDetectors","0");
@@ -68,7 +68,7 @@ ConvertEventsToMDEventsTest(){
    // any inelastic units or unit conversion using TOF needs Ei to be present among properties. 
    wsEv->mutableRun().addProperty("Ei",13.,"meV",true);
 
-   AnalysisDataService::Instance().addOrReplace("testWSProcessed", wsEv);
+   AnalysisDataService::Instance().addOrReplace("testEvWS", wsEv);
 
 }
 

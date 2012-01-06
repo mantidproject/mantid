@@ -92,8 +92,14 @@ namespace MDAlgorithms
       EventWSType,     //< Event worskapce
       NInWSTypes
   };
+// way to treat the X-coorinate in the workspace:
+    enum XCoordType
+    {
+        Histohram, // typical for Matrix workspace -- deploys central average 0.5(X[i]+X[i+1]); other types of averaging are possible if needed 
+        Axis       // typical for events
+    };
 /// predefenition of the class, which does all coordinate transformations, Linux compilers need this. 
-  template<Q_state Q, AnalMode MODE, CnvrtUnits CONV> 
+  template<Q_state Q, AnalMode MODE, CnvrtUnits CONV,XCoordType XTYPE> 
   struct COORD_TRANSFORMER;
   
   class DLLExport ConvertToMDEvents  : public MDEvents::BoxControllerSettingsAlgorithm
@@ -202,7 +208,7 @@ namespace MDAlgorithms
 
     /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
     /// presumably will be completely inlined
-     template<Q_state Q, AnalMode MODE, CnvrtUnits CONV> 
+     template<Q_state Q, AnalMode MODE, CnvrtUnits CONV,XCoordType XTYPE> 
      friend struct COORD_TRANSFORMER;
      /// helper class to orginize metaloop on various algorithm options
      template<Q_state Q,size_t N_ALGORITHMS >
