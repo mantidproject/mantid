@@ -250,6 +250,14 @@ namespace Mantid
     {
       MatrixWorkspace_sptr inputW = boost::dynamic_pointer_cast<MatrixWorkspace>
            (AnalysisDataService::Instance().retrieve(inname));
+      double maxD = inputW->readX(s).back();
+      std::vector<double> peakPos = Kernel::VectorHelper::splitStringIntoVector<double>(peakPositions);
+      std::ostringstream mess;
+      for (int i = 0; i < static_cast<int>(peakPos.size()); ++i)
+      {
+        if(peakPos[i] < maxD) mess << peakPos[i]<<",";
+      }
+      peakPositions = mess.str();
 
       API::IAlgorithm_sptr findpeaks = createSubAlgorithm("FindPeaks",0.0,0.2);
       findpeaks->setProperty("InputWorkspace", inputW);
@@ -266,9 +274,8 @@ namespace Mantid
       findpeaks->setProperty<int>("MaxGuessedPeakWidth",4);
       findpeaks->executeAsSubAlg();
       ITableWorkspace_sptr peakslist = findpeaks->getProperty("PeaksList");
-      std::vector<double> peakPos = Kernel::VectorHelper::splitStringIntoVector<double>(peakPositions);
+      peakPos = Kernel::VectorHelper::splitStringIntoVector<double>(peakPositions);
       double errsum = 0.0;
-      double maxD = inputW->readX(s).back();
       for (int i = 0; i < peakslist->rowCount(); ++i)
       {
         // Get references to the data
