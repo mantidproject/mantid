@@ -262,7 +262,8 @@ namespace Mantid
       findpeaks->setProperty("PeakPositions", peakPositions);
       findpeaks->setProperty<std::string>("BackgroundType", "Linear");
       findpeaks->setProperty<bool>("HighBackground", true);
-      findpeaks->setProperty<int>("MaxGuessedPeakWidth",2);
+      findpeaks->setProperty<int>("MinGuessedPeakWidth",4);
+      findpeaks->setProperty<int>("MaxGuessedPeakWidth",4);
       findpeaks->executeAsSubAlg();
       ITableWorkspace_sptr peakslist = findpeaks->getProperty("PeaksList");
       std::vector<double> peakPos = Kernel::VectorHelper::splitStringIntoVector<double>(peakPositions);
@@ -276,8 +277,6 @@ namespace Mantid
         double offsetAD = offset*peakPos[i]/(1+offset);
         if(centre > 0 && centre < maxD) 
           errsum += std::fabs(peakPos[i]-(centre+offsetAD));
-        //else
-          //errsum += 1.0;
       }
       peakPos.clear();
       return errsum;
