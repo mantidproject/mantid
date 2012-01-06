@@ -41,6 +41,8 @@
 #include <algorithm>
 #include <limits>
 
+#include <boost/math/special_functions/fpclassify.hpp>
+
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -172,7 +174,7 @@ void MantidMatrix::viewChanged(int index)
 /// Checks if d is not infinity or a NaN
 bool isANumber(volatile const double& d)
 {
-  return d != std::numeric_limits<double>::infinity() && d == d;
+  return d != std::numeric_limits<double>::infinity() && !boost::math::isnan(d);
 }
 
 void MantidMatrix::setup(Mantid::API::MatrixWorkspace_sptr ws, int start, int end)
@@ -718,7 +720,7 @@ QwtDoubleRect MantidMatrix::boundingRect()
 }
 
 //----------------------------------------------------------------------------
-MantidMatrixFunction::MantidMatrixFunction(MantidMatrix* wsm):m_matrix(wsm){}
+MantidMatrixFunction::MantidMatrixFunction(MantidMatrix* wsm):m_matrix(wsm),m_dx(0),m_dy(0),m_outside(0){}
 
 void MantidMatrixFunction::init()
 {

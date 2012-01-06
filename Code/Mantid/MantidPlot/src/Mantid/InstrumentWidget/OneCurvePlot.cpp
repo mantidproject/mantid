@@ -33,6 +33,8 @@ QwtPlot(parent),m_curve(NULL)
   m_colors << Qt::red<< Qt::green  << Qt::blue << Qt::cyan << Qt::magenta << Qt::yellow << Qt::gray;
   m_colors << Qt::darkRed<< Qt::darkGreen  << Qt::darkBlue << Qt::darkCyan << Qt::darkMagenta << Qt::darkYellow << Qt::darkGray;
   m_colorIndex = 0;
+  m_x0 = 0;
+  m_y0 = 0;
 }
 
 /**

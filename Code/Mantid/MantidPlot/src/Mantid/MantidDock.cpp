@@ -1406,7 +1406,7 @@ void MantidDockWidget::treeSelectionChanged()
 
 //------------ MantidTreeWidget -----------------------//
 
-MantidTreeWidget::MantidTreeWidget(QWidget *w, MantidUI *mui):QTreeWidget(w),m_mantidUI(mui)
+MantidTreeWidget::MantidTreeWidget(QWidget *w, MantidUI *mui):QTreeWidget(w),m_mantidUI(mui),m_sortScheme()
 {
   setObjectName("WorkspaceTree");
   setSelectionMode(QAbstractItemView::ExtendedSelection);

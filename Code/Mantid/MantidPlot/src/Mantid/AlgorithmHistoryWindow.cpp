@@ -28,6 +28,12 @@ using namespace Mantid::API;
 Mantid::Kernel::Logger& AlgorithmHistoryWindow::g_log = Mantid::Kernel::Logger::get("AlgorithmHistoryWindow");
 Mantid::Kernel::Logger& AlgHistoryTreeWidget::g_log = Mantid::Kernel::Logger::get("AlgHistoryTreeWidget");
 
+AlgExecSummaryGrpBox::AlgExecSummaryGrpBox(QWidget *w) : QGroupBox(w),
+  m_execDurationlabel(NULL),m_execDurationEdit(NULL),
+  m_Datelabel(NULL),m_execDateTimeEdit(NULL), m_algexecDuration()
+{
+}
+
 AlgExecSummaryGrpBox::AlgExecSummaryGrpBox(QString title,QWidget*w)
   : QGroupBox(title,w), m_execDurationlabel(NULL),m_execDurationEdit(NULL),
     m_Datelabel(NULL),m_execDateTimeEdit(NULL), m_algexecDuration()
@@ -99,6 +105,13 @@ void AlgExecSummaryGrpBox::setData(const double execDuration,const Mantid::Kerne
   if(datetimeEdit)datetimeEdit->setText(str);
 
 }
+
+AlgEnvHistoryGrpBox::AlgEnvHistoryGrpBox(QWidget *w) : QGroupBox(w),
+  m_osNameLabel(NULL),m_osNameEdit(NULL),m_osVersionLabel(NULL),m_osVersionEdit(NULL),
+  m_frmworkVersionLabel(NULL),m_frmwkVersnEdit(NULL)
+{
+}
+
 AlgEnvHistoryGrpBox::AlgEnvHistoryGrpBox(QString title,QWidget*w):QGroupBox(title,w),
 								  m_osNameLabel(NULL),m_osNameEdit(NULL),m_osVersionLabel(NULL),m_osVersionEdit(NULL),
 								  m_frmworkVersionLabel(NULL),m_frmwkVersnEdit(NULL)
@@ -169,6 +182,13 @@ AlgHistScriptButton::AlgHistScriptButton(QString title,QWidget* w):QPushButton(t
 AlgHistScriptButton::~AlgHistScriptButton()
 {
 }
+
+AlgorithmHistoryWindow::AlgorithmHistoryWindow(QWidget *parent) : MantidDialog(parent),
+  m_scriptButton(NULL),m_Historytree(NULL),m_histPropWindow(NULL),
+  m_execSumGrpBox(NULL),m_envHistGrpBox(NULL),m_wsName("")
+{
+}
+
 AlgorithmHistoryWindow::AlgorithmHistoryWindow(QWidget *parent,const boost::shared_ptr<const Workspace> wsptr):
 MantidDialog(parent),m_algHist(wsptr->getHistory().getAlgorithmHistories()),m_histPropWindow(NULL),m_execSumGrpBox(NULL),m_envHistGrpBox(NULL),m_wsName(wsptr->getName().c_str())
 {

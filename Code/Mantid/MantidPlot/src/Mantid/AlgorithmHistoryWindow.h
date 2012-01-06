@@ -64,7 +64,7 @@ class AlgExecSummaryGrpBox: public QGroupBox
 {
   Q_OBJECT
   public:
-  AlgExecSummaryGrpBox(QWidget*w):QGroupBox(w){}
+  AlgExecSummaryGrpBox(QWidget*w);
   AlgExecSummaryGrpBox(QString,QWidget*w);
   ~AlgExecSummaryGrpBox();
   void setData(const double execDuration,const Mantid::Kernel::DateAndTime execDate);
@@ -83,7 +83,7 @@ class AlgEnvHistoryGrpBox: public QGroupBox
 {
   Q_OBJECT
   public:
-  AlgEnvHistoryGrpBox(QWidget*w):QGroupBox(w){}
+  AlgEnvHistoryGrpBox(QWidget*w);
   AlgEnvHistoryGrpBox(QString,QWidget*w);
   ~AlgEnvHistoryGrpBox();
 
@@ -116,7 +116,7 @@ class AlgorithmHistoryWindow: public MantidQt::API::MantidDialog
   signals:
   void updateAlgorithmHistoryWindow(QString algName);
 public:
-  AlgorithmHistoryWindow(QWidget *parent) : MantidQt::API::MantidDialog(parent){}
+  AlgorithmHistoryWindow(QWidget *parent);
   AlgorithmHistoryWindow(QWidget *parent,const boost::shared_ptr<const Mantid::API::Workspace>);
   ~AlgorithmHistoryWindow();
 private slots:
