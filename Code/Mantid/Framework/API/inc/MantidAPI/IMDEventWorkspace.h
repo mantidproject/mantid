@@ -56,6 +56,8 @@ namespace API
 
     /// Set the number of bins in each dimension to something corresponding to the estimated resolution of the finest binning
     virtual void estimateResolution() = 0;
+    /// get number of dimensions contained in initialized MD workspace
+    virtual size_t getNumDims()const=0;
 
     /// Split all boxes that exceed the split threshold.
     virtual void splitAllIfNeeded(Kernel::ThreadScheduler * ts) = 0;

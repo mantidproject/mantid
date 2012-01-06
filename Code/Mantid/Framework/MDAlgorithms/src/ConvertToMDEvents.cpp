@@ -325,6 +325,7 @@ void ConvertToMDEvents::exec()
   }
   else
   {
+    n_activated_dimensions = spws->getNumDims();
     dim_min.assign(n_activated_dimensions,-1);
     dim_max.assign(n_activated_dimensions,1);
     throw(Kernel::Exception::NotImplementedError("Adding to existing MD workspace not Yet Implemented"));
@@ -666,20 +667,19 @@ ConvertToMDEvents::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS,const std
         convert_log.error()<<"Can not currently deal with more then: "<<pWSWrapper->getMaxNDim()<< " dimesnions, but requested: "<<nDims<<std::endl;
         throw(std::invalid_argument(" Too many dimensions requested "));
     }
-
+    // get emode
     int emode;
-    // any inelastic mode or unit conversion involing TOF needs Ei to be among the input workspace properties
     if (!Q_mode_req.empty()){
         emode = getEMode(this);
     }else{
-        emode = -1;
+        emode = -1;  // no coordinate conversion
     }
-    //if((emode == 1)||(emode == 2)||(the_algID.find("TOF")!=std::string::npos))
+    // any inelastic mode  needs Ei to be among the input workspace properties 
     if((emode == 1)||(emode == 2))
     {        
         if(!inWS->run().hasProperty("Ei")){
-            convert_log.error()<<" Conversion sub-algorithm with ID: "<<the_algID<<" needs input energy to be present among run properties\n";
-            throw(std::invalid_argument(" Needs Input energy to be present "));
+            convert_log.error()<<" Conversion sub-algorithm with ID: "<<the_algID<<" (inelastic) needs input energy to be present among run properties\n";
+            throw(std::invalid_argument(" Needs Input energy to be present for inelastic modes"));
         }
     }
 

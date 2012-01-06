@@ -181,7 +181,7 @@ void ConvertToMDEvents::processQNDEWS()
          int32_t det_id            = det_loc.det_id[wi];
 
          const DataObjects::EventList & el   = pEventWS->getEventList(ic);
-         size_t numEvents       = el.getNumberEvents();
+         size_t numEvents       = (int64_t)el.getNumberEvents();
 
     
         const MantidVec& X        = el.dataX();
@@ -190,7 +190,7 @@ void ConvertToMDEvents::processQNDEWS()
          if(!trn.calcYDepCoordinates(Coord,ic))continue;   // skip y outsize of the range;
 
         //=> START INTERNAL LOOP OVER THE "TIME"
-        for (size_t j = 0; j < numEvents-1; ++j)
+        for (size_t j = 0; j < Signal.size(); ++j)
         {
            // drop emtpy histohrams
            if(Signal[j]<FLT_EPSILON)continue;
