@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>809</width>
-    <height>728</height>
+    <width>867</width>
+    <height>757</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -28,43 +28,7 @@
      <item>
       <layout class="QVBoxLayout" name="overviewLayout">
        <item>
-        <layout class="QHBoxLayout" name="fileLoadingLayout">
-         <item>
-          <widget class="QPushButton" name="btn_add_file">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>Add a raw file</string>
-           </property>
-           <property name="text">
-            <string>Add Raw File</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btn_remove_workspace">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="toolTip">
-          <string>Remove any workspace once it is highlighted</string>
-         </property>
-         <property name="text">
-          <string>Remove Selected</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="workspaceLoadingLayout">
+        <layout class="QHBoxLayout" name="mementoLoadingLayout">
          <item>
           <widget class="QPushButton" name="btn_add_workspace">
            <property name="sizePolicy">
@@ -85,6 +49,49 @@
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btn_add_raw_file">
+           <property name="text">
+            <string>Add Raw File</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btn_add_event_nexus_file">
+           <property name="text">
+            <string>Add EventNexus File</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btn_remove_workspace">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>Remove any workspace once it is highlighted</string>
+           </property>
+           <property name="text">
+            <string>Remove Selected</string>
            </property>
           </widget>
          </item>
@@ -131,7 +138,10 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
-          <layout class="QVBoxLayout" name="verticalLayout_3">
+          <layout class="QVBoxLayout" name="verticalLayout_3" stretch="4,1,1,4">
+           <property name="sizeConstraint">
+            <enum>QLayout::SetDefaultConstraint</enum>
+           </property>
            <item>
             <layout class="QVBoxLayout" name="verticalLayout_mandatory">
              <item>
@@ -140,6 +150,12 @@
                 <layout class="QHBoxLayout" name="horizontalLayout_latticeCrystal">
                  <item>
                   <widget class="QGroupBox" name="groupBox_lattice">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>2</verstretch>
+                    </sizepolicy>
+                   </property>
                    <property name="minimumSize">
                     <size>
                      <width>300</width>
@@ -149,126 +165,84 @@
                    <property name="title">
                     <string>UB Matrix</string>
                    </property>
-                   <widget class="QPushButton" name="btn_set_ub_matrix">
-                    <property name="geometry">
-                     <rect>
-                      <x>10</x>
-                      <y>30</y>
-                      <width>281</width>
-                      <height>21</height>
-                     </rect>
-                    </property>
-                    <property name="text">
-                     <string>Set UB Matrix</string>
-                    </property>
-                   </widget>
-                   <widget class="QGroupBox" name="gropBox_findUB">
-                    <property name="geometry">
-                     <rect>
-                      <x>10</x>
-                      <y>70</y>
-                      <width>281</width>
-                      <height>131</height>
-                     </rect>
-                    </property>
-                    <property name="title">
-                     <string>Find UB Matrix</string>
-                    </property>
-                    <widget class="QPushButton" name="btn_find_ub_matrix">
-                     <property name="geometry">
-                      <rect>
-                       <x>10</x>
-                       <y>20</y>
-                       <width>261</width>
-                       <height>21</height>
-                      </rect>
-                     </property>
-                     <property name="text">
-                      <string>Find UB Matrix</string>
-                     </property>
-                    </widget>
-                    <widget class="QGroupBox" name="groupBox_PeakFinding">
-                     <property name="geometry">
-                      <rect>
-                       <x>10</x>
-                       <y>50</y>
-                       <width>121</width>
-                       <height>71</height>
-                      </rect>
-                     </property>
-                     <property name="title">
-                      <string>Peak Finding</string>
-                     </property>
-                     <widget class="QRadioButton" name="ckFindSXPeaks">
-                      <property name="geometry">
-                       <rect>
-                        <x>10</x>
-                        <y>20</y>
-                        <width>101</width>
-                        <height>18</height>
-                       </rect>
-                      </property>
+                   <layout class="QVBoxLayout" name="verticalLayout_6">
+                    <item>
+                     <widget class="QPushButton" name="btn_set_ub_matrix">
                       <property name="text">
-                       <string>FindSXPeaks</string>
-                      </property>
-                      <property name="checkable">
-                       <bool>true</bool>
-                      </property>
-                      <property name="checked">
-                       <bool>true</bool>
+                       <string>Set UB Matrix</string>
                       </property>
                      </widget>
-                    </widget>
-                    <widget class="QGroupBox" name="groupBox_PeakIndexing">
-                     <property name="geometry">
-                      <rect>
-                       <x>140</x>
-                       <y>50</y>
-                       <width>131</width>
-                       <height>71</height>
-                      </rect>
-                     </property>
-                     <property name="title">
-                      <string>Peak Indexing</string>
-                     </property>
-                     <widget class="QRadioButton" name="ckIndexPeaks">
-                      <property name="geometry">
-                       <rect>
-                        <x>10</x>
-                        <y>20</y>
-                        <width>82</width>
-                        <height>18</height>
-                       </rect>
+                    </item>
+                    <item>
+                     <widget class="QGroupBox" name="gropBox_findUB">
+                      <property name="title">
+                       <string>Find UB Matrix</string>
                       </property>
-                      <property name="text">
-                       <string>IndexPeaks</string>
-                      </property>
-                      <property name="checkable">
-                       <bool>true</bool>
-                      </property>
-                      <property name="checked">
-                       <bool>true</bool>
-                      </property>
+                      <layout class="QVBoxLayout" name="verticalLayout_7">
+                       <item>
+                        <widget class="QPushButton" name="btn_find_ub_matrix">
+                         <property name="text">
+                          <string>Find UB Matrix</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QGroupBox" name="groupBox_PeakFinding">
+                         <property name="title">
+                          <string>Peak Finding</string>
+                         </property>
+                         <layout class="QVBoxLayout" name="verticalLayout_8">
+                          <item>
+                           <widget class="QRadioButton" name="ckFindSXPeaks">
+                            <property name="text">
+                             <string>FindSXPeaks</string>
+                            </property>
+                            <property name="checkable">
+                             <bool>true</bool>
+                            </property>
+                            <property name="checked">
+                             <bool>true</bool>
+                            </property>
+                           </widget>
+                          </item>
+                         </layout>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QGroupBox" name="groupBox_PeakIndexing">
+                         <property name="title">
+                          <string>Peak Indexing</string>
+                         </property>
+                         <layout class="QVBoxLayout" name="verticalLayout_9">
+                          <item>
+                           <widget class="QRadioButton" name="ckIndexPeaks">
+                            <property name="text">
+                             <string>IndexPeaks</string>
+                            </property>
+                            <property name="checkable">
+                             <bool>true</bool>
+                            </property>
+                            <property name="checked">
+                             <bool>true</bool>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QRadioButton" name="ckIndexSXPeaks">
+                            <property name="text">
+                             <string>IndexSXPeaks</string>
+                            </property>
+                           </widget>
+                          </item>
+                         </layout>
+                        </widget>
+                       </item>
+                      </layout>
                      </widget>
-                     <widget class="QRadioButton" name="ckIndexSXPeaks">
-                      <property name="geometry">
-                       <rect>
-                        <x>10</x>
-                        <y>40</y>
-                        <width>91</width>
-                        <height>18</height>
-                       </rect>
-                      </property>
-                      <property name="text">
-                       <string>IndexSXPeaks</string>
-                      </property>
-                     </widget>
-                    </widget>
-                   </widget>
-                   <zorder>btn_set_ub_matrix</zorder>
+                    </item>
+                   </layout>
                    <zorder>gropBox_findUB</zorder>
-                   <zorder></zorder>
-                   <zorder>goniometerGroupBox</zorder>
+                   <zorder>btn_set_ub_matrix</zorder>
                   </widget>
                  </item>
                 </layout>
@@ -285,66 +259,65 @@
              <property name="alignment">
               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
              </property>
-             <widget class="QPushButton" name="btn_set_goniometer">
-              <property name="geometry">
-               <rect>
-                <x>10</x>
-                <y>30</y>
-                <width>281</width>
-                <height>23</height>
-               </rect>
-              </property>
-              <property name="text">
-               <string>Set Goniometer</string>
-              </property>
-             </widget>
+             <layout class="QVBoxLayout" name="verticalLayout_5">
+              <item>
+               <widget class="QPushButton" name="btn_set_goniometer">
+                <property name="text">
+                 <string>Set Goniometer</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </widget>
            </item>
            <item>
-            <widget class="QGroupBox" name="groupBox">
+            <widget class="QGroupBox" name="creationGroupBox">
              <property name="title">
               <string>Create MD Workspace</string>
              </property>
-             <widget class="QPushButton" name="btn_create">
-              <property name="geometry">
-               <rect>
-                <x>10</x>
-                <y>190</y>
-                <width>281</width>
-                <height>21</height>
-               </rect>
-              </property>
-              <property name="text">
-               <string>Create MD Workspace</string>
-              </property>
-             </widget>
-             <widget class="QCheckBox" name="checkBox">
-              <property name="geometry">
-               <rect>
-                <x>20</x>
-                <y>150</y>
-                <width>161</width>
-                <height>18</height>
-               </rect>
-              </property>
-              <property name="text">
-               <string>Merge All MD Workspaces</string>
-              </property>
-             </widget>
+             <layout class="QVBoxLayout" name="verticalLayout_4">
+              <item>
+               <widget class="QCheckBox" name="ck_merge">
+                <property name="text">
+                 <string>Merge All MD Workspaces</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btn_create">
+                <property name="font">
+                 <font>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Create MD Workspace(s)</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </widget>
            </item>
            <item>
-            <widget class="Line" name="line">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
+            <layout class="QVBoxLayout" name="spacerLayout">
+             <property name="sizeConstraint">
+              <enum>QLayout::SetMinimumSize</enum>
              </property>
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-            </widget>
+             <item>
+              <spacer name="verticalSpacer">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
            </item>
           </layout>
          </item>

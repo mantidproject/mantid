@@ -1,6 +1,7 @@
 set ( SRC_FILES
     src/ConvertToEnergy.cpp
 	src/CreateMDWorkspace.cpp
+	src/EventNexusFileMemento.cpp
 	src/Homer.cpp
 	src/IO_MuonGrouping.cpp
 	src/Indirect.cpp
@@ -18,9 +19,9 @@ set ( SRC_FILES
 	src/SANSRunWindow.cpp
 	src/background.cpp
 	src/deltaECalc.cpp
-  src/WorkspaceInADS.cpp
+	src/WorkspaceInADS.cpp
 	src/WorkspaceMemento.cpp
-  src/RawFileMemento.cpp
+	src/RawFileMemento.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -28,6 +29,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Background.h
 	inc/MantidQtCustomInterfaces/ConvertToEnergy.h
 	inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
+	inc/MantidQtCustomInterfaces/EventNexusFileMemento.h	
 	inc/MantidQtCustomInterfaces/Homer.h
 	inc/MantidQtCustomInterfaces/IO_MuonGrouping.h
 	inc/MantidQtCustomInterfaces/Indirect.h
@@ -79,6 +81,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
 )
 
 set( TEST_FILES
+               test/EventNexusFileMementoTest.h
                test/WorkspaceMementoTest.h
                test/WorkspaceInADSTest.h
                test/RawFileMementoTest.h

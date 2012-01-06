@@ -1,5 +1,5 @@
-#ifndef MANTID_CUSTOMINTERFACES_RAW_FILE_ON_DISK_H_
-#define MANTID_CUSTOMINTERFACES_RAW_FILE_ON_DISK_H_
+#ifndef MANTID_CUSTOMINTERFACES_EVENT_NEXUS_FILE_MEMENTO
+#define MANTID_CUSTOMINTERFACES_EVENT_NEXUS_FILE_MEMENTO
 
 #include "MantidQtCustomInterfaces/WorkspaceMemento.h"
 
@@ -7,8 +7,8 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    /** @class RawFileMemento
-    A workspace memento refering to a Raw File on disk
+    /** @class EventNexusFileMemento
+    A workspace memento refering to a Event nexus File on disk
 
     Copyright &copy; 2011-12 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -30,13 +30,13 @@ namespace MantidQt
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport RawFileMemento : public WorkspaceMemento
+    class DLLExport EventNexusFileMemento : public WorkspaceMemento
     {
     public:
       /**
       @param fileName : path + name of the file holding the workspace
       */
-      RawFileMemento(std::string fileName);
+      EventNexusFileMemento(std::string fileName);
       /**
       Getter for the id of the workspace
       @return the id of the workspace
@@ -61,7 +61,7 @@ namespace MantidQt
       ///Clean-up operations
       virtual void cleanUp();
       /// Destructor
-      virtual ~RawFileMemento();
+      virtual ~EventNexusFileMemento();
 
       /*
       Location type associated with this type.
