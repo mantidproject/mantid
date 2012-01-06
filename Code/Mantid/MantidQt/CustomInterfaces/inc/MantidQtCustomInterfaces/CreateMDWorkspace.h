@@ -61,6 +61,8 @@ namespace MantidQt
 
       void setGoniometerClicked();
 
+      void mergeClicked(bool);
+
     private:
       Ui::CreateMDWorkspace  m_uiForm;
       WorkspaceMementoCollection m_data;

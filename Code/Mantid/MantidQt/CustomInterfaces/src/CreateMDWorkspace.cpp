@@ -95,6 +95,7 @@ Initalize the layout.
 void CreateMDWorkspace::initLayout()
 {
   m_uiForm.setupUi(this);
+  connect(m_uiForm.ck_merge, SIGNAL(clicked(bool)), this, SLOT(mergeClicked(bool)));
   connect(m_uiForm.btn_create, SIGNAL(clicked()), this, SLOT(createMDWorkspaceClicked()));
   connect(m_uiForm.btn_add_workspace, SIGNAL(clicked()), this, SLOT(addWorkspaceClicked()));
   connect(m_uiForm.btn_add_nexus_file, SIGNAL(clicked()), this, SLOT(addNexusFileClicked()));
@@ -106,6 +107,8 @@ void CreateMDWorkspace::initLayout()
   //Set MVC Model
   m_uiForm.tableView->setModel(m_model);
   this->setWindowTitle("Create MD Workspaces");
+  m_uiForm.txt_merged_workspace_name->setEnabled(m_uiForm.ck_merge->isChecked());
+  m_uiForm.lbl_merged_name->setEnabled(m_uiForm.ck_merge->isChecked());
 }
 
 /*
@@ -183,6 +186,14 @@ void CreateMDWorkspace::findUBMatrixClicked()
   {
     runConfirmation(ex.what());
   }
+}
+
+/// Event handler for selecting merging.
+void CreateMDWorkspace::mergeClicked(bool)
+{
+  bool isEnabled = m_uiForm.ck_merge->isChecked();
+  m_uiForm.txt_merged_workspace_name->setEnabled(isEnabled);
+  m_uiForm.lbl_merged_name->setEnabled(isEnabled);
 }
 
 /*
@@ -415,6 +426,19 @@ int CreateMDWorkspace::runConfirmation(const std::string& message)
 
 void CreateMDWorkspace::createMDWorkspaceClicked()
 {
+  QString mergedWorkspaceName = m_uiForm.txt_merged_workspace_name->text().trimmed();
+
+  if(m_data.size() == 0)
+  {
+    runConfirmation("Nothing to process. Add workspaces first.");
+    return;
+  }
+  if(m_uiForm.ck_merge->isChecked() && mergedWorkspaceName.isEmpty())
+  {
+    runConfirmation("A name must be provided for the merged workspace");
+    return;
+  }
+
   CreateMDWorkspaceAlgDialog algDlg;
   algDlg.setModal(true);
   int result = algDlg.exec();
@@ -438,12 +462,12 @@ void CreateMDWorkspace::createMDWorkspaceClicked()
   }
 
   //2) Run ConvertToMDEvents on each workspace.
+  QString fileNames;
   for(WorkspaceMementoCollection::size_type i = 0; i < m_data.size(); i++)
   {
     WorkspaceMemento_sptr currentMemento = m_data[i];
     Workspace_sptr ws = currentMemento->applyActions();
 
-    //
     QString command = "try:\n"
       "    ConvertToMDEvents(InputWorkspace='%1',OutputWorkspace='%1_md',OtherDimensions='%2',dEAnalysisMode='%3',QDimensions='%4',MinValues='%5',MaxValues='%6')\n"
       "    SaveMD(InputWorkspace='%1_md', Filename='%7/%1_md.nxs',MakeFileBacked='1')\n"
@@ -451,7 +475,8 @@ void CreateMDWorkspace::createMDWorkspaceClicked()
       "except:\n"
       "    print 'FAIL'";
 
-    command = command.arg(QString(currentMemento->getId().c_str()), otherDimensions, analysisMode, qDimension, minExtents, maxExtents, location);
+    QString id(currentMemento->getId().c_str());
+    command = command.arg(id, otherDimensions, analysisMode, qDimension, minExtents, maxExtents, location);
     QString pyOutput = runPythonCode(command).trimmed();
     if(pyOutput == "FAIL")
     {
@@ -459,6 +484,11 @@ void CreateMDWorkspace::createMDWorkspaceClicked()
       return; //Abort.
     }
 
+    if(i != 0)
+    {
+      fileNames += ",";
+    }
+    fileNames += location + "/" + id + "_md.nxs";
     currentMemento->cleanUp();
   }
 
@@ -466,8 +496,17 @@ void CreateMDWorkspace::createMDWorkspaceClicked()
   //3) Run Merge algorithm (if required)
   if(m_uiForm.ck_merge->isChecked())
   {
-    //QString command = ""
-    //  "";
+    QString command = "try:"
+      "    MergeMD(Filenames='%1',OutputFilename='%2/%3.nxs',OutputWorkspace='%3')\n"
+      "except:\n"
+      "    print 'FAIL'";
+
+    command = command.arg(fileNames, location, mergedWorkspaceName);
+    QString pyOutput = runPythonCode(command).trimmed();
+    if(pyOutput == "FAIL")
+    {
+      runConfirmation("Aborted during merge. See log messages.");
+    }
   }
 
 }

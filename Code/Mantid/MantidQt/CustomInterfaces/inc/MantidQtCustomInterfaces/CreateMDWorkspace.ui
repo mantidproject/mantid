@@ -277,11 +277,42 @@
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_4">
               <item>
-               <widget class="QCheckBox" name="ck_merge">
-                <property name="text">
-                 <string>Merge All MD Workspaces</string>
-                </property>
-               </widget>
+               <layout class="QHBoxLayout" name="mergeLayout">
+                <item>
+                 <widget class="QCheckBox" name="ck_merge">
+                  <property name="text">
+                   <string>Merge All MD Workspaces</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_2">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QLabel" name="lbl_merged_name">
+                  <property name="text">
+                   <string>name</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="txt_merged_workspace_name">
+                  <property name="toolTip">
+                   <string>Name for the merged workspace</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </item>
               <item>
                <widget class="QPushButton" name="btn_create">
@@ -290,6 +321,9 @@
                   <weight>75</weight>
                   <bold>true</bold>
                  </font>
+                </property>
+                <property name="toolTip">
+                 <string/>
                 </property>
                 <property name="text">
                  <string>Create MD Workspace(s)</string>
