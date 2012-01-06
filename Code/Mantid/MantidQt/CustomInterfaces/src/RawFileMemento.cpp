@@ -38,7 +38,7 @@ namespace MantidQt
         m_adsID = m_adsID.substr(0, m_adsID.find('.'));
 
         //Generate an initial report.
-        MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(fetchIt());
+        MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(fetchIt(MinimalData));
         if(ws->mutableSample().hasOrientedLattice())
         {
           std::vector<double> ub = ws->mutableSample().getOrientedLattice().getUB().get_vector();
@@ -79,9 +79,10 @@ namespace MantidQt
       /**
       Getter for the workspace itself
       @returns the matrix workspace
+      @param protocol : Follow the protocol to fetch all spectrum or just the first.
       @throw if workspace has been moved since instantiation.
       */
-      Mantid::API::Workspace_sptr RawFileMemento::fetchIt() const
+      Mantid::API::Workspace_sptr RawFileMemento::fetchIt(FetchProtocol protocol) const
       {
         checkStillThere();
 
@@ -90,6 +91,11 @@ namespace MantidQt
         alg->setRethrows(true);
         alg->setProperty("Filename", m_fileName);
         alg->setPropertyValue("OutputWorkspace", m_adsID);
+        if(protocol == MinimalData)
+        {
+          alg->setProperty("SpectrumMin", 1);
+          alg->setProperty("SpectrumMax", 1);
+        }
         alg->execute();
 
         Workspace_sptr ws = AnalysisDataService::Instance().retrieve(m_adsID);
@@ -130,7 +136,7 @@ namespace MantidQt
       */
       Mantid::API::Workspace_sptr RawFileMemento::applyActions()
       {
-        Mantid::API::Workspace_sptr ws = fetchIt();
+        Mantid::API::Workspace_sptr ws = fetchIt(Everything);
         
         if(m_ub.size() == 9)
         {

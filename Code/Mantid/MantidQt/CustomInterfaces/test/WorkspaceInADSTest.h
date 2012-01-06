@@ -55,7 +55,7 @@ public:
     AnalysisDataService::Instance().addOrReplace("ws", ws);
     WorkspaceInADS memento("ws");
     TS_ASSERT(memento.checkStillThere());
-    MatrixWorkspace_sptr result = boost::dynamic_pointer_cast<MatrixWorkspace>( memento.fetchIt() );
+    MatrixWorkspace_sptr result = boost::dynamic_pointer_cast<MatrixWorkspace>( memento.fetchIt(MinimalData) );
     TS_ASSERT(result != NULL);
   }
 
@@ -66,7 +66,7 @@ public:
     WorkspaceInADS memento("ws");
     AnalysisDataService::Instance().remove("ws");
     TS_ASSERT(!memento.checkStillThere());
-    TS_ASSERT_THROWS(memento.fetchIt(), std::runtime_error);
+    TS_ASSERT_THROWS(memento.fetchIt(MinimalData), std::runtime_error);
   }
 
   void testExtractExistingUB()

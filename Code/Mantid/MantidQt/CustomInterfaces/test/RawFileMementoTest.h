@@ -44,8 +44,22 @@ public:
   {
     RawFileMemento memento(getSuitableFileNamePath());
     TSM_ASSERT("File should be present", memento.checkStillThere()); 
-    MatrixWorkspace_sptr result = boost::dynamic_pointer_cast<MatrixWorkspace>(memento.fetchIt());
+    MatrixWorkspace_sptr result = boost::dynamic_pointer_cast<MatrixWorkspace>(memento.fetchIt(MinimalData));
     TSM_ASSERT("Should have fetched the workspace", result);
+  }
+
+  void testFetchItWithMinimalData()
+  {
+    RawFileMemento memento(getSuitableFileNamePath());
+    MatrixWorkspace_sptr result = boost::dynamic_pointer_cast<MatrixWorkspace>(memento.fetchIt(MinimalData));
+    TS_ASSERT_EQUALS(1, result->getNumberHistograms());
+  }
+
+  void testFetchItWithEverything()
+  {
+    RawFileMemento memento(getSuitableFileNamePath());
+    MatrixWorkspace_sptr result = boost::dynamic_pointer_cast<MatrixWorkspace>(memento.fetchIt(Everything));
+    TS_ASSERT(result->getNumberHistograms() > 1);
   }
 
   void testNoExistingUB()

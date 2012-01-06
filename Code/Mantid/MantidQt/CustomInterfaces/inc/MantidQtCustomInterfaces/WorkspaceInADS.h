@@ -53,9 +53,10 @@ namespace MantidQt
       /**
       Getter for the workspace itself
       @returns the workspace
+      @param protocol : fetch protocol
       @throw if workspace has been moved since instantiation.
       */
-      virtual Mantid::API::Workspace_sptr fetchIt() const;
+      virtual Mantid::API::Workspace_sptr fetchIt(FetchProtocol protocol) const;
 
       /*
       Do nothing clean-up method.

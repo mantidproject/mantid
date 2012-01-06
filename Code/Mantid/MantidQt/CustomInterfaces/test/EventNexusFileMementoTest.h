@@ -43,7 +43,7 @@ public:
   {
     EventNexusFileMemento memento(getSuitableFileNamePath());
     TSM_ASSERT("File should be present", memento.checkStillThere()); 
-    IEventWorkspace_sptr result = boost::dynamic_pointer_cast<IEventWorkspace>(memento.fetchIt());
+    IEventWorkspace_sptr result = boost::dynamic_pointer_cast<IEventWorkspace>(memento.fetchIt(MinimalData));
     TSM_ASSERT("Should have fetched the workspace", result);
   }
 

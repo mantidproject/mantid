@@ -41,11 +41,16 @@ namespace MantidQt
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
+    // Fetch protocal enumeration type.
+    enum FetchProtocol{Everything=0, MinimalData};
+    
     class DLLExport WorkspaceMemento
     {
     public:
-      //Status enumeration type.
+      
+      // Status enumeration type.
       enum Status{NoOrientedLattice=0, Ready};
+      
 
       /// Constructor for the workspace memento.
       WorkspaceMemento();
@@ -66,10 +71,11 @@ namespace MantidQt
       virtual bool checkStillThere() const = 0;
       /**
       Getter for the workspace itself
-      @returns the matrix workspace
+      @returns the workspace
+      @param protocol : Follow the protocol to fetch all spectrum or just the first.
       @throw if workspace has been moved since instantiation.
       */
-      virtual Mantid::API::Workspace_sptr  fetchIt() const = 0;
+      virtual Mantid::API::Workspace_sptr  fetchIt(FetchProtocol protocol) const = 0;
       /// Generates a status report based on the workspace state.
       std::string statusReport() const;
       /// Perform any clean up operations of the underlying workspace

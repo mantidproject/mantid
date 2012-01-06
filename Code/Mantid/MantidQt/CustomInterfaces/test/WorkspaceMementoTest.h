@@ -42,7 +42,7 @@ public:
     throw std::runtime_error("Not implemented");
   }
 
-  virtual Mantid::API::Workspace_sptr fetchIt() const
+  virtual Mantid::API::Workspace_sptr fetchIt(FetchProtocol) const
   {
     throw std::runtime_error("Not implemented");
   }

@@ -66,9 +66,10 @@ namespace MantidQt
     /**
     Getter for the workspace itself
     @returns the matrix workspace
+    @param protocol : fetch protocol
     @throw if workspace has been moved since instantiation.
     */
-    Workspace_sptr WorkspaceInADS::fetchIt() const
+    Workspace_sptr WorkspaceInADS::fetchIt(FetchProtocol) const
     {
       if(!checkStillThere())
       {

@@ -119,7 +119,7 @@ void CreateMDWorkspace::findUBMatrixClicked()
   try
   {
     WorkspaceMemento_sptr memento = getFirstSelected();
-    memento->fetchIt();
+    memento->fetchIt(MinimalData);
 
     // Find the peaks workspace in detector space
     command = "from mantidsimple import *\n"
@@ -210,10 +210,11 @@ Event handler for setting the UB Matrix
 */
 void CreateMDWorkspace::setUBMatrixClicked()
 {
+  WorkspaceMemento_sptr memento;
   try
   {
-    WorkspaceMemento_sptr memento = getFirstSelected();
-    Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>( memento->fetchIt() );
+    memento = getFirstSelected();
+    Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>( memento->fetchIt(MinimalData) );
     QString id = QString(memento->getId().c_str());
 
     QString pyInput =
@@ -236,7 +237,6 @@ void CreateMDWorkspace::setUBMatrixClicked()
     if (ub.size() == 9 )
     {
       memento->setUB(ub[0].toDouble(), ub[1].toDouble(), ub[2].toDouble(), ub[3].toDouble(), ub[4].toDouble(), ub[5].toDouble(), ub[6].toDouble(),  ub[7].toDouble(),  ub[8].toDouble());
-      memento->cleanUp(); 
       m_model->update();
     }
   }
@@ -244,6 +244,8 @@ void CreateMDWorkspace::setUBMatrixClicked()
   {
     runConfirmation(ex.what());
   }
+  memento->cleanUp(); 
+  
 }
 
 /*
@@ -340,7 +342,7 @@ void CreateMDWorkspace::setGoniometerClicked()
       runConfirmation("Currently, Goniometer settings may only be applied to Workspace in memory");
       return;
     }
-    Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>( memento->fetchIt() );
+    Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>( memento->fetchIt(MinimalData) );
     QString id = QString(memento->getId().c_str());
 
     QString pyInput =
