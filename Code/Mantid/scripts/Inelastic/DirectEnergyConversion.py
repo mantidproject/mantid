@@ -159,7 +159,7 @@ class DirectEnergyConversion(object):
                 kwargs['end_index'] = bank[1] - 1
                 diagnostics.diagnose(whiteintegrals, **kwargs)
                 
-        if 'sample' in kwargs:
+        if 'sample_counts' in kwargs:
             DeleteWorkspace('background_int')
             DeleteWorkspace('total_counts')
         # Return a mask workspace
