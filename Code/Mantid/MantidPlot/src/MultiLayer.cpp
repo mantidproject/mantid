@@ -90,7 +90,7 @@ void LayerButton::mouseDoubleClickEvent ( QMouseEvent * )
 
 MultiLayer::MultiLayer(ApplicationWindow* parent, int layers, int rows, int cols, 
                        const QString& label, const char* name, Qt::WFlags f)
-                         : MdiSubWindow(label, parent, name, f),
+                         : MdiSubWindow(parent, label, name, f),
                          active_graph(NULL),
                          d_cols(cols),
                          d_rows(rows),
@@ -1275,7 +1275,7 @@ bool MultiLayer::focusNextPrevChild ( bool next )
 
 void MultiLayer::dragEnterEvent( QDragEnterEvent * event )
 {
-  QObject * workspaceTree = this->parent()->parent()->parent()->findChild<QObject*>("WorkspaceTree");
+  QObject * workspaceTree = applicationWindow()->findChild<QObject*>("WorkspaceTree");
   if ( event->source() == workspaceTree)
   {
     event->acceptProposedAction();

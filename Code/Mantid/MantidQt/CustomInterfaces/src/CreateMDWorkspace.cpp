@@ -5,7 +5,8 @@
 #include "MantidQtCustomInterfaces/CreateMDWorkspace.h"
 #include "MantidQtCustomInterfaces/WorkspaceMemento.h"
 #include "MantidQtCustomInterfaces/WorkspaceInADS.h"
-#include "MantidQtCustomInterfaces/WorkspaceOnDisk.h"
+#include "MantidQtCustomInterfaces/RawFileMemento.h"
+#include "MantidQtCustomInterfaces/EventNexusFileMemento.h"
 #include "MantidQtCustomInterfaces/WorkspaceMemento.h"
 
 #include "MantidAPI/WorkspaceFactory.h"
@@ -39,6 +40,7 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QRadioButton>
+#include <QCheckBox>
 #include <strstream>
 #include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
@@ -94,7 +96,8 @@ void CreateMDWorkspace::initLayout()
   m_uiForm.setupUi(this);
   connect(m_uiForm.btn_create, SIGNAL(clicked()), this, SLOT(createMDWorkspaceClicked()));
   connect(m_uiForm.btn_add_workspace, SIGNAL(clicked()), this, SLOT(addWorkspaceClicked()));
-  connect(m_uiForm.btn_add_file, SIGNAL(clicked()), this, SLOT(addFileClicked()));
+  connect(m_uiForm.btn_add_raw_file, SIGNAL(clicked()), this, SLOT(addRawFileClicked()));
+  connect(m_uiForm.btn_add_event_nexus_file, SIGNAL(clicked()), this, SLOT(addEventNexusFileClicked()));
   connect(m_uiForm.btn_remove_workspace, SIGNAL(clicked()), this, SLOT(removeSelectedClicked()));
   connect(m_uiForm.btn_set_ub_matrix, SIGNAL(clicked()), this, SLOT(setUBMatrixClicked()));
   connect(m_uiForm.btn_find_ub_matrix, SIGNAL(clicked()), this, SLOT(findUBMatrixClicked()));
@@ -102,6 +105,7 @@ void CreateMDWorkspace::initLayout()
   connect(m_uiForm.btn_set_goniometer, SIGNAL(clicked()), this, SLOT(setGoniometerClicked()));
   //Set MVC Model
   m_uiForm.tableView->setModel(m_model);
+  this->setWindowTitle("Create MD Workspaces");
 }
 
 /*
@@ -278,7 +282,7 @@ void CreateMDWorkspace::addUniqueMemento(WorkspaceMemento_sptr candidate)
 /*
 Add a raw file from the ADS
 */
-void CreateMDWorkspace::addFileClicked()
+void CreateMDWorkspace::addRawFileClicked()
 {
   QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
     "/home",
@@ -289,7 +293,31 @@ void CreateMDWorkspace::addFileClicked()
   {
     try
     {
-      WorkspaceMemento_sptr candidate(new WorkspaceOnDisk(name));
+      WorkspaceMemento_sptr candidate(new RawFileMemento(name));
+      addUniqueMemento(candidate);
+    }
+    catch(std::invalid_argument& arg)
+    {
+      this->runConfirmation(arg.what());
+    }
+  }
+}
+
+/*
+Add an Event nexus file from the ADS
+*/
+void CreateMDWorkspace::addEventNexusFileClicked()
+{
+  QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
+    "/home",
+    tr("Event Nexus files (*.nxs)"));
+
+  std::string name = fileName.toStdString();
+  if(!name.empty())
+  {
+    try
+    {
+      WorkspaceMemento_sptr candidate(new EventNexusFileMemento(name));
       addUniqueMemento(candidate);
     }
     catch(std::invalid_argument& arg)
@@ -386,6 +414,25 @@ int CreateMDWorkspace::runConfirmation(const std::string& message)
 void CreateMDWorkspace::createMDWorkspaceClicked()
 {
   //Launch dialog
+
+  //1) Run a top-level dialog similar to ConvertToMDEvents. Extract all required arguments.
+  
+  //2) Run ConvertToMDEvents on each workspace.
+  for(WorkspaceMementoCollection::size_type i = 0; i < m_data.size(); i++)
+  {
+    //Workspace_sptr ws = m_data[i]->applyActions();
+    //QString command = ""
+    //  "";
+  }
+
+
+  //3) Run Merge algorithm (if required)
+  if(m_uiForm.ck_merge->isChecked())
+  {
+    //QString command = ""
+    //  "";
+  }
+
 }
 
 

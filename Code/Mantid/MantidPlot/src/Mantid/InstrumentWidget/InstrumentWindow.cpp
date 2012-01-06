@@ -49,7 +49,7 @@ using namespace MantidQt::API;
  * Constructor.
  */
 InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, ApplicationWindow *app , const QString& name , Qt::WFlags f ):
-  MdiSubWindow(label, app, name, f), WorkspaceObserver(),
+  MdiSubWindow(app, label, name, f), WorkspaceObserver(),
   m_workspaceName(wsName),
   m_instrumentActor(NULL),
   mViewChanged(false), 

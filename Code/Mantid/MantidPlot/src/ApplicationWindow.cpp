@@ -230,6 +230,14 @@ m_exitCode(0),
   init(factorySettings);
 }
 
+/**
+ * Calls QCoreApplication::exit(m_exitCode)
+ */
+void ApplicationWindow::exitWithPresetCode()
+{
+  QCoreApplication::exit(m_exitCode);
+}
+
 void ApplicationWindow::init(bool factorySettings)
 {
   setWindowTitle(tr("MantidPlot - untitled"));//Mantid
@@ -16582,7 +16590,7 @@ else
     }
   }
 
-  QMdiSubWindow* usr_win = new QMdiSubWindow;
+  MdiSubWindow* usr_win = new MdiSubWindow(this);
   usr_win->setAttribute(Qt::WA_DeleteOnClose, false);
   MantidQt::API::UserSubWindow *user_interface = MantidQt::API::InterfaceManager::Instance().createSubWindow(action_data, usr_win);
   if(user_interface)
@@ -17109,7 +17117,7 @@ void ApplicationWindow::ICatLogin()
 
 void ApplicationWindow::ICatIsisSearch()
 {	
-  QMdiSubWindow* usr_win = new QMdiSubWindow(this);
+  MdiSubWindow* usr_win = new MdiSubWindow(this);
   usr_win->setAttribute(Qt::WA_DeleteOnClose, false);
   QWidget* icatsearch_interface = new MantidQt::MantidWidgets::ICatSearch(usr_win);
   if(icatsearch_interface)
@@ -17123,7 +17131,7 @@ void ApplicationWindow::ICatIsisSearch()
 }
 void ApplicationWindow::ICatMyDataSearch()
 {	
-  QMdiSubWindow* usr_win = new QMdiSubWindow(this);
+  MdiSubWindow* usr_win = new MdiSubWindow(this);
   usr_win->setAttribute(Qt::WA_DeleteOnClose, false);
   QWidget* mydatsearch = new MantidQt::MantidWidgets::ICatMyDataSearch(usr_win);
   if(mydatsearch)
@@ -17137,7 +17145,7 @@ void ApplicationWindow::ICatMyDataSearch()
 }
 void ApplicationWindow ::ICatAdvancedSearch()
 {
-  QMdiSubWindow* usr_win = new QMdiSubWindow(this);
+  MdiSubWindow* usr_win = new MdiSubWindow(this);
   usr_win->setAttribute(Qt::WA_DeleteOnClose, false);
   QWidget* advanced_search = new MantidQt::MantidWidgets::ICatAdvancedSearch(usr_win);
   if(advanced_search)
@@ -17149,7 +17157,7 @@ void ApplicationWindow ::ICatAdvancedSearch()
     delete usr_win;
   }
 }
-void ApplicationWindow::setGeometry(QMdiSubWindow* usr_win,QWidget* user_interface)
+void ApplicationWindow::setGeometry(MdiSubWindow* usr_win,QWidget* user_interface)
 {   
   QRect frame = QRect(usr_win->frameGeometry().topLeft() - usr_win->geometry().topLeft(),
       usr_win->geometry().bottomRight() - usr_win->geometry().bottomRight());
@@ -17157,11 +17165,8 @@ void ApplicationWindow::setGeometry(QMdiSubWindow* usr_win,QWidget* user_interfa
   QRect iface_geom = QRect(frame.topLeft() + user_interface->geometry().topLeft(),
       frame.bottomRight() + user_interface->geometry().bottomRight());
   usr_win->setGeometry(iface_geom);
-  d_workspace->addSubWindow(usr_win);
-  usr_win->show();
-
-
-
+  addMdiSubWindow(usr_win);
+  usr_win->setName(user_interface->windowTitle());
 }
 void ApplicationWindow::ICatLogout()
 {
@@ -17350,7 +17355,7 @@ FloatingWindow* ApplicationWindow::addMdiSubWindowAsFloating(MdiSubWindow* w, QP
     if (y > p.y()) p.setY(y + 1);
   }
 
-  fw->setWindowTitle(w->windowTitle());
+  fw->setWindowTitle(w->name());
   fw->setMdiSubWindow(w);
   fw->resize(sz);
   fw->move(p);

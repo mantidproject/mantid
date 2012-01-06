@@ -9,18 +9,45 @@
 # Author: Martyn Gigg, Tessella Support Services plc
 #
 #----------------------------------------------
-if __name__ == '__main__':
-    
-    # Make Mantid available
-    from MantidFramework import *
-    # Initialize the Mantid framework
-    mtd.initialise()
+def get_default_python_api():
+    """Returns an integer indicating which Python API to use
 
-    # Make MantidPlot Python API available to main user scripts.
-    # For modules imported into a main script users will need to do this too
+    There are currently two versions:
+        1 - The original Python API
+        2 - The new-style Python interface returning workspaces from simple algorithm functions
+    """
+    from PyQt4 import QtCore
+    settings = QtCore.QSettings()
+    settings.beginGroup("Mantid")
+    settings.beginGroup("Python")
+    api_version = settings.value("APIVersion", 1).toInt()
+    settings.endGroup()
+    settings.endGroup()
+    if type(api_version) == tuple:
+        return api_version[0]
+    else:
+        return api_version
+
+if __name__ == '__main__':
+    # Make Mantid available without requiring users to import scripts
+    _api = get_default_python_api()
+    if _api == 1:
+        # Make Mantid available
+        from MantidFramework import *
+        # Initialize the Mantid framework
+        mtd.initialise()
+        # For some reason the algorithm definitions are not available within IPython
+        # Adding this fixes that and appears to do no harm elsewhere
+        from mantidsimple import *
+    elif _api == 2:
+        from mantid import *
+        from mantid.simpleapi import *
+    else:
+        raise Runtime("Unknown Python API version requested: %d" % _api)
+
+    # Import MantidPlot python commands
     from mantidplotpy import *
     
-
     # Define a helper class for the autocomplete
     import inspect
     import __main__
@@ -106,8 +133,6 @@ if __name__ == '__main__':
     import sys
     sys.path.insert(0,'')
 
-    # For some reason the algorithm definitions are not available within IPython
-    # Adding this fixes that and appears to do no harm elsewhere
-    from mantidsimple import *
+    
 else:
     raise ImportError("mantidplotrc.py is an initialization file for MantidPlot not an importable module")

@@ -86,3 +86,8 @@ set_target_output_directory ( PythonAPIModule ${OUTPUT_DIR} .pyd )
 
 # Add the required dependencies
 target_link_libraries ( PythonAPIModule PythonGeometryModule PythonKernelModule ${PYTHON_DEPS} )
+
+###########################################################################
+# Installation settings
+###########################################################################
+install ( TARGETS PythonAPIModule DESTINATION ${BIN_DIR}/mantid/api )
