@@ -230,6 +230,14 @@ m_exitCode(0),
   init(factorySettings);
 }
 
+/**
+ * Calls QCoreApplication::exit(m_exitCode)
+ */
+void ApplicationWindow::exitWithPresetCode()
+{
+  QCoreApplication::exit(m_exitCode);
+}
+
 void ApplicationWindow::init(bool factorySettings)
 {
   setWindowTitle(tr("MantidPlot - untitled"));//Mantid
