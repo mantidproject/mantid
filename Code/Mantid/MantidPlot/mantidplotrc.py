@@ -46,7 +46,7 @@ if __name__ == '__main__':
         raise Runtime("Unknown Python API version requested: %d" % _api)
 
     # Import MantidPlot python commands
-    #from mantidplotpy import *
+    from mantidplotpy import *
     
     # Define a helper class for the autocomplete
     import inspect
