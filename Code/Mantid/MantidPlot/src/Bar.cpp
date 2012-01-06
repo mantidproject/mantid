@@ -54,6 +54,7 @@ void Bar::configure(double rad)
 {
   plot = 0;
   radius_ = rad;
+  diag_ = 0.0;
 }
 
 void Bar::drawBegin()

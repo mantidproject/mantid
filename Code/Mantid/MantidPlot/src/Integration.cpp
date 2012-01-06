@@ -66,6 +66,7 @@ d_variable(var)
 	d_method = 1;
     d_max_iterations = 20;
     d_sort_data = false;
+    d_area = 0.0;
 }
 
 Integration::Integration(ApplicationWindow *parent, Graph *g)
@@ -102,6 +103,7 @@ void Integration::init()
 	d_method = 1;
     d_max_iterations = 1;
     d_sort_data = true;
+    d_area = 0.0;
 }
 
 double Integration::trapez()

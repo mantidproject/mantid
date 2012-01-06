@@ -77,7 +77,8 @@ FunctionCurve::FunctionCurve(const FunctionCurve& c)
 d_variable(c.d_variable),
 d_formulas(c.d_formulas),
 d_from(c.d_from),
-d_to(c.d_to)
+d_to(c.d_to),
+m_identifier(c.m_identifier)
 {
 }
 

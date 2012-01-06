@@ -2605,9 +2605,17 @@ Table* MantidUI::createTableFromSpectraList(const QString& tableName, const QStr
   int nspec = static_cast<int>(workspace->getNumberHistograms());
   //Loop through the list of index and remove all the indexes that are out of range
 
-  for(QList<int>::iterator it=indexList.begin();it!=indexList.end();++it)
+  for(QList<int>::iterator it=indexList.begin();it!=indexList.end();)
   {
-    if ((*it) > nspec || (*it) < 0) indexList.erase(it);
+    if ((*it) > nspec || (*it) < 0)
+    {
+      // erase moves iterator to next position
+      it = indexList.erase(it);
+    }
+    else
+    {
+      ++it;
+    }
   }
   if ( indexList.empty() ) return 0;
 

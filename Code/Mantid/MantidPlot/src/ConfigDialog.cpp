@@ -1951,8 +1951,8 @@ void ConfigDialog::apply()
   QList<MdiSubWindow*> windows = app->windowsList();
   foreach(MdiSubWindow *w, windows){
     if (w->isA("MultiLayer")){
-      ((MultiLayer*)w)->setScaleLayersOnPrint(boxScaleLayersOnPrint->isChecked());
-      ((MultiLayer*)w)->printCropmarks(boxPrintCropmarks->isChecked());
+      (dynamic_cast<MultiLayer*>(w))->setScaleLayersOnPrint(boxScaleLayersOnPrint->isChecked());
+      (dynamic_cast<MultiLayer*>(w))->printCropmarks(boxPrintCropmarks->isChecked());
     }
   }
   // general page: application tab
@@ -2001,9 +2001,9 @@ void ConfigDialog::apply()
       foreach(MdiSubWindow *w, windows){
         w->setLocale(locale);
         if(w->isA("Table"))
-          ((Table *)w)->updateDecimalSeparators();
+          (dynamic_cast<Table *>(w))->updateDecimalSeparators();
         else if(w->isA("Matrix"))
-          ((Matrix *)w)->resetView();
+          (dynamic_cast<Matrix *>(w))->resetView();
       }
       app->modifiedProject();
       QApplication::restoreOverrideCursor();
