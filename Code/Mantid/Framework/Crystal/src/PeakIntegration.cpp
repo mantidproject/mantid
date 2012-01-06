@@ -194,11 +194,6 @@ namespace Mantid
         }
   
         double I=0., sigI=0.;
-        //Initialize Ikeda-Carpender function variables
-        double Alpha0 = 1.6;
-        double Alpha1 = 1.5;
-        double Beta0 = 31.9;
-        double Kappa = 46.0;
         // Find point of peak centre
         // Get references to the current spectrum
         const MantidVec& X = outputW->readX(i);
@@ -252,6 +247,11 @@ namespace Mantid
           fit_alg->setProperty("EndX", X[TOFmax]);
           fit_alg->setProperty("MaxIterations", 5000);
           //fit_alg->setProperty("Output", "fit");
+          //Initialize Ikeda-Carpender function variables
+          double Alpha0 = 1.6;
+          double Alpha1 = 1.5;
+          double Beta0 = 31.9;
+          double Kappa = 46.0;
           std::ostringstream fun_str;
           fun_str << "name=IkedaCarpenterPV,I="<<peakHeight<<",Alpha0="<<Alpha0<<",Alpha1="<<Alpha1<<",Beta0="<<Beta0<<",Kappa="<<Kappa<<",SigmaSquared="<<SigmaSquared<<",Gamma="<<Gamma<<",X0="<<peakLoc;
           fit_alg->setProperty("Function", fun_str.str());

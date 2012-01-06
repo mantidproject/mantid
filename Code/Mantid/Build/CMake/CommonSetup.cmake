@@ -206,9 +206,11 @@ if ( CPPCHECK_EXECUTABLE )
         Framework/ICat/inc/MantidICat/GSoapGenerated/
         Framework/ICat/src/GSoapGenerated/
         Framework/ICat/src/GSoapGenerated.cpp
+        Framework/ICat/src/GSoap/
         Framework/ICat/src/GSoap.cpp
 	Framework/Kernel/src/ANN/
 	Framework/Kernel/src/ANN_complete.cpp
+        Framework/PythonAPI/src/boostpython.cpp
       )
 
   # setup the standard arguments
