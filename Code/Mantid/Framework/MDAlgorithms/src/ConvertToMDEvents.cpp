@@ -133,10 +133,15 @@ ConvertToMDEvents::getEi(ConvertToMDEvents const *const pHost)
         convert_log.error()<<"getEi: invoked when input workspace is undefined\n";
         throw(std::logic_error(" should not call this function when input workpace is undefined"));
     }
-    Kernel::PropertyWithValue<double>  *pProp  =dynamic_cast<Kernel::PropertyWithValue<double>  *>(pHost->inWS2D->run().getProperty("Ei"));
+    Kernel::PropertyWithValue<double>  *pProp(NULL);
+    try{
+       pProp  =dynamic_cast<Kernel::PropertyWithValue<double>  *>(pHost->inWS2D->run().getProperty("Ei"));
+    }catch(...){
+    }
     if(!pProp){
-        convert_log.error()<<"getEi: can not obtain incident energy of neutrons\n";
-        throw(std::logic_error(" should not call this function when incident energy is undefined"));
+        //convert_log.error()<<"getEi: can not obtain incident energy of neutrons\n";
+        //throw(std::logic_error(" should not call this function when incident energy is undefined"));
+        return std::numeric_limits<double>::quiet_NaN();
     }
     return (*pProp); 
 }
@@ -669,7 +674,8 @@ ConvertToMDEvents::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS,const std
     }else{
         emode = -1;
     }
-    if((emode == 1)||(emode == 2)||(the_algID.find("TOF")!=std::string::npos))
+    //if((emode == 1)||(emode == 2)||(the_algID.find("TOF")!=std::string::npos))
+    if((emode == 1)||(emode == 2))
     {        
         if(!inWS->run().hasProperty("Ei")){
             convert_log.error()<<" Conversion sub-algorithm with ID: "<<the_algID<<" needs input energy to be present among run properties\n";
