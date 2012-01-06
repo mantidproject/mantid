@@ -316,13 +316,13 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
     #==========================================================================
     #======================= LineViewer =======================================
     #==========================================================================
-    def test_showLineViewer(self):
-        svw = self.svw
-        svw.show()
-        svw.getSlicer().toggleLineMode(True)
-        QtCore.QCoreApplication.processEvents()
-        QtCore.QCoreApplication.processEvents()
-        self.assertTrue(svw.getLiner().isVisible())
+#    def test_showLineViewer(self):
+#        svw = self.svw
+#        svw.show()
+#        svw.getSlicer().toggleLineMode(True)
+#        QtCore.QCoreApplication.processEvents()
+#        QtCore.QCoreApplication.processEvents()
+#        self.assertTrue(svw.getLiner().isVisible())
         
     def test_make_a_line(self):
         svw = self.svw
