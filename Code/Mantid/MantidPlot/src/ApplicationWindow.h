@@ -199,6 +199,7 @@ public:
 public slots:
   //! \name Projects and Project Files
   //@{
+  void exitWithPresetCode();
   void open();
   ApplicationWindow* open(const QString& fn, bool factorySettings = false, bool newProject = true);
   ApplicationWindow* openProject(const QString& fn, bool factorySettings = false, bool newProject = true);

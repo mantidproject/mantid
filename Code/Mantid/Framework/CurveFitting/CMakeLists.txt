@@ -10,6 +10,7 @@ set ( SRC_FILES
 	src/CostFuncLeastSquares.cpp
 	src/DeltaFunction.cpp
 	src/ExpDecay.cpp
+	src/ExpDecayOsc.cpp
 	src/FRConjugateGradientMinimizer.cpp
 	src/Fit.cpp
 	src/Fit1D.cpp
@@ -56,6 +57,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/DeltaFunction.h
 	inc/MantidCurveFitting/DllConfig.h
 	inc/MantidCurveFitting/ExpDecay.h
+	inc/MantidCurveFitting/ExpDecayOsc.h
 	inc/MantidCurveFitting/FRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/Fit.h
 	inc/MantidCurveFitting/Fit1D.h
@@ -96,6 +98,7 @@ set ( TEST_FILES
 	test/CompositeFunctionTest.h
 	test/ConvolutionTest.h
 	test/ExpDecayTest.h
+	test/ExpDecayOscTest.h
 	test/FitTest.h
 	test/NewFitTest.h
 	test/FuncMinimizerFactoryTest.h

@@ -562,7 +562,16 @@ bool ScriptManagerWidget::runScriptCode(const QString & code, const int line_off
   if( isScriptRunning() ) return false;
 
   // Get the correct script runner
-  Script * runner = m_script_runners.value(this->currentIndex());
+  Script * runner(NULL);
+  if( m_script_runners.contains(this->currentIndex()) )
+  {
+    runner = m_script_runners.value(this->currentIndex());
+  }
+  else
+  {
+    QMessageBox::critical(this,"MantidPlot","Logical error occurred trying to run a python script. Contact the development team");
+    return false;
+  }
   runner->setLineOffset(line_offset);
   ScriptEditor *editor = currentEditor();
   if( editor ) 
@@ -1074,7 +1083,7 @@ void ScriptManagerWidget::closeTabAtIndex(int index)
   askSave(index);
   editor->disconnect();
   // Remove the path from the script runner
-  /*Script *runner =*/m_script_runners.take(index);
+  /* Script *runner = */ m_script_runners.take(index);
   //delete runner;
   //Get the widget attached to the tab first as this is not deleted
   //when remove is called
