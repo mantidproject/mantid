@@ -41,6 +41,7 @@ public:
   {
     // ---- Create the simple workspace -------
     MatrixWorkspace_sptr WS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1,200);
+    AnalysisDataService::Instance().addOrReplace("temp_event_ws", WS);
     WS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
     const Mantid::MantidVec &X = WS->readX(0);
     Mantid::MantidVec &Y = WS->dataY(0);
@@ -54,7 +55,7 @@ public:
 
     // ---- Run algo -----
     if ( !offsets.isInitialized() ) offsets.initialize();
-    TS_ASSERT_THROWS_NOTHING( offsets.setProperty("InputWorkspace",WS) );
+    TS_ASSERT_THROWS_NOTHING( offsets.setProperty("InputWorkspace","temp_event_ws" ) );
     std::string outputWS("offsetsped");
     TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("OutputWorkspace",outputWS) );
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("DReference","9.98040"));
@@ -88,7 +89,7 @@ public:
 
     // ---- Run algo -----
     if ( !offsets.isInitialized() ) offsets.initialize();
-    TS_ASSERT_THROWS_NOTHING( offsets.setProperty("InputWorkspace",WS) );
+    TS_ASSERT_THROWS_NOTHING( offsets.setProperty("InputWorkspace","temp_event_ws") );
     std::string outputWS("offsetsped");
     TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("OutputWorkspace",outputWS) );
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("DReference","9.98040"));
@@ -134,6 +135,7 @@ public:
         E[i] = 0.001;
       }
     }
+    AnalysisDataService::Instance().addOrReplace("temp_event_ws", WS);
   }
 
   void test_performance()
@@ -141,7 +143,7 @@ public:
     AlgorithmManager::Instance(); //Initialize here to avoid an odd ABORT
     GetDetOffsetsMultiPeaks offsets;
     if ( !offsets.isInitialized() ) offsets.initialize();
-    TS_ASSERT_THROWS_NOTHING( offsets.setProperty("InputWorkspace", WS) );
+    TS_ASSERT_THROWS_NOTHING( offsets.setProperty("InputWorkspace", "temp_event_ws") );
     TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("DReference","9.98040"));
     TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("OutputWorkspace","dummyname"));
     TS_ASSERT_THROWS_NOTHING( offsets.execute() );

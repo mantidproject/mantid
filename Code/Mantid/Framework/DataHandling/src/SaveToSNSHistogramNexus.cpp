@@ -141,7 +141,7 @@ namespace DataHandling
    */
   int SaveToSNSHistogramNexus::copy_file(const char* inFile, int nx_read_access, const char* outFile, int nx_write_access)
   {
-    int i, nx_is_definition = 0;
+    int nx_is_definition = 0;
     char* tstr;
     links_count = 0;
     current_path[0] = '\0';
@@ -177,7 +177,7 @@ namespace DataHandling
     //HDF5 only
     {
       /* now create any required links */
-      for(i=0; i<links_count; i++)
+      for(int i=0; i<links_count; i++)
       {
         if (NXopenpath(outId, links_to_make[i].to) != NX_OK) return NX_ERROR;
         if (NXgetdataID(outId, &link) == NX_OK  || NXgetgroupID(outId, &link) == NX_OK)

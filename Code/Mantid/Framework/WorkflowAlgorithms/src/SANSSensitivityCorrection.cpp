@@ -294,13 +294,9 @@ void SANSSensitivityCorrection::exec()
   MatrixWorkspace_sptr outputWS = divideAlg->getProperty("OutputWorkspace");
 
   // Copy over the efficiency's masked pixels to the reduced workspace
-  IAlgorithm_sptr getMaskAlg = createSubAlgorithm("GetMaskedDetectors", 0.7, 0.75);
-  getMaskAlg->setProperty("InputWorkspace", floodWS);
-  getMaskAlg->executeAsSubAlg();
-
   IAlgorithm_sptr maskAlg = createSubAlgorithm("MaskDetectors", 0.75, 0.85);
   maskAlg->setProperty("Workspace", outputWS);
-  maskAlg->setPropertyValue("DetectorList", getMaskAlg->getPropertyValue("DetectorList"));
+  maskAlg->setProperty("MaskedWorkspace", floodWS);
   maskAlg->executeAsSubAlg();
 
   setProperty("OutputWorkspace", outputWS);

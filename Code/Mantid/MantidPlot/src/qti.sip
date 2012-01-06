@@ -725,8 +725,8 @@ public:
   void addHistogram(Matrix*);
   void addArrow(ArrowMarker*);
 
-  ImageMarker* addImage(ImageMarker*);
-  ImageMarker* addImage(const QString& fileName);
+  void addImage(ImageMarker*);
+  void addImage(const QString& fileName);
 
   void setTitle(const QString& t);
   void setTitleFont(const QFont &fnt);

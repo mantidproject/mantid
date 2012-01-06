@@ -176,7 +176,7 @@ private:
 	QPushButton* buttonTextFont, *buttonHeaderFont;
 	QStackedWidget * generalDialog;
 	QWidget *appColors, *tables, *plotOptions, *plotAxes, *plotTicks, *plotFonts, *confirm, *plotPrint;
-	QWidget *application, *curves, *plots3D, *fitPage, *numericFormatPage;
+	QWidget *application, *curves, *plots3D, *fitPage, *numericFormatPage, *floatingWindowsPage;
   //Mantid
   QWidget *instrumentPage;
   QComboBox *facility;
@@ -207,6 +207,7 @@ private:
   
 	QPushButton* buttonAxesFont, *buttonNumbersFont, *buttonLegendFont, *buttonTitleFont, *fontsBtn;
 	QCheckBox *boxSearchUpdates, *boxOrthogonal, *logBox, *plotLabelBox, *scaleErrorsBox;
+  QCheckBox *boxSharedMenuBar;
 	QCheckBox *boxTitle, *boxFrame, *boxPlots3D, *boxPlots2D, *boxTables, *boxNotes, *boxFolders,*boxInstrWindow;
 	QCheckBox *boxSave, *boxBackbones, *boxShowLegend, *boxSmoothMesh;
   QCheckBox *boxAllAxes;
@@ -214,6 +215,7 @@ private:
   QComboBox *cbXLog,  *cbYLog, *cbZLog;
 	QCheckBox *boxAutoscaling, *boxShowProjection, *boxMatrices, *boxScaleFonts, *boxResize, *boxAspectRatio;
 	QComboBox *boxMajTicks, *boxMinTicks, *boxStyle, *boxCurveStyle, *boxSeparator, *boxLanguage, *boxDecimalSeparator;
+  QCheckBox *boxFloatingGraph, *boxFloatingTable, *boxFloatingInstrumentWindow, *boxFloatingMantidMatrix, *boxFloatingNote, *boxFloatingMatrix;
 	QSpinBox *boxMinutes, *boxLineWidth, *boxFrameWidth, *boxResolution, *boxMargin, *boxPrecision, *boxAppPrecision;
 	QSpinBox *boxSymbolSize, *boxMinTicksLength, *boxMajTicksLength, *generatePointsBox;
 	DoubleSpinBox *boxCurveLineWidth;

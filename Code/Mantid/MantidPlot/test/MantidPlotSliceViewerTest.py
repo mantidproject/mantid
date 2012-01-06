@@ -110,6 +110,24 @@ class MantidPlotSliceViewerTest(unittest.TestCase):
             screenshot(None, filename, "SliceViewer: result of saveImage(). Should be only the 2D plot with a color bar (no GUI elements)",
                        png_exists=True)
         
+    def test_showLine(self):
+        svw = plotSlice('uniform')
+        svw.setSlicePoint(2,6.0)
+        liner = svw.showLine([1,1], [7,9], width=0.88, num_bins=200)
+        self.assertTrue( not (liner is None), "Returns a LineViewer proxy object")
+        # Check that the values are there
+        self.assertEqual(liner.getNumBins(), 200)
+        # Length of 10 with 200 bins = 0.05 width
+        self.assertAlmostEqual(liner.getBinWidth(), 0.05, 3)
+        # Width was set
+        self.assertAlmostEqual(liner.getPlanarWidth(), 0.88, 3)
+        screenshot(svw, "SliceViewer_and_LineViewer", "SliceViewer with LineViewer open, showing line overlay and integrated line.")
+        # Now turn it off
+        svw.toggleLineMode(False)
+        self.assertFalse( liner.isVisible(), "LineViewer was hidden")
+        
+        
+        
 # Run the unit tests
 mantidplottests.runTests(MantidPlotSliceViewerTest)
 

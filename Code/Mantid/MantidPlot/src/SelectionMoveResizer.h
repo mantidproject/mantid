@@ -178,7 +178,7 @@ class SelectionMoveResizer : public QWidget
 		//! Return one of the rectangles to be filled for starting resize operations.
 		static const QRect handlerRect(QRect rect, Operation op);
 		//! Apply operation specified by #d_op and #d_op_dp to in.
-		QRect operateOn(const QRect in);
+		QRect operateOn(const QRect& in);
 		//! Apply operation specified by #d_op and #d_op_dp to all targets.
 		void operateOnTargets();
 		//! The initialization part common to all constructors.
@@ -205,8 +205,8 @@ class SelectionMoveResizer : public QWidget
 
 	private slots:
 		//! A non-typesafe version of remvoveAll(QWidget*) needed for QObject::destroyed().
-		void removeWidget(QObject* w) { removeAll((QWidget*) w); }
-		void removeLegend(QObject* w) { removeAll((LegendWidget*) w); };
+		void removeWidget(QObject* w);
+		void removeLegend(QObject* w);
 };
 
 #endif // ifndef SELECTION_MOVE_RESIZER_H

@@ -42,7 +42,7 @@ ExportDialog::ExportDialog(const QString& tableName, QWidget* parent, Qt::WFlags
 	setWindowTitle( tr( "MantidPlot - Export ASCII" ) );
 	setSizeGripEnabled( true );
 
-	ApplicationWindow *app = (ApplicationWindow *)parent;
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent);
 
 	QGridLayout *gl1 = new QGridLayout();
     gl1->addWidget(new QLabel(tr("Export From")), 0, 0);
@@ -140,7 +140,7 @@ void ExportDialog::enableTableName(bool ok)
 
 void ExportDialog::accept()
 {
-	ApplicationWindow *app = (ApplicationWindow *)parent();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
 	if (!app)
 		return;
 
@@ -190,7 +190,7 @@ void ExportDialog::setColumnSeparator(const QString& sep)
 
 void ExportDialog::closeEvent(QCloseEvent* e)
 {
-	ApplicationWindow *app = (ApplicationWindow *)this->parent();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
 	if (app){
 		app->d_export_col_names = boxNames->isChecked();
 		app->d_export_table_selection = boxSelection->isChecked();
@@ -209,7 +209,7 @@ void ExportDialog::closeEvent(QCloseEvent* e)
 
 void ExportDialog::updateOptions(const QString & name)
 {
-    ApplicationWindow *app = (ApplicationWindow *)this->parent();
+		ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
 	if (!app)
         return;
 

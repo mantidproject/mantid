@@ -302,7 +302,6 @@ int vtkRebinningTransformOperator::RequestInformation(vtkInformation* vtkNotUsed
     }
     catch(std::exception& e)
     {
-      std::string ex = e.what();
     }
   }
   setTimeRange(outputVector);

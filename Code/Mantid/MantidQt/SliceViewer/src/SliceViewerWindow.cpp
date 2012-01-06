@@ -47,7 +47,7 @@ SliceViewerWindow::SliceViewerWindow(const QString& wsName, const QString& label
 
   // Watch for the deletion of the associated workspace
   observeAfterReplace();
-  observeDelete();
+  observePreDelete();
   observeADSClear();
 
   // Set up the window
@@ -107,6 +107,8 @@ SliceViewerWindow::SliceViewerWindow(const QString& wsName, const QString& label
             this, SLOT(changeStartOrEnd(Mantid::Kernel::VMD, Mantid::Kernel::VMD)) );
   QObject::connect( m_liner, SIGNAL(changedPlanarWidth(double)),
             this, SLOT(changePlanarWidth(double)) );
+  QObject::connect( m_liner, SIGNAL(changedFixedBinWidth(bool,double)),
+            this, SLOT(lineViewer_changedFixedBinWidth(bool,double)) );
 
   this->initMenus();
 
@@ -192,7 +194,26 @@ void SliceViewerWindow::slicerWorkspaceChanged()
 }
 
 //------------------------------------------------------------------------------------------------
-/** Slot called when the line viewer should be shown/hidden */
+/** Slot called when the LineViewer is setting a fixed bin width mode
+ *
+ * @param fixed :: True for fixed bin width
+ * @param binwidth :: desired width
+ */
+void SliceViewerWindow::lineViewer_changedFixedBinWidth(bool fixed, double binWidth)
+{
+  if (fixed)
+    // Enable the snap-to-length
+    m_slicer->getLineOverlay()->setSnapLength(binWidth);
+  else
+    // Disable the snap-to-length
+    m_slicer->getLineOverlay()->setSnapLength(0.0);
+}
+
+//------------------------------------------------------------------------------------------------
+/** Show or hide the LineViewer widget (on the right of the SliceViewer)
+ *
+ * @param visible :: True to show the LineViewer widget.
+ */
 void SliceViewerWindow::showLineViewer(bool visible)
 {
   int linerWidth = m_liner->width();
@@ -320,7 +341,7 @@ void SliceViewerWindow::changePlanarWidth(double width)
 
 //------------------------------------------------------------------------------------------------
 /** Signal to close this window if the workspace has just been deleted */
-void SliceViewerWindow::deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
+void SliceViewerWindow::preDeleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
 {
   Mantid::API::IMDWorkspace * ws_ptr = dynamic_cast<Mantid::API::IMDWorkspace*>(ws.get());
   if (!ws_ptr) return;

@@ -112,7 +112,7 @@ MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_sptr ws, ApplicationWind
               (QMIN(10,numRows())+1)*m_table_viewY->verticalHeader()->sectionSize(0)+100);
 
   observeAfterReplace();
-  observeDelete();
+  observePreDelete();
   observeADSClear();
 
   connect(this,SIGNAL(needWorkspaceChange(Mantid::API::MatrixWorkspace_sptr)),this,SLOT(changeWorkspace(Mantid::API::MatrixWorkspace_sptr))); 
@@ -134,6 +134,7 @@ bool MantidMatrix::eventFilter(QObject *object, QEvent *e)
 {
   // if it's context menu on any of the views
   if (e->type() == QEvent::ContextMenu && (object == m_table_viewY || object == m_table_viewX || object == m_table_viewE)){
+    e->accept();
     emit showContextMenu();
     return true;
   }
@@ -717,6 +718,8 @@ QwtDoubleRect MantidMatrix::boundingRect()
 }
 
 //----------------------------------------------------------------------------
+MantidMatrixFunction::MantidMatrixFunction(MantidMatrix* wsm):m_matrix(wsm){}
+
 void MantidMatrixFunction::init()
 {
  if (!m_matrix->workspace()->getAxis(1))
@@ -1345,9 +1348,8 @@ void MantidMatrix::setMatrixProperties()
   dlg->exec();
 }
 
-void MantidMatrix::deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
+void MantidMatrix::preDeleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
 {
-  (void) ws; //Avoid unused warning
   (void) wsName; //Avoid unused warning
   if (m_workspace.get() == ws.get())
   {

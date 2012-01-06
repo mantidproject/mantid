@@ -172,7 +172,7 @@ int Integration::romberg()
 
 QString Integration::logInfo()
 {
-	ApplicationWindow *app = (ApplicationWindow *)parent();
+  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
     QLocale locale = app->locale();
     int prec = app->d_decimal_digits;
 
@@ -219,7 +219,7 @@ QString Integration::logInfo()
 void Integration::setMethodOrder(int n)
 {
     if (n < 1 || n > 5){
-        QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot - Error"),
+        QMessageBox::critical(dynamic_cast<ApplicationWindow *>(this->parent()), tr("MantidPlot - Error"),
         tr("Unknown integration method. Valid values must be in the range: 1 (Trapezoidal Method) to 5."));
         return;
     }

@@ -59,7 +59,7 @@ MantidMatrixCurve::MantidMatrixCurve(const MantidMatrixCurve& c)
   m_yUnits(c.m_yUnits)
 {
   setData(c.data());
-  observeDelete();
+  observePostDelete();
   connect( this, SIGNAL(resetData(const QString&)), this, SLOT(dataReset(const QString&)) );
   observeAfterReplace();
   observeADSClear();
@@ -133,7 +133,7 @@ void MantidMatrixCurve::init(Graph* g,bool distr,Graph::CurveType style)
     g->insertCurve(this,lineWidth);
   }
   connect(g,SIGNAL(axisScaleChanged(int,bool)),this,SLOT(axisScaleChanged(int,bool)));
-  observeDelete();
+  observePostDelete();
  	connect( this, SIGNAL(resetData(const QString&)), this, SLOT(dataReset(const QString&)) );
  	observeAfterReplace();
  	observeADSClear();
@@ -262,7 +262,7 @@ void MantidMatrixCurve::dataReset(const QString& wsName)
     // Get here if the new workspace has fewer spectra and the plotted one no longer exists
     Mantid::Kernel::Logger::get("MantidMatrixCurve").information() << "Workspace " << wsNameStd
         << " now has fewer spectra - plotted curve(s) deleted\n";
-    deleteHandle(wsNameStd,mws);
+    postDeleteHandle(wsNameStd);
   }
   delete new_mantidData;
 }

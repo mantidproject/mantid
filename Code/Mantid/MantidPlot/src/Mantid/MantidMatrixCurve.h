@@ -111,12 +111,11 @@ private:
   void init(Graph* g, bool distr, Graph::CurveType style);
 
   /// Handles delete notification
-  void deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
+  void postDeleteHandle(const std::string& wsName)
   {
-    (void) ws; //Avoid compiler warning
     if (wsName == m_wsName.toStdString())
     {
-      observeDelete(false);
+      observePostDelete(false);
       emit removeMe(this);
     }
   }

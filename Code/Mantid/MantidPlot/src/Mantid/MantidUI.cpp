@@ -358,13 +358,13 @@ bool MantidUI::menuAboutToShow(MdiSubWindow *w)
 
   if (w && w->isA("MantidMatrix"))
   {
-    appWindow()->menuBar()->insertItem(tr("3D &Plot"), appWindow()->plot3DMenu);
+    appWindow()->myMenuBar()->insertItem(tr("3D &Plot"), appWindow()->plot3DMenu);
     appWindow()->actionCopySelection->setEnabled(true);
     appWindow()->actionPasteSelection->setEnabled(false);
     appWindow()->actionClearSelection->setEnabled(false);
     appWindow()->plotMatrixBar->setEnabled (true);
 
-    appWindow()->menuBar()->insertItem(tr("&Workspace"),menuMantidMatrix);
+    appWindow()->myMenuBar()->insertItem(tr("&Workspace"),menuMantidMatrix);
     return true;
   }
 
@@ -428,13 +428,7 @@ MantidMatrix* MantidUI::importMatrixWorkspace(const QString& wsName, int lower, 
   }
   if ( !w ) return 0;
 
-  connect(w, SIGNAL(closedWindow(MdiSubWindow*)), appWindow(), SLOT(closeWindow(MdiSubWindow*)));
-  connect(w,SIGNAL(hiddenWindow(MdiSubWindow*)),appWindow(), SLOT(hideWindow(MdiSubWindow*)));
-  connect (w,SIGNAL(showContextMenu()),appWindow(),SLOT(showWindowContextMenu()));
-
-  appWindow()->d_workspace->addSubWindow(w);
-  if( makeVisible ) w->showNormal();
-  else w->showMinimized();
+  appWindow()->addMdiSubWindow(w,makeVisible);
   return w;
 }
 
@@ -447,10 +441,9 @@ void MantidUI::importWorkspace(const QString& wsName, bool showDlg, bool makeVis
 {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   MantidMatrix* mm = importMatrixWorkspace(wsName,-1, -1, showDlg,makeVisible);
-  appWindow()->addListViewItem(mm);
   if (!mm)
-  {Table * t=importTableWorkspace(wsName,showDlg,makeVisible);
-  appWindow()->addListViewItem(t);
+  {
+    Table * t=importTableWorkspace(wsName,showDlg,makeVisible);
   }
   QApplication::restoreOverrideCursor();
 }
@@ -474,7 +467,6 @@ void MantidUI::importTransposed()
   {
     ws = boost::dynamic_pointer_cast<ITableWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
     Table *t = importTableWorkspace(wsName,true,true,true);
-    appWindow()->addListViewItem(t);
   }
   QApplication::restoreOverrideCursor();
 }
@@ -1567,7 +1559,7 @@ bool MantidUI::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg, const boo
     { 
       QCoreApplication::processEvents(); 
     } 
-    result.wait(); 
+    result.wait();
 
     try 
     { 
@@ -1705,7 +1697,7 @@ void MantidUI::handleReplaceWorkspace(Mantid::API::WorkspaceAfterReplaceNotifica
   emit workspace_replaced(QString::fromStdString(pNf->object_name()),(pNf->object()));
 }
 
-void MantidUI::handleDeleteWorkspace(Mantid::API::WorkspaceDeleteNotification_ptr pNf)
+void MantidUI::handleDeleteWorkspace(Mantid::API::WorkspacePostDeleteNotification_ptr pNf)
 {
   emit workspace_removed(QString::fromStdString(pNf->object_name()));
 }
@@ -1818,12 +1810,8 @@ InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName, int tab)
 
   insWin->selectTab(tab);
 
-  appWindow()->d_workspace->addSubWindow(insWin);
-  appWindow()->addListViewItem(insWin);
+  appWindow()->addMdiSubWindow(insWin);
 
-  connect(insWin, SIGNAL(closedWindow(MdiSubWindow*)), appWindow(), SLOT(closeWindow(MdiSubWindow*)));
-  connect(insWin,SIGNAL(hiddenWindow(MdiSubWindow*)), appWindow(), SLOT(hideWindow(MdiSubWindow*)));
-  connect (insWin,SIGNAL(showContextMenu()), appWindow(),SLOT(showWindowContextMenu()));
   connect(insWin,SIGNAL(plotSpectra(const QString&,const std::set<int>&)),this,
       SLOT(plotSpectraList(const QString&,const std::set<int>&)));
   connect(insWin,SIGNAL(createDetectorTable(const QString&,const std::vector<int>&,bool)),this,
@@ -1880,7 +1868,7 @@ void MantidUI::mantidMenuAboutToShow()
 
 void MantidUI::insertMenu()
 {
-  appWindow()->menuBar()->insertItem(tr("Man&tid"), mantidMenu);
+  appWindow()->myMenuBar()->insertItem(tr("Man&tid"), mantidMenu);
 }
 
 void MantidUI::clearAllMemory()
@@ -3213,12 +3201,8 @@ MantidMatrix* MantidUI::openMatrixWorkspace(ApplicationWindow* parent,const QStr
   w = new MantidMatrix(ws, appWindow(), "Mantid",wsName, lower, upper);
   if ( !w ) return 0;
 
-  connect(w, SIGNAL(closedWindow(MdiSubWindow*)), appWindow(), SLOT(closeWindow(MdiSubWindow*)));
-  connect(w,SIGNAL(hiddenWindow(MdiSubWindow*)),appWindow(), SLOT(hideWindow(MdiSubWindow*)));
-  connect (w,SIGNAL(showContextMenu()),appWindow(),SLOT(showWindowContextMenu()));
+  appWindow()->addMdiSubWindow(w);
 
-  appWindow()->d_workspace->addSubWindow(w);
-  w->showNormal();
   return w;
 }
 

@@ -134,8 +134,7 @@ namespace Mantid
             slogTitle = currentLine;
             slogtitleset = true;
           }
-          double bc1 = 0;
-          double bc2 = 0;
+
 
           if (currentLine[0] == '\n' || currentLine[0] == '#')
           {
@@ -228,6 +227,8 @@ namespace Mantid
             int specno, nbin1, nbin2;
             std::istringstream inputLine(currentLine, std::ios::in);
 
+            double bc1 = 0;
+            double bc2 = 0;
             /*
              inputLine.ignore(256, 'F');
              inputLine >> bc1 >> bc2 >> bc1 >> bc4;
@@ -261,10 +262,9 @@ namespace Mantid
             }
 
             // Determine x0
-            double x0 = 0;
             if (filetype == 'r')
             {
-              x0 = bc1 / 32;
+              double x0 = bc1 / 32;
               g_log.debug() << "RALF: x0 = " << x0 << "  bc4 = " << bc4 << std::endl;
               X->push_back(x0);
             }

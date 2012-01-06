@@ -114,6 +114,36 @@ class TestCommands(unittest.TestCase):
         self.assertEqual(ReductionSingleton().instrument, None)
         self.assertEqual(ReductionSingleton()._data_path, '.')
         self.assertEqual(ReductionSingleton()._background_subtracter, None)
+        
+        if sys.version_info[0]==2 and sys.version_info[1]<7:
+            def _assertAlmostEqual(first, second, places=None, msg=None, delta=None):
+                if first == second:
+                    # shortcut
+                    return
+                if delta is not None and places is not None:
+                    raise TypeError("specify delta or places not both")
+        
+                if delta is not None:
+                    if abs(first - second) <= delta:
+                        return
+        
+                    standardMsg = '%s != %s within %s delta' % (safe_repr(first),
+                                                                safe_repr(second),
+                                                                safe_repr(delta))
+                else:
+                    if places is None:
+                        places = 7
+        
+                    if round(abs(second-first), places) == 0:
+                        return
+        
+                    standardMsg = '%s != %s within %r places' % (safe_repr(first),
+                                                                  safe_repr(second),
+                                                                  places)
+                msg = self._formatMessage(msg, standardMsg)
+                raise self.failureException(msg)
+                    
+            self.assertAlmostEqual = _assertAlmostEqual
                 
     def test_data_path(self):
         self.assertEqual(ReductionSingleton()._data_path, '.')

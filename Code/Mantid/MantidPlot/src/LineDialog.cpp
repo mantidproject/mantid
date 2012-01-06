@@ -75,7 +75,7 @@ LineDialog::LineDialog( ArrowMarker *line, QWidget* parent,  Qt::WFlags fl )
 
 	gl1->addWidget(new QLabel(tr("Line width")), 2, 0);
     widthBox = new DoubleSpinBox('f');
-	widthBox->setLocale(((ApplicationWindow *)parent)->locale());
+  widthBox->setLocale(dynamic_cast<ApplicationWindow *>(this->parent())->locale());
 	widthBox->setSingleStep(0.1);
     widthBox->setRange(0, 100);
 	widthBox->setValue(lm->width());
@@ -169,7 +169,7 @@ void LineDialog::initGeometryTab()
 	bl1->addWidget(new QLabel(tr( "Unit" )));
 	bl1->addWidget(unitBox);
 
-	ApplicationWindow *app = (ApplicationWindow *)parent();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
 	QLocale locale = QLocale();
 	if (app)
 		locale = app->locale();
@@ -348,7 +348,7 @@ else
 
 void LineDialog::setDefaultValues()
 {
-ApplicationWindow *app = (ApplicationWindow *)this->parent();
+ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
 if (!app)
 	return;
 

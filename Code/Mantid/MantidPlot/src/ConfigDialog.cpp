@@ -83,7 +83,7 @@ ConfigDialog::ConfigDialog( QWidget* parent, Qt::WFlags fl )
     : QDialog( parent, fl )
 {
 	// get current values from app window
-	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 	plot3DTitleFont = app->plot3DTitleFont;
 	plot3DNumbersFont = app->plot3DNumbersFont;
 	plot3DAxesFont = app->plot3DAxesFont;
@@ -179,7 +179,7 @@ void ConfigDialog::setCurrentPage(int index)
 
 void ConfigDialog::initTablesPage()
 {
-	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 	tables = new QWidget();
 
 	QHBoxLayout * topLayout = new QHBoxLayout();
@@ -245,7 +245,7 @@ void ConfigDialog::initTablesPage()
 
 void ConfigDialog::initPlotsPage()
 {
-	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 
 	plotsTabWidget = new QTabWidget();
 
@@ -355,7 +355,7 @@ void ConfigDialog::showFrameWidth(bool ok)
 
 void ConfigDialog::initPlots3DPage()
 {
-	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 	plots3D = new QWidget();
 
 	QGroupBox * topBox = new QGroupBox();
@@ -441,7 +441,7 @@ void ConfigDialog::initPlots3DPage()
 
 void ConfigDialog::initAppPage()
 {
-	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 
 	appTabWidget = new QTabWidget(generalDialog);
 	appTabWidget->setUsesScrollButtons(false);
@@ -518,7 +518,15 @@ void ConfigDialog::initAppPage()
 	boxSearchUpdates->setChecked(app->autoSearchUpdates);
 	topBoxLayout->addWidget( boxSearchUpdates, 9, 0, 1, 2 );
 
-	topBoxLayout->setRowStretch(10, 1);
+#ifdef SHARED_MENUBAR
+  boxSharedMenuBar = new QCheckBox();
+  boxSharedMenuBar->setChecked(app->isMenuBarShared());
+  topBoxLayout->addWidget( boxSharedMenuBar, 10, 0, 1, 2 );
+  topBoxLayout->setRowStretch(11, 1);
+#else
+  boxSharedMenuBar = NULL;
+  topBoxLayout->setRowStretch(10, 1);
+#endif
 
 	appTabWidget->addTab(application, QString());
 
@@ -589,6 +597,44 @@ void ConfigDialog::initAppPage()
 	appTabWidget->addTab( numericFormatPage, QString() );
 
 	initFileLocationsPage();
+
+  // Floating windows page
+  floatingWindowsPage = new QWidget();
+  QVBoxLayout *floatLayout = new QVBoxLayout(floatingWindowsPage);
+  QGroupBox *floatBox = new QGroupBox();
+  floatLayout->addWidget(floatBox);
+  QGridLayout *floatPageLayout = new QGridLayout(floatBox);
+
+  QLabel* comment = new QLabel("Select types of windows to be floating by default.\n"
+    "You can use Windows menu to make a window floating or docked.");
+  floatPageLayout->addWidget(comment,0,0);
+  
+  boxFloatingGraph = new QCheckBox("Graphs");
+  boxFloatingGraph->setChecked(app->settings.value("/General/FloatingWindows/MultiLayer",false).toBool());
+  floatPageLayout->addWidget(boxFloatingGraph,1,0);
+
+  boxFloatingTable = new QCheckBox("Tables");
+  boxFloatingTable->setChecked(app->settings.value("/General/FloatingWindows/Table",false).toBool());
+  floatPageLayout->addWidget(boxFloatingTable,2,0);
+
+  boxFloatingInstrumentWindow = new QCheckBox("Instrument views");
+  boxFloatingInstrumentWindow->setChecked(app->settings.value("/General/FloatingWindows/InstrumentWindow",false).toBool());
+  floatPageLayout->addWidget(boxFloatingInstrumentWindow,3,0);
+  
+  boxFloatingMantidMatrix = new QCheckBox("Mantid Matrices");
+  boxFloatingMantidMatrix->setChecked(app->settings.value("/General/FloatingWindows/MantidMatrix",false).toBool());
+  floatPageLayout->addWidget(boxFloatingMantidMatrix,4,0);
+  
+  boxFloatingNote = new QCheckBox("Notes");
+  boxFloatingNote->setChecked(app->settings.value("/General/FloatingWindows/Note",false).toBool());
+  floatPageLayout->addWidget(boxFloatingNote,5,0);
+  
+  boxFloatingMatrix = new QCheckBox("Matrices");
+  boxFloatingMatrix->setChecked(app->settings.value("/General/FloatingWindows/Matrix",false).toBool());
+  floatPageLayout->addWidget(boxFloatingMatrix,6,0);
+  
+  floatPageLayout->setRowStretch(7,1);
+  appTabWidget->addTab(floatingWindowsPage, QString());
 
 	connect( boxLanguage, SIGNAL( activated(int) ), this, SLOT( switchToLanguage(int) ) );
 	connect( fontsBtn, SIGNAL( clicked() ), this, SLOT( pickApplicationFont() ) );
@@ -1152,7 +1198,7 @@ void ConfigDialog::initCurveFittingTab()
     }
   }
 
-  ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
   
   // Set the correct default property
   QString setting = //QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("curvefitting.autoBackground"));
@@ -1227,7 +1273,7 @@ void ConfigDialog::initCurveFittingTab()
 
 void ConfigDialog::initOptionsPage()
 {
-  ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 
   plotOptions = new QWidget();
 
@@ -1304,7 +1350,7 @@ void ConfigDialog::initOptionsPage()
 
 void ConfigDialog::initAxesPage()
 {
-	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 
   plotAxes = new QWidget();
 
@@ -1382,7 +1428,7 @@ void ConfigDialog::initAxesPage()
 
 void ConfigDialog::initCurvesPage()
 {
-	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 
 	curves = new QWidget();
 
@@ -1429,7 +1475,7 @@ void ConfigDialog::initCurvesPage()
 
 void ConfigDialog::initFittingPage()
 {
-	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 	fitPage = new QWidget();
 
 	groupBoxFittingCurve = new QGroupBox();
@@ -1503,7 +1549,7 @@ void ConfigDialog::initFittingPage()
 
 void ConfigDialog::initConfirmationsPage()
 {
-	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 	confirm = new QWidget();
 
 	groupBoxConfirm = new QGroupBox();
@@ -1552,7 +1598,7 @@ void ConfigDialog::initConfirmationsPage()
 
 void ConfigDialog::initFileLocationsPage()
 {
-	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 	fileLocationsPage = new QWidget();
 
 	QGroupBox *gb = new QGroupBox();
@@ -1607,7 +1653,7 @@ void ConfigDialog::initFileLocationsPage()
 void ConfigDialog::languageChange()
 {
   setWindowTitle( tr( "MantidPlot - Choose default settings" ) ); //Mantid
-	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 
 	// pages list
 	itemsList->clear();
@@ -1713,6 +1759,7 @@ void ConfigDialog::languageChange()
 	appTabWidget->setTabText(appTabWidget->indexOf(appColors), tr("Colors"));
 	appTabWidget->setTabText(appTabWidget->indexOf(numericFormatPage), tr("Numeric Format"));
 	appTabWidget->setTabText(appTabWidget->indexOf(fileLocationsPage), tr("File Locations"));
+  appTabWidget->setTabText(appTabWidget->indexOf(floatingWindowsPage), tr("Floating windows"));
 
 	//Mantid Page
 	mtdTabWidget->setTabText(mtdTabWidget->indexOf(instrumentPage), tr("Instrument"));
@@ -1727,6 +1774,9 @@ void ConfigDialog::languageChange()
 	boxSave->setText(tr("Save every"));
 	boxBackupProject->setText(tr("&Backup project before saving"));
 	boxSearchUpdates->setText(tr("Check for new versions at startup"));
+#ifdef SHARED_MENUBAR
+  boxSharedMenuBar->setText(tr("Share menu bar"));
+#endif
 	boxMinutes->setSuffix(tr(" minutes"));
 	lblScriptingLanguage->setText(tr("Default scripting language"));
 	lblUndoStackSize->setText(tr("Matrix Undo Stack Size"));
@@ -1872,7 +1922,7 @@ void ConfigDialog::accept()
 
 void ConfigDialog::apply()
 {
-	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 	if (!app)
 		return;
 
@@ -1944,6 +1994,9 @@ void ConfigDialog::apply()
 	setFont(appFont);
 	app->changeAppStyle(boxStyle->currentText());
 	app->autoSearchUpdates = boxSearchUpdates->isChecked();
+#ifdef SHARED_MENUBAR
+  app->shareMenuBar(boxSharedMenuBar->isChecked());
+#endif
 	app->setSaveSettings(boxSave->isChecked(), boxMinutes->value());
 	app->d_backup_files = boxBackupProject->isChecked();
 	app->defaultScriptingLang = boxScriptingLanguage->currentText();
@@ -1997,6 +2050,13 @@ void ConfigDialog::apply()
 			boxNotes->isChecked(),boxInstrWindow->isChecked());
 	// general page: colors tab
 	app->setAppColors(btnWorkspace->color(), btnPanels->color(), btnPanelsText->color());
+  // general page: floating windows tab
+  app->settings.setValue("/General/FloatingWindows/MultiLayer",boxFloatingGraph->isChecked());
+  app->settings.setValue("/General/FloatingWindows/Table",boxFloatingTable->isChecked());
+  app->settings.setValue("/General/FloatingWindows/InstrumentWindow",boxFloatingInstrumentWindow->isChecked());
+  app->settings.setValue("/General/FloatingWindows/MantidMatrix",boxFloatingMantidMatrix->isChecked());
+  app->settings.setValue("/General/FloatingWindows/Note",boxFloatingNote->isChecked());
+  app->settings.setValue("/General/FloatingWindows/Matrix",boxFloatingMatrix->isChecked());
 	// 3D plots page
 	QStringList plot3DColors = QStringList() << btnToColor->color().name() << btnLabels->color().name();
 	plot3DColors << btnMesh->color().name() << btnGrid->color().name() << btnFromColor->color().name();
@@ -2096,7 +2156,7 @@ void ConfigDialog::updateCurveFitSettings()
     setting += std::string(" ") + args.toStdString();
   }
 
-  ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 
   //mantid_config.setString("curvefitting.autoBackground", setting);
   app->mantidUI->fitFunctionBrowser()->setAutoBackgroundName(QString::fromStdString(setting));
@@ -2144,7 +2204,7 @@ void ConfigDialog::updateMantidOptionsTab()
     mantid_config.setString("algorithms.categories.hidden",hiddenCategoryString);
   
     //update the algorithm tree
-    ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+    ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
     app->mantidUI->updateAlgorithms();
   }
 }
@@ -2372,14 +2432,14 @@ void ConfigDialog::gotoMantidDirectories()
 
 void ConfigDialog::switchToLanguage(int param)
 {
-	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 	app->switchToLanguage(param);
 	languageChange();
 }
 
 void ConfigDialog::insertLanguagesList()
 {
-	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 	if(!app)
 		return;
 
@@ -2431,7 +2491,7 @@ void ConfigDialog::showPointsBox(bool)
 
 void ConfigDialog::chooseTranslationsFolder()
 {
-	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 	if (!app)
 		return;
 
@@ -2449,7 +2509,7 @@ void ConfigDialog::chooseTranslationsFolder()
 
 void ConfigDialog::chooseHelpFolder()
 {
-	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 	if (!app)
 		return;
 
@@ -2462,7 +2522,7 @@ void ConfigDialog::chooseHelpFolder()
 // #ifdef SCRIPTING_PYTHON
 // void ConfigDialog::choosePythonConfigFolder()
 // {
-// 	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+// 	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 // 	if (!app)
 // 		return;
 

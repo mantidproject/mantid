@@ -93,6 +93,7 @@ set ( TEST_FILES
 	test/BooleanBinaryOperationMDTest.h
 	test/ConvertToQ3DdETest.h
 	test/ConvertToMDEventsTest.h
+	test/ConvertEventsToMDEventsTest.h	
 	test/DivideMDTest.h
 	test/EqualToMDTest.h
 	test/ExponentialMDTest.h

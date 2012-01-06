@@ -61,6 +61,8 @@ namespace Mantid
     Algorithm::~Algorithm()
     {
       g_log.release();
+      // Free up any memory available.
+      Mantid::API::MemoryManager::Instance().releaseFreeMemory();
     }
 
 
@@ -196,10 +198,7 @@ namespace Mantid
                 if(wsGrpSptr)
                 {        //this must be a group - test for that
                   g_log.debug()<<" one of the inputs is a workspace group - call processGroups"<<std::endl;
-
                   return processGroups(wsGrpSptr,Prop);
-
-
                 }
               }
 
@@ -379,7 +378,8 @@ namespace Mantid
 
       m_notificationCenter.postNotification(new FinishedNotification(this,isExecuted()));
       // Only gets to here if algorithm ended normally
-
+      // Free up any memory available.
+      Mantid::API::MemoryManager::Instance().releaseFreeMemory();
       return isExecuted();
     }
 
@@ -817,7 +817,6 @@ namespace Mantid
       int nPeriod=1;
       int execPercentage=0;
       bool bgroupPassed=true;
-      bool bgroupFailed;
 
       WorkspaceGroup_sptr wsgrp1_sptr; 
       WorkspaceGroup_sptr wsgrp2_sptr;
@@ -860,11 +859,11 @@ namespace Mantid
           std::vector<Mantid::Kernel::Property*>::const_iterator itr;
           for (itr=props.begin();itr!=props.end();++itr)
           {
-
-
+            // cppcheck-suppress variableScope
+            int outWSCount=0;
             if(isWorkspaceProperty(*itr) )
             {
-                int outWSCount=0;
+
               if(isInputWorkspaceProperty(*itr))
               {
 
@@ -921,7 +920,6 @@ namespace Mantid
           }
           // status of each execution is checking 
           bgroupPassed=bgroupPassed&&bStatus;
-          bgroupFailed=bgroupFailed||bStatus;
           execPercentage+=10;
           progress(double((execPercentage)/execTotal));
           //if a workspace execution fails

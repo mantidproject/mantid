@@ -883,9 +883,9 @@ class Mask(ReductionStep):
             # Mask the pixels by passing the list of IDs
             MaskDetectors(workspace, DetectorList = masked_detectors)
             
-        masked_detectors = GetMaskedDetectors(workspace)
+        masked_detectors = ExtractMasking(InputWorkspace=workspace, OutputWorkspace="__mask")
         mantid.sendLogMessage("Mask check %s: %g masked pixels" % (workspace, len(masked_detectors.getPropertyValue("DetectorList"))))  
-            
+        
         return "Mask applied %s: %g masked pixels" % (workspace, len(masked_detectors.getPropertyValue("DetectorList")))
 
 class CorrectToFileStep(ReductionStep):

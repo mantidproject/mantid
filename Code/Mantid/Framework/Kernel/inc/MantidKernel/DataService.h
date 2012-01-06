@@ -61,18 +61,29 @@ class DLLExport DataService
 {
 public:
 
-    /// Base class for DataService notifications
-    class DataServiceNotification: public Poco::Notification
+    /// Class for named object notifications
+    class NamedObjectNotification: public Poco::Notification
+    {
+    public:
+      NamedObjectNotification(const std::string& name) :
+        Poco::Notification(), m_name(name) {}
+
+      /// Returns the name of the object
+      std::string object_name()const{return m_name;}
+    private:
+      std::string m_name;///< object's name
+    };
+
+    /// Base class for DataService notifications that also stores a pointer to the object
+    class DataServiceNotification : public NamedObjectNotification
     {
     public:
         /// Constructor
-        DataServiceNotification(const std::string& name, const boost::shared_ptr<T> obj):Poco::Notification(),m_name(name),m_object(obj){}
+        DataServiceNotification(const std::string& name, const boost::shared_ptr<T> obj)
+          : NamedObjectNotification(name), m_object(obj){}
         /// Returns the const pointer to the object concerned or 0 if it is a general notification
         const boost::shared_ptr<T> object()const{return m_object;}
-        /// Returns the name of the object
-        std::string object_name()const{return m_name;}
     private:
-        std::string m_name;///< object's name
         boost::shared_ptr<T> m_object;///< shared pointer to the object
     };
 
@@ -108,38 +119,47 @@ public:
     {
     public:
         /** Constructor.
-
-            @param name :: The name of the replaced object
-            @param new_obj :: The pointer to the new object
-
-            Only new objects are guaranteed to exist when an observer receives the notification.
+          * @param name :: The name of the replaced object
+          *  @param new_obj :: The pointer to the new object
+          *  Only new objects are guaranteed to exist when an observer receives the notification.
         */
         AfterReplaceNotification(const std::string& name, const boost::shared_ptr<T> new_obj):DataServiceNotification(name,new_obj) {}
     };
 
-    /// DeleteNotification is sent after an object is deleted from the data service.
+    /// PreDeleteNotification is sent before an object is deleted from the data service.
     /// name() and object() return name and pointer to the object being deleted.
     /// The object still exists when the notification is received by an observer.
-    class DeleteNotification: public DataServiceNotification
+    class PreDeleteNotification: public DataServiceNotification
     {
     public:
       /// Constructor
-      DeleteNotification(const std::string& name,const boost::shared_ptr<T> obj):DataServiceNotification(name,obj){}
+      PreDeleteNotification(const std::string& name,const boost::shared_ptr<T> obj):DataServiceNotification(name,obj){}
+    };
+
+    /// PostDeleteNotification is sent after an object is deleted from the data service.
+    /// name() returns the name of the object being deleted.
+    /// The object no longer exists when the notification is received by an observer.
+    class PostDeleteNotification: public NamedObjectNotification
+    {
+    public:
+      /// Constructor
+      PostDeleteNotification(const std::string& name):NamedObjectNotification(name) {}
     };
 
     /// Clear notification is sent when the service is cleared
-    class ClearNotification: public DataServiceNotification
+    class ClearNotification: public NamedObjectNotification
     {
     public:
       ///Constructor
-      ClearNotification() :  DataServiceNotification("", boost::shared_ptr<T>()) {}
+      ClearNotification() :  NamedObjectNotification("") {}
     };
     /// Rename notification is sent from Renameworkspaces algorithm after a workspace is renamed
-    class RenameNotification: public DataServiceNotification
+    class RenameNotification: public NamedObjectNotification
     {
     public:
         /// Constructor
-      RenameNotification(const std::string& name,const std::string& newwsname):DataServiceNotification(name,boost::shared_ptr<T>()),m_outwsname(newwsname){}
+      RenameNotification(const std::string& name,const std::string& newwsname) :
+        NamedObjectNotification(name), m_outwsname(newwsname){}
 
       ///name of the new workspace
       const std::string& new_objectname()const{return m_outwsname;}
@@ -229,10 +249,11 @@ public:
       return;
     }
 
-    notificationCenter.postNotification(new DeleteNotification(name,it->second));
+    notificationCenter.postNotification(new PreDeleteNotification(name,it->second));
     g_log.information("Data Object '"+ name +"' deleted from data service.");
     datamap.erase(it);
     API::MemoryManager::Instance().releaseFreeMemory();
+    notificationCenter.postNotification(new PostDeleteNotification(name));
     return;
   }
 

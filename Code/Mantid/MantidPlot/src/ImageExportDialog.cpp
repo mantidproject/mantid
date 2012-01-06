@@ -85,7 +85,7 @@ ImageExportDialog::ImageExportDialog(QWidget * parent, bool vector_options, bool
 
 void ImageExportDialog::initAdvancedOptions()
 {
-    ApplicationWindow *app = (ApplicationWindow *)this->parent();
+		ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
 	d_advanced_options = new QStackedWidget();
 
 	d_vector_options = new QGroupBox();
@@ -180,7 +180,7 @@ void ImageExportDialog::updateAdvancedOptions (const QString & filter)
 
 void ImageExportDialog::closeEvent(QCloseEvent* e)
 {
-	ApplicationWindow *app = (ApplicationWindow *)this->parent();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
 	if (app){
 		app->d_extended_export_dialog = this->isExtended();
 		app->d_image_export_filter = this->selectedFilter();

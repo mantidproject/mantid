@@ -358,8 +358,7 @@ class SensitivityCorrection(BaseSensitivityCorrection):
                                     OutputEfficiencyWorkspace="__wl_efficiency")
         
         # Copy over the efficiency's masked pixels to the reduced workspace
-        masked_detectors = GetMaskedDetectors(self._efficiency_ws)
-        MaskDetectors(workspace, None, masked_detectors.getPropertyValue("DetectorList"))        
+        MaskDetectors(InputWorkspace=workspace, MaskedWorkspace=self._efficiency_ws)        
         
         return "Wavelength-dependent sensitivity correction applied\n%s\n" % output_str
         

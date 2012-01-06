@@ -150,7 +150,7 @@ CustomActionDialog::CustomActionDialog(QWidget* parent, Qt::WFlags fl)
 
 void CustomActionDialog::init()
 {
-	ApplicationWindow *app = (ApplicationWindow *)parent();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
 	folderBox->setText(app->customActionsDirPath);
 
 	d_menus = app->customizableMenusList();
@@ -195,7 +195,7 @@ void CustomActionDialog::updateDisplayList()
 {
 	itemsList->clear();
 
-	QList<QAction *> actionsList = ((ApplicationWindow *)parentWidget())->customActionsList();
+    QList<QAction *> actionsList = (dynamic_cast<ApplicationWindow *>(parentWidget()))->customActionsList();
 	foreach(QAction *action, actionsList){//add existing actions to the list widget
 	    QString text = action->text();
         QString shortcut = action->shortcut().toString();
@@ -214,7 +214,7 @@ void CustomActionDialog::updateDisplayList()
 QAction* CustomActionDialog::addAction()
 {
 	QAction *action = NULL;
-    ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+    ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parentWidget());
     if (!app)
         return action;
 
@@ -263,7 +263,7 @@ bool CustomActionDialog::validUserInput()
 		folder = folderBox->text();
 	}
 
-	ApplicationWindow *app = (ApplicationWindow *)this->parent();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
 	QList<QAction *>actions = app->customActionsList();
 
 	if (textBox->text().isEmpty()){
@@ -370,7 +370,7 @@ void CustomActionDialog::removeAction()
 	if (!action)
 		return;
 	
-	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+    ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parentWidget());
     QFile f(app->customActionsDirPath + "/" + action->text() + ".qca");
     f.remove();
 	
@@ -394,7 +394,7 @@ void CustomActionDialog::saveCurrentAction()
 	if ((toolBarBtn->isChecked() && w->objectName() != toolBarBox->currentText()) || 
 		(menuBtn->isChecked() && w->objectName() != menuBox->currentText())){
 		//relocate action: create a new one and delete the old
-		ApplicationWindow *app = (ApplicationWindow *)parent();
+		ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
 		QAction *newAction = new QAction(app);
 		customizeAction(newAction);			
 		if (toolBarBtn->isChecked()){
@@ -426,7 +426,7 @@ void CustomActionDialog::saveAction(QAction *action)
     if (!action)
         return;
 
-    ApplicationWindow *app = (ApplicationWindow *)parent();
+    ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
     QString fileName = app->customActionsDirPath + "/" + action->text() + ".qca";
     QFile f(fileName);
 	if (!f.open( QIODevice::WriteOnly)){
@@ -496,7 +496,7 @@ void CustomActionDialog::chooseFolder()
 
 QAction * CustomActionDialog::actionAt(int row)
 {
-	ApplicationWindow *app = (ApplicationWindow *)this->parent();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
 	QList<QAction *>actions = app->customActionsList();
 	if (actions.isEmpty() || row < 0 || row >= actions.count())
         return 0;

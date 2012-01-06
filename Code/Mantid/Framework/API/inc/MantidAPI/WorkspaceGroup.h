@@ -89,9 +89,9 @@ private:
   /// Private, unimplemented copy assignment operator
   const WorkspaceGroup& operator=(const WorkspaceGroup&);
   /// Callback when a delete notification is received
-  void workspaceDeleteHandle(Mantid::API::WorkspaceDeleteNotification_ptr notice);
+  void workspaceDeleteHandle(Mantid::API::WorkspacePostDeleteNotification_ptr notice);
   /// Observer for workspace delete notfications
-  Poco::NObserver<WorkspaceGroup, Mantid::API::WorkspaceDeleteNotification> m_deleteObserver;
+  Poco::NObserver<WorkspaceGroup, Mantid::API::WorkspacePostDeleteNotification> m_deleteObserver;
   /// Callback when a rename notification is received
   void workspaceRenameHandle(Mantid::API::WorkspaceRenameNotification_ptr notice);
   /// Observer for renaming of workspaces

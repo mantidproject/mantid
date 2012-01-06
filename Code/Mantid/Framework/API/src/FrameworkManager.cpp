@@ -92,6 +92,7 @@ void FrameworkManagerImpl::clearAlgorithms()
 void FrameworkManagerImpl::clearData()
 {
   AnalysisDataService::Instance().clear();
+  MemoryManager::Instance().releaseFreeMemory();
 }
 
 /**

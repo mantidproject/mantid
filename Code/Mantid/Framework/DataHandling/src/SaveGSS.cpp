@@ -123,7 +123,6 @@ namespace Mantid
       }
 
       std::string filename = getProperty("Filename");
-      std::string inputWSName = getProperty("InputWorkspace");
 
       std::size_t pos = filename.find_first_of(".");
       std::string ext;

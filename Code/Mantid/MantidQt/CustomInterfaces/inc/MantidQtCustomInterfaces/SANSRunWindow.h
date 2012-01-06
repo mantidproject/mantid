@@ -173,7 +173,7 @@ private:
   void fillDetectNames(QComboBox *output);
   QStringList getSaveAlgs();
   /// Handle a delete notification from Mantid
-  void handleMantidDeleteWorkspace(Mantid::API::WorkspaceDeleteNotification_ptr p_dnf);
+  void handleMantidDeleteWorkspace(Mantid::API::WorkspacePostDeleteNotification_ptr p_dnf);
   // Format a double in a string with a specfied colour, format and precision
   QString formatDouble(double value, const QString & colour = "black", char format = 'f', int precision = 3);
   /// Issue a warning 
@@ -311,7 +311,7 @@ private:
   /// Get notified when the system input directories have changed
   Poco::NObserver<SANSRunWindow, Mantid::Kernel::ConfigValChangeNotification> m_newInDir;
   /// An observer for a delete notification from Mantid
-  Poco::NObserver<SANSRunWindow, Mantid::API::WorkspaceDeleteNotification> m_delete_observer;
+  Poco::NObserver<SANSRunWindow, Mantid::API::WorkspacePostDeleteNotification> m_delete_observer;
   /// A map of S2D detector names to QLabel pointers
   QList<QHash<QString, QLabel*> > m_s2d_detlabels;
   /// A map of LOQ detector names to QLabel pointers

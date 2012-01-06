@@ -1,5 +1,5 @@
-#ifndef MANTID_CUSTOMINTERFACES_WORKSPACE_ON_DISK_H_
-#define MANTID_CUSTOMINTERFACES_WORKSPACE_ON_DISK_H_
+#ifndef MANTID_CUSTOMINTERFACES_RAW_FILE_ON_DISK_H_
+#define MANTID_CUSTOMINTERFACES_RAW_FILE_ON_DISK_H_
 
 #include "MantidQtCustomInterfaces/WorkspaceMemento.h"
 
@@ -7,10 +7,10 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    /** @class WorkspaceOnDisk
-    A workspace memento refering to a workspace in the Analysis Data Service.
+    /** @class RawFileMemento
+    A workspace memento refering to a Raw File on disk
 
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2011-12 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -30,13 +30,13 @@ namespace MantidQt
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport WorkspaceOnDisk : public WorkspaceMemento
+    class DLLExport RawFileMemento : public WorkspaceMemento
     {
     public:
       /**
       @param fileName : path + name of the file holding the workspace
       */
-      WorkspaceOnDisk(std::string fileName);
+      RawFileMemento(std::string fileName);
       /**
       Getter for the id of the workspace
       @return the id of the workspace
@@ -54,14 +54,27 @@ namespace MantidQt
       virtual bool checkStillThere() const;
       /**
       Getter for the workspace itself
-      @returns the matrix workspace
+      @returns the  workspace
       @throw if workspace has been moved since instantiation.
       */
-      virtual Mantid::API::MatrixWorkspace_sptr fetchIt() const;
+      virtual Mantid::API::Workspace_sptr fetchIt() const;
       ///Clean-up operations
       virtual void cleanUp();
       /// Destructor
-      virtual ~WorkspaceOnDisk();
+      virtual ~RawFileMemento();
+
+      /*
+      Location type associated with this type.
+      @return string describing location
+      */
+      static std::string locType()
+      {
+        return "On Disk";
+      }
+
+      //Apply actions wrapped up in this memento.
+      virtual Mantid::API::Workspace_sptr  applyActions();
+
     private:
       /// Helper method to delete a workspace out of memory after loading.
       void dumpIt(const std::string& name);

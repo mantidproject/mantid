@@ -3,7 +3,7 @@ import sys
 import os
 import unittest
 import time
-from PyQt4 import Qt
+from PyQt4 import QtCore, QtGui
 #from PyQt4.QtTest import QTest
         
 # Import the Mantid framework
@@ -15,7 +15,7 @@ import mantidqtpython
 from mantidqtpython import StdRuntimeError, StdInvalidArgument
 
 # Create the application only once per test; otherwise I get a segfault
-app = Qt.QApplication(sys.argv)
+app = QtGui.QApplication(sys.argv)
 
 
 class SliceViewerPythonInterfaceTest(unittest.TestCase):
@@ -89,7 +89,7 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         self.svw.deleteLater()
         #self.svw.show()
         # Schedule quit at the next event
-        Qt.QTimer.singleShot(0, app, Qt.SLOT("quit()"))
+        QtCore.QTimer.singleShot(0, app, QtCore.SLOT("quit()"))
         # This is required for deleteLater() to do anything (it deletes at the next event loop)
         app.quitOnLastWindowClosed = True
        	app.exec_()
@@ -120,7 +120,7 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         self.assertRaises(StdRuntimeError, sv.setWorkspace, 'workspace2d')
     
     #==========================================================================
-    #======================= XML Tests ======================================
+    #======================= XML Tests ========================================
     #==========================================================================
     def test_openFromXML_3D(self):
         sv = self.sv
@@ -312,6 +312,58 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         self.assertTrue(sv.getFastRender(), "Fast rendering mode is TRUE by default")
         sv.setFastRender(False)
         self.assertFalse(sv.getFastRender(), "Fast rendering mode is set to false")
+        
+    #==========================================================================
+    #======================= LineViewer =======================================
+    #==========================================================================
+#    def test_showLineViewer(self):
+#        svw = self.svw
+#        svw.show()
+#        svw.getSlicer().toggleLineMode(True)
+#        QtCore.QCoreApplication.processEvents()
+#        QtCore.QCoreApplication.processEvents()
+#        self.assertTrue(svw.getLiner().isVisible())
+        
+    def test_make_a_line(self):
+        svw = self.svw
+        sv = self.sv
+        sv.toggleLineMode(True)
+        liner = svw.getLiner()
+        liner.setStartXY(1, 1)
+        liner.setEndXY(5, 4)
+        liner.setNumBins(200)
+        liner.apply()
+        # Check that the values are there
+        self.assertEqual(liner.getNumBins(), 200)
+        # Length of 5 with 200 bins = 0.025 width
+        self.assertAlmostEqual(liner.getBinWidth(), 0.025, 3)
+    
+    def test_setWidth(self):
+        svw = self.svw
+        self.sv.toggleLineMode(True)
+        liner = self.svw.getLiner()
+        liner.setPlanarWidth(1.5)
+        self.assertAlmostEqual(liner.getPlanarWidth(), 1.5, 3)
+        liner.setWidth(2, 0.75)
+        # Not yet a method to get the width in any dimension
+        
+                
+    def test_fixedBinWidth(self):
+        svw = self.svw
+        sv = self.sv
+        sv.toggleLineMode(True)
+        liner = svw.getLiner()
+        liner.setFixedBinWidthMode(True, 0.025)
+        liner.setStartXY(1, 1)
+        liner.setEndXY(5, 4)
+        liner.setPlanarWidth(1)
+        liner.apply()
+        # Length of 5, bin width of 0.025 = 200 bins
+        self.assertEqual(liner.getNumBins(), 200)
+        self.assertAlmostEqual(liner.getBinWidth(), 0.025, 3)
+        
+        
+        
         
 
         

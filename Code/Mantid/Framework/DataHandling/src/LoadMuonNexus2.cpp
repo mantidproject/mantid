@@ -89,7 +89,7 @@ namespace Mantid
       else
       {
         std::string definition = entry.getString("definition");
-        if (info.stat == NX_ERROR || entry.getString("definition") != "pulsedTD")
+        if (info.stat == NX_ERROR || definition != "pulsedTD")
         {
           throw std::runtime_error("Unknown Muon Nexus file format");
         }

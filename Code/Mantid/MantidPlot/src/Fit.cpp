@@ -82,7 +82,7 @@ void Fit::init()
 	chi_2 = -1;
 	d_scale_errors = false;
 	d_sort_data = false;
-	d_prec = (((ApplicationWindow *)parent())->fit_output_precision);
+	d_prec = (dynamic_cast<ApplicationWindow *>(parent())->fit_output_precision);
 	d_param_table = 0;
 	d_cov_matrix = 0;
 	covar = 0;
@@ -289,7 +289,7 @@ QString Fit::logFitInfo(int iterations, int status)
 	}
 	info +="\n";
 
-	ApplicationWindow *app = (ApplicationWindow *)parent();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
 	QLocale locale = app->locale();
 	if (is_non_linear){
 		if (d_solver == NelderMeadSimplex)
@@ -345,7 +345,7 @@ QString Fit::legendInfo()
 	QString info = tr("Dataset") + ": " + dataSet + "\n";
 	info += tr("Function") + ": " + d_formula + "\n\n";
 
-	ApplicationWindow *app = (ApplicationWindow *)parent();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
 	QLocale locale = app->locale();
 
 	double chi_2_dof = chi_2/(d_n - d_p);
@@ -377,7 +377,7 @@ bool Fit::setWeightingData(WeightingMethod w, const QString& colName)
 		case Instrumental:
 			{
 				if (!d_graph && d_table){
-					QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot - Error"),
+					QMessageBox::critical(dynamic_cast<ApplicationWindow *>(this->parent()), tr("MantidPlot - Error"),
   	    				tr("You cannot use the instrumental weighting method."));
   	    			return false;
 				}
@@ -396,7 +396,7 @@ bool Fit::setWeightingData(WeightingMethod w, const QString& colName)
 					}
                 }
 				if (error){
-					QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot - Error"),
+					QMessageBox::critical(dynamic_cast<ApplicationWindow *>(this->parent()), tr("MantidPlot - Error"),
 					tr("The curve %1 has no associated Y error bars. You cannot use instrumental weighting method.").arg(d_curve->title().text()));
 					return false;
 				}
@@ -422,12 +422,12 @@ bool Fit::setWeightingData(WeightingMethod w, const QString& colName)
 				if (colName.isEmpty())
 					return false;
 
-				Table* t = ((ApplicationWindow *)parent())->table(colName);
+				Table* t = (dynamic_cast<ApplicationWindow *>(this->parent()))->table(colName);
 				if (!t)
 					return false;
 
 				if (t->numRows() < d_n){
-  	            	QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot - Error"),
+									QMessageBox::critical(dynamic_cast<ApplicationWindow *>(this->parent()), tr("MantidPlot - Error"),
   	                tr("The column %1 has less points than the fitted data set. Please choose another column!.").arg(colName));
   	                return false;
   	            }
@@ -447,7 +447,7 @@ bool Fit::setWeightingData(WeightingMethod w, const QString& colName)
 
 Table* Fit::parametersTable(const QString& tableName)
 {
-	ApplicationWindow *app = (ApplicationWindow *)parent();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
 	d_param_table = app->table(tableName);
 	if (!d_param_table || d_param_table->objectName() != tableName){
 		d_param_table = app->newTable(app->generateUniqueName(tableName, false), d_p, 3);
@@ -477,7 +477,7 @@ void Fit::writeParametersToTable(Table *t, bool append)
 		t->setNumRows(rows + d_p);
 	}
 
-	ApplicationWindow *app = (ApplicationWindow *)parent();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
 	QLocale locale = app->locale();
 
 	for (int i=0; i<d_p; i++){
@@ -493,7 +493,7 @@ void Fit::writeParametersToTable(Table *t, bool append)
 
 Matrix* Fit::covarianceMatrix(const QString& matrixName)
 {
-	ApplicationWindow *app = (ApplicationWindow *)parent();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
 	d_cov_matrix = app->matrix(matrixName);
 	if (!d_cov_matrix || d_cov_matrix->objectName() != matrixName)
 		d_cov_matrix = app->newMatrix(app->generateUniqueName(matrixName, false), d_p, d_p);
@@ -529,22 +529,22 @@ void Fit::fit()
 		return;
 
 	if (!d_n){
-		QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot - Fit Error"),
+		QMessageBox::critical(dynamic_cast<ApplicationWindow *>(this->parent()), tr("MantidPlot - Fit Error"),
 				tr("You didn't specify a valid data set for this fit operation. Operation aborted!"));
 		return;
 	}
 	if (!d_p){
-		QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot - Fit Error"),
+		QMessageBox::critical(dynamic_cast<ApplicationWindow *>(this->parent()), tr("MantidPlot - Fit Error"),
 				tr("There are no parameters specified for this fit operation. Operation aborted!"));
 		return;
 	}
 	if (d_p > d_n){
-  		QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot - Fit Error"),
+			QMessageBox::critical(dynamic_cast<ApplicationWindow *>(this->parent()), tr("MantidPlot - Fit Error"),
   	    tr("You need at least %1 data points for this fit operation. Operation aborted!").arg(d_p));
   	    return;
   	}
 	if (d_formula.isEmpty()){
-		QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot - Fit Error"),
+		QMessageBox::critical(dynamic_cast<ApplicationWindow *>(this->parent()), tr("MantidPlot - Fit Error"),
 				tr("You must specify a valid fit function first. Operation aborted!"));
 		return;
 	}
@@ -591,7 +591,7 @@ void Fit::fit()
 
 	generateFitCurve();
 
-	ApplicationWindow *app = (ApplicationWindow *)parent();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
 	if (app->writeFitResultsToLog)
 		app->updateLog(logFitInfo(iterations, status));
 
@@ -692,7 +692,7 @@ bool Fit::load(const QString& fileName)
 
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly | QFile::Text)) {
-        QMessageBox::warning(((ApplicationWindow *)parent()), tr("MantidPlot Fit Model"),
+        QMessageBox::warning((dynamic_cast<ApplicationWindow *>(this->parent())), tr("MantidPlot Fit Model"),
                               tr("Cannot read file %1:\n%2.")
                               .arg(fileName)
                               .arg(file.errorString()));

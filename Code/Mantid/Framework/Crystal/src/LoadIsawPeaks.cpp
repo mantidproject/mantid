@@ -108,6 +108,7 @@ namespace Crystal
       throw  std::logic_error( std::string( "No Version for Peaks file" ) );
 
     tag = getWord( in ,  false );
+    // cppcheck-suppress unreadVariable
     std::string C_Facility = getWord( in ,  false );
 
     tag = getWord( in ,  false );

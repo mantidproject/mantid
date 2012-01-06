@@ -371,7 +371,7 @@ namespace Mantid
       */
       static double* AddVariable(const char *varName, void *pufun)
       {
-        UserFunctionMD& fun = *(UserFunctionMD*)pufun;
+        UserFunctionMD& fun = *reinterpret_cast<UserFunctionMD*>(pufun);
 
         std::vector<std::string>::iterator x = std::find(fun.m_varNames.begin(),fun.m_varNames.end(),varName);
         if (x != fun.m_varNames.end())

@@ -44,7 +44,7 @@ def setup_reducer(inst_name):
     """
     try:
         return DirectEnergyConversion(inst_name)
-    except RuntimeError:
+    except RuntimeError, exc:
         raise RuntimeError('Unknown instrument "%s", cannot continue' % inst_name)
     
 
@@ -53,65 +53,123 @@ class DirectEnergyConversion(object):
     Performs a convert to energy assuming the provided instrument is an elastic instrument
     """
 
-    def diagnose(self, white_run, sample_run=None, other_white=None, remove_zero=None, 
-                 tiny=None, large=None, median_lo=None, median_hi=None, signif=None, 
-                 bkgd_threshold=None, bkgd_range=None, variation=None,
-                 bleed_test=False, bleed_maxrate=None, bleed_pixels=None,
-                 hard_mask=None, print_results=False):
+    def diagnose(self, white, **kwargs):
         """
-        A pass through method to the 'real' one in diagnostics.py
-
-        Run diagnostics on the provided run and white beam files.
-
-        There are 4 possible tests, depending on the input given:
-          White beam diagnosis
-          Background tests
-          Second white beam
-          PSD bleed test
+            Run diagnostics on the provided workspaces.
             
-        Required inputs:
-        
-          white_run  - The run number or filepath of the white beam run
-        
-        Optional inputs:
-          sample_run - The run number or filepath of the sample run for the background test (default = None)
-          other_white   - If provided an addional set of tests is performed on this file. (default = None)
-          remove_zero - If true then zeroes in the data will count as failed (default = False)
-          tiny          - Minimum threshold for acceptance (default = 1e-10)
-          large         - Maximum threshold for acceptance (default = 1e10)
-          median_lo     - Fraction of median to consider counting low (default = 0.1)
-          median_hi     - Fraction of median to consider counting high (default = 3.0)
-          signif        - Counts within this number of multiples of the 
-                          standard dev will be kept (default = 3.3)
-          bkgd_threshold - High threshold for background removal in multiples of median (default = 5.0)
-          bkgd_range - The background range as a list of 2 numbers: [min,max]. 
-                       If not present then they are taken from the parameter file. (default = None)
-          variation  - The number of medians the ratio of the first/second white beam can deviate from
-                       the average by (default=1.1)
-          bleed_test - If true then the CreatePSDBleedMask algorithm is run
-          bleed_maxrate - If the bleed test is on then this is the maximum framerate allowed in a tube
-          bleed_pixels - If the bleed test is on then this is the number of pixels ignored within the
-                         bleed test diagnostic
-          hard_mask  - A file specifying those spectra that should be masked without testing
-          print_results - If True then the results are printed to std out
-          inst_name  - The name of the instrument to perform the diagnosis.
-                       If it is not provided then the default instrument is used (default = None)
+            This method does some additional processing before moving on to the diagnostics:
+              1) Computes the white beam integrals, converting to energy
+              2) Computes the background integral using the instrument defined range
+              3) Computes a total count from the sample
+              
+            These inputs are passed to the diagnostics functions
+    
+            Required inputs:
+            
+              white  - A workspace, run number or filepath of a white beam run. A workspace is assumed to
+                       have simple been loaded and nothing else.
+            
+            Optional inputs:
+              sample - A workspace, run number or filepath of a sample run. A workspace is assumed to
+                       have simple been loaded and nothing else. (default = None)
+              second_white - If provided an additional set of tests is performed on this. (default = None)
+              hard_mask  - A file specifying those spectra that should be masked without testing (default=None)
+              tiny        - Minimum threshold for acceptance (default = 1e-10)
+              huge        - Maximum threshold for acceptance (default = 1e10)
+              bkgd_range - A list of two numbers indicating the background range (default=instrument defaults)
+              van_out_lo  - Lower bound defining outliers as fraction of median value (default = 0.01)
+              van_out_hi  - Upper bound defining outliers as fraction of median value (default = 100.)
+              van_lo      - Fraction of median to consider counting low for the white beam diag (default = 0.1)
+              van_hi      - Fraction of median to consider counting high for the white beam diag (default = 1.5)
+              van_sig  - Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the\n"
+                          "difference with respect to the median value must also exceed this number of error bars (default=0.0)
+              samp_zero    - If true then zeroes in the vanadium data will count as failed (default = True)
+              samp_lo      - Fraction of median to consider counting low for the white beam diag (default = 0)
+              samp_hi      - Fraction of median to consider counting high for the white beam diag (default = 2.0)
+              samp_sig  - Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the\n"
+                          "difference with respect to the median value must also exceed this number of error bars (default=3.3)
+              variation  - The number of medians the ratio of the first/second white beam can deviate from
+                           the average by (default=1.1)
+              bleed_test - If true then the CreatePSDBleedMask algorithm is run
+              bleed_maxrate - If the bleed test is on then this is the maximum framerate allowed in a tube
+              bleed_pixels - If the bleed test is on then this is the number of pixels ignored within the
+                             bleed test diagnostic
+              print_results - If True then the results are printed to the screen
         """
+        if kwargs.get('second_white', None) is not None:
+            raise RuntimeError("Diagnostic does not support second white beam run yet")
+
         lhs_names = lhs_info('names')
         if len(lhs_names) > 0:
             var_name = lhs_names[0]
         else:
             var_name = None
-          
-        __diagnostic_mask = diagnostics.diagnose(white_run, sample_run, other_white, remove_zero,
-                                        tiny, large, median_lo, median_hi, signif,
-                                        bkgd_threshold, bkgd_range, variation,
-                                        bleed_test, bleed_maxrate, bleed_pixels,                                              
-                                        hard_mask, print_results, self.instr_name)
-        if var_name is not None:
-            result = RenameWorkspace(str(__diagnostic_mask), var_name).workspace()
+
+        # Check for any keywords that have not been supplied and put in the defaults
+        for par in self.diag_params:
+            arg = par.lstrip('diag_')
+            if arg not in kwargs:
+                kwargs[arg] = getattr(self, par)
+        
+        # Get the white beam vanadium integrals
+        whiteintegrals = self.do_white(white, None, None) # No grouping yet
+        # Get the background/total counts from the sample if present
+        if 'sample' in kwargs:
+            sample = kwargs['sample']
+            del kwargs['sample']
+            # If the bleed test is requested then we need to pass in the sample_run as well
+            if kwargs.get('bleed_test', False):
+                kwargs['sample_run'] = sample
+            
+            # Set up the background integrals
+            result_ws = common.load_runs(sample)
+            self.normalise(result_ws, result_ws, self.normalise_method)
+            if 'bkgd_range' in kwargs:
+                bkgd_range = kwargs['bkgd_range']
+                del kwargs['bkgd_range']
+            else:
+                bkgd_range = self.background_range
+            background_int = Integration(result_ws, OutputWorkspace='background_int',\
+                                         RangeLower=bkgd_range[0],RangeUpper=bkgd_range[1], \
+                                         IncludePartialBins=True).workspace()
+            total_counts = Integration(result_ws, OutputWorkspace='total_counts', IncludePartialBins=True).workspace()
+            background_int = ConvertUnits(background_int, background_int, "Energy", AlignBins=0).workspace()
+            background_int *= 1.7016e8
+            background_int /= whiteintegrals
+            kwargs['background_int'] = background_int
+            kwargs['sample_counts'] = total_counts
+            
+        # Check how we should run diag
+        if self.diag_spectra is None:
+            # Do the whole lot at once
+            diagnostics.diagnose(whiteintegrals, **kwargs)
         else:
-            result = __diagnostic_mask
+            banks = self.diag_spectra.split(";")
+            bank_spectra = []
+            for b in banks:
+                token = b.split(",")  # b = "(,)"
+                if len(token) != 2: 
+                    raise ValueError("Invalid bank spectra specification in diag %s" % self.diag_spectra)
+                start = int(token[0].lstrip('('))
+                end = int(token[1].rstrip(')'))
+                bank_spectra.append((start,end))
+            
+            for index, bank in enumerate(bank_spectra):
+                kwargs['start_index'] = bank[0] - 1
+                kwargs['end_index'] = bank[1] - 1
+                diagnostics.diagnose(whiteintegrals, **kwargs)
+                
+        if 'sample' in kwargs:
+            DeleteWorkspace('background_int')
+            DeleteWorkspace('total_counts')
+        # Return a mask workspace
+        diag_mask = ExtractMasking(whiteintegrals, OutputWorkspace='diag_mask').workspace()
+        DeleteWorkspace(whiteintegrals)
+
+        if var_name is not None and var_name != str(diag_mask):
+            result = RenameWorkspace(str(diag_mask), var_name).workspace()
+        else:
+            result = diag_mask
         self.spectra_masks = result
         return result
     
@@ -495,13 +553,13 @@ class DirectEnergyConversion(object):
         
         ConvertToMatrixWorkspace(data_ws, data_ws)
         
-        min_value = self.tiny
-        max_value = self.large
+        min_value = self.diag_tiny
+        max_value = self.diag_huge
         median_lbound = self.monovan_lo_bound
         median_ubound = self.monovan_hi_bound
         median_frac_low = self.monovan_lo_frac
         median_frac_hi = self.monovan_hi_frac
-        median_sig = self.signif
+        median_sig = self.diag_samp_sig
 
         self.mask_detectors_outside_range(data_ws, min_value, max_value, median_lbound,
                                           median_ubound, median_frac_low, median_frac_hi, median_sig)
@@ -728,13 +786,34 @@ class DirectEnergyConversion(object):
         self.van_mass = self.get_default_parameter("vanadium-mass")
         self.van_rmm = self.get_default_parameter("vanadium-rmm")
 
-        self.tiny = self.get_default_parameter('tiny')
-        self.large = self.get_default_parameter('large')
+        # Diag 
+        self.diag_params = ['diag_tiny', 'diag_huge', 'diag_samp_zero', 'diag_samp_lo', 'diag_samp_hi','diag_samp_sig',\
+                            'diag_van_out_lo', 'diag_van_out_hi', 'diag_van_lo', 'diag_van_hi', 'diag_van_sig']
+        # Add an attribute for each of them
+        for par in self.diag_params:
+            setattr(self, par, self.get_default_parameter(par))
+            
+        # Bleed options
+        try:
+            self.diag_bleed_test = self.get_default_parameter('diag_bleed_test')
+            self.diag_bleed_maxrate = self.get_default_parameter('diag_bleed_maxrate')
+            self.diag_bleed_pixels = self.get_default_parameter('diag_bleed_pixels')
+            self.diag_params.extend(['diag_bleed_maxrate','diag_bleed_pixels'])
+        except ValueError:
+            self.diag_bleed_test = False
+        self.diag_params.append('diag_bleed_test')
+
+        # Do we have specified spectra to diag over
+        try:
+            self.diag_spectra = self.instrument.getStringParameter("diag_spectra")[0]
+        except Exception:
+            self.diag_spectra = None
+        
+        # Absolute units
         self.monovan_lo_bound = self.get_default_parameter('monovan_lo_bound')
         self.monovan_hi_bound = self.get_default_parameter('monovan_hi_bound')
         self.monovan_lo_frac = self.get_default_parameter('monovan_lo_frac')
         self.monovan_hi_frac = self.get_default_parameter('monovan_hi_frac')
-        self.signif = self.get_default_parameter('signif')
 
         # Mark IDF files as read
         self._idf_values_read = True

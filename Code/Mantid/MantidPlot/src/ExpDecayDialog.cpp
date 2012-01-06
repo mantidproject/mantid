@@ -166,7 +166,7 @@ void ExpDecayDialog::activateCurve(const QString& curveName)
 	if (!c)
 		return;
 
-    ApplicationWindow *app = (ApplicationWindow *)this->parent();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
 	if (!app)
         return;
 
@@ -201,7 +201,7 @@ void ExpDecayDialog::fit()
 		return;
 	}
 
-	ApplicationWindow *app = (ApplicationWindow *)this->parent();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
 	if (!app)
         return;
 
@@ -264,7 +264,7 @@ void ExpDecayDialog::closeEvent (QCloseEvent * e )
 {
 	if(fitter)
 	{
-        ApplicationWindow *app = (ApplicationWindow *)this->parent();
+				ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
         if (app && app->pasteFitResultsToPlot)
             fitter->showLegend();
 

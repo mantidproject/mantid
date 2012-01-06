@@ -457,8 +457,8 @@ private:
     void handleReplaceWorkspace(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
     Poco::NObserver<MantidUI, Mantid::API::WorkspaceAfterReplaceNotification> m_replaceObserver;
 
-    void handleDeleteWorkspace(Mantid::API::WorkspaceDeleteNotification_ptr pNf);
-    Poco::NObserver<MantidUI, Mantid::API::WorkspaceDeleteNotification> m_deleteObserver;
+    void handleDeleteWorkspace(Mantid::API::WorkspacePostDeleteNotification_ptr pNf);
+    Poco::NObserver<MantidUI, Mantid::API::WorkspacePostDeleteNotification> m_deleteObserver;
 
   void handleClearADS(Mantid::API::ClearADSNotification_ptr pNf);
   Poco::NObserver<MantidUI, Mantid::API::ClearADSNotification> m_clearADSObserver;

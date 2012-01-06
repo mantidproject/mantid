@@ -76,7 +76,6 @@ void Integration::exec()
   m_MaxRange = getProperty("RangeUpper");
   m_MinSpec = getProperty("StartWorkspaceIndex");
   m_MaxSpec = getProperty("EndWorkspaceIndex");
-  //m_incPartBins = getProperty("IncludePartialBins");
   const bool incPartBins = getProperty("IncludePartialBins");
 
   // Get the input workspace
@@ -101,14 +100,6 @@ void Integration::exec()
     g_log.warning("Range_upper is less than Range_lower. Will integrate up to frame maximum.");
     m_MaxRange = 0.0;
   }
-
-  // No check for EventWorkspace because all output to MatrixWorkspace, rebin can be used to retain EventWorkspace
-  //inputEventWS = boost::dynamic_pointer_cast<const EventWorkspace>(localworkspace);
-  //if (inputEventWS)
-  //{
-  //  execEvent();
-  //  return;
-  //}
 
   // Create the 2D workspace (with 1 bin) for the output
   MatrixWorkspace_sptr outputWorkspace = API::WorkspaceFactory::Instance().create(localworkspace,m_MaxSpec-m_MinSpec+1,2,1);

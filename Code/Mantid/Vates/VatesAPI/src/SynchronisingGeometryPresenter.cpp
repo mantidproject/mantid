@@ -27,7 +27,7 @@ namespace Mantid
     struct FindId : public std::unary_function <DimPresenter_sptr, bool>
     {
       const std::string m_id;
-      FindId(const std::string id) : m_id(id){ }
+      FindId(const std::string &id) : m_id(id){ }
 
       bool operator ()(const DimPresenter_sptr obj) const
       {
@@ -40,7 +40,7 @@ namespace Mantid
     struct FindModelId : public std::unary_function <IMDDimension_sptr, bool>
     {
       const std::string m_id;
-      FindModelId(const std::string id) : m_id(id){ }
+      FindModelId(const std::string &id) : m_id(id){ }
 
       bool operator ()(const IMDDimension_sptr obj) const
       {

@@ -24,8 +24,8 @@ public:
     ExtractMasking maskExtractor;
     maskExtractor.initialize();
     std::vector<Property*> properties = maskExtractor.getProperties();
-    TS_ASSERT_EQUALS(properties.size(), 2); 
-    if( properties.size() == 2 )
+    TS_ASSERT_EQUALS(properties.size(), 3);
+    if( properties.size() == 3 )
     {
       TS_ASSERT_EQUALS(properties[0]->name(), "InputWorkspace");
       TS_ASSERT_EQUALS(properties[1]->name(), "OutputWorkspace");

@@ -149,7 +149,7 @@ if (from >= to)
 	return;
 	}
 
-Interpolation *i = new Interpolation((ApplicationWindow *)this->parent(), graph, curve,
+Interpolation *i = new Interpolation(dynamic_cast<ApplicationWindow *>(this->parent()), graph, curve,
                                       from, to, boxMethod->currentIndex());
 i->setOutputPoints(boxPoints->value());
 i->setColor(boxColor->currentIndex());
@@ -181,7 +181,7 @@ void InterpolationDialog::activateCurve(const QString& curveName)
 	if (!c)
 		return;
 
-    ApplicationWindow *app = (ApplicationWindow *)parent();
+    ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
     if(!app)
         return;
 
@@ -193,7 +193,7 @@ void InterpolationDialog::activateCurve(const QString& curveName)
 
 void InterpolationDialog::changeDataRange()
 {
-ApplicationWindow *app = (ApplicationWindow *)parent();
+ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
 if(!app)
     return;
 

@@ -75,7 +75,7 @@ public:
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "InstrumentCorrections"; }
+  virtual const std::string category() const { return "CorrectionFunctions\\InstrumentCorrections"; }
 
 private:
   //conversion constants applicable to histogram and event workspaces

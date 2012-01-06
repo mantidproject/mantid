@@ -48,6 +48,26 @@ def grab_doxygen(cppfile, method):
     return None
     
     
+def start_python_doc_section(out, line, look_for, section_header):
+    """Modify the lines by adding a section like Args
+    
+    @param out :: list of dosctring lines
+    @param line :: last line read, no spaces
+    @param look_for :: @string to look at
+    @param section_header :: line text
+    @return True if the section was added
+    """
+    # Add the 'Args:' line.
+    if line.strip().startswith(look_for):
+        # Add a blank line if there isn't one
+        if len(out)>0:
+            if out[-1].strip() != "":
+                out.append("    ")
+        out.append(section_header)
+        return True
+    return False
+                
+    
 #----------------------------------------------------------
 def doxygen_to_docstring(doxygen, method):
     """ Takes an array of DOXYGEN lines, and converts
@@ -60,11 +80,36 @@ def doxygen_to_docstring(doxygen, method):
     out.append("%Docstring")
     out.append(method)
     out.append('-' * len(method))
+    
+    args_started = False
+    returns_started = False
+    raises_started = False
+    
     for line in doxygen:
         line = line.strip()
         if line.startswith("/**"): line = line[3:]
         if line.endswith("*/"): line = line[:-2]
         if line.startswith("*"): line = line[1:]
+        
+        # Add the 'Args:' line.
+        if not args_started:
+            args_started = start_python_doc_section(out, line, "@param", "    Args:")
+        
+        # Add the 'Returns:' line.
+        if not returns_started:
+            returns_started = start_python_doc_section(out, line, "@return", "    Returns:")
+        
+        # Add the 'Raises:' line.
+        if not raises_started:
+            raises_started = start_python_doc_section(out, line, "@throw", "    Raises:")
+
+        # Replace the doxygen codes with an indent
+        line = line.replace("@param ", "    ")
+        line = line.replace("@returns ", "    ")
+        line = line.replace("@return ", "    ")
+        line = line.replace("@throws ", "    ")
+        line = line.replace("@throw ", "    ")
+        
         # Make the text indented by 4 spaces
         line = "   " + line
         out.append(line)

@@ -23,23 +23,36 @@ public:
     ~LineViewer();
 
     void setWorkspace(Mantid::API::IMDWorkspace_sptr ws);
+    void setFreeDimensions(bool all, int dimX, int dimY);
     void setStart(Mantid::Kernel::VMD start);
     void setEnd(Mantid::Kernel::VMD end);
     void setWidth(Mantid::Kernel::VMD width);
     void setPlanarWidth(double width);
-    void setNumBins(size_t numBins);
-    void setFreeDimensions(bool all, int dimX, int dimY);
+    void setNumBins(int numBins);
+    void setFixedBinWidthMode(bool fixedWidth, double binWidth);
 
     void showPreview();
     void showFull();
 
     double getPlanarWidth() const;
     Mantid::Kernel::VMD getWidth() const;
+    double getFixedBinWidth() const;
+    bool getFixedBinWidthMode() const;
+    int getNumBins() const;
+    double getBinWidth() const;
+
+    // For python
+    void setStartXY(double x, double y);
+    void setEndXY(double x, double y);
+    void setWidth(double width);
+    void setWidth(int dim, double width);
+    void setWidth(const QString & dim, double width);
 
 private:
     void createDimensionWidgets();
     void updateFreeDimensions();
     void updateStartEnd();
+    void updateBinWidth();
     void readTextboxes();
     void calculateCurve(Mantid::API::IMDWorkspace_sptr ws, Mantid::Kernel::VMD start, Mantid::Kernel::VMD end,
         size_t minNumPoints, QwtPlotCurve * curve);
@@ -52,12 +65,16 @@ public slots:
     void numBinsChanged();
     void adaptiveBinsChanged();
     void setFreeDimensions(size_t dimX, size_t dimY);
+    void on_radNumBins_toggled();
+    void on_textBinWidth_changed();
 
 signals:
     /// Signal emitted when the planar width changes
     void changedPlanarWidth(double);
     /// Signal emitted when the start or end position has changed
     void changedStartOrEnd(Mantid::Kernel::VMD, Mantid::Kernel::VMD);
+    /// Signal emitted when changing fixed bin width mode
+    void changedFixedBinWidth(bool, double);
 
 
 private:
@@ -115,6 +132,15 @@ private:
     int m_freeDimX;
     /// Index of the Y dimension in the 2D slice
     int m_freeDimY;
+
+    /// When True, then the bin width is fixed and the number of bins changes
+    bool m_fixedBinWidthMode;
+
+    /// Desired bin width in fixedBinWidthMode
+    double m_fixedBinWidth;
+
+    /// ACTUAL bin width, whether in fixed or not-fixed bin width mode
+    double m_binWidth;
 
 };
 

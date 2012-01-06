@@ -2,7 +2,8 @@
 #define MANTID_CUSTOMINTERFACES_MEMENTO_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidAPI/Workspace.h"
 #include <string>
 #include <vector>
 #include <boost/shared_ptr.hpp>
@@ -13,7 +14,8 @@ namespace MantidQt
   {
     /** @class WorkspaceMemento
 
-    A memento carrying basic information about an existing workspace.
+    A memento carrying basic information about an existing workspace. 
+    Mementos introduce transaction like behaviour because changes to mementos are not automatically persisted to workspaces and can occur independently.
 
     @author Owen Arnold
     @date 30/08/2011
@@ -67,37 +69,40 @@ namespace MantidQt
       @returns the matrix workspace
       @throw if workspace has been moved since instantiation.
       */
-      virtual Mantid::API::MatrixWorkspace_sptr fetchIt() const = 0;
-      /**
-      Generates a status report based on the workspace state.
-      */
-      std::string statusReport()
-      {
-        return m_statusReport;
-      }
+      virtual Mantid::API::Workspace_sptr  fetchIt() const = 0;
+      /// Generates a status report based on the workspace state.
+      std::string statusReport() const;
       /// Perform any clean up operations of the underlying workspace
       virtual void cleanUp() = 0;
-      /// Sets the status report overrideing it with the provided message.
-      void setReport(const Status status);
-
+      /// Sets a ub matrix element by element.
+      void setUB(const double& ub00, const double&  ub01, const double&  ub02, const double&  ub10, const double&  ub11, const double&  ub12, const double&  ub20, const double&  ub21, const double&  ub22);
+      /// Getter for a ub matrix.
+      std::vector<double> getUB() const;
+      /// Sets the goniometer matrix
+      void setGoniometer(const Mantid::Kernel::DblMatrix& matrix); 
+      /// Getter for the goniometer matrix
+      Mantid::Kernel::DblMatrix getGoniometer() const;
       /// Destructor
       virtual ~WorkspaceMemento(){};
-
+      /// Common implementation for generating status
+      Status generateStatus() const;
+      /// Apply actions wrapped up in the memento back to the original workspace
+      virtual Mantid::API::Workspace_sptr applyActions() = 0;
+      
     protected:
 
-      /**
-      Common implementation of report generation.
-      @param ws : workspace to report on.
-      */
-      void generateReport(Mantid::API::MatrixWorkspace_sptr ws);
+      // Vector of elements describing a UB matrix.
+      std::vector<double> m_ub;
 
     private:
 
       /// Extract a friendly status.
-      void interpretStatus(const Status arg);
+      std::string interpretStatus(const Status arg) const;
 
-      /// Status report.
-      std::string m_statusReport;
+      
+
+      // Goniometer matrix
+      Mantid::Kernel::DblMatrix m_goniometer;
 
     };
 

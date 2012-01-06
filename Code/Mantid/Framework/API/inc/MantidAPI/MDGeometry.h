@@ -104,7 +104,7 @@ namespace API
   protected:
 
     /// Function called when observer objects recieves a notification
-    void deleteNotificationReceived(Mantid::API::WorkspaceDeleteNotification_ptr notice);
+    void deleteNotificationReceived(Mantid::API::WorkspacePreDeleteNotification_ptr notice);
 
     /// Vector of the dimensions used, in the order X Y Z t, etc.
     std::vector<Mantid::Geometry::IMDDimension_sptr> m_dimensions;
@@ -125,7 +125,7 @@ namespace API
     Mantid::API::CoordTransform * m_transformToOriginal;
 
     /// Poco delete notification observer object
-    Poco::NObserver<MDGeometry, Mantid::API::WorkspaceDeleteNotification> m_delete_observer;
+    Poco::NObserver<MDGeometry, Mantid::API::WorkspacePreDeleteNotification> m_delete_observer;
 
     /// Set to True when the m_delete_observer is observing workspace deletions.
     bool m_observingDelete;

@@ -213,9 +213,9 @@ public:
   /// Get a workspace pointer from the ADS
   boost::shared_ptr<Mantid::API::Workspace> retrieveWorkspace(const std::string & wsName);
   /// Function called when observer objects recieves a notification
-  void deleteNotificationReceived(Mantid::API::WorkspaceDeleteNotification_ptr notice);
+  void deleteNotificationReceived(Mantid::API::WorkspacePostDeleteNotification_ptr notice);
   /// Poco delete notification observer object
-  Poco::NObserver<FrameworkManagerProxy, Mantid::API::WorkspaceDeleteNotification> m_delete_observer;
+  Poco::NObserver<FrameworkManagerProxy, Mantid::API::WorkspacePostDeleteNotification> m_delete_observer;
   /// Function called when observer objects recieve an add notification
   void addNotificationReceived(Mantid::API::WorkspaceAddNotification_ptr notice);
   /// Poco add notification observer object

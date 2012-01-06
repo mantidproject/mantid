@@ -52,13 +52,14 @@ protected slots:
   void changedSlicePoint(Mantid::Kernel::VMD);
   void lineChanging(QPointF start, QPointF end, double width);
   void lineChanged(QPointF start, QPointF end, double width);
-  void showLineViewer(bool);
   void changeStartOrEnd(Mantid::Kernel::VMD, Mantid::Kernel::VMD);
   void changePlanarWidth(double);
   void resizeWindow();
+  void lineViewer_changedFixedBinWidth(bool fixed, double binWidth);
+  void showLineViewer(bool);
 
 protected:
-  void deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
+  void preDeleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
   void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
 
 

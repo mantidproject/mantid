@@ -59,7 +59,7 @@ Interpolation::Interpolation(ApplicationWindow *parent, Table *t, const QString&
 void Interpolation::init(int m)
 {
     if (m < 0 || m > 2){
-        QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot") + " - " + tr("Error"),
+        QMessageBox::critical(dynamic_cast<ApplicationWindow *>(this->parent()), tr("MantidPlot") + " - " + tr("Error"),
         tr("Unknown interpolation method. Valid values are: 0 - Linear, 1 - Cubic, 2 - Akima."));
         d_init_err = true;
         return;
@@ -88,14 +88,14 @@ void Interpolation::init(int m)
 void Interpolation::setMethod(int m)
 {
 if (m < 0 || m > 2){
-    QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot - Error"),
+    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(this->parent()), tr("MantidPlot - Error"),
     tr("Unknown interpolation method, valid values are: 0 - Linear, 1 - Cubic, 2 - Akima."));
     d_init_err = true;
     return;
     }
 int min_points = m + 3;
 if (d_n < min_points){
-    QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot") + " - " + tr("Error"),
+    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(this->parent()), tr("MantidPlot") + " - " + tr("Error"),
     tr("You need at least %1 points in order to perform this operation!").arg(min_points));
     d_init_err = true;
     return;
@@ -179,6 +179,8 @@ int Interpolation::sortedCurveData(QwtPlotCurve *c, double start, double end, do
         if (i > i_start && xtemp[j] == pr_x){
             delete (*x);
             delete (*y);
+            delete[] xtemp;
+            delete[] ytemp;
             return -1;//this kind of data causes division by zero in GSL interpolation routines
         }
         pr_x = xtemp[j];

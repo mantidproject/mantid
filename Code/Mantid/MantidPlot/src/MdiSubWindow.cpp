@@ -39,6 +39,7 @@
 #include <QMenu>
 #include <QTextStream>
 #include <QTemporaryFile>
+#include <QMdiArea>
 
 #include <fstream>
 #include <string>
@@ -88,6 +89,11 @@ switch (d_caption_policy)
 	break;
 	}
 
+  QWidget* wrapper = this->getWrapperWindow();
+  if (wrapper)
+  {
+    wrapper->setWindowTitle(windowTitle());
+  }
 	d_app->setListViewLabel(objectName(), d_label);
 };
 
@@ -97,6 +103,52 @@ void MdiSubWindow::resizeEvent( QResizeEvent* e )
   MdiSubWindowParent_t::resizeEvent( e );
 }
 
+/**
+ * Override the QWidget's show() slot to show the wrapper window instead.
+ */
+void MdiSubWindow::show()
+{
+  QWidget* pw = getWrapperWindow();
+  if (!pw)
+  {
+    MdiSubWindowParent_t::show();
+    return;
+  }
+  pw->show();
+}
+
+/**
+ * Override the QWidget's hide() slot to hide the wrapper window instead.
+ */
+void MdiSubWindow::hide()
+{
+  QWidget* pw = getWrapperWindow();
+  if (!pw)
+  {
+    MdiSubWindowParent_t::hide();
+    return;
+  }
+  pw->hide();
+}
+
+/**
+ * Override the QWidget's close() slot to close the wrapper window as well.
+ */
+bool MdiSubWindow::close()
+{
+  QWidget* pw = getWrapperWindow();
+  if (!pw)
+  {
+    return MdiSubWindowParent_t::close();
+  }
+  pw->close();
+  return false;
+}
+
+/**
+ * Handle the close event.
+ * @param e :: A QCloseEvent event.
+ */
 void MdiSubWindow::closeEvent( QCloseEvent *e )
 {
 	if (d_confirm_close){
@@ -201,30 +253,50 @@ void MdiSubWindow::setStatus(Status s)
 
 void MdiSubWindow::setHidden()
 {
-    d_status = Hidden;
-    emit statusChanged (this);
+    setStatus(Hidden);
     hide();
 }
 
 void MdiSubWindow::setNormal()
 {
-	showNormal();
-	d_status = Normal;
-	emit statusChanged (this);
+  QWidget* wrapper = getWrapperWindow();
+  if (wrapper)
+  {
+    wrapper->showNormal();
+  }
+  else
+  {
+	  showNormal();
+  }
+	setStatus(Normal);
 }
 
 void MdiSubWindow::setMinimized()
 {
-	d_status = Minimized;
-	emit statusChanged (this);
-	showMinimized();
+	setStatus(Minimized);
+  QWidget* wrapper = getWrapperWindow();
+  if (wrapper)
+  {
+    wrapper->showMinimized();
+  }
+  else
+  {
+	  showMinimized();
+  }
 }
 
 void MdiSubWindow::setMaximized()
 {
-	showMaximized();
-	d_status = Maximized;
-	emit statusChanged (this);
+  QWidget* wrapper = getWrapperWindow();
+  if (wrapper)
+  {
+    wrapper->showMaximized();
+  }
+  else
+  {
+	  showMaximized();
+  }
+	setStatus(Maximized);
 }
 
 QString MdiSubWindow::parseAsciiFile(const QString& fname, const QString &commentString,
@@ -337,3 +409,115 @@ QString MdiSubWindow::parseMacAsciiFile(const QString& fname, const QString &com
 	QApplication::restoreOverrideCursor();
 	return path;
 }
+
+/**
+ * Return a pointer to the wrapper window if it is a FloatingWindow or NULL otherwise.
+ */
+FloatingWindow* MdiSubWindow::getFloatingWindow() const
+{
+  if (!parent() || !parent()->parent()) return NULL;
+  return dynamic_cast<FloatingWindow*>(parent()->parent());
+}
+
+/**
+ * Return a pointer to the wrapper window if it is a QMdiSubWindow or NULL otherwise.
+ */
+QMdiSubWindow* MdiSubWindow::getDockedWindow() const
+{
+  if (!parent()) return NULL;
+  return dynamic_cast<QMdiSubWindow*>(parent());
+}
+
+/**
+ * Return a pointer to the wrapper window.
+ */
+QWidget* MdiSubWindow::getWrapperWindow() const
+{
+  QWidget* wrapper = getDockedWindow();
+  if (!wrapper)
+  {
+    wrapper = getFloatingWindow();
+  }
+  return wrapper;
+}
+
+/*----------- FloatingWindow ---------*/
+
+/**
+ * Constructor.
+ */
+FloatingWindow::FloatingWindow(ApplicationWindow* appWindow, Qt::WindowFlags f):
+QMainWindow(appWindow,f),
+//MdiSubWindowParent_t(appWindow,f | Qt::Window),
+d_app(appWindow)
+{
+  setFocusPolicy(Qt::StrongFocus);
+  connect(appWindow,SIGNAL(shutting_down()),this,SLOT(close()));
+  m_flags = windowFlags();
+}
+
+/**
+ * Catch the WindowActivate event to tell ApplicationWindow that it's activated
+ */
+bool FloatingWindow::event(QEvent * e)
+{
+  if (e->type() == QEvent::WindowActivate)
+  {
+    MdiSubWindow* w = dynamic_cast<MdiSubWindow*>(widget());
+    if (w && this != w->d_app->getActiveFloating())
+    {
+      w->d_app->activateWindow(w);
+    }
+  }
+  else if (e->type() == QEvent::WindowStateChange)
+  {
+    if (this->isMinimized())
+    {
+      this->setParent(NULL);
+      this->showMinimized();
+      mdiSubWindow()->setStatus(MdiSubWindow::Minimized);
+    }
+    else if ( (!this->isMaximized() || !this->isMinimized() ) && this->parent() != d_app)
+    {
+      this->setParent(d_app);
+      this->setWindowFlags(m_flags);
+      this->showNormal();
+      mdiSubWindow()->setStatus(MdiSubWindow::Normal);
+    }
+    else if (this->isMaximized() && this->parent() != d_app)
+    {
+      this->setParent(d_app);
+      this->setWindowFlags(m_flags);
+      this->showMaximized();
+      mdiSubWindow()->setStatus(MdiSubWindow::Maximized);
+    }
+  }
+  else if (e->type() == QEvent::Close)
+  {
+    d_app->removeFloatingWindow(this);
+  }
+  return QMainWindow::event(e);
+}
+
+void FloatingWindow::setStaysOnTopFlag()
+{
+  Qt::WindowFlags flags = windowFlags();
+  Qt::WindowFlags new_flags = flags | Qt::WindowStaysOnTopHint;
+  if (new_flags != flags)
+  {
+    setWindowFlags(new_flags);
+    show();
+  }
+}
+
+void FloatingWindow::removeStaysOnTopFlag()
+{
+  Qt::WindowFlags flags = windowFlags();
+  Qt::WindowFlags new_flags = flags ^ Qt::WindowStaysOnTopHint;
+  if (new_flags != flags)
+  {
+    setWindowFlags(new_flags);
+    show();
+  }
+}
+

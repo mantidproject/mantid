@@ -26,7 +26,7 @@ public:
   // This means the constructor isn't called when running other tests
   static ApplyDetailedBalanceTest *createSuite() { return new ApplyDetailedBalanceTest(); }
   static void destroySuite( ApplyDetailedBalanceTest *suite ) { delete suite; }
-  ApplyDetailedBalanceTest():inputWSname("testInput"),outputWSname("testOutput")
+  ApplyDetailedBalanceTest():inputWSname("testADBInput"),outputWSname("testADBOutput")
   {
   }
 
@@ -47,21 +47,70 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Temperature", "300.") );
     TS_ASSERT_THROWS_NOTHING( alg.execute() );
     TS_ASSERT( alg.isExecuted() );
-    /*
-    // Retrieve the workspace from data service. TODO: Change to your desired type
-    Workspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve(outWSName)) );
-    TS_ASSERT(ws);
-    if (!ws) return;
+
+    Workspace2D_sptr inws,outws;
+    TS_ASSERT_THROWS_NOTHING( outws = boost::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve(outputWSname)) );
+    TS_ASSERT(outws);
+    TS_ASSERT_THROWS_NOTHING( inws = boost::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve(inputWSname)) );
+    TS_ASSERT(inws);
+    if (!outws) return;
     
-    // TODO: Check the results
-    
-    // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove(outWSName);*/
+    for(std::size_t i=0;i<5;++i)
+    {
+      TS_ASSERT_DELTA(outws->readY(0)[i],M_PI*(1-std::exp(-11.604519*(inws->readX(0)[i]+inws->readX(0)[i+1])/2./300.))*inws->readY(0)[i],1e-8);
+    }
+    AnalysisDataService::Instance().remove(outputWSname);
+    AnalysisDataService::Instance().remove(inputWSname);
   }
-  
-  void test_Something()
+
+  void test_failTemp()
   {
+    createWorkspace2D(true);
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace",inputWSname) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace",outputWSname) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Temperature", "x") );
+    TS_ASSERT_THROWS_NOTHING( alg.execute() );
+    TS_ASSERT( alg.isExecuted() );
+    Workspace2D_sptr outws;
+    TS_ASSERT_THROWS_ANYTHING( outws = boost::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve(outputWSname)) );
+
+    //AnalysisDataService::Instance().remove(outputWSname);
+    AnalysisDataService::Instance().remove(inputWSname);
+  }
+
+  void test_event()
+  {
+    EventWorkspace_sptr evin=WorkspaceCreationHelper::CreateEventWorkspace(1,5,10,0,1,3),evout;
+    evin->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
+    AnalysisDataService::Instance().add(inputWSname, evin);
+
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace",inputWSname));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace",outputWSname));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Temperature","100"));
+
+
+    alg.execute();
+    TS_ASSERT( alg.isExecuted() );
+
+    TS_ASSERT_THROWS_NOTHING( evout = boost::dynamic_pointer_cast<EventWorkspace>(
+                                AnalysisDataService::Instance().retrieve(outputWSname)));
+
+    double temp=100.;
+    TS_ASSERT( evout ); //should be an event workspace
+    for (size_t i=0;i<5;++i)
+    {
+      double en=static_cast<double>(i)+0.5;
+      double w=M_PI*(1-std::exp(-en*11.604519/temp));
+      TS_ASSERT_DELTA(evout->getEventList(0).getEvent(i).m_weight,w,w*1e-6);
+    }
+    AnalysisDataService::Instance().remove(outputWSname);
+
+    AnalysisDataService::Instance().remove(inputWSname);
+
   }
 
 private:

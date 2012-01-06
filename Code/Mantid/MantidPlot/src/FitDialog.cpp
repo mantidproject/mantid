@@ -96,7 +96,7 @@ FitDialog::FitDialog(Graph *g, QWidget* parent, Qt::WFlags fl )
 
 void FitDialog::initFitPage()
 {
-    ApplicationWindow *app = (ApplicationWindow *)parent();
+    ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
 
     QGridLayout *gl1 = new QGridLayout();
     gl1->addWidget(new QLabel(tr("Curve")), 0, 0);
@@ -362,7 +362,7 @@ void FitDialog::initEditPage()
 
 void FitDialog::initAdvancedPage()
 {
-	ApplicationWindow *app = (ApplicationWindow *)this->parent();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
 
 	generatePointsBtn = new QRadioButton (tr("&Uniform X Function"));
 	generatePointsBtn->setChecked(app->generateUniformFitPoints);
@@ -467,7 +467,7 @@ void FitDialog::initAdvancedPage()
 
 void FitDialog::applyChanges()
 {
-	ApplicationWindow *app = (ApplicationWindow *)this->parent();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
 	int prec = boxPrecision->value();
 	app->fit_output_precision = prec;
 	if (d_current_fit)
@@ -618,7 +618,7 @@ void FitDialog::saveUserFunction()
 		if (funcBox->currentItem()->text() == name)
 			showExpression(index);
 	} else {
-	    ApplicationWindow *app = (ApplicationWindow *)this->parent();
+			ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
 		QString filter = tr("MantidPlot fit model")+" (*.fit);;";
 		filter += tr("All files")+" (*.*)";
 		QString fn = QFileDialog::getSaveFileName(app, tr("MantidPlot") + " - " + tr("Save Fit Model As"),
@@ -694,7 +694,7 @@ void FitDialog::showFitPage()
 		return;
 	}
 
-	ApplicationWindow *app = (ApplicationWindow *)parent();
+  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
     if (!boxUseBuiltIn->isChecked()){
         d_current_fit = new NonLinearFit(app, d_graph);
 		d_current_fit->setParametersList(boxParam->text().split(QRegExp("[,;]+[\\s]*"), QString::SkipEmptyParts));
@@ -800,7 +800,7 @@ void FitDialog::showAdvancedPage()
 		scaleErrorsBox->setChecked(false);
 		scaleErrorsBox->setEnabled(false);
 	} else {
-		ApplicationWindow *app = (ApplicationWindow *)this->parent();
+		ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
 		if (app)
 			scaleErrorsBox->setChecked(app->fit_scale_errors);
 		scaleErrorsBox->setEnabled(true);
@@ -884,7 +884,7 @@ void FitDialog::showFunctionsList(int category)
 
 void FitDialog::chooseFolder()
 {
-	ApplicationWindow *app = (ApplicationWindow *)this->parent();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
 	if (categoryBox->currentRow() == 3){//plugins
         QString dir = QFileDialog::getExistingDirectory(this, tr("Choose the plugins folder"), app->fitPluginsPath);
         if (!dir.isEmpty()){
@@ -913,7 +913,7 @@ void FitDialog::loadPlugins()
     d_plugins.clear();
 	typedef char* (*fitFunc)();
 
-	ApplicationWindow *app = (ApplicationWindow *)this->parent();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
 	QString path = app->fitPluginsPath + "/";
 	QString modelsDirPath = app->fitModelsPath + "/";
 	QDir dir(path);
@@ -1011,7 +1011,7 @@ void FitDialog::addFunctionName()
 
 void FitDialog::accept()
 {
-	ApplicationWindow *app = (ApplicationWindow *)this->parent();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
 
 	QString curve = boxCurve->currentText();
 	QStringList curvesList = d_graph->curvesList();
@@ -1240,7 +1240,7 @@ void FitDialog::resetFunction()
 
 void FitDialog::initBuiltInFunctions()
 {
-	ApplicationWindow *app = (ApplicationWindow *)this->parent();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
 
 	d_built_in_functions << new SigmoidalFit(app, d_graph);
 	d_built_in_functions << new ExponentialFit(app, d_graph);
@@ -1294,7 +1294,7 @@ QStringList FitDialog::builtInFunctionNames()
 void FitDialog::loadUserFunctions()
 {
     d_user_functions.clear();
-	ApplicationWindow *app = (ApplicationWindow *)this->parent();
+  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
 	QString path = app->fitModelsPath + "/";
 	QDir dir(path);
 	QStringList lst = dir.entryList(QDir::Files|QDir::NoSymLinks, QDir::Name);
@@ -1356,7 +1356,7 @@ void FitDialog::saveInitialGuesses()
     if (!fileName.isEmpty())
         d_current_fit->save(fileName);
     else {
-	    ApplicationWindow *app = (ApplicationWindow *)this->parent();
+      ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
 		QString filter = tr("MantidPlot fit model") + " (*.fit);;";
 		filter += tr("All files") + " (*.*)";
 		QString fn = QFileDialog::getSaveFileName(app, tr("MantidPlot") + " - " + tr("Save Fit Model As"),

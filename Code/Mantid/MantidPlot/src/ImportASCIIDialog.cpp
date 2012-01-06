@@ -69,7 +69,7 @@ ImportASCIIDialog::ImportASCIIDialog(bool new_windows_only, QWidget * parent, bo
 	setExtensionWidget(d_advanced_options);
 
 	// get rembered option values
-	ApplicationWindow *app = (ApplicationWindow *)parent;
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
 	setLocale(app->locale());
 
 	d_strip_spaces->setChecked(app->strip_spaces);
@@ -261,7 +261,7 @@ void ImportASCIIDialog::initPreview(int previewMode)
 	if (previewMode < NewTables || previewMode > Overwrite)
 		return;
 
-	ApplicationWindow *app = (ApplicationWindow *)parent();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
 	if (!app)
 		return;
 
@@ -401,7 +401,7 @@ void ImportASCIIDialog::updateImportMode(int mode)
 
 void ImportASCIIDialog::closeEvent(QCloseEvent* e)
 {
-	ApplicationWindow *app = (ApplicationWindow *)this->parent();
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
 	if (app){
 		app->d_extended_import_ASCII_dialog = this->isExtended();
 		app->d_ASCII_file_filter = this->selectedFilter();
@@ -774,7 +774,7 @@ PreviewMatrix::PreviewMatrix(QWidget *parent, Matrix * m):QTableView(parent)
 {
 	d_matrix_model = new MatrixModel(32, 32, m);
 	if (!m){
-		ApplicationWindow *app = (ApplicationWindow *)parent;
+		ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
 		if (app){
 			d_matrix_model->setLocale(app->locale());
 			d_matrix_model->setNumericFormat('f', app->d_decimal_digits);

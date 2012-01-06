@@ -31,11 +31,14 @@ void export_Quat()
     .def("len2", &Quat::len2, "Returns the square of the 'length' of the quaternion")
     .def(self + self)
     .def(self += self)
+      // cppcheck-suppress duplicateExpression
     .def(self - self)
     .def(self -= self)
     .def(self * self)
     .def(self *= self)
+      // cppcheck-suppress duplicateExpression
     .def(self == self)
+      // cppcheck-suppress duplicateExpression
     .def(self != self)
     .def("__getitem__", (const double&(Quat::*)(int) const)&Quat::operator[], return_value_policy<copy_const_reference>())
     .def(boost::python::self_ns::str(self))

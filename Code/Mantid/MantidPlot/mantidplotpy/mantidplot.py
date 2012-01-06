@@ -15,6 +15,10 @@ import proxies
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt
 
+# Import into the global namespace qti classes that:
+#   (a) don't need a proxy & (b) can be constructed from python
+from qti import PlotSymbol, ImageSymbol, ArrowMarker, ImageMarker
+
 #-------------------------- Wrapped MantidPlot functions -----------------
 
 # Overload for consistency with qtiplot table(..) & matrix(..) commands
@@ -35,7 +39,7 @@ def table(name):
     Returns:
         A handle to the table.
     """
-    return proxies.QtProxyObject(qti.app.table(name))
+    return proxies.MDIWindow(qti.app.table(name))
 
 def newTable(name=None,rows=30,columns=2):
     """Create a table.
@@ -49,9 +53,9 @@ def newTable(name=None,rows=30,columns=2):
         A handle to the created table.
     """
     if name is None:
-        return proxies.QtProxyObject(qti.app.newTable())
+        return proxies.MDIWindow(qti.app.newTable())
     else:
-        return proxies.QtProxyObject(qti.app.newTable(name,rows,columns))
+        return proxies.MDIWindow(qti.app.newTable(name,rows,columns))
 
 def matrix(name):
     """Get a handle on a matrix.
@@ -62,7 +66,7 @@ def matrix(name):
     Returns:
         A handle to the matrix.
     """
-    return proxies.QtProxyObject(qti.app.matrix(name))
+    return proxies.MDIWindow(qti.app.matrix(name))
 
 def newMatrix(name=None,rows=32,columns=32):
     """Create a matrix (N.B. This is not the same as a 'MantidMatrix').
@@ -76,9 +80,9 @@ def newMatrix(name=None,rows=32,columns=32):
         A handle to the created matrix.
     """
     if name is None:
-        return proxies.QtProxyObject(qti.app.newMatrix())
+        return proxies.MDIWindow(qti.app.newMatrix())
     else:
-        return proxies.QtProxyObject(qti.app.newMatrix(name,rows,columns))
+        return proxies.MDIWindow(qti.app.newMatrix(name,rows,columns))
 
 def graph(name):
     """Get a handle on a graph widget.
@@ -117,7 +121,7 @@ def note(name):
     Returns:
         A handle to the note.
     """
-    return proxies.QtProxyObject(qti.app.note(name))
+    return proxies.MDIWindow(qti.app.note(name))
 
 def newNote(name=None):
     """Create a note.
@@ -129,14 +133,22 @@ def newNote(name=None):
         A handle to the created note.
     """
     if name is None:
-        return proxies.QtProxyObject(qti.app.newNote())
+        return proxies.MDIWindow(qti.app.newNote())
     else:
-        return proxies.QtProxyObject(qti.app.newNote(name))
+        return proxies.MDIWindow(qti.app.newNote(name))
 
 #-----------------------------------------------------------------------------
 # Intercept qtiplot "plot" command and forward to plotSpectrum for a workspace
 def plot(source, *args, **kwargs):
-    """Create a new plot given a workspace, table or matrix."""
+    """Create a new plot given a workspace, table or matrix.
+    
+    Args:
+        source: what to plot; if it is a Workspace, will
+                call plotSpectrum()
+    
+    Returns:
+        A handle to the created Graph widget.
+    """
     if isinstance(source,WorkspaceProxy):
         return plotSpectrum(source, *args, **kwargs)
     else:
@@ -150,9 +162,10 @@ def plotSpectrum(source, indices, error_bars = False, type = -1):
     This plots one or more spectra, with X as the bin boundaries,
     and Y as the counts in each bin.
     
-    @param source :: workspace or name of a workspace
-    @param indices :: workspace index or list of workspace indices to plot
-    @param error_bars :: bool, set to True to add error bars.
+    Args:
+        source :: workspace or name of a workspace
+        indices :: workspace index or list of workspace indices to plot
+        error_bars :: bool, set to True to add error bars.
     """
     workspace_names = __getWorkspaceNames(source)
     index_list = __getWorkspaceIndices(indices)
@@ -172,9 +185,13 @@ def plotBin(source, indices, error_bars = False, type = 0):
     If indices is a list, then several lines are created, one
     for each bin index.
     
-    @param source :: workspace or name of a workspace
-    @param indices :: bin number to plot
-    @param error_bars :: bool, set to True to add error bars.
+    Args:
+        source :: workspace or name of a workspace
+        indices :: bin number to plot
+        error_bars :: bool, set to True to add error bars.
+
+    Returns:
+        A handle to the created Graph widget.
     """
     return __doPlotting(source,indices,error_bars,type)
 
@@ -237,7 +254,7 @@ def importImage(filename):
     Returns:
         A handle to the matrix containing the image data.
     """
-    return proxies.QtProxyObject(qti.app.importImage(filename))
+    return proxies.MDIWindow(qti.app.importImage(filename))
 
 #-----------------------------------------------------------------------------
 def newPlot3D():
@@ -248,6 +265,96 @@ def plot3D(*args):
         return proxies.Graph3D(qti.app.plot3D(*args))
     else:
         return proxies.Graph3D(qti.app.plot3D(args[0]._getHeldObject(),*args[1:]))
+
+#-----------------------------------------------------------------------------
+#-------------------------- Project/Folder functions -----------------------
+#-----------------------------------------------------------------------------
+def windows():
+    """Get a list of the open windows."""
+    f = qti.app.windows()
+    ret = []
+    for item in f:
+        ret.append(proxies.MDIWindow(item))
+    return ret
+
+def activeFolder():
+    """Get a handle to the currently active folder."""
+    return proxies.Folder(qti.app.activeFolder())
+
+# These methods don't seem to work
+#def appendProject(filename, parentFolder=None):
+#    if parentFolder is not None:
+#        parentFolder = parentFolder._getHeldObject()
+#    return proxies.Folder(qti.app.appendProject(filename,parentFolder))
+#
+#def saveFolder(folder, filename, compress=False):
+#    qti.app.saveFolder(folder._getHeldObject(),filename,compress)
+
+def rootFolder():
+    """Get a handle to the top-level folder."""
+    return proxies.Folder(qti.app.rootFolder())
+
+def addFolder(name,parentFolder=None):
+    """Create a new folder.
+    
+    Args:
+        name: The name of the folder to create.
+        parentFolder: If given, make the new folder a subfolder of this one.
+        
+    Returns:
+        A handle to the newly created folder.
+    """
+    if parentFolder is not None:
+        parentFolder = parentFolder._getHeldObject()
+    return proxies.Folder(qti.app.addFolder(name,parentFolder))
+
+def deleteFolder(folder):
+    """Delete the referenced folder"""
+    return qti.app.deleteFolder(folder._getHeldObject())
+
+def changeFolder(folder, force=False):
+    """Changes the current folder.
+    
+    Args:
+        folder: A reference to the folder to change to.
+        force: Whether to do stuff even if the new folder is already the active one (default: no).
+    
+    Returns:
+        True on success.
+    """
+    return qti.app.changeFolder(folder._getHeldObject(),force)
+
+def copyFolder(source, destination):
+    """Copy a folder (and its contents) into another.
+    
+    Returns:
+        True on success.
+    """
+    return qti.app.copyFolder(source._getHeldObject(),destination._getHeldObject())
+
+def openTemplate(filename):
+    """Load a previously saved window template"""
+    return proxies.MDIWindow(qti.app.openTemplate(filename))
+
+def saveAsTemplate(window, filename):
+    """Save the characteristics of the given window to file"""
+    qti.app.saveAsTemplate(window._getHeldObject(), filename)
+
+def setWindowName(window, name):
+    """Set the given window to have the given name"""
+    qti.app.setWindowName(window._getHeldObject(), name)
+
+def setPreferences(layer):
+    qti.app.setPreferences(graph._getHeldObject())
+
+def clone(window):
+    return proxies.MDIWindow(qti.app.clone(window._getHeldObject()))
+
+def tableToMatrix(table):
+    return proxies.MDIWindow(qti.app.tableToMatrix(table._getHeldObject()))
+
+def matrixToTable(matrix, conversionType=qti.app.Direct):
+    return proxies.MDIWindow(qti.app.matrixToTable(matrix._getHeldObject(),conversionType))
 
 #-----------------------------------------------------------------------------
 #-------------------------- Wrapped MantidUI functions -----------------------
@@ -275,7 +382,7 @@ def getInstrumentView(name, tab=-1):
     Returns:
         A handle to the created instrument view widget.
     """
-    return proxies.QtProxyObject(qti.app.mantidUI.getInstrumentView(name,tab))
+    return proxies.MDIWindow(qti.app.mantidUI.getInstrumentView(name,tab))
 
 def importMatrixWorkspace(name, firstIndex=None, lastIndex=None, showDialog=False, visible=False):
     """Create a MantidMatrix object from the named workspace.
@@ -307,7 +414,7 @@ def importTableWorkspace(name, visible=False):
     Returns:
         A handle to the newly created table.
     """
-    return proxies.QtProxyObject(qti.app.mantidUI.importTableWorkspace(name,False,visible))
+    return proxies.MDIWindow(qti.app.mantidUI.importTableWorkspace(name,False,visible))
 
 #-----------------------------------------------------------------------------
 #-------------------------- SliceViewer functions ----------------------------
@@ -319,27 +426,29 @@ def plotSlice(source, label="", xydim=None, slicepoint=None,
                     limits=None, **kwargs):
     """Opens the SliceViewer with the given MDWorkspace(s).
     
-    @param source :: one workspace, or a list of workspaces
+    Args:
+        source :: one workspace, or a list of workspaces
         
-    The following are optional keyword arguments:
-    @param label :: label for the window title
-    @param xydim :: indexes or names of the dimensions to plot,
+    Optional Keyword Args:
+        label :: label for the window title
+        xydim :: indexes or names of the dimensions to plot,
             as an (X,Y) list or tuple.
             See SliceViewer::setXYDim()
-    @param slicepoint :: list with the slice point in each dimension. Must be the 
+        slicepoint :: list with the slice point in each dimension. Must be the 
             same length as the number of dimensions of the workspace.
             See SliceViewer::setSlicePoint()
-    @param colormin :: value of the minimum color in the scale
+        colormin :: value of the minimum color in the scale
             See SliceViewer::setColorScaleMin()
-    @param colormax :: value of the maximum color in the scale
+        colormax :: value of the maximum color in the scale
             See SliceViewer::setColorScaleMax()
-    @param colorscalelog :: value of the maximum color in the scale
+        colorscalelog :: value of the maximum color in the scale
             See SliceViewer::setColorScaleLog()
-    @param limits :: list with the (xleft, xright, ybottom, ytop) limits
+        limits :: list with the (xleft, xright, ybottom, ytop) limits
             to the view to show.
             See SliceViewer::setXYLimits()
         
-    @return a (list of) handle(s) to the SliceViewerWindow widgets that were open.
+    Returns:
+        a (list of) handle(s) to the SliceViewerWindow widgets that were open.
             Use SliceViewerWindow.getSlicer() to get access to the functions of the
             SliceViewer, e.g. setting the view and slice point.
     """ 
@@ -374,9 +483,12 @@ def getSliceViewer(source, label=""):
     by the MultiSlice view in VATES Simple Interface.
     Will raise an exception if not found.
     
-    @param source :: name of the workspace that was open
-    @param label :: additional label string that was used to identify the window.
-    @return a handle to the SliceViewerWindow object that was created before. 
+    Args:
+        source :: name of the workspace that was open
+        label :: additional label string that was used to identify the window.
+        
+    Returns:
+        a handle to the SliceViewerWindow object that was created before. 
     """
     import mantidqtpython
     workspace_names = __getWorkspaceNames(source)
@@ -400,6 +512,14 @@ def closeAllSliceViewers():
 # Legacy function
 plotTimeBin = plotBin
 
+# import 'safe' methods (i.e. no proxy required) of ApplicationWindow into the global namespace
+# Only 1 at the moment!
+appImports = [
+        'saveProjectAs'
+        ]
+for name in appImports:
+    globals()[name] = getattr(qti.app,name)
+        
 # Ensure these functions are available as without the qti.app.mantidUI prefix
 MantidUIImports = [
     'getSelectedWorkspaceName'
@@ -432,8 +552,11 @@ def __getWorkspaceNames(source):
     of workspaces, or a list of names, and converts
     it to a list of workspace names.
     
-        @param source :: input list or workspace group
-        @return list of workspace names 
+    Args:
+        source :: input list or workspace group
+        
+    Returns:
+        list of workspace names 
     """
     ws_names = []
     if isinstance(source, list) or isinstance(source,tuple):
@@ -471,10 +594,12 @@ def __doSliceViewer(wsname, label="", xydim=None, slicepoint=None,
                     limits=None):
     """Open a single SliceViewerWindow for the workspace, and shows it
     
-    @param wsname :: name of the workspace
+    Args:
+        wsname :: name of the workspace
     See plotSlice() for full list of keyword parameters.
-
-    @return SliceViewerWindow widget
+        
+    Returns:
+        A handle to the created SliceViewerWindow widget
     """
     import mantidqtpython
     from PyQt4 import QtCore
@@ -544,8 +669,8 @@ def __getWorkspaceIndices(source):
 
 # Try plotting, raising an error if no plot object is created
 def __tryPlot(workspace_names, indices, error_bars, type):
-    graph = qti.app.mantidUI.pyPlotSpectraList(workspace_names, indices, error_bars, type)
-    if graph == None:
+    graph = proxies.Graph(qti.app.mantidUI.pyPlotSpectraList(workspace_names, indices, error_bars, type))
+    if graph._getHeldObject() == None:
         raise RuntimeError("Cannot create graph, see log for details.")
     else:
         return graph
@@ -590,4 +715,4 @@ def __CallPlotFunction(workspace, index, error_bars,type):
         wkspname = workspace
     else:
         wkspname = workspace.getName()
-    return qti.app.mantidUI.plotBin(wkspname, index, error_bars,type)
+    return proxies.Graph(qti.app.mantidUI.plotBin(wkspname, index, error_bars,type))

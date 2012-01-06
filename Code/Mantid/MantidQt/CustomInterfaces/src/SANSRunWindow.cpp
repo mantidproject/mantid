@@ -2850,7 +2850,7 @@ QStringList SANSRunWindow::getSaveAlgs()
  * Handle a delete notification from Mantid
  * @param p_dnf :: A Mantid delete notification
  */
-void SANSRunWindow::handleMantidDeleteWorkspace(Mantid::API::WorkspaceDeleteNotification_ptr p_dnf)
+void SANSRunWindow::handleMantidDeleteWorkspace(Mantid::API::WorkspacePostDeleteNotification_ptr p_dnf)
 {
   QString wkspName = QString::fromStdString(p_dnf->object_name());
   if ( m_workspaceNames.find(wkspName) != m_workspaceNames.end() )

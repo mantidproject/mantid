@@ -203,7 +203,7 @@ private:
   bool m_instrumentDisplayContextMenuOn;
 
 private:
-  virtual void deleteHandle(const std::string & ws_name, const boost::shared_ptr<Mantid::API::Workspace> workspace_ptr);
+  virtual void preDeleteHandle(const std::string & ws_name, const boost::shared_ptr<Mantid::API::Workspace> workspace_ptr);
   virtual void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> workspace_ptr);
   virtual void clearADSHandle();
 };

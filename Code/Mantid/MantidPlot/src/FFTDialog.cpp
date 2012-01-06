@@ -160,7 +160,7 @@ void FFTDialog::accept()
 		return;
 	}
 
-	ApplicationWindow *app = (ApplicationWindow *)parent();
+  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
     FFT *fft = NULL;
 	if (graph)
         fft = new FFT(app, graph, boxName->currentText());
@@ -237,7 +237,7 @@ void FFTDialog::setTable(Table *t)
 
 void FFTDialog::setMatrix(Matrix *m)
 {
-    ApplicationWindow *app = (ApplicationWindow *)parent();
+    ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
     QStringList lst = app->matrixNames();
     boxReal->addItems(lst);
     if (m){
@@ -250,7 +250,7 @@ void FFTDialog::setMatrix(Matrix *m)
 
 void FFTDialog::fftMatrix()
 {
-    ApplicationWindow *app = (ApplicationWindow *)parent();
+    ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
     Matrix *mReal = app->matrix(boxReal->currentText());
     if (!mReal)
         return;
