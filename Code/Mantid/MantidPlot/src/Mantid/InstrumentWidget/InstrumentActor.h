@@ -67,7 +67,7 @@ class InstrumentActor: public QObject, public GLActor
 {
   Q_OBJECT
 public:
-  InstrumentActor(const QString wsName); ///< Constructor
+  InstrumentActor(const QString &wsName); ///< Constructor
   ~InstrumentActor();    ///< Destructor
   virtual std::string type()const {return "InstrumentActor";} ///< Type of the GL object
   void draw(bool picking = false)const;

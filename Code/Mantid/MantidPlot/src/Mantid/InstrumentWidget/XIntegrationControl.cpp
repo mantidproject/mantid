@@ -62,7 +62,7 @@ void	XIntegrationScrollBar::mouseMoveEvent (QMouseEvent* e)
   */
 bool XIntegrationScrollBar::eventFilter(QObject *object, QEvent *e)
 {
-  QPushButton* slider = (QPushButton*)object;
+  QPushButton* slider = dynamic_cast<QPushButton*>(object);
   if (!slider) return false;
   if( e->type() == QEvent::Leave)
   {

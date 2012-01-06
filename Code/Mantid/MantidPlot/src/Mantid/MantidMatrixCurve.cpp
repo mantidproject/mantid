@@ -114,7 +114,7 @@ void MantidMatrixCurve::init(Graph* g,bool distr,Graph::CurveType style)
     m_yUnits.reset(new Mantid::Kernel::Units::Empty());
   }
   int lineWidth = 1;
-  MultiLayer* ml = (MultiLayer*)(g->parent()->parent()->parent());
+  MultiLayer* ml = dynamic_cast<MultiLayer*>(g->parent()->parent()->parent());
   if (style == Graph::Unspecified || (ml && ml->applicationWindow()->applyCurveStyleToMantid) )
   {
     applyStyleChoice(style, ml, lineWidth);

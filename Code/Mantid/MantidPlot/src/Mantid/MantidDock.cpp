@@ -988,7 +988,7 @@ void MantidDockWidget::deleteWorkspaces()
   QList<QTreeWidgetItem*> items = m_tree->selectedItems();
   if(items.empty())
   {
-    MantidMatrix* m = (MantidMatrix*) m_mantidUI->appWindow()->activeWindow();
+    MantidMatrix* m = dynamic_cast<MantidMatrix*>(m_mantidUI->appWindow()->activeWindow());
     if (!m || !m->isA("MantidMatrix")) return;
     if(m->workspaceName().isEmpty()) return;
 

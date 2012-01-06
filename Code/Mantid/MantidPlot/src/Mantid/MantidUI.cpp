@@ -800,7 +800,7 @@ void MantidUI::showContextMenu(QMenu& cm, MdiSubWindow* w)
 
 void MantidUI::copyRowToTable()
 {
-  MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
+  MantidMatrix* m = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
   if (!m || !m->isA("MantidMatrix")) return;
   Table* t = createTableFromSelectedRows(m,true,true);
   t->showNormal();
@@ -808,7 +808,7 @@ void MantidUI::copyRowToTable()
 
 void MantidUI::copyColumnToTable()
 {
-  MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
+  MantidMatrix* m = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
   if (!m || !m->isA("MantidMatrix")) return;
   Table* t = createTableFromSelectedColumns(m,true);
   t->showNormal();
@@ -816,7 +816,7 @@ void MantidUI::copyColumnToTable()
 
 void MantidUI::copyRowToGraph()
 {
-  MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
+  MantidMatrix* m = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
   if (!m || !m->isA("MantidMatrix")) return;
   plotSelectedRows(m,false);
 
@@ -824,7 +824,7 @@ void MantidUI::copyRowToGraph()
 
 void MantidUI::copyColumnToGraph()
 {
-  MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
+  MantidMatrix* m = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
   if (!m || !m->isA("MantidMatrix")) return;
   createGraphFromSelectedColumns(m,false);
 
@@ -832,7 +832,7 @@ void MantidUI::copyColumnToGraph()
 
 void MantidUI::copyColumnToGraphErr()
 {
-  MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
+  MantidMatrix* m = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
   if (!m || !m->isA("MantidMatrix")) return;
   createGraphFromSelectedColumns(m,true);
 
@@ -840,7 +840,7 @@ void MantidUI::copyColumnToGraphErr()
 
 void MantidUI::copyRowToGraphErr()
 {
-  MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
+  MantidMatrix* m = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
   if (!m || !m->isA("MantidMatrix")) return;
   plotSelectedRows(m,true);
 
@@ -848,7 +848,7 @@ void MantidUI::copyRowToGraphErr()
 
 void MantidUI::copyRowsToWaterfall()
 {
-  const MantidMatrix* const m = (MantidMatrix*)appWindow()->activeWindow();
+  const MantidMatrix* const m = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
   if (!m || !m->isA("MantidMatrix")) return;
   MultiLayer* ml = plotSelectedRows(m,false);
   if (ml) convertToWaterfall(ml);
@@ -856,7 +856,7 @@ void MantidUI::copyRowsToWaterfall()
 
 void MantidUI::plotWholeAsWaterfall()
 {
-  const MantidMatrix* const m = (MantidMatrix*)appWindow()->activeWindow();
+  const MantidMatrix* const m = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
   if (!m || !m->isA("MantidMatrix")) return;
   MultiLayer* ml = plotSpectraRange(m->workspaceName(),0,m->numRows()-1,false);
   if (ml) convertToWaterfall(ml);
@@ -875,14 +875,14 @@ void MantidUI::convertToWaterfall(MultiLayer* ml)
 
 void MantidUI::copyDetectorsToTable()
 {
-  MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
+  MantidMatrix* m = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
   if (!m || !m->isA("MantidMatrix")) return;
   createTableDetectors(m);
 }
 
 void MantidUI::copyValues()
 {
-  MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
+  MantidMatrix* m = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
   if (!m || !m->isA("MantidMatrix")) return;
   m->copySelection();
 }
@@ -1836,7 +1836,7 @@ void MantidUI::showMantidInstrument(const QString& wsName)
 
 void MantidUI::showMantidInstrument()
 {
-  MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
+  MantidMatrix* m = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
   if (!m || !m->isA("MantidMatrix")) 
     return;
   if(!m->workspaceName().isEmpty())
@@ -2314,7 +2314,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
 
   //Get the starting time of the log.
   Mantid::Kernel::DateAndTime startTime;
-  if (time_value_map.size() > 0)
+  if (!time_value_map.empty())
   {
     startTime = ws->run().startTime();
   }
@@ -2465,7 +2465,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
       if (useAbsoluteDate)
       {
         //Convert time into string
-        std::string time_string = lastTime.to_simple_string();
+        time_string = lastTime.to_simple_string();
       }
       else
       {
@@ -2712,10 +2712,9 @@ MultiLayer* MantidUI::createGraphFromTable(Table* t, int type)
     //remove the X names from the column list and pass the X removed list
     //to multilayerPlot
     QString str=(*itr);
-    int index=0;
     if(str.contains("XS",Qt::CaseInsensitive))
     {
-      index=lst.indexOf(str);
+      int index=lst.indexOf(str);
       lst.removeAt(index);
     }
   }

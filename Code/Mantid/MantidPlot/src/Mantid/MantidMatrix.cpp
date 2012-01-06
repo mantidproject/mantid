@@ -1045,18 +1045,18 @@ void MantidMatrix::removeWindow()
   foreach(MdiSubWindow *w, windows){
     //if (w->isA("Graph3D") && ((Graph3D*)w)->userFunction()->hlpFun() == &m_funct)
     if (w->isA("Graph3D") )//&& ((Graph3D*)w)->userFunction()->hlpFun() == &m_funct)
-    { 	UserFunction* fn=((Graph3D*)w)->userFunction();
+    { 	UserFunction* fn=(dynamic_cast<Graph3D*>(w))->userFunction();
       if(fn)
-      {	if(fn->hlpFun() == &m_funct)((Graph3D*)w)->clearData();
+      {	if(fn->hlpFun() == &m_funct)(dynamic_cast<Graph3D*>(w))->clearData();
       }
 
     }else if (w->isA("Table")){
     }
     else if (w->isA("MultiLayer")){
-      QList<Graph *> layers = ((MultiLayer*)w)->layersList();
+      QList<Graph *> layers = (dynamic_cast<MultiLayer*>(w))->layersList();
       foreach(Graph *g, layers){
         for (int i=0; i<g->curves(); i++){
-          Spectrogram *sp = (Spectrogram *)g->plotItem(i);
+          Spectrogram *sp = dynamic_cast<Spectrogram *>(g->plotItem(i));
           if (sp && sp->rtti() == QwtPlotItem::Rtti_PlotSpectrogram && sp->funct() == &m_funct)
             g->removeCurve(i);
         }
@@ -1128,7 +1128,7 @@ void MantidMatrix::dependantClosed(MdiSubWindow* w)
     QMap<MultiLayer*,Table*>::iterator itr;
     for( itr = m_plots1D.begin(); itr != m_plots1D.end(); ++itr )
     {
-      if( itr.value() == (Table*)w )
+      if( itr.value() == dynamic_cast<Table*>(w) )
       {
         m_plots1D.erase(itr);
         break;
@@ -1137,10 +1137,10 @@ void MantidMatrix::dependantClosed(MdiSubWindow* w)
   }
   else if (w->isA("MultiLayer"))
   {
-    int i = m_plots2D.indexOf((MultiLayer*)w);
+    int i = m_plots2D.indexOf(dynamic_cast<MultiLayer*>(w));
     if (i >= 0)m_plots2D.remove(i);
     else
-    {QMap<MultiLayer*,Table*>::iterator i = m_plots1D.find((MultiLayer*)w);
+    {QMap<MultiLayer*,Table*>::iterator i = m_plots1D.find(dynamic_cast<MultiLayer*>(w));
       if (i != m_plots1D.end())
       {
         if (i.value() != 0)
