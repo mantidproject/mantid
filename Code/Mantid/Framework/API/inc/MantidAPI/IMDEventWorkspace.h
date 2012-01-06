@@ -58,6 +58,10 @@ namespace API
     virtual void estimateResolution() = 0;
     /// get number of dimensions contained in initialized MD workspace
     virtual size_t getNumDims()const=0;
+    /// split box function;
+    virtual void splitBox()=0;
+    //
+    virtual void refreshCache()=0;
 
     /// Split all boxes that exceed the split threshold.
     virtual void splitAllIfNeeded(Kernel::ThreadScheduler * ts) = 0;

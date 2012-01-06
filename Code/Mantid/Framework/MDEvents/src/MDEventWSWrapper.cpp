@@ -91,10 +91,6 @@ class LOOP{
             pH->wsCreator.push_back(boost::bind(std::mem_fun(&MDEventWSWrapper::createEmptyEventWS<i>),pH));
             pH->mdEvSummator.push_back(boost::bind(std::mem_fun(&MDEventWSWrapper::add_MDData<i>),pH));
 
-            // vftable definition
-            pH->boxSplitter.push_back(boost::bind(std::mem_fun(&MDEventWSWrapper::split_Box<i>),pH));
-            pH->cashRefresher.push_back(boost::bind(std::mem_fun(&MDEventWSWrapper::refresh_Cache<i>),pH));
-
     }
 };
 template<>
@@ -104,18 +100,14 @@ class LOOP<0>{
             fpVoidMethod fp = (boost::bind(std::mem_fun(&MDEventWSWrapper::throwNotInitiatedError),pH));
             pH->wsCreator.push_back(fp);
             pH->mdEvSummator.push_back(fp);
-            pH->boxSplitter.push_back(fp);
-            pH->cashRefresher.push_back(fp);
-    }
+      }
 };
 
 MDEventWSWrapper::MDEventWSWrapper():n_dimensions(0)
 {
     wsCreator.reserve(MAX_N_DIM+1);
     mdEvSummator.reserve(MAX_N_DIM+1);
-    boxSplitter.reserve(MAX_N_DIM+1);
-    cashRefresher.reserve(MAX_N_DIM+1);
-    LOOP<MAX_N_DIM>::EXEC(this);
+      LOOP<MAX_N_DIM>::EXEC(this);
 }
 
 

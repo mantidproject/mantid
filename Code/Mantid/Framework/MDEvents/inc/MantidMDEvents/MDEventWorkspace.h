@@ -84,16 +84,16 @@ namespace MDEvents
     /// Set the number of bins in each dimension to something corresponding to the estimated resolution of the finest binning
     void estimateResolution();
 
-    void splitAllIfNeeded(Kernel::ThreadScheduler * ts);
+    virtual void splitAllIfNeeded(Kernel::ThreadScheduler * ts);
 
+    virtual  void splitBox();
+
+    virtual  void refreshCache();
     //------------------------ (END) IMDEventWorkspace Methods -----------------------------------------
 
     Mantid::API::ITableWorkspace_sptr makeBoxTable(size_t start, size_t num);
 
-    void splitBox();
-
-    void refreshCache();
-
+ 
     void addEvent(const MDE & event);
 
     size_t addEvents(const std::vector<MDE> & events);

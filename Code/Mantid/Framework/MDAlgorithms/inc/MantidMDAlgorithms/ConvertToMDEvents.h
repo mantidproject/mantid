@@ -102,6 +102,7 @@ namespace MDAlgorithms
   template<Q_state Q, AnalMode MODE, CnvrtUnits CONV,XCoordType XTYPE> 
   struct COORD_TRANSFORMER;
   
+//
   class DLLExport ConvertToMDEvents  : public MDEvents::BoxControllerSettingsAlgorithm
   {
   public:

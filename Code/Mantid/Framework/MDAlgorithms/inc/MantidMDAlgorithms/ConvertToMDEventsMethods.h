@@ -181,7 +181,7 @@ void ConvertToMDEvents::processQNDEWS()
          int32_t det_id            = det_loc.det_id[wi];
 
          const DataObjects::EventList & el   = pEventWS->getEventList(ic);
-         size_t numEvents       = (int64_t)el.getNumberEvents();
+         //size_t numEvents       = el.getNumberEvents();
 
     
         const MantidVec& X        = el.dataX();
