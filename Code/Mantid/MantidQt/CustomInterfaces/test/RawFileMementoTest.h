@@ -18,14 +18,14 @@ private:
 
   static std::string getSuitableFileNamePath()
   {
-    return Mantid::API::FileFinder::Instance().getFullPath("LOQ48127.raw");
+    return Mantid::API::FileFinder::Instance().getFullPath("LOQ49886.nxs");
   }
 
 public:
 
   void testConstructorThrowsWithWrongExtension()
   {
-    std::string badFile = "MAR11001.rrr"; //Fictional extension
+    std::string badFile = "LOQ49886.nxss"; //Fictional extension
     TSM_ASSERT_THROWS("Unknown extension, should throw.", new RawFileMemento(badFile), std::invalid_argument);
   }
 
@@ -37,7 +37,7 @@ public:
 
   void testConstructThrowsWhenFileDoesntExist()
   {
-    TSM_ASSERT_THROWS("Unknown file, should throw.", new RawFileMemento("MadeUp.raw"), std::runtime_error);
+    TSM_ASSERT_THROWS("Unknown file, should throw.", new RawFileMemento("MadeUp.nxs"), std::runtime_error);
   }
 
   void testFetchItSucceedsWhenFileExists()

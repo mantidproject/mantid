@@ -97,7 +97,7 @@ void CreateMDWorkspace::initLayout()
   m_uiForm.setupUi(this);
   connect(m_uiForm.btn_create, SIGNAL(clicked()), this, SLOT(createMDWorkspaceClicked()));
   connect(m_uiForm.btn_add_workspace, SIGNAL(clicked()), this, SLOT(addWorkspaceClicked()));
-  connect(m_uiForm.btn_add_raw_file, SIGNAL(clicked()), this, SLOT(addRawFileClicked()));
+  connect(m_uiForm.btn_add_nexus_file, SIGNAL(clicked()), this, SLOT(addNexusFileClicked()));
   connect(m_uiForm.btn_add_event_nexus_file, SIGNAL(clicked()), this, SLOT(addEventNexusFileClicked()));
   connect(m_uiForm.btn_remove_workspace, SIGNAL(clicked()), this, SLOT(removeSelectedClicked()));
   connect(m_uiForm.btn_set_ub_matrix, SIGNAL(clicked()), this, SLOT(setUBMatrixClicked()));
@@ -282,13 +282,13 @@ void CreateMDWorkspace::addUniqueMemento(WorkspaceMemento_sptr candidate)
 }
 
 /*
-Add a raw file from the ADS
+Add a nexus file from the ADS
 */
-void CreateMDWorkspace::addRawFileClicked()
+void CreateMDWorkspace::addNexusFileClicked()
 {
   QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
     "/home",
-    tr("Raw Files (*.raw)"));
+    tr("Raw Files (*.nxs)"));
 
   std::string name = fileName.toStdString();
   if(!name.empty())
@@ -415,14 +415,12 @@ int CreateMDWorkspace::runConfirmation(const std::string& message)
 
 void CreateMDWorkspace::createMDWorkspaceClicked()
 {
-  //Launch dialog
-
-  //1) Run a top-level dialog similar to ConvertToMDEvents. Extract all required arguments.
   CreateMDWorkspaceAlgDialog algDlg;
   algDlg.setModal(true);
   int result = algDlg.exec();
   if(result != QDialog::Accepted)
   {
+    runConfirmation("Aborted by user.");
     return;
   }
   
@@ -432,6 +430,12 @@ void CreateMDWorkspace::createMDWorkspaceClicked()
   QString analysisMode = algDlg.getAnalysisMode();
   QString otherDimensions = algDlg.getOtherDimensions();
   bool preProcessedEvents = algDlg.getPreprocessedEvents();
+  QString location = algDlg.getLocation();
+  if(location.isEmpty())
+  {
+    runConfirmation("Output location is mandatory. Please start again and enter one.");
+    return;
+  }
 
   //2) Run ConvertToMDEvents on each workspace.
   for(WorkspaceMementoCollection::size_type i = 0; i < m_data.size(); i++)
@@ -440,12 +444,20 @@ void CreateMDWorkspace::createMDWorkspaceClicked()
     Workspace_sptr ws = currentMemento->applyActions();
 
     //
-    //QString command = ""
-    //  "";
+    QString command = "try:\n"
+      "    ConvertToMDEvents(InputWorkspace='%1',OutputWorkspace='%1_md',OtherDimensions='%2',dEAnalysisMode='%3',QDimensions='%4',MinValues='%5',MaxValues='%6')\n"
+      "    SaveMD(InputWorkspace='%1_md', Filename='%7/%1_md.nxs',MakeFileBacked='1')\n"
+      "    mtd.deleteWorkspace('%1_md')\n"
+      "except:\n"
+      "    print 'FAIL'";
 
-    //ConvertToMDEvents
-    //SaveMD
-    
+    command = command.arg(QString(currentMemento->getId().c_str()), otherDimensions, analysisMode, qDimension, minExtents, maxExtents, location);
+    QString pyOutput = runPythonCode(command).trimmed();
+    if(pyOutput == "FAIL")
+    {
+      runConfirmation("Aborted during conversion. See log messages.");
+      return; //Abort.
+    }
 
     currentMemento->cleanUp();
   }

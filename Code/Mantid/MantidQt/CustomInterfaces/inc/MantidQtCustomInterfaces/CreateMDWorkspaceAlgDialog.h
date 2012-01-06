@@ -19,13 +19,18 @@ public:
   QString getOtherDimensions() const;
   QString getMaxExtents() const;
   QString getMinExtents() const;
+  QString getLocation() const;
   bool getPreprocessedEvents() const;
 
+private slots:
 
+    void outputLocationClicked();
 
 private:
 
   Ui::CreateMDWorkspaceAlgDialog m_uiForm;
+
+  QString m_location;
 
 };
 

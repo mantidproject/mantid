@@ -2,11 +2,13 @@
 #include <QComboBox>
 #include <QLineEdit>
 #include <QCheckBox>
+#include <QFileDialog>
 
 CreateMDWorkspaceAlgDialog::CreateMDWorkspaceAlgDialog()
 {
   m_uiForm.setupUi(this);
 
+  connect(m_uiForm.btn_output_location, SIGNAL(clicked()), this, SLOT(outputLocationClicked()));
   connect(m_uiForm.buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
   connect(m_uiForm.buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 
@@ -14,9 +16,9 @@ CreateMDWorkspaceAlgDialog::CreateMDWorkspaceAlgDialog()
   m_uiForm.combo_q_dimensions->addItem("QxQyQz");
 
   m_uiForm.combo_analysis_mode->addItem("Direct");
+  m_uiForm.combo_analysis_mode->addItem("Elastic");
   m_uiForm.combo_analysis_mode->addItem("Indirect");
-  m_uiForm.combo_analysis_mode->addItem("InElastic");
-
+  
   this->setWindowTitle("Set MDWorkspace Creation Parameters");
 }
 
@@ -50,6 +52,16 @@ bool CreateMDWorkspaceAlgDialog::getPreprocessedEvents() const
   return m_uiForm.ck_use_preprocessed_detectors->isChecked();
 }
 
+QString CreateMDWorkspaceAlgDialog::getLocation() const
+{
+  return m_location;
+}
+
 CreateMDWorkspaceAlgDialog::~CreateMDWorkspaceAlgDialog()
 {
+}
+
+void CreateMDWorkspaceAlgDialog::outputLocationClicked()
+{
+  this->m_location = QFileDialog::getExistingDirectory(this, tr("Open Directory"), "/home");
 }

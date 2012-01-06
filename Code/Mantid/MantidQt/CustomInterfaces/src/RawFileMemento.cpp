@@ -19,17 +19,17 @@ namespace MantidQt
       */
       RawFileMemento::RawFileMemento(std::string fileName) : m_fileName(fileName)
       {
-        boost::regex pattern("(RAW)$", boost::regex_constants::icase); 
+        boost::regex pattern("(NXS)$", boost::regex_constants::icase); 
 
         if(!boost::regex_search(fileName, pattern))
         {
-          std::string msg = "RawFileMemento:: Unknown File extension on: " + fileName;
+          std::string msg = "NexusFileMemento:: Unknown File extension on: " + fileName;
           throw std::invalid_argument(msg);
         }
 
         if(!checkStillThere())
         {
-          throw std::runtime_error("RawFileMemento:: File doesn't exist");
+          throw std::runtime_error("NexusFileMemento:: File doesn't exist");
         }
 
         std::vector<std::string> strs;
@@ -86,7 +86,7 @@ namespace MantidQt
       {
         checkStillThere();
 
-        IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadRaw");
+        IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadNexus");
         alg->initialize();
         alg->setRethrows(true);
         alg->setProperty("Filename", m_fileName);

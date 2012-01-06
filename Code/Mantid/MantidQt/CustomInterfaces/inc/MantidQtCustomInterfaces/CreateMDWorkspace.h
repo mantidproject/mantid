@@ -47,7 +47,7 @@ namespace MantidQt
 
       void addWorkspaceClicked();
 
-      void addRawFileClicked();
+      void addNexusFileClicked();
 
       void addEventNexusFileClicked();
 

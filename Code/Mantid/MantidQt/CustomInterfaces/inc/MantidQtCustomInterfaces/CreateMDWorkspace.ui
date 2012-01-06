@@ -66,9 +66,9 @@
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="btn_add_raw_file">
+          <widget class="QPushButton" name="btn_add_nexus_file">
            <property name="text">
-            <string>Add Raw File</string>
+            <string>Add Nexus</string>
            </property>
           </widget>
          </item>

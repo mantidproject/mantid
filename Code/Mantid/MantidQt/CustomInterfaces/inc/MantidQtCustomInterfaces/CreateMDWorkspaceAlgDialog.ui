@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>456</width>
-    <height>205</height>
+    <height>216</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <property name="fieldGrowthPolicy">
     <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
    </property>
-   <item row="1" column="0">
+   <item row="2" column="0">
     <widget class="QLabel" name="label">
      <property name="toolTip">
       <string>You can to transfer source workspace dimensions into target worskpace directly (NoQ) or transform into mod(Q) (1 dimension) or QxQyQz (3 dimensions) in Q space</string>
@@ -27,10 +27,10 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="1">
+   <item row="2" column="1">
     <widget class="QComboBox" name="combo_q_dimensions"/>
    </item>
-   <item row="2" column="0">
+   <item row="3" column="0">
     <widget class="QLabel" name="label_2">
      <property name="toolTip">
       <string>You can analyze neutron energy transfer in direct, indirect or elastic mode. The analysis mode has to correspond to experimenal set up.</string>
@@ -40,10 +40,10 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="1">
+   <item row="3" column="1">
     <widget class="QComboBox" name="combo_analysis_mode"/>
    </item>
-   <item row="3" column="0">
+   <item row="4" column="0">
     <widget class="QLabel" name="label_5">
      <property name="toolTip">
       <string>List(comma separated) of additional to Q (orthogonal) dimensions in the target workspace.</string>
@@ -53,10 +53,10 @@
      </property>
     </widget>
    </item>
-   <item row="3" column="1">
+   <item row="4" column="1">
     <widget class="QLineEdit" name="txt_other_dimensions"/>
    </item>
-   <item row="4" column="1">
+   <item row="5" column="1">
     <widget class="QCheckBox" name="ck_use_preprocessed_detectors">
      <property name="text">
       <string>Use Pre-processed detectors</string>
@@ -66,7 +66,7 @@
      </property>
     </widget>
    </item>
-   <item row="5" column="0">
+   <item row="6" column="0">
     <widget class="QLabel" name="label_3">
      <property name="toolTip">
       <string>An array of size: 
@@ -96,7 +96,7 @@
      </property>
     </widget>
    </item>
-   <item row="5" column="1">
+   <item row="6" column="1">
     <widget class="QLineEdit" name="txt_min_values">
      <property name="toolTip">
       <string>An array of the same size and the same units as MinValues array
@@ -105,17 +105,17 @@
      </property>
     </widget>
    </item>
-   <item row="6" column="0">
+   <item row="7" column="0">
     <widget class="QLabel" name="label_4">
      <property name="text">
       <string>Max Values</string>
      </property>
     </widget>
    </item>
-   <item row="6" column="1">
+   <item row="7" column="1">
     <widget class="QLineEdit" name="txt_max_values"/>
    </item>
-   <item row="7" column="1">
+   <item row="8" column="1">
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -129,6 +129,19 @@
     <widget class="QLabel" name="label_6">
      <property name="text">
       <string>Settings made here will be applied to every converted workspace.</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QPushButton" name="btn_output_location">
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Set Output Location</string>
      </property>
     </widget>
    </item>
