@@ -138,7 +138,7 @@ void ConvertToMDEvents::processQNDEWS()
 {
     DataObjects::EventWorkspace_const_sptr pEventWS  = boost::static_pointer_cast<const DataObjects::EventWorkspace>(inWS2D);
 
-    size_t lastNumBoxes = this->pWSWrapper->pWorkspace()->getBoxController()->getTotalNumMDBoxes();
+   // size_t lastNumBoxes = this->pWSWrapper->pWorkspace()->getBoxController()->getTotalNumMDBoxes();
     // counder for the number of events
     size_t n_added_events(0);
     // amount of work
@@ -178,7 +178,7 @@ void ConvertToMDEvents::processQNDEWS()
          size_t ic                 = det_loc.detIDMap[wi];
          int32_t det_id            = det_loc.det_id[wi];
 
-         const EventList & el   = pEventWS->getEventList(ic);
+         const DataObjects::EventList & el   = pEventWS->getEventList(ic);
          size_t numEvents       = el.getNumberEvents();
 
     
