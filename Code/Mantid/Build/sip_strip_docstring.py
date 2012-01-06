@@ -46,8 +46,8 @@ def process_sip(filename):
             if line.startswith("%docstring"):
                 in_docstring = True
                 # Add a blank line separating doc strings if not present
-                if len(wikilines) > 0 and wikilines[-1].strip() != "":
-                    wikilines.append(" ")
+                if len(wikilines) > 0 and wikilines[-1] != "":
+                    wikilines.append("")
             # Copy to output
             if not in_docstring:
                 outlines.append(lines[i])
