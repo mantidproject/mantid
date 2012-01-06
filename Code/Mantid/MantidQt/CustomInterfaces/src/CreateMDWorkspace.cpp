@@ -418,7 +418,7 @@ void CreateMDWorkspace::createMDWorkspaceClicked()
   //1) Run a top-level dialog similar to ConvertToMDEvents. Extract all required arguments.
   
   //2) Run ConvertToMDEvents on each workspace.
-  for(int i = 0; i < m_data.size(); i++)
+  for(WorkspaceMementoCollection::size_type i = 0; i < m_data.size(); i++)
   {
     //Workspace_sptr ws = m_data[i]->applyActions();
     //QString command = ""
