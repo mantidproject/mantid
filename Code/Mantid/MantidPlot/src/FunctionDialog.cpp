@@ -199,7 +199,7 @@ void FunctionDialog::setCurveToModify(Graph *g, int curve)
 
 	graph = g;
 
-	FunctionCurve *c = (FunctionCurve *)graph->curve(curve);
+  FunctionCurve *c = dynamic_cast<FunctionCurve *>(graph->curve(curve));
 	if (!c)
 		return;
 

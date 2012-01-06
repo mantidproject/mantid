@@ -45,7 +45,7 @@ QList<Folder*> Folder::folders()
 {
 	QList<Folder*> lst;
 	foreach(QObject *f, children())
-		lst.append((Folder*) f);
+    lst.append(static_cast<Folder*>(f));
 	return lst;
 }
 
@@ -64,10 +64,10 @@ QStringList Folder::subfolders()
 QString Folder::path()
 {
     QString s = "/" + QString(objectName()) + "/";
-    Folder *parentFolder = (Folder *)parent();
+    Folder *parentFolder = static_cast<Folder *>(parent());
     while (parentFolder){
         s.prepend("/" + QString(parentFolder->objectName()));
-        parentFolder = (Folder *)parentFolder->parent();
+        parentFolder = static_cast<Folder *>(parentFolder->parent());
 	}
     return s;
 }
@@ -75,10 +75,10 @@ QString Folder::path()
 int Folder::depth()
 {
 	int d = 0;
-    Folder *parentFolder = (Folder *)parent();
+    Folder *parentFolder = static_cast<Folder *>(parent());
     while (parentFolder){
         ++d;
-        parentFolder = (Folder *)parentFolder->parent();
+        parentFolder = static_cast<Folder *>(parentFolder->parent());
 	}
     return d;
 }
@@ -89,7 +89,7 @@ Folder* Folder::folderBelow()
 	if (!lst.isEmpty())
 		return lst.first();
 
-	Folder *parentFolder = (Folder *)parent();
+  Folder *parentFolder = static_cast<Folder *>(parent());
 	Folder *childFolder = this;
 	while (parentFolder && childFolder){
 		lst = parentFolder->folders();
@@ -98,7 +98,7 @@ Folder* Folder::folderBelow()
 			return lst.at(pos);
 
 		childFolder = parentFolder;
-		parentFolder = (Folder *)parentFolder->parent();
+    parentFolder = static_cast<Folder *>(parentFolder->parent());
 	}
 	return NULL;
 }
@@ -122,7 +122,7 @@ Folder* Folder::findSubfolder(const QString& s, bool caseSensitive, bool partial
 					return static_cast<Folder *>(f);
 			}
 
-			Folder* folder = ((Folder*)f)->findSubfolder(s, caseSensitive, partialMatch);
+      Folder* folder = (static_cast<Folder*>(f))->findSubfolder(s, caseSensitive, partialMatch);
             if(folder)
                 return folder;
 		}
@@ -173,7 +173,7 @@ MdiSubWindow *Folder::window(const QString &name, const char *cls, bool recursiv
 
 	if (!recursive) return NULL;
 	foreach (QObject *f, children()){
-		MdiSubWindow *w = ((Folder*)f)->window(name, cls, true);
+    MdiSubWindow *w = (static_cast<Folder *>(f))->window(name, cls, true);
 		if (w) return w;
 	}
 	return NULL;
@@ -222,7 +222,7 @@ Folder* Folder::rootFolder()
 {
 	Folder *i = this;
 	while(i->parent())
-		i = (Folder*)i->parent();
+    i = static_cast<Folder*>(i->parent());
 	return i;
 }
 
@@ -266,12 +266,12 @@ void FolderListItem::setActive( bool o )
 
 bool FolderListItem::isChildOf(FolderListItem *src)
 {
-	FolderListItem *parent = (FolderListItem *)this->parent();
+  FolderListItem *parent = dynamic_cast<FolderListItem *>(this->parent());
 	while (parent){
 	if (parent == src)
 		return true;
 
-	parent = (FolderListItem *)parent->parent();
+  parent = dynamic_cast<FolderListItem *>(parent->parent());
 	}
 	return false;
 }
@@ -289,8 +289,8 @@ FolderListView::FolderListView( QWidget *parent, const char *name )
     viewport()->setAcceptDrops( true );
 
 	if (parent){
-		connect(this, SIGNAL(collapsed(Q3ListViewItem *)), (ApplicationWindow *)parent, SLOT(modifiedProject()));
-		connect(this, SIGNAL(expanded(Q3ListViewItem *)), (ApplicationWindow *)parent, SLOT(modifiedProject()));
+    connect(this, SIGNAL(collapsed(Q3ListViewItem *)), dynamic_cast<ApplicationWindow *>(parent), SLOT(modifiedProject()));
+    connect(this, SIGNAL(expanded(Q3ListViewItem *)), dynamic_cast<ApplicationWindow *>(parent), SLOT(modifiedProject()));
 		connect(this, SIGNAL(expanded(Q3ListViewItem *)), this, SLOT(expandedItem(Q3ListViewItem *)));
 	}
 }
