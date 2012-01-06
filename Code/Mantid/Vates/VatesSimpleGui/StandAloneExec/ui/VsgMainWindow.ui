@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Mantid Vates Simple Interface</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../../ViewWidgets/icons/ViewWidgetsIcons.qrc">
+    <normaloff>:/VatesSimpleGuiViewWidgets/icons/pvIcon.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pvIcon.png</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
@@ -214,7 +218,9 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../../ViewWidgets/icons/ViewWidgetsIcons.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>action_Exit</sender>

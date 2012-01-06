@@ -612,7 +612,10 @@ void MantidUI::showVatesSimpleInterface()
     {
       m_vatesSubWindow = new QMdiSubWindow;
       m_vatesSubWindow->setAttribute(Qt::WA_DeleteOnClose, false);
+      QIcon icon; icon.addFile(QString::fromUtf8(":/VatesSimpleGuiViewWidgets/icons/pvIcon.png"), QSize(), QIcon::Normal, QIcon::Off);
+      m_vatesSubWindow->setWindowIcon(icon);
       connect(m_appWindow, SIGNAL(shutting_down()), m_vatesSubWindow, SLOT(close()));
+
       MantidQt::API::VatesViewerInterface *vsui = MantidQt::API::InterfaceManager::Instance().createVatesSimpleGui();
       if (vsui)
       {

@@ -710,6 +710,7 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
 
 qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/Images/images.qrc )
 qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/MantidQt/SliceViewer/icons/SliceViewerIcons.qrc )
+qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/Vates/VatesSimpleGui/ViewWidgets/icons/ViewWidgetsIcons.qrc )
 
 ###########################################################################
 # Add the dependencies
