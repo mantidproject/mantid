@@ -106,7 +106,7 @@ Triple UserParametricSurface::operator()(double u, double v)
 }
 
 Graph3D::Graph3D(const QString& label, ApplicationWindow* parent, const char* name, Qt::WFlags f)
-: MdiSubWindow(label, parent, name, f)
+: MdiSubWindow(parent, label, name, f)
 {
 	initPlot();
 }

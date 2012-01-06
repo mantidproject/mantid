@@ -65,14 +65,14 @@
 #include <gsl/gsl_linalg.h>
 
 Matrix::Matrix(ScriptingEnv *env, const QString& label, ApplicationWindow* parent, const QString& name, Qt::WFlags f)
-: MdiSubWindow(label, parent, name, f), Scripted(env)
+: MdiSubWindow(parent, label, name, f), Scripted(env)
 {
   m_bk_color = QColor(255, 255, 128);
   m_matrix_icon = getQPixmap("matrix_xpm");
 }
 
 Matrix::Matrix(ScriptingEnv *env, int r, int c, const QString& label, ApplicationWindow* parent, const QString& name, Qt::WFlags f)
-: MdiSubWindow(label, parent, name, f), Scripted(env)
+: MdiSubWindow(parent, label, name, f), Scripted(env)
 {
   m_bk_color = QColor(255, 255, 128);
   m_matrix_icon = getQPixmap("matrix_xpm");
@@ -80,7 +80,7 @@ Matrix::Matrix(ScriptingEnv *env, int r, int c, const QString& label, Applicatio
 }
 
 Matrix::Matrix(ScriptingEnv *env, const QImage& image, const QString& label, ApplicationWindow* parent, const QString& name, Qt::WFlags f)
-: MdiSubWindow(label, parent, name, f), Scripted(env)
+: MdiSubWindow(parent, label, name, f), Scripted(env)
 {
   m_bk_color = QColor(255, 255, 128);
   m_matrix_icon = getQPixmap("matrix_xpm");

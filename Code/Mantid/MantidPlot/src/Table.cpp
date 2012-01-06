@@ -61,7 +61,7 @@
 #include <ctime>
 
 Table::Table(ScriptingEnv *env, int r, int c, const QString& label, ApplicationWindow* parent, const QString& name, Qt::WFlags f)
-: MdiSubWindow(label,parent,name,f), Scripted(env)
+: MdiSubWindow(parent,label,name,f), Scripted(env)
 {
   init(r,c);
 }

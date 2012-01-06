@@ -1158,7 +1158,7 @@ private:
   void ICatAdvancedSearch();
 
   /// method to create widgets from mantid qt;
-  void setGeometry(QMdiSubWindow* usr_win,QWidget* user_interface);
+  void setGeometry(MdiSubWindow* usr_win,QWidget* user_interface);
 
   ///
   void showalgorithmDescriptions();

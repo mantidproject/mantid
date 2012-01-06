@@ -90,7 +90,7 @@ void LayerButton::mouseDoubleClickEvent ( QMouseEvent * )
 
 MultiLayer::MultiLayer(ApplicationWindow* parent, int layers, int rows, int cols, 
                        const QString& label, const char* name, Qt::WFlags f)
-                         : MdiSubWindow(label, parent, name, f),
+                         : MdiSubWindow(parent, label, name, f),
                          active_graph(NULL),
                          d_cols(cols),
                          d_rows(rows),

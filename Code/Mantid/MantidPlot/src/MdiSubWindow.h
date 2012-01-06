@@ -93,13 +93,13 @@ public:
 
 	//! Constructor
 	/**
+	 * @param parent :: parent window as ApplicationWindow
 	 * @param label :: window label
-	 * @param parent :: parent widget
 	 * @param name :: window name
 	 * @param f :: window flags
 	 * \sa setCaptionPolicy(), captionPolicy()
 	 */
-	MdiSubWindow(const QString& label = QString(), ApplicationWindow *app = 0, const QString& name = QString(), Qt::WFlags f = 0);
+	MdiSubWindow(ApplicationWindow *app, const QString& label = QString(), const QString& name = QString(), Qt::WFlags f = 0);
 
 	//! Possible window captions.
 	enum CaptionPolicy{
