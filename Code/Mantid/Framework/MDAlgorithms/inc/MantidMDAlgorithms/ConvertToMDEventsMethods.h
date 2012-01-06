@@ -34,7 +34,7 @@ namespace MDAlgorithms
 */
 
 // service variable used for efficient filling of the MD event WS  -> should be moved to configuration;
-#define SPLIT_LEVEL  1024
+#define SPLIT_LEVEL  2048
 
 
 
@@ -112,13 +112,15 @@ void ConvertToMDEvents::processQNDHWS()
             allCoord.insert(allCoord.end(),Coord.begin(),Coord.end());
 
             n_added_events++;
-        } // end spectra loop
-        if(n_added_events>=buf_size){
+            if(n_added_events>=buf_size){
               pWSWrapper->addMDData(sig_err,run_index,det_ids,allCoord,n_added_events);
  
               n_added_events=0;
               pProg->report(i);
-          }
+            }
+       
+        } // end spectra loop
+      
        } // end detectors loop;
 
        if(n_added_events>0){
@@ -190,7 +192,10 @@ void ConvertToMDEvents::processQNDEWS()
         //=> START INTERNAL LOOP OVER THE "TIME"
         for (size_t j = 0; j < numEvents-1; ++j)
         {
-  
+           // drop emtpy histohrams
+           if(Signal[j]<FLT_EPSILON)continue;
+
+
            if(!trn.calcMatrixCoord(X,ic,j,Coord))continue; // skip ND outside the range
             //  ADD RESULTING EVENTS TO THE WORKSPACE
             float ErrSq = float(Error[j]*Error[j]);
@@ -203,13 +208,14 @@ void ConvertToMDEvents::processQNDEWS()
             allCoord.insert(allCoord.end(),Coord.begin(),Coord.end());
 
             n_added_events++;
-        } // end spectra loop
-        if(n_added_events>=buf_size){
+            if(n_added_events>=buf_size){
               pWSWrapper->addMDData(sig_err,run_index,det_ids,allCoord,n_added_events);
  
               n_added_events=0;
               pProg->report(wi);
           }
+        } // end spectra loop
+   
        } // end detectors loop;
 
        if(n_added_events>0){
