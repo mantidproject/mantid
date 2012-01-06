@@ -218,11 +218,11 @@ void Fit::setDataCurve(int curve, double start, double end)
     Filter::setDataCurve(curve, start, end);
 
     d_w = new double[d_n];
-    if (d_graph && d_curve && ((PlotCurve *)d_curve)->type() != Graph::Function)
+    if (d_graph && d_curve && (dynamic_cast<PlotCurve *>(d_curve))->type() != Graph::Function)
     {
-        QList<DataCurve *> lst = ((DataCurve *)d_curve)->errorBarsList();
+        QList<DataCurve *> lst = (dynamic_cast<DataCurve *>(d_curve))->errorBarsList();
         foreach (DataCurve *c, lst){
-            QwtErrorPlotCurve *er = (QwtErrorPlotCurve *)c;
+            QwtErrorPlotCurve *er = dynamic_cast<QwtErrorPlotCurve *>(c);
             if (!er->xErrors()){
                 d_weighting = Instrumental;
                 for (int i=0; i<d_n; i++)
@@ -384,10 +384,10 @@ bool Fit::setWeightingData(WeightingMethod w, const QString& colName)
 
 				bool error = true;
 				QwtErrorPlotCurve *er = 0;
-				if (((PlotCurve *)d_curve)->type() != Graph::Function){
-					QList<DataCurve *> lst = ((DataCurve *)d_curve)->errorBarsList();
+        if ((dynamic_cast<PlotCurve *>(d_curve))->type() != Graph::Function){
+          QList<DataCurve *> lst = (dynamic_cast<DataCurve *>(d_curve))->errorBarsList();
                 	foreach (DataCurve *c, lst){
-                    	er = (QwtErrorPlotCurve *)c;
+                      er = dynamic_cast<QwtErrorPlotCurve *>(c);
                     	if (!er->xErrors()){
                         	weighting_dataset = er->title().text();
                         	error = false;
