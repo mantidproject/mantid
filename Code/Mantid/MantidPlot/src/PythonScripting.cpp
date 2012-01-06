@@ -71,7 +71,7 @@ ScriptingEnv *PythonScripting::constructor(ApplicationWindow *parent)
 /** Constructor */
 PythonScripting::PythonScripting(ApplicationWindow *parent)
   : ScriptingEnv(parent, langName), m_globals(NULL), m_math(NULL),
-    m_sys(NULL), refresh_allowed(0), m_workspaceHandles()
+    m_sys(NULL), refresh_allowed(0)
 {
   // MG (Russell actually found this for OS X): We ship SIP and PyQt4 with Mantid and we need to
   // ensure that the internal import that sip does of PyQt picks up the correct version.
@@ -96,11 +96,6 @@ PythonScripting::PythonScripting(ApplicationWindow *parent)
   setenv(envname, value.c_str(), 1);
 #endif
 
-  // Observe ADS updates
-  //observeAdd();
-  //observeAfterReplace();
-  //observeDelete();
-  //observeADSClear();
 }
 
 PythonScripting::~PythonScripting()
@@ -392,120 +387,3 @@ bool PythonScripting::loadInitFile(const QString & filename)
 
   return success;
 }
-
-/**
- * Listen to add notifications from the ADS and add a Python variable of the workspace name
- * to the current scope
- * @param wsName The name of the workspace
- * @param ws The ws ptr (unused)
- */
-void PythonScripting::addHandle(const std::string& wsName,const Mantid::API::Workspace_sptr ws)
-{
-  addPythonReference(wsName, ws);
-}
-
-/**
- * Listen to add/replace notifications from the ADS and add a Python variable of the workspace name
- * to the current scope
- * @param wsName The name of the workspace
- * @param ws The ws ptr (unused)
- */
-void PythonScripting::afterReplaceHandle(const std::string& wsName,const Mantid::API::Workspace_sptr ws)
-{
-  addPythonReference(wsName, ws);
-}
-
-/**
- * Removes a Python variable of the workspace name from the current scope
- * @param wsName The name of the workspace
- * @param ws The ws ptr (unused)
- */
-void PythonScripting::deleteHandle(const std::string& wsName,const Mantid::API::Workspace_sptr ws)
-{
-  UNUSED_ARG(ws);
-  deletePythonReference(wsName);
-}
-
-/**
- * Clear all workspace handle references
- */
-void PythonScripting::clearADSHandle()
-{
-  std::set<std::string>::const_iterator iend = m_workspaceHandles.end();
-  for( std::set<std::string>::const_iterator itr = m_workspaceHandles.begin(); itr != iend; )
-  {
-    // This also erases the element from current set. The standard says that erase only invalidates
-    // iterators of erased elements so we need to increment the iterator and get back the previous value
-    // i.e. the postfix operator
-    this->deletePythonReference(*(itr++));
-  }
-  
-  assert(m_workspaceHandles.empty());
-}
-
-
-/**
- * Add a Python variable of the workspace name
- * to the current scope
- * @param wsName The name of the workspace
- * @param ws The ws ptr (unused)
- */
-void PythonScripting::addPythonReference(const std::string& wsName,const Mantid::API::Workspace_sptr ws)
-{
-  UNUSED_ARG(ws);
-
-  // Compile a code object
-  const size_t length = wsName.length() * 2 + 10;
-  char * code = new char[length + 1];
-  const char * name = wsName.c_str();
-  sprintf(code, "%s = mtd['%s']", name, name);
-  GILHolder gil;
-  PyObject *codeObj = Py_CompileString(code, "PythonScripting::addPythonReference", Py_file_input);
-  if( codeObj )
-  {
-    PyObject *ret = PyEval_EvalCode((PyCodeObject*)codeObj,globalDict(), globalDict());
-    Py_XDECREF(ret);
-  }
-  if( PyErr_Occurred() )
-  {
-    PyErr_Clear();
-  }
-  else
-  {
-    // Keep track of it
-    m_workspaceHandles.insert(m_workspaceHandles.end(), wsName);
-  }
-  Py_XDECREF(codeObj);
-  delete [] code;
-}
-
-
-/**
- * Delete a Python reference to the given workspace name
- * @param wsName The name of the workspace
- */
-void PythonScripting::deletePythonReference(const std::string& wsName)
-{
-  const size_t length = wsName.length() + 4;
-  char * code = new char[length + 1];
-  sprintf(code, "del %s", wsName.c_str());
-  GILHolder gil;
-  PyObject *codeObj = Py_CompileString(code, "PythonScripting::deleteHandle", Py_file_input);
-  if( codeObj )
-  {
-    PyObject *ret = PyEval_EvalCode((PyCodeObject*)codeObj,globalDict(), globalDict());
-    Py_XDECREF(ret);
-  }
-  if( PyErr_Occurred() )
-  {
-    PyErr_Clear();
-  }
-  else
-  {
-    m_workspaceHandles.erase(wsName);
-  }
-  Py_XDECREF(codeObj);
-  delete [] code;
-
-}
-
