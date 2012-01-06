@@ -27,6 +27,7 @@ def get_analysis_data_service():
     Returns:
         A object that acts like a dictionary to retrieve workspaces
     """
+    import sys
     if 'mantid.api' in sys.modules:
         import mantid
         return mantid.AnalysisDataService.Instance()
