@@ -6,7 +6,6 @@ reference to None, thus ensuring that further attempts at access do not cause a 
 
 from PyQt4 import QtCore
 from PyQt4.QtCore import Qt
-from MantidFramework import WorkspaceProxy
 
 #-----------------------------------------------------------------------------
 #--------------------------- Proxy Objects -----------------------------------
@@ -160,7 +159,7 @@ class Layer(QtProxyObject):
         """
         if isinstance(args[0],str):
             return self._getHeldObject().insertCurve(*args)
-        elif isinstance(args[0],WorkspaceProxy):
+        elif hasattr(args[0], 'getName'):
             return self._getHeldObject().insertCurve(args[0].getName(),*args[1:])
         else:
             return self._getHeldObject().insertCurve(args[0]._getHeldObject(),*args[1:])
