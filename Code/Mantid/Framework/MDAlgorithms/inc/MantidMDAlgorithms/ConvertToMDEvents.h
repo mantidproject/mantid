@@ -1,24 +1,8 @@
 #ifndef MANTID_MD_CONVERT2_MDEVENTS
 #define MANTID_MD_CONVERT2_MDEVENTS
     
-#include "MantidKernel/System.h"
-#include "MantidKernel/Exception.h"
-#include "MantidAPI/Algorithm.h" 
-
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
-
-#include "MantidAPI/NumericAxis.h"
-#include "MantidAPI/Progress.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidMDAlgorithms/ConvertToMDEventsDetInfo.h"
-
-#include "MantidMDEvents/MDEventWSWrapper.h"
-#include "MantidMDEvents/MDEvent.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsMethods.h"
 #include "MantidMDEvents/BoxControllerSettingsAlgorithm.h"
-
-
 
 namespace Mantid
 {
@@ -53,56 +37,13 @@ namespace MDAlgorithms
         File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-  class ConvertToMDEvents;
   // signature for an algorithm processing n-dimension event workspace
   typedef boost::function<void (ConvertToMDEvents* )> pMethod;
  // vectors of strings are here everywhere
   typedef  std::vector<std::string> Strings;
 
-
-  /// known sates for algorithms, caluclating Q-values
-  enum Q_state{
-       NoQ,     //< no Q transformatiom, just copying values along X axis (may be with units transformation)
-       modQ,    //< calculate mod Q
-       Q3D,      //< calculate 3 component of Q in fractional coordinate system.
-       NQStates  // number of various recognized Q-analysis modes used to terminate Q-state algorithms metalooop.
-   };
-  /**  known analysis modes, arranged according to emodes 
-    *  It is importent to assign enums proper numbers, as direct correspondence between enums and their emodes 
-    *  used by the external units conversion algorithms and this algorithm, so the agreement should be the stame     */
-  enum AnalMode{  
-      Elastic = 0,  //< int emode = 0; Elastic analysis
-      Direct  = 1,  //< emode=1; Direct inelastic analysis mode
-      Indir   = 2,  //< emode=2; InDirect inelastic analysis mode
-      ANY_Mode      //< couples with NoQ, means just copying existing data (may be douing units conversion), also used to terminate AnalMode algorithms metaloop
-  };
-  /** enum describes if there is need to convert workspace units and different unit conversion modes 
-   * this modes are identified by algorithm from workpace parameters and user input.   */
-  enum CnvrtUnits   // here the numbers are specified to enable proper metaloop on conversion
-  {
-      ConvertNo,   //< no, input workspace has the same units as output workspace or in units used by Q-dE algorithms naturally
-      ConvFast , //< the input workspace has different units from the requested and fast conversion is possible
-      ConvByTOF,   //< conversion possible via TOF
-      ConvFromTOF,  //< Input workspace units are the TOF 
-      NConvUintsStates // number of various recognized unit conversion modes used to terminate CnvrtUnits algorithms metalooop.
-  };
-  enum InputWSType  // Algorithm recognizes 2 input workspace types with different interface. 
-  {
-      Workspace2DType, //< 2D matirix workspace
-      EventWSType,     //< Event worskapce
-      NInWSTypes
-  };
-// way to treat the X-coorinate in the workspace:
-    enum XCoordType
-    {
-        Histohram, // typical for Matrix workspace -- deploys central average 0.5(X[i]+X[i+1]); other types of averaging are possible if needed 
-        Axis       // typical for events
-    };
-/// predefenition of the class, which does all coordinate transformations, Linux compilers need this. 
-  template<Q_state Q, AnalMode MODE, CnvrtUnits CONV,XCoordType XTYPE> 
-  struct COORD_TRANSFORMER;
-  
-//
+ 
+/// Convert to MD Events class itself:
   class DLLExport ConvertToMDEvents  : public MDEvents::BoxControllerSettingsAlgorithm
   {
   public:
@@ -134,32 +75,24 @@ namespace MDAlgorithms
  
   /// logger -> to provide logging, for MD dataset file operations
     static Mantid::Kernel::Logger& convert_log;
-
    /// pointer to the input workspace;
    Mantid::API::MatrixWorkspace_sptr inWS2D;
-
-   // THE VARIABLES BELOW DESCRIBE TARGET M-DIMENSIONAL  WORKSPACE:
-   /// the variable which describes the number of the dimensions, in the target workspace. 
-   /// Calculated from number of input properties and the operations, performed on input workspace;
-   size_t n_activated_dimensions;
-  
+ 
    /// the variable which keeps preprocessed positions of the detectors if any availible (TODO: should it be a table ws and separate algorithm?);
     static preprocessed_detectors det_loc;  
-    /// minimal and maximal values for the workspace dimensions:
-    std::vector<double>      dim_min,dim_max;
-    /// the names for the target workspace dimensions and properties of input MD workspace
-    std::vector<std::string> targ_dim_names;
-    /// the units of target workspace dimensions and properties of input MD workspace dimensions
-    std::vector<std::string> targ_dim_units;
-  protected: //for testing
+    /// the properties of the requested target MD workpsace:
+    MDWSDescription TWS;
+   /// the pointer to class which is responsible for adding data to N-dimensional workspace;
+    boost::shared_ptr<MDEvents::MDEventWSWrapper> pWSWrapper;
+   protected: //for testing
+ 
+   //>---> Parts of the identifyTheAlg;
    /** function returns the list of the property names, which can be treated as additional dimensions present in current matrix workspace */
-  void getAddDimensionNames(API::MatrixWorkspace_const_sptr inMatrixWS,std::vector<std::string> &add_dim_names,std::vector<std::string> &add_dim_units)const;
-     
+   void getAddDimensionNames(API::MatrixWorkspace_const_sptr inMatrixWS,std::vector<std::string> &add_dim_names,std::vector<std::string> &add_dim_units)const;
    /** function parses arguments entered by user, and identifies, which subalgorithm should be deployed on WS  as function of the input artuments and the WS format */
    std::string identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS,const std::string &Q_mode_req, const std::string &dE_mode_req,
                                  std::vector<std::string> &out_dim_names,std::vector<std::string> &out_dim_units);
-
-   // Parts of the identifyMatrixAlg, separated for unit testing:
+   //>---> Parts of the identifyMatrixAlg, separated for unit testing:
    // identify Q - mode
    std::string parseQMode(const std::string &Q_mode_req,const Strings &ws_dim_names,const Strings &ws_dim_units,Strings &out_dim_names,Strings &out_dim_units, int &nQdims);
    // identify energy transfer mode
@@ -169,10 +102,14 @@ namespace MDAlgorithms
    std::string parseConvMode(const std::string &Q_MODE_ID,const std::string &natural_units,const Strings &ws_dim_units);
    // identify what kind of input workspace is there:
    std::string parseWSType(API::MatrixWorkspace_const_sptr inMatrixWS)const;
-
-   /** identifies conversion subalgorithm to run on a workspace */
+   //<---< Parts of the identifyMatrixAlg;
+   /** identifies the ID of the conversion subalgorithm to run on a workspace */
    std::string identifyTheAlg(API::MatrixWorkspace_const_sptr inMatrixWS,const std::string &Q_mode_req, const std::string &dE_mode_req,
-                              const std::vector<std::string> &other_dim_names,std::vector<std::string> &targ_dim_names,std::vector<std::string> &targ_dim_units);
+                              const std::vector<std::string> &other_dim_names,MDWSDescription &TargWSDescription);
+   //<---< Parts of the identifyTheAlg;
+
+   
+   
    /** function extracts the coordinates from additional workspace porperties and places them to proper position within the vector of MD coodinates */
    bool fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_t n_ws_properties);
 
@@ -182,14 +119,13 @@ namespace MDAlgorithms
 
    /// map to select an algorithm as function of the key, which describes it
    std::map<std::string, pMethod> alg_selector;
-   /// the pointer to class which is responsible for adding data to N-dimensional workspace;
-    std::auto_ptr<MDEvents::MDEventWSWrapper> pWSWrapper;
+
 
     // strictly for testing!!!
     void setAlgoID(const std::string &newID){
         this->algo_id=newID;
     }
-   // strictly for testing!!!
+    // strictly for testing!!!
     void setAlgoUnits(int emode){
         if(emode==0){
             this->subalgorithm_units=native_elastic_unitID;
@@ -200,17 +136,16 @@ namespace MDAlgorithms
     }
   private: 
    //--------------------------------------------------------------------------------------------------
-   /** generic template to convert to any Dimensions workspace from a histohram workspace   */
-    template<Q_state Q, AnalMode MODE, CnvrtUnits CONV>
-    void processQNDHWS();
-   /** generic template to convert to any Dimensions workspace from an Event workspace   */
-    template<Q_state Q, AnalMode MODE, CnvrtUnits CONV>
-    void processQNDEWS();
+   ///** generic template to convert to any Dimensions workspace from a histohram workspace   */
+   // template<Q_state Q, AnalMode MODE, CnvrtUnits CONV>
+   // void processQNDHWS();
+   ///** generic template to convert to any Dimensions workspace from an Event workspace   */
+   // template<Q_state Q, AnalMode MODE, CnvrtUnits CONV>
+   // void processQNDEWS();
 
-    /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
-    /// presumably will be completely inlined
-     template<Q_state Q, AnalMode MODE, CnvrtUnits CONV,XCoordType XTYPE> 
-     friend struct COORD_TRANSFORMER;
+    template<Q_state Q, AnalMode MODE, CnvrtUnits CONV>
+    friend class processHistoWS;
+
      /// helper class to orginize metaloop on various algorithm options
      template<Q_state Q,size_t N_ALGORITHMS >
      friend class LOOP_ND;
@@ -233,16 +168,12 @@ namespace MDAlgorithms
     // The Units (different for different Q and dE mode), for input workspace, for the selected sub algorihm to work with. 
     // Any other input workspace units have to be converted into these:
     std::string subalgorithm_units;
-  // string -Key to identify the algorithm -- rather for testing
+  // string -Key to identify the algorithm -- rather for testing and debugging 
     std::string algo_id;
     //
-    std::vector<double> getTransfMatrix()const{return rotMatrix;}
-    // 
-    std::vector<double> rotMatrix;  // should it be the Quat?
-
-   /// helper function which does exatly what it says
-   void checkMaxMoreThenMin(const std::vector<double> &min,const std::vector<double> &max)const;
-   /** helper function which verifies if projection vectors are specified and if their values are correct when present.
+    std::vector<double> getTransfMatrix()const{return TWS.rotMatrix;}
+  
+    /** helper function which verifies if projection vectors are specified and if their values are correct when present.
     * sets defaults [1,0,0] and [0,1,0] if not present or any error. */
    void checkUVsettings(const std::vector<double> &ut,const std::vector<double> &vt,Kernel::V3D &u,Kernel::V3D &v)const;
  };

@@ -265,10 +265,10 @@ void ConvertToMDEvents::exec()
 {
   // in case of subsequent calls
   this->algo_id="";
-  // initiate class which would deal with any dimension workspaces
+  // initiate class which would deal with any dimension workspaces, handling 
   if(!pWSWrapper.get())
   {
-    pWSWrapper = std::auto_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
+    pWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
   }
   // -------- Input workspace
   this->inWS2D = getProperty("InputWorkspace");
@@ -292,7 +292,7 @@ void ConvertToMDEvents::exec()
   this->checkUVsettings(ut,vt,u,v);
 
   // set up target coordinate system
-  this ->rotMatrix = getTransfMatrix(inWS2D,u,v);
+ TWS.rotMatrix = getTransfMatrix(inWS2D,u,v);
 
   // if new workspace is created, its properties are determened by the user's input
   if (create_new_ws)
@@ -306,28 +306,21 @@ void ConvertToMDEvents::exec()
     std::vector<std::string> other_dim_names = getProperty("OtherDimensions");
 
     // Identify the algorithm to deploy and identify/set the dimension names to use
-    algo_id = identifyTheAlg(inWS2D,Q_mod_req,dE_mod_req,other_dim_names,targ_dim_names,targ_dim_units);
+    algo_id = identifyTheAlg(inWS2D,Q_mod_req,dE_mod_req,other_dim_names,TWS);
 
     // set the min and max values for the dimensions from the input porperties
-    dim_min = getProperty("MinValues");
-    dim_max = getProperty("MaxValues");
-    // verify that the number min/max values is equivalent to the number of dimensions defined by properties
-    if(dim_min.size()!=dim_max.size()||dim_min.size()!=n_activated_dimensions)
-    {
-      g_log.error()<<" number of specified min dimension values: "<<dim_min.size()<<", number of max values: "<<dim_max.size()<<
-                     " and total number of target dimensions: "<<n_activated_dimensions<<" are not consistent\n";
-      throw(std::invalid_argument("wrong number of dimension limits"));
-    }
-    this->checkMaxMoreThenMin(dim_min,dim_max);
-
+    TWS.dim_min = getProperty("MinValues");
+    TWS.dim_max = getProperty("MaxValues");
+    // verify that the number min/max values is equivalent to the number of dimensions defined by properties and min is less the
+    TWS.checkMinMaxNdimConsistent(convert_log);
     // the output dimensions and almost everything else will be determined by the dimensions of the target workspace
     // user input is mainly ignored
   }
   else
   {
-    n_activated_dimensions = spws->getNumDims();
-    dim_min.assign(n_activated_dimensions,-1);
-    dim_max.assign(n_activated_dimensions,1);
+    TWS.n_activated_dimensions = spws->getNumDims();
+    TWS.dim_min.assign(TWS.n_activated_dimensions,-1);
+    TWS.dim_max.assign(TWS.n_activated_dimensions,1);
     throw(Kernel::Exception::NotImplementedError("Adding to existing MD workspace not Yet Implemented"));
   }
 
@@ -336,10 +329,10 @@ void ConvertToMDEvents::exec()
 
   if(create_new_ws)
   {
-    spws = pWSWrapper->createEmptyMDWS(n_activated_dimensions, targ_dim_names,targ_dim_units, dim_min, dim_max);
+    spws = pWSWrapper->createEmptyMDWS(TWS.n_activated_dimensions, TWS.dim_names,TWS.dim_units, TWS.dim_min, TWS.dim_max);
     if(!spws)
     {
-      g_log.error()<<"can not create target event workspace with :"<<n_activated_dimensions<<" dimensions\n";
+      g_log.error()<<"can not create target event workspace with :"<<TWS.n_activated_dimensions<<" dimensions\n";
       throw(std::invalid_argument("can not create target workspace"));
     }
     // Build up the box controller
@@ -365,21 +358,12 @@ void ConvertToMDEvents::exec()
 
   // free the algorithm from the responsibility for the workspace to allow it to be deleted if necessary
   pWSWrapper->releaseWorkspace();
+  // free up the sp to the input workspace, which would be deleted if nobody needs it any more;
+  inWS2D.reset();
   return;
 }
 
-void 
-ConvertToMDEvents::checkMaxMoreThenMin(const std::vector<double> &min,const std::vector<double> &max)const
-{
-  for(size_t i=0; i<min.size();i++)
-  {
-    if(max[i]<=min[i])
-    {
-      convert_log.error()<<" min value "<<min[i]<<" not less then max value"<<max[i]<<" in direction: "<<i<<std::endl;
-      throw(std::invalid_argument("min limit not smaller then max limit"));
-    }
-  }
-}
+
 
 /**  
   *  The dimensions, which can be obtained from workspace are determined by the availible algorithms.
@@ -619,10 +603,11 @@ ConvertToMDEvents::parseWSType(API::MatrixWorkspace_const_sptr inMatrixWS)const
 std::string 
 ConvertToMDEvents::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS,const std::string &Q_mode_req, 
                                  const std::string &dE_mode_req,const std::vector<std::string> &other_dim_names,
-                                 std::vector<std::string> &dim_names_requested,std::vector<std::string> &dim_units_requested)
+                                 MDWSDescription &TargWSDescription)
 {
 
-   std::vector<std::string> ws_dim_names,ws_dim_units;
+   Strings dim_names_requested,dim_units_requested;
+   Strings ws_dim_names,ws_dim_units;
    std::string the_algID;
 
    // identify the matrix conversion part of subalgorithm as function of user input and workspace Matrix parameters (axis)
@@ -682,8 +667,11 @@ ConvertToMDEvents::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS,const std
             throw(std::invalid_argument(" Needs Input energy to be present for inelastic modes"));
         }
     }
-
-    this->n_activated_dimensions = nDims;
+    // set up the target workspace description;
+    TargWSDescription.n_activated_dimensions= nDims;
+    TargWSDescription.emode                 = emode;
+    TargWSDescription.dim_names             = dim_names_requested;
+    TargWSDescription.dim_units             = dim_units_requested;
 
     return the_algID;
 
@@ -766,7 +754,7 @@ ConvertToMDEvents::fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_
 {
      for(size_t i=n_ws_properties;i<nd;i++){
          //HACK: A METHOD, Which converts TSP into value, correspondent to time scale of matrix workspace has to be developed and deployed!
-         Kernel::Property *pProperty = (inWS2D->run().getProperty(this->targ_dim_names[i]));
+         Kernel::Property *pProperty = (inWS2D->run().getProperty(TWS.dim_names[i]));
          Kernel::TimeSeriesProperty<double> *run_property = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(pProperty);  
          if(run_property){
                 Coord[i]=run_property->firstValue();
@@ -774,12 +762,12 @@ ConvertToMDEvents::fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_
               // e.g Ei can be a property and dimenson
               Kernel::PropertyWithValue<double> *proc_property = dynamic_cast<Kernel::PropertyWithValue<double> *>(pProperty);  
               if(!proc_property){
-                 convert_log.error()<<" property: "<<this->targ_dim_names[i]<<" is neither a time series (run) property nor a property with double value\n";
+                 convert_log.error()<<" property: "<<this->TWS.dim_names[i]<<" is neither a time series (run) property nor a property with double value\n";
                  throw(std::invalid_argument(" can not interpret property, used as dimension"));
               }
               Coord[i]  = *(proc_property);
          }
-        if(Coord[i]<dim_min[i] || Coord[i]>=dim_max[i])return false;
+        if(Coord[i]<TWS.dim_min[i] || Coord[i]>=TWS.dim_max[i])return false;
      }
      return true;
 }
@@ -940,7 +928,28 @@ native_inelastic_unitID("DeltaE")
   
 }
 
-//
+/** function verifies the consistency of the min and max dimsnsions values  checking if all necessary 
+ * values vere defined and min values are smaller then mav values
+*/
+void 
+MDWSDescription::checkMinMaxNdimConsistent(Mantid::Kernel::Logger& g_log)const
+{
+  if(this->dim_min.size()!=this->dim_max.size()||this->dim_min.size()!=this->n_activated_dimensions)
+  {
+      g_log.error()<<" number of specified min dimension values: "<<dim_min.size()<<", number of max values: "<<dim_max.size()<<
+                     " and total number of target dimensions: "<<n_activated_dimensions<<" are not consistent\n";
+      throw(std::invalid_argument("wrong number of dimension limits"));
+  }
+    
+  for(size_t i=0; i<this->dim_min.size();i++)
+  {
+    if(this->dim_max[i]<=this->dim_min[i])
+    {
+      g_log.error()<<" min value "<<dim_min[i]<<" not less then max value"<<dim_max[i]<<" in direction: "<<i<<std::endl;
+      throw(std::invalid_argument("min limit not smaller then max limit"));
+    }
+  }
+}
 
 } // namespace Mantid
 } // namespace MDAlgorithms

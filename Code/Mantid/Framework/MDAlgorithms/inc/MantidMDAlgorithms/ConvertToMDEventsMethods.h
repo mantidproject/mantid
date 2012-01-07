@@ -1,7 +1,22 @@
 #ifndef H_CONVERT_TO_MDEVENTS_METHODS
 #define H_CONVERT_TO_MDEVENTS_METHODS
 //
-#include "MantidMDAlgorithms/ConvertToMDEvents.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Exception.h"
+#include "MantidAPI/Algorithm.h" 
+
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+
+#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/Progress.h"
+#include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+
+#include "MantidMDEvents/MDEventWSWrapper.h"
+#include "MantidMDEvents/MDEvent.h"
+
+#include "MantidMDAlgorithms/ConvertToMDEventsDetInfo.h"
 #include "MantidMDAlgorithms/ConvertToMDEventsCoordTransf.h"
 
 namespace Mantid
@@ -29,20 +44,98 @@ namespace MDAlgorithms
         You should have received a copy of the GNU General Public License
         along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-        File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+        File/ change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 // service variable used for efficient filling of the MD event WS  -> should be moved to configuration;
 #define SPLIT_LEVEL  2048
+/** class describes the inteface to the methods, which perfoen the conversion from usual workspaces to MDEventWorkspace */
+class IConvertToMDEventMethods
+{
+public:
+    virtual void setUPConversion(Mantid::API::MatrixWorkspace_sptr inWS2D,preprocessed_detectors &det_loc,MDWSDescription &TWS,boost::shared_ptr<MDEvents::MDEventWSWrapper> pWSWrapper)=0;
+    virtual void runConversion()=0;
+    virtual void conversionChunk()=0;
+    virtual ~IConvertToMDEventMethods(){};
+};
 
+ class ConvertToMDEvents;
+ /// the class describes the properties of target MD workspace, which should be obtained as the result of this algorithm. 
+  struct MDWSDescription
+  {
+  public:
+      /// constructor
+      MDWSDescription():n_activated_dimensions(0),emode(-1){};
+    /// the variable which describes the number of the dimensions, in the target workspace. 
+    /// Calculated from number of input properties and the operations, performed on input workspace;
+    size_t n_activated_dimensions;
+    ///
+    int emode;
+    /// minimal and maximal values for the workspace dimensions:
+    std::vector<double>      dim_min,dim_max;
+    /// the names for the target workspace dimensions and properties of input MD workspace
+    std::vector<std::string> dim_names;
+    /// the units of target workspace dimensions and properties of input MD workspace dimensions
+    std::vector<std::string> dim_units;
+    /// the matrix to transform momentums of the workspace into notional target coordinate system
+    std::vector<double> rotMatrix;  // should it be the Quat?
+    /// helper function checks if min values are less them max values and are consistent between each other 
+    void checkMinMaxNdimConsistent(Mantid::Kernel::Logger& log)const;
+ 
+  }; 
 
+  /// known sates for algorithms, caluclating Q-values
+  enum Q_state{
+       NoQ,     //< no Q transformatiom, just copying values along X axis (may be with units transformation)
+       modQ,    //< calculate mod Q
+       Q3D,      //< calculate 3 component of Q in fractional coordinate system.
+       NQStates  // number of various recognized Q-analysis modes used to terminate Q-state algorithms metalooop.
+   };
+  /**  known analysis modes, arranged according to emodes 
+    *  It is importent to assign enums proper numbers, as direct correspondence between enums and their emodes 
+    *  used by the external units conversion algorithms and this algorithm, so the agreement should be the stame     */
+  enum AnalMode{  
+      Elastic = 0,  //< int emode = 0; Elastic analysis
+      Direct  = 1,  //< emode=1; Direct inelastic analysis mode
+      Indir   = 2,  //< emode=2; InDirect inelastic analysis mode
+      ANY_Mode      //< couples with NoQ, means just copying existing data (may be douing units conversion), also used to terminate AnalMode algorithms metaloop
+  };
+  /** enum describes if there is need to convert workspace units and different unit conversion modes 
+   * this modes are identified by algorithm from workpace parameters and user input.   */
+  enum CnvrtUnits   // here the numbers are specified to enable proper metaloop on conversion
+  {
+      ConvertNo,   //< no, input workspace has the same units as output workspace or in units used by Q-dE algorithms naturally
+      ConvFast , //< the input workspace has different units from the requested and fast conversion is possible
+      ConvByTOF,   //< conversion possible via TOF
+      ConvFromTOF,  //< Input workspace units are the TOF 
+      NConvUintsStates // number of various recognized unit conversion modes used to terminate CnvrtUnits algorithms metalooop.
+  };
+  enum InputWSType  // Algorithm recognizes 2 input workspace types with different interface. 
+  {
+      Workspace2DType, //< 2D matirix workspace
+      EventWSType,     //< Event worskapce
+      NInWSTypes
+  };
+// way to treat the X-coorinate in the workspace:
+    enum XCoordType
+    {
+        Histohram, // typical for Matrix workspace -- deploys central average 0.5(X[i]+X[i+1]); other types of averaging are possible if needed 
+        Axis       // typical for events
+    };
 
 //-----------------------------------------------
 // Method to process histohram workspace
 template<Q_state Q, AnalMode MODE, CnvrtUnits CONV>
-void ConvertToMDEvents::processQNDHWS()
+class processHistoWS: public IConvertToMDEventMethods 
 {
+/// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
+    /// presumably will be completely inlined
+     template<Q_state Q, AnalMode MODE, CnvrtUnits CONV,XCoordType XTYPE> 
+     friend struct COORD_TRANSFORMER;
+public:
+    void setUPConversion(Mantid::API::MatrixWorkspace_sptr inWS2D,preprocessed_detectors &det_loc,MDWSDescription &TWS,boost::shared_ptr<MDEvents::MDEventWSWrapper> pWSWrapper)
+    {
     // counder for the number of events
     size_t n_added_events(0);
     // amount of work
