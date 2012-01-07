@@ -89,6 +89,8 @@ struct COORD_TRANSFORMER
     inline bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
         UNUSED_ARG(X); UNUSED_ARG(i); UNUSED_ARG(j); UNUSED_ARG(Coord);throw(Kernel::Exception::NotImplementedError(""));
         return false;}
+
+    void setUP(ConvertToMDEvents *){};
   
 private:
  
@@ -141,7 +143,10 @@ struct COORD_TRANSFORMER<NoQ,MODE,CONV,Type>
        return true;
     }
     // constructor;
-    COORD_TRANSFORMER(ConvertToMDEvents *pConv):pHost(pConv){} 
+    COORD_TRANSFORMER(){} 
+    void setUP(ConvertToMDEvents *pConv){
+        pHost = pConv;
+    }
 private:
    // the variables used for exchange data between different specific parts of the generic ND algorithm:
     // pointer to Y axis of MD workspace
@@ -232,7 +237,10 @@ struct COORD_TRANSFORMER<modQ,MODE,CONV,Type>
 
     }
     // constructor;
-    COORD_TRANSFORMER(ConvertToMDEvents *pConv):pHost(pConv){}
+    COORD_TRANSFORMER(){}
+    void setUP(ConvertToMDEvents *pConv){
+        pHost = pConv;
+    }
 private:
     // the energy of the incident neutrons
     double Ei;
@@ -299,7 +307,10 @@ struct COORD_TRANSFORMER<modQ,Elastic,CONV,Type>
 
     }
     // constructor;
-    COORD_TRANSFORMER(ConvertToMDEvents *pConv):pHost(pConv){}
+    COORD_TRANSFORMER(){}
+   void setUP(ConvertToMDEvents *pConv){
+        pHost = pConv;
+    }
 private:
     // the energy of the incident neutrons
     double Ei;
@@ -370,8 +381,10 @@ struct COORD_TRANSFORMER<Q3D,MODE,CONV,Type>
 
          return true;
     }
-    // constructor;
-    COORD_TRANSFORMER(ConvertToMDEvents *pConv):pHost(pConv){}
+   COORD_TRANSFORMER(){}
+   void setUP(ConvertToMDEvents *pConv){
+        pHost = pConv;
+    }
 private:
     // the energy of the incident neutrons
     double Ei;
@@ -433,8 +446,10 @@ struct COORD_TRANSFORMER<Q3D,Elastic,CONV,Type>
 
          return true;
     }
-    // constructor;
-    COORD_TRANSFORMER(ConvertToMDEvents *pConv):pHost(pConv){}
+    COORD_TRANSFORMER(){}
+    void setUP(ConvertToMDEvents *pConv){
+        pHost = pConv;
+    }
 private:
     // directions to the detectors 
     double ex,ey,ez;

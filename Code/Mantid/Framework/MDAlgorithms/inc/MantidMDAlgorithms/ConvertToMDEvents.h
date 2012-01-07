@@ -37,8 +37,7 @@ namespace MDAlgorithms
         File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-  // signature for an algorithm processing n-dimension event workspace
-  typedef boost::function<void (ConvertToMDEvents* )> pMethod;
+ 
  // vectors of strings are here everywhere
   typedef  std::vector<std::string> Strings;
 
@@ -70,10 +69,7 @@ namespace MDAlgorithms
    /// Sets documentation strings for this algorithm
     virtual void initDocs();
 
-    /// Progress reporter 
-    std::auto_ptr<API::Progress> pProg;
- 
-  /// logger -> to provide logging, for MD dataset file operations
+   /// logger -> to provide logging, for MD dataset file operations
     static Mantid::Kernel::Logger& convert_log;
    /// pointer to the input workspace;
    Mantid::API::MatrixWorkspace_sptr inWS2D;
@@ -108,17 +104,14 @@ namespace MDAlgorithms
                               const std::vector<std::string> &other_dim_names,MDWSDescription &TargWSDescription);
    //<---< Parts of the identifyTheAlg;
 
-   
-   
-   /** function extracts the coordinates from additional workspace porperties and places them to proper position within the vector of MD coodinates */
-   bool fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_t n_ws_properties);
+ 
 
    /** function provides the linear representation for the transformation matrix, which translate momentums from laboratory to notional (fractional) coordinate system */
    std::vector<double> getTransfMatrix(API::MatrixWorkspace_sptr inWS2D,const Kernel::V3D &u=Kernel::V3D(1,0,0), const Kernel::V3D &v=Kernel::V3D(0,1,0), 
                                        bool is_powder=false)const;
 
    /// map to select an algorithm as function of the key, which describes it
-   std::map<std::string, pMethod> alg_selector;
+   std::map<std::string, IConvertToMDEventMethods *> alg_selector;
 
 
     // strictly for testing!!!
@@ -143,8 +136,12 @@ namespace MDAlgorithms
    // template<Q_state Q, AnalMode MODE, CnvrtUnits CONV>
    // void processQNDEWS();
 
+    // temporary
     template<Q_state Q, AnalMode MODE, CnvrtUnits CONV>
-    friend class processHistoWS;
+    friend class ProcessHistoWS;
+    template<Q_state Q, AnalMode MODE, CnvrtUnits CONV,XCoordType XTYPE> 
+    friend struct COORD_TRANSFORMER;
+  
 
      /// helper class to orginize metaloop on various algorithm options
      template<Q_state Q,size_t N_ALGORITHMS >

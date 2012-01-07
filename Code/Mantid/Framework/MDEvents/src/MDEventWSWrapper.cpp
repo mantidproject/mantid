@@ -70,7 +70,7 @@ MDEventWSWrapper::addMDData(std::vector<float> &sig_err,std::vector<uint16_t> &r
 void 
 MDEventWSWrapper::releaseWorkspace()
 {
-    // decrease the sp count by one?
+    // decrease the sp count by one
      workspace.reset();
      // mark the number dimensions invalid;
      n_dimensions=0;
