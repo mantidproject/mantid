@@ -6,7 +6,7 @@ Here are examples of input and output from PG3 and SNAP:
 
 [[Image:SNAP_Calibrate.png]]
 
--The purpose of this algorithm is to calibrate the detector pixels and write a calibration file.  The calibration file name contains the instrument, run number, and date of calibration.  A binary Dspacemap file that converts from TOF to d-space including the calculated offsets is also an output option.  For crosscorrelation option:  If one peak is not in the spectra of all the detectors, you can specify the first n detectors to be calibrated with one peak and the next n detectors to be calibrated with the second peak.  If a color fill plot of the calibrated workspace does not look good, do a color fill plot of the workspace that ends in cc to see if the CrossCorrelationPoints and/or PeakHalfWidth should be increased or decreased.  Also plot the reference spectra from the cc workspace.
+-The purpose of this algorithm is to calibrate the detector pixels and write a calibration file.  The calibration file name contains the instrument, run number, and date of calibration.  A binary Dspacemap file that converts from TOF to d-space including the calculated offsets is also an output option.  For CrossCorrelation option:  If one peak is not in the spectra of all the detectors, you can specify the first n detectors to be calibrated with one peak and the next n detectors to be calibrated with the second peak.  If a color fill plot of the calibrated workspace does not look good, do a color fill plot of the workspace that ends in cc to see if the CrossCorrelationPoints and/or PeakHalfWidth should be increased or decreased.  Also plot the reference spectra from the cc workspace.
 
 
 *WIKI*"""
@@ -53,19 +53,14 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                              Description="Maximum absolute value of offsets; default is 1")
         self.declareProperty("CrossCorrelation", True,
                              Description="CrossCorrelation if True; minimize using many peaks if False.")
-        self.declareProperty("Peak1", 0.0,
-                             Description="d-space position of reference peak for cross correlation.")
-        self.declareProperty("Peak2", 0.0,
-                             Description="Optional: d-space position of second reference peak for cross correlation.")
-        self.declareProperty("DetectorsPeak1", 0,
-                             Description="Number of detector banks for Peak1 for cross correlation.  Default is all.")
-        self.declareProperty("DetectorsPeak2", 0,
-                             Description="Optional: Number of detector banks for Peak2 for cross correlation.")
+        self.declareProperty("PeakPositions", "", 
+                             Description="Comma delimited d-space positions of reference peaks.  Use 1 or 2 for Cross Correlation.  Unlimited for many peaks option.")
+        self.declareProperty("DetectorsPeaks", "",
+                             Description="Comma delimited numbers of detector banks for each peak if using 2 peaks for Cross Correlation.  Default is all.")
         self.declareProperty("PeakHalfWidth", 0.05,
-                             Description="Half width of d-space around peaks for cross correlation. Default is 0.05")
+                             Description="Half width of d-space around peaks for Cross Correlation. Default is 0.05")
         self.declareProperty("CrossCorrelationPoints", 100,
-                             Description="Number of points to find peak from cross correlation.  Default is 100")
-        self.declareProperty("PeakPositions", "", Description="d-space position of reference peaks for many peaks option.")
+                             Description="Number of points to find peak from Cross Correlation.  Default is 100")
         self.declareListProperty("Binning", [0.,0.,0.],
                              Description="Min, Step, and Max of d-space bins.  Logarithmic binning is used if Step is negative.")
         self.declareProperty("DiffractionFocusWorkspace", False, Description="Diffraction focus by detectors.  Default is False")
@@ -280,8 +275,8 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             DReference=self._peakpos1, XMin=-self._ccnumber, XMax=self._ccnumber, MaxOffset=self._maxoffset, MaskWorkspace=str(wksp)+"mask")
         mtd.deleteWorkspace(str(wksp)+"cc")
         mtd.releaseFreeMemory()
-        Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,Params=str(self._peakmin2)+","+str(abs(self._binning[1]))+","+str(self._peakmax2))
         if self._peakpos2 > 0.0:
+            Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,Params=str(self._peakmin2)+","+str(abs(self._binning[1]))+","+str(self._peakmax2))
             #Find good peak for reference
             ymax = 0
             for s in range(0,wksp.getNumberHistograms()):
@@ -415,18 +410,31 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         self._xpixelbin = self.getProperty("XPixelSum")
         self._ypixelbin = self.getProperty("YPixelSum")
         self._peakpos = self.getProperty("PeakPositions")
-        self._peakpos1 = self.getProperty("Peak1")
-        self._peakpos2 = self.getProperty("Peak2")
-        pixelbin2 = self._xpixelbin*self._ypixelbin
-        self._lastpixel = self.getProperty("DetectorsPeak1")
-        self._lastpixel2 = (self.getProperty("DetectorsPeak1")+self.getProperty("DetectorsPeak2"))
-        peakhalfwidth = self.getProperty("PeakHalfWidth")
-        self._ccnumber = self.getProperty("CrossCorrelationPoints")
+        positions = self._peakpos.strip().split(',')
+        if self.getProperty("CrossCorrelation"):
+            self._peakpos1 = float(positions[0])
+            self._peakpos2 = 0
+            self._lastpixel = 0
+            self._lastpixel2 = 0
+            print self._peakpos1
+            peakhalfwidth = self.getProperty("PeakHalfWidth")
+            self._peakmin = self._peakpos1-peakhalfwidth
+            self._peakmax = self._peakpos1+peakhalfwidth
+            if len(positions) >= 2:
+                self._peakpos2 = float(positions[1])
+                self._peakmin2 = self._peakpos2-peakhalfwidth
+                self._peakmax2 = self._peakpos2+peakhalfwidth
+                print self._peakpos2
+            detectors = self.getProperty("DetectorsPeaks").strip().split(',')
+            if detectors[0]:
+                self._lastpixel = int(detectors[0])
+                print self._lastpixel
+            if len(detectors) >= 2:
+                self._lastpixel2 = self._lastpixel+int(detectors[1])
+                print self._lastpixel2
+            pixelbin2 = self._xpixelbin*self._ypixelbin
+            self._ccnumber = self.getProperty("CrossCorrelationPoints")
         self._maxoffset = self.getProperty("MaxOffset")
-        self._peakmin = self._peakpos1-peakhalfwidth
-        self._peakmax = self._peakpos1+peakhalfwidth
-        self._peakmin2 = self._peakpos2-peakhalfwidth
-        self._peakmax2 = self._peakpos2+peakhalfwidth
         self._diffractionfocus = self.getProperty("DiffractionFocusWorkspace")
         self._filterBadPulses = self.getProperty("FilterBadPulses")
         filterLogs = self.getProperty("FilterByLogValue")
