@@ -30,10 +30,11 @@
 #define ERRORBARS_H
 
 #include "PlotCurve.h"
+#include "Mantid/ErrorBarSettings.h"
 #include <qwt_plot.h>
 
 //! Error bars curve
-class QwtErrorPlotCurve: public DataCurve
+class QwtErrorPlotCurve: public DataCurve, public ErrorBarSettings
 {
 public:
 	enum Orientation{Horizontal = 0, Vertical = 1};
@@ -49,9 +50,6 @@ public:
 	QwtArray<double> errors(){return err;};
 	void setErrors(const QwtArray<double>&data){err=data;};
 
-	int capLength(){return cap;};
-	void setCapLength(int t){cap=t;};
-
 	double width(){return pen().widthF();};
 	void setWidth(double w);
 
@@ -63,15 +61,6 @@ public:
 
 	bool xErrors();
 	void setXErrors(bool yes);
-
-	bool throughSymbol(){return through;};
-	void drawThroughSymbol(bool yes){through=yes;};
-
-	bool plusSide(){return plus;};
-	void drawPlusSide(bool yes){plus=yes;};
-
-	bool minusSide(){return minus;};
-	void drawMinusSide(bool yes){minus=yes;};
 
 	//! Returns the master curve to which this error bars curve is attached.
 	DataCurve* masterCurve(){return d_master_curve;};
@@ -96,13 +85,8 @@ private:
     //! Stores the error bar values
     QwtArray<double> err;
 
-	//! Orientation of the bars: Horizontal or Vertical
-	int type;
-
-	//! Length of the bar cap decoration
-	int cap;
-
-	bool plus, minus, through;
+  //! Orientation of the bars: Horizontal or Vertical
+  int type;
 
 	//! Reference to the master curve to which this error bars curve is attached.
 	DataCurve *d_master_curve;
