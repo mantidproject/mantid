@@ -50,10 +50,10 @@ public:
   QwtArray<double> errors(){return err;};
   void setErrors(const QwtArray<double>&data){err=data;};
 
-  double width(){return pen().widthF();};
+  double width() const {return pen().widthF();};
   void setWidth(double w);
 
-  QColor color(){return pen().color();};
+  QColor color() const {return pen().color();};
   void setColor(const QColor& c);
 
   int direction(){return type;};

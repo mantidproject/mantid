@@ -151,17 +151,16 @@ void MantidCurve::doDraw(QPainter *p,
           const QRect&, MantidQwtWorkspaceData const * const d) const
 {
   int sh = 0;
-  const QwtSymbol symbol(symbol());
-  if (symbol.style() != QwtSymbol::NoSymbol)
+  if (symbol().style() != QwtSymbol::NoSymbol)
   {
-    sh = symbol.size().height() / 2;
+    sh = symbol().size().height() / 2;
   }
 
   int xi0 = 0;
-  QPen pen(pen());
-  pen.setColor(m_errorSettings->color());
-  pen.setWidth(m_errorSettings->width());
-  p->setPen(pen);
+  QPen mypen(pen());
+  mypen.setColor(m_errorSettings->color());
+  mypen.setWidthF(m_errorSettings->width());
+  p->setPen(mypen);
   const int dx = m_errorSettings->capLength()/2;
   const int dx2 = 2*dx;
   const int x1 = static_cast<int>(floor(xMap.p1()));
