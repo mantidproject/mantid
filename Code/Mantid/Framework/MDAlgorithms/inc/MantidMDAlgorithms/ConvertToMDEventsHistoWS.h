@@ -81,9 +81,6 @@ public:
     {
        // counder for the number of events
         size_t n_added_events(0);
-       // amount of work
-        const size_t numSpec  = inWS2D->getNumberHistograms();
-      
 
         const size_t specSize = this->inWS2D->blocksize();    
         size_t nValidSpectra  = pDetLoc->det_id.size();
