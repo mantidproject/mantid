@@ -39,7 +39,7 @@ namespace MDEvents
   {
   public:
       /// constructor
-     MDWSDescription():n_dims(0),emode(-1){};
+     MDWSDescription():n_dims(0),emode(-1),Ei(std::numeric_limits<double>::quiet_NaN()){};
      /// mainly test constructor;
      MDWSDescription(size_t nDimesnions);
     /// the variable which describes the number of the dimensions, in the target workspace. 
@@ -47,6 +47,8 @@ namespace MDEvents
     size_t n_dims;
     /// conversion mode (see its description below)
     int emode;
+    /// energy of incident neutrons, relevant in inelastic mode
+    double Ei; 
     /// minimal and maximal values for the workspace dimensions:
     std::vector<double>      dim_min,dim_max;
     /// the names for the target workspace dimensions and properties of input MD workspace

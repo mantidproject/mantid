@@ -61,14 +61,6 @@ public:
     /// get access to the internal workspace
     API::IMDEventWorkspace_sptr pWorkspace(){return workspace;}
 
-//****> the methods below provide the equivalent of vftable for MDEvent workspace write interface. 
-//      It should probably be moved to that interface if no substantial performance loss is identified (and seems there are no)
-   /// to access to splitBox method of multidimensional workspace
-    void splitBox(){workspace->splitBox();}
-    /** returns the MDevent ws box controller for access and modifications */
-    Mantid::API::BoxController_sptr getBoxController(){return workspace->getBoxController();}
-    /// refresh cash on md event workspace
-    void refreshCache(){workspace->refreshCache();}
 private:
     /// maximal nuber of dimensions, currently supported by the class;
    static const size_t MAX_N_DIM=8;

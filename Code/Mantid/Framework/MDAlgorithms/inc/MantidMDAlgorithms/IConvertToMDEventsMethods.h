@@ -3,7 +3,15 @@
 
 #include <vector>
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+
+#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/Progress.h"
+
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidMDEvents/MDWSDescription.h"
+#include "MantidMDEvents/MDEventWSWrapper.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsDetInfo.h"
 namespace Mantid
 {
 namespace MDAlgorithms
@@ -72,31 +80,54 @@ namespace MDAlgorithms
         Axis       // typical for events
     };
 
- class ConvertToMDEvents;
  
- class IConvertToMDEventMethods
+ class IConvertToMDEventsMethods
  {
+    template<Q_state Q,AnalMode MODE,CnvrtUnits CONV,XCoordType Type>
+    friend struct COORD_TRANSFORMER;
  public:
+     // constructor;
+     IConvertToMDEventsMethods();
+ 
     ///method which initates all main class variables (constructor in fact)
-    virtual void setUPConversion(ConvertToMDEvents *pAlgo){
-        TWS   = pAlgo->TWS;
-        inWS2D= pAlgo->inWS2D;
-    };
+    virtual size_t setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const PreprocessedDetectors &detLoc,const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper);
     /// method which starts the conversion procedure
-    virtual void runConversion()=0;
+    virtual void runConversion(API::Progress *)=0;
     /// virtual destructor
-    virtual ~IConvertToMDEventMethods(){};
- protected:
+    virtual ~IConvertToMDEventsMethods(){};
+/**> helper functions: To assist with units conversion done by separate class and get access to some important internal states of the subalgorithm */
+    Kernel::Unit_sptr              getAxisUnits()const;
+    PreprocessedDetectors const * pPrepDetectors()const{return pDetLoc;}
+    double    getEi()const{return TWS.Ei;}
+    int       getEMode()const{return TWS.emode;}
+    API::NumericAxis *getPAxis(int nAaxis)const{return dynamic_cast<API::NumericAxis *>(this->inWS2D->getAxis(nAaxis));}
+    std::vector<double> getTransfMatrix()const{return TWS.rotMatrix;}
+//<------------------
+
+   /** function extracts the coordinates from additional workspace porperties and places them to proper position within the vector of MD coodinates */
+    bool fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_t n_ws_properties);
+  protected:
    /// pointer to the input workspace;
     Mantid::API::MatrixWorkspace_sptr inWS2D;
     /// the properties of the requested target MD workpsace:
-    MDWSDescription TWS;
- 
-   /** function extracts the coordinates from additional workspace porperties and places them to proper position within the vector of MD coodinates */
-   bool fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_t n_ws_properties);
+    MDEvents::MDWSDescription TWS;
+    //
+   boost::shared_ptr<MDEvents::MDEventWSWrapper> pWSWrapper ;
+   //
+    PreprocessedDetectors const *  pDetLoc;
+   /// number of target ws dimesnions
+    size_t n_dims;
+    /// pointers to the array of variables which describe min limits for the target variables;
+    double *dim_min;
+    /// pointers to the array of variables which describe max limits for the target variables;
+    double *dim_max;
+
+   /// logger -> to provide logging, for MD dataset file operations
+    static Mantid::Kernel::Logger& convert_log;
  private:
     /// internal function which do one peace of work, which should be performed by one thread
    virtual void conversionChunk()=0;
+
 };
 
  

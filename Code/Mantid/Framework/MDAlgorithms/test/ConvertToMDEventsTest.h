@@ -30,10 +30,10 @@ public:
     }
      //
     std::string identifyTheAlg(API::MatrixWorkspace_const_sptr inMatrixWS,const std::string &Q_mode_req, const std::string &dE_mode_req,
-                              const std::vector<std::string> &other_dim_names,std::vector<std::string> &targ_dim_names,std::vector<std::string> &targ_dim_units)
+                              const std::vector<std::string> &other_dim_names,MDEvents::MDWSDescription &TWSD)
     {
        
-                              return ConvertToMDEvents::identifyTheAlg(inMatrixWS,Q_mode_req, dE_mode_req,other_dim_names,targ_dim_names,targ_dim_units);
+                              return ConvertToMDEvents::identifyTheAlg(inMatrixWS,Q_mode_req, dE_mode_req,other_dim_names,TWSD);
     }
     std::string identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS,const std::string &Q_mode_req, const std::string &dE_mode_req,
                                   std::vector<std::string> &outws_dim_names,std::vector<std::string> &outws_dim_units){

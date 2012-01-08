@@ -54,7 +54,7 @@ namespace MDAlgorithms
 // logger for loading workspaces  
    Kernel::Logger& ConvertToMDEvents::convert_log =Kernel::Logger::get("MD-Algorithms");
 // the variable describes the locations of the preprocessed detectors, which can be stored and reused if the algorithm runs more then once;
-preprocessed_detectors ConvertToMDEvents::det_loc;
+PreprocessedDetectors ConvertToMDEvents::det_loc;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertToMDEvents)
@@ -65,59 +65,6 @@ void ConvertToMDEvents::initDocs()
 {
     this->setWikiSummary("Create a MDEventWorkspace with selected dimensions, e.g. the reciprocal space of momentums (Qx, Qy, Qz) or momentums modules |Q|, energy transfer dE if availible and any other user specified log values which can be treated as dimensions. If the OutputWorkspace exists, then events are added to it.");
     this->setOptionalMessage("Create a MDEventWorkspace with selected dimensions, e.g. the reciprocal space of momentums (Qx, Qy, Qz) or momentums modules |Q|, energy transfer dE if availible and any other user specified log values which can be treated as dimensions. If the OutputWorkspace exists, then events are added to it.");
-}
-/** Helper Static function to obtain the natural units for input workspace. 
-  *  Natural units are the units, which subalgorithm is working with without any initial unit transformation.
-  *  Other units have to be transfromed into natural untis first
-  *
-  *@param pHost the pointer to the algorithm to work with
-  *
-  *@returns the name(ID) of the unit, current algorithm expects to work with internaly 
-*/
-std::string          
-ConvertToMDEvents::getNativeUnitsID(ConvertToMDEvents const *const pHost)
-{
-    if(pHost->subalgorithm_units.empty()){
-        convert_log.error()<<" getNativeUnitsID: requested undefined subalgorithm units, the subalgorithm is probably not yet defined itself\n";
-        throw(std::logic_error(" should not be able to call this function when subalgorithm is undefined"));
-    }
-    return pHost->subalgorithm_units;
-}
-/** Helper Static function to obtain the units set along X-axis of the input workspace. 
-  *
-  *@param pHost the pointer to the algorithm to work with
-  *
-  *@returns the name(ID) of the unit, specified along X-axis of current workspace
-*/
-Kernel::Unit_sptr    
-ConvertToMDEvents::getAxisUnits(ConvertToMDEvents const *const pHost){
-    if(!pHost->inWS2D){
-        convert_log.error()<<"getAxisUnits: invoked when input workspace is undefined\n";
-        throw(std::logic_error(" should not be able to call this function when workpsace is undefined"));
-    }
-    API::NumericAxis *pAxis = dynamic_cast<API::NumericAxis *>(pHost->inWS2D->getAxis(0));
-    if(!pAxis){
-        convert_log.error()<<"getAxisUnits: can not obtained when first workspace axis is undefined or not numeric\n";
-        throw(std::logic_error(" should not be able to call this function when X-axis is wrong"));
-    }
-    return pHost->inWS2D->getAxis(0)->unit();
-}
-/** Helper Static function to obtain the reference, to the structure with preprocessed detectors
-  *
-  *@param pHost the pointer to the algorithm to work with
-  *
-  *@returns the reference to the structure with information about the preprocessed detectors. 
-  *         Throws if the structure has not been defined
-*/
-preprocessed_detectors & 
-ConvertToMDEvents::getPrepDetectors(ConvertToMDEvents const *const pHost)
-{       
-        UNUSED_ARG(pHost);
-        if(!det_loc.is_defined()){
-            convert_log.error()<<"getPrepDetectors: invoked when preprocessed detectors are undefined\n";
-            throw(std::logic_error(" should not be able to call this function when detectors are undefined"));
-        }
-        return ConvertToMDEvents::det_loc;
 }
 /** Helper Static function to obtain the energy of incident neutrons 
   *
@@ -145,6 +92,8 @@ ConvertToMDEvents::getEi(ConvertToMDEvents const *const pHost)
     }
     return (*pProp); 
 }
+
+
 /** Helper Static function to obtain current analysis mode 
   *
   *@param pHost the pointer to the algorithm to work with
@@ -174,12 +123,19 @@ ConvertToMDEvents::getEMode(ConvertToMDEvents const *const pHost){
     throw(std::logic_error(" can not identify correct emode"));
     return -1;
 }
-
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
 ConvertToMDEvents::~ConvertToMDEvents()
-{}
+{
+
+    std::map<std::string, IConvertToMDEventsMethods *>::iterator it;
+
+    for(it= alg_selector.begin(); it!=alg_selector.end();it++){
+        delete it->second;  
+    }
+    alg_selector.clear();
+}
 /** function checks if the candidate belongs to the group and returns its number in the group or -1 if the candidate is not a group member */
 int is_member(const std::vector<std::string> &group,const std::string &candidate)
 {
@@ -280,9 +236,12 @@ void ConvertToMDEvents::exec()
   // shared pointer to target workspace
   API::IMDEventWorkspace_sptr spws = getProperty("OutputWorkspace");
   bool create_new_ws(false);
-  if(!spws)
+  if(!spws.get())
   {
     create_new_ws = true;
+  }else{ //HACK, TODO: fix it
+      convert_log.warning()<< " Adding to existing workspace is not supported, workspace: "<<spws->name()<<" will be replaced\n";
+      create_new_ws=true;
   }
 
   //identify if u,v are present among input parameters and use defaults if not
@@ -318,9 +277,9 @@ void ConvertToMDEvents::exec()
   }
   else
   {
-    TWS.n_activated_dimensions = spws->getNumDims();
-    TWS.dim_min.assign(TWS.n_activated_dimensions,-1);
-    TWS.dim_max.assign(TWS.n_activated_dimensions,1);
+    TWS.n_dims   = spws->getNumDims();
+    TWS.dim_min.assign(TWS.n_dims,-1);
+    TWS.dim_max.assign(TWS.n_dims,1);
     throw(Kernel::Exception::NotImplementedError("Adding to existing MD workspace not Yet Implemented"));
   }
 
@@ -329,26 +288,28 @@ void ConvertToMDEvents::exec()
 
   if(create_new_ws)
   {
-    spws = pWSWrapper->createEmptyMDWS(TWS.n_activated_dimensions, TWS.dim_names,TWS.dim_units, TWS.dim_min, TWS.dim_max);
+    spws = pWSWrapper->createEmptyMDWS(TWS);
     if(!spws)
     {
-      g_log.error()<<"can not create target event workspace with :"<<TWS.n_activated_dimensions<<" dimensions\n";
+      g_log.error()<<"can not create target event workspace with :"<<TWS.n_dims<<" dimensions\n";
       throw(std::invalid_argument("can not create target workspace"));
     }
     // Build up the box controller
-    Mantid::API::BoxController_sptr bc = pWSWrapper->getBoxController();
+    Mantid::API::BoxController_sptr bc = pWSWrapper->pWorkspace()->getBoxController();
     // Build up the box controller, using the properties in BoxControllerSettingsAlgorithm
     this->setBoxController(bc);
     // split boxes;
-    pWSWrapper->splitBox();
+    pWSWrapper->pWorkspace()->splitBox();
   }
 
   // call selected algorithm
-  IConvertToMDEventMethods * algo =  alg_selector[algo_id];
+  IConvertToMDEventsMethods * algo =  alg_selector[algo_id];
   if(algo)
   {
-    algo->setUPConversion(this);
-    algo->runConversion();
+     size_t n_steps = algo->setUPConversion(inWS2D,det_loc,TWS, pWSWrapper);
+      // progress reporter
+      pProg = std::auto_ptr<API::Progress >(new API::Progress(this,0.0,1.0,n_steps)); 
+      algo->runConversion(pProg.get());
   }
   else
   {
@@ -604,7 +565,7 @@ ConvertToMDEvents::parseWSType(API::MatrixWorkspace_const_sptr inMatrixWS)const
 std::string 
 ConvertToMDEvents::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS,const std::string &Q_mode_req, 
                                  const std::string &dE_mode_req,const std::vector<std::string> &other_dim_names,
-                                 MDWSDescription &TargWSDescription)
+                                 MDEvents::MDWSDescription &TargWSDescription)
 {
 
    Strings dim_names_requested,dim_units_requested;
@@ -660,6 +621,7 @@ ConvertToMDEvents::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS,const std
     }else{
         emode = -1;  // no coordinate conversion
     }
+
     // any inelastic mode  needs Ei to be among the input workspace properties 
     if((emode == 1)||(emode == 2))
     {        
@@ -667,12 +629,13 @@ ConvertToMDEvents::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS,const std
             convert_log.error()<<" Conversion sub-algorithm with ID: "<<the_algID<<" (inelastic) needs input energy to be present among run properties\n";
             throw(std::invalid_argument(" Needs Input energy to be present for inelastic modes"));
         }
+        TargWSDescription.Ei = getEi(this);
     }
     // set up the target workspace description;
-    TargWSDescription.n_activated_dimensions= nDims;
-    TargWSDescription.emode                 = emode;
-    TargWSDescription.dim_names             = dim_names_requested;
-    TargWSDescription.dim_units             = dim_units_requested;
+    TargWSDescription.n_dims          = nDims;
+    TargWSDescription.emode           = emode;
+    TargWSDescription.dim_names       = dim_names_requested;
+    TargWSDescription.dim_units       = dim_units_requested;
 
     return the_algID;
 
@@ -789,14 +752,14 @@ private:
 
             std::string Key;
             Key = pH->SupportedWS[Workspace2DType]+Key0;
-            pH->alg_selector.insert(std::pair<std::string, IConvertToMDEventMethods *>(Key,
-                (new processHistoWS<Q,static_cast<AnalMode>(MODE),static_cast<CnvrtUnits>(CONV)>())));
+            pH->alg_selector.insert(std::pair<std::string, IConvertToMDEventsMethods *>(Key,
+                (new ProcessHistoWS<Q,static_cast<AnalMode>(MODE),static_cast<CnvrtUnits>(CONV)>())));
 /*#ifdef _DEBUG
             std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
 #endif*/
             Key = pH->SupportedWS[EventWSType]+Key0;
-            pH->alg_selector.insert(std::pair<std::string, IConvertToMDEventMethods *>(Key,
-                (new processHistoWS<Q,static_cast<AnalMode>(MODE),static_cast<CnvrtUnits>(CONV)>())));
+            pH->alg_selector.insert(std::pair<std::string, IConvertToMDEventsMethods *>(Key,
+                (new ProcessHistoWS<Q,static_cast<AnalMode>(MODE),static_cast<CnvrtUnits>(CONV)>())));
 /*#ifdef _DEBUG
             std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
 #endif   */ 
@@ -821,15 +784,16 @@ private:
             std::string Key;
 
             Key = pH->SupportedWS[Workspace2DType]+Key0;
-            pH->alg_selector.insert(std::pair<std::string,IConvertToMDEventMethods *>(Key,
-                (new processHistoWS<NoQ,ANY_Mode,static_cast<CnvrtUnits>(CONV)>())));
+            pH->alg_selector.insert(std::pair<std::string,IConvertToMDEventsMethods *>(Key,
+                (new ProcessHistoWS<NoQ,ANY_Mode,static_cast<CnvrtUnits>(CONV)>())));
+           
 //#ifdef _DEBUG
 //            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
 //#endif
 
             Key = pH->SupportedWS[EventWSType]+Key0;
-            pH->alg_selector.insert(std::pair<std::string,IConvertToMDEventMethods *>(Key,
-               (new processHistoWS<NoQ,ANY_Mode,static_cast<CnvrtUnits>(CONV)>())));
+            pH->alg_selector.insert(std::pair<std::string,IConvertToMDEventsMethods *>(Key,
+               (new ProcessHistoWS<NoQ,ANY_Mode,static_cast<CnvrtUnits>(CONV)>())));
 //#ifdef _DEBUG
 //            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
 //#endif
@@ -862,10 +826,10 @@ Q_modes(NQStates),
 dE_modes(4),
 ConvModes(NConvUintsStates),
 SupportedWS(NInWSTypes),
-// The conversion subalgorithm processes input data expressed in these units; 
-// Change of the units have to be accompanied by correspondent change in conversion subalgorithm
-native_elastic_unitID("Momentum"), 
-native_inelastic_unitID("DeltaE")
+ /// the ID of the unit, which is used in the expression to converty to QND. All other related elastic units should be converted to this one. 
+native_elastic_unitID("Momentum"),// currently it is Q
+/// the ID of the unit, which is used in the expression to converty to QND. All other related inelastic units should be converted to this one. 
+native_inelastic_unitID("DeltaE") // currently it is energy transfer (DeltaE)
 {
      Q_modes[modQ] = "|Q|";
      Q_modes[Q3D]  = "QxQyQz";    

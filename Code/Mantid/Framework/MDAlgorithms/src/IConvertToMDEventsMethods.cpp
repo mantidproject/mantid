@@ -4,6 +4,8 @@ namespace Mantid
 namespace MDAlgorithms
 {
 
+// logger for loading workspaces  
+   Kernel::Logger& IConvertToMDEventsMethods::convert_log =Kernel::Logger::get("MD-Algorithms");
 /** function extracts the coordinates from additional workspace porperties and places them to proper position within the vector of MD coodinates for 
     the particular workspace.
 
@@ -17,6 +19,27 @@ namespace MDAlgorithms
     *@returns        -- true if all coordinates are within the range allowed for the algorithm and false otherwise
 
  */
+
+/** Helper function to obtain the units set along X-axis of the input workspace. 
+  *
+  *@param pHost the pointer to the algorithm to work with
+  *
+  *@returns the name(ID) of the unit, specified along X-axis of current workspace
+*/
+Kernel::Unit_sptr    
+IConvertToMDEventsMethods::getAxisUnits()const{
+    if(!this->inWS2D.get()){
+        convert_log.error()<<"getAxisUnits: invoked when input workspace is undefined\n";
+        throw(std::logic_error(" should not be able to call this function when workpsace is undefined"));
+    }
+    API::NumericAxis *pAxis = dynamic_cast<API::NumericAxis *>(this->inWS2D->getAxis(0));
+    if(!pAxis){
+        convert_log.error()<<"getAxisUnits: can not obtained when first workspace axis is undefined or not numeric\n";
+        throw(std::logic_error(" should not be able to call this function when X-axis is wrong"));
+    }
+    return this->inWS2D->getAxis(0)->unit();
+}
+
 bool 
 IConvertToMDEventsMethods::fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_t n_ws_properties)
 {
@@ -40,8 +63,26 @@ IConvertToMDEventsMethods::fillAddProperties(std::vector<coord_t> &Coord,size_t 
      return true;
 }
 
-  
+///method which initates all main class variables
+size_t
+IConvertToMDEventsMethods::setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const PreprocessedDetectors &detLoc,const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
+{
+        TWS   = WSD;
+        inWS2D= pWS2D;
+        pWSWrapper = inWSWrapper;
+        pDetLoc    = &detLoc;
+     
+        n_dims       = this->pWSWrapper->nDimensions();
+        
+        dim_min   = &(TWS.dim_min[0]);
+        dim_max   = &(TWS.dim_max[0]);
+        
+        size_t n_spectra =inWS2D->getNumberHistograms();
+        return n_spectra;
+};  
 
+IConvertToMDEventsMethods::IConvertToMDEventsMethods()
+{}
 
 } // endNamespace MDAlgorithms
 }

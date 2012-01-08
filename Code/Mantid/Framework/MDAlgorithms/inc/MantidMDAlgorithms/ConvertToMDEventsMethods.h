@@ -11,7 +11,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Progress.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/TimeSeriesProperty.h"
+
 
 #include "MantidMDEvents/MDEventWSWrapper.h"
 #include "MantidMDEvents/MDEvent.h"
@@ -55,45 +55,38 @@ namespace MDAlgorithms
 //-----------------------------------------------
 // Method to process histohram workspace
 template<Q_state Q, AnalMode MODE, CnvrtUnits CONV>
-class ProcessHistoWS: public IConvertToMDEventMethods 
+class ProcessHistoWS: public IConvertToMDEventsMethods 
 {
     /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
     /// presumably will be completely inlined
      template<Q_state Q, AnalMode MODE, CnvrtUnits CONV,XCoordType XTYPE> 
      friend struct COORD_TRANSFORMER;
-     //
-     COORD_TRANSFORMER<Q,MODE,CONV,Histohram> trn(); 
-  
-   /// the pointer to class which is responsible for adding data to N-dimensional workspace;
-    boost::shared_ptr<MDEvents::MDEventWSWrapper> pWSWrapper;
-    /// numnber of target ws dimesnions
-    size_t n_dims;
-
-    // progress report
-    std::auto_ptr<API::Progress> *pProg;
-    //
+     // the instanciation of the class which does the transformation itself
+     COORD_TRANSFORMER<Q,MODE,CONV,Histohram> trn; 
+     // 
     virtual void conversionChunk(){};
 public:
-    void setUPConversion(ConvertToMDEvents *pAlgo)
+    size_t  setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const PreprocessedDetectors &detLoc,
+                          const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
     {
-       //
-       pWSWrapper = pAlgo->pWSWrapper;
-       // initiate the templated class which does the conversion of workspace data into MD WS coordinates;
-        trn.setUP(pAlgo);
-      // progress reporter
-        pProg = std::auto_ptr<API::Progress>(new API::Progress(this,0.0,1.0,numSpec));
+        size_t numSpec=IConvertToMDEventsMethods::setUPConversion(pWS2D,detLoc,WSD,inWSWrapper);
 
-        n_dims       = this->pWSWrapper->nDimensions();
+        // initiate the templated class which does the conversion of workspace data into MD WS coordinates;
+        trn.setUP(this); 
+
+        return numSpec;
     }
 
-    void runConversion(){
+    void runConversion(API::Progress *pProg)
+    {
        // counder for the number of events
         size_t n_added_events(0);
        // amount of work
         const size_t numSpec  = inWS2D->getNumberHistograms();
+      
 
         const size_t specSize = this->inWS2D->blocksize();    
-        size_t nValidSpectra  = det_loc.det_id.size();
+        size_t nValidSpectra  = pDetLoc->det_id.size();
         // copy experiment info into target workspace
         API::ExperimentInfo_sptr ExperimentInfo(inWS2D->cloneExperimentInfo());
         // run index;
@@ -118,8 +111,8 @@ public:
         //External loop over the spectra:
         for (int64_t i = 0; i < int64_t(nValidSpectra); ++i)
         {
-            size_t ic                 = det_loc.detIDMap[i];
-            int32_t det_id            = det_loc.det_id[i];
+            size_t ic                 = pDetLoc->detIDMap[i];
+            int32_t det_id            = pDetLoc->det_id[i];
 
             const MantidVec& X        = inWS2D->readX(ic);
             const MantidVec& Signal   = inWS2D->readY(ic);
@@ -151,11 +144,11 @@ public:
  
                  n_added_events=0;
                  pProg->report(i);
-            }
+                }
        
-        } // end spectra loop
+            } // end spectra loop
       
-       } // end detectors loop;
+        } // end detectors loop;
 
        if(n_added_events>0){
               pWSWrapper->addMDData(sig_err,run_index,det_ids,allCoord,n_added_events);
@@ -163,7 +156,7 @@ public:
               n_added_events=0;
         }
  
-        pWSWrapper->refreshCache();
+        pWSWrapper->pWorkspace()->refreshCache();
         pProg->report();          
     }
 };

@@ -1,7 +1,8 @@
 #ifndef MANTID_MD_CONVERT2_MDEVENTS
 #define MANTID_MD_CONVERT2_MDEVENTS
     
-#include "MantidMDAlgorithms/ConvertToMDEventsMethods.h"
+#include "MantidMDAlgorithms/IConvertToMDEventsMethods.h"
+#include "MantidMDEvents/MDWSDescription.h"
 #include "MantidMDEvents/BoxControllerSettingsAlgorithm.h"
 
 namespace Mantid
@@ -40,7 +41,6 @@ namespace MDAlgorithms
  
  // vectors of strings are here everywhere
   typedef  std::vector<std::string> Strings;
-
  
 /// Convert to MD Events class itself:
   class DLLExport ConvertToMDEvents  : public MDEvents::BoxControllerSettingsAlgorithm
@@ -55,13 +55,9 @@ namespace MDAlgorithms
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
     virtual const std::string category() const { return "MDAlgorithms";}  
-
-//**> helper functions: To assist with units conversion done by separate class and get access to some important internal states of the algorithm
-    static std::string          getNativeUnitsID(ConvertToMDEvents const *const pHost);
-    static Kernel::Unit_sptr    getAxisUnits(ConvertToMDEvents const *const pHost);
-    static preprocessed_detectors & getPrepDetectors(ConvertToMDEvents const *const pHost);
-    static  double              getEi(ConvertToMDEvents const *const pHost);
-    static int                  getEMode(ConvertToMDEvents const *const pHost);
+    // helper function to obtain some characteristics of the workspace and invoked algorithm
+   static  double      getEi(ConvertToMDEvents const *const pHost);
+   static int          getEMode(ConvertToMDEvents const *const pHost);
 //**<
   private:
     void init();
@@ -75,19 +71,19 @@ namespace MDAlgorithms
    Mantid::API::MatrixWorkspace_sptr inWS2D;
  
    /// the variable which keeps preprocessed positions of the detectors if any availible (TODO: should it be a table ws and separate algorithm?);
-    static preprocessed_detectors det_loc;  
+    static PreprocessedDetectors det_loc;  
     /// the properties of the requested target MD workpsace:
-    MDWSDescription TWS;
+    MDEvents::MDWSDescription TWS;
    /// the pointer to class which is responsible for adding data to N-dimensional workspace;
     boost::shared_ptr<MDEvents::MDEventWSWrapper> pWSWrapper;
    protected: //for testing
  
    //>---> Parts of the identifyTheAlg;
    /** function returns the list of the property names, which can be treated as additional dimensions present in current matrix workspace */
-   void getAddDimensionNames(API::MatrixWorkspace_const_sptr inMatrixWS,std::vector<std::string> &add_dim_names,std::vector<std::string> &add_dim_units)const;
+   void getAddDimensionNames(API::MatrixWorkspace_const_sptr inMatrixWS,Strings &add_dim_names,Strings &add_dim_units)const;
    /** function parses arguments entered by user, and identifies, which subalgorithm should be deployed on WS  as function of the input artuments and the WS format */
    std::string identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS,const std::string &Q_mode_req, const std::string &dE_mode_req,
-                                 std::vector<std::string> &out_dim_names,std::vector<std::string> &out_dim_units);
+                                 Strings &out_dim_names,Strings &out_dim_units);
    //>---> Parts of the identifyMatrixAlg, separated for unit testing:
    // identify Q - mode
    std::string parseQMode(const std::string &Q_mode_req,const Strings &ws_dim_names,const Strings &ws_dim_units,Strings &out_dim_names,Strings &out_dim_units, int &nQdims);
@@ -101,7 +97,7 @@ namespace MDAlgorithms
    //<---< Parts of the identifyMatrixAlg;
    /** identifies the ID of the conversion subalgorithm to run on a workspace */
    std::string identifyTheAlg(API::MatrixWorkspace_const_sptr inMatrixWS,const std::string &Q_mode_req, const std::string &dE_mode_req,
-                              const std::vector<std::string> &other_dim_names,MDWSDescription &TargWSDescription);
+                              const Strings &other_dim_names,MDEvents::MDWSDescription &TargWSDescription);
    //<---< Parts of the identifyTheAlg;
 
  
@@ -111,7 +107,7 @@ namespace MDAlgorithms
                                        bool is_powder=false)const;
 
    /// map to select an algorithm as function of the key, which describes it
-   std::map<std::string, IConvertToMDEventMethods *> alg_selector;
+   std::map<std::string, IConvertToMDEventsMethods *> alg_selector;
 
 
     // strictly for testing!!!
@@ -129,20 +125,9 @@ namespace MDAlgorithms
     }
   private: 
    //--------------------------------------------------------------------------------------------------
-   ///** generic template to convert to any Dimensions workspace from a histohram workspace   */
-   // template<Q_state Q, AnalMode MODE, CnvrtUnits CONV>
-   // void processQNDHWS();
-   ///** generic template to convert to any Dimensions workspace from an Event workspace   */
-   // template<Q_state Q, AnalMode MODE, CnvrtUnits CONV>
-   // void processQNDEWS();
-
-    // temporary
-    template<Q_state Q, AnalMode MODE, CnvrtUnits CONV>
-    friend class ProcessHistoWS;
-    template<Q_state Q, AnalMode MODE, CnvrtUnits CONV,XCoordType XTYPE> 
-    friend struct COORD_TRANSFORMER;
+    /// progress reporter
+   std::auto_ptr<API::Progress > pProg;
   
-
      /// helper class to orginize metaloop on various algorithm options
      template<Q_state Q,size_t N_ALGORITHMS >
      friend class LOOP_ND;

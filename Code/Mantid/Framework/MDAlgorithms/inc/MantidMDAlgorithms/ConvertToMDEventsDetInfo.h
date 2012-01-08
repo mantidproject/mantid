@@ -39,7 +39,7 @@ namespace Mantid
 namespace MDAlgorithms
 {
 
-struct preprocessed_detectors{
+struct PreprocessedDetectors{
     double L1;
     Kernel::V3D   minDetPosition;    // minimal and
     Kernel::V3D   maxDetPosition;    // maxinal position for the detectors
@@ -51,15 +51,15 @@ struct preprocessed_detectors{
     //
     bool is_defined(void)const{return det_dir.size()>0;}
     bool is_defined(size_t new_size)const{return det_dir.size()==new_size;}
-    double  *  pL2(){return &L2[0];}
-    double  *  pTwoTheta(){return &TwoTheta[0];}
-    size_t  *  iDetIDMap(){return &detIDMap[0];}
-    Kernel::V3D  * pDetDir(){return &det_dir[0];}
+    std::vector<double>const & getL2()const{return L2;}
+    std::vector<double>const & getTwoTheta()const{return TwoTheta;}
+    std::vector<size_t>const  & getDetIDMap()const{return detIDMap;}
+    std::vector<Kernel::V3D>const & getDetDir()const{return det_dir;}
 };
 
 /** helper function, does preliminary calculations of the detectors positions to convert results into k-dE space ;
       and places the resutls into static cash to be used in subsequent calls to this algorithm */
-void DLLExport processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS,preprocessed_detectors &det,Kernel::Logger& convert_log);
+void DLLExport processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS,PreprocessedDetectors &det,Kernel::Logger& convert_log);
 } // end MDAlgorithms
 }
 #endif

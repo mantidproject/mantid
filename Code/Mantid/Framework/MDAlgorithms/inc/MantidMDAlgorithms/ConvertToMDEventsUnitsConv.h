@@ -1,6 +1,6 @@
 #ifndef H_CONVERT_TO_MDEVENTS_UNITS
 #define H_CONVERT_TO_MDEVENTS_UNITS
-#include "MantidMDAlgorithms/ConvertToMDEvents.h"
+#include "MantidMDAlgorithms/IConvertToMDEventsMethods.h"
 /** Set of internal classes used by ConvertToMDEvents algorithm and responsible for Units conversion
    *
    * @date 11-10-2011
@@ -48,7 +48,8 @@ struct UNITS_CONVERSION
      * @param pHost   -- pointer to the Mantid algorithm, which calls this function to obtain the variables, 
      *                   relevant to the units conversion
     */
-    inline void     setUpConversion(ConvertToMDEvents const * const pHost ){UNUSED_ARG(pHost);}
+    inline void     setUpConversion(IConvertToMDEventsMethods const * const pHost,const std::string &native_units )
+    {UNUSED_ARG(pHost);UNUSED_ARG(native_units);}
     /// Update all spectra dependednt  variables, relevant to conversion in the loop over spectra (detectors)
     inline void     updateConversion(uint64_t i){UNUSED_ARG(i);}
     /// Convert current X variable into the units requested;
@@ -64,11 +65,10 @@ template<XCoordType Type>
 struct UNITS_CONVERSION<ConvFast,Type>
 {
 
-    void setUpConversion(ConvertToMDEvents const *const pHost)
+    void setUpConversion(IConvertToMDEventsMethods const *const pHost,const std::string &native_units)
     {       
-       const Kernel::Unit_sptr pThisUnit= ConvertToMDEvents::getAxisUnits(pHost);
-       std::string native_units         = ConvertToMDEvents::getNativeUnitsID(pHost);
-
+       const Kernel::Unit_sptr pThisUnit= pHost->getAxisUnits();
+    
        if(!pThisUnit->quickConversion(native_units,factor,power)){
            throw(std::logic_error(" should be able to convert units and catch case of non-conversions much earlier"));
        }
@@ -92,27 +92,31 @@ template<XCoordType Type>
 struct UNITS_CONVERSION<ConvFromTOF,Type>
 {
 
-    void setUpConversion(ConvertToMDEvents const *const pHost)
+    void setUpConversion(IConvertToMDEventsMethods const *const pHost,const std::string &native_units)
     {       
        // check if axis units are TOF
-       const Kernel::Unit_sptr pThisUnit= ConvertToMDEvents::getAxisUnits(pHost);
+       const Kernel::Unit_sptr pThisUnit= pHost->getAxisUnits();
        if(std::string("TOF").compare(pThisUnit->unitID())!=0){
            throw(std::logic_error(" it whould be only TOF here"));
        }
-       // get units class, requested by subalgorithm
-       std::string native_units       = ConvertToMDEvents::getNativeUnitsID(pHost);
+      // create units for this subalgorith to convert to 
        pWSUnit      = Kernel::UnitFactory::Instance().create(native_units);
        if(!pWSUnit){
            throw(std::logic_error(" can not retrieve workspace unit from the units factory"));
        }
+   
        // get detectors positions and other data needed for units conversion:
-       pTwoTheta =  ConvertToMDEvents::getPrepDetectors(pHost).pTwoTheta();
-       pL2       =  ConvertToMDEvents::getPrepDetectors(pHost).pL2();
-       L1        =  ConvertToMDEvents::getPrepDetectors(pHost).L1;
+     // get detectors positions and other data needed for units conversion:
+       const std::vector<double> TwoTheta =  pHost->pPrepDetectors()->getTwoTheta();
+       pTwoTheta = &TwoTheta[0]; 
+       const std::vector<double> L2       =  pHost->pPrepDetectors()->getL2();
+       pL2       = &L2[0];
+       L1        =  pHost->pPrepDetectors()->L1;
+        // get efix
+       efix      =  pHost->getEi();
+       emode     =  pHost->getEMode();
 
-       efix      =  ConvertToMDEvents::getEi(pHost);
-       emode     =  ConvertToMDEvents::getEMode(pHost);
-    };
+       };
     inline void updateConversion(uint64_t i)
     {
         double delta;
@@ -143,28 +147,29 @@ template<XCoordType Type>
 struct UNITS_CONVERSION<ConvByTOF,Type>
 {
 
-    void setUpConversion(ConvertToMDEvents const *const pHost)
+    void setUpConversion(IConvertToMDEventsMethods const *const pHost,const std::string &native_units)
     {       
 
-       pSourceWSUnit= ConvertToMDEvents::getAxisUnits(pHost);
+       pSourceWSUnit= pHost->getAxisUnits();
        if(!pSourceWSUnit){
            throw(std::logic_error(" can not retrieve source workspace units from the input workspacee"));
        }
 
        // get units class, requested by subalgorithm
-       std::string native_units  = ConvertToMDEvents::getNativeUnitsID(pHost);
-       pWSUnit                   = Kernel::UnitFactory::Instance().create(native_units);
+          pWSUnit                   = Kernel::UnitFactory::Instance().create(native_units);
        if(!pWSUnit){
            throw(std::logic_error(" can not retrieve target workspace unit from the units factory"));
        }
 
        // get detectors positions and other data needed for units conversion:
-       pTwoTheta =  ConvertToMDEvents::getPrepDetectors(pHost).pTwoTheta();
-       pL2       =  ConvertToMDEvents::getPrepDetectors(pHost).pL2();
-       L1        =  ConvertToMDEvents::getPrepDetectors(pHost).L1;
+       const std::vector<double> TwoTheta =  pHost->pPrepDetectors()->getTwoTheta();
+       pTwoTheta = &TwoTheta[0]; 
+       const std::vector<double> L2       =  pHost->pPrepDetectors()->getL2();
+       pL2       = &L2[0];
+       L1        =  pHost->pPrepDetectors()->L1;
        // get efix
-       efix      =  ConvertToMDEvents::getEi(pHost);
-       emode     =  ConvertToMDEvents::getEMode(pHost);
+       efix      =  pHost->getEi();
+       emode     =  pHost->getEMode();
     };
 
     inline void updateConversion(uint64_t i)

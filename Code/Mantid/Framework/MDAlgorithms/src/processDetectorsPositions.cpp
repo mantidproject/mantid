@@ -14,7 +14,7 @@ namespace MDAlgorithms
 /** helper function, does preliminary calculations of the detectors positions to convert results into k-dE space ;
       and places the resutls into static cash to be used in subsequent calls to this algorithm */
 void DLLExport
-processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS,preprocessed_detectors &det_loc,Kernel::Logger& convert_log)
+processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS,PreprocessedDetectors &det_loc,Kernel::Logger& convert_log)
 {
   // 
   Instrument_const_sptr instrument = inputWS->getInstrument();

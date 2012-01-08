@@ -9,6 +9,7 @@ set ( SRC_FILES
 	src/CompositeImplicitFunction.cpp
 	src/CompositeImplicitFunctionParser.cpp
 	src/ConvertToMDEvents.cpp
+	src/IConvertToMDEventsMethods.cpp	
 	src/DivideMD.cpp
 	src/EqualToMD.cpp
 	src/ExponentialMD.cpp

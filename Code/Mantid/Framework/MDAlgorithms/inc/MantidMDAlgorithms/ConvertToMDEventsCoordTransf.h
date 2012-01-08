@@ -1,7 +1,7 @@
 #ifndef  H_CONVERT_TO_MDEVENTS_COORD_TRANSF
 #define  H_CONVERT_TO_MDEVENTS_COORD_TRANSF
 //
-#include "MantidMDAlgorithms/ConvertToMDEvents.h"
+#include "MantidMDAlgorithms/IConvertToMDEventsMethods.h"
 #include "MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h"
 //
 namespace Mantid
@@ -47,7 +47,7 @@ namespace MDAlgorithms
 template<Q_state Q,AnalMode MODE,CnvrtUnits CONV,XCoordType Type>
 struct COORD_TRANSFORMER
 {
-      COORD_TRANSFORMER(ConvertToMDEvents *){}
+      
     /**Template defines common interface to common part of the algorithm, where all variables
      * needed within the loop calculated before the loop starts. 
      *
@@ -90,7 +90,7 @@ struct COORD_TRANSFORMER
         UNUSED_ARG(X); UNUSED_ARG(i); UNUSED_ARG(j); UNUSED_ARG(Coord);throw(Kernel::Exception::NotImplementedError(""));
         return false;}
 
-    void setUP(ConvertToMDEvents *){};
+     inline void setUP(IConvertToMDEventsMethods *){};
   
 private:
  
@@ -111,14 +111,14 @@ struct COORD_TRANSFORMER<NoQ,MODE,CONV,Type>
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)    
     {
        // get optional Y axis which can be used in NoQ-kind of algorithms
-       pYAxis = dynamic_cast<API::NumericAxis *>(pHost->inWS2D->getAxis(1));
+       pYAxis = pHost->getPAxis(1);
        if(pYAxis){  // two inital properties came from workspace. All are independant; All other dimensions are obtained from properties
            if(!pHost->fillAddProperties(Coord,nd,2))return false;
        }else{        // only one workspace property availible;
            if(!pHost->fillAddProperties(Coord,nd,1))return false;
        }
         // set up units conversion defined by the host algorithm.  
-       CONV_UNITS_FROM.setUpConversion(this->pHost); 
+       CONV_UNITS_FROM.setUpConversion(this->pHost,""); 
        return true;
     }
 
@@ -144,7 +144,8 @@ struct COORD_TRANSFORMER<NoQ,MODE,CONV,Type>
     }
     // constructor;
     COORD_TRANSFORMER(){} 
-    void setUP(ConvertToMDEvents *pConv){
+
+    inline void setUP(IConvertToMDEventsMethods *pConv){
         pHost = pConv;
     }
 private:
@@ -152,7 +153,7 @@ private:
     // pointer to Y axis of MD workspace
      API::NumericAxis *pYAxis;
      // pointer to MD workspace convertor
-     ConvertToMDEvents *pHost;
+     IConvertToMDEventsMethods *pHost;
      // class which would convert units
      UNITS_CONVERSION<CONV,Type> CONV_UNITS_FROM;
 };
@@ -187,16 +188,17 @@ struct COORD_TRANSFORMER<modQ,MODE,CONV,Type>
         if(!pHost->fillAddProperties(Coord,nd,2))return false;
 
         // energy 
-         Ei  =  ConvertToMDEvents::getEi(pHost);
+         Ei  =  pHost->getEi();
          // the wave vector of incident neutrons;
          ki=sqrt(Ei/PhysicalConstants::E_mev_toNeutronWavenumberSq); 
          // get transformation matrix (needed for CrystalAsPoder mode)
          rotMat = pHost->getTransfMatrix();
          // 
-         CONV_UNITS_FROM.setUpConversion(this->pHost); 
+         CONV_UNITS_FROM.setUpConversion(this->pHost,"DeltaE"); 
 
         // get pointer to the positions of the detectors
-          pDet = &(ConvertToMDEvents::getPrepDetectors(pHost).det_dir[0]);
+          std::vector<Kernel::V3D> const & DetDir = pHost->pPrepDetectors()->getDetDir();
+          pDet = &DetDir[0];
         //
          return true;
     }
@@ -238,7 +240,7 @@ struct COORD_TRANSFORMER<modQ,MODE,CONV,Type>
     }
     // constructor;
     COORD_TRANSFORMER(){}
-    void setUP(ConvertToMDEvents *pConv){
+    void setUP(IConvertToMDEventsMethods *pConv){
         pHost = pConv;
     }
 private:
@@ -251,9 +253,9 @@ private:
     // the matrix which transforms the neutron momentums from lablratory to crystall coordinate system. 
     std::vector<double> rotMat;
     //
-    Kernel::V3D *pDet;
+    Kernel::V3D const *pDet;
     // Calling Mantid algorithm
-    ConvertToMDEvents *pHost;
+    IConvertToMDEventsMethods *pHost;
     // class that performs untis conversion;
     UNITS_CONVERSION<CONV,Type> CONV_UNITS_FROM;
 };
@@ -269,10 +271,11 @@ struct COORD_TRANSFORMER<modQ,Elastic,CONV,Type>
           // get transformation matrix (needed for CrystalAsPoder mode)
           rotMat = pHost->getTransfMatrix();
           // 
-          CONV_UNITS_FROM.setUpConversion(this->pHost); 
+          CONV_UNITS_FROM.setUpConversion(this->pHost,"Momentum"); 
+
          // get pointer to the positions of the detectors
-          pDet = ConvertToMDEvents::getPrepDetectors(pHost).pDetDir();
-          //
+          std::vector<Kernel::V3D> const & DetDir = pHost->pPrepDetectors()->getDetDir();
+          pDet = &DetDir[0];     //
         return true;
     }
     //
@@ -308,7 +311,7 @@ struct COORD_TRANSFORMER<modQ,Elastic,CONV,Type>
     }
     // constructor;
     COORD_TRANSFORMER(){}
-   void setUP(ConvertToMDEvents *pConv){
+   void setUP(IConvertToMDEventsMethods *pConv){
         pHost = pConv;
     }
 private:
@@ -321,9 +324,9 @@ private:
     // the matrix which transforms the neutron momentums from lablratory to crystall coordinate system. 
     std::vector<double> rotMat;
     //
-    Kernel::V3D *pDet;
+    Kernel::V3D const * pDet;
     // Calling Mantid algorithm
-    ConvertToMDEvents *pHost;
+    IConvertToMDEventsMethods *pHost;
     // class that performs untis conversion;
     UNITS_CONVERSION<CONV,Type> CONV_UNITS_FROM;
 };
@@ -338,17 +341,17 @@ struct COORD_TRANSFORMER<Q3D,MODE,CONV,Type>
         // four inital properties came from workspace and all are interconnnected all additional defined by  properties:
         if(!pHost->fillAddProperties(Coord,nd,4))return false;
         // energy 
-         Ei  =  ConvertToMDEvents::getEi(pHost);
+         Ei  =  pHost->getEi();
          // the wave vector of incident neutrons;
          ki=sqrt(Ei/PhysicalConstants::E_mev_toNeutronWavenumberSq); 
          // 
          rotMat = pHost->getTransfMatrix();
-         CONV_UNITS_FROM.setUpConversion(this->pHost); 
+         CONV_UNITS_FROM.setUpConversion(this->pHost,"DeltaE"); 
 
-        // get pointer to the positions of the detectors
-          pDet = &(ConvertToMDEvents::getPrepDetectors(pHost).det_dir[0]);
-        //
-        return true;
+     // get pointer to the positions of the detectors
+          std::vector<Kernel::V3D> const & DetDir = pHost->pPrepDetectors()->getDetDir();
+          pDet = &DetDir[0];
+          return true;
     }
     //
     inline bool calcYDepCoordinates(std::vector<coord_t> &Coord,uint64_t i)
@@ -382,7 +385,7 @@ struct COORD_TRANSFORMER<Q3D,MODE,CONV,Type>
          return true;
     }
    COORD_TRANSFORMER(){}
-   void setUP(ConvertToMDEvents *pConv){
+   void setUP(IConvertToMDEventsMethods *pConv){
         pHost = pConv;
     }
 private:
@@ -395,9 +398,9 @@ private:
     // the matrix which transforms the neutron momentums from lablratory to orthogonal crystall coordinate system. 
     std::vector<double> rotMat;
     // pointer to the detectors directions
-    Kernel::V3D *pDet;
+    Kernel::V3D const *pDet;
     // Calling Mantid algorithm
-    ConvertToMDEvents *pHost;
+    IConvertToMDEventsMethods *pHost;
     // class that performs untis conversion;
     UNITS_CONVERSION<CONV,Type> CONV_UNITS_FROM;
 };
@@ -413,9 +416,9 @@ struct COORD_TRANSFORMER<Q3D,Elastic,CONV,Type>
          // 
         rotMat = pHost->getTransfMatrix();
         //
-        CONV_UNITS_FROM.setUpConversion(this->pHost); 
+        CONV_UNITS_FROM.setUpConversion(this->pHost,"Momentum"); 
         // get pointer to the positions of the detectors
-        pDet = &(ConvertToMDEvents::getPrepDetectors(pHost).det_dir[0]);
+         pDet = &(pHost->pPrepDetectors()->det_dir[0]);
     
         return true;
     }
@@ -447,7 +450,7 @@ struct COORD_TRANSFORMER<Q3D,Elastic,CONV,Type>
          return true;
     }
     COORD_TRANSFORMER(){}
-    void setUP(ConvertToMDEvents *pConv){
+    void setUP(IConvertToMDEventsMethods *pConv){
         pHost = pConv;
     }
 private:
@@ -456,9 +459,9 @@ private:
     // the matrix which transforms the neutron momentums from lablratory to crystall coordinate system. 
     std::vector<double> rotMat;
     // pointer to the beginning of the array with 
-    Kernel::V3D *pDet;
+    Kernel::V3D const *pDet;
     // pointer to the algoritm, which calls all these transformations
-    ConvertToMDEvents *pHost;
+    IConvertToMDEventsMethods *pHost;
     // class that performs untis conversion;
     UNITS_CONVERSION<CONV,Type> CONV_UNITS_FROM;
 };

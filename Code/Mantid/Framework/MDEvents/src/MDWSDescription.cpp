@@ -30,6 +30,7 @@ MDWSDescription::checkMinMaxNdimConsistent(Mantid::Kernel::Logger& g_log)const
 MDWSDescription::MDWSDescription(size_t nDimesnions):
 n_dims(nDimesnions),
 emode(-1),
+Ei(std::numeric_limits<double>::quiet_NaN()),
 dim_names(nDimesnions,"mdn"),
 dim_units(nDimesnions,"Momentum"),
 dim_min(nDimesnions,-1),
