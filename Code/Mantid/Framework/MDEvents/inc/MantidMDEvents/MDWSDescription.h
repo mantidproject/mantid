@@ -2,6 +2,7 @@
 #define H_MDEVENT_WS_DESCRIPTION
 
 #include "MantidMDEvents/MDEvent.h"
+#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
