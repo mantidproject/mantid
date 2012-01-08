@@ -868,6 +868,34 @@ private:
   MultiLayer(const MultiLayer&);
 };
 
+class ErrorBarSettings
+{
+%TypeHeaderCode
+#include "../src/Mantid/ErrorBarSettings.h"
+%End
+public:
+  int capLength();
+  void setCapLength(int t);
+
+  double width();
+  void setWidth(double w);
+
+  QColor color();
+  void setColor(const QColor& c);
+
+  bool throughSymbol();
+  void drawThroughSymbol(bool);
+
+  bool plusSide();
+  void drawPlusSide(bool);
+
+  bool minusSide();
+  void drawMinusSide(bool);
+
+private:
+  ErrorBarSettings(const ErrorBarSettings&);
+};
+
 class Note: MdiSubWindow
 {
 %TypeHeaderCode

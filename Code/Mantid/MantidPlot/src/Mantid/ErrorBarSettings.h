@@ -1,9 +1,11 @@
 #ifndef ERRORBARSETTINGS_H
 #define ERRORBARSETTINGS_H
 
+#include <QObject>
 #include <QColor>
 
 /** Holds the settings for how a set of error bars are to be drawn.
+    The class is a QObject purely so that our python proxy objects will work with it.
 
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -22,8 +24,9 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-class ErrorBarSettings
+class ErrorBarSettings : public QObject
 {
+  Q_OBJECT
 public:
   ErrorBarSettings();
 
