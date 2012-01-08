@@ -722,6 +722,8 @@ public:
 		  int type = 1, double width = 1, int cap = 8, const QColor& color = QColor(Qt::black),
 		  bool through = true, bool minus = true, bool plus = true);
 
+  ErrorBarSettings* errorBarSettings(int curveIndex, int errorBarIndex = 0);
+
   void addHistogram(Matrix*);
   void addArrow(ArrowMarker*);
 
@@ -868,7 +870,7 @@ private:
   MultiLayer(const MultiLayer&);
 };
 
-class ErrorBarSettings
+class ErrorBarSettings : QObject
 {
 %TypeHeaderCode
 #include "../src/Mantid/ErrorBarSettings.h"

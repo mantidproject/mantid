@@ -8,15 +8,7 @@
 #include "../Graph.h"
 #include "../ApplicationWindow.h"
 #include "../MultiLayer.h"
-
-/**
-Constructor
-@param wsName : Name of the workspace
-@param err : flag indicating that errors should be used.
-*/
-MantidCurve::MantidCurve(const QString& wsName, bool err) : PlotCurve(wsName), WorkspaceObserver(), m_drawErrorBars(err), m_drawAllErrorBars(false)
-{
-}
+#include "ErrorBarSettings.h"
 
 /**
 Constructor
@@ -24,7 +16,9 @@ Constructor
 @param err : flag indicating that all error bars should be used.
 @param allError : flag indicating that all error bars should be plotted.
 */
-MantidCurve::MantidCurve(const QString& wsName, bool err, bool allError) : PlotCurve(wsName), WorkspaceObserver(), m_drawErrorBars(err), m_drawAllErrorBars(allError)
+MantidCurve::MantidCurve(const QString& wsName, bool err, bool allError)
+ : PlotCurve(wsName), WorkspaceObserver(),
+   m_drawErrorBars(err), m_drawAllErrorBars(allError), m_errorSettings(new ErrorBarSettings)
 {
 }
 
@@ -32,7 +26,9 @@ MantidCurve::MantidCurve(const QString& wsName, bool err, bool allError) : PlotC
 Constructor 
 @param err : flag indicating that errors should be used.
 */
-MantidCurve::MantidCurve(bool err) : PlotCurve(), WorkspaceObserver(), m_drawErrorBars(err), m_drawAllErrorBars(false)
+MantidCurve::MantidCurve(bool err)
+ : PlotCurve(), WorkspaceObserver(), 
+   m_drawErrorBars(err), m_drawAllErrorBars(false), m_errorSettings(new ErrorBarSettings)
 {
 }
 
@@ -120,6 +116,7 @@ void MantidCurve::axisScaleChanged(int axis, bool toLog)
 /// Destructor
 MantidCurve::~MantidCurve()
 {
+  delete m_errorSettings;
 }
 
 
@@ -127,6 +124,13 @@ void MantidCurve::itemChanged()
 {
   //Forward request onwards
   PlotCurve::itemChanged();
+}
+
+QList<ErrorBarSettings*> MantidCurve::errorBarSettingsList() const
+{
+  QList<ErrorBarSettings*> retval;
+  retval.append(m_errorSettings);
+  return retval;
 }
 
 /** Create the name for a curve which is a copy of another curve.

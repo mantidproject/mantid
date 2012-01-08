@@ -6,9 +6,10 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidQwtWorkspaceData.h"
 
+class Graph;
+class ErrorBarSettings;
+
 /** Base class for MantidCurve types. 
-    
-    @date 17/11/2011
 
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -31,15 +32,12 @@
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>    
 */
-class Graph;
 class MantidCurve :public PlotCurve, public MantidQt::API::WorkspaceObserver
 {
   Q_OBJECT
 public:
   /// Constructor
-  MantidCurve(const QString& wsName, bool error);
-  /// Constructor
-  MantidCurve(const QString& wsName, bool error, bool allerror);
+  MantidCurve(const QString& wsName, bool error, bool allerror = false);
   /// Default constructor
   MantidCurve(bool err);
   /// Destructor
@@ -58,6 +56,9 @@ public:
   {
     return m_drawErrorBars;
   }
+
+  /// Returns the error bar settings for this curve (a MantidCurve has only one set of error bars)
+  virtual QList<ErrorBarSettings*> errorBarSettingsList() const;
 
   /// Invalidates the bounding rect forcing it to be recalculated
   void invalidateBoundingRect(){m_boundingRect = QwtDoubleRect();}
@@ -104,6 +105,8 @@ private:
   //To ensure that all MantidCurves can work with Mantid Workspaces.
   virtual void init(Graph* g, bool distr, Graph::CurveType style) = 0;
 
+  // The error bar settings for this curve. Owned by this class.
+  ErrorBarSettings * m_errorSettings;
 };
 
 #endif

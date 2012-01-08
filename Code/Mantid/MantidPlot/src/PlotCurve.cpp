@@ -32,6 +32,7 @@
 #include "SymbolBox.h"
 #include "PatternBox.h"
 #include "plot2D/ScaleEngine.h"
+#include "Mantid/ErrorBarSettings.h"
 #include <QDateTime>
 #include <QMessageBox>
 #include <QPainter>
@@ -556,6 +557,17 @@ void DataCurve::loadData()
     ((Graph*)plot->parent())->updatePlot();
     loadLabels();
   }
+}
+
+QList<ErrorBarSettings *> DataCurve::errorBarSettingsList() const
+{
+  QList<ErrorBarSettings *> retval;
+  foreach(DataCurve* crv, d_error_bars)
+  {
+    ErrorBarSettings* err = dynamic_cast<ErrorBarSettings*>(crv);
+    if ( err ) retval << err; // (Should always be true)
+  }
+  return retval;
 }
 
 void DataCurve::removeErrorBars(DataCurve *c)

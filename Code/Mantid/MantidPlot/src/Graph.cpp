@@ -60,6 +60,7 @@
 #include "UserFunction.h"
 #include "Mantid/MantidMatrixCurve.h"
 #include "Mantid/MantidQwtMatrixWorkspaceData.h"
+#include "Mantid/ErrorBarSettings.h"
 
 #ifdef EMF_OUTPUT
 #include "EmfEngine.h"
@@ -3008,6 +3009,20 @@ void Graph::removeMantidErrorBars(const QString& curveName)
   c->setErrorBars(false);
   updatePlot();
   return;
+}
+
+ErrorBarSettings* Graph::errorBarSettings(int curveIndex, int errorBarIndex)
+{
+  PlotCurve* c = dynamic_cast<PlotCurve*>(curve(curveIndex));
+  if ( c && errorBarIndex >= 0 )
+  {
+    QList<ErrorBarSettings*> settings = c->errorBarSettingsList();
+    if ( errorBarIndex < settings.size() )
+    {
+      return settings[errorBarIndex];
+    }
+  }
+  return NULL;
 }
 
 QwtPieCurve* Graph::plotPie(Table* w, const QString& name, const QPen& pen, int brush,

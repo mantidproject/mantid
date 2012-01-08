@@ -215,6 +215,18 @@ class Layer(QtProxyObject):
         """
         self._getHeldObject().addErrorBars(yColName,errTable._getHeldObject(),errColName,type,width,cap,color,through,minus,plus)
 
+    def errorBarSettings(self, curveIndex, errorBarIndex=0):
+        """Get a handle to the error bar settings for a specified curve.
+        
+        Args:
+            curveIndex: The curve to get the settings for
+            errorBarIndex: A curve can hold more than one set of error bars. Specify which one (default: the first).
+                           Note that a curve plotted from a workspace can have only one set of error bars (and hence settings).
+                           
+        Returns: A handle to the error bar settings object.
+        """
+        return QtProxyObject(self._getHeldObject().errorBarSettings(curveIndex,errorBarIndex))
+
     def addHistogram(self, matrix):
         """Add a matrix histogram  to the graph"""
         self._getHeldObject().addHistogram(matrix._getHeldObject())

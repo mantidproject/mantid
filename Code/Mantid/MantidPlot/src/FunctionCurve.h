@@ -79,7 +79,10 @@ public:
 	QString legend();
 
 	void loadData(int points = 0);
-  
+ 
+  /// No error bars on this curve: Always return an empty list.
+  QList<ErrorBarSettings *> errorBarSettingsList() const {return QList<ErrorBarSettings*>();}
+
   /// returns identifier where this curve plots a IFitFunction
   const Mantid::API::IFitFunction* getIFitFunctionIdentifier() const {return m_identifier;};
 private:

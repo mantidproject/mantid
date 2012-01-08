@@ -1,11 +1,11 @@
 #include "ErrorBarSettings.h"
 
 /** Constructor.
- *  Sets defaults of black lines having width 1.0 and caps of length 10,
+ *  Sets defaults of black lines having width 1.0 and caps of length 6,
  *  that show on both sides of the symbol but don't draw through it.
  */
 ErrorBarSettings::ErrorBarSettings()
-  : m_cap(10), m_plus(true), m_minus(true), m_through(false),
+  : m_cap(6), m_plus(true), m_minus(true), m_through(false),
     m_width(1.0), m_color(Qt::black)
 {}
 
