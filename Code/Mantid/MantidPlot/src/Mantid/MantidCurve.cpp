@@ -18,7 +18,7 @@ Constructor
 */
 MantidCurve::MantidCurve(const QString& wsName, bool err, bool allError)
  : PlotCurve(wsName), WorkspaceObserver(),
-   m_drawErrorBars(err), m_drawAllErrorBars(allError), m_errorSettings(new ErrorBarSettings)
+   m_drawErrorBars(err), m_drawAllErrorBars(allError), m_errorSettings(new ErrorBarSettings(this))
 {
 }
 
@@ -28,7 +28,7 @@ Constructor
 */
 MantidCurve::MantidCurve(bool err)
  : PlotCurve(), WorkspaceObserver(), 
-   m_drawErrorBars(err), m_drawAllErrorBars(false), m_errorSettings(new ErrorBarSettings)
+   m_drawErrorBars(err), m_drawAllErrorBars(false), m_errorSettings(new ErrorBarSettings(this))
 {
 }
 
@@ -116,7 +116,6 @@ void MantidCurve::axisScaleChanged(int axis, bool toLog)
 /// Destructor
 MantidCurve::~MantidCurve()
 {
-  delete m_errorSettings;
 }
 
 
@@ -151,28 +150,57 @@ void MantidCurve::doDraw(QPainter *p,
           const QwtScaleMap &xMap, const QwtScaleMap &yMap,
           const QRect&, MantidQwtWorkspaceData const * const d) const
 {
+  int sh = 0;
+  const QwtSymbol symbol(symbol());
+  if (symbol.style() != QwtSymbol::NoSymbol)
+  {
+    sh = symbol.size().height() / 2;
+  }
+
   int xi0 = 0;
-  p->setPen(pen());
-  const int dx = 3;
+  QPen pen(pen());
+  pen.setColor(m_errorSettings->color());
+  pen.setWidth(m_errorSettings->width());
+  p->setPen(pen);
+  const int dx = m_errorSettings->capLength()/2;
   const int dx2 = 2*dx;
-  int x1 = static_cast<int>(floor(xMap.p1()));
-  int x2 = static_cast<int>(floor(xMap.p2()));
-  for (int i = 0; i < static_cast<int>(d->esize()); i++)
+  const int x1 = static_cast<int>(floor(xMap.p1()));
+  const int x2 = static_cast<int>(floor(xMap.p2()));
+  
+  const int skipPoints = skipSymbolsCount();
+  for (int i = 0; i < static_cast<int>(d->esize()); i += skipPoints)
   {
     const int xi = xMap.transform(d->ex(i));
     if (m_drawAllErrorBars || (xi > x1 && xi < x2 && (i == 0 || abs(xi - xi0) > dx2)))
     {
       const double Y = y(i);
       const double E = d->e(i);
+      const int yi = yMap.transform(Y);
       const int ei1 = yMap.transform(Y - E);
       const int ei2 = yMap.transform(Y + E);
+      const int yhl = yi - sh;
+      const int ylh = yi + sh;
 
-      // This call can crash MantidPlot if the error is zero,
-      //   so protect against this (line of zero length anyway)
-      if (E) p->drawLine(xi,ei1,xi,ei2);
-      p->drawLine(xi-dx,ei1,xi+dx,ei1);
-      p->drawLine(xi-dx,ei2,xi+dx,ei2);
 
+      if ( m_errorSettings->minusSide() )
+      {
+        // This call can crash MantidPlot if the error is zero,
+        //   so protect against this (line of zero length anyway)
+        if (E) p->drawLine(xi,ei1,xi,ylh);
+        p->drawLine(xi-dx,ei1,xi+dx,ei1);
+      }
+      if ( m_errorSettings->plusSide() )
+      {
+        // This call can crash MantidPlot if the error is zero,
+        //   so protect against this (line of zero length anyway)
+        if (E) p->drawLine(xi,yhl,xi,ei2);
+        p->drawLine(xi-dx,ei2,xi+dx,ei2);
+      }
+      if ( m_errorSettings->throughSymbol() )
+      {
+        if (E) p->drawLine(xi,yhl,xi,ylh);
+      }
+      
       xi0 = xi;
     }
   }

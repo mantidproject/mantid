@@ -73,7 +73,7 @@ public:
   //! Set the number of symbols not to be drawn: useful for large data sets
   void setSkipSymbolsCount(int count);
   //! Returns the number of symbols not to be drawn
-  int skipSymbolsCount() {return d_skip_symbols;}
+  int skipSymbolsCount() const {return d_skip_symbols;}
 
   /// Returns a list of error bar settings for each set of error bars associated to this curve
   virtual QList<ErrorBarSettings*> errorBarSettingsList() const = 0;

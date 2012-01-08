@@ -719,8 +719,8 @@ public:
 %End
 
   void addErrorBars(const QString&, Table *, const QString&,
-		  int type = 1, double width = 1, int cap = 8, const QColor& color = QColor(Qt::black),
-		  bool through = true, bool minus = true, bool plus = true);
+                    int type = 1, double width = 1, int cap = 8, const QColor& color = QColor(Qt::black),
+                    bool through = false, bool minus = true, bool plus = true);
 
   ErrorBarSettings* errorBarSettings(int curveIndex, int errorBarIndex = 0);
 
