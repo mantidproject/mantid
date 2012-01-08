@@ -56,14 +56,14 @@ public:
          TSM_ASSERT_THROWS_NOTHING("should be fine",pWSWrap->createEmptyMDWS(TWSD));
 
          // Build up the box controller
-         TSM_ASSERT_THROWS_NOTHING("should be fine", bc = pWSWrap->getBoxController());
+         TSM_ASSERT_THROWS_NOTHING("should be fine", bc = pWSWrap->pWorkspace()->getBoxController());
 
          // set default BC values
          TSM_ASSERT_THROWS_NOTHING("should be fine",  bc->setSplitThreshold(5));
          TSM_ASSERT_THROWS_NOTHING("should be fine",  bc->setMaxDepth( 20 ));
          TSM_ASSERT_THROWS_NOTHING("should be fine",  bc->setSplitInto(10));
 
-         TSM_ASSERT_THROWS_NOTHING("should be fine",pWSWrap->splitBox());
+         TSM_ASSERT_THROWS_NOTHING("should be fine",pWSWrap->pWorkspace()->splitBox());
 
        // allocate temporary buffer for MD Events data
          std::vector<Mantid::coord_t>  allCoord(n_dims*n_MDev,0.5);
@@ -76,7 +76,7 @@ public:
 
          TSM_ASSERT_THROWS_NOTHING("should be fine",pWSWrap->addMDData(sig_err,run_index,det_ids,allCoord,n_MDev));
 
-         TSM_ASSERT_THROWS_NOTHING("should be fine",pWSWrap->refreshCache());
+         TSM_ASSERT_THROWS_NOTHING("should be fine",pWSWrap->pWorkspace()->refreshCache());
 
          TSM_ASSERT_EQUALS("all points should be added successfully",n_MDev,pWSWrap->pWorkspace()->getNPoints());
   }

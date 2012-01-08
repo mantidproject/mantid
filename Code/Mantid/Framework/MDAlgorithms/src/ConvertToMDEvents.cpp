@@ -35,7 +35,8 @@
 //
 #include "MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h"
 #include "MantidMDAlgorithms/ConvertToMDEventsCoordTransf.h"
-#include "MantidMDAlgorithms/ConvertToMDEventsMethods.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsHistoWS.h"
+#include "MAntidMDAlgorithms/ConvertToMDEventsEventWS.h"
 
 #include <algorithm>
 #include <float.h>
@@ -738,7 +739,7 @@ ConvertToMDEvents::checkUVsettings(const std::vector<double> &ut,const std::vect
 // AUTOINSTANSIATION OF EXISTING CODE:
 // Templated loop over dependant templated arguments
 template<Q_state Q, size_t NumAlgorithms=0>
-class LOOP_ND{
+class LOOP_MATRIX_ALG{
 private:
     enum{
         CONV = NumAlgorithms%NConvUintsStates,           // internal oop over conversion modes, the variable changes first
@@ -747,72 +748,99 @@ private:
     };
   public:
     static inline void EXEC(ConvertToMDEvents *pH){
-                
-            std::string Key0=pH->Q_modes[Q]+pH->dE_modes[MODE]+pH->ConvModes[CONV];
-
-            std::string Key;
-            Key = pH->SupportedWS[Workspace2DType]+Key0;
+          
+            std::string  Key = pH->SupportedWS[Workspace2DType]+pH->Q_modes[Q]+pH->dE_modes[MODE]+pH->ConvModes[CONV];
             pH->alg_selector.insert(std::pair<std::string, IConvertToMDEventsMethods *>(Key,
-                (new ProcessHistoWS<Q,static_cast<AnalMode>(MODE),static_cast<CnvrtUnits>(CONV)>())));
+                (new ConvertToMDEvensHistoWS<Q,static_cast<AnalMode>(MODE),static_cast<CnvrtUnits>(CONV)>())));
 /*#ifdef _DEBUG
             std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
 #endif*/
-            Key = pH->SupportedWS[EventWSType]+Key0;
-            pH->alg_selector.insert(std::pair<std::string, IConvertToMDEventsMethods *>(Key,
-                (new ProcessHistoWS<Q,static_cast<AnalMode>(MODE),static_cast<CnvrtUnits>(CONV)>())));
-/*#ifdef _DEBUG
-            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
-#endif   */ 
-         LOOP_ND<Q, NumAlgorithms+1>::EXEC(pH);
+            LOOP_MATRIX_ALG<Q, NumAlgorithms+1>::EXEC(pH);
     }
 };
 
 // Templated loop specialization for the noQ case
 template< size_t NumAlgorithms>
-class LOOP_ND<NoQ,NumAlgorithms>{
+class LOOP_MATRIX_ALG<NoQ,NumAlgorithms>{
 private:
     enum{
         CONV = NumAlgorithms%NConvUintsStates       // internal Loop over conversion modes, the variable changes first
         //MODE => noQ -- no mode conversion ANY_Mode, 
- 
-      
+    
     };
   public:
     static inline void EXEC(ConvertToMDEvents *pH){
-                
-            std::string Key0 = pH->Q_modes[NoQ]+pH->dE_modes[ANY_Mode]+pH->ConvModes[CONV];
-            std::string Key;
 
-            Key = pH->SupportedWS[Workspace2DType]+Key0;
+            std::string  Key = pH->SupportedWS[Workspace2DType]+pH->Q_modes[NoQ]+pH->dE_modes[ANY_Mode]+pH->ConvModes[CONV];
             pH->alg_selector.insert(std::pair<std::string,IConvertToMDEventsMethods *>(Key,
-                (new ProcessHistoWS<NoQ,ANY_Mode,static_cast<CnvrtUnits>(CONV)>())));
+                (new ConvertToMDEvensHistoWS<NoQ,ANY_Mode,static_cast<CnvrtUnits>(CONV)>())));
            
 //#ifdef _DEBUG
 //            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
 //#endif
 
-            Key = pH->SupportedWS[EventWSType]+Key0;
-            pH->alg_selector.insert(std::pair<std::string,IConvertToMDEventsMethods *>(Key,
-               (new ProcessHistoWS<NoQ,ANY_Mode,static_cast<CnvrtUnits>(CONV)>())));
-//#ifdef _DEBUG
-//            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
-//#endif
-
-
-            LOOP_ND<NoQ,NumAlgorithms+1>::EXEC(pH);
+             LOOP_MATRIX_ALG<NoQ,NumAlgorithms+1>::EXEC(pH);
     }
 };
 
 // Q3d and modQ terminator
 template<Q_state Q >
-class LOOP_ND<Q,static_cast<size_t>(ANY_Mode*NConvUintsStates) >{
+class LOOP_MATRIX_ALG<Q,static_cast<size_t>(ANY_Mode*NConvUintsStates) >{
   public:
       static inline void EXEC(ConvertToMDEvents *pH){UNUSED_ARG(pH);} 
 };
 
 // any mode terminator
 template<>
-class LOOP_ND<NoQ,static_cast<size_t>(NConvUintsStates) >{
+class LOOP_MATRIX_ALG<NoQ,static_cast<size_t>(NConvUintsStates) >{
+  public:
+      static inline void EXEC(ConvertToMDEvents *pH){UNUSED_ARG(pH);} 
+};
+//-------------------------------------------------------------------------------------------------------------------------------
+// LOOP over MDEventAlgoritm
+template<Q_state Q,size_t NumAlgorithms=0>
+class LOOP_EVENT_ALG{
+private:
+    enum{
+        MODE = NumAlgorithms%ANY_Mode, //  momentum conversion mode  
+     
+    };
+  public:
+    static inline void EXEC(ConvertToMDEvents *pH){             
+            std::string Key = pH->SupportedWS[EventWSType]+pH->Q_modes[Q]+pH->dE_modes[MODE]+pH->ConvModes[ConvFromTOF];
+            pH->alg_selector.insert(std::pair<std::string, IConvertToMDEventsMethods *>(Key,
+                (new ConvertToMDEvensEventWSAutoRebin<Q,static_cast<AnalMode>(MODE)>())));
+/*#ifdef _DEBUG
+            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
+#endif*/
+ 
+         LOOP_EVENT_ALG<Q,NumAlgorithms+1>::EXEC(pH);
+    }
+};
+
+// Templated loop specialization for the noQ case
+template<>
+class LOOP_EVENT_ALG<NoQ,ANY_Mode>{
+private:
+   
+  public:
+    static inline void EXEC(ConvertToMDEvents *pH){
+                
+            std::string Key = pH->SupportedWS[EventWSType]+pH->Q_modes[NoQ]+pH->dE_modes[ANY_Mode]+pH->ConvModes[ConvFromTOF];
+
+            pH->alg_selector.insert(std::pair<std::string,IConvertToMDEventsMethods *>(Key,
+                (new ConvertToMDEvensEventWSAutoRebin<NoQ,ANY_Mode>())));
+           
+//#ifdef _DEBUG
+//            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
+//#endif
+
+    }
+};
+
+// Q3d and modQ terminator
+template<Q_state Q >
+class LOOP_EVENT_ALG<Q,static_cast<size_t>(ANY_Mode) >{
   public:
       static inline void EXEC(ConvertToMDEvents *pH){UNUSED_ARG(pH);} 
 };
@@ -849,13 +877,16 @@ native_inelastic_unitID("DeltaE") // currently it is energy transfer (DeltaE)
 
 // Subalgorithm factories:
 // NoQ --> any Analysis mode will do as it does not depend on it; we may want to convert unuts
-   LOOP_ND<NoQ,0>::EXEC(this);
+   LOOP_MATRIX_ALG<NoQ,0>::EXEC(this);
+   LOOP_EVENT_ALG<NoQ,0>::EXEC(this);
  
 // MOD Q
-    LOOP_ND<modQ,0>::EXEC(this);
+    LOOP_MATRIX_ALG<modQ,0>::EXEC(this);
+    LOOP_EVENT_ALG<modQ,0>::EXEC(this);
 
  // Q3D
-    LOOP_ND<Q3D,0>::EXEC(this);
+    LOOP_MATRIX_ALG<Q3D,0>::EXEC(this);
+    LOOP_EVENT_ALG<Q3D,0>::EXEC(this);
   
 }
 

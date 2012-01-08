@@ -78,7 +78,8 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/XorMD.h
 	inc/MantidMDAlgorithms/ConvertToMDEvents.h
 	inc/MantidMDAlgorithms/IConvertToMDEventsMethods.h	
-	inc/MantidMDAlgorithms/ConvertToMDEventsMethods.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsHistoWS.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsEventWS.h	
 	inc/MantidMDAlgorithms/ConvertToMDEventsCoordTransf.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h
     inc/MantidMDAlgorithms/ConvertToMDEventsDetInfo.h 	

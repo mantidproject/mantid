@@ -43,9 +43,9 @@ namespace MDAlgorithms
 
   /// known sates for algorithms, caluclating momentums
   enum Q_state{
-       NoQ,     //< no Q transformatiom, just copying values along X axis (may be with units transformation)
        modQ,    //< calculate mod Q
-       Q3D,      //< calculate 3 component of Q in fractional coordinate system.
+       Q3D,     //< calculate 3 component of Q in fractional coordinate system.
+       NoQ,     //< no Q transformatiom, just copying values along X axis (may be with units transformation)
        NQStates  // number of various recognized Q-analysis modes used to terminate Q-state algorithms metalooop.
    };
   /**  known analysis modes, arranged according to emodes 

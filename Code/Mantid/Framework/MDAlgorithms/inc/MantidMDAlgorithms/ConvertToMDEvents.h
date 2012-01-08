@@ -130,7 +130,11 @@ namespace MDAlgorithms
   
      /// helper class to orginize metaloop on various algorithm options
      template<Q_state Q,size_t N_ALGORITHMS >
-     friend class LOOP_ND;
+     friend class LOOP_MATRIX_ALG;
+  
+   /// helper class to orginize metaloop on various algorithm options
+     template<Q_state Q,size_t N_ALGORITHMS >
+     friend class LOOP_EVENT_ALG;
   
  
     /// known momentum analysis mode ID-s (symbolic representation of correspondent enum);
