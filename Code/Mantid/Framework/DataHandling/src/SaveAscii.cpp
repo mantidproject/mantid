@@ -15,6 +15,8 @@ The algorithm assumes that the workspace has common X values for all spectra (i.
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/FileProperty.h"
 
+#include "MantidKernel/VisibleWhenProperty.h"
+
 #include <set>
 #include <fstream>
 #include <boost/tokenizer.hpp>
@@ -40,6 +42,11 @@ namespace Mantid
     // Initialise the logger
     Logger& SaveAscii::g_log = Logger::get("SaveAscii");
 
+    /// Empty constructor
+    SaveAscii::SaveAscii() : m_separatorIndex()
+    {
+    }
+
     /// Initialisation method.
     void SaveAscii::init()
     {
@@ -59,8 +66,27 @@ namespace Mantid
       declareProperty(new ArrayProperty<int>("SpectrumList"));
       declareProperty("Precision", EMPTY_INT(), mustBePositive->clone());
       declareProperty("WriteXError", false, "If true, the error on X with be written as the fourth column.");
-      declareProperty("Separator", " , ", "Characters to put as separator between X, Y, E values.");
+
       declareProperty("CommentIndicator", "", "Characters to put in front of comment lines.");
+      
+      // For the ListValidator
+      std::string spacers[6][2] = { {"CSV", ","}, {"Tab", "\t"}, {"Space", " "}, 
+      {"Colon", ":"}, {"SemiColon", ";"}, {"UserDefined", "UserDefined"} };
+      std::vector<std::string> sepOptions;
+      for( size_t i = 0; i < 6; ++i )
+      {
+        std::string option = spacers[i][0];
+        m_separatorIndex.insert(std::pair<std::string,std::string>(option, spacers[i][1]));
+        sepOptions.push_back(option);
+      }
+      
+      declareProperty("Separator", "CSV", new ListValidator(sepOptions),
+        "Characters to put as separator between X, Y, E values. (Default: CSV)");
+
+      declareProperty(new PropertyWithValue<std::string>("CustomSeparator", "", Direction::Input),
+        "If present, will overide any specified choice given to Separator.");
+
+      setPropertySettings("CustomSeparator", new VisibleWhenProperty(this, "Separator", IS_EQUAL_TO, "UserDefined") );
     }
 
     /** 
@@ -80,7 +106,26 @@ namespace Mantid
 
         // Check whether we need to write the fourth column
         bool write_dx = getProperty("WriteXError");
-        std::string sep = getPropertyValue("Separator");
+        std::string choice = getPropertyValue("Separator");
+        std::string custom = getPropertyValue("CustomSeparator");
+        std::string sep;
+        // If the custom separator property is not empty, then we use that under any circumstance.
+        if(custom != "")
+        {
+          sep = custom;
+        }
+        // Else if the separator drop down choice is not UserDefined then we use that.
+        else if(choice != "UserDefined")
+        {
+          std::map<std::string, std::string>::iterator it = m_separatorIndex.find(choice);
+          sep = it->second;
+        }
+        // If we still have nothing, then we are forced to use a default.
+        if(sep.empty())
+        {
+          g_log.notice() << "\"UserDefined\" has been selected, but no custom separator has been entered.  Using default instead.";
+          sep = " , ";
+        }
         std::string comment = getPropertyValue("CommentIndicator");
 
         // Create an spectra index list for output
@@ -152,23 +197,31 @@ namespace Mantid
             if (idx.empty())
                 for(int spec=0;spec<nSpectra;spec++)
                 {
-                    file << sep << ws->readY(spec)[bin] << sep << ws->readE(spec)[bin];
+                    file << sep;
+                    file << ws->readY(spec)[bin];
+                    file << sep;
+                    file << ws->readE(spec)[bin];
                 }
             else
                 for(std::set<int>::const_iterator spec=idx.begin();spec!=idx.end();++spec)
                 {
-                    file << sep << ws->readY(*spec)[bin] << sep << ws->readE(*spec)[bin];
+                    file << sep;
+                    file << ws->readY(*spec)[bin]; 
+                    file << sep;
+                    file << ws->readE(*spec)[bin];
                 }
 
             if (write_dx)
             {
 				if (isHistogram) // bin centres
 				{
-					file << sep << ( ws->readDx(0)[bin] + ws->readDx(0)[bin+1] )/2;
+					file << sep;
+          file << ( ws->readDx(0)[bin] + ws->readDx(0)[bin+1] )/2;
 				}
 				else // data points
 				{
-					file << sep << ws->readDx(0)[bin];
+					file << sep;
+          file << ws->readDx(0)[bin];
 				}
             }
             file << '\n';

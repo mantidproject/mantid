@@ -288,7 +288,7 @@ class Stitcher(object):
                 SaveCanSAS1D(Filename=file_path, InputWorkspace=iq)
             else:
                 SaveAscii(Filename=file_path, InputWorkspace=iq, 
-                          Separator="\t", CommentIndicator="# ", WriteXError=True)
+                          Separator="Tab", CommentIndicator="# ", WriteXError=True)
         
     def trim_zeros(self, x, y, e, dx):
         zipped = zip(x,y,e,dx)
