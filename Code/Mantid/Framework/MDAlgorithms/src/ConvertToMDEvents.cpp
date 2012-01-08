@@ -36,7 +36,7 @@
 #include "MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h"
 #include "MantidMDAlgorithms/ConvertToMDEventsCoordTransf.h"
 #include "MantidMDAlgorithms/ConvertToMDEventsHistoWS.h"
-#include "MAntidMDAlgorithms/ConvertToMDEventsEventWS.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsEventWS.h"
 
 #include <algorithm>
 #include <float.h>

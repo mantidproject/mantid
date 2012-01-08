@@ -59,7 +59,7 @@ class ConvertToMDEvensHistoWS: public IConvertToMDEventsMethods
 {
     /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
     /// presumably will be completely inlined
-     template<Q_state Q, AnalMode MODE, CnvrtUnits CONV,XCoordType XTYPE> 
+     template<Q, MODE, CONV, Histohram> 
      friend struct COORD_TRANSFORMER;
      // the instanciation of the class which does the transformation itself
      COORD_TRANSFORMER<Q,MODE,CONV,Histohram> trn; 
