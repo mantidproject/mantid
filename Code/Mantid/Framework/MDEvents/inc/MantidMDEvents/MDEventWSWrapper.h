@@ -3,6 +3,7 @@
 
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidMDEvents/MDWSDescription.h"
 
 namespace Mantid
 {
@@ -52,8 +53,7 @@ public:
     /// get number of dimensions, for the workspace, currently accessed by the algorithm. 
     size_t nDimensions()const;
     /** function creates empty MD event workspace with given parameters (workspace factory) and stores internal pointer to this workspace for further usage */
-    API::IMDEventWorkspace_sptr createEmptyMDWS(size_t n_dim, const Strings &targ_dim_names,const Strings  &targ_dim_units,
-                                                                const std::vector<double> &dim_min, const std::vector<double> &dim_max);
+    API::IMDEventWorkspace_sptr createEmptyMDWS(const MDWSDescription &WSD);
     /// add the data to the internal workspace. The workspace has to exist and be initiated 
     void  addMDData(std::vector<float> &sig_err,std::vector<uint16_t> &run_index,std::vector<uint32_t> &det_id,std::vector<coord_t> &Coord,size_t data_size);
     /// releases the function pointer of the workspace, stored by the class and makes the class instance undefined; 

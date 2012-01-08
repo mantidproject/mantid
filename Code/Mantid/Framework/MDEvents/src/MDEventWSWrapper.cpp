@@ -20,14 +20,14 @@ MDEventWSWrapper::nDimensions()const
 }
 /** function creates empty MD event workspace with given parameters (workspace factory) and stores internal pointer to this workspace for further usage */
 API::IMDEventWorkspace_sptr
-MDEventWSWrapper::createEmptyMDWS(size_t n_dim, const Strings &targ_dim_names,const Strings  &targ_dim_units,
-                                                 const std::vector<double> &dim_min, const std::vector<double> &dim_max)
+MDEventWSWrapper::createEmptyMDWS(const MDWSDescription &WSD)
 {
-    if(n_dim<1||n_dim>MAX_N_DIM){
-        g_log.error()<< " Number of requested dimensions: "<<n_dim<<" exceeds the maxumal allowed numed or dimensions: "<<MAX_N_DIM<<std::endl;
+    if(WSD.n_dims<1||WSD.n_dims>MAX_N_DIM){
+        g_log.error()<< " Number of requested dimensions: "<<WSD.n_dims<<" exceeds the maxumal allowed numed or dimensions: "<<MAX_N_DIM<<std::endl;
         throw(std::invalid_argument(" Numer of requested dimensions exceeds maximal allowed number of dimensions"));
     }
-    this->n_dimensions = (int)n_dim;
+    this->n_dimensions = (int)WSD.n_dims;
+    size_t n_dim = WSD.n_dims;
 
     // store input dimensions;
     this->dim_min.resize(n_dim);
@@ -36,10 +36,10 @@ MDEventWSWrapper::createEmptyMDWS(size_t n_dim, const Strings &targ_dim_names,co
     this->targ_dim_units.resize(n_dim);
 
     for(size_t i=0;i<n_dim;i++){
-        this->dim_min[i]=dim_min[i];
-        this->dim_max[i]=dim_max[i];
-        this->targ_dim_names[i]= targ_dim_names[i];
-        this->targ_dim_units[i]= targ_dim_units[i];
+        this->dim_min[i]=WSD.dim_min[i];
+        this->dim_max[i]=WSD.dim_max[i];
+        this->targ_dim_names[i]= WSD.dim_names[i];
+        this->targ_dim_units[i]= WSD.dim_units[i];
     }
 
     wsCreator[n_dimensions]();

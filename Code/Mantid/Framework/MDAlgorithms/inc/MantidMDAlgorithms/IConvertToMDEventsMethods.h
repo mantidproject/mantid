@@ -73,31 +73,7 @@ namespace MDAlgorithms
     };
 
  class ConvertToMDEvents;
- /// helper class describes the properties of target MD workspace, which should be obtained as the result of conversion algorithm. 
-  struct MDWSDescription
-  {
-  public:
-      /// constructor
-      MDWSDescription():n_activated_dimensions(0),emode(-1){};
-    /// the variable which describes the number of the dimensions, in the target workspace. 
-    /// Calculated from number of input properties and the operations, performed on input workspace;
-    size_t n_activated_dimensions;
-    /// conversion mode (see its description below)
-    int emode;
-    /// minimal and maximal values for the workspace dimensions:
-    std::vector<double>      dim_min,dim_max;
-    /// the names for the target workspace dimensions and properties of input MD workspace
-    std::vector<std::string> dim_names;
-    /// the units of target workspace dimensions and properties of input MD workspace dimensions
-    std::vector<std::string> dim_units;
-    /// the matrix to transform momentums of the workspace into notional target coordinate system
-    std::vector<double> rotMatrix;  // should it be the Quat?
-    /// helper function checks if min values are less them max values and are consistent between each other 
-    void checkMinMaxNdimConsistent(Mantid::Kernel::Logger& log)const;
  
-  }; 
-
-
  class IConvertToMDEventMethods
  {
  public:

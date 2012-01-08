@@ -27,14 +27,16 @@ public:
   void test_buildNewWS()
   {
          IMDEventWorkspace_sptr pws;
-         Mantid::MDEvents::Strings targ_dim_names(5,"mdn"),targ_dim_units(5,"Momentum");
-         std::vector<double> dim_min(5,-1),dim_max(5,1);
+         MDWSDescription TWS0;
+         MDWSDescription TWS9(9);
+         MDWSDescription TWS5(5);
+        
 
-         TSM_ASSERT_THROWS("too few dimensions",pws=pWSWrap->createEmptyMDWS(0, targ_dim_names,targ_dim_units,dim_min,dim_max),std::invalid_argument);
-         TSM_ASSERT_THROWS("too many dimensions",pws=pWSWrap->createEmptyMDWS(9, targ_dim_names,targ_dim_units,dim_min,dim_max),std::invalid_argument);
+         TSM_ASSERT_THROWS("too few dimensions",pws=pWSWrap->createEmptyMDWS(TWS0),std::invalid_argument);
+         TSM_ASSERT_THROWS("too many dimensions",pws=pWSWrap->createEmptyMDWS(TWS9),std::invalid_argument);
          TSM_ASSERT_THROWS("dimensions have not been defined ",pWSWrap->nDimensions(),std::invalid_argument);
 
-         TSM_ASSERT_THROWS_NOTHING("should be fine",pws=pWSWrap->createEmptyMDWS(5, targ_dim_names,targ_dim_units,dim_min,dim_max));
+         TSM_ASSERT_THROWS_NOTHING("should be fine",pws=pWSWrap->createEmptyMDWS(TWS5));
 
          TSM_ASSERT_EQUALS("should have 5 dimensions",5,pWSWrap->nDimensions());
 
@@ -49,10 +51,9 @@ public:
 
         const size_t n_dims(5),n_MDev(2);
         Mantid::API::BoxController_sptr bc;
-         Mantid::MDEvents::Strings targ_dim_names(n_dims,"mdn"),targ_dim_units(n_dims,"Momentum");
-         std::vector<double> dim_min(n_dims,-1),dim_max(n_dims,1);
+        MDWSDescription TWSD(5);
 
-         TSM_ASSERT_THROWS_NOTHING("should be fine",pWSWrap->createEmptyMDWS(5, targ_dim_names,targ_dim_units,dim_min,dim_max));
+         TSM_ASSERT_THROWS_NOTHING("should be fine",pWSWrap->createEmptyMDWS(TWSD));
 
          // Build up the box controller
          TSM_ASSERT_THROWS_NOTHING("should be fine", bc = pWSWrap->getBoxController());

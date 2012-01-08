@@ -25,6 +25,7 @@ set ( SRC_FILES
 	src/MDBoxIterator.cpp
 	src/MDEventFactory.cpp
 	src/MDEventWorkspace.cpp
+	src/MDWSDescription.cpp	
 	src/MDEventWSWrapper.cpp
 	src/MDGridBox.cpp
 	src/MDHistoWorkspace.cpp
@@ -76,6 +77,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDEvent.h
 	inc/MantidMDEvents/MDEventFactory.h
 	inc/MantidMDEvents/MDEventWorkspace.h
+	inc/MantidMDEvents/MDWSDescription.h		
 	inc/MantidMDEvents/MDEventWSWrapper.h	
 	inc/MantidMDEvents/MDGridBox.h
 	inc/MantidMDEvents/MDHistoWorkspace.h
