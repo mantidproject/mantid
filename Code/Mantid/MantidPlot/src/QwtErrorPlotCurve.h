@@ -37,59 +37,59 @@
 class QwtErrorPlotCurve: public DataCurve, public ErrorBarSettings
 {
 public:
-	enum Orientation{Horizontal = 0, Vertical = 1};
+  enum Orientation{Horizontal = 0, Vertical = 1};
 
-	QwtErrorPlotCurve(int orientation, Table *t, const QString& name);
-	QwtErrorPlotCurve(Table *t, const QString& name);
+  QwtErrorPlotCurve(int orientation, Table *t, const QString& name);
+  QwtErrorPlotCurve(Table *t, const QString& name);
 
-	void copy(const QwtErrorPlotCurve *e);
+  void copy(const QwtErrorPlotCurve *e);
 
-	QwtDoubleRect boundingRect() const;
+  QwtDoubleRect boundingRect() const;
 
-	double errorValue(int i);
-	QwtArray<double> errors(){return err;};
-	void setErrors(const QwtArray<double>&data){err=data;};
+  double errorValue(int i);
+  QwtArray<double> errors(){return err;};
+  void setErrors(const QwtArray<double>&data){err=data;};
 
-	double width(){return pen().widthF();};
-	void setWidth(double w);
+  double width(){return pen().widthF();};
+  void setWidth(double w);
 
-	QColor color(){return pen().color();};
-	void setColor(const QColor& c);
+  QColor color(){return pen().color();};
+  void setColor(const QColor& c);
 
-	int direction(){return type;};
-	void setDirection(int o){type = o;};
+  int direction(){return type;};
+  void setDirection(int o){type = o;};
 
-	bool xErrors();
-	void setXErrors(bool yes);
+  bool xErrors();
+  void setXErrors(bool yes);
 
-	//! Returns the master curve to which this error bars curve is attached.
-	DataCurve* masterCurve(){return d_master_curve;};
-	void setMasterCurve(DataCurve *c);
+  //! Returns the master curve to which this error bars curve is attached.
+  DataCurve* masterCurve(){return d_master_curve;};
+  void setMasterCurve(DataCurve *c);
 
-	//! Causes the master curve to delete this curve from its managed error bars list.
-	void detachFromMasterCurve(){d_master_curve->removeErrorBars(this);};
+  //! Causes the master curve to delete this curve from its managed error bars list.
+  void detachFromMasterCurve(){d_master_curve->removeErrorBars(this);};
 
-    QString plotAssociation() const;
+  QString plotAssociation() const;
 
-	bool updateData(Table *t, const QString& colName);
-	void loadData();
+  bool updateData(Table *t, const QString& colName);
+  void loadData();
 
 private:
-	using DataCurve::draw; // Unhide base class method (avoids Intel compiler warning)
-	virtual void draw(QPainter *painter,const QwtScaleMap &xMap,
-		const QwtScaleMap &yMap, int from, int to) const;
+  using DataCurve::draw; // Unhide base class method (avoids Intel compiler warning)
+  virtual void draw(QPainter *painter,const QwtScaleMap &xMap,
+                     const QwtScaleMap &yMap, int from, int to) const;
 
-	void drawErrorBars(QPainter *painter, const QwtScaleMap &xMap,
-		const QwtScaleMap &yMap, int from, int to) const;
+  void drawErrorBars(QPainter *painter, const QwtScaleMap &xMap,
+                     const QwtScaleMap &yMap, int from, int to) const;
 
-    //! Stores the error bar values
-    QwtArray<double> err;
+  //! Stores the error bar values
+  QwtArray<double> err;
 
   //! Orientation of the bars: Horizontal or Vertical
   int type;
 
-	//! Reference to the master curve to which this error bars curve is attached.
-	DataCurve *d_master_curve;
+  //! Reference to the master curve to which this error bars curve is attached.
+  DataCurve *d_master_curve;
 };
 
 #endif
