@@ -32,7 +32,7 @@ void ExpDecayOsc::functionMW(double* out, const double* xValues, const size_t nD
   const double& gf = getParameter("Frequency"); 
   const double& gphi = getParameter("Phi"); 
 
-  for (int i = 0; i < nData; i++) {
+  for (size_t i = 0; i < nData; i++) {
     double x = xValues[i];
     out[i] = gA0*exp(-gs*x)*cos(2*PI*gf*x +gphi);
   } 
