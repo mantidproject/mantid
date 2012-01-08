@@ -632,6 +632,15 @@ ConvertToMDEvents::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS,const std
         }
         TargWSDescription.Ei = getEi(this);
     }
+    // event workspace currenlty can be in TOF units only
+    if(the_algID.find(this->SupportedWS[EventWSType])!=std::string::npos)
+    {
+        if(the_algID.find(this->ConvModes[ConvFromTOF])==std::string::npos){
+            convert_log.error()<<" event workspace: "<<inWS2D->name()<<" has to be in TOF units, but algorithm selector: "<<the_algID<<" suggests other units\n";
+            throw(std::invalid_argument(" Input event workspace has to be in TOF units"));
+        }
+    }
+ 
     // set up the target workspace description;
     TargWSDescription.n_dims          = nDims;
     TargWSDescription.emode           = emode;
