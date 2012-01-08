@@ -6,8 +6,8 @@
         <file>stock-tool-pencil-16.png</file>
         <file>cross.png</file>
         <file>grid.png</file>
-        <file>SliceViewerWindow_icon.png</file>
         <file>letter_x.png</file>
         <file>letter_y.png</file>
+        <file>SliceViewerWindow_icon.png</file>
     </qresource>
 </RCC>

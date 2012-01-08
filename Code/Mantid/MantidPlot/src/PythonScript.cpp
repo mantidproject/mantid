@@ -70,7 +70,8 @@ namespace
 PythonScript::PythonScript(PythonScripting *env, const QString &code, QObject *context, 
          const QString &name, bool interactive, bool reportProgress)
   : Script(env, code, context, name, interactive, reportProgress), PyCode(NULL), localDict(NULL),
-    stdoutSave(NULL), stderrSave(NULL), isFunction(false), m_isInitialized(false)
+    stdoutSave(NULL), stderrSave(NULL), isFunction(false), m_isInitialized(false),
+    m_workspaceHandles()
 {
   ROOT_CODE_OBJECT = NULL;
   CURRENT_SCRIPT_OBJECT = this;
@@ -80,6 +81,15 @@ PythonScript::PythonScript(PythonScripting *env, const QString &code, QObject *c
   localDict = PyDict_Copy(PyModule_GetDict(pymodule));
   setQObject(Context, "self");
   updatePath(Name, true);
+
+  // Observe ADS updates
+  if( interactive )
+  {
+    observeAdd();
+    observeAfterReplace();
+    observePostDelete();
+    observeADSClear();
+  }
 }
 
 /**
@@ -87,6 +97,11 @@ PythonScript::PythonScript(PythonScripting *env, const QString &code, QObject *c
  */
 PythonScript::~PythonScript()
 {
+  observeAdd(false);
+  observeAfterReplace(false);
+  observePostDelete(false);
+  observeADSClear(false);
+
   this->disconnect();
   updatePath(Name, false);
   Py_XDECREF(PyCode);
@@ -296,8 +311,8 @@ bool PythonScript::exec()
     env()->setIsRunning(false);
     return false;
   }
-  // Redirect the output
-  beginStdoutRedirect();
+  // Redirect the output, if required
+  if ( redirectStdOut() ) beginStdoutRedirect();
 
   if( reportProgress() )
   {
@@ -326,7 +341,7 @@ bool PythonScript::exec()
   /// Return value is non-NULL if everything succeeded
   pyret = executeScript(empty_tuple);
   // Restore output
-  endStdoutRedirect();
+  if ( redirectStdOut() ) endStdoutRedirect();
   /// Disable trace
   PyEval_SetTrace(NULL, NULL);
 
@@ -644,4 +659,121 @@ void PythonScript::endStdoutRedirect()
   Py_XDECREF(stdoutSave);
   PyDict_SetItemString(env()->sysDict(), "stderr", stderrSave);
   Py_XDECREF(stderrSave);
+}
+
+/**
+ * Listen to add notifications from the ADS and add a Python variable of the workspace name
+ * to the current scope
+ * @param wsName The name of the workspace
+ * @param ws The ws ptr (unused)
+ */
+void PythonScript::addHandle(const std::string& wsName,const Mantid::API::Workspace_sptr ws)
+{
+  addPythonReference(wsName, ws);
+}
+
+/**
+ * Listen to add/replace notifications from the ADS and add a Python variable of the workspace name
+ * to the current scope
+ * @param wsName The name of the workspace
+ * @param ws The ws ptr (unused)
+ */
+void PythonScript::afterReplaceHandle(const std::string& wsName,const Mantid::API::Workspace_sptr ws)
+{
+  addPythonReference(wsName, ws);
+}
+
+/**
+ * Removes a Python variable of the workspace name from the current scope
+ * @param wsName The name of the workspace
+ * @param ws The ws ptr (unused)
+ */
+void PythonScript::postDeleteHandle(const std::string& wsName)
+{
+  deletePythonReference(wsName);
+}
+
+/**
+ * Clear all workspace handle references
+ */
+void PythonScript::clearADSHandle()
+{
+  std::set<std::string>::const_iterator iend = m_workspaceHandles.end();
+  for( std::set<std::string>::const_iterator itr = m_workspaceHandles.begin(); itr != iend; )
+  {
+    // This also erases the element from current set. The standard says that erase only invalidates
+    // iterators of erased elements so we need to increment the iterator and get back the previous value
+    // i.e. the postfix operator
+    this->deletePythonReference(*(itr++));
+  }
+  
+  assert(m_workspaceHandles.empty());
+}
+
+
+/**
+ * Add a Python variable of the workspace name
+ * to the current scope
+ * @param wsName The name of the workspace
+ * @param ws The ws ptr (unused)
+ */
+void PythonScript::addPythonReference(const std::string& wsName,const Mantid::API::Workspace_sptr ws)
+{
+  return;
+  UNUSED_ARG(ws);
+
+  // Compile a code object
+  const size_t length = wsName.length() * 2 + 10;
+  char * code = new char[length + 1];
+  const char * name = wsName.c_str();
+  sprintf(code, "%s = mtd['%s']", name, name);
+  GILHolder gil;
+  PyObject *codeObj = Py_CompileString(code, "PythonScript::addPythonReference", Py_file_input);
+  if( codeObj )
+  {
+    PyObject *ret = PyEval_EvalCode((PyCodeObject*)codeObj,localDict, localDict);
+    Py_XDECREF(ret);
+  }
+  if( PyErr_Occurred() )
+  {
+    PyErr_Clear();
+  }
+  else
+  {
+    // Keep track of it
+    m_workspaceHandles.insert(m_workspaceHandles.end(), wsName);
+  }
+  Py_XDECREF(codeObj);
+  delete [] code;
+}
+
+
+/**
+ * Delete a Python reference to the given workspace name
+ * @param wsName The name of the workspace
+ */
+void PythonScript::deletePythonReference(const std::string& wsName)
+{
+  return;
+  const size_t length = wsName.length() + 4;
+  char * code = new char[length + 1];
+  sprintf(code, "del %s", wsName.c_str());
+  GILHolder gil;
+  PyObject *codeObj = Py_CompileString(code, "PythonScript::deleteHandle", Py_file_input);
+  if( codeObj )
+  {
+    PyObject *ret = PyEval_EvalCode((PyCodeObject*)codeObj,localDict, localDict);
+    Py_XDECREF(ret);
+  }
+  if( PyErr_Occurred() )
+  {
+    PyErr_Clear();
+  }
+  else
+  {
+    m_workspaceHandles.erase(wsName);
+  }
+  Py_XDECREF(codeObj);
+  delete [] code;
+
 }

@@ -183,7 +183,7 @@ void ErrDialog::setSrcTables(QList<MdiSubWindow *> tables)
 void ErrDialog::selectSrcTable(int tabnr)
 {
   colNamesBox->clear();
-  colNamesBox->addItems(((Table*)srcTables.at(tabnr))->colNames());
+  colNamesBox->addItems((dynamic_cast<Table*>(srcTables.at(tabnr)))->colNames());
 }
 
 void ErrDialog::add()

@@ -139,7 +139,6 @@ class ApplicationWindow: public QMainWindow, public Scripted
   Q_OBJECT
 public:
   ApplicationWindow(bool factorySettings = false);
-  ApplicationWindow(const QStringList& l);
   ~ApplicationWindow();
 
   enum ShowWindowsPolicy{HideAll, ActiveFolder, SubFolders};
@@ -727,6 +726,8 @@ public slots:
   void showScriptWindow(bool forceVisible = false);
   void saveScriptWindowGeometry();
   void showScriptInterpreter();
+  bool testForIPython();
+  void launchIPythonConsole();
   void showMoreWindows();
   void showMarkerPopupMenu();
   void showHelp();
@@ -1126,7 +1127,7 @@ private:
   void showCustomActionDialog();
   void showUserDirectoryDialog();
   void performCustomAction(QAction *);
-  void runPythonScript(const QString & code, bool quiet=false);
+  bool runPythonScript(const QString & code, bool quiet=false, bool redirect=true);
 
   void setPlotType(const QStringList & plotType);
 
@@ -1403,7 +1404,7 @@ private:
   QAction *actionNextWindow, *actionPrevWindow;
   QAction *actionScriptingLang,*actionClearTable, *actionGoToRow, *actionGoToColumn;
   QAction *actionSaveNote;
-  QAction *actionShowScriptWindow, *actionShowScriptInterpreter;
+  QAction *actionShowScriptWindow, *actionShowScriptInterpreter, *actionIPythonConsole;
   QAction *actionAnimate, *actionPerspective, *actionFitFrame, *actionResetRotation;
   QAction *actionDeleteRows, *actionDrawPoints;
   QAction *btnCursor, *btnSelect, *btnPicker, *btnRemovePoints, *btnMovePoints, /* *btnPeakPick,*/ *btnMultiPeakPick;

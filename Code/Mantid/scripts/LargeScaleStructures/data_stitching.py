@@ -185,18 +185,13 @@ class DataSet(object):
             raise RuntimeError, "Corrupted I(q) %s" % self._ws_name
         
         sum = 0.0
-        if is_histo:
-            for i in range(len(y)):
-                if x[i]>xmin and x[i+1]<xmax: 
-                    sum += y[i]*(x[i+1]-x[i])
-        else:
-            for i in range(len(y)-1):
-                if x[i]>=xmin and x[i+1]<=xmax:
-                    sum += (y[i]+y[i+1])*(x[i+1]-x[i])/2.0
-                elif x[i]<xmin and x[i+1]>xmin:
-                    sum += (y[i+1]+(y[i]-y[i+1])/(x[i]-x[i+1])*(x[i]-xmin)/2.0) * (x[i+1]-xmin)
-                elif x[i]<xmax and x[i+1]>xmax:
-                    sum += (y[i]+(y[i+1]-y[i])/(x[i+1]-x[i])*(xmax-x[i])/2.0) * (xmax-x[i])
+        for i in range(len(y)-1):
+            if x[i]>=xmin and x[i+1]<=xmax:
+                sum += (y[i]+y[i+1])*(x[i+1]-x[i])/2.0
+            elif x[i]<xmin and x[i+1]>xmin:
+                sum += (y[i+1]+(y[i]-y[i+1])/(x[i]-x[i+1])*(x[i]-xmin)/2.0) * (x[i+1]-xmin)
+            elif x[i]<xmax and x[i+1]>xmax:
+                sum += (y[i]+(y[i+1]-y[i])/(x[i+1]-x[i])*(xmax-x[i])/2.0) * (xmax-x[i])
         
         return sum
             
@@ -293,7 +288,7 @@ class Stitcher(object):
                 SaveCanSAS1D(Filename=file_path, InputWorkspace=iq)
             else:
                 SaveAscii(Filename=file_path, InputWorkspace=iq, 
-                          Separator="\t", CommentIndicator="# ", WriteXError=True)
+                          Separator="Tab", CommentIndicator="# ", WriteXError=True)
         
     def trim_zeros(self, x, y, e, dx):
         zipped = zip(x,y,e,dx)

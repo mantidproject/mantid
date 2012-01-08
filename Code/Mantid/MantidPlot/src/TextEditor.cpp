@@ -53,7 +53,7 @@ TextEditor::TextEditor(Graph *g): QTextEdit(g)
 	if (g->selectedText()){
 		d_target = g->selectedText();
 		setGeometry(d_target->geometry());
-		text = ((LegendWidget*)d_target)->text();
+		text = dynamic_cast<LegendWidget*>(d_target)->text();
 		d_target->hide();
 	} else if (g->titleSelected()){
 		d_target = g->plotWidget()->titleLabel();
@@ -96,16 +96,16 @@ TextEditor::TextEditor(Graph *g): QTextEdit(g)
 
 void TextEditor::closeEvent(QCloseEvent *e)
 {
-    Graph *g = (Graph *)parent();
+		Graph *g = dynamic_cast<Graph *>(parent());
 	QString s = QString();
 	if (d_target->isA("LegendWidget")){
 		s = text();
-		((LegendWidget*)d_target)->setText(s);
+		dynamic_cast<LegendWidget*>(d_target)->setText(s);
         d_target->show();
 		g->setSelectedText(NULL);
 	} else if (d_target->isA("PieLabel")){
 		s = text();
-		((PieLabel*)d_target)->setCustomText(s);
+		dynamic_cast<PieLabel*>(d_target)->setCustomText(s);
         d_target->show();
 		g->setSelectedText(NULL);
 	} else if (d_target->isA("QwtTextLabel")){

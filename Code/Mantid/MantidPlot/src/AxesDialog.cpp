@@ -2254,7 +2254,7 @@ void AxesDialog::updateGrid()
     QList<MdiSubWindow *> windows = app->windowsList();
     foreach(MdiSubWindow *w, windows){
       if (w->isA("MultiLayer")){
-        QList<Graph *> layers = ((MultiLayer*)w)->layersList();
+        QList<Graph *> layers = (dynamic_cast<MultiLayer*>(w))->layersList();
         foreach(Graph *g, layers){
           if (g->isPiePlot())
             continue;
@@ -2300,7 +2300,7 @@ void AxesDialog::applyChangesToGrid(Grid *grid)
 
 void AxesDialog::showGridOptions(int axis)
 {
-  Grid *grd = (Grid *)d_graph->plotWidget()->grid();
+  Grid *grd = dynamic_cast<Grid *>(d_graph->plotWidget()->grid());
   if (!grd)
     return;
 
@@ -2429,7 +2429,7 @@ void AxesDialog::changeBaselineDist(int baseline)
 
 bool AxesDialog::updatePlot()
 {
-  if (generalDialog->currentWidget()==(QWidget*)scalesPage)
+  if (generalDialog->currentWidget()==dynamic_cast<QWidget*>(scalesPage))
   {		
 
     int a = mapToQwtAxis(axesList->currentRow());
@@ -2437,12 +2437,12 @@ bool AxesDialog::updatePlot()
 
     double start = 0.0, end = 0.0;
     if (type == ScaleDraw::Date){
-      ScaleDraw *sclDraw = (ScaleDraw *)d_graph->plotWidget()->axisScaleDraw(a);
+      ScaleDraw *sclDraw = dynamic_cast<ScaleDraw *>(d_graph->plotWidget()->axisScaleDraw(a));
       QDateTime origin = sclDraw->dateTimeOrigin();
       start = (double)origin.secsTo(boxStartDateTime->dateTime());
       end = (double)origin.secsTo(boxEndDateTime->dateTime());
     } else if (type == ScaleDraw::Time){
-      ScaleDraw *sclDraw = (ScaleDraw *)d_graph->plotWidget()->axisScaleDraw(a);
+      ScaleDraw *sclDraw = dynamic_cast<ScaleDraw *>(d_graph->plotWidget()->axisScaleDraw(a));
       QTime origin = sclDraw->dateTimeOrigin().time();
       start = (double)origin.msecsTo(boxStartTime->time());
       end = (double)origin.msecsTo(boxEndTime->time());
@@ -2496,7 +2496,7 @@ bool AxesDialog::updatePlot()
   }
   else if (generalDialog->currentWidget() == gridPage)
     updateGrid();
-  else if (generalDialog->currentWidget() == (QWidget*)axesPage)
+  else if (generalDialog->currentWidget() == dynamic_cast<QWidget*>(axesPage))
   {
     int axis = mapToQwtAxisId();
     int format = boxAxisType->currentIndex();
@@ -2558,7 +2558,7 @@ bool AxesDialog::updatePlot()
         boxShowLabels->isChecked(), boxAxisColor->color(), boxFormat->currentIndex(),
         boxPrecision->value(), boxAngle->value(), baseline, formula, boxAxisNumColor->color());
   }
-  else if (generalDialog->currentWidget()==(QWidget*)frame){
+  else if (generalDialog->currentWidget()==dynamic_cast<QWidget*>(frame)){
     d_graph->setAxesLinewidth(boxAxesLinewidth->value());
     d_graph->changeTicksLength(boxMinorTicksLength->value(), boxMajorTicksLength->value());
     if (boxFramed->isChecked())
@@ -2612,7 +2612,7 @@ void AxesDialog::setGraph(Graph *g)
     const QwtScaleDraw *sd = p->axisScaleDraw (axis);
     tickLabelsOn << QString::number(sd->hasComponent(QwtAbstractScaleDraw::Labels));
 
-    QwtScaleWidget *scale = (QwtScaleWidget *)p->axisWidget(axis);
+    QwtScaleWidget *scale = dynamic_cast<QwtScaleWidget *>(p->axisWidget(axis));
     if (scale)
       axesBaseline << scale->margin();
     else
@@ -2676,7 +2676,7 @@ void AxesDialog::updateScale()
   double end = QMAX(scDiv->lBound(), scDiv->hBound());
   ScaleDraw::ScaleType type = d_graph->axisType(a);
   if (type == ScaleDraw::Date){
-    ScaleDraw *sclDraw = (ScaleDraw *)d_plot->axisScaleDraw(a);
+    ScaleDraw *sclDraw = dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw(a));
     QDateTime origin = sclDraw->dateTimeOrigin();
 
     boxStart->hide();
@@ -2697,7 +2697,7 @@ void AxesDialog::updateScale()
     boxStep->setValue(d_graph->axisStep(a)/86400.0);
     boxStep->setSingleStep(1);
   } else if (type == ScaleDraw::Time){
-    ScaleDraw *sclDraw = (ScaleDraw *)d_plot->axisScaleDraw(a);
+    ScaleDraw *sclDraw = dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw(a));
     QTime origin = sclDraw->dateTimeOrigin().time();
 
     boxStart->hide();
@@ -2959,21 +2959,21 @@ void AxesDialog::setCurrentScale(int axisPos)
     axis = 2;
     break;
   }
-  if (generalDialog->currentPage()==(QWidget*)scalesPage)
+  if (generalDialog->currentPage()==dynamic_cast<QWidget*>(scalesPage))
     axesList->setCurrentRow(axis);
-  else if (generalDialog->currentPage()==(QWidget*)axesPage)
+  else if (generalDialog->currentPage()==dynamic_cast<QWidget*>(axesPage))
     axesTitlesList->setCurrentRow(axis);
 }
 
 void AxesDialog::showAxesPage()
 {
-  if (generalDialog->currentWidget()!=(QWidget*)axesPage)
+  if (generalDialog->currentWidget()!=dynamic_cast<QWidget*>(axesPage))
     generalDialog->setCurrentWidget(axesPage);
 }
 
 void AxesDialog::showGridPage()
 {
-  if (generalDialog->currentWidget()!=(QWidget*)gridPage)
+  if (generalDialog->currentWidget()!=dynamic_cast<QWidget*>(gridPage))
     generalDialog->setCurrentWidget(gridPage);
 }
 

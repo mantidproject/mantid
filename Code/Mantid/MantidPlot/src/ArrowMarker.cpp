@@ -42,6 +42,7 @@
 #endif
 
 ArrowMarker::ArrowMarker():
+    d_start_arrow(false),
 		d_end_arrow(true),
 		d_fill_head(true),
 		d_head_angle(45),

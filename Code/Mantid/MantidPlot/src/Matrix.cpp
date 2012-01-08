@@ -370,7 +370,7 @@ double Matrix::determinant()
   int cols = numCols();
 
   if (rows != cols){
-    QMessageBox::critical((ApplicationWindow *)applicationWindow(), tr("MantidPlot - Error"),
+    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(applicationWindow()), tr("MantidPlot - Error"),
         tr("Calculation failed, the matrix is not square!"));
     return GSL_POSINF;
   }
@@ -381,7 +381,7 @@ double Matrix::determinant()
   gsl_permutation * p = gsl_permutation_alloc(rows);
   if (!A || !p){
     QApplication::restoreOverrideCursor();
-    QMessageBox::critical((ApplicationWindow *)applicationWindow(),
+    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(applicationWindow()),
         tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
         tr("Not enough memory, operation aborted!"));
     return 0.0;
@@ -409,7 +409,7 @@ double Matrix::determinant()
 void Matrix::invert()
 {
   if (numRows() != numCols()){
-    QMessageBox::critical((ApplicationWindow *)applicationWindow(), tr("MantidPlot - Error"),
+    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(applicationWindow()), tr("MantidPlot - Error"),
         tr("Inversion failed, the matrix is not square!"));
     return;
   }
@@ -823,7 +823,7 @@ void Matrix::insertColumn()
 void Matrix::customEvent(QEvent *e)
 {
   if (e->type() == SCRIPTING_CHANGE_EVENT)
-    scriptingChangeEvent((ScriptingChangeEvent*)e);
+    scriptingChangeEvent(dynamic_cast<ScriptingChangeEvent*>(e));
 }
 
 void Matrix::exportRasterImage(const QString& fileName, int quality)
@@ -1480,7 +1480,7 @@ void Matrix::importASCII(const QString &fname, const QString &sep, int ignoredLi
 bool Matrix::ignoreUndo()
 {
   QString msg = tr("Due to memory limitations it will not be possible to undo this change. Do you want to continue anyways?");
-  return (QMessageBox::Yes == QMessageBox::warning((ApplicationWindow *)applicationWindow(),
+  return (QMessageBox::Yes == QMessageBox::warning(dynamic_cast<ApplicationWindow *>(applicationWindow()),
       tr("MantidPlot") + " - " + tr("Warning"), msg, QMessageBox::Yes, QMessageBox::Cancel));
 }
 
@@ -1490,7 +1490,7 @@ double* Matrix::initWorkspace(int size)
     d_workspace = (double *)malloc(size * sizeof (double));
 
   if (!d_workspace)
-    QMessageBox::critical((ApplicationWindow *)applicationWindow(), tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
+    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(applicationWindow()), tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
         tr("Not enough memory, operation aborted!"));
 
   return d_workspace;

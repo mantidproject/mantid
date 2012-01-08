@@ -1136,13 +1136,17 @@ class MantidPyFramework(FrameworkManager):
     
     #### methods ###########################################################
 
-    def initialise(self):
+    def initialise(self, gui=None):
         """
         Initialise the framework
         """
         if self.__is_initialized == True:
             return
-        self.__gui__ = HAVE_GUI
+
+        if gui is None:
+            self.__gui__ = HAVE_GUI
+        else:
+            self.__gui__ = gui
 
         # Run through init steps 
         self._importSimpleAPIToMain()

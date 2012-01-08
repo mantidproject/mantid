@@ -292,13 +292,13 @@ void LineDialog::setCoordinates(int unit)
 
 void LineDialog::apply()
 {
-    if (tw->currentPage()==(QWidget *)options){
+    if (tw->currentPage()==dynamic_cast<QWidget *>(options)){
         lm->setStyle(Graph::getPenStyle(styleBox->currentItem()));
         lm->setColor(colorBox->color());
         lm->setWidth(widthBox->value());
         lm->drawEndArrow(endBox->isChecked());
         lm->drawStartArrow(startBox->isChecked());
-	} else if (tw->currentPage()==(QWidget *)head){
+  } else if (tw->currentPage()==dynamic_cast<QWidget *>(head)){
         if (lm->headLength() != boxHeadLength->value())
             lm->setHeadLength( boxHeadLength->value() );
 
@@ -307,11 +307,11 @@ void LineDialog::apply()
 
         if (lm->filledArrowHead() != filledBox->isChecked())
             lm->fillArrowHead( filledBox->isChecked() );
-	} else if (tw->currentPage()==(QWidget *)geometry)
+  } else if (tw->currentPage()==dynamic_cast<QWidget *>(geometry))
         setCoordinates(unitBox->currentItem());
 
 	QwtPlot *plot = lm->plot();
-	Graph *g = (Graph *)plot->parent();
+  Graph *g = dynamic_cast<Graph *>(plot->parent());
 	plot->replot();
 	g->notifyChanges();
 

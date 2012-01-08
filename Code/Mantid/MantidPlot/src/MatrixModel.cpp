@@ -46,7 +46,7 @@
 
 MatrixModel::MatrixModel(QObject *parent)
      : QAbstractTableModel(parent),
-	 d_matrix((Matrix*)parent)
+   d_matrix(dynamic_cast<Matrix*>(parent))
 {
 	init();
 	
@@ -63,7 +63,7 @@ MatrixModel::MatrixModel(QObject *parent)
 
 MatrixModel::MatrixModel(int rows, int cols, QObject *parent)
      : QAbstractTableModel(parent),
-	 d_matrix((Matrix*)parent)
+   d_matrix(dynamic_cast<Matrix*>(parent))
 {
 	init();
 	
@@ -85,7 +85,7 @@ MatrixModel::MatrixModel(int rows, int cols, QObject *parent)
 
 MatrixModel::MatrixModel(const QImage& image, QObject *parent)
      : QAbstractTableModel(parent),
-	 d_matrix((Matrix*)parent)
+   d_matrix(dynamic_cast<Matrix*>(parent))
 {
 	init();
     setImage(image);
@@ -377,21 +377,21 @@ bool MatrixModel::canResize(int rows, int cols)
 
 bool MatrixModel::removeColumns(int column, int count, const QModelIndex & parent)
 {
-	beginRemoveColumns(parent, column, column + count - 1);
+  beginRemoveColumns(parent, column, column + count - 1);
 
-    d_cols -= count;
-	d_data_block_size = QSize(d_rows, d_cols);
+  d_cols -= count;
+  d_data_block_size = QSize(d_rows, d_cols);
 
-    int size = d_rows*d_cols;
-    for (int i = column; i < size; i++){
-	    int aux = (i - column)/d_cols + 1;
-        d_data[i] = d_data[i + aux*count];
-	}
+  int size = d_rows*d_cols;
+  for (int i = column; i < size; i++){
+    int aux = (i - column)/d_cols + 1;
+    d_data[i] = d_data[i + aux*count];
+  }
 
-    d_data = (double *)realloc (d_data, size*sizeof(double));
+  d_data = (double *)realloc (d_data, size*sizeof(double));
 
-	endRemoveColumns();
-	return true;
+  endRemoveColumns();
+  return true;
 }
 
 bool MatrixModel::insertColumns(int column, int count, const QModelIndex & parent)

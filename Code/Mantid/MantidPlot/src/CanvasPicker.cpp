@@ -70,10 +70,10 @@ bool CanvasPicker::eventFilter(QObject *object, QEvent *e)
 				emit selectPlot();
 
 				const QMouseEvent *me = (const QMouseEvent *)e;
-				bool allAxisDisabled = true;
+        //bool allAxisDisabled = true;
 				for (int i=0; i < QwtPlot::axisCnt; i++){
 					if (plotWidget->axisEnabled(i)){
-						allAxisDisabled = false;
+            //allAxisDisabled = false;
 						break;
 					}
 				}
@@ -279,7 +279,7 @@ bool CanvasPicker::selectMarker(const QMouseEvent *e)
 {
 	const QPoint point = e->pos();
 	foreach(int i, plot()->imageMarkerKeys()) {
-		ImageMarker* m=(ImageMarker*)plotWidget->marker(i);
+    ImageMarker* m=dynamic_cast<ImageMarker*>(plotWidget->marker(i));
 		if (!m) return false;
 		if (m->rect().contains(point)) {
 			disableEditing();
@@ -288,7 +288,7 @@ bool CanvasPicker::selectMarker(const QMouseEvent *e)
 		}
 	}
 	foreach(int i, plot()->lineMarkerKeys()) {
-		ArrowMarker* mrkL=(ArrowMarker*) plotWidget->marker(i);
+    ArrowMarker* mrkL=dynamic_cast<ArrowMarker*>(plotWidget->marker(i));
 		if (!mrkL)
 			return false;
 		int d = qRound(mrkL->width() + floor(mrkL->headLength()*tan(M_PI*mrkL->headAngle()/180.0)+0.5));

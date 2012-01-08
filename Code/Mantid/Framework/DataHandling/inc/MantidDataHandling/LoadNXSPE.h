@@ -64,6 +64,8 @@ namespace DataHandling
     void init();
     /// Run the algorithm
     void exec();
+    /// Function to return a cuboid shape, with widths dx,dy,dz
+    Geometry::Object_sptr createCuboid(double dx,double dy, double dz);
 
 
   };

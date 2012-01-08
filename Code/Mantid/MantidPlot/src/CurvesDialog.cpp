@@ -192,7 +192,7 @@ void CurvesDialog::showCurveBtn(int)
     return;
   }
 
-  PlotCurve *c = (PlotCurve *)it;
+  PlotCurve *c = dynamic_cast<PlotCurve *>(it);
   if (c->type() == Graph::Function)
   {
     btnEditFunction->setEnabled(true);
@@ -531,8 +531,8 @@ void CurvesDialog::showCurveRange(bool on )
       if (!it)
         continue;
 
-      if (it->rtti() == QwtPlotItem::Rtti_PlotCurve && ((PlotCurve *)it)->type() != Graph::Function){
-        DataCurve *c = (DataCurve *)it;
+      if (it->rtti() == QwtPlotItem::Rtti_PlotCurve && (dynamic_cast<PlotCurve *>(it))->type() != Graph::Function){
+        DataCurve *c = dynamic_cast<DataCurve *>(it);
         lst << c->title().text() + "[" + QString::number(c->startRow()+1) + ":" + QString::number(c->endRow()+1) + "]";
       } else
         lst << it->title().text();
@@ -568,7 +568,7 @@ void CurvesDialog::showCurrentFolder(bool currentFolder)
         if (!w->inherits("Table"))
           continue;
 
-        Table *t = (Table *)w;
+        Table *t = dynamic_cast<Table *>(w);
         for (int i=0; i < t->numCols(); i++){
           if(t->colPlotDesignation(i) == Table::Y)
             columns << QString(t->objectName()) + "_" + t->colLabel(i);

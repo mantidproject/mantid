@@ -599,9 +599,12 @@ desktopQTIPlot = addTo(QTIPlotEXE,'Shortcut',{'Id':'desktopQTIPlot','Directory':
     
 addFileV('mantidplotrc', 'mtdrc.py', 'mantidplotrc.py', CODEDIR + '/Mantid/MantidPlot/mantidplotrc.py', MantidDlls)
 mantidplot = addCompList('mtdpltmod',CODEDIR + '/Mantid/MantidPlot/mantidplotpy','mantidplotpy',binDir)[0]
+ipython = addCompList('ipython',CODEDIR + '/Mantid/MantidPlot/ipython_plugin','ipython_plugin',binDir)[0]
 
 # Remove files that may have been created
-files_to_remove = ['qtiplotrc.pyc','qtiUtil.pyc','mantidplotrc.pyc','mantidplot.pyc','MantidFramework.pyc','MantidHeader.pyc',\
+files_to_remove = ['qtiplotrc.pyc','qtiUtil.pyc','mantidplotrc.pyc','mantidplot.pyc',\
+                   'proxies.pyc','MantidFramework.pyc','MantidHeader.pyc',\
+                   '__init__.pyc','ipython_plugin.pyc','internal_ipkernel.pyc',\
                    'mantidsimple.py', 'mantidsimple.pyc','mtdpyalgorithm_keywords.txt']
 for index, name in enumerate(files_to_remove):
     addTo(MantidDlls,'RemoveFile',{'Id':'RemFile_' + str(index),'On':'uninstall','LongName': name, 'Name':name[:8]})
@@ -755,6 +758,7 @@ addCRefs(pythonLib,MantidExec)
 addCRefs(mantidpy, MantidExec)
 addCRefs(pythonScripts,MantidExec)
 addCRefs(mantidplot,MantidExec)
+addCRefs(ipython,MantidExec)
 addCRef('Plugins',MantidExec)
 addCRef('UserAlgorithms',MantidExec)
 addCRef('Documents',MantidExec)

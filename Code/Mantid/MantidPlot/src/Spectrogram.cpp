@@ -42,16 +42,29 @@
 
 Spectrogram::Spectrogram():
 	    QwtPlotSpectrogram(),
-	    d_matrix(0),d_funct(0),//Mantid
+			d_color_map_pen(false),
+			d_matrix(0),d_funct(0),//Mantid
 	    color_axis(QwtPlot::yRight),
 	    color_map_policy(Default),
-	    color_map(QwtLinearColorMap())
+			color_map(QwtLinearColorMap()),
+			d_show_labels(true),
+			d_white_out_labels(false),
+			d_labels_angle(0.0),
+			d_selected_label(NULL),
+			d_click_pos_x(0.),
+			d_click_pos_y(0.),
+			d_labels_x_offset(0),
+			d_labels_y_offset(0),
+			d_labels_align(Qt::AlignHCenter),
+			m_nRows(0),
+			m_nColumns(0),
+			m_bIntensityChanged(false)
 {
 }
 
 Spectrogram::Spectrogram(Matrix *m):
 	    QwtPlotSpectrogram(QString(m->objectName())),
-	    d_matrix(m),d_funct(0),//Mantid
+			d_matrix(m),d_funct(0),//Mantid
 	    color_axis(QwtPlot::yRight),
 	    color_map_policy(Default),mColorMap()
 //color_map(QwtLinearColorMap()),

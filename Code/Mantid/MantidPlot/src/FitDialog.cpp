@@ -473,10 +473,10 @@ void FitDialog::applyChanges()
 	if (d_current_fit)
 		d_current_fit->setOutputPrecision(prec);
 	for (int i=0; i<boxParams->rowCount(); i++){
-		((DoubleSpinBox*)boxParams->cellWidget(i, 2))->setDecimals(prec);
+    (dynamic_cast<DoubleSpinBox*>(boxParams->cellWidget(i, 2)))->setDecimals(prec);
 		if (d_current_fit->type() != Fit::BuiltIn){
-			((RangeLimitBox*)boxParams->cellWidget(i, 1))->setDecimals(prec);
-			((RangeLimitBox*)boxParams->cellWidget(i, 3))->setDecimals(prec);
+      (dynamic_cast<RangeLimitBox*>(boxParams->cellWidget(i, 1)))->setDecimals(prec);
+      (dynamic_cast<RangeLimitBox*>(boxParams->cellWidget(i, 3)))->setDecimals(prec);
 		}
 	}
 
@@ -610,7 +610,7 @@ void FitDialog::saveUserFunction()
 	QString formula = parseFormula(editBox->text().simplified());
 	if (lst.contains(name)){
 		int index = lst.findIndex(name);
-		d_current_fit = (NonLinearFit *)d_user_functions[index];
+    d_current_fit = dynamic_cast<NonLinearFit *>(d_user_functions[index]);
 		d_current_fit->setParametersList(boxParam->text().split(QRegExp("[,;]+[\\s]*"), QString::SkipEmptyParts));
         d_current_fit->setFormula(formula);
         d_current_fit->save(d_current_fit->fileName());
@@ -1037,7 +1037,7 @@ void FitDialog::accept()
 	int n = 0, rows = boxParams->rowCount();
 	if (!boxParams->isColumnHidden(4)){
 		for (int i=0; i<rows; i++){//count the non-constant parameters
-            QCheckBox *cb = (QCheckBox*)boxParams->cellWidget(i, 4);
+            QCheckBox *cb = dynamic_cast<QCheckBox*>(boxParams->cellWidget(i, 4));
 			if (!cb->isChecked())
 				n++;
 		}
@@ -1053,32 +1053,32 @@ void FitDialog::accept()
 		if (!boxParams->isColumnHidden(4)){
 			int j = 0;
 			for (int i=0; i<rows; i++){
-                QCheckBox *cb = (QCheckBox*)boxParams->cellWidget(i, 4);
+                QCheckBox *cb = dynamic_cast<QCheckBox*>(boxParams->cellWidget(i, 4));
 				if (!cb->isChecked()){
-					paramsInit[j] = ((DoubleSpinBox*)boxParams->cellWidget(i, 2))->value();
+          paramsInit[j] = (dynamic_cast<DoubleSpinBox*>(boxParams->cellWidget(i, 2)))->value();
 					parser.DefineVar(boxParams->item(i, 0)->text().ascii(), &paramsInit[j]);
 					parameters << boxParams->item(i, 0)->text();
 
 					if (d_current_fit->type() != Fit::BuiltIn){
-						double left = ((RangeLimitBox*)boxParams->cellWidget(j, 1))->value();
-						double right = ((RangeLimitBox*)boxParams->cellWidget(j, 3))->value();
+            double left = (dynamic_cast<RangeLimitBox*>(boxParams->cellWidget(j, 1)))->value();
+            double right = (dynamic_cast<RangeLimitBox*>(boxParams->cellWidget(j, 3)))->value();
 						d_current_fit->setParameterRange(j, left, right);
 					}
 					j++;
 				} else {
-					double val = ((DoubleSpinBox*)boxParams->cellWidget(i, 2))->value();
+          double val = (dynamic_cast<DoubleSpinBox*>(boxParams->cellWidget(i, 2)))->value();
 					formula.replace(boxParams->item(i, 0)->text(), QString::number(val, 'e', app->fit_output_precision));
 				}
 			}
 		} else {
 			for (int i=0; i<n; i++) {
-				paramsInit[i] = ((DoubleSpinBox*)boxParams->cellWidget(i, 2))->value();
+        paramsInit[i] = (dynamic_cast<DoubleSpinBox*>(boxParams->cellWidget(i, 2)))->value();
 				parser.DefineVar(boxParams->item(i, 0)->text().ascii(), &paramsInit[i]);
 				parameters << boxParams->item(i, 0)->text();
 
 				if (d_current_fit->type() != Fit::BuiltIn){
-					double left = ((RangeLimitBox*)boxParams->cellWidget(i, 1))->value();
-					double right = ((RangeLimitBox*)boxParams->cellWidget(i, 3))->value();
+          double left = (dynamic_cast<RangeLimitBox*>(boxParams->cellWidget(i, 1)))->value();
+          double right = (dynamic_cast<RangeLimitBox*>(boxParams->cellWidget(i, 3)))->value();
 					d_current_fit->setParameterRange(i, left, right);
 				}
 			}
@@ -1124,13 +1124,13 @@ void FitDialog::accept()
 		if (!boxParams->isColumnHidden(4)){
 			int j = 0;
 			for (int i=0; i<rows; i++){
-                QCheckBox *cb = (QCheckBox*)boxParams->cellWidget(i, 4);
+                QCheckBox *cb = dynamic_cast<QCheckBox*>(boxParams->cellWidget(i, 4));
 				if (!cb->isChecked())
-					((DoubleSpinBox*)boxParams->cellWidget(i, 2))->setValue(res[j++]);
+          (dynamic_cast<DoubleSpinBox*>(boxParams->cellWidget(i, 2)))->setValue(res[j++]);
 			}
 		} else {
 			for (int i=0; i<rows; i++)
-				((DoubleSpinBox*)boxParams->cellWidget(i, 2))->setValue(res[i]);
+        (dynamic_cast<DoubleSpinBox*>(boxParams->cellWidget(i, 2)))->setValue(res[i]);
 		}
 
 		if (globalParamTableBox->isChecked() && d_param_table)
@@ -1188,7 +1188,7 @@ void FitDialog::selectSrcTable(int tabnr)
 	colNamesBox->clear();
 
 	if (tabnr >= 0 && tabnr < srcTables.count()){
-		Table *t = (Table*)srcTables.at(tabnr);
+    Table *t = dynamic_cast<Table*>(srcTables.at(tabnr));
 		if (t)
 			colNamesBox->addItems(t->colNames());
 	}
@@ -1274,9 +1274,9 @@ void FitDialog::setNumPeaks(int peaks)
 {
 	if (d_current_fit->objectName() == tr("Gauss") ||
 		d_current_fit->objectName() == tr("Lorentz"))
-		((MultiPeakFit *)d_current_fit)->setNumPeaks(peaks);
+    (dynamic_cast<MultiPeakFit *>(d_current_fit))->setNumPeaks(peaks);
 	else if (d_current_fit->objectName() == tr("Polynomial"))
-		((PolynomialFit *)d_current_fit)->setOrder(peaks);
+    (dynamic_cast<PolynomialFit *>(d_current_fit))->setOrder(peaks);
 
 	int index = funcBox->currentRow();
 	d_built_in_functions[index] = d_current_fit;
@@ -1350,7 +1350,7 @@ void FitDialog::saveInitialGuesses()
 
 	int rows = boxParams->rowCount();
     for (int i=0; i<rows; i++)
-        d_current_fit->setInitialGuess(i, ((DoubleSpinBox*)boxParams->cellWidget(i, 2))->value());
+        d_current_fit->setInitialGuess(i, (dynamic_cast<DoubleSpinBox*>(boxParams->cellWidget(i, 2)))->value());
 
     QString fileName = d_current_fit->fileName();
     if (!fileName.isEmpty())
@@ -1405,7 +1405,7 @@ void FitDialog::updatePreview()
     int p = boxParams->rowCount();
     QVarLengthArray<double> parameters(p);//double parameters[p];
     for (int i=0; i<p; i++)
-        parameters[i] = ((DoubleSpinBox*)boxParams->cellWidget(i, 2))->value();
+        parameters[i] = (dynamic_cast<DoubleSpinBox*>(boxParams->cellWidget(i, 2)))->value();
     if (d_current_fit->type() == Fit::BuiltIn)
         modifyGuesses(parameters.data());//modifyGuesses(parameters);
 

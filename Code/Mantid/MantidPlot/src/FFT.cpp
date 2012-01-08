@@ -78,7 +78,7 @@ QString FFT::fftCurve()
 	double *result = new double[2*d_n];
 
 	if(!amp || !result){
-		QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot") + " - " + tr("Error"),
+    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
                         tr("Could not allocate memory, operation aborted!"));
         d_init_err = true;
         return "";

@@ -316,19 +316,19 @@ void DataPickerTool::removePoint()
 {
 	if ( !d_selected_curve )
 		return;
-	if (((PlotCurve *)d_selected_curve)->type() == Graph::Function){
+  if ((dynamic_cast<PlotCurve *>(d_selected_curve))->type() == Graph::Function){
 		QMessageBox::critical(d_graph, tr("MantidPlot - Remove point error"),
 				tr("Sorry, but removing points of a function is not possible."));
 		return;
 	}
 
-	Table *t = ((DataCurve *)d_selected_curve)->table();
+  Table *t = (dynamic_cast<DataCurve *>(d_selected_curve))->table();
 	if (!t)
 		return;
 
 	int col = t->colIndex(d_selected_curve->title().text());
 	if (t->columnType(col) == Table::Numeric)
-		t->clearCell(((DataCurve *)d_selected_curve)->tableRow(d_selected_point), col);
+    t->clearCell((dynamic_cast<DataCurve *>(d_selected_curve))->tableRow(d_selected_point), col);
 	else {
 		QMessageBox::warning(d_graph, tr("MantidPlot - Warning"),
 					tr("This operation cannot be performed on curves plotted from columns having a non-numerical format."));
@@ -344,18 +344,18 @@ void DataPickerTool::movePoint(const QPoint &pos)
 {
 	if ( !d_selected_curve )
 		return;
-	if ( ((PlotCurve *)d_selected_curve)->type() == Graph::Function){
+  if ( (dynamic_cast<PlotCurve *>(d_selected_curve))->type() == Graph::Function){
 		QMessageBox::critical(d_graph, tr("MantidPlot - Move point error"),
 				tr("Sorry, but moving points of a function is not possible."));
 		return;
 	}
-	Table *t = ((DataCurve *)d_selected_curve)->table();
+  Table *t = (dynamic_cast<DataCurve *>(d_selected_curve))->table();
 	if (!t)
 		return;
 	
-	if (t->isReadOnlyColumn(t->colIndex(((DataCurve *)d_selected_curve)->xColumnName()))){
+  if (t->isReadOnlyColumn(t->colIndex((dynamic_cast<DataCurve *>(d_selected_curve))->xColumnName()))){
     	QMessageBox::warning(d_app, tr("MantidPlot - Warning"),
-        tr("The column '%1' is read-only! Please choose another curve!").arg(((DataCurve *)d_selected_curve)->xColumnName()));
+        tr("The column '%1' is read-only! Please choose another curve!").arg((dynamic_cast<DataCurve *>(d_selected_curve))->xColumnName()));
 		return;
 	} else if (t->isReadOnlyColumn(t->colIndex(d_selected_curve->title().text()))){
     	QMessageBox::warning(d_app, tr("MantidPlot - Warning"),
@@ -383,8 +383,8 @@ void DataPickerTool::movePoint(const QPoint &pos)
 		d_selection_marker.attach(d_graph->plotWidget());
 
     QLocale locale = d_app->locale();
-	int row = ((DataCurve *)d_selected_curve)->tableRow(d_selected_point);
-	int xcol = t->colIndex(((DataCurve *)d_selected_curve)->xColumnName());
+  int row = (dynamic_cast<DataCurve *>(d_selected_curve))->tableRow(d_selected_point);
+  int xcol = t->colIndex((dynamic_cast<DataCurve *>(d_selected_curve))->xColumnName());
 	int ycol = t->colIndex(d_selected_curve->title().text());
 	if (t->columnType(xcol) == Table::Numeric && t->columnType(ycol) == Table::Numeric) {
 		t->setText(row, xcol, locale.toString(new_x_val));
@@ -463,17 +463,17 @@ void DataPickerTool::pasteSelection()
 	if (text.isEmpty())
 		return;
 
-    if (((PlotCurve *)d_selected_curve)->type() == Graph::Function)
+    if ((dynamic_cast<PlotCurve *>(d_selected_curve))->type() == Graph::Function)
         return;
 
-    Table *t = ((DataCurve*)d_selected_curve)->table();
+    Table *t = (dynamic_cast<DataCurve *>(d_selected_curve))->table();
     if (!t)
         return;
 
 	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
 	QTextStream ts( &text, QIODevice::ReadOnly );
-    int row = ((DataCurve*)d_selected_curve)->tableRow(d_selected_point);
+    int row = (dynamic_cast<DataCurve *>(d_selected_curve))->tableRow(d_selected_point);
     int col = t->colIndex(d_selected_curve->title().text());
 
     int prec; char f;
@@ -509,14 +509,14 @@ void DataPickerTool::selectTableRow()
     if (!d_selected_curve)
         return;
 
-    if (((PlotCurve *)d_selected_curve)->type() == Graph::Function)
+    if ((dynamic_cast<PlotCurve *>(d_selected_curve))->type() == Graph::Function)
         return;
 
-    Table *t = ((DataCurve*)d_selected_curve)->table();
+    Table *t = (dynamic_cast<DataCurve *>(d_selected_curve))->table();
     if (!t)
         return;
 
-    int row = ((DataCurve*)d_selected_curve)->tableRow(d_selected_point);
+    int row = (dynamic_cast<DataCurve *>(d_selected_curve))->tableRow(d_selected_point);
     t->goToRow(row + 1);
 }
 

@@ -31,8 +31,6 @@
 
 #include "PythonScript.h"
 #include "ScriptingEnv.h"
-#include "MantidQtAPI/WorkspaceObserver.h"
-#include <set>
 
 class QObject;
 class QString;
@@ -40,7 +38,7 @@ class QString;
 /**
  * A scripting environment for executing Python code.
  */
-class PythonScripting: public ScriptingEnv, MantidQt::API::WorkspaceObserver
+class PythonScripting: public ScriptingEnv
 {
 
   Q_OBJECT
@@ -54,7 +52,9 @@ public:
   virtual bool isRunning() const;
   /// Write text to std out
   void write(const QString &text) { emit print(text); }
+  /// 'Fake' method needed for IPython import
   void flush() {}
+  /// 'Fake' method needed for IPython import
   void set_parent(PyObject*) {}
   /// Create a new code lexer for Python
   QsciLexer * createCodeLexer() const;
@@ -108,18 +108,6 @@ private:
   void shutdown();
   /// Run execfile on a given file
   bool loadInitFile(const QString &path);
-  /// Listen to add notifications from the ADS
-  void addHandle(const std::string& wsName,const Mantid::API::Workspace_sptr ws);
-  /// Listen to add/replace notifications from the ADS
-  void afterReplaceHandle(const std::string& wsName,const Mantid::API::Workspace_sptr ws);
-  /// Listen to delete notifications
-  void deleteHandle(const std::string& wsName,const Mantid::API::Workspace_sptr ws);
-  /// Listen to ADS clear notifications
-  void clearADSHandle();
-  /// Add/update a Python reference to the given workspace
-  void addPythonReference(const std::string& wsName,const Mantid::API::Workspace_sptr ws);
-  /// Delete a Python reference to the given workspace name
-  void deletePythonReference(const std::string& wsName);
   
 private:
   /// The global dictionary
@@ -130,8 +118,6 @@ private:
   PyObject *m_sys;
   /// Refresh protection
   int refresh_allowed;
-  /// Set of current python variables that point to worksapce handles
-  std::set<std::string> m_workspaceHandles;
 };
 
 //-----------------------------------------------------------------------------

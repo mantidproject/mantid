@@ -405,8 +405,8 @@ public:
   std::vector<TYPE> valuesAsVector() const
   {
     std::vector<TYPE> out;
-    if (m_propertySeries.size() == 0)
-      return out;
+    out.reserve(m_propertySeries.size());
+
     typename timeMap::const_iterator p = m_propertySeries.begin();
     for (; p != m_propertySeries.end(); p++)
       out.push_back(p->second);
@@ -419,8 +419,8 @@ public:
   std::vector<DateAndTime> timesAsVector() const
   {
     std::vector<DateAndTime> out;
-    if (m_propertySeries.size() == 0)
-      return out;
+    out.reserve(m_propertySeries.size());
+
     typename timeMap::const_iterator p = m_propertySeries.begin();
     for (; p != m_propertySeries.end(); p++)
       out.push_back(p->first);
@@ -428,12 +428,14 @@ public:
   }
 
   //-----------------------------------------------------------------------------------------------
-  /**  Return the time series's times as a vector<double>, where
-   * the time is the number of seconds since the start.
-    */
+  /** Return the time series's times as a vector<double>, where
+   *  the time is the number of seconds since the start.
+   */
   std::vector<double> timesAsVectorSeconds() const
   {
     std::vector<double> out;
+    out.reserve(m_propertySeries.size());
+
     if (m_propertySeries.size() == 0)
       return out;
     typename timeMap::const_iterator p = m_propertySeries.begin();
@@ -490,6 +492,8 @@ public:
     typename timeMap::iterator it = m_propertySeries.begin();
     for (size_t i=0; i < times.size(); i++)
     {
+      // Bail out if fewer value than times
+      if ( i >= values.size() ) return;
       // By feeding back the iterator, inserting N objects is O(N) instead of O(N * log N)
       it = m_propertySeries.insert(it, typename timeMap::value_type(times[i], values[i]));
       m_size++;
@@ -580,7 +584,7 @@ public:
       }
       catch (...)
       {
-        //Some kind of error; for example, invalid year, can occur when converying boost time.
+        //Some kind of error; for example, invalid year, can occur when converting boost time.
         ins << "Error Error" << std::endl;
       }
       p++;
@@ -714,25 +718,12 @@ public:
     // 1. Find upper bound
     typename timeMap::const_iterator lowboundit = m_propertySeries.upper_bound(t);
 
-    // std::cout << std::endl << "Locate " << t << ":  First Hit " << lowboundit->first << ", " << lowboundit->second << std::endl;
-
     // 2. Find.  low_bound() can give entry equal or just larger than t
     if (lowboundit != m_propertySeries.begin())
       --lowboundit;
 
     // 3. return
     return lowboundit->second;
-
-    /*
-    typename timeMap::const_reverse_iterator it = m_propertySeries.rbegin();
-    for (; it != m_propertySeries.rend(); it++)
-      if (it->first <= t)
-        return it->second;
-    if (m_propertySeries.size() == 0)
-      return TYPE();
-    else
-      return m_propertySeries.begin()->second;
-      */
   }
 
   //-----------------------------------------------------------------------------------------------

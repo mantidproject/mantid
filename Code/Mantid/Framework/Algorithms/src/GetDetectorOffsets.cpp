@@ -120,20 +120,8 @@ namespace Mantid
       for (int wi=0;wi<nspec;++wi)
       {
         PARALLEL_START_INTERUPT_REGION
-        double offset = 0.0;
-        const int YLength = static_cast<int>(inputW->readY(wi).size());
-        const MantidVec& Y = inputW->readY(wi);
-        double sumY = 0.0;
-        for (int i = 0; i < YLength; i++) sumY += Y[i];
-        if (sumY < 1.e-30)
-        {
-          offset=1000.;
-        }
-        else
-        {
-          // Fit the peak
-          offset=fitSpectra(wi);
-        }
+        // Fit the peak
+        double offset=fitSpectra(wi);
         double mask=1.0;
         if (std::abs(offset) > maxOffset)
         { 

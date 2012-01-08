@@ -302,7 +302,7 @@ void ImportASCIIDialog::initPreview(int previewMode)
 				d_preview_stack->addWidget(d_preview_table);
 				enableTableOptions(true);
 			} else if (w->isA("Matrix")){
-				d_preview_matrix = new PreviewMatrix(app, (Matrix *)w);
+        d_preview_matrix = new PreviewMatrix(app, dynamic_cast<Matrix *>(w));
 				d_preview_stack->addWidget(d_preview_matrix);
 				enableTableOptions(false);
 			}
@@ -721,7 +721,7 @@ void PreviewTable::clear()
 
 void PreviewTable::updateDecimalSeparators(const QLocale& oldSeparators)
 {
-	QLocale locale = ((QWidget *)parent())->locale();
+  QLocale locale = (dynamic_cast<QWidget *>(parent()))->locale();
 	for (int i=0; i<numCols(); i++){
         for (int j=0; j<numRows(); j++){
             if (!text(j, i).isEmpty()){
@@ -736,11 +736,11 @@ void PreviewTable::setHeader()
 {
 	Q3Header *head = horizontalHeader();
 	for (int i=0; i<numCols(); i++){
-		QString s = col_label[i];
-		int lines = columnWidth(i)/head->fontMetrics().averageCharWidth();
+    QString s = col_label[i];
 	#ifdef Q_OS_MAC
 		head->setLabel(i, s.remove("\n"));
-	#else
+  #else
+    int lines = columnWidth(i)/head->fontMetrics().averageCharWidth();
 		head->setLabel(i, s.remove("\n") + "\n" + QString(lines, '_') + "\n" + comments[i]);
 	#endif
 	}

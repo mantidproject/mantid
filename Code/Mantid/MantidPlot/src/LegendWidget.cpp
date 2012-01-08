@@ -202,10 +202,10 @@ void LegendWidget::drawVector(PlotCurve *c, QPainter *p, int x, int y, int l)
 	if (!c)
 		return;
 
-	VectorCurve *v = (VectorCurve*)c;
+  VectorCurve *v = dynamic_cast<VectorCurve*>(c);
 	p->save();
 
-	if (((Graph *)d_plot->parent())->antialiasing())
+  if ((dynamic_cast<Graph *>(d_plot->parent()))->antialiasing())
 		p->setRenderHints(QPainter::Antialiasing);
 
 	QPen pen(v->color(), v->width(), Qt::SolidLine);
@@ -241,7 +241,7 @@ void LegendWidget::drawSymbol(PlotCurve *c, int point, QPainter *p, int x, int y
     }
 
 	if (c->type() == Graph::Pie){
-		QwtPieCurve *pie = (QwtPieCurve *)c;
+    QwtPieCurve *pie = dynamic_cast<QwtPieCurve *>(c);
 		const QBrush br = QBrush(pie->color(point), pie->pattern());
 		QPen pen = pie->pen();
 		p->save();
@@ -280,7 +280,7 @@ void LegendWidget::drawText(QPainter *p, const QRect& rect,
 		QwtArray<int> height, int symbolLineLength)
 {
   p->save();
-  if (((Graph *)d_plot->parent())->antialiasing())
+  if ((dynamic_cast<Graph *>(d_plot->parent()))->antialiasing())
     p->setRenderHints(QPainter::Antialiasing);
 
   // RJT (22/09/09): For remainder of method, copied in code from current 
@@ -345,7 +345,7 @@ void LegendWidget::drawText(QPainter *p, const QRect& rect,
           continue;
           }
           int point = s.mid(pos1 + 1, pos2 - pos1 - 1).toInt() - 1;
-          drawSymbol((PlotCurve*)d_plot->curve(0), point, p, w, height[i], l);
+          drawSymbol(dynamic_cast<PlotCurve*>(d_plot->curve(0)), point, p, w, height[i], l);
           w += l;
           s = s.right(s.length() - pos2 - 1);
         } else {
@@ -368,7 +368,7 @@ void LegendWidget::drawText(QPainter *p, const QRect& rect,
               continue;
             }
             int point = s.mid(pos1 + 1, pos3 - pos1 - 1).toInt() - 1;
-            drawSymbol((PlotCurve*)d_plot->curve(0), point, p, w, height[i], l);
+            drawSymbol(dynamic_cast<PlotCurve*>(d_plot->curve(0)), point, p, w, height[i], l);
             w += l;
             s = s.right(s.length() - pos3 - 1);
           }
@@ -408,12 +408,12 @@ QwtArray<int> LegendWidget::itemsHeight(int y, int symbolLineLength, int &width,
   for (int i=0; i<n; i++){
     QString s = titles[i];
     int textL = 0;
-    bool curveSymbol = false;
+    //bool curveSymbol = false;
     while (s.contains("\\l(",Qt::CaseInsensitive) || s.contains("\\p{",Qt::CaseInsensitive)){
       int pos = s.indexOf("\\l(", 0,Qt::CaseInsensitive);
       int pos2 = s.indexOf(",",pos); // two arguments in case if pie chart
       int pos3 = s.indexOf(")",pos);
-      curveSymbol = true;
+      //curveSymbol = true;
       if (pos >= 0 && (pos2==-1 || pos2>pos3)){
         QwtText aux(parse(s.left(pos))); //not a pie chart
         aux.setFont(d_text->font());
@@ -561,14 +561,14 @@ QString LegendWidget::parse(const QString& str)
 		QStringList lst = spec.split(",");
 		if (!lst.isEmpty()){
         	int cv = lst[0].toInt() - 1;
-			Graph *g = (Graph *)d_plot->parent();
+      Graph *g = dynamic_cast<Graph *>(d_plot->parent());
         	if (g && cv >= 0 && cv < g->curves()){
-				PlotCurve *c = (PlotCurve *)g->curve(cv);
+        PlotCurve *c = dynamic_cast<PlotCurve *>(g->curve(cv));
             	if (c){
 					if (lst.count() == 1)
 						s = s.replace(pos, pos2-pos+1, c->title().text());
 					else if (lst.count() == 3 && c->type() == Graph::Pie){
-						Table *t = ((DataCurve *)c)->table();
+            Table *t = (dynamic_cast<DataCurve *>(c))->table();
 						int col = t->colIndex(c->title().text());
 						int row = lst[2].toInt() - 1;
 						s = s.replace(pos, pos2-pos+1, t->text(row, col));
@@ -585,7 +585,7 @@ PlotCurve* LegendWidget::getCurve(const QString& s, int &point)
 {
 	point = -1;
 	PlotCurve *curve = 0;
-	Graph *g = (Graph *)d_plot->parent();
+  Graph *g = dynamic_cast<Graph *>(d_plot->parent());
 
 	QStringList l = s.split(",");
     if (l.count() == 2)
@@ -597,11 +597,11 @@ PlotCurve* LegendWidget::getCurve(const QString& s, int &point)
     		int cv = l[1].toInt() - 1;
 			Graph *layer = g->multiLayer()->layer(l[0].toInt());
 			if (layer && cv >= 0 && cv < layer->curves())
-				return (PlotCurve*)layer->curve(cv);
+        return dynamic_cast<PlotCurve*>(layer->curve(cv));
 		} else if (l.count() == 1){
 			int cv = l[0].toInt() - 1;
 			if (cv >= 0 || cv < g->curves())
-				return (PlotCurve*)g->curve(cv);
+        return dynamic_cast<PlotCurve*>(g->curve(cv));
 		}
 	}
 	return curve;
@@ -614,12 +614,12 @@ void LegendWidget::mousePressEvent (QMouseEvent *)
 		d_selector = NULL;
 	}
 
-	((Graph *)d_plot->parent())->activateGraph();
-	((Graph *)d_plot->parent())->deselectMarker();
+  (dynamic_cast<Graph *>(d_plot->parent()))->activateGraph();
+  (dynamic_cast<Graph *>(d_plot->parent()))->deselectMarker();
 
     d_selector = new SelectionMoveResizer(this);
-	connect(d_selector, SIGNAL(targetsChanged()), (Graph*)d_plot->parent(), SIGNAL(modifiedGraph()));
-	((Graph *)d_plot->parent())->setSelectedText(this);
+  connect(d_selector, SIGNAL(targetsChanged()), dynamic_cast<Graph*>(d_plot->parent()), SIGNAL(modifiedGraph()));
+  (dynamic_cast<Graph *>(d_plot->parent()))->setSelectedText(this);
 }
 
 void LegendWidget::setSelected(bool on)
@@ -629,13 +629,13 @@ void LegendWidget::setSelected(bool on)
 			return;
 		else {
 			d_selector = new SelectionMoveResizer(this);
-			connect(d_selector, SIGNAL(targetsChanged()), (Graph*)d_plot->parent(), SIGNAL(modifiedGraph()));
-			((Graph *)d_plot->parent())->setSelectedText(this);
+      connect(d_selector, SIGNAL(targetsChanged()), dynamic_cast<Graph*>(d_plot->parent()), SIGNAL(modifiedGraph()));
+      (dynamic_cast<Graph *>(d_plot->parent()))->setSelectedText(this);
 		}
 	} else if (d_selector){
 		d_selector->close();
 		d_selector = NULL;
-		((Graph *)d_plot->parent())->setSelectedText(NULL);
+    (dynamic_cast<Graph *>(d_plot->parent()))->setSelectedText(NULL);
 	}
 }
 
@@ -648,7 +648,7 @@ void LegendWidget::showTextEditor()
   //  d_selector = NULL;
   //}
 
-    ApplicationWindow *app = ((Graph *)d_plot->parent())->multiLayer()->applicationWindow();
+    ApplicationWindow *app = (dynamic_cast<Graph *>(d_plot->parent()))->multiLayer()->applicationWindow();
     if (!app)
         return;
 

@@ -31,6 +31,7 @@
 
 #include "PythonSystemHeader.h"
 #include "Script.h"
+#include "MantidQtAPI/WorkspaceObserver.h"
 
 class QObject;
 class QString;
@@ -40,13 +41,13 @@ class PythonScripting;
 /**
  * This class holds, compiles and executes the Python code. 
  */
-class PythonScript : public Script
+class PythonScript : public Script, MantidQt::API::WorkspaceObserver
 {
   Q_OBJECT
   public:
   /// Constructor
   PythonScript(PythonScripting *env, const QString &code, QObject *context = 0, 
-         const QString &name="<input>", bool interactive = true, bool reportProgress = false);
+         const QString &name="<input>", bool interactive = false, bool reportProgress = false);
   ///Destructor
   ~PythonScript();
   /// A function to connect to the ouput stream of the running Python code
@@ -54,7 +55,7 @@ class PythonScript : public Script
   { 
     emit print(text); 
   }
-  
+  /// 'Fake' method needed for IPython import
   void flush() {}
 
   /// Emit a new line signal
@@ -83,6 +84,19 @@ public slots:
   void setContext(QObject *context);
 
 private:
+  /// Listen to add notifications from the ADS
+  void addHandle(const std::string& wsName, const Mantid::API::Workspace_sptr ws);
+  /// Listen to add/replace notifications from the ADS
+  void afterReplaceHandle(const std::string& wsName,const Mantid::API::Workspace_sptr ws);
+  /// Listen to delete notifications
+  void postDeleteHandle(const std::string& wsName);
+  /// Listen to ADS clear notifications
+  void clearADSHandle();
+  /// Add/update a Python reference to the given workspace
+  void addPythonReference(const std::string& wsName,const Mantid::API::Workspace_sptr ws);
+  /// Delete a Python reference to the given workspace name
+  void deletePythonReference(const std::string& wsName);
+
   // Append or remove a path from the Python sys.path
   void updatePath(const QString & filename, bool append = true);
   /// Perform a call to the Python eval function with the necessary wrapping
@@ -99,6 +113,8 @@ private:
   bool isFunction;
   QString fileName;
   bool m_isInitialized;
+  /// Set of current python variables that point to worksapce handles
+  std::set<std::string> m_workspaceHandles;
 };
 
 #endif

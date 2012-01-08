@@ -290,6 +290,8 @@ void MantidDockWidget::createWorkspaceMenuActions()
   connect(m_showBoxData,SIGNAL(activated()),m_mantidUI,SLOT(importBoxDataTable()));
 
   m_showVatesGui = new QAction(tr("Show Vates Simple Interface"), this);
+  { QIcon icon; icon.addFile(QString::fromUtf8(":/VatesSimpleGuiViewWidgets/icons/pvIcon.png"), QSize(), QIcon::Normal, QIcon::Off);
+  m_showVatesGui->setIcon(icon); }
   connect(m_showVatesGui, SIGNAL(activated()), m_mantidUI, SLOT(showVatesSimpleInterface()));
 
   m_showMDPlot = new QAction(tr("Plot MD"), this);
@@ -299,8 +301,8 @@ void MantidDockWidget::createWorkspaceMenuActions()
   connect(m_showListData, SIGNAL(activated()), m_mantidUI, SLOT(showListData())); 
 
   m_showSliceViewer = new QAction(tr("Show Slice Viewer"), this);
-  QIcon icon; icon.addFile(QString::fromUtf8(":/SliceViewer/icons/SliceViewerWindow_icon.png"), QSize(), QIcon::Normal, QIcon::Off);
-  m_showSliceViewer->setIcon(icon);
+  { QIcon icon; icon.addFile(QString::fromUtf8(":/SliceViewer/icons/SliceViewerWindow_icon.png"), QSize(), QIcon::Normal, QIcon::Off);
+  m_showSliceViewer->setIcon(icon); }
   connect(m_showSliceViewer, SIGNAL(activated()), m_mantidUI, SLOT(showSliceViewer()));
 
   m_showLogs = new QAction(tr("Sample Logs..."), this);

@@ -1170,7 +1170,7 @@ class SaveIqAscii(ReductionStep):
                         log_text += "Could not read %s\n" % self._process
                         
                     filename = os.path.join(output_dir, output_ws+'.txt')
-                    SaveAscii(Filename=filename, InputWorkspace=output_ws, Separator="\t", CommentIndicator="# ", WriteXError=True)
+                    SaveAscii(Filename=filename, InputWorkspace=output_ws, Separator="Tab", CommentIndicator="# ", WriteXError=True)
                     filename = os.path.join(output_dir, output_ws+'.xml')
                     SaveCanSAS1D(Filename=filename, InputWorkspace=output_ws, Process=proc_xml)
                     

@@ -141,7 +141,7 @@ void LineProfileTool::calculateLineProfile(const QPoint& start, const QPoint& en
 
 	Table *t = d_app->newTable(tr("Table") + "1", n, 4, text);
 	MultiLayer* plot = d_app->multilayerPlot(t, QStringList(QString(t->objectName())+"_intensity"), 0);
-	Graph *g = (Graph*)plot->activeGraph();
+  Graph *g = dynamic_cast<Graph*>(plot->activeGraph());
 	if (g){
 		g->setTitle("");
 		g->setXAxisTitle(tr("pixels"));

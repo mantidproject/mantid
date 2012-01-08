@@ -55,7 +55,15 @@ UserParametricSurface::UserParametricSurface(const QString& xFormula, const QStr
 : ParametricSurface(pw),
 d_x_formula(xFormula),
 d_y_formula(yFormula),
-d_z_formula(zFormula)
+d_z_formula(zFormula),
+  d_rows(0),
+  d_columns(0),
+  d_u_periodic(false),
+  d_v_periodic(false),
+  d_ul(0.0),
+  d_ur(0.0),
+  d_vl(0.0),
+  d_vr(0.0)
 {}
 
 void UserParametricSurface::setDomain(double ul, double ur, double vl, double vr)

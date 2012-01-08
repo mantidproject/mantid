@@ -479,7 +479,7 @@ void CustomActionDialog::chooseFile()
 
 void CustomActionDialog::chooseFolder()
 {
-    ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+    ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parentWidget());
 
     QString dir = QFileDialog::getExistingDirectory(this, tr("Choose the custom actions folder"), app->customActionsDirPath);
     if (!dir.isEmpty() && QFileInfo(dir).isReadable()){
@@ -524,13 +524,13 @@ void CustomActionDialog::setCurrentAction(int row)
 		return;
 
 	if (w->isA("QToolBar")){
-    	int index = toolBarBox->findText(((QToolBar*)w)->windowTitle());
+      int index = toolBarBox->findText((dynamic_cast<QToolBar*>(w))->windowTitle());
     	if (index >= 0){
         	toolBarBox->setCurrentIndex(index);
         	toolBarBtn->setChecked(true);
     	}
 	} else {
-        int index = menuBox->findText(((QMenu*)w)->title().remove("&"));
+        int index = menuBox->findText((dynamic_cast<QMenu*>(w))->title().remove("&"));
         if (index >= 0){
             menuBox->setCurrentIndex(index);
             menuBtn->setChecked(true);

@@ -234,7 +234,7 @@ bool MdiSubWindow::eventFilter(QObject *object, QEvent *e)
 		QObjectList lst = children();
 		foreach(QObject *o, lst){
 			if (o->isA("QMenu") && d_app){
-			    d_app->customWindowTitleBarMenu(this, (QMenu *)o);
+          d_app->customWindowTitleBarMenu(this, dynamic_cast<QMenu *>(o));
 				break;
 			}
 		}
