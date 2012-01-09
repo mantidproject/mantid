@@ -107,7 +107,7 @@ MDEventWSWrapper::MDEventWSWrapper():n_dimensions(0)
 {
     wsCreator.reserve(MAX_N_DIM+1);
     mdEvSummator.reserve(MAX_N_DIM+1);
-      LOOP<MAX_N_DIM>::EXEC(this);
+    LOOP<MAX_N_DIM>::EXEC(this);
 }
 
 
