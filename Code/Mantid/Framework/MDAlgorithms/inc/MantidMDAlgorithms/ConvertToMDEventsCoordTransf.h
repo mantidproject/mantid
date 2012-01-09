@@ -107,16 +107,6 @@ private:
   
 }; // end COORD_TRANSFORMER structure:
 
-template<Q_state Q,AnalMode MODE,CnvrtUnits CONV,XCoordType Type>
-struct ICOORD_TRANSFORMER
-{
-public:
-    
-protected:
- // class which would convert units
-     UNITS_CONVERSION<CONV,Type> CONV_UNITS_FROM;
-};
-
 
 //----------------------------------------------------------------------------------------------------------------------
 // SPECIALIZATIONS:
@@ -125,7 +115,7 @@ protected:
 // NoQ,ANY_Mode -- no units conversion. This templates just copies the data into MD events and not doing any momentum transformations
 //
 template<AnalMode MODE,CnvrtUnits CONV,XCoordType Type> 
-struct COORD_TRANSFORMER<NoQ,MODE,CONV,Type>: public ICOORD_TRANSFORMER<NoQ,MODE,CONV,Type>
+struct COORD_TRANSFORMER<NoQ,MODE,CONV,Type>
 {
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)    
     {
@@ -184,7 +174,8 @@ private:
      API::NumericAxis *pYAxis;
      // pointer to MD workspace convertor
      IConvertToMDEventsMethods *pHost;
-    
+// class which would convert units
+     UNITS_CONVERSION<CONV,Type> CONV_UNITS_FROM;
 };
 //
 ////----------------------------------------------------------------------------------------------------------------------
@@ -209,7 +200,7 @@ inline double k_trans<Indir>(double Ei, double E_tr){
 //  ----->  modQ
 // modQ,Inelastic 
 template<AnalMode MODE,CnvrtUnits CONV,XCoordType Type> 
-struct COORD_TRANSFORMER<modQ,MODE,CONV,Type>: public ICOORD_TRANSFORMER<modQ,MODE,CONV,Type> 
+struct COORD_TRANSFORMER<modQ,MODE,CONV,Type>
 { 
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
     {
@@ -295,11 +286,13 @@ private:
     Kernel::V3D const *pDet;
     // Calling Mantid algorithm
     IConvertToMDEventsMethods *pHost;
+   // class which would convert units
+     UNITS_CONVERSION<CONV,Type> CONV_UNITS_FROM;
  
 };
 // modQ,Elastic 
 template<CnvrtUnits CONV,XCoordType Type> 
-struct COORD_TRANSFORMER<modQ,Elastic,CONV,Type>: public ICOORD_TRANSFORMER<modQ,Elastic,CONV,Type>
+struct COORD_TRANSFORMER<modQ,Elastic,CONV,Type>
 { 
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
     {
@@ -377,12 +370,15 @@ private:
     Kernel::V3D const * pDet;
     // Calling Mantid algorithm
     IConvertToMDEventsMethods *pHost;  
+   // class which would convert units
+     UNITS_CONVERSION<CONV,Type> CONV_UNITS_FROM;
+ 
 };
 
 
 // Direct/Indirect tramsformatiom, this template describes 3D Q analysis mode. 
 template<AnalMode MODE,CnvrtUnits CONV,XCoordType Type> 
-struct COORD_TRANSFORMER<Q3D,MODE,CONV,Type>: public ICOORD_TRANSFORMER<Q3D,MODE,CONV,Type>
+struct COORD_TRANSFORMER<Q3D,MODE,CONV,Type>
 {
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
     {
@@ -461,12 +457,14 @@ private:
     Kernel::V3D const *pDet;
     // Calling Mantid algorithm
     IConvertToMDEventsMethods *pHost;
-   
+   // class which would convert units
+     UNITS_CONVERSION<CONV,Type> CONV_UNITS_FROM;
+    
 };
 
 // Elastic
 template<CnvrtUnits CONV,XCoordType Type> 
-struct COORD_TRANSFORMER<Q3D,Elastic,CONV,Type>: public ICOORD_TRANSFORMER<Q3D,Elastic,CONV,Type>
+struct COORD_TRANSFORMER<Q3D,Elastic,CONV,Type>
 {
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
     {
@@ -532,6 +530,9 @@ private:
     Kernel::V3D const *pDet;
     // pointer to the algoritm, which calls all these transformations
     IConvertToMDEventsMethods *pHost;  
+   // class which would convert units
+     UNITS_CONVERSION<CONV,Type> CONV_UNITS_FROM;
+ 
 };
 
 
