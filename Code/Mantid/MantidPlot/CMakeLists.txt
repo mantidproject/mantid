@@ -558,6 +558,7 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/FunctionDialog.h
                         src/Graph3D.h
                         src/Graph.h
+                        src/Grid.h
                         src/ImageDialog.h
                         src/ImageExportDialog.h
                         src/ImportASCIIDialog.h

@@ -481,7 +481,7 @@ private:
   ImageMarker(const ImageMarker&);
 };
 
-class LegendWidget // : QWidget /PyName=Legend/
+class LegendWidget : QObject // : QWidget /PyName=Legend/
 {
 %TypeHeaderCode
 #include "src/LegendWidget.h"
@@ -586,7 +586,7 @@ private:
 };
 
 
-class Grid // : QwtPlotGrid
+class Grid : QObject // : QwtPlotGrid
 {
 %TypeHeaderCode
 #include "src/Grid.h"
