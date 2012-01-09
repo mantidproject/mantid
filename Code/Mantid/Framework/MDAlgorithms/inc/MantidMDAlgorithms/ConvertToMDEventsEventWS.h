@@ -215,9 +215,7 @@ class ConvertToMDEvensEventWS: public IConvertToMDEventsMethods
 
     void runConversion(API::Progress *pProg)
     {
-          // amount of work
-        const size_t numSpec  = inWS2D->getNumberHistograms();
-       // Get the box controller
+         // Get the box controller
         Mantid::API::BoxController_sptr bc = pWSWrapper->pWorkspace()->getBoxController();
         size_t lastNumBoxes = bc->getTotalNumMDBoxes();
       
@@ -254,6 +252,7 @@ class ConvertToMDEvensEventWS: public IConvertToMDEventsMethods
 
             // Count the new # of boxes.
               lastNumBoxes = pWSWrapper->pWorkspace()->getBoxController()->getTotalNumMDBoxes();
+              pProg->report(wi);
            }
    
        }
@@ -265,6 +264,7 @@ class ConvertToMDEvensEventWS: public IConvertToMDEventsMethods
     // Recount totals at the end.
     pWSWrapper->pWorkspace()->refreshCache(); 
     pWSWrapper->refreshCentroid();
+    pProg->report();
     }
     private:
      //
@@ -274,11 +274,11 @@ class ConvertToMDEvensEventWS: public IConvertToMDEventsMethods
         switch (this->pEventWS->getEventList(workspaceIndex).getEventType())
         {
         case Mantid::API::TOF:
-           return this->convertEventList<TofEvent>(workspaceIndex);
+            return this->convertEventList<Mantid::DataObjects::TofEvent>(workspaceIndex);
          case Mantid::API::WEIGHTED:
-          return  this->convertEventList<WeightedEvent>(workspaceIndex);
+          return  this->convertEventList<Mantid::DataObjects::WeightedEvent>(workspaceIndex);
         case Mantid::API::WEIGHTED_NOTIME:
-          return this->convertEventList<WeightedEventNoTime>(workspaceIndex);
+          return this->convertEventList<Mantid::DataObjects::WeightedEventNoTime>(workspaceIndex);
         default:
            throw std::runtime_error("EventList had an unexpected data type!");
         }
@@ -290,7 +290,7 @@ class ConvertToMDEvensEventWS: public IConvertToMDEventsMethods
 //       std::vector<coord_t> locCoord(this->Coord);
 //       if(!trn.calcYDepCoordinates(locCoord,workspaceIndex))return;   // s
 //
-         EventList & el = this->pEventWS->getEventList(workspaceIndex);
+         Mantid::DataObjects::EventList & el = this->pEventWS->getEventList(workspaceIndex);
          size_t numEvents     = el.getNumberEvents();    
          size_t  detNum       = this->pDetLoc->spec2detMap[workspaceIndex];
          uint32_t detID       = this->pDetLoc->det_id[detNum];
