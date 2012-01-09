@@ -28,5 +28,5 @@ ConvertToMDEventsUnitsConvTest (){
  ////  wsEv->mutableRun().addProperty("Ei",13.,"meV",true);
 
 }
-
+};
 #endif
