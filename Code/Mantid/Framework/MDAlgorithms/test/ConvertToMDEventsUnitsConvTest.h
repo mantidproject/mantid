@@ -11,6 +11,10 @@ public:
 static ConvertToMDEventsUnitsConvTest *createSuite() { return new ConvertToMDEventsUnitsConvTest(); }
 static void destroySuite(ConvertToMDEventsUnitsConvTest  * suite) { delete suite; }    
 
+void test_nothing()
+{
+    TS_ASSERT(true);
+}
 
 
 
