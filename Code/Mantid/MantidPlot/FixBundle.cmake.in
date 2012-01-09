@@ -16,6 +16,6 @@ set ( other_libs ${bundle}/Contents/MacOS/libMantidPythonAPI.so
                  ${mtdqtplugins}
 )
 
-set ( dirs "@CMAKE_LIBRARY_OUTPUT_DIRECTORY@" "@CMAKE_LIBRARY_PATH@" /Library/Frameworks /opt/intel/lib )
+set ( dirs "@CMAKE_LIBRARY_OUTPUT_DIRECTORY@" "@CMAKE_LIBRARY_OUTPUT_DIRECTORY@/mantid/kernel" "@CMAKE_LIBRARY_OUTPUT_DIRECTORY@/mantid/geometry" "@CMAKE_LIBRARY_PATH@" /Library/Frameworks /opt/intel/lib )
 
 fixup_bundle ( "${bundle}" "${other_libs}" "${dirs}" )
