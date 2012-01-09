@@ -273,11 +273,11 @@ class ConvertToMDEvensEventWS: public IConvertToMDEventsMethods
 
         switch (this->pEventWS->getEventList(workspaceIndex).getEventType())
         {
-        case TOF:
+        case Mantid::API::TOF:
            return this->convertEventList<TofEvent>(workspaceIndex);
-         case WEIGHTED:
+         case Mantid::API::WEIGHTED:
           return  this->convertEventList<WeightedEvent>(workspaceIndex);
-        case WEIGHTED_NOTIME:
+        case Mantid::API::WEIGHTED_NOTIME:
           return this->convertEventList<WeightedEventNoTime>(workspaceIndex);
         default:
            throw std::runtime_error("EventList had an unexpected data type!");
