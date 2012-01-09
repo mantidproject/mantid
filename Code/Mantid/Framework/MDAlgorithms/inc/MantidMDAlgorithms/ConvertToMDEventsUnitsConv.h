@@ -117,12 +117,9 @@ struct UNITS_CONVERSION<ConvFromTOF,Type>
            throw(std::logic_error(" can not retrieve workspace unit from the units factory"));
        }
    
-       // get detectors positions and other data needed for units conversion:
      // get detectors positions and other data needed for units conversion:
-       const std::vector<double> TwoTheta =  pHost->pPrepDetectors()->getTwoTheta();
-       pTwoTheta = &TwoTheta[0]; 
-       const std::vector<double> L2       =  pHost->pPrepDetectors()->getL2();
-       pL2       = &L2[0];
+       pTwoTheta =  &(pHost->pPrepDetectors()->getTwoTheta());      
+       pL2       =  &(pHost->pPrepDetectors()->getL2());
        L1        =  pHost->pPrepDetectors()->L1;
         // get efix
        efix      =  pHost->getEi();
@@ -132,7 +129,7 @@ struct UNITS_CONVERSION<ConvFromTOF,Type>
     inline void updateConversion(uint64_t i)
     {
         double delta;
-        pWSUnit->initialize(L1,pL2[i],pTwoTheta[i],emode,efix,delta);
+        pWSUnit->initialize(L1,(*pL2)[i],(*pTwoTheta)[i],emode,efix,delta);
     }
     inline double  getXConverted(const MantidVec& X,size_t j)const
     {   
@@ -155,8 +152,9 @@ private:
       int emode;
  
       double L1,efix;
-      double const *pTwoTheta;
-      double const *pL2;
+      std::vector<double>const *pTwoTheta;
+      std::vector<double>const *pL2;
+
 
 };
 
@@ -179,11 +177,9 @@ struct UNITS_CONVERSION<ConvByTOF,Type>
            throw(std::logic_error(" can not retrieve target workspace unit from the units factory"));
        }
 
-       // get detectors positions and other data needed for units conversion:
-       const std::vector<double> TwoTheta =  pHost->pPrepDetectors()->getTwoTheta();
-       pTwoTheta = &TwoTheta[0]; 
-       const std::vector<double> L2       =  pHost->pPrepDetectors()->getL2();
-       pL2       = &L2[0];
+     // get detectors positions and other data needed for units conversion:
+       pTwoTheta =  &(pHost->pPrepDetectors()->getTwoTheta());      
+       pL2       =  &(pHost->pPrepDetectors()->getL2());
        L1        =  pHost->pPrepDetectors()->L1;
        // get efix
        efix      =  pHost->getEi();
@@ -193,8 +189,8 @@ struct UNITS_CONVERSION<ConvByTOF,Type>
     inline void updateConversion(uint64_t i)
     {
         double delta;
-        pWSUnit->initialize(L1,pL2[i],pTwoTheta[i],emode,efix,delta);
-        pSourceWSUnit->initialize(L1,pL2[i],pTwoTheta[i],emode,efix,delta);
+        pWSUnit->initialize(L1,(*pL2)[i],(*pTwoTheta)[i],emode,efix,delta);
+        pSourceWSUnit->initialize(L1,(*pL2)[i],(*pTwoTheta)[i],emode,efix,delta);
     }
     //
     inline double  getXConverted(const MantidVec& X,size_t j)const
@@ -219,8 +215,8 @@ private:
     //  Unit * localOutputUnit = outputUnit->clone();
       int emode;
       double L1,efix;
-      double const *pTwoTheta;
-      double const *pL2;
+      std::vector<double>const *pTwoTheta;
+      std::vector<double>const *pL2;
 
 };
 

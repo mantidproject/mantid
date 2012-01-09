@@ -64,7 +64,7 @@ class ConvertToMDEvensHistoWS: public IConvertToMDEventsMethods
      // the instanciation of the class which does the transformation itself
      COORD_TRANSFORMER<Q,MODE,CONV,Histohram> trn; 
      // not yet parallel
-     virtual void conversionChunk(size_t job_ID){}
+     virtual size_t conversionChunk(size_t job_ID){return 0;}
 public:
     size_t  setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const PreprocessedDetectors &detLoc,
                           const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
@@ -115,8 +115,8 @@ public:
             const MantidVec& Signal   = inWS2D->readY(iSpctr);
             const MantidVec& Error    = inWS2D->readE(iSpctr);
 
-
-            if(!trn.calcYDepCoordinates(Coord,ic))continue;   // skip y outsize of the range;
+            // calculate the coordinates which depend on detector posision 
+            if(!trn.calcYDepCoordinates(Coord,i))continue;   // skip y outsize of the range;
 
          //=> START INTERNAL LOOP OVER THE "TIME"
             for (size_t j = 0; j < specSize; ++j)
@@ -124,7 +124,7 @@ public:
                 // drop emtpy events
                 if(Signal[j]<FLT_EPSILON)continue;
 
-                if(!trn.calcMatrixCoord(X,iSpec,j,Coord))continue; // skip ND outside the range
+                if(!trn.calcMatrixCoord(X,i,j,Coord))continue; // skip ND outside the range
                 //  ADD RESULTING EVENTS TO THE WORKSPACE
                 float ErrSq = float(Error[j]*Error[j]);
 
@@ -137,10 +137,11 @@ public:
 
                 n_added_events++;
                 if(n_added_events>=buf_size){
-                pWSWrapper->addMDData(sig_err,run_index,det_ids,allCoord,n_added_events);
- 
-                 n_added_events=0;
-                 pProg->report(i);
+                   pWSWrapper->addMDData(sig_err,run_index,det_ids,allCoord,n_added_events);
+                   pWSWrapper->pWorkspace()->splitAllIfNeeded(NULL);
+
+                  n_added_events=0;
+                  pProg->report(i);
                 }
        
             } // end spectra loop
@@ -149,12 +150,12 @@ public:
 
        if(n_added_events>0){
               pWSWrapper->addMDData(sig_err,run_index,det_ids,allCoord,n_added_events);
- 
+              pWSWrapper->pWorkspace()->splitAllIfNeeded(NULL);
               n_added_events=0;
         }
  
         pWSWrapper->pWorkspace()->refreshCache();
-        pWSWrapper->pWorkspace()->getBox()->refreshCentroid(NULL);
+        pWSWrapper->refreshCentroid();
         pProg->report();          
     }
 };

@@ -823,7 +823,7 @@ private:
     static inline void EXEC(ConvertToMDEvents *pH){             
             std::string Key = pH->SupportedWS[EventWSType]+pH->Q_modes[Q]+pH->dE_modes[MODE]+pH->ConvModes[ConvFromTOF];
             pH->alg_selector.insert(std::pair<std::string, IConvertToMDEventsMethods *>(Key,
-                (new ConvertToMDEvensEventWSAutoRebin<Q,static_cast<AnalMode>(MODE)>())));
+                (new ConvertToMDEvensEventWS<Q,static_cast<AnalMode>(MODE)>())));
 /*#ifdef _DEBUG
             std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
 #endif*/
@@ -843,7 +843,7 @@ private:
             std::string Key = pH->SupportedWS[EventWSType]+pH->Q_modes[NoQ]+pH->dE_modes[ANY_Mode]+pH->ConvModes[ConvFromTOF];
 
             pH->alg_selector.insert(std::pair<std::string,IConvertToMDEventsMethods *>(Key,
-                (new ConvertToMDEvensEventWSAutoRebin<NoQ,ANY_Mode>())));
+                (new ConvertToMDEvensEventWS<NoQ,ANY_Mode>())));
            
 //#ifdef _DEBUG
 //            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;

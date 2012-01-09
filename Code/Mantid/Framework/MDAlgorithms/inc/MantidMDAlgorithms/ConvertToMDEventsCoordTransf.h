@@ -169,7 +169,7 @@ struct COORD_TRANSFORMER<NoQ,MODE,CONV,Type>: public ICOORD_TRANSFORMER<NoQ,MODE
     inline bool ConvertAndCalcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const
     {
          double X_ev = CONV_UNITS_FROM.getXConverted(X);
-         return calcMatrixCoord(X_ev,Coord);
+         return calc1MatrixCoord(X_ev,Coord);
     }   
 
     // constructor;
@@ -275,7 +275,7 @@ struct COORD_TRANSFORMER<modQ,MODE,CONV,Type>: public ICOORD_TRANSFORMER<modQ,MO
     inline bool ConvertAndCalcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const
     {
          double X_ev = CONV_UNITS_FROM.getXConverted(X);
-         return calcMatrixCoord(X_ev,Coord);
+         return calc1MatrixCoord(X_ev,Coord);
     }   
     // constructor;
     COORD_TRANSFORMER(){}
@@ -356,7 +356,7 @@ struct COORD_TRANSFORMER<modQ,Elastic,CONV,Type>: public ICOORD_TRANSFORMER<modQ
     inline bool ConvertAndCalcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const
     {
          double X_ev = CONV_UNITS_FROM.getXConverted(X);
-         return calcMatrixCoord(X_ev,Coord);
+         return calc1MatrixCoord(X_ev,Coord);
     }   
 
     // constructor;
@@ -441,7 +441,7 @@ struct COORD_TRANSFORMER<Q3D,MODE,CONV,Type>: public ICOORD_TRANSFORMER<Q3D,MODE
     inline bool ConvertAndCalcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const
     {
          double X_ev = CONV_UNITS_FROM.getXConverted(X);
-         return calcMatrixCoord(X_ev,Coord);
+         return calc1MatrixCoord(X_ev,Coord);
     }   
   
    COORD_TRANSFORMER(){}
@@ -516,7 +516,7 @@ struct COORD_TRANSFORMER<Q3D,Elastic,CONV,Type>: public ICOORD_TRANSFORMER<Q3D,E
     inline bool ConvertAndCalcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const
     {
          double X_ev = CONV_UNITS_FROM.getXConverted(X);
-         return calcMatrixCoord(X_ev,Coord);
+         return calc1MatrixCoord(X_ev,Coord);
     }   
 
     COORD_TRANSFORMER(){}

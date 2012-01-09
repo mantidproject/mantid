@@ -51,6 +51,7 @@ MDEventWSWrapper::createEmptyMDWS(const MDWSDescription &WSD)
 void  
 MDEventWSWrapper::addMDData(std::vector<float> &sig_err,std::vector<uint16_t> &run_index,std::vector<uint32_t> &det_id,std::vector<coord_t> &Coord,size_t data_size)
 {
+    if(data_size==0)return;
   // transfer pointers to data:
    this->sig_err = &sig_err[0];
    this->run_index=&run_index[0];
@@ -90,6 +91,7 @@ class LOOP{
             LOOP< i-1 >::EXEC(pH);
             pH->wsCreator.push_back(boost::bind(std::mem_fun(&MDEventWSWrapper::createEmptyEventWS<i>),pH));
             pH->mdEvSummator.push_back(boost::bind(std::mem_fun(&MDEventWSWrapper::add_MDData<i>),pH));
+            pH->mdCalCentroid.push_back(boost::bind(std::mem_fun(&MDEventWSWrapper::calc_Centroid<i>),pH));
 
     }
 };
@@ -100,6 +102,7 @@ class LOOP<0>{
             fpVoidMethod fp = (boost::bind(std::mem_fun(&MDEventWSWrapper::throwNotInitiatedError),pH));
             pH->wsCreator.push_back(fp);
             pH->mdEvSummator.push_back(fp);
+            pH->mdCalCentroid.push_back(fp);
       }
 };
 
@@ -107,6 +110,7 @@ MDEventWSWrapper::MDEventWSWrapper():n_dimensions(0)
 {
     wsCreator.reserve(MAX_N_DIM+1);
     mdEvSummator.reserve(MAX_N_DIM+1);
+    mdCalCentroid.reserve(MAX_N_DIM+1);
     LOOP<MAX_N_DIM>::EXEC(this);
 }
 

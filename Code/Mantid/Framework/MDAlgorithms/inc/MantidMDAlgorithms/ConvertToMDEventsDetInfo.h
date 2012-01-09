@@ -47,13 +47,15 @@ struct PreprocessedDetectors{
     std::vector<double>       L2;
     std::vector<double>       TwoTheta;
     std::vector<int32_t>      det_id;   // the detector ID;
-    std::vector<size_t>       detIDMap;
+    std::vector<size_t>       detIDMap; // stores spectra index which corresponds to a valid detector index;
+    std::vector<size_t>       spec2detMap; //stores detector index which corresponds to the workspace index;
     //
     bool is_defined(void)const{return det_dir.size()>0;}
     bool is_defined(size_t new_size)const{return det_dir.size()==new_size;}
     std::vector<double>const & getL2()const{return L2;}
     std::vector<double>const & getTwoTheta()const{return TwoTheta;}
     std::vector<size_t>const  & getDetIDMap()const{return detIDMap;}
+    std::vector<size_t>const  & getSpec2DetMap()const{return spec2detMap;}
     std::vector<Kernel::V3D>const & getDetDir()const{return det_dir;}
 };
 

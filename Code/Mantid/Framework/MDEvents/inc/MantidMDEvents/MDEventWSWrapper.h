@@ -42,6 +42,7 @@ typedef  std::vector<std::string> Strings;
 class MDEventWSWrapper;
 typedef boost::function<void () > fpVoidMethod;
 
+
 class DLLExport MDEventWSWrapper
 {
 public:
@@ -60,7 +61,10 @@ public:
     void releaseWorkspace();
     /// get access to the internal workspace
     API::IMDEventWorkspace_sptr pWorkspace(){return workspace;}
-
+    //
+    void refreshCentroid(){
+        mdCalCentroid[n_dimensions]();
+    };
 private:
     /// maximal nuber of dimensions, currently supported by the class;
    static const size_t MAX_N_DIM=8;
@@ -93,6 +97,9 @@ private:
    std::vector<fpVoidMethod> wsCreator;
    /// vector holding function pointers to the code, which adds diffrent dimension number events to the workspace
    std::vector<fpVoidMethod> mdEvSummator;
+   /// vector holding function pointers to the code, which refreshes centroid
+   std::vector<fpVoidMethod> mdCalCentroid;
+
     /// helper function to create empty MDEventWorkspace with nd dimensions 
    template<size_t nd>
     void  createEmptyEventWS(void)
@@ -137,9 +144,21 @@ private:
        // This splits up all the boxes according to split thresholds and sizes.
          //Kernel::ThreadScheduler * ts = new ThreadSchedulerFIFO();
          //ThreadPool tp(NULL);
-         pWs->splitAllIfNeeded(NULL);
+         //pWs->splitAllIfNeeded(NULL);
         //tp.joinAll();        
  
+    }
+  /// helper function to create empty MDEventWorkspace with nd dimensions 
+    template<size_t nd>
+    void  calc_Centroid(void)
+    {
+
+       MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *const pWs = dynamic_cast<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *>(this->workspace.get());
+        if(!pWs){
+            g_log.error()<<"MDEventWSWrapper: can not cast  worspace pointer into pointer to proper target workspace\n"; 
+            throw(std::bad_cast());
+        }
+        pWs->getBox()->refreshCentroid(NULL);
     }
  
     /// function called if the workspace has not been initated;

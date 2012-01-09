@@ -43,6 +43,8 @@ processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS,PreprocessedDe
     det_loc.L2.resize(nHist);
     det_loc.TwoTheta.resize(nHist);
     det_loc.detIDMap.resize(nHist);
+    det_loc.spec2detMap.assign(nHist,uint32_t(-1));
+    size_t div=100;
      // Loop over the spectra
    size_t ic(0);
    for (size_t i = 0; i < nHist; i++){
@@ -57,8 +59,9 @@ processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS,PreprocessedDe
     // Check that we aren't dealing with monitor...
     if (spDet->isMonitor())continue;   
 
-     det_loc.det_id[ic]  = spDet->getID();
-     det_loc.detIDMap[ic]= i;
+     det_loc.spec2detMap[i]= ic;
+     det_loc.det_id[ic]    = spDet->getID();
+     det_loc.detIDMap[ic]  = i;
      det_loc.L2[ic]      = spDet->getDistance(*sample);
      
 
@@ -76,7 +79,9 @@ processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS,PreprocessedDe
      det_loc.det_dir[ic].setZ(ez);
 
      ic++;
-     pProg->report(i);
+     if( i%div==0){
+        pProg->report(i);
+     }
    }
    // 
    if(ic<nHist){
@@ -87,6 +92,7 @@ processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS,PreprocessedDe
        det_loc.detIDMap.resize(ic);
    }
    convert_log.information()<<"finished preprocessing detectors locations \n";
+   pProg->report();
 }
 
 } // END MDAlgorithms ns
