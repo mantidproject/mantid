@@ -184,7 +184,7 @@ class ConvertToMDEvensEventWS: public IConvertToMDEventsMethods
 {
     /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
     /// presumably will be completely inlined
-     template<Q_state Q, AnalMode MODE, CnvrtUnits CONV,XCoordType XTYPE> 
+     template<Q_state QX, AnalMode MODEX, CnvrtUnits CONV,XCoordType XTYPE> 
      friend struct COORD_TRANSFORMER;
      // the instanciation of the class which does the transformation itself
      COORD_TRANSFORMER<Q,MODE,ConvFromTOF,Axis> trn; 

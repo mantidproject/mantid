@@ -64,7 +64,7 @@ class ConvertToMDEvensHistoWS: public IConvertToMDEventsMethods
      // the instanciation of the class which does the transformation itself
      COORD_TRANSFORMER<Q,MODE,CONV,Histohram> trn; 
      // not yet parallel
-     virtual size_t conversionChunk(size_t job_ID){return 0;}
+     virtual size_t conversionChunk(size_t job_ID){UNUSED_ARG(job_ID); return 0;}
 public:
     size_t  setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const PreprocessedDetectors &detLoc,
                           const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
