@@ -20,7 +20,7 @@ def get_default_python_api():
     settings = QtCore.QSettings()
     settings.beginGroup("Mantid")
     settings.beginGroup("Python")
-    api_version = settings.value("APIVersion", 1).toInt()
+    api_version = settings.value("APIVersion", 2).toInt()
     settings.endGroup()
     settings.endGroup()
     if type(api_version) == tuple:
@@ -42,6 +42,10 @@ if __name__ == '__main__':
     elif _api == 2:
         from mantid import *
         from mantid.simpleapi import *
+        from mantid.kernel.plugins import PyAlgLoader
+        # Make sure the Python algorithms are loaded as these all have to use the old API at the moment
+        loader = PyAlgLoader()
+        loader.load_modules()
     else:
         raise Runtime("Unknown Python API version requested: %d" % _api)
 

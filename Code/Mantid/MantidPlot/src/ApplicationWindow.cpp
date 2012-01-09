@@ -15502,7 +15502,10 @@ void ApplicationWindow::addListViewItem(MdiSubWindow *w)
   else if (w->isA("InstrumentWindow")){
     it->setText(1, tr("Instrument"));
   }
-
+  else
+  {
+    it->setText(1, tr("Custom window"));
+  }
 
   it->setText(0, w->objectName());
   it->setText(2, w->aspect());
@@ -16722,7 +16725,7 @@ void ApplicationWindow::closeGraph(const QString & wsName)
       {
         MultiLayer *plot = dynamic_cast<MultiLayer*>(w);
         plot->setconfirmcloseFlag(false);
-        closeWindow(w);
+        w->close();
         break;
       }
     }
@@ -16794,7 +16797,7 @@ void ApplicationWindow::setPlotType(const QStringList & plotDetails)
           MultiLayer *plot = dynamic_cast<MultiLayer*>(w);
           {
             // Check to see if graph is the new one by comparing the names
-            if (w->objectName() == plotDetails[0])
+            if (w->objectName() == plotDetails[0] + "-1")
             {
               PlotDialog* pd = new PlotDialog(d_extended_plot_dialog, this);
               pd->setMultiLayer(plot);
@@ -17201,8 +17204,8 @@ void ApplicationWindow::setGeometry(MdiSubWindow* usr_win,QWidget* user_interfac
   QRect iface_geom = QRect(frame.topLeft() + user_interface->geometry().topLeft(),
       frame.bottomRight() + user_interface->geometry().bottomRight());
   usr_win->setGeometry(iface_geom);
-  addMdiSubWindow(usr_win);
   usr_win->setName(user_interface->windowTitle());
+  addMdiSubWindow(usr_win);
 }
 void ApplicationWindow::ICatLogout()
 {
@@ -17332,6 +17335,12 @@ MultiLayer* ApplicationWindow::waterfallPlot(Table *t, const QStringList& list)
   return ml;
 }
 
+/**
+ * Add a sub-window either as a docked or a floating window. The desision is made by isDefalutFloating() method.
+ * @param w :: Pointer to a MdiSubWindow which to add.
+ * @param showNormal :: If true (default) show as a normal window, if false show as a minimized docked window
+ *   regardless of what isDefalutFloating() returns.
+ */
 void ApplicationWindow::addMdiSubWindow(MdiSubWindow *w, bool showNormal)
 {
   connect(w, SIGNAL(modifiedWindow(MdiSubWindow*)), this, SLOT(modifiedProject(MdiSubWindow*)));
@@ -17341,7 +17350,7 @@ void ApplicationWindow::addMdiSubWindow(MdiSubWindow *w, bool showNormal)
   connect(w, SIGNAL(statusChanged(MdiSubWindow*)),this, SLOT(updateWindowStatus(MdiSubWindow*)));
   connect(w, SIGNAL(showContextMenu()), this, SLOT(showWindowContextMenu()));
 
-  bool showFloating = settings.value("/General/FloatingWindows/"+QString(w->className()),false).toBool();
+  bool showFloating = isDefaultFloating(w);
 
   if (showFloating && showNormal)
   {
@@ -17364,6 +17373,8 @@ void ApplicationWindow::addMdiSubWindow(MdiSubWindow *w, bool showNormal)
 }
 
 /**
+ * Add a sub-window to as a floating window.
+ * @param w :: Pointer to a MdiSubWindow which will be wrapped in a FloatingWindow.
  * @param pos :: Position of created window relative to the main window
  */
 FloatingWindow* ApplicationWindow::addMdiSubWindowAsFloating(MdiSubWindow* w, QPoint pos)
@@ -17400,6 +17411,10 @@ FloatingWindow* ApplicationWindow::addMdiSubWindowAsFloating(MdiSubWindow* w, QP
   return fw;
 }
 
+/**
+ * Add a sub-window to as a docked MDI window.
+ * @param w :: Pointer to a MdiSubWindow which will be wrapped in a QMdiSubWindow.
+ */
 QMdiSubWindow* ApplicationWindow::addMdiSubWindowAsDocked(MdiSubWindow* w)
 {
   QMdiSubWindow* sw = this->d_workspace->addSubWindow(w);
@@ -17434,11 +17449,11 @@ void ApplicationWindow::changeToDocked(MdiSubWindow* w)
 {
   FloatingWindow* fw = w->getFloatingWindow();
   if (!fw) return;
-  addMdiSubWindowAsDocked(w);
   fw->removeMdiSubWindow();
   removeFloatingWindow(fw);
   // main window must be closed or application will freeze 
   fw->close();
+  addMdiSubWindowAsDocked(w);
   //activateWindow(w);
   w->setNormal();
   return;
@@ -17576,6 +17591,7 @@ void ApplicationWindow::activateNewWindow()
 #ifdef SHARED_MENUBAR
 /**
   * Toggles sharing of the menu bar.
+  * @param yes :: True to share the menu bar.
   */
 void ApplicationWindow::shareMenuBar(bool yes)
 {
@@ -17593,14 +17609,44 @@ void ApplicationWindow::shareMenuBar(bool yes)
 }
 #endif
 
+/**
+ * The slot to change the active window from docked to floating.
+ */
 void ApplicationWindow::changeActiveToFloating()
 {
   MdiSubWindow* activeWin = activeWindow();
   changeToFloating(activeWin);
 }
 
+/**
+ * The slot to change the active window from floating to docked.
+ */
 void ApplicationWindow::changeActiveToDocked()
 {
   MdiSubWindow* activeWin = activeWindow();
   changeToDocked(activeWin);
+}
+
+/**
+ * Returns if a window should be made floating by default.
+ * @param w :: Pointer to a MdiSubWindow.
+ */
+bool ApplicationWindow::isDefaultFloating(const MdiSubWindow* w) const
+{
+  QString wClassName = w->className();
+  return isDefaultFloating(wClassName);
+}
+
+/**
+ * Returns if a window should be made floating by default.
+ * @param aClassName :: Class name of a MdiSubWindow or its internal widget in case of custom interfaces.
+ */
+bool ApplicationWindow::isDefaultFloating(const QString& aClassName) const
+{
+  bool theDefault = false;
+  if (aClassName == "MultiLayer" || aClassName =="InstrumentWindow")
+  {
+    theDefault = true;
+  }
+  return settings.value("/General/FloatingWindows/"+aClassName,theDefault).toBool();
 }

@@ -55,18 +55,30 @@ public:
   {
     if (w == NULL)
     {// removing widget
+      if (m_widget)
+      {
+        m_widget->setParent(NULL); // I am not sure about this
+      }
       m_widget = NULL;
       return;
     }
 
+    // widget cannot be replaced
     if (m_widget)
     {
       throw std::runtime_error("Widget already set");
     }
+
+    // setting the internal widget
     QVBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0,0,0,0);
     layout->addWidget(w);
     m_widget = w;
+    m_widget->setParent(this); // I am not sure about this
+  }
+  ~MdiSubWindowParent_t()
+  {
+    //std::cerr << "MdiSubWindowParent_t deleted\n";
   }
   QWidget* widget() {return m_widget;}
   const QWidget* widget() const {return m_widget;}

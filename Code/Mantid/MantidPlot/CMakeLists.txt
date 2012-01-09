@@ -106,7 +106,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/ScriptingWindow.cpp
                    src/ScriptManagerWidget.cpp
                    src/SelectionMoveResizer.cpp
-				   src/SendToProgramDialog.cpp
+                   src/SendToProgramDialog.cpp
                    src/SetColValuesDialog.cpp
                    src/SigmoidalFit.cpp
                    src/SmoothCurveDialog.cpp
@@ -153,6 +153,7 @@ endif ()
 set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/AlgorithmHistoryWindow.cpp
+                   src/Mantid/ErrorBarSettings.cpp
                    src/Mantid/FirstTimeSetup.cpp
                    src/Mantid/FitParameterTie.cpp
                    src/Mantid/FlowLayout.cpp
@@ -163,19 +164,19 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/ManageCustomMenus.cpp
                    src/Mantid/MantidAbout.cpp
                    src/Mantid/MantidApplication.cpp
-				   src/Mantid/MantidCurve.cpp
+                   src/Mantid/MantidCurve.cpp
                    src/Mantid/MantidDock.cpp
                    src/Mantid/MantidLog.cpp
                    src/Mantid/MantidMatrix.cpp
-				   src/Mantid/MantidMatrixCurve.cpp
-				   src/Mantid/MantidMDCurve.cpp
+                   src/Mantid/MantidMatrixCurve.cpp
+                   src/Mantid/MantidMDCurve.cpp
                    src/Mantid/MantidMatrixDialog.cpp
                    src/Mantid/MantidSampleLogDialog.cpp
                    src/Mantid/MantidUI.cpp
                    src/Mantid/MantidTable.cpp
                    src/Mantid/MantidWSIndexDialog.cpp
-				   src/Mantid/MantidQwtIMDWorkspaceData.cpp
-				   src/Mantid/MantidQwtMatrixWorkspaceData.cpp
+                   src/Mantid/MantidQwtIMDWorkspaceData.cpp
+                   src/Mantid/MantidQwtMatrixWorkspaceData.cpp
                    src/Mantid/PeakPickerTool.cpp
                    src/Mantid/Preferences.cpp
                    src/Mantid/RemoveErrorsDialog.cpp
@@ -330,7 +331,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/ScriptingWindow.h
                    src/ScriptManagerWidget.h
                    src/SelectionMoveResizer.h
-				   src/SendToProgramDialog.h
+                   src/SendToProgramDialog.h
                    src/SetColValuesDialog.h
                    src/SigmoidalFit.h
                    src/SmoothCurveDialog.h
@@ -369,6 +370,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
 set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/AlgorithmMonitor.h
                    src/Mantid/AlgorithmHistoryWindow.h
+                   src/Mantid/ErrorBarSettings.h
                    src/Mantid/FirstTimeSetup.h
                    src/Mantid/FitParameterTie.h
                    src/Mantid/FlowLayout.h
@@ -379,20 +381,20 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/ManageCustomMenus.h
                    src/Mantid/MantidAbout.h
                    src/Mantid/MantidApplication.h
-				   src/Mantid/MantidCurve.h
-				   src/Mantid/MantidDock.h
+                   src/Mantid/MantidCurve.h
+                   src/Mantid/MantidDock.h
                    src/Mantid/MantidLog.h
                    src/Mantid/MantidMatrixCurve.h
-				   src/Mantid/MantidMDCurve.h
+                   src/Mantid/MantidMDCurve.h
                    src/Mantid/MantidMatrixDialog.h
                    src/Mantid/MantidMatrix.h
                    src/Mantid/MantidSampleLogDialog.h
                    src/Mantid/MantidUI.h
                    src/Mantid/MantidWSIndexDialog.h
                    src/Mantid/MantidTable.h
-				   src/Mantid/MantidQwtIMDWorkspaceData.h
-				   src/Mantid/MantidQwtMatrixWorkspaceData.h
-				   src/Mantid/MantidQwtWorkspaceData.h
+                   src/Mantid/MantidQwtIMDWorkspaceData.h
+                   src/Mantid/MantidQwtMatrixWorkspaceData.h
+                   src/Mantid/MantidQwtWorkspaceData.h
                    src/Mantid/PeakPickerTool.h
                    src/Mantid/Preferences.h
                    src/Mantid/RemoveErrorsDialog.h
@@ -605,7 +607,7 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/ScriptingWindow.h
                         src/ScriptManagerWidget.h
                         src/SelectionMoveResizer.h
-						src/SendToProgramDialog.h
+                        src/SendToProgramDialog.h
                         src/SetColValuesDialog.h
                         src/SigmoidalFit.h
                         src/SmoothCurveDialog.h
@@ -636,6 +638,7 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
 
 set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/AlgorithmHistoryWindow.h
+                       src/Mantid/ErrorBarSettings.h
                        src/Mantid/FirstTimeSetup.h
                        src/Mantid/IFunctionWrapper.h
                        src/Mantid/ImportWorkspaceDlg.h
@@ -646,16 +649,16 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/MantidCurve.h
                        src/Mantid/MantidDock.h
                        src/Mantid/MantidLog.h
-					   src/Mantid/MantidMatrixCurve.h
-					   src/Mantid/MantidMDCurve.h
+                       src/Mantid/MantidMatrixCurve.h
+                       src/Mantid/MantidMDCurve.h
                        src/Mantid/MantidMatrixDialog.h
                        src/Mantid/MantidMatrix.h
                        src/Mantid/MantidSampleLogDialog.h
                        src/Mantid/MantidUI.h
                        src/Mantid/MantidWSIndexDialog.h
                        src/Mantid/MantidTable.h
-					   src/Mantid/MantidQwtIMDWorkspaceData.h
-					   src/Mantid/MantidQwtMatrixWorkspaceData.h
+                       src/Mantid/MantidQwtIMDWorkspaceData.h
+                       src/Mantid/MantidQwtMatrixWorkspaceData.h
                        src/Mantid/PeakPickerTool.h
                        src/Mantid/RemoveErrorsDialog.h
                        src/Mantid/UserFitFunctionDialog.h

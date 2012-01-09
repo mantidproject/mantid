@@ -609,31 +609,35 @@ void ConfigDialog::initAppPage()
     "You can use Windows menu to make a window floating or docked.");
   floatPageLayout->addWidget(comment,0,0);
 
-  boxFloatingGraph = new QCheckBox("Graphs");
-  boxFloatingGraph->setChecked(app->settings.value("/General/FloatingWindows/MultiLayer",false).toBool());
+  boxFloatingGraph = new QCheckBox("Graphs"); // default to true
+  boxFloatingGraph->setChecked(app->isDefaultFloating("MultiLayer"));
   floatPageLayout->addWidget(boxFloatingGraph,1,0);
 
   boxFloatingTable = new QCheckBox("Tables");
-  boxFloatingTable->setChecked(app->settings.value("/General/FloatingWindows/Table",false).toBool());
+  boxFloatingTable->setChecked(app->isDefaultFloating("Table"));
   floatPageLayout->addWidget(boxFloatingTable,2,0);
 
-  boxFloatingInstrumentWindow = new QCheckBox("Instrument views");
-  boxFloatingInstrumentWindow->setChecked(app->settings.value("/General/FloatingWindows/InstrumentWindow",false).toBool());
+  boxFloatingInstrumentWindow = new QCheckBox("Instrument views"); // default to true
+  boxFloatingInstrumentWindow->setChecked(app->isDefaultFloating("InstrumentWindow"));
   floatPageLayout->addWidget(boxFloatingInstrumentWindow,3,0);
 
   boxFloatingMantidMatrix = new QCheckBox("Mantid Matrices");
-  boxFloatingMantidMatrix->setChecked(app->settings.value("/General/FloatingWindows/MantidMatrix",false).toBool());
+  boxFloatingMantidMatrix->setChecked(app->isDefaultFloating("MantidMatrix"));
   floatPageLayout->addWidget(boxFloatingMantidMatrix,4,0);
 
   boxFloatingNote = new QCheckBox("Notes");
-  boxFloatingNote->setChecked(app->settings.value("/General/FloatingWindows/Note",false).toBool());
+  boxFloatingNote->setChecked(app->isDefaultFloating("Note"));
   floatPageLayout->addWidget(boxFloatingNote,5,0);
 
   boxFloatingMatrix = new QCheckBox("Matrices");
-  boxFloatingMatrix->setChecked(app->settings.value("/General/FloatingWindows/Matrix",false).toBool());
+  boxFloatingMatrix->setChecked(app->isDefaultFloating("Matrix"));
   floatPageLayout->addWidget(boxFloatingMatrix,6,0);
 
-  floatPageLayout->setRowStretch(7,1);
+  boxFloatingCustomInterfaces = new QCheckBox("Custom interfaces");
+  boxFloatingCustomInterfaces->setChecked(app->isDefaultFloating("MdiSubWindow"));
+  floatPageLayout->addWidget(boxFloatingCustomInterfaces,7,0);
+
+  floatPageLayout->setRowStretch(8,1);
   appTabWidget->addTab(floatingWindowsPage, QString());
 
   connect( boxLanguage, SIGNAL( activated(int) ), this, SLOT( switchToLanguage(int) ) );
@@ -732,7 +736,7 @@ void ConfigDialog::initMantidOptionsTab()
   // Default Python API check box
   m_defaultToNewPython = new QCheckBox("Use new-style Python by default (requires a restart of MantidPlot to take effect)");
   QSettings settings;
-  int apiVersion = settings.value("Mantid/Python/APIVersion", 1).toInt();
+  int apiVersion = settings.value("Mantid/Python/APIVersion", 2).toInt();
 
   if( apiVersion == 2 ) m_defaultToNewPython->setChecked(true);
   else m_defaultToNewPython->setChecked(false);
@@ -2023,6 +2027,7 @@ void ConfigDialog::apply()
   app->settings.setValue("/General/FloatingWindows/MantidMatrix",boxFloatingMantidMatrix->isChecked());
   app->settings.setValue("/General/FloatingWindows/Note",boxFloatingNote->isChecked());
   app->settings.setValue("/General/FloatingWindows/Matrix",boxFloatingMatrix->isChecked());
+  app->settings.setValue("/General/FloatingWindows/MdiSubWindow",boxFloatingCustomInterfaces->isChecked());
   // 3D plots page
   QStringList plot3DColors = QStringList() << btnToColor->color().name() << btnLabels->color().name();
   plot3DColors << btnMesh->color().name() << btnGrid->color().name() << btnFromColor->color().name();

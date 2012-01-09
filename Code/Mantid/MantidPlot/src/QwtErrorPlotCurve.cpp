@@ -35,36 +35,28 @@
 #include <QPainter>
 
 QwtErrorPlotCurve::QwtErrorPlotCurve(int orientation, Table *t, const QString& name) :
-    DataCurve(t, QString(), name), d_master_curve(NULL)
+    DataCurve(t, QString(), name), ErrorBarSettings(), d_master_curve(NULL)
 {
-  cap = 10;
   type = orientation;
-  plus = true;
-  minus = true;
-  through = false;
   setType(Graph::ErrorBars);
   setStyle(QwtPlotCurve::UserCurve);
 }
 
 QwtErrorPlotCurve::QwtErrorPlotCurve(Table *t, const QString& name) :
-    DataCurve(t, QString(), name), d_master_curve(NULL)
+    DataCurve(t, QString(), name), ErrorBarSettings(), d_master_curve(NULL)
 {
-  cap = 10;
   type = Vertical;
-  plus = true;
-  minus = true;
-  through = false;
   setType(Graph::ErrorBars);
   setStyle(QwtPlotCurve::UserCurve);
 }
 
 void QwtErrorPlotCurve::copy(const QwtErrorPlotCurve *e)
 {
-  cap = e->cap;
+  setCapLength(e->capLength());
   type = e->type;
-  plus = e->plus;
-  minus = e->minus;
-  through = e->through;
+  drawPlusSide(e->plusSide());
+  drawMinusSide(e->minusSide());
+  drawThroughSymbol(e->throughSymbol());
   setPen(e->pen());
   err = e->err;
 }
@@ -116,17 +108,17 @@ void QwtErrorPlotCurve::drawErrorBars(QPainter *painter, const QwtScaleMap &xMap
       const int yhl = yi - sh / 2;
       const int ylh = yi + sh / 2;
 
-      if (plus)
+      if (plusSide())
       {
         QwtPainter::drawLine(painter, xi, yhl, xi, yh);
-        QwtPainter::drawLine(painter, xi - cap / 2, yh, xi + cap / 2, yh);
+        QwtPainter::drawLine(painter, xi - capLength() / 2, yh, xi + capLength() / 2, yh);
       }
-      if (minus)
+      if (minusSide())
       {
         QwtPainter::drawLine(painter, xi, ylh, xi, yl);
-        QwtPainter::drawLine(painter, xi - cap / 2, yl, xi + cap / 2, yl);
+        QwtPainter::drawLine(painter, xi - capLength() / 2, yl, xi + capLength() / 2, yl);
       }
-      if (through)
+      if (throughSymbol())
         QwtPainter::drawLine(painter, xi, yhl, xi, ylh);
     }
     else if (type == Horizontal)
@@ -136,17 +128,17 @@ void QwtErrorPlotCurve::drawErrorBars(QPainter *painter, const QwtScaleMap &xMap
       const int xpm = xi + sw / 2;
       const int xmp = xi - sw / 2;
 
-      if (plus)
+      if (plusSide())
       {
         QwtPainter::drawLine(painter, xp, yi, xpm, yi);
-        QwtPainter::drawLine(painter, xp, yi - cap / 2, xp, yi + cap / 2);
+        QwtPainter::drawLine(painter, xp, yi - capLength() / 2, xp, yi + capLength() / 2);
       }
-      if (minus)
+      if (minusSide())
       {
         QwtPainter::drawLine(painter, xm, yi, xmp, yi);
-        QwtPainter::drawLine(painter, xm, yi - cap / 2, xm, yi + cap / 2);
+        QwtPainter::drawLine(painter, xm, yi - capLength() / 2, xm, yi + capLength() / 2);
       }
-      if (through)
+      if (throughSymbol())
         QwtPainter::drawLine(painter, xmp, yi, xpm, yi);
     }
   }

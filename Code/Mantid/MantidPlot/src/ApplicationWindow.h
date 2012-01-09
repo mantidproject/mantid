@@ -1036,6 +1036,7 @@ public slots:
   /// Activate a subwindow (docked or floating) other than current active one
   void activateNewWindow();
 
+  //   Methods for Floating windows
   FloatingWindow* addMdiSubWindowAsFloating(MdiSubWindow* w, QPoint pos = QPoint(0,0));
   QMdiSubWindow* addMdiSubWindowAsDocked(MdiSubWindow* w);
   void mdiWindowActivated(MdiSubWindow* w);
@@ -1043,6 +1044,8 @@ public slots:
   void changeToDocked(MdiSubWindow* w);
   void removeFloatingWindow(FloatingWindow* w);
   FloatingWindow* getActiveFloating() const;
+  bool isDefaultFloating(const MdiSubWindow* w) const;
+  bool isDefaultFloating(const QString& aClassName) const;
   QMenuBar* myMenuBar();
 #ifdef SHARED_MENUBAR
   bool isMenuBarShared() const {return m_sharedMenuBar != NULL;}

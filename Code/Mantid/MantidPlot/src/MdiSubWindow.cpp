@@ -156,8 +156,16 @@ void MdiSubWindow::closeEvent( QCloseEvent *e )
 				tr("Do you want to hide or delete") + "<p><b>'" + objectName() + "'</b> ?",
 				tr("Delete"), tr("Hide"), tr("Cancel"), 0, 2)){
 		case 0:
-			emit closedWindow(this);
-			e->accept();
+      if (widget()->close())
+      {
+			  e->accept();
+			  emit closedWindow(this);
+      }
+      else
+      {
+        QMessageBox::critical(parentWidget(),"MantidPlot - Error", "Window cannot be closed");
+        e->ignore();
+      }
 		break;
 
 		case 1:
@@ -170,8 +178,16 @@ void MdiSubWindow::closeEvent( QCloseEvent *e )
 		break;
 		}
     } else {
-		emit closedWindow(this);
-    	e->accept();
+      if (widget()->close())
+      {
+        e->accept();
+        emit closedWindow(this);
+      }
+      else
+      {
+        QMessageBox::critical(parentWidget(),"MantidPlot - Error", "Window cannot be closed");
+        e->ignore();
+      }
     }
 }
 
@@ -447,8 +463,8 @@ QWidget* MdiSubWindow::getWrapperWindow() const
  * Constructor.
  */
 FloatingWindow::FloatingWindow(ApplicationWindow* appWindow, Qt::WindowFlags f):
+//QMainWindow(NULL,f),
 QMainWindow(appWindow,f),
-//MdiSubWindowParent_t(appWindow,f | Qt::Window),
 d_app(appWindow)
 {
   setFocusPolicy(Qt::StrongFocus);

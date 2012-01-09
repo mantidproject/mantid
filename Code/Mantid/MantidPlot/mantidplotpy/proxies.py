@@ -198,7 +198,7 @@ class Layer(QtProxyObject):
         """
         return self._getHeldObject().addCurves(table._getHeldObject(),columnName,style,lineWidth,symbolSize,startRow,endRow)
 
-    def addErrorBars(self, yColName, errTable, errColName, type=1, width=1, cap=8, color=Qt.black, through=True, minus=True, plus=True):
+    def addErrorBars(self, yColName, errTable, errColName, type=1, width=1, cap=8, color=Qt.black, through=False, minus=True, plus=True):
         """Add error bars to a plot that was created from a table column.
         
         Args:
@@ -209,11 +209,23 @@ class Layer(QtProxyObject):
             width: The line width of the error bars (default: 1).
             cap: The length of the cap on the error bars (default: 8).
             color: The color of error bars (default: black).
-            through: Whether the error bars are drawn through the symbol (default: yes).
+            through: Whether the error bars are drawn through the symbol (default: no).
             minus: Whether these errors should be shown as negative errors (default: yes).
             plus: Whether these errors should be shown as positive errors (default: yes).
         """
         self._getHeldObject().addErrorBars(yColName,errTable._getHeldObject(),errColName,type,width,cap,color,through,minus,plus)
+
+    def errorBarSettings(self, curveIndex, errorBarIndex=0):
+        """Get a handle to the error bar settings for a specified curve.
+        
+        Args:
+            curveIndex: The curve to get the settings for
+            errorBarIndex: A curve can hold more than one set of error bars. Specify which one (default: the first).
+                           Note that a curve plotted from a workspace can have only one set of error bars (and hence settings).
+                           
+        Returns: A handle to the error bar settings object.
+        """
+        return QtProxyObject(self._getHeldObject().errorBarSettings(curveIndex,errorBarIndex))
 
     def addHistogram(self, matrix):
         """Add a matrix histogram  to the graph"""

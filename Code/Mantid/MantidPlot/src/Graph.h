@@ -90,6 +90,7 @@ class BoxCurve;
 class QwtHistogram;
 class UserHelperFunction;
 class QMutex;
+class ErrorBarSettings;
 
 namespace Mantid
 {
@@ -323,11 +324,11 @@ public slots:
   //@{
   QwtErrorPlotCurve* addErrorBars(const QString& xColName, const QString& yColName, Table *errTable,
                                   const QString& errColName, int type = 1, double width = 1, int cap = 8, const QColor& color = QColor(Qt::black),
-                                  bool through = true, bool minus = true, bool plus = true);
+                                  bool through = false, bool minus = true, bool plus = true);
 
   QwtErrorPlotCurve* addErrorBars(const QString& yColName, Table *errTable, const QString& errColName,
                                   int type = 1, double width = 1, int cap = 8, const QColor& color = QColor(Qt::black),
-                                  bool through = true, bool minus = true, bool plus = true);
+                                  bool through = false, bool minus = true, bool plus = true);
 
   /// Adds the errors to an existing MantidCurve
   void addMantidErrorBars(const QString& curveName,bool drawAll);
@@ -335,6 +336,8 @@ public slots:
   void removeMantidErrorBars(const QString& curveName);
 
   void updateErrorBars(QwtErrorPlotCurve *er, bool xErr, double width, int cap, const QColor& c, bool plus, bool minus, bool through);
+
+  ErrorBarSettings* errorBarSettings(int curveIndex, int errorBarIndex = 0);
 
   //! Returns a valid master curve for the error bars curve.
   DataCurve* masterCurve(QwtErrorPlotCurve *er);

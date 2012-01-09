@@ -63,7 +63,6 @@ else:
         if not os.path.exists(pythonlib):
             raise RuntimeError('Unable to find libMantidPythonAPI, cannot continue')
     
-    os.environ['MANTIDPATH']
     def get_libpath(mainlib, dependency):
         if platform.system() == 'Linux':
             cmd = 'ldd %s | grep %s' % (mainlib, dependency)

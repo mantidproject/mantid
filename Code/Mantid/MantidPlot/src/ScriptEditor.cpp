@@ -624,7 +624,9 @@ void ScriptEditor::updateMarker(int lineno, bool success)
   {
     markerDeleteAll();
   }
-  if( lineno < 0 ) return;
+  // Check the lineno actually exists, -1 means delete
+  if( lineno < 0 || lineno > this->lines() ) return;
+
   ensureLineVisible(lineno);
   markerAdd(lineno - 1, m_marker_handle);
 }

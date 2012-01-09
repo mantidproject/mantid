@@ -1794,7 +1794,7 @@ QString MuonAnalysis::getNewPlotName(const QString & cropWSfirstPart)
     {
       if((m_uiForm.plotCreation->currentIndex() == 0) || (m_uiForm.plotCreation->currentIndex() == 2) )
       {
-        emit closeGraph(cropWS);
+        emit closeGraph(cropWS + "-1");
         AnalysisDataService::Instance().remove(cropWS.toStdString());
         break;
       }
@@ -2846,7 +2846,7 @@ void MuonAnalysis::assignPeakPickerTool(const QString & workspaceName)
   {
     m_assigned = true;
     m_currentDataName = workspaceName;
-    emit fittingRequested(m_uiForm.fitBrowser, workspaceName);
+    emit fittingRequested(m_uiForm.fitBrowser, workspaceName + "-1");
   }
 }
 

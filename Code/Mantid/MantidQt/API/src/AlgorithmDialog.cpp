@@ -918,7 +918,6 @@ void AlgorithmDialog::helpClicked()
     // Find the latest version
     IAlgorithm* alg = Mantid::API::FrameworkManager::Instance().createAlgorithm(m_algName.toStdString(), -1);
     int latest_version = alg->version();
-    delete alg;
     // Adjust the link if you're NOT looking at the latest version of the algo
     int this_version = m_algorithm->version();
     if ((this_version != latest_version))

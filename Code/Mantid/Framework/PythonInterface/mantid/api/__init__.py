@@ -11,7 +11,9 @@ Defines Python objects that wrap the C++ API namespace.
 ###############################################################################
 # The fully-qualified package path allows it to be found with path manipulation
 from mantid.kernel import dlopen as _dlopen
-flags = _dlopen.setup_dlopen() # Ensure the library is open with the correct flags
+import os as _os
+clib = _os.path.join(_os.path.dirname(__file__), '_api.so')
+flags = _dlopen.setup_dlopen(clib, ['libMantidKernel', 'libMantidGeometry', 'libMantidAPI']) # Ensure the library is open with the correct flags
 from mantid.kernel import _kernel
 from _api import *
 _dlopen.restore_flags(flags)

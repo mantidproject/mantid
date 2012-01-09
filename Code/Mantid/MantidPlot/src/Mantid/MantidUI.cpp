@@ -443,7 +443,7 @@ void MantidUI::importWorkspace(const QString& wsName, bool showDlg, bool makeVis
   MantidMatrix* mm = importMatrixWorkspace(wsName,-1, -1, showDlg,makeVisible);
   if (!mm)
   {
-    Table * t=importTableWorkspace(wsName,showDlg,makeVisible);
+    importTableWorkspace(wsName,showDlg,makeVisible);
   }
   QApplication::restoreOverrideCursor();
 }
@@ -466,7 +466,7 @@ void MantidUI::importTransposed()
   if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
   {
     ws = boost::dynamic_pointer_cast<ITableWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
-    Table *t = importTableWorkspace(wsName,true,true,true);
+    importTableWorkspace(wsName,true,true,true);
   }
   QApplication::restoreOverrideCursor();
 }

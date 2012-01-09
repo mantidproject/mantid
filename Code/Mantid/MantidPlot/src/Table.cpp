@@ -1242,7 +1242,10 @@ void Table::clearSelection()
             tr("Column '%1' is read only!").arg(name));
         return;
       }
-      d_table->setText(d_table->currentRow (), col, "");
+      if (col >= 0)
+      {
+        d_table->setText(d_table->currentRow (), col, "");
+      }
       emit modifiedData(this, name);
     } else {
       QStringList lstReadOnly;

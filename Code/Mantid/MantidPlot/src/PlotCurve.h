@@ -35,6 +35,7 @@
 
 class PlotMarker;
 class Graph;
+class ErrorBarSettings;
 
 namespace Mantid
 {
@@ -72,7 +73,10 @@ public:
   //! Set the number of symbols not to be drawn: useful for large data sets
   void setSkipSymbolsCount(int count);
   //! Returns the number of symbols not to be drawn
-  int skipSymbolsCount() {return d_skip_symbols;}
+  int skipSymbolsCount() const {return d_skip_symbols;}
+
+  /// Returns a list of error bar settings for each set of error bars associated to this curve
+  virtual QList<ErrorBarSettings*> errorBarSettingsList() const = 0;
 
   // remove this curve form the graph (and delete from memory)
   void removeMe(){emit removeMe(this);}
@@ -180,6 +184,8 @@ public:
 
   //! The list of attached error bars.
   QList<DataCurve *> errorBarsList()const{return d_error_bars;};
+  /// Returns a list of error bar settings for each set of error bars associated to this curve
+  virtual QList<ErrorBarSettings *> errorBarSettingsList() const;
   //! Adds a single error bars curve to the list of attached error bars.
   void addErrorBars(DataCurve *c){if (c) d_error_bars << c;};
   //! Remove a single error bars curve from the list of attached error bars.
