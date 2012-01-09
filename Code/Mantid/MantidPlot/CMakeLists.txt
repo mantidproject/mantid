@@ -825,6 +825,7 @@ add_custom_command ( TARGET MantidPlot POST_BUILD
 set ( MANTIDPLOT_TEST_PY_FILES 
 	MantidPlotSliceViewerTest.py
 	MantidPlot1DPlotTest.py
+	MantidPlotProxiesTest.py
 )
 
 if ( 0 )

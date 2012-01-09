@@ -58,6 +58,7 @@ public:
   Folder* folder();
 
   void askOnCloseEvent(bool)/PyName=confirmClose/;
+  bool close();
 
 private:
   MdiSubWindow(const MdiSubWindow&);

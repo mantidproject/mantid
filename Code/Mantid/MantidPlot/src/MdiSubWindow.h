@@ -267,6 +267,9 @@ private:
 
 typedef QList<MdiSubWindow*> MDIWindowList;
 
+
+//==============================================================================
+//==============================================================================
 /**
  * Floating wrapper window for a MdiSubWindow.
  */
@@ -278,25 +281,13 @@ public:
   void setStaysOnTopFlag();
   void removeStaysOnTopFlag();
   MdiSubWindow* mdiSubWindow() {return static_cast<MdiSubWindow*>(widget());}
-  void setMdiSubWindow(MdiSubWindow* sw) {setWidget(sw);}
-  void removeMdiSubWindow()
-  {
-    MdiSubWindowParent_t* wrapper = dynamic_cast<MdiSubWindowParent_t*>(centralWidget());
-    if (wrapper)
-    {
-      wrapper->setWidget(NULL);
-    }
-  }
+  void setMdiSubWindow(MdiSubWindow* sw);
+  void removeMdiSubWindow();
+
 protected:
 
-  void setWidget(QWidget* w)
-  {
-    MdiSubWindowParent_t* wrapper = new MdiSubWindowParent_t(this);
-    wrapper->setWidget(w);
-    setCentralWidget(wrapper);
-  }
+  void setWidget(QWidget* w);
   QWidget* widget() {return static_cast<MdiSubWindowParent_t*>(centralWidget())->widget();}
-
   virtual bool event(QEvent * e);
   ApplicationWindow* d_app;
   Qt::WindowFlags m_flags;

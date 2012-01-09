@@ -17472,6 +17472,8 @@ void ApplicationWindow::removeFloatingWindow(FloatingWindow* w)
     {
       closeWindow(w->mdiSubWindow());
     }
+    // Make the FloatingWindow delete itself
+    w->deleteLater();
   }
 }
 
