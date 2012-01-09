@@ -13,7 +13,7 @@ Defines Python objects that wrap the C++ API namespace.
 from mantid.kernel import dlopen as _dlopen
 import os as _os
 clib = _os.path.join(_os.path.dirname(__file__), '_api.so')
-flags = _dlopen.setup_dlopen(clib, ['libMantidKernel.so', 'libMantidGeometry.so', 'libMantidAPI.so']) # Ensure the library is open with the correct flags
+flags = _dlopen.setup_dlopen(clib, ['libMantidKernel', 'libMantidGeometry', 'libMantidAPI']) # Ensure the library is open with the correct flags
 from mantid.kernel import _kernel
 from _api import *
 _dlopen.restore_flags(flags)
