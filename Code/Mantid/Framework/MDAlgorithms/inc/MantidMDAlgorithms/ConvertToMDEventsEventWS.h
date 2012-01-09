@@ -140,7 +140,7 @@ public:
            if(Signal[j]<FLT_EPSILON)continue;
 
 
-           if(!trn.calcMatrixCoord(X,i,j,Coord))continue; // skip ND outside the range
+           if(!trn.calcMatrixCoord(X,wi,j,Coord))continue; // skip ND outside the range
             //  ADD RESULTING EVENTS TO THE WORKSPACE
             float ErrSq = float(Error[j]*Error[j]);
 
