@@ -151,44 +151,43 @@ bool MdiSubWindow::close()
  */
 void MdiSubWindow::closeEvent( QCloseEvent *e )
 {
-	if (d_confirm_close){
-    	switch( QMessageBox::information(this, tr("MantidPlot"),
-				tr("Do you want to hide or delete") + "<p><b>'" + objectName() + "'</b> ?",
-				tr("Delete"), tr("Hide"), tr("Cancel"), 0, 2)){
-		case 0:
-      if (widget()->close())
-      {
-			  e->accept();
-			  emit closedWindow(this);
-      }
-      else
-      {
-        QMessageBox::critical(parentWidget(),"MantidPlot - Error", "Window cannot be closed");
-        e->ignore();
-      }
-		break;
+  // Default result = do close.
+  int result = 0;
 
-		case 1:
-			e->ignore();
-			emit hiddenWindow(this);
-		break;
+  // If you need to confirm the close, ask the user
+  if (d_confirm_close)
+  {
+    result = QMessageBox::information(this, tr("MantidPlot"),
+        tr("Do you want to hide or delete") + "<p><b>'" + objectName() + "'</b> ?",
+        tr("Delete"), tr("Hide"), tr("Cancel"), 0, 2);
+  }
 
-		case 2:
-			e->ignore();
-		break;
-		}
-    } else {
-      if (widget()->close())
-      {
-        e->accept();
-        emit closedWindow(this);
-      }
-      else
-      {
-        QMessageBox::critical(parentWidget(),"MantidPlot - Error", "Window cannot be closed");
-        e->ignore();
-      }
+  switch(result)
+  {
+  case 0:
+    if (widget()->close())
+    {
+      e->accept();
+      emit closedWindow(this);
+      // Continue; the mdi window should close (?)
     }
+    else
+    {
+      QMessageBox::critical(parentWidget(),"MantidPlot - Error", "Window cannot be closed");
+      e->ignore();
+    }
+    break;
+
+  case 1:
+    e->ignore();
+    emit hiddenWindow(this);
+    break;
+
+  case 2:
+    e->ignore();
+    break;
+  }
+
 }
 
 QString MdiSubWindow::aspect()
