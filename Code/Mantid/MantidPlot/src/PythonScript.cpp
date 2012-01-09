@@ -83,7 +83,7 @@ PythonScript::PythonScript(PythonScripting *env, const QString &code, QObject *c
   updatePath(Name, true);
 
   // Observe ADS updates
-  if( interactive )
+  if( false ) // Causes random crashes at the moment
   {
     observeAdd();
     observeAfterReplace();
@@ -719,7 +719,6 @@ void PythonScript::clearADSHandle()
  */
 void PythonScript::addPythonReference(const std::string& wsName,const Mantid::API::Workspace_sptr ws)
 {
-  return;
   UNUSED_ARG(ws);
 
   // Compile a code object
@@ -754,7 +753,6 @@ void PythonScript::addPythonReference(const std::string& wsName,const Mantid::AP
  */
 void PythonScript::deletePythonReference(const std::string& wsName)
 {
-  return;
   const size_t length = wsName.length() + 4;
   char * code = new char[length + 1];
   sprintf(code, "del %s", wsName.c_str());
