@@ -84,7 +84,26 @@ set_target_output_directory ( PythonKernelModule ${OUTPUT_DIR} .pyd )
 # Add the required dependencies
 target_link_libraries ( PythonKernelModule ${PYTHON_DEPS} )
 
+if ( UNIX )
+  add_library ( _dlopen src/dlopen.c )
+  set_target_properties ( _dlopen PROPERTIES OUTPUT_NAME _dlopen )
+  set_target_output_directory ( _dlopen ${OUTPUT_DIR} .pyd )
+if ( APPLE )
+  # and in .so on the Mac
+  # Need to remove OpenMP
+  set ( CMAKE_C_FLAGS -m64 )
+  set_target_properties ( _dlopen PROPERTIES SUFFIX .so )
+  target_link_libraries ( _dlopen ${PYTHON_LIBRARIES} )
+endif()
+  add_dependencies( PythonKernelModule _dlopen )
+endif()
+
+
 ###########################################################################
 # Installation settings
 ###########################################################################
 install ( TARGETS PythonKernelModule DESTINATION ${BIN_DIR}/mantid/kernel )
+if ( UNIX )
+install ( TARGETS _dlopen DESTINATION ${BIN_DIR}/mantid/kernel )
+endif()
+
