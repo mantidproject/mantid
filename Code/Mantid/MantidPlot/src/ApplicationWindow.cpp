@@ -16725,7 +16725,7 @@ void ApplicationWindow::closeGraph(const QString & wsName)
       {
         MultiLayer *plot = dynamic_cast<MultiLayer*>(w);
         plot->setconfirmcloseFlag(false);
-        closeWindow(w);
+        w->close();
         break;
       }
     }
@@ -16797,7 +16797,7 @@ void ApplicationWindow::setPlotType(const QStringList & plotDetails)
           MultiLayer *plot = dynamic_cast<MultiLayer*>(w);
           {
             // Check to see if graph is the new one by comparing the names
-            if (w->objectName() == plotDetails[0])
+            if (w->objectName() == plotDetails[0] + "-1")
             {
               PlotDialog* pd = new PlotDialog(d_extended_plot_dialog, this);
               pd->setMultiLayer(plot);
