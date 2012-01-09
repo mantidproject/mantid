@@ -1,6 +1,8 @@
 #ifndef H_CONVERT_TO_MDEVENTS_UNITS
 #define H_CONVERT_TO_MDEVENTS_UNITS
 #include "MantidMDAlgorithms/IConvertToMDEventsMethods.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
 /** Set of internal classes used by ConvertToMDEvents algorithm and responsible for Units conversion
    *
    * @date 11-10-2011
