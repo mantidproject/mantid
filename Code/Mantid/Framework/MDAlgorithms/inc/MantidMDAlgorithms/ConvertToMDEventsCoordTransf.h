@@ -86,17 +86,36 @@ struct COORD_TRANSFORMER
      *
      * has to be specialized
      */
-    inline bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
+    inline bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord)const
+    {
         UNUSED_ARG(X); UNUSED_ARG(i); UNUSED_ARG(j); UNUSED_ARG(Coord);throw(Kernel::Exception::NotImplementedError(""));
-        return false;}
+        return false;
+    }
+    inline bool calc1MatrixCoord(const double & X,std::vector<coord_t> &Coord)const
+    {
+          UNUSED_ARG(X); UNUSED_ARG(Coord);throw(Kernel::Exception::NotImplementedError(""));
+    }
+    inline bool ConvertAndCalcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const
+    {
+          UNUSED_ARG(X); UNUSED_ARG(Coord);throw(Kernel::Exception::NotImplementedError(""));
+    }
 
-     inline void setUP(IConvertToMDEventsMethods *){};
+    inline void setUP(IConvertToMDEventsMethods *){};
   
 private:
  
   
 }; // end COORD_TRANSFORMER structure:
 
+template<Q_state Q,AnalMode MODE,CnvrtUnits CONV,XCoordType Type>
+struct ICOORD_TRANSFORMER
+{
+public:
+    
+protected:
+ // class which would convert units
+     UNITS_CONVERSION<CONV,Type> CONV_UNITS_FROM;
+};
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -106,7 +125,7 @@ private:
 // NoQ,ANY_Mode -- no units conversion. This templates just copies the data into MD events and not doing any momentum transformations
 //
 template<AnalMode MODE,CnvrtUnits CONV,XCoordType Type> 
-struct COORD_TRANSFORMER<NoQ,MODE,CONV,Type>
+struct COORD_TRANSFORMER<NoQ,MODE,CONV,Type>: public ICOORD_TRANSFORMER<NoQ,MODE,CONV,Type>
 {
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)    
     {
@@ -126,22 +145,33 @@ struct COORD_TRANSFORMER<NoQ,MODE,CONV,Type>
     {
         CONV_UNITS_FROM.updateConversion(i);
         if(pYAxis){   
-            Coord[1] = pYAxis->operator()(i);
             if(Coord[1]<pHost->dim_min[1]||Coord[1]>=pHost->dim_max[1])return false;
+            Coord[1] = (coord_t)(pYAxis->operator()(i));
         }
         return true;
     }
 
-    inline bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord)
+    inline bool calc1MatrixCoord(const double& X,std::vector<coord_t> &Coord)const
     {
-       UNUSED_ARG(i);
-       coord_t X_ev = CONV_UNITS_FROM.getXConverted(X,j);
-
-       if(X_ev<pHost->dim_min[0]||X_ev>=pHost->dim_max[0])return false;
+       if(X<pHost->dim_min[0]||X>=pHost->dim_max[0])return false;
           
-       Coord[0]=X_ev;
+       Coord[0]=(coord_t)X;
        return true;
     }
+    // should be actually on ICOORD_TRANSFORMER
+    inline bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord)const
+    {
+       UNUSED_ARG(i);
+       double X_ev = CONV_UNITS_FROM.getXConverted(X,j);
+
+       return calc1MatrixCoord(X_ev,Coord);
+    }
+    inline bool ConvertAndCalcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const
+    {
+         double X_ev = CONV_UNITS_FROM.getXConverted(X);
+         return calcMatrixCoord(X_ev,Coord);
+    }   
+
     // constructor;
     COORD_TRANSFORMER(){} 
 
@@ -154,8 +184,7 @@ private:
      API::NumericAxis *pYAxis;
      // pointer to MD workspace convertor
      IConvertToMDEventsMethods *pHost;
-     // class which would convert units
-     UNITS_CONVERSION<CONV,Type> CONV_UNITS_FROM;
+    
 };
 //
 ////----------------------------------------------------------------------------------------------------------------------
@@ -180,7 +209,7 @@ inline double k_trans<Indir>(double Ei, double E_tr){
 //  ----->  modQ
 // modQ,Inelastic 
 template<AnalMode MODE,CnvrtUnits CONV,XCoordType Type> 
-struct COORD_TRANSFORMER<modQ,MODE,CONV,Type>
+struct COORD_TRANSFORMER<modQ,MODE,CONV,Type>: public ICOORD_TRANSFORMER<modQ,MODE,CONV,Type> 
 { 
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
     {
@@ -212,13 +241,10 @@ struct COORD_TRANSFORMER<modQ,MODE,CONV,Type>
         ez = (pDet+i)->Z();
         return true;
     }
-    //
-    inline bool calcMatrixCoord(const MantidVec& X,uint64_t i,size_t j,std::vector<coord_t> &Coord)
+    
+    inline bool calc1MatrixCoord(const double& E_tr,std::vector<coord_t> &Coord)const
     {
-        UNUSED_ARG(i);
-        // convert X-data into energy transfer (if necessary)
-        coord_t E_tr = CONV_UNITS_FROM.getXConverted(X,j);
-        Coord[1]    = E_tr;
+        Coord[1]    =(coord_t)E_tr;
         if(Coord[1]<pHost->dim_min[1]||Coord[1]>=pHost->dim_max[1])return false;
 
         // get module of the wavevector for scattered neutrons
@@ -233,11 +259,24 @@ struct COORD_TRANSFORMER<modQ,MODE,CONV,Type>
         double Qz  = (rotMat[2]*qx+rotMat[5]*qy+rotMat[8]*qz);
 
         double Qsq = Qx*Qx+Qy*Qy+Qz*Qz;
-        Coord[0]   = sqrt(Qsq);
+        Coord[0]   = (coord_t)sqrt(Qsq);
         if(Coord[0]<pHost->dim_min[0]||Coord[0]>=pHost->dim_max[0])return false;
         return true;
 
     }
+    // should be actually on ICOORD_TRANSFORMER
+    inline bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord)const
+    {
+       UNUSED_ARG(i);
+       double X_ev = CONV_UNITS_FROM.getXConverted(X,j);
+
+       return calc1MatrixCoord(X_ev,Coord);
+    }
+    inline bool ConvertAndCalcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const
+    {
+         double X_ev = CONV_UNITS_FROM.getXConverted(X);
+         return calcMatrixCoord(X_ev,Coord);
+    }   
     // constructor;
     COORD_TRANSFORMER(){}
     void setUP(IConvertToMDEventsMethods *pConv){
@@ -256,12 +295,11 @@ private:
     Kernel::V3D const *pDet;
     // Calling Mantid algorithm
     IConvertToMDEventsMethods *pHost;
-    // class that performs untis conversion;
-    UNITS_CONVERSION<CONV,Type> CONV_UNITS_FROM;
+ 
 };
 // modQ,Elastic 
 template<CnvrtUnits CONV,XCoordType Type> 
-struct COORD_TRANSFORMER<modQ,Elastic,CONV,Type>
+struct COORD_TRANSFORMER<modQ,Elastic,CONV,Type>: public ICOORD_TRANSFORMER<modQ,Elastic,CONV,Type>
 { 
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
     {
@@ -289,11 +327,8 @@ struct COORD_TRANSFORMER<modQ,Elastic,CONV,Type>
         return true;
     }
     //
-    inline bool calcMatrixCoord(const MantidVec& X,uint64_t i,size_t j,std::vector<coord_t> &Coord)
+    inline bool calc1MatrixCoord(const double& k0,std::vector<coord_t> &Coord)const
     {
-        UNUSED_ARG(i);
-        // convert X-data into momentum transfer (if necessary)
-        coord_t k0 = CONV_UNITS_FROM.getXConverted(X,j);
    
         double  qx  =  -ex*k0;                
         double  qy  =  -ey*k0;       
@@ -309,6 +344,21 @@ struct COORD_TRANSFORMER<modQ,Elastic,CONV,Type>
         return true;
 
     }
+
+    // should be actually on ICOORD_TRANSFORMER
+    inline bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord)const
+    {
+       UNUSED_ARG(i);
+       double X_ev = CONV_UNITS_FROM.getXConverted(X,j);
+
+       return calc1MatrixCoord(X_ev,Coord);
+    }
+    inline bool ConvertAndCalcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const
+    {
+         double X_ev = CONV_UNITS_FROM.getXConverted(X);
+         return calcMatrixCoord(X_ev,Coord);
+    }   
+
     // constructor;
     COORD_TRANSFORMER(){}
    void setUP(IConvertToMDEventsMethods *pConv){
@@ -326,15 +376,13 @@ private:
     //
     Kernel::V3D const * pDet;
     // Calling Mantid algorithm
-    IConvertToMDEventsMethods *pHost;
-    // class that performs untis conversion;
-    UNITS_CONVERSION<CONV,Type> CONV_UNITS_FROM;
+    IConvertToMDEventsMethods *pHost;  
 };
 
 
 // Direct/Indirect tramsformatiom, this template describes 3D Q analysis mode. 
 template<AnalMode MODE,CnvrtUnits CONV,XCoordType Type> 
-struct COORD_TRANSFORMER<Q3D,MODE,CONV,Type>
+struct COORD_TRANSFORMER<Q3D,MODE,CONV,Type>: public ICOORD_TRANSFORMER<Q3D,MODE,CONV,Type>
 {
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
     {
@@ -364,11 +412,9 @@ struct COORD_TRANSFORMER<Q3D,MODE,CONV,Type>
            return true;
     }
 
-    inline bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
-         UNUSED_ARG(i);
-         // convert X-data into energy transfer (if necessary)
-          coord_t E_tr = CONV_UNITS_FROM.getXConverted(X,j);
-          Coord[3]    = E_tr;
+    inline bool calc1MatrixCoord(const double& E_tr,std::vector<coord_t> &Coord)const
+    {
+          Coord[3]    = (coord_t)E_tr;
           if(Coord[3]<pHost->dim_min[3]||Coord[3]>=pHost->dim_max[3])return false;
 
          // get module of the wavevector for scattered neutrons
@@ -384,6 +430,20 @@ struct COORD_TRANSFORMER<Q3D,MODE,CONV,Type>
 
          return true;
     }
+    // should be actually on ICOORD_TRANSFORMER
+    inline bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord)const
+    {
+       UNUSED_ARG(i);
+       double X_ev = CONV_UNITS_FROM.getXConverted(X,j);
+
+       return calc1MatrixCoord(X_ev,Coord);
+    }
+    inline bool ConvertAndCalcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const
+    {
+         double X_ev = CONV_UNITS_FROM.getXConverted(X);
+         return calcMatrixCoord(X_ev,Coord);
+    }   
+  
    COORD_TRANSFORMER(){}
    void setUP(IConvertToMDEventsMethods *pConv){
         pHost = pConv;
@@ -401,13 +461,12 @@ private:
     Kernel::V3D const *pDet;
     // Calling Mantid algorithm
     IConvertToMDEventsMethods *pHost;
-    // class that performs untis conversion;
-    UNITS_CONVERSION<CONV,Type> CONV_UNITS_FROM;
+   
 };
 
 // Elastic
 template<CnvrtUnits CONV,XCoordType Type> 
-struct COORD_TRANSFORMER<Q3D,Elastic,CONV,Type>
+struct COORD_TRANSFORMER<Q3D,Elastic,CONV,Type>: public ICOORD_TRANSFORMER<Q3D,Elastic,CONV,Type>
 {
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
     {
@@ -434,11 +493,8 @@ struct COORD_TRANSFORMER<Q3D,Elastic,CONV,Type>
           return true;
     }
 
-    inline bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
-          UNUSED_ARG(i);
-          //convert X from any units it initally is, into momentum transfer (if necessary)
-          coord_t k0 = CONV_UNITS_FROM.getXConverted(X,j);   
-
+    inline bool calc1MatrixCoord(const double& k0,std::vector<coord_t> &Coord)const
+    {
           double  qx  =  -ex*k0;                
           double  qy  =  -ey*k0;
           double  qz  = (1 - ez)*k0;
@@ -449,6 +505,20 @@ struct COORD_TRANSFORMER<Q3D,Elastic,CONV,Type>
 
          return true;
     }
+    // should be actually on ICOORD_TRANSFORMER
+    inline bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord)const
+    {
+       UNUSED_ARG(i);
+       double X_ev = CONV_UNITS_FROM.getXConverted(X,j);
+
+       return calc1MatrixCoord(X_ev,Coord);
+    }
+    inline bool ConvertAndCalcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const
+    {
+         double X_ev = CONV_UNITS_FROM.getXConverted(X);
+         return calcMatrixCoord(X_ev,Coord);
+    }   
+
     COORD_TRANSFORMER(){}
     void setUP(IConvertToMDEventsMethods *pConv){
         pHost = pConv;
@@ -461,9 +531,7 @@ private:
     // pointer to the beginning of the array with 
     Kernel::V3D const *pDet;
     // pointer to the algoritm, which calls all these transformations
-    IConvertToMDEventsMethods *pHost;
-    // class that performs untis conversion;
-    UNITS_CONVERSION<CONV,Type> CONV_UNITS_FROM;
+    IConvertToMDEventsMethods *pHost;  
 };
 
 

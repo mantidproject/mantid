@@ -125,8 +125,13 @@ namespace MDAlgorithms
    /// logger -> to provide logging, for MD dataset file operations
     static Mantid::Kernel::Logger& convert_log;
  private:
-    /// internal function which do one peace of work, which should be performed by one thread
-   virtual void conversionChunk()=0;
+    /** internal function which do one peace of work, which should be performed by one thread 
+      *
+      *@param job_ID -- the identifier which specifies, what part of the work on the workspace this job has to do. 
+                        Oftern it is a spectra number
+      *
+    */
+   virtual size_t conversionChunk(size_t job_ID)=0;
 
 };
 

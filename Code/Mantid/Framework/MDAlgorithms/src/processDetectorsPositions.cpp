@@ -14,8 +14,9 @@ namespace MDAlgorithms
 /** helper function, does preliminary calculations of the detectors positions to convert results into k-dE space ;
       and places the resutls into static cash to be used in subsequent calls to this algorithm */
 void DLLExport
-processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS,PreprocessedDetectors &det_loc,Kernel::Logger& convert_log)
+processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS,PreprocessedDetectors &det_loc,Kernel::Logger& convert_log,API::Progress *pProg)
 {
+  convert_log.information()<<" Preprocessing detectors locations in a target reciprocal space\n";
   // 
   Instrument_const_sptr instrument = inputWS->getInstrument();
   //
@@ -75,6 +76,7 @@ processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS,PreprocessedDe
      det_loc.det_dir[ic].setZ(ez);
 
      ic++;
+     pProg->report(i);
    }
    // 
    if(ic<nHist){
@@ -84,6 +86,7 @@ processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS,PreprocessedDe
        det_loc.TwoTheta.resize(ic);
        det_loc.detIDMap.resize(ic);
    }
+   convert_log.information()<<"finished preprocessing detectors locations \n";
 }
 
 } // END MDAlgorithms ns

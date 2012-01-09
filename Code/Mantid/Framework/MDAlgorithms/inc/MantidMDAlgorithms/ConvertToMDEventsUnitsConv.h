@@ -53,10 +53,16 @@ struct UNITS_CONVERSION
     /// Update all spectra dependednt  variables, relevant to conversion in the loop over spectra (detectors)
     inline void     updateConversion(uint64_t i){UNUSED_ARG(i);}
     /// Convert current X variable into the units requested;
-    inline coord_t  getXConverted(const MantidVec& X,size_t j)const
+    inline double  getXConverted(const MantidVec& X,size_t j)const
     {
         return XValue<Type>(X,j);
     }
+    /// Convert current X variable into the units requested;
+    inline double  getXConverted(const double& X)const
+    {
+        return X;
+    }
+
 
 };
 
@@ -77,9 +83,15 @@ struct UNITS_CONVERSION<ConvFast,Type>
     // does nothing
     inline void    updateConversion(const uint64_t ){}
     // convert X coordinate using power series
-    inline coord_t  getXConverted(const MantidVec& X,size_t j)const
+    inline double  getXConverted(const MantidVec& X,size_t j)const
     {
-        return (factor*std::pow(XValue<Type>(X,j),power));
+        double x = XValue<Type>(X,j);
+        return getXConverted(x);
+    }
+   // convert X coordinate using power series
+    inline double  getXConverted(const double& X)const
+    {
+        return (factor*std::pow(X,power));
     }
 private:
     // variables for units conversion:
@@ -122,9 +134,15 @@ struct UNITS_CONVERSION<ConvFromTOF,Type>
         double delta;
         pWSUnit->initialize(L1,pL2[i],pTwoTheta[i],emode,efix,delta);
     }
-    inline coord_t  getXConverted(const MantidVec& X,size_t j)const{
-   
-        return (coord_t)pWSUnit->singleFromTOF(XValue<Type>(X,j));
+    inline double  getXConverted(const MantidVec& X,size_t j)const
+    {   
+        double x = XValue<Type>(X,j);
+        return getXConverted(x);
+    }
+
+   inline double  getXConverted(const double& X)const
+    {
+        return pWSUnit->singleFromTOF(X);
     }
 private:
     // variables for units conversion:
@@ -179,9 +197,16 @@ struct UNITS_CONVERSION<ConvByTOF,Type>
         pSourceWSUnit->initialize(L1,pL2[i],pTwoTheta[i],emode,efix,delta);
     }
     //
-    inline coord_t  getXConverted(const MantidVec& X,size_t j)const{
-        double tof  = pSourceWSUnit->singleToTOF(XValue<Type>(X,j));
-        return (coord_t)pWSUnit->singleFromTOF(tof);
+    inline double  getXConverted(const MantidVec& X,size_t j)const
+    {
+        double x = XValue<Type>(X,j);
+        return getXConverted(x);
+    }
+    // 
+    inline double  getXConverted(const double& X)const
+    {
+        double tof  = pSourceWSUnit->singleToTOF(X);
+        return (double)pWSUnit->singleFromTOF(tof);
     }
 private:
     // variables for units conversion:

@@ -240,8 +240,8 @@ void ConvertToMDEvents::exec()
   if(!spws.get())
   {
     create_new_ws = true;
-  }else{ //HACK, TODO: fix it
-      convert_log.warning()<< " Adding to existing workspace is not supported, workspace: "<<spws->name()<<" will be replaced\n";
+  }else{ //HACK, TODO: fix it, implement additn to exisiting workspace
+      convert_log.warning()<< " Adding to existing workspace is not yet implemented, workspace: "<<spws->name()<<" will be replaced\n";
       create_new_ws=true;
   }
 
@@ -285,7 +285,12 @@ void ConvertToMDEvents::exec()
   }
 
   bool reuse_preprocecced_detectors = getProperty("UsePreprocessedDetectors");
-  if(!(reuse_preprocecced_detectors&&det_loc.is_defined()))processDetectorsPositions(inWS2D,det_loc,convert_log);
+  if(!(reuse_preprocecced_detectors&&det_loc.is_defined())){
+      // amount of work:
+      const size_t nHist = inWS2D->getNumberHistograms();
+      pProg = std::auto_ptr<API::Progress >(new API::Progress(this,0.0,1.0,nHist));
+      processDetectorsPositions(inWS2D,det_loc,convert_log,pProg.get());
+  }
 
   if(create_new_ws)
   {

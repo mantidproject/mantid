@@ -64,7 +64,7 @@ class ConvertToMDEvensEventWSAutoRebin: public IConvertToMDEventsMethods
      // the instanciation of the class which does the transformation itself
      COORD_TRANSFORMER<Q,MODE,ConvFromTOF,Histohram> trn; 
      // 
-    virtual void conversionChunk(){};
+    virtual size_t conversionChunk(size_t){};
 public:
     size_t  setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const PreprocessedDetectors &detLoc,
                           const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
@@ -108,10 +108,10 @@ public:
 
     for (size_t wi=0; wi < nValidSpectra; wi++)
     {
-        size_t ic                 = pDetLoc->detIDMap[wi];
+        size_t iSpec             = pDetLoc->detIDMap[wi];
         int32_t det_id            = pDetLoc->det_id[wi];
 
-         const DataObjects::EventList & el   = pEventWS->getEventList(ic);
+         const DataObjects::EventList & el   = pEventWS->getEventList(iSpec);
          //size_t numEvents       = el.getNumberEvents();
 
     
@@ -127,7 +127,7 @@ public:
            if(Signal[j]<FLT_EPSILON)continue;
 
 
-           if(!trn.calcMatrixCoord(X,ic,j,Coord))continue; // skip ND outside the range
+           if(!trn.calcMatrixCoord(X,iSpec,j,Coord))continue; // skip ND outside the range
             //  ADD RESULTING EVENTS TO THE WORKSPACE
             float ErrSq = float(Error[j]*Error[j]);
 
@@ -156,6 +156,7 @@ public:
         }
  
          pWSWrapper->pWorkspace()->refreshCache();
+         pWSWrapper->pWorkspace()->getBox()->refreshCentroid(NULL);
          pProg->report();          
     }
   
@@ -163,179 +164,144 @@ public:
 
 
 // Class to process event workspace by direct conversion:
-//template<Q_state Q, AnalMode MODE>
-//class ConvertToMDEvensEventWS: public IConvertToMDEventsMethods 
-//{
-//    /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
-//    /// presumably will be completely inlined
-//     template<Q_state Q, AnalMode MODE, CnvrtUnits CONV,XCoordType XTYPE> 
-//     friend struct COORD_TRANSFORMER;
-//     // the instanciation of the class which does the transformation itself
-//     COORD_TRANSFORMER<Q,MODE,ConvFromTOF,Axis> trn; 
-//     // 
-// public:
-//    size_t  setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const PreprocessedDetectors &detLoc,
-//                          const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
-//    {
-//        size_t numSpec=IConvertToMDEventsMethods::setUPConversion(pWS2D,detLoc,WSD,inWSWrapper);
-//
-//        // initiate the templated class which does the conversion of workspace data into MD WS coordinates;
-//        trn.setUP(this); 
-//
-//        return numSpec;
-//    }
-//
-//    void runConversion(API::Progress *pProg)
-//    {
-//       // counder for the number of events
-//        size_t n_added_events(0);
-//       // amount of work
-//        const size_t numSpec  = inWS2D->getNumberHistograms();
-//      
-//
-//        const size_t specSize = this->inWS2D->blocksize();    
-//        size_t nValidSpectra  = pDetLoc->det_id.size();
-//        // copy experiment info into target workspace
-//        API::ExperimentInfo_sptr ExperimentInfo(inWS2D->cloneExperimentInfo());
-//        // run index;
-//        uint16_t runIndex   = this->pWSWrapper->pWorkspace()->addExperimentInfo(ExperimentInfo);
-//       // number of dimesnions
-//        std::vector<coord_t>  Coord(n_dims);             // coordinates for single event
-//     // if any property dimension is outside of the data range requested, the job is done;
-//        if(!trn.calcGenericVariables(Coord,n_dims))return; 
-//
-//        // take at least bufSize amout of data in one run for efficiency
-//        size_t buf_size     = ((specSize>SPLIT_LEVEL)?specSize:SPLIT_LEVEL);
-//        // allocate temporary buffer for MD Events data
-//        std::vector<coord_t>  allCoord(0); // MD events coordinates buffer
-//        allCoord.reserve(n_dims*buf_size);
-// 
-//        std::vector<float>    sig_err(2*buf_size);       // array for signal and error. 
-//        std::vector<uint16_t> run_index(buf_size);       // Buffer run index for each event 
-//        std::vector<uint32_t> det_ids(buf_size);         // Buffer of det Id-s for each event
+template<Q_state Q, AnalMode MODE>
+class ConvertToMDEvensEventWS: public IConvertToMDEventsMethods 
+{
+    /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
+    /// presumably will be completely inlined
+     template<Q_state Q, AnalMode MODE, CnvrtUnits CONV,XCoordType XTYPE> 
+     friend struct COORD_TRANSFORMER;
+     // the instanciation of the class which does the transformation itself
+     COORD_TRANSFORMER<Q,MODE,ConvFromTOF,Axis> trn; 
+     // vector to keep generic part of event workspaces
+    std::vector<coord_t> Coord;
+    // index of current run(workspace) for MD WS combining
+    uint16_t runIndex;
+ public:
+    size_t  setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const PreprocessedDetectors &detLoc,
+                          const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
+    {
+        size_t numSpec=IConvertToMDEventsMethods::setUPConversion(pWS2D,detLoc,WSD,inWSWrapper);
 
-//
-//      //// Equivalent of: this->convertEventList(wi);
-//      //EventList & el = in_ws->getEventList(wi);
-//
-//      //// We want to bind to the right templated function, so we have to know the type of TofEvent contained in the EventList.
-//      //boost::function<void ()> func;
-//      //switch (el.getEventType())
-//      //{
-//      //case TOF:
-//      //  func = boost::bind(&ConvertToDiffractionMDWorkspace::convertEventList<TofEvent>, &*this, static_cast<int>(wi));
-//      //  break;
-//      //case WEIGHTED:
-//      //  func = boost::bind(&ConvertToDiffractionMDWorkspace::convertEventList<WeightedEvent>, &*this, static_cast<int>(wi));
-//      //  break;
-//      //case WEIGHTED_NOTIME:
-//      //  func = boost::bind(&ConvertToDiffractionMDWorkspace::convertEventList<WeightedEventNoTime>, &*this, static_cast<int>(wi));
-//      //  break;
-//      //default:
-//      //  throw std::runtime_error("EventList had an unexpected data type!");
-//      //}
-//
-//      //// Give this task to the scheduler
-//      //double cost = double(el.getNumberEvents());
-//      //ts->push( new FunctionTask( func, cost) );
-//
-//      //// Keep a running total of how many events we've added
-//      //eventsAdded += el.getNumberEvents();
-//      //if (bc->shouldSplitBoxes(eventsAdded, lastNumBoxes))
-//      //{
-//      //  // Do all the adding tasks
-//      //  tp.joinAll();
-//      //  // Now do all the splitting tasks
-//      //  ws->splitAllIfNeeded(ts);
-//      //  tp.joinAll();
-//
-//      //  // Count the new # of boxes.
-//      //  lastNumBoxes = ws->getBoxController()->getTotalNumMDBoxes();
-//     
-//      //  eventsAdded = 0;
-//      //}
-//
-//
-//   // tp.joinAll();
-//   // // Do a final splitting of everything
-//   // ws->splitAllIfNeeded(ts);
-//   // tp.joinAll();
-//   //
-//   // // Recount totals at the end.
-//   //// cputim.reset();
-//   // ws->refreshCache();
-//   //    //TODO: Centroid in parallel, maybe?
-//   // ws->getBox()->refreshCentroid(NULL);
-//   
-//
-//
-//};
+        // initiate the templated class which does the conversion of workspace data into MD WS coordinates;
+        trn.setUP(this); 
+        // allocate space for single MDEvent coordinates with common coordinates which would propagate everywhere
+        Coord.resize(this->n_dims);
+
+        return numSpec;
+    }
+
+    void runConversion(API::Progress *pProg)
+    {
+          // amount of work
+        const size_t numSpec  = inWS2D->getNumberHistograms();
+      
+
+        const size_t specSize = this->inWS2D->blocksize();    
+        size_t nValidSpectra  = this->pDetLoc->det_id.size();
+        // copy experiment info into target workspace
+        API::ExperimentInfo_sptr ExperimentInfo(inWS2D->cloneExperimentInfo());
+        // run index;
+        runIndex   = this->pWSWrapper->pWorkspace()->addExperimentInfo(ExperimentInfo);
 
 
-    //      // This little dance makes the getting vector of events more general (since you can't overload by return type).
-//      typename std::vector<T> * events_ptr;
-//      getEventsFrom(el, events_ptr);
-//      typename std::vector<T> & events = *events_ptr;
-//
-//      // Iterators to start/end
-//      typename std::vector<T>::iterator it = events.begin();
-//      typename std::vector<T>::iterator it_end = events.end();
-//
-//      for (; it != it_end; it++)
-//      {
-//      // Get the wavenumber in ang^-1 using the previously calculated constant.
-//        double wavenumber = wavenumber_in_angstrom_times_tof_in_microsec / it->tof();
-//
-//
-//        // Q vector = K_final - K_initial = wavenumber * (output_direction - input_direction)
-//        coord_t center[3] = {Q_dir_x * wavenumber, Q_dir_y * wavenumber, Q_dir_z * wavenumber};
-//
-//   
-//          // Push the MDLeanEvent with the same weight
-//          out_events.push_back( MDE(float(it->weight()), float(it->errorSquared()), center) );
-//
-//      }
+       // if any property dimension is outside of the data range requested, the job is done;
+        if(!trn.calcGenericVariables(Coord,this->n_dims))return; 
 
+        size_t lastNumBoxes = this->pWSWrapper->getBoxController()->getTotalNumMDBoxes();
+        size_t eventsAdded  = 0;
+        for (size_t wi=0; wi < inWS2D->getNumberHistograms(); wi++)
+        {     
+           size_t iSpec         = this->pDetLoc->detIDMap[wi];       
+           int32_t det_id       = this->pDetLoc->det_id[wi];
 
-//template <class T>
-//void ConvertToDiffractionMDWorkspace::convertEventList(int workspaceIndex)
-//  {
-//    EventList & el = in_ws->getEventList(workspaceIndex);
-//    size_t numEvents = el.getNumberEvents();
-//
-//    // Get the position of the detector there.
-//    std::set<detid_t>& detectors = el.getDetectorIDs();
-//    if (detectors.size() > 0)
-//    {
-//      // The 3D MDEvents that will be added into the MDEventWorkspce
-//      std::vector<MDE> out_events;
-//      out_events.reserve( el.getNumberEvents() );
-//
-//     
-//      // This little dance makes the getting vector of events more general (since you can't overload by return type).
-//      typename std::vector<T> * events_ptr;
-//      getEventsFrom(el, events_ptr);
-//      typename std::vector<T> & events = *events_ptr;
-//
-//      // Iterators to start/end
-//      typename std::vector<T>::iterator it = events.begin();
-//      typename std::vector<T>::iterator it_end = events.end();
-//
-//      for (; it != it_end; it++)
-//      {
-//      // Get the wavenumber in ang^-1 using the previously calculated constant.
-//        double wavenumber = wavenumber_in_angstrom_times_tof_in_microsec / it->tof();
-//
-//
-//        // Q vector = K_final - K_initial = wavenumber * (output_direction - input_direction)
-//        coord_t center[3] = {Q_dir_x * wavenumber, Q_dir_y * wavenumber, Q_dir_z * wavenumber};
-//
-//   
-//          // Push the MDLeanEvent with the same weight
-//          out_events.push_back( MDE(float(it->weight()), float(it->errorSquared()), center) );
-//
-//      }
-//
+           eventsAdded         += this->conversionChunk(iSpec);
+      // Give this task to the scheduler
+         //%double cost = double(el.getNumberEvents());
+         //ts->push( new FunctionTask( func, cost) );
+
+          // Keep a running total of how many events we've added
+           if (bc->shouldSplitBoxes(eventsAdded, lastNumBoxes)){
+            // Do all the adding tasks
+            //   tp.joinAll();    
+            // Now do all the splitting tasks
+              //ws->splitAllIfNeeded(ts);
+               ws->splitAllIfNeeded(NULL);
+             //if (ts->size() > 0)       tp.joinAll();
+
+            // Count the new # of boxes.
+              lastNumBoxes = pWSWrapper->pWorkspace()->getBoxController()->getTotalNumMDBoxes();
+           }
+   
+       }
+    //tp.joinAll();
+    // Do a final splitting of everything
+    //ws->splitAllIfNeeded(ts);
+    //tp.joinAll();
+    pWSWrapper->pWorkspace()->splitAllIfNeeded(NULL);
+    // Recount totals at the end.
+    pWSWrapper->pWorkspace()->refreshCache(); 
+    pWSWrapper->pWorkspace()->getBox()->refreshCentroid(NULL);
+    }
+    private:
+     //
+      virtual size_t conversionChunk(size_t workspaceIndex)
+      {
+
+        Events::EventList & el =  this->inWS2D->getEventList(workspaceIndex);
+
+        switch (el.getEventType())
+        {
+        case TOF:
+           return this->convertEventList<TofEvent>(workspaceIndex);
+         case WEIGHTED:
+          return  this->convertEventList<WeightedEvent>(workspaceIndex);
+        case WEIGHTED_NOTIME:
+          return this->convertEventList<WeightedEventNoTime>(workspaceIndex);
+        default:
+           throw std::runtime_error("EventList had an unexpected data type!");
+        }
+      };
+    // internal function to convert event list:
+   template <class T>
+   size_t convertEventList(size_t workspaceIndex)
+   {
+       std::vector<coord_t> locCoord(this->Coord);
+       if(!trn.calcYDepCoordinates(locCoord,workspaceIndex))return;   // s
+
+        EventList & el   = this->inWS2D->getEventList(workspaceIndex);
+        size_t numEvents     = el.getNumberEvents();    
+        uint16_t runIndexLoc = this->runIndex;
+
+        // allocate temporary buffer for MD Events data
+        std::vector<coord_t>  allCoord(0); // MD events coordinates buffer
+        allCoord.reserve(this->n_dims*numEvents);
+ 
+        std::vector<float>    sig_err.reserve(2*numEvents);       // array for signal and error. 
+        std::vector<uint16_t> run_index.reserve(numEvents);       // Buffer run index for each event 
+        std::vector<uint32_t> det_ids.reserve(numEvents);         // Buffer of det Id-s for each event
+    
+      // This little dance makes the getting vector of events more general (since you can't overload by return type).
+        typename std::vector<T> * events_ptr;
+        getEventsFrom(el, events_ptr);
+        typename std::vector<T> & events = *events_ptr;
+
+       // Iterators to start/end
+       typename std::vector<T>::iterator it = events.begin();
+       typename std::vector<T>::iterator it_end = events.end();
+
+       for (; it != it_end; it++)
+       {
+         double tof=it->tof();
+         if(!trn.calc1MatrixCoord(tof,locCoord))continue; // skip ND outside the range
+
+            sig_err.push_back(float(it->weight());
+            sig_err.push_back(float(it->errorSquared());
+            run_index.push_back(runIndexLoc);
+            det_ids.push_back(det_id);
+            allCoord.insert(allCoord.end(),locCoord.begin(),locCoord.end());
+      }
+
 //      // Clear out the EventList to save memory
 //      if (ClearInputWorkspace)
 //      {
@@ -348,13 +314,13 @@ public:
 //      }
 //
 //      // Add them to the MDEW
-//      ws->addEvents(out_events);
-//    }
-//    
-//  }
+        size_t n_added_events = run_index.size();
+        pWSWrapper->addMDData(sig_err,run_index,det_ids,allCoord,n_added_events);
 
+        return n_added_events;
+    }
 
-
+};
 
 } // endNamespace MDAlgorithms
 } // endNamespace Mantid

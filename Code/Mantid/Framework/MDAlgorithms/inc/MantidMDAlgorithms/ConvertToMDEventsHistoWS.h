@@ -63,8 +63,8 @@ class ConvertToMDEvensHistoWS: public IConvertToMDEventsMethods
      friend struct COORD_TRANSFORMER;
      // the instanciation of the class which does the transformation itself
      COORD_TRANSFORMER<Q,MODE,CONV,Histohram> trn; 
-     // 
-    virtual void conversionChunk(){};
+     // not yet parallel
+     virtual void conversionChunk(size_t job_ID){}
 public:
     size_t  setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const PreprocessedDetectors &detLoc,
                           const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
@@ -108,12 +108,12 @@ public:
         //External loop over the spectra:
         for (int64_t i = 0; i < int64_t(nValidSpectra); ++i)
         {
-            size_t ic                 = pDetLoc->detIDMap[i];
+            size_t iSpctr             = pDetLoc->detIDMap[i];
             int32_t det_id            = pDetLoc->det_id[i];
 
-            const MantidVec& X        = inWS2D->readX(ic);
-            const MantidVec& Signal   = inWS2D->readY(ic);
-            const MantidVec& Error    = inWS2D->readE(ic);
+            const MantidVec& X        = inWS2D->readX(iSpctr);
+            const MantidVec& Signal   = inWS2D->readY(iSpctr);
+            const MantidVec& Error    = inWS2D->readE(iSpctr);
 
 
             if(!trn.calcYDepCoordinates(Coord,ic))continue;   // skip y outsize of the range;
@@ -124,7 +124,7 @@ public:
                 // drop emtpy events
                 if(Signal[j]<FLT_EPSILON)continue;
 
-                if(!trn.calcMatrixCoord(X,i,j,Coord))continue; // skip ND outside the range
+                if(!trn.calcMatrixCoord(X,iSpec,j,Coord))continue; // skip ND outside the range
                 //  ADD RESULTING EVENTS TO THE WORKSPACE
                 float ErrSq = float(Error[j]*Error[j]);
 
@@ -154,6 +154,7 @@ public:
         }
  
         pWSWrapper->pWorkspace()->refreshCache();
+        pWSWrapper->pWorkspace()->getBox()->refreshCentroid(NULL);
         pProg->report();          
     }
 };
