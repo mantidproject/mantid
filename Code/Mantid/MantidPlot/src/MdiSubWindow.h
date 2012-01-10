@@ -91,9 +91,15 @@ protected:
  *
  * These are the main objects of every Qtiplot project.
  * All content (apart from the directory structure) is managed by subclasses of MdiSubWindow.
+ * 
+ * With introduction of floating windows this class is no longer a sub-window (with window title and system menu)
+ * but rather the internal widget of a QMdiSubWindow or a FloatingWindow. The outer window can be changed between
+ * FloatingWindow and QMdiSubWindow at runtime using ApplicationWindow::changeToFloating(...) and
+ * ApplicationWindow::changeToDocked(...) methods. MdiSubWindow overrides show(), hide(), and close() methods so that the 
+ * corresponding events are passed to the outer window.
  *
- * \section future Future Plans
- * Rename to Aspect.
+ * MdiSubWindow can serve as a wrapper for another widget. Use MdiSubWindow::setWidget(...) to set its internal widget.
+ * In this case if close event needs to be processed override closeEvent(...) of the internal widget.
  *
  * \sa Folder, ApplicationWindow
  */
@@ -278,6 +284,7 @@ class FloatingWindow: public QMainWindow
   Q_OBJECT
 public:
   FloatingWindow(ApplicationWindow* appWindow, Qt::WindowFlags f = 0);
+  ~FloatingWindow();
   void setStaysOnTopFlag();
   void removeStaysOnTopFlag();
   MdiSubWindow* mdiSubWindow() {return static_cast<MdiSubWindow*>(widget());}

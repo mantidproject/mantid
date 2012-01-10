@@ -164,8 +164,8 @@ void MdiSubWindow::closeEvent( QCloseEvent *e )
 
   switch(result)
   {
-  case 0:
-    if (widget()->close())
+  case 0: // close
+    if (!widget() || widget()->close())
     {
       e->accept();
       emit closedWindow(this);
@@ -178,12 +178,12 @@ void MdiSubWindow::closeEvent( QCloseEvent *e )
     }
     break;
 
-  case 1:
+  case 1: // hide
     e->ignore();
     emit hiddenWindow(this);
     break;
 
-  case 2:
+  case 2: // cancel
     e->ignore();
     break;
   }
@@ -475,6 +475,11 @@ d_app(appWindow)
   setAttribute(Qt::WA_DeleteOnClose, false);
 }
 
+FloatingWindow::~FloatingWindow()
+{
+  //std::cerr << "Deleted FloatingWindow\n";
+}
+
 /**
  * Catch the WindowActivate event to tell ApplicationWindow that it's activated
  */
@@ -513,7 +518,10 @@ bool FloatingWindow::event(QEvent * e)
   }
   else if (e->type() == QEvent::Close)
   {
-    d_app->removeFloatingWindow(this);
+    if (widget() && widget()->close())
+    {
+      d_app->removeFloatingWindow(this);
+    }
   }
   return QMainWindow::event(e);
 }
