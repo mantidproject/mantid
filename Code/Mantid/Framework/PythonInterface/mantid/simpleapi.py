@@ -298,7 +298,7 @@ def create_algorithm_dialog(algorithm, version, _algm_object):
     # Dark magic to get the correct function signature
     #_algm_object = mtd.createUnmanagedAlgorithm(algorithm, version)
     arg_list = []
-    for p in _algm_object.mandatoryProperties():
+    for p in _algm_object.orderedProperties():
         arg_list.append("%s=None" % p)
     arg_str = ','.join(arg_list)
     signature = "\b%s" % arg_str

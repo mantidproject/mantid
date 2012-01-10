@@ -46,7 +46,7 @@ namespace
     /**
      * Returns a list of input property names that is ordered such that the
      * mandatory properties are first followed by the optional ones. The list
-     * also includes InOut properties.
+     * excludes output properties.
      * @param self :: A pointer to the python object wrapping and Algorithm.
      * @return A Python list of strings
      */
@@ -65,6 +65,28 @@ namespace
         {
           PyList_Append(names, PyString_FromString(p->name().c_str()));
         }
+      }
+      return names;
+    }
+
+     /**
+     * Returns a list of input property names that is ordered such that the
+     * mandatory properties are first followed by the optional ones. The list
+     * also includes InOut properties.
+     * @param self :: A pointer to the python object wrapping and Algorithm.
+     * @return A Python list of strings
+     */
+    PyObject * getAlgorithmPropertiesOrdered(IAlgorithm & self)
+    {
+      PropVector properties(self.getProperties()); // Makes a copy so that it can be sorted
+      std::sort(properties.begin(), properties.end(), MandatoryFirst());
+      PropVector::const_iterator iend = properties.end();
+      // Build a python list
+      PyObject *names = PyList_New(0);
+      for (PropVector::const_iterator itr = properties.begin(); itr != iend; ++itr)
+      {
+        Property *p = *itr;
+        PyList_Append(names, PyString_FromString(p->name().c_str()));
       }
       return names;
     }
@@ -158,6 +180,8 @@ void export_algorithm()
     .def("getWikiDescription", &IAlgorithm::getWikiDescription, "Returns the description found on the wiki page using wiki markup")
     .def("docString", &createDocString, "Returns a doc string for the algorithm")
     .def("mandatoryProperties",&getInputPropertiesWithMandatoryFirst, "Returns a list of input and in/out property names that is ordered "
+          "such that the mandatory properties are first followed by the optional ones.")
+    .def("orderedProperties", &getAlgorithmPropertiesOrdered, "Return a list of input, in/out and output properties "
           "such that the mandatory properties are first followed by the optional ones.")
     .def("outputProperties",&getOutputProperties, "Returns a list of the output properties on the algorithm")
     .def("isInitialized", &IAlgorithm::isInitialized, "Returns True if the algorithm is initialized, False otherwise")
