@@ -25,6 +25,8 @@ namespace Algorithms
   SignalOverError::SignalOverError()
   : UnaryOperation()
   {
+    // Flag that EventWorkspaces will become histograms
+    this->useHistogram=true;
   }
     
   //----------------------------------------------------------------------------------------------
