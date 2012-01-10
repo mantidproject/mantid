@@ -149,5 +149,5 @@ class MantidPlotSliceViewerTest(unittest.TestCase):
         
         
 # Run the unit tests
-mantidplottests.runTests(MantidPlotSliceViewerTest)
+mantidplottests.runTests(MantidPlotSliceViewerTest) 
 
