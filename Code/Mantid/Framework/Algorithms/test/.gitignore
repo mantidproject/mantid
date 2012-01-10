@@ -1,5 +1,14 @@
+*.exe
+*.cpp
+*.filters
+*.vcxproj
+*.sln
+test_header.h
+*.propeties
+
 DivideTest.h
-MinusTest.h
+MunusTest.h
 MultiplyTest.h
 PlusTest.h
-*.cpp
+
+*.gitignore
