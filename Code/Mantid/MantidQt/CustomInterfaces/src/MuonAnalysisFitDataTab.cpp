@@ -48,10 +48,6 @@ void MuonAnalysisFitDataTab::makeRawWorkspace(const std::string& wsName)
   duplicate->setProperty<Mantid::API::Workspace_sptr>("InputWorkspace", inputWs);
   duplicate->setPropertyValue("OutputWorkspace", wsName + "_Raw");
   duplicate->execute();
-
-  Mantid::API::Workspace_sptr temp = duplicate->getProperty("OutputWorkspace");
-  Mantid::API::MatrixWorkspace_sptr outputWs = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(temp);
-  //Mantid::API::AnalysisDataService::Instance().add(wsName + "_Raw", outputWs);
 }
 
 

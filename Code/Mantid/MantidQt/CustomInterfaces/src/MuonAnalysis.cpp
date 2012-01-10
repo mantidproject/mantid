@@ -1575,8 +1575,8 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
 
         normalise(rawX, rawY, cropWS + "_Raw");
 
-        pyString = "RemoveExpDecay(\"" + cropWS + "_Raw\",\"" 
-        + cropWS + "_Raw\")\n" + pyS;
+        pyString += "RemoveExpDecay(\"" + cropWS + "_Raw\",\"" 
+        + cropWS + "_Raw\")\n";
       }
     }
     else if (plotType.compare("Logorithm") == 0)
