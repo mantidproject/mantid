@@ -77,11 +77,11 @@ namespace MDAlgorithms
     enum XCoordType
     {
         Histohram, // typical for Matrix workspace -- deploys central average 0.5(X[i]+X[i+1]); other types of averaging are possible if needed 
-        Axis       // typical for events
+        Centered   // typical for events
     };
 
  
- class IConvertToMDEventsMethods
+ class DLLExport IConvertToMDEventsMethods
  {
     template<Q_state Q,AnalMode MODE,CnvrtUnits CONV,XCoordType Type>
     friend struct COORD_TRANSFORMER;
