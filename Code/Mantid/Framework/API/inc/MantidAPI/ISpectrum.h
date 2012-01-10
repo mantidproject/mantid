@@ -102,6 +102,7 @@ namespace API
     void addDetectorIDs(const std::set<detid_t> detIDs);
     void addDetectorIDs(const std::vector<detid_t> detIDs);
     void setDetectorID(const detid_t detID);
+   
 
     bool hasDetectorID(const detid_t detID) const;
 

@@ -164,8 +164,8 @@ void MdiSubWindow::closeEvent( QCloseEvent *e )
 
   switch(result)
   {
-  case 0:
-    if (widget()->close())
+  case 0: // close
+    if (!widget() || widget()->close())
     {
       e->accept();
       emit closedWindow(this);
@@ -178,12 +178,12 @@ void MdiSubWindow::closeEvent( QCloseEvent *e )
     }
     break;
 
-  case 1:
+  case 1: // hide
     e->ignore();
     emit hiddenWindow(this);
     break;
 
-  case 2:
+  case 2: // cancel
     e->ignore();
     break;
   }
@@ -469,6 +469,15 @@ d_app(appWindow)
   setFocusPolicy(Qt::StrongFocus);
   connect(appWindow,SIGNAL(shutting_down()),this,SLOT(close()));
   m_flags = windowFlags();
+  // Window must NOT get deleted automatically when closed.
+  // Instead, the ApplicationWindow->removeFloatingWindow() call takes care of
+  // calling deleteLater().
+  setAttribute(Qt::WA_DeleteOnClose, false);
+}
+
+FloatingWindow::~FloatingWindow()
+{
+  //std::cerr << "Deleted FloatingWindow\n";
 }
 
 /**
@@ -509,7 +518,10 @@ bool FloatingWindow::event(QEvent * e)
   }
   else if (e->type() == QEvent::Close)
   {
-    d_app->removeFloatingWindow(this);
+    if (widget() && widget()->close())
+    {
+      d_app->removeFloatingWindow(this);
+    }
   }
   return QMainWindow::event(e);
 }
@@ -536,3 +548,75 @@ void FloatingWindow::removeStaysOnTopFlag()
   }
 }
 
+/** Sets the underlying MdiSubWindow */
+void FloatingWindow::setMdiSubWindow(MdiSubWindow* sw)
+{
+  setWidget(sw);
+}
+
+
+/** removes the underlying MdiSubWindow */
+void FloatingWindow::removeMdiSubWindow()
+{
+  MdiSubWindowParent_t* wrapper = dynamic_cast<MdiSubWindowParent_t*>(centralWidget());
+  if (wrapper)
+  {
+    wrapper->setWidget(NULL);
+  }
+}
+
+/** Sets the widget displayed in the FloatingWindow
+ *
+ * @param w :: MdiSubWindow being floated
+ */
+void FloatingWindow::setWidget(QWidget* w)
+{
+  MdiSubWindowParent_t* wrapper = new MdiSubWindowParent_t(this);
+  wrapper->setWidget(w);
+  setCentralWidget(wrapper);
+}
+
+//
+///**
+// * Handle the close event.
+// * @param e :: A QCloseEvent event.
+// */
+//void FloatingWindow::closeEvent( QCloseEvent *e )
+//{
+//  // Default result = do close.
+//  int result = 0;
+//
+////  // If you need to confirm the close, ask the user
+////  if (d_confirm_close)
+////  {
+////    result = QMessageBox::information(this, tr("MantidPlot"),
+////        tr("Do you want to hide or delete") + "<p><b>'" + objectName() + "'</b> ?",
+////        tr("Delete"), tr("Hide"), tr("Cancel"), 0, 2);
+////  }
+//
+//  switch(result)
+//  {
+//  case 0:
+//    if (widget()->close())
+//    {
+//      e->accept();
+//      // Continue; the mdi window should close (?)
+//    }
+//    else
+//    {
+//      QMessageBox::critical(parentWidget(),"MantidPlot - Error", "Window cannot be closed");
+//      e->ignore();
+//    }
+//    break;
+//
+////  case 1:
+////    e->ignore();
+////    emit hiddenWindow(this);
+////    break;
+////
+////  case 2:
+////    e->ignore();
+////    break;
+//  }
+//
+//}

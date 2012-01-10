@@ -79,7 +79,7 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,
           new WorkspaceUnitValidator<>("dSpacing")),"A 2D workspace with X values of d-spacing");
 
-      declareProperty("DReference","2.0","Optional: enter a comma-separated list of the expected X-position of the centre of the peaks. Only peaks near these positions will be fitted." );
+      declareProperty("DReference","2.0","Enter a comma-separated list of the expected X-position of the centre of the peaks. Only peaks near these positions will be fitted." );
 
       declareProperty(new FileProperty("GroupingFileName","", FileProperty::OptionalSave, ".cal"),
           "Optional: The name of the output CalFile to save the generated OffsetsWorkspace." );

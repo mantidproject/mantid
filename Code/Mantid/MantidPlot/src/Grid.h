@@ -33,8 +33,9 @@
 #include <qwt_plot_grid.h>
 #include <qwt_plot_marker.h>
 
-class Grid : public QwtPlotGrid
+class Grid : public QObject, public QwtPlotGrid // Made a QObject just for our python proxies
 {
+  Q_OBJECT
 public:
     Grid();
 

@@ -93,9 +93,8 @@ namespace Algorithms
 
     std::vector<std::string> exts;
     exts.push_back(".dat");
-    declareProperty(new FileProperty("CalibrationFile", "", FileProperty::OptionalLoad, exts),
-       "Optional: The .cal file containing the position correction factors. Either this or OffsetsWorkspace needs to be specified.");
-
+    declareProperty(new FileProperty("CalibrationFile", "", FileProperty::Load, exts),
+       "The .dat file containing the position correction factors.  It is given by VULCAN instrument scientist, but not a Mantid calibration file. ");
   }
 
   //-----------------------------------------------------------------------

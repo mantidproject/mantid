@@ -36,7 +36,7 @@
 
 #include <QPainter>
 
-Grid::Grid() : QwtPlotGrid(),
+Grid::Grid() : QObject(), QwtPlotGrid(),
 d_maj_pen_y(QPen(Qt::blue, 0.5, Qt::SolidLine)),
 d_min_pen_y(QPen(Qt::gray, 0.4, Qt::DotLine)),
 mrkX(-1),

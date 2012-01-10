@@ -30,6 +30,22 @@ _framework = api.FrameworkManager.Instance()
 def version():
     return "simpleapi - memory-based version"
 
+def _is_workspace_property(prop):
+    """
+        Returns true if the property is a workspace property.
+        
+        Currently several properties , i.e WorspaceProperty<EventWorkspace>
+        cannot be recognised by Python so we have to resort to a name test
+        
+        @param prop - A property object
+        @returns True if the property is considered to be of type workspace
+    """
+    if isinstance(prop, api.IWorkspaceProperty):
+        return True
+    if 'Workspace' in prop.name: return True
+    # Doesn't look like a workspace property
+    return False
+
 def get_additional_args(lhs, algm_obj):
     """
         Return the extra arguments that are to be passed to the algorithm
@@ -55,7 +71,12 @@ def get_additional_args(lhs, algm_obj):
     i = 0
     while len(ret_names) > 0 and i < nprops:
         p = output_props[i]
-        if isinstance(p,api.IWorkspaceProperty):
+        #
+        # Some algorithms declare properties as EventWorkspace and not its interface
+        # so Python doesn't know about it. Need to find a better way of
+        # dealing with WorkspaceProperty types. If they didn't multiple inherit
+        # that would help
+        if _is_workspace_property(p):
             extra_args[p.name] = ret_names[0]
             ret_names = ret_names[1:]
         i += 1
@@ -84,7 +105,7 @@ def gather_returns(func_name, lhs, algm_obj, ignore=[]):
     for name in algm_obj.outputProperties():
         if name in ignore: continue
         prop = algm_obj.getProperty(name)
-        if isinstance(prop, api.IWorkspaceProperty) and not algm_obj.isChild():
+        if not algm_obj.isChild() and _is_workspace_property(prop):
             retvals.append(_ads[prop.valueAsStr])
         else:
             retvals.append(prop.value)
