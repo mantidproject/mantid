@@ -1482,8 +1482,16 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     if ( extPos!=std::string::npos)
       workspaceGroupName = workspaceGroupName.substr(0,extPos);
     
-    QString cropWSfirstPart = QString(workspaceGroupName.c_str()) + "; Group="
+    QString wsGroupName(workspaceGroupName.c_str());
+
+    if (wsGroupName.contains("_"))
+    {
+      wsGroupName.replace(wsGroupName.find("_"), 1, "-");
+    }
+
+    QString cropWSfirstPart = wsGroupName + "; Group="
       + groupName + "";
+
     // decide on name for workspace to be plotted
     QString cropWS(getNewPlotName(cropWSfirstPart));
     
@@ -1494,7 +1502,7 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     bool rawExists = Mantid::API::AnalysisDataService::Instance().doesExist(titleLabel.toStdString() + "_Raw");
 
     // create the plot workspace
-    createPlotWS(workspaceGroupName,cropWS.toStdString());
+    createPlotWS(wsGroupName.toStdString(),cropWS.toStdString());
 
     // create first part of plotting Python string
     QString gNum = QString::number(groupNum);
@@ -1601,9 +1609,9 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     if (!rawExists)
     {
       std::vector<std::string> groupWorkspaces;
-      groupWorkspaces.push_back(workspaceGroupName);
+      groupWorkspaces.push_back(wsGroupName.toStdString());
       groupWorkspaces.push_back(titleLabel.toStdString() + "_Raw");
-      m_fitDataTab->groupRawWorkspace(groupWorkspaces, workspaceGroupName);
+      m_fitDataTab->groupRawWorkspace(groupWorkspaces, wsGroupName.toStdString());
     }
 
     // Change the plot style of the graph so that it matches what is selected on 
@@ -1655,8 +1663,15 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     if ( extPos!=std::string::npos)
       workspaceGroupName = workspaceGroupName.substr(0,extPos);
 
-    QString cropWSfirstPart = QString(workspaceGroupName.c_str()) + "; Group="
-      + pairName + "";
+    QString wsGroupName(workspaceGroupName.c_str());
+
+    if (wsGroupName.contains("_"))
+    {
+      wsGroupName.replace(wsGroupName.find("_"), 1, "-");
+    }
+
+    QString cropWSfirstPart = wsGroupName + "; Group=" + pairName + "";
+    
     // decide on name for workspace to be plotted
     QString cropWS(getNewPlotName(cropWSfirstPart));
 
@@ -1667,7 +1682,7 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     bool rawExists = Mantid::API::AnalysisDataService::Instance().doesExist(titleLabel.toStdString() + "_Raw");
 
     // Create the workspace and raw workspace if there isn't one already.
-    createPlotWS(workspaceGroupName,cropWS.toStdString());
+    createPlotWS(wsGroupName.toStdString(),cropWS.toStdString());
 
     // create first part of plotting Python string
     QString gNum = QString::number(pairNum);
@@ -1750,9 +1765,9 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     if (!rawExists)
     {
       std::vector<std::string> groupWorkspaces;
-      groupWorkspaces.push_back(workspaceGroupName);
+      groupWorkspaces.push_back(wsGroupName.toStdString());
       groupWorkspaces.push_back(titleLabel.toStdString() + "_Raw");
-      m_fitDataTab->groupRawWorkspace(groupWorkspaces, workspaceGroupName);
+      m_fitDataTab->groupRawWorkspace(groupWorkspaces, wsGroupName.toStdString());
     }    
 
     // Change the plot style of the graph so that it matches what is selected on 
