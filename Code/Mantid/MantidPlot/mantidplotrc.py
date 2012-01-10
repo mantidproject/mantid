@@ -40,12 +40,12 @@ if __name__ == '__main__':
         # Adding this fixes that and appears to do no harm elsewhere
         from mantidsimple import *
     elif _api == 2:
-        from mantid import *
         from mantid.kernel.plugins import PyAlgLoader
         # Make sure the Python algorithms are loaded as these all have to use the old API at the moment
         loader = PyAlgLoader()
         loader.load_modules()
         # Create simple API
+        from mantid import *
         from mantid.simpleapi import * 
     else:
         raise Runtime("Unknown Python API version requested: %d" % _api)
