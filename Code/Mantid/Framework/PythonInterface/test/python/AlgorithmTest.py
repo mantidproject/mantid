@@ -15,7 +15,9 @@ class AlgorithmTest(unittest.TestCase):
         self.assertTrue(self._load.name(), 'Load')
         self.assertTrue(self._load.version(), 1)
         self.assertTrue(self._load.category(), 'DataHandling')
-    
+
+    def test_get_unknown_property_raises_error(self):
+        self.assertRaises(RuntimeError, self._load.getProperty, "NotAProperty")
         
     def test_alg_set_valid_prop_succeeds(self):
         self._load.setProperty('Filename', 'LOQ48127.raw')

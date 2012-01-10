@@ -1,11 +1,18 @@
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/IEventList.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidPythonInterface/kernel/SingleValueTypeHandler.h"
+#include "MantidPythonInterface/kernel/PropertyWithValue.h"
 
 #include <boost/python/class.hpp>
+#include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::API::IEventWorkspace;
+using Mantid::API::IEventWorkspace_sptr;
 using Mantid::API::IEventList;
+using Mantid::API::WorkspaceProperty;
+using Mantid::API::IWorkspaceProperty;
+using Mantid::Kernel::PropertyWithValue;
 using namespace boost::python;
 
 void export_IEventWorkspace()
@@ -23,4 +30,13 @@ void export_IEventWorkspace()
     ;
 
   DECLARE_SINGLEVALUETYPEHANDLER(IEventWorkspace, Mantid::Kernel::DataItem_sptr);
+}
+
+void export_IEventWorkspaceProperty()
+{
+  EXPORT_PROP_W_VALUE(IEventWorkspace_sptr, IEventWorkspace);
+  register_ptr_to_python<WorkspaceProperty<IEventWorkspace>*>();
+  class_<WorkspaceProperty<IEventWorkspace>, bases<PropertyWithValue<IEventWorkspace_sptr>,IWorkspaceProperty>,
+         boost::noncopyable>("WorkspaceProperty_IEventWorkspace", no_init)
+      ;
 }
