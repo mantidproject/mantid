@@ -15405,11 +15405,11 @@ bool ApplicationWindow::changeFolder(Folder *newFolder, bool force)
     if (!hiddenWindows->contains(w) && show_windows_policy != HideAll){
       //show only windows in the current folder which are not hidden by the user
       if(w->status() == MdiSubWindow::Normal)
-        w->showNormal();
+        w->setNormal();
       else if(w->status() == MdiSubWindow::Minimized)
-        w->showMinimized();
+        w->setMinimized();
       else if(w->status() == MdiSubWindow::Maximized)
-        w->showMaximized();
+        w->setMaximized();
     } else
       w->setStatus(MdiSubWindow::Hidden);
 
