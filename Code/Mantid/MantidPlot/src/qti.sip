@@ -519,7 +519,7 @@ private:
   QwtPlotSpectrogram(const QwtPlotSpectrogram&);
 };
 
-class Spectrogram : QwtPlotSpectrogram
+class Spectrogram : QObject, QwtPlotSpectrogram
 {
 %TypeHeaderCode
 #include "src/Spectrogram.h"
@@ -1144,6 +1144,8 @@ public:
   MantidUI* mantidUI;
   void addUserMenu(const QString &);
   void addUserMenuAction(const QString &, const QString &, const QString &);
+
+  void setConfirmFolderClose(bool value);
   //--------------
 private:
   ApplicationWindow(const ApplicationWindow&);

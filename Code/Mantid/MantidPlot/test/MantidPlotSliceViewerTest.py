@@ -13,13 +13,17 @@ import mantidplottests
 from mantidplottests import *
 import time
 
-CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace='mdw')
-FakeMDEventData("mdw",  UniformParams="1e5")
-FakeMDEventData("mdw",  PeakParams="1e4, 2,4,6, 1.5")
-BinMD("mdw", "uniform",  1, "x,0,10,30", "y,0,10,30", "z,0,10,30", IterateEvents="1", Parallel="0")
-CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace='empty')
-CreateMDWorkspace(Dimensions='4',Extents='0,10,0,10,0,10,0,10',Names='x,y,z,e',Units='m,m,m,meV',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace='md4')
-
+good_setup = False
+try: 
+    CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace='mdw')
+    FakeMDEventData(InputWorkspace="mdw",  UniformParams="1e5")
+    FakeMDEventData(InputWorkspace="mdw",  PeakParams="1e4, 2,4,6, 1.5")
+    BinMD(InputWorkspace="mdw", OutputWorkspace="uniform",  AlignedDim=1, AlignedDimX="x,0,10,30", AlignedDimY="y,0,10,30", AlignedDimZ="z,0,10,30", IterateEvents="1", Parallel="0")
+    CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace='empty')
+    CreateMDWorkspace(Dimensions='4',Extents='0,10,0,10,0,10,0,10',Names='x,y,z,e',Units='m,m,m,meV',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace='md4')
+    good_setup = True
+except:
+    pass
 
 class MantidPlotSliceViewerTest(unittest.TestCase):
     
@@ -29,6 +33,10 @@ class MantidPlotSliceViewerTest(unittest.TestCase):
     def tearDown(self):
         closeAllSliceViewers()
         pass
+    
+    def test_good_setup(self):
+        global good_setup
+        self.assertTrue(good_setup, "Data was setup correctly")
 
     def test_plotSlice(self):
         """ Basic plotSlice() usage """

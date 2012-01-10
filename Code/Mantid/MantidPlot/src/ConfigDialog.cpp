@@ -736,7 +736,7 @@ void ConfigDialog::initMantidOptionsTab()
   // Default Python API check box
   m_defaultToNewPython = new QCheckBox("Use new-style Python by default (requires a restart of MantidPlot to take effect)");
   QSettings settings;
-  int apiVersion = settings.value("Mantid/Python/APIVersion", 2).toInt();
+  int apiVersion = settings.value("Mantid/Python/APIVersion", 1).toInt();
 
   if( apiVersion == 2 ) m_defaultToNewPython->setChecked(true);
   else m_defaultToNewPython->setChecked(false);

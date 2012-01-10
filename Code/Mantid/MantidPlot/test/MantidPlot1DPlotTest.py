@@ -20,8 +20,7 @@ X = np.append(X1, X2)
 Y = np.append(Y1, Y2)
 E = np.sqrt(Y)
 
-CreateWorkspace("fake", list(X), list(Y), list(E), NSpec=2, UnitX="TOF", YUnitLabel="Counts",  WorkspaceTitle="Faked data Workspace")
-#CreateWorkspace("fake2", X, Y, E, NSpec=2, UnitX="TOF", YUnitLabel="Counts",  WorkspaceTitle="Faked data Workspace")
+CreateWorkspace(OutputWorkspace="fake", DataX=list(X), DataY=list(Y), DataE=list(E), NSpec=2, UnitX="TOF", YUnitLabel="Counts",  WorkspaceTitle="Faked data Workspace")
 
 class MantidPlot1DPlotTest(unittest.TestCase):
     
