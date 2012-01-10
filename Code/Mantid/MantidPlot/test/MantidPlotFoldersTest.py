@@ -41,18 +41,18 @@ class MantidPlotFoldersTest(unittest.TestCase):
         deleteFolder(f)
         self.assertTrue(f._getHeldObject() is None, "Folder was deleted")
         
-#    def test_Folder_accessing_windows(self):
-#        """ Access windows through a folder """
-#        f, old_windows = self.setup_folder("fld")
-#        windows = f.windows()
-#        self.assertEqual(len(windows), 4, "4 windows in folder")
-#        self.assertTrue( f.window("table-fld") is not None)
-#        self.assertTrue( f.table("table-fld") is not None)
-#        self.assertTrue( f.matrix("matrix-fld") is not None)
-#        self.assertTrue( f.graph("graph-fld") is not None)
-#        deleteFolder(f)
-#        for w in windows: w.close()
-#        
+    def test_Folder_accessing_windows(self):
+        """ Access windows through a folder """
+        f, old_windows = self.setup_folder("fld")
+        windows = f.windows()
+        self.assertEqual(len(windows), 4, "4 windows in folder")
+        self.assertTrue( f.window("table-fld") is not None)
+        self.assertTrue( f.table("table-fld") is not None)
+        self.assertTrue( f.matrix("matrix-fld") is not None)
+        self.assertTrue( f.graph("graph-fld") is not None)
+        for w in windows: w.close()
+        deleteFolder(f)
+        
 # FIXME: this fails if some of the windows are floating (Graphs in my case)
 #    def test_switchFolder_windows(self):
 #        """ Access windows through a folder """
