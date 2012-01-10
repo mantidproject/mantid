@@ -18,7 +18,7 @@ try:
     CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace='mdw')
     FakeMDEventData(InputWorkspace="mdw",  UniformParams="1e5")
     FakeMDEventData(InputWorkspace="mdw",  PeakParams="1e4, 2,4,6, 1.5")
-    BinMD(InputWorkspace="mdw", OutputWorkspace="uniform",  AlignedDim=1, AlignedDimX="x,0,10,30", AlignedDimY="y,0,10,30", AlignedDimZ="z,0,10,30", IterateEvents="1", Parallel="0")
+    BinMD(InputWorkspace="mdw", OutputWorkspace="uniform",  AxisAligned=1, AlignedDimX="x,0,10,30", AlignedDimY="y,0,10,30", AlignedDimZ="z,0,10,30", IterateEvents="1", Parallel="0")
     CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace='empty')
     CreateMDWorkspace(Dimensions='4',Extents='0,10,0,10,0,10,0,10',Names='x,y,z,e',Units='m,m,m,meV',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace='md4')
     good_setup = True
@@ -149,5 +149,5 @@ class MantidPlotSliceViewerTest(unittest.TestCase):
         
         
 # Run the unit tests
-mantidplottests.runTests(MantidPlotSliceViewerTest)
+mantidplottests.runTests(MantidPlotSliceViewerTest) 
 
