@@ -3098,11 +3098,11 @@ Note* ApplicationWindow::newNote(const QString& caption)
 
   addMdiSubWindow(m);
 
-  connect(m, SIGNAL(modifiedWindow(MdiSubWindow*)), this, SLOT(modifiedProject(MdiSubWindow*)));
-  connect(m, SIGNAL(resizedWindow(MdiSubWindow*)),this,SLOT(modifiedProject(MdiSubWindow*)));
-  connect(m, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(closeWindow(MdiSubWindow*)));
-  connect(m, SIGNAL(hiddenWindow(MdiSubWindow*)), this, SLOT(hideWindow(MdiSubWindow*)));
-  connect(m, SIGNAL(statusChanged(MdiSubWindow*)), this, SLOT(updateWindowStatus(MdiSubWindow*)));
+  //connect(m, SIGNAL(modifiedWindow(MdiSubWindow*)), this, SLOT(modifiedProject(MdiSubWindow*)));
+  //connect(m, SIGNAL(resizedWindow(MdiSubWindow*)),this,SLOT(modifiedProject(MdiSubWindow*)));
+  //connect(m, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(closeWindow(MdiSubWindow*)));
+  //connect(m, SIGNAL(hiddenWindow(MdiSubWindow*)), this, SLOT(hideWindow(MdiSubWindow*)));
+  //connect(m, SIGNAL(statusChanged(MdiSubWindow*)), this, SLOT(updateWindowStatus(MdiSubWindow*)));
 
   m->showNormal();
   return m;
@@ -4501,7 +4501,8 @@ ApplicationWindow* ApplicationWindow::openProject(const QString& fn, bool factor
       app->setListViewDate(caption, graph[3]);
       plot->setBirthDate(graph[3]);
 
-      restoreWindowGeometry(app, plot, t.readLine());
+      //restoreWindowGeometry(app, plot, t.readLine());
+      t.readLine();
       plot->blockSignals(true);
 
       if (d_file_version > 71)
@@ -4776,7 +4777,7 @@ MdiSubWindow* ApplicationWindow::openTemplate(const QString& fn)
       if (w){
         dynamic_cast<MultiLayer*>(w)->setCols(cols);
         dynamic_cast<MultiLayer*>(w)->setRows(rows);
-        restoreWindowGeometry(this, w, geometry);
+        //restoreWindowGeometry(this, w, geometry);
         if (d_file_version > 83){
           QStringList lst=t.readLine().split("\t", QString::SkipEmptyParts);
           dynamic_cast<MultiLayer*>(w)->setMargins(lst[1].toInt(),lst[2].toInt(),lst[3].toInt(),lst[4].toInt());
@@ -4809,7 +4810,7 @@ MdiSubWindow* ApplicationWindow::openTemplate(const QString& fn)
         while (!t.atEnd())
           lst << t.readLine();
         w->restore(lst);
-        restoreWindowGeometry(this, w, geometry);
+        //restoreWindowGeometry(this, w, geometry);
       }
     }
   }
@@ -10695,7 +10696,7 @@ Note* ApplicationWindow::openNote(ApplicationWindow* app, const QStringList &fli
     app->setListViewDate(caption, lst[1]);
     w->setBirthDate(lst[1]);
   }
-  restoreWindowGeometry(app, w, flist[1]);
+  //restoreWindowGeometry(app, w, flist[1]);
 
   lst=flist[2].split("\t");
   w->setWindowLabel(lst[1]);
@@ -10799,7 +10800,7 @@ void ApplicationWindow::openMantidMatrix(const QStringList &list)
     QStringList fields = (*line).split("\t");
     if (fields[0] == "geometry" || fields[0] == "tgeometry") 
     {
-      restoreWindowGeometry(this, m, *line);
+      //restoreWindowGeometry(this, m, *line);
     }
   }
 }
@@ -10811,14 +10812,14 @@ void ApplicationWindow::openInstrumentWindow(const QStringList &list)
   InstrumentWindow *insWin = mantidUI->getInstrumentView(wsName);
   if(!insWin) 
     return;
-  insWin->show();
+  //insWin->show();
   QStringList::const_iterator line = list.begin();
   for (line++; line!=list.end(); ++line)
   {	
     QStringList fields = (*line).split("\t");
     if (fields[0] == "geometry" || fields[0] == "tgeometry") 
     {
-      restoreWindowGeometry(this, insWin, *line);
+      //restoreWindowGeometry(this, insWin, *line);
     }
   }
 }
@@ -11791,7 +11792,7 @@ Graph3D* ApplicationWindow::openSurfacePlot(ApplicationWindow* app, const QStrin
   app->setListViewDate(caption, date);
   plot->setBirthDate(date);
   plot->setIgnoreFonts(true);
-  restoreWindowGeometry(app, plot, lst[1]);
+  //restoreWindowGeometry(app, plot, lst[1]);
 
   fList=lst[4].split("\t", QString::SkipEmptyParts);
   plot->setGrid(fList[1].toInt());
@@ -14679,7 +14680,7 @@ Folder* ApplicationWindow::appendProject(const QString& fn, Folder* parentFolder
         plot->setBirthDate(graph[3]);
         plot->blockSignals(true);
 
-        restoreWindowGeometry(this, plot, t.readLine());
+        //restoreWindowGeometry(this, plot, t.readLine());
 
         if (d_file_version > 71){
           QStringList lst=t.readLine().split("\t");
@@ -15998,8 +15999,13 @@ void ApplicationWindow::cascade()
   int y = 0;
   QList<QMdiSubWindow*> windows = d_workspace->subWindowList(QMdiArea::StackingOrder);
   foreach (QMdiSubWindow *w, windows){
+    MdiSubWindow* innerWidget = dynamic_cast<MdiSubWindow*>(w->widget());
+    if (!innerWidget)
+    {
+      throw std::runtime_error("A non-MdiSubWindow detected in the MDI area");
+    }
     w->setActiveWindow();
-    dynamic_cast<MdiSubWindow*>(w)->setNormal();
+    innerWidget->setNormal();
     w->setGeometry(x, y, w->geometry().width(), w->geometry().height());
     w->raise();
     x += xoffset;
