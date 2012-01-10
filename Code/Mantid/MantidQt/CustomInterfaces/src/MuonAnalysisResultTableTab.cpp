@@ -155,6 +155,13 @@ void MuonAnalysisResultTableTab::populateTables(const QStringList& wsList)
   // Populate the individual log values and fittings into their respective tables.
   populateFittings(sameFittedWsList);
   populateLogsAndValues(sameFittedWsList);
+
+  QTableWidgetItem* temp = static_cast<QTableWidgetItem*>(m_uiForm.valueTable->item(0,0));
+  // If there is no item in the first row then there must be no log files found between the two data sets.
+  if (temp == NULL)
+  {
+    QMessageBox::information(this, "Mantid - Muon Analysis", "There were no common log files found.");
+  }
 }
 
 
