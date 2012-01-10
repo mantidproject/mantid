@@ -7,6 +7,7 @@ file ( GLOB_RECURSE qtplugins ${bundle}/Contents/Frameworks/plugins/*.dylib )
 file ( GLOB_RECURSE mtdqtplugins ${bundle}/plugins/*.dylib )
 set ( mantidpydir ${bundle}/Contents/MacOS/mantid ) 
 set ( mantidpy ${mantidpydir}/kernel/_kernel.so
+               ${mantidpydir}/kernel/_dlopen.so
                ${mantidpydir}/geometry/_geometry.so
                ${mantidpydir}/api/_api.so )
 
