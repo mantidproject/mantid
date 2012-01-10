@@ -1640,7 +1640,16 @@ bool MantidTreeWidgetItem::operator<(const QTreeWidgetItem &other)const
       if(childCount() > 0 && other.childCount() > 0)
       {
         const QTreeWidgetItem * other_ptr = &other;
-        return getLastModified(this) < getLastModified(other_ptr);
+
+        try
+        {
+          return getLastModified(this) < getLastModified(other_ptr);
+        }
+        catch(std::out_of_range e)
+        {
+          QMessageBox::warning(m_parent, "Error", e.what());
+          return false;
+        }
       }
       else if (childCount() == 0 && other.childCount() > 0)
       {
@@ -1662,48 +1671,22 @@ bool MantidTreeWidgetItem::operator<(const QTreeWidgetItem &other)const
  */
 DateAndTime MantidTreeWidgetItem::getLastModified(const QTreeWidgetItem* workspaceWidget)
 {
-  bool isWorkspaceGroup = false;
-  if(workspaceWidget->childCount() > 0) 
+  const QString wsName = workspaceWidget->text(0);
+  Mantid::API::Workspace_sptr ws = Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString());
+  
+  const Mantid::API::WorkspaceHistory wsHist = ws->getHistory();
+  const std::vector<AlgorithmHistory>& algHists = wsHist.getAlgorithmHistories();
+
+  if(algHists.size() == 0)
   {
-    for(int i = 0; i < workspaceWidget->childCount(); i++)
-    {
-      if(workspaceWidget->child(i)->childCount() > 0)
-        isWorkspaceGroup = true;
-    }
+    throw std::out_of_range("The workspace \"" + wsName.toStdString() +
+      "\" has no history and so cannot be sorted by date last modified.");
   }
 
-  if(isWorkspaceGroup)
-  {
-    const QString wsgName = workspaceWidget->text(0);
-  
-    Mantid::API::WorkspaceGroup_sptr wsgPstr;
-      wsgPstr = boost::dynamic_pointer_cast<WorkspaceGroup>
-        (Mantid::API::AnalysisDataService::Instance().retrieve(wsgName.toStdString()));
+  AlgorithmHistory lastAlgHist = algHists.at(algHists.size() - 1);
+  DateAndTime output = lastAlgHist.executionDate();
 
-    const Mantid::API::WorkspaceHistory wsgHist = wsgPstr->getHistory();
-    const std::vector<AlgorithmHistory>& algHists = wsgHist.getAlgorithmHistories();
-  
-    AlgorithmHistory lastAlgHist = algHists.at(algHists.size() - 1);
-    DateAndTime output = lastAlgHist.executionDate();
-
-    return output;
-  }
-  else
-  {
-    const QString wsName = workspaceWidget->text(0);
-  
-    Mantid::API::Workspace_sptr wsPstr;
-      wsPstr = boost::dynamic_pointer_cast<Workspace>
-        (Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString()));
-
-    const Mantid::API::WorkspaceHistory wsHist = wsPstr->getHistory();
-    const std::vector<AlgorithmHistory>& algHists = wsHist.getAlgorithmHistories();
-  
-    AlgorithmHistory lastAlgHist = algHists.at(algHists.size() - 1);
-    DateAndTime output = lastAlgHist.executionDate();
-
-    return output;
-  }
+  return output;
 }
 
 //-------------------- AlgorithmDockWidget ----------------------//
