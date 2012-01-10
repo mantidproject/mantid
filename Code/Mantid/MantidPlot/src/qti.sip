@@ -1144,6 +1144,8 @@ public:
   MantidUI* mantidUI;
   void addUserMenu(const QString &);
   void addUserMenuAction(const QString &, const QString &, const QString &);
+
+  void setConfirmFolderClose(bool value);
   //--------------
 private:
   ApplicationWindow(const ApplicationWindow&);

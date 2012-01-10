@@ -1054,6 +1054,11 @@ public slots:
   void changeActiveToFloating();
   void changeActiveToDocked();
 
+  /** Sets whether to prompt the user when closing/deleting a folder */
+  void setConfirmFolderClose(bool value)
+  { confirmCloseFolder = value; }
+
+
 signals:
   void modified();
   void resultsContextMenu();

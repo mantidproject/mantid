@@ -828,6 +828,7 @@ set ( MANTIDPLOT_TEST_PY_FILES
 	MantidPlotSliceViewerTest.py
 	MantidPlot1DPlotTest.py
 	MantidPlotProxiesTest.py
+	MantidPlotFoldersTest.py
 )
 
 if ( 0 )
