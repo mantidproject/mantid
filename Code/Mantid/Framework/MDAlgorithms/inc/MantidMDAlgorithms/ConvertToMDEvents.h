@@ -64,10 +64,7 @@ namespace MDAlgorithms
     void exec();
    /// Sets documentation strings for this algorithm
     virtual void initDocs();
-
-   /// logger -> to provide logging, for MD dataset file operations
-    static Mantid::Kernel::Logger& convert_log;
-   /// pointer to the input workspace;
+  /// pointer to the input workspace;
    Mantid::API::MatrixWorkspace_sptr inWS2D;
  
    /// the variable which keeps preprocessed positions of the detectors if any availible (TODO: should it be a table ws and separate algorithm?);
@@ -76,8 +73,35 @@ namespace MDAlgorithms
     MDEvents::MDWSDescription TWS;
    /// the pointer to class which is responsible for adding data to N-dimensional workspace;
     boost::shared_ptr<MDEvents::MDEventWSWrapper> pWSWrapper;
-   protected: //for testing
- 
+  /// progress reporter
+   std::auto_ptr<API::Progress > pProg;
+    /// logger -> to provide logging, for MD dataset file operations
+    static Mantid::Kernel::Logger& convert_log;
+  //------------------------------------------------------------------------------------------------------------------------------------------
+  // Internal helper variables
+  //
+    /// known momentum analysis mode ID-s (symbolic representation of correspondent enum);
+    std::vector<std::string> Q_modes;
+    /// known energy transfer modes ID-s (symbolic representation of correspondent enum)
+    std::vector<std::string> dE_modes;
+    /// known conversion modes ID-s       (symbolic representation of correspondent enum)
+    std::vector<std::string> ConvModes;
+    /// supported input workspace types  (names of supported workspace types )
+    std::vector<std::string> SupportedWS;
+
+    /// the ID of the unit, which is used in the expression to converty to QND. All other related elastic units should be converted to this one. 
+    std::string  native_elastic_unitID; // currently it is Q
+    /// the ID of the unit, which is used in the expression to converty to QND. All other related inelastic units should be converted to this one. 
+    std::string  native_inelastic_unitID; // currently it is energy transfer (DeltaE)
+
+    /**  The Units (different for different Q and dE mode), for input workspace, for the selected sub algorihm to work with. 
+      *  Any other input workspace units have to be converted into these, and these have to correspond to actual units, defined in workspace */
+    std::string subalgorithm_units;
+    /// string -Key to identify the algorithm -- rather for testing and debugging, though may be reliet upon somewhere by bad practice
+    std::string algo_id;
+  
+    protected: //for testing
+        static Mantid::Kernel::Logger & getLogger();
    //>---> Parts of the identifyTheAlg;
    /** function returns the list of the property names, which can be treated as additional dimensions present in current matrix workspace */
    void getAddDimensionNames(API::MatrixWorkspace_const_sptr inMatrixWS,Strings &add_dim_names,Strings &add_dim_units)const;
@@ -105,10 +129,11 @@ namespace MDAlgorithms
    /** function provides the linear representation for the transformation matrix, which translate momentums from laboratory to notional (fractional) coordinate system */
    std::vector<double> getTransfMatrix(API::MatrixWorkspace_sptr inWS2D,const Kernel::V3D &u=Kernel::V3D(1,0,0), const Kernel::V3D &v=Kernel::V3D(0,1,0), 
                                        bool is_powder=false)const;
-
+   /// get transformation matrix currently defined for the algorithm
+   std::vector<double> getTransfMatrix()const{return TWS.rotMatrix;}
+ 
    /// map to select an algorithm as function of the key, which describes it
    std::map<std::string, IConvertToMDEventsMethods *> alg_selector;
-
 
     // strictly for testing!!!
     void setAlgoID(const std::string &newID){
@@ -124,44 +149,18 @@ namespace MDAlgorithms
         }
     }
   private: 
-   //--------------------------------------------------------------------------------------------------
-    /// progress reporter
-   std::auto_ptr<API::Progress > pProg;
-  
-     /// helper class to orginize metaloop on various algorithm options
+   //--------------------------------------------------------------------------------------------------   
+     /// helper class to orginize metaloop over various subalgorithm options dealign with matrix workspace
      template<Q_state Q,size_t N_ALGORITHMS >
      friend class LOOP_MATRIX_ALG;
   
-   /// helper class to orginize metaloop on various algorithm options
+     /// helper class to orginize metaloop over various subalgorithm options dealign with event workspace
      template<Q_state Q,size_t N_ALGORITHMS >
      friend class LOOP_EVENT_ALG;
   
- 
-    /// known momentum analysis mode ID-s (symbolic representation of correspondent enum);
-    std::vector<std::string> Q_modes;
-    /// known energy transfer modes ID-s (symbolic representation of correspondent enum)
-    std::vector<std::string> dE_modes;
-    /// known conversion modes ID-s       (symbolic representation of correspondent enum)
-    std::vector<std::string> ConvModes;
-    /// supported input workspace types  (names of supported workspace types)
-    std::vector<std::string> SupportedWS;
-
-    /// the ID of the unit, which is used in the expression to converty to QND. All other related elastic units should be converted to this one. 
-    std::string  native_elastic_unitID; // currently it is Q
-    /// the ID of the unit, which is used in the expression to converty to QND. All other related inelastic units should be converted to this one. 
-    std::string  native_inelastic_unitID; // currently it is energy transfer (DeltaE)
-
-    // The Units (different for different Q and dE mode), for input workspace, for the selected sub algorihm to work with. 
-    // Any other input workspace units have to be converted into these:
-    std::string subalgorithm_units;
-  // string -Key to identify the algorithm -- rather for testing and debugging 
-    std::string algo_id;
-    //
-    std::vector<double> getTransfMatrix()const{return TWS.rotMatrix;}
-  
     /** helper function which verifies if projection vectors are specified and if their values are correct when present.
-    * sets defaults [1,0,0] and [0,1,0] if not present or any error. */
-   void checkUVsettings(const std::vector<double> &ut,const std::vector<double> &vt,Kernel::V3D &u,Kernel::V3D &v)const;
+      * sets defaults [1,0,0] and [0,1,0] if not present or any error. */
+    void checkUVsettings(const std::vector<double> &ut,const std::vector<double> &vt,Kernel::V3D &u,Kernel::V3D &v)const;
  };
  
 } // namespace Mantid

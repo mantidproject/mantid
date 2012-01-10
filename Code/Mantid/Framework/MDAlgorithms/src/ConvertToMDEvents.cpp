@@ -54,10 +54,13 @@ namespace MDAlgorithms
 {
 
 // logger for loading workspaces  
-   Kernel::Logger& ConvertToMDEvents::convert_log =Kernel::Logger::get("MD-Algorithms");
+Kernel::Logger& ConvertToMDEvents::convert_log =Kernel::Logger::get("MD-Algorithms");
 // the variable describes the locations of the preprocessed detectors, which can be stored and reused if the algorithm runs more then once;
 PreprocessedDetectors ConvertToMDEvents::det_loc;
-
+//
+Mantid::Kernel::Logger & 
+ConvertToMDEvents::getLogger(){return convert_log;}
+//
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertToMDEvents)
   
@@ -65,8 +68,9 @@ DECLARE_ALGORITHM(ConvertToMDEvents)
 // Sets documentation strings for this algorithm
 void ConvertToMDEvents::initDocs()
 {
-    this->setWikiSummary("Create a MDEventWorkspace with selected dimensions, e.g. the reciprocal space of momentums (Qx, Qy, Qz) or momentums modules |Q|, energy transfer dE if availible and any other user specified log values which can be treated as dimensions. If the OutputWorkspace exists, then events are added to it.");
-    this->setOptionalMessage("Create a MDEventWorkspace with selected dimensions, e.g. the reciprocal space of momentums (Qx, Qy, Qz) or momentums modules |Q|, energy transfer dE if availible and any other user specified log values which can be treated as dimensions. If the OutputWorkspace exists, then events are added to it.");
+    this->setWikiSummary("Create a MDEventWorkspace with selected dimensions, e.g. the reciprocal space of momentums (Qx, Qy, Qz) or momentums modules |Q|, energy transfer dE if availible and any other user specified log values which can be treated as dimensions. If the OutputWorkspace exists, it will be replaced");
+    this->setOptionalMessage("Create a MDEventWorkspace with selected dimensions, e.g. the reciprocal space of momentums (Qx, Qy, Qz) or momentums modules |Q|, energy transfer dE if availible and any other user specified log values which can be treated as dimensions. If the OutputWorkspace exists, it will be replaced");
+//TODO:    "If the OutputWorkspace exists, then events are added to it." 
 }
 /** Helper Static function to obtain the energy of incident neutrons 
   *
@@ -151,7 +155,7 @@ int is_member(const std::vector<std::string> &group,const std::string &candidate
     return num;
 }
 //
-const double rad2deg = 180.0 / M_PI;
+//const double rad2deg = 180.0 / M_PI;
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
