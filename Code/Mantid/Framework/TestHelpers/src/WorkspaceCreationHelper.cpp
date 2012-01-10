@@ -743,14 +743,18 @@ namespace WorkspaceCreationHelper
    std::set<int64_t> maskedWorkspaceIndices;
    size_t numPixels= L2.size();
 
-   Mantid::API::MatrixWorkspace_sptr  ws= Create2DWorkspaceWithValues(uint64_t(numPixels), uint64_t(numBins),true, maskedWorkspaceIndices,0, 1, 0.1);
-  
 
-    ws->setInstrument( ComponentCreationHelper::createCylInstrumentWithDetInGivenPosisions(L2,polar,azimutal) );
+   Mantid::API::MatrixWorkspace_sptr  ws= Create2DWorkspaceWithValues(uint64_t(numPixels), uint64_t(numBins),true, maskedWorkspaceIndices,0, 1, 0.1);
+
+ // detectors at L2, sample at 0 and source at -L2_min
+   ws->setInstrument( ComponentCreationHelper::createCylInstrumentWithDetInGivenPosisions(L2,polar,azimutal) );
+ 
     for (int g=0; g < static_cast<int>(numPixels); g++)
     {
       ISpectrum * spec = ws->getSpectrum(g);
-      spec->addDetectorID(g);
+      // we just made (in createCylInstrumentWithDetInGivenPosisions) det ID-s to start from 1
+      spec->setDetectorID(g+1);
+      // and this is absolutely different nummer, corresponding to det ID just by chance ? -- some uncertainties remain
       spec->setSpectrumNo(g+1);
       //spec->setSpectrumNo(g+1);
    //   spec->addDetectorID(g*9);

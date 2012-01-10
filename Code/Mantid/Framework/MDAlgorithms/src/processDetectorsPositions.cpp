@@ -51,7 +51,8 @@ processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS,PreprocessedDe
 
      Geometry::IDetector_const_sptr spDet;
      try{
-        spDet= inputWS->getDetector(i);
+        // get detector or detector group which corresponds to the spectra i
+         spDet= inputWS->getDetector(i);
      }catch(Kernel::Exception::NotFoundError &){
         continue;
      }
@@ -62,7 +63,7 @@ processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS,PreprocessedDe
      det_loc.spec2detMap[i]= ic;
      det_loc.det_id[ic]    = spDet->getID();
      det_loc.detIDMap[ic]  = i;
-     det_loc.L2[ic]      = spDet->getDistance(*sample);
+     det_loc.L2[ic]        = spDet->getDistance(*sample);
      
 
      double polar        =  inputWS->detectorTwoTheta(spDet);

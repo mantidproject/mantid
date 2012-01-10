@@ -53,13 +53,18 @@ void testEventWS()
    pAlg->setRethrows(false);
    pAlg->execute();
    TSM_ASSERT("Shoud finish succesfully",pAlg->isExecuted());
-   Mantid::API::Workspace_sptr spws = AnalysisDataService::Instance().retrieve("testMDEvWorkspace");
+   Mantid::API::Workspace_sptr spws;
+   TS_ASSERT_THROWS_NOTHING(spws = AnalysisDataService::Instance().retrieve("testMDEvWorkspace"));
    TSM_ASSERT(" Worskpace should be retrieved",spws.get());
 
    boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<3>,3> > ws = boost::dynamic_pointer_cast<MDEvents::MDEventWorkspace<MDEvents::MDEvent<3>,3> >(spws);
    TSM_ASSERT("It shoudl be 3D MD workspace",ws.get());
 
-   TS_ASSERT_EQUALS(900,ws->getNPoints());
+   if(ws.get()){
+     TS_ASSERT_EQUALS(900,ws->getNPoints());
+   }else{
+       TS_FAIL("event workspace has not beed build");
+   }
    AnalysisDataService::Instance().remove("testMDEvWorkspace"); 
 
 
