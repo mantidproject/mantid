@@ -23,6 +23,7 @@ Y = np.append(Y1, Y2)
 E = np.sqrt(Y)
 
 CreateWorkspace(OutputWorkspace="fake", DataX=list(X), DataY=list(Y), DataE=list(E), NSpec=2, UnitX="TOF", YUnitLabel="Counts",  WorkspaceTitle="Faked data Workspace")
+LoadRaw(Filename=r'IRS26173.raw',OutputWorkspace='IRS26173',Cache='Always',LoadLogFiles='0',LoadMonitors='Exclude')
 
 class MantidPlotProxiesTest(unittest.TestCase):
     
@@ -36,6 +37,7 @@ class MantidPlotProxiesTest(unittest.TestCase):
     def try_closing(self, obj, msg=""):
         """ Try closing a graphical object, and
         access the variable to see if it has been set to None """
+        self.assertFalse(obj._getHeldObject() is None, msg + "'s return value was not None to begin with")
         # No closing dialog
         obj.confirmClose(False)
         # This should close (and hopefully delete) obj
@@ -87,22 +89,102 @@ class MantidPlotProxiesTest(unittest.TestCase):
         self.assertTrue(l_active._getHeldObject() is None, "Active Layer object from deleted graph is None")
 
     def test_closing_Layer_objects(self):
+        """ Make a plot then access some contained objects.
+        They should safely be cleared when deleting the graph"""
         g = plotSpectrum("fake", [0,1])
+        g.confirmClose(False)
         l = g.activeLayer()
-        
-        return
-        # FIXME! The following calls fail:
         legend = l.legend()
-        legend2 = l.newLegend()
+        legend2 = l.newLegend("a new legend")
         grid = l.grid()
-        self.assertTrue(legend._getHeldObject() is None, "Deleted legend safely")
-        self.assertTrue(legend2._getHeldObject() is None, "Deleted new legend safely")
-        self.assertTrue(grid._getHeldObject() is None, "Deleted grid safely")
+        errbar = l.errorBarSettings(0)
+        self.assertFalse(legend._getHeldObject() is None, "Object returned correctly")
+        self.assertFalse(legend2._getHeldObject() is None, "Object returned correctly")
+        self.assertFalse(grid._getHeldObject() is None, "Object returned correctly")
+        self.assertFalse(l._getHeldObject() is None, "Object returned correctly")
+        self.assertFalse(errbar._getHeldObject() is None, "Object returned correctly")
+        # Deleting the parent graph should None the children
+        self.try_closing(g, "plotSpectrum()")
+        self.assertTrue(legend._getHeldObject() is None, "Deleted Legend safely")
+        self.assertTrue(legend2._getHeldObject() is None, "Deleted new Legend safely")
+        self.assertTrue(grid._getHeldObject() is None, "Deleted Grid safely")
+        self.assertTrue(l._getHeldObject() is None, "Deleted Layer safely")
+        self.assertTrue(errbar._getHeldObject() is None, "Deleted ErrorBarSettings safely")
         
         #spectrogram = l.spectrogram()
         #self.assertTrue(spectrogram._getHeldObject() is None, "Deleted spectrogram safely")
-
+        
+    def setup_folder(self):
+        """ Create a folder with some windows in it """
+        f = addFolder("test_folder")
+        changeFolder(f)
+        windows = []
+        windows.append(newTable("table"))
+        windows.append(newMatrix("matrix"))
+        windows.append(newPlot3D())
+        windows.append(newGraph("graph"))
+        windows.append(newNote("note"))
+        return (f, windows)
+      
+    def test_Folder_deletion(self):
+        """ Create a folder then delete it """
+        f = addFolder("test_folder")
+        deleteFolder(f)
+        self.assertTrue(f._getHeldObject() is None, "Folder was deleted")
+        
+    def test_Folder_windows(self):
+        """ Access windows through a folder """
+        f, old_windows = self.setup_folder()
+        windows = f.windows()
+        self.assertEqual(len(windows), 5, "5 windows in folder")
+        for window in windows:
+            self.try_closing(window, "Folder.windows()")
+        deleteFolder(f)
+           
     
+    def test_closing_MantidMatrix(self):
+        """ Create a MantidMatrix and then delete it safely """
+        mm = importMatrixWorkspace("fake", visible=True)
+        self.try_closing(mm, "importMatrixWorkspace()")
+
+    def test_closing_MantidMatrix_plotGraph2D(self):
+        """ Make a color fill plot. then delete"""
+        mm = importMatrixWorkspace("fake", visible=True)
+        g = mm.plotGraph2D()
+        screenshot(g, "getInstrumentView", "Call to MantidMatrix.plotGraph2D() on a workspace.")
+        self.try_closing(mm, "importMatrixWorkspace()")
+        self.assertTrue(g._getHeldObject() is None, "Deleted graph safely when the parent MantidMatrix was deleted")
+
+    def test_closing_MantidMatrix_plotGraph3D(self):
+        """ Make a 3D plot. then delete"""
+        mm = importMatrixWorkspace("fake", visible=True)
+        g = mm.plotGraph3D()
+        self.try_closing(mm, "importMatrixWorkspace()")
+        self.try_closing(g, "importMatrixWorkspace().plotGraph3D()")
+        
+    def test_closing_getInstrumentView(self):
+        iv = getInstrumentView("IRS26173")    
+        screenshot(iv, "getInstrumentView", "Call to getInstrumentView() on a workspace.")
+        self.try_closing(iv, "getInstrumentView()")
+        
+    def test_convertToWaterfall(self):
+        g = plotSpectrum("IRS26173",(0,1,2,3,4))
+        convertToWaterfall(g)
+        screenshot(g, "convertToWaterfall", "Call to convertToWaterfall() on a workspace.")
+        self.try_closing(g, "convertToWaterfall()")
+        
+# FIXME: Spectrogram object isn't returned right
+#    def test_MantidMatrix_plotGraph2D(self):
+#        """ Make a color fill plot. then delete"""
+#        mm = importMatrixWorkspace("fake", visible=True)
+#        g = mm.plotGraph2D()
+#        spec = g.activeLayer().spectrogram()
+#        self.try_closing(mm, "importMatrixWorkspace()")
+#        self.assertTrue(g._getHeldObject() is None, "Deleted graph safely")
+#        self.assertTrue(spec._getHeldObject() is None, "Deleted spectrogram safely")
+            
+        
+        
 # Run the unit tests
 mantidplottests.runTests(MantidPlotProxiesTest)
 

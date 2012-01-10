@@ -613,6 +613,7 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/SigmoidalFit.h
                         src/SmoothCurveDialog.h
                         src/SmoothFilter.h
+                        src/Spectrogram.h
                         src/SortDialog.h
                         src/SurfaceDialog.h
                         src/TableDialog.h

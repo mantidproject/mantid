@@ -42,15 +42,18 @@
 #include <fstream>
 #include <float.h>
 #include "MantidQtAPI/MantidColorMap.h"
-#include "Mantid//InstrumentWidget//GLColor.h"
+#include "Mantid/InstrumentWidget/GLColor.h"
 #include <boost/shared_ptr.hpp>
 #include <QPainter>
+#include <qobject.h>
 
 class MatrixData;
 class PlotMarker;
 
-class Spectrogram: public QwtPlotSpectrogram
+class Spectrogram: public QObject, public QwtPlotSpectrogram
 {
+  Q_OBJECT
+
 public:
   Spectrogram();
   Spectrogram(Matrix *m);

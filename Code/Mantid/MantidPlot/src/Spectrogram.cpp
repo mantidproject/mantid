@@ -41,7 +41,7 @@
 #include <numeric>
 
 Spectrogram::Spectrogram():
-	    QwtPlotSpectrogram(),
+      QObject(), QwtPlotSpectrogram(),
 			d_color_map_pen(false),
 			d_matrix(0),d_funct(0),//Mantid
 	    color_axis(QwtPlot::yRight),
@@ -63,7 +63,7 @@ Spectrogram::Spectrogram():
 }
 
 Spectrogram::Spectrogram(Matrix *m):
-	    QwtPlotSpectrogram(QString(m->objectName())),
+      QObject(), QwtPlotSpectrogram(QString(m->objectName())),
 			d_matrix(m),d_funct(0),//Mantid
 	    color_axis(QwtPlot::yRight),
 	    color_map_policy(Default),mColorMap()
@@ -81,7 +81,7 @@ Spectrogram::Spectrogram(Matrix *m):
 }
 
 Spectrogram::Spectrogram(UserHelperFunction *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz)
-:	QwtPlotSpectrogram(),
+:	QObject(), QwtPlotSpectrogram(),
  	d_matrix(0),d_funct(f),
  	color_axis(QwtPlot::yRight),
  	color_map_policy(Default),
@@ -100,7 +100,7 @@ Spectrogram::Spectrogram(UserHelperFunction *f,int nrows, int ncols,double left,
 }
 
 Spectrogram::Spectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz)
-:	QwtPlotSpectrogram(),
+:	QObject(), QwtPlotSpectrogram(),
  	d_color_map_pen(false),
  	d_matrix(0),
  	d_funct(f),
