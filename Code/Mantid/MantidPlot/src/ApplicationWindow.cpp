@@ -17652,7 +17652,7 @@ bool ApplicationWindow::isDefaultFloating(const MdiSubWindow* w) const
 bool ApplicationWindow::isDefaultFloating(const QString& aClassName) const
 {
   bool theDefault = false;
-  if (aClassName == "MultiLayer" || aClassName =="InstrumentWindow")
+  if (aClassName == "MultiLayer" || aClassName =="InstrumentWindow" || aClassName == "MdiSubWindow")
   {
     theDefault = true;
   }
