@@ -80,6 +80,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/IConvertToMDEventsMethods.h	
 	inc/MantidMDAlgorithms/ConvertToMDEventsHistoWS.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsEventWS.h	
+	inc/MantidMDAlgorithms/ConvertToMDEventsEventWSAutoRebin.h		
 	inc/MantidMDAlgorithms/ConvertToMDEventsCoordTransf.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h
     inc/MantidMDAlgorithms/ConvertToMDEventsDetInfo.h 	
