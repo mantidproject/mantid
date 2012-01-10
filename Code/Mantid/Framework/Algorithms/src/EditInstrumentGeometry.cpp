@@ -128,7 +128,7 @@ namespace Algorithms
       } else {
         Kernel::V3D sourcepos = oldinstrument->getSource()->getPos();
         mL1 = sourcepos.Z()*-1;
-        g_log.notice() << "source position = " << sourcepos.X() << ", " << sourcepos.Y() << ", " << sourcepos.Z() << std::endl;
+        g_log.debug() << "source position = " << sourcepos.X() << ", " << sourcepos.Y() << ", " << sourcepos.Z() << std::endl;
       }
     }
 
@@ -165,7 +165,7 @@ namespace Algorithms
       stor2Thetas[workspaceindex] = tths[i];
       storPhis[workspaceindex] = phis[i];
 
-      g_log.notice() << "workspace index = " << workspaceindex << " is for Spectrum " << specids[i] << std::endl;
+      g_log.debug() << "workspace index = " << workspaceindex << " is for Spectrum " << specids[i] << std::endl;
     }
 
     // 4.2 Storable?  (1) NOT TO BE SET ... and (2) DETECTOR > 1
@@ -257,7 +257,7 @@ namespace Algorithms
           g_log.error() << g_log.error() << "Spectrum ID " << specids[i] << " does not exist!  Skip setting detector parameters to this spectrum" << std::endl;
           continue;
         } else {
-          g_log.notice() << "Raw: Spectrum " << spectrum->getSpectrumNo() << ": # Detectors =  " << spectrum->getDetectorIDs().size() << std::endl;
+          g_log.debug() << "Raw: Spectrum " << spectrum->getSpectrumNo() << ": # Detectors =  " << spectrum->getDetectorIDs().size() << std::endl;
         }
 
         spectrum->clearDetectorIDs();
