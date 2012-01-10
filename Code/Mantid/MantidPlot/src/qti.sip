@@ -519,7 +519,7 @@ private:
   QwtPlotSpectrogram(const QwtPlotSpectrogram&);
 };
 
-class Spectrogram : QwtPlotSpectrogram
+class Spectrogram : QObject, QwtPlotSpectrogram
 {
 %TypeHeaderCode
 #include "src/Spectrogram.h"
