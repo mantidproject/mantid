@@ -83,10 +83,9 @@ PythonScript::PythonScript(PythonScripting *env, const QString &code, QObject *c
   updatePath(Name, true);
 
   // Observe ADS updates
-  if( false ) // Causes random crashes at the moment
+  if( interactive )
   {
     observeAdd();
-    observeAfterReplace();
     observePostDelete();
     observeADSClear();
   }
