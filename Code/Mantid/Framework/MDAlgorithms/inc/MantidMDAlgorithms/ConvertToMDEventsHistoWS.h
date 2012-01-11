@@ -72,7 +72,7 @@ public:
         size_t numSpec=IConvertToMDEventsMethods::setUPConversion(pWS2D,detLoc,WSD,inWSWrapper);
 
         // initiate the templated class which does the conversion of workspace data into MD WS coordinates;
-        trn.setUP(this); 
+        trn.setUpTransf(this); 
 
         return numSpec;
     }

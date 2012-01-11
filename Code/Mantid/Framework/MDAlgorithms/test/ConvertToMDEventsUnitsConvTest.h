@@ -16,9 +16,9 @@ using namespace Mantid::Geometry;
 
 class TestConvertToMDEventsMethods :public IConvertToMDEventsMethods
 {
-    virtual size_t conversionChunk(size_t job_ID){return 0;}
+    size_t conversionChunk(size_t job_ID){UNUSED_ARG(job_ID);return 0;}
 public:
-    virtual void setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const PreprocessedDetectors &detLoc)
+    void setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const PreprocessedDetectors &detLoc)
     {
         MDEvents::MDWSDescription TestWS(5);
 
@@ -32,7 +32,7 @@ public:
 
     }
     /// method which starts the conversion procedure
-    virtual void runConversion(API::Progress *){}
+    void runConversion(API::Progress *){}
  
 };
 
@@ -91,6 +91,7 @@ void testConvertToTofInelasticWS()
          TOFS[i]     =Conv.getXConverted(X,i);
      }
 
+     // Let WS know that it is in TOF now (one column)
      MantidVec& T = ws2D->dataX(0);
 
      NumericAxis *pAxis0 = new NumericAxis(n_bins-1); 
@@ -139,6 +140,7 @@ ConvertToMDEventsUnitsConvTest (){
    Kernel::UnitFactory::Instance().create("DeltaE");
    Kernel::UnitFactory::Instance().create("DeltaE_inWavenumber");
    Kernel::UnitFactory::Instance().create("Momentum");
+
 
 }
 };

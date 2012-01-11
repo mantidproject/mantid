@@ -74,8 +74,8 @@ IConvertToMDEventsMethods::setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS
      
         n_dims       = this->pWSWrapper->nDimensions();
         
-        dim_min   = &(TWS.dim_min[0]);
-        dim_max   = &(TWS.dim_max[0]);
+        dim_min.assign(WSD.dim_min.begin(),WSD.dim_min.end());
+        dim_max.assign(WSD.dim_max.begin(),WSD.dim_max.end());
         
         size_t n_spectra =inWS2D->getNumberHistograms();
         return n_spectra;

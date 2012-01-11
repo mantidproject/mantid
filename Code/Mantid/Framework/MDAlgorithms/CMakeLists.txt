@@ -98,6 +98,7 @@ set ( TEST_FILES
 	test/ConvertToQ3DdETest.h
 	test/ConvertToMDEventsTest.h
 	test/ConvertToMDEventsUnitsConvTest.h
+	test/ConvertToMDEventsCoordTransfTest.h
 	test/ConvertEventsToMDEventsTest.h	
 	test/DivideMDTest.h
 	test/EqualToMDTest.h
