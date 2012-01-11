@@ -255,8 +255,10 @@ void CreateMDWorkspace::setUBMatrixClicked()
   {
     runConfirmation(ex.what());
   }
-  memento->cleanUp(); 
-  
+  if(memento != NULL)
+  {
+    memento->cleanUp(); 
+  }
 }
 
 /*
