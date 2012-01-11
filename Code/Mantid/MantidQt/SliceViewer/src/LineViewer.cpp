@@ -56,7 +56,7 @@ LineViewer::LineViewer(QWidget *parent)
   QObject::connect(ui.spinNumBins, SIGNAL(valueChanged(int)), this, SLOT(numBinsChanged()));
   QObject::connect(ui.textPlaneWidth, SIGNAL(textEdited(QString)), this, SLOT(widthTextEdited()));
   QObject::connect(ui.radNumBins, SIGNAL(toggled(bool)), this, SLOT(on_radNumBins_toggled()));
-  QObject::connect(ui.textBinWidth, SIGNAL(editingFinished()), this, SLOT(on_textBinWidth_changed()));
+  QObject::connect(ui.textBinWidth, SIGNAL(editingFinished()), this, SLOT(textBinWidth_changed()));
 }
 
 LineViewer::~LineViewer()
@@ -416,7 +416,7 @@ void LineViewer::on_radNumBins_toggled()
 /** Slot called when the desired fixed bin width text box
  * is edited and the user pressed Return or lost focus.
  */
-void LineViewer::on_textBinWidth_changed()
+void LineViewer::textBinWidth_changed()
 {
   if (m_fixedBinWidthMode)
   {

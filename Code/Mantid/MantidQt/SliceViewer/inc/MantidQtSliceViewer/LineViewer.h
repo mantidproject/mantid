@@ -66,7 +66,7 @@ public slots:
     void adaptiveBinsChanged();
     void setFreeDimensions(size_t dimX, size_t dimY);
     void on_radNumBins_toggled();
-    void on_textBinWidth_changed();
+    void textBinWidth_changed();
 
 signals:
     /// Signal emitted when the planar width changes
