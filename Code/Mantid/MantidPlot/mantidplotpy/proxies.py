@@ -196,7 +196,7 @@ class Layer(QtProxyObject):
         Returns:
             A boolean indicating success or failure.
         """
-        return self._getHeldObject().addCurves(table._getHeldObject(),columnName,style,lineWidth,symbolSize,startRow,endRow)
+        return self._getHeldObject().addCurve(table._getHeldObject(),columnName,style,lineWidth,symbolSize,startRow,endRow)
 
     def addErrorBars(self, yColName, errTable, errColName, type=1, width=1, cap=8, color=Qt.black, through=False, minus=True, plus=True):
         """Add error bars to a plot that was created from a table column.
