@@ -442,7 +442,7 @@ class ProxyObject(object):
     """
     def __init__(self, toproxy):
         self.__obj = toproxy
-
+        
     def __getattr__(self, attr):
         """
         Reroute a method call to the the stored object
@@ -877,17 +877,21 @@ class WorkspaceGarbageCollector(object):
         """
         Replace an object reference within a proxy
         """
-        if name in self._refs:
+        try:
             self._refs[name]._swap(wksp)
+        except Exception:
+            pass
 
     def kill_object(self, name):
         """
         Signal the proxy to nullify its stored reference
         """
-        if name in self._refs:
+        try:
             self._refs[name]._kill_object()
             # Remove the key as we don't want to keep the reference around
             del self._refs[name]
+        except Exception:
+            pass
 
     def kill_all(self):
         """
@@ -1305,57 +1309,16 @@ class MantidPyFramework(FrameworkManager):
         # 99% of the time people are using matrix workspaces but we still need to check
         
         # Try each workspace type in order, from more specialised to less specialised.
+        attrs = ['_getRawIPeaksWorkspacePointer', '_getRawIEventWorkspacePointer', '_getRawMatrixWorkspacePointer',
+                 '_getRawIMDEventWorkspacePointer','_getRawIMDHistoWorkspacePointer',
+                '_getRawIMDWorkspacePointer', '_getRawWorkspaceGroupPointer', '_getRawTableWorkspacePointer']
         
-#        try:
-#            return self._getRawEventWorkspacePointer(name)
-#        except RuntimeError:
-#            pass
-                
-        try:
-            return self._getRawIPeaksWorkspacePointer(name)
-        except RuntimeError:
-            pass
-                
-        try:
-            return self._getRawIEventWorkspacePointer(name)
-        except RuntimeError:
-            pass
-            
-        try:
-            return self._getRawMatrixWorkspacePointer(name)
-        except(RuntimeError):
-            pass
-
-        try:
-            return self._getRawIMDEventWorkspacePointer(name)
-        except RuntimeError:
-            pass
-       
-        try:
-            return self._getRawIMDHistoWorkspacePointer(name)
-        except RuntimeError:
-            pass
-       
-        try:
-            return self._getRawIMDWorkspacePointer(name)
-        except RuntimeError:
-            pass
-        
-        try:
-            return self._getRawWorkspaceGroupPointer(name)
-        except RuntimeError:
-            pass
-        
-#        try:
-#            return self._getRawPeaksWorkspacePointer(name)
-#        except RuntimeError:
-#            return None
-        
-        try:
-            return self._getRawTableWorkspacePointer(name)
-        except RuntimeError:
-            return None
-        
+        for att in attrs:
+            retval = getattr(self, att)(name)
+            if retval is not None: 
+                return retval
+        # Preserve behaviour
+        return None
 
     def _workspaceRemoved(self, name):
         """

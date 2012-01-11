@@ -1469,6 +1469,19 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
 {
   m_updating = true;
 
+  QString plotTypeTitle("");
+  if (plotType == "Asymmetry")
+  {
+    plotTypeTitle = "Asym";
+  }
+  else
+  {
+    if(plotType == "Counts")
+      plotTypeTitle = "Counts";
+    else
+      plotTypeTitle = "Logs";
+  }
+
   int groupNum = getGroupNumberFromRow(m_groupTableRowInFocus);
   if ( groupNum >= 0 )
   {
@@ -1490,7 +1503,7 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     }
 
     QString cropWSfirstPart = wsGroupName + "; Group="
-      + groupName + "";
+      + groupName + "; " + plotTypeTitle + "";
 
     // decide on name for workspace to be plotted
     QString cropWS(getNewPlotName(cropWSfirstPart));
@@ -1649,6 +1662,19 @@ void MuonAnalysis::plotPair(const std::string& plotType)
 {
   m_updating = true;
 
+  QString plotTypeTitle("");
+  if (plotType == "Asymmetry")
+  {
+    plotTypeTitle = "Asym";
+  }
+  else 
+  {
+    if(plotType == "Counts")
+      plotTypeTitle = "Counts";
+    else
+      plotTypeTitle = "Logs";
+  }
+
   int pairNum = getPairNumberFromRow(m_pairTableRowInFocus);
   if ( pairNum >= 0 )
   {
@@ -1670,7 +1696,7 @@ void MuonAnalysis::plotPair(const std::string& plotType)
       wsGroupName.replace(wsGroupName.find("_"), 1, "-");
     }
 
-    QString cropWSfirstPart = wsGroupName + "; Group=" + pairName + "";
+    QString cropWSfirstPart = wsGroupName + "; Group=" + pairName + "; " + plotTypeTitle + "";
     
     // decide on name for workspace to be plotted
     QString cropWS(getNewPlotName(cropWSfirstPart));

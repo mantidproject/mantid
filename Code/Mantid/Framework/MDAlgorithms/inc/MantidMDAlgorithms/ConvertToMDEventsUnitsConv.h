@@ -38,7 +38,7 @@ template<XCoordType TYPE>
 double XValue(const MantidVec& X,size_t j){return static_cast<double>(0.5*(X[j]+X[j+1]));}
 // for axis type -- just value
 template <>
-double XValue<Axis>(const MantidVec& X,size_t j){return static_cast<double>(X[j]);}
+double XValue<Centered>(const MantidVec& X,size_t j){return static_cast<double>(X[j]);}
 // DO UNITS CONVERSION --
 
 

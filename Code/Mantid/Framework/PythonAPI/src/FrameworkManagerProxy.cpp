@@ -46,7 +46,6 @@ FrameworkManagerProxy::FrameworkManagerProxy()
   API::FrameworkManager::Instance();
 
   API::AnalysisDataService::Instance().notificationCenter.addObserver(m_delete_observer);
-  API::AnalysisDataService::Instance().notificationCenter.addObserver(m_add_observer);
   API::AnalysisDataService::Instance().notificationCenter.addObserver(m_replace_observer);
   API::AnalysisDataService::Instance().notificationCenter.addObserver(m_clear_observer);
 }
@@ -56,7 +55,6 @@ FrameworkManagerProxy::~FrameworkManagerProxy()
 {
   API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_clear_observer);
   API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_replace_observer);
-  API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_add_observer);
   API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_delete_observer);
   API::AlgorithmFactory::Instance().notificationCenter.removeObserver(m_algupdate_observer);
 }
@@ -270,16 +268,17 @@ std::string FrameworkManagerProxy::createAlgorithmDocs(const std::string& algNam
  **/
 boost::shared_ptr<API::MatrixWorkspace> FrameworkManagerProxy::retrieveMatrixWorkspace(const std::string& wsName)
 {
-  API::MatrixWorkspace_sptr matrix_wksp =  boost::dynamic_pointer_cast<API::MatrixWorkspace>(retrieveWorkspace(wsName));
-  if( matrix_wksp.get() )
-  {
-    return matrix_wksp;
-  }
-  else
-  {
-    throw std::runtime_error("\"" + wsName + "\" is not a matrix workspace. "
-        "This may be a table workspace, try getTableWorkspace().");
-  }
+  return boost::dynamic_pointer_cast<API::MatrixWorkspace>(retrieveWorkspace(wsName));
+//  API::MatrixWorkspace_sptr matrix_wksp =  boost::dynamic_pointer_cast<API::MatrixWorkspace>(retrieveWorkspace(wsName));
+//  if( matrix_wksp.get() )
+//  {
+//    return matrix_wksp;
+//  }
+//  else
+//  {
+//    throw std::runtime_error("\"" + wsName + "\" is not a matrix workspace. "
+//        "This may be a table workspace, try getTableWorkspace().");
+//  }
 }
 
 /** Return pointer to IEventWorkspace
@@ -289,15 +288,16 @@ boost::shared_ptr<API::MatrixWorkspace> FrameworkManagerProxy::retrieveMatrixWor
  */
 boost::shared_ptr<API::IEventWorkspace> FrameworkManagerProxy::retrieveIEventWorkspace(const std::string& wsName)
 {
-  API::IEventWorkspace_sptr event = boost::dynamic_pointer_cast<API::IEventWorkspace>(retrieveWorkspace(wsName));
-  if (event != NULL)
-  {
-    return event;
-  }
-  else
-  {
-    throw std::runtime_error("\"" + wsName + "\" is not an event workspace. ");
-  }
+  return boost::dynamic_pointer_cast<API::IEventWorkspace>(retrieveWorkspace(wsName));
+//  API::IEventWorkspace_sptr event = boost::dynamic_pointer_cast<API::IEventWorkspace>(retrieveWorkspace(wsName));
+//  if (event != NULL)
+//  {
+//    return event;
+//  }
+//  else
+//  {
+//    throw std::runtime_error("\"" + wsName + "\" is not an event workspace. ");
+//  }
 }
 
 /** Return pointer to IPeaksWorkspace
@@ -307,11 +307,13 @@ boost::shared_ptr<API::IEventWorkspace> FrameworkManagerProxy::retrieveIEventWor
  */
 boost::shared_ptr<IPeaksWorkspace> FrameworkManagerProxy::retrieveIPeaksWorkspace(const std::string& wsName)
 {
-  IPeaksWorkspace_sptr ws = boost::dynamic_pointer_cast<IPeaksWorkspace>(retrieveWorkspace(wsName));
-  if (ws != NULL)
-    return ws;
-  else
-    throw std::runtime_error("\"" + wsName + "\" is not a peaks workspace. ");
+  return  boost::dynamic_pointer_cast<IPeaksWorkspace>(retrieveWorkspace(wsName));
+
+//  IPeaksWorkspace_sptr ws = boost::dynamic_pointer_cast<IPeaksWorkspace>(retrieveWorkspace(wsName));
+//  if (ws != NULL)
+//    return ws;
+//  else
+//    throw std::runtime_error("\"" + wsName + "\" is not a peaks workspace. ");
 }
 
 /** Return pointer to IMDWorkspace
@@ -321,15 +323,16 @@ boost::shared_ptr<IPeaksWorkspace> FrameworkManagerProxy::retrieveIPeaksWorkspac
  */
 boost::shared_ptr<API::IMDWorkspace> FrameworkManagerProxy::retrieveIMDWorkspace(const std::string& wsName)
 {
-  API::IMDWorkspace_sptr ws = boost::dynamic_pointer_cast<API::IMDWorkspace>(retrieveWorkspace(wsName));
-  if (ws != NULL)
-  {
-    return ws;
-  }
-  else
-  {
-    throw std::runtime_error("\"" + wsName + "\" is not an MD workspace. ");
-  }
+  return boost::dynamic_pointer_cast<API::IMDWorkspace>(retrieveWorkspace(wsName));
+//  API::IMDWorkspace_sptr ws = boost::dynamic_pointer_cast<API::IMDWorkspace>(retrieveWorkspace(wsName));
+//  if (ws != NULL)
+//  {
+//    return ws;
+//  }
+//  else
+//  {
+//    throw std::runtime_error("\"" + wsName + "\" is not an MD workspace. ");
+//  }
 }
 
 
@@ -340,15 +343,16 @@ boost::shared_ptr<API::IMDWorkspace> FrameworkManagerProxy::retrieveIMDWorkspace
  */
 boost::shared_ptr<API::IMDHistoWorkspace> FrameworkManagerProxy::retrieveIMDHistoWorkspace(const std::string& wsName)
 {
-  API::IMDHistoWorkspace_sptr ws = boost::dynamic_pointer_cast<API::IMDHistoWorkspace>(retrieveWorkspace(wsName));
-  if (ws != NULL)
-  {
-    return ws;
-  }
-  else
-  {
-    throw std::runtime_error("\"" + wsName + "\" is not an MDHistoWorkspace. ");
-  }
+  return boost::dynamic_pointer_cast<API::IMDHistoWorkspace>(retrieveWorkspace(wsName));
+//  API::IMDHistoWorkspace_sptr ws = boost::dynamic_pointer_cast<API::IMDHistoWorkspace>(retrieveWorkspace(wsName));
+//  if (ws != NULL)
+//  {
+//    return ws;
+//  }
+//  else
+//  {
+//    throw std::runtime_error("\"" + wsName + "\" is not an MDHistoWorkspace. ");
+//  }
 }
 
 
@@ -360,15 +364,16 @@ boost::shared_ptr<API::IMDHistoWorkspace> FrameworkManagerProxy::retrieveIMDHist
  */
 boost::shared_ptr<API::IMDEventWorkspace> FrameworkManagerProxy::retrieveIMDEventWorkspace(const std::string& wsName)
 {
-  API::IMDEventWorkspace_sptr ws = boost::dynamic_pointer_cast<API::IMDEventWorkspace>(retrieveWorkspace(wsName));
-  if (ws != NULL)
-  {
-    return ws;
-  }
-  else
-  {
-    throw std::runtime_error("\"" + wsName + "\" is not an MD Event Workspace. ");
-  }
+  return boost::dynamic_pointer_cast<API::IMDEventWorkspace>(retrieveWorkspace(wsName));
+//  API::IMDEventWorkspace_sptr ws = boost::dynamic_pointer_cast<API::IMDEventWorkspace>(retrieveWorkspace(wsName));
+//  if (ws != NULL)
+//  {
+//    return ws;
+//  }
+//  else
+//  {
+//    throw std::runtime_error("\"" + wsName + "\" is not an MD Event Workspace. ");
+//  }
 }
 
 
@@ -379,16 +384,17 @@ boost::shared_ptr<API::IMDEventWorkspace> FrameworkManagerProxy::retrieveIMDEven
 **/
 boost::shared_ptr<API::ITableWorkspace> FrameworkManagerProxy::retrieveTableWorkspace(const std::string& wsName)
 {
-  API::ITableWorkspace_sptr table_wksp =  boost::dynamic_pointer_cast<API::ITableWorkspace>(retrieveWorkspace(wsName));
-  if( table_wksp.get() )
-  {
-    return table_wksp;
-  }
-  else
-  {
-    throw std::runtime_error("\"" + wsName + "\" is not a table workspace. "
-        "This may be a matrix workspace, try getMatrixWorkspace().");
-  }
+  return boost::dynamic_pointer_cast<API::ITableWorkspace>(retrieveWorkspace(wsName));
+//  API::ITableWorkspace_sptr table_wksp =  boost::dynamic_pointer_cast<API::ITableWorkspace>(retrieveWorkspace(wsName));
+//  if( table_wksp.get() )
+//  {
+//    return table_wksp;
+//  }
+//  else
+//  {
+//    throw std::runtime_error("\"" + wsName + "\" is not a table workspace. "
+//        "This may be a matrix workspace, try getMatrixWorkspace().");
+//  }
 }
 
 /**
@@ -398,16 +404,18 @@ boost::shared_ptr<API::ITableWorkspace> FrameworkManagerProxy::retrieveTableWork
  */
 boost::shared_ptr<API::WorkspaceGroup> FrameworkManagerProxy::retrieveWorkspaceGroup(const std::string& group_name)
 {
-  API::WorkspaceGroup_sptr wksp_group = boost::dynamic_pointer_cast<API::WorkspaceGroup>(retrieveWorkspace(group_name));
-  if( wksp_group.get() )
-  {
-    return wksp_group;
-  }
-  else
-  {
-    throw std::runtime_error("\"" + group_name + "\" is not a group workspace. "
-        "This may be a matrix workspace, try getMatrixWorkspace().");
-  }
+  return boost::dynamic_pointer_cast<API::WorkspaceGroup>(retrieveWorkspace(group_name));
+//
+//  API::WorkspaceGroup_sptr wksp_group = boost::dynamic_pointer_cast<API::WorkspaceGroup>(retrieveWorkspace(group_name));
+//  if( wksp_group.get() )
+//  {
+//    return wksp_group;
+//  }
+//  else
+//  {
+//    throw std::runtime_error("\"" + group_name + "\" is not a group workspace. "
+//        "This may be a matrix workspace, try getMatrixWorkspace().");
+//  }
 }
 
 /**
