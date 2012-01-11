@@ -42,6 +42,19 @@ UserSubWindow::UserSubWindow(QWidget* parent) :
  */
 UserSubWindow::~UserSubWindow()
 {
+  // disconnect from the mantid's logger. otherwise we have a crash
+  try
+  {
+    Poco::SignalChannel *pChannel = 
+      dynamic_cast<Poco::SignalChannel*>(Poco::LoggingRegistry::defaultRegistry().channelForName("signalChannel"));
+    if( pChannel )
+    { 
+      pChannel->sig().disconnect(boost::bind(&UserSubWindow::mantidLogReceiver, this, _1));
+    }
+  }
+  catch(...)
+  {
+  }
 }
 
 /**
