@@ -7,7 +7,7 @@ test_header.h
 *.propeties
 
 DivideTest.h
-MunusTest.h
+MinusTest.h
 MultiplyTest.h
 PlusTest.h
 
