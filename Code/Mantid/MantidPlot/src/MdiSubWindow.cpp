@@ -487,10 +487,13 @@ bool FloatingWindow::event(QEvent * e)
 {
   if (e->type() == QEvent::WindowActivate)
   {
+    // If FloatingWindow was activated by clicking on it we need to
+    // let the application know about it
     MdiSubWindow* w = dynamic_cast<MdiSubWindow*>(widget());
     if (w && this != w->d_app->getActiveFloating())
     {
-      w->d_app->activateWindow(w);
+      // the second argument says that FloatingWindow must not be activated again
+      w->d_app->activateWindow(w,false);
     }
   }
   else if (e->type() == QEvent::WindowStateChange)

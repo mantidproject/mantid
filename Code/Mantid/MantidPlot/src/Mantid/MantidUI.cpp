@@ -439,8 +439,8 @@ MantidMatrix* MantidUI::importMatrixWorkspace(const QString& wsName, int lower, 
  */
 void MantidUI::importWorkspace(const QString& wsName, bool showDlg, bool makeVisible)
 {
-  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   MantidMatrix* mm = importMatrixWorkspace(wsName,-1, -1, showDlg,makeVisible);
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   if (!mm)
   {
     importTableWorkspace(wsName,showDlg,makeVisible);
@@ -2846,8 +2846,8 @@ MultiLayer* MantidUI::plotSpectraList(const QString& wsName, const std::set<int>
  */
 MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs, bool distr, Graph::CurveType style)
 {
-  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   UNUSED_ARG(errs);
+  if(toPlot.size() == 0) return NULL;
   if (toPlot.size() > 10)
   {
     QMessageBox ask(appWindow());
@@ -2857,18 +2857,10 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
       "Are you sure you want to plot this many?");
     ask.setIcon(QMessageBox::Question);
     ask.exec();
-    if (ask.clickedButton() != confirmButton)
-    {
-      QApplication::restoreOverrideCursor();
-      return NULL;
-    }
+    if (ask.clickedButton() != confirmButton) return NULL;
   }
 
-  if(toPlot.size() == 0)
-  {
-    QApplication::restoreOverrideCursor();
-    return NULL;
-  }
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor)); 
 
   const QString& firstWorkspace = toPlot.constBegin().key();
   MultiLayer* ml = appWindow()->multilayerPlot(appWindow()->generateUniqueName(firstWorkspace+"-"));
