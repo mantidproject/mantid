@@ -336,12 +336,13 @@ class SNSPowderReduction(PythonAlgorithm):
             return None
 
         # load the calibration file if the workspaces aren't already in memory
-        if (mtd[self._instrument + "_offsets"] is None) or (mtd[self._instrument + "_mask"] is None) \
-            or (mtd[self._instrument + "_group"] is None):
+        if (not mtd.workspaceExists(self._instrument + "_offsets")) \
+              or (not mtd.workspaceExists(self._instrument + "_mask")) \
+              or (not mtd.workspaceExists(self._instrument + "_group")):
             whichones = {}
-            whichones['MakeGroupingWorkspace'] = (mtd[self._instrument + "_group"] is None)
-            whichones['MakeOffsetsWorkspace'] = (mtd[self._instrument + "_offsets"] is None)
-            whichones['MakeMaskWorkspace'] = (mtd[self._instrument + "_mask"] is None)
+            whichones['MakeGroupingWorkspace'] = (not mtd.workspaceExists(self._instrument + "_group"))
+            whichones['MakeOffsetsWorkspace'] = (not mtd.workspaceExists(self._instrument + "_offsets"))
+            whichones['MakeMaskWorkspace'] = (not mtd.workspaceExists(self._instrument + "_group"))
             LoadCalFile(InputWorkspace=wksp, CalFileName=calib, WorkspaceName=self._instrument,
                         **whichones)
 
@@ -564,15 +565,14 @@ class SNSPowderReduction(PythonAlgorithm):
             elif canRun < 0: # turn off the correction
                 canRun = 0
             if canRun > 0:
-                temp = mtd["%s_%d" % (self._instrument, canRun)]
-                if temp is None:
+                if mtd.workspaceExists("%s_%d" % (self._instrument, canRun)):
+                    canRun = mtd["%s_%d" % (self._instrument, canRun)]
+                else:
                     if self.getProperty("FilterCharacterizations"):
                         canRun = self._loadData(canRun, SUFFIX, filterWall)
                     else:
                         canRun = self._loadData(canRun, SUFFIX, (0., 0.))
                     canRun = self._focus(canRun, calib, info, preserveEvents=preserveEvents)
-                else:
-                    canRun = temp
                 ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
                 workspacelist.append(str(canRun))
             else:
@@ -585,8 +585,9 @@ class SNSPowderReduction(PythonAlgorithm):
             elif vanRun < 0: # turn off the correction
                 vanRun = 0
             if vanRun > 0:
-                temp = mtd["%s_%d" % (self._instrument, vanRun)]
-                if temp is None:
+                if mtd.workspaceExists("%s_%d" % (self._instrument, vanRun)):
+                    vanRun = mtd["%s_%d" % (self._instrument, vanRun)]
+                else:
                     if self.getProperty("FilterCharacterizations"):
                         vanRun = self._loadData(vanRun, SUFFIX, filterWall)
                     else:
@@ -639,8 +640,6 @@ class SNSPowderReduction(PythonAlgorithm):
                                                          AttenuationXSection=2.8, ScatteringXSection=5.1,
                                                          SampleNumberDensity=0.0721, CylinderSampleRadius=.3175)
                     SetUncertaintiesToZero(InputWorkspace=vanRun, OutputWorkspace=vanRun)
-                else:
-                    vanRun = temp
                 ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
                 workspacelist.append(str(vanRun))
             else:
