@@ -8567,6 +8567,8 @@ void ApplicationWindow::activateWindow(MdiSubWindow *w, bool activateOuterWindow
   {
     if (activateOuterWindow)
     {
+      //w->setNormal();
+      fw->showNormal();
       fw->activateWindow();
     }
   }
