@@ -40,6 +40,14 @@ public:
         IConvertToMDEventsMethods::setUPConversion(pWS2D,detLoc,TestWS,pOutMDWSWrapper);
 
     }
+    void resetConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const PreprocessedDetectors &detLoc,const MDEvents::MDWSDescription &TestWS){
+
+        boost::shared_ptr<MDEvents::MDEventWSWrapper> pOutMDWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
+        pOutMDWSWrapper->createEmptyMDWS(TestWS);
+
+        IConvertToMDEventsMethods::setUPConversion(pWS2D,detLoc,TestWS,pOutMDWSWrapper);
+
+    }
     /// method which starts the conversion procedure
     void runConversion(API::Progress *){} 
 };
@@ -74,6 +82,101 @@ void test_CoordTransfNOQ()
     for(size_t i=0;i<n_data;i++){
         TS_ASSERT_THROWS_NOTHING(Copy.calcMatrixCoord(X,0,i,Coord));
         TS_ASSERT_DELTA(0.5*(X[i]+X[i+1]),Coord[0],1.e-5);  
+    }
+}
+
+void test_CoordTransfQ3DDirect()
+{
+    COORD_TRANSFORMER<Q3D,Direct,ConvertNo,Histohram> ConvFromHisto;
+
+    MDEvents::MDWSDescription TestWS(4);
+
+    TestWS.Ei   = *(dynamic_cast<Kernel::PropertyWithValue<double>  *>(ws2D->run().getProperty("Ei")));
+    TestWS.emode= MDAlgorithms::Direct;
+    TestWS.dim_min.assign(4,-3);
+    TestWS.dim_max.assign(4,3);
+    TestWS.dim_names.assign(4,"Momentum");
+    TestWS.dim_names[3]="DeltaE";
+    TestWS.rotMatrix.assign(9,0);
+    TestWS.rotMatrix[0]=1;
+    TestWS.rotMatrix[4]=1;
+    TestWS.rotMatrix[8]=1;
+
+
+    pConvMethods->resetConversion(ws2D,det_loc,TestWS);
+
+    const size_t specSize = ws2D->blocksize();
+    size_t nValidSpectra = det_loc.nDetectors();
+
+    // helper conversion to TOF
+    UNITS_CONVERSION<ConvByTOF,Histohram> ConvToTOF;
+    TS_ASSERT_THROWS_NOTHING(ConvToTOF.setUpConversion(pConvMethods.get(),"TOF"));
+
+    // set up the run over the histohram methods
+    ConvFromHisto.setUpTransf(pConvMethods.get());
+    std::vector<coord_t> Coord(4);
+
+    // copy one generic variable from WS axis (Y axis is not deined)
+    TS_ASSERT_THROWS_NOTHING(ConvFromHisto.calcGenericVariables(Coord,4));    
+
+    std::vector<coord_t> allCoordDir;
+    allCoordDir.reserve(specSize*nValidSpectra*4);
+
+    size_t ic(0);
+    std::vector<double> TOF_data(specSize*nValidSpectra);
+
+    for (size_t i = 0; i < nValidSpectra; ++i){
+            size_t iSpctr             = det_loc.detIDMap[i];
+            int32_t det_id            = det_loc.det_id[i];
+
+            const MantidVec& X        = ws2D->readX(iSpctr);        
+            // calculate the coordinates which depend on detector posision 
+            TS_ASSERT_THROWS_NOTHING(ConvFromHisto.calcYDepCoordinates(Coord,i));
+            
+            TS_ASSERT_THROWS_NOTHING(ConvToTOF.updateConversion(i));
+
+         //=> START INTERNAL LOOP OVER THE "TIME"
+            for (size_t j = 0; j < specSize; ++j)
+            {
+              TS_ASSERT_THROWS_NOTHING(ConvFromHisto.calcMatrixCoord(X,i,j,Coord));
+              allCoordDir.insert(allCoordDir.end(),Coord.begin(),Coord.end());
+
+              // convert to TOF for comparsion
+              TS_ASSERT_THROWS_NOTHING(TOF_data[ic]=ConvToTOF.getXConverted(X,j));
+              ic++;
+            }   
+    }
+    // compare with conversion from TOF
+
+    COORD_TRANSFORMER<Q3D,Direct,ConvFromTOF,Histohram> ConvFromTOFHisto;
+
+    // make axis untit to be TOF to be able to work with conversion from TOF
+    NumericAxis *pAxis0 = new NumericAxis(specSize); 
+    pAxis0->setUnit("TOF");
+    ws2D->replaceAxis(0,pAxis0);
+
+    TS_ASSERT_THROWS_NOTHING(ConvFromTOFHisto.setUpTransf(pConvMethods.get()));    
+    TS_ASSERT_THROWS_NOTHING(ConvFromTOFHisto.calcGenericVariables(Coord,4));    
+    size_t icc(0);
+    ic = 0;    for (size_t i = 0; i < nValidSpectra; ++i){
+        size_t iSpctr             = det_loc.detIDMap[i];
+        int32_t det_id            = det_loc.det_id[i];
+
+        // calculate the coordinates which depend on detector posision 
+         TS_ASSERT_THROWS_NOTHING(ConvFromTOFHisto.calcYDepCoordinates(Coord,i));
+           
+         //=> START INTERNAL LOOP OVER THE "TIME"
+         for (size_t j = 0; j < specSize; ++j){
+
+              TS_ASSERT_THROWS_NOTHING(ConvFromTOFHisto.ConvertAndCalcMatrixCoord(TOF_data[ic],Coord));
+              // compare with results from TOF
+              TS_ASSERT_DELTA(allCoordDir[icc+0],Coord[0],1.e-5);
+              TS_ASSERT_DELTA(allCoordDir[icc+1],Coord[1],1.e-5);
+              TS_ASSERT_DELTA(allCoordDir[icc+2],Coord[2],1.e-5);
+              TS_ASSERT_DELTA(allCoordDir[icc+3],Coord[3],1.e-5);
+              icc+=4;
+              ic++;
+            }   
     }
 
 
