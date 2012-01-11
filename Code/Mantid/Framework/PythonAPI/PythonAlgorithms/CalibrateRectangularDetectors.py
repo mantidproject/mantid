@@ -358,7 +358,8 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         if self._xpixelbin*self._ypixelbin>1:
                 SumNeighbours(InputWorkspace=wksp, OutputWorkspace=wksp, SumX=self._xpixelbin, SumY=self._ypixelbin)
         # Bin events in d-Spacing
-        Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,Params=str(self._binning[0])+","+str(abs(self._binning[1]))+","+str(self._binning[2]))
+        if not "histo" in self.getProperty("Extension"):
+        	Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,Params=str(self._binning[0])+","+str(abs(self._binning[1]))+","+str(self._binning[2]))
         # Remove old calibration files
         cmd = "rm "+calib
         os.system(cmd)
