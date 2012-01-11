@@ -1067,89 +1067,97 @@ void MantidDockWidget::saveToProgram(const QString & name)
     QFileInfo target = QString::fromStdString(expTarget);
     if(target.exists())
     {
-      //Setup a shared pointer for the algorithm using the appropriate save type
-      Mantid::API::IAlgorithm_sptr alg;
-
-      //Convert to QString and create Algorithm
-      QString saveUsing = QString::fromStdString(programKeysAndDetails.find("saveusing")->second);
-
-      //Create a new save based on what files the new program can open
-      alg = m_mantidUI->createAlgorithm(saveUsing);
-
-      //Get the file extention based on the workspace
-      Property* prop = alg->getProperty("Filename");
-      FileProperty *fileProp = dynamic_cast<FileProperty*>(prop);
-      std::string ext;
-      if(fileProp)
-      {
-        ext = fileProp->getDefaultExt();
-      }
-
-      //Save as.. default save + the file type i.e .nxs
-      alg->setPropertyValue("fileName", "auto_save_" + selectedWsName.toStdString() + ext);
-
-      //Save the workspace
-      alg->setPropertyValue("InputWorkspace", selectedWsName.toStdString());
-
-      //If there are any save parameters
-      if (programKeysAndDetails.count("saveparameters") != 0)
-      {
-        QString saveParametersGrouped = QString::fromStdString(programKeysAndDetails.find("saveparameters")->second);
-        QStringList saveParameters = saveParametersGrouped.split(',');
-
-        //For each one found split it up and assign the parameter
-        for (int i = 0; i<saveParameters.size(); i++)
-        {
-          QStringList sPNameAndDetail = saveParameters[i].split('=');
-          std::string saveParameterName = sPNameAndDetail[0].trimmed().toStdString();
-          std::string saveParameterDetail = sPNameAndDetail[1].trimmed().toStdString();
-          if(saveParameterDetail == "True")
-            alg->setProperty(saveParameterName, true);
-          else if(saveParameterDetail == "False")
-            alg->setProperty(saveParameterName, false);
-          else  //if not true or false then must be a value
-          {
-            alg->setPropertyValue(saveParameterName, saveParameterDetail);
-          }
-        }
-      }
-
-      //Execute the save
-      m_mantidUI->executeAlgorithmAsync(alg, true);
-      //alg->execute();
-
-      //Get the save location of the file (should be default Mantid folder)
-      //std::string savedFile = alg->getProperty("Filename");
-      QString savedFile = QString::fromStdString(alg->getProperty("Filename"));
-      QStringList arguments;
-
-      //Arguments for the program to take. Default will be the file anyway.
-      if (programKeysAndDetails.count("arguments") != 0)
-      {
-        QString temp = QString::fromStdString(programKeysAndDetails.find("arguments")->second);
-        temp.replace(QString("[file]"), savedFile);
-        //temp.replace(QString("[user]"), user;
-        arguments = temp.split(",");
-      }
-      else
-        arguments.insert(0, savedFile);
-  
-      //convert the list into a standard vector for compatibility with Poco
-      std::vector<std::string> argumentsV;
-
-      for (int i = 0; i<arguments.size(); i++)
-      {
-        argumentsV.assign(1, (arguments[i].toStdString()));
-      }
-    
-      //Execute the program
       try
       {
-        Mantid::Kernel::ConfigService::Instance().launchProcess(expTarget, argumentsV);
+        //Setup a shared pointer for the algorithm using the appropriate save type
+        Mantid::API::IAlgorithm_sptr alg;
+
+        //Convert to QString and create Algorithm
+        QString saveUsing = QString::fromStdString(programKeysAndDetails.find("saveusing")->second);
+
+        //Create a new save based on what files the new program can open
+        alg = m_mantidUI->createAlgorithm(saveUsing);
+
+        //Get the file extention based on the workspace
+        Property* prop = alg->getProperty("Filename");
+        FileProperty *fileProp = dynamic_cast<FileProperty*>(prop);
+        std::string ext;
+        if(fileProp)
+        {
+          ext = fileProp->getDefaultExt();
+        }
+
+        //Save as.. default save + the file type i.e .nxs
+        alg->setPropertyValue("fileName", "auto_save_" + selectedWsName.toStdString() + ext);
+
+        //Save the workspace
+        alg->setPropertyValue("InputWorkspace", selectedWsName.toStdString());
+
+        //If there are any save parameters
+        if (programKeysAndDetails.count("saveparameters") != 0)
+        {
+          QString saveParametersGrouped = QString::fromStdString(programKeysAndDetails.find("saveparameters")->second);
+          QStringList saveParameters = saveParametersGrouped.split(',');
+
+          //For each one found split it up and assign the parameter
+          for (int i = 0; i<saveParameters.size(); i++)
+          {
+            QStringList sPNameAndDetail = saveParameters[i].split('=');
+            std::string saveParameterName = sPNameAndDetail[0].trimmed().toStdString();
+            std::string saveParameterDetail = sPNameAndDetail[1].trimmed().toStdString();
+            if(saveParameterDetail == "True")
+              alg->setProperty(saveParameterName, true);
+            else if(saveParameterDetail == "False")
+              alg->setProperty(saveParameterName, false);
+            else  //if not true or false then must be a value
+            {
+              alg->setPropertyValue(saveParameterName, saveParameterDetail);
+            }
+          }
+        }
+
+        //Execute the save
+        m_mantidUI->executeAlgorithmAsync(alg, true);
+        //alg->execute();
+
+        //Get the save location of the file (should be default Mantid folder)
+        //std::string savedFile = alg->getProperty("Filename");
+        QString savedFile = QString::fromStdString(alg->getProperty("Filename"));
+        QStringList arguments;
+
+        //Arguments for the program to take. Default will be the file anyway.
+        if (programKeysAndDetails.count("arguments") != 0)
+        {
+          QString temp = QString::fromStdString(programKeysAndDetails.find("arguments")->second);
+          temp.replace(QString("[file]"), savedFile);
+          //temp.replace(QString("[user]"), user;
+          arguments = temp.split(",");
+        }
+        else
+          arguments.insert(0, savedFile);
+  
+        //convert the list into a standard vector for compatibility with Poco
+        std::vector<std::string> argumentsV;
+
+        for (int i = 0; i<arguments.size(); i++)
+        {
+          argumentsV.assign(1, (arguments[i].toStdString()));
+        }
+    
+        //Execute the program
+        try
+        {
+          Mantid::Kernel::ConfigService::Instance().launchProcess(expTarget, argumentsV);
+        }
+        catch(std::runtime_error&)
+        {
+          QMessageBox::information(this, "Error", "User tried to open program from: " + QString::fromStdString(expTarget) + " There was an error opening the program. Please check the target and arguments list to ensure that these are correct");
+        }
       }
-      catch(std::runtime_error&)
+      catch(std::exception& ex)
       {
-        QMessageBox::information(this, "Error", "User tried to open program from: " + QString::fromStdString(expTarget) + " There was an error opening the program. Please check the target and arguments list to ensure that these are correct");
+        QMessageBox::information(this, "Mantid - Send to Program", "A file property wasn't found. Please check that the correct"
+          + QString("save algorithm was used.\n(View -> Preferences -> Mantid -> SendTo -> Edit -> SaveUsing)") );
       }
     }
     else
