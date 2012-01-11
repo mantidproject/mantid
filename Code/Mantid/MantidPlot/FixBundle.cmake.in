@@ -34,7 +34,7 @@ endfunction()
 
 # Additional steps so that the plugins that depend on plugins actually work
 set ( mantid_bundle ${bundle}/Contents/MacOS/mantid ) 
-set ( mantid_exec_path @executable_path/../../Contents/MacOS/mantid )
+set ( mantid_exec_path @executable_path/../MacOS/mantid )
 set ( macos_exec_path @executable_path/../../Contents/MacOS )
 
 # First make sure the IDs is correct
@@ -44,13 +44,13 @@ change_bundle_id ( ${mantid_exec_path}/geometry/_geometry.so ${mantid_bundle}/ge
 change_bundle_id ( ${mantid_exec_path}/api/_api.so ${mantid_bundle}/api/_api.so )
 
 # _kernel dependency in _geometry
-change_bundle_dep( ${macos_exec_path}/_kernel.so ${mantid_exec_path}/mantid/kernel/_kernel.so ${mantid_bundle}/geometry/_geometry.so )
+change_bundle_dep( ${macos_exec_path}/_kernel.so ${mantid_exec_path}/kernel/_kernel.so ${mantid_bundle}/geometry/_geometry.so )
 
 # _kernel dependency in _api
-change_bundle_dep( ${macos_exec_path}/_kernel.so ${mantid_exec_path}/mantid/kernel/_kernel.so ${mantid_bundle}/api/_api.so )
+change_bundle_dep( ${macos_exec_path}/_kernel.so ${mantid_exec_path}/kernel/_kernel.so ${mantid_bundle}/api/_api.so )
 
 # _geometry dependency in _api
-change_bundle_dep( ${macos_exec_path}/_geometry.so ${mantid_exec_path}/mantid/geometry/_geometry.so ${mantid_bundle}/api/_api.so )
+change_bundle_dep( ${macos_exec_path}/_geometry.so ${mantid_exec_path}/geometry/_geometry.so ${mantid_bundle}/api/_api.so )
 
 
 
