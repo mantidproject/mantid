@@ -139,7 +139,7 @@ class MantidPlotProxiesTest(unittest.TestCase):
         self.try_closing(iv, "getInstrumentView()")
         
     def test_convertToWaterfall(self):
-        g = plotSpectrum("IRS26173",(0,1,2,3,4))
+        g = plot(workspace("IRS26173"),(0,1,2,3,4))
         convertToWaterfall(g)
         screenshot(g, "convertToWaterfall", "Call to convertToWaterfall() on a workspace.")
         self.try_closing(g, "convertToWaterfall()")
