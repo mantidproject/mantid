@@ -100,6 +100,7 @@ set ( TEST_FILES
 	test/ConvertToMDEventsUnitsConvTest.h
 	test/ConvertToMDEventsCoordTransfTest.h
 	test/ConvertEventsToMDEventsTest.h	
+	test/ConvertToMDEventsMethodsTest.h
 	test/DivideMDTest.h
 	test/EqualToMDTest.h
 	test/ExponentialMDTest.h
