@@ -11,10 +11,12 @@
 #include <iomanip>
 #include <iostream>
 #include <Poco/File.h>
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
+using namespace Mantid::Geometry;
 
 class CloneMDWorkspaceTest : public CxxTest::TestSuite
 {
@@ -96,13 +98,12 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
   }
 
-  void test_MDHistoWorkspace()
+  /** Clone a workspace and check that the clone matches */
+  void do_test_MDHisto(MDHistoWorkspace_sptr ws1)
   {
     // Name of the output workspace.
     std::string outWSName("CloneMDWorkspaceTest_OutputWS");
-
-    // Make a fake file-backed (or not) MDEW
-    MDHistoWorkspace_sptr ws1 = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 2.34);
+    // Add the input workspace
     AnalysisDataService::Instance().addOrReplace("CloneMDWorkspaceTest_ws", ws1);
 
     CloneMDWorkspace alg;
@@ -119,14 +120,57 @@ public:
     TS_ASSERT(ws2); if (!ws2) return;
 
     // Compare the WS
+    TS_ASSERT_EQUALS( ws1->getNumDims(), ws2->getNumDims());
     TS_ASSERT_EQUALS( ws1->getNPoints(), ws2->getNPoints());
     TS_ASSERT_DELTA( ws1->getSignalAt(0), ws2->getSignalAt(0), 1e-5);
     TS_ASSERT_DELTA( ws1->getErrorAt(0), ws2->getErrorAt(0), 1e-5);
+
+    if (ws1->getNPoints() == ws2->getNPoints())
+    {
+      for (size_t i=0; i < ws1->getNPoints(); i++)
+      {
+        TS_ASSERT_DELTA( ws1->getSignalAt(i), ws2->getSignalAt(i), 1e-5);
+        TS_ASSERT_DELTA( ws1->getErrorAt(i), ws2->getErrorAt(i), 1e-5);
+        TS_ASSERT_DELTA( ws1->getSignalNormalizedAt(i), ws2->getSignalNormalizedAt(i), 1e-5);
+      }
+    }
+
+    for (size_t d=0; d<ws1->getNumDims(); d++)
+    {
+      TS_ASSERT_EQUALS( ws1->getDimension(d)->getName(), ws2->getDimension(d)->getName());
+      TS_ASSERT_EQUALS( ws1->getDimension(d)->getNBins(), ws2->getDimension(d)->getNBins());
+    }
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove("CloneMDWorkspaceTest_ws");
     AnalysisDataService::Instance().remove(outWSName);
   }
+
+  void test_MDHistoWorkspace_1D()
+  {
+    MDHistoWorkspace_sptr ws1 = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 1, 5, 10.0, 2.34);
+    do_test_MDHisto(ws1);
+  }
+
+  void test_MDHistoWorkspace_2D()
+  {
+    // Make a fake file-backed (or not) MDEW
+    MDHistoWorkspace_sptr ws1 = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 2.34);
+    do_test_MDHisto(ws1);
+  }
+
+  void test_MDHistoWorkspace_2D_uneven_bins()
+  {
+    // Make the number of bins uneven in both dimensions
+    Mantid::MDEvents::MDHistoWorkspace * ws = NULL;
+    ws = new Mantid::MDEvents::MDHistoWorkspace(
+          MDHistoDimension_sptr(new MDHistoDimension("x","x","m", 0.0, 10.0, 50)),
+          MDHistoDimension_sptr(new MDHistoDimension("y","y","m", 0.0, 10.0, 100))  );
+    Mantid::MDEvents::MDHistoWorkspace_sptr ws1(ws);
+    ws1->setTo(1.234, 5.678);
+    do_test_MDHisto(ws1);
+  }
+
   
 
 };
