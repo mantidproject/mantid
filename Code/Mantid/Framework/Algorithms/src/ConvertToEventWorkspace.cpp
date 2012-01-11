@@ -1,10 +1,11 @@
 /*WIKI* 
 
+This algorithm takes a Workspace2D with any binning or units as its input.
+An event is created for each bin of each histogram, except if the bin count is 0.0. The event is created with an X position (typically time-of-flight) equal to the **center** of the bin. The weight and error of the event are taken from the histogram value.
 
-
-This algorithm takes a Workspace2D with any binning or units as its input. An event is created for each bin of each histogram, except if the bin count is 0.0. The event is created with an X position (typically time-of-flight) equal to the **center** of the bin. The weight and error of the event are taken from the histogram value.
-
-If the GenerateMultipleEvents option is set, then instead of a single event per bin, a certain number of events evenly distributed along the X bin are generated. The number of events generated in each bin is calculated by N = (Y/E)^2 .
+If the GenerateMultipleEvents option is set, then instead of a single event per bin,
+a certain number of events evenly distributed along the X bin are generated.
+The number of events generated in each bin is calculated by N = (Y/E)^2 .
 
 
 
@@ -95,6 +96,7 @@ namespace Algorithms
     PARALLEL_FOR1(inWS)
     for (int iwi=0; iwi<int(inWS->getNumberHistograms()); iwi++)
     {
+      PARALLEL_START_INTERUPT_REGION
       size_t wi = size_t(iwi);
       // The input spectrum (a histogram)
       const ISpectrum * inSpec = inWS->getSpectrum(wi);
@@ -167,7 +169,9 @@ namespace Algorithms
       el.setSortOrder( TOF_SORT );
 
       prog.report("Converting");
+      PARALLEL_END_INTERUPT_REGION
     }
+    PARALLEL_CHECK_INTERUPT_REGION
 
     // Set the output
     setProperty("OutputWorkspace", outWS);
