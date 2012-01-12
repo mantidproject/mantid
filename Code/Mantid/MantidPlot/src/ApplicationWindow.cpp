@@ -8520,6 +8520,11 @@ void ApplicationWindow::activateWindow(MdiSubWindow *w, bool activateOuterWindow
 
   if(getActiveWindow()  == w )
   {
+    // this can happen
+    if (w->status() == MdiSubWindow::Minimized)
+    {
+      w->setNormal();
+    }
     return;
   }
 
@@ -17614,8 +17619,12 @@ void ApplicationWindow::activateNewWindow()
   {
     if (w->widget() != static_cast<QWidget*>(current))
     {
-      newone = dynamic_cast<MdiSubWindow*>(w->widget());
-      if (newone) break;
+      MdiSubWindow* sw = dynamic_cast<MdiSubWindow*>(w->widget());
+      if (sw && sw->status() != MdiSubWindow::Minimized)
+      {
+        newone = sw;
+        break;
+      }
     }
   }
 
@@ -17627,12 +17636,18 @@ void ApplicationWindow::activateNewWindow()
       MdiSubWindow* sw = w->mdiSubWindow();
       if (sw != current)
       {
-        newone = sw;
-        if (newone) break;
+        if (sw && sw->status() != MdiSubWindow::Minimized)
+        {
+          newone = sw;
+          break;
+        }
       }
     }
   }
-  setActiveWindow(newone);
+  if (newone)
+  {
+    activateWindow(newone);
+  }
 }
 
 #ifdef SHARED_MENUBAR

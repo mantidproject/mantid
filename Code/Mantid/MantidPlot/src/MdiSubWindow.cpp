@@ -293,6 +293,7 @@ void MdiSubWindow::setMinimized()
   if (wrapper)
   {
     wrapper->showMinimized();
+    d_app->activateNewWindow();
   }
   else
   {
@@ -503,6 +504,7 @@ bool FloatingWindow::event(QEvent * e)
       this->setParent(NULL);
       this->showMinimized();
       mdiSubWindow()->setStatus(MdiSubWindow::Minimized);
+      d_app->activateNewWindow();
     }
     else if ( (!this->isMaximized() || !this->isMinimized() ) && this->parent() != d_app)
     {
