@@ -1312,13 +1312,16 @@ class MantidPyFramework(FrameworkManager):
         attrs = ['_getRawIPeaksWorkspacePointer', '_getRawIEventWorkspacePointer', '_getRawMatrixWorkspacePointer',
                  '_getRawIMDEventWorkspacePointer','_getRawIMDHistoWorkspacePointer',
                 '_getRawIMDWorkspacePointer', '_getRawWorkspaceGroupPointer', '_getRawTableWorkspacePointer']
-        
-        for att in attrs:
-            retval = getattr(self, att)(name)
-            if retval is not None: 
-                return retval
+        retval = None
+        try:
+            for att in attrs:
+                retval = getattr(self, att)(name)
+                if retval is not None: 
+                    break
+        except RuntimeError:
+            pass
         # Preserve behaviour
-        return None
+        return retval
 
     def _workspaceRemoved(self, name):
         """
