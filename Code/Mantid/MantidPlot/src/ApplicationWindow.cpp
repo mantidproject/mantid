@@ -3098,13 +3098,6 @@ Note* ApplicationWindow::newNote(const QString& caption)
   m->askOnCloseEvent(confirmCloseNotes);
 
   addMdiSubWindow(m);
-
-  //connect(m, SIGNAL(modifiedWindow(MdiSubWindow*)), this, SLOT(modifiedProject(MdiSubWindow*)));
-  //connect(m, SIGNAL(resizedWindow(MdiSubWindow*)),this,SLOT(modifiedProject(MdiSubWindow*)));
-  //connect(m, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(closeWindow(MdiSubWindow*)));
-  //connect(m, SIGNAL(hiddenWindow(MdiSubWindow*)), this, SLOT(hideWindow(MdiSubWindow*)));
-  //connect(m, SIGNAL(statusChanged(MdiSubWindow*)), this, SLOT(updateWindowStatus(MdiSubWindow*)));
-
   m->showNormal();
   return m;
 }
@@ -15316,7 +15309,9 @@ bool ApplicationWindow::deleteFolder(Folder *f)
 
     FolderListItem *fi = f->folderListItem();
     foreach(MdiSubWindow *w, f->windowsList())
-    closeWindow(w);
+    {
+      w->close();
+    }
 
     if (!(f->children()).isEmpty()){
       Folder *subFolder = f->folderBelow();
