@@ -17635,6 +17635,7 @@ void ApplicationWindow::activateNewWindow()
 {
   MdiSubWindow* current = getActiveWindow();
   MdiSubWindow* newone = NULL;
+  Folder* folder = currentFolder();
   
   // try the docked windows first
   QList<QMdiSubWindow*> wl = d_workspace->subWindowList();
@@ -17643,7 +17644,7 @@ void ApplicationWindow::activateNewWindow()
     if (w->widget() != static_cast<QWidget*>(current))
     {
       MdiSubWindow* sw = dynamic_cast<MdiSubWindow*>(w->widget());
-      if (sw && sw->status() != MdiSubWindow::Minimized)
+      if (sw && sw->status() != MdiSubWindow::Minimized && folder->hasWindow(sw))
       {
         newone = sw;
         break;
@@ -17659,7 +17660,7 @@ void ApplicationWindow::activateNewWindow()
       MdiSubWindow* sw = w->mdiSubWindow();
       if (sw != current)
       {
-        if (sw && sw->status() != MdiSubWindow::Minimized)
+        if (sw && sw->status() != MdiSubWindow::Minimized && folder->hasWindow(sw))
         {
           newone = sw;
           break;

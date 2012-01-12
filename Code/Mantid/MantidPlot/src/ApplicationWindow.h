@@ -889,7 +889,7 @@ public slots:
   //! \name Folders
   //@{
   //! Returns a pointer to the current folder in the project
-  Folder* currentFolder(){return current_folder;};
+  Folder* currentFolder(){return current_folder;}
   //! Adds a new folder to the project
   void addFolder();
   Folder* addFolder(QString name, Folder* parent = NULL);
