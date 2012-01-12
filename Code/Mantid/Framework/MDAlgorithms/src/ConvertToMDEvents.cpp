@@ -710,7 +710,7 @@ ConvertToMDEvents::getTransfMatrix(API::MatrixWorkspace_sptr inWS,const Kernel::
            Kernel::Matrix<double> gon =inWS->run().getGoniometer().getR();
 
           // Obtain the transformation matrix:
-           mat = umat*gon ; //*(2*M_PI)?;
+           mat = gon*umat ; //*(2*M_PI)?;
            mat.Invert();
         }catch(std::runtime_error &){
             convert_log.warning()<<" Can not obtain transformation matrix from the input workspace: "<<inWS->name()<<" as no oriented lattice has been defined. Use unit transformation matrix anyway\n";
@@ -879,7 +879,7 @@ native_elastic_unitID("Momentum"),// currently it is Q
 native_inelastic_unitID("DeltaE") // currently it is energy transfer (DeltaE)
 {
      Q_modes[modQ] = "|Q|";
-     Q_modes[Q3D]  = "QxQyQz";    
+     Q_modes[Q3D]  = "QhQkQl";    
      Q_modes[NoQ]  = "";    // no Q dimension (does it have any interest&relevance to ISIS/SNS?) 
      dE_modes[ANY_Mode]  = ""; // no Q uses it to run without conversion. 
      dE_modes[Direct]    = "Direct";

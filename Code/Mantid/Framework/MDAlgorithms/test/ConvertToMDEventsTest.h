@@ -176,9 +176,9 @@ void testParseQMode_Q3D()
      std::vector<std::string> out_dim_names,out_dim_units;
      int nQ_dims;
      std::string MODE;
-     TS_ASSERT_THROWS_NOTHING(MODE=pAlg->parseQMode("QxQyQz",ws_dim_names,ws_dim_units,out_dim_names,out_dim_units, nQ_dims));
+     TS_ASSERT_THROWS_NOTHING(MODE=pAlg->parseQMode("QhQkQl",ws_dim_names,ws_dim_units,out_dim_names,out_dim_units, nQ_dims));
      TS_ASSERT_EQUALS(3,nQ_dims);
-     TS_ASSERT_EQUALS("QxQyQz",MODE);
+     TS_ASSERT_EQUALS("QhQkQl",MODE);
      TS_ASSERT_EQUALS("Q_x",out_dim_names[0]);
      TS_ASSERT_EQUALS("Q_y",out_dim_names[1]);
      TS_ASSERT_EQUALS("Q_z",out_dim_names[2]);
@@ -348,7 +348,7 @@ void testNeedsNumericAxis(){
     ws2D->replaceAxis(0,new API::TextAxis(3));
     std::vector<std::string> dim_names;
     std::vector<std::string> dim_units;
-    TS_ASSERT_THROWS(pAlg->identifyMatrixAlg(ws2D,"QxQyQz","",dim_names,dim_units),std::invalid_argument);
+    TS_ASSERT_THROWS(pAlg->identifyMatrixAlg(ws2D,"QhQkQl","",dim_names,dim_units),std::invalid_argument);
 }
 void testGetWS4DimIDFine(){
     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4,10,true);
@@ -356,11 +356,11 @@ void testGetWS4DimIDFine(){
     std::vector<std::string> dim_names;
     std::vector<std::string> dim_units;
     std::string Alg_ID;
-    TS_ASSERT_THROWS_NOTHING(Alg_ID=pAlg->identifyMatrixAlg(ws2D,"QxQyQz","Direct",dim_names,dim_units));
+    TS_ASSERT_THROWS_NOTHING(Alg_ID=pAlg->identifyMatrixAlg(ws2D,"QhQkQl","Direct",dim_names,dim_units));
 
     TSM_ASSERT_EQUALS("Inelastic workspace will produce 4 dimensions",4,dim_names.size());
     TSM_ASSERT_EQUALS("Last dimension of Inelastic transformation should be DeltaE","DeltaE",dim_units[3]);
-    TSM_ASSERT_EQUALS("Alg ID would be: ","WS2DQxQyQzDirectCnvNo",Alg_ID);
+    TSM_ASSERT_EQUALS("Alg ID would be: ","WS2DQhQkQlDirectCnvNo",Alg_ID);
 }
 void testGetWS3DimIDFine(){
     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4,10,true);
@@ -373,11 +373,11 @@ void testGetWS3DimIDFine(){
     std::vector<std::string> dim_names;
     std::vector<std::string> dim_units;
     std::string Alg_ID;
-    TS_ASSERT_THROWS_NOTHING(Alg_ID=pAlg->identifyMatrixAlg(ws2D,"QxQyQz","Elastic",dim_names,dim_units));
+    TS_ASSERT_THROWS_NOTHING(Alg_ID=pAlg->identifyMatrixAlg(ws2D,"QhQkQl","Elastic",dim_names,dim_units));
 
     TSM_ASSERT_EQUALS("Inelastic workspace will produce 3 dimensions",3,dim_names.size());
     TSM_ASSERT_EQUALS("Last dimension of Elastic transformation should be ","Momentum",dim_units[2]);
-    TSM_ASSERT_EQUALS("Alg ID would be: ","WS2DQxQyQzElasticCnvByTOF",Alg_ID);
+    TSM_ASSERT_EQUALS("Alg ID would be: ","WS2DQhQkQlElasticCnvByTOF",Alg_ID);
 
 }
 void testGetWSDimNames2AxisNoQ(){
@@ -418,7 +418,7 @@ void testGetWSDimNames2AxisNoQ(){
 //
 //   std::vector<std::string> basic_properties(7);
 //   basic_properties[0]="|Q|";
-//   basic_properties[1]="QxQyQz";
+//   basic_properties[1]="QhQkQl";
 //   basic_properties[2]="DeltaE";
 //   basic_properties[3]="phi";
 //   basic_properties[4]="chi";
@@ -537,7 +537,7 @@ void testIdentifyMatrixAlg_5()
     pAx->setUnit("DeltaE");
     ws2D->replaceAxis(0,pAx);
 
-    TS_ASSERT_EQUALS("WS2DQxQyQzIndirectCnvNo",pAlg->identifyMatrixAlg(ws2D,"QxQyQz","Indirect",dim_names,dim_units));
+    TS_ASSERT_EQUALS("WS2DQhQkQlIndirectCnvNo",pAlg->identifyMatrixAlg(ws2D,"QhQkQl","Indirect",dim_names,dim_units));
     TSM_ASSERT_EQUALS("One dim name came from Q (this can be wrong)",4,dim_names.size());
     TS_ASSERT_EQUALS(dim_names[0],"Q_x");
     TS_ASSERT_EQUALS(dim_names[1],"Q_y");
@@ -620,7 +620,7 @@ void testExecQ3D()
     pAlg->setPropertyValue("OtherDimensions","phi,chi");
     pAlg->setPropertyValue("UsePreprocessedDetectors","0");
      
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions", "QxQyQz"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions", "QhQkQl"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Direct"));
     pAlg->setPropertyValue("MinValues","-10,-10,-10,  0,-10,-10");
     pAlg->setPropertyValue("MaxValues"," 10, 10, 10, 20, 40, 20");

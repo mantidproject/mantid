@@ -120,7 +120,6 @@ void testConvertToTofInelasticWS()
 
 
 ConvertToMDEventsUnitsConvTest (){
-
     
 
    std::vector<double> L2(5,5);

@@ -58,7 +58,7 @@ void t__tWithExistingLatticeTrowsLowEnergy(){
 
     AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
 
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions","QxQyQz"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions","QhQkQl"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Inelastic"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
@@ -96,7 +96,7 @@ void testExecFailsOnNewWorkspaceNoMaxLimits(){
 
     AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
 
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions","QxQyQz"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions","QhQkQl"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Indirect"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
  
@@ -115,7 +115,7 @@ void testExecFailsLimits_MinGeMax(){
     AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
 
  
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions","QxQyQz"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions","QhQkQl"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Indirect"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
  
@@ -136,7 +136,7 @@ void testExecFine(){
 
     AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
 
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions","QxQyQz"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions","QhQkQl"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Indirect"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
  
@@ -160,8 +160,7 @@ void testExecAndAdd(){
 
      AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
 
- 
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions","QxQyQz"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions","QhQkQl"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Indirect"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
  

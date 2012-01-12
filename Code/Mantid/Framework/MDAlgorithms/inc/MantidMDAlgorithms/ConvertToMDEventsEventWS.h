@@ -187,7 +187,7 @@ class ConvertToMDEvensEventWS: public IConvertToMDEventsMethods
         getEventsFrom(el, events_ptr);
         typename std::vector<T> & events = *events_ptr;
 
-       // Iterators to start/end
+        // Iterators to start/end
        typename std::vector<T>::iterator it = events.begin();
        typename std::vector<T>::iterator it_end = events.end();
 
