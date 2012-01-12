@@ -8,6 +8,16 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
+namespace
+{
+  class MockWorkspace : public Workspace
+  {
+    virtual const std::string id() const { return "MockWorkspace"; }
+    virtual size_t getMemorySize() const { return 1; }
+  };
+  typedef boost::shared_ptr<MockWorkspace> MockWorkspace_sptr;
+}
+
 class AnalysisDataServiceTest : public CxxTest::TestSuite
 {
 public:
@@ -39,6 +49,18 @@ public:
     ads.setIllegalCharacterList("");
   }
 
+  void test_Retrieve_Checks_For_Exact_Match_Then_Lower_Upper_And_Sentence_Case()
+  {
+    addToADS("z");
+    addToADS("Z");
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().retrieve("z"));
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().retrieve("Z"));
+
+    removeFromADS("z");// Remove lower case
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().retrieve("z")); // Will find upper case
+    removeFromADS("z");// Remove lower case
+    TS_ASSERT_THROWS(AnalysisDataService::Instance().retrieve("z"), Exception::NotFoundError);
+  }
 
   void test_Add_With_Name_That_Has_No_Special_Chars_Is_Accpeted()
   {
@@ -152,7 +174,7 @@ private:
   /// Add a ptr to the ADS with the given name
   Workspace_sptr addToADS(const std::string & name)
   {
-    Workspace_sptr space = Workspace_sptr();
+    MockWorkspace_sptr space = MockWorkspace_sptr(new MockWorkspace);
     AnalysisDataService::Instance().add(name, space);
     return space;
   }
@@ -160,7 +182,7 @@ private:
   /// Add or replace the given name
   void addOrReplaceToADS(const std::string & name)
   {
-    AnalysisDataService::Instance().addOrReplace(name, Workspace_sptr());
+    AnalysisDataService::Instance().addOrReplace(name, Workspace_sptr(new MockWorkspace));
   }
 
   void removeFromADS(const std::string & name)

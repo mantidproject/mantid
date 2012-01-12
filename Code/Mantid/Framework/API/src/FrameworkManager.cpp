@@ -250,6 +250,9 @@ bool FrameworkManagerImpl::deleteWorkspace(const std::string& wsName)
     //  selected workspace is a group workspace
     ws_grpsptr->deepRemoveAll();
   }
+  // Make sure we drop the references so the memory will get freed when we expect it to
+  ws_sptr.reset();
+  ws_grpsptr.reset();
   try
   {
     AnalysisDataService::Instance().remove(wsName);
@@ -261,6 +264,7 @@ bool FrameworkManagerImpl::deleteWorkspace(const std::string& wsName)
     g_log.error()<<"Workspace "<< wsName << " could not be found."<<std::endl;
     retVal = false;
   }
+  Mantid::API::MemoryManager::Instance().releaseFreeMemory();
   return retVal;
 }
 

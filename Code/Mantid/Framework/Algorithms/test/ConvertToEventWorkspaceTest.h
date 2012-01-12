@@ -39,10 +39,18 @@ public:
     do_test_exec(true);
   }
 
-  void do_test_exec(bool GenerateMultipleEvents)
+  void test_exec_PointData_fails()
   {
+    do_test_exec(true, true);
+  }
+
+  void do_test_exec(bool GenerateMultipleEvents, bool ConvertToPointData=false)
+  {
+    std::string inWSName("ConvertToEventWorkspaceTest_InputWS");
+    std::string outWSName("ConvertToEventWorkspaceTest_OutputWS");
     // Create the input
     Workspace2D_sptr inWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(50, 10, true);
+    AnalysisDataService::Instance().addOrReplace(inWSName, inWS);
 
     inWS->dataY(0)[0] = 1.0;
     inWS->dataE(0)[0] = 1.0;
@@ -55,17 +63,32 @@ public:
     inWS->dataY(0)[4] = 10000.0;
     inWS->dataE(0)[4] = 100.0;
 
-    // Name of the output workspace.
-    std::string outWSName("ConvertToEventWorkspaceTest_OutputWS");
+    if (ConvertToPointData)
+    {
+      FrameworkManager::Instance().exec("ConvertToPointData", 4,
+          "InputWorkspace", inWSName.c_str(),
+          "OutputWorkspace", inWSName.c_str());
+    }
+
   
     ConvertToEventWorkspace alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", inWS) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", inWSName) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("GenerateMultipleEvents", GenerateMultipleEvents) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
-    TS_ASSERT( alg.isExecuted() );
+    if (ConvertToPointData)
+    {
+      // Should NOT work
+      TS_ASSERT( !alg.isExecuted() );
+      return;
+    }
+    else
+    {
+      // Should work
+      TS_ASSERT( alg.isExecuted() );
+    }
     
     // Retrieve the workspace from data service.
     EventWorkspace_sptr outWS;
@@ -135,6 +158,7 @@ public:
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
+    AnalysisDataService::Instance().remove(inWSName);
   }
   
 

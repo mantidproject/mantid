@@ -177,10 +177,10 @@ void CheckWorkspacesMatch::doComparison()
   // Check that both workspaces are the same type
   bool checkType = getProperty("CheckType");
   EventWorkspace_const_sptr ews1, ews2;
+  ews1 = boost::dynamic_pointer_cast<const EventWorkspace>(ws1);
+  ews2 = boost::dynamic_pointer_cast<const EventWorkspace>(ws2);
   if (checkType)
   {
-    ews1 = boost::dynamic_pointer_cast<const EventWorkspace>(ws1);
-    ews2 = boost::dynamic_pointer_cast<const EventWorkspace>(ws2);
     if ((ews1 && !ews2) ||(!ews1 && ews2))
     {
       result = "One workspace is an EventWorkspace and the other is not.";

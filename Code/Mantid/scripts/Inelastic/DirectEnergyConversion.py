@@ -797,7 +797,7 @@ class DirectEnergyConversion(object):
         try:
             self.diag_bleed_test = self.get_default_parameter('diag_bleed_test')
             self.diag_bleed_maxrate = self.get_default_parameter('diag_bleed_maxrate')
-            self.diag_bleed_pixels = self.get_default_parameter('diag_bleed_pixels')
+            self.diag_bleed_pixels = int(self.get_default_parameter('diag_bleed_pixels'))
             self.diag_params.extend(['diag_bleed_maxrate','diag_bleed_pixels'])
         except ValueError:
             self.diag_bleed_test = False

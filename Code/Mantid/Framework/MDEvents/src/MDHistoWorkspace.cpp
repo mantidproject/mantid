@@ -55,7 +55,7 @@ namespace MDEvents
     for (size_t d=0; d < other.getNumDims(); d++)
     {
       // Copy the dimension
-      MDHistoDimension_sptr dim(new MDHistoDimension( other.getDimension(0).get() ) );
+      MDHistoDimension_sptr dim(new MDHistoDimension( other.getDimension(d).get() ) );
       dimensions.push_back(dim);
     }
     this->init(dimensions);

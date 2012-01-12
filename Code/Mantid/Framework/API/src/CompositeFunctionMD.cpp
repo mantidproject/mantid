@@ -135,7 +135,7 @@ void CompositeFunctionMD::functionDeriv(Jacobian* out)
 
 void CompositeFunctionMD::setWorkspace(boost::shared_ptr<const Workspace> ws,const std::string& slicing, bool copyData)
 {
-  UNUSED_ARG(copyData)
+  UNUSED_ARG(copyData) // Fix copyData = TRUE, effectively
   boost::shared_ptr<const IMDWorkspace> mws = boost::dynamic_pointer_cast<const IMDWorkspace>(ws);
   if (ws && !mws)
   {
@@ -148,6 +148,7 @@ void CompositeFunctionMD::setWorkspace(boost::shared_ptr<const Workspace> ws,con
   }
   m_wsIndex.resize(nFunctions());
 
+  // Go through every function in this composite
   for(size_t iFun=0;iFun<nFunctions();iFun++)
   {
     IFitFunction* fun = dynamic_cast<IFitFunction*>(getFunction(iFun));
@@ -157,19 +158,24 @@ void CompositeFunctionMD::setWorkspace(boost::shared_ptr<const Workspace> ws,con
     }
     if (fun->getWorkspace())
     {
+      // Function already had a workspace associated to it
       boost::shared_ptr<const IMDWorkspace> iws =  boost::dynamic_pointer_cast<const IMDWorkspace>(fun->getWorkspace());
       std::vector< boost::shared_ptr<const IMDWorkspace> >::iterator it = std::find(m_workspaces.begin(),m_workspaces.end(),iws);
       size_t i;
       if (it == m_workspaces.end())
       {
+        // It was not already in the list - add it to our list of workspaces
         i = m_workspaces.size();
         m_workspaces.push_back(iws);
       }
       else
       {
+        // Find the index of this workspace in our list
         i = size_t(std::distance(it,m_workspaces.begin()));
       }
+      // Associate the workspace #i with the function #iFun
       m_wsIndex[iFun].push_back(i);
+      // And set it on the function
       fun->setWorkspace(boost::static_pointer_cast<const Workspace>(iws),slicing,false);
     }
     //else
@@ -178,6 +184,7 @@ void CompositeFunctionMD::setWorkspace(boost::shared_ptr<const Workspace> ws,con
     //}
   }
 
+  // If the workspace #s have not been set for each function, set them
   for(size_t iFun=0;iFun<nFunctions();iFun++)
   {
     std::vector<size_t>& index = m_wsIndex[iFun];
@@ -189,7 +196,7 @@ void CompositeFunctionMD::setWorkspace(boost::shared_ptr<const Workspace> ws,con
     }
   }
 
-  // set dimensions and calculate ws's contribution to m_dataSize
+  // Set dimensions. This clears m_dataSize to 0.
   IFitFunction::setWorkspace(ws,slicing,false);
 
   // Cache the iterators
@@ -197,15 +204,16 @@ void CompositeFunctionMD::setWorkspace(boost::shared_ptr<const Workspace> ws,con
   for(size_t i = 0; i < m_workspaces.size(); ++i)
     iterators.push_back(m_workspaces[i]->createIterator());
 
-  // add other workspaces
+  // Add ALL the workspaces
+  m_dataSize = 0;
   m_offset.resize(m_workspaces.size(),0);
-  for(size_t i = 1; i < m_workspaces.size(); ++i)
+  for(size_t i = 0; i < m_workspaces.size(); ++i)
   {
     mws = m_workspaces[i];
     IMDIterator* r = iterators[i];
     size_t n = r->getDataSize();
     m_offset[i] = m_dataSize;
-    m_dataSize += static_cast<int>(n);
+    m_dataSize += static_cast<int>(n); // increase the size of it
   }
 
   m_data.reset(new double[m_dataSize]);

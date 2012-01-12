@@ -13,6 +13,7 @@
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidVatesAPI/TimeStepToTimeStep.h"
 #include "MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h"
+#include "MantidVatesAPI/vtkThresholdingHexahedronFactory.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
 
@@ -83,7 +84,16 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     }
 
     FilterUpdateProgressAction<vtkMDHWSource> updateHandler(this);
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> *factory = new vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep>(ThresholdRange_scptr(new IgnoreZerosThresholdRange()), "signal", m_time);
+
+    ThresholdRange_scptr thresholdRange(new IgnoreZerosThresholdRange());
+
+    /*
+    Will attempt to handle drawing in 4D case and then in 3D case if that fails.
+    */
+    vtkThresholdingHexahedronFactory* successor = new vtkThresholdingHexahedronFactory(thresholdRange, "signal");
+    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> *factory = new vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep>(thresholdRange, "signal", m_time);
+    factory->SetSuccessor(successor);
+
     vtkDataSet* product = m_presenter->execute(factory, updateHandler);
 
     //-------------------------------------------------------- Corrects problem whereby boundaries not set propertly in PV.

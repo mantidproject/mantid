@@ -48,7 +48,6 @@ namespace API
         useAllDimensions();
       }
 
-      m_dataSize = 1;
       m_dimensions.resize(m_dimensionIndexMap.size());
       std::map<std::string,size_t>::const_iterator it = m_dimensionIndexMap.begin();
       std::map<std::string,size_t>::const_iterator end = m_dimensionIndexMap.end();
@@ -60,22 +59,19 @@ namespace API
           throw std::invalid_argument("Dimension "+it->first+" dos not exist in workspace "+ws->getName());
         }
         m_dimensions[it->second] = dim;
-        m_dataSize *= dim->getNBins();
       }
 
-      if (m_dataSize == 0)
-      {
-        throw std::runtime_error("Fitting data is empty");
-      }
+      // Start with 0 data (for copyData = false; data will be copied later.
+      m_dataSize = 0;
 
       if (copyData)
       {
+        IMDIterator* r = m_workspace->createIterator();
+        m_dataSize = r->getDataSize();
 
         // fill in m_data and m_weights
         m_data.reset(new double[m_dataSize]);
         m_weights.reset(new double[m_dataSize]);
-
-        IMDIterator* r = m_workspace->createIterator();
 
         size_t i = 0;
         do
@@ -88,7 +84,13 @@ namespace API
           i++;
         } while(r->next());
         delete r;
+
+        if (m_dataSize == 0)
+        {
+          throw std::runtime_error("Fitting data is empty");
+        }
       }
+
     }
     catch(std::exception& e)
     {

@@ -1032,7 +1032,7 @@ public:
     V3D  b3( -0.1,  1,   -0.1 );
     V3D  c3( -0.1, -0.1,  1   );
 
-    TS_ASSERT_EQUALS( IndexingUtils::HasNiggliAngles(a2, b2, c2, 0.001), true);
+    TS_ASSERT_EQUALS( IndexingUtils::HasNiggliAngles(a3, b3, c3, 0.001), true);
   }
 
 
@@ -1042,14 +1042,51 @@ public:
                             {  0.106642,  0.120341,  0.090518 },
                             { -0.261273,  0.258426, -0.006190 } };
 
+    Matrix<double> newUB(3,3,false);
     Matrix<double> UB = getSiliconUB();
-    Matrix<double> newUB(3,3,false);  
+    UB = UB * 1.0;
 
-    IndexingUtils::MakeNiggliUB( UB, newUB );
+    TS_ASSERT( IndexingUtils::MakeNiggliUB( UB, newUB ) );
 
     for ( size_t row = 0; row < 3; row++ )
       for ( size_t col = 0; col < 3; col++ )
         TS_ASSERT_DELTA( newUB[row][col], answer[row][col], 1e-5 );  
+  }
+
+
+  void test_MakeNiggliUB2()
+  {
+    // Make a fake UB matrix with:
+    // gamma > 90 deg
+    // alpha < 90 deg
+    Matrix<double> UB(3,3, true);
+    V3D a(10,0,0);
+    V3D b(-5,5,0);
+    V3D c(0,5,5);
+    IndexingUtils::GetUB(UB, a,b,c);
+
+    Matrix<double> newUB(3,3,false);
+
+    TS_ASSERT( IndexingUtils::MakeNiggliUB( UB, newUB ) );
+
+    // Extract the a,b,c vectors
+    V3D a_dir;
+    V3D b_dir;
+    V3D c_dir;
+    IndexingUtils::GetABC(newUB, a_dir,b_dir,c_dir);
+    double alpha = b_dir.angle( c_dir ) * 180.0/PI;
+    double beta  = c_dir.angle( a_dir ) * 180.0/PI;
+    double gamma = a_dir.angle( b_dir ) * 180.0/PI;
+    // All vectors have two components of length 5.0
+    double norm = sqrt(50.0);
+    TS_ASSERT_DELTA( a_dir.norm(), norm, 1e-3 );
+    TS_ASSERT_DELTA( b_dir.norm(), norm, 1e-3 );
+    TS_ASSERT_DELTA( c_dir.norm(), norm, 1e-3 );
+    // Angles are 60 degrees
+    TS_ASSERT_DELTA( alpha, 60, 1e-1 );
+    TS_ASSERT_DELTA( beta, 60, 1e-1 );
+    TS_ASSERT_DELTA( gamma, 60, 1e-1 );
+
   }
 };
 

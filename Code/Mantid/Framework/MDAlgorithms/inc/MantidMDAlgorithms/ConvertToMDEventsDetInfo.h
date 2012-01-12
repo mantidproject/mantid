@@ -53,6 +53,7 @@ struct PreprocessedDetectors{
     //
     bool is_defined(void)const{return det_dir.size()>0;}
     bool is_defined(size_t new_size)const{return det_dir.size()==new_size;}
+    size_t nDetectors()const{return TwoTheta.size();}
     std::vector<double>const & getL2()const{return L2;}
     std::vector<double>const & getTwoTheta()const{return TwoTheta;}
     std::vector<size_t>const  & getDetIDMap()const{return detIDMap;}

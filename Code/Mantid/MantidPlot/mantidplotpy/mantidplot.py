@@ -168,7 +168,7 @@ def plot(source, *args, **kwargs):
     if hasattr(source, '_getHeldObject') and isinstance(source._getHeldObject(), QtCore.QObject):
         return proxies.Graph(qti.app.plot(source._getHeldObject(), *args, **kwargs))
     else:
-        plotSpectrum(source, *args, **kwargs)
+        return plotSpectrum(source, *args, **kwargs)
         
 #-----------------------------------------------------------------------------
 def plotSpectrum(source, indices, error_bars = False, type = -1):

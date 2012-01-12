@@ -58,8 +58,9 @@ public:
 
 	QList<MdiSubWindow *> windowsList(){return lstWindows;};
 
-    void addWindow( MdiSubWindow *w );
+  void addWindow( MdiSubWindow *w );
 	void removeWindow( MdiSubWindow *w );
+  bool hasWindow(MdiSubWindow *w) const;
 
 	//! The list of subfolder names, including first generation children only
 	QStringList subfolders();

@@ -98,7 +98,9 @@ set ( TEST_FILES
 	test/ConvertToQ3DdETest.h
 	test/ConvertToMDEventsTest.h
 	test/ConvertToMDEventsUnitsConvTest.h
+	test/ConvertToMDEventsCoordTransfTest.h
 	test/ConvertEventsToMDEventsTest.h	
+	test/ConvertToMDEventsMethodsTest.h
 	test/DivideMDTest.h
 	test/EqualToMDTest.h
 	test/ExponentialMDTest.h
@@ -158,10 +160,10 @@ if ( CXXTEST_FOUND )
                         ../TestHelpers/src/BinaryOperationMDTestHelper.cpp )
   if ( GMOCK_FOUND AND GTEST_FOUND )
     cxxtest_add_test ( MDAlgorithmsTest ${TEST_FILES} ${GMOCK_TEST_FILES})
-    target_link_libraries( MDAlgorithmsTest MDAlgorithms DataHandling CurveFitting ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
+    target_link_libraries( MDAlgorithmsTest MDAlgorithms DataHandling CurveFitting Nexus NexusCPP ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
   else ()
     cxxtest_add_test ( MDAlgorithmsTest ${TEST_FILES} )
-    target_link_libraries( MDAlgorithmsTest MDAlgorithms DataHandling CurveFitting )
+    target_link_libraries( MDAlgorithmsTest MDAlgorithms DataHandling CurveFitting Nexus NexusCPP)
   endif ()
   add_dependencies ( FrameworkTests MDAlgorithmsTest )
   # Add to the 'FrameworkTests' group in VS

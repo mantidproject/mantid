@@ -707,6 +707,12 @@ Unit * DeltaE::clone() const
   return new DeltaE(*this);
 }
 
+DeltaE::DeltaE() : Unit() 
+{
+   addConversion("DeltaE_inWavenumber",PhysicalConstants::meVtoWavenumber,1.);
+}
+
+
 
 // =====================================================================================================
 /* Energy Transfer in units of wavenumber
@@ -725,6 +731,10 @@ void DeltaE_inWavenumber::init()
 Unit * DeltaE_inWavenumber::clone() const
 {
   return new DeltaE_inWavenumber(*this);
+}
+DeltaE_inWavenumber::DeltaE_inWavenumber() : DeltaE() 
+{
+  addConversion("DeltaE",1/PhysicalConstants::meVtoWavenumber,1.);
 }
 
 // =====================================================================================================

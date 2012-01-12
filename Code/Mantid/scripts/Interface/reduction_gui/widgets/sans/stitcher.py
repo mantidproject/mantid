@@ -451,8 +451,10 @@ class StitcherWidget(BaseWidget):
         """
             Update the catalog according to the new data path
         """
-        pass
-    
+        # Refresh combo boxes
+        self.populate_combobox(self._content.low_q_combo)
+        self.populate_combobox(self._content.medium_q_combo)
+        self.populate_combobox(self._content.high_q_combo)
 
     def get_state(self):
         """

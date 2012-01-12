@@ -59,7 +59,7 @@ class ConvertToMDEvensEventWS: public IConvertToMDEventsMethods
      template<Q_state QX, AnalMode MODEX, CnvrtUnits CONV,XCoordType XTYPE> 
      friend struct COORD_TRANSFORMER;
      // the instanciation of the class which does the transformation itself
-     COORD_TRANSFORMER<Q,MODE,ConvFromTOF,Axis> trn; 
+     COORD_TRANSFORMER<Q,MODE,ConvFromTOF,Centered> trn; 
      // the pointer to underlying event workspace
      DataObjects::EventWorkspace_sptr pEventWS;
      // vector to keep generic part of event coordinates
@@ -73,7 +73,7 @@ class ConvertToMDEvensEventWS: public IConvertToMDEventsMethods
         size_t numSpec=IConvertToMDEventsMethods::setUPConversion(pWS2D,detLoc,WSD,inWSWrapper);
 
         // initiate the templated class which does the conversion of workspace data into MD WS coordinates;
-        trn.setUP(this); 
+        trn.setUpTransf(this); 
         // allocate space for single MDEvent coordinates with common coordinates which would propagate everywhere
         Coord.resize(this->n_dims);
 

@@ -109,6 +109,7 @@
 #include "SymbolDialog.h"
 #include "CustomActionDialog.h"
 #include "MdiSubWindow.h"
+#include "FloatingWindow.h"
 
 // TODO: move tool-specific code to an extension manager
 #include "ScreenPickerTool.h"
@@ -3097,13 +3098,6 @@ Note* ApplicationWindow::newNote(const QString& caption)
   m->askOnCloseEvent(confirmCloseNotes);
 
   addMdiSubWindow(m);
-
-  //connect(m, SIGNAL(modifiedWindow(MdiSubWindow*)), this, SLOT(modifiedProject(MdiSubWindow*)));
-  //connect(m, SIGNAL(resizedWindow(MdiSubWindow*)),this,SLOT(modifiedProject(MdiSubWindow*)));
-  //connect(m, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(closeWindow(MdiSubWindow*)));
-  //connect(m, SIGNAL(hiddenWindow(MdiSubWindow*)), this, SLOT(hideWindow(MdiSubWindow*)));
-  //connect(m, SIGNAL(statusChanged(MdiSubWindow*)), this, SLOT(updateWindowStatus(MdiSubWindow*)));
-
   m->showNormal();
   return m;
 }
@@ -3473,7 +3467,8 @@ Matrix* ApplicationWindow::matrix(const QString& name)
 
 MdiSubWindow *ApplicationWindow::activeWindow(WindowType type)
 {
-  if (!d_active_window)
+  MdiSubWindow* active = getActiveWindow();
+  if (!active)
     return NULL;
 
   switch(type){
@@ -3481,41 +3476,41 @@ MdiSubWindow *ApplicationWindow::activeWindow(WindowType type)
     break;
 
   case TableWindow:
-    if (d_active_window->inherits("Table"))
-      return d_active_window;
+    if (active->inherits("Table"))
+      return active;
     else
       return NULL;
     break;
 
   case MatrixWindow:
-    if (d_active_window->inherits("Matrix"))//Mantid
-      return d_active_window;
+    if (active->inherits("Matrix"))//Mantid
+      return active;
     else
       return NULL;
     break;
 
   case MultiLayerWindow:
-    if (d_active_window->isA("MultiLayer"))
-      return d_active_window;
+    if (active->isA("MultiLayer"))
+      return active;
     else
       return NULL;
     break;
 
   case NoteWindow:
-    if (d_active_window->isA("Note"))
-      return d_active_window;
+    if (active->isA("Note"))
+      return active;
     else
       return NULL;
     break;
 
   case Plot3DWindow:
-    if (d_active_window->isA("Graph3D"))
-      return d_active_window;
+    if (active->isA("Graph3D"))
+      return active;
     else
       return NULL;
     break;
   }
-  return d_active_window;
+  return active;
 }
 
 void ApplicationWindow::windowActivated(QMdiSubWindow *w)
@@ -8486,6 +8481,50 @@ void ApplicationWindow::setWindowGeometry(int x, int y, int w, int h)
   activeWindow()->setGeometry(x, y, w, h);
 }
 
+/**
+  * Checks if a mdi sub-window exists.
+  */
+bool ApplicationWindow::existsWindow(MdiSubWindow* w) const
+{
+  if (!w) return false;
+  FloatingWindow* fw = w->getFloatingWindow();
+  if (fw && m_floatingWindows.contains(fw))
+  {
+    return true;
+  }
+  QMdiSubWindow* sw = w->getDockedWindow();
+  return sw && d_workspace->subWindowList().contains(sw);
+}
+
+/**
+  * Returns the active sub-window
+  */
+MdiSubWindow* ApplicationWindow::getActiveWindow() const
+{
+  //m_active_window_mutex.lock();
+  if (!existsWindow(d_active_window))
+  {
+    d_active_window = NULL;
+  }
+  return d_active_window;
+  //m_active_window_mutex.unlock();
+}
+
+/**
+  * Sets internal pointer to a new active sub-window.
+  */
+void ApplicationWindow::setActiveWindow(MdiSubWindow* w)
+{
+  //m_active_window_mutex.lock();
+  d_active_window = w;
+  if (!existsWindow(d_active_window))
+  {
+    d_active_window = NULL;
+  }
+  //m_active_window_mutex.unlock();
+}
+
+
 void ApplicationWindow::activateWindow()
 {
   WindowListItem *it = dynamic_cast<WindowListItem*>(lv->currentItem());
@@ -8496,27 +8535,43 @@ void ApplicationWindow::activateWindow()
  * Activate a new MdiSubWindow: update the menu, tool bars, and folders.
  * @param w :: Subwindow to activate.
  */
-void ApplicationWindow::activateWindow(MdiSubWindow *w)
+void ApplicationWindow::activateWindow(MdiSubWindow *w, bool activateOuterWindow)
 {
 
   if (blockWindowActivation) return;
 
-  if( d_active_window == w ) return;
+  if (!w)
+  {
+    setActiveWindow(NULL);
+    return;
+  }
 
-  d_active_window = w;
+  // don't activat a window twice, but make sure it is visible
+  if(getActiveWindow()  == w )
+  {
+    // this can happen
+    if (w->status() == MdiSubWindow::Minimized)
+    {
+      w->setNormal();
+    }
+    return;
+  }
 
-  if (!w) return;
-
-  QMdiSubWindow* qw = dynamic_cast<QMdiSubWindow*>(w->parent());
-  w->setNormal();
+  // remember the active window
+  setActiveWindow(w);
 
   updateWindowLists(w);
-
   customToolBars(w);
   customMenu(w);
 
-  if (d_opening_file) return;
+  // ?
+  if (d_opening_file)
+  {
+    return;
+  }
 
+  // return any non-active QMdiSubWindows to normal so that the active could be seen
+  QMdiSubWindow* qw = dynamic_cast<QMdiSubWindow*>(w->parent());
   QList<MdiSubWindow *> windows = current_folder->windowsList();
   foreach(MdiSubWindow *ow, windows)
   {
@@ -8528,20 +8583,25 @@ void ApplicationWindow::activateWindow(MdiSubWindow *w)
     }
   }
 
+  // update the folder
   Folder *f = w->folder();
   if (f)
     f->setActiveWindow(w);
 
   blockWindowActivation = true;
-  FloatingWindow* fw = d_active_window->getFloatingWindow();
+  FloatingWindow* fw = w->getFloatingWindow();
   if (fw)
   {
-    fw->activateWindow();
+    if (activateOuterWindow)
+    {
+      fw->showNormal();
+      fw->activateWindow();
+    }
   }
   else
   {
     QMainWindow::activateWindow();
-    d_active_window->setFocus();
+    w->setNormal();
   }
   blockWindowActivation = false;
 
@@ -8643,7 +8703,7 @@ void ApplicationWindow::closeWindow(MdiSubWindow* window)
   if (!window)
     return;
 
-  if (d_active_window == window)
+  if (getActiveWindow() == window)
   {
     activateNewWindow();
   }
@@ -15277,7 +15337,9 @@ bool ApplicationWindow::deleteFolder(Folder *f)
 
     FolderListItem *fi = f->folderListItem();
     foreach(MdiSubWindow *w, f->windowsList())
-    closeWindow(w);
+    {
+      w->close();
+    }
 
     if (!(f->children()).isEmpty()){
       Folder *subFolder = f->folderBelow();
@@ -15405,7 +15467,9 @@ bool ApplicationWindow::changeFolder(Folder *newFolder, bool force)
     if (!hiddenWindows->contains(w) && show_windows_policy != HideAll){
       //show only windows in the current folder which are not hidden by the user
       if(w->status() == MdiSubWindow::Normal)
+      {
         w->setNormal();
+      }
       else if(w->status() == MdiSubWindow::Minimized)
         w->setMinimized();
       else if(w->status() == MdiSubWindow::Maximized)
@@ -15437,7 +15501,7 @@ bool ApplicationWindow::changeFolder(Folder *newFolder, bool force)
   }
 
   if (active_window){
-    d_active_window = active_window;
+    setActiveWindow(active_window);
     customMenu(active_window);
     customToolBars(active_window);
     if (active_window_state == MdiSubWindow::Minimized)
@@ -17036,7 +17100,8 @@ void ApplicationWindow::setMatrixUndoStackSize(int size)
 // after a MultiLayer plot window is resized by the user: Qt bug?
 void ApplicationWindow::repaintWindows()
 {
-  if (d_opening_file || (d_active_window && d_active_window->status() == MdiSubWindow::Maximized))
+  MdiSubWindow* w = getActiveWindow();
+  if (d_opening_file || (w && w->status() == MdiSubWindow::Maximized))
     return;
 
   QWidget *viewPort = d_workspace->viewport();
@@ -17489,8 +17554,9 @@ void ApplicationWindow::removeFloatingWindow(FloatingWindow* w)
  */
 FloatingWindow* ApplicationWindow::getActiveFloating() const
 {
-  if (!d_active_window) return NULL;
-  return d_active_window->getFloatingWindow();
+  MdiSubWindow* w = getActiveWindow();
+  if (!w) return NULL;
+  return w->getFloatingWindow();
 }
 
 /**
@@ -17550,7 +17616,7 @@ bool ApplicationWindow::event(QEvent * e)
 void ApplicationWindow::mdiWindowActivated(MdiSubWindow* w)
 {
   if (!w) return;
-  d_active_window = w;
+  setActiveWindow(w);
 }
 
 /**
@@ -17567,8 +17633,9 @@ void ApplicationWindow::updateOnTopFlags()
  */
 void ApplicationWindow::activateNewWindow()
 {
-  MdiSubWindow* current = d_active_window;
-  d_active_window = NULL;
+  MdiSubWindow* current = getActiveWindow();
+  MdiSubWindow* newone = NULL;
+  Folder* folder = currentFolder();
   
   // try the docked windows first
   QList<QMdiSubWindow*> wl = d_workspace->subWindowList();
@@ -17576,24 +17643,33 @@ void ApplicationWindow::activateNewWindow()
   {
     if (w->widget() != static_cast<QWidget*>(current))
     {
-      d_active_window = dynamic_cast<MdiSubWindow*>(w->widget());
-      if (d_active_window) break;
+      MdiSubWindow* sw = dynamic_cast<MdiSubWindow*>(w->widget());
+      if (sw && sw->status() != MdiSubWindow::Minimized && folder->hasWindow(sw))
+      {
+        newone = sw;
+        break;
+      }
     }
   }
 
   // if unsuccessful try the floating windows
-  if (!d_active_window)
+  if (!newone)
   {
     foreach(FloatingWindow* w, m_floatingWindows)
     {
       MdiSubWindow* sw = w->mdiSubWindow();
       if (sw != current)
       {
-        d_active_window = sw;
-        if (d_active_window) break;
+        if (sw && sw->status() != MdiSubWindow::Minimized && folder->hasWindow(sw))
+        {
+          newone = sw;
+          break;
+        }
       }
     }
   }
+  // activate a new sub-window or pass NULL if no window can be activated
+  activateWindow(newone);
 }
 
 #ifdef SHARED_MENUBAR

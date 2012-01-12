@@ -41,6 +41,8 @@ Description          : QtiPlot's main window
 #include <QLocale>
 #include <QSet>
 #include <QSettings>
+#include <QMutex>
+
 #include "Table.h"
 #include "ScriptingEnv.h"
 #include "Scripted.h"
@@ -533,8 +535,9 @@ public slots:
   void hideWindow();
   void hideActiveWindow();
   void activateWindow();
-  void activateWindow(MdiSubWindow *);
+  void activateWindow(MdiSubWindow *, bool activateOuterWindow = true);
   void repaintWindows();
+  bool existsWindow(MdiSubWindow* w) const;
   //@}
 
   //! Show about dialog
@@ -886,7 +889,7 @@ public slots:
   //! \name Folders
   //@{
   //! Returns a pointer to the current folder in the project
-  Folder* currentFolder(){return current_folder;};
+  Folder* currentFolder(){return current_folder;}
   //! Adds a new folder to the project
   void addFolder();
   Folder* addFolder(QString name, Folder* parent = NULL);
@@ -1319,7 +1322,9 @@ public:
   QString defaultScriptingLang;
 
 private:
-  MdiSubWindow *d_active_window;
+  mutable MdiSubWindow *d_active_window;
+  MdiSubWindow* getActiveWindow() const;
+  void setActiveWindow(MdiSubWindow* w);
   TextEditor *d_text_editor;
   QLocale d_locale;
   // Flag telling if table values should be automatically recalculated when values in a column are modified.
@@ -1458,6 +1463,7 @@ private:
   QList<FloatingWindow*> m_floatingWindows;
   // To block activating new window when a floating window is in process of resetting flags
   bool blockWindowActivation;
+  mutable QMutex m_active_window_mutex;
 
 #ifdef SHARED_MENUBAR
   QMenuBar* m_sharedMenuBar; ///< Pointer to the shared menubar

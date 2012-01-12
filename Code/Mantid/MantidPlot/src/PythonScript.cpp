@@ -53,7 +53,7 @@ namespace
   static int _trace_callback(PyObject *, _frame *frame, int what, PyObject *)
   {
     // If we are in the main code and this is a line number event
-    if( ROOT_CODE_OBJECT && frame->f_code->co_filename == ROOT_CODE_OBJECT
+    if( ROOT_CODE_OBJECT && CURRENT_SCRIPT_OBJECT && frame->f_code->co_filename == ROOT_CODE_OBJECT
       && what == PyTrace_LINE )
     {
       CURRENT_SCRIPT_OBJECT->broadcastNewLineNumber(frame->f_lineno);
@@ -61,6 +61,23 @@ namespace
     // I don't care about the return value
     return 0;
   }
+
+  /**
+   * Sets a pointer to null when its destructor is run
+   */
+  struct ScriptNullifier
+  {
+    ScriptNullifier(PythonScript *script) :
+      m_script(script)
+    {}
+
+    ~ScriptNullifier()
+    {
+      m_script = NULL;
+    }
+  private:
+    PythonScript *m_script;
+  };
 
 }
 
@@ -83,10 +100,9 @@ PythonScript::PythonScript(PythonScripting *env, const QString &code, QObject *c
   updatePath(Name, true);
 
   // Observe ADS updates
-  if( false ) // Causes random crashes at the moment
+  if( false ) // Disabled as it causes random crashes in different places on different systems
   {
     observeAdd();
-    observeAfterReplace();
     observePostDelete();
     observeADSClear();
   }
@@ -300,6 +316,9 @@ bool PythonScript::exec()
   // Cannot have two things executing at the same time
   if( env()->isRunning() ) return false;
 
+  CURRENT_SCRIPT_OBJECT = this;
+  ScriptNullifier nullifier(CURRENT_SCRIPT_OBJECT); // Ensure the current code object reference is nullified after execution
+
   // Must acquire the GIL just in case other Python is running, i.e asynchronous Python algorithm
   GILHolder gil;
 
@@ -319,11 +338,13 @@ bool PythonScript::exec()
     // This stores the address of the main file that is being executed so that
     // we can track line numbers from the main code only
     ROOT_CODE_OBJECT = ((PyCodeObject*)PyCode)->co_filename;
+    CURRENT_SCRIPT_OBJECT = this;
     PyEval_SetTrace((Py_tracefunc)&_trace_callback, PyCode);
   }
   else
   {
     ROOT_CODE_OBJECT = NULL;
+    CURRENT_SCRIPT_OBJECT = NULL;
     PyEval_SetTrace(NULL, NULL);
   }
 

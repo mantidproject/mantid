@@ -273,31 +273,4 @@ private:
 
 typedef QList<MdiSubWindow*> MDIWindowList;
 
-
-//==============================================================================
-//==============================================================================
-/**
- * Floating wrapper window for a MdiSubWindow.
- */
-class FloatingWindow: public QMainWindow
-{
-  Q_OBJECT
-public:
-  FloatingWindow(ApplicationWindow* appWindow, Qt::WindowFlags f = 0);
-  ~FloatingWindow();
-  void setStaysOnTopFlag();
-  void removeStaysOnTopFlag();
-  MdiSubWindow* mdiSubWindow() {return static_cast<MdiSubWindow*>(widget());}
-  void setMdiSubWindow(MdiSubWindow* sw);
-  void removeMdiSubWindow();
-
-protected:
-
-  void setWidget(QWidget* w);
-  QWidget* widget() {return static_cast<MdiSubWindowParent_t*>(centralWidget())->widget();}
-  virtual bool event(QEvent * e);
-  ApplicationWindow* d_app;
-  Qt::WindowFlags m_flags;
-};
-
 #endif

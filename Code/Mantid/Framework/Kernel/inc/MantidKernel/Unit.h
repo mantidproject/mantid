@@ -398,7 +398,7 @@ public:
   virtual Unit * clone() const;
 
   /// Constructor
-  DeltaE() : Unit() {}
+  DeltaE();
   /// Destructor
   ~DeltaE() {}
 
@@ -423,7 +423,7 @@ public:
   virtual Unit * clone() const;
 
   /// Constructor
-  DeltaE_inWavenumber() : DeltaE() {}
+  DeltaE_inWavenumber();
   /// Destructor
   ~DeltaE_inWavenumber() {}
 

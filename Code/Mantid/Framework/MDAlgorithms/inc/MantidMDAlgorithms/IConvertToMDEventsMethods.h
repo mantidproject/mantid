@@ -77,11 +77,11 @@ namespace MDAlgorithms
     enum XCoordType
     {
         Histohram, // typical for Matrix workspace -- deploys central average 0.5(X[i]+X[i+1]); other types of averaging are possible if needed 
-        Axis       // typical for events
+        Centered   // typical for events
     };
 
  
- class IConvertToMDEventsMethods
+ class DLLExport IConvertToMDEventsMethods
  {
     template<Q_state Q,AnalMode MODE,CnvrtUnits CONV,XCoordType Type>
     friend struct COORD_TRANSFORMER;
@@ -113,14 +113,14 @@ namespace MDAlgorithms
     MDEvents::MDWSDescription TWS;
     //
    boost::shared_ptr<MDEvents::MDEventWSWrapper> pWSWrapper ;
-   //
+   // pointer to the array of detector's directions in reciprocal space
     PreprocessedDetectors const *  pDetLoc;
    /// number of target ws dimesnions
     size_t n_dims;
-    /// pointers to the array of variables which describe min limits for the target variables;
-    double *dim_min;
-    /// pointers to the array of variables which describe max limits for the target variables;
-    double *dim_max;
+    /// array of variables which describe min limits for the target variables;
+    std::vector<double> dim_min;
+    /// the array of variables which describe max limits for the target variables;
+    std::vector<double> dim_max;
 
    /// logger -> to provide logging, for MD dataset file operations
     static Mantid::Kernel::Logger& convert_log;

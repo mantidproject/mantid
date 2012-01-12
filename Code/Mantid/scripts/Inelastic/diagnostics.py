@@ -90,16 +90,19 @@ def diagnose(white_int, **kwargs):
         _add_masking(white_int, __white_masks, start_index, end_index)
         DeleteWorkspace(__white_masks)
     else:
-        raise RuntimeError('Invalid input for white run "%s"' % str(white_run))
+        raise RuntimeError('Invalid input for white run "%s"' % str(white_int))
 
     #
     # Zero total count check for sample counts
     #
+    zero_count_failures = 0
     if hasattr(parser, 'sample_counts'):
         _add_masking(parser.sample_counts, white_int)
-        maskZero = FindDetectorsOutsideLimits(InputWorkspace=parser.sample_counts, OutputWorkspace='maskZero',
-                                              StartWorkspaceIndex=start_index, EndWorkspaceIndex=end_index,
-                                              LowThreshold=1e-10, HighThreshold=1e100).workspace()
+        checker = FindDetectorsOutsideLimits(InputWorkspace=parser.sample_counts, OutputWorkspace='maskZero',
+                                             StartWorkspaceIndex=start_index, EndWorkspaceIndex=end_index,
+                                             LowThreshold=1e-10, HighThreshold=1e100)
+        zero_count_failures = checker['NumberOfFailures'].value 
+        maskZero = checker.workspace()
         _add_masking(white_int, maskZero, start_index, end_index)
         DeleteWorkspace(maskZero)
         
@@ -110,6 +113,7 @@ def diagnose(white_int, **kwargs):
         _add_masking(parser.background_int, white_int)
         __bkgd_mask, failures = _do_background_test(parser.background_int, parser.samp_lo, 
                                                     parser.samp_hi, parser.samp_sig, parser.samp_zero, start_index, end_index)
+        test_results[2] = [str(__bkgd_mask), zero_count_failures + failures]
         _add_masking(white_int, __bkgd_mask, start_index, end_index)
         DeleteWorkspace(__bkgd_mask)
     
@@ -119,9 +123,10 @@ def diagnose(white_int, **kwargs):
     if hasattr(parser, 'bleed_test') and parser.bleed_test:
         if not hasattr(parser, 'sample_run'):
             raise RuntimeError("Bleed test requested but the sample_run keyword has not been provided")
-        _bleed_masks, failures = _do_bleed_test(parser.sample_run, parser.bleed_maxrate, parser.bleed_pixels)
+        __bleed_masks, failures = _do_bleed_test(parser.sample_run, parser.bleed_maxrate, parser.bleed_pixels)
+        test_results[3] = [str(__bleed_masks), failures]
         _add_masking(white_int, __bleed_masks)
-        DeleteWorkspace(_bleed_masks)
+        DeleteWorkspace(__bleed_masks)
     
     if hasattr(parser, 'print_results') and parser.print_results:
         print_test_summary(test_results)
@@ -284,7 +289,10 @@ def _do_bleed_test(sample_run, max_framerate, ignored_pixels):
         max_framerate = float(data_ws.getInstrument().getNumberParameter('max-tube-framerate')[0])
     if ignored_pixels is None:
         ignored_pixels = int(data_ws.getInstrument().getNumberParameter('num-ignored-pixels')[0])
-    
+    else:
+        # Make sure it is an int
+        ignored_pixels = int(ignored_pixels)
+
     # What shall we call the output
     lhs_names = lhs_info('names')
     if len(lhs_names) > 0:

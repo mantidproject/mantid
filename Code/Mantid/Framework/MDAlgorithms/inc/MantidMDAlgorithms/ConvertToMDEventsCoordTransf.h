@@ -81,7 +81,7 @@ struct COORD_TRANSFORMER
      * @param i    -- index of external loop, identifying generic y-coordinate
      * @param j    -- index of internal loop, identifying generic x-coordinate
      * 
-     * @param Coord --Subalgorithm specific number of coordinates, placed in the proper position of the Coordinate vector
+     * @param Coord  -- subalgorithm specific number of coordinates, placed in the proper position of the Coordinate vector
      * @return true  -- if all Coord are within the range requested by algorithm. false otherwise   
      *
      * has to be specialized
@@ -91,6 +91,16 @@ struct COORD_TRANSFORMER
         UNUSED_ARG(X); UNUSED_ARG(i); UNUSED_ARG(j); UNUSED_ARG(Coord);throw(Kernel::Exception::NotImplementedError(""));
         return false;
     }
+ /** template generalizes the code to calculate all remaining coordinates, defined within the inner loop
+    * given that the input described by sinble value only
+     * @param X    -- X workspace value
+     * 
+     * @param Coord  -- subalgorithm specific number of coordinates, placed in the proper position of the Coordinate vector
+     * @return true  -- if all Coord are within the range requested by algorithm. false otherwise   
+     *
+     * has to be specialized
+     */
+
     inline bool calc1MatrixCoord(const double & X,std::vector<coord_t> &Coord)const
     {
           UNUSED_ARG(X); UNUSED_ARG(Coord);throw(Kernel::Exception::NotImplementedError(""));
@@ -100,7 +110,7 @@ struct COORD_TRANSFORMER
           UNUSED_ARG(X); UNUSED_ARG(Coord);throw(Kernel::Exception::NotImplementedError(""));
     }
 
-    inline void setUP(IConvertToMDEventsMethods *){};
+    inline void setUpTransf(IConvertToMDEventsMethods *){};
   
 private:
  
@@ -148,7 +158,7 @@ struct COORD_TRANSFORMER<NoQ,MODE,CONV,Type>
        Coord[0]=(coord_t)X;
        return true;
     }
-    // should be actually on ICOORD_TRANSFORMER
+    // should be actually on ICOORD_TRANSFORMER but there is problem with template-overloaded functions
     inline bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord)const
     {
        UNUSED_ARG(i);
@@ -165,7 +175,7 @@ struct COORD_TRANSFORMER<NoQ,MODE,CONV,Type>
     // constructor;
     COORD_TRANSFORMER(){} 
 
-    inline void setUP(IConvertToMDEventsMethods *pConv){
+    inline void setUpTransf(IConvertToMDEventsMethods *pConv){
         pHost = pConv;
     }
 private:
@@ -180,7 +190,7 @@ private:
 //
 ////----------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------
-// the module of the wavevector for scattered neutrons
+// the module for the momentum transfer wavevector of the scattered neutrons
 template<AnalMode MODE>
 inline double k_trans(double Ei, double E_tr){
     UNUSED_ARG(Ei);UNUSED_ARG(E_tr);
@@ -204,7 +214,8 @@ struct COORD_TRANSFORMER<modQ,MODE,CONV,Type>
 { 
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
     {
-        // 2 coordinates (|Q|, DeltaE) came from workspace, are interconnnected all additional defined by  properties:
+        /// 2 coordinates (|Q|, DeltaE) came from workspace, are interconnnected all additional defined by  properties, 
+        /// here we copy these values into Coord vector
         if(!pHost->fillAddProperties(Coord,nd,2))return false;
 
         // energy 
@@ -213,12 +224,17 @@ struct COORD_TRANSFORMER<modQ,MODE,CONV,Type>
          ki=sqrt(Ei/PhysicalConstants::E_mev_toNeutronWavenumberSq); 
          // get transformation matrix (needed for CrystalAsPoder mode)
          rotMat = pHost->getTransfMatrix();
-         // 
+         // if workspace is not in DeltaE, initiate units conversion, if not -- empty conversion should be instanciated
          CONV_UNITS_FROM.setUpConversion(this->pHost,"DeltaE"); 
-
-        // get pointer to the positions of the detectors
+         // get pointer to the positions of the detectors
           std::vector<Kernel::V3D> const & DetDir = pHost->pPrepDetectors()->getDetDir();
           pDet = &DetDir[0];
+
+          dim_min.assign(pHost->dim_min.begin(),pHost->dim_min.end());
+          dim_max.assign(pHost->dim_max.begin(),pHost->dim_max.end());
+          // dim_min here is a momentum and it is verified on momentum squared base
+          dim_min[0]*=dim_min[0];
+          dim_max[0]*=dim_max[0];
         //
          return true;
     }
@@ -250,19 +266,20 @@ struct COORD_TRANSFORMER<modQ,MODE,CONV,Type>
         double Qz  = (rotMat[2]*qx+rotMat[5]*qy+rotMat[8]*qz);
 
         double Qsq = Qx*Qx+Qy*Qy+Qz*Qz;
+        if(Qsq < dim_min[0]||Coord[0]>=Qsq)return false;
         Coord[0]   = (coord_t)sqrt(Qsq);
-        if(Coord[0]<pHost->dim_min[0]||Coord[0]>=pHost->dim_max[0])return false;
+
         return true;
 
     }
-    // should be actually on ICOORD_TRANSFORMER
+   // should be actually on ICOORD_TRANSFORMER but there is problem with template-overloaded functions
     inline bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord)const
     {
        UNUSED_ARG(i);
        double X_ev = CONV_UNITS_FROM.getXConverted(X,j);
-
        return calc1MatrixCoord(X_ev,Coord);
     }
+
     inline bool ConvertAndCalcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const
     {
          double X_ev = CONV_UNITS_FROM.getXConverted(X);
@@ -270,7 +287,7 @@ struct COORD_TRANSFORMER<modQ,MODE,CONV,Type>
     }   
     // constructor;
     COORD_TRANSFORMER(){}
-    void setUP(IConvertToMDEventsMethods *pConv){
+    void setUpTransf(IConvertToMDEventsMethods *pConv){
         pHost = pConv;
     }
 private:
@@ -282,12 +299,14 @@ private:
     double ex,ey,ez;
     // the matrix which transforms the neutron momentums from lablratory to crystall coordinate system. 
     std::vector<double> rotMat;
+    // min-max values, some modified to work with squared values:
+    std::vector<double> dim_min,dim_max;
     //
     Kernel::V3D const *pDet;
     // Calling Mantid algorithm
     IConvertToMDEventsMethods *pHost;
-   // class which would convert units
-     UNITS_CONVERSION<CONV,Type> CONV_UNITS_FROM;
+    // class which would convert units
+    UNITS_CONVERSION<CONV,Type> CONV_UNITS_FROM;
  
 };
 // modQ,Elastic 
@@ -307,6 +326,12 @@ struct COORD_TRANSFORMER<modQ,Elastic,CONV,Type>
          // get pointer to the positions of the detectors
           std::vector<Kernel::V3D> const & DetDir = pHost->pPrepDetectors()->getDetDir();
           pDet = &DetDir[0];     //
+
+          dim_min.assign(pHost->dim_min.begin(),pHost->dim_min.end());
+          dim_max.assign(pHost->dim_max.begin(),pHost->dim_max.end());
+          // dim_min here is a momentum and it is verified on momentum squared base
+          dim_min[0]*=dim_min[0];
+          dim_max[0]*=dim_max[0];
         return true;
     }
     //
@@ -332,8 +357,8 @@ struct COORD_TRANSFORMER<modQ,Elastic,CONV,Type>
         double Qz  = (rotMat[2]*qx+rotMat[5]*qy+rotMat[8]*qz);
 
         double Qsq = Qx*Qx+Qy*Qy+Qz*Qz;
-        Coord[0]   = sqrt(Qsq);
-        if(Coord[0]<pHost->dim_min[0]||Coord[0]>=pHost->dim_max[0])return false;
+        if(Coord[0]<dim_min[0]||Coord[0]>=dim_max[0])return false;
+        Coord[0]   = (coord_t)sqrt(Qsq);
         return true;
 
     }
@@ -354,7 +379,7 @@ struct COORD_TRANSFORMER<modQ,Elastic,CONV,Type>
 
     // constructor;
     COORD_TRANSFORMER(){}
-   void setUP(IConvertToMDEventsMethods *pConv){
+    void setUpTransf(IConvertToMDEventsMethods *pConv){
         pHost = pConv;
     }
 private:
@@ -366,6 +391,8 @@ private:
     double ex,ey,ez;
     // the matrix which transforms the neutron momentums from lablratory to crystall coordinate system. 
     std::vector<double> rotMat;
+    // min-max values, some modified to work with squared values:
+    std::vector<double> dim_min,dim_max;
     //
     Kernel::V3D const * pDet;
     // Calling Mantid algorithm
@@ -410,8 +437,8 @@ struct COORD_TRANSFORMER<Q3D,MODE,CONV,Type>
 
     inline bool calc1MatrixCoord(const double& E_tr,std::vector<coord_t> &Coord)const
     {
-          Coord[3]    = (coord_t)E_tr;
-          if(Coord[3]<pHost->dim_min[3]||Coord[3]>=pHost->dim_max[3])return false;
+         Coord[3]    = (coord_t)E_tr;
+         if(Coord[3]<pHost->dim_min[3]||Coord[3]>=pHost->dim_max[3])return false;
 
          // get module of the wavevector for scattered neutrons
          double k_tr = k_trans<MODE>(Ei,E_tr);
@@ -441,7 +468,7 @@ struct COORD_TRANSFORMER<Q3D,MODE,CONV,Type>
     }   
   
    COORD_TRANSFORMER(){}
-   void setUP(IConvertToMDEventsMethods *pConv){
+   void setUpTransf(IConvertToMDEventsMethods *pConv){
         pHost = pConv;
     }
 private:
@@ -487,15 +514,15 @@ struct COORD_TRANSFORMER<Q3D,Elastic,CONV,Type>
 
           ex = (pDet+i)->X();
           ey = (pDet+i)->Y();
-          ez = (pDet+i)->Z();
+          ezm1 =(1-(pDet+i)->Z());
           return true;
     }
 
     inline bool calc1MatrixCoord(const double& k0,std::vector<coord_t> &Coord)const
     {
-          double  qx  =  -ex*k0;                
-          double  qy  =  -ey*k0;
-          double  qz  = (1 - ez)*k0;
+         double  qx  =  -ex*k0;                
+         double  qy  =  -ey*k0;
+         double  qz  = ezm1*k0;
 
          Coord[0]  = (coord_t)(rotMat[0]*qx+rotMat[3]*qy+rotMat[6]*qz);  if(Coord[0]<pHost->dim_min[0]||Coord[0]>=pHost->dim_max[0])return false;
          Coord[1]  = (coord_t)(rotMat[1]*qx+rotMat[4]*qy+rotMat[7]*qz);  if(Coord[1]<pHost->dim_min[1]||Coord[1]>=pHost->dim_max[1])return false;
@@ -518,20 +545,20 @@ struct COORD_TRANSFORMER<Q3D,Elastic,CONV,Type>
     }   
 
     COORD_TRANSFORMER(){}
-    void setUP(IConvertToMDEventsMethods *pConv){
+    void setUpTransf(IConvertToMDEventsMethods *pConv){
         pHost = pConv;
     }
 private:
     // directions to the detectors 
-    double ex,ey,ez;
+    double ex,ey,ezm1;
     // the matrix which transforms the neutron momentums from lablratory to crystall coordinate system. 
     std::vector<double> rotMat;
-    // pointer to the beginning of the array with 
+    // pointer to the beginning of the array with the detectors directions in Q-space
     Kernel::V3D const *pDet;
     // pointer to the algoritm, which calls all these transformations
     IConvertToMDEventsMethods *pHost;  
-   // class which would convert units
-     UNITS_CONVERSION<CONV,Type> CONV_UNITS_FROM;
+    // class which would convert units
+    UNITS_CONVERSION<CONV,Type> CONV_UNITS_FROM;
  
 };
 

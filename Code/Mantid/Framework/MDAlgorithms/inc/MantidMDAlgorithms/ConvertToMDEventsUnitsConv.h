@@ -35,10 +35,10 @@ namespace MDAlgorithms
 // How to treat X-coordinates:
 // for histohram we take centerpiece average
 template<XCoordType TYPE>
-double XValue(const MantidVec& X,size_t j){return static_cast<double>(0.5*(X[j]+X[j+1]));}
+inline double XValue(const MantidVec& X,size_t j){return static_cast<double>(0.5*(X[j]+X[j+1]));}
 // for axis type -- just value
 template <>
-double XValue<Axis>(const MantidVec& X,size_t j){return static_cast<double>(X[j]);}
+inline double XValue<Centered>(const MantidVec& X,size_t j){return static_cast<double>(X[j]);}
 // DO UNITS CONVERSION --
 
 
@@ -47,11 +47,12 @@ template<CnvrtUnits CONV,XCoordType Type>
 struct UNITS_CONVERSION
 { 
     /** Set up all variables necessary for units conversion at the beginning of the conversion loop
-     * @param pHost   -- pointer to the Mantid algorithm, which calls this function to obtain the variables, 
-     *                   relevant to the units conversion
+     * @param pHost     -- pointer to the Mantid algorithm, which calls this function to obtain the variables, 
+     *                     relevant to the units conversion
+     *@param targ_units -- the units we want to convert to 
     */
-    inline void     setUpConversion(IConvertToMDEventsMethods const * const pHost,const std::string &native_units )
-    {UNUSED_ARG(pHost);UNUSED_ARG(native_units);}
+    inline void     setUpConversion(IConvertToMDEventsMethods const * const pHost,const std::string &targ_units )
+    {UNUSED_ARG(pHost);UNUSED_ARG(targ_units);}
     /// Update all spectra dependednt  variables, relevant to conversion in the loop over spectra (detectors)
     inline void     updateConversion(uint64_t i){UNUSED_ARG(i);}
     /// Convert current X variable into the units requested;
@@ -73,12 +74,12 @@ template<XCoordType Type>
 struct UNITS_CONVERSION<ConvFast,Type>
 {
 
-    void setUpConversion(IConvertToMDEventsMethods const *const pHost,const std::string &native_units)
+    void setUpConversion(IConvertToMDEventsMethods const *const pHost,const std::string &targ_units)
     {       
        const Kernel::Unit_sptr pThisUnit= pHost->getAxisUnits();
     
-       if(!pThisUnit->quickConversion(native_units,factor,power)){
-           throw(std::logic_error(" should be able to convert units and catch case of non-conversions much earlier"));
+       if(!pThisUnit->quickConversion(targ_units,factor,power)){
+           throw(std::logic_error(" should be able to convert units quickly and catch the case of non-conversions before invoking this template"));
        }
       
     };
@@ -106,7 +107,7 @@ template<XCoordType Type>
 struct UNITS_CONVERSION<ConvFromTOF,Type>
 {
 
-    void setUpConversion(IConvertToMDEventsMethods const *const pHost,const std::string &native_units)
+    void setUpConversion(IConvertToMDEventsMethods const *const pHost,const std::string &targ_units)
     {       
        // check if axis units are TOF
        const Kernel::Unit_sptr pThisUnit= pHost->getAxisUnits();
@@ -114,7 +115,7 @@ struct UNITS_CONVERSION<ConvFromTOF,Type>
            throw(std::logic_error(" it whould be only TOF here"));
        }
       // create units for this subalgorith to convert to 
-       pWSUnit      = Kernel::UnitFactory::Instance().create(native_units);
+       pWSUnit      = Kernel::UnitFactory::Instance().create(targ_units);
        if(!pWSUnit){
            throw(std::logic_error(" can not retrieve workspace unit from the units factory"));
        }
@@ -165,7 +166,7 @@ template<XCoordType Type>
 struct UNITS_CONVERSION<ConvByTOF,Type>
 {
 
-    void setUpConversion(IConvertToMDEventsMethods const *const pHost,const std::string &native_units)
+    void setUpConversion(IConvertToMDEventsMethods const *const pHost,const std::string &targ_units)
     {       
 
        pSourceWSUnit= pHost->getAxisUnits();
@@ -174,7 +175,7 @@ struct UNITS_CONVERSION<ConvByTOF,Type>
        }
 
        // get units class, requested by subalgorithm
-          pWSUnit                   = Kernel::UnitFactory::Instance().create(native_units);
+       pWSUnit                   = Kernel::UnitFactory::Instance().create(targ_units);
        if(!pWSUnit){
            throw(std::logic_error(" can not retrieve target workspace unit from the units factory"));
        }
@@ -221,8 +222,6 @@ private:
       std::vector<double>const *pL2;
 
 };
-
-
 
 } // endNamespace MDAlgorithms
 } // endNamespace Mantid

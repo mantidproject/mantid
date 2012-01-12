@@ -5,18 +5,52 @@ set ( bundle ${CMAKE_INSTALL_PREFIX}/MantidPlot.app )
 file ( GLOB pyqt_libs ${bundle}/Contents/MacOS/PyQt4/*.so )
 file ( GLOB_RECURSE qtplugins ${bundle}/Contents/Frameworks/plugins/*.dylib )
 file ( GLOB_RECURSE mtdqtplugins ${bundle}/plugins/*.dylib )
-set ( mantidpydir ${bundle}/Contents/MacOS/mantid ) 
-set ( mantidpy ${mantidpydir}/kernel/_kernel.so
-               ${mantidpydir}/kernel/_dlopen.so
-               ${mantidpydir}/geometry/_geometry.so
-               ${mantidpydir}/api/_api.so )
+
+set ( mantidpydir ${bundle}/Contents/MacOS/mantid )
+set ( mantidpylibs ${mantidpydir}/kernel/_kernel.so
+                   ${mantidpydir}/geometry/_geometry.so
+                   ${mantidpydir}/api/_api.so )
 
 set ( other_libs ${bundle}/Contents/MacOS/libMantidPythonAPI.so
                  ${bundle}/Contents/MacOS/mantidqtpython.so
-                 ${mantidpy} ${pyqt_libs} ${qtplugins} 
-                 ${mtdqtplugins}
-)
+                 ${pyqt_libs} ${qtplugins} 
+                 ${mantidpylibs} ${mtdqtplugins} )
 
-set ( dirs "@CMAKE_LIBRARY_OUTPUT_DIRECTORY@" "@CMAKE_LIBRARY_OUTPUT_DIRECTORY@/mantid/kernel" "@CMAKE_LIBRARY_OUTPUT_DIRECTORY@/mantid/geometry" "@CMAKE_LIBRARY_PATH@" /Library/Frameworks /opt/intel/lib )
+set ( dirs "@CMAKE_LIBRARY_OUTPUT_DIRECTORY@" "@CMAKE_LIBRARY_PATH@" /Library/Frameworks /opt/intel/lib )
 
-fixup_bundle ( "${bundle}" "${other_libs}" "${dirs}" )
+fixup_bundle ( "${bundle}" "${other_libs}" "${dirs}" ) # This will fix up the dependencies for the hard dependencies: MantidKernel etc
+
+####################################################
+# Fix up python plugins that depend on each other
+####################################################
+
+function( change_bundle_id new_id sharedlib )
+  execute_process(COMMAND install_name_tool -id ${new_id} ${sharedlib})
+endfunction()
+
+function( change_bundle_dep old_dep new_dep sharedlib )
+  execute_process(COMMAND install_name_tool -change ${old_dep} ${new_dep} ${sharedlib})
+endfunction()
+
+# Additional steps so that the plugins that depend on plugins actually work
+set ( mantid_bundle ${bundle}/Contents/MacOS/mantid ) 
+set ( mantid_exec_path @executable_path/../MacOS/mantid )
+set ( macos_exec_path @executable_path/../../Contents/MacOS )
+
+# First make sure the IDs is correct
+change_bundle_id ( ${mantid_exec_path}/kernel/_dlopen.so ${mantid_bundle}/kernel/_dlopen.so )
+change_bundle_id ( ${mantid_exec_path}/kernel/_kernel.so ${mantid_bundle}/kernel/_kernel.so )
+change_bundle_id ( ${mantid_exec_path}/geometry/_geometry.so ${mantid_bundle}/geometry/_geometry.so )
+change_bundle_id ( ${mantid_exec_path}/api/_api.so ${mantid_bundle}/api/_api.so )
+
+# _kernel dependency in _geometry
+change_bundle_dep( ${macos_exec_path}/_kernel.so ${mantid_exec_path}/kernel/_kernel.so ${mantid_bundle}/geometry/_geometry.so )
+
+# _kernel dependency in _api
+change_bundle_dep( ${macos_exec_path}/_kernel.so ${mantid_exec_path}/kernel/_kernel.so ${mantid_bundle}/api/_api.so )
+
+# _geometry dependency in _api
+change_bundle_dep( ${macos_exec_path}/_geometry.so ${mantid_exec_path}/geometry/_geometry.so ${mantid_bundle}/api/_api.so )
+
+
+
