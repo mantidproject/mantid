@@ -59,6 +59,14 @@ namespace Kernel
 template <typename T>
 class DLLExport DataService
 {
+private:
+  /// Typedef for the map holding the names of and pointers to the data objects
+  typedef std::map<std::string,  boost::shared_ptr<T> > svcmap;
+  /// Iterator for the data store map
+  typedef typename svcmap::iterator svc_it;
+  /// Const iterator for the data store map
+  typedef typename svcmap::const_iterator svc_constit;
+
 public:
 
     /// Class for named object notifications
@@ -190,7 +198,7 @@ public:
     }
     else
     {
-      std::string information=" add Data Object '"+name+"' successful";
+      std::string information=" add Data Object '"+name+"' successful\n";
       g_log.debug(information);
 
       //check the workspace invisible option set
@@ -213,12 +221,13 @@ public:
   virtual void addOrReplace( const std::string& name, const boost::shared_ptr<T>& Tobject)
   {
     //find if the Tobject already exists
-    svc_it it = datamap.find(name);
+    std::string foundName;
+    svc_it it = this->findNameWithCaseSearch(name, foundName);
     if (it!=datamap.end())
     {
-      g_log.debug("Data Object '"+ name +"' replaced in data service.");
+      g_log.debug("Data Object '"+ foundName +"' replaced in data service.\n");
       notificationCenter.postNotification(new BeforeReplaceNotification(name,it->second,Tobject));
-      datamap[name] = Tobject;
+      datamap[foundName] = Tobject;
 
       std::string name_startswith=name.substr(0,2);
       //check the workspace invisible option set
@@ -242,18 +251,19 @@ public:
   /// Remove an object
   void remove( const std::string& name)
   {
-    svc_it it = datamap.find(name);
+    std::string foundName;
+    svc_it it = this->findNameWithCaseSearch(name, foundName);
     if (it==datamap.end())
     {
       g_log.warning(" remove '" + name + "' cannot be found");
       return;
     }
 
-    notificationCenter.postNotification(new PreDeleteNotification(name,it->second));
-    g_log.information("Data Object '"+ name +"' deleted from data service.");
+    notificationCenter.postNotification(new PreDeleteNotification(foundName,it->second));
+    g_log.information("Data Object '"+ foundName +"' deleted from data service.\n");
     datamap.erase(it);
     API::MemoryManager::Instance().releaseFreeMemory();
-    notificationCenter.postNotification(new PostDeleteNotification(name));
+    notificationCenter.postNotification(new PostDeleteNotification(foundName));
     return;
   }
 
@@ -262,14 +272,15 @@ public:
   {
     datamap.clear();
     notificationCenter.postNotification(new ClearNotification());
-    g_log.debug() << typeid(this).name() << " cleared.";
+    g_log.debug() << typeid(this).name() << " cleared.\n";
   }
 
   /// Get a shared pointer to a stored data object
   boost::shared_ptr<T> retrieve( const std::string& name) const
   {
-    svc_constit it = datamap.find(name);
-    if (it!=datamap.end())
+    std::string foundName;
+    svc_it it = this->findNameWithCaseSearch(name, foundName);
+    if (it != datamap.end())
     {
       return it->second;
     }
@@ -282,7 +293,8 @@ public:
   /// Check to see if a data object exists in the store
   bool doesExist(const std::string& name) const
   {
-    svc_constit it=datamap.find(name);
+    std::string foundName;
+    svc_it it = this->findNameWithCaseSearch(name, foundName);
     if (it!=datamap.end())
         return true;
     return false;
@@ -329,41 +341,47 @@ private:
   /// Private, unimplemented copy assignment operator
   DataService& operator=(const DataService&);
 
+  /**
+   * Find a name in the map and return an iterator pointing to it. This takes
+   * the string and if it does not find it then it looks for a match disregarding
+   * the case (const version)
+   * @param name The string name to search for
+   * @param foundName [Output] Stores the name here if one was found. It will be empty if not
+   * @returns An iterator pointing at the element or the end iterator
+   */
+  svc_it findNameWithCaseSearch(const std::string & name, std::string &foundName) const
+  {
+    const svcmap& constdata = this->datamap;
+    svcmap& data = const_cast<svcmap&>(constdata);
+    if(name.empty()) return data.end();
+
+    //Exact match
+    foundName = name;
+    svc_it match = data.find(name);
+    if( match != data.end() ) return match;
+
+    // Try UPPER case
+    std::transform(foundName.begin(), foundName.end(), foundName.begin(),toupper);
+    match = data.find(foundName);
+    if( match != data.end() ) return match;
+
+    // Try lower case
+    std::transform(foundName.begin(), foundName.end(), foundName.begin(),tolower);
+    match = data.find(foundName);
+    if( match != data.end() ) return match;
+
+    // Try Sentence case
+    foundName = name;
+    // Upper cases the first letter
+    std::transform(foundName.begin(), foundName.begin() + 1, foundName.begin(),toupper);
+    match = data.find(foundName);
+    if( match == data.end() ) foundName = "";
+    return match;
+  }
+
   /// DataService name. This is set only at construction. DataService name should be provided when construction of derived classes
   std::string svc_name;
   
-  /// functor for the less binary function that compares strings alphabetically without taking account of case
-  struct ci_less : std::binary_function<std::string, std::string, bool>
-  {
-    
-    /// functor for case-independent less binary function for characters
-    struct nocase_compare : public std::binary_function<unsigned char,unsigned char,bool> 
-    {
-      /// case-independent less binary function for characters
-      bool operator() (const unsigned char &c1, const unsigned char &c2) const 
-      {
-        return tolower (c1) < tolower (c2);
-      }
-    };
-    /** case-independent (ci) less binary function for strings
-    * Compares strings alphabetically
-    * @param s1 :: first string for comparison
-    * @param s2 :: second string for comparison
-    * @return true if s1 < s2
-    */
-    bool operator() (const std::string &s1, const std::string &s2) const
-    {
-      return lexicographical_compare 
-        (s1.begin(), s1.end(), s2.begin(), s2.end(), nocase_compare());
-    }
-  }; // end of ci_less
-
-  /// Typedef for the map holding the names of and pointers to the data objects
-  typedef std::map<std::string,  boost::shared_ptr<T>, ci_less > svcmap;
-  /// Iterator for the data store map
-  typedef typename svcmap::iterator svc_it;
-  /// Const iterator for the data store map
-  typedef typename svcmap::const_iterator svc_constit;
   /// Map of objects in the data service
   svcmap datamap;
 
