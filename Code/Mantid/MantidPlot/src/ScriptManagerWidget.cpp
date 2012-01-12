@@ -28,6 +28,7 @@
 #include <QGroupBox>
 #include <QButtonGroup>
 #include <QTextCursor>
+
 //***************************************************************************
 //
 // ScriptManagerWidget class
@@ -94,8 +95,8 @@ ScriptManagerWidget::~ScriptManagerWidget()
     delete m_findrep_dlg;
   }
   
-  QList<int> script_keys = m_script_runners.uniqueKeys();
-  QListIterator<int> iter(script_keys);
+  QList<ScriptEditor*> script_keys = m_script_runners.uniqueKeys();
+  QListIterator<ScriptEditor*> iter(script_keys);
   while( iter.hasNext() )
   {
     Script *code = m_script_runners.take(iter.next());
@@ -206,6 +207,26 @@ ScriptEditor* ScriptManagerWidget::currentEditor() const
 {
   if( count() == 0 ) return NULL;
   return qobject_cast<ScriptEditor*>(currentWidget());
+}
+
+/**
+ * Return the current runner
+ */
+Script* ScriptManagerWidget::currentRunner() const
+{
+  if( count() == 0 ) return NULL;
+  ScriptEditor *editor = currentEditor();
+  Script *runner(NULL);
+  if (m_script_runners.contains(editor))
+  {
+    runner = m_script_runners.value(editor);
+  }
+  else
+  {
+    // This should never happen but if it does the situation should still be recoverable
+    QMessageBox::critical(const_cast<ScriptManagerWidget*>(this),"MantidPlot","Error accessing Python. Please save your work, close all tabs and reopen script.");
+  }
+  return runner;
 }
 
 /**
@@ -349,8 +370,10 @@ ScriptEditor* ScriptManagerWidget::newTab(int index, const QString & filename)
   }
   index = insertTab(index, editor, tab_title);
   setCurrentIndex(index);
+
   // Store a script runner
-  m_script_runners.insert(index, createScriptRunner(editor));
+  Script * runner = createScriptRunner(editor);
+  m_script_runners.insert(editor, runner);
 
   // Completion etc
   setCodeCompletionBehaviour(editor, m_toggle_completion->isChecked());
@@ -561,17 +584,8 @@ bool ScriptManagerWidget::runScriptCode(const QString & code, const int line_off
 {
   if( isScriptRunning() ) return false;
 
-  // Get the correct script runner
-  Script * runner(NULL);
-  if( m_script_runners.contains(this->currentIndex()) )
-  {
-    runner = m_script_runners.value(this->currentIndex());
-  }
-  else
-  {
-    QMessageBox::critical(this,"MantidPlot","Logical error occurred trying to run a python script. Contact the development team");
-    return false;
-  }
+  Script * runner = currentRunner();
+  if( !runner ) return false;
   runner->setLineOffset(line_offset);
   ScriptEditor *editor = currentEditor();
   if( editor ) 
@@ -617,7 +631,7 @@ void ScriptManagerWidget::compile(const QString & code)
   {
     return ;
   }// Get the correct script runner
-  Script * runner = m_script_runners.value(this->currentIndex());
+  Script * runner = currentRunner();
   int lineno,index;
   editor->getCursorPosition(&lineno, &index);
   runner->setLineOffset(lineno);
@@ -644,11 +658,7 @@ void ScriptManagerWidget::compile(const QString & code)
 bool ScriptManagerWidget::runMultiLineCode(int line_offset)
 {
   // Get the correct script runner
-  Script * runner = m_script_runners.value(this->currentIndex());
-  if(!runner)
-  {
-    return 0;
-  }
+  Script * runner = currentRunner();
   emit ScriptIsActive(true);
   runner->setLineOffset(line_offset);
   bool success = runner->exec();
@@ -797,7 +807,7 @@ void ScriptManagerWidget::toggleProgressArrow(bool state)
   {
     ScriptEditor *editor = static_cast<ScriptEditor*>(widget(index));
     if( editor ) editor->setMarkerState(state);
-    Script *script = m_script_runners.value(index);
+    Script *script = m_script_runners.value(editor);
     if( script ) script->reportProgress(state);
   }
 }
@@ -985,7 +995,7 @@ void ScriptManagerWidget::customEvent(QEvent *event)
     {
       ScriptEditor *editor = static_cast<ScriptEditor*>(widget(index));
       editor->setLexer(scriptingEnv()->createCodeLexer());
-      m_script_runners[index] = createScriptRunner(editor);
+      m_script_runners[editor] = createScriptRunner(editor);
     }
   }
 }
@@ -1083,11 +1093,13 @@ void ScriptManagerWidget::closeTabAtIndex(int index)
   askSave(index);
   editor->disconnect();
   // Remove the path from the script runner
-  /* Script *runner = */ m_script_runners.take(index);
-  //delete runner;
+  Script *runner = m_script_runners.take(editor);
+  runner->disconnect();
   //Get the widget attached to the tab first as this is not deleted
   //when remove is called
   editor->deleteLater();
+  runner->deleteLater();
+
   //  If we are removing the final tab, close the find replace dialog if it exists and is visible
   if( m_findrep_dlg && m_findrep_dlg->isVisible() && count() == 1 )
   {

@@ -76,6 +76,8 @@ public:
   bool isScriptRunning();
   /// Return the current editor
   ScriptEditor *currentEditor() const;
+  /// Return the current runner
+  Script * currentRunner() const;
   /// Undo action for the current editor
   QAction* undoAction() const;
   /// Redo action for the current editor
@@ -211,7 +213,7 @@ private:
   /// The last directory visted with a file dialog
   QString m_last_dir;
   /// The script objects for each tab that will execute the code
-  QHash<int, Script *> m_script_runners;
+  QHash<ScriptEditor*, Script *> m_script_runners;
   // The cursor position within the tab bar when the right-mouse button was last clicked
   // I need this to ensure that the position of a call to tabBar()->tabAt() is accurate
   // as Qt doesn't provide an action signal parameterized on a position
