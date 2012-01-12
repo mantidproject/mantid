@@ -4,11 +4,17 @@
     that information in a database in the user home area.
 """
 import os
-import sqlite3
 import re
 import time
 import sys
 import traceback
+
+# Make sure we have sqlite
+try:
+    import sqlite3
+    HAS_SQLITE = True
+except:
+    HAS_SQLITE = False
 
 # Check whether Mantid is available
 try:
@@ -180,13 +186,16 @@ class DataCatalog(object):
         self.db_exists = False
         self.db = None
         
-        try:
-             self._create_db(db_path, replace_db)
-        except:
-            if HAS_MANTID:
-                mtd.sendLogMessage("DataCatalog: Could not access local data catalog\n%s" % sys.exc_value)
-            else:
-                raise
+        if HAS_SQLITE:
+            try:
+                 self._create_db(db_path, replace_db)
+            except:
+                if HAS_MANTID:
+                    mtd.sendLogMessage("DataCatalog: Could not access local data catalog\n%s" % sys.exc_value)
+                else:
+                    raise
+        else:
+            mtd.sendLogMessage("Could not find SQLite: re-generating data catalog")
         
     def _create_db(self, db_path, replace_db):
         """
