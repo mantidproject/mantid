@@ -250,21 +250,18 @@ if bNorm:
                   OutputWorkspace='NormWks')
    
     #collapse data to 1 spectrum (peak region)
-    mt_NormWks = mtd['NormWks']
-    _tof_axis = mt_NormWks.readX(0)[:]
-    counts_vs_tof = zeros(len(_tof_axis))
-    from_norm_peak = list_norm_peak[0][0]
-    to_norm_peak = list_norm_peak[0][1]
-    NormPeakRange = arange(to_norm_peak-from_norm_peak+1) + from_norm_peak
-    for x in NormPeakRange:
-        print x
-        counts_vs_tof += mt_NormWks.readY(int(x))[:]
-    CreateWorkspace('NormWks', DataX=_tof_axis, DataY=counts_vs_tof, DataE=counts_vs_tof, Nspec=1)
-   
-#    #replace NaN values
-#    ReplaceSpecialValues(InputWorkspace='NormWks',
-#                         Outputworkspace='NormWks',
-#                         NaNValue=0)
+    Integration('NormWks','IntegratedNormWks',)
+    
+#    mt_NormWks = mtd['NormWks']
+#    _tof_axis = mt_NormWks.readX(0)[:]
+#    counts_vs_tof = zeros(len(_tof_axis))
+#    from_norm_peak = list_norm_peak[0][0]
+#    to_norm_peak = list_norm_peak[0][1]
+#    NormPeakRange = arange(to_norm_peak-from_norm_peak+1) + from_norm_peak
+#    for x in NormPeakRange:
+#        print x
+#        counts_vs_tof += mt_NormWks.readY(int(x))[:]
+#    CreateWorkspace('NormWks', DataX=_tof_axis, DataY=counts_vs_tof, DataE=counts_vs_tof, Nspec=1)
    
     #### divide data by normalize histo workspace
     Divide(LHSWorkspace='DataWks',
