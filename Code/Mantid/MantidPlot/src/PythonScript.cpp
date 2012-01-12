@@ -100,7 +100,7 @@ PythonScript::PythonScript(PythonScripting *env, const QString &code, QObject *c
   updatePath(Name, true);
 
   // Observe ADS updates
-  if( interactive )
+  if( false ) // Disabled as it causes random crashes in different places on different systems
   {
     observeAdd();
     observePostDelete();
