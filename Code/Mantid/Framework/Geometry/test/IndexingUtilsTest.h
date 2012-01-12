@@ -1052,15 +1052,19 @@ public:
 
     TS_ASSERT( IndexingUtils::MakeNiggliUB( UB, newUB ) );
     IndexingUtils::GetABC(newUB, a,b,c);
-
+    std::cout << a <<std::endl;
+    std::cout << b <<std::endl;
+    std::cout << c <<std::endl;
     // Expected values
     V3D a2(-5,0,5);
     V3D b2(-5,-5,0);
     V3D c2(0,-5,5);
-
-    TS_ASSERT( a == a2 );
-    TS_ASSERT( b == b2 );
-    TS_ASSERT( c == c2 );
+    for (size_t i=0; i<3; i++)
+    {
+      TS_ASSERT_DELTA( a[i], a2[i], 1e-3 );
+      TS_ASSERT_DELTA( b[i], b2[i], 1e-3 );
+      TS_ASSERT_DELTA( c[i], c2[i], 1e-3 );
+    }
   }
 };
 
