@@ -17,6 +17,8 @@ macro( SQUISH_ADD_TEST_SUITE )
              ${CMAKE_COMMAND}
              "-Dsquish_server_executable:STRING=${SQUISH_SERVER_EXECUTABLE}"
              "-Dsquish_client_executable:STRING=${SQUISH_CLIENT_EXECUTABLE}"
+             "-Dsquish_aut:STRING=${SQUISH_AUT}"
+             "-Dsquish_aut_path:STRING=${SQUISH_AUT_PATH}"
              "-Dsquish_test_suite:STRING=${testSuite}"
              "-Dsquish_results_dir:STRING=${CMAKE_BINARY_DIR}/bin/Testing"
              "-Dsquish_results_file:STRING=${resultFile}"
