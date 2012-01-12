@@ -109,6 +109,7 @@
 #include "SymbolDialog.h"
 #include "CustomActionDialog.h"
 #include "MdiSubWindow.h"
+#include "FloatingWindow.h"
 
 // TODO: move tool-specific code to an extension manager
 #include "ScreenPickerTool.h"
@@ -8518,6 +8519,13 @@ void ApplicationWindow::activateWindow(MdiSubWindow *w, bool activateOuterWindow
 
   if (blockWindowActivation) return;
 
+  if (!w)
+  {
+    setActiveWindow(NULL);
+    return;
+  }
+
+  // don't activat a window twice, but make sure it is visible
   if(getActiveWindow()  == w )
   {
     // this can happen
@@ -8528,29 +8536,21 @@ void ApplicationWindow::activateWindow(MdiSubWindow *w, bool activateOuterWindow
     return;
   }
 
+  // remember the active window
   setActiveWindow(w);
 
-  if (!w)
-  {
-    return;
-  }
-
-  QMdiSubWindow* qw = dynamic_cast<QMdiSubWindow*>(w->parent());
-//  if (!dontActivateOuterWindow)
-//  {
-//    w->setNormal();
-//  }
-
   updateWindowLists(w);
-
   customToolBars(w);
   customMenu(w);
 
+  // ?
   if (d_opening_file)
   {
     return;
   }
 
+  // return any non-active QMdiSubWindows to normal so that the active could be seen
+  QMdiSubWindow* qw = dynamic_cast<QMdiSubWindow*>(w->parent());
   QList<MdiSubWindow *> windows = current_folder->windowsList();
   foreach(MdiSubWindow *ow, windows)
   {
@@ -8562,6 +8562,7 @@ void ApplicationWindow::activateWindow(MdiSubWindow *w, bool activateOuterWindow
     }
   }
 
+  // update the folder
   Folder *f = w->folder();
   if (f)
     f->setActiveWindow(w);
@@ -8572,7 +8573,6 @@ void ApplicationWindow::activateWindow(MdiSubWindow *w, bool activateOuterWindow
   {
     if (activateOuterWindow)
     {
-      //w->setNormal();
       fw->showNormal();
       fw->activateWindow();
     }
@@ -17644,10 +17644,8 @@ void ApplicationWindow::activateNewWindow()
       }
     }
   }
-  if (newone)
-  {
-    activateWindow(newone);
-  }
+  // activate a new sub-window or pass NULL if no window can be activated
+  activateWindow(newone);
 }
 
 #ifdef SHARED_MENUBAR

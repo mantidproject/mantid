@@ -39,6 +39,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/FitDialog.cpp
                    src/fit_gsl.cpp
                    src/FitModelHandler.cpp
+                   src/FloatingWindow.cpp
                    src/Folder.cpp
                    src/FunctionCurve.cpp
                    src/FunctionDialog.cpp
@@ -259,6 +260,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/fit_gsl.h
                    src/Fit.h
                    src/FitModelHandler.h
+                   src/FloatingWindow.h
                    src/Folder.h
                    src/FunctionCurve.h
                    src/FunctionDialog.h
@@ -554,6 +556,7 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/FindDialog.h
                         src/FitDialog.h
                         src/Fit.h
+                        src/FloatingWindow.h
                         src/Folder.h
                         src/FunctionDialog.h
                         src/Graph3D.h
