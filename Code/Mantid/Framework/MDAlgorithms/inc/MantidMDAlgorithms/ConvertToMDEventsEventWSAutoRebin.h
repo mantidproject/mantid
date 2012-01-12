@@ -162,7 +162,6 @@ public:
               // reset buffer counts
               n_buf_events =0;
               n_coordinates=0;
-              itc=allCoord.begin();
               if (bc->shouldSplitBoxes(n_added_events, lastNumBoxes)){
                   // Do all the adding tasks
                   //   tp.joinAll();    
