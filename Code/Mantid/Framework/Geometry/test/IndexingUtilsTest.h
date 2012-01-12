@@ -1051,20 +1051,25 @@ public:
     Matrix<double> newUB(3,3,false);
 
     TS_ASSERT( IndexingUtils::MakeNiggliUB( UB, newUB ) );
-    IndexingUtils::GetABC(newUB, a,b,c);
-    std::cout << a <<std::endl;
-    std::cout << b <<std::endl;
-    std::cout << c <<std::endl;
-    // Expected values
-    V3D a2(-5,0,5);
-    V3D b2(-5,-5,0);
-    V3D c2(0,-5,5);
-    for (size_t i=0; i<3; i++)
-    {
-      TS_ASSERT_DELTA( a[i], a2[i], 1e-3 );
-      TS_ASSERT_DELTA( b[i], b2[i], 1e-3 );
-      TS_ASSERT_DELTA( c[i], c2[i], 1e-3 );
-    }
+
+    // Extract the a,b,c vectors
+    V3D a_dir;
+    V3D b_dir;
+    V3D c_dir;
+    IndexingUtils::GetABC(newUB, a_dir,b_dir,c_dir);
+    double alpha = b_dir.angle( c_dir ) * 180.0/PI;
+    double beta  = c_dir.angle( a_dir ) * 180.0/PI;
+    double gamma = a_dir.angle( b_dir ) * 180.0/PI;
+    // All vectors have two components of length 5.0
+    double norm = sqrt(50.0);
+    TS_ASSERT_DELTA( a_dir.norm(), norm, 1e-3 );
+    TS_ASSERT_DELTA( b_dir.norm(), norm, 1e-3 );
+    TS_ASSERT_DELTA( c_dir.norm(), norm, 1e-3 );
+    // Angles are 60 degrees
+    TS_ASSERT_DELTA( alpha, 60, 1e-1 );
+    TS_ASSERT_DELTA( beta, 60, 1e-1 );
+    TS_ASSERT_DELTA( gamma, 60, 1e-1 );
+
   }
 };
 
