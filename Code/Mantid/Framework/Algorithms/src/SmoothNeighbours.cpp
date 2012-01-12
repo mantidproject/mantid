@@ -100,6 +100,7 @@ The algorithm will ignore masked detectors if this flag is set.
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include <boost/algorithm/string.hpp>
+#include <boost/regex.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -532,6 +533,19 @@ void SmoothNeighbours::exec()
 {
   // Get the input workspace
   inWS = getProperty("InputWorkspace");
+
+  
+
+  /*
+  As a temporary measure, use with managed workspaces is disabled see #4471
+  */
+  std::string typeName = typeid(*inWS.get()).name();
+  std::cout << "type name: " << typeName << std::endl;
+  boost::regex query("^(.*)managed(.*)$",boost::regex::icase);
+  if (boost::regex_match(typeName, query))
+  {
+    throw std::invalid_argument("SmoothNeighbours algorithm cannot be used with Managed Workspaces");
+  }
 
   // Retrieve the optional properties
   double enteredRadius = getProperty("Radius");
