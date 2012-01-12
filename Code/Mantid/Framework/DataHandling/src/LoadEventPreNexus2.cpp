@@ -8,9 +8,9 @@ The LoadEventPreNeXus algorithm stores data from the pre-nexus neutron event dat
 === Optional properties ===
 Specific pulse ID and mapping files can be specified if needed; these are guessed at automatically from the neutron filename, if not specified.
 
+A specific list of pixel ids can be specified, in which case only events relating to these pixels will appear in the output.
 
-
-
+The ChunkNumber and TotalChunks properties can be used to load only a section of the file; e.g. if these are 1 and 10 respectively only the first 10% of the events will be loaded.
 
 *WIKI*/
 
