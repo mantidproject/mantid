@@ -92,9 +92,9 @@ class MantidMatrix;
 class FloatingWindow;
 
 // On Mac (and Ubuntu 11 Unity) the menubar must be shared between the main window and other floating windows.
-#ifdef Q_OS_MAC
+//#ifdef Q_OS_MAC
   #define SHARED_MENUBAR
-#endif
+//#endif
 
 namespace MantidQt
 {
@@ -537,6 +537,7 @@ public slots:
   void activateWindow();
   void activateWindow(MdiSubWindow *, bool activateOuterWindow = true);
   void repaintWindows();
+  bool existsWindow(MdiSubWindow* w) const;
   //@}
 
   //! Show about dialog
@@ -1321,7 +1322,7 @@ public:
   QString defaultScriptingLang;
 
 private:
-  MdiSubWindow *d_active_window;
+  mutable MdiSubWindow *d_active_window;
   MdiSubWindow* getActiveWindow() const;
   void setActiveWindow(MdiSubWindow* w);
   TextEditor *d_text_editor;

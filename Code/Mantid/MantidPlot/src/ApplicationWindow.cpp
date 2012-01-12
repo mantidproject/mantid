@@ -1406,6 +1406,7 @@ void ApplicationWindow::plotMenuAboutToShow()
 
 void ApplicationWindow::customMenu(MdiSubWindow* w)
 {
+  if (!existsWindow(w)) return;
   myMenuBar()->clear();
   myMenuBar()->insertItem(tr("&File"), fileMenu);
   fileMenuAboutToShow();
@@ -8481,18 +8482,46 @@ void ApplicationWindow::setWindowGeometry(int x, int y, int w, int h)
   activeWindow()->setGeometry(x, y, w, h);
 }
 
+/**
+  * Checks if a mdi sub-window exists.
+  */
+bool ApplicationWindow::existsWindow(MdiSubWindow* w) const
+{
+  if (!w) return false;
+  FloatingWindow* fw = w->getFloatingWindow();
+  if (fw && m_floatingWindows.contains(fw))
+  {
+    return true;
+  }
+  QMdiSubWindow* sw = w->getDockedWindow();
+  return sw && d_workspace->subWindowList().contains(sw);
+}
+
+/**
+  * Returns the active sub-window
+  */
 MdiSubWindow* ApplicationWindow::getActiveWindow() const
 {
   //m_active_window_mutex.lock();
-  MdiSubWindow* w = d_active_window;
+  if (!existsWindow(d_active_window))
+  {
+    d_active_window = NULL;
+  }
+  return d_active_window;
   //m_active_window_mutex.unlock();
-  return w;
 }
 
+/**
+  * Sets internal pointer to a new active sub-window.
+  */
 void ApplicationWindow::setActiveWindow(MdiSubWindow* w)
 {
   //m_active_window_mutex.lock();
   d_active_window = w;
+  if (!existsWindow(d_active_window))
+  {
+    d_active_window = NULL;
+  }
   //m_active_window_mutex.unlock();
 }
 
