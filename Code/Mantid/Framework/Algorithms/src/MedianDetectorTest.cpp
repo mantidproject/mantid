@@ -104,12 +104,12 @@ namespace Mantid
       double median = calculateMedian(countsWS, excludeZeroes);
       g_log.information() << "Median value = " << median << "\n";
       // 2. Mask outliers
-      maskOutliers(median, countsWS);
+      int numFailed = maskOutliers(median, countsWS);
       // 3. Recalulate the median
       median = calculateMedian(countsWS, excludeZeroes);
       g_log.information() << "Median value with outliers removed = " << median << "\n";
 
-      int numFailed = doDetectorTests(countsWS, median);
+      numFailed  += doDetectorTests(countsWS, median);
       g_log.information() << "Median test results:\n"
                        << "\tNumber of failures - " << numFailed << "\n";
 
@@ -200,14 +200,16 @@ namespace Mantid
      * Mask the outlier values to get a better median value.
      * @param median The median value calculated from the current counts
      * @param countsWS The counts workspace. Any outliers will be masked here
+     * @returns The number masked
      */
-    void MedianDetectorTest::maskOutliers(const double median, API::MatrixWorkspace_sptr countsWS)
+    int MedianDetectorTest::maskOutliers(const double median, API::MatrixWorkspace_sptr countsWS)
     {
       // Fractions of the median
       const double out_lo = getProperty("LowOutlier");
       const double out_hi = getProperty("HighOutlier");
       const int64_t nhist = static_cast<int64_t>(countsWS->getNumberHistograms());
-      // Mask outliers
+      int numFailed(0);
+
       PARALLEL_FOR1(countsWS)
       for(int64_t i = 0; i < nhist; ++i)
       {
@@ -215,12 +217,17 @@ namespace Mantid
         if( (value < out_lo*median) && (value > 0.0) )
         {
           countsWS->maskWorkspaceIndex(i);
+          PARALLEL_ATOMIC
+          ++numFailed;
         }
-        if( value > out_hi*median )
+        else if( value > out_hi*median )
         {
           countsWS->maskWorkspaceIndex(i);
+          PARALLEL_ATOMIC
+          ++numFailed;
         }
       }
+      return numFailed;
     }
 
 

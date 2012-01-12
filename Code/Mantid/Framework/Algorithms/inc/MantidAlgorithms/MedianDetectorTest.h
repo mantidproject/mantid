@@ -82,7 +82,7 @@ namespace Mantid
       /// Calculates the sum of solid angles of detectors for each histogram
       API::MatrixWorkspace_sptr getSolidAngles(int firstSpec, int lastSpec);
       /// Mask the outlier values to get a better median value
-      void maskOutliers(const double median, API::MatrixWorkspace_sptr countsWS);
+      int maskOutliers(const double median, API::MatrixWorkspace_sptr countsWS);
       /// Do the tests and mask those that fail
       int doDetectorTests(const API::MatrixWorkspace_sptr countsWS, const double median);
 
