@@ -1,7 +1,9 @@
 #!/bin/sh
 echo "Starting"
-echo "Starting the squish server...$1 --daemon --config addAUT $2 $3"
-$1 --daemon --config addAUT $2 $3
+echo "Configuring the squish server...$1 --config addAUT $2 $3"
+$1 --config addAUT $2 $3
+echo "Starting the squish server...$1 --daemon"
+$1 --daemon
 
 results="xmljunit,${7}"
 
