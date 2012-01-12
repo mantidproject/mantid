@@ -214,8 +214,12 @@ class ConvertInstrumentFile(PythonAlgorithm):
                 # Dtt1      Dtt2         Zero 
                 terms = line.split()
                 mdict[bank]["dtt1"] = float(terms[1])
-                mdict[bank]["dtt2"] = float(terms[2])
-                mdict[bank]["zero"] = float(terms[3])
+                if len(terms) == 3:
+                    mdict[bank]["dtt2"] = float(terms[2])
+                    mdict[bank]["zero"] = float(terms[3])
+                else:
+                    mdict[bank]["dtt2"] = 0.0
+                    mdict[bank]["zero"] = 0.0
     
             elif line.startswith("ZD2TOF"):
                 #  Zero   Dtt1  
