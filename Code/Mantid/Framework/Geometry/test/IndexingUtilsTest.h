@@ -1015,7 +1015,7 @@ public:
     V3D  b3( -0.1,  1,   -0.1 );
     V3D  c3( -0.1, -0.1,  1   );
 
-    TS_ASSERT_EQUALS( IndexingUtils::HasNiggliAngles(a2, b2, c2, 0.001), true);
+    TS_ASSERT_EQUALS( IndexingUtils::HasNiggliAngles(a3, b3, c3, 0.001), true);
   }
 
 
@@ -1025,14 +1025,42 @@ public:
                             {  0.106642,  0.120341,  0.090518 },
                             { -0.261273,  0.258426, -0.006190 } };
 
+    Matrix<double> newUB(3,3,false);
     Matrix<double> UB = getSiliconUB();
-    Matrix<double> newUB(3,3,false);  
+    UB = UB * 1.0;
 
-    IndexingUtils::MakeNiggliUB( UB, newUB );
+    TS_ASSERT( IndexingUtils::MakeNiggliUB( UB, newUB ) );
 
     for ( size_t row = 0; row < 3; row++ )
       for ( size_t col = 0; col < 3; col++ )
         TS_ASSERT_DELTA( newUB[row][col], answer[row][col], 1e-5 );  
+  }
+
+
+  void test_MakeNiggliUB2()
+  {
+    // Make a fake UB matrix with:
+    // gamma > 90 deg
+    // alpha < 90 deg
+    Matrix<double> UB(3,3, true);
+    V3D a(10,0,0);
+    V3D b(-5,5,0);
+    V3D c(0,5,5);
+    IndexingUtils::GetUB(UB, a,b,c);
+
+    Matrix<double> newUB(3,3,false);
+
+    TS_ASSERT( IndexingUtils::MakeNiggliUB( UB, newUB ) );
+    IndexingUtils::GetABC(newUB, a,b,c);
+
+    // Expected values
+    V3D a2(-5,0,5);
+    V3D b2(-5,-5,0);
+    V3D c2(0,-5,5);
+
+    TS_ASSERT( a == a2 );
+    TS_ASSERT( b == b2 );
+    TS_ASSERT( c == c2 );
   }
 };
 
