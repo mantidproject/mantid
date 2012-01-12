@@ -190,7 +190,7 @@ m_tubeXUnits(DETECTOR_ID)
   m_unitsGroup = new QActionGroup(this);
   m_unitsGroup->addAction(m_detidUnits);
   m_unitsGroup->addAction(m_lengthUnits);
-  m_unitsGroup->addAction(m_phiUnits);
+  //m_unitsGroup->addAction(m_phiUnits); // re #4169 disabled until fixed or removed
   connect(m_unitsMapper,SIGNAL(mapped(int)),this,SLOT(setTubeXUnits(int)));
 
   // Instrument display context menu actions
