@@ -1406,7 +1406,6 @@ void ApplicationWindow::plotMenuAboutToShow()
 
 void ApplicationWindow::customMenu(MdiSubWindow* w)
 {
-  if (!existsWindow(w)) return;
   myMenuBar()->clear();
   myMenuBar()->insertItem(tr("&File"), fileMenu);
   fileMenuAboutToShow();
