@@ -224,9 +224,9 @@ namespace Geometry
                                    ReducedCell::P_CENTERED   };        // 44 
 
   /**
-   *  Construct a ReducedCellInfo object representing the specified row of 
+   *  Construct a ReducedCell object representing the specified row of 
    *  Table 2 for a reduced cell with the specified lattice parameters,
-   *  if the form number is between 1 and 44 exclusive.  If the form number
+   *  if the form number is between 1 and 44 inclusive.  If the form number
    *  is specified to be zero, the scalar values will be calculated according
    *  to the column headers for Table 2, for comparison purposes.
    *

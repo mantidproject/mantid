@@ -51,6 +51,10 @@ namespace Geometry
 class MANTID_GEOMETRY_DLL IndexingUtils
 {
   public:
+  
+  /// Convenience method for sorting list of V3D objects based on magnitude
+  static bool CompareMagnitude( const Kernel::V3D & v1, 
+                                const Kernel::V3D & v2 );
 
   /// Find the UB matrix that most nearly indexes the specified qxyz values 
   /// given the lattice parameters 
@@ -257,6 +261,11 @@ class MANTID_GEOMETRY_DLL IndexingUtils
                             Kernel::V3D        & a_dir,
                             Kernel::V3D        & b_dir,
                             Kernel::V3D        & c_dir  );
+
+  /// Get the lattice parameters for the specified orientation matrix
+  static bool GetLatticeParameters( const Kernel::DblMatrix   & UB,
+                                          std::vector<double> & lattice_par );
+
 
   /// Check if a,b,c cell has angles satifying Niggli condition within epsilon
   static bool HasNiggliAngles( const Kernel::V3D  & a_dir,

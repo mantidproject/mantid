@@ -992,6 +992,23 @@ public:
   }
 
 
+  void test_GetLatticeParameters()
+  {
+    double correct_value[7] = {  6.5711, 18.2925, 18.6886,
+                                89.9399, 90.4687, 90.0127,
+                                2246.3452  };
+
+    Matrix<double> natrolite_UB = getNatroliteUB();
+
+    std::vector<double> lat_par;
+
+    IndexingUtils::GetLatticeParameters( natrolite_UB, lat_par );
+
+    for ( size_t i = 0; i < lat_par.size(); i++ )
+      TS_ASSERT_DELTA( lat_par[i], correct_value[i], 1e-3 );
+  }
+
+
   void test_HasNiggleAngles()
   {
     V3D  a(1,0,0);
