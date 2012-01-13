@@ -309,6 +309,7 @@ class StitcherWidget(BaseWidget):
         fname = self.data_browse_dialog()
         if fname:
             self._content.low_q_combo.setItemText(0,fname)
+            self._content.low_q_combo.setCurrentIndex(0)
             self._update_low_q()
 
     def _medium_q_browse(self):
@@ -318,6 +319,7 @@ class StitcherWidget(BaseWidget):
         fname = self.data_browse_dialog()
         if fname:
             self._content.medium_q_combo.setItemText(0,fname)
+            self._content.medium_q_combo.setCurrentIndex(0)
             self._update_medium_q()
 
     def _high_q_browse(self):
@@ -327,6 +329,7 @@ class StitcherWidget(BaseWidget):
         fname = self.data_browse_dialog()
         if fname:
             self._content.high_q_combo.setItemText(0,fname)
+            self._content.high_q_combo.setCurrentIndex(0)
             self._update_high_q()   
 
     def is_running(self, is_running):

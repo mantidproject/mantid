@@ -329,8 +329,14 @@ class Stitcher(object):
         dx = mtd[ws_combined].dataDx(0)
         y = mtd[ws_combined].dataY(0)
         e = mtd[ws_combined].dataE(0)
-        if len(x)!=len(y) and len(x)!=len(e):
-            raise RuntimeError, "Stitcher expected distributions but got histo"
+        HISTO = False
+        if len(x)==len(y)+1:
+            HISTO = True
+            xtmp = [(x[i]+x[i+1])/2.0 for i in range(len(y))]
+            dxtmp = [(dx[i]+dx[i+1])/2.0 for i in range(len(y))]
+            x = xtmp
+            dx = dxtmp
+        print len(x), len(y)
         x, y, e, dx = self.trim_zeros(x, y, e, dx)
         
         for d in self._data_sets[1:]:
@@ -340,8 +346,12 @@ class Stitcher(object):
                 _y = mtd[ws].dataY(0)
                 _e = mtd[ws].dataE(0)
                 _dx = mtd[ws].dataDx(0)
-                if len(_x)!=len(_y) and len(_x)!=len(_e):
-                    raise RuntimeError, "Stitcher expected distributions but got histo"
+                if len(_x)==len(_y)+1:
+                    xtmp = [(_x[i]+_x[i+1])/2.0 for i in range(len(_y))]
+                    dxtmp = [(_dx[i]+_dx[i+1])/2.0 for i in range(len(_y))]
+                    _x = xtmp
+                    _dx = dxtmp
+                    
                 _x, _y, _e, _dx = self.trim_zeros(_x, _y, _e, _dx)
                 x.extend(_x)
                 y.extend(_y)
@@ -363,29 +373,40 @@ class Stitcher(object):
         
         # Use the space we have in the current data vectors
         npts = len(ytmp)
-        if len(x)>=npts:
+        if len(y)>=npts:
             for i in range(npts):
                 xtmp[i] = x[i]
                 ytmp[i] = y[i]
                 etmp[i] = e[i]
                 dxtmp[i] = dx[i]
-            if len(x)>npts:
-                xtmp.extend(x[npts:])
-                ytmp.extend(y[npts:])
-                etmp.extend(e[npts:])
-                dxtmp.extend(dx[npts:])
+            if len(y)>npts:
+                if HISTO:
+                    xtmp[npts] = x[npts]
+                    dxtmp[npts] = dx[npts]
+                    xtmp.extend(x[npts+1:])
+                    ytmp.extend(y[npts:])
+                    etmp.extend(e[npts:])
+                    dxtmp.extend(dx[npts+1:])
+                else:
+                    xtmp.extend(x[npts:])
+                    ytmp.extend(y[npts:])
+                    etmp.extend(e[npts:])
+                    dxtmp.extend(dx[npts:])
         else:
-            for i in range(len(x)):
+            for i in range(len(y)):
                 xtmp[i] = x[i]
                 ytmp[i] = y[i]
                 etmp[i] = e[i]
                 dxtmp[i] = dx[i]
-            for i in range(len(x),npts):
-                xtmp[i] = xtmp[len(x)-1]+1.0
+            for i in range(len(y),npts):
+                xtmp[i] = xtmp[len(y)-1]+1.0
                 ytmp[i] = 0.0
                 etmp[i] = 0.0
                 dxtmp[i] = 0.0
-            CropWorkspace(InputWorkspace=ws_combined, OutputWorkspace=ws_combined, XMin=0.0, XMax=xtmp[len(x)-1])
+                if HISTO:
+                    xtmp[len(y)] = xtmp[len(y)-1]
+                    dxtmp[len(y)] = 0.0
+            CropWorkspace(InputWorkspace=ws_combined, OutputWorkspace=ws_combined, XMin=0.0, XMax=xtmp[len(y)-1])
         return ws_combined
         
                     
