@@ -58,6 +58,8 @@ public:
   Folder* folder();
 
   void askOnCloseEvent(bool)/PyName=confirmClose/;
+  void show();
+  void hide();
   bool close();
 
 private:
