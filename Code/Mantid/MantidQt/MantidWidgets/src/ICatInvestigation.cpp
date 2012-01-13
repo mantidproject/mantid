@@ -589,7 +589,7 @@ namespace MantidQt
       }
       else if(index!=-1 && indexBackwardSlash!=-1)
       {
-        wsName=filePath.mid(index1+1,index-index1-1);
+        wsName=filePath.mid(indexBackwardSlash+1,index-indexBackwardSlash-1);
       }
 
       if(!isLoadingControlled())
