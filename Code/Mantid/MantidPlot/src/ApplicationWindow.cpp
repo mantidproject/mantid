@@ -17505,8 +17505,8 @@ FloatingWindow* ApplicationWindow::addMdiSubWindowAsFloating(MdiSubWindow* w, QP
   fw->setMdiSubWindow(w);
   fw->resize(sz);
   fw->move(pos);
+  m_floatingWindows.append(fw); // do it before show
   fw->show();
-  m_floatingWindows.append(fw);
   return fw;
 }
 
