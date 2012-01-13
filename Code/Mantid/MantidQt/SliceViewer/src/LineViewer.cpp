@@ -452,13 +452,13 @@ void LineViewer::textBinWidth_changed()
 void LineViewer::radPlot_changed()
 {
   if (ui.radPlotDistance->isChecked())
-    this->setPlotAxis(PlotDistance);
+    m_plotAxis = PlotDistance;
   else if (ui.radPlotX->isChecked())
-    this->setPlotAxis(PlotX);
+    m_plotAxis = PlotX;
   else if (ui.radPlotY->isChecked())
-    this->setPlotAxis(PlotY);
+    m_plotAxis = PlotY;
   else
-    this->setPlotAxis(PlotAuto);
+    m_plotAxis = PlotAuto;
   // Refresh the plot, without recalculating
   if (m_sliceWS)
     this->showFull();
@@ -806,6 +806,21 @@ double LineViewer::getBinWidth() const
 void LineViewer::setPlotAxis(LineViewer::PlotAxisChoice choice)
 {
   m_plotAxis = choice;
+  switch(m_plotAxis)
+  {
+  case PlotX:
+    ui.radPlotX->setChecked(true);
+    break;
+  case PlotY:
+    ui.radPlotY->setChecked(true);
+    break;
+  case PlotDistance:
+    ui.radPlotDistance->setChecked(true);
+    break;
+  default:
+    ui.radPlotAuto->setChecked(true);
+    break;
+  }
 }
 
 /** Return which coordinates to use as the X axis to plot in the line view.
