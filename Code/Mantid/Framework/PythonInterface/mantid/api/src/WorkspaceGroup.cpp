@@ -1,10 +1,13 @@
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidPythonInterface/kernel/SingleValueTypeHandler.h"
+
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::API::WorkspaceGroup;
 using Mantid::API::WorkspaceGroup_sptr;
 using Mantid::API::Workspace;
+using Mantid::Kernel::DataItem_sptr;
 using namespace boost::python;
 
 void export_WorkspaceGroup()
@@ -21,5 +24,7 @@ void export_WorkspaceGroup()
     .def("__len__", &WorkspaceGroup::getNumberOfEntries)
     .def("__contains__", &WorkspaceGroup::contains)
   ;
+
+  DECLARE_SINGLEVALUETYPEHANDLER(WorkspaceGroup, DataItem_sptr);
 }
 

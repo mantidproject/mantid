@@ -55,6 +55,7 @@ class Graph;
 class TextFormatButtons;
 class DoubleSpinBox;
 class Grid;
+class ApplicationWindow;
 
 //! General plot options dialog
 /**
@@ -70,9 +71,7 @@ public:
    * @param parent :: parent widget
    * @param fl :: window flags
    */
-  AxesDialog( QWidget* parent = 0, Qt::WFlags fl = 0 );
-
-  void setGraph(Graph *g);
+  AxesDialog( ApplicationWindow* app, Graph* g, Qt::WFlags fl = 0 );
 
 public slots:
   void setCurrentScale(int axisPos);
@@ -145,6 +144,10 @@ protected:
   void initFramePage();
   //! Modifies the grid
   void applyChangesToGrid(Grid *grid);
+  void setGraph(Graph *g);
+
+  ApplicationWindow* d_app;
+  Graph* d_graph;
 
   QPushButton* buttonApply;
   QPushButton* buttonOk;
@@ -205,7 +208,6 @@ protected:
   QComboBox *boxMinorTicksBeforeBreak, *boxMinorTicksAfterBreak;
   QCheckBox *boxLog10AfterBreak, *boxBreakDecoration, *boxAntialiseGrid;
   QComboBox *boxApplyGridFormat;
-  Graph* d_graph;
   //! Last selected tab
   QWidget* lastPage;
   QDateTimeEdit *boxStartDateTime, *boxEndDateTime;

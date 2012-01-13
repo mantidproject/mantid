@@ -1405,7 +1405,7 @@ void FitPropertyBrowser::fit()
       Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
       alg->initialize();
       if (rawData())
-        alg->setPropertyValue("InputWorkspace",wsName + "_raw");
+        alg->setPropertyValue("InputWorkspace",wsName + "_Raw");
       else
         alg->setPropertyValue("InputWorkspace",wsName);
       alg->setProperty("WorkspaceIndex",workspaceIndex());

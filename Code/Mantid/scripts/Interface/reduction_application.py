@@ -154,6 +154,11 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
                     instr = instr.replace("-","")
                     if instr in INSTRUMENT_DICT[facility].keys():
                         self._instrument = instr
+                        
+                # If we still can't find an instrument, show the
+                # instrument selection dialog
+                if self._instrument == '':
+                    self._change_instrument()
             else:
                 self._change_instrument()
                 

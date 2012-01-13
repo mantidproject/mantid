@@ -127,7 +127,7 @@ void test_CoordTransfQ3DDirect()
 
     for (size_t i = 0; i < nValidSpectra; ++i){
             size_t iSpctr             = det_loc.detIDMap[i];
-            int32_t det_id            = det_loc.det_id[i];
+            //int32_t det_id            = det_loc.det_id[i];
 
             const MantidVec& X        = ws2D->readX(iSpctr);        
             // calculate the coordinates which depend on detector posision 
@@ -159,8 +159,8 @@ void test_CoordTransfQ3DDirect()
     TS_ASSERT_THROWS_NOTHING(ConvFromTOFHisto.calcGenericVariables(Coord,4));    
     size_t icc(0);
     ic = 0;    for (size_t i = 0; i < nValidSpectra; ++i){
-        size_t iSpctr             = det_loc.detIDMap[i];
-        int32_t det_id            = det_loc.det_id[i];
+        //size_t iSpctr             = det_loc.detIDMap[i];
+        //int32_t det_id            = det_loc.det_id[i];
 
         // calculate the coordinates which depend on detector posision 
          TS_ASSERT_THROWS_NOTHING(ConvFromTOFHisto.calcYDepCoordinates(Coord,i));

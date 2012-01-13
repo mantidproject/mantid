@@ -10,13 +10,25 @@
 # include <boost/type_traits/transform_traits.hpp>
 # include <boost/type_traits/cv_traits.hpp>
 
+/**
+ * Mantid - In order to ensure that the registries of the two
+ * Python interfaces are separate on Linux & Mac we need to
+ * explicitly mark the symbols hidden. This is the default
+ * on Windows so is unnecessary.
+ */
+#if defined(__APPLE__) || defined(__GNUC__)
+  #define DLL_LOCAL __attribute__ ((visibility ("hidden")))
+#else
+  #define DLL_LOCAL
+#endif
+
 namespace boost { namespace python { namespace converter { 
 
 struct registration;
 
 # ifndef BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
 template <class T>
-struct registered_pointee
+struct DLL_LOCAL registered_pointee
     : registered<
         typename remove_pointer<
            typename remove_cv<
@@ -30,14 +42,14 @@ struct registered_pointee
 namespace detail
 {
   template <class T>
-  struct registered_pointee_base
+  struct DLL_LOCAL registered_pointee_base
   {
       static registration const& converters;
   };
 }
 
 template <class T>
-struct registered_pointee
+struct DLL_LOCAL registered_pointee
     : detail::registered_pointee_base<
         typename add_reference<
            typename add_cv<T>::type

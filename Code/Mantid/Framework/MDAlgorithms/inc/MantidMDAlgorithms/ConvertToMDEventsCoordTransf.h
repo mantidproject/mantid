@@ -173,7 +173,7 @@ struct COORD_TRANSFORMER<NoQ,MODE,CONV,Type>
     }   
 
     // constructor;
-    COORD_TRANSFORMER(){} 
+    COORD_TRANSFORMER():pYAxis(NULL),pHost(NULL){} 
 
     inline void setUpTransf(IConvertToMDEventsMethods *pConv){
         pHost = pConv;
@@ -286,7 +286,7 @@ struct COORD_TRANSFORMER<modQ,MODE,CONV,Type>
          return calc1MatrixCoord(X_ev,Coord);
     }   
     // constructor;
-    COORD_TRANSFORMER(){}
+    COORD_TRANSFORMER():pDet(NULL),pHost(NULL){}
     void setUpTransf(IConvertToMDEventsMethods *pConv){
         pHost = pConv;
     }
@@ -378,7 +378,7 @@ struct COORD_TRANSFORMER<modQ,Elastic,CONV,Type>
     }   
 
     // constructor;
-    COORD_TRANSFORMER(){}
+    COORD_TRANSFORMER():pDet(NULL),pHost(NULL){}
     void setUpTransf(IConvertToMDEventsMethods *pConv){
         pHost = pConv;
     }
@@ -467,7 +467,7 @@ struct COORD_TRANSFORMER<Q3D,MODE,CONV,Type>
          return calc1MatrixCoord(X_ev,Coord);
     }   
   
-   COORD_TRANSFORMER(){}
+   COORD_TRANSFORMER():pDet(NULL),pHost(NULL){}
    void setUpTransf(IConvertToMDEventsMethods *pConv){
         pHost = pConv;
     }
@@ -544,7 +544,7 @@ struct COORD_TRANSFORMER<Q3D,Elastic,CONV,Type>
          return calc1MatrixCoord(X_ev,Coord);
     }   
 
-    COORD_TRANSFORMER(){}
+    COORD_TRANSFORMER():pDet(NULL),pHost(NULL){}
     void setUpTransf(IConvertToMDEventsMethods *pConv){
         pHost = pConv;
     }

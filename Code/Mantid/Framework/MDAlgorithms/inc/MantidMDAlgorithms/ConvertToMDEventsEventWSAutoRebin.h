@@ -93,7 +93,7 @@ public:
         size_t lastNumBoxes = bc->getTotalNumMDBoxes();
     
        // counder for the number of events
-        size_t n_added_events(0);
+        size_t n_added_events(0),n_buf_events(0);
        
 
         const size_t specSize = this->inWS2D->blocksize();    
@@ -110,9 +110,10 @@ public:
         // take at least bufSize amout of data in one run for efficiency
         size_t buf_size     = ((specSize>SPLIT_LEVEL)?specSize:SPLIT_LEVEL);
         // allocate temporary buffer for MD Events data
-        std::vector<coord_t>  allCoord(0); // MD events coordinates buffer
-        allCoord.reserve(n_dims*buf_size);
- 
+        std::vector<coord_t>  allCoord(n_dims*buf_size); // MD events coordinates buffer
+        size_t n_coordinates(0);
+        //std::vector<coord_t>::iterator itc=allCoord.begin(); 
+
         std::vector<float>    sig_err(2*buf_size);       // array for signal and error. 
         std::vector<uint16_t> run_index(buf_size);       // Buffer run index for each event 
         std::vector<uint32_t> det_ids(buf_size);         // Buffer of det Id-s for each event
@@ -145,34 +146,47 @@ public:
             float ErrSq = float(Error[j]*Error[j]);
 
             // coppy all data into data buffer for future transformation into events;
-            sig_err[2*n_added_events+0]=float(Signal[j]);
-            sig_err[2*n_added_events+1]=ErrSq;
-            run_index[n_added_events]  = runIndex;
-            det_ids[n_added_events]    = det_id;
-            allCoord.insert(allCoord.end(),Coord.begin(),Coord.end());
+            sig_err[2*n_buf_events+0]=float(Signal[j]);
+            sig_err[2*n_buf_events+1]=ErrSq;
+            run_index[n_buf_events]  = runIndex;
+            det_ids[n_buf_events]    = det_id;
+            for(size_t ii=0;ii<n_dims;ii++){
+                allCoord[n_coordinates++]=Coord[ii];
+            }
 
-            n_added_events++;
-            if(n_added_events>=buf_size){
-              pWSWrapper->addMDData(sig_err,run_index,det_ids,allCoord,n_added_events);
-              pWSWrapper->pWorkspace()->splitAllIfNeeded(NULL);
- 
-              n_added_events=0;
+            n_buf_events++;
+            if(n_buf_events>=buf_size){
+              pWSWrapper->addMDData(sig_err,run_index,det_ids,allCoord,n_buf_events);
+
+              n_added_events+=n_buf_events;
+              // reset buffer counts
+              n_buf_events =0;
+              n_coordinates=0;
+              if (bc->shouldSplitBoxes(n_added_events, lastNumBoxes)){
+                  // Do all the adding tasks
+                  //   tp.joinAll();    
+                  // Now do all the splitting tasks
+                  //ws->splitAllIfNeeded(ts);
+                  pWSWrapper->pWorkspace()->splitAllIfNeeded(NULL);
+                  //if (ts->size() > 0)       tp.joinAll();
+                  // Count the new # of boxes.
+                  lastNumBoxes = pWSWrapper->pWorkspace()->getBoxController()->getTotalNumMDBoxes();
+              }
               pProg->report(wi);
           }
         } // end spectra loop
    
        } // end detectors loop;
 
-       if(n_added_events>0){
-              pWSWrapper->addMDData(sig_err,run_index,det_ids,allCoord,n_added_events);
-              pWSWrapper->pWorkspace()->splitAllIfNeeded(NULL);
- 
-              n_added_events=0;
+       if(n_buf_events>0){
+             pWSWrapper->addMDData(sig_err,run_index,det_ids,allCoord,n_buf_events);
+             n_buf_events=0;
         }
+        pWSWrapper->pWorkspace()->splitAllIfNeeded(NULL);
  
-         pWSWrapper->pWorkspace()->refreshCache();
-         pWSWrapper->refreshCentroid();
-         pProg->report();          
+        pWSWrapper->pWorkspace()->refreshCache();
+        pWSWrapper->refreshCentroid();
+        pProg->report();          
     }
   
 };

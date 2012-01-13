@@ -13,7 +13,7 @@ CreateMDWorkspaceAlgDialog::CreateMDWorkspaceAlgDialog()
   connect(m_uiForm.buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 
   m_uiForm.combo_q_dimensions->addItem("|Q|");
-  m_uiForm.combo_q_dimensions->addItem("QxQyQz");
+  m_uiForm.combo_q_dimensions->addItem("QhQkQl");
 
   m_uiForm.combo_analysis_mode->addItem("Direct");
   m_uiForm.combo_analysis_mode->addItem("Elastic");

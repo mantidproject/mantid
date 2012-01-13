@@ -184,7 +184,7 @@ public:
   //@}
 
   QList<QMenu *> menusList();
-  QList<QToolBar *> toolBarsList();
+  QList<QToolBar *> toolBarsList() const;
 
   MdiSubWindow *activeWindow(WindowType type = NoWindow);
   void addMdiSubWindow(MdiSubWindow *w, bool showNormal = true);
@@ -225,7 +225,8 @@ public slots:
   */
   ApplicationWindow * loadScript(const QString& fn, bool execute = false, bool quit = false);
 
-  QList<MdiSubWindow *> windowsList();
+  QList<MdiSubWindow *> windowsList() const;
+  QList<MdiSubWindow *> getAllWindows() const;
   void updateWindowLists(MdiSubWindow *w);
   /**
   Arranges all the visible project windows in a cascade pattern.
@@ -347,7 +348,7 @@ public slots:
   //@{
   MultiLayer * newFunctionPlot(QStringList &formulas, double start, double end, int points = 100, const QString& var = "x", int type = 0);
 
-  FunctionDialog* functionDialog();
+  FunctionDialog* functionDialog(Graph* g = NULL);
   FunctionDialog* showFunctionDialog();
   FunctionDialog* showFunctionDialog(Graph * g, int curve);
   void addFunctionCurve();
@@ -974,7 +975,7 @@ public slots:
   void setShowWindowsPolicy(int p);
 
   //!  returns a pointer to the root project folder
-  Folder* projectFolder();
+  Folder* projectFolder() const;
 
   //!  used by the findDialog
   void find(const QString& s, bool windowNames, bool labels, bool folderNames,
@@ -1040,7 +1041,7 @@ public slots:
   void activateNewWindow();
 
   //   Methods for Floating windows
-  FloatingWindow* addMdiSubWindowAsFloating(MdiSubWindow* w, QPoint pos = QPoint(0,0));
+  FloatingWindow* addMdiSubWindowAsFloating(MdiSubWindow* w, QPoint pos = QPoint(-1,-1));
   QMdiSubWindow* addMdiSubWindowAsDocked(MdiSubWindow* w);
   void mdiWindowActivated(MdiSubWindow* w);
   void changeToFloating(MdiSubWindow* w);
@@ -1072,7 +1073,7 @@ protected:
   virtual bool event(QEvent * e);
 
 private:
-  virtual QMenu * createPopupMenu(){return NULL;};
+  virtual QMenu * createPopupMenu(){return NULL;}
   ///void open spectrogram plot from project
   Spectrogram*  openSpectrogram(Graph*ag,const std::string &wsName,const QStringList &lst);
   Matrix* openMatrix(ApplicationWindow* app, const QStringList &flist);
@@ -1084,7 +1085,8 @@ private:
   void openInstrumentWindow(const QStringList &list);
   /// this method saves the data on project save
   void savedatainNexusFormat(const std::string& wsName,const std::string & fileName);
-  void updateOnTopFlags();
+  QPoint positionNewFloatinfWindow(QSize sz) const;
+  QPoint desktopTopLeft() const;
 
 
   private slots:

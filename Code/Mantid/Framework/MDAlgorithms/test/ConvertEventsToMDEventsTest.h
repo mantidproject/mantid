@@ -37,14 +37,13 @@ static ConvertEventsToMDEventsTest *createSuite() { return new ConvertEventsToMD
 static void destroySuite(ConvertEventsToMDEventsTest * suite) { delete suite; }    
 
 
-
 void testEventWS()
 {
 // set up algorithm
    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace","testEvWS"));
    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace","testMDEvWorkspace"));
    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OtherDimensions",""));
-   TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions", "QxQyQz"));
+   TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions", "QhQkQl"));
    pAlg->setPropertyValue("UsePreprocessedDetectors","0");
    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Elastic"));
    pAlg->setPropertyValue("MinValues","-10,-10,-10");

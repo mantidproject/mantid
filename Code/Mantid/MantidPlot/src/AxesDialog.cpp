@@ -1182,8 +1182,11 @@ static const char*  image7_data[] = {
 #define M_PI	3.141592653589793238462643
 #endif
 //Mantid::Kernel::Logger & AxesDialog::g_log=Mantid::Kernel::Logger::get("AxesDialog");
-AxesDialog::AxesDialog( QWidget* parent, Qt::WFlags fl )
-: QDialog( parent, fl ),m_updatePlot(false)
+AxesDialog::AxesDialog( ApplicationWindow* app, Graph* g, Qt::WFlags fl )
+: QDialog( g, fl ),
+  d_app(app),
+  d_graph(NULL),
+  m_updatePlot(false)
 {
   QPixmap image4( ( const char** ) image4_data );
   QPixmap image5( ( const char** ) image5_data );
@@ -1224,11 +1227,12 @@ AxesDialog::AxesDialog( QWidget* parent, Qt::WFlags fl )
   connect( buttonApply, SIGNAL( clicked() ), this, SLOT(updatePlot() ) );
   connect( generalDialog, SIGNAL( currentChanged ( QWidget * ) ),
       this, SLOT(pageChanged ( QWidget * ) ) );
+
+  setGraph(g);
 }
 
 void AxesDialog::initScalesPage()
 {
-  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
   scalesPage = new QWidget();
 
   QGroupBox * middleBox = new QGroupBox(QString());
@@ -1236,8 +1240,8 @@ void AxesDialog::initScalesPage()
 
   middleLayout->addWidget(new QLabel(tr( "From" )), 0, 0);
   boxStart = new DoubleSpinBox();
-  boxStart->setLocale(app->locale());
-  boxStart->setDecimals(app->d_decimal_digits);
+  boxStart->setLocale(d_app->locale());
+  boxStart->setDecimals(d_app->d_decimal_digits);
   middleLayout->addWidget( boxStart, 0, 1 );
 
   boxStartDateTime = new QDateTimeEdit();
@@ -1251,8 +1255,8 @@ void AxesDialog::initScalesPage()
 
   middleLayout->addWidget(new QLabel(tr( "To" )), 1, 0);
   boxEnd = new DoubleSpinBox();
-  boxEnd->setLocale(app->locale());
-  boxEnd->setDecimals(app->d_decimal_digits);
+  boxEnd->setLocale(d_app->locale());
+  boxEnd->setDecimals(d_app->d_decimal_digits);
   middleLayout->addWidget( boxEnd, 1, 1);
 
   boxEndDateTime = new QDateTimeEdit();
@@ -1287,14 +1291,14 @@ void AxesDialog::initScalesPage()
 
   breaksLayout->addWidget(new QLabel(tr("From")), 1, 0);
   boxBreakStart = new DoubleSpinBox();
-  boxBreakStart->setLocale(app->locale());
-  boxBreakStart->setDecimals(app->d_decimal_digits);
+  boxBreakStart->setLocale(d_app->locale());
+  boxBreakStart->setDecimals(d_app->d_decimal_digits);
   breaksLayout->addWidget(boxBreakStart, 1, 1);
 
   breaksLayout->addWidget(new QLabel(tr("To")), 2, 0);
   boxBreakEnd = new DoubleSpinBox();
-  boxBreakEnd->setLocale(app->locale());
-  boxBreakEnd->setDecimals(app->d_decimal_digits);
+  boxBreakEnd->setLocale(d_app->locale());
+  boxBreakEnd->setDecimals(d_app->d_decimal_digits);
   breaksLayout->addWidget(boxBreakEnd, 2, 1);
 
   breaksLayout->addWidget(new QLabel(tr("Position")), 3, 0);
@@ -1314,16 +1318,16 @@ void AxesDialog::initScalesPage()
   boxStepBeforeBreak = new DoubleSpinBox();
   boxStepBeforeBreak->setMinimum(0.0);
   boxStepBeforeBreak->setSpecialValueText(tr("Guess"));
-  boxStepBeforeBreak->setLocale(app->locale());
-  boxStepBeforeBreak->setDecimals(app->d_decimal_digits);
+  boxStepBeforeBreak->setLocale(d_app->locale());
+  boxStepBeforeBreak->setDecimals(d_app->d_decimal_digits);
   breaksLayout->addWidget(boxStepBeforeBreak, 1, 3);
 
   breaksLayout->addWidget(new QLabel(tr("Step After Break")), 2, 2);
   boxStepAfterBreak = new DoubleSpinBox();
   boxStepAfterBreak->setMinimum(0.0);
   boxStepAfterBreak->setSpecialValueText(tr("Guess"));
-  boxStepAfterBreak->setLocale(app->locale());
-  boxStepAfterBreak->setDecimals(app->d_decimal_digits);
+  boxStepAfterBreak->setLocale(d_app->locale());
+  boxStepAfterBreak->setDecimals(d_app->d_decimal_digits);
   breaksLayout->addWidget(boxStepAfterBreak, 2, 3);
 
   breaksLayout->addWidget(new QLabel(tr("Minor Ticks Before")), 3, 2);
@@ -1351,8 +1355,8 @@ void AxesDialog::initScalesPage()
 
   boxStep = new DoubleSpinBox();
   boxStep->setMinimum(0.0);
-  boxStep->setLocale(app->locale());
-  boxStep->setDecimals(app->d_decimal_digits);
+  boxStep->setLocale(d_app->locale());
+  boxStep->setDecimals(d_app->d_decimal_digits);
   stepWidgetLayout->addWidget(boxStep);
 
   boxUnit = new QComboBox();
@@ -1476,14 +1480,14 @@ void AxesDialog::initGridPage()
   rightLayout->addWidget( new QLabel(tr( "Thickness" )), 3, 0 );
 
   boxWidthMajor = new DoubleSpinBox('f');
-  boxWidthMajor->setLocale(dynamic_cast<ApplicationWindow *>(this->parent())->locale());
+  boxWidthMajor->setLocale(d_app->locale());
   boxWidthMajor->setSingleStep(0.1);
   boxWidthMajor->setRange(0.1, 20);
   boxWidthMajor->setValue(1);
   rightLayout->addWidget( boxWidthMajor, 3, 1);
 
   boxWidthMinor = new DoubleSpinBox('f');
-  boxWidthMinor->setLocale(dynamic_cast<ApplicationWindow *>(this->parent())->locale());
+  boxWidthMinor->setLocale(d_app->locale());
   boxWidthMinor->setSingleStep(0.1);
   boxWidthMinor->setRange(0.1, 20);
   boxWidthMinor->setValue(1);
@@ -2247,11 +2251,10 @@ void AxesDialog::updateGrid()
 
   case 2:
   {
-    ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
-    if (!app)
+    if (!d_app)
       return;
 
-    QList<MdiSubWindow *> windows = app->windowsList();
+    QList<MdiSubWindow *> windows = d_app->windowsList();
     foreach(MdiSubWindow *w, windows){
       if (w->isA("MultiLayer")){
         QList<Graph *> layers = (dynamic_cast<MultiLayer*>(w))->layersList();
@@ -2263,7 +2266,7 @@ void AxesDialog::updateGrid()
         }
       }
     }
-    app->modifiedProject();
+    d_app->modifiedProject();
   }
   break;
   }
@@ -2575,8 +2578,7 @@ bool AxesDialog::updatePlot()
 
 void AxesDialog::setGraph(Graph *g)
 {
-  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
-  if (!app)
+  if (!d_app)
     return;
 
   if (!g)
@@ -2585,10 +2587,10 @@ void AxesDialog::setGraph(Graph *g)
   d_graph = g;
   Plot *p = d_graph->plotWidget();
 
-  tablesList = app->tableNames();
+  tablesList = d_app->tableNames();
   boxTableName->insertStringList(tablesList);
 
-  boxColName-> insertStringList(app->columnsList(Table::All));
+  boxColName-> insertStringList(d_app->columnsList(Table::All));
 
   xAxisOn = p->axisEnabled(QwtPlot::xBottom);
   yAxisOn = p->axisEnabled(QwtPlot::yLeft);
@@ -3129,11 +3131,10 @@ void AxesDialog::showAxis(int axis, int type, const QString& labelsColName, bool
     int majTicksType, int minTicksType, bool labelsOn, const QColor& c, int format,
     int prec, int rotation, int baselineDist, const QString& formula, const QColor& labelsColor)
 {
-  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
-  if (!app)
+  if (!d_app)
     return;
 
-  Table *w = app->table(labelsColName);
+  Table *w = d_app->table(labelsColName);
   if ((type == ScaleDraw::Text || type == ScaleDraw::ColHeader) && !w)
     return;
 

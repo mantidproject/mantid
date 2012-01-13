@@ -31,7 +31,7 @@ namespace Mantid
 {
 namespace MDAlgorithms
 {
-
+    
 // How to treat X-coordinates:
 // for histohram we take centerpiece average
 template<XCoordType TYPE>

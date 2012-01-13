@@ -164,6 +164,7 @@
 #include <QUndoStack>
 #include <QUndoView>
 #include <QSignalMapper>
+#include <QDesktopWidget>
 
 #include <zlib.h>
 
@@ -5818,7 +5819,7 @@ void ApplicationWindow::restoreWindowGeometry(ApplicationWindow *app, MdiSubWind
   }
 }
 
-Folder* ApplicationWindow::projectFolder()
+Folder* ApplicationWindow::projectFolder() const
 {
   return dynamic_cast<FolderListItem*>(folders->firstChild())->folder();
 }
@@ -6143,9 +6144,8 @@ void ApplicationWindow::showCurvesDialog()
     QMessageBox::warning(this,tr("MantidPlot - Error"),//Mantid
         tr("This functionality is not available for pie plots!"));
   } else {
-    CurvesDialog* crvDialog = new CurvesDialog(this);
+    CurvesDialog* crvDialog = new CurvesDialog(this,g);
     crvDialog->setAttribute(Qt::WA_DeleteOnClose);
-    crvDialog->setGraph(g);
     crvDialog->resize(d_add_curves_dialog_size);
     crvDialog->setModal(true);
     crvDialog->show();
@@ -6944,8 +6944,7 @@ QDialog* ApplicationWindow::showScaleDialog()
       return 0;
     }
 
-    AxesDialog* ad = new AxesDialog(this);
-    ad->setGraph(g);
+    AxesDialog* ad = new AxesDialog(this,g);
     ad->exec();
     return ad;
   } else if (w->isA("Graph3D"))
@@ -6998,10 +6997,10 @@ void ApplicationWindow::showPlotDialog(int curveKey)
   if (!w)
     return;
 
-  PlotDialog* pd = new PlotDialog(d_extended_plot_dialog, this);
+  PlotDialog* pd = new PlotDialog(d_extended_plot_dialog, this,w);
   pd->setAttribute(Qt::WA_DeleteOnClose);
   pd->insertColumnsList(columnsList(Table::All));
-  pd->setMultiLayer(w);
+  //pd->setMultiLayer(w);
   if (curveKey >= 0){
     Graph *g = w->activeGraph();
     if (g)
@@ -9259,6 +9258,13 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
 
   // Mantid changes here
 
+  // don't ask the closing sub-windows: the answer will be ignored
+  MDIWindowList windows = getAllWindows();
+  foreach(MdiSubWindow* w,windows)
+  {
+    w->askOnCloseEvent(false);
+  }
+
   if( scriptingEnv()->isRunning() )
   {
     if( QMessageBox::question(this, tr("MantidPlot"), "A script is still running, abort and quit application?", tr("Yes"), tr("No")) == 0 )
@@ -9967,15 +9973,15 @@ FunctionDialog* ApplicationWindow::showFunctionDialog(Graph *g, int curve)
   if ( !g )
     return 0;
 
-  FunctionDialog* fd = functionDialog();
+  FunctionDialog* fd = functionDialog(g);
   fd->setWindowTitle(tr("MantidPlot - Edit function"));//Mantid
   fd->setCurveToModify(g, curve);
   return fd;
 }
 
-FunctionDialog* ApplicationWindow::functionDialog()
+FunctionDialog* ApplicationWindow::functionDialog(Graph* g)
 {
-  FunctionDialog* fd = new FunctionDialog(this);
+  FunctionDialog* fd = new FunctionDialog(this,g);
   fd->setAttribute(Qt::WA_DeleteOnClose);
   connect (fd,SIGNAL(clearParamFunctionsList()),this,SLOT(clearParamFunctionsList()));
   connect (fd,SIGNAL(clearPolarFunctionsList()),this,SLOT(clearPolarFunctionsList()));
@@ -9983,7 +9989,7 @@ FunctionDialog* ApplicationWindow::functionDialog()
   fd->insertParamFunctionsList(xFunctions, yFunctions);
   fd->insertPolarFunctionsList(rFunctions, thetaFunctions);
   fd->show();
-  fd->setActiveWindow();
+  //fd->setActiveWindow();
   return fd;
 }
 
@@ -10002,9 +10008,7 @@ void ApplicationWindow::addFunctionCurve()
 
   Graph* g = plot->activeGraph();
   if ( g ) {
-    FunctionDialog* fd = functionDialog();
-    if (fd)
-      fd->setGraph(g);
+    FunctionDialog* fd = functionDialog(g);
   }
 }
 
@@ -12021,8 +12025,7 @@ void ApplicationWindow::showDataSetDialog(Analysis operation)
   if (!g)
     return;
 
-  DataSetDialog *ad = new DataSetDialog(tr("Curve") + ": ", this);
-  ad->setGraph(g);
+  DataSetDialog *ad = new DataSetDialog(tr("Curve") + ": ", this,g);
   ad->setOperationType(operation);
   ad->exec();
 }
@@ -14070,7 +14073,7 @@ void ApplicationWindow::deleteFitTables()
   delete mLst;
 }
 
-QList<MdiSubWindow *> ApplicationWindow::windowsList()
+QList<MdiSubWindow *> ApplicationWindow::windowsList() const
 {
   QList<MdiSubWindow *> lst;
 
@@ -14083,6 +14086,36 @@ QList<MdiSubWindow *> ApplicationWindow::windowsList()
   }
   return lst;
 }
+
+/**
+  * Return all windows in all folders.
+  */
+QList<MdiSubWindow *> ApplicationWindow::getAllWindows() const
+{
+  QList<MdiSubWindow *> out;
+  // get the docked windows first
+  QList<QMdiSubWindow*> wl = d_workspace->subWindowList();
+  foreach(QMdiSubWindow* w,wl)
+  {
+    MdiSubWindow* sw = dynamic_cast<MdiSubWindow*>(w->widget());
+    if (sw)
+    {
+      out.append(sw);
+    }
+  }
+
+  // get the floating windows
+  foreach(FloatingWindow* w, m_floatingWindows)
+  {
+    MdiSubWindow* sw = w->mdiSubWindow();
+    if (sw)
+    {
+      out.append(sw);
+    }
+  }
+  return out;
+}
+
 
 void ApplicationWindow::updateRecentProjectsList()
 {
@@ -16869,8 +16902,8 @@ void ApplicationWindow::setPlotType(const QStringList & plotDetails)
             // Check to see if graph is the new one by comparing the names
             if (w->objectName() == plotDetails[0] + "-1")
             {
-              PlotDialog* pd = new PlotDialog(d_extended_plot_dialog, this);
-              pd->setMultiLayer(plot);
+              PlotDialog* pd = new PlotDialog(d_extended_plot_dialog, this, plot);
+              //pd->setMultiLayer(plot);
               Graph *g = plot->activeGraph();
               if (g)
               {
@@ -17051,7 +17084,7 @@ QList<QMenu *> ApplicationWindow::menusList()
 // End of a section of Mantid custom functions
 //-------------------------------------------
 
-QList<QToolBar *> ApplicationWindow::toolBarsList()
+QList<QToolBar *> ApplicationWindow::toolBarsList() const
 {
   QList<QToolBar *> lst;
   QObjectList children = this->children();
@@ -17446,10 +17479,12 @@ void ApplicationWindow::addMdiSubWindow(MdiSubWindow *w, bool showNormal)
 /**
  * Add a sub-window to as a floating window.
  * @param w :: Pointer to a MdiSubWindow which will be wrapped in a FloatingWindow.
- * @param pos :: Position of created window relative to the main window
+ * @param pos :: Position of created window relative to the main window.
+ *   Setting it to (-1,-1) means no autogenerate the position.
  */
 FloatingWindow* ApplicationWindow::addMdiSubWindowAsFloating(MdiSubWindow* w, QPoint pos)
 {
+  const QPoint none(-1,-1);
   FloatingWindow* fw =new FloatingWindow(this);//, Qt::WindowStaysOnTopHint);
 #ifdef SHARED_MENUBAR
   if (m_sharedMenuBar != NULL)
@@ -17457,12 +17492,30 @@ FloatingWindow* ApplicationWindow::addMdiSubWindowAsFloating(MdiSubWindow* w, QP
     fw->setMenuBar(m_sharedMenuBar);
   }
 #endif
-  // calculate the postion for the new window
   QSize sz = w->size();
+  if (pos == none)
+  {
+    pos = positionNewFloatinfWindow(sz);
+  }
+  else
+  {
+    pos += desktopTopLeft();
+  }
+  fw->setWindowTitle(w->name());
+  fw->setMdiSubWindow(w);
+  fw->resize(sz);
+  fw->move(pos);
+  fw->show();
+  m_floatingWindows.append(fw);
+  return fw;
+}
+
+/**
+  * Returns the top-left corner of the desktop available for sub-windows.
+  */
+QPoint ApplicationWindow::desktopTopLeft() const
+{
   QPoint p = this->pos() + d_workspace->pos();
-  QPoint p0 = pos;
-  if (p0.y() < 0) p0.setY(0);
-  p += p0;
 
   // make sure the floating window doesn't overlap the tool bars
   QList<QToolBar *> toolBars = toolBarsList();
@@ -17472,14 +17525,36 @@ FloatingWindow* ApplicationWindow::addMdiSubWindowAsFloating(MdiSubWindow* w, QP
     int y = this->pos().y() + d_workspace->pos().y() + bar->rect().bottom();
     if (y > p.y()) p.setY(y + 1);
   }
+  return p;
+}
 
-  fw->setWindowTitle(w->name());
-  fw->setMdiSubWindow(w);
-  fw->resize(sz);
-  fw->move(p);
-  fw->show();
-  m_floatingWindows.append(fw);
-  return fw;
+/**
+  * Find the best position for a new floating window.
+  * @param sz :: Size of the new window.
+  */
+QPoint ApplicationWindow::positionNewFloatinfWindow(QSize sz) const
+{
+  const int dlt = 40; // shift in x and y
+  const QPoint first(-1,-1);
+  static QPoint lastPoint(first);
+
+  if (lastPoint == first)
+  {
+    lastPoint = desktopTopLeft();
+    return lastPoint;
+  }
+
+  lastPoint += QPoint(dlt,dlt);
+
+  QWidget* desktop = QApplication::desktop()->screen();
+  if (lastPoint.x() + sz.width() > desktop->width() ||
+      lastPoint.y() + sz.height() > desktop->height())
+  {
+    lastPoint = QPoint(0,0);
+  }
+
+  return lastPoint;
+
 }
 
 /**
@@ -17620,14 +17695,6 @@ void ApplicationWindow::mdiWindowActivated(MdiSubWindow* w)
 }
 
 /**
- * Update the stays-on-top flags of all floating windows. The active floating window
- * will have the flag on, the others - off.
- */
-void ApplicationWindow::updateOnTopFlags()
-{
-}
-
-/**
  * Activate a subwindow (docked or floating) other than current active one.
  * This is required when the current window is closing.
  */
@@ -17728,9 +17795,11 @@ bool ApplicationWindow::isDefaultFloating(const MdiSubWindow* w) const
 bool ApplicationWindow::isDefaultFloating(const QString& aClassName) const
 {
   bool theDefault = false;
+#ifndef Q_OS_LINUX
   if (aClassName == "MultiLayer" || aClassName =="InstrumentWindow" || aClassName == "MdiSubWindow")
   {
     theDefault = true;
   }
+#endif
   return settings.value("/General/FloatingWindows/"+aClassName,theDefault).toBool();
 }

@@ -101,12 +101,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
 
         # find the file to load
         filename = self._findData(runnumber, extension)
-
-        # generate the workspace name
-        (path, name) = os.path.split(filename)
-        name = name.split('.')[0] # remove the extension
-        if "_event" in name:
-            name = name[0:-1*len("_event")]
+        print "Loading ",filename
 
         return self._loadNeXusData(filename, name, bank, extension, **kwargs)
 

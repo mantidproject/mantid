@@ -82,7 +82,7 @@ def get_additional_args(lhs, algm_obj):
         i += 1
     return extra_args
     
-def gather_returns(func_name, lhs, algm_obj, ignore=[]):
+def gather_returns(func_name, lhs, algm_obj, ignore_regex=[]):
     """
         Gather the return values and ensure they are in the
         correct order as defined by the output properties and
@@ -94,17 +94,29 @@ def gather_returns(func_name, lhs, algm_obj, ignore=[]):
                on the lhs of the function call and the names of these
                variables
         @param algm_obj :: An executed algorithm object
-        @param ignore :: A list of property names to ignore when returning
+        @param ignore_regex :: A list of strings containing regex expressions to match against property names
     """
-    # Gather the returns
-    # The minor complication here is the workspace properties have their
-    # values stored in the ADS and not within the property if they are NOT
-    # child algorithms
-    if type(ignore) is str: ignore = [ignore]
+    import re
+    def ignore_property(name, ignore_regex):
+        for regex in ignore_regex:
+            if regex.match(name) is not None:
+                return True
+        # Matched nothing
+        return False
+    
+    if type(ignore_regex) is str: 
+        ignore_regex = [ignore_regex]
+    # Compile regexes
+    for index, expr in enumerate(ignore_regex):
+        ignore_regex[index] = re.compile(expr)
+
     retvals = []
     for name in algm_obj.outputProperties():
-        if name in ignore: continue
+        if ignore_property(name, ignore_regex):
+            continue
         prop = algm_obj.getProperty(name)
+        # Parent algorithms store their workspaces in the ADS
+        # Child algorithms store their workspaces in the property
         if not algm_obj.isChild() and _is_workspace_property(prop):
             retvals.append(_ads[prop.valueAsStr])
         else:
@@ -137,14 +149,14 @@ def _set_properties(alg_object, *args, **kwargs):
     # Set the properties of the algorithm.
     for key in kwargs.keys():
         value = kwargs[key]
-        alg_object.setProperty(key, value)
         # For data items setting by explicit value
-        # doesn't set the string name of the, i.e. workspace
-        # name on the property. This causes problems for
-        # properties that then try and 
-        # set a property by name
+        # doesn't set the string name of the, i.e. workspace,
+        # on the property. This causes problems for
+        # properties that then try and use a name property by name
+        # WorkspaceGroups require this to be set first for some reason
         if isinstance(value, kernel.DataItem):
             alg_object.setPropertyValue(key, str(value))
+        alg_object.setProperty(key, value)
 
 def create_algorithm(algorithm, version, _algm_object):
     """
@@ -381,7 +393,8 @@ def Load(*args, **kwargs):
             del kwargs[key]
     _set_properties(algm, **kwargs)
     algm.execute()
-    return gather_returns('Load', lhs, algm, ignore='LoaderName')
+    # If a WorkspaceGroup was loaded then there will be OutputWorkspace_ properties about, don't include them
+    return gather_returns('Load', lhs, algm, ignore_regex=['LoaderName','OutputWorkspace_.*'])
 
 # Have a better load signature for autocomplete
 _signature = "\bFilename"
