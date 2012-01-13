@@ -103,14 +103,14 @@ If false, then the workspace gets converted to a Workspace2D histogram.
     def test_Load_call_with_other_args_executes_correctly(self):
         try:
             raw = simpleapi.Load('IRS21360.raw',SpectrumMax=1)
-        except Runtime:
+        except RuntimeError:
             self.fail("Load with a filename and extra args should not raise an exception")
         self.assertEquals(1, raw.getNumberHistograms())
 
     def test_Load_call_with_args_that_do_not_apply_executes_correctly(self):
         try:
             raw = simpleapi.Load('IRS21360.raw',SpectrumMax=1,Append=True)
-        except Runtime:
+        except RuntimeError:
             self.fail("Load with a filename and extra args should not raise an exception")
         self.assertEquals(1, raw.getNumberHistograms())
     
