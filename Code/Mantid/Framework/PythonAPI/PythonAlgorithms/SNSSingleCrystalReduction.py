@@ -93,16 +93,6 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         kwargs["Precount"] = True
         name = "%s_%d" % (self._instrument, runnumber)
         filename = name + extension
-
-        try: # first just try loading the file
-            return self._loadNeXusData(filename, name, bank, extension, **kwargs)
-        except:
-            pass
-
-        # find the file to load
-        filename = self._findData(runnumber, extension)
-        print "Loading ",filename
-
         return self._loadNeXusData(filename, name, bank, extension, **kwargs)
 
     def _loadData(self, runnumber, bank, extension, filterWall=None):

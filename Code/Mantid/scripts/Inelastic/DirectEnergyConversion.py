@@ -513,8 +513,14 @@ class DirectEnergyConversion(object):
         """
         Apply normalisation using specified source
         """
+        # Make sure we don't call this twice
         method = method.lower()
-        if method == 'monitor-1':
+        done_log = "DirectInelasticReductionNormalisedBy"
+        if done_log in data_ws.getRun() or method == 'none':
+            if str(data_ws) != str(result_ws):
+                CloneWorkspace(InputWorkspace=data_ws, OutputWorkspace=result_ws)
+            output = mtd[str(result_ws)]
+        elif method == 'monitor-1':
             range_min = self.mon1_norm_range[0] + range_offset
             range_max = self.mon1_norm_range[1] + range_offset
             NormaliseToMonitor(InputWorkspace=data_ws, OutputWorkspace=result_ws, MonitorSpectrum=int(self.mon1_norm_spec), 
@@ -523,13 +529,11 @@ class DirectEnergyConversion(object):
         elif method == 'current':
             NormaliseByCurrent(InputWorkspace=data_ws, OutputWorkspace=result_ws)
             output = mtd[str(result_ws)]
-        elif method == 'none':
-            if str(data_ws) != str(result_ws):
-                CloneWorkspace(InputWorkspace=data_ws, OutputWorkspace=result_ws)
-            output = mtd[str(result_ws)]
         else:
             raise RuntimeError('Normalisation scheme ' + reference + ' not found. It must be one of monitor-1, current, peak or none')
 
+        # Add a log to the workspace to say that the normalisation has been done
+        AddSampleLog(Workspace=output, LogName=done_log,LogText=method)
         return output
             
     def calc_average(self, data_ws):
