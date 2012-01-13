@@ -225,6 +225,7 @@ void DetectorEfficiencyCor::correctForEfficiency(int64_t spectraIn)
 
   // get a pointer to the detectors that created the spectrum
   const std::set<detid_t> dets = m_inputWS->getSpectrum(spectraIn)->getDetectorIDs();
+  const double ndets(static_cast<double>(dets.size())); // We correct each pixel so make sure we average the correction computing it for the spectrum
 
   std::set<detid_t>::const_iterator it = dets.begin();
   std::set<detid_t>::const_iterator iend = dets.end();
@@ -285,7 +286,7 @@ void DetectorEfficiencyCor::correctForEfficiency(int64_t spectraIn)
         *wavItr = calculateOneOverK(*xItr, *(xItr + 1 ));
       }
       const double oneOverWave = *wavItr;
-      const double factor = 1.0/detectorEfficiency(det_const*oneOverWave);
+      const double factor = 1.0/ndets/detectorEfficiency(det_const*oneOverWave);
       *youtItr += (*yinItr)*factor;
       *eoutItr += (*einItr)*factor;
       ++yinItr; ++einItr;
