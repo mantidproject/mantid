@@ -507,6 +507,7 @@ class Normalize(ReductionStep):
             return "Normalization by monitor: %6.2g counts" % norm_count 
         elif self._normalization_spectrum == reducer.instrument.NORMALIZATION_TIME:
             norm_count = mtd[workspace].getRun().getProperty("timer").value
+            Scale(workspace, workspace, 1.0/norm_count, 'Multiply')
             return "Normalization by time: %6.2g sec" % norm_count
         else:
             mantid.sendLogMessage("Normalization step did not get a valid normalization option: skipping")
