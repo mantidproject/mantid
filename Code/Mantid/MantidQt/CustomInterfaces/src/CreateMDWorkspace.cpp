@@ -143,7 +143,8 @@ void CreateMDWorkspace::findUBMatrixClicked()
       "    FindSXPeaksDialog(InputWorkspace='%1', OutputWorkspace='%1_peaks')\n"
       "    print 'SUCCESS'\n"
       "except:\n"
-      "    print 'FAIL'";
+      "    print 'FAIL'\n"
+      "    raise\n";
     args = QString(memento->getId().c_str());
     command = command.arg(args);
     result = runPythonCode(command).trimmed();
@@ -165,7 +166,8 @@ void CreateMDWorkspace::findUBMatrixClicked()
       "    CopySample(InputWorkspace='%1_peaks',OutputWorkspace='%1',CopyName='0',CopyMaterial='0',CopyEnvironment='0',CopyShape='0',CopyLattice='1')\n"
       "    print '%(a)s, %(b)s, %(c)s, %(alpha)s, %(beta)s, %(gamma)s' % {'a': a, 'b' : b, 'c' : c, 'alpha' : alpha, 'beta' : beta, 'gamma' : gamma}\n"
       "except:\n"
-      "    print 'FAIL'";
+      "    print 'FAIL'\n"
+      "    raise\n";
 
     command = command.arg(args);
     result = runPythonCode(command).trimmed();
@@ -378,7 +380,8 @@ void CreateMDWorkspace::setGoniometerClicked()
       "    SetGoniometerDialog(Workspace=wsName)\n"
       "    print 'SUCCESS'\n"
       "except:\n"
-      "    print 'FAIL'\n";
+      "    print 'FAIL'\n"
+      "    raise\n";
 
     pyInput = pyInput.arg(id);
     QString pyOutput = runPythonCode(pyInput).trimmed();
@@ -484,10 +487,11 @@ void CreateMDWorkspace::createMDWorkspaceClicked()
 
     QString command = "try:\n"
       "    ConvertToMDEvents(InputWorkspace='%1',OutputWorkspace='%1_md',OtherDimensions='%2',dEAnalysisMode='%3',QDimensions='%4',MinValues='%5',MaxValues='%6',UsePreprocessedDetectors='%7')\n"
-      "    SaveMD(InputWorkspace='%1_md', Filename='%8/%1_md.nxs',MakeFileBacked='1')\n"
-      "    mtd.deleteWorkspace('%1_md')\n"
+      "    SaveMD(InputWorkspace='%1_md', Filename=r'%8/%1_md.nxs',MakeFileBacked='1')\n"
+      "    DeleteWorkspace(Workspace='%1_md')\n"
       "except:\n"
-      "    print 'FAIL'";
+      "    print 'FAIL'\n"
+      "    raise\n";
 
     QString id(currentMemento->getId().c_str());
     command = command.arg(id, otherDimensions, analysisMode, qDimension, minExtents, maxExtents, preProcessedDetectors, location);
@@ -511,9 +515,10 @@ void CreateMDWorkspace::createMDWorkspaceClicked()
   if(m_uiForm.ck_merge->isChecked())
   {
     QString command = "try:"
-      "    MergeMD(Filenames='%1',OutputFilename='%2/%3.nxs',OutputWorkspace='%3')\n"
+      "    MergeMD(Filenames=r'%1',OutputFilename=r'%2/%3.nxs',OutputWorkspace='%3')\n"
       "except:\n"
-      "    print 'FAIL'";
+      "    print 'FAIL'\n"
+      "    raise\n";
 
     command = command.arg(fileNames, location, mergedWorkspaceName);
     QString pyOutput = runPythonCode(command).trimmed();

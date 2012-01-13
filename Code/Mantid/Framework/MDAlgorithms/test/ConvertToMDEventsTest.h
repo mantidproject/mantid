@@ -632,6 +632,46 @@ void testExecQ3D()
     AnalysisDataService::Instance().remove("OutputWorkspace"); 
 }
 
+//DO NOT DISABLE THIS TEST
+void testAlgorithmProperties()
+{
+  /*
+  The Create MD Workspace GUI runs this algorithm internally.
+  If property names and property allowed values here change, that interface will break.
+
+  This unit test is designed to flag up changes here. If property values and names here do need to be changed, 
+  1) They must also be updated in CreateMDWorkspaceAlgDialog.cpp. 
+  2) It should then be confirmed that that the Create MD Workspace custom interface still works!
+  3) Finally this unit test should be updated so that the tests pass.
+  */
+
+  ConvertToMDEvents alg;
+  alg.initialize();
+
+  Mantid::Kernel::Property *QDimProperty;
+  TSM_ASSERT_THROWS_NOTHING("Property name has changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", QDimProperty = alg.getProperty("QDimensions"));
+  TSM_ASSERT_THROWS_NOTHING("Property name has changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", QDimProperty = alg.getProperty("dEAnalysisMode"));
+  TSM_ASSERT_THROWS_NOTHING("Property name has changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", QDimProperty = alg.getProperty("OtherDimensions"));
+  TSM_ASSERT_THROWS_NOTHING("Property name has changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", QDimProperty = alg.getProperty("MinValues"));
+  TSM_ASSERT_THROWS_NOTHING("Property name has changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", QDimProperty = alg.getProperty("MaxValues"));
+
+  typedef std::set<std::string> PropertyAllowedValues;
+  QDimProperty =alg.getProperty("QDimensions");
+  PropertyAllowedValues QDimValues = QDimProperty->allowedValues();
+  TSM_ASSERT_EQUALS("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", 3, QDimValues.size());
+  TSM_ASSERT("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!",  QDimValues.find("") != QDimValues.end());
+  TSM_ASSERT("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", QDimValues.find("|Q|") != QDimValues.end());
+  TSM_ASSERT("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", QDimValues.find("QhQkQl") != QDimValues.end());
+
+  Mantid::Kernel::Property *dEAnalysisMode =alg.getProperty("dEAnalysisMode");
+  PropertyAllowedValues dEAnalysisModeValues = dEAnalysisMode->allowedValues();
+  TSM_ASSERT_EQUALS("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", 4, dEAnalysisModeValues.size());
+  TSM_ASSERT("dEAnalysisMode property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!",  dEAnalysisModeValues.find("") != dEAnalysisModeValues.end());
+  TSM_ASSERT("dEAnalysisMode property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", dEAnalysisModeValues.find("Direct") != dEAnalysisModeValues.end());
+  TSM_ASSERT("dEAnalysisMode property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", dEAnalysisModeValues.find("Indirect") != dEAnalysisModeValues.end());
+  TSM_ASSERT("dEAnalysisMode property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", dEAnalysisModeValues.find("Elastic") != dEAnalysisModeValues.end());
+}
+
 
 ConvertToMDEventsTest(){
      pAlg = std::auto_ptr<Convert2AnyTestHelper>(new Convert2AnyTestHelper());
