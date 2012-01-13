@@ -1261,7 +1261,6 @@ class InstrumentWindow: MdiSubWindow
 #include "src/Mantid/InstrumentWidget/InstrumentWindow.h"
 %End
 public:
-  void show() /PyName = showWindow/;
   void changeColormap() /PyName = changeColorMap/;
   void changeColormap(const QString & file) /PyName = changeColorMap/;
   void setColorMapMinValue(double);
