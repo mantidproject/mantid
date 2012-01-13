@@ -517,7 +517,7 @@ ConvertToMDEvents::parseQMode(const std::string &Q_mode_req,const Strings &ws_di
         nQ_dims=1;      
         out_dim_names.resize(1);
         out_dim_units.resize(1);
-        out_dim_names[0] = "|Q|";
+        out_dim_names[0] = default_dimension_names[0];
         out_dim_units[0] = native_elastic_unitID;
         Q_MODE_ID = Q_modes[modQ];
 
@@ -526,9 +526,9 @@ ConvertToMDEvents::parseQMode(const std::string &Q_mode_req,const Strings &ws_di
     {
        nQ_dims=3;
        out_dim_names.resize(3);       
-       out_dim_names[0]="Q_x";
-       out_dim_names[1]="Q_y";
-       out_dim_names[2]="Q_z";
+       out_dim_names[0]= default_dimension_names[1];
+       out_dim_names[1]= default_dimension_names[2];
+       out_dim_names[2]= default_dimension_names[3];
        Q_MODE_ID = Q_modes[Q3D];
        out_dim_units.assign(3,native_elastic_unitID);
 
@@ -876,11 +876,19 @@ SupportedWS(NInWSTypes),
  /// the ID of the unit, which is used in the expression to converty to QND. All other related elastic units should be converted to this one. 
 native_elastic_unitID("Momentum"),// currently it is Q
 /// the ID of the unit, which is used in the expression to converty to QND. All other related inelastic units should be converted to this one. 
-native_inelastic_unitID("DeltaE") // currently it is energy transfer (DeltaE)
+native_inelastic_unitID("DeltaE"), // currently it is energy transfer (DeltaE)
+default_dimension_names(4)
 {
      Q_modes[modQ] = "|Q|";
      Q_modes[Q3D]  = "QhQkQl";    
      Q_modes[NoQ]  = "";    // no Q dimension (does it have any interest&relevance to ISIS/SNS?) 
+     // for modQ transformation:
+     default_dimension_names[0]="|Q|";
+     // for Q3D transformation
+     default_dimension_names[1]="[q_h,0,0]";
+     default_dimension_names[2]="[0,q_k,0]";
+     default_dimension_names[3]="[0,0,q_l]";
+
      dE_modes[ANY_Mode]  = ""; // no Q uses it to run without conversion. 
      dE_modes[Direct]    = "Direct";
      dE_modes[Indir]     = "Indirect";

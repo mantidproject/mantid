@@ -99,6 +99,8 @@ namespace MDAlgorithms
     std::string subalgorithm_units;
     /// string -Key to identify the algorithm -- rather for testing and debugging, though may be reliet upon somewhere by bad practice
     std::string algo_id;
+    // the vector describes default dimension names, specified along the axis if nothing explicitly requested;
+    std::vector<std::string> default_dimension_names;
   
     protected: //for testing
         static Mantid::Kernel::Logger & getLogger();
