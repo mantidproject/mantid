@@ -15371,7 +15371,11 @@ bool ApplicationWindow::deleteFolder(Folder *f)
     FolderListItem *fi = f->folderListItem();
     foreach(MdiSubWindow *w, f->windowsList())
     {
-      w->close();
+      if (!w->close())
+      {
+        QMessageBox::warning(this,"Mantid - Warning","Folder was not deleted.");
+        return false;
+      }
     }
 
     if (!(f->children()).isEmpty()){

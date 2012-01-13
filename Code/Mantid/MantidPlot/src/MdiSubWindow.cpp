@@ -142,8 +142,7 @@ bool MdiSubWindow::close()
   {
     return MdiSubWindowParent_t::close();
   }
-  pw->close();
-  return false;
+  return pw->close();
 }
 
 /**
