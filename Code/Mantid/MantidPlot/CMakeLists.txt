@@ -828,11 +828,11 @@ add_custom_command ( TARGET MantidPlot POST_BUILD
 
 # List of .py files than must be run WITHIN MantidPlot.
 set ( MANTIDPLOT_TEST_PY_FILES 
-	#MantidPlotSliceViewerTest.py #FIXME: Only works with old-style python API as of Jan 10, 2012
+	MantidPlotSliceViewerTest.py 
 	MantidPlot1DPlotTest.py
 	MantidPlotProxiesTest.py
 	MantidPlotPythonImportTest.py
-	#MantidPlotFoldersTest.py #FIXME: Only works with old-style python API as of Jan 10, 2012
+	MantidPlotFoldersTest.py 
 )
 
 if ( 0 )

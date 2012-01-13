@@ -147,6 +147,11 @@ def runTests(classname):
     #Run using either runner
     res = runner.run(suite)
     
+    # Process some events that ensure MantidPlot closes properly.
+    QtCore.QCoreApplication.processEvents()
+    QtCore.QCoreApplication.processEvents()
+    QtCore.QCoreApplication.processEvents()
+    
     # Set Mantid exit code
     if not res.wasSuccessful():
         qti.app.setExitCode(1)

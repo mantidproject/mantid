@@ -4,9 +4,6 @@ folders.
 """
 import mantidplottests
 from mantidplottests import *
-import time
-import numpy as np
-from PyQt4 import QtGui, QtCore
 
 class MantidPlotFoldersTest(unittest.TestCase):
     
