@@ -113,7 +113,14 @@ bool FloatingWindow::event(QEvent * e)
   {
     if (widget() && widget()->close())
     {
+      // forget about me and close
       d_app->removeFloatingWindow(this);
+    }
+    else
+    {
+      // don't close
+      e->ignore();
+      return true;
     }
   }
   return QMainWindow::event(e);
