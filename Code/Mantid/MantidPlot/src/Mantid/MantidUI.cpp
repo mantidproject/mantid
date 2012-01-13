@@ -1780,10 +1780,10 @@ void MantidUI::manageMantidWorkspaces()
  */
 InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName, int tab)
 {
-  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   if( !Mantid::API::AnalysisDataService::Instance().doesExist(wsName.toStdString()) ) return NULL;
   MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(getWorkspace(wsName));
   if (!ws) return NULL;
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   Mantid::Geometry::Instrument_const_sptr instr = ws->getInstrument();
   if (!instr || instr->getName().empty())
   {
