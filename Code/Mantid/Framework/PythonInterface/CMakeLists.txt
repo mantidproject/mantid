@@ -10,7 +10,7 @@
 set ( Boost_LIBRARIES ) # Empty out the variable after previous use
 set ( Boost_USE_DEBUG_PYTHON TRUE )
 find_package ( Boost REQUIRED python )
-add_definitions ( -DBOOST_DEBUG_PYTHON -DBOOST_PYTHON_NO_LIB )
+add_definitions ( -DBOOST_DEBUG_PYTHON -DBOOST_PYTHON_NO_LIB -DBOOST_PYTHON_STATIC_LIB -DBOOST_PYTHON_SOURCE )
 
 find_package ( Numpy REQUIRED )
 include_directories ( SYSTEM ${PYTHON_NUMPY_INCLUDE_DIR} )
