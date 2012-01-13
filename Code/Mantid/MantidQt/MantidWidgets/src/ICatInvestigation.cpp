@@ -446,7 +446,7 @@ namespace MantidQt
         try
         {
           ws_sptr->find(*citr,row,col);
-          fileId=ws_sptr->cell<int64_t>(row,col+2);//3rd column is the file id.
+          fileId=ws_sptr->cell<int64_t>(row,col+3); //4rd column is the id.
         }
         catch(std::range_error&)
         {
@@ -582,7 +582,12 @@ namespace MantidQt
       QString wsName;
       int index = filePath.lastIndexOf(".");
       int index1 = filePath.lastIndexOf("/");
+      int indexBackwardSlash = filePath.lastIndexOf("\\");
       if(index!=-1 && index1!=-1)
+      {
+        wsName=filePath.mid(index1+1,index-index1-1);
+      }
+      else if(index!=-1 && indexBackwardSlash!=-1)
       {
         wsName=filePath.mid(index1+1,index-index1-1);
       }
