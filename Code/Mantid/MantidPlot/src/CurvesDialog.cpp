@@ -51,8 +51,10 @@
 
 #include <QMessageBox>
 
-CurvesDialog::CurvesDialog( QWidget* parent, Qt::WFlags fl )
-  : QDialog( parent, fl )
+CurvesDialog::CurvesDialog( ApplicationWindow* app, Graph* g, Qt::WFlags fl )
+  : QDialog( g, fl ),
+    d_app(app),
+    d_graph(g)
 {
   setName( "CurvesDialog" );
   setWindowTitle( tr( "MantidPlot - Add/Remove curves" ) );
@@ -165,6 +167,8 @@ CurvesDialog::CurvesDialog( QWidget* parent, Qt::WFlags fl )
   connect(shortcut, SIGNAL(activated()), this, SLOT(removeCurves()));
   shortcut = new QShortcut(QKeySequence("+"), this);
   connect(shortcut, SIGNAL(activated()), this, SLOT(addCurves()));
+
+  setGraph(g);
 }
 
 CurvesDialog::~CurvesDialog()
@@ -214,10 +218,9 @@ void CurvesDialog::showCurveRangeDialog()
   if (curve < 0)
     curve = 0;
 
-  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
-  if (app)
+  if (d_app)
   {
-    app->showCurveRangeDialog(d_graph, curve);
+    d_app->showCurveRangeDialog(d_graph, curve);
     updateCurveRange();
   }
 }
@@ -228,21 +231,19 @@ void CurvesDialog::showPlotAssociations()
   if (curve < 0)
     curve = 0;
 
-  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
   close();
 
-  if (app)
-    app->showPlotAssociations(curve);
+  if (d_app)
+    d_app->showPlotAssociations(curve);
 }
 
 void CurvesDialog::showFunctionDialog()
 {
-  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
   int currentRow = contents->currentRow();
   close();
 
-  if (app)
-    app->showFunctionDialog(d_graph, currentRow);
+  if (d_app)
+    d_app->showFunctionDialog(d_graph, currentRow);
 }
 
 QSize CurvesDialog::sizeHint() const
@@ -283,19 +284,18 @@ void CurvesDialog::contextMenuEvent(QContextMenuEvent *e)
 
 void CurvesDialog::init()
 {
-  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
-  if (app){
-    bool currentFolderOnly = app->d_show_current_folder;
+  if (d_app){
+    bool currentFolderOnly = d_app->d_show_current_folder;
     boxShowCurrentFolder->setChecked(currentFolderOnly);
     showCurrentFolder(currentFolderOnly);
 
-    QStringList matrices = app->matrixNames();
+    QStringList matrices = d_app->matrixNames();
     if (!matrices.isEmpty ()){
       boxMatrixStyle->show();
       available->addItems(matrices);
     }
 
-    int style = app->defaultCurveStyle;
+    int style = d_app->defaultCurveStyle;
     if (style == Graph::Line)
       boxStyle->setCurrentItem(0);
     else if (style == Graph::Scatter)
@@ -318,7 +318,7 @@ void CurvesDialog::init()
       boxStyle->setCurrentItem(9);
   }
 
-  QList<MdiSubWindow *> wList = app->windowsList();
+  QList<MdiSubWindow *> wList = d_app->windowsList();
   foreach(MdiSubWindow* w, wList)
   {
     MultiLayer* ml = dynamic_cast<MultiLayer*>(w);
@@ -377,13 +377,12 @@ void CurvesDialog::addCurves()
 
 bool CurvesDialog::addCurve(const QString& name)
 {
-  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
-  if (!app)
+  if (!d_app)
     return false;
 
-  QStringList matrices = app->matrixNames();
+  QStringList matrices = d_app->matrixNames();
   if (matrices.contains(name)){
-    Matrix *m = app->matrix(name);
+    Matrix *m = d_app->matrix(name);
     if (!m)
       return false;
 
@@ -408,7 +407,7 @@ bool CurvesDialog::addCurve(const QString& name)
   }
 
   int style = curveStyle();
-  Table* t = app->table(name);
+  Table* t = d_app->table(name);
   if (t){
     PlotCurve *c = d_graph->insertCurve(t, name, style);
     CurveLayout cl = Graph::initCurveLayout();
@@ -418,8 +417,8 @@ bool CurvesDialog::addCurve(const QString& name)
     cl.lCol = color;
     cl.symCol = color;
     cl.fillCol = color;
-    cl.lWidth = float(app->defaultCurveLineWidth);
-    cl.sSize = app->defaultSymbolSize;
+    cl.lWidth = float(d_app->defaultCurveLineWidth);
+    cl.sSize = d_app->defaultSymbolSize;
     cl.sType = symbol;
 
     if (style == Graph::Line)
@@ -553,15 +552,14 @@ void CurvesDialog::updateCurveRange()
 
 void CurvesDialog::showCurrentFolder(bool currentFolder)
 {
-  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
-  if (!app)
+  if (!d_app)
     return;
 
-  app->d_show_current_folder = currentFolder;
+  d_app->d_show_current_folder = currentFolder;
   available->clear();
 
   if (currentFolder){
-    Folder *f = app->currentFolder();
+    Folder *f = d_app->currentFolder();
     if (f){
       QStringList columns;
       foreach (QWidget *w, f->windowsList()){
@@ -578,19 +576,18 @@ void CurvesDialog::showCurrentFolder(bool currentFolder)
     }
   }
   else
-    available->addItems(app->columnsList(Table::Y));
+    available->addItems(d_app->columnsList(Table::Y));
 }
 
 void CurvesDialog::closeEvent(QCloseEvent* e)
 {
-  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
-  if (app)
+  if (d_app)
   {
-    app->d_add_curves_dialog_size = this->size();
+    d_app->d_add_curves_dialog_size = this->size();
     // Need to reenable close-on-empty behaviour so
     // that deleting workspaces causes the empty graphs to
     // disappear
-    QList<MdiSubWindow *> wList = app->windowsList();
+    QList<MdiSubWindow *> wList = d_app->windowsList();
     foreach(MdiSubWindow* w, wList)
     {
       MultiLayer* ml = dynamic_cast<MultiLayer*>(w);

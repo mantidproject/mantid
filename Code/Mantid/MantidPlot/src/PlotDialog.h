@@ -63,6 +63,7 @@ class QwtPlotItem;
 class DoubleSpinBox;
 class PenStyleBox;
 class ContourLinesEditor;
+class ApplicationWindow;
 
 //! Custom plot/curves dialog
 class PlotDialog : public QDialog
@@ -70,10 +71,9 @@ class PlotDialog : public QDialog
   Q_OBJECT
 
 public:
-  PlotDialog(bool showExtended, QWidget* parent = 0, Qt::WFlags fl = 0 );
+  PlotDialog(bool showExtended, ApplicationWindow* app, MultiLayer *ml, Qt::WFlags fl = 0 );
   void initFonts(const QFont& titlefont, const QFont& axesfont, const QFont& numbersfont, const QFont& legendfont);
   void insertColumnsList(const QStringList& names){columnNames = names;};
-  void setMultiLayer(MultiLayer *ml);
 
   void setPlotType(int plotType, int curveNum, const QString & color = "Default");
 
@@ -154,6 +154,7 @@ protected slots:
   void showCustomPenColumn(bool on);
 
 private:
+  void setMultiLayer(MultiLayer *ml);
   int labelsAlignment();
   void closeEvent(QCloseEvent* e);
 
@@ -186,6 +187,7 @@ private:
 
   QFont titleFont, legendFont, axesFont, numbersFont;
 
+  ApplicationWindow *d_app;
   MultiLayer *d_ml;
   QStringList columnNames;
 

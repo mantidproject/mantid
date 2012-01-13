@@ -69,8 +69,9 @@
 #include <QMenu>
 #include <QDateTime>
 
-PlotDialog::PlotDialog(bool showExtended, QWidget* parent, Qt::WFlags fl )
-: QDialog(parent, fl),
+PlotDialog::PlotDialog(bool showExtended, ApplicationWindow* app, MultiLayer *ml, Qt::WFlags fl )
+: QDialog(ml, fl),
+  d_app(app),
   d_ml(0)
 {
     setName( "PlotDialog" );
@@ -157,7 +158,7 @@ PlotDialog::PlotDialog(bool showExtended, QWidget* parent, Qt::WFlags fl )
 	QShortcut *shortcut = new QShortcut(QKeySequence(Qt::Key_Delete), this);
     connect(shortcut, SIGNAL(activated()), this, SLOT(removeSelectedCurve()));
 	
-	
+  setMultiLayer(ml);
 }
 
 void PlotDialog::showAll(bool all)
@@ -179,10 +180,8 @@ void PlotDialog::showAll(bool all)
 }
 void PlotDialog::initContourLinesPage()
 {
-	ApplicationWindow *app = dynamic_cast<ApplicationWindow*>(parent());
 	QLocale locale = QLocale();
-	if (app)
-		locale = app->locale();
+    locale = d_app->locale();
 
   	contourLinesPage = new QWidget();
 
@@ -217,7 +216,7 @@ void PlotDialog::initContourLinesPage()
 	hl1->setColumnStretch(1, 10);
 	hl1->setRowStretch(4, 1);
 
-	contourLinesEditor = new ContourLinesEditor(app->locale());
+  contourLinesEditor = new ContourLinesEditor(d_app->locale());
 	hl0->addWidget(contourLinesEditor);
 	hl0->addWidget(gb1);
 
@@ -307,8 +306,7 @@ void PlotDialog::showPlotAssociations(QTreeWidgetItem *item, int)
 	if (!item)
 		return;
 
-	ApplicationWindow *app = dynamic_cast<ApplicationWindow*>(this->parent());
-	if (!app)
+  if (!d_app)
 		return;
 
     if (item->type() != CurveTreeItem::PlotCurveTreeItem)
@@ -328,11 +326,11 @@ void PlotDialog::showPlotAssociations(QTreeWidgetItem *item, int)
 
 	hide();
 	if (dynamic_cast<PlotCurve *>(it)->type() == Graph::Function){
-				FunctionDialog *fd = app->showFunctionDialog((dynamic_cast<CurveTreeItem*>(item))->graph(), dynamic_cast<CurveTreeItem*>(item)->plotItemIndex());
+        FunctionDialog *fd = d_app->showFunctionDialog((dynamic_cast<CurveTreeItem*>(item))->graph(), dynamic_cast<CurveTreeItem*>(item)->plotItemIndex());
 		if (fd)
 			connect((QObject *)fd, SIGNAL(destroyed()), this, SLOT(show()));
 	} else {
-				AssociationsDialog* ad = app->showPlotAssociations(dynamic_cast<CurveTreeItem*>(item)->plotItemIndex());
+        AssociationsDialog* ad = d_app->showPlotAssociations(dynamic_cast<CurveTreeItem*>(item)->plotItemIndex());
 		if (ad)
 			connect((QObject *)ad, SIGNAL(destroyed()), this, SLOT(show()));
 	}
@@ -340,7 +338,6 @@ void PlotDialog::showPlotAssociations(QTreeWidgetItem *item, int)
 
 void PlotDialog::editCurve()
 {
-  ApplicationWindow *app = dynamic_cast<ApplicationWindow*>(this->parent());
 
   CurveTreeItem *item = dynamic_cast<CurveTreeItem *>(listBox->currentItem());
     if (!item)
@@ -353,13 +350,13 @@ void PlotDialog::editCurve()
 
 	hide();
 
-	if (app){
+  if (d_app){
 		if (curveType == Graph::Function){
-			FunctionDialog *fd = app->showFunctionDialog(item->graph(), index);
+      FunctionDialog *fd = d_app->showFunctionDialog(item->graph(), index);
 			if (fd)
 				connect(reinterpret_cast<QObject *>(fd), SIGNAL(destroyed()), this, SLOT(show()));
 		} else {
-			AssociationsDialog* ad = app->showPlotAssociations(index);
+      AssociationsDialog* ad = d_app->showPlotAssociations(index);
 			if (ad)
 				connect(reinterpret_cast<QObject *>(ad), SIGNAL(destroyed()), this, SLOT(show()));
 		}
@@ -650,7 +647,7 @@ void PlotDialog::initPiePage()
 	boxPieLineWidth = new DoubleSpinBox('f');
 	boxPieLineWidth->setSingleStep(0.1);
 	boxPieLineWidth->setMinimum(0.0);
-	boxPieLineWidth->setLocale((dynamic_cast<ApplicationWindow*>(this->parent()))->locale());
+  boxPieLineWidth->setLocale(d_app->locale());
 	gl1->addWidget(boxPieLineWidth, 2, 1);
 	gl1->setRowStretch(3,1);
 
@@ -683,7 +680,7 @@ void PlotDialog::initPieGeometryPage()
 {
     pieGeometryPage = new QWidget();
 
-  QLocale locale = (dynamic_cast<ApplicationWindow*>(this->parent()))->locale();
+  QLocale locale = d_app->locale();
 
 	QGroupBox *gb3 = new QGroupBox(tr( "3D View" ));
 	QGridLayout *gl3 = new QGridLayout(gb3);
@@ -769,7 +766,7 @@ void PlotDialog::initPieLabelsPage()
 	gl2->addWidget(new QLabel( tr( "Dist. from Pie Edge" )), 0, 0);
 	boxPieEdgeDist = new DoubleSpinBox('f');
 	boxPieEdgeDist->setRange(-100, 100);
-	boxPieEdgeDist->setLocale((dynamic_cast<ApplicationWindow*>(this->parent()))->locale());
+  boxPieEdgeDist->setLocale(d_app->locale());
 	gl2->addWidget(boxPieEdgeDist, 0, 1);
 	gl2->setRowStretch(1, 1);
 
@@ -826,7 +823,7 @@ void PlotDialog::initLabelsPage()
     gl->addWidget(new QLabel(tr( "Rotate (deg)" )), 3, 0);
     boxLabelsAngle = new DoubleSpinBox('f');
     boxLabelsAngle->setDecimals(1);
-    boxLabelsAngle->setLocale((dynamic_cast<ApplicationWindow*>(parent()))->locale());
+    boxLabelsAngle->setLocale(d_app->locale());
     boxLabelsAngle->setRange(0, 180);
     gl->addWidget(boxLabelsAngle, 3, 1);
 
@@ -914,7 +911,7 @@ void PlotDialog::initLinePage()
 
 	gl1->addWidget(new QLabel(tr( "Width" )), 2, 0);
 	boxLineWidth = new DoubleSpinBox('f');
-	boxLineWidth->setLocale((dynamic_cast<ApplicationWindow*>(this->parent()))->locale());
+  boxLineWidth->setLocale(d_app->locale());
 	boxLineWidth->setSingleStep(0.1);
 	boxLineWidth->setMinimum(0.1);
 	boxLineWidth->setValue( 1 );
@@ -973,7 +970,7 @@ void PlotDialog::initSymbolsPage()
     gl->addWidget(boxSymbolColor, 3, 1);
     gl->addWidget(new QLabel(tr( "Edge Width" )), 4, 0);
 	boxPenWidth = new DoubleSpinBox('f');
-	boxPenWidth->setLocale((dynamic_cast<ApplicationWindow*>(this->parent()))->locale());
+  boxPenWidth->setLocale(d_app->locale());
 	boxPenWidth->setSingleStep(0.1);
     boxPenWidth->setRange(0.1, 100);
     gl->addWidget(boxPenWidth, 4, 1);
@@ -1138,7 +1135,7 @@ void PlotDialog::initPercentilePage()
 
     gl2->addWidget(new QLabel(tr( "Edge Width" )), 3, 0);
 	boxEdgeWidth = new DoubleSpinBox('f');
-	boxEdgeWidth->setLocale((dynamic_cast<ApplicationWindow*>(parent()))->locale());
+  boxEdgeWidth->setLocale(d_app->locale());
 	boxEdgeWidth->setSingleStep(0.1);
     boxEdgeWidth->setRange(0, 100);
     gl2->addWidget(boxEdgeWidth, 3, 1);
@@ -1223,7 +1220,7 @@ void PlotDialog::initSpectrogramPage()
 
     gl1->addWidget(new QLabel(tr( "Width" )), 1, 0);
   	contourWidthBox = new DoubleSpinBox('f');
-  contourWidthBox->setLocale((dynamic_cast<ApplicationWindow*>(parent()))->locale());
+  contourWidthBox->setLocale(d_app->locale());
 	contourWidthBox->setSingleStep(0.1);
     contourWidthBox->setRange(0, 100);
     gl1->addWidget(contourWidthBox, 1, 1);
@@ -1301,7 +1298,7 @@ void PlotDialog::initErrorsPage()
 
     gl->addWidget(new QLabel(tr( "Line Width" )), 1, 0);
 	widthBox = new DoubleSpinBox('f');
-	widthBox->setLocale((dynamic_cast<ApplicationWindow*>(parent()))->locale());
+  widthBox->setLocale(d_app->locale());
 	widthBox->setSingleStep(0.1);
     widthBox->setRange(0, 100);
     gl->addWidget(widthBox, 1, 1);
@@ -1396,7 +1393,7 @@ void PlotDialog::initVectPage()
     gl1->addWidget(vectColorBox, 0, 1);
     gl1->addWidget(new QLabel(tr( "Line Width" )), 1, 0);
 	vectWidthBox = new DoubleSpinBox('f');
-	vectWidthBox->setLocale((dynamic_cast<ApplicationWindow*>(parent()))->locale());
+  vectWidthBox->setLocale(d_app->locale());
 	vectWidthBox->setSingleStep(0.1);
     vectWidthBox->setRange(0, 100);
     gl1->addWidget(vectWidthBox, 1, 1);
@@ -1498,8 +1495,7 @@ void PlotDialog::selectCurve(int index)
 
 void PlotDialog::showStatistics()
 {
-	ApplicationWindow *app = dynamic_cast<ApplicationWindow*>(this->parent());
-	if (!app)
+  if (!d_app)
         return;
 
     QTreeWidgetItem *it = listBox->currentItem();
@@ -1516,8 +1512,8 @@ void PlotDialog::showStatistics()
 	if (!h)
 		return;
 
-    QString tableName = app->generateUniqueName(tr("Bins"));
-    Table *t = app->newTable(h->dataSize(), 4, tableName, tr("Histogram and Probabilities for") + " " + h->title().text());
+    QString tableName = d_app->generateUniqueName(tr("Bins"));
+    Table *t = d_app->newTable(h->dataSize(), 4, tableName, tr("Histogram and Probabilities for") + " " + h->title().text());
     if (t)
     {
         double h_sum = 0.0;
@@ -1546,8 +1542,8 @@ void PlotDialog::showStatistics()
 	info += tr("Bins")+" = "+QString::number(h->dataSize())+"\n";
 	info += "-------------------------------------------------------------\n";
     if (!info.isEmpty()){
-        app->current_folder->appendLogInfo(info);
-        app->showResults(true);
+        d_app->current_folder->appendLogInfo(info);
+        d_app->showResults(true);
     }
 
 	close();
@@ -1879,8 +1875,7 @@ void PlotDialog::quit()
 
 void PlotDialog::showWorksheet()
 {
-	ApplicationWindow *app = dynamic_cast<ApplicationWindow*>(this->parent());
-	if (!app)
+  if (!d_app)
 		return;
 
     CurveTreeItem *item = dynamic_cast<CurveTreeItem*>(listBox->currentItem());
@@ -1889,7 +1884,7 @@ void PlotDialog::showWorksheet()
     if (item->type() != CurveTreeItem::PlotCurveTreeItem)
         return;
 
-	app->showCurveWorksheet(item->graph(), item->plotItemIndex());
+  d_app->showCurveWorksheet(item->graph(), item->plotItemIndex());
 	close();
 }
 
@@ -2490,13 +2485,12 @@ bool PlotDialog::acceptParams()
 		graph->setBarsGap(item->plotItemIndex(), gapBox->value(), offsetBox->value());
 	else if (privateTabWidget->currentPage() == vectPage){
 		int index = item->plotItemIndex();
-		ApplicationWindow *app = dynamic_cast<ApplicationWindow*>(this->parent());
-		if (!app)
+    if (!d_app)
 			return false;
 
 		QString xEndCol = xEndBox->currentText();
 		QString yEndCol = yEndBox->currentText();
-		Table* w = app->table(xEndCol);
+    Table* w = d_app->table(xEndCol);
 		if (!w)
 			return false;
 
@@ -3190,9 +3184,8 @@ void PlotDialog::adjustLayerWidth(int height)
 
 void PlotDialog::closeEvent(QCloseEvent* e)
 {
-	ApplicationWindow *app = dynamic_cast<ApplicationWindow*>(this->parent());
-	if (app)
-		app->d_extended_plot_dialog = btnMore->isChecked ();
+  if (d_app)
+    d_app->d_extended_plot_dialog = btnMore->isChecked ();
 
 	e->accept();
 }

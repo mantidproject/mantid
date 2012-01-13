@@ -6144,9 +6144,8 @@ void ApplicationWindow::showCurvesDialog()
     QMessageBox::warning(this,tr("MantidPlot - Error"),//Mantid
         tr("This functionality is not available for pie plots!"));
   } else {
-    CurvesDialog* crvDialog = new CurvesDialog(this);
+    CurvesDialog* crvDialog = new CurvesDialog(this,g);
     crvDialog->setAttribute(Qt::WA_DeleteOnClose);
-    crvDialog->setGraph(g);
     crvDialog->resize(d_add_curves_dialog_size);
     crvDialog->setModal(true);
     crvDialog->show();
@@ -6945,8 +6944,7 @@ QDialog* ApplicationWindow::showScaleDialog()
       return 0;
     }
 
-    AxesDialog* ad = new AxesDialog(this);
-    ad->setGraph(g);
+    AxesDialog* ad = new AxesDialog(this,g);
     ad->exec();
     return ad;
   } else if (w->isA("Graph3D"))
@@ -6999,10 +6997,10 @@ void ApplicationWindow::showPlotDialog(int curveKey)
   if (!w)
     return;
 
-  PlotDialog* pd = new PlotDialog(d_extended_plot_dialog, this);
+  PlotDialog* pd = new PlotDialog(d_extended_plot_dialog, this,w);
   pd->setAttribute(Qt::WA_DeleteOnClose);
   pd->insertColumnsList(columnsList(Table::All));
-  pd->setMultiLayer(w);
+  //pd->setMultiLayer(w);
   if (curveKey >= 0){
     Graph *g = w->activeGraph();
     if (g)
@@ -9975,15 +9973,15 @@ FunctionDialog* ApplicationWindow::showFunctionDialog(Graph *g, int curve)
   if ( !g )
     return 0;
 
-  FunctionDialog* fd = functionDialog();
+  FunctionDialog* fd = functionDialog(g);
   fd->setWindowTitle(tr("MantidPlot - Edit function"));//Mantid
   fd->setCurveToModify(g, curve);
   return fd;
 }
 
-FunctionDialog* ApplicationWindow::functionDialog()
+FunctionDialog* ApplicationWindow::functionDialog(Graph* g)
 {
-  FunctionDialog* fd = new FunctionDialog(this);
+  FunctionDialog* fd = new FunctionDialog(this,g);
   fd->setAttribute(Qt::WA_DeleteOnClose);
   connect (fd,SIGNAL(clearParamFunctionsList()),this,SLOT(clearParamFunctionsList()));
   connect (fd,SIGNAL(clearPolarFunctionsList()),this,SLOT(clearPolarFunctionsList()));
@@ -9991,7 +9989,7 @@ FunctionDialog* ApplicationWindow::functionDialog()
   fd->insertParamFunctionsList(xFunctions, yFunctions);
   fd->insertPolarFunctionsList(rFunctions, thetaFunctions);
   fd->show();
-  fd->setActiveWindow();
+  //fd->setActiveWindow();
   return fd;
 }
 
@@ -10010,9 +10008,7 @@ void ApplicationWindow::addFunctionCurve()
 
   Graph* g = plot->activeGraph();
   if ( g ) {
-    FunctionDialog* fd = functionDialog();
-    if (fd)
-      fd->setGraph(g);
+    FunctionDialog* fd = functionDialog(g);
   }
 }
 
@@ -12029,8 +12025,7 @@ void ApplicationWindow::showDataSetDialog(Analysis operation)
   if (!g)
     return;
 
-  DataSetDialog *ad = new DataSetDialog(tr("Curve") + ": ", this);
-  ad->setGraph(g);
+  DataSetDialog *ad = new DataSetDialog(tr("Curve") + ": ", this,g);
   ad->setOperationType(operation);
   ad->exec();
 }
@@ -16907,8 +16902,8 @@ void ApplicationWindow::setPlotType(const QStringList & plotDetails)
             // Check to see if graph is the new one by comparing the names
             if (w->objectName() == plotDetails[0] + "-1")
             {
-              PlotDialog* pd = new PlotDialog(d_extended_plot_dialog, this);
-              pd->setMultiLayer(plot);
+              PlotDialog* pd = new PlotDialog(d_extended_plot_dialog, this, plot);
+              //pd->setMultiLayer(plot);
               Graph *g = plot->activeGraph();
               if (g)
               {

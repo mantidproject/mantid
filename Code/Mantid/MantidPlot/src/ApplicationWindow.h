@@ -348,7 +348,7 @@ public slots:
   //@{
   MultiLayer * newFunctionPlot(QStringList &formulas, double start, double end, int points = 100, const QString& var = "x", int type = 0);
 
-  FunctionDialog* functionDialog();
+  FunctionDialog* functionDialog(Graph* g = NULL);
   FunctionDialog* showFunctionDialog();
   FunctionDialog* showFunctionDialog(Graph * g, int curve);
   void addFunctionCurve();

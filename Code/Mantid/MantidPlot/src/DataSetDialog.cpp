@@ -38,8 +38,10 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 
-DataSetDialog::DataSetDialog( const QString& text, QWidget* parent,  Qt::WFlags fl )
-: QDialog( parent, fl )
+DataSetDialog::DataSetDialog( const QString& text, ApplicationWindow* app, Graph* g,  Qt::WFlags fl )
+: QDialog( g, fl ),
+  d_app(app),
+  d_graph(g)
 {
 	setAttribute(Qt::WA_DeleteOnClose);
 	setWindowTitle(tr("MantidPlot - Select data set"));
@@ -72,6 +74,8 @@ DataSetDialog::DataSetDialog( const QString& text, QWidget* parent,  Qt::WFlags 
 
 	connect( buttonOk, SIGNAL( clicked() ), this, SLOT( accept() ) );
 	connect( buttonCancel, SIGNAL( clicked() ), this, SLOT( reject() ) );
+
+  setGraph(g);
 }
 
 void DataSetDialog::accept()
@@ -79,9 +83,8 @@ void DataSetDialog::accept()
 	if (d_operation == ApplicationWindow::NoAnalysis)
 		emit options(boxName->currentText());
 	else if (d_graph){
-        ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
-	    if (app)
-            app->analyzeCurve(d_graph, d_operation, boxName->currentText());
+      if (d_app)
+            d_app->analyzeCurve(d_graph, d_operation, boxName->currentText());
 	}
 	close();
 }
