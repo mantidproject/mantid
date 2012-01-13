@@ -139,6 +139,8 @@ MantidQt::SliceViewer::LineViewer* SliceViewerWindow::getLiner()
 };
 
 
+
+
 /***************************************************************************/
 /***************************************************************************/
 /***************************************************************************/
@@ -161,6 +163,15 @@ LineViewer
 %End
 
 public:
+
+enum PlotAxisChoice
+{
+  PlotAuto = 0,
+  PlotX = 1,
+  PlotY = 2,
+  PlotDistance = 3
+};
+
 void apply()   throw (std::runtime_error);
 %Docstring
 void LineViewer::apply()
@@ -376,6 +387,10 @@ double LineViewer::getBinWidth()
 %End
 
 
+//*WIKI* ==== Plotting ====
+void setPlotAxis(PlotAxisChoice choice);
+PlotAxisChoice getPlotAxis() const;
+
 };
 
 
@@ -453,7 +468,19 @@ void SliceViewer::openFromXML(const QString & xml)
    
 %End
 
-  void saveImage(const QString & filename = QString());
+  void saveImage(const QString & filename);
+%Docstring
+void SliceViewer::saveImage(const QString & filename)
+-----------------------------------------------------
+    Save the rendered 2D slice to an image file.
+   
+    Args:
+        filename :: full path to the file to save, including extension
+           (e.g. .png). If not specified or empty, then a dialog will prompt
+           the user to pick a file.
+   
+%End
+
   void setFastRender(bool fast);
 %Docstring
 void SliceViewer::setFastRender(bool fast)
@@ -486,7 +513,17 @@ bool SliceViewer::getFastRender()
    
 %End
 
-  void toggleLineMode(bool);
+  void toggleLineMode(bool lineMode);
+%Docstring
+void SliceViewer::toggleLineMode(bool lineMode)
+-----------------------------------------------
+    Toggle "line-drawing" mode (to draw 1D lines using the mouse)
+   
+    Args:
+        lineMode :: True to go into line mode, False to exit it.
+   
+%End
+
 
   //*WIKI* ==== X/Y Dimension ====
   void setXYDim(int indexX, int indexY)     throw (std::invalid_argument);

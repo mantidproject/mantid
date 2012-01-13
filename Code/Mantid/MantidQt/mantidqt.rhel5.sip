@@ -91,6 +91,8 @@ public:
 };
 
 
+
+
 /***************************************************************************/
 /***************************************************************************/
 /***************************************************************************/
@@ -102,6 +104,15 @@ class LineViewer : QWidget
 
 
 public:
+
+enum PlotAxisChoice
+{
+  PlotAuto = 0,
+  PlotX = 1,
+  PlotY = 2,
+  PlotDistance = 3
+};
+
 void apply()   throw (std::runtime_error);
 
 void showPreview();
@@ -141,6 +152,10 @@ int getNumBins() const;
 double getBinWidth() const;
 
 
+//*WIKI* ==== Plotting ====
+void setPlotAxis(PlotAxisChoice choice);
+PlotAxisChoice getPlotAxis() const;
+
 };
 
 
@@ -164,12 +179,14 @@ public:
 
   void openFromXML(const QString & xml)   throw (std::invalid_argument, std::runtime_error);
 
-  void saveImage(const QString & filename = QString());
+  void saveImage(const QString & filename);
+
   void setFastRender(bool fast);
 
   bool getFastRender() const;
 
-  void toggleLineMode(bool);
+  void toggleLineMode(bool lineMode);
+
 
   //*WIKI* ==== X/Y Dimension ====
   void setXYDim(int indexX, int indexY)     throw (std::invalid_argument);

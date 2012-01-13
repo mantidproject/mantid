@@ -8,6 +8,7 @@
 #include <QtGui/QWidget>
 #include <qwt_plot_curve.h>
 #include <qwt_plot.h>
+#include <qwt_painter.h>
 
 namespace MantidQt
 {
@@ -19,6 +20,21 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER LineViewer : public QWidget
     Q_OBJECT
 
 public:
+    /** Enumeration of the ways to plot the X axis of the
+     * line plot.
+     */
+    enum PlotAxisChoice
+    {
+      /// Automatically pick X or Y depending on the angle
+      PlotAuto = 0,
+      /// Plot the X axis, in the coords of the original workspace
+      PlotX = 1,
+      /// Plot the Y axis, in the coords of the original workspace
+      PlotY = 2,
+      /// Plot the distance in the XY plane, relative to the start of the line
+      PlotDistance = 3
+    };
+
     LineViewer(QWidget *parent = 0);
     ~LineViewer();
 
@@ -30,6 +46,7 @@ public:
     void setPlanarWidth(double width);
     void setNumBins(int numBins);
     void setFixedBinWidthMode(bool fixedWidth, double binWidth);
+    void setPlotAxis(LineViewer::PlotAxisChoice choice);
 
     void showPreview();
     void showFull();
@@ -40,6 +57,7 @@ public:
     bool getFixedBinWidthMode() const;
     int getNumBins() const;
     double getBinWidth() const;
+    LineViewer::PlotAxisChoice getPlotAxis() const;
 
     // For python
     void setStartXY(double x, double y);
@@ -47,6 +65,8 @@ public:
     void setWidth(double width);
     void setWidth(int dim, double width);
     void setWidth(const QString & dim, double width);
+    QPointF getStartXY() const;
+    QPointF getEndXY() const;
 
 private:
     void createDimensionWidgets();
@@ -56,6 +76,8 @@ private:
     void readTextboxes();
     void calculateCurve(Mantid::API::IMDWorkspace_sptr ws, Mantid::Kernel::VMD start, Mantid::Kernel::VMD end,
         size_t minNumPoints, QwtPlotCurve * curve);
+    void choosePlotAxis();
+    void setPlotAxisLabels();
 
 public slots:
     void startEndTextEdited();
@@ -67,6 +89,7 @@ public slots:
     void setFreeDimensions(size_t dimX, size_t dimY);
     void on_radNumBins_toggled();
     void textBinWidth_changed();
+    void radPlot_changed();
 
 signals:
     /// Signal emitted when the planar width changes
@@ -141,6 +164,12 @@ private:
 
     /// ACTUAL bin width, whether in fixed or not-fixed bin width mode
     double m_binWidth;
+
+    /// Choice of which X axis to plot.
+    PlotAxisChoice m_plotAxis;
+
+    /// Current choice, in the case of auto-determined
+    PlotAxisChoice m_currentPlotAxis;
 
 };
 

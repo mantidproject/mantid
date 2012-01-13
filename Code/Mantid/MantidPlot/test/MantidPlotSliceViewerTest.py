@@ -126,6 +126,9 @@ class MantidPlotSliceViewerTest(unittest.TestCase):
         svw.setSlicePoint(2,6.0)
         liner = svw.showLine([1,1], [7,9], width=0.88, num_bins=200)
         self.assertTrue( not (liner is None), "Returns a LineViewer proxy object")
+        # Plot the X units
+        liner.setPlotAxis(2);
+        liner.apply()
         # Check that the values are there
         self.assertEqual(liner.getNumBins(), 200)
         # Length of 10 with 200 bins = 0.05 width

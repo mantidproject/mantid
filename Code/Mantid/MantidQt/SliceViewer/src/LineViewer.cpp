@@ -2,15 +2,18 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/VMD.h"
 #include "MantidQtSliceViewer/LineViewer.h"
 #include <QIntValidator>
 #include <qwt_plot_curve.h>
+#include <qwt_plot.h>
 
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using Mantid::Geometry::IMDDimension_const_sptr;
 
 namespace MantidQt
 {
@@ -23,7 +26,8 @@ LineViewer::LineViewer(QWidget *parent)
    m_planeWidth(0),
    m_numBins(100),
    m_allDimsFree(false), m_freeDimX(0), m_freeDimY(1),
-   m_fixedBinWidthMode(false), m_fixedBinWidth(0.1), m_binWidth(0.1)
+   m_fixedBinWidthMode(false), m_fixedBinWidth(0.1), m_binWidth(0.1),
+   m_plotAxis(PlotAuto), m_currentPlotAxis(PlotDistance)
 {
 	ui.setupUi(this);
 
@@ -57,6 +61,10 @@ LineViewer::LineViewer(QWidget *parent)
   QObject::connect(ui.textPlaneWidth, SIGNAL(textEdited(QString)), this, SLOT(widthTextEdited()));
   QObject::connect(ui.radNumBins, SIGNAL(toggled(bool)), this, SLOT(on_radNumBins_toggled()));
   QObject::connect(ui.textBinWidth, SIGNAL(editingFinished()), this, SLOT(textBinWidth_changed()));
+  QObject::connect(ui.radPlotAuto, SIGNAL(toggled(bool)), this, SLOT(radPlot_changed()));
+  QObject::connect(ui.radPlotX, SIGNAL(toggled(bool)), this, SLOT(radPlot_changed()));
+  QObject::connect(ui.radPlotY, SIGNAL(toggled(bool)), this, SLOT(radPlot_changed()));
+  QObject::connect(ui.radPlotDistance, SIGNAL(toggled(bool)), this, SLOT(radPlot_changed()));
 }
 
 LineViewer::~LineViewer()
@@ -112,6 +120,7 @@ void LineViewer::createDimensionWidgets()
 //-----------------------------------------------------------------------------------------------
 /** Disable any controls relating to dimensions that are not "free"
  * e.g. if you are in the X-Y plane, the Z position cannot be changed.
+ * Also updates the radio buttons for the choice of X axis.
  */
 void LineViewer::updateFreeDimensions()
 {
@@ -151,6 +160,9 @@ void LineViewer::updateFreeDimensions()
     std::string s = "(in " + m_ws->getDimension(m_freeDimX)->getName() + "-" +  m_ws->getDimension(m_freeDimY)->getName()
         + " plane)";
     ui.lblPlaneWidth->setText(QString::fromStdString(s));
+
+    ui.radPlotX->setText(QString::fromStdString("X (" + m_ws->getDimension(m_freeDimX)->getName() + ")"));
+    ui.radPlotY->setText(QString::fromStdString("Y (" + m_ws->getDimension(m_freeDimY)->getName() + ")"));
   }
 
 }
@@ -435,6 +447,26 @@ void LineViewer::textBinWidth_changed()
   }
 }
 
+/** Slot called when any of the X plot choice radio buttons are clicked
+ */
+void LineViewer::radPlot_changed()
+{
+  if (ui.radPlotDistance->isChecked())
+    this->setPlotAxis(PlotDistance);
+  else if (ui.radPlotX->isChecked())
+    this->setPlotAxis(PlotX);
+  else if (ui.radPlotY->isChecked())
+    this->setPlotAxis(PlotY);
+  else
+    this->setPlotAxis(PlotAuto);
+  // Refresh the plot, without recalculating
+  if (m_sliceWS)
+    this->showFull();
+  else
+    this->showPreview();
+}
+
+
 // ==============================================================================================
 // ================================== External Getters ==========================================
 // ==============================================================================================
@@ -674,6 +706,30 @@ void LineViewer::setEndXY(double x, double y)
   emit changedStartOrEnd(m_start, m_end);
 }
 
+//------------------------------------------------------------------------------
+/** Return the start of the line to integrate,
+ * in the X/Y coordinates as shown in the SliceViewer
+ * @return [X,Y] coordinates
+ */
+QPointF LineViewer::getStartXY() const
+{
+  if (m_allDimsFree)
+    throw std::runtime_error("LineViewer::getStartXY(): cannot use with all dimensions free.");
+  return QPointF(m_start[m_freeDimX], m_start[m_freeDimY]);
+}
+
+/** Return the end of the line to integrate,
+ * in the X/Y coordinates as shown in the SliceViewer
+ * @return [X,Y] coordinates
+ */
+QPointF LineViewer::getEndXY() const
+{
+  if (m_allDimsFree)
+    throw std::runtime_error("LineViewer::getEndXY(): cannot use with all dimensions free.");
+  return QPointF(m_end[m_freeDimX], m_end[m_freeDimY]);
+}
+
+//------------------------------------------------------------------------------
 /** Set the width to integrate to be the same in all dimensions
  *
  * This sets the planar width and all the other dimensions' widths
@@ -743,11 +799,52 @@ double LineViewer::getBinWidth() const
   return m_binWidth;
 }
 
+/** Choose which coordinates to use as the X axis to plot in the line view.
+ *
+ * @param choice :: PlotAxisChoice, either Auto, X, Y or Distance.
+ */
+void LineViewer::setPlotAxis(LineViewer::PlotAxisChoice choice)
+{
+  m_plotAxis = choice;
+}
+
+/** Return which coordinates to use as the X axis to plot in the line view.
+ *
+ * @return PlotAxisChoice, either Auto, X, Y or Distance.
+ */
+LineViewer::PlotAxisChoice LineViewer::getPlotAxis() const
+{
+  return m_plotAxis;
+}
+
 
 // ==============================================================================================
 // ================================== Rendering =================================================
 // ==============================================================================================
 
+/** Automatically choose which coordinate to use as the X axis,
+ * if we selected it to be automatic
+ */
+void LineViewer::choosePlotAxis()
+{
+  if (m_plotAxis == PlotAuto)
+  {
+    QPointF start = this->getStartXY();
+    QPointF end = this->getEndXY();
+    QPointF diff = end - start;
+    double d = fabs(diff.y()) - fabs(diff.x());
+    if (d < 1e-3)
+      // More line in X than in Y, or nearly the same
+      m_currentPlotAxis = PlotX;
+    else
+      // More Y than X
+      m_currentPlotAxis = PlotY;
+  }
+  else
+  {
+    m_currentPlotAxis = m_plotAxis;
+  }
+}
 
 /** Calculate a curve between two points given a linear start/end point
  *
@@ -761,6 +858,13 @@ void LineViewer::calculateCurve(IMDWorkspace_sptr ws, VMD start, VMD end,
     size_t minNumPoints, QwtPlotCurve * curve)
 {
   if (!ws) return;
+  // Find the axis to plot.
+  this->choosePlotAxis();
+
+  // Retrieve the transform to original coords if available.
+  CoordTransform * toOriginal = NULL;
+  if (ws->hasOriginalWorkspace())
+    toOriginal = ws->getTransformToOriginal();
 
   // Use the width of the plot (in pixels) to choose the fineness)
   // That way, there is ~1 point per pixel = as fine as it needs to be
@@ -771,8 +875,8 @@ void LineViewer::calculateCurve(IMDWorkspace_sptr ws, VMD start, VMD end,
   double stepLength = step.norm();
 
   // These will be the curve as plotted
-  double * x = new double[numPoints];
-  double * y = new double[numPoints];
+  double * xArr = new double[numPoints];
+  double * yArr = new double[numPoints];
 
   for (size_t i=0; i<numPoints; i++)
   {
@@ -780,20 +884,70 @@ void LineViewer::calculateCurve(IMDWorkspace_sptr ws, VMD start, VMD end,
     VMD coord = start + step * double(i);
     // Signal in the WS at that coordinate
     signal_t signal = ws->getSignalAtCoord(coord);
+
+    // Choose which X to plot
+    VMD original = coord;
+    if (toOriginal)
+      original = toOriginal->applyVMD(coord);
+
+    double x = 0;
+    switch (m_currentPlotAxis)
+    {
+    case PlotX:
+      x = original[m_freeDimX];
+      break;
+    case PlotY:
+      x = original[m_freeDimY];
+      break;
+    default:
+      // Distance, or not set.
+      x = stepLength * double(i);
+      break;
+    }
+
     // Make into array
-    x[i] = stepLength * double(i);
-    y[i] = signal;
+    xArr[i] = x;
+    yArr[i] = signal;
   }
 
   // Make the curve
-  curve->setData(x,y, int(numPoints));
+  curve->setData(xArr,yArr, int(numPoints));
 
-  delete [] x;
-  delete [] y;
-
+  delete [] xArr;
+  delete [] yArr;
 }
 
 
+//-----------------------------------------------------------------------------
+/** Sets the appropriate labels on the plot axes */
+void LineViewer::setPlotAxisLabels()
+{
+  IMDDimension_const_sptr dimX = m_ws->getDimension(m_freeDimX);
+  IMDDimension_const_sptr dimY = m_ws->getDimension(m_freeDimY);
+
+  std::string xLabel = "";
+  switch (m_currentPlotAxis)
+  {
+  case PlotX:
+    xLabel = dimX->getName() + " (" + dimX->getUnits() + ")";
+    break;
+  case PlotY:
+    xLabel = dimY->getName() + " (" + dimY->getUnits() + ")";
+    break;
+  default:
+    // Distance, or not set.
+    xLabel = "Distance from start";
+    if (dimX->getUnits() == dimY->getUnits())
+      xLabel += " (" + dimX->getUnits() + ")";
+    else
+      xLabel += " (undefined units)";
+    break;
+  }
+  m_plot->setAxisTitle( QwtPlot::xBottom, QString::fromStdString(xLabel));
+}
+
+
+//-----------------------------------------------------------------------------
 /** Calculate and show the preview (non-integrated) line,
  * using the current parameters. */
 void LineViewer::showPreview()
@@ -808,6 +962,7 @@ void LineViewer::showPreview()
   m_previewCurve->setVisible(true);
   m_plot->replot();
   m_plot->setTitle("Preview Plot");
+  this->setPlotAxisLabels();
 }
 
 
@@ -818,8 +973,15 @@ void LineViewer::showFull()
 {
   if (!m_sliceWS) return;
   VMD start(m_sliceWS->getNumDims());
-  start *= 0;
+  // Follow along the middle of each bin
+  for (size_t d=0; d<m_sliceWS->getNumDims(); d++)
+  {
+    IMDDimension_const_sptr dim = m_sliceWS->getDimension(d);
+    start[d] = (dim->getMinimum() + dim->getMaximum()) / 2.0;
+  }
   VMD end = start;
+  // Except along the line, go from start to end
+  start[0] = m_sliceWS->getDimension(0)->getMinimum();
   end[0] = m_sliceWS->getDimension(0)->getMaximum();
 
   calculateCurve(m_sliceWS, start, end, m_numBins, m_fullCurve);
@@ -832,6 +994,7 @@ void LineViewer::showFull()
   m_fullCurve->setVisible(true);
   m_plot->replot();
   m_plot->setTitle("Integrated Line Plot");
+  this->setPlotAxisLabels();
 }
 
 
