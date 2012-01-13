@@ -141,6 +141,11 @@ namespace Mantid
         if(peak.getRunNumber() == inputW->getRunNumber() && wi < Numberwi) MaxPeaks = i;
         }
       }
+      if (MaxPeaks < 0)
+      {
+        g_log.error("RunNumbers of InPeaksWorkspace and InputWorkspace do not match");
+        return;
+      }
 
       Progress prog(this, MinPeaks, 1.0, MaxPeaks);
       PARALLEL_FOR3(inputW, peaksW, outputW)
