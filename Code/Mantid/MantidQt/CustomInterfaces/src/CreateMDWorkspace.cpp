@@ -109,6 +109,18 @@ void CreateMDWorkspace::initLayout()
   this->setWindowTitle("Create MD Workspaces");
   m_uiForm.txt_merged_workspace_name->setEnabled(m_uiForm.ck_merge->isChecked());
   m_uiForm.lbl_merged_name->setEnabled(m_uiForm.ck_merge->isChecked());
+
+  //Add existing ADS names into selector.
+  m_uiForm.workspaceSelector->clear();
+  typedef std::set<std::string> NameSet;
+  NameSet names = AnalysisDataService::Instance().getObjectNames();
+  NameSet::iterator it = names.begin();
+  while(it != names.end())
+  {
+    m_uiForm.workspaceSelector->addItem((*it).c_str());
+    it++;
+  }
+  
 }
 
 /*
