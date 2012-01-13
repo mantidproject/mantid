@@ -923,7 +923,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   double a0, a1, a2;
 
   if (fitStatus.compare("success")){
-    g_log.error() << "Fit " << backgroundtype << " Fails For Peak @ " << X[i4] << std::endl;
+    g_log.warning() << "Fit " << backgroundtype << " Fails For Peak @ " << X[i4] << std::endl;
     a0 = a1 = a2 = 0;
   } else {
     a0 = params[0];
