@@ -119,15 +119,14 @@ class MatrixWorkspaceTest(unittest.TestCase):
             self.assertEquals(x_np[i][blocksize], workspace.readX(i)[blocksize])
             
     def test_operators_with_workspaces_in_ADS(self):
-        run_algorithm('CreateWorkspace', OutputWorkspace='A',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
+        run_algorithm('CreateWorkspace', OutputWorkspace='a',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
         ads = AnalysisDataService.Instance()
-        A = ads['A']
-        run_algorithm('CreateWorkspace', OutputWorkspace='B', DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
-        B = ads['B']
+        A = ads['a']
+        run_algorithm('CreateWorkspace', OutputWorkspace='b', DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
+        B = ads['b']
         
         # Equality
         self.assertTrue(A.equals(B, 1e-8))
-#    
         # Two workspaces
         C = A + B
         C = A - B
@@ -137,16 +136,31 @@ class MatrixWorkspaceTest(unittest.TestCase):
         C += B
         C *= B
         C /= B
+        
         # Workspace + double
         B = 123.456
         C = A + B
         C = A - B
         C = A * B
         C = A / B
-        C -= B
-        C += B
+
+        ads.remove('C')
+        self.assertTrue('C' not in ads)
+        run_algorithm('CreateWorkspace', OutputWorkspace='ca', DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
+        C = ads['ca']
+
         C *= B
+        self.assertTrue('C' not in ads)
+        C -= B
+        self.assertTrue('C' not in ads)
+        C += B
+        self.assertTrue('C' not in ads)
         C /= B
+        self.assertTrue('C' not in ads)
+        # Check correct in place ops have been used
+        self.assertTrue('ca' in ads)
+        ads.remove('ca')
+
         # Commutative: double + workspace
         C = B * A
         C = B + A

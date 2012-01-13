@@ -34,10 +34,10 @@ def attach_binary_operators_to_workspace():
         setattr(Workspace, attr, op_wrapper)
     # Binary operations that workspaces are aware of
     operations = {
-        "Plus":("__add__", "__radd__","_iadd__"),
-        "Minus":("__sub__", "__rsub__","_isub__"),
-        "Multiply":("__mul__", "__rmul__","_imul__"),
-        "Divide":("__div__", "__div__","_idiv__"),
+        "Plus":("__add__", "__radd__","__iadd__"),
+        "Minus":("__sub__", "__rsub__","__isub__"),
+        "Multiply":("__mul__", "__rmul__","__imul__"),
+        "Divide":("__div__", "__div__","__idiv__"),
         "LessThan":"__lt__",
         "GreaterThan":"__gt__",
         "Or":"__or__",
