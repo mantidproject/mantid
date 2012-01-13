@@ -4,12 +4,11 @@ from numpy import zeros
 from pylab import *
 import wks_utility
 
-#This will activate or not the various 2d or 1d plots
-bPlot = True
-bDataBack = True
-bNorm = True
-bNormBack = True
-
+#flags
+bPlot = True #display the plots
+bDataBack = True #with data background
+bNorm = True #with normalization
+bNormBack = True #with normalization background
 
 h = 6.626e-34  #m^2 kg s^-1
 m = 1.675e-27     #kg
@@ -23,7 +22,6 @@ TOFrange = [9000, 23600] #microS
 #Due to the frame effect, it's sometimes necessary to narrow the range
 #over which we add all the pixels along the low resolution
 Xrange = [115, 210]
-
 
 nexus_path = '/mnt/hgfs/j35/results/'
 list_data = ['66421',
@@ -249,8 +247,25 @@ if bNorm:
         Transpose(InputWorkspace='TransposedFlatID',
                   OutputWorkspace='NormWks')
    
-    #collapse data to 1 spectrum (peak region)
-    Integration('NormWks','IntegratedNormWks',)
+#    #collapse data to 1 spectrum (peak region)
+#    Integration('NormWks',
+#                'IntegratedNormWks',
+#                StartWorkspaceIndex=list_norm_peak[0][0],
+#                EndWorkspaceIndex=list_norm_peak[0][1])
+
+    #perform the integration myself
+    mt_temp = mtd['NormWks']
+    x_axis = mt_temp.readX(0)[:]   #[9100,9300,.... 23500] (73,1)
+    from_peak = list_norm_peak[0][0]
+    to_peak = list_norm_peak[0][1]
+    NormPeakRange = arange(to_peak-from_peak+1) + from_peak
+    counts_vs_tof = zeros(len(x_axis))
+    for x in NormPeakRange:
+        #counts_vs_tof += mt_temp.readY(x)[:]
+        print mt_temp.readY(int(x))[:]
+    print counts_vs_tof
+    sys.exit("stop here")
+#    raise SystemExit(0)
     
 #    mt_NormWks = mtd['NormWks']
 #    _tof_axis = mt_NormWks.readX(0)[:]
@@ -270,12 +285,6 @@ if bNorm:
 
     mt4 = mtd['NormalizedWks']
     
-    #display 2d plot at this point to see if we have data
-    
-
-
-
-
 else:
     
     mt4 = mtd['DataWks']
