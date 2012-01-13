@@ -1383,7 +1383,7 @@ void SliceViewer::openFromXML(const QString & xml)
   if (wsName.empty()) throw std::runtime_error("SliceViewer::openFromXML(): Empty MDWorkspaceName found!");
 
   // Look for the rebinned workspace with a custom name:
-  std::string histoName = "__" + wsName + "_mdhisto";
+  std::string histoName = wsName + "_mdhisto";
   // Use the rebinned workspace if available.
   if (AnalysisDataService::Instance().doesExist(histoName))
     this->setWorkspace(QString::fromStdString(histoName));

@@ -253,7 +253,7 @@ namespace Mantid
     {
       std::string wsName = m_serializer.getWorkspaceName();
       // Create a private output workspace name
-      std::string outWsName = "__" + wsName + "_mdhisto";
+      std::string outWsName = wsName + "_mdhisto";
 
       using namespace Mantid::API;
       if(RecalculateAll == m_request->action())
