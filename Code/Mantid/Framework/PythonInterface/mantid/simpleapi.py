@@ -99,9 +99,7 @@ def gather_returns(func_name, lhs, algm_obj, ignore_regex=[]):
     import re
     def ignore_property(name, ignore_regex):
         for regex in ignore_regex:
-            print 'Check for ignored',name
             if regex.match(name) is not None:
-                print 'Ignoring'
                 return True
         # Matched nothing
         return False
@@ -116,7 +114,6 @@ def gather_returns(func_name, lhs, algm_obj, ignore_regex=[]):
     for name in algm_obj.outputProperties():
         if ignore_property(name, ignore_regex):
             continue
-        print 'adding',name
         prop = algm_obj.getProperty(name)
         # Parent algorithms store their workspaces in the ADS
         # Child algorithms store their workspaces in the property
@@ -125,7 +122,6 @@ def gather_returns(func_name, lhs, algm_obj, ignore_regex=[]):
         else:
             retvals.append(prop.value)
     nvals = len(retvals)
-    print retvals
     nlhs = lhs[0]
     if nlhs > 1 and nvals != nlhs:
         # There is a discrepancy in the number are unpacking variables
