@@ -885,9 +885,9 @@ default_dimension_names(4)
      // for modQ transformation:
      default_dimension_names[0]="|Q|";
      // for Q3D transformation
-     default_dimension_names[1]="[q_h,0,0]";
-     default_dimension_names[2]="[0,q_k,0]";
-     default_dimension_names[3]="[0,0,q_l]";
+     default_dimension_names[1]="[Q_h,0,0]";
+     default_dimension_names[2]="[0,Q_k,0]";
+     default_dimension_names[3]="[0,0,Q_l]";
 
      dE_modes[ANY_Mode]  = ""; // no Q uses it to run without conversion. 
      dE_modes[Direct]    = "Direct";

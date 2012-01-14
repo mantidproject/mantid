@@ -261,9 +261,9 @@ struct COORD_TRANSFORMER<modQ,MODE,CONV,Type>
         double  qy  =  -ey*k_tr;       
         double  qz  = ki - ez*k_tr;
         // transformation matrix has to be here for "Crystal AS Powder conversion mode, further specialization possible if "powder" switch provided"
-        double Qx  = (rotMat[0]*qx+rotMat[3]*qy+rotMat[6]*qz);
-        double Qy  = (rotMat[1]*qx+rotMat[4]*qy+rotMat[7]*qz); 
-        double Qz  = (rotMat[2]*qx+rotMat[5]*qy+rotMat[8]*qz);
+        double Qx  = (rotMat[0]*qx+rotMat[2]*qy+rotMat[3]*qz);
+        double Qy  = (rotMat[3]*qx+rotMat[4]*qy+rotMat[5]*qz); 
+        double Qz  = (rotMat[6]*qx+rotMat[7]*qy+rotMat[8]*qz);
 
         double Qsq = Qx*Qx+Qy*Qy+Qz*Qz;
         if(Qsq < dim_min[0]||Coord[0]>=Qsq)return false;
@@ -352,9 +352,9 @@ struct COORD_TRANSFORMER<modQ,Elastic,CONV,Type>
         double  qy  =  -ey*k0;       
         double  qz  = (1 - ez)*k0;
         // transformation matrix has to be here for "Crystal AS Powder mode, further specialization possible if "
-        double Qx  = (rotMat[0]*qx+rotMat[3]*qy+rotMat[6]*qz);
-        double Qy  = (rotMat[1]*qx+rotMat[4]*qy+rotMat[7]*qz); 
-        double Qz  = (rotMat[2]*qx+rotMat[5]*qy+rotMat[8]*qz);
+        double Qx  = (rotMat[0]*qx+rotMat[1]*qy+rotMat[2]*qz);
+        double Qy  = (rotMat[3]*qx+rotMat[4]*qy+rotMat[5]*qz); 
+        double Qz  = (rotMat[6]*qx+rotMat[7]*qy+rotMat[8]*qz);
 
         double Qsq = Qx*Qx+Qy*Qy+Qz*Qz;
         if(Coord[0]<dim_min[0]||Coord[0]>=dim_max[0])return false;
@@ -447,9 +447,9 @@ struct COORD_TRANSFORMER<Q3D,MODE,CONV,Type>
          double  qy  =  -ey*k_tr;
          double  qz  = ki - ez*k_tr;
 
-         Coord[0]  = (coord_t)(rotMat[0]*qx+rotMat[3]*qy+rotMat[6]*qz);  if(Coord[0]<pHost->dim_min[0]||Coord[0]>=pHost->dim_max[0])return false;
-         Coord[1]  = (coord_t)(rotMat[1]*qx+rotMat[4]*qy+rotMat[7]*qz);  if(Coord[1]<pHost->dim_min[1]||Coord[1]>=pHost->dim_max[1])return false;
-         Coord[2]  = (coord_t)(rotMat[2]*qx+rotMat[5]*qy+rotMat[8]*qz);  if(Coord[2]<pHost->dim_min[2]||Coord[2]>=pHost->dim_max[2])return false;
+         Coord[0]  = (coord_t)(rotMat[0]*qx+rotMat[1]*qy+rotMat[2]*qz);  if(Coord[0]<pHost->dim_min[0]||Coord[0]>=pHost->dim_max[0])return false;
+         Coord[1]  = (coord_t)(rotMat[3]*qx+rotMat[4]*qy+rotMat[5]*qz);  if(Coord[1]<pHost->dim_min[1]||Coord[1]>=pHost->dim_max[1])return false;
+         Coord[2]  = (coord_t)(rotMat[6]*qx+rotMat[7]*qy+rotMat[8]*qz);  if(Coord[2]<pHost->dim_min[2]||Coord[2]>=pHost->dim_max[2])return false;
 
          return true;
     }
@@ -524,9 +524,9 @@ struct COORD_TRANSFORMER<Q3D,Elastic,CONV,Type>
          double  qy  =  -ey*k0;
          double  qz  = ezm1*k0;
 
-         Coord[0]  = (coord_t)(rotMat[0]*qx+rotMat[3]*qy+rotMat[6]*qz);  if(Coord[0]<pHost->dim_min[0]||Coord[0]>=pHost->dim_max[0])return false;
-         Coord[1]  = (coord_t)(rotMat[1]*qx+rotMat[4]*qy+rotMat[7]*qz);  if(Coord[1]<pHost->dim_min[1]||Coord[1]>=pHost->dim_max[1])return false;
-         Coord[2]  = (coord_t)(rotMat[2]*qx+rotMat[5]*qy+rotMat[8]*qz);  if(Coord[2]<pHost->dim_min[2]||Coord[2]>=pHost->dim_max[2])return false;
+         Coord[0]  = (coord_t)(rotMat[0]*qx+rotMat[1]*qy+rotMat[2]*qz);  if(Coord[0]<pHost->dim_min[0]||Coord[0]>=pHost->dim_max[0])return false;
+         Coord[1]  = (coord_t)(rotMat[3]*qx+rotMat[4]*qy+rotMat[5]*qz);  if(Coord[1]<pHost->dim_min[1]||Coord[1]>=pHost->dim_max[1])return false;
+         Coord[2]  = (coord_t)(rotMat[6]*qx+rotMat[7]*qy+rotMat[8]*qz);  if(Coord[2]<pHost->dim_min[2]||Coord[2]>=pHost->dim_max[2])return false;
 
          return true;
     }
