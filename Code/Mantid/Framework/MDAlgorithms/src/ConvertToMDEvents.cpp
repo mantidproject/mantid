@@ -703,7 +703,7 @@ ConvertToMDEvents::getTransfMatrix(API::MatrixWorkspace_sptr inWS,const Kernel::
            Kernel::Matrix<double> gon =inWS->run().getGoniometer().getR();
 
           // Obtain the transformation matrix:
-           mat = gon*umat ; //*(2*M_PI)?;
+           mat = gon*umat ;
            mat.Invert();
         }catch(std::runtime_error &){
             convert_log.warning()<<" Can not obtain transformation matrix from the input workspace: "<<inWS->name()<<" as no oriented lattice has been defined. Use unit transformation matrix anyway\n";
