@@ -261,7 +261,7 @@ struct COORD_TRANSFORMER<modQ,MODE,CONV,Type>
         double  qy  =  -ey*k_tr;       
         double  qz  = ki - ez*k_tr;
         // transformation matrix has to be here for "Crystal AS Powder conversion mode, further specialization possible if "powder" switch provided"
-        double Qx  = (rotMat[0]*qx+rotMat[2]*qy+rotMat[3]*qz);
+        double Qx  = (rotMat[0]*qx+rotMat[1]*qy+rotMat[2]*qz);
         double Qy  = (rotMat[3]*qx+rotMat[4]*qy+rotMat[5]*qz); 
         double Qz  = (rotMat[6]*qx+rotMat[7]*qy+rotMat[8]*qz);
 
