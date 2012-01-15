@@ -154,11 +154,8 @@ namespace MDAlgorithms
    //--------------------------------------------------------------------------------------------------   
      /// helper class to orginize metaloop over various subalgorithm options dealign with matrix workspace
      template<Q_state Q,size_t N_ALGORITHMS >
-     friend class LOOP_MATRIX_ALG;
+     friend class LOOP_ALGS;
   
-     /// helper class to orginize metaloop over various subalgorithm options dealign with event workspace
-     template<Q_state Q,size_t N_ALGORITHMS >
-     friend class LOOP_EVENT_ALG;
   
     /** helper function which verifies if projection vectors are specified and if their values are correct when present.
       * sets defaults [1,0,0] and [0,1,0] if not present or any error. */

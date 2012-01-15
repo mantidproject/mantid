@@ -103,7 +103,7 @@ void test_buildFromEWS()
           throw std::runtime_error("Error in ConvertToEventWorkspace. Cannot proceed.");
      }
 
-     ConvertToMDEvensEventWS<Q3D,Direct> TOFConv;
+     ConvertToMDEvensEventWS<Q3D,Direct,ConvFromTOF> TOFConv;
   
      Mantid::API::BoxController_sptr bc=pEventMDWSWrapper->pWorkspace()->getBoxController();
      bc->setSplitThreshold(5);
