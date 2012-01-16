@@ -6,7 +6,7 @@
 
 Some lovely wording here...
 
-and probaly more structure
+and probably more structure
 
 .. toctree::
    :maxdepth: 2
