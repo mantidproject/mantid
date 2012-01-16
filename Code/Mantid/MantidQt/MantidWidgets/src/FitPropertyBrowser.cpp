@@ -188,8 +188,6 @@ m_mantidui(mantidui)
   connect(m_filenameManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(stringChanged(QtProperty*)));
   connect(m_formulaManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(stringChanged(QtProperty*)));
 
-  connect(this,SIGNAL(xRangeChanged(double, double)), m_mantidui, SLOT(x_range_from_picker(double, double)));
-
   /* Create function group */
   QtProperty* functionsGroup = m_groupManager->addProperty("Functions");
   QtProperty* settingsGroup(NULL);
