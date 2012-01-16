@@ -608,7 +608,7 @@ void CreateMDWorkspace::createMDWorkspaceClicked()
     }
   }
   //Report successful conversion.
-  std::string msg = "Success. Ouput MD files have been written to : " + algDlg.getLocation();
+  std::string msg = "Success. Ouput MD files have been written to : " + algDlg.getLocation().toStdString();
   runConfirmation(msg);
 }
 
