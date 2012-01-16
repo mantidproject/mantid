@@ -74,6 +74,7 @@ else:
             libpath = out.split()[2]
         else:
             libpath = os.path.join(_bin, dependency + '.dylib')
+        return libpath
         
     library_var = "LD_LIBRARY_PATH"
     if platform.system() == 'Darwin':
