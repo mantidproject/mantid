@@ -66,29 +66,29 @@ else:
     def get_libpath(mainlib, dependency):
         if platform.system() == 'Linux':
             cmd = 'ldd %s | grep %s' % (mainlib, dependency)
-            part = 2
-        else:
-            cmd = 'otool -L %s | grep %s' % (mainlib, dependency)
-            part = 0
-        subp = subprocess.Popen(cmd,stdout=subprocess.PIPE,
+            subp = subprocess.Popen(cmd,stdout=subprocess.PIPE,
                                 stderr=subprocess.STDOUT,shell=True)
-        out = subp.communicate()[0]
-        # ldd produces a string that always has 4 columns. The full path
-        # is in the 3rd column
-        return out.split()[part]
-    # stdc++ has to be loaded first or exceptions don't get translated 
-    # properly across bounadries
-    # NeXus has to be loaded as well as there seems to be an issue with
-    # the thread-local storage not being initialized properly unles
-    # it is loaded before other libraries.
+            out = subp.communicate()[0]
+            # ldd produces a string that always has 4 columns. The full path
+            # is in the 3rd column
+            libpath = out.split()[2]
+        else:
+            libpath = os.path.join(_bin, dependency + '.dylib')
+        
     library_var = "LD_LIBRARY_PATH"
     if platform.system() == 'Darwin':
         library_var = 'DY' + library_var
     ldpath = os.environ.get(library_var, "")
     ldpath += ":" + _bin
     os.environ[library_var] = ldpath
-    dlloader(get_libpath(pythonlib, 'stdc++'))
-    dlloader(get_libpath(pythonlib, 'libNeXus'))
+    if platform.system() == 'Linux':
+        # stdc++ has to be loaded first or exceptions don't get translated 
+        # properly across bounadries
+        # NeXus has to be loaded as well as there seems to be an issue with
+        # the thread-local storage not being initialized properly unles
+        # it is loaded before other libraries.
+        dlloader(get_libpath(pythonlib, 'stdc++')) 
+        dlloader(get_libpath(pythonlib, 'libNeXus'))
     dlloader(get_libpath(pythonlib, 'libMantidKernel'))
     dlloader(get_libpath(pythonlib, 'libMantidGeometry'))
     dlloader(get_libpath(pythonlib, 'libMantidAPI'))
