@@ -542,12 +542,7 @@ void CreateMDWorkspace::createMDWorkspaceClicked()
   QString otherDimensions = algDlg.getOtherDimensions();
   QString preProcessedDetectors = algDlg.getPreprocessedDetectors();
   QString location = algDlg.getLocation();
-  if(location.isEmpty())
-  {
-    runConfirmation("Output location is mandatory. Please start again and enter one.");
-    return;
-  }
-
+  
   //2) Run ConvertToMDEvents on each workspace.
   QString fileNames;
   for(WorkspaceMementoCollection::size_type i = 0; i < m_data.size(); i++)
@@ -591,6 +586,7 @@ void CreateMDWorkspace::createMDWorkspaceClicked()
       fileNames += ",";
     }
     fileNames += location + "/" + id + "_md.nxs";
+    
     currentMemento->cleanUp();
   }
 
@@ -611,7 +607,9 @@ void CreateMDWorkspace::createMDWorkspaceClicked()
       runConfirmation("Aborted during merge. See log messages.");
     }
   }
-
+  //Report successful conversion.
+  std::string msg = "Success. Ouput MD files have been written to : " + algDlg.getLocation();
+  runConfirmation(msg);
 }
 
 
