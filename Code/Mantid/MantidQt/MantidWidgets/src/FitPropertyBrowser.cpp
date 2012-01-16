@@ -194,6 +194,7 @@ m_mantidui(mantidui)
 
   if (!m_customFittings)
   {  
+    connect(this,SIGNAL(xRangeChanged(double, double)), m_mantidui, SLOT(x_range_from_picker(double, double)));
     /* Create input - output properties */  
     settingsGroup = m_groupManager->addProperty("Settings");    
     m_startX = addDoubleProperty("StartX");

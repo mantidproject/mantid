@@ -191,9 +191,11 @@ void MantidUI::init()
 }
 
 /// Slot: Receives a new X range from a FitPropertyBrowser and re-emits it.
-void MantidUI::x_range_from_picker(double xmin, double xmax){
+void MantidUI::x_range_from_picker(double xmin, double xmax)
+{
   emit x_range_update(xmin, xmax);
 }
+
 /// Updates the algorithms tree as this may have changed
 void MantidUI::updateAlgorithms()
 {
