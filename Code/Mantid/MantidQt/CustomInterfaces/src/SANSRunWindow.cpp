@@ -344,7 +344,6 @@ void SANSRunWindow::connectFirstPageSignals()
 {
   //controls on the first tab page
 
-  connect(m_uiForm.smpl_offset, SIGNAL(textEdited(const QString&)), this, SLOT(runChanged()));
   connect(m_uiForm.outfile_edit, SIGNAL(textEdited(const QString&)),
     this, SLOT(enableOrDisableDefaultSave()));
 
