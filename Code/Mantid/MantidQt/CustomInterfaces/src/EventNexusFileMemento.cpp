@@ -98,7 +98,7 @@ namespace MantidQt
         alg->execute();
 
         // Overwrite add log values. These are commonly needed by algorithms such as SetGoniometer.
-        for(int i = 0 ; i < m_logEntries.size(); i++)
+        for(size_t i = 0 ; i < m_logEntries.size(); i++)
         {
           Mantid::API::IAlgorithm_sptr logAlg = Mantid::API::AlgorithmManager::Instance().create("AddSampleLog");
           logAlg->initialize();

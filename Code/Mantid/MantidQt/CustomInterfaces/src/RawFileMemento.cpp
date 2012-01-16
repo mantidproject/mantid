@@ -99,7 +99,7 @@ namespace MantidQt
         alg->execute();
 
         // Overwrite add log values. These are commonly needed by algorithms such as SetGoniometer.
-        for(int i = 0 ; i < m_logEntries.size(); i++)
+        for(size_t i = 0 ; i < m_logEntries.size(); i++)
         {
           Mantid::API::IAlgorithm_sptr logAlg = Mantid::API::AlgorithmManager::Instance().create("AddSampleLog");
           logAlg->initialize();
@@ -151,21 +151,6 @@ namespace MantidQt
       {
         Mantid::API::Workspace_sptr ws = fetchIt(Everything);
         
-        // Overwrite/add log values.
-        for(int i = 0 ; i < m_logEntries.size(); i++)
-        {
-          if(!m_logEntries[i].name.empty())
-          {
-            Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("AddSampleLog");
-            alg->initialize();
-            alg->setRethrows(true);
-            alg->setPropertyValue("Workspace", this->m_adsID);
-            alg->setPropertyValue("LogName", m_logEntries[i].name);
-            alg->setPropertyValue("LogText", m_logEntries[i].value);
-            alg->setPropertyValue("LogType", m_logEntries[i].type);
-            alg->execute();
-          }
-        }
         // Overwrite ub matrix
         if(m_ub.size() == 9)
         {
