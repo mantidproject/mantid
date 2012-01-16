@@ -100,7 +100,7 @@ namespace MDAlgorithms
     /// string -Key to identify the algorithm -- rather for testing and debugging, though may be reliet upon somewhere by bad practice
     std::string algo_id;
     // the vector describes default dimension names, specified along the axis if nothing explicitly requested;
-    std::vector<std::string> default_dimension_names;
+    std::vector<std::string> default_dim_ID;
   
     protected: //for testing
         static Mantid::Kernel::Logger & getLogger();
@@ -109,7 +109,7 @@ namespace MDAlgorithms
    void getAddDimensionNames(API::MatrixWorkspace_const_sptr inMatrixWS,Strings &add_dim_names,Strings &add_dim_units)const;
    /** function parses arguments entered by user, and identifies, which subalgorithm should be deployed on WS  as function of the input artuments and the WS format */
    std::string identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS,const std::string &Q_mode_req, const std::string &dE_mode_req,
-                                 Strings &out_dim_names,Strings &out_dim_units);
+                                Strings &out_dim_IDs,Strings &out_dim_units);
    //>---> Parts of the identifyMatrixAlg, separated for unit testing:
    // identify Q - mode
    std::string parseQMode(const std::string &Q_mode_req,const Strings &ws_dim_names,const Strings &ws_dim_units,Strings &out_dim_names,Strings &out_dim_units, int &nQdims);
@@ -129,10 +129,12 @@ namespace MDAlgorithms
  
 
    /** function provides the linear representation for the transformation matrix, which translate momentums from laboratory to notional (fractional) coordinate system */
-   std::vector<double> getTransfMatrix(API::MatrixWorkspace_sptr inWS2D,const Kernel::V3D &u=Kernel::V3D(1,0,0), const Kernel::V3D &v=Kernel::V3D(0,1,0), 
+   std::vector<double> getTransfMatrix(API::MatrixWorkspace_sptr inWS2D,MDEvents::MDWSDescription &TargWSDescription, 
                                        bool is_powder=false)const;
    /// get transformation matrix currently defined for the algorithm
    std::vector<double> getTransfMatrix()const{return TWS.rotMatrix;}
+   /// construct meaningful dimension names:
+   void buildDimNames(MDEvents::MDWSDescription &TargWSDescription);
  
    /// map to select an algorithm as function of the key, which describes it
    std::map<std::string, IConvertToMDEventsMethods *> alg_selector;
@@ -158,8 +160,8 @@ namespace MDAlgorithms
   
   
     /** helper function which verifies if projection vectors are specified and if their values are correct when present.
-      * sets defaults [1,0,0] and [0,1,0] if not present or any error. */
-    void checkUVsettings(const std::vector<double> &ut,const std::vector<double> &vt,Kernel::V3D &u,Kernel::V3D &v)const;
+      * sets default values u and v to [1,0,0] and [0,1,0] if not present or any error. */
+    void checkUVsettings(const std::vector<double> &ut,const std::vector<double> &vt,MDEvents::MDWSDescription &TargWSDescription)const;
  };
  
 } // namespace Mantid

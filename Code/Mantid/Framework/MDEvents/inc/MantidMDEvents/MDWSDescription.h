@@ -54,15 +54,25 @@ namespace MDEvents
     std::vector<double>      dim_min,dim_max;
     /// the names for the target workspace dimensions and properties of input MD workspace
     std::vector<std::string> dim_names;
+    /// the ID-s for the target workspace, which allow to identify the dimensions according to their ID
+    std::vector<std::string> dim_IDs;
     /// the units of target workspace dimensions and properties of input MD workspace dimensions
     std::vector<std::string> dim_units;
+    /** vectors, which describe the projection plain the target ws is based on (notional coordinate system). The transformation matrix below 
+      * should bring the momentums from lab coordinate system into notional coordinate system */
+    Kernel::V3D u,v;
+    /// the indicator, informing if the uv plain has been set. If they are not, the UB matrix from the source workspace has to be used unaltered
+    bool is_uv_default;
     /// the matrix to transform momentums of the workspace into notional target coordinate system
     std::vector<double> rotMatrix;  // should it be the Quat?
     /// helper function checks if min values are less them max values and are consistent between each other 
     void checkMinMaxNdimConsistent(Mantid::Kernel::Logger& log)const;
- 
-  }; 
+    /// the vector of default names for Q-directrions in reciprocal space;
+    std::vector<std::string> defailt_qNames;
 
+  }; 
+/** function to build mslice-like axis name from the vector, which describes crystallographic direction along this axis*/
+std::string DLLExport makeAxisName(const Kernel::V3D &vector,const std::vector<std::string> &Q1Names);
 
 }
 }

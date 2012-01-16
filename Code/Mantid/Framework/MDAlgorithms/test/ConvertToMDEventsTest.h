@@ -179,9 +179,9 @@ void testParseQMode_Q3D()
      TS_ASSERT_THROWS_NOTHING(MODE=pAlg->parseQMode("QhQkQl",ws_dim_names,ws_dim_units,out_dim_names,out_dim_units, nQ_dims));
      TS_ASSERT_EQUALS(3,nQ_dims);
      TS_ASSERT_EQUALS("QhQkQl",MODE);
-     TS_ASSERT_EQUALS("[Q_h,0,0]",out_dim_names[0]);
-     TS_ASSERT_EQUALS("[0,Q_k,0]",out_dim_names[1]);
-     TS_ASSERT_EQUALS("[0,0,Q_l]",out_dim_names[2]);
+     TS_ASSERT_EQUALS("Q1",out_dim_names[0]);
+     TS_ASSERT_EQUALS("Q2",out_dim_names[1]);
+     TS_ASSERT_EQUALS("Q3",out_dim_names[2]);
      TS_ASSERT_EQUALS("Momentum",out_dim_units[0]);
      TS_ASSERT_EQUALS("Momentum",out_dim_units[1]);
      TS_ASSERT_EQUALS("Momentum",out_dim_units[2]);
@@ -539,9 +539,9 @@ void testIdentifyMatrixAlg_5()
 
     TS_ASSERT_EQUALS("WS2DQhQkQlIndirectCnvNo",pAlg->identifyMatrixAlg(ws2D,"QhQkQl","Indirect",dim_names,dim_units));
     TSM_ASSERT_EQUALS("One dim name came from Q (this can be wrong)",4,dim_names.size());
-    TS_ASSERT_EQUALS(dim_names[0],"[Q_h,0,0]");
-    TS_ASSERT_EQUALS(dim_names[1],"[0,Q_k,0]");
-    TS_ASSERT_EQUALS(dim_names[2],"[0,0,Q_l]");
+    TS_ASSERT_EQUALS(dim_names[0],"Q1");
+    TS_ASSERT_EQUALS(dim_names[1],"Q2");
+    TS_ASSERT_EQUALS(dim_names[2],"Q3");
     TS_ASSERT_EQUALS(dim_names[3],"DeltaE");
 }
 

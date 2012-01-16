@@ -77,6 +77,8 @@ private:
    
    /// minimal and maximal values for the workspace dimensions:
    std::vector<double>      dim_min,dim_max;
+   /// the ID-s for the target workspace dimensions, which allow to address these dimesnions by name
+   Strings targ_dim_ID;
    /// the names for the target workspace dimensions and properties of input MD workspace
    Strings targ_dim_names;
    /// the units of target workspace dimensions and properties of input MD workspace dimensions
@@ -111,7 +113,7 @@ private:
         // Give all the dimensions
         for (size_t d=0; d<nd; d++)
         {
-             Geometry::MDHistoDimension * dim = new Geometry::MDHistoDimension(this->targ_dim_names[d], this->targ_dim_names[d], this->targ_dim_units[d], 
+             Geometry::MDHistoDimension * dim = new Geometry::MDHistoDimension(this->targ_dim_names[d], this->targ_dim_ID[d], this->targ_dim_units[d], 
                                                                           this->dim_min[d], this->dim_max[d], 10);
               ws->addDimension(Geometry::MDHistoDimension_sptr(dim));
         }

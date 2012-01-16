@@ -120,6 +120,7 @@ set ( TEST_FILES
 	test/MDEventTest.h
 	test/MDEventWorkspaceTest.h
 	test/MDEventWSWrapperTest.h	
+	test/MDWSDescriptionTest.h		
 	test/MDGridBoxTest.h
 	test/MDHistoWorkspaceIteratorTest.h
 	test/MDHistoWorkspaceTest.h
