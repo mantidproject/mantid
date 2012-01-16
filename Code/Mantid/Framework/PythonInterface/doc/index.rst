@@ -1,11 +1,21 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Mantid Python Documentation contents
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Mantid Python Documentation
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+.. htmlonly::
+
+   :Release: |release|
+   :Date: |today|
+   
+Welcome to the Mantid Python documentation
+   
+Contents
+========
 
 .. toctree::
    :maxdepth: 1
 
-   reference/mantid.rst
+   api/mantid.rst
 
 Indices and tables
 ==================
