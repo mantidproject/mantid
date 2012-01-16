@@ -149,14 +149,12 @@ def _set_properties(alg_object, *args, **kwargs):
     # Set the properties of the algorithm.
     for key in kwargs.keys():
         value = kwargs[key]
-        # For data items setting by explicit value
-        # doesn't set the string name of the, i.e. workspace,
-        # on the property. This causes problems for
-        # properties that then try and use a name property by name
-        # WorkspaceGroups require this to be set first for some reason
-        if isinstance(value, kernel.DataItem):
-            alg_object.setPropertyValue(key, str(value))
-        alg_object.setProperty(key, value)
+        # Anything stored in the ADS must be set by string value
+        # if it is not a child algorithm. 
+        if (not alg_object.isChild()) and isinstance(value, kernel.DataItem):
+            alg_object.setPropertyValue(key, value.name())
+        else:
+            alg_object.setProperty(key, value)
 
 def create_algorithm(algorithm, version, _algm_object):
     """
