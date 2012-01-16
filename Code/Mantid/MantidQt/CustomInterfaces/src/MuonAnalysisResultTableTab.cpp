@@ -145,22 +145,29 @@ void MuonAnalysisResultTableTab::populateTables(const QStringList& wsList)
   // Get all the workspaces from the fitPropertyBrowser and find out whether they have had fitting done to them.
   for (int i(0); i<wsList.size(); ++i)
   {
-    if((Mantid::API::AnalysisDataService::Instance().doesExist(wsList[i].toStdString() + "_parameters"))&&(Mantid::API::AnalysisDataService::Instance().doesExist(wsList[i].toStdString()))) 
+    if((Mantid::API::AnalysisDataService::Instance().doesExist(wsList[i].toStdString() + "_Parameters"))&&(Mantid::API::AnalysisDataService::Instance().doesExist(wsList[i].toStdString()))) 
       fittedWsList.append(wsList[i]);
   }
-     
-  // Make sure all params match.
-  QVector<QString> sameFittedWsList(getWorkspacesWithSameParams(fittedWsList));
 
-  // Populate the individual log values and fittings into their respective tables.
-  populateFittings(sameFittedWsList);
-  populateLogsAndValues(sameFittedWsList);
+  if(fittedWsList.size() > 0)
+  { 
+    // Make sure all params match.
+    QVector<QString> sameFittedWsList(getWorkspacesWithSameParams(fittedWsList));
 
-  QTableWidgetItem* temp = static_cast<QTableWidgetItem*>(m_uiForm.valueTable->item(0,0));
-  // If there is no item in the first row then there must be no log files found between the two data sets.
-  if (temp == NULL)
+    // Populate the individual log values and fittings into their respective tables.
+    populateFittings(sameFittedWsList);
+    populateLogsAndValues(sameFittedWsList);
+
+    QTableWidgetItem* temp = static_cast<QTableWidgetItem*>(m_uiForm.valueTable->item(0,0));
+    // If there is no item in the first row then there must be no log files found between the two data sets.
+    if (temp == NULL)
+    {
+      QMessageBox::information(this, "Mantid - Muon Analysis", "There were no common log files found.");
+    }
+  }
+  else
   {
-    QMessageBox::information(this, "Mantid - Muon Analysis", "There were no common log files found.");
+    QMessageBox::information(this, "Mantid - Muon Analysis", "A fitting must be made on the Data Analysis tab before producing a Results Table.");
   }
 }
 
@@ -329,7 +336,7 @@ void MuonAnalysisResultTableTab::createTable()
   for(int i=0; i<wsSelected.size(); ++i)
   {
     QMap<QString, double> paramsList;
-    Mantid::API::ITableWorkspace_sptr paramWs = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsSelected[i].toStdString() + "_parameters") );
+    Mantid::API::ITableWorkspace_sptr paramWs = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsSelected[i].toStdString() + "_Parameters") );
 
     Mantid::API::TableRow paramRow = paramWs->getFirstRow();
     
@@ -451,7 +458,7 @@ QVector<QString> MuonAnalysisResultTableTab::getWorkspacesWithSameParams(const Q
     std::vector<std::string> firstParams;
 
     // Find the first parameter table and use this as a comparison for all the other tables.
-    Mantid::API::ITableWorkspace_sptr paramWs = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(fittedWsList[0].toStdString() + "_parameters") );
+    Mantid::API::ITableWorkspace_sptr paramWs = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(fittedWsList[0].toStdString() + "_Parameters") );
 
     Mantid::API::TableRow paramRow = paramWs->getFirstRow();
     do
@@ -468,7 +475,7 @@ QVector<QString> MuonAnalysisResultTableTab::getWorkspacesWithSameParams(const Q
     for (int i=1; i<fittedWsList.size(); ++i)
     {
       std::vector<std::string> nextParams;
-      Mantid::API::ITableWorkspace_sptr paramWs = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(fittedWsList[i].toStdString() + "_parameters") );
+      Mantid::API::ITableWorkspace_sptr paramWs = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(fittedWsList[i].toStdString() + "_Parameters") );
 
       Mantid::API::TableRow paramRow = paramWs->getFirstRow();
       do
@@ -518,7 +525,7 @@ std::string MuonAnalysisResultTableTab::getFileName()
   if (Mantid::API::AnalysisDataService::Instance().doesExist(fileName))
   {
     int choice = QMessageBox::question(this, tr("MantidPlot - Overwrite Warning"), QString::fromStdString(fileName) +
-          tr("already exists. Do you want to replace it?"),
+          tr(" already exists. Do you want to replace it?"),
           QMessageBox::Yes|QMessageBox::Default, QMessageBox::No|QMessageBox::Escape);
     if (choice == QMessageBox::No)
     {
