@@ -1,4 +1,6 @@
 #include "MantidMDEvents/MDWSDescription.h"
+#include <boost/lexical_cast.hpp>
+#include <boost/format.hpp>
 
 namespace Mantid
 {
@@ -31,14 +33,14 @@ MDWSDescription::MDWSDescription(size_t nDimesnions):
 n_dims(nDimesnions),
 emode(-1),
 Ei(std::numeric_limits<double>::quiet_NaN()),
+dim_min(nDimesnions,-1),
+dim_max(nDimesnions,1),
 dim_names(nDimesnions,"mdn"),
 dim_IDs(nDimesnions,"mdn_"),
 dim_units(nDimesnions,"Momentum"),
-dim_min(nDimesnions,-1),
-dim_max(nDimesnions,1),
-is_uv_default(true),
 u(1,0,0),
 v(0,1,0),
+is_uv_default(true),
 defailt_qNames(3)
 {
     for(size_t i=0;i<nDimesnions;i++){
