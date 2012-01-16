@@ -63,6 +63,8 @@ namespace MantidQt
 
       void mergeClicked(bool);
 
+      void setLogValueClicked();
+
     private:
       Ui::CreateMDWorkspace  m_uiForm;
       WorkspaceMementoCollection m_data;

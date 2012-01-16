@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>867</width>
+    <width>907</width>
     <height>757</height>
    </rect>
   </property>
@@ -247,6 +247,22 @@
                  </item>
                 </layout>
                </item>
+               <item>
+                <widget class="QGroupBox" name="logValueGroupBox">
+                 <property name="title">
+                  <string>Add Log Value</string>
+                 </property>
+                 <layout class="QVBoxLayout" name="verticalLayout_10">
+                  <item>
+                   <widget class="QPushButton" name="btn_add_logs">
+                    <property name="text">
+                     <string>Add Log Value</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
               </layout>
              </item>
             </layout>
@@ -276,6 +292,13 @@
               <string>Create MD Workspace</string>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_4">
+              <item>
+               <widget class="QCheckBox" name="ck_keep">
+                <property name="text">
+                 <string>Keep generated workspace in memory</string>
+                </property>
+               </widget>
+              </item>
               <item>
                <layout class="QHBoxLayout" name="mergeLayout">
                 <item>

@@ -104,6 +104,8 @@ void CreateMDWorkspace::initLayout()
   connect(m_uiForm.btn_set_ub_matrix, SIGNAL(clicked()), this, SLOT(setUBMatrixClicked()));
   connect(m_uiForm.btn_find_ub_matrix, SIGNAL(clicked()), this, SLOT(findUBMatrixClicked()));
   connect(m_uiForm.btn_set_goniometer, SIGNAL(clicked()), this, SLOT(setGoniometerClicked()));
+  connect(m_uiForm.btn_add_logs, SIGNAL(clicked()), this, SLOT(setLogValueClicked()));
+  
   //Set MVC Model
   m_uiForm.tableView->setModel(m_model);
   this->setWindowTitle("Create MD Workspaces");
@@ -130,11 +132,11 @@ void CreateMDWorkspace::findUBMatrixClicked()
 {
   QString command, args, result;
   QStringList bMatrixArgs;
-
+  WorkspaceMemento_sptr memento;
   try
   {
-    WorkspaceMemento_sptr memento = getFirstSelected();
-    memento->fetchIt(MinimalData);
+    memento = getFirstSelected();
+    memento->fetchIt(Everything); 
 
     // Find the peaks workspace in detector space
     command = "from mantidsimple import *\n"
@@ -158,11 +160,11 @@ void CreateMDWorkspace::findUBMatrixClicked()
     command = "try:\n"
       "    alg = CalculateUMatrixDialog(PeaksWorkspace='%1_peaks')\n"
       "    a = alg.getProperty('a').value\n"
-      "    b = alg.getProperty('b')\n"
-      "    c = alg.getProperty('c')\n"
-      "    alpha = alg.getProperty('alpha')\n"
-      "    beta = alg.getProperty('beta')\n"
-      "    gamma = alg.getProperty('gamma')\n"
+      "    b = alg.getProperty('b').value\n"
+      "    c = alg.getProperty('c').value\n"
+      "    alpha = alg.getProperty('alpha').value\n"
+      "    beta = alg.getProperty('beta').value\n"
+      "    gamma = alg.getProperty('gamma').value\n"
       "    CopySample(InputWorkspace='%1_peaks',OutputWorkspace='%1',CopyName='0',CopyMaterial='0',CopyEnvironment='0',CopyShape='0',CopyLattice='1')\n"
       "    print '%(a)s, %(b)s, %(c)s, %(alpha)s, %(beta)s, %(gamma)s' % {'a': a, 'b' : b, 'c' : c, 'alpha' : alpha, 'beta' : beta, 'gamma' : gamma}\n"
       "except:\n"
@@ -199,6 +201,57 @@ void CreateMDWorkspace::findUBMatrixClicked()
   catch(std::invalid_argument& ex)
   {
     runConfirmation(ex.what());
+  }
+  if(memento != NULL)
+  {
+    memento->cleanUp(); 
+  }
+}
+
+
+/// Event handler for add log event.
+void CreateMDWorkspace::setLogValueClicked()
+{
+  WorkspaceMemento_sptr memento;
+  try
+  {
+    memento = getFirstSelected();
+    Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>( memento->fetchIt(MinimalData) );
+    QString id = QString(memento->getId().c_str());
+
+    QString pyInput =
+      "from mantidsimple import *\n"
+      "import sys\n"
+      "try:\n"
+      "    wsName='%1'\n"
+      "    alg = AddSampleLogDialog(Workspace=wsName)\n"
+      "    logValue = alg.getProperty('LogText').value\n"
+      "    logName = alg.getProperty('LogName').value\n"
+      "    logType = alg.getProperty('LogType').value\n"
+      "    print '%(LogName)s, %(LogValue)s, %(LogType)s' % {'LogName': logName, 'LogValue' : logValue, 'LogType' : logType}\n"
+      "except:\n"
+      "    print 'FAIL'\n"
+      "    raise\n";
+
+    pyInput = pyInput.arg(id);
+    QString pyOutput = runPythonCode(pyInput).trimmed();
+    QStringList logArgs = pyOutput.split(',');
+    if (logArgs.size() == 3 )
+    { 
+      std::string name = logArgs[0].trimmed().toStdString();
+      std::string value = logArgs[1].trimmed().toStdString();
+      std::string logType = logArgs[2].trimmed().toStdString();
+      memento->setLogValue(name, value, logType);
+    }
+
+  }
+  catch(std::invalid_argument& ex)
+  {
+    runConfirmation(ex.what());
+  }
+  if(memento != NULL)
+  {
+    memento->cleanUp(); 
   }
 }
 
@@ -361,14 +414,10 @@ Handler for setting the goniometer.
 */
 void CreateMDWorkspace::setGoniometerClicked()
 {
+  WorkspaceMemento_sptr memento;
   try
   {
-    WorkspaceMemento_sptr memento = getFirstSelected();
-    if(memento->locationType() != WorkspaceInADS::locType())
-    {
-      runConfirmation("Currently, Goniometer settings may only be applied to Workspace in memory");
-      return;
-    }
+    memento = getFirstSelected();
     Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>( memento->fetchIt(MinimalData) );
     QString id = QString(memento->getId().c_str());
 
@@ -377,19 +426,40 @@ void CreateMDWorkspace::setGoniometerClicked()
       "import sys\n"
       "try:\n"
       "    wsName='%1'\n"
-      "    SetGoniometerDialog(Workspace=wsName)\n"
-      "    print 'SUCCESS'\n"
+      "    alg = SetGoniometerDialog(Workspace=wsName)\n"
+      "    axis0 = alg.getProperty('Axis0').value\n"
+      "    axis1 = alg.getProperty('Axis1').value\n"
+      "    axis2 = alg.getProperty('Axis2').value\n"
+      "    axis3 = alg.getProperty('Axis3').value\n"
+      "    axis4 = alg.getProperty('Axis4').value\n"
+      "    axis5 = alg.getProperty('Axis5').value\n"
+      "    print '%(Axis0)s; %(Axis1)s; %(Axis2)s; %(Axis3)s; %(Axis4)s; %(Axis5)s' % {'Axis0': axis0, 'Axis1' : axis1, 'Axis2' : axis2, 'Axis3' : axis3, 'Axis4' : axis4, 'Axis5' : axis5}\n"
       "except:\n"
       "    print 'FAIL'\n"
       "    raise\n";
 
     pyInput = pyInput.arg(id);
     QString pyOutput = runPythonCode(pyInput).trimmed();
+    QStringList axis = pyOutput.split(';');
+    if (axis.size() == 6 )
+    { 
+      std::string axis0 = axis[0].trimmed().toStdString();
+      std::string axis1 = axis[1].trimmed().toStdString();
+      std::string axis2 = axis[2].trimmed().toStdString();
+      std::string axis3 = axis[3].trimmed().toStdString();
+      std::string axis4 = axis[4].trimmed().toStdString();
+      std::string axis5 = axis[5].trimmed().toStdString();
 
+      memento->setGoniometer(axis0, axis1, axis2, axis3, axis4, axis5);
+    }
   }
   catch(std::invalid_argument& ex)
   {
     runConfirmation(ex.what());
+  }
+  if(memento != NULL)
+  {
+    memento->cleanUp();
   }
 }
 
@@ -484,14 +554,28 @@ void CreateMDWorkspace::createMDWorkspaceClicked()
   {
     WorkspaceMemento_sptr currentMemento = m_data[i];
     Workspace_sptr ws = currentMemento->applyActions();
+    QString command;
 
-    QString command = "try:\n"
-      "    ConvertToMDEvents(InputWorkspace='%1',OutputWorkspace='%1_md',OtherDimensions='%2',dEAnalysisMode='%3',QDimensions='%4',MinValues='%5',MaxValues='%6',UsePreprocessedDetectors='%7')\n"
-      "    SaveMD(InputWorkspace='%1_md', Filename=r'%8/%1_md.nxs',MakeFileBacked='1')\n"
-      "    DeleteWorkspace(Workspace='%1_md')\n"
-      "except:\n"
-      "    print 'FAIL'\n"
-      "    raise\n";
+    bool keepWorkspaceInADS = m_uiForm.ck_keep->isChecked();
+    if(keepWorkspaceInADS)
+    {
+      command = "try:\n"
+        "    ConvertToMDEvents(InputWorkspace='%1',OutputWorkspace='%1_md',OtherDimensions='%2',dEAnalysisMode='%3',QDimensions='%4',MinValues='%5',MaxValues='%6',UsePreprocessedDetectors='%7')\n"
+        "    SaveMD(InputWorkspace='%1_md', Filename=r'%8/%1_md.nxs',MakeFileBacked='1')\n"
+        "except:\n"
+        "    print 'FAIL'\n"
+        "    raise\n";
+    }
+    else
+    {
+      command = "try:\n"
+        "    ConvertToMDEvents(InputWorkspace='%1',OutputWorkspace='%1_md',OtherDimensions='%2',dEAnalysisMode='%3',QDimensions='%4',MinValues='%5',MaxValues='%6',UsePreprocessedDetectors='%7')\n"
+        "    SaveMD(InputWorkspace='%1_md', Filename=r'%8/%1_md.nxs',MakeFileBacked='1')\n"
+        "    DeleteWorkspace(Workspace='%1_md')\n"
+        "except:\n"
+        "    print 'FAIL'\n"
+        "    raise\n";
+    }
 
     QString id(currentMemento->getId().c_str());
     command = command.arg(id, otherDimensions, analysisMode, qDimension, minExtents, maxExtents, preProcessedDetectors, location);

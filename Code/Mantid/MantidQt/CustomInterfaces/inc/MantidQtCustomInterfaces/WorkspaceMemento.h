@@ -12,6 +12,10 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
+
+    /// Fetch protocal enumeration type.
+    enum FetchProtocol{Everything=0, MinimalData};
+
     /** @class WorkspaceMemento
 
     A memento carrying basic information about an existing workspace. 
@@ -40,10 +44,6 @@ namespace MantidQt
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-
-    // Fetch protocal enumeration type.
-    enum FetchProtocol{Everything=0, MinimalData};
-    
     class DLLExport WorkspaceMemento
     {
     public:
@@ -82,10 +82,12 @@ namespace MantidQt
       virtual void cleanUp() = 0;
       /// Sets a ub matrix element by element.
       void setUB(const double& ub00, const double&  ub01, const double&  ub02, const double&  ub10, const double&  ub11, const double&  ub12, const double&  ub20, const double&  ub21, const double&  ub22);
+      /// Setter for the goniometer axis.
+      void setGoniometer(const std::string axis0, const std::string axis1, const std::string axis2, const std::string axis3, const std::string axis4, const std::string axis5);
       /// Getter for a ub matrix.
       std::vector<double> getUB() const;
-      /// Sets the goniometer matrix
-      void setGoniometer(const Mantid::Kernel::DblMatrix& matrix); 
+      /// Sets log values
+      void setLogValue(const std::string name, const std::string value, const std::string logType);
       /// Getter for the goniometer matrix
       Mantid::Kernel::DblMatrix getGoniometer() const;
       /// Destructor
@@ -100,15 +102,27 @@ namespace MantidQt
       // Vector of elements describing a UB matrix.
       std::vector<double> m_ub;
 
+      // Vector of elements of goniometer axis.
+      std::vector<std::string> m_axes; 
+      
+      /// Log entry type.
+      struct LogEntry
+      {
+        std::string value;
+        std::string name;
+        std::string type;
+      };
+
+      std::vector<LogEntry> m_logEntries;
+
     private:
 
       /// Extract a friendly status.
       std::string interpretStatus(const Status arg) const;
 
-      
-
-      // Goniometer matrix
+      /// Goniometer matrix
       Mantid::Kernel::DblMatrix m_goniometer;
+
 
     };
 

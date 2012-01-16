@@ -98,6 +98,19 @@ namespace MantidQt
         }
         alg->execute();
 
+        // Overwrite add log values. These are commonly needed by algorithms such as SetGoniometer.
+        for(int i = 0 ; i < m_logEntries.size(); i++)
+        {
+          Mantid::API::IAlgorithm_sptr logAlg = Mantid::API::AlgorithmManager::Instance().create("AddSampleLog");
+          logAlg->initialize();
+          logAlg->setRethrows(true);
+          logAlg->setPropertyValue("Workspace", this->m_adsID);
+          logAlg->setPropertyValue("LogName", m_logEntries[i].name);
+          logAlg->setPropertyValue("LogText", m_logEntries[i].value);
+          logAlg->setPropertyValue("LogType", m_logEntries[i].type);
+          logAlg->execute();
+        }
+
         Workspace_sptr ws = AnalysisDataService::Instance().retrieve(m_adsID);
 
         Mantid::API::WorkspaceGroup_sptr gws = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
@@ -138,6 +151,22 @@ namespace MantidQt
       {
         Mantid::API::Workspace_sptr ws = fetchIt(Everything);
         
+        // Overwrite/add log values.
+        for(int i = 0 ; i < m_logEntries.size(); i++)
+        {
+          if(!m_logEntries[i].name.empty())
+          {
+            Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("AddSampleLog");
+            alg->initialize();
+            alg->setRethrows(true);
+            alg->setPropertyValue("Workspace", this->m_adsID);
+            alg->setPropertyValue("LogName", m_logEntries[i].name);
+            alg->setPropertyValue("LogText", m_logEntries[i].value);
+            alg->setPropertyValue("LogType", m_logEntries[i].type);
+            alg->execute();
+          }
+        }
+        // Overwrite ub matrix
         if(m_ub.size() == 9)
         {
           Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SetUB");
@@ -145,6 +174,39 @@ namespace MantidQt
           alg->setRethrows(true);
           alg->setPropertyValue("Workspace", this->m_adsID);
           alg->setProperty("UB", m_ub);
+          alg->execute();
+        }
+        // Overwrite goniometer settings
+        if(m_axes.size() == 6)
+        {
+          Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SetGoniometer");
+          alg->initialize();
+          alg->setRethrows(true);
+          alg->setPropertyValue("Workspace", this->m_adsID);
+          if(!m_axes[0].empty())
+          {
+            alg->setProperty("Axis0", m_axes[0]);
+          }
+          if(!m_axes[1].empty())
+          {
+            alg->setProperty("Axis1", m_axes[1]);
+          }
+          if(!m_axes[2].empty())
+          {
+            alg->setProperty("Axis2", m_axes[2]);
+          }
+          if(!m_axes[3].empty())
+          {
+            alg->setProperty("Axis3", m_axes[3]);
+          }
+          if(!m_axes[4].empty())
+          {
+            alg->setProperty("Axis4", m_axes[4]);
+          }
+          if(!m_axes[5].empty())
+          {
+            alg->setProperty("Axis5", m_axes[5]);
+          }
           alg->execute();
         }
         return AnalysisDataService::Instance().retrieve(m_adsID);
