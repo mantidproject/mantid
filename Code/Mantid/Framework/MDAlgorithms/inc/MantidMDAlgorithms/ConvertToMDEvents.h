@@ -69,8 +69,6 @@ namespace MDAlgorithms
  
    /// the variable which keeps preprocessed positions of the detectors if any availible (TODO: should it be a table ws and separate algorithm?);
     static PreprocessedDetectors det_loc;  
-    /// the properties of the requested target MD workpsace:
-    MDEvents::MDWSDescription TWS;
    /// the pointer to class which is responsible for adding data to N-dimensional workspace;
     boost::shared_ptr<MDEvents::MDEventWSWrapper> pWSWrapper;
   /// progress reporter
@@ -101,7 +99,9 @@ namespace MDAlgorithms
     std::string algo_id;
     // the vector describes default dimension names, specified along the axis if nothing explicitly requested;
     std::vector<std::string> default_dim_ID;
-  
+    /// the properties of the requested target MD workpsace:
+    MDEvents::MDWSDescription TWS;
+ 
     protected: //for testing
         static Mantid::Kernel::Logger & getLogger();
    //>---> Parts of the identifyTheAlg;

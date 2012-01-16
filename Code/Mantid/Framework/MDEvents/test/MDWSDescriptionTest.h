@@ -41,7 +41,7 @@ public:
 
   }
 
-MDWSDescriptionTest::MDWSDescriptionTest():descr(5)
+MDWSDescriptionTest():descr(5)
 {
 }
 
