@@ -1,5 +1,5 @@
-#ifndef MANTID_MDEVENTS_MERGEMD_H_
-#define MANTID_MDEVENTS_MERGEMD_H_
+#ifndef MANTID_MDALGORITHMS_MERGEMDFILES_H_
+#define MANTID_MDALGORITHMS_MERGEMDFILES_H_
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 
@@ -9,7 +9,7 @@
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 
   /** Algorithm to merge multiple MDEventWorkspaces from files that
@@ -38,14 +38,14 @@ namespace MDEvents
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport MergeMD  : public API::Algorithm
+  class DLLExport MergeMDFiles  : public API::Algorithm
   {
   public:
-    MergeMD();
-    ~MergeMD();
+    MergeMDFiles();
+    ~MergeMDFiles();
     
     /// Algorithm's name for identification 
-    virtual const std::string name() const { return "MergeMD";};
+    virtual const std::string name() const { return "MergeMDFiles";};
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
@@ -63,19 +63,19 @@ namespace MDEvents
     void loadBoxData();
 
     template<typename MDE, size_t nd>
-    typename MDEventWorkspace<MDE, nd>::sptr createOutputWS(typename MDEventWorkspace<MDE, nd>::sptr ws);
+    typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr createOutputWS(typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
 
     template<typename MDE, size_t nd>
-    typename MDEventWorkspace<MDE, nd>::sptr createOutputWSbyCloning(typename MDEventWorkspace<MDE, nd>::sptr ws);
+    typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr createOutputWSbyCloning(typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
 
     template<typename MDE, size_t nd>
-    void doExec(typename MDEventWorkspace<MDE, nd>::sptr ws);
+    void doExec(typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
 
     template<typename MDE, size_t nd>
-    void doExecByCloning(typename MDEventWorkspace<MDE, nd>::sptr ws);
+    void doExecByCloning(typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
 
     template<typename MDE, size_t nd>
-    void finalizeOutput(typename MDEventWorkspace<MDE, nd>::sptr outWS);
+    void finalizeOutput(typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr outWS);
 
   public:
 
@@ -118,7 +118,7 @@ namespace MDEvents
   };
 
 
-} // namespace MDEvents
+} // namespace MDAlgorithms
 } // namespace Mantid
 
-#endif  /* MANTID_MDEVENTS_MERGEMD_H_ */
+#endif  /* MANTID_MDALGORITHMS_MERGEMDFILES_H_ */

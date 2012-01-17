@@ -609,7 +609,7 @@ void CreateMDWorkspace::createMDWorkspaceClicked()
   if(m_uiForm.ck_merge->isChecked())
   {
     QString command = "try:"
-      "    MergeMD(Filenames=r'%1',OutputFilename=r'%2/%3.nxs',OutputWorkspace='%3')\n"
+      "    MergeMDFiles(Filenames=r'%1',OutputFilename=r'%2/%3.nxs',OutputWorkspace='%3')\n"
       "except:\n"
       "    print 'FAIL'\n"
       "    raise\n";

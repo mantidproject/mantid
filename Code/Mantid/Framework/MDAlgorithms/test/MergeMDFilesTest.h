@@ -7,23 +7,23 @@
 #include <iostream>
 #include <iomanip>
 
-#include "MantidMDEvents/MergeMD.h"
+#include "MantidMDAlgorithms/MergeMDFiles.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <Poco/File.h>
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
+using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
 
-class MergeMDTest : public CxxTest::TestSuite
+class MergeMDFilesTest : public CxxTest::TestSuite
 {
 public:
-
     
   void test_Init()
   {
-    MergeMD alg;
+    MergeMDFiles alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
@@ -55,7 +55,7 @@ public:
     // Name of the output workspace.
     std::string outWSName("MergeMDTest_OutputWS");
   
-    MergeMD alg;
+    MergeMDFiles alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("Filenames", filenames) );
