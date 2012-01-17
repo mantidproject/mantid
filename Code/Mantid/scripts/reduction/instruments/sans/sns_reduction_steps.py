@@ -289,7 +289,7 @@ class DirectBeamTransmission(SingleFrameDirectBeamTransmission):
                     mtd.deleteWorkspace(ws)
             
         # Add output workspace to the list of important output workspaces
-        reducer.output_workspaces.append([self._transmission_ws, self._transmission_ws+'_unfitted'])
+        #reducer.output_workspaces.append([self._transmission_ws, self._transmission_ws+'_unfitted'])
             
         # 2- Apply correction (Note: Apply2DTransCorr)
         #Apply angle-dependent transmission correction using the zero-angle transmission
