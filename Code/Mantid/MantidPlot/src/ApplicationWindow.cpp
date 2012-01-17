@@ -6196,9 +6196,8 @@ AssociationsDialog* ApplicationWindow::showPlotAssociations(int curve)
   if (!g)
     return 0;
 
-  AssociationsDialog* ad = new AssociationsDialog(this);
+  AssociationsDialog* ad = new AssociationsDialog(g);
   ad->setAttribute(Qt::WA_DeleteOnClose);
-  ad->setGraph(g);
   ad->initTablesList(tableList(), curve);
   ad->show();
   return ad;
@@ -6397,9 +6396,8 @@ void ApplicationWindow::showColumnValuesDialog()
     return;
 
   if (w->selectedColumns().count()>0 || w->table()->currentSelection() >= 0){
-    SetColValuesDialog* vd = new SetColValuesDialog(scriptingEnv(), this);
+    SetColValuesDialog* vd = new SetColValuesDialog(scriptingEnv(), w);
     vd->setAttribute(Qt::WA_DeleteOnClose);
-    vd->setTable(w);
     vd->exec();
   } else
     QMessageBox::warning(this, tr("MantidPlot - Column selection error"), tr("Please select a column first!"));//Mantid
@@ -6877,7 +6875,7 @@ void ApplicationWindow::showColumnOptionsDialog()
     return;
 
   if(t->selectedColumns().count()>0) {
-    TableDialog* td = new TableDialog(t, this);
+    TableDialog* td = new TableDialog(t);
     td->setAttribute(Qt::WA_DeleteOnClose);
     td->exec();
   } else

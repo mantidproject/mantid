@@ -55,8 +55,7 @@ class SetColValuesDialog : public QDialog, public Scripted
     Q_OBJECT
 
 public:
-    SetColValuesDialog( ScriptingEnv *env, QWidget* parent = 0, Qt::WFlags fl = 0 );
-	void setTable(Table* w);
+    SetColValuesDialog( ScriptingEnv *env, Table* t, Qt::WFlags fl = 0 );
 
 private slots:
 	bool apply();
@@ -71,6 +70,7 @@ private slots:
 private:
 	Table* table;
 	
+	void setTable(Table* w);
 	QSize sizeHint() const ;
 	void customEvent( QEvent *e );
 

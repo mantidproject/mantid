@@ -46,10 +46,9 @@ class AssociationsDialog : public QDialog
     Q_OBJECT
 
 public:
-    AssociationsDialog( QWidget* parent = 0, Qt::WFlags fl = 0 );
+    AssociationsDialog( Graph* g, Qt::WFlags fl = 0 );
 
     void initTablesList(QList<MdiSubWindow *> lst, int curve);
-	void setGraph(Graph *g);
 
 private slots:
     void updateTable(int index);
@@ -57,7 +56,8 @@ private slots:
     void accept();
 
 private:
-    void changePlotAssociation(int curve, const QString& text);
+	void setGraph(Graph *g);
+  void changePlotAssociation(int curve, const QString& text);
 	void updateColumnTypes();
 	void uncheckCol(int col);
 	void updatePlotAssociation(int row, int col);
