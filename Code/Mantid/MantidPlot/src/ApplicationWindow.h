@@ -1051,10 +1051,6 @@ public slots:
   bool isDefaultFloating(const MdiSubWindow* w) const;
   bool isDefaultFloating(const QString& aClassName) const;
   QMenuBar* myMenuBar();
-#ifdef SHARED_MENUBAR
-  bool isMenuBarShared() const {return m_sharedMenuBar != NULL;}
-  void shareMenuBar(bool yes);
-#endif
   void changeActiveToFloating();
   void changeActiveToDocked();
 

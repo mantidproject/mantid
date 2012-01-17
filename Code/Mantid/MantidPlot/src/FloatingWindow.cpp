@@ -17,8 +17,8 @@
  * Constructor.
  */
 FloatingWindow::FloatingWindow(ApplicationWindow* appWindow, Qt::WindowFlags f):
-//QMainWindow(NULL,f),
-QMainWindow(appWindow,f),
+QMainWindow(NULL,f),
+//QMainWindow(appWindow,f),
 d_app(appWindow)
 {
   setFocusPolicy(Qt::StrongFocus);

@@ -518,15 +518,7 @@ void ConfigDialog::initAppPage()
   boxSearchUpdates->setChecked(app->autoSearchUpdates);
   topBoxLayout->addWidget( boxSearchUpdates, 9, 0, 1, 2 );
 
-#ifdef SHARED_MENUBAR
-  boxSharedMenuBar = new QCheckBox();
-  boxSharedMenuBar->setChecked(app->isMenuBarShared());
-  topBoxLayout->addWidget( boxSharedMenuBar, 10, 0, 1, 2 );
-  topBoxLayout->setRowStretch(11, 1);
-#else
-  boxSharedMenuBar = NULL;
   topBoxLayout->setRowStretch(10, 1);
-#endif
 
   appTabWidget->addTab(application, QString());
 
@@ -1744,9 +1736,6 @@ void ConfigDialog::languageChange()
   boxSave->setText(tr("Save every"));
   boxBackupProject->setText(tr("&Backup project before saving"));
   boxSearchUpdates->setText(tr("Check for new versions at startup"));
-#ifdef SHARED_MENUBAR
-  boxSharedMenuBar->setText(tr("Share menu bar"));
-#endif
   boxMinutes->setSuffix(tr(" minutes"));
   lblScriptingLanguage->setText(tr("Default scripting language"));
   lblUndoStackSize->setText(tr("Matrix Undo Stack Size"));
@@ -1964,9 +1953,6 @@ void ConfigDialog::apply()
   setFont(appFont);
   app->changeAppStyle(boxStyle->currentText());
   app->autoSearchUpdates = boxSearchUpdates->isChecked();
-#ifdef SHARED_MENUBAR
-  app->shareMenuBar(boxSharedMenuBar->isChecked());
-#endif
   app->setSaveSettings(boxSave->isChecked(), boxMinutes->value());
   app->d_backup_files = boxBackupProject->isChecked();
   app->defaultScriptingLang = boxScriptingLanguage->currentText();

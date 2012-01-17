@@ -217,15 +217,9 @@ m_exitCode(0),
   QCoreApplication::setOrganizationName("ISIS");
   QCoreApplication::setApplicationName("MantidPlot");
 #ifdef SHARED_MENUBAR
-  if (settings.value("/General/SharedMenuBar",false).toBool())
-  {
     m_sharedMenuBar = new QMenuBar(NULL);
-    setMenuBar(m_sharedMenuBar);
-  }
-  else
-  {
-    m_sharedMenuBar = NULL;
-  }
+    //setMenuBar(m_sharedMenuBar);
+    m_sharedMenuBar->setNativeMenuBar(true);
 #endif
   mantidUI = new MantidUI(this);
   setAttribute(Qt::WA_DeleteOnClose);
@@ -1413,7 +1407,6 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
   myMenuBar()->insertItem(tr("&Edit"), edit);
   editMenuAboutToShow();
   myMenuBar()->insertItem(tr("&View"), view);
-
 
   //#ifdef SCRIPTING_DIALOG
   //	scriptingMenu->addAction(actionScriptingLang);
@@ -5212,9 +5205,6 @@ void ApplicationWindow::saveSettings()
   settings.setValue("/height", d_app_rect.height());
   settings.endGroup();
 
-#ifdef SHARED_MENUBAR
-  settings.setValue("/SharedMenuBar", m_sharedMenuBar != NULL);
-#endif
   settings.setValue("/AutoSearchUpdates", autoSearchUpdates);
   settings.setValue("/Language", appLanguage);
   settings.setValue("/ShowWindowsPolicy", show_windows_policy);
@@ -17491,12 +17481,6 @@ FloatingWindow* ApplicationWindow::addMdiSubWindowAsFloating(MdiSubWindow* w, QP
 {
   const QPoint none(-1,-1);
   FloatingWindow* fw =new FloatingWindow(this);//, Qt::WindowStaysOnTopHint);
-#ifdef SHARED_MENUBAR
-  if (m_sharedMenuBar != NULL)
-  {
-    fw->setMenuBar(m_sharedMenuBar);
-  }
-#endif
   QSize sz = w->size();
   if (pos == none)
   {
@@ -17743,27 +17727,6 @@ void ApplicationWindow::activateNewWindow()
   // activate a new sub-window or pass NULL if no window can be activated
   activateWindow(newone);
 }
-
-#ifdef SHARED_MENUBAR
-/**
-  * Toggles sharing of the menu bar.
-  * @param yes :: True to share the menu bar.
-  */
-void ApplicationWindow::shareMenuBar(bool yes)
-{
-  if (yes == this->isMenuBarShared()) return;
-  if (yes)
-  {
-    m_sharedMenuBar = new QMenuBar(NULL);
-    setMenuBar(m_sharedMenuBar);
-  }
-  else
-  {
-    m_sharedMenuBar = NULL;
-  }
-  initMainMenu();
-}
-#endif
 
 /**
  * The slot to change the active window from docked to floating.
