@@ -54,7 +54,6 @@ private:
   /// Execution code
   void exec();
   double getCountingTime(API::MatrixWorkspace_sptr inputWS);
-  void cleanupDarkCurrent(API::MatrixWorkspace_sptr scaledDarkWS);
 
   static const int DEFAULT_MONITOR_ID = 0;
   static const int DEFAULT_TIMER_ID = 1;

@@ -336,6 +336,9 @@ private:
   /// Boolean to show whether the gui is being updated
   bool m_updating;
 
+  /// Boolean to show when data has been loaded. (Can't auto-update data that hasn't been loaded)
+  bool m_loaded;
+
   /// Load auto saved values
   void loadAutoSavedValues(const QString& group);
 
