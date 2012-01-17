@@ -57,7 +57,7 @@ std::string makeAxisName(const Kernel::V3D &Dir,const std::vector<std::string> &
     double eps(1.e-3);
     std::string name("["),separator=",";
     for(size_t i=0;i<3;i++){
-        double dist=abs(Dir[i]);
+        double dist=std::fabs(Dir[i]);
         if(i==2)separator="]";
         if(dist<eps){
             name+="0"+separator;
@@ -66,7 +66,7 @@ std::string makeAxisName(const Kernel::V3D &Dir,const std::vector<std::string> &
         if(Dir[i]<0){
            name+="-";
         }
-        if(abs(dist-1)<eps){
+        if(std::fabs(dist-1)<eps){
             name+=QNames[i]+separator;
             continue;
         }
