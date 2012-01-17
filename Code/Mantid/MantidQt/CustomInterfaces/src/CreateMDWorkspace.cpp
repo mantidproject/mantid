@@ -80,6 +80,30 @@ DECLARE_SUBWINDOW(CreateMDWorkspace);
     }
   };
 
+
+  class ScopedMemento
+  {
+  private:
+    WorkspaceMemento_sptr m_memento;
+    ScopedMemento(const ScopedMemento & other);
+    ScopedMemento & operator= (const ScopedMemento & other);
+  public:
+    ScopedMemento(WorkspaceMemento_sptr memento) : m_memento(memento)
+    {
+    }
+    WorkspaceMemento* operator->() const
+    {
+      return m_memento.get();
+    }
+    ~ScopedMemento()
+    {
+      if(m_memento != NULL)
+      {
+        m_memento->cleanUp();
+      }
+    }
+  };
+
 /*
 Constructor taking a WorkspaceMementoCollection, which acts as the model.
 */
@@ -132,10 +156,10 @@ void CreateMDWorkspace::findUBMatrixClicked()
 {
   QString command, args, result;
   QStringList bMatrixArgs;
-  WorkspaceMemento_sptr memento;
   try
   {
-    memento = getFirstSelected();
+    ScopedMemento memento(getFirstSelected());
+
     memento->fetchIt(Everything); 
 
     // Find the peaks workspace in detector space
@@ -202,20 +226,15 @@ void CreateMDWorkspace::findUBMatrixClicked()
   {
     runConfirmation(ex.what());
   }
-  if(memento != NULL)
-  {
-    memento->cleanUp(); 
-  }
 }
 
 
 /// Event handler for add log event.
 void CreateMDWorkspace::setLogValueClicked()
 {
-  WorkspaceMemento_sptr memento;
   try
   {
-    memento = getFirstSelected();
+    ScopedMemento memento(getFirstSelected());
     Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>( memento->fetchIt(MinimalData) );
     QString id = QString(memento->getId().c_str());
 
@@ -243,15 +262,14 @@ void CreateMDWorkspace::setLogValueClicked()
       std::string logType = logArgs[2].trimmed().toStdString();
       memento->setLogValue(name, value, logType);
     }
-
+    else
+    {
+      throw std::runtime_error("Could not set the log value!");
+    }
   }
   catch(std::invalid_argument& ex)
   {
     runConfirmation(ex.what());
-  }
-  if(memento != NULL)
-  {
-    memento->cleanUp(); 
   }
 }
 
@@ -288,10 +306,10 @@ Event handler for setting the UB Matrix
 */
 void CreateMDWorkspace::setUBMatrixClicked()
 {
-  WorkspaceMemento_sptr memento;
+  
   try
   {
-    memento = getFirstSelected();
+    ScopedMemento memento(getFirstSelected());
     Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>( memento->fetchIt(MinimalData) );
     QString id = QString(memento->getId().c_str());
 
@@ -317,14 +335,14 @@ void CreateMDWorkspace::setUBMatrixClicked()
       memento->setUB(ub[0].toDouble(), ub[1].toDouble(), ub[2].toDouble(), ub[3].toDouble(), ub[4].toDouble(), ub[5].toDouble(), ub[6].toDouble(),  ub[7].toDouble(),  ub[8].toDouble());
       m_model->update();
     }
+    else
+    {
+      throw std::runtime_error("Could not set the log value!");
+    }
   }
   catch(std::invalid_argument& ex)
   {
     runConfirmation(ex.what());
-  }
-  if(memento != NULL)
-  {
-    memento->cleanUp(); 
   }
 }
 
@@ -414,10 +432,9 @@ Handler for setting the goniometer.
 */
 void CreateMDWorkspace::setGoniometerClicked()
 {
-  WorkspaceMemento_sptr memento;
   try
   {
-    memento = getFirstSelected();
+    ScopedMemento memento(getFirstSelected());
     Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>( memento->fetchIt(MinimalData) );
     QString id = QString(memento->getId().c_str());
 
@@ -456,10 +473,6 @@ void CreateMDWorkspace::setGoniometerClicked()
   catch(std::invalid_argument& ex)
   {
     runConfirmation(ex.what());
-  }
-  if(memento != NULL)
-  {
-    memento->cleanUp();
   }
 }
 
@@ -547,7 +560,7 @@ void CreateMDWorkspace::createMDWorkspaceClicked()
   QString fileNames;
   for(WorkspaceMementoCollection::size_type i = 0; i < m_data.size(); i++)
   {
-    WorkspaceMemento_sptr currentMemento = m_data[i];
+    ScopedMemento currentMemento(m_data[i]);
     Workspace_sptr ws = currentMemento->applyActions();
     QString command;
 
