@@ -1,19 +1,13 @@
-.. _mantid-index:
+.. _mantid:
 
 #################################
-  Mantid Python Package Reference
+  Mantid Python Class Reference
 #################################
 
+.. module:: mantid
+   
 Some lovely wording here...
 
 and probably more structure
 
-.. toctree::
-   :maxdepth: 2
-   
-   DataItem.rst
-   Property.rst
-   ExperimentInfo.rst
-   Workspace.rst
-   MatrixWorkspace.rst
-
+.. include:: autogen.txt

@@ -88,7 +88,7 @@ exclude_patterns = ['_build']
 pygments_style = 'sphinx'
 
 # A list of ignored prefixes for module index sorting.
-modindex_common_prefix = ['mantid']
+modindex_common_prefix = []
 
 
 # -- Options for HTML output ---------------------------------------------------
@@ -145,7 +145,7 @@ html_static_path = ['_static']
 #html_domain_indices = True
 
 # If false, no index is generated.
-#html_use_index = True
+html_use_index = True
 
 # If true, the index is split into individual pages for each letter.
 #html_split_index = False
@@ -168,7 +168,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'mantiddoc'
+htmlhelp_basename = 'Mantiddoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------

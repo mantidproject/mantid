@@ -1,0 +1,80 @@
+#!/usr/bin/env python
+"""Script to generate Mantid Python API documentation.
+"""
+import sys
+import os
+import inspect
+
+# Append the path to the mantid library
+sys.path.append("@CMAKE_RUNTIME_OUTPUT_DIRECTORY@")
+import mantid
+
+#------------------------------------------------------------------------------
+
+class ClassAPIWriter(object):
+    """Class writer object
+    """
+    
+    _doc_template = \
+"""%(title)s
+%(underline)s
+
+.. module:`%(modname)s`
+
+.. autoclass:: %(fqlclass)s
+    :members:
+    :undoc-members:
+    :inherited-members:
+
+"""
+    
+    def __init__(self, cls, outputdir, extension):
+        if not inspect.isclass(cls):
+            raise TypeError("Expected class type, found %s" % str(type(cls)))
+        self._filename = os.path.join(outputdir, cls.__name__ + extension)
+        self._cls = cls
+        
+    def write(self):
+        rstfile = open(self._filename, 'w')
+        classname = self._cls.__name__
+        underline = '='*len(classname) # Sphinx doesn't like the title underline being incorrect
+        
+        # FQL name could contain '_cmodule' aswell, strip this off
+        modname = self._cls.__module__
+        pieces = modname.split('.')
+        fqlmod = ''
+        for p in pieces:
+            if not p.startswith('_'):
+                fqlmod += p + '.'
+        fqlclass = fqlmod + classname
+        fqlmod = fqlmod.rstrip('.') 
+
+        # Write the file
+        rstfile.write(self._doc_template % {'title':classname, 'underline':underline,'modname':fqlmod, 'fqlclass':fqlclass})
+        rstfile.close()
+        
+    def filename(self):
+        return self._filename
+
+if __name__ == '__main__':
+    extension = '.rst'
+    apidir = os.path.join(os.path.dirname(__file__), 'api')
+    output_dir = os.path.join(apidir,'generated')
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
+    
+    indexfilename = os.path.join(apidir, 'autogen.txt')
+    indexfile = open(indexfilename, 'w')
+    indexfile.write(".. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n")
+    indexfile.write(".. toctree::\n\n")
+
+    print "Generating API docs"
+    for name, member in inspect.getmembers(mantid):
+        if inspect.isclass(member):
+            apiwriter = ClassAPIWriter(member, output_dir, extension)
+        else:
+            continue
+        apiwriter.write()
+        indexfile.write("   generated/" + os.path.basename(apiwriter.filename()) + "\n")
+    indexfile.close()
+    print "Completed autogenerating API docs"

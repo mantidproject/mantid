@@ -2,10 +2,10 @@
 Mantid Python Documentation
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-.. htmlonly::
+:Release: |release|
+:Date: |today|
 
-   :Release: |release|
-   :Date: |today|
+.. default-domain:: py
    
 Welcome to the Mantid Python documentation
    
