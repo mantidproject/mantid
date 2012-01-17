@@ -697,54 +697,47 @@ std::vector<double>
 ConvertToMDEvents::getTransfMatrix(API::MatrixWorkspace_sptr inWS,MDEvents::MDWSDescription &TargWSDescription,bool is_powder)const
 {
   
-    Kernel::Matrix<double> mat(3,3);
-    mat.identityMatrix();
+    Kernel::Matrix<double> mat(3,3,true);
+    Kernel::Matrix<double> umat;
+    Geometry::OrientedLattice Latt;
 
-    if(!is_powder){
-      if(!TargWSDescription.is_uv_default)
-      {
-        try{
-          // set the transformation matrix on the basis of the oriented lattice
-           Geometry::OrientedLattice Latt = inWS->sample().getOrientedLattice();      
-          // thansform the lattice above into the notional coordinate system related to projection vectors u,v;
-           //Kernel::Matrix<double> umat = Latt.setUFromVectors(TargWSDescription.u,TargWSDescription.v);
-           //TODO: This code needs careful verification for non-orthogonal axis
-           Latt.setUFromVectors(TargWSDescription.u,TargWSDescription.v);
-
-           Kernel::Matrix<double> gon =inWS->run().getGoniometer().getR();
-
-          // Obtain the transformation matrix:
-          // mat = gon*umat ;
-          //TODO: This code needs careful verification for non-orthogonal axis
-           mat = gon*Latt.getUB();
-           mat.Invert();
-        }catch(std::runtime_error &){
-            convert_log.warning()<<" Can not obtain transformation matrix from the input workspace: "<<inWS->name()<<" as no oriented lattice has been defined. Use unit transformation matrix anyway\n";
+    bool has_lattice(false);
+    try{
+        // try to get the oriented lattice
+        Latt = inWS->sample().getOrientedLattice();      
+        has_lattice=true;
+    }catch(std::runtime_error &){
+        if(!is_powder){
+            convert_log.warning()<<
+                " Can not obtain transformation matrix from the input workspace: "<<inWS->name()<<" as no oriented lattice has been defined. Use unit transformation matrix anyway\n";
         }
+    }
+    //
+    if(has_lattice){
+      if(TargWSDescription.is_uv_default){
+         // we need to set up u,v for axis caption as it defined in UB matrix;
+         TargWSDescription.u = Latt.getuVector();
+         TargWSDescription.v = Latt.getvVector(); 
+         umat  = Latt.getU();
       }else{
-        try{
-          // set the transformation matrix on the basis of the oriented lattice
-           Geometry::OrientedLattice Latt = inWS->sample().getOrientedLattice();      
-          // thansform the lattice above into the notional coordinate system related to projection vectors u,v;
-           //Kernel::Matrix<double> umat = Latt.setUFromVectors(u,v);
-           //TODO: This code needs careful verification for non-orthogonal axis
-           Kernel::Matrix<double> gon =inWS->run().getGoniometer().getR();
-          // Obtain the transformation matrix:
-          // mat = gon*umat ;
-          //TODO: This code needs careful verification for non-orthogonal axis
-           mat = gon*Latt.getUB();
-           mat.Invert();
-           // we need to set up u,v for axis caption
-           TargWSDescription.u = Latt.getuVector();
-           TargWSDescription.v = Latt.getvVector();
-        }catch(std::runtime_error &){
-            convert_log.warning()<<" Can not obtain transformation matrix from the input workspace: "<<inWS->name()<<" as no oriented lattice has been defined. Use unit transformation matrix anyway\n";
-        }
+         // thansform the lattice above into the notional coordinate system related to projection vectors u,v;
+         umat = Latt.setUFromVectors(TargWSDescription.u,TargWSDescription.v);
+         //TODO: This code needs careful verification for non-orthogonal axis
+         //Latt.setUFromVectors(TargWSDescription.u,TargWSDescription.v);
       }
-    }else{  // it is powder. u,v should not be used but let's define them just in case
+      Kernel::Matrix<double> gon =inWS->run().getGoniometer().getR();
+       // Obtain the transformation matrix:
+      mat = gon*umat ;
+      //TODO: This code needs careful verification for non-orthogonal axis
+       //mat = gon*Latt.getUB();
+      mat.Invert();
+    }
+
+    if(is_powder){ // it is powder. u,v should not be used but let's define them just in case
         TargWSDescription.u=Kernel::V3D(1,0,0);
         TargWSDescription.v=Kernel::V3D(0,1,0);
     }
+   
     std::vector<double> rotMat = mat.get_vector();
     return rotMat;
 }
