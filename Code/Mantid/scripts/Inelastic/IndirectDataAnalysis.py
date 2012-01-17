@@ -1,5 +1,5 @@
 from mantidsimple import *
-from mantidplotpy import *
+from mantidplot import *
 from IndirectCommon import *
 
 import math, re, os.path

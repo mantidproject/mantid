@@ -237,7 +237,7 @@ namespace SliceViewer
 
   //----------------------------------------------------------------------------------------------
   /// Paint the overlay
-  void LineOverlay::paintEvent(QPaintEvent * /*event*/)
+  void LineOverlay::paintEvent(QPaintEvent */*event*/)
   {
     // Don't paint until created
     // Also, don't paint while right-click dragging (panning) the underlying pic
