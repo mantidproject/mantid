@@ -22,6 +22,19 @@ class WorkspaceMementoTest : public CxxTest::TestSuite
 
 private:
 
+/// Mock class
+class MockWorkspaceMemento : public WorkspaceMemento
+{
+public:
+  MOCK_CONST_METHOD0(getId, std::string());
+  MOCK_CONST_METHOD0(locationType, std::string());
+  MOCK_CONST_METHOD0(checkStillThere, bool());
+  MOCK_CONST_METHOD1(fetchIt, Mantid::API::Workspace_sptr(FetchProtocol));
+  MOCK_METHOD0(cleanUp, void());
+  MOCK_METHOD0(applyActions, Mantid::API::Workspace_sptr());
+  ~MockWorkspaceMemento(){};
+};
+
 /// Helper type. Concrete Workspace Memento.
 class ConcreteWorkspaceMemento : public WorkspaceMemento
 {
@@ -63,13 +76,13 @@ public:
 
   void testGetEmptyUB()
   {
-    ConcreteWorkspaceMemento memento;
+    MockWorkspaceMemento memento;
     TSM_ASSERT("Should be empty if no ub provided.", memento.getUB().empty());
   }
 
   void testSetUB()
   {
-    ConcreteWorkspaceMemento memento;
+    MockWorkspaceMemento memento;
     memento.setUB(1, 2, 3, 4, 5, 6, 7, 8, 9);
     std::vector<double> ub = memento.getUB();
     TS_ASSERT_EQUALS(1, ub[0]);
@@ -94,6 +107,19 @@ public:
     ConcreteWorkspaceMemento memento;
     memento.setUB(1, 2, 3, 4, 5, 6, 7, 8, 9);
     TS_ASSERT_EQUALS(WorkspaceMemento::Ready, memento.generateStatus());
+  }
+
+  void testScopedMemento()
+  {
+    MockWorkspaceMemento* mock = new MockWorkspaceMemento;
+    EXPECT_CALL(*mock, checkStillThere()).Times(1);
+    EXPECT_CALL(*mock, cleanUp()).Times(1);
+    WorkspaceMemento_sptr sptr(mock);
+    {
+      ScopedMemento memento(sptr);
+      TS_ASSERT_THROWS_NOTHING(memento->checkStillThere());
+    }
+    TSM_ASSERT("ScopedMemento has not been used as expected", Mock::VerifyAndClearExpectations(mock));
   }
 
 };

@@ -80,30 +80,6 @@ DECLARE_SUBWINDOW(CreateMDWorkspace);
     }
   };
 
-
-  class ScopedMemento
-  {
-  private:
-    WorkspaceMemento_sptr m_memento;
-    ScopedMemento(const ScopedMemento & other);
-    ScopedMemento & operator= (const ScopedMemento & other);
-  public:
-    ScopedMemento(WorkspaceMemento_sptr memento) : m_memento(memento)
-    {
-    }
-    WorkspaceMemento* operator->() const
-    {
-      return m_memento.get();
-    }
-    ~ScopedMemento()
-    {
-      if(m_memento != NULL)
-      {
-        m_memento->cleanUp();
-      }
-    }
-  };
-
 /*
 Constructor taking a WorkspaceMementoCollection, which acts as the model.
 */

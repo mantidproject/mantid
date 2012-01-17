@@ -51,7 +51,6 @@ namespace MantidQt
       // Status enumeration type.
       enum Status{NoOrientedLattice=0, Ready};
       
-
       /// Constructor for the workspace memento.
       WorkspaceMemento();
       /**
@@ -130,6 +129,35 @@ namespace MantidQt
     typedef boost::shared_ptr<WorkspaceMemento> WorkspaceMemento_sptr;
     /// Collection of WorkspaceMementos.
     typedef std::vector<WorkspaceMemento_sptr> WorkspaceMementoCollection;
+
+    
+    /*
+    Resource managing Smart pointer. 
+    Guarantees cleanUp is called on WorkspaceMementos when out of scope.
+    */
+    class ScopedMemento
+    {
+    private:
+      WorkspaceMemento_sptr m_memento;
+      ScopedMemento(const ScopedMemento & other);
+      ScopedMemento & operator= (const ScopedMemento & other);
+    public:
+      ScopedMemento(WorkspaceMemento_sptr memento) : m_memento(memento)
+      {
+      }
+      WorkspaceMemento* operator->() const
+      {
+        return m_memento.get();
+      }
+      ~ScopedMemento()
+      {
+        if(m_memento != NULL)
+        {
+          m_memento->cleanUp();
+        }
+      }
+    };
+
   }
 }
 
