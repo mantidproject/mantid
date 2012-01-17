@@ -321,17 +321,13 @@ class Stitcher(object):
         
         ws_combined = "combined_Iq"
         
-        # Copy over dQ
-        CloneWorkspace(InputWorkspace=self._data_sets[0].get_scaled_ws(),
-                       OutputWorkspace=ws_combined)
+        first_ws = self._data_sets[0].get_scaled_ws()
 
-        x = mtd[ws_combined].dataX(0)
-        dx = mtd[ws_combined].dataDx(0)
-        y = mtd[ws_combined].dataY(0)
-        e = mtd[ws_combined].dataE(0)
-        HISTO = False
+        x = mtd[first_ws].dataX(0)
+        dx = mtd[first_ws].dataDx(0)
+        y = mtd[first_ws].dataY(0)
+        e = mtd[first_ws].dataE(0)
         if len(x)==len(y)+1:
-            HISTO = True
             xtmp = [(x[i]+x[i+1])/2.0 for i in range(len(y))]
             dxtmp = [(dx[i]+dx[i+1])/2.0 for i in range(len(y))]
             x = xtmp
@@ -365,52 +361,17 @@ class Stitcher(object):
         combined = sorted(zipped, cmp)
         x,y,e,dx = zip(*combined)
         
-        xtmp = mtd[ws_combined].dataX(0)
-        ytmp = mtd[ws_combined].dataY(0)
-        etmp = mtd[ws_combined].dataE(0)
+        CreateWorkspace(DataX=x, DataY=y, DataE=e,
+                       OutputWorkspace=ws_combined,
+                       UnitX="MomentumTransfer",
+                       ParentWorkspace=first_ws)
+        
         dxtmp = mtd[ws_combined].dataDx(0)
         
-        # Use the space we have in the current data vectors
-        npts = len(ytmp)
-        if len(y)>=npts:
-            for i in range(npts):
-                xtmp[i] = x[i]
-                ytmp[i] = y[i]
-                etmp[i] = e[i]
-                dxtmp[i] = dx[i]
-            if len(y)>npts:
-                if HISTO:
-                    xtmp[npts] = x[npts]
-                    dxtmp[npts] = dx[npts]
-                    xtmp.extend(x[npts+1:])
-                    ytmp.extend(y[npts:])
-                    etmp.extend(e[npts:])
-                    dxtmp.extend(dx[npts+1:])
-                else:
-                    xtmp.extend(x[npts:])
-                    ytmp.extend(y[npts:])
-                    etmp.extend(e[npts:])
-                    dxtmp.extend(dx[npts:])
-        else:
-            for i in range(len(y)):
-                xtmp[i] = x[i]
-                ytmp[i] = y[i]
-                etmp[i] = e[i]
-                dxtmp[i] = dx[i]
-            for i in range(len(y),npts):
-                xtmp[i] = xtmp[len(y)-1]+1.0
-                ytmp[i] = 0.0
-                etmp[i] = 0.0
-                dxtmp[i] = 0.0
-                if HISTO:
-                    xtmp[len(y)] = xtmp[len(y)-1]
-                    dxtmp[len(y)] = 0.0
-            CropWorkspace(InputWorkspace=ws_combined, OutputWorkspace=ws_combined, XMin=0.0, XMax=xtmp[len(y)-1])
-        return ws_combined
-        
-                    
-                    
+        # Fill out dQ
+        npts = len(x)
+        for i in range(npts):
+            dxtmp[i] = dx[i]
             
-        
-        
+        return ws_combined
         

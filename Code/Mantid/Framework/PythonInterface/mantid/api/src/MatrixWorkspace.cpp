@@ -39,6 +39,8 @@ void export_MatrixWorkspace()
        return_internal_reference<>(), "Return the spectra at the given workspace index.")
     .def("getDetector", (IDetector_sptr (MatrixWorkspace::*) (const size_t) const)&MatrixWorkspace::getDetector,
         "Return the Detector or DetectorGroup that is linked to the given workspace index")
+    .def("getRun", &MatrixWorkspace::mutableRun, return_internal_reference<>(),
+             "Return the Run object for this workspace")
     .def("axes", &MatrixWorkspace::axes, "Returns the number of axes attached to the workspace")
     .def("getAxis", &MatrixWorkspace::getAxis, return_internal_reference<>())
     .def("isHistogramData", &MatrixWorkspace::isHistogramData, "Returns True if this is conisdered to be binned data.")
