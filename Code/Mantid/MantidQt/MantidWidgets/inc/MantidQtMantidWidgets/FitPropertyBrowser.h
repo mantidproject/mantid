@@ -171,8 +171,6 @@ public:
   /// Creates the "Constraints" property value for the Fit algorithm
   QString getConstraintsString()const;
 
-  void init();
-
   // send parameterChanged signal
   void sendParameterChanged(const Mantid::API::IFitFunction* f){emit parameterChanged(f);}
 
@@ -303,7 +301,15 @@ private slots:
 
   void executeCustomSetupLoad(const QString& name);
   void executeCustomSetupRemove(const QString& name);
+
+protected:
+  /// actions to do before the browser made visible
+  virtual void showEvent(QShowEvent* e);
+  /// actions to do before the browser is hidden
+  virtual void hideEvent(QHideEvent* e);
+
 private:
+
   /// load and save function
   void loadFunction(const QString& funcString);
   void saveFunction(const QString& fnName);

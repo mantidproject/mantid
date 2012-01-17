@@ -7815,7 +7815,8 @@ void ApplicationWindow::selectMultiPeak(bool showFitPropertyBrowser)
       //Called when setting up usual peakPickerTool
       PeakPickerTool* ppicker = new PeakPickerTool(g, mantidUI->fitFunctionBrowser(), mantidUI, showFitPropertyBrowser);
       g->setActiveTool(ppicker);
-      connect(plot,SIGNAL(windowStateChanged(Qt::WindowStates, Qt::WindowStates)),ppicker,SLOT(windowStateChanged(Qt::WindowStates, Qt::WindowStates)));
+      // do we need this? PeakPickerTool::windowStateChanged does nothing
+      //connect(plot,SIGNAL(windowStateChanged(Qt::WindowStates, Qt::WindowStates)),ppicker,SLOT(windowStateChanged(Qt::WindowStates, Qt::WindowStates)));
     }
   }
 

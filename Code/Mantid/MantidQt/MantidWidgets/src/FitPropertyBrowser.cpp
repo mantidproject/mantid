@@ -399,21 +399,14 @@ m_mantidui(mantidui)
 
   m_changeSlotsEnabled = true;
     
-  // Observe what workspaces are added and deleted unless it's a custom fitting, all workspaces for custom fitting (eg muon analysis) 
-  // should be manually added.
-  if (!m_customFittings)
-  {
-    observeAdd();
-  }
-  observePostDelete();
-
-  init();
+  populateFunctionNames();
 
   // Should only be done for the fitBrowser which is part of MantidPlot
   if (!m_customFittings)
   {
     if (m_mantidui->metaObject()->indexOfMethod("executeAlgorithm(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)") >= 0)
     {
+      // this make the progress bar work with Fit algorithm running form the fit browser
       connect(this,SIGNAL(executeFit(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)),
         m_mantidui,SLOT(executeAlgorithm(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)));
     }
@@ -913,6 +906,12 @@ std::string FitPropertyBrowser::workspaceName()const
 void FitPropertyBrowser::setWorkspaceName(const QString& wsName)
 {
   int i = m_workspaceNames.indexOf(wsName);
+  if (i < 0)
+  {
+    // workspace may not be found because add notification hasn't been processed yet
+    populateWorkspaceNames();
+    i = m_workspaceNames.indexOf(wsName);
+  }
   if (i >= 0)
   {
     m_enumManager->setValue(m_workspace,i);
@@ -1512,10 +1511,30 @@ void FitPropertyBrowser::populateWorkspaceNames()
   m_enumManager->setEnumNames(m_workspace, m_workspaceNames);
 }
 
-void FitPropertyBrowser::init()
+/**
+ * Connect to the AnalysisDataServis when shown
+ */
+void FitPropertyBrowser::showEvent(QShowEvent* e)
 {
-  populateFunctionNames();
+  (void)e;
+  // Observe what workspaces are added and deleted unless it's a custom fitting, all workspaces for custom fitting (eg muon analysis) 
+  // should be manually added.
+  if (!m_customFittings)
+  {
+    observeAdd();
+  }
+  observePostDelete();
   populateWorkspaceNames();
+}
+
+/**
+ * Disconnect from the AnalysisDataServis when hiden
+ */
+void FitPropertyBrowser::hideEvent(QHideEvent* e)
+{
+  (void)e;
+  observeAdd(false);
+  observePostDelete(false);
 }
 
 /// workspace was added
