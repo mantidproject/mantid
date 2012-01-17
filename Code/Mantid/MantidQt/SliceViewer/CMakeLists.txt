@@ -136,11 +136,11 @@ if ( ${CMAKE_SYSTEM} MATCHES ".*\\.el5" )
 else ()
 
 	if ( PYUNITTEST_FOUND )
-	  pyunittest_add_test ( SliceViewerTest.py ${TEST_PY_FILES} "" )
-	  add_dependencies ( SliceViewerTest.py MantidQt Algorithms )
-	  add_dependencies ( GUITests SliceViewerTest.py )
+	  pyunittest_add_test ( SliceViewerMantidPlotTest.py ${TEST_PY_FILES} "" )
+	  add_dependencies ( SliceViewerMantidPlotTest.py MantidQt Algorithms )
+	  add_dependencies ( GUITests SliceViewerMantidPlotTest.py )
 	  # Add to the 'UnitTests' group in VS
-	  set_property ( TARGET SliceViewerTest.py PROPERTY FOLDER "UnitTests" )
+	  set_property ( TARGET SliceViewerMantidPlotTest.py PROPERTY FOLDER "UnitTests" )
 	endif ()
 endif ()
 

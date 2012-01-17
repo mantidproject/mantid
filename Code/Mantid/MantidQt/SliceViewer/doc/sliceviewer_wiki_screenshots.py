@@ -31,4 +31,16 @@ import os
 # This requires imagemagick. Converts to a nifty animated gif.
 os.system("convert /home/8oz/Code/Mantid/Code/Mantid/MantidQt/SliceViewer/doc/anim*.png /home/8oz/Code/Mantid/Code/Mantid/MantidQt/SliceViewer/doc/SliceViewer_SlicePoint_Animation.gif")
 
+# =============
+BinMD(InputWorkspace='topaz_q',AlignedDimX='Q_lab_x, 0, 6, 120',AlignedDimY='Q_lab_y, -3, 3, 120',AlignedDimZ='Q_lab_z, 0, 6, 120', OutputWorkspace='bin_q')
+
+sv = plotSlice('bin_q', slicepoint=[0,0, 4.15], colorscalelog=True, limits=[2,4,-1,1])
+n = 0
+for y in np.linspace(-0.2, 0.2, 21):
+	lv = sv.showLine(start=[2.5,y], end=[3.5,y], width=0.1)
+	n += 1
+	pix = QtGui.QPixmap.grabWidget(sv._getHeldObject())
+	pix.save("anim%02d.png" % n)
+	
+
 closeAllSliceViewers()
