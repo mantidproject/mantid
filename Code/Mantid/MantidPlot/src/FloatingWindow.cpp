@@ -17,13 +17,16 @@
  * Constructor.
  */
 FloatingWindow::FloatingWindow(ApplicationWindow* appWindow, Qt::WindowFlags f):
+#ifdef Q_OS_WIN
+QMainWindow(appWindow,f),
+#else
 QMainWindow(NULL,f),
-//QMainWindow(appWindow,f),
+#endif
 d_app(appWindow)
 {
   setFocusPolicy(Qt::StrongFocus);
   connect(appWindow,SIGNAL(shutting_down()),this,SLOT(close()));
-#ifdef _WIN32
+#ifdef Q_OS_WIN
   // remember the flags
   m_flags = windowFlags();
 #endif
@@ -74,7 +77,7 @@ bool FloatingWindow::event(QEvent * e)
   {
     if (this->isMinimized())
     {
-#ifdef _WIN32
+#ifdef Q_OS_WIN
       // set parent to NULL wich makes it minimize nicely into a program bar icon
       this->setParent(NULL);
       this->showMinimized();
@@ -84,7 +87,7 @@ bool FloatingWindow::event(QEvent * e)
     }
     else if ( !this->isMaximized() || !this->isMinimized() )
     {
-#ifdef _WIN32
+#ifdef Q_OS_WIN
       // re-parent to the main window making the floating window stay on top of it
       if (this->parent() != d_app)
       {
@@ -97,7 +100,7 @@ bool FloatingWindow::event(QEvent * e)
     }
     else if (this->isMaximized())
     {
-#ifdef _WIN32
+#ifdef Q_OS_WIN
       // re-parent to the main window making the floating window stay on top of it
       if (this->parent() != d_app)
       {
