@@ -20,7 +20,7 @@ except:
 # Check whether we are running in MantidPlot
 IS_IN_MANTIDPLOT = False
 try:
-    import mantidplotpy
+    import mantidplot
     IS_IN_MANTIDPLOT = True
 except:
     pass
