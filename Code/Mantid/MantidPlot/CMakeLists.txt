@@ -799,16 +799,19 @@ endif( WIN32 )
 # Now copy the required python files into the build destination
 ###########################################################################
 
-# Command to copy when MantidPlot rebuilds. Does not work if the .py files ONLY were modified!
-add_custom_command ( TARGET MantidPlot POST_BUILD 
-                     COMMAND ${CMAKE_COMMAND} ARGS -E copy
-                       ${CMAKE_CURRENT_SOURCE_DIR}/mantidplotrc.py
-                       ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
-                     DEPENDS  mantidplotrc.py
-                     COMMENT "Copying mantidplotrc.py" 
-)
-# Perform a copy at cmake run time
-configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/mantidplotrc.py ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} COPYONLY ) 
+set ( PYTHON_INSTALL_FILES mantidplotrc.py mantidplot.py)
+foreach ( PYFILE ${PYTHON_INSTALL_FILES} )
+  # Command to copy when MantidPlot rebuilds. Does not work if the .py files ONLY were modified!
+  add_custom_command ( TARGET MantidPlot POST_BUILD
+                       COMMAND ${CMAKE_COMMAND} ARGS -E copy
+                         ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE}
+                         ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
+                       DEPENDS ${PYFILE}
+                       COMMENT "Copying ${PYFILE}"
+  )
+  # Perform a copy at cmake run time
+  configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} COPYONLY ) 
+endforeach ( PYFILE ${PYTHON_INSTALL_FILES} )
 
 add_custom_command ( TARGET MantidPlot POST_BUILD
                      COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory
@@ -887,7 +890,7 @@ endif()
 install ( TARGETS MantidPlot RUNTIME DESTINATION ${BIN_DIR} 
                              BUNDLE DESTINATION .
 )
-install ( FILES mantidplotrc.py DESTINATION ${BIN_DIR} )
+install ( FILES ${PYTHON_INSTALL_FILES} DESTINATION ${BIN_DIR} )
 install ( DIRECTORY mantidplotpy DESTINATION ${BIN_DIR} )
 install ( DIRECTORY ipython_plugin DESTINATION ${BIN_DIR} )
 

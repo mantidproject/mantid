@@ -598,6 +598,7 @@ startmenuQTIPlot = addTo(QTIPlotEXE,'Shortcut',{'Id':'startmenuQTIPlot','Directo
 desktopQTIPlot = addTo(QTIPlotEXE,'Shortcut',{'Id':'desktopQTIPlot','Directory':'DesktopFolder','Name':'MPlot','LongName':'MantidPlot','WorkingDirectory':'MantidBin','Icon':'MantidPlot.exe','IconIndex':'0'})
     
 addFileV('mantidplotrc', 'mtdrc.py', 'mantidplotrc.py', CODEDIR + '/Mantid/MantidPlot/mantidplotrc.py', MantidDlls)
+addFileV('mtdplot', 'mtdplot.py', 'mantidplot.py', CODEDIR + '/Mantid/MantidPlot/mantidplot.py', MantidDlls)
 mantidplot = addCompList('mtdpltmod',CODEDIR + '/Mantid/MantidPlot/mantidplotpy','mantidplotpy',binDir)[0]
 ipython = addCompList('ipython',CODEDIR + '/Mantid/MantidPlot/ipython_plugin','ipython_plugin',binDir)[0]
 

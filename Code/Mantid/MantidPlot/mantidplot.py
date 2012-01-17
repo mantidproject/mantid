@@ -9,7 +9,7 @@ except ImportError:
     raise ImportError('The "mantidplot" module can only be used from within MantidPlot.')
 
 
-import proxies
+import mantidplotpy.proxies as proxies
 
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt
