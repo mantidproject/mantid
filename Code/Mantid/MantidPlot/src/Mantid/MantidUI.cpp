@@ -1776,9 +1776,11 @@ void MantidUI::manageMantidWorkspaces()
 #endif
 }
 
-/**
- * Create an instrument window from a named workspace or simply return the window if
- * it already exists
+/** Create an instrument window from a named workspace.
+ *  The window will be returned hidden.
+ *  @param wsName The name of the workspace for which to generate the instrument view.
+ *  @param tab    The index of the tab (starting from 0) to initially display (default: 0)
+ *  @return A pointer to the instrument window widget if created. NULL otherwise.
  */
 InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName, int tab)
 {
@@ -1816,6 +1818,8 @@ InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName, int tab)
   insWin->selectTab(tab);
 
   appWindow()->addMdiSubWindow(insWin);
+  // When called from python, we want the window to start out hidden.
+  insWin->hide();
 
   connect(insWin,SIGNAL(plotSpectra(const QString&,const std::set<int>&)),this,
       SLOT(plotSpectraList(const QString&,const std::set<int>&)));
