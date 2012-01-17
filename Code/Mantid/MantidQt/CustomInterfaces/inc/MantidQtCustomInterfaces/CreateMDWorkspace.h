@@ -42,6 +42,8 @@ namespace MantidQt
       void addUniqueMemento(WorkspaceMemento_sptr candidate);
       /// Get the first selected memento.
       WorkspaceMemento_sptr getFirstSelected();
+      /// Find files of a certain type
+      QStringList findFiles(const std::string fileType) const;
 
     private slots:
 

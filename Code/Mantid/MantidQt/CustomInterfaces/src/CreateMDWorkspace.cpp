@@ -356,50 +356,75 @@ void CreateMDWorkspace::addUniqueMemento(WorkspaceMemento_sptr candidate)
 }
 
 /*
-Add a nexus file from the ADS
+Select and return files with a given file extension.
+*/
+QStringList CreateMDWorkspace::findFiles(const std::string fileType) const
+{
+  QFileDialog dialog;
+  dialog.setDirectory(QDir::homePath());
+  dialog.setFileMode(QFileDialog::ExistingFiles);
+  dialog.setNameFilter(QString(fileType.c_str()));
+  QStringList fileNames;
+  if (dialog.exec())
+  {
+    fileNames = dialog.selectedFiles();
+  }
+  return fileNames;
+}
+
+/*
+Add a nexus files on disk
 */
 void CreateMDWorkspace::addNexusFileClicked()
 {
-  QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
-    "/home",
-    tr("Raw Files (*.nxs)"));
+  QStringList fileNames = findFiles("Raw Files (*.nxs)");
 
-  std::string name = fileName.toStdString();
-  if(!name.empty())
+  QStringList::iterator it = fileNames.begin();
+  QStringList::const_iterator end = fileNames.end();
+  while(it != fileNames.end())
   {
-    try
+    std::string name = (*it).toStdString();
+    if(!name.empty())
     {
-      WorkspaceMemento_sptr candidate(new RawFileMemento(name));
-      addUniqueMemento(candidate);
+      try
+      {
+        WorkspaceMemento_sptr candidate(new RawFileMemento(name));
+        addUniqueMemento(candidate);
+      }
+      catch(std::invalid_argument& arg)
+      {
+        this->runConfirmation(arg.what());
+      }
     }
-    catch(std::invalid_argument& arg)
-    {
-      this->runConfirmation(arg.what());
-    }
+    ++it;
   }
 }
 
 /*
-Add an Event nexus file from the ADS
+Add an Event nexus files on disk
 */
 void CreateMDWorkspace::addEventNexusFileClicked()
 {
-  QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
-    "/home",
-    tr("Event Nexus files (*.nxs)"));
+  QStringList fileNames = findFiles("Event Nexus files (*.nxs)");
 
-  std::string name = fileName.toStdString();
-  if(!name.empty())
+  QStringList::iterator it = fileNames.begin();
+  QStringList::const_iterator end = fileNames.end();
+  while(it != fileNames.end())
   {
-    try
+    std::string name = (*it).toStdString();
+    if(!name.empty())
     {
-      WorkspaceMemento_sptr candidate(new EventNexusFileMemento(name));
-      addUniqueMemento(candidate);
+      try
+      {
+        WorkspaceMemento_sptr candidate(new EventNexusFileMemento(name));
+        addUniqueMemento(candidate);
+      }
+      catch(std::invalid_argument& arg)
+      {
+        this->runConfirmation(arg.what());
+      }
     }
-    catch(std::invalid_argument& arg)
-    {
-      this->runConfirmation(arg.what());
-    }
+    ++it;
   }
 }
 
