@@ -336,7 +336,6 @@ class Stitcher(object):
             dxtmp = [(dx[i]+dx[i+1])/2.0 for i in range(len(y))]
             x = xtmp
             dx = dxtmp
-        print len(x), len(y)
         x, y, e, dx = self.trim_zeros(x, y, e, dx)
         
         for d in self._data_sets[1:]:
