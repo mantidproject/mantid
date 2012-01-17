@@ -388,6 +388,7 @@ void MdViewerWidget::checkForUpdates()
 void MdViewerWidget::switchViews(ModeControlWidget::Views v)
 {
   this->currentView->closeSubWindows();
+  this->destroyDialogs();
   this->removeProxyTabWidgetConnections();
   this->hiddenView = this->setMainViewWidget(this->ui.viewWidget, v);
   this->hiddenView->hide();
@@ -529,6 +530,27 @@ void MdViewerWidget::onRotationPoint()
   this->rotPointDialog->show();
   this->rotPointDialog->raise();
   this->rotPointDialog->activateWindow();
+}
+
+/**
+ * This function deletes the present instances of the color options and the
+ * point rotation dialog boxes. This is necessary on switch view since the
+ * connection to the current view is destroyed.
+ */
+void MdViewerWidget::destroyDialogs()
+{
+  if (NULL != this->colorDialog)
+  {
+    this->colorDialog->close();
+    delete this->colorDialog;
+    this->colorDialog = NULL;
+  }
+  if (NULL != this->rotPointDialog)
+  {
+    this->rotPointDialog->close();
+    delete this->rotPointDialog;
+    this->rotPointDialog = NULL;
+  }
 }
 
 } // namespace SimpleGui

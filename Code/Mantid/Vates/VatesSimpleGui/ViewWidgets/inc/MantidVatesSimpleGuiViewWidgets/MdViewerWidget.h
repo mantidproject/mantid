@@ -124,6 +124,8 @@ private:
   void createAppCoreForPlugin();
   /// Add view specific stuff to a menu.
   void createMenus();
+  /// Delete dialog instances.
+  void destroyDialogs();
   /// Consolidate constructor related items.
   void internalSetup(bool pMode);
   /// Disable communication with the proxy tab widget.
