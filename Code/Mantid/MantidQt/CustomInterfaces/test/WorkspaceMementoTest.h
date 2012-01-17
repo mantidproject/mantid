@@ -22,7 +22,7 @@ class WorkspaceMementoTest : public CxxTest::TestSuite
 
 private:
 
-/// Mock class
+/// Mock Workspace Memento helper
 class MockWorkspaceMemento : public WorkspaceMemento
 {
 public:
@@ -34,43 +34,6 @@ public:
   MOCK_METHOD0(applyActions, Mantid::API::Workspace_sptr());
   ~MockWorkspaceMemento(){};
 };
-
-/// Helper type. Concrete Workspace Memento.
-class ConcreteWorkspaceMemento : public WorkspaceMemento
-{
-public:
-
-  virtual std::string getId() const
-  {
-    throw std::runtime_error("Not implemented");
-  }
-
-  virtual std::string locationType() const 
-  {
-    throw std::runtime_error("Not implemented");
-  }
-
-  virtual bool checkStillThere() const
-  {
-    throw std::runtime_error("Not implemented");
-  }
-
-  virtual Mantid::API::Workspace_sptr fetchIt(FetchProtocol) const
-  {
-    throw std::runtime_error("Not implemented");
-  }
-
-  virtual void cleanUp()
-  {
-    throw std::runtime_error("Not implemented");
-  }
-
-  virtual Mantid::API::Workspace_sptr applyActions()
-  {
-    throw std::runtime_error("Not implemented");
-  }
-};
-
 
 public:
 
@@ -98,13 +61,13 @@ public:
 
   void testStatusWithoutUB()
   {
-    ConcreteWorkspaceMemento memento;
+    MockWorkspaceMemento memento;
     TS_ASSERT_EQUALS(WorkspaceMemento::NoOrientedLattice, memento.generateStatus());
   }
 
   void testStatusWithUB()
   {
-    ConcreteWorkspaceMemento memento;
+    MockWorkspaceMemento memento;
     memento.setUB(1, 2, 3, 4, 5, 6, 7, 8, 9);
     TS_ASSERT_EQUALS(WorkspaceMemento::Ready, memento.generateStatus());
   }
