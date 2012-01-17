@@ -3,16 +3,17 @@
 
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidKernel/Logger.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 
 namespace Mantid
 {
 namespace MDEvents
 {
- /**  Lighteweith class wrapping together all parameters, related to MDEventoWorkspace used mainly to reduce number of parameters trasferred between 
+ /**  Lighteweith class wrapping together all parameters, related to MDEventoWorkspace description used mainly to reduce number of parameters trasferred between 
     * an algorithm, creating MD workspace and UI.
+    * It also defines some auxiliary functions, used for convenient description of MD workspace e.g. 
     *   
-    *   Introduced to decrease code bloat in methods and algorithms, which use MDEvents write interface and run-time defined number of dimensions
-    
+        
     @date 2011-28-12
 
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -61,10 +62,12 @@ namespace MDEvents
     /** vectors, which describe the projection plain the target ws is based on (notional coordinate system). The transformation matrix below 
       * should bring the momentums from lab coordinate system into notional coordinate system */
     Kernel::V3D u,v;
-    /// the indicator, informing if the uv plain has been set. If they are not, the UB matrix from the source workspace has to be used unaltered
+    /// the indicator, informing if the uv plain has been set as a parameter. If they are not, the UB matrix from the source workspace is be used uncnanged
     bool is_uv_default;
     /// the matrix to transform momentums of the workspace into notional target coordinate system
     std::vector<double> rotMatrix;  // should it be the Quat?
+    /// the oriented lattice which should be picked up from source ws and be carryed out to target ws as it can be modified by u,v on the way. 
+    Geometry::OrientedLattice Latt;
     /// helper function checks if min values are less them max values and are consistent between each other 
     void checkMinMaxNdimConsistent(Mantid::Kernel::Logger& log)const;
     /// the vector of default names for Q-directrions in reciprocal space;

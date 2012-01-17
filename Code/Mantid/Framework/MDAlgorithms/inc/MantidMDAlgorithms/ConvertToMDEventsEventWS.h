@@ -95,6 +95,10 @@ class ConvertToMDEvensEventWS: public IConvertToMDEventsMethods
         size_t nValidSpectra  = this->pDetLoc->det_id.size();
         // copy experiment info into target workspace
         API::ExperimentInfo_sptr ExperimentInfo(inWS2D->cloneExperimentInfo());
+
+        // set oriented lattice from workspace description, as this lattice can be modified by algorithm settings;
+        ExperimentInfo->mutableSample().setOrientedLattice(&TWS.Latt);
+   
         // run index;
         runIndex   = this->pWSWrapper->pWorkspace()->addExperimentInfo(ExperimentInfo);
 

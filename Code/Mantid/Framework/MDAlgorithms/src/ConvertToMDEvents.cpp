@@ -699,12 +699,12 @@ ConvertToMDEvents::getTransfMatrix(API::MatrixWorkspace_sptr inWS,MDEvents::MDWS
   
     Kernel::Matrix<double> mat(3,3,true);
     Kernel::Matrix<double> umat;
-    Geometry::OrientedLattice Latt;
+    
 
     bool has_lattice(false);
     try{
         // try to get the oriented lattice
-        Latt = inWS->sample().getOrientedLattice();      
+        TargWSDescription.Latt = inWS->sample().getOrientedLattice();      
         has_lattice=true;
     }catch(std::runtime_error &){
         if(!is_powder){
@@ -716,12 +716,12 @@ ConvertToMDEvents::getTransfMatrix(API::MatrixWorkspace_sptr inWS,MDEvents::MDWS
     if(has_lattice){
       if(TargWSDescription.is_uv_default){
          // we need to set up u,v for axis caption as it defined in UB matrix;
-         TargWSDescription.u = Latt.getuVector();
-         TargWSDescription.v = Latt.getvVector(); 
-         umat  = Latt.getU();
+         TargWSDescription.u = TargWSDescription.Latt.getuVector();
+         TargWSDescription.v = TargWSDescription.Latt.getvVector(); 
+         umat  = TargWSDescription.Latt.getU();
       }else{
          // thansform the lattice above into the notional coordinate system related to projection vectors u,v;
-         umat = Latt.setUFromVectors(TargWSDescription.u,TargWSDescription.v);
+         umat = TargWSDescription.Latt.setUFromVectors(TargWSDescription.u,TargWSDescription.v);
          //TODO: This code needs careful verification for non-orthogonal axis
          //Latt.setUFromVectors(TargWSDescription.u,TargWSDescription.v);
       }
