@@ -79,7 +79,7 @@ Logger& MuonAnalysis::g_log = Logger::get("MuonAnalysis");
 ///Constructor
 MuonAnalysis::MuonAnalysis(QWidget *parent) :
   UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_currentDataName(""), m_assigned(false), m_groupTableRowInFocus(0), m_pairTableRowInFocus(0),
-  m_tabNumber(0), m_groupNames(), m_groupingTempFilename("tempMuonAnalysisGrouping.xml"), m_settingsGroup("CustomInterfaces/MuonAnalysis/"), m_updating(false)
+  m_tabNumber(0), m_groupNames(), m_groupingTempFilename("tempMuonAnalysisGrouping.xml"), m_settingsGroup("CustomInterfaces/MuonAnalysis/"), m_updating(false), m_loaded(false)
 {
 }
 
@@ -1361,6 +1361,8 @@ void MuonAnalysis::clearTablesAndCombo()
  */
 void MuonAnalysis::createPlotWS(const std::string& groupName, const std::string& wsname)
 {
+  m_loaded = true;
+
   QString inputWS = m_workspace_name.c_str() + QString("Grouped");
 
   if ( m_uiForm.homePeriodBox2->isEnabled() && m_uiForm.homePeriodBox2->currentText()!="None" )
@@ -2952,7 +2954,8 @@ void MuonAnalysis::homeTabUpdatePlot()
   int choice(m_uiForm.plotCreation->currentIndex());
   if ((choice == 1 || choice == 2) && (!m_updating) && (m_tabNumber == 0) )
   {
-    runFrontPlotButton();
+    if (m_loaded == true)
+      runFrontPlotButton();
   }
 }
 
@@ -2961,7 +2964,8 @@ void MuonAnalysis::groupTabUpdateGroup()
   int choice(m_uiForm.plotCreation->currentIndex());
   if ((choice == 1 || choice == 2) && (!m_updating) && (m_tabNumber == 1) )
   {
-    runGroupTablePlotButton();
+    if (m_loaded == true)
+      runGroupTablePlotButton();
   }
 }
 
@@ -2970,7 +2974,8 @@ void MuonAnalysis::groupTabUpdatePair()
   int choice(m_uiForm.plotCreation->currentIndex());
   if ((choice == 1 || choice == 2) && (!m_updating) && (m_tabNumber == 1) )
   {
-    runPairTablePlotButton();
+    if (m_loaded == true)
+      runPairTablePlotButton();
   }
 }
 
@@ -2979,7 +2984,8 @@ void MuonAnalysis::settingsTabUpdatePlot()
   int choice(m_uiForm.plotCreation->currentIndex());
   if ((choice == 1 || choice == 2) && (!m_updating) && (m_tabNumber == 2) )
   {
-    runFrontPlotButton();
+    if (m_loaded == true)
+      runFrontPlotButton();
   }
 }
 
