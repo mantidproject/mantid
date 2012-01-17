@@ -56,12 +56,15 @@ namespace API
 
     /// Set the number of bins in each dimension to something corresponding to the estimated resolution of the finest binning
     virtual void estimateResolution() = 0;
-    /// get number of dimensions contained in initialized MD workspace
-    virtual size_t getNumDims()const=0;
-    /// split box function;
-    virtual void splitBox()=0;
-    //
-    virtual void refreshCache()=0;
+
+    /// Split the top-level MDBox into a MDGridBox.
+    virtual void splitBox() = 0;
+
+    /// Refresh the cache (integrated signal of each box)
+    virtual void refreshCache() = 0;
+
+    /// Return the type of event contained, as a string. MDEvent or MDLeanEvent
+    virtual std::string getEventTypeName() const = 0;
 
     /// Split all boxes that exceed the split threshold.
     virtual void splitAllIfNeeded(Kernel::ThreadScheduler * ts) = 0;

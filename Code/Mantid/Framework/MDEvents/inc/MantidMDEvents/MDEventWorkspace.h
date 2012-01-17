@@ -89,6 +89,9 @@ namespace MDEvents
     virtual  void splitBox();
 
     virtual  void refreshCache();
+
+    std::string getEventTypeName() const;
+
     //------------------------ (END) IMDEventWorkspace Methods -----------------------------------------
 
     Mantid::API::ITableWorkspace_sptr makeBoxTable(size_t start, size_t num);

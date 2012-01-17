@@ -35,7 +35,7 @@ public:
 
   void test_exec_fileBacked()
   {
-    do_test_exec("MergeMDTest_OutputWS.nxs");
+    do_test_exec("MergeMDFilesTest_OutputWS.nxs");
   }
   
   void do_test_exec(std::string OutputFilename)
@@ -46,14 +46,14 @@ public:
     for (size_t i=0; i<3; i++)
     {
       std::ostringstream mess;
-      mess << "MergeMDTestInput" << i;
+      mess << "MergeMDFilesTestInput" << i;
       MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeFileBackedMDEW(mess.str(), true);
       inWorkspaces.push_back(ws);
       filenames.push_back(ws->getBoxController()->getFilename());
     }
 
     // Name of the output workspace.
-    std::string outWSName("MergeMDTest_OutputWS");
+    std::string outWSName("MergeMDFilesTest_OutputWS");
   
     MergeMDFiles alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )

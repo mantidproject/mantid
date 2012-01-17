@@ -97,6 +97,17 @@ namespace MDEvents
 
 
   //-----------------------------------------------------------------------------------------------
+  /** Get the data type (id) of the events in the workspace.
+   * @return a string, either "MDEvent" or "MDLeanEvent"
+   */
+  TMDE(
+  std::string MDEventWorkspace)::getEventTypeName() const
+  {
+    return MDE::getTypeName();
+  }
+
+
+  //-----------------------------------------------------------------------------------------------
   /** Returns the number of dimensions in this workspace */
   TMDE(
   size_t MDEventWorkspace)::getNumDims() const

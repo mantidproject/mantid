@@ -10,6 +10,7 @@
 #include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidKernel/SingletonHolder.h"
 
 namespace Mantid
 {
@@ -54,11 +55,12 @@ namespace MDEventsTestHelper
    * @param max :: extent of each dimension (max)
    * @param numEventsPerBox :: will create one MDLeanEvent in the center of each sub-box.
    *        0 = don't split box, don't add events
-   * @return
+   * @param wsName :: if specified, then add the workspace to the analysis data service
+   * @return shared ptr to the created workspace
    */
   template<typename MDE, size_t nd>
   boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<MDE,nd> >
-    makeAnyMDEW(size_t splitInto, double min, double max, size_t numEventsPerBox = 0 )
+    makeAnyMDEW(size_t splitInto, double min, double max, size_t numEventsPerBox = 0, std::string wsName = "" )
   {
     boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<MDE,nd> >
             out(new Mantid::MDEvents::MDEventWorkspace<MDE,nd>());
@@ -97,6 +99,10 @@ namespace MDEventsTestHelper
       }
       out->refreshCache();
     }
+
+    // Add to ADS on option
+    if (!wsName.empty())
+      Mantid::API::AnalysisDataService::Instance().addOrReplace(wsName, out);
 
     return out;
   }
