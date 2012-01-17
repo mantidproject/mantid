@@ -51,14 +51,22 @@ void export_MatrixWorkspace()
        return_value_policy<return_by_value>(), "Set distribution flag. If True the workspace has been divided by the bin-width.")
     .def("replaceAxis", &MatrixWorkspace::replaceAxis)
     //--------------------------------------- Data access ---------------------------------------------------------------------------
-    .def("readX", &Mantid::PythonInterface::Numpy::wrapX,
+    .def("readX", &Mantid::PythonInterface::Numpy::readOnlyX,
           "Creates a read-only numpy wrapper around the original X data at the given index")
-    .def("readY", &Mantid::PythonInterface::Numpy::wrapY,
+    .def("readY", &Mantid::PythonInterface::Numpy::readOnlyY,
           "Creates a read-only numpy wrapper around the original Y data at the given index")
-    .def("readE", &Mantid::PythonInterface::Numpy::wrapE,
+    .def("readE", &Mantid::PythonInterface::Numpy::readOnlyE,
           "Creates a read-only numpy wrapper around the original E data at the given index")
-    .def("readDx", &Mantid::PythonInterface::Numpy::wrapDx,
-         "Creates a read-only numpy wrapper around the original E data at the given index")
+    .def("readDx", &Mantid::PythonInterface::Numpy::readOnlyDx,
+         "Creates a read-only numpy wrapper around the original Dx data at the given index")
+    .def("dataX", &Mantid::PythonInterface::Numpy::readWriteX,
+         "Creates a writable numpy wrapper around the original X data at the given index")
+    .def("dataY", &Mantid::PythonInterface::Numpy::readWriteY,
+         "Creates a writable numpy wrapper around the original Y data at the given index")
+    .def("dataE", &Mantid::PythonInterface::Numpy::readWriteE,
+         "Creates a writable numpy wrapper around the original E data at the given index")
+    .def("dataDx", &Mantid::PythonInterface::Numpy::readWriteDx,
+        "Creates a writable numpy wrapper around the original Dx data at the given index")
     .def("extractX", Mantid::PythonInterface::Numpy::cloneX, 
          "Extracts (copies) the X data from the workspace into a 2D numpy array. "
          "Note: This can fail for large workspaces as numpy will require a block "
