@@ -52,10 +52,11 @@ void MuonAnalysisOptionTab::initLayout()
            SLOT(runyAxisMinimumInput()));
   connect(m_uiForm.yAxisMaximumInput, SIGNAL(lostFocus()), this, 
            SLOT(runyAxisMaximumInput()));
-  connect(m_uiForm.yAxisAutoscale, SIGNAL(toggled(bool)), this, 
-             SLOT(runShowErrorBars(bool)));
   connect(m_uiForm.yAxisAutoscale, SIGNAL(toggled(bool)), this,  
            SLOT(runyAxisAutoscale(bool)));
+  connect(m_uiForm.plotCreation, SIGNAL(currentIndexChanged(int)), this, SLOT(plotCreationChanged(int)));
+  connect(m_uiForm.connectPlotType, SIGNAL(currentIndexChanged(int)), this, SLOT(plotTypeChanged(int)));
+  connect(m_uiForm.showErrorBars, SIGNAL(toggled(bool)), this, SLOT(errorBarsChanged(bool)));
 
   ////////////// Data Binning slots ///////////////
   connect(m_uiForm.rebinComboBox, SIGNAL(currentIndexChanged(int)), this, 
@@ -263,15 +264,26 @@ void MuonAnalysisOptionTab::runyAxisMaximumInput()
   }
 }
 
+void MuonAnalysisOptionTab::plotCreationChanged(int index)
+{
+  // save this new choice
+  QSettings group;
+  group.beginGroup(m_settingsGroup + "SettingOptions");
+  group.setValue("plotCreation", index);
+}
 
-/**
-* When clicking autoscale (slot)
-*/
-void MuonAnalysisOptionTab::runShowErrorBars(bool state)
+void MuonAnalysisOptionTab::plotTypeChanged(int index)
 {
   QSettings group;
-  group.beginGroup(m_settingsGroup + "plotStyleOptions");
-  group.setValue("showErrorBars", state);   
+  group.beginGroup(m_settingsGroup + "SettingOptions");
+  group.setValue("connectPlotStyle", index);
+}
+
+void MuonAnalysisOptionTab::errorBarsChanged(bool state)
+{
+  QSettings group;
+  group.beginGroup(m_settingsGroup + "SettingOptions");
+  group.setValue("errorBars", state);
 }
 
 }

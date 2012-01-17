@@ -2535,9 +2535,6 @@ void MuonAnalysis::loadAutoSavedValues(const QString& group)
   m_uiForm.yAxisAutoscale->setChecked(axisAutoScaleOnOff);
   m_optionTab->runyAxisAutoscale(axisAutoScaleOnOff);
 
-  bool showErrorBars = prevPlotStyle.value("showErrorBars", 1).toBool();
-  m_uiForm.showErrorBars->setChecked(showErrorBars);
-
   QStringList kusse = prevPlotStyle.childKeys();
   if ( kusse.contains("yAxisStart") )
   {
@@ -2559,6 +2556,19 @@ void MuonAnalysis::loadAutoSavedValues(const QString& group)
   int rebinComboBoxIndex = prevPlotBinning.value("rebinComboBoxIndex", 0).toInt();
   m_uiForm.rebinComboBox->setCurrentIndex(rebinComboBoxIndex);
   m_optionTab->runRebinComboBox(rebinComboBoxIndex);
+
+  // Load Setting tab options
+  QSettings prevSettingTabOptions;
+  prevSettingTabOptions.beginGroup(group + "SettingOptions"); 
+
+  int plotCreationIndex = prevSettingTabOptions.value("plotCreation", 0).toInt();
+  m_uiForm.plotCreation->setCurrentIndex(plotCreationIndex);
+
+  int connectPlotStyleIndex = prevSettingTabOptions.value("connectPlotStyle", 0).toInt();
+  m_uiForm.connectPlotType->setCurrentIndex(connectPlotStyleIndex);
+
+  bool errorBars = prevSettingTabOptions.value("errorBars", 1).toBool();
+  m_uiForm.showErrorBars->setChecked(errorBars);
 }
 
 
