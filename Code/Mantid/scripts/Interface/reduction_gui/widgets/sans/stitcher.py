@@ -63,6 +63,11 @@ class StitcherWidget(BaseWidget):
         self._content.medium_scale_edit.setValidator(QtGui.QDoubleValidator(self._content.medium_scale_edit))
         self._content.high_scale_edit.setValidator(QtGui.QDoubleValidator(self._content.high_scale_edit))
 
+        self._content.low_min_edit.setValidator(QtGui.QDoubleValidator(self._content.low_min_edit))
+        self._content.low_max_edit.setValidator(QtGui.QDoubleValidator(self._content.low_max_edit))
+        self._content.medium_min_edit.setValidator(QtGui.QDoubleValidator(self._content.medium_min_edit))
+        self._content.medium_max_edit.setValidator(QtGui.QDoubleValidator(self._content.medium_max_edit))
+
         # Browse buttons
         self.connect(self._content.low_q_browse_button, QtCore.SIGNAL("clicked()"), self._low_q_browse)
         self.connect(self._content.medium_q_browse_button, QtCore.SIGNAL("clicked()"), self._medium_q_browse)
@@ -167,8 +172,8 @@ class StitcherWidget(BaseWidget):
         """
         if self._low_q_data is not None:
             def call_back(xmin, xmax):
-                self._content.low_min_edit.setText(str(xmin))
-                self._content.low_max_edit.setText(str(xmax))
+                self._content.low_min_edit.setText("%6.3g" % xmin)
+                self._content.low_max_edit.setText("%6.3g" % xmax)
             ws_list = []
             if self._low_q_data is not None:
                 ws_list.append(str(self._low_q_data))
@@ -182,8 +187,8 @@ class StitcherWidget(BaseWidget):
         """
         if self._medium_q_data is not None:
             def call_back(xmin, xmax):
-                self._content.medium_min_edit.setText(str(xmin))
-                self._content.medium_max_edit.setText(str(xmax))
+                self._content.medium_min_edit.setText("%6.3g" % xmin)
+                self._content.medium_max_edit.setText("%6.3g" % xmax)
             ws_list = []
             if self._medium_q_data is not None:
                 ws_list.append(str(self._medium_q_data))
@@ -226,9 +231,11 @@ class StitcherWidget(BaseWidget):
                 util.set_valid(self._content.low_q_combo.lineEdit(), False)
                 QtGui.QMessageBox.warning(self, "Error loading file", "Could not load %s.\nMake sure you pick the XML output from the reduction." % file)
                 return
-            minx, maxx = self._low_q_data.get_range()
-            self._content.low_min_edit.setText(str(minx))
-            self._content.low_max_edit.setText(str(maxx))
+            if len(self._content.low_min_edit.text())==0 or \
+                len(self._content.low_max_edit.text())==0:
+                minx, maxx = self._low_q_data.get_range()
+                self._content.low_min_edit.setText("%6.3g" % minx)
+                self._content.low_max_edit.setText("%6.3g" % maxx)
             self._content.low_scale_edit.setText("1.0")
             npts = self._low_q_data.get_number_of_points()
             self._content.low_first_spin.setMaximum(npts)
@@ -252,9 +259,11 @@ class StitcherWidget(BaseWidget):
                 util.set_valid(self._content.medium_q_combo.lineEdit(), False)
                 QtGui.QMessageBox.warning(self, "Error loading file", "Could not load %s.\nMake sure you pick the XML output from the reduction." % file)
                 return
-            minx, maxx = self._medium_q_data.get_range()
-            self._content.medium_min_edit.setText(str(minx))
-            self._content.medium_max_edit.setText(str(maxx))
+            if len(self._content.medium_min_edit.text())==0 or \
+                len(self._content.medium_max_edit.text())==0:
+                minx, maxx = self._medium_q_data.get_range()
+                self._content.medium_min_edit.setText("%6.3g" % minx)
+                self._content.medium_max_edit.setText("%6.3g" % maxx)
             self._content.medium_scale_edit.setText("1.0")
             npts = self._medium_q_data.get_number_of_points()
             self._content.medium_first_spin.setMaximum(npts)
