@@ -78,9 +78,6 @@ class RefLReduction(PythonAlgorithm):
         import mantidsimple
         globals()["FindSNSNeXus"] = mantidsimple.FindSNSNeXus
 
-        # get generic information
-        SUFFIX = "_event.nxs"
-        
         self._binning = self.getProperty("Binning")
         if len(self._binning) != 1 and len(self._binning) != 3:
             raise RuntimeError("Can only specify (width) or (start,width,stop) for binning. Found %d values." % len(self._binning))
@@ -111,10 +108,6 @@ class RefLReduction(PythonAlgorithm):
         #dimension of the detector (256 by 304 pixels)
         maxX = 304
         maxY = 256
-        
-        #nexus_path = '/mnt/hgfs/j35/results/'
-        nexus_path = '/home/m2d/data/ref_l/'
-        pre = 'REF_L_'
         
         norm_back = self.getProperty("NormBackgroundPixelRange")
         BackfromYpixel = norm_back[0]
@@ -182,7 +175,6 @@ class RefLReduction(PythonAlgorithm):
         
         # Normalized by Current (proton charge)
         NormaliseByCurrent(InputWorkspace=ws_histo_data, OutputWorkspace=ws_histo_data)
-        mt = mtd['HistoData']
         
         # Calculation of the central pixel (using weighted average)
         pixelXtof_data = wks_utility.getPixelXTOF(mtd[ws_histo_data], maxX=maxX, maxY=maxY)
@@ -239,16 +231,24 @@ class RefLReduction(PythonAlgorithm):
                   OutputWorkspace='DataWks')
             
             
-        ## Work on Normalization file now
-        #check with first one first if it works
-        norm_file = nexus_path + pre + str(normalization_run) + SUFFIX
-    
+        # Work on Normalization file
+        # Find full path to event NeXus data file
+        f = FileFinder.findRuns("REF_L%d" %normalization_run)
+        if len(f)>0 and os.path.isfile(f[0]): 
+            norm_file = f[0]
+        else:
+            msg = "RefLReduction: could not find run %d\n" % run_number[0]
+            msg += "Add your data folder to your User Data Directories in the File menu"
+            raise RuntimeError(msg)
+            
         #load normalization file
-        LoadEventNexus(Filename=norm_file, OutputWorkspace='EventNorm')
-        mt = mtd['EventNorm']
+        ws_norm = "__normalization_refl%d" % run_numbers[0]
+        ws_norm_event_data = ws_norm+"_evt"  
+
+        LoadEventNexus(Filename=norm_file, OutputWorkspace=ws_norm_event_data)
     
-        #rebin data
-        rebin(InputWorkspace='EventNorm',
+        # Rebin data
+        Rebin(InputWorkspace=ws_norm_event_data,
               OutputWorkspace='HistoNorm',
               Params=self._binning)
     
