@@ -64,8 +64,6 @@ class ConvertToMDEvensEventWS: public IConvertToMDEventsMethods
      DataObjects::EventWorkspace_sptr pEventWS;
      // vector to keep generic part of event coordinates
     std::vector<coord_t> Coord;
-    // index of current run(workspace) for MD WS combining
-    uint16_t runIndex;
  public:
     size_t  setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const PreprocessedDetectors &detLoc,
                           const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
@@ -90,18 +88,8 @@ class ConvertToMDEvensEventWS: public IConvertToMDEventsMethods
          // Get the box controller
         Mantid::API::BoxController_sptr bc = pWSWrapper->pWorkspace()->getBoxController();
         size_t lastNumBoxes = bc->getTotalNumMDBoxes();
-      
-           
+              
         size_t nValidSpectra  = this->pDetLoc->det_id.size();
-        // copy experiment info into target workspace
-        API::ExperimentInfo_sptr ExperimentInfo(inWS2D->cloneExperimentInfo());
-
-        // set oriented lattice from workspace description, as this lattice can be modified by algorithm settings;
-        ExperimentInfo->mutableSample().setOrientedLattice(&TWS.Latt);
-   
-        // run index;
-        runIndex   = this->pWSWrapper->pWorkspace()->addExperimentInfo(ExperimentInfo);
-
 
        // if any property dimension is outside of the data range requested, the job is done;
         if(!trn.calcGenericVariables(Coord,this->n_dims))return; 

@@ -9,7 +9,14 @@ namespace Mantid
 {
 namespace MDAlgorithms
 {
+bool 
+PreprocessedDetectors::is_defined(const API::MatrixWorkspace_const_sptr &inputWS)const
+{
+    if(det_dir.empty())return false;
 
+    if(pBaseInstr !=inputWS->getInstrument()->baseInstrument())return false;
+    return true;
+}
 
 /** helper function, does preliminary calculations of the detectors positions to convert results into k-dE space ;
       and places the resutls into static cash to be used in subsequent calls to this algorithm */
@@ -19,6 +26,7 @@ processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS,PreprocessedDe
   convert_log.information()<<" Preprocessing detectors locations in a target reciprocal space\n";
   // 
   Instrument_const_sptr instrument = inputWS->getInstrument();
+  det_loc.pBaseInstr               = instrument->baseInstrument();
   //
   IObjComponent_const_sptr source = instrument->getSource();
   IObjComponent_const_sptr sample = instrument->getSample();

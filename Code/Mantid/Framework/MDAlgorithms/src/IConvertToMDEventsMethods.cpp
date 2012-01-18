@@ -79,6 +79,14 @@ IConvertToMDEventsMethods::setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS
         
         size_t n_spectra =inWS2D->getNumberHistograms();
         return n_spectra;
+
+        // copy experiment info into target workspace
+        API::ExperimentInfo_sptr ExperimentInfo(inWS2D->cloneExperimentInfo());
+        // set oriented lattice from workspace description, as this lattice can be modified by algorithm settings;
+        ExperimentInfo->mutableSample().setOrientedLattice(&TWS.Latt);   
+        // run index;
+        runIndex   = this->pWSWrapper->pWorkspace()->addExperimentInfo(ExperimentInfo);
+
 };  
 
 IConvertToMDEventsMethods::IConvertToMDEventsMethods()

@@ -274,7 +274,7 @@ void ConvertToMDEvents::exec()
     //c) other dim property;
     std::vector<std::string> other_dim_names = getProperty("OtherDimensions");
 
-    // Identify the algorithm to deploy and identify/set the dimension names to use
+    // Identify the algorithm to deploy and identify/set the (multi)dimension names to use
     algo_id = identifyTheAlg(inWS2D,Q_mod_req,dE_mod_req,other_dim_names,TWS);
 
     // set the min and max values for the dimensions from the input porperties
@@ -294,7 +294,7 @@ void ConvertToMDEvents::exec()
   }
 
   bool reuse_preprocecced_detectors = getProperty("UsePreprocessedDetectors");
-  if(!(reuse_preprocecced_detectors&&det_loc.is_defined())){
+  if(!(reuse_preprocecced_detectors&&det_loc.is_defined(inWS2D))){
       // amount of work:
       const size_t nHist = inWS2D->getNumberHistograms();
       pProg = std::auto_ptr<API::Progress >(new API::Progress(this,0.0,1.0,nHist));
@@ -479,7 +479,7 @@ ConvertToMDEvents::parseDEMode(const std::string &Q_MODE_ID,const std::string &d
     // inelastic modes have one additional dimension and need special units on X-axis
     if((DE_MODE_ID.compare(dE_modes[Direct])==0)||(DE_MODE_ID.compare(dE_modes[Indir])==0)){
         ndE_dims = 1;
-        out_dim_IDs.push_back("DeltaE");
+        out_dim_IDs.push_back(default_dim_ID[4]);
         out_dim_units.push_back("DeltaE");
         // natural units defined in subalgorithm doing the conversion and their ID has to be defined correctly in class constructor
         natural_units = native_inelastic_unitID;
@@ -709,13 +709,15 @@ ConvertToMDEvents::getTransfMatrix(API::MatrixWorkspace_sptr inWS,MDEvents::MDWS
     }catch(std::runtime_error &){
         if(!is_powder){
             convert_log.warning()<<
-                " Can not obtain transformation matrix from the input workspace: "<<inWS->name()<<" as no oriented lattice has been defined. Use unit transformation matrix anyway\n";
+                " Can not obtain transformation matrix from the input workspace: "<<inWS->name()<<
+                 " as no oriented lattice has been defined. \n"
+                 " Will use unit transformation matrix\n";
         }
     }
     //
     if(has_lattice){
       if(TargWSDescription.is_uv_default){
-         // we need to set up u,v for axis caption as it defined in UB matrix;
+         // we need to set up u,v for axis caption as it is defined in workspace UB matrix;
          TargWSDescription.u = TargWSDescription.Latt.getuVector();
          TargWSDescription.v = TargWSDescription.Latt.getvVector(); 
          umat  = TargWSDescription.Latt.getU();
@@ -803,7 +805,8 @@ ConvertToMDEvents::checkUVsettings(const std::vector<double> &ut,const std::vect
 // }
 //----------------------------------------------------------------------------------------------
 // AUTOINSTANSIATION OF EXISTING CODE:
-// Templated loop over dependant templated arguments
+/** helper class to orginize metaloop instantiating various subalgorithms dealing with particular 
+  * workspaces and implementing particular user requests */
 template<Q_state Q, size_t NumAlgorithms=0>
 class LOOP_ALGS{
 private:
@@ -829,7 +832,7 @@ private:
     }
 };
 
-// Templated loop specialization for the noQ case
+/** Templated metaloop specialization for noQ case */
 template< size_t NumAlgorithms>
 class LOOP_ALGS<NoQ,NumAlgorithms>{
 private:
@@ -858,14 +861,14 @@ private:
     }
 };
 
-// Q3d and modQ terminator
+/** Q3d and modQ metaloop terminator */
 template<Q_state Q >
 class LOOP_ALGS<Q,static_cast<size_t>(ANY_Mode*NConvUintsStates) >{
   public:
       static inline void EXEC(ConvertToMDEvents *pH){UNUSED_ARG(pH);} 
 };
 
-// any mode terminator
+/** ANY_Mode (NoQ) metaloop terminator */
 template<>
 class LOOP_ALGS<NoQ,static_cast<size_t>(NConvUintsStates) >{
   public:
@@ -889,17 +892,11 @@ default_dim_ID(5),
 // initiate target ws description to be not empty and have 4 dimensions (It will be redefined later, but defailt_qNames are defined only when it is not empty)
 TWS(4)
 {
+     // strings to indentify possible momentum analysis modes
      Q_modes[modQ] = "|Q|";
      Q_modes[Q3D]  = "QhQkQl";    
      Q_modes[NoQ]  = "";    // no Q dimension (does it have any interest&relevance to ISIS/SNS?) 
-     // for modQ transformation:
-     default_dim_ID[0]="|Q|";
-     // for Q3D transformation
-     default_dim_ID[1]="Q1";
-     default_dim_ID[2]="Q2";
-     default_dim_ID[3]="Q3";
-     default_dim_ID[4]="DeltaE";
-
+     // strings to indentify possible energy conversion modes
      dE_modes[ANY_Mode]  = ""; // no Q uses it to run without conversion. 
      dE_modes[Direct]    = "Direct";
      dE_modes[Indir]     = "Indirect";
@@ -912,6 +909,15 @@ TWS(4)
      // possible input workspace ID-s
      SupportedWS[Workspace2DType] = "WS2D";
      SupportedWS[EventWSType]     = "WSEvent";
+
+     // this defines default dimension ID-s which are used to indentify dimensions when using the target MD workspace later
+     // for modQ transformation:
+     default_dim_ID[0]="|Q|";
+     // for Q3D transformation
+     default_dim_ID[1]="Q1";
+     default_dim_ID[2]="Q2";
+     default_dim_ID[3]="Q3";
+     default_dim_ID[4]="DeltaE";
 
 // Subalgorithm factories:
 // NoQ --> any Analysis mode will do as it does not depend on it; we may want to convert unuts

@@ -98,10 +98,6 @@ public:
 
         const size_t specSize = this->inWS2D->blocksize();    
         size_t nValidSpectra  = pDetLoc->det_id.size();
-        // copy experiment info into target workspace
-        API::ExperimentInfo_sptr ExperimentInfo(inWS2D->cloneExperimentInfo());
-        // run index;
-        uint16_t runIndex   = this->pWSWrapper->pWorkspace()->addExperimentInfo(ExperimentInfo);
        // number of dimesnions
         std::vector<coord_t>  Coord(n_dims);             // coordinates for single event
      // if any property dimension is outside of the data range requested, the job is done;
