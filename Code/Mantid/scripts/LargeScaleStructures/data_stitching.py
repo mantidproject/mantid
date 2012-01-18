@@ -28,8 +28,7 @@ class RangeSelector(object):
             if g is None:
                 g = qti.app.mantidUI.pyPlotSpectraList(ws,[0],True)
                 g.setName(self._graph)        
-            qti.app.selectMultiPeak(False)
-            qti.app.selectMultiPeak(False)
+            qti.app.selectMultiPeak(g,False)
     
     @classmethod
     def connect(cls, ws, call_back):
