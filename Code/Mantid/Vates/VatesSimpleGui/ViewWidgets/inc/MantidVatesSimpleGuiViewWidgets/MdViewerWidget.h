@@ -118,14 +118,20 @@ private:
   Ui::MdViewerWidgetClass ui; ///< The MD viewer's UI form
   QHBoxLayout *viewLayout; ///< Layout manager for the view widget
 
-  /// Check the environmental variables to make sure PV_PLUGIN_PATH is available
+  /// Check the environmental variables to make sure PV_PLUGIN_PATH is available.
   void checkEnvSetup();
-  /// Function to create the pqPVApplicationCore object in plugin mode
+  /// Setup color options dialog connections.
+  void connectColorOptionsDialog();
+  /// Setup connections for all dialogs.
+  void connectDialogs();
+  /// Setup rotation point dialog connections.
+  void connectRotationPointDialog();
+  /// Function to create the pqPVApplicationCore object in plugin mode.
   void createAppCoreForPlugin();
   /// Add view specific stuff to a menu.
   void createMenus();
-  /// Delete dialog instances.
-  void destroyDialogs();
+  /// Disconnect dialog connections.
+  void disconnectDialogs();
   /// Consolidate constructor related items.
   void internalSetup(bool pMode);
   /// Disable communication with the proxy tab widget.
