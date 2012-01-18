@@ -86,7 +86,7 @@ void MuonAnalysisOptionTab::initLayout()
 void MuonAnalysisOptionTab::muonAnalysisHelpSettingsClicked()
 {
   QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
-            "MuonAnalysisPlotting"));
+            "MuonAnalysisSettings"));
 }
 
 
