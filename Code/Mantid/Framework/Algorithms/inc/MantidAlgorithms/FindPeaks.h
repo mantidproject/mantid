@@ -111,6 +111,9 @@ private:
   unsigned int maxGuessedPeakWidth;
   unsigned int stepGuessedPeakWidth;
 
+  bool usePeakPositionTolerance;
+  double peakPositionTolerance;
+
 };
 
 } // namespace Algorithms

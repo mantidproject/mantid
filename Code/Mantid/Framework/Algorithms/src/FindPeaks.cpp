@@ -91,6 +91,11 @@ void FindPeaks::init()
   declareProperty("GuessedPeakWidthStep", 2,
       "Step of guessed peak width. It is in unit of number of pixels.");
 
+  declareProperty("ApplyPeakPositionTolerance", false,
+      "Option to apply tolerance on found peaks' position against input peak positions.");
+  declareProperty("PeakPositionTolerance", 0.01,
+      "Tolerance on the found peaks' positions against the input peak positions.");
+
   // The found peaks in a table
   declareProperty(new WorkspaceProperty<API::ITableWorkspace>("PeaksList","",Direction::Output),
     "The name of the TableWorkspace in which to store the list of peaks found" );
@@ -158,6 +163,9 @@ void FindPeaks::exec()
   maxGuessedPeakWidth = static_cast<unsigned int>(t2);
   stepGuessedPeakWidth = static_cast<unsigned int>(t3);
 
+  usePeakPositionTolerance = getProperty("ApplyPeakPositionTolerance");
+  peakPositionTolerance = getProperty("PeakPositionTolerance");
+
   // b) Get the specified peak positions, which is optional
   std::string peakPositions = getProperty("PeakPositions");
 
@@ -207,6 +215,7 @@ void FindPeaks::findPeaksGivenStartingPoints(std::vector<double> peakCenters, st
 
   for (int spec = start; spec < end; ++spec)
   {
+    g_log.information() << "Finding Peaks In Spectrum " << spec << std::endl;
 
     const MantidVec& datax = inputWS->readX(spec);
 
@@ -214,6 +223,9 @@ void FindPeaks::findPeaksGivenStartingPoints(std::vector<double> peakCenters, st
     {
       //Try to fit at this center
       double x_center = *it;
+
+      g_log.information() << " @ d = " << x_center << std::endl;
+
       // Check whether it is the in data range
       if (x_center > datax[0] && x_center < datax[datax.size()-1]){
         this->fitPeak(inputWS, spec, x_center, this->fwhm, backgroundtype);
@@ -913,7 +925,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   fit->setProperty("CostFunction", "Least squares");
   fit->setProperty("Function", function);
 
-  // e) Fit and get result
+  // e) Fit and get result of fitting background
   fit->executeAsSubAlg();
 
   std::string fitStatus = fit->getProperty("OutputStatus");
@@ -922,9 +934,11 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
 
   double a0, a1, a2;
 
+  double bkgdchi2;
   if (fitStatus.compare("success")){
     g_log.warning() << "Fit " << backgroundtype << " Fails For Peak @ " << X[i4] << std::endl;
     a0 = a1 = a2 = 0;
+    bkgdchi2 = -100;
   } else {
     a0 = params[0];
     a1 = params[1];
@@ -933,8 +947,10 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
     } else {
       a2 = 0.0;
     }
+    bkgdchi2 = fit->getProperty("OutputChi2overDoF");
   }
-  g_log.debug() << "Background parameters: a0 = " << a0 << "  a1 = " << a1 << "  a2 = " << a2 << std::endl;
+  g_log.information() << "(High Background) Fit Background:  Chi2 = " << bkgdchi2 <<
+      " a0 = " << a0 << "  a1 = " << a1 << "  a2 = " << a2 << std::endl;
 
   // f) Create theoretic background workspace and thus peak workspace
   size_t fitsize = i_max-i_min+1;
@@ -964,7 +980,6 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
       vPeak = pY[i];
       xPeak = pX[i];
     }
-
   }
 
   // g) Looping on peak width for the best fit
@@ -973,6 +988,8 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   double bestcenter = 0;
   double bestheight = 0;
 
+  g_log.information() << "Loop From " << minGuessedPeakWidth << " To " << maxGuessedPeakWidth << " with step "
+      << stepGuessedPeakWidth << std::endl;
   for (unsigned int iwidth = minGuessedPeakWidth; iwidth <= maxGuessedPeakWidth; iwidth += stepGuessedPeakWidth){
     // a) Set up sub algorithm Fit
     IAlgorithm_sptr gfit;
@@ -1039,7 +1056,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
     std::string outputstatus = gfit->getProperty("OutputStatus");
 
     if (fheight <= 0 || fsigma <= 0){
-      g_log.debug() << "Wrong Fit!!!" << std::endl;
+      g_log.information() << "Wrong Guass Fit!!!" << std::endl;
     } else {
       if (chi2 < mincost){
         bestheight = fheight;
@@ -1047,6 +1064,8 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
         bestsigma = fsigma;
         mincost = chi2;
       }
+      g_log.information() << "\tTrial " << iwidth << "  Chi2 = " << chi2 << " H = " << fheight << " Sigma = " << fsigma
+          << " X0 = " << fcenter << std::endl;
     }
     g_log.debug() << "Fit Status: " << outputstatus << " Cost = " << chi2 << "  Height, Center, Sigma = " << fheight << ", " << fcenter << ", " << fsigma << std::endl;
 
@@ -1086,7 +1105,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
     throw std::invalid_argument("Background type is not supported in FindPeak.cpp");
   }
   function = ss2.str();
-  g_log.debug() << "Final Fit Function: " << function << std::endl;
+  g_log.debug() << "(High Background) Final Fit Function: " << function << std::endl;
 
   // d) complete fit
   lastfit->setProperty("StartX", (X[i4] - 2 * (X[i0] - X[i2])));
@@ -1126,18 +1145,34 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
     g_log.debug() << "FindPeaks: Final Fit Error!  Message: " << fitStatus2 << std::endl;
   }
 
-  // i) Set return value
+  // i) Analyze whether the result is a good fit
+  if (usePeakPositionTolerance)
+  {
+    if ( fabs(bestcenter-X[i4]) > peakPositionTolerance )
+    {
+      bestheight = 0.0;
+    }
+
+  }
+
+  // j) Set return value
   API::TableRow t = m_peaks->appendRow();
   t << spectrum << bestcenter << bestsigma << bestheight << a0 << a1 << a2;
 
-  g_log.information() << "FindPeaks: Final-Fit Result: cost = " << fcost << "  vs. min cost = " << mincost
-      << " x0 = " << bestcenter << " h = " << bestheight << std::endl;
+  g_log.information() << "(High Background) Final-Find Peak: Cost = " << fcost << "  vs. Min cost = " << mincost
+      << " Background cost = " << bkgdchi2 << " x0 = " << bestcenter << "(" << X[i2] << ", " << X[i0] <<
+      ") H = " << bestheight << std::endl;
+
+
+  g_log.notice() << "Chi2   Combine = " << fcost << " vs.  Background = " << bkgdchi2 << " + Gaussian = " << mincost << std::endl;
 
   return;
 
 } // END-FUNCTION
 
-
+/*
+ * Check the result of peak fitting
+ */
 bool FindPeaks::checkFitResultParameterNames(std::vector<std::string> paramnames, std::string backgroundtype,
     std::string &errormessage){
 

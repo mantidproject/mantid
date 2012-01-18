@@ -105,7 +105,12 @@ void ViewBase::correctVisibility(pqPipelineBrowserWidget *pbw)
 bool ViewBase::isPeaksWorkspace(pqPipelineSource *src)
 {
   QString wsType(vtkSMPropertyHelper(src->getProxy(),
-                                     "WorkspaceTypeName").GetAsString());
+                                     "WorkspaceTypeName", true).GetAsString());
+  // This must be a Mantid rebinner filter if the property is empty.
+  if (wsType.isEmpty())
+  {
+    wsType = src->getSMName();
+  }
   return wsType.contains("PeaksWorkspace");
 }
 

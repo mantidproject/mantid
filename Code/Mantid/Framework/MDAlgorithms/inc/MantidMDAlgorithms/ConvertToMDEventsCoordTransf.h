@@ -251,8 +251,8 @@ struct COORD_TRANSFORMER<modQ,MODE,CONV,Type>
     
     inline bool calc1MatrixCoord(const double& E_tr,std::vector<coord_t> &Coord)const
     {
+        if(E_tr<dim_min[1]||E_tr>=dim_max[1])return false;
         Coord[1]    =(coord_t)E_tr;
-        if(Coord[1]<pHost->dim_min[1]||Coord[1]>=pHost->dim_max[1])return false;
 
         // get module of the wavevector for scattered neutrons
         double k_tr = k_trans<MODE>(Ei,E_tr);
@@ -266,7 +266,7 @@ struct COORD_TRANSFORMER<modQ,MODE,CONV,Type>
         double Qz  = (rotMat[6]*qx+rotMat[7]*qy+rotMat[8]*qz);
 
         double Qsq = Qx*Qx+Qy*Qy+Qz*Qz;
-        if(Qsq < dim_min[0]||Coord[0]>=Qsq)return false;
+        if(Qsq < dim_min[0]||Qsq>=dim_max[0])return false;
         Coord[0]   = (coord_t)sqrt(Qsq);
 
         return true;
@@ -357,7 +357,7 @@ struct COORD_TRANSFORMER<modQ,Elastic,CONV,Type>
         double Qz  = (rotMat[6]*qx+rotMat[7]*qy+rotMat[8]*qz);
 
         double Qsq = Qx*Qx+Qy*Qy+Qz*Qz;
-        if(Coord[0]<dim_min[0]||Coord[0]>=dim_max[0])return false;
+        if(Qsq < dim_min[0]||Qsq>=dim_max[0])return false;
         Coord[0]   = (coord_t)sqrt(Qsq);
         return true;
 

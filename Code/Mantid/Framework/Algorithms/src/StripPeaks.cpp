@@ -54,6 +54,11 @@ void StripPeaks::init()
   declareProperty("PeakPositions", "",
     "Optional: enter a comma-separated list of the expected X-position of the centre of the peaks. Only peaks near these positions will be fitted." );
 
+  declareProperty("ApplyPeakPositionTolerance", false,
+      "Option to apply tolerance on found peaks' position against input peak positions.");
+  declareProperty("PeakPositionTolerance", 0.01,
+      "Tolerance on the found peaks' positions against the input peak positions.");
+
   std::vector<std::string> bkgdtypes;
   bkgdtypes.push_back("Linear");
   bkgdtypes.push_back("Quadratic");
@@ -100,9 +105,9 @@ void StripPeaks::exec()
  */
 API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS)
 {
-  g_log.information("Calling FindPeaks as a sub-algorithm");
+  g_log.debug("Calling FindPeaks as a sub-algorithm");
 
-  bool showlog = false;
+  bool showlog = true;
   API::IAlgorithm_sptr findpeaks = createSubAlgorithm("FindPeaks",0.0, 0.2, showlog);
   findpeaks->setProperty("InputWorkspace", WS);
   findpeaks->setProperty<int>("FWHM",getProperty("FWHM"));
@@ -114,6 +119,9 @@ API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS)
   findpeaks->setProperty<std::string>("PeakPositions", getProperty("PeakPositions"));
   findpeaks->setProperty<std::string>("BackgroundType", getProperty("BackgroundType"));
   findpeaks->setProperty<bool>("HighBackground", getProperty("HighBackground"));
+
+  findpeaks->setProperty<bool>("ApplyPeakPositionTolerance", getProperty("ApplyPeakPositionTolerance"));
+  findpeaks->setProperty<double>("PeakPositionTolerance", getProperty("PeakPositionTolerance"));
 
   findpeaks->executeAsSubAlg();
   return findpeaks->getProperty("PeaksList");
@@ -128,7 +136,7 @@ API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS)
  */
 API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_const_sptr input, API::ITableWorkspace_sptr peakslist)
 {
-  g_log.information("Subtracting peaks");
+  g_log.debug("Subtracting peaks");
   // Create an output workspace - same size as input one
   MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(input);
   // Copy the data over from the input to the output workspace

@@ -7,80 +7,28 @@ from reduction.instruments.reflectometer import wks_utility
 class RefLReduction(PythonAlgorithm):
 
     def category(self):
-        return "Diffraction;PythonAlgorithms"
+        return "Reflectometry"
 
     def name(self):
         return "RefLReduction"
 
     def PyInit(self):
         self.declareListProperty("RunNumbers", [0], Validator=ArrayBoundedValidator(Lower=0))
-        
         self.declareProperty("NormalizationRunNumber", 0, Description="")
-
         self.declareListProperty("SignalPeakPixelRange", [126, 134], Validator=ArrayBoundedValidator(Lower=0))
         self.declareListProperty("SignalBackgroundPixelRange", [123, 137], Validator=ArrayBoundedValidator(Lower=0))
         self.declareListProperty("NormPeakPixelRange", [127, 133], Validator=ArrayBoundedValidator(Lower=0))
         self.declareListProperty("NormBackgroundPixelRange", [123, 137], Validator=ArrayBoundedValidator(Lower=0))
         self.declareListProperty("LowResAxisPixelRange", [115, 210], Validator=ArrayBoundedValidator(Lower=0))
-
         self.declareListProperty("TOFRange", [9000., 23600.], Validator=ArrayBoundedValidator(Lower=0))
-        
-
         self.declareListProperty("Binning", [0,200,200000],
-                             Description="Positive is linear bins, negative is logorithmic")
-
-    def _findData(self, runnumber, extension):
-        result = FindSNSNeXus(Instrument=self._instrument,
-                              RunNumber=runnumber, Extension=extension)
-        return result["ResultPath"].value
-
-
-    def _loadNeXusData(self, filename, name, bank, extension, **kwargs):
-        alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, BankName=bank, SingleBankPixelsOnly=1, FilterByTofMin=self._binning[0], FilterByTofMax=self._binning[2], LoadMonitors=True, MonitorsAsEvents=True, **kwargs)
-        wksp = alg['OutputWorkspace']
-        LoadIsawDetCal(InputWorkspace=wksp,Filename=self._DetCalfile)
-        #Normalise by sum of counts in upstream monitor
-        Integration(InputWorkspace=mtd[str(name)+'_monitors'], OutputWorkspace='Mon', RangeLower=self._binning[0], RangeUpper=self._binning[2], EndWorkspaceIndex=0)
-        mtd.deleteWorkspace(str(name)+'_monitors')
-        mtd.releaseFreeMemory()
-        # take care of filtering events
-        if self._filterBadPulses:
-            FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp)
-        CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
-        return wksp
-
-    def _findNeXusData(self, runnumber, bank, extension, **kwargs):
-        kwargs["Precount"] = True
-        name = "%s_%d" % (self._instrument, runnumber)
-        filename = name + extension
-        return self._loadNeXusData(filename, name, bank, extension, **kwargs)
-
-    def _loadData(self, runnumber, bank, extension, filterWall=None):
-        filter = {}
-        if filterWall is not None:
-            if filterWall[0] > 0.:
-                filter["FilterByTofStart"] = filterWall[0]
-            if filterWall[1] > 0.:
-                filter["FilterByTofStop"] = filterWall[1]
-
-        if  runnumber is None or runnumber <= 0:
-            return None
-
-        if extension.endswith(".nxs"):
-            return self._findNeXusData(runnumber, bank, extension, **filter)
-        else:
-            return self._findPreNeXusData(runnumber, extension)
-
-  
+                                 Description="Positive is linear bins, negative is logorithmic")
 
     def PyExec(self):
         # temporary hack for getting python algorithms working
         import mantidsimple
         globals()["FindSNSNeXus"] = mantidsimple.FindSNSNeXus
 
-        # get generic information
-        SUFFIX = "_event.nxs"
-        
         self._binning = self.getProperty("Binning")
         if len(self._binning) != 1 and len(self._binning) != 3:
             raise RuntimeError("Can only specify (width) or (start,width,stop) for binning. Found %d values." % len(self._binning))
@@ -111,10 +59,6 @@ class RefLReduction(PythonAlgorithm):
         #dimension of the detector (256 by 304 pixels)
         maxX = 304
         maxY = 256
-        
-        #nexus_path = '/mnt/hgfs/j35/results/'
-        nexus_path = '/home/m2d/data/ref_l/'
-        pre = 'REF_L_'
         
         norm_back = self.getProperty("NormBackgroundPixelRange")
         BackfromYpixel = norm_back[0]
@@ -182,7 +126,6 @@ class RefLReduction(PythonAlgorithm):
         
         # Normalized by Current (proton charge)
         NormaliseByCurrent(InputWorkspace=ws_histo_data, OutputWorkspace=ws_histo_data)
-        mt = mtd['HistoData']
         
         # Calculation of the central pixel (using weighted average)
         pixelXtof_data = wks_utility.getPixelXTOF(mtd[ws_histo_data], maxX=maxX, maxY=maxY)
@@ -239,36 +182,45 @@ class RefLReduction(PythonAlgorithm):
                   OutputWorkspace='DataWks')
             
             
-        ## Work on Normalization file now
-        #check with first one first if it works
-        norm_file = nexus_path + pre + str(normalization_run) + SUFFIX
-    
+        # Work on Normalization file
+        # Find full path to event NeXus data file
+        f = FileFinder.findRuns("REF_L%d" %normalization_run)
+        if len(f)>0 and os.path.isfile(f[0]): 
+            norm_file = f[0]
+        else:
+            msg = "RefLReduction: could not find run %d\n" % run_number[0]
+            msg += "Add your data folder to your User Data Directories in the File menu"
+            raise RuntimeError(msg)
+            
         #load normalization file
-        LoadEventNexus(Filename=norm_file, OutputWorkspace='EventNorm')
-        mt = mtd['EventNorm']
+        ws_norm = "__normalization_refl%d" % run_numbers[0]
+        ws_norm_event_data = ws_norm+"_evt"  
+        ws_norm_histo_data = ws_norm+"_histo"  
+
+        LoadEventNexus(Filename=norm_file, OutputWorkspace=ws_norm_event_data)
     
-        #rebin data
-        rebin(InputWorkspace='EventNorm',
-              OutputWorkspace='HistoNorm',
+        # Rebin data
+        Rebin(InputWorkspace=ws_norm_event_data,
+              OutputWorkspace=ws_norm_histo_data,
               Params=self._binning)
     
-        ##keep only range of TOF of interest
-        CropWorkspace('HistoNorm', 
+        # Keep only range of TOF of interest
+        CropWorkspace(ws_norm_histo_data, 
                       'CropHistoNorm', 
                       XMin=TOFrange[0], 
                       XMax=TOFrange[1])
     
-        #Normalized by Current (proton charge)
+        # Normalized by Current (proton charge)
         NormaliseByCurrent(InputWorkspace='CropHistoNorm', 
                            OutputWorkspace='NormWks')
-        mt = mtd['NormWks']
     
         ##Background subtraction
 
         #Create a new event workspace of only the range of pixel of interest 
         #background range (along the y-axis) and of only the pixel
         #of interest along the x-axis (to avoid the frame effect)
-        mt3_norm = wks_utility.createIntegratedWorkspace(mt, "IntegratedNormWks",
+        mt3_norm = wks_utility.createIntegratedWorkspace(mtd['NormWks'], 
+                                                         "IntegratedNormWks",
                                             fromXpixel=Xrange[0],
                                             toXpixel=Xrange[1],
                                             fromYpixel=BackfromYpixel,
@@ -291,8 +243,6 @@ class RefLReduction(PythonAlgorithm):
         Transpose(InputWorkspace='TransposedFlatID',
                   OutputWorkspace='NormWks')
    
-        
-    
         #perform the integration myself
         mt_temp = mtd['NormWks']
         x_axis = mt_temp.readX(0)[:]   #[9100,9300,.... 23500] (73,1)

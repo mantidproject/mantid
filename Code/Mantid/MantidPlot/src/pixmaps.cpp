@@ -369,7 +369,7 @@ static const char * mantid_matrix_xpm[] = {
 "{]]{]]{]]{]]{",
 "{{{{{{{{{{{{{"};
 
-static const char * mantid_mdews_xpm[] = {
+static const char * mantid_mdws_xpm[] = {
   "13 14 50 1",
   "   c None",
   ".  c #000821",
@@ -12780,7 +12780,7 @@ QPixmap getQPixmap(const std::string &name)
   else if (name == "copy_xpm") return QPixmap(copy_xpm);
   else if (name == "unzoom_xpm") return QPixmap(unzoom_xpm);
   else if (name == "mantid_matrix_xpm") return QPixmap(mantid_matrix_xpm);
-  else if (name == "mantid_mdews_xpm") return QPixmap(mantid_mdews_xpm);
+  else if (name == "mantid_mdws_xpm") return QPixmap(mantid_mdws_xpm);
   else if (name == "mantid_xpm") return QPixmap(mantid_xpm);
   else if (name == "mantid_wsgroup_xpm") return QPixmap(mantid_wsgroup_xpm);
   else if (name == "folder_closed") return QPixmap(folder_closed);
