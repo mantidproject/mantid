@@ -57,6 +57,7 @@ void MuonAnalysisOptionTab::initLayout()
   connect(m_uiForm.plotCreation, SIGNAL(currentIndexChanged(int)), this, SLOT(plotCreationChanged(int)));
   connect(m_uiForm.connectPlotType, SIGNAL(currentIndexChanged(int)), this, SLOT(plotTypeChanged(int)));
   connect(m_uiForm.showErrorBars, SIGNAL(toggled(bool)), this, SLOT(errorBarsChanged(bool)));
+  connect(m_uiForm.hideToolbars, SIGNAL(toggled(bool)), this, SLOT(toolbarsChanged(bool)));
 
   ////////////// Data Binning slots ///////////////
   connect(m_uiForm.rebinComboBox, SIGNAL(currentIndexChanged(int)), this, 
@@ -284,6 +285,14 @@ void MuonAnalysisOptionTab::errorBarsChanged(bool state)
   QSettings group;
   group.beginGroup(m_settingsGroup + "SettingOptions");
   group.setValue("errorBars", state);
+}
+
+void MuonAnalysisOptionTab::toolbarsChanged(bool state)
+{
+  //emit toolbarsOnOrOff(state);
+  QSettings group;
+  group.beginGroup(m_settingsGroup + "SettingOptions");
+  group.setValue("toolbars", state);
 }
 
 }

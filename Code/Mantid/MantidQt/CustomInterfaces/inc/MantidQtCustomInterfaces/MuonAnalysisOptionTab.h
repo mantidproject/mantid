@@ -109,6 +109,8 @@ private slots:
   void plotTypeChanged(int);
   ///
   void errorBarsChanged(bool);
+  ///
+  void toolbarsChanged(bool);
 };
 
 }

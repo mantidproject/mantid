@@ -147,6 +147,8 @@ void MuonAnalysis::initLayout()
   connect(m_uiForm.frontGroupGroupPairComboBox, SIGNAL(currentIndexChanged(int)), this, 
     SLOT(runFrontGroupGroupPairComboBox(int)));
 
+  connect(m_uiForm.hideToolbars, SIGNAL(toggled(bool)), this, SLOT(showHideToolbars(bool)));
+
   // connect "?" (Help) Button
   connect(m_uiForm.muonAnalysisHelp, SIGNAL(clicked()), this, SLOT(muonAnalysisHelpClicked()));
   connect(m_uiForm.muonAnalysisHelpGrouping, SIGNAL(clicked()), this, SLOT(muonAnalysisHelpGroupingClicked()));
@@ -272,7 +274,7 @@ void MuonAnalysis::runFrontPlotButton()
 *
 * @param prefix :: instrument name from QComboBox object
 */
-void MuonAnalysis::userSelectInstrument(const QString& prefix) 
+void MuonAnalysis::userSelectInstrument(const QString& prefix)
 {
   if ( prefix != m_curInterfaceSetup )
   {
@@ -2571,6 +2573,9 @@ void MuonAnalysis::loadAutoSavedValues(const QString& group)
 
   bool errorBars = prevSettingTabOptions.value("errorBars", 1).toBool();
   m_uiForm.showErrorBars->setChecked(errorBars);
+
+  bool hideTools = prevSettingTabOptions.value("toolbars", 1).toBool();
+  m_uiForm.hideToolbars->setChecked(hideTools);
 }
 
 
@@ -2861,7 +2866,8 @@ void MuonAnalysis::getFullCode(int size, QString & limitedCode)
 void MuonAnalysis::changeTab(int tabNumber)
 {
   // Make sure all toolbars are still not visible. May have brought them back to do a plot.
-  emit hideToolbars();
+  if (m_uiForm.hideToolbars->isChecked())
+    emit hideToolbars();
 
   m_tabNumber = tabNumber;
   m_uiForm.fitBrowser->setStartX(m_uiForm.timeAxisStartAtInput->text().toDouble());
@@ -2996,19 +3002,33 @@ void MuonAnalysis::settingsTabUpdatePlot()
 void MuonAnalysis::closeEvent(QCloseEvent *e)
 {
   // Show the toolbar
-  emit showToolbars();
+  if (m_uiForm.hideToolbars->isChecked())
+    emit showToolbars();
   e->accept();
 }
 
 
 /**
-* Hide the toolbars after opening MuonAnalysis
+* Hide the toolbar after opening MuonAnalysis if setting requires it
 */
 void MuonAnalysis::showEvent(QShowEvent *e)
 {
   // Hide the toolbar
-  emit hideToolbars();
+  if (m_uiForm.hideToolbars->isChecked() )
+    emit hideToolbars();
   e->accept();
+}
+
+
+/**
+* Show/Hide Toolbar
+*/
+void MuonAnalysis::showHideToolbars(bool state)
+{
+  if (state == true)
+    emit hideToolbars();
+  else
+    emit showToolbars();
 }
 
 

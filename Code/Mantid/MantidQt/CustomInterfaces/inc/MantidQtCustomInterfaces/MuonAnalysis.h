@@ -68,9 +68,6 @@ public:
   MuonAnalysis(QWidget *parent = 0);
 
 private slots:
-  /// Exit the interface
-  //void exitClicked();
-
   /// Guess Alpha clicked
   void guessAlphaClicked();
 
@@ -115,6 +112,9 @@ private slots:
 
   /// User select instrument
   void userSelectInstrument(const QString& prefix);
+
+  /// User clicks hide toolbars checkbox
+  void showHideToolbars(bool state);
 
   ///
   void runFrontPlotButton();

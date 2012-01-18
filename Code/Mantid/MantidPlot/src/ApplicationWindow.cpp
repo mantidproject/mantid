@@ -16711,22 +16711,20 @@ else
       return;
     }
   }
+      // Enables/Disables the toolbar
 
   MdiSubWindow* usr_win = new MdiSubWindow(this);
   usr_win->setAttribute(Qt::WA_DeleteOnClose, false);
   MantidQt::API::UserSubWindow *user_interface = MantidQt::API::InterfaceManager::Instance().createSubWindow(action_data, usr_win);
   if(user_interface)
   {
+    connect(user_interface, SIGNAL(hideToolbars()), this, SLOT(hideToolbars()));
+    connect(user_interface, SIGNAL(showToolbars()), this, SLOT(showToolbars()));
     setGeometry(usr_win,user_interface);
     connect(user_interface, SIGNAL(runAsPythonScript(const QString&)), this,
         SLOT(runPythonScript(const QString&)));
     if(user_interface->objectName() == "Muon Analysis")
     {
-      // Disable to begin with and then let signals handle it
-      hideToolbars();
-      // Enables/Disables the toolbar
-      connect(user_interface, SIGNAL(hideToolbars()), this, SLOT(hideToolbars()));
-      connect(user_interface, SIGNAL(showToolbars()), this, SLOT(showToolbars()));
       // Re-emits the signal caught from the muon analysis
       connect(user_interface, SIGNAL(setAsPlotType(const QStringList &)), this, SLOT(setPlotType(const QStringList &)));
       // Closes the active graph
