@@ -1638,7 +1638,6 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     plotType.setNum(m_uiForm.connectPlotType->currentIndex());
 
     plotDetails.push_back(titleLabel);
-    plotDetails.push_back("");
     plotDetails.push_back(plotType);
     plotDetails.push_back("Data");
     if(m_uiForm.showErrorBars->isChecked())
@@ -1807,7 +1806,6 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     plotType.setNum(m_uiForm.connectPlotType->currentIndex());
 
     plotDetails.push_back(titleLabel);
-    plotDetails.push_back("");
     plotDetails.push_back(plotType);
     plotDetails.push_back("Data");
     if(m_uiForm.showErrorBars->isChecked())
@@ -2912,9 +2910,9 @@ void MuonAnalysis::assignPeakPickerTool(const QString & workspaceName)
 
 /**
 * Set up the string that will contain all the data needed for changing the data.
-* [wsName, axisLabel, connectType, plotType, Errors, Color]
+* [wsName, connectType, plotType, Errors, Color]
 *
-* @param plotDetails :: The workspace name of the plot to be created and axis label.
+* @param plotDetails :: The workspace name of the plot to be created.
 */
 void MuonAnalysis::changeDataPlotType(const QStringList & plotDetails)
 {

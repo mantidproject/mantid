@@ -2106,7 +2106,7 @@ void FitPropertyBrowser::clearAllPlots()
 /**
 * Customise the plot if it is a custom fitting. (i.e part of muon analysis)
 *
-* @param plotDetails :: The name of the workspace plot to be customised and the axis label seperated by a '.'
+* @param plotDetails :: The name of the workspace plot to be customised seperated by a '.'
 */
 void FitPropertyBrowser::customisation(const QStringList& plotDetails)
 {

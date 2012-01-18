@@ -543,7 +543,6 @@ void PeakPickerTool::functionRemoved()
  */
 void PeakPickerTool::algorithmFinished(const QString& out)
 {
-  QString axisLabel = QString::fromStdString(m_ws->getAxis(1)->label(spec()));
   m_curveFitName = workspaceName()+"_"+QString("Worksapce-Calc");
   m_curveDifName = workspaceName()+"_"+QString("Workspace-Diff");
 
@@ -559,7 +558,6 @@ void PeakPickerTool::algorithmFinished(const QString& out)
   //customise the plot
   QStringList plotDetails;
   plotDetails.push_back(workspaceName());
-  plotDetails.push_back(axisLabel);
 
   m_fitPropertyBrowser->customisation(plotDetails);  
   
@@ -887,10 +885,8 @@ void PeakPickerTool::plotGuess()
   
   d_graph->replot();
 
-  QString axisLabel = QString::fromStdString(m_ws->getAxis(1)->label(spec()));
   QStringList plotDetails;
   plotDetails.push_back(m_wsName);
-  plotDetails.push_back(axisLabel);
 
   m_fitPropertyBrowser->customisation(plotDetails);
 }

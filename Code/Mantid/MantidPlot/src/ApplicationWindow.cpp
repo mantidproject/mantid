@@ -16881,7 +16881,7 @@ bool ApplicationWindow::runPythonScript(const QString & code, bool quiet, bool r
 * Makes sure that it is dealing with a graph and then tells the plotDialog class 
 * to change the plot style
 *
-* @params plotDetails :: This includes all details of the plot [wsName, axisLabel, connectType, plotType, Errors, Color]
+* @params plotDetails :: This includes all details of the plot [wsName, connectType, plotType, Errors, Color]
 */
 void ApplicationWindow::setPlotType(const QStringList & plotDetails)
 {
@@ -16891,9 +16891,9 @@ void ApplicationWindow::setPlotType(const QStringList & plotDetails)
   }
   else
   {
-    if (plotDetails.size() > 4)
+    if (plotDetails.size() > 3)
     {
-      int connectType = plotDetails[2].toInt();
+      int connectType = plotDetails[1].toInt();
       QList<MdiSubWindow *> windows = windowsList();
       foreach (MdiSubWindow *w, windows) 
       {
@@ -16911,10 +16911,10 @@ void ApplicationWindow::setPlotType(const QStringList & plotDetails)
               {
                 int curveNum(-1);
 
-                if (plotDetails[3] == "Data")
+                if (plotDetails[2] == "Data")
                 {
                   curveNum = g->curveIndex(plotDetails[0]); //workspaceName
-                  if (plotDetails[4] == "AllErrors") // if all errors, display all errors
+                  if (plotDetails[3] == "AllErrors") // if all errors, display all errors
                   {
                     QwtPlotCurve *temp = g->curve(curveNum);
                     MantidMatrixCurve *curve = dynamic_cast<MantidMatrixCurve *>(temp);
@@ -16932,8 +16932,8 @@ void ApplicationWindow::setPlotType(const QStringList & plotDetails)
                   // line(0) scatter(1) line+symbol(2)
                   if (connectType >= 0 && connectType <= 2)
                   {
-                    if (plotDetails.size() > 5)
-                      pd->setPlotType(connectType, curveNum, plotDetails[5]);
+                    if (plotDetails.size() > 4)
+                      pd->setPlotType(connectType, curveNum, plotDetails[4]);
                     else
                       pd->setPlotType(connectType, curveNum);            
                   }
