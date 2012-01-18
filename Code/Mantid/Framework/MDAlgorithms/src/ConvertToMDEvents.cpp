@@ -192,11 +192,12 @@ ConvertToMDEvents::init()
         " List(comma separated) of additional to Q (orthogonal) dimensions in the target workspace.\n"
         " The names of these dimensions have to coinside with the log names in the source workspace");
 
-    // this property is mainly for subalgorithms to set-up as they have to identify 
+    // this property is mainly for subalgorithms to set-up as they have to identify if they use the same instrument. 
     declareProperty(new PropertyWithValue<bool>("UsePreprocessedDetectors", true, Direction::Input), 
-        "Store the part of the detectors transformation into reciprocal space to save/reuse it later. "
-        "Useful if one expects to analyse number of different experiments obtained on the same instrument.");
- 
+        "Store the part of the detectors transformation into reciprocal space to save/reuse it later.\n"
+        " Useful if one expects to analyse number of different experiments obtained on the same instrument.\n"
+        "<span style=""color:#FF0000""> Dangerous if one uses number of workspaces with modified derived instrument one after another. </span>"
+        " In this case switch has to be set to false, as first instrument will be used for all workspaces and no check for its validity is performed."); 
 
     declareProperty(new ArrayProperty<double>("MinValues"),
         "It has to be N comma separated values, where N is defined as: \n"
