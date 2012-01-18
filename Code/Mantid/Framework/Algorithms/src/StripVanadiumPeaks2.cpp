@@ -71,6 +71,11 @@ DECLARE_ALGORITHM(StripVanadiumPeaks2)
     declareProperty("HighBackground", true,
         "Flag to indicate that the peaks are relatively weak comparing to background ");
 
+    declareProperty("ApplyPeakPositionTolerance", false,
+        "Option to apply tolerance on found peaks' position against input peak positions.");
+    declareProperty("PeakPositionTolerance", 0.01,
+        "Tolerance on the found peaks' positions against the input peak positions.");
+
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
     mustBePositive->setLower(0);
     declareProperty("WorkspaceIndex",EMPTY_INT(),mustBePositive,
@@ -111,7 +116,7 @@ DECLARE_ALGORITHM(StripVanadiumPeaks2)
     // Call StripPeak
     double pro0 = 0.0;
     double prof = 1.0;
-    bool sublog = false;
+    bool sublog = true;
     IAlgorithm_sptr stripPeaks = createSubAlgorithm("StripPeaks", pro0, prof, sublog);
     stripPeaks->setProperty("InputWorkspace", inputWS);
     stripPeaks->setPropertyValue("OutputWorkspace", outputWSName);
@@ -123,6 +128,8 @@ DECLARE_ALGORITHM(StripVanadiumPeaks2)
     if (singleSpectrum){
       stripPeaks->setProperty("WorkspaceIndex", singleIndex);
     }
+    stripPeaks->setProperty<bool>("ApplyPeakPositionTolerance", getProperty("ApplyPeakPositionTolerance"));
+    stripPeaks->setProperty<double>("PeakPositionTolerance", getProperty("PeakPositionTolerance"));
 
     stripPeaks->executeAsSubAlg();
 
