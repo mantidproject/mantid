@@ -162,6 +162,8 @@ void SliceViewer::loadSettings()
   if (!m_currentColorMapFile.isEmpty())
     loadColorMap(m_currentColorMapFile);
   m_colorBar->setLog(scaleType);
+  // Last saved image file
+  m_lastSavedFile = settings.value("LastSavedImagePath", "").toString();
   settings.endGroup();
 }
 
@@ -173,6 +175,7 @@ void SliceViewer::saveSettings()
   settings.beginGroup("Mantid/SliceViewer");
   settings.setValue("ColormapFile", m_currentColorMapFile);
   settings.setValue("LogColorScale", (int)m_colorBar->getLog() );
+  settings.setValue("LastSavedImagePath", m_lastSavedFile);
   settings.endGroup();
 }
 
