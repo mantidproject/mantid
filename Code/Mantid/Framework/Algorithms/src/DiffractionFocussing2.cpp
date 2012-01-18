@@ -532,17 +532,23 @@ int DiffractionFocussing2::validateSpectrumInGroup(size_t wi)
   if (*it < 0) // bad pixel id
     return -1;
 
-  const int group = udet2group[*it];
-  if (group <= 0)
-    return -1;
-  it++;
-  for (; it != dets.end(); ++it) // Loop other all other udets
-  {
-    if (udet2group[*it] != group)
+  try
+  {// what if index out of range?
+    const int group = udet2group.at(*it);
+    if (group <= 0)
       return -1;
+    it++;
+    for (; it != dets.end(); ++it) // Loop other all other udets
+    {
+      if (udet2group.at(*it) != group)
+        return -1;
+    }
+    return group;
   }
+  catch(...)
+  {}
 
-  return group;
+  return -1;
 }
 
 
