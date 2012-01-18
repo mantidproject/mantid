@@ -115,20 +115,26 @@ namespace MDEvents
     Strings::convert(strs[ strs.size()-1 ], numBins);
     max = double(numBins);
     if (name.size() == 0)
-      throw std::invalid_argument("Name should not be blank.");
+      throw std::invalid_argument("name should not be blank.");
     if (numBins < 1)
-      throw std::invalid_argument("Number of bins should be >= 1.");
+      throw std::invalid_argument("number of bins should be >= 1.");
 
     double length = 0.0;
     Strings::convert(strs[ strs.size()-2 ], length);
     min = 0.0;
     max = length;
 
+    if (length <= 0)
+      throw std::invalid_argument("'length' parameter should be > 0.0.");
+
     // Create the basis vector with the right # of dimensions
     VMD basis(this->m_inWS->getNumDims());
     for (size_t d=0; d<this->m_inWS->getNumDims(); d++)
       Strings::convert(strs[d+2], basis[d]);
-    basis.normalize();
+    double oldBasisLength = basis.normalize();
+
+    if (oldBasisLength <= 0)
+      throw std::invalid_argument("direction should not be 0-length.");
 
     // Now, convert the basis vector to the coordinates of the ORIGNAL ws, if any
     if (m_originalWS)
