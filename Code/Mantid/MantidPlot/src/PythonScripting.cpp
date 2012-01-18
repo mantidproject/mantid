@@ -47,11 +47,11 @@
 
 #include <cassert>
 
-#include "sipAPIqti.h"
+#include "sipAPI_qti.h"
 
 // Function is defined in a sip object file that is linked in later. There is no header file
 // so this is necessary
-extern "C" void initqti();
+extern "C" void init_qti();
 
 // Language name
 const char* PythonScripting::langName = "Python";
@@ -153,12 +153,12 @@ bool PythonScripting::start()
     }
 
     //Embedded qti module needs sip definitions initializing before it can be used
-    initqti();
+    init_qti();
 
-    pymodule = PyImport_ImportModule("qti");
+    pymodule = PyImport_ImportModule("_qti");
     if( pymodule )
     {
-      PyDict_SetItemString(m_globals, "qti", pymodule);
+      PyDict_SetItemString(m_globals, "_qti", pymodule);
       PyObject *qti_dict = PyModule_GetDict(pymodule);
       setQObject(d_parent, "app", qti_dict);
       PyDict_SetItemString(qti_dict, "mathFunctions", m_math);
@@ -254,11 +254,11 @@ bool PythonScripting::setQObject(QObject *val, const char *name, PyObject *dict)
   if(!val) return false;
   PyObject *pyobj=NULL;
   
-  if (!sipAPI_qti)
+  if (!sipAPI__qti)
   {
     throw std::runtime_error("sipAPI_qti is undefined");
   }
-  if (!sipAPI_qti->api_find_class)
+  if (!sipAPI__qti->api_find_class)
   {
     throw std::runtime_error("sipAPI_qti->api_find_class is undefined");
   }

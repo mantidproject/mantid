@@ -451,7 +451,7 @@ separate_arguments ( PYQT4_SIP_FLAGS )
 set ( SIP_SPEC ${CMAKE_CURRENT_SOURCE_DIR}/src/qti.sip )
 set ( SIP_SRC_IN ${CMAKE_CURRENT_SOURCE_DIR}/src/sipqti.cpp.in )
 set ( SIP_SRC ${CMAKE_CURRENT_BINARY_DIR}/sipqti.cpp )
-set ( SIP_SRC_AUTO sipqtipart0.cpp )
+set ( SIP_SRC_AUTO sip_qtipart0.cpp )
 
 
 # We need to manually add all the headers that are in qti.sip
@@ -464,31 +464,16 @@ set ( SIP_HDRS src/MdiSubWindow.h
                src/LegendWidget.h
                src/Grid.h
                src/Graph.h
-               src/LegendWidget.h
                src/MultiLayer.h
                src/Note.h
                src/Graph3D.h
                src/ApplicationWindow.h
-               src/Fit.h
-               src/ExponentialFit.h
-               src/SigmoidalFit.h
-               src/LogisticFit.h
-               src/MultiPeakFit.h
-               src/NonLinearFit.h
-               src/PluginFit.h
-               src/PolynomialFit.h
-               src/Filter.h
-               src/Differentiation.h
-               src/Integration.h
-               src/Interpolation.h
-               src/SmoothFilter.h
-               src/FFTFilter.h
-               src/FFT.h
-               src/Correlation.h
-               src/Convolution.h
+               src/Spectrogram.h
                src/PythonScripting.h
                src/PythonScript.h
                src/Folder.h
+               src/plot2D/ImageSymbol.h
+               src/Mantid/ErrorBarSettings.h
                src/Mantid/MantidUI.h
                src/Mantid/MantidMatrix.h
                src/Mantid/InstrumentWidget/InstrumentWindow.h

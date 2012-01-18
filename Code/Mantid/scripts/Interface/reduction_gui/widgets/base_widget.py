@@ -5,7 +5,7 @@ from reduction_gui.settings.application_settings import GeneralSettings
 
 IS_IN_MANTIDPLOT = False
 try:
-    import qti
+    import _qti
     from MantidFramework import *
     mtd.initialise(False)
     from mantidsimple import *
@@ -149,7 +149,7 @@ class BaseWidget(QtGui.QWidget):
                 else:
                     return True
             
-            self._instrument_view = qti.app.mantidUI.getInstrumentView(ws, tab)
+            self._instrument_view = _qti.app.mantidUI.getInstrumentView(ws, tab)
             if self._instrument_view is not None:
                 self._instrument_view.show()
                 self._data_set_viewed = file_name

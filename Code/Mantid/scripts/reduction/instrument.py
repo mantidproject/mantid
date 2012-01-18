@@ -73,8 +73,9 @@ class Instrument(object):
         elif not MantidFramework.mtd.workspaceExists(workspace_name):
             self.load_empty(workspace_name)
 
-        instrument_win = mantidsimple.qti.app.mantidUI.getInstrumentView(workspace_name)
-        instrument_win.showWindow()
+        import _qti
+        instrument_win = _qti.app.mantidUI.getInstrumentView(workspace_name)
+        instrument_win.show()
 
         return workspace_name
 

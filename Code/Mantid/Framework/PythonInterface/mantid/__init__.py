@@ -22,7 +22,7 @@ algorithms and data objects that are:
 ###############################################################################
 # Flag indicating whether the GUI layer is loaded. 
 try:
-    import qti
+    import _qti
     __gui__ = True
 except ImportError:
     __gui__ = False

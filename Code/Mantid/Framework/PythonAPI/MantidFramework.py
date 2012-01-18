@@ -10,7 +10,7 @@ import opcode
 import __builtin__
 import __main__
 try:
-    import qti
+    import _qti
     import PyQt4.QtCore as qtcore
     HAVE_GUI = True
 except:
@@ -1057,7 +1057,7 @@ class IAlgorithmProxy(ProxyObject):
                 presets += name + '=' + _makeString(value) + '|'
 
         # finally run the configured dialog
-        dialog = qti.app.mantidUI.createPropertyInputDialog(self.name(), presets, message, enabled_list, disabled_list)
+        dialog = _qti.app.mantidUI.createPropertyInputDialog(self.name(), presets, message, enabled_list, disabled_list)
         if dialog == False:
             sys.exit('Information: Script execution cancelled')
 
@@ -1072,7 +1072,7 @@ class IAlgorithmProxy(ProxyObject):
         except AttributeError:
             run_async = False
         if run_async:
-            success = qti.app.mantidUI.runAlgorithmAsync_PyCallback(self.name()) 
+            success = _qti.app.mantidUI.runAlgorithmAsync_PyCallback(self.name()) 
             if success == False:
                 sys.exit('An error occurred while running %s. See results log for details.' % self.name())
         else:

@@ -11,7 +11,7 @@ import sys
 import os
 import unittest
 import time
-import qti
+import _qti
 import datetime
 from PyQt4 import QtGui, QtCore
 
@@ -153,8 +153,8 @@ def runTests(classname):
     
     # Set Mantid exit code
     if not res.wasSuccessful():
-        qti.app.setExitCode(1)
+        _qti.app.setExitCode(1)
     else:
-        qti.app.setExitCode(0)
+        _qti.app.setExitCode(0)
     
     return res

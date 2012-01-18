@@ -8,7 +8,7 @@ import ui.ui_instrument_dialog
 
 IS_IN_MANTIDPLOT = False
 try:
-    import qti
+    import _qti
     IS_IN_MANTIDPLOT = True
 except:
     pass
@@ -305,10 +305,10 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self.reduce_button.setEnabled(False)   
         self.export_button.setEnabled(False)
         if IS_IN_MANTIDPLOT:
-            qti.app.mantidUI.setIsRunning(True)
+            _qti.app.mantidUI.setIsRunning(True)
         self._interface.reduce()
         if IS_IN_MANTIDPLOT:
-            qti.app.mantidUI.setIsRunning(False)
+            _qti.app.mantidUI.setIsRunning(False)
         self.reduce_button.setEnabled(True)   
         self.export_button.setEnabled(True)
         

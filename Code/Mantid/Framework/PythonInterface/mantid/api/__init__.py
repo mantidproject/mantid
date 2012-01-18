@@ -53,10 +53,10 @@ import mantid
 if mantid.__gui__ == True:
     # Save the original function
     _orig_execute = IAlgorithm.execute
-    import qti
+    import _qti
     def execute_wrapper(self):
         if hasattr(self, '__async__') and self.__async__:
-            success = qti.app.mantidUI.runAlgorithmAsync_PyCallback(self.name())
+            success = _qti.app.mantidUI.runAlgorithmAsync_PyCallback(self.name())
             if not success:
                 raise RuntimeError('An error occurred while running %s. See results log for details.' % self.name())
         else:

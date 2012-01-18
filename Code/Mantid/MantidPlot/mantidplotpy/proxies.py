@@ -76,7 +76,7 @@ class QtProxyObject(QtCore.QObject):
 
 #-----------------------------------------------------------------------------
 class MDIWindow(QtProxyObject):
-    """Proxy for the qti.MDIWindow object. 
+    """Proxy for the _qti.MDIWindow object. 
     Also used for subclasses that do not need any methods intercepted (e.g. Table, Note, Matrix)
     """
     def __init__(self, toproxy):
@@ -87,7 +87,7 @@ class MDIWindow(QtProxyObject):
 
 #-----------------------------------------------------------------------------
 class Graph(MDIWindow):
-    """Proxy for the qti.Graph object.
+    """Proxy for the _qti.Graph object.
     """
     def __init__(self, toproxy):
         MDIWindow.__init__(self,toproxy)
@@ -142,7 +142,7 @@ class Graph(MDIWindow):
 
 #-----------------------------------------------------------------------------
 class Layer(QtProxyObject):
-    """Proxy for the qti.Layer object.
+    """Proxy for the _qti.Layer object.
     """
     def __init__(self, toproxy):
         QtProxyObject.__init__(self,toproxy)
@@ -256,7 +256,7 @@ class Layer(QtProxyObject):
 
 #-----------------------------------------------------------------------------
 class Graph3D(QtProxyObject):
-    """Proxy for the qti.Graph3D object.
+    """Proxy for the _qti.Graph3D object.
     """
     def __init__(self, toproxy):
         QtProxyObject.__init__(self,toproxy)
@@ -281,7 +281,7 @@ class Graph3D(QtProxyObject):
 
 #-----------------------------------------------------------------------------
 class Spectrogram(QtProxyObject):
-    """Proxy for the qti.Spectrogram object.
+    """Proxy for the _qti.Spectrogram object.
     """
     def __init__(self, toproxy):
         QtProxyObject.__init__(self,toproxy)
@@ -292,7 +292,7 @@ class Spectrogram(QtProxyObject):
 
 #-----------------------------------------------------------------------------
 class Folder(QtProxyObject):
-    """Proxy for the qti.Folder object.
+    """Proxy for the _qti.Folder object.
     """
     def __init__(self, toproxy):
         QtProxyObject.__init__(self,toproxy)
@@ -387,7 +387,7 @@ class Folder(QtProxyObject):
 
 #-----------------------------------------------------------------------------
 class MantidMatrix(MDIWindow):
-    """Proxy for the qti.MantidMatrix object.
+    """Proxy for the _qti.MantidMatrix object.
     """
     def __init__(self, toproxy):
         QtProxyObject.__init__(self,toproxy)

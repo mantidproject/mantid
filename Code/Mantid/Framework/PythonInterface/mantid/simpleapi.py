@@ -276,8 +276,8 @@ def _set_properties_dialog(algm_object, *args, **kwargs):
             presets += name + '=' + make_str(value) + '|'
 
     # finally run the configured dialog
-    import qti
-    dialog =  qti.app.mantidUI.createPropertyInputDialog(algm_object.name(), presets, message, enabled_list, disabled_list)
+    import _qti
+    dialog =  _qti.app.mantidUI.createPropertyInputDialog(algm_object.name(), presets, message, enabled_list, disabled_list)
     if dialog == False:
         sys.exit('Information: Script execution cancelled')
 

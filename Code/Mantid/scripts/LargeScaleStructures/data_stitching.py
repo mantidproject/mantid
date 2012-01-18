@@ -19,16 +19,16 @@ class RangeSelector(object):
             self._graph = "StitcherRangeSelector"
             
         def disconnect(self):
-            qti.app.disconnect(qti.app.mantidUI, QtCore.SIGNAL("x_range_update(double,double)"), self._call_back)
+            _qti.app.disconnect(_qti.app.mantidUI, QtCore.SIGNAL("x_range_update(double,double)"), self._call_back)
             
         def connect(self, ws, call_back):
             self._call_back = call_back
-            qti.app.connect(qti.app.mantidUI, QtCore.SIGNAL("x_range_update(double,double)"), self._call_back)
-            g = qti.app.graph(self._graph)
+            _qti.app.connect(_qti.app.mantidUI, QtCore.SIGNAL("x_range_update(double,double)"), self._call_back)
+            g = _qti.app.graph(self._graph)
             if g is None:
-                g = qti.app.mantidUI.pyPlotSpectraList(ws,[0],True)
+                g = _qti.app.mantidUI.pyPlotSpectraList(ws,[0],True)
                 g.setName(self._graph)        
-            qti.app.selectMultiPeak(g,False)
+            _qti.app.selectMultiPeak(g,False)
     
     @classmethod
     def connect(cls, ws, call_back):

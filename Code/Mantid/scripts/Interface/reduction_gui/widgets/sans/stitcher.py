@@ -5,7 +5,7 @@ from reduction_gui.widgets.base_widget import BaseWidget
 import reduction_gui.widgets.util as util
 import ui.ui_stitcher
 
-import qti
+import _qti
 from MantidFramework import *
 mtd.initialise(False)
 from mantidsimple import *
@@ -432,9 +432,9 @@ class StitcherWidget(BaseWidget):
             ws_list.append(self._high_q_data.get_scaled_ws())
         
         if len(ws_list)>0:
-            g = qti.app.graph(self._graph)
+            g = _qti.app.graph(self._graph)
             if g is None:
-                g = qti.app.mantidUI.pyPlotSpectraList(ws_list,[0],True)
+                g = _qti.app.mantidUI.pyPlotSpectraList(ws_list,[0],True)
                 g.setName(self._graph)
                 
     def _save_result(self):

@@ -29,7 +29,7 @@
  *                                                                         *
  ***************************************************************************/
 
-%Module qti
+%Module _qti
 %Import QtCore/QtCoremod.sip
 %Import QtGui/QtGuimod.sip
 
@@ -423,7 +423,7 @@ private:
 class ImageSymbol : QwtSymbol
 {
 %TypeHeaderCode
-#include <plot2D/ImageSymbol.h>
+#include "src/plot2D/ImageSymbol.h"
 %End
 
 public:
@@ -876,7 +876,7 @@ private:
 class ErrorBarSettings : QObject
 {
 %TypeHeaderCode
-#include "../src/Mantid/ErrorBarSettings.h"
+#include "src/Mantid/ErrorBarSettings.h"
 %End
 public:
   int capLength();
