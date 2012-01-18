@@ -172,8 +172,8 @@ class StitcherWidget(BaseWidget):
         """
         if self._low_q_data is not None:
             def call_back(xmin, xmax):
-                self._content.low_min_edit.setText("%6.3g" % xmin)
-                self._content.low_max_edit.setText("%6.3g" % xmax)
+                self._content.low_min_edit.setText("%-6.3g" % xmin)
+                self._content.low_max_edit.setText("%-6.3g" % xmax)
             ws_list = []
             if self._low_q_data is not None:
                 ws_list.append(str(self._low_q_data))
@@ -187,8 +187,8 @@ class StitcherWidget(BaseWidget):
         """
         if self._medium_q_data is not None:
             def call_back(xmin, xmax):
-                self._content.medium_min_edit.setText("%6.3g" % xmin)
-                self._content.medium_max_edit.setText("%6.3g" % xmax)
+                self._content.medium_min_edit.setText("%-6.3g" % xmin)
+                self._content.medium_max_edit.setText("%-6.3g" % xmax)
             ws_list = []
             if self._medium_q_data is not None:
                 ws_list.append(str(self._medium_q_data))
@@ -234,8 +234,8 @@ class StitcherWidget(BaseWidget):
             if len(self._content.low_min_edit.text())==0 or \
                 len(self._content.low_max_edit.text())==0:
                 minx, maxx = self._low_q_data.get_range()
-                self._content.low_min_edit.setText("%6.3g" % minx)
-                self._content.low_max_edit.setText("%6.3g" % maxx)
+                self._content.low_min_edit.setText("%-6.3g" % minx)
+                self._content.low_max_edit.setText("%-6.3g" % maxx)
             self._content.low_scale_edit.setText("1.0")
             npts = self._low_q_data.get_number_of_points()
             self._content.low_first_spin.setMaximum(npts)
@@ -262,8 +262,8 @@ class StitcherWidget(BaseWidget):
             if len(self._content.medium_min_edit.text())==0 or \
                 len(self._content.medium_max_edit.text())==0:
                 minx, maxx = self._medium_q_data.get_range()
-                self._content.medium_min_edit.setText("%6.3g" % minx)
-                self._content.medium_max_edit.setText("%6.3g" % maxx)
+                self._content.medium_min_edit.setText("%-6.3g" % minx)
+                self._content.medium_max_edit.setText("%-6.3g" % maxx)
             self._content.medium_scale_edit.setText("1.0")
             npts = self._medium_q_data.get_number_of_points()
             self._content.medium_first_spin.setMaximum(npts)
