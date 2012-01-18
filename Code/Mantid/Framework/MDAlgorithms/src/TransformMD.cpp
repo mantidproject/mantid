@@ -1,6 +1,7 @@
 /*WIKI*
 
 This algorithm applies a simple linear transformation to a [[MDWorkspace]] or [[MDHistoWorkspace]].
+This could be used, for example, to scale the Energy dimension to different units.
 
 Each coordinate is tranformed so that
 <math> x'_d = (x_d * s_d) + o_d </math>
@@ -13,9 +14,13 @@ You can specify either a single value for Scaling and Offset, in which case the
 same m_scaling or m_offset are applied to each dimension; or you can specify a list
 with one entry for each dimension.
 
-'''NOTE:''' the relationship between the workspace and the original [[MDWorkspace]],
+==== Notes ====
+
+The relationship between the workspace and the original [[MDWorkspace]],
 for example when the MDHistoWorkspace is the result of [[BinMD]], is lost.
 This means that you cannot re-bin a transformed [[MDHistoWorkspace]].
+
+No units are not modified by this algorithm.
 
 ==== Performance Notes ====
 
@@ -78,8 +83,8 @@ namespace MDAlgorithms
   /// Sets documentation strings for this algorithm
   void TransformMD::initDocs()
   {
-    this->setWikiSummary("Scale and/or m_offset the coordinates of a MDWorkspace");
-    this->setOptionalMessage("Scale and/or m_offset the coordinates of a MDWorkspace");
+    this->setWikiSummary("Scale and/or offset the coordinates of a MDWorkspace");
+    this->setOptionalMessage("Scale and/or offset the coordinates of a MDWorkspace");
   }
 
   //----------------------------------------------------------------------------------------------
