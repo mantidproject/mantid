@@ -231,6 +231,7 @@ set ( TEST_FILES
 	test/MatrixPropertyTest.h
 	test/MatrixTest.h
 	test/MemoryTest.h
+	test/MutexTest.h
 	test/MersenneTwisterTest.h
 	test/MultiFileNameParserTest.h
 	test/NeutronAtomTest.h
