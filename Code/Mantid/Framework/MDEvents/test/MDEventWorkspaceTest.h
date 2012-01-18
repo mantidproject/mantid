@@ -89,6 +89,7 @@ public:
     TS_ASSERT_EQUALS( copy.getNumExperimentInfo(), 1);
     TSM_ASSERT_DIFFERS( "ExperimentInfo's were deep-copied", copy.getExperimentInfo(0), ew3.getExperimentInfo(0));
     TSM_ASSERT_DIFFERS( "BoxController was deep-copied", copy.getBoxController(), ew3.getBoxController());
+    TSM_ASSERT_DIFFERS( "Dimensions were deep-copied", copy.getDimension(0), ew3.getDimension(0));
   }
 
   void test_initialize_throws()

@@ -200,6 +200,21 @@ namespace MDEvents
   }
 
   //-----------------------------------------------------------------------------------------------
+  /** Transform the dimensions contained in this box
+   * x' = x*scaling + offset.
+   * NON-RECURSIVE!
+   *
+   * @param scaling :: multiply each coordinate by this value.
+   * @param offset :: after multiplying, add this offset.
+   */
+  TMDE(
+  void MDGridBox)::transformDimensions(std::vector<double> & scaling, std::vector<double> & offset)
+  {
+    IMDBox<MDE,nd>::transformDimensions(scaling, offset);
+    this->computeSizesFromSplit();
+  }
+
+  //-----------------------------------------------------------------------------------------------
   /** Compute some data from the split[] array and the extents.
    *
    * @return :: the total number of boxes */

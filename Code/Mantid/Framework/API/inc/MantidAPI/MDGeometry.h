@@ -50,6 +50,7 @@ namespace API
   {
   public:
     MDGeometry();
+    MDGeometry(const MDGeometry & other);
     ~MDGeometry();
     void initGeometry(std::vector<Mantid::Geometry::IMDDimension_sptr> & dimensions);
 
@@ -85,6 +86,8 @@ namespace API
     void setTransformFromOriginal(Mantid::API::CoordTransform * transform);
     Mantid::API::CoordTransform * getTransformToOriginal() const;
     void setTransformToOriginal(Mantid::API::CoordTransform * transform);
+
+    void transformDimensions(std::vector<double> & scaling, std::vector<double> & offset);
 
     // --------------------------------------------------------------------------------------------
     ///@return the vector of the origin (in the original workspace) that corresponds to 0,0,0... in this workspace

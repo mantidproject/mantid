@@ -1,10 +1,12 @@
 #include "MantidAPI/MDGeometry.h"
 #include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using Mantid::Geometry::MDGeometryBuilderXML;
+using namespace Mantid::Geometry;
 
 namespace Mantid
 {
@@ -22,6 +24,28 @@ namespace API
    m_observingDelete(false)
   {
   }
+
+  //----------------------------------------------------------------------------------------------
+  /** Copy Constructor
+   */
+  MDGeometry::MDGeometry(const MDGeometry & other) :
+   m_originalWorkspace(other.m_originalWorkspace),
+   m_transformFromOriginal(NULL), m_transformToOriginal(NULL),
+   m_delete_observer(*this, &MDGeometry::deleteNotificationReceived),
+   m_observingDelete(false)
+  {
+    //TODO: How to copy the coordinate transformations?
+    // Perform a deep copy of the dimensions
+    std::vector<Mantid::Geometry::IMDDimension_sptr> dimensions;
+    for (size_t d=0; d < other.getNumDims(); d++)
+    {
+      // Copy the dimension
+      MDHistoDimension_sptr dim(new MDHistoDimension( other.getDimension(d).get() ) );
+      dimensions.push_back(dim);
+    }
+    this->initGeometry(dimensions);
+  }
+
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
@@ -233,6 +257,39 @@ namespace API
     }
 
   }
+
+  //---------------------------------------------------------------------------------------------------
+  /** Transform the dimensions contained in this geometry
+   * x' = x*scaling + offset
+   *
+   * This clears any original workspace or coordinate transformation
+   * contained.
+   *
+   * NOTE! This does not modify any other underlying data. Call the TransformMD
+   * algorithm to perform a full transform.
+   *
+   * @param scaling :: multiply each coordinate by this value.
+   * @param offset :: after multiplying, add this offset.
+   */
+  void MDGeometry::transformDimensions(std::vector<double> & scaling, std::vector<double> & offset)
+  {
+    if (scaling.size() != m_dimensions.size())
+      throw std::invalid_argument("MDGeometry::transformDimensions(): scaling.size() must be equal to number of dimensions.");
+    if (offset.size() != m_dimensions.size())
+      throw std::invalid_argument("MDGeometry::transformDimensions(): offset.size() must be equal to number of dimensions.");
+    for (size_t d=0; d<m_dimensions.size(); d++)
+    {
+      IMDDimension_sptr dim = m_dimensions[d];
+      double min = (dim->getMinimum() * scaling[d]) + offset[d];
+      double max = (dim->getMaximum() * scaling[d]) + offset[d];
+      dim->setRange( dim->getNBins(), min, max);
+    }
+    // Clear the original workspace
+    setOriginalWorkspace(boost::shared_ptr<Workspace>());
+    setTransformFromOriginal(NULL);
+    setTransformToOriginal(NULL);
+  }
+
 
 
   //---------------------------------------------------------------------------------------------------

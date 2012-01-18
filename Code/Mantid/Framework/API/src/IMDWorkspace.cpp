@@ -10,6 +10,22 @@ namespace Mantid
       {
       }
 
+      //-----------------------------------------------------------------------------------------------
+      /** Default constructor */
+      IMDWorkspace::IMDWorkspace()
+      : Workspace(),
+        Mantid::API::MDGeometry()
+      {
+      }
+
+      //-----------------------------------------------------------------------------------------------
+      /** Copy constructor */
+      IMDWorkspace::IMDWorkspace(const IMDWorkspace & other)
+      : Workspace(other),
+        Mantid::API::MDGeometry(other)
+      {
+      }
+
 
       /**
         * Default implementation throws NotImplementedError exception.

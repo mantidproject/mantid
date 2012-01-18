@@ -34,6 +34,7 @@ set ( SRC_FILES
 	src/SimulateMDD.cpp
 	src/SimulateResolution.cpp
 	src/TobyFitSimulate.cpp
+	src/TransformMD.cpp
 	src/UnaryOperationMD.cpp
 	src/Vector3DParameterParser.cpp
 	src/XorMD.cpp
@@ -84,6 +85,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/SimulateMDD.h
 	inc/MantidMDAlgorithms/SimulateResolution.h
 	inc/MantidMDAlgorithms/TobyFitSimulate.h
+	inc/MantidMDAlgorithms/TransformMD.h
 	inc/MantidMDAlgorithms/UnaryOperationMD.h
 	inc/MantidMDAlgorithms/Vector3DParameter.h
 	inc/MantidMDAlgorithms/Vector3DParameterParser.h
@@ -124,6 +126,7 @@ set ( TEST_FILES
 	test/SetMDUsingMaskTest.h
 	test/SimulateMDDTest.h
 	test/TobyFitSimulateTest.h
+	test/TransformMDTest.h
 	test/UnaryOperationMDTest.h
 	test/XorMDTest.h
 )

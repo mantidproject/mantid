@@ -199,6 +199,28 @@ public:
     TS_ASSERT_DELTA( stats[1].getApproxVariance(), 0.5, 1e-3);
   }
 
+  void test_transformDimensions()
+  {
+    MDBox<MDLeanEvent<2>,2> b;
+    MDLeanEvent<2> ev(1.2, 3.4);
+    ev.setCenter(0, 2.0);
+    ev.setCenter(1, 3.0);
+    b.addEvent(ev);
+    ev.setCenter(0, 4.0);
+    ev.setCenter(1, 5.0);
+    b.addEvent(ev);
+
+    std::vector<double> scaling(2, 3.0);
+    std::vector<double> offset(2, 1.0);
+    b.transformDimensions(scaling, offset);
+    const std::vector<MDLeanEvent<2> > events = b.getConstEvents();
+    TS_ASSERT_DELTA( events[0].getCenter(0), 7.0, 1e-3);
+    TS_ASSERT_DELTA( events[0].getCenter(1), 10.0, 1e-3);
+    TS_ASSERT_DELTA( events[1].getCenter(0), 13.0, 1e-3);
+    TS_ASSERT_DELTA( events[1].getCenter(1), 16.0, 1e-3);
+    b.releaseEvents();
+  }
+
   void test_clear()
   {
     BoxController_sptr bc( new BoxController(2));

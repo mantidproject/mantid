@@ -50,6 +50,8 @@ namespace MDEvents
 
     void init(std::vector<Mantid::Geometry::MDHistoDimension_sptr> & dimensions);
 
+    void cacheValues();
+
     virtual const std::string id() const
     { return "MDHistoWorkspace"; }
 

@@ -58,7 +58,9 @@ namespace Mantid
     class MANTID_API_DLL IMDWorkspace : public Workspace, public Mantid::API::MDGeometry
     {
     public:
-      
+      IMDWorkspace();
+      IMDWorkspace(const IMDWorkspace & other);
+
       /// Get the number of points associated with the workspace.
       /// For MDEvenWorkspace it is the number of events contributing into the workspace
       /// For regularly gridded workspace (MDHistoWorkspace and MatrixWorkspace), it is
