@@ -283,6 +283,16 @@ def plot3D(*args):
         return proxies.Graph3D(qti.app.plot3D(args[0]._getHeldObject(),*args[1:]))
 
 #-----------------------------------------------------------------------------
+def selectMultiPeak(source, showFitPropertyBrowser = True):
+    """Switch on the multi-peak selecting tool for fitting with the Fit algorithm.
+    
+    Args:
+        source: A reference to a MultiLayer with the data to fit.
+        showFitPropertyBrowser: Whether to show the FitPropertyBrowser or not.
+    """
+    qti.app.selectMultiPeak(source._getHeldObject(), showFitPropertyBrowser)
+
+#-----------------------------------------------------------------------------
 #-------------------------- Project/Folder functions -----------------------
 #-----------------------------------------------------------------------------
 def windows():

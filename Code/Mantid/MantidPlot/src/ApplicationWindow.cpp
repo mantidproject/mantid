@@ -7777,6 +7777,17 @@ void ApplicationWindow::selectMultiPeak(bool showFitPropertyBrowser)
   MultiLayer *plot = dynamic_cast<MultiLayer*>(activeWindow(MultiLayerWindow));
   if (!plot)
     return;
+  selectMultiPeak(plot, showFitPropertyBrowser);
+}
+
+/**  Switch on the multi-peak selecting tool for fitting with the Fit algorithm.
+ * @param plot :: The MultiLayer the tool will apply to.
+ * @param showFitPropertyBrowser :: Set if FitPropertyBrowser must be shown as well.
+ */
+void ApplicationWindow::selectMultiPeak(MultiLayer* plot, bool showFitPropertyBrowser)
+{
+  setActiveWindow(plot);
+
   if (plot->isEmpty()){
     QMessageBox::warning(this,tr("MantidPlot - Warning"),//Mantid
         tr("<h4>There are no plot layers available in this window.</h4>"
