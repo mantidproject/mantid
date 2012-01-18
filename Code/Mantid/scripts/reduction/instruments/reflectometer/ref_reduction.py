@@ -17,13 +17,16 @@ m = 1.675e-27     #kg
 maxX = 304
 maxY = 256
 
+#Parameter
 TOFrange = [9000, 23600] #microS
 
 #Due to the frame effect, it's sometimes necessary to narrow the range
 #over which we add all the pixels along the low resolution
+#Parameter
 Xrange = [115, 210]
 
-nexus_path = '/mnt/hgfs/j35/results/'
+#nexus_path = '/mnt/hgfs/j35/results/'
+nexus_path = '/home/m2d/data/ref_l/'
 list_data = ['66421',
              '66420',
              '66422',
@@ -39,6 +42,7 @@ rebin_parameters = '0,200,200000'  #microS
 pre = 'REF_L_'
 post = '_event.nxs'
 
+#Parameter
 list_data_peak = [[126, 134],
                   [126, 134],
                   [126, 134],
@@ -56,6 +60,7 @@ list_data_back = [[123, 137],
                   [123, 137],
                   [123, 137]]
                   
+# Same thing for normalization run
 list_norm_peak = [[127, 133]]
 list_norm_back = [[123, 137]]
 
@@ -264,7 +269,7 @@ if bNorm:
         #counts_vs_tof += mt_temp.readY(x)[:]
         print mt_temp.readY(int(x))[:]
     print counts_vs_tof
-    sys.exit("stop here")
+    #sys.exit("stop here")
 #    raise SystemExit(0)
     
 #    mt_NormWks = mtd['NormWks']
@@ -278,6 +283,7 @@ if bNorm:
 #        counts_vs_tof += mt_NormWks.readY(int(x))[:]
 #    CreateWorkspace('NormWks', DataX=_tof_axis, DataY=counts_vs_tof, DataE=counts_vs_tof, Nspec=1)
    
+    SumSpectra(InputWorkspace='NormalizedWks', OutputWorkspace='NormalizedWks')
     #### divide data by normalize histo workspace
     Divide(LHSWorkspace='DataWks',
            RHSWorkspace='NormWks',
@@ -289,6 +295,10 @@ else:
     
     mt4 = mtd['DataWks']
     
+#SumSpectra(InputWorkspace="NormWks", OutputWorkspace="NormWks")
+#NormalizedWks = Divide("DataWks","NormWks")
+#ReplaceSpecialValues("NormalizedWks",NaNValue=0,NaNError=0, OutputWorkspace="NormalizedWks")
+#test=SumSpectra("NormalizedWks")
     
 #ConvertToHistogram(InputWorkspace='NormalizedWks',
 #                   OutputWorkspace='NormalizedWksHisto')
