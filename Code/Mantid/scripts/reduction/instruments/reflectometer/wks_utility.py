@@ -127,7 +127,9 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
     #normalization by proton charge
 #    _y_axis /= (proton_charge * 1e-12)
 
-    CreateWorkspace(outputWorkspace, DataX=_tof_axis, DataY=_y_axis, DataE=_y_error_axis, Nspec=maxY)
+    CreateWorkspace(OutputWorkspace=outputWorkspace, 
+                    DataX=_tof_axis, DataY=_y_axis, DataE=_y_error_axis, Nspec=maxY,
+                    UnitX="TOF",ParentWorkspace=mt1)
     mt2 = mtd[outputWorkspace]
     return mt2
 
