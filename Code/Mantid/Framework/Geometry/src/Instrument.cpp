@@ -417,7 +417,8 @@ namespace Mantid
         detid2det_map::const_iterator it = m_detectorCache.find(detector_id);
         if ( it == m_detectorCache.end() )
         {
-          g_log.debug() << "Detector with ID " << detector_id << " not found." << std::endl;
+          //FIXME: When ticket #4544 is fixed, re-enable this debug print:
+          //g_log.debug() << "Detector with ID " << detector_id << " not found." << std::endl;
           std::stringstream readInt;
           readInt << detector_id;
           throw Kernel::Exception::NotFoundError("Instrument: Detector with ID " + readInt.str() + " not found.","");

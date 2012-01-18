@@ -432,7 +432,7 @@ namespace MDEvents
       eventsAdded += el.getNumberEvents();
       if (bc->shouldSplitBoxes(eventsAdded, lastNumBoxes))
       {
-        if (DODEBUG) std::cout << cputim << ": Added tasks worth " << eventsAdded << " events.\n";
+        if (DODEBUG) std::cout << cputim << ": Added tasks worth " << eventsAdded << " events. WorkspaceIndex " << wi << std::endl;
         // Do all the adding tasks
         tp.joinAll();
         if (DODEBUG) std::cout << cputim << ": Performing the addition of these events.\n";
