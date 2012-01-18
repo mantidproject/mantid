@@ -4,8 +4,6 @@ import os
 import numpy
 from reduction.instruments.reflectometer import wks_utility
 
-COMPRESS_TOL_TOF = .01
-
 class RefLReduction(PythonAlgorithm):
 
     def category(self):
@@ -91,7 +89,8 @@ class RefLReduction(PythonAlgorithm):
                 raise RuntimeError("Failed to specify the binning")
         
         run_numbers = self.getProperty("RunNumbers")
-        if len(run_numbers)>1:
+        allow_multiple = False
+        if len(run_numbers)>1 and not allow_multiple:
             raise RuntimeError("Not ready for multiple runs yet, please specify only one run number")
     
         normalization_run = self.getProperty("NormalizationRunNumber")
@@ -113,7 +112,6 @@ class RefLReduction(PythonAlgorithm):
         maxX = 304
         maxY = 256
         
-        
         #nexus_path = '/mnt/hgfs/j35/results/'
         nexus_path = '/home/m2d/data/ref_l/'
         pre = 'REF_L_'
@@ -122,66 +120,74 @@ class RefLReduction(PythonAlgorithm):
         BackfromYpixel = norm_back[0]
         BacktoYpixel = norm_back[1]
 
+        norm_peak = self.getProperty("NormPeakPixelRange")
+        from_peak = norm_peak[0]
+        to_peak = norm_peak[1]
         
         ########################################################################
-        ########################################################################
+        # Find full path to event NeXus data file
+        f = FileFinder.findRuns("REF_L%d" %run_numbers[0])
+        if len(f)>0 and os.path.isfile(f[0]): 
+            data_file = f[0]
+        else:
+            msg = "RefLReduction: could not find run %d\n" % run_number[0]
+            msg += "Add your data folder to your User Data Directories in the File menu"
+            raise RuntimeError(msg)
         
+        # Pick a good workspace name
+        ws_name = "refl%d" % run_numbers[0]
+        ws_event_data = ws_name+"_evt"  
+        # Load the data into its workspace
+        LoadEventNexus(Filename=data_file, OutputWorkspace=ws_event_data)
         
-        
-        #full path of data file
-        data_file = nexus_path + pre + str(run_numbers[0]) + SUFFIX
-        
-        ##load the data into its workspace
-        LoadEventNexus(Filename=data_file, OutputWorkspace='EventData')
-        mt = mtd['EventData']
-        
-        #Get metadata
-        mt_run = mt.getRun()
+        # Get metadata
+        mt_run = mtd[ws_event_data].getRun()
         ##get angles value
         ths_value = mt_run.getProperty('ths').value[0]
         ths_units = mt_run.getProperty('ths').units
         tthd_value = mt_run.getProperty('tthd').value[0]
         tthd_units = mt_run.getProperty('tthd').units
         ths_rad = wks_utility.angleUnitConversion(value=ths_value,
-                                      from_units=ths_units,
-                                      to_units='rad')
+                                                  from_units=ths_units,
+                                                  to_units='rad')
         tthd_rad = wks_utility.angleUnitConversion(value=tthd_value,
-                                       from_units=tthd_units,
-                                       to_units='rad')
-        ##retrieve geometry of instrument
-        # distance Sample detector
-        sample = mt.getInstrument().getSample()
-        source = mt.getInstrument().getSource()
+                                                   from_units=tthd_units,
+                                                   to_units='rad')
+        # Retrieve geometry of instrument
+        # Sample-to-detector distance
+        sample = mtd[ws_event_data].getInstrument().getSample()
+        source = mtd[ws_event_data].getInstrument().getSource()
         dSM = sample.getDistance(source)
-        #create array of distances pixel->sample
+        # Create array of distances pixel->sample
         dPS_array = numpy.zeros((maxY, maxX))
         for x in range(maxX):
             for y in range(maxY):
                 _index = maxY * x + y
-                detector = mt.getDetector(_index)
+                detector = mtd[ws_event_data].getDetector(_index)
                 dPS_array[y, x] = sample.getDistance(detector)
-        #array of distances pixel->source
+        # Array of distances pixel->source
         dMP_array = dPS_array + dSM
-        #distance sample->center of detector
+        # Distance sample->center of detector
         dSD = dPS_array[maxY / 2, maxX / 2]
-        #distance source->center of detector
+        # Distance source->center of detector
         dMD = dSD + dSM
         
         
-        ##rebin data (x-axis is in TOF)
-        rebin(InputWorkspace='EventData', OutputWorkspace='HistoData', Params=self._binning)
+        # Rebin data (x-axis is in TOF)
+        ws_histo_data = ws_name+"_histo"
+        Rebin(InputWorkspace=ws_event_data, OutputWorkspace=ws_histo_data, Params=self._binning)
         
-        ##keep only range of TOF of interest
-        CropWorkspace('HistoData','CropHistoData',XMin=TOFrange[0], XMax=TOFrange[1])
+        # Keep only range of TOF of interest
+        CropWorkspace(ws_histo_data,ws_histo_data,XMin=TOFrange[0], XMax=TOFrange[1])
         
-        ##Normalized by Current (proton charge)
-        NormaliseByCurrent(InputWorkspace='CropHistoData', OutputWorkspace='HistoData')
+        # Normalized by Current (proton charge)
+        NormaliseByCurrent(InputWorkspace=ws_histo_data, OutputWorkspace=ws_histo_data)
         mt = mtd['HistoData']
         
-        ##Calculation of the central pixel (using weighted average)
-        pixelXtof_data = wks_utility.getPixelXTOF(mt, maxX=maxX, maxY=maxY)
+        # Calculation of the central pixel (using weighted average)
+        pixelXtof_data = wks_utility.getPixelXTOF(mtd[ws_histo_data], maxX=maxX, maxY=maxY)
         pixelXtof_1d = pixelXtof_data.sum(axis=1)
-        #keep only range of pixels
+        # Keep only range of pixels
         pixelXtof_roi = pixelXtof_1d[data_peak[0]:data_peak[1]]
         sz = pixelXtof_roi.size
         _num = 0
@@ -193,14 +199,15 @@ class RefLReduction(PythonAlgorithm):
             _den += pixelXtof_roi[i]
         data_cpix = _num / _den    
         
-        ##Background subtraction
+        # Background subtraction
         BackfromYpixel = data_back[0]
         BacktoYpixel = data_back[1]
         
         #Create a new event workspace of only the range of pixel of interest 
         #background range (along the y-axis) and of only the pixel
         #of interest along the x-axis (to avoid the frame effect)
-        mt2 = wks_utility.createIntegratedWorkspace(mt, "IntegratedDataWks",
+        mt2 = wks_utility.createIntegratedWorkspace(mtd[ws_histo_data], 
+                                                    "IntegratedDataWks",
                                                     fromXpixel=Xrange[0],
                                                     toXpixel=Xrange[1],
                                                     fromYpixel=BackfromYpixel,
@@ -279,7 +286,7 @@ class RefLReduction(PythonAlgorithm):
                        OutputWorkspace='TransposedFlatID',
                        StartX=BackfromYpixel,
                        Mode='Mean',
-                       EndX=list_norm_peak[0][0])
+                       EndX=norm_peak[0])
 
         Transpose(InputWorkspace='TransposedFlatID',
                   OutputWorkspace='NormWks')
@@ -289,8 +296,6 @@ class RefLReduction(PythonAlgorithm):
         #perform the integration myself
         mt_temp = mtd['NormWks']
         x_axis = mt_temp.readX(0)[:]   #[9100,9300,.... 23500] (73,1)
-        from_peak = list_norm_peak[0][0]
-        to_peak = list_norm_peak[0][1]
         NormPeakRange = numpy.arange(to_peak-from_peak+1) + from_peak
         counts_vs_tof = numpy.zeros(len(x_axis))
 
