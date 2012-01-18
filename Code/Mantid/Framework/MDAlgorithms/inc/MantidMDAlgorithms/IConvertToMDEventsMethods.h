@@ -121,7 +121,7 @@ namespace MDAlgorithms
     std::vector<double> dim_min;
     /// the array of variables which describe max limits for the target variables;
     std::vector<double> dim_max;
-    // index of current run(workspace) for MD WS combining
+    /// index of current run(workspace) for MD WS combining
     uint16_t runIndex;
    /// logger -> to provide logging, for MD dataset file operations
     static Mantid::Kernel::Logger& convert_log;
