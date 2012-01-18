@@ -179,7 +179,11 @@ public:
 
   void openFromXML(const QString & xml)   throw (std::invalid_argument, std::runtime_error);
 
+  QPixmap getImage();
+
   void saveImage(const QString & filename);
+
+  void copyImageToClipboard();
 
   void setFastRender(bool fast);
 

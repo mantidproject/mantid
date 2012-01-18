@@ -104,7 +104,9 @@ public slots:
   void setFastRender(bool fast);
   // Slots that will be automatically connected via QMetaObject.connectSlotsByName
   void on_btnClearLine_clicked();
+  QPixmap getImage();
   void saveImage(const QString & filename = QString());
+  void copyImageToClipboard();
 
   // Synced checkboxes
   void LineMode_toggled(bool);

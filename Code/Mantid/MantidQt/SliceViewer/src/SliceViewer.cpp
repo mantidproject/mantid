@@ -217,6 +217,11 @@ void SliceViewer::initMenus()
   connect(action, SIGNAL(triggered()), this, SLOT(saveImage()));
   m_menuFile->addAction(action);
 
+  action = new QAction(QPixmap(), "Copy image to &Clipboard", this);
+  action->setShortcut(Qt::Key_C + Qt::ControlModifier);
+  connect(action, SIGNAL(triggered()), this, SLOT(copyImageToClipboard()));
+  m_menuFile->addAction(action);
+
 
   // --------------- View Menu ----------------------------------------
   m_menuView = new QMenu("&View", this);
@@ -714,6 +719,48 @@ void SliceViewer::loadColorMapSlot()
 }
 
 //------------------------------------------------------------------------------------
+/** Grab the 2D view as an image. The image is rendered at the current window
+ * size, with the color scale but without the text boxes for changing them.
+ *
+ * See also saveImage() and copyImageToClipboard()
+ *
+ * @return QPixmap containing the image.
+ */
+QPixmap SliceViewer::getImage()
+{
+
+  // Switch to full resolution rendering
+  bool oldFast = this->getFastRender();
+  this->setFastRender(false);
+  // Hide the line overlay handles
+  this->m_lineOverlay->setShowHandles(false);
+  this->m_colorBar->setRenderMode(true);
+
+  // Grab it
+  QCoreApplication::processEvents();
+  QCoreApplication::processEvents();
+  QPixmap pix = QPixmap::grabWidget(this->ui.frmPlot);
+
+  // Back to previous mode
+  this->m_lineOverlay->setShowHandles(true);
+  this->m_colorBar->setRenderMode(false);
+  this->setFastRender(oldFast);
+
+  return pix;
+}
+
+//------------------------------------------------------------------------------------
+/** Copy the rendered 2D image to the clipboard
+ */
+void SliceViewer::copyImageToClipboard()
+{
+  // Create the image
+  QPixmap pix = this->getImage();
+  // Set the clipboard
+  QApplication::clipboard()->setImage(pix, QClipboard::Clipboard);
+}
+
+//------------------------------------------------------------------------------------
 /** Save the rendered 2D slice to an image file.
  *
  * @param filename :: full path to the file to save, including extension
@@ -735,25 +782,12 @@ void SliceViewer::saveImage(const QString & filename)
   else
     fileselection = filename;
 
-  // Switch to full resolution rendering
-  bool oldFast = this->getFastRender();
-  this->setFastRender(false);
-  // Hide the line overlay handles
-  this->m_lineOverlay->setShowHandles(false);
-  this->m_colorBar->setRenderMode(true);
-
-  // Grab it and save
-  QCoreApplication::processEvents();
-  QCoreApplication::processEvents();
-  QPixmap pix = QPixmap::grabWidget(this->ui.frmPlot);
+  // Create the image
+  QPixmap pix = this->getImage();
+  // And save to the file
   pix.save(fileselection);
 
-  // Back to previous mode
-  this->m_lineOverlay->setShowHandles(true);
-  this->m_colorBar->setRenderMode(false);
-  this->setFastRender(oldFast);
 }
-
 
 //=================================================================================================
 //=================================================================================================
