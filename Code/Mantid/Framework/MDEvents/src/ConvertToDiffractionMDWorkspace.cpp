@@ -13,20 +13,21 @@ If the OutputWorkspace does NOT already exist, a default one is created. In orde
 *WIKI*/
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Progress.h"
-#include "MantidKernel/ProgressText.h"
+#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/FunctionTask.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/ProgressText.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidKernel/CPUTimer.h"
 #include "MantidMDEvents/ConvertToDiffractionMDWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -72,10 +73,14 @@ namespace MDEvents
    */
   void ConvertToDiffractionMDWorkspace::init()
   {
-    //TODO: Make sure in units are okay
-    declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
-        "An input Workspace. If you specify a Workspace2D, it gets converted to "
+    // Input units must be TOF
+    API::CompositeWorkspaceValidator<MatrixWorkspace> *wsValidator = new API::CompositeWorkspaceValidator<MatrixWorkspace>;
+    wsValidator->add(new API::WorkspaceUnitValidator<MatrixWorkspace>("TOF"));
+    wsValidator->add(new API::RawCountValidator<MatrixWorkspace>);
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input, wsValidator),
+        "An input workspace in time-of-flight. If you specify a Workspace2D, it gets converted to "
         "an EventWorkspace using ConvertToEventWorkspace.");
+
     declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output),
         "Name of the output MDEventWorkspace. If the workspace already exists, then the events will be added to it.");
     declareProperty(new PropertyWithValue<bool>("Append", false, Direction::Input),
