@@ -69,6 +69,10 @@ void WorkspaceGroup::add(const std::string& name)
  */
 bool WorkspaceGroup::contains(const std::string & wsName) const
 {
+  // Protection against the case where calling m_wsNames.end() results in a crash. (Probable temp fix.)
+  if(m_wsNames.size() == 0 )
+    return false;
+
   std::vector<std::string>::const_iterator itr = std::find(m_wsNames.begin(), m_wsNames.end(), wsName);
   return (itr != m_wsNames.end());
 }
