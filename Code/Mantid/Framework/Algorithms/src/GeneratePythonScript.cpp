@@ -190,19 +190,33 @@ std::string GeneratePythonScript::genParamString(
         params += ",";
       }
 
-      // Try and cast the property to a FileProperty type.  If successful, we have to guard against
-      // the the occurence of directory separators (forward or back slashes) in the file path that the 
-      // property contains. We do this by appending "r" onto the parameter in the output, to make it 
-      // a Python "raw" string.
-      Property *p = ialg_Sptr->getPointerToProperty(name);
-      FileProperty* fp = dynamic_cast<FileProperty*> ((p));
-      if(NULL != fp)
-      { 
-        params += name + "=r'" + value + "'";
+      if(algHistName == "Load")
+      {
+        if(propHist.type() == "string")
+        {
+          params += name + "=r'" + value + "'";
+        }
+        else
+        {
+          params += name + "='" + value + "'";
+        }
       }
       else
       {
-        params += name + "='" + value + "'";
+        // Try and cast the property to a FileProperty type.  If successful, we have to guard against
+        // the the occurence of directory separators (forward or back slashes) in the file path that the 
+        // property contains. We do this by appending "r" onto the parameter in the output, to make it 
+        // a Python "raw" string.
+        Property *p = ialg_Sptr->getPointerToProperty(name);
+        FileProperty* fp = dynamic_cast<FileProperty*> ((p));
+        if(NULL != fp)
+        {
+          params += name + "=r'" + value + "'";
+        }
+        else
+        {
+          params += name + "='" + value + "'";
+        }
       }
     }
   }

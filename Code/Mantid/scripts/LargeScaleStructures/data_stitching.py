@@ -3,7 +3,7 @@ import copy
 from MantidFramework import *
 mtd.initialise(False)
 from mantidsimple import *
-
+import _qti
 from PyQt4 import QtGui, QtCore
 
 class RangeSelector(object):
