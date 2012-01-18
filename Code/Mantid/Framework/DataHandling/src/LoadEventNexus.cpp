@@ -1739,6 +1739,21 @@ void LoadEventNexus::loadTimeOfFlight(const std::string &nexusfilename, DataObje
 void LoadEventNexus::loadTimeOfFlightData(::NeXus::File& file, DataObjects::EventWorkspace_sptr WS,
   const std::string& binsName,size_t start_wi, size_t end_wi)
 {
+  // first check if the data is already randomized
+  std::map<std::string, std::string> entries;
+  file.getEntries(entries);
+  std::map<std::string, std::string>::const_iterator shift = entries.find("event_time_offset_shift");
+  if (shift != entries.end())
+  {
+    std::string random;
+    file.readData("event_time_offset_shift",random);
+    if (random == "random")
+    {
+      return;
+    }
+  }
+
+  // if the data is not randomized randomize it uniformly within each bin
   file.openData(binsName);
   // time of flights of events
   std::vector<float> tof;
