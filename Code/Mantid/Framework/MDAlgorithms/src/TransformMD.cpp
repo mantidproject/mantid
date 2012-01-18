@@ -1,5 +1,5 @@
 /*WIKI*
- *
+
 This algorithm applies a simple linear transformation to a [[MDWorkspace]] or [[MDHistoWorkspace]].
 
 Each coordinate is tranformed so that
