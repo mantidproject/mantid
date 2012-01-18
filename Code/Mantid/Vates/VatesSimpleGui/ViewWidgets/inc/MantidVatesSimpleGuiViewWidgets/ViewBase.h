@@ -189,8 +189,10 @@ private:
 
   /// Return the active representation determined by ParaView.
   pqPipelineRepresentation *getPvActiveRep();
-  /// Return the active view determined by ParaView
+  /// Return the active view determined by ParaView.
   pqRenderView *getPvActiveView();
+  /// Return the appropriate representation.
+  pqPipelineRepresentation *getRep();
   /// Find the number of true sources in the pipeline.
   unsigned int getNumSources();
   /// Collect time information for animation controls.

@@ -68,26 +68,26 @@ void ViewBase::destroyFilter(pqObjectBuilder *builder, const QString &name)
 
 void ViewBase::onAutoScale()
 {
-  QPair <double, double> range = this->colorUpdater.autoScale(this->getPvActiveRep());
+  QPair <double, double> range = this->colorUpdater.autoScale(this->getRep());
   this->renderAll();
   emit this->dataRange(range.first, range.second);
 }
 
 void ViewBase::onColorMapChange(const pqColorMapModel *model)
 {
-  this->colorUpdater.colorMapChange(this->getPvActiveRep(), model);
+  this->colorUpdater.colorMapChange(this->getRep(), model);
   this->renderAll();
 }
 
 void ViewBase::onColorScaleChange(double min, double max)
 {
-  this->colorUpdater.colorScaleChange(this->getPvActiveRep(), min, max);
+  this->colorUpdater.colorScaleChange(this->getRep(), min, max);
   this->renderAll();
 }
 
 void ViewBase::onLogScale(int state)
 {
-  this->colorUpdater.logScale(this->getPvActiveRep(), state);
+  this->colorUpdater.logScale(this->getRep(), state);
   this->renderAll();
 }
 
@@ -394,6 +394,21 @@ double ViewBase::getCurrentTimeStep()
  */
 void ViewBase::closeSubWindows()
 {
+}
+
+/**
+ * This function returns the representation appropriate for the request. It
+ * checks the ParaView active representation first. If that can't be found, the
+ * fallback is to check the original representation associated with the view.
+ */
+pqPipelineRepresentation *ViewBase::getRep()
+{
+  pqPipelineRepresentation *rep = this->getPvActiveRep();
+  if (NULL == rep)
+  {
+    rep = this->origRep;
+  }
+  return rep;
 }
 
 } // namespace SimpleGui
