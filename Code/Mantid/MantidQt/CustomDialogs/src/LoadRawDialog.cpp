@@ -83,8 +83,6 @@ void LoadRawDialog::initLayout()
   prop_line = new QHBoxLayout;
   prop_line->addWidget(new QLabel("Enter name for workspace:"));  
   prop_line->addWidget(m_wsBox);
-  int charWidth = m_wsBox->fontMetrics().maxWidth();
-  m_wsBox->setMaximumWidth(charWidth*8);
   tie(m_wsBox, "OutputWorkspace", prop_line);
   prop_line->addStretch();
   main_layout->addLayout(prop_line); 
@@ -94,17 +92,16 @@ void LoadRawDialog::initLayout()
   prop_line = new QHBoxLayout;
   
   QLineEdit *text_field = new QLineEdit;
-  text_field->setMaximumWidth(charWidth*3);
+  text_field->setMaximumWidth(m_wsBox->fontMetrics().width("888888"));
   prop_line->addWidget(new QLabel("Start:"));
   prop_line->addWidget(text_field);
   tie(text_field, "SpectrumMin", prop_line);
   text_field = new QLineEdit;
-  text_field->setMaximumWidth(charWidth*3);
+  text_field->setMaximumWidth(m_wsBox->fontMetrics().width("888888"));
   prop_line->addWidget(new QLabel("End:"));
   prop_line->addWidget(text_field);
   tie(text_field, "SpectrumMax", prop_line);
   text_field = new QLineEdit;
-  text_field->setMinimumWidth(charWidth*6);
   prop_line->addWidget(new QLabel("List:"));
   prop_line->addWidget(text_field);
    
