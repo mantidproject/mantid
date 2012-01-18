@@ -3,10 +3,11 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/MultiThreaded.h"
-#include <boost/thread.hpp>
 
 using namespace Mantid::Kernel;
 
+/*
+#include <boost/thread.hpp>
 boost::shared_mutex _access;
 void reader()
 {
@@ -33,7 +34,7 @@ void unconditional_writer()
   boost::unique_lock< boost::shared_mutex > lock( _access );
   // do work here, with exclusive access
 }
-
+*/
 
 class MutexTest : public CxxTest::TestSuite
 {
