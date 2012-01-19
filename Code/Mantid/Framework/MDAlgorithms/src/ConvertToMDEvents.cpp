@@ -657,6 +657,7 @@ ConvertToMDEvents::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS,const std
     TargWSDescription.dim_names       = dim_IDs_requested;
     TargWSDescription.dim_IDs         = dim_IDs_requested;
     TargWSDescription.dim_units       = dim_units_requested;
+    TargWSDescription.AlgID           = the_algID;
 
     // build meaningfull dimension names for Q-transformation if it is Q-transformation indeed
     this->buildDimNames(TargWSDescription);
@@ -753,7 +754,7 @@ void ConvertToMDEvents::buildDimNames(MDEvents::MDWSDescription &TargWSDescripti
     if(TargWSDescription.emode<0)return;
 
     // Q3D mode needs special treatment for dimension names:
-    if(TargWSDescription.dim_IDs[0].find(Q_modes[Q3D])!=std::string::npos){
+    if(TargWSDescription.AlgID.find(Q_modes[Q3D])!=std::string::npos){
         std::vector<Kernel::V3D> dim_directions(3);
         dim_directions[0]=TargWSDescription.u;
         dim_directions[1]=TargWSDescription.v;
