@@ -70,11 +70,11 @@ void MuonAnalysisOptionTab::initLayout()
   ////////////// Auto Update  /////////////////
   connect(m_uiForm.connectPlotType, SIGNAL(currentIndexChanged(int)), this, SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.timeComboBox, SIGNAL(currentIndexChanged(int)), this, SIGNAL(settingsTabUpdatePlot()));
-  connect(m_uiForm.timeAxisStartAtInput, SIGNAL(textChanged(const QString&)), this, SIGNAL(settingsTabUpdatePlot()));
-  connect(m_uiForm.timeAxisFinishAtInput, SIGNAL(textChanged(const QString&)), this, SIGNAL(settingsTabUpdatePlot()));
-  connect(m_uiForm.yAxisMinimumInput, SIGNAL(textChanged(const QString&)), this, SIGNAL(settingsTabUpdatePlot()));
-  connect(m_uiForm.yAxisMaximumInput, SIGNAL(textChanged(const QString&)), this, SIGNAL(settingsTabUpdatePlot()));
-  connect(m_uiForm.optionStepSizeText, SIGNAL(textChanged(const QString&)), this, SIGNAL(settingsTabUpdatePlot()));
+  connect(m_uiForm.timeAxisStartAtInput, SIGNAL(editingFinished ()), this, SIGNAL(settingsTabUpdatePlot()));
+  connect(m_uiForm.timeAxisFinishAtInput, SIGNAL(editingFinished ()), this, SIGNAL(settingsTabUpdatePlot()));
+  connect(m_uiForm.yAxisMinimumInput, SIGNAL(editingFinished ()), this, SIGNAL(settingsTabUpdatePlot()));
+  connect(m_uiForm.yAxisMaximumInput, SIGNAL(editingFinished ()), this, SIGNAL(settingsTabUpdatePlot()));
+  connect(m_uiForm.optionStepSizeText, SIGNAL(editingFinished ()), this, SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.rebinComboBox, SIGNAL(currentIndexChanged(int)), this, SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.showErrorBars, SIGNAL(clicked()), this, SIGNAL(settingsTabUpdatePlot()));
 }
