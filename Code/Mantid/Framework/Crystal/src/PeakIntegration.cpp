@@ -129,6 +129,7 @@ namespace Mantid
       API::WorkspaceFactory::Instance().initializeFromParent(inputW, outputW, true);
       size_t Numberwi = inputW->getNumberHistograms();
       int NumberPeaks = peaksW->getNumberPeaks();
+      int MinPeaks = 0;
       for (int i = NumberPeaks-1; i >= 0; i--)
       {
         Peak & peak = peaksW->getPeaks()[i];
@@ -138,8 +139,10 @@ namespace Mantid
         if (pixel_to_wi->find(pixelID) != pixel_to_wi->end())
         {
           size_t wi = (*pixel_to_wi)[pixelID];
-        if((matchRun && peak.getRunNumber() != inputW->getRunNumber()) || wi >= Numberwi) peaksW->removePeak(i);
+          if((matchRun && peak.getRunNumber() != inputW->getRunNumber()) || wi >= Numberwi) peaksW->removePeak(i);
         }
+        else  // This is for appending peak workspaces when running SNSSingleCrystalReduction one bank at at time
+          if(i+1 > MinPeaks) MinPeaks = i+1;
       }
       NumberPeaks = peaksW->getNumberPeaks();
       if (NumberPeaks <= 0)
@@ -148,9 +151,9 @@ namespace Mantid
         return;
       }
 
-      Progress prog(this, 0, 1.0, NumberPeaks);
+      Progress prog(this, MinPeaks, 1.0, NumberPeaks);
       PARALLEL_FOR3(inputW, peaksW, outputW)
-      for (int i = 0; i< NumberPeaks; i++)
+      for (int i = MinPeaks; i< NumberPeaks; i++)
       {
         PARALLEL_START_INTERUPT_REGION
   
