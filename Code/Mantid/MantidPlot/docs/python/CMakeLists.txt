@@ -6,30 +6,41 @@
 find_package ( Sphinx )
 
 if ( SPHINX_FOUND )
-  # Fill in the config file and autogen file
-  configure_file ( conf.py.in conf.py @ONLY ) 
+  # Fill in the config file and autogen file with build information
+  configure_file ( source/conf.py.in source/conf.py @ONLY ) 
   configure_file ( autogen_api.py.in autogen_api.py @ONLY ) 
-
-  # These files need to be relative to the conf.py file
-  add_custom_command ( OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/index.rst
-    COMMAND ${CMAKE_COMMAND} ARGS -E copy 
-      ${CMAKE_CURRENT_SOURCE_DIR}/index.rst ${CMAKE_CURRENT_BINARY_DIR}/index.rst
-    COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory 
-      ${CMAKE_CURRENT_SOURCE_DIR}/api ${CMAKE_CURRENT_BINARY_DIR}/api
-    COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory 
-      ${CMAKE_CURRENT_SOURCE_DIR}/_static ${CMAKE_CURRENT_BINARY_DIR}/_static
-    COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory 
-      ${CMAKE_CURRENT_SOURCE_DIR}/_templates ${CMAKE_CURRENT_BINARY_DIR}/_templates
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/conf.py
+  configure_file ( runsphinx.py.in runsphinx.py @ONLY )
+  
+  # Sphinx seems to require the config file to be next to the rest of the source 
+  # files meaning we need to copy everything over to the build directory
+  set ( SPHINX_SOURCE
+    source/index.rst
+    source/api/mantid.rst
+    source/api/mantidplot.rst
+    source/_templates/indexcontent.html
+    source/_templates/indexsidebar.html
+    source/_templates/layout.html
   )
-
-  # Sphinx is run as '${SPHINX_EXECUTABLE} -b sourcedir builddir'
-  set ( OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/../../../python-sphinx/html )
-  add_custom_target ( python-sphinx 
-    COMMAND python autogen_api.py
-    COMMAND ${SPHINX_EXECUTABLE} -b html ${CMAKE_CURRENT_BINARY_DIR} ${OUTPUT_DIR}
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/index.rst
-    COMMENT "Build Python Sphinx API documentation"
+  
+  # The destination for the copied files
+  set ( SPHINX_CONF_DIR ${CMAKE_CURRENT_BINARY_DIR} )
+  set ( SPHINX_CONF_FILES )
+  foreach( file ${SPHINX_SOURCE} )
+    set ( out_file ${SPHINX_CONF_DIR}/${file} )
+    add_custom_command ( OUTPUT ${out_file}
+      COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/${file} ${out_file}
+      DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${file}
     )
+  set ( SPHINX_CONF_FILES ${SPHINX_CONF_FILES} ${out_file} )
+  endforeach()  
+
+  set ( SPHINX_HTML_BUILD ${CMAKE_CURRENT_BINARY_DIR}/../../../python-sphinx/html )
+  # Sphinx is run as '${SPHINX_EXECUTABLE} -b sourcedir builddir'
+  add_custom_target ( python-sphinx 
+    COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/MantidPlot -xq autogen_api.py
+    COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/MantidPlot -xq runsphinx.py
+    DEPENDS ${SPHINX_CONF_FILES}
+    COMMENT "Build Python Sphinx API documentation"
+  )
 
 endif ()

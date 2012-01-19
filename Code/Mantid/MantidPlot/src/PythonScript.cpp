@@ -96,6 +96,12 @@ PythonScript::PythonScript(PythonScripting *env, const QString &code, QObject *c
   GILHolder gil;
   PyObject *pymodule = PyImport_AddModule("__main__");
   localDict = PyDict_Copy(PyModule_GetDict(pymodule));
+  if( QFileInfo(Name).exists() )
+  {
+    QString scriptPath = QFileInfo(Name).absoluteFilePath();
+    // Make sure the __file__ variable is set
+    PyDict_SetItem(localDict,PyString_FromString("__file__"), PyString_FromString(scriptPath.toAscii().data()));
+  }
   setQObject(Context, "self");
   updatePath(Name, true);
 
@@ -675,6 +681,7 @@ void PythonScript::beginStdoutRedirect()
  */
 void PythonScript::endStdoutRedirect()
 {
+
   GILHolder gil; // Aqcuire the GIL
   PyDict_SetItemString(env()->sysDict(), "stdout", stdoutSave);
   Py_XDECREF(stdoutSave);

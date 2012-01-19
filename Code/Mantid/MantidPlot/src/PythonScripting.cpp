@@ -184,7 +184,6 @@ bool PythonScripting::start()
 
     //Get the refresh protection flag
     Mantid::Kernel::ConfigService::Instance().getValue("pythonalgorithms.refresh.allowed", refresh_allowed);
-
     if( loadInitFile(mantidbin.absoluteFilePath("mantidplotrc.py")) )
     {
       d_initialized = true;
@@ -193,18 +192,22 @@ bool PythonScripting::start()
     {
       d_initialized = false;
     }
-    return d_initialized;
   }
   catch(std::exception & ex)
   {
     std::cerr << "Exception in PythonScripting.cpp: " << ex.what() << std::endl;
-    return false;
+    d_initialized = false;
   }
   catch(...)
   {
     std::cerr << "Exception in PythonScripting.cpp" << std::endl;
-    return false;
+    d_initialized = false;
   }
+  // Reset the stdout/err printers
+  PyDict_SetItemString(m_sys, "stdout",PyDict_GetItemString(m_sys, "__stdout__"));
+  PyDict_SetItemString(m_sys, "stderr",PyDict_GetItemString(m_sys, "__stderr__"));
+
+  return d_initialized;
 }
 
 /**

@@ -107,13 +107,13 @@ class ScriptingWindow : public QMainWindow
 
 public:
   ///Constructor
-  ScriptingWindow(ScriptingEnv *env,QWidget *parent = 0, Qt::WindowFlags flags = 0);
+  ScriptingWindow(ScriptingEnv *env,bool capturePrint = true,QWidget *parent = 0, Qt::WindowFlags flags = 0);
   ///Destructor
   ~ScriptingWindow();
   /// Override the closeEvent
   void closeEvent(QCloseEvent *event);
   /// Override the showEvent
-  void showEvent(QShowEvent *event);		      
+  void showEvent(QShowEvent *event);
   /// Is a script running?
   bool isScriptRunning() const;
   ///Save the current state of the script window for next time
@@ -177,7 +177,6 @@ private:
   QAction *m_scripting_lang;
   /// Flag to define whether we should accept a close event
   bool m_acceptClose;
-  
 };
 
 #endif //SCRIPTINGWINDOW_H_

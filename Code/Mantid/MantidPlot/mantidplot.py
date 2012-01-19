@@ -21,7 +21,7 @@ from _qti import PlotSymbol, ImageSymbol, ArrowMarker, ImageMarker
 #-------------------------- Mantid Python access functions----------------
 # Grab a few Mantid things so that we can recognise workspace variables
 # While we have 2 APIs we need to figure out which to use so add a little bit of indirection
-def get_analysis_data_service():
+def _get_analysis_data_service():
     """Returns an object that can be used to get a workspace by name from Mantid
     
     Returns:
@@ -44,7 +44,7 @@ def workspace(name):
     Args:
         name: The name of the workspace in the Analysis Data Service.
     """
-    return get_analysis_data_service()[name]
+    return _get_analysis_data_service()[name]
 
 def table(name):
     """Get a handle on a table.
@@ -217,8 +217,7 @@ def stemPlot(source, index, power=None, startPoint=None, endPoint=None):
     Args:
         source: A reference to a workspace or a table.
         index: For a table, the column number or name. For a workspace, the workspace index.
-        power: The stem unit as a power of 10. If not provided, a dialog will appear with a
-            suggested value.
+        power: The stem unit as a power of 10. If not provided, a dialog will appear with a suggested value.
         startPoint: The first point (row or bin) to use (Default: the first one).
         endPoint: The last point (row or bin) to use (Default: the last one).
         
@@ -457,26 +456,17 @@ def plotSlice(source, label="", xydim=None, slicepoint=None,
         
     Optional Keyword Args:
         label :: label for the window title
-        xydim :: indexes or names of the dimensions to plot,
-            as an (X,Y) list or tuple.
-            See SliceViewer::setXYDim()
-        slicepoint :: list with the slice point in each dimension. Must be the 
-            same length as the number of dimensions of the workspace.
-            See SliceViewer::setSlicePoint()
-        colormin :: value of the minimum color in the scale
-            See SliceViewer::setColorScaleMin()
-        colormax :: value of the maximum color in the scale
-            See SliceViewer::setColorScaleMax()
-        colorscalelog :: value of the maximum color in the scale
-            See SliceViewer::setColorScaleLog()
-        limits :: list with the (xleft, xright, ybottom, ytop) limits
-            to the view to show.
-            See SliceViewer::setXYLimits()
+        xydim :: indexes or names of the dimensions to plot, as an (X,Y) list or tuple. See SliceViewer::setXYDim()
+        slicepoint :: list with the slice point in each dimension.  Must be the same length as the number of dimensions of the workspace. See SliceViewer::setSlicePoint()
+        colormin :: value of the minimum color in the scale. See SliceViewer::setColorScaleMin()
+        colormax :: value of the maximum color in the scale. See SliceViewer::setColorScaleMax()
+        colorscalelog :: value of the maximum color in the scale. See SliceViewer::setColorScaleLog()
+        limits :: list with the (xleft, xright, ybottom, ytop) limits to the view to show. See SliceViewer::setXYLimits()
         
     Returns:
         a (list of) handle(s) to the SliceViewerWindow widgets that were open.
-            Use SliceViewerWindow.getSlicer() to get access to the functions of the
-            SliceViewer, e.g. setting the view and slice point.
+        Use SliceViewerWindow.getSlicer() to get access to the functions of the
+        SliceViewer, e.g. setting the view and slice point.
     """ 
     workspace_names = __getWorkspaceNames(source)
     try:
@@ -563,10 +553,6 @@ Layer.Right = _qti.GraphOptions.Right
 Layer.Bottom = _qti.GraphOptions.Bottom
 Layer.Top = _qti.GraphOptions.Top
 
-
-
-
-
 #-----------------------------------------------------------------------------
 #--------------------------- "Private" functions -----------------------------
 #-----------------------------------------------------------------------------
@@ -604,7 +590,7 @@ def __getWorkspaceNames(source):
         else:
             ws_names.append(wspace.getName())
     elif isinstance(source,str):
-        w = get_analysis_data_service()[source]
+        w = _get_analysis_data_service()[source]
         if w != None:
             names = __getWorkspaceNames(w)
             for n in names:

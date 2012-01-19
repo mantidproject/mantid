@@ -10008,7 +10008,7 @@ void ApplicationWindow::addFunctionCurve()
 
   Graph* g = plot->activeGraph();
   if ( g ) {
-    FunctionDialog* fd = functionDialog(g);
+    functionDialog(g);
   }
 }
 
@@ -14445,6 +14445,8 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
     {
       exec = true;
       quit = true;
+      // Minimize ourselves
+      this->showMinimized();
     }
     else if (str.startsWith("-") || str.startsWith("--"))
     {
@@ -15935,13 +15937,20 @@ void ApplicationWindow::goToColumn()
   }
 }
 
-void ApplicationWindow::showScriptWindow(bool forceVisible)
+/**
+ * Show the script window, creating it if necessary
+ * @param forceVisible - If true the window is forced to visible rather than toggling
+ * @param quitting - If true then it is assumed MantidPlot will exit automatically so stdout redirect
+ * from scripts is disabled.
+ */
+void ApplicationWindow::showScriptWindow(bool forceVisible, bool quitting)
 {
   if( !scriptingWindow )
   {
     // MG 09/02/2010 : Removed parent from scripting window. If it has one then it doesn't respect the always on top 
     // flag, it is treated as a sub window of its parent
-    scriptingWindow = new ScriptingWindow(scriptingEnv(), NULL);
+    const bool capturePrint = !quitting;
+    scriptingWindow = new ScriptingWindow(scriptingEnv(),capturePrint, NULL);
     scriptingWindow->setObjectName("ScriptingWindow");
     scriptingWindow->setAttribute(Qt::WA_DeleteOnClose, false);
     connect(scriptingWindow, SIGNAL(closeMe()), this, SLOT(saveScriptWindowGeometry()));
@@ -15954,7 +15963,14 @@ void ApplicationWindow::showScriptWindow(bool forceVisible)
   {
     scriptingWindow->resize(d_script_win_size);
     scriptingWindow->move(d_script_win_pos);
-    scriptingWindow->show();
+    if( quitting )
+    {
+      scriptingWindow->showMinimized();
+    }
+    else
+    {
+      scriptingWindow->show();
+    }
     scriptingWindow->setFocus();
   }
   else 
@@ -16121,7 +16137,7 @@ ApplicationWindow * ApplicationWindow::loadScript(const QString& fn, bool execut
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   setScriptingLanguage("Python");
   restoreApplicationGeometry();
-  showScriptWindow();
+  showScriptWindow(false, quit);
   scriptingWindow->open(fn, false);
   QApplication::restoreOverrideCursor();
   if (execute)

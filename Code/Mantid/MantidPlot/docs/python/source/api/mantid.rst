@@ -1,13 +1,9 @@
 .. _mantid:
 
-#################################
-  Mantid Python Class Reference
-#################################
+##################################
+  Mantid Framework class reference
+##################################
 
 .. module:: mantid
    
-Some lovely wording here...
-
-and probably more structure
-
-.. include:: autogen.txt
+.. include:: automantid.txt
