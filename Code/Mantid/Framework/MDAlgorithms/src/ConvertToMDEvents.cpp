@@ -189,8 +189,10 @@ ConvertToMDEvents::init()
 
      
     declareProperty(new ArrayProperty<std::string>("OtherDimensions",Direction::Input),
-        " List(comma separated) of additional to Q (orthogonal) dimensions in the target workspace.\n"
-        " The names of these dimensions have to coinside with the log names in the source workspace");
+        " List(comma separated) of additional to Q and DeltaE variables which form additional (orthogonal) to Q dimensions"
+        " in the target workspace (e.g. Temperature or Magnetic field).\n"
+        " These variables had to be logged during experiment and the names of these variables "
+        " have to coincide with the log names for the records of these variables in the source workspace");
 
     // this property is mainly for subalgorithms to set-up as they have to identify if they use the same instrument. 
     declareProperty(new PropertyWithValue<bool>("UsePreprocessedDetectors", true, Direction::Input), 
