@@ -1471,6 +1471,9 @@ void MuonAnalysis::normalise(const std::vector<double>& x, const std::vector<dou
  */
 void MuonAnalysis::plotGroup(const std::string& plotType)
 {
+  if (plotToTime() <= plotFromTime())
+    return;
+
   m_updating = true;
 
   QString plotTypeTitle("");
@@ -1663,6 +1666,9 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
  */
 void MuonAnalysis::plotPair(const std::string& plotType)
 {
+  if (plotToTime() <= plotFromTime())
+    return;
+
   m_updating = true;
 
   QString plotTypeTitle("");
