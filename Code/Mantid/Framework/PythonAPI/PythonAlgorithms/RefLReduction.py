@@ -11,6 +11,9 @@ class RefLReduction(PythonAlgorithm):
 
     def name(self):
         return "RefLReduction"
+    
+    def version(self):
+        return 1
 
     def PyInit(self):
         self.declareListProperty("RunNumbers", [0], Validator=ArrayBoundedValidator(Lower=0))
@@ -23,12 +26,10 @@ class RefLReduction(PythonAlgorithm):
         self.declareListProperty("TOFRange", [9000., 23600.], Validator=ArrayBoundedValidator(Lower=0))
         self.declareListProperty("Binning", [0,200,200000],
                                  Description="Positive is linear bins, negative is logorithmic")
+        # Output workspace to put the transmission histo into
+        self.declareWorkspaceProperty("OutputWorkspace", "", Direction.Output)
 
     def PyExec(self):
-        # temporary hack for getting python algorithms working
-        import mantidsimple
-        globals()["FindSNSNeXus"] = mantidsimple.FindSNSNeXus
-
         self._binning = self.getProperty("Binning")
         if len(self._binning) != 1 and len(self._binning) != 3:
             raise RuntimeError("Can only specify (width) or (start,width,stop) for binning. Found %d values." % len(self._binning))
@@ -256,6 +257,10 @@ class RefLReduction(PythonAlgorithm):
                RHSWorkspace='NormWks',
                OutputWorkspace='NormalizedWks')
         ReplaceSpecialValues("NormalizedWks",NaNValue=0,NaNError=0, OutputWorkspace="NormalizedWks")
-        SumSpectra(InputWorkspace="NormalizedWks", OutputWorkspace="Reflectivity")
+        
+        output_ws = self.getPropertyValue("OutputWorkspace")
+        
+        SumSpectra(InputWorkspace="NormalizedWks", OutputWorkspace=output_ws)
+        self.setProperty("OutputWorkspace", mtd[output_ws])
             
 mtd.registerPyAlgorithm(RefLReduction())

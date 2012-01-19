@@ -1,6 +1,4 @@
 from numpy import zeros, arctan2
-from pylab import *
-import matplotlib.pyplot as plt
 from mantidsimple import *
 import math
 
