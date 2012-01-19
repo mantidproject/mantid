@@ -1,0 +1,36 @@
+import _qti
+from mantidsimple import *
+from reduction.instruments.reflectometer import wks_utility
+
+def tof_distribution(file_path):
+    """
+        Plot counts as a function of TOF for a given REF_L data file
+    """
+    ws = "__REFL_TOF_distribution"
+    graph_name = "TOF distribution"
+    LoadEventNexus(Filename=file_path, OutputWorkspace=ws)
+    Rebin(InputWorkspace=ws,OutputWorkspace=ws,Params="0,200,200000")
+    SumSpectra(InputWorkspace=ws, OutputWorkspace=ws)
+    g = _qti.app.graph(graph_name)
+    if g is None:
+        g = _qti.app.mantidUI.pyPlotSpectraList([ws],[0],True)
+        g.setName(graph_name)  
+    
+def counts_vs_y_distribution(file_path, minTOF, maxTOF):
+    ws = "__REFL_data"
+    ws_output = "__REFL_Y_distribution"
+    graph_name = "Counts vs Y"
+    LoadEventNexus(Filename=file_path, OutputWorkspace=ws)
+    Rebin(InputWorkspace=ws,OutputWorkspace=ws,Params="0,200000,200000")
+    ws_integrated = wks_utility.createIntegratedWorkspace(mtd[ws],ws_output,0,303,0,255)
+    Transpose(InputWorkspace=ws_output, OutputWorkspace=ws_output)
+
+    Rebin(InputWorkspace=ws,OutputWorkspace=ws,Params="0,200,200000")
+    ws_integrated = wks_utility.createIntegratedWorkspace(mtd[ws],ws_output+"_2D",0,303,0,255)
+    
+    
+    g = _qti.app.graph(graph_name)
+    if g is None:
+        g = _qti.app.mantidUI.pyPlotSpectraList([ws_output],[0],True)
+        g.setName(graph_name)  
+    
