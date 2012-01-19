@@ -15,7 +15,7 @@ class DataSets(BaseScriptElement):
     DataPeakDiscreteSelection = 'N/A'
     DataBackgroundFlag = False
     DataBackgroundRoi = [123, 137,123, 137]
-    DataTofRange = [9000., 23600.]
+    DataTofRange = [9600., 21600.]
     
     x_range = [115,210]
     
@@ -37,13 +37,8 @@ class DataSets(BaseScriptElement):
             Generate reduction script
             @param execute: if true, the script will be executed
         """
-        script = "# REF_L reduction script\n"
-        script += "# Script automatically generated on %s\n\n" % time.ctime(time.time())
-        
-        script += "from MantidFramework import *\n"
-        script += "mtd.initialise(False)\n"
-        script += "from mantidsimple import *\n\n"
-        script += "RefLReduction(RunNumbers=%s,\n" % ','.join([str(i) for i in self.data_files])
+
+        script =  "RefLReduction(RunNumbers=%s,\n" % ','.join([str(i) for i in self.data_files])
         script += "              NormalizationRunNumber=%d,\n" % self.norm_file
         script += "              SignalPeakPixelRange=%s,\n" % str(self.DataPeakPixels)
         script += "              SignalBackgroundPixelRange=%s,\n" % str(self.DataBackgroundRoi[:2])
@@ -52,7 +47,7 @@ class DataSets(BaseScriptElement):
         script += "              LowResAxisPixelRange=%s,\n" % str(self.x_range)
         script += "              TOFRange=%s,\n" % str(self.DataTofRange)
         script += "              Binning=[0,200,200000],\n"
-        script += "              OutputWorkspace=\"Reflectivity\")"
+        script += "              OutputWorkspace='reflectivity_%s')" % str(self.data_files[0])
         script += "\n"
 
         return script
@@ -75,10 +70,10 @@ class DataSets(BaseScriptElement):
         xml += "<to_peak_pixels>%s</to_peak_pixels>\n" % str(self.DataPeakPixels[1])
         xml += "<peak_discrete_selection>%s</peak_discrete_selection>\n" % self.DataPeakDiscreteSelection
         xml += "<background_flag>%s</background_flag>\n" % str(self.DataBackgroundFlag)
-        xml += "<back_roi1_from>%s</back_roi1_from>\n" % self.DataBackgroundRoi[0]
-        xml += "<back_roi1_to>%s</back_roi1_to>\n" % self.DataBackgroundRoi[1]
-        xml += "<back_roi2_from>%s</back_roi2_from>\n" % self.DataBackgroundRoi[2]
-        xml += "<back_roi2_to>%s</back_roi2_to>\n" % self.DataBackgroundRoi[3]
+        xml += "<back_roi1_from>%s</back_roi1_from>\n" % str(self.DataBackgroundRoi[0])
+        xml += "<back_roi1_to>%s</back_roi1_to>\n" % str(self.DataBackgroundRoi[1])
+        xml += "<back_roi2_from>%s</back_roi2_from>\n" % str(self.DataBackgroundRoi[2])
+        xml += "<back_roi2_to>%s</back_roi2_to>\n" % str(self.DataBackgroundRoi[3])
         xml += "<from_tof_range>%s</from_tof_range>\n" % str(self.DataTofRange[0])
         xml += "<to_tof_range>%s</to_tof_range>\n" % str(self.DataTofRange[1])
         xml += "<data_sets>%s</data_sets>\n" % ','.join([str(i) for i in self.data_files])
@@ -86,11 +81,11 @@ class DataSets(BaseScriptElement):
         xml += "<x_max_pixel>%s</x_max_pixel>\n" % str(self.x_range[1])
         
         
-        xml += "<norm_from_peak_pixels>%s</norm_from_peak_pixels>\n" % self.NormPeakPixels[0]
-        xml += "<norm_to_peak_pixels>%s</norm_to_peak_pixels>\n" % self.NormPeakPixels[1]
-        xml += "<norm_background_flag>%s</norm_background_flag>\n" % self.NormBackgroundFlag
-        xml += "<norm_from_back_pixels>%s</norm_from_back_pixels>\n" % self.NormBackgroundRoi[0]
-        xml += "<norm_to_back_pixels>%s</norm_to_back_pixels>\n" % self.NormBackgroundRoi[1]
+        xml += "<norm_from_peak_pixels>%s</norm_from_peak_pixels>\n" % str(self.NormPeakPixels[0])
+        xml += "<norm_to_peak_pixels>%s</norm_to_peak_pixels>\n" % str(self.NormPeakPixels[1])
+        xml += "<norm_background_flag>%s</norm_background_flag>\n" % str(self.NormBackgroundFlag)
+        xml += "<norm_from_back_pixels>%s</norm_from_back_pixels>\n" % str(self.NormBackgroundRoi[0])
+        xml += "<norm_to_back_pixels>%s</norm_to_back_pixels>\n" % str(self.NormBackgroundRoi[1])
         xml += "<norm_dataset>%s</norm_dataset>\n" % str(self.norm_file)
         xml += "</Data>\n"
 
@@ -126,10 +121,10 @@ class DataSets(BaseScriptElement):
         self.DataBackgroundFlag = BaseScriptElement.getBoolElement(instrument_dom, "background_flag")
 
         #background from/to pixels
-        self.DataBackgroundRoi = [BaseScriptElement.getStringElement(instrument_dom, "back_roi1_from"),
-                                  BaseScriptElement.getStringElement(instrument_dom, "back_roi1_to"),
-                                  BaseScriptElement.getStringElement(instrument_dom, "back_roi2_from"),
-                                  BaseScriptElement.getStringElement(instrument_dom, "back_roi2_to")]
+        self.DataBackgroundRoi = [BaseScriptElement.getIntElement(instrument_dom, "back_roi1_from"),
+                                  BaseScriptElement.getIntElement(instrument_dom, "back_roi1_to"),
+                                  BaseScriptElement.getIntElement(instrument_dom, "back_roi2_from"),
+                                  BaseScriptElement.getIntElement(instrument_dom, "back_roi2_to")]
 
         #from TOF and to TOF
         self.DataTofRange = [BaseScriptElement.getFloatElement(instrument_dom, "from_tof_range"),
