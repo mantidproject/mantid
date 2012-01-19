@@ -10,7 +10,7 @@ if not hasattr(sys, 'argv'):
 #import resources # Initialize Qt resources from file resources.py
 
 IPYTHON_LOADED = False
-import IPython, pygments
+import IPython, pygments, matplotlib
 from internal_ipkernel import InternalIPKernel
 IPYTHON_LOADED = True
 

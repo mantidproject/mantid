@@ -1471,6 +1471,9 @@ void MuonAnalysis::normalise(const std::vector<double>& x, const std::vector<dou
  */
 void MuonAnalysis::plotGroup(const std::string& plotType)
 {
+  if (plotToTime() <= plotFromTime())
+    return;
+
   m_updating = true;
 
   QString plotTypeTitle("");
@@ -1663,6 +1666,9 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
  */
 void MuonAnalysis::plotPair(const std::string& plotType)
 {
+  if (plotToTime() <= plotFromTime())
+    return;
+
   m_updating = true;
 
   QString plotTypeTitle("");
@@ -2934,12 +2940,13 @@ void MuonAnalysis::groupFittedWorkspaces(QString workspaceName)
 void MuonAnalysis::connectAutoUpdate()
 {
   // Home tab Auto Updates
-  connect(m_uiForm.firstGoodBinFront, SIGNAL(textChanged(const QString&)), this, SLOT(homeTabUpdatePlot()));
+  connect(m_uiForm.firstGoodBinFront, SIGNAL(editingFinished ()), this, SLOT(homeTabUpdatePlot()));
   connect(m_uiForm.frontGroupGroupPairComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(homeTabUpdatePlot()));
   connect(m_uiForm.homePeriodBox1, SIGNAL(currentIndexChanged(int)), this, SLOT(homeTabUpdatePlot()));
   connect(m_uiForm.homePeriodBoxMath, SIGNAL(currentIndexChanged(int)), this, SLOT(homeTabUpdatePlot()));
   connect(m_uiForm.homePeriodBox2, SIGNAL(currentIndexChanged(int)), this, SLOT(homeTabUpdatePlot()));
   connect(m_uiForm.frontPlotFuncs, SIGNAL(currentIndexChanged(int)), this, SLOT(homeTabUpdatePlot()));
+  connect(m_uiForm.frontAlphaNumber, SIGNAL(editingFinished ()), this, SLOT(homeTabUpdatePlot()));
 
   // Grouping tab Auto Updates
   // Group Table

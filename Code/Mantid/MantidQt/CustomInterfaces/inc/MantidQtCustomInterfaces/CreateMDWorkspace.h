@@ -67,6 +67,8 @@ namespace MantidQt
 
       void setLogValueClicked();
 
+      void helpClicked();
+
     private:
       Ui::CreateMDWorkspace  m_uiForm;
       WorkspaceMementoCollection m_data;

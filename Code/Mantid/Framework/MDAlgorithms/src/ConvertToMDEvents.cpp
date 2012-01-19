@@ -189,8 +189,10 @@ ConvertToMDEvents::init()
 
      
     declareProperty(new ArrayProperty<std::string>("OtherDimensions",Direction::Input),
-        " List(comma separated) of additional to Q (orthogonal) dimensions in the target workspace.\n"
-        " The names of these dimensions have to coinside with the log names in the source workspace");
+        " List(comma separated) of additional to Q and DeltaE variables which form additional (orthogonal) to Q dimensions"
+        " in the target workspace (e.g. Temperature or Magnetic field).\n"
+        " These variables had to be logged during experiment and the names of these variables "
+        " have to coincide with the log names for the records of these variables in the source workspace");
 
     // this property is mainly for subalgorithms to set-up as they have to identify if they use the same instrument. 
     declareProperty(new PropertyWithValue<bool>("UsePreprocessedDetectors", true, Direction::Input), 
@@ -223,7 +225,15 @@ ConvertToMDEvents::init()
 
    // Box controller properties. These are the defaults
     this->initBoxControllerProps("5" /*SplitInto*/, 1500 /*SplitThreshold*/, 20 /*MaxRecursionDepth*/);
+    // additional box controller settings property. 
+    declareProperty(
+      new PropertyWithValue<int>("MinRecursionDepth", 0),
+      "Optional. If specified, then all the boxes will be split to this minimum recursion depth. 0 = no splitting, 1 = one level of splitting, etc.\n"
+      "Be careful using this since it can quickly create a huge number of boxes = (SplitInto ^ (MinRercursionDepth * NumDimensions)).\n"
+      "But setting this property equal to MaxRecursionDepth property is necessary if one wants to generate multiple file based workspaces in order to merge them later\n");
+    setPropertyGroup("MinRecursionDepth", getBoxSettingsGroupName());
 
+ 
 }
 
  //----------------------------------------------------------------------------------------------
@@ -315,7 +325,11 @@ void ConvertToMDEvents::exec()
     // Build up the box controller, using the properties in BoxControllerSettingsAlgorithm
     this->setBoxController(bc);
     // split boxes;
-    pWSWrapper->pWorkspace()->splitBox();
+    spws->splitBox();
+  // Do we split more due to MinRecursionDepth?
+    int minDepth = this->getProperty("MinRecursionDepth");
+    if (minDepth<0) throw std::invalid_argument("MinRecursionDepth must be >= 0.");
+    spws->setMinRecursionDepth(size_t(minDepth));  
   }
 
   // call selected algorithm
@@ -655,6 +669,7 @@ ConvertToMDEvents::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS,const std
     TargWSDescription.dim_names       = dim_IDs_requested;
     TargWSDescription.dim_IDs         = dim_IDs_requested;
     TargWSDescription.dim_units       = dim_units_requested;
+    TargWSDescription.AlgID           = the_algID;
 
     // build meaningfull dimension names for Q-transformation if it is Q-transformation indeed
     this->buildDimNames(TargWSDescription);
@@ -751,7 +766,7 @@ void ConvertToMDEvents::buildDimNames(MDEvents::MDWSDescription &TargWSDescripti
     if(TargWSDescription.emode<0)return;
 
     // Q3D mode needs special treatment for dimension names:
-    if(TargWSDescription.dim_IDs[0].find(Q_modes[Q3D])!=std::string::npos){
+    if(TargWSDescription.AlgID.find(Q_modes[Q3D])!=std::string::npos){
         std::vector<Kernel::V3D> dim_directions(3);
         dim_directions[0]=TargWSDescription.u;
         dim_directions[1]=TargWSDescription.v;

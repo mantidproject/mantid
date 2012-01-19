@@ -42,6 +42,8 @@
 #include <QFileDialog>
 #include <QRadioButton>
 #include <QCheckBox>
+#include <QDesktopServices>
+#include <QUrl>
 #include <strstream>
 #include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
@@ -105,6 +107,7 @@ void CreateMDWorkspace::initLayout()
   connect(m_uiForm.btn_find_ub_matrix, SIGNAL(clicked()), this, SLOT(findUBMatrixClicked()));
   connect(m_uiForm.btn_set_goniometer, SIGNAL(clicked()), this, SLOT(setGoniometerClicked()));
   connect(m_uiForm.btn_add_logs, SIGNAL(clicked()), this, SLOT(setLogValueClicked()));
+  connect(m_uiForm.btn_help, SIGNAL(clicked()), this, SLOT(helpClicked()));
   
   //Set MVC Model
   m_uiForm.tableView->setModel(m_model);
@@ -624,6 +627,15 @@ void CreateMDWorkspace::createMDWorkspaceClicked()
   //Report successful conversion.
   std::string msg = "Success. Ouput MD files have been written to : " + algDlg.getLocation().toStdString();
   runConfirmation(msg);
+}
+
+/**
+ * Event handler for the help request. Launches browser to obtain help.
+ */
+void CreateMDWorkspace::helpClicked()
+{
+    QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
+				   "Create_MD_Workspace_GUI"));
 }
 
 

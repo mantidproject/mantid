@@ -21,6 +21,7 @@ See also: [[MergeMDFiles]], for merging when system memory is too small to keep 
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidMDEvents/MDBoxIterator.h"
+#include "MantidKernel/CPUTimer.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -179,6 +180,7 @@ namespace MDAlgorithms
   template<typename MDE, size_t nd>
   void MergeMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
+    //CPUTimer tim;
     typename MDEventWorkspace<MDE, nd>::sptr ws1 = boost::dynamic_pointer_cast<MDEventWorkspace<MDE, nd> >(out);
     typename MDEventWorkspace<MDE, nd>::sptr ws2 = ws;
     if (!ws1 || !ws2)
@@ -191,10 +193,19 @@ namespace MDAlgorithms
     size_t initial_numEvents = ws1->getNPoints();
 
     // Make a leaf-only iterator through all boxes with events in the RHS workspace
-    MDBoxIterator<MDE,nd> it2(box2, 1000, true);
-    do
+    std::vector<IMDBox<MDE,nd> *> boxes;
+    box2->getBoxes(boxes, 1000, true);
+    int numBoxes = int(boxes.size());
+
+    // Add the boxes in parallel. They should be spread out enough on each
+    // core to avoid stepping on each other.
+    //PRAGMA_OMP( parallel for if (!ws2->isFileBacked()) schedule(dynamic, PARALLEL_GET_MAX_THREADS*2) )
+    //PRAGMA_OMP( parallel for if (!ws2->isFileBacked()) schedule(dynamic) )
+    PRAGMA_OMP( parallel for if (!ws2->isFileBacked()) )
+    for (int i=0; i<numBoxes; i++)
     {
-      MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(it2.getBox());
+      PARALLEL_START_INTERUPT_REGION
+      MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(boxes[i]);
       if (box)
       {
         // Copy the events from WS2 and add them into WS1
@@ -203,7 +214,10 @@ namespace MDAlgorithms
         box1->addEvents(events);
         box->releaseEvents();
       }
-    } while (it2.next());
+      PARALLEL_END_INTERUPT_REGION
+    }
+    PARALLEL_CHECK_INTERUPT_REGION
+
 
     //Progress * prog2 = new Progress(this, 0.4, 0.9, 100);
     Progress * prog2 = NULL;
@@ -217,6 +231,8 @@ namespace MDAlgorithms
     if (ws1->getNPoints() != initial_numEvents)
       ws1->setFileNeedsUpdating(true);
 
+    //std::cout << tim << " to add workspace " << ws2->name() << std::endl;
+
   }
 
 
@@ -225,6 +241,7 @@ namespace MDAlgorithms
    */
   void MergeMD::exec()
   {
+    CPUTimer tim;
     // Check that all input workspaces exist and match in certain important ways
     const std::vector<std::string> inputs_orig = getProperty("InputWorkspaces");
 
@@ -269,6 +286,8 @@ namespace MDAlgorithms
     // Add to data service
     AnalysisDataService::Instance().addOrReplace(this->getPropertyValue("OutputWorkspace"), out);
     this->setProperty("OutputWorkspace", out);
+
+    g_log.debug() << tim << " to merge all workspaces." << std::endl;
   }
 
 

@@ -1,0 +1,10 @@
+{% extends "default/layout.html" %}
+
+{%- block sidebarlogo %}
+{%- if logo %}
+         <p class="logo"><a href="{{ pathto(master_doc) }}">
+           <img class="logo" src="{{ pathto('_static/' + logo, 1) }}" alt="Logo" width=220 height=110/>
+         </a></p>
+{%- endif %}
+{%- endblock %}
+
