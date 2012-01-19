@@ -241,27 +241,22 @@ void Qxy::exec()
           const double pixelESq = pixelAdj->readE(i)[0]*pixelAdj->readE(i)[0]; 
           const double waveYSq = waveAdj->readY(0)[j]*waveAdj->readY(0)[j];
           const double waveESq = waveAdj->readE(0)[j]*waveAdj->readE(0)[j];
-          // add product of errors from pixelAdj and waveAdj       
-          weights->dataE(yIndex)[xIndex] += sqrt( weights->dataE(yIndex)[xIndex]*weights->dataE(yIndex)[xIndex] 
-                   + weight*weight*(waveESq*pixelYSq + pixelESq*waveYSq) );
+          // add product of errors from pixelAdj and waveAdj (note no error on weight is assumed)   
+          weights->dataE(yIndex)[xIndex] += weight*weight*(waveESq*pixelYSq + pixelESq*waveYSq);
         }
         else if (pixelAdj)
         {
           weights->dataY(yIndex)[xIndex] += weight*pixelAdj->readY(i)[0];
           const double pixelE = weight*pixelAdj->readE(i)[0]; 
           // add error from pixelAdj
-          weights->dataE(yIndex)[xIndex] += 
-                  sqrt( weights->dataE(yIndex)[xIndex]*weights->dataE(yIndex)[xIndex]
-                        + pixelE*pixelE);
+          weights->dataE(yIndex)[xIndex] += pixelE*pixelE;
         }
         else if(waveAdj)
         {
           weights->dataY(yIndex)[xIndex] += weight*waveAdj->readY(0)[j];
           const double waveE = weight*waveAdj->readE(0)[j]; 
           // add error from waveAdj
-          weights->dataE(yIndex)[xIndex] += 
-                  sqrt( weights->dataE(yIndex)[xIndex]*weights->dataE(yIndex)[xIndex]
-                        + waveE*waveE);
+          weights->dataE(yIndex)[xIndex] += waveE*waveE;
         }
         else
           weights->dataY(yIndex)[xIndex] += weight;
@@ -275,6 +270,17 @@ void Qxy::exec()
 //    PARALLEL_END_INTERUPT_REGION
   } // loop over all spectra
 //  PARALLEL_CHECK_INTERUPT_REGION
+
+  // take sqrt of error weight values
+  // left to be executed here for computational efficiency
+  size_t numHist = weights->getNumberHistograms();
+  for (size_t i = 0; i < numHist; i++)
+  {
+    for (size_t j = 0; j < weights->dataE(i).size(); j++)
+    {
+      weights->dataE(i)[j] = sqrt(weights->dataE(i)[j]);
+    } 
+  }
 
   // Divide the output data by the solid angles
   outputWorkspace /= weights;
