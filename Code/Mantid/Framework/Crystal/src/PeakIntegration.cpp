@@ -28,6 +28,8 @@ Integrate and calculate error of integration of each peak from single crystal da
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include <boost/algorithm/string.hpp>
 #include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 
 namespace Mantid
 {
@@ -75,6 +77,20 @@ namespace Mantid
       declareProperty("YMax", 7, "Maximum of Y (row) Range to integrate for peak");
       declareProperty("TOFBinMin", -4, "Minimum of TOF Bin Range to integrate for peak");
       declareProperty("TOFBinMax", 6, "Maximum of TOF Bin Range to integrate for peak");
+      setPropertySettings("XMin", new VisibleWhenProperty(this, "FitSlices", IS_NOT_DEFAULT) );
+      setPropertySettings("XMax", new VisibleWhenProperty(this, "FitSlices", IS_NOT_DEFAULT) );
+      setPropertySettings("YMin", new VisibleWhenProperty(this, "FitSlices", IS_NOT_DEFAULT) );
+      setPropertySettings("YMax", new VisibleWhenProperty(this, "FitSlices", IS_NOT_DEFAULT) );
+      setPropertySettings("TOFBinMin", new VisibleWhenProperty(this, "FitSlices", IS_NOT_DEFAULT) );
+      setPropertySettings("TOFBinMax", new VisibleWhenProperty(this, "FitSlices", IS_NOT_DEFAULT) );
+
+      std::string grp1 = "ShoeBox Limits";
+      setPropertyGroup("XMin", grp1);
+      setPropertyGroup("XMax", grp1);
+      setPropertyGroup("YMin", grp1);
+      setPropertyGroup("YMax", grp1);
+      setPropertyGroup("TOFBinMin", grp1);
+      setPropertyGroup("TOFBinMax", grp1);
 
     }
 
