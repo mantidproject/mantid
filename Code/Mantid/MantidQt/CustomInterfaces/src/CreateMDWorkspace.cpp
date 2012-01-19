@@ -43,7 +43,7 @@
 #include <QRadioButton>
 #include <QCheckBox>
 #include <QDesktopServices>
-#include <Qurl>
+#include <QUrl>
 #include <strstream>
 #include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
