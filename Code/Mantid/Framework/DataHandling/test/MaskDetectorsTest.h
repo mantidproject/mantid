@@ -54,21 +54,8 @@ public:
   {
     // 1. Instrument
     Instrument_sptr instr = boost::dynamic_pointer_cast<Instrument>(ComponentCreationHelper::createTestInstrumentCylindrical(1, false));
-
-    /*
-    std::cout << "At start:  " << instr->getDetectorIDs().size() << std::endl;
-    for (size_t i = 0; i < instr->getDetectorIDs().size(); i ++)
-      std::cout << "Detector " << i << " has ID " << instr->getDetectorIDs()[i] << std::endl;
-     */
-
     Detector *d = new Detector("det",0,0);
     instr->markAsDetector(d);
-
-    /*
-    std::cout << "After adding a detector" << std::endl;
-    for (size_t i = 0; i < instr->getDetectorIDs().size(); i ++)
-      std::cout << "Detector " << i << " has ID " << instr->getDetectorIDs()[i] << std::endl;
-     */
 
     // 2. Workspace
     MatrixWorkspace_sptr space;
@@ -112,11 +99,6 @@ public:
     }
     else
     {
-      // Mantid::Geometry::Instrument_sptr inst1 = ComponentCreationHelper::createTestInstrumentCylindrical(1);
-
-      std::vector<detid_t> detids = instr->getDetectorIDs(false);
-      std::cout << "Instrument total detectors = " << detids.size() << std::endl;
-
       Mantid::DataObjects::SpecialWorkspace2D_sptr specspace(new  Mantid::DataObjects::SpecialWorkspace2D(instr));
       for (size_t i = 0; i < specspace->getNumberHistograms(); i ++)
       {
