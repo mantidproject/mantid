@@ -957,6 +957,7 @@ template DLLExport std::string toString(const double value);
 template DLLExport std::string toString(const int value);
 template DLLExport std::string toString(const uint16_t value);
 template DLLExport std::string toString(const size_t value);
+template DLLExport std::string toString(const std::string value);
 
 template DLLExport int convPartNum(const std::string&,double&);
 template DLLExport int convPartNum(const std::string&,int&);

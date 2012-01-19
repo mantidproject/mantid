@@ -5,6 +5,7 @@ set ( SRC_FILES
 	src/BinaryOperationMD.cpp
 	src/BooleanBinaryOperationMD.cpp
 	src/CobaltSpinWaveDSHO.cpp
+	src/CompareMDWorkspaces.cpp
 	src/CompositeFunctionBuilder.cpp
 	src/CompositeImplicitFunction.cpp
 	src/CompositeImplicitFunctionParser.cpp
@@ -50,6 +51,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/BinaryOperationMD.h
 	inc/MantidMDAlgorithms/BooleanBinaryOperationMD.h
 	inc/MantidMDAlgorithms/CobaltSpinWaveDSHO.h
+	inc/MantidMDAlgorithms/CompareMDWorkspaces.h
 	inc/MantidMDAlgorithms/CompositeFunctionBuilder.h
 	inc/MantidMDAlgorithms/CompositeImplicitFunction.h
 	inc/MantidMDAlgorithms/CompositeImplicitFunctionParser.h
@@ -99,6 +101,7 @@ set ( TEST_FILES
 	#test/CreateMDFitWorkspaceTest.h
 	test/AndMDTest.h
 	test/BooleanBinaryOperationMDTest.h
+	test/CompareMDWorkspacesTest.h
 	test/ConvertEventsToMDEventsTest.h
 	test/ConvertToMDEventsCoordTransfTest.h
 	test/ConvertToMDEventsMethodsTest.h
