@@ -63,6 +63,10 @@ namespace MantidQt
       m_loaderLayout->addWidget(checkbox);
       tie(checkbox, "IkedaCarpenterTOF", m_loaderLayout);
     
+      checkbox = new QCheckBox ("MatchingRunNo",this);
+      m_loaderLayout->addWidget(checkbox);
+      tie(checkbox, "MatchingRunNo", m_loaderLayout);
+    
       checkbox = new QCheckBox ("FitSlices",this);
       m_loaderLayout->addWidget(checkbox);
       tie(checkbox, "FitSlices", m_loaderLayout);

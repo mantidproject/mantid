@@ -64,6 +64,8 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutPeaksWorkspace", "", Direction::Output), "Name of the output peaks workspace with integrated intensities.");
       declareProperty("IkedaCarpenterTOF", false, "Integrate TOF using IkedaCarpenter fit.\n"
         "Default is false which is best for corrected data.");
+      declareProperty("MatchingRunNo", true, "Integrate only peaks where run number of peak matches run number of sample.\n"
+        "Default is true.");
       declareProperty("FitSlices", true, "Integrate slices using IntegratePeakTimeSlices algorithm (default).\n"
         "If false, then next 6 variables are used for shoebox with pixels masked that are outside peak cluster.");
 
@@ -95,6 +97,7 @@ namespace Mantid
       double qspan = 0.01;
       bool slices = getProperty("FitSlices");
       bool IC = getProperty("IkedaCarpenterTOF");
+      bool matchRun = getProperty("MatchingRunNo");
       if (slices)
       {
         if (peaksW->mutableSample().hasOrientedLattice())
@@ -124,11 +127,9 @@ namespace Mantid
       outputW =API::WorkspaceFactory::Instance().create(inputW,peaksW->getNumberPeaks(),YLength+1,YLength);
       //Copy geometry over.
       API::WorkspaceFactory::Instance().initializeFromParent(inputW, outputW, true);
-      int MinPeaks = -1;
-      int MaxPeaks = -1;
       size_t Numberwi = inputW->getNumberHistograms();
       int NumberPeaks = peaksW->getNumberPeaks();
-      for (int i = 0; i<NumberPeaks; i++)
+      for (int i = NumberPeaks-1; i >= 0; i--)
       {
         Peak & peak = peaksW->getPeaks()[i];
         int pixelID = peak.getDetectorID();
@@ -137,19 +138,19 @@ namespace Mantid
         if (pixel_to_wi->find(pixelID) != pixel_to_wi->end())
         {
           size_t wi = (*pixel_to_wi)[pixelID];
-        if(MinPeaks == -1 && peak.getRunNumber() == inputW->getRunNumber() && wi < Numberwi) MinPeaks = i;
-        if(peak.getRunNumber() == inputW->getRunNumber() && wi < Numberwi) MaxPeaks = i;
+        if((matchRun && peak.getRunNumber() != inputW->getRunNumber()) || wi >= Numberwi) peaksW->removePeak(i);
         }
       }
-      if (MaxPeaks < 0)
+      NumberPeaks = peaksW->getNumberPeaks();
+      if (NumberPeaks <= 0)
       {
         g_log.error("RunNumbers of InPeaksWorkspace and InputWorkspace do not match");
         return;
       }
 
-      Progress prog(this, MinPeaks, 1.0, MaxPeaks);
+      Progress prog(this, 0, 1.0, NumberPeaks);
       PARALLEL_FOR3(inputW, peaksW, outputW)
-      for (int i = MinPeaks; i<= MaxPeaks; i++)
+      for (int i = 0; i< NumberPeaks; i++)
       {
         PARALLEL_START_INTERUPT_REGION
   
