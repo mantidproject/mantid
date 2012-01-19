@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/SpecialWorkspace2D.h"
 
 namespace Mantid
 {
@@ -71,6 +72,7 @@ private:
   void fillIndexListFromSpectra(std::vector<size_t>& indexList, const std::vector<specid_t>& spectraList,
                                 const API::MatrixWorkspace_sptr WS);
   void appendToIndexListFromWS(std::vector<size_t>& indexList, const API::MatrixWorkspace_sptr maskedWorkspace);
+  void appendToIndexListFromMaskWS(std::vector<size_t>& indexList, const DataObjects::SpecialWorkspace2D_const_sptr maskedWorkspace);
 };
 
 } // namespace DataHandling
