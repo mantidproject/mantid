@@ -1,5 +1,6 @@
 <?xml version='1.0' encoding='ASCII'?>
-<instrument valid-to="2100-01-31 23:59:59" name="BASIS" valid-from="1900-07-22 15:37:14.080242">
+<instrument valid-to="2011-08-02 16:09:00" name="BASIS" valid-from="1900-07-22 15:37:14.080242">
+  <!-- Last run with this geometry is 16692 -->
   <!-- Created by Stuart Campbell -->
   <defaults>
     <length unit="metre"/>
