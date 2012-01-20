@@ -322,6 +322,10 @@ namespace DataHandling
     UNUSED_ARG(detectors)
     UNUSED_ARG(detectorpairslow)
     UNUSED_ARG(detectorpairsup)
+
+    if (singles.size() == 0 && pairslow.size() == 0)
+      return;
+
     g_log.error() << "SpectrumID in XML File (ids) Is Not Supported!  Spectrum IDs" << std::endl;
 
     for (size_t i = 0; i < singles.size(); i ++){
