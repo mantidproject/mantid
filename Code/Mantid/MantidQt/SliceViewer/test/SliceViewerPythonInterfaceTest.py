@@ -331,13 +331,13 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         # Length of 5 with 200 bins = 0.025 width
         self.assertAlmostEqual(liner.getBinWidth(), 0.025, 3)
     
-    def test_setWidth(self):
+    def test_setThickness(self):
         svw = self.svw
         self.sv.toggleLineMode(True)
         liner = self.svw.getLiner()
         liner.setPlanarWidth(1.5)
         self.assertAlmostEqual(liner.getPlanarWidth(), 1.5, 3)
-        liner.setWidth(2, 0.75)
+        liner.setThickness(2, 0.75)
         # Not yet a method to get the width in any dimension
         
                 

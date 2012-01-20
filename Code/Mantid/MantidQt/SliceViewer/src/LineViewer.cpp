@@ -58,7 +58,7 @@ LineViewer::LineViewer(QWidget *parent)
   QObject::connect(ui.btnApply, SIGNAL(clicked()), this, SLOT(apply()));
   QObject::connect(ui.chkAdaptiveBins, SIGNAL(  stateChanged(int)), this, SLOT(adaptiveBinsChanged()));
   QObject::connect(ui.spinNumBins, SIGNAL(valueChanged(int)), this, SLOT(numBinsChanged()));
-  QObject::connect(ui.textPlaneWidth, SIGNAL(textEdited(QString)), this, SLOT(widthTextEdited()));
+  QObject::connect(ui.textPlaneWidth, SIGNAL(textEdited(QString)), this, SLOT(thicknessTextEdited()));
   QObject::connect(ui.radNumBins, SIGNAL(toggled(bool)), this, SLOT(on_radNumBins_toggled()));
   QObject::connect(ui.textBinWidth, SIGNAL(editingFinished()), this, SLOT(textBinWidth_changed()));
   QObject::connect(ui.radPlotAuto, SIGNAL(toggled(bool)), this, SLOT(radPlot_changed()));
@@ -88,24 +88,24 @@ void LineViewer::createDimensionWidgets()
 
       QLineEdit * startText = new QLineEdit(this);
       QLineEdit * endText = new QLineEdit(this);
-      QLineEdit * widthText = new QLineEdit(this);
+      QLineEdit * thicknessText = new QLineEdit(this);
       startText->setMaximumWidth(100);
       endText->setMaximumWidth(100);
-      widthText->setMaximumWidth(100);
+      thicknessText->setMaximumWidth(100);
       startText->setToolTip("Start point of the line in this dimension");
       endText->setToolTip("End point of the line in this dimension");
-      widthText->setToolTip("Width of the line in this dimension");
+      thicknessText->setToolTip("Integration thickness (above and below plane) in this dimension");
       startText->setValidator(new QDoubleValidator(startText));
       endText->setValidator(new QDoubleValidator(endText));
-      widthText->setValidator(new QDoubleValidator(widthText));
+      thicknessText->setValidator(new QDoubleValidator(thicknessText));
       ui.gridLayout->addWidget(startText, 1, int(d)+1);
       ui.gridLayout->addWidget(endText, 2, int(d)+1);
-      ui.gridLayout->addWidget(widthText, 3, int(d)+1);
+      ui.gridLayout->addWidget(thicknessText, 3, int(d)+1);
       m_startText.push_back(startText);
       m_endText.push_back(endText);
-      m_widthText.push_back(widthText);
+      m_thicknessText.push_back(thicknessText);
       // Signals that don't change
-      QObject::connect(widthText, SIGNAL(textEdited(QString)), this, SLOT(widthTextEdited()));
+      QObject::connect(thicknessText, SIGNAL(textEdited(QString)), this, SLOT(thicknessTextEdited()));
     }
   }
 
@@ -134,10 +134,10 @@ void LineViewer::updateFreeDimensions()
     m_endText[d]->setEnabled(b);
     // If all dims are free, width makes little sense. Only allow one (circular) width
     if (m_allDimsFree)
-      m_widthText[d]->setVisible(d != 0);
+      m_thicknessText[d]->setVisible(d != 0);
     else
-      m_widthText[d]->setVisible(!b);
-    m_widthText[d]->setToolTip("Integration width in this dimension.");
+      m_thicknessText[d]->setVisible(!b);
+    m_thicknessText[d]->setToolTip("Integration width in this dimension.");
 
     // --- Adjust the signals ---
     m_startText[d]->disconnect();
@@ -175,7 +175,7 @@ void LineViewer::updateStartEnd()
   {
     m_startText[d]->setText(QString::number(m_start[d]));
     m_endText[d]->setText(QString::number(m_end[d]));
-    m_widthText[d]->setText(QString::number(m_width[d]));
+    m_thicknessText[d]->setText(QString::number(m_thickness[d]));
   }
   ui.textPlaneWidth->setText(QString::number(m_planeWidth));
 
@@ -221,7 +221,7 @@ void LineViewer::readTextboxes()
 {
   VMD start = m_start;
   VMD end = m_start;
-  VMD width = m_width;
+  VMD width = m_thickness;
   bool allOk = true;
   bool ok;
   for (int d=0; d<int(m_ws->getNumDims()); d++)
@@ -232,7 +232,7 @@ void LineViewer::readTextboxes()
     end[d] = m_endText[d]->text().toDouble(&ok);
     allOk = allOk && ok;
 
-    width[d] = m_widthText[d]->text().toDouble(&ok);
+    width[d] = m_thicknessText[d]->text().toDouble(&ok);
     allOk = allOk && ok;
   }
   // Now the planar width
@@ -243,7 +243,7 @@ void LineViewer::readTextboxes()
   if (!allOk) return;
   m_start = start;
   m_end = end;
-  m_width = width;
+  m_thickness = width;
   m_planeWidth = tempPlaneWidth;
 }
 
@@ -286,7 +286,7 @@ void LineViewer::apply()
   for (int d=0; d<int(m_ws->getNumDims()); d++)
   {
     if ((d != m_freeDimX) && (d != m_freeDimY))
-      origin[d] -= m_width[d];
+      origin[d] -= m_thickness[d];
   }
 
   IAlgorithm * alg = NULL;
@@ -326,7 +326,7 @@ void LineViewer::apply()
       basis[d] = 1.0;
       // Set the basis vector with the width *2 and 1 bin
       alg->setPropertyValue("BasisVector" + dim, dim +",units," + basis.toString(",")
-            + "," + Strings::toString(m_width[d]*2.0) + ",1" );
+            + "," + Strings::toString(m_thickness[d]*2.0) + ",1" );
       propNum++;
       if (propNum > dimChars.size())
         throw std::runtime_error("LineViewer::apply(): too many dimensions!");
@@ -392,7 +392,7 @@ void LineViewer::startEndTextEdited()
 }
 
 /** Slot called when the width text box is edited */
-void LineViewer::widthTextEdited()
+void LineViewer::thicknessTextEdited()
 {
   this->readTextboxes();
   //TODO: Don't always auto-apply
@@ -479,7 +479,7 @@ double LineViewer::getPlanarWidth() const
 /// @return the full width vector in each dimensions. The values in the X-Y dimensions should be ignored
 Mantid::Kernel::VMD LineViewer::getWidth() const
 {
-  return m_width;
+  return m_thickness;
 }
 
 /** For fixed-bin-width mode, get the desired fixed bin width.
@@ -508,7 +508,7 @@ bool LineViewer::getFixedBinWidthMode() const
 void LineViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
 {
   m_ws = ws;
-  m_width = VMD(ws->getNumDims());
+  m_thickness = VMD(ws->getNumDims());
   createDimensionWidgets();
 }
 
@@ -536,11 +536,11 @@ void LineViewer::setEnd(Mantid::Kernel::VMD end)
 
 /** Set the width of the line in each dimensions
  * @param width :: vector for the width in each dimension. X dimension stands in for the XY plane width */
-void LineViewer::setWidth(Mantid::Kernel::VMD width)
+void LineViewer::setThickness(Mantid::Kernel::VMD width)
 {
   if (m_ws && width.getNumDims() != m_ws->getNumDims())
-    throw std::runtime_error("LineViewer::setwidth(): Invalid number of dimensions in the width vector.");
-  m_width = width;
+    throw std::runtime_error("LineViewer::setThickness(): Invalid number of dimensions in the width vector.");
+  m_thickness = width;
   updateStartEnd();
 }
 
@@ -551,17 +551,17 @@ void LineViewer::setPlanarWidth(double width)
 {
   if (m_allDimsFree)
   {
-    for (size_t d=0; d<m_width.getNumDims(); d++)
-      m_width[d] = width;
+    for (size_t d=0; d<m_thickness.getNumDims(); d++)
+      m_thickness[d] = width;
   }
   else
   {
     double oldPlanarWidth = this->getPlanarWidth();
-    for (size_t d=0; d<m_width.getNumDims(); d++)
+    for (size_t d=0; d<m_thickness.getNumDims(); d++)
     {
       // Only modify the locked onese
-      if (m_width[d] == oldPlanarWidth)
-        m_width[d] = width;
+      if (m_thickness[d] == oldPlanarWidth)
+        m_thickness[d] = width;
     }
     // And always set the planar one
     m_planeWidth = width;
@@ -730,55 +730,57 @@ QPointF LineViewer::getEndXY() const
 }
 
 //------------------------------------------------------------------------------
-/** Set the width to integrate to be the same in all dimensions
+/** Set the thickness to integrate to be the same in all dimensions
  *
- * This sets the planar width and all the other dimensions' widths
+ * This sets the planar width and all the other dimensions' thicknesses
  * to the same value.
  *
  * @param width :: width of integration, in the units of all dimensions
  */
-void LineViewer::setWidth(double width)
+void LineViewer::setThickness(double width)
 {
   if (!m_ws) return;
   for (int i=0; i<int(m_ws->getNumDims()); i++)
-    m_width[i] = width;
+    m_thickness[i] = width;
   this->setPlanarWidth(width);
 }
 
-/** Set the width to integrate in a particular dimension.
+/** Set the thickness to integrate in a particular dimension.
  *
- * Integration is performed perpendicular to the XY plane, from -width below
- * to +width above the center.
+ * Integration is performed perpendicular to the XY plane,
+ * from -thickness below to +thickness above the center.
+ *
  * Use setPlanarWidth() to set the width along the XY plane.
  *
  * @param dim :: index of the dimension to change
  * @param width :: width of integration, in the units of the dimension.
  * @throw std::invalid_argument if the index is invalid
  */
-void LineViewer::setWidth(int dim, double width)
+void LineViewer::setThickness(int dim, double width)
 {
   if (!m_ws) return;
   if (dim >= int(m_ws->getNumDims()) || dim < 0)
     throw std::invalid_argument("There is no dimension # " + Strings::toString(dim) + " in the workspace.");
-  m_width[dim] = width;
+  m_thickness[dim] = width;
   updateStartEnd();
 }
 
-/** Set the width to integrate in a particular dimension.
+/** Set the thickness to integrate in a particular dimension.
  *
- * Integration is performed perpendicular to the XY plane, from -width below
- * to +width above the center.
+ * Integration is performed perpendicular to the XY plane,
+ * from -thickness below to +thickness above the center.
+ *
  * Use setPlanarWidth() to set the width along the XY plane.
  *
  * @param dim :: name of the dimension to change
- * @param width :: width of integration, in the units of the dimension.
+ * @param width :: thickness of integration, in the units of the dimension.
  * @throw std::runtime_error if the name is not found in the workspace
  */
-void LineViewer::setWidth(const QString & dim, double width)
+void LineViewer::setThickness(const QString & dim, double width)
 {
   if (!m_ws) return;
   int index = int(m_ws->getDimensionIndexByName(dim.toStdString()));
-  return this->setWidth(index, width);
+  return this->setThickness(index, width);
 }
 
 /** Get the number of bins
