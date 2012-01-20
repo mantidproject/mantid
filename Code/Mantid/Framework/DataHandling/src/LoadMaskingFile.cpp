@@ -88,15 +88,18 @@ namespace DataHandling
   void LoadMaskingFile::init(){
 
     // 1. Setup
+    /*
     std::vector<std::string> instrumentnames;
     instrumentnames.push_back("VULCAN");
     instrumentnames.push_back("POWGEN");
     instrumentnames.push_back("NOMAD");
-
-    // 2. Declare property
     declareProperty("Instrument", "POWGEN", new ListValidator(instrumentnames),
         "Instrument to mask.  If InstrumentName is given, algorithm will take InstrumentName. ");
-    declareProperty("InstrumentName", "", "Name of instrument to mask.");
+    */
+
+    // 2. Declare property
+
+    declareProperty("Instrument", "", "Name of instrument to mask.");
     declareProperty(new FileProperty("InputFile", "", FileProperty::Load, ".xml"),
         "XML file for masking. ");
     // declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace", "Masking", Direction::Output),
@@ -113,9 +116,6 @@ namespace DataHandling
     // 1. Load Instrument and create output Mask workspace
     const std::string instrumentname = getProperty("Instrument");
     mInstrumentName = instrumentname;
-    std::string anothername = getProperty("InstrumentName");
-    if (anothername.size() > 0)
-      mInstrumentName = anothername;
 
     this->intializeMaskWorkspace();
     setProperty("OutputWorkspace",mMaskWS);
