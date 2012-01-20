@@ -98,7 +98,7 @@ namespace DataHandling
         "Instrument to mask.  If InstrumentName is given, algorithm will take InstrumentName. ");
     declareProperty("InstrumentName", "", "Name of instrument to mask.");
     declareProperty(new FileProperty("InputFile", "", FileProperty::Load, ".xml"),
-        "XML file for masking");
+        "XML file for masking. ");
     // declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace", "Masking", Direction::Output),
     declareProperty(new WorkspaceProperty<DataObjects::SpecialWorkspace2D>("OutputWorkspace", "Masking", Direction::Output),
         "Output Masking Workspace");

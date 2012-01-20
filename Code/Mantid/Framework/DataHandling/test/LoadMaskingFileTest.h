@@ -73,6 +73,9 @@ public:
 
 
 
+  /*
+   * By given a non-existing instrument's name, exception should be thrown.
+   */
   void test_LoadXMLThrow()
   {
     LoadMaskingFile loadfile;
