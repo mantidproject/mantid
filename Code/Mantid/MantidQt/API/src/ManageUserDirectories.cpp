@@ -43,7 +43,6 @@ void ManageUserDirectories::loadProperties()
   // get data search directories and populate the list widget (lwDataSearchDirs)
   QString directories = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories")).trimmed();
   QStringList list = directories.split(";",QString::SkipEmptyParts);
-  list.removeDuplicates();
   m_uiForm.lwDataSearchDirs->clear();
   m_uiForm.lwDataSearchDirs->addItems(list);
 
