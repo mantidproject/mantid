@@ -1,23 +1,21 @@
-#ifndef MANTID_CURVEFITTING_EXPDECAYOSC_H_
-#define MANTID_CURVEFITTING_EXPDECAYOSC_H_
+#ifndef MANTID_CURVEFITTING_EXPDECAYMUON_H_
+#define MANTID_CURVEFITTING_EXPDECAYMUON_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/ParamFunction.h"
-//#include "MantidAPI/IPeakFunction.h"
-
 #include "MantidAPI/IFunctionMW.h"
 
 namespace Mantid
 {
   namespace CurveFitting
   {
-    /** 
-    Provide oscillating exponential decay function: h*exp(-lambda.x)*(cos(2pi*f*x+phi))
+    /**
+    Provide exponential decay function: h*exp(-lambda.x)
    
      @author Karl Palmen, ISIS, RAL 
-     @date 06/01/2012 
+     @date 20/01/2012 
   
      Copyright &copy; 2007-2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory 
   
@@ -40,28 +38,27 @@ namespace Mantid
      Code Documentation is available at: <http://doxygen.mantidproject.org> 
      */ 
 
-    class DLLExport ExpDecayOsc : public API::ParamFunction, public API::IFunctionMW
+    class DLLExport ExpDecayMuon : public API::ParamFunction, public API::IFunctionMW
     {
     public:
 
       /// Destructor
-      virtual ~ExpDecayOsc() {}
+      virtual ~ExpDecayMuon() {}
 
       /// overwrite IFunction base class methods
-      std::string name()const{return "ExpDecayOsc";}
+      std::string name()const{return "ExpDecayMuon";}
 
       /// overwrite IFunction base class methods
-      virtual const std::string category() const { return "General;Muon";}
+      virtual const std::string category() const { return "Muon";}
     protected:
       virtual void functionMW(double* out, const double* xValues, const size_t nData)const;
       virtual void functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData);
 
       /// overwrite IFunction base class method that declares function parameters 
       virtual void init(); 
-
     };
 
   } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_EXPDECAYOSC_H_*/
+#endif /*MANTID_CURVEFITTING_EXPDECAYMUON_H_*/
