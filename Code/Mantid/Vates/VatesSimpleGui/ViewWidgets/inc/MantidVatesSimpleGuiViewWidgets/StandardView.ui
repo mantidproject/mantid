@@ -44,16 +44,6 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="integrateButton">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="text">
-        <string>Integrate</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <spacer name="horizontalSpacer_2">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
