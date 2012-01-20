@@ -91,6 +91,8 @@ protected slots:
 
 private:
   Q_DISABLE_COPY(StandardView)
+  /// Determine if dataset is a MDHistoWorkspace
+  bool isMDHistoWorkspace(pqPipelineSource *src);
 
   QPointer<pqPipelineSource> rebinCut; ///< Holder for the RebinnerCutter
   Ui::StandardView ui; ///< The standard view's UI form
