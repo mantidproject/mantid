@@ -125,22 +125,6 @@ void StandardView::resetCamera()
   this->view->resetCamera();
 }
 
-/**
- * This function checks if a pqPipelineSource is a MDHistoWorkspace.
- * @return true if the source is a MDHistoWorkspace
- */
-bool StandardView::isMDHistoWorkspace(pqPipelineSource *src)
-{
-  QString wsType(vtkSMPropertyHelper(src->getProxy(),
-                                     "WorkspaceTypeName", true).GetAsString());
-  // This must be a Mantid rebinner filter if the property is empty.
-  if (wsType.isEmpty())
-  {
-    wsType = src->getSMName();
-  }
-  return wsType.contains("MDHistoWorkspace");
-}
-
-}
-}
-}
+} // SimpleGui
+} // Vates
+} // Mantid
