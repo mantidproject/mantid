@@ -157,9 +157,9 @@ void setStartXY(double x, double y)   throw (std::runtime_error);
 void setEndXY(double x, double y)   throw (std::runtime_error);
 
 //*WIKI* ==== Width ====
-void setWidth(double width);
-void setWidth(int dim, double width)   throw (std::invalid_argument, std::runtime_error);
-void setWidth(const QString & dim, double width)   throw (std::invalid_argument, std::runtime_error);
+void setThickness(double width);
+void setThickness(int dim, double width)   throw (std::invalid_argument, std::runtime_error);
+void setThickness(const QString & dim, double width)   throw (std::invalid_argument, std::runtime_error);
 void setPlanarWidth(double width);
 double getPlanarWidth() const;
 

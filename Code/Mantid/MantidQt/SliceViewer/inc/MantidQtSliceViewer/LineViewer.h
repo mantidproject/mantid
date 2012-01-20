@@ -42,7 +42,7 @@ public:
     void setFreeDimensions(bool all, int dimX, int dimY);
     void setStart(Mantid::Kernel::VMD start);
     void setEnd(Mantid::Kernel::VMD end);
-    void setWidth(Mantid::Kernel::VMD width);
+    void setThickness(Mantid::Kernel::VMD width);
     void setPlanarWidth(double width);
     void setNumBins(int numBins);
     void setFixedBinWidthMode(bool fixedWidth, double binWidth);
@@ -62,9 +62,9 @@ public:
     // For python
     void setStartXY(double x, double y);
     void setEndXY(double x, double y);
-    void setWidth(double width);
-    void setWidth(int dim, double width);
-    void setWidth(const QString & dim, double width);
+    void setThickness(double width);
+    void setThickness(int dim, double width);
+    void setThickness(const QString & dim, double width);
     QPointF getStartXY() const;
     QPointF getEndXY() const;
 
@@ -81,7 +81,7 @@ private:
 
 public slots:
     void startEndTextEdited();
-    void widthTextEdited();
+    void thicknessTextEdited();
     void startLinkedToEndText();
     void apply();
     void numBinsChanged();
@@ -124,8 +124,8 @@ private:
     QVector<QLineEdit *> m_startText;
     /// Vector of text boxes with the end point
     QVector<QLineEdit *> m_endText;
-    /// Vector of text boxes with the widths
-    QVector<QLineEdit *> m_widthText;
+    /// Vector of text boxes with the thicknesses
+    QVector<QLineEdit *> m_thicknessText;
 
 
     // -------------------------- Data Members ----------------------------
@@ -141,7 +141,7 @@ private:
     /// End point of the line
     Mantid::Kernel::VMD m_end;
     /// Width in each dimension (some will be ignored)
-    Mantid::Kernel::VMD m_width;
+    Mantid::Kernel::VMD m_thickness;
     /// Width in the in-plane, perpendicular-to-line direction
     double m_planeWidth;
 

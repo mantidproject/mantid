@@ -578,7 +578,7 @@
                    </palette>
                   </property>
                   <property name="text">
-                   <string>*</string>
+                   <string/>
                   </property>
                  </widget>
                 </item>
@@ -667,7 +667,7 @@
                    </palette>
                   </property>
                   <property name="text">
-                   <string>*</string>
+                   <string/>
                   </property>
                  </widget>
                 </item>
@@ -1064,7 +1064,7 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="data_peak_from_pixel_missing_2">
+                 <widget class="QLabel" name="norm_peak_from_pixel_missing">
                   <property name="minimumSize">
                    <size>
                     <width>10</width>
@@ -1493,7 +1493,7 @@
                    </palette>
                   </property>
                   <property name="text">
-                   <string>*</string>
+                   <string/>
                   </property>
                  </widget>
                 </item>
@@ -1543,7 +1543,7 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="data_peak_to_pixel_missing_2">
+                 <widget class="QLabel" name="norm_peak_to_pixel_missing">
                   <property name="palette">
                    <palette>
                     <active>
@@ -1582,7 +1582,7 @@
                    </palette>
                   </property>
                   <property name="text">
-                   <string>*</string>
+                   <string/>
                   </property>
                  </widget>
                 </item>
@@ -1626,7 +1626,7 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="data_background_from_pixel1_label_2">
+                 <widget class="QLabel" name="norm_background_from_pixel1_label">
                   <property name="enabled">
                    <bool>false</bool>
                   </property>
@@ -1739,7 +1739,7 @@
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QLabel" name="data_background_to_pixel1_label_2">
+                 <widget class="QLabel" name="norm_background_to_pixel1_label">
                   <property name="enabled">
                    <bool>false</bool>
                   </property>

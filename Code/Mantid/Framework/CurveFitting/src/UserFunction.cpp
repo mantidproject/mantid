@@ -121,41 +121,7 @@ namespace Mantid
     */
     void UserFunction::functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
     {
-      if (nData == 0) return;
-      std::vector<double> dp(nParams());
-      std::vector<double> param(nParams());
-      for(size_t i=0;i<nParams();i++)
-      {
-        double param = getParameter(i);
-        if (param != 0.0)
-        {
-          dp[i] = param*0.01;
-        }
-        else
-        {
-          dp[i] = 0.01;
-        }
-      }
-
-      if (!m_tmp)
-      {
-        m_tmp.reset(new double[nData]);
-        m_tmp1.reset(new double[nData]);
-      }
-
-      functionMW(m_tmp.get(),xValues, nData);
-
-      for (size_t j = 0; j < nParams(); j++)
-      {
-        double p0 = getParameter(j);
-        setParameter(j,p0 + dp[j],false);
-        functionMW(m_tmp1.get(),xValues, nData);
-        for (size_t i = 0; i < nData; i++)
-        {
-          out->set(i,j, (m_tmp1[i] - m_tmp[i])/dp[j]);
-        }
-        setParameter(j,p0,false);
-      }
+      IFunctionMW::calNumericalDeriv(out,xValues,nData);
     }
 
   } // namespace CurveFitting

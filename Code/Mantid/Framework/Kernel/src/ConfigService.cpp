@@ -650,8 +650,13 @@ void ConfigServiceImpl::cacheUserSearchPaths()
  */
 bool ConfigServiceImpl::isInDataSearchList(const std::string & path) const
 {
+  // the path produced by poco will have \ on windows, but the searchdirs will always have /
+  std::string correctedPath=path;
+  replace( correctedPath.begin(), correctedPath.end(), '\\', '/' );
+
+
   std::vector<std::string>::const_iterator it = std::find_if(m_DataSearchDirs.begin(),
-      m_DataSearchDirs.end(), std::bind2nd(std::equal_to<std::string>(), path));
+      m_DataSearchDirs.end(), std::bind2nd(std::equal_to<std::string>(), correctedPath));
   return (it != m_DataSearchDirs.end());
 }
 

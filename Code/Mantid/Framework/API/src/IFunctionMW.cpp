@@ -693,9 +693,10 @@ boost::shared_ptr<API::MatrixWorkspace> IFunctionMW::createCalculatedWorkspace(
  */
 void IFunctionMW::calNumericalDeriv(Jacobian* out, const double* xValues, const size_t& nData)
 {
+    const double minDouble = std::numeric_limits<double>::min();
+    const double epsilon = std::numeric_limits<double>::epsilon();
     double stepPercentage = 0.001; // step percentage
     double step; // real step
-    double minDouble = std::numeric_limits<double>::min();
     double cutoff = 100.0*minDouble/stepPercentage;
     size_t nParam = nParams();
 
@@ -713,9 +714,9 @@ void IFunctionMW::calNumericalDeriv(Jacobian* out, const double* xValues, const 
       if ( isActive(iP) )
       {
         const double& val = getParameter(iP);
-        if (val < cutoff)
+        if (fabs(val) < cutoff)
         {
-          step = cutoff;
+          step = epsilon;
         }
         else
         {

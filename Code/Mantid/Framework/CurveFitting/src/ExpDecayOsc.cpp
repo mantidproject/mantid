@@ -51,9 +51,9 @@ void ExpDecayOsc::functionDerivMW(Jacobian* out, const double* xValues, const si
         double c = cos(2*PI*gf*x +gphi);
         double s = sin(2*PI*gf*x +gphi);
         out->set(i,0, e*c);            //derivative w.r.t. A (gA0)
-        out->set(i,1, gA0*x*e*c);      //derivative w.r.t  Lambda (gs)
-        out->set(i,2, gA0*e*2*PI*x*s); // derivate w.r.t. Frequency (gf)
-        out->set(i,3, gA0*e*s);        // detivative w.r.t Phi (gphi) 
+        out->set(i,1, -gA0*x*e*c);      //derivative w.r.t  Lambda (gs)
+        out->set(i,2, -gA0*e*2*PI*x*s); // derivate w.r.t. Frequency (gf)
+        out->set(i,3, -gA0*e*s);        // detivative w.r.t Phi (gphi) 
     }
 }
 

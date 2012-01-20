@@ -19,8 +19,10 @@ class RefLReduction(PythonAlgorithm):
         self.declareListProperty("RunNumbers", [0], Validator=ArrayBoundedValidator(Lower=0))
         self.declareProperty("NormalizationRunNumber", 0, Description="")
         self.declareListProperty("SignalPeakPixelRange", [126, 134], Validator=ArrayBoundedValidator(Lower=0))
+        self.declareProperty("SubtractSignalBackground", True)
         self.declareListProperty("SignalBackgroundPixelRange", [123, 137], Validator=ArrayBoundedValidator(Lower=0))
         self.declareListProperty("NormPeakPixelRange", [127, 133], Validator=ArrayBoundedValidator(Lower=0))
+        self.declareProperty("SubtractNormBackground", True)
         self.declareListProperty("NormBackgroundPixelRange", [123, 137], Validator=ArrayBoundedValidator(Lower=0))
         self.declareListProperty("LowResAxisPixelRange", [115, 210], Validator=ArrayBoundedValidator(Lower=0))
         self.declareListProperty("TOFRange", [9000., 23600.], Validator=ArrayBoundedValidator(Lower=0))
@@ -68,6 +70,9 @@ class RefLReduction(PythonAlgorithm):
         norm_peak = self.getProperty("NormPeakPixelRange")
         from_peak = norm_peak[0]
         to_peak = norm_peak[1]
+        
+        subtract_data_bck = self.getProperty("SubtractSignalBackground")
+        subtract_norm_bck = self.getProperty("SubtractNormBackground")
         
         ########################################################################
         # Find full path to event NeXus data file
@@ -174,12 +179,14 @@ class RefLReduction(PythonAlgorithm):
                   OutputWorkspace='TransposedID')
         ConvertToHistogram(InputWorkspace='TransposedID',
                            OutputWorkspace='TransposedID')
-        FlatBackground(InputWorkspace='TransposedID',
-                       OutputWorkspace='TransposedFlatID',
-                       StartX=BackfromYpixel,
-                       Mode='Mean',
-                       EndX=data_peak[0])
-        Transpose(InputWorkspace='TransposedFlatID',
+        
+        if subtract_data_bck:
+            FlatBackground(InputWorkspace='TransposedID',
+                           OutputWorkspace='TransposedID',
+                           StartX=BackfromYpixel,
+                           Mode='Mean',
+                           EndX=data_peak[0])
+        Transpose(InputWorkspace='TransposedID',
                   OutputWorkspace='DataWks')
             
             
@@ -235,13 +242,14 @@ class RefLReduction(PythonAlgorithm):
         ConvertToHistogram(InputWorkspace='TransposedID',
                            OutputWorkspace='TransposedID')
         
-        FlatBackground(InputWorkspace='TransposedID',
-                       OutputWorkspace='TransposedFlatID',
-                       StartX=BackfromYpixel,
-                       Mode='Mean',
-                       EndX=norm_peak[0])
-
-        Transpose(InputWorkspace='TransposedFlatID',
+        if subtract_norm_bck:
+            FlatBackground(InputWorkspace='TransposedID',
+                           OutputWorkspace='TransposedID',
+                           StartX=BackfromYpixel,
+                           Mode='Mean',
+                           EndX=norm_peak[0])
+    
+        Transpose(InputWorkspace='TransposedID',
                   OutputWorkspace='NormWks')
    
         #perform the integration myself
