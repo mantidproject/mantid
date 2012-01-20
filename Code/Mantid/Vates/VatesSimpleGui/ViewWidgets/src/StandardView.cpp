@@ -69,6 +69,11 @@ void StandardView::render()
   {
     this->ui.rebinButton->setEnabled(false);
   }
+  if (this->isPeaksWorkspace(this->origSrc))
+  {
+    this->ui.rebinButton->setEnabled(false);
+    this->ui.cutButton->setEnabled(false);
+  }
 
   // Show the data
   pqDataRepresentation *drep = builder->createDataRepresentation(\
