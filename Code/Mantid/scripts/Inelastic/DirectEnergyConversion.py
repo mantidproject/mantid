@@ -279,7 +279,8 @@ class DirectEnergyConversion(object):
                 ei_calc = monitor_ws.getRun().getLogData("Ei").value
             except:
                 self.log("Error in GetEi. Using entered values.")
-                monitor_ws.getRun()['Ei'] = ei_value
+                #monitor_ws.getRun()['Ei'] = ei_value
+		AddSampleLog(monitor_ws, 'Ei', ei_value, "Number")
                 ei_value = ei_guess
                 ei_calc = None
                 TzeroCalculated = Tzero
