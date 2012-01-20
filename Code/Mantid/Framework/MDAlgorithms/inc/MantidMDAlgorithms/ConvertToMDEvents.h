@@ -123,7 +123,7 @@ namespace MDAlgorithms
    //<---< Parts of the identifyMatrixAlg;
    /** identifies the ID of the conversion subalgorithm to run on a workspace */
    std::string identifyTheAlg(API::MatrixWorkspace_const_sptr inMatrixWS,const std::string &Q_mode_req, const std::string &dE_mode_req,
-                              const Strings &other_dim_names,MDEvents::MDWSDescription &TargWSDescription);
+                              const Strings &other_dim_names,bool convert_to_hkl,MDEvents::MDWSDescription &TargWSDescription);
    //<---< Parts of the identifyTheAlg;
 
  

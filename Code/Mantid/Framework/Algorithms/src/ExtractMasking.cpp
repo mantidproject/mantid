@@ -13,6 +13,7 @@ The spectra containing 0 are also marked as masked and the instrument link is pr
 //------------------------------------------------------------------------------
 #include "MantidAlgorithms/ExtractMasking.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/NullValidator.h"
@@ -70,7 +71,8 @@ namespace Mantid
       const int nHist = static_cast<int>(inputWS->getNumberHistograms());
       const int xLength(1), yLength(1);
       // Create a new workspace for the results, copy from the input to ensure that we copy over the instrument and current masking
-      MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS, nHist, xLength, yLength);
+      MatrixWorkspace_sptr outputWS = MatrixWorkspace_sptr(new DataObjects::SpecialWorkspace2D(inputWS->getInstrument()));
+      outputWS->setTitle(inputWS->getTitle());
 
       Progress prog(this,0.0,1.0,nHist);
       MantidVecPtr xValues;

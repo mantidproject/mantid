@@ -912,71 +912,105 @@ void MuonAnalysis::inputFileChanged_MWRunFiles()
 
   m_previousFilename = m_uiForm.mwRunFiles->getFirstFilename();
 
-  int appendSeparator(-1);
-  appendSeparator = m_previousFilename.find("-");
+  //int appendSeparator(-1);
+  ////appendSeparator = m_previousFilename.find("-");
 
-  if (appendSeparator != -1)
+  //if (appendSeparator != -1)
+  //{
+  //  int difference(0);
+
+  //  //if a range has been selected then open them all
+  //  //first split into files
+  //  QString currentFile = m_uiForm.mwRunFiles->getText();//m_previousFilename; // m_uiForm.mwRunFiles->getFirstFilename();
+  //  
+  //  int lowSize(-1);
+  //  int lowLimit(-1);
+  //  QString fileExtension("");
+  //  QString lowString("");
+
+  //  if (currentFile.contains("."))
+  //  {
+  //    //Get the file extension and then remove it from the current file
+  //    int temp(currentFile.size()-currentFile.find("."));
+  //    fileExtension = currentFile.right(temp);
+  //    currentFile.chop(temp);
+  //  
+  //    //Get the max value and then chop this off
+  //    QString maxString = currentFile.right(currentFile.size() - appendSeparator - 1);
+  //    int maxSize = maxString.size();
+  //    int maxLimit = maxString.toInt();
+  //    //include chopping off the "-" symbol
+  //    currentFile.chop(maxSize + 1);
+
+  //    separateMuonFile(currentFile, lowSize, lowLimit);
+  //    difference = maxLimit - lowLimit;
+
+  //    for(int i = 0; i<=difference; ++i)
+  //    {
+  //      lowString = lowString.setNum(lowLimit + i);
+  //      getFullCode(lowSize, lowString);
+  //      m_previousFilename = currentFile + lowString + fileExtension;
+  //      // in case file is selected from browser button check that it actually exist
+  //      Poco::File l_path( m_previousFilename.toStdString() );
+  //      if ( !l_path.exists() )
+  //      {
+  //        QMessageBox::warning(this,"Mantid - MuonAnalysis", m_previousFilename + "Specified data file does not exist.");
+  //        return;
+  //      }
+  //
+  //      // save selected browse file directory to be reused next time interface is started up
+  //      m_uiForm.mwRunFiles->saveSettings(m_settingsGroup + "mwRunFilesBrowse");
+
+  //      inputFileChanged(m_previousFilename);
+  //    }
+  //  }
+  //}
+  //else
+  //{
+  // in case file is selected from browser button check that it actually exist
+  try
   {
-    int difference(0);
-
-    //if a range has been selected then open them all
-    //first split into files
-    QString currentFile = m_uiForm.mwRunFiles->getText();//m_previousFilename; // m_uiForm.mwRunFiles->getFirstFilename();
-    
-    int lowSize(-1);
-    int lowLimit(-1);
-    QString fileExtension("");
-    QString lowString("");
-
-    //Get the file extension and then remove it from the current file
-    int temp(currentFile.size()-currentFile.find("."));
-    fileExtension = currentFile.right(temp);
-    currentFile.chop(temp);
-    
-    //Get the max value and then chop this off
-    QString maxString = currentFile.right(currentFile.size() - appendSeparator - 1);
-    int maxSize = maxString.size();
-    int maxLimit = maxString.toInt();
-    //include chopping off the "-" symbol
-    currentFile.chop(maxSize + 1);
-
-    separateMuonFile(currentFile, lowSize, lowLimit);
-    difference = maxLimit - lowLimit;
-
-    for(int i = 0; i<=difference; ++i)
-    {
-      lowString = lowString.setNum(lowLimit + i);
-      getFullCode(lowSize, lowString);
-      m_previousFilename = currentFile + lowString + fileExtension;
-      // in case file is selected from browser button check that it actually exist
-      Poco::File l_path( m_previousFilename.toStdString() );
-      if ( !l_path.exists() )
-      {
-        QMessageBox::warning(this,"Mantid - MuonAnalysis", m_previousFilename + "Specified data file does not exist.");
-        return;
-      }
-  
-      // save selected browse file directory to be reused next time interface is started up
-      m_uiForm.mwRunFiles->saveSettings(m_settingsGroup + "mwRunFilesBrowse");
-
-      inputFileChanged(m_previousFilename);
-    }
-  }
-  else
-  {
-    // in case file is selected from browser button check that it actually exist
     Poco::File l_path( m_previousFilename.toStdString() );
     if ( !l_path.exists() )
-    {
-      QMessageBox::warning(this,"Mantid - MuonAnalysis", m_previousFilename + "Specified data file does not exist.");
+    {    
+      QString tempFilename;
+      if (m_previousFilename.contains('.'))
+      {
+        tempFilename = m_previousFilename.left(m_previousFilename.find('.'));
+      }
+      Poco::File l_path( tempFilename.toStdString() );
+      if ( !l_path.exists() )
+      {    
+        QMessageBox::warning(this,"Mantid - MuonAnalysis", m_previousFilename + " Specified data file does not exist.");
+      }
       return;
     }
-  
-    // save selected browse file directory to be reused next time interface is started up
-    m_uiForm.mwRunFiles->saveSettings(m_settingsGroup + "mwRunFilesBrowse");
-
-    inputFileChanged(m_previousFilename);
   }
+  catch(std::exception &e)
+  {
+    //Specified a network drive.
+    QString tempFilename;
+    if (m_previousFilename.contains('.'))
+    {
+      tempFilename = m_previousFilename.left(m_previousFilename.find('.'));
+    }
+    Poco::File l_path( tempFilename.toStdString() );
+    try
+    {
+      if ( !l_path.exists() )
+        QMessageBox::warning(this,"Mantid - MuonAnalysis", m_previousFilename + " Specified data file does not exist.");
+    }
+    catch (std::exception &e)
+    {
+      QMessageBox::warning(this,"Mantid - MuonAnalysis", tempFilename + " Specified directory does not exist.");
+    }
+    return;
+  }
+  // save selected browse file directory to be reused next time interface is started up
+  m_uiForm.mwRunFiles->saveSettings(m_settingsGroup + "mwRunFilesBrowse");
+
+  inputFileChanged(m_previousFilename);
+  //}
 }
 
 /**
@@ -2750,7 +2784,7 @@ void MuonAnalysis::changeRun(int amountToChange)
   //Find where the file begins
   for (int i = 0; i<currentFile.size(); i++)
   {
-    if(currentFile[i] == '/')  //.isDigit())
+    if(currentFile[i] == '/' || currentFile[i] == '\\')  //.isDigit())
     {
       fileStart = i+1;
     }

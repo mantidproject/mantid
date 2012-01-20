@@ -41,9 +41,11 @@ class DataSets(BaseScriptElement):
         script =  "RefLReduction(RunNumbers=%s,\n" % ','.join([str(i) for i in self.data_files])
         script += "              NormalizationRunNumber=%d,\n" % self.norm_file
         script += "              SignalPeakPixelRange=%s,\n" % str(self.DataPeakPixels)
+        script += "              SubtractSignalBackground=%s,\n" % str(self.DataBackgroundFlag)
         script += "              SignalBackgroundPixelRange=%s,\n" % str(self.DataBackgroundRoi[:2])
         script += "              NormPeakPixelRange=%s,\n" % str(self.NormPeakPixels)
         script += "              NormBackgroundPixelRange=%s,\n" % str(self.NormBackgroundRoi)
+        script += "              SubtractNormBackground=%s,\n" % str(self.NormBackgroundFlag)
         script += "              LowResAxisPixelRange=%s,\n" % str(self.x_range)
         script += "              TOFRange=%s,\n" % str(self.DataTofRange)
         script += "              Binning=[0,200,200000],\n"
@@ -115,7 +117,7 @@ class DataSets(BaseScriptElement):
                         BaseScriptElement.getIntElement(instrument_dom, "x_max_pixel")]
         
         #discrete selection string
-        self.DataBackgroundFlag = BaseScriptElement.getStringElement(instrument_dom, "peak_discrete_selection")
+        self.DataPeakDiscreteSelection = BaseScriptElement.getStringElement(instrument_dom, "peak_discrete_selection")
         
         #background flag
         self.DataBackgroundFlag = BaseScriptElement.getBoolElement(instrument_dom, "background_flag")

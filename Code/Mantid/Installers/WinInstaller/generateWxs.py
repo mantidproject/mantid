@@ -505,7 +505,22 @@ control.appendChild(publish)
 publish.setAttribute('Property','ALLUSERS')
 publish.setAttribute('Value','{}')
 addText(r'ASSISTANCE_USERS = "current"',publish)
+###################################################################################################################
 
+# Set the default install dir, it sets the default value for [INSTALLDIR] to use
+# [WindowsVolume] rather than [ROOTDRIVE]. ROOTDRIVE can end up being a USB drive if it
+# has more space than an internal drive
+# We want to write this to the XML file, as usal this is more complicated than it needs be
+#
+# <CustomAction Id="SetInstallDirDefault" Property="INSTALLDIR"
+# Value="[WindowsVolume]MantidInstall" />
+# <InstallUISequence>
+# <Custom Action="SetInstallDirDefault" After="CostInitialize" />
+# </InstallUISequence> 
+#
+addTo(Product,'CustomAction',{'Id':'SetInstallDirDefault','Property':'INSTALLDIR','Value':'[WindowsVolume]%s' % MantidInstallDir})
+installDefaultUISeq = addTo(Product, 'InstallUISequence', {})
+addTo(installDefaultUISeq, 'Custom', {'Action':'SetInstallDirDefault','After':'CostInitialize'})
 TargetDir = addDirectory('TARGETDIR','SourceDir','SourceDir',Product)
 InstallDir = addDirectory('INSTALLDIR','MInstall',MantidInstallDir,TargetDir)
 binDir = addDirectory('MantidBin','bin','bin',InstallDir)
@@ -751,6 +766,7 @@ DesktopFolder = addDirectory('DesktopFolder','Desktop','Desktop',TargetDir)
 
 #-----------------------------------------------------------------------
 
+
 Complete = addRootFeature('Complete','Mantid','The complete package','1',Product)
 MantidExec = addFeature('MantidExecAndDlls','Mantid binaries','The main executable.','1',Complete)
 addCRef('MantidDLLs',MantidExec)
@@ -776,7 +792,7 @@ addCRef('QtImagePlugins', MantidExec)
 addCRef('MantidQtPlugins', MantidExec)
 
 # Header files
-Includes = addFeature('Includes','Includes','Mantid and third party header files.','2',Complete)
+Includes = addFeature('Includes','Includes','Mantid and third party header files.','1',Complete)
 addCRef('IncludeFiles', Includes)
 addCRef('IncludeMantidAPI',Includes)
 addCRefs(includeMantidGeometryDirList,Includes)

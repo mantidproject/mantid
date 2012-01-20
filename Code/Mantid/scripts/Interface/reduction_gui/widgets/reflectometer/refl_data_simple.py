@@ -59,11 +59,21 @@ class DataReflWidget(BaseWidget):
         self._summary.data_to_tof.setValidator(QtGui.QDoubleValidator(self._summary.data_to_tof))
 
         # Event connections
+        self.connect(self._summary.norm_background_switch, QtCore.SIGNAL("clicked(bool)"), self._norm_background_clicked)
         self.connect(self._summary.data_background_switch, QtCore.SIGNAL("clicked(bool)"), self._data_background_clicked)
         self.connect(self._summary.plot_count_vs_y_btn, QtCore.SIGNAL("clicked()"), self._plot_count_vs_y)
         self.connect(self._summary.plot_tof_btn, QtCore.SIGNAL("clicked()"), self._plot_tof)
         self.connect(self._summary.add_dataset_btn, QtCore.SIGNAL("clicked()"), self._add_data)
         self.connect(self._summary.angle_list, QtCore.SIGNAL("itemSelectionChanged()"), self._angle_changed)
+
+    def is_running(self, is_running):
+        """
+            Enable/disable controls depending on whether a reduction is running or not
+            @param is_running: True if a reduction is running
+        """
+        super(DataReflWidget, self).is_running(is_running)
+        self._summary.plot_count_vs_y_btn.setEnabled(not is_running)
+        self._summary.plot_tof_btn.setEnabled(not is_running)
 
     def _data_background_clicked(self, is_checked):
         """
@@ -74,6 +84,16 @@ class DataReflWidget(BaseWidget):
         self._summary.data_background_from_pixel1_label.setEnabled(is_checked)
         self._summary.data_background_to_pixel1.setEnabled(is_checked)
         self._summary.data_background_to_pixel1_label.setEnabled(is_checked)
+        
+    def _norm_background_clicked(self, is_checked):
+        """
+            This is reached when the user clicks the Background switch and will enabled or not
+            the widgets that follow that button
+        """
+        self._summary.norm_background_from_pixel1.setEnabled(is_checked)
+        self._summary.norm_background_from_pixel1_label.setEnabled(is_checked)
+        self._summary.norm_background_to_pixel1.setEnabled(is_checked)
+        self._summary.norm_background_to_pixel1_label.setEnabled(is_checked)
         
     def _plot_count_vs_y(self):
         f = FileFinder.findRuns("REF_L%s" % str(self._summary.data_run_number_edit.text()))

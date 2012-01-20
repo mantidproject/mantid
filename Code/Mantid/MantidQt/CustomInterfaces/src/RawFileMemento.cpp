@@ -2,6 +2,7 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include <iostream>
 #include <fstream>
@@ -21,15 +22,17 @@ namespace MantidQt
       {
         boost::regex pattern("(NXS)$", boost::regex_constants::icase); 
 
+        //Fail if the file extension is wrong.
         if(!boost::regex_search(fileName, pattern))
         {
           std::string msg = "NexusFileMemento:: Unknown File extension on: " + fileName;
           throw std::invalid_argument(msg);
         }
 
+        //Fail if there is no file at the given location
         if(!checkStillThere())
         {
-          throw std::runtime_error("NexusFileMemento:: File doesn't exist");
+          throw std::invalid_argument("NexusFileMemento:: File doesn't exist");
         }
 
         std::vector<std::string> strs;
@@ -93,7 +96,7 @@ namespace MantidQt
         alg->setPropertyValue("OutputWorkspace", m_adsID);
         if(protocol == MinimalData)
         {
-          alg->setProperty("SpectrumMin", 1);
+          alg->setProperty("SpectrumMin", 0);
           alg->setProperty("SpectrumMax", 1);
         }
         alg->execute();
