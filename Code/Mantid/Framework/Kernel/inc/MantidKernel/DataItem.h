@@ -53,7 +53,7 @@ namespace Mantid
     class MANTID_KERNEL_DLL DataItem
     {
     public:
-      /// Default constructore
+      /// Default constructor
       DataItem();
       /// Destructor
       virtual ~DataItem();

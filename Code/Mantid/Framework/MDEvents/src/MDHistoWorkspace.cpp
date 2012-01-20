@@ -23,7 +23,8 @@ namespace MDEvents
    */
   MDHistoWorkspace::MDHistoWorkspace(Mantid::Geometry::MDHistoDimension_sptr dimX, Mantid::Geometry::MDHistoDimension_sptr dimY,
       Mantid::Geometry::MDHistoDimension_sptr dimZ, Mantid::Geometry::MDHistoDimension_sptr dimT)
-  : numDimensions(0)
+  : IMDHistoWorkspace(),
+    numDimensions(0)
   {
     std::vector<Mantid::Geometry::MDHistoDimension_sptr> dimensions;
     if (dimX) dimensions.push_back(dimX);
@@ -38,7 +39,8 @@ namespace MDEvents
    * @param dimensions :: vector of MDHistoDimension; no limit to how many.
    */
   MDHistoWorkspace::MDHistoWorkspace(std::vector<Mantid::Geometry::MDHistoDimension_sptr> & dimensions)
-  : numDimensions(0)
+  : IMDHistoWorkspace(),
+    numDimensions(0)
   {
     this->init(dimensions);
   }

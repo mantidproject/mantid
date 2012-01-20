@@ -51,6 +51,8 @@ class MANTID_API_DLL Workspace : public Kernel::DataItem
 {
 public:
     Workspace();
+    virtual ~Workspace();
+
     // DataItem interface
     /// Name
     virtual const std::string name() const { return this->getName(); }

@@ -60,6 +60,7 @@ namespace Mantid
     public:
       IMDWorkspace();
       IMDWorkspace(const IMDWorkspace & other);
+      virtual ~IMDWorkspace();
 
       /// Get the number of points associated with the workspace.
       /// For MDEvenWorkspace it is the number of events contributing into the workspace
@@ -84,8 +85,6 @@ namespace Mantid
       {
         return this->getSignalAtCoord(coords.getBareArray());
       }
-
-      virtual ~IMDWorkspace();
 
     };
     

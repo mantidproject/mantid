@@ -7,8 +7,16 @@ namespace API
 {
 
 /// Default constructor
-  Workspace::Workspace() : m_title(), m_comment(), m_name(), m_history()
+  Workspace::Workspace()
+  : DataItem(),
+    m_title(), m_comment(), m_name(), m_history()
 {}
+
+/// Workspace destructor
+Workspace::~Workspace()
+{
+}
+
 
 /** Set the title of the workspace
  *

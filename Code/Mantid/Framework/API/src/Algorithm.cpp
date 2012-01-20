@@ -279,9 +279,6 @@ namespace Mantid
 
       }// end of for loop for checking the properties for workspace groups
 
-
-      throw;
-
       // Invoke exec() method of derived class and catch all uncaught exceptions
       try
       {
@@ -360,9 +357,7 @@ namespace Mantid
 
       catch (...)
       {
-        // Gaudi sets the executed flag to true here despite the exception
-        // This allows it to move to the next command or it just loops indefinitely.
-        // we will set it to false (see Nick Draper) 6/12/07
+        // Execution failed
         setExecuted(false);
         m_runningAsync = false;
         m_running = false;
@@ -370,12 +365,7 @@ namespace Mantid
         m_notificationCenter.postNotification(new ErrorNotification(this,"UNKNOWN Exception is caught "));
         g_log.error() << this->name() << ": UNKNOWN Exception is caught\n";
         throw;
-        // Gaudi calls exception service 'handle' method here
       }
-
-      // Gaudi has some stuff here where it tests for failure, increments the error counter
-      // and then converts to success if less than the maximum. This is clearly related to
-      // having an event loop, and thus we shouldn't want it. This is the only place it's used.
 
       m_notificationCenter.postNotification(new FinishedNotification(this,isExecuted()));
       // Only gets to here if algorithm ended normally
@@ -809,30 +799,30 @@ namespace Mantid
     }
 
     /** To Process workspace groups.
-    *  @param ingrpws_sptr :: input workspacegroup pointer to iterate through all members
-    *  @param  props a vector holding the input properties
-    *  @returns true - if all the workspace members are executed.
-    */
-    bool Algorithm::processGroups(WorkspaceGroup_sptr ingrpws_sptr,const std::vector<Mantid::Kernel::Property*>& props)
+     * This runs the algorithm once for each workspace in the group.
+     *
+     * @param ingrpws_sptr :: input workspacegroup pointer to iterate through all members
+     * @param props :: a vector holding the input properties
+     * @return true - if all the workspace members are executed.
+     */
+    bool Algorithm::processGroups(WorkspaceGroup_sptr ingrpws_sptr, const std::vector<Mantid::Kernel::Property*>& props)
     {
       int nPeriod=1;
       int execPercentage=0;
       bool bgroupPassed=true;
 
-      WorkspaceGroup_sptr wsgrp1_sptr; 
-      WorkspaceGroup_sptr wsgrp2_sptr;
-      bool bnewGoup1=true;
-      bool bnewGoup2=true;
+      // Vector of each Output WorkspaceProperty, that now becomes a group
+      std::vector<WorkspaceGroup_sptr> outputGroups;
       std::string prevPropName("");
 
       //getting the input workspace group names
       const std::vector<std::string> inputWSNames=ingrpws_sptr->getNames();
       const size_t nSize=inputWSNames.size();
-      //size is one if only group header.
-      //return if atleast one meber is not there in group to process
+      // Size is one if only group header.
+      // There needs to be at least one member in the input group
       if(nSize<1)
-      { throw std::runtime_error("Input WorkspaceGroup has no members to process");
-      }
+        throw std::runtime_error("Input WorkspaceGroup has no members to process");
+
 
       int execTotal=0;
       //removing the header count from the totalsize
@@ -848,12 +838,13 @@ namespace Mantid
       std::string ingrpwsName;
       getInputGroupWorkspaceName(props,ingrpwsName);
       //check the workspace are of similar names (similar if they are of names like group_1,group_2)
-      bool bSimilarNames=isGroupWorkspacesofSimilarNames(ingrpwsName,inputWSNames);
+      bool bSimilarNames = isGroupWorkspacesofSimilarNames(ingrpwsName,inputWSNames);
 
+      // For each workspace in the group
       std::vector<std::string>::const_iterator wsItr=inputWSNames.begin();
       for(;wsItr!=inputWSNames.end();++wsItr)
-      { //set  properties
-        
+      {
+        // Set properties
         if (API::AnalysisDataService::Instance().retrieve(*wsItr)->id() != "TableWorkspace")
         {
           // Do the rest of the for loop
@@ -861,82 +852,67 @@ namespace Mantid
           for (itr=props.begin();itr!=props.end();++itr)
           {
             // cppcheck-suppress variableScope
-            int outWSCount=0;
+            size_t outWSCount = 0;
             if(isWorkspaceProperty(*itr) )
             {
-
               if(isInputWorkspaceProperty(*itr))
               {
-
+                // Replace the input workspace property with the name of the WS
+                // that is in the group
                 if(!setInputWSProperties(alg,*itr,*wsItr))
-                {
                   throw std::runtime_error("Invalid value found for the property " +(*itr)->name()+ " when executing the algorithm"+this->name());
-                }
-
               }
               if(isOutputWorkspaceProperty(*itr))
               {
                 ++outWSCount;
-                //create a group and pass that to setOutputWSProperties 
-                if(outWSCount==1)
-                { 
-                  if( bnewGoup1)
-                  {
-                    wsgrp1_sptr= WorkspaceGroup_sptr(new WorkspaceGroup);
-                    bnewGoup1=false;
-                  }
-                  if(!setOutputWSProperties(alg,*itr,nPeriod,*wsItr,wsgrp1_sptr,bSimilarNames,bequal))
-                  {
-                    throw std::runtime_error("Invalid value found for the property " +(*itr)->name()+ " when executing the algorithm"+this->name());
-                  }
-
-                }
-                if(outWSCount==2)
+                if (outWSCount > outputGroups.size())
                 {
-                  if( bnewGoup2)
-                  {
-                    wsgrp2_sptr= WorkspaceGroup_sptr(new WorkspaceGroup);
-                    bnewGoup2=false;
-                  }
-                  if(!setOutputWSProperties(alg,*itr,nPeriod,*wsItr,wsgrp2_sptr,bSimilarNames,bequal))
-                  {
-                    throw std::runtime_error("Invalid value found for the property " +(*itr)->name()+ " when executing the algorithm"+this->name());
-                  }
+                  // Create a new OUTPUT group when needed
+                  outputGroups.push_back(WorkspaceGroup_sptr(new WorkspaceGroup));
                 }
+
+                // This is the output group workspace for this property.
+                WorkspaceGroup_sptr thisOutputGroup = outputGroups[outWSCount-1];
+
+                // Set the workspace
+                if(!setOutputWSProperties(alg,*itr,nPeriod,*wsItr,thisOutputGroup,bSimilarNames,bequal))
+                  throw std::runtime_error("Invalid value found for the property " +(*itr)->name()+ " when executing the algorithm"+this->name());
 
               }//end of isOutputWorkspaceProperty
 
             }// end of isWorkspaceProperty
             else
             {
+              // Simply copy any other property (by string)
               this->setOtherProperties(alg,(*itr)->name(),(*itr)->value(),nPeriod);
             }
           }//end of for loop for setting properties
+
           //resetting the previous properties at the end of each execution 
           prevPropName="";
+
           // execute the algorithm 
           bool bStatus = false;
           if ( alg->validateProperties() ) 
-          {bStatus = alg->execute();
-          }
+            bStatus = alg->execute();
+
           // status of each execution is checking 
-          bgroupPassed=bgroupPassed&&bStatus;
-          execPercentage+=10;
+          bgroupPassed = bgroupPassed && bStatus;
+          execPercentage += 10;
           progress(double((execPercentage)/execTotal));
+
           //if a workspace execution fails
           if(!bStatus)
-          {  
-            throw std::runtime_error("execution failed for the input workspace "+(*wsItr));
-          }
+            throw std::runtime_error("Execution failed for the input workspace "+(*wsItr));
         }
         //increment count for outworkpsace name
         nPeriod++;
-        
+
       }//end of for loop for input workspace group members processing
+
       //if all passed 
       if(bgroupPassed)
-      {setExecuted(true);
-      }
+        setExecuted(true);
 
       m_notificationCenter.postNotification(new FinishedNotification(this,isExecuted()));
       return bgroupPassed;
@@ -1044,12 +1020,12 @@ namespace Mantid
     }
 
     /** Setting input workspace properties for an algorithm,for handling workspace groups.
-    *  @param pAlg ::  pointer to algorithm
-    *  @param  prop  pointer to a vector holding the input properties
-    *  @param  inMemberWSName input workspace name
+    *  @param pAlg :: pointer to algorithm
+    *  @param prop :: property to set
+    *  @param inMemberWSName :: input workspace name
     *  @returns true - if property is set .
     */
-    bool  Algorithm::setInputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property* prop,const std::string& inMemberWSName )
+    bool  Algorithm::setInputWSProperties(IAlgorithm* pAlg, Mantid::Kernel::Property* prop,const std::string& inMemberWSName )
     {
       if(!pAlg) return false;
       if(!prop)return false;
@@ -1064,9 +1040,10 @@ namespace Mantid
       return true;
 
     }
-    /** setting output workspace properties for an algorithm,
-    *  This used for processing workspace groups and this  method is called when
-    *  the input and out workspaces are not same
+    /** Setting output workspace properties for an algorithm,
+    *  This used for processing workspace groups and this method is called when
+    *  the input and out workspaces are not same.
+    *
     *  @param pAlg ::      pointer to algorithm
     *  @param prop ::      pointer to the input properties
     *  @param nPeriod ::   period number 
@@ -1100,14 +1077,10 @@ namespace Mantid
         if(bSimilarNames) //if group are of similar names
         {
           outmemberwsName=outgrpwsName+"_"+suffix.str(); // input group ws ="Group"  ,//OutPut GroupWs ="NewGroup"
-          //input member ws1="Group_1",//output member ws1="NewGroup_1"
-          //input member ws2="Group_2",//output member ws2="NewGroup_2" 
         }       
         else
         {
           outmemberwsName= inmemberwsName+"_"+outgrpwsName;//InputPut GroupWs ="Group",//OutPut GroupWs ="NewGroup"
-          // input member ws1 = "Bob", // output member ws1="Bob_NewGroup" 
-          //input member ws2 = "Sally",// output member ws2="Sally_NewGroup" 
         }
       }
       if(nPeriod==1)

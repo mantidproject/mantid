@@ -61,6 +61,7 @@ namespace API
       // Stop watching once object is deleted
       API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_delete_observer);
     }
+    m_dimensions.clear();
   }
 
   

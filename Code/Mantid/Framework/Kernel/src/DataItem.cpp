@@ -20,7 +20,8 @@ namespace Mantid
      */
     DataItem::~DataItem()
     {
-      delete m_lock;
+//      delete m_lock;
+//      m_lock = NULL;
     }
 
     /** Private method to access the RWLock object.
