@@ -9,13 +9,13 @@ import os
 from pkg_resources import load_entry_point
 
 mantidplot = "@CMAKE_RUNTIME_OUTPUT_DIRECTORY@/MantidPlot"
-builder = "html"
+builder = "@BUILDER@"
 src_dir = "@CMAKE_CURRENT_BINARY_DIR@/source"
-output_dir = "@CMAKE_CURRENT_BINARY_DIR@/../../../python-sphinx/" + builder
+output_dir = os.path.join("@SPHINX_BUILD@", builder)
 argv = [mantidplot,'-b', builder, src_dir, output_dir]
 
 if __name__ == '__main__':
     sys.exit(
-        load_entry_point('Sphinx==1.1.2', 'console_scripts', 'sphinx-build')(argv)
+      load_entry_point('Sphinx==1.1.2', 'console_scripts', 'sphinx-build')(argv)
     )
 
