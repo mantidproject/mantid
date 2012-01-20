@@ -66,6 +66,7 @@ void MuonRemoveExpDecay::exec()
     {
 			PARALLEL_START_INTERUPT_REGION
       removeDecay(inputWS->readX(i), inputWS->readY(i), outputWS->dataY(i));
+      removeDecay(inputWS->readX(i), inputWS->readE(i), outputWS->dataE(i));
       outputWS->dataX(i) = inputWS->readX(i);
 
       //Need to do something about the errors?
@@ -107,9 +108,9 @@ void MuonRemoveExpDecay::exec()
       }
 
       removeDecay(inputWS->readX(Spectra[i]), inputWS->readY(Spectra[i]), outputWS->dataY(Spectra[i]));
+      removeDecay(inputWS->readX(Spectra[i]), inputWS->readE(Spectra[i]), outputWS->dataE(Spectra[i]));
       outputWS->dataX(Spectra[i]) = inputWS->readX(Spectra[i]);
 
-      //Need to do something about the errors?
       prog.report();
 			PARALLEL_END_INTERUPT_REGION
     }
