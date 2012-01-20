@@ -194,7 +194,7 @@ ConvertToMDEvents::init()
 
      
      /// this variable describes default possible ID-s for Q-dimensions   
-     declareProperty("QDimensions",Q_modes[modQ],new ListValidator(Q_modes),
+     declareProperty("QDimensions",Q_modes[NoQ],new ListValidator(Q_modes),
          "You can to transfer source workspace dimensions into target workspace directly """" (NoQ), transform into mod(Q) (1 dimension) or QhQkQl (3 dimensions) in Q space",Direction::InOut);        
      // this switch allows to make units expressed in HKL, hkl is currently not supported by units conversion so the resulting workspace can not be subject to unit conversion
      declareProperty(new PropertyWithValue<bool>("QinHKL", false, Direction::Input),
@@ -310,7 +310,7 @@ void ConvertToMDEvents::exec()
     //d) part of the procedure, specifying the target dimensions units. Currently only Q3D target units can be converted to hkl
     bool convert_to_hkl                      = getProperty("QinHKL");
 
-    // Identify the algorithm to deploy and identify/set the (multi)dimension names to use
+    // Identify the algorithm to deploy and identify/set the (multi)dimension's names to use
     algo_id = identifyTheAlg(inWS2D,Q_mod_req,dE_mod_req,other_dim_names,convert_to_hkl,TWS);
 
     // set the min and max values for the dimensions from the input porperties
