@@ -75,7 +75,7 @@ namespace DataHandling
    */
   LoadMaskingFile::~LoadMaskingFile()
   {
-    // TODO Auto-generated destructor stub
+    // Auto-generated destructor stub
   }
   
   /// Sets documentation strings for this algorithm
@@ -83,6 +83,7 @@ namespace DataHandling
     this->setWikiSummary("Loads an XML file or calibration file to generate MaskWorkspace.");
     this->setOptionalMessage("");
   }
+
   /// Initialise the properties
   void LoadMaskingFile::init(){
 
@@ -94,7 +95,8 @@ namespace DataHandling
 
     // 2. Declare property
     declareProperty("Instrument", "POWGEN", new ListValidator(instrumentnames),
-        "Instrument to mask");
+        "Instrument to mask.  If InstrumentName is given, algorithm will take InstrumentName. ");
+    declareProperty("InstrumentName", "", "Name of instrument to mask.");
     declareProperty(new FileProperty("InputFile", "", FileProperty::Load, ".xml"),
         "XML file for masking");
     // declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace", "Masking", Direction::Output),
@@ -111,6 +113,10 @@ namespace DataHandling
     // 1. Load Instrument and create output Mask workspace
     const std::string instrumentname = getProperty("Instrument");
     mInstrumentName = instrumentname;
+    std::string anothername = getProperty("InstrumentName");
+    if (anothername.size() > 0)
+      mInstrumentName = anothername;
+
     this->intializeMaskWorkspace();
     setProperty("OutputWorkspace",mMaskWS);
 
@@ -663,6 +669,12 @@ namespace DataHandling
     childAlg->setPropertyValue("InstrumentName", mInstrumentName);
     childAlg->setProperty("RewriteSpectraMap", false);
     childAlg->executeAsSubAlg();
+
+    if (!childAlg->isExecuted())
+    {
+      g_log.error() << "Unable to load Instrument " << mInstrumentName << std::endl;
+      throw std::invalid_argument("Incorrect instrument name given!");
+    }
 
     // 2. Use the instrument in the temp Workspace for new MaskWorkspace
     Geometry::Instrument_const_sptr minstrument = tempWS->getInstrument();

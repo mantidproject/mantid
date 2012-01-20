@@ -44,6 +44,56 @@ public:
     }
   } // test_LoadXML
 
+
+  void test_LoadXML2()
+  {
+    LoadMaskingFile loadfile;
+    loadfile.initialize();
+
+    loadfile.setProperty("Instrument", "NOMAD");
+    loadfile.setProperty("InstrumentName", "POWGEN");
+    loadfile.setProperty("InputFile", "testmasking.xml");
+    loadfile.setProperty("OutputWorkspace", "PG3Mask");
+
+    try
+    {
+      TS_ASSERT_EQUALS(loadfile.execute(), true);
+      DataObjects::SpecialWorkspace2D_sptr maskws =
+          boost::dynamic_pointer_cast<DataObjects::SpecialWorkspace2D>(AnalysisDataService::Instance().retrieve("PG3Mask"));
+      std::string instrumentname = maskws->getInstrument()->getName();
+      int r = instrumentname.compare("POWGEN");
+      TS_ASSERT_EQUALS(r, 0);
+    }
+    catch(std::runtime_error & e)
+    {
+      TS_FAIL(e.what());
+    }
+
+  } // test_LoadXML
+
+
+
+  void test_LoadXMLThrow()
+  {
+    LoadMaskingFile loadfile;
+    loadfile.initialize();
+
+    loadfile.setProperty("Instrument", "NOMAD");
+    loadfile.setProperty("InstrumentName", "WhatEver");
+    loadfile.setProperty("InputFile", "testmasking.xml");
+    loadfile.setProperty("OutputWorkspace", "PG3Mask");
+
+    try
+    {
+      TS_ASSERT_EQUALS(loadfile.execute(), false);
+    }
+    catch(std::runtime_error & e)
+    {
+      TS_FAIL(e.what());
+    }
+
+  } // test_LoadXML
+
   void test_BinaryOperation()
   {
     // 1. Generate Mask Workspace
