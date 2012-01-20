@@ -44,6 +44,29 @@ public:
     }
   } // test_LoadXML
 
+  /*
+   * By given a non-existing instrument's name, exception should be thrown.
+   */
+  void test_LoadXMLThrow()
+  {
+    LoadMaskingFile loadfile;
+    loadfile.initialize();
+
+    loadfile.setProperty("Instrument", "WhatEver");
+    loadfile.setProperty("InputFile", "testmasking.xml");
+    loadfile.setProperty("OutputWorkspace", "PG3Mask");
+
+    try
+    {
+      TS_ASSERT_EQUALS(loadfile.execute(), false);
+    }
+    catch(std::runtime_error & e)
+    {
+      TS_FAIL(e.what());
+    }
+
+  } // test_LoadXML
+
   void test_BinaryOperation()
   {
     // 1. Generate Mask Workspace

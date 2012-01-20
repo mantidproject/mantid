@@ -9,6 +9,7 @@
 #include "../Graph.h"
 #include "../ApplicationWindow.h"
 #include "../MultiLayer.h"
+#include "ErrorBarSettings.h"
 
 
 using namespace Mantid::API;
@@ -128,10 +129,16 @@ void MantidMatrixCurve::init(Graph* g,bool distr,Graph::CurveType style)
   {
     setStyle(QwtPlotCurve::Lines);
   }
+
+
   if (g)
   {
     g->insertCurve(this,lineWidth);
   }
+
+  // Initialise error bar colour to match curve colour
+  m_errorSettings->setColor(pen().color());
+
   connect(g,SIGNAL(axisScaleChanged(int,bool)),this,SLOT(axisScaleChanged(int,bool)));
   observePostDelete();
  	connect( this, SIGNAL(resetData(const QString&)), this, SLOT(dataReset(const QString&)) );

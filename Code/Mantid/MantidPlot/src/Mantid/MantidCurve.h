@@ -98,15 +98,16 @@ protected:
   -------------------------------------------------------------------------------------*/
    bool m_drawErrorBars; /// Flag indicating that error bars should be drawn.
    bool m_drawAllErrorBars; ///< if true and m_drawErrorBars is true draw all error bars (no skipping)
+
+   // The error bar settings for this curve. Owned by this class.
+   ErrorBarSettings * m_errorSettings;
+
 private:
   /// The bounding rect used by qwt to set the axes
   mutable QwtDoubleRect m_boundingRect;
   
   //To ensure that all MantidCurves can work with Mantid Workspaces.
   virtual void init(Graph* g, bool distr, Graph::CurveType style) = 0;
-
-  // The error bar settings for this curve. Owned by this class.
-  ErrorBarSettings * m_errorSettings;
 };
 
 #endif
