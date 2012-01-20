@@ -1,6 +1,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/DataItem.h"
 #include "MantidPythonInterface/kernel/PropertyMarshal.h"
+#include "MantidPythonInterface/kernel/WeakPtr.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
@@ -8,7 +9,6 @@
 #include <boost/python/reference_existing_object.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
-#include <boost/weak_ptr.hpp>
 
 using Mantid::API::AnalysisDataServiceImpl;
 using Mantid::API::AnalysisDataService;
@@ -18,31 +18,6 @@ using namespace boost::python;
 
 /// Weak pointer to DataItem typedef
 typedef boost::weak_ptr<DataItem> DataItem_wptr;
-
-namespace boost
-{
-  /**
-   * Boost.Python doesn't understand weak_ptrs out of the box. This acts an intermediary
-   * so that a bare pointer can be retrieved from the wrapper. The important
-   * bit here is that the weak pointer won't allow the bare pointer to be retrieved
-   * unless the object it points to still exists
-   * The name and arguments are dictated by boost
-   * @param dataItem :: A reference to the weak_ptr
-   * @return A bare pointer to the DataItem
-   */
-  inline DataItem * get_pointer(const DataItem_wptr & dataItem )
-  {
-    if( DataItem_sptr lockedItem = dataItem.lock() )
-    {
-      return lockedItem.get(); // Safe as we can guarantee that another reference exists
-    }
-    else
-    {
-      throw std::runtime_error("Variable invalidated, data has been deleted.");
-    }
-  }
-
-}
 
 namespace
 {
