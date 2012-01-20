@@ -396,7 +396,7 @@ void ApplicationWindow::init(bool factorySettings)
   connect(d_workspace, SIGNAL(subWindowActivated(QMdiSubWindow *)),
       this, SLOT(windowActivated(QMdiSubWindow*)));
   connect(lv, SIGNAL(doubleClicked(Q3ListViewItem *)),
-      this, SLOT(activateWindow(Q3ListViewItem *)));
+      this, SLOT(maximizeWindow(Q3ListViewItem *)));
   connect(lv, SIGNAL(doubleClicked(Q3ListViewItem *)),
       this, SLOT(folderItemDoubleClicked(Q3ListViewItem *)));
   connect(lv, SIGNAL(contextMenuRequested(Q3ListViewItem *, const QPoint &, int)),
@@ -8429,7 +8429,6 @@ void ApplicationWindow::hideWindow(MdiSubWindow* w)
 {
   hiddenWindows->append(w);
   w->setHidden();
-  activateNewWindow();
   emit modified();
 }
 
@@ -8501,11 +8500,13 @@ bool ApplicationWindow::existsWindow(MdiSubWindow* w) const
   */
 MdiSubWindow* ApplicationWindow::getActiveWindow() const
 {
+  //m_active_window_mutex.lock();
   if (!existsWindow(d_active_window))
   {
     d_active_window = NULL;
   }
   return d_active_window;
+  //m_active_window_mutex.unlock();
 }
 
 /**
@@ -8513,11 +8514,13 @@ MdiSubWindow* ApplicationWindow::getActiveWindow() const
   */
 void ApplicationWindow::setActiveWindow(MdiSubWindow* w)
 {
+  //m_active_window_mutex.lock();
   d_active_window = w;
   if (!existsWindow(d_active_window))
   {
     d_active_window = NULL;
   }
+  //m_active_window_mutex.unlock();
 }
 
 
@@ -8546,7 +8549,7 @@ void ApplicationWindow::activateWindow(MdiSubWindow *w, bool activateOuterWindow
   if(getActiveWindow()  == w )
   {
     // this can happen
-    if (w->status() == MdiSubWindow::Minimized || w->status() == MdiSubWindow::Hidden)
+    if (w->status() == MdiSubWindow::Minimized)
     {
       w->setNormal();
     }
@@ -8590,7 +8593,8 @@ void ApplicationWindow::activateWindow(MdiSubWindow *w, bool activateOuterWindow
   {
     if (activateOuterWindow)
     {
-      w->setNormal();
+      fw->showNormal();
+      fw->activateWindow();
     }
   }
   else
@@ -8601,17 +8605,6 @@ void ApplicationWindow::activateWindow(MdiSubWindow *w, bool activateOuterWindow
   blockWindowActivation = false;
 
   emit modified();
-}
-
-void ApplicationWindow::activateWindow(Q3ListViewItem * lbi)
-{
-  if (!lbi)
-    lbi = lv->currentItem();
-
-  if (!lbi || lbi->rtti() == FolderListItem::RTTI)
-    return;
-
-  activateWindow(dynamic_cast<WindowListItem*>(lbi)->window());
 }
 
 void ApplicationWindow::maximizeWindow(Q3ListViewItem * lbi)
@@ -15172,19 +15165,19 @@ void ApplicationWindow::showAllFolderWindows()
       switch (w->status())
       {
       case MdiSubWindow::Hidden:
-        w->setNormal();
+        w->showNormal();
         break;
 
       case MdiSubWindow::Normal:
-        w->setNormal();
+        w->showNormal();
         break;
 
       case MdiSubWindow::Minimized:
-        w->setMinimized();
+        w->showMinimized();
         break;
 
       case MdiSubWindow::Maximized:
-        w->setMaximized();
+        w->showMaximized();
         break;
       }
     }
@@ -15205,19 +15198,19 @@ void ApplicationWindow::showAllFolderWindows()
         switch (w->status())
         {
         case MdiSubWindow::Hidden:
-          w->setNormal();
+          w->showNormal();
           break;
 
         case MdiSubWindow::Normal:
-          w->setNormal();
+          w->showNormal();
           break;
 
         case MdiSubWindow::Minimized:
-          w->setMinimized();
+          w->showMinimized();
           break;
 
         case MdiSubWindow::Maximized:
-          w->setMaximized();
+          w->showMaximized();
           break;
         }
       }
@@ -17730,10 +17723,7 @@ void ApplicationWindow::activateNewWindow()
     if (w->widget() != static_cast<QWidget*>(current))
     {
       MdiSubWindow* sw = dynamic_cast<MdiSubWindow*>(w->widget());
-        if (sw && 
-            sw->status() != MdiSubWindow::Minimized && 
-            sw->status() != MdiSubWindow::Hidden && 
-            folder->hasWindow(sw))
+      if (sw && sw->status() != MdiSubWindow::Minimized && folder->hasWindow(sw))
       {
         newone = sw;
         break;
@@ -17749,10 +17739,7 @@ void ApplicationWindow::activateNewWindow()
       MdiSubWindow* sw = w->mdiSubWindow();
       if (sw != current)
       {
-        if (sw && 
-            sw->status() != MdiSubWindow::Minimized && 
-            sw->status() != MdiSubWindow::Hidden && 
-            folder->hasWindow(sw))
+        if (sw && sw->status() != MdiSubWindow::Minimized && folder->hasWindow(sw))
         {
           newone = sw;
           break;
