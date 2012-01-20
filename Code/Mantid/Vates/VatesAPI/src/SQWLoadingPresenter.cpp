@@ -99,7 +99,7 @@ namespace Mantid
     void SQWLoadingPresenter::extractMetadata(Mantid::API::IMDEventWorkspace_sptr eventWs)
     {
       using namespace Mantid::Geometry;
-      MDGeometryBuilderXML<StrictDimensionPolicy> refresh;
+      MDGeometryBuilderXML<NoDimensionPolicy> refresh;
       this->xmlBuilder= refresh; //Reassign.
       std::vector<MDDimensionExtents> ext = eventWs->getMinimumExtents(5);
       std::vector<IMDDimension_sptr> dimensions;

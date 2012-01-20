@@ -11,7 +11,7 @@
 #include "MantidVatesAPI/MDHWInMemoryLoadingPresenter.h"
 #include "MantidVatesAPI/MDLoadingViewAdapter.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
-#include "MantidVatesAPI/TimeStepToTimeStep.h"
+#include "MantidVatesAPI/TimeToTimeStep.h"
 #include "MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h"
 #include "MantidVatesAPI/vtkThresholdingHexahedronFactory.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
@@ -79,7 +79,7 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
 
     if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS()))
     {
-      // usually only one actual step requested
+      // Extracts the actual time.
       m_time =outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0];
     }
 
@@ -91,7 +91,7 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     Will attempt to handle drawing in 4D case and then in 3D case if that fails.
     */
     vtkThresholdingHexahedronFactory* successor = new vtkThresholdingHexahedronFactory(thresholdRange, "signal");
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> *factory = new vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep>(thresholdRange, "signal", m_time);
+    vtkThresholdingUnstructuredGridFactory<TimeToTimeStep> *factory = new vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>(thresholdRange, "signal", m_time);
     factory->SetSuccessor(successor);
 
     vtkDataSet* product = m_presenter->execute(factory, updateHandler);
