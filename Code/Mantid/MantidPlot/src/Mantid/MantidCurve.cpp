@@ -158,8 +158,9 @@ void MantidCurve::doDraw(QPainter *p,
 
   int xi0 = 0;
   QPen mypen(pen());
-  mypen.setColor(m_errorSettings->color());
-  mypen.setWidthF(m_errorSettings->width());
+  // why do we want to draw the curve and the errors in different colors?
+  //mypen.setColor(m_errorSettings->color());
+  //mypen.setWidthF(m_errorSettings->width());
   p->setPen(mypen);
   const int dx = m_errorSettings->capLength()/2;
   const int dx2 = 2*dx;
