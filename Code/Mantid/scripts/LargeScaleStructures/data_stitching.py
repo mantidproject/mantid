@@ -321,6 +321,8 @@ class Stitcher(object):
         ws_combined = "combined_Iq"
         
         first_ws = self._data_sets[0].get_scaled_ws()
+        if first_ws is None:
+            return
 
         x = mtd[first_ws].dataX(0)
         dx = mtd[first_ws].dataDx(0)

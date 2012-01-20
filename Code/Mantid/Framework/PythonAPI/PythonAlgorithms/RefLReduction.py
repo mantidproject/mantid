@@ -87,8 +87,10 @@ class RefLReduction(PythonAlgorithm):
         # Pick a good workspace name
         ws_name = "refl%d" % run_numbers[0]
         ws_event_data = ws_name+"_evt"  
+        
         # Load the data into its workspace
-        LoadEventNexus(Filename=data_file, OutputWorkspace=ws_event_data)
+        if not mtd.workspaceExists(ws_event_data):
+            LoadEventNexus(Filename=data_file, OutputWorkspace=ws_event_data)
         
         # Get metadata
         mt_run = mtd[ws_event_data].getRun()
@@ -155,6 +157,7 @@ class RefLReduction(PythonAlgorithm):
         #Create a new event workspace of only the range of pixel of interest 
         #background range (along the y-axis) and of only the pixel
         #of interest along the x-axis (to avoid the frame effect)
+        theta = tthd_rad - ths_rad
         mt2 = wks_utility.createIntegratedWorkspace(mtd[ws_histo_data], 
                                                     "IntegratedDataWks",
                                                     fromXpixel=Xrange[0],
@@ -162,17 +165,17 @@ class RefLReduction(PythonAlgorithm):
                                                     fromYpixel=BackfromYpixel,
                                                     toYpixel=BacktoYpixel,
                                                     maxX=maxX,
-                                                    maxY=maxY)
+                                                    maxY=maxY,
+                                                    source_to_detector=dMD,
+                                                    theta=theta)
         
-        theta = tthd_rad - ths_rad
-        _tof_axis = mt2.readX(0)[:]
+        #_tof_axis = mt2.readX(0)[:]
         ########## This was used to test the R(Q) 
         ##Convert the data without background subtraction to R(Q)
-        q_array = wks_utility.convertToRvsQ(dMD=dMD,
-                                            theta=theta,
-                                            tof=_tof_axis)
-        
-        q_array_reversed = q_array[::-1]
+        #q_array = wks_utility.convertToRvsQ(dMD=dMD,
+        #                                    theta=theta,
+        #                                    tof=_tof_axis)
+        #q_array_reversed = q_array[::-1]
         
         # Background
         Transpose(InputWorkspace='IntegratedDataWks',
@@ -185,12 +188,19 @@ class RefLReduction(PythonAlgorithm):
                            OutputWorkspace='TransposedID',
                            StartX=BackfromYpixel,
                            Mode='Mean',
-                           EndX=data_peak[0])
+                           EndX=data_peak[0],
+                           OutputMode="Return Background")
         Transpose(InputWorkspace='TransposedID',
-                  OutputWorkspace='DataWks')
+                  OutputWorkspace='DataBckWks')
+        
+        ConvertToHistogram("DataBckWks", OutputWorkspace="DataBckWks")
+        RebinToWorkspace(WorkspaceToRebin="DataBckWks", WorkspaceToMatch="IntegratedDataWks", OutputWorkspace="DataBckWks")
+        Minus("IntegratedDataWks", "DataBckWks", OutputWorkspace="DataWks")
+        
+        
             
             
-        # Work on Normalization file
+        # Work on Normalization file #########################################
         # Find full path to event NeXus data file
         f = FileFinder.findRuns("REF_L%d" %normalization_run)
         if len(f)>0 and os.path.isfile(f[0]): 
@@ -205,36 +215,33 @@ class RefLReduction(PythonAlgorithm):
         ws_norm_event_data = ws_norm+"_evt"  
         ws_norm_histo_data = ws_norm+"_histo"  
 
-        LoadEventNexus(Filename=norm_file, OutputWorkspace=ws_norm_event_data)
+        if not mtd.workspaceExists(ws_norm_event_data):
+            LoadEventNexus(Filename=norm_file, OutputWorkspace=ws_norm_event_data)
     
         # Rebin data
-        Rebin(InputWorkspace=ws_norm_event_data,
-              OutputWorkspace=ws_norm_histo_data,
-              Params=self._binning)
+        Rebin(InputWorkspace=ws_norm_event_data, OutputWorkspace=ws_norm_histo_data, Params=self._binning)
     
         # Keep only range of TOF of interest
-        CropWorkspace(ws_norm_histo_data, 
-                      'CropHistoNorm', 
-                      XMin=TOFrange[0], 
-                      XMax=TOFrange[1])
+        CropWorkspace(ws_norm_histo_data, ws_norm_histo_data, XMin=TOFrange[0], XMax=TOFrange[1])
     
         # Normalized by Current (proton charge)
-        NormaliseByCurrent(InputWorkspace='CropHistoNorm', 
-                           OutputWorkspace='NormWks')
+        NormaliseByCurrent(InputWorkspace=ws_norm_histo_data, OutputWorkspace=ws_norm_histo_data)
     
         ##Background subtraction
 
         #Create a new event workspace of only the range of pixel of interest 
         #background range (along the y-axis) and of only the pixel
         #of interest along the x-axis (to avoid the frame effect)
-        mt3_norm = wks_utility.createIntegratedWorkspace(mtd['NormWks'], 
+        mt3_norm = wks_utility.createIntegratedWorkspace(mtd[ws_norm_histo_data], 
                                                          "IntegratedNormWks",
                                             fromXpixel=Xrange[0],
                                             toXpixel=Xrange[1],
                                             fromYpixel=BackfromYpixel,
                                             toYpixel=BacktoYpixel,
                                             maxX=maxX,
-                                            maxY=maxY)
+                                            maxY=maxY,
+                                            source_to_detector=dMD,
+                                            theta=theta)
 
         Transpose(InputWorkspace='IntegratedNormWks',
                   OutputWorkspace='TransposedID')
@@ -247,10 +254,16 @@ class RefLReduction(PythonAlgorithm):
                            OutputWorkspace='TransposedID',
                            StartX=BackfromYpixel,
                            Mode='Mean',
-                           EndX=norm_peak[0])
+                           EndX=norm_peak[0],
+                           OutputMode="Return Background")
     
         Transpose(InputWorkspace='TransposedID',
-                  OutputWorkspace='NormWks')
+                  OutputWorkspace='NormBckWks')
+        
+        ConvertToHistogram("NormBckWks", OutputWorkspace="NormBckWks")
+        RebinToWorkspace(WorkspaceToRebin="NormBckWks", WorkspaceToMatch="IntegratedNormWks", OutputWorkspace="NormBckWks")
+        Minus("IntegratedNormWks", "NormBckWks", OutputWorkspace="NormWks")
+
    
         #perform the integration myself
         mt_temp = mtd['NormWks']
@@ -269,6 +282,10 @@ class RefLReduction(PythonAlgorithm):
         output_ws = self.getPropertyValue("OutputWorkspace")
         
         SumSpectra(InputWorkspace="NormalizedWks", OutputWorkspace=output_ws)
+        #ConvertToHistogram(InputWorkspace=output_ws,OutputWorkspace=output_ws)
+        #ConvertUnits(InputWorkspace=output_ws,Target="MomentumTransfer",OutputWorkspace=output_ws)
+        
+        
         self.setProperty("OutputWorkspace", mtd[output_ws])
             
 mtd.registerPyAlgorithm(RefLReduction())

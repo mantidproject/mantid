@@ -24,8 +24,10 @@ class DataSets(BaseScriptElement):
     NormBackgroundRoi = [123, 137]
 
     # Data files
-    data_files = [66421]
-    norm_file = 66196
+    #data_files = [66421]
+    #norm_file = 66196
+    data_files = [0]
+    norm_file = 0
     
 
     def __init__(self):

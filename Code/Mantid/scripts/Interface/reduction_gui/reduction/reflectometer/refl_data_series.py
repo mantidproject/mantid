@@ -22,14 +22,7 @@ class DataSeries(BaseScriptElement):
             Generate reduction script
             @param execute: if true, the script will be executed
         """
-        
-        script = "# REF_L reduction script\n"
-        script += "# Script automatically generated on %s\n\n" % time.ctime(time.time())
-        
-        script += "from MantidFramework import *\n"
-        script += "mtd.initialise(False)\n"
-        script += "from mantidsimple import *\n\n"
-        
+        script = ""
         for item in self.data_sets:
             script += item.to_script()
             script += "\n"
