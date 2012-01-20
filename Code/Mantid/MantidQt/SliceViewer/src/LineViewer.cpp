@@ -137,7 +137,6 @@ void LineViewer::updateFreeDimensions()
       m_thicknessText[d]->setVisible(d != 0);
     else
       m_thicknessText[d]->setVisible(!b);
-    m_thicknessText[d]->setToolTip("Integration width in this dimension.");
 
     // --- Adjust the signals ---
     m_startText[d]->disconnect();
