@@ -115,42 +115,9 @@
 		  <value val="0.0"/>
 		</parameter>
 
-		<!-- TO BE REMOVED Diagnostic test defaults -->
-
-		<parameter name="remove_zero">
-			<value val="1.0" />
-		</parameter>
-
-		<parameter name="tiny">
-			<value val="1e-10" />
-		</parameter>
-
-		<parameter name="large">
-			<value val="1e10" />
-		</parameter>
-
-		<parameter name="median_lo">
-			<value val="0.1" />
-		</parameter>
-
-		<parameter name="median_hi">
-			<value val="3.0" />
-		</parameter>
-
-		<parameter name="signif">
-			<value val="3.3" />
-		</parameter>
-
-		<parameter name="check_background">
-			<value val="1.0" />
-		</parameter>
-
-		<parameter name="bkgd_threshold">
-			<value val="5.0" />
-		</parameter>
-
-		<parameter name="variation">
-			<value val="1.1" />
+		<!-- Variation for ratio test with second white beam -->
+		<parameter name="diag_variation">
+		  <value val="1.1"/>
 		</parameter>
 
 		<!-- Absolute units conversion average -->
