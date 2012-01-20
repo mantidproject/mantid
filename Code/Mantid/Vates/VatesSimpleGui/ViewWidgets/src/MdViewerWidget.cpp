@@ -58,10 +58,12 @@
 #include <pqVerifyRequiredPluginBehavior.h>
 
 #include <QAction>
+#include <QDesktopServices>
 #include <QHBoxLayout>
 #include <QMainWindow>
 #include <QMenuBar>
 #include <QModelIndex>
+#include <QUrl>
 #include <QWidget>
 
 #include <iostream>
@@ -464,6 +466,15 @@ void MdViewerWidget::createMenus()
                    this, SLOT(onColorOptions()));
   viewMenu->addAction(colorAction);
 
+  QMenu *helpMenu = menubar->addMenu(QApplication::tr("&Help"));
+
+  QAction *wikiHelpAction = new QAction(QApplication::tr("Show Wiki Help"), this);
+  wikiHelpAction->setShortcut(QKeySequence::fromString("Ctrl+Shift+H"));
+  wikiHelpAction->setStatusTip(QApplication::tr("Show the wiki help page in a browser."));
+  QObject::connect(wikiHelpAction, SIGNAL(triggered()),
+                   this, SLOT(onWikiHelp()));
+  helpMenu->addAction(wikiHelpAction);
+
   if (this->pluginMode)
   {
     this->ui.verticalLayout->insertWidget(0, menubar);
@@ -511,6 +522,16 @@ void MdViewerWidget::onRotationPoint()
   this->rotPointDialog->show();
   this->rotPointDialog->raise();
   this->rotPointDialog->activateWindow();
+}
+
+/**
+ * This function shows the wiki help page for the simple interface in a
+ * browser.
+ */
+void MdViewerWidget::onWikiHelp()
+{
+  QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
+                                 "VatesSimpleInterface"));
 }
 
 /**
