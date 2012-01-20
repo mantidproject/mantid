@@ -1,9 +1,9 @@
-#ifndef EXPDECAYTEST_H_
-#define EXPDECAYTEST_H_
+#ifndef EXPDECAYMUONTEST_H_
+#define EXPDECAYMUONTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/ExpDecay.h"
+#include "MantidCurveFitting/ExpDecayMuon.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidCurveFitting/LinearBackground.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
@@ -24,14 +24,14 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 
 
-class ExpDecayTest : public CxxTest::TestSuite
+class ExpDecayMuonTest : public CxxTest::TestSuite
 {
 public:
 
   void getMockData(Mantid::MantidVec& y, Mantid::MantidVec& e)
   {
     
-    y[0] = 5;
+    y[0] = 5.0;
     y[1] = 3.582656552869;
     y[2] = 2.567085595163;
     y[3] = 1.839397205857;
@@ -79,7 +79,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().addOrReplace(wsName, ws2D));
 
     // set up Lorentzian fitting function
-    ExpDecay* fn = new ExpDecay();
+    ExpDecayMuon* fn = new ExpDecayMuon();
     fn->initialize();
 
     //alg2.setFunction(fn);
@@ -104,13 +104,13 @@ public:
     TS_ASSERT_DELTA( dummy, 0.0001,0.0001);
 
     IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
-    TS_ASSERT_DELTA( out->getParameter("Height"), 5 ,0.0001);
-    TS_ASSERT_DELTA( out->getParameter("Lifetime"), 3 ,0.001);
+    TS_ASSERT_DELTA( out->getParameter("A"), 5 ,0.0001);
+    TS_ASSERT_DELTA( out->getParameter("Lambda"), 0.3333 ,0.001);
 
     // check it categories
     const std::vector<std::string> categories = out->categories();
     TS_ASSERT( categories.size() == 1 );
-    TS_ASSERT( categories[0] == "General" );
+    TS_ASSERT( categories[0] == "Muon" );
 
     AnalysisDataService::Instance().remove(wsName);
 
@@ -119,4 +119,4 @@ public:
 
 };
 
-#endif /*EXPDECAYTEST_H_*/
+#endif /*EXPDECAYMUONTEST_H_*/
