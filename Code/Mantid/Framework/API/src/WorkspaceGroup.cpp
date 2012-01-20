@@ -37,8 +37,8 @@ void WorkspaceGroup::observeADSNotifications(const bool observeADS)
   {
     if(!m_observingADS)
     {
-      Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
-      Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_renameObserver);
+      AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
+      AnalysisDataService::Instance().notificationCenter.addObserver(m_renameObserver);
       m_observingADS = true;
     }
   }
@@ -46,8 +46,8 @@ void WorkspaceGroup::observeADSNotifications(const bool observeADS)
   {
     if(m_observingADS)
     {
-      Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
-      Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_renameObserver);
+      AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
+      AnalysisDataService::Instance().notificationCenter.removeObserver(m_renameObserver);
       m_observingADS = false;
     }
   }
@@ -70,12 +70,29 @@ void WorkspaceGroup::add(const std::string& name)
 bool WorkspaceGroup::contains(const std::string & wsName) const
 {
   // Protection against the case where calling m_wsNames.end() results in a crash. (Probable temp fix.)
-  if(m_wsNames.size() == 0 )
+  if(m_wsNames.empty() )
     return false;
 
   std::vector<std::string>::const_iterator itr = std::find(m_wsNames.begin(), m_wsNames.end(), wsName);
   return (itr != m_wsNames.end());
 }
+
+/**
+ * Return the ith workspace
+ * @param index The index within the group
+ * @throws an out_of_range error if the index is invalid
+ */
+Workspace_sptr WorkspaceGroup::getItem(const size_t index) const
+{
+  if( index >= this->size() )
+  {
+    std::ostringstream os;
+    os << "WorkspaceGroup - index out of range. Requested=" << index << ", current size=" << this->size();
+    throw std::out_of_range(os.str());
+  }
+  return AnalysisDataService::Instance().retrieve(m_wsNames[index]);
+}
+
 
 /// Empty all the entries out of the workspace group. Does not remove the workspaces from the ADS.
 void WorkspaceGroup::removeAll()
@@ -131,7 +148,7 @@ void WorkspaceGroup::workspaceDeleteHandle(Mantid::API::WorkspacePostDeleteNotif
     this->remove(deletedName);
     if(isEmpty())
     {
-     Mantid::API::AnalysisDataService::Instance().remove(this->getName());
+     AnalysisDataService::Instance().remove(this->getName());
     }
   }
 }

@@ -2,12 +2,14 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidPythonInterface/kernel/PropertyWithValue.h"
 #include "MantidPythonInterface/kernel/SingleValueTypeHandler.h"
+#include "MantidPythonInterface/kernel/WeakPtr.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/args.hpp>
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/weak_ptr.hpp>
 
 using namespace Mantid::API;
 using Mantid::Kernel::PropertyWithValue;
@@ -25,6 +27,7 @@ namespace
 void export_Workspace()
 {
   register_ptr_to_python<Workspace_sptr>();
+  register_ptr_to_python<boost::weak_ptr<Workspace> >();
 
   class_<Workspace, bases<DataItem>, boost::noncopyable>("Workspace", no_init)
     .def("getName", &Workspace::getName, return_value_policy<copy_const_reference>(), 

@@ -544,7 +544,7 @@ void MultiSliceView::resetCamera()
 void MultiSliceView::checkSliceViewCompat()
 {
   QString wsName = this->getWorkspaceName();
-  if (wsName != "")
+  if (!wsName.isEmpty())
   {
     this->ui.xAxisWidget->setShowSliceView(true);
     this->ui.yAxisWidget->setShowSliceView(true);

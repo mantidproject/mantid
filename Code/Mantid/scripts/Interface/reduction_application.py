@@ -1,6 +1,7 @@
 import sys, os
 import traceback
 from PyQt4 import QtGui, QtCore, uic
+from mantidsimple import *
 
 # Check whether Mantid is available
 try:

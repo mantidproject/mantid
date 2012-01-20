@@ -160,7 +160,7 @@ class DataReflWidget(BaseWidget):
             Populate the UI elements with the data from the given state. 
             @param state: data object    
         """
-        if IS_IN_MANTIDPLOT:
+        if False and IS_IN_MANTIDPLOT:
             ws_name = "reflectivity"
             ws_list = [n for n in mtd.keys() if n.startswith(ws_name)]
             g = _qti.app.graph(ws_name)
@@ -169,12 +169,16 @@ class DataReflWidget(BaseWidget):
                 g.setName(ws_name)  
         
         self._summary.angle_list.clear()
-        for item in state.data_sets:
-            if item is not None:
-                item_widget = QtGui.QListWidgetItem(unicode(str(','.join([str(i) for i in item.data_files]))), self._summary.angle_list)
-                item_widget.setData(QtCore.Qt.UserRole, item)
+        if len(state.data_sets)==1 and state.data_sets[0].data_files[0]==0:
+            pass
+        else: 
+            for item in state.data_sets:
+                if item is not None:
+                    item_widget = QtGui.QListWidgetItem(unicode(str(','.join([str(i) for i in item.data_files]))), self._summary.angle_list)
+                    item_widget.setData(QtCore.Qt.UserRole, item)
 
-        self.set_editing_state(state.data_sets[0])
+        if len(state.data_sets)>0:
+            self.set_editing_state(state.data_sets[0])
 
     def set_editing_state(self, state):
 

@@ -12,6 +12,7 @@ if not hasattr(sys, 'argv'):
 IPYTHON_LOADED = False
 import IPython, pygments, matplotlib
 from internal_ipkernel import InternalIPKernel
+from IPython.lib.kernel import get_connection_file, connect_qtconsole
 IPYTHON_LOADED = True
 
 class MantidPlot_IPython(object):
@@ -26,7 +27,7 @@ class MantidPlot_IPython(object):
         kernel.init_ipkernel('qt')
         # Start the threads that make up the IPython kernel and integrate them
         # with the Qt event loop.
-        #kernel.ipkernel.start()
+        kernel.ipkernel.start()
 
         self.kernel = kernel
 
@@ -36,10 +37,11 @@ class MantidPlot_IPython(object):
             print "Unable to load IPython"
             return
 
-        if self.kernel is None:
+        #if self.kernel is None:
+        try:
+            # This will throw if the kernel is not yet running
+            get_connection_file()
+            connect_qtconsole()
+        except RuntimeError:
             self.init_kernel()
-
-        self.kernel.new_qt_console()
-        # Start the threads that make up the IPython kernel and integrate them
-        # with the Qt event loop.
-        self.kernel.ipkernel.start()
+            self.kernel.new_qt_console()

@@ -94,6 +94,8 @@ protected slots:
   void onColorOptions();
   /// Pop-up the rotation point dialog.
   void onRotationPoint();
+  /// Show the wiki help in a browser.
+  void onWikiHelp();
   /**
    * Load and render data from the given source.
    * @param source a ParaView compatible source
