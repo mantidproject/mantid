@@ -199,53 +199,12 @@ namespace Mantid
                 {
                   // This is a group. Call processGroups instead.
                   g_log.debug()<<" one of the inputs is a workspace group - call processGroups"<<std::endl;
+                  // This calls this->execute() again on each member of the group.
                   return processGroups(wsGrpSptr,Prop);
                 }
               }
             }
-            catch (std::invalid_argument&ex)
-            {
-              g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
-              g_log.error()<<ex.what()<<std::endl;
-              m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
-              m_running = false;
-              if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
-              {
-                m_runningAsync = false;
-                throw;
-              }
-              return false;
-
-            }
-            catch(Exception::NotFoundError&ex )
-            {
-              g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
-              g_log.error()<<ex.what()<<std::endl;
-              m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
-              m_running = false;
-              if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
-              {
-                m_runningAsync = false;
-                throw;
-              }
-              return false;
-
-            }
             catch (std::runtime_error &ex)
-            {
-              g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
-              g_log.error()<<ex.what()<<std::endl;
-              m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
-              m_running = false;
-              if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
-              {
-                m_runningAsync = false;
-                throw;
-              }
-              return false;
-
-            }
-            catch(CancelException& ex)
             {
               g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
               g_log.error()<<ex.what()<<std::endl;
