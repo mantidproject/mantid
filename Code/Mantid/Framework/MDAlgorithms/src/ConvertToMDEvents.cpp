@@ -249,9 +249,12 @@ ConvertToMDEvents::init()
    // Box controller properties. These are the defaults
     this->initBoxControllerProps("5" /*SplitInto*/, 1500 /*SplitThreshold*/, 20 /*MaxRecursionDepth*/);
     // additional box controller settings property. 
+    BoundedValidator<int> *mustBeMoreThen1 = new BoundedValidator<int> ();
+    mustBeMoreThen1->setLower(1);
+
     declareProperty(
-      new PropertyWithValue<int>("MinRecursionDepth", 0),
-      "Optional. If specified, then all the boxes will be split to this minimum recursion depth. 0 = no splitting, 1 = one level of splitting, etc.\n"
+      new PropertyWithValue<int>("MinRecursionDepth", 1,mustBeMoreThen1),
+      "Optional. If specified, then all the boxes will be split to this minimum recursion depth. 1 = one level of splitting, etc.\n"
       "Be careful using this since it can quickly create a huge number of boxes = (SplitInto ^ (MinRercursionDepth * NumDimensions)).\n"
       "But setting this property equal to MaxRecursionDepth property is necessary if one wants to generate multiple file based workspaces in order to merge them later\n");
     setPropertyGroup("MinRecursionDepth", getBoxSettingsGroupName());
@@ -351,7 +354,8 @@ void ConvertToMDEvents::exec()
     spws->splitBox();
   // Do we split more due to MinRecursionDepth?
     int minDepth = this->getProperty("MinRecursionDepth");
-    if (minDepth<0) throw std::invalid_argument("MinRecursionDepth must be >= 0.");
+    int maxDepth = this->getProperty("MaxRecursionDepth");
+    if (minDepth<maxDepth) throw std::invalid_argument("MinRecursionDepth must be >= MaxRecursionDepth and ");
     spws->setMinRecursionDepth(size_t(minDepth));  
   }
 
