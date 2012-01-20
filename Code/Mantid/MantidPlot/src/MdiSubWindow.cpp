@@ -109,13 +109,7 @@ void MdiSubWindow::resizeEvent( QResizeEvent* e )
  */
 void MdiSubWindow::show()
 {
-  QWidget* pw = getWrapperWindow();
-  if (!pw)
-  {
-    MdiSubWindowParent_t::show();
-    return;
-  }
-  pw->show();
+  setNormal();
 }
 
 /**
@@ -123,13 +117,7 @@ void MdiSubWindow::show()
  */
 void MdiSubWindow::hide()
 {
-  QWidget* pw = getWrapperWindow();
-  if (!pw)
-  {
-    MdiSubWindowParent_t::hide();
-    return;
-  }
-  pw->hide();
+  setHidden();
 }
 
 /**
@@ -268,8 +256,16 @@ void MdiSubWindow::setStatus(Status s)
 
 void MdiSubWindow::setHidden()
 {
-    setStatus(Hidden);
-    hide();
+  QWidget* pw = getWrapperWindow();
+  if (!pw)
+  {
+    MdiSubWindowParent_t::hide();
+  }
+  else
+  {
+    pw->hide();
+  }
+  setStatus(Hidden);
 }
 
 void MdiSubWindow::setNormal()
