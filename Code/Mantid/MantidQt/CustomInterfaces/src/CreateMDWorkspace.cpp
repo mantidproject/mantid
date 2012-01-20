@@ -380,7 +380,7 @@ Add a nexus files on disk
 */
 void CreateMDWorkspace::addNexusFileClicked()
 {
-  QStringList fileNames = findFiles("Raw Files (*.nxs)");
+  QStringList fileNames = findFiles("Nexus files (*.nxs)");
 
   QStringList::iterator it = fileNames.begin();
   QStringList::const_iterator end = fileNames.end();

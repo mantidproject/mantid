@@ -20,6 +20,11 @@ private:
     return Mantid::API::FileFinder::Instance().getFullPath("CNCS_7860_event.nxs");
   }
 
+  static std::string getUnSuitableFileNamePath()
+  {
+    return Mantid::API::FileFinder::Instance().getFullPath("MDEW_4D.nxs");
+  }
+
 public:
 
   void testConstructorThrowsWithWrongExtension()
@@ -36,7 +41,12 @@ public:
 
   void testConstructThrowsWhenFileDoesntExist()
   {
-    TSM_ASSERT_THROWS("Unknown file, should throw.", new EventNexusFileMemento("MadeUp.nxs"), std::runtime_error);
+    TSM_ASSERT_THROWS("Unknown file, should throw.", new EventNexusFileMemento("MadeUp.nxs"), std::invalid_argument);
+  }
+
+  void testConstructThrowsOnInvalidFile()
+  {
+    TSM_ASSERT_THROWS("Unknown file structure, should throw.", new EventNexusFileMemento(getUnSuitableFileNamePath()), std::invalid_argument);
   }
 
   void testFetchItSucceedsWhenFileExists()

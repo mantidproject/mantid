@@ -33,7 +33,7 @@ public:
                               const std::vector<std::string> &other_dim_names,MDEvents::MDWSDescription &TWSD)
     {
        
-                              return ConvertToMDEvents::identifyTheAlg(inMatrixWS,Q_mode_req, dE_mode_req,other_dim_names,TWSD);
+                              return ConvertToMDEvents::identifyTheAlg(inMatrixWS,Q_mode_req, dE_mode_req,other_dim_names,false,TWSD);
     }
     std::string identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS,const std::string &Q_mode_req, const std::string &dE_mode_req,
                                   std::vector<std::string> &outws_dim_names,std::vector<std::string> &outws_dim_units){
@@ -129,7 +129,7 @@ void testInit(){
     TS_ASSERT_THROWS_NOTHING( pAlg->initialize() )
     TS_ASSERT( pAlg->isInitialized() )
 
-    TSM_ASSERT_EQUALS("algortithm should have 14 propeties",14,(size_t)(pAlg->getProperties().size()));
+    TSM_ASSERT_EQUALS("algortithm should have 15 propeties",15,(size_t)(pAlg->getProperties().size()));
 }
 // TEST QMode
 void testParseQMode_WrongThrows()

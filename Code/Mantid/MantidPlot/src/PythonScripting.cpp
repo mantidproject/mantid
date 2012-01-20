@@ -203,10 +203,6 @@ bool PythonScripting::start()
     std::cerr << "Exception in PythonScripting.cpp" << std::endl;
     d_initialized = false;
   }
-  // Reset the stdout/err printers
-  PyDict_SetItemString(m_sys, "stdout",PyDict_GetItemString(m_sys, "__stdout__"));
-  PyDict_SetItemString(m_sys, "stderr",PyDict_GetItemString(m_sys, "__stderr__"));
-
   return d_initialized;
 }
 

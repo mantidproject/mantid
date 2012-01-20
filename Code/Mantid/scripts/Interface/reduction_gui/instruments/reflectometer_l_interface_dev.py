@@ -5,7 +5,7 @@
     process is kept elsewhere (REFLReduction object)
 """
 from interface import InstrumentInterface
-from reduction_gui.widgets.reflectometer.refl_data import DataReflWidget
+from reduction_gui.widgets.reflectometer.refl_data_simple import DataReflWidget
 from reduction_gui.widgets.reflectometer.refl_parameters import ParametersReflWidget
 from reduction_gui.widgets.reflectometer.refl_norm import NormReflWidget
 from reduction_gui.widgets.reflectometer.advanced import AdvancedWidget
@@ -30,13 +30,13 @@ class REFLInterface(InstrumentInterface):
         self.attach(DataReflWidget(settings = self._settings, name=name, data_proxy=DataProxy))
         
         # normalization REF_L tab
-        self.attach(NormReflWidget(settings = self._settings, data_proxy=DataProxy))
+        #self.attach(NormReflWidget(settings = self._settings, data_proxy=DataProxy))
 
         # Parameters REF_L tab
-        self.attach(ParametersReflWidget(settings = self._settings, data_proxy=DataProxy))
+        #self.attach(ParametersReflWidget(settings = self._settings, data_proxy=DataProxy))
 
         # Parameters advanced tab
-        self.attach(AdvancedWidget(settings = self._settings, data_proxy=DataProxy))
+        #self.attach(AdvancedWidget(settings = self._settings, data_proxy=DataProxy))
         
         # Reduction output
-        self.attach(OutputWidget(settings = self._settings))
+        #self.attach(OutputWidget(settings = self._settings))

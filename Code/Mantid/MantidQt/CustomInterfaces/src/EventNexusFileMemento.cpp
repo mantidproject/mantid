@@ -1,4 +1,5 @@
 #include "MantidQtCustomInterfaces/EventNexusFileMemento.h"
+#include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IEventWorkspace.h"
@@ -21,15 +22,24 @@ namespace MantidQt
       {
         boost::regex pattern("(NXS)$", boost::regex_constants::icase); 
 
+        //Fail if wrong extension
         if(!boost::regex_search(fileName, pattern))
         {
           std::string msg = "EventNexusFileMemento:: Unknown File extension on: " + fileName;
           throw std::invalid_argument(msg);
         }
-
+        
+        //Check file exists at given location
         if(!checkStillThere())
         {
-          throw std::runtime_error("EventNexusFileMemento:: File doesn't exist");
+          throw std::invalid_argument("EventNexusFileMemento:: File doesn't exist");
+        }
+
+        //Detailed check of file structure.
+        IDataFileChecker_sptr alg = LoadAlgorithmFactory::Instance().create("LoadEventNexus");
+        if(!alg->fileCheck(m_fileName))
+        {
+          throw std::invalid_argument("Expecting Event Nexus files. This file type is not recognised");
         }
 
         std::vector<std::string> strs;
@@ -86,7 +96,7 @@ namespace MantidQt
       {
         checkStillThere();
 
-        IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadEventNexus");
+        IDataFileChecker_sptr alg = LoadAlgorithmFactory::Instance().create("LoadEventNexus");
         alg->initialize();
         alg->setRethrows(true);
         alg->setProperty("Filename", m_fileName);

@@ -52,7 +52,7 @@ namespace Mantid
       ---------------------------------------------------------------------------*/
       MDLoadingView* m_view;
       
-      Mantid::Geometry::MDGeometryBuilderXML<Mantid::Geometry::StrictDimensionPolicy> xmlBuilder;
+      Mantid::Geometry::MDGeometryBuilderXML<Mantid::Geometry::NoDimensionPolicy> xmlBuilder;
       Mantid::Geometry::IMDDimension_sptr tDimension;
       virtual void appendMetadata(vtkDataSet* visualDataSet, const std::string& wsName) ;
       virtual void extractMetadata(Mantid::API::IMDHistoWorkspace_sptr histoWs);

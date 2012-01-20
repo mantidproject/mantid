@@ -64,8 +64,8 @@ namespace Mantid
       parser.execute();
 
       using Mantid::Geometry::MDGeometryBuilderXML;
-      using Mantid::Geometry::StrictDimensionPolicy;
-      MDGeometryBuilderXML<StrictDimensionPolicy> xmlBuilder;
+      using Mantid::Geometry::NoDimensionPolicy;
+      MDGeometryBuilderXML<NoDimensionPolicy> xmlBuilder;
 
       Mantid::Geometry::VecIMDDimension_sptr dimensions =parser.getAllDimensions();
       DimensionVec::iterator it = dimensions.begin();

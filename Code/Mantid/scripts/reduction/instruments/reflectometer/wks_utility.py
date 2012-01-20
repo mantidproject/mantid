@@ -1,4 +1,4 @@
-from numpy import zeros, arctan2
+from numpy import zeros, arctan2, arange
 from mantidsimple import *
 import math
 
@@ -118,7 +118,7 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
             _y_error_axis[y, :] += ((mt1.readE(_index)[:]) * (mt1.readE(_index)[:]))
 
     _y_axis = _y_axis.flatten()
-    _y_error_axis = sqrt(_y_error_axis)
+    _y_error_axis = numpy.sqrt(_y_error_axis)
     #plot_y_error_axis = _y_error_axis #for output testing only    -> plt.imshow(plot_y_error_axis, aspect='auto', origin='lower')
     _y_error_axis = _y_error_axis.flatten()
 
@@ -234,13 +234,13 @@ def convertToRvsQ(dMD=-1,theta=-1,tof=None):
             theta: angle of detector
     """
     _const = float(4) * math.pi * m * dMD / h
-    sz_tof = shape(tof)[0]
+    sz_tof = numpy.shape(tof)[0]
     q_array = zeros(sz_tof-1)
     for t in range(sz_tof-1):
         tof1 = tof[t]
         tof2 = tof[t+1]
         tofm = (tof1+tof2)/2.
-        _Q = _const * sin(theta) / (tofm*1e-6)
+        _Q = _const * math.sin(theta) / (tofm*1e-6)
         q_array[t] = _Q*1e-10
     
     return q_array
