@@ -179,6 +179,8 @@ public:
 
   };
 
+
+  //============================================================================
   Algorithm();
   virtual ~Algorithm();
   /// function to return a name of the algorithm, must be overridden in all algorithms

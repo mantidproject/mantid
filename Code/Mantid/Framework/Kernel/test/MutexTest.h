@@ -14,7 +14,14 @@ using namespace Mantid::Kernel;
 std::vector<double> shared_data;
 
 
+
 Poco::RWLock _access;
+
+//Poco::ScopedReadRWLock getReadLock()
+//{
+//  return Poco::ScopedReadRWLock(_access);
+//}
+
 void reader()
 {
 //  std::cout << "Read started" << std::endl;

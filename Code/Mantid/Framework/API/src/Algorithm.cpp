@@ -185,23 +185,23 @@ namespace Mantid
           if (direction == Kernel::Direction::Input ||direction==Kernel::Direction::InOut)
           {
             std::string wsName=wsPropProp->value();
-            // try
-            //{
-            //checking the input is a group
+
+            // Checking the input is a group
             try
-            {     //check if the pointer is valid, it won't be if it is a group
+            {
+              // Check if the pointer is valid, it won't be if it is a group
               Workspace_sptr wsSptr=wsProp->getWorkspace();
               if(!wsName.empty() && !wsSptr)
               {
                 boost::shared_ptr<WorkspaceGroup> wsGrpSptr =
                   boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(wsName));
                 if(wsGrpSptr)
-                {        //this must be a group - test for that
+                {
+                  // This is a group. Call processGroups instead.
                   g_log.debug()<<" one of the inputs is a workspace group - call processGroups"<<std::endl;
                   return processGroups(wsGrpSptr,Prop);
                 }
               }
-
             }
             catch (std::invalid_argument&ex)
             {
@@ -257,8 +257,6 @@ namespace Mantid
                 throw;
               }
               return false;
-
-
             }
             catch(std::exception&ex)
             {
@@ -274,12 +272,15 @@ namespace Mantid
               return false;
             }
 
-            //}
 
-          }//end of if loop checking the direction
-        }//end of if loop for checking workspace properties
+          } //end of if (its an input/inout workspace)
+
+        }//end of if (it is a workspace property)
 
       }// end of for loop for checking the properties for workspace groups
+
+
+      throw;
 
       // Invoke exec() method of derived class and catch all uncaught exceptions
       try
