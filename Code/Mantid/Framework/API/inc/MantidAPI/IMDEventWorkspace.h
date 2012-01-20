@@ -63,6 +63,9 @@ namespace API
     /// Refresh the cache (integrated signal of each box)
     virtual void refreshCache() = 0;
 
+    /// Recurse down to a minimum depth
+    virtual void setMinRecursionDepth(size_t depth) = 0;
+
     /// Return the type of event contained, as a string. MDEvent or MDLeanEvent
     virtual std::string getEventTypeName() const = 0;
 
@@ -72,6 +75,7 @@ namespace API
     bool fileNeedsUpdating() const;
 
     void setFileNeedsUpdating(bool value);
+
 
   protected:
     /// Marker set to true when a file-backed workspace needs its back-end file updated (by calling SaveMD(UpdateFileBackEnd=1) )

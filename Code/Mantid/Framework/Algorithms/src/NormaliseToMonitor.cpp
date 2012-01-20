@@ -193,7 +193,9 @@ void NormaliseToMonitor::init()
 
   // ...or provide it in a separate workspace (note: optional WorkspaceProperty)
   declareProperty(new WorkspaceProperty<>("MonitorWorkspace","",Direction::Input,true,val->clone()),
-    "A single-spectrum workspace containing the monitor spectrum");
+    "A workspace containing the monitor spectrum");
+  declareProperty("MonitorWorkspaceSpectrum",0,
+      "The spectrum number within the MonitorWorkspace you want to normalize by (usually monitor spectrum but can be any)",Direction::InOut);
 
   // If users set either of these optional properties two things happen
   // 1) normalisation is by an integrated count instead of bin-by-bin
@@ -339,10 +341,11 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getMonitorWorkspace(API::MatrixWor
 {
   // Get the workspace from the ADS. Will throw if it's not there.
   MatrixWorkspace_sptr monitorWS = getProperty("MonitorWorkspace");
+  int monitorSpec = getProperty("MonitorWorkspaceSpectrum");
   // Check that it's a single spectrum workspace
-  if ( monitorWS->getNumberHistograms() != 1 )
+  if ( static_cast<int>(monitorWS->getNumberHistograms()) < monitorSpec+1 )
   {
-    throw std::runtime_error("The MonitorWorkspace must contain only 1 spectrum");
+    throw std::runtime_error("The MonitorWorkspace must contain the MonitorWorkspaceSpectrum");
   }
   // Check that the two workspace come from the same instrument
   if ( monitorWS->getInstrument()->getName() != inputWorkspace->getInstrument()->getName() )
@@ -360,7 +363,7 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getMonitorWorkspace(API::MatrixWor
                   API::WorkspaceHelpers::matchingBins(inputWorkspace,monitorWS,true) );
 
   // If the workspace passes all these tests, make a local copy because it will get changed
-  return this->extractMonitorSpectrum(monitorWS,0);
+  return this->extractMonitorSpectrum(monitorWS,monitorSpec);
 }
 
 /** Pulls the monitor spectrum out of a larger workspace

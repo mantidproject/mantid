@@ -78,9 +78,11 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
     def _loadNeXusData(self, filename, name, bank, extension, **kwargs):
         alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, BankName=bank, SingleBankPixelsOnly=1, FilterByTofMin=self._binning[0], FilterByTofMax=self._binning[2], LoadMonitors=True, MonitorsAsEvents=True, **kwargs)
         wksp = alg['OutputWorkspace']
-        LoadIsawDetCal(InputWorkspace=wksp,Filename=self._DetCalfile)
+        if self._DetCalfile is not None:
+            LoadIsawDetCal(InputWorkspace=wksp,Filename=self._DetCalfile)
         #Normalise by sum of counts in upstream monitor
-        Integration(InputWorkspace=mtd[str(name)+'_monitors'], OutputWorkspace='Mon', RangeLower=self._binning[0], RangeUpper=self._binning[2], EndWorkspaceIndex=0)
+        NormaliseToMonitor(InputWorkspace=wksp,OutputWorkspace=wksp,MonitorWorkspace=mtd[str(name)+'_monitors'],IntegrationRangeMin=self._binning[0],IntegrationRangeMax=self._binning[2])
+        wksp *= 1e8
         mtd.deleteWorkspace(str(name)+'_monitors')
         mtd.releaseFreeMemory()
         # take care of filtering events
@@ -221,18 +223,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                 if bkgRun > 0:
                     temp = mtd["%s_%d" % (self._instrument, bkgRun)]
                     if temp is None:
-                                vanMon = mtd['Mon']
-                                RenameWorkspace(InputWorkspace=vanMon,OutputWorkspace="vanMon")
-                                vanMon = mtd['vanMon']
                                 bkgRun = self._loadData(bkgRun, "", SUFFIX, (0., 0.))
-                                temp = mtd['Mon']
-                                vanMon /= temp
-                                # Keep units of Counts
-                                vanMon.setYUnit("")
-                                Multiply(LHSWorkspace=bkgRun, RHSWorkspace=vanMon, OutputWorkspace=bkgRun, AllowDifferentNumberSpectra=1)
-                                mtd.deleteWorkspace('Mon')
-                                mtd.deleteWorkspace('vanMon')
-                                mtd.releaseFreeMemory()
                     else:
                                 bkgRun = temp
                 else:
@@ -266,9 +257,6 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             for bank in Banks:
                 # first round of processing the sample
                 samRun = self._loadData(samRunnum, bank, SUFFIX, filterWall)
-                samMon = mtd['Mon']
-                RenameWorkspace(InputWorkspace=samMon,OutputWorkspace="samMon")
-                samMon = mtd['samMon']
 
                 # process the background
                 bkgRun = self.getProperty("BackgroundNumber")
@@ -276,13 +264,6 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                     temp = mtd["%s_%d" % (self._instrument, bkgRun)]
                     if temp is None:
                                 bkgRun = self._loadData(bkgRun, bank, SUFFIX, (0., 0.))
-                                temp = mtd['Mon']
-                                temp /= samMon
-                                # Keep units of Counts
-                                temp.setYUnit("")
-                                Divide(LHSWorkspace=bkgRun, RHSWorkspace=temp, OutputWorkspace=bkgRun, AllowDifferentNumberSpectra=1)
-                                mtd.deleteWorkspace('Mon')
-                                mtd.releaseFreeMemory()
                     else:
                                 bkgRun = temp
                 else:
@@ -310,14 +291,11 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
 
                 # write out the files
                 # scale data so fitting routines do not run out of memory
-                samMon /= 1e8
-                samRun /= samMon
                 samRun = self._bin(samRun)
                 mtd.releaseFreeMemory()
                 self._save(samRun, normalized)
                 if self._outTypes is not '':
                     mtd.deleteWorkspace(str(samRun))
-                mtd.deleteWorkspace('samMon')
                 mtd.releaseFreeMemory()
             peaksWS = mtd['Peaks']
             try:

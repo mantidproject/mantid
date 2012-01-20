@@ -728,7 +728,7 @@ public slots:
   //! Connected to the context menu signal from lv; it's called when there are no items selected in the list
   void showListViewPopupMenu(const QPoint &p);
 
-  void showScriptWindow(bool forceVisible = false);
+  void showScriptWindow(bool forceVisible = false, bool quitting = false);
   void saveScriptWindowGeometry();
   void showScriptInterpreter();
   bool testForIPython();

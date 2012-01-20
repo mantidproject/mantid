@@ -126,35 +126,8 @@ namespace MDEvents
 
     // Do we split more due to MinRecursionDepth?
     int minDepth = this->getProperty("MinRecursionDepth");
-    double numBoxes = pow(double(bc->getNumSplit()), double(minDepth));
-    double memoryToUse = numBoxes * double(sizeof(MDBox<MDE,nd>)) / 1024.0;
-    MemoryStats stats;
-    if (double(stats.availMem()) < memoryToUse)
-    {
-      g_log.error() << "MinRecursionDepth is set to " << minDepth << ", which would create " << numBoxes << " boxes using " <<  memoryToUse << " kB of memory."
-          << " You have " << stats.availMem() << " kB available." << std::endl;
-      throw std::runtime_error("Not enough memory available for the given MinRecursionDepth!");
-    }
-
-    for (int depth = 1; depth < minDepth; depth++)
-    {
-      // Get all the MDGridBoxes in the workspace
-      std::vector<IMDBox<MDE,nd>*> boxes;
-      boxes.clear();
-      ws->getBox()->getBoxes(boxes, depth-1, false);
-      for (size_t i=0; i<boxes.size(); i++)
-      {
-        IMDBox<MDE,nd> * box = boxes[i];
-        MDGridBox<MDE,nd>* gbox = dynamic_cast<MDGridBox<MDE,nd>*>(box);
-        if (gbox)
-        {
-          // Split ALL the contents.
-          for (size_t j=0; j<gbox->getNumChildren(); j++)
-            gbox->splitContents(j, NULL);
-        }
-      }
-    }
-
+    if (minDepth<0) throw std::invalid_argument("MinRecursionDepth must be >= 0.");
+    ws->setMinRecursionDepth(size_t(minDepth));
   }
 
 

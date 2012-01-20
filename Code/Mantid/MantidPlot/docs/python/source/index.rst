@@ -16,6 +16,7 @@ Contents
    :maxdepth: 1
 
    api/mantid.rst
+   api/mantidplot.rst
 
 Indices and tables
 ==================

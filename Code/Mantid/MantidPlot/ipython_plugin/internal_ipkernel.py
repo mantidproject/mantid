@@ -10,7 +10,7 @@ The code has been modified slightly to achieve compatiblity with IPython v0.11.
 # Imports
 #-----------------------------------------------------------------------------
 
-from IPython.lib.kernel import connect_qtconsole
+from IPython.lib.kernel import connect_qtconsole, find_connection_file
 from IPython.zmq.ipkernel import IPKernelApp
 
 #-----------------------------------------------------------------------------
@@ -21,11 +21,7 @@ def pylab_kernel(gui):
     """Launch and return an IPython kernel with pylab support for the desired gui
     """
     kernel = IPKernelApp.instance()
-    # Notes: pylab command seems to be needed for event loop to behave nicely
-    #        IPython needs additional mantidsimple import (even if started from a command line)
-    #               - added this to mantidplotrc.py
-    #        Can only %run one file. I think qtiplotrc should go away anyway.
-    #        Weird things happen if I run this under a debug build
+    # Note: pylab command seems to be needed for event loop to behave nicely
     kernel.initialize(['python', '--pylab=%s' % gui,
         "--c='%run -m mantidplotrc'"])
     return kernel
@@ -52,6 +48,20 @@ class InternalIPKernel(object):
 
     def new_qt_console(self, evt=None):
         """start a new qtconsole connected to our kernel"""
+        
+        import sys
+        # We have to step in and cannibalise connect_qtconsole if we're on windows because
+        # it launches sys.executable assuming it'll be python, when in fact it's MantidPlot
+        if sys.platform == 'win32':
+            argv = []
+            cf = find_connection_file(self.ipkernel.connection_file, profile=self.ipkernel.profile)
+            cmd = ';'.join([
+                "from IPython.frontend.qt.console import qtconsoleapp",
+                "qtconsoleapp.main()"
+            ])
+            from subprocess import Popen, PIPE
+            return Popen([sys.exec_prefix+'\pythonw.exe', '-c', cmd, '--existing', cf] + argv, stdout=PIPE, stderr=PIPE)
+        
         return connect_qtconsole(self.ipkernel.connection_file, profile=self.ipkernel.profile)
 
     def cleanup_consoles(self, evt=None):

@@ -73,6 +73,8 @@ namespace MDEvents
     void checkMinMaxNdimConsistent(Mantid::Kernel::Logger& log)const;
     /// the vector of default names for Q-directrions in reciprocal space;
     std::vector<std::string> defailt_qNames;
+    /// the string which describes subalgorithm, used to convert source ws to target MD ws. 
+    std::string AlgID;
 
   }; 
 /** function to build mslice-like axis name from the vector, which describes crystallographic direction along this axis*/

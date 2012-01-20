@@ -62,7 +62,7 @@ class ScriptManagerWidget : public QTabWidget, Scripted
 
 public:
   /// Constructor
-  ScriptManagerWidget(ScriptingEnv *env, QWidget *parent, bool interpreter_mode = false);
+  ScriptManagerWidget(ScriptingEnv *env, QWidget *parent, bool interpreter_mode = false, bool capturePrint = true);
   ///Destructor
   ~ScriptManagerWidget();
   ///Save settings applicable to the manager
@@ -244,6 +244,8 @@ private:
   bool m_interpreter_mode;
   ///list storing the recent scripts
   QStringList m_recentScriptList;
+  /// Flag to indicate whether stdout should be redirected
+  bool m_capturePrint;
   /// enum used for maximum of recent scripts size
   enum {MaxRecentScripts = 5};
 };
@@ -314,7 +316,6 @@ private:
 
   /// If a find is in progress
   bool m_find_inprogress;
-  
 };
 
 

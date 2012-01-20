@@ -202,10 +202,11 @@ namespace MDEventsTestHelper
    * @param numBins :: bins in each dimensions
    * @param max :: max position in each dimension
    * @param errorSquared :: error squared in every point
+   * @param name :: optional name
    * @return the MDHisto
    */
   Mantid::MDEvents::MDHistoWorkspace_sptr makeFakeMDHistoWorkspace(double signal, size_t numDims, size_t numBins,
-      double max, double errorSquared)
+      double max, double errorSquared, std::string name)
   {
     Mantid::MDEvents::MDHistoWorkspace * ws = NULL;
     if (numDims ==1)
@@ -237,6 +238,8 @@ namespace MDEventsTestHelper
     }
     Mantid::MDEvents::MDHistoWorkspace_sptr ws_sptr(ws);
     ws_sptr->setTo(signal, errorSquared);
+    if (!name.empty())
+      AnalysisDataService::Instance().addOrReplace(name, ws_sptr);
     return ws_sptr;
   }
 

@@ -5,9 +5,8 @@ import sys
 import os
 import inspect
 
-# Append the path to the mantid library
+# Append the path to the mantid/mantidplot library
 sys.path.append("@CMAKE_RUNTIME_OUTPUT_DIRECTORY@")
-import mantid
 
 #------------------------------------------------------------------------------
 
@@ -27,7 +26,6 @@ class ClassAPIWriter(object):
     :inherited-members:
 
 """
-    
     def __init__(self, cls, outputdir, extension):
         if not inspect.isclass(cls):
             raise TypeError("Expected class type, found %s" % str(type(cls)))
@@ -41,6 +39,11 @@ class ClassAPIWriter(object):
         
         # FQL name could contain '_cmodule' aswell, strip this off
         modname = self._cls.__module__
+
+        # Hack for replaceing qti reference with mantidplot ref
+        if 'qti' in modname:
+            modname = modname.replace('_qti','mantidplot')
+        # Build up the module name and don't reference the "private" modules
         pieces = modname.split('.')
         fqlmod = ''
         for p in pieces:
@@ -55,26 +58,89 @@ class ClassAPIWriter(object):
         
     def filename(self):
         return self._filename
-
-if __name__ == '__main__':
-    extension = '.rst'
-    apidir = os.path.join(os.path.dirname(__file__), 'api')
-    output_dir = os.path.join(apidir,'generated')
-    if not os.path.exists(output_dir):
-        os.mkdir(output_dir)
+        
+class FunctionAPIWriter(object):
+    """Writes a Sphinx documentation file
+       for a given function
+    """
     
-    indexfilename = os.path.join(apidir, 'autogen.txt')
+    _doc_template = \
+"""%(title)s
+%(underline)s
+
+.. module:`%(modulename)s`
+
+.. autofunction:: %(modulename)s.%(function)s
+
+"""
+    
+    def __init__(self, func, outputdir, extension):
+        if not inspect.isfunction(func):
+            raise TypeError("Expected function type, found %s" % str(type(cls)))
+        self._filename = os.path.join(outputdir, func.__name__ + extension)
+        self._func = func
+        
+    def write(self):
+        rstfile = open(self._filename, 'w')
+        funcname = self._func.__name__
+        underline = '='*len(funcname) # Sphinx doesn't like the title underline being incorrect
+        # FQL name could contain '_cmodule' aswell, strip this off
+        modname = self._func.__module__
+        # Hack for replaceing qti reference with mantidplot ref
+        if 'qti' in modname:
+            modname = modname.replace('_qti','mantidplot')
+        
+        # Write the file
+        rstfile.write(self._doc_template % {'title':funcname, 'underline':underline,\
+					    'modulename':modname,'function':funcname})
+        rstfile.close()
+        
+    def filename(self):
+        return self._filename
+
+
+def generate_api_doc(module, indexfilename):
+    """Write the sphinx doc files for a given module
+    
+        @param module - The module object
+        @param indexfilename - A file that will contain an index list of the given files
+    """
+    
     indexfile = open(indexfilename, 'w')
     indexfile.write(".. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n")
     indexfile.write(".. toctree::\n\n")
 
-    print "Generating API docs"
-    for name, member in inspect.getmembers(mantid):
+    print "Generating %s API docs" % module.__name__
+    for name, member in inspect.getmembers(module):
+	if name.startswith("_"): continue
         if inspect.isclass(member):
             apiwriter = ClassAPIWriter(member, output_dir, extension)
+        elif inspect.isfunction(member):
+            apiwriter = FunctionAPIWriter(member, output_dir, extension)
         else:
             continue
         apiwriter.write()
         indexfile.write("   generated/" + os.path.basename(apiwriter.filename()) + "\n")
     indexfile.close()
-    print "Completed autogenerating API docs"
+    print "Done generating API %s docs" % module.__name__
+
+if __name__ == '__main__':
+    extension = '.rst'
+    apidir = os.path.join(os.path.dirname(__file__), 'source','api')
+    output_dir = os.path.join(apidir,'generated')
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
+
+    import mantid
+    indexfilename = os.path.join(apidir, 'automantid.txt')
+    generate_api_doc(mantid, indexfilename)
+    try:
+        import mantidplot
+        indexfilename = os.path.join(apidir, 'automantidplot.txt')
+        generate_api_doc(mantidplot, indexfilename)
+    except:
+        import warnings
+        warnings.warn("Unable to import mantidplot. No api documentation will be generated for MantidPlot")
+
+
+    

@@ -41,11 +41,11 @@ class ReactorSANSResolution(PythonAlgorithm):
         # All distances in mm
         wvl = None
         if input_ws.getRun().hasProperty("wavelength"):            
-            wvl = input_ws.getRun().hasProperty("wavelength")
+            wvl = input_ws.getRun().getProperty("wavelength").value
             
         d_wvl = None
         if input_ws.getRun().hasProperty("wavelength-spread"):            
-            d_wvl = input_ws.getRun().hasProperty("wavelength-spread")
+            d_wvl = input_ws.getRun().getProperty("wavelength-spread").value
         
         source_apert_radius = None
         if input_ws.getRun().hasProperty("source-aperture-diameter"):
@@ -74,7 +74,7 @@ class ReactorSANSResolution(PythonAlgorithm):
             res_factor += math.pow(k*pixel_size_x/sample_detector_distance, 2)/12.0
             
             for i in range(len(output_ws.readX(0))):
-                 output_ws.dataDx(0)[i] = math.sqrt(res_factor+math.pow((output_ws.readX(0)[i]*d_wvl/wvl), 2)/6.0)       
+                 output_ws.dataDx(0)[i] = math.sqrt(res_factor+math.pow((output_ws.readX(0)[i]*d_wvl), 2)/6.0)       
         else:
             raise RuntimeError, "ReactorSANSResolution could not find all the run parameters needed to compute the resolution."
 

@@ -129,7 +129,7 @@ void testInit(){
     TS_ASSERT_THROWS_NOTHING( pAlg->initialize() )
     TS_ASSERT( pAlg->isInitialized() )
 
-    TSM_ASSERT_EQUALS("algortithm should have 13 propeties",13,(size_t)(pAlg->getProperties().size()));
+    TSM_ASSERT_EQUALS("algortithm should have 14 propeties",14,(size_t)(pAlg->getProperties().size()));
 }
 // TEST QMode
 void testParseQMode_WrongThrows()
@@ -346,19 +346,19 @@ void testParseConv_ByTOF()
 void testNeedsNumericAxis(){
     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::Create2DWorkspace(4,10);
     ws2D->replaceAxis(0,new API::TextAxis(3));
-    std::vector<std::string> dim_names;
+    std::vector<std::string> dim_ID;
     std::vector<std::string> dim_units;
-    TS_ASSERT_THROWS(pAlg->identifyMatrixAlg(ws2D,"QhQkQl","",dim_names,dim_units),std::invalid_argument);
+    TS_ASSERT_THROWS(pAlg->identifyMatrixAlg(ws2D,"QhQkQl","",dim_ID,dim_units),std::invalid_argument);
 }
 void testGetWS4DimIDFine(){
     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4,10,true);
 
-    std::vector<std::string> dim_names;
+    std::vector<std::string> dim_ID;
     std::vector<std::string> dim_units;
     std::string Alg_ID;
-    TS_ASSERT_THROWS_NOTHING(Alg_ID=pAlg->identifyMatrixAlg(ws2D,"QhQkQl","Direct",dim_names,dim_units));
+    TS_ASSERT_THROWS_NOTHING(Alg_ID=pAlg->identifyMatrixAlg(ws2D,"QhQkQl","Direct",dim_ID,dim_units));
 
-    TSM_ASSERT_EQUALS("Inelastic workspace will produce 4 dimensions",4,dim_names.size());
+    TSM_ASSERT_EQUALS("Inelastic workspace will produce 4 dimensions",4,dim_ID.size());
     TSM_ASSERT_EQUALS("Last dimension of Inelastic transformation should be DeltaE","DeltaE",dim_units[3]);
     TSM_ASSERT_EQUALS("Alg ID would be: ","WS2DQhQkQlDirectCnvNo",Alg_ID);
 }
@@ -370,12 +370,12 @@ void testGetWS3DimIDFine(){
     ws2D->replaceAxis(0,pAx);
 
 
-    std::vector<std::string> dim_names;
+    std::vector<std::string> dim_ID;
     std::vector<std::string> dim_units;
     std::string Alg_ID;
-    TS_ASSERT_THROWS_NOTHING(Alg_ID=pAlg->identifyMatrixAlg(ws2D,"QhQkQl","Elastic",dim_names,dim_units));
+    TS_ASSERT_THROWS_NOTHING(Alg_ID=pAlg->identifyMatrixAlg(ws2D,"QhQkQl","Elastic",dim_ID,dim_units));
 
-    TSM_ASSERT_EQUALS("Inelastic workspace will produce 3 dimensions",3,dim_names.size());
+    TSM_ASSERT_EQUALS("Inelastic workspace will produce 3 dimensions",3,dim_ID.size());
     TSM_ASSERT_EQUALS("Last dimension of Elastic transformation should be ","Momentum",dim_units[2]);
     TSM_ASSERT_EQUALS("Alg ID would be: ","WS2DQhQkQlElasticCnvByTOF",Alg_ID);
 
@@ -393,14 +393,14 @@ void testGetWSDimNames2AxisNoQ(){
     pAx->setUnit("QSquared");
     ws2D->replaceAxis(1,pAx);
 
-    std::vector<std::string> dim_names;
+    std::vector<std::string> dim_ID;
     std::vector<std::string> dim_units;
     std::string AlgID;
-    TS_ASSERT_THROWS_NOTHING(AlgID=pAlg->identifyMatrixAlg(ws2D,"","",dim_names,dim_units));
+    TS_ASSERT_THROWS_NOTHING(AlgID=pAlg->identifyMatrixAlg(ws2D,"","",dim_ID,dim_units));
 
-    TS_ASSERT_EQUALS(2,dim_names.size());
-    TS_ASSERT_EQUALS("Dim1",dim_names[0]);
-    TS_ASSERT_EQUALS("Dim2",dim_names[1]);
+    TS_ASSERT_EQUALS(2,dim_ID.size());
+    TS_ASSERT_EQUALS("Dim1",dim_ID[0]);
+    TS_ASSERT_EQUALS("Dim2",dim_ID[1]);
 
     TS_ASSERT_EQUALS(2,dim_units.size());
     TS_ASSERT_EQUALS("dSpacing",dim_units[0]);

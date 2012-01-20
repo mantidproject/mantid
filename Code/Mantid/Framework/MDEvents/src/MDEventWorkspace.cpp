@@ -18,6 +18,7 @@
 #include <iomanip>
 #include <functional>
 #include "MantidMDEvents/MDBoxIterator.h"
+#include "MantidKernel/Memory.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -121,6 +122,56 @@ namespace MDEvents
   uint64_t MDEventWorkspace)::getNPoints() const
   {
     return data->getNPoints();
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /** Recurse box structure down to a minimum depth.
+   *
+   * This will split all boxes so that all MDBoxes are at the depth indicated.
+   * 0 = no splitting, 1 = one level of splitting, etc.
+   *
+   * WARNING! This should ONLY be called before adding any events to a workspace.
+   *
+   * WARNING! Be careful using this since it can quickly create a huge
+   * number of boxes = (SplitInto ^ (MinRercursionDepth * NumDimensions))
+   *
+   * @param minDepth :: minimum recursion depth.
+   * @throw std::runtime_error if there is not enough memory for the boxes.
+   */
+  TMDE(
+  void MDEventWorkspace)::setMinRecursionDepth(size_t minDepth)
+  {
+    BoxController_sptr bc = this->getBoxController();
+    double numBoxes = pow(double(bc->getNumSplit()), double(minDepth));
+    double memoryToUse = numBoxes * double(sizeof(MDBox<MDE,nd>)) / 1024.0;
+    MemoryStats stats;
+    if (double(stats.availMem()) < memoryToUse)
+    {
+      std::ostringstream mess;
+      mess << "Not enough memory available for the given MinRecursionDepth! "
+           << "MinRecursionDepth is set to " << minDepth << ", which would create " << numBoxes << " boxes using " <<  memoryToUse << " kB of memory."
+           << " You have " << stats.availMem() << " kB available." << std::endl;
+      throw std::runtime_error(mess.str());
+    }
+
+    for (size_t depth = 1; depth < minDepth; depth++)
+    {
+      // Get all the MDGridBoxes in the workspace
+      std::vector<IMDBox<MDE,nd>*> boxes;
+      boxes.clear();
+      this->getBox()->getBoxes(boxes, depth-1, false);
+      for (size_t i=0; i<boxes.size(); i++)
+      {
+        IMDBox<MDE,nd> * box = boxes[i];
+        MDGridBox<MDE,nd>* gbox = dynamic_cast<MDGridBox<MDE,nd>*>(box);
+        if (gbox)
+        {
+          // Split ALL the contents.
+          for (size_t j=0; j<gbox->getNumChildren(); j++)
+            gbox->splitContents(j, NULL);
+        }
+      }
+    }
   }
 
 

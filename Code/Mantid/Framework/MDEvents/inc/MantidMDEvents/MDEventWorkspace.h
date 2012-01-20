@@ -86,11 +86,13 @@ namespace MDEvents
 
     virtual void splitAllIfNeeded(Kernel::ThreadScheduler * ts);
 
-    virtual  void splitBox();
+    virtual void splitBox();
 
-    virtual  void refreshCache();
+    virtual void refreshCache();
 
     std::string getEventTypeName() const;
+
+    virtual void setMinRecursionDepth(size_t minDepth);
 
     //------------------------ (END) IMDEventWorkspace Methods -----------------------------------------
 
