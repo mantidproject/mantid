@@ -2258,7 +2258,7 @@ void SANSRunWindow::handleDefSaveClick()
   const QString fileBase = m_uiForm.outfile_edit->text();
   if (fileBase.isEmpty())
   {
-    QMessageBox::warning(this, "Filename required", "A filename must be entred into the text box above to save this file");
+    QMessageBox::warning(this, "Filename required", "A filename must be entered into the text box above to save this file");
   }
 
   const QStringList algs(getSaveAlgs());
@@ -2277,7 +2277,7 @@ void SANSRunWindow::handleDefSaveClick()
     QMessageBox::critical(this, "Error saving workspace", "Problem encountered saving workspace, does it still exist. There may be more information in the results console?");
   }
 
-  runPythonCode(saveCommand);
+//  runPythonCode(saveCommand);
 }
 /**
  * Set up controls based on the users selection in the combination box
