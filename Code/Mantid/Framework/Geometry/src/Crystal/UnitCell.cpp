@@ -90,6 +90,14 @@ namespace Geometry
   {
     return da[2];
   }
+/** Get lattice parameter a1-a3 as function of index (0-2)
+  @return a_n :: lattice parameter \f$ a,b or c \f$ (in \f$ \mbox{\AA} \f$ )
+  */ 
+  double UnitCell::a(int nd)const
+  {
+      if(nd<0||nd>2)throw(std::invalid_argument("lattice parameter index can change from 0 to 2 "));
+      return da[nd];
+  }
 
   /** Get lattice parameter
   @return alpha1 :: lattice parameter \f$ \alpha \f$ (in radians)

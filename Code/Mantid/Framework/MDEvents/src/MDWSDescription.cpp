@@ -38,6 +38,7 @@ dim_max(nDimesnions,1),
 dim_names(nDimesnions,"mdn"),
 dim_IDs(nDimesnions,"mdn_"),
 dim_units(nDimesnions,"Momentum"),
+convert_to_hkl(false),
 u(1,0,0),
 v(0,1,0),
 is_uv_default(true),
@@ -49,6 +50,13 @@ defailt_qNames(3)
     defailt_qNames[0]="Qh";
     defailt_qNames[1]="Qk";
     defailt_qNames[2]="Ql";
+
+}
+std::string DLLExport sprintfd(const double data, const double eps)
+{
+     // truncate to eps decimal points
+     float dist = float((int(data/eps+0.5))*eps);
+     return boost::str(boost::format("%d")%dist);
 
 }
 
@@ -70,9 +78,7 @@ std::string makeAxisName(const Kernel::V3D &Dir,const std::vector<std::string> &
             name+=QNames[i]+separator;
             continue;
         }
-        // truncate to eps decimal points
-        dist = float(int(dist/eps+0.5))*eps;
-        name+= boost::str(boost::format("%d")%dist)+QNames[i]+separator;
+        name+= sprintfd(dist,eps)+QNames[i]+separator;
     }
 
     return name;

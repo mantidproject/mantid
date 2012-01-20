@@ -73,6 +73,7 @@ namespace Geometry
       double alpha2() const;
       double alpha3() const;
       // Direct lattice parameters, angle in degrees.
+      double a(int nd)const;    // get lattice parameter as function of index (0-2)
       double a() const;    
       double b() const;
       double c() const;
