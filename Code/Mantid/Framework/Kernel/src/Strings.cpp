@@ -956,7 +956,10 @@ template MANTID_KERNEL_DLL int convert(const char*,std::size_t&);
 template MANTID_KERNEL_DLL std::string toString(const double value);
 template MANTID_KERNEL_DLL std::string toString(const int value);
 template MANTID_KERNEL_DLL std::string toString(const uint16_t value);
-template MANTID_KERNEL_DLL std::string toString(const size_t value);
+template MANTID_KERNEL_DLL std::string toString(const size_t value); // Matches uint64_t on Linux & Win
+#ifdef __APPLE__
+  template MANTID_KERNEL_DLL std::string toString(const uint64_t value);
+#endif
 template MANTID_KERNEL_DLL std::string toString(const std::string value);
 
 template MANTID_KERNEL_DLL int convPartNum(const std::string&,double&);
