@@ -1,0 +1,22 @@
+#PBS -A CSC035
+#PBS -N Mantid_CNCS_mpi_example
+#PBS -j oe
+#PBS -l walltime=00:10:00
+#PBS -l nodes=2:ppn=16
+# Email when it ends #PBS -m e
+
+module load hdf5
+module load ompi/1.4.3-gnu4.4.4
+module load gcc/4.4.4
+
+# Setup environment to point to home directory
+export PATH=$HOME/bin:$PATH
+export LD_LIBRARY_PATH=$HOME/lib:$LD_LIBRARY_PATH
+export PYTHONPATH=$HOME/lib/python2.7/site-packages/
+
+echo $LD_LIBRARY_PATH
+
+cd /ccs/home/8oz/Code/Mantid/Code/Mantid/Framework/MPIAlgorithms/scripts
+export MANTIDPATH=$HOME/Code/Mantid/framework/bin 
+export PYTHONPATH=$MANTIDPATH 
+mpirun ~/bin/python2.7 CNCS_mpi_example.py
