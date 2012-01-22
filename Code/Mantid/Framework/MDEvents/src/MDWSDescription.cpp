@@ -42,7 +42,8 @@ convert_to_hkl(false),
 u(1,0,0),
 v(0,1,0),
 is_uv_default(true),
-defailt_qNames(3)
+defailt_qNames(3),
+detInfoLost(false)
 {
     for(size_t i=0;i<nDimesnions;i++){
         dim_IDs[i]= dim_IDs[i]+boost::lexical_cast<std::string>(i);

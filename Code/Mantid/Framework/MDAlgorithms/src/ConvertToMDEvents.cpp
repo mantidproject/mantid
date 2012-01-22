@@ -197,7 +197,7 @@ ConvertToMDEvents::init()
      declareProperty("QDimensions",Q_modes[NoQ],new ListValidator(Q_modes),
          "You can to transfer source workspace dimensions into target workspace directly """" (NoQ), transform into mod(Q) (1 dimension) or QhQkQl (3 dimensions) in Q space",Direction::InOut);        
      // this switch allows to make units expressed in HKL, hkl is currently not supported by units conversion so the resulting workspace can not be subject to unit conversion
-     declareProperty(new PropertyWithValue<bool>("QinHKL", false, Direction::Input),
+     declareProperty(new PropertyWithValue<bool>("QinHKL", true, Direction::Input),
          " Setting this property to true will normalize three momentums obtained in QhQkQl mode by reciprocal lattice vectors 2pi/a,2pi/b and 2pi/c\n"
          " ignored in mod|Q| and NoQ modes and if reciprocal lattice is not defined");
      /// this variable describes implemented modes for energy transfer analysis
@@ -222,9 +222,10 @@ ConvertToMDEvents::init()
     declareProperty(new ArrayProperty<double>("MinValues"),
         "It has to be N comma separated values, where N is defined as: \n"
         "a) 1+N_OtherDimensions if the first dimension (QDimensions property) is equal to |Q| or \n"
-        "b) 3+N_OtherDimensions if the first (3) dimensions (QDimensions property) equal  QxQyQz or \n"
+        "b) 3+N_OtherDimensions if the first (3) dimensions (QDimensions property) equal  QhQkQl or \n"
         "c) (1 or 2)+N_OtherDimesnions if QDimesnins property is emtpty. \n"
         " In case c) the target workspace dimensions are defined by the [[units]] of the input workspace axis.\n\n"
+        " In case b), the target dimensions for QhQkQl are either momentums if QinHKL is false or are momentums divided by correspondent lattice parameters if QinHKL is true\n"
          " This property contains minimal values for all dimensions.\n"
          " Momentum values expected to be in [A^-1] and energy transfer (if any) expressed in [meV]\n"
          " All other values are in the [[units]] they are expressed in their log files\n"
@@ -310,7 +311,7 @@ void ConvertToMDEvents::exec()
     std::string dE_mod_req                   = getProperty("dEAnalysisMode");
     //c) other dim property;
     std::vector<std::string> other_dim_names = getProperty("OtherDimensions");
-    //d) part of the procedure, specifying the target dimensions units. Currently only Q3D target units can be converted to hkl
+    //d) part of the procedure, specifying the target dimensions units. Currently only Q3D target units be converted to hkl
     bool convert_to_hkl                      = getProperty("QinHKL");
 
     // Identify the algorithm to deploy and identify/set the (multi)dimension's names to use
@@ -330,12 +331,21 @@ void ConvertToMDEvents::exec()
     throw(Kernel::Exception::NotImplementedError("Adding to existing MD workspace not Yet Implemented"));
   }
 
-  bool reuse_preprocecced_detectors = getProperty("UsePreprocessedDetectors");
-  if(!(reuse_preprocecced_detectors&&det_loc.is_defined(inWS2D))){
+
+  if(TWS.detInfoLost){ // in NoQ mode one can not have DetPositions any more. Neither this information is needed for anything except data conversion interface. 
+      buildFakeDetectorsPositions(inWS2D,det_loc);
+  }else{
+    bool reuse_preprocecced_detectors = getProperty("UsePreprocessedDetectors");
+    if(!(reuse_preprocecced_detectors&&det_loc.isDefined(inWS2D))){
       // amount of work:
       const size_t nHist = inWS2D->getNumberHistograms();
       pProg = std::auto_ptr<API::Progress >(new API::Progress(this,0.0,1.0,nHist));
       processDetectorsPositions(inWS2D,det_loc,convert_log,pProg.get());
+      if(det_loc.det_id.empty()){
+          g_log.error()<<" no valid detectors identified associated with spectra, nothing to do\n";
+          throw(std::invalid_argument("no valid detectors indentified associated with any spectra"));
+      }
+    }
   }
 
   if(create_new_ws)
@@ -355,7 +365,7 @@ void ConvertToMDEvents::exec()
   // Do we split more due to MinRecursionDepth?
     int minDepth = this->getProperty("MinRecursionDepth");
     int maxDepth = this->getProperty("MaxRecursionDepth");
-    if (minDepth<maxDepth) throw std::invalid_argument("MinRecursionDepth must be >= MaxRecursionDepth and ");
+    if (minDepth>maxDepth) throw std::invalid_argument("MinRecursionDepth must be >= MaxRecursionDepth and ");
     spws->setMinRecursionDepth(size_t(minDepth));  
   }
 
@@ -392,12 +402,13 @@ void ConvertToMDEvents::exec()
   * @param inMatrixWS -- const pointer to const matrix workspace, which provides information about availible axis
   * @param Q_mode_req     -- what to do with Q-dimensions e.g. calculate either mod|Q| or Q3D;
   * @param dE_mode_req    -- desirable dE analysis mode (elastic, direct/indirect)
-  * @param out_dim_IDs   -- the vector of strings, with each string identify the dimensions ID-s, derived from current workspace by the algorithm
-  * @param out_dim_units -- vector of units for target workspace, if inelastic, one of the dimension units have to be DeltaE
+  * @return out_dim_IDs        -- the vector of strings, with each string identify the dimensions ID-s, derived from current workspace by the algorithm
+  * @return out_dim_units      -- vector of units for target workspace, if inelastic, one of the dimension units have to be DeltaE
+  * @return is_det_info_lost   -- if Y axis of matix workspace contains some meaningful info, the detector information is certainly lost. 
 */
 std::string 
 ConvertToMDEvents::identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS, const std::string &Q_mode_req, const std::string &dE_mode_req,
-                                     Strings &out_dim_IDs,Strings &out_dim_units)
+                                     Strings &out_dim_IDs,Strings &out_dim_units, bool &is_detector_information_lost)
 {
 
     // dimension names present in input workspace
@@ -417,11 +428,14 @@ ConvertToMDEvents::identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS,
         ws_dim_units.push_back(Dim1Unit);
     }
     // get optional Y axis which can be used in NoQ-kind of algorithms
+    is_detector_information_lost= false;
     API::NumericAxis *pYAxis = dynamic_cast<API::NumericAxis *>(inMatrixWS->getAxis(1));
     if(pYAxis){
         std::string Dim2Unit = pYAxis->unit()->unitID();
         ws_dim_names.push_back(pYAxis->title());
         ws_dim_units.push_back(Dim2Unit);
+        // if this is numeric axis, then the detector's information has been lost:
+        is_detector_information_lost=true;
     }          
 
 
@@ -548,7 +562,8 @@ ConvertToMDEvents::parseDEMode(const std::string &Q_MODE_ID,const std::string &d
   *@param nQ_dims [out]       -- number of Q or other dimensions. When converting into Q, it is 1 or 3 dimensions, if NoQ -- workspace dimensions are copied.
 */
 std::string 
-ConvertToMDEvents::parseQMode(const std::string &Q_mode_req,const Strings &ws_dim_names,const Strings &ws_dim_units,Strings &out_dim_ID,Strings &out_dim_units, int &nQ_dims)
+ConvertToMDEvents::parseQMode(const std::string &Q_mode_req,const Strings &ws_dim_names,const Strings &ws_dim_units,Strings &out_dim_ID,Strings &out_dim_units, 
+                              int &nQ_dims)
 {
     std::string Q_MODE_ID("Unknown");
     if(is_member(Q_modes,Q_mode_req)<0){
@@ -635,9 +650,10 @@ ConvertToMDEvents::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS,const std
    Strings dim_IDs_requested,dim_units_requested;
    Strings ws_dim_IDs,ws_dim_units;
    std::string the_algID;
+   bool is_detector_info_lost;
 
    // identify the matrix conversion part of subalgorithm as function of user input and workspace Matrix parameters (axis)
-   the_algID = identifyMatrixAlg(inWS, Q_mode_req, dE_mode_req,ws_dim_IDs,ws_dim_units);
+   the_algID = identifyMatrixAlg(inWS, Q_mode_req, dE_mode_req,ws_dim_IDs,ws_dim_units,is_detector_info_lost);
    if(the_algID.find("Unknown")!=std::string::npos){
        convert_log.error()<<" Input parameters indentify uncomplete algorithm ID: "<<the_algID<<std::endl;
        throw(std::logic_error("can not parse input parameters propertly"));
@@ -673,7 +689,7 @@ ConvertToMDEvents::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS,const std
         convert_log.error()<<"Algorithm with ID:"<<the_algID<<" should produce at least 3 dimensions and it requested to provie just:"<<nDims<<" dims \n";
         throw(std::logic_error("can not parse input parameters propertly"));
     }
-    // we have currenlty instanciated only N input dimensions. See algorithm constructor to change that. 
+    // we have can currenlty instanciate only N input dimensions. See the wsWrapper constructor to change that. 
     if(nDims>pWSWrapper->getMaxNDim()){
         convert_log.error()<<"Can not currently deal with more then: "<<pWSWrapper->getMaxNDim()<< " dimesnions, but requested: "<<nDims<<std::endl;
         throw(std::invalid_argument(" Too many dimensions requested "));
@@ -695,11 +711,18 @@ ConvertToMDEvents::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS,const std
         }
         TargWSDescription.Ei = getEi(this);
     }
+    // detector information can be currently lost in NoQ mode only, when no conversion from detectors position to Q occurs
+    if(is_detector_info_lost && emode!=-1){
+        convert_log.error()<<" Algorithm with ID: "<<the_algID<<" emode: "<<emode<<" request workspace with isntrument and full detectord information attached\n"
+                           <<" but the detector information on input workspace has been lost\n";
+        throw(std::invalid_argument(" input workspace do not have full detector information attached to it"));
+    }
    
  
     // set up the target workspace description;
     TargWSDescription.n_dims          = nDims;
     TargWSDescription.emode           = emode;
+    TargWSDescription.detInfoLost     = is_detector_info_lost;
     TargWSDescription.convert_to_hkl  = convert_to_hkl;
     TargWSDescription.dim_names       = dim_IDs_requested;
     TargWSDescription.dim_IDs         = dim_IDs_requested;

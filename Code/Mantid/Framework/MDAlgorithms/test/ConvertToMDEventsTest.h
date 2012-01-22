@@ -37,7 +37,8 @@ public:
     }
     std::string identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS,const std::string &Q_mode_req, const std::string &dE_mode_req,
                                   std::vector<std::string> &outws_dim_names,std::vector<std::string> &outws_dim_units){
-        return ConvertToMDEvents::identifyMatrixAlg(inMatrixWS,Q_mode_req, dE_mode_req,outws_dim_names,outws_dim_units);
+        bool is_detInfoDefined;
+        return ConvertToMDEvents::identifyMatrixAlg(inMatrixWS,Q_mode_req, dE_mode_req,outws_dim_names,outws_dim_units,is_detInfoDefined);
     }
     //
     std::string parseQMode(const std::string &Q_mode_req,const std::vector<std::string> &ws_dim_names,const std::vector<std::string> &ws_dim_units,
