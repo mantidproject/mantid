@@ -468,12 +468,22 @@ class Mask_ISIS(sans_reduction_steps.Mask):
         self.spec_mask_r=specmask_r
         self.spec_mask_f=specmask_f
 
-        self.mask_phi = True
+        # as far as I can used to possibly set phi masking
+        # not to be applied even though _lim_phi_xml has been set
+        self.mask_phi = True 
         self.phi_mirror = True
         self._lim_phi_xml = ''
         self.phi_min = -90.0
         self.phi_max = 90.0
-        self._readonly_phi = False
+        # read only phi (only used in set_phi_limit...)
+        # this option seems totally bizarre to me since it allow
+        # set_phi_limit to be called but not setting the _lim_phi_xml
+        # string.....
+        self._readonly_phi = False  
+        # used to assess if set phi limit has been called just once
+        # in which case exactly one phi range has been masked
+        # and get_phi_limits  
+        self._numberOfTimesSetPhiLimitBeenCalled = 0
         self.spec_list = []
         
         #is set when there is an arm to mask, it's the width in millimetres
@@ -678,6 +688,17 @@ class Mask_ISIS(sans_reduction_steps.Mask):
                                                [math.cos(angle*math.pi/180.0),math.sin(angle*math.pi/180.0),0.0], "arm")
 
 
+    def get_phi_limits_tag(self):
+        """
+            Get the values of the lowest and highest boundaries
+            Used to append to output workspace name
+            @return 'Phi'low'_'high if it has been set
+        """
+        if self.mask_phi and self._lim_phi_xml != '' :
+          return 'Phi'+str(self.phi_min)+'_'+str(self.phi_max)
+        else:
+          return ''
+    
     def normalizePhi(self, phi):
         if phi > 90.0:
             phi -= 180.0
@@ -688,6 +709,16 @@ class Mask_ISIS(sans_reduction_steps.Mask):
         return phi
 
     def set_phi_limit(self, phimin, phimax, phimirror, override=True):
+        '''
+            ...
+            @param phimin:  
+            @param phimax:            
+            @param phimirror: 
+            @param override: This one I don't understand. It seem 
+               dangerous to be allowed to set this one to false.
+               Also this option cannot be set from the command interface
+            @return: return xml shape string
+        '''        
         if phimirror :
             if phimin > phimax:
                 phimin, phimax = phimax, phimin
