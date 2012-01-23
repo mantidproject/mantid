@@ -132,7 +132,7 @@ public:
 
     if (rhs)
     {
-      if (rhs != this)
+      if (this->operator!=(*rhs))
       {
         //Concatenate the maps!
         m_propertySeries.insert(rhs->m_propertySeries.begin(), rhs->m_propertySeries.end());
@@ -150,6 +150,46 @@ public:
       g_log.warning() << "TimeSeriesProperty " << this->name() << " could not be added to another property of the same name but incompatible type.\n";
 
     return *this;
+  }
+
+  /**
+   * Deep comparison.
+   * @param right The other property to compare to.
+   * @return true if the are equal.
+   */
+  virtual bool operator==( const TimeSeriesProperty & right )
+  {
+    if (this->name() != right.name()) // should this be done?
+      return false;
+
+    if (this->m_size != right.m_size)
+      return false;
+
+    { // so vectors can go out of scope
+      std::vector<DateAndTime> lhsTimes = this->timesAsVector();
+      std::vector<DateAndTime> rhsTimes = right.timesAsVector();
+      if (!std::equal(lhsTimes.begin(), lhsTimes.end(), rhsTimes.begin()))
+        return false;
+    }
+
+    { // so vectors can go out of scope
+      std::vector<TYPE> lhsValues = this->valuesAsVector();
+      std::vector<TYPE> rhsValues = right.valuesAsVector();
+      if (!std::equal(lhsValues.begin(), lhsValues.end(), rhsValues.begin()))
+        return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Deep comparison.
+   * @param right The other property to compare to.
+   * @return true if the are not equal.
+   */
+  virtual bool operator!=(const TimeSeriesProperty & right )
+  {
+    return !(*this == right);
   }
 
   /*
