@@ -83,12 +83,12 @@ public:
   {
     SlicingAlgorithmImpl alg; alg.m_inWS = ws;
     TSM_ASSERT_THROWS_NOTHING("", alg.makeAlignedDimensionFromString("Axis2, 1.0, 9.0, 10"));
-    TS_ASSERT_EQUALS( alg.dimensionToBinFrom.size(), 1);
-    TS_ASSERT_EQUALS( alg.binDimensions.size(), 1);
+    TS_ASSERT_EQUALS( alg.m_dimensionToBinFrom.size(), 1);
+    TS_ASSERT_EQUALS( alg.m_binDimensions.size(), 1);
 
-    TS_ASSERT_EQUALS( alg.dimensionToBinFrom[0], 2);
+    TS_ASSERT_EQUALS( alg.m_dimensionToBinFrom[0], 2);
 
-    IMDDimension_sptr dim = alg.binDimensions[0];
+    IMDDimension_sptr dim = alg.m_binDimensions[0];
     TS_ASSERT_EQUALS( dim->getName(), "Axis2");
     TS_ASSERT_EQUALS( dim->getUnits(), "m");
     TS_ASSERT_EQUALS( dim->getNBins(), 10);
@@ -125,15 +125,15 @@ public:
         do_createAlignedTransform("Axis0, 2.0,8.0, 6", "Axis1, 2.0,8.0, 3", "Axis2, 2.0,8.0, 3", "");
 
     TS_ASSERT_EQUALS(alg->m_bases.size(), 3);
-    TS_ASSERT_EQUALS(alg->binDimensions.size(), 3);
+    TS_ASSERT_EQUALS(alg->m_binDimensions.size(), 3);
 
     TS_ASSERT_EQUALS( alg->m_bases[0], VMD(1,0,0) );
     TS_ASSERT_EQUALS( alg->m_bases[1], VMD(0,1,0) );
     TS_ASSERT_EQUALS( alg->m_bases[2], VMD(0,0,1) );
 
-    TS_ASSERT_EQUALS( alg->dimensionToBinFrom[0], 0);
-    TS_ASSERT_EQUALS( alg->dimensionToBinFrom[1], 1);
-    TS_ASSERT_EQUALS( alg->dimensionToBinFrom[2], 2);
+    TS_ASSERT_EQUALS( alg->m_dimensionToBinFrom[0], 0);
+    TS_ASSERT_EQUALS( alg->m_dimensionToBinFrom[1], 1);
+    TS_ASSERT_EQUALS( alg->m_dimensionToBinFrom[2], 2);
 
     coord_t in[3] = {2.5, 3.5, 4.5};
     coord_t out[3];  VMD outV;
@@ -163,15 +163,15 @@ public:
         do_createAlignedTransform("Axis2, 2.0,8.0, 3", "Axis0, 2.0,8.0, 6", "Axis1, 2.0,8.0, 3", "");
 
     TS_ASSERT_EQUALS(alg->m_bases.size(), 3);
-    TS_ASSERT_EQUALS(alg->binDimensions.size(), 3);
+    TS_ASSERT_EQUALS(alg->m_binDimensions.size(), 3);
 
     TS_ASSERT_EQUALS( alg->m_bases[0], VMD(0,0,1) );
     TS_ASSERT_EQUALS( alg->m_bases[1], VMD(1,0,0) );
     TS_ASSERT_EQUALS( alg->m_bases[2], VMD(0,1,0) );
 
-    TS_ASSERT_EQUALS( alg->dimensionToBinFrom[0], 2);
-    TS_ASSERT_EQUALS( alg->dimensionToBinFrom[1], 0);
-    TS_ASSERT_EQUALS( alg->dimensionToBinFrom[2], 1);
+    TS_ASSERT_EQUALS( alg->m_dimensionToBinFrom[0], 2);
+    TS_ASSERT_EQUALS( alg->m_dimensionToBinFrom[1], 0);
+    TS_ASSERT_EQUALS( alg->m_dimensionToBinFrom[2], 1);
 
     coord_t in[3] = {2.5, 3.5, 4.5};
     coord_t out[3];  VMD outV;
@@ -201,9 +201,9 @@ public:
   {
     SlicingAlgorithmImpl * alg = do_createAlignedTransform("Axis0, 2.0,8.0, 6", "", "", "");
     TS_ASSERT_EQUALS( alg->m_bases.size(), 1);
-    TS_ASSERT_EQUALS( alg->binDimensions.size(), 1);
+    TS_ASSERT_EQUALS( alg->m_binDimensions.size(), 1);
     TS_ASSERT_EQUALS( alg->m_bases[0], VMD(1,0,0) );
-    TS_ASSERT_EQUALS( alg->dimensionToBinFrom[0], 0);
+    TS_ASSERT_EQUALS( alg->m_dimensionToBinFrom[0], 0);
 
     coord_t in[3] = {2.5, 3.5, 4.5};
     coord_t out[1];
@@ -279,13 +279,13 @@ public:
     TS_ASSERT_EQUALS(alg.m_bases.size(), 0);
     TSM_ASSERT_THROWS_NOTHING("", alg.makeBasisVectorFromString(" name, units  , 1,2,3, 10.0, 5"));
     TS_ASSERT_EQUALS(alg.m_bases.size(), 1);
-    TS_ASSERT_EQUALS(alg.binDimensions.size(), 1);
+    TS_ASSERT_EQUALS(alg.m_binDimensions.size(), 1);
     TS_ASSERT_EQUALS(alg.m_scaling.size(), 1);
 
     VMD basis(1,2,3);
     basis.normalize();
     TS_ASSERT_EQUALS( alg.m_bases[0], basis );
-    IMDDimension_sptr dim = alg.binDimensions[0];
+    IMDDimension_sptr dim = alg.m_binDimensions[0];
     TS_ASSERT_EQUALS( dim->getName(), "name");
     TS_ASSERT_EQUALS( dim->getUnits(), "units");
     TS_ASSERT_EQUALS( dim->getNBins(), 5);
@@ -334,7 +334,7 @@ public:
 
     TS_ASSERT_EQUALS( alg->m_bases.size(), 3);
     TS_ASSERT_EQUALS( alg->m_origin, VMD(1,1,0));
-    TS_ASSERT_EQUALS( alg->binDimensions.size(), 3);
+    TS_ASSERT_EQUALS( alg->m_binDimensions.size(), 3);
     TS_ASSERT_EQUALS( alg->m_bases[0], baseX);
     TS_ASSERT_EQUALS( alg->m_bases[1], baseY);
     TS_ASSERT_EQUALS( alg->m_bases[2], baseZ);
@@ -394,7 +394,7 @@ public:
 
     TS_ASSERT_EQUALS( alg->m_bases.size(), 3);
     TS_ASSERT_EQUALS( alg->m_origin, VMD(0,0,0));
-    TS_ASSERT_EQUALS( alg->binDimensions.size(), 3);
+    TS_ASSERT_EQUALS( alg->m_binDimensions.size(), 3);
     TS_ASSERT_EQUALS( alg->m_bases[0], baseX);
     TS_ASSERT_EQUALS( alg->m_bases[1], baseY);
     TS_ASSERT_EQUALS( alg->m_bases[2], baseZ);
