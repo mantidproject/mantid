@@ -336,7 +336,7 @@ void ConvertToMDEvents::exec()
   }
 
 
-  if(TWS.detInfoLost){ // in NoQ mode one can not have DetPositions any more. Neither this information is needed for anything except data conversion interface. 
+  if(TWS.detInfoLost){ // in NoQ mode one may not have DetPositions any more. Neither this information is needed for anything except data conversion interface. 
       buildFakeDetectorsPositions(inWS2D,det_loc);
   }else{
     bool reuse_preprocecced_detectors = getProperty("UsePreprocessedDetectors");
@@ -836,8 +836,9 @@ void ConvertToMDEvents::buildDimNames(MDEvents::MDWSDescription &TargWSDescripti
     if(TargWSDescription.AlgID.find(Q_modes[Q3D])!=std::string::npos){
         std::vector<Kernel::V3D> dim_directions(3);
         dim_directions[0]=TargWSDescription.u;
-        dim_directions[1]=TargWSDescription.v;
-        dim_directions[2]=dim_directions[0].cross_prod(dim_directions[1]);
+        dim_directions[2]=TargWSDescription.u.cross_prod(TargWSDescription.v);
+        dim_directions[1]=dim_directions[2].cross_prod(dim_directions[0]);
+
         for(int i=0;i<3;i++){
             TargWSDescription.dim_names[i]=MDEvents::makeAxisName(dim_directions[i],TWS.defailt_qNames);
             if(TargWSDescription.convert_to_hkl){
