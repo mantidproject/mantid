@@ -112,8 +112,11 @@ class DirectEnergyConversion(object):
         whiteintegrals = self.do_white(white, None, None) # No grouping yet
         if 'second_white' in kwargs:
             second_white = kwargs['second_white']
-            other_whiteintegrals = self.do_white(second_white, None, None) # No grouping yet
-            kwargs['second_white'] = other_whiteintegrals
+            if second_white is None:
+                del kwargs['second_white']
+            else:
+                other_whiteintegrals = self.do_white(second_white, None, None) # No grouping yet
+                kwargs['second_white'] = other_whiteintegrals
 
         # Get the background/total counts from the sample if present
         if 'sample' in kwargs:

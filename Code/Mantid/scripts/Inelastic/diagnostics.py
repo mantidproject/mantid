@@ -71,17 +71,15 @@ def diagnose(white_int, **kwargs):
     # Each element is the mask workspace name then the number of failures
     test_results = [ [None, None], [None, None], [None, None], [None, None], [None, None]]
 
-    # Load the hard mask file if necessary
-    hard_mask_spectra = ''
-    if 'hard_mask' in kwargs:
+    # Hard mask
+    hardmask_file = kwargs.get('hard_mask', None)
+    if hardmask_file is not None:
         hard_mask_spectra = common.load_mask(parser.hard_mask)
         test_results[0][0] = os.path.basename(parser.hard_mask)
-
-    # Hard mask
-    masking = MaskDetectors(white_int, SpectraList=hard_mask_spectra)
-    # Find out how many detectors we hard masked
-    hard_mask_spectra = masking['SpectraList'].value
-    test_results[0][1] = len(hard_mask_spectra)
+        masking = MaskDetectors(white_int, SpectraList=hard_mask_spectra)
+        # Find out how many detectors we hard masked
+        hard_mask_spectra = masking['SpectraList'].value
+        test_results[0][1] = len(hard_mask_spectra)
 
     # White beam Test
     __white_masks, num_failed = do_white_test(white_int, parser.tiny, parser.huge, 
