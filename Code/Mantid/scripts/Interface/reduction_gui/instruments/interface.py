@@ -190,6 +190,12 @@ class InstrumentInterface(object):
         for widget in self.widgets:
             widget.is_running(is_running)
         
+    def has_advanced_version(self):
+        """
+            Returns true if the instrument has simple and advanced views
+        """
+        return False
+        
     def reset(self):
         """
             Reset the interface

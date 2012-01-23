@@ -180,6 +180,12 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
                 self.tabWidget.addTab(tab[1], tab[0])
             self._set_window_title()
             
+            # Show the "advanced interface" check box if needed
+            if self._interface.has_advanced_version():
+                self.interface_chk.show()
+            else:
+                self.interface_chk.hide()
+            
             if load_last:
                 self._interface.load_last_reduction()
         else:
@@ -384,6 +390,8 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self.export_button.setEnabled(False)
         self.save_button.setEnabled(False)
         self.interface_chk.setEnabled(False)
+        self.file_menu.setEnabled(False)
+        self.tools_menu.setEnabled(False)
         if IS_IN_MANTIDPLOT:
             _qti.app.mantidUI.setIsRunning(True)
         self._interface.reduce()
@@ -393,6 +401,8 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self.export_button.setEnabled(True)
         self.save_button.setEnabled(True)
         self.interface_chk.setEnabled(True)
+        self.file_menu.setEnabled(True)
+        self.tools_menu.setEnabled(True)
         
     def open_file(self, file_path=None):
         """

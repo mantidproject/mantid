@@ -65,6 +65,12 @@ class DataReflWidget(BaseWidget):
         self.connect(self._summary.plot_tof_btn, QtCore.SIGNAL("clicked()"), self._plot_tof)
         self.connect(self._summary.add_dataset_btn, QtCore.SIGNAL("clicked()"), self._add_data)
         self.connect(self._summary.angle_list, QtCore.SIGNAL("itemSelectionChanged()"), self._angle_changed)
+        self.connect(self._summary.remove_btn, QtCore.SIGNAL("clicked()"), self._remove_item)
+        
+    def _remove_item(self):
+        row = self._summary.angle_list.currentRow()
+        if row>=0:
+            self._summary.angle_list.takeItem(row)
 
     def is_running(self, is_running):
         """
@@ -111,15 +117,16 @@ class DataReflWidget(BaseWidget):
         run_numbers = self._summary.data_run_number_edit.text()
         list_items = self._summary.angle_list.findItems(run_numbers, QtCore.Qt.MatchFixedString)
         if len(list_items)>0:
-            print "Found"
             list_items[0].setData(QtCore.Qt.UserRole, state)
         else:
             item_widget = QtGui.QListWidgetItem(run_numbers, self._summary.angle_list)
             item_widget.setData(QtCore.Qt.UserRole, state)
 
     def _angle_changed(self):
-        state = self._summary.angle_list.currentItem().data(QtCore.Qt.UserRole).toPyObject()
-        self.set_editing_state(state)
+        current_item =  self._summary.angle_list.currentItem()
+        if current_item is not None:
+            state = current_item.data(QtCore.Qt.UserRole).toPyObject()
+            self.set_editing_state(state)
 
     def _check_for_missing_fields(self):
 
@@ -179,6 +186,7 @@ class DataReflWidget(BaseWidget):
 
         if len(state.data_sets)>0:
             self.set_editing_state(state.data_sets[0])
+            self._summary.angle_list.setCurrentRow(0)
 
     def set_editing_state(self, state):
 
@@ -191,6 +199,7 @@ class DataReflWidget(BaseWidget):
         
         #Background flag
         self._summary.data_background_switch.setChecked(state.DataBackgroundFlag)
+        self._data_background_clicked(state.DataBackgroundFlag)
 
         #Background from/to pixels
         self._summary.data_background_from_pixel1.setText(str(state.DataBackgroundRoi[0]))
@@ -208,6 +217,7 @@ class DataReflWidget(BaseWidget):
         self._summary.norm_peak_to_pixel.setText(str(state.NormPeakPixels[1]))
         
         self._summary.norm_background_switch.setChecked(state.NormBackgroundFlag)
+        self._norm_background_clicked(state.NormBackgroundFlag)
 
         self._summary.norm_background_from_pixel1.setText(str(state.NormBackgroundRoi[0]))
         self._summary.norm_background_to_pixel1.setText(str(state.NormBackgroundRoi[1]))

@@ -262,7 +262,7 @@ class Stitcher(object):
         if len(self._data_sets)<2:
             return
         
-        for i in range(self._reference):
+        for i in range(self._reference-1,-1,-1):
             Stitcher.normalize(self._data_sets[i+1], self._data_sets[i])
         for i in range(self._reference,len(self._data_sets)-1):
             Stitcher.normalize(self._data_sets[i], self._data_sets[i+1])
