@@ -5,16 +5,7 @@
 #PBS -l nodes=2:ppn=16
 # Email when it ends #PBS -m e
 
-module load hdf5
-module load ompi/1.4.3-gnu4.4.4
-module load gcc/4.4.4
-
-# Setup environment to point to home directory
-export PATH=$HOME/bin:$PATH
-export LD_LIBRARY_PATH=$HOME/lib:$LD_LIBRARY_PATH
-export PYTHONPATH=$HOME/lib/python2.7/site-packages/
-
-echo $LD_LIBRARY_PATH
+# Make sure your .bash_profile file is set and loads modules esp. gcc/4.4.4
 
 cd /ccs/home/8oz/Code/Mantid/Code/Mantid/Framework/MPIAlgorithms/scripts
 export MANTIDPATH=$HOME/Code/Mantid/framework/bin 
