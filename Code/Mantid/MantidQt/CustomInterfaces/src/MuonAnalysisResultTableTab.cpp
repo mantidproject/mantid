@@ -199,6 +199,7 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QVector<QString>& f
     for( std::vector< Mantid::Kernel::Property * >::const_iterator pItr = logData.begin();
           pItr != pEnd; ++pItr )
     {  
+
       QString logFile(QFileInfo((**pItr).name().c_str()).fileName());
       // Just get the num.series log values
       Mantid::Kernel::TimeSeriesProperty<double> *tspd = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(*pItr);

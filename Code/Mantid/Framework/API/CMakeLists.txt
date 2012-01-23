@@ -230,7 +230,6 @@ set ( TEST_FILES
 	test/ImplicitFunctionParserFactoryTest.h
 	test/InstrumentDataServiceTest.h
 	test/MDGeometryTest.h
-	test/MatrixWorkspaceTest.h
 	test/MemoryManagerTest.h
 	test/MultipleExperimentInfosTest.h
 	test/MultipleFilePropertyTest.h
@@ -255,6 +254,7 @@ set ( TEST_FILES
 set ( GMOCK_TEST_FILES
         test/ImplicitFunctionFactoryTest.h
         test/ImplicitFunctionParameterParserFactoryTest.h
+	test/MatrixWorkspaceTest.h
 )
 
 

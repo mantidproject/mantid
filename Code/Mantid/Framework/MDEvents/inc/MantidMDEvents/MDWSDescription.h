@@ -77,6 +77,8 @@ namespace MDEvents
     std::vector<std::string> defailt_qNames;
     /// the string which describes subalgorithm, used to convert source ws to target MD ws. 
     std::string AlgID;
+    /// shows if workspace still has information about detectors. Some ws (like rebinned one) do not have this information any more. 
+    bool detInfoLost;
 
   }; 
 /** function to build mslice-like axis name from the vector, which describes crystallographic direction along this axis*/

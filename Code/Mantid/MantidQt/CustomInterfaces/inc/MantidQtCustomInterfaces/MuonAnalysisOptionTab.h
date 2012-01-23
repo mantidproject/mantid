@@ -111,6 +111,10 @@ private slots:
   void errorBarsChanged(bool);
   ///
   void toolbarsChanged(bool);
+  ///
+  void validateYMin();
+  ///
+  void validateYMax();
 };
 
 }

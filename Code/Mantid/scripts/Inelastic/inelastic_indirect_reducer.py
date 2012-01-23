@@ -92,7 +92,12 @@ class IndirectReducer(MSGReducer):
                 self.append_step(steps.FoldData())
             else:
                 return
-            
+        
+        # "Summary" adds another histogram onto the end of the resultant workspaces.
+        # "none", "sum" or "average" are currently supported.
+        step = steps.Summary(MultipleFrames=self._multiple_frames)
+        self.append_step(step)
+        
         # The "SaveItem" step saves the files in the requested formats.
         if (len(self._save_formats) > 0):
             step = steps.SaveItem()

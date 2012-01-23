@@ -2,6 +2,7 @@
 #define WORKSPACETEST_H_
 
 #include "MantidTestHelpers/FakeObjects.h"
+#include "MantidTestHelpers/FakeGmockObjects.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"

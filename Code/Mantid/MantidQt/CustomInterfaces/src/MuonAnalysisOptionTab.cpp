@@ -70,13 +70,19 @@ void MuonAnalysisOptionTab::initLayout()
   ////////////// Auto Update  /////////////////
   connect(m_uiForm.connectPlotType, SIGNAL(currentIndexChanged(int)), this, SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.timeComboBox, SIGNAL(currentIndexChanged(int)), this, SIGNAL(settingsTabUpdatePlot()));
-  connect(m_uiForm.timeAxisStartAtInput, SIGNAL(editingFinished ()), this, SIGNAL(settingsTabUpdatePlot()));
-  connect(m_uiForm.timeAxisFinishAtInput, SIGNAL(editingFinished ()), this, SIGNAL(settingsTabUpdatePlot()));
-  connect(m_uiForm.yAxisMinimumInput, SIGNAL(editingFinished ()), this, SIGNAL(settingsTabUpdatePlot()));
-  connect(m_uiForm.yAxisMaximumInput, SIGNAL(editingFinished ()), this, SIGNAL(settingsTabUpdatePlot()));
-  connect(m_uiForm.optionStepSizeText, SIGNAL(editingFinished ()), this, SIGNAL(settingsTabUpdatePlot()));
+  connect(m_uiForm.timeAxisStartAtInput, SIGNAL(returnPressed ()), this, SIGNAL(settingsTabUpdatePlot()));
+  connect(m_uiForm.timeAxisFinishAtInput, SIGNAL(returnPressed ()), this, SIGNAL(settingsTabUpdatePlot()));
+  
+  //validate
+  connect(m_uiForm.yAxisMinimumInput, SIGNAL(editingfinished ()), this, SLOT(runyAxisMinimumInput()));
+  connect(m_uiForm.yAxisMaximumInput, SIGNAL(editingfinished ()), this, SLOT(runyAxisMaximumInput()));
+  
+  connect(m_uiForm.yAxisMinimumInput, SIGNAL(returnPressed ()), this, SIGNAL(settingsTabUpdatePlot()));
+  connect(m_uiForm.yAxisMaximumInput, SIGNAL(returnPressed ()), this, SIGNAL(settingsTabUpdatePlot()));
+  connect(m_uiForm.optionStepSizeText, SIGNAL(returnPressed ()), this, SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.rebinComboBox, SIGNAL(currentIndexChanged(int)), this, SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.showErrorBars, SIGNAL(clicked()), this, SIGNAL(settingsTabUpdatePlot()));
+  connect(m_uiForm.yAxisAutoscale, SIGNAL(clicked()), this, SIGNAL(settingsTabUpdatePlot()));
 }
 
 
@@ -212,8 +218,8 @@ void MuonAnalysisOptionTab::runTimeAxisFinishAtInput()
   }
   catch (...)
   {
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Finish (ms):' input box.");
-    m_uiForm.timeAxisFinishAtInput->setText("");
+    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Finish (ms):' input box. Reset to 0.");
+    m_uiForm.timeAxisFinishAtInput->setText("0");
   }
 }
 
@@ -236,8 +242,8 @@ void MuonAnalysisOptionTab::runyAxisMinimumInput()
   }
   catch (...)
   {
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Minimum:' input box.");
-    m_uiForm.yAxisMinimumInput->setText("");
+    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Minimum:' input box. Reset to 0");
+    m_uiForm.yAxisMinimumInput->setText("0");
   }
 }
 
@@ -260,8 +266,8 @@ void MuonAnalysisOptionTab::runyAxisMaximumInput()
   }
   catch (...)
   {
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Maximum:' input box.");
-    m_uiForm.yAxisMaximumInput->setText("");
+    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Maximum:' input box. Reset to 0");
+    m_uiForm.yAxisMaximumInput->setText("0");
   }
 }
 
@@ -294,6 +300,28 @@ void MuonAnalysisOptionTab::toolbarsChanged(bool state)
   group.beginGroup(m_settingsGroup + "SettingOptions");
   group.setValue("toolbars", state);
 }
+
+
+void MuonAnalysisOptionTab::validateYMin()
+{
+  QString tempValue = m_uiForm.yAxisMinimumInput->text();
+  runyAxisMinimumInput();
+  if(tempValue == m_uiForm.yAxisMinimumInput->text())
+  {
+    emit settingsTabUpdatePlot();
+  }
+}
+
+void MuonAnalysisOptionTab::validateYMax()
+{
+  QString tempValue = m_uiForm.yAxisMinimumInput->text();
+  runyAxisMinimumInput();
+  if(tempValue == m_uiForm.yAxisMinimumInput->text())
+  {
+    emit settingsTabUpdatePlot();
+  }
+}
+
 
 }
 }

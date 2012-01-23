@@ -572,7 +572,7 @@ void CreateMDWorkspace::createMDWorkspaceClicked()
     if(keepWorkspaceInADS)
     {
       command = "try:\n"
-        "    ConvertToMDEvents(InputWorkspace='%1',OutputWorkspace='%1_md',OtherDimensions='%2',dEAnalysisMode='%3',QDimensions='%4',MinValues='%5',MaxValues='%6',UsePreprocessedDetectors='%7')\n"
+        "    ConvertToMDEvents(InputWorkspace='%1',OutputWorkspace='%1_md',MaxRecursionDepth=1,MinRecursionDepth=1,OtherDimensions='%2',dEAnalysisMode='%3',QDimensions='%4',MinValues='%5',MaxValues='%6',UsePreprocessedDetectors='%7')\n"
         "    SaveMD(InputWorkspace='%1_md', Filename=r'%8/%1_md.nxs',MakeFileBacked='1')\n"
         "except:\n"
         "    print 'FAIL'\n"
@@ -581,7 +581,7 @@ void CreateMDWorkspace::createMDWorkspaceClicked()
     else
     {
       command = "try:\n"
-        "    ConvertToMDEvents(InputWorkspace='%1',OutputWorkspace='%1_md',OtherDimensions='%2',dEAnalysisMode='%3',QDimensions='%4',MinValues='%5',MaxValues='%6',UsePreprocessedDetectors='%7')\n"
+        "    ConvertToMDEvents(InputWorkspace='%1',OutputWorkspace='%1_md',MaxRecursionDepth=1,MinRecursionDepth=1,OtherDimensions='%2',dEAnalysisMode='%3',QDimensions='%4',MinValues='%5',MaxValues='%6',UsePreprocessedDetectors='%7')\n"
         "    SaveMD(InputWorkspace='%1_md', Filename=r'%8/%1_md.nxs',MakeFileBacked='1')\n"
         "    DeleteWorkspace(Workspace='%1_md')\n"
         "except:\n"
