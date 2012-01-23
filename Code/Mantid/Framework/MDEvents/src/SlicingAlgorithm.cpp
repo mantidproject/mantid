@@ -92,9 +92,9 @@ namespace MDEvents
   /** Generate the MDHistoDimension and basis vector for a given string from BasisVectorX etc.
    *
    *  "Format: 'name, units, x,y,z,.., length, number_of_bins'.\n"
+   * Adds values to m_bases, m_binDimensions and m_scaling
    *
    * @param str :: name,number_of_bins
-   * @return a vector describing the basis vector in the input dimensions.
    */
   void SlicingAlgorithm::makeBasisVectorFromString(const std::string & str)
   {
@@ -160,7 +160,7 @@ namespace MDEvents
 
     // Put both in the algo for future use
     m_bases.push_back(basis);
-    binDimensions.push_back(out);
+    m_binDimensions.push_back(out);
     m_scaling.push_back(scaling);
   }
 
@@ -186,8 +186,8 @@ namespace MDEvents
     }
 
     // Number of output binning dimensions found
-    outD = binDimensions.size();
-    if (outD == 0)
+    m_outD = m_binDimensions.size();
+    if (m_outD == 0)
       throw std::runtime_error("No output dimensions were found in the MDEventWorkspace. Cannot bin!");
 
     bool ForceOrthogonal = getProperty("ForceOrthogonal");
@@ -224,34 +224,34 @@ namespace MDEvents
     }
 
     // Validate
-    if (outD > inD)
+    if (m_outD > inD)
       throw std::runtime_error("More output dimensions were specified than input dimensions exist in the MDEventWorkspace. Cannot bin!");
-    if (m_scaling.size() != outD)
+    if (m_scaling.size() != m_outD)
       throw std::runtime_error("Inconsistent number of entries in scaling vector.");
 
     // Create the CoordTransformAffine with these basis vectors
-    CoordTransformAffine * ct = new CoordTransformAffine(inD, outD);
+    CoordTransformAffine * ct = new CoordTransformAffine(inD, m_outD);
     ct->buildOrthogonal(m_origin, this->m_bases, VMD(this->m_scaling) ); // note the scaling makes the coordinate correspond to a bin index
     this->m_transform = ct;
 
     // Transformation original->binned
-    std::vector<double> unitScaling(outD, 1.0);
-    CoordTransformAffine * ctFrom = new CoordTransformAffine(inD, outD);
+    std::vector<double> unitScaling(m_outD, 1.0);
+    CoordTransformAffine * ctFrom = new CoordTransformAffine(inD, m_outD);
     ctFrom->buildOrthogonal(m_origin, this->m_bases, VMD(unitScaling) );
     m_transformFromOriginal = ctFrom;
 
     // Validate
     if (m_transform->getInD() != inD)
       throw std::invalid_argument("The number of input dimensions in the CoordinateTransform object is not consistent with the number of dimensions in the input workspace.");
-    if (m_transform->getOutD() != outD)
+    if (m_transform->getOutD() != m_outD)
       throw std::invalid_argument("The number of output dimensions in the CoordinateTransform object is not consistent with the number of dimensions specified in the OutDimX, etc. properties.");
 
     // Now the reverse transformation
     m_transformToOriginal = NULL;
-    if (outD == inD)
+    if (m_outD == inD)
     {
       // Can't reverse transform if you lost dimensions.
-      CoordTransformAffine * ctTo = new CoordTransformAffine(inD, outD);
+      CoordTransformAffine * ctTo = new CoordTransformAffine(inD, m_outD);
       Matrix<coord_t> fromMatrix = ctFrom->getMatrix();
       Matrix<coord_t> toMatrix = fromMatrix;
       // Invert the affine matrix to get the reverse transformation
@@ -309,7 +309,7 @@ namespace MDEvents
         IMDDimension_const_sptr inputDim = m_inWS->getDimension(dim_index);
         units = inputDim->getUnits();
         // Add the index from which we're binning to the vector
-        this->dimensionToBinFrom.push_back(dim_index);
+        this->m_dimensionToBinFrom.push_back(dim_index);
       }
       catch (std::runtime_error &)
       {
@@ -317,7 +317,7 @@ namespace MDEvents
         throw std::runtime_error("Dimension " + name + " was not found in the MDEventWorkspace! Cannot continue.");
       }
 
-      binDimensions.push_back( MDHistoDimension_sptr(new MDHistoDimension(name, id, units, min, max, numBins)));
+      m_binDimensions.push_back( MDHistoDimension_sptr(new MDHistoDimension(name, id, units, min, max, numBins)));
     }
   }
   //----------------------------------------------------------------------------------------------
@@ -357,42 +357,42 @@ namespace MDEvents
     }
 
     // Number of output binning dimensions found
-    outD = binDimensions.size();
+    m_outD = m_binDimensions.size();
 
     // Now we build the coordinate transformation object
     m_origin = VMD(inD);
     m_bases.clear();
-    std::vector<coord_t> origin(outD), scaling(outD);
-    for (size_t d=0; d<outD; d++)
+    std::vector<coord_t> origin(m_outD), scaling(m_outD);
+    for (size_t d=0; d<m_outD; d++)
     {
-      origin[d] = binDimensions[d]->getMinimum();
-      scaling[d] = coord_t(1.0) / binDimensions[d]->getBinWidth();
+      origin[d] = m_binDimensions[d]->getMinimum();
+      scaling[d] = coord_t(1.0) / m_binDimensions[d]->getBinWidth();
       // Origin in the input
-      m_origin[ dimensionToBinFrom[d] ] = origin[d];
+      m_origin[ m_dimensionToBinFrom[d] ] = origin[d];
       // Create a unit basis vector that corresponds to this
       VMD basis(inD);
-      basis[ dimensionToBinFrom[d] ] = 1.0;
+      basis[ m_dimensionToBinFrom[d] ] = 1.0;
       m_bases.push_back(basis);
     }
 
     // Transform for binning
-    m_transform = new CoordTransformAligned(m_inWS->getNumDims(), outD,
-        dimensionToBinFrom, origin, scaling);
+    m_transform = new CoordTransformAligned(m_inWS->getNumDims(), m_outD,
+        m_dimensionToBinFrom, origin, scaling);
 
     // Transformation original->binned. There is no offset or scaling!
-    std::vector<double> unitScaling(outD, 1.0);
-    std::vector<double> zeroOrigin(outD, 0.0);
-    m_transformFromOriginal = new CoordTransformAligned(inD, outD,
-        dimensionToBinFrom, zeroOrigin, unitScaling);
+    std::vector<double> unitScaling(m_outD, 1.0);
+    std::vector<double> zeroOrigin(m_outD, 0.0);
+    m_transformFromOriginal = new CoordTransformAligned(inD, m_outD,
+        m_dimensionToBinFrom, zeroOrigin, unitScaling);
 
     // Now the reverse transformation.
-    if (outD == inD)
+    if (m_outD == inD)
     {
       // Make the reverse map = if you're in the output dimension "od", what INPUT dimension index is that?
       std::vector<size_t> reverseDimensionMap(inD, 0);
-      for (size_t od=0; od<dimensionToBinFrom.size(); od++)
-        reverseDimensionMap[ dimensionToBinFrom[od] ] = od;
-      m_transformToOriginal = new CoordTransformAligned(inD, outD,
+      for (size_t od=0; od<m_dimensionToBinFrom.size(); od++)
+        reverseDimensionMap[ m_dimensionToBinFrom[od] ] = od;
+      m_transformToOriginal = new CoordTransformAligned(inD, m_outD,
           reverseDimensionMap, zeroOrigin, unitScaling);
     }
     else
@@ -530,9 +530,9 @@ namespace MDEvents
     for (size_t d=0; d<m_bases.size(); d++)
     {
       double xMin = 0;
-      double xMax = binDimensions[d]->getX(binDimensions[d]->getNBins());
-      if (chunkMin != NULL) xMin = binDimensions[d]->getX(chunkMin[d]);
-      if (chunkMax != NULL) xMax = binDimensions[d]->getX(chunkMax[d]);
+      double xMax = m_binDimensions[d]->getX(m_binDimensions[d]->getNBins());
+      if (chunkMin != NULL) xMin = m_binDimensions[d]->getX(chunkMin[d]);
+      if (chunkMax != NULL) xMax = m_binDimensions[d]->getX(chunkMax[d]);
       o1 += (m_bases[d] * xMin);
       o2 += (m_bases[d] * xMax);
       VMD thisBase = m_bases[d] * (xMax-xMin);
@@ -684,18 +684,18 @@ namespace MDEvents
     {
       std::vector<coord_t> function_min(nd, -1e50); // default to all space if the dimension is not specified
       std::vector<coord_t> function_max(nd, +1e50); // default to all space if the dimension is not specified
-      for (size_t bd=0; bd<outD; bd++)
+      for (size_t bd=0; bd<m_outD; bd++)
       {
         // Dimension in the MDEventWorkspace
-        size_t d = dimensionToBinFrom[bd];
+        size_t d = m_dimensionToBinFrom[bd];
         if (chunkMin)
-          function_min[d] = binDimensions[bd]->getX(chunkMin[bd]);
+          function_min[d] = m_binDimensions[bd]->getX(chunkMin[bd]);
         else
-          function_min[d] = binDimensions[bd]->getX(0);
+          function_min[d] = m_binDimensions[bd]->getX(0);
         if (chunkMax)
-          function_max[d] = binDimensions[bd]->getX(chunkMax[bd]);
+          function_max[d] = m_binDimensions[bd]->getX(chunkMax[bd]);
         else
-          function_max[d] = binDimensions[bd]->getX(binDimensions[bd]->getNBins());
+          function_max[d] = m_binDimensions[bd]->getX(m_binDimensions[bd]->getNBins());
       }
       MDBoxImplicitFunction * function = new MDBoxImplicitFunction(function_min, function_max);
       return function;

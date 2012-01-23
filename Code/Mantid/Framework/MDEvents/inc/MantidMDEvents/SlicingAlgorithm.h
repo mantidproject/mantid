@@ -82,10 +82,10 @@ namespace MDEvents
     Mantid::API::IMDWorkspace_sptr m_originalWS;
 
     /// Bin dimensions to actually use
-    std::vector<Mantid::Geometry::MDHistoDimension_sptr> binDimensions;
+    std::vector<Mantid::Geometry::MDHistoDimension_sptr> m_binDimensions;
 
     /// Index of the dimension in the MDEW for the dimension in the output. Only for axis-aligned slices
-    std::vector<size_t> dimensionToBinFrom;
+    std::vector<size_t> m_dimensionToBinFrom;
 
     /// Coordinate transformation to apply. This transformation
     /// contains the scaling that makes the output coordinate = bin indexes in the output MDHistoWorkspace.
@@ -100,7 +100,7 @@ namespace MDEvents
     bool m_axisAligned;
 
     /// Number of dimensions in the output (binned) workspace.
-    size_t outD;
+    size_t m_outD;
 
     /// Basis vectors of the output dimensions, normalized to unity length
     std::vector<Mantid::Kernel::VMD> m_bases;
