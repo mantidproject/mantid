@@ -35,6 +35,7 @@ namespace Crystal
     void init();
     /// Run the algorithm
     void exec();
+    void Outliers(std::vector<double>& data, std::vector<double>& err);
 
   };
 

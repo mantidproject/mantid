@@ -121,6 +121,7 @@ namespace Crystal
         err.push_back(peak2.getSigmaIntensity());
         if(i == NumberPeaks-1)
         {
+          Outliers(data,err);
           Statistics stats = getStatistics(data);
           TableRow r = t->appendRow();
           r <<peak1.getH()<<peak1.getK()<<peak1.getL()<<bank1<<static_cast<int>(data.size())<<stats.mean<< stats.standard_deviation<< stats.minimum<< stats.maximum<< stats.median;
@@ -132,6 +133,7 @@ namespace Crystal
       }
       else
       {
+        Outliers(data,err);
         Statistics stats = getStatistics(data);
         TableRow r = t->appendRow();
         r <<peak1.getH()<<peak1.getK()<<peak1.getL()<<bank1<<static_cast<int>(data.size())<<stats.mean<< stats.standard_deviation<< stats.minimum<< stats.maximum<< stats.median;
@@ -141,14 +143,29 @@ namespace Crystal
         err.clear();
         hkl1 = hkl2;
         bank1 = bank2;
-        data.push_back(peak1.getIntensity());
-        err.push_back(peak1.getSigmaIntensity());
+        data.push_back(peak2.getIntensity());
+        err.push_back(peak2.getSigmaIntensity());
       }
     }
     data.clear();
     err.clear();
     setProperty("DuplicatesStatisticsTable",t);
 
+  }
+  void SortHKL::Outliers(std::vector<double>& data, std::vector<double>& err)
+  {
+      if(static_cast<int>(data.size()) < 2) return;
+      Statistics stats = getStatistics(data);
+      if(stats.standard_deviation == 0.)return;
+      for (int i = static_cast<int>(data.size())-1; i>=0; i--)
+      {
+        double zscore = std::fabs((data[i] - stats.mean) / stats.standard_deviation);
+        if (zscore > 3.0)
+        {
+          data.erase(data.begin()+i);
+          err.erase(err.begin()+i);
+        }
+      }
   }
 
 
