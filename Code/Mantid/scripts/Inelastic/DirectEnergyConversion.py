@@ -265,9 +265,11 @@ class DirectEnergyConversion(object):
             ChangeBinOffset(data_ws, result_name, -tzero)
             mon1_peak = 0.0
         elif (self.instr_name == "ARCS" or self.instr_name == "SEQUOIA"):
-            if 'Filename' in data_ws.getRun(): mono_run = data_ws.getRun()['Filename']
+            if 'Filename' in data_ws.getRun(): mono_run = data_ws.getRun()['Filename'].value
             else: raise RuntimeError('Cannot load monitors for event reduction. Unable to determine Filename from mono workspace, it should have been added as a run log.')
-                           
+                 
+	    mtd.sendDebugMessage("mono_run = %s (%s)" % (mono_run,type(mono_run)))
+          
             if mono_run.endswith("_event.nxs"):
                 loader=LoadNexusMonitors(Filename=mono_run, OutputWorkspace="monitor_ws")    
             elif mono_run.endswith("_event.dat"):
