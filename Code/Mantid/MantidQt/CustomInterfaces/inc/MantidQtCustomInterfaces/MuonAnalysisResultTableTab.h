@@ -63,8 +63,8 @@ public:
 
 private slots:
   void helpResultsClicked();
-  void selectAllLogs();
-  void selectAllFittings();
+  void selectAllLogs(bool);
+  void selectAllFittings(bool);
   void createTable();
 
 private:
