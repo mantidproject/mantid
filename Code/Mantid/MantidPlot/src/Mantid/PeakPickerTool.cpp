@@ -543,7 +543,7 @@ void PeakPickerTool::functionRemoved()
  */
 void PeakPickerTool::algorithmFinished(const QString& out)
 {
-  m_curveFitName = workspaceName()+"_"+QString("Worksapce-Calc");
+  m_curveFitName = workspaceName()+"_"+QString("Workspace-Calc");
   m_curveDifName = workspaceName()+"_"+QString("Workspace-Diff");
 
   graph()->removeCurve(m_curveFitName);

@@ -1444,6 +1444,9 @@
               <property name="text">
                <string>Select/Deselect All</string>
               </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
              </widget>
             </item>
             <item row="0" column="0">
@@ -1778,6 +1781,9 @@
              <widget class="QCheckBox" name="selectAllFittingResults">
               <property name="text">
                <string>Select/Deselect All</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
               </property>
              </widget>
             </item>

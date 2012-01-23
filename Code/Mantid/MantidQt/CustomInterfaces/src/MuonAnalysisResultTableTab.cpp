@@ -53,8 +53,8 @@ void MuonAnalysisResultTableTab::initLayout()
   m_uiForm.tableName->setText("ResultsTable");
 
   // Connect the select/deselect all buttons.
-  connect(m_uiForm.selectAllLogValues, SIGNAL(clicked()), this, SLOT(selectAllLogs()));
-  connect(m_uiForm.selectAllFittingResults, SIGNAL(clicked()), this, SLOT(selectAllFittings()));
+  connect(m_uiForm.selectAllLogValues, SIGNAL(toggled(bool)), this, SLOT(selectAllLogs(bool)));
+  connect(m_uiForm.selectAllFittingResults, SIGNAL(toggled(bool)), this, SLOT(selectAllFittings(bool)));
 
   // Connect the create table button
   connect(m_uiForm.createTableBtn, SIGNAL(clicked()), this, SLOT(createTable()));
@@ -74,9 +74,9 @@ void MuonAnalysisResultTableTab::helpResultsClicked()
 /**
 * Select/Deselect all log values to be included in the table
 */
-void MuonAnalysisResultTableTab::selectAllLogs()
+void MuonAnalysisResultTableTab::selectAllLogs(bool state)
 {
-  if (m_uiForm.selectAllLogValues->isChecked())
+  if (state)
   {
     for (int i = 0; i < m_uiForm.valueTable->rowCount(); i++)
     {
@@ -103,9 +103,9 @@ void MuonAnalysisResultTableTab::selectAllLogs()
 /**
 * Select/Deselect all fitting results to be included in the table
 */
-void MuonAnalysisResultTableTab::selectAllFittings()
+void MuonAnalysisResultTableTab::selectAllFittings(bool state)
 {
-  if (m_uiForm.selectAllFittingResults->isChecked())
+  if (state)
   {
     for (int i = 0; i < m_uiForm.fittingResultsTable->rowCount(); i++)
     {
@@ -163,6 +163,12 @@ void MuonAnalysisResultTableTab::populateTables(const QStringList& wsList)
     if (temp == NULL)
     {
       QMessageBox::information(this, "Mantid - Muon Analysis", "There were no common log files found.");
+    }
+    else
+    {
+      // Make sure all logs and fittings are selected by default.
+      selectAllLogs(true);
+      selectAllFittings(true);
     }
   }
   else
@@ -325,7 +331,7 @@ void MuonAnalysisResultTableTab::createTable()
 
   // Create the results table
   Mantid::API::ITableWorkspace_sptr table = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-  table->addColumn("str","Run Name");
+  table->addColumn("str","Run Number");
   for(int i=0; i<logsSelected.size(); ++i)
   {
     table->addColumn("double", logsSelected[i].toStdString());
@@ -371,10 +377,19 @@ void MuonAnalysisResultTableTab::createTable()
     {
       if (wsSelected[i] == itr.key())
       {
-        //Add new row and add run name
+        //Add new row and add run number
         Mantid::API::TableRow row = table->appendRow();
-        QString runName(itr.key().left(itr.key().find(';')));
-        row << runName.toStdString();
+        QString run(itr.key().left(itr.key().find(';')));
+        
+        for (int j=0; j<run.size(); ++j)
+        {
+          if(run[j].isNumber())
+          {
+            run = run.right(run.size() - j);
+            break;
+          }
+        }
+        row << run.toStdString();
 
         // Add log values
         QMap<QString, double> logsAndValues = itr.value();
