@@ -10,6 +10,8 @@
 #include "MantidVatesAPI/MDHWLoadingPresenter.h"
 #include "MantidVatesAPI/MDLoadingView.h"
 
+#include "MockObjects.h"
+
 using namespace testing;
 using namespace Mantid::VATES;
 
@@ -20,16 +22,6 @@ class MDHWLoadingPresenterTest : public CxxTest::TestSuite
 {
 
 private: 
-
-  class MockMDLoadingView : public Mantid::VATES::MDLoadingView
-  {
-  public:
-    MOCK_CONST_METHOD0(getTime, double());
-    MOCK_CONST_METHOD0(getRecursionDepth, size_t());
-    MOCK_CONST_METHOD0(getLoadInMemory, bool());
-    MOCK_METHOD1(updateAlgorithmProgress, void(double));
-    ~MockMDLoadingView(){}
-  };
 
   /*
   Helper class allows the behaviour of the abstract base type to be tested. Derives from target abstract class providing 
@@ -42,6 +34,11 @@ private:
   public:
     ConcreteMDHWLoadingPresenter(MockMDLoadingView* view) : MDHWLoadingPresenter(view)
     {
+    }
+
+    virtual void extractMetadata(Mantid::API::IMDHistoWorkspace_sptr histoWs)
+    {
+      MDHWLoadingPresenter::extractMetadata(histoWs);
     }
 
     virtual vtkDataSet* execute(vtkDataSetFactory*, ProgressAction&)
@@ -117,6 +114,34 @@ void testLoadInMemoryChanged()
   TSM_ASSERT("Load in memory changed. this SHOULD trigger re-load", presenter.shouldLoad());
   
   TSM_ASSERT("View not used as expected.", Mock::VerifyAndClearExpectations(&view));
+}
+
+void testhasTDimensionWhenIntegrated()
+{
+  //Setup view
+  MockMDLoadingView* view = new MockMDLoadingView;
+
+  ConcreteMDHWLoadingPresenter presenter(view);
+
+  //Test that it does work when setup.
+  Mantid::API::Workspace_sptr ws = get3DWorkspace(true, false); //Integrated T Dimension
+  presenter.extractMetadata(boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
+
+  TSM_ASSERT("This is a 4D workspace with an integrated T dimension", !presenter.hasTDimensionAvailable());
+}
+
+void testHasTDimensionWhenNotIntegrated()
+{
+  //Setup view
+  MockMDLoadingView* view = new MockMDLoadingView;
+
+  ConcreteMDHWLoadingPresenter presenter(view);
+
+  //Test that it does work when setup. 
+  Mantid::API::Workspace_sptr ws = get3DWorkspace(false, false); //Non-integrated T Dimension
+  presenter.extractMetadata(boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
+
+  TSM_ASSERT("This is a 4D workspace with an integrated T dimension", presenter.hasTDimensionAvailable());
 }
 
 };
