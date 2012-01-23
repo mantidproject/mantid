@@ -159,7 +159,7 @@ namespace Mantid
       {
         throw std::runtime_error("Have not yet run ::extractMetaData!");
       }
-      return !xmlBuilder.hasIntegratedTDimension();
+      return xmlBuilder.hasTDimension() && !xmlBuilder.hasIntegratedTDimension();
     }
 
        /*

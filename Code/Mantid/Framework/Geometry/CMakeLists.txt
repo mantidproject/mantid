@@ -63,9 +63,6 @@ set ( SRC_FILES
 	src/Rendering/GeometryHandler.cpp
 	src/Rendering/GluGeometryHandler.cpp
 	src/Rendering/GluGeometryRenderer.cpp
-	src/Rendering/OCGeometryGenerator.cpp
-	src/Rendering/OCGeometryHandler.cpp
-	src/Rendering/OCGeometryRenderer.cpp
 	src/Rendering/vtkGeometryCacheReader.cpp
 	src/Rendering/vtkGeometryCacheWriter.cpp
 	src/Surfaces/Cone.cpp
@@ -79,6 +76,12 @@ set ( SRC_FILES
 	src/Surfaces/Surface.cpp
 	src/Surfaces/SurfaceFactory.cpp
 	src/Surfaces/Torus.cpp
+)
+
+set ( OPENCASCADE_SRC
+	src/Rendering/OCGeometryGenerator.cpp
+	src/Rendering/OCGeometryHandler.cpp
+	src/Rendering/OCGeometryRenderer.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/Instrument/CompAssembly.cpp
@@ -267,16 +270,23 @@ if ( NOT OPENGL_FOUND )
   message ( FATAL_ERROR "OpenGL was not found." )
 endif ()
 
-find_package ( OpenCascade REQUIRED )
-
-include_directories ( ${OPENCASCADE_INCLUDE_DIR} )
-include_directories ( ${OPENGL_INCLUDE_DIR} )
-include_directories ( ${GSL_INCLUDE_DIR} )
+# ===================== Open Cascade ===================
+if (NOT NO_OPENCASCADE)
+  find_package ( OpenCascade REQUIRED )
+  include_directories ( ${OPENCASCADE_INCLUDE_DIR} )
+  set (SRC_FILES ${SRC_FILES} ${OPENCASCADE_SRC} )
+else ()
+  add_definitions ( -DNO_OPENCASCADE )
+endif ()
 
 # A few defines needed for OpenCascade on the Mac
 if ( APPLE )
   add_definitions ( -DHAVE_IOSTREAM -DHAVE_LIMITS -DHAVE_IOMANIP )
 endif ()
+
+include_directories ( ${OPENGL_INCLUDE_DIR} )
+include_directories ( ${GSL_INCLUDE_DIR} )
+
 
 # Add a precompiled header where they are supported
 ADD_PRECOMPILED_HEADER( inc/MantidGeometry/PrecompiledHeader.h MantidGeometry src/PrecompiledHeader.cpp SRC_FILES INC_FILES )
@@ -288,7 +298,11 @@ set_target_properties ( Geometry PROPERTIES OUTPUT_NAME MantidGeometry
 # Add to the 'Framework' group in VS
 set_property ( TARGET Geometry PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( Geometry ${MANTIDLIBS} ${OPENCASCADE_LIBRARIES} ${OPENGL_LIBRARIES} ${GSL_LIBRARIES} )
+target_link_libraries ( Geometry ${MANTIDLIBS}  ${OPENGL_LIBRARIES} ${GSL_LIBRARIES} )
+
+if (NOT NO_OPENCASCADE)
+  target_link_libraries ( Geometry ${OPENCASCADE_LIBRARIES} )
+endif ()
 
 if ( CXXTEST_FOUND )
   # This is required to pick up ComponentCreationHelper, which is the only TestHelpers class that may be 

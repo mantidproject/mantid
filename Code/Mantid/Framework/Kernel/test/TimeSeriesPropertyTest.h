@@ -423,6 +423,28 @@ public:
     val->operator+=(logi);
   }
 
+  void test_PlusEqualsOperator_() {
+    TimeSeriesProperty<double> * lhs  = new TimeSeriesProperty<double>("doubleLog");
+    TS_ASSERT( lhs->addValue("2007-11-30T16:17:00",1) );
+    TS_ASSERT( lhs->addValue("2007-11-30T16:17:10",2) );
+    TS_ASSERT( lhs->addValue("2007-11-30T16:17:20",3) );
+    TS_ASSERT( lhs->addValue("2007-11-30T16:17:30",4) );
+    TS_ASSERT( lhs->addValue("2007-11-30T16:17:40",5) );
+    TimeSeriesProperty<double> * rhs  = new TimeSeriesProperty<double>("doubleLog");
+    TS_ASSERT( rhs->addValue("2007-11-30T16:17:00",1) );
+    TS_ASSERT( rhs->addValue("2007-11-30T16:17:10",2) );
+    TS_ASSERT( rhs->addValue("2007-11-30T16:17:20",3) );
+    TS_ASSERT( rhs->addValue("2007-11-30T16:17:30",4) );
+    TS_ASSERT( rhs->addValue("2007-11-30T16:17:40",5) );
+
+    lhs->operator+=(rhs);
+
+    TS_ASSERT_EQUALS(lhs->size(), rhs->size());
+
+    delete lhs;
+    delete rhs;
+  }
+
   /*
    * Test include (1) normal interval (2) normal on grid point (3) outside upper boundary
    * (4) outside lower bound

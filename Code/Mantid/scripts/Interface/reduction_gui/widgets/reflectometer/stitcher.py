@@ -20,12 +20,10 @@ class StitcherState(BaseScriptElement):
     
 class ReflData(object):
     name = ""
-    is_ref = False
     scale = 1.0
     def __init__(self, workspace, is_ref=False, scale=1.0, parent_layout=None):
-        self.is_ref = is_ref
         self.name = workspace
-        self.scale = scale
+        self._scale = scale
         self._data = None
         self._call_back = None
         
@@ -48,12 +46,16 @@ class ReflData(object):
         self._layout.addWidget(self._label)
         self._layout.addItem(self._spacer)
         self._layout.addWidget(self._edit_ctrl)
-        self._edit_ctrl.setText(str(self.scale))
+        self._edit_ctrl.setText(str(self._scale))
         
         if parent_layout is not None:
             parent_layout.addLayout(self._layout)
             parent_layout.connect(self._edit_ctrl, QtCore.SIGNAL("returnPressed()"), self._scale_updated)
+            #parent_layout.connect(self._radio, QtCore.SIGNAL("toggled()"), self._reference_updated)
         
+    def is_selected(self):
+        return self._radio.isChecked()
+    
     def _scale_updated(self):
         if self._data is not None:
             try:
@@ -77,11 +79,10 @@ class ReflData(object):
             sip.delete(self._layout)
 
     def select(self):
-        self.is_ref = True
         self._radio.setChecked(True)
         
     def get_scale(self):
-        return self.scale
+        return self._scale
     
     def set_scale(self, scale):
         self._edit_ctrl.setText("%-6.3g" % scale)
@@ -125,7 +126,6 @@ class StitcherWidget(BaseWidget):
         self._data_sets = []
         self._plotted = False
         
-        
         self._workspace_list = []
         self.initialize_content()
 
@@ -134,8 +134,8 @@ class StitcherWidget(BaseWidget):
             Initialize the content of the frame
         """
         # Apply and save buttons
-        #self.connect(self._content.apply_button, QtCore.SIGNAL("clicked()"), self._apply)        
-        #self.connect(self._content.save_result_button, QtCore.SIGNAL("clicked()"), self._save_result)
+        self.connect(self._content.auto_scale_btn, QtCore.SIGNAL("clicked()"), self._apply)        
+        self.connect(self._content.save_btn, QtCore.SIGNAL("clicked()"), self._save_result)
         
     def _add_entry(self, workspace):
         entry = ReflData(workspace, parent_layout=self._content.angle_list_layout)
@@ -147,8 +147,8 @@ class StitcherWidget(BaseWidget):
             @param is_running: True if a reduction is running
         """
         super(StitcherWidget, self).is_running(is_running)
-        #self._content.save_result_button.setEnabled(not is_running)
-        #self._content.apply_button.setEnabled(not is_running)
+        self._content.save_btn.setEnabled(not is_running)
+        self._content.auto_scale_btn.setEnabled(not is_running)
         
     def _load_workspace(self, workspace):
         ws_data = DataSet(workspace)
@@ -165,14 +165,13 @@ class StitcherWidget(BaseWidget):
         """
         s = Stitcher()
         refID = 0
-        
         for i in range(len(self._workspace_list)):
             item = self._workspace_list[i]
             data = DataSet(item.name)
             data.load(True)
             item.set_user_data(data)
 
-            if item.is_ref:
+            if item.is_selected():
                 data.set_scale(item.get_scale())
                 refID = i
             
@@ -190,8 +189,6 @@ class StitcherWidget(BaseWidget):
             scale = data.get_scale()
             item.set_scale(scale)
 
-        # Update widgets
-                
         self._stitcher = s
         
         self.plot_result()
@@ -212,6 +209,8 @@ class StitcherWidget(BaseWidget):
             if g is None or not self._plotted:
                 g = _qti.app.mantidUI.pyPlotSpectraList(ws_list,[0],True)
                 g.setName(self._graph)
+                l=g.activeLayer()
+                l.setTitle(" ")
                 self._plotted = True
                 
     def _save_result(self):
@@ -219,22 +218,14 @@ class StitcherWidget(BaseWidget):
             Save the scaled output in one combined I(Q) file
         """
         if self._stitcher is not None:
-            if not os.path.isdir(self._output_dir):
+            if self._output_dir is None or not os.path.isdir(self._output_dir):
                 self._output_dir = os.path.expanduser("~")
             fname_qstr = QtGui.QFileDialog.getSaveFileName(self, "Save combined I(Q)",
                                                            self._output_dir, 
-                                                           "Data Files (*.xml)")
+                                                           "Data Files (*.txt)")
             fname = str(QtCore.QFileInfo(fname_qstr).filePath())
             if len(fname)>0:
-                if fname.endswith('.xml'):
-                    self._stitcher.save_combined(fname, as_canSAS=True)
-                elif fname.endswith('.txt'):
-                    self._stitcher.save_combined(fname, as_canSAS=False)
-                else:
-                    fname_tmp = fname + ".xml"
-                    self._stitcher.save_combined(fname_tmp, as_canSAS=True)
-                    fname_tmp = fname + ".txt"
-                    self._stitcher.save_combined(fname_tmp, as_canSAS=False)
+                self._stitcher.save_combined(fname, as_canSAS=False)
     
     def set_state(self, state):
         """
@@ -248,7 +239,7 @@ class StitcherWidget(BaseWidget):
         
         # Refresh combo boxes
         for item in mtd.keys():
-            if item.startswith("reflectivity"):
+            if item.startswith("reflectivity") and not item.endswith("scaled"):
                 self._add_entry(item)
                 
         if len(self._workspace_list)>0:

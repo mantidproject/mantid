@@ -51,7 +51,8 @@ set ( INC_FILES
 
 set ( PY_FILES 
   __init__.py
-  workspaceops.py
+  _adsimports.py
+  _workspaceops.py
 )
 
 # Set the destination directory

@@ -1322,7 +1322,7 @@
               </property>
               <item>
                <property name="text">
-                <string>Overwrite</string>
+                <string>Auto-Update + Overwrite</string>
                </property>
               </item>
               <item>
@@ -1332,7 +1332,7 @@
               </item>
               <item>
                <property name="text">
-                <string>Auto-Update + Overwrite</string>
+                <string>Overwrite</string>
                </property>
               </item>
               <item>
@@ -1443,6 +1443,9 @@
              <widget class="QCheckBox" name="selectAllLogValues">
               <property name="text">
                <string>Select/Deselect All</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
@@ -1779,6 +1782,9 @@
               <property name="text">
                <string>Select/Deselect All</string>
               </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
              </widget>
             </item>
             <item row="0" column="0">
@@ -2080,7 +2086,15 @@
   </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>instrSelector</tabstop>
+  <tabstop>timeZeroFront</tabstop>
+  <tabstop>firstGoodBinFront</tabstop>
   <tabstop>loadCurrent</tabstop>
+  <tabstop>mwRunFiles</tabstop>
+  <tabstop>appendRun</tabstop>
+  <tabstop>previousRun</tabstop>
+  <tabstop>nextRun</tabstop>
   <tabstop>frontGroupGroupPairComboBox</tabstop>
   <tabstop>frontAlphaNumber</tabstop>
   <tabstop>homePeriodBox1</tabstop>
@@ -2102,8 +2116,27 @@
   <tabstop>pairTablePlotChoice</tabstop>
   <tabstop>pairTablePlotButton</tabstop>
   <tabstop>muonAnalysisHelpGrouping</tabstop>
+  <tabstop>connectPlotType</tabstop>
+  <tabstop>timeComboBox</tabstop>
+  <tabstop>timeAxisStartAtInput</tabstop>
+  <tabstop>timeAxisFinishAtInput</tabstop>
+  <tabstop>yAxisMinimumInput</tabstop>
+  <tabstop>yAxisMaximumInput</tabstop>
+  <tabstop>yAxisAutoscale</tabstop>
+  <tabstop>showErrorBars</tabstop>
   <tabstop>rebinComboBox</tabstop>
   <tabstop>optionStepSizeText</tabstop>
+  <tabstop>plotCreation</tabstop>
+  <tabstop>hideToolbars</tabstop>
+  <tabstop>muonAnalysisHelpPlotting</tabstop>
+  <tabstop>muonAnalysisHelpDataAnalysis</tabstop>
+  <tabstop>valueTable</tabstop>
+  <tabstop>selectAllLogValues</tabstop>
+  <tabstop>fittingResultsTable</tabstop>
+  <tabstop>selectAllFittingResults</tabstop>
+  <tabstop>tableName</tabstop>
+  <tabstop>createTableBtn</tabstop>
+  <tabstop>muonAnalysisHelpResults</tabstop>
  </tabstops>
  <resources/>
  <connections/>

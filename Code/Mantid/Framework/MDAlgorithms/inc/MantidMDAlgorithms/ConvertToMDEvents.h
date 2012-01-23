@@ -109,7 +109,7 @@ namespace MDAlgorithms
    void getAddDimensionNames(API::MatrixWorkspace_const_sptr inMatrixWS,Strings &add_dim_names,Strings &add_dim_units)const;
    /** function parses arguments entered by user, and identifies, which subalgorithm should be deployed on WS  as function of the input artuments and the WS format */
    std::string identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS,const std::string &Q_mode_req, const std::string &dE_mode_req,
-                                Strings &out_dim_IDs,Strings &out_dim_units);
+                                Strings &out_dim_IDs,Strings &out_dim_units, bool &is_detector_information_lost);
    //>---> Parts of the identifyMatrixAlg, separated for unit testing:
    // identify Q - mode
    std::string parseQMode(const std::string &Q_mode_req,const Strings &ws_dim_names,const Strings &ws_dim_units,Strings &out_dim_names,Strings &out_dim_units, int &nQdims);

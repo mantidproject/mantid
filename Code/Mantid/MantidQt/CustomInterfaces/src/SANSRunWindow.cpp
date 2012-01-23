@@ -2267,7 +2267,10 @@ void SANSRunWindow::handleDefSaveClick()
   {
     QString ext = SaveWorkspaces::getSaveAlgExt(*alg);
     QString fname = fileBase.endsWith(ext) ? fileBase : fileBase+ext;
-    saveCommand += (*alg)+"('"+m_outputWS+"','"+fname+"')\n";
+    if ( (*alg) == "SaveRKH" )
+      saveCommand += (*alg)+"('"+m_outputWS+"','"+fname+"', Append=False)\n";
+    else
+      saveCommand += (*alg)+"('"+m_outputWS+"','"+fname+"')\n";
   }
 
   saveCommand += "print 'success'\n";
@@ -2276,8 +2279,6 @@ void SANSRunWindow::handleDefSaveClick()
   {
     QMessageBox::critical(this, "Error saving workspace", "Problem encountered saving workspace, does it still exist. There may be more information in the results console?");
   }
-
-//  runPythonCode(saveCommand);
 }
 /**
  * Set up controls based on the users selection in the combination box
