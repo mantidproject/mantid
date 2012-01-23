@@ -29,18 +29,19 @@ class AnalysisDataServiceTest(unittest.TestCase):
         
     def test_len_increases_when_item_added(self):
         wsname = 'ADSTest_test_len_increases_when_item_added'
+        current_len = len(AnalysisDataService.Instance())
         self._run_createws(wsname)
-        self.assertEquals(len(AnalysisDataService.Instance()), 1)
+        self.assertEquals(len(AnalysisDataService.Instance()), current_len + 1)
         # Remove to clean the test up
         AnalysisDataService.Instance().remove(wsname)
         
     def test_len_decreases_when_item_removed(self):
         wsname = 'ADSTest_test_len_decreases_when_item_removed'
         self._run_createws(wsname)
-        self.assertEquals(len(AnalysisDataService.Instance()), 1)
+        current_len = len(AnalysisDataService.Instance())
         # Remove to clean the test up
         del AnalysisDataService.Instance()[wsname]
-        self.assertEquals(len(AnalysisDataService.Instance()), 0)
+        self.assertEquals(len(AnalysisDataService.Instance()), current_len - 1)
     
     def test_key_operator_does_same_as_retrieve(self):
         wsname = 'ADSTest_test_key_operator_does_same_as_retrieve'
@@ -75,6 +76,35 @@ class AnalysisDataServiceTest(unittest.TestCase):
         self.assertTrue(succeeded, "DataItem handle should be valid and allow function calls")
         AnalysisDataService.Instance().remove(wsname)
         self.assertRaises(RuntimeError, ws_handle.id)
+        
+    def test_importAll_exists_as_member(self):
+        self.assertTrue(hasattr(AnalysisDataService.Instance(), "importAll"))
+        
+    def test_importAll_creates_variable_in_current_global_dict_pointing_to_each_workspace(self):
+        obj_names = mtd.getObjectNames()
+        extra_names = ["ADSTest_test_1", "ADSTest_test_2", "ADSTest_test_3"]
+        for name in extra_names:
+            self._run_createws(name)
+        obj_names += extra_names
+        
+        # Check no names are in globals
+        for name in obj_names:
+            self.assertFalse(name in locals())
+
+        # Pull in variables
+        mtd.importAll()
+        # Are they in the local namespace
+        for name in obj_names:
+            self.assertTrue(name in locals())
+        
+        # Clean up
+        for name in obj_names:
+            try:
+                del locals()[name]
+            except KeyError:
+                pass
+        for name in extra_names:
+            mtd.remove(name)
 
 if __name__ == '__main__':
     unittest.main()
