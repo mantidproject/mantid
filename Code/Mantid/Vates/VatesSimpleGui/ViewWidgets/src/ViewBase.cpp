@@ -104,6 +104,10 @@ void ViewBase::correctVisibility(pqPipelineBrowserWidget *pbw)
  */
 bool ViewBase::isPeaksWorkspace(pqPipelineSource *src)
 {
+  if (NULL == src)
+  {
+    return false;
+  }
   QString wsType(vtkSMPropertyHelper(src->getProxy(),
                                      "WorkspaceTypeName", true).GetAsString());
   // This must be a Mantid rebinner filter if the property is empty.
@@ -160,7 +164,31 @@ pqPipelineSource *ViewBase::getPvActiveSrc()
  */
 void ViewBase::checkView()
 {
-  emit this->setViewsStatus(!this->isPeaksWorkspace(this->origSrc));
+  if (this->isMDHistoWorkspace(this->origSrc))
+  {
+    emit this->setViewsStatus(true);
+    emit this->setViewStatus(ModeControlWidget::SPLATTERPLOT, false);
+  }
+  else if (this->isPeaksWorkspace(this->origSrc))
+  {
+    emit this->setViewsStatus(false);
+  }
+  else
+  {
+    emit this->setViewsStatus(true);
+  }
+}
+
+/**
+ * This function sets the status for the view mode control buttons when the
+ * view switches.
+ */
+void ViewBase::checkViewOnSwitch()
+{
+  if (this->isMDHistoWorkspace(this->origSrc))
+  {
+    emit this->setViewStatus(ModeControlWidget::SPLATTERPLOT, false);
+  }
 }
 
 /**
@@ -422,6 +450,10 @@ pqPipelineRepresentation *ViewBase::getRep()
  */
 bool ViewBase::isMDHistoWorkspace(pqPipelineSource *src)
 {
+  if (NULL == src)
+  {
+    return false;
+  }
   QString wsType(vtkSMPropertyHelper(src->getProxy(),
                                      "WorkspaceTypeName", true).GetAsString());
   // This must be a Mantid rebinner filter if the property is empty.
