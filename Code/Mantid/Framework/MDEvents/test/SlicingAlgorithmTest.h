@@ -50,6 +50,7 @@ public:
   IMDEventWorkspace_sptr ws3;
   IMDEventWorkspace_sptr ws4;
   IMDEventWorkspace_sptr ws5;
+  IMDEventWorkspace_sptr ws_names;
 
   SlicingAlgorithmTest()
   {
@@ -59,6 +60,10 @@ public:
     ws3 = MDEventsTestHelper::makeMDEW<3>(5, 0.0, 10.0, 1);
     ws4 = MDEventsTestHelper::makeMDEW<4>(5, 0.0, 10.0, 1);
     ws5 = MDEventsTestHelper::makeMDEW<5>(5, 0.0, 10.0, 1);
+    /// Workspace with custom names
+    ws_names = MDEventsTestHelper::makeAnyMDEW<MDEvent<3>,3>(3, 0.0, 10.0, 1,
+        "", "[%dh,k,l]", "Q%d");
+
   }
 
   void test_initSlicingProps()
@@ -77,6 +82,11 @@ public:
     TSM_ASSERT_THROWS_ANYTHING("Blank name", alg.makeAlignedDimensionFromString(", 1.0, 9.0, 10"));
     TSM_ASSERT_THROWS_ANYTHING("Min > max", alg.makeAlignedDimensionFromString("Axis0, 11.0, 9.0, 10"));
     TSM_ASSERT_THROWS_ANYTHING("Name not found in input WS", alg.makeAlignedDimensionFromString("SillyName, 1.0, 9.0, 10"));
+    TSM_ASSERT_THROWS_ANYTHING("Name not found in input WS", alg.makeAlignedDimensionFromString("SillyName, 1.0, 9.0, 10"));
+    TSM_ASSERT_THROWS_ANYTHING("One entry too many means looking for name 'Axis0, 1.0'",
+        alg.makeAlignedDimensionFromString("Axis0, 1.0, 9.0, 10, 222"));
+    TSM_ASSERT_THROWS_ANYTHING("One entry too few",
+        alg.makeAlignedDimensionFromString("Axis0, 11.0, 9.0"));
   }
 
   void test_makeAlignedDimensionFromString()
@@ -90,6 +100,40 @@ public:
 
     IMDDimension_sptr dim = alg.m_binDimensions[0];
     TS_ASSERT_EQUALS( dim->getName(), "Axis2");
+    TS_ASSERT_EQUALS( dim->getUnits(), "m");
+    TS_ASSERT_EQUALS( dim->getNBins(), 10);
+    TS_ASSERT_EQUALS( dim->getX(10), 9.0);
+  }
+
+  /// Dimension name is of style "[x,y,z]". Handle this.
+  void test_makeAlignedDimensionFromString_NameWithCommas()
+  {
+    SlicingAlgorithmImpl alg; alg.m_inWS = ws_names;
+    TSM_ASSERT_THROWS_NOTHING("", alg.makeAlignedDimensionFromString("[2h,k,l], 1.0, 9.0, 10"));
+    TS_ASSERT_EQUALS( alg.m_dimensionToBinFrom.size(), 1);
+    TS_ASSERT_EQUALS( alg.m_binDimensions.size(), 1);
+    if (alg.m_binDimensions.size() < 1) return;
+    TS_ASSERT_EQUALS( alg.m_dimensionToBinFrom[0], 2);
+
+    IMDDimension_sptr dim = alg.m_binDimensions[0];
+    TS_ASSERT_EQUALS( dim->getName(), "[2h,k,l]");
+    TS_ASSERT_EQUALS( dim->getUnits(), "m");
+    TS_ASSERT_EQUALS( dim->getNBins(), 10);
+    TS_ASSERT_EQUALS( dim->getX(10), 9.0);
+  }
+
+  /// Allow the user to specify the dimension ID instead of the name.
+  void test_makeAlignedDimensionFromString_SpecifyDimensionID()
+  {
+    SlicingAlgorithmImpl alg; alg.m_inWS = ws_names;
+    TSM_ASSERT_THROWS_NOTHING("", alg.makeAlignedDimensionFromString("Q2, 1.0, 9.0, 10"));
+    TS_ASSERT_EQUALS( alg.m_dimensionToBinFrom.size(), 1);
+    TS_ASSERT_EQUALS( alg.m_binDimensions.size(), 1);
+    if (alg.m_binDimensions.size() < 1) return;
+    TS_ASSERT_EQUALS( alg.m_dimensionToBinFrom[0], 2);
+
+    IMDDimension_sptr dim = alg.m_binDimensions[0];
+    TS_ASSERT_EQUALS( dim->getName(), "[2h,k,l]");
     TS_ASSERT_EQUALS( dim->getUnits(), "m");
     TS_ASSERT_EQUALS( dim->getNBins(), 10);
     TS_ASSERT_EQUALS( dim->getX(10), 9.0);
@@ -287,6 +331,28 @@ public:
     TS_ASSERT_EQUALS( alg.m_bases[0], basis );
     IMDDimension_sptr dim = alg.m_binDimensions[0];
     TS_ASSERT_EQUALS( dim->getName(), "name");
+    TS_ASSERT_EQUALS( dim->getUnits(), "units");
+    TS_ASSERT_EQUALS( dim->getNBins(), 5);
+    TS_ASSERT_EQUALS( dim->getX(5), 10.0);
+  }
+
+  /// Create a basis vector with a dimension with [commas,etc] in the name.
+  void test_makeBasisVectorFromString_NameWithCommas()
+  {
+    SlicingAlgorithmImpl alg; alg.m_inWS = ws;
+    TS_ASSERT_EQUALS(alg.m_bases.size(), 0);
+    TSM_ASSERT_THROWS_NOTHING("", alg.makeBasisVectorFromString("[Dumb,Name], units  , 1,2,3, 10.0, 5"));
+    TS_ASSERT_EQUALS(alg.m_bases.size(), 1);
+    TS_ASSERT_EQUALS(alg.m_binDimensions.size(), 1);
+    TS_ASSERT_EQUALS(alg.m_scaling.size(), 1);
+    if (alg.m_bases.size() < 1) return;
+
+    VMD basis(1,2,3);
+    basis.normalize();
+    TS_ASSERT_EQUALS( alg.m_bases[0], basis );
+    IMDDimension_sptr dim = alg.m_binDimensions[0];
+    TS_ASSERT_EQUALS( dim->getName(), "[Dumb,Name]");
+    TS_ASSERT_EQUALS( dim->getDimensionId(), "[Dumb,Name]");
     TS_ASSERT_EQUALS( dim->getUnits(), "units");
     TS_ASSERT_EQUALS( dim->getNBins(), 5);
     TS_ASSERT_EQUALS( dim->getX(5), 10.0);

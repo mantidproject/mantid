@@ -98,39 +98,70 @@ namespace MDEvents
    */
   void SlicingAlgorithm::makeBasisVectorFromString(const std::string & str)
   {
-    if (Strings::strip(str).empty())
+    std::string input = Strings::strip(str);
+    if (input.empty())
       return;
+    if (input.size() < 4)
+      throw std::invalid_argument("Dimension string is too short to be valid: " + str);
 
-    std::string name, id, units;
-    double min, max;
-    int numBins = 0;
-    std::vector<std::string> strs;
-    boost::split(strs, str, boost::is_any_of(","));
-    if (strs.size() != this->m_inWS->getNumDims() + 4)
-      throw std::invalid_argument("Wrong number of values (expected 4 + # of input dimensions) in the dimensions string: " + str);
-    // Extract the arguments
-    name = Strings::strip(strs[0]);
-    id = name;
-    units = Strings::strip(strs[1]);
-    Strings::convert(strs[ strs.size()-1 ], numBins);
-    max = double(numBins);
+    size_t n_first_comma = std::string::npos;
+
+    // Special case: accept dimension names [x,y,z]
+    if (input[0] == '[')
+    {
+      // Find the name at the closing []
+      size_t n = input.find_first_of("]", 1);
+      if (n == std::string::npos)
+        throw std::invalid_argument("No closing ] character in the dimension name of : " + str);
+      // Find the comma after the name
+      n_first_comma = input.find_first_of(",", n);
+      if (n_first_comma == std::string::npos)
+        throw std::invalid_argument("No comma after the closing ] character in the dimension string: " + str);
+    }
+    else
+      // Find the comma after the name
+      n_first_comma = input.find_first_of(",");
+
+    if (n_first_comma == std::string::npos)
+      throw std::invalid_argument("No comma in the dimension string: " + str);
+    if (n_first_comma == input.size()-1)
+      throw std::invalid_argument("Dimension string ends in a comma: " + str);
+
+    // Get the entire name
+    std::string name = Strings::strip(input.substr(0, n_first_comma));
     if (name.size() == 0)
       throw std::invalid_argument("name should not be blank.");
+
+    // Now remove the name and comma
+    // And split the rest of it
+    input = input.substr(n_first_comma+1);
+    std::vector<std::string> strs;
+    boost::split(strs, input, boost::is_any_of(","));
+    if (strs.size() != this->m_inWS->getNumDims() + 3)
+      throw std::invalid_argument("Wrong number of values (expected 4 + # of input dimensions) in the dimensions string: " + str);
+
+    // Extract the arguments
+    std::string id = name;
+    std::string units = Strings::strip(strs[0]);
+
+    int numBins = 0;
+    Strings::convert(strs[ strs.size()-1 ], numBins);
     if (numBins < 1)
       throw std::invalid_argument("number of bins should be >= 1.");
 
     double length = 0.0;
     Strings::convert(strs[ strs.size()-2 ], length);
-    min = 0.0;
-    max = length;
-
     if (length <= 0)
       throw std::invalid_argument("'length' parameter should be > 0.0.");
+
+    double min = 0.0;
+    double max = length;
 
     // Create the basis vector with the right # of dimensions
     VMD basis(this->m_inWS->getNumDims());
     for (size_t d=0; d<this->m_inWS->getNumDims(); d++)
-      Strings::convert(strs[d+2], basis[d]);
+      if (!Strings::convert(strs[d+1], basis[d]))
+        throw std::invalid_argument("Error converting argument '" + strs[d+1] + "' in the dimensions string '" + str + "' to a number.");
     double oldBasisLength = basis.normalize();
 
     if (oldBasisLength <= 0)
@@ -281,18 +312,38 @@ namespace MDEvents
     }
     else
     {
-      std::string name;
+      // Strip spaces
+      std::string input = Strings::strip(str);
+      if (input.size() < 4)
+        throw std::invalid_argument("Dimensions string is too short to be valid: " + str);
+
+      // Find the 3rd comma from the end
+      size_t n = std::string::npos;
+      for (size_t i=0; i<3; i++)
+      {
+        n = input.find_last_of( ",", n);
+        if (n == std::string::npos)
+          throw std::invalid_argument("Wrong number of values (4 are expected) in the dimensions string: " + str);
+        if (n == 0)
+          throw std::invalid_argument("Dimension string starts with a comma: " + str);
+        n--;
+      }
+      // The name is everything before the 3rd comma from the end
+      std::string name = input.substr(0, n+1);
+
+      // And split the rest of it
+      input = input.substr(n+2);
+      std::vector<std::string> strs;
+      boost::split(strs, input, boost::is_any_of(","));
+      if (strs.size() != 3)
+        throw std::invalid_argument("Wrong number of values (3 are expected) after the name in the dimensions string: " + str);
+
+      // Extract the arguments
       double min, max;
       int numBins = 0;
-      std::vector<std::string> strs;
-      boost::split(strs, str, boost::is_any_of(","));
-      if (strs.size() != 4)
-        throw std::invalid_argument("Wrong number of values (4 are expected) in the dimensions string: " + str);
-      // Extract the arguments
-      name = Strings::strip(strs[0]);
-      Strings::convert(strs[1], min);
-      Strings::convert(strs[2], max);
-      Strings::convert(strs[3], numBins);
+      Strings::convert(strs[0], min);
+      Strings::convert(strs[1], max);
+      Strings::convert(strs[2], numBins);
       if (name.size() == 0)
         throw std::invalid_argument("Name should not be blank.");
       if (min >= max)
@@ -300,24 +351,32 @@ namespace MDEvents
       if (numBins < 1)
         throw std::invalid_argument("Number of bins should be >= 1.");
 
-      std::string units = "";
-      std::string id = name;
       // Find the named axis in the input workspace
+      size_t dim_index = 0;
       try
       {
-        size_t dim_index = m_inWS->getDimensionIndexByName(name);
-        IMDDimension_const_sptr inputDim = m_inWS->getDimension(dim_index);
-        units = inputDim->getUnits();
-        // Add the index from which we're binning to the vector
-        this->m_dimensionToBinFrom.push_back(dim_index);
+        dim_index = m_inWS->getDimensionIndexByName(name);
       }
       catch (std::runtime_error &)
       {
-        // The dimension was not found, so this is a problem
-        throw std::runtime_error("Dimension " + name + " was not found in the MDEventWorkspace! Cannot continue.");
+        // The dimension was not found by name. Try using the ID
+        try
+        {
+          dim_index = m_inWS->getDimensionIndexById(name);
+        }
+        catch (std::runtime_error &)
+        {
+          throw std::runtime_error("Dimension " + name + " was not found in the MDEventWorkspace! Cannot continue.");
+        }
       }
 
-      m_binDimensions.push_back( MDHistoDimension_sptr(new MDHistoDimension(name, id, units, min, max, numBins)));
+      // Copy the dimension name, ID and units
+      IMDDimension_const_sptr inputDim = m_inWS->getDimension(dim_index);
+      m_binDimensions.push_back( MDHistoDimension_sptr(
+          new MDHistoDimension(inputDim->getName(), inputDim->getDimensionId(), inputDim->getUnits(), min, max, numBins)));
+
+      // Add the index from which we're binning to the vector
+      this->m_dimensionToBinFrom.push_back(dim_index);
     }
   }
   //----------------------------------------------------------------------------------------------
