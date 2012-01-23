@@ -68,7 +68,7 @@ DECLARE_ALGORITHM(ConvertToMDEvents)
 /** describes default dimensions ID currently used by multidimensional workspace
  * 
  *  DimensionID is the short name which used to retrieve this dimesnion from MD workspace.
- *  The names themself are defined by constructor
+ *  The names themself are defined in constructor
  */
 enum defaultDimID
 {
@@ -195,11 +195,15 @@ ConvertToMDEvents::init()
      
      /// this variable describes default possible ID-s for Q-dimensions   
      declareProperty("QDimensions",Q_modes[NoQ],new ListValidator(Q_modes),
-         "You can to transfer source workspace dimensions into target workspace directly """" (NoQ), transform into mod(Q) (1 dimension) or QhQkQl (3 dimensions) in Q space",Direction::InOut);        
+         "You can to transfer source workspace dimensions into target MD workspace directly by supplying empty string """" (NoQ), \n"
+         "into mod(Q) (1 dimension) providing ""|Q|"" string or into 3 dimensions in Q space ""QhQkQl"". \n"
+         " First mode used for copying data from input workspace into multidimensional target workspace, second -- mainly for powder analysis\n"
+         "(though crystal as powder is also included into this mode) and the third -- for crystal analysis.\n",Direction::InOut); 
+
      // this switch allows to make units expressed in HKL, hkl is currently not supported by units conversion so the resulting workspace can not be subject to unit conversion
      declareProperty(new PropertyWithValue<bool>("QinHKL", true, Direction::Input),
          " Setting this property to true will normalize three momentums obtained in QhQkQl mode by reciprocal lattice vectors 2pi/a,2pi/b and 2pi/c\n"
-         " ignored in mod|Q| and NoQ modes and if reciprocal lattice is not defined");
+         " ignored in mod|Q| and NoQ modes and if a reciprocal lattice is not defined in the input workspace");
      /// this variable describes implemented modes for energy transfer analysis
      declareProperty("dEAnalysisMode",dE_modes[Direct],new ListValidator(dE_modes),
         "You can analyse neutron energy transfer in direct, indirect or elastic mode. The analysis mode has to correspond to experimental set up."
@@ -217,7 +221,7 @@ ConvertToMDEvents::init()
         "Store the part of the detectors transformation into reciprocal space to save/reuse it later.\n"
         " Useful if one expects to analyse number of different experiments obtained on the same instrument.\n"
         "<span style=""color:#FF0000""> Dangerous if one uses number of workspaces with modified derived instrument one after another. </span>"
-        " In this case switch has to be set to false, as first instrument will be used for all workspaces and no check for its validity is performed."); 
+        " In this case switch has to be set to false, as first instrument would be used for all workspaces othewise and no check for its validity is performed."); 
 
     declareProperty(new ArrayProperty<double>("MinValues"),
         "It has to be N comma separated values, where N is defined as: \n"
@@ -225,17 +229,17 @@ ConvertToMDEvents::init()
         "b) 3+N_OtherDimensions if the first (3) dimensions (QDimensions property) equal  QhQkQl or \n"
         "c) (1 or 2)+N_OtherDimesnions if QDimesnins property is emtpty. \n"
         " In case c) the target workspace dimensions are defined by the [[units]] of the input workspace axis.\n\n"
-        " In case b), the target dimensions for QhQkQl are either momentums if QinHKL is false or are momentums divided by correspondent lattice parameters if QinHKL is true\n"
          " This property contains minimal values for all dimensions.\n"
          " Momentum values expected to be in [A^-1] and energy transfer (if any) expressed in [meV]\n"
+         " In case b), the target dimensions for QhQkQl are either momentums if QinHKL is false or are momentums divided by correspondent lattice parameters if QinHKL is true\n"
          " All other values are in the [[units]] they are expressed in their log files\n"
-         " Values lower then the specified one will be ignored and not transferred into the target MD workspace\n"
-         " If a minimal target workspace range is higher then the one specified here, the target workspace range will be used instead (not implemented)" );
+         " Values lower then the specified one will be ignored and not transferred into the target MD workspace\n");
+//TODO:    " If a minimal target workspace range is higher then the one specified here, the target workspace range will be used instead " );
 
    declareProperty(new ArrayProperty<double>("MaxValues"),
          " A list of the same size and the same units as MinValues list"
          " Values higher or equal to the specified by this list will be ignored\n");
-//TODO:         "If a maximal target workspace range is lower, then one of specified here, the target workspace range will be used instead" );
+//TODO:    "If a maximal target workspace range is lower, then one of specified here, the target workspace range will be used instead" );
     
     declareProperty(new ArrayProperty<double>("u"),
      "Optional: First base vector (in hkl) defining fractional coordinate system for neutron diffraction;\n"
@@ -248,7 +252,7 @@ ConvertToMDEvents::init()
     "and if this fails, proceed as for property u above.");
 
    // Box controller properties. These are the defaults
-    this->initBoxControllerProps("5" /*SplitInto*/, 1500 /*SplitThreshold*/, 20 /*MaxRecursionDepth*/);
+    this->initBoxControllerProps("5" /*SplitInto*/, 1000 /*SplitThreshold*/, 20 /*MaxRecursionDepth*/);
     // additional box controller settings property. 
     BoundedValidator<int> *mustBeMoreThen1 = new BoundedValidator<int> ();
     mustBeMoreThen1->setLower(1);
