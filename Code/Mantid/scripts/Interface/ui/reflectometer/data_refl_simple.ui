@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1182</width>
-    <height>979</height>
+    <width>1171</width>
+    <height>1002</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -36,8 +36,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>1164</width>
-        <height>961</height>
+        <width>1153</width>
+        <height>984</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -49,6 +49,12 @@
             <layout class="QHBoxLayout" name="horizontalLayout_11">
              <item>
               <widget class="QGroupBox" name="groupBox_3">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="title">
                 <string>Angle List</string>
                </property>
@@ -80,6 +86,12 @@ Drag items to change the reduction order.</string>
                     <height>0</height>
                    </size>
                   </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>16777215</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
                   <property name="dragEnabled">
                    <bool>true</bool>
                   </property>
@@ -102,7 +114,7 @@ Drag items to change the reduction order.</string>
                      <enum>Qt::Horizontal</enum>
                     </property>
                     <property name="sizeType">
-                     <enum>QSizePolicy::Fixed</enum>
+                     <enum>QSizePolicy::Expanding</enum>
                     </property>
                     <property name="sizeHint" stdset="0">
                      <size>
@@ -116,13 +128,13 @@ Drag items to change the reduction order.</string>
                    <widget class="QPushButton" name="remove_btn">
                     <property name="minimumSize">
                      <size>
-                      <width>85</width>
+                      <width>150</width>
                       <height>0</height>
                      </size>
                     </property>
                     <property name="maximumSize">
                      <size>
-                      <width>16777215</width>
+                      <width>150</width>
                       <height>16777215</height>
                      </size>
                     </property>
@@ -203,9 +215,15 @@ Drag items to change the reduction order.</string>
                     </item>
                     <item>
                      <widget class="QLabel" name="data_peak_from_pixel_label">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
                       <property name="minimumSize">
                        <size>
-                        <width>0</width>
+                        <width>80</width>
                         <height>0</height>
                        </size>
                       </property>
@@ -244,6 +262,12 @@ Drag items to change the reduction order.</string>
                     </item>
                     <item>
                      <widget class="QLabel" name="data_peak_from_pixel_missing">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
                       <property name="minimumSize">
                        <size>
                         <width>10</width>
@@ -694,6 +718,18 @@ Drag items to change the reduction order.</string>
                     </item>
                     <item>
                      <widget class="QLabel" name="data_peak_to_pixel_label">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>60</width>
+                        <height>0</height>
+                       </size>
+                      </property>
                       <property name="text">
                        <string>to pixel</string>
                       </property>
@@ -781,6 +817,28 @@ Drag items to change the reduction order.</string>
                       </property>
                      </spacer>
                     </item>
+                    <item>
+                     <widget class="QPushButton" name="plot_count_vs_y_btn">
+                      <property name="minimumSize">
+                       <size>
+                        <width>150</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>150</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
+                      <property name="toolTip">
+                       <string>Plot detector counts versus Y pixel</string>
+                      </property>
+                      <property name="text">
+                       <string>Counts vs Pixels Y</string>
+                      </property>
+                     </widget>
+                    </item>
                    </layout>
                   </item>
                   <item>
@@ -808,6 +866,24 @@ Drag items to change the reduction order.</string>
                      <widget class="QLabel" name="data_background_from_pixel1_label">
                       <property name="enabled">
                        <bool>false</bool>
+                      </property>
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>80</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>150</width>
+                        <height>16777215</height>
+                       </size>
                       </property>
                       <property name="text">
                        <string>from pixel</string>
@@ -847,6 +923,12 @@ Drag items to change the reduction order.</string>
                     </item>
                     <item>
                      <widget class="QLabel" name="label_5">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
                       <property name="minimumSize">
                        <size>
                         <width>10</width>
@@ -884,6 +966,18 @@ Drag items to change the reduction order.</string>
                      <widget class="QLabel" name="data_background_to_pixel1_label">
                       <property name="enabled">
                        <bool>false</bool>
+                      </property>
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>60</width>
+                        <height>0</height>
+                       </size>
                       </property>
                       <property name="text">
                        <string>to pixel</string>
@@ -956,6 +1050,24 @@ Drag items to change the reduction order.</string>
                     </item>
                     <item>
                      <widget class="QLabel" name="label_7">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>80</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>150</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
                       <property name="text">
                        <string>from pixel</string>
                       </property>
@@ -979,6 +1091,12 @@ Drag items to change the reduction order.</string>
                     </item>
                     <item>
                      <widget class="QLabel" name="label_8">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
                       <property name="minimumSize">
                        <size>
                         <width>10</width>
@@ -1014,6 +1132,18 @@ Drag items to change the reduction order.</string>
                     </item>
                     <item>
                      <widget class="QLabel" name="label_9">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>60</width>
+                        <height>0</height>
+                       </size>
+                      </property>
                       <property name="text">
                        <string>to pixel</string>
                       </property>
@@ -1118,9 +1248,15 @@ Drag items to change the reduction order.</string>
                     </item>
                     <item>
                      <widget class="QLabel" name="data_peak_from_pixel_label_2">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
                       <property name="minimumSize">
                        <size>
-                        <width>0</width>
+                        <width>80</width>
                         <height>0</height>
                        </size>
                       </property>
@@ -1159,6 +1295,12 @@ Drag items to change the reduction order.</string>
                     </item>
                     <item>
                      <widget class="QLabel" name="norm_peak_from_pixel_missing">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
                       <property name="minimumSize">
                        <size>
                         <width>10</width>
@@ -1609,6 +1751,18 @@ Drag items to change the reduction order.</string>
                     </item>
                     <item>
                      <widget class="QLabel" name="data_peak_to_pixel_label_2">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>60</width>
+                        <height>0</height>
+                       </size>
+                      </property>
                       <property name="text">
                        <string>to pixel</string>
                       </property>
@@ -1724,6 +1878,24 @@ Drag items to change the reduction order.</string>
                       <property name="enabled">
                        <bool>false</bool>
                       </property>
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>80</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>150</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
                       <property name="text">
                        <string>from pixel</string>
                       </property>
@@ -1762,6 +1934,12 @@ Drag items to change the reduction order.</string>
                     </item>
                     <item>
                      <widget class="QLabel" name="data_background_from_pixel_missing_2">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
                       <property name="minimumSize">
                        <size>
                         <width>10</width>
@@ -1836,6 +2014,18 @@ Drag items to change the reduction order.</string>
                      <widget class="QLabel" name="norm_background_to_pixel1_label">
                       <property name="enabled">
                        <bool>false</bool>
+                      </property>
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>60</width>
+                        <height>0</height>
+                       </size>
                       </property>
                       <property name="text">
                        <string>to pixel</string>
@@ -1947,23 +2137,39 @@ Drag items to change the reduction order.</string>
                    </property>
                   </spacer>
                  </item>
-                </layout>
-               </item>
-               <item>
-                <layout class="QHBoxLayout" name="horizontalLayout_7">
                  <item>
-                  <widget class="QPushButton" name="add_dataset_btn">
+                  <widget class="QPushButton" name="plot_tof_btn">
+                   <property name="minimumSize">
+                    <size>
+                     <width>150</width>
+                     <height>0</height>
+                    </size>
+                   </property>
                    <property name="maximumSize">
                     <size>
-                     <width>200</width>
+                     <width>150</width>
                      <height>16777215</height>
                     </size>
                    </property>
+                   <property name="toolTip">
+                    <string>Plot TOF distribution</string>
+                   </property>
                    <property name="text">
-                    <string>Save to list</string>
+                    <string>TOF distribution</string>
                    </property>
                   </widget>
                  </item>
+                </layout>
+               </item>
+               <item>
+                <widget class="Line" name="line">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_7">
                  <item>
                   <spacer name="horizontalSpacer">
                    <property name="orientation">
@@ -1981,34 +2187,21 @@ Drag items to change the reduction order.</string>
                   </spacer>
                  </item>
                  <item>
-                  <widget class="QPushButton" name="plot_tof_btn">
+                  <widget class="QPushButton" name="add_dataset_btn">
+                   <property name="minimumSize">
+                    <size>
+                     <width>150</width>
+                     <height>0</height>
+                    </size>
+                   </property>
                    <property name="maximumSize">
                     <size>
-                     <width>200</width>
+                     <width>150</width>
                      <height>16777215</height>
                     </size>
                    </property>
-                   <property name="toolTip">
-                    <string>Plot TOF distribution</string>
-                   </property>
                    <property name="text">
-                    <string>TOF distribution</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QPushButton" name="plot_count_vs_y_btn">
-                   <property name="maximumSize">
-                    <size>
-                     <width>200</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
-                   <property name="toolTip">
-                    <string>Plot detector counts versus Y pixel</string>
-                   </property>
-                   <property name="text">
-                    <string>Counts vs Pixels Y</string>
+                    <string>Save to list</string>
                    </property>
                   </widget>
                  </item>
