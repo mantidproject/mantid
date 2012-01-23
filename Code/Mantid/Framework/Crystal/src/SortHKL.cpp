@@ -114,7 +114,7 @@ namespace Crystal
       {
         data.push_back(peak2.getIntensity());
         err.push_back(peak2.getSigmaIntensity());
-        if(i == NumberPeaks-1 && data.size()>1)
+        if(i == NumberPeaks-1)
         {
           Statistics stats = getStatistics(data);
           TableRow r = t->appendRow();
@@ -127,14 +127,11 @@ namespace Crystal
       }
       else
       {
-        if(data.size()>1)
-        {
-          Statistics stats = getStatistics(data);
-          TableRow r = t->appendRow();
-          r <<peak1.getH()<<peak1.getK()<<peak1.getL()<<static_cast<int>(data.size())<<stats.mean<< stats.standard_deviation<< stats.minimum<< stats.maximum<< stats.median;
-          stats = getStatistics(err);
-          r <<stats.mean<< stats.standard_deviation<< stats.minimum<< stats.maximum<< stats.median;
-        }
+        Statistics stats = getStatistics(data);
+        TableRow r = t->appendRow();
+        r <<peak1.getH()<<peak1.getK()<<peak1.getL()<<static_cast<int>(data.size())<<stats.mean<< stats.standard_deviation<< stats.minimum<< stats.maximum<< stats.median;
+        stats = getStatistics(err);
+        r <<stats.mean<< stats.standard_deviation<< stats.minimum<< stats.maximum<< stats.median;
         data.clear();
         err.clear();
         hkl1 = hkl2;
