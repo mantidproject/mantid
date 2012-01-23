@@ -34,8 +34,15 @@ void ExpDecayMuon::functionMW(double* out, const double* xValues, const size_t n
 
 void ExpDecayMuon::functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
 {
-  // Use numerical derivates, because attempt to use analytic derivatives failed
-    calNumericalDeriv(out, xValues, nData);
+    const double& gA0 = getParameter("A");
+    const double& gs = getParameter("Lambda");
+
+    for (size_t i = 0; i < nData; i++) {
+        double x = xValues[i];
+        double e = exp( -gs*x );
+        out->set(i,0, e);            //derivative w.r.t. A (gA0)
+        out->set(i,1, -gA0*x*e);     //derivative w.r.t  Lambda (gs)
+    }
 }
 
 
