@@ -238,6 +238,9 @@ namespace Mantid
 
       }// end of for loop for checking the properties for workspace groups
 
+      //TODO: Here add a call to something that
+      // read or write locks every input/output workspace
+
       // Invoke exec() method of derived class and catch all uncaught exceptions
       try
       {
