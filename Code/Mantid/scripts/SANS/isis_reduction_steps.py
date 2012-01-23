@@ -694,7 +694,7 @@ class Mask_ISIS(sans_reduction_steps.Mask):
             Used to append to output workspace name
             @return 'Phi'low'_'high if it has been set
         """
-        if self.mask_phi and self._lim_phi_xml != '' :
+        if self.mask_phi and self._lim_phi_xml != '' and (abs(self.phi_max - self.phi_min) != 180.0):
           return 'Phi'+str(self.phi_min)+'_'+str(self.phi_max)
         else:
           return ''
