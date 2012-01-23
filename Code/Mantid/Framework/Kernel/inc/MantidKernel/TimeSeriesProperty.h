@@ -157,7 +157,7 @@ public:
    * @param right The other property to compare to.
    * @return true if the are equal.
    */
-  virtual bool operator==( const TimeSeriesProperty & right )
+  virtual bool operator==( const TimeSeriesProperty & right ) const
   {
     if (this->name() != right.name()) // should this be done?
       return false;
@@ -187,7 +187,7 @@ public:
    * @param right The other property to compare to.
    * @return true if the are not equal.
    */
-  virtual bool operator!=(const TimeSeriesProperty & right )
+  virtual bool operator!=(const TimeSeriesProperty & right ) const
   {
     return !(*this == right);
   }
