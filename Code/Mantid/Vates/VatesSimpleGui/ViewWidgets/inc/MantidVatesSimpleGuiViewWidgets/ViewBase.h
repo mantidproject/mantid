@@ -98,6 +98,8 @@ public:
   virtual pqRenderView *getView() = 0;
   /// Get the workspace name from the original source object.
   virtual QString getWorkspaceName();
+  /// Check if file/workspace is a MDHistoWorkspace.
+  virtual bool isMDHistoWorkspace(pqPipelineSource *src);
   /// Check if file/workspace is a Peaks one.
   virtual bool isPeaksWorkspace(pqPipelineSource *src);
   /// Prints properties for given source.

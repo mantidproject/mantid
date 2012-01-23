@@ -54,10 +54,8 @@ void StripPeaks::init()
   declareProperty("PeakPositions", "",
     "Optional: enter a comma-separated list of the expected X-position of the centre of the peaks. Only peaks near these positions will be fitted." );
 
-  declareProperty("ApplyPeakPositionTolerance", false,
-      "Option to apply tolerance on found peaks' position against input peak positions.");
   declareProperty("PeakPositionTolerance", 0.01,
-      "Tolerance on the found peaks' positions against the input peak positions.");
+      "Tolerance on the found peaks' positions against the input peak positions. Non-positive value indicates that this option is turned off.");
 
   std::vector<std::string> bkgdtypes;
   bkgdtypes.push_back("Linear");
@@ -119,8 +117,6 @@ API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS)
   findpeaks->setProperty<std::string>("PeakPositions", getProperty("PeakPositions"));
   findpeaks->setProperty<std::string>("BackgroundType", getProperty("BackgroundType"));
   findpeaks->setProperty<bool>("HighBackground", getProperty("HighBackground"));
-
-  findpeaks->setProperty<bool>("ApplyPeakPositionTolerance", getProperty("ApplyPeakPositionTolerance"));
   findpeaks->setProperty<double>("PeakPositionTolerance", getProperty("PeakPositionTolerance"));
 
   findpeaks->executeAsSubAlg();

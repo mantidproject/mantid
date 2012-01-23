@@ -16,6 +16,7 @@ namespace API
   /** Constructor
    */
   IMDHistoWorkspace::IMDHistoWorkspace()
+  : IMDWorkspace(), MultipleExperimentInfos()
   {
   }
 

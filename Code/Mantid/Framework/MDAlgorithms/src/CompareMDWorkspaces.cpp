@@ -16,17 +16,20 @@ using namespace Mantid::API;
 using namespace Mantid::MDEvents;
 using namespace Mantid::Geometry;
 
+
+//=============================================================================
 /** Custom exception class to signal a failure
  * in the comparison
  */
-class CompareFailsException
+class CompareFailsException : public std::runtime_error
 {
 public:
-  CompareFailsException(const std::string& msg) : msg_(msg) {}
-  ~CompareFailsException( ) {}
-  std::string getMessage( ) const {return(msg_);}
-private:
-  std::string msg_;
+  CompareFailsException(const std::string& msg) :
+    std::runtime_error(msg)
+   {}
+  ~CompareFailsException( ) throw ()
+  {}
+  std::string getMessage( ) const {return this->what();}
 };
 
 
@@ -197,6 +200,7 @@ namespace MDAlgorithms
 
     for (size_t j=0; j<boxes1.size(); j++)
     {
+
       IMDBox<MDE,nd>* box1 = boxes1[j];
       IMDBox<MDE,nd>* box2 = boxes2[j];
 
@@ -235,24 +239,35 @@ namespace MDAlgorithms
         {
           const std::vector<MDE > & events1 = mdbox1->getConstEvents();
           const std::vector<MDE > & events2 = mdbox2->getConstEvents();
-          this->compare( events1.size(), events2.size(), "Box event vectors are not the same length" );
-          if (events1.size() == events2.size() && events1.size() > 2)
+          try
           {
-            // Check first and last event
-            for (size_t i=0; i<events1.size(); i+=events1.size()-1)
+            this->compare( events1.size(), events2.size(), "Box event vectors are not the same length" );
+            if (events1.size() == events2.size() && events1.size() > 2)
             {
-              for (size_t d=0; d<nd; d++)
+              // Check first and last event
+              for (size_t i=0; i<events1.size(); i++)
               {
-                this->compareTol( events1[i].getCenter(d), events2[i].getCenter(d), "Event center does not match");
+                for (size_t d=0; d<nd; d++)
+                {
+                  this->compareTol( events1[i].getCenter(d), events2[i].getCenter(d), "Event center does not match");
+                }
+                this->compareTol( events1[i].getSignal(), events2[i].getSignal(), "Event signal does not match");
+                this->compareTol( events1[i].getErrorSquared(), events2[i].getErrorSquared(), "Event error does not match");
               }
-              this->compareTol( events1[i].getSignal(), events2[i].getSignal(), "Event signal does not match");
-              this->compareTol( events1[i].getErrorSquared(), events2[i].getErrorSquared(), "Event error does not match");
             }
+          }
+          catch (CompareFailsException & e)
+          {
+            // Boxes must release events if the check fails
+            mdbox1->releaseEvents();
+            mdbox2->releaseEvents();
+            throw;
           }
           mdbox1->releaseEvents();
           mdbox2->releaseEvents();
         }// Don't compare if BoxStructureOnly
       } // is mdbox1
+
     }
 
 

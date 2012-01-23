@@ -1,4 +1,4 @@
-from numpy import zeros, arctan2
+from numpy import zeros, arctan2, arange
 from mantidsimple import *
 import math
 
@@ -96,12 +96,18 @@ def getPixelXTOF(mt1, maxX=304, maxY=256):
 def createIntegratedWorkspace(mt1, outputWorkspace,
                               fromXpixel, toXpixel,
                               fromYpixel, toYpixel,
-                              maxX=304, maxY=256):
+                              maxX=304, maxY=256, 
+                              source_to_detector=None, theta=None):
     """
         This creates the integrated workspace over the second pixel range (304 here) and
         returns the new workspace handle
     """
     _tof_axis = mt1.readX(0)[:]
+    
+    if source_to_detector is not None and theta is not None:
+        _const = float(4) * math.pi * m * source_to_detector / h
+        _tof_axis = 1e-10 * _const * math.sin(theta) / (_tof_axis*1e-6)
+    
     _y_axis = zeros((maxY, len(_tof_axis) - 1))
     _y_error_axis = zeros((maxY, len(_tof_axis) - 1))
     
@@ -118,16 +124,20 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
             _y_error_axis[y, :] += ((mt1.readE(_index)[:]) * (mt1.readE(_index)[:]))
 
     _y_axis = _y_axis.flatten()
-    _y_error_axis = sqrt(_y_error_axis)
+    _y_error_axis = numpy.sqrt(_y_error_axis)
     #plot_y_error_axis = _y_error_axis #for output testing only    -> plt.imshow(plot_y_error_axis, aspect='auto', origin='lower')
     _y_error_axis = _y_error_axis.flatten()
 
     #normalization by proton charge
 #    _y_axis /= (proton_charge * 1e-12)
+    
+    _tof_axis = _tof_axis[::-1]
+    _y_axis = _y_axis[::-1]
+    _y_error_axis = _y_error_axis[::-1]
 
     CreateWorkspace(OutputWorkspace=outputWorkspace, 
                     DataX=_tof_axis, DataY=_y_axis, DataE=_y_error_axis, Nspec=maxY,
-                    UnitX="TOF",ParentWorkspace=mt1)
+                    UnitX="MomentumTransfer",ParentWorkspace=mt1)
     mt2 = mtd[outputWorkspace]
     return mt2
 
@@ -234,13 +244,24 @@ def convertToRvsQ(dMD=-1,theta=-1,tof=None):
             theta: angle of detector
     """
     _const = float(4) * math.pi * m * dMD / h
-    sz_tof = shape(tof)[0]
+    sz_tof = numpy.shape(tof)[0]
     q_array = zeros(sz_tof-1)
     for t in range(sz_tof-1):
         tof1 = tof[t]
         tof2 = tof[t+1]
         tofm = (tof1+tof2)/2.
-        _Q = _const * sin(theta) / (tofm*1e-6)
+        _Q = _const * math.sin(theta) / (tofm*1e-6)
         q_array[t] = _Q*1e-10
     
     return q_array
+
+def getQHisto(source_to_detector, theta, tof_array):
+    _const = float(4) * math.pi * m * source_to_detector / h
+    sz_tof = len(tof_array)
+    q_array = zeros(sz_tof)
+    for t in range(sz_tof):
+        _Q = _const * math.sin(theta) / (tof_array[t]*1e-6)
+        q_array[t] = _Q*1e-10
+    
+    return q_array
+    

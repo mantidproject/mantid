@@ -61,6 +61,7 @@ namespace API
       // Stop watching once object is deleted
       API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_delete_observer);
     }
+    m_dimensions.clear();
   }
 
   
@@ -352,8 +353,8 @@ namespace API
   std::string MDGeometry::getGeometryXML() const
   {
     using Mantid::Geometry::MDGeometryBuilderXML;
-    using Mantid::Geometry::StrictDimensionPolicy;
-    MDGeometryBuilderXML<StrictDimensionPolicy> xmlBuilder;
+    using Mantid::Geometry::NoDimensionPolicy;
+    MDGeometryBuilderXML<NoDimensionPolicy> xmlBuilder;
     // Add all dimensions.
     const size_t nDimensions = this->getNumDims();
     for(size_t i = 0; i < nDimensions; i++)

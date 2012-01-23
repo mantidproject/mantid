@@ -51,7 +51,7 @@ namespace API
   public:
     MDGeometry();
     MDGeometry(const MDGeometry & other);
-    ~MDGeometry();
+    virtual ~MDGeometry();
     void initGeometry(std::vector<Mantid::Geometry::IMDDimension_sptr> & dimensions);
 
     // --------------------------------------------------------------------------------------------

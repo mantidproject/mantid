@@ -7,6 +7,17 @@
 #include "MantidKernel/DllConfig.h"
 #include <boost/shared_ptr.hpp>
 #include <string>
+#include <Poco/RWLock.h>
+
+
+// Forward declaration to allow Friend class.
+namespace Mantid
+{
+  namespace API
+  {
+    class Algorithm;
+  }
+}
 
 
 namespace Mantid
@@ -42,6 +53,8 @@ namespace Mantid
     class MANTID_KERNEL_DLL DataItem
     {
     public:
+      /// Default constructor
+      DataItem();
       /// Destructor
       virtual ~DataItem();
 
@@ -56,6 +69,22 @@ namespace Mantid
       /// Serializes the object to a string
       virtual std::string toString() const = 0;
       //@}
+
+    private:
+      /// Multiple-reader/single-writer lock to restrict multithreaded
+      /// access to the data item.
+      Poco::RWLock * m_lock;
+
+      Poco::RWLock * getLock();
+
+      /// Allow the ReadLock class direct access to the m_lock object.
+      friend class ReadLock;
+      /// Allow the Algorithm class but NOT its derived classes to get the lock object.
+      friend class Mantid::API::Algorithm;
+      /* WARNING: Do not add other friend classes unless you really know what
+       * you are doing. Write locks are INTENTIONALLY restricted to
+       * only the Algorithm base class.
+       */
     };
 
     /// Shared pointer to a DataItem

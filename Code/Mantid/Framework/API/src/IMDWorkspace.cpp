@@ -6,10 +6,6 @@ namespace Mantid
 {
   namespace API
   {
-      IMDWorkspace::~IMDWorkspace()
-      {
-      }
-
       //-----------------------------------------------------------------------------------------------
       /** Default constructor */
       IMDWorkspace::IMDWorkspace()
@@ -26,6 +22,10 @@ namespace Mantid
       {
       }
 
+      /// Destructor
+      IMDWorkspace::~IMDWorkspace()
+      {
+      }
 
       /**
         * Default implementation throws NotImplementedError exception.

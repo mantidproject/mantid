@@ -96,9 +96,6 @@ class DirectEnergyConversion(object):
                              bleed test diagnostic
               print_results - If True then the results are printed to the screen
         """
-        if kwargs.get('second_white', None) is not None:
-            raise RuntimeError("Diagnostic does not support second white beam run yet")
-
         lhs_names = lhs_info('names')
         if len(lhs_names) > 0:
             var_name = lhs_names[0]
@@ -113,6 +110,11 @@ class DirectEnergyConversion(object):
         
         # Get the white beam vanadium integrals
         whiteintegrals = self.do_white(white, None, None) # No grouping yet
+        if 'second_white' in kwargs:
+            second_white = kwargs['second_white']
+            other_whiteintegrals = self.do_white(second_white, None, None) # No grouping yet
+            kwargs['second_white'] = other_whiteintegrals
+
         # Get the background/total counts from the sample if present
         if 'sample' in kwargs:
             sample = kwargs['sample']
@@ -135,7 +137,7 @@ class DirectEnergyConversion(object):
             total_counts = Integration(result_ws, OutputWorkspace='total_counts', IncludePartialBins=True).workspace()
             background_int = ConvertUnits(background_int, background_int, "Energy", AlignBins=0).workspace()
             background_int *= 1.7016e8
-            background_int /= whiteintegrals
+            diagnostics.normalise_background(background_int, whiteintegrals, kwargs.get('second_white',None))
             kwargs['background_int'] = background_int
             kwargs['sample_counts'] = total_counts
             
@@ -162,6 +164,8 @@ class DirectEnergyConversion(object):
         if 'sample_counts' in kwargs:
             DeleteWorkspace('background_int')
             DeleteWorkspace('total_counts')
+        if 'second_white' in kwargs:
+            DeleteWorkspace(kwargs['second_white'])
         # Return a mask workspace
         diag_mask = ExtractMasking(whiteintegrals, OutputWorkspace='diag_mask').workspace()
         DeleteWorkspace(whiteintegrals)
@@ -178,9 +182,8 @@ class DirectEnergyConversion(object):
         Normalise to a specified white-beam run
         """
         whitews_name = common.create_resultname(white_run, suffix='-white')
-        if mtd.workspaceExists(whitews_name):
-            return mtd[whitews_name]
-
+        if whitews_name in mtd:
+            DeleteWorkspace(whitews_name)
         # Load
         white_data = self.load_data(white_run)
         # Normalise
@@ -276,7 +279,8 @@ class DirectEnergyConversion(object):
                 ei_calc = monitor_ws.getRun().getLogData("Ei").value
             except:
                 self.log("Error in GetEi. Using entered values.")
-                monitor_ws.getRun()['Ei'] = ei_value
+                #monitor_ws.getRun()['Ei'] = ei_value
+		AddSampleLog(monitor_ws, 'Ei', ei_value, "Number")
                 ei_value = ei_guess
                 ei_calc = None
                 TzeroCalculated = Tzero
@@ -792,7 +796,7 @@ class DirectEnergyConversion(object):
 
         # Diag 
         self.diag_params = ['diag_tiny', 'diag_huge', 'diag_samp_zero', 'diag_samp_lo', 'diag_samp_hi','diag_samp_sig',\
-                            'diag_van_out_lo', 'diag_van_out_hi', 'diag_van_lo', 'diag_van_hi', 'diag_van_sig']
+                            'diag_van_out_lo', 'diag_van_out_hi', 'diag_van_lo', 'diag_van_hi', 'diag_van_sig', 'diag_variation']
         # Add an attribute for each of them
         for par in self.diag_params:
             setattr(self, par, self.get_default_parameter(par))

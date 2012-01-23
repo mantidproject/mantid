@@ -60,6 +60,8 @@ namespace MDEvents
     std::vector<std::string> dim_IDs;
     /// the units of target workspace dimensions and properties of input MD workspace dimensions
     std::vector<std::string> dim_units;
+    /// the swich, specifying if the target Q3D -dimensions should be converted to hkl. Ignored in ModQ and NoQ mode and if no oriented lattice is found in input ws. 
+    bool convert_to_hkl;
     /** vectors, which describe the projection plain the target ws is based on (notional coordinate system). The transformation matrix below 
       * should bring the momentums from lab coordinate system into notional coordinate system */
     Kernel::V3D u,v;
@@ -79,6 +81,8 @@ namespace MDEvents
   }; 
 /** function to build mslice-like axis name from the vector, which describes crystallographic direction along this axis*/
 std::string DLLExport makeAxisName(const Kernel::V3D &vector,const std::vector<std::string> &Q1Names);
+/**creates string representation of the number with accuracy, cpecified by eps*/
+std::string DLLExport sprintfd(const double data, const double eps);
 
 }
 }

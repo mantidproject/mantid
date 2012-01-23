@@ -46,6 +46,9 @@ MaskDetectors::MaskDetectors() {}
 /// Destructor
 MaskDetectors::~MaskDetectors() {}
 
+/*
+ * Define input arguments
+ */
 void MaskDetectors::init()
 {
   declareProperty(
@@ -68,19 +71,22 @@ void MaskDetectors::init()
   BoundedValidator<int> *mustBePosInt = new BoundedValidator<int>();
   mustBePosInt->setLower(0);
   declareProperty("StartWorkspaceIndex", 0, mustBePosInt,
-          "The index number of the first spectrum to include in the calculation\n"
+          "The index number of the first workspace index to include in the calculation\n"
           "(default 0)" );
   declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePosInt->clone(),
-          "The index number of the last spectrum to include in the calculation\n"
+          "The index number of the last workspace index to include in the calculation\n"
           "(default the last histogram)" );
 }
 
+/*
+ * Main exec body
+ */
 void MaskDetectors::exec()
 {
   // Get the input workspace
   const MatrixWorkspace_sptr WS = getProperty("Workspace");
 
-  //Is it an event workspace?
+  // Is it an event workspace?
   EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(WS);
 
   std::vector<size_t> indexList = getProperty("WorkspaceIndexList");
@@ -88,18 +94,12 @@ void MaskDetectors::exec()
   const std::vector<detid_t> detectorList = getProperty("DetectorList");
   const MatrixWorkspace_sptr prevMasking = getProperty("MaskedWorkspace");
 
-  //each one of these values is optional but the user can't leave all four blank
+  // each one of these values is optional but the user can't leave all four blank
   if ( indexList.empty() && spectraList.empty() && detectorList.empty() && !prevMasking )
   {
     g_log.information(name() + ": There is nothing to mask, the index, spectra, "
 		      "detector lists and masked workspace properties are all empty");
     return;
-  }
-
-  // Check the provided workspace has the same number of spectra as the input
-  if( prevMasking && prevMasking->getNumberHistograms() > WS->getNumberHistograms() )
-  {
-    throw std::runtime_error("Size mismatch between two input workspaces.");
   }
 
   // If the spectraList property has been set, need to loop over the workspace looking for the
@@ -119,10 +119,29 @@ void MaskDetectors::exec()
   // If we have a workspace that could contain masking,copy that in too
   if( prevMasking )
   {
-    appendToIndexListFromWS(indexList,prevMasking);
+
+    DataObjects::SpecialWorkspace2D_const_sptr maskWS = boost::dynamic_pointer_cast<DataObjects::SpecialWorkspace2D>(prevMasking);
+    if (maskWS)
+    {
+      if (maskWS->getInstrument()->getDetectorIDs().size() != WS->getInstrument()->getDetectorIDs().size())
+      {
+        throw std::runtime_error("Size mismatch between input Workspace and SpecialWorkspace2D");
+      }
+
+      appendToIndexListFromMaskWS(indexList, maskWS);
+    } else
+    {
+      // Check the provided workspace has the same number of spectra as the input
+      if(prevMasking->getNumberHistograms() > WS->getNumberHistograms() )
+      {
+        g_log.error() << "Input workspace has " << WS->getNumberHistograms() << " histograms   vs. " <<
+            "Input masking workspace has " << prevMasking->getNumberHistograms() << " histograms. " << std::endl;
+        throw std::runtime_error("Size mismatch between two input workspaces.");
+      }
+      appendToIndexListFromWS(indexList,prevMasking);
+    }
   }
   
-
   // Need to get hold of the parameter map
   Geometry::ParameterMap& pmap = WS->instrumentParameters();
   
@@ -235,7 +254,33 @@ void MaskDetectors::appendToIndexListFromWS(std::vector<size_t>& indexList, cons
     }
   }
 
-}
+  return;
+} // appendToIndexListFromWS
+
+/**
+ * Append the indices of the masked spectra from the given workspace list to the given list
+ * @param indexList :: An existing list of indices
+ * @param maskedWorkspace :: An workspace with masked spectra
+ */
+void MaskDetectors::appendToIndexListFromMaskWS(std::vector<size_t>& indexList, const DataObjects::SpecialWorkspace2D_const_sptr maskedWorkspace)
+{
+  // Convert the vector of properties into a set for easy searching
+  std::set<int64_t> existingIndices(indexList.begin(), indexList.end());
+  int endIndex = getProperty("EndWorkspaceIndex");
+  if (endIndex == EMPTY_INT() ) endIndex = static_cast<int>(maskedWorkspace->getNumberHistograms() - 1);
+  int startIndex = getProperty("StartWorkspaceIndex");
+
+  for (int64_t i = startIndex; i <= endIndex; ++i)
+  {
+
+    if( maskedWorkspace->dataY(i)[0] < 0.5 && existingIndices.count(i) == 0 )
+    {
+      indexList.push_back(i);
+    }
+  }
+
+  return;
+} // appendToIndexListFromWS
 
 } // namespace DataHandling
 } // namespace Mantid

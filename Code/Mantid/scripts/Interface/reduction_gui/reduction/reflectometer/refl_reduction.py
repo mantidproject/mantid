@@ -3,7 +3,7 @@
     This is a fake version of the Reducer for testing purposes.
 """
 import time
-from scripter import BaseReductionScripter
+from reduction_gui.reduction.scripter import BaseReductionScripter
 
 class REFLReductionScripter(BaseReductionScripter):
     """
@@ -23,22 +23,21 @@ class REFLReductionScripter(BaseReductionScripter):
         script = "# REF_L reduction script\n"
         script += "# Script automatically generated on %s\n\n" % time.ctime(time.time())
         
-#        script += "from MantidFramework import *\n"
-#        script += "mtd.initialise(False)\n"
-##        script += "from reduction.instruments.sans.hfir_command_interface import *\n"
-#        script += "\n"
-#        
-#        for item in self._observers:
-#            if item.state() is not None:
-#                script += str(item.state())
-#        
-#        script += "SaveIqAscii()\n"
-#        script += "Reduce1D()\n"
-        
+        script += "from MantidFramework import *\n"
+        script += "mtd.initialise(False)\n"
+        script += "from mantidsimple import *\n\n"
+                
+        for item in self._observers:
+            if item.state() is not None:
+                script += str(item.state())
+                
         if file_name is not None:
             f = open(file_name, 'w')
             f.write(script)
             f.close()
+        
+        
+        
         
         return script
         

@@ -1,6 +1,7 @@
 import sys, os
 import traceback
 from PyQt4 import QtGui, QtCore, uic
+from mantidsimple import *
 
 # Check whether Mantid is available
 try:
@@ -404,7 +405,14 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
                 file_path = unicode(action.data().toString())
             
         # Check whether the file describes the current instrument
-        found_instrument = self._interface.scripter.verify_instrument(file_path)
+        try:
+            found_instrument = self._interface.scripter.verify_instrument(file_path)
+        except:
+            msg = "The file you attempted to load doesn't have a recognized format.\n\n"
+            msg += "Please make sure it has been produced by this application."
+            QtGui.QMessageBox.warning(self, "Error loading reduction parameter file", msg)
+            return
+         
         if not found_instrument == self._instrument:
             self._instrument = found_instrument
             self.setup_layout()

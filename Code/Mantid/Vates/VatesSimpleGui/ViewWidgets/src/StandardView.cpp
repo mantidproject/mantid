@@ -65,6 +65,16 @@ void StandardView::render()
   }
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
 
+  if (this->isMDHistoWorkspace(this->origSrc))
+  {
+    this->ui.rebinButton->setEnabled(false);
+  }
+  if (this->isPeaksWorkspace(this->origSrc))
+  {
+    this->ui.rebinButton->setEnabled(false);
+    this->ui.cutButton->setEnabled(false);
+  }
+
   // Show the data
   pqDataRepresentation *drep = builder->createDataRepresentation(\
         this->origSrc->getOutputPort(0), this->view);
@@ -115,6 +125,6 @@ void StandardView::resetCamera()
   this->view->resetCamera();
 }
 
-}
-}
-}
+} // SimpleGui
+} // Vates
+} // Mantid

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <facilities>
 
-<facility name="ISIS" zeropadding="5" FileExtensions=".nxs,.raw,.sav,.n*,.s*,">
+<facility name="ISIS" zeropadding="5" FileExtensions=".nxs,.raw,.sav,.n*,.s*,.add,">
   <archive>
     <archiveSearch plugin="ISISDataSearch" />
   </archive>

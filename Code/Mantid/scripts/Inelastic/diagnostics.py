@@ -59,62 +59,71 @@ def diagnose(white_int, **kwargs):
                          bleed test diagnostic
           print_results - If True then the results are printed to the screen
     """
+    if white_int is None and str(white_int) != '':
+        raise RuntimeError("No white beam integral specified. This is the minimum required to run diagnostics")
+    
     # Grab the arguments
     parser = ArgumentParser(kwargs)
     start_index = parser.start_index
     end_index = parser.end_index
-    
-    # Load the hard mask file if necessary
-    hard_mask_spectra = ''
-    if kwargs.get('hard_mask', None) is not None:
-        hard_mask_spectra = common.load_mask(hard_mask)
 
     # Map the test number to the results
     # Each element is the mask workspace name then the number of failures
-    test_results = [ [None, None], [None, None], [None, None], [None, None]]
-    
+    test_results = [ [None, None], [None, None], [None, None], [None, None], [None, None]]
 
-    ##
-    ## White beam Test
-    ##
-    white_counts = None
-    if white_int is not None and str(white_int) != '':
-        # Hard mask
-        MaskDetectors(white_int, SpectraList=hard_mask_spectra)
-        # Run first white beam tests
-        __white_masks, num_failed = _do_white_test(white_int, parser.tiny, parser.huge, 
+    # Load the hard mask file if necessary
+    hard_mask_spectra = ''
+    if 'hard_mask' in kwargs:
+        hard_mask_spectra = common.load_mask(parser.hard_mask)
+        test_results[0][0] = os.path.basename(parser.hard_mask)
+
+    # Hard mask
+    masking = MaskDetectors(white_int, SpectraList=hard_mask_spectra)
+    # Find out how many detectors we hard masked
+    hard_mask_spectra = masking['SpectraList'].value
+    test_results[0][1] = len(hard_mask_spectra)
+
+    # White beam Test
+    __white_masks, num_failed = do_white_test(white_int, parser.tiny, parser.huge, 
+                                              parser.van_out_lo, parser.van_out_hi,
+                                              parser.van_lo, parser.van_hi, 
+                                              parser.van_sig, start_index, end_index)
+    test_results[1] = [str(__white_masks), num_failed]
+    add_masking(white_int, __white_masks, start_index, end_index)
+    DeleteWorkspace(__white_masks)
+
+    # Second white beam test
+    if 'second_white' in kwargs:
+        __second_white_masks, num_failed = do_second_white_test(white_int, parser.second_white, parser.tiny, parser.huge, 
                                                    parser.van_out_lo, parser.van_out_hi,
-                                                   parser.van_lo, parser.van_hi, 
+                                                   parser.van_lo, parser.van_hi, parser.variation,
                                                    parser.van_sig, start_index, end_index)
-        test_results[0] = [str(__white_masks), num_failed]
-        _add_masking(white_int, __white_masks, start_index, end_index)
-        DeleteWorkspace(__white_masks)
-    else:
-        raise RuntimeError('Invalid input for white run "%s"' % str(white_int))
+        test_results[2] = [str(__second_white_masks), num_failed]
+        add_masking(white_int, __second_white_masks, start_index, end_index)
 
     #
     # Zero total count check for sample counts
     #
     zero_count_failures = 0
-    if hasattr(parser, 'sample_counts'):
-        _add_masking(parser.sample_counts, white_int)
+    if kwargs.get('sample_counts',None) is not None and kwargs.get('samp_zero',False):
+        add_masking(parser.sample_counts, white_int)
         checker = FindDetectorsOutsideLimits(InputWorkspace=parser.sample_counts, OutputWorkspace='maskZero',
                                              StartWorkspaceIndex=start_index, EndWorkspaceIndex=end_index,
                                              LowThreshold=1e-10, HighThreshold=1e100)
         zero_count_failures = checker['NumberOfFailures'].value 
         maskZero = checker.workspace()
-        _add_masking(white_int, maskZero, start_index, end_index)
+        add_masking(white_int, maskZero, start_index, end_index)
         DeleteWorkspace(maskZero)
-        
+
     #
     # Background check
     #
     if hasattr(parser, 'background_int'):
-        _add_masking(parser.background_int, white_int)
-        __bkgd_mask, failures = _do_background_test(parser.background_int, parser.samp_lo, 
-                                                    parser.samp_hi, parser.samp_sig, parser.samp_zero, start_index, end_index)
-        test_results[2] = [str(__bkgd_mask), zero_count_failures + failures]
-        _add_masking(white_int, __bkgd_mask, start_index, end_index)
+        add_masking(parser.background_int, white_int)
+        __bkgd_mask, failures = do_background_test(parser.background_int, parser.samp_lo, 
+                                                   parser.samp_hi, parser.samp_sig, parser.samp_zero, start_index, end_index)
+        test_results[3] = [str(__bkgd_mask), zero_count_failures + failures]
+        add_masking(white_int, __bkgd_mask, start_index, end_index)
         DeleteWorkspace(__bkgd_mask)
     
     #
@@ -123,9 +132,9 @@ def diagnose(white_int, **kwargs):
     if hasattr(parser, 'bleed_test') and parser.bleed_test:
         if not hasattr(parser, 'sample_run'):
             raise RuntimeError("Bleed test requested but the sample_run keyword has not been provided")
-        __bleed_masks, failures = _do_bleed_test(parser.sample_run, parser.bleed_maxrate, parser.bleed_pixels)
-        test_results[3] = [str(__bleed_masks), failures]
-        _add_masking(white_int, __bleed_masks)
+        __bleed_masks, failures = do_bleed_test(parser.sample_run, parser.bleed_maxrate, parser.bleed_pixels)
+        test_results[4] = [str(__bleed_masks), failures]
+        add_masking(white_int, __bleed_masks)
         DeleteWorkspace(__bleed_masks)
     
     if hasattr(parser, 'print_results') and parser.print_results:
@@ -133,7 +142,7 @@ def diagnose(white_int, **kwargs):
 
 #-------------------------------------------------------------------------------
 
-def _add_masking(input_ws, mask_ws, start_index=None, end_index=None):
+def add_masking(input_ws, mask_ws, start_index=None, end_index=None):
     """
     Mask the Detectors on the input workspace that are masked 
     on the mask_ws. Avoids a current bug in using MaskDetectors with a MaskedWorkspace in a loop 
@@ -145,8 +154,8 @@ def _add_masking(input_ws, mask_ws, start_index=None, end_index=None):
 
 #-------------------------------------------------------------------------------
 
-def _do_white_test(white_int, tiny, large, out_lo, out_hi, median_lo, median_hi, sigma, 
-                   start_index=None, end_index=None):
+def do_white_test(white_int, tiny, large, out_lo, out_hi, median_lo, median_hi, sigma, 
+                  start_index=None, end_index=None):
     """
     Run the diagnostic tests on the integrated white beam run
 
@@ -186,8 +195,9 @@ def _do_white_test(white_int, tiny, large, out_lo, out_hi, median_lo, median_hi,
 
 #-------------------------------------------------------------------------------
 
-def _do_second_white_test(white_counts, comp_white_counts, tiny, large, median_lo,
-                          median_hi, signif, variation):
+def do_second_white_test(white_counts, comp_white_counts, tiny, large, out_lo, out_hi, 
+                         median_lo, median_hi, sigma, variation,
+                         start_index=None, end_index=None):
     """
     Run additional tests comparing given another white beam count workspace, comparing
     to the first
@@ -207,7 +217,7 @@ def _do_second_white_test(white_counts, comp_white_counts, tiny, large, median_l
       variation     - Defines a range within which the ratio of the two counts is
                       allowed to fall in terms of the number of medians
     """ 
-    mtd.sendLogMessage('Running second white beam test')   
+    mtd.sendLogMessage('Running second white beam test')
 
     # What shall we call the output
     lhs_names = lhs_info('names')
@@ -221,13 +231,15 @@ def _do_second_white_test(white_counts, comp_white_counts, tiny, large, median_l
     ConvertToMatrixWorkspace(comp_white_counts, comp_white_counts)
     
     # Do the white beam test
-    __second_white_tests, failed = _do_white_test(comp_white_counts, tiny, large, median_lo, median_hi, signif)
+    __second_white_tests, failed = do_white_test(comp_white_counts, tiny, large, median_lo, median_hi, 
+                                                 sigma, start_index, end_index)
     # and now compare it with the first
-    effic_var = DetectorEfficiencyVariation(white_counts, comp_white_counts, ws_name, Variation=variation)
+    effic_var = DetectorEfficiencyVariation(white_counts, comp_white_counts, ws_name, Variation=variation,
+                                            StartWorkspaceIndex=start_index, EndWorkspaceIndex=end_index,)
     # Total number of failures
     num_failed = effic_var['NumberOfFailures'].value + failed
 
-    mtd.deleteWorkspace(str(__second_white_tests))
+    DeleteWorkspace(str(__second_white_tests))
     # Mask those that failed
     maskWS = effic_var.workspace()
     MaskDetectors(white_counts, MaskedWorkspace=maskWS)
@@ -236,8 +248,27 @@ def _do_second_white_test(white_counts, comp_white_counts, tiny, large, median_l
     return maskWS, num_failed
 
 #------------------------------------------------------------------------------
+def normalise_background(background_int, white_int, second_white_int=None):
+    """Normalize the background integrals
+    
+       If two white beam files are provided then the background integrals
+       are normalized by the harmonic mean of the two:
+       
+       hmean = 2.0/((1/v1) + (1/v2)) = 2v1*v2/(v1+v2)
+       
+       If only a single white
+       beam is provided then the background is normalized by the white beam itself 
+    
+    """
+    if second_white_int is None:
+        background_int /= white_int
+    else:
+        hmean = 2.0*white_int*second_white_int/(white_int+second_white_int)
+        background_int /= hmean
+        DeleteWorkspace(hmean)
 
-def _do_background_test(background_int, median_lo, median_hi, sigma, mask_zero, 
+#------------------------------------------------------------------------------
+def do_background_test(background_int, median_lo, median_hi, sigma, mask_zero, 
                         start_index=None, end_index=None):
     """
     Run the background tests
@@ -251,10 +282,6 @@ def _do_background_test(background_int, median_lo, median_hi, sigma, mask_zero,
 
     """
     mtd.sendLogMessage('Running background count test')
-
-    # If we need to remove zeroes as well then set the the low threshold to a tiny positive number
-    if mask_zero:
-        median_lo = 1e-40
 
     # What shall we call the output
     lhs_names = lhs_info('names')
@@ -273,7 +300,7 @@ def _do_background_test(background_int, median_lo, median_hi, sigma, mask_zero,
 
 #-------------------------------------------------------------------------------
 
-def _do_bleed_test(sample_run, max_framerate, ignored_pixels):
+def do_bleed_test(sample_run, max_framerate, ignored_pixels):
     """Runs the CreatePSDBleedMask algorithm
 
     Input:
@@ -315,7 +342,7 @@ def print_test_summary(test_results):
     test_results - A list or tuple containing either the number of failed spectra or None
                    indicating that the test was not run
     """
-    num_diags = 4
+    num_diags = 5
     if len(test_results) != num_diags:
         raise ValueError("Invalid input for print_test_summary. A list of %d numbers is expected." % num_diags)
 
@@ -329,10 +356,11 @@ def print_test_summary(test_results):
         return
 
     summary = (
-        ['First white beam test:',test_results[0]], \
-        ['Second white beam test:',test_results[1]], \
-        ['Background test:',test_results[2]], \
-        ['PSD Bleed test :',test_results[3]] \
+        ['Hard mask:',test_results[0]], \
+        ['First white beam test:',test_results[1]], \
+        ['Second white beam test:',test_results[2]], \
+        ['Background test:',test_results[3]], \
+        ['PSD Bleed test :',test_results[4]] \
         )
 
     print '==== Diagnostic Test Summary ===='

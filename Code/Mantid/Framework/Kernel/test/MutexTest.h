@@ -7,52 +7,47 @@
 #include "MantidKernel/FunctionTask.h"
 #include <iostream>
 #include "MantidKernel/CPUTimer.h"
-
+#include <Poco/RWLock.h>
 using namespace Mantid::Kernel;
 
 #define DATA_SIZE 10000000
 std::vector<double> shared_data;
 
 
-//#include <boost/thread.hpp>
-//boost::shared_mutex _access;
-//void reader()
+
+Poco::RWLock _access;
+
+//Poco::ScopedReadRWLock getReadLock()
 //{
-//  boost::shared_lock< boost::shared_mutex > lock(_access);
-//  // do work here, without anyone having exclusive access
-//  for (size_t i=0; i<shared_data.size(); i++)
-//  {
-//    double val = shared_data[i];
-//  }
+//  return Poco::ScopedReadRWLock(_access);
 //}
-//
-//void conditional_writer()
-//{
-//  boost::upgrade_lock< boost::shared_mutex > lock(_access);
-//  // do work here, without anyone having exclusive access
-//
-//  if (true)
-//  {
-//    boost::upgrade_to_unique_lock< boost::shared_mutex > uniqueLock(lock);
-//    // do work here, but now you have exclusive access
-//    for (size_t i=0; i<shared_data.size(); i++)
-//    {
-//      shared_data[i] = 2.345;
-//    }
-//  }
-//
-//  // do more work here, without anyone having exclusive access
-//}
-//
-//void unconditional_writer()
-//{
-//  boost::unique_lock< boost::shared_mutex > lock( _access );
-//  // do work here, with exclusive access
-//  shared_data.resize(shared_data.size()+1, 2.345);
-//  // Dumb thing to slow down the writer
-//  for (size_t i=0; i<shared_data.size(); i++)
-//    shared_data[i] = 4.567;
-//}
+
+void reader()
+{
+//  std::cout << "Read started" << std::endl;
+  Poco::ScopedReadRWLock lock(_access);
+//  std::cout << "Read launching" << std::endl;
+  // do work here, without anyone having exclusive access
+  for (size_t i=0; i<shared_data.size(); i++)
+  {
+    double val = shared_data[i];
+  }
+//  std::cout << "Read finished" << std::endl;
+}
+
+
+void unconditional_writer()
+{
+//  std::cout << "Write started" << std::endl;
+  Poco::ScopedWriteRWLock lock( _access );
+//  std::cout << "Write launching" << std::endl;
+  // do work here, with exclusive access
+  shared_data.resize(shared_data.size()+1, 2.345);
+  // Dumb thing to slow down the writer
+  for (size_t i=0; i<shared_data.size(); i++)
+    shared_data[i] = 4.567;
+//  std::cout << "Write finished" << std::endl;
+}
 
 
 class MutexTest : public CxxTest::TestSuite
@@ -72,48 +67,48 @@ public:
   {
   }
 
-//  /** Launch a bunch of reading threads */
-//  void test_simultaneous_read()
-//  {
-//    ThreadPool pool;
-//    CPUTimer tim;
-//    size_t numTasks = 100;
-//    for (size_t i=0; i<numTasks; i++)
-//      pool.schedule( new FunctionTask(reader) );
-//    pool.joinAll();
-//    std::cout << tim << " to execute all " << numTasks << " tasks" << std::endl;
-//  }
-//
-//  /** Launch a bunch of writing threads */
-//  void test_simultaneous_write()
-//  {
-//    ThreadPool pool;
-//    CPUTimer tim;
-//    size_t numTasks = 10;
-//    for (size_t i=0; i<numTasks; i++)
-//      pool.schedule( new FunctionTask(unconditional_writer) );
-//    pool.joinAll();
-//    std::cout << tim << " to execute all " << numTasks << " tasks" << std::endl;
-//    TSM_ASSERT_EQUALS( "The writers were all called", shared_data.size(), DATA_SIZE + numTasks)
-//  }
-//
-//  /** Mix 1 writing thread for 9 reading threads */
-//  void test_write_blocks_readers()
-//  {
-//    ThreadPool pool;
-//    CPUTimer tim;
-//    size_t numTasks = 100;
-//    for (size_t i=0; i<numTasks; i++)
-//    {
-//      if (i%10 == 0)
-//        pool.schedule( new FunctionTask(unconditional_writer) );
-//      else
-//        pool.schedule( new FunctionTask(reader) );
-//    }
-//    pool.joinAll();
-//    std::cout << tim << " to execute all " << numTasks << " tasks" << std::endl;
-//    TSM_ASSERT_EQUALS( "The writers were all called", shared_data.size(), DATA_SIZE + numTasks/10)
-//  }
+  /** Launch a bunch of reading threads */
+  void test_simultaneous_read()
+  {
+    ThreadPool pool;
+    CPUTimer tim;
+    size_t numTasks = 50;
+    for (size_t i=0; i<numTasks; i++)
+      pool.schedule( new FunctionTask(reader) );
+    pool.joinAll();
+    std::cout << tim << " to execute all " << numTasks << " tasks" << std::endl;
+  }
+
+  /** Launch a bunch of writing threads */
+  void test_simultaneous_write()
+  {
+    ThreadPool pool;
+    CPUTimer tim;
+    size_t numTasks = 10;
+    for (size_t i=0; i<numTasks; i++)
+      pool.schedule( new FunctionTask(unconditional_writer) );
+    pool.joinAll();
+    std::cout << tim << " to execute all " << numTasks << " tasks" << std::endl;
+    TSM_ASSERT_EQUALS( "The writers were all called", shared_data.size(), DATA_SIZE + numTasks)
+  }
+
+  /** Mix 1 writing thread for 9 reading threads */
+  void test_write_blocks_readers()
+  {
+    ThreadPool pool;
+    CPUTimer tim;
+    size_t numTasks = 50;
+    for (size_t i=0; i<numTasks; i++)
+    {
+      if (i%10 == 0)
+        pool.schedule( new FunctionTask(unconditional_writer) );
+      else
+        pool.schedule( new FunctionTask(reader) );
+    }
+    pool.joinAll();
+    std::cout << tim << " to execute all " << numTasks << " tasks" << std::endl;
+    TSM_ASSERT_EQUALS( "The writers were all called", shared_data.size(), DATA_SIZE + numTasks/10)
+  }
 
 };
 

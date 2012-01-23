@@ -37,7 +37,7 @@ public:
 
   void testConstructThrowsWhenFileDoesntExist()
   {
-    TSM_ASSERT_THROWS("Unknown file, should throw.", new RawFileMemento("MadeUp.nxs"), std::runtime_error);
+    TSM_ASSERT_THROWS("Unknown file, should throw.", new RawFileMemento("MadeUp.nxs"), std::invalid_argument);
   }
 
   void testFetchItSucceedsWhenFileExists()

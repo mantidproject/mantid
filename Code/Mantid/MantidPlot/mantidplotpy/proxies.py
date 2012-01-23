@@ -476,7 +476,7 @@ class SliceViewerWindowProxy(QtProxyObject):
         """
         return SliceViewerProxy(self._getHeldObject().getSlicer())
     
-    def showLine(self, start, end, width=None, planar_width=0.1, dim_widths=None,
+    def showLine(self, start, end, width=None, planar_width=0.1, thicknesses=None,
                  num_bins=100):
         """Opens the LineViewer and define a 1D line along which to integrate.
         
@@ -492,7 +492,7 @@ class SliceViewerWindowProxy(QtProxyObject):
                 dimensions) to this integration width.
             planar_width :: sets the XY-planar (perpendicular to the line)
                 integration width. Default 0.1.
-            dim_widths :: list with one width value for each dimension in the
+            thicknesses :: list with one thickness value for each dimension in the
                 workspace (including the XY dimensions, which are ignored).
                 e.g. [0,1,2,3] in a XYZT workspace.
             num_bins :: number of bins by which to divide the line.
@@ -512,12 +512,12 @@ class SliceViewerWindowProxy(QtProxyObject):
         
         # Set the width.
         if not width is None:
-            liner.setWidth(width)
+            liner.setThickness(width)
         else:
             liner.setPlanarWidth(planar_width)
-            if not dim_widths is None:
-                for d in xrange(len(dim_widths)):
-                    liner.setWidth(d, dim_widths[i])
+            if not thicknesses is None:
+                for d in xrange(len(thicknesses)):
+                    liner.setThickness(d, thicknesses[i])
         # Bins
         liner.setNumBins(num_bins)
         liner.apply()
@@ -552,6 +552,6 @@ class LineViewerProxy(QtProxyObject):
         
     def __dir__(self):
         """Returns the list of attributes for this object.   """
-        return ["apply", "showPreview", "showFull", "setStartXY", "setEndXY", "setWidth", "setWidth", "setPlanarWidth", "getPlanarWidth", "setNumBins", "setFixedBinWidthMode", "getFixedBinWidth", "getFixedBinWidthMode", "getNumBins", "getBinWidth"]
+        return ["apply", "showPreview", "showFull", "setStartXY", "setEndXY", "setThickness", "setThickness", "setThickness", "setPlanarWidth", "getPlanarWidth", "setNumBins", "setFixedBinWidthMode", "getFixedBinWidth", "getFixedBinWidthMode", "getNumBins", "getBinWidth", "setPlotAxis", "getPlotAxis"]
     
     

@@ -91,10 +91,8 @@ void FindPeaks::init()
   declareProperty("GuessedPeakWidthStep", 2,
       "Step of guessed peak width. It is in unit of number of pixels.");
 
-  declareProperty("ApplyPeakPositionTolerance", false,
-      "Option to apply tolerance on found peaks' position against input peak positions.");
-  declareProperty("PeakPositionTolerance", 0.01,
-      "Tolerance on the found peaks' positions against the input peak positions.");
+  declareProperty("PeakPositionTolerance", -1.0,
+      "Tolerance on the found peaks' positions against the input peak positions.  Non-positive value indicates that this option is turned off.");
 
   // The found peaks in a table
   declareProperty(new WorkspaceProperty<API::ITableWorkspace>("PeaksList","",Direction::Output),
@@ -163,8 +161,11 @@ void FindPeaks::exec()
   maxGuessedPeakWidth = static_cast<unsigned int>(t2);
   stepGuessedPeakWidth = static_cast<unsigned int>(t3);
 
-  usePeakPositionTolerance = getProperty("ApplyPeakPositionTolerance");
   peakPositionTolerance = getProperty("PeakPositionTolerance");
+  if (peakPositionTolerance > 0)
+    usePeakPositionTolerance = true;
+  else
+    usePeakPositionTolerance = false;
 
   // b) Get the specified peak positions, which is optional
   std::string peakPositions = getProperty("PeakPositions");

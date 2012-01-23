@@ -53,6 +53,7 @@ class StitcherWidget(BaseWidget):
         self._graph = "StitchedData"
         self._output_dir = None
         self._stitcher = None
+        self._plotted = False
 
     def initialize_content(self):
         """
@@ -244,6 +245,7 @@ class StitcherWidget(BaseWidget):
         else:
             self._low_q_data = None
             util.set_valid(self._content.low_q_combo.lineEdit(), False)
+        self._plotted = False
 
     def _update_medium_q(self, ws=None):
         """
@@ -272,6 +274,7 @@ class StitcherWidget(BaseWidget):
         else:
             self._medium_q_data = None
             util.set_valid(self._content.medium_q_combo.lineEdit(), False)
+        self._plotted = False
 
     def _update_high_q(self, ws=None):
         """
@@ -295,6 +298,7 @@ class StitcherWidget(BaseWidget):
         else:
             self._high_q_data = None
             util.set_valid(self._content.high_q_combo.lineEdit(), False)
+        self._plotted = False
 
     def data_browse_dialog(self):
         """
@@ -433,9 +437,10 @@ class StitcherWidget(BaseWidget):
         
         if len(ws_list)>0:
             g = _qti.app.graph(self._graph)
-            if g is None:
+            if g is None or not self._plotted:
                 g = _qti.app.mantidUI.pyPlotSpectraList(ws_list,[0],True)
                 g.setName(self._graph)
+                self._plotted = True
                 
     def _save_result(self):
         """
