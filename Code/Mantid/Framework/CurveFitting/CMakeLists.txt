@@ -17,6 +17,7 @@ set ( SRC_FILES
 	src/Fit1D.cpp
 	src/FuncMinimizerFactory.cpp
 	src/GSLFunctions.cpp
+	src/GausDecay.cpp
 	src/Gaussian.cpp
 	src/Gaussian1D.cpp
 	src/GaussianLinearBG1D.cpp
@@ -66,6 +67,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Fit1D.h
 	inc/MantidCurveFitting/FuncMinimizerFactory.h
 	inc/MantidCurveFitting/GSLFunctions.h
+	inc/MantidCurveFitting/GausDecay.h
 	inc/MantidCurveFitting/Gaussian.h
 	inc/MantidCurveFitting/Gaussian1D.h
 	inc/MantidCurveFitting/GaussianLinearBG1D.h
