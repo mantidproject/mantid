@@ -77,6 +77,7 @@ namespace Crystal
     t->addColumn("double","h");
     t->addColumn("double","k");
     t->addColumn("double","l");
+    t->addColumn("str","BankName");
     t->addColumn("int","duplicates");
     t->addColumn("double","Intensity.mean");
     t->addColumn("double","Intensity.std");
@@ -94,15 +95,18 @@ namespace Crystal
     criteria.push_back( std::pair<std::string, bool>("H", true) );
     criteria.push_back( std::pair<std::string, bool>("K", true) );
     criteria.push_back( std::pair<std::string, bool>("L", true) );
+    criteria.push_back( std::pair<std::string, bool>("BankName", true) );
     peaksW->sort(criteria);
 
     int NumberPeaks = peaksW->getNumberPeaks();
     std::vector<double> data, err;
     V3D hkl1;
+    std::string bank1;
     for (int i = 1; i < NumberPeaks; i++)
     {
       Peak & peak1 = peaksW->getPeaks()[i-1];
       hkl1 = peak1.getHKL();
+      bank1 = peak1.getBankName();
       if(i == 1)
       {
         data.push_back(peak1.getIntensity());
@@ -110,7 +114,8 @@ namespace Crystal
       }
       Peak & peak2 = peaksW->getPeaks()[i];
       V3D hkl2 = peak2.getHKL();
-      if (hkl1 == hkl2)
+      std::string bank2 = peak2.getBankName();
+      if (hkl1 == hkl2 && bank1.compare(bank2) == 0)
       {
         data.push_back(peak2.getIntensity());
         err.push_back(peak2.getSigmaIntensity());
@@ -118,7 +123,7 @@ namespace Crystal
         {
           Statistics stats = getStatistics(data);
           TableRow r = t->appendRow();
-          r <<peak1.getH()<<peak1.getK()<<peak1.getL()<<static_cast<int>(data.size())<<stats.mean<< stats.standard_deviation<< stats.minimum<< stats.maximum<< stats.median;
+          r <<peak1.getH()<<peak1.getK()<<peak1.getL()<<bank1<<static_cast<int>(data.size())<<stats.mean<< stats.standard_deviation<< stats.minimum<< stats.maximum<< stats.median;
           stats = getStatistics(err);
           r <<stats.mean<< stats.standard_deviation<< stats.minimum<< stats.maximum<< stats.median;
           data.clear();
@@ -129,12 +134,13 @@ namespace Crystal
       {
         Statistics stats = getStatistics(data);
         TableRow r = t->appendRow();
-        r <<peak1.getH()<<peak1.getK()<<peak1.getL()<<static_cast<int>(data.size())<<stats.mean<< stats.standard_deviation<< stats.minimum<< stats.maximum<< stats.median;
+        r <<peak1.getH()<<peak1.getK()<<peak1.getL()<<bank1<<static_cast<int>(data.size())<<stats.mean<< stats.standard_deviation<< stats.minimum<< stats.maximum<< stats.median;
         stats = getStatistics(err);
         r <<stats.mean<< stats.standard_deviation<< stats.minimum<< stats.maximum<< stats.median;
         data.clear();
         err.clear();
         hkl1 = hkl2;
+        bank1 = bank2;
         data.push_back(peak1.getIntensity());
         err.push_back(peak1.getSigmaIntensity());
       }
