@@ -15,7 +15,10 @@
     <value val="002" />
 </parameter>
 <!-- Available options are "Show" or "Hide". -->
-<parameter name="cm-1-convert_choice" type="string">
+<parameter name="cm-1-convert-choice" type="string">
+    <value val="Show" />
+</parameter>
+<parameter name="save-aclimax-choice" type="string">
     <value val="Show" />
 </parameter>
   
@@ -57,7 +60,7 @@
 <parameter name="Workflow.Summary" type="string">
     <value val="Average" />
 </parameter>
-
+  
 </component-link>
 
 </parameter-file>

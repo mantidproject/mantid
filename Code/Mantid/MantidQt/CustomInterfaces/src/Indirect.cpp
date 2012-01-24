@@ -251,18 +251,17 @@ void Indirect::runConvertToEnergy()
     pyInput += "reducer.set_fold_multiple_frames(False)\n";
   }
 
+  if( m_uiForm.ckCm1Units->isChecked() )
+  {
+    pyInput +=
+      "reducer.set_save_to_cm_1(True)\n";
+  }
+
   pyInput += "reducer.set_save_formats([" + savePyCode() + "])\n";
 
   pyInput +=
     "reducer.reduce()\n"
     "ws_list = reducer.get_result_workspaces()\n";
-
-  if( m_uiForm.ckCm1Units->isChecked() )
-  {
-    pyInput +=
-      "for ws in ws_list:"
-      "  ConvertUnits(InputWorkspace=ws,OutputWorkspace=ws,EMode='Indirect',Target='DeltaE_inWavenumber')";
-  }
 
   // Plot Output options
   switch ( m_uiForm.ind_cbPlotOutput->currentIndex() )
@@ -360,7 +359,8 @@ void Indirect::setIDFValues(const QString & prefix)
 */
 void Indirect::performInstSpecific()
 {
-  setInstSpecificWidget("cm-1-convert_choice", m_uiForm.ckCm1Units, QCheckBox::Off);
+  setInstSpecificWidget("cm-1-convert-choice", m_uiForm.ckCm1Units, QCheckBox::Off);
+  setInstSpecificWidget("save-aclimax-choice", m_uiForm.save_ckAclimax, QCheckBox::Off);
 }
 
 /**
@@ -491,6 +491,8 @@ QString Indirect::savePyCode()
     fileFormats << "nxspe";
   if ( m_uiForm.save_ckAscii->isChecked() )
     fileFormats << "ascii";
+  if ( m_uiForm.save_ckAclimax->isChecked() )
+    fileFormats << "aclimax";
 
   if ( fileFormats.size() != 0 )
     fileFormatList = "'" + fileFormats.join("', '") + "'";

@@ -627,8 +627,42 @@ class Summary(ReductionStep):
             # Note: Detector info of the output becomes spurious as there will be a third entry for a detector 
             # that does not exist.
             ConjoinWorkspaces(wsName, tempName, False)
-	    
 
+class ConvertToCm1(ReductionStep):
+    """
+    Converts the workspaces to cm-1.
+    """
+    
+    _multiple_frames = False
+    _save_to_cm_1 = False
+    
+    def __init__(self, MultipleFrames=False):
+        super(ConvertToCm1, self).__init__()
+        self._multiple_frames = MultipleFrames
+    
+    def execute(self, reducer, file_ws):
+        
+        if self._save_to_cm_1 == False:
+            return
+        
+        if ( self._multiple_frames ):
+            try:
+                workspaceNames = mtd[file_ws].getNames()
+            except AttributeError:
+                workspaceNames = [file_ws]
+        else:
+            workspaceNames = [file_ws]
+        
+        for wsName in workspaceNames:
+            try:
+                ws = mtd[wsName]
+            except:
+                continue
+            ConvertUnits(InputWorkspace=ws,OutputWorkspace=ws,EMode='Indirect',Target='DeltaE_inWavenumber')
+
+    def set_save_to_cm_1(self, save_to_cm_1):
+        self._save_to_cm_1 = save_to_cm_1
+            
 class ConvertToEnergy(ReductionStep):
     """
     """    
@@ -841,6 +875,7 @@ class SaveItem(ReductionStep):
             Flight if not already in that unit for saving in this format).
     """
     _formats = []
+    _save_to_cm_1 = False
     
     def __init__(self):
         super(SaveItem, self).__init__()
@@ -862,9 +897,19 @@ class SaveItem(ReductionStep):
                 ConvertUnits(file_ws, "__save_item_temp", "TOF")
                 SaveGSS("__save_item_temp", filename+".gss")
                 DeleteWorkspace("__save_item_temp")
-            
+            elif format == 'aclimax':
+                if (self._save_to_cm_1 == False):
+                    bins = '-2.5, 0.01, 3, -0.005, 500' #meV
+                else:
+                    bins = '24, -0.005, 4000' #cm-1
+                Rebin(file_ws, file_ws + '_aclimax_save_temp', bins)
+                SaveAscii(file_ws + '_aclimax_save_temp', filename+ '_aclimax.dat', Separator='Tab')
+                DeleteWorkspace(file_ws + '_aclimax_save_temp')
+                
     def set_formats(self, formats):
         self._formats = formats
+    def set_save_to_cm_1(self, save_to_cm_1):
+        self._save_to_cm_1 = save_to_cm_1
 
 class Naming(ReductionStep):
     """Takes the responsibility of naming the results away from the Grouping
