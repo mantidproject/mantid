@@ -197,6 +197,8 @@ class SNSPowderReduction(PythonAlgorithm):
         self.declareProperty("BinInDspace", True,
                              Description="If all three bin parameters a specified, whether they are in dspace (true) or time-of-flight (false)")
         self.declareProperty("VanadiumFWHM", 7, Description="Default=7")
+        self.declareProperty("VanadiumPeakTol", 0.05,
+                             Description="How far from the ideal position a vanadium peak can be during StripVanadiumPeaks. Default=0.05, negative turns off")
         self.declareProperty("VanadiumSmoothParams", "20,2", Description="Default=20,2")
         self.declareProperty("FilterBadPulses", True, Description="Filter out events measured while proton charge is more than 5% below average")
         outfiletypes = ['gsas', 'fullprof', 'gsas and fullprof']
@@ -632,7 +634,8 @@ class SNSPowderReduction(PythonAlgorithm):
                         vanRun -= vbackRun
 
                     ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="dSpacing")
-                    StripVanadiumPeaks(InputWorkspace=vanRun, OutputWorkspace=vanRun, FWHM=self._vanPeakFWHM, HighBackground=True)
+                    StripVanadiumPeaks(InputWorkspace=vanRun, OutputWorkspace=vanRun, FWHM=self._vanPeakFWHM,
+                                       PeakPositionTolerance=self.getProperty("VanadiumPeakTol"), HighBackground=True)
                     ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
                     FFTSmooth(InputWorkspace=vanRun, OutputWorkspace=vanRun, Filter="Butterworth",
                               Params=self._vanSmoothing,IgnoreXBins=True,AllSpectra=True)
