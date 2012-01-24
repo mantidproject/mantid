@@ -621,7 +621,7 @@ class Summary(ReductionStep):
             tempName = wsName + '_temp_sum'
             SumSpectra(InputWorkspace=wsName, OutputWorkspace=tempName)
             
-            if (summary == 'average'):
+            if (summary == 'Average'):
                 tempWs = mtd[tempName]
                 tempWs /= nSpec
             # Note: Detector info of the output becomes spurious as there will be a third entry for a detector 
