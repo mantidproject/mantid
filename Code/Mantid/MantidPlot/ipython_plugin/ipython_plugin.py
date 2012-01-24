@@ -41,7 +41,7 @@ class MantidPlot_IPython(object):
         try:
             # This will throw if the kernel is not yet running
             get_connection_file()
-            connect_qtconsole()
+            InternalIPKernel().new_qt_console()
         except RuntimeError:
             self.init_kernel()
             self.kernel.new_qt_console()
