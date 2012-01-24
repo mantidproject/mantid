@@ -49,6 +49,7 @@
 #include <vector>
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/ReadLock.h"
+#include "MantidQtAPI/SafeQwtPlot.h"
 
 
 using namespace Mantid;
@@ -63,6 +64,7 @@ using Poco::XML::Node;
 using Poco::XML::NodeList;
 using Poco::XML::NodeIterator;
 using Poco::XML::NodeFilter;
+using MantidQt::API::SafeQwtPlot;
 
 namespace MantidQt
 {
@@ -86,7 +88,7 @@ SliceViewer::SliceViewer(QWidget *parent)
 
 	// Create the plot
   m_spectLayout = new QHBoxLayout(ui.frmPlot);
-	m_plot = new QwtPlot();
+	m_plot = new SafeQwtPlot();
   m_plot->autoRefresh();
   m_spectLayout->addWidget(m_plot, 1, 0);
 
@@ -424,6 +426,7 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
 {
   m_ws = ws;
   m_data->setWorkspace(ws);
+  m_plot->setWorkspace(ws);
 
   // Emit the signal that we changed the workspace
   emit workspaceChanged();

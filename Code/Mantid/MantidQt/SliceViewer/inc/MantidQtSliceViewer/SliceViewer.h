@@ -9,6 +9,7 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/VMD.h"
 #include "MantidQtAPI/MantidColorMap.h"
+#include "MantidQtAPI/SafeQwtPlot.h"
 #include "MantidQtAPI/SyncedCheckboxes.h"
 #include "MantidQtSliceViewer/LineOverlay.h"
 #include "QwtRasterDataMD.h"
@@ -135,7 +136,7 @@ private:
   Ui::SliceViewerClass ui;
 
   /// Main plot object
-  QwtPlot * m_plot;
+  MantidQt::API::SafeQwtPlot * m_plot;
 
   /// Spectrogram plot
   QwtPlotSpectrogram * m_spect;
