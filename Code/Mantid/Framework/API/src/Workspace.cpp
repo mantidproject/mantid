@@ -7,10 +7,20 @@ namespace API
 {
 
 /// Default constructor
-  Workspace::Workspace()
-  : DataItem(),
-    m_title(), m_comment(), m_name(), m_history()
+Workspace::Workspace()
+: DataItem(),
+  m_title(), m_comment(), m_name(), m_history()
 {}
+
+/** Copy constructor
+ * @param other :: workspace to copy
+ */
+Workspace::Workspace(const Workspace & other)
+: DataItem(other),
+  m_title(other.m_title), m_comment(other.m_comment), m_name(other.m_name), m_history(other.m_history)
+{
+}
+
 
 /// Workspace destructor
 Workspace::~Workspace()

@@ -51,6 +51,7 @@ class MANTID_API_DLL Workspace : public Kernel::DataItem
 {
 public:
     Workspace();
+    Workspace(const Workspace & other);
     virtual ~Workspace();
 
     // DataItem interface
