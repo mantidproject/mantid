@@ -1436,9 +1436,10 @@ void MuonAnalysis::createPlotWS(const std::string& groupName, const std::string&
   runPythonCode( cropStr ).trimmed();
 
   // Copy the data and keep as raw for later
-  if (!(AnalysisDataService::Instance().doesExist(wsname + "_Raw") ) )
+  bool newRaw = (!(AnalysisDataService::Instance().doesExist(wsname + "_Raw") ) );
+  if (newRaw)
   {
-    m_fitDataTab->makeRawWorkspace(wsname);
+    m_fitDataTab->makeRawWorkspace(wsname); 
   }
 
   // rebin data if option set in Plot Options
@@ -1464,6 +1465,15 @@ void MuonAnalysis::createPlotWS(const std::string& groupName, const std::string&
     QString groupStr = QString("GroupWorkspaces(InputWorkspaces='") + wsname.c_str() + "," + groupName.c_str()
       + "',OutputWorkspace='" + groupName.c_str() + "')\n";
     runPythonCode( groupStr ).trimmed();
+  }
+
+  if(newRaw)
+  {
+    // Group the raw workspace
+    std::vector<std::string> groupWorkspaces;
+    groupWorkspaces.push_back(groupName);
+    groupWorkspaces.push_back(wsname + "_Raw");
+    m_fitDataTab->groupRawWorkspace(groupWorkspaces, groupName); 
   }
 }
 
@@ -1652,21 +1662,15 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     }
     else
     {
+      if (!rawExists)
+        Mantid::API::AnalysisDataService::Instance().remove(cropWS.toStdString() + "_Raw");
       g_log.error("Unknown group table plot function");
+      m_updating = false;
       return;
     }
 
     // run python script
     QString pyOutput = runPythonCode( pyString ).trimmed();
-
-    // Group the raw workspace
-    if (!rawExists)
-    {
-      std::vector<std::string> groupWorkspaces;
-      groupWorkspaces.push_back(wsGroupName.toStdString());
-      groupWorkspaces.push_back(titleLabel.toStdString() + "_Raw");
-      m_fitDataTab->groupRawWorkspace(groupWorkspaces, wsGroupName.toStdString());
-    }
 
     // Change the plot style of the graph so that it matches what is selected on 
     // the plot options tab. Default is set to line (0).
@@ -1824,20 +1828,14 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     }
     else
     {
+      if (!rawExists)
+        Mantid::API::AnalysisDataService::Instance().remove(cropWS.toStdString() + "_Raw");
       g_log.error("Unknown pair table plot function");
+      m_updating = false;
       return;
     }
     
     QString pyOutput = runPythonCode( pyString ).trimmed();
-
-    // Group the raw workspace
-    if (!rawExists)
-    {
-      std::vector<std::string> groupWorkspaces;
-      groupWorkspaces.push_back(wsGroupName.toStdString());
-      groupWorkspaces.push_back(titleLabel.toStdString() + "_Raw");
-      m_fitDataTab->groupRawWorkspace(groupWorkspaces, wsGroupName.toStdString());
-    }    
 
     // Change the plot style of the graph so that it matches what is selected on 
     // the plot options tab. Default is set to line (0).
@@ -2974,13 +2972,13 @@ void MuonAnalysis::groupFittedWorkspaces(QString workspaceName)
 void MuonAnalysis::connectAutoUpdate()
 {
   // Home tab Auto Updates
-  connect(m_uiForm.firstGoodBinFront, SIGNAL(editingFinished ()), this, SLOT(homeTabUpdatePlot()));
+  connect(m_uiForm.firstGoodBinFront, SIGNAL(returnPressed ()), this, SLOT(homeTabUpdatePlot()));
   connect(m_uiForm.frontGroupGroupPairComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(homeTabUpdatePlot()));
   connect(m_uiForm.homePeriodBox1, SIGNAL(currentIndexChanged(int)), this, SLOT(homeTabUpdatePlot()));
   connect(m_uiForm.homePeriodBoxMath, SIGNAL(currentIndexChanged(int)), this, SLOT(homeTabUpdatePlot()));
   connect(m_uiForm.homePeriodBox2, SIGNAL(currentIndexChanged(int)), this, SLOT(homeTabUpdatePlot()));
   connect(m_uiForm.frontPlotFuncs, SIGNAL(currentIndexChanged(int)), this, SLOT(homeTabUpdatePlot()));
-  connect(m_uiForm.frontAlphaNumber, SIGNAL(editingFinished ()), this, SLOT(homeTabUpdatePlot()));
+  connect(m_uiForm.frontAlphaNumber, SIGNAL(returnPressed ()), this, SLOT(homeTabUpdatePlot()));
 
   // Grouping tab Auto Updates
   // Group Table
@@ -2997,7 +2995,7 @@ void MuonAnalysis::connectAutoUpdate()
 void MuonAnalysis::homeTabUpdatePlot()
 {
   int choice(m_uiForm.plotCreation->currentIndex());
-  if ((choice == 1 || choice == 2) && (!m_updating) && (m_tabNumber == 0) )
+  if ((choice == 0 || choice == 1) && (!m_updating) && (m_tabNumber == 0) )
   {
     if (m_loaded == true)
       runFrontPlotButton();
@@ -3007,7 +3005,7 @@ void MuonAnalysis::homeTabUpdatePlot()
 void MuonAnalysis::groupTabUpdateGroup()
 {
   int choice(m_uiForm.plotCreation->currentIndex());
-  if ((choice == 1 || choice == 2) && (!m_updating) && (m_tabNumber == 1) )
+  if ((choice == 0 || choice == 1) && (!m_updating) && (m_tabNumber == 1) )
   {
     if (m_loaded == true)
       runGroupTablePlotButton();
@@ -3017,7 +3015,7 @@ void MuonAnalysis::groupTabUpdateGroup()
 void MuonAnalysis::groupTabUpdatePair()
 {
   int choice(m_uiForm.plotCreation->currentIndex());
-  if ((choice == 1 || choice == 2) && (!m_updating) && (m_tabNumber == 1) )
+  if ((choice == 0 || choice == 1) && (!m_updating) && (m_tabNumber == 1) )
   {
     if (m_loaded == true)
       runPairTablePlotButton();
@@ -3027,7 +3025,7 @@ void MuonAnalysis::groupTabUpdatePair()
 void MuonAnalysis::settingsTabUpdatePlot()
 {
   int choice(m_uiForm.plotCreation->currentIndex());
-  if ((choice == 1 || choice == 2) && (!m_updating) && (m_tabNumber == 2) )
+  if ((choice == 0 || choice == 1) && (!m_updating) && (m_tabNumber == 2) )
   {
     if (m_loaded == true)
       runFrontPlotButton();

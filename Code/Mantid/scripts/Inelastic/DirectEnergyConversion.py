@@ -112,8 +112,11 @@ class DirectEnergyConversion(object):
         whiteintegrals = self.do_white(white, None, None) # No grouping yet
         if 'second_white' in kwargs:
             second_white = kwargs['second_white']
-            other_whiteintegrals = self.do_white(second_white, None, None) # No grouping yet
-            kwargs['second_white'] = other_whiteintegrals
+            if second_white is None:
+                del kwargs['second_white']
+            else:
+                other_whiteintegrals = self.do_white(second_white, None, None) # No grouping yet
+                kwargs['second_white'] = other_whiteintegrals
 
         # Get the background/total counts from the sample if present
         if 'sample' in kwargs:
@@ -262,9 +265,11 @@ class DirectEnergyConversion(object):
             ChangeBinOffset(data_ws, result_name, -tzero)
             mon1_peak = 0.0
         elif (self.instr_name == "ARCS" or self.instr_name == "SEQUOIA"):
-            if 'Filename' in data_ws.getRun(): mono_run = data_ws.getRun()['Filename']
+            if 'Filename' in data_ws.getRun(): mono_run = data_ws.getRun()['Filename'].value
             else: raise RuntimeError('Cannot load monitors for event reduction. Unable to determine Filename from mono workspace, it should have been added as a run log.')
-                           
+                 
+	    mtd.sendDebugMessage("mono_run = %s (%s)" % (mono_run,type(mono_run)))
+          
             if mono_run.endswith("_event.nxs"):
                 loader=LoadNexusMonitors(Filename=mono_run, OutputWorkspace="monitor_ws")    
             elif mono_run.endswith("_event.dat"):
@@ -280,8 +285,8 @@ class DirectEnergyConversion(object):
             except:
                 self.log("Error in GetEi. Using entered values.")
                 #monitor_ws.getRun()['Ei'] = ei_value
-		AddSampleLog(monitor_ws, 'Ei', ei_value, "Number")
                 ei_value = ei_guess
+		AddSampleLog(monitor_ws, 'Ei', ei_value, "Number")
                 ei_calc = None
                 TzeroCalculated = Tzero
                 

@@ -41,7 +41,6 @@ Description          : QtiPlot's main window
 #include <QLocale>
 #include <QSet>
 #include <QSettings>
-#include <QMutex>
 
 #include "Table.h"
 #include "ScriptingEnv.h"
@@ -518,6 +517,7 @@ public slots:
   bool setWindowName(MdiSubWindow *w, const QString &text);
 
   void maximizeWindow(Q3ListViewItem * lbi = 0);
+  void activateWindow(Q3ListViewItem * lbi);
   void maximizeWindow(MdiSubWindow *w);
   void minimizeWindow(MdiSubWindow *w = 0);
   //! Changes the geometry of the active MDI window
@@ -1462,7 +1462,6 @@ private:
   QList<FloatingWindow*> m_floatingWindows;
   // To block activating new window when a floating window is in process of resetting flags
   bool blockWindowActivation;
-  mutable QMutex m_active_window_mutex;
 
 #ifdef SHARED_MENUBAR
   QMenuBar* m_sharedMenuBar; ///< Pointer to the shared menubar

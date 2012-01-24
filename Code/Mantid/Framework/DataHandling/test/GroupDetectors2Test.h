@@ -223,26 +223,35 @@ public:
       TS_ASSERT_DELTA(outputWS->dataE(0)[i], std::sqrt(static_cast<double>(2)), 1e-6);
     }
     TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(0), 1 );
+    TS_ASSERT_EQUALS( outputWS->getSpectrum(0)->getSpectrumNo(), 1);
 
     TS_ASSERT_EQUALS( outputWS->dataX(1), tens );
     TS_ASSERT_EQUALS( outputWS->dataY(1), std::vector<double>(NBINS, 4 ) ); // Directly # 4
     TS_ASSERT_EQUALS( outputWS->dataE(1), ones );
-    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(1), 4 );
+    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(1), 2 );
+    TS_ASSERT_EQUALS( outputWS->getSpectrum(1)->getSpectrumNo(), 2);
     
     //check the unmoved spectra
     TS_ASSERT_EQUALS( outputWS->dataX(2), tens );
     TS_ASSERT_EQUALS( outputWS->dataY(2), std::vector<double>(NBINS, 2) );
     TS_ASSERT_EQUALS( outputWS->dataE(2), ones );
     TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(2), 2 );
+    TS_ASSERT_EQUALS( outputWS->getSpectrum(2)->getSpectrumNo(), 2);
+
 
     TS_ASSERT_EQUALS( outputWS->dataX(3), tens );
     TS_ASSERT_EQUALS( outputWS->dataY(3), std::vector<double>(NBINS, 5) );
     TS_ASSERT_EQUALS( outputWS->dataE(3), ones );
+
     TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(3), 5 );
+    TS_ASSERT_EQUALS( outputWS->getSpectrum(3)->getSpectrumNo(), 5);
+
 
     TS_ASSERT_EQUALS( outputWS->dataY(4), std::vector<double>(NBINS, 6) );
     TS_ASSERT_EQUALS( outputWS->dataE(4), ones );
     TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(4), 6 );
+    TS_ASSERT_EQUALS( outputWS->getSpectrum(4)->getSpectrumNo(), 6);
+
 
     // the first two spectra should have a group of detectors the other spectra a single detector
 
@@ -291,11 +300,15 @@ public:
       TS_ASSERT_DELTA(outputWS->dataE(0)[i], std::sqrt(static_cast<double>(3)), 1e-6);
     }
     TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(0), 1 );
+    TS_ASSERT_EQUALS( outputWS->getSpectrum(0)->getSpectrumNo(), 1);
+
     // check the second grouped spectrum
     TS_ASSERT_EQUALS( outputWS->dataX(1), tens );
     TS_ASSERT_EQUALS( outputWS->dataY(1), std::vector<double>(NBINS, 4 ) );
     TS_ASSERT_EQUALS( outputWS->dataE(1), ones );
-    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(1), 4 );
+    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(1), 2);
+    TS_ASSERT_EQUALS( outputWS->getSpectrum(1)->getSpectrumNo(), 2);
+
     // check the third grouped spectrum
     TS_ASSERT_EQUALS( outputWS->dataX(2), tens );
     TS_ASSERT_EQUALS( outputWS->dataY(2), std::vector<double>(NBINS, 5+6 ) );
@@ -304,7 +317,8 @@ public:
       TS_ASSERT_DELTA(
         outputWS->dataE(2)[i], std::sqrt(static_cast<double>(2)), 1e-6);
     }
-    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(2), 5 );
+    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(2), 3 );
+    TS_ASSERT_EQUALS( outputWS->getSpectrum(2)->getSpectrumNo(), 3);
 
     AnalysisDataService::Instance().remove(output);
     remove(inputFile.c_str());

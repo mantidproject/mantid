@@ -56,12 +56,6 @@ extern "C" void init_qti();
 // Language name
 const char* PythonScripting::langName = "Python";
 
-namespace
-{
-  /// Logger
-  Mantid::Kernel::Logger & g_log = Mantid::Kernel::Logger::get("PythonScripting");
-}
-
 // Factory function
 ScriptingEnv *PythonScripting::constructor(ApplicationWindow *parent) 
 { 
@@ -174,16 +168,22 @@ bool PythonScripting::start()
     setQObject(this, "stderr", m_sys);
 
     // Add in Mantid paths so that the framework will be found
-    QDir mantidbin(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getPropertiesDir()));
+    // Linux has the libraries in the lib directory at bin/../lib
+    using namespace Mantid::Kernel;
+    ConfigServiceImpl &configSvc = ConfigService::Instance();
+    QDir mantidbin(QString::fromStdString(configSvc.getPropertiesDir()));
     QString pycode =
       "import sys\n"
-      "mantidbin = '" +  mantidbin.absolutePath() + "'\n" +
+      "import os\n"
+      "mantidbin = '%1'\n"
       "if not mantidbin in sys.path:\n"
-      "\tsys.path.insert(0,mantidbin)\n";
+      "    sys.path.insert(0,mantidbin)\n"
+      "sys.path.insert(1, os.path.join(mantidbin,'..','lib'))";
+    pycode = pycode.arg(mantidbin.absolutePath());
     PyRun_SimpleString(pycode.toStdString().c_str());
 
     //Get the refresh protection flag
-    Mantid::Kernel::ConfigService::Instance().getValue("pythonalgorithms.refresh.allowed", refresh_allowed);
+    configSvc.getValue("pythonalgorithms.refresh.allowed", refresh_allowed);
     if( loadInitFile(mantidbin.absoluteFilePath("mantidplotrc.py")) )
     {
       d_initialized = true;

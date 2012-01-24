@@ -1,7 +1,6 @@
 """
-    This module contains functions to add attributes to the
-    the Workspace classes so that Python operators, i.e +-*/,
-    can be used on them
+    This module adds functions to  the Workspace classe
+    so that Python operators, i.e +-*/,  can be used on them
     
     It is intended for internal use.
 """
@@ -9,10 +8,6 @@ from mantid.api import Workspace, AnalysisDataService, FrameworkManager
 from mantid.api import performBinaryOp as _performBinaryOp
 from mantid.kernel.funcreturns import lhs_info
 _ads = AnalysisDataService.Instance()
-
-def add_operators_to_workspace():
-    attach_binary_operators_to_workspace()
-    attach_unary_operators_to_workspace()
 
 #------------------------------------------------------------------------------
 # Binary Ops
@@ -162,3 +157,8 @@ def _do_unary_operation(op, self, lhs_vars):
         
     return resultws
 
+#------------------------------------------------------------------------------
+# Attach the operators
+#------------------------------------------------------------------------------
+attach_binary_operators_to_workspace()
+attach_unary_operators_to_workspace()

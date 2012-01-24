@@ -10,12 +10,25 @@ namespace Mantid
 namespace MDAlgorithms
 {
 bool 
-PreprocessedDetectors::is_defined(const API::MatrixWorkspace_const_sptr &inputWS)const
+PreprocessedDetectors::isDefined(const API::MatrixWorkspace_const_sptr &inputWS)const
 {
     if(det_dir.empty())return false;
 
     if(pBaseInstr !=inputWS->getInstrument()->baseInstrument())return false;
     return true;
+}
+
+void 
+PreprocessedDetectors::allocDetMemory(size_t nHist)
+{
+    this->det_dir.resize(nHist);
+    this->det_id.resize(nHist);
+    this->L2.resize(nHist);
+    this->TwoTheta.resize(nHist);
+    this->detIDMap.resize(nHist);
+    this->spec2detMap.assign(nHist,uint32_t(-1));
+
+
 }
 
 /** helper function, does preliminary calculations of the detectors positions to convert results into k-dE space ;
@@ -46,16 +59,12 @@ processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS,PreprocessedDe
   //
   const size_t nHist = inputWS->getNumberHistograms();
 
-    det_loc.det_dir.resize(nHist);
-    det_loc.det_id.resize(nHist);
-    det_loc.L2.resize(nHist);
-    det_loc.TwoTheta.resize(nHist);
-    det_loc.detIDMap.resize(nHist);
-    det_loc.spec2detMap.assign(nHist,uint32_t(-1));
-    size_t div=100;
+  det_loc.allocDetMemory(nHist);
+
+  size_t div=100;
      // Loop over the spectra
-   size_t ic(0);
-   for (size_t i = 0; i < nHist; i++){
+  size_t ic(0);
+  for (size_t i = 0; i < nHist; i++){
 
      Geometry::IDetector_const_sptr spDet;
      try{
@@ -102,6 +111,40 @@ processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS,PreprocessedDe
    }
    convert_log.information()<<"finished preprocessing detectors locations \n";
    pProg->report();
+}
+
+void DLLExport
+buildFakeDetectorsPositions(const API::MatrixWorkspace_sptr inputWS,PreprocessedDetectors &det_loc)
+{
+
+     det_loc.L1 = 1;
+     double polar(0);
+    //
+    const size_t nHist = inputWS->getNumberHistograms();
+    det_loc.allocDetMemory(nHist);
+   // Loop over the spectra
+   for (size_t i = 0; i < nHist; i++){
+
+
+     det_loc.spec2detMap[i]= i;
+     det_loc.det_id[i]     = (detid_t)i;
+     det_loc.detIDMap[i]   = i;
+     det_loc.L2[i]         = 10;
+     
+
+     det_loc.TwoTheta[i] =  polar;
+
+
+     double ez = 1.;
+     double ex = 0.;
+     double ey = 0.;
+ 
+     det_loc.det_dir[i].setX(ex);
+     det_loc.det_dir[i].setY(ey);
+     det_loc.det_dir[i].setZ(ez);
+
+   }
+   // 
 }
 
 } // END MDAlgorithms ns

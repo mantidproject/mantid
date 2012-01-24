@@ -1,6 +1,6 @@
 """*WIKI* 
 
-Creates a cal file from a mask workspace: the masked out detectors (Y == 0 in mask workspace) will be combined into group 1.
+Creates a cal file from a mask workspace: the masked out detectors (Y == 0 in mask workspace) will be combined into group 0.
 
 *WIKI*"""
 
@@ -38,17 +38,17 @@ class MaskWorkspaceToCalFile(PythonAlgorithm):
 		calFile.write('# Format: number      UDET       offset       select    group\n')
 		#save the grouping
 		for i in range(inputWorkspace.getNumberHistograms()):
-			if (inputWorkspace.readY(i)[0] == 0) == (not invert):
-				group = 1
-			else:
-				group = 0
 			det = inputWorkspace.getDetector(i)
+			if (det.isMasked()): #check if masked
+				group = 0
+			else:
+				group = 1
 			if type(det) == DetectorGroup:
 				detIDs = det.getDetectorIDs()
 			else:
 				detIDs = [det.getID()]
 			for id in detIDs:
-				calFile.write(self.FormatLine(i,id,0.0,1,group))
+				calFile.write(self.FormatLine(i,id,0.0,group,group))
 		calFile.close()
 
 

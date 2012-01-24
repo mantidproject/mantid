@@ -33,11 +33,13 @@ namespace Mantid
     {
       if(mNoOfVertices<=0) //There are no triangles defined to use OpenCascade handler
       {
-	OCGeometryHandler h(Obj);
-	mNoOfVertices=h.NumberOfPoints();
-	mNoOfTriangles=h.NumberOfTriangles();
-	mPoints=h.getTriangleVertices();
-	mFaces=h.getTriangleFaces();
+#ifndef NO_OPENCASCADE
+        OCGeometryHandler h(Obj);
+        mNoOfVertices=h.NumberOfPoints();
+        mNoOfTriangles=h.NumberOfTriangles();
+        mPoints=h.getTriangleVertices();
+        mFaces=h.getTriangleFaces();
+#endif
       }
     }
 

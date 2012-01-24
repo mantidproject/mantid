@@ -8,7 +8,7 @@
 #include <boost/python/return_value_policy.hpp>
 #include <boost/python/reference_existing_object.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
-
+#include <boost/python/list.hpp>
 
 using Mantid::API::AnalysisDataServiceImpl;
 using Mantid::API::AnalysisDataService;
@@ -73,6 +73,25 @@ namespace
     Mantid::PythonInterface::PropertyMarshal::upcastFromDataItem(dataItem);
     return dataItem;
   }
+
+  /**
+   * Return a Python list of object names from the ADS as this is
+   * far easier to work with than a set
+   * @param self :: A reference to the ADS object that called this method
+   * @returns A python list created from the set of strings
+   */
+  object _getObjectNames(AnalysisDataServiceImpl& self)
+  {
+    boost::python::list names;
+    const std::set<std::string> keys = self.getObjectNames();
+    std::set<std::string>::const_iterator iend = keys.end();
+    for(std::set<std::string>::const_iterator itr = keys.begin(); itr != iend; ++itr)
+    {
+      names.append(*itr);
+    }
+    assert(names.attr("__len__")() == keys.size());
+    return names;
+  }
   ///@endcond
 }
 
@@ -90,6 +109,7 @@ void export_AnalysisDataService()
     .def("remove", &AnalysisDataServiceImpl::remove, "Remove a named object")
     .def("clear", &AnalysisDataServiceImpl::clear, "Removes all objects managed by the service.")
     .def("size", &AnalysisDataServiceImpl::size, "Returns the number of objects within the service")
+    .def("getObjectNames", &_getObjectNames, "Return the list of names currently known to the ADS")
     // Make it act like a dictionary
     .def("__len__", &AnalysisDataServiceImpl::size)
     .def("__getitem__", &retrieveUpcastedPtr)

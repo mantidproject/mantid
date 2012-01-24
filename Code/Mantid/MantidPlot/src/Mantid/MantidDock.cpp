@@ -553,6 +553,10 @@ void MantidDockWidget::populateMDWorkspaceData(Mantid::API::IMDWorkspace_sptr wo
     std::ostringstream mess;
     IMDDimension_const_sptr dim = workspace->getDimension(i);
     mess << "Dim " << i << ": (" << dim->getName() << ") " << dim->getMinimum() << " to " << dim->getMaximum() << " in " << dim->getNBins() << " bins";
+    // Also show the dimension ID string, if different than name
+    if (dim->getDimensionId() != dim->getName())
+      mess << ". Id=" << dim->getDimensionId();
+
     std::string s = mess.str();
     MantidTreeWidgetItem* sub_data_item = new MantidTreeWidgetItem(QStringList(QString::fromStdString(s)), m_tree);
     sub_data_item->setFlags(Qt::NoItemFlags);
