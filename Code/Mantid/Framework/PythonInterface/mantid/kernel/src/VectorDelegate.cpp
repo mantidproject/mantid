@@ -59,7 +59,8 @@ namespace Mantid
       }
 
       /**
-       * Convert a python array object into a std::vector
+       * Convert a numpy array object into a std::vector. Each dimension is simply appended
+       * at the point the previous ends
        * @param arr :: A pointer to a numpy array
        * @return A new vector created from the python values (i.e. a copy)
        */
@@ -67,10 +68,7 @@ namespace Mantid
       const std::vector<VectorElementType> toStdVectorFromNumpy(PyArrayObject *arr)
       {
         // A numpy array is a homogeneous array, i.e each type is identical and the underlying array is contiguous
-        const int ndim = PyArray_NDIM(arr);
-        if( ndim > 1 ) throw std::invalid_argument("toStdVectorNumpy - Unable to handle arrays with greater than 1 dimension.");
-
-        npy_intp length = PyArray_SIZE(arr);
+        npy_intp length = PyArray_SIZE(arr); // Returns the total number of elements in the array
         std::vector<VectorElementType> result(length);
         if(length == 0)
         {
@@ -81,9 +79,10 @@ namespace Mantid
          * and assign each value to the corresponding vector
          */
         PyObject *iter = PyArray_IterNew((PyObject*)arr);
-        size_t index(0);
+        npy_intp index(0);
         do
         {
+          assert(index < length);
           NumpyType *item = (NumpyType*)PyArray_ITER_DATA(iter);
           result[index] = static_cast<VectorElementType>(*item);
           ++index;

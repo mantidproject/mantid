@@ -121,6 +121,8 @@ void CorrectKiKf::exec()
     }
   }
 
+  // Get the parameter map
+  const ParameterMap& pmap = outputWS->constInstrumentParameters();
 
   PARALLEL_FOR2(inputWS,outputWS)
   for (int64_t i = 0; i < int64_t(numberOfSpectra); ++i)
@@ -129,29 +131,28 @@ void CorrectKiKf::exec()
     double Efi = 0;
     // Now get the detector object for this histogram to check if monitor
     // or to get Ef for indirect geometry
-    if (emodeStr == "Indirect") 
+    if (emodeStr == "Indirect")
     {
       if ( efixedProp != EMPTY_DBL()) Efi = efixedProp;
-      else try 
+      else try
       {
         IDetector_const_sptr det = inputWS->getDetector(i);
         if (!det->isMonitor())
         {
-          std::vector< double >  wsProp=det->getNumberParameter("Efixed");
-          if ( !wsProp.empty() )
-          {
-            Efi=wsProp.at(0);
-            g_log.debug() << i << " Ef: "<< Efi<<" (from parameter file)\n";     
-          }
-          else
-          { 
-            g_log.information() <<"Ef not found for spectrum "<< i << std::endl;
-            throw std::invalid_argument("No Ef value has been set or found.");
-          }
+            try
+            {
+              Parameter_sptr par = pmap.getRecursive(det.get(),"Efixed");
+              if (par)
+              {
+                Efi = par->value<double>();
+                g_log.debug() << "Detector: " << det->getID() << " EFixed: " << Efi << "\n";
+              }
+            }
+            catch (std::runtime_error&) { /* Throws if a DetectorGroup, use single provided value */ }
         }
 
       }
-      catch(std::runtime_error&) { g_log.information() << "Spectrum " << i << ": cannot find detector" << "\n"; }
+      catch(std::runtime_error&) { g_log.information() << "Workspace Index " << i << ": cannot find detector" << "\n"; }
     }
 
     MantidVec& yOut = outputWS->dataY(i);
@@ -257,6 +258,9 @@ void CorrectKiKf::execEvent()
     }
   }
 
+  // Get the parameter map
+  const ParameterMap& pmap = outputWS->constInstrumentParameters();
+
   int64_t numHistograms = static_cast<int64_t>(inputWS->getNumberHistograms());
   API::Progress prog = API::Progress(this, 0.0, 1.0, numHistograms);
   PARALLEL_FOR1(outputWS)
@@ -275,21 +279,20 @@ void CorrectKiKf::execEvent()
         IDetector_const_sptr det = inputWS->getDetector(i);
         if (!det->isMonitor())
         {
-          std::vector< double >  wsProp=det->getNumberParameter("Efixed");
-          if ( !wsProp.empty() )
-          {
-            Efi=wsProp.at(0);
-            g_log.debug() << i << " Ef: "<< Efi<<" (from parameter file)\n";     
-          }
-          else
-          { 
-            g_log.information() <<"Ef not found for spectrum "<< i << std::endl;
-            throw std::invalid_argument("No Ef value has been set or found.");
-          }
+            try
+            {
+              Parameter_sptr par = pmap.getRecursive(det.get(),"Efixed");
+              if (par)
+              {
+                Efi = par->value<double>();
+                g_log.debug() << "Detector: " << det->getID() << " EFixed: " << Efi << "\n";
+              }
+            }
+            catch (std::runtime_error&) { /* Throws if a DetectorGroup, use single provided value */ }
         }
 
       }
-      catch(std::runtime_error&) { g_log.information() << "Spectrum " << i << ": cannot find detector" << "\n"; }
+      catch(std::runtime_error&) { g_log.information() << "Workspace Index " << i << ": cannot find detector" << "\n"; }
     }
 
     if (emodeStr == "Indirect") efixed=Efi;

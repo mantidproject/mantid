@@ -1487,6 +1487,13 @@ p, li { white-space: pre-wrap; }
              </widget>
             </item>
             <item>
+             <widget class="QCheckBox" name="save_ckAclimax">
+              <property name="text">
+               <string>Aclimax</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <spacer name="horizontalSpacer_15">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
@@ -1622,6 +1629,13 @@ Later steps in the process (saving, renaming) will not be done.</string>
                   </property>
                   <property name="checked">
                    <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="ckCm1Units">
+                  <property name="text">
+                   <string>Output in cm-1</string>
                   </property>
                  </widget>
                 </item>

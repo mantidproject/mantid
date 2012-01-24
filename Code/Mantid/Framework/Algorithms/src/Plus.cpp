@@ -224,8 +224,20 @@ namespace Mantid
     void Plus::operateOnRun(const Run& lhs, const Run& rhs, Run& ans) const
     {
       //The addition operator of Run will add the proton charges, append logs, etc.
-      ans = lhs;
-      ans += rhs;
+      // If ans=lhs or ans=rhs then we need to be careful in which order we do this
+      if( &rhs == &ans )
+      {
+        // The output is the same as the RHS workspace so needs to be set to that run object
+        ans = rhs;
+        ans += lhs;
+      }
+      else
+      {
+        // The output is either the same as the LHS workspace so needs to be set to that run object
+        // or it is a completely separate workspace meaning that it actually doesn't matter
+        ans = lhs;
+        ans += rhs;
+      }
     }
 
 

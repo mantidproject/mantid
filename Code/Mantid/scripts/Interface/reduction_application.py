@@ -57,6 +57,8 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         # Name handle for the instrument
         if instrument is None:
             instrument = unicode(settings.value("instrument_name", QtCore.QVariant('')).toString())
+            if instrument not in instrument_list:
+                instrument = None
 
         self._instrument = instrument
         
@@ -146,7 +148,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self.tabWidget.clear()
         self.progress_bar.hide()
         
-        if self._instrument == '':
+        if self._instrument == '' or self._instrument is None:
             if IS_IN_MANTIDPLOT:
                 c = ConfigService()
                 facility = str(c.facility().name())
@@ -158,12 +160,12 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
                         
                 # If we still can't find an instrument, show the
                 # instrument selection dialog
-                if self._instrument == '':
+                if self._instrument == '' or self._instrument is None:
                     self._change_instrument()
             else:
                 self._change_instrument()
                 
-        if self._instrument == '':
+        if self._instrument == '' or self._instrument is None:
             self.close()
             self._quit_asap = True
             return

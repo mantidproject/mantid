@@ -1775,7 +1775,14 @@ bool FitPropertyBrowser::isUndoEnabled()const
 void FitPropertyBrowser::setFitEnabled(bool yes)
 {
   m_fitActionFit->setEnabled(yes);
-  m_fitActionSeqFit->setEnabled(yes);
+  if (!m_customFittings)
+  {
+    m_fitActionSeqFit->setEnabled(yes);
+  }
+  else
+  {
+    m_fitActionSeqFit->setEnabled(false);
+  }
 }
 
 /// Returns true if the function is ready for a fit

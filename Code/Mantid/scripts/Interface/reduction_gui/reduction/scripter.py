@@ -311,6 +311,15 @@ class BaseReductionScripter(object):
         else:
             raise RuntimeError, "The format of the provided file is not recognized"
 
+    def check_xml_compatibility(self, file_name):
+        try:
+            instr = self.verify_instrument(file_name)
+            return instr==self.instrument_name
+        except:
+            # Could not load file or identify it's instrument
+            pass
+        return False
+
     def to_xml(self, file_name=None):
         """
             Write all reduction parameters to XML

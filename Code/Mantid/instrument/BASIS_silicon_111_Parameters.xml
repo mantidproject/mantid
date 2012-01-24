@@ -13,11 +13,11 @@
 
 <!--FIXME: This spectrum max should be bigger -->
 <parameter name="spectra-max">
-	<value val="5760" />
+	<value val="16385" />
 </parameter>
 
 <parameter name="efixed-val">
-	<value val="1.8450" />
+	<value val="2.082" />
 </parameter>
 
 <parameter name="peak-start">
@@ -41,6 +41,14 @@
   </component-link>
   
   <component-link name="bank2">
+    <parameter name="Efixed"> <value val="2.082" /> </parameter>
+  </component-link>
+  
+  <component-link name="bank3">
+    <parameter name="Efixed"> <value val="2.082" /> </parameter>
+  </component-link>
+  
+  <component-link name="bank4">
     <parameter name="Efixed"> <value val="2.082" /> </parameter>
   </component-link>
   

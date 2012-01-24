@@ -23,6 +23,9 @@ class REFLInterface(InstrumentInterface):
     
     def __init__(self, name, settings):
         super(REFLInterface, self).__init__(name, settings)
+
+        self.ERROR_REPORT_NAME = "refl_error_report.xml"    
+        self.LAST_REDUCTION_NAME = ".mantid_last_refl_reduction.xml"    
         
         # Scripter object to interface with Mantid 
         self.scripter = REFLReductionScripter(name=name)        
