@@ -33,6 +33,9 @@ class EQSANSInterface(InstrumentInterface):
     def __init__(self, name, settings):
         super(EQSANSInterface, self).__init__(name, settings)
         
+        self.ERROR_REPORT_NAME = "sans_error_report.xml"    
+        self.LAST_REDUCTION_NAME = ".mantid_last_reduction.xml"    
+        
         # Scripter object to interface with Mantid 
         self.scripter = EQSANSReductionScripter(name=name)        
 
