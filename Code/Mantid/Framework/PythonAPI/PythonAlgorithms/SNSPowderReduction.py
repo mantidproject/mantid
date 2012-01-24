@@ -214,7 +214,7 @@ class SNSPowderReduction(PythonAlgorithm):
         #self.log().information(str(dir()))
         #self.log().information(str(dir(mantidsimple)))
         result = FindSNSNeXus(Instrument=self._instrument,
-                              RunNumber=runnumber, Extension=extension)
+                              RunNumber=runnumber, Extension=extension, UseWebService=True)
 #        result = self.executeSubAlg("FindSNSNeXus", Instrument=self._instrument,
 #                                    RunNumber=runnumber, Extension=extension)
         return result["ResultPath"].value
@@ -229,40 +229,46 @@ class SNSPowderReduction(PythonAlgorithm):
             return False
 
 
-    def _loadPreNeXusData(self, runnumber, extension):
+    def _loadPreNeXusData(self, runnumber, extension, **kwargs):
+        mykwargs = {}
+        if kwargs.has_key("FilterByTimeStart"):
+            mykwargs["ChunkNumber"] = int(kwargs["FilterByTimeStart"])
+        if kwargs.has_key("FilterByTimeStop"):
+            mykwargs["TotalChunks"] = int(kwargs["FilterByTimeStop"])
+
         # generate the workspace name
         name = "%s_%d" % (self._instrument, runnumber)
         filename = name + extension
         print filename
 
         try: # first just try loading the file
-            alg = LoadEventPreNexus(EventFilename=filename, OutputWorkspace=name)
+            alg = LoadEventPreNexus(EventFilename=filename, OutputWorkspace=name, **mykwargs)
             wksp = alg['OutputWorkspace']
         except:
             # find the file to load
             filename = self._findData(runnumber, extension)
+            if (len(filename) == 0):
+                raise RuntimeError("Failed to find prenexus file for run %d" % runnumber)
             # load the prenexus file
-            alg = LoadEventPreNexus(EventFilename=filename, OutputWorkspace=name)
+            alg = LoadEventPreNexus(EventFilename=filename, OutputWorkspace=name, **mykwargs)
             wksp = alg['OutputWorkspace']
 
         # add the logs to it
         reloadInstr = (str(self._instrument) == "SNAP")
 
-        nxsfile = "%s_%d_event.nxs" % (self._instrument, runnumber)
-        if self._addNeXusLogs(wksp, nxsfile, reloadInstr):
-            return wksp
+        datadir = os.path.split(filename)[0]
+        nxsfile_event = "%s_%d_event.nxs" % (self._instrument, runnumber)
+        nxsfile_histo = "%s_%d_histo.nxs" % (self._instrument, runnumber)
 
-        nxsfile = "%s_%d_histo.nxs" % (self._instrument, runnumber)
-        if self._addNeXusLogs(wksp, nxsfile, reloadInstr):
-            return wksp
-
-        nxsfile = self._findData(runnumber, "_event.nxs")
-        if self._addNeXusLogs(wksp, nxsfile, reloadInstr):
-            return wksp
-
-        nxsfile = self._findData(runnumber, "_histo.nxs")
-        if self._addNeXusLogs(wksp, nxsfile, reloadInstr):
-            return wksp
+        files = [nxsfile_event, nxsfile_histo,
+                 os.path.join(datadir, nxsfile_event),
+                 os.path.join(datadir, nxsfile_histo)]
+        datadir = os.path.split(datadir)[0]
+        files.extend([os.path.join(datadir, "NeXus", nxsfile_event),
+                      os.path.join(datadir, "NeXus", nxsfile_histo)])
+        for nxsfile in files:
+            if self._addNeXusLogs(wksp, nxsfile, reloadInstr):
+                return wksp
 
         # TODO filter out events using timemin and timemax
 
@@ -322,15 +328,14 @@ class SNSPowderReduction(PythonAlgorithm):
         elif extension.endswith("_histo.nxs"):
             return self._loadHistoNeXusData(runnumber, extension)
         elif "and" in extension:
-            wksp0 = self._loadPreNeXusData(runnumber, "_neutron0_event.dat")
+            wksp0 = self._loadPreNeXusData(runnumber, "_neutron0_event.dat", **filter)
             RenameWorkspace(InputWorkspace=wksp0,OutputWorkspace="tmp")
-            wksp1 = self._loadPreNeXusData(runnumber, "_neutron1_event.dat")
+            wksp1 = self._loadPreNeXusData(runnumber, "_neutron1_event.dat", **filter)
             Plus(LHSWorkspace=wksp1, RHSWorkspace="tmp",OutputWorkspace=wksp1)
-            wksp1.getRun()['gd_prtn_chrg'] = wksp1.getRun()['gd_prtn_chrg'].value/2
             mtd.deleteWorkspace("tmp")
             return wksp1;
         else:
-            return self._loadPreNeXusData(runnumber, extension)
+            return self._loadPreNeXusData(runnumber, extension, **filter)
 
     def _focus(self, wksp, calib, info, filterLogs=None, preserveEvents=True,
                normByCurrent=True, filterBadPulsesOverride=True):
