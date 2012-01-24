@@ -44,6 +44,10 @@ namespace Mantid
     template MANTID_API_DLL bool Algorithm::isEmpty<int64_t> (const int64_t);
     template MANTID_API_DLL bool Algorithm::isEmpty<std::size_t> (const std::size_t);
 
+    //=============================================================================================
+    //================================== Constructors/Destructors ===================================
+    //=============================================================================================
+
     /// Initialize static algorithm counter
     size_t Algorithm::g_execCount=0;
 
@@ -65,6 +69,113 @@ namespace Mantid
       Mantid::API::MemoryManager::Instance().releaseFreeMemory();
     }
 
+
+    //=============================================================================================
+    //================================== Simple Getters/Setters ===================================
+    //=============================================================================================
+
+
+
+    //---------------------------------------------------------------------------------------------
+    /// Has the Algorithm already been initialized
+    bool Algorithm::isInitialized() const
+    {
+      return m_isInitialized;
+    }
+
+    /// Has the Algorithm already been executed
+    bool Algorithm::isExecuted() const
+    {
+      return m_isExecuted;
+    }
+
+    //---------------------------------------------------------------------------------------------
+    /// Set the Algorithm initialized state
+    void Algorithm::setInitialized()
+    {
+      m_isInitialized = true;
+    }
+
+    /** Set the executed flag to the specified state
+    // Public in Gaudi - don't know why and will leave here unless we find a reason otherwise
+    //     Also don't know reason for different return type and argument.
+    @param state :: New executed state
+    */
+    void Algorithm::setExecuted(bool state)
+    {
+      m_isExecuted = state;
+    }
+
+    //---------------------------------------------------------------------------------------------
+    /** To query whether algorithm is a child.
+    *  @returns true - the algorithm is a child algorithm.  False - this is a full managed algorithm.
+    */
+    bool Algorithm::isChild() const
+    {
+      return m_isChildAlgorithm;
+    }
+
+    /** To set whether algorithm is a child.
+    *  @param isChild :: True - the algorithm is a child algorithm.  False - this is a full managed algorithm.
+    */
+    void Algorithm::setChild(const bool isChild)
+    {
+      m_isChildAlgorithm = isChild;
+    }
+
+    /** Set whether the algorithm will rethrow exceptions
+     * @param rethrow :: true if you want to rethrow exception.
+     */
+    void Algorithm::setRethrows(const bool rethrow)
+    {
+      this->m_rethrow = rethrow;
+    }
+
+
+
+    //---------------------------------------------------------------------------------------------
+    /**  Add an observer to a notification
+    @param observer :: Reference to the observer to add
+    */
+    void Algorithm::addObserver(const Poco::AbstractObserver& observer)const
+    {
+      m_notificationCenter.addObserver(observer);
+    }
+
+    /**  Remove an observer
+    @param observer :: Reference to the observer to remove
+    */
+    void Algorithm::removeObserver(const Poco::AbstractObserver& observer)const
+    {
+      m_notificationCenter.removeObserver(observer);
+    }
+
+    //---------------------------------------------------------------------------------------------
+    /// Function to return all of the categories that contain this algorithm
+    const std::vector<std::string> Algorithm::categories() const
+    {
+      std::vector < std::string > res;
+      Poco::StringTokenizer tokenizer(category(), categorySeperator(),
+          Poco::StringTokenizer::TOK_TRIM | Poco::StringTokenizer::TOK_IGNORE_EMPTY);
+      Poco::StringTokenizer::Iterator h = tokenizer.begin();
+
+      for (; h != tokenizer.end(); ++h)
+      {
+        res.push_back(*h);
+      }
+
+      const DeprecatedAlgorithm * depo = dynamic_cast<const DeprecatedAlgorithm *>(this);
+      if (depo != NULL)
+      {
+        res.push_back("Deprecated");
+      }
+      return res;
+    }
+
+
+    //=============================================================================================
+    //================================== Initialization ===========================================
+    //=============================================================================================
 
     //---------------------------------------------------------------------------------------------
     /** Initialization method invoked by the framework. This method is responsible
@@ -108,9 +219,7 @@ namespace Mantid
         g_log.fatal("UNKNOWN Exception is caught");
         throw;
       }
-      cacheWorkspaceProperties();
     }
-
 
     //---------------------------------------------------------------------------------------------
     /** Go through the properties and cache the input/output
@@ -147,8 +256,11 @@ namespace Mantid
       } // each property
     }
 
+    //=============================================================================================
+    //================================== Execution ================================================
+    //=============================================================================================
 
-  //---------------------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------
     /** Go through the workspace properties of this algorithm
      * and lock the workspaces for reading or writing.
      *
@@ -156,6 +268,10 @@ namespace Mantid
      */
     void Algorithm::lockWorkspaces()
     {
+      // Do not lock workspace for child algos
+      if (this->isChild())
+        return;
+
       if (!m_readLockedWorkspaces.empty() || !m_writeLockedWorkspaces.empty())
         throw std::logic_error("Algorithm::lockWorkspaces(): The workspaces have already been locked!");
 
@@ -200,6 +316,10 @@ namespace Mantid
      */
     void Algorithm::unlockWorkspaces()
     {
+      // Do not lock workspace for child algos
+      if (this->isChild())
+        return;
+
       for (size_t i=0; i<m_writeLockedWorkspaces.size(); i++)
       {
         Workspace_sptr ws = m_writeLockedWorkspaces[i];
@@ -250,6 +370,9 @@ namespace Mantid
         g_log.error("Algorithm is not initialized:" + this->name());
         throw std::runtime_error("Algorithm is not initialised:" + this->name());
       }
+
+      // Cache the workspace in/out properties for later use
+      cacheWorkspaceProperties();
 
       // no logging of input if a child algorithm
       if (!m_isChildAlgorithm) algorithm_info();
@@ -470,17 +593,28 @@ namespace Mantid
       }
     }
 
-    //---------------------------------------------------------------------------------------------
-    /// Has the Algorithm already been initialized
-    bool Algorithm::isInitialized() const
+    /** Stores any output workspaces into the AnalysisDataService
+    *  @throw std::runtime_error If unable to successfully store an output workspace
+    */
+    void Algorithm::store()
     {
-      return m_isInitialized;
-    }
-
-    /// Has the Algorithm already been executed
-    bool Algorithm::isExecuted() const
-    {
-      return m_isExecuted;
+      const std::vector< Property*> &props = getProperties();
+      for (unsigned int i = 0; i < props.size(); ++i)
+      {
+        IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty*>(props[i]);
+        if (wsProp)
+        {
+          try
+          {
+            wsProp->store();
+          }
+          catch (std::runtime_error&)
+          {
+            g_log.error("Error storing output workspace in AnalysisDataService");
+            throw;
+          }
+        }
+      }
     }
 
     /** Create a sub algorithm.  A call to this method creates a child algorithm object.
@@ -559,21 +693,10 @@ namespace Mantid
       return;
     }
 
-    /**  Add an observer to a notification
-    @param observer :: Reference to the observer to add
-    */
-    void Algorithm::addObserver(const Poco::AbstractObserver& observer)const
-    {
-      m_notificationCenter.addObserver(observer);
-    }
+    //=============================================================================================
+    //================================== Algorithm History ========================================
+    //=============================================================================================
 
-    /**  Remove an observer
-    @param observer :: Reference to the observer to remove
-    */
-    void Algorithm::removeObserver(const Poco::AbstractObserver& observer)const
-    {
-      m_notificationCenter.removeObserver(observer);
-    }
 
     /**
      * Serialize this object to a string. The format is
@@ -589,6 +712,31 @@ namespace Mantid
         << ")";
       return writer.str();
     }
+
+
+    //--------------------------------------------------------------------------------------------
+    /// Construct an object from a history entry
+    IAlgorithm_sptr Algorithm::fromHistory(const AlgorithmHistory & history)
+    {
+      // Hand off to the string creator
+      std::ostringstream stream;
+      stream << history.name() << "." << history.version()
+       << "(";
+      const std::vector<Kernel::PropertyHistory>& props = history.getProperties();
+      const size_t numProps(props.size());
+      for( size_t i = 0 ; i < numProps; ++i )
+      {
+        const Kernel::PropertyHistory & prop = props[i];
+        if( !prop.isDefault() )
+        {
+          stream << prop.name() << "=" << prop.value();
+        }
+        if( i < numProps - 1 ) stream << ",";
+      }
+      stream << ")";
+      return Algorithm::fromString(stream.str());
+    }
+
 
     //--------------------------------------------------------------------------------------------
     /**
@@ -647,56 +795,7 @@ namespace Mantid
       }
     }
 
-    //--------------------------------------------------------------------------------------------
-    /// Construct an object from a history entry
-    IAlgorithm_sptr Algorithm::fromHistory(const AlgorithmHistory & history)
-    {
-      // Hand off to the string creator
-      std::ostringstream stream;
-      stream << history.name() << "." << history.version()
-       << "(";
-      const std::vector<Kernel::PropertyHistory>& props = history.getProperties();
-      const size_t numProps(props.size());
-      for( size_t i = 0 ; i < numProps; ++i )
-      {
-        const Kernel::PropertyHistory & prop = props[i];
-        if( !prop.isDefault() )
-        {
-          stream << prop.name() << "=" << prop.value();
-        }
-        if( i < numProps - 1 ) stream << ",";
-      }
-      stream << ")";
-      return Algorithm::fromString(stream.str());
-    }
-
-    //--------------------------------------------------------------------------------------------
-    /**
-     * Cancel an algorithm
-     */
-    void Algorithm::cancel() const
-    {
-      //set myself to be cancelled
-      m_cancel = true;
-
-      //set any child algorithms to be cancelled as well
-      std::vector<IAlgorithm_wptr>::const_iterator it;
-
-      // Loop over the output workspaces and try to cancel them
-      for (it = m_ChildAlgorithms.begin(); it != m_ChildAlgorithms.end(); ++it)
-      {
-        IAlgorithm_wptr weakPtr = *it;
-        if (IAlgorithm_sptr sharedPtr = weakPtr.lock())
-        {
-          sharedPtr->cancel();
-        }
-      }
-    }
-
-    //----------------------------------------------------------------------
-    // Protected Member Functions
-    //----------------------------------------------------------------------
-
+    //-------------------------------------------------------------------------
     /** Initialize using proxy algorithm.
     Call the main initialize method and then copy in the property values.
     @param proxy :: Initialising proxy algorithm
@@ -707,24 +806,6 @@ namespace Mantid
       copyPropertiesFrom(proxy);
       m_algorithmID = proxy.getAlgorithmID();
       setLogging(proxy.isLogging());
-      // Need to re-cache the properties
-      cacheWorkspaceProperties();
-    }
-
-    /// Set the Algorithm initialized state
-    void Algorithm::setInitialized()
-    {
-      m_isInitialized = true;
-    }
-
-    /** Set the executed flag to the specified state
-    // Public in Gaudi - don't know why and will leave here unless we find a reason otherwise
-    //     Also don't know reason for different return type and argument.
-    @param state :: New executed state
-    */
-    void Algorithm::setExecuted(bool state)
-    {
-      m_isExecuted = state;
     }
 
     /** Sends ProgressNotification. 
@@ -738,18 +819,6 @@ namespace Mantid
       m_notificationCenter.postNotification(new ProgressNotification(this,p,msg, estimatedTime, progressPrecision));
     }
 
-    void Algorithm::interruption_point()
-    {
-      // only throw exceptions if the code is not multi threaded otherwise you contravene the OpenMP standard
-      // that defines that all loops must complete, and no exception can leave an OpenMP section
-      // openmp cancel handling is performed using the ??, ?? and ?? macros in each algrothim
-      IF_NOT_PARALLEL
-        if (m_cancel) throw CancelException();
-    }
-
-    //----------------------------------------------------------------------
-    // Private Member Functions
-    //----------------------------------------------------------------------
 
     /** Fills History, Algorithm History and Algorithm Parameters
     *  @param start :: a date and time defnining the start time of the algorithm
@@ -823,53 +892,11 @@ namespace Mantid
       g_log.information() << AH;
     }
 
-    /** Stores any output workspaces into the AnalysisDataService
-    *  @throw std::runtime_error If unable to successfully store an output workspace
-    */
-    void Algorithm::store()
-    {
-      const std::vector< Property*> &props = getProperties();
-      for (unsigned int i = 0; i < props.size(); ++i)
-      {
-        IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty*>(props[i]);
-        if (wsProp)
-        {
-          try
-          {
-            wsProp->store();
-          }
-          catch (std::runtime_error&)
-          {
-            g_log.error("Error storing output workspace in AnalysisDataService");
-            throw;
-          }
-        }
-      }
-    }
 
-    /** To query whether algorithm is a child.
-    *  @returns true - the algorithm is a child algorithm.  False - this is a full managed algorithm.
-    */
-    bool Algorithm::isChild() const
-    {
-      return m_isChildAlgorithm;
-    }
 
-    /** To set whether algorithm is a child.
-    *  @param isChild :: True - the algorithm is a child algorithm.  False - this is a full managed algorithm.
-    */
-    void Algorithm::setChild(const bool isChild)
-    {
-      m_isChildAlgorithm = isChild;
-    }
-
-    /** Set whether the algorithm will rethrow exceptions
-     * @param rethrow :: true if you want to rethrow exception.
-     */
-    void Algorithm::setRethrows(const bool rethrow)
-    {
-      this->m_rethrow = rethrow;
-    }
+    //=============================================================================================
+    //================================== WorkspaceGroup-related ===================================
+    //=============================================================================================
 
     //--------------------------------------------------------------------------------------------
     /** To Process workspace groups.
@@ -1257,6 +1284,7 @@ namespace Mantid
       };
     }
 
+    //--------------------------------------------------------------------------------------------
     /**
     * Asynchronous execution
     */
@@ -1283,25 +1311,40 @@ namespace Mantid
       progress(p,pNf->message);
     }
 
-    /// Function to return all of the categories that contain this algorithm
-    const std::vector<std::string> Algorithm::categories() const
+    //--------------------------------------------------------------------------------------------
+    /**
+     * Cancel an algorithm
+     */
+    void Algorithm::cancel() const
     {
-      std::vector < std::string > res;
-      Poco::StringTokenizer tokenizer(category(), categorySeperator(),
-          Poco::StringTokenizer::TOK_TRIM | Poco::StringTokenizer::TOK_IGNORE_EMPTY);
-      Poco::StringTokenizer::Iterator h = tokenizer.begin();
+      //set myself to be cancelled
+      m_cancel = true;
 
-      for (; h != tokenizer.end(); ++h)
-      {
-        res.push_back(*h);
-      }
+      //set any child algorithms to be cancelled as well
+      std::vector<IAlgorithm_wptr>::const_iterator it;
 
-      const DeprecatedAlgorithm * depo = dynamic_cast<const DeprecatedAlgorithm *>(this);
-      if (depo != NULL)
+      // Loop over the output workspaces and try to cancel them
+      for (it = m_ChildAlgorithms.begin(); it != m_ChildAlgorithms.end(); ++it)
       {
-        res.push_back("Deprecated");
+        IAlgorithm_wptr weakPtr = *it;
+        if (IAlgorithm_sptr sharedPtr = weakPtr.lock())
+        {
+          sharedPtr->cancel();
+        }
       }
-      return res;
+    }
+
+    //--------------------------------------------------------------------------------------------
+    /** This is called during long-running operations,
+     * and check if the algorithm has requested that it be cancelled.
+     */
+    void Algorithm::interruption_point()
+    {
+      // only throw exceptions if the code is not multi threaded otherwise you contravene the OpenMP standard
+      // that defines that all loops must complete, and no exception can leave an OpenMP section
+      // openmp cancel handling is performed using the ??, ?? and ?? macros in each algrothim
+      IF_NOT_PARALLEL
+        if (m_cancel) throw CancelException();
     }
 
 
