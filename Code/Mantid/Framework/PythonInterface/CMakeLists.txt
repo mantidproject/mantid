@@ -75,6 +75,7 @@ set ( TEST_PY_FILES
   test/python/AnalysisDataServiceTest.py
   test/python/BoundedValidatorTest.py
   test/python/ConfigServiceTest.py
+  test/python/CreateWorkspaceTest.py
   test/python/ExperimentInfoTest.py
   test/python/FilePropertyTest.py
   test/python/FileFinderTest.py

@@ -1550,7 +1550,7 @@ void Indirect::sOfQwClicked()
     pyInput +=
       "efixed = " + m_uiForm.leEfixed->text() + "\n"
       "rebin = '" + rebinString + "'\n"      
-      "SofQW(sqwInput, sqwOutput, rebin, 'Indirect', EFixed=efixed)\n"
+      "SofQW2(sqwInput, sqwOutput, rebin, 'Indirect', EFixed=efixed)\n"
       "if cleanup:\n"
       "    mantid.deleteWorkspace(sqwInput)\n";
 
