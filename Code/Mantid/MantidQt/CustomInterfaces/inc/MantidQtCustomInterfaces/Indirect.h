@@ -71,6 +71,8 @@ namespace MantidQt
       void runConvertToEnergy();
       /// gather necessary information from Instument Definition Files
       virtual void setIDFValues(const QString & prefix);
+      /// perform any instrument-specific changes to layout
+      void performInstSpecific();
 
     private:
       virtual void closeEvent(QCloseEvent* close);
@@ -125,6 +127,9 @@ namespace MantidQt
       void sliceUpdateRS(QtProperty*, double);
 
     private:
+      /// set and show an instrument-specific widget
+      void setInstSpecificWidget(const std::string & parameterName, QCheckBox * checkBox, QCheckBox::ToggleState defaultState);
+
       Ui::ConvertToEnergy m_uiForm; ///< user interface form object
       Background *m_backgroundDialog; ///< background removal dialog
       Poco::NObserver<Indirect, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver; ///< Poco observer for changes in user directory settings

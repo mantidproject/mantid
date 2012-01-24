@@ -14,6 +14,10 @@
 <parameter name="refl-graphite" type="string">
     <value val="002" />
 </parameter>
+<!-- Available options are "Show" or "Hide". -->
+<parameter name="cm-1-convert_choice" type="string">
+    <value val="Show" />
+</parameter>
   
 <!-- This parameter will be taken as a default value for the rebinning of
         the data in DeltaE. The existence of the parameter will make rebinning

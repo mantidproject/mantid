@@ -313,6 +313,7 @@ void ConvertToEnergy::changeInterface(DeltaEMode desired)
 	      this, SIGNAL(runAsPythonScript(const QString&)));
       m_indirectInstruments->initializeLocalPython();
     }
+    m_indirectInstruments->performInstSpecific();
     m_indirectInstruments->setIDFValues(curInstPrefix);
     break;
   default:
