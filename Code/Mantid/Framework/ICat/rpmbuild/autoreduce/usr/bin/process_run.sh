@@ -60,10 +60,10 @@ fi
 
 
 echo "--------Creating metadata file for raw data--------"
-nxingestCommand=nxingest
-mappingFile=mapping.xml
+nxingestCommand=nxingest-autoreduce
+mappingFile=/etc/autoreduce/mapping.xml
 echo $nxingestCommand $mappingFile $nexusFile $metadataFile
-./$nxingestCommand $mappingFile $nexusFile $metadataFile
+$nxingestCommand $mappingFile $nexusFile $metadataFile
 
 # Accumulate any non-zero return code
 status=$(( $status + $? ))
@@ -71,7 +71,7 @@ echo "status=$status"
 
 # Metadata catalog
 icatCommand="java -jar -Djavax.net.ssl.trustStore=/usr/local/glassfish3/glassfish/domains/domain1/config/cacerts.jks"
-icatJar=/home/3qr/workspace/projects/icat4/trunk/icat3-xmlingest-client/target/icat3-xmllingest-client-1.0.0-SNAPSHOT.jar
+icatJar=/usr/lib64/autoreduce/icat3-xmllingest-client-1.0.0-SNAPSHOT.jar
 icatAdmin=snsAdmin
 
 echo "--------Catalogging raw data--------"
@@ -81,15 +81,15 @@ echo
 
 echo
 echo "--------Reducing data--------"
-redCommand="python reduce_"$instrument".py"
+redCommand="python /SNS/PG3/shared/autoreduce/reduce_"$instrument".py"
 echo $redCommand $runNumber $metadataDir
 $redCommand $runNumber $redOutDir
 echo
 
 echo
 echo "--------Creating metadata file for reduced data--------"
-echo python create_reduced_metadata.py $instrument $proposalId $visitId $runNumber $redOutDir $reducedMetadataFile
-python create_reduced_metadata.py $instrument $proposalId $visitId $runNumber $redOutDir $reducedMetadataFile
+echo python /usr/bin/create_reduced_metadata.py $instrument $proposalId $visitId $runNumber $redOutDir $reducedMetadataFile
+python /usr/bin/create_reduced_metadata.py $instrument $proposalId $visitId $runNumber $redOutDir $reducedMetadataFile
 echo
 
 echo "--------Catalogging reduced data--------"
