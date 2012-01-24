@@ -66,6 +66,7 @@ namespace Mantid
     }
 
 
+    //---------------------------------------------------------------------------------------------
     /** Initialization method invoked by the framework. This method is responsible
     *  for any bookkeeping of initialization required by the framework itself.
     *  It will in turn invoke the init() method of the derived algorithm,
@@ -107,11 +108,117 @@ namespace Mantid
         g_log.fatal("UNKNOWN Exception is caught");
         throw;
       }
-
-      // Only gets to here if everything worked normally
-      return;
+      cacheWorkspaceProperties();
     }
 
+
+    //---------------------------------------------------------------------------------------------
+    /** Go through the properties and cache the input/output
+     * workspace properties for later use.
+     */
+    void Algorithm::cacheWorkspaceProperties()
+    {
+      // Cache the list of the in/out workspace properties
+      m_inputWorkspaceProps.clear();
+      m_outputWorkspaceProps.clear();
+      const std::vector<Property*>& props = this->getProperties();
+      for (size_t i=0; i<props.size(); i++)
+      {
+        Property* prop = props[i];
+        IWorkspaceProperty * wsProp = dynamic_cast<IWorkspaceProperty*>(prop);
+        if (wsProp)
+        {
+          switch(prop->direction())
+          {
+          case Kernel::Direction::Input:
+            m_inputWorkspaceProps.push_back(wsProp);
+            break;
+          case Kernel::Direction::InOut:
+            m_inputWorkspaceProps.push_back(wsProp);
+            m_outputWorkspaceProps.push_back(wsProp);
+            break;
+          case Kernel::Direction::Output:
+            m_outputWorkspaceProps.push_back(wsProp);
+            break;
+          default:
+            throw std::logic_error("Unexpected property direction found for property " + prop->name() + " of algorithm " + this->name());
+          }
+        } // is a ws property
+      } // each property
+    }
+
+
+  //---------------------------------------------------------------------------------------------
+    /** Go through the workspace properties of this algorithm
+     * and lock the workspaces for reading or writing.
+     *
+     * @param props :: vector of Property * of this algorithm
+     */
+    void Algorithm::lockWorkspaces()
+    {
+      if (!m_readLockedWorkspaces.empty() || !m_writeLockedWorkspaces.empty())
+        throw std::logic_error("Algorithm::lockWorkspaces(): The workspaces have already been locked!");
+
+      // First, Write-lock the output workspaces
+      for (size_t i=0; i<m_outputWorkspaceProps.size(); i++)
+      {
+        Workspace_sptr ws = m_outputWorkspaceProps[i]->getWorkspace();
+        if (ws)
+        {
+          // Is it already write-locked?
+          if (std::find(m_writeLockedWorkspaces.begin(), m_writeLockedWorkspaces.end(), ws)
+              == m_writeLockedWorkspaces.end())
+          {
+            // Write-lock it if not already
+            ws->getLock()->writeLock();
+            m_writeLockedWorkspaces.push_back(ws);
+          }
+        }
+      }
+
+      // Next read-lock the input workspaces
+      for (size_t i=0; i<m_inputWorkspaceProps.size(); i++)
+      {
+        Workspace_sptr ws = m_inputWorkspaceProps[i]->getWorkspace();
+        if (ws)
+        {
+          // Is it already write-locked?
+          if (std::find(m_writeLockedWorkspaces.begin(), m_writeLockedWorkspaces.end(), ws)
+              == m_writeLockedWorkspaces.end())
+          {
+            // Read-lock it if not already write-locked
+            ws->getLock()->readLock();
+            m_readLockedWorkspaces.push_back(ws);
+          }
+        }
+      }
+    }
+
+    //---------------------------------------------------------------------------------------------
+    /** Unlock any previously locked workspaces
+     *
+     */
+    void Algorithm::unlockWorkspaces()
+    {
+      for (size_t i=0; i<m_writeLockedWorkspaces.size(); i++)
+      {
+        Workspace_sptr ws = m_writeLockedWorkspaces[i];
+        if (ws)
+          ws->getLock()->unlock();
+      }
+      for (size_t i=0; i<m_readLockedWorkspaces.size(); i++)
+      {
+        Workspace_sptr ws = m_readLockedWorkspaces[i];
+        if (ws)
+          ws->getLock()->unlock();
+      }
+
+      // Don't double-unlock workspaces
+      m_readLockedWorkspaces.clear();
+      m_writeLockedWorkspaces.clear();
+    }
+
+    //---------------------------------------------------------------------------------------------
     /** The actions to be performed by the algorithm on a dataset. This method is
     *  invoked for top level algorithms by the application manager.
     *  This method invokes exec() method.
@@ -174,72 +281,66 @@ namespace Mantid
       // if not normal execution
 
       std::vector<Property*> Prop=getProperties();
-      std::vector<Property*>::const_iterator itr;
-      for (itr=Prop.begin();itr!=Prop.end();++itr)
+
+      std::vector<IWorkspaceProperty*>::const_iterator itr;
+      for (itr=m_inputWorkspaceProps.begin(); itr!=m_inputWorkspaceProps.end(); ++itr)
       {
-        const IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty*>(*itr);
+        IWorkspaceProperty* wsProp = *itr;
         if (wsProp)
         {
-          const Property *wsPropProp = dynamic_cast<Property*>(*itr);
-          unsigned int direction = wsPropProp->direction();
-          if (direction == Kernel::Direction::Input ||direction==Kernel::Direction::InOut)
+          Property *wsPropProp = dynamic_cast<Property*>(wsProp);
+          std::string wsName = wsPropProp->value();
+
+          // Checking the input is a group
+          try
           {
-            std::string wsName=wsPropProp->value();
-
-            // Checking the input is a group
-            try
+            // Check if the pointer is valid, it won't be if it is a group
+            Workspace_sptr wsSptr = wsProp->getWorkspace();
+            if(!wsName.empty() && !wsSptr)
             {
-              // Check if the pointer is valid, it won't be if it is a group
-              Workspace_sptr wsSptr=wsProp->getWorkspace();
-              if(!wsName.empty() && !wsSptr)
-              {
-                boost::shared_ptr<WorkspaceGroup> wsGrpSptr =
+              boost::shared_ptr<WorkspaceGroup> wsGrpSptr =
                   boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(wsName));
-                if(wsGrpSptr)
-                {
-                  // This is a group. Call processGroups instead.
-                  g_log.debug()<<" one of the inputs is a workspace group - call processGroups"<<std::endl;
-                  // This calls this->execute() again on each member of the group.
-                  return processGroups(wsGrpSptr,Prop);
-                }
-              }
-            }
-            catch (std::runtime_error &ex)
-            {
-              g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
-              g_log.error()<<ex.what()<<std::endl;
-              m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
-              m_running = false;
-              if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
+              if(wsGrpSptr)
               {
-                m_runningAsync = false;
-                throw;
+                // This is a group. Call processGroups instead.
+                g_log.debug()<<" one of the inputs is a workspace group - call processGroups"<<std::endl;
+                // This calls this->execute() again on each member of the group.
+                return processGroups(wsGrpSptr,Prop);
               }
-              return false;
             }
-            catch(std::exception&ex)
+          }
+          catch (std::runtime_error &ex)
+          {
+            g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
+            g_log.error()<<ex.what()<<std::endl;
+            m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
+            m_running = false;
+            if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
             {
-              g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
-              g_log.error()<<ex.what()<<std::endl;
-              m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
-              m_running = false;
-              if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
-              {
-                m_runningAsync = false;
-                throw;
-              }
-              return false;
+              m_runningAsync = false;
+              throw;
             }
-
-
-          } //end of if (its an input/inout workspace)
-
+            return false;
+          }
+          catch(std::exception&ex)
+          {
+            g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
+            g_log.error()<<ex.what()<<std::endl;
+            m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
+            m_running = false;
+            if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
+            {
+              m_runningAsync = false;
+              throw;
+            }
+            return false;
+          }
         }//end of if (it is a workspace property)
-
       }// end of for loop for checking the properties for workspace groups
 
-      //TODO: Here add a call to something that
+
       // read or write locks every input/output workspace
+      this->lockWorkspaces();
 
       // Invoke exec() method of derived class and catch all uncaught exceptions
       try
@@ -275,6 +376,7 @@ namespace Mantid
         }
         catch(std::runtime_error& ex)
         {
+          this->unlockWorkspaces();
           if (m_isChildAlgorithm || m_runningAsync || m_rethrow) throw;
           else
           {
@@ -286,6 +388,7 @@ namespace Mantid
         }
         catch(std::logic_error& ex)
         {
+          this->unlockWorkspaces();
           if (m_isChildAlgorithm || m_runningAsync || m_rethrow) throw;
           else
           {
@@ -302,6 +405,7 @@ namespace Mantid
         m_running = false;
         g_log.error() << this->name() << ": Execution terminated by user.\n";
         m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
+        this->unlockWorkspaces();
         throw;
       }
       // Gaudi also specifically catches GaudiException & std:exception.
@@ -314,6 +418,7 @@ namespace Mantid
         m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
         g_log.error() << "Error in execution of algorithm " << this->name() << ":\n";
         g_log.error(ex.what());
+        this->unlockWorkspaces();
         throw;
       }
 
@@ -326,8 +431,12 @@ namespace Mantid
 
         m_notificationCenter.postNotification(new ErrorNotification(this,"UNKNOWN Exception is caught "));
         g_log.error() << this->name() << ": UNKNOWN Exception is caught\n";
+        this->unlockWorkspaces();
         throw;
       }
+
+      // Unlock the locked workspaces
+      this->unlockWorkspaces();
 
       m_notificationCenter.postNotification(new FinishedNotification(this,isExecuted()));
       // Only gets to here if algorithm ended normally
@@ -336,7 +445,11 @@ namespace Mantid
       return isExecuted();
     }
 
-    /// Execute as a sub-algorithm
+    //---------------------------------------------------------------------------------------------
+    /** Execute as a sub-algorithm.
+     * This runs execute() but catches errors so as to log the name
+     * of the failed sub-algorithm, if it fails.
+     */
     void Algorithm::executeAsSubAlg()
     {
       bool executed = false;
@@ -357,6 +470,7 @@ namespace Mantid
       }
     }
 
+    //---------------------------------------------------------------------------------------------
     /// Has the Algorithm already been initialized
     bool Algorithm::isInitialized() const
     {
@@ -476,6 +590,7 @@ namespace Mantid
       return writer.str();
     }
 
+    //--------------------------------------------------------------------------------------------
     /**
     * De-serialize an object from a string
     * @param input :: An input string in the format. The format is
@@ -532,6 +647,7 @@ namespace Mantid
       }
     }
 
+    //--------------------------------------------------------------------------------------------
     /// Construct an object from a history entry
     IAlgorithm_sptr Algorithm::fromHistory(const AlgorithmHistory & history)
     {
@@ -543,17 +659,18 @@ namespace Mantid
       const size_t numProps(props.size());
       for( size_t i = 0 ; i < numProps; ++i )
       {
-  const Kernel::PropertyHistory & prop = props[i];
-  if( !prop.isDefault() )
-  {
-    stream << prop.name() << "=" << prop.value();
-  }
-  if( i < numProps - 1 ) stream << ",";
+        const Kernel::PropertyHistory & prop = props[i];
+        if( !prop.isDefault() )
+        {
+          stream << prop.name() << "=" << prop.value();
+        }
+        if( i < numProps - 1 ) stream << ",";
       }
       stream << ")";
       return Algorithm::fromString(stream.str());
     }
 
+    //--------------------------------------------------------------------------------------------
     /**
      * Cancel an algorithm
      */
@@ -590,6 +707,8 @@ namespace Mantid
       copyPropertiesFrom(proxy);
       m_algorithmID = proxy.getAlgorithmID();
       setLogging(proxy.isLogging());
+      // Need to re-cache the properties
+      cacheWorkspaceProperties();
     }
 
     /// Set the Algorithm initialized state
@@ -752,14 +871,7 @@ namespace Mantid
       this->m_rethrow = rethrow;
     }
 
-    /**
-    * Asynchronous execution
-    */
-    Poco::ActiveResult<bool> Algorithm::executeAsync()
-    { 
-      return m_executeAsync(Poco::Void());
-    }
-
+    //--------------------------------------------------------------------------------------------
     /** To Process workspace groups.
      * This runs the algorithm once for each workspace in the group.
      *
@@ -880,6 +992,7 @@ namespace Mantid
       return bgroupPassed;
     }
 
+    //--------------------------------------------------------------------------------------------
     /**This method checks input and output groupworkspace for an algorithm is of same name.
     *  @param props :: a list of properties for the algorithm
     *  @param ingroupwsName ::  input groupworkspace
@@ -909,6 +1022,7 @@ namespace Mantid
       }
     }
 
+    //--------------------------------------------------------------------------------------------
     /** This method checks input and output groupworkspace for an algorithm is of same name.
     *  @param props :: a list of properties for the algorithm
     *  @returns true if the input and output groupworkspaces are of same names
@@ -934,6 +1048,7 @@ namespace Mantid
     }
 
 
+    //--------------------------------------------------------------------------------------------
     /**This method checks the member workspace are of similar names in a group workspace .
     *  @param ingroupwsName :: input group workspace name
     *  @param grpmembersNames :: a list of group member names
@@ -1031,8 +1146,6 @@ namespace Mantid
       if(bequal)
       {
         outmemberwsName=inmemberwsName;               //InputPut GroupWs ="NewGroup",//OutPut GroupWs ="NewGroup"
-        // input member ws1= "Bob", // output member ws1="Bob_NewGroup" 
-        //input member ws2 = "Sally",// output member ws2="Sally_NewGroup" 
       }
       else
       { 
@@ -1114,6 +1227,9 @@ namespace Mantid
     }
 
 
+    //=============================================================================================
+    //================================== Asynchronous Execution ===================================
+    //=============================================================================================
     namespace
     {
       /**
@@ -1139,7 +1255,14 @@ namespace Mantid
         ///Running flag
         bool & m_running_flag;
       };
+    }
 
+    /**
+    * Asynchronous execution
+    */
+    Poco::ActiveResult<bool> Algorithm::executeAsync()
+    {
+      return m_executeAsync(Poco::Void());
     }
 
     /**Callback when an algorithm is executed asynchronously

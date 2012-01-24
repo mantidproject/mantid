@@ -6,6 +6,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/Property.h"
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidTestHelpers/FakeObjects.h"
 
 using namespace Mantid::Kernel; 
 using namespace Mantid::API;
@@ -75,6 +76,29 @@ public:
   }
   void exec() {}
 };
+
+
+class WorkspaceAlgorithm : public Algorithm
+{
+public:
+  WorkspaceAlgorithm() : Algorithm() {}
+  virtual ~WorkspaceAlgorithm() {}
+
+  const std::string name() const { return "WorkspaceAlgorithm";}
+  int version() const  { return 1;}
+  const std::string category() const { return "Cat;Leopard;Mink";}
+  void init()
+  {
+    declareProperty(new WorkspaceProperty<>("InputWorkspace1", "", Direction::Input));
+    declareProperty(new WorkspaceProperty<>("InputWorkspace2", "", Direction::Input, true));
+    declareProperty(new WorkspaceProperty<>("InOutWorkspace", "", Direction::InOut, true));
+    declareProperty(new WorkspaceProperty<>("OutputWorkspace1","",Direction::Output));
+    declareProperty(new WorkspaceProperty<>("OutputWorkspace2","",Direction::Output, true));
+  }
+  void exec() {}
+};
+
+
 
 class AlgorithmTest : public CxxTest::TestSuite
 {
@@ -307,6 +331,43 @@ public:
     }
 
   }
+
+  void do_test_locking(std::string in1, std::string in2, std::string inout, std::string out1, std::string out2="")
+  {
+    for (size_t i=0; i<6; i++)
+    {
+      boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
+      AnalysisDataService::Instance().addOrReplace("ws" + Strings::toString(i), ws);
+    }
+    WorkspaceAlgorithm alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace1", in1);
+    alg.setPropertyValue("InputWorkspace2", in2);
+    alg.setPropertyValue("InOutWorkspace", inout);
+    alg.setPropertyValue("OutputWorkspace1", out1);
+    alg.setPropertyValue("OutputWorkspace2", out2);
+    alg.execute();
+  }
+
+
+  void test_lockingWorkspaces()
+  {
+    // Input and output are different
+    do_test_locking("ws0", "", "", "ws1");
+    // Repeated output workspaces
+    do_test_locking("ws0", "", "", "ws1", "ws1");
+    // Different output workspaces
+    do_test_locking("ws0", "", "", "ws1", "ws2");
+    // Input and output are same
+    do_test_locking("ws0", "", "", "ws0");
+    // Two input workspaces
+    do_test_locking("ws0", "ws0", "", "ws5");
+    // Also in-out workspace
+    do_test_locking("ws0", "ws0", "ws0", "ws0");
+    // All the same
+    do_test_locking("ws0", "ws0", "ws0", "ws0", "ws0");
+  }
+
 
 
 private:

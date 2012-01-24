@@ -300,6 +300,8 @@ protected:
   void setInitialized();
   void setExecuted(bool state);
 
+  void cacheWorkspaceProperties();
+
 //  // Make PropertyManager's declareProperty methods protected in Algorithm
 //  using Kernel::PropertyManagerOwner::declareProperty;
 
@@ -329,7 +331,7 @@ protected:
   /// checks the property is output workspace property
   bool isOutputWorkspaceProperty(const Kernel::Property* const prop) const;
   /// This method checks the members workspaces are of similar names (example group_1,group_2) and returns true if they are.
-        bool isGroupWorkspacesofSimilarNames(const std::string&,const std::vector<std::string>& grpmembersNames); 
+  bool isGroupWorkspacesofSimilarNames(const std::string&,const std::vector<std::string>& grpmembersNames);
                 
   /// process workspace groups
   virtual bool processGroups(WorkspaceGroup_sptr ingrpws_sptr,const std::vector<Mantid::Kernel::Property*>&props);
@@ -346,6 +348,9 @@ private:
   Algorithm(const Algorithm&);
   /// Private assignment operator: NO ASSIGNMENT ALLOWED
   Algorithm& operator=(const Algorithm&);
+
+  void lockWorkspaces();
+  void unlockWorkspaces();
 
   void store();
   void fillHistory(Mantid::Kernel::DateAndTime, double,std::size_t);
@@ -388,6 +393,16 @@ private:
   std::vector<IAlgorithm_wptr> m_ChildAlgorithms; ///< A list of weak pointers to any child algorithms created
 
   static size_t g_execCount; ///< Counter to keep track of algorithm execution order
+
+  /// Vector of all the workspaces that have been read-locked
+  std::vector<Workspace_sptr> m_readLockedWorkspaces;
+  /// Vector of all the workspaces that have been write-locked
+  std::vector<Workspace_sptr> m_writeLockedWorkspaces;
+
+  /// All the WorkspaceProperties that are Input or InOut. Set in initialize()
+  std::vector<IWorkspaceProperty *> m_inputWorkspaceProps;
+  /// All the WorkspaceProperties that are Output or InOut. Set in initialize()
+  std::vector<IWorkspaceProperty *> m_outputWorkspaceProps;
 };
 
 ///Typedef for a shared pointer to an Algorithm
