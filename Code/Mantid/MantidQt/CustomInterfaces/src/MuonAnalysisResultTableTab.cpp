@@ -166,8 +166,7 @@ void MuonAnalysisResultTableTab::populateTables(const QStringList& wsList)
     }
     else
     {
-      // Make sure all logs and fittings are selected by default.
-      selectAllLogs(true);
+      // Make sure all fittings are selected by default.
       selectAllFittings(true);
     }
   }
