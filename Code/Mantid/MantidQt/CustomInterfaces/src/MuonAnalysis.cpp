@@ -82,7 +82,7 @@ MuonAnalysis::MuonAnalysis(QWidget *parent) :
   m_tabNumber(0), m_groupNames(), m_settingsGroup("CustomInterfaces/MuonAnalysis/"), m_updating(false), m_loaded(false)
 {
   // this should work for now
-  m_groupingTempFilename = "Grouping/tempMuonAnalysisGrouping.xml";
+  m_groupingTempFilename = getInstrumentDirectory()+"Grouping/tempMuonAnalysisGrouping.xml";
 }
 
 /// Set up the dialog layout
