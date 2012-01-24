@@ -112,6 +112,7 @@ set ( TEST_FILES
 	test/FunctionFactoryTest.h
 	test/FunctionTest.h
 	test/Gaussian1DTest.h
+	test/GausDecayTest.h
 	test/GaussianTest.h
 	test/IkedaCarpenterPVTest.h
 	test/LinearBackgroundTest.h

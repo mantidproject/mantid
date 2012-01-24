@@ -17,7 +17,7 @@ DECLARE_FUNCTION(GausDecay)
 
 void GausDecay::init()
 {
-   declareParameter("A", 0.2); 
+   declareParameter("A", 5.0); 
    declareParameter("Sigma", 0.2);  
 }
 
