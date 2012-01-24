@@ -669,6 +669,7 @@ class SNSPowderReduction(PythonAlgorithm):
             if minY < 0.:
                 self.log().notice("Minimum y = " + str(minY) + " adding to all y-values")
                 minY *= -1.
+                ConvertToMatrixWorkspace(InputWorkspace=samRun, OutputWorkspace=samRun)
                 samRun += minY
 
             # write out the files

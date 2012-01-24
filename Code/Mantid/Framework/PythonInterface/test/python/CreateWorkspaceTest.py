@@ -55,7 +55,7 @@ class CreateWorkspaceTest(unittest.TestCase):
         y = loq.extractY()
         e = loq.extractE()
         
-        wksp = CreateWorkspace(DataX=x, DataY=y,DataE=e,NSpec=loq.getNumberHistograms(),UnitX='Wavelength')
+        wksp = CreateWorkspace(DataX=x, DataY=y,DataE=e,NSpec=2,UnitX='Wavelength')
         self.assertTrue(isinstance(wksp, MatrixWorkspace))
         self.assertEquals(wksp.getNumberHistograms(), 2)
         
