@@ -54,3 +54,9 @@ class EQSANSInterface(InstrumentInterface):
         # Stitcher
         if IS_IN_MANTIDPLOT:
             self.attach(StitcherWidget(settings = self._settings))
+
+    def has_advanced_version(self):
+        """
+            Returns true if the instrument has simple and advanced views
+        """
+        return True

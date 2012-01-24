@@ -59,6 +59,8 @@ public:
   enum Views {STANDARD, THREESLICE, MULTISLICE, SPLATTERPLOT};
 
 public slots:
+  /// Enable/disable a specific view button.
+  void enableViewButton(ModeControlWidget::Views mode, bool state);
   /**
    * Enable/disable all view buttons, except standard.
    * @param state whether or not to enable the buttons

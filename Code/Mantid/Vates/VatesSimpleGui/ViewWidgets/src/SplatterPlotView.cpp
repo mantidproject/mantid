@@ -39,6 +39,7 @@ void SplatterPlotView::destroyView()
   if (this->peaksSource)
   {
     builder->destroy(this->peaksSource);
+    pqActiveObjects::instance().setActiveSource(this->origSrc);
   }
   if (this->threshSource)
   {

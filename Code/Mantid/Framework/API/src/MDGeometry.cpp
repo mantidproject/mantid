@@ -124,6 +124,21 @@ namespace API
     throw std::runtime_error("Dimension named '" + name + "' was not found in the IMDWorkspace.");
   }
 
+  //-----------------------------------------------------------------------------------------------
+  /** Get the index of the dimension that matches the ID given
+   *
+   * @param id :: id string of the dimension
+   * @return the index (size_t)
+   * @throw runtime_error if it cannot be found.
+   */
+  size_t MDGeometry::getDimensionIndexById(const std::string & id) const
+  {
+    for (size_t d=0; d<m_dimensions.size(); d++)
+      if (m_dimensions[d]->getDimensionId() == id)
+        return d;
+    throw std::runtime_error("Dimension with id '" + id + "' was not found in the IMDWorkspace.");
+  }
+
   // --------------------------------------------------------------------------------------------
   /** Add a dimension
    * @param dim :: shared pointer to the dimension object   */

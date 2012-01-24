@@ -58,6 +58,9 @@ public:
    std::string parseConvMode(const std::string &Q_MODE_ID,const std::string &natural_units,const std::vector<std::string> &ws_dim_units){
        return ConvertToMDEvents::parseConvMode(Q_MODE_ID,natural_units,ws_dim_units);
    }
+   void buildDimNames(MDEvents::MDWSDescription &TargWSDescription){
+       this->ConvertToMDEvents::buildDimNames(TargWSDescription);
+   }
   
    void setAlgoID(const std::string &newID){
        ConvertToMDEvents::setAlgoID(newID);
@@ -650,6 +653,26 @@ void testExecQ3D()
     TSM_ASSERT("Shoud finish succesfully",pAlg->isExecuted());
     AnalysisDataService::Instance().remove("OutputWorkspace"); 
 }
+
+void test_buildDimNames(){
+
+    MDEvents::MDWSDescription TargWSDescription(4);
+
+    TargWSDescription.u=Kernel::V3D(1,0,0);
+    TargWSDescription.v=Kernel::V3D(0,1,0);
+    TargWSDescription.emode=1;
+    TargWSDescription.AlgID = "QhQkQl";
+    TargWSDescription.convert_to_hkl=true;
+    TargWSDescription.rotMatrix.assign(9,0);
+
+    pAlg->buildDimNames(TargWSDescription);
+    TS_ASSERT_EQUALS("[Qh,0,0]",TargWSDescription.dim_names[0]);
+    TS_ASSERT_EQUALS("[0,Qk,0]",TargWSDescription.dim_names[1]);
+    TS_ASSERT_EQUALS("[0,0,Ql]",TargWSDescription.dim_names[2]);
+    
+
+}
+
 
 //DO NOT DISABLE THIS TEST
 void testAlgorithmProperties()

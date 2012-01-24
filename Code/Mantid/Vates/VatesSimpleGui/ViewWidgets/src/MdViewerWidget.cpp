@@ -304,6 +304,10 @@ void MdViewerWidget::setParaViewComponentsForView()
 
   QObject::connect(this->currentView, SIGNAL(setViewsStatus(bool)),
                    this->ui.modeControlWidget, SLOT(enableViewButtons(bool)));
+  QObject::connect(this->currentView,
+                   SIGNAL(setViewStatus(ModeControlWidget::Views, bool)),
+                   this->ui.modeControlWidget,
+                   SLOT(enableViewButton(ModeControlWidget::Views, bool)));
 
   // Set animation (time) control widget <-> view signals/slots.
   QObject::connect(this->currentView,
@@ -406,6 +410,7 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   this->hiddenView->destroyView();
   delete this->hiddenView;
   this->currentView->render();
+  this->currentView->checkViewOnSwitch();
   this->currentView->correctVisibility(this->ui.pipelineBrowser);
 }
 

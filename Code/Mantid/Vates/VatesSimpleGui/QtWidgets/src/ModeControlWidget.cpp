@@ -35,29 +35,29 @@ void ModeControlWidget::enableViewButtons(bool state)
 
 void ModeControlWidget::onMultiSliceViewButtonClicked()
 {
-  emit executeSwitchViews(ModeControlWidget::MULTISLICE);
   this->ui.multiSliceButton->setEnabled(false);
   this->ui.standardButton->setEnabled(true);
   this->ui.splatterPlotButton->setEnabled(true);
   this->ui.threeSliceButton->setEnabled(true);
+  emit executeSwitchViews(ModeControlWidget::MULTISLICE);
 }
 
 void ModeControlWidget::onStandardViewButtonClicked()
 {
-  emit executeSwitchViews(ModeControlWidget::STANDARD);
   this->ui.standardButton->setEnabled(false);
   this->ui.multiSliceButton->setEnabled(true);
   this->ui.splatterPlotButton->setEnabled(true);
   this->ui.threeSliceButton->setEnabled(true);
+  emit executeSwitchViews(ModeControlWidget::STANDARD);
 }
 
 void ModeControlWidget::onThreeSliceViewButtonClicked()
 {
-  emit executeSwitchViews(ModeControlWidget::THREESLICE);
   this->ui.threeSliceButton->setEnabled(false);
   this->ui.multiSliceButton->setEnabled(true);
   this->ui.splatterPlotButton->setEnabled(true);
   this->ui.standardButton->setEnabled(true);
+  emit executeSwitchViews(ModeControlWidget::THREESLICE);
 }
 
 void ModeControlWidget::setToStandardView()
@@ -74,6 +74,33 @@ void ModeControlWidget::onSplatterPlotViewButtonClicked()
   emit executeSwitchViews(ModeControlWidget::SPLATTERPLOT);
 }
 
+/**
+ * This function allows one to enable/disable a specific view button.
+ * @param mode The view mode button to set state for
+ * @param state Enable/diable the view mode button
+ */
+void ModeControlWidget::enableViewButton(ModeControlWidget::Views mode,
+                                         bool state)
+{
+  switch (mode)
+  {
+  case ModeControlWidget::STANDARD:
+    this->ui.standardButton->setEnabled(state);
+    break;
+  case ModeControlWidget::MULTISLICE:
+    this->ui.multiSliceButton->setEnabled(state);
+    break;
+  case ModeControlWidget::THREESLICE:
+    this->ui.threeSliceButton->setEnabled(state);
+    break;
+  case ModeControlWidget::SPLATTERPLOT:
+    this->ui.splatterPlotButton->setEnabled(state);
+    break;
+  default:
+    break;
+  }
 }
-}
-}
+
+} // SimpleGui
+} // Vates
+} // Mantid
