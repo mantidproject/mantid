@@ -12,20 +12,17 @@
 using namespace Mantid;
 using namespace Mantid::Kernel;
 
-//class MockDataItem : public DataItem
-//{
-//public:
-//  virtual const std::string id() const { return "MockDataItem"; }
-//  /// The name of the object
-//  virtual const std::string name() const{ return "Noone"; }
-//  /// Can this object be accessed from multiple threads safely
-//  virtual bool threadSafe() const { return true; }
-//  /// Serializes the object to a string
-//  virtual std::string toString() const { return "Nothing"; }
-//
-//  Poco::RWLock * getLock()
-//  { return m_lock; }
-//};
+class MockDataItem : public DataItem
+{
+public:
+  virtual const std::string id() const { return "MockDataItem"; }
+  /// The name of the object
+  virtual const std::string name() const{ return "Noone"; }
+  /// Can this object be accessed from multiple threads safely
+  virtual bool threadSafe() const { return true; }
+  /// Serializes the object to a string
+  virtual std::string toString() const { return "Nothing"; }
+};
 
 
 
@@ -33,10 +30,12 @@ class ReadLockTest : public CxxTest::TestSuite
 {
 public:
 
-  void test_Something()
+  void test_Scoped_ReadLock()
   {
+    MockDataItem item;
+    ReadLock lock(item);
+    // Can't directly check the underlying lock object as it is private...
   }
-
 
 };
 

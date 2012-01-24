@@ -48,6 +48,7 @@
 #include <sstream>
 #include <vector>
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/ReadLock.h"
 
 
 using namespace Mantid;
@@ -894,6 +895,10 @@ QwtDoubleInterval SliceViewer::getRange(IMDIterator * it)
 void SliceViewer::findRangeFull()
 {
   if (!m_ws) return;
+  // Acquire a scoped read-only lock on the workspace, preventing it from being written
+  // while we iterate through.
+  ReadLock lock(*m_ws);
+
   // Iterate through the entire workspace
   IMDIterator * it = m_ws->createIterator();
   m_colorRangeFull = getRange(it);
@@ -907,6 +912,10 @@ part of the workspace */
 void SliceViewer::findRangeSlice()
 {
   if (!m_ws) return;
+  // Acquire a scoped read-only lock on the workspace, preventing it from being written
+  // while we iterate through.
+  ReadLock lock(*m_ws);
+
   m_colorRangeSlice = QwtDoubleInterval(0., 1.0);
 
   // This is what is currently visible on screen
