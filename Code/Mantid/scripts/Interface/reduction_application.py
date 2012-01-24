@@ -160,7 +160,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
                         
                 # If we still can't find an instrument, show the
                 # instrument selection dialog
-                if self._instrument == '':
+                if self._instrument == '' or self._instrument is None:
                     self._change_instrument()
             else:
                 self._change_instrument()
