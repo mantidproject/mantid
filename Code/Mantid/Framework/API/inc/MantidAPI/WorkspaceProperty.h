@@ -248,6 +248,13 @@ namespace Mantid
         return  m_initialWSName == m_workspaceName;
       }
 
+      /** Is the workspace property optional
+       * @return true if the workspace can be blank   */
+      bool isOptional() const
+      {
+        return m_optional;
+      }
+
       /** Returns the current contents of the AnalysisDataService for input workspaces.
        *  For output workspaces, an empty set is returned
        *  @return set of objects in AnalysisDataService

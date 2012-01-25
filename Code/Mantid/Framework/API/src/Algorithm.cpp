@@ -231,6 +231,7 @@ namespace Mantid
       // Cache the list of the in/out workspace properties
       m_inputWorkspaceProps.clear();
       m_outputWorkspaceProps.clear();
+      m_pureOutputWorkspaceProps.clear();
       const std::vector<Property*>& props = this->getProperties();
       for (size_t i=0; i<props.size(); i++)
       {
@@ -249,6 +250,7 @@ namespace Mantid
             break;
           case Kernel::Direction::Output:
             m_outputWorkspaceProps.push_back(wsProp);
+            m_pureOutputWorkspaceProps.push_back(wsProp);
             break;
           default:
             throw std::logic_error("Unexpected property direction found for property " + prop->name() + " of algorithm " + this->name());
@@ -408,72 +410,33 @@ namespace Mantid
         }
 
       }
-      // get properties and check one of the input properties is a work space group
-      // if it's a group call process group 
-      // if not normal execution
 
-      std::vector<Property*> Prop=getProperties();
-
-      std::vector<IWorkspaceProperty*>::const_iterator itr;
-      for (itr=m_inputWorkspaceProps.begin(); itr!=m_inputWorkspaceProps.end(); ++itr)
+      // ----- Check for processing groups -------------
+      try
       {
-        IWorkspaceProperty* wsProp = *itr;
-        if (wsProp)
+        // Checking the input is a group. Throws if the sizes are wrong
+        this->checkGroups();
+        if (m_processGroups)
         {
-          Property *wsPropProp = dynamic_cast<Property*>(wsProp);
-          std::string wsName = wsPropProp->value();
-
-          // Checking the input is a group
-          try
-          {
-            // First try and get the value. This will be 0 unless:
-            //     (a) The property has been set to a group, and
-            //     (b) The WorkspaceProperty is of TYPE Workspace (or WorkspaceGroup)
-            WorkspaceGroup_sptr wsGrpSptr = boost::dynamic_pointer_cast<WorkspaceGroup>(wsProp->getWorkspace());
-            if ( !wsGrpSptr )
-            {
-              // Now try and get the workspace from the ADS and see if it is a group
-              try {
-                wsGrpSptr = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(wsName));
-              } catch (Exception::NotFoundError&) { /* Do nothing */ }
-            }
-            if( wsGrpSptr )
-            {
-                // This is a group. Call processGroups instead.
-                g_log.debug()<<" one of the inputs is a workspace group - call processGroups"<<std::endl;
-                // This calls this->execute() again on each member of the group.
-                return processGroups(wsGrpSptr,Prop);
-            }
-          }
-          catch (std::runtime_error &ex)
-          {
-            g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
-            g_log.error()<<ex.what()<<std::endl;
-            m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
-            m_running = false;
-            if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
-            {
-              m_runningAsync = false;
-              throw;
-            }
-            return false;
-          }
-          catch(std::exception&ex)
-          {
-            g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
-            g_log.error()<<ex.what()<<std::endl;
-            m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
-            m_running = false;
-            if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
-            {
-              m_runningAsync = false;
-              throw;
-            }
-            return false;
-          }
-        }//end of if (it is a workspace property)
-      }// end of for loop for checking the properties for workspace groups
-
+          // This calls this->execute() again on each member of the group.
+          return processGroups();
+        }
+      }
+      catch(std::exception&ex)
+      {
+        g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
+        g_log.error()<<ex.what()<<std::endl;
+        m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
+        m_running = false;
+        if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
+        {
+          m_runningAsync = false;
+          throw;
+        }
+      }
+      // If processGroups()/checkGroups() threw an exception
+      if (m_processGroups)
+        return false;
 
       // read or write locks every input/output workspace
       this->lockWorkspaces();
@@ -918,16 +881,20 @@ namespace Mantid
      *    - In this case, algorithms are processed in order
      *  - OR, only one input should be a group, the others being size of 1
      *
-     * @return true if processGroups() should be called.
+     * Sets m_processGroups to true if if processGroups() should be called.
+     * It also sets up some other members
+     *
      * @throw std::invalid_argument if the groups sizes are incompatible.
      * @throw std::invalid_argument if a member is not found
      */
-    bool Algorithm::checkGroups()
+    void  Algorithm::checkGroups()
     {
       size_t numGroups = 0;
+      m_processGroups = false;
 
       // Unroll the groups or single inputs into vectors of workspace
       m_groups.clear();
+      m_groupWorkspaces.clear();
       // Count the number of groups that are bigger than one
       size_t numGroupsMoreThanOne = 0;
       for (size_t i=0; i<m_inputWorkspaceProps.size(); i++)
@@ -949,6 +916,7 @@ namespace Mantid
         if (wsGroup)
         {
           numGroups++;
+          m_processGroups = true;
           std::vector<std::string> names = wsGroup->getNames();
           for (size_t j=0; j<names.size(); j++)
           {
@@ -959,18 +927,22 @@ namespace Mantid
           }
         }
         else
+        {
           // "group" with only one member
-          thisGroup.push_back(ws);
+          if (ws)
+            thisGroup.push_back(ws);
+        }
 
         // Add to the list of groups
         m_groups.push_back(thisGroup);
         if (thisGroup.size() > 1)
           numGroupsMoreThanOne++;
+        m_groupWorkspaces.push_back(wsGroup);
       }
 
       // No groups? Get out.
       if (numGroups == 0)
-        return false;
+        return;
 
       // ---- Confirm that all the groups are the same size -----
       // Index of the single group
@@ -981,7 +953,8 @@ namespace Mantid
       for (size_t i=0; i<m_groups.size(); i++)
       {
         std::vector<Workspace_sptr> & thisGroup = m_groups[i];
-        if (thisGroup.size() == 0)
+        // We're ok with empty groups if the workspace property is optional
+        if (thisGroup.size() == 0 && !m_inputWorkspaceProps[i]->isOptional())
           throw std::invalid_argument("Empty group passed as input");
         if (thisGroup.size() > 1)
         {
@@ -997,14 +970,13 @@ namespace Mantid
           m_groupSize = thisGroup.size();
 
           // Are ALL the names similar?
-          Workspace_sptr ws = m_inputWorkspaceProps[i]->getWorkspace();
-          WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
-          m_groupsHaveSimilarNames = m_groupsHaveSimilarNames && wsGroup->areNamesSimilar();
+          WorkspaceGroup_sptr wsGroup = m_groupWorkspaces[i];
+          if (wsGroup)
+            m_groupsHaveSimilarNames = m_groupsHaveSimilarNames && wsGroup->areNamesSimilar();
         }
       } // end for each group
 
       // If you get here, then the groups are compatible
-      return true;
     }
 
 
@@ -1021,9 +993,9 @@ namespace Mantid
       std::vector<WorkspaceGroup_sptr> outGroups;
 
       // ---------- Create all the output workspaces ----------------------------
-      for (size_t owp=0; owp<m_outputWorkspaceProps.size(); owp++)
+      for (size_t owp=0; owp<m_pureOutputWorkspaceProps.size(); owp++)
       {
-        Property * prop = dynamic_cast<Property *>(m_outputWorkspaceProps[owp]);
+        Property * prop = dynamic_cast<Property *>(m_pureOutputWorkspaceProps[owp]);
         // Do not observe ADS notifications while constructing the group
         WorkspaceGroup_sptr outWSGrp = WorkspaceGroup_sptr(new WorkspaceGroup(false));
         outGroups.push_back(outWSGrp);
@@ -1051,34 +1023,36 @@ namespace Mantid
         for (size_t iwp=0; iwp<m_groups.size(); iwp++)
         {
           std::vector<Workspace_sptr> & thisGroup = m_groups[iwp];
-          // By default (for a single group) point to the first/only workspace
-          Workspace_sptr ws = thisGroup[0];
-
-          if ((m_singleGroup == int (iwp)) || m_singleGroup < 0)
+          if (thisGroup.size() > 0)
           {
-            // Either: this is the single group
-            // OR: all inputs are groups
-            // ... so get then entry^th workspace in this group
-            ws = thisGroup[entry];
-          }
-          // Append the names together
-          if (!outputBaseName.empty()) outputBaseName += "_";
-          outputBaseName += ws->name();
+            // By default (for a single group) point to the first/only workspace
+            Workspace_sptr ws = thisGroup[0];
 
-          // Set the property using the name of that workspace
-          Property * prop = dynamic_cast<Property *>(m_inputWorkspaceProps[iwp]);
-          alg->setPropertyValue(prop->name(), ws->name());
+            if ((m_singleGroup == int (iwp)) || m_singleGroup < 0)
+            {
+              // Either: this is the single group
+              // OR: all inputs are groups
+              // ... so get then entry^th workspace in this group
+              ws = thisGroup[entry];
+            }
+            // Append the names together
+            if (!outputBaseName.empty()) outputBaseName += "_";
+            outputBaseName += ws->name();
 
+            // Set the property using the name of that workspace
+            Property * prop = dynamic_cast<Property *>(m_inputWorkspaceProps[iwp]);
+            alg->setPropertyValue(prop->name(), ws->name());
+          } // not an empty (i.e. optional) input
         } // for each InputWorkspace property
 
 
         // ---------- Set all the output workspaces ----------------------------
-        for (size_t owp=0; owp<m_outputWorkspaceProps.size(); owp++)
+        for (size_t owp=0; owp<m_pureOutputWorkspaceProps.size(); owp++)
         {
-          Property * prop = dynamic_cast<Property *>(m_outputWorkspaceProps[owp]);
+          Property * prop = dynamic_cast<Property *>(m_pureOutputWorkspaceProps[owp]);
 
           // Default name = "in1_in2_out"
-          std::string outName = outputBaseName + prop->value();
+          std::string outName = outputBaseName + "_" + prop->value();
           // Except if all inputs had similar names, then the name is "out_1"
           if (m_groupsHaveSimilarNames)
             outName = prop->value() + "_" + Strings::toString(entry+1);
@@ -1100,11 +1074,15 @@ namespace Mantid
       //TODO: Set the output workspace properties to the groups created. ???
 
       // Finish up
-      for (size_t owp=0; owp<m_outputWorkspaceProps.size(); owp++)
+      for (size_t i=0; i<outGroups.size(); i++)
       {
         // Go back to observing ADS in each group.
-        outGroups[owp]->observeADSNotifications(true);
+        outGroups[i]->observeADSNotifications(true);
       }
+
+      // We finished successfully.
+      setExecuted(true);
+      m_notificationCenter.postNotification(new FinishedNotification(this,isExecuted()));
 
       return true;
     }

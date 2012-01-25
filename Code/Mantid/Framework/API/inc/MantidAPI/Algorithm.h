@@ -389,15 +389,21 @@ private:
   std::vector<IWorkspaceProperty *> m_inputWorkspaceProps;
   /// All the WorkspaceProperties that are Output or InOut. Set in execute()
   std::vector<IWorkspaceProperty *> m_outputWorkspaceProps;
+  /// All the WorkspaceProperties that are Output (not inOut). Set in execute()
+  std::vector<IWorkspaceProperty *> m_pureOutputWorkspaceProps;
 
   // ------------------ For WorkspaceGroups ------------------------------------
-  bool checkGroups();
+  void checkGroups();
   virtual bool processGroups();
   bool areisGroupWorkspacesofSimilarNames(const std::string&,const std::vector<std::string>& grpmembersNames);
   void copyNonWorkspaceProperties(IAlgorithm * alg);
 
   /// One vector of workspaces for each input workspace property
   std::vector<std::vector<Workspace_sptr> > m_groups;
+  /// Pointer to the WorkspaceGroup (if any) for each input workspace property
+  std::vector<WorkspaceGroup_sptr> m_groupWorkspaces;
+  /// Flag set true if processGroups() should be called
+  bool m_processGroups;
   /// If only one input is a group, this is its index. -1 if they are all groups
   int m_singleGroup;
   /// Size of the group(s) being processed

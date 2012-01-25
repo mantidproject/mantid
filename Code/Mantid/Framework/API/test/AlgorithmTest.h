@@ -95,9 +95,20 @@ public:
     declareProperty(new WorkspaceProperty<>("OutputWorkspace1","",Direction::Output));
     declareProperty(new WorkspaceProperty<>("OutputWorkspace2","",Direction::Output, true));
   }
-  void exec() {}
+  void exec()
+  {
+    boost::shared_ptr<WorkspaceTester> out1(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> out2(new WorkspaceTester());
+    std::string outName = getPropertyValue("InputWorkspace1")
+            + "+" + getPropertyValue("InputWorkspace2")
+            + "+" + getPropertyValue("InOutWorkspace");
+    out1->setTitle(outName);
+    out2->setTitle(outName);
+    setProperty("OutputWorkspace1", out1);
+    setProperty("OutputWorkspace2", out2);
+  }
 };
-
+DECLARE_ALGORITHM( WorkspaceAlgorithm)
 
 
 class AlgorithmTest : public CxxTest::TestSuite
@@ -111,6 +122,8 @@ public:
 
   AlgorithmTest()
   {
+    Mantid::API::FrameworkManager::Instance();
+    AnalysisDataService::Instance();
     Mantid::API::AlgorithmFactory::Instance().subscribe<ToyAlgorithm>();
     Mantid::API::AlgorithmFactory::Instance().subscribe<ToyAlgorithmTwo>();
   }
@@ -409,12 +422,12 @@ public:
   }
 
   //------------------------------------------------------------------------
-  void do_test_groups(
+  WorkspaceGroup_sptr do_test_groups(
       std::string group1, std::string contents1,
       std::string group2, std::string contents2,
       std::string group3, std::string contents3,
-      bool expectFail = false,
-      std::string expectedOutput = "D_1,D_2,D_3")
+      bool expectFail = false
+      )
   {
     makeWorkspaceGroup(group1, contents1);
     makeWorkspaceGroup(group2, contents2);
@@ -431,12 +444,21 @@ public:
     if (expectFail)
     {
       TS_ASSERT( !alg.isExecuted() );
-      return;
+      return WorkspaceGroup_sptr();
     }
-    else
-    {
-      TS_ASSERT( alg.isExecuted() )
-    }
+    TS_ASSERT( alg.isExecuted() )
+    Workspace_sptr out1 = AnalysisDataService::Instance().retrieve("D");
+    WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<WorkspaceGroup>(out1);
+
+    TS_ASSERT_EQUALS( group->name(), "D" )
+    TS_ASSERT_EQUALS( group->getNumberOfEntries(), 3 )
+    if (group->getNumberOfEntries()!=3) return group;
+
+    ws1 = group->getItem(0);
+    ws2 = group->getItem(1);
+    ws3 = group->getItem(2);
+
+    return group;
   }
 
   void test_processGroups_failures()
@@ -447,10 +469,74 @@ public:
         true /*fails*/);
   }
 
-  void test_processGroups()
+  /// All groups are the same size
+  void test_processGroups_allSameSize()
   {
-    do_test_groups("A", "A_1,A_2,A_3",
+    WorkspaceGroup_sptr group = do_test_groups("A", "A_1,A_2,A_3",
+        "B", "B_1,B_2,B_3",   "C", "C_1,C_2,C_3");
+
+    TS_ASSERT_EQUALS( ws1->name(), "D_1" );
+    TS_ASSERT_EQUALS( ws1->getTitle(), "A_1+B_1+C_1" );
+    TS_ASSERT_EQUALS( ws2->name(), "D_2" );
+    TS_ASSERT_EQUALS( ws2->getTitle(), "A_2+B_2+C_2" );
+    TS_ASSERT_EQUALS( ws3->name(), "D_3" );
+    TS_ASSERT_EQUALS( ws3->getTitle(), "A_3+B_3+C_3" );
+  }
+
+  /// All groups are the same size, but they don't all match the rigid naming
+  void test_processGroups_allSameSize_namesNotSimilar()
+  {
+    WorkspaceGroup_sptr group = do_test_groups("A", "A_1,A_2,A_3",
+        "B", "B_1,B_2,B_3",   "C", "alice,bob,charlie");
+
+    TS_ASSERT_EQUALS( ws1->name(), "A_1_B_1_alice_D" );
+    TS_ASSERT_EQUALS( ws1->getTitle(), "A_1+B_1+alice" );
+    TS_ASSERT_EQUALS( ws2->name(), "A_2_B_2_bob_D" );
+    TS_ASSERT_EQUALS( ws2->getTitle(), "A_2+B_2+bob" );
+    TS_ASSERT_EQUALS( ws3->name(), "A_3_B_3_charlie_D" );
+    TS_ASSERT_EQUALS( ws3->getTitle(), "A_3+B_3+charlie" );
+  }
+
+  /// One input is a group, rest are singles
+  void test_processGroups_onlyOneGroup()
+  {
+    WorkspaceGroup_sptr group = do_test_groups("A", "A_1,A_2,A_3",
+        "B", "",   "C", "");
+
+    TS_ASSERT_EQUALS( ws1->name(), "D_1" );
+    TS_ASSERT_EQUALS( ws1->getTitle(), "A_1+B+C" );
+    TS_ASSERT_EQUALS( ws2->name(), "D_2" );
+    TS_ASSERT_EQUALS( ws2->getTitle(), "A_2+B+C" );
+    TS_ASSERT_EQUALS( ws3->name(), "D_3" );
+    TS_ASSERT_EQUALS( ws3->getTitle(), "A_3+B+C" );
+  }
+
+  /// One optional WorkspaceProperty is not specified
+  void test_processGroups_optionalInput()
+  {
+    WorkspaceGroup_sptr group = do_test_groups("A", "A_1,A_2,A_3",
         "B", "",   "", "");
+
+    TS_ASSERT_EQUALS( ws1->name(), "D_1" );
+    TS_ASSERT_EQUALS( ws1->getTitle(), "A_1+B+" );
+    TS_ASSERT_EQUALS( ws2->name(), "D_2" );
+    TS_ASSERT_EQUALS( ws2->getTitle(), "A_2+B+" );
+    TS_ASSERT_EQUALS( ws3->name(), "D_3" );
+    TS_ASSERT_EQUALS( ws3->getTitle(), "A_3+B+" );
+  }
+
+  /// One optional WorkspaceProperty is not specified
+  void test_processGroups_twoGroups_and_optionalInput()
+  {
+    WorkspaceGroup_sptr group = do_test_groups("A", "A_1,A_2,A_3",
+        "", "", "C", "C_1,C_2,C_3");
+
+    TS_ASSERT_EQUALS( ws1->name(), "D_1" );
+    TS_ASSERT_EQUALS( ws1->getTitle(), "A_1++C_1" );
+    TS_ASSERT_EQUALS( ws2->name(), "D_2" );
+    TS_ASSERT_EQUALS( ws2->getTitle(), "A_2++C_2" );
+    TS_ASSERT_EQUALS( ws3->name(), "D_3" );
+    TS_ASSERT_EQUALS( ws3->getTitle(), "A_3++C_3" );
   }
 
 
@@ -468,6 +554,10 @@ private:
   ToyAlgorithm alg;
   ToyAlgorithmTwo algv2;
   ToyAlgorithmThree algv3;
+
+  Workspace_sptr ws1;
+  Workspace_sptr ws2;
+  Workspace_sptr ws3;
 };
 
  
