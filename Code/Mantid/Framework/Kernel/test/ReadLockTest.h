@@ -22,6 +22,7 @@ public:
   virtual bool threadSafe() const { return true; }
   /// Serializes the object to a string
   virtual std::string toString() const { return "Nothing"; }
+  friend class ReadLockTest;
 };
 
 
@@ -36,6 +37,14 @@ public:
     ReadLock lock(item);
     // Can't directly check the underlying lock object as it is private...
   }
+
+  void test_new_doesNotCompile()
+  {
+    MockDataItem item;
+    // The next line does not compile, which is what we want!
+    //ReadLock * lock = new ReadLock(item);
+  }
+
 
 };
 

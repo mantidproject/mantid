@@ -59,6 +59,7 @@ namespace API
     ReadLock lock(*m_ws);
     // Draw using the usual procedure.
     QwtPlot::drawCanvas(painter);
+    // lock is released when it goes out of scope.
   }
 
 } // namespace MantidQt

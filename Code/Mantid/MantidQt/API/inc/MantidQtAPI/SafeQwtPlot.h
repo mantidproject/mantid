@@ -14,10 +14,13 @@ namespace API
 {
 
   /** A version of QwtPlot that adds a layer of thread safety.
+   *
    * Each SafeQwtPlot has a workspace associated with it.
    * Before drawing, it acquires a ReadLock to prevent
    * an algorithm from modifying the underlying workspace while it is
    * drawing.
+   *
+   * If no workspace is set, no drawing occurs (silently).
     
     @date 2012-01-24
 

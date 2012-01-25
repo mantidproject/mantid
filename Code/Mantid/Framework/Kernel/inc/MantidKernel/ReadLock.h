@@ -60,6 +60,11 @@ namespace Kernel
     ReadLock(const ReadLock &);
     /// Private assignment operator - NO ASSIGNMENT ALLOWED
     ReadLock& operator=(const ReadLock &);
+    /// Disallow creating the object on the heap
+    void *operator new( size_t );
+    /// Disallow creating the object on the heap
+    void *operator new[]( size_t );
+
 
     /// Reference to the data item we are locking
     const DataItem & m_item;
