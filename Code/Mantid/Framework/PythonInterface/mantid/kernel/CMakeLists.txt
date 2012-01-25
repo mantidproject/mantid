@@ -18,6 +18,8 @@ set ( EXPORT_FILES
   src/Unit.cpp
   src/IValidator.cpp
   src/BoundedValidator.cpp
+  src/TimeSeriesProperty.cpp
+  src/DateAndTime.cpp
 )  
 
 set ( SRC_FILES
