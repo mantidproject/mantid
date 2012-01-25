@@ -110,7 +110,7 @@ namespace Mantid
 
       Workspace_sptr result=AnalysisDataService::Instance().retrieve("MD_EVENT_WS_ID");
       Mantid::API::IMDEventWorkspace_sptr eventWs = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
-      m_wsTypeName = typeid(*eventWs).name(); //Cache the workspace type.
+      m_wsTypeName = eventWs->id();
 
       factory->setRecursionDepth(this->m_view->getRecursionDepth());
       factory->initialize(eventWs);

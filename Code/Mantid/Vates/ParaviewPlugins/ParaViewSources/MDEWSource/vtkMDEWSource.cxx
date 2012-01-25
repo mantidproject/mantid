@@ -209,7 +209,8 @@ char* vtkMDEWSource::GetWorkspaceTypeName()
   try
   {
     //Forward request on to MVP presenter
-    return const_cast<char*>(m_presenter->getWorkspaceTypeName().c_str());
+    typeName = m_presenter->getWorkspaceTypeName();
+    return const_cast<char*>(typeName.c_str());
   }
   catch(std::runtime_error&)
   {

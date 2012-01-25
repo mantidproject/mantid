@@ -98,7 +98,7 @@ int vtkPeaksSource::RequestInformation(vtkInformation *vtkNotUsed(request),
     //Preload the Workspace and then cache it to avoid reloading later.
     Workspace_sptr result = AnalysisDataService::Instance().retrieve(m_wsName);
     m_PeakWS = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(result);
-    m_wsTypeName = typeid(*m_PeakWS).name();
+    m_wsTypeName = m_PeakWS->id();
   }
   return 1;
 }
