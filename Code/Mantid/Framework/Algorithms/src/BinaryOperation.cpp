@@ -22,7 +22,7 @@ namespace Mantid
   namespace Algorithms
   {
     BinaryOperation::BinaryOperation()
-      : API::PairedGroupAlgorithm(),
+      : API::Algorithm(),
       m_ClearRHSWorkspace(false),
       m_useHistogramForRhsEventWorkspace(false),
       m_do2D_even_for_SingleColumn_on_rhs(false),

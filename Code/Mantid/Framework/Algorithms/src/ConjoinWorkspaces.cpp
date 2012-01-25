@@ -44,7 +44,7 @@ void ConjoinWorkspaces::initDocs()
 
 //----------------------------------------------------------------------------------------------
 /// Default constructor
-ConjoinWorkspaces::ConjoinWorkspaces() : PairedGroupAlgorithm(), m_progress(NULL) {}
+ConjoinWorkspaces::ConjoinWorkspaces() : Algorithm(), m_progress(NULL) {}
 
 //----------------------------------------------------------------------------------------------
 /// Destructor
@@ -457,7 +457,7 @@ void ConjoinWorkspaces::fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1, 
   output->generateSpectraMap();
 }
 
-/// Appends the removal of the empty group after execution to the PairedGroupAlgorithm::processGroups method
+/// Appends the removal of the empty group after execution to the Algorithm::processGroups() method
 bool ConjoinWorkspaces::processGroups()
 {
   // Call the base class method for most of the functionality

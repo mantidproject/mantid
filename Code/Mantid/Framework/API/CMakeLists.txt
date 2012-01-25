@@ -59,7 +59,6 @@ set ( SRC_FILES
 	src/MultipleExperimentInfos.cpp
 	src/MultipleFileProperty.cpp
 	src/NumericAxis.cpp
-	src/PairedGroupAlgorithm.cpp
 	src/ParamFunction.cpp
 	src/ParameterReference.cpp
 	src/ParameterTie.cpp
@@ -172,7 +171,6 @@ set ( INC_FILES
 	inc/MantidAPI/MultipleExperimentInfos.h
 	inc/MantidAPI/MultipleFileProperty.h
 	inc/MantidAPI/NumericAxis.h
-	inc/MantidAPI/PairedGroupAlgorithm.h
 	inc/MantidAPI/ParamFunction.h
 	inc/MantidAPI/ParameterReference.h
 	inc/MantidAPI/ParameterTie.h

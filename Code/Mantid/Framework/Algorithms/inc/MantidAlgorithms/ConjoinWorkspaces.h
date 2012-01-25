@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/PairedGroupAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid
@@ -48,7 +48,7 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ConjoinWorkspaces : public API::PairedGroupAlgorithm
+class DLLExport ConjoinWorkspaces : public API::Algorithm
 {
 public:
   /// Empty constructor

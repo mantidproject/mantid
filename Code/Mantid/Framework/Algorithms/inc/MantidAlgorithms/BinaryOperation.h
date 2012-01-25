@@ -4,12 +4,12 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/PairedGroupAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/Run.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid
@@ -64,7 +64,7 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     */
-    class DLLExport BinaryOperation : public API::PairedGroupAlgorithm
+    class DLLExport BinaryOperation : public API::Algorithm
     {
     public:
       /// Default constructor
