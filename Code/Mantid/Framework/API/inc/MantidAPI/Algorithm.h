@@ -392,10 +392,18 @@ private:
 
   // ------------------ For WorkspaceGroups ------------------------------------
   bool checkGroups();
+  virtual bool processGroups();
+  bool areisGroupWorkspacesofSimilarNames(const std::string&,const std::vector<std::string>& grpmembersNames);
+  void copyNonWorkspaceProperties(IAlgorithm * alg);
+
   /// One vector of workspaces for each input workspace property
   std::vector<std::vector<Workspace_sptr> > m_groups;
   /// If only one input is a group, this is its index. -1 if they are all groups
   int m_singleGroup;
+  /// Size of the group(s) being processed
+  size_t m_groupSize;
+  /// All the groups have similar names (group_1, group_2 etc.)
+  bool m_groupsHaveSimilarNames;
 
 };
 

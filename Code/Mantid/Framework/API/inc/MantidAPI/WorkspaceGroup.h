@@ -85,6 +85,7 @@ public:
   void deepRemoveAll();
   /// This method returns true if the group is empty (no member workspace)
   bool isEmpty() const;
+  bool areNamesSimilar() const;
  
 
 private:

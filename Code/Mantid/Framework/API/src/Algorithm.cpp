@@ -18,6 +18,7 @@
 #include <Poco/StringTokenizer.h>
 
 #include <iomanip>
+#include "MantidAPI/WorkspaceGroup.h"
 
 using namespace Mantid::Kernel;
 
@@ -923,29 +924,31 @@ namespace Mantid
      */
     bool Algorithm::checkGroups()
     {
-      // Start by checking if there are ANY groups
-      bool anyGroups = false;
-      for (size_t i=0; i<m_inputWorkspaceProps.size(); i++)
-      {
-        WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>
-            (m_inputWorkspaceProps[i]->getWorkspace());
-        if (wsGroup) anyGroups = true;
-      }
-      if (!anyGroups)
-        return false;
+      size_t numGroups = 0;
 
       // Unroll the groups or single inputs into vectors of workspace
       m_groups.clear();
-
-
+      // Count the number of groups that are bigger than one
+      size_t numGroupsMoreThanOne = 0;
       for (size_t i=0; i<m_inputWorkspaceProps.size(); i++)
       {
+        Property * prop = dynamic_cast<Property *>(m_inputWorkspaceProps[i]);
         std::vector<Workspace_sptr> thisGroup;
 
         Workspace_sptr ws = m_inputWorkspaceProps[i]->getWorkspace();
         WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+
+        // Workspace groups are NOT returned by IWP->getWorkspace() most of the time
+        // because WorkspaceProperty is templated by <MatrixWorkspace>
+        // and WorkspaceGroup does not subclass <MatrixWorkspace>
+        if (!wsGroup && !prop->value().empty())
+          // So try to use the name in the AnalysisDataService
+          wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(prop->value()));
+
+        // Found the group either directly or by name?
         if (wsGroup)
         {
+          numGroups++;
           std::vector<std::string> names = wsGroup->getNames();
           for (size_t j=0; j<names.size(); j++)
           {
@@ -961,14 +964,20 @@ namespace Mantid
 
         // Add to the list of groups
         m_groups.push_back(thisGroup);
-        //Property * prop = dynamic_cast<Property *>(m_inputWorkspaceProps[i]);
+        if (thisGroup.size() > 1)
+          numGroupsMoreThanOne++;
       }
+
+      // No groups? Get out.
+      if (numGroups == 0)
+        return false;
 
       // ---- Confirm that all the groups are the same size -----
       // Index of the single group
       m_singleGroup = -1;
       // Size of the single or of all the groups
-      size_t groupSize = 0;
+      m_groupSize = 0;
+      m_groupsHaveSimilarNames = true;
       for (size_t i=0; i<m_groups.size(); i++)
       {
         std::vector<Workspace_sptr> & thisGroup = m_groups[i];
@@ -976,19 +985,156 @@ namespace Mantid
           throw std::invalid_argument("Empty group passed as input");
         if (thisGroup.size() > 1)
         {
-          m_singleGroup = int(i);
+          // Record the index of the single group.
+          if (numGroupsMoreThanOne == 1)
+            m_singleGroup = int(i);
           // Check for matching group size
-          if (groupSize > 0)
-            if (thisGroup.size() != groupSize)
+          if (m_groupSize > 0)
+            if (thisGroup.size() != m_groupSize)
               throw std::invalid_argument("Input WorkspaceGroups are not of the same size.");
+
           // Save the size for the next group
-          groupSize = thisGroup.size();
+          m_groupSize = thisGroup.size();
+
+          // Are ALL the names similar?
+          Workspace_sptr ws = m_inputWorkspaceProps[i]->getWorkspace();
+          WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+          m_groupsHaveSimilarNames = m_groupsHaveSimilarNames && wsGroup->areNamesSimilar();
         }
       } // end for each group
 
-      // If you get here, then the group si
+      // If you get here, then the groups are compatible
       return true;
     }
+
+
+
+    //--------------------------------------------------------------------------------------------
+    /** Process WorkspaceGroup inputs.
+     *
+     * This should be called after checkGroups(), which sets up required members.
+     *
+     * @return true - if all the workspace members are executed.
+     */
+    bool Algorithm::processGroups()
+    {
+      std::vector<WorkspaceGroup_sptr> outGroups;
+
+      // ---------- Create all the output workspaces ----------------------------
+      for (size_t owp=0; owp<m_outputWorkspaceProps.size(); owp++)
+      {
+        Property * prop = dynamic_cast<Property *>(m_outputWorkspaceProps[owp]);
+        // Do not observe ADS notifications while constructing the group
+        WorkspaceGroup_sptr outWSGrp = WorkspaceGroup_sptr(new WorkspaceGroup(false));
+        outGroups.push_back(outWSGrp);
+        // Put the GROUP in the ADS
+        AnalysisDataService::Instance().addOrReplace(prop->value(), outWSGrp );
+      }
+
+      // Go through each entry in the input group(s)
+      for (size_t entry=0; entry<m_groupSize; entry++)
+      {
+        // Create a new instance of the algorithm
+        IAlgorithm* alg = API::FrameworkManager::Instance().createAlgorithm(this->name(), this->version());
+        if(!alg)
+        {
+          g_log.error()<<"CreateAlgorithm failed for "<<this->name()<<"("<<this->version()<<")"<<std::endl;
+          throw std::runtime_error("Algorithm creation failed.");
+        }
+
+        // Set all non-workspace properties
+        this->copyNonWorkspaceProperties(alg);
+
+        std::string outputBaseName = "";
+
+        // ---------- Set all the input workspaces ----------------------------
+        for (size_t iwp=0; iwp<m_groups.size(); iwp++)
+        {
+          std::vector<Workspace_sptr> & thisGroup = m_groups[iwp];
+          // By default (for a single group) point to the first/only workspace
+          Workspace_sptr ws = thisGroup[0];
+
+          if ((m_singleGroup == int (iwp)) || m_singleGroup < 0)
+          {
+            // Either: this is the single group
+            // OR: all inputs are groups
+            // ... so get then entry^th workspace in this group
+            ws = thisGroup[entry];
+          }
+          // Append the names together
+          if (!outputBaseName.empty()) outputBaseName += "_";
+          outputBaseName += ws->name();
+
+          // Set the property using the name of that workspace
+          Property * prop = dynamic_cast<Property *>(m_inputWorkspaceProps[iwp]);
+          alg->setPropertyValue(prop->name(), ws->name());
+
+        } // for each InputWorkspace property
+
+
+        // ---------- Set all the output workspaces ----------------------------
+        for (size_t owp=0; owp<m_outputWorkspaceProps.size(); owp++)
+        {
+          Property * prop = dynamic_cast<Property *>(m_outputWorkspaceProps[owp]);
+
+          // Default name = "in1_in2_out"
+          std::string outName = outputBaseName + prop->value();
+          // Except if all inputs had similar names, then the name is "out_1"
+          if (m_groupsHaveSimilarNames)
+            outName = prop->value() + "_" + Strings::toString(entry+1);
+
+          // Set in the output
+          alg->setPropertyValue(prop->name(), outName);
+
+          // And add it to the output group
+          outGroups[owp]->add(outName);
+        } // for each OutputWorkspace property
+
+        // ------------ Execute the algo --------------
+        if (!alg->execute())
+          throw std::runtime_error("Execution of " + this->name() + " for group entry " + Strings::toString(entry+1) + " failed.");
+
+      } // for each entry in each group
+
+
+      //TODO: Set the output workspace properties to the groups created. ???
+
+      // Finish up
+      for (size_t owp=0; owp<m_outputWorkspaceProps.size(); owp++)
+      {
+        // Go back to observing ADS in each group.
+        outGroups[owp]->observeADSNotifications(true);
+      }
+
+      return true;
+    }
+
+    //--------------------------------------------------------------------------------------------
+    /** Copy all the non-workspace properties from this to alg
+     *
+     * @param alg :: other IAlgorithm
+     */
+    void Algorithm::copyNonWorkspaceProperties(IAlgorithm * alg)
+    {
+      if (!alg) throw std::runtime_error("Algorithm not created!");
+      std::vector<Property*> props = this->getProperties();
+      for (size_t i=0; i < props.size(); i++)
+      {
+        Property * prop = props[i];
+        if (prop)
+        {
+          IWorkspaceProperty* wsProp = dynamic_cast<IWorkspaceProperty*>(prop);
+          // Copy the property using the string
+          if (!wsProp)
+            alg->setProperty(prop->name(), prop->value());
+        }
+      }
+    }
+
+
+
+
+
 
     //--------------------------------------------------------------------------------------------
     /** To Process workspace groups.

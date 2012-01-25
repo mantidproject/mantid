@@ -332,6 +332,11 @@ public:
 
   }
 
+
+  //------------------------------------------------------------------------
+  /** Test of setting read and/or write locks
+   * for various combinations of input/output workspaces.
+   */
   void do_test_locking(std::string in1, std::string in2, std::string inout, std::string out1, std::string out2="")
   {
     for (size_t i=0; i<6; i++)
@@ -346,10 +351,12 @@ public:
     alg.setPropertyValue("InOutWorkspace", inout);
     alg.setPropertyValue("OutputWorkspace1", out1);
     alg.setPropertyValue("OutputWorkspace2", out2);
+    // This throws or hangs if the code is wrong
     alg.execute();
   }
 
 
+  //------------------------------------------------------------------------
   void test_lockingWorkspaces()
   {
     // Input and output are different
@@ -366,6 +373,84 @@ public:
     do_test_locking("ws0", "ws0", "ws0", "ws0");
     // All the same
     do_test_locking("ws0", "ws0", "ws0", "ws0", "ws0");
+  }
+
+  //------------------------------------------------------------------------
+  /** Make a workspace group with:
+   *
+   * @param group1 :: name of the group. Do nothing if blank.
+   * @param contents1 :: comma-sep names of fake workspaces in the group
+   *        Make no group if blank, just 1 workspace
+   */
+  void makeWorkspaceGroup(std::string group1, std::string contents1)
+  {
+    if (contents1.empty())
+    {
+      if (group1.empty()) return;
+      boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
+      AnalysisDataService::Instance().addOrReplace(group1,ws);
+      return;
+    }
+
+    std::vector<std::string> names;
+    boost::split( names, contents1, boost::algorithm::detail::is_any_ofF<char>(","));
+    if (names.size() > 1)
+    {
+      WorkspaceGroup_sptr wsGroup = WorkspaceGroup_sptr(new WorkspaceGroup());
+      std::vector<std::string>::iterator it = names.begin();
+      for (; it != names.end(); it++)
+      {
+        boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
+        AnalysisDataService::Instance().addOrReplace(*it,ws);
+        wsGroup->add(*it);
+      }
+      AnalysisDataService::Instance().addOrReplace(group1, wsGroup);
+    }
+  }
+
+  //------------------------------------------------------------------------
+  void do_test_groups(
+      std::string group1, std::string contents1,
+      std::string group2, std::string contents2,
+      std::string group3, std::string contents3,
+      bool expectFail = false,
+      std::string expectedOutput = "D_1,D_2,D_3")
+  {
+    makeWorkspaceGroup(group1, contents1);
+    makeWorkspaceGroup(group2, contents2);
+    makeWorkspaceGroup(group3, contents3);
+
+    WorkspaceAlgorithm alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace1", group1);
+    alg.setPropertyValue("InputWorkspace2", group2);
+    alg.setPropertyValue("InOutWorkspace", group3);
+    alg.setPropertyValue("OutputWorkspace1", "D");
+    alg.setPropertyValue("OutputWorkspace2", "E");
+    TS_ASSERT_THROWS_NOTHING( alg.execute() );
+    if (expectFail)
+    {
+      TS_ASSERT( !alg.isExecuted() );
+      return;
+    }
+    else
+    {
+      TS_ASSERT( alg.isExecuted() )
+    }
+  }
+
+  void test_processGroups_failures()
+  {
+    // Fails due to unequal sizes.
+    do_test_groups("A", "A_1,A_2,A_3",
+        "B", "B_1,B_2,B_3,B_4",   "", "",
+        true /*fails*/);
+  }
+
+  void test_processGroups()
+  {
+    do_test_groups("A", "A_1,A_2,A_3",
+        "B", "",   "", "");
   }
 
 
