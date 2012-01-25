@@ -26,7 +26,7 @@ TOFrange = [9000, 23600] #microS
 Xrange = [115, 210]
 
 #nexus_path = '/mnt/hgfs/j35/results/'
-nexus_path = '/home/m2d/data/ref_l/'
+nexus_path = '/home/j35/results/'
 list_data = ['66421',
              '66420',
              '66422',
@@ -153,9 +153,30 @@ theta = tthd_rad - ths_rad
 _tof_axis = mt2.readX(0)[:]
 ########## This was used to test the R(Q) 
 ##Convert the data without background subtraction to R(Q)
-q_array = wks_utility.convertToRvsQ(dMD=dMD,
-                                    theta=theta,
-                                    tof=_tof_axis)
+
+
+##without geometry correction
+#q_array = wks_utility.convertToRvsQ(dMD=dMD,
+#                                    theta=theta,
+#                                    tof=_tof_axis)
+                                    
+##without geometry correction
+yrange = arange(int(list_data_peak[0][1]) - int(list_data_peak[0][0])) + int(list_data_peak[0][0])
+q_array = wks_utility.convertToRvsQWithCorrection(mt, 
+                                                  dMD=dMD,
+                                                  theta=theta,
+                                                  tof=_tof_axis,
+                                                  yrange = yrange,
+                                                  cpix=data_cpix)
+
+
+
+
+imshow(q_array)
+legend()
+show()
+
+sys.exit("stop")
 
 q_array_reversed = q_array[::-1]
 #if bPlot:
