@@ -49,11 +49,34 @@ def concatWSs(workspaces, unit, name):
     CreateWorkspace(name, dataX, dataY, dataE, NSpec=len(workspaces),
         UnitX=unit)
 
+def split(l, n):
+    #Yield successive n-sized chunks from l.
+    for i in xrange(0, len(l), n):
+        yield l[i:i+n]
+
+def segment(l, fromIndex, toIndex):
+    for i in xrange(fromIndex, toIndex + 1):
+        yield l[i]
+
+def trimData(nSpec, vals, min, max):
+    result = []
+    chunkSize = len(vals) / nSpec
+    assert min >= 0, 'trimData: min is less then zero'
+    assert max <= chunkSize - 1, 'trimData: max is greater than the number of spectra'
+    assert min <= max, 'trimData: min is greater than max'
+    chunks = split(vals,chunkSize)
+    for chunk in chunks:
+        seg = segment(chunk,min,max)
+        for val in seg:
+            result.append(val)
+    return result
+
 def confitParsToWS(Table, Data, BackG='FixF', specMin=0, specMax=-1):
     if ( specMax == -1 ):
         specMax = mtd[Data].getNumberHistograms() - 1
     dataX = createQaxis(Data)
     xAxisVals = []
+    xAxisTrimmed = []
     dataY = []
     dataE = []
     names = ''
@@ -63,7 +86,7 @@ def confitParsToWS(Table, Data, BackG='FixF', specMin=0, specMax=-1):
     for spec in range(0,nSpec):
         yAxis = cName[(spec*2)+1]
         if re.search('HWHM$', yAxis) or re.search('Height$', yAxis):
-            xAxisVals += dataX        
+            xAxisVals += dataX
             if (len(names) > 0):
                 names += ","
             names += yAxis
@@ -75,7 +98,8 @@ def confitParsToWS(Table, Data, BackG='FixF', specMin=0, specMax=-1):
             nSpec -= 1
     suffix = str(nSpec / 2) + 'L' + BackG
     outNm = Table + suffix
-    CreateWorkspace(outNm, xAxisVals, dataY, dataE, nSpec,
+    xAxisTrimmed = trimData(nSpec, xAxisVals, specMin, specMax)
+    CreateWorkspace(outNm, xAxisTrimmed, dataY, dataE, nSpec,
         UnitX='MomentumTransfer', VerticalAxisUnit='Text',
         VerticalAxisValues=names)
     return outNm
