@@ -23,13 +23,20 @@ echo "facility="$facility",instrument="$instrument",proposal="$proposal",visit="
 
 # Create tmp metadata output directory
 echo "--------Creating tmp metadata output directory--------"
+metadataDir=/tmp/METADATA_XML
+if [ ! -d $metadataDir ]; then
+  mkdir $metadataDir
+  chmod 777 $metadataDir
+fi
+
 rawMetadataDir=/tmp/METADATA_XML/raw
 reducedMetadataDir=/tmp/METADATA_XML/reduced
 if [ ! -d $rawMetadataDir ]; then
-  mkdir "$rawMetadataDir"
+  mkdir $rawMetadataDir
+  chmod 777 $rawMetadataDir
 fi 
 if [ ! -d $reducedMetadataDir ]; then
-  mkdir "$reducedMetadataDir"
+  mkdir $reducedMetadataDir
 fi 
 
 # Set raw metadata.xml
@@ -46,16 +53,6 @@ echo "redOutDir= "$redOutDir
 if [ ! -d $redOutDir ]; then
   mkdir "$redOutDir"
   echo $redOutDir" is created"
-else
-  echo "Found "$redOutDir
-  list='ls -l $redOutDir | grep -v "total 0"'
-  if [ -z "$list" ]
-  then
-    exit
-  else
-    rm -f $redOutDir/*
-    echo $redOutDir" is cleaned up"
-  fi
 fi 
 
 
