@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/reduction_main.ui'
 #
-# Created: Wed Nov 16 13:57:36 2011
+# Created: Wed Jan 25 09:40:15 2012
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -32,31 +32,37 @@ class Ui_SANSReduction(object):
         self.tabWidget.setObjectName("tabWidget")
         self.tab = QtGui.QWidget()
         self.tab.setObjectName("tab")
+        self.verticalLayout_2 = QtGui.QVBoxLayout(self.tab)
+        self.verticalLayout_2.setObjectName("verticalLayout_2")
+        self.label = QtGui.QLabel(self.tab)
+        self.label.setObjectName("label")
+        self.verticalLayout_2.addWidget(self.label)
         self.tabWidget.addTab(self.tab, "")
-        self.tab_2 = QtGui.QWidget()
-        self.tab_2.setObjectName("tab_2")
-        self.tabWidget.addTab(self.tab_2, "")
         self.verticalLayout.addWidget(self.tabWidget)
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.interface_chk = QtGui.QCheckBox(self.centralwidget)
+        self.interface_chk.setEnabled(True)
         self.interface_chk.setObjectName("interface_chk")
         self.horizontalLayout.addWidget(self.interface_chk)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.progress_bar = QtGui.QProgressBar(self.centralwidget)
-        self.progress_bar.setProperty("value", 24)
+        self.progress_bar.setProperty("value", 0)
         self.progress_bar.setObjectName("progress_bar")
         self.horizontalLayout.addWidget(self.progress_bar)
         spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem1)
         self.reduce_button = QtGui.QPushButton(self.centralwidget)
+        self.reduce_button.setEnabled(False)
         self.reduce_button.setObjectName("reduce_button")
         self.horizontalLayout.addWidget(self.reduce_button)
         self.save_button = QtGui.QPushButton(self.centralwidget)
+        self.save_button.setEnabled(False)
         self.save_button.setObjectName("save_button")
         self.horizontalLayout.addWidget(self.save_button)
         self.export_button = QtGui.QPushButton(self.centralwidget)
+        self.export_button.setEnabled(False)
         self.export_button.setObjectName("export_button")
         self.horizontalLayout.addWidget(self.export_button)
         self.verticalLayout.addLayout(self.horizontalLayout)
@@ -87,8 +93,15 @@ class Ui_SANSReduction(object):
 
     def retranslateUi(self, SANSReduction):
         SANSReduction.setWindowTitle(QtGui.QApplication.translate("SANSReduction", "SANS Reduction", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QtGui.QApplication.translate("SANSReduction", "Tab 1", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QtGui.QApplication.translate("SANSReduction", "Tab 2", None, QtGui.QApplication.UnicodeUTF8))
+        self.label.setText(QtGui.QApplication.translate("SANSReduction", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:\'Ubuntu\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:14pt; font-weight:600;\">No instrument was selected!</span></p>\n"
+"<p align=\"center\" style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:12pt;\">You need to select an instrument from the Tools menu</span></p>\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:12pt;\"> or the Instrument Dialog to continue.</span></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QtGui.QApplication.translate("SANSReduction", "No Instrument Selected", None, QtGui.QApplication.UnicodeUTF8))
         self.interface_chk.setText(QtGui.QApplication.translate("SANSReduction", "Advanced interface", None, QtGui.QApplication.UnicodeUTF8))
         self.reduce_button.setToolTip(QtGui.QApplication.translate("SANSReduction", "Click to execute reduction.", None, QtGui.QApplication.UnicodeUTF8))
         self.reduce_button.setText(QtGui.QApplication.translate("SANSReduction", "Reduce", None, QtGui.QApplication.UnicodeUTF8))

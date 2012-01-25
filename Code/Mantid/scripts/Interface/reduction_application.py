@@ -109,24 +109,6 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         # Flag to let use know that we need to close the window as soon as possible
         self._quit_asap = False 
         
-        # There is an edge-case where the user doesn't have a facility/instrument
-        # selected and hits cancel when the instrument selection dialog shows up.
-        # In that case, the main window is shown empty and it should be closed.
-        # Since the close() method can only be called after the QApplication has been
-        # started, we use the _quit_asap flag to close it as soon as we can.
-        # Note that we choose to show the dialog before showing the main window because
-        # we don't want to have the main window appear empty in the main use-case. 
-        class ShowEventFilter(QtCore.QObject):
-            def eventFilter(obj_self, filteredObj, event):
-                if event.type() == QtCore.QEvent.ActivationChange\
-                    and filteredObj.isActiveWindow()\
-                    and self._quit_asap:
-                    self.close()
-                return QtCore.QObject.eventFilter(obj_self, filteredObj, event)
-        
-        eventFilter = ShowEventFilter(self)
-        self.installEventFilter(eventFilter)
-
     def _set_window_title(self):
         """
             Sets the window title using the instrument name and the 
