@@ -45,7 +45,7 @@ namespace Mantid
     template MANTID_API_DLL bool Algorithm::isEmpty<std::size_t> (const std::size_t);
 
     //=============================================================================================
-    //================================== Constructors/Destructors ===================================
+    //================================== Constructors/Destructors =================================
     //=============================================================================================
 
     /// Initialize static algorithm counter
@@ -910,6 +910,86 @@ namespace Mantid
     //================================== WorkspaceGroup-related ===================================
     //=============================================================================================
 
+    /** Check the input workspace properties for groups.
+     *
+     * If there are more than one input workspace properties, then:
+     *  - All inputs should be groups of the same size
+     *    - In this case, algorithms are processed in order
+     *  - OR, only one input should be a group, the others being size of 1
+     *
+     * @return true if processGroups() should be called.
+     * @throw std::invalid_argument if the groups sizes are incompatible.
+     * @throw std::invalid_argument if a member is not found
+     */
+    bool Algorithm::checkGroups()
+    {
+      // Start by checking if there are ANY groups
+      bool anyGroups = false;
+      for (size_t i=0; i<m_inputWorkspaceProps.size(); i++)
+      {
+        WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>
+            (m_inputWorkspaceProps[i]->getWorkspace());
+        if (wsGroup) anyGroups = true;
+      }
+      if (!anyGroups)
+        return false;
+
+      // Unroll the groups or single inputs into vectors of workspace
+      m_groups.clear();
+
+
+      for (size_t i=0; i<m_inputWorkspaceProps.size(); i++)
+      {
+        std::vector<Workspace_sptr> thisGroup;
+
+        Workspace_sptr ws = m_inputWorkspaceProps[i]->getWorkspace();
+        WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+        if (wsGroup)
+        {
+          std::vector<std::string> names = wsGroup->getNames();
+          for (size_t j=0; j<names.size(); j++)
+          {
+            Workspace_sptr memberWS = AnalysisDataService::Instance().retrieve(names[j]);
+            if (!memberWS)
+              throw std::invalid_argument("One of the members of " + wsGroup->name() + ", " + names[j] + " was not found!.");
+            thisGroup.push_back(memberWS);
+          }
+        }
+        else
+          // "group" with only one member
+          thisGroup.push_back(ws);
+
+        // Add to the list of groups
+        m_groups.push_back(thisGroup);
+        //Property * prop = dynamic_cast<Property *>(m_inputWorkspaceProps[i]);
+      }
+
+      // ---- Confirm that all the groups are the same size -----
+      // Index of the single group
+      m_singleGroup = -1;
+      // Size of the single or of all the groups
+      size_t groupSize = 0;
+      for (size_t i=0; i<m_groups.size(); i++)
+      {
+        std::vector<Workspace_sptr> & thisGroup = m_groups[i];
+        if (thisGroup.size() == 0)
+          throw std::invalid_argument("Empty group passed as input");
+        if (thisGroup.size() > 1)
+        {
+          m_singleGroup = int(i);
+          // Check for matching group size
+          if (groupSize > 0)
+            if (thisGroup.size() != groupSize)
+              throw std::invalid_argument("Input WorkspaceGroups are not of the same size.");
+          // Save the size for the next group
+          groupSize = thisGroup.size();
+        }
+      } // end for each group
+
+      // If you get here, then the group si
+      return true;
+    }
+
     //--------------------------------------------------------------------------------------------
     /** To Process workspace groups.
      * This runs the algorithm once for each workspace in the group.
@@ -1306,6 +1386,7 @@ namespace Mantid
     }
 
     /**Callback when an algorithm is executed asynchronously
+     * @param i :: Unused argument
      * @return true if executed successfully.
     */
     bool Algorithm::executeAsyncImpl(const Poco::Void&)
