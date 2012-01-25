@@ -49,10 +49,11 @@ Of course, your basis vectors can be aligned with the dimensions, which is equiv
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using Mantid::Geometry::MDImplicitFunction;
+using namespace Mantid::Geometry;
 
 namespace Mantid
 {
