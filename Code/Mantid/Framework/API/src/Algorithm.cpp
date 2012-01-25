@@ -425,19 +425,23 @@ namespace Mantid
           // Checking the input is a group
           try
           {
-            // Check if the pointer is valid, it won't be if it is a group
-            Workspace_sptr wsSptr = wsProp->getWorkspace();
-            if(!wsName.empty() && !wsSptr)
+            // First try and get the value. This will be 0 unless:
+            //     (a) The property has been set to a group, and
+            //     (b) The WorkspaceProperty is of TYPE Workspace (or WorkspaceGroup)
+            WorkspaceGroup_sptr wsGrpSptr = boost::dynamic_pointer_cast<WorkspaceGroup>(wsProp->getWorkspace());
+            if ( !wsGrpSptr )
             {
-              boost::shared_ptr<WorkspaceGroup> wsGrpSptr =
-                  boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(wsName));
-              if(wsGrpSptr)
-              {
+              // Now try and get the workspace from the ADS and see if it is a group
+              try {
+                wsGrpSptr = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(wsName));
+              } catch (Exception::NotFoundError&) { /* Do nothing */ }
+            }
+            if( wsGrpSptr )
+            {
                 // This is a group. Call processGroups instead.
                 g_log.debug()<<" one of the inputs is a workspace group - call processGroups"<<std::endl;
                 // This calls this->execute() again on each member of the group.
                 return processGroups(wsGrpSptr,Prop);
-              }
             }
           }
           catch (std::runtime_error &ex)
