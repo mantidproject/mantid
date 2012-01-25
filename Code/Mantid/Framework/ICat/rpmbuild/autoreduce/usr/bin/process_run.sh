@@ -16,20 +16,27 @@ var=$(echo $nexusFile | awk -F"/" '{print $1,$2,$3,$4,$5,$6}')
 set -- $var
 facility=$1
 instrument=$2
-proposalId=$3
-visitId=$4
+proposal=$3
+visit=$4
 runNumber=$5
-echo "facility="$facility",instrument="$instrument",proposalId="$proposalId",visitId="$visitId",runNumber="$runNumber
+echo "facility="$facility",instrument="$instrument",proposal="$proposal",visit="$visit",runNumber="$runNumber
 
 # Create tmp metadata output directory
 echo "--------Creating tmp metadata output directory--------"
+metadataDir=/tmp/METADATA_XML
+if [ ! -d $metadataDir ]; then
+  mkdir $metadataDir
+  chmod 777 $metadataDir
+fi
+
 rawMetadataDir=/tmp/METADATA_XML/raw
 reducedMetadataDir=/tmp/METADATA_XML/reduced
 if [ ! -d $rawMetadataDir ]; then
-  mkdir "$rawMetadataDir"
+  mkdir $rawMetadataDir
+  chmod 777 $rawMetadataDir
 fi 
 if [ ! -d $reducedMetadataDir ]; then
-  mkdir "$reducedMetadataDir"
+  mkdir $reducedMetadataDir
 fi 
 
 # Set raw metadata.xml
@@ -41,37 +48,27 @@ echo "reduced metadata file = "$reducedMetadataFile
 
 echo "--------Creating stage directory for data reduction--------"
 # Auto reduction
-redOutDir="/tmp/reduced/"$runNumber
+redOutDir="/"$facility"/"$instrument"/"$proposal"/shared/autoreduce/"
 echo "redOutDir= "$redOutDir
 if [ ! -d $redOutDir ]; then
   mkdir "$redOutDir"
   echo $redOutDir" is created"
-else
-  echo "Found "$redOutDir
-  list='ls -l $redOutDir | grep -v "total 0"'
-  if [ -z "$list" ]
-  then
-    exit
-  else
-    rm -f $redOutDir/*
-    echo $redOutDir" is cleaned up"
-  fi
 fi 
 
 
 echo "--------Creating metadata file for raw data--------"
-nxingestCommand=nxingest
-mappingFile=mapping.xml
+nxingestCommand=nxingest-autoreduce
+mappingFile=/etc/autoreduce/mapping.xml
 echo $nxingestCommand $mappingFile $nexusFile $metadataFile
-./$nxingestCommand $mappingFile $nexusFile $metadataFile
+$nxingestCommand $mappingFile $nexusFile $metadataFile
 
 # Accumulate any non-zero return code
 status=$(( $status + $? ))
 echo "status=$status"
 
 # Metadata catalog
-icatCommand="java -jar -Djavax.net.ssl.trustStore=/usr/local/glassfish3/glassfish/domains/domain1/config/cacerts.jks"
-icatJar=/home/3qr/workspace/projects/icat4/trunk/icat3-xmlingest-client/target/icat3-xmllingest-client-1.0.0-SNAPSHOT.jar
+icatCommand="java -jar -Djavax.net.ssl.trustStore=/etc/autoreduce/cacerts.jks"
+icatJar=/usr/lib64/autoreduce/icat3-xmlingest-client-1.0.0-SNAPSHOT.jar
 icatAdmin=snsAdmin
 
 echo "--------Catalogging raw data--------"
@@ -81,15 +78,15 @@ echo
 
 echo
 echo "--------Reducing data--------"
-redCommand="python reduce_"$instrument".py"
+redCommand="python /SNS/PG3/shared/autoreduce/reduce_"$instrument".py"
 echo $redCommand $runNumber $metadataDir
 $redCommand $runNumber $redOutDir
 echo
 
 echo
 echo "--------Creating metadata file for reduced data--------"
-echo python create_reduced_metadata.py $instrument $proposalId $visitId $runNumber $redOutDir $reducedMetadataFile
-python create_reduced_metadata.py $instrument $proposalId $visitId $runNumber $redOutDir $reducedMetadataFile
+echo python /usr/bin/create_reduced_metadata.py $instrument $proposal $visit $runNumber $redOutDir $reducedMetadataFile
+python /usr/bin/create_reduced_metadata.py $instrument $proposal $visit $runNumber $redOutDir $reducedMetadataFile
 echo
 
 echo "--------Catalogging reduced data--------"

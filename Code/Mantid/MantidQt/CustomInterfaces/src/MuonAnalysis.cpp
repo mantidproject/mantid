@@ -1207,7 +1207,8 @@ void MuonAnalysis::guessAlphaClicked()
     if (!idsF || !idsB)
       return;
 
-    QString inputWS = m_workspace_name.c_str() + QString("Grouped");
+    //QString inputWS = m_workspace_name.c_str() + QString("Grouped");
+    QString inputWS = m_workspace_name.c_str();
     if ( m_uiForm.homePeriodBox2->isEnabled() )
       inputWS += "_" + m_uiForm.homePeriodBox1->currentText();
 

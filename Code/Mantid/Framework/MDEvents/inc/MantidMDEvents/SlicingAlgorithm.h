@@ -81,7 +81,8 @@ namespace MDEvents
     /// Original (MDEventWorkspace) that inWS was based on. Used during basis vector constructor
     Mantid::API::IMDWorkspace_sptr m_originalWS;
 
-    /// Bin dimensions to actually use
+    /** Bin dimensions to actually use. These are NEW dimensions created,
+     * or copied (not pointing to) the original workspace. */
     std::vector<Mantid::Geometry::MDHistoDimension_sptr> m_binDimensions;
 
     /// Index of the dimension in the MDEW for the dimension in the output. Only for axis-aligned slices

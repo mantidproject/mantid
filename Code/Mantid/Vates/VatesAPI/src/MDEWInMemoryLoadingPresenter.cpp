@@ -96,7 +96,7 @@ namespace Mantid
 
       Workspace_sptr ws = m_repository->fetchWorkspace(m_wsName);
       IMDEventWorkspace_sptr eventWs = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(ws);
-      m_wsTypeName = typeid(*eventWs).name(); //Cache workspace type name
+      m_wsTypeName = eventWs->id();
       //Call base-class extraction method.
       this->extractMetadata(eventWs);
     }

@@ -1,4 +1,4 @@
-from numpy import zeros, arctan2, arange
+from numpy import zeros, arctan2, arange, shape
 from mantidsimple import *
 import math
 
@@ -97,48 +97,71 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
                               fromXpixel, toXpixel,
                               fromYpixel, toYpixel,
                               maxX=304, maxY=256, 
-                              source_to_detector=None, theta=None):
+                              cpix=None,
+                              source_to_detector=None, 
+                              sample_to_detector=None,
+                              theta=None,
+                              geo_correction=False):
     """
         This creates the integrated workspace over the second pixel range (304 here) and
         returns the new workspace handle
     """
     _tof_axis = mt1.readX(0)[:]
     
-    if source_to_detector is not None and theta is not None:
-        _const = float(4) * math.pi * m * source_to_detector / h
-        _tof_axis = 1e-10 * _const * math.sin(theta) / (_tof_axis*1e-6)
-    
-    _y_axis = zeros((maxY, len(_tof_axis) - 1))
-    _y_error_axis = zeros((maxY, len(_tof_axis) - 1))
-    
-    x_size = toXpixel - fromXpixel + 1 
-    x_range = arange(x_size) + fromXpixel
-    
-    y_size = toYpixel - fromYpixel + 1
-    y_range = arange(y_size) + fromYpixel
-    
-    for x in x_range:
-        for y in y_range:
-            _index = int((maxY) * x + y)
-            _y_axis[y, :] += mt1.readY(_index)[:]
-            _y_error_axis[y, :] += ((mt1.readE(_index)[:]) * (mt1.readE(_index)[:]))
+    if geo_correction:
+        
+        yrange = arange(toYpixel-fromYpixel+1) + fromYpixel
+        _q_axis = convertToRvsQWithCorrection(mt1, 
+                                              dMD=sample_to_detector,
+                                              theta=theta,
+                                              tof=_tof_axis, 
+                                              yrange=yrange, 
+                                              cpix=cpix)
 
-    _y_axis = _y_axis.flatten()
-    _y_error_axis = numpy.sqrt(_y_error_axis)
-    #plot_y_error_axis = _y_error_axis #for output testing only    -> plt.imshow(plot_y_error_axis, aspect='auto', origin='lower')
-    _y_error_axis = _y_error_axis.flatten()
+        print shape(_q_axis)
 
-    #normalization by proton charge
-#    _y_axis /= (proton_charge * 1e-12)
+    else:
     
-    _tof_axis = _tof_axis[::-1]
-    _y_axis = _y_axis[::-1]
-    _y_error_axis = _y_error_axis[::-1]
+        if source_to_detector is not None and theta is not None:
+            _const = float(4) * math.pi * m * source_to_detector / h
+            _q_axis = 1e-10 * _const * math.sin(theta) / (_tof_axis*1e-6)
+    
+        _y_axis = zeros((maxY, len(_q_axis) - 1))
+        _y_error_axis = zeros((maxY, len(_q_axis) - 1))
+    
+        x_size = toXpixel - fromXpixel + 1 
+        x_range = arange(x_size) + fromXpixel
+    
+        y_size = toYpixel - fromYpixel + 1
+        y_range = arange(y_size) + fromYpixel
+    
+        for x in x_range:
+            for y in y_range:
+                _index = int((maxY) * x + y)
+                _y_axis[y, :] += mt1.readY(_index)[:]
+                _y_error_axis[y, :] += ((mt1.readE(_index)[:]) * (mt1.readE(_index)[:]))
 
-    CreateWorkspace(OutputWorkspace=outputWorkspace, 
-                    DataX=_tof_axis, DataY=_y_axis, DataE=_y_error_axis, Nspec=maxY,
-                    UnitX="MomentumTransfer",ParentWorkspace=mt1)
-    mt2 = mtd[outputWorkspace]
+        _y_axis = _y_axis.flatten()
+        _y_error_axis = numpy.sqrt(_y_error_axis)
+        #plot_y_error_axis = _y_error_axis #for output testing only    -> plt.imshow(plot_y_error_axis, aspect='auto', origin='lower')
+        _y_error_axis = _y_error_axis.flatten()
+
+        #normalization by proton charge
+        #_y_axis /= (proton_charge * 1e-12)
+    
+        _q_axis = _q_axis[::-1]
+        _y_axis = _y_axis[::-1]
+        _y_error_axis = _y_error_axis[::-1]
+
+        CreateWorkspace(OutputWorkspace=outputWorkspace, 
+                        DataX=_q_axis, DataY=_y_axis, DataE=_y_error_axis, Nspec=maxY,
+                        UnitX="MomentumTransfer",ParentWorkspace=mt1)
+        mt2 = mtd[outputWorkspace]
+    
+    
+    
+    
+    
     return mt2
 
 def angleUnitConversion(value, from_units='degree', to_units='rad'):
@@ -235,6 +258,8 @@ def _convertToRvsQ(_tof_axis,
     return q_array
 
 
+
+
 def convertToRvsQ(dMD=-1,theta=-1,tof=None):
     """
     This function converts the pixel/TOF array to the R(Q) array
@@ -243,6 +268,7 @@ def convertToRvsQ(dMD=-1,theta=-1,tof=None):
             TOF: TOF of pixel
             theta: angle of detector
     """
+    
     _const = float(4) * math.pi * m * dMD / h
     sz_tof = numpy.shape(tof)[0]
     q_array = zeros(sz_tof-1)
@@ -252,7 +278,58 @@ def convertToRvsQ(dMD=-1,theta=-1,tof=None):
         tofm = (tof1+tof2)/2.
         _Q = _const * math.sin(theta) / (tofm*1e-6)
         q_array[t] = _Q*1e-10
+    return q_array
     
+    
+    
+    
+def convertToRvsQWithCorrection(mt, dMD=-1,theta=-1,tof=None, yrange=None, cpix=None):
+    """
+    This function converts the pixel/TOF array to the R(Q) array
+    using Q = (4.Pi.Mn)/h  *  L.sin(theta/2)/TOF
+    with    L: distance central_pixel->source
+            TOF: TOF of pixel
+            theta: angle of detector
+    """
+
+    h = 6.626e-34 #m^2 kg s^-1
+    m = 1.675e-27 #kg
+
+    sample = mt.getInstrument().getSample()
+    source = mt.getInstrument().getSource()
+    dSM = sample.getDistance(source)
+
+    maxX = 304
+    maxY = 256
+    
+    dPS_array = zeros((maxY, maxX))
+    for x in range(maxX):
+        for y in range(maxY):
+            _index = maxY * x + y
+            detector = mt.getDetector(_index)
+            dPS_array[y, x] = sample.getDistance(detector)
+    #array of distances pixel->source
+    dMP_array = dPS_array + dSM
+    #distance sample->center of detector
+    dSD = dPS_array[maxY / 2, maxX / 2]
+
+    _const = float(4) * math.pi * m * dMD / h
+    sz_tof = len(tof)
+    q_array = zeros((len(yrange), sz_tof-1))
+
+    xrange = range(len(yrange))
+    for x in xrange:
+        _px = yrange[x]
+        dangle = ref_beamdiv_correct(cpix, mt, dSD, _px)
+        #theta += (2.0 * dangle)
+        theta += dangle
+        for t in range(sz_tof-1):
+            tof1 = tof[t]
+            tof2 = tof[t+1]
+            tofm = (tof1+tof2)/2.
+            _Q = _const * math.sin(theta) / (tofm*1e-6)
+            q_array[x,t] = _Q*1e-10
+
     return q_array
 
 def getQHisto(source_to_detector, theta, tof_array):
@@ -265,3 +342,168 @@ def getQHisto(source_to_detector, theta, tof_array):
     
     return q_array
     
+    
+def ref_beamdiv_correct(cpix, mt, det_secondary, 
+                        pixel_index, 
+                        pixel_width=0.0007):
+    """
+    This function calculates the acceptance diagram, determines pixel overlap
+    and computes the offset to the scattering angle.
+    """
+    
+    # This is currently set to the same number for both REF_L and REF_M
+    epsilon = 0.5 * 1.3 * 1.0e-3
+    
+    # Set the center pixel
+    if cpix is None:
+        cpix = 133.5
+        
+    first_slit_size = getS1h(mt)
+    last_slit_size = getS2h(mt)
+    last_slit_dist = 0.654 #m
+    slit_dist = 2.193 #m
+    
+    _y = 0.5 * (first_slit_size[0] + last_slit_size[0])
+    _x = slit_dist
+    gamma_plus = math.atan2( _y, _x)
+    
+    _y = 0.5 * (first_slit_size[0] - last_slit_size[0])
+    _x = slit_dist 
+    gamma_minus = math.atan2( _y, _x)
+    
+    half_last_aperture = 0.5 * last_slit_size[0]
+    neg_half_last_aperture = -1.0 * half_last_aperture
+    
+    last_slit_to_det = last_slit_dist + det_secondary
+    dist_last_aper_det_sin_gamma_plus = last_slit_to_det * math.sin(gamma_plus)
+    dist_last_aper_det_sin_gamma_minus = last_slit_to_det * math.sin(gamma_minus)
+    
+    #set the delta theta coordinates of the acceptance polygon
+    accept_poly_x = []
+    accept_poly_x.append(-1.0 * gamma_minus)
+    accept_poly_x.append(gamma_plus)
+    accept_poly_x.append(gamma_plus)
+    accept_poly_x.append(gamma_minus)
+    accept_poly_x.append(-1.0 * gamma_plus)
+    accept_poly_x.append(-1.0 * gamma_plus)
+    accept_poly_x.append(accept_poly_x[0])
+    
+    #set the z coordinates of the acceptance polygon
+    accept_poly_y = []
+    accept_poly_y.append(half_last_aperture - dist_last_aper_det_sin_gamma_minus + epsilon)
+    accept_poly_y.append(half_last_aperture + dist_last_aper_det_sin_gamma_plus + epsilon)
+    accept_poly_y.append(half_last_aperture + dist_last_aper_det_sin_gamma_plus - epsilon)
+    accept_poly_y.append(neg_half_last_aperture + dist_last_aper_det_sin_gamma_minus - epsilon)
+    accept_poly_y.append(neg_half_last_aperture - dist_last_aper_det_sin_gamma_plus - epsilon)
+    accept_poly_y.append(neg_half_last_aperture - dist_last_aper_det_sin_gamma_plus + epsilon)
+    accept_poly_y.append(accept_poly_y[0])
+    
+    cur_index = pixel_index
+    
+    #set the z band for the pixel
+    xMinus = (cur_index - cpix - 0.5) * pixel_width
+    xPlus = (cur_index - cpix + 0.5) * pixel_width
+    
+    #calculate the intersection
+    yLeftCross = -1
+    yRightCross = -1
+    
+    xI = accept_poly_x[0]
+    yI = accept_poly_y[0]
+    
+    int_poly_x = []
+    int_poly_y = []
+    
+    for i in range(len(accept_poly_x)):
+        
+        xF = accept_poly_y[i]
+        yF = accept_poly_x[i]
+        
+        if xI < xF:
+            
+            if xI < xMinus and xF > xMinus:
+                yLeftCross = yI + (yF - yI) * (xMinus - xI) / (xF - xI)
+                int_poly_x.append(yLeftCross)
+                int_poly_y.append(xMinus)
+            
+            if xI < xPlus and xF >= xPlus:
+                yRightCross = yI + (yF - yI) * (xPlus - xI) / (xF - xI)
+                int_poly_x.append(yRightCross)
+                int_poly_y.append(xPlus)
+    
+        else:
+            
+            if xF < xPlus and xI >= xPlus:
+                yRightCross = yI + (yF - yI) * (xPlus - xI) / (xF - xI)
+                int_poly_x.append(yRightCross)
+                int_poly_y.append(xPlus)
+                
+            if xF < xMinus and xI >= xMinus:
+                yLeftCross = yI + (yF - yI) * (xMinus - xI) / (xF - xI)
+                int_poly_x.append(yLeftCross)
+                int_poly_y.append(xMinus)
+                
+        #This catches points on the polygon inside the range of interest
+        if xF >= xMinus and xF < xPlus:
+            int_poly_x.append(yF)
+            int_poly_y.append(xF)
+            
+        xI = xF
+        yI = yF
+        
+    if (len(int_poly_x) > 2):
+        int_poly_x.append(int_poly_x[0])
+        int_poly_y.append(int_poly_y[0])
+        int_poly_x.append(int_poly_x[1])
+        int_poly_y.append(int_poly_y[1])
+    else:
+        #Intersection polygon is null, point or line, so has no area
+        #therefore there is no angle corrction
+        return None
+
+    #Calculate intersection polygon area
+    area = calc_area_2D_polygon(int_poly_x, 
+                                int_poly_y,
+                                len(int_poly_x) - 2)
+
+
+    center_of_mass = calc_center_of_mass(int_poly_x, 
+                                         int_poly_y, 
+                                         area)
+    
+    return center_of_mass
+
+def calc_area_2D_polygon(x_coord, y_coord, size_poly):
+    """
+    Calculation of the area defined by the 2D polygon
+    """
+    _range = arange(size_poly) + 1
+    area = 0
+    for i in _range:
+        area += (x_coord[i] * (y_coord[i+1] - y_coord[i-1]))
+    return area/2.
+    
+def calc_center_of_mass(arr_x, arr_y, A):
+    """
+    Function that calculates the center-of-mass for the given polygon
+    
+    @param arr_x: The array of polygon x coordinates
+    @param arr_y: The array of polygon y coordinates
+    @param A: The signed area of the polygon
+    
+    @return: The polygon center-of-mass
+    """
+    
+    center_of_mass = 0.0
+    SIXTH = 1./6.
+    for j in arange(len(arr_x)-2):
+        center_of_mass += (arr_x[j] + arr_x[j+1]) \
+                * ((arr_x[j] * arr_y[j+1]) - \
+                   (arr_x[j+1] * arr_y[j]))
+        
+    if A != 0.0:
+        return (SIXTH * center_of_mass) / A
+    else:
+        return 0.0
+    
+            

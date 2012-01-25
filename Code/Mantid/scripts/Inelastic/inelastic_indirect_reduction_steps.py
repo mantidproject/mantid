@@ -48,7 +48,7 @@ class LoadData(ReductionStep):
         for file in self._data_files:
             mtd.sendLogMessage("Loading file %s" % file)
 
-            loader_handle = Load(file, file, LoadLogFiles=False)
+            loader_handle = Load(self._data_files[file], file, LoadLogFiles=False)
             loader_name = loader_handle.getPropertyValue("LoaderName")
 
             if self._parameter_file != None:
@@ -75,7 +75,7 @@ class LoadData(ReductionStep):
 
             for ws in workspaces:
                 if (loader_name.endswith('Nexus')):
-                    LoadNexusMonitors(file, ws+'_mon')
+                    LoadNexusMonitors(self._data_files[file], ws+'_mon')
                 else:
                     ## Extract Monitor Spectrum
                     ExtractSingleSpectrum(ws, ws+'_mon', self._monitor_index)
@@ -621,7 +621,7 @@ class Summary(ReductionStep):
             tempName = wsName + '_temp_sum'
             SumSpectra(InputWorkspace=wsName, OutputWorkspace=tempName)
             
-            if (summary == 'average'):
+            if (summary == 'Average'):
                 tempWs = mtd[tempName]
                 tempWs /= nSpec
             # Note: Detector info of the output becomes spurious as there will be a third entry for a detector 

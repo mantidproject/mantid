@@ -42,7 +42,7 @@ class FindSNSNeXus(PythonAlgorithm):
 
     def findNeXus(self, runnumber):
         # find the nexus file
-        result = self.finder.findNeXus(runnumber)
+        result = self.finder.findNeXus(runnumber, usews=self.usews)
         if len(result) <= 0:
             raise RuntimeError("Failed to find \"" + self.nxsfile + "\"")
         result = result[0]
@@ -58,7 +58,7 @@ class FindSNSNeXus(PythonAlgorithm):
 
     def findPreNeXus(self, runnumber):
         # find the prenexus directory
-        result = self.finder.findPreNeXus(runnumber)
+        result = self.finder.findPreNeXus(runnumber, usews=self.usews)
         if len(result) <= 0:
             raise RuntimeError("Failed to find \"" + self.realfile + "\"")
         result = result[0]
@@ -80,7 +80,7 @@ class FindSNSNeXus(PythonAlgorithm):
         instrument = self.getProperty("Instrument").upper()
         runnumber = self.getProperty("RunNumber")
         extension = self.getProperty("Extension")
-        usews = self.getProperty("UseWebService")
+        self.usews = self.getProperty("UseWebService")
 
         self.nxsfile = instrument + "_" + str(runnumber) + ".nxs"
         self.realfile = instrument + "_" + str(runnumber) + extension
@@ -91,13 +91,14 @@ class FindSNSNeXus(PythonAlgorithm):
             nexusformat = "Event"
 
         info = ArchiveInfo(instrument=instrument)
-        self.finder = Finder(info, usews=usews, nexusformat=nexusformat, find_all=True)
+        self.finder = Finder(info, usews=self.usews, nexusformat=nexusformat, find_all=True)
         try:
             if extension.endswith(".nxs"):
                 result = self.findNeXus(runnumber)
             else:
                 result = self.findPreNeXus(runnumber)
-        except:
+        except Exception, e:
+            self.log().warning(str(e))
             result = ""
         self.log().information("FindSNSNeXus found: %s" % result)
         self.setProperty("ResultPath", result)

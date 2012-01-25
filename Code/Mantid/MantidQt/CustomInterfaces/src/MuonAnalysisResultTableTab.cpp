@@ -42,7 +42,7 @@ void MuonAnalysisResultTableTab::initLayout()
   // add check boxes for the include columns on log table and fitting table.
   for (int i = 0; i < m_uiForm.valueTable->rowCount(); i++)
   {
-    m_uiForm.valueTable->setCellWidget(i,3, new QCheckBox);
+    m_uiForm.valueTable->setCellWidget(i,1, new QCheckBox);
   }
   for (int i = 0; i < m_uiForm.fittingResultsTable->rowCount(); i++)
   {
@@ -84,7 +84,7 @@ void MuonAnalysisResultTableTab::selectAllLogs(bool state)
       // If there is an item there then check the box
       if (temp != NULL)
       {
-        QCheckBox* includeCell = static_cast<QCheckBox*>(m_uiForm.valueTable->cellWidget(i,3));
+        QCheckBox* includeCell = static_cast<QCheckBox*>(m_uiForm.valueTable->cellWidget(i,1));
         includeCell->setChecked(true);
       }
     }
@@ -93,7 +93,7 @@ void MuonAnalysisResultTableTab::selectAllLogs(bool state)
   {
     for (int i = 0; i < m_uiForm.valueTable->rowCount(); i++)
     {
-      QCheckBox* includeCell = static_cast<QCheckBox*>(m_uiForm.valueTable->cellWidget(i,3));
+      QCheckBox* includeCell = static_cast<QCheckBox*>(m_uiForm.valueTable->cellWidget(i,1));
       includeCell->setChecked(false);
     }
   }
@@ -201,6 +201,10 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QVector<QString>& f
 
     const std::vector< Mantid::Kernel::Property * > & logData = ws->run().getLogData();
     std::vector< Mantid::Kernel::Property * >::const_iterator pEnd = logData.end();
+    
+    Mantid::Kernel::DateAndTime start = ws->run().startTime();
+    Mantid::Kernel::DateAndTime end = ws->run().endTime();
+
     for( std::vector< Mantid::Kernel::Property * >::const_iterator pItr = logData.begin();
           pItr != pEnd; ++pItr )
     {  
@@ -211,23 +215,49 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QVector<QString>& f
 
       if( tspd )//If it is then it must be num.series
       {
-        allLogs[logFile] = tspd->nthValue(0);
-        if (i == 0)
-          logsToDisplay.push_back(logFile);
-        else
+        bool logFound(false);
+        double value(0.0);
+        double count(0.0);
+
+        Mantid::Kernel::DateAndTime logTime;
+
+        //iterate through all logs entries of a specific log
+        for (int k(0); k<tspd->size(); k++)
         {
-          bool reg(true);
-          for(int j=0; j<logsToDisplay.size(); ++j)
+          // Get the log time for the specific entry
+          logTime = tspd->nthTime(k);
+
+          // If the entry was made during the run times
+          if ((logTime >= start) && (logTime <= end))
           {
-            //if log file already registered then don't register it again.
-            if (logsToDisplay[j] == logFile)
-            {
-              reg = false;
-              break;
-            }
+            // add it to a total and increment the count (will be used to make average entry value during a run)
+            value += tspd->nthValue(k);
+            count++;
+            logFound = true;
           }
-          if (reg==true)
-          logsToDisplay.push_back(logFile);
+        }
+
+        if (logFound == true)
+        {
+          //Find average
+          allLogs[logFile] = value/count;
+          if (i == 0)
+            logsToDisplay.push_back(logFile);
+          else
+          {
+            bool reg(true);
+            for(int j=0; j<logsToDisplay.size(); ++j)
+            {
+              //if log file already registered then don't register it again.
+              if (logsToDisplay[j] == logFile)
+              {
+                reg = false;
+                break;
+              }
+            }
+            if (reg==true)
+            logsToDisplay.push_back(logFile);
+          }
         }
       }
     }
@@ -443,7 +473,7 @@ QVector<QString> MuonAnalysisResultTableTab::getSelectedLogs()
   QVector<QString> logsSelected;
   for (int i = 0; i < m_numLogsdisplayed; i++)
   {
-    QCheckBox* includeCell = static_cast<QCheckBox*>(m_uiForm.valueTable->cellWidget(i,3));
+    QCheckBox* includeCell = static_cast<QCheckBox*>(m_uiForm.valueTable->cellWidget(i,1));
     if (includeCell->isChecked())
     {
       QTableWidgetItem* logParam = static_cast<QTableWidgetItem*>(m_uiForm.valueTable->item(i,0));

@@ -9,6 +9,7 @@
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/overloads.hpp>
+#include <boost/python/copy_const_reference.hpp>
 
 using namespace Mantid::API;
 using Mantid::Geometry::IDetector_sptr;
@@ -44,6 +45,8 @@ void export_MatrixWorkspace()
     .def("axes", &MatrixWorkspace::axes, "Returns the number of axes attached to the workspace")
     .def("getAxis", &MatrixWorkspace::getAxis, return_internal_reference<>())
     .def("isHistogramData", &MatrixWorkspace::isHistogramData, "Returns True if this is conisdered to be binned data.")
+    .def("isDistribution", (const bool& (MatrixWorkspace::*)() const)&MatrixWorkspace::isDistribution,
+         return_value_policy<copy_const_reference>(), "Returns the status of the distribution flag")
     .def("YUnit", &MatrixWorkspace::YUnit, "Returns the current Y unit for the data (Y axis) in the workspace")
     .def("YUnitLabel", &MatrixWorkspace::YUnitLabel, "Returns the caption for the Y axis")
     //--------------------------------------- Setters -------------------------------------------------------------------------------

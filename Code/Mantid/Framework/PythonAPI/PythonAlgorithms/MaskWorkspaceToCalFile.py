@@ -38,17 +38,21 @@ class MaskWorkspaceToCalFile(PythonAlgorithm):
 		calFile.write('# Format: number      UDET       offset       select    group\n')
 		#save the grouping
 		for i in range(inputWorkspace.getNumberHistograms()):
-			det = inputWorkspace.getDetector(i)
-			if (det.isMasked()): #check if masked
-				group = 0
-			else:
-				group = 1
-			if type(det) == DetectorGroup:
-				detIDs = det.getDetectorIDs()
-			else:
-				detIDs = [det.getID()]
-			for id in detIDs:
-				calFile.write(self.FormatLine(i,id,0.0,group,group))
+			try:
+				det = inputWorkspace.getDetector(i)
+				if (det.isMasked()): #check if masked
+					group = 0
+				else:
+					group = 1
+				if type(det) == DetectorGroup:
+					detIDs = det.getDetectorIDs()
+				else:
+					detIDs = [det.getID()]
+				for id in detIDs:
+					calFile.write(self.FormatLine(i,id,0.0,group,group))
+			except:
+				#no detector for this spectra
+				pass
 		calFile.close()
 
 

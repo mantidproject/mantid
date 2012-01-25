@@ -119,7 +119,7 @@ namespace Mantid
 
       Workspace_sptr result=AnalysisDataService::Instance().retrieve("MD_EVENT_WS_ID");
       IMDEventWorkspace_sptr eventWs = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
-      m_wsTypeName = typeid(*eventWs).name();
+      m_wsTypeName = eventWs->id();
       //Call base-class extraction method.
       this->extractMetadata(eventWs);
 

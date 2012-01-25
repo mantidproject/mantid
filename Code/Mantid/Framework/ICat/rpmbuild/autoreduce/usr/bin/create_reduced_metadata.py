@@ -61,7 +61,8 @@ dataset_type = doc.createElement("dataset_type")
 dataset.appendChild(dataset_type)
 dataset_type.appendChild(doc.createTextNode("REDUCED"))
 
-listing = glob.glob(os.path.join(directory, "*"))
+pattern = instrument_text + '_' + run_number_text + '*'
+listing = glob.glob(os.path.join(directory, pattern))
 for infile in listing:
   datafile = doc.createElement("datafile")
   dataset.appendChild(datafile)

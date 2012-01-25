@@ -585,27 +585,9 @@ void MantidDockWidget::populateMDWorkspaceData(Mantid::API::IMDWorkspace_sptr wo
  */
 void MantidDockWidget::populateMDEventWorkspaceData(Mantid::API::IMDEventWorkspace_sptr workspace, QTreeWidgetItem* ws_item)
 {
-  MantidTreeWidgetItem* data_item = new MantidTreeWidgetItem(QStringList("Title: "+QString::fromStdString(workspace->getTitle())), m_tree);
-  data_item->setFlags(Qt::NoItemFlags);
-  excludeItemFromSort(data_item);
-  ws_item->addChild(data_item);
+  this->populateMDWorkspaceData(workspace, ws_item);
 
-  //data_item = new QTreeWidgetItem(QStringList("Dimensions: "));
-  //data_item->setFlags(Qt::NoItemFlags);
-  //ws_item->addChild(data_item);
-
-  // Now add each dimension
-  for (size_t i=0; i < workspace->getNumDims(); i++)
-  {
-    std::ostringstream mess;
-    IMDDimension_const_sptr dim = workspace->getDimension(i);
-    mess << "Dim " << i << ": (" << dim->getName() << ") " << dim->getMinimum() << " to " << dim->getMaximum() << " " << dim->getUnits();
-    std::string s = mess.str();
-    MantidTreeWidgetItem* sub_data_item = new MantidTreeWidgetItem(QStringList(QString::fromStdString(s)), m_tree);
-    sub_data_item->setFlags(Qt::NoItemFlags);
-    excludeItemFromSort(sub_data_item);
-    ws_item->addChild(sub_data_item);
-  }
+  MantidTreeWidgetItem* data_item;
 
   // Now box controller details
   std::vector<std::string> stats = workspace->getBoxControllerStats();
@@ -617,13 +599,10 @@ void MantidDockWidget::populateMDEventWorkspaceData(Mantid::API::IMDEventWorkspa
     ws_item->addChild(sub_data_item);
   }
 
-
   data_item = new MantidTreeWidgetItem(QStringList("Events: "+ QLocale(QLocale::English).toString(double(workspace->getNPoints()), 'd', 0)), m_tree);
   data_item->setFlags(Qt::NoItemFlags);
   excludeItemFromSort(data_item);
   ws_item->addChild(data_item);
-
-
 }
 
 

@@ -475,7 +475,7 @@ class Mask_ISIS(sans_reduction_steps.Mask):
         self._lim_phi_xml = ''
         self.phi_min = -90.0
         self.phi_max = 90.0
-        # read only phi (only used in set_phi_limit...)
+        # read only phi (only used in ...)
         # this option seems totally bizarre to me since it allow
         # set_phi_limit to be called but not setting the _lim_phi_xml
         # string.....
@@ -710,7 +710,8 @@ class Mask_ISIS(sans_reduction_steps.Mask):
 
     def set_phi_limit(self, phimin, phimax, phimirror, override=True):
         '''
-            ...
+            ... (tx to Richard for changes to this function 
+                 for ticket #)
             @param phimin:  
             @param phimax:            
             @param phimirror: 
@@ -722,17 +723,13 @@ class Mask_ISIS(sans_reduction_steps.Mask):
         if phimirror :
             if phimin > phimax:
                 phimin, phimax = phimax, phimin
-            if abs(phimin) > 180.0:
-                phimin = -90.0
-            if abs(phimax) > 180.0:
-                phimax = 90.0
         
             if phimax - phimin == 180.0:
                 self.phi_min = -90.0
                 self.phi_max = 90.0
-            else:
-                self.phi_min = self.normalizePhi(phimin)
-                self.phi_max = self.normalizePhi(phimax)
+            else:          
+                self.phi_min = phimin
+                self.phi_max = phimax
         else:
             self.phi_min = phimin
             self.phi_max = phimax
