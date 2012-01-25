@@ -1126,20 +1126,36 @@ void MuonAnalysis::inputFileChanged(const QString& filename)
 
   // Populate run information text field
   m_title = matrix_workspace->getTitle();
-  std::string infoStr = "Title = ";
-  infoStr += m_title + "\n" + "Comment: "
-    + matrix_workspace->getComment() + "\n";
+  std::string infoStr = "Title: ";
+  infoStr += m_title; 
+  
+  // Add the comment to run information
+  infoStr += "\nComment: ";
+  infoStr += matrix_workspace->getComment();
+  
   const Run& runDetails = matrix_workspace->run();
-  infoStr += "Start: ";
+  
+  // Add the start time for the run
+  infoStr += "\nStart: ";
   if ( runDetails.hasProperty("run_start") )
   {
     infoStr += runDetails.getProperty("run_start")->value();
   }
+
+  // Add the end time for the run
   infoStr += "\nEnd: ";
   if ( runDetails.hasProperty("run_end") )
   {
     infoStr += runDetails.getProperty("run_end")->value();
   }
+
+  // Add counts to run information
+  infoStr += "\nCounts: ";
+  if ( runDetails.hasProperty("CountRate") )
+  {
+    infoStr += runDetails.getProperty("CountRate")->value();
+  }
+
   m_uiForm.infoBrowser->setText(infoStr.c_str());
 
   // Populate period information
