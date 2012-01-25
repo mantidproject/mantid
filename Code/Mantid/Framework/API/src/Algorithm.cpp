@@ -895,8 +895,6 @@ namespace Mantid
       // Unroll the groups or single inputs into vectors of workspace
       m_groups.clear();
       m_groupWorkspaces.clear();
-      // Count the number of groups that are bigger than one
-      size_t numGroupsMoreThanOne = 0;
       for (size_t i=0; i<m_inputWorkspaceProps.size(); i++)
       {
         Property * prop = dynamic_cast<Property *>(m_inputWorkspaceProps[i]);
@@ -933,15 +931,13 @@ namespace Mantid
         }
         else
         {
-          // "group" with only one member
+          // Single Workspace. Treat it as a "group" with only one member
           if (ws)
             thisGroup.push_back(ws);
         }
 
         // Add to the list of groups
         m_groups.push_back(thisGroup);
-        if (thisGroup.size() > 1)
-          numGroupsMoreThanOne++;
         m_groupWorkspaces.push_back(wsGroup);
       }
 
@@ -953,7 +949,7 @@ namespace Mantid
       // Index of the single group
       m_singleGroup = -1;
       // Size of the single or of all the groups
-      m_groupSize = 0;
+      m_groupSize = 1;
       m_groupsHaveSimilarNames = true;
       for (size_t i=0; i<m_groups.size(); i++)
       {
@@ -961,23 +957,28 @@ namespace Mantid
         // We're ok with empty groups if the workspace property is optional
         if (thisGroup.size() == 0 && !m_inputWorkspaceProps[i]->isOptional())
           throw std::invalid_argument("Empty group passed as input");
-        if (thisGroup.size() > 1)
+        if (thisGroup.size() >= 1)
         {
           // Record the index of the single group.
-          if (numGroupsMoreThanOne == 1)
-            m_singleGroup = int(i);
-          // Check for matching group size
-          if (m_groupSize > 0)
-            if (thisGroup.size() != m_groupSize)
-              throw std::invalid_argument("Input WorkspaceGroups are not of the same size.");
-
-          // Save the size for the next group
-          m_groupSize = thisGroup.size();
-
-          // Are ALL the names similar?
           WorkspaceGroup_sptr wsGroup = m_groupWorkspaces[i];
-          if (wsGroup)
-            m_groupsHaveSimilarNames = m_groupsHaveSimilarNames && wsGroup->areNamesSimilar();
+          if (wsGroup && (numGroups == 1))
+            m_singleGroup = int(i);
+
+          // For actual groups (>1 members)
+          if (thisGroup.size() > 1)
+          {
+            // Check for matching group size
+            if (m_groupSize > 1)
+              if (thisGroup.size() != m_groupSize)
+                throw std::invalid_argument("Input WorkspaceGroups are not of the same size.");
+
+            // Are ALL the names similar?
+            if (wsGroup)
+              m_groupsHaveSimilarNames = m_groupsHaveSimilarNames && wsGroup->areNamesSimilar();
+
+            // Save the size for the next group
+            m_groupSize = thisGroup.size();
+          }
         }
       } // end for each group
 

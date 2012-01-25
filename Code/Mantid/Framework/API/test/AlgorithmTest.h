@@ -412,7 +412,7 @@ public:
 
     std::vector<std::string> names;
     boost::split( names, contents1, boost::algorithm::detail::is_any_ofF<char>(","));
-    if (names.size() > 1)
+    if (names.size() >= 1)
     {
       WorkspaceGroup_sptr wsGroup = WorkspaceGroup_sptr(new WorkspaceGroup());
       std::vector<std::string>::iterator it = names.begin();
@@ -432,7 +432,8 @@ public:
       std::string group1, std::string contents1,
       std::string group2, std::string contents2,
       std::string group3, std::string contents3,
-      bool expectFail = false
+      bool expectFail = false,
+      int expectedNumber = 3
       )
   {
     makeWorkspaceGroup(group1, contents1);
@@ -458,13 +459,13 @@ public:
     WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<WorkspaceGroup>(out1);
 
     TS_ASSERT_EQUALS( group->name(), "D" )
-    TS_ASSERT_EQUALS( group->getNumberOfEntries(), 3 )
-    if (group->getNumberOfEntries()!=3) return group;
-
+    TS_ASSERT_EQUALS( group->getNumberOfEntries(), expectedNumber )
+    if (group->getNumberOfEntries() < 1) return group;
     ws1 = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+    if (group->getNumberOfEntries() < 2) return group;
     ws2 = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(1));
+    if (group->getNumberOfEntries() < 3) return group;
     ws3 = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(2));
-
     return group;
   }
 
@@ -549,6 +550,28 @@ public:
     TS_ASSERT_EQUALS( ws2->getTitle(), "A_2++C_2" );
     TS_ASSERT_EQUALS( ws3->name(), "D_3" );
     TS_ASSERT_EQUALS( ws3->getTitle(), "A_3++C_3" );
+  }
+
+  /// One input is a group with only one member (not possible via GUI)
+  void test_processGroups_onlyOneGroup_withOnlyOneMember()
+  {
+    WorkspaceGroup_sptr group = do_test_groups("A", "A_1",
+        "B", "",   "C", "", false, 1);
+
+    TS_ASSERT_EQUALS( ws1->name(), "D_1" );
+    TS_ASSERT_EQUALS( ws1->getTitle(), "A_1+B+C" );
+    TS_ASSERT_EQUALS( ws1->readY(0)[0], 234 );
+  }
+
+  /// Two inputs are groups with one member (each)
+  void test_processGroups_twoGroup_withOnlyOneMember()
+  {
+    WorkspaceGroup_sptr group = do_test_groups("A", "A_1",
+        "B", "B_1",   "C", "", false, 1);
+
+    TS_ASSERT_EQUALS( ws1->name(), "D_1" );
+    TS_ASSERT_EQUALS( ws1->getTitle(), "A_1+B_1+C" );
+    TS_ASSERT_EQUALS( ws1->readY(0)[0], 234 );
   }
 
 
