@@ -97,48 +97,71 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
                               fromXpixel, toXpixel,
                               fromYpixel, toYpixel,
                               maxX=304, maxY=256, 
-                              source_to_detector=None, theta=None):
+                              cpix=None,
+                              source_to_detector=None, 
+                              sample_to_detector=None,
+                              theta=None,
+                              geo_correction=False):
     """
         This creates the integrated workspace over the second pixel range (304 here) and
         returns the new workspace handle
     """
     _tof_axis = mt1.readX(0)[:]
     
-    if source_to_detector is not None and theta is not None:
-        _const = float(4) * math.pi * m * source_to_detector / h
-        _q_axis = 1e-10 * _const * math.sin(theta) / (_tof_axis*1e-6)
-    
-    _y_axis = zeros((maxY, len(_q_axis) - 1))
-    _y_error_axis = zeros((maxY, len(_q_axis) - 1))
-    
-    x_size = toXpixel - fromXpixel + 1 
-    x_range = arange(x_size) + fromXpixel
-    
-    y_size = toYpixel - fromYpixel + 1
-    y_range = arange(y_size) + fromYpixel
-    
-    for x in x_range:
-        for y in y_range:
-            _index = int((maxY) * x + y)
-            _y_axis[y, :] += mt1.readY(_index)[:]
-            _y_error_axis[y, :] += ((mt1.readE(_index)[:]) * (mt1.readE(_index)[:]))
+    if geo_correction:
+        
+        yrange = arange(toYpixel-fromYpixel+1) + fromYpixel
+        _q_axis = convertToRvsQWithCorrection(mt1, 
+                                              dMD=sample_to_detector,
+                                              theta=theta,
+                                              tof=_tof_axis, 
+                                              yrange=yrange, 
+                                              cpix=cpix)
 
-    _y_axis = _y_axis.flatten()
-    _y_error_axis = numpy.sqrt(_y_error_axis)
-    #plot_y_error_axis = _y_error_axis #for output testing only    -> plt.imshow(plot_y_error_axis, aspect='auto', origin='lower')
-    _y_error_axis = _y_error_axis.flatten()
+        print shape(_q_axis)
 
-    #normalization by proton charge
-#    _y_axis /= (proton_charge * 1e-12)
+    else:
     
-    _q_axis = _q_axis[::-1]
-    _y_axis = _y_axis[::-1]
-    _y_error_axis = _y_error_axis[::-1]
+        if source_to_detector is not None and theta is not None:
+            _const = float(4) * math.pi * m * source_to_detector / h
+            _q_axis = 1e-10 * _const * math.sin(theta) / (_tof_axis*1e-6)
+    
+        _y_axis = zeros((maxY, len(_q_axis) - 1))
+        _y_error_axis = zeros((maxY, len(_q_axis) - 1))
+    
+        x_size = toXpixel - fromXpixel + 1 
+        x_range = arange(x_size) + fromXpixel
+    
+        y_size = toYpixel - fromYpixel + 1
+        y_range = arange(y_size) + fromYpixel
+    
+        for x in x_range:
+            for y in y_range:
+                _index = int((maxY) * x + y)
+                _y_axis[y, :] += mt1.readY(_index)[:]
+                _y_error_axis[y, :] += ((mt1.readE(_index)[:]) * (mt1.readE(_index)[:]))
 
-    CreateWorkspace(OutputWorkspace=outputWorkspace, 
-                    DataX=_q_axis, DataY=_y_axis, DataE=_y_error_axis, Nspec=maxY,
-                    UnitX="MomentumTransfer",ParentWorkspace=mt1)
-    mt2 = mtd[outputWorkspace]
+        _y_axis = _y_axis.flatten()
+        _y_error_axis = numpy.sqrt(_y_error_axis)
+        #plot_y_error_axis = _y_error_axis #for output testing only    -> plt.imshow(plot_y_error_axis, aspect='auto', origin='lower')
+        _y_error_axis = _y_error_axis.flatten()
+
+        #normalization by proton charge
+        #_y_axis /= (proton_charge * 1e-12)
+    
+        _q_axis = _q_axis[::-1]
+        _y_axis = _y_axis[::-1]
+        _y_error_axis = _y_error_axis[::-1]
+
+        CreateWorkspace(OutputWorkspace=outputWorkspace, 
+                        DataX=_q_axis, DataY=_y_axis, DataE=_y_error_axis, Nspec=maxY,
+                        UnitX="MomentumTransfer",ParentWorkspace=mt1)
+        mt2 = mtd[outputWorkspace]
+    
+    
+    
+    
+    
     return mt2
 
 def angleUnitConversion(value, from_units='degree', to_units='rad'):
@@ -268,6 +291,9 @@ def convertToRvsQWithCorrection(mt, dMD=-1,theta=-1,tof=None, yrange=None, cpix=
             TOF: TOF of pixel
             theta: angle of detector
     """
+
+    h = 6.626e-34 #m^2 kg s^-1
+    m = 1.675e-27 #kg
 
     sample = mt.getInstrument().getSample()
     source = mt.getInstrument().getSource()
