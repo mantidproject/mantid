@@ -106,10 +106,10 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
     
     if source_to_detector is not None and theta is not None:
         _const = float(4) * math.pi * m * source_to_detector / h
-        _tof_axis = 1e-10 * _const * math.sin(theta) / (_tof_axis*1e-6)
+        _q_axis = 1e-10 * _const * math.sin(theta) / (_tof_axis*1e-6)
     
-    _y_axis = zeros((maxY, len(_tof_axis) - 1))
-    _y_error_axis = zeros((maxY, len(_tof_axis) - 1))
+    _y_axis = zeros((maxY, len(_q_axis) - 1))
+    _y_error_axis = zeros((maxY, len(_q_axis) - 1))
     
     x_size = toXpixel - fromXpixel + 1 
     x_range = arange(x_size) + fromXpixel
@@ -131,12 +131,12 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
     #normalization by proton charge
 #    _y_axis /= (proton_charge * 1e-12)
     
-    _tof_axis = _tof_axis[::-1]
+    _q_axis = _q_axis[::-1]
     _y_axis = _y_axis[::-1]
     _y_error_axis = _y_error_axis[::-1]
 
     CreateWorkspace(OutputWorkspace=outputWorkspace, 
-                    DataX=_tof_axis, DataY=_y_axis, DataE=_y_error_axis, Nspec=maxY,
+                    DataX=_q_axis, DataY=_y_axis, DataE=_y_error_axis, Nspec=maxY,
                     UnitX="MomentumTransfer",ParentWorkspace=mt1)
     mt2 = mtd[outputWorkspace]
     return mt2
