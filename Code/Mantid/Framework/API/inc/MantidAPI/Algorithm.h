@@ -312,17 +312,6 @@ protected:
 
   ///checks the property is a workspace property
   bool isWorkspaceProperty(const Kernel::Property* const prop) const;
-  /// checks the property is input workspace property
-  bool isInputWorkspaceProperty(const Kernel::Property* const prop) const;
-  /// checks the property is output workspace property
-  bool isOutputWorkspaceProperty(const Kernel::Property* const prop) const;
-  /// This method checks the members workspaces are of similar names (example group_1,group_2) and returns true if they are.
-  bool isGroupWorkspacesofSimilarNames(const std::string&,const std::vector<std::string>& grpmembersNames);
-                
-  /// process workspace groups
-  virtual bool processGroups(WorkspaceGroup_sptr ingrpws_sptr,const std::vector<Mantid::Kernel::Property*>&props);
-  /// virtual method to set non workspace properties for an algorithm,it's useful for checking the period number when a member in a group workspace is executed
-  virtual void setOtherProperties(IAlgorithm* alg,const std::string & propertyName,const std::string &propertyValue,int perioidNum);
 
   /// Set to true to stop execution
   mutable bool m_cancel;
@@ -330,6 +319,10 @@ protected:
   bool m_parallelException;
   /// Reference to the logger class
   Kernel::Logger& g_log;
+
+  // ------------------ For WorkspaceGroups ------------------------------------
+  virtual bool processGroups();
+  virtual void setOtherProperties(IAlgorithm * alg, const std::string & propertyName, const std::string & propertyValue, int periodNum);
 
 private:
 
@@ -346,17 +339,6 @@ private:
   void findWorkspaceProperties(std::vector<Workspace_sptr>& inputWorkspaces,
       std::vector<Workspace_sptr>& outputWorkspaces) const;
   void algorithm_info() const;
-
-  /// setting the input properties for an algorithm - to handle workspace groups
-  bool setInputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property* prop,const std::string& inMemberWSName );
-  /// setting the output properties for an algorithm -to handle workspace groups
-  bool setOutputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property* prop,const int nPeriod,
-      const std::string& inmemberwsName,WorkspaceGroup_sptr& outwsgrp_sptr,bool bSimilarNames,bool bequal);
-
-  /// This method gets the input workspace name
-  void getInputGroupWorkspaceName(const std::vector<Mantid::Kernel::Property*>& props,std::string& ingroupwsName);
-  /// This method returns true if the input and output workspaces are same
-  bool isInputequaltoOutPut(const std::vector<Mantid::Kernel::Property*>&props);
 
 
   /// Poco::ActiveMethod used to implement asynchronous execution.
@@ -394,9 +376,7 @@ private:
 
   // ------------------ For WorkspaceGroups ------------------------------------
   void checkGroups();
-  virtual bool processGroups();
-  bool areisGroupWorkspacesofSimilarNames(const std::string&,const std::vector<std::string>& grpmembersNames);
-  void copyNonWorkspaceProperties(IAlgorithm * alg);
+  void copyNonWorkspaceProperties(IAlgorithm * alg, int periodNum);
 
   /// One vector of workspaces for each input workspace property
   std::vector<std::vector<Workspace_sptr> > m_groups;

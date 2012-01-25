@@ -200,13 +200,13 @@ namespace DataHandling
     NXMEnableErrorReporting();
 
     Workspace_sptr inputWorkspace = getProperty("InputWorkspace");
-    boost::shared_ptr<WorkspaceGroup> wsGrpSptr =
-                  boost::dynamic_pointer_cast<WorkspaceGroup>(inputWorkspace);
-    if(wsGrpSptr)
-    {
-      processGroups(wsGrpSptr, this->getProperties());
-      return;
-    }
+//    boost::shared_ptr<WorkspaceGroup> wsGrpSptr =
+//                  boost::dynamic_pointer_cast<WorkspaceGroup>(inputWorkspace);
+//    if(wsGrpSptr)
+//    {
+//      processGroups(wsGrpSptr, this->getProperties());
+//      return;
+//    }
 
     // Set amount of time expected to be spent on writing initial part - could in future depend on type of workspace
     m_timeProgInit = 0.05;

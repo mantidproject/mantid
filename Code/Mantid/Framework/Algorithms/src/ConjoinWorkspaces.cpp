@@ -458,10 +458,10 @@ void ConjoinWorkspaces::fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1, 
 }
 
 /// Appends the removal of the empty group after execution to the PairedGroupAlgorithm::processGroups method
-bool ConjoinWorkspaces::processGroups(API::WorkspaceGroup_sptr wsPt, const std::vector<Kernel::Property*>& prop)
+bool ConjoinWorkspaces::processGroups()
 {
   // Call the base class method for most of the functionality
-  const bool retval = PairedGroupAlgorithm::processGroups(wsPt,prop);
+  const bool retval = Algorithm::processGroups();
 
   // If that was successful, remove the now empty group in the second input workspace property
   if (retval) AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace2"));

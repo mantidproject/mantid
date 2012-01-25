@@ -92,18 +92,23 @@ public:
     declareProperty(new WorkspaceProperty<>("InputWorkspace1", "", Direction::Input));
     declareProperty(new WorkspaceProperty<>("InputWorkspace2", "", Direction::Input, true));
     declareProperty(new WorkspaceProperty<>("InOutWorkspace", "", Direction::InOut, true));
+    declareProperty("Number", 0.0);
     declareProperty(new WorkspaceProperty<>("OutputWorkspace1","",Direction::Output));
     declareProperty(new WorkspaceProperty<>("OutputWorkspace2","",Direction::Output, true));
   }
   void exec()
   {
     boost::shared_ptr<WorkspaceTester> out1(new WorkspaceTester());
+    out1->init(10,10,10);
     boost::shared_ptr<WorkspaceTester> out2(new WorkspaceTester());
+    out2->init(10,10,10);
     std::string outName = getPropertyValue("InputWorkspace1")
             + "+" + getPropertyValue("InputWorkspace2")
             + "+" + getPropertyValue("InOutWorkspace");
     out1->setTitle(outName);
     out2->setTitle(outName);
+    double val = getProperty("Number");
+    out1->dataY(0)[0] = val;
     setProperty("OutputWorkspace1", out1);
     setProperty("OutputWorkspace2", out2);
   }
@@ -414,6 +419,7 @@ public:
       for (; it != names.end(); it++)
       {
         boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
+        ws->init(10,10,10);
         AnalysisDataService::Instance().addOrReplace(*it,ws);
         wsGroup->add(*it);
       }
@@ -438,6 +444,7 @@ public:
     alg.setPropertyValue("InputWorkspace1", group1);
     alg.setPropertyValue("InputWorkspace2", group2);
     alg.setPropertyValue("InOutWorkspace", group3);
+    alg.setPropertyValue("Number", "234");
     alg.setPropertyValue("OutputWorkspace1", "D");
     alg.setPropertyValue("OutputWorkspace2", "E");
     TS_ASSERT_THROWS_NOTHING( alg.execute() );
@@ -454,9 +461,9 @@ public:
     TS_ASSERT_EQUALS( group->getNumberOfEntries(), 3 )
     if (group->getNumberOfEntries()!=3) return group;
 
-    ws1 = group->getItem(0);
-    ws2 = group->getItem(1);
-    ws3 = group->getItem(2);
+    ws1 = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+    ws2 = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(1));
+    ws3 = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(2));
 
     return group;
   }
@@ -477,6 +484,7 @@ public:
 
     TS_ASSERT_EQUALS( ws1->name(), "D_1" );
     TS_ASSERT_EQUALS( ws1->getTitle(), "A_1+B_1+C_1" );
+    TS_ASSERT_EQUALS( ws1->readY(0)[0], 234 );
     TS_ASSERT_EQUALS( ws2->name(), "D_2" );
     TS_ASSERT_EQUALS( ws2->getTitle(), "A_2+B_2+C_2" );
     TS_ASSERT_EQUALS( ws3->name(), "D_3" );
@@ -491,6 +499,7 @@ public:
 
     TS_ASSERT_EQUALS( ws1->name(), "A_1_B_1_alice_D" );
     TS_ASSERT_EQUALS( ws1->getTitle(), "A_1+B_1+alice" );
+    TS_ASSERT_EQUALS( ws1->readY(0)[0], 234 );
     TS_ASSERT_EQUALS( ws2->name(), "A_2_B_2_bob_D" );
     TS_ASSERT_EQUALS( ws2->getTitle(), "A_2+B_2+bob" );
     TS_ASSERT_EQUALS( ws3->name(), "A_3_B_3_charlie_D" );
@@ -505,6 +514,7 @@ public:
 
     TS_ASSERT_EQUALS( ws1->name(), "D_1" );
     TS_ASSERT_EQUALS( ws1->getTitle(), "A_1+B+C" );
+    TS_ASSERT_EQUALS( ws1->readY(0)[0], 234 );
     TS_ASSERT_EQUALS( ws2->name(), "D_2" );
     TS_ASSERT_EQUALS( ws2->getTitle(), "A_2+B+C" );
     TS_ASSERT_EQUALS( ws3->name(), "D_3" );
@@ -519,6 +529,7 @@ public:
 
     TS_ASSERT_EQUALS( ws1->name(), "D_1" );
     TS_ASSERT_EQUALS( ws1->getTitle(), "A_1+B+" );
+    TS_ASSERT_EQUALS( ws1->readY(0)[0], 234 );
     TS_ASSERT_EQUALS( ws2->name(), "D_2" );
     TS_ASSERT_EQUALS( ws2->getTitle(), "A_2+B+" );
     TS_ASSERT_EQUALS( ws3->name(), "D_3" );
@@ -533,6 +544,7 @@ public:
 
     TS_ASSERT_EQUALS( ws1->name(), "D_1" );
     TS_ASSERT_EQUALS( ws1->getTitle(), "A_1++C_1" );
+    TS_ASSERT_EQUALS( ws1->readY(0)[0], 234 );
     TS_ASSERT_EQUALS( ws2->name(), "D_2" );
     TS_ASSERT_EQUALS( ws2->getTitle(), "A_2++C_2" );
     TS_ASSERT_EQUALS( ws3->name(), "D_3" );
@@ -555,9 +567,9 @@ private:
   ToyAlgorithmTwo algv2;
   ToyAlgorithmThree algv3;
 
-  Workspace_sptr ws1;
-  Workspace_sptr ws2;
-  Workspace_sptr ws3;
+  MatrixWorkspace_sptr ws1;
+  MatrixWorkspace_sptr ws2;
+  MatrixWorkspace_sptr ws3;
 };
 
  
