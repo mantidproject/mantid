@@ -24,6 +24,9 @@ import api
 import kernel
 from kernel import funcreturns as _funcreturns
 
+# Make mtd available if a user just types from mantid.simpleapi import *
+from mantid import mtd
+
 _ads = api.AnalysisDataService.Instance()
 _framework = api.FrameworkManager.Instance()
 

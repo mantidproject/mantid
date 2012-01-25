@@ -16,10 +16,10 @@ var=$(echo $nexusFile | awk -F"/" '{print $1,$2,$3,$4,$5,$6}')
 set -- $var
 facility=$1
 instrument=$2
-proposalId=$3
-visitId=$4
+proposal=$3
+visit=$4
 runNumber=$5
-echo "facility="$facility",instrument="$instrument",proposalId="$proposalId",visitId="$visitId",runNumber="$runNumber
+echo "facility="$facility",instrument="$instrument",proposal="$proposal",visit="$visit",runNumber="$runNumber
 
 # Create tmp metadata output directory
 echo "--------Creating tmp metadata output directory--------"
@@ -41,7 +41,7 @@ echo "reduced metadata file = "$reducedMetadataFile
 
 echo "--------Creating stage directory for data reduction--------"
 # Auto reduction
-redOutDir="/tmp/reduced/"$runNumber
+redOutDir="/"$facility"/"$instrument"/"$proposal"/shared/autoreduce/"
 echo "redOutDir= "$redOutDir
 if [ ! -d $redOutDir ]; then
   mkdir "$redOutDir"
@@ -70,8 +70,8 @@ status=$(( $status + $? ))
 echo "status=$status"
 
 # Metadata catalog
-icatCommand="java -jar -Djavax.net.ssl.trustStore=/usr/local/glassfish3/glassfish/domains/domain1/config/cacerts.jks"
-icatJar=/usr/lib64/autoreduce/icat3-xmllingest-client-1.0.0-SNAPSHOT.jar
+icatCommand="java -jar -Djavax.net.ssl.trustStore=/etc/autoreduce/cacerts.jks"
+icatJar=/usr/lib64/autoreduce/icat3-xmlingest-client-1.0.0-SNAPSHOT.jar
 icatAdmin=snsAdmin
 
 echo "--------Catalogging raw data--------"
@@ -88,8 +88,8 @@ echo
 
 echo
 echo "--------Creating metadata file for reduced data--------"
-echo python /usr/bin/create_reduced_metadata.py $instrument $proposalId $visitId $runNumber $redOutDir $reducedMetadataFile
-python /usr/bin/create_reduced_metadata.py $instrument $proposalId $visitId $runNumber $redOutDir $reducedMetadataFile
+echo python /usr/bin/create_reduced_metadata.py $instrument $proposal $visit $runNumber $redOutDir $reducedMetadataFile
+python /usr/bin/create_reduced_metadata.py $instrument $proposal $visit $runNumber $redOutDir $reducedMetadataFile
 echo
 
 echo "--------Catalogging reduced data--------"

@@ -64,5 +64,8 @@ private:
 
   //Time
   double m_time;
+
+  //Cached workspace type name.
+  std::string typeName;
 };
 #endif

@@ -85,6 +85,9 @@ private:
   /// MVP presenter.
   Mantid::VATES::MDLoadingPresenter* m_presenter;
 
+  /// Cached typename.
+  std::string typeName;
+
   vtkMDEWSource(const vtkMDEWSource&);
   void operator = (const vtkMDEWSource&);
   void setTimeRange(vtkInformationVector* outputVector);

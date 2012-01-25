@@ -167,7 +167,9 @@ class RefLReduction(PythonAlgorithm):
                                                     maxX=maxX,
                                                     maxY=maxY,
                                                     source_to_detector=dMD,
-                                                    theta=theta)
+                                                    sample_to_detector=dSD,
+                                                    theta=theta,
+                                                    geo_correction=False)
         
         #_tof_axis = mt2.readX(0)[:]
         ########## This was used to test the R(Q) 
@@ -234,14 +236,17 @@ class RefLReduction(PythonAlgorithm):
         #of interest along the x-axis (to avoid the frame effect)
         mt3_norm = wks_utility.createIntegratedWorkspace(mtd[ws_norm_histo_data], 
                                                          "IntegratedNormWks",
-                                            fromXpixel=Xrange[0],
-                                            toXpixel=Xrange[1],
-                                            fromYpixel=BackfromYpixel,
-                                            toYpixel=BacktoYpixel,
-                                            maxX=maxX,
-                                            maxY=maxY,
-                                            source_to_detector=dMD,
-                                            theta=theta)
+                                                         fromXpixel=Xrange[0],
+                                                         toXpixel=Xrange[1],
+                                                         fromYpixel=BackfromYpixel,
+                                                         toYpixel=BacktoYpixel,
+                                                         maxX=maxX,
+                                                         maxY=maxY,
+                                                         cpix=data_cpix,
+                                                         source_to_detector=dMD,
+                                                         sample_to_detector=dSD,
+                                                         theta=theta,
+                                                         geo_correction=False)
 
         Transpose(InputWorkspace='IntegratedNormWks',
                   OutputWorkspace='TransposedID')
@@ -273,6 +278,8 @@ class RefLReduction(PythonAlgorithm):
 
         # Normalization           
         SumSpectra(InputWorkspace="NormWks", OutputWorkspace="NormWks")
+
+        
         #### divide data by normalize histo workspace
         Divide(LHSWorkspace='DataWks',
                RHSWorkspace='NormWks',
