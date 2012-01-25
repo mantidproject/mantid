@@ -378,7 +378,8 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self.tools_menu.setEnabled(False)
         if IS_IN_MANTIDPLOT:
             _qti.app.mantidUI.setIsRunning(True)
-        self._interface.reduce()
+        if self._interface is not None:
+            self._interface.reduce()
         if IS_IN_MANTIDPLOT:
             _qti.app.mantidUI.setIsRunning(False)
         self.reduce_button.setEnabled(True)   
@@ -503,6 +504,9 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             Exports the current content of the UI to a python script that can 
             be run within MantidPlot
         """
+        if self._interface is None:
+            return
+        
         fname = '.'
         if self._filename is not None:
             (root, ext) = os.path.splitext(self._filename)

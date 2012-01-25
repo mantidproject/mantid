@@ -109,7 +109,7 @@ p, li { white-space: pre-wrap; }
       <item>
        <widget class="QPushButton" name="reduce_button">
         <property name="enabled">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="toolTip">
          <string>Click to execute reduction.</string>
@@ -122,7 +122,7 @@ p, li { white-space: pre-wrap; }
       <item>
        <widget class="QPushButton" name="save_button">
         <property name="enabled">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="toolTip">
          <string>Click to save your reduction parameters.</string>
@@ -135,7 +135,7 @@ p, li { white-space: pre-wrap; }
       <item>
        <widget class="QPushButton" name="export_button">
         <property name="enabled">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="toolTip">
          <string>Click to export the reduction parameters to a python script that can be run in MantidPlot.</string>

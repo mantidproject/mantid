@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/reduction_main.ui'
 #
-# Created: Wed Jan 25 09:40:15 2012
+# Created: Wed Jan 25 14:22:13 2012
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -54,15 +54,15 @@ class Ui_SANSReduction(object):
         spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem1)
         self.reduce_button = QtGui.QPushButton(self.centralwidget)
-        self.reduce_button.setEnabled(False)
+        self.reduce_button.setEnabled(True)
         self.reduce_button.setObjectName("reduce_button")
         self.horizontalLayout.addWidget(self.reduce_button)
         self.save_button = QtGui.QPushButton(self.centralwidget)
-        self.save_button.setEnabled(False)
+        self.save_button.setEnabled(True)
         self.save_button.setObjectName("save_button")
         self.horizontalLayout.addWidget(self.save_button)
         self.export_button = QtGui.QPushButton(self.centralwidget)
-        self.export_button.setEnabled(False)
+        self.export_button.setEnabled(True)
         self.export_button.setObjectName("export_button")
         self.horizontalLayout.addWidget(self.export_button)
         self.verticalLayout.addLayout(self.horizontalLayout)
