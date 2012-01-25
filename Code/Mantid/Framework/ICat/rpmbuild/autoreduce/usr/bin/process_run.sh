@@ -70,8 +70,8 @@ status=$(( $status + $? ))
 echo "status=$status"
 
 # Metadata catalog
-icatCommand="java -jar -Djavax.net.ssl.trustStore=/usr/local/glassfish3/glassfish/domains/domain1/config/cacerts.jks"
-icatJar=/usr/lib64/autoreduce/icat3-xmllingest-client-1.0.0-SNAPSHOT.jar
+icatCommand="java -jar -Djavax.net.ssl.trustStore=/etc/autoreduce/cacerts.jks"
+icatJar=/usr/lib64/autoreduce/icat3-xmlingest-client-1.0.0-SNAPSHOT.jar
 icatAdmin=snsAdmin
 
 echo "--------Catalogging raw data--------"
