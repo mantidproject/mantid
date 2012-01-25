@@ -84,8 +84,6 @@ static const string PID_PARAM("SpectrumList");
 static const string PARALLEL_PARAM("UseParallelProcessing");
 static const string BLOCK_SIZE_PARAM("LoadingBlockSize");
 static const string OUT_PARAM("OutputWorkspace");
-static const string PULSE_EXT(".dat");
-static const string EVENT_EXT("event.dat");
 /// Default number of items to read in from any of the files.
 static const size_t DEFAULT_BLOCK_SIZE = 1000000; // 100,000
 /// All pixel ids with matching this mask are errors.
@@ -222,9 +220,17 @@ void LoadEventPreNexus2::initDocs()
 void LoadEventPreNexus2::init()
 {
   // which files to use
-  declareProperty(new FileProperty(EVENT_PARAM, "", FileProperty::Load, EVENT_EXT),
+  vector<string> eventExts;
+  eventExts.push_back("_neutron_event.dat");
+  eventExts.push_back("_neutron0_event.dat");
+  eventExts.push_back("_neutron1_event.dat");
+  declareProperty(new FileProperty(EVENT_PARAM, "", FileProperty::Load, eventExts),
       "The name of the neutron event file to read, including its full or relative path. In most cases, the file typically ends in neutron_event.dat (N.B. case sensitive if running on Linux).");
-  declareProperty(new FileProperty(PULSEID_PARAM, "", FileProperty::OptionalLoad, PULSE_EXT),
+  vector<string> pulseExts;
+  pulseExts.push_back("_pulseid.dat");
+  pulseExts.push_back("_pulseid0.dat");
+  pulseExts.push_back("_pulseid1.dat");
+  declareProperty(new FileProperty(PULSEID_PARAM, "", FileProperty::OptionalLoad, pulseExts),
       "File containing the accelerator pulse information; the filename will be found automatically if not specified.");
   declareProperty(new FileProperty(MAP_PARAM, "", FileProperty::OptionalLoad, ".dat"),
       "File containing the pixel mapping (DAS pixels to pixel IDs) file (typically INSTRUMENT_TS_YYYY_MM_DD.dat). The filename will be found automatically if not specified.");
