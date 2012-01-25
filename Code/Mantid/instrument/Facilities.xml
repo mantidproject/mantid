@@ -202,7 +202,7 @@
    
 </facility> 
 
-<facility name="SNS" delimiter="_" FileExtensions="_event.nxs,.nxs,.dat,_histo.nxs">
+<facility name="SNS" delimiter="_" FileExtensions="_event.nxs,.nxs,.dat,_neutron_event.dat,_neutron0_event.dat,_neutron1_event.dat,_histo.nxs">
 
   <archive>
     <archiveSearch plugin="OrbiterDataSearch" />
