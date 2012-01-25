@@ -403,6 +403,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
     def _focus(self, wksp, calib, filterLogs=None):
         if wksp is None:
             return None
+        MaskDetectors(Workspace=wksp, MaskedWorkspace=str(wksp)+"mask")
         AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp, OffsetsWorkspace=str(wksp)+"offset")
         # Diffraction focusing using new calibration file with offsets
         if self._diffractionfocus:
