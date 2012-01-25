@@ -425,7 +425,9 @@ namespace Mantid
           // Checking the input is a group
           try
           {
-            if( !wsName.empty() ) // Is this possible? Is this anyway the correct behaviour if not?
+            // Check if the pointer is valid, it won't be if it is a group
+            Workspace_sptr wsSptr = wsProp->getWorkspace();
+            if(!wsName.empty() && !wsSptr)
             {
               boost::shared_ptr<WorkspaceGroup> wsGrpSptr =
                   boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(wsName));
