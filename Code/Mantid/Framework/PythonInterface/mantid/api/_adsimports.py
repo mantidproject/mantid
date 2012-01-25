@@ -48,11 +48,15 @@ def _importAll(mtd):
             Returns a name cleaned up so that it is a valid
             identifier
         """
-        # Remove invalid characters with underscore
-        varname = INVALID_CHARS_REGEX.sub('_', name)
-        # If it starts with a number prefix with underscore
-        if LEADING_NUMS_REGEX.match(varname) is not None:
-            varname = '_' + varname
+        # If it is exactly a keyword just prefix with an underscore
+        if _keyword.iskeyword(name):
+            varname = "_" + name
+        else:
+            # Replace invalid characters with underscore
+            varname = INVALID_CHARS_REGEX.sub('_', name)
+            # If it starts with a number prefix with underscore
+            if LEADING_NUMS_REGEX.match(varname) is not None:
+                varname = "_" + varname
         return varname
     
     stack = _inspect.stack()
