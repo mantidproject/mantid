@@ -438,6 +438,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         if self.getProperty("CrossCorrelation"):
             self._peakpos1 = float(positions[0])
             self._peakpos2 = 0
+            self._peakpos3 = 0
             self._lastpixel = 0
             self._lastpixel2 = 0
             self._lastpixel3 = 0
