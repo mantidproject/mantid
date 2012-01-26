@@ -128,7 +128,8 @@ namespace MDAlgorithms
 
  
 
-   /** function provides the linear representation for the transformation matrix, which translate momentums from laboratory to notional (fractional) coordinate system */
+   /** function provides the linear representation for the transformation matrix, which translate momentums from laboratory to crystal cartezian 
+       (C)- Busing, Levi 1967 coordinate system */
    std::vector<double> getTransfMatrix(API::MatrixWorkspace_sptr inWS2D,MDEvents::MDWSDescription &TargWSDescription, 
                                        bool is_powder=false)const;
    /// get transformation matrix currently defined for the algorithm

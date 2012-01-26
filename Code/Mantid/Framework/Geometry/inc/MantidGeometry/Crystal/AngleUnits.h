@@ -2,6 +2,7 @@
 #define MANTID_GEOMETRY_ANGLEUNITS_H_
 
 #include "MantidGeometry/DllConfig.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include <cmath>
 
 namespace Mantid

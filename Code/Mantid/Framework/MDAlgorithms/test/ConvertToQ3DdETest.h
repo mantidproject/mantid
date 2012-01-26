@@ -9,6 +9,7 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidMDEvents/MDWSDescription.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
@@ -21,17 +22,29 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::MDEvents;
 
+class ConvertTo3DdETestHelper: public ConvertToMDEvents
+{
+public:
+    ConvertTo3DdETestHelper(){};
+   // private (PROTECTED) methods, exposed for testing:
+   std::vector<double> getTransfMatrix(API::MatrixWorkspace_sptr inWS2D,MDWSDescription &TargWSDescription, 
+                                       bool is_powder=false)const
+   {
+       return ConvertToMDEvents::getTransfMatrix(inWS2D,TargWSDescription,is_powder);
+   }
+ 
+};
+
 // Test is transformed from ConvetToQ3DdE but actually tests some aspects of ConvertToMDEvents algorithm. 
 class ConvertToQ3DdETest : public CxxTest::TestSuite
 {
- std::auto_ptr<ConvertToMDEvents> pAlg;
+ std::auto_ptr<ConvertTo3DdETestHelper> pAlg;
 public:
 static ConvertToQ3DdETest *createSuite() { return new ConvertToQ3DdETest(); }
 static void destroySuite(ConvertToQ3DdETest * suite) { delete suite; }    
 
 void testInit(){
-
-    TS_ASSERT_THROWS_NOTHING( pAlg->initialize() )
+  
     TS_ASSERT( pAlg->isInitialized() )
  
 }
@@ -180,6 +193,8 @@ void xtestTransfMat1()
      Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(16,10,true);
      OrientedLattice * latt = new OrientedLattice(1,2,3, 90., 90., 90.);
      ws2D->mutableSample().setOrientedLattice(latt);
+     MDWSDescription TWS(4);
+
 
      std::vector<double> rot;
 //    std::vector<double> rot=pAlg->get_transf_matrix(ws2D,Kernel::V3D(1,0,0),Kernel::V3D(0,1,0));
@@ -332,7 +347,8 @@ void t__tResult(){
 
 
 ConvertToQ3DdETest(){
-    pAlg = std::auto_ptr<ConvertToMDEvents>(new ConvertToMDEvents());
+    pAlg = std::auto_ptr<ConvertTo3DdETestHelper>(new ConvertTo3DdETestHelper());
+    pAlg->initialize();
 }
 
 };
