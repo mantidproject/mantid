@@ -1,4 +1,4 @@
-/*WIKI* 
+/*WIKI*
 
 
 
@@ -6,7 +6,7 @@ Converts a 2D workspace from units of spectrum number/energy transfer to  the in
 
 
 
-*WIKI*/
+ *WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -27,7 +27,7 @@ namespace Mantid
     // Register the algorithm into the AlgorithmFactory
     DECLARE_ALGORITHM(SofQW2)
 
-    using namespace Mantid::Kernel;
+        using namespace Mantid::Kernel;
     using namespace Mantid::API;
     using Geometry::IDetector_const_sptr;
     using Geometry::DetectorGroup;
@@ -37,9 +37,9 @@ namespace Mantid
     using Geometry::Vertex2D;
 
     /// Default constructor
-    SofQW2::SofQW2() 
-      : SofQW(), m_emode(0), m_efixedGiven(false), m_efixed(0.0), m_beamDir(),
-        m_samplePos(), m_progress(), m_qcached()
+    SofQW2::SofQW2()
+    : SofQW(), m_emode(0), m_efixedGiven(false), m_efixed(0.0), m_progress(),
+      m_Qout(), m_thetaPts(), m_thetaWidth(0.0)
     {
     }
 
@@ -51,177 +51,242 @@ namespace Mantid
       this->setOptionalMessage("Calculate the intensity as a function of momentum transfer and energy.");
     }
 
-    /** 
-    * Execute the algorithm.
-    */
+    /**
+     * Execute the algorithm.
+     */
     void SofQW2::exec()
     {
       MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-      // Output workspace
-      std::vector<double> newYBins;
-      MatrixWorkspace_sptr outputWS = this->setUpOutputWorkspace(inputWS, newYBins);
-      const int64_t nOutHist(static_cast<int64_t>(outputWS->getNumberHistograms()));
-      const size_t nOutBins(outputWS->blocksize());
-      const size_t nreports(static_cast<size_t>(nOutHist*nOutBins+1));
+      // Do the full check for common binning
+      if ( ! WorkspaceHelpers::commonBoundaries(inputWS) )
+      {
+        throw std::invalid_argument("The input workspace must have common binning across all spectra");
+      }
+
+      MatrixWorkspace_sptr outputWS = this->setUpOutputWorkspace(inputWS, m_Qout);
+      //Progress reports & cancellation
+      const size_t nreports(static_cast<size_t>(inputWS->getNumberHistograms()*inputWS->blocksize()));
       m_progress = boost::shared_ptr<API::Progress>(new API::Progress(this, 0.0, 1.0, nreports));
+
+      // Compute input caches
       initCachedValues(inputWS);
+      const size_t nTheta = m_thetaPts.size();
+      const size_t nenergyBins = inputWS->blocksize();
+      const MantidVec & X = inputWS->readX(0);
+
+      // Select the calculate Q method based on the mode
+      // rather than doing this repeatedly in the loop
+      typedef double (SofQW2::*QCalculation)(double, double, double, double) const;
+      QCalculation qCalculator;
+      if( m_emode == 1)
+      {
+        qCalculator = &SofQW2::calculateDirectQ;
+      }
+      else
+      {
+        qCalculator = &SofQW2::calculateIndirectQ;
+      }
 
       PARALLEL_FOR2(inputWS, outputWS)
-      for(int64_t i = 0; i < nOutHist; ++i) // signed for openmp
+      for(int64_t i = 0; i < static_cast<int64_t>(nTheta); ++i) // signed for openmp
       {
         PARALLEL_START_INTERUPT_REGION
 
-        const size_t index = static_cast<size_t>(i); // Avoid warning
-        const double y_i = newYBins[index];
-        const double y_ip1 = newYBins[index+1];
-        const MantidVec& X = outputWS->readX(index);
-        // References to the Y and E data
-        MantidVec & outY = outputWS->dataY(index);
-        MantidVec & outE = outputWS->dataE(index);
-        for( size_t j = 0; j < nOutBins; ++j )
+        const double theta = m_thetaPts[i];
+        const double efixed = getEFixed(inputWS->getDetector(i));
+        const double thetaLower = theta - 0.5*m_thetaWidth;
+        const double thetaUpper = theta + 0.5*m_thetaWidth;
+
+        for(size_t j = 0; j < nenergyBins; ++j)
         {
-          m_progress->report("Computing polygon overlap");
-          const double xo_lo(X[j]), xo_hi(X[j+1]);
-          Quadrilateral newPoly(xo_lo, xo_hi, y_i, y_ip1);
-          std::pair<double,double> contrib = calculateYE(inputWS, newPoly);
-          outY[j] = contrib.first;
-          outE[j] = contrib.second;
+          m_progress->report("Computing polygon intersections");
+          // For each input polygon test where it intersects with
+          // the output grid and assign the appropriate weights of Y/E
+          const double dE_j = X[j];
+          const double dE_jp1 = X[j+1];
+
+          const V2D ll(dE_j, (this->*qCalculator)(efixed, dE_j,thetaLower,0.0));
+          const V2D lr(dE_jp1, (this->*qCalculator)(efixed, dE_jp1,thetaLower,0.0));
+          const V2D ur(dE_jp1, (this->*qCalculator)(efixed, dE_jp1,thetaUpper,0.0));
+          const V2D ul(dE_j, (this->*qCalculator)(efixed, dE_j,thetaUpper,0.0));
+          Quadrilateral inputQ = Quadrilateral(ll, lr, ur, ul);
+
+          rebinToOutput(inputQ, inputWS, i, j, outputWS);
         }
 
         PARALLEL_END_INTERUPT_REGION
       }
       PARALLEL_CHECK_INTERUPT_REGION
-    }
 
-    /**
-     * Calculate the Y and E values for the given possible overlap
-     * @param inputWS :: A pointer to the inputWS
-     * @param outputPoly :: A reference to a polygon to test for overlap
-     * @returns A pair of Y and E values
-     */
-    std::pair<double,double> 
-    SofQW2::calculateYE(API::MatrixWorkspace_const_sptr inputWS,
-                        const ConvexPolygon & outputPoly) const
-    {
-      // Build a list intersection locations in terms of workspace indices
-      // along with corresponding weights from that location
-      std::vector<BinWithWeight> overlaps = findIntersections(inputWS, outputPoly);
-      std::pair<double,double> binValues(0,0);
+      const size_t nOutputHist(outputWS->getNumberHistograms());
+      // The errors need square-rooting
+      PARALLEL_FOR1(outputWS)
+      for(int64_t i = 0; i < static_cast<int64_t>(nOutputHist); ++i)
+      {
+        PARALLEL_START_INTERUPT_REGION
+
+        MantidVec& errors = outputWS->dataE(i);
+        std::transform(errors.begin(), errors.end(), errors.begin(), (double (*)(double))std::sqrt);
+
+        PARALLEL_END_INTERUPT_REGION
+      }
+      PARALLEL_CHECK_INTERUPT_REGION
+
+      // Divide by the bin width if the input is a distribution
       if( inputWS->isDistribution() )
       {
-        const double newWidth = outputPoly[3].X() - outputPoly[0].X(); // For distribution
-        binValues = calculateDistYE(inputWS, overlaps, newWidth);
+        this->makeDistribution(outputWS, m_Qout);
       }
-      else
-      {
-        binValues = calculateYE(inputWS, overlaps);
-      }
-      return binValues;
-    }
-
-        /**
-     * Calculate the Y and E values from the given overlaps
-     * @param inputWS :: A pointer to the inputWS
-     * @param overlaps :: A list of overlap locations and weights
-     * @returns A pair of Y and E values
-     */
-    std::pair<double,double> SofQW2::calculateYE(API::MatrixWorkspace_const_sptr inputWS,
-                                                  const std::vector<BinWithWeight> & overlaps) const
-    {
-      double totalY(0.0), totalE(0.0);
-      std::vector<BinWithWeight>::const_iterator iend = overlaps.end();
-      for(std::vector<BinWithWeight>::const_iterator itr = overlaps.begin();
-          itr != iend; ++itr)
-      {
-        const size_t yIndex = itr->yIndex;
-        const size_t xIndex = itr->xIndex;
-        const MantidVec & inputY = inputWS->readY(yIndex);
-        const MantidVec & inputE = inputWS->readE(yIndex);
-        totalY += inputY[xIndex] * itr->weight;
-        totalE += std::pow(inputE[xIndex] * itr->weight, 2);
-      }
-      return std::make_pair(totalY,std::sqrt(totalE));
     }
 
     /**
-     * Calculate the Y and E values from the given intersections for an input distribution
-     * @param inputWS :: A pointer to the inputWS
-     * @param overlaps :: A list of overlap locations and weights
-     * @param newBinWidth :: The width of the new bin
-     * @returns A pair of Y and E values
+     * Rebin the input quadrilateral to the output grid
+     * @param inputQ The input polygon
+     * @param inputWS The input workspace containing the input intensity values
+     * @param i The index in the Q direction that inputQ references
+     * @param j The index in the dE direction that inputQ references
+     * @param outputWS A pointer to the output workspace that accumulates the data
      */
-    std::pair<double,double> SofQW2::calculateDistYE(API::MatrixWorkspace_const_sptr inputWS,
-                                                      const std::vector<BinWithWeight> & overlaps,
-                                                      const double newBinWidth) const
+    void SofQW2::rebinToOutput(const Geometry::Quadrilateral & inputQ, MatrixWorkspace_const_sptr inputWS, 
+                               const size_t i, const size_t j, MatrixWorkspace_sptr outputWS)
     {
-      const MantidVec & oldXBins = inputWS->readX(0);
-      double totalY(0.0), totalE(0.0);
-      std::vector<BinWithWeight>::const_iterator iend = overlaps.end();
-      for(std::vector<BinWithWeight>::const_iterator itr = overlaps.begin();
-          itr != iend; ++itr)
+      size_t qstart(0.0), qend(0.0), en_start(0.0), en_end(0.0);
+      if( !getIntersectionRegion(outputWS, inputQ, qstart, qend, en_start, en_end)) return;
+      const MantidVec & X = inputWS->readX(0);
+      for( size_t qi = qstart; qi < qend; ++qi )
       {
-        const size_t yIndex = itr->yIndex;
-        const size_t xIndex = itr->xIndex;
-        const MantidVec & inputY = inputWS->readY(yIndex);
-        const MantidVec & inputE = inputWS->readE(yIndex);
-        double oldWidth = oldXBins[xIndex+1] - oldXBins[xIndex];
-        totalY += inputY[xIndex] * oldWidth * itr->weight;
-        totalE += std::pow(inputE[xIndex]*oldWidth*itr->weight,2);
-      }
-      return std::make_pair(totalY/newBinWidth,std::sqrt(totalE)/newBinWidth);
-    }
-
-    /**
-     * Find the overlap of the inputWS with the given polygon
-     * @param inputWS :: A pointer to the inputWS
-     * @param poly :: The new polygon to test
-     * @returns A list of intersection locations with weights of the overlap
-     */
-    std::vector<SofQW2::BinWithWeight> 
-    SofQW2::findIntersections(API::MatrixWorkspace_const_sptr inputWS,
-                              const Geometry::ConvexPolygon & poly) const
-    {
-      const MantidVec & oldAxis1 = inputWS->readX(0);
-      // Find the X boundaries
-      const double xn_lo(poly[0].X()), xn_hi(poly[2].X());
-      MantidVec::const_iterator start_it = std::upper_bound(oldAxis1.begin(), oldAxis1.end(), xn_lo);
-      MantidVec::const_iterator end_it = std::upper_bound(oldAxis1.begin(), oldAxis1.end(), xn_hi);
-      size_t start_index(0), end_index(oldAxis1.size() - 1);
-      if( start_it != oldAxis1.begin() )
-      {
-        start_index = (start_it - oldAxis1.begin() - 1);
-      }
-      if( end_it != oldAxis1.end() )
-      {
-        end_index = end_it - oldAxis1.begin();
-      }
-      const double yn_lo(poly[0].Y()), yn_hi(poly[1].Y());
-
-      std::vector<BinWithWeight> overlaps;
-      overlaps.reserve(5); // Have a guess at a possible limit
-
-      std::list<QRangeCache>::const_iterator iend = m_qcached.end();
-      for(std::list<QRangeCache>::const_iterator itr = m_qcached.begin();
-          itr != iend; ++itr)
-      {
-        for(size_t j = start_index; j < end_index; ++j)
+        for( size_t ei = en_start; ei < en_end; ++ei )
         {
-          const double xo_lo(oldAxis1[j]), xo_hi(oldAxis1[j+1]);
-          const  QValues & qold = itr->qValues[j];
-          if( qold.upperLeft < yn_lo || qold.upperRight < yn_lo || 
-              qold.lowerLeft > yn_hi || qold.lowerRight > yn_hi ) continue;
-          Quadrilateral oldPoly(V2D(xo_lo, qold.lowerLeft), V2D(xo_hi, qold.lowerRight),
-              V2D(xo_hi, qold.upperRight), V2D(xo_lo, qold.upperLeft));
+          const V2D ll(X[ei], m_Qout[qi]);
+          const V2D lr(X[ei+1], m_Qout[qi]);
+          const V2D ur(X[ei+1], m_Qout[qi+1]);
+          const V2D ul(X[ei], m_Qout[qi+1]);
+          const Quadrilateral outputQ(ll, lr, ur, ul);
           try
           {
-            ConvexPolygon overlap = intersectionByLaszlo(poly, oldPoly);
-            overlaps.push_back(BinWithWeight(itr->wsIndex,j,itr->weight*overlap.area()/oldPoly.area()));
+            ConvexPolygon overlap = intersectionByLaszlo(outputQ, inputQ);
+            const double weight = overlap.area()/inputQ.area();
+            outputWS->dataY(qi)[ei] += inputWS->readY(i)[j] * weight;
+            outputWS->dataE(qi)[ei] += std::pow(inputWS->readE(i)[j] * weight, 2);
           }
           catch(Geometry::NoIntersectionException &)
-          {}            
+          {}
+
         }
-      } 
-      return overlaps;
+      }
+    }
+
+    /**
+     * Find the possible region of intersection on the output workspace for the given polygon
+     * @param outputWS A pointer to the output workspace
+     * @param inputQ The input polygon
+     * @param qstart An output giving the starting index in the Q direction
+     * @param qend An output giving the end index in the Q direction
+     * @param en_start An output giving the start index in the dE direction
+     * @param en_end An output giving the end index in the dE direction
+     * @return True if an intersecition is possible
+     */
+    bool SofQW2::getIntersectionRegion(API::MatrixWorkspace_const_sptr outputWS, const Geometry::Quadrilateral & inputQ,
+        size_t &qstart, size_t &qend, size_t &en_start, size_t &en_end) const
+    {
+      const MantidVec & energyAxis = outputWS->readX(0);
+      const double xn_lo(inputQ.smallestX()), xn_hi(inputQ.largestX());
+      const double yn_lo(inputQ.smallestY()), yn_hi(inputQ.largestY());
+
+      if( xn_lo < energyAxis.front() || xn_hi > energyAxis.back() ||
+          yn_lo < m_Qout.front() || yn_hi > m_Qout.back() ) return true;
+
+      MantidVec::const_iterator start_it = std::upper_bound(energyAxis.begin(), energyAxis.end(), xn_lo);
+      MantidVec::const_iterator end_it = std::upper_bound(energyAxis.begin(), energyAxis.end(), xn_hi);
+      en_start = 0;
+      en_end = energyAxis.size() - 1;
+      if( start_it != energyAxis.begin() )
+      {
+        en_start = (start_it - energyAxis.begin() - 1);
+      }
+      if( end_it != energyAxis.end() )
+      {
+        en_end = end_it - energyAxis.begin();
+      }
+      // Q region
+      start_it = std::upper_bound(m_Qout.begin(), m_Qout.end(), yn_lo);
+      end_it = std::upper_bound(m_Qout.begin(), m_Qout.end(), yn_hi);
+      qstart = 0;
+      qend = m_Qout.size() - 1;
+      if( start_it != m_Qout.begin() )
+      {
+        qstart = (start_it - m_Qout.begin() - 1);
+      }
+      if( end_it != m_Qout.end() )
+      {
+        qend = end_it - m_Qout.begin();
+      }
+      return true;
+    }
+
+
+    /**
+     * Return the efixed for this detector
+     * @param det A pointer to a detector object
+     * @return The value of efixed
+     */
+    double SofQW2::getEFixed(Geometry::IDetector_const_sptr det) const
+    {
+      double efixed(0.0);
+      if( m_emode == 1 ) //Direct
+      {
+        efixed = m_efixed;
+      }
+      else // Indirect
+      {
+        if( m_efixedGiven ) efixed = m_efixed; // user provided a value
+        else
+        {
+          std::vector<double> param = det->getNumberParameter("EFixed");
+          if( param.empty() ) throw std::runtime_error("Cannot find EFixed parameter for component \"" + det->getName()
+              + "\". This is required in indirect mode. Please check the IDF contains these values.");
+          efixed = param[0];
+        }
+      }
+      return efixed;
+    }
+
+    /**
+     * Calculate the Q value for a direct instrument
+     * @param efixed An efixed value
+     * @param deltaE The energy change
+     * @param twoTheta The value of the scattering angle
+     * @param psi The value of the azimuth
+     * @return The value of Q
+     */
+    double SofQW2::calculateDirectQ(const double efixed, const double deltaE, const double twoTheta,
+        const double psi) const
+    {
+      const double ki = std::sqrt(efixed*m_EtoK);
+      const double kf = std::sqrt((efixed - deltaE)*m_EtoK);
+      const double Qx = ki - kf*std::cos(twoTheta);
+      const double Qy = -kf*std::sin(twoTheta)*std::cos(psi);
+      const double Qz = -kf*std::sin(twoTheta)*std::sin(psi);
+      return std::sqrt(Qx*Qx + Qy*Qy + Qz*Qz);
+    }
+
+    /**
+     * Calculate the Q value for a direct instrument
+     * @param efixed An efixed value
+     * @param deltaE The energy change
+     * @param twoTheta The value of the scattering angle
+     * @param psi The value of the azimuth
+     * @return The value of Q
+     */
+    double SofQW2::calculateIndirectQ(const double efixed, const double deltaE, const double twoTheta,
+        const double psi) const
+    {
+      UNUSED_ARG(psi);
+      const double ki = std::sqrt((efixed + deltaE)*m_EtoK);
+      const double kf = std::sqrt(efixed*m_EtoK);
+      const double Qx = ki - kf*std::cos(twoTheta);
+      const double Qy = -kf*std::sin(twoTheta);
+      return std::sqrt(Qx*Qx + Qy*Qy);
     }
 
     /**
@@ -273,59 +338,36 @@ namespace Mantid
 
 
       // Conversion constant for E->k. k(A^-1) = sqrt(energyToK*E(meV))
-      m_EtoK = 8.0*M_PI*M_PI*PhysicalConstants::NeutronMass*PhysicalConstants::meV*1e-20 / 
-        (PhysicalConstants::h*PhysicalConstants::h);
+      m_EtoK = 8.0*M_PI*M_PI*PhysicalConstants::NeutronMass*PhysicalConstants::meV*1e-20 /
+          (PhysicalConstants::h*PhysicalConstants::h);
 
-      // Get a pointer to the instrument contained in the workspace
-      Geometry::Instrument_const_sptr instrument = workspace->getInstrument();
-      // Get the distance between the source and the sample (assume in metres)
-      Geometry::IObjComponent_const_sptr source = instrument->getSource();
-      Geometry::IObjComponent_const_sptr sample = instrument->getSample();
-      m_samplePos = sample->getPos();
-      m_beamDir = m_samplePos - source->getPos();
-      m_beamDir.normalize();
-      // Is the instrument set up correctly
-      double l1(0.0);
-      try
-      {
-        l1 = source->getDistance(*sample);
-        g_log.debug() << "Source-sample distance: " << l1 << std::endl;
-      }
-      catch (Exception::NotFoundError &)
-      {
-        throw Exception::InstrumentDefinitionError("Unable to calculate source-sample distance", 
-                                                   workspace->getTitle());
-      }
-      // Index Q cache
-      initQCache(workspace);
+      // Index theta cache
+      initThetaCache(workspace);
     }
 
     /**
      * A map detector ID and Q ranges
      * This method looks unnecessary as it could be calculated on the fly but
-     * the parallelization means that lazy instantation slows it down due to the 
-     * necessary CRITICAL sections required to update the cache. The Q range 
+     * the parallelization means that lazy instantation slows it down due to the
+     * necessary CRITICAL sections required to update the cache. The Q range
      * values are required very frequently so the total time is more than
      * offset by this precaching step
      */
-    void SofQW2::initQCache(API::MatrixWorkspace_const_sptr workspace)
+    void SofQW2::initThetaCache(API::MatrixWorkspace_const_sptr workspace)
     {
       Mantid::Kernel::Timer clock;
-      const size_t nhist(workspace->getNumberHistograms());
-      const size_t nxpoints = workspace->blocksize();
-      const MantidVec & X = workspace->readX(0);
-      m_qcached.clear();
+      const size_t nhist = workspace->getNumberHistograms();
+      m_thetaPts = std::vector<double>(nhist);
 
       PARALLEL_FOR1(workspace)
-      for(int64_t i = 0 ; i < (int64_t)nhist; ++i)
+      for(int64_t i = 0 ; i < (int64_t)nhist; ++i) //signed for OpenMP
       {
         PARALLEL_START_INTERUPT_REGION
 
         IDetector_const_sptr det;
         try
         {
-           det = workspace->getDetector(i);
-           if( det->isMonitor() ) det.reset();
+          det = workspace->getDetector(i);
         }
         catch(Kernel::Exception::NotFoundError&)
         {
@@ -334,135 +376,18 @@ namespace Mantid
           // in an openmp block.
         }
         // If no detector found, skip onto the next spectrum
-        if ( !det ) continue;
-
-        std::vector<QValues> qvalues(nxpoints);
-        DetectorGroup_const_sptr detGroup = boost::dynamic_pointer_cast<const DetectorGroup>(det);
-        if( detGroup )
-        {
-          std::vector<IDetector_const_sptr> dets = detGroup->getDetectors();
-          const size_t ndets(dets.size());
-          for( size_t j = 0; j < ndets; ++j )
-          {
-            IDetector_const_sptr det_j = dets[j];
-            QRangeCache qrange(static_cast<size_t>(i), 1.0/(double)ndets);
-            for( size_t k = 0; k < nxpoints; ++k)
-            {
-              qvalues[k] = calculateQValues(det_j, X[k], X[k+1]);
-            }
-            qrange.qValues = qvalues;
-            PARALLEL_CRITICAL(qcache_a)
-            {
-              m_qcached.insert(m_qcached.end(), qrange);
-            }
-          }
-        }
-        else
-        {
-          QRangeCache qrange(static_cast<size_t>(i), 1.0);
-          for( size_t k = 0; k < nxpoints; ++k)
-          {
-            qvalues[k] = calculateQValues(det, X[k], X[k+1]);
-          }
-          qrange.qValues = qvalues;
-          PARALLEL_CRITICAL(qcache_b)
-          {
-            m_qcached.insert(m_qcached.end(), qrange);
-          }
-        }
+        if( !det || det->isMonitor() ) continue;
+        m_thetaPts[i] = workspace->detectorTwoTheta(det);
 
         PARALLEL_END_INTERUPT_REGION
       }
       PARALLEL_CHECK_INTERUPT_REGION
 
-      g_log.debug() << "Initializing Q Cache took " << clock.elapsed() << " seconds\n";
+      m_thetaWidth = std::abs(m_thetaPts.back() - m_thetaPts.front())/static_cast<double>(m_thetaPts.size());
+
+      g_log.debug() << "Initializing theta Cache took " << clock.elapsed() << " seconds\n";
     }
 
-    /// Calculate the corner Q values
-    SofQW2::QValues SofQW2::calculateQValues(Geometry::IDetector_const_sptr det,
-        const double dEMin, const double dEMax) const
-    {
-      // Compute ki and kf wave vectors and therefore q = ki - kf
-      double ei_min(0.0), ei_max(0.0), ef_min(0.0), ef_max(0.0);
-      if( m_emode == 2 )
-      {
-        double efixed(0.0);
-        if( m_efixedGiven ) efixed = m_efixed; // user provided a value
-        else
-        {
-          std::vector<double> param = det->getNumberParameter("EFixed");
-          if( param.empty() ) throw std::runtime_error("Cannot find EFixed parameter for component \"" + det->getName()
-                                                        + "\". This is required in indirect mode. Please check the IDF contains these values.");
-          efixed = param[0];
-        }
-        ei_min = efixed + dEMin;
-        ei_max = efixed + dEMax;
-        ef_min = ef_max = efixed;
-      }
-      else
-      {
-        ei_min = ei_max = m_efixed;
-        ef_min = m_efixed - dEMin;
-        ef_max = m_efixed - dEMax;
-      }    
-      std::pair<V3D,V3D> scatterDirs = calculateScatterDir(det);
-      const V3D ki_min = m_beamDir*sqrt(m_EtoK*ei_min);
-      const V3D ki_max = m_beamDir*sqrt(m_EtoK*ei_max);
-      /**
-       * Q calculation: Note that this is identical to calculating
-       * Qx, Qy, Qz separately. Given that we already have the 3D vectors
-       * it is simpler to do the vector algebrea with them.
-       */
-      
-      const V3D kf_ll = scatterDirs.first*(sqrt(m_EtoK*ef_min)); // Lower-left
-      const V3D kf_lr = scatterDirs.first*(sqrt(m_EtoK*ef_max)); // Lower-right
-      const V3D kf_ur = scatterDirs.second*(sqrt(m_EtoK*ef_max)); // Upper-right
-      const V3D kf_ul = scatterDirs.second*(sqrt(m_EtoK*ef_min)); // Upper-left
-      
-      QValues qValues(
-        (ki_min - kf_ll).norm(), // Lower-left 
-        (ki_max - kf_lr).norm(), // Lower-right
-        (ki_max - kf_ur).norm(), // Upper-right
-        (ki_min - kf_ul).norm() ); // Upper-left
-      return qValues;
-    }
-    
-    /**
-     * Calculate the Kf vectors
-     * @param det :: The detector
-     */
-    std::pair<Kernel::V3D, Kernel::V3D>
-    SofQW2::calculateScatterDir(Geometry::IDetector_const_sptr det) const
-    {
-      Geometry::BoundingBox bbox;
-      det->getBoundingBox(bbox);
-      double r(0.0), theta_pt(0.0), phi(0.0);
-      det->getPos().getSpherical(r, theta_pt, phi);
-
-      const V3D & min  = bbox.minPoint();
-      double theta_min(0.0), theta_max(0.0), dummy(0.0);
-      min.getSpherical(dummy,theta_min, dummy);
-      const V3D & max = bbox.maxPoint();
-      max.getSpherical(dummy,theta_max, dummy);
-      V3D scatter_min, scatter_max;
-      if( theta_min > theta_max ) 
-      {
-        scatter_min = max;
-        scatter_max = min;
-      }
-      else
-      {
-        scatter_min = min;
-        scatter_max = max;
-      }
-
-      scatter_min = (scatter_min - m_samplePos);
-      scatter_min.normalize();
-      scatter_max = (scatter_max - m_samplePos);
-      scatter_max.normalize();
-      
-      return std::pair<Kernel::V3D, Kernel::V3D>(scatter_min, scatter_max);
-    }
 
   } // namespace Mantid
 } // namespace Algorithms

@@ -10,7 +10,7 @@ class WorkspaceGroupTest(unittest.TestCase):
         run_algorithm('GroupWorkspaces',InputWorkspaces='First,Second',OutputWorkspace='grouped')
         grouped = mtd['grouped']
         self.assertEquals(type(grouped), WorkspaceGroup)
-
+        self.assertEquals(2, grouped.size())
         self.assertEquals(2, grouped.getNumberOfEntries())
         # Matches operator
         self.assertEquals(len(grouped), grouped.getNumberOfEntries())

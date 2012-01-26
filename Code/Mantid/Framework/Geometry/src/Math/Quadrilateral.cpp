@@ -16,7 +16,8 @@ namespace Mantid
     Quadrilateral::Quadrilateral(const V2D & lowerLeft, const V2D & lowerRight,
                                  const V2D & upperRight, const V2D & upperLeft) :
       ConvexPolygon(), m_lowerLeft(lowerLeft),
-      m_lowerRight(lowerRight), m_upperRight(upperRight), m_upperLeft(upperLeft)
+      m_lowerRight(lowerRight), m_upperRight(upperRight), m_upperLeft(upperLeft),
+      m_lowestX(0.0), m_highestX(0.0), m_lowestY(0.0), m_highestY(0.0)
     {
       initialize();
     }
@@ -28,7 +29,9 @@ namespace Mantid
                                  const double lowerY, const double upperY)
       : ConvexPolygon(), m_lowerLeft(lowerX,lowerY),
         m_lowerRight(upperX,lowerY), m_upperRight(upperX,upperY), 
-        m_upperLeft(lowerX,upperY) 
+        m_upperLeft(lowerX,upperY),
+        m_lowestX(0.0), m_highestX(0.0), m_lowestY(0.0), m_highestY(0.0)
+
     {
       initialize();
     }
@@ -110,6 +113,42 @@ namespace Mantid
       return 2.0*area();
     }
 
+    /**
+     * Return the lowest X value in the polygon
+     * @returns A double indicating the smallest X value in the polygon
+     */
+    double Quadrilateral::smallestX() const
+    {
+      return m_lowestX;
+    }
+
+    /**
+     * Return the largest X value in the polygon
+     * @returns A double indicating the smallest X value in the polygon
+     */
+    double Quadrilateral::largestX() const
+    {
+      return m_highestX;
+    }
+
+    /**
+     * Return the lowest X value in the polygon
+     * @returns A double indicating the smallest Y value in the polygon
+     */
+    double Quadrilateral::smallestY() const
+    {
+      return m_lowestY;
+    }
+
+    /**
+     * Return the largest Y value in the polygon
+     * @returns A double indicating the smallest Y value in the polygon
+     */
+    double Quadrilateral::largestY() const
+    {
+      return m_highestY;
+    }
+
     //-----------------------------------------------------------------------------
     // Private member functions
     //-----------------------------------------------------------------------------
@@ -123,6 +162,21 @@ namespace Mantid
       m_head->insert(&m_lowerRight);
       m_head->insert(&m_upperRight);
       m_head->insert(&m_upperLeft);
+
+      m_lowestX = m_lowerLeft.X();
+      m_highestX = m_lowerLeft.X();
+      m_lowestY = m_lowerLeft.Y();
+      m_highestY = m_lowerLeft.Y();
+      for( int i = 1; i < 4; ++i )
+      {
+        const V2D & pt = (*this)[i];
+        if( pt.X() < m_lowestX ) m_lowestX = pt.X();
+        else if( pt.X() > m_highestX ) m_highestX = pt.X();
+
+        if( pt.Y() < m_lowestY ) m_lowestY = pt.Y();
+        else if( pt.Y() > m_highestY ) m_highestY = pt.Y();
+      }
+
     }
 
 

@@ -1126,20 +1126,43 @@ void MuonAnalysis::inputFileChanged(const QString& filename)
 
   // Populate run information text field
   m_title = matrix_workspace->getTitle();
-  std::string infoStr = "Title = ";
-  infoStr += m_title + "\n" + "Comment: "
-    + matrix_workspace->getComment() + "\n";
+  std::string infoStr = "Title: ";
+  infoStr += m_title; 
+  
+  // Add the comment to run information
+  infoStr += "\nComment: ";
+  infoStr += matrix_workspace->getComment();
+  
   const Run& runDetails = matrix_workspace->run();
-  infoStr += "Start: ";
+  
+  // Add the start time for the run
+  infoStr += "\nStart: ";
   if ( runDetails.hasProperty("run_start") )
   {
     infoStr += runDetails.getProperty("run_start")->value();
   }
+
+  // Add the end time for the run
   infoStr += "\nEnd: ";
   if ( runDetails.hasProperty("run_end") )
   {
     infoStr += runDetails.getProperty("run_end")->value();
   }
+
+  // Add counts to run information
+  infoStr += "\nCounts: ";
+  double counts(0.0);
+  for (size_t i=0; i<matrix_workspace->getNumberHistograms(); ++i)
+  {
+    for (size_t j=0; j<matrix_workspace->blocksize(); ++j)
+    {
+      counts += matrix_workspace->dataY(i)[j];
+    }
+  }
+  std::ostringstream ss;
+  ss << counts;
+  infoStr += ss.str();
+
   m_uiForm.infoBrowser->setText(infoStr.c_str());
 
   // Populate period information
@@ -1448,9 +1471,21 @@ void MuonAnalysis::createPlotWS(const std::string& groupName, const std::string&
   // rebin data if option set in Plot Options
   if (m_uiForm.rebinComboBox->currentText() == "Fixed")
   {
-    QString reBunchStr = QString("Rebunch(\"") + wsname.c_str() + "\",\""
-        + wsname.c_str() + QString("\",") + m_uiForm.optionStepSizeText->text() + ");";
-    runPythonCode( reBunchStr ).trimmed(); 
+    try
+    {
+      Mantid::API::MatrixWorkspace_sptr tempWs =  boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsname));
+      tempWs->isDistribution(true);
+      double binSize = tempWs->dataX(0)[1]-tempWs->dataX(0)[0];
+
+      QString reBinStr = QString("Rebin(\"") + wsname.c_str() + "\",\""
+        + wsname.c_str() + QString("\",") + boost::lexical_cast<std::string>(m_uiForm.optionStepSizeText->text().toDouble()*binSize).c_str() + ");";
+      runPythonCode( reBinStr ).trimmed();
+      tempWs->isDistribution(false);
+    }
+    catch(std::exception &e)
+    {
+      QMessageBox::information(this, "Mantid - Muon Analysis", "The workspace couldn't be rebunched.");
+    }
   } 
 
   // Make group to display more organised in Mantidplot workspace list
