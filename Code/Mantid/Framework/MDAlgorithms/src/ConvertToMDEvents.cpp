@@ -858,6 +858,10 @@ void ConvertToMDEvents::buildDimNames(MDEvents::MDWSDescription &TargWSDescripti
             if(TargWSDescription.dim_IDs[i].empty()){
                   TargWSDescription.dim_IDs[i]="Dim"+boost::lexical_cast<std::string>(i);              
             }
+            if(TargWSDescription.dim_names[i].empty()){
+                  TargWSDescription.dim_names[i]=TargWSDescription.dim_IDs[i]; 
+            }
+
         }
 
     }
