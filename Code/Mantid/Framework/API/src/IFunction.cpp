@@ -202,7 +202,7 @@ void IFunction::setHandler(FunctionHandler* handler)
 const std::vector<std::string> IFunction::categories() const
 {
   std::vector < std::string > res;
-  Poco::StringTokenizer tokenizer(category(), categorySeperator(),
+  Poco::StringTokenizer tokenizer(category(), categorySeparator(),
       Poco::StringTokenizer::TOK_TRIM | Poco::StringTokenizer::TOK_IGNORE_EMPTY);
   Poco::StringTokenizer::Iterator h = tokenizer.begin();
 

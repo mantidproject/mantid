@@ -152,11 +152,23 @@ namespace Mantid
     }
 
     //---------------------------------------------------------------------------------------------
+    /** Sends ProgressNotification.
+     * @param p :: Reported progress,  must be between 0 (just started) and 1 (finished)
+     * @param msg :: Optional message string
+     * @param estimatedTime :: Optional estimated time to completion
+     * @param progressPrecision :: optional, int number of digits after the decimal point to show.
+    */
+    void Algorithm::progress(double p, const std::string& msg, double estimatedTime, int progressPrecision)
+    {
+      m_notificationCenter.postNotification(new ProgressNotification(this,p,msg, estimatedTime, progressPrecision));
+    }
+
+    //---------------------------------------------------------------------------------------------
     /// Function to return all of the categories that contain this algorithm
     const std::vector<std::string> Algorithm::categories() const
     {
       std::vector < std::string > res;
-      Poco::StringTokenizer tokenizer(category(), categorySeperator(),
+      Poco::StringTokenizer tokenizer(category(), categorySeparator(),
           Poco::StringTokenizer::TOK_TRIM | Poco::StringTokenizer::TOK_IGNORE_EMPTY);
       Poco::StringTokenizer::Iterator h = tokenizer.begin();
 
@@ -288,7 +300,6 @@ namespace Mantid
           if (std::find(m_writeLockedWorkspaces.begin(), m_writeLockedWorkspaces.end(), ws)
               == m_writeLockedWorkspaces.end())
           {
-            //std::cout << "Write-locking " << ws->name() << std::endl;
             // Write-lock it if not already
             ws->getLock()->writeLock();
             m_writeLockedWorkspaces.push_back(ws);
@@ -306,7 +317,6 @@ namespace Mantid
           if (std::find(m_writeLockedWorkspaces.begin(), m_writeLockedWorkspaces.end(), ws)
               == m_writeLockedWorkspaces.end())
           {
-            //std::cout << "Read-locking " << ws->name() << std::endl;
             // Read-lock it if not already write-locked
             ws->getLock()->readLock();
             m_readLockedWorkspaces.push_back(ws);
@@ -329,19 +339,13 @@ namespace Mantid
       {
         Workspace_sptr ws = m_writeLockedWorkspaces[i];
         if (ws)
-        {
-          //std::cout << "Un-write-locking " << ws->name() << std::endl;
           ws->getLock()->unlock();
-        }
       }
       for (size_t i=0; i<m_readLockedWorkspaces.size(); i++)
       {
         Workspace_sptr ws = m_readLockedWorkspaces[i];
         if (ws)
-        {
-          //std::cout << "Un-read-locking " << ws->name() << std::endl;
           ws->getLock()->unlock();
-        }
       }
 
       // Don't double-unlock workspaces
@@ -386,7 +390,7 @@ namespace Mantid
       cacheWorkspaceProperties();
 
       // no logging of input if a child algorithm
-      if (!m_isChildAlgorithm) algorithm_info();
+      if (!m_isChildAlgorithm) logAlgorithmInfo();
 
       // Check all properties for validity
       if ( !validateProperties() )
@@ -422,7 +426,7 @@ namespace Mantid
           return processGroups();
         }
       }
-      catch(std::exception&ex)
+      catch(std::exception& ex)
       {
         g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
         g_log.error()<<ex.what()<<std::endl;
@@ -434,11 +438,12 @@ namespace Mantid
           throw;
         }
       }
-      // If processGroups()/checkGroups() threw an exception
+      // If checkGroups() threw an exception but there ARE group workspaces
+      // (means that the group sizes were incompatible)
       if (m_processGroups)
         return false;
 
-      // read or write locks every input/output workspace
+      // Read or write locks every input/output workspace
       this->lockWorkspaces();
 
       // Invoke exec() method of derived class and catch all uncaught exceptions
@@ -569,6 +574,7 @@ namespace Mantid
       }
     }
 
+    //---------------------------------------------------------------------------------------------
     /** Stores any output workspaces into the AnalysisDataService
     *  @throw std::runtime_error If unable to successfully store an output workspace
     */
@@ -593,6 +599,7 @@ namespace Mantid
       }
     }
 
+    //---------------------------------------------------------------------------------------------
     /** Create a sub algorithm.  A call to this method creates a child algorithm object.
     *  Using this mechanism instead of creating daughter
     *  algorithms directly via the new operator is prefered since then
@@ -603,7 +610,7 @@ namespace Mantid
     *  @param endProgress ::    The percentage progress value of the overall algorithm where this child algorithm ends
     *  @param enableLogging ::  Set to false to disable logging from the child algorithm
     *  @param version ::        The version of the child algorithm to create. By default gives the latest version.
-    *  @returns Set to point to the newly created algorithm object
+    *  @return shared pointer to the newly created algorithm object
     */
     Algorithm_sptr Algorithm::createSubAlgorithm(const std::string& name, const double startProgress, const double endProgress,
       const bool enableLogging, const int& version)
@@ -691,7 +698,13 @@ namespace Mantid
 
 
     //--------------------------------------------------------------------------------------------
-    /// Construct an object from a history entry
+    /** Construct an object from a history entry.
+     *
+     * This creates the algorithm and sets all of its properties using the history.
+     *
+     * @param history :: AlgorithmHistory object
+     * @return a shared pointer to the created algorithm.
+     */
     IAlgorithm_sptr Algorithm::fromHistory(const AlgorithmHistory & history)
     {
       // Hand off to the string creator
@@ -715,12 +728,12 @@ namespace Mantid
 
 
     //--------------------------------------------------------------------------------------------
-    /**
-    * De-serialize an object from a string
+    /** De-serializes the algorithm from a string
+     *
     * @param input :: An input string in the format. The format is
-    * AlgorithmName.version(prop1=value1,prop2=value2,...). If .version is not found the 
-    * highest found is used.
-    * @returns A pointer to a managed algorithm object
+    *        AlgorithmName.version(prop1=value1,prop2=value2,...). If .version is not found the
+    *        highest found is used.
+    * @return A pointer to a managed algorithm object
     */
     IAlgorithm_sptr Algorithm::fromString(const std::string & input)
     {
@@ -773,26 +786,14 @@ namespace Mantid
 
     //-------------------------------------------------------------------------
     /** Initialize using proxy algorithm.
-    Call the main initialize method and then copy in the property values.
-    @param proxy :: Initialising proxy algorithm
-    */
+     * Call the main initialize method and then copy in the property values.
+     * @param proxy :: Initialising proxy algorithm  */
     void Algorithm::initializeFromProxy(const AlgorithmProxy& proxy)
     {
       initialize();
       copyPropertiesFrom(proxy);
       m_algorithmID = proxy.getAlgorithmID();
       setLogging(proxy.isLogging());
-    }
-
-    /** Sends ProgressNotification. 
-    @param p :: Reported progress,  must be between 0 (just started) and 1 (finished)
-    @param msg :: Optional message string
-    @param estimatedTime :: Optional estimated time to completion
-    @param progressPrecision :: optional, int number of digits after the decimal point to show.
-    */
-    void Algorithm::progress(double p, const std::string& msg, double estimatedTime, int progressPrecision)
-    {
-      m_notificationCenter.postNotification(new ProgressNotification(this,p,msg, estimatedTime, progressPrecision));
     }
 
 
@@ -859,8 +860,8 @@ namespace Mantid
       }
     }
 
-    /// puts out algorithm parameter information to the logger
-    void Algorithm::algorithm_info() const
+    /** Sends out algorithm parameter information to the logger */
+    void Algorithm::logAlgorithmInfo() const
     {
       g_log.notice() << name() << " started"<< std::endl;
       // Make use of the AlgorithmHistory class, which holds all the info we want here
@@ -882,12 +883,15 @@ namespace Mantid
      *  - OR, only one input should be a group, the others being size of 1
      *
      * Sets m_processGroups to true if if processGroups() should be called.
-     * It also sets up some other members
+     * It also sets up some other members.
+     *
+     * Override if it is needed to customize the group checking. Make sure
+     * to set m_processGroups in the overridden method.
      *
      * @throw std::invalid_argument if the groups sizes are incompatible.
      * @throw std::invalid_argument if a member is not found
      */
-    void  Algorithm::checkGroups()
+    void Algorithm::checkGroups()
     {
       size_t numGroups = 0;
       m_processGroups = false;
@@ -991,6 +995,11 @@ namespace Mantid
     /** Process WorkspaceGroup inputs.
      *
      * This should be called after checkGroups(), which sets up required members.
+     * It goes through each member of the group(s), creates and sets an algorithm
+     * for each and executes them one by one.
+     *
+     * If there are several group input workspaces, then the member of each group
+     * is executed pair-wise.
      *
      * @return true - if all the workspace members are executed.
      */
@@ -1076,9 +1085,6 @@ namespace Mantid
 
       } // for each entry in each group
 
-
-      //TODO: Set the output workspace properties to the groups created. ???
-
       // Finish up
       for (size_t i=0; i<outGroups.size(); i++)
       {
@@ -1119,7 +1125,7 @@ namespace Mantid
 
     //--------------------------------------------------------------------------------------------
     /** Virtual method to set the non workspace properties for this algorithm.
-     * To be overridden by specific algorithms.
+     * To be overridden by specific algorithms when needed.
      *
      *  @param alg :: pointer to the algorithm
      *  @param propertyName :: name of the property

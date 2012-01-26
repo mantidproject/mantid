@@ -194,7 +194,7 @@ public:
   /// Function to return all of the categories that contain this algorithm
   virtual const std::vector<std::string> categories() const;
   /// Function to return the sperator token for the category string. A default implementation ';' is provided
-  virtual const std::string categorySeperator() const {return ";";}
+  virtual const std::string categorySeparator() const {return ";";}
   /// function to return any aliases to the algorithm;  A default implementation is provided
   virtual const std::string alias() const {return "";}
   /// Algorithm ID. Unmanaged algorithms return 0 (or NULL?) values. Managed ones have non-zero.
@@ -338,7 +338,7 @@ private:
   void fillHistory(Mantid::Kernel::DateAndTime, double,std::size_t);
   void findWorkspaceProperties(std::vector<Workspace_sptr>& inputWorkspaces,
       std::vector<Workspace_sptr>& outputWorkspaces) const;
-  void algorithm_info() const;
+  void logAlgorithmInfo() const;
 
 
   /// Poco::ActiveMethod used to implement asynchronous execution.
@@ -375,7 +375,7 @@ private:
   std::vector<IWorkspaceProperty *> m_pureOutputWorkspaceProps;
 
   // ------------------ For WorkspaceGroups ------------------------------------
-  void checkGroups();
+  virtual void checkGroups();
   void copyNonWorkspaceProperties(IAlgorithm * alg, int periodNum);
 
   /// One vector of workspaces for each input workspace property
