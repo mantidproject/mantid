@@ -278,14 +278,14 @@ namespace Algorithms
       {
           GroupNames = "";
 
-          PARALLEL_FOR1(inWS)
+          PRAGMA_OMP(parallel for schedule(dynamic, 1) )
           for (int num = 0; num < 200; ++num)
           {
               PARALLEL_START_INTERUPT_REGION
               std::ostringstream mess;
               mess<< grouping<<num;
               IComponent_const_sptr comp = inst->getComponentByName(mess.str());
-              PARALLEL_CRITICAL(GroupNames)
+              PRAGMA_OMP(ordered)
               if(comp) GroupNames+=mess.str()+",";
               PARALLEL_END_INTERUPT_REGION
           }
