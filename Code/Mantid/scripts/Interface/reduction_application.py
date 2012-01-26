@@ -1,12 +1,12 @@
 import sys, os
 import traceback
 from PyQt4 import QtGui, QtCore, uic
-from mantidsimple import *
 
 # Check whether Mantid is available
 try:
     from MantidFramework import *
     mtd.initialise(False)
+    from mantidsimple import *
     HAS_MANTID = True
 except:
     HAS_MANTID = False    
