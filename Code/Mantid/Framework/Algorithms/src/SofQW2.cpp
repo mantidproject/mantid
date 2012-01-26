@@ -87,13 +87,15 @@ namespace Mantid
         qCalculator = &SofQW2::calculateIndirectQ;
       }
 
-
+      PARALLEL_FOR2(inputWS, outputWS)
       for(int64_t i = 0; i < static_cast<int64_t>(nTheta); ++i) // signed for openmp
       {
+        PARALLEL_START_INTERUPT_REGION
+
         const double theta = m_thetaPts[i];
         const double efixed = getEFixed(inputWS->getDetector(i));
-        const double thetaLower = theta - m_thetaWidth;
-        const double thetaUpper = theta + m_thetaWidth;
+        const double thetaLower = theta - 0.5*m_thetaWidth;
+        const double thetaUpper = theta + 0.5*m_thetaWidth;
 
         for(size_t j = 0; j < nenergyBins; ++j)
         {
@@ -111,7 +113,24 @@ namespace Mantid
 
           rebinToOutput(inputQ, inputWS, i, j, outputWS);
         }
+
+        PARALLEL_END_INTERUPT_REGION
       }
+      PARALLEL_CHECK_INTERUPT_REGION
+
+      const size_t nOutputHist(outputWS->getNumberHistograms());
+      // The errors need square-rooting
+      PARALLEL_FOR1(outputWS)
+      for(int64_t i = 0; i < static_cast<int64_t>(nOutputHist); ++i)
+      {
+        PARALLEL_START_INTERUPT_REGION
+
+        MantidVec& errors = outputWS->dataE(i);
+        std::transform(errors.begin(), errors.end(), errors.begin(), (double (*)(double))std::sqrt);
+
+        PARALLEL_END_INTERUPT_REGION
+      }
+      PARALLEL_CHECK_INTERUPT_REGION
 
       // Divide by the bin width if the input is a distribution
       if( inputWS->isDistribution() )
@@ -146,7 +165,9 @@ namespace Mantid
           try
           {
             ConvexPolygon overlap = intersectionByLaszlo(outputQ, inputQ);
-            outputWS->dataY(qi)[ei] += inputWS->readY(i)[j] * (overlap.area()/inputQ.area());
+            const double weight = overlap.area()/inputQ.area();
+            outputWS->dataY(qi)[ei] += inputWS->readY(i)[j] * weight;
+            outputWS->dataE(qi)[ei] += std::pow(inputWS->readE(i)[j] * weight, 2);
           }
           catch(Geometry::NoIntersectionException &)
           {}

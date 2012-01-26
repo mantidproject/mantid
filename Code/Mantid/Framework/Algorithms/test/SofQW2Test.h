@@ -69,28 +69,28 @@ public:
 //    std::cerr << "\n";
 //    for(int i = 0; i < 6; ++i)
 //    {
-//      std::cerr << std::setprecision(12) << result->readY(i)[bins[i]] << "  " << result->readE(i)[bins[i]];
+//      std::cerr << std::setprecision(12) << result->readY(i)[bins[i]] << "  " << result->readE(i)[bins[i]] << "\n";
 //    }
 //    std::cerr << "\n";
 
     const double delta(1e-08);
-    TS_ASSERT_DELTA( result->readY(0)[1160], 5.41214271, delta);
-    //TS_ASSERT_DELTA( result->readE(0)[1160], 0.062926550, delta);
+    TS_ASSERT_DELTA( result->readY(0)[1160], 0.0, delta);
+    TS_ASSERT_DELTA( result->readE(0)[1160], 0.0, delta);
 
-    TS_ASSERT_DELTA( result->readY(1)[1145], 13.12828673, delta);
-    //TS_ASSERT_DELTA( result->readE(1)[1145], 0.040755760, delta);
+    TS_ASSERT_DELTA( result->readY(1)[1145], 14.21487562, delta);
+    TS_ASSERT_DELTA( result->readE(1)[1145], 0.27891342, delta);
 
-    TS_ASSERT_DELTA( result->readY(2)[1200], 6.63459775, delta);
-    //TS_ASSERT_DELTA( result->readE(2)[1200], 0.021459611, delta);
+    TS_ASSERT_DELTA( result->readY(2)[1200], 5.33576534, delta);
+    TS_ASSERT_DELTA( result->readE(2)[1200], 0.16793570, delta);
 
-    TS_ASSERT_DELTA( result->readY(3)[99], 0.17718250  , delta);
-    //TS_ASSERT_DELTA( result->readE(3)[99],   0.007609629, delta);
+    TS_ASSERT_DELTA( result->readY(3)[99],  0.17843416 , delta);
+    TS_ASSERT_DELTA( result->readE(3)[99],  0.07401977, delta);
 
-    TS_ASSERT_DELTA( result->readY(4)[1654],0.07161639 , delta);
-    //TS_ASSERT_DELTA( result->readE(4)[1654], 0.00182863, delta);
+    TS_ASSERT_DELTA( result->readY(4)[1654], 0.06845460, delta);
+    TS_ASSERT_DELTA( result->readE(4)[1654], 0.02002920, delta);
 
-    TS_ASSERT_DELTA( result->readY(5)[1025], 0.14990359, delta);
-    //TS_ASSERT_DELTA( result->readE(5)[1025], 0.00410309, delta);
+    TS_ASSERT_DELTA( result->readY(5)[1025], 0.20644528, delta);
+    TS_ASSERT_DELTA( result->readE(5)[1025], 0.04115725, delta);
 
     AnalysisDataService::Instance().remove(inputWS);
     AnalysisDataService::Instance().remove(outputWS);    
