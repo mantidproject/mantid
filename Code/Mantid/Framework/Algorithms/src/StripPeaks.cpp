@@ -118,6 +118,7 @@ API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS)
   findpeaks->setProperty<std::string>("BackgroundType", getProperty("BackgroundType"));
   findpeaks->setProperty<bool>("HighBackground", getProperty("HighBackground"));
   findpeaks->setProperty<double>("PeakPositionTolerance", getProperty("PeakPositionTolerance"));
+  findpeaks->setProperty<double>("PeakHeightTolerance", 5);
 
   findpeaks->executeAsSubAlg();
   return findpeaks->getProperty("PeaksList");

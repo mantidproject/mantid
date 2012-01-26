@@ -3079,6 +3079,8 @@ void MuonAnalysis::closeEvent(QCloseEvent *e)
   // Show the toolbar
   if (m_uiForm.hideToolbars->isChecked())
     emit showToolbars();
+  // delete the peak picker tool because it is no longer needed.
+  emit fittingRequested(m_uiForm.fitBrowser, "");
   e->accept();
 }
 

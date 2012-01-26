@@ -84,6 +84,16 @@ namespace Algorithms
       "Use / or , to separate multiple groups.\n"
       "If empty, then an empty GroupingWorkspace will be created.");
 
+    std::vector<std::string> grouping;
+    grouping.push_back("");
+    grouping.push_back("All");
+    grouping.push_back("Group");
+    grouping.push_back("Column");
+    grouping.push_back("bank");
+    declareProperty("GroupDetectorsBy", "", new ListValidator(grouping),
+        "Only used if GroupNames is empty: All detectors as one group, Groups (East,West for SNAP), Columns for SNAP, detector banks");
+
+
     declareProperty(new WorkspaceProperty<GroupingWorkspace>("OutputWorkspace","",Direction::Output),
         "An output GroupingWorkspace.");
   }
@@ -221,6 +231,7 @@ namespace Algorithms
     std::string InstrumentFilename = getPropertyValue("InstrumentFilename");
     std::string OldCalFilename = getPropertyValue("OldCalFilename");
     std::string GroupNames = getPropertyValue("GroupNames");
+    std::string grouping = getPropertyValue("GroupDetectorsBy");
 
     // Some validation
     int numParams = 0;
@@ -252,6 +263,36 @@ namespace Algorithms
       childAlg->executeAsSubAlg();
       inst = tempWS->getInstrument();
     }
+
+    if (GroupNames.empty())
+    {
+      if (grouping.compare("All") == 0)
+      {
+          GroupNames = inst->getName();
+      }
+      else if (inst->getName().compare("SNAP") == 0 && grouping.compare("Group") == 0)
+      {
+          GroupNames = "East,West";
+      }
+      else
+      {
+          GroupNames = "";
+
+          PRAGMA_OMP(parallel for schedule(dynamic, 1) )
+          for (int num = 0; num < 200; ++num)
+          {
+              PARALLEL_START_INTERUPT_REGION
+              std::ostringstream mess;
+              mess<< grouping<<num;
+              IComponent_const_sptr comp = inst->getComponentByName(mess.str());
+              PARALLEL_CRITICAL(GroupNames)
+              if(comp) GroupNames+=mess.str()+",";
+              PARALLEL_END_INTERUPT_REGION
+          }
+          PARALLEL_CHECK_INTERUPT_REGION
+      }
+    }
+
 
 
     // --------------------------- Create the output --------------------------

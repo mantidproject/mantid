@@ -210,24 +210,6 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 UnwrapSNS(InputWorkspace=wksp, OutputWorkspace=wksp, LRef=LRef)
             if DIFCref > 0:
                 RemoveLowResTOF(InputWorkspace=wksp, OutputWorkspace=wksp, ReferenceDIFC=DIFCref)
-        if self._grouping == "All":
-            if str(self._instrument) == "PG3":
-                groups = "POWGEN"
-            elif str(self._instrument) == "NOM":
-                groups = "NOMAD"
-            else:
-                groups = str(self._instrument)
-        elif str(self._instrument) == "SNAP" and self._grouping == "Group":
-                groups = "East,West"
-        else:
-            groups = ""
-            numrange = 200
-            if str(self._instrument) == "SNAP":
-                numrange = 19
-            for num in xrange(1,numrange):
-                comp = wksp.getInstrument().getComponentByName("%s%d" % (self._grouping, num) )
-                if not comp == None:
-                    groups+=("%s%d," % (self._grouping, num) )
         # take care of filtering events
         if self._filterBadPulses and not self.getProperty("CompressOnRead"):
             FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp)
@@ -319,7 +301,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             mtd.deleteWorkspace(str(wksp)+"offset3")
             mtd.deleteWorkspace(str(wksp)+"mask3")
             mtd.releaseFreeMemory()
-        CreateGroupingWorkspace(InputWorkspace=wksp, GroupNames=groups, OutputWorkspace=str(wksp)+"group")
+        CreateGroupingWorkspace(InputWorkspace=wksp, GroupDetectorsBy=self._grouping, OutputWorkspace=str(wksp)+"group")
         lcinst = str(self._instrument)
         
         if "dspacemap" in self._outTypes:
@@ -340,24 +322,6 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 UnwrapSNS(InputWorkspace=wksp, OutputWorkspace=wksp, LRef=LRef)
             if DIFCref > 0:
                 RemoveLowResTOF(InputWorkspace=wksp, OutputWorkspace=wksp, ReferenceDIFC=DIFCref)
-        if self._grouping == "All":
-            if str(self._instrument) == "PG3":
-                groups = "POWGEN"
-            elif str(self._instrument) == "NOM":
-                groups = "NOMAD"
-            else:
-                groups = str(self._instrument)
-        elif str(self._instrument) == "SNAP" and self._grouping == "Group":
-                groups = "East,West"
-        else:
-            groups = ""
-            numrange = 200
-            if str(self._instrument) == "SNAP":
-                numrange = 19
-            for num in xrange(1,numrange):
-                comp = wksp.getInstrument().getComponentByName("%s%d" % (self._grouping, num) )
-                if not comp == None:
-                    groups+=("%s%d," % (self._grouping, num) )
         # take care of filtering events
         if self._filterBadPulses and not self.getProperty("CompressOnRead") and not "histo" in self.getProperty("Extension"):
             FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp)
@@ -389,7 +353,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         GetDetOffsetsMultiPeaks(InputWorkspace=str(wksp), OutputWorkspace=str(wksp)+"offset",
             DReference=self._peakpos, MaxOffset=self._maxoffset, MaskWorkspace=str(wksp)+"mask")
         Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,Params=str(self._binning[0])+","+str(abs(self._binning[1]))+","+str(self._binning[2]))
-        CreateGroupingWorkspace(InputWorkspace=wksp, GroupNames=groups, OutputWorkspace=str(wksp)+"group")
+        CreateGroupingWorkspace(InputWorkspace=wksp, GroupDetectorsBy=self._grouping, OutputWorkspace=str(wksp)+"group")
         lcinst = str(self._instrument)
         
         if "dspacemap" in self._outTypes:

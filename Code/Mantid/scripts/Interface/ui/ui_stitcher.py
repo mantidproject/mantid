@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/stitcher.ui'
 #
-# Created: Wed Jan  4 13:37:50 2012
+# Created: Thu Jan 26 12:14:59 2012
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -13,15 +13,18 @@ class Ui_Frame(object):
     def setupUi(self, Frame):
         Frame.setObjectName("Frame")
         Frame.resize(1062, 993)
-        Frame.setFrameShape(QtGui.QFrame.StyledPanel)
-        Frame.setFrameShadow(QtGui.QFrame.Raised)
+        Frame.setFrameShape(QtGui.QFrame.NoFrame)
+        Frame.setFrameShadow(QtGui.QFrame.Plain)
         self.verticalLayout = QtGui.QVBoxLayout(Frame)
+        self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName("verticalLayout")
         self.scrollArea = QtGui.QScrollArea(Frame)
+        self.scrollArea.setFrameShape(QtGui.QFrame.NoFrame)
+        self.scrollArea.setFrameShadow(QtGui.QFrame.Plain)
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
         self.scrollAreaWidgetContents = QtGui.QWidget(self.scrollArea)
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 1040, 971))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 1062, 993))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.verticalLayout_6 = QtGui.QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_6.setObjectName("verticalLayout_6")
