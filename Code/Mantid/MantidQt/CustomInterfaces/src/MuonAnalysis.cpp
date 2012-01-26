@@ -1151,10 +1151,17 @@ void MuonAnalysis::inputFileChanged(const QString& filename)
 
   // Add counts to run information
   infoStr += "\nCounts: ";
-  if ( runDetails.hasProperty("CountRate") )
+  double counts(0.0);
+  for (int i=0; i<matrix_workspace->getNumberHistograms(); ++i)
   {
-    infoStr += runDetails.getProperty("CountRate")->value();
+    for (int j=0; j<matrix_workspace->blocksize(); ++j)
+    {
+      counts += matrix_workspace->dataY(i)[j];
+    }
   }
+  std::ostringstream ss;
+  ss << counts;
+  infoStr += ss.str();
 
   m_uiForm.infoBrowser->setText(infoStr.c_str());
 
