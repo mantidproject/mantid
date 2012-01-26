@@ -1152,9 +1152,9 @@ void MuonAnalysis::inputFileChanged(const QString& filename)
   // Add counts to run information
   infoStr += "\nCounts: ";
   double counts(0.0);
-  for (int i=0; i<matrix_workspace->getNumberHistograms(); ++i)
+  for (size_t i=0; i<matrix_workspace->getNumberHistograms(); ++i)
   {
-    for (int j=0; j<matrix_workspace->blocksize(); ++j)
+    for (size_t j=0; j<matrix_workspace->blocksize(); ++j)
     {
       counts += matrix_workspace->dataY(i)[j];
     }
