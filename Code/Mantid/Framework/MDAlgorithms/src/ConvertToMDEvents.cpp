@@ -833,8 +833,12 @@ void ConvertToMDEvents::buildDimNames(MDEvents::MDWSDescription &TargWSDescripti
     //if(TargWSDescription.emode<0)return;
      for(size_t i=0;i<TargWSDescription.dim_IDs.size();i++){
          if(TargWSDescription.dim_IDs[i].empty()){
-                  TargWSDescription.dim_IDs[i]="Dim"+boost::lexical_cast<std::string>(i);              
+               TargWSDescription.dim_IDs[i]="Dim"+boost::lexical_cast<std::string>(i);              
          }
+         if(TargWSDescription.dim_names[i].empty()){
+                TargWSDescription.dim_names[i]=TargWSDescription.dim_IDs[i]; 
+         }
+
      }
 
 
@@ -858,16 +862,7 @@ void ConvertToMDEvents::buildDimNames(MDEvents::MDWSDescription &TargWSDescripti
 
         }
     }
-   // NoQ copies dimension names and may need dimension ID-s changed
-    if(TargWSDescription.AlgID.find(Q_modes[NoQ])!=std::string::npos){
-        for(size_t i=0;i<TargWSDescription.dim_IDs.size();i++){
-            if(TargWSDescription.dim_names[i].empty()){
-                  TargWSDescription.dim_names[i]=TargWSDescription.dim_IDs[i]; 
-            }
-
-        }
-
-    }
+  
 
 }
 
