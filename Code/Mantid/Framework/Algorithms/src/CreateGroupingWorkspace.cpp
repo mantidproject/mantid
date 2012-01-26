@@ -285,7 +285,7 @@ namespace Algorithms
               std::ostringstream mess;
               mess<< grouping<<num;
               IComponent_const_sptr comp = inst->getComponentByName(mess.str());
-              PRAGMA_OMP(ordered)
+              PARALLEL_CRITICAL(GroupNames)
               if(comp) GroupNames+=mess.str()+",";
               PARALLEL_END_INTERUPT_REGION
           }
