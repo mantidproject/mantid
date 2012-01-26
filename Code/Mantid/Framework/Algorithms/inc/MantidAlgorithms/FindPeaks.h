@@ -114,6 +114,9 @@ private:
   bool usePeakPositionTolerance;
   double peakPositionTolerance;
 
+  bool usePeakHeightTolerance;
+  double peakHeightTolerance;
+
 };
 
 } // namespace Algorithms
