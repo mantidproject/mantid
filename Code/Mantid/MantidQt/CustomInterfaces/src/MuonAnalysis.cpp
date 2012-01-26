@@ -1471,9 +1471,21 @@ void MuonAnalysis::createPlotWS(const std::string& groupName, const std::string&
   // rebin data if option set in Plot Options
   if (m_uiForm.rebinComboBox->currentText() == "Fixed")
   {
-    QString reBunchStr = QString("Rebunch(\"") + wsname.c_str() + "\",\""
-        + wsname.c_str() + QString("\",") + m_uiForm.optionStepSizeText->text() + ");";
-    runPythonCode( reBunchStr ).trimmed(); 
+    try
+    {
+      Mantid::API::MatrixWorkspace_sptr tempWs =  boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsname));
+      tempWs->isDistribution(true);
+      double binSize = tempWs->dataX(0)[1]-tempWs->dataX(0)[0];
+
+      QString reBinStr = QString("Rebin(\"") + wsname.c_str() + "\",\""
+        + wsname.c_str() + QString("\",") + boost::lexical_cast<std::string>(m_uiForm.optionStepSizeText->text().toDouble()*binSize).c_str() + ");";
+      runPythonCode( reBinStr ).trimmed();
+      tempWs->isDistribution(false);
+    }
+    catch(std::exception &e)
+    {
+      QMessageBox::information(this, "Mantid - Muon Analysis", "The workspace couldn't be rebunched.");
+    }
   } 
 
   // Make group to display more organised in Mantidplot workspace list
