@@ -124,22 +124,23 @@ class RefLReduction(PythonAlgorithm):
         # Distance source->center of detector
         dMD = dSD + dSM
         
-        
         # Rebin data (x-axis is in TOF)
         ws_histo_data = ws_name+"_histo"
         Rebin(InputWorkspace=ws_event_data, OutputWorkspace=ws_histo_data, Params=self._binning)
         
         # Keep only range of TOF of interest
-        CropWorkspace(ws_histo_data,ws_histo_data,XMin=TOFrange[0], XMax=TOFrange[1])
-        
+        #CropWorkspace(ws_histo_data,ws_histo_data,XMin=TOFrange[0], XMax=TOFrange[1])
+
         # Normalized by Current (proton charge)
         NormaliseByCurrent(InputWorkspace=ws_histo_data, OutputWorkspace=ws_histo_data)
         
         # Calculation of the central pixel (using weighted average)
         pixelXtof_data = wks_utility.getPixelXTOF(mtd[ws_histo_data], maxX=maxX, maxY=maxY)
         pixelXtof_1d = pixelXtof_data.sum(axis=1)
+        
         # Keep only range of pixels
         pixelXtof_roi = pixelXtof_1d[data_peak[0]:data_peak[1]]
+        
         sz = pixelXtof_roi.size
         _num = 0
         _den = 0
@@ -171,6 +172,7 @@ class RefLReduction(PythonAlgorithm):
                                                     theta=theta,
                                                     geo_correction=False)
         
+        
         #_tof_axis = mt2.readX(0)[:]
         ########## This was used to test the R(Q) 
         ##Convert the data without background subtraction to R(Q)
@@ -182,6 +184,7 @@ class RefLReduction(PythonAlgorithm):
         # Background
         Transpose(InputWorkspace='IntegratedDataWks',
                   OutputWorkspace='TransposedID')
+        
         ConvertToHistogram(InputWorkspace='TransposedID',
                            OutputWorkspace='TransposedID')
         
@@ -192,14 +195,16 @@ class RefLReduction(PythonAlgorithm):
                            Mode='Mean',
                            EndX=data_peak[0],
                            OutputMode="Return Background")
+
         Transpose(InputWorkspace='TransposedID',
                   OutputWorkspace='DataBckWks')
-        
+
         ConvertToHistogram("DataBckWks", OutputWorkspace="DataBckWks")
         RebinToWorkspace(WorkspaceToRebin="DataBckWks", WorkspaceToMatch="IntegratedDataWks", OutputWorkspace="DataBckWks")
         Minus("IntegratedDataWks", "DataBckWks", OutputWorkspace="DataWks")
         
-        
+        print '#4'
+
             
             
         # Work on Normalization file #########################################
@@ -224,7 +229,7 @@ class RefLReduction(PythonAlgorithm):
         Rebin(InputWorkspace=ws_norm_event_data, OutputWorkspace=ws_norm_histo_data, Params=self._binning)
     
         # Keep only range of TOF of interest
-        CropWorkspace(ws_norm_histo_data, ws_norm_histo_data, XMin=TOFrange[0], XMax=TOFrange[1])
+        #CropWorkspace(ws_norm_histo_data, ws_norm_histo_data, XMin=TOFrange[0], XMax=TOFrange[1])
     
         # Normalized by Current (proton charge)
         NormaliseByCurrent(InputWorkspace=ws_norm_histo_data, OutputWorkspace=ws_norm_histo_data)
@@ -291,6 +296,9 @@ class RefLReduction(PythonAlgorithm):
         SumSpectra(InputWorkspace="NormalizedWks", OutputWorkspace=output_ws)
         #ConvertToHistogram(InputWorkspace=output_ws,OutputWorkspace=output_ws)
         #ConvertUnits(InputWorkspace=output_ws,Target="MomentumTransfer",OutputWorkspace=output_ws)
+        
+        CropWorkspace(output_ws, output_ws, XMin=TOFrange[0], XMax=TOFrange[1])
+
         
         
         self.setProperty("OutputWorkspace", mtd[output_ws])

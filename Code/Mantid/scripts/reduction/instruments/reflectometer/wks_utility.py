@@ -118,10 +118,8 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
                                               yrange=yrange, 
                                               cpix=cpix)
 
-        print shape(_q_axis)
-
     else:
-    
+        
         if source_to_detector is not None and theta is not None:
             _const = float(4) * math.pi * m * source_to_detector / h
             _q_axis = 1e-10 * _const * math.sin(theta) / (_tof_axis*1e-6)
@@ -146,21 +144,17 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
         #plot_y_error_axis = _y_error_axis #for output testing only    -> plt.imshow(plot_y_error_axis, aspect='auto', origin='lower')
         _y_error_axis = _y_error_axis.flatten()
 
-        #normalization by proton charge
-        #_y_axis /= (proton_charge * 1e-12)
-    
         _q_axis = _q_axis[::-1]
         _y_axis = _y_axis[::-1]
         _y_error_axis = _y_error_axis[::-1]
 
+        _q_axis = _q_axis[:-1]
+
         CreateWorkspace(OutputWorkspace=outputWorkspace, 
                         DataX=_q_axis, DataY=_y_axis, DataE=_y_error_axis, Nspec=maxY,
-                        UnitX="MomentumTransfer",ParentWorkspace=mt1)
+                        UnitX="MomentumTransfer", ParentWorkspace=mt1)
+
         mt2 = mtd[outputWorkspace]
-    
-    
-    
-    
     
     return mt2
 
