@@ -831,6 +831,12 @@ void ConvertToMDEvents::buildDimNames(MDEvents::MDWSDescription &TargWSDescripti
 {
     // non-energy transformation modes currently do not change any units and dimension names
     //if(TargWSDescription.emode<0)return;
+     for(size_t i=0;i<TargWSDescription.dim_IDs.size();i++){
+         if(TargWSDescription.dim_IDs[i].empty()){
+                  TargWSDescription.dim_IDs[i]="Dim"+boost::lexical_cast<std::string>(i);              
+         }
+     }
+
 
     // Q3D mode needs special treatment for dimension names:
     if(TargWSDescription.AlgID.find(Q_modes[Q3D])!=std::string::npos){
@@ -855,9 +861,6 @@ void ConvertToMDEvents::buildDimNames(MDEvents::MDWSDescription &TargWSDescripti
    // NoQ copies dimension names and may need dimension ID-s changed
     if(TargWSDescription.AlgID.find(Q_modes[NoQ])!=std::string::npos){
         for(size_t i=0;i<TargWSDescription.dim_IDs.size();i++){
-            if(TargWSDescription.dim_IDs[i].empty()){
-                  TargWSDescription.dim_IDs[i]="Dim"+boost::lexical_cast<std::string>(i);              
-            }
             if(TargWSDescription.dim_names[i].empty()){
                   TargWSDescription.dim_names[i]=TargWSDescription.dim_IDs[i]; 
             }
