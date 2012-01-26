@@ -49,6 +49,7 @@ void export_WorkspaceGroup()
     .def("getNames", &WorkspaceGroup::getNames, "Returns the names of the entries in the group")
     .def("contains", &WorkspaceGroup::contains, "Returns true if the given name is in the group")
     .def("add", &WorkspaceGroup::add, "Add a name to the group")
+    .def("size", &WorkspaceGroup::size, "Returns the number of workspaces contained in the group")
     .def("remove", &WorkspaceGroup::remove, "Remove a name from the group")
     .def("getItemAsWorkspace",&getItemAsWorkspace, "Return the item at the given index, not casted up automatically. For internal use.")
     // ------------ Operators --------------------------------
