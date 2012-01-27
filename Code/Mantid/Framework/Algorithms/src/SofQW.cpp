@@ -134,7 +134,7 @@ void SofQW::exec()
           {
             efixed = par->value<double>();
           }
-          else
+          else if( efixed == 0.0 )
           {
             continue;
           }

@@ -77,20 +77,20 @@ public:
     TS_ASSERT_DELTA( result->readY(0)[1160], 0.0, delta);
     TS_ASSERT_DELTA( result->readE(0)[1160], 0.0, delta);
 
-    TS_ASSERT_DELTA( result->readY(1)[1145], 14.21487562, delta);
-    TS_ASSERT_DELTA( result->readE(1)[1145], 0.27891342, delta);
+    TS_ASSERT_DELTA( result->readY(1)[1145], 7.59421601661, delta);
+    TS_ASSERT_DELTA( result->readE(1)[1145], 0.0697283556312, delta);
 
-    TS_ASSERT_DELTA( result->readY(2)[1200], 5.33576534, delta);
-    TS_ASSERT_DELTA( result->readE(2)[1200], 0.16793570, delta);
+    TS_ASSERT_DELTA( result->readY(2)[1200], 2.07634830425, delta);
+    TS_ASSERT_DELTA( result->readE(2)[1200], 0.0419839252961, delta);
 
-    TS_ASSERT_DELTA( result->readY(3)[99],  0.17843416 , delta);
-    TS_ASSERT_DELTA( result->readE(3)[99],  0.07401977, delta);
+    TS_ASSERT_DELTA( result->readY(3)[99], 0.0417455762209, delta);
+    TS_ASSERT_DELTA( result->readE(3)[99], 0.0185049423467, delta);
 
-    TS_ASSERT_DELTA( result->readY(4)[1654], 0.06845460, delta);
-    TS_ASSERT_DELTA( result->readE(4)[1654], 0.02002920, delta);
+    TS_ASSERT_DELTA( result->readY(4)[1654], 0.0171141154986, delta);
+    TS_ASSERT_DELTA( result->readE(4)[1654], 0.005007299861, delta);
 
-    TS_ASSERT_DELTA( result->readY(5)[1025], 0.20644528, delta);
-    TS_ASSERT_DELTA( result->readE(5)[1025], 0.04115725, delta);
+    TS_ASSERT_DELTA( result->readY(5)[1025], 0.0808168496594, delta);
+    TS_ASSERT_DELTA( result->readE(5)[1025], 0.0102893133461, delta);
 
     AnalysisDataService::Instance().remove(inputWS);
     AnalysisDataService::Instance().remove(outputWS);    

@@ -91,7 +91,7 @@ namespace Mantid
         qCalculator = &SofQW2::calculateIndirectQ;
       }
 
-      PARALLEL_FOR2(inputWS, outputWS)
+      PARALLEL_FOR3(inputWS, m_numIntersectionsWS, outputWS)
       for(int64_t i = 0; i < static_cast<int64_t>(nTheta); ++i) // signed for openmp
       {
         PARALLEL_START_INTERUPT_REGION
@@ -170,6 +170,8 @@ namespace Mantid
       const MantidVec & X = inputWS->readX(0);
       for( size_t qi = qstart; qi < qend; ++qi )
       {
+        MantidVec & outputY = outputWS->dataY(qi);
+        MantidVec & outputE = outputWS->dataE(qi);
         for( size_t ei = en_start; ei < en_end; ++ei )
         {
           const V2D ll(X[ei], m_Qout[qi]);
@@ -181,9 +183,9 @@ namespace Mantid
           {
             ConvexPolygon overlap = intersectionByLaszlo(outputQ, inputQ);
             const double weight = overlap.area()/inputQ.area();
-            outputWS->dataY(qi)[ei] += inputWS->readY(i)[j] * weight;
+            outputY[ei] += inputWS->readY(i)[j] * weight;
             m_numIntersectionsWS->dataY(qi)[ei] += weight;
-            outputWS->dataE(qi)[ei] += std::pow(inputWS->readE(i)[j] * weight, 2);
+            outputE[ei] += std::pow(inputWS->readE(i)[j] * weight, 2);
           }
           catch(Geometry::NoIntersectionException &)
           {}
@@ -373,7 +375,7 @@ namespace Mantid
       size_t ndets(0);
       double minTheta(DBL_MAX), maxTheta(-DBL_MAX);
 
-      PARALLEL_FOR1(workspace)
+      //PARALLEL_FOR1(workspace)
       for(int64_t i = 0 ; i < (int64_t)nhist; ++i) //signed for OpenMP
       {
         PARALLEL_START_INTERUPT_REGION
