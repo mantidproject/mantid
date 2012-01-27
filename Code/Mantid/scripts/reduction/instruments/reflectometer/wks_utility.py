@@ -101,7 +101,8 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
                               source_to_detector=None, 
                               sample_to_detector=None,
                               theta=None,
-                              geo_correction=False):
+                              geo_correction=False,
+                              Qrange=None):
     """
         This creates the integrated workspace over the second pixel range (304 here) and
         returns the new workspace handle
@@ -112,49 +113,67 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
         
         yrange = arange(toYpixel-fromYpixel+1) + fromYpixel
         _q_axis = convertToRvsQWithCorrection(mt1, 
-                                              dMD=sample_to_detector,
+                                              dMD=source_to_detector,
                                               theta=theta,
                                               tof=_tof_axis, 
                                               yrange=yrange, 
                                               cpix=cpix)
-
     else:
         
         if source_to_detector is not None and theta is not None:
             _const = float(4) * math.pi * m * source_to_detector / h
             _q_axis = 1e-10 * _const * math.sin(theta) / (_tof_axis*1e-6)
+        
+
+    _y_axis = zeros((maxY, len(_q_axis) - 1))
+    _y_error_axis = zeros((maxY, len(_q_axis) - 1))
     
-        _y_axis = zeros((maxY, len(_q_axis) - 1))
-        _y_error_axis = zeros((maxY, len(_q_axis) - 1))
+    x_size = toXpixel - fromXpixel + 1 
+    x_range = arange(x_size) + fromXpixel
     
-        x_size = toXpixel - fromXpixel + 1 
-        x_range = arange(x_size) + fromXpixel
+    y_size = toYpixel - fromYpixel + 1
+    y_range = arange(y_size) + fromYpixel
     
-        y_size = toYpixel - fromYpixel + 1
-        y_range = arange(y_size) + fromYpixel
-    
-        for x in x_range:
-            for y in y_range:
-                _index = int((maxY) * x + y)
-                _y_axis[y, :] += mt1.readY(_index)[:]
-                _y_error_axis[y, :] += ((mt1.readE(_index)[:]) * (mt1.readE(_index)[:]))
+    for x in x_range:
+        for y in y_range:
+            _index = int((maxY) * x + y)
+            _y_axis[y, :] += mt1.readY(_index)[:]
+            _y_error_axis[y, :] += ((mt1.readE(_index)[:]) * (mt1.readE(_index)[:]))
 
-        _y_axis = _y_axis.flatten()
-        _y_error_axis = numpy.sqrt(_y_error_axis)
-        #plot_y_error_axis = _y_error_axis #for output testing only    -> plt.imshow(plot_y_error_axis, aspect='auto', origin='lower')
-        _y_error_axis = _y_error_axis.flatten()
+    _y_axis = _y_axis.flatten()
+    _y_error_axis = numpy.sqrt(_y_error_axis)
+    _y_error_axis = _y_error_axis.flatten()
 
-        _q_axis = _q_axis[::-1]
-        _y_axis = _y_axis[::-1]
-        _y_error_axis = _y_error_axis[::-1]
+    _q_axis = _q_axis[::-1]
+    _y_axis = _y_axis[::-1]
+    _y_error_axis = _y_error_axis[::-1]
 
-        _q_axis = _q_axis[:-1]
+    CreateWorkspace(OutputWorkspace=outputWorkspace, 
+                    DataX=_q_axis, DataY=_y_axis, DataE=_y_error_axis, Nspec=maxY,
+                    UnitX="MomentumTransfer", ParentWorkspace=mt1)
 
-        CreateWorkspace(OutputWorkspace=outputWorkspace, 
-                        DataX=_q_axis, DataY=_y_axis, DataE=_y_error_axis, Nspec=maxY,
-                        UnitX="MomentumTransfer", ParentWorkspace=mt1)
+    if geo_correction:
+        
+        #replace the _q_axis of the yrange of interest by the new 
+        #individual _q_axis
 
-        mt2 = mtd[outputWorkspace]
+        for _q_index in range(y_size):
+            
+            CreateWorkspace(OutputWorkspace=outputWorkspace,
+                            DataX=_q_axis[_q_index],
+                            DataY=_y_axis,
+                            DataE=_y_error_axis,
+                            Nspec=maxY,
+                            UnitX="MomentumTransfer",
+                            ParentWorskpace=mt1)
+            rebin(InputWorkspace=outputWorksapce,
+                  OutputWorkspace='tmp_outputWks',
+                  Params=Qrange)
+
+            if _q_index != 0:
+                Plus(outputWorkspace,"tmp_outputWks",outputWorkspace)
+
+    mt2 = mtd[outputWorkspace]
     
     return mt2
 
@@ -273,11 +292,8 @@ def convertToRvsQ(dMD=-1,theta=-1,tof=None):
         _Q = _const * math.sin(theta) / (tofm*1e-6)
         q_array[t] = _Q*1e-10
     return q_array
-    
-    
-    
-    
-def convertToRvsQWithCorrection(mt, dMD=-1,theta=-1,tof=None, yrange=None, cpix=None):
+        
+def convertToRvsQWithCorrection(mt, dMD=-1, theta=-1,tof=None, yrange=None, cpix=None):
     """
     This function converts the pixel/TOF array to the R(Q) array
     using Q = (4.Pi.Mn)/h  *  L.sin(theta/2)/TOF
@@ -335,8 +351,7 @@ def getQHisto(source_to_detector, theta, tof_array):
         q_array[t] = _Q*1e-10
     
     return q_array
-    
-    
+
 def ref_beamdiv_correct(cpix, mt, det_secondary, 
                         pixel_index, 
                         pixel_width=0.0007):
@@ -354,6 +369,7 @@ def ref_beamdiv_correct(cpix, mt, det_secondary,
         
     first_slit_size = getS1h(mt)
     last_slit_size = getS2h(mt)
+    
     last_slit_dist = 0.654 #m
     slit_dist = 2.193 #m
     
