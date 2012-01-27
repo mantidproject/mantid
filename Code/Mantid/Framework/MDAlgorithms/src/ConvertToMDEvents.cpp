@@ -801,16 +801,15 @@ ConvertToMDEvents::getTransfMatrix(API::MatrixWorkspace_sptr inWS,MDEvents::MDWS
          TargWSDescription.v = TargWSDescription.Latt.getvVector(); 
          umat  = TargWSDescription.Latt.getU();
       }else{
-         // thansform the lattice above into the notional coordinate system related to projection vectors u,v;
+         // thansform the lattice above into the Cartezian coordinate system related to projection vectors u,v;
          umat = TargWSDescription.Latt.setUFromVectors(TargWSDescription.u,TargWSDescription.v);
-         //TODO: This code needs careful verification for non-orthogonal axis
-         //Latt.setUFromVectors(TargWSDescription.u,TargWSDescription.v);
       }
+
       Kernel::Matrix<double> gon =inWS->run().getGoniometer().getR();
-       // Obtain the transformation matrix:
+      // Obtain the transformation matrix to Cartezian related to Crystal
       mat = gon*umat ;
-      //TODO: This code needs careful verification for non-orthogonal axis
-       //mat = gon*Latt.getUB();
+     // and this is the transformation matrix to notional
+     //mat = gon*Latt.getUB();
       mat.Invert();
     }
 
@@ -845,9 +844,13 @@ void ConvertToMDEvents::buildDimNames(MDEvents::MDWSDescription &TargWSDescripti
     // Q3D mode needs special treatment for dimension names:
     if(TargWSDescription.AlgID.find(Q_modes[Q3D])!=std::string::npos){
         std::vector<Kernel::V3D> dim_directions(3);
-        dim_directions[0]=TargWSDescription.u;
-        dim_directions[2]=TargWSDescription.u.cross_prod(TargWSDescription.v);
-        dim_directions[1]=dim_directions[2].cross_prod(dim_directions[0]);
+        Kernel::Matrix<double> Bm = TargWSDescription.Latt.getB();
+        dim_directions[0]=Bm*Kernel::V3D(1,0,0);
+        dim_directions[0].normalize();
+        dim_directions[1]=Bm*Kernel::V3D(0,1,0);
+        dim_directions[1].normalize();
+        dim_directions[2]=Bm*Kernel::V3D(0,0,1);
+        dim_directions[2].normalize();
 
         for(int i=0;i<3;i++){
             TargWSDescription.dim_names[i]=MDEvents::makeAxisName(dim_directions[i],TWS.defailt_qNames);

@@ -732,21 +732,8 @@ void MWRunFiles::browseClicked()
   QString uFile = openFileDialog();
   if( uFile.trimmed().isEmpty() ) return;
 
-  if( this->allowMultipleFiles() )
-  {
-    if ( !m_uiForm.fileEditor->text().isEmpty() )
-    {
-      m_uiForm.fileEditor->setText(m_uiForm.fileEditor->text()+", " + uFile);
-    }
-    else
-    {
-      m_uiForm.fileEditor->setText(uFile);
-    }
-  }
-  else
-  {
-    m_uiForm.fileEditor->setText(uFile);
-  }
+  m_uiForm.fileEditor->setText(uFile);
+
   emit fileEditingFinished();
 }
 /** Currently just checks that entryNum contains an int > 0 and hence might be a

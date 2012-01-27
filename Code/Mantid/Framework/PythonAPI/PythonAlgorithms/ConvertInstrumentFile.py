@@ -60,9 +60,9 @@ def calL2FromDtt1(difc, L1, twotheta):
     DIFC = 252.816*2sin(theta)sqrt(L1+L2)
     """
     import math
-    print "DIFC = %f,  L1 = %f,  2theta = %f" % (difc, L1, twotheta)
+    # print "DIFC = %f,  L1 = %f,  2theta = %f" % (difc, L1, twotheta)
     l2 = difc/(252.816*2.0*math.sin(0.5*twotheta*math.pi/180.0)) - L1
-    print "L2 = %f" % (l2)
+    # print "L2 = %f" % (l2)
 
     return l2
     
@@ -412,8 +412,11 @@ class ConvertInstrumentFile(PythonAlgorithm):
             prmfile += ('INS   FPATH1     %f \n' % (self.iL1))
             prmfile += ('INS   HTYPE   PNTR \n')
          # ENDIF
-   
-        #L2sam = calL2FromDtt1(self.mdict[bank]["dtt1"], 60.0, self.mdict[bank]["twotheta"])
+  
+        if self.iL2 < 0:
+            self.iL2 = calL2FromDtt1(difc=self.mdict[bank]["dtt1"], L1=self.iL1, twotheta=self.i2theta)
+
+        print "Debug: L2 = %f,  2Theta (irf) = %f,  2Theta (input) = %f" % (self.iL2, pardict["twotheta"], self.i2theta)
 
         prmfile += ('INS %2i ICONS%10.3f%10.3f%10.3f          %10.3f%5i%10.3f\n' % 
                 (bank, instC*1.00009, 0.0, pardict["zero"],0.0,0,0.0))
@@ -493,7 +496,10 @@ class ConvertInstrumentFile(PythonAlgorithm):
         self.declareProperty("Frequency", "60", Validator=ListValidator(frequencies),
                 Description="Frequency of the instrument file corresponds to")
         self.declareProperty("L1", 60.0)
-        self.declareProperty("L2", 3.0)
+        self.declareProperty("L2", 3.0, 
+                Description="Distance from sample to detector.  If 2Theta is given, this won't work. ")
+        self.declareProperty("2Theta", 1001.0,
+                Description="Angle of the detector bank.  It is to calculate L2 with given Dtt1")
         self.declareFileProperty("OutputFile", "", FileAction.Save, [".iparm", ".prm"],
                 Description="Output .iparm or .prm file")
 
@@ -510,7 +516,12 @@ class ConvertInstrumentFile(PythonAlgorithm):
         inputfilename = self.getProperty("InputFile")
         banks = self.getProperty("Banks")
         self.iL1 = self.getProperty("L1")
-        self.iL2 = self.getProperty("L2")
+        self.i2theta = self.getProperty("2Theta")
+        if self.i2theta >= 1000:
+            self.iL2 = self.getProperty("L2")
+        else:
+            self.iL2 = -1;
+
         self.frequency = int(self.getProperty("Frequency"))
         outputfilename = self.getProperty("OutputFile")
 

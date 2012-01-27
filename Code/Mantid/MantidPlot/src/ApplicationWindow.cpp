@@ -16911,7 +16911,7 @@ void ApplicationWindow::setPlotType(const QStringList & plotDetails)
 {
   if (plotDetails.size() == 0)
   {
-    QMessageBox::information(this, "Mantid - Error", "Plot type or curve index is missing. Please contact a Mantid team member.");
+    QMessageBox::information(this, "Mantid - Error", "Plot type or workspace name is missing. Please contact a Mantid team member.");
   }
   else
   {
@@ -16961,7 +16961,7 @@ void ApplicationWindow::setPlotType(const QStringList & plotDetails)
                     else
                       pd->setPlotType(connectType, curveNum);            
                   }
-                  g->activateGraph();
+                  g->replot();
                 }
               }
             }

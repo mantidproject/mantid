@@ -102,6 +102,8 @@ namespace Mantid
       std::vector<double> m_thetaPts;
       /// Theta width
       double m_thetaWidth;
+      ///
+      API::MatrixWorkspace_sptr m_numIntersectionsWS;
     };
 
 

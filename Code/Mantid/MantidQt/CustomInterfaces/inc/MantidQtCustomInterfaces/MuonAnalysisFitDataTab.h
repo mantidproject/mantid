@@ -61,10 +61,10 @@ public:
   void init();
 
   void makeRawWorkspace(const std::string & wsName);
-  void groupRawWorkspace(const std::vector<std::string> & inputWorkspaces, const std::string & groupName);
+  void groupWorkspaces(const std::vector<std::string> & inputWorkspaces, const std::string & groupName);
   void groupFittedWorkspaces(QString workspaceName);
   
-  QStringList getAllPlotDetails(const QStringList & plotDetails);
+  QStringList getAllPlotDetails(const QString & workspace);
 
 signals:
 

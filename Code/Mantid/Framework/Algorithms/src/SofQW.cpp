@@ -129,16 +129,20 @@ void SofQW::exec()
       if (emode==2)
       {
         try {
-          Parameter_sptr par = pmap.get(spectrumDet.get(),"Efixed");
+          Parameter_sptr par = pmap.get(spectrumDet.get(),"EFixed");
           if (par) 
           {
             efixed = par->value<double>();
+          }
+          else if( efixed == 0.0 )
+          {
+            continue;
           }
         } catch (std::runtime_error&) { /* Throws if a DetectorGroup, use single provided value */ }
       }
 
       // For inelastic scattering the simple relationship q=4*pi*sinTheta/lambda does not hold. In order to
-      // be completely general wemust calculate the momentum transfer by calculating the incident and final
+      // be completely general we must calculate the momentum transfer by calculating the incident and final
       // wave vectors and then use |q| = sqrt[(ki - kf)*(ki - kf)]
       DetectorGroup_const_sptr detGroup = boost::dynamic_pointer_cast<const DetectorGroup>(spectrumDet);
       std::vector<IDetector_const_sptr> detectors;
@@ -238,7 +242,11 @@ API::MatrixWorkspace_sptr SofQW::setUpOutputWorkspace(API::MatrixWorkspace_const
   
   // Set the axis units
   verticalAxis->unit() = UnitFactory::Instance().create("MomentumTransfer");
+  verticalAxis->title() = "|Q|";
   
+  // Set the X axis title (for conversion to MD)
+  outputWorkspace->getAxis(0)->title() = "Energy transfer";
+
   setProperty("OutputWorkspace",outputWorkspace);
   return outputWorkspace;
 }

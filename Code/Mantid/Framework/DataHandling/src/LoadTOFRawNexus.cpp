@@ -463,7 +463,7 @@ void LoadTOFRawNexus::exec()
   // Load the logs
   prog->doReport("Loading DAS logs");
   g_log.debug() << "Loading DAS logs" << std::endl;
-  LoadEventNexus::runLoadNexusLogs(filename, WS, pulseTimes, this);
+  LoadEventNexus::runLoadNexusLogs(filename, WS, this);
 
   // Load the instrument
   prog->report("Loading instrument");

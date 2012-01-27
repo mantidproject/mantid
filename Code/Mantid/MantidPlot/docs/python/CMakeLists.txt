@@ -23,6 +23,7 @@ if ( SPHINX_FOUND )
   # files meaning we need to copy everything over to the build directory
   set ( SPHINX_SOURCE
     source/index.rst
+    source/changes.rst
     source/api/mantid.rst
     source/api/mantidplot.rst
     source/_templates/indexcontent.html

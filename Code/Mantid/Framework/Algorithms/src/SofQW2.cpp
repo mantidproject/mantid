@@ -17,8 +17,6 @@ Converts a 2D workspace from units of spectrum number/energy transfer to  the in
 #include "MantidGeometry/Math/Vertex2D.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 
-#include "MantidKernel/Timer.h"
-
 namespace Mantid
 {
   namespace Algorithms
@@ -27,7 +25,7 @@ namespace Mantid
     // Register the algorithm into the AlgorithmFactory
     DECLARE_ALGORITHM(SofQW2)
 
-        using namespace Mantid::Kernel;
+    using namespace Mantid::Kernel;
     using namespace Mantid::API;
     using Geometry::IDetector_const_sptr;
     using Geometry::DetectorGroup;
@@ -64,6 +62,13 @@ namespace Mantid
       }
 
       MatrixWorkspace_sptr outputWS = this->setUpOutputWorkspace(inputWS, m_Qout);
+      // We also need to keep track of how many intersections went into a pixel so that we can
+      // normalize correctly
+      m_numIntersectionsWS = WorkspaceFactory::Instance().create(outputWS);
+
+      const size_t nOutputHist(outputWS->getNumberHistograms());
+      const size_t nenergyBins = inputWS->blocksize();
+
       //Progress reports & cancellation
       const size_t nreports(static_cast<size_t>(inputWS->getNumberHistograms()*inputWS->blocksize()));
       m_progress = boost::shared_ptr<API::Progress>(new API::Progress(this, 0.0, 1.0, nreports));
@@ -71,7 +76,6 @@ namespace Mantid
       // Compute input caches
       initCachedValues(inputWS);
       const size_t nTheta = m_thetaPts.size();
-      const size_t nenergyBins = inputWS->blocksize();
       const MantidVec & X = inputWS->readX(0);
 
       // Select the calculate Q method based on the mode
@@ -87,16 +91,33 @@ namespace Mantid
         qCalculator = &SofQW2::calculateIndirectQ;
       }
 
-      PARALLEL_FOR2(inputWS, outputWS)
+      PARALLEL_FOR3(inputWS, m_numIntersectionsWS, outputWS)
       for(int64_t i = 0; i < static_cast<int64_t>(nTheta); ++i) // signed for openmp
       {
         PARALLEL_START_INTERUPT_REGION
 
         const double theta = m_thetaPts[i];
-        const double efixed = getEFixed(inputWS->getDetector(i));
-        const double thetaLower = theta - 0.5*m_thetaWidth;
-        const double thetaUpper = theta + 0.5*m_thetaWidth;
+        if( theta < 0.0 ) // One to skip
+        {
+          continue;
+        }
+        double leftWidth(0.5*m_thetaWidth), rightWidth(0.5*m_thetaWidth);
+        // If the gap between this and the previous pixel is largest than
+        // the calculate width we need to enlarge the pixel
+        double gap(0.0);
+        if( i > 2 )
+        {
+          gap = theta - m_thetaPts[i-1];
+          if( gap > m_thetaWidth )
+          {
+            // Move the left boundary to encompass the gap
+            leftWidth = gap - 0.5*m_thetaWidth;
+          }
+        }
 
+        const double thetaLower = theta - leftWidth;
+        const double thetaUpper = theta + rightWidth;
+        const double efixed = getEFixed(inputWS->getDetector(i));
         for(size_t j = 0; j < nenergyBins; ++j)
         {
           m_progress->report("Computing polygon intersections");
@@ -118,25 +139,31 @@ namespace Mantid
       }
       PARALLEL_CHECK_INTERUPT_REGION
 
-      const size_t nOutputHist(outputWS->getNumberHistograms());
-      // The errors need square-rooting
+      /**
+       * Normalise the output by the total accumulated fraction
+       * and square root the errors
+       */
+
       PARALLEL_FOR1(outputWS)
       for(int64_t i = 0; i < static_cast<int64_t>(nOutputHist); ++i)
       {
         PARALLEL_START_INTERUPT_REGION
 
-        MantidVec& errors = outputWS->dataE(i);
-        std::transform(errors.begin(), errors.end(), errors.begin(), (double (*)(double))std::sqrt);
+        MantidVec & outputY = outputWS->dataY(i);
+        MantidVec & outputE = outputWS->dataE(i);
+        const MantidVec & noIntersects = m_numIntersectionsWS->readY(i);
+        for(size_t j = 0; j < nenergyBins; ++j)
+        {
+          m_progress->report("Calculating errors and normalising");
+          const double numIntersects = noIntersects[j];
+          if(numIntersects > 0.0) outputY[j] /= numIntersects;
+          outputE[j] = std::sqrt(outputE[j]);
+        }
 
         PARALLEL_END_INTERUPT_REGION
       }
       PARALLEL_CHECK_INTERUPT_REGION
 
-      // Divide by the bin width if the input is a distribution
-      if( inputWS->isDistribution() )
-      {
-        this->makeDistribution(outputWS, m_Qout);
-      }
     }
 
     /**
@@ -150,8 +177,9 @@ namespace Mantid
     void SofQW2::rebinToOutput(const Geometry::Quadrilateral & inputQ, MatrixWorkspace_const_sptr inputWS, 
                                const size_t i, const size_t j, MatrixWorkspace_sptr outputWS)
     {
-      size_t qstart(0.0), qend(0.0), en_start(0.0), en_end(0.0);
+      size_t qstart(0), qend(0), en_start(0), en_end(0);
       if( !getIntersectionRegion(outputWS, inputQ, qstart, qend, en_start, en_end)) return;
+
       const MantidVec & X = inputWS->readX(0);
       for( size_t qi = qstart; qi < qend; ++qi )
       {
@@ -166,12 +194,15 @@ namespace Mantid
           {
             ConvexPolygon overlap = intersectionByLaszlo(outputQ, inputQ);
             const double weight = overlap.area()/inputQ.area();
-            outputWS->dataY(qi)[ei] += inputWS->readY(i)[j] * weight;
-            outputWS->dataE(qi)[ei] += std::pow(inputWS->readE(i)[j] * weight, 2);
+            PARALLEL_CRITICAL(overlap)
+            {
+              outputWS->dataY(qi)[ei] += inputWS->readY(i)[j] * weight;
+              m_numIntersectionsWS->dataY(qi)[ei] += weight;
+              outputWS->dataE(qi)[ei] += std::pow(inputWS->readE(i)[j] * weight, 2);
+            }
           }
           catch(Geometry::NoIntersectionException &)
           {}
-
         }
       }
     }
@@ -208,6 +239,7 @@ namespace Mantid
       {
         en_end = end_it - energyAxis.begin();
       }
+
       // Q region
       start_it = std::upper_bound(m_Qout.begin(), m_Qout.end(), yn_lo);
       end_it = std::upper_bound(m_Qout.begin(), m_Qout.end(), yn_hi);
@@ -221,6 +253,7 @@ namespace Mantid
       {
         qend = end_it - m_Qout.begin();
       }
+
       return true;
     }
 
@@ -295,8 +328,6 @@ namespace Mantid
      */
     void SofQW2::initCachedValues(API::MatrixWorkspace_const_sptr workspace)
     {
-      m_progress->report("Initializing caches");
-
       // Retrieve the emode & efixed properties
       const std::string emode = getProperty("EMode");
       // Convert back to an integer representation
@@ -355,19 +386,28 @@ namespace Mantid
      */
     void SofQW2::initThetaCache(API::MatrixWorkspace_const_sptr workspace)
     {
-      Mantid::Kernel::Timer clock;
       const size_t nhist = workspace->getNumberHistograms();
       m_thetaPts = std::vector<double>(nhist);
+      size_t ndets(0);
+      double minTheta(DBL_MAX), maxTheta(-DBL_MAX);
 
-      PARALLEL_FOR1(workspace)
       for(int64_t i = 0 ; i < (int64_t)nhist; ++i) //signed for OpenMP
       {
-        PARALLEL_START_INTERUPT_REGION
 
+        m_progress->report("Calculating detector angles");
         IDetector_const_sptr det;
         try
         {
           det = workspace->getDetector(i);
+          // Check to see if there is an EFixed, if not skip it
+          try
+          {
+            getEFixed(det);
+          }
+          catch(std::runtime_error&)
+          {
+            det.reset();
+          }
         }
         catch(Kernel::Exception::NotFoundError&)
         {
@@ -376,16 +416,28 @@ namespace Mantid
           // in an openmp block.
         }
         // If no detector found, skip onto the next spectrum
-        if( !det || det->isMonitor() ) continue;
-        m_thetaPts[i] = workspace->detectorTwoTheta(det);
-
-        PARALLEL_END_INTERUPT_REGION
+        if( !det || det->isMonitor() )
+        {
+          m_thetaPts[i] = -1.0; // Indicates a detector to skip
+        }
+        else
+        {
+          ++ndets;
+          const double theta = workspace->detectorTwoTheta(det);
+          m_thetaPts[i] = theta;
+          if( theta < minTheta )
+          {
+            minTheta = theta;
+          }
+          else if( theta > maxTheta )
+          {
+            maxTheta = theta;
+          }
+        }
       }
-      PARALLEL_CHECK_INTERUPT_REGION
 
-      m_thetaWidth = std::abs(m_thetaPts.back() - m_thetaPts.front())/static_cast<double>(m_thetaPts.size());
-
-      g_log.debug() << "Initializing theta Cache took " << clock.elapsed() << " seconds\n";
+      m_thetaWidth = (maxTheta - minTheta)/static_cast<double>(ndets);
+      g_log.information() << "Calculated detector width in theta=" << (m_thetaWidth*180.0/M_PI) << " degrees.\n";
     }
 
 

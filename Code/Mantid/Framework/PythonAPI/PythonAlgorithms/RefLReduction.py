@@ -50,6 +50,7 @@ class RefLReduction(PythonAlgorithm):
         data_back = self.getProperty("SignalBackgroundPixelRange")
 
         TOFrange = self.getProperty("TOFRange") #microS
+        Qrange = [0.001,0.001,0.2]  #Qmin, Qwidth, Qmax
         
         #Due to the frame effect, it's sometimes necessary to narrow the range
         #over which we add all the pixels along the low resolution
@@ -124,22 +125,23 @@ class RefLReduction(PythonAlgorithm):
         # Distance source->center of detector
         dMD = dSD + dSM
         
-        
         # Rebin data (x-axis is in TOF)
         ws_histo_data = ws_name+"_histo"
         Rebin(InputWorkspace=ws_event_data, OutputWorkspace=ws_histo_data, Params=self._binning)
         
         # Keep only range of TOF of interest
         CropWorkspace(ws_histo_data,ws_histo_data,XMin=TOFrange[0], XMax=TOFrange[1])
-        
+
         # Normalized by Current (proton charge)
         NormaliseByCurrent(InputWorkspace=ws_histo_data, OutputWorkspace=ws_histo_data)
         
         # Calculation of the central pixel (using weighted average)
         pixelXtof_data = wks_utility.getPixelXTOF(mtd[ws_histo_data], maxX=maxX, maxY=maxY)
         pixelXtof_1d = pixelXtof_data.sum(axis=1)
+        
         # Keep only range of pixels
         pixelXtof_roi = pixelXtof_1d[data_peak[0]:data_peak[1]]
+        
         sz = pixelXtof_roi.size
         _num = 0
         _den = 0
@@ -159,17 +161,20 @@ class RefLReduction(PythonAlgorithm):
         #of interest along the x-axis (to avoid the frame effect)
         theta = tthd_rad - ths_rad
         mt2 = wks_utility.createIntegratedWorkspace(mtd[ws_histo_data], 
-                                                    "IntegratedDataWks",
+                                                    "IntegratedDataWks1",
                                                     fromXpixel=Xrange[0],
                                                     toXpixel=Xrange[1],
                                                     fromYpixel=BackfromYpixel,
                                                     toYpixel=BacktoYpixel,
                                                     maxX=maxX,
                                                     maxY=maxY,
+                                                    cpix=data_cpix,
                                                     source_to_detector=dMD,
                                                     sample_to_detector=dSD,
                                                     theta=theta,
-                                                    geo_correction=False)
+                                                    geo_correction=False,
+                                                    Qrange=Qrange)
+        
         
         #_tof_axis = mt2.readX(0)[:]
         ########## This was used to test the R(Q) 
@@ -180,8 +185,13 @@ class RefLReduction(PythonAlgorithm):
         #q_array_reversed = q_array[::-1]
         
         # Background
+
+        ConvertToHistogram(InputWorkspace='IntegratedDataWks1',
+                           OutputWorkspace='IntegratedDataWks')
+
         Transpose(InputWorkspace='IntegratedDataWks',
                   OutputWorkspace='TransposedID')
+        
         ConvertToHistogram(InputWorkspace='TransposedID',
                            OutputWorkspace='TransposedID')
         
@@ -192,15 +202,14 @@ class RefLReduction(PythonAlgorithm):
                            Mode='Mean',
                            EndX=data_peak[0],
                            OutputMode="Return Background")
+
         Transpose(InputWorkspace='TransposedID',
                   OutputWorkspace='DataBckWks')
-        
+
         ConvertToHistogram("DataBckWks", OutputWorkspace="DataBckWks")
         RebinToWorkspace(WorkspaceToRebin="DataBckWks", WorkspaceToMatch="IntegratedDataWks", OutputWorkspace="DataBckWks")
+                
         Minus("IntegratedDataWks", "DataBckWks", OutputWorkspace="DataWks")
-        
-        
-            
             
         # Work on Normalization file #########################################
         # Find full path to event NeXus data file
@@ -291,6 +300,9 @@ class RefLReduction(PythonAlgorithm):
         SumSpectra(InputWorkspace="NormalizedWks", OutputWorkspace=output_ws)
         #ConvertToHistogram(InputWorkspace=output_ws,OutputWorkspace=output_ws)
         #ConvertUnits(InputWorkspace=output_ws,Target="MomentumTransfer",OutputWorkspace=output_ws)
+        
+#        CropWorkspace(output_ws, output_ws, XMin=TOFrange[0], XMax=TOFrange[1])
+
         
         
         self.setProperty("OutputWorkspace", mtd[output_ws])
