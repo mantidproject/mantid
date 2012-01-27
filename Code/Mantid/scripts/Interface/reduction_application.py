@@ -57,7 +57,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         # Name handle for the instrument
         if instrument is None:
             instrument = unicode(settings.value("instrument_name", QtCore.QVariant('')).toString())
-            if instrument not in instrument_list:
+            if instrument_list is not None and instrument not in instrument_list:
                 instrument = None
 
         self._instrument = instrument

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/reflectometer/data_refl_simple.ui'
 #
-# Created: Mon Jan 23 15:45:44 2012
+# Created: Thu Jan 26 15:49:29 2012
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -781,8 +781,34 @@ class Ui_Frame(object):
         self.add_dataset_btn.setObjectName("add_dataset_btn")
         self.horizontalLayout_7.addWidget(self.add_dataset_btn)
         self.verticalLayout_4.addLayout(self.horizontalLayout_7)
-        spacerItem13 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        spacerItem13 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
         self.verticalLayout_4.addItem(spacerItem13)
+        self.auto_reduce_help_label = QtGui.QLabel(self.scrollAreaWidgetContents)
+        self.auto_reduce_help_label.setObjectName("auto_reduce_help_label")
+        self.verticalLayout_4.addWidget(self.auto_reduce_help_label)
+        self.horizontalLayout_13 = QtGui.QHBoxLayout()
+        self.horizontalLayout_13.setObjectName("horizontalLayout_13")
+        spacerItem14 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_13.addItem(spacerItem14)
+        self.auto_reduce_tip_label = QtGui.QLabel(self.scrollAreaWidgetContents)
+        font = QtGui.QFont()
+        font.setItalic(True)
+        self.auto_reduce_tip_label.setFont(font)
+        self.auto_reduce_tip_label.setObjectName("auto_reduce_tip_label")
+        self.horizontalLayout_13.addWidget(self.auto_reduce_tip_label)
+        spacerItem15 = QtGui.QSpacerItem(20, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_13.addItem(spacerItem15)
+        self.auto_reduce_btn = QtGui.QPushButton(self.scrollAreaWidgetContents)
+        self.auto_reduce_btn.setMinimumSize(QtCore.QSize(150, 0))
+        self.auto_reduce_btn.setMaximumSize(QtCore.QSize(150, 16777215))
+        self.auto_reduce_btn.setObjectName("auto_reduce_btn")
+        self.horizontalLayout_13.addWidget(self.auto_reduce_btn)
+        self.verticalLayout_4.addLayout(self.horizontalLayout_13)
+        spacerItem16 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.verticalLayout_4.addItem(spacerItem16)
+        self.auto_reduce_check = QtGui.QCheckBox(self.scrollAreaWidgetContents)
+        self.auto_reduce_check.setObjectName("auto_reduce_check")
+        self.verticalLayout_4.addWidget(self.auto_reduce_check)
         self.horizontalLayout_11.addLayout(self.verticalLayout_4)
         self.verticalLayout_3.addLayout(self.horizontalLayout_11)
         self.horizontalLayout_6.addLayout(self.verticalLayout_3)
@@ -826,5 +852,22 @@ class Ui_Frame(object):
         self.label_16.setText(QtGui.QApplication.translate("Frame", "microS", None, QtGui.QApplication.UnicodeUTF8))
         self.plot_tof_btn.setToolTip(QtGui.QApplication.translate("Frame", "Plot TOF distribution", None, QtGui.QApplication.UnicodeUTF8))
         self.plot_tof_btn.setText(QtGui.QApplication.translate("Frame", "TOF distribution", None, QtGui.QApplication.UnicodeUTF8))
+        self.add_dataset_btn.setToolTip(QtGui.QApplication.translate("Frame", "Click to add the data set above to the reduction list", None, QtGui.QApplication.UnicodeUTF8))
         self.add_dataset_btn.setText(QtGui.QApplication.translate("Frame", "Save to list", None, QtGui.QApplication.UnicodeUTF8))
+        self.auto_reduce_help_label.setText(QtGui.QApplication.translate("Frame", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:\'Ubuntu\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:12pt; font-weight:600;\">Automated Reduction</span></p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:12pt; font-style:italic;\">The parameters above can be used to specify how new data files </span></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:12pt; font-style:italic;\">are automatically reduced.</span></p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:12pt; font-style:italic;\"></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:12pt; font-style:italic;\">Once you click the &quot;Apply Changes&quot; button, the parameters above</span></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:12pt; font-style:italic;\">will be used to reduce all your data files until you change them again.</span></p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:12pt; font-style:italic;\"></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.auto_reduce_tip_label.setText(QtGui.QApplication.translate("Frame", "Click to apply changes to the automated reduction process:", None, QtGui.QApplication.UnicodeUTF8))
+        self.auto_reduce_btn.setToolTip(QtGui.QApplication.translate("Frame", "Click to apply changes to the automated reduction process", None, QtGui.QApplication.UnicodeUTF8))
+        self.auto_reduce_btn.setText(QtGui.QApplication.translate("Frame", "Apply Changes", None, QtGui.QApplication.UnicodeUTF8))
+        self.auto_reduce_check.setText(QtGui.QApplication.translate("Frame", "Show automated reduction information", None, QtGui.QApplication.UnicodeUTF8))
 
