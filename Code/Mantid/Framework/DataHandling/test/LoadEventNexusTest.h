@@ -365,9 +365,11 @@ public:
     LoadEventNexus ld;
     std::string outws_name = "arcs";
     ld.initialize();
-    ld.setPropertyValue("Filename","ARCS_12954_event.nxs");
-    std::string filename = ld.getPropertyValue("Filename");
-    if (!Poco::File(filename).exists())
+    try
+    {
+      ld.setPropertyValue("Filename","ARCS_12954_event.nxs");
+    }
+    catch (...)
     {
       std::cout << "Skipping test since file does not exist.";
       return;
