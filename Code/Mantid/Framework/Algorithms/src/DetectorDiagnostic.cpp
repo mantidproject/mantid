@@ -117,7 +117,7 @@ namespace Mantid
         }
         // If the detector is either not found, a monitor or is masked do not include it
         if ( !det || det->isMonitor() || det->isMasked() ) continue;
-	
+    
         const double yValue = input->readY(i)[0];
         if ( yValue  < 0.0 )
         {

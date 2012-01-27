@@ -28,10 +28,14 @@ public:
     ConvertTo3DdETestHelper(){};
    // private (PROTECTED) methods, exposed for testing:
    std::vector<double> getTransfMatrix(API::MatrixWorkspace_sptr inWS2D,MDWSDescription &TargWSDescription, 
-                                       bool is_powder=false)const
-   {
+                                       bool is_powder=false)const{
        return ConvertToMDEvents::getTransfMatrix(inWS2D,TargWSDescription,is_powder);
    }
+   /// construct meaningful dimension names:
+   void buildDimNames(MDEvents::MDWSDescription &TargWSDescription){
+        ConvertToMDEvents::buildDimNames(TargWSDescription);
+   }
+
  
 };
 
@@ -187,6 +191,39 @@ void testExecAndAdd(){
  
 
 }
+
+void testTransfMat1()
+{
+     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(16,10,true);
+     OrientedLattice * latt = new OrientedLattice(10.4165,3.4165,10.4165, 90., 90., 90.);
+     V3D u(1,0,0);
+     V3D v(0,0,1);
+     latt->setUFromVectors(u,v);
+     ws2D->mutableSample().setOrientedLattice(latt);
+
+     MDWSDescription TWS(4);
+     TWS.convert_to_hkl=false;
+     TWS.is_uv_default=true;
+     TWS.emode=1;
+
+     std::vector<double> rot=pAlg->getTransfMatrix(ws2D,TWS);
+     Kernel::Matrix<double> rez(rot);
+     V3D ez = rez*u;
+     ez.normalize();
+     V3D ex = rez*v;
+     ex.normalize();
+     TS_ASSERT_EQUALS(V3D(0,0,1),ez);
+     TS_ASSERT_EQUALS(V3D(1,0,0),ex);
+
+     // to allow recalculate axis names specific for Q3D mode
+     TWS.AlgID="QhQkQl";
+     pAlg->buildDimNames(TWS);
+     TS_ASSERT_EQUALS("[10.416Qh,0,0]",TWS.dim_names[0]);
+     TS_ASSERT_EQUALS("[0,0,10.416Ql]",TWS.dim_names[1]);
+ 
+
+}
+
 // COMPARISON WITH HORACE:  --->
 void xtestTransfMat1()
 {

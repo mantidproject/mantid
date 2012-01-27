@@ -272,6 +272,31 @@ void test_UVPerm1()
     
 
   }
+void test_UVPerm3()
+  {
+    OrientedLattice theCell(2,1,2,90,90,90);
+    DblMatrix U;
+    V3D r1(1,0,0);
+    V3D r2(0,0,1);
+    TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",theCell.setUFromVectors(r1,r2));
+    U = theCell.getU();
+   
+    V3D ez=U*r1;
+    ez.normalize();
+    V3D ex=U*r2;
+    ex.normalize();
+    V3D ey=U*r1.cross_prod(r2);
+    ey.normalize();
+
+    V3D eyPrime = r1.cross_prod(r2);
+    TSM_ASSERT_EQUALS("U*u should be along the beam",V3D(0,0,1),ez);
+    TSM_ASSERT_EQUALS("U*v should be along the x direction",V3D(1,0,0),ex);
+    TSM_ASSERT_EQUALS(" should be along the y direction",V3D(0,1,0),ey);
+    TSM_ASSERT_EQUALS("y direction is",V3D(0,-1,0),eyPrime);
+
+
+  }
+
 
 };
 
