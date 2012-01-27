@@ -194,6 +194,85 @@ public:
     TSM_ASSERT_EQUALS("Ub*v should be along the x direction",res2,expected2);
   }
 
+  void test_UVPerm2()
+  {
+    OrientedLattice theCell(1,3,4,35,60,70);
+    DblMatrix U;
+    TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",theCell.setUFromVectors(V3D(1,0,0),V3D(0,1,0)));
+    U = theCell.getU();
+    V3D ez=U*V3D(1,0,0);
+    V3D ex=U*V3D(0,1,0);
+    V3D ey=U*V3D(0,0,1);
+
+    TSM_ASSERT_EQUALS("U*u should be along the beam",V3D(0,0,1),ez);
+    TSM_ASSERT_EQUALS("U*v should be along the x direction",V3D(1,0,0),ex);
+    TSM_ASSERT_EQUALS(" should be along the y direction",V3D(0,1,0),ey);
+
+
+    std::vector<double> rotMat = U.get_vector();
+    double qx(1),qy(2),qz(3);
+    V3D vc=U*V3D(qx,qy,qz);
+    double Qx  = (rotMat[0]*qx+rotMat[1]*qy+rotMat[2]*qz);
+    double Qy  = (rotMat[3]*qx+rotMat[4]*qy+rotMat[5]*qz); 
+    double Qz  = (rotMat[6]*qx+rotMat[7]*qy+rotMat[8]*qz);
+    TS_ASSERT_DELTA(vc.X(),Qx,1.e-5);
+    TS_ASSERT_DELTA(vc.Y(),Qy,1.e-5);
+    TS_ASSERT_DELTA(vc.Z(),Qz,1.e-5);
+    
+  }
+void test_UVPerm1()
+  {
+    OrientedLattice theCell(1,1,1,90,90,90);
+    DblMatrix U;
+    V3D r1(1,1,0);
+    V3D r2(1,-1,0);
+    TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",theCell.setUFromVectors(r1,r2));
+    U = theCell.getU();
+   
+    V3D ez=U*r1;
+    ez.normalize();
+    V3D ex=U*r2;
+    ex.normalize();
+    V3D ey=U*r1.cross_prod(r2);
+    ey.normalize();
+
+    TSM_ASSERT_EQUALS("U*u should be along the beam",V3D(0,0,1),ez);
+    TSM_ASSERT_EQUALS("U*v should be along the x direction",V3D(1,0,0),ex);
+    TSM_ASSERT_EQUALS(" should be along the y direction",V3D(0,1,0),ey);
+
+    TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",theCell.setUFromVectors(V3D(1,0,0),V3D(0,0,1)));
+    U = theCell.getU();
+    ez= U*V3D(1,0,0);
+    ex= U*V3D(0,0,1);
+    ey= U*V3D(0,-1,0);
+
+    TSM_ASSERT_EQUALS("U*u should be along the beam",V3D(0,0,1),ez);
+    TSM_ASSERT_EQUALS("U*v should be along the x direction",V3D(1,0,0),ex);
+    TSM_ASSERT_EQUALS(" should be along the y direction",V3D(0,1,0),ey);
+
+    TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",theCell.setUFromVectors(V3D(0,1,0),V3D(0,0,1)));
+    U  = theCell.getU();
+    ez = U*V3D(0,1,0);
+    ex = U*V3D(0,0,1);
+    ey = U*V3D(1,0,0);
+
+    TSM_ASSERT_EQUALS("U*u should be along the beam",V3D(0,0,1),ez);
+    TSM_ASSERT_EQUALS("U*v should be along the x direction",V3D(1,0,0),ex);
+    TSM_ASSERT_EQUALS(" should be along the y direction",V3D(0,1,0),ey);
+
+    std::vector<double> rotMat = U.get_vector();
+    double qx(1),qy(2),qz(3);
+    V3D vc=U*V3D(qx,qy,qz);
+    double Qx  = (rotMat[0]*qx+rotMat[1]*qy+rotMat[2]*qz);
+    double Qy  = (rotMat[3]*qx+rotMat[4]*qy+rotMat[5]*qz); 
+    double Qz  = (rotMat[6]*qx+rotMat[7]*qy+rotMat[8]*qz);
+    TS_ASSERT_DELTA(vc.X(),Qx,1.e-5);
+    TS_ASSERT_DELTA(vc.Y(),Qy,1.e-5);
+    TS_ASSERT_DELTA(vc.Z(),Qz,1.e-5);
+    
+
+  }
+
 };
 
 
