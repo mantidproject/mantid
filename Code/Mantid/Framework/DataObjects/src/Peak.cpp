@@ -558,6 +558,11 @@ namespace DataObjects
   void Peak::setL(double m_L)
   {    this->m_L = m_L;  }
 
+  /** Set the BankName of this peak
+   * @param m_BankName :: index to set   */
+  void Peak::setBankName(std::string m_BankName)
+  {    this->m_BankName = m_BankName;  }
+
   /** Set all three H,K,L indices of the peak */
   void Peak::setHKL(double H, double K, double L)
   {

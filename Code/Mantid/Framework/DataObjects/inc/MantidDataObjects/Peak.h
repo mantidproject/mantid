@@ -56,6 +56,7 @@ namespace DataObjects
     void setH(double m_H);
     void setK(double m_K);
     void setL(double m_L);
+    void setBankName(std::string m_BankName);
     void setHKL(double H, double K, double L);
     void setHKL(Mantid::Kernel::V3D HKL);
 

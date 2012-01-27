@@ -9,6 +9,7 @@ set ( SRC_FILES
 	src/FindUBUsingMinMaxD.cpp
 	src/IndexPeaks.cpp
 	src/IntegratePeakTimeSlices.cpp
+	src/LoadHKL.cpp
 	src/LoadIsawPeaks.cpp
     src/IndexSXPeaks.cpp
 	src/LoadIsawUB.cpp
@@ -39,6 +40,7 @@ set ( INC_FILES
 	inc/MantidCrystal/IndexPeaks.h
     inc/MantidCrystal/IndexSXPeaks.h
 	inc/MantidCrystal/IntegratePeakTimeSlices.h
+	inc/MantidCrystal/LoadHKL.h
 	inc/MantidCrystal/LoadIsawPeaks.h
 	inc/MantidCrystal/LoadIsawUB.h
 	inc/MantidCrystal/MaskPeaksWorkspace.h
