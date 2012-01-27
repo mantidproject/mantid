@@ -121,6 +121,10 @@ void Indirect::initLayout()
   m_uiForm.save_ckSPE->setChecked(false);
   m_uiForm.save_ckNexus->setChecked(true);
 
+  // nudge "Background Removal" button to display whether it is
+  // set to "OFF" or "ON".
+  backgroundRemoval();
+
   loadSettings();
 
   refreshWSlist();
@@ -1174,19 +1178,18 @@ void Indirect::backgroundClicked()
 }
 /**
 * Slot called when m_backgroundDialog is closed. Assesses whether user desires background removal.
+* Can be called before m_backgroundDialog even exists, for the purposes of setting the button to
+* it's initial (default) value.
 */
 void Indirect::backgroundRemoval()
 {
-  if ( m_backgroundDialog->removeBackground() )
-  {
-    m_bgRemoval = true;
+  if ( NULL != m_backgroundDialog )
+    m_bgRemoval = m_backgroundDialog->removeBackground();
+  
+  if (m_bgRemoval)
     m_uiForm.pbBack_2->setText("Background Removal (On)");
-  }
   else
-  {
-    m_bgRemoval = false;
     m_uiForm.pbBack_2->setText("Background Removal (Off)");
-  }
 }
 /**
 * Plots raw time data from .raw file before any data conversion has been performed.
