@@ -224,7 +224,8 @@ void testTransfMat1()
      TWS.AlgID="QhQkQl";
      pAlg->buildDimNames(TWS);
      TS_ASSERT_EQUALS("[Qh,0,0]",TWS.dim_names[0]);
-     TS_ASSERT_EQUALS("[0,0,Ql]",TWS.dim_names[1]);
+     TS_ASSERT_EQUALS("[0,Qk,0]",TWS.dim_names[1]);
+     TS_ASSERT_EQUALS("[0,0,Ql]",TWS.dim_names[2]);
  
 
 }
