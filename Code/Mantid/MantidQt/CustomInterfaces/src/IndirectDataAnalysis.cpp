@@ -135,6 +135,8 @@ void IndirectDataAnalysis::initLayout()
 
 void IndirectDataAnalysis::initLocalPython()
 {
+  QString pyInput = "from mantidsimple import *";
+  QString pyOutput = runPythonCode(pyInput).trimmed();
   loadSettings();
 }
 
