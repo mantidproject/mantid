@@ -138,6 +138,10 @@ namespace Mantid
       }
       PARALLEL_CHECK_INTERUPT_REGION
 
+      if(medianInput.empty()){
+          throw std::out_of_range(" no single valid histohrams identified in the workspace");
+      }
+
       // We need a sorted array to calculate the median
       std::sort(medianInput.begin(), medianInput.end());
       double median = gsl_stats_median_from_sorted_data( &medianInput[0], 1, medianInput.size() );
