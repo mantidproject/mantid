@@ -154,6 +154,7 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
 
     if geo_correction:
         
+        
         #replace the _q_axis of the yrange of interest by the new 
         #individual _q_axis
 
