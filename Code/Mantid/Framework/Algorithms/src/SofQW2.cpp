@@ -165,13 +165,12 @@ namespace Mantid
     void SofQW2::rebinToOutput(const Geometry::Quadrilateral & inputQ, MatrixWorkspace_const_sptr inputWS, 
                                const size_t i, const size_t j, MatrixWorkspace_sptr outputWS)
     {
-      size_t qstart(0.0), qend(0.0), en_start(0.0), en_end(0.0);
+      size_t qstart(0), qend(0), en_start(0), en_end(0);
       if( !getIntersectionRegion(outputWS, inputQ, qstart, qend, en_start, en_end)) return;
+
       const MantidVec & X = inputWS->readX(0);
       for( size_t qi = qstart; qi < qend; ++qi )
       {
-        MantidVec & outputY = outputWS->dataY(qi);
-        MantidVec & outputE = outputWS->dataE(qi);
         for( size_t ei = en_start; ei < en_end; ++ei )
         {
           const V2D ll(X[ei], m_Qout[qi]);
@@ -183,9 +182,12 @@ namespace Mantid
           {
             ConvexPolygon overlap = intersectionByLaszlo(outputQ, inputQ);
             const double weight = overlap.area()/inputQ.area();
-            outputY[ei] += inputWS->readY(i)[j] * weight;
-            m_numIntersectionsWS->dataY(qi)[ei] += weight;
-            outputE[ei] += std::pow(inputWS->readE(i)[j] * weight, 2);
+            PARALLEL_CRITICAL(overlap)
+            {
+              outputWS->dataY(qi)[ei] += inputWS->readY(i)[j] * weight;
+              m_numIntersectionsWS->dataY(qi)[ei] += weight;
+              outputWS->dataE(qi)[ei] += std::pow(inputWS->readE(i)[j] * weight, 2);
+            }
           }
           catch(Geometry::NoIntersectionException &)
           {}
@@ -225,6 +227,7 @@ namespace Mantid
       {
         en_end = end_it - energyAxis.begin();
       }
+
       // Q region
       start_it = std::upper_bound(m_Qout.begin(), m_Qout.end(), yn_lo);
       end_it = std::upper_bound(m_Qout.begin(), m_Qout.end(), yn_hi);
@@ -238,6 +241,7 @@ namespace Mantid
       {
         qend = end_it - m_Qout.begin();
       }
+
       return true;
     }
 
@@ -375,10 +379,8 @@ namespace Mantid
       size_t ndets(0);
       double minTheta(DBL_MAX), maxTheta(-DBL_MAX);
 
-      //PARALLEL_FOR1(workspace)
       for(int64_t i = 0 ; i < (int64_t)nhist; ++i) //signed for OpenMP
       {
-        PARALLEL_START_INTERUPT_REGION
 
         m_progress->report("Calculating detector angles");
         IDetector_const_sptr det;
@@ -408,25 +410,19 @@ namespace Mantid
         }
         else
         {
-          PARALLEL_ATOMIC
           ++ndets;
           const double theta = workspace->detectorTwoTheta(det);
           m_thetaPts[i] = theta;
           if( theta < minTheta )
           {
-            PARALLEL_CRITICAL(minTheta)
             minTheta = theta;
           }
           else if( theta > maxTheta )
           {
-            PARALLEL_CRITICAL(maxTheta)
             maxTheta = theta;
           }
         }
-
-        PARALLEL_END_INTERUPT_REGION
       }
-      PARALLEL_CHECK_INTERUPT_REGION
 
       m_thetaWidth = (maxTheta - minTheta)/static_cast<double>(ndets);
       g_log.information() << "Calculated detector width in theta=" << (m_thetaWidth*180.0/M_PI) << " degrees.\n";
