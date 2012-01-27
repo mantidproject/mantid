@@ -101,11 +101,23 @@ namespace Mantid
         {
           continue;
         }
+        double leftWidth(0.5*m_thetaWidth), rightWidth(0.5*m_thetaWidth);
+        // If the gap between this and the previous pixel is largest than
+        // the calculate width we need to enlarge the pixel
+        double gap(0.0);
+        if( i > 2 )
+        {
+          gap = theta - m_thetaPts[i-1];
+          if( gap > m_thetaWidth )
+          {
+            // Move the left boundary to encompass the gap
+            leftWidth = gap - 0.5*m_thetaWidth;
+          }
+        }
 
+        const double thetaLower = theta - leftWidth;
+        const double thetaUpper = theta + rightWidth;
         const double efixed = getEFixed(inputWS->getDetector(i));
-        const double thetaLower = theta - 0.5*m_thetaWidth;
-        const double thetaUpper = theta + 0.5*m_thetaWidth;
-
         for(size_t j = 0; j < nenergyBins; ++j)
         {
           m_progress->report("Computing polygon intersections");
