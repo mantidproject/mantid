@@ -155,12 +155,10 @@ private slots:
   /// Update the pair plot based on changes on the group page.
   void settingsTabUpdatePlot();
 
-  /// Assigns a peak picker tool to the workspace
+  /// Assigns a peak picker tool to the workspace.
   void assignPeakPickerTool(const QString &);
 
-  /// Change the data style and color
-  void changeDataPlotType(const QStringList &);
-
+  /// Group the fitted workspaces.
   void groupFittedWorkspaces(QString);
 
 

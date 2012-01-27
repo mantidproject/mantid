@@ -181,9 +181,6 @@ void MuonAnalysis::initLayout()
   // Detect when the tab is changed
   connect(m_uiForm.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(changeTab(int)));
 
-  // Detect if the graph should be customised and call the two functions that change the different curves on the graph.
-  connect(m_uiForm.fitBrowser, SIGNAL(customiseGraph(const QStringList &)), this, SLOT(changeDataPlotType(const QStringList &)));
-
   // Detect when the fit has finished and group the workspaces that have been created as a result.
   connect(m_uiForm.fitBrowser, SIGNAL(fittingDone(QString)), this, SLOT(groupFittedWorkspaces(QString)));
 
@@ -1512,7 +1509,7 @@ void MuonAnalysis::createPlotWS(const std::string& groupName, const std::string&
     std::vector<std::string> groupWorkspaces;
     groupWorkspaces.push_back(groupName);
     groupWorkspaces.push_back(wsname + "_Raw");
-    m_fitDataTab->groupRawWorkspace(groupWorkspaces, groupName); 
+    m_fitDataTab->groupWorkspaces(groupWorkspaces, groupName); 
   }
 }
 
@@ -1712,22 +1709,8 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     QString pyOutput = runPythonCode( pyString ).trimmed();
 
     // Change the plot style of the graph so that it matches what is selected on 
-    // the plot options tab. Default is set to line (0).
-    QStringList plotDetails;
-    QString plotType("");
-    plotType.setNum(m_uiForm.connectPlotType->currentIndex());
-
-    plotDetails.push_back(titleLabel);
-    plotDetails.push_back(plotType);
-    plotDetails.push_back("Data");
-    if(m_uiForm.showErrorBars->isChecked())
-    {
-      plotDetails.push_back("AllErrors");
-    }
-    else
-    {
-      plotDetails.push_back("NoErrors");
-    }
+    // the plot options tab.
+    QStringList plotDetails = m_fitDataTab->getAllPlotDetails(titleLabel);
     changePlotType(plotDetails);
 
     m_currentDataName = titleLabel;
@@ -1878,21 +1861,7 @@ void MuonAnalysis::plotPair(const std::string& plotType)
 
     // Change the plot style of the graph so that it matches what is selected on 
     // the plot options tab. Default is set to line (0).
-    QStringList plotDetails;
-    QString plotType("");
-    plotType.setNum(m_uiForm.connectPlotType->currentIndex());
-
-    plotDetails.push_back(titleLabel);
-    plotDetails.push_back(plotType);
-    plotDetails.push_back("Data");
-    if(m_uiForm.showErrorBars->isChecked())
-    {
-      plotDetails.push_back("AllErrors");
-    }
-    else
-    {
-      plotDetails.push_back("NoErrors");
-    }
+    QStringList plotDetails = m_fitDataTab->getAllPlotDetails(titleLabel);
     changePlotType(plotDetails);
     
     m_currentDataName = titleLabel;
@@ -2986,18 +2955,6 @@ void MuonAnalysis::assignPeakPickerTool(const QString & workspaceName)
 
 
 /**
-* Set up the string that will contain all the data needed for changing the data.
-* [wsName, connectType, plotType, Errors, Color]
-*
-* @param plotDetails :: The workspace name of the plot to be created.
-*/
-void MuonAnalysis::changeDataPlotType(const QStringList & plotDetails)
-{
-  QStringList allPlotDetails(m_fitDataTab->getAllPlotDetails(plotDetails));
-  changePlotType(allPlotDetails);
-}
-
-/**
 * Group the fitted workspaces that are created from the 'fit' algorithm
 *
 * @param workspaceName :: The workspaceName that the fit has been done against
@@ -3005,6 +2962,10 @@ void MuonAnalysis::changeDataPlotType(const QStringList & plotDetails)
 void MuonAnalysis::groupFittedWorkspaces(QString workspaceName)
 {
   m_fitDataTab->groupFittedWorkspaces(workspaceName);
+
+  //QStringList plotDetails;
+  //plotDetails.push_back(workspaceName);
+  //changeDataPlotType(plotDetails);
 }
 
 

@@ -555,12 +555,6 @@ void PeakPickerTool::algorithmFinished(const QString& out)
     new MantidMatrixCurve(m_curveDifName,out,graph(),2,false);
   }
 
-  //customise the plot
-  QStringList plotDetails;
-  plotDetails.push_back(workspaceName());
-
-  m_fitPropertyBrowser->customisation(plotDetails);  
-  
   graph()->replot();
 }
 
@@ -882,13 +876,7 @@ void PeakPickerTool::plotGuess()
   MantidQt::MantidWidgets::PropertyHandler* h = m_fitPropertyBrowser->getHandler();
   plotFitFunction(h);
   h->hasPlot() = true;
-  
   d_graph->replot();
-
-  QStringList plotDetails;
-  plotDetails.push_back(m_wsName);
-
-  m_fitPropertyBrowser->customisation(plotDetails);
 }
 
 void PeakPickerTool::plotCurrentGuess()
@@ -896,15 +884,7 @@ void PeakPickerTool::plotCurrentGuess()
   MantidQt::MantidWidgets::PropertyHandler* h = m_fitPropertyBrowser->currentHandler();
   plotFitFunction(h);
   h->hasPlot() = true;
-  
   d_graph->replot();
-
-  QString axisLabel = QString::fromStdString(m_ws->getAxis(1)->label(spec()));
-  QStringList plotDetails;
-  plotDetails.push_back(m_wsName);
-  plotDetails.push_back(axisLabel);
-
-  m_fitPropertyBrowser->customisation(plotDetails);  
 }
 
 /**

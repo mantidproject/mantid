@@ -2110,17 +2110,6 @@ void FitPropertyBrowser::clearAllPlots()
   emit removeFitCurves();
 }
 
-/**
-* Customise the plot if it is a custom fitting. (i.e part of muon analysis)
-*
-* @param plotDetails :: The name of the workspace plot to be customised seperated by a '.'
-*/
-void FitPropertyBrowser::customisation(const QStringList& plotDetails)
-{
-  if (m_customFittings)
-    emit customiseGraph(plotDetails);
-}
-
 /** Create a double property and set some settings
  * @param name :: The name of the new property
  * @return Pointer to the created property
