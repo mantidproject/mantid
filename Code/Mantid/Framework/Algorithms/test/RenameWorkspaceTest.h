@@ -10,89 +10,91 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-class RenameWorkspaceTest : public CxxTest::TestSuite
+class RenameWorkspaceTest: public CxxTest::TestSuite
 {
 public:
-	void testName()
-	{
-		TS_ASSERT_EQUALS( alg.name(), "RenameWorkspace" );
-	}
+  void testName()
+  {
+    TS_ASSERT_EQUALS( alg.name(), "RenameWorkspace");
+  }
 
-	void testVersion()
-	{
-		TS_ASSERT_EQUALS( alg.version(), 1 );
-	}
+  void testVersion()
+  {
+    TS_ASSERT_EQUALS( alg.version(), 1);
+  }
 
-	void testInit()
-	{
-		Mantid::Algorithms::RenameWorkspace alg2;
-		TS_ASSERT_THROWS_NOTHING( alg2.initialize() );
-		TS_ASSERT( alg2.isInitialized() );
+  void testInit()
+  {
+    Mantid::Algorithms::RenameWorkspace alg2;
+    TS_ASSERT_THROWS_NOTHING( alg2.initialize());
+    TS_ASSERT( alg2.isInitialized());
 
-		const std::vector<Property*> props = alg2.getProperties();
-		TS_ASSERT_EQUALS( props.size(), 2 );
+    const std::vector<Property*> props = alg2.getProperties();
+    TS_ASSERT_EQUALS( props.size(), 2);
 
-		TS_ASSERT_EQUALS( props[0]->name(), "InputWorkspace" );
-		TS_ASSERT( props[0]->isDefault() );
-		TS_ASSERT( dynamic_cast<WorkspaceProperty<Workspace>* >(props[0]) );
+    TS_ASSERT_EQUALS( props[0]->name(), "InputWorkspace");
+    TS_ASSERT( props[0]->isDefault());
+    TS_ASSERT( dynamic_cast<WorkspaceProperty<Workspace>* >(props[0]));
 
-		TS_ASSERT_EQUALS( props[1]->name(), "OutputWorkspace" );
-		TS_ASSERT( props[1]->isDefault() );
-		TS_ASSERT( dynamic_cast<WorkspaceProperty<Workspace>* >(props[1]) );
+    TS_ASSERT_EQUALS( props[1]->name(), "OutputWorkspace");
+    TS_ASSERT( props[1]->isDefault());
+    TS_ASSERT( dynamic_cast<WorkspaceProperty<Workspace>* >(props[1]));
 
-	
-	}
+  }
 
-	void testExec()
-	{
-		MatrixWorkspace_sptr inputWS = createWorkspace();
-		AnalysisDataService::Instance().add("InputWS",inputWS);
+  void testExec()
+  {
+    MatrixWorkspace_sptr inputWS = createWorkspace();
+    AnalysisDataService::Instance().add("InputWS", inputWS);
 
-		Mantid::Algorithms::RenameWorkspace alg3;
-		alg3.initialize();
-		TS_ASSERT_THROWS_NOTHING( alg3.setPropertyValue("InputWorkspace","InputWS") );
-		TS_ASSERT_THROWS_NOTHING( alg3.setPropertyValue("OutputWorkspace","WSRenamed") );
+    Mantid::Algorithms::RenameWorkspace alg3;
+    alg3.initialize();
+    TS_ASSERT_THROWS_NOTHING( alg3.setPropertyValue("InputWorkspace","InputWS"));
+    TS_ASSERT_THROWS_NOTHING( alg3.setPropertyValue("OutputWorkspace","WSRenamed"));
 
-		TS_ASSERT_THROWS_NOTHING( alg3.execute() );
-		TS_ASSERT( alg3.isExecuted() );
+    TS_ASSERT_THROWS_NOTHING( alg3.execute());
+    TS_ASSERT( alg3.isExecuted());
 
-		Workspace_sptr result;
-		TS_ASSERT_THROWS_NOTHING( result = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("WSRenamed")) );
-		TS_ASSERT( result );
+    Workspace_sptr result;
+    TS_ASSERT_THROWS_NOTHING(
+        result = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("WSRenamed")));
+    TS_ASSERT( result);
 
-		TS_ASSERT_THROWS_ANYTHING( result = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("InputWS")) );
+    TS_ASSERT_THROWS_ANYTHING(
+        result = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("InputWS")));
 
     AnalysisDataService::Instance().remove("WSRenamed");
-	}
-	
-	void testExecSameNames()
-	{
-		MatrixWorkspace_sptr inputWS = createWorkspace();
-		AnalysisDataService::Instance().add("InputWS",inputWS);
+  }
 
-		Mantid::Algorithms::RenameWorkspace alg3;
-		alg3.initialize();
-		TS_ASSERT_THROWS_NOTHING( alg3.setPropertyValue("InputWorkspace","InputWS") );
-		TS_ASSERT_THROWS_NOTHING( alg3.setPropertyValue("OutputWorkspace","InputWS") );
+  void testExecSameNames()
+  {
+    MatrixWorkspace_sptr inputWS = createWorkspace();
+    AnalysisDataService::Instance().add("InputWS", inputWS);
 
-		TS_ASSERT_THROWS_NOTHING( alg3.execute() );
-		TS_ASSERT( !alg3.isExecuted() );
+    Mantid::Algorithms::RenameWorkspace alg3;
+    alg3.initialize();
+    TS_ASSERT_THROWS_NOTHING( alg3.setPropertyValue("InputWorkspace","InputWS"));
+    TS_ASSERT_THROWS_NOTHING( alg3.setPropertyValue("OutputWorkspace","InputWS"));
 
-		Workspace_sptr result;
-		TS_ASSERT_THROWS_NOTHING( result = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("InputWS")) );
-		TS_ASSERT( result );
+    TS_ASSERT_THROWS_NOTHING( alg3.execute());
+    TS_ASSERT( !alg3.isExecuted());
 
-		AnalysisDataService::Instance().remove("InputWS");
-	}
+    Workspace_sptr result;
+    TS_ASSERT_THROWS_NOTHING(
+        result = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("InputWS")));
+    TS_ASSERT( result);
 
-	MatrixWorkspace_sptr createWorkspace()
-	{
-		MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(4,4,0.5);
-		return inputWS;
-	}
+    AnalysisDataService::Instance().remove("InputWS");
+  }
+
+  MatrixWorkspace_sptr createWorkspace()
+  {
+    MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(4, 4, 0.5);
+    return inputWS;
+  }
 
 private:
-	Mantid::Algorithms::RenameWorkspace alg;
+  Mantid::Algorithms::RenameWorkspace alg;
 
 };
 
