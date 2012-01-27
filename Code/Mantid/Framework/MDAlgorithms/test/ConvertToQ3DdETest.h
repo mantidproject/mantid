@@ -198,15 +198,20 @@ void testTransfMat1()
      OrientedLattice * latt = new OrientedLattice(10.4165,3.4165,10.4165, 90., 90., 90.);
      V3D u(1,0,0);
      V3D v(0,0,1);
-     latt->setUFromVectors(u,v);
+     Kernel::Matrix<double> U0=latt->setUFromVectors(u,v);
+     std::vector<double> rot0=U0.get_vector();
      ws2D->mutableSample().setOrientedLattice(latt);
 
      MDWSDescription TWS(4);
      TWS.convert_to_hkl=false;
      TWS.is_uv_default=true;
      TWS.emode=1;
-
+     // get transformation matrix from oriented lattice. 
      std::vector<double> rot=pAlg->getTransfMatrix(ws2D,TWS);
+  
+     for(int i=0;i<9;i++){
+        TS_ASSERT_DELTA(rot0[i],rot[i],1.e-6);
+     }
      Kernel::Matrix<double> rez(rot);
      V3D ez = rez*u;
      ez.normalize();
