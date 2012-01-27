@@ -648,6 +648,7 @@ void MuonAnalysis::groupTableClicked(int row)
   {
     m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(gNum);
     updateFront();
+    m_uiForm.frontPlotFuncs->setCurrentIndex(m_uiForm.groupTablePlotChoice->currentIndex());
   }
 }
 
@@ -3042,7 +3043,13 @@ void MuonAnalysis::homeTabUpdatePlot()
 
 void MuonAnalysis::groupTabUpdateGroup()
 {
-  int choice(m_uiForm.plotCreation->currentIndex());
+  int choice(m_uiForm.plotCreation->currentIndex());      
+  if (m_uiForm.frontPlotFuncs->count() <= 1)
+  {
+    m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(0);
+    updateFront();
+  }
+  m_uiForm.frontPlotFuncs->setCurrentIndex(m_uiForm.groupTablePlotChoice->currentIndex());
   if ((choice == 0 || choice == 1) && (!m_updating) && (m_tabNumber == 1) )
   {
     if (m_loaded == true)
