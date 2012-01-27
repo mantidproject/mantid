@@ -31,6 +31,7 @@ set ( SRC_FILES
 	src/PowerMD.cpp
 	src/QuadEnBackground.cpp
 	src/RunParam.cpp
+	src/SaveZODS.cpp
 	src/SetMDUsingMask.cpp
 	src/SimulateMDD.cpp
 	src/SimulateResolution.cpp
@@ -83,6 +84,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/PowerMD.h
 	inc/MantidMDAlgorithms/QuadEnBackground.h
 	inc/MantidMDAlgorithms/RunParam.h
+	inc/MantidMDAlgorithms/SaveZODS.h
 	inc/MantidMDAlgorithms/SetMDUsingMask.h
 	inc/MantidMDAlgorithms/SimulateMDD.h
 	inc/MantidMDAlgorithms/SimulateResolution.h
@@ -126,6 +128,7 @@ set ( TEST_FILES
 	test/PowerMDTest.h
 	test/QuadEnBackgroundTest.h
 	test/RunParamTest.h
+	test/SaveZODSTest.h
 	test/SetMDUsingMaskTest.h
 	test/SimulateMDDTest.h
 	test/TobyFitSimulateTest.h
