@@ -1,6 +1,6 @@
 # Spencer's F2PY Absorption Corrections Wrapper
 ## Handle selection of .pyd files for absorption corrections
-import platform
+import platform, sys
 operatingenvironment = platform.system()+platform.architecture()[0]
 if ( operatingenvironment == 'Windows32bit' ):
     import fltabs_win32 as fltabs, cylabs_win32 as cylabs
