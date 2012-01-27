@@ -1,5 +1,15 @@
 /*WIKI*
-TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
+
+Compare two MDWorkspaces ([[MDEventWorkspace]] or [[MDHistoWorkspace]]) to see
+if they are the same. This is mostly meant for testing/debugging use by
+developers.
+
+'''What is compared''': The dimensions, as well as the signal and error for each
+bin of each workspace will be compared.
+
+'''[[MDEventWorkspace]]''': the events in each box will be compared if the ''CheckEvents''
+option is checked. The events would need to be in the same order to match.
+
 *WIKI*/
 
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -91,10 +101,10 @@ namespace MDAlgorithms
     declareProperty("CheckEvents",true,
         "Whether to compare each MDEvent. If False, will only look at the box structure.");
 
-    declareProperty(new PropertyWithValue<std::string>("Result","",Direction::Output),
-        "String describing the difference found between the workspaces");
     declareProperty(new PropertyWithValue<bool>("Equals",false,Direction::Output),
         "Boolean set to true if the workspaces match.");
+    declareProperty(new PropertyWithValue<std::string>("Result","",Direction::Output),
+        "String describing the difference found between the workspaces");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -151,7 +161,6 @@ namespace MDAlgorithms
       compare(dim1->getNBins(), dim2->getNBins(), "Dimension #" + Strings::toString(d) + " has a different number of bins");
       compareTol(dim1->getMinimum(), dim2->getMinimum(), "Dimension #" + Strings::toString(d) + " has a different minimum");
       compareTol(dim1->getMaximum(), dim2->getMaximum(), "Dimension #" + Strings::toString(d) + " has a different maximum");
-      // TODO? Compare origin and transforms?
     }
   }
 
