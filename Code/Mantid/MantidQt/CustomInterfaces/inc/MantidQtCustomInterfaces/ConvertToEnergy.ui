@@ -238,6 +238,9 @@
                     <property name="label" stdset="0">
                      <string>Run Files</string>
                     </property>
+                    <property name="multipleFiles" stdset="0">
+                     <bool>true</bool>
+                    </property>
                    </widget>
                   </item>
                   <item>
