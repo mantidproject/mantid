@@ -100,7 +100,11 @@ namespace MDAlgorithms
 
     // ----------- Attributes ------------------
     std::vector<double> origin(3, 0.0);
+
+    // Size in each dimension (in the "C" style order, so z,y,x
+    // That is, data[z][y][x] = etc.
     std::vector<int> size(3, 0);
+
     // Dimension_X attributes give the step size for each dimension
     for (size_t d=0; d<3; d++)
     {
@@ -109,8 +113,8 @@ namespace MDAlgorithms
       direction[d] = dim->getBinWidth();
       // Origin of the CENTER of the first bin
       origin[d] = dim->getMinimum() + dim->getBinWidth()/2;
-      // Size in each dimension
-      size[d] = int(dim->getNBins());
+      // Size in each dimension (reverse order)
+      size[2-d] = int(dim->getNBins());
 //      file->putAttr("direction_" + Strings::toString(d+1), direction);
     }
 //    file->putAttr("origin", origin);
