@@ -31,6 +31,14 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SofQW)
 
+/// Energy to K constant
+double SofQW::energyToK()
+{
+  static const double energyToK = 8.0*M_PI*M_PI*PhysicalConstants::NeutronMass*PhysicalConstants::meV*1e-20 /
+      (PhysicalConstants::h*PhysicalConstants::h);
+  return energyToK;
+}
+
 /// Sets documentation strings for this algorithm
 void SofQW::initDocs()
 {
@@ -42,7 +50,19 @@ void SofQW::initDocs()
 using namespace Kernel;
 using namespace API;
 
+/**
+ * Create the input properties
+ */
 void SofQW::init()
+{
+  createInputProperties(*this);
+}
+
+/**
+ * Create the given algorithm's input properties
+ * @param alg An algorithm object
+ */
+void SofQW::createInputProperties(API::Algorithm & alg)
 {
   CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("DeltaE"));
@@ -50,20 +70,21 @@ void SofQW::init()
   wsValidator->add(new CommonBinsValidator<>);
   wsValidator->add(new HistogramValidator<>);
   wsValidator->add(new InstrumentValidator<>);
-  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator));
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
+  alg.declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator));
+  alg.declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
 
-  declareProperty(new ArrayProperty<double>("QAxisBinning", new RebinParamsValidator));
+  alg.declareProperty(new ArrayProperty<double>("QAxisBinning", new RebinParamsValidator));
   
   std::vector<std::string> propOptions;
   propOptions.push_back("Direct");
   propOptions.push_back("Indirect");
-  declareProperty("EMode","",new ListValidator(propOptions),
+  alg.declareProperty("EMode","",new ListValidator(propOptions),
     "The energy mode");
   BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
   mustBePositive->setLower(0.0);
-  declareProperty("EFixed",0.0,mustBePositive,
-    "Value of fixed energy in meV : EI (EMode=Direct) or EF (EMode=Indirect).");
+  alg.declareProperty("EFixed",0.0,mustBePositive,
+      "Value of fixed energy in meV : EI (EMode=Direct) or EF (EMode=Indirect).");
+
 }
 
 void SofQW::exec()
@@ -79,7 +100,8 @@ void SofQW::exec()
   }
   
   std::vector<double> verticalAxis;
-  MatrixWorkspace_sptr outputWorkspace = this->setUpOutputWorkspace(inputWorkspace, verticalAxis);
+  MatrixWorkspace_sptr outputWorkspace = setUpOutputWorkspace(inputWorkspace, getProperty("QAxisBinning"), verticalAxis);
+  setProperty("OutputWorkspace",outputWorkspace);
 
   // Retrieve the emode & efixed properties
   const std::string emodeStr = getProperty("EMode");
@@ -213,17 +235,19 @@ void SofQW::exec()
 
 /** Creates the output workspace, setting the axes according to the input binning parameters
  *  @param[in]  inputWorkspace The input workspace
+ *  @param[in]  binParams The bin parameters from the user
  *  @param[out] newAxis        The 'vertical' axis defined by the given parameters
  *  @return A pointer to the newly-created workspace
  */
-API::MatrixWorkspace_sptr SofQW::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace, std::vector<double>& newAxis)
+API::MatrixWorkspace_sptr SofQW::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace,
+    const std::vector<double> & binParams, std::vector<double>& newAxis)
 {
   // Create vector to hold the new X axis values
   MantidVecPtr xAxis;
   xAxis.access() = inputWorkspace->readX(0);
   const int xLength = static_cast<int>(xAxis->size());
   // Create a vector to temporarily hold the vertical ('y') axis and populate that
-  const int yLength = static_cast<int>(VectorHelper::createAxisFromRebinParams(getProperty("QAxisBinning"),newAxis));
+  const int yLength = static_cast<int>(VectorHelper::createAxisFromRebinParams(binParams,newAxis));
   
   // Create the output workspace
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace,yLength-1,xLength,xLength-1);
@@ -247,7 +271,6 @@ API::MatrixWorkspace_sptr SofQW::setUpOutputWorkspace(API::MatrixWorkspace_const
   // Set the X axis title (for conversion to MD)
   outputWorkspace->getAxis(0)->title() = "Energy transfer";
 
-  setProperty("OutputWorkspace",outputWorkspace);
   return outputWorkspace;
 }
 

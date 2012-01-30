@@ -11,6 +11,7 @@ Converts a 2D workspace from units of spectrum number/energy transfer to  the in
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SofQW2.h"
+#include "MantidAlgorithms/SofQW.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidGeometry/Math/LaszloIntersection.h"
 #include "MantidGeometry/Math/Quadrilateral.h"
@@ -36,7 +37,7 @@ namespace Mantid
 
     /// Default constructor
     SofQW2::SofQW2()
-    : SofQW(), m_emode(0), m_efixedGiven(false), m_efixed(0.0), m_progress(),
+    : Rebin2D(), m_emode(0), m_efixedGiven(false), m_efixed(0.0),
       m_Qout(), m_thetaPts(), m_thetaWidth(0.0)
     {
     }
@@ -47,6 +48,14 @@ namespace Mantid
     {
       this->setWikiSummary("Calculate the intensity as a function of momentum transfer and energy");
       this->setOptionalMessage("Calculate the intensity as a function of momentum transfer and energy.");
+    }
+
+    /**
+     * Initialize the algorithm
+     */
+    void SofQW2::init()
+    {
+      SofQW::createInputProperties(*this);
     }
 
     /**
@@ -61,12 +70,8 @@ namespace Mantid
         throw std::invalid_argument("The input workspace must have common binning across all spectra");
       }
 
-      MatrixWorkspace_sptr outputWS = this->setUpOutputWorkspace(inputWS, m_Qout);
-      // We also need to keep track of how many intersections went into a pixel so that we can
-      // normalize correctly
-      m_numIntersectionsWS = WorkspaceFactory::Instance().create(outputWS);
-
-      const size_t nOutputHist(outputWS->getNumberHistograms());
+      MatrixWorkspace_sptr outputWS = SofQW::setUpOutputWorkspace(inputWS, getProperty("QAxisBinning"), m_Qout);
+      setProperty("OutputWorkspace",outputWS);
       const size_t nenergyBins = inputWS->blocksize();
 
       //Progress reports & cancellation
@@ -91,7 +96,7 @@ namespace Mantid
         qCalculator = &SofQW2::calculateIndirectQ;
       }
 
-      PARALLEL_FOR3(inputWS, m_numIntersectionsWS, outputWS)
+      PARALLEL_FOR2(inputWS, outputWS)
       for(int64_t i = 0; i < static_cast<int64_t>(nTheta); ++i) // signed for openmp
       {
         PARALLEL_START_INTERUPT_REGION
@@ -114,7 +119,6 @@ namespace Mantid
             leftWidth = gap - 0.5*m_thetaWidth;
           }
         }
-
         const double thetaLower = theta - leftWidth;
         const double thetaUpper = theta + rightWidth;
         const double efixed = getEFixed(inputWS->getDetector(i));
@@ -132,131 +136,15 @@ namespace Mantid
           const V2D ul(dE_j, (this->*qCalculator)(efixed, dE_j,thetaUpper,0.0));
           Quadrilateral inputQ = Quadrilateral(ll, lr, ur, ul);
 
-          rebinToOutput(inputQ, inputWS, i, j, outputWS);
+          rebinToOutput(inputQ, inputWS, i, j, outputWS, m_Qout);
         }
 
         PARALLEL_END_INTERUPT_REGION
       }
       PARALLEL_CHECK_INTERUPT_REGION
 
-      /**
-       * Normalise the output by the total accumulated fraction
-       * and square root the errors
-       */
-
-      PARALLEL_FOR1(outputWS)
-      for(int64_t i = 0; i < static_cast<int64_t>(nOutputHist); ++i)
-      {
-        PARALLEL_START_INTERUPT_REGION
-
-        MantidVec & outputY = outputWS->dataY(i);
-        MantidVec & outputE = outputWS->dataE(i);
-        const MantidVec & noIntersects = m_numIntersectionsWS->readY(i);
-        for(size_t j = 0; j < nenergyBins; ++j)
-        {
-          m_progress->report("Calculating errors and normalising");
-          const double numIntersects = noIntersects[j];
-          if(numIntersects > 0.0) outputY[j] /= numIntersects;
-          outputE[j] = std::sqrt(outputE[j]);
-        }
-
-        PARALLEL_END_INTERUPT_REGION
-      }
-      PARALLEL_CHECK_INTERUPT_REGION
-
+      normaliseOutput(outputWS, inputWS);
     }
-
-    /**
-     * Rebin the input quadrilateral to the output grid
-     * @param inputQ The input polygon
-     * @param inputWS The input workspace containing the input intensity values
-     * @param i The index in the Q direction that inputQ references
-     * @param j The index in the dE direction that inputQ references
-     * @param outputWS A pointer to the output workspace that accumulates the data
-     */
-    void SofQW2::rebinToOutput(const Geometry::Quadrilateral & inputQ, MatrixWorkspace_const_sptr inputWS, 
-                               const size_t i, const size_t j, MatrixWorkspace_sptr outputWS)
-    {
-      size_t qstart(0), qend(0), en_start(0), en_end(0);
-      if( !getIntersectionRegion(outputWS, inputQ, qstart, qend, en_start, en_end)) return;
-
-      const MantidVec & X = inputWS->readX(0);
-      for( size_t qi = qstart; qi < qend; ++qi )
-      {
-        for( size_t ei = en_start; ei < en_end; ++ei )
-        {
-          const V2D ll(X[ei], m_Qout[qi]);
-          const V2D lr(X[ei+1], m_Qout[qi]);
-          const V2D ur(X[ei+1], m_Qout[qi+1]);
-          const V2D ul(X[ei], m_Qout[qi+1]);
-          const Quadrilateral outputQ(ll, lr, ur, ul);
-          try
-          {
-            ConvexPolygon overlap = intersectionByLaszlo(outputQ, inputQ);
-            const double weight = overlap.area()/inputQ.area();
-            PARALLEL_CRITICAL(overlap)
-            {
-              outputWS->dataY(qi)[ei] += inputWS->readY(i)[j] * weight;
-              m_numIntersectionsWS->dataY(qi)[ei] += weight;
-              outputWS->dataE(qi)[ei] += std::pow(inputWS->readE(i)[j] * weight, 2);
-            }
-          }
-          catch(Geometry::NoIntersectionException &)
-          {}
-        }
-      }
-    }
-
-    /**
-     * Find the possible region of intersection on the output workspace for the given polygon
-     * @param outputWS A pointer to the output workspace
-     * @param inputQ The input polygon
-     * @param qstart An output giving the starting index in the Q direction
-     * @param qend An output giving the end index in the Q direction
-     * @param en_start An output giving the start index in the dE direction
-     * @param en_end An output giving the end index in the dE direction
-     * @return True if an intersecition is possible
-     */
-    bool SofQW2::getIntersectionRegion(API::MatrixWorkspace_const_sptr outputWS, const Geometry::Quadrilateral & inputQ,
-        size_t &qstart, size_t &qend, size_t &en_start, size_t &en_end) const
-    {
-      const MantidVec & energyAxis = outputWS->readX(0);
-      const double xn_lo(inputQ.smallestX()), xn_hi(inputQ.largestX());
-      const double yn_lo(inputQ.smallestY()), yn_hi(inputQ.largestY());
-
-      if( xn_lo < energyAxis.front() || xn_hi > energyAxis.back() ||
-          yn_lo < m_Qout.front() || yn_hi > m_Qout.back() ) return true;
-
-      MantidVec::const_iterator start_it = std::upper_bound(energyAxis.begin(), energyAxis.end(), xn_lo);
-      MantidVec::const_iterator end_it = std::upper_bound(energyAxis.begin(), energyAxis.end(), xn_hi);
-      en_start = 0;
-      en_end = energyAxis.size() - 1;
-      if( start_it != energyAxis.begin() )
-      {
-        en_start = (start_it - energyAxis.begin() - 1);
-      }
-      if( end_it != energyAxis.end() )
-      {
-        en_end = end_it - energyAxis.begin();
-      }
-
-      // Q region
-      start_it = std::upper_bound(m_Qout.begin(), m_Qout.end(), yn_lo);
-      end_it = std::upper_bound(m_Qout.begin(), m_Qout.end(), yn_hi);
-      qstart = 0;
-      qend = m_Qout.size() - 1;
-      if( start_it != m_Qout.begin() )
-      {
-        qstart = (start_it - m_Qout.begin() - 1);
-      }
-      if( end_it != m_Qout.end() )
-      {
-        qend = end_it - m_Qout.begin();
-      }
-
-      return true;
-    }
-
 
     /**
      * Return the efixed for this detector
@@ -295,8 +183,8 @@ namespace Mantid
     double SofQW2::calculateDirectQ(const double efixed, const double deltaE, const double twoTheta,
         const double psi) const
     {
-      const double ki = std::sqrt(efixed*m_EtoK);
-      const double kf = std::sqrt((efixed - deltaE)*m_EtoK);
+      const double ki = std::sqrt(efixed*SofQW::energyToK());
+      const double kf = std::sqrt((efixed - deltaE)*SofQW::energyToK());
       const double Qx = ki - kf*std::cos(twoTheta);
       const double Qy = -kf*std::sin(twoTheta)*std::cos(psi);
       const double Qz = -kf*std::sin(twoTheta)*std::sin(psi);
@@ -315,8 +203,8 @@ namespace Mantid
         const double psi) const
     {
       UNUSED_ARG(psi);
-      const double ki = std::sqrt((efixed + deltaE)*m_EtoK);
-      const double kf = std::sqrt(efixed*m_EtoK);
+      const double ki = std::sqrt((efixed + deltaE)*SofQW::energyToK());
+      const double kf = std::sqrt(efixed*SofQW::energyToK());
       const double Qx = ki - kf*std::cos(twoTheta);
       const double Qy = -kf*std::sin(twoTheta);
       return std::sqrt(Qx*Qx + Qy*Qy);
@@ -366,11 +254,6 @@ namespace Mantid
           m_efixedGiven = true;
         }
       }
-
-
-      // Conversion constant for E->k. k(A^-1) = sqrt(energyToK*E(meV))
-      m_EtoK = 8.0*M_PI*M_PI*PhysicalConstants::NeutronMass*PhysicalConstants::meV*1e-20 /
-          (PhysicalConstants::h*PhysicalConstants::h);
 
       // Index theta cache
       initThetaCache(workspace);

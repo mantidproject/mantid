@@ -17,6 +17,7 @@ The algorithms currently requires the second axis on the workspace to be a numer
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidGeometry/Math/ConvexPolygon.h"
+#include "MantidGeometry/Math/Quadrilateral.h"
 #include "MantidGeometry/Math/LaszloIntersection.h"
 
 namespace Mantid
@@ -29,6 +30,7 @@ namespace Mantid
 
     using namespace API;
     using Geometry::ConvexPolygon;
+    using Geometry::Quadrilateral;
     using Kernel::V2D;
 
     //--------------------------------------------------------------------------
@@ -78,168 +80,200 @@ namespace Mantid
         throw std::invalid_argument("Vertical axis is not a numeric axis, cannot rebin. "
                                     "If it is a spectra axis try running ConvertSpectrumAxis first.");
       }
-      const std::vector<double> oldYBins = oldAxis2->createBinBoundaries();
+
+      const MantidVec & oldXEdges = inputWS->readX(0);
+      const size_t numXBins = inputWS->blocksize();
+      const size_t numYBins = inputWS->getNumberHistograms();
+      std::vector<double> oldYEdges;
+      if(numYBins == oldAxis2->length())
+      {
+        //Pt data on axis 2, create bins
+        oldYEdges = oldAxis2->createBinBoundaries();
+      }
+      else
+      {
+        oldYEdges.resize(oldAxis2->length());
+        for(size_t i = 0; i < oldAxis2->length(); ++i)
+        {
+          oldYEdges[i] = (*oldAxis2)(i);
+        }
+      }
+
 
       // Output grid and workspace. Fills in the new X and Y bin vectors
       MantidVecPtr newXBins;
       MantidVec newYBins;
       MatrixWorkspace_sptr outputWS = createOutputWorkspace(inputWS, newXBins.access(), newYBins);
-      const int64_t numHist = static_cast<int64_t>(outputWS->getNumberHistograms());
-      const int64_t numSig = static_cast<int64_t>(outputWS->blocksize());
-      Axis* newAxis2 = outputWS->getAxis(1);
 
-      Progress progress(this,0.0,1.0, numHist);
-      // Find the intersection of the each new 'spectra' with the old
-      PARALLEL_FOR2(inputWS,outputWS)
-      for(int64_t i = 0; i < numHist; ++i)
+      //Progress reports & cancellation
+      const size_t nreports(static_cast<size_t>(inputWS->getNumberHistograms()*inputWS->blocksize()));
+      m_progress = boost::shared_ptr<API::Progress>(new API::Progress(this, 0.0, 1.0, nreports));
+
+      PARALLEL_FOR2(inputWS, outputWS)
+      for(int64_t i = 0; i < static_cast<int64_t>(numYBins); ++i) // signed for openmp
       {
         PARALLEL_START_INTERUPT_REGION
 
-        outputWS->setX(i, newXBins);
-        // References to the Y and E data
-        MantidVec & outY = outputWS->dataY(i);
-        MantidVec & outE = outputWS->dataE(i);
-        // The Y axis value is the bin centre of the new Y bins
-        const double y_i = newYBins[i];
-        const double y_ip1 = newYBins[i+1];
-        newAxis2->setValue(i, 0.5*(y_i + y_ip1));
-
-        // For each bin on the new workspace, test compute overlap
-        for(int64_t j = 0; j < numSig; ++j)
+        const double vlo = oldYEdges[i];
+        const double vhi = oldYEdges[i+1];
+        for(size_t j = 0; j < numXBins; ++j)
         {
-          ConvexPolygon newBin = ConvexPolygon((*newXBins)[j],(*newXBins)[j+1], y_i, y_ip1);
-          std::pair<double,double> contrib = calculateYE(inputWS, oldYBins, newBin);
-          outY[j] = contrib.first;
-          outE[j] = contrib.second;
+          m_progress->report("Computing polygon intersections");
+          // For each input polygon test where it intersects with
+          // the output grid and assign the appropriate weights of Y/E
+          const double x_j = oldXEdges[j];
+          const double x_jp1 = oldXEdges[j+1];
+          Quadrilateral inputQ = Quadrilateral(x_j, x_jp1, vlo, vhi);
+          rebinToOutput(inputQ, inputWS, i, j, outputWS, newYBins);
         }
-        progress.report();
+
+        PARALLEL_END_INTERUPT_REGION
+      }
+      PARALLEL_CHECK_INTERUPT_REGION
+
+      normaliseOutput(outputWS, inputWS);
+      setProperty("OutputWorkspace", outputWS);
+    }
+
+    /**
+     * Rebin the input quadrilateral to the output grid
+     * @param inputQ The input polygon
+     * @param inputWS The input workspace containing the input intensity values
+     * @param i The index in the vertical axis direction that inputQ references
+     * @param j The index in the horizontal axis direction that inputQ references
+     * @param outputWS A pointer to the output workspace that accumulates the data
+     * @param verticalAxis A vector containing the output vertical axis bin boundaries
+     */
+    void Rebin2D::rebinToOutput(const Geometry::Quadrilateral & inputQ, MatrixWorkspace_const_sptr inputWS,
+                                const size_t i, const size_t j, MatrixWorkspace_sptr outputWS,
+                                const std::vector<double> & verticalAxis)
+    {
+      size_t qstart(0), qend(verticalAxis.size()-1), en_start(0), en_end(outputWS->readX(0).size() - 1);
+      if( !getIntersectionRegion(outputWS, verticalAxis, inputQ, qstart, qend, en_start, en_end)) return;
+      const MantidVec & X = outputWS->readX(0);
+      const double inputBinWidth = inputQ.largestX() - inputQ.smallestX();
+
+      for( size_t qi = qstart; qi < qend; ++qi )
+      {
+        const double vlo = verticalAxis[qi];
+        const double vhi = verticalAxis[qi+1];
+        for( size_t ei = en_start; ei < en_end; ++ei )
+        {
+          const V2D ll(X[ei], vlo);
+          const V2D lr(X[ei+1], vlo);
+          const V2D ur(X[ei+1], vhi);
+          const V2D ul(X[ei], vhi);
+          const Quadrilateral outputQ(ll, lr, ur, ul);
+
+          try
+          {
+            ConvexPolygon overlap = intersectionByLaszlo(outputQ, inputQ);
+            const double weight = overlap.area()/inputQ.area();
+            double yValue = inputWS->readY(i)[j] * weight;
+            double eValue = inputWS->readE(i)[j] * weight;
+            if(inputWS->isDistribution())
+            {
+              yValue *= inputBinWidth;
+              eValue *= inputBinWidth;
+            }
+            eValue = eValue*eValue;
+            PARALLEL_CRITICAL(overlap)
+            {
+              outputWS->dataY(qi)[ei] += yValue;
+              outputWS->dataE(qi)[ei] += eValue;
+            }
+          }
+          catch(Geometry::NoIntersectionException &)
+          {}
+        }
+      }
+    }
+
+    /**
+     * Find the possible region of intersection on the output workspace for the given polygon
+     * @param outputWS A pointer to the output workspace
+     * @param verticalAxis A vector containing the output vertical axis edges
+     * @param inputQ The input polygon
+     * @param qstart An output giving the starting index in the Q direction
+     * @param qend An output giving the end index in the Q direction
+     * @param en_start An output giving the start index in the dE direction
+     * @param en_end An output giving the end index in the dE direction
+     * @return True if an intersecition is possible
+     */
+    bool Rebin2D::getIntersectionRegion(API::MatrixWorkspace_const_sptr outputWS, const std::vector<double> & verticalAxis,
+                                        const Geometry::Quadrilateral & inputQ,
+                                        size_t &qstart, size_t &qend, size_t &en_start, size_t &en_end) const
+    {
+      const MantidVec & xAxis = outputWS->readX(0);
+      const double xn_lo(inputQ.smallestX()), xn_hi(inputQ.largestX());
+      const double yn_lo(inputQ.smallestY()), yn_hi(inputQ.largestY());
+
+      if( xn_hi < xAxis.front() || xn_lo > xAxis.back() ||
+          yn_hi < verticalAxis.front() || yn_lo > verticalAxis.back() ) return false;
+
+      MantidVec::const_iterator start_it = std::upper_bound(xAxis.begin(), xAxis.end(), xn_lo);
+      MantidVec::const_iterator end_it = std::upper_bound(xAxis.begin(), xAxis.end(), xn_hi);
+      en_start = 0;
+      en_end = xAxis.size() - 1;
+      if( start_it != xAxis.begin() )
+      {
+        en_start = (start_it - xAxis.begin() - 1);
+      }
+      if( end_it != xAxis.end() )
+      {
+        en_end = end_it - xAxis.begin();
+      }
+
+      // Q region
+      start_it = std::upper_bound(verticalAxis.begin(), verticalAxis.end(), yn_lo);
+      end_it = std::upper_bound(verticalAxis.begin(), verticalAxis.end(), yn_hi);
+      qstart = 0;
+      qend = verticalAxis.size() - 1;
+      if( start_it != verticalAxis.begin() )
+      {
+        qstart = (start_it - verticalAxis.begin() - 1);
+      }
+      if( end_it != verticalAxis.end() )
+      {
+        qend = end_it - verticalAxis.begin();
+      }
+
+      return true;
+    }
+
+    /**
+     * Computes the square root of the errors and if the input was a distribution
+     * this divides by the new bin-width
+     * @param outputWS The workspace containing the output data
+     * @param inputWS The input workspace used for testing distribution state
+     */
+    void Rebin2D::normaliseOutput(MatrixWorkspace_sptr outputWS, MatrixWorkspace_const_sptr inputWS)
+    {
+      PARALLEL_FOR1(outputWS)
+      for(int64_t i = 0; i < static_cast<int64_t>(outputWS->getNumberHistograms()); ++i)
+      {
+        PARALLEL_START_INTERUPT_REGION
+
+        MantidVec & outputY = outputWS->dataY(i);
+        MantidVec & outputE = outputWS->dataE(i);
+        for(size_t j = 0; j < outputWS->blocksize(); ++j)
+        {
+          m_progress->report("Calculating errors");
+          const double binWidth = (outputWS->readX(i)[j+1] - outputWS->readX(i)[j]);
+          double eValue = std::sqrt(outputE[j]);
+          if( inputWS->isDistribution() )
+          {
+            outputY[j] /= binWidth;
+            eValue /= binWidth;
+          }
+          outputE[j] = eValue;
+        }
 
         PARALLEL_END_INTERUPT_REGION
       }
       PARALLEL_CHECK_INTERUPT_REGION
 
       outputWS->isDistribution(inputWS->isDistribution());
-      setProperty("OutputWorkspace", outputWS);
-    }
-
-    /**
-     * Calculate the Y and E values for the given possible overlap
-     * @param inputWS :: A pointer to the inputWS
-     * @param oldYBins :: A reference to the set of Y bin boundaries on the input WS
-     * @param outputPoly :: A reference to a polygon to test for overlap
-     * @returns A pair of Y and E values
-     */
-    std::pair<double,double> 
-    Rebin2D::calculateYE(API::MatrixWorkspace_const_sptr inputWS,
-                         const MantidVec & oldYBins, const ConvexPolygon & outputPoly) const
-    {
-      const MantidVec & oldXBins = inputWS->readX(0);
-      // Build a list intersection locations in terms of workspace indices
-      // along with corresponding weights from that location
-      std::vector<BinWithWeight> overlaps = findIntersections(oldXBins, oldYBins, outputPoly);
-      std::pair<double,double> binValues(0,0);
-      if( inputWS->isDistribution() )
-      {
-        const double newWidth = outputPoly[3].X() - outputPoly[0].X(); // For distribution
-        binValues = calculateDistYE(inputWS, overlaps, newWidth);
-      }
-      else
-      {
-        binValues = calculateYE(inputWS, overlaps);
-      }
-      return binValues;
-    }
-
-    /**
-     * Calculate the Y and E values from the given overlaps
-     * @param inputWS :: A pointer to the inputWS
-     * @param overlaps :: A list of overlap locations and weights
-     * @returns A pair of Y and E values
-     */
-    std::pair<double,double> Rebin2D::calculateYE(API::MatrixWorkspace_const_sptr inputWS,
-                                                  const std::vector<BinWithWeight> & overlaps) const
-    {
-      double totalY(0.0), totalE(0.0);
-      std::vector<BinWithWeight>::const_iterator iend = overlaps.end();
-      for(std::vector<BinWithWeight>::const_iterator itr = overlaps.begin();
-          itr != iend; ++itr)
-      {
-        const size_t yIndex = itr->yIndex;
-        const size_t xIndex = itr->xIndex;
-        const MantidVec & inputY = inputWS->readY(yIndex);
-        const MantidVec & inputE = inputWS->readE(yIndex);
-        totalY += inputY[xIndex] * itr->weight;
-        totalE += std::pow(inputE[xIndex] * itr->weight, 2);
-      }
-      return std::make_pair(totalY,std::sqrt(totalE));
-    }
-
-    /**
-     * Calculate the Y and E values from the given intersections for an input distribution
-     * @param inputWS :: A pointer to the inputWS
-     * @param overlaps :: A list of overlap locations and weights
-     * @param newBinWidth :: The width of the new bin
-     * @returns A pair of Y and E values
-     */
-    std::pair<double,double> Rebin2D::calculateDistYE(API::MatrixWorkspace_const_sptr inputWS,
-                                                      const std::vector<BinWithWeight> & overlaps,
-                                                      const double newBinWidth) const
-    {
-      const MantidVec & oldXBins = inputWS->readX(0);
-      double totalY(0.0), totalE(0.0);
-      std::vector<BinWithWeight>::const_iterator iend = overlaps.end();
-      for(std::vector<BinWithWeight>::const_iterator itr = overlaps.begin();
-          itr != iend; ++itr)
-      {
-        const size_t yIndex = itr->yIndex;
-        const size_t xIndex = itr->xIndex;
-        const MantidVec & inputY = inputWS->readY(yIndex);
-        const MantidVec & inputE = inputWS->readE(yIndex);
-        double oldWidth = oldXBins[xIndex+1] - oldXBins[xIndex];
-        totalY += inputY[xIndex] * oldWidth * itr->weight;
-        totalE += std::pow(inputE[xIndex]*oldWidth*itr->weight,2);
-      }
-      return std::make_pair(totalY/newBinWidth,std::sqrt(totalE)/newBinWidth);
-    }
-
-    /**
-     * Find the overlap of the inputWS with the given polygon
-     * @param oldAxis1 :: Axis 1 bin boundaries from the input grid
-     * @param oldAxis2 :: Axis 2 bin boundaries from the input grid
-     * @param newPoly :: The new polygon to test
-     * @returns A list of intersection locations with weights of the overlap
-     */
-    std::vector<Rebin2D::BinWithWeight> 
-    Rebin2D::findIntersections(const MantidVec & oldAxis1, const MantidVec & oldAxis2,
-                               const Geometry::ConvexPolygon & newPoly) const
-    {
-      std::vector<BinWithWeight> overlaps;
-      overlaps.reserve(5); // Have a guess at a posible limit
-
-      const size_t nxpoints(oldAxis1.size()-1), nypoints(oldAxis2.size()-1);
-      const double yn_lo(newPoly[0].Y()), yn_hi(newPoly[1].Y());
-      const double xn_lo(newPoly[0].X()), xn_hi(newPoly[2].X());
-      for(size_t i = 0; i < nypoints; ++i)
-      {
-        const double yo_lo(oldAxis2[i]), yo_hi(oldAxis2[i+1]);
-        // Check if there is a possibility of overlap
-        if( yo_hi < yn_lo || yo_lo > yn_hi ) continue;
-        for(size_t j = 0; j < nxpoints; ++j)
-        {
-          const double xo_lo(oldAxis1[j]), xo_hi(oldAxis1[j+1]);
-          // Check if there is a possibility of overlap
-          if( xo_hi < xn_lo || xo_lo > xn_hi ) continue;
-          ConvexPolygon oldPoly(xo_lo, xo_hi, yo_lo, yo_hi);
-          try
-          {
-            ConvexPolygon overlap = intersectionByLaszlo(newPoly, oldPoly);
-            overlaps.push_back(BinWithWeight(i,j,overlap.area()/oldPoly.area()));
-          }
-          catch(Geometry::NoIntersectionException &)
-          {}            
-        }
-      }
-      return overlaps;
     }
 
     /**
@@ -258,7 +292,23 @@ namespace Mantid
       const int newXSize = createAxisFromRebinParams(getProperty("Axis1Binning"), newXBins);
       const int newYSize = createAxisFromRebinParams(getProperty("Axis2Binning"), newYBins);
       // and now the workspace
-      return WorkspaceFactory::Instance().create(parent,newYSize-1,newXSize,newXSize-1);
+      MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(parent,newYSize-1,newXSize,newXSize-1);
+      Axis* const verticalAxis = new NumericAxis(newYSize);
+      // Meta data
+      verticalAxis->unit() = parent->getAxis(1)->unit();
+      verticalAxis->title() = parent->getAxis(1)->title();
+      outputWS->replaceAxis(1,verticalAxis);
+
+      // Now set the axis values
+      for (size_t i=0; i < static_cast<size_t>(newYSize-1); ++i)
+      {
+        outputWS->setX(i,newXBins);
+        verticalAxis->setValue(i,newYBins[i]);
+      }
+      // One more to set on the 'y' axis
+      verticalAxis->setValue(newYSize-1,newYBins[newYSize-1]);
+
+      return outputWS;
     }
     
   } // namespace Algorithms

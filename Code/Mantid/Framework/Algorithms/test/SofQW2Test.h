@@ -74,22 +74,22 @@ public:
 //    std::cerr << "\n";
 
     const double delta(1e-08);
-    TS_ASSERT_DELTA( result->readY(0)[1160], 0.0, delta);
-    TS_ASSERT_DELTA( result->readE(0)[1160], 0.0, delta);
+    TS_ASSERT_DELTA( result->readY(0)[1160], 17.5583314826, delta);
+    TS_ASSERT_DELTA( result->readE(0)[1160], 0.197345265992, delta);
 
-    TS_ASSERT_DELTA( result->readY(1)[1145], 7.59421601661, delta);
-    TS_ASSERT_DELTA( result->readE(1)[1145], 0.0697283556312, delta);
+    TS_ASSERT_DELTA( result->readY(1)[1145], 4.61301046588, delta);
+    TS_ASSERT_DELTA( result->readE(1)[1145], 0.0721823446635,delta);
 
-    TS_ASSERT_DELTA( result->readY(2)[1200], 2.07634830425, delta);
+    TS_ASSERT_DELTA( result->readY(2)[1200], 1.33394133548, delta);
     TS_ASSERT_DELTA( result->readE(2)[1200], 0.0419839252961, delta);
 
-    TS_ASSERT_DELTA( result->readY(3)[99], 0.0421578372241, delta);
+    TS_ASSERT_DELTA( result->readY(3)[99], 0.0489605347949, delta);
     TS_ASSERT_DELTA( result->readE(3)[99], 0.0205020036326, delta);
 
-    TS_ASSERT_DELTA( result->readY(4)[1654], 0.0171027307025, delta);
+    TS_ASSERT_DELTA( result->readY(4)[1654], 0.0176095939231, delta);
     TS_ASSERT_DELTA( result->readE(4)[1654], 0.00517369024804, delta);
 
-    TS_ASSERT_DELTA( result->readY(5)[1025], 0.0808168496594, delta);
+    TS_ASSERT_DELTA( result->readY(5)[1025], 0.038616901764, delta);
     TS_ASSERT_DELTA( result->readE(5)[1025], 0.00769872580375, delta);
 
     AnalysisDataService::Instance().remove(inputWS);

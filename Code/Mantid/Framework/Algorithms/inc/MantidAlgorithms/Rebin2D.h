@@ -5,7 +5,9 @@
 // Includes
 //------------------------------------------------------------------------------    
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h" 
+#include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/Math/Quadrilateral.h"
+
 
 namespace Mantid
 {
@@ -45,7 +47,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport Rebin2D  : public API::Algorithm
+    class DLLExport Rebin2D : public API::Algorithm
     {
     public:
       /// Algorithm's name for identification 
@@ -55,46 +57,28 @@ namespace Mantid
       /// Algorithm's category for identification
       virtual const std::string category() const { return "Transforms\\Rebin";}
       
-    private:
-      /// A struct to store information about an intersection
-      struct BinWithWeight
-      {
-        /** Constructor
-         * @param i :: The index in the Y direction of the data bin
-         * @param j :: The index in the X direction of the data bin
-         * @param pointWeight :: The weight this point carries
-         */
-        BinWithWeight(const size_t i, const size_t j, const double pointWeight)
-          : yIndex(i), xIndex(j), weight(pointWeight) {}
-        /// The index in the Y direction of the data bin
-        size_t yIndex;
-        /// The index in the X direction of the data bin
-        size_t xIndex;
-        /// The weight this point carries
-        double weight;            
-      };
+    protected:
+      /// Rebin the input quadrilateral to to output grid
+      void rebinToOutput(const Geometry::Quadrilateral & inputQ, API::MatrixWorkspace_const_sptr inputWS,
+                         const size_t i, const size_t j, API::MatrixWorkspace_sptr outputWS,
+                         const std::vector<double> & verticalAxis);
+      /// Find the intersect region on the output grid
+      bool getIntersectionRegion(API::MatrixWorkspace_const_sptr outputWS, const std::vector<double> & verticalAxis,
+                                 const Geometry::Quadrilateral & inputQ,
+                                 size_t &qstart, size_t &qend, size_t &en_start, size_t &en_end) const;
+      /// Compute sqrt of errors and put back in bin width division if necessary
+      void normaliseOutput(API::MatrixWorkspace_sptr outputWS, API::MatrixWorkspace_const_sptr inputWS);
 
+      /// Progress reporter
+      boost::shared_ptr<API::Progress> m_progress;
+
+    private:
       /// Sets documentation strings for this algorithm
       virtual void initDocs();
       /// Initialise the properties
       void init();
       /// Run the algorithm
       void exec();
-      /// Calculate the Y and E values for the given possible overlap
-      std::pair<double,double> calculateYE(API::MatrixWorkspace_const_sptr inputWS,
-                                           const MantidVec & oldYBins,
-                                           const Geometry::ConvexPolygon & outputPoly) const;
-      /// Calculate the Y and E values from the given overlaps
-      std::pair<double,double> calculateYE(API::MatrixWorkspace_const_sptr inputWS,
-                                           const std::vector<BinWithWeight> & overlaps) const;
-      /// Calculate the Y and E values from the given overlaps for a distribution
-      std::pair<double,double> calculateDistYE(API::MatrixWorkspace_const_sptr inputWS,
-                                               const std::vector<BinWithWeight> & overlaps,
-                                               const double newBinWidth) const;
-      /// Find the overlap of the inputWS with the given polygon
-      std::vector<BinWithWeight> findIntersections(const MantidVec & oldAxis1, 
-                                                   const MantidVec & oldAxis2,
-                                                   const Geometry::ConvexPolygon & poly) const;
       /// Setup the output workspace 
       API::MatrixWorkspace_sptr createOutputWorkspace(API::MatrixWorkspace_const_sptr parent,
                                                       MantidVec &newXBins, 
