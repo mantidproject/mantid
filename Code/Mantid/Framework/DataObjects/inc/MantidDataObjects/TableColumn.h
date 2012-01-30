@@ -206,13 +206,13 @@ void TableColumn<Type>::read(size_t index, const std::string & text)
 }
 
 template<>
-double TableColumn<API::Boolean>::toDouble(size_t i)const
+inline double TableColumn<API::Boolean>::toDouble(size_t i)const
 {
   return m_data[i] ? 1.0 : 0.0;
 }
 
 template<>
-void TableColumn<API::Boolean>::fromDouble(size_t i, double value)
+inline void TableColumn<API::Boolean>::fromDouble(size_t i, double value)
 {
   m_data[i] = value != 0.0;
 }
