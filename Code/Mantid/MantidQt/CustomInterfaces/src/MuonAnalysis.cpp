@@ -593,7 +593,23 @@ void MuonAnalysis::runLoadCurrent()
  */
 void MuonAnalysis::runPairTablePlotButton()
 {
-  plotPair(m_uiForm.pairTablePlotChoice->currentText().toStdString());
+  m_uiForm.frontPlotFuncs->setCurrentIndex(m_uiForm.pairTablePlotChoice->currentIndex());
+  // if something sensible in row then update front
+  int currentSelection(m_uiForm.pairTable->currentRow());
+  if (currentSelection >= 0)
+  {
+    int index (numGroups() + currentSelection);
+    if (m_uiForm.frontGroupGroupPairComboBox->count() >= index)
+    {
+      m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(index);
+      plotPair(m_uiForm.pairTablePlotChoice->currentText().toStdString());
+    }
+  }
+  else
+  {
+    m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(numGroups()); //if two groups then index 2 will be pair group
+    plotPair(m_uiForm.pairTablePlotChoice->currentText().toStdString());
+  }  
 }
 
 /**
@@ -1213,6 +1229,8 @@ void MuonAnalysis::inputFileChanged(const QString& filename)
  */
 void MuonAnalysis::guessAlphaClicked()
 {
+  m_updating = true;
+
   if ( getPairNumberFromRow(m_pairTableRowInFocus) >= 0 )
   {
     QComboBox* qwF = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus,1));
@@ -1252,6 +1270,8 @@ void MuonAnalysis::guessAlphaClicked()
     else
       m_uiForm.pairTable->setItem(m_pairTableRowInFocus,3, new QTableWidgetItem(pyOutput));
   }
+
+  m_updating = false;
 
   // See if auto-update is on and if so update the plot
   groupTabUpdatePair();
@@ -2977,7 +2997,7 @@ void MuonAnalysis::connectAutoUpdate()
   connect(m_uiForm.homePeriodBox1, SIGNAL(currentIndexChanged(int)), this, SLOT(homeTabUpdatePlot()));
   connect(m_uiForm.homePeriodBoxMath, SIGNAL(currentIndexChanged(int)), this, SLOT(homeTabUpdatePlot()));
   connect(m_uiForm.homePeriodBox2, SIGNAL(currentIndexChanged(int)), this, SLOT(homeTabUpdatePlot()));
-  connect(m_uiForm.frontPlotFuncs, SIGNAL(currentIndexChanged(int)), this, SLOT(homeTabUpdatePlot()));
+  connect(m_uiForm.frontPlotFuncs, SIGNAL(currentIndexChanged(int)), this, SLOT(changeHomeFunction()));
   connect(m_uiForm.frontAlphaNumber, SIGNAL(returnPressed ()), this, SLOT(homeTabUpdatePlot()));
 
   // Grouping tab Auto Updates
@@ -2992,8 +3012,17 @@ void MuonAnalysis::connectAutoUpdate()
   connect(m_optionTab, SIGNAL(settingsTabUpdatePlot()), this, SLOT(settingsTabUpdatePlot()));
 }
 
-void MuonAnalysis::homeTabUpdatePlot()
+void MuonAnalysis::changeHomeFunction()
 {
+  if (m_tabNumber == 0)
+  {
+    m_uiForm.groupTablePlotChoice->setCurrentIndex(m_uiForm.frontPlotFuncs->currentIndex());
+    homeTabUpdatePlot();
+  }
+}
+
+void MuonAnalysis::homeTabUpdatePlot()
+{ 
   int choice(m_uiForm.plotCreation->currentIndex());
   if ((choice == 0 || choice == 1) && (!m_updating) && (m_tabNumber == 0) )
   {
@@ -3004,27 +3033,33 @@ void MuonAnalysis::homeTabUpdatePlot()
 
 void MuonAnalysis::groupTabUpdateGroup()
 {
-  int choice(m_uiForm.plotCreation->currentIndex());      
-  if (m_uiForm.frontPlotFuncs->count() <= 1)
+  if (m_tabNumber == 1)
   {
-    m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(0);
-    updateFront();
-  }
-  m_uiForm.frontPlotFuncs->setCurrentIndex(m_uiForm.groupTablePlotChoice->currentIndex());
-  if ((choice == 0 || choice == 1) && (!m_updating) && (m_tabNumber == 1) )
-  {
-    if (m_loaded == true)
-      runGroupTablePlotButton();
+    if (m_uiForm.frontPlotFuncs->count() <= 1)
+    {
+      m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(0);
+      updateFront();
+    }
+    m_uiForm.frontPlotFuncs->setCurrentIndex(m_uiForm.groupTablePlotChoice->currentIndex());
+    int choice(m_uiForm.plotCreation->currentIndex()); 
+    if ((choice == 0 || choice == 1) && (!m_updating) )
+    {
+      if (m_loaded == true)
+        runGroupTablePlotButton();
+    }
   }
 }
 
 void MuonAnalysis::groupTabUpdatePair()
 {
-  int choice(m_uiForm.plotCreation->currentIndex());
-  if ((choice == 0 || choice == 1) && (!m_updating) && (m_tabNumber == 1) )
+  if (m_tabNumber == 1)
   {
-    if (m_loaded == true)
-      runPairTablePlotButton();
+    int choice(m_uiForm.plotCreation->currentIndex());
+    if ((choice == 0 || choice == 1) && (!m_updating) )
+    {
+      if (m_loaded == true)
+        runPairTablePlotButton();
+    }
   }
 }
 
