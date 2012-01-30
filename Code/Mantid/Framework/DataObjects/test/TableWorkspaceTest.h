@@ -100,7 +100,7 @@ public:
     TS_ASSERT_EQUALS(str.size(),3);
     TS_ASSERT_EQUALS(str[2],"STRiNG");
 
-    for(int i=0;i<cNumb.size();i++)
+    for(int i=0;i<static_cast<int>(cNumb.size());i++)
         cNumb[i] = i+1;
 
     tw.insertRow(2);
@@ -242,10 +242,6 @@ public:
       //bool b = bc->data()[1]; // works
       bc->data()[1] = true;
 
-      for(int i=0;i<tw.rowCount();i++)
-      {
-//          std::cerr<<bc->data()[i]<<'\n';
-      }
   }
   catch(std::exception& e)
   {
@@ -285,7 +281,8 @@ public:
 
       }
       std::string searchstr="Name3";
-      int row=0;const int col=0;
+      size_t row=0;
+      const size_t col=0;
       tw.find(searchstr,row,col);
       TS_ASSERT_EQUALS(row,2);
 

@@ -221,7 +221,7 @@ namespace DataObjects
   /// Gets the shared pointer to a column by index.
   boost::shared_ptr<Mantid::API::Column> PeaksWorkspace::getColumn(size_t index)
   {
-    if (index >= static_cast<int>(columns.size())) throw std::invalid_argument("PeaksWorkspace::getColumn() called with invalid index.");
+    if (index >= columns.size()) throw std::invalid_argument("PeaksWorkspace::getColumn() called with invalid index.");
     return columns[index];
   }
 
@@ -229,7 +229,7 @@ namespace DataObjects
   /// Gets the shared pointer to a column by index.
   boost::shared_ptr<const Mantid::API::Column> PeaksWorkspace::getColumn(size_t index) const
   {
-    if (index >= static_cast<int>(columns.size())) throw std::invalid_argument("PeaksWorkspace::getColumn() called with invalid index.");
+    if (index >= columns.size()) throw std::invalid_argument("PeaksWorkspace::getColumn() called with invalid index.");
     return columns[index];
   }
 
