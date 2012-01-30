@@ -195,6 +195,7 @@ namespace MDEventsTestHelper
 
 
 
+  //-------------------------------------------------------------------------------------
   /** Creates a fake MDHistoWorkspace
    *
    * @param signal :: signal in every point
@@ -236,6 +237,44 @@ namespace MDEventsTestHelper
           MDHistoDimension_sptr(new MDHistoDimension("t","z","m", 0.0, max, numBins))
           );
     }
+    Mantid::MDEvents::MDHistoWorkspace_sptr ws_sptr(ws);
+    ws_sptr->setTo(signal, errorSquared);
+    if (!name.empty())
+      AnalysisDataService::Instance().addOrReplace(name, ws_sptr);
+    return ws_sptr;
+  }
+
+
+
+  //-------------------------------------------------------------------------------------
+  /** Creates a fake MDHistoWorkspace with more options
+   *
+   * @param numDims :: number of dimensions to create. They will range from 0 to max
+   * @param signal :: signal in every point
+   * @param errorSquared :: error squared in every point
+   * @param numBins :: array of # of bins in each dimensions
+   * @param min :: array of min position in each dimension
+   * @param max :: array of max position in each dimension
+   * @param name :: optional name
+   * @return the MDHisto
+   */
+  Mantid::MDEvents::MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceGeneral(size_t numDims,
+      double signal, double errorSquared,
+      size_t * numBins, double * min, double * max,
+      std::string name)
+  {
+    std::vector<std::string> names;
+    names.push_back("x");
+    names.push_back("y");
+    names.push_back("z");
+    names.push_back("t");
+
+    std::vector<Mantid::Geometry::MDHistoDimension_sptr> dimensions;
+    for (size_t d=0; d<numDims; d++)
+      dimensions.push_back(MDHistoDimension_sptr(new MDHistoDimension(names[d], names[d], "m", min[d], max[d], numBins[d])));
+
+    Mantid::MDEvents::MDHistoWorkspace * ws = NULL;
+    ws = new Mantid::MDEvents::MDHistoWorkspace(dimensions);
     Mantid::MDEvents::MDHistoWorkspace_sptr ws_sptr(ws);
     ws_sptr->setTo(signal, errorSquared);
     if (!name.empty())

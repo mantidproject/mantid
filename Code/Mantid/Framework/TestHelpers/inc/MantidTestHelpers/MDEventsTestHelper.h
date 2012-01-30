@@ -46,6 +46,12 @@ namespace MDEventsTestHelper
   Mantid::MDEvents::MDHistoWorkspace_sptr makeFakeMDHistoWorkspace(double signal, size_t numDims, size_t numBins = 10, double max = 10.0,
       double errorSquared=1.0, std::string name="");
 
+  /// More general fake n-dimensionsal MDHistoWorkspace
+  Mantid::MDEvents::MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceGeneral(size_t numDims,
+      double signal, double errorSquared,
+      size_t * numBins, double * min, double * max,
+      std::string name="");
+
 
   //-------------------------------------------------------------------------------------
   /** Create a test MDEventWorkspace<nd> . Dimensions are names Axis0, Axis1, etc.
