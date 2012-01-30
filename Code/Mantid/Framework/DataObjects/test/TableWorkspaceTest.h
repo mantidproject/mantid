@@ -166,7 +166,7 @@ public:
         size_t j = row.row();
         std::ostringstream ostr;
         ostr<<"Number "<<j;
-        row << int(18*j) << 3.14*j << ostr.str() << (j%2 == 0);
+        row << int(18*j) << 3.14*double(j) << ostr.str() << (j%2 == 0);
     }
 
     TS_ASSERT_EQUALS(tw.rowCount(),7);
