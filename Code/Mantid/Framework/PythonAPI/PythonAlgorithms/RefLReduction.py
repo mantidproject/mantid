@@ -26,18 +26,21 @@ class RefLReduction(PythonAlgorithm):
         self.declareListProperty("NormBackgroundPixelRange", [123, 137], Validator=ArrayBoundedValidator(Lower=0))
         self.declareListProperty("LowResAxisPixelRange", [115, 210], Validator=ArrayBoundedValidator(Lower=0))
         self.declareListProperty("TOFRange", [9000., 23600.], Validator=ArrayBoundedValidator(Lower=0))
-        self.declareListProperty("Binning", [0,200,200000],
-                                 Description="Positive is linear bins, negative is logorithmic")
+        self.declareListProperty("TOFBinning", [0.,200.,200000.],
+                                 Description="Positive is linear bins, negative is logarithmic")
+        self.declareProperty("QCutEnabled", False)
+        self.declareListProperty("QBinning", [0.001,0.001,0.2],
+                                 Description="Positive is linear bins, negative is logarithmic")
         # Output workspace to put the transmission histo into
         self.declareWorkspaceProperty("OutputWorkspace", "", Direction.Output)
 
     def PyExec(self):
-        self._binning = self.getProperty("Binning")
-        if len(self._binning) != 1 and len(self._binning) != 3:
-            raise RuntimeError("Can only specify (width) or (start,width,stop) for binning. Found %d values." % len(self._binning))
-        if len(self._binning) == 3:
-            if self._binning[0] == 0. and self._binning[1] == 0. and self._binning[2] == 0.:
-                raise RuntimeError("Failed to specify the binning")
+        tof_binning = self.getProperty("TOFBinning")
+        if len(tof_binning) != 1 and len(tof_binning) != 3:
+            raise RuntimeError("Can only specify (width) or (start,width,stop) for binning. Found %d values." % len(tof_binning))
+        if len(tof_binning) == 3:
+            if tof_binning[0] == 0. and tof_binning[1] == 0. and tof_binning[2] == 0.:
+                raise RuntimeError("Failed to specify the TOF binning")
         
         run_numbers = self.getProperty("RunNumbers")
         allow_multiple = False
@@ -50,7 +53,16 @@ class RefLReduction(PythonAlgorithm):
         data_back = self.getProperty("SignalBackgroundPixelRange")
 
         TOFrange = self.getProperty("TOFRange") #microS
-        Qrange = [0.001,0.001,0.2]  #Qmin, Qwidth, Qmax
+
+        q_cut_enabled = self.getProperty("QCutEnabled")
+        q_binning = None
+        if q_cut_enabled:
+            q_binning = self.getProperty("QBinning")
+            if len(q_binning) != 1 and len(q_binning) != 3:
+                raise RuntimeError("Can only specify (width) or (start,width,stop) for binning. Found %d values." % len(q_binning))
+            if len(q_binning) == 3:
+                if q_binning[0] == 0. and q_binning[1] == 0. and q_binning[2] == 0.:
+                    raise RuntimeError("Failed to specify the q-binning")
         
         #Due to the frame effect, it's sometimes necessary to narrow the range
         #over which we add all the pixels along the low resolution
@@ -127,7 +139,7 @@ class RefLReduction(PythonAlgorithm):
         
         # Rebin data (x-axis is in TOF)
         ws_histo_data = ws_name+"_histo"
-        Rebin(InputWorkspace=ws_event_data, OutputWorkspace=ws_histo_data, Params=self._binning)
+        Rebin(InputWorkspace=ws_event_data, OutputWorkspace=ws_histo_data, Params=tof_binning)
         
         # Keep only range of TOF of interest
         CropWorkspace(ws_histo_data,ws_histo_data,XMin=TOFrange[0], XMax=TOFrange[1])
@@ -173,7 +185,7 @@ class RefLReduction(PythonAlgorithm):
                                                     sample_to_detector=dSD,
                                                     theta=theta,
                                                     geo_correction=False,
-                                                    Qrange=Qrange)
+                                                    Qrange=q_binning)
         
         
         #_tof_axis = mt2.readX(0)[:]
@@ -230,7 +242,7 @@ class RefLReduction(PythonAlgorithm):
             LoadEventNexus(Filename=norm_file, OutputWorkspace=ws_norm_event_data)
     
         # Rebin data
-        Rebin(InputWorkspace=ws_norm_event_data, OutputWorkspace=ws_norm_histo_data, Params=self._binning)
+        Rebin(InputWorkspace=ws_norm_event_data, OutputWorkspace=ws_norm_histo_data, Params=tof_binning)
     
         # Keep only range of TOF of interest
         CropWorkspace(ws_norm_histo_data, ws_norm_histo_data, XMin=TOFrange[0], XMax=TOFrange[1])
@@ -298,12 +310,6 @@ class RefLReduction(PythonAlgorithm):
         output_ws = self.getPropertyValue("OutputWorkspace")
         
         SumSpectra(InputWorkspace="NormalizedWks", OutputWorkspace=output_ws)
-        #ConvertToHistogram(InputWorkspace=output_ws,OutputWorkspace=output_ws)
-        #ConvertUnits(InputWorkspace=output_ws,Target="MomentumTransfer",OutputWorkspace=output_ws)
-        
-#        CropWorkspace(output_ws, output_ws, XMin=TOFrange[0], XMax=TOFrange[1])
-
-        
         
         self.setProperty("OutputWorkspace", mtd[output_ws])
             
