@@ -71,7 +71,7 @@ class TableVector;
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <class Type>
-class DLLExport TableColumn: public API::Column
+class TableColumn: public API::Column
 {
   /// Helper struct helping to write a generic casting to double
   struct InconvertibleToDoubleType
@@ -203,6 +203,18 @@ void TableColumn<Type>::read(size_t index, const std::string & text)
 {
   std::istringstream istr(text);
   istr >> m_data[index];
+}
+
+template<>
+double TableColumn<API::Boolean>::toDouble(size_t i)const
+{
+  return m_data[i] ? 1.0 : 0.0;
+}
+
+template<>
+void TableColumn<API::Boolean>::fromDouble(size_t i, double value)
+{
+  m_data[i] = value != 0.0;
 }
 
 /// Shared pointer to a column with aoutomatic type cast and data type check.

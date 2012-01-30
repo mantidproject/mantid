@@ -24,9 +24,9 @@ TableRow::TableRow(const TableRowHelper& trh):m_row(trh.m_row),m_col(0),m_sep(",
 /**  Makes the TableRow point to i-th row in the TableWorkspace
      @param i :: New row number
  */
-void TableRow::row(int i)
+void TableRow::row(size_t i)
 {
-    if (i >= 0 && i < m_nrows)
+    if (i < m_nrows)
     {
         m_row = i;
         m_col = 0;

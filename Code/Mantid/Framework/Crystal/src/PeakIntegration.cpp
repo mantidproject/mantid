@@ -673,7 +673,7 @@ int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0, int 
       MantidVec& Yout=outputW->dataY(idet);
       MantidVec& Eout=outputW->dataE(idet);
       TableWorkspace_sptr logtable = slice_alg->getProperty("OutputWorkspace");
-      TOFmax = logtable->rowCount();
+      TOFmax = static_cast<int>(logtable->rowCount());
       for (int iTOF=0; iTOF < TOFmax; iTOF++)
       {
         Xout[iTOF] = logtable->getRef<double>(std::string("Time"), iTOF);

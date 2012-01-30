@@ -428,7 +428,7 @@ using namespace DataObjects;
       return(2);
     status=NXopengroup(fileID,group_name,"NXdata");
 
-    int nRows = itableworkspace->rowCount();
+    int nRows = static_cast<int>(itableworkspace->rowCount());
 
     int dims_array[1] = { nRows };
 

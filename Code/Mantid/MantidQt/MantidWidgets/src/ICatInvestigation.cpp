@@ -310,13 +310,13 @@ namespace MantidQt
       {
         m_uiForm.invsttableWidget->removeRow(i);
       }
-      m_uiForm.invsttableWidget->setRowCount(ws_sptr->rowCount());
-      m_uiForm.invsttableWidget->setColumnCount(ws_sptr->columnCount());
+      m_uiForm.invsttableWidget->setRowCount(static_cast<int>(ws_sptr->rowCount()));
+      m_uiForm.invsttableWidget->setColumnCount(static_cast<int>(ws_sptr->columnCount()));
 
       for (size_t i=0;i<ws_sptr->rowCount();++i)
       {
         //setting the row height of tableWidget
-        m_uiForm.invsttableWidget->setRowHeight(i,20);
+        m_uiForm.invsttableWidget->setRowHeight(static_cast<int>(i),20);
       }
 
       QStringList qlabelList;
@@ -334,7 +334,7 @@ namespace MantidQt
 
           QTableWidgetItem *newItem  = new QTableWidgetItem(QString::fromStdString(ostr.str()));
           newItem->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-          m_uiForm.invsttableWidget->setItem(j,i, newItem);
+          m_uiForm.invsttableWidget->setItem(static_cast<int>(j),static_cast<int>(i), newItem);
           newItem->setToolTip(QString::fromStdString(ostr.str()));
 
         }

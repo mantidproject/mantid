@@ -42,13 +42,13 @@ namespace MantidQt
       tablewidget->setSortingEnabled(false);
 
       tablewidget->verticalHeader()->setVisible(false);
-      tablewidget->setRowCount(ws_sptr->rowCount());
-      tablewidget->setColumnCount(ws_sptr->columnCount());
+      tablewidget->setRowCount(static_cast<int>(ws_sptr->rowCount()));
+      tablewidget->setColumnCount(static_cast<int>(ws_sptr->columnCount()));
 
       for (size_t i=0;i<ws_sptr->rowCount();++i)
       {
         //setting the row height of tableWidget
-        tablewidget->setRowHeight(i,20);
+        tablewidget->setRowHeight(static_cast<int>(i),20);
       }
 
       QStringList qlabelList;
@@ -66,7 +66,7 @@ namespace MantidQt
 
           QTableWidgetItem *newItem  = new QTableWidgetItem(QString::fromStdString(ostr.str()));
           newItem->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-          tablewidget->setItem(j,i, newItem);
+          tablewidget->setItem(static_cast<int>(j),static_cast<int>(i), newItem);
           newItem->setToolTip(QString::fromStdString(ostr.str()));
         }
       }
@@ -234,7 +234,7 @@ namespace MantidQt
 
         instrlist= alg->getProperty("InstrumentList");
       }
-      catch (Mantid::Kernel::Exception::NotFoundError& e)
+      catch (Mantid::Kernel::Exception::NotFoundError&)
       {
         throw;
       }
@@ -247,7 +247,7 @@ namespace MantidQt
       {
         return  alg->getProperty("IsValid");
       }
-      catch (Mantid::Kernel::Exception::NotFoundError&e)
+      catch (Mantid::Kernel::Exception::NotFoundError&)
       {
         throw;
       }
