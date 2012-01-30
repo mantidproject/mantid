@@ -1,6 +1,7 @@
 #ifndef MANTID_DATAHANDLING_LoadPreNexus_H_
 #define MANTID_DATAHANDLING_LoadPreNexus_H_
 
+#include <vector>
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 
@@ -49,7 +50,9 @@ namespace DataHandling
     virtual void initDocs();
     void init();
     void exec();
-
+    void parseRuninfo(const std::string &runinfo, std::string &dataDir, std::vector<std::string> &eventFilenames);
+    void runLoadNexusLogs(const std::string &runinfo, Mantid::API::IEventWorkspace_sptr wksp);
+    void runLoadMonitors();
 
   };
 
