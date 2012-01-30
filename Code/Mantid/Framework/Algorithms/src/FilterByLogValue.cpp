@@ -214,7 +214,6 @@ void FilterByLogValue::exec()
 
 
 
-    // for (int i=0; i < splitter.size(); i++)   std::cout << splitter[i].start() << " to " << splitter[i].stop() << "\n";
   }
 
   g_log.information() << splitter.size() << " entries in the filter.\n";

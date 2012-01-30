@@ -250,9 +250,8 @@ namespace Mantid
       file.getData(time_double);
 
       // Fake values with zeroes.
-      std::vector<int> values(time_double.size(), 0);
-      // Make an int TSP
-      TimeSeriesProperty<int> * tsp = new TimeSeriesProperty<int>("veto_pulse_time");
+      std::vector<double> values(time_double.size(), 0.0);
+      TimeSeriesProperty<double> * tsp = new TimeSeriesProperty<double>("veto_pulse_time");
       tsp->create(start, time_double, values);
       tsp->setUnits("");
 

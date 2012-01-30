@@ -318,7 +318,22 @@ public:
     // It has 5 entries, leaving 95 seconds of events
     do_test_fake("temp", 0, 0, 95, true, true /* in place*/, true /*PulseFilter*/);
     do_test_fake("temp", 0, 0, 95, true, false /* not in place*/, true /*PulseFilter*/);
+    // Filter on an entry with only one point
+    do_test_fake("single_middle", 0, 0, 99, true, false /* not in place*/, true /*PulseFilter*/);
   }
+
+//  // Very slow
+//  void xtest_HYSPEC()
+//  {
+//    FrameworkManager::Instance().exec("LoadEventNexus", 4,
+//       "OutputWorkspace", "hys_4333",
+//       "Filename", "HYS_4333_event.nxs");
+//    FrameworkManager::Instance().exec("FilterByLogValue", 8,
+//        "InputWorkspace", "hys_4333",
+//        "OutputWorkspace", "hys_4333_veto",
+//        "LogName", "veto_pulse_time",
+//        "PulseFilter", "1");
+//  }
 
 
 private:
