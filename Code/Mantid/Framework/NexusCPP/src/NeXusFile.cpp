@@ -563,6 +563,22 @@ void File::putAttr(const std::string& name, const NumT value) {
   this->putAttr(info, &value);
 }
 
+template <typename NumT>
+void File::putAttr(const std::string& name, const std::vector<NumT> & value)
+{
+  if (value.size() == 0)
+    throw Exception("Specified value vector is empty.");
+  NumT * data = new NumT[value.size()];
+  for (size_t i=0; i<value.size(); i++)
+    data[i] = value[i];
+  AttrInfo info;
+  info.name = name;
+  info.length = int(value.size());
+  info.type = getType<NumT>();
+  this->putAttr(info, data);
+  delete [] data;
+}
+
 void File::putAttr(const char* name, const char* value) {
   if (name == NULL) {
     throw Exception("Specified name as null to putAttr");
@@ -1373,6 +1389,27 @@ template
 NXDLL_EXPORT void File::putAttr(const string& name, const uint64_t value);
 template
 NXDLL_EXPORT void File::putAttr(const string& name, const char value);
+
+template
+NXDLL_EXPORT void File::putAttr(const string& name, const std::vector<float>& value);
+template
+NXDLL_EXPORT void File::putAttr(const string& name, const std::vector<double>& value);
+template
+NXDLL_EXPORT void File::putAttr(const string& name, const std::vector<int8_t>& value);
+template
+NXDLL_EXPORT void File::putAttr(const string& name, const std::vector<uint8_t>& value);
+template
+NXDLL_EXPORT void File::putAttr(const string& name, const std::vector<int16_t>& value);
+template
+NXDLL_EXPORT void File::putAttr(const string& name, const std::vector<uint16_t>& value);
+template
+NXDLL_EXPORT void File::putAttr(const string& name, const std::vector<int32_t>& value);
+template
+NXDLL_EXPORT void File::putAttr(const string& name, const std::vector<uint32_t>& value);
+template
+NXDLL_EXPORT void File::putAttr(const string& name, const std::vector<int64_t>& value);
+template
+NXDLL_EXPORT void File::putAttr(const string& name, const std::vector<uint64_t>& value);
 
 template
 NXDLL_EXPORT float File::getAttr(const AttrInfo& info);

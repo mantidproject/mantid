@@ -440,6 +440,16 @@ namespace NeXus {
     void putAttr(const std::string& name, const NumT value);
 
     /**
+     * Put the supplied data as an attribute (vector) into the currently open data.
+     *
+     * @param name :: Name of the attribute to add.
+     * @param value :: Reference to the attribute vector of values.
+     * \tparam NumT numeric data type of \a value
+     */
+    template <typename NumT>
+    void putAttr(const std::string& name, const std::vector<NumT> & value);
+
+    /**
      * Put a string as an attribute in the file.
      *
      * @param name :: Name of the attribute to add.
