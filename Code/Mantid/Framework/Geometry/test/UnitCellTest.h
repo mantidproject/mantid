@@ -91,7 +91,10 @@ public:
     checkCell(u2);
 
   }
-
+  void test_UnitCellCrash(){
+      TS_WARN("This throw unhandled exception");
+      //UnitCell US(10.4165,3.4165,10.4165,30,45,80);
+  }
 
 };
 
