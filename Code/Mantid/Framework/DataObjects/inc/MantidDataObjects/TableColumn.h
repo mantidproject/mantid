@@ -142,7 +142,7 @@ public:
      */
     virtual double toDouble(size_t i)const
     {
-      typedef boost::mpl::if_c< 
+      typedef typename boost::mpl::if_c<
         boost::is_convertible<double, Type>::value, Type, InconvertibleToDoubleType>::type DoubleType;
       return boost::numeric_cast<double,DoubleType>(m_data[i]);
     }
@@ -155,9 +155,9 @@ public:
      */
     virtual void fromDouble(size_t i, double value)
     {
-      typedef boost::mpl::if_c< 
+      typedef typename boost::mpl::if_c<
         boost::is_convertible<double, Type>::value, Type, InconvertibleToDoubleType>::type DoubleType;
-      m_data[i] = boost::numeric_cast<DoubleType,double>(value);
+      m_data[i] = static_cast<Type>(boost::numeric_cast<DoubleType,double>(value));
     }
 
     /// Reference to the data.
@@ -203,18 +203,6 @@ void TableColumn<Type>::read(size_t index, const std::string & text)
 {
   std::istringstream istr(text);
   istr >> m_data[index];
-}
-
-template<>
-double TableColumn<API::Boolean>::toDouble(size_t i)const
-{
-  return m_data[i] ? 1.0 : 0.0;
-}
-
-template<>
-void TableColumn<API::Boolean>::fromDouble(size_t i, double value)
-{
-  m_data[i] = value != 0.0;
 }
 
 /// Shared pointer to a column with aoutomatic type cast and data type check.
