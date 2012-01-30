@@ -303,9 +303,16 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=True, Plot=False):
         logy =[]
         loge =[]
         for i in range(0, len(inY)):
-            ly = math.log(inY[i])
+            if(inY[i] == 0):
+                ly = math.log(0.000000000001)
+            else:
+                ly = math.log(inY[i])
             logy.append(ly)
-            loge.append(math.log(inY[i]+inE[i])-ly)
+            if( inY[i]+inE[i] == 0 ):
+                le = math.log(0.000000000001)-ly
+            else:
+                le = math.log(inY[i]+inE[i])-ly
+            loge.append(le)
         lnWS = root[:-3] + 'lnI'
         CreateWorkspace(lnWS, inX, logy, loge, 1)
         log_name = root[0:8]+'_'+log_type
