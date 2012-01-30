@@ -54,7 +54,7 @@ void ApplyDeadTimeCorr::exec()
     API::MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
     API::ITableWorkspace_sptr deadTimeTable = getProperty("DeadTimeTable");
 
-    if (!(deadTimeTable->rowCount() > static_cast<int>(inputWs->getNumberHistograms() ) ) )
+    if (!(deadTimeTable->rowCount() > inputWs->getNumberHistograms() ) )
     {
         // Get number of good frames from Run object. This also serves as
         // a test to see if valid input workspace has been provided

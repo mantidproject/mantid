@@ -1157,9 +1157,9 @@ namespace Mantid
       int newRowIndex = 0;
 
       if (dir > 0)
-        newRowIndex = TabWS->rowCount();
+        newRowIndex = static_cast<int>(TabWS->rowCount());
 
-      int TableRow = TabWS->insertRow(newRowIndex);
+      int TableRow = static_cast<int>(TabWS->insertRow(newRowIndex));
 
       int ncells = (int) (AttributeValues[INRows] * AttributeValues[INCol]);
       TabWS->getRef<double> (std::string("Background"), TableRow) = params[Ibk];

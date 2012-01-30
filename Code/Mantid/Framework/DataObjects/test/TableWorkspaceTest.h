@@ -163,7 +163,7 @@ public:
     for(int i=0;i<5;i++)
     {
         TableRow row = tw.appendRow();
-        int j = row.row();
+        size_t j = row.row();
         std::ostringstream ostr;
         ostr<<"Number "<<j;
         row << 18*j << 3.14*j << ostr.str() << (j%2 == 0);
@@ -177,7 +177,7 @@ public:
     do
     {
         TS_ASSERT_EQUALS(row1.Int(0),row1.row()*18);
-        TS_ASSERT_EQUALS(row1.Double(1),row1.row()*3.14);
+        TS_ASSERT_EQUALS(row1.Double(1),static_cast<double>(row1.row())*3.14);
         std::istringstream istr(row1.String(2));
         std::string str;
         int j;
@@ -229,7 +229,7 @@ public:
       TableRow row = tw.getFirstRow();
       do
       {
-          int i = row.row();
+          size_t i = row.row();
           row << i << (i % 2 == 0);
       }
       while(row.next());
@@ -328,7 +328,7 @@ public:
       TableRow row = tw.getFirstRow();
       row << int(12) << float(25.1) << double(123.456) << false << true << std::string("hello");
 
-      double d;
+      double d = 100.0;
       TS_ASSERT_THROWS_NOTHING(d = tw.getColumn("X")->toDouble(0));
       TS_ASSERT_EQUALS( d, 12.0 );
       TS_ASSERT_THROWS_NOTHING(d = tw.getColumn("Y")->toDouble(0));

@@ -186,7 +186,7 @@ API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_const_spt
       // Subtract the calculated value from the data
       Y[j] -= funcVal;
     }
-    prg+=(0.7/peakslist->rowCount());
+    prg+=(0.7/static_cast<double>(peakslist->rowCount()));
     progress(prg);
   }
 
