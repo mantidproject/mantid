@@ -432,7 +432,7 @@ using namespace DataObjects;
 
     int dims_array[1] = { nRows };
 
-    for (int i = 0; i < itableworkspace->columnCount(); i++)
+    for (size_t i = 0; i < itableworkspace->columnCount(); i++)
     {
       boost::shared_ptr<const API::Column> col = itableworkspace->getColumn(i);
 

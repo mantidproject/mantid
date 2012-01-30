@@ -87,7 +87,7 @@ namespace DataObjects
   {
   public:
     /// Constructor.
-    TableWorkspace(int nrows=0);
+    TableWorkspace(size_t nrows=0);
     /// Virtual destructor.
     virtual ~TableWorkspace();
     /// Return the workspace typeID
@@ -99,24 +99,24 @@ namespace DataObjects
     /// Removes a column.
     void removeColumn( const std::string& name);
     /// Number of columns in the workspace.
-    int columnCount() const {return static_cast<int>(m_columns.size());}
+    size_t columnCount() const {return static_cast<int>(m_columns.size());}
     /// Gets the shared pointer to a column.
     API::Column_sptr getColumn(const std::string& name);
     API::Column_const_sptr getColumn(const std::string& name)const;
     /// Gets the shared pointer to a column.
-    API::Column_sptr getColumn(int index);
+    API::Column_sptr getColumn(size_t index);
     /// Gets the shared pointer to a column by index - return none-modifyable column.
-    API::Column_const_sptr getColumn(int index) const;
+    API::Column_const_sptr getColumn(size_t index) const;
     /// Returns a vector of all column names.
     std::vector<std::string> getColumnNames();
     /// Number of rows in the workspace.
-    int rowCount() const {return m_rowCount;}
+    size_t rowCount() const {return m_rowCount;}
     /// Resizes the workspace.
-    void setRowCount(int count);
+    void setRowCount(size_t count);
     /// Inserts a row before row pointed to by index and fills it with default vales.
-    int insertRow(int index);
+    size_t insertRow(size_t index);
     /// Delets a row if it exists.
-    void removeRow(int index);
+    void removeRow(size_t index);
     /// Clone table workspace instance.
     TableWorkspace* clone() const;
 
@@ -125,7 +125,7 @@ namespace DataObjects
      * @param  row  row number of the value  searched
      * @param  col  column number of the value searched
      */
-    virtual void find(int value,int& row,const int & col)
+    virtual void find(size_t value,size_t& row,const size_t & col)
     {
       findValue(value,row,col);
     }
@@ -134,7 +134,7 @@ namespace DataObjects
      * @param  row  row number of the value  searched
      * @param  col  column number of the value searched
      */
-    virtual void find(std::string value,int& row,const int & col)
+    virtual void find(std::string value,size_t& row,const size_t & col)
     {
       findValue(value,row,col);
     }
@@ -143,7 +143,7 @@ namespace DataObjects
      * @param  row  row number of the value  searched
      * @param  col  column number of the value searched
      */
-    virtual void find(float value,int& row,const int & col)
+    virtual void find(float value,size_t& row,const size_t & col)
     {
       findValue(value,row,col);
     }
@@ -152,7 +152,7 @@ namespace DataObjects
      * @param  row  row number of the value  searched
      * @param  col  column number of the value searched
      */
-    virtual void find(API::Boolean value,int& row,const int & col)
+    virtual void find(API::Boolean value,size_t& row,const size_t & col)
     {
       findValue(value,row,col);
     }
@@ -161,7 +161,7 @@ namespace DataObjects
      * @param  row  row number of the value  searched
      * @param  col  column number of the value searched
      */
-    virtual void find(double value,int& row,const int & col)
+    virtual void find(double value,size_t& row,const size_t & col)
     {
       findValue(value,row,col);
     }
@@ -170,7 +170,7 @@ namespace DataObjects
      * @param  row  row number of the value  searched
      * @param  col  column number of the value searched
      */
-    void find(Mantid::Kernel::V3D value,int& row,const int & col)
+    void find(Mantid::Kernel::V3D value,size_t& row,const size_t & col)
     {
       findValue(value,row,col);
     }
@@ -191,7 +191,7 @@ private:
     
     /// template method to find a given value in a table.
     template<typename  Type>
-    void findValue(const Type value,int& row,const int & colIndex)
+    void findValue(const Type value,size_t& row,const size_t & colIndex)
     {
         
         try
@@ -204,7 +204,7 @@ private:
             {
                 std::vector<int>::difference_type pos;
                 pos=std::distance(dataVec.begin(),itr);
-                //int pos=static_cast<int>itr-dataVec.begin();
+                //size_t pos=static_cast<int>itr-dataVec.begin();
                 row=static_cast<int>(pos);
                 
             }
@@ -230,7 +230,7 @@ private:
     * @param  row  row number of the value  searched
     * @param  col  column number of the value searched
     */
-    virtual void find(int value,int& row,int & col)
+    virtual void find(size_t value,size_t& row,size_t & col)
     {		
       findValue(value,row,col);
     }
@@ -239,7 +239,7 @@ private:
     * @param  row  row number of the value  searched
     * @param  col  column number of the value searched
     */
-    virtual void find(std::string value,int& row,int & col)
+    virtual void find(std::string value,size_t& row,size_t & col)
     {
       findValue(value,row,col);
     }
@@ -248,7 +248,7 @@ private:
     * @param  row  row number of the value  searched
     * @param  col  column number of the value searched
     */
-    virtual void find(float value,int& row,int & col)
+    virtual void find(float value,size_t& row,size_t & col)
     {
       findValue(value,row,col);
     }
@@ -257,7 +257,7 @@ private:
     * @param  row  row number of the value  searched
     * @param  col  column number of the value searched
     */
-    virtual void find(API::Boolean value,int& row,int & col)
+    virtual void find(API::Boolean value,size_t& row,size_t & col)
     {
       findValue(value,row,col);
     }
@@ -266,7 +266,7 @@ private:
     * @param  row  row number of the value  searched
     * @param  col  column number of the value searched
     */
-    virtual void find(double value,int& row,int & col)
+    virtual void find(double value,size_t& row,size_t & col)
     {
       findValue(value,row,col);
     }
@@ -275,7 +275,7 @@ private:
     * @param  row  row number of the value  searched
     * @param  col  column number of the value searched
     */
-    void find(Mantid::Kernel::V3D value,int& row,int & col)
+    void find(Mantid::Kernel::V3D value,size_t& row,size_t & col)
     {
       findValue(value,row,col);
     }
@@ -301,7 +301,7 @@ private:
     /// Shared pointers to the columns.
     std::vector< boost::shared_ptr<API::Column> > m_columns;
     /// row count
-    int m_rowCount;
+    size_t m_rowCount;
     /// Logger
     static Kernel::Logger& g_log;
 

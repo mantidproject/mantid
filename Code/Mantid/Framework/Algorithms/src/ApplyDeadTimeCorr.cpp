@@ -81,7 +81,7 @@ void ApplyDeadTimeCorr::exec()
                 try
                 {
                     // Apply Dead Time
-                    for (int i=0; i<deadTimeTable->rowCount(); ++i)
+                    for (size_t i=0; i<deadTimeTable->rowCount(); ++i)
                     {
                         API::TableRow deadTimeRow = deadTimeTable->getRow(i);
                         size_t index = static_cast<size_t>(inputWs->getIndexFromSpectrumNumber(static_cast<int>(deadTimeRow.Int(0) ) ) );

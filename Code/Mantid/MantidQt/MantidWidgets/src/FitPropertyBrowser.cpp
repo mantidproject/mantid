@@ -2489,7 +2489,7 @@ void FitPropertyBrowser::findPeaks()
     Mantid::API::ColumnVector<double> centre = ws->getVector("centre");
     Mantid::API::ColumnVector<double> width = ws->getVector("width");
     Mantid::API::ColumnVector<double> height = ws->getVector("height");
-    for(int i=0; i<centre.size(); ++i)
+    for(size_t i=0; i<centre.size(); ++i)
     {
       if (centre[i] < startX() || centre[i] > endX()) continue;
       Mantid::API::IPeakFunction* f = dynamic_cast<Mantid::API::IPeakFunction*>(

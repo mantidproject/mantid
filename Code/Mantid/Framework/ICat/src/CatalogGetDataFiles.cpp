@@ -86,7 +86,7 @@ namespace Mantid
         return;
       }
       /// now filter log files
-      for( int row=0;row<ws_sptr->rowCount();)
+      for( size_t row=0;row<ws_sptr->rowCount();)
       {
         if(!isDataFile(ws_sptr->cell<std::string>(row,0)))
         {

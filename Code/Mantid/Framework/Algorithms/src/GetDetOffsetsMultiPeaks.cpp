@@ -276,7 +276,7 @@ namespace Mantid
       ITableWorkspace_sptr peakslist = findpeaks->getProperty("PeaksList");
       peakPos = Kernel::VectorHelper::splitStringIntoVector<double>(peakPositions);
       double errsum = 0.0;
-      for (int i = 0; i < peakslist->rowCount(); ++i)
+      for (size_t i = 0; i < peakslist->rowCount(); ++i)
       {
         // Get references to the data
         const double centre = peakslist->getRef<double>("centre",i);

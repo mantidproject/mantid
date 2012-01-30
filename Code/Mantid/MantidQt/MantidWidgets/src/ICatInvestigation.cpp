@@ -313,21 +313,21 @@ namespace MantidQt
       m_uiForm.invsttableWidget->setRowCount(ws_sptr->rowCount());
       m_uiForm.invsttableWidget->setColumnCount(ws_sptr->columnCount());
 
-      for (int i=0;i<ws_sptr->rowCount();++i)
+      for (size_t i=0;i<ws_sptr->rowCount();++i)
       {
         //setting the row height of tableWidget
         m_uiForm.invsttableWidget->setRowHeight(i,20);
       }
 
       QStringList qlabelList;
-      for(int i=0;i<ws_sptr->columnCount();i++)
+      for(size_t i=0;i<ws_sptr->columnCount();i++)
       {
         Column_sptr col_sptr = ws_sptr->getColumn(i);
         //get the column name to display as the header of table widget
         QString colTitle = QString::fromStdString(col_sptr->name());
         qlabelList.push_back(colTitle);
 
-        for(int j=0;j<ws_sptr->rowCount();++j)
+        for(size_t j=0;j<ws_sptr->rowCount();++j)
         {
           std::ostringstream ostr;
           col_sptr->print(j,ostr);
@@ -438,8 +438,8 @@ namespace MantidQt
         (AnalysisDataService::Instance().retrieve("datafiles"));
       }
       int64_t fileId=0;
-      const int col=0;
-      int row=0;
+      const size_t col=0;
+      size_t row=0;
       std::vector<std::string>::const_iterator citr;
       for(citr=fileNames.begin();citr!=fileNames.end();++citr)
       {
