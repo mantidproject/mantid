@@ -81,20 +81,21 @@ double Detector::getTwoTheta(const V3D& observer, const V3D& axis) const
 Get the two theata angle signed according the quadrant
 @param observer :: The observer position
 @param axis :: The axis
+@param instrumentUp :: instrument up direction.
 @return The angle
 */
-//double Detector::getSignedTwoTheta(const V3D& observer, const V3D& axis) const
-//{
-//  //const V3D sampleDetVec = this->getPos() - observer;
-//  //double angle = sampleDetVec.angle(axis);
-//
-//  //V3D cross = axis.cross_prod(sampleDetVec);
-//  //if (cross.norm() < 0) { 
-//  //  angle *= -1;
-//  //}
-//  //return angle;
-//  return this->getTwoTheta(observer, axis);
-//}
+double Detector::getSignedTwoTheta(const V3D& observer, const V3D& axis, const V3D& instrumentUp) const
+{
+  const V3D sampleDetVec = this->getPos() - observer;
+  double angle = sampleDetVec.angle(axis);
+
+  V3D cross = axis.cross_prod(sampleDetVec);
+  if (instrumentUp.scalar_prod(cross) < 0 )
+  { 
+    angle *= -1;
+  }
+  return angle;
+}
 
 ///Get the phi angle between the detector with reference to the origin
 ///@return The angle
