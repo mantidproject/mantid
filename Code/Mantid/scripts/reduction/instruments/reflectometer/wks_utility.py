@@ -118,6 +118,83 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
                                               tof=_tof_axis, 
                                               yrange=yrange, 
                                               cpix=cpix)
+
+        #replace the _q_axis of the yrange of interest by the new 
+        #individual _q_axis
+        
+        y_size = toYpixel - fromYpixel + 1
+        y_range = arange(y_size) + fromYpixel
+
+        _y_axis = zeros((maxY, len(_tof_axis) - 1))
+        _y_error_axis = zeros((maxY, len(_tof_axis) - 1))
+    
+        x_size = toXpixel - fromXpixel + 1 
+        x_range = arange(x_size) + fromXpixel
+        
+        for x in x_range:
+            for y in y_range:
+                _index = int((maxY) * x + y)
+                _y_axis[y, :] += mt1.readY(_index)[:]
+                _y_error_axis[y, :] += ((mt1.readE(_index)[:]) * (mt1.readE(_index)[:]))
+
+        for _q_index in range(y_size):
+            
+            _tmp_q_axis = _q_axis[_q_index]
+            q_axis = _tmp_q_axis[::-1]
+
+            _outputWorkspace = 'tmpOWks_' + str(_q_index)
+
+            _y_axis_tmp = _y_axis[yrange[_q_index],:]
+            _y_axis_tmp = _y_axis_tmp.flatten()
+
+            _y_error_axis_tmp = _y_error_axis[yrange[_q_index],:]
+            _y_error_axis_tmp = numpy.sqrt(_y_error_axis_tmp)
+            _y_error_axis_tmp = _y_error_axis_tmp.flatten()
+
+            _y_axis_tmp = _y_axis_tmp[::-1]
+            _y_error_axis_tmp = _y_error_axis_tmp[::-1]
+            
+            CreateWorkspace(OutputWorkspace=_outputWorkspace,
+                            DataX=_q_axis[_q_index],
+                            DataY=_y_axis_tmp,
+                            DataE=_y_error_axis_tmp,
+                            Nspec=1,
+                            UnitX="MomentumTransfer")
+
+            _outputWorkspace_rebin = 'tmpOWks_' + str(_q_index)
+            rebin(InputWorkspace=_outputWorkspace,
+                  OutputWorkspace=_outputWorkspace_rebin,
+                  Params=Qrange)
+
+        _mt = mtd['tmpOWks_0']
+        _x_array = _mt.readX(0)[:]
+
+        #create big y_array of the all the pixel of interest (yrange)
+        big_y_array = zeros((maxY, len(_x_array)))
+        big_y_error_array = zeros((maxY, len(_x_array)))
+        
+        for _q_index in range(y_size):
+            
+            _wks = 'tmpOWks_' + str(_q_index)
+            _mt = mtd[_wks]
+            _tmp_y = _mt.readY(0)[:]
+            _tmp_y_error = _mt.readE(0)[:]
+
+            big_y_array[yrange[_q_index],:] = _tmp_y
+            big_y_error_array[yrange[_q_index],:] = _tmp_y_error
+
+        _x_axis = _x_array.flatten()        
+        _y_axis = big_y_array.flatten()
+        _y_error_axis = big_y_error_array.flatten()
+        
+        CreateWorkspace(OutputWorkspace=outputWorkspace,
+                        DataX=_x_axis,
+                        DataY=_y_axis,
+                        DataE=_y_error_axis,
+                        Nspec=maxY,
+                        UnitX="MomentumTransfer",
+                        ParentWorkspace=mt1)
+    
     else:
         
         if source_to_detector is not None and theta is not None:
@@ -125,58 +202,37 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
             _q_axis = 1e-10 * _const * math.sin(theta) / (_tof_axis*1e-6)
         
 
-    _y_axis = zeros((maxY, len(_q_axis) - 1))
-    _y_error_axis = zeros((maxY, len(_q_axis) - 1))
+        _y_axis = zeros((maxY, len(_q_axis) - 1))
+        _y_error_axis = zeros((maxY, len(_q_axis) - 1))
     
-    x_size = toXpixel - fromXpixel + 1 
-    x_range = arange(x_size) + fromXpixel
+        x_size = toXpixel - fromXpixel + 1 
+        x_range = arange(x_size) + fromXpixel
     
-    y_size = toYpixel - fromYpixel + 1
-    y_range = arange(y_size) + fromYpixel
+        y_size = toYpixel - fromYpixel + 1
+        y_range = arange(y_size) + fromYpixel
     
-    for x in x_range:
-        for y in y_range:
-            _index = int((maxY) * x + y)
-            _y_axis[y, :] += mt1.readY(_index)[:]
-            _y_error_axis[y, :] += ((mt1.readE(_index)[:]) * (mt1.readE(_index)[:]))
+        for x in x_range:
+            for y in y_range:
+                _index = int((maxY) * x + y)
+                _y_axis[y, :] += mt1.readY(_index)[:]
+                _y_error_axis[y, :] += ((mt1.readE(_index)[:]) * (mt1.readE(_index)[:]))
 
-    _y_axis = _y_axis.flatten()
-    _y_error_axis = numpy.sqrt(_y_error_axis)
-    _y_error_axis = _y_error_axis.flatten()
+        _y_axis = _y_axis.flatten()
+        _y_error_axis = numpy.sqrt(_y_error_axis)
+        _y_error_axis = _y_error_axis.flatten()
 
-    _q_axis = _q_axis[::-1]
-    _y_axis = _y_axis[::-1]
-    _y_error_axis = _y_error_axis[::-1]
+        _q_axis = _q_axis[::-1]
+        _y_axis = _y_axis[::-1]
+        _y_error_axis = _y_error_axis[::-1]
 
-    CreateWorkspace(OutputWorkspace=outputWorkspace, 
-                    DataX=_q_axis, DataY=_y_axis, DataE=_y_error_axis, Nspec=maxY,
-                    UnitX="MomentumTransfer", ParentWorkspace=mt1)
+        CreateWorkspace(OutputWorkspace=outputWorkspace, 
+                        DataX=_q_axis, 
+                        DataY=_y_axis, 
+                        DataE=_y_error_axis, 
+                        Nspec=maxY,
+                        UnitX="MomentumTransfer", 
+                        ParentWorkspace=mt1)
 
-    if geo_correction:
-        
-        
-        #replace the _q_axis of the yrange of interest by the new 
-        #individual _q_axis
-
-        for _q_index in range(y_size):
-            
-            CreateWorkspace(OutputWorkspace=outputWorkspace,
-                            DataX=_q_axis[_q_index],
-                            DataY=_y_axis,
-                            DataE=_y_error_axis,
-                            Nspec=maxY,
-                            UnitX="MomentumTransfer",
-                            ParentWorskpace=mt1)
-            rebin(InputWorkspace=outputWorksapce,
-                  OutputWorkspace='tmp_outputWks',
-                  Params=Qrange)
-
-            if _q_index != 0:
-                Plus(outputWorkspace,"tmp_outputWks",outputWorkspace)
-
-    mt2 = mtd[outputWorkspace]
-    
-    return mt2
 
 def angleUnitConversion(value, from_units='degree', to_units='rad'):
     """

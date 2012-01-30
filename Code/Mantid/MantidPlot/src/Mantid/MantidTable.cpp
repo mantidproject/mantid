@@ -30,6 +30,15 @@ m_ws(ws),
 m_wsName(ws->getName()),
 m_transposed(transpose)
 {
+  // if plot types is set in ws then update Table with that information
+  for ( int i = 0; i < ws->columnCount(); i++ )
+  {
+    int pt = ws->getColumn(i)->getPlotType();
+    if ( pt != -1000 )
+      setColPlotDesignation(i, pt);
+  }
+  setHeaderColType();
+
   // Set name and stuff
   parent->initTable(this, parent->generateUniqueName("Table-"));
   //  askOnCloseEvent(false);

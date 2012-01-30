@@ -172,31 +172,20 @@ class RefLReduction(PythonAlgorithm):
         #background range (along the y-axis) and of only the pixel
         #of interest along the x-axis (to avoid the frame effect)
         theta = tthd_rad - ths_rad
-        mt2 = wks_utility.createIntegratedWorkspace(mtd[ws_histo_data], 
-                                                    "IntegratedDataWks1",
-                                                    fromXpixel=Xrange[0],
-                                                    toXpixel=Xrange[1],
-                                                    fromYpixel=BackfromYpixel,
-                                                    toYpixel=BacktoYpixel,
-                                                    maxX=maxX,
-                                                    maxY=maxY,
-                                                    cpix=data_cpix,
-                                                    source_to_detector=dMD,
-                                                    sample_to_detector=dSD,
-                                                    theta=theta,
-                                                    geo_correction=False,
-                                                    Qrange=q_binning)
-        
-        
-        #_tof_axis = mt2.readX(0)[:]
-        ########## This was used to test the R(Q) 
-        ##Convert the data without background subtraction to R(Q)
-        #q_array = wks_utility.convertToRvsQ(dMD=dMD,
-        #                                    theta=theta,
-        #                                    tof=_tof_axis)
-        #q_array_reversed = q_array[::-1]
-        
-        # Background
+        wks_utility.createIntegratedWorkspace(mtd[ws_histo_data], 
+                                              "IntegratedDataWks1",
+                                              fromXpixel=Xrange[0],
+                                              toXpixel=Xrange[1],
+                                              fromYpixel=BackfromYpixel,
+                                              toYpixel=BacktoYpixel,
+                                              maxX=maxX,
+                                              maxY=maxY,
+                                              cpix=data_cpix,
+                                              source_to_detector=dMD,
+                                              sample_to_detector=dSD,
+                                              theta=theta,
+                                              geo_correction=True,
+                                              Qrange=Qrange)
 
         ConvertToHistogram(InputWorkspace='IntegratedDataWks1',
                            OutputWorkspace='IntegratedDataWks')
@@ -206,7 +195,7 @@ class RefLReduction(PythonAlgorithm):
         
         ConvertToHistogram(InputWorkspace='TransposedID',
                            OutputWorkspace='TransposedID')
-        
+         
         if subtract_data_bck:
             FlatBackground(InputWorkspace='TransposedID',
                            OutputWorkspace='TransposedID',
@@ -222,7 +211,7 @@ class RefLReduction(PythonAlgorithm):
         RebinToWorkspace(WorkspaceToRebin="DataBckWks", WorkspaceToMatch="IntegratedDataWks", OutputWorkspace="DataBckWks")
                 
         Minus("IntegratedDataWks", "DataBckWks", OutputWorkspace="DataWks")
-            
+             
         # Work on Normalization file #########################################
         # Find full path to event NeXus data file
         f = FileFinder.findRuns("REF_L%d" %normalization_run)
@@ -255,19 +244,19 @@ class RefLReduction(PythonAlgorithm):
         #Create a new event workspace of only the range of pixel of interest 
         #background range (along the y-axis) and of only the pixel
         #of interest along the x-axis (to avoid the frame effect)
-        mt3_norm = wks_utility.createIntegratedWorkspace(mtd[ws_norm_histo_data], 
-                                                         "IntegratedNormWks",
-                                                         fromXpixel=Xrange[0],
-                                                         toXpixel=Xrange[1],
-                                                         fromYpixel=BackfromYpixel,
-                                                         toYpixel=BacktoYpixel,
-                                                         maxX=maxX,
-                                                         maxY=maxY,
-                                                         cpix=data_cpix,
-                                                         source_to_detector=dMD,
-                                                         sample_to_detector=dSD,
-                                                         theta=theta,
-                                                         geo_correction=False)
+        wks_utility.createIntegratedWorkspace(mtd[ws_norm_histo_data], 
+                                              "IntegratedNormWks",
+                                              fromXpixel=Xrange[0],
+                                              toXpixel=Xrange[1],
+                                              fromYpixel=BackfromYpixel,
+                                              toYpixel=BacktoYpixel,
+                                              maxX=maxX,
+                                              maxY=maxY,
+                                              cpix=data_cpix,
+                                              source_to_detector=dMD,
+                                              sample_to_detector=dSD,
+                                              theta=theta,
+                                              geo_correction=False)
 
         Transpose(InputWorkspace='IntegratedNormWks',
                   OutputWorkspace='TransposedID')
@@ -287,9 +276,14 @@ class RefLReduction(PythonAlgorithm):
                   OutputWorkspace='NormBckWks')
         
         ConvertToHistogram("NormBckWks", OutputWorkspace="NormBckWks")
+#        RebinToWorkspace(WorkspaceToRebin="NormBckWks", WorkspaceToMatch="IntegratedNormWks", OutputWorkspace="NormBckWks")
         RebinToWorkspace(WorkspaceToRebin="NormBckWks", WorkspaceToMatch="IntegratedNormWks", OutputWorkspace="NormBckWks")
+       
         Minus("IntegratedNormWks", "NormBckWks", OutputWorkspace="NormWks")
 
+        RebinToWorkspace(WorkspaceToRebin="NormWks", 
+                         WorkspaceToMatch='DataWks',
+                         OutputWorkspace='NormWks')
    
         #perform the integration myself
         mt_temp = mtd['NormWks']
