@@ -39,6 +39,16 @@ public:
     std::string m_name;///< column namae
 };
 
+/// Helper class used to create ConstColumnVector
+class TableConstColumnHelper
+{
+public:
+    /// Constructor
+    TableConstColumnHelper(const ITableWorkspace *tw,const std::string& name):m_workspace(tw),m_name(name){}
+    const ITableWorkspace *m_workspace;///< Pointer to the TableWorkspace
+    std::string m_name;///< column namae
+};
+
 /// Helper class used to create TableRow
 class TableRowHelper
 {
@@ -154,6 +164,9 @@ public:
   /// Gets the shared pointer to a column by name.
   virtual boost::shared_ptr<Mantid::API::Column> getColumn(const std::string& name) = 0;
 
+  /// Gets the shared pointer to a column by name.
+  virtual boost::shared_ptr<const Mantid::API::Column> getColumn(const std::string& name) const = 0;
+
   /// Gets the shared pointer to a column by index.
   virtual boost::shared_ptr<Mantid::API::Column> getColumn(int index) = 0;
 
@@ -195,6 +208,12 @@ public:
   TableColumnHelper getVector(const std::string& name)
   {
     return TableColumnHelper(this,name);
+  }
+
+  /// Access the column with name \c name trough a ColumnVector object
+  TableConstColumnHelper getVector(const std::string& name)const
+  {
+    return TableConstColumnHelper(this,name);
   }
 
   template <class T>
@@ -347,9 +366,7 @@ public:
   {
     if (!m_column->isType<T>())
     {
-      std::string str = "Type mismatch. ";
-      m_column->g_log.error(str);
-      throw std::runtime_error(str);
+      throw std::runtime_error("Type mismatch when creating a ColumnVector.");
     }
   }
   /** Get the element
@@ -361,6 +378,33 @@ public:
   int size(){return static_cast<int>(m_column->size());}
 private:
   Column_sptr m_column;///< Pointer to the underlying column
+};
+
+/** @class ConstColumnVector
+     ConstColumnVector gives const access to the column elements without alowing its resizing.
+     Created by TableWorkspace::getVector(...)
+ */
+template< class T>
+class ConstColumnVector
+{
+public:
+  /// Constructor
+  ConstColumnVector(const TableConstColumnHelper& th):m_column(th.m_workspace->getColumn(th.m_name))
+  {
+    if (!m_column->isType<T>())
+    {
+      throw std::runtime_error("Type mismatch when creating a ColumnVector.");
+    }
+  }
+  /** Get the const reference to element
+        @param i :: Element's position
+        @return the column at the requested index
+   */
+  const T& operator[](size_t i){return m_column->cell<T>(static_cast<int>(i));}
+  /// Size of the vector
+  int size(){return static_cast<int>(m_column->size());}
+private:
+  Column_const_sptr m_column;///< Pointer to the underlying column
 };
 
 /// Typedef for a shared pointer to \c TableWorkspace

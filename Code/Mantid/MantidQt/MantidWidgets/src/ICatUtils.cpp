@@ -62,7 +62,7 @@ namespace MantidQt
         for(int j=0;j<ws_sptr->rowCount();++j)
         {
           std::ostringstream ostr;
-          col_sptr->print(ostr,j);
+          col_sptr->print(j,ostr);
 
           QTableWidgetItem *newItem  = new QTableWidgetItem(QString::fromStdString(ostr.str()));
           newItem->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);

@@ -81,7 +81,7 @@ void MantidTable::fillTable()
     {
       std::ostringstream ostr;
       // This is the method on the Column object to convert to a string.
-      c->print(ostr,j);
+      c->print(j,ostr);
       QString qstr = QString::fromStdString(ostr.str());
       setText(j,i,qstr);
 
@@ -140,7 +140,7 @@ void MantidTable::fillTableTransposed()
     {
       std::ostringstream ostr;
       // This is the method on the Column object to convert to a string.
-      c->print(ostr,j);
+      c->print(j,ostr);
       QString qstr = QString::fromStdString(ostr.str());
 
       int col = j + 1;
@@ -222,12 +222,12 @@ void MantidTable::cellEdited(int row,int col)
 
   // Have the column convert the text to a value internally
   int index = row;
-  c->read(text, index);
+  c->read(index, text);
 
   // Set the table view to be the same text after editing.
   // That way, if the string was stupid, it will be reset to the old value.
   std::ostringstream s;
-  c->print(s, index);
+  c->print(index, s);
   d_table->setText(row, col, QString(s.str().c_str()));
 }
 

@@ -193,6 +193,10 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
 
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/AnalysisDataService.h"
+
 using namespace Qwt3D;
 using namespace MantidQt::API;
 
@@ -1281,6 +1285,8 @@ void ApplicationWindow::tableMenuAboutToShow()
   tableMenu->clear();
   fillMenu->clear();
 
+  MdiSubWindow* t = activeWindow();
+
   QMenu *setAsMenu = tableMenu->addMenu(tr("Set Columns &As"));
   setAsMenu->addAction(actionSetXCol);
   setAsMenu->addAction(actionSetYCol);
@@ -1326,6 +1332,10 @@ void ApplicationWindow::tableMenuAboutToShow()
   tableMenu->addAction(actionGoToColumn);
   tableMenu->insertSeparator();
   tableMenu->addAction(actionConvertTable);
+  if (t->isA("Table")) // but not MantidTable
+  {
+    tableMenu->addAction(actionConvertTableToWorkspace);
+  }
 
   tableMenu->insertSeparator();
   tableMenu->addAction(actionShowPlotWizard);
@@ -3381,6 +3391,76 @@ Matrix* ApplicationWindow::convertTableToMatrix()
     return 0;
 
   return tableToMatrix (t);
+}
+
+/**
+ * Convert Table in the active window to a TableWorkspace
+ */
+void ApplicationWindow::convertTableToWorkspace()
+{
+  Table* t = dynamic_cast<Table*>(activeWindow(TableWindow));
+  if (!t) return;
+  MantidTable* mt = dynamic_cast<MantidTable*>(t);
+  if (!mt)
+  {
+    mt = convertTableToTableWorkspace(t);
+  }
+}
+
+/**
+ * Convert a Table to a TableWorkspace. Columns with plot designations X,Y,Z,xErr,yErr
+ * are transformed to doubles, others - to strings.
+ * @param t :: The Table to convert.
+ */
+MantidTable* ApplicationWindow::convertTableToTableWorkspace(Table* t)
+{
+  if (!t) return NULL;
+  Mantid::API::ITableWorkspace_sptr tws = Mantid::API::WorkspaceFactory::Instance().createTable();
+  for(int col = 0; col < t->numCols(); ++col)
+  {
+    Table::PlotDesignation des = (Table::PlotDesignation)t->colPlotDesignation(col);
+    QString name = t->colLabel(col);
+    std::string type;
+    switch(des)
+    {
+    case Table::X:
+    case Table::Y:
+    case Table::Z:
+    case Table::yErr:
+    case Table::xErr: type = "double"; break;
+    default:
+      type = "string";
+    }
+    tws->addColumn(type,name.toStdString());
+  }
+  tws->setRowCount(t->numRows());
+  for(int col = 0; col < t->numCols(); ++col)
+  {
+    Mantid::API::Column_sptr column = tws->getColumn(col);
+    for(int row = 0; row < t->numRows(); ++row)
+    {
+      column->read(row, t->text(row,col).toStdString());
+    }
+  }
+  std::string wsName = t->objectName().toStdString();
+  if (Mantid::API::AnalysisDataService::Instance().doesExist(wsName))
+  {
+    if (QMessageBox::query("MantidPlot","Workspace with name " + t->objectName() + " already exists\n"
+      "Do you want to overwrite it?"))
+    {
+      Mantid::API::AnalysisDataService::Instance().addOrReplace(wsName,tws);
+    }
+    else
+    {
+      return NULL;
+    }
+  }
+  else
+  {
+    Mantid::API::AnalysisDataService::Instance().add(wsName,tws);
+  }
+  MantidTable* mt = new MantidTable(scriptingEnv(), tws, t->objectName(), this);
+  return mt;
 }
 
 Matrix* ApplicationWindow::tableToMatrix(Table* t)
@@ -12943,6 +13023,9 @@ void ApplicationWindow::createActions()
   actionConvertTable= new QAction(tr("Convert to &Matrix"), this);
   connect(actionConvertTable, SIGNAL(activated()), this, SLOT(convertTableToMatrix()));
 
+  actionConvertTableToWorkspace= new QAction(tr("Convert to &Workspace"), this);
+  connect(actionConvertTableToWorkspace, SIGNAL(activated()), this, SLOT(convertTableToWorkspace()));
+
   actionPlot3DWireFrame = new QAction(QIcon(getQPixmap("lineMesh_xpm")), tr("3D &Wire Frame"), this);
   connect(actionPlot3DWireFrame, SIGNAL(activated()), this, SLOT(plot3DWireframe()));
 
@@ -13622,6 +13705,7 @@ void ApplicationWindow::translateActionsStrings()
   actionExportMatrix->setMenuText(tr("&Export Image ..."));
 
   actionConvertTable->setMenuText(tr("Convert to &Matrix"));
+  actionConvertTableToWorkspace->setMenuText(tr("Convert to &Workspace"));
   actionPlot3DWireFrame->setMenuText(tr("3D &Wire Frame"));
   actionPlot3DHiddenLine->setMenuText(tr("3D &Hidden Line"));
   actionPlot3DPolygons->setMenuText(tr("3D &Polygons"));

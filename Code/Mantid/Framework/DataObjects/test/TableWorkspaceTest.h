@@ -11,16 +11,7 @@
 #include "MantidAPI/TableRow.h" 
 #include "MantidAPI/ColumnFactory.h" 
 
-class Class
-{
-public:
-    int d;
-    Class():d(0){} 
-private:
-    Class(const Class&);
-};
-
-DECLARE_TABLEPOINTERCOLUMN(Class,Class);
+#include <limits>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -38,7 +29,6 @@ public:
     }
 
 };
-
 
 class TableWorkspaceTest : public CxxTest::TestSuite
 {
@@ -96,10 +86,9 @@ public:
     tw.addColumn("int","Number");
     tw.addColumn("str","Name");
     tw.addColumn("V3D","Position");
-    tw.addColumn("Class","class");
 
     TS_ASSERT_EQUALS(tw.rowCount(),3);
-    TS_ASSERT_EQUALS(tw.columnCount(),4);
+    TS_ASSERT_EQUALS(tw.columnCount(),3);
 
     tw.getRef<int>("Number",1) = 17;
     tw.cell<std::string>(2,1) = "STRiNG";
@@ -110,9 +99,6 @@ public:
     ColumnVector<string> str = tw.getVector("Name");
     TS_ASSERT_EQUALS(str.size(),3);
     TS_ASSERT_EQUALS(str[2],"STRiNG");
-
-    ColumnVector<Class> cl = tw.getVector("class");
-    TS_ASSERT_EQUALS(cl.size(),3);
 
     for(int i=0;i<cNumb.size();i++)
         cNumb[i] = i+1;
@@ -134,13 +120,10 @@ public:
     TS_ASSERT_EQUALS(tw.rowCount(),2);
     TS_ASSERT_EQUALS(cNumb[1],2);
 
-    str[0] = "First"; str[1] = "Second";
-    cl[0].d = 11; cl[1].d = 22;
-
-    vector<string> names;
-    names.push_back("Number");
-    names.push_back("Name");
-    names.push_back("class");
+    //str[0] = "First"; str[1] = "Second";
+    //vector<string> names;
+    //names.push_back("Number");
+    //names.push_back("Name");
 
   }
 
@@ -335,7 +318,36 @@ public:
 
   }
 
+  void test_toDouble()
+  {
+    TableWorkspace tw(1);
+      tw.addColumn("int","X");
+      tw.addColumn("float","Y");
+      tw.addColumn("double","Z");
+      tw.addColumn("bool","F");
+      tw.addColumn("bool","T");
+      tw.addColumn("str","S");
 
+      TableRow row = tw.getFirstRow();
+      row << int(12) << float(25.1) << double(123.456) << false << true << std::string("hello");
+
+      double d;
+      TS_ASSERT_THROWS_NOTHING(d = tw.getColumn("X")->toDouble(0));
+      TS_ASSERT_EQUALS( d, 12.0 );
+      TS_ASSERT_THROWS_NOTHING(d = tw.getColumn("Y")->toDouble(0));
+      TS_ASSERT_DELTA( d, 25.1 , 1e-6); // accuracy of float
+      TS_ASSERT_THROWS_NOTHING(d = tw.getColumn("Z")->toDouble(0));
+      TS_ASSERT_EQUALS( d, 123.456 );
+      TS_ASSERT_THROWS_NOTHING(d = tw.getColumn("F")->toDouble(0));
+      TS_ASSERT_EQUALS( d, 0.0 );
+      TS_ASSERT_THROWS_NOTHING(d = tw.getColumn("T")->toDouble(0));
+      TS_ASSERT_EQUALS( d, 1.0 );
+      TS_ASSERT_THROWS(d = tw.getColumn("S")->toDouble(0),std::runtime_error);
+
+
+  }
 
 };
+
+
 #endif /*TESTTABLEWORKSPACE_*/

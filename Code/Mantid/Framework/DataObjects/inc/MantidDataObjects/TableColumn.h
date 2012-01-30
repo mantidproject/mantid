@@ -14,6 +14,9 @@
 #include <boost/shared_ptr.hpp>
 #include <limits>
 #include <boost/lexical_cast.hpp>
+#include <boost/mpl/if.hpp>
+#include <boost/type_traits.hpp>
+#include <boost/numeric/conversion/cast.hpp>
 
 namespace Mantid
 {
@@ -70,6 +73,17 @@ class TableVector;
 template <class Type>
 class DLLExport TableColumn: public API::Column
 {
+  /// Helper struct helping to write a generic casting to double
+  struct InconvertibleToDoubleType
+  {
+    /// Constructor
+    InconvertibleToDoubleType(const Type&){}
+    /// Constructor
+    InconvertibleToDoubleType(const double&){}
+    /// Convertion to double throws a runtime_error.
+    operator double() const {throw std::runtime_error(std::string("Cannot convert ")+typeid(Type).name()+" to double.");}
+    operator Type() const {throw std::runtime_error(std::string("Cannot convert double to ")+typeid(Type).name()+".");}
+  };
 public:
     TableColumn(){
         int length = sizeof(Type);
@@ -98,13 +112,15 @@ public:
     /// Virtual destructor.
     virtual ~TableColumn(){}
     /// Number of individual elements in the column.
-    int size()const{return int(m_data.size());}
+    size_t size()const{return m_data.size();}
     /// Type id of the data in the column
     const std::type_info& get_type_info()const{return typeid(Type);}
     /// Type id of the pointer to data in the column
     const std::type_info& get_pointer_type_info()const{return typeid(Type*);}
     /// Output to an ostream.
-    void print(std::ostream& s, int index)const{s << m_data[index];}
+    void print(size_t index, std::ostream& s)const{s << m_data[index];}
+    /// Read in a string and set the value at the given index
+    void read(size_t index, const std::string & text);
     /// Type check
     bool isBool()const{return typeid(Type) == typeid(API::Boolean);}
     /// Memory used by the column
@@ -116,6 +132,32 @@ public:
       temp->m_data = this->m_data;
       temp->setName(this->m_name);
       return temp;
+    }
+
+    /** 
+     * Cast an element to double if possible. If it's impossible boost::numeric::bad_numeric_cast
+     * is throw. In case of an overflow boost::numeric::positive_overflow or boost::numeric::negative_overflow
+     * is throw.
+     * @param i :: The index to an element.
+     */
+    virtual double toDouble(size_t i)const
+    {
+      typedef boost::mpl::if_c< 
+        boost::is_convertible<double, Type>::value, Type, InconvertibleToDoubleType>::type DoubleType;
+      return boost::numeric_cast<double,DoubleType>(m_data[i]);
+    }
+
+    /** 
+     * Cast an element to double if possible. If it's impossible boost::numeric::bad_numeric_cast
+     * is throw. In case of an overflow boost::numeric::positive_overflow or boost::numeric::negative_overflow
+     * is throw.
+     * @param i :: The index to an element.
+     */
+    virtual void fromDouble(size_t i, double value)
+    {
+      typedef boost::mpl::if_c< 
+        boost::is_convertible<double, Type>::value, Type, InconvertibleToDoubleType>::type DoubleType;
+      m_data[i] = boost::numeric_cast<DoubleType,double>(value);
     }
 
     /// Reference to the data.
@@ -134,26 +176,46 @@ public:
 
 protected:
     /// Resize.
-    void resize(int count){m_data.resize(count);}
+    void resize(size_t count){m_data.resize(count);}
     /// Inserts default value at position index. 
-    void insert(int index)
+    void insert(size_t index)
     {
-        if (index < int(m_data.size()))
+        if (index < m_data.size())
             m_data.insert(m_data.begin()+index,Type()); 
         else
             m_data.push_back(Type());
     }
     /// Removes an item at index.
-    void remove(int index){m_data.erase(m_data.begin()+index);}
+    void remove(size_t index){m_data.erase(m_data.begin()+index);}
     /// Returns a pointer to the data element.
-    void* void_pointer(int index){return &m_data[index];}
+    void* void_pointer(size_t index){return &m_data[index];}
     /// Returns a pointer to the data element.
-    const void* void_pointer(int index)const {return &m_data[index];}
+    const void* void_pointer(size_t index)const {return &m_data[index];}
 private:
     /// Column data
     std::vector<Type> m_data;
     friend class TableWorkspace;  
 };
+
+/// Read in a string and set the value at the given index
+template<typename Type>
+void TableColumn<Type>::read(size_t index, const std::string & text)
+{
+  std::istringstream istr(text);
+  istr >> m_data[index];
+}
+
+template<>
+double TableColumn<API::Boolean>::toDouble(size_t i)const
+{
+  return m_data[i] ? 1.0 : 0.0;
+}
+
+template<>
+void TableColumn<API::Boolean>::fromDouble(size_t i, double value)
+{
+  m_data[i] = value != 0.0;
+}
 
 /// Shared pointer to a column with aoutomatic type cast and data type check.
 /// Can be created with TableWorkspace::getColumn(...)

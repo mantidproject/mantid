@@ -127,6 +127,10 @@ public:
             throw std::range_error("Column index out of range.");
         }
         Column_sptr c = m_columns[m_col];
+        if (!c->isType<T>())
+        {
+            throw std::runtime_error("TableRow type mismatch.");
+        }
         t = c->cell<T>(m_row);
         ++m_col;
         return *this;

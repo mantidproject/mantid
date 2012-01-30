@@ -85,16 +85,16 @@ std::ostream& operator<<(std::ostream& s,const TableRow& row)
     if (row.m_columns.size() == 0) return s;
     if (row.m_columns.size() == 1)
     {
-        row.m_columns[0]->print(s,row.row());
+        row.m_columns[0]->print(row.row(), s);
         return s;
     }
     std::vector< boost::shared_ptr<Column> >::const_iterator ci = row.m_columns.begin();
     for(;ci!=row.m_columns.end()-1;++ci)
     {
-        (*ci)->print(s,row.row());
+        (*ci)->print(row.row(), s);
         s << row.m_sep;
     }
-    (*ci)->print(s,row.row());
+    (*ci)->print(row.row(), s);
     return s;
 }
 

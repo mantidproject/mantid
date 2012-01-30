@@ -50,7 +50,6 @@ set ( INC_FILES
 	inc/MantidDataObjects/PeaksWorkspace.h
 	inc/MantidDataObjects/SpecialWorkspace2D.h
 	inc/MantidDataObjects/TableColumn.h
-	inc/MantidDataObjects/TablePointerColumn.h
 	inc/MantidDataObjects/TableWorkspace.h
 	inc/MantidDataObjects/Workspace2D.h
 	inc/MantidDataObjects/WorkspaceSingleValue.h
