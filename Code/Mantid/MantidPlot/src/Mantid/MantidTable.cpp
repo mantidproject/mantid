@@ -56,7 +56,7 @@ void MantidTable::fillTable()
   setNumRows(m_ws->rowCount());
 
   // Add all columns
-  for(int i=0;i<m_ws->columnCount();i++)
+  for(size_t i=0;i<m_ws->columnCount();i++)
   {
     Mantid::API::Column_sptr c = m_ws->getColumn(i);
     QString colName = QString::fromStdString(c->name());
@@ -77,11 +77,11 @@ void MantidTable::fillTable()
     if (thisWidth > maxWidth) maxWidth = thisWidth;
 
     // Print out the data in each row of this column
-    for(int j=0; j<m_ws->rowCount(); j++)
+    for(size_t j=0; j<m_ws->rowCount(); j++)
     {
       std::ostringstream ostr;
       // This is the method on the Column object to convert to a string.
-      c->print(ostr,j);
+      c->print(j,ostr);
       QString qstr = QString::fromStdString(ostr.str());
       setText(j,i,qstr);
 
@@ -101,7 +101,7 @@ void MantidTable::fillTable()
   if (m_ws->rowCount() < 1000)
   {
     // Note: This is very slow for some reason so it is only done for smallish tables.
-    for(int j=0; j<m_ws->rowCount(); j++)
+    for(size_t j=0; j<m_ws->rowCount(); j++)
       d_table->verticalHeader()->setLabel(j,QString::number(j));
   }
 
@@ -123,7 +123,7 @@ void MantidTable::fillTableTransposed()
   std::vector<int> maxWidth(numCols(), 6);
   QFontMetrics fm( this->getTextFont() );
   // Add all columns
-  for(int i = 0; i < m_ws->columnCount(); ++i)
+  for(size_t i = 0; i < m_ws->columnCount(); ++i)
   {
     Mantid::API::Column_sptr c = m_ws->getColumn(i);
 
@@ -136,11 +136,11 @@ void MantidTable::fillTableTransposed()
     if (thisWidth > maxWidth[0]) maxWidth[0] = thisWidth;
 
     // Print out the data in each row of this column
-    for(int j = 0; j < m_ws->rowCount(); ++j)
+    for(size_t j = 0; j < m_ws->rowCount(); ++j)
     {
       std::ostringstream ostr;
       // This is the method on the Column object to convert to a string.
-      c->print(ostr,j);
+      c->print(j,ostr);
       QString qstr = QString::fromStdString(ostr.str());
 
       int col = j + 1;
@@ -222,12 +222,12 @@ void MantidTable::cellEdited(int row,int col)
 
   // Have the column convert the text to a value internally
   int index = row;
-  c->read(text, index);
+  c->read(index, text);
 
   // Set the table view to be the same text after editing.
   // That way, if the string was stupid, it will be reset to the old value.
   std::ostringstream s;
-  c->print(s, index);
+  c->print(index, s);
   d_table->setText(row, col, QString(s.str().c_str()));
 }
 

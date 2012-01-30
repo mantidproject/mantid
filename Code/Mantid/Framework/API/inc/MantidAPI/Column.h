@@ -11,6 +11,7 @@
 #include <string>
 #include <typeinfo>
 #include <limits>
+#include <vector>
 
 namespace Mantid
 {
@@ -82,7 +83,7 @@ public:
     void setName(const std::string& str){m_name = str;}
 
     /// Number of individual elements in the column.
-    virtual int size()const = 0;
+    virtual size_t size()const = 0;
 
     /// Returns typeid for the data in the column
     virtual const std::type_info& get_type_info()const = 0;
@@ -94,10 +95,10 @@ public:
     { return true; }
 
     /// Prints out the value to a stream
-    virtual void print(std::ostream& s, int index) const = 0;
+    virtual void print(size_t index, std::ostream& s) const = 0;
 
     /// Read in a string and set the value at the given index
-    virtual void read(const std::string & text, int index)
+    virtual void read(size_t index, const std::string & text )
     { UNUSED_ARG(text);UNUSED_ARG(index); }
 
     /// Specialized type check
@@ -109,9 +110,15 @@ public:
     /// Virtual destructor. Fully clone any column.
     virtual Column* clone() const = 0;
 
+    /// Cast an element to double if possible
+    virtual double toDouble(size_t index)const = 0;
+
+    /// Assign an element from double if possible
+    virtual void fromDouble(size_t index, double value) = 0;
+
     /// Templated method for returning a value. No type checks are done.
     template<class T>
-    T& cell(int index)
+    T& cell(size_t index)
     {
         return *static_cast<T*>(void_pointer(index));
     }
@@ -119,7 +126,7 @@ public:
 
     /// Templated method for returning a value (const version). No type checks are done.
     template<class T>
-    const T& cell(int index)const
+    const T& cell(size_t index)const
     {
         return *static_cast<const T*>(void_pointer(index));
     }
@@ -131,17 +138,31 @@ public:
         return get_type_info() == typeid(T);
     }
 
+    /**
+     * Fills a std vector with values from the column if the types are compatible.
+     * @param vec :: The vector to fill in.
+     */
+    template<class T>
+    void numeric_fill(std::vector<T>& vec) const
+    {
+      vec.resize(size());
+      for(size_t i = 0; i < vec.size(); ++i)
+      {
+        vec[i] = static_cast<T>(toDouble(i));
+      }
+    }
+
 protected:
     /// Sets the new column size.
-    virtual void resize(int count) = 0;
+    virtual void resize(size_t count) = 0;
     /// Inserts an item.
-    virtual void insert(int index) = 0;
+    virtual void insert(size_t index) = 0;
     /// Removes an item.
-    virtual void remove(int index) = 0;
+    virtual void remove(size_t index) = 0;
     /// Pointer to a data element
-    virtual void* void_pointer(int index) = 0;
+    virtual void* void_pointer(size_t index) = 0;
     /// Pointer to a data element
-    virtual const void* void_pointer(int index) const = 0;
+    virtual const void* void_pointer(size_t index) const = 0;
 
     std::string m_name;///< name
     std::string m_type;///< type
@@ -175,6 +196,8 @@ struct Column_DllExport Boolean
 
 /// Printing Boolean to an output stream
 Column_DllExport std::ostream& operator<<(std::ostream& ,const API::Boolean& );
+/// Redaing a Boolean from an input stream
+Column_DllExport std::istream& operator>>(std::istream& istr, API::Boolean&);
 
 typedef boost::shared_ptr<Column> Column_sptr;
 typedef boost::shared_ptr<const Column> Column_const_sptr;

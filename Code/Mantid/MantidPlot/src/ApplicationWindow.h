@@ -89,6 +89,7 @@ class TextEditor;
 class AssociationsDialog;
 class MantidMatrix;
 class FloatingWindow;
+class MantidTable;
 
 // On Mac (and Ubuntu 11 Unity) the menubar must be shared between the main window and other floating windows.
 #ifdef Q_OS_MAC
@@ -372,6 +373,8 @@ public slots:
   Matrix* newMatrix(const QString& caption, int r, int c);
   Matrix* matrix(const QString& name);
   Matrix* convertTableToMatrix();
+  void convertTableToWorkspace();
+  MantidTable* convertTableToTableWorkspace(Table* t);
   Matrix* tableToMatrix(Table* t);
   void initMatrix(Matrix* m, const QString& caption);
   void transposeMatrix();
@@ -1391,7 +1394,7 @@ private:
   QAction *actionShowColumnOptionsDialog, *actionShowColumnValuesDialog, *actionShowColsDialog, *actionShowRowsDialog;
   QAction *actionTableRecalculate;
   QAction *actionAbout, *actionShowHelp, *actionChooseHelpFolder,*actionMantidConcepts,*actionMantidAlgorithms,*actionmantidplotHelp;
-  QAction *actionRename, *actionCloseWindow, *actionConvertTable;
+  QAction *actionRename, *actionCloseWindow, *actionConvertTable, *actionConvertTableToWorkspace;
   QAction *actionAddColToTable, *actionDeleteLayer, *actionInterpolate;
   QAction *actionResizeActiveWindow, *actionHideActiveWindow;
   QAction *actionShowMoreWindows, *actionPixelLineProfile, *actionIntensityTable;

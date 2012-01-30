@@ -48,10 +48,10 @@ namespace
     MatrixWorkspace_sptr ws = WorkspaceCreationHelper::Create2DWorkspaceBinned(int(nhist), int(nbins), x0, deltax);
 
     // We need something other than a spectrum axis, call this one theta
-    NumericAxis* const thetaAxis = new NumericAxis(nhist);
-    for(size_t i = 0; i < nhist; ++i)
+    NumericAxis* const thetaAxis = new NumericAxis(nhist+1);
+    for(size_t i = 0; i < nhist+1; ++i)
     {
-      thetaAxis->setValue(i, static_cast<double>(i));
+      thetaAxis->setValue(i, -0.5 + static_cast<double>(i));
     }
     ws->replaceAxis(1, thetaAxis);
 
@@ -138,11 +138,10 @@ private:
     TS_ASSERT_EQUALS(outputWS->isDistribution(), dist);
     // Axis sizes
     TS_ASSERT_EQUALS(outputWS->getAxis(0)->length(), nxvalues);
-    TS_ASSERT_EQUALS(outputWS->getAxis(1)->length(), nhist);
+    TS_ASSERT_EQUALS(outputWS->getAxis(1)->length(), nhist+1);
     TS_ASSERT_EQUALS(outputWS->readX(0).size(), nxvalues);
     TS_ASSERT_EQUALS(outputWS->readY(0).size(), nxvalues - 1);
 
-    Mantid::API::Axis *newYAxis = outputWS->getAxis(1);
     const double epsilon(1e-08);
     for(size_t i = 0; i < nhist; ++i)
     {
@@ -200,16 +199,6 @@ private:
         {
           TS_ASSERT_DELTA(outputWS->readX(i)[nxvalues-1], 15.0, epsilon);        
         }
-      }
-      if( onAxis1 )
-      {
-        // The new Y axis value should be the centre point bin values
-        TS_ASSERT_DELTA((*newYAxis)(i), static_cast<double>(i), epsilon);
-      }
-      else
-      {
-        // The new Y axis value should be the centre point bin values
-        TS_ASSERT_DELTA((*newYAxis)(i), 0.5 + 2.0*static_cast<double>(i), epsilon);
       }
     }
     // Clean up

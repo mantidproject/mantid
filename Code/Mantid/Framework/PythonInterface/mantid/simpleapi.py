@@ -24,8 +24,8 @@ import api
 import kernel
 from kernel import funcreturns as _funcreturns
 
-# Make mtd available if a user just types from mantid.simpleapi import *
-from mantid import mtd
+# Make "mtd" and "logger" available if a user just types from mantid.simpleapi import *
+from mantid import mtd, logger
 
 _ads = api.AnalysisDataService.Instance()
 _framework = api.FrameworkManager.Instance()
@@ -235,11 +235,12 @@ def create_algorithm(algorithm, version, _algm_object):
 def _set_properties_dialog(algm_object, *args, **kwargs):
     """
     Set the properties all in one go assuming that you are preparing for a
-    dialog box call. If the dialog is cancelled do a sys.exit, otherwise 
+    dialog box call. If the dialog is cancelled raise a runtime error, otherwise 
     return the algorithm ready to execute.
     """
     if not mantid.__gui__:
         raise RuntimeError("Can only display properties dialog in gui mode")
+
     # generic setup
     enabled_list = [s.lstrip(' ') for s in kwargs.get("Enable", "").split(',')]
     del kwargs["Enable"] # no longer needed
@@ -272,6 +273,12 @@ def _set_properties_dialog(algm_object, *args, **kwargs):
                 return '0'
         else:
             return str(value)
+    # Translate positional arguments and add them to the keyword list
+    ordered_props = algm_object.orderedProperties()
+    for index, value in enumerate(args):
+        propname = ordered_props[index]
+        kwargs[propname] = args[index]
+    
     # configure everything for the dialog
     for name in kwargs.keys():
         value = kwargs[name]
@@ -282,7 +289,7 @@ def _set_properties_dialog(algm_object, *args, **kwargs):
     import _qti
     dialog =  _qti.app.mantidUI.createPropertyInputDialog(algm_object.name(), presets, message, enabled_list, disabled_list)
     if dialog == False:
-        sys.exit('Information: Script execution cancelled')
+        raise RuntimeError('Information: Script execution cancelled')
 
 def create_algorithm_dialog(algorithm, version, _algm_object):
     """

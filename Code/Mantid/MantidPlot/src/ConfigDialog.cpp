@@ -2009,6 +2009,7 @@ void ConfigDialog::apply()
   // general page: floating windows tab
   app->settings.setValue("/General/FloatingWindows/MultiLayer",boxFloatingGraph->isChecked());
   app->settings.setValue("/General/FloatingWindows/Table",boxFloatingTable->isChecked());
+  app->settings.setValue("/General/FloatingWindows/MantidTable",boxFloatingTable->isChecked());
   app->settings.setValue("/General/FloatingWindows/InstrumentWindow",boxFloatingInstrumentWindow->isChecked());
   app->settings.setValue("/General/FloatingWindows/MantidMatrix",boxFloatingMantidMatrix->isChecked());
   app->settings.setValue("/General/FloatingWindows/Note",boxFloatingNote->isChecked());

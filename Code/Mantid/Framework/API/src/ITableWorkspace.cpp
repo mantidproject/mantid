@@ -11,6 +11,9 @@ namespace API
 // Get a reference to the logger
 Kernel::Logger& ITableWorkspace::g_log = Kernel::Logger::get("ITableWorkspace");
 
+/**
+ * If the workspace is the AnalysisDataService sends AfterReplaceNotification.
+ */
 void ITableWorkspace::modified()
 {
   if (!AnalysisDataService::Instance().doesExist(this->getName())) return;

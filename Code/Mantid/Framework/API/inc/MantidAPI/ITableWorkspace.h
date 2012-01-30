@@ -39,14 +39,24 @@ public:
     std::string m_name;///< column namae
 };
 
+/// Helper class used to create ConstColumnVector
+class TableConstColumnHelper
+{
+public:
+    /// Constructor
+    TableConstColumnHelper(const ITableWorkspace *tw,const std::string& name):m_workspace(tw),m_name(name){}
+    const ITableWorkspace *m_workspace;///< Pointer to the TableWorkspace
+    std::string m_name;///< column namae
+};
+
 /// Helper class used to create TableRow
 class TableRowHelper
 {
 public:
     /// Constructor
-    TableRowHelper(ITableWorkspace* tw,int row):m_workspace(tw),m_row(row){}
+    TableRowHelper(ITableWorkspace* tw,size_t row):m_workspace(tw),m_row(row){}
     ITableWorkspace* m_workspace;///< Pointer to the TableWorkspace
-    int m_row;///< Row number
+    size_t m_row;///< Row number
 };
 
 
@@ -130,10 +140,10 @@ public:
   virtual bool addColumn(const std::string& type, const std::string& name) = 0;
 
   /// Creates n new columns of the same type.
-  virtual bool addColumns(const std::string& type, const std::string& name, int n)
+  virtual bool addColumns(const std::string& type, const std::string& name, size_t n)
   {
     bool ok = true;
-    for(int i=0;i<n;i++)
+    for(size_t i=0;i<n;i++)
     {
       std::ostringstream ostr;
       ostr<<name<<'_'<<i;
@@ -149,31 +159,34 @@ public:
   virtual ITableWorkspace* clone() const = 0;
 
   /// Number of columns in the workspace.
-  virtual int columnCount() const = 0;
+  virtual size_t columnCount() const = 0;
 
   /// Gets the shared pointer to a column by name.
   virtual boost::shared_ptr<Mantid::API::Column> getColumn(const std::string& name) = 0;
 
+  /// Gets the shared pointer to a column by name.
+  virtual boost::shared_ptr<const Mantid::API::Column> getColumn(const std::string& name) const = 0;
+
   /// Gets the shared pointer to a column by index.
-  virtual boost::shared_ptr<Mantid::API::Column> getColumn(int index) = 0;
+  virtual boost::shared_ptr<Mantid::API::Column> getColumn(size_t index) = 0;
 
   /// Gets the shared pointer to a column by index - return none-modifyable column.
-  virtual boost::shared_ptr<const Mantid::API::Column> getColumn(int index) const = 0;
+  virtual boost::shared_ptr<const Mantid::API::Column> getColumn(size_t index) const = 0;
 
   /// Returns a vector of all column names.
   virtual std::vector<std::string> getColumnNames() = 0;
 
   /// Number of rows in the workspace.
-  virtual int rowCount() const = 0;
+  virtual size_t rowCount() const = 0;
 
   /// Resizes the workspace.
-  virtual void setRowCount(int count) = 0;
+  virtual void setRowCount(size_t count) = 0;
 
   /// Inserts a row before row pointed to by index and fills it with default vales.
-  virtual int insertRow(int index) = 0;
+  virtual size_t insertRow(size_t index) = 0;
 
   /// Delets a row if it exists.
-  virtual void removeRow(int index) = 0;
+  virtual void removeRow(size_t index) = 0;
 
   /// Appends a row.
   TableRowHelper appendRow()
@@ -197,6 +210,12 @@ public:
     return TableColumnHelper(this,name);
   }
 
+  /// Access the column with name \c name trough a ColumnVector object
+  TableConstColumnHelper getVector(const std::string& name)const
+  {
+    return TableConstColumnHelper(this,name);
+  }
+
   template <class T>
   /**  Get a reference to a data element
          @param name :: Column name.
@@ -205,7 +224,7 @@ public:
            a runtime_error exception is thrown.
          @return the reference to the data element
    */
-  T& getRef(const std::string& name, int index)
+  T& getRef(const std::string& name, size_t index)
   {
     boost::shared_ptr<Column> c = getColumn(name);
     if (!c->isType<T>())
@@ -226,7 +245,7 @@ public:
          @return the reference to the requested cell
    */
   template<class T>
-  T& cell(int row,int col)
+  T& cell(size_t row,size_t col)
   {
     Column_sptr c = getColumn(col);
     if (!c->isType<T>())
@@ -250,50 +269,50 @@ public:
          @param col :: Column number
          @return the reference of a requested cell if it's an integer
    */
-  int& Int(int row,int col){return cell<int>(row,col);}
+  int& Int(size_t row,size_t col){return cell<int>(row,col);}
   /**  Get the reference to the element in row \c row and column \c col if its type is \c double.
          If it doesn't match the actual type of the column a runtime_error exception is thrown.
          @param row :: Row number
          @param col :: Column number
          @return the reference of a requested cell if it's a double
    */
-  double& Double(int row,int col){return cell<double>(row,col);}
+  double& Double(size_t row,size_t col){return cell<double>(row,col);}
   /**  Get the reference to the element in row \c row and column \c col if its type is \c bool.
          If it doesn't match the actual type of the column a runtime_error exception is thrown.
          @param row :: Row number
          @param col :: Column number
          @return the reference of a requested cell if it's a boolean
    */
-  Boolean& Bool(int row,int col){return cell<Boolean>(row,col);}
+  Boolean& Bool(size_t row,size_t col){return cell<Boolean>(row,col);}
   /**  Get the reference to the element in row \a row and column \a col if its type is \c std::string.
          If it doesn't match the actual type of the column a runtime_error exception is thrown.
          @param row :: Row number
          @param col :: Column number
          @return the reference of a requested cell if it's a string
    */
-  std::string& String(int row,int col){return cell<std::string>(row,col);}
+  std::string& String(size_t row,size_t col){return cell<std::string>(row,col);}
 
   /**  Creates a TableRow object for row \a row.
          @param row :: Row number
          @return the requested row
    */
-  TableRowHelper getRow(int row){return TableRowHelper(this,row);}
+  TableRowHelper getRow(size_t row){return TableRowHelper(this,row);}
   /**  Creates a TableRow object for the first row (\c row == 0).
    */
   TableRowHelper getFirstRow(){return TableRowHelper(this,0);}
 
   /// find method to get the index of integer cell value in a table workspace
-  virtual void find(int value,int& row,const int & col)=0;
+  virtual void find(size_t value,size_t& row,const size_t & col)=0;
   /// find method to get the index of  double cell value in a table workspace
-  virtual void find (double  value,int& row,const int & col)=0;
+  virtual void find (double  value,size_t& row,const size_t & col)=0;
   /// find method to get the index of  float cell value in a table workspace
-  virtual void find(float value,int& row,const int & col)=0;
+  virtual void find(float value,size_t& row,const size_t & col)=0;
   /// find method to get the index of  API::Boolean value cell in a table workspace
-  virtual void find(API::Boolean value,int& row,const int & col)=0;
+  virtual void find(API::Boolean value,size_t& row,const size_t & col)=0;
   /// find method to get the index of cellstd::string  value in a table workspace
-  virtual void find(std::string value,int& row,const int & col)=0;
+  virtual void find(std::string value,size_t& row,const size_t & col)=0;
   /// find method to get the index of  Mantid::Kernel::V3D cell value in a table workspace
-  virtual void find(Mantid::Kernel::V3D value,int& row,const int & col)=0;
+  virtual void find(Mantid::Kernel::V3D value,size_t& row,const size_t & col)=0;
 
   void modified();
 
@@ -303,7 +322,7 @@ protected:
          @param c :: Pointer to the column
          @param size :: New column size
    */
-  void resizeColumn(Column* c,int size)
+  void resizeColumn(Column* c,size_t size)
   {
     c->resize(size);
   }
@@ -312,7 +331,7 @@ protected:
          @param c :: Pointer to the column
          @param index :: Index in the column before which a new element wil be inserted.
    */
-  void insertInColumn(Column* c,int index)
+  void insertInColumn(Column* c,size_t index)
   {
     c->insert(index);
   }
@@ -321,7 +340,7 @@ protected:
          @param c :: Pointer to the column
          @param index :: Index of the element to be removed.
    */
-  void removeFromColumn(Column* c,int index)
+  void removeFromColumn(Column* c,size_t index)
   {
     c->remove(index);
   }
@@ -347,9 +366,7 @@ public:
   {
     if (!m_column->isType<T>())
     {
-      std::string str = "Type mismatch. ";
-      m_column->g_log.error(str);
-      throw std::runtime_error(str);
+      throw std::runtime_error("Type mismatch when creating a ColumnVector.");
     }
   }
   /** Get the element
@@ -358,9 +375,36 @@ public:
    */
   T& operator[](size_t i){return m_column->cell<T>(static_cast<int>(i));}
   /// Size of the vector
-  int size(){return static_cast<int>(m_column->size());}
+  size_t size(){return static_cast<int>(m_column->size());}
 private:
   Column_sptr m_column;///< Pointer to the underlying column
+};
+
+/** @class ConstColumnVector
+     ConstColumnVector gives const access to the column elements without alowing its resizing.
+     Created by TableWorkspace::getVector(...)
+ */
+template< class T>
+class ConstColumnVector
+{
+public:
+  /// Constructor
+  ConstColumnVector(const TableConstColumnHelper& th):m_column(th.m_workspace->getColumn(th.m_name))
+  {
+    if (!m_column->isType<T>())
+    {
+      throw std::runtime_error("Type mismatch when creating a ColumnVector.");
+    }
+  }
+  /** Get the const reference to element
+        @param i :: Element's position
+        @return the column at the requested index
+   */
+  const T& operator[](size_t i){return m_column->cell<T>(static_cast<int>(i));}
+  /// Size of the vector
+  size_t size(){return static_cast<int>(m_column->size());}
+private:
+  Column_const_sptr m_column;///< Pointer to the underlying column
 };
 
 /// Typedef for a shared pointer to \c TableWorkspace

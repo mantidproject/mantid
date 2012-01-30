@@ -333,6 +333,8 @@ void MantidDockWidget::createWorkspaceMenuActions()
   m_showTransposed = new QAction(tr("Show Transposed"),this);
   connect(m_showTransposed,SIGNAL(triggered()),m_mantidUI,SLOT(importTransposed()));
 
+  m_convertToMatrixWorkspace = new QAction(tr("Convert to MatrixWorkpace"),this);
+  connect(m_convertToMatrixWorkspace,SIGNAL(triggered()),this,SLOT(convertToMatrixWorkspace()));
 }
 
 /**
@@ -947,6 +949,7 @@ void MantidDockWidget::addTableWorkspaceMenuItems(QMenu * menu) const
   menu->addAction(m_showData);
   menu->addAction(m_showTransposed);
   menu->addAction(m_showHist);
+  menu->addAction(m_convertToMatrixWorkspace);
 }
 
 void MantidDockWidget::clickedWorkspace(QTreeWidgetItem* item, int)
@@ -1395,7 +1398,13 @@ void MantidDockWidget::treeSelectionChanged()
 
 }
 
-
+/**
+ * Convert selected TableWorkspace to a MatrixWorkspace.
+ */
+void MantidDockWidget::convertToMatrixWorkspace()
+{
+  m_mantidUI->executeAlgorithm("ConvertTableToMatrixWorkspace",-1);
+}
 
 //------------ MantidTreeWidget -----------------------//
 

@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/SofQW.h" 
+#include "MantidAlgorithms/Rebin2D.h"
 #include "MantidGeometry/Math/Quadrilateral.h"
 #include "MantidGeometry/IDetector.h"
 #include <list>
@@ -51,7 +51,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
      */
-    class DLLExport SofQW2  : public SofQW
+    class DLLExport SofQW2 : public Rebin2D
     {
     public:
       /// Default constructor
@@ -67,20 +67,22 @@ namespace Mantid
 
       /// Sets documentation strings for this algorithm
       virtual void initDocs();
+      /// Initialize the algorithm
+      void init();
       /// Run the algorithm
       void exec();
-      /// Rebin the inputQ 
-      void rebinToOutput(const Geometry::Quadrilateral & inputQ, API::MatrixWorkspace_const_sptr inputWS, 
-                         const size_t i, const size_t j, API::MatrixWorkspace_sptr outputWS);
+//      /// Rebin the inputQ
+//      void rebinToOutput(const Geometry::Quadrilateral & inputQ, API::MatrixWorkspace_const_sptr inputWS,
+//                         const size_t i, const size_t j, API::MatrixWorkspace_sptr outputWS);
       /// Get the efixed value for the given detector
       double getEFixed(Geometry::IDetector_const_sptr det) const;
       /// Calculate the Q value for a direct instrument
       double calculateDirectQ(const double efixed, const double deltaE, const double twoTheta, const double psi) const;
       /// Calculate the Q value for an indirect instrument
       double calculateIndirectQ(const double efixed, const double deltaE, const double twoTheta, const double psi) const;
-      /// Find the intersect region on the output grid
-      bool getIntersectionRegion(API::MatrixWorkspace_const_sptr outputWS, const Geometry::Quadrilateral & inputQ,
-                                 size_t &qstart, size_t &qend, size_t &en_start, size_t &en_end) const;
+//      /// Find the intersect region on the output grid
+//      bool getIntersectionRegion(API::MatrixWorkspace_const_sptr outputWS, const Geometry::Quadrilateral & inputQ,
+//                                 size_t &qstart, size_t &qend, size_t &en_start, size_t &en_end) const;
       /// Init variables cache base on the given workspace
       void initCachedValues(API::MatrixWorkspace_const_sptr workspace);
       /// Init the theta index
@@ -92,8 +94,6 @@ namespace Mantid
       bool m_efixedGiven;
       /// EFixed
       double m_efixed;
-      /// Progress reporter
-      boost::shared_ptr<API::Progress> m_progress;
 
       //---------------------------------------------------------------------------------
       /// Output Q axis
@@ -102,8 +102,6 @@ namespace Mantid
       std::vector<double> m_thetaPts;
       /// Theta width
       double m_thetaWidth;
-      ///
-      API::MatrixWorkspace_sptr m_numIntersectionsWS;
     };
 
 

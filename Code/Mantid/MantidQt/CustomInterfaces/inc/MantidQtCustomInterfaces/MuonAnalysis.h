@@ -161,6 +161,9 @@ private slots:
   /// Group the fitted workspaces.
   void groupFittedWorkspaces(QString);
 
+  /// Called when the plot function has been changed on the home page.
+  void changeHomeFunction();
+
 
 private:
   /// Initialize the layout

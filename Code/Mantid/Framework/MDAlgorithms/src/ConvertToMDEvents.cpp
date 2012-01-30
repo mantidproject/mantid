@@ -845,12 +845,27 @@ void ConvertToMDEvents::buildDimNames(MDEvents::MDWSDescription &TargWSDescripti
     if(TargWSDescription.AlgID.find(Q_modes[Q3D])!=std::string::npos){
         std::vector<Kernel::V3D> dim_directions(3);
         Kernel::Matrix<double> Bm = TargWSDescription.Latt.getB();
-        dim_directions[0]=Bm*Kernel::V3D(1,0,0);
-        dim_directions[0].normalize();
-        dim_directions[1]=Bm*Kernel::V3D(0,1,0);
-        dim_directions[1].normalize();
-        dim_directions[2]=Bm*Kernel::V3D(0,0,1);
-        dim_directions[2].normalize();
+        if(TargWSDescription.is_uv_default){
+            dim_directions[0]=Bm*Kernel::V3D(1,0,0);
+            dim_directions[0].normalize();
+            dim_directions[1]=Bm*Kernel::V3D(0,1,0);
+            dim_directions[1].normalize();
+            dim_directions[2]=Bm*Kernel::V3D(0,0,1);
+            dim_directions[2].normalize();
+        }else{
+            for(int i=0;i<3;i++){
+                for(int j=0;j<3;j++){
+                    Bm[i][j]*= TargWSDescription.Latt.a(i);
+                }
+            }
+            dim_directions[0]=Bm*TargWSDescription.u;
+            Kernel::V3D vp   =Bm*TargWSDescription.v;
+            dim_directions[2]=dim_directions[0].cross_prod(vp);
+            dim_directions[2].normalize();
+            dim_directions[1]=dim_directions[2].cross_prod(dim_directions[0]);
+            dim_directions[1].normalize();
+
+        }
 
         for(int i=0;i<3;i++){
             TargWSDescription.dim_names[i]=MDEvents::makeAxisName(dim_directions[i],TWS.defailt_qNames);
