@@ -1,6 +1,5 @@
 import sys
 import os
-import argparse
 import datetime
 import re
 

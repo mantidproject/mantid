@@ -3,12 +3,19 @@
 
 import sys
 import os
-import argparse
+try:
+    import argparse
+    useArgparse = True
+except ImportError, e:
+    import optparse # deprecated in v2.7
+    useArgparse = False
 import datetime
 import re
 import cmakelists_utils
 from cmakelists_utils import *
 import commands
+
+VERSION = "1.0"
 
 #======================================================================
 def write_header(subproject, classname, filename, args):
@@ -335,34 +342,73 @@ def generate(subproject, classname, overwrite, args):
 
 #======================================================================
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Utility to create Mantid class files: header, source and test.')
-    parser.add_argument('subproject', metavar='SUBPROJECT', type=str,
-                        help='The subproject under Framework/; e.g. Kernel')
-    parser.add_argument('classname', metavar='CLASSNAME', type=str,
-                        help='Name of the class to create')
-    parser.add_argument('--force', dest='force', action='store_const',
-                        const=True, default=False,
-                        help='Force overwriting existing files. Use with caution!')
-    parser.add_argument('--no-header', dest='header', action='store_const',
-                        const=False, default=True,
-                        help="Don't create the header file")
-    parser.add_argument('--no-test', dest='test', action='store_const',
-                        const=False, default=True,
-                        help="Don't create the test file")
-    parser.add_argument('--no-cpp', dest='cpp', action='store_const',
-                        const=False, default=True,
-                        help="Don't create the cpp file")
-    parser.add_argument('--alg', dest='alg', action='store_const',
-                        const=True, default=False,
-                        help='Create an Algorithm stub. This adds some methods common to algorithms.')
-    parser.add_argument('--subfolder', dest='subfolder', 
-                        default="",
-                        help='Put the source under a subfolder below the main part of the project, e.g. Geometry/Instrument.')
-    parser.add_argument('--project', dest='project', 
-                        default="Framework",
-                        help='The project in which this goes. Default: Framework. Can be MantidQt, Vates')
-     
-    args = parser.parse_args()
+    parser = None
+    
+    if useArgparse:
+        parser = argparse.ArgumentParser(description='Utility to create Mantid class files: header, source and test. version ' + VERSION)
+        parser.add_argument('subproject', metavar='SUBPROJECT', type=str,
+                            help='The subproject under Framework/; e.g. Kernel')
+        parser.add_argument('classname', metavar='CLASSNAME', type=str,
+                            help='Name of the class to create')
+        parser.add_argument('--force', dest='force', action='store_const',
+                            const=True, default=False,
+                            help='Force overwriting existing files. Use with caution!')
+        parser.add_argument('--no-header', dest='header', action='store_const',
+                            const=False, default=True,
+                            help="Don't create the header file")
+        parser.add_argument('--no-test', dest='test', action='store_const',
+                            const=False, default=True,
+                            help="Don't create the test file")
+        parser.add_argument('--no-cpp', dest='cpp', action='store_const',
+                            const=False, default=True,
+                            help="Don't create the cpp file")
+        parser.add_argument('--alg', dest='alg', action='store_const',
+                            const=True, default=False,
+                            help='Create an Algorithm stub. This adds some methods common to algorithms.')
+        parser.add_argument('--subfolder', dest='subfolder', 
+                            default="",
+                            help='Put the source under a subfolder below the main part of the project, e.g. Geometry/Instrument.')
+        parser.add_argument('--project', dest='project', 
+                            default="Framework",
+                            help='The project in which this goes. Default: Framework. Can be MantidQt, Vates')
+    else:
+        parser = optparse.OptionParser("Usage: %prog SUBPROJECT CLASSNAME [options]", None,
+                                       optparse.Option, VERSION, 'error', 'Utility to create Mantid class files: header, source and test.')
+        #parser.add_option('--subproject', metavar='SUBPROJECT', type=str,
+        #                    help='The subproject under Framework/; e.g. Kernel')
+        #parser.add_option('--classname', metavar='CLASSNAME', type=str,
+        #                    help='Name of the class to create')
+        parser.add_option('--force', dest='force', action='store_const',
+                            const=True, default=False,
+                            help='Force overwriting existing files. Use with caution!')
+        parser.add_option('--no-header', dest='header', action='store_const',
+                            const=False, default=True,
+                            help="Don't create the header file")
+        parser.add_option('--no-test', dest='test', action='store_const',
+                            const=False, default=True,
+                            help="Don't create the test file")
+        parser.add_option('--no-cpp', dest='cpp', action='store_const',
+                            const=False, default=True,
+                            help="Don't create the cpp file")
+        parser.add_option('--alg', dest='alg', action='store_const',
+                            const=True, default=False,
+                            help='Create an Algorithm stub. This adds some methods common to algorithms.')
+        parser.add_option('--subfolder', dest='subfolder', 
+                            default="",
+                            help='Put the source under a subfolder below the main part of the project, e.g. Geometry/Instrument.')
+        parser.add_option('--project', dest='project', 
+                            default="Framework",
+                            help='The project in which this goes. Default: Framework. Can be MantidQt, Vates')
+
+    args = None
+    if useArgparse:
+        args = parser.parse_args()
+    else:
+        (options, myargs) = parser.parse_args()
+        args = options
+        args.subproject = myargs[0]
+        args.classname = myargs[1]
+
     subproject = args.subproject
     classname = args.classname
     overwrite = args.force
