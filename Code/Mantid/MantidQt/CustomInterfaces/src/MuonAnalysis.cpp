@@ -2666,10 +2666,7 @@ void MuonAnalysis::checkAppendingPreviousRun()
     return;
   }
   
-  if ( !m_uiForm.mwRunFiles->isValid() )
-  {
-    return;
-  }
+  m_uiForm.previousRun->setEnabled(false);
   
   if (m_uiForm.appendRun->isChecked())
   {
@@ -2680,6 +2677,8 @@ void MuonAnalysis::checkAppendingPreviousRun()
     //Subtact one from the current run and load
     changeRun(-1);
   }
+
+  m_uiForm.previousRun->setEnabled(true);
 }
 
 
@@ -2690,8 +2689,8 @@ void MuonAnalysis::checkAppendingNextRun()
 {
   if (m_uiForm.mwRunFiles->getText().isEmpty() )
     return;
-  //if (m_uiForm.mwRunFiles->isValid() )
-  //  return;
+
+  m_uiForm.nextRun->setEnabled(false);
 
   if (m_uiForm.appendRun->isChecked())
   {
@@ -2702,6 +2701,8 @@ void MuonAnalysis::checkAppendingNextRun()
     //Add one to current run and laod
     changeRun(1);
   }
+
+  m_uiForm.nextRun->setEnabled(true);
 }
 
 
@@ -2790,7 +2791,6 @@ void MuonAnalysis::setAppendingRun(int inc)
 
   m_previousFilename = currentFile;
   m_uiForm.mwRunFiles->setText(m_previousFilename);
-
 }
 
 /**
