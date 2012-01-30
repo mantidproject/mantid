@@ -3,6 +3,7 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
@@ -675,6 +676,24 @@ namespace Geometry
     }
   }
 
+  PointingAlong axisNameToAxisType(std::string& input)
+  {
+    PointingAlong direction;
+    if(input.compare("x") == 0)
+    {
+      direction = X;
+    }
+    else if(input.compare("y") == 0)
+    {
+      direction = Y;
+    }
+    else
+    {
+      direction = Z;
+    }
+    return direction;
+  }
+
   //-----------------------------------------------------------------------------------------------------------------------
   /** Reads the contents of the \<defaults\> element to set member variables,
   *  requires m_instrument to be already set
@@ -720,6 +739,55 @@ namespace Geometry
     // Any neutronic position tags will be ignored if this tag is missing
     if ( defaults->getChildElement("indirect-neutronic-positions") )
       m_indirectPositions = true;
+
+    /*
+    Try to extract the reference frame information.
+    */
+    //Get the target xml element.
+    Element* referenceFrameElement = defaults->getChildElement("reference-frame");
+    //Extract if available
+    if(referenceFrameElement)
+    {
+      using Poco::XML::XMLString;
+      //Get raw xml values
+      Element* upElement = referenceFrameElement->getChildElement("pointing-up");
+      Element* alongElement = referenceFrameElement->getChildElement("along-beam");
+      Element* handednessElement = referenceFrameElement->getChildElement("handedness");
+      Element* originElement = referenceFrameElement->getChildElement("origin");
+
+      //Defaults
+      XMLString s_alongBeam("z");
+      XMLString s_pointingUp("y");
+      XMLString s_handedness("right");
+      XMLString s_origin("");
+
+      //Make extractions from sub elements where possible.
+      if(alongElement)
+      {
+        s_alongBeam = alongElement->getAttribute("axis");
+      }
+      if(upElement)
+      {
+        s_pointingUp = upElement->getAttribute("axis");
+      }
+      if(handednessElement)
+      {
+        s_handedness = handednessElement->getAttribute("val");
+      }
+      if(originElement)
+      {
+        s_origin = originElement->getAttribute("val");
+      }
+
+      //Convert to input types
+      PointingAlong alongBeam = axisNameToAxisType(s_alongBeam);
+      PointingAlong pointingUp = axisNameToAxisType(s_pointingUp);
+      Handedness handedness = s_handedness.compare("right") == 0 ? Right : Left;
+
+      //Overwrite the default reference frame
+      m_instrument->setReferenceFrame(boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(pointingUp, alongBeam, handedness, s_origin)));
+    }
+    
   }
 
   std::vector<std::string> InstrumentDefinitionParser::buildExcludeList(const Poco::XML::Element* const location)

@@ -12,6 +12,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -26,6 +27,27 @@ public:
   // This means the constructor isn't called when running other tests
   static InstrumentDefinitionParserTest *createSuite() { return new InstrumentDefinitionParserTest(); }
   static void destroySuite( InstrumentDefinitionParserTest *suite ) { delete suite; }
+
+  void test_extract_ref_info() 
+  {
+    std::string filename = ConfigService::Instance().getInstrumentDirectory() + "/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING.xml";
+    std::string xmlText = Strings::loadFile(filename);
+    boost::shared_ptr<const Instrument> i;
+
+    // Parse the XML
+    InstrumentDefinitionParser parser;
+    TS_ASSERT_THROWS_NOTHING( parser.initialize(filename, "For Unit Testing", xmlText); );
+    TS_ASSERT_THROWS_NOTHING( i = parser.parseXML(NULL); );
+
+    // Extract the reference frame object
+    boost::shared_ptr<const ReferenceFrame> frame = i->getReferenceFrame();
+
+    // Test that values have been populated with expected values (those from file).
+    TS_ASSERT_EQUALS(Right, frame->getHandedness());
+    TS_ASSERT_EQUALS(Y, frame->pointingUp());
+    TS_ASSERT_EQUALS(Z, frame->pointingAlongBeam());
+    TS_ASSERT(frame->origin().empty());
+  }
 
 
   void test_parse_IDF_for_unit_testing() // IDF stands for Instrument Definition File
