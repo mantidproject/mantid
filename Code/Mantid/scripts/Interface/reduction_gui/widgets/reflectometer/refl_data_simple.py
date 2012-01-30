@@ -62,6 +62,13 @@ class DataReflWidget(BaseWidget):
         self._summary.x_min_edit.setValidator(QtGui.QDoubleValidator(self._summary.x_min_edit))
         self._summary.x_max_edit.setValidator(QtGui.QDoubleValidator(self._summary.x_max_edit))
 
+        self._summary.q_cut_chk.setChecked(False)
+        self.connect(self._summary.q_cut_chk, QtCore.SIGNAL("clicked(bool)"), self._enable_q_cut)
+        self._summary.q_min_edit.setValidator(QtGui.QDoubleValidator(self._summary.q_min_edit))
+        self._summary.q_max_edit.setValidator(QtGui.QDoubleValidator(self._summary.q_max_edit))
+        self._summary.q_step_edit.setValidator(QtGui.QDoubleValidator(self._summary.q_step_edit))
+        self._enable_q_cut(self._summary.q_cut_chk.isChecked())
+
         self._summary.norm_peak_from_pixel.setValidator(QtGui.QIntValidator(self._summary.norm_peak_from_pixel))
         self._summary.norm_peak_to_pixel.setValidator(QtGui.QIntValidator(self._summary.norm_peak_to_pixel))
         self._summary.norm_background_from_pixel1.setValidator(QtGui.QIntValidator(self._summary.norm_background_from_pixel1))
@@ -85,6 +92,11 @@ class DataReflWidget(BaseWidget):
         # If we do not have access to /SNS, don't display the automated reduction options
         if not os.path.isdir("/SNS/REF_L"):
             self._summary.auto_reduce_check.hide()
+        
+    def _enable_q_cut(self, is_enabled):
+        self._summary.q_min_edit.setEnabled(is_enabled)
+        self._summary.q_max_edit.setEnabled(is_enabled)
+        self._summary.q_step_edit.setEnabled(is_enabled)
         
     def _create_auto_reduce_template(self):
         m = self.get_editing_state()

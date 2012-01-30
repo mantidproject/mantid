@@ -161,6 +161,9 @@ Drag items to change the reduction order.</string>
                  <layout class="QVBoxLayout" name="verticalLayout">
                   <item>
                    <layout class="QHBoxLayout" name="horizontalLayout">
+                    <property name="spacing">
+                     <number>0</number>
+                    </property>
                     <item>
                      <widget class="QLabel" name="label">
                       <property name="minimumSize">
@@ -194,6 +197,9 @@ Drag items to change the reduction order.</string>
                   </item>
                   <item>
                    <layout class="QHBoxLayout" name="horizontalLayout_3">
+                    <property name="spacing">
+                     <number>0</number>
+                    </property>
                     <item>
                      <widget class="QLabel" name="label_2">
                       <property name="minimumSize">
@@ -843,6 +849,9 @@ Drag items to change the reduction order.</string>
                   </item>
                   <item>
                    <layout class="QHBoxLayout" name="horizontalLayout_8">
+                    <property name="spacing">
+                     <number>0</number>
+                    </property>
                     <item>
                      <widget class="QCheckBox" name="data_background_switch">
                       <property name="minimumSize">
@@ -1029,6 +1038,9 @@ Drag items to change the reduction order.</string>
                   </item>
                   <item>
                    <layout class="QHBoxLayout" name="horizontalLayout_5">
+                    <property name="spacing">
+                     <number>0</number>
+                    </property>
                     <item>
                      <widget class="QLabel" name="label_6">
                       <property name="minimumSize">
@@ -1194,6 +1206,9 @@ Drag items to change the reduction order.</string>
                  <layout class="QVBoxLayout" name="verticalLayout_2">
                   <item>
                    <layout class="QHBoxLayout" name="horizontalLayout_2">
+                    <property name="spacing">
+                     <number>0</number>
+                    </property>
                     <item>
                      <widget class="QLabel" name="label_3">
                       <property name="minimumSize">
@@ -1227,6 +1242,9 @@ Drag items to change the reduction order.</string>
                   </item>
                   <item>
                    <layout class="QHBoxLayout" name="horizontalLayout_4">
+                    <property name="spacing">
+                     <number>0</number>
+                    </property>
                     <item>
                      <widget class="QLabel" name="label_4">
                       <property name="minimumSize">
@@ -1854,6 +1872,9 @@ Drag items to change the reduction order.</string>
                   </item>
                   <item>
                    <layout class="QHBoxLayout" name="horizontalLayout_10">
+                    <property name="spacing">
+                     <number>0</number>
+                    </property>
                     <item>
                      <widget class="QCheckBox" name="norm_background_switch">
                       <property name="minimumSize">
@@ -2080,15 +2101,42 @@ Drag items to change the reduction order.</string>
                </item>
                <item>
                 <layout class="QHBoxLayout" name="horizontalLayout_9">
+                 <property name="spacing">
+                  <number>0</number>
+                 </property>
                  <item>
                   <widget class="QLabel" name="label_14">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="minimumSize">
+                    <size>
+                     <width>220</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>150</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
                    <property name="text">
-                    <string>From TOF</string>
+                    <string>TOF from</string>
                    </property>
                   </widget>
                  </item>
                  <item>
                   <widget class="QLineEdit" name="data_from_tof">
+                   <property name="minimumSize">
+                    <size>
+                     <width>80</width>
+                     <height>0</height>
+                    </size>
+                   </property>
                    <property name="maximumSize">
                     <size>
                      <width>80</width>
@@ -2099,13 +2147,31 @@ Drag items to change the reduction order.</string>
                  </item>
                  <item>
                   <widget class="QLabel" name="label_15">
+                   <property name="minimumSize">
+                    <size>
+                     <width>70</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>70</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
                    <property name="text">
-                    <string>microS to  TOF</string>
+                    <string> µs  to</string>
                    </property>
                   </widget>
                  </item>
                  <item>
                   <widget class="QLineEdit" name="data_to_tof">
+                   <property name="minimumSize">
+                    <size>
+                     <width>80</width>
+                     <height>0</height>
+                    </size>
+                   </property>
                    <property name="maximumSize">
                     <size>
                      <width>80</width>
@@ -2117,7 +2183,7 @@ Drag items to change the reduction order.</string>
                  <item>
                   <widget class="QLabel" name="label_16">
                    <property name="text">
-                    <string>microS</string>
+                    <string> µs</string>
                    </property>
                   </widget>
                  </item>
@@ -2162,6 +2228,151 @@ Drag items to change the reduction order.</string>
                 </layout>
                </item>
                <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_14">
+                 <property name="spacing">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <widget class="QCheckBox" name="q_cut_chk">
+                   <property name="minimumSize">
+                    <size>
+                     <width>150</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>150</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>Enable Q cut:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="label_11">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="minimumSize">
+                    <size>
+                     <width>70</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>70</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>Q from</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLineEdit" name="q_min_edit">
+                   <property name="minimumSize">
+                    <size>
+                     <width>80</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>80</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="label_12">
+                   <property name="minimumSize">
+                    <size>
+                     <width>70</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>70</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string> 1/Å  to</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLineEdit" name="q_max_edit">
+                   <property name="minimumSize">
+                    <size>
+                     <width>80</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>80</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="label_13">
+                   <property name="text">
+                    <string> 1/Å in steps of </string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLineEdit" name="q_step_edit">
+                   <property name="minimumSize">
+                    <size>
+                     <width>80</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>80</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="label_17">
+                   <property name="text">
+                    <string> 1/Å</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <spacer name="horizontalSpacer_16">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>40</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                </layout>
+               </item>
+               <item>
                 <widget class="Line" name="line">
                  <property name="orientation">
                   <enum>Qt::Horizontal</enum>
@@ -2170,6 +2381,9 @@ Drag items to change the reduction order.</string>
                </item>
                <item>
                 <layout class="QHBoxLayout" name="horizontalLayout_7">
+                 <property name="spacing">
+                  <number>0</number>
+                 </property>
                  <item>
                   <spacer name="horizontalSpacer">
                    <property name="orientation">
@@ -2246,6 +2460,9 @@ p, li { white-space: pre-wrap; }
                </item>
                <item>
                 <layout class="QHBoxLayout" name="horizontalLayout_13">
+                 <property name="spacing">
+                  <number>0</number>
+                 </property>
                  <item>
                   <spacer name="horizontalSpacer_12">
                    <property name="orientation">
