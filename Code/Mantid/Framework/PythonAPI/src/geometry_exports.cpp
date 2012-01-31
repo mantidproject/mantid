@@ -157,7 +157,6 @@ namespace Mantid
        .export_values();  
 
     class_< Geometry::ReferenceFrame, boost::noncopyable>("ReferenceFrame", no_init)
-      .def( "axesInfo", &Geometry::ReferenceFrame::origin)  
       .def( "pointingAlongBeam", &Geometry::ReferenceFrame::pointingAlongBeam)
       .def( "pointingUp", &Geometry::ReferenceFrame::pointingUp)
       ;

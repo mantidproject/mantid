@@ -1,7 +1,9 @@
 #ifndef MANTID_GEOMETRY_REFERENCEFRAME_H_
 #define MANTID_GEOMETRY_REFERENCEFRAME_H_
 
+#include "MantidKernel/V3D.h"
 #include "MantidKernel/System.h"
+#include <string>
 
 
 namespace Mantid
