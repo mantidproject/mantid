@@ -6,6 +6,7 @@
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include <algorithm>
 #include <iostream>
 #include <sstream>
@@ -24,14 +25,16 @@ namespace Mantid
     /// Default constructor
     Instrument::Instrument() : CompAssembly(),
       m_detectorCache(),m_sourceCache(0),m_sampleCache(0),
-      m_defaultViewAxis("Z+")
-    {}
+      m_defaultViewAxis("Z+"), m_referenceFrame(new ReferenceFrame)
+    {
+    }
 
     /// Constructor with name
     Instrument::Instrument(const std::string& name) : CompAssembly(name),
       m_detectorCache(),m_sourceCache(0),m_sampleCache(0),
-      m_defaultViewAxis("Z+")
-    {}
+      m_defaultViewAxis("Z+"), m_referenceFrame(new ReferenceFrame)
+    {
+    }
 
     /** Constructor to create a parametrized instrument
      *  @param instr :: instrument for parameter inclusion
@@ -42,8 +45,9 @@ namespace Mantid
       m_sourceCache(instr->m_sourceCache), m_sampleCache(instr->m_sampleCache),
       m_defaultViewAxis(instr->m_defaultViewAxis),
       m_instr(instr), m_map_nonconst(map),
-      m_ValidFrom(instr->m_ValidFrom), m_ValidTo(instr->m_ValidTo)
-    {}
+      m_ValidFrom(instr->m_ValidFrom), m_ValidTo(instr->m_ValidTo), m_referenceFrame(new ReferenceFrame)
+    {
+    }
 
     /** Copy constructor
      *  This method was added to deal with having distinct neutronic and physical positions
@@ -54,7 +58,7 @@ namespace Mantid
         m_logfileCache(instr.m_logfileCache), m_logfileUnit(instr.m_logfileUnit),
         m_monitorCache(instr.m_monitorCache), m_defaultViewAxis(instr.m_defaultViewAxis),
         m_instr(), m_map_nonconst(), /* Should not be parameterized */
-        m_ValidFrom(instr.m_ValidFrom), m_ValidTo(instr.m_ValidTo)
+        m_ValidFrom(instr.m_ValidFrom), m_ValidTo(instr.m_ValidTo), m_referenceFrame(instr.m_referenceFrame)
     {
       // Now we need to fill the detector, source and sample caches with pointers into the new instrument
       std::vector<IComponent_const_sptr> children;
@@ -951,6 +955,31 @@ namespace Mantid
     {
       file->openGroup(group, "NXinstrument");
       file->closeGroup();
+    }
+
+    /**
+    Setter for the reference frame.
+    @param frame : reference frame object to use.
+    */
+    void Instrument::setReferenceFrame(boost::shared_ptr<ReferenceFrame> frame)
+    {
+      m_referenceFrame = frame;
+    }
+
+    /**
+    Getter for the reference frame.
+    @return : reference frame.
+    */
+    boost::shared_ptr<const ReferenceFrame> Instrument::getReferenceFrame() const
+    {
+      if (m_isParametrized)
+      {
+        return m_instr->getReferenceFrame();
+      }
+      else
+      {
+        return m_referenceFrame;
+      }
     }
 
 

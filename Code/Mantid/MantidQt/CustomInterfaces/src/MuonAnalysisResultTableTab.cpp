@@ -361,9 +361,11 @@ void MuonAnalysisResultTableTab::createTable()
   // Create the results table
   Mantid::API::ITableWorkspace_sptr table = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
   table->addColumn("str","Run Number");
+  table->getColumn(table->columnCount()-1)->setPlotType(6);
   for(int i=0; i<logsSelected.size(); ++i)
   {
     table->addColumn("double", logsSelected[i].toStdString());
+    table->getColumn(table->columnCount()-1)->setPlotType(1);
   }
 
   // Get param information
@@ -386,7 +388,9 @@ void MuonAnalysisResultTableTab::createTable()
       if (i == 0)
       {
         table->addColumn("double", key);
+        table->getColumn(table->columnCount()-1)->setPlotType(2);
         table->addColumn("double", key + "Error");
+        table->getColumn(table->columnCount()-1)->setPlotType(5);
         paramsToDisplay.append(QString::fromStdString(key));
         paramsToDisplay.append(QString::fromStdString(key) + "Error");
       }

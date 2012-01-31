@@ -58,7 +58,7 @@ namespace Mantid
         if (*it >= tw->rowCount()) continue;
         if (pw)
         {
-          pw->removePeak(*it);
+          pw->removePeak(static_cast<int>(*it));
         }
         else
         {

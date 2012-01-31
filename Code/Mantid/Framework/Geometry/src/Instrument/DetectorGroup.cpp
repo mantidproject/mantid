@@ -133,6 +133,35 @@ namespace Mantid
       return result/static_cast<double>(m_detectors.size());
     }
 
+    /*
+    Gives the average angle of a group of detectors from the observation point, relative to the axis given.
+    Returned values are signed according to the rotation direction relative to the axis and the instrument up direction.
+    @param observer : observer (usually sample)
+    @param axis : scattering axis.
+    @param instrumentUp : Instrument up direction
+    @return signed theta
+    */
+    double DetectorGroup::getSignedTwoTheta(const Kernel::V3D& observer, const Kernel::V3D& axis, const Kernel::V3D& instrumentUp) const
+    {
+      double result = 0.0;
+      double angle = 0.0;
+      DetCollection::const_iterator it;
+      for (it = m_detectors.begin(); it != m_detectors.end(); ++it)
+      {
+        const V3D sampleDetVec = it->second->getPos() - observer;
+        angle = sampleDetVec.angle(axis);
+
+        V3D cross = axis.cross_prod(sampleDetVec);
+        V3D normToSurface = axis.cross_prod(instrumentUp);
+        if (normToSurface.scalar_prod(cross) < 0 )
+        { 
+          angle *= -1;
+        }
+        result += angle;
+      }
+      return result/static_cast<double>(m_detectors.size());
+    }
+
     /// Computes the averate position and returns the phi value
     double DetectorGroup::getPhi() const
     {

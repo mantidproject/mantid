@@ -84,7 +84,7 @@ DataPickerTool::DataPickerTool(Graph *graph, ApplicationWindow *app, Mode mode, 
 DataPickerTool::~DataPickerTool()
 {
 	d_selection_marker.detach();
-	d_graph->plotWidget()->canvas()->unsetCursor();
+	//d_graph->plotWidget()->canvas()->unsetCursor(); crash
 }
 
 void DataPickerTool::append(const QPoint &pos)
@@ -104,86 +104,100 @@ void DataPickerTool::append(const QPoint &pos)
 
 void DataPickerTool::setSelection(QwtPlotCurve *curve, int point_index)
 {
-	if (curve == d_selected_curve && point_index == d_selected_point)
-		return;
+  if (curve == d_selected_curve && point_index == d_selected_point)
+    return;
 
-	d_selected_curve = curve;
-	d_selected_point = point_index;
+  d_selected_curve = curve;
+  d_selected_point = point_index;
 
-	if (!d_selected_curve) {
-		d_selection_marker.detach();
-		d_graph->plotWidget()->replot();
-		return;
-	}
+  if (!d_selected_curve) {
+    d_selection_marker.detach();
+    d_graph->plotWidget()->replot();
+    return;
+  }
 
-	setAxis(d_selected_curve->xAxis(), d_selected_curve->yAxis());
+  setAxis(d_selected_curve->xAxis(), d_selected_curve->yAxis());
 
-    d_restricted_move_pos = QPoint(plot()->transform(xAxis(), d_selected_curve->x(d_selected_point)),
-                                    plot()->transform(yAxis(), d_selected_curve->y(d_selected_point)));
+  d_restricted_move_pos = QPoint(plot()->transform(xAxis(), d_selected_curve->x(d_selected_point)),
+    plot()->transform(yAxis(), d_selected_curve->y(d_selected_point)));
 
-    if (dynamic_cast<PlotCurve *>(d_selected_curve)->type() == Graph::Function) {
-         QLocale locale = d_app->locale();
-         emit statusText(QString("%1[%2]: x=%3; y=%4")
-			.arg(d_selected_curve->title().text())
-			.arg(d_selected_point + 1)
-			.arg(locale.toString(d_selected_curve->x(d_selected_point), 'G', d_app->d_decimal_digits))
-			.arg(locale.toString(d_selected_curve->y(d_selected_point), 'G', d_app->d_decimal_digits)));
-    } else {
-        int row = dynamic_cast<DataCurve*>(d_selected_curve)->tableRow(d_selected_point);
+  if (dynamic_cast<PlotCurve *>(d_selected_curve)->type() == Graph::Function) 
+  {
+    QLocale locale = d_app->locale();
+    emit statusText(QString("%1[%2]: x=%3; y=%4")
+      .arg(d_selected_curve->title().text())
+      .arg(d_selected_point + 1)
+      .arg(locale.toString(d_selected_curve->x(d_selected_point), 'G', d_app->d_decimal_digits))
+      .arg(locale.toString(d_selected_curve->y(d_selected_point), 'G', d_app->d_decimal_digits)));
+  }
+  else if (dynamic_cast<DataCurve*>(d_selected_curve))
+  {
+    int row = dynamic_cast<DataCurve*>(d_selected_curve)->tableRow(d_selected_point);
 
-        Table *t = dynamic_cast<DataCurve*>(d_selected_curve)->table();
-        int xCol = t->colIndex(dynamic_cast<DataCurve*>(d_selected_curve)->xColumnName());
-        int yCol = t->colIndex(d_selected_curve->title().text());
+    Table *t = dynamic_cast<DataCurve*>(d_selected_curve)->table();
+    int xCol = t->colIndex(dynamic_cast<DataCurve*>(d_selected_curve)->xColumnName());
+    int yCol = t->colIndex(d_selected_curve->title().text());
 
-        emit statusText(QString("%1[%2]: x=%3; y=%4")
-			.arg(d_selected_curve->title().text())
-			.arg(row + 1)
-			.arg(t->text(row, xCol))
-			.arg(t->text(row, yCol)));
-    }
+    emit statusText(QString("%1[%2]: x=%3; y=%4")
+      .arg(d_selected_curve->title().text())
+      .arg(row + 1)
+      .arg(t->text(row, xCol))
+      .arg(t->text(row, yCol)));
+  }
 
-	QwtDoublePoint selected_point_value(d_selected_curve->x(d_selected_point), d_selected_curve->y(d_selected_point));
-	d_selection_marker.setValue(selected_point_value);
-	if (d_selection_marker.plot() == NULL)
-		d_selection_marker.attach(d_graph->plotWidget());
-	d_graph->plotWidget()->replot();
+  QwtDoublePoint selected_point_value(d_selected_curve->x(d_selected_point), d_selected_curve->y(d_selected_point));
+  d_selection_marker.setValue(selected_point_value);
+  if (d_selection_marker.plot() == NULL)
+    d_selection_marker.attach(d_graph->plotWidget());
+  d_graph->plotWidget()->replot();
 }
 
 bool DataPickerTool::eventFilter(QObject *obj, QEvent *event)
 {
-  if (!d_selected_curve) return true;
-	switch(event->type()) {
-		case QEvent::MouseButtonDblClick:
-			switch(d_mode) {
-				case Remove:
-					removePoint();
-					return true;
-				default:
-					if (d_selected_curve)
-						emit selected(d_selected_curve, d_selected_point);
-					return true;
-			}
-        case QEvent::MouseMove:
-            if (((QMouseEvent *)event)->modifiers() == Qt::ControlModifier)
-                d_move_mode = Vertical;
-            else if (((QMouseEvent *)event)->modifiers() == Qt::AltModifier)
-                d_move_mode = Horizontal;
-            else
-                d_move_mode = Free;
-            break;
+  if (!d_selected_curve)
+  {
+    return QwtPlotPicker::eventFilter(obj, event);
+  }
+  switch(event->type()) 
+  {
+  case QEvent::MouseButtonDblClick:
+    switch(d_mode) 
+    {
+    case Remove:
+      removePoint();
+      break;
+    default:
+      if (d_selected_curve)
+        emit selected(d_selected_curve, d_selected_point);
+    }
+    event->accept();
+    return true;
 
-		case QEvent::KeyPress:
-			if (keyEventFilter((QKeyEvent*)event))
-				return true;
-			break;
-		default:
-			break;
-	}
+  case QEvent::MouseMove:
+    if (((QMouseEvent *)event)->modifiers() == Qt::ControlModifier)
+      d_move_mode = Vertical;
+    else if (((QMouseEvent *)event)->modifiers() == Qt::AltModifier)
+      d_move_mode = Horizontal;
+    else
+      d_move_mode = Free;
+    break;
+
+  case QEvent::KeyPress:
+    if (keyEventFilter((QKeyEvent*)event))
+    {
+      event->accept();
+      return true;
+    }
+    break;
+  default:
+    break;
+  }
 	return QwtPlotPicker::eventFilter(obj, event);
 }
 
 bool DataPickerTool::keyEventFilter(QKeyEvent *ke)
 {
+	return false;
 	const int delta = 5;
 	switch(ke->key()) {
 		case Qt::Key_Enter:
@@ -314,6 +328,8 @@ bool DataPickerTool::keyEventFilter(QKeyEvent *ke)
 
 void DataPickerTool::removePoint()
 {
+  //std::cerr << "removePoint\n";
+	return;
 	if ( !d_selected_curve )
 		return;
   if ((dynamic_cast<PlotCurve *>(d_selected_curve))->type() == Graph::Function){
@@ -342,6 +358,8 @@ void DataPickerTool::removePoint()
 
 void DataPickerTool::movePoint(const QPoint &pos)
 {
+  //std::cerr << "movePoint\n";
+	return;
 	if ( !d_selected_curve )
 		return;
   if ( (dynamic_cast<PlotCurve *>(d_selected_curve))->type() == Graph::Function){
@@ -405,6 +423,8 @@ void DataPickerTool::movePoint(const QPoint &pos)
 
 void DataPickerTool::move(const QPoint &point)
 {
+  //std::cerr << "move\n";
+	return;
 	QPoint p = point;
 	if (d_mode == Move){
 	    switch (d_move_mode){
@@ -434,6 +454,8 @@ bool DataPickerTool::end(bool ok)
 
 void DataPickerTool::moveBy(int dx, int dy)
 {
+  //std::cerr << "moveBy\n";
+	return;
 	if ( !d_selected_curve )
 		return;
 	movePoint(transform(QwtDoublePoint(d_selected_curve->x(d_selected_point),
@@ -442,12 +464,16 @@ void DataPickerTool::moveBy(int dx, int dy)
 
 void DataPickerTool::cutSelection()
 {
+  //std::cerr << "cutSelection\n";
+	return;
     copySelection();
     removePoint();
 }
 
 void DataPickerTool::copySelection()
 {
+  //std::cerr << "copySelection\n";
+	return;
     if (!d_selected_curve)
         return;
 
@@ -459,6 +485,8 @@ void DataPickerTool::copySelection()
 
 void DataPickerTool::pasteSelection()
 {
+  //std::cerr << "pasteSelection\n";
+	return;
 	QString text = QApplication::clipboard()->text();
 	if (text.isEmpty())
 		return;
@@ -506,6 +534,8 @@ void DataPickerTool::pasteSelection()
 
 void DataPickerTool::selectTableRow()
 {
+  //std::cerr << "selectTableRow\n";
+	return;
     if (!d_selected_curve)
         return;
 
@@ -522,6 +552,8 @@ void DataPickerTool::selectTableRow()
 
 int DataPickerTool::findClosestPoint(QwtPlotCurve *c, double x, bool up)
 {
+  //std::cerr << "findClosestPoint\n";
+	return -1;
     if (!c)
         return -1;
 

@@ -212,7 +212,15 @@ namespace Mantid
         }
       } // end-for
       
-      // Reaching here means no intersections have been found
+      // Reaching this point means we have no intersections
+      // of the polygon edges. There is the possiblity that
+      // the larger polygon completely encloses the smaller
+      // in which case no edge intersections would be found
+      if( P.contains(Q) )
+      {
+        return Q;
+      }
+
       throw NoIntersectionException();
     }
 

@@ -128,6 +128,36 @@ public:
     checkData(outputWS, 6, 10, false, true, true);
   }
   
+  void test_BothAxes()
+  {
+    // 5,6,7,8,9,10,11,12,12,14,15
+    MatrixWorkspace_sptr inputWS = makeInputWS(false,false,false); //10 histograms, 10 bins
+    MatrixWorkspace_sptr outputWS = runAlgorithm(inputWS, "5.,1.8,15", "-0.5,2.5,9.5");
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 4);
+    TS_ASSERT_EQUALS(outputWS->blocksize(), 6);
+
+    double errors[6] = {2.716615541, 2.50998008, 2.437211521, 2.50998008, 2.716615541, 2.121320344};
+
+    const double epsilon(1e-08);
+    for(size_t i = 0; i < outputWS->getNumberHistograms(); ++i)
+    {
+      for(size_t j = 0; j < outputWS->blocksize(); ++j)
+      {
+        if( j < 5 )
+        {
+          TS_ASSERT_DELTA(outputWS->readY(i)[j], 9, epsilon);
+        }
+        else
+        {
+          // Last bin
+          TS_ASSERT_DELTA(outputWS->readY(i)[j], 5, epsilon);
+        }
+        TS_ASSERT_DELTA(outputWS->readE(i)[j], errors[j], epsilon);
+      }
+    }
+
+  }
+
 
 private:
   

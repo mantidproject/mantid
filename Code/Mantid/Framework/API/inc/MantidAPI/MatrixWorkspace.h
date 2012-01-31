@@ -87,6 +87,7 @@ namespace Mantid
       //@{
       Geometry::IDetector_const_sptr getDetector(const size_t workspaceIndex) const;
       double detectorTwoTheta(Geometry::IDetector_const_sptr det) const;
+      double detectorSignedTwoTheta(Geometry::IDetector_const_sptr det) const;
       double gravitationalDrop(Geometry::IDetector_const_sptr det, const double waveLength) const;
       //@}
 

@@ -99,7 +99,6 @@ namespace Mantid
         }
       }
 
-
       // Output grid and workspace. Fills in the new X and Y bin vectors
       MantidVecPtr newXBins;
       MantidVec newYBins;
@@ -109,7 +108,7 @@ namespace Mantid
       const size_t nreports(static_cast<size_t>(inputWS->getNumberHistograms()*inputWS->blocksize()));
       m_progress = boost::shared_ptr<API::Progress>(new API::Progress(this, 0.0, 1.0, nreports));
 
-      PARALLEL_FOR2(inputWS, outputWS)
+      //PARALLEL_FOR2(inputWS, outputWS)
       for(int64_t i = 0; i < static_cast<int64_t>(numYBins); ++i) // signed for openmp
       {
         PARALLEL_START_INTERUPT_REGION
@@ -148,10 +147,9 @@ namespace Mantid
                                 const size_t i, const size_t j, MatrixWorkspace_sptr outputWS,
                                 const std::vector<double> & verticalAxis)
     {
-      size_t qstart(0), qend(verticalAxis.size()-1), en_start(0), en_end(outputWS->readX(0).size() - 1);
-      if( !getIntersectionRegion(outputWS, verticalAxis, inputQ, qstart, qend, en_start, en_end)) return;
       const MantidVec & X = outputWS->readX(0);
-      const double inputBinWidth = inputQ.largestX() - inputQ.smallestX();
+      size_t qstart(0), qend(verticalAxis.size()-1), en_start(0), en_end(X.size() - 1);
+      if( !getIntersectionRegion(outputWS, verticalAxis, inputQ, qstart, qend, en_start, en_end)) return;
 
       for( size_t qi = qstart; qi < qend; ++qi )
       {
@@ -171,10 +169,11 @@ namespace Mantid
             const double weight = overlap.area()/inputQ.area();
             double yValue = inputWS->readY(i)[j] * weight;
             double eValue = inputWS->readE(i)[j] * weight;
+            const double overlapWidth = overlap.largestX() - overlap.smallestX();
             if(inputWS->isDistribution())
             {
-              yValue *= inputBinWidth;
-              eValue *= inputBinWidth;
+              yValue *= overlapWidth;
+              eValue *= overlapWidth;
             }
             eValue = eValue*eValue;
             PARALLEL_CRITICAL(overlap)
@@ -249,7 +248,7 @@ namespace Mantid
      */
     void Rebin2D::normaliseOutput(MatrixWorkspace_sptr outputWS, MatrixWorkspace_const_sptr inputWS)
     {
-      PARALLEL_FOR1(outputWS)
+      //PARALLEL_FOR1(outputWS)
       for(int64_t i = 0; i < static_cast<int64_t>(outputWS->getNumberHistograms()); ++i)
       {
         PARALLEL_START_INTERUPT_REGION

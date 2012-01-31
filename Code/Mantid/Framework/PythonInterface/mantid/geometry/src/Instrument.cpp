@@ -1,4 +1,5 @@
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
@@ -9,6 +10,7 @@ using Mantid::Geometry::CompAssembly;
 using Mantid::Geometry::IObjComponent;
 using Mantid::Geometry::IDetector;
 using Mantid::Geometry::IComponent;
+using Mantid::Geometry::ReferenceFrame;
 using Mantid::detid_t;
 using namespace boost::python;
 
@@ -26,6 +28,8 @@ void export_Instrument()
          "Returns the named component")
     .def("getDetector", (boost::shared_ptr<IDetector> (Instrument::*)(const detid_t&)const)&Instrument::getDetector, 
          "Returns the dector with the given ID")
+    .def("getReferenceFrame", (boost::shared_ptr<const ReferenceFrame> (Instrument::*)())&Instrument::getReferenceFrame )
+      ;
     ;
     
 ;

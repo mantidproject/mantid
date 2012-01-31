@@ -55,15 +55,26 @@ namespace Mantid
       /// Remove this node from the chain
       Vertex2D * remove();
       /**
-       * Returns the next in the chain
+       * Returns the next in the chain (non-const version)
        * @returns The next vertex
        */
-      inline Vertex2D * next() const { return m_next; }
+      inline Vertex2D * next() { return m_next; }
      /**
-       * Returns the previous in the chain
+       * Returns the previous in the chain (non-const version)
        * @returns The previous vertex
        */
-      inline Vertex2D * previous() const { return m_prev; }
+      inline Vertex2D * previous() { return m_prev; }
+
+      /**
+       * Returns the next in the chain (const version)
+       * @returns The next vertex
+       */
+      inline const Vertex2D * next() const { return m_next; }
+     /**
+       * Returns the previous in the chain (const version)
+       * @returns The previous vertex
+       */
+      inline const Vertex2D * previous() const { return m_prev; }
 
     private:
       /// Initialize the neighbour pointers
