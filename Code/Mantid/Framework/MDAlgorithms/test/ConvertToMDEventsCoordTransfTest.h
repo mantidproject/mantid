@@ -17,12 +17,11 @@ using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
-
 class ConvertToMDEventsCoordTestHelper :public IConvertToMDEventsMethods
 {
     size_t conversionChunk(size_t job_ID){UNUSED_ARG(job_ID);return 0;}
 public:
-    void setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const PreprocessedDetectors &detLoc)
+    void setUPTestConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const PreprocessedDetectors &detLoc)
     {
         MDEvents::MDWSDescription TestWS(4);
 
@@ -208,7 +207,7 @@ ConvertToMDEventsCoordTransfTest (){
 
     processDetectorsPositions(ws2D,det_loc,ConvertToMDEvents::getLogger(),pProg.get());
     pConvMethods = std::auto_ptr<ConvertToMDEventsCoordTestHelper>(new ConvertToMDEventsCoordTestHelper());
-    pConvMethods->setUPConversion(ws2D,det_loc);
+    pConvMethods->setUPTestConversion(ws2D,det_loc);
 
 
 }
