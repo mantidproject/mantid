@@ -23,6 +23,7 @@ namespace Geometry
     {
       throw std::invalid_argument("Cannot have up direction the same as the beam direction");
     }
+    init();
   }
 
   //----------------------------------------------------------------------------------------------
@@ -32,7 +33,40 @@ namespace Geometry
   ReferenceFrame::ReferenceFrame()
     : m_up(Y), m_alongBeam(Z), m_handedness(Right), m_origin("source")
   {
+    init();
+  } 
+  
+  /**
+  Non-member helper method to convert x y z enumeration directions into proper
+  3D vectors.
+  @param direction : direction marker
+  @return 3D vector
+  */
+  V3D directionToVector(const PointingAlong& direction)
+  {
+    Mantid::Kernel::V3D result;
+    if(direction == X)
+    {
+      result = V3D(1, 0, 0);
+    }
+    else if(direction == Y)
+    {
+      result = V3D(0, 1, 0);
+    }
+    else
+    {
+      result = V3D(0, 0, 1);
+    }
+    return result;
   }
+
+  ///Perform common initalisation steps.
+  void ReferenceFrame::init()
+  {
+    m_vecPointingUp = directionToVector(m_up);
+    m_vecPointingAlongBeam = directionToVector(m_alongBeam);
+  }
+
 
 
   //----------------------------------------------------------------------------------------------
@@ -73,6 +107,24 @@ namespace Geometry
   std::string ReferenceFrame::origin() const
   {
     return m_origin;
+  }
+
+  /**
+  Getter for the up instrument direction
+  @return up direction.
+  */
+  const V3D& ReferenceFrame::vecPointingUp() const
+  {
+    return m_vecPointingUp;
+  }
+
+  /**
+  Getter for the along beam vector.
+  @return along beam direction.
+  */
+  const V3D& ReferenceFrame::vecPointingAlongBeam() const
+  {
+    return m_vecPointingAlongBeam;
   }
 
 

@@ -784,7 +784,7 @@ namespace Geometry
       PointingAlong pointingUp = axisNameToAxisType(s_pointingUp);
       Handedness handedness = s_handedness.compare("right") == 0 ? Right : Left;
 
-      //Overwrite the default reference frame
+      //Overwrite the default reference frame.
       m_instrument->setReferenceFrame(boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(pointingUp, alongBeam, handedness, s_origin)));
     }
     

@@ -972,7 +972,7 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
       pos.getSpherical(R,Theta,Phi);
       // Need to get R & Theta through these methods to be correct for grouped detectors
       R = det->getDistance(*sample);
-      Theta = ws->detectorTwoTheta(det)*180.0/M_PI;
+      Theta = ws->detectorSignedTwoTheta(det)*180.0/M_PI;
     }
     catch(...)
     {

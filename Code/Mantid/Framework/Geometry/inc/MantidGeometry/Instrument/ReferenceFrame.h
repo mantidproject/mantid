@@ -55,13 +55,15 @@ namespace Geometry
     std::string origin() const;
     /// Destructor
     virtual ~ReferenceFrame();
-
+    /// Convert up axis into a 3D direction
+    const Mantid::Kernel::V3D& vecPointingUp() const;
+    /// Convert along beam axis into a 3D direction
+    const Mantid::Kernel::V3D& vecPointingAlongBeam() const;
   private:
+    /// Common setup
+    void ReferenceFrame::init();
     ///Disabled assignment
     ReferenceFrame& operator=(const ReferenceFrame&);
-    ///Disabled copy construction
-    ReferenceFrame(const ReferenceFrame&);
-
     /// Pointing up axis
     PointingAlong m_up;
     /// Beam pointing along axis
@@ -70,6 +72,10 @@ namespace Geometry
     Handedness m_handedness;
     /// Origin 
     std::string m_origin;
+    /// Vector pointing along the beam
+    Mantid::Kernel::V3D m_vecPointingAlongBeam;
+    /// Vector pointing up instrument
+    Mantid::Kernel::V3D m_vecPointingUp;
 
   };
 

@@ -4,12 +4,14 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/V3D.h"
 #include <iostream>
 #include <iomanip>
 
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 
 using namespace Mantid;
+using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
 class ReferenceFrameTest : public CxxTest::TestSuite
@@ -62,6 +64,48 @@ public:
   void testIdenticalUpAndBeamDirectionsThrow()
   {
     TS_ASSERT_THROWS(ReferenceFrame(X, X, Right, "source"), std::invalid_argument);
+  }
+
+  void testGetUpDirectionVector()
+  {
+    ReferenceFrame x(X, Y, Right,"source");
+    V3D x_vec = x.vecPointingUp();
+    TS_ASSERT_EQUALS(1, x_vec[0]);
+    TS_ASSERT_EQUALS(0, x_vec[1]);
+    TS_ASSERT_EQUALS(0, x_vec[2]);
+
+    ReferenceFrame y(Y, X, Right,"source");
+    V3D y_vec = y.vecPointingUp();
+    TS_ASSERT_EQUALS(0, y_vec[0]);
+    TS_ASSERT_EQUALS(1, y_vec[1]);
+    TS_ASSERT_EQUALS(0, y_vec[2]);
+
+    ReferenceFrame z(Z, Y, Right,"source");
+    V3D z_vec = z.vecPointingUp();
+    TS_ASSERT_EQUALS(0, z_vec[0]);
+    TS_ASSERT_EQUALS(0, z_vec[1]);
+    TS_ASSERT_EQUALS(1, z_vec[2]);
+  }
+
+  void testGetAlongBeamDirectionVector()
+  {
+    ReferenceFrame x(Y, X, Right,"source");
+    V3D x_vec = x.vecPointingAlongBeam();
+    TS_ASSERT_EQUALS(1, x_vec[0]);
+    TS_ASSERT_EQUALS(0, x_vec[1]);
+    TS_ASSERT_EQUALS(0, x_vec[2]);
+
+    ReferenceFrame y(X, Y, Right,"source");
+    V3D y_vec = y.vecPointingAlongBeam();
+    TS_ASSERT_EQUALS(0, y_vec[0]);
+    TS_ASSERT_EQUALS(1, y_vec[1]);
+    TS_ASSERT_EQUALS(0, y_vec[2]);
+
+    ReferenceFrame z(X, Z, Right,"source");
+    V3D z_vec = z.vecPointingAlongBeam();
+    TS_ASSERT_EQUALS(0, z_vec[0]);
+    TS_ASSERT_EQUALS(0, z_vec[1]);
+    TS_ASSERT_EQUALS(1, z_vec[2]);
   }
 
 

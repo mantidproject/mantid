@@ -25,6 +25,7 @@
 #include <MantidGeometry/Instrument/Detector.h>
 #include <MantidGeometry/Instrument.h>
 #include <MantidGeometry/Instrument/DetectorGroup.h>
+#include <MantidGeometry/Instrument/ReferenceFrame.h>
 #include "MantidPythonAPI/geometryhelper.h" //exports for matrices to numpy arrays
 
 namespace Mantid
@@ -145,6 +146,23 @@ namespace Mantid
         ;
     }
 
+  void export_reference_frame()
+  {
+    register_ptr_to_python<boost::shared_ptr<const Geometry::ReferenceFrame> >();
+
+    enum_< Geometry::PointingAlong>("PointingAlong")
+       .value("X", Geometry::X)
+       .value("Y", Geometry::Y)
+       .value("Z", Geometry::Z)
+       .export_values();  
+
+    class_< Geometry::ReferenceFrame, boost::noncopyable>("ReferenceFrame", no_init)
+      .def( "axesInfo", &Geometry::ReferenceFrame::origin)  
+      .def( "pointingAlongBeam", &Geometry::ReferenceFrame::pointingAlongBeam)
+      .def( "pointingUp", &Geometry::ReferenceFrame::pointingUp)
+      ;
+  }
+
   void export_instrument()
   {
     //Pointer to the interface
@@ -157,6 +175,7 @@ namespace Mantid
       .def("getSource", (boost::shared_ptr<Geometry::IObjComponent> (Geometry::Instrument::*)())&Geometry::Instrument::getSource)
       .def("getComponentByName", (boost::shared_ptr<Geometry::IComponent> (Geometry::Instrument::*)(const std::string&))&Geometry::Instrument::getComponentByName)
       .def("getDetector", (boost::shared_ptr<Geometry::IDetector> (Geometry::Instrument::*)(const detid_t&)const)&Geometry::Instrument::getDetector)
+      .def("getReferenceFrame", (boost::shared_ptr<const Geometry::ReferenceFrame> (Geometry::Instrument::*)())&Geometry::Instrument::getReferenceFrame )
       ;
   }
 
@@ -317,6 +336,7 @@ namespace Mantid
 
     void export_geometry_namespace()
     {
+      export_reference_frame();
       export_components();
       export_instrument();
       export_unit_cell();

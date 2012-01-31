@@ -90,7 +90,8 @@ double Detector::getSignedTwoTheta(const V3D& observer, const V3D& axis, const V
   double angle = sampleDetVec.angle(axis);
 
   V3D cross = axis.cross_prod(sampleDetVec);
-  if (instrumentUp.scalar_prod(cross) < 0 )
+  V3D normToSurface = axis.cross_prod(instrumentUp);
+  if (normToSurface.scalar_prod(cross) < 0 )
   { 
     angle *= -1;
   }
