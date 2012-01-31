@@ -224,12 +224,16 @@ void LoadEventPreNexus2::init()
   eventExts.push_back("_neutron_event.dat");
   eventExts.push_back("_neutron0_event.dat");
   eventExts.push_back("_neutron1_event.dat");
+  eventExts.push_back("_neutron2_event.dat");
+  eventExts.push_back("_neutron3_event.dat");
   declareProperty(new FileProperty(EVENT_PARAM, "", FileProperty::Load, eventExts),
       "The name of the neutron event file to read, including its full or relative path. In most cases, the file typically ends in neutron_event.dat (N.B. case sensitive if running on Linux).");
   vector<string> pulseExts;
   pulseExts.push_back("_pulseid.dat");
   pulseExts.push_back("_pulseid0.dat");
   pulseExts.push_back("_pulseid1.dat");
+  pulseExts.push_back("_pulseid2.dat");
+  pulseExts.push_back("_pulseid3.dat");
   declareProperty(new FileProperty(PULSEID_PARAM, "", FileProperty::OptionalLoad, pulseExts),
       "File containing the accelerator pulse information; the filename will be found automatically if not specified.");
   declareProperty(new FileProperty(MAP_PARAM, "", FileProperty::OptionalLoad, ".dat"),
