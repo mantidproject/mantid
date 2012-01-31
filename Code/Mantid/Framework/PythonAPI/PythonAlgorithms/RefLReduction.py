@@ -1,8 +1,5 @@
 from MantidFramework import *
 from mantidsimple import *
-import os
-import numpy
-from reduction.instruments.reflectometer import wks_utility
 
 class RefLReduction(PythonAlgorithm):
 
@@ -35,6 +32,9 @@ class RefLReduction(PythonAlgorithm):
         self.declareWorkspaceProperty("OutputWorkspace", "", Direction.Output)
 
     def PyExec(self):
+        import os
+        import numpy
+        from reduction.instruments.reflectometer import wks_utility
         tof_binning = self.getProperty("TOFBinning")
         if len(tof_binning) != 1 and len(tof_binning) != 3:
             raise RuntimeError("Can only specify (width) or (start,width,stop) for binning. Found %d values." % len(tof_binning))
@@ -64,6 +64,8 @@ class RefLReduction(PythonAlgorithm):
                 if q_binning[0] == 0. and q_binning[1] == 0. and q_binning[2] == 0.:
                     raise RuntimeError("Failed to specify the q-binning")
         
+        print q_binning
+    
         #Due to the frame effect, it's sometimes necessary to narrow the range
         #over which we add all the pixels along the low resolution
         #Parameter
@@ -185,7 +187,7 @@ class RefLReduction(PythonAlgorithm):
                                               sample_to_detector=dSD,
                                               theta=theta,
                                               geo_correction=True,
-                                              Qrange=Qrange)
+                                              q_binning=q_binning)
 
         ConvertToHistogram(InputWorkspace='IntegratedDataWks1',
                            OutputWorkspace='IntegratedDataWks')
