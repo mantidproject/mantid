@@ -89,14 +89,14 @@ redCommand="python /SNS/PG3/shared/autoreduce/reduce_"$instrument".py"
 echo $redCommand $runNumber $metadataDir
 echo $redCommand $runNumber $metadataDir  | sed "s/^/$(date)  /" >> $logfile
 start=`date +%x-%T`
-$redCommand $runNumber $redOutDir | sed "s/^/$(date)  /" >> $logfile
+$redCommand $runNumber $redOutDir &>> $logfile
 end=`date +%x-%T`
 echo "Started at $start --- Ended at $end"
 echo
 
 # Create metadata file for reduced data
 echo python /usr/bin/create_reduced_metadata.py $instrument $proposal $visit $runNumber $redOutDir $reducedMetadataFile  | sed "s/^/$(date)  /" >> $logfile
-python /usr/bin/create_reduced_metadata.py $instrument $proposal $visit $runNumber $redOutDir $reducedMetadataFile | sed "s/^/$(date)  /" >> $logfile
+python /usr/bin/create_reduced_metadata.py $instrument $proposal $visit $runNumber $redOutDir $reducedMetadataFile &>> $logfile
 
 # Catalog reduced metadata
 echo "--------Catalogging reduced data--------"
