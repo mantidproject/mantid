@@ -1,4 +1,4 @@
-#include "MantidQwtIMDWorkspaceData.h"
+#include "MantidQtAPI/MantidQwtIMDWorkspaceData.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 

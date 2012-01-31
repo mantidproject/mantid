@@ -1,4 +1,4 @@
-#include "MantidQwtMatrixWorkspaceData.h"
+#include "MantidQtAPI/MantidQwtMatrixWorkspaceData.h"
 
 /// Constructor
 MantidQwtMatrixWorkspaceData::MantidQwtMatrixWorkspaceData(Mantid::API::MatrixWorkspace_const_sptr workspace,int specIndex, const bool logScale, bool distr)

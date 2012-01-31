@@ -1,10 +1,10 @@
-#ifndef MANTIDPLOT_MANTIDQWTMATRIXWORKSPACEDATA_H
-#define MANTIDPLOT_MANTIDQWTMATRIXWORKSPACEDATA_H
+#ifndef MANTIDQTAPI_MANTIDQWTMATRIXWORKSPACEDATA_H
+#define MANTIDQTAPI_MANTIDQWTMATRIXWORKSPACEDATA_H
 
 #include <boost/shared_ptr.hpp>
 #include "MantidAPI/MatrixWorkspace.h"
 #include <QObject>
-#include "MantidQwtWorkspaceData.h"
+#include "MantidQtAPI/MantidQwtWorkspaceData.h"
 
 //=================================================================================================
 //=================================================================================================

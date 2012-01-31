@@ -1,10 +1,10 @@
-#ifndef MANTIDPLOT_MANTIDQWTIMDWORKSPACEDATA_H
-#define MANTIDPLOT_MANTIDQWTIMDWORKSPACEDATA_H
+#ifndef MANTIDQTAPI_MANTIDQWTIMDWORKSPACEDATA_H
+#define MANTIDQTAPI_MANTIDQWTIMDWORKSPACEDATA_H
 
 #include <boost/shared_ptr.hpp>
 #include "MantidAPI/IMDWorkspace.h"
 #include <QObject>
-#include "MantidQwtWorkspaceData.h"
+#include "MantidQtAPI/MantidQwtWorkspaceData.h"
 
 class MantidQwtIMDWorkspaceData:  public QObject, public MantidQwtWorkspaceData
 {

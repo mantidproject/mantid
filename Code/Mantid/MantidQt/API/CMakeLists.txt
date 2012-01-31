@@ -13,6 +13,8 @@ set ( SRC_FILES
 	src/UserSubWindow.cpp
 	src/VatesViewerInterface.cpp
 	src/WorkspaceObserver.cpp
+	src/MantidQwtIMDWorkspaceData.cpp
+	src/MantidQwtMatrixWorkspaceData.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -29,6 +31,9 @@ set ( INC_FILES
 	inc/MantidQtAPI/MantidColorMap.h
 	inc/MantidQtAPI/MantidDialog.h
 	inc/MantidQtAPI/MantidWidget.h
+	inc/MantidQtAPI/MantidQwtIMDWorkspaceData.h
+	inc/MantidQtAPI/MantidQwtMatrixWorkspaceData.h
+	inc/MantidQtAPI/MantidQwtWorkspaceData.h
 	inc/MantidQtAPI/PythonRunner.h
 	inc/MantidQtAPI/SyncedCheckboxes.h
 	inc/MantidQtAPI/UserSubWindow.h
@@ -47,6 +52,8 @@ set ( MOC_FILES
 	inc/MantidQtAPI/UserSubWindow.h
 	inc/MantidQtAPI/VatesViewerInterface.h
 	inc/MantidQtAPI/WorkspaceObserver.h
+	inc/MantidQtAPI/MantidQwtIMDWorkspaceData.h
+	inc/MantidQtAPI/MantidQwtMatrixWorkspaceData.h
 )
 
 set ( UI_FILES 

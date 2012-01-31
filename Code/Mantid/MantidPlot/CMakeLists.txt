@@ -176,8 +176,6 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/MantidUI.cpp
                    src/Mantid/MantidTable.cpp
                    src/Mantid/MantidWSIndexDialog.cpp
-                   src/Mantid/MantidQwtIMDWorkspaceData.cpp
-                   src/Mantid/MantidQwtMatrixWorkspaceData.cpp
                    src/Mantid/PeakPickerTool.cpp
                    src/Mantid/Preferences.cpp
                    src/Mantid/RemoveErrorsDialog.cpp
@@ -394,9 +392,6 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/MantidUI.h
                    src/Mantid/MantidWSIndexDialog.h
                    src/Mantid/MantidTable.h
-                   src/Mantid/MantidQwtIMDWorkspaceData.h
-                   src/Mantid/MantidQwtMatrixWorkspaceData.h
-                   src/Mantid/MantidQwtWorkspaceData.h
                    src/Mantid/PeakPickerTool.h
                    src/Mantid/Preferences.h
                    src/Mantid/RemoveErrorsDialog.h
@@ -647,8 +642,6 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/MantidUI.h
                        src/Mantid/MantidWSIndexDialog.h
                        src/Mantid/MantidTable.h
-                       src/Mantid/MantidQwtIMDWorkspaceData.h
-                       src/Mantid/MantidQwtMatrixWorkspaceData.h
                        src/Mantid/PeakPickerTool.h
                        src/Mantid/RemoveErrorsDialog.h
                        src/Mantid/UserFitFunctionDialog.h

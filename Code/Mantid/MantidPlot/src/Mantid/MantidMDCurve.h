@@ -4,7 +4,7 @@
 #include "MantidCurve.h"
 #include <boost/shared_ptr.hpp>
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidQwtIMDWorkspaceData.h"
+#include "MantidQtAPI/MantidQwtIMDWorkspaceData.h"
 
 // Forward definitions
 class MantidUI;
