@@ -60,6 +60,9 @@ namespace MDEvents
     /// Returns the (normalized) signal at a given coordinates
     virtual signal_t getSignalAtCoord(const coord_t * coords) const;
 
+    virtual void getLinePlot(const Mantid::Kernel::VMD & start, const Mantid::Kernel::VMD & end,
+        MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y);
+
     //------------------------ (END) IMDWorkspace Methods -----------------------------------------
 
     /** @returns the number of bytes of memory used by the workspace. */

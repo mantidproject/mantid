@@ -22,6 +22,20 @@ namespace Mantid
 
     class IMDIterator;
     
+    /** Enum describing different ways to normalize the signal
+     * in a MDWorkspace.
+     */
+    enum MDNormalization
+    {
+      /// Don't normalize = return raw counts
+      NoNormalization = 0,
+      /// Divide the signal by the volume of the box/bin
+      VolumeNormalization = 1,
+      /// Divide the signal by the number of events that contributed to it.
+      NumEventsNormalization  = 2
+    };
+
+
     /** Basic MD Workspace Abstract Class.
      *
      *  This defines the interface that allows one to iterate through several types of workspaces:
@@ -76,12 +90,16 @@ namespace Mantid
       }
 
       //-------------------------------------------------------------------------------------------
-      /// Returns the (normalized) signal at a given coordinates
+      /// Returns the signal (normalized by volume) at a given coordinates
       /// @param coords :: coordinate as a VMD vector
       signal_t getSignalAtCoord(const Mantid::Kernel::VMD & coords) const
       {
         return this->getSignalAtCoord(coords.getBareArray());
       }
+
+      /// Method to generate a line plot through a MD-workspace
+      virtual void getLinePlot(const Mantid::Kernel::VMD & start, const Mantid::Kernel::VMD & end,
+          Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y) = 0;
 
       virtual ~IMDWorkspace();
 

@@ -6,9 +6,11 @@
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidMDEvents/MDHistoWorkspaceIterator.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
+using namespace Mantid::API;
 
 namespace Mantid
 {
@@ -350,6 +352,229 @@ namespace MDEvents
     // This copies again! :(
     return out;
   }
+
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Helper method to find the intersection between a point and the edges
+   * of a box
+   *
+   * @param boxExtents :: min/max of the box
+   * @param pos :: current position
+   * @param dirSign :: +1, -1 or 0 depending on the sign of travel direction
+   * @param nd :: number of dimensions
+   * @param bestDistance :: set to the best distance found (along the direction)
+   * @param closestDimension :: set to the index of the closest dimension
+   * @param closestIsMin :: set to true if the closest bound is the MIN edge. MAX otherwise
+   * @return the distance traveled along the line
+   */
+  void findClosestEdgeDimension(MDDimensionExtents * boxExtents,
+      VMD & pos, VMD & dirSign, size_t nd,
+      coord_t & bestDistance, size_t & closestDimension, bool & closestIsMin)
+  {
+    // Find the extents of the current box
+    bestDistance = 1e100;
+    closestDimension = 0;
+    closestIsMin = false;
+    for (size_t d=0; d<nd; d++)
+    {
+      coord_t dist;
+      // How close are we to the min edge?
+      dist = dirSign[d] * (boxExtents[d].min - pos[d]);
+      if (dist > 0 && dist < bestDistance)
+      {
+        // Distance > 0 = pointing in the right direction
+        // and this is the closes of any one so far.
+        bestDistance = dist;
+        closestDimension = d;
+        closestIsMin = true;
+      }
+
+      // How close are we to the max edge?
+      dist = dirSign[d] * (boxExtents[d].max - pos[d]);
+      if (dist > 0 && dist < bestDistance)
+      {
+        bestDistance = dist;
+        closestDimension = d;
+        closestIsMin = false;
+      }
+    }
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Obtain coordinates for a line plot through a MDWorkspace.
+   * Cross the workspace from start to end points, recording the signal along the line.
+   * Sets the x,y vectors to the histogram bin boundaries and counts
+   *
+   * @param start :: coordinates of the start point of the line
+   * @param end :: coordinates of the end point of the line
+   * @param normalize :: how to normalize the signal
+   * @param x :: is set to the boundaries of the bins, relative to start of the line.
+   * @param y :: is set to the normalized signal for each bin. Length = length(x) - 1
+   */
+  void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD & start, const Mantid::Kernel::VMD & end,
+      Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y)
+  {
+    size_t nd = this->getNumDims();
+    if (start.getNumDims() != nd)
+      throw std::runtime_error("Start point must have the same number of dimensions as the workspace.");
+    if (end.getNumDims() != nd)
+      throw std::runtime_error("End point must have the same number of dimensions as the workspace.");
+    x.clear();
+    y.clear();
+
+    // Unit-vector of the direction
+    VMD dir = end - start;
+    double length = dir.normalize();
+
+    // Vector with +1 where direction is positive, -1 where negative
+    #define sgn(x) ((x<0)?-1:((x>0)?1:0))
+    VMD dirSign(nd);
+    for (size_t d=0; d<nd; d++)
+      dirSign[d] = sgn(dir[d]);
+
+    // Dimensions of the workspace
+    VMD min(nd), max(nd), step(nd);
+    MDDimensionExtents * boxExtents = new MDDimensionExtents[nd];
+    size_t * index = new size_t[nd];
+    bool startOutsideRange = false;
+    for (size_t d=0; d<nd; d++)
+    {
+      IMDDimension_const_sptr dim = this->getDimension(d);
+      min[d] = dim->getMinimum();
+      max[d] = dim->getMaximum();
+      step[d] = dim->getBinWidth();
+      boxExtents[d].min = min[d];
+      boxExtents[d].max = max[d];
+      index[d] = 0;
+      startOutsideRange = startOutsideRange || start[d] < min[d];
+      startOutsideRange = startOutsideRange || start[d] > max[d];
+    }
+
+    // Start point
+    VMD pos = start;
+    coord_t thisX = 0;
+
+    // If the start/end are outside the boundaries, then
+    // move them to the edges
+    if (startOutsideRange)
+    {
+      // Find the closest edge of the overall workspace
+      coord_t bestDistance = 1e100;
+      size_t closestDimension = 0;
+      bool closestIsMin = false;
+      findClosestEdgeDimension(boxExtents, pos, dirSign, nd, bestDistance, closestDimension, closestIsMin);
+      coord_t movedBy = fabs(bestDistance / dir[closestDimension]);
+      if (bestDistance > 1e99)
+      {
+        // Nothing is close = whole line is out of the extents!
+        // Make a single bin with NAN
+        x.push_back(0);  x.push_back(length);
+        y.push_back(std::numeric_limits<double>::quiet_NaN());
+        return;
+      }
+      // Move the point so it is at the edge instad.
+      pos += dir * movedBy;
+      thisX = movedBy;
+    }
+
+    // Initial index into each dimension
+    for (size_t d=0; d<nd; d++)
+    {
+      index[d] = size_t((pos[d] - min[d]) / step[d]);
+      if (index[d] >= this->getDimension(d)->getNBins())
+      {
+        // Whole line is out of the extents!
+        // Make a single bin with NAN
+        x.push_back(0);  x.push_back(length);
+        y.push_back(std::numeric_limits<double>::quiet_NaN());
+        return;
+      }
+    }
+
+    // First boundary (is 0 unless the start is outside the range)
+    x.push_back(thisX);
+
+    // Set to true when we go outside the range of the workspace, to break out of while loop
+    bool outside = false;
+
+    // Keep adding points till the end of the line or going out of bounds.
+    while (thisX < length && !outside)
+    {
+      // Find the extents of the current box
+      for (size_t d=0; d<nd; d++)
+      {
+        boxExtents[d].min = double(index[d]) * step[d];
+        boxExtents[d].max = boxExtents[d].min + step[d];
+      }
+
+      // Find the closest edge
+      coord_t bestDistance = 1e100;
+      size_t closestDimension = 0;
+      bool closestIsMin = false;
+      findClosestEdgeDimension(boxExtents, pos, dirSign, nd, bestDistance, closestDimension, closestIsMin);
+
+      // Index into the array of this box
+      size_t linearIndex = this->getLinearIndex(index);
+
+      // This is the distance ALONG the line (not along the dimension alone)
+      coord_t movedBy = fabs(bestDistance / dir[closestDimension]);
+
+      // Is the edge of the box PAST the end of the line?
+      if (movedBy > (length-thisX))
+      {
+        // Then go to the end
+        outside = true;
+        pos = end;
+      }
+      else
+      {
+        // Move to the next closest box
+        if (closestIsMin)
+        {
+          // Decrease the index in that dimension
+          if (index[closestDimension] == 0)
+            outside = true;
+          else
+            index[closestDimension]--;
+        }
+        else
+        {
+          // Increase the index in that dimension
+          index[closestDimension]++;
+          // Gone outside the range?
+          if (index[closestDimension] >= this->getDimension(closestDimension)->getNBins())
+            outside = true;
+        }
+        // Move the point by the distance that makes it intersect the edge
+        pos = pos + dir * movedBy;
+      } // (moving to the edge of a box)
+
+      // Position along the line
+      thisX = coord_t((pos - start).norm());
+      // Add it to the list
+      x.push_back(thisX);
+      // And add the signal to the list too
+      switch (normalize)
+      {
+      case NoNormalization:
+        y.push_back( this->getSignalAt(linearIndex) );
+        break;
+      case VolumeNormalization:
+        y.push_back( this->getSignalAt(linearIndex) * m_inverseVolume );
+        break;
+      case NumEventsNormalization:
+        // TODO: Implement when we track # of events in MDHisto.
+        y.push_back( this->getSignalAt(linearIndex) );
+        break;
+      }
+    } // (while thisX < length, i.e. while the line is being drawn)
+
+    delete [] index;
+    delete boxExtents;
+  }
+
 
   //==============================================================================================
   //============================== ARITHMETIC OPERATIONS =========================================
