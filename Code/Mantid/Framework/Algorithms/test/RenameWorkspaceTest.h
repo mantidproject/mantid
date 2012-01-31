@@ -87,6 +87,48 @@ public:
     AnalysisDataService::Instance().remove("InputWS");
   }
 
+  void testGroup()
+  {
+    AnalysisDataServiceImpl& ads = AnalysisDataService::Instance();
+    WorkspaceGroup_sptr group(new WorkspaceGroup);
+    ads.add("oldName",group);
+    MatrixWorkspace_sptr member1 = createWorkspace();
+    ads.add("oldName_1",member1);
+    group->add("oldName_1");
+    MatrixWorkspace_sptr member2 = createWorkspace();
+    ads.add("oldName_2",member2);
+    group->add("oldName_2");
+
+    Mantid::Algorithms::RenameWorkspace renamer;
+    renamer.initialize();
+    TS_ASSERT_THROWS_NOTHING( renamer.setPropertyValue("InputWorkspace", "oldName") )
+    TS_ASSERT_THROWS_NOTHING( renamer.setPropertyValue("OutputWorkspace", "newName") );
+    TS_ASSERT( renamer.execute() )
+
+    Workspace_sptr result;
+    TS_ASSERT_THROWS_NOTHING ( result = ads.retrieve("newName") )
+    WorkspaceGroup_sptr resultGroup;
+    TS_ASSERT ( resultGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(result) )
+    // It should actually be the same workspace as the input
+    TS_ASSERT( resultGroup == group )
+    // The output group should have the same workspaces in, with new names of course
+    TS_ASSERT_EQUALS( resultGroup->size(), 2 )
+    TS_ASSERT_EQUALS( resultGroup->getItem(0), member1 )
+    TS_ASSERT_EQUALS( resultGroup->getItem(0)->name(), "newName_1" )
+    TS_ASSERT_EQUALS( resultGroup->getItem(1), member2 )
+    TS_ASSERT_EQUALS( resultGroup->getItem(1)->name(), "newName_2" )
+    // The old ones should not be in the ADS
+    TS_ASSERT_THROWS( ads.retrieve("oldName"), Mantid::Kernel::Exception::NotFoundError )
+    TS_ASSERT_THROWS( ads.retrieve("oldName_1"), Mantid::Kernel::Exception::NotFoundError )
+    TS_ASSERT_THROWS( ads.retrieve("oldName_2"), Mantid::Kernel::Exception::NotFoundError )
+    // The new ones should be
+    TS_ASSERT_THROWS_NOTHING ( ads.retrieve("newName_1") )
+    TS_ASSERT_THROWS_NOTHING ( ads.retrieve("newName_1") )
+
+    // Clean up
+    ads.clear();
+  }
+
   MatrixWorkspace_sptr createWorkspace()
   {
     MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(4, 4, 0.5);
