@@ -170,6 +170,8 @@ class SNSPowderReduction(PythonAlgorithm):
                              Description="Argument to supply to algorithms that can change from events to histograms.")
         self.declareProperty("Sum", False,
                              Description="Sum the runs. Does nothing for characterization runs")
+        self.declareProperty("PushDataPositive", False,
+                             Description="Add a constant to the data that makes it positive over the whole range.")
         self.declareProperty("BackgroundNumber", 0, Validator=BoundedValidator(Lower=-1),
                              Description="If specified overrides value in CharacterizationRunsFile If -1 turns off correction.")
         self.declareProperty("VanadiumNumber", 0, Validator=BoundedValidator(Lower=-1),
@@ -673,12 +675,13 @@ class SNSPowderReduction(PythonAlgorithm):
                            Tolerance=COMPRESS_TOL_TOF) # 5ns
 
             # make sure there are no negative values - gsas hates them
-            minY = self._getMin(samRun)
-            if minY < 0.:
-                self.log().notice("Minimum y = " + str(minY) + " adding to all y-values")
-                minY *= -1.
-                ConvertToMatrixWorkspace(InputWorkspace=samRun, OutputWorkspace=samRun)
-                samRun += minY
+            if self.getProperty("PushDataPositive"):
+              minY = self._getMin(samRun)
+              if minY < 0.:
+                  self.log().notice("Minimum y = " + str(minY) + " adding to all y-values")
+                  minY *= -1.
+                  ConvertToMatrixWorkspace(InputWorkspace=samRun, OutputWorkspace=samRun)
+                  samRun += minY
 
             # write out the files
             self._save(samRun, info, normalized)
