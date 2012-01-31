@@ -51,6 +51,9 @@ class LoadData(ReductionStep):
             loader_handle = Load(self._data_files[file], file, LoadLogFiles=False)
             loader_name = loader_handle.getPropertyValue("LoaderName")
 
+            if mtd[file].getInstrument().getName() == 'BASIS':
+		ModeratorTzero(file, file)
+
             if self._parameter_file != None:
                 LoadParameterFile(file, self._parameter_file)
 
