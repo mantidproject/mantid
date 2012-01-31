@@ -10,7 +10,7 @@ namespace Mantid
 namespace DataHandling
 {
 
-  /** LoadPreNexus : TODO: DESCRIPTION
+  /** LoadPreNexus : Workflow algorithm to load a collection of preNeXus files.
     
     @date 2012-01-30
 
