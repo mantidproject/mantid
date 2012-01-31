@@ -152,7 +152,7 @@ void MuonAnalysisResultTableTab::populateTables(const QStringList& wsList)
   if(fittedWsList.size() > 0)
   { 
     // Make sure all params match.
-    QVector<QString> sameFittedWsList(getWorkspacesWithSameParams(fittedWsList));
+    QVector<QString> sameFittedWsList(fittedWsList);
 
     // Populate the individual log values and fittings into their respective tables.
     populateFittings(sameFittedWsList);
@@ -325,15 +325,104 @@ void MuonAnalysisResultTableTab::populateFittings(const QVector<QString>& fitted
   }
   else
   {
+    // Get colors, 0=Black, 1=Red, 2=Green, 3=Blue, 4=Orange, 5=Purple. (If there are more than this then use black as default.)
+    QMap<int, int> colors = getWorkspaceColors(fittedWsList);
     for (int row = 0; row < m_uiForm.fittingResultsTable->rowCount(); row++)
     {
       // Fill values and delete previous old ones.
       if (row < fittedWsList.size())
-        m_uiForm.fittingResultsTable->setItem(row,0, new QTableWidgetItem(fittedWsList[row]));
+      {
+        QTableWidgetItem *item = new QTableWidgetItem(fittedWsList[row]);
+        int color(colors.find(row).data());
+        switch (color)
+        {
+          case(1):
+            item->setTextColor("red");
+            break;
+          case(2):
+            item->setTextColor("green");
+            break;
+          case(3):
+            item->setTextColor("blue");
+            break;
+          case(4):
+            item->setTextColor("orange");
+            break;
+          case(5):
+            item->setTextColor("purple");
+            break;
+          default:
+            item->setTextColor("black");
+        }
+        m_uiForm.fittingResultsTable->setItem(row, 0, item);
+      }
       else
         m_uiForm.fittingResultsTable->setItem(row,0, NULL);
     }
   }
+}
+
+
+/**
+* Get the colors corresponding to their position in the workspace list.
+*
+* @params wsList :: List of all workspaces with fitted parameters.
+* @return colors :: List of colors (as numbers) with the key being position in wsList.
+*/
+QMap<int, int> MuonAnalysisResultTableTab::getWorkspaceColors(const QVector<QString>& wsList)
+{
+  QMap<int,int> colors; //position, color
+  int posCount(0);
+  int colorCount(0);
+
+  while (wsList.size() != posCount)
+  {
+    // If a color has already been chosen for the current workspace then skip
+    if (!colors.contains(posCount))
+    {
+      std::vector<std::string> firstParams;
+      // Find the first parameter table and use this as a comparison for all the other tables.
+      Mantid::API::ITableWorkspace_sptr paramWs = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsList[posCount].toStdString() + "_Parameters") );
+
+      Mantid::API::TableRow paramRow = paramWs->getFirstRow();
+      do
+      {  
+        std::string key;
+        paramRow >> key;
+        firstParams.push_back(key);
+      }
+      while(paramRow.next());
+
+      colors.insert(posCount, colorCount);
+
+      // Compare to all the other parameters. +1 don't compare with self.
+      for (int i=(posCount + 1); i<wsList.size(); ++i)
+      {
+        if (!colors.contains(i))
+        {
+          std::vector<std::string> nextParams;
+          Mantid::API::ITableWorkspace_sptr paramWs = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsList[i].toStdString() + "_Parameters") );
+
+          Mantid::API::TableRow paramRow = paramWs->getFirstRow();
+          do
+          {  
+            std::string key;
+            paramRow >> key;
+            nextParams.push_back(key);
+          }
+          while(paramRow.next());
+
+          if (firstParams == nextParams)
+          {
+            colors.insert(i, colorCount);
+          }
+        }
+      }
+      colorCount++;
+    }
+    posCount++;
+  }
+  return colors;
 }
 
 
@@ -358,91 +447,143 @@ void MuonAnalysisResultTableTab::createTable()
     return;
   }
 
-  // Create the results table
-  Mantid::API::ITableWorkspace_sptr table = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-  table->addColumn("str","Run Number");
-  table->getColumn(table->columnCount()-1)->setPlotType(6);
-  for(int i=0; i<logsSelected.size(); ++i)
+  // Check workspaces have same parameters
+  if (haveSameParameters(wsSelected))
   {
-    table->addColumn("double", logsSelected[i].toStdString());
-    table->getColumn(table->columnCount()-1)->setPlotType(1);
-  }
-
-  // Get param information
-  QMap<QString, QMap<QString, double> > wsParamsList;
-  QVector<QString> paramsToDisplay;
-  for(int i=0; i<wsSelected.size(); ++i)
-  {
-    QMap<QString, double> paramsList;
-    Mantid::API::ITableWorkspace_sptr paramWs = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsSelected[i].toStdString() + "_Parameters") );
-
-    Mantid::API::TableRow paramRow = paramWs->getFirstRow();
-    
-    // Loop over all rows and get values and errors.
-    do
-    {  
-      std::string key;
-      double value;
-      double error;
-      paramRow >> key >> value >> error;
-      if (i == 0)
-      {
-        table->addColumn("double", key);
-        table->getColumn(table->columnCount()-1)->setPlotType(2);
-        table->addColumn("double", key + "Error");
-        table->getColumn(table->columnCount()-1)->setPlotType(5);
-        paramsToDisplay.append(QString::fromStdString(key));
-        paramsToDisplay.append(QString::fromStdString(key) + "Error");
-      }
-      paramsList[QString::fromStdString(key)] = value;
-      paramsList[QString::fromStdString(key) + "Error"] = error;
+    // Create the results table
+    Mantid::API::ITableWorkspace_sptr table = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+    table->addColumn("str","Run Number");
+    table->getColumn(table->columnCount()-1)->setPlotType(6);
+    for(int i=0; i<logsSelected.size(); ++i)
+    {
+      table->addColumn("double", logsSelected[i].toStdString());
+      table->getColumn(table->columnCount()-1)->setPlotType(1);
     }
-    while(paramRow.next());
 
-    wsParamsList[wsSelected[i]] = paramsList;
-  }
-
-  // Add data to table
-  QMap<QString,QMap<QString, double> >::Iterator itr; 
-  for (itr = m_tableValues.begin(); itr != m_tableValues.end(); itr++)
-  { 
+    // Get param information
+    QMap<QString, QMap<QString, double> > wsParamsList;
+    QVector<QString> paramsToDisplay;
     for(int i=0; i<wsSelected.size(); ++i)
     {
-      if (wsSelected[i] == itr.key())
+      QMap<QString, double> paramsList;
+      Mantid::API::ITableWorkspace_sptr paramWs = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsSelected[i].toStdString() + "_Parameters") );
+
+      Mantid::API::TableRow paramRow = paramWs->getFirstRow();
+    
+      // Loop over all rows and get values and errors.
+      do
+      {  
+        std::string key;
+        double value;
+        double error;
+        paramRow >> key >> value >> error;
+        if (i == 0)
+        {
+          table->addColumn("double", key);
+          table->getColumn(table->columnCount()-1)->setPlotType(2);
+          table->addColumn("double", key + "Error");
+          table->getColumn(table->columnCount()-1)->setPlotType(5);
+          paramsToDisplay.append(QString::fromStdString(key));
+          paramsToDisplay.append(QString::fromStdString(key) + "Error");
+        }
+        paramsList[QString::fromStdString(key)] = value;
+        paramsList[QString::fromStdString(key) + "Error"] = error;
+      }
+      while(paramRow.next());
+
+      wsParamsList[wsSelected[i]] = paramsList;
+    }
+
+    // Add data to table
+    QMap<QString,QMap<QString, double> >::Iterator itr; 
+    for (itr = m_tableValues.begin(); itr != m_tableValues.end(); itr++)
+    { 
+      for(int i=0; i<wsSelected.size(); ++i)
       {
-        //Add new row and add run number
-        Mantid::API::TableRow row = table->appendRow();
-        QString run(itr.key().left(itr.key().find(';')));
+        if (wsSelected[i] == itr.key())
+        {
+          //Add new row and add run number
+          Mantid::API::TableRow row = table->appendRow();
+          QString run(itr.key().left(itr.key().find(';')));
         
-        for (int j=0; j<run.size(); ++j)
-        {
-          if(run[j].isNumber())
+          for (int j=0; j<run.size(); ++j)
           {
-            run = run.right(run.size() - j);
-            break;
+            if(run[j].isNumber())
+            {
+              run = run.right(run.size() - j);
+              break;
+            }
           }
-        }
-        row << run.toStdString();
+          row << run.toStdString();
 
-        // Add log values
-        QMap<QString, double> logsAndValues = itr.value();
-        for(int j=0; j<logsSelected.size(); ++j)
-        {
-          row << logsAndValues.find(logsSelected[j]).value();
-        }
+          // Add log values
+          QMap<QString, double> logsAndValues = itr.value();
+          for(int j=0; j<logsSelected.size(); ++j)
+          {
+            row << logsAndValues.find(logsSelected[j]).value();
+          }
 
-        // Add param values (presume params the same for all workspaces)
-        QMap<QString, double> paramsList = wsParamsList.find(itr.key()).value();
-        for(int j=0; j<paramsToDisplay.size(); ++j)
-        {
-          row << paramsList.find(paramsToDisplay[j]).value();
+          // Add param values (presume params the same for all workspaces)
+          QMap<QString, double> paramsList = wsParamsList.find(itr.key()).value();
+          for(int j=0; j<paramsToDisplay.size(); ++j)
+          {
+            row << paramsList.find(paramsToDisplay[j]).value();
+          }
         }
       }
     }  
+    // Save the table to the ADS
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(getFileName(),table);
   }
+  else
+  {
+    QMessageBox::information(this, "Mantid - Muon Analysis", "Please pick workspaces with the same fitted parameters");
+  }
+}
 
-  // Save the table to the ADS
-  Mantid::API::AnalysisDataService::Instance().addOrReplace(getFileName(),table);
+
+/**
+* See if the workspaces selected have the same parameters.
+*
+* @params wsList :: A list of workspaces with fitted parameters.
+* @return bool :: Whether or not the wsList given share the same fitting parameters.
+*/
+bool MuonAnalysisResultTableTab::haveSameParameters(const QVector<QString>& wsList)
+{
+  std::vector<std::string> firstParams;
+
+  // Find the first parameter table and use this as a comparison for all the other tables.
+  Mantid::API::ITableWorkspace_sptr paramWs = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsList[0].toStdString() + "_Parameters") );
+
+  Mantid::API::TableRow paramRow = paramWs->getFirstRow();
+  do
+  {  
+    std::string key;
+    paramRow >> key;
+    firstParams.push_back(key);
+  }
+  while(paramRow.next());
+
+  // Compare to all the other parameters.
+  for (int i=1; i<wsList.size(); ++i)
+  {
+    std::vector<std::string> nextParams;
+    Mantid::API::ITableWorkspace_sptr paramWs = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsList[i].toStdString() + "_Parameters") );
+
+    Mantid::API::TableRow paramRow = paramWs->getFirstRow();
+    do
+    {  
+      std::string key;
+      paramRow >> key;
+      nextParams.push_back(key);
+    }
+    while(paramRow.next());
+
+    if (firstParams == nextParams)
+      return true;
+    else
+      return false;
+  }
 }
 
 
@@ -485,79 +626,6 @@ QVector<QString> MuonAnalysisResultTableTab::getSelectedLogs()
     }
   }
   return logsSelected;
-}
-
-
-/**
-* Looks through all the parameter tables and trys to match the parameters within them.
-* If one or more workspaces were fitted using different parameters then a suitable
-* error message will be displayed.
-*
-* QVector<QString> fittedWsList :: List of workspaces with parameter tables.
-* @return sameFittedWsList :: A list of workspaces that all share a parameter table
-*                             with the same parameters fitted.
-*/
-QVector<QString> MuonAnalysisResultTableTab::getWorkspacesWithSameParams(const QVector<QString>& fittedWsList)
-{
-  QVector<QString> sameFittedWsList;
-  // Check all parameters are the same.
-  if (fittedWsList.size() > 0)
-  {
-    bool differentParams(false);
-    std::vector<std::string> firstParams;
-
-    // Find the first parameter table and use this as a comparison for all the other tables.
-    Mantid::API::ITableWorkspace_sptr paramWs = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(fittedWsList[0].toStdString() + "_Parameters") );
-
-    Mantid::API::TableRow paramRow = paramWs->getFirstRow();
-    do
-    {  
-      std::string key;
-      paramRow >> key;
-      firstParams.push_back(key);
-    }
-    while(paramRow.next());
-
-    sameFittedWsList.push_back(fittedWsList[0]);
-
-    // Compare to all the other parameters.
-    for (int i=1; i<fittedWsList.size(); ++i)
-    {
-      std::vector<std::string> nextParams;
-      Mantid::API::ITableWorkspace_sptr paramWs = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(fittedWsList[i].toStdString() + "_Parameters") );
-
-      Mantid::API::TableRow paramRow = paramWs->getFirstRow();
-      do
-      {  
-        std::string key;
-        paramRow >> key;
-        nextParams.push_back(key);
-      }
-      while(paramRow.next());
-
-      if (firstParams == nextParams)
-      {
-        // If they are the same parameter then add to the vector which will be populated in the tables.
-        sameFittedWsList.push_back(fittedWsList[i]);
-      }
-      else
-      {
-        differentParams = true;
-      }
-    }
-
-    if(differentParams) // Params were found to be different from the ones in the first table, therefore output warning message.
-    {
-      QMessageBox::information(this, "Mantid - Muon Analysis", "The parameters didn't match for each workspace. Default to display\n"
-        "all the parameters that match the first workspace " + fittedWsList[0]);
-    } 
-  }
-  else // if there is only one fitted workspace then no need to for check to see if they are the same.
-  {
-    sameFittedWsList = fittedWsList;
-  }
-
-  return sameFittedWsList;
 }
 
 
