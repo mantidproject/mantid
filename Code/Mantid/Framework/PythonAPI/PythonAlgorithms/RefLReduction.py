@@ -25,15 +25,15 @@ class RefLReduction(PythonAlgorithm):
         self.declareListProperty("TOFRange", [9000., 23600.], Validator=ArrayBoundedValidator(Lower=0))
         self.declareListProperty("TOFBinning", [0.,200.,200000.],
                                  Description="Positive is linear bins, negative is logarithmic")
-        self.declareProperty("QCutEnabled", False)
-        self.declareListProperty("QBinning", [0.001,0.001,0.2],
-                                 Description="Positive is linear bins, negative is logarithmic")
+        self.declareProperty("QMin", 0.001, Description="Minimum Q-value")
+        self.declareProperty("QStep", 0.001, Description="Step-size in Q. Enter a negative value to get a log scale.")
         # Output workspace to put the transmission histo into
         self.declareWorkspaceProperty("OutputWorkspace", "", Direction.Output)
 
     def PyExec(self):
         import os
         import numpy
+        import math
         from reduction.instruments.reflectometer import wks_utility
         tof_binning = self.getProperty("TOFBinning")
         if len(tof_binning) != 1 and len(tof_binning) != 3:
@@ -54,18 +54,9 @@ class RefLReduction(PythonAlgorithm):
 
         TOFrange = self.getProperty("TOFRange") #microS
 
-        q_cut_enabled = self.getProperty("QCutEnabled")
-        q_binning = None
-        if q_cut_enabled:
-            q_binning = self.getProperty("QBinning")
-            if len(q_binning) != 1 and len(q_binning) != 3:
-                raise RuntimeError("Can only specify (width) or (start,width,stop) for binning. Found %d values." % len(q_binning))
-            if len(q_binning) == 3:
-                if q_binning[0] == 0. and q_binning[1] == 0. and q_binning[2] == 0.:
-                    raise RuntimeError("Failed to specify the q-binning")
-        
-        print q_binning
-    
+        q_min = self.getProperty("QMin")
+        q_step = self.getProperty("QStep")
+                
         #Due to the frame effect, it's sometimes necessary to narrow the range
         #over which we add all the pixels along the low resolution
         #Parameter
@@ -170,10 +161,17 @@ class RefLReduction(PythonAlgorithm):
         BackfromYpixel = data_back[0]
         BacktoYpixel = data_back[1]
         
-        #Create a new event workspace of only the range of pixel of interest 
-        #background range (along the y-axis) and of only the pixel
-        #of interest along the x-axis (to avoid the frame effect)
+        # Create a new event workspace of only the range of pixel of interest 
+        # background range (along the y-axis) and of only the pixel
+        # of interest along the x-axis (to avoid the frame effect)
         theta = tthd_rad - ths_rad
+        
+        if dMD is not None and theta is not None:
+            _tof_axis = mtd[ws_histo_data].readX(0)
+            _const = float(4) * math.pi * m * dMD / h
+            _q_axis = 1e-10 * _const * math.sin(theta) / (_tof_axis*1e-6)
+            q_max = max(_q_axis)
+
         wks_utility.createIntegratedWorkspace(mtd[ws_histo_data], 
                                               "IntegratedDataWks1",
                                               fromXpixel=Xrange[0],
@@ -186,8 +184,8 @@ class RefLReduction(PythonAlgorithm):
                                               source_to_detector=dMD,
                                               sample_to_detector=dSD,
                                               theta=theta,
-                                              geo_correction=True,
-                                              q_binning=q_binning)
+                                              geo_correction=False,
+                                              q_binning=[q_min,q_step,q_max])
 
         ConvertToHistogram(InputWorkspace='IntegratedDataWks1',
                            OutputWorkspace='IntegratedDataWks')

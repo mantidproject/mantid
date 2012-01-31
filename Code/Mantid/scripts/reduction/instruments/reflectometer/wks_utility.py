@@ -102,7 +102,7 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
                               sample_to_detector=None,
                               theta=None,
                               geo_correction=False,
-                              Qrange=None):
+                              q_binning=None):
     """
         This creates the integrated workspace over the second pixel range (304 here) and
         returns the new workspace handle
@@ -162,9 +162,10 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
                             UnitX="MomentumTransfer")
 
             _outputWorkspace_rebin = 'tmpOWks_' + str(_q_index)
-            rebin(InputWorkspace=_outputWorkspace,
+            
+            Rebin(InputWorkspace=_outputWorkspace,
                   OutputWorkspace=_outputWorkspace_rebin,
-                  Params=Qrange)
+                  Params=q_binning)
 
         _mt = mtd['tmpOWks_0']
         _x_array = _mt.readX(0)[:]
