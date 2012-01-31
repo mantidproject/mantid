@@ -63,7 +63,7 @@ namespace Geometry
     const Mantid::Kernel::V3D& vecPointingAlongBeam() const;
   private:
     /// Common setup
-    void ReferenceFrame::init();
+    void init();
     ///Disabled assignment
     ReferenceFrame& operator=(const ReferenceFrame&);
     /// Pointing up axis
