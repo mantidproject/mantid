@@ -39,11 +39,11 @@ namespace Mantid
      * @param other :: The object to construct this from
      */
     Quadrilateral::Quadrilateral(const Quadrilateral & other)
-      : ConvexPolygon(), m_lowerLeft(other.m_lowerLeft),
+      : ConvexPolygon(other), m_lowerLeft(other.m_lowerLeft),
         m_lowerRight(other.m_lowerRight), m_upperRight(other.m_upperRight), 
         m_upperLeft(other.m_upperLeft)
     {
-      initialize();
+      // Base class does the work
     }
     
     /// Destructor

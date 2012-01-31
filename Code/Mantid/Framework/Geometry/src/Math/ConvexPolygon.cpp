@@ -237,8 +237,7 @@ namespace Mantid
      */
     void ConvexPolygon::setup()
     {
-      m_numVertices = 1;
-      Vertex2D *nextVertex = m_head->next();
+      m_numVertices = 0;
 
       m_lowestX = m_head->X();
       m_highestX = m_head->X();
@@ -246,16 +245,18 @@ namespace Mantid
       m_highestY = m_head->Y();
 
       // Count the vertices
-      while( nextVertex != m_head )
+      Vertex2D *current = m_head;
+      do
       {
         ++m_numVertices;
-        nextVertex = nextVertex->next();
-        if(  nextVertex->X() < m_lowestX ) m_lowestX = nextVertex->X();
-        else if( nextVertex->X() > m_highestX ) m_highestX = nextVertex->X();
+        if(  current->X() < m_lowestX ) m_lowestX = current->X();
+        else if( current->X() > m_highestX ) m_highestX = current->X();
 
-        if( nextVertex->Y() < m_lowestY ) m_lowestY = nextVertex->Y();
-        else if( nextVertex->Y() > m_highestY ) m_highestY = nextVertex->Y();
+        if( current->Y() < m_lowestY ) m_lowestY = current->Y();
+        else if( current->Y() > m_highestY ) m_highestY = current->Y();
+        current = current->next();
       }
+      while( current != m_head );
 
     }
     
