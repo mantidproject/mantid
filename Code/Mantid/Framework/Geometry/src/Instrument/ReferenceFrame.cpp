@@ -1,4 +1,5 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include <stdexcept>
 
 using namespace Mantid::Kernel;
 
