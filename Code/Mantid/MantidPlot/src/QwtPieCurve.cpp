@@ -34,6 +34,8 @@
 #include <QPainter>
 #include <QPainterPath>
 #include <QVarLengthArray>
+#include <QMessageBox>
+#include <QApplication>
 
 QwtPieCurve::QwtPieCurve(Table *t, const QString& name, int startRow, int endRow):
 DataCurve(t, QString(), name, startRow, endRow),
@@ -361,6 +363,16 @@ void QwtPieCurve::setBrushStyle(const Qt::BrushStyle& style)
 
 void QwtPieCurve::loadData()
 {
+  // Limit number of slices to 1000 - seems plenty and avoids potential crash (#4470)
+  if ( abs(d_end_row-d_start_row) > 1000 )
+  {
+    QString mess = QString("Pie charts are limited to 1000 segments!\n") +
+                   QString("You asked for ") + QString::number(abs(d_end_row-d_start_row)) +
+                   QString(" - plotting only the first 1000.");
+    QMessageBox::warning(qApp->mainWidget(),"Pie chart",mess);
+    d_end_row = d_start_row + 1000;
+  }
+
   Plot *d_plot = (Plot *)plot();
   QLocale locale = d_plot->locale();
   QVarLengthArray<double> X(abs(d_end_row - d_start_row) + 1);
