@@ -943,6 +943,7 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
   //Mantid::API::Axis *spectraAxis = ws->getAxis(1);
   Mantid::Geometry::IObjComponent_const_sptr sample = ws->getInstrument()->getSample();
   QList<double> col_values; // List of double valued data for one row
+  bool b_showSignedTwoThetaVersion = false; //Flag indicating that a signedVersion of the two theta value should be displayed
   for( size_t row = 0; row < nrows; ++row )
   {
     size_t ws_index = indices.empty() ? row : indices[row];
@@ -972,7 +973,22 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
       pos.getSpherical(R,Theta,Phi);
       // Need to get R & Theta through these methods to be correct for grouped detectors
       R = det->getDistance(*sample);
-      Theta = ws->detectorTwoTheta(det)*180.0/M_PI;
+
+      // Lazy evaluation of the instrument parameter map.
+      if(row == 0)
+      {
+        std::vector<std::string> parameters = det->getStringParameter("show-signed-theta", true);
+        b_showSignedTwoThetaVersion = parameters.size() > 0 && find(parameters.begin(), parameters.end(), "Always") != parameters.end();
+      }
+      if(b_showSignedTwoThetaVersion)
+      {
+        Theta = ws->detectorSignedTwoTheta(det)*180.0/M_PI;
+      }
+      else
+      {
+        Theta = ws->detectorTwoTheta(det)*180.0/M_PI;
+      }
+      
     }
     catch(...)
     {
