@@ -34,7 +34,6 @@ def counts_vs_y_distribution(file_path, minTOF, maxTOF):
     ws_output = "__REFL_Y_distribution"
     graph_name = "Counts vs Y"
     LoadEventNexus(Filename=file_path, OutputWorkspace=ws)
-    Rebin(InputWorkspace=ws,OutputWorkspace=ws,Params="0,200000,200000")
     ws_integrated = wks_utility.createIntegratedWorkspace(mtd[ws],ws_output,0,303,0,255)
     Transpose(InputWorkspace=ws_output, OutputWorkspace=ws_output)
 
