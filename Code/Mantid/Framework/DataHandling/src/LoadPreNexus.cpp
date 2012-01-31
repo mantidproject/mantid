@@ -22,6 +22,7 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using std::size_t;
 using std::string;
 using std::vector;
 
@@ -100,7 +101,12 @@ namespace DataHandling
   /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
   int LoadPreNexus::fileCheck(const std::string& filePath)
   {
-    return 0; // TODO
+    std::string ext = extension(filePath);
+
+    if (ext.rfind("_runinfo.xml") != std::string::npos)
+      return 80;
+    else
+      return 0;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -155,9 +161,18 @@ namespace DataHandling
     bool loadmonitors = this->getProperty("LoadMonitors");
 
     // determine the event file names
+    Progress prog(this, 0., .1, 1);
     vector<string> eventFilenames;
     string dataDir;
     this->parseRuninfo(runinfo, dataDir, eventFilenames);
+    prog.doReport("parsed runinfo file");
+
+    // do math for the progress bar
+    size_t numFiles = eventFilenames.size() + 1; // extra 1 is nexus logs
+    if (loadmonitors)
+      numFiles++;
+    double prog_start = .1;
+    double prog_delta = (1.-prog_start)/static_cast<double>(numFiles);
 
     // load event files
     IEventWorkspace_sptr outws;
@@ -169,7 +184,7 @@ namespace DataHandling
       else
         temp_wsname = "__" + wsname + "_temp__";
 
-      IAlgorithm_sptr alg = this->createSubAlgorithm("LoadEventPreNexus");
+      IAlgorithm_sptr alg = this->createSubAlgorithm("LoadEventPreNexus", prog_start, prog_start+prog_delta);
       alg->setProperty("EventFilename", dataDir + eventFilenames[i]);
       alg->setProperty("MappingFilename", mapfile);
       alg->setProperty("ChunkNumber", chunkNumber);
@@ -177,6 +192,7 @@ namespace DataHandling
       alg->setProperty("UseParallelProcessing", useParallel);
       alg->setPropertyValue("OutputWorkspace", temp_wsname);
       alg->executeAsSubAlg();
+      prog_start += prog_delta;
 
       if (i == 0)
       {
@@ -198,7 +214,8 @@ namespace DataHandling
 
 
     // load the logs
-    this->runLoadNexusLogs(runinfo, dataDir, outws);
+    this->runLoadNexusLogs(runinfo, dataDir, outws, prog_start, prog_start+prog_delta);
+    prog_start += prog_delta;
 
     // publish output workspace
     this->setProperty("OutputWorkspace", outws);
@@ -207,7 +224,7 @@ namespace DataHandling
     //TODO update progress
     if (loadmonitors)
     {
-      this->runLoadMonitors();
+      this->runLoadMonitors(prog_start, 1.);
     }
   }
 
@@ -283,7 +300,8 @@ namespace DataHandling
     }
   }
 
-  void LoadPreNexus::runLoadNexusLogs(const string &runinfo, const string &dataDir, IEventWorkspace_sptr wksp)
+  void LoadPreNexus::runLoadNexusLogs(const string &runinfo, const string &dataDir,
+                                      IEventWorkspace_sptr wksp, const double prog_start, const double prog_stop)
   {
     // determine the name of the file "inst_run"
     string shortName = runinfo.substr(dataDir.size());
@@ -305,7 +323,7 @@ namespace DataHandling
       if (Poco::File(possibilities[i]).exists())
       {
         g_log.information() << "Loading logs from \"" << possibilities[i] << "\"\n";
-        IAlgorithm_sptr alg = this->createSubAlgorithm("LoadNexusLogs");
+        IAlgorithm_sptr alg = this->createSubAlgorithm("LoadNexusLogs", prog_start, prog_stop);
         alg->setProperty("Workspace", wksp);
         alg->setProperty("Filename", possibilities[i]);
         alg->setProperty("OverwriteLogs", true); // TODO should be false
@@ -315,12 +333,12 @@ namespace DataHandling
 
   }
 
-  void LoadPreNexus::runLoadMonitors()
+  void LoadPreNexus::runLoadMonitors(const double prog_start, const double prog_stop)
   {
     std::string mon_wsname = this->getProperty("OutputWorkspace");
     mon_wsname.append("_monitors");
 
-    IAlgorithm_sptr alg = this->createSubAlgorithm("LoadPreNexusMonitors");
+    IAlgorithm_sptr alg = this->createSubAlgorithm("LoadPreNexusMonitors", prog_start, prog_stop);
     alg->setPropertyValue("RunInfoFilename", this->getProperty(RUNINFO_PARAM));
     alg->setPropertyValue("OutputWorkspace", mon_wsname);
     alg->executeAsSubAlg();

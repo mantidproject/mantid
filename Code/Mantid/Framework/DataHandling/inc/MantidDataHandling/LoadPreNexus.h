@@ -51,8 +51,9 @@ namespace DataHandling
     void init();
     void exec();
     void parseRuninfo(const std::string &runinfo, std::string &dataDir, std::vector<std::string> &eventFilenames);
-    void runLoadNexusLogs(const std::string &runinfo, const std::string &dataDir, Mantid::API::IEventWorkspace_sptr wksp);
-    void runLoadMonitors();
+    void runLoadNexusLogs(const std::string &runinfo, const std::string &dataDir,
+                          Mantid::API::IEventWorkspace_sptr wksp, const double prog_start, const double prog_stop);
+    void runLoadMonitors(const double prog_start, const double prog_stop);
 
   };
 
