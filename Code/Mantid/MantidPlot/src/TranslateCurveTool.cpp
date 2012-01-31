@@ -85,7 +85,6 @@ void TranslateCurveTool::selectCurvePoint(QwtPlotCurve *curve, int point_index)
 	d_curve_point = QwtDoublePoint(curve->x(point_index), curve->y(point_index));
 	delete d_sub_tool;
 
-  std::cerr << "select destination\n";
 	// Phase 2: select destination
 	d_sub_tool = new ScreenPickerTool(d_graph, this, SIGNAL(statusText(const QString&)));
 	connect(dynamic_cast<ScreenPickerTool*>(d_sub_tool), SIGNAL(selected(const QwtDoublePoint&)), this, SLOT(selectDestination(const QwtDoublePoint&)));
