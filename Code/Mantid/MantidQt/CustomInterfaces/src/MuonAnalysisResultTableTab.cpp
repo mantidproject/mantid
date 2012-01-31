@@ -579,11 +579,10 @@ bool MuonAnalysisResultTableTab::haveSameParameters(const QVector<QString>& wsLi
     }
     while(paramRow.next());
 
-    if (firstParams == nextParams)
-      return true;
-    else
+    if (!(firstParams == nextParams))
       return false;
   }
+  return true;
 }
 
 
