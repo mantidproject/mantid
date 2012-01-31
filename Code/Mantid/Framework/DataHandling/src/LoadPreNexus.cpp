@@ -1,5 +1,5 @@
 /*WIKI*
-TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
+Workflow algorithm to load all of the preNeXus files.
 *WIKI*/
 
 #include <fstream>
@@ -40,55 +40,53 @@ namespace DataHandling
 
 
   //----------------------------------------------------------------------------------------------
-  /** Constructor
-   */
+  /// Constructor
   LoadPreNexus::LoadPreNexus()
   {
   }
     
   //----------------------------------------------------------------------------------------------
-  /** Destructor
-   */
+  /// Destructor
   LoadPreNexus::~LoadPreNexus()
   {
   }
   
 
   //----------------------------------------------------------------------------------------------
-  /// Algorithm's name for identification. @see Algorithm::name
+  /// @copydoc Mantid::API::IAlgorithm::name()
   const std::string LoadPreNexus::name() const
   {
     return "LoadPreNexus";
   }
   
-  /// Algorithm's version for identification. @see Algorithm::version
+  /// @copydoc Mantid::API::IAlgorithm::version()
   int LoadPreNexus::version() const
   {
     return 1;
   }
   
-  /// Algorithm's category for identification. @see Algorithm::category
+  /// @copydoc Mantid::API::IAlgorithm::category()
   const std::string LoadPreNexus::category() const
   {
     return "DataHandling\\PreNexus;Workflow\\DataHandling";
   }
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
+  /// @copydoc Mantid::API::Algorithm::initDocs()
   void LoadPreNexus::initDocs()
   {
-    this->setWikiSummary("Load a PreNexus file.");
-    this->setOptionalMessage("Load a PreNexus file.");
+    this->setWikiSummary("Load a collection of PreNexus files.");
+    this->setOptionalMessage("Load a collection of PreNexus files.");
   }
 
   //----------------------------------------------------------------------------------------------
-  /// Returns the name of the property to be considered as the Filename for Load
+  /// @copydoc Mantid::API::IDataFileChecker::filePropertyName()
   const char * LoadPreNexus::filePropertyName() const
   {
     return RUNINFO_PARAM.c_str();
   }
 
-  /// do a quick check that this file can be loaded
+  /// @copydoc Mantid::API::IDataFileChecker::quickFileCheck
   bool LoadPreNexus::quickFileCheck(const std::string& filePath,size_t nread,const file_header& header)
   {
     UNUSED_ARG(nread);
@@ -98,7 +96,7 @@ namespace DataHandling
     return (ext.rfind("_runinfo.xml") != std::string::npos);
   }
 
-  /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
+  /// @copydoc Mantid::API::IDataFileChecker::fileCheck
   int LoadPreNexus::fileCheck(const std::string& filePath)
   {
     std::string ext = extension(filePath);
@@ -110,8 +108,7 @@ namespace DataHandling
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Initialize the algorithm's properties.
-   */
+  /// @copydoc Mantid::API::Algorithm::init()
   void LoadPreNexus::init()
   {
     // runfile to read in
@@ -148,8 +145,7 @@ namespace DataHandling
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Execute the algorithm.
-   */
+  /// @copydoc Mantid::API::Algorithm::exec()
   void LoadPreNexus::exec()
   {
     string runinfo = this->getPropertyValue(RUNINFO_PARAM);
@@ -227,6 +223,13 @@ namespace DataHandling
     }
   }
 
+  /**
+   * Parse the runinfo file to find the names of the neutron event files.
+   *
+   * @param runinfo Runinfo file with full path.
+   * @param dataDir Directory where the runinfo file lives.
+   * @param eventFilenames vector of all possible event files. This is filled by the algorithm.
+   */
   void LoadPreNexus::parseRuninfo(const string &runinfo, string &dataDir, vector<string> &eventFilenames)
   {
     eventFilenames.clear();
@@ -299,6 +302,15 @@ namespace DataHandling
     }
   }
 
+  /**
+   * Load logs from a nexus file onto the workspace.
+   *
+   * @param runinfo Runinfo file with full path.
+   * @param dataDir Directory where the runinfo file lives.
+   * @param wksp Workspace to add the logs to.
+   * @param prog_start Starting position for the progress bar.
+   * @param prog_stop Ending position for the progress bar.
+   */
   void LoadPreNexus::runLoadNexusLogs(const string &runinfo, const string &dataDir,
                                       IEventWorkspace_sptr wksp, const double prog_start, const double prog_stop)
   {
@@ -317,6 +329,7 @@ namespace DataHandling
     possibilities.push_back(dataDir + "../NeXus/" + shortName + ".nxs");
 
     // run the algorithm
+    bool loadedLogs = false;
     for (size_t i = 0; i < possibilities.size(); i++)
     {
       if (Poco::File(possibilities[i]).exists())
@@ -327,11 +340,21 @@ namespace DataHandling
         alg->setProperty("Filename", possibilities[i]);
         alg->setProperty("OverwriteLogs", false);
         alg->executeAsSubAlg();
+        loadedLogs = true;
+        break;
       }
     }
 
+    if (!loadedLogs)
+      g_log.notice() << "Did not find a nexus file to load logs from\n";
   }
 
+  /**
+   * Load the monitor files.
+   *
+   * @param prog_start Starting position for the progress bar.
+   * @param prog_stop Ending position for the progress bar.
+   */
   void LoadPreNexus::runLoadMonitors(const double prog_start, const double prog_stop)
   {
     std::string mon_wsname = this->getProperty("OutputWorkspace");
