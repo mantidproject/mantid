@@ -1513,7 +1513,11 @@ void ConfigDialog::initFittingPage()
   fitParamsLayout->addWidget(scaleErrorsBox, 3, 0);
   scaleErrorsBox->setChecked(app->fit_scale_errors);
 
+  cbEnableQtiPlotFitting = new QCheckBox();
+  cbEnableQtiPlotFitting->setChecked(app->m_enableQtiPlotFitting);
+
   QVBoxLayout* fitPageLayout = new QVBoxLayout(fitPage);
+  fitPageLayout->addWidget(cbEnableQtiPlotFitting);
   fitPageLayout->addWidget(groupBoxFittingCurve);
   fitPageLayout->addWidget(groupBoxMultiPeak);
   fitPageLayout->addWidget(groupBoxFitParameters);
@@ -1856,6 +1860,7 @@ void ConfigDialog::languageChange()
   boxAutoscale3DPlots->setText( tr( "Autosca&ling" ) );
 
   //Fitting page
+  cbEnableQtiPlotFitting->setText(tr("Enable QtiPlot fitting"));
   groupBoxFittingCurve->setTitle(tr("Generated Fit Curve"));
   generatePointsBtn->setText(tr("Uniform X Function"));
   lblPoints->setText( tr("Points") );
@@ -2033,6 +2038,7 @@ void ConfigDialog::apply()
   app->setPlot3DOptions();
 
   // fitting page
+  app->m_enableQtiPlotFitting = cbEnableQtiPlotFitting->isChecked();
   app->fit_output_precision = boxPrecision->value();
   app->pasteFitResultsToPlot = plotLabelBox->isChecked();
   app->writeFitResultsToLog = logBox->isChecked();

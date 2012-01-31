@@ -241,6 +241,7 @@ private:
   QSpinBox *undoStackSizeBox;
   QComboBox *boxEndLine;
   QCheckBox* cbApplyToMantid;
+  QCheckBox* cbEnableQtiPlotFitting;
 
 
 

@@ -1454,6 +1454,7 @@ private:
   QList<MantidMatrix*> m_mantidmatrixWindows;
 
   friend class MantidUI;
+  friend class ConfigDialog;
   QString m_nexusInputWSName;
 
   // Store initialized script environments
@@ -1465,6 +1466,8 @@ private:
   QList<FloatingWindow*> m_floatingWindows;
   // To block activating new window when a floating window is in process of resetting flags
   bool blockWindowActivation;
+  /// 
+  bool m_enableQtiPlotFitting;
 
 #ifdef SHARED_MENUBAR
   QMenuBar* m_sharedMenuBar; ///< Pointer to the shared menubar
