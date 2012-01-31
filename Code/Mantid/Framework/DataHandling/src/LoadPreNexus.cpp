@@ -2,6 +2,7 @@
 Workflow algorithm to load all of the preNeXus files.
 *WIKI*/
 
+#include <exception>
 #include <fstream>
 #include <Poco/Path.h>
 #include <Poco/File.h>
@@ -150,8 +151,18 @@ namespace DataHandling
   {
     string runinfo = this->getPropertyValue(RUNINFO_PARAM);
     string mapfile = this->getPropertyValue(MAP_PARAM);
-    int chunkNumber = this->getProperty("ChunkNumber");
     int chunkTotal = this->getProperty("TotalChunks");
+    int chunkNumber = this->getProperty("ChunkNumber");
+    if ( isEmpty(chunkTotal) || isEmpty(chunkNumber))
+    {
+      chunkNumber = EMPTY_INT();
+      chunkTotal = EMPTY_INT();
+    }
+    else
+    {
+      if (chunkNumber > chunkTotal)
+        throw std::out_of_range("ChunkNumber cannot be larger than TotalChunks");
+    }
     string useParallel = this->getProperty("UseParallelProcessing");
     string wsname = this->getProperty("OutputWorkspace");
     bool loadmonitors = this->getProperty("LoadMonitors");
@@ -360,6 +371,7 @@ namespace DataHandling
     std::string mon_wsname = this->getProperty("OutputWorkspace");
     mon_wsname.append("_monitors");
 
+    try{
     IAlgorithm_sptr alg = this->createSubAlgorithm("LoadPreNexusMonitors", prog_start, prog_stop);
     alg->setPropertyValue("RunInfoFilename", this->getProperty(RUNINFO_PARAM));
     alg->setPropertyValue("OutputWorkspace", mon_wsname);
@@ -368,6 +380,11 @@ namespace DataHandling
     this->declareProperty(new WorkspaceProperty<>("MonitorWorkspace",
         mon_wsname, Direction::Output), "Monitors from the Event NeXus file");
     this->setProperty("MonitorWorkspace", mons);
+    }
+    catch (std::exception &e)
+    {
+      g_log.warning() << "Failed to load monitors: " << e.what() << "\n";
+    }
   }
 
 } // namespace Mantid

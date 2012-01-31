@@ -7,24 +7,24 @@
 #include <iostream>
 #include <iomanip>
 
-#include "MantidDataHandling/LoadPrenexus.h"
+#include "MantidDataHandling/LoadPreNexus.h"
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;
 using namespace Mantid::API;
 
-class LoadPrenexusTest : public CxxTest::TestSuite
+class LoadPreNexusTest : public CxxTest::TestSuite
 {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LoadPrenexusTest *createSuite() { return new LoadPrenexusTest(); }
-  static void destroySuite( LoadPrenexusTest *suite ) { delete suite; }
+  static LoadPreNexusTest *createSuite() { return new LoadPreNexusTest(); }
+  static void destroySuite( LoadPreNexusTest *suite ) { delete suite; }
 
 
   void test_Init()
   {
-    LoadPrenexus alg;
+    LoadPreNexus alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
@@ -32,13 +32,15 @@ public:
   void test_exec()
   {
     // Name of the output workspace.
-    std::string outWSName("LoadPrenexusTest_OutputWS");
+    std::string outWSName("LoadPreNexusTest_OutputWS");
   
-    LoadPrenexus alg;
+    LoadPreNexus alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("REPLACE_PROPERTY_NAME_HERE!!!!", "value") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", "CNCS_7860_runinfo.xml") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("ChunkNumber", 1));
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("TotalChunks", 5));
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
     
@@ -53,11 +55,6 @@ public:
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
   }
-  
-  void test_Something()
-  {
-  }
-
 
 };
 

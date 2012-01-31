@@ -1,9 +1,12 @@
 #ifndef MANTID_DATAHANDLING_LoadPreNexus_H_
 #define MANTID_DATAHANDLING_LoadPreNexus_H_
 
+#include <string>
 #include <vector>
+#include "MantidAPI/IDataFileChecker.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IEventWorkspace.h"
 
 namespace Mantid
 {
