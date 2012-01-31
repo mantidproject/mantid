@@ -490,6 +490,9 @@ private:
   
   /// This method accepts user inputs and executes loadraw/load nexus algorithm
   void executeAlgorithm(MantidQt::API::AlgorithmDialog* dlg,Mantid::API::IAlgorithm_sptr alg);
+  
+  /// This method accepts user inputs and executes loadraw/load nexus algorithm
+  std::string extractLogTime(Mantid::Kernel::DateAndTime value,bool useAbsoluteDate, Mantid::Kernel::DateAndTime start);
 
     // Private variables
 
