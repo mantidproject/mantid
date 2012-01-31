@@ -221,7 +221,6 @@ namespace DataHandling
     this->setProperty("OutputWorkspace", outws);
 
     // load the monitor
-    //TODO update progress
     if (loadmonitors)
     {
       this->runLoadMonitors(prog_start, 1.);
@@ -326,7 +325,7 @@ namespace DataHandling
         IAlgorithm_sptr alg = this->createSubAlgorithm("LoadNexusLogs", prog_start, prog_stop);
         alg->setProperty("Workspace", wksp);
         alg->setProperty("Filename", possibilities[i]);
-        alg->setProperty("OverwriteLogs", true); // TODO should be false
+        alg->setProperty("OverwriteLogs", false);
         alg->executeAsSubAlg();
       }
     }
