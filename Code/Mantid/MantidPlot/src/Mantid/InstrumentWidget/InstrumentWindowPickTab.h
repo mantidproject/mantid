@@ -117,6 +117,7 @@ private:
   double m_efixed;
   double m_delta;
   TubeXUnits m_tubeXUnits; ///< quantity the time bin integrals to be plotted against
+  bool m_freezePlot;
 };
 
 
