@@ -323,6 +323,8 @@ namespace CurveFitting
 
         Mantid::API::ITableWorkspace_sptr m_covariance = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
         m_covariance->addColumn("str","Name");
+        // set plot type to Label = 6
+        m_covariance->getColumn(m_covariance->columnCount()-1)->setPlotType(6);
         std::vector<std::string> paramThatAreFitted; // used for populating 1st "name" column
         for(size_t i=0; i < m_function->nParams(); i++)
         {
@@ -362,9 +364,15 @@ namespace CurveFitting
 
       Mantid::API::ITableWorkspace_sptr m_result = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
       m_result->addColumn("str","Name");
+      // set plot type to Label = 6
+      m_result->getColumn(m_result->columnCount()-1)->setPlotType(6);
       m_result->addColumn("double","Value");
       if ( isDerivDefined ) 
+      { 
         m_result->addColumn("double","Error");
+        // yErr = 5
+        m_result->getColumn(m_result->columnCount()-1)->setPlotType(5);
+      }
 
       for(size_t i=0;i<m_function->nParams();i++)
       {

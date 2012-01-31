@@ -18,6 +18,8 @@ class DataSets(BaseScriptElement):
     DataTofRange = [9600., 21600.]
     
     x_range = [115,210]
+    norm_x_min = 115
+    norm_x_max = 210
     
     NormPeakPixels = [127, 133]
     NormBackgroundFlag = False
@@ -29,6 +31,10 @@ class DataSets(BaseScriptElement):
     data_files = [0]
     norm_file = 0
     
+    # Q range
+    q_min = 0.001
+    q_step = 0.001
+    auto_q_binning = False
 
     def __init__(self):
         super(DataSets, self).__init__()
@@ -50,7 +56,8 @@ class DataSets(BaseScriptElement):
         script += "              SubtractNormBackground=%s,\n" % str(self.NormBackgroundFlag)
         script += "              LowResAxisPixelRange=%s,\n" % str(self.x_range)
         script += "              TOFRange=%s,\n" % str(self.DataTofRange)
-        script += "              Binning=[0,200,200000],\n"
+        script += "              QMin=%s,\n" % str(self.q_min)
+        script += "              QStep=%s,\n" % str(self.q_step)
         script += "              OutputWorkspace='reflectivity_%s')" % str(self.data_files[0])
         script += "\n"
 
@@ -83,7 +90,8 @@ class DataSets(BaseScriptElement):
         xml += "<data_sets>%s</data_sets>\n" % ','.join([str(i) for i in self.data_files])
         xml += "<x_min_pixel>%s</x_min_pixel>\n" % str(self.x_range[0])
         xml += "<x_max_pixel>%s</x_max_pixel>\n" % str(self.x_range[1])
-        
+        xml += "<norm_x_max>%s</norm_x_max>\n" % str(self.norm_x_max)
+        xml += "<norm_x_min>%s</norm_x_min>\n" % str(self.norm_x_min)
         
         xml += "<norm_from_peak_pixels>%s</norm_from_peak_pixels>\n" % str(self.NormPeakPixels[0])
         xml += "<norm_to_peak_pixels>%s</norm_to_peak_pixels>\n" % str(self.NormPeakPixels[1])
@@ -91,6 +99,12 @@ class DataSets(BaseScriptElement):
         xml += "<norm_from_back_pixels>%s</norm_from_back_pixels>\n" % str(self.NormBackgroundRoi[0])
         xml += "<norm_to_back_pixels>%s</norm_to_back_pixels>\n" % str(self.NormBackgroundRoi[1])
         xml += "<norm_dataset>%s</norm_dataset>\n" % str(self.norm_file)
+        
+        # Q cut
+        xml += "<q_min>%s</q_min>\n" % str(self.q_min)
+        xml += "<q_step>%s</q_step>\n" % str(self.q_step)
+        xml += "<auto_q_binning>%s</auto_q_binning>" % str(self.auto_q_binning)
+        
         xml += "</Data>\n"
 
         return xml
@@ -118,11 +132,18 @@ class DataSets(BaseScriptElement):
         self.x_range = [BaseScriptElement.getIntElement(instrument_dom, "x_min_pixel"),
                         BaseScriptElement.getIntElement(instrument_dom, "x_max_pixel")]
         
+        self.norm_x_min = BaseScriptElement.getIntElement(instrument_dom, "norm_x_min", 
+                                                          default=DataSets.norm_x_min)
+        self.norm_x_max = BaseScriptElement.getIntElement(instrument_dom, "norm_x_max",
+                                                          default=DataSets.norm_x_max)
+        
         #discrete selection string
         self.DataPeakDiscreteSelection = BaseScriptElement.getStringElement(instrument_dom, "peak_discrete_selection")
         
         #background flag
-        self.DataBackgroundFlag = BaseScriptElement.getBoolElement(instrument_dom, "background_flag")
+        self.DataBackgroundFlag = BaseScriptElement.getBoolElement(instrument_dom,
+                                                                   "background_flag",
+                                                                   default=DataSets.DataBackgroundFlag)
 
         #background from/to pixels
         self.DataBackgroundRoi = [BaseScriptElement.getIntElement(instrument_dom, "back_roi1_from"),
@@ -141,13 +162,20 @@ class DataSets(BaseScriptElement):
                                BaseScriptElement.getIntElement(instrument_dom, "norm_to_peak_pixels")]
 
         #background flag
-        self.NormBackgroundFlag = BaseScriptElement.getBoolElement(instrument_dom, "norm_background_flag")
+        self.NormBackgroundFlag = BaseScriptElement.getBoolElement(instrument_dom, 
+                                                                   "norm_background_flag", 
+                                                                   default=DataSets.NormBackgroundFlag)
         
         #background from/to pixels
         self.NormBackgroundRoi = [BaseScriptElement.getIntElement(instrument_dom, "norm_from_back_pixels"),
                                   BaseScriptElement.getIntElement(instrument_dom, "norm_to_back_pixels")]
         
         self.norm_file = BaseScriptElement.getIntElement(instrument_dom, "norm_dataset")
+    
+        # Q cut
+        self.q_min = BaseScriptElement.getFloatElement(instrument_dom, "q_min", default=DataSets.q_min)    
+        self.q_step = BaseScriptElement.getFloatElement(instrument_dom, "q_step", default=DataSets.q_step)
+        self.auto_q_binning = BaseScriptElement.getBoolElement(instrument_dom, "auto_q_binning", default=False)
     
     def reset(self):
         """
@@ -166,3 +194,10 @@ class DataSets(BaseScriptElement):
         self.NormPeakPixels = DataSets.NormPeakPixels
         self.norm_file = DataSets.norm_file
         self.x_range = DataSets.x_range
+        self.norm_x_max = DataSets.norm_x_max
+        self.norm_x_min = DataSets.norm_x_min
+        
+        # Q range
+        self.q_min = DataSets.q_min
+        self.q_step = DataSets.q_step
+        self.auto_q_binning = DataSets.auto_q_binning

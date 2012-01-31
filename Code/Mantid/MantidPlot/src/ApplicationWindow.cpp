@@ -211,6 +211,7 @@ ApplicationWindow::ApplicationWindow(bool factorySettings)
 : QMainWindow(), 
 Scripted(ScriptingLangManager::newEnv(this)),
 blockWindowActivation(false),
+m_enableQtiPlotFitting(false),
 m_exitCode(0),
 #ifdef Q_OS_MAC // Mac
   settings(QSettings::IniFormat,QSettings::UserScope, "ISIS", "MantidPlot")
@@ -1447,8 +1448,11 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
       myMenuBar()->insertItem(tr("&Graph"), graph);
       myMenuBar()->insertItem(tr("&Data"), plotDataMenu);
       plotDataMenuAboutToShow();
-      //myMenuBar()->insertItem(tr("&Analysis"), analysisMenu);
-      //analysisMenuAboutToShow();
+      if (m_enableQtiPlotFitting)
+      {
+        myMenuBar()->insertItem(tr("&Analysis"), analysisMenu);
+        analysisMenuAboutToShow();
+      }
       myMenuBar()->insertItem(tr("For&mat"), format);
 
       format->clear();
@@ -5142,6 +5146,7 @@ void ApplicationWindow::readSettings()
   /* ----------------- end group 3D Plots --------------------------- */
 
   settings.beginGroup("/Fitting");
+  m_enableQtiPlotFitting = settings.value("/EnableQtiPlotFitting", false).toBool();
   fit_output_precision = settings.value("/OutputPrecision", 15).toInt();
   pasteFitResultsToPlot = settings.value("/PasteResultsToPlot", false).toBool();
   writeFitResultsToLog = settings.value("/WriteResultsToLog", true).toBool();
@@ -5502,6 +5507,7 @@ void ApplicationWindow::saveSettings()
   /* ----------------- end group 2D Plots -------- */
 
   settings.beginGroup("/Fitting");
+  settings.setValue("/EnableQtiPlotFitting", m_enableQtiPlotFitting);
   settings.setValue("/OutputPrecision", fit_output_precision);
   settings.setValue("/PasteResultsToPlot", pasteFitResultsToPlot);
   settings.setValue("/WriteResultsToLog", writeFitResultsToLog);
@@ -8842,10 +8848,11 @@ void ApplicationWindow::analysisMenuAboutToShow()
     return;
 
   if (w->isA("MultiLayer")){
-    QMenu *translateMenu = analysisMenu->addMenu (tr("&Translate"));
-    translateMenu->addAction(actionTranslateVert);
-    translateMenu->addAction(actionTranslateHor);
-    analysisMenu->insertSeparator();
+    // The tool doesn't work yet (DataPickerTool)
+    //QMenu *translateMenu = analysisMenu->addMenu (tr("&Translate"));
+    //translateMenu->addAction(actionTranslateVert);
+    //translateMenu->addAction(actionTranslateHor);
+    //analysisMenu->insertSeparator();
     analysisMenu->addAction(actionDifferentiate);
     analysisMenu->addAction(actionIntegrate);
     analysisMenu->addAction(actionShowIntDialog);
@@ -8883,10 +8890,12 @@ void ApplicationWindow::analysisMenuAboutToShow()
     analysisMenu->addAction(actionFitGauss);
     analysisMenu->addAction(actionFitLorentz);
 
-    multiPeakMenu->clear();
-    multiPeakMenu = analysisMenu->addMenu (tr("Fit &Multi-peak"));
-    multiPeakMenu->addAction(actionMultiPeakGauss);
-    multiPeakMenu->addAction(actionMultiPeakLorentz);
+    // The tool doesn't work yet (DataPickerTool)
+    //multiPeakMenu->clear();
+    //multiPeakMenu = analysisMenu->addMenu (tr("Fit &Multi-peak"));
+    //multiPeakMenu->addAction(actionMultiPeakGauss);
+    //multiPeakMenu->addAction(actionMultiPeakLorentz);
+
     analysisMenu->insertSeparator();
     analysisMenu->addAction(actionShowFitDialog);
   } else if (w->isA("Matrix")){
@@ -9675,7 +9684,10 @@ void ApplicationWindow::showGraphContextMenu()
     }
     cm.addAction(actionShowCurvesDialog);
     cm.addAction(actionAddFunctionCurve);
-    //cm.insertItem(tr("Anal&yze"), analysisMenu);
+    if (m_enableQtiPlotFitting)
+    {
+      cm.insertItem(tr("Anal&yze"), analysisMenu);
+    }
   }
 
   if (lastCopiedLayer){

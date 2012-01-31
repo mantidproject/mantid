@@ -18,7 +18,7 @@ class TestConvertToMDEventsMethods :public IConvertToMDEventsMethods
 {
     size_t conversionChunk(size_t job_ID){UNUSED_ARG(job_ID);return 0;}
 public:
-    void setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const PreprocessedDetectors &detLoc)
+    void setUPTestConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const PreprocessedDetectors &detLoc)
     {
         MDEvents::MDWSDescription TestWS(5);
 
@@ -58,7 +58,7 @@ void testSetUp_and_PreprocessDetectors()
 
     TS_ASSERT_THROWS_NOTHING(processDetectorsPositions(ws2D,det_loc,ConvertToMDEvents::getLogger(),pProg.get()));
     TS_ASSERT_THROWS_NOTHING(pConvMethods = std::auto_ptr<TestConvertToMDEventsMethods>(new TestConvertToMDEventsMethods()));
-    TS_ASSERT_THROWS_NOTHING(pConvMethods->setUPConversion(ws2D,det_loc));
+    TS_ASSERT_THROWS_NOTHING(pConvMethods->setUPTestConversion(ws2D,det_loc));
 
 }
 

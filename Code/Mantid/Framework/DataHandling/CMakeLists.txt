@@ -49,6 +49,7 @@ set ( SRC_FILES
 	src/LoadNexusProcessed.cpp
 	src/LoadParameterFile.cpp
 	src/LoadPreNexusMonitors.cpp
+	src/LoadPreNexus.cpp
 	src/LoadQKK.cpp
 	src/LoadRKH.cpp
 	src/LoadRaw.cpp
@@ -156,6 +157,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadNexusProcessed.h
 	inc/MantidDataHandling/LoadParameterFile.h
 	inc/MantidDataHandling/LoadPreNexusMonitors.h
+	inc/MantidDataHandling/LoadPreNexus.h
 	inc/MantidDataHandling/LoadQKK.h
 	inc/MantidDataHandling/LoadRKH.h
 	inc/MantidDataHandling/LoadRaw.h
@@ -255,6 +257,7 @@ set ( TEST_FILES
 	test/LoadNexusTest.h
 	test/LoadParameterFileTest.h
 	test/LoadPreNexusMonitorsTest.h
+	test/LoadPreNexusTest.h
 	test/LoadQKKTest.h
 	test/LoadRKHTest.h
 	test/LoadRSaveNLoadNcspTest.h

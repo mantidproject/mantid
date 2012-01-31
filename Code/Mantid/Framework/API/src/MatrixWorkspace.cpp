@@ -14,6 +14,7 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
 #include "MantidGeometry/Instrument/NearestNeighboursFactory.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/MatrixWSIndexCalculator.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -809,6 +810,34 @@ namespace Mantid
       // Else need to construct a DetectorGroup and return that
       std::vector<Geometry::IDetector_const_sptr> dets_ptr = localInstrument->getDetectors(dets);
       return Geometry::IDetector_const_sptr( new Geometry::DetectorGroup(dets_ptr, false) );
+    }
+
+
+    /** Returns the signed 2Theta scattering angle for a detector
+    *  @param det :: A pointer to the detector object (N.B. might be a DetectorGroup)
+    *  @return The scattering angle (0 < theta < pi)
+    *  @throws InstrumentDefinitionError if source or sample is missing, or they are in the same place
+    */
+    double MatrixWorkspace::detectorSignedTwoTheta(Geometry::IDetector_const_sptr det) const
+    {
+      Instrument_const_sptr instrument = getInstrument();
+      Geometry::IObjComponent_const_sptr source = instrument->getSource();
+      Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+      if ( source == NULL || sample == NULL )
+      {
+        throw Kernel::Exception::InstrumentDefinitionError("Instrument not sufficiently defined: failed to get source and/or sample");
+      }
+
+      const Kernel::V3D samplePos = sample->getPos();
+      const Kernel::V3D beamLine  = samplePos - source->getPos();
+
+      if ( beamLine.nullVector() )
+      {
+        throw Kernel::Exception::InstrumentDefinitionError("Source and sample are at same position!");
+      }
+      //Get the instrument up axis.
+      const V3D& instrumentUpAxis = instrument->getReferenceFrame()->vecPointingUp();
+      return det->getSignedTwoTheta(samplePos,beamLine, instrumentUpAxis);
     }
 
     /** Returns the 2Theta scattering angle for a detector

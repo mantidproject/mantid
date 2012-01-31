@@ -47,6 +47,8 @@
 #include <QPainter>
 #include <QMessageBox>
 
+#include <limits>
+
 Detacher::Detacher(QwtPlotItem *plotItem) : m_plotItem(plotItem)
 {
 }
@@ -482,13 +484,21 @@ QwtPlotCurve* Plot::curve(int index)
         return 0;
 }
 
+/**
+ * Returns the index of the closest curve to a point on the canvas.
+ * Also returns index of the nearest data point on that curve.
+ * @param xpos :: x coordinate of a point on the canvas in pixels.
+ * @param ypos :: y coordinate of a point on the canvas in pixels.
+ * @param dist :: ?
+ * @param point :: Output index of the nearest data point to the point with coordinates (xpos,ypos)
+ */
 int Plot::closestCurve(int xpos, int ypos, int &dist, int &point)
 {
 	QwtScaleMap map[QwtPlot::axisCnt];
 	for ( int axis = 0; axis < QwtPlot::axisCnt; axis++ )
 		map[axis] = canvasMap(axis);
 
-	double dmin = 1.0e10;
+  double dmin = std::numeric_limits<double>::max();
 	int key = -1;
 	for (QMap<int, QwtPlotItem *>::iterator iter = d_curves.begin(); iter != d_curves.end(); ++iter )
 	{
@@ -496,32 +506,34 @@ int Plot::closestCurve(int xpos, int ypos, int &dist, int &point)
 		if (!item)
 			continue;
 
-		if(item->rtti() != QwtPlotItem::Rtti_PlotSpectrogram)
-		{
+    if(item->rtti() != QwtPlotItem::Rtti_PlotSpectrogram)
+    {
       PlotCurve *c = (PlotCurve *)item;
       DataCurve *dc = dynamic_cast<DataCurve *>(item);
-      if (!dc) continue;
-      if (c->type() != Graph::Function && dc->hasLabels() &&
-        dc->selectedLabels(QPoint(xpos, ypos))){
-          dist = 0;
-          return iter.key();
-      } else
-        dc->setLabelsSelected(false);
+      if (dc)
+      {
+        if (c->type() != Graph::Function && dc->hasLabels() &&
+          dc->selectedLabels(QPoint(xpos, ypos))){
+            dist = 0;
+            return iter.key();
+        } else
+          dc->setLabelsSelected(false);
+      }
 
-			for (int i=0; i<c->dataSize(); i++)
-			{
-				double cx = map[c->xAxis()].xTransform(c->x(i)) - double(xpos);
-				double cy = map[c->yAxis()].xTransform(c->y(i)) - double(ypos);
-				double f = qwtSqr(cx) + qwtSqr(cy);
-				if (f < dmin && c->type() != Graph::ErrorBars)
-				{
-					dmin = f;
-					key = iter.key();
-					point = i;
-				}
-			}
-		}
-	}
+      for (int i=0; i<c->dataSize(); i++)
+      {
+        double cx = map[c->xAxis()].xTransform(c->x(i)) - double(xpos);
+        double cy = map[c->yAxis()].xTransform(c->y(i)) - double(ypos);
+        double f = qwtSqr(cx) + qwtSqr(cy);
+        if (f < dmin && c->type() != Graph::ErrorBars)
+        {
+          dmin = f;
+          key = iter.key();
+          point = i;
+        }
+      }
+    }
+  }
 	dist = static_cast<int>(sqrt(dmin));
 	return key;
 }

@@ -130,7 +130,8 @@ InstrumentWindowPickTab::InstrumentWindowPickTab(InstrumentWindow* instrWindow):
 QFrame(instrWindow),
 m_instrWindow(instrWindow),
 m_currentDetID(-1),
-m_tubeXUnits(DETECTOR_ID)
+m_tubeXUnits(DETECTOR_ID),
+m_freezePlot(false)
 {
   mInstrumentDisplay = m_instrWindow->getInstrumentDisplay();
   m_plotSum = true;
@@ -305,6 +306,11 @@ void InstrumentWindowPickTab::updatePlot(int detid)
  */
 void InstrumentWindowPickTab::updateSelectionInfo(int detid)
 {
+  if (m_freezePlot)
+  {// freeze the plot for one update
+    m_freezePlot = false;
+    return;
+  }
   if (m_instrWindow->blocked()) 
   {
     m_selectionInfoDisplay->clear();
@@ -787,7 +793,7 @@ void InstrumentWindowPickTab::showEvent (QShowEvent *)
  */
 void InstrumentWindowPickTab::setInstrumentDisplayContextMenu(QMenu& context)
 {
-  //QMenu context(this);
+  m_freezePlot = true;
   if (m_plot->hasCurve())
   {
     context.addAction(m_storeCurve);

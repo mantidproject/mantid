@@ -24,6 +24,7 @@ set ( SRC_FILES
 	src/Instrument/ParameterMap.cpp
 	src/Instrument/RectangularDetector.cpp
 	src/Instrument/RectangularDetectorPixel.cpp
+	src/Instrument/ReferenceFrame.cpp
 	src/Instrument/XMLlogfile.cpp
 	src/MDGeometry/IMDDimension.cpp
 	src/MDGeometry/IMDDimensionFactory.cpp
@@ -124,6 +125,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/ParameterMap.h
 	inc/MantidGeometry/Instrument/RectangularDetector.h
 	inc/MantidGeometry/Instrument/RectangularDetectorPixel.h
+	inc/MantidGeometry/Instrument/ReferenceFrame.h
 	inc/MantidGeometry/Instrument/XMLlogfile.h
 	inc/MantidGeometry/MDGeometry/IMDDimension.h
 	inc/MantidGeometry/MDGeometry/IMDDimensionFactory.h
@@ -232,6 +234,7 @@ set ( TEST_FILES
 	test/QuadrilateralTest.h
 	test/RectangularDetectorPixelTest.h
 	test/RectangularDetectorTest.h
+	test/ReferenceFrameTest.h
 	test/ReflectionConditionTest.h
 	test/RotCounterTest.h
 	test/RulesBoolValueTest.h

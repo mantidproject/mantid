@@ -61,6 +61,12 @@ class DataReflWidget(BaseWidget):
         
         self._summary.x_min_edit.setValidator(QtGui.QDoubleValidator(self._summary.x_min_edit))
         self._summary.x_max_edit.setValidator(QtGui.QDoubleValidator(self._summary.x_max_edit))
+        self._summary.norm_x_min_edit.setValidator(QtGui.QDoubleValidator(self._summary.norm_x_min_edit))
+        self._summary.norm_x_max_edit.setValidator(QtGui.QDoubleValidator(self._summary.norm_x_max_edit))
+
+        self._summary.log_scale_chk.setChecked(True)
+        self._summary.q_min_edit.setValidator(QtGui.QDoubleValidator(self._summary.q_min_edit))
+        self._summary.q_step_edit.setValidator(QtGui.QDoubleValidator(self._summary.q_step_edit))
 
         self._summary.norm_peak_from_pixel.setValidator(QtGui.QIntValidator(self._summary.norm_peak_from_pixel))
         self._summary.norm_peak_to_pixel.setValidator(QtGui.QIntValidator(self._summary.norm_peak_to_pixel))
@@ -228,40 +234,6 @@ class DataReflWidget(BaseWidget):
             state = current_item.data(QtCore.Qt.UserRole).toPyObject()
             self.set_editing_state(state)
 
-    def _check_for_missing_fields(self):
-
-        self._summary.data_peak_discrete_selection_missing.setText(" ")
-        from_pixel = self._summary.data_peak_from_pixel.text()
-        if from_pixel == '':
-            self._summary.data_peak_from_pixel_missing.setText("*")
-        else:
-            self._summary.data_peak_from_pixel_missing.setText(" ")
-            
-        to_pixel = self._summary.data_peak_to_pixel.text()
-        if to_pixel == '':
-            self._summary.data_peak_to_pixel_missing.setText("*")
-        else:
-            self._summary.data_peak_to_pixel_missing.setText(" ")
-            
-        #background
-        is_checked = self._summary.data_background_switch.isChecked()
-        if is_checked:
-            from_pixel1 = self._summary.data_background_from_pixel1.text()
-            if from_pixel1 == '':
-                self._summary.data_background_from_pixel_missing.setText("*")
-            else:
-                self._summary.data_background_from_pixel_missing.setText(" ")
-                
-            to_pixel1 = self._summary.data_background_to_pixel1.text()
-            if to_pixel1 == '':
-                self._summary.data_background_to_pixel_missing.setText("*")
-            else:
-                self._summary.data_background_to_pixel_missing.setText(" ")
-            
-        else:
-            self._summary.data_background_from_pixel_missing.setText(" ")
-            self._summary.data_background_to_pixel_missing.setText(" ")
-                                    
     def set_state(self, state):
         """
             Populate the UI elements with the data from the given state. 
@@ -297,6 +269,9 @@ class DataReflWidget(BaseWidget):
         self._summary.x_min_edit.setText(str(state.x_range[0]))
         self._summary.x_max_edit.setText(str(state.x_range[1]))
         
+        self._summary.norm_x_min_edit.setText(str(state.norm_x_min))
+        self._summary.norm_x_max_edit.setText(str(state.norm_x_max))
+        
         #Background flag
         self._summary.data_background_switch.setChecked(state.DataBackgroundFlag)
         self._data_background_clicked(state.DataBackgroundFlag)
@@ -321,6 +296,11 @@ class DataReflWidget(BaseWidget):
 
         self._summary.norm_background_from_pixel1.setText(str(state.NormBackgroundRoi[0]))
         self._summary.norm_background_to_pixel1.setText(str(state.NormBackgroundRoi[1]))
+        
+        # Q binning
+        self._summary.q_min_edit.setText(str(state.q_min))
+        self._summary.log_scale_chk.setChecked(state.q_step<0)
+        self._summary.q_step_edit.setText(str(math.fabs(state.q_step)))
 
     def get_state(self):
         """
@@ -344,6 +324,9 @@ class DataReflWidget(BaseWidget):
         
         m.x_range = [int(self._summary.x_min_edit.text()),
                      int(self._summary.x_max_edit.text())]
+        
+        m.norm_x_min = int(self._summary.norm_x_min_edit.text())
+        m.norm_x_max = int(self._summary.norm_x_max_edit.text())
         
         #Background flag
         m.DataBackgroundFlag = self._summary.data_background_switch.isChecked()
@@ -373,4 +356,10 @@ class DataReflWidget(BaseWidget):
         roi1_from = int(self._summary.norm_background_from_pixel1.text())
         roi1_to = int(self._summary.norm_background_to_pixel1.text())
         m.NormBackgroundRoi = [roi1_from, roi1_to]
+        
+        m.q_min = float(self._summary.q_min_edit.text())
+        m.q_step = float(self._summary.q_step_edit.text())
+        if self._summary.log_scale_chk.isChecked():
+            m.q_step = -m.q_step
+        
         return m

@@ -106,21 +106,9 @@ namespace Mantid
         {
           continue;
         }
-        double leftWidth(0.5*m_thetaWidth), rightWidth(0.5*m_thetaWidth);
-        // If the gap between this and the previous pixel is largest than
-        // the calculate width we need to enlarge the pixel
-        double gap(0.0);
-        if( i > 2 )
-        {
-          gap = theta - m_thetaPts[i-1];
-          if( gap > m_thetaWidth )
-          {
-            // Move the left boundary to encompass the gap
-            leftWidth = gap - 0.5*m_thetaWidth;
-          }
-        }
-        const double thetaLower = theta - leftWidth;
-        const double thetaUpper = theta + rightWidth;
+        double halfWidth(0.5*m_thetaWidth);
+        const double thetaLower = theta - halfWidth;
+        const double thetaUpper = theta + halfWidth;
         const double efixed = getEFixed(inputWS->getDetector(i));
         for(size_t j = 0; j < nenergyBins; ++j)
         {

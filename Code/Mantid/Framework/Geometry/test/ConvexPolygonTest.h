@@ -137,6 +137,31 @@ public:
     ConvexPolygon parallelogram = makeParallelogram();
     TS_ASSERT_DELTA(parallelogram.area(), std::sqrt(2.0), DBL_EPSILON);
   }
+  
+  void test_Extreme_Points_Are_Correct()
+  {
+    ConvexPolygon parallelogram = makeParallelogram();
+    TS_ASSERT_DELTA(parallelogram.smallestX(), 0.0, DBL_EPSILON);
+    TS_ASSERT_DELTA(parallelogram.largestX(), 2.0 + 0.5*std::sqrt(2.0), DBL_EPSILON);
+    TS_ASSERT_DELTA(parallelogram.smallestY(), 0.0, DBL_EPSILON);
+    TS_ASSERT_DELTA(parallelogram.largestY(), 0.5*std::sqrt(2.0), DBL_EPSILON);
+  }
+
+  void test_Polygon_Contains_Polygon()
+  {
+    Vertex2D *head = new Vertex2D(0.0,0.1);
+    head->insert(new Vertex2D(2.0,0.1));
+    head->insert(new Vertex2D(1.0,0.1 + std::sqrt(3.0)));
+    ConvexPolygon smallTriangle(head);
+
+    head = new Vertex2D(-1.0,0.0);
+    head->insert(new Vertex2D(3.0,0.0));
+    head->insert(new Vertex2D(2.0,2.0*std::sqrt(3.0)));
+    ConvexPolygon largeTriangle(head);
+
+    TS_ASSERT_EQUALS(largeTriangle.contains(smallTriangle), true);
+    TS_ASSERT_EQUALS(smallTriangle.contains(largeTriangle), false);
+  }
 
 private:
   /// Side length 2

@@ -321,8 +321,11 @@ namespace Mantid
       bool overwritelogs = this->getProperty("OverwriteLogs");
       try
       {
-        Kernel::Property *logValue = createTimeSeries(file, entry_name);
-        workspace->mutableRun().addProperty(logValue, overwritelogs);
+        if (overwritelogs || !(workspace->run().hasProperty(entry_name)))
+        {
+          Kernel::Property *logValue = createTimeSeries(file, entry_name);
+          workspace->mutableRun().addProperty(logValue, overwritelogs);
+        }
       }
       catch(::NeXus::Exception &e)
       {

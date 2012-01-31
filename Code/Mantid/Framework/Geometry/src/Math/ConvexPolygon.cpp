@@ -26,14 +26,7 @@ namespace Mantid
     {
       validate(head);
       m_head = head;
-      m_numVertices = 1;
-      Vertex2D *nextVertex = head->next();
-      // Count the vertices
-      while( nextVertex != head )
-      {
-        ++m_numVertices;
-        nextVertex = nextVertex->next();
-      }
+      setup();
     }
 
     /**
@@ -51,7 +44,11 @@ namespace Mantid
       m_head->insert(new Vertex2D(x_upper, y_lower)); // Bottom right
       m_head->insert(new Vertex2D(x_upper, y_upper)); // Top right
       m_head->insert(new Vertex2D(x_lower, y_upper)); // Top left
-      
+
+      m_lowestX = x_lower;
+      m_highestX = x_upper;
+      m_lowestY = y_lower;
+      m_highestY = y_upper;
     }
 
     /**
@@ -62,7 +59,6 @@ namespace Mantid
     {
       if( this != &rhs )
       {
-        m_numVertices = rhs.m_numVertices;
         m_head = new Vertex2D(rhs.m_head->X(), rhs.m_head->Y());
         /// Iterating next() around the other polygon produces the points in clockwise order
         /// so we need to go backwards here to ensure that they remain in the same order
@@ -73,6 +69,7 @@ namespace Mantid
           m_head->insert(new Vertex2D(rhsVertex->X(), rhsVertex->Y()));
           rhsVertex = rhsVertex->previous();
         }
+        setup();
       }
     }
 
@@ -124,14 +121,36 @@ namespace Mantid
     bool ConvexPolygon::contains(const Kernel::V2D & point) const
     {
       Vertex2D *v = m_head;
-      while( v != m_head )
+      do
       {
         PolygonEdge edge(v->point(), v->next()->point());
         if( classify(point, edge) == Left ) return false;
         v = v->next();
       }
+      while( v != m_head );
+
       return true;
     }
+
+    ///
+    /**
+     *  Is the given polygon completely encosed by this one
+     * @param poly Another polygon
+     * @return True if the given polygon is enclosed by this, false otherwise
+     */
+    bool ConvexPolygon::contains(const ConvexPolygon & poly) const
+    {
+      // Basically just have to test if each point is inside us, this could be
+      // slow
+      const Vertex2D * current = poly.head();
+      for(size_t i = 0; i < poly.numVertices(); ++i)
+      {
+        if(!this->contains(*current)) return false;
+        current = current->next();
+      }
+      return true;
+    }
+
 
     /**
      * Compute the area of the polygon using triangulation. As this is a 
@@ -176,6 +195,70 @@ namespace Mantid
       while( v_i != m_head );
       return lhs - rhs;
     }
+
+    /**
+     * Return the lowest X value in the polygon
+     * @returns A double indicating the smallest X value in the polygon
+     */
+    double ConvexPolygon::smallestX() const
+    {
+      return m_lowestX;
+    }
+
+    /**
+     * Return the largest X value in the polygon
+     * @returns A double indicating the smallest X value in the polygon
+     */
+    double ConvexPolygon::largestX() const
+    {
+      return m_highestX;
+    }
+
+    /**
+     * Return the lowest X value in the polygon
+     * @returns A double indicating the smallest Y value in the polygon
+     */
+    double ConvexPolygon::smallestY() const
+    {
+      return m_lowestY;
+    }
+
+    /**
+     * Return the largest Y value in the polygon
+     * @returns A double indicating the smallest Y value in the polygon
+     */
+    double ConvexPolygon::largestY() const
+    {
+      return m_highestY;
+    }
+
+    /**
+     * Setup the meta-data: no of vertices, high/low points
+     */
+    void ConvexPolygon::setup()
+    {
+      m_numVertices = 0;
+
+      m_lowestX = m_head->X();
+      m_highestX = m_head->X();
+      m_lowestY = m_head->Y();
+      m_highestY = m_head->Y();
+
+      // Count the vertices
+      Vertex2D *current = m_head;
+      do
+      {
+        ++m_numVertices;
+        if(  current->X() < m_lowestX ) m_lowestX = current->X();
+        else if( current->X() > m_highestX ) m_highestX = current->X();
+
+        if( current->Y() < m_lowestY ) m_lowestY = current->Y();
+        else if( current->Y() > m_highestY ) m_highestY = current->Y();
+        current = current->next();
+      }
+      while( current != m_head );
+
+    }
     
     /**
      * Check this is a valid polygon
@@ -198,6 +281,7 @@ namespace Mantid
         throw std::invalid_argument(os.str());
       }
     }
+
 
     /**
      * Compute the area of a triangle given by 3 points (a,b,c) using the

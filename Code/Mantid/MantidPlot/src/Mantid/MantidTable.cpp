@@ -23,13 +23,22 @@ using namespace MantidQt::API;
 MantidTable::MantidTable(ScriptingEnv *env, Mantid::API::ITableWorkspace_sptr ws, const QString &label, 
     ApplicationWindow* parent, bool transpose):
 Table(env,
-  transpose? ws->columnCount() : ws->rowCount(),
-  transpose? ws->rowCount() + 1 : ws->columnCount(),
+  transpose? static_cast<int>(ws->columnCount()) : static_cast<int>(ws->rowCount()),
+  transpose? static_cast<int>(ws->rowCount() + 1) : static_cast<int>(ws->columnCount()),
   label,parent,"",0),
 m_ws(ws),
 m_wsName(ws->getName()),
 m_transposed(transpose)
 {
+  // if plot types is set in ws then update Table with that information
+  for ( size_t i = 0; i < ws->columnCount(); i++ )
+  {
+    int pt = ws->getColumn(i)->getPlotType();
+    if ( pt != -1000 )
+      setColPlotDesignation(static_cast<int>(i), pt);
+  }
+  setHeaderColType();
+
   // Set name and stuff
   parent->initTable(this, parent->generateUniqueName("Table-"));
   //  askOnCloseEvent(false);
@@ -52,13 +61,13 @@ void MantidTable::fillTable()
     return;
   }
 
-  setNumCols(m_ws->columnCount());
-  setNumRows(m_ws->rowCount());
+  setNumCols(static_cast<int>(m_ws->columnCount()));
+  setNumRows(static_cast<int>(m_ws->rowCount()));
 
   // Add all columns
-  for(size_t i=0;i<m_ws->columnCount();i++)
+  for(int i=0; i < static_cast<int>(m_ws->columnCount());i++)
   {
-    Mantid::API::Column_sptr c = m_ws->getColumn(i);
+    Mantid::API::Column_sptr c = m_ws->getColumn(static_cast<int>(i));
     QString colName = QString::fromStdString(c->name());
     setColName(i,colName);
     // Make columns of ITableWorkspaces read only, if specified
@@ -77,11 +86,11 @@ void MantidTable::fillTable()
     if (thisWidth > maxWidth) maxWidth = thisWidth;
 
     // Print out the data in each row of this column
-    for(size_t j=0; j<m_ws->rowCount(); j++)
+    for(int j=0; j < static_cast<int>(m_ws->rowCount()); j++)
     {
       std::ostringstream ostr;
       // This is the method on the Column object to convert to a string.
-      c->print(j,ostr);
+      c->print(static_cast<size_t>(j),ostr);
       QString qstr = QString::fromStdString(ostr.str());
       setText(j,i,qstr);
 
@@ -101,7 +110,7 @@ void MantidTable::fillTable()
   if (m_ws->rowCount() < 1000)
   {
     // Note: This is very slow for some reason so it is only done for smallish tables.
-    for(size_t j=0; j<m_ws->rowCount(); j++)
+    for(int j=0; j < static_cast<int>(m_ws->rowCount()); j++)
       d_table->verticalHeader()->setLabel(j,QString::number(j));
   }
 
@@ -113,8 +122,8 @@ void MantidTable::fillTable()
 void MantidTable::fillTableTransposed()
 {
 
-  int ncols = m_ws->rowCount() + 1;
-  int nrows = m_ws->columnCount();
+  int ncols = static_cast<int>(m_ws->rowCount() + 1);
+  int nrows = static_cast<int>(m_ws->columnCount());
 
   setNumCols(ncols);
   setNumRows(nrows);
@@ -123,9 +132,9 @@ void MantidTable::fillTableTransposed()
   std::vector<int> maxWidth(numCols(), 6);
   QFontMetrics fm( this->getTextFont() );
   // Add all columns
-  for(size_t i = 0; i < m_ws->columnCount(); ++i)
+  for(int i = 0; i < static_cast<int>(m_ws->columnCount()); ++i)
   {
-    Mantid::API::Column_sptr c = m_ws->getColumn(i);
+    Mantid::API::Column_sptr c = m_ws->getColumn(static_cast<size_t>(i));
 
     QString colName = QString::fromStdString(c->name());
 
@@ -136,11 +145,11 @@ void MantidTable::fillTableTransposed()
     if (thisWidth > maxWidth[0]) maxWidth[0] = thisWidth;
 
     // Print out the data in each row of this column
-    for(size_t j = 0; j < m_ws->rowCount(); ++j)
+    for(int j = 0; j < static_cast<int>(m_ws->rowCount()); ++j)
     {
       std::ostringstream ostr;
       // This is the method on the Column object to convert to a string.
-      c->print(j,ostr);
+      c->print(static_cast<size_t>(j),ostr);
       QString qstr = QString::fromStdString(ostr.str());
 
       int col = j + 1;

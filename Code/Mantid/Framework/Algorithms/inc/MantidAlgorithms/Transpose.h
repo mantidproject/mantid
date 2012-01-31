@@ -8,9 +8,9 @@
 
 namespace Mantid
 {
-namespace Algorithms
-{
-/**
+  namespace Algorithms
+  {
+    /**
     This algorithm "transposes" the bins of the input workspace into a single spectra. So, given
     an input workspace of N1 Spectra with N2 Bins, the result is a workspace with N2 Spectra, and
     N1 Bins. The output workspace is data points, not histograms.
@@ -37,31 +37,35 @@ namespace Algorithms
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
-class DLLExport Transpose : public API::Algorithm
-{
-public:
-  /// (Empty) Constructor
-  Transpose() : API::Algorithm() {}
-  /// Virtual destructor
-  virtual ~Transpose() {}
-  /// Algorithm's name
-  virtual const std::string name() const { return "Transpose"; }
-  /// Algorithm's version
-  virtual int version() const { return (1); }
-  /// Algorithm's category for identification
-  virtual const std::string category() const { return "Transforms\\Axes"; }
+     */
+    class DLLExport Transpose : public API::Algorithm
+    {
+    public:
+      /// (Empty) Constructor
+      Transpose() : API::Algorithm() {}
+      /// Virtual destructor
+      virtual ~Transpose() {}
+      /// Algorithm's name
+      virtual const std::string name() const { return "Transpose"; }
+      /// Algorithm's version
+      virtual int version() const { return (1); }
+      /// Algorithm's category for identification
+      virtual const std::string category() const { return "Transforms\\Axes"; }
 
-private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
-  /// Initialisation code
-  void init();
-  /// Execution code
-  void exec();
-};
+    private:
+      /// Sets documentation strings for this algorithm
+      virtual void initDocs();
+      /// Initialisation code
+      void init();
+      /// Execution code
+      void exec();
+      /// Create the output workspace
+      API::MatrixWorkspace_sptr createOutputWorkspace(API::MatrixWorkspace_const_sptr workspace);
+      /// Return the vertical axis on the workspace, throwing if it is not valid
+      API::Axis *getVerticalAxis(API::MatrixWorkspace_const_sptr inputWorkspace) const;
+    };
 
-} // namespace Algorithms
+  } // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_TRANSPOSE_H_*/

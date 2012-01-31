@@ -54,20 +54,10 @@ namespace Mantid
       ~Quadrilateral();
       /// Index access.
       virtual const Kernel::V2D& operator[](const size_t index) const;
-      /// Is a point inside this polygon
-      virtual bool contains(const Kernel::V2D & point) const;
-      /// Compute the area of the polygon using triangulation
+      /// Compute the area of the quadrilateral
       virtual double area() const;
       /// Compute the 'determinant' of the points
       virtual double determinant() const;
-      /// Return the lowest X value in the polygon
-      double smallestX() const;
-      /// Return the largest X value in the polygon
-      double largestX() const;
-      /// Return the lowest Y value in the polygon
-      double smallestY() const;
-      /// Return the largest Y value in the polygon
-      double largestY() const;
 
     private:
       /// Default constructor
@@ -82,14 +72,6 @@ namespace Mantid
       Vertex2D m_upperRight;
       /// Upper left
       Vertex2D m_upperLeft;
-      /// Lowest X value
-      double m_lowestX;
-      /// Highest X value
-      double m_highestX;
-      /// Lowest Y value
-      double m_lowestY;
-      /// Highest Y value
-      double m_highestY;
     };
 
 
