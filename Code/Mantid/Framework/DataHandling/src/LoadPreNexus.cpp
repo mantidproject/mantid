@@ -198,7 +198,7 @@ namespace DataHandling
 
 
     // load the logs
-    //this->runLoadNexusLogs(runinfo, WS, this);
+    this->runLoadNexusLogs(runinfo, dataDir, outws);
 
     // publish output workspace
     this->setProperty("OutputWorkspace", outws);
@@ -283,9 +283,35 @@ namespace DataHandling
     }
   }
 
-  void LoadPreNexus::runLoadNexusLogs(const string &runinfo, IEventWorkspace_sptr wksp)
+  void LoadPreNexus::runLoadNexusLogs(const string &runinfo, const string &dataDir, IEventWorkspace_sptr wksp)
   {
-    IAlgorithm_sptr loadLogs = this->createSubAlgorithm("LoadNexusLogs");
+    // determine the name of the file "inst_run"
+    string shortName = runinfo.substr(dataDir.size());
+    shortName = shortName.substr(0, shortName.find("_runinfo.xml"));
+    g_log.debug() << "SHORTNAME = \"" << shortName << "\"\n";
+
+    // put together a list of possible locations
+    vector<string> possibilities;
+    possibilities.push_back(dataDir + shortName + "_event.nxs"); // next to runinfo
+    possibilities.push_back(dataDir + shortName + "_histo.nxs");
+    possibilities.push_back(dataDir + shortName + ".nxs");
+    possibilities.push_back(dataDir + "../NeXus/" + shortName + "_event.nxs"); // in NeXus directory
+    possibilities.push_back(dataDir + "../NeXus/" + shortName + "_histo.nxs");
+    possibilities.push_back(dataDir + "../NeXus/" + shortName + ".nxs");
+
+    // run the algorithm
+    for (size_t i = 0; i < possibilities.size(); i++)
+    {
+      if (Poco::File(possibilities[i]).exists())
+      {
+        g_log.information() << "Loading logs from \"" << possibilities[i] << "\"\n";
+        IAlgorithm_sptr alg = this->createSubAlgorithm("LoadNexusLogs");
+        alg->setProperty("Workspace", wksp);
+        alg->setProperty("Filename", possibilities[i]);
+        alg->setProperty("OverwriteLogs", true); // TODO should be false
+        alg->executeAsSubAlg();
+      }
+    }
 
   }
 
