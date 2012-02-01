@@ -1,6 +1,7 @@
 from reducer import ReductionStep
 from mantidsimple import *
 import string
+import os
 
 class LoadData(ReductionStep):
     """Handles the loading of the data for Indirect instruments. The summing
@@ -842,7 +843,7 @@ class Grouping(ReductionStep):
             xml += "</group>\n"
         xml += "</detector-grouping>\n"
         
-        xfile = mtd.getConfigProperty('defaultsave.directory') + 'fixedGrp.xml'
+        xfile = os.path.join(mtd.getConfigProperty('defaultsave.directory'), 'fixedGrp.xml')
         file = open(xfile, 'w')
         file.write(xml)
         file.close()
