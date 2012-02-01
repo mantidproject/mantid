@@ -43,6 +43,7 @@ MantidQwtIMDWorkspaceData::PlotAxisChoice LinePlotOptions::getPlotAxis() const
   return m_plotAxis;
 }
 
+
 /** Set the choice of X-axis to plot
  *
  * @param choice :: option from PlotAxisChoice enum */

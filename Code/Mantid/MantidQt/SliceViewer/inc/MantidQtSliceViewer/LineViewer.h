@@ -63,10 +63,6 @@ private:
     void updateStartEnd();
     void updateBinWidth();
     void readTextboxes();
-    void calculateCurve(Mantid::API::IMDWorkspace_sptr ws, Mantid::Kernel::VMD start, Mantid::Kernel::VMD end,
-        size_t minNumPoints, QwtPlotCurve * curve);
-    void choosePlotAxis();
-    void setPlotAxisLabels();
 
 public slots:
     void startEndTextEdited();
@@ -154,21 +150,6 @@ private:
 
     /// ACTUAL bin width, whether in fixed or not-fixed bin width mode
     double m_binWidth;
-
-    /// Choice of which X axis to plot.
-    MantidQwtIMDWorkspaceData::PlotAxisChoice m_plotAxis;
-
-    /// Current choice, in the case of auto-determined
-    MantidQwtIMDWorkspaceData::PlotAxisChoice m_currentPlotAxis;
-
-    /// Do nothing coordinate transformation for the preview
-    Mantid::API::CoordTransform * m_transformToOriginal_preview;
-
-    /// Transformation from "line" workspace to the viewed (original) workspace, for the preview
-    Mantid::API::CoordTransform * m_transformToOriginal_full;
-
-    /// Dimension Index into the original workspace to plot as X
-    size_t m_plotOriginalDimensionIndex;
 
 
 };

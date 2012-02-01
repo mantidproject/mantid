@@ -29,9 +29,7 @@ LineViewer::LineViewer(QWidget *parent)
    m_planeWidth(0),
    m_numBins(100),
    m_allDimsFree(false), m_freeDimX(0), m_freeDimY(1),
-   m_fixedBinWidthMode(false), m_fixedBinWidth(0.1), m_binWidth(0.1),
-   m_plotAxis(MantidQwtIMDWorkspaceData::PlotAuto), m_currentPlotAxis(MantidQwtIMDWorkspaceData::PlotDistance),
-   m_transformToOriginal_preview(NULL), m_transformToOriginal_full(NULL)
+   m_fixedBinWidthMode(false), m_fixedBinWidth(0.1), m_binWidth(0.1)
 {
 	ui.setupUi(this);
 
@@ -492,9 +490,6 @@ void LineViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
   m_ws = ws;
   m_thickness = VMD(ws->getNumDims());
   createDimensionWidgets();
-  // Make a do-nothing coordinate transformation
-  delete m_transformToOriginal_preview;
-  m_transformToOriginal_preview = new NullCoordTransform(m_ws->getNumDims());
 }
 
 
@@ -809,155 +804,16 @@ MantidQwtIMDWorkspaceData::PlotAxisChoice LineViewer::getPlotAxis() const
 // ================================== Rendering =================================================
 // ==============================================================================================
 
-/** Automatically choose which coordinate to use as the X axis,
- * if we selected it to be automatic
- */
-void LineViewer::choosePlotAxis()
-{
-  if (m_plotAxis == MantidQwtIMDWorkspaceData::PlotAuto)
-  {
-    QPointF start = this->getStartXY();
-    QPointF end = this->getEndXY();
-    QPointF diff = end - start;
-    double d = fabs(diff.y()) - fabs(diff.x());
-    if (d < 1e-3)
-      // More line in X than in Y, or nearly the same
-      m_currentPlotAxis = MantidQwtIMDWorkspaceData::PlotX;
-    else
-      // More Y than X
-      m_currentPlotAxis = MantidQwtIMDWorkspaceData::PlotY;
-  }
-  else
-  {
-    m_currentPlotAxis = m_plotAxis;
-  }
-  // Find the coordinate transformation for plotting
-  if (m_sliceWS)
-  {
-    // If there are two transformations, then the second (index 1) goes to the INTERMEDIATE workspace, which is what we want.
-    if (m_sliceWS->numOriginalWorkspaces() > 0)
-      m_transformToOriginal_full = m_sliceWS->getTransformToOriginal(m_sliceWS->numOriginalWorkspaces() - 1);
-  }
-  // Point to the right index in the ORIGINAL workspace.
-  m_plotOriginalDimensionIndex = 0;
-  if (m_currentPlotAxis == MantidQwtIMDWorkspaceData::PlotX)
-    m_plotOriginalDimensionIndex = m_freeDimX;
-  else if (m_currentPlotAxis == MantidQwtIMDWorkspaceData::PlotY)
-    m_plotOriginalDimensionIndex = m_freeDimY;
-
-}
-
-///** Calculate a curve between two points given a linear start/end point
-// *
-// * @param ws :: MDWorkspace to plot
-// * @param start :: start point in ND
-// * @param end :: end point in ND
-// * @param minNumPoints :: minimum number of points to plot
-// * @param curve :: curve to set
-// */
-//void LineViewer::calculateCurve(IMDWorkspace_sptr ws, VMD start, VMD end,
-//    size_t minNumPoints, QwtPlotCurve * curve)
-//{
-//  if (!ws) return;
-//  // Find the axis to plot.
-//  this->choosePlotAxis();
-//
-//  // Retrieve the transform to original coords if available.
-//  CoordTransform * toOriginal = NULL;
-//  if (ws->hasOriginalWorkspace())
-//    toOriginal = ws->getTransformToOriginal();
-//
-//  // Use the width of the plot (in pixels) to choose the fineness)
-//  // That way, there is ~1 point per pixel = as fine as it needs to be
-//  size_t numPoints = size_t(m_plot->width());
-//  if (numPoints < minNumPoints) numPoints = minNumPoints;
-//
-//  VMD step = (end-start) / double(numPoints);
-//  double stepLength = step.norm();
-//
-//  // These will be the curve as plotted
-//  double * xArr = new double[numPoints];
-//  double * yArr = new double[numPoints];
-//
-//  for (size_t i=0; i<numPoints; i++)
-//  {
-//    // Coordinate along the line
-//    VMD coord = start + step * double(i);
-//    // Signal in the WS at that coordinate
-//    signal_t signal = ws->getSignalAtCoord(coord);
-//
-//    // Choose which X to plot
-//    VMD original = coord;
-//    if (toOriginal)
-//      original = toOriginal->applyVMD(coord);
-//
-//    double x = 0;
-//    switch (m_currentPlotAxis)
-//    {
-//    case PlotX:
-//      x = original[m_freeDimX];
-//      break;
-//    case PlotY:
-//      x = original[m_freeDimY];
-//      break;
-//    default:
-//      // Distance, or not set.
-//      x = stepLength * double(i);
-//      break;
-//    }
-//
-//    // Make into array
-//    xArr[i] = x;
-//    yArr[i] = signal;
-//  }
-//
-//  // Make the curve
-//  curve->setData(xArr,yArr, int(numPoints));
-//
-//  delete [] xArr;
-//  delete [] yArr;
-//}
-
-
-//-----------------------------------------------------------------------------
-/** Sets the appropriate labels on the plot axes */
-void LineViewer::setPlotAxisLabels()
-{
-  IMDDimension_const_sptr dimX = m_ws->getDimension(m_freeDimX);
-  IMDDimension_const_sptr dimY = m_ws->getDimension(m_freeDimY);
-
-  std::string xLabel = "";
-  switch (m_currentPlotAxis)
-  {
-  case MantidQwtIMDWorkspaceData::PlotX:
-    xLabel = dimX->getName() + " (" + dimX->getUnits() + ")";
-    break;
-  case MantidQwtIMDWorkspaceData::PlotY:
-    xLabel = dimY->getName() + " (" + dimY->getUnits() + ")";
-    break;
-  default:
-    // Distance, or not set.
-    xLabel = "Distance from start";
-    if (dimX->getUnits() == dimY->getUnits())
-      xLabel += " (" + dimX->getUnits() + ")";
-    else
-      xLabel += " (undefined units)";
-    break;
-  }
-  m_plot->setAxisTitle( QwtPlot::xBottom, QString::fromStdString(xLabel));
-}
-
 
 //-----------------------------------------------------------------------------
 /** Calculate and show the preview (non-integrated) line,
  * using the current parameters. */
 void LineViewer::showPreview()
 {
-  this->choosePlotAxis();
   MantidQwtIMDWorkspaceData curveData(m_ws, false,
       m_start, m_end, Mantid::API::VolumeNormalization);
-  if (m_currentPlotAxis != MantidQwtIMDWorkspaceData::PlotDistance)
-    curveData.setTransform(m_transformToOriginal_preview, m_plotOriginalDimensionIndex);
+  curveData.setOriginalWorkspaceIndex(-1, m_freeDimX, m_freeDimY);
+  curveData.setPlotAxisChoice(m_lineOptions->getPlotAxis());
   m_previewCurve->setData(curveData);
 
   if (m_fullCurve->isVisible())
@@ -969,7 +825,9 @@ void LineViewer::showPreview()
   m_previewCurve->setVisible(true);
   m_plot->replot();
   m_plot->setTitle("Preview Plot");
-  this->setPlotAxisLabels();
+
+  m_plot->setAxisTitle( QwtPlot::xBottom, QString::fromStdString( curveData.getXAxisLabel() ));;
+  m_plot->setAxisTitle( QwtPlot::yLeft, QString::fromStdString( curveData.getYAxisLabel() ));;
 }
 
 
@@ -979,11 +837,10 @@ void LineViewer::showPreview()
 void LineViewer::showFull()
 {
   if (!m_sliceWS) return;
-  this->choosePlotAxis();
   MantidQwtIMDWorkspaceData curveData(m_sliceWS, false,
       VMD(), VMD(), Mantid::API::VolumeNormalization);
-  if (m_currentPlotAxis != MantidQwtIMDWorkspaceData::PlotDistance)
-    curveData.setTransform(m_transformToOriginal_full, m_plotOriginalDimensionIndex);
+  curveData.setOriginalWorkspaceIndex(int(m_sliceWS->numOriginalWorkspaces())-1, m_freeDimX, m_freeDimY);
+  curveData.setPlotAxisChoice(m_lineOptions->getPlotAxis());
   m_fullCurve->setData(curveData);
 
   if (m_previewCurve->isVisible())
@@ -995,7 +852,8 @@ void LineViewer::showFull()
   m_fullCurve->setVisible(true);
   m_plot->replot();
   m_plot->setTitle("Integrated Line Plot");
-  this->setPlotAxisLabels();
+  m_plot->setAxisTitle( QwtPlot::xBottom, QString::fromStdString( curveData.getXAxisLabel() ));;
+  m_plot->setAxisTitle( QwtPlot::yLeft, QString::fromStdString( curveData.getYAxisLabel() ));;
 }
 
 

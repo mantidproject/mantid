@@ -1,9 +1,15 @@
 #include "MantidQtAPI/MantidQwtIMDWorkspaceData.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidAPI/NullCoordTransform.h"
+#include "MantidAPI/CoordTransform.h"
+#include "MantidAPI/IMDWorkspace.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
+using Mantid::API::NullCoordTransform;
+using Mantid::API::CoordTransform;
+using Mantid::API::IMDWorkspace;
 
 /** Constructor
  *
@@ -27,7 +33,8 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(Mantid::API::IMDWorkspace_c
   m_end(end),
   m_normalization(normalize),
   m_isDistribution(isDistribution),
-  m_transform(NULL)
+  m_transform(NULL),
+  m_plotAxis(PlotDistance), m_currentPlotAxis(PlotDistance)
 {
   if (start.getNumDims() == 1 && end.getNumDims() == 1)
   {
@@ -73,10 +80,14 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(const MantidQwtIMDWorkspace
   m_end(data.m_end),
   m_dir(data.m_dir),
   m_normalization(data.m_normalization),
-  m_isDistribution(data.m_isDistribution)
+  m_isDistribution(data.m_isDistribution),
+  m_originalWorkspace(data.m_originalWorkspace),
+  m_originalXDim(data.m_originalXDim), m_originalYDim(data.m_originalYDim),
+  m_transform(data.m_transform->clone() ),
+  m_dimensionIndex(data.m_dimensionIndex),
+  m_plotAxis(data.m_plotAxis), m_currentPlotAxis(data.m_currentPlotAxis)
 {
   this->cacheLinePlot();
-  this->setTransform(data.m_transform, data.m_dimensionIndex);
 }
 
 /// Destructor
@@ -101,28 +112,6 @@ MantidQwtIMDWorkspaceData* MantidQwtIMDWorkspaceData::copy(Mantid::API::IMDWorks
       m_normalization, m_isDistribution);
 }
 
-
-//-----------------------------------------------------------------------------
-/** Set the coordinate transformation to use to calculate the plot X values.
- * The coordinates in the m_workspace will be converted to another,
- * and then the dimensionIndex^th coordinate will be displayed as the X
- *
- * @param transform :: CoordTransform, NULL for none
- * @param dimensionIndex :: index into the output coordinate space.
- * @throw std::runtime_error if the dimension index does not match the coordinate
- */
-void MantidQwtIMDWorkspaceData::setTransform(Mantid::API::CoordTransform * transform, size_t dimensionIndex)
-{
-  m_dimensionIndex = dimensionIndex;
-  if (transform)
-  {
-    m_transform = transform->clone();
-    if (m_dimensionIndex >= m_transform->getOutD())
-      throw std::runtime_error("DimensionIndex is larger than the number of output dimensions of the transformation");
-  }
-  else
-    m_transform = NULL;
-}
 
 
 
@@ -215,3 +204,123 @@ bool MantidQwtIMDWorkspaceData::setAsDistribution(bool on)
   m_isDistribution = on;
   return m_isDistribution;
 }
+
+//-----------------------------------------------------------------------------
+void MantidQwtIMDWorkspaceData::setPlotAxisChoice(PlotAxisChoice choice)
+{
+  m_plotAxis = choice;
+  this->choosePlotAxis();
+}
+
+//-----------------------------------------------------------------------------
+/** Which original workspace to use relative to the workspace being plotted.
+ *
+ * @param index :: -1 for PREVIEW mode = plot this workspace.
+ * @param originalXDim :: the index of the X dimension in the slice viewer.
+ * @param originalYDim :: the index of the Y dimension in the slice viewer.
+ */
+void MantidQwtIMDWorkspaceData::setOriginalWorkspaceIndex(int index, size_t originalXDim, size_t originalYDim)
+{
+  m_originalXDim = originalXDim;
+  m_originalYDim = originalYDim;
+
+  if (index < 0)
+  {
+    // Preview mode. No transformation.
+    m_originalWorkspace = m_workspace;
+    m_transform = new NullCoordTransform(m_workspace->getNumDims());
+  }
+  else
+  {
+    m_originalWorkspace = boost::dynamic_pointer_cast<IMDWorkspace>(m_workspace->getOriginalWorkspace(size_t(index)));
+    CoordTransform * temp = m_workspace->getTransformToOriginal(size_t(index));
+    if (temp)
+      m_transform = temp->clone();
+  }
+  this->choosePlotAxis();
+}
+
+
+
+//-----------------------------------------------------------------------------
+/** Automatically choose which coordinate to use as the X axis,
+ * if we selected it to be automatic
+ */
+void MantidQwtIMDWorkspaceData::choosePlotAxis()
+{
+  if (m_plotAxis == MantidQwtIMDWorkspaceData::PlotAuto)
+  {
+    if (m_transform)
+    {
+      // Find the X and Y of the start and end points, as would be seen in the SliceViewer
+      VMD originalStart = m_transform->applyVMD(m_start);
+      VMD originalEnd = m_transform->applyVMD(m_end);
+      VMD diff = originalEnd - originalStart;
+      double d = fabs(diff[m_originalYDim]) - fabs(diff[m_originalXDim]);
+      if (d < 1e-3)
+        // More line in X than in Y, or nearly the same
+        m_currentPlotAxis = MantidQwtIMDWorkspaceData::PlotX;
+      else
+        // More Y than X
+        m_currentPlotAxis = MantidQwtIMDWorkspaceData::PlotY;
+    }
+    else
+      m_currentPlotAxis = PlotDistance;
+  }
+  else
+  {
+    m_currentPlotAxis = m_plotAxis;
+  }
+
+  // Point to the right index in the ORIGINAL workspace.
+  m_dimensionIndex = 0;
+  if (m_currentPlotAxis == MantidQwtIMDWorkspaceData::PlotX)
+    m_dimensionIndex = m_originalXDim;
+  else if (m_currentPlotAxis == MantidQwtIMDWorkspaceData::PlotY)
+    m_dimensionIndex = m_originalYDim;
+}
+
+//-----------------------------------------------------------------------------
+/// @return the label for the X axis
+std::string MantidQwtIMDWorkspaceData::getXAxisLabel() const
+{
+  IMDDimension_const_sptr dimX = m_originalWorkspace->getDimension(m_originalXDim);
+  IMDDimension_const_sptr dimY = m_originalWorkspace->getDimension(m_originalYDim);
+  std::string xLabel = "";
+  switch (m_currentPlotAxis)
+  {
+  case MantidQwtIMDWorkspaceData::PlotX:
+    xLabel = dimX->getName() + " (" + dimX->getUnits() + ")";
+    break;
+  case MantidQwtIMDWorkspaceData::PlotY:
+    xLabel = dimY->getName() + " (" + dimY->getUnits() + ")";
+    break;
+  default:
+    // Distance, or not set.
+    xLabel = "Distance from start";
+    if (dimX->getUnits() == dimY->getUnits())
+      xLabel += " (" + dimX->getUnits() + ")";
+    else
+      xLabel += " (undefined units)";
+    break;
+  }
+  return xLabel;
+}
+
+//-----------------------------------------------------------------------------
+/// @return the label for the Y axis
+std::string MantidQwtIMDWorkspaceData::getYAxisLabel() const
+{
+  switch (m_normalization)
+  {
+  case Mantid::API::NoNormalization:
+    return "Signal";
+  case Mantid::API::VolumeNormalization:
+    return "Signal normalized by volume";
+  case Mantid::API::NumEventsNormalization:
+    return "Signal normalized by number of events";
+  }
+  return "Unknown";
+}
+
+

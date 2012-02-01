@@ -51,7 +51,12 @@ public:
 
   bool sameWorkspace(Mantid::API::IMDWorkspace_sptr workspace)const;
 
-  void setTransform(Mantid::API::CoordTransform * transform, size_t dimensionIndex);
+  void setOriginalWorkspaceIndex(int index, size_t originalXDim, size_t originalYDim);
+  void setPlotAxisChoice(PlotAxisChoice choice);
+
+  std::string getXAxisLabel() const;
+  std::string getYAxisLabel() const;
+
 
   /// Inform the data that it is to be plotted on a log y scale
   void setLogScale(bool on);
@@ -64,11 +69,13 @@ public:
 private:
 
   void cacheLinePlot();
+  void choosePlotAxis();
 
   friend class MantidMatrixCurve;
 
-  /// Pointer to the Mantid workspace
+  /// Pointer to the Mantid workspace being displayed
   Mantid::API::IMDWorkspace_const_sptr m_workspace;
+
   /// Indicates that the data is plotted on a log y scale
   bool m_logScale;
   /// lowest positive y value
@@ -98,10 +105,26 @@ private:
   /// Is plotting as distribution
   bool m_isDistribution;
 
+  /// Original workspace (for purposes of showing alternative coordinates)
+  Mantid::API::IMDWorkspace_const_sptr m_originalWorkspace;
+
+  /// Index of the X dimension of the line plot in the original workspace
+  size_t m_originalXDim;
+
+  /// Index of the Y dimension of the line plot in the original workspace
+  size_t m_originalYDim;
+
   /// Optional coordinate transformation to go from distance on line to another coordinate
   Mantid::API::CoordTransform * m_transform;
 
   /// If m_transform is specified, X (on the line) = this dimension index in the output coordinates
   size_t m_dimensionIndex;
+
+  /// Choice of which X axis to plot.
+  PlotAxisChoice m_plotAxis;
+
+  /// Current choice, in the case of auto-determined
+  PlotAxisChoice m_currentPlotAxis;
+
 };
 #endif
