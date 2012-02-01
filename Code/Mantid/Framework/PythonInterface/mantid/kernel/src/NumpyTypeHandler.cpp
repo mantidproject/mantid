@@ -33,7 +33,12 @@ namespace Mantid
         Kernel::Property *prop = alg->getPointerToProperty(name);
         const std::type_info & propTypeInfo = *(prop->type_info());
         PyArrayObject *nparray=(PyArrayObject*)value.ptr();
-        if( typeid(std::vector<double>) == propTypeInfo )
+        // If we are going to a std::vector<string> just try and extract that out
+        if( typeid(std::vector<std::string>) == propTypeInfo )
+        {
+          this->setStringArrayProperty(alg, name, nparray);
+        }
+        else if( typeid(std::vector<double>) == propTypeInfo )
         {
           this->setDoubleArrayProperty(alg, name, nparray);
         }
@@ -41,7 +46,6 @@ namespace Mantid
         {
           this->setIntNumpyProperty(alg, name, propTypeInfo, nparray);
         }
-
         else
         {
           throw std::invalid_argument("NumpyTypeHandler::set - Unable to handle non-double std::vector property types.");
@@ -60,7 +64,7 @@ namespace Mantid
       }
 
       //-----------------------------------------------------------------------
-      // Private memebers
+      // Private members
       //-----------------------------------------------------------------------
       /**
        *  Handle double-type properties, i.e PropertyWithValue<std::vector<double> > types
@@ -161,6 +165,21 @@ namespace Mantid
             alg->setProperty(name, propValues);
           }
         }
+
+        /**
+         * @param alg :: A pointer to the property manager
+         * @param name :: The name of the property
+         * @param nparray :: A numpy array
+         */
+        void NumpyTypeHandler::setStringArrayProperty(Kernel::IPropertyManager* alg, const std::string &name, PyArrayObject * nparray)
+        {
+          /// @todo: Needs to be merged with delegate code so that we can avoid turning it into a list
+          PyObject *lst = PyArray_ToList(nparray);
+          std::vector<std::string> propValues = VectorDelegate::toStdVector<std::string>(lst);
+          Py_DECREF(lst); // List is temporary, make sure we drop the reference
+          alg->setProperty(name, propValues);
+        }
+
 
     }
   }

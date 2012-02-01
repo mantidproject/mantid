@@ -593,6 +593,7 @@ using namespace boost::python;
       .def("label", & API::Axis::label)
       .def("getUnit", (const Mantid::Kernel::Unit_sptr & (Mantid::API::Axis::*)() const) &API::Axis::unit, return_value_policy<copy_const_reference>() )
       .def("setUnit", & API::Axis::setUnit)
+      .def("getValue", & API::NumericAxis::getValue)
       ;
 
     // Numeric Axis subclass

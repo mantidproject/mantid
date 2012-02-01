@@ -44,7 +44,9 @@ void ConjoinWorkspaces::initDocs()
 
 //----------------------------------------------------------------------------------------------
 /// Default constructor
-ConjoinWorkspaces::ConjoinWorkspaces() : Algorithm(), m_progress(NULL) {}
+ConjoinWorkspaces::ConjoinWorkspaces() : Algorithm(), m_progress(NULL), m_overlapChecked(false)
+{
+}
 
 //----------------------------------------------------------------------------------------------
 /// Destructor
@@ -209,7 +211,12 @@ void ConjoinWorkspaces::exec()
 void ConjoinWorkspaces::execEvent()
 {
   //We do not need to check that binning is compatible, just that there is no overlap
-  this->checkForOverlap(event_ws1, event_ws2, false);
+  // make sure we should bother checking
+  if (this->getProperty("CheckOverlapping"))
+  {
+    this->checkForOverlap(event_ws1, event_ws2, false);
+    m_overlapChecked = true;
+  }
 
   // Create the output workspace
   const size_t totalHists = event_ws1->getNumberHistograms() + event_ws2->getNumberHistograms();
@@ -294,7 +301,7 @@ void ConjoinWorkspaces::execEvent()
  *  @param ws2 :: The second input workspace
  *  @throw std::invalid_argument If the workspaces are not compatible
  */
-void ConjoinWorkspaces::validateInputs(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2) const
+void ConjoinWorkspaces::validateInputs(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2)
 {
   // This is the full check for common binning
   if ( !WorkspaceHelpers::commonBoundaries(ws1) || !WorkspaceHelpers::commonBoundaries(ws2) )
@@ -336,7 +343,11 @@ void ConjoinWorkspaces::validateInputs(API::MatrixWorkspace_const_sptr ws1, API:
     throw std::invalid_argument(message);
   }
 
-  this->checkForOverlap(ws1,ws2, true);
+  if (this->getProperty("CheckOverlapping") )
+  {
+    this->checkForOverlap(ws1,ws2, true);
+    m_overlapChecked = true;
+  }
 }
 
 //----------------------------------------------------------------------------------------------
@@ -348,9 +359,6 @@ void ConjoinWorkspaces::validateInputs(API::MatrixWorkspace_const_sptr ws1, API:
  */
 void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2, bool checkSpectra) const
 {
-  // make sure we should bother checking
-  if (!this->getProperty("CheckOverlapping"))
-    return;
   // Loop through the first workspace adding all the spectrum numbers & UDETS to a set
   std::set<specid_t> spectra;
   std::set<detid_t> detectors;
@@ -420,7 +428,7 @@ void getMinMax(MatrixWorkspace_const_sptr ws, specid_t& min, specid_t& max)
 }
 
 /***
- * This will add the maximum spectrum number from ws1 to the data coming from ws2.
+ * This will ensure the spectrum numbers do not overlap by starting the second on at the first + 1
  *
  * @param ws1 The first workspace supplied to the algorithm.
  * @param ws2 The second workspace supplied to the algorithm.
@@ -429,11 +437,18 @@ void getMinMax(MatrixWorkspace_const_sptr ws, specid_t& min, specid_t& max)
 void ConjoinWorkspaces::fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2,
                                            API::MatrixWorkspace_sptr output)
 {
-  UNUSED_ARG(ws2);
-  // make sure we should bother. If you don't check for overlap, you don't need to
-  if (this->getProperty("CheckOverlapping"))
-    return;
+  // If check throws then we need to fix the output
+  bool needsFix(false);
+  try
+  {
+    if( !m_overlapChecked ) checkForOverlap(ws1, ws2, true);
+  }
+  catch(std::invalid_argument&)
+  {
+    needsFix = true;
+  }
 
+  if( !needsFix ) return;
   // is everything possibly ok?
   specid_t min;
   specid_t max;

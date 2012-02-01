@@ -1552,8 +1552,14 @@ void Indirect::sOfQwClicked()
     }
     pyInput +=
       "efixed = " + m_uiForm.leEfixed->text() + "\n"
-      "rebin = '" + rebinString + "'\n"      
-      "SofQW2(sqwInput, sqwOutput, rebin, 'Indirect', EFixed=efixed)\n"
+      "rebin = '" + rebinString + "'\n";
+
+    if(m_uiForm.sqw_cbRebinType->currentText() == "Centre (SofQW)")
+      pyInput += "SofQW(sqwInput, sqwOutput, rebin, 'Indirect', EFixed=efixed)\n";
+    else if(m_uiForm.sqw_cbRebinType->currentText() == "Parallelepiped (SofQW2)")
+      pyInput += "SofQW2(sqwInput, sqwOutput, rebin, 'Indirect', EFixed=efixed)\n";
+    
+    pyInput +=
       "if cleanup:\n"
       "    mantid.deleteWorkspace(sqwInput)\n";
 

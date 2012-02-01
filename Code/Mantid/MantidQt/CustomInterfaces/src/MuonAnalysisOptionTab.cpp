@@ -74,11 +74,11 @@ void MuonAnalysisOptionTab::initLayout()
   connect(m_uiForm.timeAxisFinishAtInput, SIGNAL(returnPressed ()), this, SIGNAL(settingsTabUpdatePlot()));
   
   //validate
-  connect(m_uiForm.yAxisMinimumInput, SIGNAL(editingfinished ()), this, SLOT(runyAxisMinimumInput()));
-  connect(m_uiForm.yAxisMaximumInput, SIGNAL(editingfinished ()), this, SLOT(runyAxisMaximumInput()));
+  connect(m_uiForm.yAxisMinimumInput, SIGNAL(editingFinished ()), this, SLOT(runyAxisMinimumInput()));
+  connect(m_uiForm.yAxisMaximumInput, SIGNAL(editingFinished ()), this, SLOT(runyAxisMaximumInput()));
   
-  connect(m_uiForm.yAxisMinimumInput, SIGNAL(returnPressed ()), this, SIGNAL(settingsTabUpdatePlot()));
-  connect(m_uiForm.yAxisMaximumInput, SIGNAL(returnPressed ()), this, SIGNAL(settingsTabUpdatePlot()));
+  connect(m_uiForm.yAxisMinimumInput, SIGNAL(returnPressed ()), this, SLOT(validateYMin()));
+  connect(m_uiForm.yAxisMaximumInput, SIGNAL(returnPressed ()), this, SLOT(validateYMax()));
   connect(m_uiForm.optionStepSizeText, SIGNAL(returnPressed ()), this, SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.rebinComboBox, SIGNAL(currentIndexChanged(int)), this, SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.showErrorBars, SIGNAL(clicked()), this, SIGNAL(settingsTabUpdatePlot()));

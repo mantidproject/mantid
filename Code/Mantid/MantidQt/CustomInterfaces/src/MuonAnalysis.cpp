@@ -98,8 +98,6 @@ void MuonAnalysis::initLayout()
   connect(m_uiForm.previousRun, SIGNAL(clicked()), this, SLOT(checkAppendingPreviousRun()));
   connect(m_uiForm.nextRun, SIGNAL(clicked()), this, SLOT(checkAppendingNextRun()));
 
-  m_uiForm.appendRun->setDisabled(true);
-
   m_optionTab = new MuonAnalysisOptionTab(m_uiForm, m_settingsGroup);
   m_fitDataTab = new MuonAnalysisFitDataTab(m_uiForm);
   m_resultTableTab = new MuonAnalysisResultTableTab(m_uiForm);
@@ -328,6 +326,7 @@ void MuonAnalysis::runSaveGroupButton()
  */
 void MuonAnalysis::runLoadGroupButton()
 {
+  m_updating = true;
   // Get grouping file
   QSettings prevValues;
   prevValues.beginGroup(m_settingsGroup + "LoadGroupFile");
@@ -384,6 +383,7 @@ void MuonAnalysis::runLoadGroupButton()
     }
   }
   updateFront();
+  m_updating = false;
 }
 
 /**
@@ -1063,7 +1063,7 @@ void MuonAnalysis::inputFileChanged(const QString& filename)
   }
   if ( !foundInst )
   {
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Muon file not recognised.");
+    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Muon file " + filename + " not recognised.");
     return;
   }
 
@@ -2668,7 +2668,7 @@ void MuonAnalysis::checkAppendingPreviousRun()
   
   m_uiForm.previousRun->setEnabled(false);
   
-  if (m_uiForm.appendRun->isChecked())
+  if (m_uiForm.mwRunFiles->getText().contains("-"))
   {
     setAppendingRun(-1);
   }
@@ -2692,7 +2692,7 @@ void MuonAnalysis::checkAppendingNextRun()
 
   m_uiForm.nextRun->setEnabled(false);
 
-  if (m_uiForm.appendRun->isChecked())
+  if (m_uiForm.mwRunFiles->getText().contains("-"))
   {
     setAppendingRun(1);
   }

@@ -1,4 +1,4 @@
-# Spencer's F2PY Absorption Corrections Wrapper
+# IDA F2PY Absorption Corrections Wrapper
 ## Handle selection of .pyd files for absorption corrections
 import platform, sys
 operatingenvironment = platform.system()+platform.architecture()[0]

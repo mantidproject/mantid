@@ -123,7 +123,11 @@ def gather_returns(func_name, lhs, algm_obj, ignore_regex=[]):
         if not algm_obj.isChild() and _is_workspace_property(prop):
             retvals.append(_ads[prop.valueAsStr])
         else:
-            retvals.append(prop.value)
+            if not hasattr(prop, 'value'):
+                print ('Unknown property type encountered. "%s" on "%s" is not understood by '
+                       'Python. Return value skipped. Please contact development team' % (name, algm_obj.name()))
+            else:
+                retvals.append(prop.value)
     nvals = len(retvals)
     nlhs = lhs[0]
     if nlhs > 1 and nvals != nlhs:
@@ -386,12 +390,19 @@ def Load(*args, **kwargs):
     elif len(args) == 0:
         filename = get_argument_value('Filename', kwargs)
     else:
-        raise RuntimeError('Load() takes only the filename as a positional argument. %d arguments found.' % len(args))
+        raise RuntimeError('Load() takes only the filename as a positional argument. ' + \
+                           'Other arguments must be specified by keyword.')
     
     # Create and execute
     algm = _framework.createAlgorithm('Load')
     algm.setProperty('Filename', filename) # Must be set first
     lhs = _funcreturns.lhs_info()
+    # If the output has not been assigned to anything, i.e. lhs[0] = 0 and kwargs does not have OutputWorkspace
+    # then raise a more helpful error than what we would get from an algorithm
+    if lhs[0] == 0 and 'OutputWorkspace' not in kwargs:
+        raise RuntimeError("Unable to set output workspace name. Please either assign the output of "
+                           "Load to a variable or use the OutputWorkspace keyword.") 
+    
     extra_args = get_additional_args(lhs, algm)
     kwargs.update(extra_args)
     # Check for any properties that aren't known and warn they will not be used
@@ -401,6 +412,7 @@ def Load(*args, **kwargs):
             del kwargs[key]
     _set_properties(algm, **kwargs)
     algm.execute()
+        
     # If a WorkspaceGroup was loaded then there will be OutputWorkspace_ properties about, don't include them
     return gather_returns('Load', lhs, algm, ignore_regex=['LoaderName','OutputWorkspace_.*'])
 

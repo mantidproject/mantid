@@ -84,7 +84,11 @@ namespace MantidQt
       fillAndSetComboBox("InputWorkspace", m_form.cbInputWorkspace);
       if (!presetInputWorkspace.isEmpty())
       {
-        m_form.cbInputWorkspace->setCurrentText(presetInputWorkspace);
+        int i = m_form.cbInputWorkspace->findText(presetInputWorkspace);
+        if ( i >= 0 )
+        {
+          m_form.cbInputWorkspace->setCurrentIndex(i);
+        }
       }
       connect(m_form.cbInputWorkspace,SIGNAL(currentIndexChanged(const QString&)),this,SLOT(fillColumnNames(const QString&)));
       fillColumnNames(m_form.cbInputWorkspace->currentText());

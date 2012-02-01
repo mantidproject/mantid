@@ -201,7 +201,8 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
         if source_to_detector is not None and theta is not None:
             _const = float(4) * math.pi * m * source_to_detector / h
             _q_axis = 1e-10 * _const * math.sin(theta) / (_tof_axis*1e-6)
-        
+        else:
+            _q_axis = _tof_axis
 
         _y_axis = zeros((maxY, len(_q_axis) - 1))
         _y_error_axis = zeros((maxY, len(_q_axis) - 1))
