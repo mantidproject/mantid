@@ -70,7 +70,7 @@ private:
   void exec();
   void execEvent();
 
-  void validateInputs(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2) const;
+  void validateInputs(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2);
   void checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2, bool checkSpectra) const;
   void fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2, API::MatrixWorkspace_sptr output);
   bool processGroups(API::WorkspaceGroup_sptr wsPt, const std::vector<Kernel::Property*>& prop);
@@ -81,7 +81,8 @@ private:
   DataObjects::EventWorkspace_const_sptr event_ws1;
   /// Second event workspace input.
   DataObjects::EventWorkspace_const_sptr event_ws2;
-
+  /// True if spectra overlap
+  bool m_overlapChecked;
 };
 
 } // namespace Algorithm
