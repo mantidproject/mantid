@@ -438,10 +438,14 @@ namespace Geometry
   /// Private function, called at initialization or whenever lattice parameters are changed
   void UnitCell::recalculate()
   {
-      calculateG();
-      calculateGstar();
-      calculateReciprocalLattice();
-      calculateB();
+    if ((da[3]>da[4]+da[5])||(da[4]>da[3]+da[5])||(da[5]>da[4]+da[3]))
+    {
+      throw std::invalid_argument("Invalid angles");
+    }
+    calculateG();
+    calculateGstar();
+    calculateReciprocalLattice();
+    calculateB();
   }
       
   /// Private function to calculate #G matrix
