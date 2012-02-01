@@ -320,6 +320,8 @@ namespace MDEvents
       return out;
     }
 
+    size_t getLinearIndexAtCoord(const coord_t * coords) const;
+
 
 
     /** Array subscript operator

@@ -132,7 +132,7 @@ void MantidQwtIMDWorkspaceData::cacheLinePlot()
 {
   m_workspace->getLinePlot(m_start, m_end, m_normalization, m_lineX, m_Y, m_E);
   std::cout << "MantidQwtIMDWorkspaceData found " << m_Y.size() << " points\n";
-  std::cout << "Plotting from " << m_start << " to " << m_end << std::endl;
+//  std::cout << "Plotting from " << m_start << " to " << m_end << std::endl;
 }
 
 
