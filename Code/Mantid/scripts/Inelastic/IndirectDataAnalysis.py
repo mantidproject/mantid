@@ -327,17 +327,17 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=True, Plot=False):
             tmp = run_logs[log_name].value
             temp = tmp[len(tmp)-1]
             mtd.sendLogMessage('Run : '+root[0:8] +' ; Temperature = '+str(temp))
-        outWS = root[:-3] + 'msd'
-        fit_alg = Linear(lnWS, outWS, WorkspaceIndex=0, StartX=startX, EndX=endX)
+        outWS = root[:-3] + 'msd_' + str(np)
+        function = 'name=LinearBackground, A0=0, A1=0'
+        fit_alg = Fit(lnWS, 0, startX, endX, function, Output=outWS)
         output.append(outWS)
-        A0 = fit_alg.getPropertyValue('FitIntercept')
-        A1 = fit_alg.getPropertyValue('FitSlope')
-        Cov00 = fit_alg.getPropertyValue('Cov00')
-        Cov11 = fit_alg.getPropertyValue('Cov11')
-        title = 'Intercept: '+A0+' ; Slope: '+A1
-        er0 = math.sqrt(float(Cov00))
-        er1 = math.sqrt(float(Cov11))
-        fit = 'Intercept: '+A0+' +- '+str(er0)+' ; Slope: '+A1+' +- '+str(er1)
+        params = mtd[outWS+'_Parameters'] #  get a TableWorkspace with the parameters and errors
+        A0 = params.getDouble('Value',0) # get the value of the first parameter
+        A0_Err = params.getDouble('Error',0) # get the error of the first parameter
+        A1 = params.getDouble('Value',1) # get the value of the second parameter
+        A1_Err = params.getDouble('Error',1) # get the error of the second parameter
+        title = 'Intercept: '+str(A0)+' ; Slope: '+str(A1)
+        fit = 'Intercept: '+str(A0)+' +- '+str(A0_Err)+' ; Slope: '+str(A1)+' +- '+str(A1_Err)
         if verbOp:
             mtd.sendLogMessage(fit)
         if (log_path == ''):
@@ -347,10 +347,11 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=True, Plot=False):
             DataX.append(temp)
             xlabel = 'Temperature (K)'
         DataY.append(-float(A1)*3.0)
-        DataE.append(er1*3.0)
+        DataE.append(A1_Err*3.0)
         np += 1
         if Plot:
-            graph=plotSpectrum([lnWS,outWS],0, 1)
+#            graph=plotSpectrum([lnWS,outWS+'_Workspace'],0, 1)
+            graph=plotSpectrum(outWS+'_Workspace',(0,1),True)
             graph.activeLayer().setTitle(title)
             graph.activeLayer().setAxisTitle(Layer.Bottom,'Q^2')
             graph.activeLayer().setAxisTitle(Layer.Left,'ln(intensity)')
@@ -358,7 +359,7 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=True, Plot=False):
     DataX.append(2*DataX[np-1]-DataX[np-2])
     CreateWorkspace(fitWS,DataX,DataY,DataE,1)
     if Plot:
-        graph1=plotSpectrum(fitWS,0,1)
+        graph1=plotSpectrum(fitWS,0,True)
         graph1.activeLayer().setAxisTitle(Layer.Bottom,xlabel)
         graph1.activeLayer().setAxisTitle(Layer.Left,'<u2>')
     if Save:
@@ -395,9 +396,9 @@ def plotInput(inputfiles,spectra=[]):
 ###############################################################################
 
 def CubicFit(inputWS, spec, verbose=False):
-    '''Uses the Mantid Fit Algorithm to fit a cubic function to the inputWS
+    '''Uses the Mantid Fit Algorithm to fit a quadratic to the inputWS
     parameter. Returns a list containing the fitted parameter values.'''
-    function = 'name=UserFunction, Formula=A0+A1*x+A2*x*x, A0=1, A1=0, A2=0'
+    function = 'name=Quadratic, A0=1, A1=0, A2=0'
     fit = Fit(inputWS, spec, Function=function)
     Abs = fit.getPropertyValue('Parameters')
     if verbose:
