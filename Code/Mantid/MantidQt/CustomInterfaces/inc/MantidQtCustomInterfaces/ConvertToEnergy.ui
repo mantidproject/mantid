@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>630</width>
-    <height>626</height>
+    <height>770</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -1989,7 +1989,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
          <property name="maximumSize">
           <size>
            <width>16777215</width>
-           <height>100</height>
+           <height>150</height>
           </size>
          </property>
          <property name="title">
