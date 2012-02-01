@@ -1835,7 +1835,7 @@ InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName, int tab)
 
   appWindow()->addMdiSubWindow(insWin);
   // When called from python, we want the window to start out hidden.
-  insWin->hide();
+  //insWin->hide(); 
 
   connect(insWin,SIGNAL(plotSpectra(const QString&,const std::set<int>&)),this,
     SLOT(plotSpectraList(const QString&,const std::set<int>&)));
@@ -1856,7 +1856,10 @@ void MantidUI::showMantidInstrument(const QString& wsName)
   {
     return;
   }
-  insWin->show();
+  if (!insWin->isVisible())
+  {
+    insWin->show();
+  }
 }
 
 void MantidUI::showMantidInstrument()

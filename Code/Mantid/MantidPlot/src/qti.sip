@@ -1299,6 +1299,10 @@ public:
   MantidMatrix* getMantidMatrix(const QString &);
   QString getSelectedWorkspaceName();
   InstrumentWindow* getInstrumentView(const QString &, int tab = -1);
+%MethodCode
+  sipRes = sipCpp->getInstrumentView(*a0,a1);
+  sipRes->hide();
+%End
   MantidMatrix* importMatrixWorkspace(const QString&,int = -1, int = -1, bool = false, bool = false);
   Table* createTableFromSpectraList(const QString& tableName, const QString& workspaceName, 
       QList<int> indexList, bool errs=true, bool binCentres=false) /PyName = workspaceToTable/;
