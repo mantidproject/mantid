@@ -336,7 +336,7 @@ m_mantidui(mantidui)
   m_setupActionCustomSetup = new QAction("Custom Setup",this);
   QAction* setupActionManageSetup = new QAction("Manage Setup",this);
   QAction* setupActionFindPeaks = new QAction("Find Peaks",this);
-  QAction* setupActionClearFit = new QAction("Clear Fit",this);
+  QAction* setupActionClearFit = new QAction("Clear Model",this);
 
   QMenu* setupSubMenuCustom = new QMenu(this);
   m_setupActionCustomSetup->setMenu(setupSubMenuCustom);
