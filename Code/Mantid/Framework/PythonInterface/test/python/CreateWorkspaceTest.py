@@ -68,3 +68,23 @@ class CreateWorkspaceTest(unittest.TestCase):
             self.assertEquals(wksp.readX(i)[len(x)-1], loq.readX(i)[len(x)-1])
 
         AnalysisDataService.Instance().remove("wksp")
+
+    def test_create_with_numerical_vertical_axis_values(self):
+        data = [1.,2.,3.]
+        axis_values = [5,6,7]
+        alg = run_algorithm("CreateWorkspace", DataX=data, DataY=data, NSpec=3,VerticalAxisUnit='MomentumTransfer',
+                            VerticalAxisValues=axis_values,child=True)
+        wksp = alg.getProperty("OutputWorkspace").value
+        for i in range(len(axis_values)):
+            self.assertEquals(wksp.getAxis(1).getValue(i), axis_values[i])
+        
+    def test_create_with_numpy_vertical_axis_values(self):
+        data = [1.,2.,3.]
+        axis_values = np.array([6.,7.,8.])
+        alg = run_algorithm("CreateWorkspace", DataX=data, DataY=data, NSpec=3,VerticalAxisUnit='MomentumTransfer',
+                            VerticalAxisValues=axis_values,child=True)
+        wksp = alg.getProperty("OutputWorkspace").value
+        for i in range(len(axis_values)):
+            self.assertEquals(wksp.getAxis(1).getValue(i), axis_values[i])
+
+
