@@ -98,6 +98,8 @@ namespace Mantid
       template DLLExport const std::vector<int> toStdVector<int>(PyObject *value);
       template DLLExport const std::vector<size_t> toStdVector<size_t>(PyObject *value);
       template DLLExport const std::vector<double> toStdVector<double>(PyObject *value);
+      template DLLExport const std::vector<std::string> toStdVector<std::string>(PyObject *value);
+
       // To Double vector types
       template DLLExport const std::vector<double> toStdVectorFromNumpy<double, npy_double>(PyArrayObject *value);
       template DLLExport const std::vector<double> toStdVectorFromNumpy<double, npy_int64>(PyArrayObject *value);

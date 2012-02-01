@@ -55,6 +55,11 @@ namespace Mantid
           std::vector<double> propValues = VectorDelegate::toStdVector<double>(value.ptr());
           alg->setProperty(name, propValues);
         }
+        else if( PyString_Check(firstElement) )
+        {
+          std::vector<std::string> propValues = VectorDelegate::toStdVector<std::string>(value.ptr());
+          alg->setProperty(name, propValues);
+        }
         else
         {
           throw std::invalid_argument("SequenceTypeHandler::set - The first element of the value for the '" + name + "' property cannot be handled.");

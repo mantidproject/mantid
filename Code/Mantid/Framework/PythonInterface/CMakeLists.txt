@@ -73,6 +73,7 @@ set ( TEST_PY_FILES
   test/python/AlgorithmFactoryTest.py
   test/python/AlgorithmManagerTest.py
   test/python/AnalysisDataServiceTest.py
+  test/python/AxisTest.py
   test/python/BoundedValidatorTest.py
   test/python/ConfigServiceTest.py
   test/python/CreateWorkspaceTest.py
