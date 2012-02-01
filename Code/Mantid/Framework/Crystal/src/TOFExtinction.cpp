@@ -91,26 +91,26 @@ namespace Crystal
     int NumberPeaks = peaksW->getNumberPeaks();
     double mosaic = getProperty("Mosaic");
     double cell = getProperty("Cell");
-    double r_crystallite = getProperty("RCrystallite");
-    double dMin = getProperty("MinD");
+    //double r_crystallite = getProperty("RCrystallite");
+    //double dMin = getProperty("MinD");
     double scaleFactor = getProperty("ScaleFactor");
-    double wlMin = getProperty("MinWL");
-    double wlMax = getProperty("MaxWL");
+    //double wlMin = getProperty("MinWL");
+    //double wlMax = getProperty("MaxWL");
     double Eg = getEg(mosaic); // defined by Zachariasen, W. H. (1967). Acta Cryst. A23, 558
     for (int i = 0; i < NumberPeaks; i++)
     {
       Peak & peak1 = peaksW->getPeaks()[i];
-      double h = peak1.getH();
-      double k = peak1.getK();
-      double l = peak1.getL();
+      //double h = peak1.getH();
+      //double k = peak1.getK();
+      //double l = peak1.getL();
       double fsq = peak1.getIntensity()*scaleFactor;
       double sigfsq = peak1.getSigmaIntensity()*scaleFactor;
       double wl = peak1.getWavelength();
-      double dsp = peak1.getDSpacing();
+      //double dsp = peak1.getDSpacing();
       double twoth = peak1.getScattering();
       double tbar = 0.0;
       double transmission = absor_sphere(twoth, wl, tbar);
-      std::cout << twoth<<"  "<<wl <<"  "<<tbar<<"\n";
+      std::cout << twoth<<"  "<<wl <<"  "<<tbar<<"  "<<transmission<<"\n";
       //if(dsp < dMin || wl < wlMin || wl > wlMax) continue;
       // Extinction Correction
       // Use measured Fo_squared in first iteration
@@ -153,7 +153,7 @@ namespace Crystal
   }
   double TOFExtinction::getEg(double mosaic)
   {
-        double Eg = 2.0*std::sqrt(std::log(2)/(2*M_PI))/(mosaic*M_PI/180.0);
+        double Eg = 2.0*std::sqrt(std::log(static_cast<double>(2.0))/(2*M_PI))/(mosaic*M_PI/180.0);
         return Eg;
   }
 ;
