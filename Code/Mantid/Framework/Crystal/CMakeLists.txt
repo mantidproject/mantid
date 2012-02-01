@@ -25,6 +25,7 @@ set ( SRC_FILES
 	src/SetGoniometer.cpp
 	src/SetUB.cpp
 	src/SortHKL.cpp
+	src/tofExtinction.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES )
@@ -55,6 +56,7 @@ set ( INC_FILES
 	inc/MantidCrystal/SetGoniometer.h
 	inc/MantidCrystal/SetUB.h
 	inc/MantidCrystal/SortHKL.h
+	inc/MantidCrystal/tofExtinction.h
 )
 
 set ( TEST_FILES
