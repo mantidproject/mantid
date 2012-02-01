@@ -423,7 +423,8 @@ public:
     VMD end(9.5, 0.5);
     std::vector<coord_t> x;
     std::vector<signal_t> y;
-    ws->getLinePlot(start, end, NoNormalization, x,y);
+    std::vector<signal_t> e;
+    ws->getLinePlot(start, end, NoNormalization, x,y,e);
     TS_ASSERT_EQUALS( x.size(), 11);
     TS_ASSERT_DELTA( x[0], 0.0, 1e-5);
     TS_ASSERT_DELTA( x[1], 0.5, 1e-5);
@@ -447,7 +448,8 @@ public:
     VMD end(0.5, 0.5);
     std::vector<coord_t> x;
     std::vector<signal_t> y;
-    ws->getLinePlot(start, end, NoNormalization, x,y);
+    std::vector<signal_t> e;
+    ws->getLinePlot(start, end, NoNormalization, x,y,e);
     TS_ASSERT_EQUALS( x.size(), 11);
     TS_ASSERT_DELTA( x[0], 0.0, 1e-5);
     TS_ASSERT_DELTA( x[1], 0.5, 1e-5);
@@ -471,7 +473,8 @@ public:
     VMD end(1.9, 1.5);
     std::vector<coord_t> x;
     std::vector<signal_t> y;
-    ws->getLinePlot(start, end, NoNormalization, x,y);
+    std::vector<signal_t> e;
+    ws->getLinePlot(start, end, NoNormalization, x,y,e);
     std::cout << "X\n" << Strings::join(x.begin(), x.end(), ",") << std::endl;
     std::cout << "Y\n" << Strings::join(y.begin(), y.end(), ",") << std::endl;
 
@@ -498,7 +501,8 @@ public:
     VMD end(10.5, 0.5);
     std::vector<coord_t> x;
     std::vector<signal_t> y;
-    ws->getLinePlot(start, end, NoNormalization, x,y);
+    std::vector<signal_t> e;
+    ws->getLinePlot(start, end, NoNormalization, x,y,e);
     TS_ASSERT_EQUALS( x.size(), 11);
     TS_ASSERT_DELTA( x[0], 0.5, 1e-5);
     TS_ASSERT_DELTA( x[1], 1.5, 1e-5);
@@ -522,7 +526,8 @@ public:
     VMD end(1, 20.5);
     std::vector<coord_t> x;
     std::vector<signal_t> y;
-    ws->getLinePlot(start, end, NoNormalization, x,y);
+    std::vector<signal_t> e;
+    ws->getLinePlot(start, end, NoNormalization, x,y,e);
     TS_ASSERT_EQUALS( x.size(), 2);
     TS_ASSERT_DELTA( x[0], 0, 1e-5);
     // NAN for Y

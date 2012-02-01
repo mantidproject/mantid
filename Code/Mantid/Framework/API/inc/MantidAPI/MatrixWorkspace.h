@@ -281,7 +281,7 @@ namespace Mantid
       static const std::string yDimensionId;
 
       virtual void getLinePlot(const Mantid::Kernel::VMD & start, const Mantid::Kernel::VMD & end,
-          Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y);
+          Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y, std::vector<signal_t> & e) const;
 
       void saveSpectraMapNexus(::NeXus::File * file, const std::vector<int>& spec,
           const ::NeXus::NXcompression compression = ::NeXus::LZW) const;

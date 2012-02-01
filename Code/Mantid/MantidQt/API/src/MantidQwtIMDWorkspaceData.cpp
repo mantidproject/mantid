@@ -2,99 +2,142 @@
 #include "MantidAPI/IMDIterator.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 
-/// Constructor
-MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(Mantid::API::IMDWorkspace_const_sptr workspace,const bool logScale, bool isDistribution)
-: QObject(),
-m_workspace(workspace),
-m_logScale(logScale),
-m_minPositive(0),
-m_isDistribution(isDistribution)
-{}
+using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
+
+/** Constructor
+ *
+ * @param workspace :: IMDWorkspace to plot
+ * @param logScale :: true to plot Y in log scale
+ * @param start :: start point in N-dimensions of the line
+ * @param end :: end point in N-dimensions of the line
+ * @param normalize :: method for normalizing the line
+ * @param isDistribution :: is this a distribution (divide by bin width?)
+ * @return
+ */
+MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(Mantid::API::IMDWorkspace_const_sptr workspace, const bool logScale,
+    Mantid::Kernel::VMD start, Mantid::Kernel::VMD end,
+    Mantid::API::MDNormalization normalize,
+    bool isDistribution)
+  : QObject(),
+  m_workspace(workspace),
+  m_logScale(logScale),
+  m_minPositive(0),
+  m_start(start),
+  m_end(end),
+  m_normalization(normalize),
+  m_isDistribution(isDistribution)
+{
+  if (start.getNumDims() == 1 && end.getNumDims() == 1)
+  {
+    if (start[0] == 0.0 && end[0] == 0.0)
+    {
+      // Default start and end. Find the limits
+      std::string alongDim = m_workspace->getNonIntegratedDimensions()[0]->getName();
+      size_t nd = m_workspace->getNumDims();
+      m_start = VMD(nd);
+      m_end = VMD(nd);
+      for (size_t d=0; d<nd; d++)
+      {
+        IMDDimension_const_sptr dim = m_workspace->getDimension(d);
+        if (dim->getDimensionId() == alongDim)
+        {
+          // All the way through in the single dimension
+          m_start[d] = dim->getMinimum();
+          m_end[d] = dim->getMaximum();
+        }
+        else
+        {
+          // Mid point along each dimension
+          m_start[d] = (dim->getMaximum() + dim->getMinimum()) / 2;
+          m_end[d] = m_start[d];
+        }
+      }
+    }
+  }
+  // And cache the X/Y values
+  this->cacheLinePlot();
+}
 
 /// Copy constructor
 MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(const MantidQwtIMDWorkspaceData& data)
-: QObject(),
-m_workspace(data.m_workspace),
-m_logScale(data.m_logScale),
-m_minPositive(0),
-m_isDistribution(data.m_isDistribution)
-{}
+  : QObject(),
+  m_workspace(data.m_workspace),
+  m_logScale(data.m_logScale),
+  m_start(data.m_start),
+  m_end(data.m_end),
+  m_normalization(data.m_normalization),
+  m_isDistribution(data.m_isDistribution)
+{
+  this->cacheLinePlot();
+}
 
+/** Cloner/virtual copy constructor
+ * @return a copy of this
+ */
+QwtData * MantidQwtIMDWorkspaceData::copy() const
+{
+  return new MantidQwtIMDWorkspaceData(*this);
+}
+
+/// Return a new data object of the same type but with a new workspace
+MantidQwtIMDWorkspaceData* MantidQwtIMDWorkspaceData::copy(Mantid::API::IMDWorkspace_sptr workspace)const
+{
+  return new MantidQwtIMDWorkspaceData(workspace, m_logScale, m_start, m_end,
+      m_normalization, m_isDistribution);
+}
+
+
+//-----------------------------------------------------------------------------
+/** Cache the X/Y line plot data from this workspace and start/end points */
+void MantidQwtIMDWorkspaceData::cacheLinePlot()
+{
+  m_workspace->getLinePlot(m_start, m_end, m_normalization, m_lineX, m_Y, m_E);
+}
+
+
+//-----------------------------------------------------------------------------
 /** Size of the data set
  */
 size_t MantidQwtIMDWorkspaceData::size() const
 {
-  return m_workspace->getNonIntegratedDimensions()[0]->getNBins();
+  return m_Y.size();
 }
 
-/**
-Return the x value of data point i
+/** Return the x value of data point i
 @param i :: Index
 @return x X value of data point i
 */
 double MantidQwtIMDWorkspaceData::x(size_t i) const
 {
-  Mantid::Geometry::IMDDimension_const_sptr dimension = m_workspace->getNonIntegratedDimensions()[0];
-  //Linear mapping from i as index to actual x value.
-  double minimum = dimension->getMinimum();
-  double maximum = dimension->getMaximum();
-  size_t nbins = dimension->getNBins();
-  return minimum + double(i)*(maximum - minimum)/(double(nbins));
+  return m_lineX[i];
 }
 
-/**
-Return the y value of data point i
+/** Return the y value of data point i
 @param i :: Index
 @return y Y value of data point i
 */
 double MantidQwtIMDWorkspaceData::y(size_t i) const
 {
-  Mantid::Geometry::IMDDimension_const_sptr dimension = m_workspace->getNonIntegratedDimensions()[0];
-  Mantid::API::IMDIterator* it = m_workspace->createIterator();
-  size_t counter = 0;
-  Mantid::signal_t signal;
-  while(true)
-  {
-    signal = it->getNormalizedSignal();
-    if(counter == i)
-    {
-      break;
-    }
-    counter++;
-    it->next();
-  }
-  delete it;
-  return signal;
+  return m_Y[i];
 }
 
+/// Returns the x position of the error bar for the i-th data point (bin)
 double MantidQwtIMDWorkspaceData::ex(size_t i) const
 {
-  return x(i);
+  return (this->x(i) + this->x(i+1)) / 2.0;
 }
 
+/// Returns the error of the i-th data point
 double MantidQwtIMDWorkspaceData::e(size_t i) const
 {
-  Mantid::Geometry::IMDDimension_const_sptr dimension = m_workspace->getNonIntegratedDimensions()[0];
-  Mantid::API::IMDIterator* it = m_workspace->createIterator();
-  size_t counter = 0;
-  Mantid::signal_t error;
-  while(true)
-  {
-    error = it->getNormalizedError();
-    if(counter == i)
-    {
-      break;
-    }
-    counter++;
-    it->next();
-  }
-  delete it;
-  return error;
+  return m_E[i];
 }
 
+/// Number of error bars to plot
 size_t MantidQwtIMDWorkspaceData::esize() const
 {
-  return m_workspace->getNonIntegratedDimensions()[0]->getNBins();
+  return m_E.size();
 }
 
 bool MantidQwtIMDWorkspaceData::sameWorkspace(Mantid::API::IMDWorkspace_sptr workspace)const

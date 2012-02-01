@@ -5,46 +5,28 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include <QObject>
 #include "MantidQtAPI/MantidQwtWorkspaceData.h"
+#include "MantidKernel/VMD.h"
 
 class MantidQwtIMDWorkspaceData:  public QObject, public MantidQwtWorkspaceData
 {
   Q_OBJECT
 public:
-  /// Constructor
-  MantidQwtIMDWorkspaceData(Mantid::API::IMDWorkspace_const_sptr workspace, const bool logScale, bool distr = false);
+  MantidQwtIMDWorkspaceData(Mantid::API::IMDWorkspace_const_sptr workspace, const bool logScale,
+      Mantid::Kernel::VMD start = Mantid::Kernel::VMD(), Mantid::Kernel::VMD end = Mantid::Kernel::VMD(),
+      Mantid::API::MDNormalization normalize = Mantid::API::NoNormalization,
+      bool isDistribution = false);
 
-  /// Copy constructor
   MantidQwtIMDWorkspaceData(const MantidQwtIMDWorkspaceData& data);
 
-    //! @return Pointer to a copy (virtual copy constructor)
-  virtual QwtData *copy() const {return new MantidQwtIMDWorkspaceData(*this);}
+  virtual QwtData *copy() const;
+  virtual MantidQwtIMDWorkspaceData* copy(Mantid::API::IMDWorkspace_sptr workspace) const;
 
-  //! @return Size of the data set
   virtual size_t size() const;
-
-  /**
-  Return the x value of data point i
-  @param i :: Index
-  @return x X value of data point i
-  */
   virtual double x(size_t i) const;
-  /**
-  Return the y value of data point i
-  @param i :: Index
-  @return y Y value of data point i
-  */
   virtual double y(size_t i) const;
 
-  /// Return a new data object of the same type but with a new workspace
-  virtual MantidQwtIMDWorkspaceData* copy(Mantid::API::IMDWorkspace_sptr workspace)const
-  {
-    return new MantidQwtIMDWorkspaceData(workspace, m_logScale);
-  }
-  /// Returns the error of the i-th data point
   double e(size_t i)const;
-  /// Returns the x position of the error bar for the i-th data point (bin)
   double ex(size_t i)const;
-  /// Number of error bars to plot
   size_t esize()const;
 
   bool sameWorkspace(Mantid::API::IMDWorkspace_sptr workspace)const;
@@ -59,6 +41,8 @@ public:
 
 private:
 
+  void cacheLinePlot();
+
   friend class MantidMatrixCurve;
 
   /// Pointer to the Mantid workspace
@@ -67,8 +51,26 @@ private:
   bool m_logScale;
   /// lowest positive y value
   mutable double m_minPositive;
+
+  /// Start point of the line in the workspace
+  Mantid::Kernel::VMD m_start;
+
+  /// End point of the line in the workspace
+  Mantid::Kernel::VMD m_end;
+
+  /// Cached vector of positions along the line (from the start)
+  std::vector<Mantid::coord_t> m_lineX;
+
+  /// Cached vector of signal (normalized)
+  std::vector<Mantid::signal_t> m_Y;
+
+  /// Cached vector of error (normalized)
+  std::vector<Mantid::signal_t> m_E;
+
+  /// Method of normalization of the signal
+  Mantid::API::MDNormalization m_normalization;
+
   /// Is plotting as distribution
   bool m_isDistribution;
-
 };
 #endif

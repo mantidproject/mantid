@@ -65,7 +65,7 @@ namespace MDEvents
     virtual Mantid::API::IMDIterator* createIterator(Mantid::Geometry::MDImplicitFunction * function = NULL) const;
 
     virtual void getLinePlot(const Mantid::Kernel::VMD & start, const Mantid::Kernel::VMD & end,
-        Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y);
+        Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y, std::vector<signal_t> & e) const;
 
     void checkWorkspaceSize(const MDHistoWorkspace & other, std::string operation);
 

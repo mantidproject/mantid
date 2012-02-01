@@ -414,7 +414,7 @@ namespace MDEvents
    * @param y :: is set to the normalized signal for each bin. Length = length(x) - 1
    */
   void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD & start, const Mantid::Kernel::VMD & end,
-      Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y)
+      Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y, std::vector<signal_t> & e) const
   {
     size_t nd = this->getNumDims();
     if (start.getNumDims() != nd)
@@ -423,6 +423,7 @@ namespace MDEvents
       throw std::runtime_error("End point must have the same number of dimensions as the workspace.");
     x.clear();
     y.clear();
+    e.clear();
 
     // Unit-vector of the direction
     VMD dir = end - start;
@@ -472,6 +473,7 @@ namespace MDEvents
         // Make a single bin with NAN
         x.push_back(0);  x.push_back(length);
         y.push_back(std::numeric_limits<double>::quiet_NaN());
+        e.push_back(std::numeric_limits<double>::quiet_NaN());
         return;
       }
       // Move the point so it is at the edge instad.
@@ -489,6 +491,7 @@ namespace MDEvents
         // Make a single bin with NAN
         x.push_back(0);  x.push_back(length);
         y.push_back(std::numeric_limits<double>::quiet_NaN());
+        e.push_back(std::numeric_limits<double>::quiet_NaN());
         return;
       }
     }
@@ -555,20 +558,26 @@ namespace MDEvents
       thisX = coord_t((pos - start).norm());
       // Add it to the list
       x.push_back(thisX);
-      // And add the signal to the list too
+
+      // What is our normalization factor?
+      signal_t normalizer = 1.0;
       switch (normalize)
       {
       case NoNormalization:
-        y.push_back( this->getSignalAt(linearIndex) );
         break;
       case VolumeNormalization:
-        y.push_back( this->getSignalAt(linearIndex) * m_inverseVolume );
+        normalizer = m_inverseVolume;
         break;
       case NumEventsNormalization:
         // TODO: Implement when we track # of events in MDHisto.
-        y.push_back( this->getSignalAt(linearIndex) );
+        normalizer = 1.0;
         break;
       }
+
+      // And add the normalized signal/error to the list too
+      y.push_back( this->getSignalAt(linearIndex) * normalizer );
+      e.push_back( this->getErrorAt(linearIndex) * normalizer );
+
     } // (while thisX < length, i.e. while the line is being drawn)
 
     delete [] index;
