@@ -155,17 +155,24 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
             _y_error_axis_tmp = _y_error_axis_tmp[::-1]
             
             CreateWorkspace(OutputWorkspace=_outputWorkspace,
-                            DataX=_q_axis[_q_index],
+                            DataX=q_axis,
                             DataY=_y_axis_tmp,
                             DataE=_y_error_axis_tmp,
                             Nspec=1,
                             UnitX="MomentumTransfer")
+
+            if _q_index == 0:
+                mt_tmp = mtd[_outputWorkspace]
 
             _outputWorkspace_rebin = 'tmpOWks_' + str(_q_index)
             
             Rebin(InputWorkspace=_outputWorkspace,
                   OutputWorkspace=_outputWorkspace_rebin,
                   Params=q_binning)
+
+            if _q_index == 0:
+                mt_tmp = mtd[_outputWorkspace_rebin]
+
 
         _mt = mtd['tmpOWks_0']
         _x_array = _mt.readX(0)[:]
@@ -390,13 +397,17 @@ def convertToRvsQWithCorrection(mt, dMD=-1, theta=-1,tof=None, yrange=None, cpix
     for x in xrange:
         _px = yrange[x]
         dangle = ref_beamdiv_correct(cpix, mt, dSD, _px)
-        #theta += (2.0 * dangle)
-        theta += dangle
+        
+        if dangle is not None:
+            _theta = theta + dangle
+        else:
+            _theta = theta
+        
         for t in range(sz_tof-1):
             tof1 = tof[t]
             tof2 = tof[t+1]
             tofm = (tof1+tof2)/2.
-            _Q = _const * math.sin(theta) / (tofm*1e-6)
+            _Q = _const * math.sin(_theta) / (tofm*1e-6)
             q_array[x,t] = _Q*1e-10
 
     return q_array
@@ -430,17 +441,20 @@ def ref_beamdiv_correct(cpix, mt, det_secondary,
     last_slit_size = getS2h(mt)
     
     last_slit_dist = 0.654 #m
-    slit_dist = 2.193 #m
+    slit_dist = 0.885000050068 #m
     
-    _y = 0.5 * (first_slit_size[0] + last_slit_size[0])
+    first_slit_size = float(first_slit_size[0]) * 0.001
+    last_slit_size = float(last_slit_size[0]) * 0.001
+    
+    _y = 0.5 * (first_slit_size + last_slit_size)
     _x = slit_dist
     gamma_plus = math.atan2( _y, _x)
     
-    _y = 0.5 * (first_slit_size[0] - last_slit_size[0])
+    _y = 0.5 * (first_slit_size - last_slit_size)
     _x = slit_dist 
     gamma_minus = math.atan2( _y, _x)
     
-    half_last_aperture = 0.5 * last_slit_size[0]
+    half_last_aperture = 0.5 * last_slit_size
     neg_half_last_aperture = -1.0 * half_last_aperture
     
     last_slit_to_det = last_slit_dist + det_secondary
@@ -539,7 +553,7 @@ def ref_beamdiv_correct(cpix, mt, det_secondary,
     center_of_mass = calc_center_of_mass(int_poly_x, 
                                          int_poly_y, 
                                          area)
-    
+        
     return center_of_mass
 
 def calc_area_2D_polygon(x_coord, y_coord, size_poly):

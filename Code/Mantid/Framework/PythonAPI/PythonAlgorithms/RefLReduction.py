@@ -184,7 +184,7 @@ class RefLReduction(PythonAlgorithm):
                                               source_to_detector=dMD,
                                               sample_to_detector=dSD,
                                               theta=theta,
-                                              geo_correction=False,
+                                              geo_correction=True,
                                               q_binning=[q_min,q_step,q_max])
 
         ConvertToHistogram(InputWorkspace='IntegratedDataWks1',
@@ -276,7 +276,6 @@ class RefLReduction(PythonAlgorithm):
                   OutputWorkspace='NormBckWks')
         
         ConvertToHistogram("NormBckWks", OutputWorkspace="NormBckWks")
-#        RebinToWorkspace(WorkspaceToRebin="NormBckWks", WorkspaceToMatch="IntegratedNormWks", OutputWorkspace="NormBckWks")
         RebinToWorkspace(WorkspaceToRebin="NormBckWks", WorkspaceToMatch="IntegratedNormWks", OutputWorkspace="NormBckWks")
        
         Minus("IntegratedNormWks", "NormBckWks", OutputWorkspace="NormWks")
@@ -293,7 +292,6 @@ class RefLReduction(PythonAlgorithm):
 
         # Normalization           
         SumSpectra(InputWorkspace="NormWks", OutputWorkspace="NormWks")
-
         
         #### divide data by normalize histo workspace
         Divide(LHSWorkspace='DataWks',
@@ -301,7 +299,13 @@ class RefLReduction(PythonAlgorithm):
                OutputWorkspace='NormalizedWks')
         ReplaceSpecialValues("NormalizedWks",NaNValue=0,NaNError=0, OutputWorkspace="NormalizedWks")
         
-        output_ws = self.getPropertyValue("OutputWorkspace")
+        mt1 = mtd['DataWks']
+        print mt1.readE(0)[:]
+        
+        mt2 = mtd['NormWks']
+        print mt2.readE(0)[:]
+        
+        output_ws = self.getPropertyValue("OutputWorkspace")        
         
         SumSpectra(InputWorkspace="NormalizedWks", OutputWorkspace=output_ws)
         
