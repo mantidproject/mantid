@@ -11,6 +11,7 @@
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
+#include <fstream>
 #include <Poco/File.h>
 
 using namespace Mantid;
@@ -66,7 +67,33 @@ public:
     
     // Get the file
     outfile = alg.getPropertyValue("Filename");
-    TS_ASSERT( Poco::File(outfile).exists() );
+    bool fileExists = false;
+    TS_ASSERT( fileExists = Poco::File(outfile).exists() );
+    if ( fileExists )
+    {
+      std::ifstream in(outfile.c_str());
+
+      double d1,d2,d3,d4,d5,d6,d7,d8,d9,d10,d11,d12,d13,d14;
+      if(numPeaksPerBank > 0)
+      {
+        in >> d1 >> d2 >> d3 >> d4 >> d5 >>d6 >> d7 >>d8 >>d9 >>d10>> d11>> d12>>d13>>d14;
+        TS_ASSERT_EQUALS(d1,-1 );
+        TS_ASSERT_EQUALS(d2,-1 );
+        TS_ASSERT_EQUALS(d3,-1 );
+        TS_ASSERT_EQUALS(d4,1.1 );
+        TS_ASSERT_EQUALS(d5,1 );
+        TS_ASSERT_EQUALS(d6,1 );
+        TS_ASSERT_EQUALS(d7,1.5 );
+        TS_ASSERT_EQUALS(d8,0.1591 );
+        TS_ASSERT_EQUALS(d9,1000. );
+        TS_ASSERT_EQUALS(d10,1 );
+        TS_ASSERT_EQUALS(d11,0.9434 );
+        TS_ASSERT_EQUALS(d12,1 );
+        TS_ASSERT_DELTA(d13,0.4205 , 1e-4);
+        TS_ASSERT_EQUALS(d14,3.5933 );
+      }
+    }
+
     if (Poco::File(outfile).exists())
       Poco::File(outfile).remove();
   }
