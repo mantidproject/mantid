@@ -67,6 +67,23 @@ public:
     TS_ASSERT_DELTA( output[2], 3.0, 1e-6 );
   }
 
+  /// Clone the transform, check that it still works
+  void test_clone()
+  {
+    size_t dimToBinFrom[3] = {3, 1, 0};
+    coord_t origin[3] = {5, 10, 15};
+    coord_t scaling[3] = {1, 2, 3};
+    CoordTransformAligned ct(4,3, dimToBinFrom, origin, scaling);
+    CoordTransform * clone = ct.clone();
+
+    coord_t input[4] = {16, 11, 11111111 /*ignored*/, 6};
+    coord_t output[3] = {0,0,0};
+    clone->apply(input, output);
+    TS_ASSERT_DELTA( output[0], 1.0, 1e-6 );
+    TS_ASSERT_DELTA( output[1], 2.0, 1e-6 );
+    TS_ASSERT_DELTA( output[2], 3.0, 1e-6 );
+  }
+
   /// Turn the aligned transform into an affine transform
   void test_makeAffineMatrix()
   {

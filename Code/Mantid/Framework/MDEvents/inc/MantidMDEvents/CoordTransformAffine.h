@@ -34,6 +34,7 @@ namespace MDEvents
   {
   public:
     CoordTransformAffine(const size_t inD, const size_t outD);
+    virtual CoordTransform * clone() const;
     virtual ~CoordTransformAffine();
     virtual std::string toXMLString() const;
     void addTranslation(const coord_t * translationVector);

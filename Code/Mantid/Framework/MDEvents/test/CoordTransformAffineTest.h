@@ -102,6 +102,22 @@ public:
     compare(2, out, expected);
   }
 
+  /** Clone a translation */
+  void test_clone()
+  {
+    coord_t in[2] = {1.5, 2.5};
+    coord_t out[2];
+    coord_t translation[2] = {2.0, 3.0};
+    coord_t expected[2] = {3.5, 5.5};
+    CoordTransformAffine ct(2,2);
+    ct.addTranslation(translation);
+
+    // Clone and check the clone works
+    CoordTransform * clone = ct.clone();
+    clone->apply(in, out);
+    compare(2, out, expected);
+  }
+
   /** apply() method with VMD */
   void test_apply_VMD()
   {

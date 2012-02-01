@@ -21,6 +21,7 @@ namespace Mantid
       virtual ~NullCoordTransform();
       std::string toXMLString() const;
       void apply(const Mantid::coord_t * inputVector, Mantid::coord_t * outVector) const;
+      virtual CoordTransform * clone() const;
 
     private:
       /// Number of dimensions.

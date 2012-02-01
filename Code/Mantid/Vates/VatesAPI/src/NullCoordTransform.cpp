@@ -1,4 +1,7 @@
 #include "MantidVatesAPI/NullCoordTransform.h"
+#include "MantidAPI/CoordTransform.h"
+
+using Mantid::API::CoordTransform;
 
 namespace Mantid
 {
@@ -11,6 +14,12 @@ namespace Mantid
     NullCoordTransform::NullCoordTransform(size_t ndims) : Mantid::API::CoordTransform(3, 3), m_ndims(ndims)
     {
     }
+
+    CoordTransform * NullCoordTransform::clone() const
+    {
+      return new NullCoordTransform(m_ndims);
+    }
+
 
     /// Destructor
     NullCoordTransform::~NullCoordTransform()
