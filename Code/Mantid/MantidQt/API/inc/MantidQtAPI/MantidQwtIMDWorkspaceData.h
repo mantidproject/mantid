@@ -10,6 +10,24 @@
 
 class MantidQwtIMDWorkspaceData:  public QObject, public MantidQwtWorkspaceData
 {
+
+public:
+  /** Enumeration of the ways to plot the X axis of the
+   * line plot.
+   */
+  enum PlotAxisChoice
+  {
+    /// Automatically pick X or Y depending on the angle
+    PlotAuto = 0,
+    /// Plot the X axis, in the coords of the original workspace
+    PlotX = 1,
+    /// Plot the Y axis, in the coords of the original workspace
+    PlotY = 2,
+    /// Plot the distance in the XY plane, relative to the start of the line
+    PlotDistance = 3
+  };
+
+
   Q_OBJECT
 public:
   MantidQwtIMDWorkspaceData(Mantid::API::IMDWorkspace_const_sptr workspace, const bool logScale,

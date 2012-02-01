@@ -140,13 +140,13 @@ LineViewer
 
 public:
 
-enum PlotAxisChoice
-{
-  PlotAuto = 0,
-  PlotX = 1,
-  PlotY = 2,
-  PlotDistance = 3
-};
+//enum PlotAxisChoice
+//{
+//  PlotAuto = 0,
+//  PlotX = 1,
+//  PlotY = 2,
+//  PlotDistance = 3
+//};
 
 void apply()   throw (std::runtime_error);
 void showPreview();
@@ -171,9 +171,9 @@ bool getFixedBinWidthMode() const;
 int getNumBins() const;
 double getBinWidth() const;
 
-//*WIKI* ==== Plotting ====
-void setPlotAxis(PlotAxisChoice choice);
-PlotAxisChoice getPlotAxis() const;
+////*WIKI* ==== Plotting ====
+//void setPlotAxis(PlotAxisChoice choice);
+//PlotAxisChoice getPlotAxis() const;
 
 };
 

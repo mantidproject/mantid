@@ -10,6 +10,7 @@ set ( SRC_FILES
 	src/SliceViewerWindow.cpp
 	src/SnapToGridDialog.cpp
 	src/XYLimitsDialog.cpp
+	src/LinePlotOptions.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -18,6 +19,7 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/CustomTools.h
 	inc/MantidQtSliceViewer/DimensionSliceWidget.h
 	inc/MantidQtSliceViewer/LineOverlay.h
+	inc/MantidQtSliceViewer/LinePlotOptions.h
 	inc/MantidQtSliceViewer/LineViewer.h
 	inc/MantidQtSliceViewer/QScienceSpinBox.h
 	inc/MantidQtSliceViewer/QwtRasterDataMD.h
@@ -32,6 +34,7 @@ set ( MOC_FILES
 	inc/MantidQtSliceViewer/DimensionSliceWidget.h
 	inc/MantidQtSliceViewer/LineOverlay.h
 	inc/MantidQtSliceViewer/LineViewer.h
+	inc/MantidQtSliceViewer/LinePlotOptions.h
 	inc/MantidQtSliceViewer/SliceViewer.h
 	inc/MantidQtSliceViewer/SliceViewerWindow.h
 	inc/MantidQtSliceViewer/ColorBarWidget.h
@@ -44,6 +47,7 @@ set ( UI_FILES
 	inc/MantidQtSliceViewer/DimensionSliceWidget.ui
 	inc/MantidQtSliceViewer/SliceViewer.ui
 	inc/MantidQtSliceViewer/LineViewer.ui
+	inc/MantidQtSliceViewer/LinePlotOptions.ui
 	inc/MantidQtSliceViewer/ColorBarWidget.ui
 	inc/MantidQtSliceViewer/SnapToGridDialog.ui
 	inc/MantidQtSliceViewer/XYLimitsDialog.ui

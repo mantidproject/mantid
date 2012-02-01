@@ -10,6 +10,8 @@
 #include <qwt_plot.h>
 #include <qwt_painter.h>
 #include "MantidAPI/CoordTransform.h"
+#include "MantidQtAPI/MantidQwtIMDWorkspaceData.h"
+#include "MantidQtSliceViewer/LinePlotOptions.h"
 
 namespace MantidQt
 {
@@ -21,20 +23,6 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER LineViewer : public QWidget
     Q_OBJECT
 
 public:
-    /** Enumeration of the ways to plot the X axis of the
-     * line plot.
-     */
-    enum PlotAxisChoice
-    {
-      /// Automatically pick X or Y depending on the angle
-      PlotAuto = 0,
-      /// Plot the X axis, in the coords of the original workspace
-      PlotX = 1,
-      /// Plot the Y axis, in the coords of the original workspace
-      PlotY = 2,
-      /// Plot the distance in the XY plane, relative to the start of the line
-      PlotDistance = 3
-    };
 
     LineViewer(QWidget *parent = 0);
     ~LineViewer();
@@ -47,7 +35,7 @@ public:
     void setPlanarWidth(double width);
     void setNumBins(int numBins);
     void setFixedBinWidthMode(bool fixedWidth, double binWidth);
-    void setPlotAxis(LineViewer::PlotAxisChoice choice);
+    void setPlotAxis(MantidQwtIMDWorkspaceData::PlotAxisChoice choice);
 
     void showPreview();
     void showFull();
@@ -58,7 +46,7 @@ public:
     bool getFixedBinWidthMode() const;
     int getNumBins() const;
     double getBinWidth() const;
-    LineViewer::PlotAxisChoice getPlotAxis() const;
+    MantidQwtIMDWorkspaceData::PlotAxisChoice getPlotAxis() const;
 
     // For python
     void setStartXY(double x, double y);
@@ -90,7 +78,6 @@ public slots:
     void setFreeDimensions(size_t dimX, size_t dimY);
     void on_radNumBins_toggled();
     void textBinWidth_changed();
-    void radPlot_changed();
 
 signals:
     /// Signal emitted when the planar width changes
@@ -108,7 +95,7 @@ private:
     Ui::LineViewerClass ui;
 
     /// Layout containing the plot
-    QHBoxLayout * m_plotLayout;
+    QVBoxLayout * m_plotLayout;
 
     /// Main plot object
     QwtPlot * m_plot;
@@ -128,6 +115,8 @@ private:
     /// Vector of text boxes with the thicknesses
     QVector<QLineEdit *> m_thicknessText;
 
+    /// Widget to choose X plot axis and normalization
+    LinePlotOptions * m_lineOptions;
 
     // -------------------------- Data Members ----------------------------
 
@@ -167,10 +156,10 @@ private:
     double m_binWidth;
 
     /// Choice of which X axis to plot.
-    PlotAxisChoice m_plotAxis;
+    MantidQwtIMDWorkspaceData::PlotAxisChoice m_plotAxis;
 
     /// Current choice, in the case of auto-determined
-    PlotAxisChoice m_currentPlotAxis;
+    MantidQwtIMDWorkspaceData::PlotAxisChoice m_currentPlotAxis;
 
     /// Do nothing coordinate transformation for the preview
     Mantid::API::CoordTransform * m_transformToOriginal_preview;
