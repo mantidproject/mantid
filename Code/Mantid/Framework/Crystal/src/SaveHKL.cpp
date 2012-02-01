@@ -57,8 +57,8 @@ namespace Crystal
    */
   void SaveHKL::init()
   {
-    declareProperty(new WorkspaceProperty<PeaksWorkspace>("InputWorkspace","",Direction::Input, new InstrumentValidator<PeaksWorkspace>()),
-        "An input PeaksWorkspace with an instrument.");
+    declareProperty(new WorkspaceProperty<PeaksWorkspace>("InputWorkspace","",Direction::Input),
+        "An input PeaksWorkspace.");
 
     BoundedValidator<double> *mustBePositive = new BoundedValidator<double> ();
     mustBePositive->setLower(0.0);
@@ -118,13 +118,6 @@ namespace Crystal
       out.open( filename.c_str(), std::ios::out);
     }
 
-    Instrument_const_sptr inst = ws->getInstrument();
-    if (!inst) throw std::runtime_error("No instrument in PeaksWorkspace. Cannot save peaks file.");
-
-    double l1; V3D beamline; double beamline_norm; V3D samplePos;
-    inst->getInstrumentParameters(l1, beamline, beamline_norm, samplePos);
-
-
     // We must sort the peaks first by run, then bank #, and save the list of workspace indices of it
     typedef std::map<int, std::vector<size_t> > bankMap_t;
     typedef std::map<int, bankMap_t> runMap_t;
@@ -182,11 +175,9 @@ namespace Crystal
               boost::math::isnan(p.getSigmaIntensity())) continue;
 
             double tbar = 0;
-            // This is the scattered beam direction
-            V3D dir = p.getDetPos() - inst->getSample()->getPos();
 
             // Two-theta = polar angle = scattering angle = between +Z vector and the scattered beam
-            double scattering = dir.angle( V3D(0.0, 0.0, 1.0) );
+            double scattering = p.getScattering();
             double lambda =  p.getWavelength();
             double transmission = absor_sphere(scattering, lambda, tbar);
 
@@ -305,7 +296,10 @@ namespace Crystal
                                                  // trans = exp(-mu*tbar)
 
 //  calculate tbar as defined by coppens.
-    tbar = -(double)std::log(trans)/mu;
+    if(mu == 0.0)
+      tbar=0.0;
+    else
+      tbar = -(double)std::log(trans)/mu;
 
     return trans;
   }

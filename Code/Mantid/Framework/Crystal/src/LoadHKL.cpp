@@ -135,7 +135,7 @@ namespace Crystal
       peak.setIntensity(Inti);
       peak.setSigmaIntensity(SigI);
       peak.setRunNumber(run);
-      peak.setBankName(bank);
+      peak.setBankName("bank"+bank);
       ws->addPeak(peak);
 
     } while (!in.eof());
