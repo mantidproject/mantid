@@ -162,8 +162,7 @@ class SNSPowderReduction(PythonAlgorithm):
         #self.declareProperty("FileType", "Event NeXus",
         #                     Validator=ListValidator(types))
         self.declareListProperty("RunNumber", [0], Validator=ArrayBoundedValidator(Lower=0))
-        extensions = [ "_histo.nxs", "_event.nxs", "_neutron_event.dat",
-                      "_neutron0_event.dat", "_neutron1_event.dat", "_neutron0_event.dat and _neutron1_event.dat"]
+        extensions = [ "_histo.nxs", "_event.nxs", "_runinfo.xml"]
         self.declareProperty("Extension", "_event.nxs",
                              Validator=ListValidator(extensions))
         self.declareProperty("PreserveEvents", True,
@@ -198,6 +197,8 @@ class SNSPowderReduction(PythonAlgorithm):
                              Description="Positive is linear bins, negative is logorithmic")
         self.declareProperty("BinInDspace", True,
                              Description="If all three bin parameters a specified, whether they are in dspace (true) or time-of-flight (false)")
+        self.declareProperty("StripVanadiumPeaks", True,
+                             Description="Subtract fitted vanadium peaks from the known positions.")
         self.declareProperty("VanadiumFWHM", 7, Description="Default=7")
         self.declareProperty("VanadiumPeakTol", 0.05,
                              Description="How far from the ideal position a vanadium peak can be during StripVanadiumPeaks. Default=0.05, negative turns off")
@@ -221,16 +222,6 @@ class SNSPowderReduction(PythonAlgorithm):
 #                                    RunNumber=runnumber, Extension=extension)
         return result["ResultPath"].value
 
-    def _addNeXusLogs(self, wksp, nxsfile, reloadInstr):
-        try:
-            LoadNexusLogs(Workspace=wksp, Filename=nxsfile)
-            if reloadInstr:
-                LoadInstrument(Workspace=wksp, InstrumentName=self._instrument, RewriteSpectraMap=False)
-            return True
-        except:
-            return False
-
-
     def _loadPreNeXusData(self, runnumber, extension, **kwargs):
         mykwargs = {}
         if kwargs.has_key("FilterByTimeStart"):
@@ -244,7 +235,7 @@ class SNSPowderReduction(PythonAlgorithm):
         print filename
 
         try: # first just try loading the file
-            alg = LoadEventPreNexus(EventFilename=filename, OutputWorkspace=name, **mykwargs)
+            alg = LoadPreNexus(Filename=filename, OutputWorkspace=name, **mykwargs)
             wksp = alg['OutputWorkspace']
         except:
             # find the file to load
@@ -252,27 +243,12 @@ class SNSPowderReduction(PythonAlgorithm):
             if (len(filename) == 0):
                 raise RuntimeError("Failed to find prenexus file for run %d" % runnumber)
             # load the prenexus file
-            alg = LoadEventPreNexus(EventFilename=filename, OutputWorkspace=name, **mykwargs)
+            alg = LoadPreNexus(Filename=filename, OutputWorkspace=name, **mykwargs)
             wksp = alg['OutputWorkspace']
 
         # add the logs to it
-        reloadInstr = (str(self._instrument) == "SNAP")
-
-        datadir = os.path.split(filename)[0]
-        nxsfile_event = "%s_%d_event.nxs" % (self._instrument, runnumber)
-        nxsfile_histo = "%s_%d_histo.nxs" % (self._instrument, runnumber)
-
-        files = [nxsfile_event, nxsfile_histo,
-                 os.path.join(datadir, nxsfile_event),
-                 os.path.join(datadir, nxsfile_histo)]
-        datadir = os.path.split(datadir)[0]
-        files.extend([os.path.join(datadir, "NeXus", nxsfile_event),
-                      os.path.join(datadir, "NeXus", nxsfile_histo)])
-        for nxsfile in files:
-            if self._addNeXusLogs(wksp, nxsfile, reloadInstr):
-                return wksp
-
-        # TODO filter out events using timemin and timemax
+        if (str(self._instrument) == "SNAP"):
+            LoadInstrument(Workspace=wksp, InstrumentName=self._instrument, RewriteSpectraMap=False)
 
         return wksp
 
@@ -640,9 +616,10 @@ class SNSPowderReduction(PythonAlgorithm):
                         vbackRun = self._focus(vbackRun, calib, info, preserveEvents=False)
                         vanRun -= vbackRun
 
-                    ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="dSpacing")
-                    StripVanadiumPeaks(InputWorkspace=vanRun, OutputWorkspace=vanRun, FWHM=self._vanPeakFWHM,
-                                       PeakPositionTolerance=self.getProperty("VanadiumPeakTol"), HighBackground=True)
+                    if self.getProperty("StripVanadiumPeaks"):
+                        ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="dSpacing")
+                        StripVanadiumPeaks(InputWorkspace=vanRun, OutputWorkspace=vanRun, FWHM=self._vanPeakFWHM,
+                                           PeakPositionTolerance=self.getProperty("VanadiumPeakTol"), HighBackground=True)
                     ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
                     FFTSmooth(InputWorkspace=vanRun, OutputWorkspace=vanRun, Filter="Butterworth",
                               Params=self._vanSmoothing,IgnoreXBins=True,AllSpectra=True)
