@@ -9,6 +9,7 @@
 #include <QIntValidator>
 #include <qwt_plot_curve.h>
 #include <qwt_plot.h>
+#include "MantidQtAPI/MantidQwtIMDWorkspaceData.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -509,6 +510,8 @@ void LineViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
   m_ws = ws;
   m_thickness = VMD(ws->getNumDims());
   createDimensionWidgets();
+  // TODO: Use NullCoordTransform
+  m_transformToOriginal_preview = NULL;
 }
 
 
@@ -860,78 +863,80 @@ void LineViewer::choosePlotAxis()
   {
     m_currentPlotAxis = m_plotAxis;
   }
+
+
 }
 
-/** Calculate a curve between two points given a linear start/end point
- *
- * @param ws :: MDWorkspace to plot
- * @param start :: start point in ND
- * @param end :: end point in ND
- * @param minNumPoints :: minimum number of points to plot
- * @param curve :: curve to set
- */
-void LineViewer::calculateCurve(IMDWorkspace_sptr ws, VMD start, VMD end,
-    size_t minNumPoints, QwtPlotCurve * curve)
-{
-  if (!ws) return;
-  // Find the axis to plot.
-  this->choosePlotAxis();
-
-  // Retrieve the transform to original coords if available.
-  CoordTransform * toOriginal = NULL;
-  if (ws->hasOriginalWorkspace())
-    toOriginal = ws->getTransformToOriginal();
-
-  // Use the width of the plot (in pixels) to choose the fineness)
-  // That way, there is ~1 point per pixel = as fine as it needs to be
-  size_t numPoints = size_t(m_plot->width());
-  if (numPoints < minNumPoints) numPoints = minNumPoints;
-
-  VMD step = (end-start) / double(numPoints);
-  double stepLength = step.norm();
-
-  // These will be the curve as plotted
-  double * xArr = new double[numPoints];
-  double * yArr = new double[numPoints];
-
-  for (size_t i=0; i<numPoints; i++)
-  {
-    // Coordinate along the line
-    VMD coord = start + step * double(i);
-    // Signal in the WS at that coordinate
-    signal_t signal = ws->getSignalAtCoord(coord);
-
-    // Choose which X to plot
-    VMD original = coord;
-    if (toOriginal)
-      original = toOriginal->applyVMD(coord);
-
-    double x = 0;
-    switch (m_currentPlotAxis)
-    {
-    case PlotX:
-      x = original[m_freeDimX];
-      break;
-    case PlotY:
-      x = original[m_freeDimY];
-      break;
-    default:
-      // Distance, or not set.
-      x = stepLength * double(i);
-      break;
-    }
-
-    // Make into array
-    xArr[i] = x;
-    yArr[i] = signal;
-  }
-
-  // Make the curve
-  curve->setData(xArr,yArr, int(numPoints));
-
-  delete [] xArr;
-  delete [] yArr;
-}
+///** Calculate a curve between two points given a linear start/end point
+// *
+// * @param ws :: MDWorkspace to plot
+// * @param start :: start point in ND
+// * @param end :: end point in ND
+// * @param minNumPoints :: minimum number of points to plot
+// * @param curve :: curve to set
+// */
+//void LineViewer::calculateCurve(IMDWorkspace_sptr ws, VMD start, VMD end,
+//    size_t minNumPoints, QwtPlotCurve * curve)
+//{
+//  if (!ws) return;
+//  // Find the axis to plot.
+//  this->choosePlotAxis();
+//
+//  // Retrieve the transform to original coords if available.
+//  CoordTransform * toOriginal = NULL;
+//  if (ws->hasOriginalWorkspace())
+//    toOriginal = ws->getTransformToOriginal();
+//
+//  // Use the width of the plot (in pixels) to choose the fineness)
+//  // That way, there is ~1 point per pixel = as fine as it needs to be
+//  size_t numPoints = size_t(m_plot->width());
+//  if (numPoints < minNumPoints) numPoints = minNumPoints;
+//
+//  VMD step = (end-start) / double(numPoints);
+//  double stepLength = step.norm();
+//
+//  // These will be the curve as plotted
+//  double * xArr = new double[numPoints];
+//  double * yArr = new double[numPoints];
+//
+//  for (size_t i=0; i<numPoints; i++)
+//  {
+//    // Coordinate along the line
+//    VMD coord = start + step * double(i);
+//    // Signal in the WS at that coordinate
+//    signal_t signal = ws->getSignalAtCoord(coord);
+//
+//    // Choose which X to plot
+//    VMD original = coord;
+//    if (toOriginal)
+//      original = toOriginal->applyVMD(coord);
+//
+//    double x = 0;
+//    switch (m_currentPlotAxis)
+//    {
+//    case PlotX:
+//      x = original[m_freeDimX];
+//      break;
+//    case PlotY:
+//      x = original[m_freeDimY];
+//      break;
+//    default:
+//      // Distance, or not set.
+//      x = stepLength * double(i);
+//      break;
+//    }
+//
+//    // Make into array
+//    xArr[i] = x;
+//    yArr[i] = signal;
+//  }
+//
+//  // Make the curve
+//  curve->setData(xArr,yArr, int(numPoints));
+//
+//  delete [] xArr;
+//  delete [] yArr;
+//}
 
 
 //-----------------------------------------------------------------------------
@@ -968,7 +973,12 @@ void LineViewer::setPlotAxisLabels()
  * using the current parameters. */
 void LineViewer::showPreview()
 {
-  calculateCurve(m_ws, m_start, m_end, 100, m_previewCurve);
+  this->choosePlotAxis();
+  MantidQwtIMDWorkspaceData curveData(m_ws, false,
+      m_start, m_end, Mantid::API::VolumeNormalization);
+  curveData.setTransform(m_transformToOriginal_preview, m_plotOriginalDimensionIndex);
+  m_previewCurve->setData(curveData);
+
   if (m_fullCurve->isVisible())
   {
     m_fullCurve->setVisible(false);
@@ -988,19 +998,12 @@ void LineViewer::showPreview()
 void LineViewer::showFull()
 {
   if (!m_sliceWS) return;
-  VMD start(m_sliceWS->getNumDims());
-  // Follow along the middle of each bin
-  for (size_t d=0; d<m_sliceWS->getNumDims(); d++)
-  {
-    IMDDimension_const_sptr dim = m_sliceWS->getDimension(d);
-    start[d] = (dim->getMinimum() + dim->getMaximum()) / 2.0;
-  }
-  VMD end = start;
-  // Except along the line, go from start to end
-  start[0] = m_sliceWS->getDimension(0)->getMinimum();
-  end[0] = m_sliceWS->getDimension(0)->getMaximum();
+  this->choosePlotAxis();
+  MantidQwtIMDWorkspaceData curveData(m_sliceWS, false,
+      VMD(), VMD(), Mantid::API::VolumeNormalization);
+  curveData.setTransform(m_transformToOriginal_full, m_plotOriginalDimensionIndex);
+  m_fullCurve->setData(curveData);
 
-  calculateCurve(m_sliceWS, start, end, m_numBins, m_fullCurve);
   if (m_previewCurve->isVisible())
   {
     m_previewCurve->setVisible(false);

@@ -11,7 +11,7 @@ namespace Mantid
     /** Constructor
     @param ndims : Number of dimensions
     */
-    NullCoordTransform::NullCoordTransform(size_t ndims) : Mantid::API::CoordTransform(3, 3), m_ndims(ndims)
+    NullCoordTransform::NullCoordTransform(size_t ndims) : Mantid::API::CoordTransform(ndims, ndims), m_ndims(ndims)
     {
     }
 

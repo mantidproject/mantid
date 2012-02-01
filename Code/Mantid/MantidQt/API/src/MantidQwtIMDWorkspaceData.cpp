@@ -76,7 +76,7 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(const MantidQwtIMDWorkspace
   m_isDistribution(data.m_isDistribution)
 {
   this->cacheLinePlot();
-  this->setTransform(m_transform, m_dimensionIndex);
+  this->setTransform(data.m_transform, data.m_dimensionIndex);
 }
 
 /// Destructor
@@ -131,6 +131,7 @@ void MantidQwtIMDWorkspaceData::setTransform(Mantid::API::CoordTransform * trans
 void MantidQwtIMDWorkspaceData::cacheLinePlot()
 {
   m_workspace->getLinePlot(m_start, m_end, m_normalization, m_lineX, m_Y, m_E);
+  std::cout << "MantidQwtIMDWorkspaceData found " << m_Y.size() << " points\n";
 }
 
 

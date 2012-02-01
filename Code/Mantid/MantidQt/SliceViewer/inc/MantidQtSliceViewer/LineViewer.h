@@ -9,6 +9,7 @@
 #include <qwt_plot_curve.h>
 #include <qwt_plot.h>
 #include <qwt_painter.h>
+#include "MantidAPI/CoordTransform.h"
 
 namespace MantidQt
 {
@@ -170,6 +171,16 @@ private:
 
     /// Current choice, in the case of auto-determined
     PlotAxisChoice m_currentPlotAxis;
+
+    /// Do nothing coordinate transformation for the preview
+    Mantid::API::CoordTransform * m_transformToOriginal_preview;
+
+    /// Transformation from "line" workspace to the viewed (original) workspace, for the preview
+    Mantid::API::CoordTransform * m_transformToOriginal_full;
+
+    /// Dimension Index into the original workspace to plot as X
+    size_t m_plotOriginalDimensionIndex;
+
 
 };
 
