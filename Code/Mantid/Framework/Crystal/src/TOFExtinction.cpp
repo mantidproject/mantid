@@ -300,7 +300,10 @@ namespace Crystal
                                                  // trans = exp(-mu*tbar)
 
 //  calculate tbar as defined by coppens.
-    tbar = -(double)std::log(trans)/mu;
+    if(mu == 0.0)
+      tbar=0.0;
+    else
+      tbar = -(double)std::log(trans)/mu;
 
     return trans;
   }
