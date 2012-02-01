@@ -16,8 +16,8 @@ namespace API
   /** Constructor
    */
   MDGeometry::MDGeometry() :
-   m_originalWorkspace(),
-   m_transformFromOriginal(NULL), m_transformToOriginal(NULL),
+   m_originalWorkspaces(),
+   m_transforms_FromOriginal(), m_transforms_ToOriginal(),
    m_delete_observer(*this, &MDGeometry::deleteNotificationReceived),
    m_observingDelete(false)
   {
@@ -28,10 +28,10 @@ namespace API
    */
   MDGeometry::~MDGeometry()
   {
-    if (m_transformFromOriginal)
-      delete m_transformFromOriginal;
-    if (m_transformToOriginal)
-      delete m_transformToOriginal;
+    for (size_t i=0; i<m_transforms_FromOriginal.size(); i++)
+      delete m_transforms_FromOriginal[i];
+    for (size_t i=0; i<m_transforms_ToOriginal.size(); i++)
+      delete m_transforms_ToOriginal[i];
     if (m_observingDelete)
     {
       // Stop watching once object is deleted
@@ -225,21 +225,39 @@ namespace API
 
   //---------------------------------------------------------------------------------------------------
   /// @return true if the geometry is defined relative to another workspace.
-  bool MDGeometry::hasOriginalWorkspace() const
+  /// @param index :: index into the vector of original workspaces
+  bool MDGeometry::hasOriginalWorkspace(size_t index) const
   {
-    return bool(m_originalWorkspace);
+    if (index >= m_originalWorkspaces.size())
+      return false;
+    return bool(m_originalWorkspaces[index]);
   }
 
-  /// @return the original workspace to which the basis vectors relate
-  boost::shared_ptr<Workspace> MDGeometry::getOriginalWorkspace() const
+  /// @return the number of original workspaces attached to this one
+  size_t MDGeometry::numOriginalWorkspaces() const
   {
-    return m_originalWorkspace;
+    return m_originalWorkspaces.size();
+  }
+
+
+  //---------------------------------------------------------------------------------------------------
+  /// @return the original workspace to which the basis vectors relate
+  /// @param index :: index into the vector of original workspaces
+  boost::shared_ptr<Workspace> MDGeometry::getOriginalWorkspace(size_t index) const
+  {
+    if (index >= m_originalWorkspaces.size())
+      throw std::runtime_error("MDGeometry::getOriginalWorkspace() invalid index.");
+    return m_originalWorkspaces[index];
   }
 
   /// Set the original workspace to which the basis vectors relate
-  void MDGeometry::setOriginalWorkspace(boost::shared_ptr<Workspace> ws)
+  /// @param ws :: original workspace shared pointer
+  /// @param index :: index into the vector of original workspaces
+  void MDGeometry::setOriginalWorkspace(boost::shared_ptr<Workspace> ws, size_t index)
   {
-    m_originalWorkspace = ws;
+    if (index >= m_originalWorkspaces.size())
+      m_originalWorkspaces.resize(index+1);
+    m_originalWorkspaces[index] = ws;
     // Watch for workspace deletions
     if (!m_observingDelete)
     {
@@ -261,48 +279,64 @@ namespace API
    */
   void MDGeometry::deleteNotificationReceived(Mantid::API::WorkspacePreDeleteNotification_ptr notice)
   {
-    if (bool(m_originalWorkspace))
+    for (size_t i=0; i<m_originalWorkspaces.size(); i++)
     {
-      // Compare the pointer being deleted to the one stored as the original.
-      Workspace_sptr deleted = notice->object();
-      if (this->m_originalWorkspace == deleted)
+      Workspace_sptr original = m_originalWorkspaces[i];
+      if (original)
       {
-        // Clear the reference
-        m_originalWorkspace.reset();
+        // Compare the pointer being deleted to the one stored as the original.
+        Workspace_sptr deleted = notice->object();
+        if (original == deleted)
+        {
+          // Clear the reference
+          m_originalWorkspaces[i].reset();
+        }
       }
     }
   }
 
   //---------------------------------------------------------------------------------------------------
-  /// @return Coordinate Transformation that goes from the original workspace to this workspace's coordinates.
-  Mantid::API::CoordTransform * MDGeometry::getTransformFromOriginal() const
+  /** @return Coordinate Transformation that goes from the original workspace to this workspace's coordinates.
+   * @param index :: index into the array of original workspaces */
+  Mantid::API::CoordTransform * MDGeometry::getTransformFromOriginal(size_t index) const
   {
-    return m_transformFromOriginal;
+    if (index >= m_transforms_FromOriginal.size())
+      throw std::runtime_error("MDGeometry::getTransformFromOriginal(): invalid index.");
+    return m_transforms_FromOriginal[index];
   }
 
   /** Set Coordinate Transformation that goes from the original workspace to this workspace's coordinates.
-   * @param transform :: CoordTransform pointer (this assumes pointer ownership) */
-  void MDGeometry::setTransformFromOriginal(Mantid::API::CoordTransform * transform)
+   * @param transform :: CoordTransform pointer (this assumes pointer ownership)
+   * @param index :: index into the array of original workspaces */
+  void MDGeometry::setTransformFromOriginal(Mantid::API::CoordTransform * transform, size_t index)
   {
-    if (m_transformFromOriginal)
-      delete m_transformFromOriginal;
-    m_transformFromOriginal = transform;
+    if (index >= m_transforms_FromOriginal.size())
+      m_transforms_FromOriginal.resize(index+1);
+    if (m_transforms_FromOriginal[index])
+      delete m_transforms_FromOriginal[index];
+    m_transforms_FromOriginal[index] = transform;
   }
 
   //---------------------------------------------------------------------------------------------------
-  /// @return Coordinate Transformation that goes from this workspace's coordinates to the original workspace coordinates.
-  Mantid::API::CoordTransform * MDGeometry::getTransformToOriginal() const
+  /** @return Coordinate Transformation that goes from this workspace's coordinates to the original workspace coordinates.
+   * @param index :: index into the array of original workspaces */
+  Mantid::API::CoordTransform * MDGeometry::getTransformToOriginal(size_t index) const
   {
-    return m_transformToOriginal;
+    if (index >= m_transforms_ToOriginal.size())
+      throw std::runtime_error("MDGeometry::getTransformFromOriginal(): invalid index.");
+    return m_transforms_ToOriginal[index];
   }
 
   /** Set Coordinate Transformation that goes from this workspace's coordinates to the original workspace coordinates.
-   * @param transform :: CoordTransform pointer (this assumes pointer ownership) */
-  void MDGeometry::setTransformToOriginal(Mantid::API::CoordTransform * transform)
+   * @param transform :: CoordTransform pointer (this assumes pointer ownership)
+   * @param index :: index into the array of original workspaces */
+  void MDGeometry::setTransformToOriginal(Mantid::API::CoordTransform * transform, size_t index)
   {
-    if (m_transformToOriginal)
-      delete m_transformToOriginal;
-    m_transformToOriginal = transform;
+    if (index >= m_transforms_ToOriginal.size())
+      m_transforms_ToOriginal.resize(index+1);
+    if (m_transforms_ToOriginal[index])
+      delete m_transforms_ToOriginal[index];
+    m_transforms_ToOriginal[index] = transform;
   }
 
   //---------------------------------------------------------------------------------------------------

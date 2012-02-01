@@ -78,6 +78,19 @@ public:
     TS_ASSERT(g.hasOriginalWorkspace());
   }
 
+  void test_OriginalWorkspace_multiple()
+  {
+    MDGeometry g;
+    TS_ASSERT(!g.hasOriginalWorkspace());
+    boost::shared_ptr<WorkspaceTester> ws0(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> ws1(new WorkspaceTester());
+    g.setOriginalWorkspace(ws0);
+    g.setOriginalWorkspace(ws1, 1);
+    TS_ASSERT(g.hasOriginalWorkspace());
+    TS_ASSERT(g.hasOriginalWorkspace(1));
+    TS_ASSERT_EQUALS(g.numOriginalWorkspaces(), 2);
+  }
+
   /** If a MDGeometry workspace holds a pointer to an original workspace
    * that gets deleted, remove the pointer and allow it to be destructed.
    */
