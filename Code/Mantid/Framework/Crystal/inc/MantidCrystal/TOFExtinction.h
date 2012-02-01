@@ -36,14 +36,14 @@ namespace Crystal
   const double radtodeg_half = 180.0/M_PI/2.;
 
 
-  class DLLExport tofExtinction  : public API::Algorithm
+  class DLLExport TOFExtinction  : public API::Algorithm
   {
   public:
-    tofExtinction();
-    ~tofExtinction();
+    TOFExtinction();
+    ~TOFExtinction();
     
     /// Algorithm's name for identification 
-    virtual const std::string name() const { return "tofExtinction";};
+    virtual const std::string name() const { return "TOFExtinction";};
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification

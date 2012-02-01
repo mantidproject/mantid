@@ -4,7 +4,7 @@
 *WIKI*/
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidCrystal/tofExtinction.h"
+#include "MantidCrystal/TOFExtinction.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -29,27 +29,27 @@ namespace Crystal
 {
 
   // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(tofExtinction)
+  DECLARE_ALGORITHM(TOFExtinction)
 
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  tofExtinction::tofExtinction()
+  TOFExtinction::TOFExtinction()
   {
   }
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  tofExtinction::~tofExtinction()
+  TOFExtinction::~TOFExtinction()
   {
   }
   
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
-  void tofExtinction::initDocs()
+  void TOFExtinction::initDocs()
   {
     this->setWikiSummary("Sorts a PeaksWorkspace by HKL.");
     this->setOptionalMessage("Sorts a PeaksWorkspace by HKL.");
@@ -58,7 +58,7 @@ namespace Crystal
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
-  void tofExtinction::init()
+  void TOFExtinction::init()
   {
     declareProperty(new WorkspaceProperty<PeaksWorkspace>("InputWorkspace","",Direction::InOut),
         "An input PeaksWorkspace with an instrument.");
@@ -83,7 +83,7 @@ namespace Crystal
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
-  void tofExtinction::exec()
+  void TOFExtinction::exec()
   {
 
     PeaksWorkspace_sptr peaksW = getProperty("InputWorkspace");
@@ -151,34 +151,34 @@ namespace Crystal
     setProperty("OutputWorkspace",peaksW);
 
   }
-  double tofExtinction::getEg(double mosaic)
+  double TOFExtinction::getEg(double mosaic)
   {
-        double Eg = 2.0*std::sqrt(log(2)/(2*M_PI))/(mosaic*M_PI/180.0);
+        double Eg = 2.0*std::sqrt(std::log(2)/(2*M_PI))/(mosaic*M_PI/180.0);
         return Eg;
   }
 ;
-  double tofExtinction::getXqt(double Eg, double cellV, double wl, double twoth, double tbar, double fsq)
+  double TOFExtinction::getXqt(double Eg, double cellV, double wl, double twoth, double tbar, double fsq)
   {
         // Xqt calculated from measured Fsqr;
         double beta = Eg / std::pow(cellV,2) * std::pow(wl,4) / std::pow((std::sin(twoth/2)),2) * tbar * fsq/10;
         double Xqt = std::pow(beta,2) + beta * std::sqrt(std::pow(beta,2) + 1);
         return Xqt;
   }
-  double tofExtinction::getTypeIZachariasen(double Xqt)
+  double TOFExtinction::getTypeIZachariasen(double Xqt)
   {
         // TYPE-I, Zachariasen, W. H. (1967). Acta Cryst. A23, 558 ;
         double y_ext = std::sqrt(1 + 2 * Xqt);
         return y_ext;
   }
 ;
-  double tofExtinction::getTypeIGaussian(double Xqt, double twoth)
+  double TOFExtinction::getTypeIGaussian(double Xqt, double twoth)
   {
         // Type-I, Gaussian, Becker, P. J. & Coppens, P. (1974). Acta Cryst. A30, 129;
         double y_ext =std::sqrt(1 + 2*Xqt + (0.58 + 0.48*std::cos(twoth) + 0.24*std::pow((std::cos(twoth)),2))*std::pow(Xqt,2)/(1 + (0.02 - 0.025*std::cos(twoth))*Xqt));
         return y_ext;
   }
 ;
-  double tofExtinction::getTypeILorentzian(double Xqt, double twoth)
+  double TOFExtinction::getTypeILorentzian(double Xqt, double twoth)
   {
         //TYPE-I Lorentzian, Becker, P. J. & Coppens, P. (1974). Acta Cryst. A30, 129;
         double y_ext;
@@ -190,7 +190,7 @@ namespace Crystal
   }
 ;
         // Type-II extinction correction;
-  double tofExtinction::getRg(double Eg, double r_crystallite, double wl, double twoth)
+  double TOFExtinction::getRg(double Eg, double r_crystallite, double wl, double twoth)
   {
         double r = r_crystallite; // micron
         // Two-theta dependence by Becker & Coppens, Acta Cryst A 30, 129 (1974)
@@ -200,28 +200,28 @@ namespace Crystal
         return Rg;
   }
 ;
-  double tofExtinction::getXqtII(double Rg, double cellV, double wl, double twoth, double tbar, double fsq)
+  double TOFExtinction::getXqtII(double Rg, double cellV, double wl, double twoth, double tbar, double fsq)
   {
         double betaII = Rg / std::pow(cellV,2) * std::pow(wl,4) / std::pow((std::sin(twoth/2)),2) * tbar * fsq/10;
         double XqtII = std::pow(betaII,2) + betaII * std::sqrt(std::pow(betaII,2) + 1);
         return XqtII;
   }
 ;
-  double tofExtinction::getTypeIIZachariasen(double XqtII)
+  double TOFExtinction::getTypeIIZachariasen(double XqtII)
   {
         // TYPE-II, Zachariasen, W. H. (1967). Acta Cryst. A23, 558 ;
         double y_ext_II = std::sqrt(1 + 2 * XqtII);
         return y_ext_II;
   }
 ;
-  double tofExtinction::getTypeIIGaussian(double XqtII, double twoth)
+  double TOFExtinction::getTypeIIGaussian(double XqtII, double twoth)
   {
         //Becker, P. J. & Coppens, P. (1974). Acta Cryst. A30, 129;
         double y_ext_II =std::sqrt(1 + 2*XqtII + (0.58 + 0.48*std::cos(twoth) + 0.24*std::pow((std::cos(twoth)),2))*std::pow(XqtII,2)/(1 + (0.02 - 0.025*std::cos(twoth))*XqtII));
         return y_ext_II;
   }
 ;
-  double tofExtinction::getTypeIILorentzian(double XqtII, double twoth)
+  double TOFExtinction::getTypeIILorentzian(double XqtII, double twoth)
   {
         //TYPE-II Lorentzian, Becker, P. J. & Coppens, P. (1974). Acta Cryst. A30, 129;
         double y_ext_II;
@@ -247,7 +247,7 @@ namespace Crystal
   *
   *       a. j. schultz, june, 2008
   */
-  double tofExtinction::absor_sphere(double& twoth, double& wl, double& tbar)
+  double TOFExtinction::absor_sphere(double& twoth, double& wl, double& tbar)
   {
     int i;
     double mu, mur;         //mu is the linear absorption coefficient,
