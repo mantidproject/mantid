@@ -6,7 +6,7 @@
 #include <vtkImageData.h>
 #include <vtkRectilinearGrid.h>
 #include <vtkStructuredGrid.h>
-#include "MantidVatesAPI/NullCoordTransform.h"
+#include "MantidAPI/NullCoordTransform.h"
 
 using Mantid::API::IMDWorkspace;
 using Mantid::Kernel::CPUTimer;

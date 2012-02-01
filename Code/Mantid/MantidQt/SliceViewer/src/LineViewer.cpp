@@ -10,6 +10,7 @@
 #include <qwt_plot_curve.h>
 #include <qwt_plot.h>
 #include "MantidQtAPI/MantidQwtIMDWorkspaceData.h"
+#include "MantidAPI/NullCoordTransform.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -28,7 +29,8 @@ LineViewer::LineViewer(QWidget *parent)
    m_numBins(100),
    m_allDimsFree(false), m_freeDimX(0), m_freeDimY(1),
    m_fixedBinWidthMode(false), m_fixedBinWidth(0.1), m_binWidth(0.1),
-   m_plotAxis(PlotAuto), m_currentPlotAxis(PlotDistance)
+   m_plotAxis(PlotAuto), m_currentPlotAxis(PlotDistance),
+   m_transformToOriginal_preview(NULL), m_transformToOriginal_full(NULL)
 {
 	ui.setupUi(this);
 
@@ -510,8 +512,9 @@ void LineViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
   m_ws = ws;
   m_thickness = VMD(ws->getNumDims());
   createDimensionWidgets();
-  // TODO: Use NullCoordTransform
-  m_transformToOriginal_preview = NULL;
+  // Make a do-nothing coordinate transformation
+  delete m_transformToOriginal_preview;
+  m_transformToOriginal_preview = new NullCoordTransform(m_ws->getNumDims());
 }
 
 
@@ -863,7 +866,19 @@ void LineViewer::choosePlotAxis()
   {
     m_currentPlotAxis = m_plotAxis;
   }
-
+  // Find the coordinate transformation for plotting
+  if (m_sliceWS)
+  {
+    // If there are two transformations, then the second (index 1) goes to the INTERMEDIATE workspace, which is what we want.
+    if (m_sliceWS->numOriginalWorkspaces() > 0)
+      m_transformToOriginal_full = m_sliceWS->getTransformToOriginal(m_sliceWS->numOriginalWorkspaces() - 1);
+  }
+  // Point to the right index in the ORIGINAL workspace.
+  m_plotOriginalDimensionIndex = 0;
+  if (m_currentPlotAxis == PlotX)
+    m_plotOriginalDimensionIndex = m_freeDimX;
+  else if (m_currentPlotAxis == PlotY)
+    m_plotOriginalDimensionIndex = m_freeDimY;
 
 }
 
@@ -976,7 +991,8 @@ void LineViewer::showPreview()
   this->choosePlotAxis();
   MantidQwtIMDWorkspaceData curveData(m_ws, false,
       m_start, m_end, Mantid::API::VolumeNormalization);
-  curveData.setTransform(m_transformToOriginal_preview, m_plotOriginalDimensionIndex);
+  if (m_currentPlotAxis != PlotDistance)
+    curveData.setTransform(m_transformToOriginal_preview, m_plotOriginalDimensionIndex);
   m_previewCurve->setData(curveData);
 
   if (m_fullCurve->isVisible())
@@ -1001,7 +1017,8 @@ void LineViewer::showFull()
   this->choosePlotAxis();
   MantidQwtIMDWorkspaceData curveData(m_sliceWS, false,
       VMD(), VMD(), Mantid::API::VolumeNormalization);
-  curveData.setTransform(m_transformToOriginal_full, m_plotOriginalDimensionIndex);
+  if (m_currentPlotAxis != PlotDistance)
+    curveData.setTransform(m_transformToOriginal_full, m_plotOriginalDimensionIndex);
   m_fullCurve->setData(curveData);
 
   if (m_previewCurve->isVisible())

@@ -21,7 +21,7 @@
 #include "MantidVatesAPI/RebinningActionManager.h"
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
 #include "MantidVatesAPI/WorkspaceProvider.h"
-#include "MantidVatesAPI/NullCoordTransform.h"
+#include "MantidAPI/NullCoordTransform.h"
 #include <gmock/gmock.h>
 #include <vtkFieldData.h>
 #include <vtkCharArray.h>

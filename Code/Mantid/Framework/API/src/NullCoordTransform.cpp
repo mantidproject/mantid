@@ -1,11 +1,9 @@
-#include "MantidVatesAPI/NullCoordTransform.h"
+#include "MantidAPI/NullCoordTransform.h"
 #include "MantidAPI/CoordTransform.h"
-
-using Mantid::API::CoordTransform;
 
 namespace Mantid
 {
-  namespace VATES
+  namespace API
   {
 
     /** Constructor
