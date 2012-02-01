@@ -438,6 +438,31 @@ public:
   }
 
   //---------------------------------------------------------------------------------------------------
+  /** Line along X, going positive */
+  void test_getLinePlot_3D()
+  {
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, 10);
+    for (size_t i=0; i<1000; i++)
+      ws->setSignalAt(i, double(i));
+    VMD start(0.5, 0.5, 0.5);
+    VMD end(9.5, 0.5, 0.5);
+    std::vector<coord_t> x;
+    std::vector<signal_t> y;
+    std::vector<signal_t> e;
+    ws->getLinePlot(start, end, NoNormalization, x,y,e);
+    TS_ASSERT_EQUALS( x.size(), 11);
+    TS_ASSERT_DELTA( x[0], 0.0, 1e-5);
+    TS_ASSERT_DELTA( x[1], 0.5, 1e-5);
+    TS_ASSERT_DELTA( x[2], 1.5, 1e-5);
+    TS_ASSERT_DELTA( x[10], 9.0, 1e-5);
+
+    TS_ASSERT_EQUALS( y.size(), 10);
+    TS_ASSERT_DELTA( y[0], 0.0, 1e-5);
+    TS_ASSERT_DELTA( y[1], 1.0, 1e-5);
+    TS_ASSERT_DELTA( y[2], 2.0, 1e-5);
+  }
+
+  //---------------------------------------------------------------------------------------------------
   /** Line along X, going negative */
   void test_getLinePlot_horizontal_backwards()
   {

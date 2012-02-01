@@ -50,7 +50,7 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(Mantid::API::IMDWorkspace_c
         else
         {
           // Mid point along each dimension
-          m_start[d] = (dim->getMaximum() + dim->getMinimum()) / 2;
+          m_start[d] = (dim->getMaximum() + dim->getMinimum()) / 2.0;
           m_end[d] = m_start[d];
         }
       }
@@ -132,6 +132,7 @@ void MantidQwtIMDWorkspaceData::cacheLinePlot()
 {
   m_workspace->getLinePlot(m_start, m_end, m_normalization, m_lineX, m_Y, m_E);
   std::cout << "MantidQwtIMDWorkspaceData found " << m_Y.size() << " points\n";
+  std::cout << "Plotting from " << m_start << " to " << m_end << std::endl;
 }
 
 
