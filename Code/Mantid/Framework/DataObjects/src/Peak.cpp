@@ -137,6 +137,27 @@ namespace DataObjects
     this->setDetectorID(m_DetectorID);
     this->setWavelength(m_Wavelength);
   }
+  //----------------------------------------------------------------------------------------------
+  /** Constructor
+   *
+   * @param m_inst :: Shared pointer to the instrument for this peak detection
+   * @param scattering :: fake detector position using scattering angle
+   * @param m_Wavelength :: incident neutron wavelength, in Angstroms
+   * @return
+   */
+  Peak::Peak(Geometry::Instrument_const_sptr m_inst, double scattering, double m_Wavelength)
+  : m_H(0), m_K(0), m_L(0),
+    m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
+    m_GoniometerMatrix(3,3,true),
+    m_InverseGoniometerMatrix(3,3,true),
+    m_RunNumber(0)
+  {
+    this->setInstrument(m_inst);
+    this->setWavelength(m_Wavelength);
+    m_DetectorID = -1;
+    detPos=V3D(sin(scattering),0.0,cos(scattering));
+  }
+
 
   //----------------------------------------------------------------------------------------------
   /** Constructor making a Peak from IPeak interface

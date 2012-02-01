@@ -126,10 +126,11 @@ namespace Crystal
       inst->add(sample);  // This takes care of deletion
       inst->markAsSamplePos(sample);
       Mantid::Geometry::ObjComponent * source = new Mantid::Geometry::ObjComponent("Source");
+      source->setPos(0.0,0.0,-1.0);
       inst->add(source);  // This takes care of deletion
       inst->markAsSource(source);
 
-      Peak peak(inst, -1, wl);
+      Peak peak(inst, scattering, wl);
       peak.setHKL(-h,-k,-l);
       peak.setIntensity(Inti);
       peak.setSigmaIntensity(SigI);
