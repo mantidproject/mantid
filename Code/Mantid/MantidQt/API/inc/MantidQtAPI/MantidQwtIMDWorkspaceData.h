@@ -6,6 +6,7 @@
 #include <QObject>
 #include "MantidQtAPI/MantidQwtWorkspaceData.h"
 #include "MantidKernel/VMD.h"
+#include "MantidAPI/CoordTransform.h"
 
 class MantidQwtIMDWorkspaceData:  public QObject, public MantidQwtWorkspaceData
 {
@@ -17,6 +18,7 @@ public:
       bool isDistribution = false);
 
   MantidQwtIMDWorkspaceData(const MantidQwtIMDWorkspaceData& data);
+  virtual ~MantidQwtIMDWorkspaceData();
 
   virtual QwtData *copy() const;
   virtual MantidQwtIMDWorkspaceData* copy(Mantid::API::IMDWorkspace_sptr workspace) const;
@@ -30,6 +32,8 @@ public:
   size_t esize()const;
 
   bool sameWorkspace(Mantid::API::IMDWorkspace_sptr workspace)const;
+
+  void setTransform(Mantid::API::CoordTransform * transform, size_t dimensionIndex);
 
   /// Inform the data that it is to be plotted on a log y scale
   void setLogScale(bool on);
@@ -57,6 +61,9 @@ private:
 
   /// End point of the line in the workspace
   Mantid::Kernel::VMD m_end;
+
+  /// Direction from start to end, normalized to unity
+  Mantid::Kernel::VMD m_dir;
 
   /// Cached vector of positions along the line (from the start)
   std::vector<Mantid::coord_t> m_lineX;

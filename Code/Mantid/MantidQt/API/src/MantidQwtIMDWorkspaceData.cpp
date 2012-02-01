@@ -56,10 +56,14 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(Mantid::API::IMDWorkspace_c
       }
     }
   }
+  // Unit direction of the line
+  m_dir = m_end - m_start;
+  m_dir.normalize();
   // And cache the X/Y values
   this->cacheLinePlot();
 }
 
+//-----------------------------------------------------------------------------
 /// Copy constructor
 MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(const MantidQwtIMDWorkspaceData& data)
   : QObject(),
@@ -67,12 +71,21 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(const MantidQwtIMDWorkspace
   m_logScale(data.m_logScale),
   m_start(data.m_start),
   m_end(data.m_end),
+  m_dir(data.m_dir),
   m_normalization(data.m_normalization),
   m_isDistribution(data.m_isDistribution)
 {
   this->cacheLinePlot();
+  this->setTransform(m_transform, m_dimensionIndex);
 }
 
+/// Destructor
+MantidQwtIMDWorkspaceData::~MantidQwtIMDWorkspaceData()
+{
+  delete m_transform;
+}
+
+//-----------------------------------------------------------------------------
 /** Cloner/virtual copy constructor
  * @return a copy of this
  */
@@ -87,6 +100,30 @@ MantidQwtIMDWorkspaceData* MantidQwtIMDWorkspaceData::copy(Mantid::API::IMDWorks
   return new MantidQwtIMDWorkspaceData(workspace, m_logScale, m_start, m_end,
       m_normalization, m_isDistribution);
 }
+
+
+//-----------------------------------------------------------------------------
+/** Set the coordinate transformation to use to calculate the plot X values.
+ * The coordinates in the m_workspace will be converted to another,
+ * and then the dimensionIndex^th coordinate will be displayed as the X
+ *
+ * @param transform :: CoordTransform, NULL for none
+ * @param dimensionIndex :: index into the output coordinate space.
+ * @throw std::runtime_error if the dimension index does not match the coordinate
+ */
+void MantidQwtIMDWorkspaceData::setTransform(Mantid::API::CoordTransform * transform, size_t dimensionIndex)
+{
+  m_dimensionIndex = dimensionIndex;
+  if (transform)
+  {
+    m_transform = transform->clone();
+    if (m_dimensionIndex >= m_transform->getOutD())
+      throw std::runtime_error("DimensionIndex is larger than the number of output dimensions of the transformation");
+  }
+  else
+    m_transform = NULL;
+}
+
 
 
 //-----------------------------------------------------------------------------
@@ -111,7 +148,17 @@ size_t MantidQwtIMDWorkspaceData::size() const
 */
 double MantidQwtIMDWorkspaceData::x(size_t i) const
 {
-  return m_lineX[i];
+  double x = m_lineX[i];
+  if (m_transform)
+  {
+    // Coordinates in the workspace being plotted
+    VMD wsCoord = m_start + m_dir * x;
+    // Transform to the original workspace's coordinates
+    VMD originalCoord = m_transform->applyVMD(wsCoord);
+    // And pick only that coordinate
+    x = originalCoord[m_dimensionIndex];
+  }
+  return x;
 }
 
 /** Return the y value of data point i
