@@ -94,6 +94,14 @@ namespace MDEvents
     return affineMatrix;
   }
 
+  /** @return the affine matrix */
+  Mantid::Kernel::Matrix<coord_t> CoordTransformAffine::makeAffineMatrix() const
+  {
+    return affineMatrix;
+  }
+
+
+
   //----------------------------------------------------------------------------------------------
   /** Add a translation (in the output coordinates) to the transform.
    *

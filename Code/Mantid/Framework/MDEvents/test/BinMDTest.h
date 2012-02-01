@@ -436,8 +436,9 @@ public:
    * @param binned1Name :: original, binned direct from MDEW
    * @param binned2Name :: binned from a MDHisto
    * @param origWS :: both should have this as its originalWorkspace
+   * @return binned2 shared pointer
    */
-  void do_compare_histo(std::string binned1Name, std::string binned2Name, std::string origWS)
+  MDHistoWorkspace_sptr do_compare_histo(std::string binned1Name, std::string binned2Name, std::string origWS)
   {
     MDHistoWorkspace_sptr binned1 = boost::dynamic_pointer_cast<MDHistoWorkspace>(AnalysisDataService::Instance().retrieve(binned1Name));
     MDHistoWorkspace_sptr binned2 = boost::dynamic_pointer_cast<MDHistoWorkspace>(AnalysisDataService::Instance().retrieve(binned2Name));
@@ -452,6 +453,7 @@ public:
       TS_ASSERT_DELTA( binned1->getSignalAt(i), binned2->getSignalAt(i), 1e-5);
     }
     TS_ASSERT_EQUALS( numErrors, 0);
+    return binned2;
   }
 
   /** Common setup for double-binning tests */
@@ -504,7 +506,14 @@ public:
         "ForceOrthogonal", "1",
         "Origin", "-10, -10");
 
-    do_compare_histo("binned0", "binned1", "mdew");
+    MDHistoWorkspace_sptr binned1 = do_compare_histo("binned0", "binned1", "mdew");
+
+    // Intermediate workspace (the MDHisto)
+    TS_ASSERT_EQUALS( binned1->numOriginalWorkspaces(), 2);
+    TS_ASSERT_EQUALS( binned1->getOriginalWorkspace(1)->name(), "binned0");
+    // Transforms to/from the INTERMEDIATE workspace exist
+    TS_ASSERT( binned1->getTransformToOriginal(1) );
+    TS_ASSERT( binned1->getTransformFromOriginal(1) );
   }
 
 
@@ -543,7 +552,15 @@ public:
         "ForceOrthogonal", "1",
         "Origin", "0, 0");
     // Check they are the same
-    do_compare_histo("binned0", "binned2", "mdew");
+    MDHistoWorkspace_sptr binned2 = do_compare_histo("binned0", "binned2", "mdew");
+
+    // Intermediate workspace (the MDHisto)
+    TS_ASSERT_EQUALS( binned2->numOriginalWorkspaces(), 2);
+    TS_ASSERT_EQUALS( binned2->getOriginalWorkspace(1)->name(), "binned1");
+    // Transforms to/from the INTERMEDIATE workspace exist
+    TS_ASSERT( binned2->getTransformToOriginal(1) );
+    TS_ASSERT( binned2->getTransformFromOriginal(1) );
+
   }
 
 

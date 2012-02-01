@@ -544,12 +544,20 @@ namespace MDEvents
     outWS = MDHistoWorkspace_sptr(new MDHistoWorkspace(m_binDimensions));
 
     // Saves the geometry transformation from original to binned in the workspace
-    outWS->setTransformFromOriginal( this->m_transformFromOriginal );
-    outWS->setTransformToOriginal( this->m_transformToOriginal );
+    outWS->setTransformFromOriginal( this->m_transformFromOriginal, 0 );
+    outWS->setTransformToOriginal( this->m_transformToOriginal, 0 );
     for (size_t i=0; i<m_bases.size(); i++)
       outWS->setBasisVector(i, m_bases[i]);
     outWS->setOrigin( this->m_origin );
-    outWS->setOriginalWorkspace(m_inWS);
+    outWS->setOriginalWorkspace(m_inWS, 0);
+
+    // And the intermediate WS one too, if any
+    if (m_intermediateWS)
+    {
+      outWS->setOriginalWorkspace(m_intermediateWS, 1);
+      outWS->setTransformFromOriginal(m_transformFromIntermediate, 1);
+      outWS->setTransformToOriginal(m_transformToIntermediate, 1);
+    }
 
     // Wrapper to cast to MDEventWorkspace then call the function
     bool IterateEvents = getProperty("IterateEvents");
