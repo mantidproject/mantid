@@ -67,6 +67,9 @@ LineViewer::LineViewer(QWidget *parent)
   QObject::connect(ui.textPlaneWidth, SIGNAL(textEdited(QString)), this, SLOT(thicknessTextEdited()));
   QObject::connect(ui.radNumBins, SIGNAL(toggled(bool)), this, SLOT(on_radNumBins_toggled()));
   QObject::connect(ui.textBinWidth, SIGNAL(editingFinished()), this, SLOT(textBinWidth_changed()));
+
+  QObject::connect(m_lineOptions, SIGNAL(changedPlotAxis()), this, SLOT(refreshPlot()));
+  QObject::connect(m_lineOptions, SIGNAL(changedNormalization()), this, SLOT(refreshPlot()));
 }
 
 LineViewer::~LineViewer()
@@ -811,7 +814,7 @@ MantidQwtIMDWorkspaceData::PlotAxisChoice LineViewer::getPlotAxis() const
 void LineViewer::showPreview()
 {
   MantidQwtIMDWorkspaceData curveData(m_ws, false,
-      m_start, m_end, Mantid::API::VolumeNormalization);
+      m_start, m_end, m_lineOptions->getNormalization());
   curveData.setOriginalWorkspaceIndex(-1, m_freeDimX, m_freeDimY);
   curveData.setPlotAxisChoice(m_lineOptions->getPlotAxis());
   m_previewCurve->setData(curveData);
@@ -831,6 +834,7 @@ void LineViewer::showPreview()
 }
 
 
+//-----------------------------------------------------------------------------
 /** Calculate and show the full (integrated) line, using the latest
  * integrated workspace. The apply() method must have been called
  * before calling this. */
@@ -838,7 +842,7 @@ void LineViewer::showFull()
 {
   if (!m_sliceWS) return;
   MantidQwtIMDWorkspaceData curveData(m_sliceWS, false,
-      VMD(), VMD(), Mantid::API::VolumeNormalization);
+      VMD(), VMD(), m_lineOptions->getNormalization());
   curveData.setOriginalWorkspaceIndex(int(m_sliceWS->numOriginalWorkspaces())-1, m_freeDimX, m_freeDimY);
   curveData.setPlotAxisChoice(m_lineOptions->getPlotAxis());
   m_fullCurve->setData(curveData);
@@ -854,6 +858,19 @@ void LineViewer::showFull()
   m_plot->setTitle("Integrated Line Plot");
   m_plot->setAxisTitle( QwtPlot::xBottom, QString::fromStdString( curveData.getXAxisLabel() ));;
   m_plot->setAxisTitle( QwtPlot::yLeft, QString::fromStdString( curveData.getYAxisLabel() ));;
+}
+
+//-----------------------------------------------------------------------------
+/** Slot called when the options of the plot display change (normalization
+ * or plot axis.
+ * Refreshes the preview or full plot, whichever is visible.
+ */
+void LineViewer::refreshPlot()
+{
+  if (m_previewCurve->isVisible())
+    showPreview();
+  else
+    showFull();
 }
 
 

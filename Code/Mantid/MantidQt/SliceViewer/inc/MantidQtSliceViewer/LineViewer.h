@@ -74,6 +74,7 @@ public slots:
     void setFreeDimensions(size_t dimX, size_t dimY);
     void on_radNumBins_toggled();
     void textBinWidth_changed();
+    void refreshPlot();
 
 signals:
     /// Signal emitted when the planar width changes

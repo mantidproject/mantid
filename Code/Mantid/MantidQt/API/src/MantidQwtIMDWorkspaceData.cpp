@@ -140,7 +140,7 @@ size_t MantidQwtIMDWorkspaceData::size() const
 double MantidQwtIMDWorkspaceData::x(size_t i) const
 {
   double x = m_lineX[i];
-  if (m_transform)
+  if (m_currentPlotAxis != PlotDistance && m_transform)
   {
     // Coordinates in the workspace being plotted
     VMD wsCoord = m_start + m_dir * x;
@@ -148,6 +148,7 @@ double MantidQwtIMDWorkspaceData::x(size_t i) const
     VMD originalCoord = m_transform->applyVMD(wsCoord);
     // And pick only that coordinate
     x = originalCoord[m_dimensionIndex];
+    std::cout << wsCoord << " -> " << originalCoord << " at index " << i << " is read as " << x << ". m_dimensionIndex is " << m_dimensionIndex <<  std::endl;
   }
   return x;
 }
@@ -308,7 +309,7 @@ std::string MantidQwtIMDWorkspaceData::getXAxisLabel() const
 }
 
 //-----------------------------------------------------------------------------
-/// @return the label for the Y axis
+/// @return the label for the Y axis, based on the selected normalization
 std::string MantidQwtIMDWorkspaceData::getYAxisLabel() const
 {
   switch (m_normalization)
@@ -316,9 +317,9 @@ std::string MantidQwtIMDWorkspaceData::getYAxisLabel() const
   case Mantid::API::NoNormalization:
     return "Signal";
   case Mantid::API::VolumeNormalization:
-    return "Signal normalized by volume";
+    return "Signal/volume";
   case Mantid::API::NumEventsNormalization:
-    return "Signal normalized by number of events";
+    return "Signal/num. events";
   }
   return "Unknown";
 }

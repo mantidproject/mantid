@@ -116,7 +116,7 @@ IMDWorkspace_sptr makeDemoData(bool binned = false)
         "AxisAligned", "0",
         "BasisVectorX", "rx, m, 1.0, 0.0, 0.0, 10.0, 100",
         "BasisVectorY", "ry, m, 0.0, 1.0, 0.0, 10.0, 100",
-        "BasisVectorZ", "ry, m, 0.0, 0.0, 1.0, 10.0, 100",
+        "BasisVectorZ", "rz, m, 0.0, 0.0, 1.0, 10.0, 100",
         "ForceOrthogonal", "1",
         "Origin", "-5, -5, -5");
 

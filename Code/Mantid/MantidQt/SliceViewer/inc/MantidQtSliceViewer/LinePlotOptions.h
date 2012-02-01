@@ -35,9 +35,6 @@ signals:
 private:
   Ui::LinePlotOptionsClass ui;
 
-  /// Workspace being sliced
-  Mantid::API::IMDWorkspace_sptr m_ws;
-
   /// Chosen plot X-axis
   MantidQwtIMDWorkspaceData::PlotAxisChoice m_plotAxis;
 

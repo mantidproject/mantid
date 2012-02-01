@@ -1,7 +1,9 @@
 #include "../inc/MantidQtSliceViewer/LinePlotOptions.h"
 
 LinePlotOptions::LinePlotOptions(QWidget *parent)
-    : QWidget(parent)
+    : QWidget(parent),
+      m_plotAxis(MantidQwtIMDWorkspaceData::PlotAuto),
+      m_normalize(Mantid::API::VolumeNormalization)
 {
 	ui.setupUi(this);
 
