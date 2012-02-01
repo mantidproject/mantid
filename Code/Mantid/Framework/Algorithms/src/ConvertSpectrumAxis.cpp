@@ -17,7 +17,8 @@ For units other than <math>\theta</math>, the value placed in the axis is genera
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/Run.h"
-
+#include <boost/function.hpp>
+#include <boost/bind.hpp>
 #include <cfloat>
 
 namespace Mantid
@@ -123,20 +124,24 @@ namespace Algorithms
     }
     else
     {
-      bool b_doSignedTheta = unitTarget.compare("signed_theta") == 0;
+      //Set up binding to memeber funtion. Avoids condition as part of loop over nHistograms.
+      boost::function<double(IDetector_const_sptr)> thetaFunction;
+      if(unitTarget.compare("signed_theta") == 0)
+      {
+        thetaFunction = boost::bind(&MatrixWorkspace::detectorSignedTwoTheta, inputWS, _1);
+      }
+      else
+      {
+        thetaFunction = boost::bind(&MatrixWorkspace::detectorTwoTheta, inputWS, _1);
+      }
+
       for (size_t i = 0; i < nHist; ++i)
       {
         try 
         {
           IDetector_const_sptr det = inputWS->getDetector(i);
-          if(b_doSignedTheta)
-          {
-            indexMap.insert( std::make_pair( inputWS->detectorSignedTwoTheta(det)*180.0/M_PI , i ) );
-          }
-          else
-          {
-            indexMap.insert( std::make_pair( inputWS->detectorTwoTheta(det)*180.0/M_PI , i ) );
-          }
+          //Invoke relevant member function.
+          indexMap.insert( std::make_pair( thetaFunction(det)*180.0/M_PI , i ) );
         }
         catch(Exception::NotFoundError &)
         {
