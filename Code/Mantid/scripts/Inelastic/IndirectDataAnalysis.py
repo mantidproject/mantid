@@ -392,7 +392,7 @@ def plotInput(inputfiles,spectra=[]):
         layer = graph.activeLayer().setTitle(", ".join(workspaces))
         
 ###############################################################################
-## abscor (previously in SpencerAnalysis) #####################################
+## abscor #####################################################################
 ###############################################################################
 
 def CubicFit(inputWS, spec, verbose=False):
