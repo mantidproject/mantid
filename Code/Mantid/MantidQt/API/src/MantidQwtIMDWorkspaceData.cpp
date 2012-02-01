@@ -26,7 +26,8 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(Mantid::API::IMDWorkspace_c
   m_start(start),
   m_end(end),
   m_normalization(normalize),
-  m_isDistribution(isDistribution)
+  m_isDistribution(isDistribution),
+  m_transform(NULL)
 {
   if (start.getNumDims() == 1 && end.getNumDims() == 1)
   {

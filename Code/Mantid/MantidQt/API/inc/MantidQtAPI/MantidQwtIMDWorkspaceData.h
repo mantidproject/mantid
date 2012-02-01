@@ -72,5 +72,11 @@ private:
 
   /// Is plotting as distribution
   bool m_isDistribution;
+
+  /// Optional coordinate transformation to go from distance on line to another coordinate
+  Mantid::API::CoordTransform * m_transform;
+
+  /// If m_transform is specified, X (on the line) = this dimension index in the output coordinates
+  size_t m_dimensionIndex;
 };
 #endif
