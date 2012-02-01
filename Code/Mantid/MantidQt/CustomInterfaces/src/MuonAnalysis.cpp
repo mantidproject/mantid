@@ -328,6 +328,7 @@ void MuonAnalysis::runSaveGroupButton()
  */
 void MuonAnalysis::runLoadGroupButton()
 {
+  m_updating = true;
   // Get grouping file
   QSettings prevValues;
   prevValues.beginGroup(m_settingsGroup + "LoadGroupFile");
@@ -384,6 +385,7 @@ void MuonAnalysis::runLoadGroupButton()
     }
   }
   updateFront();
+  m_updating = false;
 }
 
 /**
