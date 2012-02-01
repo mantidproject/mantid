@@ -98,7 +98,8 @@ namespace Crystal
 
     // Sequence and run number
     int seqNum = 1;
-    int firstrun = peaks[0].getRunNumber();
+    int firstrun = 0;
+    if(peaks.size()>0) firstrun = peaks[0].getRunNumber();
 
     std::fstream out;
     bool append = getProperty("AppendFile");
