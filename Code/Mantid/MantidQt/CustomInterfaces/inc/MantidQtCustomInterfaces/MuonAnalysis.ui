@@ -298,13 +298,6 @@
             </item>
            </layout>
           </item>
-          <item row="0" column="1" colspan="2">
-           <widget class="QCheckBox" name="appendRun">
-            <property name="text">
-             <string>Append</string>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="0">
            <layout class="QHBoxLayout" name="fileInputLayout">
             <item>
@@ -2085,7 +2078,6 @@
   <tabstop>firstGoodBinFront</tabstop>
   <tabstop>loadCurrent</tabstop>
   <tabstop>mwRunFiles</tabstop>
-  <tabstop>appendRun</tabstop>
   <tabstop>previousRun</tabstop>
   <tabstop>nextRun</tabstop>
   <tabstop>frontGroupGroupPairComboBox</tabstop>
