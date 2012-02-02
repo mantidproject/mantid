@@ -7,8 +7,16 @@
 #include "MantidQtAPI/MantidQwtWorkspaceData.h"
 #include "MantidKernel/VMD.h"
 #include "MantidAPI/CoordTransform.h"
+#include "DllOption.h"
 
-class MantidQwtIMDWorkspaceData:  public QObject, public MantidQwtWorkspaceData
+
+/** This class is used to plot MDWorkspace line plots.
+ * For example, in the LineViewer and via the "Plot MD" menu on workspaces.
+ *
+ * It implements the QwtData interface.
+ *
+ */
+class EXPORT_OPT_MANTIDQT_API MantidQwtIMDWorkspaceData:  public QObject, public MantidQwtWorkspaceData
 {
 
 public:
