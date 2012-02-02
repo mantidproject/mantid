@@ -40,7 +40,7 @@ class DataSets(BaseScriptElement):
         super(DataSets, self).__init__()
         self.reset()
 
-    def to_script(self):
+    def to_script(self, for_automated_reduction=False):
         """
             Generate reduction script
             @param execute: if true, the script will be executed
@@ -58,7 +58,10 @@ class DataSets(BaseScriptElement):
         script += "              TOFRange=%s,\n" % str(self.DataTofRange)
         script += "              QMin=%s,\n" % str(self.q_min)
         script += "              QStep=%s,\n" % str(self.q_step)
-        script += "              OutputWorkspace='reflectivity_%s')" % str(self.data_files[0])
+        if for_automated_reduction:
+            script += "              OutputWorkspace='reflectivity_'+%s)" % str(self.data_files[0])
+        else:
+            script += "              OutputWorkspace='reflectivity_%s')" % str(self.data_files[0])
         script += "\n"
 
         return script

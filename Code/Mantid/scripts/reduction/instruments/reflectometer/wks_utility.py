@@ -242,6 +242,37 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
                         UnitX="MomentumTransfer", 
                         ParentWorkspace=mt1)
 
+def create_grouping(workspace=None, xmin=0, xmax=None, filename=".refl_grouping.xml"):
+    # This should be read from the 
+    npix_x = 304
+    npix_y = 256
+    if workspace is not None:
+        if mtd[workspace].getInstrument().hasParameter("number-of-x-pixels"):
+            npix_x = int(mtd[workspace].getInstrument().getNumberParameter("number-of-x-pixels")[0])
+        if mtd[workspace].getInstrument().hasParameter("number-of-y-pixels"):
+            npix_y = int(mtd[workspace].getInstrument().getNumberParameter("number-of-y-pixels")[0])
+    
+    f = open(filename,'w')
+    f.write("<detector-grouping description=\"Integrated over X\">\n")
+    
+    if xmax is None:
+        xmax = npix_x
+        
+    for y in range(npix_y):
+        # index = max_y * x + y
+        indices = []
+        for x in range(xmin, xmax+1):
+            indices.append(str(npix_y*x + y))
+        
+        # Detector IDs start at zero, but spectrum numbers start at 1
+        # Grouping works on spectrum numbers
+        indices_str = ','.join(indices)
+        f.write("  <group name='%d'>\n" % y)
+        f.write("    <ids val='%s'/>\n" % indices_str)
+        f.write("  </group>\n")
+    
+    f.write("</detector-grouping>\n")
+    f.close()
 
 def angleUnitConversion(value, from_units='degree', to_units='rad'):
     """
