@@ -581,57 +581,6 @@ class FoldData(ReductionStep):
             if ( xval >= range[0] and xval <= range[1] ): result += 1
         return result
 
-class Summary(ReductionStep):
-    """
-    Adds an extra histogram to the workspace(s) that result from the reduction.
-    The options are:
-    
-    * "Sum" - the sum of all the other histograms in the workspace.
-    * "Average" - the average of all the other histograms in the workspace.
-    * "None" - no extra histogram is added.
-    """
-    
-    _multiple_frames = False
-    
-    def __init__(self, MultipleFrames=False):
-        super(Summary, self).__init__()
-        self._multiple_frames = MultipleFrames
-    
-    def execute(self, reducer, file_ws):
-        try: 
-            summary = mtd[file_ws].getInstrument().getStringParameter('Workflow.Summary')[0]
-        except IndexError:
-            return
-        
-        if ((summary != "Sum") and (summary != "Average")):
-            return
-        
-        if ( self._multiple_frames ):
-            try:
-                workspaceNames = mtd[file_ws].getNames()
-            except AttributeError:
-                workspaceNames = [file_ws]
-        else:
-            workspaceNames = [file_ws]
-        
-        for wsName in workspaceNames:
-            try:
-                ws = mtd[wsName]
-            except:
-                continue
-            nSpec = ws.getNumberHistograms()
-            if (nSpec == 0):
-                continue
-            tempName = wsName + '_temp_sum'
-            SumSpectra(InputWorkspace=wsName, OutputWorkspace=tempName)
-            
-            if (summary == 'Average'):
-                tempWs = mtd[tempName]
-                tempWs /= nSpec
-            # Note: Detector info of the output becomes spurious as there will be a third entry for a detector 
-            # that does not exist.
-            ConjoinWorkspaces(wsName, tempName, False)
-
 class ConvertToCm1(ReductionStep):
     """
     Converts the workspaces to cm-1.

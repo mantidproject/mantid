@@ -94,11 +94,6 @@ class IndirectReducer(MSGReducer):
             else:
                 return
         
-        # "Summary" adds another histogram onto the end of the resultant workspaces.
-        # "none", "sum" or "average" are currently supported.
-        step = steps.Summary(MultipleFrames=self._multiple_frames)
-        self.append_step(step)
-        
         step = steps.ConvertToCm1(MultipleFrames=self._multiple_frames)
         step.set_save_to_cm_1(self._save_to_cm_1)
         self.append_step(step)
