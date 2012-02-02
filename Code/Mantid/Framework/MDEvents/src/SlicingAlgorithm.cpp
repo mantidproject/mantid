@@ -453,12 +453,17 @@ namespace MDEvents
     // Now the reverse transformation.
     if (m_outD == inD)
     {
-      // Make the reverse map = if you're in the output dimension "od", what INPUT dimension index is that?
-      std::vector<size_t> reverseDimensionMap(inD, 0);
-      for (size_t od=0; od<m_dimensionToBinFrom.size(); od++)
-        reverseDimensionMap[ m_dimensionToBinFrom[od] ] = od;
-      m_transformToOriginal = new CoordTransformAligned(inD, m_outD,
-          reverseDimensionMap, zeroOrigin, unitScaling);
+//      // Make the reverse map = if you're in the output dimension "od", what INPUT dimension index is that?
+//      std::vector<size_t> reverseDimensionMap(inD, 0);
+//      for (size_t od=0; od<m_dimensionToBinFrom.size(); od++)
+//        reverseDimensionMap[ m_dimensionToBinFrom[od] ] = od;
+//      m_transformToOriginal = new CoordTransformAligned(inD, m_outD,
+//          reverseDimensionMap, zeroOrigin, unitScaling);
+      Matrix<coord_t> mat = m_transformFromOriginal->makeAffineMatrix();
+      mat.Invert();
+      CoordTransformAffine * tmp = new CoordTransformAffine(inD, m_outD);
+      tmp->setMatrix(mat);
+      m_transformToOriginal = tmp;
     }
     else
       // Changed # of dimensions - can't reverse the transform
@@ -515,17 +520,16 @@ namespace MDEvents
     {
       // The intermediate workspace is the MDHistoWorkspace being BINNED
       m_intermediateWS = m_inWS;
-      CoordTransform * originalToIntermediate = m_inWS->getTransformFromOriginal();
+      CoordTransform * originalToIntermediate = m_intermediateWS->getTransformFromOriginal();
       if (originalToIntermediate && (m_originalWS->getNumDims() == m_intermediateWS->getNumDims()))
       {
         try
         {
           // The transform from the INPUT to the INTERMEDIATE ws
-          // = transformToOriginal * originalToIntermediate^-1
+          // intermediate_coords =  [OriginalToIntermediate] * [thisToOriginal] * these_coords
           Matrix<coord_t> matToOriginal = m_transformToOriginal->makeAffineMatrix();
           Matrix<coord_t> matOriginalToIntermediate = originalToIntermediate->makeAffineMatrix();
-          matOriginalToIntermediate.Invert();
-          Matrix<coord_t> matToIntermediate = matToOriginal * matOriginalToIntermediate;
+          Matrix<coord_t> matToIntermediate = matOriginalToIntermediate * matToOriginal;
 
           m_transformToIntermediate = new CoordTransformAffine(m_originalWS->getNumDims(), m_intermediateWS->getNumDims());
           m_transformToIntermediate->setMatrix(matToIntermediate);

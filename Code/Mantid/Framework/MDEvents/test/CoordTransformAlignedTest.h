@@ -104,6 +104,44 @@ public:
     TS_ASSERT_DELTA( output[2], 3.0, 1e-6 );
   }
 
+  /// Turn the aligned transform into an affine transform
+  void test_makeAffineMatrix_2()
+  {
+    size_t dimToBinFrom[3] = {1, 2, 0};
+    coord_t origin[3] = {1, 2, 3};
+    coord_t scaling[3] = {1, 2, 3};
+    CoordTransformAligned cto(3,3, dimToBinFrom, origin, scaling);
+
+    // Do the transform direction
+    coord_t input[3] = {2, 3, 4};
+    coord_t output[3] = {0,0,0};
+    cto.apply(input, output);
+    TS_ASSERT_DELTA( output[0], 2.0, 1e-6 );
+    TS_ASSERT_DELTA( output[1], 4.0, 1e-6 );
+    TS_ASSERT_DELTA( output[2], -3.0, 1e-6 );
+
+    Matrix<coord_t> mat = cto.makeAffineMatrix();
+    CoordTransformAffine ct(3,3);
+    ct.setMatrix(mat);
+
+    // Test in the same way
+    ct.apply(input, output);
+    TS_ASSERT_DELTA( output[0], 2.0, 1e-6 );
+    TS_ASSERT_DELTA( output[1], 4.0, 1e-6 );
+    TS_ASSERT_DELTA( output[2], -3.0, 1e-6 );
+
+    // Do the inverted conversion
+    coord_t input2[3] = {2,4,-3};
+    //std::cout << "Original\n" << mat << std::endl;
+    mat.Invert();
+    //std::cout << "Inverted\n" << mat << std::endl;
+    ct.setMatrix(mat);
+    ct.apply(input2, output);
+    TS_ASSERT_DELTA( output[0], 2.0, 1e-6 );
+    TS_ASSERT_DELTA( output[1], 3.0, 1e-6 );
+    TS_ASSERT_DELTA( output[2], 4.0, 1e-6 );
+  }
+
 
 };
 
