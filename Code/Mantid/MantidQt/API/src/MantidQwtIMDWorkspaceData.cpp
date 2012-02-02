@@ -79,23 +79,36 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(Mantid::API::IMDWorkspace_c
 //-----------------------------------------------------------------------------
 /// Copy constructor
 MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(const MantidQwtIMDWorkspaceData& data)
-  : QObject(),
-  m_workspace(data.m_workspace),
-  m_logScale(data.m_logScale),
-  m_preview(data.m_preview),
-  m_start(data.m_start),
-  m_end(data.m_end),
-  m_dir(data.m_dir),
-  m_normalization(data.m_normalization),
-  m_isDistribution(data.m_isDistribution),
-  m_originalWorkspace(data.m_originalWorkspace),
-  m_transform(NULL),
-  m_plotAxis(data.m_plotAxis), m_currentPlotAxis(data.m_currentPlotAxis)
+  : QObject()
 {
+  this->operator =(data);
+}
+
+//-----------------------------------------------------------------------------
+/** Assignment operator
+ *
+ * @param data :: copy into this
+ */
+MantidQwtIMDWorkspaceData& MantidQwtIMDWorkspaceData::operator=(const MantidQwtIMDWorkspaceData &data)
+{
+  m_workspace = data.m_workspace;
+  m_logScale = data.m_logScale;
+  m_preview = data.m_preview;
+  m_start = data.m_start;
+  m_end = data.m_end;
+  m_dir = data.m_dir;
+  m_normalization = data.m_normalization;
+  m_isDistribution = data.m_isDistribution;
+  m_originalWorkspace = data.m_originalWorkspace;
+  m_transform = NULL;
+  m_plotAxis = data.m_plotAxis;
+  m_currentPlotAxis = data.m_currentPlotAxis;
   if (data.m_transform)
     m_transform = data.m_transform->clone();
   this->cacheLinePlot();
+  return *this;
 }
+
 
 /// Destructor
 MantidQwtIMDWorkspaceData::~MantidQwtIMDWorkspaceData()

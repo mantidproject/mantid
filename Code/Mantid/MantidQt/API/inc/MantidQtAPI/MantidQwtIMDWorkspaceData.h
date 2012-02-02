@@ -34,6 +34,7 @@ public:
       bool isDistribution = false);
 
   MantidQwtIMDWorkspaceData(const MantidQwtIMDWorkspaceData& data);
+  MantidQwtIMDWorkspaceData &operator=(const MantidQwtIMDWorkspaceData &);
   virtual ~MantidQwtIMDWorkspaceData();
 
   virtual QwtData *copy() const;
