@@ -233,15 +233,16 @@ m_mantidui(mantidui)
   settingsGroup->addSubProperty(m_workspaceIndex);
   settingsGroup->addSubProperty(m_startX);
   settingsGroup->addSubProperty(m_endX);
-  settingsGroup->addSubProperty(m_output);
+  
   
   // Only include the cost function when in the dock widget inside mantid plot, not on muon analysis widget
   // Include minimiser and plot difference under a different settings section.
   if (!customFittings)
   {
-  settingsGroup->addSubProperty(m_minimizer);
-  settingsGroup->addSubProperty(m_costFunction);
-  settingsGroup->addSubProperty(m_plotDiff);
+    settingsGroup->addSubProperty(m_output);
+    settingsGroup->addSubProperty(m_minimizer);
+    settingsGroup->addSubProperty(m_costFunction);
+    settingsGroup->addSubProperty(m_plotDiff);
   }
   
   /* Create editors and assign them to the managers */
