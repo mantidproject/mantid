@@ -306,7 +306,7 @@ void MuonAnalysis::runSaveGroupButton()
     ConfigService::Instance().getString("defaultsave.directory"))).toString();
 
   QString filter;
-  filter.append("Files (*.xml *.XML)");
+  filter.append("Files (*.xml)");
   filter += ";;AllFiles (*.*)";
   QString groupingFile = QFileDialog::getSaveFileName(this,
                                    "Save Grouping file as", prevPath, filter);
@@ -425,9 +425,8 @@ void MuonAnalysis::runLoadCurrent()
         QString("does not seem to exist"));
       return;
     }
-    m_previousFilenames.clear();
-    m_previousFilenames.append(argusDAE);
-    inputFileChanged(m_previousFilenames);
+    m_previousFilename = argusDAE;
+    inputFileChanged(argusDAE);
     return;
   }
 
@@ -478,9 +477,8 @@ void MuonAnalysis::runLoadCurrent()
       return;
     }
 
-    m_previousFilenames.clear();
-    m_previousFilenames.append(psudoDAE);
-    inputFileChanged(m_previousFilenames);
+    m_previousFilename = psudoDAE;
+    inputFileChanged(psudoDAE);
     return;
   }
 
@@ -925,40 +923,10 @@ void MuonAnalysis::inputFileChanged_MWRunFiles()
     return;
   }
 
-  QStringList runFiles = m_uiForm.mwRunFiles->getFilenames();
-  
-  if (runFiles.size() == m_previousFilenames.size())
-  {
-    bool same(true);
-    for (int i=0; i<runFiles.size(); ++i)
-    {
-      if (runFiles[i] != m_previousFilenames[i])
-        same = false;
-    }
-    if (same == true)
-      return;
-  }
+  if ( m_previousFilename.compare(m_uiForm.mwRunFiles->getFirstFilename()) == 0 )
+    return;
 
-  m_previousFilenames.clear();
-  m_previousFilenames = m_uiForm.mwRunFiles->getFilenames();
-  
-
-  //if (runFiles.size() <= 1) // Only one been loaded.
-  //{
-  //  if ( m_previousFilename.compare(m_uiForm.mwRunFiles->getFirstFilename()) == 0 )
-  //    return;
-  //  else
-  //    m_previousFilename = m_uiForm.mwRunFiles->getFirstFilename();
-  //}
-  //else
-  //{
-  //  QString range(runFiles[0] + "-" + runFiles[runFiles.size()-1]);
-  //  /////////////////QString lastFile(runFiles[runFiles.size()-1]);
-  //  if (m_previousFilename.compare(range) == 0)
-  //    return;
-  //  else
-  //    m_previousFilename = range;
-  //}
+  m_previousFilename = m_uiForm.mwRunFiles->getFirstFilename();
 
   //int appendSeparator(-1);
   ////appendSeparator = m_previousFilename.find("-");
@@ -1016,51 +984,48 @@ void MuonAnalysis::inputFileChanged_MWRunFiles()
   //else
   //{
   // in case file is selected from browser button check that it actually exist
-  for (int i=0; i<m_previousFilenames.size(); ++i)
+  try
   {
-    try
-    {
-      Poco::File l_path( m_previousFilenames[i].toStdString() );
-      if ( !l_path.exists() )
-      {    
-        QString tempFilename;
-        if (m_previousFilenames[i].contains('.'))
-        {
-          tempFilename = m_previousFilenames[i].left(m_previousFilenames[i].find('.'));
-        }
-        Poco::File l_path( tempFilename.toStdString() );
-        if ( !l_path.exists() )
-        {    
-          QMessageBox::warning(this,"Mantid - MuonAnalysis", m_previousFilenames[i] + " Specified data file does not exist.");
-        }
-        return;
-      }
-    }
-    catch(std::exception &e)
-    {
-      //Specified a network drive.
+    Poco::File l_path( m_previousFilename.toStdString() );
+    if ( !l_path.exists() )
+    {    
       QString tempFilename;
-      if (m_previousFilenames[i].contains('.'))
+      if (m_previousFilename.contains('.'))
       {
-        tempFilename = m_previousFilenames[i].left(m_previousFilenames[i].find('.'));
+        tempFilename = m_previousFilename.left(m_previousFilename.find('.'));
       }
       Poco::File l_path( tempFilename.toStdString() );
-      try
-      {
-        if ( !l_path.exists() )
-          QMessageBox::warning(this,"Mantid - MuonAnalysis", m_previousFilenames[i] + " Specified data file does not exist.");
-      }
-      catch (std::exception &e)
-      {
-        QMessageBox::warning(this,"Mantid - MuonAnalysis", tempFilename + " Specified directory does not exist.");
+      if ( !l_path.exists() )
+      {    
+        QMessageBox::warning(this,"Mantid - MuonAnalysis", m_previousFilename + " Specified data file does not exist.");
       }
       return;
     }
   }
+  catch(std::exception &e)
+  {
+    //Specified a network drive.
+    QString tempFilename;
+    if (m_previousFilename.contains('.'))
+    {
+      tempFilename = m_previousFilename.left(m_previousFilename.find('.'));
+    }
+    Poco::File l_path( tempFilename.toStdString() );
+    try
+    {
+      if ( !l_path.exists() )
+        QMessageBox::warning(this,"Mantid - MuonAnalysis", m_previousFilename + " Specified data file does not exist.");
+    }
+    catch (std::exception &e)
+    {
+      QMessageBox::warning(this,"Mantid - MuonAnalysis", tempFilename + " Specified directory does not exist.");
+    }
+    return;
+  }
   // save selected browse file directory to be reused next time interface is started up
   m_uiForm.mwRunFiles->saveSettings(m_settingsGroup + "mwRunFilesBrowse");
 
-  inputFileChanged(m_previousFilenames);
+  inputFileChanged(m_previousFilename);
   //}
 }
 
@@ -1069,70 +1034,62 @@ void MuonAnalysis::inputFileChanged_MWRunFiles()
  * Note this method does no check of input filename assumed
  * done elsewhere depending on e.g. whether filename came from
  * MWRunFiles or 'get current run' button
- * @param filename Filename of new data file///////////////////////////////////////////////////////////////////////
+ * @param filename Filename of new data file
  */
-void MuonAnalysis::inputFileChanged(const QStringList& files)
+void MuonAnalysis::inputFileChanged(const QString& filename)
 {
-  if (files.size() <= 0)
-    return;
-
   m_updating = true;
 
-  std::string mainFieldDirection;
-  double timeZero;
-  double firstGoodData;
+  Poco::File l_path( filename.toStdString() );
 
-  for (int i=0; i<files.size(); ++i)
+  // and check if file is from a recognised instrument and update instrument combo box
+  QString filenamePart = (Poco::Path(l_path.path()).getFileName()).c_str();
+  filenamePart = filenamePart.toLower();
+  bool foundInst = false;
+  for (int i = 0; i < m_uiForm.instrSelector->count(); i++)
   {
-    QString filename = files[i];
-    Poco::File l_path( filename.toStdString() );
-
-    // and check if file is from a recognised instrument and update instrument combo box
-    QString filenamePart = (Poco::Path(l_path.path()).getFileName()).c_str();
-    filenamePart = filenamePart.toLower();
-    bool foundInst = false;
-    for (int i = 0; i < m_uiForm.instrSelector->count(); i++)
-    {
-      QString instName = m_uiForm.instrSelector->itemText(i).toLower();
+    QString instName = m_uiForm.instrSelector->itemText(i).toLower();
     
-      std::string sfilename = filenamePart.toStdString();
-      std::string sinstName = instName.toStdString();
-      size_t found;
-      found = sfilename.find(sinstName);
-      if ( found != std::string::npos )
-      {
-        m_uiForm.instrSelector->setCurrentIndex(i);
-        foundInst = true;
-        break;
-      }
-    }
-    if ( !foundInst )
+    std::string sfilename = filenamePart.toStdString();
+    std::string sinstName = instName.toStdString();
+    size_t found;
+    found = sfilename.find(sinstName);
+    if ( found != std::string::npos )
     {
-      QMessageBox::warning(this,"Mantid - MuonAnalysis", "Muon file " + filename + " not recognised.");
-      return;
+      m_uiForm.instrSelector->setCurrentIndex(i);
+      foundInst = true;
+      break;
     }
+  }
+  if ( !foundInst )
+  {
+    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Muon file " + filename + " not recognised.");
+    return;
+  }
 
-    QString pyString = "from mantidsimple import *\n"
-        "import sys\n"
-        "try:\n"
-        "  alg = LoadMuonNexus(r'" + filename + "','" + m_workspace_name.c_str() + "', AutoGroup='0')\n"
-        "  print alg.getPropertyValue('MainFieldDirection'), alg.getPropertyValue('TimeZero'), alg.getPropertyValue('FirstGoodData')\n"
-        "except SystemExit, message:\n"
-        "  print ''";
-    QString outputParams = runPythonCode( pyString ).trimmed();
+  QString pyString = "from mantidsimple import *\n"
+      "import sys\n"
+      "try:\n"
+      "  alg = LoadMuonNexus(r'" + filename + "','" + m_workspace_name.c_str() + "', AutoGroup='0')\n"
+      "  print alg.getPropertyValue('MainFieldDirection'), alg.getPropertyValue('TimeZero'), alg.getPropertyValue('FirstGoodData')\n"
+      "except SystemExit, message:\n"
+      "  print ''";
+  QString outputParams = runPythonCode( pyString ).trimmed();
 
-    if ( outputParams.isEmpty() )
-    {
-      QMessageBox::warning(this,"Mantid - MuonAnalysis", "Problem when executing LoadMuonNexus algorithm.");
-      return;
-    }
-
-    // get hold of output parameters
-    std::stringstream strParam(outputParams.toStdString());
-    strParam >> mainFieldDirection >> timeZero >> firstGoodData;
+  if ( outputParams.isEmpty() )
+  {
+    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Problem when executing LoadMuonNexus algorithm.");
+    return;
   }
 
   nowDataAvailable();
+
+  // get hold of output parameters
+  std::stringstream strParam(outputParams.toStdString());
+  std::string mainFieldDirection;
+  double timeZero;
+  double firstGoodData;
+  strParam >> mainFieldDirection >> timeZero >> firstGoodData;
 
   // Get hold of a pointer to a matrix workspace and apply grouping if applicatable
   Workspace_sptr workspace_ptr = AnalysisDataService::Instance().retrieve(m_workspace_name);
@@ -1153,7 +1110,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
 
   // if grouping not set, first see if grouping defined in Nexus
   if ( !isGroupingSet() )
-    setGroupingFromNexus(files[0]);
+    setGroupingFromNexus(filename);
   // if grouping still not set, then take grouping from IDF
   if ( !isGroupingSet() )
     setGroupingFromIDF(mainFieldDirection, matrix_workspace);
@@ -1637,17 +1594,10 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
   {
     QTableWidgetItem *itemName = m_uiForm.groupTable->item(m_groupTableRowInFocus,0);
     QString groupName = itemName->text();
-    ///////////////////////////////////////////////////////////////////////////////////////////
-    std::string workspaceGroupName("");
 
     // Decide on name for workspaceGroup
-    if (m_previousFilenames.size() == 1)
-    {
-      Poco::File l_path( m_previousFilenames[0].toStdString() );
-      workspaceGroupName = Poco::Path(l_path.path()).getFileName();
-    }
-    else
-      workspaceGroupName = "RANGE - NOT IMPLEMENTED"; /////////////////////////////////////////
+    Poco::File l_path( m_previousFilename.toStdString() );
+    std::string workspaceGroupName = Poco::Path(l_path.path()).getFileName();
     std::size_t extPos = workspaceGroupName.find(".");
     if ( extPos!=std::string::npos)
       workspaceGroupName = workspaceGroupName.substr(0,extPos);
@@ -1820,19 +1770,10 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     QTableWidgetItem *item = m_uiForm.pairTable->item(m_pairTableRowInFocus,3);
     QTableWidgetItem *itemName = m_uiForm.pairTable->item(m_pairTableRowInFocus,0);
     QString pairName = itemName->text();
-    
-    //////////////////////////////////////////////////////////////////////
-    std::string workspaceGroupName("");
 
     // Decide on name for workspaceGroup
-    if (m_previousFilenames.size() == 1)
-    {
-      Poco::File l_path( m_previousFilenames[0].toStdString() );
-      workspaceGroupName = Poco::Path(l_path.path()).getFileName();
-    }
-    else
-      workspaceGroupName = "RANGE - NOT IMPLEMENTED"; /////////////////////////////////////////
-    
+    Poco::File l_path( m_previousFilename.toStdString() );
+    std::string workspaceGroupName = Poco::Path(l_path.path()).getFileName();
     std::size_t extPos = workspaceGroupName.find(".");
     if ( extPos!=std::string::npos)
       workspaceGroupName = workspaceGroupName.substr(0,extPos);
@@ -2928,9 +2869,7 @@ void MuonAnalysis::changeRun(int amountToChange)
   // save selected browse file directory to be reused next time interface is started up
   m_uiForm.mwRunFiles->saveSettings(m_settingsGroup + "mwRunFilesBrowse");
 
-  std::vector<QString> files;
-  files.push_back(m_previousFilename);
-  inputFileChanged(files);
+  inputFileChanged(m_previousFilename);
 }
 
 
