@@ -306,7 +306,7 @@ void MuonAnalysis::runSaveGroupButton()
     ConfigService::Instance().getString("defaultsave.directory"))).toString();
 
   QString filter;
-  filter.append("Files (*.XML *.xml)");
+  filter.append("Files (*.xml)");
   filter += ";;AllFiles (*.*)";
   QString groupingFile = API::FileDialogHandler::getSaveFileName(this,
                                    "Save Grouping file as", prevPath, filter);
