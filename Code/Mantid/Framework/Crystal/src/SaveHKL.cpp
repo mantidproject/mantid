@@ -70,6 +70,9 @@ namespace Crystal
       "Radius of the sample in centimeters");
     declareProperty("ScalePeaks", 1.0, mustBePositive->clone(),
       "Multiply FSQ and sig(FSQ) by scaleFactor");
+    declareProperty("MinD", 0.0, "Minimum d-spacing (Angstroms)");
+    declareProperty("MinWL", 0.0, "Minimum wavelength (Angstroms)");
+    declareProperty("MaxWL", 100.0, "Maximum wavelength (Angstroms)");
 
     declareProperty("AppendFile", false, "Append to file if true.\n"
       "If false, new file (default).");
@@ -93,6 +96,9 @@ namespace Crystal
     amu = getProperty("LinearAbsorptionCoef"); // in 1/cm
     radius = getProperty("Radius"); // in cm
     double scaleFactor = getProperty("ScalePeaks"); 
+    double dMin = getProperty("MinD");
+    double wlMin = getProperty("MinWL");
+    double wlMax = getProperty("MaxWL");
 
     std::vector<Peak> peaks = ws->getPeaks();
 
@@ -180,7 +186,9 @@ namespace Crystal
             // Two-theta = polar angle = scattering angle = between +Z vector and the scattered beam
             double scattering = p.getScattering();
             double lambda =  p.getWavelength();
+            double dsp = p.getDSpacing();
             double transmission = absor_sphere(scattering, lambda, tbar);
+            if(dsp < dMin || lambda < wlMin || lambda > wlMax) continue;
 
             // Anvred write from Art Schultz
             //hklFile.write('%4d%4d%4d%8.2f%8.2f%4d%8.4f%7.4f%7d%7d%7.4f%4d%9.5f%9.4f\n' 
@@ -213,7 +221,7 @@ namespace Crystal
               << scattering; //two-theta scattering
 
             out << std::setw( 9 ) << std::fixed << std::setprecision( 4 )
-              << p.getDSpacing();
+              << dsp;
 
             out << std::endl;
 
