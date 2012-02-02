@@ -852,7 +852,7 @@ class SaveItem(ReductionStep):
                 DeleteWorkspace("__save_item_temp")
             elif format == 'aclimax':
                 if (self._save_to_cm_1 == False):
-                    bins = '-2.5, 0.01, 3, -0.005, 500' #meV
+                    bins = '3, -0.005, 500' #meV
                 else:
                     bins = '24, -0.005, 4000' #cm-1
                 Rebin(file_ws, file_ws + '_aclimax_save_temp', bins)
