@@ -1,6 +1,7 @@
 /*WIKI* 
-
-
+ Exctinction correction algorithm
+ Input is Fsq's saved in peak workspace
+ Output is Fsq's corrected for extinction.
 *WIKI*/
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
@@ -72,11 +73,8 @@ namespace Crystal
     declareProperty("Radius", 0.10, "Radius of spherical crystal in cm");
     declareProperty("Mosaic", 0.262, "Mosaic Spread (FWHM) (Degrees)");
     declareProperty("Cell", 255.0, "Unit Cell Volume (Angstroms^3)");
-    declareProperty("RCrystallite", 6.0, "Becker-Coppens Crystallite Radius (micron)");
-    declareProperty("MinD", 0.40, "Minimum d-spacing (Angstroms)");
+    //declareProperty("RCrystallite", 6.0, "Becker-Coppens Crystallite Radius (micron)");
     declareProperty("ScaleFactor", 1.2, "Multiply FSQ and sig(FSQ) by scaleFactor");
-    declareProperty("MinWL", 0.45, "Minimum wavelength (Angstroms)");
-    declareProperty("MaxWL", 3.6, "Maximum wavelength (Angstroms)");
 
   }
 
@@ -92,29 +90,19 @@ namespace Crystal
     double mosaic = getProperty("Mosaic");
     double cell = getProperty("Cell");
     //double r_crystallite = getProperty("RCrystallite");
-    //double dMin = getProperty("MinD");
     double scaleFactor = getProperty("ScaleFactor");
-    //double wlMin = getProperty("MinWL");
-    //double wlMax = getProperty("MaxWL");
     double Eg = getEg(mosaic); // defined by Zachariasen, W. H. (1967). Acta Cryst. A23, 558
     for (int i = 0; i < NumberPeaks; i++)
     {
       Peak & peak1 = peaksW->getPeaks()[i];
-      //double h = peak1.getH();
-      //double k = peak1.getK();
-      //double l = peak1.getL();
       double fsq = peak1.getIntensity()*scaleFactor;
       double sigfsq = peak1.getSigmaIntensity()*scaleFactor;
       double wl = peak1.getWavelength();
-      //double dsp = peak1.getDSpacing();
       double twoth = peak1.getScattering();
       double tbar = 0.0;
       double transmission = absor_sphere(twoth, wl, tbar);
       std::cout << twoth<<"  "<<wl <<"  "<<tbar<<"  "<<transmission<<"\n";
-      //if(dsp < dMin || wl < wlMin || wl > wlMax) continue;
       // Extinction Correction
-      // Use measured Fo_squared in first iteration
-      // y_corr = extinctionCorrection(mosaic, wl, fsq, tbar, twoth, cell, r_crystallite)
 
       double Xqt = getXqt(Eg, cell, wl, twoth, tbar, fsq);
 
@@ -128,8 +116,8 @@ namespace Crystal
       //double y_corrII_Z = getTypeIIZachariasen(XqtII);
       //double y_corrII_G = getTypeIIGaussian(XqtII, twoth);
       //double y_corrII_L = getTypeIILorentzian(XqtII, twoth);
+
       // Apply correction to fsq with Type-I Z for testing
-      //double y_corr = y_corrI_Z;
       double fsq_ys = fsq * y_corr;
       double sigfsq_ys = sigfsq * y_corr;
       sigfsq_ys = std::sqrt(1+sigfsq_ys*sigfsq_ys+std::pow(0.005*sigfsq_ys,2));   // Ad a constant 1 for background and 0.5% of Fsq for instrument error
@@ -137,15 +125,7 @@ namespace Crystal
       peak1.setIntensity(fsq_ys);
       peak1.setSigmaIntensity(sigfsq_ys);
 
-      // output reflection to log file and to hkl file
-      /*printf('%4d%4d%4d%8.2f%8.2f%4d%8.4f%7.4f%7d%7d%7.4f%4d%9.5f%9.5f%9.5f%9.5f%9.5f%9.5f%9.5f%9.5f%9.5f\n' 
-                , (h, k, l, fsq_ys, sigfsq_ys, hstnum, wl, tbar, curhst, seqnum, transmission, dn, twoth, dsp, 
-                y_corr, y_corrI_Z, y_corrI_G, y_corrI_L, y_corrII_Z, y_corrII_G, y_corrII_L));
-
-        // last record all zeros for shelx
-        std::string lastLine = '   0   0   0    0.00    0.00   0  0.0000 0.0000      0      0 0.0000   0  0.0000   0.00000  0.00000';
-
-        printf(lastLine);*/
+      // output reflection to log file and to hkl file with SaveHKL
 
     }
     setProperty("OutputWorkspace",peaksW);
