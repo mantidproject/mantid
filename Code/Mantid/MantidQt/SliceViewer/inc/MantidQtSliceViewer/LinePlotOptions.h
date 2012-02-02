@@ -5,8 +5,9 @@
 #include "ui_LinePlotOptions.h"
 #include "MantidQtAPI/MantidQwtIMDWorkspaceData.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "DllOption.h"
 
-class LinePlotOptions : public QWidget
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER LinePlotOptions : public QWidget
 {
   Q_OBJECT
 
