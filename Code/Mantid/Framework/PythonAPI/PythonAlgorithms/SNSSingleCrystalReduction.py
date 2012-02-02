@@ -324,6 +324,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             if savemat is None:
 		savemat = "lsintUB"+str(samRunnum)+".mat"
             SaveHKL(LinearScatteringCoef=self._amu,LinearAbsorptionCoef=self._smu,Radius=self._radius,ScalePeaks=self._scale,
+                MinDSpacing=self._minD,MinWavelength=self._minWL,MaxWavelength=self._maxWL,
                 Filename=self._outFile, AppendFile=self._append,InputWorkspace=peaksWS)
             self._append = True
             mtd.deleteWorkspace(str(peaksWS))
