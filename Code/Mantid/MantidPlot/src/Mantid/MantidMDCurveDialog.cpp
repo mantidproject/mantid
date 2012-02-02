@@ -18,7 +18,13 @@ MantidMDCurveDialog::MantidMDCurveDialog(QWidget *parent, QString wsName)
   IMDWorkspace_sptr ws = boost::dynamic_pointer_cast<IMDWorkspace>(
     AnalysisDataService::Instance().retrieve( m_wsName.toStdString()) );
   if (ws)
-    m_lineOptions->setOriginalWorkspace(ws);
+  {
+    // Retrieve the original workspace. Prefer the "intermediate" one if available.
+    if (ws->hasOriginalWorkspace())
+      ws = boost::dynamic_pointer_cast<IMDWorkspace>(ws->getOriginalWorkspace( ws->numOriginalWorkspaces()-1 ));
+    if (ws)
+      m_lineOptions->setOriginalWorkspace(ws);
+  }
 
   // Connect the button slots
   QMetaObject::connectSlotsByName(this);
