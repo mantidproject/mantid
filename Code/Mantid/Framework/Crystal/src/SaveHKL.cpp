@@ -96,9 +96,9 @@ namespace Crystal
     amu = getProperty("LinearAbsorptionCoef"); // in 1/cm
     radius = getProperty("Radius"); // in cm
     double scaleFactor = getProperty("ScalePeaks"); 
-    double dMin = getProperty("MinD");
-    double wlMin = getProperty("MinWL");
-    double wlMax = getProperty("MaxWL");
+    double dMin = getProperty("MinDSpacing");
+    double wlMin = getProperty("MinWavelength");
+    double wlMax = getProperty("MaxWavelength");
 
     std::vector<Peak> peaks = ws->getPeaks();
 
