@@ -88,9 +88,11 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(const MantidQwtIMDWorkspace
   m_normalization(data.m_normalization),
   m_isDistribution(data.m_isDistribution),
   m_originalWorkspace(data.m_originalWorkspace),
-  m_transform(data.m_transform->clone() ),
+  m_transform(NULL),
   m_plotAxis(data.m_plotAxis), m_currentPlotAxis(data.m_currentPlotAxis)
 {
+  if (data.m_transform)
+    m_transform = data.m_transform->clone();
   this->cacheLinePlot();
 }
 
