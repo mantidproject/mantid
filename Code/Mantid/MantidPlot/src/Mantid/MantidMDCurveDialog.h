@@ -8,13 +8,22 @@
 /** Dialog asking the user for some options on how to plot a MDWorkspace
  * before plotting
  */
-class MantidMDCurveDialog : public QWidget
+class MantidMDCurveDialog : public QDialog
 {
     Q_OBJECT
 
 public:
     MantidMDCurveDialog(QWidget *parent = 0, QString wsName=QString());
     ~MantidMDCurveDialog();
+
+    LinePlotOptions * getLineOptionsWidget()
+    {return m_lineOptions; }
+
+    bool showErrorBars();
+
+public slots:
+    void on_btnOK_toggled();
+    void on_btnCancel_toggled();
 
 private:
     Ui::MantidMDCurveDialogClass ui;

@@ -8,6 +8,7 @@
 #include "AlgorithmHistoryWindow.h"
 #include "MantidMatrixCurve.h"
 #include "MantidMDCurve.h"
+#include "MantidMDCurveDialog.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidTable.h"
 #include "../../MantidQt/MantidWidgets/ui_SequentialFitDialog.h"
@@ -518,9 +519,20 @@ void MantidUI::showMDPlot()
     appWindow()->setPreferences(g);
     g->newLegend("");
 
-    bool showErrors = true; //Hard-coded to true. Could set this via another menu option.
+    // Create a dialog to ask for options
+    MantidMDCurveDialog * dlg = new MantidMDCurveDialog(appWindow(), wsName);
+    dlg->exec();
+
+    // Extract the errors
+    bool showErrors = dlg->showErrorBars();
+    LinePlotOptions * opts = dlg->getLineOptionsWidget();
+
     MantidMDCurve* curve = new MantidMDCurve(wsName,g,showErrors);
-    UNUSED_ARG(curve);
+    // TODO: normalization
+    curve->mantidData()->setPlotAxisChoice(opts->getPlotAxis());
+
+    // Now pop up the dialog to choose some options. Leave the plot open.
+
 
     IMDWorkspace_sptr mdews = boost::dynamic_pointer_cast<IMDWorkspace>(
       AnalysisDataService::Instance().retrieve( wsName.toStdString()) );

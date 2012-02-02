@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>MantidMDCurveDialogClass</class>
- <widget class="QWidget" name="MantidMDCurveDialogClass">
+ <widget class="QDialog" name="MantidMDCurveDialogClass">
   <property name="geometry">
    <rect>
     <x>0</x>
