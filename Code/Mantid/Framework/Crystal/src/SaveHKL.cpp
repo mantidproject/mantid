@@ -70,9 +70,9 @@ namespace Crystal
       "Radius of the sample in centimeters");
     declareProperty("ScalePeaks", 1.0, mustBePositive->clone(),
       "Multiply FSQ and sig(FSQ) by scaleFactor");
-    declareProperty("MinD", 0.0, "Minimum d-spacing (Angstroms)");
-    declareProperty("MinWL", 0.0, "Minimum wavelength (Angstroms)");
-    declareProperty("MaxWL", 100.0, "Maximum wavelength (Angstroms)");
+    declareProperty("MinDSpacing", 0.0, "Minimum d-spacing (Angstroms)");
+    declareProperty("MinWavelength", 0.0, "Minimum wavelength (Angstroms)");
+    declareProperty("MaxWavelength", 100.0, "Maximum wavelength (Angstroms)");
 
     declareProperty("AppendFile", false, "Append to file if true.\n"
       "If false, new file (default).");
