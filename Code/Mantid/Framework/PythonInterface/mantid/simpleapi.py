@@ -25,7 +25,7 @@ import kernel
 from kernel import funcreturns as _funcreturns
 
 # Make "mtd" and "logger" available if a user just types from mantid.simpleapi import *
-from mantid import mtd, logger
+from mantid import mtd, logger, apiVersion
 
 _ads = api.AnalysisDataService.Instance()
 _framework = api.FrameworkManager.Instance()

@@ -7,6 +7,9 @@ class SimpleAPITest(unittest.TestCase):
 
     def tearDown(self):
         mtd.clear()
+        
+    def test_version_number_equals_2(self):
+        self.assertEquals(simpleapi.apiVersion(), 2)
     
     def test_module_dict_seems_to_be_correct_size(self):
         # Check that the module has at least the same number

@@ -6,7 +6,35 @@ NUM_TUBES = 304
 PIXEL_WIDTH = 0.0007
 PIXEL_HEIGHT = 0.0007
 
-
+def create_grouping(workspace=None):
+    # This should be read from the 
+    npix_x = 304
+    npix_y = 256
+    if workspace is not None:
+        if mtd[workspace].getInstrument().hasParameter("number-of-x-pixels"):
+            npix_x = int(mtd[workspace].getInstrument().getNumberParameter("number-of-x-pixels")[0])
+        if mtd[workspace].getInstrument().hasParameter("number-of-y-pixels"):
+            npix_y = int(mtd[workspace].getInstrument().getNumberParameter("number-of-y-pixels")[0])
+    
+    f = open("REFL_Detector_Grouping_Sum_X.xml",'w')
+    f.write("<detector-grouping description=\"Integrated over X\">\n")
+    
+    # Pixels are in the reverse order as read by the users
+    for y in range(npix_y-1,-1,-1):
+        # index = max_y * x + y
+        indices = range(y, npix_x*(npix_y-1), npix_y)
+        
+        # Detector IDs start at zero, but spectrum numbers start at 1
+        # Grouping works on spectrum numbers
+        indices_lst = [str(i+1) for i in indices]
+        indices_str = ','.join(indices_lst)
+        f.write("  <group name='%d'>\n" % y)
+        f.write("    <ids val='%s'/>\n" % indices_str)
+        f.write("  </group>\n")
+    
+    f.write("</detector-grouping>\n")
+    f.close()
+    
 def create_geometry(file_name=None, pixel_width=None, pixel_height=None):
     inst_name = "REF_L"
     short_name = "REF_L"

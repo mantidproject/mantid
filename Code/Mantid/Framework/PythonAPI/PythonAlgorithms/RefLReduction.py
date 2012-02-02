@@ -297,13 +297,7 @@ class RefLReduction(PythonAlgorithm):
         Divide(LHSWorkspace='DataWks',
                RHSWorkspace='NormWks',
                OutputWorkspace='NormalizedWks')
-        ReplaceSpecialValues("NormalizedWks",NaNValue=0,NaNError=0, OutputWorkspace="NormalizedWks")
-        
-        mt1 = mtd['DataWks']
-        print mt1.readE(0)[:]
-        
-        mt2 = mtd['NormWks']
-        print mt2.readE(0)[:]
+        ReplaceSpecialValues(InputWorkspace="NormalizedWks", NaNValue=0, NaNError=0, InfinityValue=0, InfinityError=0, OutputWorkspace="NormalizedWks")
         
         output_ws = self.getPropertyValue("OutputWorkspace")        
         

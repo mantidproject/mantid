@@ -51,14 +51,10 @@
     <value val="Fixed" />
 </parameter>
 <parameter name="Workflow.FixedGrouping" type="string">
-    <value val="0-69,70-139" />
+    <value val="0-69,70-139,0-139" />
 </parameter>
 <parameter name="Workflow.Masking" type="string">
     <value val="IdentifyNoisyDetectors" />
-</parameter>
-<!-- Available options are "average", "sum", or "none". -->
-<parameter name="Workflow.Summary" type="string">
-    <value val="Average" />
 </parameter>
   
 </component-link>

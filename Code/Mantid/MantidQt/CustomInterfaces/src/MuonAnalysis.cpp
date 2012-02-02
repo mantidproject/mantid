@@ -306,9 +306,9 @@ void MuonAnalysis::runSaveGroupButton()
     ConfigService::Instance().getString("defaultsave.directory"))).toString();
 
   QString filter;
-  filter.append("Files (*.XML *.xml)");
+  filter.append("Files (*.xml *.XML)");
   filter += ";;AllFiles (*.*)";
-  QString groupingFile = API::FileDialogHandler::getSaveFileName(this,
+  QString groupingFile = QFileDialog::getSaveFileName(this,
                                    "Save Grouping file as", prevPath, filter);
 
   if( ! groupingFile.isEmpty() )
@@ -337,7 +337,7 @@ void MuonAnalysis::runLoadGroupButton()
     ConfigService::Instance().getString("defaultload.directory"))).toString();
 
   QString filter;
-  filter.append("Files (*.XML *.xml)");
+  filter.append("Files (*.xml *.XML)");
   filter += ";;AllFiles (*.*)";
   QString groupingFile = QFileDialog::getOpenFileName(this, "Load Grouping file", prevPath, filter);    
   if( groupingFile.isEmpty() || QFileInfo(groupingFile).isDir() ) 
