@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>377</width>
-    <height>165</height>
+    <width>410</width>
+    <height>139</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MD Plot Options</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="mainLayout">
    <property name="spacing">
     <number>4</number>
    </property>

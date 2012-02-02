@@ -27,8 +27,8 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(Mantid::API::IMDWorkspace_c
     bool isDistribution)
   : QObject(),
   m_workspace(workspace),
-  m_logScale(logScale),
-  m_minPositive(0),
+  m_logScale(logScale), m_minPositive(0),
+  m_preview(false),
   m_start(start),
   m_end(end),
   m_normalization(normalize),
@@ -82,6 +82,7 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(const MantidQwtIMDWorkspace
   : QObject(),
   m_workspace(data.m_workspace),
   m_logScale(data.m_logScale),
+  m_preview(data.m_preview),
   m_start(data.m_start),
   m_end(data.m_end),
   m_dir(data.m_dir),
@@ -114,8 +115,13 @@ QwtData * MantidQwtIMDWorkspaceData::copy() const
 /// Return a new data object of the same type but with a new workspace
 MantidQwtIMDWorkspaceData* MantidQwtIMDWorkspaceData::copy(Mantid::API::IMDWorkspace_sptr workspace)const
 {
-  return new MantidQwtIMDWorkspaceData(workspace, m_logScale, m_start, m_end,
+  MantidQwtIMDWorkspaceData * out;
+  out = new MantidQwtIMDWorkspaceData(workspace, m_logScale, m_start, m_end,
       m_normalization, m_isDistribution);
+  out->m_plotAxis = this->m_plotAxis;
+  out->m_currentPlotAxis = this->m_currentPlotAxis;
+  out->setPreviewMode(m_preview);
+  return out;
 }
 
 
@@ -213,10 +219,26 @@ bool MantidQwtIMDWorkspaceData::setAsDistribution(bool on)
 }
 
 //-----------------------------------------------------------------------------
+/** Set which axis to plot as the X of the line plot
+ *
+ * @param choice :: int, -2 = auto, -1 = distance,
+ */
 void MantidQwtIMDWorkspaceData::setPlotAxisChoice(int choice)
 {
   m_plotAxis = choice;
   this->choosePlotAxis();
+}
+
+//-----------------------------------------------------------------------------
+/** Set the signal normalization to use.
+ * This recalculates the line plot.
+ *
+ * @param choice :: one of MDNormalization enum
+ */
+void MantidQwtIMDWorkspaceData::setNormalization(Mantid::API::MDNormalization choice)
+{
+  m_normalization = choice;
+  this->cacheLinePlot();
 }
 
 //-----------------------------------------------------------------------------
@@ -233,6 +255,7 @@ void MantidQwtIMDWorkspaceData::setPlotAxisChoice(int choice)
  */
 void MantidQwtIMDWorkspaceData::setPreviewMode(bool preview)
 {
+  m_preview = preview;
   // If the workspace has no original, then we MUST be in preview mode.
   if (preview || (m_workspace->numOriginalWorkspaces() == 0))
   {
@@ -298,6 +321,8 @@ void MantidQwtIMDWorkspaceData::choosePlotAxis()
 std::string MantidQwtIMDWorkspaceData::getXAxisLabel() const
 {
   std::string xLabel;
+  if (!m_originalWorkspace)
+    return "";
   if (m_currentPlotAxis >= 0)
   {
     // One of the dimensions of the original

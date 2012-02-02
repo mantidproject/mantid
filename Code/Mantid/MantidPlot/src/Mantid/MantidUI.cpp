@@ -506,6 +506,13 @@ having only one non-integrated dimension. Should exit gracefully otherwise.
 void MantidUI::showMDPlot()
 {
   QString wsName = getSelectedWorkspaceName();
+
+  // Create a dialog to ask for options
+  MantidMDCurveDialog * dlg = new MantidMDCurveDialog(appWindow(), wsName);
+  int result = dlg->exec();
+  if (result == QDialog::Rejected)
+    return;
+
   MultiLayer* ml = appWindow()->multilayerPlot(appWindow()->generateUniqueName(wsName));
   ml->setCloseOnEmpty(true);
   Graph *g = ml->activeGraph();
@@ -519,29 +526,24 @@ void MantidUI::showMDPlot()
     appWindow()->setPreferences(g);
     g->newLegend("");
 
-    // Create a dialog to ask for options
-    MantidMDCurveDialog * dlg = new MantidMDCurveDialog(appWindow(), wsName);
-    dlg->exec();
-
-    // Extract the errors
+    // Extract the settings from the dialog opened earlier
     bool showErrors = dlg->showErrorBars();
     LinePlotOptions * opts = dlg->getLineOptionsWidget();
 
+    // Create the curve with defaults
     MantidMDCurve* curve = new MantidMDCurve(wsName,g,showErrors);
-    // TODO: normalization
-    curve->mantidData()->setPlotAxisChoice(opts->getPlotAxis());
+    MantidQwtIMDWorkspaceData * data = curve->mantidData();
+    // Apply the settings
+    data->setPreviewMode(false);
+    data->setPlotAxisChoice(opts->getPlotAxis());
+    data->setNormalization(opts->getNormalization());
+//    // Force a refresh
+//    curve->setData(*data);
 
-    // Now pop up the dialog to choose some options. Leave the plot open.
-
-
-    IMDWorkspace_sptr mdews = boost::dynamic_pointer_cast<IMDWorkspace>(
-      AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
-
+    // Set some of the labels on the plot
     g->setTitle(tr("Workspace ")+wsName);
-    g->setYAxisTitle(tr("Normalised Signal"));
-    Mantid::Geometry::IMDDimension_const_sptr nonIntegratedDim = mdews->getNonIntegratedDimensions()[0];
-    std::string xAxisLabel = nonIntegratedDim->getName() + " / " + nonIntegratedDim->getUnits();
-    g->setXAxisTitle(xAxisLabel.c_str());
+    g->setXAxisTitle(QString::fromStdString(data->getXAxisLabel()));
+    g->setYAxisTitle(QString::fromStdString(data->getYAxisLabel()));
     g->setAntialiasing(false);
     g->setAutoScale();
   }

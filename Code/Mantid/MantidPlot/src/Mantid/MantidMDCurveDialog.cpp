@@ -12,6 +12,7 @@ MantidMDCurveDialog::MantidMDCurveDialog(QWidget *parent, QString wsName)
 {
 	ui.setupUi(this);
 	m_lineOptions = new LinePlotOptions(this);
+	ui.mainLayout->insertWidget(0, m_lineOptions);
 
 	// To set the right dimension labels
   IMDWorkspace_sptr ws = boost::dynamic_pointer_cast<IMDWorkspace>(
@@ -19,6 +20,8 @@ MantidMDCurveDialog::MantidMDCurveDialog(QWidget *parent, QString wsName)
   if (ws)
     m_lineOptions->setOriginalWorkspace(ws);
 
+  // Connect the button slots
+  QMetaObject::connectSlotsByName(this);
 }
 
 /// @return true if error bars are selected
@@ -32,12 +35,14 @@ MantidMDCurveDialog::~MantidMDCurveDialog()
 {
 
 }
-void MantidMDCurveDialog::on_btnOK_toggled()
+void MantidMDCurveDialog::on_btnOK_clicked()
 {
   this->accept();
+  this->close();
 }
 
-void MantidMDCurveDialog::on_btnCancel_toggled()
+void MantidMDCurveDialog::on_btnCancel_clicked()
 {
   this->reject();
+  this->close();
 }

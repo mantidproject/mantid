@@ -43,6 +43,7 @@ public:
 
   void setPreviewMode(bool preview);
   void setPlotAxisChoice(int choice);
+  void setNormalization(Mantid::API::MDNormalization choice);
 
   std::string getXAxisLabel() const;
   std::string getYAxisLabel() const;
@@ -68,8 +69,12 @@ private:
 
   /// Indicates that the data is plotted on a log y scale
   bool m_logScale;
+
   /// lowest positive y value
   mutable double m_minPositive;
+
+  /// Are we in preview mode?
+  bool m_preview;
 
   /// Start point of the line in the workspace
   Mantid::Kernel::VMD m_start;

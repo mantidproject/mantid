@@ -22,8 +22,8 @@ public:
     bool showErrorBars();
 
 public slots:
-    void on_btnOK_toggled();
-    void on_btnCancel_toggled();
+    void on_btnOK_clicked();
+    void on_btnCancel_clicked();
 
 private:
     Ui::MantidMDCurveDialogClass ui;
