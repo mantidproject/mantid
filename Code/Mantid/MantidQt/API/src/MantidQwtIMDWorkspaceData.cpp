@@ -88,9 +88,7 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(const MantidQwtIMDWorkspace
   m_normalization(data.m_normalization),
   m_isDistribution(data.m_isDistribution),
   m_originalWorkspace(data.m_originalWorkspace),
-  m_originalXDim(data.m_originalXDim), m_originalYDim(data.m_originalYDim),
   m_transform(data.m_transform->clone() ),
-  m_dimensionIndex(data.m_dimensionIndex),
   m_plotAxis(data.m_plotAxis), m_currentPlotAxis(data.m_currentPlotAxis)
 {
   this->cacheLinePlot();
@@ -153,8 +151,8 @@ double MantidQwtIMDWorkspaceData::x(size_t i) const
     // Transform to the original workspace's coordinates
     VMD originalCoord = m_transform->applyVMD(wsCoord);
     // And pick only that coordinate
-    x = originalCoord[m_dimensionIndex];
-    std::cout << wsCoord << " -> " << originalCoord << " at index " << i << " is read as " << x << ". m_dimensionIndex is " << m_dimensionIndex <<  std::endl;
+    x = originalCoord[m_currentPlotAxis];
+    //std::cout << wsCoord << " -> " << originalCoord << " at index " << i << " is read as " << x << ". m_dimensionIndex is " << m_dimensionIndex <<  std::endl;
   }
   return x;
 }
@@ -213,25 +211,28 @@ bool MantidQwtIMDWorkspaceData::setAsDistribution(bool on)
 }
 
 //-----------------------------------------------------------------------------
-void MantidQwtIMDWorkspaceData::setPlotAxisChoice(PlotAxisChoice choice)
+void MantidQwtIMDWorkspaceData::setPlotAxisChoice(int choice)
 {
   m_plotAxis = choice;
   this->choosePlotAxis();
 }
 
 //-----------------------------------------------------------------------------
-/** Which original workspace to use relative to the workspace being plotted.
+/** Are we in Preview mode?
  *
- * @param index :: -1 for PREVIEW mode = plot this workspace.
- * @param originalXDim :: the index of the X dimension in the slice viewer.
- * @param originalYDim :: the index of the Y dimension in the slice viewer.
+ * Preview means that we are visualizing the workspace directly, i.e.,
+ * while dragging the line around; Therefore there is no "original" workspace
+ * to change coordinates to.
+ *
+ * If NOT in preview mode, then we get a reference to the original workspace,
+ * which we use to display the right X axis coordinate.
+ *
+ * @param preview :: true for Preview mode.
  */
-void MantidQwtIMDWorkspaceData::setOriginalWorkspaceIndex(int index, size_t originalXDim, size_t originalYDim)
+void MantidQwtIMDWorkspaceData::setPreviewMode(bool preview)
 {
-  m_originalXDim = originalXDim;
-  m_originalYDim = originalYDim;
-
-  if (index < 0)
+  // If the workspace has no original, then we MUST be in preview mode.
+  if (preview || (m_workspace->numOriginalWorkspaces() == 0))
   {
     // Preview mode. No transformation.
     m_originalWorkspace = m_workspace;
@@ -239,8 +240,10 @@ void MantidQwtIMDWorkspaceData::setOriginalWorkspaceIndex(int index, size_t orig
   }
   else
   {
-    m_originalWorkspace = boost::dynamic_pointer_cast<IMDWorkspace>(m_workspace->getOriginalWorkspace(size_t(index)));
-    CoordTransform * temp = m_workspace->getTransformToOriginal(size_t(index));
+    // Refer to the last workspace = the intermediate in the case of MDHisto binning
+    size_t index = m_workspace->numOriginalWorkspaces()-1;
+    m_originalWorkspace = boost::dynamic_pointer_cast<IMDWorkspace>(m_workspace->getOriginalWorkspace(index));
+    CoordTransform * temp = m_workspace->getTransformToOriginal(index);
     if (temp)
       m_transform = temp->clone();
   }
@@ -259,57 +262,56 @@ void MantidQwtIMDWorkspaceData::choosePlotAxis()
   {
     if (m_transform)
     {
-      // Find the X and Y of the start and end points, as would be seen in the SliceViewer
+      // Find the start and end points in the original workspace
       VMD originalStart = m_transform->applyVMD(m_start);
       VMD originalEnd = m_transform->applyVMD(m_end);
       VMD diff = originalEnd - originalStart;
-      double d = fabs(diff[m_originalYDim]) - fabs(diff[m_originalXDim]);
-      if (d < 1e-3)
-        // More line in X than in Y, or nearly the same
-        m_currentPlotAxis = MantidQwtIMDWorkspaceData::PlotX;
-      else
-        // More Y than X
-        m_currentPlotAxis = MantidQwtIMDWorkspaceData::PlotY;
+
+      // Now we find the dimension with the biggest change
+      double largest = -1e100;
+      // Default to 0
+      m_currentPlotAxis = 0;
+      for (size_t d=0; d<diff.getNumDims(); d++)
+      {
+        if (fabs(diff[d]) > largest)
+        {
+          largest = fabs(diff[d]);
+          m_currentPlotAxis = int(d);
+        }
+      }
     }
     else
-      m_currentPlotAxis = PlotDistance;
+      // Drop to distance if the transform does not exist
+      m_currentPlotAxis = MantidQwtIMDWorkspaceData::PlotDistance;
   }
   else
   {
+    // Pass-through the value.
     m_currentPlotAxis = m_plotAxis;
   }
-
-  // Point to the right index in the ORIGINAL workspace.
-  m_dimensionIndex = 0;
-  if (m_currentPlotAxis == MantidQwtIMDWorkspaceData::PlotX)
-    m_dimensionIndex = m_originalXDim;
-  else if (m_currentPlotAxis == MantidQwtIMDWorkspaceData::PlotY)
-    m_dimensionIndex = m_originalYDim;
 }
 
 //-----------------------------------------------------------------------------
 /// @return the label for the X axis
 std::string MantidQwtIMDWorkspaceData::getXAxisLabel() const
 {
-  IMDDimension_const_sptr dimX = m_originalWorkspace->getDimension(m_originalXDim);
-  IMDDimension_const_sptr dimY = m_originalWorkspace->getDimension(m_originalYDim);
-  std::string xLabel = "";
-  switch (m_currentPlotAxis)
+  std::string xLabel;
+  if (m_currentPlotAxis >= 0)
   {
-  case MantidQwtIMDWorkspaceData::PlotX:
-    xLabel = dimX->getName() + " (" + dimX->getUnits() + ")";
-    break;
-  case MantidQwtIMDWorkspaceData::PlotY:
-    xLabel = dimY->getName() + " (" + dimY->getUnits() + ")";
-    break;
-  default:
+    // One of the dimensions of the original
+    IMDDimension_const_sptr dim = m_originalWorkspace->getDimension(m_currentPlotAxis);
+    xLabel = dim->getName() + " (" + dim->getUnits() + ")";
+  }
+  else
+  {
+    // Distance
     // Distance, or not set.
     xLabel = "Distance from start";
-    if (dimX->getUnits() == dimY->getUnits())
-      xLabel += " (" + dimX->getUnits() + ")";
-    else
-      xLabel += " (undefined units)";
-    break;
+//    if (dimX->getUnits() == dimY->getUnits())
+//      xLabel += " (" + dimX->getUnits() + ")";
+//    else
+//      xLabel += " (undefined units)";
+//    break;
   }
   return xLabel;
 }

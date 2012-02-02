@@ -11,7 +11,7 @@
 #include <qwt_plot.h>
 #include "MantidQtAPI/MantidQwtIMDWorkspaceData.h"
 #include "MantidAPI/NullCoordTransform.h"
-#include "../inc/MantidQtSliceViewer/LinePlotOptions.h"
+#include "MantidQtSliceViewer/LinePlotOptions.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -53,7 +53,7 @@ LineViewer::LineViewer(QWidget *parent)
 
   // The plotOptions
   m_lineOptions = new LinePlotOptions(this);
-  m_plotLayout->addWidget(m_lineOptions, 1);
+  m_plotLayout->addWidget(m_lineOptions, 0);
 
 
   // Make the splitter use the minimum size for the controls and not stretch out
@@ -164,8 +164,6 @@ void LineViewer::updateFreeDimensions()
     std::string s = "(in " + m_ws->getDimension(m_freeDimX)->getName() + "-" +  m_ws->getDimension(m_freeDimY)->getName()
         + " plane)";
     ui.lblPlaneWidth->setText(QString::fromStdString(s));
-    // Update the line options GUI
-    m_lineOptions->setXYNames(m_ws->getDimension(m_freeDimX)->getName(), m_ws->getDimension(m_freeDimY)->getName());
   }
 
 }
@@ -493,6 +491,8 @@ void LineViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
   m_ws = ws;
   m_thickness = VMD(ws->getNumDims());
   createDimensionWidgets();
+  // Update the dimensions shown in the original workspace
+  m_lineOptions->setOriginalWorkspace(m_ws);
 }
 
 
@@ -788,7 +788,7 @@ double LineViewer::getBinWidth() const
  *
  * @param choice :: PlotAxisChoice, either Auto, X, Y or Distance.
  */
-void LineViewer::setPlotAxis(MantidQwtIMDWorkspaceData::PlotAxisChoice choice)
+void LineViewer::setPlotAxis(int choice)
 {
   m_lineOptions->setPlotAxis(choice);
 }
@@ -797,7 +797,7 @@ void LineViewer::setPlotAxis(MantidQwtIMDWorkspaceData::PlotAxisChoice choice)
  *
  * @return PlotAxisChoice, either Auto, X, Y or Distance.
  */
-MantidQwtIMDWorkspaceData::PlotAxisChoice LineViewer::getPlotAxis() const
+int LineViewer::getPlotAxis() const
 {
   return m_lineOptions->getPlotAxis();
 }
@@ -815,7 +815,7 @@ void LineViewer::showPreview()
 {
   MantidQwtIMDWorkspaceData curveData(m_ws, false,
       m_start, m_end, m_lineOptions->getNormalization());
-  curveData.setOriginalWorkspaceIndex(-1, m_freeDimX, m_freeDimY);
+  curveData.setPreviewMode(true);
   curveData.setPlotAxisChoice(m_lineOptions->getPlotAxis());
   m_previewCurve->setData(curveData);
 
@@ -843,7 +843,7 @@ void LineViewer::showFull()
   if (!m_sliceWS) return;
   MantidQwtIMDWorkspaceData curveData(m_sliceWS, false,
       VMD(), VMD(), m_lineOptions->getNormalization());
-  curveData.setOriginalWorkspaceIndex(int(m_sliceWS->numOriginalWorkspaces())-1, m_freeDimX, m_freeDimY);
+  curveData.setPreviewMode(false);
   curveData.setPlotAxisChoice(m_lineOptions->getPlotAxis());
   m_fullCurve->setData(curveData);
 

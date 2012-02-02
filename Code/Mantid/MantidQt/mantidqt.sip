@@ -164,14 +164,6 @@ LineViewer
 
 public:
 
-//enum PlotAxisChoice
-//{
-//  PlotAuto = 0,
-//  PlotX = 1,
-//  PlotY = 2,
-//  PlotDistance = 3
-//};
-
 void apply()   throw (std::runtime_error);
 %Docstring
 void LineViewer::apply()
@@ -390,8 +382,28 @@ double LineViewer::getBinWidth()
 
 
 ////*WIKI* ==== Plotting ====
-//void setPlotAxis(PlotAxisChoice choice);
-//PlotAxisChoice getPlotAxis() const;
+void setPlotAxis(int choice);
+%Docstring
+void LineViewer::setPlotAxis(int choice)
+----------------------------------------
+    Choose which coordinates to use as the X axis to plot in the line view.
+   
+    Args:
+        choice :: PlotAxisChoice, either Auto, X, Y or Distance.
+   
+%End
+
+int getPlotAxis() const;
+%Docstring
+int LineViewer::getPlotAxis()
+-----------------------------
+    Return which coordinates to use as the X axis to plot in the line view.
+   
+    Returns:
+        PlotAxisChoice, either Auto, X, Y or Distance.
+   
+%End
+
 
 };
 

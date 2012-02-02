@@ -265,6 +265,12 @@ from the length of the line being drawn</string>
        <enum>QFrame::Raised</enum>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_3">
+       <property name="spacing">
+        <number>4</number>
+       </property>
+       <property name="margin">
+        <number>2</number>
+       </property>
        <item>
         <widget class="QFrame" name="frmPlot">
          <property name="frameShape">

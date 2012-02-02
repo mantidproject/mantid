@@ -14,10 +14,10 @@ public:
   LinePlotOptions(QWidget *parent = 0);
   ~LinePlotOptions();
 
-  void setXYNames(const std::string & xName, const std::string & yName);
+  void setOriginalWorkspace(Mantid::API::IMDWorkspace_sptr ws);
 
-  MantidQwtIMDWorkspaceData::PlotAxisChoice getPlotAxis() const;
-  void setPlotAxis(MantidQwtIMDWorkspaceData::PlotAxisChoice choice);
+  int getPlotAxis() const;
+  void setPlotAxis(int choice);
 
   Mantid::API::MDNormalization getNormalization() const;
   void setNormalization(Mantid::API::MDNormalization method);
@@ -33,10 +33,19 @@ signals:
   void changedNormalization();
 
 private:
+
+  void addPlotRadioButton(const std::string & text, const std::string & tooltip);
+
   Ui::LinePlotOptionsClass ui;
 
+  /// Vector of the various plot axis radio buttons
+  QVector<QRadioButton *> m_radPlots;
+
+  /// Original workspace (gives the dimensions to plot);
+  Mantid::API::IMDWorkspace_sptr m_originalWs;
+
   /// Chosen plot X-axis
-  MantidQwtIMDWorkspaceData::PlotAxisChoice m_plotAxis;
+  int m_plotAxis;
 
   /// Chosen normalization method
   Mantid::API::MDNormalization m_normalize;

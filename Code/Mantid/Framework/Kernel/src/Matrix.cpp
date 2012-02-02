@@ -88,7 +88,7 @@ template<typename T>
 std::ostream& operator<<(std::ostream& os,const Matrix<T>& matrix)
 {
   size_t nrows(matrix.numRows()), ncols(matrix.numCols());
-  os << "Matrix(" << nrows << "," << ncols << ")" << std::endl;
+  os << "Matrix(" << nrows << "," << ncols << ")";
   for( size_t i = 0; i < nrows; ++i )
   {
     for( size_t j = 0; j < ncols; ++j )
@@ -96,7 +96,7 @@ std::ostream& operator<<(std::ostream& os,const Matrix<T>& matrix)
       os << matrix[i][j];
       if( i < nrows - 1 || j < ncols - 1 ) os << ",";
     }
-    os << std::endl;
+    //os << std::endl;
   }
   return os;
 }

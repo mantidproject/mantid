@@ -35,7 +35,7 @@ public:
     void setPlanarWidth(double width);
     void setNumBins(int numBins);
     void setFixedBinWidthMode(bool fixedWidth, double binWidth);
-    void setPlotAxis(MantidQwtIMDWorkspaceData::PlotAxisChoice choice);
+    void setPlotAxis(int choice);
 
     void showPreview();
     void showFull();
@@ -46,7 +46,7 @@ public:
     bool getFixedBinWidthMode() const;
     int getNumBins() const;
     double getBinWidth() const;
-    MantidQwtIMDWorkspaceData::PlotAxisChoice getPlotAxis() const;
+    int getPlotAxis() const;
 
     // For python
     void setStartXY(double x, double y);

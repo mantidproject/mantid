@@ -1,4 +1,7 @@
 #include "../inc/MantidQtSliceViewer/LinePlotOptions.h"
+using namespace Mantid;
+using namespace Mantid::API;
+using namespace Mantid::Geometry;
 
 LinePlotOptions::LinePlotOptions(QWidget *parent)
     : QWidget(parent),
@@ -7,16 +10,15 @@ LinePlotOptions::LinePlotOptions(QWidget *parent)
 {
 	ui.setupUi(this);
 
-	// Connect all the radio buttons
-  QObject::connect(ui.radPlotAuto, SIGNAL(toggled(bool)), this, SLOT(radPlot_changed()));
-  QObject::connect(ui.radPlotX, SIGNAL(toggled(bool)), this, SLOT(radPlot_changed()));
-  QObject::connect(ui.radPlotY, SIGNAL(toggled(bool)), this, SLOT(radPlot_changed()));
-  QObject::connect(ui.radPlotDistance, SIGNAL(toggled(bool)), this, SLOT(radPlot_changed()));
+	addPlotRadioButton("Auto", "Automatically choose between plotting X or Y depending on the angle of the line");
+  addPlotRadioButton("Distance", "Use the distance from the start of the line as the X axis of the plot");
+  // Default to "Auto"
+  m_radPlots[0]->setChecked(true);
 
+	// Connect all the radio buttons
   QObject::connect(ui.radNoNormalization, SIGNAL(toggled(bool)), this, SLOT(radNormalization_changed()));
   QObject::connect(ui.radNumEventsNormalization, SIGNAL(toggled(bool)), this, SLOT(radNormalization_changed()));
   QObject::connect(ui.radVolumeNormalization, SIGNAL(toggled(bool)), this, SLOT(radNormalization_changed()));
-
 }
 
 LinePlotOptions::~LinePlotOptions()
@@ -25,48 +27,82 @@ LinePlotOptions::~LinePlotOptions()
 }
 
 //------------------------------------------------------------------------------
-/** Set the names of the dimensions in X/Y of the slice viewer
+/** Add a radio button to the plot options
  *
- * @param xName :: name of the X dimension
- * @param yName :: name of the Y dimension
+ * @param text :: text on the radio button
+ * @param tooltip :: tooltip
  */
-void LinePlotOptions::setXYNames(const std::string & xName, const std::string & yName)
+void LinePlotOptions::addPlotRadioButton(const std::string & text, const std::string & tooltip)
 {
-  ui.radPlotX->setText(QString::fromStdString("X (" + xName + ")"));
-  ui.radPlotY->setText(QString::fromStdString("Y (" + yName + ")"));
+  QRadioButton * rad;
+  rad = new QRadioButton(ui.widgetPlotAxis);
+  rad->setText(QString::fromStdString(text));
+  rad->setToolTip(QString::fromStdString(tooltip));
+  rad->setVisible(true);
+  // Insert it one before the horizontal spacer.
+  QBoxLayout * layout = qobject_cast<QBoxLayout*>(ui.widgetPlotAxis->layout());
+  layout->insertWidget( layout->count()-1, rad);
+  m_radPlots.push_back(rad);
+  QObject::connect(rad, SIGNAL(toggled(bool)), this, SLOT(radPlot_changed()));
 }
+
+
+
+//------------------------------------------------------------------------------
+/** Set the original workspace, to show the axes plot choice */
+void LinePlotOptions::setOriginalWorkspace(Mantid::API::IMDWorkspace_sptr ws)
+{
+  if (!ws) return;
+  m_originalWs = ws;
+  for (size_t d=0; d<(m_originalWs->getNumDims()); d++)
+  {
+    IMDDimension_const_sptr dim = m_originalWs->getDimension(d);
+    std::string text = dim->getName();
+    std::string tooltip = "Use the "+dim->getName()+" dimension as the X plot axis.";
+    // Index into the radio buttons array
+    int index = int(d)+2;
+    if (m_radPlots.size() > index)
+    {
+      m_radPlots[index]->setText(QString::fromStdString(text));
+      m_radPlots[index]->setToolTip(QString::fromStdString(tooltip));
+    }
+    else
+      addPlotRadioButton(text, tooltip);
+  }
+}
+
 
 //------------------------------------------------------------------------------
 /** Get the choice of X-axis to plot
  *
- * @return option from PlotAxisChoice enum */
-MantidQwtIMDWorkspaceData::PlotAxisChoice LinePlotOptions::getPlotAxis() const
+ * -1 : Distance from start
+ * -2 : Auto-determine which axis
+ * 0+ : The dimension index in the original workspace.
+ *
+ * @return int */
+int LinePlotOptions::getPlotAxis() const
 {
   return m_plotAxis;
 }
 
 
-/** Set the choice of X-axis to plot
+//------------------------------------------------------------------------------
+/** Set the choice of X-axis to plot.
  *
- * @param choice :: option from PlotAxisChoice enum */
-void LinePlotOptions::setPlotAxis(MantidQwtIMDWorkspaceData::PlotAxisChoice choice)
+ * -1 : Distance from start
+ * -2 : Auto-determine which axis
+ * 0+ : The dimension index in the original workspace.
+ *
+ * @param choice :: int */
+void LinePlotOptions::setPlotAxis(int choice)
 {
   m_plotAxis = choice;
-  switch(m_plotAxis)
-  {
-  case MantidQwtIMDWorkspaceData::PlotX:
-    ui.radPlotX->setChecked(true);
-    break;
-  case MantidQwtIMDWorkspaceData::PlotY:
-    ui.radPlotY->setChecked(true);
-    break;
-  case MantidQwtIMDWorkspaceData::PlotDistance:
-    ui.radPlotDistance->setChecked(true);
-    break;
-  default:
-    ui.radPlotAuto->setChecked(true);
-    break;
-  }
+  // Since the radPlots start corresponding with -2, the index = choice + 2
+  int index = m_plotAxis+2;
+  if (index >= m_radPlots.size())
+    m_plotAxis = m_radPlots.size()-1 - 2;
+  // Check the right radio button
+  m_radPlots[index]->setChecked(true);
 }
 
 
@@ -108,14 +144,12 @@ void LinePlotOptions::setNormalization(Mantid::API::MDNormalization method)
  */
 void LinePlotOptions::radPlot_changed()
 {
-  if (ui.radPlotDistance->isChecked())
-    m_plotAxis = MantidQwtIMDWorkspaceData::PlotDistance;
-  else if (ui.radPlotX->isChecked())
-    m_plotAxis = MantidQwtIMDWorkspaceData::PlotX;
-  else if (ui.radPlotY->isChecked())
-    m_plotAxis = MantidQwtIMDWorkspaceData::PlotY;
-  else
-    m_plotAxis = MantidQwtIMDWorkspaceData::PlotAuto;
+  for (int i=0; i<m_radPlots.size(); i++)
+  {
+    if (m_radPlots[i]->isChecked())
+      // Options start at -2 (index 0 in the radPlots)
+      m_plotAxis = i-2;
+  }
   // Send out a signal
   emit changedPlotAxis();
 }

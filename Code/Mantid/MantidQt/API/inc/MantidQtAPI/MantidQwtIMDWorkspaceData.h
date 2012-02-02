@@ -12,21 +12,11 @@ class MantidQwtIMDWorkspaceData:  public QObject, public MantidQwtWorkspaceData
 {
 
 public:
-  /** Enumeration of the ways to plot the X axis of the
-   * line plot.
-   */
-  enum PlotAxisChoice
-  {
-    /// Automatically pick X or Y depending on the angle
-    PlotAuto = 0,
-    /// Plot the X axis, in the coords of the original workspace
-    PlotX = 1,
-    /// Plot the Y axis, in the coords of the original workspace
-    PlotY = 2,
-    /// Plot the distance in the XY plane, relative to the start of the line
-    PlotDistance = 3
-  };
 
+  /// For PlotAxisChoice, auto-determine it
+  static const int PlotAuto = -2;
+  /// For PlotAxisChoice, distance from start of line
+  static const int PlotDistance = -1;
 
   Q_OBJECT
 public:
@@ -51,8 +41,8 @@ public:
 
   bool sameWorkspace(Mantid::API::IMDWorkspace_sptr workspace)const;
 
-  void setOriginalWorkspaceIndex(int index, size_t originalXDim, size_t originalYDim);
-  void setPlotAxisChoice(PlotAxisChoice choice);
+  void setPreviewMode(bool preview);
+  void setPlotAxisChoice(int choice);
 
   std::string getXAxisLabel() const;
   std::string getYAxisLabel() const;
@@ -108,23 +98,16 @@ private:
   /// Original workspace (for purposes of showing alternative coordinates)
   Mantid::API::IMDWorkspace_const_sptr m_originalWorkspace;
 
-  /// Index of the X dimension of the line plot in the original workspace
-  size_t m_originalXDim;
-
-  /// Index of the Y dimension of the line plot in the original workspace
-  size_t m_originalYDim;
-
   /// Optional coordinate transformation to go from distance on line to another coordinate
   Mantid::API::CoordTransform * m_transform;
 
-  /// If m_transform is specified, X (on the line) = this dimension index in the output coordinates
-  size_t m_dimensionIndex;
-
   /// Choice of which X axis to plot.
-  PlotAxisChoice m_plotAxis;
+  int m_plotAxis;
 
-  /// Current choice, in the case of auto-determined
-  PlotAxisChoice m_currentPlotAxis;
+  /// Current choice, in the case of auto-determined.
+  /// This will correspond to -1 (distance)
+  /// or the index into the original workspace dimensions
+  int m_currentPlotAxis;
 
 };
 #endif
