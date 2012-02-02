@@ -308,7 +308,7 @@ void MuonAnalysis::runSaveGroupButton()
   QString filter;
   filter.append("Files (*.xml)");
   filter += ";;AllFiles (*.*)";
-  QString groupingFile = API::FileDialogHandler::getSaveFileName(this,
+  QString groupingFile = QFileDialog::getSaveFileName(this,
                                    "Save Grouping file as", prevPath, filter);
 
   if( ! groupingFile.isEmpty() )
