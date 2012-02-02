@@ -499,10 +499,10 @@ void MantidUI::importBoxDataTable()
   }
 }
 
-/*
-Plots a Curve showing intensities for a MDWorkspace only if the workspace meets certain criteria, such as 
-having only one non-integrated dimension. Should exit gracefully otherwise.
-*/
+/** Plots a Curve showing intensities for a MDWorkspace.
+ * But only if the workspace meets certain criteria, such as
+ * having only one non-integrated dimension. Should exit gracefully otherwise.
+ */
 void MantidUI::showMDPlot()
 {
   QString wsName = getSelectedWorkspaceName();
@@ -512,6 +512,9 @@ void MantidUI::showMDPlot()
   int result = dlg->exec();
   if (result == QDialog::Rejected)
     return;
+  // Extract the settings from the dialog opened earlier
+  bool showErrors = dlg->showErrorBars();
+  LinePlotOptions * opts = dlg->getLineOptionsWidget();
 
   MultiLayer* ml = appWindow()->multilayerPlot(appWindow()->generateUniqueName(wsName));
   ml->setCloseOnEmpty(true);
@@ -526,10 +529,6 @@ void MantidUI::showMDPlot()
     appWindow()->setPreferences(g);
     g->newLegend("");
 
-    // Extract the settings from the dialog opened earlier
-    bool showErrors = dlg->showErrorBars();
-    LinePlotOptions * opts = dlg->getLineOptionsWidget();
-
     // Create the curve with defaults
     MantidMDCurve* curve = new MantidMDCurve(wsName,g,showErrors);
     MantidQwtIMDWorkspaceData * data = curve->mantidData();
@@ -537,8 +536,6 @@ void MantidUI::showMDPlot()
     data->setPreviewMode(false);
     data->setPlotAxisChoice(opts->getPlotAxis());
     data->setNormalization(opts->getNormalization());
-//    // Force a refresh
-//    curve->setData(*data);
 
     // Set some of the labels on the plot
     g->setTitle(tr("Workspace ")+wsName);

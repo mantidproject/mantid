@@ -65,6 +65,8 @@
 #include "Mantid/MantidMDCurve.h"
 
 #include <gsl/gsl_vector.h>
+#include "Mantid/MantidMDCurveDialog.h"
+#include "MantidQtSliceViewer/LinePlotOptions.h"
 
 LayerButton::LayerButton(const QString& text, QWidget* parent)
 : QPushButton(text, parent)
@@ -1309,8 +1311,7 @@ void MultiLayer::dropEvent( QDropEvent * event )
   }
 }
 
-/*
-Drop a workspace onto an exisiting md curve
+/** Drop a workspace onto an exisiting MantidMDCurve (plot of a MDWorkspace)
 @param g : Graph object
 @param originalCurve : the original MantidMDCurve onto which the new workspace(s) are to be dropped
 @param tree : Mantid Tree widget
@@ -1320,6 +1321,16 @@ void MultiLayer::dropOntoMDCurve(Graph *g, MantidMDCurve* originalCurve, MantidT
   UNUSED_ARG(originalCurve);
   using namespace Mantid::API;
   QList<QString> allWsNames = tree->getSelectedWorkspaceNames();
+
+  if (allWsNames.size() <= 0) return;
+  // Create a dialog to ask for options. Use the first workspace to choose the dimensions
+  MantidMDCurveDialog * dlg = new MantidMDCurveDialog(g, allWsNames[0]);
+  int result = dlg->exec();
+  if (result == QDialog::Rejected)
+    return;
+  // Extract the settings from the dialog opened earlier
+  bool showErrors = dlg->showErrorBars();
+  LinePlotOptions * opts = dlg->getLineOptionsWidget();
 
   // Loop through all selected workspaces create curves and put them onto the graph
   for (int i=0; i<allWsNames.size(); i++)
@@ -1333,7 +1344,13 @@ void MultiLayer::dropOntoMDCurve(Graph *g, MantidMDCurve* originalCurve, MantidT
       QString currentName(imdWS->name().c_str());
       try
       {
-        new MantidMDCurve(currentName,g,true);
+        MantidMDCurve* curve = new MantidMDCurve(currentName, g, showErrors);
+        MantidQwtIMDWorkspaceData * data = curve->mantidData();
+        // Apply the settings
+        data->setPreviewMode(false);
+        data->setPlotAxisChoice(opts->getPlotAxis());
+        data->setNormalization(opts->getNormalization());
+
       }
       catch(std::invalid_argument& ex)
       {
