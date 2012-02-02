@@ -11,6 +11,7 @@ using Mantid::API::NullCoordTransform;
 using Mantid::API::CoordTransform;
 using Mantid::API::IMDWorkspace;
 
+/** This is needed to successfully compile on windows. */
 QwtData & QwtData::operator=(class QwtData const &)
 {
   throw std::runtime_error("QwtData::operator=() not implemented on the abstract base class.");

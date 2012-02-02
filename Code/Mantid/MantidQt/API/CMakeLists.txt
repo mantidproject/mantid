@@ -77,8 +77,8 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
 
 # For Windows:
 add_definitions ( -DIN_MANTIDQT_API )
-add_definitions ( -DQWT_DLL )
-add_definitions ( -DQWT_MAKEDLL )
+# add_definitions ( -DQWT_DLL )
+# add_definitions ( -DQWT_MAKEDLL )
 
 # Use a precompiled header where they are supported
 ADD_PRECOMPILED_HEADER( inc/MantidQtAPI/PrecompiledHeader.h MantidQtAPI src/PrecompiledHeader.cpp ALL_SRC INC_FILES )
