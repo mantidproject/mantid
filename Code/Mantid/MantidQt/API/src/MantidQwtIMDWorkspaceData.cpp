@@ -11,6 +11,11 @@ using Mantid::API::NullCoordTransform;
 using Mantid::API::CoordTransform;
 using Mantid::API::IMDWorkspace;
 
+QwtData & QwtData::operator=(class QwtData const &)
+{
+  throw std::runtime_error("QwtData::operator=() not implemented on the abstract base class.");
+}
+
 /** Constructor
  *
  * @param workspace :: IMDWorkspace to plot

@@ -17,18 +17,27 @@ m_isDistribution(distr)
 
 /// Copy constructor
 MantidQwtMatrixWorkspaceData::MantidQwtMatrixWorkspaceData(const MantidQwtMatrixWorkspaceData& data)
-: QObject(),
-m_workspace(data.m_workspace),
-m_spec(data.m_spec),
-m_X(data.m_workspace->readX(data.m_spec)),
-m_Y(data.m_workspace->readY(data.m_spec)),
-m_E(data.m_workspace->readE(data.m_spec)),
-m_isHistogram(m_workspace->isHistogramData()),
-m_binCentres(data.m_binCentres),
-m_logScale(data.m_logScale),
-m_minPositive(0),
-m_isDistribution(data.m_isDistribution)
-{}
+: QObject()
+{
+  this->operator =(data);
+}
+
+/** Assignment operator */
+MantidQwtMatrixWorkspaceData& MantidQwtMatrixWorkspaceData::operator=(const MantidQwtMatrixWorkspaceData &data)
+{
+  m_workspace = data.m_workspace;
+  m_spec = data.m_spec;
+  m_X = data.m_workspace->readX(data.m_spec);
+  m_Y = data.m_workspace->readY(data.m_spec);
+  m_E = data.m_workspace->readE(data.m_spec);
+  m_isHistogram = m_workspace->isHistogramData();
+  m_binCentres = data.m_binCentres;
+  m_logScale = data.m_logScale;
+  m_minPositive = 0;
+  m_isDistribution = data.m_isDistribution;
+  return *this;
+}
+
 
 /** Size of the data set
  */

@@ -15,11 +15,9 @@ class EXPORT_OPT_MANTIDQT_API MantidQwtMatrixWorkspaceData:  public QObject,  pu
 {
   Q_OBJECT
 public:
-  /// Constructor
   MantidQwtMatrixWorkspaceData(Mantid::API::MatrixWorkspace_const_sptr workspace, int specIndex, const bool logScale, bool distr = false);
-
-  /// Copy constructor
   MantidQwtMatrixWorkspaceData(const MantidQwtMatrixWorkspaceData& data);
+  MantidQwtMatrixWorkspaceData& operator=(const MantidQwtMatrixWorkspaceData &);
 
     //! @return Pointer to a copy (virtual copy constructor)
   virtual QwtData *copy() const {return new MantidQwtMatrixWorkspaceData(*this);}
