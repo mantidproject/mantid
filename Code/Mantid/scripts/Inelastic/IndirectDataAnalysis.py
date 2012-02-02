@@ -286,6 +286,7 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=True, Plot=False):
     verbOp = 'True'
     if verbOp:
         mtd.sendLogMessage('Starting MSDfit')
+    workdir = mantid.getConfigProperty('defaultsave.directory')
     log_type = 'sample'
     output = []
     DataX = []
@@ -350,22 +351,24 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=True, Plot=False):
         DataE.append(A1_Err*3.0)
         np += 1
         if Plot:
-#            graph=plotSpectrum([lnWS,outWS+'_Workspace'],0, 1)
-            graph=plotSpectrum(outWS+'_Workspace',(0,1),True)
-            graph.activeLayer().setTitle(title)
-            graph.activeLayer().setAxisTitle(Layer.Bottom,'Q^2')
-            graph.activeLayer().setAxisTitle(Layer.Left,'ln(intensity)')
+            data_plot=plotSpectrum(lnWS,0, True)
+            data_plot.activeLayer().setTitle(title)
+            data_plot.activeLayer().setAxisTitle(Layer.Bottom,'Q^2')
+            data_plot.activeLayer().setAxisTitle(Layer.Left,'ln(intensity)')
+            fit_plot=plotSpectrum(outWS+'_Workspace',(0,1),True)
+            mergePlots(data_plot,fit_plot)
     fitWS = root[0:8]+'_MsdFit'
     DataX.append(2*DataX[np-1]-DataX[np-2])
     CreateWorkspace(fitWS,DataX,DataY,DataE,1)
     if Plot:
-        graph1=plotSpectrum(fitWS,0,True)
-        graph1.activeLayer().setAxisTitle(Layer.Bottom,xlabel)
-        graph1.activeLayer().setAxisTitle(Layer.Left,'<u2>')
+        msd_plot=plotSpectrum(fitWS,0,True)
+        msd_plot.activeLayer().setAxisTitle(Layer.Bottom,xlabel)
+        msd_plot.activeLayer().setAxisTitle(Layer.Left,'<u2>')
     if Save:
-        SaveNexusProcessed(fitWS, fitWS+'.nxs', Title=fitWS)
-    if verbOp:
-        mtd.sendLogMessage('Output file : '+fitWS)  
+        fit_path = os.path.join(workdir, fitWS+'.nxs')					# path name for nxs file
+        SaveNexusProcessed(fitWS, fit_path, Title=fitWS)
+        if verbOp:
+            mtd.sendLogMessage('Output file : '+fit_path)  
     return output
 
 def plotFury(inWS_n, spec):
@@ -461,43 +464,49 @@ def abscorFeeder(sample, container, geom, useCor):
     verbOp = True
     Plot = True
     workdir = mantid.getConfigProperty('defaultsave.directory')
-    if useCor:
-        s_hist = mtd[sample].getNumberHistograms()       # no. of hist/groups in sam
-        if container != '':
-            c_hist = mtd[container].getNumberHistograms()
-            if s_hist != c_hist:	# check that no. groups are the same
-                error = 'Can histograms (' +str(c_hist) + ') not = Sample (' +str(s_hist) +')'	
-                exit(error)
-            else:
-                if verbOp:
-                    mtd.sendLogMessage('Correcting sample ' + sample + ' with ' + container)
+    s_hist = mtd[sample].getNumberHistograms()       # no. of hist/groups in sam
+    Xin = mtd[sample].readX(0)
+    sxlen = len(Xin)
+    if container != '':
+        c_hist = mtd[container].getNumberHistograms()
+        Xin = mtd[container].readX(0)
+        cxlen = len(Xin)
+        if s_hist != c_hist:	# check that no. groups are the same
+            error = 'Can histograms (' +str(c_hist) + ') not = Sample (' +str(s_hist) +')'	
+            exit(error)
         else:
-            if verbOp:
-                mtd.sendLogMessage('Correcting sample ' + sample)
-        file = sample[:-3] + geom +'_Abs.nxs'
-        path = os.path.join(workdir, file)					# path name for nxs file
+            if sxlen != cxlen:	# check that array lengths are the same
+                error = 'Can array length (' +str(cxlen) + ') not = Sample (' +str(sxlen) +')'	
+                exit(error)
+    if useCor:
         if verbOp:
-            mtd.sendLogMessage('Correction file :'+path)
-        corrections = [loadNexus(path)]
-        result = applyCorrections(sample, container, corrections, verbOp)
-        SaveNexusProcessed(result,os.path.join(workdir,result+'.nxs'))
-        plot_list = [result,sample]
+            mtd.sendLogMessage('Correcting sample ' + sample + ' with ' + container)
+        file = sample[:-3] + geom +'_Abs.nxs'
+        abs_path = os.path.join(workdir, file)					# path name for nxs file
+        if verbOp:
+            mtd.sendLogMessage('Correction file :'+abs_path)
+        corrections = [loadNexus(abs_path)]
+        cor_result = applyCorrections(sample, container, corrections, verbOp)
+        cor_path = os.path.join(workdir,cor_result+'.nxs')
+        SaveNexusProcessed(cor_result,cor_path)
+        plot_list = [cor_result,sample]
         if ( container != '' ):
             plot_list.append(container)
         if verbOp:
-            mtd.sendLogMessage('Output files created : '+workdir+result+'.nxs')
+            mtd.sendLogMessage('Output file created : '+cor_path)
         if Plot:
-           graph=plotSpectrum(plot_list,0)
+           cor_plot=plotSpectrum(plot_list,0)
     else:
         if ( container == '' ):
             sys.exit('Invalid options - nothing to do!')
         else:
-            result = sample[0:8] +'_Subtract_'+ container[3:8]
-            Minus(sample,container,result)
-            SaveNexusProcessed(result,os.path.join(workdir,result+'.nxs'))
+            sub_result = sample[0:8] +'_Subtract_'+ container[3:8]
+            Minus(sample,container,sub_result)
+            sub_path = os.path.join(workdir,sub_result+'.nxs')
+            SaveNexusProcessed(sub_result,sub_path)
             if verbOp:
 	            mtd.sendLogMessage('Subtracting '+container+' from '+sample)
-	            mtd.sendLogMessage('Output file created : '+workdir+result+'.nxs')
+	            mtd.sendLogMessage('Output file created : '+sub_path)
             if Plot:
-                graph=plotSpectrum([result,sample,container],0)
+                sub_plot=plotSpectrum([sub_result,sample,container],0)
     return
