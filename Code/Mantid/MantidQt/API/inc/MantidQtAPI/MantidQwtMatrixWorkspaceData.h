@@ -5,12 +5,13 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include <QObject>
 #include "MantidQtAPI/MantidQwtWorkspaceData.h"
+#include "DllOption.h"
 
 //=================================================================================================
 //=================================================================================================
 /**  This class implements QwtData with direct access to a spectrum in a MatrixWorkspace.
  */
-class MantidQwtMatrixWorkspaceData:  public QObject,  public MantidQwtWorkspaceData
+class EXPORT_OPT_MANTIDQT_API MantidQwtMatrixWorkspaceData:  public QObject,  public MantidQwtWorkspaceData
 {
   Q_OBJECT
 public:
