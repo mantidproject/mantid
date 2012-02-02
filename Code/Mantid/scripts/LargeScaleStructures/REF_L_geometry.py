@@ -19,8 +19,7 @@ def create_grouping(workspace=None):
     f = open("REFL_Detector_Grouping_Sum_X.xml",'w')
     f.write("<detector-grouping description=\"Integrated over X\">\n")
     
-    # Pixels are in the reverse order as read by the users
-    for y in range(npix_y-1,-1,-1):
+    for y in range(npix_y):
         # index = max_y * x + y
         indices = range(y, npix_x*(npix_y-1), npix_y)
         

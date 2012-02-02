@@ -34,11 +34,29 @@ def counts_vs_y_distribution(file_path, minTOF, maxTOF):
     ws_output = "__REFL_Y_distribution"
     graph_name = "Counts vs Y"
     LoadEventNexus(Filename=file_path, OutputWorkspace=ws)
-    ws_integrated = wks_utility.createIntegratedWorkspace(mtd[ws],ws_output,0,303,0,255)
+    
+    # 1D plot
+    GroupDetectors(InputWorkspace=ws, OutputWorkspace=ws_output,
+                   MapFile="Grouping/REFL_Detector_Grouping_Sum_X.xml")
     Transpose(InputWorkspace=ws_output, OutputWorkspace=ws_output)
-
+    
+    # The pixel numbers start at 1 from the perspective of the users
+    # They also read in reversed order
+    x=mtd[ws_output].dataX(0)
+    y_reversed=mtd[ws_output].dataY(0)
+    y=[i for i in y_reversed]
+    for i in range(len(x)):
+        x[i] += 1
+        y_reversed[i] = y[len(y)-1-i]
+        
+    # Copy over the units
+    units = mtd[ws_output].getAxis(0).getUnit().name()
+    mtd[ws_output].getAxis(0).setUnit(units)
+    
+    # 2D plot
     Rebin(InputWorkspace=ws,OutputWorkspace=ws,Params="0,200,200000")
-    ws_integrated = wks_utility.createIntegratedWorkspace(mtd[ws],ws_output+"_2D",0,303,0,255)
+    GroupDetectors(InputWorkspace=ws, OutputWorkspace=ws_output+'_2D',
+                   MapFile="Grouping/REFL_Detector_Grouping_Sum_X.xml")
     
     g = _qti.app.graph(graph_name)
     if g is None:
