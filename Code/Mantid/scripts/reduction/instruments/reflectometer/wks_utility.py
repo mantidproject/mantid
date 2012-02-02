@@ -347,6 +347,9 @@ def convertToRvsQ(dMD=-1,theta=-1,tof=None):
             TOF: TOF of pixel
             theta: angle of detector
     """
+    print 'dMD: '
+    print dMD
+    print
     
     _const = float(4) * math.pi * m * dMD / h
     sz_tof = numpy.shape(tof)[0]
@@ -357,6 +360,9 @@ def convertToRvsQ(dMD=-1,theta=-1,tof=None):
         tofm = (tof1+tof2)/2.
         _Q = _const * math.sin(theta) / (tofm*1e-6)
         q_array[t] = _Q*1e-10
+
+    print 'q_array'
+    print q_array
     return q_array
         
 def convertToRvsQWithCorrection(mt, dMD=-1, theta=-1,tof=None, yrange=None, cpix=None):
@@ -398,6 +404,9 @@ def convertToRvsQWithCorrection(mt, dMD=-1, theta=-1,tof=None, yrange=None, cpix
         _px = yrange[x]
         dangle = ref_beamdiv_correct(cpix, mt, dSD, _px)
         
+        print 'dangle:'
+        print dangle
+        
         if dangle is not None:
             _theta = theta + dangle
         else:
@@ -409,6 +418,11 @@ def convertToRvsQWithCorrection(mt, dMD=-1, theta=-1,tof=None, yrange=None, cpix
             tofm = (tof1+tof2)/2.
             _Q = _const * math.sin(_theta) / (tofm*1e-6)
             q_array[x,t] = _Q*1e-10
+
+        print 'q_array'
+        print q_array
+        
+    print
 
     return q_array
 

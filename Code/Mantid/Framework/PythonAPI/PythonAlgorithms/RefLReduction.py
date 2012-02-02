@@ -1,5 +1,7 @@
 from MantidFramework import *
 from mantidsimple import *
+from numpy import zeros, shape
+import math
 
 class RefLReduction(PythonAlgorithm):
 
@@ -167,9 +169,22 @@ class RefLReduction(PythonAlgorithm):
         theta = tthd_rad - ths_rad
         
         if dMD is not None and theta is not None:
+#            _tof_axis = mtd[ws_histo_data].readX(0)
+#            print _tof_axis
+#            _const = float(4) * math.pi * m * dMD / h
+#            _q_axis = 1e-10 * _const * math.sin(theta) / (_tof_axis*1e-6)
+#            q_max = max(_q_axis)
+            
             _tof_axis = mtd[ws_histo_data].readX(0)
             _const = float(4) * math.pi * m * dMD / h
-            _q_axis = 1e-10 * _const * math.sin(theta) / (_tof_axis*1e-6)
+            sz_tof = numpy.shape(_tof_axis)[0]
+            _q_axis = zeros(sz_tof-1)
+            for t in range(sz_tof-1):
+                tof1 = _tof_axis[t]
+                tof2 = _tof_axis[t+1]
+                tofm = (tof1+tof2)/2.
+                _Q = _const * math.sin(theta) / (tofm*1e-6)
+                _q_axis[t] = _Q*1e-10
             q_max = max(_q_axis)
 
         wks_utility.createIntegratedWorkspace(mtd[ws_histo_data], 
@@ -184,7 +199,7 @@ class RefLReduction(PythonAlgorithm):
                                               source_to_detector=dMD,
                                               sample_to_detector=dSD,
                                               theta=theta,
-                                              geo_correction=True,
+                                              geo_correction=False,
                                               q_binning=[q_min,q_step,q_max])
 
         ConvertToHistogram(InputWorkspace='IntegratedDataWks1',
