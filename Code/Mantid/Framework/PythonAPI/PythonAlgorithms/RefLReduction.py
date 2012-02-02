@@ -233,7 +233,7 @@ class RefLReduction(PythonAlgorithm):
         if len(f)>0 and os.path.isfile(f[0]): 
             norm_file = f[0]
         else:
-            msg = "RefLReduction: could not find run %d\n" % run_number[0]
+            msg = "RefLReduction: could not find run %d\n" % run_numbers[0]
             msg += "Add your data folder to your User Data Directories in the File menu"
             raise RuntimeError(msg)
             
