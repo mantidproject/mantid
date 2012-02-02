@@ -197,9 +197,6 @@ private:
   /// Apply whatever grouping is specified in GUI tables to workspace
   bool applyGroupingToWS( const std::string& inputWS,  const std::string& outputWS);
 
-  /// Normalise the data
-  void normalise(const std::vector<double>& x, const std::vector<double>& y, QString workspace);
-
   /// Update front 
   void updateFront();
 
