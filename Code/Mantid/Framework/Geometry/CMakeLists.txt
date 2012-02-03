@@ -3,6 +3,7 @@ set ( SRC_FILES
 	src/Crystal/IndexingUtils.cpp
 	src/Crystal/ReducedCell.cpp
 	src/Crystal/OrientedLattice.cpp
+	src/Crystal/PointGroup.cpp
 	src/Crystal/ReflectionCondition.cpp
 	src/Crystal/UnitCell.cpp
 	src/IObjComponent.cpp
@@ -96,6 +97,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Crystal/IndexingUtils.h
 	inc/MantidGeometry/Crystal/ReducedCell.h
 	inc/MantidGeometry/Crystal/OrientedLattice.h
+	inc/MantidGeometry/Crystal/PointGroup.h
 	inc/MantidGeometry/Crystal/ReflectionCondition.h
 	inc/MantidGeometry/Crystal/UnitCell.h
 	inc/MantidGeometry/DllConfig.h

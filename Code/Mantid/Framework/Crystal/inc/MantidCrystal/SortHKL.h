@@ -3,6 +3,7 @@
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 
+#include "MantidGeometry/Crystal/PointGroup.h"
 
 namespace Mantid
 {
@@ -29,6 +30,8 @@ namespace Crystal
     virtual const std::string category() const { return "Crystal;DataHandling\\Text";}
     
   private:
+    /// Point Groups possible
+    std::vector<Mantid::Geometry::PointGroup_sptr> m_pointGroups;
     /// Sets documentation strings for this algorithm
     virtual void initDocs();
     /// Initialise the properties
