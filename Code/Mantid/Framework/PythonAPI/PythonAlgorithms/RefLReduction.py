@@ -29,6 +29,8 @@ class RefLReduction(PythonAlgorithm):
                                  Description="Positive is linear bins, negative is logarithmic")
         self.declareProperty("QMin", 0.001, Description="Minimum Q-value")
         self.declareProperty("QStep", 0.001, Description="Step-size in Q. Enter a negative value to get a log scale.")
+        self.declareProperty("AngleOffset", "", Description="Angle offset (rad)")
+        self.declareProperty("AngleOffsetError", "", Description="Angle offset error (rad)")
         # Output workspace to put the transmission histo into
         self.declareWorkspaceProperty("OutputWorkspace", "", Direction.Output)
 
@@ -159,11 +161,6 @@ class RefLReduction(PythonAlgorithm):
         dSD = dPS_array[maxY / 2, maxX / 2]
         # Distance source->center of detector        
         dMD = dSD + dSM
-        dMD = 14.9509998143  #REMOVE_ME
-
-        
-        print 'dMD: '
-        print dMD
 
         # Background subtraction
         BackfromYpixel = data_back[0]
@@ -173,6 +170,9 @@ class RefLReduction(PythonAlgorithm):
         # background range (along the y-axis) and of only the pixel
         # of interest along the x-axis (to avoid the frame effect)
         theta = tthd_rad - ths_rad
+        AngleOffset = self.getProperty("AngleOffset")
+        if (AngleOffset != ""):
+            theta += float(AngleOffset)
         
         if dMD is not None and theta is not None:
 #            _tof_axis = mtd[ws_histo_data].readX(0)
@@ -192,8 +192,6 @@ class RefLReduction(PythonAlgorithm):
                 _Q = _const * math.sin(theta) / (tofm*1e-6)
                 _q_axis[t] = _Q*1e-10
             q_max = max(_q_axis)
-
-            print _q_axis
 
         wks_utility.createIntegratedWorkspace(mtd[ws_histo_data], 
                                               "IntegratedDataWks1",
