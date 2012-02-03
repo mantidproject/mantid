@@ -52,4 +52,5 @@ The major differences in the new API are as follows:
 
 * *mtd* will now raise an *KeyError* if a workspace does not exist rather than returning *None*
 
-
+* The *qti* module no longer exists. All user scripts should simply use the *mantidplot* module which contains
+  all of the *qti* functionality but adds protection against crashes from closed windows.
