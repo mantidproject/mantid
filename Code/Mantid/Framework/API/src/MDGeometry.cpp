@@ -29,8 +29,8 @@ namespace API
   /** Copy Constructor
    */
   MDGeometry::MDGeometry(const MDGeometry & other) :
-   m_originalWorkspace(other.m_originalWorkspace),
-   m_transformFromOriginal(NULL), m_transformToOriginal(NULL),
+   m_originalWorkspaces(other.m_originalWorkspaces),
+   m_transforms_FromOriginal(NULL), m_transforms_ToOriginal(NULL),
    m_delete_observer(*this, &MDGeometry::deleteNotificationReceived),
    m_observingDelete(false)
   {
