@@ -11,19 +11,19 @@ from reduction_gui.reduction.scripter import BaseScriptElement
 class DataSets(BaseScriptElement):
 
     DataPeakSelectionType = 'narrow'
-    DataPeakPixels = [126, 134]
+    DataPeakPixels = [120, 130]
     DataPeakDiscreteSelection = 'N/A'
     DataBackgroundFlag = False
-    DataBackgroundRoi = [123, 137,123, 137]
+    DataBackgroundRoi = [115, 137,123, 137]
     DataTofRange = [9600., 21600.]
     
     x_range = [115,210]
     norm_x_min = 115
     norm_x_max = 210
     
-    NormPeakPixels = [127, 133]
+    NormPeakPixels = [120, 130]
     NormBackgroundFlag = False
-    NormBackgroundRoi = [123, 137]
+    NormBackgroundRoi = [115, 137]
 
     # Data files
     #data_files = [66421]
@@ -35,6 +35,10 @@ class DataSets(BaseScriptElement):
     q_min = 0.001
     q_step = 0.001
     auto_q_binning = False
+    
+    # Angle offset
+    angle_offset = 0.0
+    angle_offset_error = 0.0
 
     def __init__(self):
         super(DataSets, self).__init__()
@@ -58,6 +62,14 @@ class DataSets(BaseScriptElement):
         script += "              TOFRange=%s,\n" % str(self.DataTofRange)
         script += "              QMin=%s,\n" % str(self.q_min)
         script += "              QStep=%s,\n" % str(self.q_step)
+        
+        # Angle offset
+        if self.angle_offset != 0.0:
+            script += "              AngleOffset=%s,\n" % str(self.angle_offset)
+            script += "              AngleOffsetError=%s,\n" % str(self.angle_offset_error)
+            
+        # The output should be slightly different if we are generating
+        # a script for the automated reduction
         if for_automated_reduction:
             script += "              OutputWorkspace='reflectivity_'+%s)" % str(self.data_files[0])
         else:
@@ -71,8 +83,6 @@ class DataSets(BaseScriptElement):
             Update transmission from reduction output
         """
         pass
-
-           
 
     def to_xml(self):
         """
@@ -107,6 +117,10 @@ class DataSets(BaseScriptElement):
         xml += "<q_min>%s</q_min>\n" % str(self.q_min)
         xml += "<q_step>%s</q_step>\n" % str(self.q_step)
         xml += "<auto_q_binning>%s</auto_q_binning>" % str(self.auto_q_binning)
+        
+        # Angle offset
+        xml += "<angle_offset>%s</angle_offset>\n" % str(self.angle_offset)
+        xml += "<angle_offset_error>%s</angle_offset_error>\n" % str(self.angle_offset_error)
         
         xml += "</Data>\n"
 
@@ -180,6 +194,10 @@ class DataSets(BaseScriptElement):
         self.q_step = BaseScriptElement.getFloatElement(instrument_dom, "q_step", default=DataSets.q_step)
         self.auto_q_binning = BaseScriptElement.getBoolElement(instrument_dom, "auto_q_binning", default=False)
     
+        # Angle offset
+        self.angle_offset = BaseScriptElement.getFloatElement(instrument_dom, "angle_offset", default=DataSets.angle_offset)
+        self.angle_offset_error = BaseScriptElement.getFloatElement(instrument_dom, "angle_offset_error", default=DataSets.angle_offset_error)        
+        
     def reset(self):
         """
             Reset state
@@ -204,3 +222,7 @@ class DataSets(BaseScriptElement):
         self.q_min = DataSets.q_min
         self.q_step = DataSets.q_step
         self.auto_q_binning = DataSets.auto_q_binning
+        
+        # Angle offset
+        self.angle_offset = DataSets.angle_offset
+        self.angle_offset_error = DataSets.angle_offset_error

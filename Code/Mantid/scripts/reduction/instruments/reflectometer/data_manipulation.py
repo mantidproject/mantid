@@ -29,7 +29,7 @@ def tof_distribution(file_path):
         l.setScale(2,xmin,xmax)
         l.setTitle(" ")
     
-def counts_vs_y_distribution(file_path, minTOF, maxTOF):
+def counts_vs_y_distribution(file_path, minTOF, maxTOF, callback=None):
     ws = "__REFL_data"
     ws_output = "__REFL_Y_distribution"
     graph_name = "Counts vs Y"
@@ -58,6 +58,14 @@ def counts_vs_y_distribution(file_path, minTOF, maxTOF):
     GroupDetectors(InputWorkspace=ws, OutputWorkspace=ws_output+'_2D',
                    MapFile="Grouping/REFL_Detector_Grouping_Sum_X.xml")
     
+    if callback is not None:
+        from LargeScaleStructures import data_stitching
+        #def callback(xmin,xmax):
+        #    print xmin,xmax
+        data_stitching.RangeSelector.connect([ws_output], callback)
+
+    return
+
     g = _qti.app.graph(graph_name)
     if g is None:
         g = _qti.app.mantidUI.pyPlotSpectraList([ws_output],[0],True)

@@ -3,6 +3,7 @@ import reduction_gui.widgets.util as util
 import math
 import os
 import time
+import sys
 from reduction_gui.reduction.reflectometer.refl_data_script import DataSets
 from reduction_gui.reduction.reflectometer.refl_data_series import DataSeries
 from reduction_gui.settings.application_settings import GeneralSettings
@@ -67,6 +68,9 @@ class DataReflWidget(BaseWidget):
         self._summary.log_scale_chk.setChecked(True)
         self._summary.q_min_edit.setValidator(QtGui.QDoubleValidator(self._summary.q_min_edit))
         self._summary.q_step_edit.setValidator(QtGui.QDoubleValidator(self._summary.q_step_edit))
+        
+        self._summary.angle_offset_edit.setValidator(QtGui.QDoubleValidator(self._summary.angle_offset_edit))
+        self._summary.angle_offset_error_edit.setValidator(QtGui.QDoubleValidator(self._summary.angle_offset_error_edit))
 
         self._summary.norm_peak_from_pixel.setValidator(QtGui.QIntValidator(self._summary.norm_peak_from_pixel))
         self._summary.norm_peak_to_pixel.setValidator(QtGui.QIntValidator(self._summary.norm_peak_to_pixel))
@@ -89,8 +93,8 @@ class DataReflWidget(BaseWidget):
         self.connect(self._summary.auto_reduce_btn, QtCore.SIGNAL("clicked()"), self._create_auto_reduce_template)
         
         # If we do not have access to /SNS, don't display the automated reduction options
-        if not os.path.isdir("/SNS/REF_L"):
-            self._summary.auto_reduce_check.hide()
+        #if not os.path.isdir("/SNS/REF_L"):
+        #    self._summary.auto_reduce_check.hide()
         
     def _create_auto_reduce_template(self):
         m = self.get_editing_state()
@@ -120,6 +124,28 @@ class DataReflWidget(BaseWidget):
         content += "          Separator='Tab',\n"
         content += "          CommentIndicator='# ')"
         
+        # Place holder for reduction script
+        content += "\n"
+        content += "file_path = os.path.join(outputDir, 'REF_L_'+runNumber+'.py')\n"
+        content += "f=open(file_path,'w')\n"
+        content += "f.write('# Empty file')\n"
+        content += "f.close()\n"
+        
+        # Reduction option to load into Mantid
+        xml_str = "<Reduction>\n"
+        xml_str += "  <instrument_name>REF_L</instrument_name>\n"
+        xml_str += "  <timestamp>%s</timestamp>\n" % time.ctime()
+        xml_str += "  <python_version>%s</python_version>\n" % sys.version
+        if IS_IN_MANTIDPLOT:
+            xml_str += "  <mantid_version>%s</mantid_version>\n" % mantid_build_version()
+        xml_str += m.to_xml()
+        xml_str += "</Reduction>\n"
+        
+        content += "file_path = os.path.join(outputDir, 'REF_L_'+runNumber+'.xml')\n"
+        content += "f=open(file_path,'w')\n"
+        content += "f.write(%s)\n" % xml_str
+        content += "f.close()\n"
+
         home_dir = os.path.expanduser('~')
         f=open(os.path.join(home_dir,"reduce_REF_L.py"),'w')
         f.write(content)
@@ -209,7 +235,11 @@ class DataReflWidget(BaseWidget):
         
         f = FileFinder.findRuns("REF_L%s" % str(self._summary.data_run_number_edit.text()))
         if len(f)>0 and os.path.isfile(f[0]):
-            data_manipulation.counts_vs_y_distribution(f[0], 9000, 23600)
+            def call_back(xmin, xmax):
+                self._summary.data_peak_from_pixel.setText("%-d" % int(xmin))
+                self._summary.data_peak_to_pixel.setText("%-d" % int(xmax))
+            data_manipulation.counts_vs_y_distribution(f[0], 9000, 23600, call_back)
+                
 
     def _plot_tof(self):
         if not IS_IN_MANTIDPLOT:
@@ -266,6 +296,10 @@ class DataReflWidget(BaseWidget):
             self._summary.q_min_edit.setText(str(state.data_sets[0].q_min))
             self._summary.log_scale_chk.setChecked(state.data_sets[0].q_step<0)
             self._summary.q_step_edit.setText(str(math.fabs(state.data_sets[0].q_step)))
+            
+            # Common angle offset
+            self._summary.angle_offset_edit.setText(str(state.data_sets[0].angle_offset))
+            self._summary.angle_offset_error_edit.setText(str(state.data_sets[0].angle_offset_error))
 
     def set_editing_state(self, state):
 
@@ -323,11 +357,19 @@ class DataReflWidget(BaseWidget):
         if self._summary.log_scale_chk.isChecked():
             q_step = -q_step
         
+        # Angle offset
+        angle_offset = float(self._summary.angle_offset_edit.text())
+        angle_offset_error = float(self._summary.angle_offset_error_edit.text())
+        
         for i in range(self._summary.angle_list.count()):
             data = self._summary.angle_list.item(i).data(QtCore.Qt.UserRole).toPyObject()
             # Over-write Q binning with common binning
             data.q_min = q_min
             data.q_step = q_step
+        
+            # Over-write angle offset
+            data.angle_offset = angle_offset
+            data.angle_offset_error = angle_offset_error
             
             state_list.append(data)
         state.data_sets = state_list
