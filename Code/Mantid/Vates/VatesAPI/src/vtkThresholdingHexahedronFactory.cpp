@@ -7,10 +7,12 @@
 #include <vtkRectilinearGrid.h>
 #include <vtkStructuredGrid.h>
 #include "MantidAPI/NullCoordTransform.h"
+#include "MantidKernel/ReadLock.h"
 
 using Mantid::API::IMDWorkspace;
 using Mantid::Kernel::CPUTimer;
 using namespace Mantid::MDEvents;
+using Mantid::Kernel::ReadLock;
 
 namespace Mantid
 {
@@ -99,7 +101,9 @@ namespace VATES
    */
   vtkDataSet* vtkThresholdingHexahedronFactory::create3Dor4D(size_t timestep, bool do4D) const
   {
-    
+    // Acquire a scoped read-only lock to the workspace (prevent segfault from algos modifying ws)
+    ReadLock lock(*m_workspace);
+
     const int nBinsX = static_cast<int>( m_workspace->getXDimension()->getNBins() );
     const int nBinsY = static_cast<int>( m_workspace->getYDimension()->getNBins() );
     const int nBinsZ = static_cast<int>( m_workspace->getZDimension()->getNBins() );
