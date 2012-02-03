@@ -80,7 +80,11 @@ namespace Crystal
   void SortHKL::exec()
   {
 
-    PeaksWorkspace_sptr peaksW = getProperty("InputWorkspace");
+    PeaksWorkspace_sptr InPeaksW = getProperty("InputWorkspace");
+    // HKL will be overwritten by equivalent HKL but never seen by user
+    PeaksWorkspace_sptr peaksW = InPeaksW->clone();
+    peaksW->setName("PeaksByEquivalentHKL");
+    
     //Use the primitive by default
     PointGroup_sptr pointGroup(new PointGroupLaue1());
     //Get it from the property
@@ -105,6 +109,21 @@ namespace Crystal
     t->addColumn("double","Sigma.min");
     t->addColumn("double","Sigma.max");
     t->addColumn("double","Sigma.median");
+    int NumberPeaks = peaksW->getNumberPeaks();
+    for (int i = 0; i < NumberPeaks; i++)
+    {
+      Peak & peak1 = peaksW->getPeaks()[i];
+      V3D hkl1 = peak1.getHKL();
+      std::string bank1 = peak1.getBankName();
+      for (int j = i+1; j < NumberPeaks; j++)
+      {
+        Peak & peak2 = peaksW->getPeaks()[j];
+        V3D hkl2 = peak2.getHKL();
+        std::string bank2 = peak2.getBankName();
+        if (pointGroup->isEquivalent(hkl1,hkl2) && bank1.compare(bank2) == 0)
+          peaksW->getPeaks()[j].setHKL(hkl1);
+      }
+    }
 
     std::vector< std::pair<std::string, bool> > criteria;
     // Sort by detector ID then descending wavelength
@@ -112,9 +131,9 @@ namespace Crystal
     criteria.push_back( std::pair<std::string, bool>("H", true) );
     criteria.push_back( std::pair<std::string, bool>("K", true) );
     criteria.push_back( std::pair<std::string, bool>("L", true) );
+    InPeaksW->sort(criteria);
     peaksW->sort(criteria);
 
-    int NumberPeaks = peaksW->getNumberPeaks();
     std::vector<double> data, err;
     V3D hkl1;
     std::string bank1;
