@@ -29,8 +29,8 @@ class RefLReduction(PythonAlgorithm):
                                  Description="Positive is linear bins, negative is logarithmic")
         self.declareProperty("QMin", 0.001, Description="Minimum Q-value")
         self.declareProperty("QStep", 0.001, Description="Step-size in Q. Enter a negative value to get a log scale.")
-        self.declareProperty("AngleOffset", "", Description="Angle offset (rad)")
-        self.declareProperty("AngleOffsetError", "", Description="Angle offset error (rad)")
+        self.declareProperty("AngleOffset", 0.0, Description="Angle offset (degrees)")
+        self.declareProperty("AngleOffsetError", 0.0, Description="Angle offset error (degrees)")
         # Output workspace to put the transmission histo into
         self.declareWorkspaceProperty("OutputWorkspace", "", Direction.Output)
 
@@ -118,10 +118,10 @@ class RefLReduction(PythonAlgorithm):
 
         # Rebin data (x-axis is in TOF)
         ws_histo_data = ws_name+"_histo"
-        Rebin(InputWorkspace=ws_event_data, OutputWorkspace=ws_histo_data, Params=tof_binning)
+        Rebin(InputWorkspace=ws_event_data, OutputWorkspace=ws_histo_data, Params=[TOFrange[0], 200.0, TOFrange[1]])
         
         # Keep only range of TOF of interest
-        CropWorkspace(ws_histo_data,ws_histo_data,XMin=TOFrange[0], XMax=TOFrange[1])
+        #CropWorkspace(ws_histo_data,ws_histo_data,XMin=TOFrange[0], XMax=TOFrange[1])
 
         # Normalized by Current (proton charge)
         NormaliseByCurrent(InputWorkspace=ws_histo_data, OutputWorkspace=ws_histo_data)
