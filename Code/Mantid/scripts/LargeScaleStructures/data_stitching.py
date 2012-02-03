@@ -144,10 +144,11 @@ class DataSet(object):
         Scale(InputWorkspace=self._ws_scaled, OutputWorkspace=self._ws_scaled,
               Operation="Multiply", Factor=1.0)
         
-    def load(self, update_range=False):
+    def load(self, update_range=False, restricted_range=False):
         """
             Load a data set from file
             @param upate_range: if True, the Q range of the data set will be udpated
+            @param restricted_range: if True, zeros at the beginning and end will be stripped
         """
         if os.path.isfile(self._file_path):
             self._ws_name = os.path.basename(self._file_path)
@@ -160,6 +161,19 @@ class DataSet(object):
             if update_range:
                 self._xmin = min(mtd[self._ws_name].readX(0))
                 self._xmax = max(mtd[self._ws_name].readX(0))
+                if restricted_range:
+                    y = mtd[self._ws_name].readY(0)
+                    x = mtd[self._ws_name].readX(0)
+                    
+                    for i in range(len(y)):
+                        if y[i]!=0.0:
+                            self._xmin = x[i]
+                            break
+                    for i in range(len(y)-1,-1,-1):
+                        if y[i]!=0.0:
+                            self._xmax = x[i]
+                            break
+                        
             self._npts = len(mtd[self._ws_name].readY(0))
             self._last_applied_scale = 1.0
         

@@ -93,8 +93,8 @@ class DataReflWidget(BaseWidget):
         self.connect(self._summary.auto_reduce_btn, QtCore.SIGNAL("clicked()"), self._create_auto_reduce_template)
         
         # If we do not have access to /SNS, don't display the automated reduction options
-        #if not os.path.isdir("/SNS/REF_L"):
-        #    self._summary.auto_reduce_check.hide()
+        if not os.path.isdir("/SNS/REF_L"):
+            self._summary.auto_reduce_check.hide()
         
     def _create_auto_reduce_template(self):
         m = self.get_editing_state()
@@ -122,14 +122,15 @@ class DataReflWidget(BaseWidget):
         content += "SaveAscii(Filename=file_path,\n"
         content += "          InputWorkspace='reflectivity_'+runNumber,\n" 
         content += "          Separator='Tab',\n"
-        content += "          CommentIndicator='# ')"
+        content += "          CommentIndicator='# ')\n"
         
         # Place holder for reduction script
         content += "\n"
+        content += "# Place holder for python script\n"
         content += "file_path = os.path.join(outputDir, 'REF_L_'+runNumber+'.py')\n"
         content += "f=open(file_path,'w')\n"
         content += "f.write('# Empty file')\n"
-        content += "f.close()\n"
+        content += "f.close()\n\n"
         
         # Reduction option to load into Mantid
         xml_str = "<Reduction>\n"
@@ -141,9 +142,10 @@ class DataReflWidget(BaseWidget):
         xml_str += m.to_xml()
         xml_str += "</Reduction>\n"
         
+        content += "# Reduction options for loading into Mantid\n"
         content += "file_path = os.path.join(outputDir, 'REF_L_'+runNumber+'.xml')\n"
         content += "f=open(file_path,'w')\n"
-        content += "f.write(%s)\n" % xml_str
+        content += "f.write(\"\"\"%s\"\"\")\n" % xml_str
         content += "f.close()\n"
 
         home_dir = os.path.expanduser('~')
