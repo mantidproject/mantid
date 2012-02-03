@@ -8,6 +8,7 @@
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Crystal/PointGroup.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Utils.h"
@@ -37,6 +38,7 @@ namespace Crystal
    */
   SortHKL::SortHKL()
   {
+    m_pointGroups = getAllPointGroups();
   }
     
   //----------------------------------------------------------------------------------------------
@@ -62,6 +64,12 @@ namespace Crystal
   {
     declareProperty(new WorkspaceProperty<PeaksWorkspace>("InputWorkspace","",Direction::InOut),
         "An input PeaksWorkspace with an instrument.");
+    std::vector<std::string> propOptions;
+    for (size_t i=0; i<m_pointGroups.size(); ++i)
+      propOptions.push_back( m_pointGroups[i]->getName() );
+    declareProperty("PointGroup", propOptions[0],new ListValidator(propOptions),
+      "Which point group applies to this crystal?");
+
     declareProperty(new WorkspaceProperty<API::ITableWorkspace>("DuplicatesStatisticsTable","Statistics",Direction::Output));
 
   }
@@ -73,6 +81,14 @@ namespace Crystal
   {
 
     PeaksWorkspace_sptr peaksW = getProperty("InputWorkspace");
+    //Use the primitive by default
+    PointGroup_sptr pointGroup(new PointGroupLaue1());
+    //Get it from the property
+    std::string pointGroupName = getPropertyValue("PointGroup");
+    for (size_t i=0; i<m_pointGroups.size(); ++i)
+      if (m_pointGroups[i]->getName() == pointGroupName)
+        pointGroup = m_pointGroups[i];
+
     API::ITableWorkspace_sptr t = WorkspaceFactory::Instance().createTable("TableWorkspace");
     t->addColumn("double","h");
     t->addColumn("double","k");
@@ -115,7 +131,7 @@ namespace Crystal
       Peak & peak2 = peaksW->getPeaks()[i];
       V3D hkl2 = peak2.getHKL();
       std::string bank2 = peak2.getBankName();
-      if (hkl1 == hkl2 && bank1.compare(bank2) == 0)
+      if (pointGroup->isEquivalent(hkl1,hkl2) && bank1.compare(bank2) == 0)
       {
         data.push_back(peak2.getIntensity());
         err.push_back(peak2.getSigmaIntensity());
