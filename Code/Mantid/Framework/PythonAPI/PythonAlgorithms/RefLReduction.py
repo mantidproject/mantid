@@ -113,25 +113,7 @@ class RefLReduction(PythonAlgorithm):
         tthd_rad = wks_utility.angleUnitConversion(value=tthd_value,
                                                    from_units=tthd_units,
                                                    to_units='rad')
-        # Retrieve geometry of instrument
-        # Sample-to-detector distance
-        sample = mtd[ws_event_data].getInstrument().getSample()
-        source = mtd[ws_event_data].getInstrument().getSource()
-        dSM = sample.getDistance(source)
-        # Create array of distances pixel->sample
-        dPS_array = numpy.zeros((maxY, maxX))
-        for x in range(maxX):
-            for y in range(maxY):
-                _index = maxY * x + y
-                detector = mtd[ws_event_data].getDetector(_index)
-                dPS_array[y, x] = sample.getDistance(detector)
-        # Array of distances pixel->source
-        dMP_array = dPS_array + dSM
-        # Distance sample->center of detector
-        dSD = dPS_array[maxY / 2, maxX / 2]
-        # Distance source->center of detector
-        dMD = dSD + dSM
-        
+
         # Rebin data (x-axis is in TOF)
         ws_histo_data = ws_name+"_histo"
         Rebin(InputWorkspace=ws_event_data, OutputWorkspace=ws_histo_data, Params=tof_binning)
@@ -159,6 +141,30 @@ class RefLReduction(PythonAlgorithm):
             _den += pixelXtof_roi[i]
         data_cpix = _num / _den    
         
+        # Retrieve geometry of instrument
+        # Sample-to-detector distance
+        sample = mtd[ws_event_data].getInstrument().getSample()
+        source = mtd[ws_event_data].getInstrument().getSource()
+        dSM = sample.getDistance(source)
+        # Create array of distances pixel->sample
+        dPS_array = numpy.zeros((maxY, maxX))
+        for x in range(maxX):
+            for y in range(maxY):
+                _index = maxY * x + y
+                detector = mtd[ws_event_data].getDetector(_index)
+                dPS_array[y, x] = sample.getDistance(detector)
+        # Array of distances pixel->source
+        dMP_array = dPS_array + dSM
+        # Distance sample->center of detector
+        dSD = dPS_array[maxY / 2, maxX / 2]
+        # Distance source->center of detector        
+        dMD = dSD + dSM
+        dMD = 14.9509998143  #REMOVE_ME
+
+        
+        print 'dMD: '
+        print dMD
+
         # Background subtraction
         BackfromYpixel = data_back[0]
         BacktoYpixel = data_back[1]
@@ -174,7 +180,7 @@ class RefLReduction(PythonAlgorithm):
 #            _const = float(4) * math.pi * m * dMD / h
 #            _q_axis = 1e-10 * _const * math.sin(theta) / (_tof_axis*1e-6)
 #            q_max = max(_q_axis)
-            
+                    
             _tof_axis = mtd[ws_histo_data].readX(0)
             _const = float(4) * math.pi * m * dMD / h
             sz_tof = numpy.shape(_tof_axis)[0]
@@ -186,6 +192,8 @@ class RefLReduction(PythonAlgorithm):
                 _Q = _const * math.sin(theta) / (tofm*1e-6)
                 _q_axis[t] = _Q*1e-10
             q_max = max(_q_axis)
+
+            print _q_axis
 
         wks_utility.createIntegratedWorkspace(mtd[ws_histo_data], 
                                               "IntegratedDataWks1",
@@ -199,7 +207,7 @@ class RefLReduction(PythonAlgorithm):
                                               source_to_detector=dMD,
                                               sample_to_detector=dSD,
                                               theta=theta,
-                                              geo_correction=False,
+                                              geo_correction=True,
                                               q_binning=[q_min,q_step,q_max])
 
         ConvertToHistogram(InputWorkspace='IntegratedDataWks1',
