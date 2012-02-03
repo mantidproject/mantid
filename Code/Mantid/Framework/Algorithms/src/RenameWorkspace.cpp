@@ -38,74 +38,93 @@ void RenameWorkspace::init()
  */
 void RenameWorkspace::exec()
 {
+  // Get the input workspace
+  Workspace_sptr inputWS = getProperty("InputWorkspace");
+  // get the workspace name
+  std::string inputwsName = inputWS->getName();
+  // get the output workspace name
+  std::string outputwsName = getPropertyValue("OutputWorkspace");
+
   if (getPropertyValue("InputWorkspace") == getPropertyValue("OutputWorkspace"))
   {
     throw std::invalid_argument("The input and output workspace names must be different");
   }
-  // Get the input workspace
-  Workspace_sptr localworkspace = getProperty("InputWorkspace");
 
-  WorkspaceGroup_sptr ingrp_sptr = boost::dynamic_pointer_cast<WorkspaceGroup>(localworkspace);
-  // get the workspace name
-  std::string inputwsName = localworkspace->getName();
-  // get the output workspace name
-  std::string outputwsName = getPropertyValue("OutputWorkspace");
+  // Assign it to the output workspace property
+  setProperty("OutputWorkspace", inputWS);
+
   AnalysisDataServiceImpl& data_store = AnalysisDataService::Instance();
-  if (!ingrp_sptr)
+  // Post notice that a workspace has been renamed
+  data_store.notificationCenter.postNotification(new WorkspaceRenameNotification(inputwsName,
+      outputwsName));
+  //remove the input workspace from the analysis data service
+  data_store.remove(inputwsName);
+}
+
+bool RenameWorkspace::processGroups()
+{
+  // Get the input & output workspace names
+  Workspace_sptr inputWS = getProperty("InputWorkspace");
+  const std::string inputwsName = inputWS->name();
+  std::string outputwsName = getPropertyValue("OutputWorkspace");
+
+  if (inputwsName == outputwsName)
   {
-    // Assign it to the output workspace property
-    setProperty("OutputWorkspace", localworkspace);
+    throw std::invalid_argument("The input and output workspace names must be different");
   }
-  else
+
+  // Cast the input to a group
+  WorkspaceGroup_sptr inputGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(inputWS);
+  assert( inputGroup );  // Should always be true
+
+  // Decide whether we will rename the group members. Must do this before renaming group itself.
+  // Basically we rename if the members ALL follow the pattern GroupName_1, _2, _3 etc.
+  const bool renameMembers = inputGroup->areNamesSimilar();
+
+  AnalysisDataServiceImpl& data_store = AnalysisDataService::Instance();
+  // Change the group workspace name in the analysis data service
+  data_store.remove(inputwsName);
+  data_store.addOrReplace(outputwsName,inputWS);
+  // Post notice that a workspace has been renamed
+  data_store.notificationCenter.postNotification(new WorkspaceRenameNotification(inputwsName,
+        outputwsName));
+
+  // If necessary, go through group members calling the algorithm on each one
+  if ( renameMembers )
   {
-    //create output group ws 
-    WorkspaceGroup_sptr outgrp_sptr = WorkspaceGroup_sptr(new WorkspaceGroup);
-    setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(outgrp_sptr));
-   
-    //counter used to name the group members
-    int count = 0;
-    std::string outputWorkspace = "OutputWorkspace";
-    // Get members of the inpot group workspace
-    const std::vector<std::string> names = ingrp_sptr->getNames();
-    std::vector<std::string>::const_iterator citr = names.begin();
-    //loop thorugh input ws group members
-    for (; citr != names.end(); ++citr)
+    const std::vector<std::string> names = inputGroup->getNames();
+
+    // loop over input ws group members
+    for (size_t i = 0; i < names.size(); ++i)
     {
       try
       {
         // new name of the member workspaces
         std::stringstream suffix;
-        suffix << ++count;
-        std::string outws = outputWorkspace + "_" + suffix.str();
+        suffix << i+1;
         std::string wsName = outputwsName + "_" + suffix.str();
 
-        //retrieving the workspace pointer
-        Workspace_sptr ws_sptr = data_store.retrieve((*citr));
-        declareProperty(new WorkspaceProperty<Workspace> (outws, wsName,
-            Direction::Output));
-        setProperty(outws, ws_sptr);
-
-        // adding the workspace members to group
-        outgrp_sptr->add(wsName);
-
-        //remove the input group workspace  members from ADS
-
-        AnalysisDataService::Instance().remove((*citr));
-      } catch (Kernel::Exception::NotFoundError&ex)
+        IAlgorithm* alg = API::FrameworkManager::Instance().createAlgorithm(this->name(), this->version());
+        alg->setPropertyValue("InputWorkspace",names[i]);
+        alg->setPropertyValue("OutputWorkspace",wsName);
+        alg->execute();
+      }
+      catch (Kernel::Exception::NotFoundError&ex)
       {
+        // Will wind up here if group has somehow got messed up and a member doesn't exist. Should't be possible!
         g_log.error() << ex.what() << std::endl;
       }
-
     }
-
   }
-  // Post notice that a workspace has been renamed
-  data_store.notificationCenter.postNotification(new WorkspaceRenameNotification(inputwsName,
-      outputwsName));
-  //remove the input workspace from the analysis data service
-  data_store.remove(getPropertyValue("InputWorkspace"));
 
+  // We finished successfully.
+  setExecuted(true);
+  m_notificationCenter.postNotification(new FinishedNotification(this,isExecuted()));
+  g_log.notice() << name() << " successful\n";
+
+  return true;
 }
 
 } // namespace Algorithms
 } // namespace Mantid
+

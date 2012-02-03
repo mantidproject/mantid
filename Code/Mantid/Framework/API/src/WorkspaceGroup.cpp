@@ -176,6 +176,37 @@ bool WorkspaceGroup::isEmpty() const
 	return m_wsNames.empty();
 }
 
+//------------------------------------------------------------------------------
+/** Are the members of this group of similar names,
+ * e.g. for a WorkspaceGroup names "groupname",
+ * the members are "groupname_1", "groupname_2", etc.
+ *
+ * @return true if the names match this pattern.
+ */
+bool WorkspaceGroup::areNamesSimilar() const
+{
+  if(m_wsNames.empty()) return false;
+
+  //Check all the members are of similar names
+  std::vector<std::string>::const_iterator citr;
+  for(citr=m_wsNames.begin(); citr!=m_wsNames.end(); ++citr)
+  {
+    bool b;
+    // Find the last underscore _
+    std::size_t pos=(*citr).find_last_of("_");
+    // No underscore = not similar
+    if(pos==std::string::npos)
+      return false;
+    // The part before the underscore has to be the same
+    // as the group name to be similar
+    std::string commonpart((*citr).substr(0,pos));
+    if (this->name() != commonpart)
+      return false;
+  }
+  return true;
+}
+
+
 } // namespace API
 } // namespace Mantid
 

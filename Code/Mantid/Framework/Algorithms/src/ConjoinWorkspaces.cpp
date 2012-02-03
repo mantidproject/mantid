@@ -44,8 +44,9 @@ void ConjoinWorkspaces::initDocs()
 
 //----------------------------------------------------------------------------------------------
 /// Default constructor
-ConjoinWorkspaces::ConjoinWorkspaces() : PairedGroupAlgorithm(), m_progress(NULL),
-    m_overlapChecked(false) {}
+ConjoinWorkspaces::ConjoinWorkspaces() : Algorithm(), m_progress(NULL), m_overlapChecked(false)
+{
+}
 
 //----------------------------------------------------------------------------------------------
 /// Destructor
@@ -471,11 +472,11 @@ void ConjoinWorkspaces::fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1, 
   output->generateSpectraMap();
 }
 
-/// Appends the removal of the empty group after execution to the PairedGroupAlgorithm::processGroups method
-bool ConjoinWorkspaces::processGroups(API::WorkspaceGroup_sptr wsPt, const std::vector<Kernel::Property*>& prop)
+/// Appends the removal of the empty group after execution to the Algorithm::processGroups() method
+bool ConjoinWorkspaces::processGroups()
 {
   // Call the base class method for most of the functionality
-  const bool retval = PairedGroupAlgorithm::processGroups(wsPt,prop);
+  const bool retval = Algorithm::processGroups();
 
   // If that was successful, remove the now empty group in the second input workspace property
   if (retval) AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace2"));

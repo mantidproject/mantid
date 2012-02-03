@@ -934,40 +934,44 @@ size_t split_path(const std::string &path, std::vector<std::string> &path_compon
 
 /// \cond TEMPLATE
 
-template DLLExport int section(std::string&,double&);
-template DLLExport int section(std::string&,float&);
-template DLLExport int section(std::string&,int&);
-template DLLExport int section(std::string&,std::string&);
-//template DLLExport int section(std::string&, Mantid::Geometry::V3D&);
+template MANTID_KERNEL_DLL int section(std::string&,double&);
+template MANTID_KERNEL_DLL int section(std::string&,float&);
+template MANTID_KERNEL_DLL int section(std::string&,int&);
+template MANTID_KERNEL_DLL int section(std::string&,std::string&);
+//template MANTID_KERNEL_DLL int section(std::string&, Mantid::Geometry::V3D&);
 
-template DLLExport int sectPartNum(std::string&,double&);
-template DLLExport int sectPartNum(std::string&,int&);
-template DLLExport int sectionMCNPX(std::string&,double&);
+template MANTID_KERNEL_DLL int sectPartNum(std::string&,double&);
+template MANTID_KERNEL_DLL int sectPartNum(std::string&,int&);
+template MANTID_KERNEL_DLL int sectionMCNPX(std::string&,double&);
 
-template DLLExport int convert(const std::string&,double&);
-template DLLExport int convert(const std::string&,std::string&);
-template DLLExport int convert(const std::string&,int&);
-template DLLExport int convert(const std::string&,std::size_t&);
-template DLLExport int convert(const char*,std::string&);
-template DLLExport int convert(const char*,double&);
-template DLLExport int convert(const char*,int&);
-template DLLExport int convert(const char*,std::size_t&);
+template MANTID_KERNEL_DLL int convert(const std::string&,double&);
+template MANTID_KERNEL_DLL int convert(const std::string&,std::string&);
+template MANTID_KERNEL_DLL int convert(const std::string&,int&);
+template MANTID_KERNEL_DLL int convert(const std::string&,std::size_t&);
+template MANTID_KERNEL_DLL int convert(const char*,std::string&);
+template MANTID_KERNEL_DLL int convert(const char*,double&);
+template MANTID_KERNEL_DLL int convert(const char*,int&);
+template MANTID_KERNEL_DLL int convert(const char*,std::size_t&);
 
-template DLLExport std::string toString(const double value);
-template DLLExport std::string toString(const int value);
-template DLLExport std::string toString(const uint16_t value);
-template DLLExport std::string toString(const size_t value);
+template MANTID_KERNEL_DLL std::string toString(const double value);
+template MANTID_KERNEL_DLL std::string toString(const int value);
+template MANTID_KERNEL_DLL std::string toString(const uint16_t value);
+template MANTID_KERNEL_DLL std::string toString(const size_t value); // Matches uint64_t on Linux & Win
+#ifdef __APPLE__
+  template MANTID_KERNEL_DLL std::string toString(const uint64_t value);
+#endif
+template MANTID_KERNEL_DLL std::string toString(const std::string value);
 
-template DLLExport int convPartNum(const std::string&,double&);
-template DLLExport int convPartNum(const std::string&,int&);
+template MANTID_KERNEL_DLL int convPartNum(const std::string&,double&);
+template MANTID_KERNEL_DLL int convPartNum(const std::string&,int&);
 
-template DLLExport int setValues(const std::string&,const std::vector<int>&,std::vector<double>&);
+template MANTID_KERNEL_DLL int setValues(const std::string&,const std::vector<int>&,std::vector<double>&);
 
-template DLLExport int writeFile(const std::string&,const double&,const std::vector<double>&);
-template DLLExport int writeFile(const std::string&,const std::vector<double>&,const std::vector<double>&,const std::vector<double>&);
-template DLLExport int writeFile(const std::string&,const std::vector<double>&,const std::vector<double>&);
-template DLLExport int writeFile(const std::string&,const std::vector<float>&,const std::vector<float>&);
-template DLLExport int writeFile(const std::string&,const std::vector<float>&,const std::vector<float>&,const std::vector<float>&);
+template MANTID_KERNEL_DLL int writeFile(const std::string&,const double&,const std::vector<double>&);
+template MANTID_KERNEL_DLL int writeFile(const std::string&,const std::vector<double>&,const std::vector<double>&,const std::vector<double>&);
+template MANTID_KERNEL_DLL int writeFile(const std::string&,const std::vector<double>&,const std::vector<double>&);
+template MANTID_KERNEL_DLL int writeFile(const std::string&,const std::vector<float>&,const std::vector<float>&);
+template MANTID_KERNEL_DLL int writeFile(const std::string&,const std::vector<float>&,const std::vector<float>&,const std::vector<float>&);
 
 /// \endcond TEMPLATE
 

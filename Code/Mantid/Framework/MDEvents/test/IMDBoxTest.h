@@ -117,6 +117,31 @@ public:
     TS_ASSERT_DELTA( box.getExtents(2).max, 3.0, 1e-4 );
   }
 
+  void test_transformDimensions()
+  {
+    typedef IMDBoxTester<MDLeanEvent<2>,2> ibox3;
+    std::vector<Mantid::Geometry::MDDimensionExtents> extentsVector;
+    TS_ASSERT_THROWS_ANYTHING( ibox3 box(extentsVector) );
+    extentsVector.resize(2);
+    for (size_t d=0; d<2; d++)
+    {
+      extentsVector[d].min = 1.0;
+      extentsVector[d].max = 2.0;
+    }
+    IMDBoxTester<MDLeanEvent<2>,2> box(extentsVector);
+    // Now transform
+    std::vector<double> scaling(2, 3.0);
+    std::vector<double> offset(2, 1.0);
+    box.transformDimensions(scaling, offset);
+    for (size_t d=0; d<2; d++)
+    {
+      TS_ASSERT_DELTA( box.getExtents(d).min, 4.0, 1e-4 );
+      TS_ASSERT_DELTA( box.getExtents(d).max, 7.0, 1e-4 );
+    }
+    TS_ASSERT_DELTA( box.getVolume(), 9.0, 1e-4);
+
+  }
+
   void test_get_and_set_signal()
   {
     IMDBoxTester<MDLeanEvent<3>,3> box;

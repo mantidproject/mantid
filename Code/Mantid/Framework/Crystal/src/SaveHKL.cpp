@@ -57,8 +57,8 @@ namespace Crystal
    */
   void SaveHKL::init()
   {
-    declareProperty(new WorkspaceProperty<PeaksWorkspace>("InputWorkspace","",Direction::Input, new InstrumentValidator<PeaksWorkspace>()),
-        "An input PeaksWorkspace with an instrument.");
+    declareProperty(new WorkspaceProperty<PeaksWorkspace>("InputWorkspace","",Direction::Input),
+        "An input PeaksWorkspace.");
 
     BoundedValidator<double> *mustBePositive = new BoundedValidator<double> ();
     mustBePositive->setLower(0.0);
@@ -70,6 +70,9 @@ namespace Crystal
       "Radius of the sample in centimeters");
     declareProperty("ScalePeaks", 1.0, mustBePositive->clone(),
       "Multiply FSQ and sig(FSQ) by scaleFactor");
+    declareProperty("MinDSpacing", 0.0, "Minimum d-spacing (Angstroms)");
+    declareProperty("MinWavelength", 0.0, "Minimum wavelength (Angstroms)");
+    declareProperty("MaxWavelength", 100.0, "Maximum wavelength (Angstroms)");
 
     declareProperty("AppendFile", false, "Append to file if true.\n"
       "If false, new file (default).");
@@ -93,12 +96,16 @@ namespace Crystal
     amu = getProperty("LinearAbsorptionCoef"); // in 1/cm
     radius = getProperty("Radius"); // in cm
     double scaleFactor = getProperty("ScalePeaks"); 
+    double dMin = getProperty("MinDSpacing");
+    double wlMin = getProperty("MinWavelength");
+    double wlMax = getProperty("MaxWavelength");
 
     std::vector<Peak> peaks = ws->getPeaks();
 
     // Sequence and run number
     int seqNum = 1;
-    int firstrun = peaks[0].getRunNumber();
+    int firstrun = 0;
+    if(peaks.size()>0) firstrun = peaks[0].getRunNumber();
 
     std::fstream out;
     bool append = getProperty("AppendFile");
@@ -117,13 +124,6 @@ namespace Crystal
     {
       out.open( filename.c_str(), std::ios::out);
     }
-
-    Instrument_const_sptr inst = ws->getInstrument();
-    if (!inst) throw std::runtime_error("No instrument in PeaksWorkspace. Cannot save peaks file.");
-
-    double l1; V3D beamline; double beamline_norm; V3D samplePos;
-    inst->getInstrumentParameters(l1, beamline, beamline_norm, samplePos);
-
 
     // We must sort the peaks first by run, then bank #, and save the list of workspace indices of it
     typedef std::map<int, std::vector<size_t> > bankMap_t;
@@ -182,13 +182,13 @@ namespace Crystal
               boost::math::isnan(p.getSigmaIntensity())) continue;
 
             double tbar = 0;
-            // This is the scattered beam direction
-            V3D dir = p.getDetPos() - inst->getSample()->getPos();
 
             // Two-theta = polar angle = scattering angle = between +Z vector and the scattered beam
-            double scattering = dir.angle( V3D(0.0, 0.0, 1.0) );
+            double scattering = p.getScattering();
             double lambda =  p.getWavelength();
+            double dsp = p.getDSpacing();
             double transmission = absor_sphere(scattering, lambda, tbar);
+            if(dsp < dMin || lambda < wlMin || lambda > wlMax) continue;
 
             // Anvred write from Art Schultz
             //hklFile.write('%4d%4d%4d%8.2f%8.2f%4d%8.4f%7.4f%7d%7d%7.4f%4d%9.5f%9.4f\n' 
@@ -221,7 +221,7 @@ namespace Crystal
               << scattering; //two-theta scattering
 
             out << std::setw( 9 ) << std::fixed << std::setprecision( 4 )
-              << p.getDSpacing();
+              << dsp;
 
             out << std::endl;
 
@@ -305,7 +305,10 @@ namespace Crystal
                                                  // trans = exp(-mu*tbar)
 
 //  calculate tbar as defined by coppens.
-    tbar = -(double)std::log(trans)/mu;
+    if(mu == 0.0)
+      tbar=0.0;
+    else
+      tbar = -(double)std::log(trans)/mu;
 
     return trans;
   }

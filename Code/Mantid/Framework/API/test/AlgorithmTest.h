@@ -6,6 +6,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/Property.h"
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidTestHelpers/FakeObjects.h"
 
 using namespace Mantid::Kernel; 
 using namespace Mantid::API;
@@ -46,7 +47,7 @@ public:
   const std::string name() const { return "ToyAlgorithm";} ///< Algorithm's name for identification
   int version() const  { return 2;} ///< Algorithm's version for identification
   const std::string category() const { return "Cat,Leopard,Mink";} 
-  const std::string categorySeperator() const { return ",";} ///< testing the ability to change the seperator
+  const std::string categorySeparator() const { return ",";} ///< testing the ability to change the seperator
   const std::string alias() const { return "Dog";}
   void init()
   { 
@@ -76,6 +77,45 @@ public:
   void exec() {}
 };
 
+
+class WorkspaceAlgorithm : public Algorithm
+{
+public:
+  WorkspaceAlgorithm() : Algorithm() {}
+  virtual ~WorkspaceAlgorithm() {}
+
+  const std::string name() const { return "WorkspaceAlgorithm";}
+  int version() const  { return 1;}
+  const std::string category() const { return "Cat;Leopard;Mink";}
+  void init()
+  {
+    declareProperty(new WorkspaceProperty<>("InputWorkspace1", "", Direction::Input));
+    declareProperty(new WorkspaceProperty<>("InputWorkspace2", "", Direction::Input, true));
+    declareProperty(new WorkspaceProperty<>("InOutWorkspace", "", Direction::InOut, true));
+    declareProperty("Number", 0.0);
+    declareProperty(new WorkspaceProperty<>("OutputWorkspace1","",Direction::Output));
+    declareProperty(new WorkspaceProperty<>("OutputWorkspace2","",Direction::Output, true));
+  }
+  void exec()
+  {
+    boost::shared_ptr<WorkspaceTester> out1(new WorkspaceTester());
+    out1->init(10,10,10);
+    boost::shared_ptr<WorkspaceTester> out2(new WorkspaceTester());
+    out2->init(10,10,10);
+    std::string outName = getPropertyValue("InputWorkspace1")
+            + "+" + getPropertyValue("InputWorkspace2")
+            + "+" + getPropertyValue("InOutWorkspace");
+    out1->setTitle(outName);
+    out2->setTitle(outName);
+    double val = getProperty("Number");
+    out1->dataY(0)[0] = val;
+    setProperty("OutputWorkspace1", out1);
+    setProperty("OutputWorkspace2", out2);
+  }
+};
+DECLARE_ALGORITHM( WorkspaceAlgorithm)
+
+
 class AlgorithmTest : public CxxTest::TestSuite
 {
 public:
@@ -87,6 +127,8 @@ public:
 
   AlgorithmTest()
   {
+    Mantid::API::FrameworkManager::Instance();
+    AnalysisDataService::Instance();
     Mantid::API::AlgorithmFactory::Instance().subscribe<ToyAlgorithm>();
     Mantid::API::AlgorithmFactory::Instance().subscribe<ToyAlgorithmTwo>();
   }
@@ -309,6 +351,231 @@ public:
   }
 
 
+  //------------------------------------------------------------------------
+  /** Test of setting read and/or write locks
+   * for various combinations of input/output workspaces.
+   */
+  void do_test_locking(std::string in1, std::string in2, std::string inout, std::string out1, std::string out2="")
+  {
+    for (size_t i=0; i<6; i++)
+    {
+      boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
+      AnalysisDataService::Instance().addOrReplace("ws" + Strings::toString(i), ws);
+    }
+    WorkspaceAlgorithm alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace1", in1);
+    alg.setPropertyValue("InputWorkspace2", in2);
+    alg.setPropertyValue("InOutWorkspace", inout);
+    alg.setPropertyValue("OutputWorkspace1", out1);
+    alg.setPropertyValue("OutputWorkspace2", out2);
+    // This throws or hangs if the code is wrong
+    alg.execute();
+  }
+
+
+  //------------------------------------------------------------------------
+  void test_lockingWorkspaces()
+  {
+    // Input and output are different
+    do_test_locking("ws0", "", "", "ws1");
+    // Repeated output workspaces
+    do_test_locking("ws0", "", "", "ws1", "ws1");
+    // Different output workspaces
+    do_test_locking("ws0", "", "", "ws1", "ws2");
+    // Input and output are same
+    do_test_locking("ws0", "", "", "ws0");
+    // Two input workspaces
+    do_test_locking("ws0", "ws0", "", "ws5");
+    // Also in-out workspace
+    do_test_locking("ws0", "ws0", "ws0", "ws0");
+    // All the same
+    do_test_locking("ws0", "ws0", "ws0", "ws0", "ws0");
+  }
+
+  //------------------------------------------------------------------------
+  /** Make a workspace group with:
+   *
+   * @param group1 :: name of the group. Do nothing if blank.
+   * @param contents1 :: comma-sep names of fake workspaces in the group
+   *        Make no group if blank, just 1 workspace
+   */
+  void makeWorkspaceGroup(std::string group1, std::string contents1)
+  {
+    if (contents1.empty())
+    {
+      if (group1.empty()) return;
+      boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
+      AnalysisDataService::Instance().addOrReplace(group1,ws);
+      return;
+    }
+
+    std::vector<std::string> names;
+    boost::split( names, contents1, boost::algorithm::detail::is_any_ofF<char>(","));
+    if (names.size() >= 1)
+    {
+      WorkspaceGroup_sptr wsGroup = WorkspaceGroup_sptr(new WorkspaceGroup());
+      std::vector<std::string>::iterator it = names.begin();
+      for (; it != names.end(); it++)
+      {
+        boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
+        ws->init(10,10,10);
+        AnalysisDataService::Instance().addOrReplace(*it,ws);
+        wsGroup->add(*it);
+      }
+      AnalysisDataService::Instance().addOrReplace(group1, wsGroup);
+    }
+  }
+
+  //------------------------------------------------------------------------
+  WorkspaceGroup_sptr do_test_groups(
+      std::string group1, std::string contents1,
+      std::string group2, std::string contents2,
+      std::string group3, std::string contents3,
+      bool expectFail = false,
+      int expectedNumber = 3
+      )
+  {
+    makeWorkspaceGroup(group1, contents1);
+    makeWorkspaceGroup(group2, contents2);
+    makeWorkspaceGroup(group3, contents3);
+
+    WorkspaceAlgorithm alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace1", group1);
+    alg.setPropertyValue("InputWorkspace2", group2);
+    alg.setPropertyValue("InOutWorkspace", group3);
+    alg.setPropertyValue("Number", "234");
+    alg.setPropertyValue("OutputWorkspace1", "D");
+    alg.setPropertyValue("OutputWorkspace2", "E");
+    TS_ASSERT_THROWS_NOTHING( alg.execute() );
+    if (expectFail)
+    {
+      TS_ASSERT( !alg.isExecuted() );
+      return WorkspaceGroup_sptr();
+    }
+    TS_ASSERT( alg.isExecuted() )
+    Workspace_sptr out1 = AnalysisDataService::Instance().retrieve("D");
+    WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<WorkspaceGroup>(out1);
+
+    TS_ASSERT_EQUALS( group->name(), "D" )
+    TS_ASSERT_EQUALS( group->getNumberOfEntries(), expectedNumber )
+    if (group->getNumberOfEntries() < 1) return group;
+    ws1 = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+    if (group->getNumberOfEntries() < 2) return group;
+    ws2 = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(1));
+    if (group->getNumberOfEntries() < 3) return group;
+    ws3 = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(2));
+    return group;
+  }
+
+  void test_processGroups_failures()
+  {
+    // Fails due to unequal sizes.
+    do_test_groups("A", "A_1,A_2,A_3",
+        "B", "B_1,B_2,B_3,B_4",   "", "",
+        true /*fails*/);
+  }
+
+  /// All groups are the same size
+  void test_processGroups_allSameSize()
+  {
+    WorkspaceGroup_sptr group = do_test_groups("A", "A_1,A_2,A_3",
+        "B", "B_1,B_2,B_3",   "C", "C_1,C_2,C_3");
+
+    TS_ASSERT_EQUALS( ws1->name(), "D_1" );
+    TS_ASSERT_EQUALS( ws1->getTitle(), "A_1+B_1+C_1" );
+    TS_ASSERT_EQUALS( ws1->readY(0)[0], 234 );
+    TS_ASSERT_EQUALS( ws2->name(), "D_2" );
+    TS_ASSERT_EQUALS( ws2->getTitle(), "A_2+B_2+C_2" );
+    TS_ASSERT_EQUALS( ws3->name(), "D_3" );
+    TS_ASSERT_EQUALS( ws3->getTitle(), "A_3+B_3+C_3" );
+  }
+
+  /// All groups are the same size, but they don't all match the rigid naming
+  void test_processGroups_allSameSize_namesNotSimilar()
+  {
+    WorkspaceGroup_sptr group = do_test_groups("A", "A_1,A_2,A_3",
+        "B", "B_1,B_2,B_3",   "C", "alice,bob,charlie");
+
+    TS_ASSERT_EQUALS( ws1->name(), "A_1_B_1_alice_D" );
+    TS_ASSERT_EQUALS( ws1->getTitle(), "A_1+B_1+alice" );
+    TS_ASSERT_EQUALS( ws1->readY(0)[0], 234 );
+    TS_ASSERT_EQUALS( ws2->name(), "A_2_B_2_bob_D" );
+    TS_ASSERT_EQUALS( ws2->getTitle(), "A_2+B_2+bob" );
+    TS_ASSERT_EQUALS( ws3->name(), "A_3_B_3_charlie_D" );
+    TS_ASSERT_EQUALS( ws3->getTitle(), "A_3+B_3+charlie" );
+  }
+
+  /// One input is a group, rest are singles
+  void test_processGroups_onlyOneGroup()
+  {
+    WorkspaceGroup_sptr group = do_test_groups("A", "A_1,A_2,A_3",
+        "B", "",   "C", "");
+
+    TS_ASSERT_EQUALS( ws1->name(), "D_1" );
+    TS_ASSERT_EQUALS( ws1->getTitle(), "A_1+B+C" );
+    TS_ASSERT_EQUALS( ws1->readY(0)[0], 234 );
+    TS_ASSERT_EQUALS( ws2->name(), "D_2" );
+    TS_ASSERT_EQUALS( ws2->getTitle(), "A_2+B+C" );
+    TS_ASSERT_EQUALS( ws3->name(), "D_3" );
+    TS_ASSERT_EQUALS( ws3->getTitle(), "A_3+B+C" );
+  }
+
+  /// One optional WorkspaceProperty is not specified
+  void test_processGroups_optionalInput()
+  {
+    WorkspaceGroup_sptr group = do_test_groups("A", "A_1,A_2,A_3",
+        "B", "",   "", "");
+
+    TS_ASSERT_EQUALS( ws1->name(), "D_1" );
+    TS_ASSERT_EQUALS( ws1->getTitle(), "A_1+B+" );
+    TS_ASSERT_EQUALS( ws1->readY(0)[0], 234 );
+    TS_ASSERT_EQUALS( ws2->name(), "D_2" );
+    TS_ASSERT_EQUALS( ws2->getTitle(), "A_2+B+" );
+    TS_ASSERT_EQUALS( ws3->name(), "D_3" );
+    TS_ASSERT_EQUALS( ws3->getTitle(), "A_3+B+" );
+  }
+
+  /// One optional WorkspaceProperty is not specified
+  void test_processGroups_twoGroups_and_optionalInput()
+  {
+    WorkspaceGroup_sptr group = do_test_groups("A", "A_1,A_2,A_3",
+        "", "", "C", "C_1,C_2,C_3");
+
+    TS_ASSERT_EQUALS( ws1->name(), "D_1" );
+    TS_ASSERT_EQUALS( ws1->getTitle(), "A_1++C_1" );
+    TS_ASSERT_EQUALS( ws1->readY(0)[0], 234 );
+    TS_ASSERT_EQUALS( ws2->name(), "D_2" );
+    TS_ASSERT_EQUALS( ws2->getTitle(), "A_2++C_2" );
+    TS_ASSERT_EQUALS( ws3->name(), "D_3" );
+    TS_ASSERT_EQUALS( ws3->getTitle(), "A_3++C_3" );
+  }
+
+  /// One input is a group with only one member (not possible via GUI)
+  void test_processGroups_onlyOneGroup_withOnlyOneMember()
+  {
+    WorkspaceGroup_sptr group = do_test_groups("A", "A_1",
+        "B", "",   "C", "", false, 1);
+
+    TS_ASSERT_EQUALS( ws1->name(), "D_1" );
+    TS_ASSERT_EQUALS( ws1->getTitle(), "A_1+B+C" );
+    TS_ASSERT_EQUALS( ws1->readY(0)[0], 234 );
+  }
+
+  /// Two inputs are groups with one member (each)
+  void test_processGroups_twoGroup_withOnlyOneMember()
+  {
+    WorkspaceGroup_sptr group = do_test_groups("A", "A_1",
+        "B", "B_1",   "C", "", false, 1);
+
+    TS_ASSERT_EQUALS( ws1->name(), "D_1" );
+    TS_ASSERT_EQUALS( ws1->getTitle(), "A_1+B_1+C" );
+    TS_ASSERT_EQUALS( ws1->readY(0)[0], 234 );
+  }
+
+
+
 private:
   IAlgorithm_sptr runFromString(const std::string & input)
   {
@@ -322,6 +589,10 @@ private:
   ToyAlgorithm alg;
   ToyAlgorithmTwo algv2;
   ToyAlgorithmThree algv3;
+
+  MatrixWorkspace_sptr ws1;
+  MatrixWorkspace_sptr ws2;
+  MatrixWorkspace_sptr ws3;
 };
 
  

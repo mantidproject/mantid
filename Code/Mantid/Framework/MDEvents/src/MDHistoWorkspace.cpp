@@ -26,7 +26,8 @@ namespace MDEvents
    */
   MDHistoWorkspace::MDHistoWorkspace(Mantid::Geometry::MDHistoDimension_sptr dimX, Mantid::Geometry::MDHistoDimension_sptr dimY,
       Mantid::Geometry::MDHistoDimension_sptr dimZ, Mantid::Geometry::MDHistoDimension_sptr dimT)
-  : numDimensions(0)
+  : IMDHistoWorkspace(),
+    numDimensions(0)
   {
     std::vector<Mantid::Geometry::MDHistoDimension_sptr> dimensions;
     if (dimX) dimensions.push_back(dimX);
@@ -41,7 +42,8 @@ namespace MDEvents
    * @param dimensions :: vector of MDHistoDimension; no limit to how many.
    */
   MDHistoWorkspace::MDHistoWorkspace(std::vector<Mantid::Geometry::MDHistoDimension_sptr> & dimensions)
-  : numDimensions(0)
+  : IMDHistoWorkspace(),
+    numDimensions(0)
   {
     this->init(dimensions);
   }
@@ -54,14 +56,11 @@ namespace MDEvents
   MDHistoWorkspace::MDHistoWorkspace(const MDHistoWorkspace & other)
   : IMDHistoWorkspace(other)
   {
-    std::vector<Mantid::Geometry::MDHistoDimension_sptr> dimensions;
-    for (size_t d=0; d < other.getNumDims(); d++)
-    {
-      // Copy the dimension
-      MDHistoDimension_sptr dim(new MDHistoDimension( other.getDimension(d).get() ) );
-      dimensions.push_back(dim);
-    }
-    this->init(dimensions);
+    // Dimensions are copied by the copy constructor of MDGeometry
+    this->cacheValues();
+    // Allocate the linear arrays
+    m_signals = new signal_t[m_length];
+    m_errorsSquared = new signal_t[m_length];
     // Now copy all the data
     for (size_t i=0; i<m_length; ++i)
     {
@@ -95,7 +94,23 @@ namespace MDEvents
     std::vector<IMDDimension_sptr> dim2;
     for (size_t i=0; i<dimensions.size(); i++) dim2.push_back(boost::dynamic_pointer_cast<IMDDimension>(dimensions[i]));
     MDGeometry::initGeometry(dim2);
+    this->cacheValues();
 
+    // Allocate the linear arrays
+    m_signals = new signal_t[m_length];
+    m_errorsSquared = new signal_t[m_length];
+
+    // Initialize them to NAN (quickly)
+    signal_t nan = std::numeric_limits<signal_t>::quiet_NaN();
+    this->setTo(nan, nan);
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** When all dimensions have been initialized, this caches all the necessary
+   * values for later use.
+   */
+  void MDHistoWorkspace::cacheValues()
+  {
     // Copy the dimensions array
     numDimensions = m_dimensions.size();
 
@@ -118,24 +133,15 @@ namespace MDEvents
     for (size_t d=numDimensions-1; d<4; d++)
       indexMultiplier[d] = 0;
 
-    // Allocate the linear arrays
-    m_signals = new signal_t[m_length];
-    m_errorsSquared = new signal_t[m_length];
-
-    // Initialize them to NAN (quickly)
-    signal_t nan = std::numeric_limits<signal_t>::quiet_NaN();
-    this->setTo(nan, nan);
-
     // Compute the volume of each cell.
     coord_t volume = 1.0;
     for (size_t i=0; i < numDimensions; ++i)
-      volume *= dimensions[i]->getBinWidth();
+      volume *= m_dimensions[i]->getBinWidth();
     m_inverseVolume = 1.0 / volume;
 
     // Continue with the vertexes array
     this->initVertexesArray();
   }
-
 
   //----------------------------------------------------------------------------------------------
   /** Sets all signals/errors in the workspace to the given values

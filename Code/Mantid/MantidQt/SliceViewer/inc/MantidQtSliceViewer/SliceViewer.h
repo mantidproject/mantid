@@ -9,6 +9,7 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/VMD.h"
 #include "MantidQtAPI/MantidColorMap.h"
+#include "MantidQtAPI/SafeQwtPlot.h"
 #include "MantidQtAPI/SyncedCheckboxes.h"
 #include "MantidQtSliceViewer/LineOverlay.h"
 #include "QwtRasterDataMD.h"
@@ -104,7 +105,9 @@ public slots:
   void setFastRender(bool fast);
   // Slots that will be automatically connected via QMetaObject.connectSlotsByName
   void on_btnClearLine_clicked();
+  QPixmap getImage();
   void saveImage(const QString & filename = QString());
+  void copyImageToClipboard();
 
   // Synced checkboxes
   void LineMode_toggled(bool);
@@ -133,7 +136,7 @@ private:
   Ui::SliceViewerClass ui;
 
   /// Main plot object
-  QwtPlot * m_plot;
+  MantidQt::API::SafeQwtPlot * m_plot;
 
   /// Spectrogram plot
   QwtPlotSpectrogram * m_spect;

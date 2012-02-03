@@ -73,6 +73,8 @@ namespace MDEvents
 
     const IMDBox<MDE,nd> * getBoxAtCoord(const coord_t * coords) const;
 
+    void transformDimensions(std::vector<double> & scaling, std::vector<double> & offset);
+
 
     void addEvent(const MDE & point);
 

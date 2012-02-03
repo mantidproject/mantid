@@ -16,6 +16,7 @@ namespace API
   /** Constructor
    */
   IMDHistoWorkspace::IMDHistoWorkspace()
+  : IMDWorkspace(), MultipleExperimentInfos()
   {
   }
 
@@ -23,7 +24,7 @@ namespace API
   /** Copy Constructor
    */
   IMDHistoWorkspace::IMDHistoWorkspace(const IMDHistoWorkspace & other)
-  : MultipleExperimentInfos(other)
+  : IMDWorkspace(other), MultipleExperimentInfos(other)
   {
   }
     

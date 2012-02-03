@@ -414,7 +414,30 @@ public:
     TS_ASSERT_EQUALS( b->getNPoints(), 1 );
   }
 
+  //-------------------------------------------------------------------------------------
+  void test_transformDimensions()
+  {
+    MDBox<MDLeanEvent<1>,1> * b = MDEventsTestHelper::makeMDBox1();
+    // Give it 10 events
+    const std::vector<MDLeanEvent<1> > events = MDEventsTestHelper::makeMDEvents1(10);
+    b->addEvents( events );
+    MDGridBox<MDLeanEvent<1>,1> * g = new MDGridBox<MDLeanEvent<1>,1>(b);
+    TSM_ASSERT_EQUALS("MDBoxes start with 1 each.", g->getChild(9)->getNPoints(), 1);
 
+    std::vector<double> scaling(1, 3.0);
+    std::vector<double> offset(1, 1.0);
+    g->transformDimensions(scaling, offset);
+
+    TS_ASSERT_DELTA(g->getVolume(), 30.0, 1e-5);
+    MDLeanEvent<1> ev;
+    ev.setCenter(0, 30.9);
+    g->addEvent(ev);
+    TSM_ASSERT_EQUALS("New event was added in the right spot.", g->getChild(9)->getNPoints(), 2);
+  }
+
+
+
+  //-------------------------------------------------------------------------------------
   /** Recursive getting of a list of IMDBox */
   void test_getBoxes()
   {

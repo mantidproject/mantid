@@ -1,7 +1,7 @@
 #ifndef ALGORITHMS_REBINTOWORKSPACE_H_
 #define ALGORITHMS_REBINTOWORKSPACE_H_
 
-#include "MantidAPI/PairedGroupAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 namespace Mantid
@@ -44,11 +44,11 @@ namespace Algorithms
      Code Documentation is available at: <http://doxygen.mantidproject.org>    
   */
 
-class DLLExport RebinToWorkspace : public Mantid::API::PairedGroupAlgorithm
+class DLLExport RebinToWorkspace : public Mantid::API::Algorithm
 {
 public:
   /// Constructor
-  RebinToWorkspace() : Mantid::API::PairedGroupAlgorithm() {}
+  RebinToWorkspace() : Mantid::API::Algorithm() {}
   /// Virtual destructor
   virtual ~RebinToWorkspace() {}
   /// Algorithm's name

@@ -9,6 +9,7 @@ set ( SRC_FILES
 	src/MantidDialog.cpp
 	src/MantidWidget.cpp
 	src/PythonRunner.cpp
+	src/SafeQwtPlot.cpp
 	src/SyncedCheckboxes.cpp
 	src/UserSubWindow.cpp
 	src/VatesViewerInterface.cpp
@@ -35,6 +36,7 @@ set ( INC_FILES
 	inc/MantidQtAPI/MantidQwtMatrixWorkspaceData.h
 	inc/MantidQtAPI/MantidQwtWorkspaceData.h
 	inc/MantidQtAPI/PythonRunner.h
+	inc/MantidQtAPI/SafeQwtPlot.h
 	inc/MantidQtAPI/SyncedCheckboxes.h
 	inc/MantidQtAPI/UserSubWindow.h
 	inc/MantidQtAPI/VatesViewerInterface.h

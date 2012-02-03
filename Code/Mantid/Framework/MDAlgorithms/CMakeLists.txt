@@ -5,6 +5,7 @@ set ( SRC_FILES
 	src/BinaryOperationMD.cpp
 	src/BooleanBinaryOperationMD.cpp
 	src/CobaltSpinWaveDSHO.cpp
+	src/CompareMDWorkspaces.cpp
 	src/CompositeFunctionBuilder.cpp
 	src/CompositeImplicitFunction.cpp
 	src/CompositeImplicitFunctionParser.cpp
@@ -30,10 +31,12 @@ set ( SRC_FILES
 	src/PowerMD.cpp
 	src/QuadEnBackground.cpp
 	src/RunParam.cpp
+	src/SaveZODS.cpp
 	src/SetMDUsingMask.cpp
 	src/SimulateMDD.cpp
 	src/SimulateResolution.cpp
 	src/TobyFitSimulate.cpp
+	src/TransformMD.cpp
 	src/UnaryOperationMD.cpp
 	src/Vector3DParameterParser.cpp
 	src/XorMD.cpp
@@ -49,6 +52,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/BinaryOperationMD.h
 	inc/MantidMDAlgorithms/BooleanBinaryOperationMD.h
 	inc/MantidMDAlgorithms/CobaltSpinWaveDSHO.h
+	inc/MantidMDAlgorithms/CompareMDWorkspaces.h
 	inc/MantidMDAlgorithms/CompositeFunctionBuilder.h
 	inc/MantidMDAlgorithms/CompositeImplicitFunction.h
 	inc/MantidMDAlgorithms/CompositeImplicitFunctionParser.h
@@ -80,10 +84,12 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/PowerMD.h
 	inc/MantidMDAlgorithms/QuadEnBackground.h
 	inc/MantidMDAlgorithms/RunParam.h
+	inc/MantidMDAlgorithms/SaveZODS.h
 	inc/MantidMDAlgorithms/SetMDUsingMask.h
 	inc/MantidMDAlgorithms/SimulateMDD.h
 	inc/MantidMDAlgorithms/SimulateResolution.h
 	inc/MantidMDAlgorithms/TobyFitSimulate.h
+	inc/MantidMDAlgorithms/TransformMD.h
 	inc/MantidMDAlgorithms/UnaryOperationMD.h
 	inc/MantidMDAlgorithms/Vector3DParameter.h
 	inc/MantidMDAlgorithms/Vector3DParameterParser.h
@@ -97,6 +103,7 @@ set ( TEST_FILES
 	#test/CreateMDFitWorkspaceTest.h
 	test/AndMDTest.h
 	test/BooleanBinaryOperationMDTest.h
+	test/CompareMDWorkspacesTest.h
 	test/ConvertEventsToMDEventsTest.h
 	test/ConvertToMDEventsCoordTransfTest.h
 	test/ConvertToMDEventsMethodsTest.h
@@ -121,9 +128,11 @@ set ( TEST_FILES
 	test/PowerMDTest.h
 	test/QuadEnBackgroundTest.h
 	test/RunParamTest.h
+	test/SaveZODSTest.h
 	test/SetMDUsingMaskTest.h
 	test/SimulateMDDTest.h
 	test/TobyFitSimulateTest.h
+	test/TransformMDTest.h
 	test/UnaryOperationMDTest.h
 	test/XorMDTest.h
 )

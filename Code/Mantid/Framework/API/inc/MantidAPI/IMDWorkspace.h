@@ -72,7 +72,10 @@ namespace Mantid
     class MANTID_API_DLL IMDWorkspace : public Workspace, public Mantid::API::MDGeometry
     {
     public:
-      
+      IMDWorkspace();
+      IMDWorkspace(const IMDWorkspace & other);
+      virtual ~IMDWorkspace();
+
       /// Get the number of points associated with the workspace.
       /// For MDEvenWorkspace it is the number of events contributing into the workspace
       /// For regularly gridded workspace (MDHistoWorkspace and MatrixWorkspace), it is
@@ -100,9 +103,6 @@ namespace Mantid
       /// Method to generate a line plot through a MD-workspace
       virtual void getLinePlot(const Mantid::Kernel::VMD & start, const Mantid::Kernel::VMD & end,
           Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y, std::vector<signal_t> & e) const = 0;
-
-      virtual ~IMDWorkspace();
-
     };
     
     /// Shared pointer to the IMDWorkspace base class

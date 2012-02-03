@@ -130,6 +130,16 @@ namespace MDEvents
     }
 
     //---------------------------------------------------------------------------------------------
+    /** Returns the array of coordinates, as a pointer to a non-const
+     * array.
+     * @return pointer to the fixed-size array.
+     * */
+    coord_t * getCenterNonConst()
+    {
+      return center;
+    }
+
+    //---------------------------------------------------------------------------------------------
     /** Sets the n-th coordinate axis value.
      * @param n :: index (0-based) of the dimension you want to set
      * @param value :: value to set.

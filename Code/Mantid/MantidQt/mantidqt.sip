@@ -482,6 +482,20 @@ void SliceViewer::openFromXML(const QString & xml)
    
 %End
 
+  QPixmap getImage();
+%Docstring
+QPixmap SliceViewer::getImage()
+-------------------------------
+    Grab the 2D view as an image. The image is rendered at the current window
+    size, with the color scale but without the text boxes for changing them.
+   
+    See also saveImage() and copyImageToClipboard()
+   
+    Returns:
+        QPixmap containing the image.
+   
+%End
+
   void saveImage(const QString & filename);
 %Docstring
 void SliceViewer::saveImage(const QString & filename)
@@ -492,6 +506,14 @@ void SliceViewer::saveImage(const QString & filename)
         filename :: full path to the file to save, including extension
            (e.g. .png). If not specified or empty, then a dialog will prompt
            the user to pick a file.
+   
+%End
+
+  void copyImageToClipboard();
+%Docstring
+void SliceViewer::copyImageToClipboard()
+----------------------------------------
+    Copy the rendered 2D image to the clipboard
    
 %End
 

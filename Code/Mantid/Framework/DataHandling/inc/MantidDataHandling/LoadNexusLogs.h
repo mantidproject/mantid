@@ -88,6 +88,8 @@ namespace Mantid
       /// Load an IXseblock entry
       void loadSELog(::NeXus::File & file, const std::string & entry_name, 
                      boost::shared_ptr<API::MatrixWorkspace> workspace) const;
+      void loadVetoPulses(::NeXus::File & file, boost::shared_ptr<API::MatrixWorkspace> workspace) const;
+
       /// Create a time series property
       Kernel::Property * createTimeSeries(::NeXus::File & file, 
                                           const std::string & prop_name) const;

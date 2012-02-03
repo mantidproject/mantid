@@ -62,6 +62,39 @@ public:
     TS_ASSERT_THROWS_ANYTHING( g.getDimensionIndexByName("IDontExist"));
   }
 
+  void test_transformDimensions()
+  {
+    MDGeometry g;
+    MDHistoDimension_sptr dim(new MDHistoDimension("Qx", "Qx", "Ang", -1, +1, 0));
+    TS_ASSERT_THROWS_NOTHING( g.addDimension(dim); )
+    MDHistoDimension_sptr dim2(new MDHistoDimension("Qy", "Qy", "Ang", -2, +2, 0));
+    TS_ASSERT_THROWS_NOTHING( g.addDimension(dim2); )
+    TS_ASSERT_EQUALS( g.getNumDims(), 2);
+    boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
+    g.setOriginalWorkspace(ws);
+    TS_ASSERT(g.hasOriginalWorkspace());
+
+    // Now transform
+    std::vector<double> scaling(2);
+    std::vector<double> offset(2);
+    scaling[0] = 2.0; scaling[1] = 4.0;
+    offset[0] = 0.5; offset[1] = -3;
+    g.transformDimensions(scaling, offset);
+
+    // resulting workspace
+    TSM_ASSERT(!g.hasOriginalWorkspace(), "Clear the original workspace");
+    TS_ASSERT_EQUALS( g.getDimension(0)->getName(), "Qx");
+    TS_ASSERT_EQUALS( g.getDimension(1)->getName(), "Qy");
+    TS_ASSERT_DELTA( g.getDimension(0)->getMinimum(), -1.5, 1e-4);
+    TS_ASSERT_DELTA( g.getDimension(0)->getMaximum(), +2.5, 1e-4);
+    TS_ASSERT_DELTA( g.getDimension(1)->getMinimum(), -11., 1e-4);
+    TS_ASSERT_DELTA( g.getDimension(1)->getMaximum(), +5.,  1e-4);
+
+    // Bad size throws
+    scaling.push_back(123);
+    TS_ASSERT_THROWS_ANYTHING( g.transformDimensions(scaling, offset) );
+  }
+
   void test_origin()
   {
     MDGeometry g;

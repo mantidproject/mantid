@@ -9,6 +9,7 @@ set ( SRC_FILES
 	src/FindUBUsingMinMaxD.cpp
 	src/IndexPeaks.cpp
 	src/IntegratePeakTimeSlices.cpp
+	src/LoadHKL.cpp
 	src/LoadIsawPeaks.cpp
     src/IndexSXPeaks.cpp
 	src/LoadIsawUB.cpp
@@ -23,6 +24,8 @@ set ( SRC_FILES
 	src/SavePeaksFile.cpp
 	src/SetGoniometer.cpp
 	src/SetUB.cpp
+	src/SortHKL.cpp
+	src/TOFExtinction.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES )
@@ -38,6 +41,7 @@ set ( INC_FILES
 	inc/MantidCrystal/IndexPeaks.h
     inc/MantidCrystal/IndexSXPeaks.h
 	inc/MantidCrystal/IntegratePeakTimeSlices.h
+	inc/MantidCrystal/LoadHKL.h
 	inc/MantidCrystal/LoadIsawPeaks.h
 	inc/MantidCrystal/LoadIsawUB.h
 	inc/MantidCrystal/MaskPeaksWorkspace.h
@@ -51,6 +55,8 @@ set ( INC_FILES
 	inc/MantidCrystal/SavePeaksFile.h
 	inc/MantidCrystal/SetGoniometer.h
 	inc/MantidCrystal/SetUB.h
+	inc/MantidCrystal/SortHKL.h
+	inc/MantidCrystal/TOFExtinction.h
 )
 
 set ( TEST_FILES
@@ -72,6 +78,7 @@ set ( TEST_FILES
 	test/PeakIntegrationTest.h
 	test/PeakIntensityVsRadiusTest.h
 	test/PredictPeaksTest.h
+	test/SaveHKLTest.h
 	test/SaveIsawPeaksTest.h
 	test/SaveIsawUBTest.h
 	test/SavePeaksFileTest.h

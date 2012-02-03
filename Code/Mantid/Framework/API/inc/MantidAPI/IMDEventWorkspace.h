@@ -76,6 +76,7 @@ namespace API
 
     void setFileNeedsUpdating(bool value);
 
+    virtual bool threadSafe() const;
 
   protected:
     /// Marker set to true when a file-backed workspace needs its back-end file updated (by calling SaveMD(UpdateFileBackEnd=1) )

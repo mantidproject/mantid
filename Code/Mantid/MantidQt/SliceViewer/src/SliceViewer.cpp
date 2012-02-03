@@ -48,6 +48,8 @@
 #include <sstream>
 #include <vector>
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/ReadLock.h"
+#include "MantidQtAPI/SafeQwtPlot.h"
 
 
 using namespace Mantid;
@@ -62,6 +64,7 @@ using Poco::XML::Node;
 using Poco::XML::NodeList;
 using Poco::XML::NodeIterator;
 using Poco::XML::NodeFilter;
+using MantidQt::API::SafeQwtPlot;
 
 namespace MantidQt
 {
@@ -85,7 +88,7 @@ SliceViewer::SliceViewer(QWidget *parent)
 
 	// Create the plot
   m_spectLayout = new QHBoxLayout(ui.frmPlot);
-	m_plot = new QwtPlot();
+	m_plot = new SafeQwtPlot();
   m_plot->autoRefresh();
   m_spectLayout->addWidget(m_plot, 1, 0);
 
@@ -162,6 +165,8 @@ void SliceViewer::loadSettings()
   if (!m_currentColorMapFile.isEmpty())
     loadColorMap(m_currentColorMapFile);
   m_colorBar->setLog(scaleType);
+  // Last saved image file
+  m_lastSavedFile = settings.value("LastSavedImagePath", "").toString();
   settings.endGroup();
 }
 
@@ -173,6 +178,7 @@ void SliceViewer::saveSettings()
   settings.beginGroup("Mantid/SliceViewer");
   settings.setValue("ColormapFile", m_currentColorMapFile);
   settings.setValue("LogColorScale", (int)m_colorBar->getLog() );
+  settings.setValue("LastSavedImagePath", m_lastSavedFile);
   settings.endGroup();
 }
 
@@ -212,6 +218,11 @@ void SliceViewer::initMenus()
   action = new QAction(QPixmap(), "&Save to image file", this);
   action->setShortcut(Qt::Key_S + Qt::ControlModifier);
   connect(action, SIGNAL(triggered()), this, SLOT(saveImage()));
+  m_menuFile->addAction(action);
+
+  action = new QAction(QPixmap(), "Copy image to &Clipboard", this);
+  action->setShortcut(Qt::Key_C + Qt::ControlModifier);
+  connect(action, SIGNAL(triggered()), this, SLOT(copyImageToClipboard()));
   m_menuFile->addAction(action);
 
 
@@ -415,6 +426,7 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
 {
   m_ws = ws;
   m_data->setWorkspace(ws);
+  m_plot->setWorkspace(ws);
 
   // Emit the signal that we changed the workspace
   emit workspaceChanged();
@@ -711,6 +723,48 @@ void SliceViewer::loadColorMapSlot()
 }
 
 //------------------------------------------------------------------------------------
+/** Grab the 2D view as an image. The image is rendered at the current window
+ * size, with the color scale but without the text boxes for changing them.
+ *
+ * See also saveImage() and copyImageToClipboard()
+ *
+ * @return QPixmap containing the image.
+ */
+QPixmap SliceViewer::getImage()
+{
+
+  // Switch to full resolution rendering
+  bool oldFast = this->getFastRender();
+  this->setFastRender(false);
+  // Hide the line overlay handles
+  this->m_lineOverlay->setShowHandles(false);
+  this->m_colorBar->setRenderMode(true);
+
+  // Grab it
+  QCoreApplication::processEvents();
+  QCoreApplication::processEvents();
+  QPixmap pix = QPixmap::grabWidget(this->ui.frmPlot);
+
+  // Back to previous mode
+  this->m_lineOverlay->setShowHandles(true);
+  this->m_colorBar->setRenderMode(false);
+  this->setFastRender(oldFast);
+
+  return pix;
+}
+
+//------------------------------------------------------------------------------------
+/** Copy the rendered 2D image to the clipboard
+ */
+void SliceViewer::copyImageToClipboard()
+{
+  // Create the image
+  QPixmap pix = this->getImage();
+  // Set the clipboard
+  QApplication::clipboard()->setImage(pix, QClipboard::Clipboard);
+}
+
+//------------------------------------------------------------------------------------
 /** Save the rendered 2D slice to an image file.
  *
  * @param filename :: full path to the file to save, including extension
@@ -732,25 +786,12 @@ void SliceViewer::saveImage(const QString & filename)
   else
     fileselection = filename;
 
-  // Switch to full resolution rendering
-  bool oldFast = this->getFastRender();
-  this->setFastRender(false);
-  // Hide the line overlay handles
-  this->m_lineOverlay->setShowHandles(false);
-  this->m_colorBar->setRenderMode(true);
-
-  // Grab it and save
-  QCoreApplication::processEvents();
-  QCoreApplication::processEvents();
-  QPixmap pix = QPixmap::grabWidget(this->ui.frmPlot);
+  // Create the image
+  QPixmap pix = this->getImage();
+  // And save to the file
   pix.save(fileselection);
 
-  // Back to previous mode
-  this->m_lineOverlay->setShowHandles(true);
-  this->m_colorBar->setRenderMode(false);
-  this->setFastRender(oldFast);
 }
-
 
 //=================================================================================================
 //=================================================================================================
@@ -857,6 +898,10 @@ QwtDoubleInterval SliceViewer::getRange(IMDIterator * it)
 void SliceViewer::findRangeFull()
 {
   if (!m_ws) return;
+  // Acquire a scoped read-only lock on the workspace, preventing it from being written
+  // while we iterate through.
+  ReadLock lock(*m_ws);
+
   // Iterate through the entire workspace
   IMDIterator * it = m_ws->createIterator();
   m_colorRangeFull = getRange(it);
@@ -870,6 +915,10 @@ part of the workspace */
 void SliceViewer::findRangeSlice()
 {
   if (!m_ws) return;
+  // Acquire a scoped read-only lock on the workspace, preventing it from being written
+  // while we iterate through.
+  ReadLock lock(*m_ws);
+
   m_colorRangeSlice = QwtDoubleInterval(0., 1.0);
 
   // This is what is currently visible on screen

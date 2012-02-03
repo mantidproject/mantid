@@ -14,7 +14,7 @@ namespace Mantid
   namespace CurveFitting
   {
     /** 
-    Provide oscillating exponential decay function: h*exp(-(x-c)/t)*(cos(2pi*f*x+phi))
+    Provide oscillating exponential decay function: h*exp(-lambda.x)*(cos(2pi*f*x+phi))
    
      @author Karl Palmen, ISIS, RAL 
      @date 06/01/2012 

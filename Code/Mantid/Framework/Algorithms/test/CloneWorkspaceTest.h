@@ -137,6 +137,45 @@ public:
     TS_ASSERT( alg.isExecuted() );
   }
 
+  void test_group()
+  {
+    WorkspaceGroup_const_sptr ingroup = WorkspaceCreationHelper::CreateWorkspaceGroup(3,1,1,"grouptoclone");
+    Mantid::Algorithms::CloneWorkspace alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace","grouptoclone");
+    alg.setPropertyValue("OutputWorkspace","clonedgroup");
+    TS_ASSERT( alg.execute() )
+
+    AnalysisDataServiceImpl& ads = AnalysisDataService::Instance();
+    Workspace_sptr out;
+    TS_ASSERT_THROWS_NOTHING( out = ads.retrieve("clonedgroup") )
+    WorkspaceGroup_const_sptr outgroup;
+    TS_ASSERT( outgroup = boost::dynamic_pointer_cast<WorkspaceGroup>(out) )
+    TS_ASSERT_EQUALS( outgroup->size(), 3 )
+    TS_ASSERT_DIFFERS( outgroup, ingroup )
+    Workspace_sptr out1, out2, out3;
+    // Try to get the first member
+    TS_ASSERT_THROWS_NOTHING( out1 = outgroup->getItem(0) )
+    // Check its name
+    TS_ASSERT_EQUALS( out1->name(), "clonedgroup_1" )
+    // Check it is indeed a different workspace
+    TS_ASSERT_DIFFERS( out1, ingroup->getItem(0) )
+    // Try to get the second member
+    TS_ASSERT_THROWS_NOTHING( out2 = outgroup->getItem(1) )
+    // Check its name
+    TS_ASSERT_EQUALS( out2->name(), "clonedgroup_2" )
+    // Check it is indeed a different workspace
+    TS_ASSERT_DIFFERS( out2, ingroup->getItem(1) )
+    // Try to get the third member
+    TS_ASSERT_THROWS_NOTHING( out3 = outgroup->getItem(2) )
+    // Check its name
+    TS_ASSERT_EQUALS( out3->name(), "clonedgroup_3" )
+    // Check it is indeed a different workspace
+    TS_ASSERT_DIFFERS( out3, ingroup->getItem(2) )
+
+    ads.clear();
+  }
+
 private:
   Mantid::Algorithms::CloneWorkspace cloner;
 };

@@ -195,7 +195,9 @@ public:
   QString getWorkspaceName() const;
   void showControls(bool visible);
   void openFromXML(const QString & xml)   throw (std::invalid_argument, std::runtime_error);
+  QPixmap getImage();
   void saveImage(const QString & filename);
+  void copyImageToClipboard();
   void setFastRender(bool fast);
   bool getFastRender() const;
   void toggleLineMode(bool lineMode);
