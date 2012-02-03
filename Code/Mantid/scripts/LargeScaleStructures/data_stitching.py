@@ -25,9 +25,10 @@ class RangeSelector(object):
             self._call_back = call_back
             _qti.app.connect(_qti.app.mantidUI, QtCore.SIGNAL("x_range_update(double,double)"), self._call_back)
             g = _qti.app.graph(self._graph)
-            if g is None:
-                g = _qti.app.mantidUI.pyPlotSpectraList(ws,[0],True)
-                g.setName(self._graph)        
+            if g is not None:
+                g.close()
+            g = _qti.app.mantidUI.pyPlotSpectraList(ws,[0],True)
+            g.setName(self._graph)        
             _qti.app.selectMultiPeak(g,False)
     
     @classmethod
