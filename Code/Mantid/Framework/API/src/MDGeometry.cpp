@@ -129,7 +129,7 @@ namespace API
    * @param id :: string ID of the dimension
    * @return the dimension with the specified id string.
    */
-  boost::shared_ptr<const Mantid::Geometry::IMDDimension> MDGeometry::getDimensionNamed(std::string id) const
+  boost::shared_ptr<const Mantid::Geometry::IMDDimension> MDGeometry::getDimensionWithId(std::string id) const
   {
     for (size_t i=0; i < m_dimensions.size(); ++i)
       if (m_dimensions[i]->getDimensionId() == id)
