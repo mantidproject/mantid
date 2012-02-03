@@ -196,7 +196,7 @@ double MantidQwtIMDWorkspaceData::y(size_t i) const
 /// Returns the x position of the error bar for the i-th data point (bin)
 double MantidQwtIMDWorkspaceData::ex(size_t i) const
 {
-  return (this->x(i) + this->x(i+1)) / 2.0;
+  return this->x(i);
 }
 
 /// Returns the error of the i-th data point

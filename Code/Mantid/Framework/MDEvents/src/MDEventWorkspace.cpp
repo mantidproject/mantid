@@ -640,27 +640,36 @@ namespace MDEvents
           outOfBounds = true;
       }
 
-
+      
+     //TODO: make the logic/reuse in the following nicer.
       if (!outOfBounds)
       {
-        // The point is in the workspace.
         box = data->getBoxAtCoord(coord.getBareArray());
-        // What is our normalization factor?
-        signal_t normalizer = 1.0;
-        switch (normalize)
+        if(box != NULL) 
         {
-        case NoNormalization:
-          break;
-        case VolumeNormalization:
-          normalizer = box->getInverseVolume();
-          break;
-        case NumEventsNormalization:
-          normalizer = double(box->getNPoints());
-          break;
+          // What is our normalization factor?
+          signal_t normalizer = 1.0;
+          switch (normalize)
+          {
+          case NoNormalization:
+            break;
+          case VolumeNormalization:
+            normalizer = box->getInverseVolume();
+            break;
+          case NumEventsNormalization:
+            normalizer = double(box->getNPoints());
+            break;
+          }
+
+          // And add the normalized signal/error to the list
+          y.push_back( box->getSignal() * normalizer );
+          e.push_back( box->getError() * normalizer );
         }
-        // And add the normalized signal/error to the list
-        y.push_back( box->getSignal() * normalizer );
-        e.push_back( box->getError() * normalizer );
+        else
+        {
+          y.push_back(std::numeric_limits<double>::quiet_NaN());
+          e.push_back(std::numeric_limits<double>::quiet_NaN());
+        }
       }
       else
       {
