@@ -240,7 +240,7 @@ class DataReflWidget(BaseWidget):
             def call_back(xmin, xmax):
                 self._summary.data_peak_from_pixel.setText("%-d" % int(xmin))
                 self._summary.data_peak_to_pixel.setText("%-d" % int(xmax))
-            data_manipulation.counts_vs_y_distribution(f[0], 9000, 23600, call_back)
+            data_manipulation.counts_vs_y_distribution(f[0], call_back)
                 
 
     def _plot_tof(self):
