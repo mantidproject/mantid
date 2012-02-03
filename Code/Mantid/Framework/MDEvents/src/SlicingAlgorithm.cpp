@@ -336,6 +336,7 @@ namespace MDEvents
       }
       // The name is everything before the 3rd comma from the end
       std::string name = input.substr(0, n+1);
+      name=Strings::strip(name);
 
       // And split the rest of it
       input = input.substr(n+2);

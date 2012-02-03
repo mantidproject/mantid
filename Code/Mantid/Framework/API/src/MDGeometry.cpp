@@ -29,12 +29,13 @@ namespace API
   /** Copy Constructor
    */
   MDGeometry::MDGeometry(const MDGeometry & other) :
-   m_originalWorkspaces(other.m_originalWorkspaces),
-   m_transforms_FromOriginal(NULL), m_transforms_ToOriginal(NULL),
+   m_originalWorkspaces(),
+   m_basisVectors(other.m_basisVectors),
+   m_origin(other.m_origin),
+   m_transforms_FromOriginal(), m_transforms_ToOriginal(),
    m_delete_observer(*this, &MDGeometry::deleteNotificationReceived),
    m_observingDelete(false)
   {
-    //TODO: How to copy the coordinate transformations?
     // Perform a deep copy of the dimensions
     std::vector<Mantid::Geometry::IMDDimension_sptr> dimensions;
     for (size_t d=0; d < other.getNumDims(); d++)
@@ -44,6 +45,29 @@ namespace API
       dimensions.push_back(dim);
     }
     this->initGeometry(dimensions);
+
+    // Perform a deep copy of the coordinate transformations
+    std::vector<CoordTransform*>::const_iterator it;
+    for (it = other.m_transforms_FromOriginal.begin(); it != other.m_transforms_FromOriginal.end(); it++)
+    {
+      if (*it)
+        m_transforms_FromOriginal.push_back((*it)->clone());
+      else
+        m_transforms_FromOriginal.push_back(NULL);
+    }
+
+    for (it = other.m_transforms_ToOriginal.begin(); it != other.m_transforms_ToOriginal.end(); it++)
+    {
+      if (*it)
+        m_transforms_ToOriginal.push_back((*it)->clone());
+      else
+        m_transforms_ToOriginal.push_back(NULL);
+    }
+
+    // Copy the references to the original workspaces
+    // This will also set up the delete observer to listen to those workspaces being deleted.
+    for (size_t i=0; i<other.m_originalWorkspaces.size(); i++)
+      this->setOriginalWorkspace(other.m_originalWorkspaces[i], i);
   }
 
     
