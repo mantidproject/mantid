@@ -445,17 +445,6 @@ class SNSPowderReduction(PythonAlgorithm):
         self.log().information("frequency: " + str(frequency) + "Hz center wavelength:" + str(wavelength) + "Angstrom")
         return self._config.getInfo(frequency, wavelength)
 
-    def _getMin(self, wksp):
-        minWksp = "__" + str(wksp)+"_min"
-        Min(wksp, minWksp)
-        minWksp = mtd[minWksp]
-        minValue = 0.
-        for i in range(minWksp.getNumberHistograms()):
-          if minValue > minWksp.dataY(i)[0]:
-            minValue = minWksp.dataY(i)[0]
-        mtd.deleteWorkspace(str(minWksp))
-        return minValue
-
     def _save(self, wksp, info, normalized):
         filename = os.path.join(self._outDir, str(wksp))
         if "gsas" in self._outTypes:
@@ -653,12 +642,7 @@ class SNSPowderReduction(PythonAlgorithm):
 
             # make sure there are no negative values - gsas hates them
             if self.getProperty("PushDataPositive"):
-              minY = self._getMin(samRun)
-              if minY < 0.:
-                  self.log().notice("Minimum y = " + str(minY) + " adding to all y-values")
-                  minY *= -1.
-                  ConvertToMatrixWorkspace(InputWorkspace=samRun, OutputWorkspace=samRun)
-                  samRun += minY
+                  ResetNegatives(InputWorkspace=samRun, OutputWorkspace=samRun, AddMinimum=False, ResetValue=0.)
 
             # write out the files
             self._save(samRun, info, normalized)
