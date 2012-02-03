@@ -42,11 +42,28 @@ def get_wiki_description(algo, version):
             n += 1
         return desc
     
+    
+#======================================================================
+def make_group_header_line(group):
+    """ Make a group header line for the property table
+     Args:
+        group :: name of the group
+    Returns:
+        string to add to the wiki
+    """
+    if group=="":
+        return "|colspan=6 align=center|   \n|-\n"
+    else:
+        return "|colspan=6 align=center|'''%s'''\n|-\n" % group
+    
 #======================================================================
 def make_property_table_line(propnum, p):
     """ Make one line of property table
-    propnum :: number of the prop
-    p :: Property object
+    Args:
+        propnum :: number of the prop
+        p :: Property object
+    Returns:
+        string to add to the wiki
     """
     out = ""
     # The property number
@@ -70,7 +87,7 @@ def make_property_table_line(propnum, p):
     except:
         try:
             val = float(default)
-            if (val >= 1.79e+308):
+            if (val >= 1e+307):
                 defaultstr = "Optional"
             else:
                 defaultstr = str(val)
@@ -144,7 +161,12 @@ def make_wiki(algo_name, version, latest_version):
     # Do all the properties
     props = alg._ProxyObject__obj.getProperties()
     propnum = 1
+    last_group = ""
     for prop in props:
+        group = prop.getGroup
+        if (group != last_group):
+            out += make_group_header_line(group)
+            last_group = group
         out += make_property_table_line(propnum, prop)
         propnum += 1
         
@@ -167,7 +189,15 @@ def make_wiki(algo_name, version, latest_version):
     # All other categories
     categories = alg.categories()
     for categ in categories:
-      out += "[[Category:" + categ + "]]\n"
+        n = categ.find("\\")
+        if (n>0):
+            # Category is "first\second"
+            first = categ[0:n]
+            second = categ[n+1:]
+            out += "[[Category:" + first + "]]\n"
+            out += "[[Category:" + second + "]]\n"
+        else:
+            out += "[[Category:" + categ + "]]\n"
 
     # Point to the right source ffiles
     if version > 1:

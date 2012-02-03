@@ -38,5 +38,6 @@ void export_Property()
     .add_property("direction", &Mantid::Kernel::Property::direction, "Input, Output, InOut or Unknown. See the Direction enum")
     .add_property("units", &Mantid::Kernel::Property::units, "The units attached to this property")
     .add_property("isDefault", &Mantid::Kernel::Property::isDefault, "Is the property set at the default value")
+    .add_property("getGroup", make_function(&Mantid::Kernel::Property::getGroup, return_value_policy<copy_const_reference>()), "Return the 'group' of the property, that is, the header in the algorithm's list of properties.")
    ;
 }

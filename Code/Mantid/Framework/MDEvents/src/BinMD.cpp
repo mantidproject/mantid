@@ -40,13 +40,15 @@ if needed to make them orthogonal to each other. Only works in 3 dimensions!
 
 It is possible to rebin a [[MDHistoWorkspace]].
 Each MDHistoWorkspace holds a reference to the [[MDEventWorkspace]] that created it,
-as well as the coordinate transformation that was used.
-
-In this case, the rebinning is actually performed on the original MDEventWorkspace,
+as well as the coordinate transformation that was used. In this case, the rebinning is actually performed on the original MDEventWorkspace,
 after suitably transforming the basis vectors.
 
 Only the non-axis aligned binning method can be performed on a MDHistoWorkspace!
 Of course, your basis vectors can be aligned with the dimensions, which is equivalent.
+
+For more details on the coordinate transformations applied in this case, please see [[BinMD Coordinate Transformations]].
+
+[[File:BinMD_Coordinate_Transforms_withLine.png]]
 
 *WIKI*/
 
