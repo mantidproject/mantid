@@ -235,7 +235,6 @@ namespace MDEvents
   }
 
 
-
   //-----------------------------------------------------------------------------------------------
   /** Get a vector of the minimum extents that still contain all the events in the workspace.
    *
@@ -595,6 +594,93 @@ namespace MDEvents
   }
 
 
+
+  //-----------------------------------------------------------------------------------------------
+  /** Obtain coordinates for a line plot through a MDWorkspace.
+   * Cross the workspace from start to end points, recording the signal along the line.
+   * Sets the x,y vectors to the histogram bin boundaries and counts
+   *
+   * @param start :: coordinates of the start point of the line
+   * @param end :: coordinates of the end point of the line
+   * @param normalize :: how to normalize the signal
+   * @param x :: is set to the boundaries of the bins, relative to start of the line.
+   * @param y :: is set to the normalized signal for each bin. Length = length(x) - 1
+   */
+  TMDE(
+  void MDEventWorkspace)::getLinePlot(const Mantid::Kernel::VMD & start, const Mantid::Kernel::VMD & end,
+      Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y, std::vector<signal_t> & e) const
+  {
+    // TODO: Don't use a fixed number of points later
+    size_t numPoints = 200;
+
+    VMD step = (end-start) / double(numPoints);
+    double stepLength = step.norm();
+
+    // These will be the curve as plotted
+    x.clear();
+    y.clear();
+    e.clear();
+    for (size_t i=0; i<numPoints; i++)
+    {
+      // Coordinate along the line
+      VMD coord = start + step * double(i);
+      // Record the position along the line
+      x.push_back(stepLength * double(i));
+
+      // Look for the box at this coordinate
+      const IMDBox<MDE,nd> * box = NULL;
+
+      // Do an initial bounds check
+      bool outOfBounds = false;
+      for (size_t d=0; d<nd; d++)
+      {
+        coord_t x = coord[d];
+        MDDimensionExtents & extents = data->getExtents(d);
+        if (x < extents.min || x >= extents.max)
+          outOfBounds = true;
+      }
+
+      
+     //TODO: make the logic/reuse in the following nicer.
+      if (!outOfBounds)
+      {
+        box = data->getBoxAtCoord(coord.getBareArray());
+        if(box != NULL) 
+        {
+          // What is our normalization factor?
+          signal_t normalizer = 1.0;
+          switch (normalize)
+          {
+          case NoNormalization:
+            break;
+          case VolumeNormalization:
+            normalizer = box->getInverseVolume();
+            break;
+          case NumEventsNormalization:
+            normalizer = double(box->getNPoints());
+            break;
+          }
+
+          // And add the normalized signal/error to the list
+          y.push_back( box->getSignal() * normalizer );
+          e.push_back( box->getError() * normalizer );
+        }
+        else
+        {
+          y.push_back(std::numeric_limits<double>::quiet_NaN());
+          e.push_back(std::numeric_limits<double>::quiet_NaN());
+        }
+      }
+      else
+      {
+        // Point is outside the workspace. Add NANs
+        y.push_back(std::numeric_limits<double>::quiet_NaN());
+        e.push_back(std::numeric_limits<double>::quiet_NaN());
+      }
+    }
+    // And the last point
+    x.push_back(  (end-start).norm() );
+  }
 
 
 }//namespace MDEvents

@@ -1492,6 +1492,22 @@ namespace Mantid
       file->closeGroup();
     }
 
+    /** Obtain coordinates for a line plot through a MDWorkspace.
+     * Cross the workspace from start to end points, recording the signal along the line.
+     * Sets the x,y vectors to the histogram bin boundaries and counts
+     *
+     * @param start :: coordinates of the start point of the line
+     * @param end :: coordinates of the end point of the line
+     * @param normalize :: how to normalize the signal
+     * @param x :: is set to the boundaries of the bins, relative to start of the line.
+     * @param y :: is set to the normalized signal for each bin. Length = length(x) - 1
+     */
+    void MatrixWorkspace::getLinePlot(const Mantid::Kernel::VMD & start, const Mantid::Kernel::VMD & end,
+        Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y, std::vector<signal_t> & e) const
+    {
+      UNUSED_ARG(start);UNUSED_ARG(end);UNUSED_ARG(normalize);UNUSED_ARG(x);UNUSED_ARG(y);UNUSED_ARG(e);
+      throw std::runtime_error("MatrixWorkspace::getLinePlot() not yet implemented.");
+    }
 
 
   } // namespace API

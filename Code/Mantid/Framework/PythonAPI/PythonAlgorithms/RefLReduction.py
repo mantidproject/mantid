@@ -1,5 +1,7 @@
 from MantidFramework import *
 from mantidsimple import *
+from numpy import zeros, shape
+import math
 
 class RefLReduction(PythonAlgorithm):
 
@@ -27,6 +29,8 @@ class RefLReduction(PythonAlgorithm):
                                  Description="Positive is linear bins, negative is logarithmic")
         self.declareProperty("QMin", 0.001, Description="Minimum Q-value")
         self.declareProperty("QStep", 0.001, Description="Step-size in Q. Enter a negative value to get a log scale.")
+        self.declareProperty("AngleOffset", "", Description="Angle offset (rad)")
+        self.declareProperty("AngleOffsetError", "", Description="Angle offset error (rad)")
         # Output workspace to put the transmission histo into
         self.declareWorkspaceProperty("OutputWorkspace", "", Direction.Output)
 
@@ -111,25 +115,7 @@ class RefLReduction(PythonAlgorithm):
         tthd_rad = wks_utility.angleUnitConversion(value=tthd_value,
                                                    from_units=tthd_units,
                                                    to_units='rad')
-        # Retrieve geometry of instrument
-        # Sample-to-detector distance
-        sample = mtd[ws_event_data].getInstrument().getSample()
-        source = mtd[ws_event_data].getInstrument().getSource()
-        dSM = sample.getDistance(source)
-        # Create array of distances pixel->sample
-        dPS_array = numpy.zeros((maxY, maxX))
-        for x in range(maxX):
-            for y in range(maxY):
-                _index = maxY * x + y
-                detector = mtd[ws_event_data].getDetector(_index)
-                dPS_array[y, x] = sample.getDistance(detector)
-        # Array of distances pixel->source
-        dMP_array = dPS_array + dSM
-        # Distance sample->center of detector
-        dSD = dPS_array[maxY / 2, maxX / 2]
-        # Distance source->center of detector
-        dMD = dSD + dSM
-        
+
         # Rebin data (x-axis is in TOF)
         ws_histo_data = ws_name+"_histo"
         Rebin(InputWorkspace=ws_event_data, OutputWorkspace=ws_histo_data, Params=tof_binning)
@@ -157,6 +143,25 @@ class RefLReduction(PythonAlgorithm):
             _den += pixelXtof_roi[i]
         data_cpix = _num / _den    
         
+        # Retrieve geometry of instrument
+        # Sample-to-detector distance
+        sample = mtd[ws_event_data].getInstrument().getSample()
+        source = mtd[ws_event_data].getInstrument().getSource()
+        dSM = sample.getDistance(source)
+        # Create array of distances pixel->sample
+        dPS_array = numpy.zeros((maxY, maxX))
+        for x in range(maxX):
+            for y in range(maxY):
+                _index = maxY * x + y
+                detector = mtd[ws_event_data].getDetector(_index)
+                dPS_array[y, x] = sample.getDistance(detector)
+        # Array of distances pixel->source
+        dMP_array = dPS_array + dSM
+        # Distance sample->center of detector
+        dSD = dPS_array[maxY / 2, maxX / 2]
+        # Distance source->center of detector        
+        dMD = dSD + dSM
+
         # Background subtraction
         BackfromYpixel = data_back[0]
         BacktoYpixel = data_back[1]
@@ -165,11 +170,27 @@ class RefLReduction(PythonAlgorithm):
         # background range (along the y-axis) and of only the pixel
         # of interest along the x-axis (to avoid the frame effect)
         theta = tthd_rad - ths_rad
+        AngleOffset = self.getProperty("AngleOffset")
+        if (AngleOffset != ""):
+            theta += float(AngleOffset)
         
         if dMD is not None and theta is not None:
+#            _tof_axis = mtd[ws_histo_data].readX(0)
+#            print _tof_axis
+#            _const = float(4) * math.pi * m * dMD / h
+#            _q_axis = 1e-10 * _const * math.sin(theta) / (_tof_axis*1e-6)
+#            q_max = max(_q_axis)
+                    
             _tof_axis = mtd[ws_histo_data].readX(0)
             _const = float(4) * math.pi * m * dMD / h
-            _q_axis = 1e-10 * _const * math.sin(theta) / (_tof_axis*1e-6)
+            sz_tof = numpy.shape(_tof_axis)[0]
+            _q_axis = zeros(sz_tof-1)
+            for t in range(sz_tof-1):
+                tof1 = _tof_axis[t]
+                tof2 = _tof_axis[t+1]
+                tofm = (tof1+tof2)/2.
+                _Q = _const * math.sin(theta) / (tofm*1e-6)
+                _q_axis[t] = _Q*1e-10
             q_max = max(_q_axis)
 
         wks_utility.createIntegratedWorkspace(mtd[ws_histo_data], 
@@ -184,7 +205,7 @@ class RefLReduction(PythonAlgorithm):
                                               source_to_detector=dMD,
                                               sample_to_detector=dSD,
                                               theta=theta,
-                                              geo_correction=False,
+                                              geo_correction=True,
                                               q_binning=[q_min,q_step,q_max])
 
         ConvertToHistogram(InputWorkspace='IntegratedDataWks1',
@@ -218,7 +239,7 @@ class RefLReduction(PythonAlgorithm):
         if len(f)>0 and os.path.isfile(f[0]): 
             norm_file = f[0]
         else:
-            msg = "RefLReduction: could not find run %d\n" % run_number[0]
+            msg = "RefLReduction: could not find run %d\n" % run_numbers[0]
             msg += "Add your data folder to your User Data Directories in the File menu"
             raise RuntimeError(msg)
             
@@ -276,7 +297,6 @@ class RefLReduction(PythonAlgorithm):
                   OutputWorkspace='NormBckWks')
         
         ConvertToHistogram("NormBckWks", OutputWorkspace="NormBckWks")
-#        RebinToWorkspace(WorkspaceToRebin="NormBckWks", WorkspaceToMatch="IntegratedNormWks", OutputWorkspace="NormBckWks")
         RebinToWorkspace(WorkspaceToRebin="NormBckWks", WorkspaceToMatch="IntegratedNormWks", OutputWorkspace="NormBckWks")
        
         Minus("IntegratedNormWks", "NormBckWks", OutputWorkspace="NormWks")
@@ -293,15 +313,14 @@ class RefLReduction(PythonAlgorithm):
 
         # Normalization           
         SumSpectra(InputWorkspace="NormWks", OutputWorkspace="NormWks")
-
         
         #### divide data by normalize histo workspace
         Divide(LHSWorkspace='DataWks',
                RHSWorkspace='NormWks',
                OutputWorkspace='NormalizedWks')
-        ReplaceSpecialValues("NormalizedWks",NaNValue=0,NaNError=0, OutputWorkspace="NormalizedWks")
+        ReplaceSpecialValues(InputWorkspace="NormalizedWks", NaNValue=0, NaNError=0, InfinityValue=0, InfinityError=0, OutputWorkspace="NormalizedWks")
         
-        output_ws = self.getPropertyValue("OutputWorkspace")
+        output_ws = self.getPropertyValue("OutputWorkspace")        
         
         SumSpectra(InputWorkspace="NormalizedWks", OutputWorkspace=output_ws)
         

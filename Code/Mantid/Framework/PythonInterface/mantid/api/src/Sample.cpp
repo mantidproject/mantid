@@ -17,7 +17,7 @@ void export_Sample()
   class_< Sample, boost::noncopyable >("Sample", no_init)
     .def("getName", &Sample::getName, return_value_policy<copy_const_reference>(), "Returns the string name of the sample")
     .def("getOrientedLattice", (const OrientedLattice & (Sample::*)() const)&Sample::getOrientedLattice,
-          return_value_policy<copy_const_reference>(), "Get the oriented lattice for this sample")
+          return_value_policy<reference_existing_object>(), "Get the oriented lattice for this sample")
     .def("hasOrientedLattice", &Sample::hasOrientedLattice, "Returns True if this sample has an oriented lattice, false otherwise")
     .def("size", &Sample::size, "Return the number of samples contained within this sample")
      // Required for ISIS SANS reduction until the full sample geometry is defined on loading

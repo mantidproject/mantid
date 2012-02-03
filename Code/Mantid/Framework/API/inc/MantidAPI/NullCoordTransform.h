@@ -1,11 +1,11 @@
-#ifndef MANTID_VATES_API_NULL_COORD_TRANSFORM_H
-#define MANTID_VATES_API_NULL_COORD_TRANSFORM_H
+#ifndef MANTIDAPI_NULLCOORDTRANSFORM_H
+#define MANTIDAPI_NULLCOORDTRANSFORM_H
 
 #include "MantidAPI/CoordTransform.h"
 
 namespace Mantid
 {
-  namespace VATES
+  namespace API
   {
 
   /** NullCoordTransform : A transform that sets the outVector to have the same values as the inputVector. 
@@ -21,6 +21,7 @@ namespace Mantid
       virtual ~NullCoordTransform();
       std::string toXMLString() const;
       void apply(const Mantid::coord_t * inputVector, Mantid::coord_t * outVector) const;
+      virtual CoordTransform * clone() const;
 
     private:
       /// Number of dimensions.

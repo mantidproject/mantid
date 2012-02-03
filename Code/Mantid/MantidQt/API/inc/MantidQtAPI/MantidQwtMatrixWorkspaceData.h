@@ -1,24 +1,23 @@
-#ifndef MANTIDPLOT_MANTIDQWTMATRIXWORKSPACEDATA_H
-#define MANTIDPLOT_MANTIDQWTMATRIXWORKSPACEDATA_H
+#ifndef MANTIDQTAPI_MANTIDQWTMATRIXWORKSPACEDATA_H
+#define MANTIDQTAPI_MANTIDQWTMATRIXWORKSPACEDATA_H
 
 #include <boost/shared_ptr.hpp>
 #include "MantidAPI/MatrixWorkspace.h"
 #include <QObject>
-#include "MantidQwtWorkspaceData.h"
+#include "MantidQtAPI/MantidQwtWorkspaceData.h"
+#include "DllOption.h"
 
 //=================================================================================================
 //=================================================================================================
 /**  This class implements QwtData with direct access to a spectrum in a MatrixWorkspace.
  */
-class MantidQwtMatrixWorkspaceData:  public QObject,  public MantidQwtWorkspaceData
+class EXPORT_OPT_MANTIDQT_API MantidQwtMatrixWorkspaceData:  public QObject,  public MantidQwtWorkspaceData
 {
   Q_OBJECT
 public:
-  /// Constructor
   MantidQwtMatrixWorkspaceData(Mantid::API::MatrixWorkspace_const_sptr workspace, int specIndex, const bool logScale, bool distr = false);
-
-  /// Copy constructor
   MantidQwtMatrixWorkspaceData(const MantidQwtMatrixWorkspaceData& data);
+  MantidQwtMatrixWorkspaceData& operator=(const MantidQwtMatrixWorkspaceData &);
 
     //! @return Pointer to a copy (virtual copy constructor)
   virtual QwtData *copy() const {return new MantidQwtMatrixWorkspaceData(*this);}

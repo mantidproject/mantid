@@ -158,7 +158,8 @@ void MantidCurve::doDraw(QPainter *p,
 
   int xi0 = 0;
   QPen mypen(pen());
-  mypen.setColor(m_errorSettings->color());
+  if ( ! m_errorSettings->m_defaultColor)
+    mypen.setColor(m_errorSettings->color());
   mypen.setWidthF(m_errorSettings->width());
   p->setPen(mypen);
   const int dx = m_errorSettings->capLength()/2;

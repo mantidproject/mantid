@@ -16,6 +16,7 @@
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidMDEvents/SlicingAlgorithm.h"
+#include "MantidMDEvents/CoordTransformAffine.h"
 
 namespace Mantid
 {
@@ -96,6 +97,13 @@ namespace MDEvents
     Mantid::API::CoordTransform * m_transformFromOriginal;
     /// Coordinate transformation to save in the output workspace (binned->original)
     Mantid::API::CoordTransform * m_transformToOriginal;
+
+    /// Intermediate original workspace. Output -> intermediate (MDHisto) -> original (MDEvent)
+    Mantid::API::IMDWorkspace_sptr m_intermediateWS;
+    /// Coordinate transformation to save in the output WS, from the intermediate WS
+    Mantid::MDEvents::CoordTransformAffine * m_transformFromIntermediate;
+    /// Coordinate transformation to save in the intermediate WS
+    Mantid::MDEvents::CoordTransformAffine * m_transformToIntermediate;
 
     /// Set to true if the cut is aligned with the axes
     bool m_axisAligned;

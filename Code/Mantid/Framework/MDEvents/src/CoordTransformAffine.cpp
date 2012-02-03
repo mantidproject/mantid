@@ -7,9 +7,11 @@
 #include <boost/format.hpp>
 #include "MantidKernel/VectorHelper.h"
 #include "MantidMDEvents/CoordTransformAligned.h"
+#include "MantidAPI/CoordTransform.h"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+using Mantid::API::CoordTransform;
 
 namespace Mantid
 {
@@ -41,6 +43,17 @@ namespace MDEvents
     // Copy into the raw matrix (for speed)
     copyRawMatrix();
   }
+
+  //----------------------------------------------------------------------------------------------
+  /** Virtual cloner
+   * @return a copy of this object  */
+  CoordTransform * CoordTransformAffine::clone() const
+  {
+    CoordTransformAffine * out = new CoordTransformAffine(inD, outD);
+    out->setMatrix( this->getMatrix() );
+    return out;
+  }
+
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
@@ -93,6 +106,14 @@ namespace MDEvents
   {
     return affineMatrix;
   }
+
+  /** @return the affine matrix */
+  Mantid::Kernel::Matrix<coord_t> CoordTransformAffine::makeAffineMatrix() const
+  {
+    return affineMatrix;
+  }
+
+
 
   //----------------------------------------------------------------------------------------------
   /** Add a translation (in the output coordinates) to the transform.

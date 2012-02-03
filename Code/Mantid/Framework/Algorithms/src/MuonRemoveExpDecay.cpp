@@ -57,6 +57,9 @@ void MuonRemoveExpDecay::exec()
   //Create output workspace with same dimensions as input
   API::MatrixWorkspace_sptr outputWS = API::WorkspaceFactory::Instance().create(inputWS);
 
+  // to hold normalised workspace or input workspace
+  API::MatrixWorkspace_sptr forNormalisationWS = API::WorkspaceFactory::Instance().create(inputWS);
+
   if (Spectra.empty())
   {
     Progress prog(this, 0.0, 1.0, numSpectra);
@@ -69,7 +72,16 @@ void MuonRemoveExpDecay::exec()
       removeDecay(inputWS->readX(i), inputWS->readE(i), outputWS->dataE(i));
       outputWS->dataX(i) = inputWS->readX(i);
 
-      //Need to do something about the errors?
+      double normConst = calNormalisationConst(outputWS, i);
+
+      // do scaling and substract by minus 1.0
+      for (size_t j = 0; j < outputWS->dataY(i).size(); j++)
+      {
+        outputWS->dataY(i)[j] /= normConst;
+        outputWS->dataY(i)[j] -= 1.0;
+        outputWS->dataE(i)[j] /= normConst;
+      }   
+
       prog.report();
 			PARALLEL_END_INTERUPT_REGION
     }
@@ -111,6 +123,16 @@ void MuonRemoveExpDecay::exec()
       removeDecay(inputWS->readX(Spectra[i]), inputWS->readE(Spectra[i]), outputWS->dataE(Spectra[i]));
       outputWS->dataX(Spectra[i]) = inputWS->readX(Spectra[i]);
 
+      double normConst = calNormalisationConst(outputWS, Spectra[i]);
+
+      // do scaling and substract by minus 1.0
+      for (size_t j = 0; j < outputWS->dataY(i).size(); j++)
+      {
+        outputWS->dataY(Spectra[i])[j] /= normConst;
+        outputWS->dataY(Spectra[i])[j] -= 1.0;
+        outputWS->dataE(Spectra[i])[j] /= normConst;
+      }   
+
       prog.report();
 			PARALLEL_END_INTERUPT_REGION
     }
@@ -136,6 +158,74 @@ void MuonRemoveExpDecay::removeDecay(const MantidVec& inX, const MantidVec& inY,
     outY[i] = inY[i] * exp(inX[i] / (Mantid::PhysicalConstants::MuonLifetime * 1000000.0));
   }
 }
+
+/**
+ * calculate normalisation constant after the exponential decay has been removed
+ * to a linear fitting function
+ * @param ws ::  workspace
+ * @param wsIndex :: workspace index
+ * @return normalisation constant
+*/
+double MuonRemoveExpDecay::calNormalisationConst(API::MatrixWorkspace_sptr ws, int wsIndex)
+{
+  double retVal = 1.0; 
+
+    API::IAlgorithm_sptr fit;
+    fit = createSubAlgorithm("Fit", -1, -1, true);
+
+    fit->setProperty("InputWorkspace", ws);
+    fit->setProperty("WorkspaceIndex", wsIndex);
+
+    std::stringstream ss;
+    ss << "name=LinearBackground,A0=" << ws->readY(wsIndex)[0] << ",A1=" << 0.0;
+    std::string function = ss.str();
+
+    fit->setProperty("Function", function);
+    fit->setProperty("Ties", "A1=0.0");
+    fit->execute();
+
+    std::string fitStatus = fit->getProperty("OutputStatus");
+    std::vector<double> params = fit->getProperty("Parameters");
+    std::vector<std::string> paramnames = fit->getProperty("ParameterNames");
+
+    // Check order of names
+    if (paramnames[0].compare("A0") != 0)
+    {
+      g_log.error() << "Parameter 0 should be A0, but is " << paramnames[0] << std::endl;
+      throw std::invalid_argument("Parameters are out of order @ 0, should be A0");
+    }
+    if (paramnames[1].compare("A1") != 0)
+    {
+      g_log.error() << "Parameter 1 should be A1, but is " << paramnames[1]
+            << std::endl;
+      throw std::invalid_argument("Parameters are out of order @ 0, should be A1");
+    }
+
+    if (!fitStatus.compare("success"))
+    {
+      const double A0 = params[0];
+      const double A1 = params[1];
+
+      if ( A0 < 0 ) 
+      {
+        g_log.warning() << "When trying to fit Asymmetry normalisation constant this constant comes out negative." 
+          << "To proceed Asym norm constant set to 1.0\n";
+      }
+      else
+      {
+        retVal = A0;
+      }
+    } 
+    else
+    {
+      g_log.warning() << "Fit falled. Status = " << fitStatus << std::endl
+                        << "For workspace index " << wsIndex << std::endl
+                     << "Asym norm constant set to 1.0\n";
+    } 
+
+  return retVal;
+}
+
 
 } // namespace Algorithm
 } // namespace Mantid

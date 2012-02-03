@@ -8,6 +8,7 @@
 #include "AlgorithmHistoryWindow.h"
 #include "MantidMatrixCurve.h"
 #include "MantidMDCurve.h"
+#include "MantidMDCurveDialog.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidTable.h"
 #include "../../MantidQt/MantidWidgets/ui_SequentialFitDialog.h"
@@ -498,13 +499,23 @@ void MantidUI::importBoxDataTable()
   }
 }
 
-/*
-Plots a Curve showing intensities for a MDWorkspace only if the workspace meets certain criteria, such as 
-having only one non-integrated dimension. Should exit gracefully otherwise.
-*/
+/** Plots a Curve showing intensities for a MDWorkspace.
+ * But only if the workspace meets certain criteria, such as
+ * having only one non-integrated dimension. Should exit gracefully otherwise.
+ */
 void MantidUI::showMDPlot()
 {
   QString wsName = getSelectedWorkspaceName();
+
+  // Create a dialog to ask for options
+  MantidMDCurveDialog * dlg = new MantidMDCurveDialog(appWindow(), wsName);
+  int result = dlg->exec();
+  if (result == QDialog::Rejected)
+    return;
+  // Extract the settings from the dialog opened earlier
+  bool showErrors = dlg->showErrorBars();
+  LinePlotOptions * opts = dlg->getLineOptionsWidget();
+
   MultiLayer* ml = appWindow()->multilayerPlot(appWindow()->generateUniqueName(wsName));
   ml->setCloseOnEmpty(true);
   Graph *g = ml->activeGraph();
@@ -518,18 +529,18 @@ void MantidUI::showMDPlot()
     appWindow()->setPreferences(g);
     g->newLegend("");
 
-    bool showErrors = true; //Hard-coded to true. Could set this via another menu option.
+    // Create the curve with defaults
     MantidMDCurve* curve = new MantidMDCurve(wsName,g,showErrors);
-    UNUSED_ARG(curve);
+    MantidQwtIMDWorkspaceData * data = curve->mantidData();
+    // Apply the settings
+    data->setPreviewMode(false);
+    data->setPlotAxisChoice(opts->getPlotAxis());
+    data->setNormalization(opts->getNormalization());
 
-    IMDWorkspace_sptr mdews = boost::dynamic_pointer_cast<IMDWorkspace>(
-      AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
-
+    // Set some of the labels on the plot
     g->setTitle(tr("Workspace ")+wsName);
-    g->setYAxisTitle(tr("Normalised Signal"));
-    Mantid::Geometry::IMDDimension_const_sptr nonIntegratedDim = mdews->getNonIntegratedDimensions()[0];
-    std::string xAxisLabel = nonIntegratedDim->getName() + " / " + nonIntegratedDim->getUnits();
-    g->setXAxisTitle(xAxisLabel.c_str());
+    g->setXAxisTitle(QString::fromStdString(data->getXAxisLabel()));
+    g->setYAxisTitle(QString::fromStdString(data->getYAxisLabel()));
     g->setAntialiasing(false);
     g->setAutoScale();
   }

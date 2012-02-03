@@ -134,9 +134,10 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, verbose):
     ## Save output
     group = assWS +','+ asscWS +','+ acscWS +','+ accWS
     GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fname)
-    SaveNexusProcessed(fname,os.path.join(workdir,fname+'.nxs'))
+    path = os.path.join(workdir,fname+'.nxs')
+    SaveNexusProcessed(fname,path)
     if verbose:
-        mtd.sendLogMessage('Output files created : '+workdir+fname+'.nxs')
+        mtd.sendLogMessage('Output file created : '+path)
     if ncan > 1:
         return [assWS, asscWS, acscWS, accWS]
     else:

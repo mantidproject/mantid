@@ -80,13 +80,14 @@ namespace API
     void setBasisVector(size_t index, const Mantid::Kernel::VMD & vec);
 
     // --------------------------------------------------------------------------------------------
-    bool hasOriginalWorkspace() const;
-    boost::shared_ptr<Workspace> getOriginalWorkspace() const;
-    void setOriginalWorkspace(boost::shared_ptr<Workspace> ws);
-    Mantid::API::CoordTransform * getTransformFromOriginal() const;
-    void setTransformFromOriginal(Mantid::API::CoordTransform * transform);
-    Mantid::API::CoordTransform * getTransformToOriginal() const;
-    void setTransformToOriginal(Mantid::API::CoordTransform * transform);
+    bool hasOriginalWorkspace(size_t index=0) const;
+    size_t numOriginalWorkspaces() const;
+    boost::shared_ptr<Workspace> getOriginalWorkspace(size_t index=0) const;
+    void setOriginalWorkspace(boost::shared_ptr<Workspace> ws, size_t index=0);
+    Mantid::API::CoordTransform * getTransformFromOriginal(size_t index=0) const;
+    void setTransformFromOriginal(Mantid::API::CoordTransform * transform, size_t index=0);
+    Mantid::API::CoordTransform * getTransformToOriginal(size_t index=0) const;
+    void setTransformToOriginal(Mantid::API::CoordTransform * transform, size_t index=0);
 
     void transformDimensions(std::vector<double> & scaling, std::vector<double> & offset);
 
@@ -113,8 +114,8 @@ namespace API
     /// Vector of the dimensions used, in the order X Y Z t, etc.
     std::vector<Mantid::Geometry::IMDDimension_sptr> m_dimensions;
 
-    /// Pointer to the original workspace, if this workspace is a coordinate transformation from an original workspace.
-    boost::shared_ptr<Workspace> m_originalWorkspace;
+    /// Pointer to the original workspace(s), if this workspace is a coordinate transformation from an original workspace.
+    std::vector<boost::shared_ptr<Workspace> > m_originalWorkspaces;
 
     /// Vector of the basis vector (in the original workspace) for each dimension of this workspace.
     std::vector<Mantid::Kernel::VMD> m_basisVectors;
@@ -123,10 +124,10 @@ namespace API
     Mantid::Kernel::VMD m_origin;
 
     /// Coordinate Transformation that goes from the original workspace to this workspace's coordinates.
-    Mantid::API::CoordTransform * m_transformFromOriginal;
+    std::vector<Mantid::API::CoordTransform *> m_transforms_FromOriginal;
 
     /// Coordinate Transformation that goes from this workspace's coordinates to the original workspace coordinates.
-    Mantid::API::CoordTransform * m_transformToOriginal;
+    std::vector<Mantid::API::CoordTransform *> m_transforms_ToOriginal;
 
     /// Poco delete notification observer object
     Poco::NObserver<MDGeometry, Mantid::API::WorkspacePreDeleteNotification> m_delete_observer;

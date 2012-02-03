@@ -4,7 +4,7 @@
 #include "../PlotCurve.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidQwtWorkspaceData.h"
+#include "MantidQtAPI/MantidQwtWorkspaceData.h"
 
 class Graph;
 class ErrorBarSettings;

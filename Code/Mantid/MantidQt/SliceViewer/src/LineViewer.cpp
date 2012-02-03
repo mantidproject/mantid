@@ -9,6 +9,9 @@
 #include <QIntValidator>
 #include <qwt_plot_curve.h>
 #include <qwt_plot.h>
+#include "MantidQtAPI/MantidQwtIMDWorkspaceData.h"
+#include "MantidAPI/NullCoordTransform.h"
+#include "MantidQtSliceViewer/LinePlotOptions.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -26,8 +29,7 @@ LineViewer::LineViewer(QWidget *parent)
    m_planeWidth(0),
    m_numBins(100),
    m_allDimsFree(false), m_freeDimX(0), m_freeDimY(1),
-   m_fixedBinWidthMode(false), m_fixedBinWidth(0.1), m_binWidth(0.1),
-   m_plotAxis(PlotAuto), m_currentPlotAxis(PlotDistance)
+   m_fixedBinWidthMode(false), m_fixedBinWidth(0.1), m_binWidth(0.1)
 {
 	ui.setupUi(this);
 
@@ -35,7 +37,7 @@ LineViewer::LineViewer(QWidget *parent)
   ui.textBinWidth->setValidator(new QDoubleValidator(ui.textBinWidth));
 
 	// --------- Create the plot -----------------
-  m_plotLayout = new QHBoxLayout(ui.frmPlot);
+  m_plotLayout = new QVBoxLayout(ui.frmPlot);
   m_plot = new QwtPlot();
   m_plot->autoRefresh();
   m_plot->setBackgroundColor(QColor(255,255,255)); // White background
@@ -49,6 +51,10 @@ LineViewer::LineViewer(QWidget *parent)
   m_previewCurve->setVisible(false);
   m_fullCurve->setVisible(false);
 
+  // The plotOptions
+  m_lineOptions = new LinePlotOptions(this);
+  m_plotLayout->addWidget(m_lineOptions, 0);
+
 
   // Make the splitter use the minimum size for the controls and not stretch out
   ui.splitter->setStretchFactor(0, 0);
@@ -61,10 +67,9 @@ LineViewer::LineViewer(QWidget *parent)
   QObject::connect(ui.textPlaneWidth, SIGNAL(textEdited(QString)), this, SLOT(thicknessTextEdited()));
   QObject::connect(ui.radNumBins, SIGNAL(toggled(bool)), this, SLOT(on_radNumBins_toggled()));
   QObject::connect(ui.textBinWidth, SIGNAL(editingFinished()), this, SLOT(textBinWidth_changed()));
-  QObject::connect(ui.radPlotAuto, SIGNAL(toggled(bool)), this, SLOT(radPlot_changed()));
-  QObject::connect(ui.radPlotX, SIGNAL(toggled(bool)), this, SLOT(radPlot_changed()));
-  QObject::connect(ui.radPlotY, SIGNAL(toggled(bool)), this, SLOT(radPlot_changed()));
-  QObject::connect(ui.radPlotDistance, SIGNAL(toggled(bool)), this, SLOT(radPlot_changed()));
+
+  QObject::connect(m_lineOptions, SIGNAL(changedPlotAxis()), this, SLOT(refreshPlot()));
+  QObject::connect(m_lineOptions, SIGNAL(changedNormalization()), this, SLOT(refreshPlot()));
 }
 
 LineViewer::~LineViewer()
@@ -159,9 +164,6 @@ void LineViewer::updateFreeDimensions()
     std::string s = "(in " + m_ws->getDimension(m_freeDimX)->getName() + "-" +  m_ws->getDimension(m_freeDimY)->getName()
         + " plane)";
     ui.lblPlaneWidth->setText(QString::fromStdString(s));
-
-    ui.radPlotX->setText(QString::fromStdString("X (" + m_ws->getDimension(m_freeDimX)->getName() + ")"));
-    ui.radPlotY->setText(QString::fromStdString("Y (" + m_ws->getDimension(m_freeDimY)->getName() + ")"));
   }
 
 }
@@ -446,26 +448,6 @@ void LineViewer::textBinWidth_changed()
   }
 }
 
-/** Slot called when any of the X plot choice radio buttons are clicked
- */
-void LineViewer::radPlot_changed()
-{
-  if (ui.radPlotDistance->isChecked())
-    m_plotAxis = PlotDistance;
-  else if (ui.radPlotX->isChecked())
-    m_plotAxis = PlotX;
-  else if (ui.radPlotY->isChecked())
-    m_plotAxis = PlotY;
-  else
-    m_plotAxis = PlotAuto;
-  // Refresh the plot, without recalculating
-  if (m_sliceWS)
-    this->showFull();
-  else
-    this->showPreview();
-}
-
-
 // ==============================================================================================
 // ================================== External Getters ==========================================
 // ==============================================================================================
@@ -509,6 +491,8 @@ void LineViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
   m_ws = ws;
   m_thickness = VMD(ws->getNumDims());
   createDimensionWidgets();
+  // Update the dimensions shown in the original workspace
+  m_lineOptions->setOriginalWorkspace(m_ws);
 }
 
 
@@ -804,33 +788,18 @@ double LineViewer::getBinWidth() const
  *
  * @param choice :: PlotAxisChoice, either Auto, X, Y or Distance.
  */
-void LineViewer::setPlotAxis(LineViewer::PlotAxisChoice choice)
+void LineViewer::setPlotAxis(int choice)
 {
-  m_plotAxis = choice;
-  switch(m_plotAxis)
-  {
-  case PlotX:
-    ui.radPlotX->setChecked(true);
-    break;
-  case PlotY:
-    ui.radPlotY->setChecked(true);
-    break;
-  case PlotDistance:
-    ui.radPlotDistance->setChecked(true);
-    break;
-  default:
-    ui.radPlotAuto->setChecked(true);
-    break;
-  }
+  m_lineOptions->setPlotAxis(choice);
 }
 
 /** Return which coordinates to use as the X axis to plot in the line view.
  *
  * @return PlotAxisChoice, either Auto, X, Y or Distance.
  */
-LineViewer::PlotAxisChoice LineViewer::getPlotAxis() const
+int LineViewer::getPlotAxis() const
 {
-  return m_plotAxis;
+  return m_lineOptions->getPlotAxis();
 }
 
 
@@ -838,137 +807,18 @@ LineViewer::PlotAxisChoice LineViewer::getPlotAxis() const
 // ================================== Rendering =================================================
 // ==============================================================================================
 
-/** Automatically choose which coordinate to use as the X axis,
- * if we selected it to be automatic
- */
-void LineViewer::choosePlotAxis()
-{
-  if (m_plotAxis == PlotAuto)
-  {
-    QPointF start = this->getStartXY();
-    QPointF end = this->getEndXY();
-    QPointF diff = end - start;
-    double d = fabs(diff.y()) - fabs(diff.x());
-    if (d < 1e-3)
-      // More line in X than in Y, or nearly the same
-      m_currentPlotAxis = PlotX;
-    else
-      // More Y than X
-      m_currentPlotAxis = PlotY;
-  }
-  else
-  {
-    m_currentPlotAxis = m_plotAxis;
-  }
-}
-
-/** Calculate a curve between two points given a linear start/end point
- *
- * @param ws :: MDWorkspace to plot
- * @param start :: start point in ND
- * @param end :: end point in ND
- * @param minNumPoints :: minimum number of points to plot
- * @param curve :: curve to set
- */
-void LineViewer::calculateCurve(IMDWorkspace_sptr ws, VMD start, VMD end,
-    size_t minNumPoints, QwtPlotCurve * curve)
-{
-  if (!ws) return;
-  // Find the axis to plot.
-  this->choosePlotAxis();
-
-  // Retrieve the transform to original coords if available.
-  CoordTransform * toOriginal = NULL;
-  if (ws->hasOriginalWorkspace())
-    toOriginal = ws->getTransformToOriginal();
-
-  // Use the width of the plot (in pixels) to choose the fineness)
-  // That way, there is ~1 point per pixel = as fine as it needs to be
-  size_t numPoints = size_t(m_plot->width());
-  if (numPoints < minNumPoints) numPoints = minNumPoints;
-
-  VMD step = (end-start) / double(numPoints);
-  double stepLength = step.norm();
-
-  // These will be the curve as plotted
-  double * xArr = new double[numPoints];
-  double * yArr = new double[numPoints];
-
-  for (size_t i=0; i<numPoints; i++)
-  {
-    // Coordinate along the line
-    VMD coord = start + step * double(i);
-    // Signal in the WS at that coordinate
-    signal_t signal = ws->getSignalAtCoord(coord);
-
-    // Choose which X to plot
-    VMD original = coord;
-    if (toOriginal)
-      original = toOriginal->applyVMD(coord);
-
-    double x = 0;
-    switch (m_currentPlotAxis)
-    {
-    case PlotX:
-      x = original[m_freeDimX];
-      break;
-    case PlotY:
-      x = original[m_freeDimY];
-      break;
-    default:
-      // Distance, or not set.
-      x = stepLength * double(i);
-      break;
-    }
-
-    // Make into array
-    xArr[i] = x;
-    yArr[i] = signal;
-  }
-
-  // Make the curve
-  curve->setData(xArr,yArr, int(numPoints));
-
-  delete [] xArr;
-  delete [] yArr;
-}
-
-
-//-----------------------------------------------------------------------------
-/** Sets the appropriate labels on the plot axes */
-void LineViewer::setPlotAxisLabels()
-{
-  IMDDimension_const_sptr dimX = m_ws->getDimension(m_freeDimX);
-  IMDDimension_const_sptr dimY = m_ws->getDimension(m_freeDimY);
-
-  std::string xLabel = "";
-  switch (m_currentPlotAxis)
-  {
-  case PlotX:
-    xLabel = dimX->getName() + " (" + dimX->getUnits() + ")";
-    break;
-  case PlotY:
-    xLabel = dimY->getName() + " (" + dimY->getUnits() + ")";
-    break;
-  default:
-    // Distance, or not set.
-    xLabel = "Distance from start";
-    if (dimX->getUnits() == dimY->getUnits())
-      xLabel += " (" + dimX->getUnits() + ")";
-    else
-      xLabel += " (undefined units)";
-    break;
-  }
-  m_plot->setAxisTitle( QwtPlot::xBottom, QString::fromStdString(xLabel));
-}
-
 
 //-----------------------------------------------------------------------------
 /** Calculate and show the preview (non-integrated) line,
  * using the current parameters. */
 void LineViewer::showPreview()
 {
-  calculateCurve(m_ws, m_start, m_end, 100, m_previewCurve);
+  MantidQwtIMDWorkspaceData curveData(m_ws, false,
+      m_start, m_end, m_lineOptions->getNormalization());
+  curveData.setPreviewMode(true);
+  curveData.setPlotAxisChoice(m_lineOptions->getPlotAxis());
+  m_previewCurve->setData(curveData);
+
   if (m_fullCurve->isVisible())
   {
     m_fullCurve->setVisible(false);
@@ -978,29 +828,25 @@ void LineViewer::showPreview()
   m_previewCurve->setVisible(true);
   m_plot->replot();
   m_plot->setTitle("Preview Plot");
-  this->setPlotAxisLabels();
+
+  m_plot->setAxisTitle( QwtPlot::xBottom, QString::fromStdString( curveData.getXAxisLabel() ));;
+  m_plot->setAxisTitle( QwtPlot::yLeft, QString::fromStdString( curveData.getYAxisLabel() ));;
 }
 
 
+//-----------------------------------------------------------------------------
 /** Calculate and show the full (integrated) line, using the latest
  * integrated workspace. The apply() method must have been called
  * before calling this. */
 void LineViewer::showFull()
 {
   if (!m_sliceWS) return;
-  VMD start(m_sliceWS->getNumDims());
-  // Follow along the middle of each bin
-  for (size_t d=0; d<m_sliceWS->getNumDims(); d++)
-  {
-    IMDDimension_const_sptr dim = m_sliceWS->getDimension(d);
-    start[d] = (dim->getMinimum() + dim->getMaximum()) / 2.0;
-  }
-  VMD end = start;
-  // Except along the line, go from start to end
-  start[0] = m_sliceWS->getDimension(0)->getMinimum();
-  end[0] = m_sliceWS->getDimension(0)->getMaximum();
+  MantidQwtIMDWorkspaceData curveData(m_sliceWS, false,
+      VMD(), VMD(), m_lineOptions->getNormalization());
+  curveData.setPreviewMode(false);
+  curveData.setPlotAxisChoice(m_lineOptions->getPlotAxis());
+  m_fullCurve->setData(curveData);
 
-  calculateCurve(m_sliceWS, start, end, m_numBins, m_fullCurve);
   if (m_previewCurve->isVisible())
   {
     m_previewCurve->setVisible(false);
@@ -1010,7 +856,21 @@ void LineViewer::showFull()
   m_fullCurve->setVisible(true);
   m_plot->replot();
   m_plot->setTitle("Integrated Line Plot");
-  this->setPlotAxisLabels();
+  m_plot->setAxisTitle( QwtPlot::xBottom, QString::fromStdString( curveData.getXAxisLabel() ));;
+  m_plot->setAxisTitle( QwtPlot::yLeft, QString::fromStdString( curveData.getYAxisLabel() ));;
+}
+
+//-----------------------------------------------------------------------------
+/** Slot called when the options of the plot display change (normalization
+ * or plot axis.
+ * Refreshes the preview or full plot, whichever is visible.
+ */
+void LineViewer::refreshPlot()
+{
+  if (m_previewCurve->isVisible())
+    showPreview();
+  else
+    showFull();
 }
 
 

@@ -22,6 +22,15 @@ try:
 except ImportError:
     HAVE_NUMPY = False
 
+###############################################################################
+# Define the api version
+###############################################################################
+def apiVersion():
+    """Indicates that this is version 1
+    of the API
+    """
+    return 1
+
 # Check whether MANTIDPATH is defined. If so, append it to the PYTHONPATH.
 if os.getenv("MANTIDPATH") is not None:
     sys.path.append(os.getenv("MANTIDPATH"))

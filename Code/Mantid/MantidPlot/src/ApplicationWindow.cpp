@@ -3753,7 +3753,13 @@ void ApplicationWindow::defineErrorBars(const QString& name, int type, const QSt
         t->setText(i, c, QString::number(dev, 'g', 15));
     }
   }
-  g->addErrorBars(xColName, name, t, errColName, direction);
+  QwtErrorPlotCurve * errs = g->addErrorBars(xColName, name, t, errColName, direction);
+  if ( errs )
+  {
+    // Error bars should be the same color as the curve line
+    errs->setColor(master_curve->pen().color());
+    g->updatePlot();
+  }
 }
 
 void ApplicationWindow::defineErrorBars(const QString& curveName, const QString& errColumnName, int direction)
@@ -3790,7 +3796,13 @@ void ApplicationWindow::defineErrorBars(const QString& curveName, const QString&
   if (!g)
     return;
 
-  g->addErrorBars(curveName, errTable, errColumnName, direction);
+  QwtErrorPlotCurve * errs = g->addErrorBars(curveName, errTable, errColumnName, direction);
+  if ( errs )
+  {
+    QwtPlotCurve * master_curve = g->curve(curveName);
+    if (master_curve) errs->setColor(master_curve->pen().color());
+    g->updatePlot();
+  }
   emit modified();
 }
 

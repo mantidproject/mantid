@@ -33,6 +33,7 @@ namespace API
     /// Pure abstract methods to be implemented
     virtual std::string toXMLString() const = 0;
     virtual void apply(const coord_t * inputVector, coord_t * outVector) const = 0;
+    virtual CoordTransform * clone() const = 0;
 
     /// Wrapper for VMD
     Mantid::Kernel::VMD applyVMD(const Mantid::Kernel::VMD & inputVector) const;
@@ -44,9 +45,13 @@ namespace API
     /// @return the number of output dimensions
     size_t getOutD() const
     { return outD; };
-//
-//    /// Compound the transformation by appending another one after this one.
-//    virtual void compound(CoordTransform * other) = 0;
+
+    /// @return the affine matrix equivalent to this transformation, if possible
+    /// @throw std::runtime_error if there is no possible affine matrix
+    virtual Mantid::Kernel::Matrix<coord_t> makeAffineMatrix() const
+    {
+      throw std::runtime_error("This coordinate transformation does not have an equivalent affine matrix.");
+    }
 
   protected:
     /// Input number of dimensions

@@ -20,6 +20,9 @@ namespace MDEvents
   /** Constructor
    */
   SlicingAlgorithm::SlicingAlgorithm()
+  : m_transform(),
+    m_transformFromOriginal(), m_transformToOriginal(),
+    m_transformFromIntermediate(), m_transformToIntermediate()
   {
   }
     
@@ -90,6 +93,9 @@ namespace MDEvents
 
   //----------------------------------------------------------------------------------------------
   /** Generate the MDHistoDimension and basis vector for a given string from BasisVectorX etc.
+   *
+   * If the workspace being binned has an original workspace, then the vector
+   * is transformed to THOSE coordinates.
    *
    *  "Format: 'name, units, x,y,z,.., length, number_of_bins'.\n"
    * Adds values to m_bases, m_binDimensions and m_scaling
@@ -447,12 +453,17 @@ namespace MDEvents
     // Now the reverse transformation.
     if (m_outD == inD)
     {
-      // Make the reverse map = if you're in the output dimension "od", what INPUT dimension index is that?
-      std::vector<size_t> reverseDimensionMap(inD, 0);
-      for (size_t od=0; od<m_dimensionToBinFrom.size(); od++)
-        reverseDimensionMap[ m_dimensionToBinFrom[od] ] = od;
-      m_transformToOriginal = new CoordTransformAligned(inD, m_outD,
-          reverseDimensionMap, zeroOrigin, unitScaling);
+//      // Make the reverse map = if you're in the output dimension "od", what INPUT dimension index is that?
+//      std::vector<size_t> reverseDimensionMap(inD, 0);
+//      for (size_t od=0; od<m_dimensionToBinFrom.size(); od++)
+//        reverseDimensionMap[ m_dimensionToBinFrom[od] ] = od;
+//      m_transformToOriginal = new CoordTransformAligned(inD, m_outD,
+//          reverseDimensionMap, zeroOrigin, unitScaling);
+      Matrix<coord_t> mat = m_transformFromOriginal->makeAffineMatrix();
+      mat.Invert();
+      CoordTransformAffine * tmp = new CoordTransformAffine(inD, m_outD);
+      tmp->setMatrix(mat);
+      m_transformToOriginal = tmp;
     }
     else
       // Changed # of dimensions - can't reverse the transform
@@ -483,7 +494,8 @@ namespace MDEvents
     m_axisAligned = getProperty("AxisAligned");
 
     // Refer to the original workspace. Make sure that is possible
-    m_originalWS = boost::dynamic_pointer_cast<IMDWorkspace>(m_inWS->getOriginalWorkspace());
+    if (m_inWS->numOriginalWorkspaces() > 0)
+      m_originalWS = boost::dynamic_pointer_cast<IMDWorkspace>(m_inWS->getOriginalWorkspace());
     if (m_originalWS)
     {
       if (m_axisAligned)
@@ -506,7 +518,34 @@ namespace MDEvents
     // Finalize, for binnign MDHistoWorkspace
     if (m_originalWS)
     {
-      // Replace the input workspace
+      // The intermediate workspace is the MDHistoWorkspace being BINNED
+      m_intermediateWS = m_inWS;
+      CoordTransform * originalToIntermediate = m_intermediateWS->getTransformFromOriginal();
+      if (originalToIntermediate && (m_originalWS->getNumDims() == m_intermediateWS->getNumDims()))
+      {
+        try
+        {
+          // The transform from the INPUT to the INTERMEDIATE ws
+          // intermediate_coords =  [OriginalToIntermediate] * [thisToOriginal] * these_coords
+          Matrix<coord_t> matToOriginal = m_transformToOriginal->makeAffineMatrix();
+          Matrix<coord_t> matOriginalToIntermediate = originalToIntermediate->makeAffineMatrix();
+          Matrix<coord_t> matToIntermediate = matOriginalToIntermediate * matToOriginal;
+
+          m_transformToIntermediate = new CoordTransformAffine(m_originalWS->getNumDims(), m_intermediateWS->getNumDims());
+          m_transformToIntermediate->setMatrix(matToIntermediate);
+          // And now the reverse
+          matToIntermediate.Invert();
+          m_transformFromIntermediate = new CoordTransformAffine(m_intermediateWS->getNumDims(), m_originalWS->getNumDims());
+          m_transformFromIntermediate->setMatrix(matToIntermediate);
+        }
+        catch (std::runtime_error & )
+        {
+          // Ignore error. Have no transform.
+        }
+      }
+
+      // Replace the input workspace with the original MDEventWorkspace
+      // for future binning
       m_inWS = m_originalWS;
     }
 

@@ -549,7 +549,8 @@ void PeakPickerTool::algorithmFinished(const QString& out)
   graph()->removeCurve(m_curveFitName);
   graph()->removeCurve(m_curveDifName);
 
-  new MantidMatrixCurve(m_curveFitName,out,graph(),1,false);
+  // If style needs to be changed from default, signal pair second will be true and change to line.
+  new MantidMatrixCurve(m_curveFitName,out,graph(),1,false, false, Graph::Line);
   if (m_fitPropertyBrowser->plotDiff())
   {
     new MantidMatrixCurve(m_curveDifName,out,graph(),2,false);

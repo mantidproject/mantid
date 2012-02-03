@@ -96,6 +96,7 @@ std::ostream& operator<<(std::ostream& os,const Matrix<T>& matrix)
       os << matrix[i][j];
       if( i < nrows - 1 || j < ncols - 1 ) os << ",";
     }
+    //os << std::endl;
   }
   return os;
 }

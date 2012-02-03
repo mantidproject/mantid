@@ -306,9 +306,9 @@ void MuonAnalysis::runSaveGroupButton()
     ConfigService::Instance().getString("defaultsave.directory"))).toString();
 
   QString filter;
-  filter.append("Files (*.XML *.xml)");
+  filter.append("Files (*.xml *.XML)");
   filter += ";;AllFiles (*.*)";
-  QString groupingFile = API::FileDialogHandler::getSaveFileName(this,
+  QString groupingFile = QFileDialog::getSaveFileName(this,
                                    "Save Grouping file as", prevPath, filter);
 
   if( ! groupingFile.isEmpty() )
@@ -337,7 +337,7 @@ void MuonAnalysis::runLoadGroupButton()
     ConfigService::Instance().getString("defaultload.directory"))).toString();
 
   QString filter;
-  filter.append("Files (*.XML *.xml)");
+  filter.append("Files (*.xml *.XML)");
   filter += ";;AllFiles (*.*)";
   QString groupingFile = QFileDialog::getOpenFileName(this, "Load Grouping file", prevPath, filter);    
   if( groupingFile.isEmpty() || QFileInfo(groupingFile).isDir() ) 
@@ -1535,38 +1535,6 @@ void MuonAnalysis::createPlotWS(const std::string& groupName, const std::string&
 
 
 /**
-* Normalise the data.
-*
-* @param x :: Data x of the workspace.
-* @param y :: Data y of the workspace.
-* @param workspace :: Name of the workspace to perform the normalisation to.
-*/
-void MuonAnalysis::normalise(const std::vector<double>& x, const std::vector<double>& y, QString workspace)
-{
-  double targetTime = boost::lexical_cast<double>(firstGoodBin().toStdString());
-  int indexTime = 0;
-  for (int i = 0; i < static_cast<int>(x.size()); i++)
-  {
-    if (x[i] > targetTime)
-    {
-      indexTime = i;
-      break;
-    }
-  }
-  double normalizationFactor = 1.0;
-  if (y[indexTime] < 0)
-    normalizationFactor = -1.0/y[indexTime];
-  else
-    normalizationFactor = 1.0/y[indexTime];
-
-  QString pyStrNormalise = "Scale('" + workspace + "','" + workspace + "','"
-    + QString::number(normalizationFactor) + "')";
-
-  runPythonCode( pyStrNormalise ).trimmed();
-}
-
-
-/**
  * Plot group
  */
 void MuonAnalysis::plotGroup(const std::string& plotType)
@@ -1673,11 +1641,6 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     else if (plotType.compare("Asymmetry") == 0)
     {
       matrix_workspace->setYUnitLabel("Asymmetry");
-      // Normalise before removing exponential decay
-      const std::vector<double>& x = matrix_workspace->readX(0);
-      const std::vector<double>& y = matrix_workspace->readY(0);
-
-      normalise(x, y, cropWS);
 
       pyString = "RemoveExpDecay(\"" + cropWS + "\",\"" 
         + cropWS + "\")\n" + pyS;
@@ -1689,11 +1652,6 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
         matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
 
         matrix_workspace->setYUnitLabel("Asymmetry");
-
-        const std::vector<double>& rawX = matrix_workspace->readX(0);
-        const std::vector<double>& rawY = matrix_workspace->readY(0);
-
-        normalise(rawX, rawY, cropWS + "_Raw");
 
         pyString += "RemoveExpDecay(\"" + cropWS + "_Raw\",\"" 
         + cropWS + "_Raw\")\n";

@@ -14,6 +14,8 @@ set ( SRC_FILES
 	src/UserSubWindow.cpp
 	src/VatesViewerInterface.cpp
 	src/WorkspaceObserver.cpp
+	src/MantidQwtIMDWorkspaceData.cpp
+	src/MantidQwtMatrixWorkspaceData.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -30,6 +32,9 @@ set ( INC_FILES
 	inc/MantidQtAPI/MantidColorMap.h
 	inc/MantidQtAPI/MantidDialog.h
 	inc/MantidQtAPI/MantidWidget.h
+	inc/MantidQtAPI/MantidQwtIMDWorkspaceData.h
+	inc/MantidQtAPI/MantidQwtMatrixWorkspaceData.h
+	inc/MantidQtAPI/MantidQwtWorkspaceData.h
 	inc/MantidQtAPI/PythonRunner.h
 	inc/MantidQtAPI/SafeQwtPlot.h
 	inc/MantidQtAPI/SyncedCheckboxes.h
@@ -49,6 +54,8 @@ set ( MOC_FILES
 	inc/MantidQtAPI/UserSubWindow.h
 	inc/MantidQtAPI/VatesViewerInterface.h
 	inc/MantidQtAPI/WorkspaceObserver.h
+	inc/MantidQtAPI/MantidQwtIMDWorkspaceData.h
+	inc/MantidQtAPI/MantidQwtMatrixWorkspaceData.h
 )
 
 set ( UI_FILES 
@@ -72,6 +79,8 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
 
 # For Windows:
 add_definitions ( -DIN_MANTIDQT_API )
+# add_definitions ( -DQWT_DLL )
+# add_definitions ( -DQWT_MAKEDLL )
 
 # Use a precompiled header where they are supported
 ADD_PRECOMPILED_HEADER( inc/MantidQtAPI/PrecompiledHeader.h MantidQtAPI src/PrecompiledHeader.cpp ALL_SRC INC_FILES )

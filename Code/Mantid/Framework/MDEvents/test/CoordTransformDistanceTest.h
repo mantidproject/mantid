@@ -7,9 +7,11 @@
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
+#include "MantidAPI/CoordTransform.h"
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
+using Mantid::API::CoordTransform;
 
 class CoordTransformDistanceTest : public CxxTest::TestSuite
 {
@@ -35,6 +37,22 @@ public:
     compare(4, center, ct.getCenter());
     for (size_t i=0; i<4; i++)
       TS_ASSERT_EQUALS( used[i], ct.getDimensionsUsed()[i]);
+  }
+
+
+  /** Clone then apply */
+  void test_clone()
+  {
+    // Build it
+    coord_t center[2] = {1, 2};
+    bool used[2] = {true, true};
+    CoordTransformDistance ct(2,center,used);
+
+    CoordTransform * clone = ct.clone();
+    coord_t out = 0;
+    coord_t in1[2] = {0, 3};
+    TS_ASSERT_THROWS_NOTHING( clone->apply(in1, &out) );
+    TS_ASSERT_DELTA( out, 2.0, 1e-5);
   }
 
 

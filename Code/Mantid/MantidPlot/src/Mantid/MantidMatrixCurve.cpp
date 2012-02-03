@@ -137,7 +137,8 @@ void MantidMatrixCurve::init(Graph* g,bool distr,Graph::CurveType style)
   }
 
   // Initialise error bar colour to match curve colour
-  m_errorSettings->setColor(pen().color());
+  m_errorSettings->m_color = pen().color();
+  m_errorSettings->setWidth(pen().widthF());
 
   connect(g,SIGNAL(axisScaleChanged(int,bool)),this,SLOT(axisScaleChanged(int,bool)));
   observePostDelete();

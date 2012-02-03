@@ -6,9 +6,12 @@
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidMDEvents/MDHistoWorkspaceIterator.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
+#include <map>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
+using namespace Mantid::API;
 
 namespace Mantid
 {
@@ -303,6 +306,21 @@ namespace MDEvents
    */
   signal_t MDHistoWorkspace::getSignalAtCoord(const coord_t * coords) const
   {
+    size_t linearIndex = this->getLinearIndexAtCoord(coords);
+    if (linearIndex < m_length)
+      return m_signals[linearIndex] * m_inverseVolume;
+    else
+      return std::numeric_limits<signal_t>::quiet_NaN();
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Get the linear index into the histo array at these coordinates
+   *
+   * @param coords :: ND-sized array of coordinates
+   * @return the linear index, or size_t(-1) if out of range.
+   */
+  size_t MDHistoWorkspace::getLinearIndexAtCoord(const coord_t * coords) const
+  {
     // Build up the linear index, dimension by dimension
     size_t linearIndex = 0;
     for (size_t d=0; d<numDimensions; d++)
@@ -310,10 +328,10 @@ namespace MDEvents
       coord_t x = coords[d] - m_origin[d];
       size_t ix = size_t(x / m_boxLength[d]);
       if (ix >= m_indexMax[d] || (x<0))
-        return std::numeric_limits<signal_t>::quiet_NaN();
+        return size_t(-1);
       linearIndex += ix * m_indexMaker[d];
     }
-    return m_signals[linearIndex] * m_inverseVolume;
+    return linearIndex;
   }
 
 
@@ -356,6 +374,175 @@ namespace MDEvents
     // This copies again! :(
     return out;
   }
+
+
+
+
+  /** @return true if the point is within the workspace (including the max edges)
+   * */
+  bool pointInWorkspace(const MDHistoWorkspace * ws, const VMD & point)
+  {
+    for (size_t d=0; d<ws->getNumDims(); d++)
+    {
+      IMDDimension_const_sptr dim = ws->getDimension(d);
+      if ((point[d] < dim->getMinimum()) || (point[d] > dim->getMaximum()))
+        return false;
+    }
+    return true;
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Obtain coordinates for a line plot through a MDWorkspace.
+   * Cross the workspace from start to end points, recording the signal along the line.
+   * Sets the x,y vectors to the histogram bin boundaries and counts
+   *
+   * @param start :: coordinates of the start point of the line
+   * @param end :: coordinates of the end point of the line
+   * @param normalize :: how to normalize the signal
+   * @param x :: is set to the boundaries of the bins, relative to start of the line.
+   * @param y :: is set to the normalized signal for each bin. Length = length(x) - 1
+   */
+  void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD & start, const Mantid::Kernel::VMD & end,
+      Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y, std::vector<signal_t> & e) const
+  {
+
+    size_t nd = this->getNumDims();
+    if (start.getNumDims() != nd)
+      throw std::runtime_error("Start point must have the same number of dimensions as the workspace.");
+    if (end.getNumDims() != nd)
+      throw std::runtime_error("End point must have the same number of dimensions as the workspace.");
+    x.clear();
+    y.clear();
+    e.clear();
+
+    // Unit-vector of the direction
+    VMD dir = end - start;
+    double length = dir.normalize();
+
+    // Vector with +1 where direction is positive, -1 where negative
+    #define sgn(x) ((x<0)?-1:((x>0)?1:0))
+    VMD dirSign(nd);
+    for (size_t d=0; d<nd; d++)
+      dirSign[d] = sgn(dir[d]);
+
+    size_t BADINDEX = size_t(-1);
+
+    // Dimensions of the workspace
+    size_t * index = new size_t[nd];
+    size_t * numBins = new size_t[nd];
+    for (size_t d=0; d<nd; d++)
+    {
+      IMDDimension_const_sptr dim = this->getDimension(d);
+      index[d] = BADINDEX;
+      numBins[d] = dim->getNBins();
+    }
+
+    // Ordered list of boundaries in position-along-the-line coordinates
+    std::set<double> boundaries;
+
+    // Start with the start/end points, if they are within range.
+    if (pointInWorkspace(this, start))
+      boundaries.insert(0);
+    if (pointInWorkspace(this, end))
+      boundaries.insert(length);
+
+    // Next, we go through each dimension and see where the bin boundaries
+    // intersect the line.
+    for (size_t d=0; d<nd; d++)
+    {
+      IMDDimension_const_sptr dim = this->getDimension(d);
+      double lineStartX = start[d];
+
+      if (dir[d] != 0.0)
+      {
+        for (size_t i=0; i<=dim->getNBins(); i++)
+        {
+          // Position in this coordinate
+          double thisX = dim->getX(i);
+          // Position along the line. Is this between the start and end of it?
+          double linePos = (thisX - lineStartX) / dir[d];
+          if (linePos >= 0 && linePos <= length)
+          {
+            // Full position
+            VMD pos = start + (dir * linePos);
+            // This is a boundary if the line point is inside the workspace
+            if (pointInWorkspace(this, pos))
+              boundaries.insert(linePos);
+          }
+        }
+      }
+    }
+
+
+    if (boundaries.empty())
+    {
+      // Nothing at all!
+      // Make a single bin with NAN
+      x.push_back(0);  x.push_back(length);
+      y.push_back(std::numeric_limits<double>::quiet_NaN());
+      e.push_back(std::numeric_limits<double>::quiet_NaN());
+      return;
+    }
+    else
+    {
+      // Get the first point
+      std::set<double>::iterator it;
+      it = boundaries.begin();
+
+      double lastLinePos = *it;
+      VMD lastPos = start + (dir * lastLinePos);
+      x.push_back(lastLinePos);
+
+      it++;
+
+      for (; it != boundaries.end(); it++)
+      {
+        // This is our current position along the line
+        double linePos = *it;
+        x.push_back(linePos);
+
+        // This is the full position at this boundary
+        VMD pos = start + (dir * linePos);
+
+        // Position in the middle of the bin
+        VMD middle = (pos + lastPos) * 0.5;
+
+        // Find the signal in this bin
+        size_t linearIndex = this->getLinearIndexAtCoord(middle.getBareArray());
+        if (linearIndex < m_length)
+        {
+          // What is our normalization factor?
+          signal_t normalizer = 1.0;
+          switch (normalize)
+          {
+          case NoNormalization:
+            break;
+          case VolumeNormalization:
+            normalizer = m_inverseVolume;
+            break;
+          case NumEventsNormalization:
+            // TODO: Implement when we track # of events in MDHisto.
+            normalizer = 1.0;
+            break;
+          }
+          // And add the normalized signal/error to the list too
+          y.push_back( this->getSignalAt(linearIndex) * normalizer );
+          e.push_back( this->getErrorAt(linearIndex) * normalizer );
+          // Save the position for next bin
+          lastPos = pos;
+        }
+        else
+        {
+          // Invalid index. This shouldn't happen
+          y.push_back(std::numeric_limits<double>::quiet_NaN());
+          e.push_back(std::numeric_limits<double>::quiet_NaN());
+        }
+      } // for each unique boundary
+    } // if there is at least one point
+  } // (end function)
+
+
 
   //==============================================================================================
   //============================== ARITHMETIC OPERATIONS =========================================

@@ -155,17 +155,24 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
             _y_error_axis_tmp = _y_error_axis_tmp[::-1]
             
             CreateWorkspace(OutputWorkspace=_outputWorkspace,
-                            DataX=_q_axis[_q_index],
+                            DataX=q_axis,
                             DataY=_y_axis_tmp,
                             DataE=_y_error_axis_tmp,
                             Nspec=1,
                             UnitX="MomentumTransfer")
+
+            if _q_index == 0:
+                mt_tmp = mtd[_outputWorkspace]
 
             _outputWorkspace_rebin = 'tmpOWks_' + str(_q_index)
             
             Rebin(InputWorkspace=_outputWorkspace,
                   OutputWorkspace=_outputWorkspace_rebin,
                   Params=q_binning)
+
+            if _q_index == 0:
+                mt_tmp = mtd[_outputWorkspace_rebin]
+
 
         _mt = mtd['tmpOWks_0']
         _x_array = _mt.readX(0)[:]
@@ -235,6 +242,37 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
                         UnitX="MomentumTransfer", 
                         ParentWorkspace=mt1)
 
+def create_grouping(workspace=None, xmin=0, xmax=None, filename=".refl_grouping.xml"):
+    # This should be read from the 
+    npix_x = 304
+    npix_y = 256
+    if workspace is not None:
+        if mtd[workspace].getInstrument().hasParameter("number-of-x-pixels"):
+            npix_x = int(mtd[workspace].getInstrument().getNumberParameter("number-of-x-pixels")[0])
+        if mtd[workspace].getInstrument().hasParameter("number-of-y-pixels"):
+            npix_y = int(mtd[workspace].getInstrument().getNumberParameter("number-of-y-pixels")[0])
+    
+    f = open(filename,'w')
+    f.write("<detector-grouping description=\"Integrated over X\">\n")
+    
+    if xmax is None:
+        xmax = npix_x
+        
+    for y in range(npix_y):
+        # index = max_y * x + y
+        indices = []
+        for x in range(xmin, xmax+1):
+            indices.append(str(npix_y*x + y))
+        
+        # Detector IDs start at zero, but spectrum numbers start at 1
+        # Grouping works on spectrum numbers
+        indices_str = ','.join(indices)
+        f.write("  <group name='%d'>\n" % y)
+        f.write("    <ids val='%s'/>\n" % indices_str)
+        f.write("  </group>\n")
+    
+    f.write("</detector-grouping>\n")
+    f.close()
 
 def angleUnitConversion(value, from_units='degree', to_units='rad'):
     """
@@ -340,6 +378,9 @@ def convertToRvsQ(dMD=-1,theta=-1,tof=None):
             TOF: TOF of pixel
             theta: angle of detector
     """
+    print 'dMD: '
+    print dMD
+    print
     
     _const = float(4) * math.pi * m * dMD / h
     sz_tof = numpy.shape(tof)[0]
@@ -350,6 +391,9 @@ def convertToRvsQ(dMD=-1,theta=-1,tof=None):
         tofm = (tof1+tof2)/2.
         _Q = _const * math.sin(theta) / (tofm*1e-6)
         q_array[t] = _Q*1e-10
+
+    print 'q_array'
+    print q_array
     return q_array
         
 def convertToRvsQWithCorrection(mt, dMD=-1, theta=-1,tof=None, yrange=None, cpix=None):
@@ -390,14 +434,26 @@ def convertToRvsQWithCorrection(mt, dMD=-1, theta=-1,tof=None, yrange=None, cpix
     for x in xrange:
         _px = yrange[x]
         dangle = ref_beamdiv_correct(cpix, mt, dSD, _px)
-        #theta += (2.0 * dangle)
-        theta += dangle
+        
+        print 'dangle:'
+        print dangle
+        
+        if dangle is not None:
+            _theta = theta + dangle
+        else:
+            _theta = theta
+        
         for t in range(sz_tof-1):
             tof1 = tof[t]
             tof2 = tof[t+1]
             tofm = (tof1+tof2)/2.
-            _Q = _const * math.sin(theta) / (tofm*1e-6)
+            _Q = _const * math.sin(_theta) / (tofm*1e-6)
             q_array[x,t] = _Q*1e-10
+
+        print 'q_array'
+        print q_array
+        
+    print
 
     return q_array
 
@@ -430,17 +486,20 @@ def ref_beamdiv_correct(cpix, mt, det_secondary,
     last_slit_size = getS2h(mt)
     
     last_slit_dist = 0.654 #m
-    slit_dist = 2.193 #m
+    slit_dist = 0.885000050068 #m
     
-    _y = 0.5 * (first_slit_size[0] + last_slit_size[0])
+    first_slit_size = float(first_slit_size[0]) * 0.001
+    last_slit_size = float(last_slit_size[0]) * 0.001
+    
+    _y = 0.5 * (first_slit_size + last_slit_size)
     _x = slit_dist
     gamma_plus = math.atan2( _y, _x)
     
-    _y = 0.5 * (first_slit_size[0] - last_slit_size[0])
+    _y = 0.5 * (first_slit_size - last_slit_size)
     _x = slit_dist 
     gamma_minus = math.atan2( _y, _x)
     
-    half_last_aperture = 0.5 * last_slit_size[0]
+    half_last_aperture = 0.5 * last_slit_size
     neg_half_last_aperture = -1.0 * half_last_aperture
     
     last_slit_to_det = last_slit_dist + det_secondary
@@ -539,7 +598,7 @@ def ref_beamdiv_correct(cpix, mt, det_secondary,
     center_of_mass = calc_center_of_mass(int_poly_x, 
                                          int_poly_y, 
                                          area)
-    
+        
     return center_of_mass
 
 def calc_area_2D_polygon(x_coord, y_coord, size_poly):
