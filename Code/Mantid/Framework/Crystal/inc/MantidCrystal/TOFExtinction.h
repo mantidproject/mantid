@@ -47,27 +47,29 @@ namespace Crystal
     virtual const std::string category() const { return "Crystal;DataHandling\\Text";}
     
   private:
-    /// Sets documentation strings for this algorithm
+    /// Sets documentation strings for this algorithm;
     virtual void initDocs();
-    /// Initialise the properties
+    /// Initialise the properties;
     void init();
-    /// Run the algorithm
+    /// Run the algorithm;
     void exec();
     double getEg(double mosaic);
+    double getEgLaue(double Eb, double twoth, double wl);
     double getXqt(double Eg, double cellV, double wl, double twoth, double tbar, double fsq);
-    double getTypeIZachariasen(double Xqt);
-    double getTypeIGaussian(double Xqt, double twoth);
-    double getTypeILorentzian(double Xqt, double twoth);
-    double getRg(double Eg, double r_crystallite, double wl, double twoth);
+    double getZachariasen(double Xqt);
+    double getGaussian(double Xqt, double twoth);
+    double getLorentzian(double Xqt, double twoth);
+    double getEsLaue(double r, double twoth, double wl);
+    double getRg(double EgLaue, double EsLaue, double wl, double twoth);
+    double getRgGaussian(double EgLaue, double r_crystallite, double wl, double twoth);
+    double getRgLorentzian(double EgLaue, double r_crystallite, double wl, double twoth);
     double getXqtII(double Rg, double cellV, double wl, double twoth, double tbar, double fsq);
     double getTypeIIZachariasen(double XqtII);
     double getTypeIIGaussian(double XqtII, double twoth);
     double getTypeIILorentzian(double XqtII, double twoth);
+    double getSigFsqr(double Rg, double cellV, double wl, double twoth, double tbar, double fsq, double sigfsq);
     double absor_sphere(double& twoth, double& wl, double& tbar) ;
   };
-
-
-} // namespace Mantid
-} // namespace Crystal
-
+} // namespace Mantid;
+} // namespace Crystal;
 #endif  /* MANTID_CRYSTAL_TOFEXTINCTION_H_ */
