@@ -15,8 +15,6 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Statistics.h"
 #include <boost/math/special_functions/fpclassify.hpp>
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/TableRow.h"
 #include <fstream>
 
 using namespace Mantid::Geometry;
@@ -53,8 +51,8 @@ namespace Crystal
   /// Sets documentation strings for this algorithm
   void SortHKL::initDocs()
   {
-    this->setWikiSummary("Sorts a PeaksWorkspace by HKL.");
-    this->setOptionalMessage("Sorts a PeaksWorkspace by HKL.");
+    this->setWikiSummary("Sorts a PeaksWorkspace by HKL. Averages intensities using point group.");
+    this->setOptionalMessage("Sorts a PeaksWorkspace by HKL. Averages intensities using point group.");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -70,7 +68,7 @@ namespace Crystal
     declareProperty("PointGroup", propOptions[0],new ListValidator(propOptions),
       "Which point group applies to this crystal?");
 
-    declareProperty(new WorkspaceProperty<API::ITableWorkspace>("DuplicatesStatisticsTable","Statistics",Direction::Output));
+    declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace","",Direction::Output));
 
   }
 
@@ -93,22 +91,8 @@ namespace Crystal
       if (m_pointGroups[i]->getName() == pointGroupName)
         pointGroup = m_pointGroups[i];
 
-    API::ITableWorkspace_sptr t = WorkspaceFactory::Instance().createTable("TableWorkspace");
-    t->addColumn("double","h");
-    t->addColumn("double","k");
-    t->addColumn("double","l");
-    t->addColumn("str","BankName");
-    t->addColumn("int","duplicates");
-    t->addColumn("double","Intensity.mean");
-    t->addColumn("double","Intensity.std");
-    t->addColumn("double","Intensity.min");
-    t->addColumn("double","Intensity.max");
-    t->addColumn("double","Intensity.median");
-    t->addColumn("double","Sigma.mean");
-    t->addColumn("double","Sigma.std");
-    t->addColumn("double","Sigma.min");
-    t->addColumn("double","Sigma.max");
-    t->addColumn("double","Sigma.median");
+    PeaksWorkspace_sptr t = PeaksWorkspace_sptr(new PeaksWorkspace());
+
     int NumberPeaks = peaksW->getNumberPeaks();
     for (int i = 0; i < NumberPeaks; i++)
     {
@@ -156,14 +140,14 @@ namespace Crystal
         err.push_back(peak2.getSigmaIntensity());
         if(i == NumberPeaks-1)
         {
-          if(static_cast<int>(data.size()) > 1)
+          if(static_cast<int>(data.size()) > 0)
           {
             Outliers(data,err);
             Statistics stats = getStatistics(data);
-            TableRow r = t->appendRow();
-            r <<peak1.getH()<<peak1.getK()<<peak1.getL()<<bank1<<static_cast<int>(data.size())<<stats.mean<< stats.standard_deviation<< stats.minimum<< stats.maximum<< stats.median;
+            peak1.setIntensity(stats.mean);
             stats = getStatistics(err);
-            r <<stats.mean<< stats.standard_deviation<< stats.minimum<< stats.maximum<< stats.median;
+            peak1.setSigmaIntensity(stats.mean);
+            t->addPeak(peak1);
           }
           Outliers(data,err);
           data.clear();
@@ -172,14 +156,14 @@ namespace Crystal
       }
       else
       {
-        if(static_cast<int>(data.size()) > 1)
+        if(static_cast<int>(data.size()) > 0)
         {
           Outliers(data,err);
           Statistics stats = getStatistics(data);
-          TableRow r = t->appendRow();
-          r <<peak1.getH()<<peak1.getK()<<peak1.getL()<<bank1<<static_cast<int>(data.size())<<stats.mean<< stats.standard_deviation<< stats.minimum<< stats.maximum<< stats.median;
+          peak1.setIntensity(stats.mean);
           stats = getStatistics(err);
-          r <<stats.mean<< stats.standard_deviation<< stats.minimum<< stats.maximum<< stats.median;
+          peak1.setSigmaIntensity(stats.mean);
+          t->addPeak(peak1);
         }
         data.clear();
         err.clear();
@@ -191,7 +175,7 @@ namespace Crystal
     }
     data.clear();
     err.clear();
-    setProperty("DuplicatesStatisticsTable",t);
+    setProperty<PeaksWorkspace_sptr>("OutputWorkspace", t);
 
   }
   void SortHKL::Outliers(std::vector<double>& data, std::vector<double>& err)
