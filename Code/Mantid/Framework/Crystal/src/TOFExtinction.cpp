@@ -139,7 +139,6 @@ namespace Crystal
       double twoth = peak1.getScattering();
       double tbar = 0.0;
       double transmission = absor_sphere(twoth, wl, tbar);
-      std::cout << twoth<<"  "<<wl <<"  "<<tbar<<"  "<<transmission<<"\n";
       // Extinction Correction
 
 
@@ -228,6 +227,7 @@ namespace Crystal
       }
 
       peak1.setIntensity(fsq * y_corr);
+      sigfsq_ys = std::sqrt(1.0+sigfsq_ys*sigfsq_ys+std::pow(0.005*sigfsq_ys,2));
       peak1.setSigmaIntensity(sigfsq_ys);
 
       // output reflection to log file and to hkl file with SaveHKL
