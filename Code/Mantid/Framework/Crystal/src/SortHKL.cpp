@@ -118,7 +118,7 @@ namespace Crystal
     InPeaksW->sort(criteria);
     peaksW->sort(criteria);
 
-    std::vector<double> data, err;
+    std::vector<double> data, sig2;
     V3D hkl1;
     std::string bank1;
     for (int i = 1; i < NumberPeaks; i++)
@@ -129,7 +129,7 @@ namespace Crystal
       if(i == 1)
       {
         data.push_back(peak1.getIntensity());
-        err.push_back(peak1.getSigmaIntensity());
+        sig2.push_back(std::pow(peak1.getSigmaIntensity(),2));
       }
       Peak & peak2 = peaksW->getPeaks()[i];
       V3D hkl2 = peak2.getHKL();
@@ -137,48 +137,48 @@ namespace Crystal
       if (pointGroup->isEquivalent(hkl1,hkl2) && bank1.compare(bank2) == 0)
       {
         data.push_back(peak2.getIntensity());
-        err.push_back(peak2.getSigmaIntensity());
+        sig2.push_back(std::pow(peak2.getSigmaIntensity(),2));
         if(i == NumberPeaks-1)
         {
           if(static_cast<int>(data.size()) > 0)
           {
-            Outliers(data,err);
+            Outliers(data,sig2);
             Statistics stats = getStatistics(data);
             peak1.setIntensity(stats.mean);
-            stats = getStatistics(err);
-            peak1.setSigmaIntensity(stats.mean);
+            stats = getStatistics(sig2);
+            peak1.setSigmaIntensity(std::sqrt(stats.mean));
             t->addPeak(peak1);
           }
-          Outliers(data,err);
+          Outliers(data,sig2);
           data.clear();
-          err.clear();
+          sig2.clear();
         }
       }
       else
       {
         if(static_cast<int>(data.size()) > 0)
         {
-          Outliers(data,err);
+          Outliers(data,sig2);
           Statistics stats = getStatistics(data);
           peak1.setIntensity(stats.mean);
-          stats = getStatistics(err);
-          peak1.setSigmaIntensity(stats.mean);
+          stats = getStatistics(sig2);
+          peak1.setSigmaIntensity(std::sqrt(stats.mean));
           t->addPeak(peak1);
         }
         data.clear();
-        err.clear();
+        sig2.clear();
         hkl1 = hkl2;
         bank1 = bank2;
         data.push_back(peak2.getIntensity());
-        err.push_back(peak2.getSigmaIntensity());
+        sig2.push_back(std::pow(peak2.getSigmaIntensity(),2));
       }
     }
     data.clear();
-    err.clear();
+    sig2.clear();
     setProperty<PeaksWorkspace_sptr>("OutputWorkspace", t);
 
   }
-  void SortHKL::Outliers(std::vector<double>& data, std::vector<double>& err)
+  void SortHKL::Outliers(std::vector<double>& data, std::vector<double>& sig2)
   {
       Statistics stats = getStatistics(data);
       if(stats.standard_deviation == 0.)return;
@@ -188,7 +188,7 @@ namespace Crystal
         if (zscore > 3.0)
         {
           data.erase(data.begin()+i);
-          err.erase(err.begin()+i);
+          sig2.erase(sig2.begin()+i);
         }
       }
   }
