@@ -106,6 +106,27 @@ boost::shared_ptr<Detector> RectangularDetector::getAtXY(const int X, const int 
 }
 
 //-------------------------------------------------------------------------------------------------
+/** Return the detector ID corresponding to the component in the assembly at the
+ * (X,Y) pixel position. No bounds check is made!
+ *
+ * @param X :: index from 0..m_xpixels-1
+ * @param Y :: index from 0..m_ypixels-1
+ * @return detector ID int
+ * @throw runtime_error if the x/y pixel width is not set, or X/Y are out of range
+ */
+detid_t RectangularDetector::getDetectorIDAtXY(const int X, const int Y) const
+{
+  const RectangularDetector * me = this;
+  if (m_isParametrized)
+    me = this->m_rectBase;
+
+  if (me->m_idfillbyfirst_y)
+    return  me->m_idstart + X * me->m_idstepbyrow + Y * me->m_idstep;
+  else
+    return me->m_idstart + Y * me->m_idstepbyrow + X * me->m_idstep;
+}
+
+//-------------------------------------------------------------------------------------------------
 /** Given a detector ID, return the X,Y coords into the rectangular detector
  *
  * @param detectorID :: detectorID
@@ -384,10 +405,7 @@ void RectangularDetector::initialize(boost::shared_ptr<Object> shape,
 
       //Calculate its id and set it.
       int id;
-      if (idfillbyfirst_y)
-        id = idstart + ix * idstepbyrow + iy * idstep;
-      else
-        id = idstart + iy * idstepbyrow + ix * idstep;
+      id = this->getDetectorIDAtXY(ix, iy);
      
       //minimum rectangular detector id
       if(id<minDetId)

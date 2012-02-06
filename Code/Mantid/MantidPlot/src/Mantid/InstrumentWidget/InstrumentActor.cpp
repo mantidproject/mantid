@@ -247,11 +247,16 @@ void InstrumentActor::resetColors()
 {
   QwtDoubleInterval qwtInterval(m_DataMinScaleValue,m_DataMaxScaleValue);
   m_colors.resize(m_specIntegrs.size());
-  for (size_t wi=0; wi < m_specIntegrs.size(); wi++)
+
+  //PARALLEL_FOR1(m_workspace)
+  for (int iwi=0; iwi < int(m_specIntegrs.size()); iwi++)
   {
+    size_t wi = size_t(iwi);
     double integratedValue = m_specIntegrs[wi];
     try {
+      // FIXME: This getdetector call is very slow.
       Mantid::Geometry::IDetector_const_sptr det = m_workspace->getDetector(wi);
+      // FIXME: This get on parameters is PARALLEL_CRITICAL, which kills the parallel loop.
       boost::shared_ptr<Mantid::Geometry::Parameter> masked = m_workspace->instrumentParameters().get(det.get(),"masked");
       if (masked)
       {
