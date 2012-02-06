@@ -92,8 +92,6 @@ namespace Crystal
       if (m_pointGroups[i]->getName() == pointGroupName)
         pointGroup = m_pointGroups[i];
 
-    PeaksWorkspace_sptr t = PeaksWorkspace_sptr(new PeaksWorkspace());
-
     double Chisq = 0.0;
     int NumberPeaks = peaksW->getNumberPeaks();
     for (int i = 0; i < NumberPeaks; i++)
@@ -121,6 +119,7 @@ namespace Crystal
     peaksW->sort(criteria);
 
     std::vector<double> data, sig2;
+    std::vector<int> peakno;
     V3D hkl1;
     std::string bank1;
     for (int i = 1; i < NumberPeaks; i++)
@@ -130,56 +129,67 @@ namespace Crystal
       bank1 = peak1.getBankName();
       if(i == 1)
       {
+        peakno.push_back(0);
         data.push_back(peak1.getIntensity());
         sig2.push_back(std::pow(peak1.getSigmaIntensity(),2));
       }
       Peak & peak2 = peaksW->getPeaks()[i];
       V3D hkl2 = peak2.getHKL();
       std::string bank2 = peak2.getBankName();
-      if (pointGroup->isEquivalent(hkl1,hkl2) && bank1.compare(bank2) == 0)
+      if (hkl1 == hkl2 && bank1.compare(bank2) == 0)
       {
+        peakno.push_back(i);
         data.push_back(peak2.getIntensity());
         sig2.push_back(std::pow(peak2.getSigmaIntensity(),2));
         if(i == NumberPeaks-1)
         {
-          if(static_cast<int>(data.size()) > 0)
+          if(static_cast<int>(data.size()) > 1)
           {
             Outliers(data,sig2);
             Statistics stats = getStatistics(data);
-            peak1.setIntensity(stats.mean);
             Chisq += stats.standard_deviation/stats.mean;
-            stats = getStatistics(sig2);
-            peak1.setSigmaIntensity(std::sqrt(stats.mean));
-            t->addPeak(peak1);
+            Statistics stats2 = getStatistics(sig2);
+            std::vector<int>::iterator itpk;
+            for (itpk = peakno.begin(); itpk != peakno.end(); ++itpk)
+            {
+              peaksW->getPeaks()[*itpk].setIntensity(stats.mean);
+              peaksW->getPeaks()[*itpk].setSigmaIntensity(std::sqrt(stats2.mean));
+            }
           }
           Outliers(data,sig2);
+          peakno.clear();
           data.clear();
           sig2.clear();
         }
       }
       else
       {
-        if(static_cast<int>(data.size()) > 0)
+        if(static_cast<int>(data.size()) > 1)
         {
           Outliers(data,sig2);
           Statistics stats = getStatistics(data);
-          peak1.setIntensity(stats.mean);
           Chisq += stats.standard_deviation/stats.mean;
-          stats = getStatistics(sig2);
-          peak1.setSigmaIntensity(std::sqrt(stats.mean));
-          t->addPeak(peak1);
+          Statistics stats2 = getStatistics(sig2);
+          std::vector<int>::iterator itpk;
+          for (itpk = peakno.begin(); itpk != peakno.end(); ++itpk)
+          {
+            peaksW->getPeaks()[*itpk].setIntensity(stats.mean);
+            peaksW->getPeaks()[*itpk].setSigmaIntensity(std::sqrt(stats2.mean));
+          }
         }
+        peakno.clear();
         data.clear();
         sig2.clear();
         hkl1 = hkl2;
         bank1 = bank2;
+        peakno.push_back(i);
         data.push_back(peak2.getIntensity());
         sig2.push_back(std::pow(peak2.getSigmaIntensity(),2));
       }
     }
     data.clear();
     sig2.clear();
-    setProperty<PeaksWorkspace_sptr>("OutputWorkspace", t);
+    setProperty<PeaksWorkspace_sptr>("OutputWorkspace", peaksW);
     setProperty("OutputChi2", Chisq);
     std::cout << "Chisq = "<<Chisq<<"\n";
 
