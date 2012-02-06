@@ -168,8 +168,9 @@ class RefLReduction(PythonAlgorithm):
         # background range (along the y-axis) and of only the pixel
         # of interest along the x-axis (to avoid the frame effect)
         theta = tthd_rad - ths_rad
-        AngleOffset = float(self.getProperty("AngleOffset"))
-        theta += AngleOffset
+        AngleOffset_deg = float(self.getProperty("AngleOffset"))
+        AngleOffset_rad = (AngleOffset_deg * math.pi) / 180.
+        theta += AngleOffset_rad
         
         if dMD is not None and theta is not None:
 #            _tof_axis = mtd[ws_histo_data].readX(0)
