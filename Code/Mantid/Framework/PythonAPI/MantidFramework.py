@@ -1246,8 +1246,10 @@ class MantidPyFramework(FrameworkManager):
             return ialg
         if isinstance(ialg, str):
             if in_callstack('PyExec',inspect.currentframe()) == True:
+                # Algorithm is being called as part of a Python algorithm.
                 ialg = self.createUnmanagedAlgorithm(ialg, version)
                 ialg.__async__ = False
+                ialg.setChild(True)
             else:
                 ialg = self.createManagedAlgorithm(ialg, version) 
                 ialg.__async__ = HAVE_GUI

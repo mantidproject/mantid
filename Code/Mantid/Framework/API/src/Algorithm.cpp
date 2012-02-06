@@ -229,7 +229,7 @@ namespace Mantid
       {
         // Gaudi: A call to the auditor service is here
         // (1) perform the printout
-        g_log.fatal("UNKNOWN Exception is caught");
+        g_log.fatal("UNKNOWN Exception is caught in initialize()");
         throw;
       }
     }
@@ -541,8 +541,8 @@ namespace Mantid
         m_runningAsync = false;
         m_running = false;
 
-        m_notificationCenter.postNotification(new ErrorNotification(this,"UNKNOWN Exception is caught "));
-        g_log.error() << this->name() << ": UNKNOWN Exception is caught\n";
+        m_notificationCenter.postNotification(new ErrorNotification(this,"UNKNOWN Exception is caught in exec()"));
+        g_log.error() << this->name() << ": UNKNOWN Exception is caught in exec()\n";
         this->unlockWorkspaces();
         throw;
       }
