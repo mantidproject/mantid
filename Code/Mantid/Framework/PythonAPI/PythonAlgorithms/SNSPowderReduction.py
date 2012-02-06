@@ -214,15 +214,6 @@ class SNSPowderReduction(PythonAlgorithm):
         self.declareProperty("NormalizeByCurrent", True, Description="Normalized by Current")
         self.declareProperty("FinalDataUnits", "dSpacing", ListValidator(["dSpacing","MomentumTransfer"]))
 
-    def _findData(self, runnumber, extension):
-        #self.log().information(str(dir()))
-        #self.log().information(str(dir(mantidsimple)))
-        result = FindSNSNeXus(Instrument=self._instrument,
-                              RunNumber=runnumber, Extension=extension, UseWebService=True)
-#        result = self.executeSubAlg("FindSNSNeXus", Instrument=self._instrument,
-#                                    RunNumber=runnumber, Extension=extension)
-        return result["ResultPath"].value
-
     def _loadPreNeXusData(self, runnumber, extension, **kwargs):
         mykwargs = {}
         if kwargs.has_key("FilterByTimeStart"):
@@ -233,19 +224,10 @@ class SNSPowderReduction(PythonAlgorithm):
         # generate the workspace name
         name = "%s_%d" % (self._instrument, runnumber)
         filename = name + extension
-        print filename
+        self.log().debug(filename)
 
-        try: # first just try loading the file
-            alg = LoadPreNexus(Filename=filename, OutputWorkspace=name, **mykwargs)
-            wksp = alg['OutputWorkspace']
-        except:
-            # find the file to load
-            filename = self._findData(runnumber, extension)
-            if (len(filename) == 0):
-                raise RuntimeError("Failed to find prenexus file for run %d" % runnumber)
-            # load the prenexus file
-            alg = LoadPreNexus(Filename=filename, OutputWorkspace=name, **mykwargs)
-            wksp = alg['OutputWorkspace']
+        alg = LoadPreNexus(Filename=filename, OutputWorkspace=name, **mykwargs)
+        wksp = alg['OutputWorkspace']
 
         # add the logs to it
         if (str(self._instrument) == "SNAP"):
@@ -258,37 +240,14 @@ class SNSPowderReduction(PythonAlgorithm):
         name = "%s_%d" % (self._instrument, runnumber)
         filename = name + extension
 
-        try: # first just try loading the file
-            alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, **kwargs)
-
-            return alg.workspace()
-        except:
-            pass
-
-        # find the file to load
-        filename = self._findData(runnumber, extension)
-
-        # TODO use timemin and timemax to filter what events are being read
         alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, **kwargs)
-
         return alg.workspace()
 
     def _loadHistoNeXusData(self, runnumber, extension):
         name = "%s_%d" % (self._instrument, runnumber)
         filename = name + extension
 
-        try: # first just try loading the file
-            alg = LoadTOFRawNexus(Filename=filename, OutputWorkspace=name)
-
-            return alg.workspace()
-        except:
-            pass
-
-        # find the file to load
-        filename = self._findData(runnumber, extension)
-
         alg = LoadTOFRawNexus(Filename=filename, OutputWorkspace=name)
-
         return alg.workspace()
 
     def _loadData(self, runnumber, extension, filterWall=None):
@@ -458,10 +417,6 @@ class SNSPowderReduction(PythonAlgorithm):
         GeneratePythonScript(InputWorkspace=wksp, Filename=filename+".py")
 
     def PyExec(self):
-        # temporary hack for getting python algorithms working
-        import mantidsimple
-        globals()["FindSNSNeXus"] = mantidsimple.FindSNSNeXus
-
         # get generic information
         SUFFIX = self.getProperty("Extension")
         self._config = self.PDConfigFile(self.getProperty("CharacterizationRunsFile"))
