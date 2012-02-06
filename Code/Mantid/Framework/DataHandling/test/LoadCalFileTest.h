@@ -64,10 +64,16 @@ public:
     TS_ASSERT_THROWS_NOTHING( maskWS = boost::dynamic_pointer_cast<SpecialWorkspace2D>(AnalysisDataService::Instance().retrieve(outWSName+"_mask")) );
     TS_ASSERT(maskWS); if (!maskWS) return;
     TS_ASSERT_EQUALS( maskWS->getTitle(), title);
+    /*
     TS_ASSERT_EQUALS( int(maskWS->getValue(101001)), 1 );
     TS_ASSERT_EQUALS( int(maskWS->getValue(101003)), 0 );
     TS_ASSERT_EQUALS( int(maskWS->getValue(101008)), 0 );
     TS_ASSERT_EQUALS( int(maskWS->getValue(715079)), 1 );
+    */
+    TS_ASSERT_EQUALS( int(maskWS->getValue(101001)), 0 );
+    TS_ASSERT_EQUALS( int(maskWS->getValue(101003)), 1 );
+    TS_ASSERT_EQUALS( int(maskWS->getValue(101008)), 1 );
+    TS_ASSERT_EQUALS( int(maskWS->getValue(715079)), 0 );
     TS_ASSERT( !maskWS->getInstrument()->getDetector(101001)->isMasked() );
     TS_ASSERT( maskWS->getInstrument()->getDetector(101003)->isMasked() );
     TS_ASSERT( maskWS->getInstrument()->getDetector(101008)->isMasked() );

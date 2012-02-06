@@ -67,6 +67,11 @@ public:
 
   } // test_LoadXML
 
+  /*
+   * Load "testingmasking.xml" and "regionofinterest.xml"
+   * These two xml files will generate two opposite Workspaces, i.e.,
+   * Number(masked detectors of WS1) = Number(unmasked detectors of WS2)
+   */
   void test_BinaryOperation()
   {
     // 1. Generate Mask Workspace
@@ -99,18 +104,20 @@ public:
     TS_ASSERT_EQUALS(sizemask==sizeinterest, true);
 
     if (sizemask == sizeinterest){
+      // number1: number of masked detectors of maskws
+      // number2: number of used detectors of interestws
       size_t number1 = 0;
       size_t number0 = 0;
       for (size_t ih = 0; ih < maskws->getNumberHistograms(); ih ++){
         double v1 = maskws->dataY(ih)[0];
         double v2 = interestws->dataY(ih)[0];
-        if (v1 < 0.5){
+        if (v1 > 0.5){
           number0 ++;
         }
-        if (v2 > 0.5){
+        if (v2 < 0.5){
           number1 ++;
         }
-        TS_ASSERT_EQUALS(v1+v2<1.5, true);
+        TS_ASSERT_EQUALS(v1+v2<1.5, true); // must be 1
         TS_ASSERT_EQUALS(v1+v2>0.5, true);
       }
 

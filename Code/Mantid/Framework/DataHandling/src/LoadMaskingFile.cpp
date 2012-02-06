@@ -160,12 +160,12 @@ namespace DataHandling
     if (mDefaultToUse){
       // Default is to use all detectors
       for (size_t i = 0; i < mMaskWS->getNumberHistograms(); i ++){
-        mMaskWS->dataY(i)[0] = 1;
+        mMaskWS->dataY(i)[0] = 0;
       }
     } else {
       // Default not to use any detectors
       for (size_t i = 0; i < mMaskWS->getNumberHistograms(); i ++){
-        mMaskWS->dataY(i)[0] = 0;
+        mMaskWS->dataY(i)[0] = 1;
       }
     }
 
@@ -193,9 +193,9 @@ namespace DataHandling
       if (it != indexmap->end()){
         size_t index = it->second;
         if (tomask)
-          mMaskWS->dataY(index)[0] = 0;
-        else
           mMaskWS->dataY(index)[0] = 1;
+        else
+          mMaskWS->dataY(index)[0] = 0;
       } else {
         g_log.error() << "Pixel w/ ID = " << detid << " Cannot Be Located" << std::endl;
       }
