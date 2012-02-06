@@ -17,10 +17,12 @@
 #include <QMessageBox>
 
 #include <numeric>
+#include "MantidGeometry/IDTypes.h"
 
 using namespace Mantid::Kernel::Exception;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
+using namespace Mantid;
 
 double InstrumentActor::m_tolerance = 0.00001;
 
@@ -248,16 +250,31 @@ void InstrumentActor::resetColors()
   QwtDoubleInterval qwtInterval(m_DataMinScaleValue,m_DataMaxScaleValue);
   m_colors.resize(m_specIntegrs.size());
 
+  Instrument_const_sptr inst = m_workspace->getInstrument();
+
   //PARALLEL_FOR1(m_workspace)
   for (int iwi=0; iwi < int(m_specIntegrs.size()); iwi++)
   {
     size_t wi = size_t(iwi);
     double integratedValue = m_specIntegrs[wi];
-    try {
+    try
+    {
       // FIXME: This getdetector call is very slow.
       Mantid::Geometry::IDetector_const_sptr det = m_workspace->getDetector(wi);
       // FIXME: This get on parameters is PARALLEL_CRITICAL, which kills the parallel loop.
-      boost::shared_ptr<Mantid::Geometry::Parameter> masked = m_workspace->instrumentParameters().get(det.get(),"masked");
+      boost::shared_ptr<Mantid::Geometry::Parameter> maskedParam = m_workspace->instrumentParameters().get(det.get(),"masked");
+
+      bool masked = bool(maskedParam);
+
+      // FIXME: The following does NOT work because isDetectorMasked() does not look for the parametrized version of the instrument. I think
+//      const std::set<detid_t>& dets = m_workspace->getSpectrum(wi)->getDetectorIDs();
+//      bool masked = false;
+//      if (dets.size() > 0)
+//      {
+//        detid_t id = *dets.begin();
+//        masked = inst->isDetectorMasked(id);
+//      }
+
       if (masked)
       {
         m_colors[wi] = m_maskedColor;

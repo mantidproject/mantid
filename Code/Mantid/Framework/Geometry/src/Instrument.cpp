@@ -432,6 +432,11 @@ namespace Mantid
       }
     }
 
+    /** Is the detector with the given ID masked?
+     *
+     * @param detector_id :: detector ID to look for.
+     * @return true if masked; false if not masked or if the detector was not found.
+     */
     bool Instrument::isDetectorMasked(const detid_t &detector_id) const
     {
       detid2det_map::const_iterator it = m_detectorCache.find(detector_id);
