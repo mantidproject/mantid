@@ -16,12 +16,12 @@ class RangeSelector(object):
     class _Selector(object):
         def __init__(self):
             self._call_back = None
-            self._graph = "StitcherRangeSelector"
+            self._graph = "Range Selector"
             
         def disconnect(self):
             _qti.app.disconnect(_qti.app.mantidUI, QtCore.SIGNAL("x_range_update(double,double)"), self._call_back)
             
-        def connect(self, ws, call_back):
+        def connect(self, ws, call_back, xmin=None, xmax=None):
             self._call_back = call_back
             _qti.app.connect(_qti.app.mantidUI, QtCore.SIGNAL("x_range_update(double,double)"), self._call_back)
             g = _qti.app.graph(self._graph)
@@ -29,15 +29,25 @@ class RangeSelector(object):
                 g.close()
             g = _qti.app.mantidUI.pyPlotSpectraList(ws,[0],True)
             g.setName(self._graph)        
+            l=g.activeLayer()
+            try:
+                title = ws[0].replace("_"," ")
+                title.strip()
+            except:
+                title = " "
+            l.setTitle(" ")
+            l.setCurveTitle(0, title)
+            if xmin is not None and xmax is not None:
+                l.setScale(2,xmin,xmax)
             _qti.app.selectMultiPeak(g,False)
     
     @classmethod
-    def connect(cls, ws, call_back):
+    def connect(cls, ws, call_back, xmin=None, xmax=None):
         if RangeSelector.__instance is not None:
             RangeSelector.__instance.disconnect()
         else:
             RangeSelector.__instance = RangeSelector._Selector()
-        RangeSelector.__instance.connect(ws, call_back)            
+        RangeSelector.__instance.connect(ws, call_back, xmin=xmin, xmax=xmax)            
     
 class DataSet(object):
     """

@@ -249,7 +249,10 @@ class DataReflWidget(BaseWidget):
         
         f = FileFinder.findRuns("REF_L%s" % str(self._summary.norm_run_number_edit.text()))
         if len(f)>0 and os.path.isfile(f[0]):
-            data_manipulation.tof_distribution(f[0])
+            def call_back(xmin, xmax):
+                self._summary.data_from_tof.setText("%-d" % int(xmin))
+                self._summary.data_to_tof.setText("%-d" % int(xmax))
+            data_manipulation.tof_distribution(f[0], call_back)
 
     def _add_data(self):
         state = self.get_editing_state()
