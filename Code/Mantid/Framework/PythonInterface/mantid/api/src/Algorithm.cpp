@@ -188,6 +188,8 @@ void export_algorithm()
     .def("isExecuted", &IAlgorithm::isExecuted, "Returns true if the algorithm has been executed successfully, false otherwise")
     .def("setChild", &IAlgorithm::setChild,
         "If true this algorithm is run as a child algorithm. There will be no logging and nothing is stored in the Analysis Data Service")
+    .def("setAlwaysStoreInADS", &IAlgorithm::setAlwaysStoreInADS,
+        "If true then even child algorithms will have their workspaces stored in the ADS.")
     .def("isChild", &IAlgorithm::isChild, "Returns True if the algorithm has been marked to run as a child. If True then Output workspaces "
         "are NOT stored in the Analysis Data Service but must be retrieved from the property.")
     .def("setLogging", &IAlgorithm::setLogging, "Toggle logging on/off.")

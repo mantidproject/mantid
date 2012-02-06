@@ -57,7 +57,7 @@ namespace Mantid
     PropertyManagerOwner(),m_progressObserver(*this, &Algorithm::handleChildProgressNotification),
       m_cancel(false),m_parallelException(false),g_log(Kernel::Logger::get("Algorithm")),
       m_executeAsync(this,&Algorithm::executeAsyncImpl),m_isInitialized(false),
-      m_isExecuted(false),m_isChildAlgorithm(false),m_runningAsync(false),
+      m_isExecuted(false),m_isChildAlgorithm(false),m_alwaysStoreInADS(false),m_runningAsync(false),
       m_running(false),m_rethrow(false),m_algorithmID(0)
     {
     }
@@ -123,6 +123,17 @@ namespace Mantid
     {
       m_isChildAlgorithm = isChild;
     }
+
+    /** Do we ALWAYS store in the AnalysisDataService? This is set to true
+     * for python algorithms' child algorithms
+     *
+     * @param doStore :: always store in ADS
+     */
+    void Algorithm::setAlwaysStoreInADS(const bool doStore)
+    {
+      m_alwaysStoreInADS = doStore;
+    }
+
 
     /** Set whether the algorithm will rethrow exceptions
      * @param rethrow :: true if you want to rethrow exception.
@@ -283,6 +294,8 @@ namespace Mantid
      */
     void Algorithm::lockWorkspaces()
     {
+      return; //FIXME REMOVE
+
       // Do not lock workspace for child algos
       if (this->isChild())
         return;
@@ -469,13 +482,14 @@ namespace Mantid
           this->exec();
           // Get how long this algorithm took to run
           const float duration = timer.elapsed();
+
           // need it to throw before trying to run fillhistory() on an algorithm which has failed
-          // Put any output workspaces into the AnalysisDataService - if this is not a child algorithm
           if (!isChild())
-          {
             fillHistory(start_time,duration,Algorithm::g_execCount);
+
+          // Put any output workspaces into the AnalysisDataService - if this is not a child algorithm
+          if (!isChild() || m_alwaysStoreInADS)
             this->store();
-          }
 
           // RJT, 19/3/08: Moved this up from below the catch blocks
           setExecuted(true);
