@@ -69,6 +69,7 @@ namespace Crystal
       "Which point group applies to this crystal?");
 
     declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace","",Direction::Output));
+    declareProperty("OutputChi2",0.0, Direction::Output);
 
   }
 
@@ -93,6 +94,7 @@ namespace Crystal
 
     PeaksWorkspace_sptr t = PeaksWorkspace_sptr(new PeaksWorkspace());
 
+    double Chisq = 0.0;
     int NumberPeaks = peaksW->getNumberPeaks();
     for (int i = 0; i < NumberPeaks; i++)
     {
@@ -145,6 +147,7 @@ namespace Crystal
             Outliers(data,sig2);
             Statistics stats = getStatistics(data);
             peak1.setIntensity(stats.mean);
+            Chisq += stats.standard_deviation/stats.mean;
             stats = getStatistics(sig2);
             peak1.setSigmaIntensity(std::sqrt(stats.mean));
             t->addPeak(peak1);
@@ -161,6 +164,7 @@ namespace Crystal
           Outliers(data,sig2);
           Statistics stats = getStatistics(data);
           peak1.setIntensity(stats.mean);
+          Chisq += stats.standard_deviation/stats.mean;
           stats = getStatistics(sig2);
           peak1.setSigmaIntensity(std::sqrt(stats.mean));
           t->addPeak(peak1);
@@ -176,6 +180,8 @@ namespace Crystal
     data.clear();
     sig2.clear();
     setProperty<PeaksWorkspace_sptr>("OutputWorkspace", t);
+    setProperty("OutputChi2", Chisq);
+    std::cout << "Chisq = "<<Chisq<<"\n";
 
   }
   void SortHKL::Outliers(std::vector<double>& data, std::vector<double>& sig2)
