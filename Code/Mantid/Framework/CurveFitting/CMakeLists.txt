@@ -9,6 +9,7 @@ set ( SRC_FILES
 	src/CostFuncIgnorePosPeaks.cpp
 	src/CostFuncLeastSquares.cpp
 	src/DeltaFunction.cpp
+	src/DiffSphere.cpp
 	src/ExpDecay.cpp
 	src/ExpDecayMuon.cpp
 	src/ExpDecayOsc.cpp
@@ -60,6 +61,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/CostFuncIgnorePosPeaks.h
 	inc/MantidCurveFitting/CostFuncLeastSquares.h
 	inc/MantidCurveFitting/DeltaFunction.h
+	inc/MantidCurveFitting/DiffSphere.h
 	inc/MantidCurveFitting/DllConfig.h
 	inc/MantidCurveFitting/ExpDecay.h
 	inc/MantidCurveFitting/ExpDecayMuon.h
