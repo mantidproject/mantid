@@ -301,6 +301,7 @@ namespace Mantid
               == m_writeLockedWorkspaces.end())
           {
             // Write-lock it if not already
+            g_log.debug() << "Write-locking " << ws->getName() << std::endl;
             ws->getLock()->writeLock();
             m_writeLockedWorkspaces.push_back(ws);
           }
@@ -318,6 +319,7 @@ namespace Mantid
               == m_writeLockedWorkspaces.end())
           {
             // Read-lock it if not already write-locked
+            g_log.debug() << "Read-locking " << ws->getName() << std::endl;
             ws->getLock()->readLock();
             m_readLockedWorkspaces.push_back(ws);
           }
@@ -339,13 +341,19 @@ namespace Mantid
       {
         Workspace_sptr ws = m_writeLockedWorkspaces[i];
         if (ws)
+        {
+          g_log.debug() << "Unlocking " << ws->getName() << std::endl;
           ws->getLock()->unlock();
+        }
       }
       for (size_t i=0; i<m_readLockedWorkspaces.size(); i++)
       {
         Workspace_sptr ws = m_readLockedWorkspaces[i];
         if (ws)
+        {
+          g_log.debug() << "Unlocking " << ws->getName() << std::endl;
           ws->getLock()->unlock();
+        }
       }
 
       // Don't double-unlock workspaces

@@ -68,7 +68,7 @@ class EQSANSNormalise(PythonAlgorithm):
 
     def PyInit(self):
         # Input workspace
-        self.declareWorkspaceProperty("InputWorkspace", "", Direction=Direction.Input, Description="Workspace to be normalised")
+        self.declareWorkspaceProperty("InputWorkspace", "", Direction=Direction.InOut, Description="Workspace to be normalised")
         self.declareProperty("NormaliseToBeam", True, Description="If true, the data will also be normalise by the beam profile")
         self.declareProperty("OutputMessage", "", Direction=Direction.Output)
 
