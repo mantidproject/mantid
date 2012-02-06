@@ -134,7 +134,7 @@ public:
     g.transformDimensions(scaling, offset);
 
     // resulting workspace
-    TSM_ASSERT(!g.hasOriginalWorkspace(), "Clear the original workspace");
+    TSM_ASSERT("Clear the original workspace", !g.hasOriginalWorkspace());
     TS_ASSERT_EQUALS( g.getDimension(0)->getName(), "Qx");
     TS_ASSERT_EQUALS( g.getDimension(1)->getName(), "Qy");
     TS_ASSERT_DELTA( g.getDimension(0)->getMinimum(), -1.5, 1e-4);
