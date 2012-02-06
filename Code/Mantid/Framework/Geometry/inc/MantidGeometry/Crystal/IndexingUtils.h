@@ -18,8 +18,7 @@ namespace Geometry
     @class IndexingUtils
   
     This class contains static utility methods for indexing peaks and
-    finding the UB matrix.  Currently there is only one method, BestFit_UB
-    that finds the best UB matrix given some indexed peaks.
+    finding the UB matrix. 
   
     @author Dennis Mikkelson 
     @date   2011-06-14 

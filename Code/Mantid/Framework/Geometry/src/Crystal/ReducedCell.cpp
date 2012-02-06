@@ -12,32 +12,11 @@ namespace Geometry
   using Mantid::Kernel::DblMatrix;
 
   /**
-   *  Strings representing the cell types.
-   */
-  const std::string ReducedCell::NONE         = "None";
-  const std::string ReducedCell::CUBIC        = "Cubic";
-  const std::string ReducedCell::HEXAGONAL    = "Hexagonal";
-  const std::string ReducedCell::RHOMBOHEDRAL = "Rhombohedral";
-  const std::string ReducedCell::TETRAGONAL   = "Tetragonal";
-  const std::string ReducedCell::ORTHORHOMBIC = "Orthorhombic";
-  const std::string ReducedCell::MONOCLINIC   = "Monoclinic";
-  const std::string ReducedCell::TRICLINIC    = "Triclinic";
-
-  /**
-   *  Strings representing the centering types.
-   */
-  const std::string ReducedCell::F_CENTERED = "F";
-  const std::string ReducedCell::I_CENTERED = "I";
-  const std::string ReducedCell::C_CENTERED = "C";
-  const std::string ReducedCell::P_CENTERED = "P";
-  const std::string ReducedCell::R_CENTERED = "R";
-
-  /**
    *  Array of basic transformations from reduced cell to conventional cell
    *  for rows 1 to 44 of Table 2.  This array is indexed by the row number
    *  1 to 44.  Entry 0 is the identity matrix. 
    */
-  static double transforms[ReducedCell::NUM_CELL_TYPES + 1][3][3] =    // row
+  static const double transforms[ReducedCell::NUM_CELL_TYPES+1][3][3] =// row
      { { {  1,   0,  0 }, {  0,  1,   0 }, {   0,  0,  1 } },          //  0
 
         { {  1,  -1,  1 }, {  1,  1,  -1 }, {  -1,  1,  1 } },         //  1
@@ -97,7 +76,7 @@ namespace Geometry
    *  These transforms pre-multiply the basic transforms in certain cases,
    *  as listed in the footnotes to Table 2.
    */
-  static double transform_modifier[2][3][3] = 
+  static const double transform_modifier[2][3][3] = 
      {  { {  0,   0, -1 }, {  0,  1,   0 }, {   1,  0,  1 } },         //  0
         { { -1,   0, -1 }, {  0,  1,   0 }, {   1,  0,  0 } }  };      //  1
 
@@ -106,122 +85,122 @@ namespace Geometry
    *  1 to 44 of Table 2.  This array is indexed by the row number 1 to 44.  
    *  Entry 0 is the String "None". 
    */
-  static std::string lattice_types[ReducedCell::NUM_CELL_TYPES + 1] =
-                                 { ReducedCell::NONE,                  //  0
+  static const std::string lattice_types[ReducedCell::NUM_CELL_TYPES + 1] =
+                                 { ReducedCell::NONE(),                  //  0
 
-                                   ReducedCell::CUBIC,                 //  1
-                                   ReducedCell::RHOMBOHEDRAL,          //  2
-                                   ReducedCell::CUBIC,                 //  3
-                                   ReducedCell::RHOMBOHEDRAL,          //  4
-                                   ReducedCell::CUBIC,                 //  5
+                                   ReducedCell::CUBIC(),                 //  1
+                                   ReducedCell::RHOMBOHEDRAL(),          //  2
+                                   ReducedCell::CUBIC(),                 //  3
+                                   ReducedCell::RHOMBOHEDRAL(),          //  4
+                                   ReducedCell::CUBIC(),                 //  5
 
-                                   ReducedCell::TETRAGONAL,            //  6
-                                   ReducedCell::TETRAGONAL,            //  7
-                                   ReducedCell::ORTHORHOMBIC,          //  8 
-                                   ReducedCell::RHOMBOHEDRAL,          //  9
-                                   ReducedCell::MONOCLINIC,            // 10
+                                   ReducedCell::TETRAGONAL(),            //  6
+                                   ReducedCell::TETRAGONAL(),            //  7
+                                   ReducedCell::ORTHORHOMBIC(),          //  8 
+                                   ReducedCell::RHOMBOHEDRAL(),          //  9
+                                   ReducedCell::MONOCLINIC(),            // 10
 
-                                   ReducedCell::TETRAGONAL,            // 11 
-                                   ReducedCell::HEXAGONAL,             // 12 
-                                   ReducedCell::ORTHORHOMBIC,          // 13 
-                                   ReducedCell::MONOCLINIC,            // 14
-                                   ReducedCell::TETRAGONAL,            // 15 
+                                   ReducedCell::TETRAGONAL(),            // 11 
+                                   ReducedCell::HEXAGONAL(),             // 12 
+                                   ReducedCell::ORTHORHOMBIC(),          // 13 
+                                   ReducedCell::MONOCLINIC(),            // 14
+                                   ReducedCell::TETRAGONAL(),            // 15 
 
-                                   ReducedCell::ORTHORHOMBIC,          // 16 
-                                   ReducedCell::MONOCLINIC,            // 17
-                                   ReducedCell::TETRAGONAL,            // 18 
-                                   ReducedCell::ORTHORHOMBIC,          // 19 
-                                   ReducedCell::MONOCLINIC,            // 20
+                                   ReducedCell::ORTHORHOMBIC(),          // 16 
+                                   ReducedCell::MONOCLINIC(),            // 17
+                                   ReducedCell::TETRAGONAL(),            // 18 
+                                   ReducedCell::ORTHORHOMBIC(),          // 19 
+                                   ReducedCell::MONOCLINIC(),            // 20
 
-                                   ReducedCell::TETRAGONAL,            // 21
-                                   ReducedCell::HEXAGONAL,             // 22 
-                                   ReducedCell::ORTHORHOMBIC,          // 23 
-                                   ReducedCell::RHOMBOHEDRAL,          // 24
-                                   ReducedCell::MONOCLINIC,            // 25
+                                   ReducedCell::TETRAGONAL(),            // 21
+                                   ReducedCell::HEXAGONAL(),             // 22 
+                                   ReducedCell::ORTHORHOMBIC(),          // 23 
+                                   ReducedCell::RHOMBOHEDRAL(),          // 24
+                                   ReducedCell::MONOCLINIC(),            // 25
 
-                                   ReducedCell::ORTHORHOMBIC,          // 26 
-                                   ReducedCell::MONOCLINIC,            // 27
-                                   ReducedCell::MONOCLINIC,            // 28
-                                   ReducedCell::MONOCLINIC,            // 29
-                                   ReducedCell::MONOCLINIC,            // 30 
+                                   ReducedCell::ORTHORHOMBIC(),          // 26 
+                                   ReducedCell::MONOCLINIC(),            // 27
+                                   ReducedCell::MONOCLINIC(),            // 28
+                                   ReducedCell::MONOCLINIC(),            // 29
+                                   ReducedCell::MONOCLINIC(),            // 30 
 
-                                   ReducedCell::TRICLINIC,             // 31 
-                                   ReducedCell::ORTHORHOMBIC,          // 32 
-                                   ReducedCell::MONOCLINIC,            // 33 
-                                   ReducedCell::MONOCLINIC,            // 34 
-                                   ReducedCell::MONOCLINIC,            // 35 
+                                   ReducedCell::TRICLINIC(),             // 31 
+                                   ReducedCell::ORTHORHOMBIC(),          // 32 
+                                   ReducedCell::MONOCLINIC(),            // 33 
+                                   ReducedCell::MONOCLINIC(),            // 34 
+                                   ReducedCell::MONOCLINIC(),            // 35 
 
-                                   ReducedCell::ORTHORHOMBIC,          // 36 
-                                   ReducedCell::MONOCLINIC,            // 37 
-                                   ReducedCell::ORTHORHOMBIC,          // 38 
-                                   ReducedCell::MONOCLINIC,            // 39 
-                                   ReducedCell::ORTHORHOMBIC,          // 40 
+                                   ReducedCell::ORTHORHOMBIC(),          // 36 
+                                   ReducedCell::MONOCLINIC(),            // 37 
+                                   ReducedCell::ORTHORHOMBIC(),          // 38 
+                                   ReducedCell::MONOCLINIC(),            // 39 
+                                   ReducedCell::ORTHORHOMBIC(),          // 40 
 
-                                   ReducedCell::MONOCLINIC,            // 41 
-                                   ReducedCell::ORTHORHOMBIC,          // 42 
-                                   ReducedCell::MONOCLINIC,            // 43 
-                                   ReducedCell::TRICLINIC     };       // 44 
+                                   ReducedCell::MONOCLINIC(),            // 41 
+                                   ReducedCell::ORTHORHOMBIC(),          // 42 
+                                   ReducedCell::MONOCLINIC(),            // 43 
+                                   ReducedCell::TRICLINIC()     };       // 44 
 
   /**
    *  Array of Strings specifying the centering for reduced cells for rows
    *  1 to 44 of Table 2.  This array is indexed by the row number 1 to 44.  
    *  Entry 0 is the String "None". 
    */
-  static std::string center_types[ReducedCell::NUM_CELL_TYPES + 1] =
-                                 { ReducedCell::NONE,                  //  0
+  static const std::string center_types[ReducedCell::NUM_CELL_TYPES + 1] =
+                                 { ReducedCell::NONE(),                  //  0
 
-                                   ReducedCell::F_CENTERED,            //  1
-                                   ReducedCell::R_CENTERED,            //  2 
-                                   ReducedCell::P_CENTERED,            //  3
-                                   ReducedCell::R_CENTERED,            //  4
-                                   ReducedCell::I_CENTERED,            //  5
+                                   ReducedCell::F_CENTERED(),            //  1
+                                   ReducedCell::R_CENTERED(),            //  2 
+                                   ReducedCell::P_CENTERED(),            //  3
+                                   ReducedCell::R_CENTERED(),            //  4
+                                   ReducedCell::I_CENTERED(),            //  5
 
-                                   ReducedCell::I_CENTERED,            //  6
-                                   ReducedCell::I_CENTERED,            //  7
-                                   ReducedCell::I_CENTERED,            //  8
-                                   ReducedCell::R_CENTERED,            //  9
-                                   ReducedCell::C_CENTERED,            // 10
+                                   ReducedCell::I_CENTERED(),            //  6
+                                   ReducedCell::I_CENTERED(),            //  7
+                                   ReducedCell::I_CENTERED(),            //  8
+                                   ReducedCell::R_CENTERED(),            //  9
+                                   ReducedCell::C_CENTERED(),            // 10
 
-                                   ReducedCell::P_CENTERED,            // 11
-                                   ReducedCell::P_CENTERED,            // 12
-                                   ReducedCell::C_CENTERED,            // 13
-                                   ReducedCell::C_CENTERED,            // 14
-                                   ReducedCell::I_CENTERED,            // 15
+                                   ReducedCell::P_CENTERED(),            // 11
+                                   ReducedCell::P_CENTERED(),            // 12
+                                   ReducedCell::C_CENTERED(),            // 13
+                                   ReducedCell::C_CENTERED(),            // 14
+                                   ReducedCell::I_CENTERED(),            // 15
 
-                                   ReducedCell::F_CENTERED,            // 16
-                                   ReducedCell::I_CENTERED,            // 17
-                                   ReducedCell::I_CENTERED,            // 18
-                                   ReducedCell::I_CENTERED,            // 19
-                                   ReducedCell::C_CENTERED,            // 20
+                                   ReducedCell::F_CENTERED(),            // 16
+                                   ReducedCell::I_CENTERED(),            // 17
+                                   ReducedCell::I_CENTERED(),            // 18
+                                   ReducedCell::I_CENTERED(),            // 19
+                                   ReducedCell::C_CENTERED(),            // 20
 
-                                   ReducedCell::P_CENTERED,            // 21
-                                   ReducedCell::P_CENTERED,            // 22
-                                   ReducedCell::C_CENTERED,            // 23
-                                   ReducedCell::R_CENTERED,            // 24
-                                   ReducedCell::C_CENTERED,            // 25
+                                   ReducedCell::P_CENTERED(),            // 21
+                                   ReducedCell::P_CENTERED(),            // 22
+                                   ReducedCell::C_CENTERED(),            // 23
+                                   ReducedCell::R_CENTERED(),            // 24
+                                   ReducedCell::C_CENTERED(),            // 25
 
-                                   ReducedCell::F_CENTERED,            // 26
-                                   ReducedCell::I_CENTERED,            // 27
-                                   ReducedCell::C_CENTERED,            // 28
-                                   ReducedCell::C_CENTERED,            // 29
-                                   ReducedCell::C_CENTERED,            // 30 
+                                   ReducedCell::F_CENTERED(),            // 26
+                                   ReducedCell::I_CENTERED(),            // 27
+                                   ReducedCell::C_CENTERED(),            // 28
+                                   ReducedCell::C_CENTERED(),            // 29
+                                   ReducedCell::C_CENTERED(),            // 30 
 
-                                   ReducedCell::P_CENTERED,            // 31
-                                   ReducedCell::P_CENTERED,            // 32
-                                   ReducedCell::P_CENTERED,            // 33
-                                   ReducedCell::P_CENTERED,            // 34
-                                   ReducedCell::P_CENTERED,            // 35
+                                   ReducedCell::P_CENTERED(),            // 31
+                                   ReducedCell::P_CENTERED(),            // 32
+                                   ReducedCell::P_CENTERED(),            // 33
+                                   ReducedCell::P_CENTERED(),            // 34
+                                   ReducedCell::P_CENTERED(),            // 35
 
-                                   ReducedCell::C_CENTERED,            // 36 
-                                   ReducedCell::C_CENTERED,            // 37 
-                                   ReducedCell::C_CENTERED,            // 38 
-                                   ReducedCell::C_CENTERED,            // 39 
-                                   ReducedCell::C_CENTERED,            // 40 
+                                   ReducedCell::C_CENTERED(),            // 36 
+                                   ReducedCell::C_CENTERED(),            // 37 
+                                   ReducedCell::C_CENTERED(),            // 38 
+                                   ReducedCell::C_CENTERED(),            // 39 
+                                   ReducedCell::C_CENTERED(),            // 40 
 
-                                   ReducedCell::C_CENTERED,            // 41 
-                                   ReducedCell::I_CENTERED,            // 42 
-                                   ReducedCell::I_CENTERED,            // 43 
-                                   ReducedCell::P_CENTERED   };        // 44 
+                                   ReducedCell::C_CENTERED(),            // 41 
+                                   ReducedCell::I_CENTERED(),            // 42 
+                                   ReducedCell::I_CENTERED(),            // 43 
+                                   ReducedCell::P_CENTERED()   };        // 44 
 
   /**
    *  Construct a ReducedCell object representing the specified row of 
@@ -586,7 +565,7 @@ namespace Geometry
     if ( a_a < 4 * fabs(a_c) )              // foot note b
     {
       premultiply(0);                       // use matrix modification 0
-      centering = I_CENTERED;
+      centering = I_CENTERED();
     }
   }
 
@@ -599,7 +578,7 @@ namespace Geometry
     if ( b_b < 4 * fabs(b_c) )              // foot note c
     {
       premultiply(0);                       // use matrix modification 0
-      centering = I_CENTERED;
+      centering = I_CENTERED();
     }
   }
 
@@ -612,7 +591,7 @@ namespace Geometry
     if ( c_c < 4 * fabs(b_c) )              // foot note d
     {
       premultiply(0);                       // use matrix modification 0
-      centering = I_CENTERED;
+      centering = I_CENTERED();
     }
   }
 
@@ -625,7 +604,7 @@ namespace Geometry
     if ( 3 * a_a < c_c + 2 * fabs(a_c) )         // foot note e
     {
       premultiply(1);                            // use matrix modification 1
-      centering = C_CENTERED;
+      centering = C_CENTERED();
     }
   }
 
@@ -638,7 +617,7 @@ namespace Geometry
     if ( 3 * b_b < c_c + 2 * fabs(b_c) )         // foot note f
     {
       premultiply(1);                            // use matrix modification 1
-      centering = C_CENTERED;
+      centering = C_CENTERED();
     }
   }
 
@@ -662,7 +641,7 @@ namespace Geometry
   /**
    *  Get the form number used to construct this form
    */
-  size_t ReducedCell::GetFormNum()
+  size_t ReducedCell::GetFormNum() const
   {
     return form_num;
   }
@@ -670,9 +649,9 @@ namespace Geometry
   /**
    *  Get the cell type of this form
    */
-  std::string ReducedCell::GetCellType()
+  std::string ReducedCell::GetCellType() const
   {
-    return cell_type;
+    return std::string( cell_type );
   }
 
   /**
@@ -680,9 +659,9 @@ namespace Geometry
    *  from the requested cell type, since sometimes the centering is 
    *  changed.  See the foot notes to Table 2 in the paper for details. 
    */
-  std::string ReducedCell::GetCentering()
+  std::string ReducedCell::GetCentering() const
   {
-    return centering;
+    return std::string( centering );
   }
 
   /**
@@ -697,7 +676,7 @@ namespace Geometry
    *
    * @return  The maximum absolute difference between the scalars.
    */
-  double ReducedCell::WeightedDistance( const ReducedCell & other )
+  double ReducedCell::WeightedDistance( const ReducedCell & other ) const
   {
     std::vector<double> vals_1 = norm_vals( *this );
     std::vector<double> vals_2 = norm_vals( other );
@@ -720,7 +699,7 @@ namespace Geometry
    * when comparing how close the lattice for one cell is to the lattice 
    * for another cell.
    */
-  std::vector<double> ReducedCell::norm_vals( const ReducedCell &info )
+  std::vector<double> ReducedCell::norm_vals( const ReducedCell &info ) const
   {
     std::vector<double> vals;
     vals.resize(6); 

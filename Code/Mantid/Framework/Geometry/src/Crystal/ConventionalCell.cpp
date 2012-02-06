@@ -46,7 +46,7 @@ namespace Geometry
    *
    *  @return the form number for this conventional cell.
    */
-  size_t ConventionalCell::GetFormNum()
+  size_t ConventionalCell::GetFormNum() const
   {
     return form_number;
   }
@@ -58,7 +58,7 @@ namespace Geometry
    *  @return  The maximum absolute weighted difference between the
    *           scalars for this conventional cell and form 0.
    */
-  double ConventionalCell::GetError()
+  double ConventionalCell::GetError() const
   {
     return scalars_error;
   }
@@ -69,9 +69,9 @@ namespace Geometry
    *
    *  @return a std::string specifying the cell type.
    */
-  std::string ConventionalCell::GetCellType()
+  std::string ConventionalCell::GetCellType() const
   {
-    return cell_type;
+    return std::string( cell_type );
   }
 
 
@@ -80,9 +80,9 @@ namespace Geometry
    *
    *  @return a std::string specifying the centering type.
    */
-  std::string ConventionalCell::GetCentering()
+  std::string ConventionalCell::GetCentering() const
   {
-    return centering;
+    return std::string( centering );
   }
 
 
@@ -92,9 +92,9 @@ namespace Geometry
    *
    *  @return  a 3x3 matrix with the original UB matrix
    */
-  Kernel::DblMatrix ConventionalCell::GetOriginalUB()
+  Kernel::DblMatrix ConventionalCell::GetOriginalUB() const
   {
-    return original_UB;
+    return Kernel::DblMatrix( original_UB );
   }
 
 
@@ -104,9 +104,9 @@ namespace Geometry
    *
    *  @return  a 3x3 matrix with the new UB matrix.
    */
-  Kernel::DblMatrix ConventionalCell::GetNewUB()
+  Kernel::DblMatrix ConventionalCell::GetNewUB() const
   {
-    return adjusted_UB;
+    return Kernel::DblMatrix( adjusted_UB );
   }
 
 
@@ -115,7 +115,7 @@ namespace Geometry
    *
    *  @return The sum of the sides of the conventional cell.
    */
-  double ConventionalCell::GetSumOfSides()
+  double ConventionalCell::GetSumOfSides() const
   {
     std::vector<double> lat_par;
     IndexingUtils::GetLatticeParameters( adjusted_UB, lat_par );
@@ -148,16 +148,16 @@ namespace Geometry
     cell_tran.Invert();
     adjusted_UB = UB * cell_tran;    
 
-    if ( cell_type == ReducedCell::ORTHORHOMBIC )
+    if ( cell_type == ReducedCell::ORTHORHOMBIC() )
     {
       SetSidesIncreasing( adjusted_UB );
     }
-    else if ( cell_type == ReducedCell::TETRAGONAL  )
+    else if ( cell_type == ReducedCell::TETRAGONAL()  )
     {
       StandardizeTetragonal( adjusted_UB );
     }
-    else if ( cell_type == ReducedCell::HEXAGONAL   ||
-              cell_type == ReducedCell::RHOMBOHEDRAL  )
+    else if ( cell_type == ReducedCell::HEXAGONAL()   ||
+              cell_type == ReducedCell::RHOMBOHEDRAL()  )
     {
       StandardizeHexagonal( adjusted_UB );
     }

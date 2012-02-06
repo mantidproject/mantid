@@ -57,25 +57,25 @@ namespace Geometry
       ConventionalCell( const Kernel::DblMatrix & UB, size_t form_num = 0 );
 
       /// get the form number for this conventional cell
-      size_t            GetFormNum();
+      size_t            GetFormNum() const;
 
       /// get the error in the scalars for this form
-      double            GetError();
+      double            GetError() const;
 
       /// get the cell type name, as named in the ReducedCell class
-      std::string       GetCellType();
+      std::string       GetCellType() const;
 
       /// get the centering type name, as named in the ReducedCell class
-      std::string       GetCentering();
+      std::string       GetCentering() const;
 
       /// get the original orientation matrix as passed in to the constructor
-      Kernel::DblMatrix GetOriginalUB();
+      Kernel::DblMatrix GetOriginalUB() const;
 
       /// get the transformed orientation matrix for the conventional cell
-      Kernel::DblMatrix GetNewUB();
+      Kernel::DblMatrix GetNewUB() const;
 
       /// get the sum of the sides of the conventional unit cell
-      double            GetSumOfSides();
+      double            GetSumOfSides() const;
 
     private:
       void              init( const Kernel::DblMatrix & UB, 

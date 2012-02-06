@@ -3,6 +3,7 @@ set ( SRC_FILES
 	src/Crystal/IndexingUtils.cpp
 	src/Crystal/ReducedCell.cpp
 	src/Crystal/ConventionalCell.cpp
+	src/Crystal/ScalarUtils.cpp
 	src/Crystal/OrientedLattice.cpp
 	src/Crystal/ReflectionCondition.cpp
 	src/Crystal/UnitCell.cpp
@@ -93,6 +94,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Crystal/IndexingUtils.h
 	inc/MantidGeometry/Crystal/ReducedCell.h
 	inc/MantidGeometry/Crystal/ConventionalCell.h
+	inc/MantidGeometry/Crystal/ScalarUtils.h
 	inc/MantidGeometry/Crystal/OrientedLattice.h
 	inc/MantidGeometry/Crystal/ReflectionCondition.h
 	inc/MantidGeometry/Crystal/UnitCell.h
@@ -196,6 +198,7 @@ set ( TEST_FILES
 	test/IndexingUtilsTest.h
         test/ReducedCellTest.h
         test/ConventionalCellTest.h
+        test/ScalarUtilsTest.h
 	test/InstrumentDefinitionParserTest.h
 	test/InstrumentRayTracerTest.h
 	test/InstrumentTest.h
