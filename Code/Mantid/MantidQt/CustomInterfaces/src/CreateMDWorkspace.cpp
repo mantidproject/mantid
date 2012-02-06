@@ -44,7 +44,7 @@
 #include <QCheckBox>
 #include <QDesktopServices>
 #include <QUrl>
-#include <strstream>
+#include <sstream>
 #include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
 
