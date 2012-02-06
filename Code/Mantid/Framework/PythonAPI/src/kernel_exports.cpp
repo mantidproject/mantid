@@ -120,7 +120,7 @@ namespace PythonAPI
       ;
     
     class_< Mantid::Kernel::Property, boost::noncopyable>("Property", no_init)
-      .add_property("name", make_function(&Mantid::Kernel::Property::name, return_value_policy<copy_const_reference>()))
+          .add_property("name", make_function(&Mantid::Kernel::Property::name, return_value_policy<copy_const_reference>()))
       .add_property("isValid", &Mantid::Kernel::Property::isValid)
       .add_property("value", &Mantid::Kernel::Property::value)
       .add_property("documentation", make_function(&Mantid::Kernel::Property::documentation, return_value_policy<copy_const_reference>()))
@@ -130,6 +130,7 @@ namespace PythonAPI
       .add_property("type", make_function(&Mantid::Kernel::Property::type))
       .add_property("getDefault", make_function(&Mantid::Kernel::Property::getDefault))
       .add_property("isDefault", &Mantid::Kernel::Property::isDefault)
+      .add_property("getGroup", make_function(&Mantid::Kernel::Property::getGroup, return_value_policy<copy_const_reference>()))
       ;
 
 

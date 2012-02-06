@@ -65,12 +65,11 @@ void MuonRemoveExpDecay::exec()
     Progress prog(this, 0.0, 1.0, numSpectra);
     //Do all the spectra	
     PARALLEL_FOR2(inputWS,outputWS)
-    for (int64_t i = 0; i < int64_t(numSpectra); ++i)
+    for (int i = 0; i < numSpectra; ++i)
     {
 			PARALLEL_START_INTERUPT_REGION
       removeDecay(inputWS->readX(i), inputWS->readY(i), outputWS->dataY(i));
       removeDecay(inputWS->readX(i), inputWS->readE(i), outputWS->dataE(i));
-      outputWS->dataX(i) = inputWS->readX(i);
 
       double normConst = calNormalisationConst(outputWS, i);
 
@@ -204,7 +203,6 @@ double MuonRemoveExpDecay::calNormalisationConst(API::MatrixWorkspace_sptr ws, i
     if (!fitStatus.compare("success"))
     {
       const double A0 = params[0];
-      const double A1 = params[1];
 
       if ( A0 < 0 ) 
       {

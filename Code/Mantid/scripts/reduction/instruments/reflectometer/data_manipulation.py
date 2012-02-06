@@ -29,7 +29,7 @@ def tof_distribution(file_path):
         l.setScale(2,xmin,xmax)
         l.setTitle(" ")
     
-def counts_vs_y_distribution(file_path, minTOF, maxTOF, callback=None):
+def counts_vs_y_distribution(file_path, callback=None):
     ws = "__REFL_data"
     ws_output = "__REFL_Y_distribution"
     graph_name = "Counts vs Y"

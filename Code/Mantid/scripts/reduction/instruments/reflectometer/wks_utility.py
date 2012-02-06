@@ -190,6 +190,8 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
 
             big_y_array[yrange[_q_index],:] = _tmp_y
             big_y_error_array[yrange[_q_index],:] = _tmp_y_error
+            
+            mtd.deleteWorkspace(_wks)
 
         _x_axis = _x_array.flatten()        
         _y_axis = big_y_array.flatten()

@@ -956,8 +956,8 @@ template MANTID_KERNEL_DLL int convert(const char*,std::size_t&);
 template MANTID_KERNEL_DLL std::string toString(const double value);
 template MANTID_KERNEL_DLL std::string toString(const int value);
 template MANTID_KERNEL_DLL std::string toString(const uint16_t value);
-template MANTID_KERNEL_DLL std::string toString(const size_t value); // Matches uint64_t on Linux & Win
-#ifdef __APPLE__
+template MANTID_KERNEL_DLL std::string toString(const size_t value); // Matches uint64_t on Linux 64 & Win 64
+#if defined(__APPLE__) || ( defined(_WIN32) && !defined(_WIN64) ) // Mac or 42-bit Windows
   template MANTID_KERNEL_DLL std::string toString(const uint64_t value);
 #endif
 template MANTID_KERNEL_DLL std::string toString(const std::string value);

@@ -153,7 +153,7 @@ class StitcherWidget(BaseWidget):
     def _load_workspace(self, workspace):
         ws_data = DataSet(workspace)
         try:
-            ws_data.load(True)
+            ws_data.load(True, True)
         except:
             ws_data = None
             QtGui.QMessageBox.warning(self, "Error loading file", "Could not load %s." % file)
@@ -168,7 +168,7 @@ class StitcherWidget(BaseWidget):
         for i in range(len(self._workspace_list)):
             item = self._workspace_list[i]
             data = DataSet(item.name)
-            data.load(True)
+            data.load(True, True)
             item.set_user_data(data)
 
             if item.is_selected():

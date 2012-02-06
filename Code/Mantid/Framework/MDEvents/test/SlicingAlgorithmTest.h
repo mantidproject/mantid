@@ -126,7 +126,7 @@ public:
   void test_makeAlignedDimensionFromString_SpecifyDimensionID()
   {
     SlicingAlgorithmImpl alg; alg.m_inWS = ws_names;
-    TSM_ASSERT_THROWS_NOTHING("", alg.makeAlignedDimensionFromString("Q2, 1.0, 9.0, 10"));
+    TSM_ASSERT_THROWS_NOTHING("", alg.makeAlignedDimensionFromString("Q2 , 1.0, 9.0, 10"));
     TS_ASSERT_EQUALS( alg.m_dimensionToBinFrom.size(), 1);
     TS_ASSERT_EQUALS( alg.m_binDimensions.size(), 1);
     if (alg.m_binDimensions.size() < 1) return;

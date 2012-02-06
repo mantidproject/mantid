@@ -269,7 +269,7 @@ namespace Mantid
       // ---------------------------------- MDGeometry methods -------------------------------
       virtual size_t getNumDims() const;
       virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(size_t index) const;
-      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimensionNamed(std::string id) const;
+      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimensionWithId(std::string id) const;
 
 
       // ---------------- IMDWorkspace Methods --------------------------------

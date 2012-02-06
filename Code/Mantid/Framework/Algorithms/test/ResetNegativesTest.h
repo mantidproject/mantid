@@ -113,7 +113,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", INPUT_WS_NAME) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", OUTPUT_WS_NAME) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("AddMinimum", false) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("ResetValu", resetValue) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("ResetValue", resetValue) );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
 
