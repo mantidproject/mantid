@@ -217,13 +217,13 @@ namespace Geometry
     IndexingUtils::GetABC( UB, a, b, c );
 
     double a_b_diff = fabs( a.norm() - b.norm() ) /
-                      fmin( a.norm(), b.norm() );
+                      std::min( a.norm(), b.norm() );
 
     double a_c_diff = fabs( a.norm() - c.norm() ) /
-                      fmin( a.norm(), c.norm() );
+                      std::min( a.norm(), c.norm() );
 
     double b_c_diff = fabs( b.norm() - c.norm() ) /
-                      fmin( b.norm(), c.norm() );
+                      std::min( b.norm(), c.norm() );
 
                           // if needed, change UB to have the two most nearly
                           // equal sides first.
