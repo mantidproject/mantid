@@ -3,6 +3,7 @@
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/CoordTransform.h"
 #include <boost/shared_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <vtkUnstructuredGrid.h>
 #include <vtkFloatArray.h>
 #include <vtkQuad.h>
