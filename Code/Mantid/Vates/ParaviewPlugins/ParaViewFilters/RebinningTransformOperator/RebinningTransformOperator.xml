@@ -21,6 +21,16 @@
           Available timestep values.
         </Documentation>
        </DoubleVectorProperty>
+	   <IntVectorProperty
+         name="OutputHistoWorkspace"
+         command="SetOutputHistogramWS"
+         number_of_elements="1"
+		 default_values="1">
+		 <BooleanDomain name="bool"/>
+		 <Documentation>
+          Output a histogram workspace or a full MD workspace.
+         </Documentation>
+       </IntVectorProperty>
 	   <DoubleVectorProperty
          name="B1"
          command="SetB1"

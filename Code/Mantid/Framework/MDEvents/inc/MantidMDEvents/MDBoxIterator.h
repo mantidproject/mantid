@@ -52,6 +52,8 @@ namespace MDEvents
 
     signal_t getError() const;
 
+    coord_t * getVertexesArray(size_t & numVertices, const size_t outDimensions, const bool * maskDim) const;
+
     coord_t * getVertexesArray(size_t & numVertices) const;
 
     Mantid::Kernel::VMD getCenter() const;
