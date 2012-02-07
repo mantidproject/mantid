@@ -207,17 +207,18 @@ class RefLReduction(PythonAlgorithm):
                                               geo_correction=True,
                                               q_binning=[q_min,q_step,q_max])
 
-        ConvertToHistogram(InputWorkspace=ws_integrated_data,
-                           OutputWorkspace=ws_integrated_data)
-
+        ws_data = "__DataWks"
         ws_transposed = '__TransposedID'
-        Transpose(InputWorkspace=ws_integrated_data,
-                  OutputWorkspace=ws_transposed)
-        
-        ConvertToHistogram(InputWorkspace=ws_transposed,
-                           OutputWorkspace=ws_transposed)
-         
         if subtract_data_bck:
+            ConvertToHistogram(InputWorkspace=ws_integrated_data,
+                               OutputWorkspace=ws_integrated_data)
+
+            Transpose(InputWorkspace=ws_integrated_data,
+                      OutputWorkspace=ws_transposed)
+        
+            ConvertToHistogram(InputWorkspace=ws_transposed,
+                               OutputWorkspace=ws_transposed)
+
             FlatBackground(InputWorkspace=ws_transposed,
                            OutputWorkspace=ws_transposed,
                            StartX=BackfromYpixel,
@@ -225,23 +226,26 @@ class RefLReduction(PythonAlgorithm):
                            EndX=data_peak[0],
                            OutputMode="Return Background")
 
-        ws_data_bck = "__DataBckWks"
-        Transpose(InputWorkspace=ws_transposed,
-                  OutputWorkspace=ws_data_bck)
+            ws_data_bck = "__DataBckWks"
+            Transpose(InputWorkspace=ws_transposed,
+                      OutputWorkspace=ws_data_bck)
 
-        ConvertToHistogram(ws_data_bck, OutputWorkspace=ws_data_bck)
-        RebinToWorkspace(WorkspaceToRebin=ws_data_bck, 
-                         WorkspaceToMatch=ws_integrated_data, 
-                         OutputWorkspace=ws_data_bck)
+            ConvertToHistogram(ws_data_bck, OutputWorkspace=ws_data_bck)
+            RebinToWorkspace(WorkspaceToRebin=ws_data_bck, 
+                             WorkspaceToMatch=ws_integrated_data, 
+                             OutputWorkspace=ws_data_bck)
                 
-        ws_data = "__DataWks"
-        Minus(ws_integrated_data, ws_data_bck, OutputWorkspace=ws_data)
-             
-        # Clean up intermediary workspaces
-        mtd.deleteWorkspace(ws_data_bck)
-        mtd.deleteWorkspace(ws_integrated_data)
-        mtd.deleteWorkspace(ws_transposed)
-        mtd.deleteWorkspace(ws_histo_data)
+            Minus(ws_integrated_data, ws_data_bck, OutputWorkspace=ws_data)
+            
+            # Clean up intermediary workspaces
+            mtd.deleteWorkspace(ws_integrated_data)
+            mtd.deleteWorkspace(ws_histo_data)
+            mtd.deleteWorkspace(ws_data_bck)
+            mtd.deleteWorkspace(ws_transposed)
+
+        else:
+            ConvertToHistogram(InputWorkspace=ws_integrated_data,
+                               OutputWorkspace=ws_data)
 
         
         # Work on Normalization file #########################################
@@ -338,8 +342,9 @@ class RefLReduction(PythonAlgorithm):
         Divide(LHSWorkspace=ws_data,
                RHSWorkspace=ws_norm_rebinned,
                OutputWorkspace=ws_data)
+
         ReplaceSpecialValues(InputWorkspace=ws_data, NaNValue=0, NaNError=0, InfinityValue=0, InfinityError=0, OutputWorkspace=ws_data)
-        
+
         output_ws = self.getPropertyValue("OutputWorkspace")        
         
         if mtd.workspaceExists(output_ws):
