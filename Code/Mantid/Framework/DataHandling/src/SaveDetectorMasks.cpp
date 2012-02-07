@@ -146,11 +146,11 @@ namespace DataHandling
     AutoPtr<Document> pDoc = new Document;
     AutoPtr<Element> pRoot = pDoc->createElement("detector-masking");
     pDoc->appendChild(pRoot);
-    pRoot->setAttribute("default", "use");
+    // pRoot->setAttribute("default", "use");
 
     // b) Append Group
     AutoPtr<Element> pChildGroup = pDoc->createElement("group");
-    pChildGroup->setAttribute("type", "notuse");
+    // pChildGroup->setAttribute("type", "notuse");
     pRoot->appendChild(pChildGroup);
 
     // c) Append detid
