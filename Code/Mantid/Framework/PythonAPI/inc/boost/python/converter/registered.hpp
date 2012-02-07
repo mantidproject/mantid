@@ -14,6 +14,19 @@
 # include <boost/python/type_id.hpp>
 # include <boost/type.hpp>
 
+/**
+ * Mantid - In order to ensure that the registries of the two
+ * Python interfaces are separate on Linux & Mac we need to
+ * explicitly mark the symbols hidden. This is the default
+ * on Windows so is unnecessary.
+ */
+#if defined(__APPLE__) || defined(__GNUC__)
+  #define DLL_LOCAL __attribute__ ((visibility ("hidden")))
+#else
+  #define DLL_LOCAL
+#endif
+
+
 namespace boost {
 
 // You'll see shared_ptr mentioned in this header because we need to
@@ -28,14 +41,14 @@ struct registration;
 namespace detail
 {
   template <class T>
-  struct registered_base
+  struct DLL_LOCAL registered_base
   {
       static registration const& converters;
   };
 }
 
 template <class T>
-struct registered
+struct DLL_LOCAL registered
   : detail::registered_base<
         typename add_reference<
             typename add_cv<T>::type
@@ -51,7 +64,7 @@ struct registered
 // some reason we can't use this collapse there or array converters
 // will not be found.
 template <class T>
-struct registered<T&>
+struct DLL_LOCAL registered<T&>
   : registered<T> {};
 # endif
 

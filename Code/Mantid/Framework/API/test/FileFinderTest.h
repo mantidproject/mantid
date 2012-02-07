@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/FileFinder.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Exception.h"
 
 #include <Poco/Path.h>
 #include <Poco/File.h>
@@ -186,9 +187,16 @@ public:
   void testFindFiles()
   {
     ConfigService::Instance().setString("default.facility","ISIS");
-    std::vector<std::string> files = FileFinder::Instance().findRuns("MUSR15189-15199");
+    std::vector<std::string> files;
+    TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15189-n15199"), std::invalid_argument);
+    TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15189n-15199"), std::invalid_argument);
+    TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15189-15199n"), std::invalid_argument);
+    TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15189-151n99"), std::invalid_argument);
+    TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15n189-151n99"), Exception::NotFoundError);
+    TS_ASSERT_THROWS_NOTHING(files = FileFinder::Instance().findRuns("MUSR15189-15199"));
     TS_ASSERT_EQUALS(files.size(), 11);
     std::vector<std::string>::iterator it = files.begin();
+
     for (; it != files.end(); ++it)
     {
       if (it != files.begin())

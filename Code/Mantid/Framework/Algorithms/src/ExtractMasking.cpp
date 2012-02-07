@@ -13,6 +13,7 @@ The spectra containing 0 are also marked as masked and the instrument link is pr
 //------------------------------------------------------------------------------
 #include "MantidAlgorithms/ExtractMasking.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/NullValidator.h"
@@ -68,9 +69,12 @@ namespace Mantid
       MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
 
       const int nHist = static_cast<int>(inputWS->getNumberHistograms());
-      const int xLength(1), yLength(1);
       // Create a new workspace for the results, copy from the input to ensure that we copy over the instrument and current masking
-      MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS, nHist, xLength, yLength);
+      DataObjects::SpecialWorkspace2D* maskWS = new DataObjects::SpecialWorkspace2D();
+      maskWS->initialize(nHist, 1, 1);
+      MatrixWorkspace_sptr outputWS(maskWS);
+      WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
+      outputWS->setTitle(inputWS->getTitle());
 
       Progress prog(this,0.0,1.0,nHist);
       MantidVecPtr xValues;
@@ -89,7 +93,6 @@ namespace Mantid
         const ISpectrum * inSpec = inputWS->getSpectrum(i);
 
         // Copy X, spectrum number and detector IDs
-        outSpec->setX(xValues);
         outSpec->copyInfoFrom(*inSpec);
 
         IDetector_const_sptr inputDet;
@@ -114,13 +117,13 @@ namespace Mantid
 
         if( inputIsMasked )
         {
-          outSpec->dataY()[0] = 0.0;
-          outSpec->dataE()[0] = 0.0;
+          outSpec->dataY()[0] = 1.0;
+          outSpec->dataE()[0] = 1.0;
         }
         else
         {
-          outSpec->dataY()[0] = 1.0;
-          outSpec->dataE()[0] = 1.0;
+          outSpec->dataY()[0] = 0.0;
+          outSpec->dataE()[0] = 0.0;
         }
         prog.report();
 

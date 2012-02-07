@@ -22,10 +22,10 @@ using namespace MantidQt::MantidWidgets;
 namespace
 {
   /// the total number of tests that results are reported for here
-  const int NUMTESTS = 4;
+  const int NUMTESTS = 5;
   /// the list of tests that we display results for
   const QString TESTS[NUMTESTS] =
-  { "First detector vanadium test", "Second detector vanadium test", "Background test", "PSD Bleed test"};
+  { "Hard mask", "First detector vanadium test", "Second detector vanadium test", "Background test", "PSD Bleed test"};
 }
 
 //----------------------

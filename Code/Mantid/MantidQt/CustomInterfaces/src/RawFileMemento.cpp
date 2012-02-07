@@ -2,6 +2,7 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include <iostream>
 #include <fstream>
@@ -21,15 +22,17 @@ namespace MantidQt
       {
         boost::regex pattern("(NXS)$", boost::regex_constants::icase); 
 
+        //Fail if the file extension is wrong.
         if(!boost::regex_search(fileName, pattern))
         {
           std::string msg = "NexusFileMemento:: Unknown File extension on: " + fileName;
           throw std::invalid_argument(msg);
         }
 
+        //Fail if there is no file at the given location
         if(!checkStillThere())
         {
-          throw std::runtime_error("NexusFileMemento:: File doesn't exist");
+          throw std::invalid_argument("NexusFileMemento:: File doesn't exist");
         }
 
         std::vector<std::string> strs;
@@ -93,10 +96,23 @@ namespace MantidQt
         alg->setPropertyValue("OutputWorkspace", m_adsID);
         if(protocol == MinimalData)
         {
-          alg->setProperty("SpectrumMin", 1);
+          alg->setProperty("SpectrumMin", 0);
           alg->setProperty("SpectrumMax", 1);
         }
         alg->execute();
+
+        // Overwrite add log values. These are commonly needed by algorithms such as SetGoniometer.
+        for(size_t i = 0 ; i < m_logEntries.size(); i++)
+        {
+          Mantid::API::IAlgorithm_sptr logAlg = Mantid::API::AlgorithmManager::Instance().create("AddSampleLog");
+          logAlg->initialize();
+          logAlg->setRethrows(true);
+          logAlg->setPropertyValue("Workspace", this->m_adsID);
+          logAlg->setPropertyValue("LogName", m_logEntries[i].name);
+          logAlg->setPropertyValue("LogText", m_logEntries[i].value);
+          logAlg->setPropertyValue("LogType", m_logEntries[i].type);
+          logAlg->execute();
+        }
 
         Workspace_sptr ws = AnalysisDataService::Instance().retrieve(m_adsID);
 
@@ -138,6 +154,7 @@ namespace MantidQt
       {
         Mantid::API::Workspace_sptr ws = fetchIt(Everything);
         
+        // Overwrite ub matrix
         if(m_ub.size() == 9)
         {
           Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SetUB");
@@ -145,6 +162,39 @@ namespace MantidQt
           alg->setRethrows(true);
           alg->setPropertyValue("Workspace", this->m_adsID);
           alg->setProperty("UB", m_ub);
+          alg->execute();
+        }
+        // Overwrite goniometer settings
+        if(m_axes.size() == 6)
+        {
+          Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SetGoniometer");
+          alg->initialize();
+          alg->setRethrows(true);
+          alg->setPropertyValue("Workspace", this->m_adsID);
+          if(!m_axes[0].empty())
+          {
+            alg->setProperty("Axis0", m_axes[0]);
+          }
+          if(!m_axes[1].empty())
+          {
+            alg->setProperty("Axis1", m_axes[1]);
+          }
+          if(!m_axes[2].empty())
+          {
+            alg->setProperty("Axis2", m_axes[2]);
+          }
+          if(!m_axes[3].empty())
+          {
+            alg->setProperty("Axis3", m_axes[3]);
+          }
+          if(!m_axes[4].empty())
+          {
+            alg->setProperty("Axis4", m_axes[4]);
+          }
+          if(!m_axes[5].empty())
+          {
+            alg->setProperty("Axis5", m_axes[5]);
+          }
           alg->execute();
         }
         return AnalysisDataService::Instance().retrieve(m_adsID);

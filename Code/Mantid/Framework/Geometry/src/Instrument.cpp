@@ -6,6 +6,7 @@
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include <algorithm>
 #include <iostream>
 #include <sstream>
@@ -24,14 +25,16 @@ namespace Mantid
     /// Default constructor
     Instrument::Instrument() : CompAssembly(),
       m_detectorCache(),m_sourceCache(0),m_sampleCache(0),
-      m_defaultViewAxis("Z+")
-    {}
+      m_defaultViewAxis("Z+"), m_referenceFrame(new ReferenceFrame)
+    {
+    }
 
     /// Constructor with name
     Instrument::Instrument(const std::string& name) : CompAssembly(name),
       m_detectorCache(),m_sourceCache(0),m_sampleCache(0),
-      m_defaultViewAxis("Z+")
-    {}
+      m_defaultViewAxis("Z+"), m_referenceFrame(new ReferenceFrame)
+    {
+    }
 
     /** Constructor to create a parametrized instrument
      *  @param instr :: instrument for parameter inclusion
@@ -42,8 +45,9 @@ namespace Mantid
       m_sourceCache(instr->m_sourceCache), m_sampleCache(instr->m_sampleCache),
       m_defaultViewAxis(instr->m_defaultViewAxis),
       m_instr(instr), m_map_nonconst(map),
-      m_ValidFrom(instr->m_ValidFrom), m_ValidTo(instr->m_ValidTo)
-    {}
+      m_ValidFrom(instr->m_ValidFrom), m_ValidTo(instr->m_ValidTo), m_referenceFrame(new ReferenceFrame)
+    {
+    }
 
     /** Copy constructor
      *  This method was added to deal with having distinct neutronic and physical positions
@@ -54,7 +58,7 @@ namespace Mantid
         m_logfileCache(instr.m_logfileCache), m_logfileUnit(instr.m_logfileUnit),
         m_monitorCache(instr.m_monitorCache), m_defaultViewAxis(instr.m_defaultViewAxis),
         m_instr(), m_map_nonconst(), /* Should not be parameterized */
-        m_ValidFrom(instr.m_ValidFrom), m_ValidTo(instr.m_ValidTo)
+        m_ValidFrom(instr.m_ValidFrom), m_ValidTo(instr.m_ValidTo), m_referenceFrame(instr.m_referenceFrame)
     {
       // Now we need to fill the detector, source and sample caches with pointers into the new instrument
       std::vector<IComponent_const_sptr> children;
@@ -417,7 +421,8 @@ namespace Mantid
         detid2det_map::const_iterator it = m_detectorCache.find(detector_id);
         if ( it == m_detectorCache.end() )
         {
-          g_log.debug() << "Detector with ID " << detector_id << " not found." << std::endl;
+          //FIXME: When ticket #4544 is fixed, re-enable this debug print:
+          //g_log.debug() << "Detector with ID " << detector_id << " not found." << std::endl;
           std::stringstream readInt;
           readInt << detector_id;
           throw Kernel::Exception::NotFoundError("Instrument: Detector with ID " + readInt.str() + " not found.","");
@@ -427,6 +432,11 @@ namespace Mantid
       }
     }
 
+    /** Is the detector with the given ID masked?
+     *
+     * @param detector_id :: detector ID to look for.
+     * @return true if masked; false if not masked or if the detector was not found.
+     */
     bool Instrument::isDetectorMasked(const detid_t &detector_id) const
     {
       detid2det_map::const_iterator it = m_detectorCache.find(detector_id);
@@ -950,6 +960,31 @@ namespace Mantid
     {
       file->openGroup(group, "NXinstrument");
       file->closeGroup();
+    }
+
+    /**
+    Setter for the reference frame.
+    @param frame : reference frame object to use.
+    */
+    void Instrument::setReferenceFrame(boost::shared_ptr<ReferenceFrame> frame)
+    {
+      m_referenceFrame = frame;
+    }
+
+    /**
+    Getter for the reference frame.
+    @return : reference frame.
+    */
+    boost::shared_ptr<const ReferenceFrame> Instrument::getReferenceFrame() const
+    {
+      if (m_isParametrized)
+      {
+        return m_instr->getReferenceFrame();
+      }
+      else
+      {
+        return m_referenceFrame;
+      }
     }
 
 

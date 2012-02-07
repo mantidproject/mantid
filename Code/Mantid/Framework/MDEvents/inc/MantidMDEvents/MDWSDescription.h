@@ -3,16 +3,18 @@
 
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/PhysicalConstants.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 
 namespace Mantid
 {
 namespace MDEvents
 {
- /**  Lighteweith class wrapping together all parameters, related to MDEventoWorkspace used mainly to reduce number of parameters trasferred between 
+ /**  Lighteweith class wrapping together all parameters, related to MDEventoWorkspace description used mainly to reduce number of parameters trasferred between 
     * an algorithm, creating MD workspace and UI.
+    * It also defines some auxiliary functions, used for convenient description of MD workspace e.g. 
     *   
-    *   Introduced to decrease code bloat in methods and algorithms, which use MDEvents write interface and run-time defined number of dimensions
-    
+        
     @date 2011-28-12
 
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -54,15 +56,35 @@ namespace MDEvents
     std::vector<double>      dim_min,dim_max;
     /// the names for the target workspace dimensions and properties of input MD workspace
     std::vector<std::string> dim_names;
+    /// the ID-s for the target workspace, which allow to identify the dimensions according to their ID
+    std::vector<std::string> dim_IDs;
     /// the units of target workspace dimensions and properties of input MD workspace dimensions
     std::vector<std::string> dim_units;
+    /// the swich, specifying if the target Q3D -dimensions should be converted to hkl. Ignored in ModQ and NoQ mode and if no oriented lattice is found in input ws. 
+    bool convert_to_hkl;
+    /** vectors, which describe the projection plain the target ws is based on (notional coordinate system). The transformation matrix below 
+      * should bring the momentums from lab coordinate system into notional coordinate system */
+    Kernel::V3D u,v;
+    /// the indicator, informing if the uv plain has been set as a parameter. If they are not, the UB matrix from the source workspace is be used uncnanged
+    bool is_uv_default;
     /// the matrix to transform momentums of the workspace into notional target coordinate system
     std::vector<double> rotMatrix;  // should it be the Quat?
+    /// the oriented lattice which should be picked up from source ws and be carryed out to target ws as it can be modified by u,v on the way. 
+    Geometry::OrientedLattice Latt;
     /// helper function checks if min values are less them max values and are consistent between each other 
     void checkMinMaxNdimConsistent(Mantid::Kernel::Logger& log)const;
- 
-  }; 
+    /// the vector of default names for Q-directrions in reciprocal space;
+    std::vector<std::string> defailt_qNames;
+    /// the string which describes subalgorithm, used to convert source ws to target MD ws. 
+    std::string AlgID;
+    /// shows if workspace still has information about detectors. Some ws (like rebinned one) do not have this information any more. 
+    bool detInfoLost;
 
+  }; 
+/** function to build mslice-like axis name from the vector, which describes crystallographic direction along this axis*/
+std::string DLLExport makeAxisName(const Kernel::V3D &vector,const std::vector<std::string> &Q1Names);
+/**creates string representation of the number with accuracy, cpecified by eps*/
+std::string DLLExport sprintfd(const double data, const double eps);
 
 }
 }

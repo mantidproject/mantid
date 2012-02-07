@@ -29,6 +29,12 @@ private:
 
 public:
 
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static IndexSXPeaksTest *createSuite() { return new IndexSXPeaksTest(); }
+  static void destroySuite( IndexSXPeaksTest *suite ) { delete suite; }
+
+
   IndexSXPeaksTest()
   {
     //Load an existing peaks workspace. This workspace already has HKL values.

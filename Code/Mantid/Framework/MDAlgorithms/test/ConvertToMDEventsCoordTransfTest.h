@@ -17,12 +17,11 @@ using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
-
 class ConvertToMDEventsCoordTestHelper :public IConvertToMDEventsMethods
 {
     size_t conversionChunk(size_t job_ID){UNUSED_ARG(job_ID);return 0;}
 public:
-    void setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const PreprocessedDetectors &detLoc)
+    void setUPTestConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const PreprocessedDetectors &detLoc)
     {
         MDEvents::MDWSDescription TestWS(4);
 
@@ -127,7 +126,7 @@ void test_CoordTransfQ3DDirect()
 
     for (size_t i = 0; i < nValidSpectra; ++i){
             size_t iSpctr             = det_loc.detIDMap[i];
-            int32_t det_id            = det_loc.det_id[i];
+            //int32_t det_id            = det_loc.det_id[i];
 
             const MantidVec& X        = ws2D->readX(iSpctr);        
             // calculate the coordinates which depend on detector posision 
@@ -159,8 +158,8 @@ void test_CoordTransfQ3DDirect()
     TS_ASSERT_THROWS_NOTHING(ConvFromTOFHisto.calcGenericVariables(Coord,4));    
     size_t icc(0);
     ic = 0;    for (size_t i = 0; i < nValidSpectra; ++i){
-        size_t iSpctr             = det_loc.detIDMap[i];
-        int32_t det_id            = det_loc.det_id[i];
+        //size_t iSpctr             = det_loc.detIDMap[i];
+        //int32_t det_id            = det_loc.det_id[i];
 
         // calculate the coordinates which depend on detector posision 
          TS_ASSERT_THROWS_NOTHING(ConvFromTOFHisto.calcYDepCoordinates(Coord,i));
@@ -208,7 +207,7 @@ ConvertToMDEventsCoordTransfTest (){
 
     processDetectorsPositions(ws2D,det_loc,ConvertToMDEvents::getLogger(),pProg.get());
     pConvMethods = std::auto_ptr<ConvertToMDEventsCoordTestHelper>(new ConvertToMDEventsCoordTestHelper());
-    pConvMethods->setUPConversion(ws2D,det_loc);
+    pConvMethods->setUPTestConversion(ws2D,det_loc);
 
 
 }

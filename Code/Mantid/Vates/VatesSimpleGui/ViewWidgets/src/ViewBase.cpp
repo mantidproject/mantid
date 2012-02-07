@@ -68,26 +68,26 @@ void ViewBase::destroyFilter(pqObjectBuilder *builder, const QString &name)
 
 void ViewBase::onAutoScale()
 {
-  QPair <double, double> range = this->colorUpdater.autoScale(this->getPvActiveRep());
+  QPair <double, double> range = this->colorUpdater.autoScale(this->getRep());
   this->renderAll();
   emit this->dataRange(range.first, range.second);
 }
 
 void ViewBase::onColorMapChange(const pqColorMapModel *model)
 {
-  this->colorUpdater.colorMapChange(this->getPvActiveRep(), model);
+  this->colorUpdater.colorMapChange(this->getRep(), model);
   this->renderAll();
 }
 
 void ViewBase::onColorScaleChange(double min, double max)
 {
-  this->colorUpdater.colorScaleChange(this->getPvActiveRep(), min, max);
+  this->colorUpdater.colorScaleChange(this->getRep(), min, max);
   this->renderAll();
 }
 
 void ViewBase::onLogScale(int state)
 {
-  this->colorUpdater.logScale(this->getPvActiveRep(), state);
+  this->colorUpdater.logScale(this->getRep(), state);
   this->renderAll();
 }
 
@@ -104,8 +104,17 @@ void ViewBase::correctVisibility(pqPipelineBrowserWidget *pbw)
  */
 bool ViewBase::isPeaksWorkspace(pqPipelineSource *src)
 {
+  if (NULL == src)
+  {
+    return false;
+  }
   QString wsType(vtkSMPropertyHelper(src->getProxy(),
-                                     "WorkspaceTypeName").GetAsString());
+                                     "WorkspaceTypeName", true).GetAsString());
+  // This must be a Mantid rebinner filter if the property is empty.
+  if (wsType.isEmpty())
+  {
+    wsType = src->getSMName();
+  }
   return wsType.contains("PeaksWorkspace");
 }
 
@@ -155,7 +164,31 @@ pqPipelineSource *ViewBase::getPvActiveSrc()
  */
 void ViewBase::checkView()
 {
-  emit this->setViewsStatus(!this->isPeaksWorkspace(this->origSrc));
+  if (this->isMDHistoWorkspace(this->origSrc))
+  {
+    emit this->setViewsStatus(true);
+    emit this->setViewStatus(ModeControlWidget::SPLATTERPLOT, false);
+  }
+  else if (this->isPeaksWorkspace(this->origSrc))
+  {
+    emit this->setViewsStatus(false);
+  }
+  else
+  {
+    emit this->setViewsStatus(true);
+  }
+}
+
+/**
+ * This function sets the status for the view mode control buttons when the
+ * view switches.
+ */
+void ViewBase::checkViewOnSwitch()
+{
+  if (this->isMDHistoWorkspace(this->origSrc))
+  {
+    emit this->setViewStatus(ModeControlWidget::SPLATTERPLOT, false);
+  }
 }
 
 /**
@@ -394,6 +427,41 @@ double ViewBase::getCurrentTimeStep()
  */
 void ViewBase::closeSubWindows()
 {
+}
+
+/**
+ * This function returns the representation appropriate for the request. It
+ * checks the ParaView active representation first. If that can't be found, the
+ * fallback is to check the original representation associated with the view.
+ */
+pqPipelineRepresentation *ViewBase::getRep()
+{
+  pqPipelineRepresentation *rep = this->getPvActiveRep();
+  if (NULL == rep)
+  {
+    rep = this->origRep;
+  }
+  return rep;
+}
+
+/**
+ * This function checks if a pqPipelineSource is a MDHistoWorkspace.
+ * @return true if the source is a MDHistoWorkspace
+ */
+bool ViewBase::isMDHistoWorkspace(pqPipelineSource *src)
+{
+  if (NULL == src)
+  {
+    return false;
+  }
+  QString wsType(vtkSMPropertyHelper(src->getProxy(),
+                                     "WorkspaceTypeName", true).GetAsString());
+  // This must be a Mantid rebinner filter if the property is empty.
+  if (wsType.isEmpty())
+  {
+    wsType = src->getSMName();
+  }
+  return wsType.contains("MDHistoWorkspace");
 }
 
 } // namespace SimpleGui

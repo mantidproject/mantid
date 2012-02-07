@@ -3,17 +3,12 @@
 
 <component-link name = "LET">
 
-<!-- Specify that the detector positions should be taken from the data file -->
-<parameter name="det-pos-source" type="string">
-  <value val="datafile"/>
-</parameter>
-
 <parameter name="deltaE-mode" type="string">
   <value val="direct"/>
 </parameter>
 
 <parameter name="ei-mon1-spec">
-  <value val="24582"/>
+  <value val="40966"/>
 </parameter>
 
 <parameter name="ei-mon2-spec">
@@ -45,7 +40,7 @@
 </parameter>
 
 <parameter name="norm-mon1-spec">
-  <value val="24577"/>
+  <value val="40961"/>
 </parameter>
 
 <parameter name="norm-mon1-min">
@@ -149,6 +144,11 @@
   <value val="80"/>
 </parameter>
 
+<!-- Variation for ratio test with second white beam -->
+<parameter name="diag_variation">
+  <value val="1.1"/>
+</parameter>
+
 <!--  -->
 <!-- Absolute units conversion average -->
 
@@ -169,45 +169,6 @@
 </parameter>
 
 <!--  -->
-
-<!-- To be removed -->
-<!-- Diagnostic test defaults -->
-
-<parameter name="remove_zero">
-  <value val="1.0"/>
-</parameter>
-
-<parameter name="tiny">
-  <value val="1e-10"/>
-</parameter>
-
-<parameter name="large">
-  <value val="1e10"/>
-</parameter>
-
-<parameter name="median_lo">
-  <value val="0.1"/>
-</parameter>
-
-<parameter name="median_hi">
-  <value val="3.0"/>
-</parameter>
-
-<parameter name="signif">
-  <value val="3.3"/>
-</parameter>
-
-<parameter name="check_background">
-  <value val="1.0"/>
-</parameter>
-
-<parameter name="bkgd_threshold">
-  <value val="5.0"/>
-</parameter>
-
-<parameter name="variation">
-  <value val="1.1"/>
-</parameter>
 
 </component-link>
 

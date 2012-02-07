@@ -5,7 +5,7 @@ from reduction_gui.widgets.base_widget import BaseWidget
 import reduction_gui.widgets.util as util
 import ui.ui_stitcher
 
-import qti
+import _qti
 from MantidFramework import *
 mtd.initialise(False)
 from mantidsimple import *
@@ -53,6 +53,7 @@ class StitcherWidget(BaseWidget):
         self._graph = "StitchedData"
         self._output_dir = None
         self._stitcher = None
+        self._plotted = False
 
     def initialize_content(self):
         """
@@ -62,6 +63,11 @@ class StitcherWidget(BaseWidget):
         self._content.low_scale_edit.setValidator(QtGui.QDoubleValidator(self._content.low_scale_edit))
         self._content.medium_scale_edit.setValidator(QtGui.QDoubleValidator(self._content.medium_scale_edit))
         self._content.high_scale_edit.setValidator(QtGui.QDoubleValidator(self._content.high_scale_edit))
+
+        self._content.low_min_edit.setValidator(QtGui.QDoubleValidator(self._content.low_min_edit))
+        self._content.low_max_edit.setValidator(QtGui.QDoubleValidator(self._content.low_max_edit))
+        self._content.medium_min_edit.setValidator(QtGui.QDoubleValidator(self._content.medium_min_edit))
+        self._content.medium_max_edit.setValidator(QtGui.QDoubleValidator(self._content.medium_max_edit))
 
         # Browse buttons
         self.connect(self._content.low_q_browse_button, QtCore.SIGNAL("clicked()"), self._low_q_browse)
@@ -167,8 +173,8 @@ class StitcherWidget(BaseWidget):
         """
         if self._low_q_data is not None:
             def call_back(xmin, xmax):
-                self._content.low_min_edit.setText(str(xmin))
-                self._content.low_max_edit.setText(str(xmax))
+                self._content.low_min_edit.setText("%-6.3g" % xmin)
+                self._content.low_max_edit.setText("%-6.3g" % xmax)
             ws_list = []
             if self._low_q_data is not None:
                 ws_list.append(str(self._low_q_data))
@@ -182,8 +188,8 @@ class StitcherWidget(BaseWidget):
         """
         if self._medium_q_data is not None:
             def call_back(xmin, xmax):
-                self._content.medium_min_edit.setText(str(xmin))
-                self._content.medium_max_edit.setText(str(xmax))
+                self._content.medium_min_edit.setText("%-6.3g" % xmin)
+                self._content.medium_max_edit.setText("%-6.3g" % xmax)
             ws_list = []
             if self._medium_q_data is not None:
                 ws_list.append(str(self._medium_q_data))
@@ -226,9 +232,11 @@ class StitcherWidget(BaseWidget):
                 util.set_valid(self._content.low_q_combo.lineEdit(), False)
                 QtGui.QMessageBox.warning(self, "Error loading file", "Could not load %s.\nMake sure you pick the XML output from the reduction." % file)
                 return
-            minx, maxx = self._low_q_data.get_range()
-            self._content.low_min_edit.setText(str(minx))
-            self._content.low_max_edit.setText(str(maxx))
+            if len(self._content.low_min_edit.text())==0 or \
+                len(self._content.low_max_edit.text())==0:
+                minx, maxx = self._low_q_data.get_range()
+                self._content.low_min_edit.setText("%-6.3g" % minx)
+                self._content.low_max_edit.setText("%-6.3g" % maxx)
             self._content.low_scale_edit.setText("1.0")
             npts = self._low_q_data.get_number_of_points()
             self._content.low_first_spin.setMaximum(npts)
@@ -237,6 +245,7 @@ class StitcherWidget(BaseWidget):
         else:
             self._low_q_data = None
             util.set_valid(self._content.low_q_combo.lineEdit(), False)
+        self._plotted = False
 
     def _update_medium_q(self, ws=None):
         """
@@ -252,9 +261,11 @@ class StitcherWidget(BaseWidget):
                 util.set_valid(self._content.medium_q_combo.lineEdit(), False)
                 QtGui.QMessageBox.warning(self, "Error loading file", "Could not load %s.\nMake sure you pick the XML output from the reduction." % file)
                 return
-            minx, maxx = self._medium_q_data.get_range()
-            self._content.medium_min_edit.setText(str(minx))
-            self._content.medium_max_edit.setText(str(maxx))
+            if len(self._content.medium_min_edit.text())==0 or \
+                len(self._content.medium_max_edit.text())==0:
+                minx, maxx = self._medium_q_data.get_range()
+                self._content.medium_min_edit.setText("%-6.3g" % minx)
+                self._content.medium_max_edit.setText("%-6.3g" % maxx)
             self._content.medium_scale_edit.setText("1.0")
             npts = self._medium_q_data.get_number_of_points()
             self._content.medium_first_spin.setMaximum(npts)
@@ -263,6 +274,7 @@ class StitcherWidget(BaseWidget):
         else:
             self._medium_q_data = None
             util.set_valid(self._content.medium_q_combo.lineEdit(), False)
+        self._plotted = False
 
     def _update_high_q(self, ws=None):
         """
@@ -286,6 +298,7 @@ class StitcherWidget(BaseWidget):
         else:
             self._high_q_data = None
             util.set_valid(self._content.high_q_combo.lineEdit(), False)
+        self._plotted = False
 
     def data_browse_dialog(self):
         """
@@ -309,6 +322,7 @@ class StitcherWidget(BaseWidget):
         fname = self.data_browse_dialog()
         if fname:
             self._content.low_q_combo.setItemText(0,fname)
+            self._content.low_q_combo.setCurrentIndex(0)
             self._update_low_q()
 
     def _medium_q_browse(self):
@@ -318,6 +332,7 @@ class StitcherWidget(BaseWidget):
         fname = self.data_browse_dialog()
         if fname:
             self._content.medium_q_combo.setItemText(0,fname)
+            self._content.medium_q_combo.setCurrentIndex(0)
             self._update_medium_q()
 
     def _high_q_browse(self):
@@ -327,6 +342,7 @@ class StitcherWidget(BaseWidget):
         fname = self.data_browse_dialog()
         if fname:
             self._content.high_q_combo.setItemText(0,fname)
+            self._content.high_q_combo.setCurrentIndex(0)
             self._update_high_q()   
 
     def is_running(self, is_running):
@@ -420,10 +436,11 @@ class StitcherWidget(BaseWidget):
             ws_list.append(self._high_q_data.get_scaled_ws())
         
         if len(ws_list)>0:
-            g = qti.app.graph(self._graph)
-            if g is None:
-                g = qti.app.mantidUI.pyPlotSpectraList(ws_list,[0],True)
+            g = _qti.app.graph(self._graph)
+            if g is None or not self._plotted:
+                g = _qti.app.mantidUI.pyPlotSpectraList(ws_list,[0],True)
                 g.setName(self._graph)
+                self._plotted = True
                 
     def _save_result(self):
         """

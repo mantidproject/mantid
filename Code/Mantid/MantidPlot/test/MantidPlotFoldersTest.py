@@ -4,15 +4,13 @@ folders.
 """
 import mantidplottests
 from mantidplottests import *
-import time
-import numpy as np
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtCore
 
 class MantidPlotFoldersTest(unittest.TestCase):
     
     def setUp(self):
         # Make sure NOT to ask to close a folder. This hangs up tests
-        qti.app.setConfirmFolderClose(False)
+        _qti.app.setConfirmFolderClose(False)
         pass
     
     def tearDown(self):
@@ -53,21 +51,20 @@ class MantidPlotFoldersTest(unittest.TestCase):
         for w in windows: w.close()
         deleteFolder(f)
         
-# FIXME: this fails if some of the windows are floating (Graphs in my case)
-#    def test_switchFolder_windows(self):
-#        """ Access windows through a folder """
-#        f1, windows1 = self.setup_folder("folder1")
-#        f2, windows2 = self.setup_folder("folder2")
-#        for w in windows1:
-#            self.assertFalse( w.isVisible(), "Window in closed folder is hidden." )
-#        for w in windows2:
-#            self.assertFalse( w.isVisible(), "Window in active folder is visible." )
-#        # Go back to folder 1
-#        changeFolder(f1)
-#        for w in windows2:
-#            self.assertFalse( w.isVisible(), "Window in closed folder is hidden." )
-#        for w in windows1:
-#            self.assertFalse( w.isVisible(), "Window in active folder is visible." )
+    def test_switchFolder_windows(self):
+        """ Access windows through a folder """
+        f1, windows1 = self.setup_folder("folder1")
+        f2, windows2 = self.setup_folder("folder2")
+        for w in windows1:
+            self.assertFalse( w.isVisible(), "Window in closed folder is hidden." )
+        for w in windows2:
+            self.assertTrue( w.isVisible(), "Window in active folder is visible." )
+        # Go back to folder 1
+        changeFolder(f1)
+        for w in windows2:
+            self.assertFalse( w.isVisible(), "Window in closed folder is hidden." )
+        for w in windows1:
+            self.assertTrue( w.isVisible(), "Window in active folder is visible." )
             
    
 

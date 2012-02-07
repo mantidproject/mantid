@@ -105,6 +105,7 @@ namespace Mantid
           loadLogs(file, group_name, group_class, workspace);
         }
       }
+
       // Freddie Akeroyd 12/10/2011
       // current ISIS implementation contains an additional indirection between collected frames via an
       // "event_frame_number" array in NXevent_data (which eliminates frames with no events).
@@ -219,6 +220,48 @@ namespace Mantid
       }
     }
 
+
+    /** Try to load the "Veto_pulse" field in DASLogs
+     * and convert it to a sample log.
+     *
+     * @param file :: open nexus file at the DASLogs group
+     * @param workspace :: workspace to add to.
+     */
+    void LoadNexusLogs::loadVetoPulses(::NeXus::File & file, boost::shared_ptr<API::MatrixWorkspace> workspace) const
+    {
+      try
+      {
+        file.openGroup("Veto_pulse", "NXgroup");
+      }
+      catch (::NeXus::Exception & e)
+      {
+        // No group. This is common in older files
+        return;
+      }
+      file.openData("veto_pulse_time");
+
+      // Load the start date/time as ISO8601 string.
+      std::string start_time;
+      file.getAttr("start_time", start_time);
+      DateAndTime start(start_time);
+
+      // Read the offsets
+      std::vector<double> time_double;
+      file.getData(time_double);
+
+      // Fake values with zeroes.
+      std::vector<double> values(time_double.size(), 0.0);
+      TimeSeriesProperty<double> * tsp = new TimeSeriesProperty<double>("veto_pulse_time");
+      tsp->create(start, time_double, values);
+      tsp->setUnits("");
+
+      // Add the log
+      workspace->mutableRun().addProperty(tsp);
+
+      file.closeData();
+      file.closeGroup();
+    }
+
     /**
      * Load log entries from the given group
      * @param file :: A reference to the NeXus file handle opened such that the
@@ -247,6 +290,7 @@ namespace Mantid
           loadSELog(file, itr->first, workspace);
         }
       }
+      loadVetoPulses(file, workspace);
 
       file.closeGroup();
     }
@@ -277,8 +321,11 @@ namespace Mantid
       bool overwritelogs = this->getProperty("OverwriteLogs");
       try
       {
-        Kernel::Property *logValue = createTimeSeries(file, entry_name);
-        workspace->mutableRun().addProperty(logValue, overwritelogs);
+        if (overwritelogs || !(workspace->run().hasProperty(entry_name)))
+        {
+          Kernel::Property *logValue = createTimeSeries(file, entry_name);
+          workspace->mutableRun().addProperty(logValue, overwritelogs);
+        }
       }
       catch(::NeXus::Exception &e)
       {

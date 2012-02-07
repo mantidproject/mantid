@@ -139,6 +139,8 @@ MantidQt::SliceViewer::LineViewer* SliceViewerWindow::getLiner()
 };
 
 
+
+
 /***************************************************************************/
 /***************************************************************************/
 /***************************************************************************/
@@ -161,6 +163,7 @@ LineViewer
 %End
 
 public:
+
 void apply()   throw (std::runtime_error);
 %Docstring
 void LineViewer::apply()
@@ -221,13 +224,13 @@ void LineViewer::setEndXY(double x, double y)
 
 
 //*WIKI* ==== Width ====
-void setWidth(double width);
+void setThickness(double width);
 %Docstring
-void LineViewer::setWidth(double width)
----------------------------------------
-    Set the width to integrate to be the same in all dimensions
+void LineViewer::setThickness(double width)
+-------------------------------------------
+    Set the thickness to integrate to be the same in all dimensions
    
-    This sets the planar width and all the other dimensions' widths
+    This sets the planar width and all the other dimensions' thicknesses
     to the same value.
    
     Args:
@@ -235,14 +238,15 @@ void LineViewer::setWidth(double width)
    
 %End
 
-void setWidth(int dim, double width)   throw (std::invalid_argument, std::runtime_error);
+void setThickness(int dim, double width)   throw (std::invalid_argument, std::runtime_error);
 %Docstring
-void LineViewer::setWidth(int dim, double width)
-------------------------------------------------
-    Set the width to integrate in a particular dimension.
+void LineViewer::setThickness(int dim, double width)
+----------------------------------------------------
+    Set the thickness to integrate in a particular dimension.
    
-    Integration is performed perpendicular to the XY plane, from -width below
-    to +width above the center.
+    Integration is performed perpendicular to the XY plane,
+    from -thickness below to +thickness above the center.
+   
     Use setPlanarWidth() to set the width along the XY plane.
    
     Args:
@@ -254,19 +258,20 @@ void LineViewer::setWidth(int dim, double width)
    
 %End
 
-void setWidth(const QString & dim, double width)   throw (std::invalid_argument, std::runtime_error);
+void setThickness(const QString & dim, double width)   throw (std::invalid_argument, std::runtime_error);
 %Docstring
-void LineViewer::setWidth(const QString & dim, double width)
-------------------------------------------------------------
-    Set the width to integrate in a particular dimension.
+void LineViewer::setThickness(const QString & dim, double width)
+----------------------------------------------------------------
+    Set the thickness to integrate in a particular dimension.
    
-    Integration is performed perpendicular to the XY plane, from -width below
-    to +width above the center.
+    Integration is performed perpendicular to the XY plane,
+    from -thickness below to +thickness above the center.
+   
     Use setPlanarWidth() to set the width along the XY plane.
    
     Args:
         dim :: name of the dimension to change
-        width :: width of integration, in the units of the dimension.
+        width :: thickness of integration, in the units of the dimension.
     
     Raises:
         std::runtime_error if the name is not found in the workspace
@@ -376,6 +381,30 @@ double LineViewer::getBinWidth()
 %End
 
 
+////*WIKI* ==== Plotting ====
+void setPlotAxis(int choice);
+%Docstring
+void LineViewer::setPlotAxis(int choice)
+----------------------------------------
+    Choose which coordinates to use as the X axis to plot in the line view.
+   
+    Args:
+        choice :: PlotAxisChoice, either Auto, X, Y or Distance.
+   
+%End
+
+int getPlotAxis() const;
+%Docstring
+int LineViewer::getPlotAxis()
+-----------------------------
+    Return which coordinates to use as the X axis to plot in the line view.
+   
+    Returns:
+        PlotAxisChoice, either Auto, X, Y or Distance.
+   
+%End
+
+
 };
 
 
@@ -453,7 +482,41 @@ void SliceViewer::openFromXML(const QString & xml)
    
 %End
 
-  void saveImage(const QString & filename = QString());
+  QPixmap getImage();
+%Docstring
+QPixmap SliceViewer::getImage()
+-------------------------------
+    Grab the 2D view as an image. The image is rendered at the current window
+    size, with the color scale but without the text boxes for changing them.
+   
+    See also saveImage() and copyImageToClipboard()
+   
+    Returns:
+        QPixmap containing the image.
+   
+%End
+
+  void saveImage(const QString & filename);
+%Docstring
+void SliceViewer::saveImage(const QString & filename)
+-----------------------------------------------------
+    Save the rendered 2D slice to an image file.
+   
+    Args:
+        filename :: full path to the file to save, including extension
+           (e.g. .png). If not specified or empty, then a dialog will prompt
+           the user to pick a file.
+   
+%End
+
+  void copyImageToClipboard();
+%Docstring
+void SliceViewer::copyImageToClipboard()
+----------------------------------------
+    Copy the rendered 2D image to the clipboard
+   
+%End
+
   void setFastRender(bool fast);
 %Docstring
 void SliceViewer::setFastRender(bool fast)
@@ -486,7 +549,17 @@ bool SliceViewer::getFastRender()
    
 %End
 
-  void toggleLineMode(bool);
+  void toggleLineMode(bool lineMode);
+%Docstring
+void SliceViewer::toggleLineMode(bool lineMode)
+-----------------------------------------------
+    Toggle "line-drawing" mode (to draw 1D lines using the mouse)
+   
+    Args:
+        lineMode :: True to go into line mode, False to exit it.
+   
+%End
+
 
   //*WIKI* ==== X/Y Dimension ====
   void setXYDim(int indexX, int indexY)     throw (std::invalid_argument);

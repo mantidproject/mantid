@@ -38,16 +38,14 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 
+
 /**
  * Process two groups and ensure the Result string is set properly on the final algorithm
- * @param group1 :: The first workspace group. Ignored as we know what the property is called so it can be retrieved directly
- * @param props :: The list of properties for this algorithms. Ignored as we know what they are.
+ *
  * returns True if everything executed correctly
  */
-bool CheckWorkspacesMatch::processGroups(boost::shared_ptr<API::WorkspaceGroup> group1, const std::vector<Property*>& props)
+bool CheckWorkspacesMatch::processGroups()
 {
-  // We don't need these here has we know what the properties are called
-  UNUSED_ARG(group1); UNUSED_ARG(props);
   AnalysisDataServiceImpl& dataStore = AnalysisDataService::Instance();
   WorkspaceGroup_sptr ws1 = boost::dynamic_pointer_cast<WorkspaceGroup>(dataStore.retrieve(getPropertyValue("Workspace1")));
   WorkspaceGroup_sptr ws2 = boost::dynamic_pointer_cast<WorkspaceGroup>(dataStore.retrieve(getPropertyValue("Workspace2")));

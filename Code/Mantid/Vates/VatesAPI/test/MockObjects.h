@@ -1,6 +1,9 @@
 #ifndef VATESAPI_TEST_MOCKOBJECTS_H
 #define VATESAPI_TEST_MOCKOBJECTS_H
 
+#include "MantidMDEvents/SliceMD.h"
+#include "MantidMDEvents/BinMD.h"
+#include "MantidMDEvents/CreateMDWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/Workspace.h"
@@ -8,6 +11,7 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidVatesAPI/Clipper.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/MDRebinningView.h"
@@ -17,7 +21,7 @@
 #include "MantidVatesAPI/RebinningActionManager.h"
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
 #include "MantidVatesAPI/WorkspaceProvider.h"
-#include "MantidVatesAPI/NullCoordTransform.h"
+#include "MantidAPI/NullCoordTransform.h"
 #include <gmock/gmock.h>
 #include <vtkFieldData.h>
 #include <vtkCharArray.h>
@@ -75,6 +79,9 @@ public:
   MOCK_CONST_METHOD3(getSignalNormalizedAt, double(size_t index1, size_t index2, size_t index3));
   MOCK_CONST_METHOD4(getSignalNormalizedAt, double(size_t index1, size_t index2, size_t index3, size_t index4));
   MOCK_CONST_METHOD0(getNonIntegratedDimensions, Mantid::Geometry::VecIMDDimension_const_sptr());
+  virtual void getLinePlot(const Mantid::Kernel::VMD & , const Mantid::Kernel::VMD & ,
+      Mantid::API::MDNormalization , std::vector<Mantid::coord_t> & , std::vector<Mantid::signal_t> & , std::vector<Mantid::signal_t> & ) const
+  {}
 
   virtual Mantid::API::IMDIterator* createIterator(Mantid::Geometry::MDImplicitFunction * /*function*/ = NULL) const
   { throw std::runtime_error("Mock createIterator() Not implemented.");
@@ -272,6 +279,60 @@ class FakeProgressAction : public Mantid::VATES::ProgressAction
       "<MDWorkspaceLocation>test_horace_reader.sqw</MDWorkspaceLocation>" +
       constrctGeometryOnlyXML(xDimensionIdMapping, yDimensionIdMapping, zDimensionIdMapping, tDimensionIdMapping) +
       "</MDInstruction>";
+  }
+
+  Mantid::API::Workspace_sptr createSimple3DWorkspace()
+  {
+    using namespace Mantid::API;
+    AnalysisDataService::Instance().remove("3D_Workspace");
+    Mantid::MDEvents::CreateMDWorkspace create;
+    create.initialize();
+    create.setProperty("Dimensions", 4);
+    create.setPropertyValue("Extents","0,5,0,5,0,5,0,5");
+    create.setPropertyValue("Names","A,B,C,D");
+    create.setPropertyValue("Units","A,A,A,A");
+    create.setPropertyValue("OutputWorkspace", "3D_Workspace");
+    create.execute();
+    return AnalysisDataService::Instance().retrieve("3D_Workspace");
+  }
+
+  Mantid::API::Workspace_sptr get3DWorkspace(bool integratedTDimension, bool sliceMD)
+  {
+    using namespace Mantid::API;
+    using namespace Mantid::MDEvents;
+
+    Mantid::API::Workspace_sptr inputWs = createSimple3DWorkspace();
+
+    AnalysisDataService::Instance().remove("binned");
+
+    Mantid::API::Algorithm_sptr binningAlg;
+    if(sliceMD)
+    {
+      binningAlg = Algorithm_sptr(new SliceMD);
+    }
+    else
+    {
+      binningAlg = Algorithm_sptr(new BinMD);
+    }
+
+    binningAlg->initialize();
+    binningAlg->setProperty("InputWorkspace", inputWs);
+    binningAlg->setPropertyValue("AlignedDimX","A,0,5,2");
+    binningAlg->setPropertyValue("AlignedDimY","B,0,5,2");
+    binningAlg->setPropertyValue("AlignedDimZ","C,0,5,2");
+
+    if(integratedTDimension)
+    {
+      binningAlg->setPropertyValue("AlignedDimT","D,0,5,1");
+    }
+    else
+    {
+      binningAlg->setPropertyValue("AlignedDimT","D,0,5,2");
+    }
+    binningAlg->setPropertyValue("OutputWorkspace", "binned");
+    binningAlg->execute();
+
+    return AnalysisDataService::Instance().retrieve("binned");
   }
 
 } // namespace

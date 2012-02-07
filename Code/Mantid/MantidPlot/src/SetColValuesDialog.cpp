@@ -48,8 +48,8 @@
 #include <QCheckBox>
 #endif
 
-SetColValuesDialog::SetColValuesDialog( ScriptingEnv *env, QWidget* parent, Qt::WFlags fl )
-    : QDialog( parent, fl ), Scripted(env)
+SetColValuesDialog::SetColValuesDialog( ScriptingEnv *env, Table* t, Qt::WFlags fl )
+    : QDialog( t, fl ), Scripted(env)
 {
     setName( "SetColValuesDialog" );
 	setWindowTitle( tr( "MantidPlot - Set column values" ) );
@@ -160,6 +160,8 @@ SetColValuesDialog::SetColValuesDialog( ScriptingEnv *env, QWidget* parent, Qt::
 	connect(functions, SIGNAL(activated(int)),this, SLOT(insertExplain(int)));
 	connect(buttonPrev, SIGNAL(clicked()), this, SLOT(prevColumn()));
 	connect(buttonNext, SIGNAL(clicked()), this, SLOT(nextColumn()));
+
+  setTable(t);
 }
 
 void SetColValuesDialog::prevColumn()

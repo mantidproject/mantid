@@ -130,7 +130,8 @@ InstrumentWindowPickTab::InstrumentWindowPickTab(InstrumentWindow* instrWindow):
 QFrame(instrWindow),
 m_instrWindow(instrWindow),
 m_currentDetID(-1),
-m_tubeXUnits(DETECTOR_ID)
+m_tubeXUnits(DETECTOR_ID),
+m_freezePlot(false)
 {
   mInstrumentDisplay = m_instrWindow->getInstrumentDisplay();
   m_plotSum = true;
@@ -190,7 +191,7 @@ m_tubeXUnits(DETECTOR_ID)
   m_unitsGroup = new QActionGroup(this);
   m_unitsGroup->addAction(m_detidUnits);
   m_unitsGroup->addAction(m_lengthUnits);
-  //m_unitsGroup->addAction(m_phiUnits); // re #4169 disabled until fixed or removed
+  m_unitsGroup->addAction(m_phiUnits); // re #4169 disabled until fixed or removed
   connect(m_unitsMapper,SIGNAL(mapped(int)),this,SLOT(setTubeXUnits(int)));
 
   // Instrument display context menu actions
@@ -305,6 +306,11 @@ void InstrumentWindowPickTab::updatePlot(int detid)
  */
 void InstrumentWindowPickTab::updateSelectionInfo(int detid)
 {
+  if (m_freezePlot)
+  {// freeze the plot for one update
+    m_freezePlot = false;
+    return;
+  }
   if (m_instrWindow->blocked()) 
   {
     m_selectionInfoDisplay->clear();
@@ -746,13 +752,15 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
     }
 
     double knorm=mN*(l1 + l2)/(hbar*tof*1e-6)/1e10;
-    knorm/=(2.*M_PI); //Peak constructor uses Q/(2*Pi)
+    //knorm/=(2.*M_PI); //Peak constructor uses Q/(2*Pi)
     Qx *= knorm;
     Qy *= knorm;
     Qz *= knorm;
 
+
     Mantid::API::IPeak* peak = tw->createPeak(Mantid::Kernel::V3D(Qx,Qy,Qz),l2);
     peak->setDetectorID(m_currentDetID);
+    peak->setGoniometerMatrix(ws->run().getGoniometer().getR());
     tw->addPeak(*peak);
     delete peak;
     tw->modified();
@@ -787,7 +795,7 @@ void InstrumentWindowPickTab::showEvent (QShowEvent *)
  */
 void InstrumentWindowPickTab::setInstrumentDisplayContextMenu(QMenu& context)
 {
-  //QMenu context(this);
+  m_freezePlot = true;
   if (m_plot->hasCurve())
   {
     context.addAction(m_storeCurve);

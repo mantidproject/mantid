@@ -464,7 +464,7 @@ class DirectBeamTransmission(BaseTransmission):
             self._calculate_transmission(sample_mon_ws, empty_mon_ws, first_det, self._transmission_ws)
             
         # Add output workspace to the list of important output workspaces
-        reducer.output_workspaces.append([self._transmission_ws, self._transmission_ws+'_unfitted'])
+        #reducer.output_workspaces.append([self._transmission_ws, self._transmission_ws+'_unfitted'])
 
         # 2- Apply correction (Note: Apply2DTransCorr)
         #Apply angle-dependent transmission correction using the zero-angle transmission
@@ -500,19 +500,18 @@ class Normalize(ReductionStep):
             self._normalization_spectrum = reducer.instrument.get_incident_mon()
         
         # Get counting time or monitor
-        norm_ws = workspace+"_normalization"
-
-        CropWorkspace(workspace, norm_ws,
-                      StartWorkspaceIndex = self._normalization_spectrum, 
-                      EndWorkspaceIndex   = self._normalization_spectrum)      
-
-        Divide(workspace, norm_ws, workspace)
-        
-        # HFIR-specific: If we count for monitor we need to multiply by 1e8
-        if self._normalization_spectrum == reducer.NORMALIZATION_MONITOR:         
-            Scale(workspace, workspace, 1.0e8, 'Multiply')
-
-        return "Normalization done [spectrum %g]" % self._normalization_spectrum
+        if self._normalization_spectrum == reducer.instrument.NORMALIZATION_MONITOR:
+            norm_count = mtd[workspace].getRun().getProperty("monitor").value
+            # HFIR-specific: If we count for monitor we need to multiply by 1e8
+            Scale(workspace, workspace, 1.0e8/norm_count, 'Multiply')
+            return "Normalization by monitor: %6.2g counts" % norm_count 
+        elif self._normalization_spectrum == reducer.instrument.NORMALIZATION_TIME:
+            norm_count = mtd[workspace].getRun().getProperty("timer").value
+            Scale(workspace, workspace, 1.0/norm_count, 'Multiply')
+            return "Normalization by time: %6.2g sec" % norm_count
+        else:
+            mantid.sendLogMessage("Normalization step did not get a valid normalization option: skipping")
+            return "Normalization step did not get a valid normalization option: skipping"
                         
     def clean(self):
         mtd.deleteWorkspace(norm_ws)

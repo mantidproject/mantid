@@ -53,6 +53,7 @@ set ( SRC_FILES
 	src/PropertyManagerOwner.cpp
 	src/PropertyWithValue.cpp
 	src/Quat.cpp
+	src/ReadLock.cpp
 	src/RebinParamsValidator.cpp
 	src/RegexStrings.cpp
 	src/SignalChannel.cpp
@@ -162,6 +163,7 @@ set ( INC_FILES
 	inc/MantidKernel/PropertyWithValue.h
 	inc/MantidKernel/Quat.h
 	inc/MantidKernel/RandomNumberGenerator.h
+	inc/MantidKernel/ReadLock.h
 	inc/MantidKernel/RebinParamsValidator.h
 	inc/MantidKernel/RegexStrings.h
 	inc/MantidKernel/SignalChannel.h
@@ -233,6 +235,7 @@ set ( TEST_FILES
 	test/MemoryTest.h
 	test/MersenneTwisterTest.h
 	test/MultiFileNameParserTest.h
+	test/MutexTest.h
 	test/NeutronAtomTest.h
 	test/NullValidatorTest.h
 	test/ProgressBaseTest.h
@@ -243,6 +246,7 @@ set ( TEST_FILES
 	test/PropertyWithValueTest.h
 	test/QuatTest.h
 	test/RandomNumberGeneratorTest.h
+	test/ReadLockTest.h
 	test/RebinHistogramTest.h
 	test/RebinParamsValidatorTest.h
 	test/RegexStringsTest.h

@@ -18,6 +18,7 @@
 #include <Poco/StringTokenizer.h>
 
 #include <iomanip>
+#include "MantidAPI/WorkspaceGroup.h"
 
 using namespace Mantid::Kernel;
 
@@ -44,6 +45,10 @@ namespace Mantid
     template MANTID_API_DLL bool Algorithm::isEmpty<int64_t> (const int64_t);
     template MANTID_API_DLL bool Algorithm::isEmpty<std::size_t> (const std::size_t);
 
+    //=============================================================================================
+    //================================== Constructors/Destructors =================================
+    //=============================================================================================
+
     /// Initialize static algorithm counter
     size_t Algorithm::g_execCount=0;
 
@@ -52,7 +57,7 @@ namespace Mantid
     PropertyManagerOwner(),m_progressObserver(*this, &Algorithm::handleChildProgressNotification),
       m_cancel(false),m_parallelException(false),g_log(Kernel::Logger::get("Algorithm")),
       m_executeAsync(this,&Algorithm::executeAsyncImpl),m_isInitialized(false),
-      m_isExecuted(false),m_isChildAlgorithm(false),m_runningAsync(false),
+      m_isExecuted(false),m_isChildAlgorithm(false),m_alwaysStoreInADS(false),m_runningAsync(false),
       m_running(false),m_rethrow(false),m_algorithmID(0)
     {
     }
@@ -66,6 +71,137 @@ namespace Mantid
     }
 
 
+    //=============================================================================================
+    //================================== Simple Getters/Setters ===================================
+    //=============================================================================================
+
+
+
+    //---------------------------------------------------------------------------------------------
+    /// Has the Algorithm already been initialized
+    bool Algorithm::isInitialized() const
+    {
+      return m_isInitialized;
+    }
+
+    /// Has the Algorithm already been executed
+    bool Algorithm::isExecuted() const
+    {
+      return m_isExecuted;
+    }
+
+    //---------------------------------------------------------------------------------------------
+    /// Set the Algorithm initialized state
+    void Algorithm::setInitialized()
+    {
+      m_isInitialized = true;
+    }
+
+    /** Set the executed flag to the specified state
+    // Public in Gaudi - don't know why and will leave here unless we find a reason otherwise
+    //     Also don't know reason for different return type and argument.
+    @param state :: New executed state
+    */
+    void Algorithm::setExecuted(bool state)
+    {
+      m_isExecuted = state;
+    }
+
+    //---------------------------------------------------------------------------------------------
+    /** To query whether algorithm is a child.
+    *  @returns true - the algorithm is a child algorithm.  False - this is a full managed algorithm.
+    */
+    bool Algorithm::isChild() const
+    {
+      return m_isChildAlgorithm;
+    }
+
+    /** To set whether algorithm is a child.
+    *  @param isChild :: True - the algorithm is a child algorithm.  False - this is a full managed algorithm.
+    */
+    void Algorithm::setChild(const bool isChild)
+    {
+      m_isChildAlgorithm = isChild;
+    }
+
+    /** Do we ALWAYS store in the AnalysisDataService? This is set to true
+     * for python algorithms' child algorithms
+     *
+     * @param doStore :: always store in ADS
+     */
+    void Algorithm::setAlwaysStoreInADS(const bool doStore)
+    {
+      m_alwaysStoreInADS = doStore;
+    }
+
+
+    /** Set whether the algorithm will rethrow exceptions
+     * @param rethrow :: true if you want to rethrow exception.
+     */
+    void Algorithm::setRethrows(const bool rethrow)
+    {
+      this->m_rethrow = rethrow;
+    }
+
+
+
+    //---------------------------------------------------------------------------------------------
+    /**  Add an observer to a notification
+    @param observer :: Reference to the observer to add
+    */
+    void Algorithm::addObserver(const Poco::AbstractObserver& observer)const
+    {
+      m_notificationCenter.addObserver(observer);
+    }
+
+    /**  Remove an observer
+    @param observer :: Reference to the observer to remove
+    */
+    void Algorithm::removeObserver(const Poco::AbstractObserver& observer)const
+    {
+      m_notificationCenter.removeObserver(observer);
+    }
+
+    //---------------------------------------------------------------------------------------------
+    /** Sends ProgressNotification.
+     * @param p :: Reported progress,  must be between 0 (just started) and 1 (finished)
+     * @param msg :: Optional message string
+     * @param estimatedTime :: Optional estimated time to completion
+     * @param progressPrecision :: optional, int number of digits after the decimal point to show.
+    */
+    void Algorithm::progress(double p, const std::string& msg, double estimatedTime, int progressPrecision)
+    {
+      m_notificationCenter.postNotification(new ProgressNotification(this,p,msg, estimatedTime, progressPrecision));
+    }
+
+    //---------------------------------------------------------------------------------------------
+    /// Function to return all of the categories that contain this algorithm
+    const std::vector<std::string> Algorithm::categories() const
+    {
+      std::vector < std::string > res;
+      Poco::StringTokenizer tokenizer(category(), categorySeparator(),
+          Poco::StringTokenizer::TOK_TRIM | Poco::StringTokenizer::TOK_IGNORE_EMPTY);
+      Poco::StringTokenizer::Iterator h = tokenizer.begin();
+
+      for (; h != tokenizer.end(); ++h)
+      {
+        res.push_back(*h);
+      }
+
+      const DeprecatedAlgorithm * depo = dynamic_cast<const DeprecatedAlgorithm *>(this);
+      if (depo != NULL)
+      {
+        res.push_back("Deprecated");
+      }
+      return res;
+    }
+
+
+    //=============================================================================================
+    //================================== Initialization ===========================================
+    //=============================================================================================
+
+    //---------------------------------------------------------------------------------------------
     /** Initialization method invoked by the framework. This method is responsible
     *  for any bookkeeping of initialization required by the framework itself.
     *  It will in turn invoke the init() method of the derived algorithm,
@@ -104,14 +240,141 @@ namespace Mantid
       {
         // Gaudi: A call to the auditor service is here
         // (1) perform the printout
-        g_log.fatal("UNKNOWN Exception is caught");
+        g_log.fatal("UNKNOWN Exception is caught in initialize()");
         throw;
       }
-
-      // Only gets to here if everything worked normally
-      return;
     }
 
+    //---------------------------------------------------------------------------------------------
+    /** Go through the properties and cache the input/output
+     * workspace properties for later use.
+     */
+    void Algorithm::cacheWorkspaceProperties()
+    {
+      // Cache the list of the in/out workspace properties
+      m_inputWorkspaceProps.clear();
+      m_outputWorkspaceProps.clear();
+      m_pureOutputWorkspaceProps.clear();
+      const std::vector<Property*>& props = this->getProperties();
+      for (size_t i=0; i<props.size(); i++)
+      {
+        Property* prop = props[i];
+        IWorkspaceProperty * wsProp = dynamic_cast<IWorkspaceProperty*>(prop);
+        if (wsProp)
+        {
+          switch(prop->direction())
+          {
+          case Kernel::Direction::Input:
+            m_inputWorkspaceProps.push_back(wsProp);
+            break;
+          case Kernel::Direction::InOut:
+            m_inputWorkspaceProps.push_back(wsProp);
+            m_outputWorkspaceProps.push_back(wsProp);
+            break;
+          case Kernel::Direction::Output:
+            m_outputWorkspaceProps.push_back(wsProp);
+            m_pureOutputWorkspaceProps.push_back(wsProp);
+            break;
+          default:
+            throw std::logic_error("Unexpected property direction found for property " + prop->name() + " of algorithm " + this->name());
+          }
+        } // is a ws property
+      } // each property
+    }
+
+    //=============================================================================================
+    //================================== Execution ================================================
+    //=============================================================================================
+
+    //---------------------------------------------------------------------------------------------
+    /** Go through the workspace properties of this algorithm
+     * and lock the workspaces for reading or writing.
+     *
+     * @param props :: vector of Property * of this algorithm
+     */
+    void Algorithm::lockWorkspaces()
+    {
+      return; //FIXME REMOVE
+
+      // Do not lock workspace for child algos
+      if (this->isChild())
+        return;
+
+      if (!m_readLockedWorkspaces.empty() || !m_writeLockedWorkspaces.empty())
+        throw std::logic_error("Algorithm::lockWorkspaces(): The workspaces have already been locked!");
+
+      // First, Write-lock the output workspaces
+      for (size_t i=0; i<m_outputWorkspaceProps.size(); i++)
+      {
+        Workspace_sptr ws = m_outputWorkspaceProps[i]->getWorkspace();
+        if (ws)
+        {
+          // Is it already write-locked?
+          if (std::find(m_writeLockedWorkspaces.begin(), m_writeLockedWorkspaces.end(), ws)
+              == m_writeLockedWorkspaces.end())
+          {
+            // Write-lock it if not already
+            g_log.debug() << "Write-locking " << ws->getName() << std::endl;
+            ws->getLock()->writeLock();
+            m_writeLockedWorkspaces.push_back(ws);
+          }
+        }
+      }
+
+      // Next read-lock the input workspaces
+      for (size_t i=0; i<m_inputWorkspaceProps.size(); i++)
+      {
+        Workspace_sptr ws = m_inputWorkspaceProps[i]->getWorkspace();
+        if (ws)
+        {
+          // Is it already write-locked?
+          if (std::find(m_writeLockedWorkspaces.begin(), m_writeLockedWorkspaces.end(), ws)
+              == m_writeLockedWorkspaces.end())
+          {
+            // Read-lock it if not already write-locked
+            g_log.debug() << "Read-locking " << ws->getName() << std::endl;
+            ws->getLock()->readLock();
+            m_readLockedWorkspaces.push_back(ws);
+          }
+        }
+      }
+    }
+
+    //---------------------------------------------------------------------------------------------
+    /** Unlock any previously locked workspaces
+     *
+     */
+    void Algorithm::unlockWorkspaces()
+    {
+      // Do not lock workspace for child algos
+      if (this->isChild())
+        return;
+
+      for (size_t i=0; i<m_writeLockedWorkspaces.size(); i++)
+      {
+        Workspace_sptr ws = m_writeLockedWorkspaces[i];
+        if (ws)
+        {
+          g_log.debug() << "Unlocking " << ws->getName() << std::endl;
+          ws->getLock()->unlock();
+        }
+      }
+      for (size_t i=0; i<m_readLockedWorkspaces.size(); i++)
+      {
+        Workspace_sptr ws = m_readLockedWorkspaces[i];
+        if (ws)
+        {
+          g_log.debug() << "Unlocking " << ws->getName() << std::endl;
+          ws->getLock()->unlock();
+        }
+      }
+
+      // Don't double-unlock workspaces
+      m_readLockedWorkspaces.clear();
+      m_writeLockedWorkspaces.clear();
+    }
+
+    //---------------------------------------------------------------------------------------------
     /** The actions to be performed by the algorithm on a dataset. This method is
     *  invoked for top level algorithms by the application manager.
     *  This method invokes exec() method.
@@ -144,8 +407,11 @@ namespace Mantid
         throw std::runtime_error("Algorithm is not initialised:" + this->name());
       }
 
+      // Cache the workspace in/out properties for later use
+      cacheWorkspaceProperties();
+
       // no logging of input if a child algorithm
-      if (!m_isChildAlgorithm) algorithm_info();
+      if (!m_isChildAlgorithm) logAlgorithmInfo();
 
       // Check all properties for validity
       if ( !validateProperties() )
@@ -169,117 +435,37 @@ namespace Mantid
         }
 
       }
-      // get properties and check one of the input properties is a work space group
-      // if it's a group call process group 
-      // if not normal execution
 
-      std::vector<Property*> Prop=getProperties();
-      std::vector<Property*>::const_iterator itr;
-      for (itr=Prop.begin();itr!=Prop.end();++itr)
+      // ----- Check for processing groups -------------
+      try
       {
-        const IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty*>(*itr);
-        if (wsProp)
+        // Checking the input is a group. Throws if the sizes are wrong
+        this->checkGroups();
+        if (m_processGroups)
         {
-          const Property *wsPropProp = dynamic_cast<Property*>(*itr);
-          unsigned int direction = wsPropProp->direction();
-          if (direction == Kernel::Direction::Input ||direction==Kernel::Direction::InOut)
-          {
-            std::string wsName=wsPropProp->value();
-            // try
-            //{
-            //checking the input is a group
-            try
-            {     //check if the pointer is valid, it won't be if it is a group
-              Workspace_sptr wsSptr=wsProp->getWorkspace();
-              if(!wsName.empty() && !wsSptr)
-              {
-                boost::shared_ptr<WorkspaceGroup> wsGrpSptr =
-                  boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(wsName));
-                if(wsGrpSptr)
-                {        //this must be a group - test for that
-                  g_log.debug()<<" one of the inputs is a workspace group - call processGroups"<<std::endl;
-                  return processGroups(wsGrpSptr,Prop);
-                }
-              }
+          // This calls this->execute() again on each member of the group.
+          return processGroups();
+        }
+      }
+      catch(std::exception& ex)
+      {
+        g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
+        g_log.error()<<ex.what()<<std::endl;
+        m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
+        m_running = false;
+        if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
+        {
+          m_runningAsync = false;
+          throw;
+        }
+      }
+      // If checkGroups() threw an exception but there ARE group workspaces
+      // (means that the group sizes were incompatible)
+      if (m_processGroups)
+        return false;
 
-            }
-            catch (std::invalid_argument&ex)
-            {
-              g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
-              g_log.error()<<ex.what()<<std::endl;
-              m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
-              m_running = false;
-              if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
-              {
-                m_runningAsync = false;
-                throw;
-              }
-              return false;
-
-            }
-            catch(Exception::NotFoundError&ex )
-            {
-              g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
-              g_log.error()<<ex.what()<<std::endl;
-              m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
-              m_running = false;
-              if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
-              {
-                m_runningAsync = false;
-                throw;
-              }
-              return false;
-
-            }
-            catch (std::runtime_error &ex)
-            {
-              g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
-              g_log.error()<<ex.what()<<std::endl;
-              m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
-              m_running = false;
-              if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
-              {
-                m_runningAsync = false;
-                throw;
-              }
-              return false;
-
-            }
-            catch(CancelException& ex)
-            {
-              g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
-              g_log.error()<<ex.what()<<std::endl;
-              m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
-              m_running = false;
-              if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
-              {
-                m_runningAsync = false;
-                throw;
-              }
-              return false;
-
-
-            }
-            catch(std::exception&ex)
-            {
-              g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
-              g_log.error()<<ex.what()<<std::endl;
-              m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
-              m_running = false;
-              if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
-              {
-                m_runningAsync = false;
-                throw;
-              }
-              return false;
-            }
-
-            //}
-
-          }//end of if loop checking the direction
-        }//end of if loop for checking workspace properties
-
-      }// end of for loop for checking the properties for workspace groups
+      // Read or write locks every input/output workspace
+      this->lockWorkspaces();
 
       // Invoke exec() method of derived class and catch all uncaught exceptions
       try
@@ -296,13 +482,14 @@ namespace Mantid
           this->exec();
           // Get how long this algorithm took to run
           const float duration = timer.elapsed();
+
           // need it to throw before trying to run fillhistory() on an algorithm which has failed
-          // Put any output workspaces into the AnalysisDataService - if this is not a child algorithm
           if (!isChild())
-          {
             fillHistory(start_time,duration,Algorithm::g_execCount);
+
+          // Put any output workspaces into the AnalysisDataService - if this is not a child algorithm
+          if (!isChild() || m_alwaysStoreInADS)
             this->store();
-          }
 
           // RJT, 19/3/08: Moved this up from below the catch blocks
           setExecuted(true);
@@ -315,6 +502,7 @@ namespace Mantid
         }
         catch(std::runtime_error& ex)
         {
+          this->unlockWorkspaces();
           if (m_isChildAlgorithm || m_runningAsync || m_rethrow) throw;
           else
           {
@@ -326,6 +514,7 @@ namespace Mantid
         }
         catch(std::logic_error& ex)
         {
+          this->unlockWorkspaces();
           if (m_isChildAlgorithm || m_runningAsync || m_rethrow) throw;
           else
           {
@@ -342,6 +531,7 @@ namespace Mantid
         m_running = false;
         g_log.error() << this->name() << ": Execution terminated by user.\n";
         m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
+        this->unlockWorkspaces();
         throw;
       }
       // Gaudi also specifically catches GaudiException & std:exception.
@@ -354,27 +544,25 @@ namespace Mantid
         m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
         g_log.error() << "Error in execution of algorithm " << this->name() << ":\n";
         g_log.error(ex.what());
+        this->unlockWorkspaces();
         throw;
       }
 
       catch (...)
       {
-        // Gaudi sets the executed flag to true here despite the exception
-        // This allows it to move to the next command or it just loops indefinitely.
-        // we will set it to false (see Nick Draper) 6/12/07
+        // Execution failed
         setExecuted(false);
         m_runningAsync = false;
         m_running = false;
 
-        m_notificationCenter.postNotification(new ErrorNotification(this,"UNKNOWN Exception is caught "));
-        g_log.error() << this->name() << ": UNKNOWN Exception is caught\n";
+        m_notificationCenter.postNotification(new ErrorNotification(this,"UNKNOWN Exception is caught in exec()"));
+        g_log.error() << this->name() << ": UNKNOWN Exception is caught in exec()\n";
+        this->unlockWorkspaces();
         throw;
-        // Gaudi calls exception service 'handle' method here
       }
 
-      // Gaudi has some stuff here where it tests for failure, increments the error counter
-      // and then converts to success if less than the maximum. This is clearly related to
-      // having an event loop, and thus we shouldn't want it. This is the only place it's used.
+      // Unlock the locked workspaces
+      this->unlockWorkspaces();
 
       m_notificationCenter.postNotification(new FinishedNotification(this,isExecuted()));
       // Only gets to here if algorithm ended normally
@@ -383,7 +571,11 @@ namespace Mantid
       return isExecuted();
     }
 
-    /// Execute as a sub-algorithm
+    //---------------------------------------------------------------------------------------------
+    /** Execute as a sub-algorithm.
+     * This runs execute() but catches errors so as to log the name
+     * of the failed sub-algorithm, if it fails.
+     */
     void Algorithm::executeAsSubAlg()
     {
       bool executed = false;
@@ -404,18 +596,32 @@ namespace Mantid
       }
     }
 
-    /// Has the Algorithm already been initialized
-    bool Algorithm::isInitialized() const
+    //---------------------------------------------------------------------------------------------
+    /** Stores any output workspaces into the AnalysisDataService
+    *  @throw std::runtime_error If unable to successfully store an output workspace
+    */
+    void Algorithm::store()
     {
-      return m_isInitialized;
+      const std::vector< Property*> &props = getProperties();
+      for (unsigned int i = 0; i < props.size(); ++i)
+      {
+        IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty*>(props[i]);
+        if (wsProp)
+        {
+          try
+          {
+            wsProp->store();
+          }
+          catch (std::runtime_error&)
+          {
+            g_log.error("Error storing output workspace in AnalysisDataService");
+            throw;
+          }
+        }
+      }
     }
 
-    /// Has the Algorithm already been executed
-    bool Algorithm::isExecuted() const
-    {
-      return m_isExecuted;
-    }
-
+    //---------------------------------------------------------------------------------------------
     /** Create a sub algorithm.  A call to this method creates a child algorithm object.
     *  Using this mechanism instead of creating daughter
     *  algorithms directly via the new operator is prefered since then
@@ -426,7 +632,7 @@ namespace Mantid
     *  @param endProgress ::    The percentage progress value of the overall algorithm where this child algorithm ends
     *  @param enableLogging ::  Set to false to disable logging from the child algorithm
     *  @param version ::        The version of the child algorithm to create. By default gives the latest version.
-    *  @returns Set to point to the newly created algorithm object
+    *  @return shared pointer to the newly created algorithm object
     */
     Algorithm_sptr Algorithm::createSubAlgorithm(const std::string& name, const double startProgress, const double endProgress,
       const bool enableLogging, const int& version)
@@ -492,21 +698,10 @@ namespace Mantid
       return;
     }
 
-    /**  Add an observer to a notification
-    @param observer :: Reference to the observer to add
-    */
-    void Algorithm::addObserver(const Poco::AbstractObserver& observer)const
-    {
-      m_notificationCenter.addObserver(observer);
-    }
+    //=============================================================================================
+    //================================== Algorithm History ========================================
+    //=============================================================================================
 
-    /**  Remove an observer
-    @param observer :: Reference to the observer to remove
-    */
-    void Algorithm::removeObserver(const Poco::AbstractObserver& observer)const
-    {
-      m_notificationCenter.removeObserver(observer);
-    }
 
     /**
      * Serialize this object to a string. The format is
@@ -523,12 +718,44 @@ namespace Mantid
       return writer.str();
     }
 
-    /**
-    * De-serialize an object from a string
+
+    //--------------------------------------------------------------------------------------------
+    /** Construct an object from a history entry.
+     *
+     * This creates the algorithm and sets all of its properties using the history.
+     *
+     * @param history :: AlgorithmHistory object
+     * @return a shared pointer to the created algorithm.
+     */
+    IAlgorithm_sptr Algorithm::fromHistory(const AlgorithmHistory & history)
+    {
+      // Hand off to the string creator
+      std::ostringstream stream;
+      stream << history.name() << "." << history.version()
+       << "(";
+      const std::vector<Kernel::PropertyHistory>& props = history.getProperties();
+      const size_t numProps(props.size());
+      for( size_t i = 0 ; i < numProps; ++i )
+      {
+        const Kernel::PropertyHistory & prop = props[i];
+        if( !prop.isDefault() )
+        {
+          stream << prop.name() << "=" << prop.value();
+        }
+        if( i < numProps - 1 ) stream << ",";
+      }
+      stream << ")";
+      return Algorithm::fromString(stream.str());
+    }
+
+
+    //--------------------------------------------------------------------------------------------
+    /** De-serializes the algorithm from a string
+     *
     * @param input :: An input string in the format. The format is
-    * AlgorithmName.version(prop1=value1,prop2=value2,...). If .version is not found the 
-    * highest found is used.
-    * @returns A pointer to a managed algorithm object
+    *        AlgorithmName.version(prop1=value1,prop2=value2,...). If .version is not found the
+    *        highest found is used.
+    * @return A pointer to a managed algorithm object
     */
     IAlgorithm_sptr Algorithm::fromString(const std::string & input)
     {
@@ -579,58 +806,10 @@ namespace Mantid
       }
     }
 
-    /// Construct an object from a history entry
-    IAlgorithm_sptr Algorithm::fromHistory(const AlgorithmHistory & history)
-    {
-      // Hand off to the string creator
-      std::ostringstream stream;
-      stream << history.name() << "." << history.version()
-       << "(";
-      const std::vector<Kernel::PropertyHistory>& props = history.getProperties();
-      const size_t numProps(props.size());
-      for( size_t i = 0 ; i < numProps; ++i )
-      {
-  const Kernel::PropertyHistory & prop = props[i];
-  if( !prop.isDefault() )
-  {
-    stream << prop.name() << "=" << prop.value();
-  }
-  if( i < numProps - 1 ) stream << ",";
-      }
-      stream << ")";
-      return Algorithm::fromString(stream.str());
-    }
-
-    /**
-     * Cancel an algorithm
-     */
-    void Algorithm::cancel() const
-    {
-      //set myself to be cancelled
-      m_cancel = true;
-
-      //set any child algorithms to be cancelled as well
-      std::vector<IAlgorithm_wptr>::const_iterator it;
-
-      // Loop over the output workspaces and try to cancel them
-      for (it = m_ChildAlgorithms.begin(); it != m_ChildAlgorithms.end(); ++it)
-      {
-        IAlgorithm_wptr weakPtr = *it;
-        if (IAlgorithm_sptr sharedPtr = weakPtr.lock())
-        {
-          sharedPtr->cancel();
-        }
-      }
-    }
-
-    //----------------------------------------------------------------------
-    // Protected Member Functions
-    //----------------------------------------------------------------------
-
+    //-------------------------------------------------------------------------
     /** Initialize using proxy algorithm.
-    Call the main initialize method and then copy in the property values.
-    @param proxy :: Initialising proxy algorithm
-    */
+     * Call the main initialize method and then copy in the property values.
+     * @param proxy :: Initialising proxy algorithm  */
     void Algorithm::initializeFromProxy(const AlgorithmProxy& proxy)
     {
       initialize();
@@ -639,45 +818,6 @@ namespace Mantid
       setLogging(proxy.isLogging());
     }
 
-    /// Set the Algorithm initialized state
-    void Algorithm::setInitialized()
-    {
-      m_isInitialized = true;
-    }
-
-    /** Set the executed flag to the specified state
-    // Public in Gaudi - don't know why and will leave here unless we find a reason otherwise
-    //     Also don't know reason for different return type and argument.
-    @param state :: New executed state
-    */
-    void Algorithm::setExecuted(bool state)
-    {
-      m_isExecuted = state;
-    }
-
-    /** Sends ProgressNotification. 
-    @param p :: Reported progress,  must be between 0 (just started) and 1 (finished)
-    @param msg :: Optional message string
-    @param estimatedTime :: Optional estimated time to completion
-    @param progressPrecision :: optional, int number of digits after the decimal point to show.
-    */
-    void Algorithm::progress(double p, const std::string& msg, double estimatedTime, int progressPrecision)
-    {
-      m_notificationCenter.postNotification(new ProgressNotification(this,p,msg, estimatedTime, progressPrecision));
-    }
-
-    void Algorithm::interruption_point()
-    {
-      // only throw exceptions if the code is not multi threaded otherwise you contravene the OpenMP standard
-      // that defines that all loops must complete, and no exception can leave an OpenMP section
-      // openmp cancel handling is performed using the ??, ?? and ?? macros in each algrothim
-      IF_NOT_PARALLEL
-        if (m_cancel) throw CancelException();
-    }
-
-    //----------------------------------------------------------------------
-    // Private Member Functions
-    //----------------------------------------------------------------------
 
     /** Fills History, Algorithm History and Algorithm Parameters
     *  @param start :: a date and time defnining the start time of the algorithm
@@ -742,8 +882,8 @@ namespace Mantid
       }
     }
 
-    /// puts out algorithm parameter information to the logger
-    void Algorithm::algorithm_info() const
+    /** Sends out algorithm parameter information to the logger */
+    void Algorithm::logAlgorithmInfo() const
     {
       g_log.notice() << name() << " started"<< std::endl;
       // Make use of the AlgorithmHistory class, which holds all the info we want here
@@ -751,386 +891,278 @@ namespace Mantid
       g_log.information() << AH;
     }
 
-    /** Stores any output workspaces into the AnalysisDataService
-    *  @throw std::runtime_error If unable to successfully store an output workspace
-    */
-    void Algorithm::store()
-    {
-      const std::vector< Property*> &props = getProperties();
-      for (unsigned int i = 0; i < props.size(); ++i)
-      {
-        IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty*>(props[i]);
-        if (wsProp)
-        {
-          try
-          {
-            wsProp->store();
-          }
-          catch (std::runtime_error&)
-          {
-            g_log.error("Error storing output workspace in AnalysisDataService");
-            throw;
-          }
-        }
-      }
-    }
 
-    /** To query whether algorithm is a child.
-    *  @returns true - the algorithm is a child algorithm.  False - this is a full managed algorithm.
-    */
-    bool Algorithm::isChild() const
-    {
-      return m_isChildAlgorithm;
-    }
 
-    /** To set whether algorithm is a child.
-    *  @param isChild :: True - the algorithm is a child algorithm.  False - this is a full managed algorithm.
-    */
-    void Algorithm::setChild(const bool isChild)
-    {
-      m_isChildAlgorithm = isChild;
-    }
+    //=============================================================================================
+    //================================== WorkspaceGroup-related ===================================
+    //=============================================================================================
 
-    /** Set whether the algorithm will rethrow exceptions
-     * @param rethrow :: true if you want to rethrow exception.
+    /** Check the input workspace properties for groups.
+     *
+     * If there are more than one input workspace properties, then:
+     *  - All inputs should be groups of the same size
+     *    - In this case, algorithms are processed in order
+     *  - OR, only one input should be a group, the others being size of 1
+     *
+     * Sets m_processGroups to true if if processGroups() should be called.
+     * It also sets up some other members.
+     *
+     * Override if it is needed to customize the group checking. Make sure
+     * to set m_processGroups in the overridden method.
+     *
+     * @throw std::invalid_argument if the groups sizes are incompatible.
+     * @throw std::invalid_argument if a member is not found
      */
-    void Algorithm::setRethrows(const bool rethrow)
+    void Algorithm::checkGroups()
     {
-      this->m_rethrow = rethrow;
-    }
+      size_t numGroups = 0;
+      m_processGroups = false;
 
-    /**
-    * Asynchronous execution
-    */
-    Poco::ActiveResult<bool> Algorithm::executeAsync()
-    { 
-      return m_executeAsync(Poco::Void());
-    }
+      // Unroll the groups or single inputs into vectors of workspace
+      m_groups.clear();
+      m_groupWorkspaces.clear();
+      for (size_t i=0; i<m_inputWorkspaceProps.size(); i++)
+      {
+        Property * prop = dynamic_cast<Property *>(m_inputWorkspaceProps[i]);
+        std::vector<Workspace_sptr> thisGroup;
 
-    /** To Process workspace groups.
-    *  @param ingrpws_sptr :: input workspacegroup pointer to iterate through all members
-    *  @param  props a vector holding the input properties
-    *  @returns true - if all the workspace members are executed.
-    */
-    bool Algorithm::processGroups(WorkspaceGroup_sptr ingrpws_sptr,const std::vector<Mantid::Kernel::Property*>& props)
-    {
-      int nPeriod=1;
-      int execPercentage=0;
-      bool bgroupPassed=true;
+        Workspace_sptr ws = m_inputWorkspaceProps[i]->getWorkspace();
+        WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
 
-      WorkspaceGroup_sptr wsgrp1_sptr; 
-      WorkspaceGroup_sptr wsgrp2_sptr;
-      bool bnewGoup1=true;
-      bool bnewGoup2=true;
-      std::string prevPropName("");
-
-      //getting the input workspace group names
-      const std::vector<std::string> inputWSNames=ingrpws_sptr->getNames();
-      const size_t nSize=inputWSNames.size();
-      //size is one if only group header.
-      //return if atleast one meber is not there in group to process
-      if(nSize<1)
-      { throw std::runtime_error("Input WorkspaceGroup has no members to process");
-      }
-
-      int execTotal=0;
-      //removing the header count from the totalsize
-      execTotal=(static_cast<int>(nSize))*10;
-      m_notificationCenter.postNotification(new StartedNotification(this));
-
-      IAlgorithm* alg = API::FrameworkManager::Instance().createAlgorithm(this->name() ,"",this->version());
-      if(!alg) {g_log.error()<<"createAlgorithm returned null pointer "<<std::endl;return false;}
-
-      //now check the input and output workspaces are of same name.
-      bool bequal=isInputequaltoOutPut(props);
-
-      std::string ingrpwsName;
-      getInputGroupWorkspaceName(props,ingrpwsName);
-      //check the workspace are of similar names (similar if they are of names like group_1,group_2)
-      bool bSimilarNames=isGroupWorkspacesofSimilarNames(ingrpwsName,inputWSNames);
-
-      std::vector<std::string>::const_iterator wsItr=inputWSNames.begin();
-      for(;wsItr!=inputWSNames.end();++wsItr)
-      { //set  properties
-        
-        if (API::AnalysisDataService::Instance().retrieve(*wsItr)->id() != "TableWorkspace")
+        // Workspace groups are NOT returned by IWP->getWorkspace() most of the time
+        // because WorkspaceProperty is templated by <MatrixWorkspace>
+        // and WorkspaceGroup does not subclass <MatrixWorkspace>
+        if (!wsGroup && !prop->value().empty())
         {
-          // Do the rest of the for loop
-          std::vector<Mantid::Kernel::Property*>::const_iterator itr;
-          for (itr=props.begin();itr!=props.end();++itr)
-          {
-            // cppcheck-suppress variableScope
-            int outWSCount=0;
-            if(isWorkspaceProperty(*itr) )
-            {
-
-              if(isInputWorkspaceProperty(*itr))
-              {
-
-                if(!setInputWSProperties(alg,*itr,*wsItr))
-                {
-                  throw std::runtime_error("Invalid value found for the property " +(*itr)->name()+ " when executing the algorithm"+this->name());
-                }
-
-              }
-              if(isOutputWorkspaceProperty(*itr))
-              {
-                ++outWSCount;
-                //create a group and pass that to setOutputWSProperties 
-                if(outWSCount==1)
-                { 
-                  if( bnewGoup1)
-                  {
-                    wsgrp1_sptr= WorkspaceGroup_sptr(new WorkspaceGroup);
-                    bnewGoup1=false;
-                  }
-                  if(!setOutputWSProperties(alg,*itr,nPeriod,*wsItr,wsgrp1_sptr,bSimilarNames,bequal))
-                  {
-                    throw std::runtime_error("Invalid value found for the property " +(*itr)->name()+ " when executing the algorithm"+this->name());
-                  }
-
-                }
-                if(outWSCount==2)
-                {
-                  if( bnewGoup2)
-                  {
-                    wsgrp2_sptr= WorkspaceGroup_sptr(new WorkspaceGroup);
-                    bnewGoup2=false;
-                  }
-                  if(!setOutputWSProperties(alg,*itr,nPeriod,*wsItr,wsgrp2_sptr,bSimilarNames,bequal))
-                  {
-                    throw std::runtime_error("Invalid value found for the property " +(*itr)->name()+ " when executing the algorithm"+this->name());
-                  }
-                }
-
-              }//end of isOutputWorkspaceProperty
-
-            }// end of isWorkspaceProperty
-            else
-            {
-              this->setOtherProperties(alg,(*itr)->name(),(*itr)->value(),nPeriod);
-            }
-          }//end of for loop for setting properties
-          //resetting the previous properties at the end of each execution 
-          prevPropName="";
-          // execute the algorithm 
-          bool bStatus = false;
-          if ( alg->validateProperties() ) 
-          {bStatus = alg->execute();
+          // So try to use the name in the AnalysisDataService
+          try {
+          wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(prop->value()));
           }
-          // status of each execution is checking 
-          bgroupPassed=bgroupPassed&&bStatus;
-          execPercentage+=10;
-          progress(double((execPercentage)/execTotal));
-          //if a workspace execution fails
-          if(!bStatus)
-          {  
-            throw std::runtime_error("execution failed for the input workspace "+(*wsItr));
+          catch (Exception::NotFoundError&) { /* Do nothing */ }
+        }
+
+        // Found the group either directly or by name?
+        if (wsGroup)
+        {
+          numGroups++;
+          m_processGroups = true;
+          std::vector<std::string> names = wsGroup->getNames();
+          for (size_t j=0; j<names.size(); j++)
+          {
+            Workspace_sptr memberWS = AnalysisDataService::Instance().retrieve(names[j]);
+            if (!memberWS)
+              throw std::invalid_argument("One of the members of " + wsGroup->name() + ", " + names[j] + " was not found!.");
+            thisGroup.push_back(memberWS);
           }
         }
-        //increment count for outworkpsace name
-        nPeriod++;
-        
-      }//end of for loop for input workspace group members processing
-      //if all passed 
-      if(bgroupPassed)
-      {setExecuted(true);
+        else
+        {
+          // Single Workspace. Treat it as a "group" with only one member
+          if (ws)
+            thisGroup.push_back(ws);
+        }
+
+        // Add to the list of groups
+        m_groups.push_back(thisGroup);
+        m_groupWorkspaces.push_back(wsGroup);
       }
 
+      // No groups? Get out.
+      if (numGroups == 0)
+        return;
+
+      // ---- Confirm that all the groups are the same size -----
+      // Index of the single group
+      m_singleGroup = -1;
+      // Size of the single or of all the groups
+      m_groupSize = 1;
+      m_groupsHaveSimilarNames = true;
+      for (size_t i=0; i<m_groups.size(); i++)
+      {
+        std::vector<Workspace_sptr> & thisGroup = m_groups[i];
+        // We're ok with empty groups if the workspace property is optional
+        if (thisGroup.size() == 0 && !m_inputWorkspaceProps[i]->isOptional())
+          throw std::invalid_argument("Empty group passed as input");
+        if (thisGroup.size() >= 1)
+        {
+          // Record the index of the single group.
+          WorkspaceGroup_sptr wsGroup = m_groupWorkspaces[i];
+          if (wsGroup && (numGroups == 1))
+            m_singleGroup = int(i);
+
+          // For actual groups (>1 members)
+          if (thisGroup.size() > 1)
+          {
+            // Check for matching group size
+            if (m_groupSize > 1)
+              if (thisGroup.size() != m_groupSize)
+                throw std::invalid_argument("Input WorkspaceGroups are not of the same size.");
+
+            // Are ALL the names similar?
+            if (wsGroup)
+              m_groupsHaveSimilarNames = m_groupsHaveSimilarNames && wsGroup->areNamesSimilar();
+
+            // Save the size for the next group
+            m_groupSize = thisGroup.size();
+          }
+        }
+      } // end for each group
+
+      // If you get here, then the groups are compatible
+    }
+
+
+
+    //--------------------------------------------------------------------------------------------
+    /** Process WorkspaceGroup inputs.
+     *
+     * This should be called after checkGroups(), which sets up required members.
+     * It goes through each member of the group(s), creates and sets an algorithm
+     * for each and executes them one by one.
+     *
+     * If there are several group input workspaces, then the member of each group
+     * is executed pair-wise.
+     *
+     * @return true - if all the workspace members are executed.
+     */
+    bool Algorithm::processGroups()
+    {
+      std::vector<WorkspaceGroup_sptr> outGroups;
+
+      // ---------- Create all the output workspaces ----------------------------
+      for (size_t owp=0; owp<m_pureOutputWorkspaceProps.size(); owp++)
+      {
+        Property * prop = dynamic_cast<Property *>(m_pureOutputWorkspaceProps[owp]);
+        // Do not observe ADS notifications while constructing the group
+        WorkspaceGroup_sptr outWSGrp = WorkspaceGroup_sptr(new WorkspaceGroup(false));
+        outGroups.push_back(outWSGrp);
+        // Put the GROUP in the ADS
+        AnalysisDataService::Instance().addOrReplace(prop->value(), outWSGrp );
+      }
+
+      // Go through each entry in the input group(s)
+      for (size_t entry=0; entry<m_groupSize; entry++)
+      {
+        // Create a new instance of the algorithm
+        IAlgorithm* alg = API::FrameworkManager::Instance().createAlgorithm(this->name(), this->version());
+        if(!alg)
+        {
+          g_log.error()<<"CreateAlgorithm failed for "<<this->name()<<"("<<this->version()<<")"<<std::endl;
+          throw std::runtime_error("Algorithm creation failed.");
+        }
+
+        // Set all non-workspace properties
+        this->copyNonWorkspaceProperties(alg, int(entry)+1);
+
+        std::string outputBaseName = "";
+
+        // ---------- Set all the input workspaces ----------------------------
+        for (size_t iwp=0; iwp<m_groups.size(); iwp++)
+        {
+          std::vector<Workspace_sptr> & thisGroup = m_groups[iwp];
+          if (thisGroup.size() > 0)
+          {
+            // By default (for a single group) point to the first/only workspace
+            Workspace_sptr ws = thisGroup[0];
+
+            if ((m_singleGroup == int (iwp)) || m_singleGroup < 0)
+            {
+              // Either: this is the single group
+              // OR: all inputs are groups
+              // ... so get then entry^th workspace in this group
+              ws = thisGroup[entry];
+            }
+            // Append the names together
+            if (!outputBaseName.empty()) outputBaseName += "_";
+            outputBaseName += ws->name();
+
+            // Set the property using the name of that workspace
+            Property * prop = dynamic_cast<Property *>(m_inputWorkspaceProps[iwp]);
+            alg->setPropertyValue(prop->name(), ws->name());
+          } // not an empty (i.e. optional) input
+        } // for each InputWorkspace property
+
+
+        // ---------- Set all the output workspaces ----------------------------
+        for (size_t owp=0; owp<m_pureOutputWorkspaceProps.size(); owp++)
+        {
+          Property * prop = dynamic_cast<Property *>(m_pureOutputWorkspaceProps[owp]);
+
+          // Default name = "in1_in2_out"
+          std::string outName = outputBaseName + "_" + prop->value();
+          // Except if all inputs had similar names, then the name is "out_1"
+          if (m_groupsHaveSimilarNames)
+            outName = prop->value() + "_" + Strings::toString(entry+1);
+
+          // Set in the output
+          alg->setPropertyValue(prop->name(), outName);
+
+          // And add it to the output group
+          outGroups[owp]->add(outName);
+        } // for each OutputWorkspace property
+
+        // ------------ Execute the algo --------------
+        if (!alg->execute())
+          throw std::runtime_error("Execution of " + this->name() + " for group entry " + Strings::toString(entry+1) + " failed.");
+
+      } // for each entry in each group
+
+      // Finish up
+      for (size_t i=0; i<outGroups.size(); i++)
+      {
+        // Go back to observing ADS in each group.
+        outGroups[i]->observeADSNotifications(true);
+      }
+
+      // We finished successfully.
+      setExecuted(true);
       m_notificationCenter.postNotification(new FinishedNotification(this,isExecuted()));
-      return bgroupPassed;
-    }
 
-    /**This method checks input and output groupworkspace for an algorithm is of same name.
-    *  @param props :: a list of properties for the algorithm
-    *  @param ingroupwsName ::  input groupworkspace
-    */ 
-    void Algorithm::getInputGroupWorkspaceName(const std::vector<Mantid::Kernel::Property*>& props,std::string& ingroupwsName)
-    {
-      std::vector<Mantid::Kernel::Property*>::const_iterator itr;
-      for (itr=props.begin();itr!=props.end();++itr)
-      {                
-        if(isInputWorkspaceProperty(*itr))
-        { 
-          try
-          {
-            if(WorkspaceGroup_sptr wsGrpSptr=boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve((*itr)->value())))
-            {
-              ingroupwsName=(*itr)->value();
-              break;
-            }
-
-          }
-          catch(Kernel::Exception::NotFoundError&)
-          {
-            throw std::runtime_error("Workspace "+ (*itr)->value()+ "not loaded");
-          }
-
-        }
-      }
-    }
-
-    /** This method checks input and output groupworkspace for an algorithm is of same name.
-    *  @param props :: a list of properties for the algorithm
-    *  @returns true if the input and output groupworkspaces are of same names
-    */ 
-    bool Algorithm::isInputequaltoOutPut(const std::vector<Mantid::Kernel::Property*>& props)
-    {
-      std::vector<Mantid::Kernel::Property*>::const_iterator citr;
-      std::string inputwsName;std::string outputwsName;
-      for(citr=props.begin();citr!=props.end();++citr)
-      {
-
-        if(isInputWorkspaceProperty(*citr))
-        {
-          inputwsName=(*citr)->value();
-        }
-        if(isOutputWorkspaceProperty(*citr))
-        {
-          outputwsName=(*citr)->value();
-        }
-
-      }
-      return (!inputwsName.compare(outputwsName)? true:false);
-    }
-
-
-    /**This method checks the member workspace are of similar names in a group workspace .
-    *  @param ingroupwsName :: input group workspace name
-    *  @param grpmembersNames :: a list of group member names
-    *  @returns true if workspaces are of similar names
-    */ 
-    bool Algorithm::isGroupWorkspacesofSimilarNames(const std::string& ingroupwsName,const std::vector<std::string>& grpmembersNames)
-    {
-      if(grpmembersNames.empty()) return false;
-
-      bool bsimilar(true);
-      //check all the members are of similar names
-      std::vector<std::string>::const_iterator citr;
-      for(citr=grpmembersNames.begin();citr!=grpmembersNames.end();++citr)
-      {
-        bool b;
-        std::size_t pos=(*citr).find_last_of("_");
-        if(pos==std::string::npos)
-        {
-          b=false;
-        }
-        std::string commonpart((*citr).substr(0,pos));
-        if(!ingroupwsName.compare(commonpart))
-        {
-          b=true;
-
-        }
-        else
-        {
-          b=false;
-        }
-        bsimilar= bsimilar&&b;
-      }
-      return(bsimilar?true:false);
-
-    }
-    /**virtual method to set the non workspace properties for this algorithm.
-    *  @param alg :: pointer to the algorithm
-    *  @param propertyName :: name of the property
-    *  @param propertyValue :: value  of the property
-    *  @param nPeriod :: period number
-    */ 
-    void Algorithm::setOtherProperties(IAlgorithm* alg,const std::string & propertyName,const std::string &propertyValue,int nPeriod)
-    {
-      (void) nPeriod; //Avoid compiler warning
-      if(alg) alg->setPropertyValue(propertyName,propertyValue);
-    }
-
-    /** Setting input workspace properties for an algorithm,for handling workspace groups.
-    *  @param pAlg ::  pointer to algorithm
-    *  @param  prop  pointer to a vector holding the input properties
-    *  @param  inMemberWSName input workspace name
-    *  @returns true - if property is set .
-    */
-    bool  Algorithm::setInputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property* prop,const std::string& inMemberWSName )
-    {
-      if(!pAlg) return false;
-      if(!prop)return false;
-      try
-      {
-        pAlg->setPropertyValue(prop->name(), inMemberWSName);
-      }
-      catch(std::invalid_argument&)
-      {
-        return false;
-      }
-      return true;
-
-    }
-    /** setting output workspace properties for an algorithm,
-    *  This used for processing workspace groups and this  method is called when
-    *  the input and out workspaces are not same
-    *  @param pAlg ::      pointer to algorithm
-    *  @param prop ::      pointer to the input properties
-    *  @param nPeriod ::   period number 
-    *  @param inmemberwsName :: outputworkspace name
-    *  @param outwsgrp_sptr :: shared pointer for workspacegroup
-    *  @param bSimilarNames :: -true if the input member workspaces are of similar names
-    *  @param bequal :: -true if both the input and output group workspaces are same
-    *  @returns true if property is set 
-    */
-    bool Algorithm::setOutputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property* prop,const int nPeriod,const std::string& inmemberwsName,
-      WorkspaceGroup_sptr& outwsgrp_sptr,bool bSimilarNames,bool bequal)
-    {
-      if(!prop) return false;
-      if(!outwsgrp_sptr) return false;
-      //output group workspace name
-      std::string outgrpwsName=prop->value();
-      // period number
-      std::stringstream suffix;
-      suffix<<nPeriod;
-      //member workspace name
-      std::string outmemberwsName;
-      //if input and ouput group workspace name same
-      if(bequal)
-      {
-        outmemberwsName=inmemberwsName;               //InputPut GroupWs ="NewGroup",//OutPut GroupWs ="NewGroup"
-        // input member ws1= "Bob", // output member ws1="Bob_NewGroup" 
-        //input member ws2 = "Sally",// output member ws2="Sally_NewGroup" 
-      }
-      else
-      { 
-        if(bSimilarNames) //if group are of similar names
-        {
-          outmemberwsName=outgrpwsName+"_"+suffix.str(); // input group ws ="Group"  ,//OutPut GroupWs ="NewGroup"
-          //input member ws1="Group_1",//output member ws1="NewGroup_1"
-          //input member ws2="Group_2",//output member ws2="NewGroup_2" 
-        }       
-        else
-        {
-          outmemberwsName= inmemberwsName+"_"+outgrpwsName;//InputPut GroupWs ="Group",//OutPut GroupWs ="NewGroup"
-          // input member ws1 = "Bob", // output member ws1="Bob_NewGroup" 
-          //input member ws2 = "Sally",// output member ws2="Sally_NewGroup" 
-        }
-      }
-      if(nPeriod==1)
-      {//group workspace is saving to ADS
-        AnalysisDataService::Instance().addOrReplace(outgrpwsName,outwsgrp_sptr );
-      } 
-      unsigned int direction = prop->direction();
-      if ((direction == Kernel::Direction::Output||direction== Kernel::Direction::InOut)) 
-      {
-        try
-        {
-          pAlg->setPropertyValue(prop->name(), outmemberwsName);
-        }
-        catch(std::invalid_argument&)
-        {
-          return false;
-        }
-      }
-      //adding  member workspace to group vector
-      g_log.information()<< outmemberwsName<<" adding to group workspace"<<std::endl;
-      outwsgrp_sptr->add(outmemberwsName);
       return true;
     }
 
+    //--------------------------------------------------------------------------------------------
+    /** Copy all the non-workspace properties from this to alg
+     *
+     * @param alg :: other IAlgorithm
+     * @param periodNum :: number of the "period" = the entry in the group + 1
+     */
+    void Algorithm::copyNonWorkspaceProperties(IAlgorithm * alg, int periodNum)
+    {
+      if (!alg) throw std::runtime_error("Algorithm not created!");
+      std::vector<Property*> props = this->getProperties();
+      for (size_t i=0; i < props.size(); i++)
+      {
+        Property * prop = props[i];
+        if (prop)
+        {
+          IWorkspaceProperty* wsProp = dynamic_cast<IWorkspaceProperty*>(prop);
+          // Copy the property using the string
+          if (!wsProp)
+            this->setOtherProperties(alg, prop->name(), prop->value(), periodNum);
+        }
+      }
+    }
+
+
+    //--------------------------------------------------------------------------------------------
+    /** Virtual method to set the non workspace properties for this algorithm.
+     * To be overridden by specific algorithms when needed.
+     *
+     *  @param alg :: pointer to the algorithm
+     *  @param propertyName :: name of the property
+     *  @param propertyValue :: value  of the property
+     *  @param periodNum :: period number
+     */
+    void Algorithm::setOtherProperties(IAlgorithm * alg, const std::string & propertyName, const std::string & propertyValue, int periodNum)
+    {
+      (void) periodNum; //Avoid compiler warning
+      if(alg)
+        alg->setPropertyValue(propertyName, propertyValue);
+    }
+
+
+    //--------------------------------------------------------------------------------------------
     /** To query the property is a workspace property
     *  @param prop :: pointer to input properties
     *  @returns true if this is a workspace property
@@ -1145,39 +1177,9 @@ namespace Mantid
       return (wsProp ? true : false);   
     }
 
-    /** checks the property is a input workspace property
-    * @param prop :: pointer to the input properties
-    *  @returns true if this is a input workspace property
-    */
-    bool Algorithm::isInputWorkspaceProperty(const Kernel::Property* const prop) const
-    {   
-      if(!prop)
-      {
-        return false;
-      }
-      const IWorkspaceProperty * const wsProp = dynamic_cast<const IWorkspaceProperty*>(prop);
-      if(!wsProp) return false;
-      unsigned int direction = prop->direction();
-      return ((direction == Kernel::Direction::Input || direction==Kernel::Direction::InOut)?true :false);
-
-    }
-    /** checks the property is a output workspace property
-    * @param prop :: pointer to input  properties
-    * @returns true if this is a output workspace property
-    */
-    bool Algorithm::isOutputWorkspaceProperty(const Kernel::Property* const prop) const
-    {
-      if(!prop)
-      {
-        return false;
-      }
-      const IWorkspaceProperty * const wsProp = dynamic_cast<const IWorkspaceProperty*>(prop);
-      if(!wsProp) return false;
-      unsigned int direction = prop->direction();
-      return((direction == Kernel::Direction::Output || direction==Kernel::Direction::InOut)? true :false);
-    }
-
-
+    //=============================================================================================
+    //================================== Asynchronous Execution ===================================
+    //=============================================================================================
     namespace
     {
       /**
@@ -1203,10 +1205,19 @@ namespace Mantid
         ///Running flag
         bool & m_running_flag;
       };
+    }
 
+    //--------------------------------------------------------------------------------------------
+    /**
+    * Asynchronous execution
+    */
+    Poco::ActiveResult<bool> Algorithm::executeAsync()
+    {
+      return m_executeAsync(Poco::Void());
     }
 
     /**Callback when an algorithm is executed asynchronously
+     * @param i :: Unused argument
      * @return true if executed successfully.
     */
     bool Algorithm::executeAsyncImpl(const Poco::Void&)
@@ -1224,25 +1235,40 @@ namespace Mantid
       progress(p,pNf->message);
     }
 
-    /// Function to return all of the categories that contain this algorithm
-    const std::vector<std::string> Algorithm::categories() const
+    //--------------------------------------------------------------------------------------------
+    /**
+     * Cancel an algorithm
+     */
+    void Algorithm::cancel() const
     {
-      std::vector < std::string > res;
-      Poco::StringTokenizer tokenizer(category(), categorySeperator(),
-          Poco::StringTokenizer::TOK_TRIM | Poco::StringTokenizer::TOK_IGNORE_EMPTY);
-      Poco::StringTokenizer::Iterator h = tokenizer.begin();
+      //set myself to be cancelled
+      m_cancel = true;
 
-      for (; h != tokenizer.end(); ++h)
-      {
-        res.push_back(*h);
-      }
+      //set any child algorithms to be cancelled as well
+      std::vector<IAlgorithm_wptr>::const_iterator it;
 
-      const DeprecatedAlgorithm * depo = dynamic_cast<const DeprecatedAlgorithm *>(this);
-      if (depo != NULL)
+      // Loop over the output workspaces and try to cancel them
+      for (it = m_ChildAlgorithms.begin(); it != m_ChildAlgorithms.end(); ++it)
       {
-        res.push_back("Deprecated");
+        IAlgorithm_wptr weakPtr = *it;
+        if (IAlgorithm_sptr sharedPtr = weakPtr.lock())
+        {
+          sharedPtr->cancel();
+        }
       }
-      return res;
+    }
+
+    //--------------------------------------------------------------------------------------------
+    /** This is called during long-running operations,
+     * and check if the algorithm has requested that it be cancelled.
+     */
+    void Algorithm::interruption_point()
+    {
+      // only throw exceptions if the code is not multi threaded otherwise you contravene the OpenMP standard
+      // that defines that all loops must complete, and no exception can leave an OpenMP section
+      // openmp cancel handling is performed using the ??, ?? and ?? macros in each algrothim
+      IF_NOT_PARALLEL
+        if (m_cancel) throw CancelException();
     }
 
 

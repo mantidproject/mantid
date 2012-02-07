@@ -3,6 +3,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 namespace Mantid
 {
@@ -14,6 +15,7 @@ template MANTID_API_DLL class Mantid::API::WorkspaceProperty<Mantid::API::IEvent
 template MANTID_API_DLL class Mantid::API::WorkspaceProperty<Mantid::API::IMDEventWorkspace>;
 template MANTID_API_DLL class Mantid::API::WorkspaceProperty<Mantid::API::IMDWorkspace>;
 template MANTID_API_DLL class Mantid::API::WorkspaceProperty<Mantid::API::MatrixWorkspace>;
+template MANTID_API_DLL class Mantid::API::WorkspaceProperty<Mantid::API::ITableWorkspace>;
 ///@endcond TEMPLATE
 } // namespace API
 } // namespace Mantid

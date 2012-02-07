@@ -77,8 +77,6 @@ public slots:
   ///
   void runyAxisMaximumInput();
   ///
-  void runShowErrorBars(bool state);
-  ///
   void runyAxisAutoscale(bool state);
 
   ////////////// Data Binning slots ///////////////
@@ -104,6 +102,19 @@ private slots:
   
   ///
   void muonAnalysisHelpSettingsClicked();
+
+  ///
+  void plotCreationChanged(int);
+  ///
+  void plotTypeChanged(int);
+  ///
+  void errorBarsChanged(bool);
+  ///
+  void toolbarsChanged(bool);
+  ///
+  void validateYMin();
+  ///
+  void validateYMax();
 };
 
 }

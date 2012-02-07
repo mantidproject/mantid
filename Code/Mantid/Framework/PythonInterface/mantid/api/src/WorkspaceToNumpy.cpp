@@ -82,50 +82,70 @@ namespace Mantid
         }
       }
 
+      // -------------------------------------- Non-copying array access ------------------------------------
+#define DEFINE_ACCESS_FN(functionName, workspaceMethod, wrapperMethod)\
+    PyObject *functionName(MatrixWorkspace &self, const size_t index)\
+    {\
+      PyArrayObject *nparray = (PyArrayObject*)wrapperMethod(self.workspaceMethod(index));\
+      return (PyObject*)nparray;\
+    }
 
-      // -------------------------------------- Read-only arrays---------------------------------------------------
       /*
-       * Create a numpy wrapper around the original X values at the given index
+       * Create a read-only numpy wrapper around the original X values at the given index
        * @param self :: A reference to the calling object
        * @param index :: The index into the workspace
        */
-      PyObject *wrapX(MatrixWorkspace &self, const size_t index)
-      {
-        PyArrayObject *nparray = (PyArrayObject*)wrapWithReadOnlyNumpy(self.readX(index));
-        return (PyObject*)nparray;
-      }
+      DEFINE_ACCESS_FN(readOnlyX, readX, wrapWithReadOnlyNumpy);
+
       /*
-       * Create a numpy wrapper around the original Y values at the given index
+       * Create a read-only numpy wrapper around the original Y values at the given index
        * @param self :: A reference to the calling object
        * @param index :: The index into the workspace
        */
-      PyObject *wrapY(MatrixWorkspace & self, const size_t index)
-      {
-        PyArrayObject *nparray = (PyArrayObject*)wrapWithReadOnlyNumpy(self.readY(index));
-        return (PyObject*)nparray;
-      }
+      DEFINE_ACCESS_FN(readOnlyY, readY, wrapWithReadOnlyNumpy);
 
       /*
-       * Create a numpy wrapper around the original E values at the given index
+       * Create a read-only numpy wrapper around the original E values at the given index
        * @param self :: A pointer to a PyObject representing the calling object
        * @param index :: The index into the workspace
        */
-      PyObject *wrapE(MatrixWorkspace & self, const size_t index)
-      {
-        PyArrayObject *nparray = (PyArrayObject*)wrapWithReadOnlyNumpy(self.readE(index));
-        return (PyObject*)nparray;
-      }
+      DEFINE_ACCESS_FN(readOnlyE, readE, wrapWithReadOnlyNumpy);
 
       /*
-       * Create a numpy wrapper around the original Dx values at the given index
+       * Create a read-only numpy wrapper around the original Dx values at the given index
        * @param self :: A pointer to a PyObject representing the calling object
        * @param index :: The index into the workspace
        */
-      PyObject *wrapDx(MatrixWorkspace & self, const size_t index)
-      {
-        PyArrayObject *nparray = (PyArrayObject*)wrapWithReadOnlyNumpy(self.readDx(index));
-        return (PyObject*)nparray;
-      }
+      DEFINE_ACCESS_FN(readOnlyDx, readDx, wrapWithReadOnlyNumpy);
+
+      /*
+       * Create a read-only numpy wrapper around the original X values at the given index
+       * @param self :: A reference to the calling object
+       * @param index :: The index into the workspace
+       */
+      DEFINE_ACCESS_FN(readWriteX, readX, wrapWithNumpy);
+
+      /*
+       * Create a read-only numpy wrapper around the original Y values at the given index
+       * @param self :: A reference to the calling object
+       * @param index :: The index into the workspace
+       */
+      DEFINE_ACCESS_FN(readWriteY, readY, wrapWithNumpy);
+
+      /*
+       * Create a read-only numpy wrapper around the original E values at the given index
+       * @param self :: A pointer to a PyObject representing the calling object
+       * @param index :: The index into the workspace
+       */
+      DEFINE_ACCESS_FN(readWriteE, readE, wrapWithNumpy);
+
+      /*
+       * Create a read-only numpy wrapper around the original Dx values at the given index
+       * @param self :: A pointer to a PyObject representing the calling object
+       * @param index :: The index into the workspace
+       */
+      DEFINE_ACCESS_FN(readWriteDx, readDx, wrapWithNumpy);
+
 
       // -------------------------------------- Cloned arrays---------------------------------------------------
       /* Create a numpy array from the X values of the given workspace reference

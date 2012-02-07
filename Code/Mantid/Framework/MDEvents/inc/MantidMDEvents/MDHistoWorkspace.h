@@ -13,6 +13,7 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 
 using Mantid::DataObjects::WorkspaceSingleValue;
+using Mantid::API::MDNormalization;
 
 
 namespace Mantid
@@ -50,6 +51,8 @@ namespace MDEvents
 
     void init(std::vector<Mantid::Geometry::MDHistoDimension_sptr> & dimensions);
 
+    void cacheValues();
+
     virtual const std::string id() const
     { return "MDHistoWorkspace"; }
 
@@ -61,10 +64,13 @@ namespace MDEvents
       return m_length;
     }
 
-    /// Creates a new iterator pointing to the first cell in the workspace
     virtual Mantid::API::IMDIterator* createIterator(Mantid::Geometry::MDImplicitFunction * function = NULL) const;
 
+    virtual void getLinePlot(const Mantid::Kernel::VMD & start, const Mantid::Kernel::VMD & end,
+        Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y, std::vector<signal_t> & e) const;
+
     void checkWorkspaceSize(const MDHistoWorkspace & other, std::string operation);
+
 
     // --------------------------------------------------------------------------------------------
     MDHistoWorkspace & operator+=(const MDHistoWorkspace & b);
@@ -302,6 +308,21 @@ namespace MDEvents
         throw std::runtime_error("Workspace does not have 4 dimensions!");
       return index1 + indexMultiplier[0]*index2 + indexMultiplier[1]*index3 + indexMultiplier[2]*index4;
     }
+
+    /** Get the linear index into the array
+     * @param index :: array of indexes, length = number of dimensions
+     * @return linear index into m_signals
+     */
+    size_t getLinearIndex(size_t * index) const
+    {
+      size_t nd = this->getNumDims();
+      size_t out = index[0];
+      for (size_t d=1; d<nd; d++)
+        out += indexMultiplier[d-1]*index[d];
+      return out;
+    }
+
+    size_t getLinearIndexAtCoord(const coord_t * coords) const;
 
 
 

@@ -257,12 +257,13 @@ void ScriptOutputDock::resetFont()
  * @param parent :: The parent widget
  * @param flags :: Window flags passed to the base class
  */
-ScriptingWindow::ScriptingWindow(ScriptingEnv *env,QWidget *parent, Qt::WindowFlags flags) : 
+ScriptingWindow::ScriptingWindow(ScriptingEnv *env, bool capturePrint, QWidget *parent, Qt::WindowFlags flags) :
   QMainWindow(parent, flags), m_acceptClose(false)
 {
   setObjectName("MantidScriptWindow");
   // Sub-widgets
-  m_manager = new ScriptManagerWidget(env, this);
+  const bool interpreterMode(false);
+  m_manager = new ScriptManagerWidget(env, this, interpreterMode, capturePrint);
   setCentralWidget(m_manager);
   m_output_dock = new ScriptOutputDock(QString(), m_manager, this);
   m_output_dock->setScriptIsRunning(false);
@@ -279,7 +280,7 @@ ScriptingWindow::ScriptingWindow(ScriptingEnv *env,QWidget *parent, Qt::WindowFl
   QSettings settings;
   settings.beginGroup("/ScriptWindow");
   QString lastdir = settings.value("LastDirectoryVisited", "").toString();
-  // If nothgin, set the last directory to the Mantid scripts directory (if present)
+  // If nothing, set the last directory to the Mantid scripts directory (if present)
   if( lastdir.isEmpty() )
   {  
     lastdir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("pythonscripts.directory"));

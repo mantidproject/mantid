@@ -4,6 +4,8 @@
 #include "MantidVatesSimpleGuiViewWidgets/ColorUpdater.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 
+#include "MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h"
+
 #include <QPointer>
 #include <QWidget>
 
@@ -64,6 +66,8 @@ public:
 
   /// Poll the view to set status for mode control buttons.
   virtual void checkView();
+  /// Poll the view to set status for mode control buttons on view switch.
+  virtual void checkViewOnSwitch();
   /// Close view generated sub-windows.
   virtual void closeSubWindows();
   /**
@@ -98,6 +102,8 @@ public:
   virtual pqRenderView *getView() = 0;
   /// Get the workspace name from the original source object.
   virtual QString getWorkspaceName();
+  /// Check if file/workspace is a MDHistoWorkspace.
+  virtual bool isMDHistoWorkspace(pqPipelineSource *src);
   /// Check if file/workspace is a Peaks one.
   virtual bool isPeaksWorkspace(pqPipelineSource *src);
   /// Prints properties for given source.
@@ -178,6 +184,8 @@ signals:
    * @param numSteps the number of "time" steps
    */
   void setAnimationControlInfo(double start, double stop, int numSteps);
+  /// Signal to set the status of a specific view mode button.
+  void setViewStatus(ModeControlWidget::Views mode, bool state);
   /**
    * Signal to set the status of the view mode buttons.
    * @param state whether or not to enable to view mode buttons
@@ -189,8 +197,10 @@ private:
 
   /// Return the active representation determined by ParaView.
   pqPipelineRepresentation *getPvActiveRep();
-  /// Return the active view determined by ParaView
+  /// Return the active view determined by ParaView.
   pqRenderView *getPvActiveView();
+  /// Return the appropriate representation.
+  pqPipelineRepresentation *getRep();
   /// Find the number of true sources in the pipeline.
   unsigned int getNumSources();
   /// Collect time information for animation controls.

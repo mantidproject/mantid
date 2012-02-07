@@ -74,9 +74,9 @@ public:
   //! Make a clone of the present component
   virtual IComponent* clone() const;
 
-  /// Get a detector at given XY indices.
   boost::shared_ptr<Detector> getAtXY(const int X, const int Y) const;
 
+  detid_t getDetectorIDAtXY(const int X, const int Y) const;
   std::pair<int, int> getXYForDetectorID(const int detectorID) const;
 
   int xpixels() const;

@@ -1,6 +1,7 @@
 from reducer import ReductionStep
 from mantidsimple import *
 import string
+import os
 
 class LoadData(ReductionStep):
     """Handles the loading of the data for Indirect instruments. The summing
@@ -48,8 +49,11 @@ class LoadData(ReductionStep):
         for file in self._data_files:
             mtd.sendLogMessage("Loading file %s" % file)
 
-            loader_handle = Load(file, file, LoadLogFiles=False)
+            loader_handle = Load(self._data_files[file], file, LoadLogFiles=False)
             loader_name = loader_handle.getPropertyValue("LoaderName")
+
+            if mtd[file].getInstrument().getName() == 'BASIS':
+		ModeratorTzero(file, file)
 
             if self._parameter_file != None:
                 LoadParameterFile(file, self._parameter_file)
@@ -75,7 +79,7 @@ class LoadData(ReductionStep):
 
             for ws in workspaces:
                 if (loader_name.endswith('Nexus')):
-                    LoadNexusMonitors(file, ws+'_mon')
+                    LoadNexusMonitors(self._data_files[file], ws+'_mon')
                 else:
                     ## Extract Monitor Spectrum
                     ExtractSingleSpectrum(ws, ws+'_mon', self._monitor_index)
@@ -577,6 +581,41 @@ class FoldData(ReductionStep):
             if ( xval >= range[0] and xval <= range[1] ): result += 1
         return result
 
+class ConvertToCm1(ReductionStep):
+    """
+    Converts the workspaces to cm-1.
+    """
+    
+    _multiple_frames = False
+    _save_to_cm_1 = False
+    
+    def __init__(self, MultipleFrames=False):
+        super(ConvertToCm1, self).__init__()
+        self._multiple_frames = MultipleFrames
+    
+    def execute(self, reducer, file_ws):
+        
+        if self._save_to_cm_1 == False:
+            return
+        
+        if ( self._multiple_frames ):
+            try:
+                workspaceNames = mtd[file_ws].getNames()
+            except AttributeError:
+                workspaceNames = [file_ws]
+        else:
+            workspaceNames = [file_ws]
+        
+        for wsName in workspaceNames:
+            try:
+                ws = mtd[wsName]
+            except:
+                continue
+            ConvertUnits(InputWorkspace=ws,OutputWorkspace=ws,EMode='Indirect',Target='DeltaE_inWavenumber')
+
+    def set_save_to_cm_1(self, save_to_cm_1):
+        self._save_to_cm_1 = save_to_cm_1
+            
 class ConvertToEnergy(ReductionStep):
     """
     """    
@@ -753,7 +792,7 @@ class Grouping(ReductionStep):
             xml += "</group>\n"
         xml += "</detector-grouping>\n"
         
-        xfile = mtd.getConfigProperty('defaultsave.directory') + 'fixedGrp.xml'
+        xfile = os.path.join(mtd.getConfigProperty('defaultsave.directory'), 'fixedGrp.xml')
         file = open(xfile, 'w')
         file.write(xml)
         file.close()
@@ -789,6 +828,7 @@ class SaveItem(ReductionStep):
             Flight if not already in that unit for saving in this format).
     """
     _formats = []
+    _save_to_cm_1 = False
     
     def __init__(self):
         super(SaveItem, self).__init__()
@@ -810,9 +850,19 @@ class SaveItem(ReductionStep):
                 ConvertUnits(file_ws, "__save_item_temp", "TOF")
                 SaveGSS("__save_item_temp", filename+".gss")
                 DeleteWorkspace("__save_item_temp")
-            
+            elif format == 'aclimax':
+                if (self._save_to_cm_1 == False):
+                    bins = '3, -0.005, 500' #meV
+                else:
+                    bins = '24, -0.005, 4000' #cm-1
+                Rebin(file_ws, file_ws + '_aclimax_save_temp', bins)
+                SaveAscii(file_ws + '_aclimax_save_temp', filename+ '_aclimax.dat', Separator='Tab')
+                DeleteWorkspace(file_ws + '_aclimax_save_temp')
+                
     def set_formats(self, formats):
         self._formats = formats
+    def set_save_to_cm_1(self, save_to_cm_1):
+        self._save_to_cm_1 = save_to_cm_1
 
 class Naming(ReductionStep):
     """Takes the responsibility of naming the results away from the Grouping

@@ -142,7 +142,7 @@
    <sender>closeButton</sender>
    <signal>clicked()</signal>
    <receiver>ColorSelectionDialogClass</receiver>
-   <slot>reject()</slot>
+   <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>455</x>

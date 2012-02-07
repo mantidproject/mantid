@@ -58,10 +58,12 @@
 #include <pqVerifyRequiredPluginBehavior.h>
 
 #include <QAction>
+#include <QDesktopServices>
 #include <QHBoxLayout>
 #include <QMainWindow>
 #include <QMenuBar>
 #include <QModelIndex>
+#include <QUrl>
 #include <QWidget>
 
 #include <iostream>
@@ -302,6 +304,10 @@ void MdViewerWidget::setParaViewComponentsForView()
 
   QObject::connect(this->currentView, SIGNAL(setViewsStatus(bool)),
                    this->ui.modeControlWidget, SLOT(enableViewButtons(bool)));
+  QObject::connect(this->currentView,
+                   SIGNAL(setViewStatus(ModeControlWidget::Views, bool)),
+                   this->ui.modeControlWidget,
+                   SLOT(enableViewButton(ModeControlWidget::Views, bool)));
 
   // Set animation (time) control widget <-> view signals/slots.
   QObject::connect(this->currentView,
@@ -388,6 +394,7 @@ void MdViewerWidget::checkForUpdates()
 void MdViewerWidget::switchViews(ModeControlWidget::Views v)
 {
   this->currentView->closeSubWindows();
+  this->disconnectDialogs();
   this->removeProxyTabWidgetConnections();
   this->hiddenView = this->setMainViewWidget(this->ui.viewWidget, v);
   this->hiddenView->hide();
@@ -398,10 +405,12 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   this->currentView->show();
   this->hiddenView->hide();
   this->setParaViewComponentsForView();
+  this->connectDialogs();
   this->hiddenView->close();
   this->hiddenView->destroyView();
   delete this->hiddenView;
   this->currentView->render();
+  this->currentView->checkViewOnSwitch();
   this->currentView->correctVisibility(this->ui.pipelineBrowser);
 }
 
@@ -430,8 +439,8 @@ bool MdViewerWidget::eventFilter(QObject *obj, QEvent *ev)
       pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
       builder->destroySources();
       this->ui.modeControlWidget->setToStandardView();
+      return true;
     }
-    return true;
   }
   return VatesViewerInterface::eventFilter(obj, ev);
 }
@@ -462,6 +471,15 @@ void MdViewerWidget::createMenus()
                    this, SLOT(onColorOptions()));
   viewMenu->addAction(colorAction);
 
+  QMenu *helpMenu = menubar->addMenu(QApplication::tr("&Help"));
+
+  QAction *wikiHelpAction = new QAction(QApplication::tr("Show Wiki Help"), this);
+  wikiHelpAction->setShortcut(QKeySequence::fromString("Ctrl+Shift+H"));
+  wikiHelpAction->setStatusTip(QApplication::tr("Show the wiki help page in a browser."));
+  QObject::connect(wikiHelpAction, SIGNAL(triggered()),
+                   this, SLOT(onWikiHelp()));
+  helpMenu->addAction(wikiHelpAction);
+
   if (this->pluginMode)
   {
     this->ui.verticalLayout->insertWidget(0, menubar);
@@ -487,23 +505,7 @@ void MdViewerWidget::onColorOptions()
   if (NULL == this->colorDialog)
   {
     this->colorDialog = new ColorSelectionDialog(this);
-
-    // Set color selection widget <-> view signals/slots
-    QObject::connect(this->colorDialog,
-                     SIGNAL(colorMapChanged(const pqColorMapModel *)),
-                     this->currentView,
-                     SLOT(onColorMapChange(const pqColorMapModel *)));
-    QObject::connect(this->colorDialog,
-                     SIGNAL(colorScaleChanged(double, double)),
-                     this->currentView,
-                     SLOT(onColorScaleChange(double, double)));
-    QObject::connect(this->currentView, SIGNAL(dataRange(double, double)),
-                     this->colorDialog,
-                     SLOT(setColorScaleRange(double, double)));
-    QObject::connect(this->colorDialog, SIGNAL(autoScale()),
-                     this->currentView, SLOT(onAutoScale()));
-    QObject::connect(this->colorDialog, SIGNAL(logScale(int)),
-                     this->currentView, SLOT(onLogScale(int)));
+    this->connectColorOptionsDialog();
     this->currentView->onAutoScale();
   }
   this->colorDialog->show();
@@ -520,15 +522,92 @@ void MdViewerWidget::onRotationPoint()
   if (NULL == this->rotPointDialog)
   {
     this->rotPointDialog = new RotationPointDialog(this);
+    this->connectRotationPointDialog();
+  }
+  this->rotPointDialog->show();
+  this->rotPointDialog->raise();
+  this->rotPointDialog->activateWindow();
+}
 
+/**
+ * This function shows the wiki help page for the simple interface in a
+ * browser.
+ */
+void MdViewerWidget::onWikiHelp()
+{
+  QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
+                                 "VatesSimpleInterface"));
+}
+
+/**
+ * This function disconnects the present instances of the color options and the
+ * point rotation dialog boxes from the current view. This is necessary on
+ * switch view since the connection to the current view is destroyed.
+ */
+void MdViewerWidget::disconnectDialogs()
+{
+  if (NULL != this->colorDialog)
+  {
+    this->colorDialog->close();
+    QObject::disconnect(this->colorDialog, 0, this->currentView, 0);
+  }
+  if (NULL != this->rotPointDialog)
+  {
+    this->rotPointDialog->close();
+    QObject::disconnect(this->rotPointDialog, 0, this->currentView, 0);
+  }
+}
+
+/**
+ * This function sets up the connections between the color options dialog
+ * and the current view.
+ */
+void MdViewerWidget::connectColorOptionsDialog()
+{
+  if (NULL != this->colorDialog)
+  {
+    // Set color selection widget <-> view signals/slots
+    QObject::connect(this->colorDialog,
+                     SIGNAL(colorMapChanged(const pqColorMapModel *)),
+                     this->currentView,
+                     SLOT(onColorMapChange(const pqColorMapModel *)));
+    QObject::connect(this->colorDialog,
+                     SIGNAL(colorScaleChanged(double, double)),
+                     this->currentView,
+                     SLOT(onColorScaleChange(double, double)));
+    QObject::connect(this->currentView, SIGNAL(dataRange(double, double)),
+                     this->colorDialog,
+                     SLOT(setColorScaleRange(double, double)));
+    QObject::connect(this->colorDialog, SIGNAL(autoScale()),
+                     this->currentView, SLOT(onAutoScale()));
+    QObject::connect(this->colorDialog, SIGNAL(logScale(int)),
+                     this->currentView, SLOT(onLogScale(int)));
+  }
+}
+
+/**
+ * This function sets up the connections between the rotation point dialog and
+ * the current view.
+ */
+void MdViewerWidget::connectRotationPointDialog()
+{
+  if (NULL != this->rotPointDialog)
+  {
     QObject::connect(this->rotPointDialog,
                      SIGNAL(sendCoordinates(double,double,double)),
                      this->currentView,
                      SLOT(onResetCenterToPoint(double,double,double)));
   }
-  this->rotPointDialog->show();
-  this->rotPointDialog->raise();
-  this->rotPointDialog->activateWindow();
+}
+
+/**
+ * This function sets up the connections for all the dialogs associated with
+ * the MdViewerWidget.
+ */
+void MdViewerWidget::connectDialogs()
+{
+  this->connectColorOptionsDialog();
+  this->connectRotationPointDialog();
 }
 
 } // namespace SimpleGui

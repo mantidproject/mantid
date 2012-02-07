@@ -42,12 +42,12 @@ namespace Mantid
     bool MementoTableWorkspace::isMementoWorkspace(const Mantid::API::ITableWorkspace& candidate)
     {
       MementoTableWorkspace theStandard;
-      int nCols = theStandard.columnCount();
+      size_t nCols = theStandard.columnCount();
       if(nCols != candidate.columnCount())
       {
         return false;
       }
-      for(int i =0 ; i < nCols; i++)
+      for(size_t i =0 ; i < nCols; i++)
       {
         if(!expectedColumn(theStandard.getColumn(i), candidate.getColumn(i)))
         {

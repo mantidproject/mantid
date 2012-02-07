@@ -58,9 +58,9 @@ public:
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING( result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
                                 (Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)) );
-    TS_ASSERT_DELTA( result->readY(0).front(), 0.9785, 0.0001 );
-    TS_ASSERT_DELTA( result->readY(0).back(), 0.9606, 0.0001 );
-    TS_ASSERT_DELTA( result->readY(0)[8], 0.9626, 0.0001 );
+    TS_ASSERT_DELTA( result->readY(0).front(), 0.9959, 0.0001 );
+    TS_ASSERT_DELTA( result->readY(0).back(), 0.9766, 0.0001 );
+    TS_ASSERT_DELTA( result->readY(0)[8], 0.9787, 0.0001 );
     
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }

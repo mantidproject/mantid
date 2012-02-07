@@ -70,7 +70,7 @@ void IndirectDiffractionReduction::demonRun()
       if ( m_uiForm.cbPlotType->currentText() == "Spectra" )
       {
         pyInput += "wslist = reducer.get_result_workspaces()\n"
-          "from mantidplotpy import *\n"
+          "from mantidplot import *\n"
           "plotSpectrum(wslist, 0)\n";
       }
 

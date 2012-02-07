@@ -161,8 +161,8 @@ private:
   std::size_t num_wrongdetid_events; ///<The number of events with wrong detector IDs. Part of error events.
   std::set<PixelType> wrongdetids; ///<set of all wrong detector IDs
   std::map<PixelType, size_t> wrongdetidmap;
-  std::vector<std::vector<int64_t> > wrongdetid_abstimes;
-
+  std::vector<std::vector<Kernel::DateAndTime> > wrongdetid_pulsetimes;
+  std::vector<std::vector<double> > wrongdetid_tofs;
 
   /// the number of events that were ignored (not loaded) because, e.g. of only loading some spectra.
   std::size_t num_ignored_events;

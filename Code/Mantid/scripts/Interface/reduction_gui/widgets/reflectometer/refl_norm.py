@@ -12,7 +12,7 @@ from SaveSNSRoi import SaveSNSRoi
 
 IS_IN_MANTIDPLOT = False
 try:
-    import qti
+    import _qti
     from MantidFramework import *
     mtd.initialise(False)
     from mantidsimple import *

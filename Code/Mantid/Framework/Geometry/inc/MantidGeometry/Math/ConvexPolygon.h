@@ -75,18 +75,38 @@ namespace Mantid
       inline size_t numVertices() const { return m_numVertices; }
       /// Is a point inside this polygon
       virtual bool contains(const Kernel::V2D & point) const;
+      /// Is a the given polygon completely encosed by this one
+      virtual bool contains(const ConvexPolygon & poly) const;
       /// Compute the area of the polygon using triangulation
       virtual double area() const;
       /// Compute the 'determinant' of the points
       virtual double determinant() const;
+      /// Return the lowest X value in the polygon
+      double smallestX() const;
+      /// Return the largest X value in the polygon
+      double largestX() const;
+      /// Return the lowest Y value in the polygon
+      double smallestY() const;
+      /// Return the largest Y value in the polygon
+      double largestY() const;
 
     protected:
       /// Default constructor
       ConvexPolygon() : m_numVertices(0), m_head(NULL) {}
+      /// Setup the meta-data
+      void setup();
       /// The size of the polygon
       size_t m_numVertices;
       /// Head vertex
       Vertex2D *m_head;
+      /// Lowest X value
+      double m_lowestX;
+      /// Highest X value
+      double m_highestX;
+      /// Lowest Y value
+      double m_lowestY;
+      /// Highest Y value
+      double m_highestY;
 
     private:
       /// Test if a list of vertices is valid

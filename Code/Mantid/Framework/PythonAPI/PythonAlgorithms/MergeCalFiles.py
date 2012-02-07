@@ -33,7 +33,7 @@ class MergeCalFiles(PythonAlgorithm):
     masterFileName = self.getProperty("MasterFile")
     outputFileName = self.getProperty("OutputFile")
 	
-    if (mergeOffsets == False) and (mergeOffsets == False) and (mergeOffsets == False):
+    if (mergeOffsets == False) and (mergeSelections == False) and (mergeGroups == False):
        raise RuntimeError('Nothing set to merge, please set one of the properties to merge, otherwise I have nothing to do')
     if (masterFileName == outputFileName) :
        raise RuntimeError('The output file must be different to the master file.')

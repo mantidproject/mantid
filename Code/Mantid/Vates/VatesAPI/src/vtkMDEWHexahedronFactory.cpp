@@ -8,11 +8,13 @@
 #include <vtkHexahedron.h>
 #include <vtkPoints.h>
 #include <vtkUnstructuredGrid.h>
+#include "MantidKernel/ReadLock.h"
 
 using namespace Mantid::API;
 using namespace Mantid::MDEvents;
 using namespace Mantid::Geometry;
 using Mantid::Kernel::CPUTimer;
+using Mantid::Kernel::ReadLock;
 
 namespace Mantid
 {
@@ -43,6 +45,8 @@ namespace Mantid
   {
     bool VERBOSE = true;
     CPUTimer tim;
+    // Acquire a scoped read-only lock to the workspace (prevent segfault from algos modifying ws)
+    ReadLock lock(*ws);
 
     // First we get all the boxes, up to the given depth; with or wo the slice function
     std::vector<IMDBox<MDE,nd> *> boxes;

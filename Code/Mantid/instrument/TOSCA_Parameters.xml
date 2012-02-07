@@ -14,7 +14,14 @@
 <parameter name="refl-graphite" type="string">
     <value val="002" />
 </parameter>
-
+<!-- Available options are "Show" or "Hide". -->
+<parameter name="cm-1-convert-choice" type="string">
+    <value val="Show" />
+</parameter>
+<parameter name="save-aclimax-choice" type="string">
+    <value val="Show" />
+</parameter>
+  
 <!-- This parameter will be taken as a default value for the rebinning of
         the data in DeltaE. The existence of the parameter will make rebinning
         the default, as opposed to not rebinning.
@@ -44,12 +51,12 @@
     <value val="Fixed" />
 </parameter>
 <parameter name="Workflow.FixedGrouping" type="string">
-    <value val="0-69,70-139" />
+    <value val="0-69,70-139,0-139" />
 </parameter>
 <parameter name="Workflow.Masking" type="string">
     <value val="IdentifyNoisyDetectors" />
 </parameter>
-
+  
 </component-link>
 
 </parameter-file>

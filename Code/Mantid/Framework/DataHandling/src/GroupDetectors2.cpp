@@ -411,8 +411,8 @@ int GroupDetectors2::readInt(std::string line)
 */
 void GroupDetectors2::readFile(spec2index_map &specs2index, std::ifstream &File, size_t &lineNum, std::vector<int64_t> &unUsedSpec)
 {
-  // used in writing the spectra to the outData map
-  int arbitaryMapKey = 0;
+  // used in writing the spectra to the outData map. The groups are just labelled incrementally from 1
+  int spectrumNo = 1;
   // go through the rest of the file reading in lists of spectra number to group
   while ( File )
   {
@@ -422,10 +422,8 @@ void GroupDetectors2::readFile(spec2index_map &specs2index, std::ifstream &File,
       std::getline( File, thisLine ), lineNum ++;
       // we haven't started reading a new group and so if the file ends here it is OK
       if ( ! File ) return;
-        // in some implementations this is the spectra number for the group but not here so we ignore the return value, uncomment out the stuff below to make it work
-        // abitaryMapKey = readInt(thisLine);
-    }//}
-    while( readInt(thisLine) == EMPTY_LINE && File );  //while( abitaryMapKey == EMPTY_LINE && File );
+    }
+    while( readInt(thisLine) == EMPTY_LINE && File );
 
     // the number of spectra that will be combined in the group
     int numberOfSpectra = EMPTY_LINE;
@@ -438,17 +436,17 @@ void GroupDetectors2::readFile(spec2index_map &specs2index, std::ifstream &File,
     while( numberOfSpectra == EMPTY_LINE );
 
     // the value of this map is the list of spectra numbers that will be combined into a group
-    m_GroupSpecInds[arbitaryMapKey].reserve(numberOfSpectra);
+    m_GroupSpecInds[spectrumNo].reserve(numberOfSpectra);
     do
     {
       if ( ! File ) throw std::invalid_argument("Premature end of file, found number of spectra specification but no spectra list");
       std::getline( File, thisLine ), lineNum ++;
       // the spectra numbers that will be included in the group
       readSpectraIndexes(
-        thisLine, specs2index, m_GroupSpecInds[arbitaryMapKey], unUsedSpec);
+        thisLine, specs2index, m_GroupSpecInds[spectrumNo], unUsedSpec);
     }
-    while (static_cast<int>(m_GroupSpecInds[arbitaryMapKey].size()) < numberOfSpectra);
-    if ( static_cast<int>(m_GroupSpecInds[arbitaryMapKey].size()) != numberOfSpectra )
+    while (static_cast<int>(m_GroupSpecInds[spectrumNo].size()) < numberOfSpectra);
+    if ( static_cast<int>(m_GroupSpecInds[spectrumNo].size()) != numberOfSpectra )
     {// it makes no sense to continue reading the file, we'll stop here
       throw std::invalid_argument(std::string("Bad number of spectra specification or spectra list near line number ") + boost::lexical_cast<std::string>(lineNum));
     }
@@ -457,11 +455,7 @@ void GroupDetectors2::readFile(spec2index_map &specs2index, std::ifstream &File,
     {
       fileReadProg( m_GroupSpecInds.size(), specs2index.size() );
     }
-//    std::cout << "Read file at key " << arbitaryMapKey << std::endl;
-//    for (size_t i=0; i < m_GroupSpecInds[arbitaryMapKey].size(); i++)
-//      std::cout << m_GroupSpecInds[arbitaryMapKey][i] << ", ";
-//    std::cout << std::endl << std::endl;
-    arbitaryMapKey ++;
+    spectrumNo++;
   }
 }
 /** The function expects that the string passed to it contains a series of integers,
@@ -561,16 +555,11 @@ size_t GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API
   bool requireDivide(false);
   for ( storage_map::const_iterator it = m_GroupSpecInds.begin(); it != m_GroupSpecInds.end() ; ++it )
   {
-    // Workspace index of the first spectrum
-    const size_t firstWI = it->second.front();
-    // get the spectra number for the first spectrum in the list to be grouped
-    const specid_t firstSpecNum = inputWS->getSpectrum(firstWI)->getSpectrumNo();
-
     // This is the grouped spectrum
     ISpectrum * outSpec = outputWS->getSpectrum(outIndex);
 
-    // the spectrum number of new group will be the number of the spectrum number of first spectrum that was grouped
-    outSpec->setSpectrumNo(firstSpecNum);
+    // The spectrum number of the group is the key
+    outSpec->setSpectrumNo(it->first);
     // Start fresh with no detector IDs
     outSpec->clearDetectorIDs();
 

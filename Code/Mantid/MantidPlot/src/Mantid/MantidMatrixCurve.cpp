@@ -9,6 +9,7 @@
 #include "../Graph.h"
 #include "../ApplicationWindow.h"
 #include "../MultiLayer.h"
+#include "ErrorBarSettings.h"
 
 
 using namespace Mantid::API;
@@ -128,10 +129,17 @@ void MantidMatrixCurve::init(Graph* g,bool distr,Graph::CurveType style)
   {
     setStyle(QwtPlotCurve::Lines);
   }
+
+
   if (g)
   {
     g->insertCurve(this,lineWidth);
   }
+
+  // Initialise error bar colour to match curve colour
+  m_errorSettings->m_color = pen().color();
+  m_errorSettings->setWidth(pen().widthF());
+
   connect(g,SIGNAL(axisScaleChanged(int,bool)),this,SLOT(axisScaleChanged(int,bool)));
   observePostDelete();
  	connect( this, SIGNAL(resetData(const QString&)), this, SLOT(dataReset(const QString&)) );
@@ -244,21 +252,15 @@ void MantidMatrixCurve::dataReset(const QString& wsName)
 
   if (!mws) return;
   const MantidQwtMatrixWorkspaceData * new_mantidData(NULL);
-  try {
+  try 
+  {
     new_mantidData = mantidData()->copy(mws);
     setData(*new_mantidData);
-    if (mws->isHistogramData())
-    {
-      setStyle(QwtPlotCurve::Steps);
-      setCurveAttribute(Inverted,true);// this is the Steps style modifier that makes horizontal steps
-    }
-    else
-    {
-      setStyle(QwtPlotCurve::Lines);
-    }
     // Queue this plot to be updated once all MantidQwtMatrixWorkspaceData objects for this workspace have been
     emit dataUpdated();
-  } catch(std::range_error &) {
+  } 
+  catch(std::range_error &) 
+  {
     // Get here if the new workspace has fewer spectra and the plotted one no longer exists
     Mantid::Kernel::Logger::get("MantidMatrixCurve").information() << "Workspace " << wsNameStd
         << " now has fewer spectra - plotted curve(s) deleted\n";

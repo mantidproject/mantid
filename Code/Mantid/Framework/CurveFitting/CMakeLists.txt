@@ -10,12 +10,14 @@ set ( SRC_FILES
 	src/CostFuncLeastSquares.cpp
 	src/DeltaFunction.cpp
 	src/ExpDecay.cpp
+	src/ExpDecayMuon.cpp
 	src/ExpDecayOsc.cpp
 	src/FRConjugateGradientMinimizer.cpp
 	src/Fit.cpp
 	src/Fit1D.cpp
 	src/FuncMinimizerFactory.cpp
 	src/GSLFunctions.cpp
+	src/GausDecay.cpp
 	src/Gaussian.cpp
 	src/Gaussian1D.cpp
 	src/GaussianLinearBG1D.cpp
@@ -58,12 +60,14 @@ set ( INC_FILES
 	inc/MantidCurveFitting/DeltaFunction.h
 	inc/MantidCurveFitting/DllConfig.h
 	inc/MantidCurveFitting/ExpDecay.h
+	inc/MantidCurveFitting/ExpDecayMuon.h
 	inc/MantidCurveFitting/ExpDecayOsc.h
 	inc/MantidCurveFitting/FRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/Fit.h
 	inc/MantidCurveFitting/Fit1D.h
 	inc/MantidCurveFitting/FuncMinimizerFactory.h
 	inc/MantidCurveFitting/GSLFunctions.h
+	inc/MantidCurveFitting/GausDecay.h
 	inc/MantidCurveFitting/Gaussian.h
 	inc/MantidCurveFitting/Gaussian1D.h
 	inc/MantidCurveFitting/GaussianLinearBG1D.h
@@ -100,6 +104,7 @@ set ( TEST_FILES
 	test/CompositeFunctionTest.h
 	test/ConvolutionTest.h
 	test/ExpDecayTest.h
+	test/ExpDecayMuonTest.h
 	test/ExpDecayOscTest.h
 	test/FitTest.h
 	test/NewFitTest.h
@@ -107,6 +112,7 @@ set ( TEST_FILES
 	test/FunctionFactoryTest.h
 	test/FunctionTest.h
 	test/Gaussian1DTest.h
+	test/GausDecayTest.h
 	test/GaussianTest.h
 	test/IkedaCarpenterPVTest.h
 	test/LinearBackgroundTest.h

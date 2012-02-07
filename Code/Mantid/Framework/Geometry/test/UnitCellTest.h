@@ -91,7 +91,9 @@ public:
     checkCell(u2);
 
   }
-
+  void test_UnitCellCrash(){
+    TS_ASSERT_THROWS(UnitCell(10.4165,3.4165,10.4165,30,45,80);,std::invalid_argument);
+  }
 
 };
 

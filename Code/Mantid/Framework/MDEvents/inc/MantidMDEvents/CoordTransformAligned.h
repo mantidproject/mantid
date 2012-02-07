@@ -60,6 +60,7 @@ namespace MDEvents
         const coord_t * origin, const coord_t * scaling);
     CoordTransformAligned(const size_t inD, const size_t outD, const std::vector<size_t> dimensionToBinFrom,
         const std::vector<coord_t> origin, const std::vector<coord_t> scaling);
+    virtual CoordTransform * clone() const;
     virtual ~CoordTransformAligned();
     
     std::string toXMLString() const;

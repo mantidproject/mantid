@@ -8,6 +8,7 @@
 #include "AlgorithmHistoryWindow.h"
 #include "MantidMatrixCurve.h"
 #include "MantidMDCurve.h"
+#include "MantidMDCurveDialog.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidTable.h"
 #include "../../MantidQt/MantidWidgets/ui_SequentialFitDialog.h"
@@ -70,16 +71,16 @@ namespace MantidException = Mantid::Kernel::Exception;
 
 
 MantidUI::MantidUI(ApplicationWindow *aw):
-    m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
-    m_addObserver(*this,&MantidUI::handleAddWorkspace),
-    m_replaceObserver(*this,&MantidUI::handleReplaceWorkspace),
-    m_deleteObserver(*this,&MantidUI::handleDeleteWorkspace),
-    m_clearADSObserver(*this,&MantidUI::handleClearADS),
-    m_algUpdatesObserver(*this, &MantidUI::handleAlgorithmFactoryUpdates),
-    m_renameObserver(*this,&MantidUI::handleRenameWorkspace),
-    m_groupworkspacesObserver(*this,&MantidUI::handleGroupWorkspaces),
-    m_ungroupworkspaceObserver(*this,&MantidUI::handleUnGroupWorkspace),
-    m_appWindow(aw), m_vatesSubWindow(NULL)
+m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
+  m_addObserver(*this,&MantidUI::handleAddWorkspace),
+  m_replaceObserver(*this,&MantidUI::handleReplaceWorkspace),
+  m_deleteObserver(*this,&MantidUI::handleDeleteWorkspace),
+  m_clearADSObserver(*this,&MantidUI::handleClearADS),
+  m_algUpdatesObserver(*this, &MantidUI::handleAlgorithmFactoryUpdates),
+  m_renameObserver(*this,&MantidUI::handleRenameWorkspace),
+  m_groupworkspacesObserver(*this,&MantidUI::handleGroupWorkspaces),
+  m_ungroupworkspaceObserver(*this,&MantidUI::handleUnGroupWorkspace),
+  m_appWindow(aw), m_vatesSubWindow(NULL)
 {
   // To be able to use them in queued signals they need to be registered
   static bool registered_addtional_types = false;
@@ -137,7 +138,7 @@ MantidUI::MantidUI(ApplicationWindow *aw):
   connect(m_algMonitor,SIGNAL(algorithmStarted(void*)),m_exploreAlgorithms,SLOT(algorithmStarted(void*)), Qt::QueuedConnection);
   connect(m_algMonitor,SIGNAL(algorithmFinished(void*)),m_exploreAlgorithms,SLOT(algorithmFinished(void*)), Qt::QueuedConnection);
   connect(m_algMonitor,SIGNAL(needUpdateProgress(void*,double, const QString&, double, int)),
-      m_exploreAlgorithms,SLOT(updateProgress(void*,double, const QString&, double, int)), Qt::QueuedConnection);
+    m_exploreAlgorithms,SLOT(updateProgress(void*,double, const QString&, double, int)), Qt::QueuedConnection);
   m_algMonitor->start();
 
   mantidMenu = new QMenu(m_appWindow);
@@ -173,7 +174,7 @@ void MantidUI::init()
   try
   {
     m_fitFunction = new MantidQt::MantidWidgets::FitPropertyBrowser(m_appWindow, m_appWindow->mantidUI, false);
-   // m_fitFunction->init();
+    // m_fitFunction->init();
     m_fitFunction->hide();
     m_appWindow->addDockWidget( Qt::LeftDockWidgetArea, m_fitFunction );
 
@@ -191,9 +192,11 @@ void MantidUI::init()
 }
 
 /// Slot: Receives a new X range from a FitPropertyBrowser and re-emits it.
-void MantidUI::x_range_from_picker(double xmin, double xmax){
+void MantidUI::x_range_from_picker(double xmin, double xmax)
+{
   emit x_range_update(xmin, xmax);
 }
+
 /// Updates the algorithms tree as this may have changed
 void MantidUI::updateAlgorithms()
 {
@@ -247,9 +250,9 @@ void MantidUI::showFitPropertyBrowser(bool on)
 }
 
 /**
- * Be careful where this is called, if it is a called too late in the Qt shutdown the application
- * crashes
- */
+* Be careful where this is called, if it is a called too late in the Qt shutdown the application
+* crashes
+*/
 void MantidUI::shutdown()
 {
   Mantid::API::FrameworkManager::Instance().clear();
@@ -293,33 +296,33 @@ QStringList MantidUI::getAlgorithmNames()
 }
 
 /**
- *  Returns the number of algorithms currently executing
- */
+*  Returns the number of algorithms currently executing
+*/
 int MantidUI::runningAlgCount() const
 {
   return m_algMonitor->count();
 }
 
 /**
- * Ticket #678
- */
+* Ticket #678
+*/
 void MantidUI::saveNexusWorkspace()
 {
   executeSaveNexus("SaveNexus",-1);
 }
 
 /**
- * DeleteWorkspace
- @param workspaceName :: Name of the workspace to delete
- */
+* DeleteWorkspace
+@param workspaceName :: Name of the workspace to delete
+*/
 bool MantidUI::deleteWorkspace(const QString& workspaceName)
 {
   return FrameworkManager::Instance().deleteWorkspace(workspaceName.toStdString());
 }
 
 /**
-       getSelectedWorkspaceName
- */
+getSelectedWorkspaceName
+*/
 QString MantidUI::getSelectedWorkspaceName()
 {
   QString str = m_exploreMantid->getSelectedWorkspaceName();
@@ -352,7 +355,7 @@ Mantid::API::Workspace_const_sptr MantidUI::getWorkspace(const QString& workspac
 }
 
 /**   Extension to ApplicationWindow::menuAboutToShow() to deal with Mantid.
- */
+*/
 bool MantidUI::menuAboutToShow(MdiSubWindow *w)
 {
 
@@ -390,13 +393,13 @@ MultiLayer* MantidUI::plotSpectrogram(Graph::CurveType type)
 }
 
 /**  Import a MatrixWorkspace into a MantidMatrix.
-     @param wsName :: Workspace name
-     @param lower :: An optional lower boundary
-     @param upper :: An optional upper boundary
-     @param showDlg :: If true show a dialog box to set some import parameters
-     @param makeVisible :: If true show the created MantidMatrix, hide otherwise.
-     @return A pointer to the new MantidMatrix.
- */
+@param wsName :: Workspace name
+@param lower :: An optional lower boundary
+@param upper :: An optional upper boundary
+@param showDlg :: If true show a dialog box to set some import parameters
+@param makeVisible :: If true show the created MantidMatrix, hide otherwise.
+@return A pointer to the new MantidMatrix.
+*/
 MantidMatrix* MantidUI::importMatrixWorkspace(const QString& wsName, int lower, int upper, bool showDlg, bool makeVisible)
 {
   MatrixWorkspace_sptr ws;
@@ -433,10 +436,10 @@ MantidMatrix* MantidUI::importMatrixWorkspace(const QString& wsName, int lower, 
 }
 
 /**  Import a Workspace into MantidPlot.
-     @param wsName :: Workspace name
-     @param showDlg :: If true show a dialog box to set some import parameters
-     @param makeVisible :: If true show the created widget, hide otherwise.
- */
+@param wsName :: Workspace name
+@param showDlg :: If true show a dialog box to set some import parameters
+@param makeVisible :: If true show the created widget, hide otherwise.
+*/
 void MantidUI::importWorkspace(const QString& wsName, bool showDlg, bool makeVisible)
 {
   MantidMatrix* mm = importMatrixWorkspace(wsName,-1, -1, showDlg,makeVisible);
@@ -449,7 +452,7 @@ void MantidUI::importWorkspace(const QString& wsName, bool showDlg, bool makeVis
 }
 
 /**  Import the selected workspace, if any. Displays the import dialog.
- */
+*/
 void MantidUI::importWorkspace()
 {
   QString wsName = getSelectedWorkspaceName();
@@ -457,7 +460,7 @@ void MantidUI::importWorkspace()
 }
 
 /**  Import the selected table workspace transposed.
- */
+*/
 void MantidUI::importTransposed()
 {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -473,7 +476,7 @@ void MantidUI::importTransposed()
 
 
 /**  Create a TableWorkspace of box data from the MDEventWorkspace
- */
+*/
 void MantidUI::importBoxDataTable()
 {
   std::cout << "MantidUI::importBoxDataTable()" << std::endl;
@@ -482,7 +485,7 @@ void MantidUI::importBoxDataTable()
   {
     // Get the MD event table
     IMDEventWorkspace_sptr ws = boost::dynamic_pointer_cast<IMDEventWorkspace>(
-        AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
+      AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
     if (!ws) return;
     ITableWorkspace_sptr tabWs = ws->makeBoxTable(0,0);
     if (!tabWs) return;
@@ -496,13 +499,23 @@ void MantidUI::importBoxDataTable()
   }
 }
 
-/*
-Plots a Curve showing intensities for a MDWorkspace only if the workspace meets certain criteria, such as 
-having only one non-integrated dimension. Should exit gracefully otherwise.
-*/
+/** Plots a Curve showing intensities for a MDWorkspace.
+ * But only if the workspace meets certain criteria, such as
+ * having only one non-integrated dimension. Should exit gracefully otherwise.
+ */
 void MantidUI::showMDPlot()
 {
   QString wsName = getSelectedWorkspaceName();
+
+  // Create a dialog to ask for options
+  MantidMDCurveDialog * dlg = new MantidMDCurveDialog(appWindow(), wsName);
+  int result = dlg->exec();
+  if (result == QDialog::Rejected)
+    return;
+  // Extract the settings from the dialog opened earlier
+  bool showErrors = dlg->showErrorBars();
+  LinePlotOptions * opts = dlg->getLineOptionsWidget();
+
   MultiLayer* ml = appWindow()->multilayerPlot(appWindow()->generateUniqueName(wsName));
   ml->setCloseOnEmpty(true);
   Graph *g = ml->activeGraph();
@@ -516,18 +529,18 @@ void MantidUI::showMDPlot()
     appWindow()->setPreferences(g);
     g->newLegend("");
 
-    bool showErrors = true; //Hard-coded to true. Could set this via another menu option.
+    // Create the curve with defaults
     MantidMDCurve* curve = new MantidMDCurve(wsName,g,showErrors);
-    UNUSED_ARG(curve);
+    MantidQwtIMDWorkspaceData * data = curve->mantidData();
+    // Apply the settings
+    data->setPreviewMode(false);
+    data->setPlotAxisChoice(opts->getPlotAxis());
+    data->setNormalization(opts->getNormalization());
 
-    IMDWorkspace_sptr mdews = boost::dynamic_pointer_cast<IMDWorkspace>(
-      AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
-
+    // Set some of the labels on the plot
     g->setTitle(tr("Workspace ")+wsName);
-    g->setYAxisTitle(tr("Normalised Signal"));
-    Mantid::Geometry::IMDDimension_const_sptr nonIntegratedDim = mdews->getNonIntegratedDimensions()[0];
-    std::string xAxisLabel = nonIntegratedDim->getName() + " / " + nonIntegratedDim->getUnits();
-    g->setXAxisTitle(xAxisLabel.c_str());
+    g->setXAxisTitle(QString::fromStdString(data->getXAxisLabel()));
+    g->setYAxisTitle(QString::fromStdString(data->getYAxisLabel()));
     g->setAntialiasing(false);
     g->setAutoScale();
   }
@@ -578,13 +591,13 @@ void MantidUI::showVatesSimpleInterface()
   try
   {
     IMDEventWorkspace_sptr mdews = boost::dynamic_pointer_cast<IMDEventWorkspace>(
-        AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
+      AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
 
     IPeaksWorkspace_sptr pws = boost::dynamic_pointer_cast<IPeaksWorkspace>(
-                                 AnalysisDataService::Instance().retrieve(wsName.toStdString()));
+      AnalysisDataService::Instance().retrieve(wsName.toStdString()));
 
     IMDHistoWorkspace_sptr mdhist = boost::dynamic_pointer_cast<IMDHistoWorkspace>(
-        AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
+      AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
 
     if (!mdews && !pws && !mdhist)
     {
@@ -646,19 +659,19 @@ void MantidUI::showVatesSimpleInterface()
 
 
 /** Create a window with a SliceViewer widget to show
- * the selected workspace
- */
+* the selected workspace
+*/
 void MantidUI::showSliceViewer()
 {
   // Retrieve the MDWorkspace
   QString wsName = getSelectedWorkspaceName();
   IMDWorkspace_sptr mdws = boost::dynamic_pointer_cast<IMDWorkspace>(
-      AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
+    AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
   if (mdws)
   {
     // Create the slice viewer window
     SliceViewerWindow * w = MantidQt::Factory::WidgetFactory::Instance()->
-        createSliceViewerWindow(wsName, "");
+      createSliceViewerWindow(wsName, "");
 
     // Connect the MantidPlot close() event with the the window's close().
     QObject::connect(appWindow(), SIGNAL(destroyed()), w, SLOT(close()));
@@ -672,8 +685,8 @@ void MantidUI::showSliceViewer()
 }
 
 /** #539: For adding Workspace History display to MantidPlot
-	Show Algorithm History Details in a window .
- */
+Show Algorithm History Details in a window .
+*/
 void MantidUI::showAlgorithmHistory()
 {
   QString wsName=getSelectedWorkspaceName();
@@ -687,7 +700,7 @@ void MantidUI::showAlgorithmHistory()
       AlgorithmHistoryWindow *palgHist = new AlgorithmHistoryWindow(m_appWindow,wsptr);
       if(NULL != palgHist)
       {
-          palgHist->show();
+        palgHist->show();
       }
     }
   }
@@ -699,12 +712,12 @@ void MantidUI::showAlgorithmHistory()
 }
 
 /**  Create a new Table and fill it with the data from a Tableworkspace
-     @param wsName :: Workspace name
-     @param showDlg :: If true show a dialog box to set some import parameters
-     @param makeVisible :: If true show the created Table, hide otherwise.
-     @param transpose :: Transpose the table
-     @return A pointer to the new Table.
- */
+@param wsName :: Workspace name
+@param showDlg :: If true show a dialog box to set some import parameters
+@param makeVisible :: If true show the created Table, hide otherwise.
+@param transpose :: Transpose the table
+@return A pointer to the new Table.
+*/
 Table* MantidUI::importTableWorkspace(const QString& wsName, bool, bool makeVisible, bool transpose)
 {
   ITableWorkspace_sptr ws;
@@ -941,6 +954,7 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
   //Mantid::API::Axis *spectraAxis = ws->getAxis(1);
   Mantid::Geometry::IObjComponent_const_sptr sample = ws->getInstrument()->getSample();
   QList<double> col_values; // List of double valued data for one row
+  bool b_showSignedTwoThetaVersion = false; //Flag indicating that a signedVersion of the two theta value should be displayed
   for( size_t row = 0; row < nrows; ++row )
   {
     size_t ws_index = indices.empty() ? row : indices[row];
@@ -970,7 +984,22 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
       pos.getSpherical(R,Theta,Phi);
       // Need to get R & Theta through these methods to be correct for grouped detectors
       R = det->getDistance(*sample);
-      Theta = ws->detectorTwoTheta(det)*180.0/M_PI;
+
+      // Lazy evaluation of the instrument parameter map.
+      if(row == 0)
+      {
+        std::vector<std::string> parameters = det->getStringParameter("show-signed-theta", true);
+        b_showSignedTwoThetaVersion = parameters.size() > 0 && find(parameters.begin(), parameters.end(), "Always") != parameters.end();
+      }
+      if(b_showSignedTwoThetaVersion)
+      {
+        Theta = ws->detectorSignedTwoTheta(det)*180.0/M_PI;
+      }
+      else
+      {
+        Theta = ws->detectorTwoTheta(det)*180.0/M_PI;
+      }
+      
     }
     catch(...)
     {
@@ -998,7 +1027,7 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
     {
       t->setText(static_cast<int>(row), ncols-ncharcols, isMon? "  yes": "  no" );
     }
-  
+
   }
 
   t->showNormal();
@@ -1078,8 +1107,8 @@ void MantidUI::executeAlgorithm()
 }
 
 /** 
- * Run the named algorithm asynchronously 
- */ 
+* Run the named algorithm asynchronously 
+*/ 
 bool MantidUI::runAlgorithmAsync_PyCallback(const QString & alg_name) 
 { 
   Mantid::API::IAlgorithm_sptr alg = findAlgorithmPointer(alg_name); 
@@ -1091,11 +1120,11 @@ bool MantidUI::runAlgorithmAsync_PyCallback(const QString & alg_name)
 }
 
 /**
-    executes Save Nexus
-	saveNexus Input Dialog is a generic dialog.Below code is added to remove
-	the workspaces except the selected workspace from the InputWorkspace combo
+executes Save Nexus
+saveNexus Input Dialog is a generic dialog.Below code is added to remove
+the workspaces except the selected workspace from the InputWorkspace combo
 
- */
+*/
 void MantidUI::executeSaveNexus(QString algName,int version)
 {
   QString selctedWsName = getSelectedWorkspaceName();
@@ -1113,7 +1142,7 @@ void MantidUI::executeSaveNexus(QString algName,int version)
   if (alg)
   {
     MantidQt::API::AlgorithmDialog *dlg =
-        MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_appWindow);
+      MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_appWindow);
     if( !dlg ) return;
     //getting the combo box which has input workspaces and removing the workspaces except the selected one
     QComboBox *combo = dlg->findChild<QComboBox*>();
@@ -1160,9 +1189,9 @@ bool MantidUI::executeAlgorithm(QString algName, int version)
 
 
 /** This method is to execute loadraw from ICat Interface
- *@param fileName :: name of the file
- *@param wsName :: name of the workspace
- */
+*@param fileName :: name of the file
+*@param wsName :: name of the workspace
+*/
 void MantidUI::loadrawfromICatInterface(const QString& fileName ,const QString& wsName)
 {
 
@@ -1250,8 +1279,8 @@ void MantidUI ::executeloadAlgorithm(const QString& algName, const QString& file
 }
 
 /** 
- * This creates an algorithm dialog (the default property entry thingie).
- */
+* This creates an algorithm dialog (the default property entry thingie).
+*/
 MantidQt::API::AlgorithmDialog*  MantidUI::createAlgorithmDialog(Mantid::API::IAlgorithm_sptr alg)
 {
   QHash<QString, QString> presets;
@@ -1270,7 +1299,7 @@ MantidQt::API::AlgorithmDialog*  MantidUI::createAlgorithmDialog(Mantid::API::IA
   QString optional_msg(alg->getOptionalMessage().c_str());
 
   MantidQt::API::AlgorithmDialog *dlg =
-      MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_appWindow, false, presets, optional_msg,enabled);
+    MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_appWindow, false, presets, optional_msg,enabled);
   return dlg;
 }
 
@@ -1290,11 +1319,11 @@ void MantidUI::executeAlgorithm(MantidQt::API::AlgorithmDialog* dlg,Mantid::API:
 }
 
 /**
-  * Execute an algorithm
-  * @param algName :: The algorithm name
-  * @param paramList :: A list of algorithm properties to be passed to Algorithm::setProperties
-  * @param obs :: A pointer to an instance of AlgorithmObserver which will be attached to the finish notification
-  */
+* Execute an algorithm
+* @param algName :: The algorithm name
+* @param paramList :: A list of algorithm properties to be passed to Algorithm::setProperties
+* @param obs :: A pointer to an instance of AlgorithmObserver which will be attached to the finish notification
+*/
 void MantidUI::executeAlgorithm(const QString & algName, const QString & paramList,Mantid::API::AlgorithmObserver* obs)
 {
   //Get latest version of the algorithm
@@ -1309,11 +1338,11 @@ void MantidUI::executeAlgorithm(const QString & algName, const QString & paramLi
 }
 
 /**
-  * Execute an algorithm
-  * @param algName :: The algorithm name
-  * @param paramList :: A list of algorithm properties to be passed to Algorithm::setProperties
-  * @param obs :: A pointer to an instance of AlgorithmObserver which will be attached to the finish notification
-  */
+* Execute an algorithm
+* @param algName :: The algorithm name
+* @param paramList :: A list of algorithm properties to be passed to Algorithm::setProperties
+* @param obs :: A pointer to an instance of AlgorithmObserver which will be attached to the finish notification
+*/
 void MantidUI::executeAlgorithm(QString algName, QMap<QString,QString> paramList,Mantid::API::AlgorithmObserver* obs)
 {
   //Get latest version of the algorithm
@@ -1331,9 +1360,9 @@ void MantidUI::executeAlgorithm(QString algName, QMap<QString,QString> paramList
 }
 
 /**
- * Find the first input workspace for an algorithm
- * @param algorithm :: A pointer to the algorithm instance
- */
+* Find the first input workspace for an algorithm
+* @param algorithm :: A pointer to the algorithm instance
+*/
 QString MantidUI::findInputWorkspaceProperty(Mantid::API::IAlgorithm_sptr algorithm) const
 {
   //Iterate through the properties and find the first input one
@@ -1367,9 +1396,9 @@ void  MantidUI::copyWorkspacestoVector(const QList<QTreeWidgetItem*> &selectedIt
 }
 
 /**
- * Renames selected workspace
- * @param wsName :: selected workspace name
- */
+* Renames selected workspace
+* @param wsName :: selected workspace name
+*/
 void MantidUI::renameWorkspace(QString wsName)
 { 
   // If the wsname is blank look for an active window and assume this workspace is
@@ -1451,7 +1480,7 @@ void MantidUI::groupWorkspaces()
     if(Mantid::API::AnalysisDataService::Instance().doesExist(sgrpName))
     {
       if ( QMessageBox::question(appWindow(),"","Workspace "+qwsGrpName+" already exists. Do you want to replace it?",
-          QMessageBox::Yes, QMessageBox::No) != QMessageBox::Yes) return;
+        QMessageBox::Yes, QMessageBox::No) != QMessageBox::Yes) return;
     }
     //
     copyWorkspacestoVector(selectedItems,inputWSVec);
@@ -1606,7 +1635,7 @@ void MantidUI::executeDownloadDataFiles(const std::vector<std::string>& filenNam
   {
     alg->setProperty("FileNames",filenNames);
     alg->setProperty("FileIds",fileIds);
-    
+
   }
   catch(std::invalid_argument& e)
   {
@@ -1663,8 +1692,8 @@ void MantidUI::createLoadDAEMantidMatrix(const QString& wsQName)
   if (ws.use_count() == 0)
   {
     QMessageBox::warning(m_appWindow, tr("Mantid"),
-        tr("A workspace with this name already exists.\n")
-        , QMessageBox::Ok, QMessageBox::Ok);
+      tr("A workspace with this name already exists.\n")
+      , QMessageBox::Ok, QMessageBox::Ok);
     return;
   }
 
@@ -1774,16 +1803,18 @@ void MantidUI::manageMantidWorkspaces()
 #endif
 }
 
-/**
- * Create an instrument window from a named workspace or simply return the window if
- * it already exists
- */
+/** Create an instrument window from a named workspace.
+*  The window will be returned hidden.
+*  @param wsName The name of the workspace for which to generate the instrument view.
+*  @param tab    The index of the tab (starting from 0) to initially display (default: 0)
+*  @return A pointer to the instrument window widget if created. NULL otherwise.
+*/
 InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName, int tab)
 {
-  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   if( !Mantid::API::AnalysisDataService::Instance().doesExist(wsName.toStdString()) ) return NULL;
   MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(getWorkspace(wsName));
   if (!ws) return NULL;
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   Mantid::Geometry::Instrument_const_sptr instr = ws->getInstrument();
   if (!instr || instr->getName().empty())
   {
@@ -1814,13 +1845,15 @@ InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName, int tab)
   insWin->selectTab(tab);
 
   appWindow()->addMdiSubWindow(insWin);
+  // When called from python, we want the window to start out hidden.
+  //insWin->hide(); 
 
   connect(insWin,SIGNAL(plotSpectra(const QString&,const std::set<int>&)),this,
-      SLOT(plotSpectraList(const QString&,const std::set<int>&)));
+    SLOT(plotSpectraList(const QString&,const std::set<int>&)));
   connect(insWin,SIGNAL(createDetectorTable(const QString&,const std::vector<int>&,bool)),this,
-      SLOT(createDetectorTable(const QString&,const std::vector<int>&,bool)));
+    SLOT(createDetectorTable(const QString&,const std::vector<int>&,bool)));
   connect(insWin, SIGNAL(execMantidAlgorithm(const QString&,const QString&,Mantid::API::AlgorithmObserver*)), this,
-      SLOT(executeAlgorithm(const QString&, const QString&,Mantid::API::AlgorithmObserver*)));
+    SLOT(executeAlgorithm(const QString&, const QString&,Mantid::API::AlgorithmObserver*)));
 
   QApplication::restoreOverrideCursor();
   return insWin;
@@ -1834,7 +1867,10 @@ void MantidUI::showMantidInstrument(const QString& wsName)
   {
     return;
   }
-  insWin->show();
+  if (!insWin->isVisible())
+  {
+    insWin->show();
+  }
 }
 
 void MantidUI::showMantidInstrument()
@@ -1860,9 +1896,9 @@ void MantidUI::mantidMenuAboutToShow()
   // Ticket #672 Mantid Menu Improvements
 
   /*mantidMenu->insertItem(tr("&Manage Workspaces"), this, SLOT(manageMantidWorkspaces() ) );
-	mantidMenu->insertItem(tr("&Instrument Window"), this, SLOT(showMantidInstrument() ) );
-	mantidMenu->insertItem(tr("&Plot Memory Usage"), this, SLOT(manageMantidWorkspaces() ));
-   */
+  mantidMenu->insertItem(tr("&Instrument Window"), this, SLOT(showMantidInstrument() ) );
+  mantidMenu->insertItem(tr("&Plot Memory Usage"), this, SLOT(manageMantidWorkspaces() ));
+  */
 
   QAction* tstAction = new QAction("&Plot Memory Usage",this);
   connect(tstAction,SIGNAL(triggered()), this, SLOT(manageMantidWorkspaces() ));
@@ -1877,7 +1913,7 @@ void MantidUI::insertMenu()
 void MantidUI::clearAllMemory()
 {
   QMessageBox::StandardButton pressed =
-      QMessageBox::question(appWindow(), "MantidPlot", "All workspaces and windows will be removed. Are you sure?", QMessageBox::Ok|QMessageBox::Cancel, QMessageBox::Ok);
+    QMessageBox::question(appWindow(), "MantidPlot", "All workspaces and windows will be removed. Are you sure?", QMessageBox::Ok|QMessageBox::Cancel, QMessageBox::Ok);
 
   if( pressed != QMessageBox::Ok ) return;
 
@@ -1916,10 +1952,10 @@ void MantidUI::enableSaveNexus(const QString& wsName)
 }
 
 /** This method is sueful for saving the currently loaded workspaces to project file on save.
- *  saves the names of all the workspaces loaded into mantid workspace tree
- *  into a string and calls save nexus on each workspace to save the data to a nexus file.
- * @param workingDir :: -working directory of teh current project
- */
+*  saves the names of all the workspaces loaded into mantid workspace tree
+*  into a string and calls save nexus on each workspace to save the data to a nexus file.
+* @param workingDir :: -working directory of teh current project
+*/
 QString MantidUI::saveToString(const std::string& workingDir)
 {
   QString wsNames;
@@ -1973,8 +2009,8 @@ QString MantidUI::saveToString(const std::string& workingDir)
   return wsNames;
 }
 /**
- *  Prepares the Mantid Menu depending on the state of the active MantidMatrix.
- */
+*  Prepares the Mantid Menu depending on the state of the active MantidMatrix.
+*/
 void MantidUI::menuMantidMatrixAboutToShow()
 {
   menuMantidMatrix->clear();
@@ -2081,9 +2117,9 @@ MultiLayer* MantidUI::plotBin(const QString& wsName, int bin, bool errors, Graph
 // interface
 //-------------------------------------------------
 /**
- * This is for the Python API to be able to call the method that takes a map as SIP didn't like accepting a multimap as an 
- * argument
- */
+* This is for the Python API to be able to call the method that takes a map as SIP didn't like accepting a multimap as an 
+* argument
+*/
 MultiLayer* MantidUI::pyPlotSpectraList(const QList<QString>& ws_names, const QList<int>& spec_list, bool errs, Graph::CurveType style)
 {
   // Convert the list into a map (with the same workspace as key in each case)
@@ -2110,17 +2146,17 @@ MultiLayer* MantidUI::pyPlotSpectraList(const QList<QString>& ws_names, const QL
 }
 
 /**
- * Sets the flag that tells the scripting environment that
- * a script is currently running
- */
+* Sets the flag that tells the scripting environment that
+* a script is currently running
+*/
 void MantidUI::setIsRunning(bool running)
 {
   appWindow()->scriptingEnv()->setIsRunning(running);
 }
 
 /**
- * Merge the curves from the two given MultiLayer objects
- */
+* Merge the curves from the two given MultiLayer objects
+*/
 MultiLayer* MantidUI::mergePlots(MultiLayer* mlayer_1, MultiLayer* mlayer_2)
 {
   if( !mlayer_1 ) return NULL;
@@ -2165,7 +2201,7 @@ void MantidUI::cancelAllRunningAlgorithms()
 }
 
 bool MantidUI::createPropertyInputDialog(const QString & alg_name, const QString & preset_values,
-    const QString & optional_msg,  const QStringList & enabled, const QStringList & disabled)
+  const QString & optional_msg,  const QStringList & enabled, const QStringList & disabled)
 {
   Mantid::API::IAlgorithm_sptr alg = findAlgorithmPointer(alg_name);
   if( !alg )
@@ -2187,8 +2223,8 @@ bool MantidUI::createPropertyInputDialog(const QString & alg_name, const QString
   }
 
   MantidQt::API::AlgorithmDialog *dlg =
-      MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_appWindow->getScriptWindowHandle(),
-          true, presets, optional_msg, enabled, disabled);
+    MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_appWindow->getScriptWindowHandle(),
+    true, presets, optional_msg, enabled, disabled);
   return (dlg->exec() == QDialog::Accepted);
 }
 
@@ -2199,7 +2235,7 @@ Mantid::API::IAlgorithm_sptr MantidUI::findAlgorithmPointer(const QString & algN
   Mantid::API::IAlgorithm_sptr alg;
   deque<Mantid::API::IAlgorithm_sptr>::const_reverse_iterator aEnd = algorithms.rend();
   for(  deque<Mantid::API::IAlgorithm_sptr>::const_reverse_iterator aIter = algorithms.rbegin() ;
-      aIter != aEnd; ++aIter )
+    aIter != aEnd; ++aIter )
   {
     if( !(*aIter)->isExecuted() && (*aIter)->name() == algName.toStdString()  )
     {
@@ -2212,9 +2248,9 @@ Mantid::API::IAlgorithm_sptr MantidUI::findAlgorithmPointer(const QString & algN
 
 
 /** Displays a string in a Qtiplot table
- *  @param logName :: the title of the table is based on this
- *  @param data :: the string to display
- */
+*  @param logName :: the title of the table is based on this
+*  @param data :: the string to display
+*/
 void MantidUI::importString(const QString &logName, const QString &data)
 {
   Table* t = new Table(appWindow()->scriptingEnv(), 1, 1, "", appWindow(), 0);
@@ -2224,7 +2260,7 @@ void MantidUI::importString(const QString &logName, const QString &data)
   label.replace("_","-");
 
   appWindow()->initTable(t, 
-      appWindow()->generateUniqueName(label.section("-",0, 0) + "-"));
+    appWindow()->generateUniqueName(label.section("-",0, 0) + "-"));
   t->setColName(0, "Log entry");
   t->setReadOnlyColumn(0, true); //Read-only
 
@@ -2232,14 +2268,14 @@ void MantidUI::importString(const QString &logName, const QString &data)
 
   //Show table
   t->resize(2*t->table()->horizontalHeader()->sectionSize(0) + 55,
-      (QMIN(10,1)+1)*t->table()->verticalHeader()->sectionSize(0)+100);
+    (QMIN(10,1)+1)*t->table()->verticalHeader()->sectionSize(0)+100);
   t->setAttribute(Qt::WA_DeleteOnClose);
   t->showNormal();
 }
 /** Displays a string in a Qtiplot table
- *  @param logName :: the title of the table is based on this
- *  @param data :: a formated string with the time series data to display
- */
+*  @param logName :: the title of the table is based on this
+*  @param data :: a formated string with the time series data to display
+*/
 void MantidUI::importStrSeriesLog(const QString &logName, const QString &data)
 {
   QStringList loglines = data.split("\n", QString::SkipEmptyParts);
@@ -2276,7 +2312,7 @@ void MantidUI::importStrSeriesLog(const QString &logName, const QString &data)
 
   //Show table
   t->resize(2*t->table()->horizontalHeader()->sectionSize(0) + 55,
-      (QMIN(10,rowcount)+1)*t->table()->verticalHeader()->sectionSize(0)+100);
+    (QMIN(10,rowcount)+1)*t->table()->verticalHeader()->sectionSize(0)+100);
   // t->askOnCloseEvent(false);
   t->setAttribute(Qt::WA_DeleteOnClose);
   t->showNormal();
@@ -2284,16 +2320,20 @@ void MantidUI::importStrSeriesLog(const QString &logName, const QString &data)
 
 //------------------------------------------------------------------------------------------------
 /**  Import a numeric log data. It will be shown in a graph and copied into a table
-     @param wsName :: The workspace name which log data will be imported
-     @param logname :: The name of the log property to import
-     @param filter :: Filter flag telling how to filter the log data.
-                - 0 means no filtering
-                - 1 filter by running status
-                - 2 filter by period
-                - 3 filter by status & period
- */
+@param wsName :: The workspace name which log data will be imported
+@param logname :: The name of the log property to import
+@param filter :: Filter flag telling how to filter the log data.
+- 0 means no filtering
+- 1 filter by running status
+- 2 filter by period
+- 3 filter by status & period
+*/
 void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname, int filter)
 {
+  //if you need to add a final filter valure to the end of the filter to match the extent of the data, then set this to the index of the row to add the value
+  int addFinalFilterValueIndex = 0;
+  Mantid::Kernel::DateAndTime lastFilterTime;
+
   MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(getWorkspace(wsName));
   if (!ws) return;
 
@@ -2406,6 +2446,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
         }
     }
 
+    
     if (flt.filter())
     {
       //Valid filter was found
@@ -2438,15 +2479,24 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
 
       for(int i=0;i<flt.filter()->size();i++)
       {
-        t->setText(i,2,QString::fromStdString(flt.filter()->nthInterval(i).begin_str()));
-        t->setCell(i,3,!flt.filter()->nthValue(i));
+        if (flt.filter()->nthInterval(i).begin() > 0) //protect against bizarre values we sometimes get
+        {
+          std::string time_string = extractLogTime(flt.filter()->nthInterval(i).begin(),useAbsoluteDate,startTime);
+
+          t->setText(i,2,QString::fromStdString(time_string));
+          t->setCell(i,3,!flt.filter()->nthValue(i));
+          if((i+1==flt.filter()->size()) && (!flt.filter()->nthValue(i))) //last filter value and set to be filtering
+          {
+            addFinalFilterValueIndex = i+1;
+            lastFilterTime = flt.filter()->nthInterval(i).begin();
+          }
+        }
       }
 
       iValueCurve = 1;
       iFilterCurve = 0;
 
     } //end (valid filter exists)
-
 
   }
 
@@ -2463,25 +2513,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
       lastTime = it->first;
       lastValue = it->second;
 
-      std::string time_string;
-
-      if (useAbsoluteDate)
-      {
-        //Convert time into string
-        time_string = lastTime.to_simple_string();
-      }
-      else
-      {
-        //How many seconds elapsed?
-        Mantid::Kernel::time_duration elapsed = lastTime - startTime;
-        double seconds = Mantid::Kernel::DateAndTime::seconds_from_duration(elapsed);
-
-        //Output with 6 decimal points
-        std::ostringstream oss;
-        oss.precision(6);
-        oss << std::fixed << seconds;
-        time_string = oss.str();
-      }
+      std::string time_string = extractLogTime(lastTime,useAbsoluteDate,startTime);
 
       t->setText(i,0,QString::fromStdString(time_string));
       t->setCell(i,1,lastValue);
@@ -2496,7 +2528,9 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
     {
       rowcount = static_cast<int>(time_value_map.size());
       if (rowcount == t->numRows()) t->addRows(1);
-      std::string time_string = flt.filter()->lastTime().to_simple_string();
+
+      std::string time_string = extractLogTime(flt.filter()->lastTime(),useAbsoluteDate,startTime);
+
       t->setText(rowcount,0,QString::fromStdString(time_string));
       t->setCell(rowcount,1,lastValue);
     }
@@ -2505,10 +2539,22 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
   {
   }
 
+  //add a final filter value if needed and the data exceed the filter range
+  if ((addFinalFilterValueIndex > 0) && (lastFilterTime < lastTime))
+  { 
+    if (addFinalFilterValueIndex >= t->numRows())
+    {
+      t->addRows(1);
+    }
+    std::string end_string = extractLogTime(lastTime,useAbsoluteDate,startTime);
+    t->setText(addFinalFilterValueIndex,2,QString::fromStdString(end_string));
+    t->setCell(addFinalFilterValueIndex,3,1); // only need to add it if filter =1
+  }
+
   //Show table
 
   t->resize(2*t->table()->horizontalHeader()->sectionSize(0) + 55,
-      (QMIN(10,t->numRows())+1)*t->table()->verticalHeader()->sectionSize(0)+100);
+    (QMIN(10,t->numRows())+1)*t->table()->verticalHeader()->sectionSize(0)+100);
   //t->askOnCloseEvent(false);
   t->setAttribute(Qt::WA_DeleteOnClose);
   t->showNormal();
@@ -2572,6 +2618,29 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
 
 }
 
+std::string  MantidUI::extractLogTime(Mantid::Kernel::DateAndTime value,bool useAbsoluteDate, Mantid::Kernel::DateAndTime start)
+{
+  std::string time_string;
+  if (useAbsoluteDate)
+  {
+    //Convert time into string
+    time_string = value.to_simple_string();
+  }
+  else
+  {
+    //How many seconds elapsed?
+    Mantid::Kernel::time_duration elapsed = value - start;
+    double seconds = Mantid::Kernel::DateAndTime::seconds_from_duration(elapsed);
+
+    //Output with 6 decimal points
+    std::ostringstream oss;
+    oss.precision(6);
+    oss << std::fixed << seconds;
+    time_string = oss.str();
+  }
+  return time_string;
+}
+
 void MantidUI::showLogFileWindow()
 {
   //Need a new window to display entries
@@ -2585,18 +2654,18 @@ void MantidUI::showLogFileWindow()
 //  *****      Plotting Methods     *****  //
 
 /** Create a Table form specified spectra in a MatrixWorkspace
-    @param tableName :: Table name
-    @param workspaceName :: Shared pointer to the workspace
-    @param indexList :: A list of spectra indices to go to the table
-    @param errs :: If true include the errors into the table
-    @param binCentres :: If true the X column will contain the bin centres, i.e. (x_i+1 + x_i)/2.
-       If false the Y values will be in the same row with the left bin boundaries.
-       If the workspace is not a histogram the parameter is ignored.
- */
+@param tableName :: Table name
+@param workspaceName :: Shared pointer to the workspace
+@param indexList :: A list of spectra indices to go to the table
+@param errs :: If true include the errors into the table
+@param binCentres :: If true the X column will contain the bin centres, i.e. (x_i+1 + x_i)/2.
+If false the Y values will be in the same row with the left bin boundaries.
+If the workspace is not a histogram the parameter is ignored.
+*/
 Table* MantidUI::createTableFromSpectraList(const QString& tableName, const QString& workspaceName, QList<int> indexList, bool errs, bool binCentres)
 {
   MatrixWorkspace_const_sptr workspace =
-      boost::dynamic_pointer_cast<const MatrixWorkspace>(getWorkspace(workspaceName));
+    boost::dynamic_pointer_cast<const MatrixWorkspace>(getWorkspace(workspaceName));
   if (!workspace)
   {
     throw std::invalid_argument(workspaceName.toStdString()+" is not a Matrix Workspace.");
@@ -2685,34 +2754,34 @@ Table* MantidUI::createTableFromSpectraList(const QString& tableName, const QStr
 }
 
 /** Creates a Qtiplot Table from selected spectra of MantidMatrix m.
-    The columns are: 1st column is x-values from the first selected spectrum,
-    2nd column is y-values of the first spectrum. Depending on value of errs
-    the 3rd column contains either first spectrum errors (errs == true) or
-    y-values of the second spectrum (errs == false). Consecutive columns have
-    y-values and errors (if errs is true) of the following spectra. If visible == true
-    the table is made visible in Qtiplot.
+The columns are: 1st column is x-values from the first selected spectrum,
+2nd column is y-values of the first spectrum. Depending on value of errs
+the 3rd column contains either first spectrum errors (errs == true) or
+y-values of the second spectrum (errs == false). Consecutive columns have
+y-values and errors (if errs is true) of the following spectra. If visible == true
+the table is made visible in Qtiplot.
 
-    The name of a Y column is "Y"+QString::number(i), where i is the row in the MantidMatrix,
-    not the spectrum index in the workspace.
+The name of a Y column is "Y"+QString::number(i), where i is the row in the MantidMatrix,
+not the spectrum index in the workspace.
 
- */
+*/
 Table* MantidUI::createTableFromSelectedRows(MantidMatrix *m, bool errs, bool binCentres)
 {
   const QList<int>& indexList = m->getSelectedRows();
   if (indexList.empty()) return NULL;
 
   return createTableFromSpectraList(m->name(), QString::fromStdString(m->workspace()->name()),
-                                    indexList, errs, binCentres);
+    indexList, errs, binCentres);
 }
 
 /**  Create a 1d graph from a Table.
-     @param t :: Pointer to the Table.
-     @param type :: Type of the curve. Possible values are:
-         - Graph::Line
-         - Graph::Scatter
-         - Graph::LineSymbols
-         - Graph::HorizontalSteps
- */
+@param t :: Pointer to the Table.
+@param type :: Type of the curve. Possible values are:
+- Graph::Line
+- Graph::Scatter
+- Graph::LineSymbols
+- Graph::HorizontalSteps
+*/
 MultiLayer* MantidUI::createGraphFromTable(Table* t, int type)
 {
   if (!t) return NULL;
@@ -2741,15 +2810,15 @@ MultiLayer* MantidUI::createGraphFromTable(Table* t, int type)
 }
 
 /** Set properties of a 1d graph which plots spectrum data from a workspace such as the title and axes captions.
-    @param ml :: MultiLayer plot with the graph
-    @param wsName :: Workspace Name
- */
+@param ml :: MultiLayer plot with the graph
+@param wsName :: Workspace Name
+*/
 void MantidUI::setUpSpectrumGraph(MultiLayer* ml, const QString& wsName)
 {
   Mantid::API::MatrixWorkspace_sptr workspace =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(
-          AnalysisDataService::Instance().retrieve(wsName.toStdString())
-      );
+    boost::dynamic_pointer_cast<MatrixWorkspace>(
+    AnalysisDataService::Instance().retrieve(wsName.toStdString())
+    );
   Graph* g = ml->activeGraph();
   g->setTitle(tr("Workspace ")+wsName);
   Mantid::API::Axis* ax;
@@ -2778,10 +2847,10 @@ void MantidUI::setUpSpectrumGraph(MultiLayer* ml, const QString& wsName)
 }
 
 /** Set properties of a 1d graph which plots bin data from a workspace.
-    @param ml :: MultiLayer plot with the graph
-    @param Name :: Name of the graph
-    @param workspace :: The workspace
- */
+@param ml :: MultiLayer plot with the graph
+@param Name :: Name of the graph
+@param workspace :: The workspace
+*/
 void MantidUI::setUpBinGraph(MultiLayer* ml, const QString& Name, Mantid::API::MatrixWorkspace_sptr workspace)
 {
   Graph* g = ml->activeGraph();
@@ -2818,11 +2887,11 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString, set<int> >& toPlo
 }
 
 /** Create a 1d graph from the specified spectra in a MatrixWorkspace
-    @param wsName :: Workspace name
-    @param indexList :: A list of spectra indices to be shown in the graph
-    @param errs :: If true include the errors on the graph
-    @param distr :: if true, workspace is a distribution
- */
+@param wsName :: Workspace name
+@param indexList :: A list of spectra indices to be shown in the graph
+@param errs :: If true include the errors on the graph
+@param distr :: if true, workspace is a distribution
+*/
 MultiLayer* MantidUI::plotSpectraList(const QString& wsName, const std::set<int>& indexList, bool errs, bool distr)
 {
   // Convert the list into a map (with the same workspace as key in each case)
@@ -2839,11 +2908,11 @@ MultiLayer* MantidUI::plotSpectraList(const QString& wsName, const std::set<int>
 }
 
 /** Create a 1d graph form a set of workspace-spectrum pairs
-    @param toPlot :: A list of spectra indices to be shown in the graph
-    @param errs :: If true include the errors to the graph
-    @param distr :: if true, workspace is a distribution
-    @param style :: curve style for plot
- */
+@param toPlot :: A list of spectra indices to be shown in the graph
+@param errs :: If true include the errors to the graph
+@param distr :: if true, workspace is a distribution
+@param style :: curve style for plot
+*/
 MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs, bool distr, Graph::CurveType style)
 {
   UNUSED_ARG(errs);
@@ -2902,9 +2971,9 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
     return NULL;
   }
   Mantid::API::MatrixWorkspace_sptr workspace =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(
-          AnalysisDataService::Instance().retrieve(firstWorkspace.toStdString())
-      );
+    boost::dynamic_pointer_cast<MatrixWorkspace>(
+    AnalysisDataService::Instance().retrieve(firstWorkspace.toStdString())
+    );
 
   g->setTitle(tr("Workspace ")+firstWorkspace);
   Mantid::API::Axis* ax;
@@ -2929,7 +2998,7 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
     xTitle = "X axis";
   }
   g->setXAxisTitle(tr(xTitle.c_str()));
-  
+
   std::string yTitle = workspace->YUnitLabel();
   if (distr)
   {
@@ -2947,11 +3016,11 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
 }
 
 /**
- * Draw a color fill plot for each of the listed workspaces. Unfortunately the plotting is 
- * initimately linked to MantidMatrix so that one of these needs to be created first
- * @param ui :: the sequential fitting UI form
- * @param fitbrowser :: pointer to the fit property browser
- */
+* Draw a color fill plot for each of the listed workspaces. Unfortunately the plotting is 
+* initimately linked to MantidMatrix so that one of these needs to be created first
+* @param ui :: the sequential fitting UI form
+* @param fitbrowser :: pointer to the fit property browser
+*/
 void MantidUI::showSequentialPlot(Ui::SequentialFitDialog* ui, MantidQt::MantidWidgets::FitPropertyBrowser* fitbrowser)
 {
   std::string wsName = fitbrowser->outputName();
@@ -2959,7 +3028,7 @@ void MantidUI::showSequentialPlot(Ui::SequentialFitDialog* ui, MantidQt::MantidW
     Mantid::API::AnalysisDataService::Instance().retrieve(wsName) );
   if (ws)
   {
-    if ((ws->columnCount() - 1)/2 != (int)fitbrowser->compositeFunction()->nParams()) return;
+    if ((ws->columnCount() - 1)/2 != fitbrowser->compositeFunction()->nParams()) return;
     Table *t = importTableWorkspace(QString::fromStdString(wsName));
     if (!t) return;
     QString parName;
@@ -2994,11 +3063,11 @@ void MantidUI::showSequentialPlot(Ui::SequentialFitDialog* ui, MantidQt::MantidW
 }
 
 /**
- * Draw a color fill plot for each of the listed workspaces. Unfortunately the plotting is 
- * initimately linked to MantidMatrix so that one of these needs to be created first
- * @param wsNames :: For each workspace listed create a 2D colorfill plot 
- * @param curveType :: The curve type for each of the plots
- */
+* Draw a color fill plot for each of the listed workspaces. Unfortunately the plotting is 
+* initimately linked to MantidMatrix so that one of these needs to be created first
+* @param wsNames :: For each workspace listed create a 2D colorfill plot 
+* @param curveType :: The curve type for each of the plots
+*/
 void MantidUI::drawColorFillPlots(const QStringList & wsNames, Graph::CurveType curveType)
 {
   for( QStringList::const_iterator cit = wsNames.begin(); cit != wsNames.end(); ++cit )
@@ -3008,11 +3077,11 @@ void MantidUI::drawColorFillPlots(const QStringList & wsNames, Graph::CurveType 
 }
 
 /**
- * Draw a single ColorFill plot for the named workspace
- * @param wsName :: The name of the workspace which provides data for the plot
- * @param curveType :: The type of curve
- * @returns A pointer to the created plot
- */
+* Draw a single ColorFill plot for the named workspace
+* @param wsName :: The name of the workspace which provides data for the plot
+* @param curveType :: The type of curve
+* @returns A pointer to the created plot
+*/
 MultiLayer* MantidUI::drawSingleColorFillPlot(const QString & wsName, Graph::CurveType curveType)
 {
   MantidMatrix *matrix =  importMatrixWorkspace(wsName, -1, -1, false,false);
@@ -3024,19 +3093,19 @@ MultiLayer* MantidUI::drawSingleColorFillPlot(const QString & wsName, Graph::Cur
 }
 
 /** Create a 1d graph form specified spectra in a MatrixWorkspace
-    @param wsName :: Workspace name
-    @param i0 :: Starting index
-    @param i1 :: Last index
-    @param errs :: If true include the errors to the graph
-    @param distr :: if true, workspace is a distribution
- */
+@param wsName :: Workspace name
+@param i0 :: Starting index
+@param i1 :: Last index
+@param errs :: If true include the errors to the graph
+@param distr :: if true, workspace is a distribution
+*/
 MultiLayer* MantidUI::plotSpectraRange(const QString& wsName, int i0, int i1, bool errs, bool distr)
 {
   if (i0 < 0 || i1 < 0) return 0;
   /** For instrument with one to many spectra-detector mapping,
-   * different pixels with correspond to the same specta so
-   * we need to remove doublons in this case.
-   */
+  * different pixels with correspond to the same specta so
+  * we need to remove doublons in this case.
+  */
   std::set<int> indexList;
   for(int i=i0;i<=i1;i++)
     indexList.insert(i);
@@ -3045,10 +3114,10 @@ MultiLayer* MantidUI::plotSpectraRange(const QString& wsName, int i0, int i1, bo
 }
 
 /**  Create a graph and plot the selected rows of a MantidMatrix
-     @param m :: Mantid matrix
-     @param errs :: True if the errors to be plotted
-     @param distr :: if true, workspace is a distribution
- */
+@param m :: Mantid matrix
+@param errs :: True if the errors to be plotted
+@param distr :: if true, workspace is a distribution
+*/
 MultiLayer* MantidUI::plotSelectedRows(const MantidMatrix * const m, bool errs, bool distr)
 {
   const QList<int>& rows = m->getSelectedRows();
@@ -3131,9 +3200,9 @@ MultiLayer* MantidUI::createGraphFromSelectedColumns(MantidMatrix *m, bool errs,
   return ml;
 }
 /** Saves data to  nexus file
- * @param wsName :: Name of the workspace to be saved
- * @param fileName :: name of the nexus file to created
- */
+* @param wsName :: Name of the workspace to be saved
+* @param fileName :: name of the nexus file to created
+*/
 void MantidUI::savedatainNexusFormat(const std::string& fileName,const std::string & wsName)
 { 
   try
@@ -3148,10 +3217,10 @@ void MantidUI::savedatainNexusFormat(const std::string& fileName,const std::stri
   }
 }
 /** Loads data from nexus file
- * @param wsName :: Name of the workspace to be created
- * @param fileName :: name of the nexus file
- * @param project :: if true, load stops GUI execution
- */
+* @param wsName :: Name of the workspace to be created
+* @param fileName :: name of the nexus file
+* @param project :: if true, load stops GUI execution
+*/
 void MantidUI::loaddataFromNexusFile(const std::string& wsName,const std::string& fileName,bool project)
 {
   if(fileName.empty()) return ;
@@ -3168,10 +3237,10 @@ void MantidUI::loaddataFromNexusFile(const std::string& wsName,const std::string
   }
 }
 /** Loads data from raw file
- * @param wsName :: Name of the workspace to be created
- * @param fileName :: name of the raw file
- * @param project :: if true, load stops GUI execution
- */
+* @param wsName :: Name of the workspace to be created
+* @param fileName :: name of the raw file
+* @param project :: if true, load stops GUI execution
+*/
 void MantidUI::loadadataFromRawFile(const std::string& wsName,const std::string& fileName,bool project)
 {
   if(fileName.empty()) return ;

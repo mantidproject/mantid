@@ -153,6 +153,8 @@ using namespace boost::python;
       .def("isRunningAsync", &API::IAlgorithm::isRunningAsync)
       .def("isInitialized", &API::IAlgorithm::isInitialized)
       .def("isExecuted", &API::IAlgorithm::isExecuted)
+      .def("setChild", &API::IAlgorithm::setChild)
+      .def("setAlwaysStoreInADS", &API::IAlgorithm::setAlwaysStoreInADS)
       .def("setRethrows", &API::IAlgorithm::setRethrows)
       .def("existsProperty", &API::IAlgorithm::existsProperty)
       .def("setPropertyValue", &API::IAlgorithm::setPropertyValue)
@@ -546,9 +548,9 @@ using namespace boost::python;
     // Table workspace
     // Some function pointers since MSVC can't figure out the function to call when 
     // placing this directly in the .def functions below
-    typedef int&(ITableWorkspace::*get_integer_ptr)(const std::string &, int);
-    typedef double&(ITableWorkspace::*get_double_ptr)(const std::string &, int);
-    typedef std::string&(ITableWorkspace::*get_string_ptr)(const std::string &, int);
+    typedef int&(ITableWorkspace::*get_integer_ptr)(const std::string &, size_t);
+    typedef double&(ITableWorkspace::*get_double_ptr)(const std::string &, size_t);
+    typedef std::string&(ITableWorkspace::*get_string_ptr)(const std::string &, size_t);
 
     // TableWorkspace class
     class_< ITableWorkspace, bases<API::Workspace>, boost::noncopyable >("ITableWorkspace", no_init)
@@ -593,6 +595,7 @@ using namespace boost::python;
       .def("label", & API::Axis::label)
       .def("getUnit", (const Mantid::Kernel::Unit_sptr & (Mantid::API::Axis::*)() const) &API::Axis::unit, return_value_policy<copy_const_reference>() )
       .def("setUnit", & API::Axis::setUnit)
+      .def("getValue", & API::NumericAxis::getValue)
       ;
 
     // Numeric Axis subclass

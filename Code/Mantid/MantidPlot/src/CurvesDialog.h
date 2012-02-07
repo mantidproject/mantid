@@ -38,6 +38,7 @@ class QPushButton;
 class QCheckBox;
 class Graph;
 class PlotCurve;
+class ApplicationWindow;
 
 //! Add/remove curves dialog
 class CurvesDialog : public QDialog
@@ -45,10 +46,8 @@ class CurvesDialog : public QDialog
   Q_OBJECT
 
 public:
-  CurvesDialog( QWidget* parent = 0, Qt::WFlags fl = 0 );
+  CurvesDialog( ApplicationWindow* app, Graph* g, Qt::WFlags fl = 0 );
   ~CurvesDialog();
-
-  void setGraph(Graph *graph);
 
 private slots:
   void addCurves();
@@ -65,6 +64,7 @@ private slots:
   void showCurrentFolder(bool);
 
 private:
+  void setGraph(Graph *graph);
   void closeEvent(QCloseEvent*);
 
   void init();
@@ -72,6 +72,7 @@ private:
   QSize sizeHint() const;
   void contextMenuEvent(QContextMenuEvent *);
 
+  ApplicationWindow* d_app;
   Graph *d_graph;
 
   QPushButton* btnAdd;

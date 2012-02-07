@@ -85,21 +85,39 @@ namespace MantidQt
     }
 
     /**
-    Setter for the goniometer matrix
-    @param goniometer matrix.
+    Setter for goniometer axis.
+    @param axis0 : axis 0 settings
+    @param axis1 : axis 1 settings
+    @param axis2 : axis 2 settings 
+    @param axis3 : axis 3 settings 
+    @param axis4 : axis 4 settings 
+    @param axis5 : axis 5 settings 
     */
-    void WorkspaceMemento::setGoniometer(const Mantid::Kernel::DblMatrix& matrix)
+    void WorkspaceMemento::setGoniometer(const std::string axis0, const std::string axis1, const std::string axis2, const std::string axis3, const std::string axis4, const std::string axis5)
     {
-      m_goniometer = matrix;
+      std::vector<std::string> temp(6);
+      m_axes.swap(temp);
+      m_axes[0] = axis0;
+      m_axes[1] = axis1;
+      m_axes[2] = axis2;
+      m_axes[3] = axis3;
+      m_axes[4] = axis4;
+      m_axes[5] = axis5;
     }
 
     /**
-    Getter for the goniometer matrix
-    @return goniometer matrix
+    Setter for log values
+    @param name : Name of the log
+    @param value : Value of  the log
+    @param logType : Log type to use
     */
-    Mantid::Kernel::DblMatrix WorkspaceMemento::getGoniometer() const
+    void WorkspaceMemento::setLogValue(const std::string name, const std::string value, const std::string logType)
     {
-      return m_goniometer;
+      LogEntry entry;
+      entry.name = name;
+      entry.value = value;
+      entry.type = logType;
+      this->m_logEntries.push_back(entry);
     }
 
     /*

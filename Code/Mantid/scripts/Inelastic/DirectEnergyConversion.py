@@ -96,9 +96,6 @@ class DirectEnergyConversion(object):
                              bleed test diagnostic
               print_results - If True then the results are printed to the screen
         """
-        if kwargs.get('second_white', None) is not None:
-            raise RuntimeError("Diagnostic does not support second white beam run yet")
-
         lhs_names = lhs_info('names')
         if len(lhs_names) > 0:
             var_name = lhs_names[0]
@@ -113,6 +110,14 @@ class DirectEnergyConversion(object):
         
         # Get the white beam vanadium integrals
         whiteintegrals = self.do_white(white, None, None) # No grouping yet
+        if 'second_white' in kwargs:
+            second_white = kwargs['second_white']
+            if second_white is None:
+                del kwargs['second_white']
+            else:
+                other_whiteintegrals = self.do_white(second_white, None, None) # No grouping yet
+                kwargs['second_white'] = other_whiteintegrals
+
         # Get the background/total counts from the sample if present
         if 'sample' in kwargs:
             sample = kwargs['sample']
@@ -135,7 +140,7 @@ class DirectEnergyConversion(object):
             total_counts = Integration(result_ws, OutputWorkspace='total_counts', IncludePartialBins=True).workspace()
             background_int = ConvertUnits(background_int, background_int, "Energy", AlignBins=0).workspace()
             background_int *= 1.7016e8
-            background_int /= whiteintegrals
+            diagnostics.normalise_background(background_int, whiteintegrals, kwargs.get('second_white',None))
             kwargs['background_int'] = background_int
             kwargs['sample_counts'] = total_counts
             
@@ -162,6 +167,8 @@ class DirectEnergyConversion(object):
         if 'sample_counts' in kwargs:
             DeleteWorkspace('background_int')
             DeleteWorkspace('total_counts')
+        if 'second_white' in kwargs:
+            DeleteWorkspace(kwargs['second_white'])
         # Return a mask workspace
         diag_mask = ExtractMasking(whiteintegrals, OutputWorkspace='diag_mask').workspace()
         DeleteWorkspace(whiteintegrals)
@@ -178,9 +185,8 @@ class DirectEnergyConversion(object):
         Normalise to a specified white-beam run
         """
         whitews_name = common.create_resultname(white_run, suffix='-white')
-        if mtd.workspaceExists(whitews_name):
-            return mtd[whitews_name]
-
+        if whitews_name in mtd:
+            DeleteWorkspace(whitews_name)
         # Load
         white_data = self.load_data(white_run)
         # Normalise
@@ -259,9 +265,11 @@ class DirectEnergyConversion(object):
             ChangeBinOffset(data_ws, result_name, -tzero)
             mon1_peak = 0.0
         elif (self.instr_name == "ARCS" or self.instr_name == "SEQUOIA"):
-            if 'Filename' in data_ws.getRun(): mono_run = data_ws.getRun()['Filename']
+            if 'Filename' in data_ws.getRun(): mono_run = data_ws.getRun()['Filename'].value
             else: raise RuntimeError('Cannot load monitors for event reduction. Unable to determine Filename from mono workspace, it should have been added as a run log.')
-                           
+                 
+	    mtd.sendDebugMessage("mono_run = %s (%s)" % (mono_run,type(mono_run)))
+          
             if mono_run.endswith("_event.nxs"):
                 loader=LoadNexusMonitors(Filename=mono_run, OutputWorkspace="monitor_ws")    
             elif mono_run.endswith("_event.dat"):
@@ -276,8 +284,9 @@ class DirectEnergyConversion(object):
                 ei_calc = monitor_ws.getRun().getLogData("Ei").value
             except:
                 self.log("Error in GetEi. Using entered values.")
-                monitor_ws.getRun()['Ei'] = ei_value
+                #monitor_ws.getRun()['Ei'] = ei_value
                 ei_value = ei_guess
+		AddSampleLog(monitor_ws, 'Ei', ei_value, "Number")
                 ei_calc = None
                 TzeroCalculated = Tzero
                 
@@ -513,8 +522,14 @@ class DirectEnergyConversion(object):
         """
         Apply normalisation using specified source
         """
+        # Make sure we don't call this twice
         method = method.lower()
-        if method == 'monitor-1':
+        done_log = "DirectInelasticReductionNormalisedBy"
+        if done_log in data_ws.getRun() or method == 'none':
+            if str(data_ws) != str(result_ws):
+                CloneWorkspace(InputWorkspace=data_ws, OutputWorkspace=result_ws)
+            output = mtd[str(result_ws)]
+        elif method == 'monitor-1':
             range_min = self.mon1_norm_range[0] + range_offset
             range_max = self.mon1_norm_range[1] + range_offset
             NormaliseToMonitor(InputWorkspace=data_ws, OutputWorkspace=result_ws, MonitorSpectrum=int(self.mon1_norm_spec), 
@@ -523,13 +538,11 @@ class DirectEnergyConversion(object):
         elif method == 'current':
             NormaliseByCurrent(InputWorkspace=data_ws, OutputWorkspace=result_ws)
             output = mtd[str(result_ws)]
-        elif method == 'none':
-            if str(data_ws) != str(result_ws):
-                CloneWorkspace(InputWorkspace=data_ws, OutputWorkspace=result_ws)
-            output = mtd[str(result_ws)]
         else:
             raise RuntimeError('Normalisation scheme ' + reference + ' not found. It must be one of monitor-1, current, peak or none')
 
+        # Add a log to the workspace to say that the normalisation has been done
+        AddSampleLog(Workspace=output, LogName=done_log,LogText=method)
         return output
             
     def calc_average(self, data_ws):
@@ -788,7 +801,7 @@ class DirectEnergyConversion(object):
 
         # Diag 
         self.diag_params = ['diag_tiny', 'diag_huge', 'diag_samp_zero', 'diag_samp_lo', 'diag_samp_hi','diag_samp_sig',\
-                            'diag_van_out_lo', 'diag_van_out_hi', 'diag_van_lo', 'diag_van_hi', 'diag_van_sig']
+                            'diag_van_out_lo', 'diag_van_out_hi', 'diag_van_lo', 'diag_van_hi', 'diag_van_sig', 'diag_variation']
         # Add an attribute for each of them
         for par in self.diag_params:
             setattr(self, par, self.get_default_parameter(par))

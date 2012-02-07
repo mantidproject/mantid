@@ -342,6 +342,7 @@ namespace Mantid
       outputws->addColumn("str","Name");
       outputws->addColumn("str","Location");
       outputws->addColumn("str","Create Time");
+      outputws->addColumn("long64","Id");
 
       std::vector<ns1__investigation*> investVec;
       investVec.assign(response.return_.begin(),response.return_.end());
@@ -377,6 +378,7 @@ namespace Mantid
                 std::string *creationtime=new std::string ;
                 creationtime->assign(ftime);
                 savetoTableWorkspace(creationtime,t);
+                savetoTableWorkspace((*datafile_citr)->id,t);
               }
 
             }//end of for loop for data files iteration
@@ -482,6 +484,7 @@ namespace Mantid
       outputws->addColumn("str","Name");
       outputws->addColumn("str","Location");
       outputws->addColumn("str","Create Time");
+      outputws->addColumn("long64","Id");
 
       try
       {		std::vector<ns1__dataset*> datasetVec;
@@ -523,7 +526,8 @@ namespace Mantid
             creationtime->assign(ftime);
           }
           savetoTableWorkspace(creationtime,t);
-
+          // 
+          savetoTableWorkspace((*datafile_citr)->id,t);
         }
 
       }

@@ -90,6 +90,14 @@ namespace Geometry
   {
     return da[2];
   }
+/** Get lattice parameter a1-a3 as function of index (0-2)
+  @return a_n :: lattice parameter \f$ a,b or c \f$ (in \f$ \mbox{\AA} \f$ )
+  */ 
+  double UnitCell::a(int nd)const
+  {
+      if(nd<0||nd>2)throw(std::invalid_argument("lattice parameter index can change from 0 to 2 "));
+      return da[nd];
+  }
 
   /** Get lattice parameter
   @return alpha1 :: lattice parameter \f$ \alpha \f$ (in radians)
@@ -430,10 +438,14 @@ namespace Geometry
   /// Private function, called at initialization or whenever lattice parameters are changed
   void UnitCell::recalculate()
   {
-      calculateG();
-      calculateGstar();
-      calculateReciprocalLattice();
-      calculateB();
+    if ((da[3]>da[4]+da[5])||(da[4]>da[3]+da[5])||(da[5]>da[4]+da[3]))
+    {
+      throw std::invalid_argument("Invalid angles");
+    }
+    calculateG();
+    calculateGstar();
+    calculateReciprocalLattice();
+    calculateB();
   }
       
   /// Private function to calculate #G matrix
@@ -460,8 +472,10 @@ namespace Geometry
       throw std::range_error("UnitCell not properly initialized");
     }
     Gstar=G;
+    std::vector<double> rr = Gstar.get_vector();
     if (Gstar.Invert()==0)
             {throw std::range_error("UnitCell not properly initialized");}
+    std::vector<double> rr1 = Gstar.get_vector();
     return;
   }
 

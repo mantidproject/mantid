@@ -28,6 +28,7 @@ set ( SRC_FILES
 	src/ConjoinWorkspaces.cpp
 	src/ConvertFromDistribution.cpp
 	src/ConvertSpectrumAxis.cpp
+	src/ConvertTableToMatrixWorkspace.cpp
 	src/ConvertToDistribution.cpp
 	src/ConvertToEventWorkspace.cpp
 	src/ConvertToHistogram.cpp
@@ -146,6 +147,7 @@ set ( SRC_FILES
 	src/RemovePromptPulse.cpp
 	src/RenameWorkspace.cpp
 	src/ReplaceSpecialValues.cpp
+	src/ResetNegatives.cpp
 	src/ResizeRectangularDetector.cpp
 	src/SANSDirectBeamScaling.cpp
 	src/Scale.cpp
@@ -210,6 +212,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ConjoinWorkspaces.h
 	inc/MantidAlgorithms/ConvertFromDistribution.h
 	inc/MantidAlgorithms/ConvertSpectrumAxis.h
+	inc/MantidAlgorithms/ConvertTableToMatrixWorkspace.h
 	inc/MantidAlgorithms/ConvertToDistribution.h
 	inc/MantidAlgorithms/ConvertToEventWorkspace.h
 	inc/MantidAlgorithms/ConvertToHistogram.h
@@ -329,6 +332,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/RemovePromptPulse.h
 	inc/MantidAlgorithms/RenameWorkspace.h
 	inc/MantidAlgorithms/ReplaceSpecialValues.h
+	inc/MantidAlgorithms/ResetNegatives.h
 	inc/MantidAlgorithms/ResizeRectangularDetector.h
 	inc/MantidAlgorithms/SANSDirectBeamScaling.h
 	inc/MantidAlgorithms/Scale.h
@@ -392,6 +396,7 @@ set ( TEST_FILES
 	test/ConjoinWorkspacesTest.h
 	test/ConvertFromDistributionTest.h
 	test/ConvertSpectrumAxisTest.h
+	test/ConvertTableToMatrixWorkspaceTest.h
 	test/ConvertToDistributionTest.h
 	test/ConvertToEventWorkspaceTest.h
 	test/ConvertToHistogramTest.h
@@ -496,6 +501,7 @@ set ( TEST_FILES
 	test/RemovePromptPulseTest.h
 	test/RenameWorkspaceTest.h
 	test/ReplaceSpecialValuesTest.h
+	test/ResetNegativesTest.h
 	test/ResizeRectangularDetectorTest.h
 	test/ScaleTest.h
 	test/ScaleXTest.h

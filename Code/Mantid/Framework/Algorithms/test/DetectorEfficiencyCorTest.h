@@ -219,8 +219,8 @@ public:
     MatrixWorkspace_sptr result = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
 
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 1);
-    TS_ASSERT_DELTA(result->readY(0).front(), 20.147351, 1e-6);
-    TS_ASSERT_DELTA(result->readY(0).back(), 0.0, 1e-6);
+    TS_ASSERT_DELTA(result->readY(0).front(), 10.07367566, 1e-8);
+    TS_ASSERT_DELTA(result->readY(0).back(), 0.0, 1e-8);
     
     AnalysisDataService::Instance().remove(wsName);
   }

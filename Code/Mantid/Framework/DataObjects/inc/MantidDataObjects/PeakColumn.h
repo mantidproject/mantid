@@ -29,8 +29,8 @@ namespace DataObjects
     
 
     /// Number of individual elements in the column.
-    virtual int size() const
-    { return static_cast<int>(peaks.size()); }
+    virtual size_t size() const
+    { return peaks.size(); }
 
     /// Returns typeid for the data in the column
     virtual const std::type_info& get_type_info()const;
@@ -41,9 +41,9 @@ namespace DataObjects
     virtual bool getReadOnly() const;
 
     /// Prints
-    virtual void print(std::ostream& s, int index) const;
+    virtual void print(size_t index, std::ostream& s) const;
 
-    virtual void read(const std::string & text, int index);
+    virtual void read(size_t index, const std::string & text );
 
     /// Specialized type check
     virtual bool isBool()const;
@@ -54,17 +54,23 @@ namespace DataObjects
     /// Clone.
     virtual PeakColumn* clone() const;
 
+    /// Cast to double
+    virtual double toDouble(size_t i)const;
+
+    /// Assign from double
+    virtual void fromDouble(size_t i, double value);
+
   protected:
     /// Sets the new column size.
-    virtual void resize(int count);
+    virtual void resize(size_t count);
     /// Inserts an item.
-    virtual void insert(int index);
+    virtual void insert(size_t index);
     /// Removes an item.
-    virtual void remove(int index);
+    virtual void remove(size_t index);
     /// Pointer to a data element
-    virtual void* void_pointer(int index);
+    virtual void* void_pointer(size_t index);
     /// Pointer to a data element
-    virtual const void* void_pointer(int index) const;
+    virtual const void* void_pointer(size_t index) const;
 
   private:
     /// Reference to the peaks object saved in the PeaksWorkspace.

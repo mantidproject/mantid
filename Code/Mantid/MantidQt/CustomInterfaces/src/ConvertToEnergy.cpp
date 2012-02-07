@@ -195,14 +195,7 @@ void ConvertToEnergy::instrumentSelectChanged(const QString& name)
     return;
   }
 
-  //QString defFile = getIDFPath(name);
   QString defFile = (Mantid::API::ExperimentInfo::getInstrumentFilename(name.toStdString())).c_str();
-
-
-        //  m_filename = ExperimentInfo::getInstrumentFilename(m_instName,date);
-
-  std::cout << "ConvertToEnergy::instrumentSelectChanged(): name = " << name.toStdString() << std::endl;
-  std::cout << "ConvertToEnergy::instrumentSelectChanged(): defFile = " << defFile.toStdString() << std::endl;
 
   if ( defFile == "" )
   {
@@ -242,38 +235,7 @@ void ConvertToEnergy::instrumentSelectChanged(const QString& name)
   m_curEmodeType = desired;
   m_uiForm.pbRun->setEnabled(true);
 
-  std::cout << "ConvertToEnergy::instrumentSelectChanged() - leaving" << std::endl;
 }
-
-//QString ConvertToEnergy::getIDFPath(const QString& prefix)
-//{
-//  QString paramfile_dir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("parameterDefinition.directory"));
-//  QDir paramdir(paramfile_dir);
-//  paramdir.setFilter(QDir::Files);
-//  QStringList filters;
-//  filters << prefix + "*_Parameters.xml";
-//  paramdir.setNameFilters(filters);
-
-//  QStringList entries = paramdir.entryList();
-//  QString defFilePrefix;
-
-//  if( entries.isEmpty() )
-//  {
-//    QMessageBox::warning(this, "MantidPlot", "Selected instrument (" + prefix + ") does not have a parameter file.\nCannot run analysis");
-//    m_uiForm.cbInst->blockSignals(true);
-//    m_uiForm.cbInst->setCurrentIndex(m_uiForm.cbInst->findText(m_curInterfaceSetup));
-//    m_uiForm.cbInst->blockSignals(false);
-//    return "";
-//  }
-//  else
-//  {
-//    defFilePrefix = entries[(entries.count()-1)];
-//    defFilePrefix.chop(15); // cut "_Parameters.xml" off the string
-//  }
-
-//  QString defFile = paramdir.filePath(defFilePrefix + "_Definition.xml");
-//  return defFile;
-//}
 
 /**
  * Runs a Python script to discover whether the selected instrument is direct or indirect.
@@ -351,6 +313,7 @@ void ConvertToEnergy::changeInterface(DeltaEMode desired)
 	      this, SIGNAL(runAsPythonScript(const QString&)));
       m_indirectInstruments->initializeLocalPython();
     }
+    m_indirectInstruments->performInstSpecific();
     m_indirectInstruments->setIDFValues(curInstPrefix);
     break;
   default:

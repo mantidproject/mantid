@@ -54,9 +54,9 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         self.declareProperty("CrossCorrelation", True,
                              Description="CrossCorrelation if True; minimize using many peaks if False.")
         self.declareProperty("PeakPositions", "", 
-                             Description="Comma delimited d-space positions of reference peaks.  Use 1 or 2 for Cross Correlation.  Unlimited for many peaks option.")
+                             Description="Comma delimited d-space positions of reference peaks.  Use 1-3 for Cross Correlation.  Unlimited for many peaks option.")
         self.declareProperty("DetectorsPeaks", "",
-                             Description="Comma delimited numbers of detector banks for each peak if using 2 peaks for Cross Correlation.  Default is all.")
+                             Description="Comma delimited numbers of detector banks for each peak if using 2-3 peaks for Cross Correlation.  Default is all.")
         self.declareProperty("PeakHalfWidth", 0.05,
                              Description="Half width of d-space around peaks for Cross Correlation. Default is 0.05")
         self.declareProperty("CrossCorrelationPoints", 100,
@@ -102,7 +102,6 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         # generate the workspace name
         name = "%s_%d" % (self._instrument, runnumber)
         filename = name + extension
-        print filename
 
         try: # first just try loading the file
             alg = LoadEventPreNexus(EventFilename=filename, OutputWorkspace=name)
@@ -211,24 +210,6 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 UnwrapSNS(InputWorkspace=wksp, OutputWorkspace=wksp, LRef=LRef)
             if DIFCref > 0:
                 RemoveLowResTOF(InputWorkspace=wksp, OutputWorkspace=wksp, ReferenceDIFC=DIFCref)
-        if self._grouping == "All":
-            if str(self._instrument) == "PG3":
-                groups = "POWGEN"
-            elif str(self._instrument) == "NOM":
-                groups = "NOMAD"
-            else:
-                groups = str(self._instrument)
-        elif str(self._instrument) == "SNAP" and self._grouping == "Group":
-                groups = "East,West"
-        else:
-            groups = ""
-            numrange = 200
-            if str(self._instrument) == "SNAP":
-                numrange = 19
-            for num in xrange(1,numrange):
-                comp = wksp.getInstrument().getComponentByName("%s%d" % (self._grouping, num) )
-                if not comp == None:
-                    groups+=("%s%d," % (self._grouping, num) )
         # take care of filtering events
         if self._filterBadPulses and not self.getProperty("CompressOnRead"):
             FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp)
@@ -267,7 +248,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         if self._lastpixel == 0:
             self._lastpixel = wksp.getNumberHistograms()-1
         else:
-            self._lastpixel = wksp.getNumberHistograms()*self._lastpixel/self._lastpixel2-1
+            self._lastpixel = wksp.getNumberHistograms()*self._lastpixel/self._lastpixel3-1
         CrossCorrelate(InputWorkspace=wksp, OutputWorkspace=str(wksp)+"cc", ReferenceSpectra=refpixel,
             WorkspaceIndexMin=0, WorkspaceIndexMax=self._lastpixel, XMin=self._peakmin, XMax=self._peakmax)
         # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
@@ -286,8 +267,9 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                         refpixel = s
                         ymax = y_s[midBin]
             print "Reference spectra=",refpixel
+            self._lastpixel2 = wksp.getNumberHistograms()*self._lastpixel2/self._lastpixel3-1
             CrossCorrelate(InputWorkspace=wksp, OutputWorkspace=str(wksp)+"cc2", ReferenceSpectra=refpixel,
-                WorkspaceIndexMin=self._lastpixel+1, WorkspaceIndexMax=wksp.getNumberHistograms()-1, XMin=self._peakmin2, XMax=self._peakmax2)
+                WorkspaceIndexMin=self._lastpixel+1, WorkspaceIndexMax=self._lastpixel2, XMin=self._peakmin2, XMax=self._peakmax2)
             # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
             GetDetectorOffsets(InputWorkspace=str(wksp)+"cc2", OutputWorkspace=str(wksp)+"offset2", Step=abs(self._binning[1]),
                 DReference=self._peakpos2, XMin=-self._ccnumber, XMax=self._ccnumber, MaxOffset=self._maxoffset, MaskWorkspace=str(wksp)+"mask2")
@@ -297,7 +279,29 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             mtd.deleteWorkspace(str(wksp)+"offset2")
             mtd.deleteWorkspace(str(wksp)+"mask2")
             mtd.releaseFreeMemory()
-        CreateGroupingWorkspace(InputWorkspace=wksp, GroupNames=groups, OutputWorkspace=str(wksp)+"group")
+        if self._peakpos3 > 0.0:
+            Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,Params=str(self._peakmin3)+","+str(abs(self._binning[1]))+","+str(self._peakmax3))
+            #Find good peak for reference
+            ymax = 0
+            for s in range(0,wksp.getNumberHistograms()):
+                y_s = wksp.readY(s)
+                midBin = wksp.blocksize()/2
+                if y_s[midBin] > ymax:
+                        refpixel = s
+                        ymax = y_s[midBin]
+            print "Reference spectra=",refpixel
+            CrossCorrelate(InputWorkspace=wksp, OutputWorkspace=str(wksp)+"cc3", ReferenceSpectra=refpixel,
+                WorkspaceIndexMin=self._lastpixel2+1, WorkspaceIndexMax=wksp.getNumberHistograms()-1, XMin=self._peakmin3, XMax=self._peakmax3)
+            # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
+            GetDetectorOffsets(InputWorkspace=str(wksp)+"cc3", OutputWorkspace=str(wksp)+"offset3", Step=abs(self._binning[1]),
+                DReference=self._peakpos3, XMin=-self._ccnumber, XMax=self._ccnumber, MaxOffset=self._maxoffset, MaskWorkspace=str(wksp)+"mask3")
+            Plus(LHSWorkspace=str(wksp)+"offset", RHSWorkspace=str(wksp)+"offset3",OutputWorkspace=str(wksp)+"offset")
+            Plus(LHSWorkspace=str(wksp)+"mask", RHSWorkspace=str(wksp)+"mask3",OutputWorkspace=str(wksp)+"mask")
+            mtd.deleteWorkspace(str(wksp)+"cc3")
+            mtd.deleteWorkspace(str(wksp)+"offset3")
+            mtd.deleteWorkspace(str(wksp)+"mask3")
+            mtd.releaseFreeMemory()
+        CreateGroupingWorkspace(InputWorkspace=wksp, GroupDetectorsBy=self._grouping, OutputWorkspace=str(wksp)+"group")
         lcinst = str(self._instrument)
         
         if "dspacemap" in self._outTypes:
@@ -318,24 +322,6 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 UnwrapSNS(InputWorkspace=wksp, OutputWorkspace=wksp, LRef=LRef)
             if DIFCref > 0:
                 RemoveLowResTOF(InputWorkspace=wksp, OutputWorkspace=wksp, ReferenceDIFC=DIFCref)
-        if self._grouping == "All":
-            if str(self._instrument) == "PG3":
-                groups = "POWGEN"
-            elif str(self._instrument) == "NOM":
-                groups = "NOMAD"
-            else:
-                groups = str(self._instrument)
-        elif str(self._instrument) == "SNAP" and self._grouping == "Group":
-                groups = "East,West"
-        else:
-            groups = ""
-            numrange = 200
-            if str(self._instrument) == "SNAP":
-                numrange = 19
-            for num in xrange(1,numrange):
-                comp = wksp.getInstrument().getComponentByName("%s%d" % (self._grouping, num) )
-                if not comp == None:
-                    groups+=("%s%d," % (self._grouping, num) )
         # take care of filtering events
         if self._filterBadPulses and not self.getProperty("CompressOnRead") and not "histo" in self.getProperty("Extension"):
             FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp)
@@ -367,7 +353,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         GetDetOffsetsMultiPeaks(InputWorkspace=str(wksp), OutputWorkspace=str(wksp)+"offset",
             DReference=self._peakpos, MaxOffset=self._maxoffset, MaskWorkspace=str(wksp)+"mask")
         Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,Params=str(self._binning[0])+","+str(abs(self._binning[1]))+","+str(self._binning[2]))
-        CreateGroupingWorkspace(InputWorkspace=wksp, GroupNames=groups, OutputWorkspace=str(wksp)+"group")
+        CreateGroupingWorkspace(InputWorkspace=wksp, GroupDetectorsBy=self._grouping, OutputWorkspace=str(wksp)+"group")
         lcinst = str(self._instrument)
         
         if "dspacemap" in self._outTypes:
@@ -381,6 +367,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
     def _focus(self, wksp, calib, filterLogs=None):
         if wksp is None:
             return None
+        MaskDetectors(Workspace=wksp, MaskedWorkspace=str(wksp)+"mask")
         AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp, OffsetsWorkspace=str(wksp)+"offset")
         # Diffraction focusing using new calibration file with offsets
         if self._diffractionfocus:
@@ -415,9 +402,10 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         if self.getProperty("CrossCorrelation"):
             self._peakpos1 = float(positions[0])
             self._peakpos2 = 0
+            self._peakpos3 = 0
             self._lastpixel = 0
             self._lastpixel2 = 0
-            print self._peakpos1
+            self._lastpixel3 = 0
             peakhalfwidth = self.getProperty("PeakHalfWidth")
             self._peakmin = self._peakpos1-peakhalfwidth
             self._peakmax = self._peakpos1+peakhalfwidth
@@ -425,14 +413,17 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 self._peakpos2 = float(positions[1])
                 self._peakmin2 = self._peakpos2-peakhalfwidth
                 self._peakmax2 = self._peakpos2+peakhalfwidth
-                print self._peakpos2
+            if len(positions) >= 3:
+                self._peakpos3 = float(positions[1])
+                self._peakmin3 = self._peakpos3-peakhalfwidth
+                self._peakmax3 = self._peakpos3+peakhalfwidth
             detectors = self.getProperty("DetectorsPeaks").strip().split(',')
             if detectors[0]:
                 self._lastpixel = int(detectors[0])
-                print self._lastpixel
             if len(detectors) >= 2:
                 self._lastpixel2 = self._lastpixel+int(detectors[1])
-                print self._lastpixel2
+            if len(detectors) >= 2:
+                self._lastpixel3 = self._lastpixel2+int(detectors[2])
             pixelbin2 = self._xpixelbin*self._ypixelbin
             self._ccnumber = self.getProperty("CrossCorrelationPoints")
         self._maxoffset = self.getProperty("MaxOffset")

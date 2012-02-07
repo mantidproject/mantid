@@ -38,6 +38,9 @@ namespace MDEvents
   {
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int> ();
     mustBePositive->setLower(0.0);
+    BoundedValidator<int> *mustBeMoreThen1 = new BoundedValidator<int> ();
+    mustBeMoreThen1->setLower(1);
+
 
     // Split up comma-separated properties
     std::vector<int> value;
@@ -58,7 +61,7 @@ namespace MDEvents
       "How many events in a box before it should be split. Default " + Strings::toString(SplitThreshold) + ".");
 
     declareProperty(
-      new PropertyWithValue<int>("MaxRecursionDepth", MaxRecursionDepth, mustBePositive),
+      new PropertyWithValue<int>("MaxRecursionDepth", MaxRecursionDepth, mustBeMoreThen1),
       "How many levels of box splitting recursion are allowed. \n"
       "The smallest box will have each side length l = (extents) / (SplitInto ^ MaxRecursionDepth). "
       "Default " + Strings::toString(MaxRecursionDepth) + ".");

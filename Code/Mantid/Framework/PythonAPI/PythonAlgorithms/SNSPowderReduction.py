@@ -162,14 +162,15 @@ class SNSPowderReduction(PythonAlgorithm):
         #self.declareProperty("FileType", "Event NeXus",
         #                     Validator=ListValidator(types))
         self.declareListProperty("RunNumber", [0], Validator=ArrayBoundedValidator(Lower=0))
-        extensions = [ "_histo.nxs", "_event.nxs", "_neutron_event.dat",
-                      "_neutron0_event.dat", "_neutron1_event.dat", "_neutron0_event.dat and _neutron1_event.dat"]
+        extensions = [ "_histo.nxs", "_event.nxs", "_runinfo.xml"]
         self.declareProperty("Extension", "_event.nxs",
                              Validator=ListValidator(extensions))
         self.declareProperty("PreserveEvents", True,
                              Description="Argument to supply to algorithms that can change from events to histograms.")
         self.declareProperty("Sum", False,
                              Description="Sum the runs. Does nothing for characterization runs")
+        self.declareProperty("PushDataPositive", False,
+                             Description="Add a constant to the data that makes it positive over the whole range.")
         self.declareProperty("BackgroundNumber", 0, Validator=BoundedValidator(Lower=-1),
                              Description="If specified overrides value in CharacterizationRunsFile If -1 turns off correction.")
         self.declareProperty("VanadiumNumber", 0, Validator=BoundedValidator(Lower=-1),
@@ -196,7 +197,11 @@ class SNSPowderReduction(PythonAlgorithm):
                              Description="Positive is linear bins, negative is logorithmic")
         self.declareProperty("BinInDspace", True,
                              Description="If all three bin parameters a specified, whether they are in dspace (true) or time-of-flight (false)")
+        self.declareProperty("StripVanadiumPeaks", True,
+                             Description="Subtract fitted vanadium peaks from the known positions.")
         self.declareProperty("VanadiumFWHM", 7, Description="Default=7")
+        self.declareProperty("VanadiumPeakTol", 0.05,
+                             Description="How far from the ideal position a vanadium peak can be during StripVanadiumPeaks. Default=0.05, negative turns off")
         self.declareProperty("VanadiumSmoothParams", "20,2", Description="Default=20,2")
         self.declareProperty("FilterBadPulses", True, Description="Filter out events measured while proton charge is more than 5% below average")
         outfiletypes = ['gsas', 'fullprof', 'gsas and fullprof']
@@ -212,57 +217,38 @@ class SNSPowderReduction(PythonAlgorithm):
         #self.log().information(str(dir()))
         #self.log().information(str(dir(mantidsimple)))
         result = FindSNSNeXus(Instrument=self._instrument,
-                              RunNumber=runnumber, Extension=extension)
+                              RunNumber=runnumber, Extension=extension, UseWebService=True)
 #        result = self.executeSubAlg("FindSNSNeXus", Instrument=self._instrument,
 #                                    RunNumber=runnumber, Extension=extension)
         return result["ResultPath"].value
 
-    def _addNeXusLogs(self, wksp, nxsfile, reloadInstr):
-        try:
-            LoadNexusLogs(Workspace=wksp, Filename=nxsfile)
-            if reloadInstr:
-                LoadInstrument(Workspace=wksp, InstrumentName=self._instrument, RewriteSpectraMap=False)
-            return True
-        except:
-            return False
+    def _loadPreNeXusData(self, runnumber, extension, **kwargs):
+        mykwargs = {}
+        if kwargs.has_key("FilterByTimeStart"):
+            mykwargs["ChunkNumber"] = int(kwargs["FilterByTimeStart"])
+        if kwargs.has_key("FilterByTimeStop"):
+            mykwargs["TotalChunks"] = int(kwargs["FilterByTimeStop"])
 
-
-    def _loadPreNeXusData(self, runnumber, extension):
         # generate the workspace name
         name = "%s_%d" % (self._instrument, runnumber)
         filename = name + extension
         print filename
 
         try: # first just try loading the file
-            alg = LoadEventPreNexus(EventFilename=filename, OutputWorkspace=name)
+            alg = LoadPreNexus(Filename=filename, OutputWorkspace=name, **mykwargs)
             wksp = alg['OutputWorkspace']
         except:
             # find the file to load
             filename = self._findData(runnumber, extension)
+            if (len(filename) == 0):
+                raise RuntimeError("Failed to find prenexus file for run %d" % runnumber)
             # load the prenexus file
-            alg = LoadEventPreNexus(EventFilename=filename, OutputWorkspace=name)
+            alg = LoadPreNexus(Filename=filename, OutputWorkspace=name, **mykwargs)
             wksp = alg['OutputWorkspace']
 
         # add the logs to it
-        reloadInstr = (str(self._instrument) == "SNAP")
-
-        nxsfile = "%s_%d_event.nxs" % (self._instrument, runnumber)
-        if self._addNeXusLogs(wksp, nxsfile, reloadInstr):
-            return wksp
-
-        nxsfile = "%s_%d_histo.nxs" % (self._instrument, runnumber)
-        if self._addNeXusLogs(wksp, nxsfile, reloadInstr):
-            return wksp
-
-        nxsfile = self._findData(runnumber, "_event.nxs")
-        if self._addNeXusLogs(wksp, nxsfile, reloadInstr):
-            return wksp
-
-        nxsfile = self._findData(runnumber, "_histo.nxs")
-        if self._addNeXusLogs(wksp, nxsfile, reloadInstr):
-            return wksp
-
-        # TODO filter out events using timemin and timemax
+        if (str(self._instrument) == "SNAP"):
+            LoadInstrument(Workspace=wksp, InstrumentName=self._instrument, RewriteSpectraMap=False)
 
         return wksp
 
@@ -320,15 +306,14 @@ class SNSPowderReduction(PythonAlgorithm):
         elif extension.endswith("_histo.nxs"):
             return self._loadHistoNeXusData(runnumber, extension)
         elif "and" in extension:
-            wksp0 = self._loadPreNeXusData(runnumber, "_neutron0_event.dat")
+            wksp0 = self._loadPreNeXusData(runnumber, "_neutron0_event.dat", **filter)
             RenameWorkspace(InputWorkspace=wksp0,OutputWorkspace="tmp")
-            wksp1 = self._loadPreNeXusData(runnumber, "_neutron1_event.dat")
+            wksp1 = self._loadPreNeXusData(runnumber, "_neutron1_event.dat", **filter)
             Plus(LHSWorkspace=wksp1, RHSWorkspace="tmp",OutputWorkspace=wksp1)
-            wksp1.getRun()['gd_prtn_chrg'] = wksp1.getRun()['gd_prtn_chrg'].value/2
             mtd.deleteWorkspace("tmp")
             return wksp1;
         else:
-            return self._loadPreNeXusData(runnumber, extension)
+            return self._loadPreNeXusData(runnumber, extension, **filter)
 
     def _focus(self, wksp, calib, info, filterLogs=None, preserveEvents=True,
                normByCurrent=True, filterBadPulsesOverride=True):
@@ -459,17 +444,6 @@ class SNSPowderReduction(PythonAlgorithm):
 
         self.log().information("frequency: " + str(frequency) + "Hz center wavelength:" + str(wavelength) + "Angstrom")
         return self._config.getInfo(frequency, wavelength)
-
-    def _getMin(self, wksp):
-        minWksp = "__" + str(wksp)+"_min"
-        Min(wksp, minWksp)
-        minWksp = mtd[minWksp]
-        minValue = 0.
-        for i in range(minWksp.getNumberHistograms()):
-          if minValue > minWksp.dataY(i)[0]:
-            minValue = minWksp.dataY(i)[0]
-        mtd.deleteWorkspace(str(minWksp))
-        return minValue
 
     def _save(self, wksp, info, normalized):
         filename = os.path.join(self._outDir, str(wksp))
@@ -631,8 +605,10 @@ class SNSPowderReduction(PythonAlgorithm):
                         vbackRun = self._focus(vbackRun, calib, info, preserveEvents=False)
                         vanRun -= vbackRun
 
-                    ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="dSpacing")
-                    StripVanadiumPeaks(InputWorkspace=vanRun, OutputWorkspace=vanRun, FWHM=self._vanPeakFWHM, HighBackground=True)
+                    if self.getProperty("StripVanadiumPeaks"):
+                        ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="dSpacing")
+                        StripVanadiumPeaks(InputWorkspace=vanRun, OutputWorkspace=vanRun, FWHM=self._vanPeakFWHM,
+                                           PeakPositionTolerance=self.getProperty("VanadiumPeakTol"), HighBackground=True)
                     ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
                     FFTSmooth(InputWorkspace=vanRun, OutputWorkspace=vanRun, Filter="Butterworth",
                               Params=self._vanSmoothing,IgnoreXBins=True,AllSpectra=True)
@@ -665,11 +641,8 @@ class SNSPowderReduction(PythonAlgorithm):
                            Tolerance=COMPRESS_TOL_TOF) # 5ns
 
             # make sure there are no negative values - gsas hates them
-            minY = self._getMin(samRun)
-            if minY < 0.:
-                self.log().notice("Minimum y = " + str(minY) + " adding to all y-values")
-                minY *= -1.
-                samRun += minY
+            if self.getProperty("PushDataPositive"):
+                  ResetNegatives(InputWorkspace=samRun, OutputWorkspace=samRun, AddMinimum=False, ResetValue=0.)
 
             # write out the files
             self._save(samRun, info, normalized)

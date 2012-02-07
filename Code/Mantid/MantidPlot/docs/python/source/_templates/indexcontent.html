@@ -1,0 +1,52 @@
+{% extends "defindex.html" %}
+{% block tables %}
+
+  <p><strong>Contents:</strong></p>
+  <table class="contentstable" align="center"><tr>
+    <td width="50%">
+      <p class="biglink"><a class="biglink" href="{{ pathto("changes") }}">Changes</a><br/>
+         <span class="linkdescr">Changes between 1.0 and 2.0</span></p>
+      <p class="biglink"><a class="biglink" href="http://www.mantidproject.org/Python_In_Mantid">Getting started</a><br/>
+         <span class="linkdescr">An introduction to Python in Mantid</span></p>
+    </td></tr>
+  </table>
+
+  <p><strong>API Reference</strong></p>
+  <table class="contentstable" align="center"><tr>
+      <td width="50%">
+      <p class="biglink"><a class="biglink" href="{{ pathto("api/mantid") }}">Mantid Framework Reference</a><br/>
+         <span class="linkdescr">Documents the classes and functions of the Mantid framework</span></p>
+      <p class="biglink"><a class="biglink" href="{{ pathto("api/mantidplot") }}">MantidPlot Reference</a><br/>
+         <span class="linkdescr">Documents the classes and functions of MantidPlot</span></p>
+    </td></tr>
+  </table>
+
+  <p><strong>Indices and tables:</strong></p>
+  <table class="contentstable" align="center"><tr>
+    <td width="50%">
+      <p class="biglink"><a class="biglink" href="{{ pathto("py-modindex") }}">Module Index</a><br/>
+         <span class="linkdescr">quick access to all modules</span></p>
+      <p class="biglink"><a class="biglink" href="{{ pathto("genindex") }}">General Index</a><br/>
+         <span class="linkdescr">all functions, classes, terms</span></p>
+      <p class="biglink"><a class="biglink" href="{{ pathto("glossary") }}">Glossary</a><br/>
+         <span class="linkdescr">the most important terms explained</span></p>
+    </td><td width="50%">
+      <p class="biglink"><a class="biglink" href="{{ pathto("search") }}">Search page</a><br/>
+         <span class="linkdescr">search this documentation</span></p>
+      <p class="biglink"><a class="biglink" href="{{ pathto("contents") }}">Complete Table of Contents</a><br/>
+         <span class="linkdescr">lists all sections and subsections</span></p>
+    </td></tr>
+  </table>
+  
+   <p><strong>Useful links:</strong></p>
+  <table class="contentstable" align="center"><tr>
+    <td width="50%">
+      <p class="biglink"><a class="biglink" href="http://www.mantidproject.org" }}">Mantid project wiki</a><br/>
+         <span class="linkdescr">Mantid wiki</span></p>
+    </td><td width="50%">
+      <p class="biglink"><a class="biglink" href="http://docs.scipy.org/doc/numpy-1.5.x/user/" }}">Numpy Tutorial</a><br/>
+         <span class="linkdescr">An introduction to numpy</span></p>
+    </td></tr>
+  </table>
+
+{% endblock %}

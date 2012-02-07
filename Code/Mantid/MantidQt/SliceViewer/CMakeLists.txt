@@ -10,6 +10,7 @@ set ( SRC_FILES
 	src/SliceViewerWindow.cpp
 	src/SnapToGridDialog.cpp
 	src/XYLimitsDialog.cpp
+	src/LinePlotOptions.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -18,6 +19,7 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/CustomTools.h
 	inc/MantidQtSliceViewer/DimensionSliceWidget.h
 	inc/MantidQtSliceViewer/LineOverlay.h
+	inc/MantidQtSliceViewer/LinePlotOptions.h
 	inc/MantidQtSliceViewer/LineViewer.h
 	inc/MantidQtSliceViewer/QScienceSpinBox.h
 	inc/MantidQtSliceViewer/QwtRasterDataMD.h
@@ -32,6 +34,7 @@ set ( MOC_FILES
 	inc/MantidQtSliceViewer/DimensionSliceWidget.h
 	inc/MantidQtSliceViewer/LineOverlay.h
 	inc/MantidQtSliceViewer/LineViewer.h
+	inc/MantidQtSliceViewer/LinePlotOptions.h
 	inc/MantidQtSliceViewer/SliceViewer.h
 	inc/MantidQtSliceViewer/SliceViewerWindow.h
 	inc/MantidQtSliceViewer/ColorBarWidget.h
@@ -44,6 +47,7 @@ set ( UI_FILES
 	inc/MantidQtSliceViewer/DimensionSliceWidget.ui
 	inc/MantidQtSliceViewer/SliceViewer.ui
 	inc/MantidQtSliceViewer/LineViewer.ui
+	inc/MantidQtSliceViewer/LinePlotOptions.ui
 	inc/MantidQtSliceViewer/ColorBarWidget.ui
 	inc/MantidQtSliceViewer/SnapToGridDialog.ui
 	inc/MantidQtSliceViewer/XYLimitsDialog.ui
@@ -136,11 +140,11 @@ if ( ${CMAKE_SYSTEM} MATCHES ".*\\.el5" )
 else ()
 
 	if ( PYUNITTEST_FOUND )
-	  pyunittest_add_test ( SliceViewerTest.py ${TEST_PY_FILES} "" )
-	  add_dependencies ( SliceViewerTest.py MantidQt Algorithms )
-	  add_dependencies ( GUITests SliceViewerTest.py )
+	  pyunittest_add_test ( SliceViewerMantidPlotTest.py ${TEST_PY_FILES} "" )
+	  add_dependencies ( SliceViewerMantidPlotTest.py MantidQt Algorithms )
+	  add_dependencies ( GUITests SliceViewerMantidPlotTest.py )
 	  # Add to the 'UnitTests' group in VS
-	  set_property ( TARGET SliceViewerTest.py PROPERTY FOLDER "UnitTests" )
+	  set_property ( TARGET SliceViewerMantidPlotTest.py PROPERTY FOLDER "UnitTests" )
 	endif ()
 endif ()
 

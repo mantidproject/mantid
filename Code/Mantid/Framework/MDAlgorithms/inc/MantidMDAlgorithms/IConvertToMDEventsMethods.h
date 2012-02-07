@@ -79,7 +79,7 @@ namespace MDAlgorithms
         Histohram, // typical for Matrix workspace -- deploys central average 0.5(X[i]+X[i+1]); other types of averaging are possible if needed 
         Centered   // typical for events
     };
-
+ 
  
  class DLLExport IConvertToMDEventsMethods
  {
@@ -89,7 +89,7 @@ namespace MDAlgorithms
      // constructor;
      IConvertToMDEventsMethods();
  
-    ///method which initates all main class variables (constructor in fact)
+    ///method which initates all main class variables 
     virtual size_t setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, const PreprocessedDetectors &detLoc,const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper);
     /// method which starts the conversion procedure
     virtual void runConversion(API::Progress *)=0;
@@ -121,7 +121,8 @@ namespace MDAlgorithms
     std::vector<double> dim_min;
     /// the array of variables which describe max limits for the target variables;
     std::vector<double> dim_max;
-
+    /// index of current run(workspace) for MD WS combining
+    uint16_t runIndex;
    /// logger -> to provide logging, for MD dataset file operations
     static Mantid::Kernel::Logger& convert_log;
  private:

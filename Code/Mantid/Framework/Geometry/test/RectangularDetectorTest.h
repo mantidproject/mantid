@@ -129,6 +129,10 @@ public:
     TS_ASSERT_EQUALS(det->getAtXY(0,12)->getID() - 1000000, 12);
     TS_ASSERT_EQUALS(det->getAtXY(0,112)->getID() - 1000000, 112);
     TS_ASSERT_EQUALS(det->getAtXY(1,12)->getID() - 1000000, 1012);
+    TS_ASSERT_EQUALS(det->getDetectorIDAtXY(0,0) , 1000000);
+    TS_ASSERT_EQUALS(det->getDetectorIDAtXY(0,12) , 1000012);
+    TS_ASSERT_EQUALS(det->getDetectorIDAtXY(0,112) , 1000112);
+    TS_ASSERT_EQUALS(det->getDetectorIDAtXY(1,12), 1001012);
 
     std::pair<int,int> xy; int x; int y;
 

@@ -43,8 +43,8 @@
 #include <QRegExp>
 #include <QDate>
 
-TableDialog::TableDialog(Table *t, QWidget* parent, Qt::WFlags fl )
-    : QDialog( parent, fl),
+TableDialog::TableDialog(Table *t, Qt::WFlags fl )
+    : QDialog( t, fl),
     d_table(t)
 {
     setName( "TableDialog" );

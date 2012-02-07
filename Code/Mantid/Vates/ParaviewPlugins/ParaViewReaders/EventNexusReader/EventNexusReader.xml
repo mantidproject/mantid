@@ -20,7 +20,7 @@
          name="Recursion Depth"
          command="SetDepth"
          number_of_elements="1"
-         default_values="1000">
+         default_values="5">
        </IntVectorProperty>
 	   <StringVectorProperty
          name="InputGeometryXML"

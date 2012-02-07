@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/PairedGroupAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid
@@ -48,7 +48,7 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ConjoinWorkspaces : public API::PairedGroupAlgorithm
+class DLLExport ConjoinWorkspaces : public API::Algorithm
 {
 public:
   /// Empty constructor
@@ -70,10 +70,10 @@ private:
   void exec();
   void execEvent();
 
-  void validateInputs(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2) const;
+  void validateInputs(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2);
   void checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2, bool checkSpectra) const;
   void fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2, API::MatrixWorkspace_sptr output);
-  bool processGroups(API::WorkspaceGroup_sptr wsPt, const std::vector<Kernel::Property*>& prop);
+  bool processGroups();
 
   /// Progress reporting object
   API::Progress *m_progress;
@@ -81,7 +81,8 @@ private:
   DataObjects::EventWorkspace_const_sptr event_ws1;
   /// Second event workspace input.
   DataObjects::EventWorkspace_const_sptr event_ws2;
-
+  /// True if spectra overlap
+  bool m_overlapChecked;
 };
 
 } // namespace Algorithm

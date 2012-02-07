@@ -115,8 +115,23 @@ public:
 
 
 
+  /** Create a workspace with:
+   * events at times 0,1,2,...99
+   * LOGS:
+   *  temp = 10 C at 10 sec up to 50C at 50 sec, every 10 seconds
+   *  press = -10 seconds to +150 seconds, every 10 seconds
+   *
+   * @param log_name
+   * @param min
+   * @param max
+   * @param seconds_kept
+   * @param add_proton_charge
+   * @param do_in_place
+   * @param PulseFilter :: PulseFilter parameter
+   */
   void do_test_fake(std::string log_name, double min, double max, int seconds_kept,
-      bool add_proton_charge = true, bool do_in_place = false)
+      bool add_proton_charge = true, bool do_in_place = false,
+      bool PulseFilter = false)
   {
     // Default Event Workspace with times from 0-99
     EventWorkspace_sptr ew = WorkspaceCreationHelper::CreateEventWorkspace2();
@@ -197,7 +212,7 @@ public:
     alg->setProperty("MinimumValue", min);
     alg->setProperty("MaximumValue", max);
     alg->setPropertyValue("TimeTolerance", "3e-3");
-
+    alg->setProperty("PulseFilter", PulseFilter);
     alg->execute();
     TS_ASSERT( alg->isExecuted() );
 
@@ -296,6 +311,29 @@ public:
     do_test_fake("single_after", 2.0, 4.0, 0);
   }
 
+
+  void test_pulseFilter()
+  {
+    // We filter out exactly the times of the temp log.
+    // It has 5 entries, leaving 95 seconds of events
+    do_test_fake("temp", 0, 0, 95, true, true /* in place*/, true /*PulseFilter*/);
+    do_test_fake("temp", 0, 0, 95, true, false /* not in place*/, true /*PulseFilter*/);
+    // Filter on an entry with only one point
+    do_test_fake("single_middle", 0, 0, 99, true, false /* not in place*/, true /*PulseFilter*/);
+  }
+
+//  // Very slow
+//  void xtest_HYSPEC()
+//  {
+//    FrameworkManager::Instance().exec("LoadEventNexus", 4,
+//       "OutputWorkspace", "hys_4333",
+//       "Filename", "HYS_4333_event.nxs");
+//    FrameworkManager::Instance().exec("FilterByLogValue", 8,
+//        "InputWorkspace", "hys_4333",
+//        "OutputWorkspace", "hys_4333_veto",
+//        "LogName", "veto_pulse_time",
+//        "PulseFilter", "1");
+//  }
 
 
 private:

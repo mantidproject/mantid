@@ -103,10 +103,7 @@ void test_buildFromEWS()
           throw std::runtime_error("Error in ConvertToEventWorkspace. Cannot proceed.");
      }
 
-
-
-     ConvertToMDEvensEventWS<Q3D,Direct> TOFConv;
-
+     ConvertToMDEvensEventWS<Q3D,Direct,ConvFromTOF> TOFConv;
   
      Mantid::API::BoxController_sptr bc=pEventMDWSWrapper->pWorkspace()->getBoxController();
      bc->setSplitThreshold(5);
@@ -135,9 +132,7 @@ void test_compareTwoBuilds()
      TS_FAIL(" can not retrieve workspace obtained from event WS");
      return;
    }
-
-    // Get all the MDBoxes contained
-    // Get all the MDBoxes contained
+    // Get all the MDBoxes contained    
     //IMDBox<MDE,nd> * parentBox = ws->getBox();
     //std::vector<IMDBox<MDE,nd> *> boxes;
     //parentBox->getBoxes(boxes, 1000, true);

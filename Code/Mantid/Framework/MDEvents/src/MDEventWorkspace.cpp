@@ -18,6 +18,7 @@
 #include <iomanip>
 #include <functional>
 #include "MantidMDEvents/MDBoxIterator.h"
+#include "MantidKernel/Memory.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -97,6 +98,17 @@ namespace MDEvents
 
 
   //-----------------------------------------------------------------------------------------------
+  /** Get the data type (id) of the events in the workspace.
+   * @return a string, either "MDEvent" or "MDLeanEvent"
+   */
+  TMDE(
+  std::string MDEventWorkspace)::getEventTypeName() const
+  {
+    return MDE::getTypeName();
+  }
+
+
+  //-----------------------------------------------------------------------------------------------
   /** Returns the number of dimensions in this workspace */
   TMDE(
   size_t MDEventWorkspace)::getNumDims() const
@@ -110,6 +122,56 @@ namespace MDEvents
   uint64_t MDEventWorkspace)::getNPoints() const
   {
     return data->getNPoints();
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /** Recurse box structure down to a minimum depth.
+   *
+   * This will split all boxes so that all MDBoxes are at the depth indicated.
+   * 0 = no splitting, 1 = one level of splitting, etc.
+   *
+   * WARNING! This should ONLY be called before adding any events to a workspace.
+   *
+   * WARNING! Be careful using this since it can quickly create a huge
+   * number of boxes = (SplitInto ^ (MinRercursionDepth * NumDimensions))
+   *
+   * @param minDepth :: minimum recursion depth.
+   * @throw std::runtime_error if there is not enough memory for the boxes.
+   */
+  TMDE(
+  void MDEventWorkspace)::setMinRecursionDepth(size_t minDepth)
+  {
+    BoxController_sptr bc = this->getBoxController();
+    double numBoxes = pow(double(bc->getNumSplit()), double(minDepth));
+    double memoryToUse = numBoxes * double(sizeof(MDBox<MDE,nd>)) / 1024.0;
+    MemoryStats stats;
+    if (double(stats.availMem()) < memoryToUse)
+    {
+      std::ostringstream mess;
+      mess << "Not enough memory available for the given MinRecursionDepth! "
+           << "MinRecursionDepth is set to " << minDepth << ", which would create " << numBoxes << " boxes using " <<  memoryToUse << " kB of memory."
+           << " You have " << stats.availMem() << " kB available." << std::endl;
+      throw std::runtime_error(mess.str());
+    }
+
+    for (size_t depth = 1; depth < minDepth; depth++)
+    {
+      // Get all the MDGridBoxes in the workspace
+      std::vector<IMDBox<MDE,nd>*> boxes;
+      boxes.clear();
+      this->getBox()->getBoxes(boxes, depth-1, false);
+      for (size_t i=0; i<boxes.size(); i++)
+      {
+        IMDBox<MDE,nd> * box = boxes[i];
+        MDGridBox<MDE,nd>* gbox = dynamic_cast<MDGridBox<MDE,nd>*>(box);
+        if (gbox)
+        {
+          // Split ALL the contents.
+          for (size_t j=0; j<gbox->getNumChildren(); j++)
+            gbox->splitContents(j, NULL);
+        }
+      }
+    }
   }
 
 
@@ -171,7 +233,6 @@ namespace MDEvents
     else
       return std::numeric_limits<signal_t>::quiet_NaN();
   }
-
 
 
   //-----------------------------------------------------------------------------------------------
@@ -533,6 +594,93 @@ namespace MDEvents
   }
 
 
+
+  //-----------------------------------------------------------------------------------------------
+  /** Obtain coordinates for a line plot through a MDWorkspace.
+   * Cross the workspace from start to end points, recording the signal along the line.
+   * Sets the x,y vectors to the histogram bin boundaries and counts
+   *
+   * @param start :: coordinates of the start point of the line
+   * @param end :: coordinates of the end point of the line
+   * @param normalize :: how to normalize the signal
+   * @param x :: is set to the boundaries of the bins, relative to start of the line.
+   * @param y :: is set to the normalized signal for each bin. Length = length(x) - 1
+   */
+  TMDE(
+  void MDEventWorkspace)::getLinePlot(const Mantid::Kernel::VMD & start, const Mantid::Kernel::VMD & end,
+      Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y, std::vector<signal_t> & e) const
+  {
+    // TODO: Don't use a fixed number of points later
+    size_t numPoints = 200;
+
+    VMD step = (end-start) / double(numPoints);
+    double stepLength = step.norm();
+
+    // These will be the curve as plotted
+    x.clear();
+    y.clear();
+    e.clear();
+    for (size_t i=0; i<numPoints; i++)
+    {
+      // Coordinate along the line
+      VMD coord = start + step * double(i);
+      // Record the position along the line
+      x.push_back(stepLength * double(i));
+
+      // Look for the box at this coordinate
+      const IMDBox<MDE,nd> * box = NULL;
+
+      // Do an initial bounds check
+      bool outOfBounds = false;
+      for (size_t d=0; d<nd; d++)
+      {
+        coord_t x = coord[d];
+        MDDimensionExtents & extents = data->getExtents(d);
+        if (x < extents.min || x >= extents.max)
+          outOfBounds = true;
+      }
+
+      
+     //TODO: make the logic/reuse in the following nicer.
+      if (!outOfBounds)
+      {
+        box = data->getBoxAtCoord(coord.getBareArray());
+        if(box != NULL) 
+        {
+          // What is our normalization factor?
+          signal_t normalizer = 1.0;
+          switch (normalize)
+          {
+          case NoNormalization:
+            break;
+          case VolumeNormalization:
+            normalizer = box->getInverseVolume();
+            break;
+          case NumEventsNormalization:
+            normalizer = double(box->getNPoints());
+            break;
+          }
+
+          // And add the normalized signal/error to the list
+          y.push_back( box->getSignal() * normalizer );
+          e.push_back( box->getError() * normalizer );
+        }
+        else
+        {
+          y.push_back(std::numeric_limits<double>::quiet_NaN());
+          e.push_back(std::numeric_limits<double>::quiet_NaN());
+        }
+      }
+      else
+      {
+        // Point is outside the workspace. Add NANs
+        y.push_back(std::numeric_limits<double>::quiet_NaN());
+        e.push_back(std::numeric_limits<double>::quiet_NaN());
+      }
+    }
+    // And the last point
+    x.push_back(  (end-start).norm() );
+  }
 
 
 }//namespace MDEvents

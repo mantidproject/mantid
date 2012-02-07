@@ -89,8 +89,16 @@ public:
       TS_ASSERT( Poco::File( realFile ).exists() );
     }
     // Clean up files
-	ws1->getBoxController()->closeFile(true);
-	ws2->getBoxController()->closeFile(true);
+    ws1->getBoxController()->closeFile(true);
+    ws2->getBoxController()->closeFile(true);
+
+    // Modifying the cloned dimension does not change the original
+    double oldMin = ws1->getDimension(0)->getMinimum();
+    std::vector<double> scaling(ws1->getNumDims(), 20.0);
+    std::vector<double> offset(ws1->getNumDims(), 1.0);
+    ws2->transformDimensions(scaling, offset);
+    TS_ASSERT_DELTA( ws1->getDimension(0)->getMinimum(), oldMin, 1e-5);
+    TSM_ASSERT_DELTA("Dimensions of the cloned WS are deep copies of the original.", ws2->getDimension(0)->getMinimum(), oldMin*20.0+1.0, 1e-5);
 
 
     // Remove workspace from the data service.
@@ -140,6 +148,14 @@ public:
       TS_ASSERT_EQUALS( ws1->getDimension(d)->getName(), ws2->getDimension(d)->getName());
       TS_ASSERT_EQUALS( ws1->getDimension(d)->getNBins(), ws2->getDimension(d)->getNBins());
     }
+
+    // Modifying the cloned dimension does not change the original
+    double oldMin = ws1->getDimension(0)->getMinimum();
+    std::vector<double> scaling(ws1->getNumDims(), 20.0);
+    std::vector<double> offset(ws1->getNumDims(), 1.0);
+    ws2->transformDimensions(scaling, offset);
+    TS_ASSERT_DELTA( ws1->getDimension(0)->getMinimum(), oldMin, 1e-5);
+    TS_ASSERT_DELTA( ws2->getDimension(0)->getMinimum(), oldMin*20.0+1.0, 1e-5);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove("CloneMDWorkspaceTest_ws");

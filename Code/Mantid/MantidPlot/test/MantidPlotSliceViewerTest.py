@@ -13,17 +13,12 @@ import mantidplottests
 from mantidplottests import *
 import time
 
-good_setup = False
-try: 
-    CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace='mdw')
-    FakeMDEventData(InputWorkspace="mdw",  UniformParams="1e5")
-    FakeMDEventData(InputWorkspace="mdw",  PeakParams="1e4, 2,4,6, 1.5")
-    BinMD(InputWorkspace="mdw", OutputWorkspace="uniform",  AxisAligned=1, AlignedDimX="x,0,10,30", AlignedDimY="y,0,10,30", AlignedDimZ="z,0,10,30", IterateEvents="1", Parallel="0")
-    CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace='empty')
-    CreateMDWorkspace(Dimensions='4',Extents='0,10,0,10,0,10,0,10',Names='x,y,z,e',Units='m,m,m,meV',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace='md4')
-    good_setup = True
-except:
-    pass
+CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace='mdw')
+FakeMDEventData(InputWorkspace="mdw",  UniformParams="1e5")
+FakeMDEventData(InputWorkspace="mdw",  PeakParams="1e4, 2,4,6, 1.5")
+BinMD(InputWorkspace="mdw", OutputWorkspace="uniform",  AxisAligned=True, AlignedDimX="x,0,10,30", AlignedDimY="y,0,10,30", AlignedDimZ="z,0,10,30", IterateEvents="1", Parallel="0")
+CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace='empty')
+CreateMDWorkspace(Dimensions='4',Extents='0,10,0,10,0,10,0,10',Names='x,y,z,e',Units='m,m,m,meV',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace='md4')
 
 class MantidPlotSliceViewerTest(unittest.TestCase):
     
@@ -34,10 +29,6 @@ class MantidPlotSliceViewerTest(unittest.TestCase):
         closeAllSliceViewers()
         pass
     
-    def test_good_setup(self):
-        global good_setup
-        self.assertTrue(good_setup, "Data was setup correctly")
-
     def test_plotSlice(self):
         """ Basic plotSlice() usage """
         svw = plotSlice('uniform')
@@ -135,6 +126,9 @@ class MantidPlotSliceViewerTest(unittest.TestCase):
         svw.setSlicePoint(2,6.0)
         liner = svw.showLine([1,1], [7,9], width=0.88, num_bins=200)
         self.assertTrue( not (liner is None), "Returns a LineViewer proxy object")
+        # Plot the X units
+        liner.setPlotAxis(2);
+        liner.apply()
         # Check that the values are there
         self.assertEqual(liner.getNumBins(), 200)
         # Length of 10 with 200 bins = 0.05 width

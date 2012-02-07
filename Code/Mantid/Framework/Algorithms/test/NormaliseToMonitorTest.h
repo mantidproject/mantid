@@ -12,10 +12,23 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using Mantid::Geometry::Instrument;
 
+class NormaliseToMonitorTestHelper : public NormaliseToMonitor
+{
+public:
+    void initialize(){
+        NormaliseToMonitor::initialize();
+    }
+    void checkProperties(MatrixWorkspace_sptr inputWorkspace){
+        NormaliseToMonitor::checkProperties(inputWorkspace);
+    }
+
+};
+
+
 class NormaliseToMonitorTest : public CxxTest::TestSuite
 {
 private:
-  NormaliseToMonitor norm;
+  NormaliseToMonitorTestHelper norm;
 
 public:
 
@@ -122,6 +135,8 @@ public:
       TS_ASSERT_DELTA( output->readE(0)[k], 4.24264, 0.00001 )
     }
   }
+
+
 
   void testNormaliseByIntegratedCount()
   {

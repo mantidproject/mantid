@@ -688,6 +688,29 @@ namespace MDEvents
   }
 
 
+  //-----------------------------------------------------------------------------------------------
+  /** Transform the dimensions contained in this box
+   * x' = x*scaling + offset.
+   *
+   * @param scaling :: multiply each coordinate by this value.
+   * @param offset :: after multiplying, add this offset.
+   */
+  TMDE(
+  void MDBox)::transformDimensions(std::vector<double> & scaling, std::vector<double> & offset)
+  {
+    IMDBox<MDE,nd>::transformDimensions(scaling, offset);
+    std::vector<MDE> & events = this->getEvents();
+    typename std::vector<MDE>::iterator it;
+    typename std::vector<MDE>::iterator it_end = events.end();
+    for (it = events.begin(); it != it_end; it++)
+    {
+      coord_t * center = it->getCenterNonConst();
+      for (size_t d=0; d<nd; d++)
+        center[d] = (center[d] * scaling[d]) + offset[d];
+    }
+    this->releaseEvents();
+  }
+
 
 
 }//namespace MDEvents

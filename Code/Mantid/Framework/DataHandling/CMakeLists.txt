@@ -49,6 +49,7 @@ set ( SRC_FILES
 	src/LoadNexusProcessed.cpp
 	src/LoadParameterFile.cpp
 	src/LoadPreNexusMonitors.cpp
+	src/LoadPreNexus.cpp
 	src/LoadQKK.cpp
 	src/LoadRKH.cpp
 	src/LoadRaw.cpp
@@ -76,6 +77,7 @@ set ( SRC_FILES
 	src/Merge2WorkspaceLogs.cpp
 	src/MoveInstrumentComponent.cpp
 	src/OrbiterDataArchive.cpp
+	src/ProcessDasNexusLog.cpp
 	src/RawFileInfo.cpp
 	src/RenameLog.cpp
 	src/RotateInstrumentComponent.cpp
@@ -156,6 +158,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadNexusProcessed.h
 	inc/MantidDataHandling/LoadParameterFile.h
 	inc/MantidDataHandling/LoadPreNexusMonitors.h
+	inc/MantidDataHandling/LoadPreNexus.h
 	inc/MantidDataHandling/LoadQKK.h
 	inc/MantidDataHandling/LoadRKH.h
 	inc/MantidDataHandling/LoadRaw.h
@@ -178,6 +181,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/Merge2WorkspaceLogs.h
 	inc/MantidDataHandling/MoveInstrumentComponent.h
 	inc/MantidDataHandling/OrbiterDataArchive.h
+	inc/MantidDataHandling/ProcessDasNexusLog.h
 	inc/MantidDataHandling/RawFileInfo.h
 	inc/MantidDataHandling/RenameLog.h
 	inc/MantidDataHandling/RotateInstrumentComponent.h
@@ -255,6 +259,7 @@ set ( TEST_FILES
 	test/LoadNexusTest.h
 	test/LoadParameterFileTest.h
 	test/LoadPreNexusMonitorsTest.h
+	test/LoadPreNexusTest.h
 	test/LoadQKKTest.h
 	test/LoadRKHTest.h
 	test/LoadRSaveNLoadNcspTest.h
@@ -276,6 +281,7 @@ set ( TEST_FILES
 	test/Merge2WorkspaceLogsTest.h
 	test/MoveInstrumentComponentTest.h
 	test/OrbiterDataArchiveTest.h
+	test/ProcessDasNexusLogTest.h
 	test/RawFileInfoTest.h
 	test/RenameLogTest.h
 	test/SaveCSVTest.h

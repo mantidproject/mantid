@@ -6,13 +6,14 @@ from PyQt4 import QtGui, QtCore, uic
 try:
     from MantidFramework import *
     mtd.initialise(False)
+    from mantidsimple import *
     HAS_MANTID = True
 except:
     HAS_MANTID = False    
 
 IS_IN_MANTIDPLOT = False
 try:
-    import qti
+    import _qti
     IS_IN_MANTIDPLOT = True
 except:
     pass
@@ -56,6 +57,8 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         # Name handle for the instrument
         if instrument is None:
             instrument = unicode(settings.value("instrument_name", QtCore.QVariant('')).toString())
+            if instrument_list is not None and instrument not in instrument_list:
+                instrument = None
 
         self._instrument = instrument
         
@@ -106,24 +109,6 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         # Flag to let use know that we need to close the window as soon as possible
         self._quit_asap = False 
         
-        # There is an edge-case where the user doesn't have a facility/instrument
-        # selected and hits cancel when the instrument selection dialog shows up.
-        # In that case, the main window is shown empty and it should be closed.
-        # Since the close() method can only be called after the QApplication has been
-        # started, we use the _quit_asap flag to close it as soon as we can.
-        # Note that we choose to show the dialog before showing the main window because
-        # we don't want to have the main window appear empty in the main use-case. 
-        class ShowEventFilter(QtCore.QObject):
-            def eventFilter(obj_self, filteredObj, event):
-                if event.type() == QtCore.QEvent.ActivationChange\
-                    and filteredObj.isActiveWindow()\
-                    and self._quit_asap:
-                    self.close()
-                return QtCore.QObject.eventFilter(obj_self, filteredObj, event)
-        
-        eventFilter = ShowEventFilter(self)
-        self.installEventFilter(eventFilter)
-
     def _set_window_title(self):
         """
             Sets the window title using the instrument name and the 
@@ -145,7 +130,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self.tabWidget.clear()
         self.progress_bar.hide()
         
-        if self._instrument == '':
+        if self._instrument == '' or self._instrument is None:
             if IS_IN_MANTIDPLOT:
                 c = ConfigService()
                 facility = str(c.facility().name())
@@ -154,10 +139,15 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
                     instr = instr.replace("-","")
                     if instr in INSTRUMENT_DICT[facility].keys():
                         self._instrument = instr
+                        
+                # If we still can't find an instrument, show the
+                # instrument selection dialog
+                if self._instrument == '' or self._instrument is None:
+                    self._change_instrument()
             else:
                 self._change_instrument()
                 
-        if self._instrument == '':
+        if self._instrument == '' or self._instrument is None:
             self.close()
             self._quit_asap = True
             return
@@ -173,6 +163,12 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             for tab in tab_list:
                 self.tabWidget.addTab(tab[1], tab[0])
             self._set_window_title()
+            
+            # Show the "advanced interface" check box if needed
+            if self._interface.has_advanced_version():
+                self.interface_chk.show()
+            else:
+                self.interface_chk.hide()
             
             if load_last:
                 self._interface.load_last_reduction()
@@ -378,15 +374,20 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self.export_button.setEnabled(False)
         self.save_button.setEnabled(False)
         self.interface_chk.setEnabled(False)
+        self.file_menu.setEnabled(False)
+        self.tools_menu.setEnabled(False)
         if IS_IN_MANTIDPLOT:
-            qti.app.mantidUI.setIsRunning(True)
-        self._interface.reduce()
+            _qti.app.mantidUI.setIsRunning(True)
+        if self._interface is not None:
+            self._interface.reduce()
         if IS_IN_MANTIDPLOT:
-            qti.app.mantidUI.setIsRunning(False)
+            _qti.app.mantidUI.setIsRunning(False)
         self.reduce_button.setEnabled(True)   
         self.export_button.setEnabled(True)
         self.save_button.setEnabled(True)
         self.interface_chk.setEnabled(True)
+        self.file_menu.setEnabled(True)
+        self.tools_menu.setEnabled(True)
         
     def open_file(self, file_path=None):
         """
@@ -399,7 +400,14 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
                 file_path = unicode(action.data().toString())
             
         # Check whether the file describes the current instrument
-        found_instrument = self._interface.scripter.verify_instrument(file_path)
+        try:
+            found_instrument = self._interface.scripter.verify_instrument(file_path)
+        except:
+            msg = "The file you attempted to load doesn't have a recognized format.\n\n"
+            msg += "Please make sure it has been produced by this application."
+            QtGui.QMessageBox.warning(self, "Error loading reduction parameter file", msg)
+            return
+         
         if not found_instrument == self._instrument:
             self._instrument = found_instrument
             self.setup_layout()
@@ -496,6 +504,9 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             Exports the current content of the UI to a python script that can 
             be run within MantidPlot
         """
+        if self._interface is None:
+            return
+        
         fname = '.'
         if self._filename is not None:
             (root, ext) = os.path.splitext(self._filename)

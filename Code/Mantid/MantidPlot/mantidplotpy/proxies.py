@@ -76,7 +76,7 @@ class QtProxyObject(QtCore.QObject):
 
 #-----------------------------------------------------------------------------
 class MDIWindow(QtProxyObject):
-    """Proxy for the qti.MDIWindow object. 
+    """Proxy for the _qti.MDIWindow object. 
     Also used for subclasses that do not need any methods intercepted (e.g. Table, Note, Matrix)
     """
     def __init__(self, toproxy):
@@ -87,7 +87,7 @@ class MDIWindow(QtProxyObject):
 
 #-----------------------------------------------------------------------------
 class Graph(MDIWindow):
-    """Proxy for the qti.Graph object.
+    """Proxy for the _qti.Graph object.
     """
     def __init__(self, toproxy):
         MDIWindow.__init__(self,toproxy)
@@ -142,7 +142,7 @@ class Graph(MDIWindow):
 
 #-----------------------------------------------------------------------------
 class Layer(QtProxyObject):
-    """Proxy for the qti.Layer object.
+    """Proxy for the _qti.Layer object.
     """
     def __init__(self, toproxy):
         QtProxyObject.__init__(self,toproxy)
@@ -256,7 +256,7 @@ class Layer(QtProxyObject):
 
 #-----------------------------------------------------------------------------
 class Graph3D(QtProxyObject):
-    """Proxy for the qti.Graph3D object.
+    """Proxy for the _qti.Graph3D object.
     """
     def __init__(self, toproxy):
         QtProxyObject.__init__(self,toproxy)
@@ -281,7 +281,7 @@ class Graph3D(QtProxyObject):
 
 #-----------------------------------------------------------------------------
 class Spectrogram(QtProxyObject):
-    """Proxy for the qti.Spectrogram object.
+    """Proxy for the _qti.Spectrogram object.
     """
     def __init__(self, toproxy):
         QtProxyObject.__init__(self,toproxy)
@@ -292,7 +292,7 @@ class Spectrogram(QtProxyObject):
 
 #-----------------------------------------------------------------------------
 class Folder(QtProxyObject):
-    """Proxy for the qti.Folder object.
+    """Proxy for the _qti.Folder object.
     """
     def __init__(self, toproxy):
         QtProxyObject.__init__(self,toproxy)
@@ -387,7 +387,7 @@ class Folder(QtProxyObject):
 
 #-----------------------------------------------------------------------------
 class MantidMatrix(MDIWindow):
-    """Proxy for the qti.MantidMatrix object.
+    """Proxy for the _qti.MantidMatrix object.
     """
     def __init__(self, toproxy):
         QtProxyObject.__init__(self,toproxy)
@@ -476,7 +476,7 @@ class SliceViewerWindowProxy(QtProxyObject):
         """
         return SliceViewerProxy(self._getHeldObject().getSlicer())
     
-    def showLine(self, start, end, width=None, planar_width=0.1, dim_widths=None,
+    def showLine(self, start, end, width=None, planar_width=0.1, thicknesses=None,
                  num_bins=100):
         """Opens the LineViewer and define a 1D line along which to integrate.
         
@@ -492,7 +492,7 @@ class SliceViewerWindowProxy(QtProxyObject):
                 dimensions) to this integration width.
             planar_width :: sets the XY-planar (perpendicular to the line)
                 integration width. Default 0.1.
-            dim_widths :: list with one width value for each dimension in the
+            thicknesses :: list with one thickness value for each dimension in the
                 workspace (including the XY dimensions, which are ignored).
                 e.g. [0,1,2,3] in a XYZT workspace.
             num_bins :: number of bins by which to divide the line.
@@ -512,12 +512,12 @@ class SliceViewerWindowProxy(QtProxyObject):
         
         # Set the width.
         if not width is None:
-            liner.setWidth(width)
+            liner.setThickness(width)
         else:
             liner.setPlanarWidth(planar_width)
-            if not dim_widths is None:
-                for d in xrange(len(dim_widths)):
-                    liner.setWidth(d, dim_widths[i])
+            if not thicknesses is None:
+                for d in xrange(len(thicknesses)):
+                    liner.setThickness(d, thicknesses[i])
         # Bins
         liner.setNumBins(num_bins)
         liner.apply()
@@ -533,7 +533,7 @@ class SliceViewerProxy(QtProxyObject):
     """Proxy for a C++ SliceViewer widget.
     """
     # These are the exposed python method names
-    slicer_methods = ["setWorkspace", "getWorkspaceName", "showControls", "openFromXML", "saveImage", "setFastRender", "getFastRender", "toggleLineMode", "setXYDim", "setXYDim", "getDimX", "getDimY", "setSlicePoint", "setSlicePoint", "getSlicePoint", "getSlicePoint", "setXYLimits", "getXLimits", "getYLimits", "zoomBy", "setXYCenter", "resetZoom", "loadColorMap", "setColorScale", "setColorScaleMin", "setColorScaleMax", "setColorScaleLog", "getColorScaleMin", "getColorScaleMax", "getColorScaleLog", "setColorScaleAutoFull", "setColorScaleAutoSlice"]
+    slicer_methods = ["setWorkspace", "getWorkspaceName", "showControls", "openFromXML", "getImage", "saveImage", "copyImageToClipboard", "setFastRender", "getFastRender", "toggleLineMode", "setXYDim", "setXYDim", "getDimX", "getDimY", "setSlicePoint", "setSlicePoint", "getSlicePoint", "getSlicePoint", "setXYLimits", "getXLimits", "getYLimits", "zoomBy", "setXYCenter", "resetZoom", "loadColorMap", "setColorScale", "setColorScaleMin", "setColorScaleMax", "setColorScaleLog", "getColorScaleMin", "getColorScaleMax", "getColorScaleLog", "setColorScaleAutoFull", "setColorScaleAutoSlice"]
     
     def __init__(self, toproxy):
         QtProxyObject.__init__(self, toproxy)
@@ -552,6 +552,6 @@ class LineViewerProxy(QtProxyObject):
         
     def __dir__(self):
         """Returns the list of attributes for this object.   """
-        return ["apply", "showPreview", "showFull", "setStartXY", "setEndXY", "setWidth", "setWidth", "setPlanarWidth", "getPlanarWidth", "setNumBins", "setFixedBinWidthMode", "getFixedBinWidth", "getFixedBinWidthMode", "getNumBins", "getBinWidth"]
+        return ["apply", "showPreview", "showFull", "setStartXY", "setEndXY", "setThickness", "setThickness", "setThickness", "setPlanarWidth", "getPlanarWidth", "setNumBins", "setFixedBinWidthMode", "getFixedBinWidth", "getFixedBinWidthMode", "getNumBins", "getBinWidth", "setPlotAxis", "getPlotAxis"]
     
     

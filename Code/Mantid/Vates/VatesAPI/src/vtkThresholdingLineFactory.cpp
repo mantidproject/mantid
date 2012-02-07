@@ -7,11 +7,12 @@
 #include <vector>
 #include <boost/math/special_functions/fpclassify.hpp> 
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidVatesAPI/NullCoordTransform.h"
+#include "MantidAPI/NullCoordTransform.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 
 using Mantid::API::IMDWorkspace;
 using Mantid::MDEvents::MDHistoWorkspace;
+using Mantid::API::NullCoordTransform;
 
 namespace Mantid
 {

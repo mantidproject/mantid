@@ -150,13 +150,13 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
     def test_openFromXML_3D_binned(self):
         sv = self.sv
         self.setUpXML()
-        BinMD(InputWorkspace="TOPAZ_3680", OutputWorkspace="__TOPAZ_3680_mdhisto",
+        BinMD(InputWorkspace="TOPAZ_3680", OutputWorkspace="TOPAZ_3680_mdhisto",
               AxisAligned=1, AlignedDimX="Q_lab_x,0,10,20", AlignedDimY="Q_lab_y,0,10,20", AlignedDimZ="Q_lab_z,0,10,20")
         # Read the XML and set the view
         sv.openFromXML(self.xml_3d)
         # Check the settings
         # Automatically grabbed the histo version
-        self.assertEqual(sv.getWorkspaceName(), "__TOPAZ_3680_mdhisto")
+        self.assertEqual(sv.getWorkspaceName(), "TOPAZ_3680_mdhisto")
         self.assertEqual(sv.getDimX(), 1)
         self.assertEqual(sv.getDimY(), 2)
         self.assertAlmostEqual( sv.getSlicePoint(0), 4.84211, 3)
@@ -331,13 +331,13 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         # Length of 5 with 200 bins = 0.025 width
         self.assertAlmostEqual(liner.getBinWidth(), 0.025, 3)
     
-    def test_setWidth(self):
+    def test_setThickness(self):
         svw = self.svw
         self.sv.toggleLineMode(True)
         liner = self.svw.getLiner()
         liner.setPlanarWidth(1.5)
         self.assertAlmostEqual(liner.getPlanarWidth(), 1.5, 3)
-        liner.setWidth(2, 0.75)
+        liner.setThickness(2, 0.75)
         # Not yet a method to get the width in any dimension
         
                 

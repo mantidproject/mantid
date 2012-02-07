@@ -62,6 +62,7 @@ public:
   std::size_t nDets() const { return 1; } ///< A Detector object represents a single physical detector
   double getDistance(const IComponent& comp) const;
   double getTwoTheta(const Kernel::V3D& observer, const Kernel::V3D& axis) const;
+  double getSignedTwoTheta(const Kernel::V3D& observer, const Kernel::V3D& axis, const Kernel::V3D& instrumentUp) const;
   double getPhi() const;
   bool isMasked() const;
   bool isMonitor() const;

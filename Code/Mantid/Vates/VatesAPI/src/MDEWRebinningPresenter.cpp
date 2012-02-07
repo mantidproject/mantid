@@ -64,8 +64,8 @@ namespace Mantid
       parser.execute();
 
       using Mantid::Geometry::MDGeometryBuilderXML;
-      using Mantid::Geometry::StrictDimensionPolicy;
-      MDGeometryBuilderXML<StrictDimensionPolicy> xmlBuilder;
+      using Mantid::Geometry::NoDimensionPolicy;
+      MDGeometryBuilderXML<NoDimensionPolicy> xmlBuilder;
 
       Mantid::Geometry::VecIMDDimension_sptr dimensions =parser.getAllDimensions();
       DimensionVec::iterator it = dimensions.begin();
@@ -253,7 +253,7 @@ namespace Mantid
     {
       std::string wsName = m_serializer.getWorkspaceName();
       // Create a private output workspace name
-      std::string outWsName = "__" + wsName + "_mdhisto";
+      std::string outWsName = wsName + "_mdhisto";
 
       using namespace Mantid::API;
       if(RecalculateAll == m_request->action())

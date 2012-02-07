@@ -46,6 +46,8 @@ public:
   virtual void clear() = 0;
   /// Get a pointer to the workspace
   virtual Workspace_sptr getWorkspace() const = 0;
+  /// Is the input workspace property optional (can be blank)?
+  virtual bool isOptional() const = 0;
   /// Returns the direction of the workspace property
   //-virtual const unsigned int direction() const = 0;
   /// Virtual destructor

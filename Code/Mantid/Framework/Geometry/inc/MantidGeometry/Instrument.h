@@ -28,6 +28,7 @@ namespace Mantid
     //------------------------------------------------------------------
     class XMLlogfile;
     class ParameterMap;
+    class ReferenceFrame;
 
     /**
     Base Instrument Class.
@@ -205,6 +206,11 @@ namespace Mantid
       void setXmlText(const std::string & filename);
       const std::string & getXmlText() const;
 
+      /// Set reference Frame
+      void setReferenceFrame(boost::shared_ptr<ReferenceFrame> frame);
+      /// Get refernce Frame
+      boost::shared_ptr<const ReferenceFrame> getReferenceFrame() const;
+
     private:
       /// Private copy assignment operator
       Instrument& operator=(const Instrument&);
@@ -260,6 +266,9 @@ namespace Mantid
 
       /// Pointer to the physical instrument, where this differs from the 'neutronic' one (indirect geometry)
       boost::shared_ptr<const Instrument> m_physicalInstrument;
+
+      /// Pointer to the reference frame object.
+      boost::shared_ptr<ReferenceFrame> m_referenceFrame;
     };
 
     /// Shared pointer to an instrument object

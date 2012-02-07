@@ -121,6 +121,10 @@ void Indirect::initLayout()
   m_uiForm.save_ckSPE->setChecked(false);
   m_uiForm.save_ckNexus->setChecked(true);
 
+  // nudge "Background Removal" button to display whether it is
+  // set to "OFF" or "ON".
+  backgroundRemoval();
+
   loadSettings();
 
   refreshWSlist();
@@ -251,6 +255,12 @@ void Indirect::runConvertToEnergy()
     pyInput += "reducer.set_fold_multiple_frames(False)\n";
   }
 
+  if( m_uiForm.ckCm1Units->isChecked() )
+  {
+    pyInput +=
+      "reducer.set_save_to_cm_1(True)\n";
+  }
+
   pyInput += "reducer.set_save_formats([" + savePyCode() + "])\n";
 
   pyInput +=
@@ -344,6 +354,50 @@ void Indirect::setIDFValues(const QString & prefix)
     }
 
     analyserSelected(m_uiForm.cbAnalyser->currentIndex());
+  }
+}
+
+/**
+* This function holds any steps that must be performed on the layout that are specific
+* to the currently selected instrument.
+*/
+void Indirect::performInstSpecific()
+{
+  setInstSpecificWidget("cm-1-convert-choice", m_uiForm.ckCm1Units, QCheckBox::Off);
+  setInstSpecificWidget("save-aclimax-choice", m_uiForm.save_ckAclimax, QCheckBox::Off);
+}
+
+/**
+* This function either shows or hides the given QCheckBox, based on the named property
+* inside the instrument param file.  When hidden, the default state will be used to
+* reset to the "unused" state of the checkbox.
+*
+* @param parameterName :: The name of the property to look for inside the current inst param file.
+* @param checkBox :: The checkbox to set the state of, and to either hide or show based on the current inst.
+* @param defaultState :: The state to which the checkbox will be set upon hiding it.
+*/
+void Indirect::setInstSpecificWidget(const std::string & parameterName, QCheckBox * checkBox, QCheckBox::ToggleState defaultState)
+{
+  // Get access to instrument specific parameters via the loaded empty workspace.
+  std::string instName = m_uiForm.cbInst->currentText().toStdString();
+  Mantid::API::MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("__empty_" + instName));
+  if(NULL == input)
+    return;
+  Mantid::Geometry::Instrument_const_sptr instr = input->getInstrument();
+
+  // See if the instrument params file requests that the checkbox be shown to the user.
+  std::vector<std::string> showParams = instr->getStringParameter(parameterName);
+  
+  std::string show = "";
+  if(showParams.size() > 0)
+    show = showParams[0];
+  
+  if(show == "Show")
+    checkBox->setHidden(false);
+  else
+  {
+    checkBox->setHidden(true);
+    checkBox->setState(defaultState);
   }
 }
 
@@ -441,6 +495,8 @@ QString Indirect::savePyCode()
     fileFormats << "nxspe";
   if ( m_uiForm.save_ckAscii->isChecked() )
     fileFormats << "ascii";
+  if ( m_uiForm.save_ckAclimax->isChecked() )
+    fileFormats << "aclimax";
 
   if ( fileFormats.size() != 0 )
     fileFormatList = "'" + fileFormats.join("', '") + "'";
@@ -1122,19 +1178,18 @@ void Indirect::backgroundClicked()
 }
 /**
 * Slot called when m_backgroundDialog is closed. Assesses whether user desires background removal.
+* Can be called before m_backgroundDialog even exists, for the purposes of setting the button to
+* it's initial (default) value.
 */
 void Indirect::backgroundRemoval()
 {
-  if ( m_backgroundDialog->removeBackground() )
-  {
-    m_bgRemoval = true;
+  if ( NULL != m_backgroundDialog )
+    m_bgRemoval = m_backgroundDialog->removeBackground();
+  
+  if (m_bgRemoval)
     m_uiForm.pbBack_2->setText("Background Removal (On)");
-  }
   else
-  {
-    m_bgRemoval = false;
     m_uiForm.pbBack_2->setText("Background Removal (Off)");
-  }
 }
 /**
 * Plots raw time data from .raw file before any data conversion has been performed.
@@ -1177,7 +1232,7 @@ void Indirect::plotRaw()
 
     QString pyInput =
       "from mantidsimple import *\n"
-      "from mantidplotpy import *\n"
+      "from mantidplot import *\n"
       "import os.path as op\n"
       "file = r'" + rawFile + "'\n"
       "name = op.splitext( op.split(file)[1] )[0]\n"
@@ -1285,7 +1340,7 @@ void Indirect::calibCreate()
 
     if ( m_uiForm.cal_ckPlotResult->isChecked() )
     {
-      reducer += "from mantidplotpy import *\n"
+      reducer += "from mantidplot import *\n"
         "plotTimeBin(result, 0)\n";
     }
 
@@ -1497,8 +1552,14 @@ void Indirect::sOfQwClicked()
     }
     pyInput +=
       "efixed = " + m_uiForm.leEfixed->text() + "\n"
-      "rebin = '" + rebinString + "'\n"      
-      "SofQW(sqwInput, sqwOutput, rebin, 'Indirect', EFixed=efixed)\n"
+      "rebin = '" + rebinString + "'\n";
+
+    if(m_uiForm.sqw_cbRebinType->currentText() == "Centre (SofQW)")
+      pyInput += "SofQW(sqwInput, sqwOutput, rebin, 'Indirect', EFixed=efixed)\n";
+    else if(m_uiForm.sqw_cbRebinType->currentText() == "Parallelepiped (SofQW2)")
+      pyInput += "SofQW2(sqwInput, sqwOutput, rebin, 'Indirect', EFixed=efixed)\n";
+    
+    pyInput +=
       "if cleanup:\n"
       "    mantid.deleteWorkspace(sqwInput)\n";
 
@@ -1561,7 +1622,7 @@ void Indirect::sOfQwInputType(const QString& input)
 void Indirect::sOfQwPlotInput()
 {
   QString pyInput = "from mantidsimple import *\n"
-    "from mantidplotpy import *\n";
+    "from mantidplot import *\n";
 
   //...
   if ( m_uiForm.sqw_cbInput->currentText() == "File" )

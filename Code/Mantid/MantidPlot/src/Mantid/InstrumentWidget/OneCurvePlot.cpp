@@ -459,8 +459,8 @@ void OneCurvePlot::removeCurve(const QString& label)
   if (it != m_stored.end())
   {
     it.value()->detach();
-    m_stored.erase(it);
     delete it.value();
+    m_stored.erase(it);
   }
 }
 

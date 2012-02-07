@@ -193,6 +193,8 @@ namespace MDEvents
 
     void getBoxes(std::vector<IMDBox<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function);
 
+    void transformDimensions(std::vector<double> & scaling, std::vector<double> & offset);
+
   protected:
 
     inline void loadEvents() const;

@@ -54,12 +54,12 @@ void MWDiag::loadSettings()
   m_designWidg.leSignificance->setText(getSetting("significance", instrument, "diag_samp_sig"));
   m_designWidg.leHighAbs->setText(getSetting("high abs", instrument, "diag_huge"));
   m_designWidg.leLowAbs->setText(getSetting("low abs", instrument, "diag_tiny"));
-  m_designWidg.leHighMed->setText(getSetting("high median", instrument, "diag_samp_hi"));
-  m_designWidg.leLowMed->setText(getSetting("low median", instrument, "diag_samp_lo"));
-  m_designWidg.leVariation->setText(getSetting("variation", instrument, "variation"));
+  m_designWidg.leHighMed->setText(getSetting("high median", instrument, "diag_van_hi"));
+  m_designWidg.leLowMed->setText(getSetting("low median", instrument, "diag_van_lo"));
+  m_designWidg.leVariation->setText(getSetting("variation", instrument, "diag_variation"));
   m_designWidg.leStartTime->setText(getSetting("TOF start", instrument, "bkgd-range-min"));
   m_designWidg.leEndTime->setText(getSetting("TOF end", instrument, "bkgd-range-max"));
-  m_designWidg.leAcceptance->setText(getSetting("back criteria", instrument, "bkgd_threshold"));
+  m_designWidg.leAcceptance->setText(getSetting("back criteria", instrument, "diag_samp_hi"));
   m_designWidg.bleed_maxrate->setText(getSetting("bleed_max_framerate", instrument, "diag_bleed_maxrate"));
   m_designWidg.ignored_pixels->setText(getSetting("bleed_ignored_pixels", instrument, "diag_bleed_pixels"));
 
@@ -416,7 +416,7 @@ QString MWDiag::createDiagnosticScript() const
   {
     // No background check so don't need all of the fields
     diagCall += 
-      "white_run=" + whiteBeam + ","
+      "white=" + whiteBeam + ","
       "tiny=" + lowCounts + ","
       "huge=" + highCounts + ","
       "van_lo=" + lowMedian + ","
@@ -440,6 +440,7 @@ QString MWDiag::createDiagnosticScript() const
 
   // Print results argument and Closing  argument bracket
   diagCall += ", print_results=True)\n";
+
   return diagCall;
 }
 

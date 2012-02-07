@@ -47,20 +47,14 @@
 
 #include <cassert>
 
-#include "sipAPIqti.h"
+#include "sipAPI_qti.h"
 
 // Function is defined in a sip object file that is linked in later. There is no header file
 // so this is necessary
-extern "C" void initqti();
+extern "C" void init_qti();
 
 // Language name
 const char* PythonScripting::langName = "Python";
-
-namespace
-{
-  /// Logger
-  Mantid::Kernel::Logger & g_log = Mantid::Kernel::Logger::get("PythonScripting");
-}
 
 // Factory function
 ScriptingEnv *PythonScripting::constructor(ApplicationWindow *parent) 
@@ -153,12 +147,12 @@ bool PythonScripting::start()
     }
 
     //Embedded qti module needs sip definitions initializing before it can be used
-    initqti();
+    init_qti();
 
-    pymodule = PyImport_ImportModule("qti");
+    pymodule = PyImport_ImportModule("_qti");
     if( pymodule )
     {
-      PyDict_SetItemString(m_globals, "qti", pymodule);
+      PyDict_SetItemString(m_globals, "_qti", pymodule);
       PyObject *qti_dict = PyModule_GetDict(pymodule);
       setQObject(d_parent, "app", qti_dict);
       PyDict_SetItemString(qti_dict, "mathFunctions", m_math);
@@ -174,17 +168,22 @@ bool PythonScripting::start()
     setQObject(this, "stderr", m_sys);
 
     // Add in Mantid paths so that the framework will be found
-    QDir mantidbin(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getPropertiesDir()));
+    // Linux has the libraries in the lib directory at bin/../lib
+    using namespace Mantid::Kernel;
+    ConfigServiceImpl &configSvc = ConfigService::Instance();
+    QDir mantidbin(QString::fromStdString(configSvc.getPropertiesDir()));
     QString pycode =
       "import sys\n"
-      "mantidbin = '" +  mantidbin.absolutePath() + "'\n" +
+      "import os\n"
+      "mantidbin = '%1'\n"
       "if not mantidbin in sys.path:\n"
-      "\tsys.path.insert(0,mantidbin)\n";
+      "    sys.path.insert(0,mantidbin)\n"
+      "sys.path.insert(1, os.path.join(mantidbin,'..','lib'))";
+    pycode = pycode.arg(mantidbin.absolutePath());
     PyRun_SimpleString(pycode.toStdString().c_str());
 
     //Get the refresh protection flag
-    Mantid::Kernel::ConfigService::Instance().getValue("pythonalgorithms.refresh.allowed", refresh_allowed);
-
+    configSvc.getValue("pythonalgorithms.refresh.allowed", refresh_allowed);
     if( loadInitFile(mantidbin.absoluteFilePath("mantidplotrc.py")) )
     {
       d_initialized = true;
@@ -193,18 +192,18 @@ bool PythonScripting::start()
     {
       d_initialized = false;
     }
-    return d_initialized;
   }
   catch(std::exception & ex)
   {
     std::cerr << "Exception in PythonScripting.cpp: " << ex.what() << std::endl;
-    return false;
+    d_initialized = false;
   }
   catch(...)
   {
     std::cerr << "Exception in PythonScripting.cpp" << std::endl;
-    return false;
+    d_initialized = false;
   }
+  return d_initialized;
 }
 
 /**
@@ -254,11 +253,11 @@ bool PythonScripting::setQObject(QObject *val, const char *name, PyObject *dict)
   if(!val) return false;
   PyObject *pyobj=NULL;
   
-  if (!sipAPI_qti)
+  if (!sipAPI__qti)
   {
     throw std::runtime_error("sipAPI_qti is undefined");
   }
-  if (!sipAPI_qti->api_find_class)
+  if (!sipAPI__qti->api_find_class)
   {
     throw std::runtime_error("sipAPI_qti->api_find_class is undefined");
   }

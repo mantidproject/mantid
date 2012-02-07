@@ -25,7 +25,7 @@ public:
   void getSelectedBoundingBox(const QModelIndex& index,double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin);
   //Mantid::Kernel::V3D getSamplePos()const;
   QModelIndex findComponentByName(const QString & name) const;
-protected slots:
+public slots:
   void sendComponentSelectedSignal(const QModelIndex);
 signals:
   void componentSelected(const Mantid::Geometry::ComponentID);

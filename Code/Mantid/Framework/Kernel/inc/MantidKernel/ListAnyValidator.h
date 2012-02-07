@@ -56,31 +56,50 @@ template<typename TYPE=std::string>
 class  ListAnyValidator : public IValidator<TYPE>
 {
 private:
-    // templated function which substitutes different code as fucntion of the initated type
-    // this codes is substituced if the condifion is true
-    template<typename U, bool Condition >
-    class IF {
-    public:
-        static inline void ENABLE(ListAnyValidator *pHost,const U &value)
-        {
-               pHost->m_allowedValues.insert(value);
-        }
-    };
-    // and this one -- if false
-    template<typename U>
-    class IF<U, false > {
-    public:
-        static inline void ENABLE(ListAnyValidator *pHost,const U &value)
-        {          
-                TYPE rVal = boost::lexical_cast<TYPE>(value);
-                pHost->m_allowedValues.insert(rVal);        
-        }
-    };
+  // templated function which substitutes different code as function of the initiated type
+  // this codes is substituted if the condifion is true
+  /** Templated function which substitutes different code as function of the initiated type
+   * @tparam U :: type of the input parameter
+   * @tparam Condition :: set to True if type of U == type of TYPE,
+   *         via the type_is_equal<T,U> structure.
+   */
+  template<typename U, bool Condition >
+  class IF
+  {
+  public:
+    /** Insert the value U directly into the validator, because U == TYPE
+     *
+     * @param pHost :: ListValidator
+     * @param value :: value to insert, type U
+     */
+    static inline void ENABLE(ListAnyValidator *pHost,const U &value)
+    {
+      pHost->m_allowedValues.insert(value);
+    }
+  };
+
+  // and this one -- if false
+  template<typename U>
+  class IF<U, false >
+  {
+  public:
+    /** Cast the value U to TYPE and then insert into the validator
+     *
+     * @param pHost :: ListValidator
+     * @param value :: value to insert, type U
+     */
+    static inline void ENABLE(ListAnyValidator *pHost,const U &value)
+    {
+      TYPE rVal = boost::lexical_cast<TYPE>(value);
+      pHost->m_allowedValues.insert(rVal);
+    }
+  };
 
 public:
 
     /// Default constructor. Sets up an empty list of valid values.
     ListAnyValidator(): IValidator<TYPE>(), m_allowedValues(){};
+
     /** Constructor
      *  @param values :: A set of values consisting of the valid values     */
     explicit ListAnyValidator(const std::set<TYPE>& values):
@@ -94,7 +113,7 @@ public:
     /// Destructor
     virtual ~ListAnyValidator(){};  
 
-    /// Returns the set of valid values
+    /// Returns the set of valid values (as strings)
     virtual std::set<std::string> allowedValues() const
     {
       std::set<std::string> rez;
@@ -104,28 +123,34 @@ public:
       }
       return rez;         
     }
-     /** Adds the argument to the set of valid values regardless of its type. 
-       * if the template type corresponds to  the class type, insertion goes directly, 
-       * if the template type is different -- lexical cast of the inserted values occurs    */
+
+    /** Adds the argument to the set of valid values regardless of its type.
+     * if the template type corresponds to  the class type, insertion goes directly,
+     * if the template type is different -- lexical cast of the inserted values occurs    */
     template <typename U>
-    void addAllowedValue(const U &value){
-        IF<U, type_is_equal<TYPE,U>::value >::ENABLE(this,value);
+    void addAllowedValue(const U &value)
+    {
+      IF<U, type_is_equal<TYPE,U>::value >::ENABLE(this,value);
     }
-    //
+
+    /// Clone this validator
     virtual IValidator<TYPE>* clone(){ return new ListAnyValidator<TYPE>(*this); }
 
-  protected:
-  /** Checks if the value passed is in the list
-   *  @param value :: The value to test
-   *  @return "" if the value is on the list, or "The value is not in the list of allowed values"   */
-   virtual std::string checkValidity(const TYPE &value) const
-   {
-        if ( m_allowedValues.count(value) ){
-            return "";
-        }else{
-              return "The value \"" + boost::lexical_cast<std::string>(value) + "\" is not in the list of allowed values";
-        }
-   }
+protected:
+    /** Checks if the value passed is in the list
+     *  @param value :: The value to test
+     *  @return "" if the value is on the list, or "The value is not in the list of allowed values"   */
+    virtual std::string checkValidity(const TYPE &value) const
+    {
+      if ( m_allowedValues.count(value) )
+      {
+        return "";
+      }
+      else
+      {
+        return "The value \"" + boost::lexical_cast<std::string>(value) + "\" is not in the list of allowed values";
+      }
+    }
 
   /// The set of valid values
   std::set<TYPE> m_allowedValues;

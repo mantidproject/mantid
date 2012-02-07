@@ -53,7 +53,7 @@ public:
 
     for (int i = 0; i <=19; i++)
     {
-      e[i] = 1.;
+      e[i] = 1.0;
     }
 
   }
@@ -109,9 +109,8 @@ public:
 
     // check it categories
     const std::vector<std::string> categories = out->categories();
-    TS_ASSERT( categories.size() == 2 );
+    TS_ASSERT( categories.size() == 1 );
     TS_ASSERT( categories[0] == "General" );
-    TS_ASSERT( categories[1] == "Muon" );
 
     AnalysisDataService::Instance().remove(wsName);
 

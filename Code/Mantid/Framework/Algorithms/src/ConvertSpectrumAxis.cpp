@@ -17,7 +17,8 @@ For units other than <math>\theta</math>, the value placed in the axis is genera
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/Run.h"
-
+#include <boost/function.hpp>
+#include <boost/bind.hpp>
 #include <cfloat>
 
 namespace Mantid
@@ -50,6 +51,7 @@ namespace Algorithms
     declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
     std::vector<std::string> targetOptions = Mantid::Kernel::UnitFactory::Instance().getKeys();
     targetOptions.push_back("theta");
+    targetOptions.push_back("signed_theta");
     declareProperty("Target","",new ListValidator(targetOptions),
       "The detector attribute to convert the spectrum axis to");
     std::vector<std::string> eModeOptions;
@@ -79,7 +81,7 @@ namespace Algorithms
     if ( isHist ) { nxBins = nBins+1; }
     else { nxBins = nBins; }
     bool warningGiven = false;
-    if ( unitTarget != "theta" )
+    if ( unitTarget != "theta" && unitTarget != "signed_theta")
     {
       Kernel::Unit_sptr fromUnit = inputWS->getAxis(0)->unit();
       Kernel::Unit_sptr toUnit = UnitFactory::Instance().create(unitTarget);
@@ -122,12 +124,24 @@ namespace Algorithms
     }
     else
     {
+      //Set up binding to memeber funtion. Avoids condition as part of loop over nHistograms.
+      boost::function<double(IDetector_const_sptr)> thetaFunction;
+      if(unitTarget.compare("signed_theta") == 0)
+      {
+        thetaFunction = boost::bind(&MatrixWorkspace::detectorSignedTwoTheta, inputWS, _1);
+      }
+      else
+      {
+        thetaFunction = boost::bind(&MatrixWorkspace::detectorTwoTheta, inputWS, _1);
+      }
+
       for (size_t i = 0; i < nHist; ++i)
       {
         try 
         {
           IDetector_const_sptr det = inputWS->getDetector(i);
-          indexMap.insert( std::make_pair( inputWS->detectorTwoTheta(det)*180.0/M_PI , i ) );
+          //Invoke relevant member function.
+          indexMap.insert( std::make_pair( thetaFunction(det)*180.0/M_PI , i ) );
         }
         catch(Exception::NotFoundError &)
         {
@@ -142,7 +156,7 @@ namespace Algorithms
     NumericAxis* const newAxis = new NumericAxis(indexMap.size());
     outputWS->replaceAxis(1,newAxis);
     // The unit of this axis is radians. Use the 'radians' unit defined above.
-    if ( unitTarget == "theta" )
+    if ( unitTarget == "theta" || unitTarget == "signed_theta" )
     {
       newAxis->unit() = boost::shared_ptr<Unit>(new Units::Degrees);
     }

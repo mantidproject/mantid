@@ -26,6 +26,7 @@ class IndirectReducer(MSGReducer):
     _background_end = None
     _detailed_balance_temp = None
     _rename_result = True
+    _save_to_cm_1 = False
     
     def __init__(self):
         """
@@ -92,11 +93,16 @@ class IndirectReducer(MSGReducer):
                 self.append_step(steps.FoldData())
             else:
                 return
-            
+        
+        step = steps.ConvertToCm1(MultipleFrames=self._multiple_frames)
+        step.set_save_to_cm_1(self._save_to_cm_1)
+        self.append_step(step)
+        
         # The "SaveItem" step saves the files in the requested formats.
         if (len(self._save_formats) > 0):
             step = steps.SaveItem()
             step.set_formats(self._save_formats)
+            step.set_save_to_cm_1(self._save_to_cm_1)
             self.append_step(step)
         
         if self._rename_result:
@@ -105,6 +111,9 @@ class IndirectReducer(MSGReducer):
     
     def set_grouping_policy(self, policy):
         self._grouping_policy = policy
+
+    def set_save_to_cm_1(self, save_to_cm_1):
+        self._save_to_cm_1 = save_to_cm_1
 
     def set_calibration_workspace(self, workspace):
         if mtd[workspace] is None:

@@ -59,7 +59,7 @@ set ( SRC_FILES
 	src/MultipleExperimentInfos.cpp
 	src/MultipleFileProperty.cpp
 	src/NumericAxis.cpp
-	src/PairedGroupAlgorithm.cpp
+	src/NullCoordTransform.cpp
 	src/ParamFunction.cpp
 	src/ParameterReference.cpp
 	src/ParameterTie.cpp
@@ -172,7 +172,7 @@ set ( INC_FILES
 	inc/MantidAPI/MultipleExperimentInfos.h
 	inc/MantidAPI/MultipleFileProperty.h
 	inc/MantidAPI/NumericAxis.h
-	inc/MantidAPI/PairedGroupAlgorithm.h
+	inc/MantidAPI/NullCoordTransform.h
 	inc/MantidAPI/ParamFunction.h
 	inc/MantidAPI/ParameterReference.h
 	inc/MantidAPI/ParameterTie.h
@@ -230,7 +230,6 @@ set ( TEST_FILES
 	test/ImplicitFunctionParserFactoryTest.h
 	test/InstrumentDataServiceTest.h
 	test/MDGeometryTest.h
-	test/MatrixWorkspaceTest.h
 	test/MemoryManagerTest.h
 	test/MultipleExperimentInfosTest.h
 	test/MultipleFilePropertyTest.h
@@ -255,6 +254,7 @@ set ( TEST_FILES
 set ( GMOCK_TEST_FILES
         test/ImplicitFunctionFactoryTest.h
         test/ImplicitFunctionParameterParserFactoryTest.h
+	test/MatrixWorkspaceTest.h
 )
 
 

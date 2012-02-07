@@ -24,6 +24,9 @@ import api
 import kernel
 from kernel import funcreturns as _funcreturns
 
+# Make "mtd" and "logger" available if a user just types from mantid.simpleapi import *
+from mantid import mtd, logger, apiVersion
+
 _ads = api.AnalysisDataService.Instance()
 _framework = api.FrameworkManager.Instance()
 
@@ -82,7 +85,7 @@ def get_additional_args(lhs, algm_obj):
         i += 1
     return extra_args
     
-def gather_returns(func_name, lhs, algm_obj, ignore=[]):
+def gather_returns(func_name, lhs, algm_obj, ignore_regex=[]):
     """
         Gather the return values and ensure they are in the
         correct order as defined by the output properties and
@@ -94,21 +97,37 @@ def gather_returns(func_name, lhs, algm_obj, ignore=[]):
                on the lhs of the function call and the names of these
                variables
         @param algm_obj :: An executed algorithm object
-        @param ignore :: A list of property names to ignore when returning
+        @param ignore_regex :: A list of strings containing regex expressions to match against property names
     """
-    # Gather the returns
-    # The minor complication here is the workspace properties have their
-    # values stored in the ADS and not within the property if they are NOT
-    # child algorithms
-    if type(ignore) is str: ignore = [ignore]
+    import re
+    def ignore_property(name, ignore_regex):
+        for regex in ignore_regex:
+            if regex.match(name) is not None:
+                return True
+        # Matched nothing
+        return False
+    
+    if type(ignore_regex) is str: 
+        ignore_regex = [ignore_regex]
+    # Compile regexes
+    for index, expr in enumerate(ignore_regex):
+        ignore_regex[index] = re.compile(expr)
+
     retvals = []
     for name in algm_obj.outputProperties():
-        if name in ignore: continue
+        if ignore_property(name, ignore_regex):
+            continue
         prop = algm_obj.getProperty(name)
+        # Parent algorithms store their workspaces in the ADS
+        # Child algorithms store their workspaces in the property
         if not algm_obj.isChild() and _is_workspace_property(prop):
             retvals.append(_ads[prop.valueAsStr])
         else:
-            retvals.append(prop.value)
+            if not hasattr(prop, 'value'):
+                print ('Unknown property type encountered. "%s" on "%s" is not understood by '
+                       'Python. Return value skipped. Please contact development team' % (name, algm_obj.name()))
+            else:
+                retvals.append(prop.value)
     nvals = len(retvals)
     nlhs = lhs[0]
     if nlhs > 1 and nvals != nlhs:
@@ -137,14 +156,12 @@ def _set_properties(alg_object, *args, **kwargs):
     # Set the properties of the algorithm.
     for key in kwargs.keys():
         value = kwargs[key]
-        alg_object.setProperty(key, value)
-        # For data items setting by explicit value
-        # doesn't set the string name of the, i.e. workspace
-        # name on the property. This causes problems for
-        # properties that then try and 
-        # set a property by name
-        if isinstance(value, kernel.DataItem):
-            alg_object.setPropertyValue(key, str(value))
+        # Anything stored in the ADS must be set by string value
+        # if it is not a child algorithm. 
+        if (not alg_object.isChild()) and isinstance(value, kernel.DataItem):
+            alg_object.setPropertyValue(key, value.name())
+        else:
+            alg_object.setProperty(key, value)
 
 def create_algorithm(algorithm, version, _algm_object):
     """
@@ -222,11 +239,12 @@ def create_algorithm(algorithm, version, _algm_object):
 def _set_properties_dialog(algm_object, *args, **kwargs):
     """
     Set the properties all in one go assuming that you are preparing for a
-    dialog box call. If the dialog is cancelled do a sys.exit, otherwise 
+    dialog box call. If the dialog is cancelled raise a runtime error, otherwise 
     return the algorithm ready to execute.
     """
     if not mantid.__gui__:
         raise RuntimeError("Can only display properties dialog in gui mode")
+
     # generic setup
     enabled_list = [s.lstrip(' ') for s in kwargs.get("Enable", "").split(',')]
     del kwargs["Enable"] # no longer needed
@@ -259,6 +277,12 @@ def _set_properties_dialog(algm_object, *args, **kwargs):
                 return '0'
         else:
             return str(value)
+    # Translate positional arguments and add them to the keyword list
+    ordered_props = algm_object.orderedProperties()
+    for index, value in enumerate(args):
+        propname = ordered_props[index]
+        kwargs[propname] = args[index]
+    
     # configure everything for the dialog
     for name in kwargs.keys():
         value = kwargs[name]
@@ -266,10 +290,10 @@ def _set_properties_dialog(algm_object, *args, **kwargs):
             presets += name + '=' + make_str(value) + '|'
 
     # finally run the configured dialog
-    import qti
-    dialog =  qti.app.mantidUI.createPropertyInputDialog(algm_object.name(), presets, message, enabled_list, disabled_list)
+    import _qti
+    dialog =  _qti.app.mantidUI.createPropertyInputDialog(algm_object.name(), presets, message, enabled_list, disabled_list)
     if dialog == False:
-        sys.exit('Information: Script execution cancelled')
+        raise RuntimeError('Information: Script execution cancelled')
 
 def create_algorithm_dialog(algorithm, version, _algm_object):
     """
@@ -366,12 +390,19 @@ def Load(*args, **kwargs):
     elif len(args) == 0:
         filename = get_argument_value('Filename', kwargs)
     else:
-        raise RuntimeError('Load() takes only the filename as a positional argument. %d arguments found.' % len(args))
+        raise RuntimeError('Load() takes only the filename as a positional argument. ' + \
+                           'Other arguments must be specified by keyword.')
     
     # Create and execute
     algm = _framework.createAlgorithm('Load')
     algm.setProperty('Filename', filename) # Must be set first
     lhs = _funcreturns.lhs_info()
+    # If the output has not been assigned to anything, i.e. lhs[0] = 0 and kwargs does not have OutputWorkspace
+    # then raise a more helpful error than what we would get from an algorithm
+    if lhs[0] == 0 and 'OutputWorkspace' not in kwargs:
+        raise RuntimeError("Unable to set output workspace name. Please either assign the output of "
+                           "Load to a variable or use the OutputWorkspace keyword.") 
+    
     extra_args = get_additional_args(lhs, algm)
     kwargs.update(extra_args)
     # Check for any properties that aren't known and warn they will not be used
@@ -381,7 +412,9 @@ def Load(*args, **kwargs):
             del kwargs[key]
     _set_properties(algm, **kwargs)
     algm.execute()
-    return gather_returns('Load', lhs, algm, ignore='LoaderName')
+        
+    # If a WorkspaceGroup was loaded then there will be OutputWorkspace_ properties about, don't include them
+    return gather_returns('Load', lhs, algm, ignore_regex=['LoaderName','OutputWorkspace_.*'])
 
 # Have a better load signature for autocomplete
 _signature = "\bFilename"

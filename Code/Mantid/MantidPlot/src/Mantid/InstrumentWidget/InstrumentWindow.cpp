@@ -40,6 +40,7 @@
 
 #include <numeric>
 #include <fstream>
+#include <stdexcept>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -590,16 +591,22 @@ void InstrumentWindow::setViewDirection(const QString& input)
   repaint();
 }
 
-/**
- * For the scripting API
+/** For the scripting API. Selects a omponent in the tree and zooms to it.
+ *  @param name The name of the component
+ *  @throw std::invalid_argument If the component name given does not exist in the tree
  */
 void InstrumentWindow::selectComponent(const QString & name)
 {
   QModelIndex component = mInstrumentTree->findComponentByName(name);
-  if( !component.isValid() ) return;
+  if( !component.isValid() )
+  {
+    throw std::invalid_argument("No component named \'"+name.toStdString()+"\' found");
+  }
 
+  mInstrumentTree->clearSelection();
   mInstrumentTree->scrollTo(component, QAbstractItemView::EnsureVisible );
   mInstrumentTree->selectionModel()->select(component, QItemSelectionModel::Select);
+  mInstrumentTree->sendComponentSelectedSignal(component);
 }
 
 /**

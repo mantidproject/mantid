@@ -8,6 +8,10 @@
 #include <QtGui/QWidget>
 #include <qwt_plot_curve.h>
 #include <qwt_plot.h>
+#include <qwt_painter.h>
+#include "MantidAPI/CoordTransform.h"
+#include "MantidQtAPI/MantidQwtIMDWorkspaceData.h"
+#include "MantidQtSliceViewer/LinePlotOptions.h"
 
 namespace MantidQt
 {
@@ -19,6 +23,7 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER LineViewer : public QWidget
     Q_OBJECT
 
 public:
+
     LineViewer(QWidget *parent = 0);
     ~LineViewer();
 
@@ -26,10 +31,11 @@ public:
     void setFreeDimensions(bool all, int dimX, int dimY);
     void setStart(Mantid::Kernel::VMD start);
     void setEnd(Mantid::Kernel::VMD end);
-    void setWidth(Mantid::Kernel::VMD width);
+    void setThickness(Mantid::Kernel::VMD width);
     void setPlanarWidth(double width);
     void setNumBins(int numBins);
     void setFixedBinWidthMode(bool fixedWidth, double binWidth);
+    void setPlotAxis(int choice);
 
     void showPreview();
     void showFull();
@@ -40,13 +46,16 @@ public:
     bool getFixedBinWidthMode() const;
     int getNumBins() const;
     double getBinWidth() const;
+    int getPlotAxis() const;
 
     // For python
     void setStartXY(double x, double y);
     void setEndXY(double x, double y);
-    void setWidth(double width);
-    void setWidth(int dim, double width);
-    void setWidth(const QString & dim, double width);
+    void setThickness(double width);
+    void setThickness(int dim, double width);
+    void setThickness(const QString & dim, double width);
+    QPointF getStartXY() const;
+    QPointF getEndXY() const;
 
 private:
     void createDimensionWidgets();
@@ -54,12 +63,10 @@ private:
     void updateStartEnd();
     void updateBinWidth();
     void readTextboxes();
-    void calculateCurve(Mantid::API::IMDWorkspace_sptr ws, Mantid::Kernel::VMD start, Mantid::Kernel::VMD end,
-        size_t minNumPoints, QwtPlotCurve * curve);
 
 public slots:
     void startEndTextEdited();
-    void widthTextEdited();
+    void thicknessTextEdited();
     void startLinkedToEndText();
     void apply();
     void numBinsChanged();
@@ -67,6 +74,7 @@ public slots:
     void setFreeDimensions(size_t dimX, size_t dimY);
     void on_radNumBins_toggled();
     void textBinWidth_changed();
+    void refreshPlot();
 
 signals:
     /// Signal emitted when the planar width changes
@@ -84,7 +92,7 @@ private:
     Ui::LineViewerClass ui;
 
     /// Layout containing the plot
-    QHBoxLayout * m_plotLayout;
+    QVBoxLayout * m_plotLayout;
 
     /// Main plot object
     QwtPlot * m_plot;
@@ -101,9 +109,11 @@ private:
     QVector<QLineEdit *> m_startText;
     /// Vector of text boxes with the end point
     QVector<QLineEdit *> m_endText;
-    /// Vector of text boxes with the widths
-    QVector<QLineEdit *> m_widthText;
+    /// Vector of text boxes with the thicknesses
+    QVector<QLineEdit *> m_thicknessText;
 
+    /// Widget to choose X plot axis and normalization
+    LinePlotOptions * m_lineOptions;
 
     // -------------------------- Data Members ----------------------------
 
@@ -118,7 +128,7 @@ private:
     /// End point of the line
     Mantid::Kernel::VMD m_end;
     /// Width in each dimension (some will be ignored)
-    Mantid::Kernel::VMD m_width;
+    Mantid::Kernel::VMD m_thickness;
     /// Width in the in-plane, perpendicular-to-line direction
     double m_planeWidth;
 
@@ -141,6 +151,7 @@ private:
 
     /// ACTUAL bin width, whether in fixed or not-fixed bin width mode
     double m_binWidth;
+
 
 };
 

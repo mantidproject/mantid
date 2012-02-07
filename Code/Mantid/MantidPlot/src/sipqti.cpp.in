@@ -10,4 +10,4 @@
   #pragma GCC diagnostic ignored "-Wcast-qual"
 #endif
 
-#include "sipqtipart0.cpp"
+#include "sip_qtipart0.cpp"

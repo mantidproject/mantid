@@ -50,15 +50,17 @@ namespace API
   {
   public:
     MDGeometry();
-    ~MDGeometry();
+    MDGeometry(const MDGeometry & other);
+    virtual ~MDGeometry();
     void initGeometry(std::vector<Mantid::Geometry::IMDDimension_sptr> & dimensions);
 
     // --------------------------------------------------------------------------------------------
     // These are the main methods for dimensions, that CAN be overridden (e.g. by MatrixWorkspace)
     virtual size_t getNumDims() const;
     virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(size_t index) const;
-    virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimensionNamed(std::string id) const;
+    virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimensionWithId(std::string id) const;
     size_t getDimensionIndexByName(const std::string & name) const;
+    size_t getDimensionIndexById(const std::string & id) const;
     Mantid::Geometry::VecIMDDimension_const_sptr getNonIntegratedDimensions() const;
 
     // --------------------------------------------------------------------------------------------
@@ -78,13 +80,16 @@ namespace API
     void setBasisVector(size_t index, const Mantid::Kernel::VMD & vec);
 
     // --------------------------------------------------------------------------------------------
-    bool hasOriginalWorkspace() const;
-    boost::shared_ptr<Workspace> getOriginalWorkspace() const;
-    void setOriginalWorkspace(boost::shared_ptr<Workspace> ws);
-    Mantid::API::CoordTransform * getTransformFromOriginal() const;
-    void setTransformFromOriginal(Mantid::API::CoordTransform * transform);
-    Mantid::API::CoordTransform * getTransformToOriginal() const;
-    void setTransformToOriginal(Mantid::API::CoordTransform * transform);
+    bool hasOriginalWorkspace(size_t index=0) const;
+    size_t numOriginalWorkspaces() const;
+    boost::shared_ptr<Workspace> getOriginalWorkspace(size_t index=0) const;
+    void setOriginalWorkspace(boost::shared_ptr<Workspace> ws, size_t index=0);
+    Mantid::API::CoordTransform * getTransformFromOriginal(size_t index=0) const;
+    void setTransformFromOriginal(Mantid::API::CoordTransform * transform, size_t index=0);
+    Mantid::API::CoordTransform * getTransformToOriginal(size_t index=0) const;
+    void setTransformToOriginal(Mantid::API::CoordTransform * transform, size_t index=0);
+
+    void transformDimensions(std::vector<double> & scaling, std::vector<double> & offset);
 
     // --------------------------------------------------------------------------------------------
     ///@return the vector of the origin (in the original workspace) that corresponds to 0,0,0... in this workspace
@@ -109,8 +114,8 @@ namespace API
     /// Vector of the dimensions used, in the order X Y Z t, etc.
     std::vector<Mantid::Geometry::IMDDimension_sptr> m_dimensions;
 
-    /// Pointer to the original workspace, if this workspace is a coordinate transformation from an original workspace.
-    boost::shared_ptr<Workspace> m_originalWorkspace;
+    /// Pointer to the original workspace(s), if this workspace is a coordinate transformation from an original workspace.
+    std::vector<boost::shared_ptr<Workspace> > m_originalWorkspaces;
 
     /// Vector of the basis vector (in the original workspace) for each dimension of this workspace.
     std::vector<Mantid::Kernel::VMD> m_basisVectors;
@@ -119,10 +124,10 @@ namespace API
     Mantid::Kernel::VMD m_origin;
 
     /// Coordinate Transformation that goes from the original workspace to this workspace's coordinates.
-    Mantid::API::CoordTransform * m_transformFromOriginal;
+    std::vector<Mantid::API::CoordTransform *> m_transforms_FromOriginal;
 
     /// Coordinate Transformation that goes from this workspace's coordinates to the original workspace coordinates.
-    Mantid::API::CoordTransform * m_transformToOriginal;
+    std::vector<Mantid::API::CoordTransform *> m_transforms_ToOriginal;
 
     /// Poco delete notification observer object
     Poco::NObserver<MDGeometry, Mantid::API::WorkspacePreDeleteNotification> m_delete_observer;

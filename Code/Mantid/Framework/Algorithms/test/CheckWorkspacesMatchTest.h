@@ -420,7 +420,7 @@ public:
     cleanupGroup(group);
   }
 
-  void test_Input_With_Two_Groups_That_Are_Different_Sizes_Gives_Size_Mismatch()
+  void test_Input_With_Two_Groups_That_Are_Different_Sizes_Fails()
   {
     // Create a group
     const std::string groupOneName("TestGroupOne");
@@ -428,7 +428,7 @@ public:
     const std::string groupTwoName("TestGroupTwo");
     WorkspaceGroup_sptr groupTwo = WorkspaceCreationHelper::CreateWorkspaceGroup(3, 2, 2, groupTwoName);
 
-    doGroupTest(groupOneName, groupTwoName, "GroupWorkspaces size mismatch.");
+    doGroupTest(groupOneName, groupTwoName, "GroupWorkspaces size mismatch.", std::map<std::string,std::string>(), true);
 
     cleanupGroup(groupOne);
     cleanupGroup(groupTwo);
@@ -478,7 +478,9 @@ private:
 
   void doGroupTest(const std::string & inputWSOne, const std::string & inputWSTwo,
                    const std::string & expectedResult,
-                   const std::map<std::string,std::string> & otherProps = std::map<std::string,std::string>())
+                   const std::map<std::string,std::string> & otherProps = std::map<std::string,std::string>(),
+                   bool expectFail = false
+                   )
   {
     Mantid::Algorithms::CheckWorkspacesMatch matcher;
     matcher.initialize();
@@ -492,6 +494,11 @@ private:
     }
 
     TS_ASSERT_THROWS_NOTHING(matcher.execute());
+    if (expectFail)
+    {
+      TS_ASSERT_EQUALS(matcher.isExecuted(), false);
+      return;
+    }
     TS_ASSERT_EQUALS(matcher.isExecuted(), true);
     TS_ASSERT_EQUALS(matcher.getPropertyValue("Result"), expectedResult);
   }

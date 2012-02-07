@@ -15,8 +15,8 @@ namespace Mantid
      */
     Quadrilateral::Quadrilateral(const V2D & lowerLeft, const V2D & lowerRight,
                                  const V2D & upperRight, const V2D & upperLeft) :
-      ConvexPolygon(), m_lowerLeft(lowerLeft),
-      m_lowerRight(lowerRight), m_upperRight(upperRight), m_upperLeft(upperLeft)
+      ConvexPolygon(), m_lowerLeft(lowerLeft), m_lowerRight(lowerRight), 
+      m_upperRight(upperRight),  m_upperLeft(upperLeft)
     {
       initialize();
     }
@@ -28,7 +28,8 @@ namespace Mantid
                                  const double lowerY, const double upperY)
       : ConvexPolygon(), m_lowerLeft(lowerX,lowerY),
         m_lowerRight(upperX,lowerY), m_upperRight(upperX,upperY), 
-        m_upperLeft(lowerX,upperY) 
+        m_upperLeft(lowerX,upperY)
+
     {
       initialize();
     }
@@ -38,11 +39,11 @@ namespace Mantid
      * @param other :: The object to construct this from
      */
     Quadrilateral::Quadrilateral(const Quadrilateral & other)
-      : ConvexPolygon(), m_lowerLeft(other.m_lowerLeft),
+      : ConvexPolygon(other), m_lowerLeft(other.m_lowerLeft),
         m_lowerRight(other.m_lowerRight), m_upperRight(other.m_upperRight), 
         m_upperLeft(other.m_upperLeft)
     {
-      initialize();
+      // Base class does the work
     }
     
     /// Destructor
@@ -74,16 +75,6 @@ namespace Mantid
     }
 
     /**
-     * Is a point inside this quadrilateral
-     * @param point :: The point to test
-     * @returns True if the point is inside the polygon
-     */
-    bool Quadrilateral::contains(const Kernel::V2D &) const
-    {
-      throw Kernel::Exception::NotImplementedError("ConvexPolygon::contains");
-    }
-
-    /**
      * Compute the area of the polygon using triangulation. As this is a 
      * convex polygon the calculation is exact. The algorithm uses one vertex
      * as a common vertex and sums the areas of the triangles formed by this
@@ -110,6 +101,7 @@ namespace Mantid
       return 2.0*area();
     }
 
+
     //-----------------------------------------------------------------------------
     // Private member functions
     //-----------------------------------------------------------------------------
@@ -123,6 +115,8 @@ namespace Mantid
       m_head->insert(&m_lowerRight);
       m_head->insert(&m_upperRight);
       m_head->insert(&m_upperLeft);
+      
+      ConvexPolygon::setup();
     }
 
 

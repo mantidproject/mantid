@@ -9,11 +9,13 @@
 #include <vtkPoints.h>
 #include <vtkUnstructuredGrid.h>
 #include "vtkSystemIncludes.h"
+#include "MantidKernel/ReadLock.h"
 
 using namespace Mantid::API;
 using namespace Mantid::MDEvents;
 using namespace Mantid::Geometry;
 using Mantid::Kernel::CPUTimer;
+using Mantid::Kernel::ReadLock;
 
 namespace Mantid
 {
@@ -44,6 +46,8 @@ namespace Mantid
   {
     bool VERBOSE = true;
     CPUTimer tim;
+    // Acquire a scoped read-only lock to the workspace (prevent segfault from algos modifying ws)
+    ReadLock lock(*ws);
 
     // Find out how many events to skip before making a point
     size_t totalPoints = ws->getNPoints();

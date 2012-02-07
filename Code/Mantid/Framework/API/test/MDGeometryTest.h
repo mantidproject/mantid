@@ -11,6 +11,7 @@
 #include "MantidKernel/VMD.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidTestHelpers/FakeObjects.h"
+#include "MantidAPI/NullCoordTransform.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -29,11 +30,12 @@ public:
   {
     MDGeometry g;
     std::vector<IMDDimension_sptr> dims;
-    IMDDimension_sptr dim(new MDHistoDimension("Qx", "Qx", "Ang", -1, +1, 0));
+    IMDDimension_sptr dim1(new MDHistoDimension("Qx", "Qx", "Ang", -1, +1, 0));
     IMDDimension_sptr dim2(new MDHistoDimension("Qy", "Qy", "Ang", -1, +1, 0));
-    dims.push_back(dim);
+    dims.push_back(dim1);
     dims.push_back(dim2);
     g.initGeometry(dims);
+
     TS_ASSERT_EQUALS( g.getNumDims(), 2);
     TS_ASSERT_EQUALS( g.getDimension(0)->getName(), "Qx");
     TS_ASSERT_EQUALS( g.getDimension(1)->getName(), "Qy");
@@ -45,6 +47,56 @@ public:
     TS_ASSERT_EQUALS( g.getBasisVector(0), VMD(1.2, 3.4));
     TS_ASSERT_EQUALS( g.getBasisVector(1), VMD(1.2, 3.4));
   }
+
+
+  void test_copy_constructor()
+  {
+    MDGeometry g;
+    std::vector<IMDDimension_sptr> dims;
+    IMDDimension_sptr dim0(new MDHistoDimension("Qx", "Qx", "Ang", -1, +1, 0));
+    IMDDimension_sptr dim1(new MDHistoDimension("Qy", "Qy", "Ang", -1, +1, 0));
+    dims.push_back(dim0);
+    dims.push_back(dim1);
+    g.initGeometry(dims);
+    g.setBasisVector(0, VMD(1.2, 3.4));
+    g.setBasisVector(1, VMD(1.2, 3.4));
+    g.setOrigin(VMD(4,5));
+    boost::shared_ptr<WorkspaceTester> ws0(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> ws1(new WorkspaceTester());
+    g.setOriginalWorkspace(ws0, 0);
+    g.setOriginalWorkspace(ws1, 1);
+    g.setTransformFromOriginal(new NullCoordTransform(5), 0);
+    g.setTransformFromOriginal(new NullCoordTransform(6), 1);
+    g.setTransformToOriginal(new NullCoordTransform(7), 0);
+    g.setTransformToOriginal(new NullCoordTransform(8), 1);
+
+    // Perform the copy
+    MDGeometry g2(g);
+
+    TS_ASSERT_EQUALS( g2.getNumDims(), 2);
+    TS_ASSERT_EQUALS( g2.getBasisVector(0), VMD(1.2, 3.4));
+    TS_ASSERT_EQUALS( g2.getBasisVector(1), VMD(1.2, 3.4));
+    TS_ASSERT_EQUALS( g2.getOrigin(), VMD(4,5));
+    TS_ASSERT_EQUALS( g2.getDimension(0)->getName(), "Qx");
+    TS_ASSERT_EQUALS( g2.getDimension(1)->getName(), "Qy");
+    // Dimensions are deep copies
+    TS_ASSERT_DIFFERS( g2.getDimension(0), dim0);
+    TS_ASSERT_DIFFERS( g2.getDimension(1), dim1);
+    // Workspaces are not deep-copied, just references
+    TS_ASSERT_EQUALS( g2.getOriginalWorkspace(0), ws0);
+    TS_ASSERT_EQUALS( g2.getOriginalWorkspace(1), ws1);
+    // But transforms are deep-copied
+    TS_ASSERT_DIFFERS( g2.getTransformFromOriginal(0), g.getTransformFromOriginal(0));
+    TS_ASSERT_DIFFERS( g2.getTransformFromOriginal(1), g.getTransformFromOriginal(1));
+    TS_ASSERT_DIFFERS( g2.getTransformToOriginal(0), g.getTransformToOriginal(0));
+    TS_ASSERT_DIFFERS( g2.getTransformToOriginal(1), g.getTransformToOriginal(1));
+    TS_ASSERT( g2.getTransformFromOriginal(0) != NULL);
+    TS_ASSERT( g2.getTransformFromOriginal(1) != NULL);
+    TS_ASSERT( g2.getTransformToOriginal(0) != NULL);
+    TS_ASSERT( g2.getTransformToOriginal(1) != NULL);
+
+  }
+
 
   /** Adding dimension info and searching for it back */
   void test_addDimension_getDimension()
@@ -62,6 +114,39 @@ public:
     TS_ASSERT_THROWS_ANYTHING( g.getDimensionIndexByName("IDontExist"));
   }
 
+  void test_transformDimensions()
+  {
+    MDGeometry g;
+    MDHistoDimension_sptr dim(new MDHistoDimension("Qx", "Qx", "Ang", -1, +1, 0));
+    TS_ASSERT_THROWS_NOTHING( g.addDimension(dim); )
+    MDHistoDimension_sptr dim2(new MDHistoDimension("Qy", "Qy", "Ang", -2, +2, 0));
+    TS_ASSERT_THROWS_NOTHING( g.addDimension(dim2); )
+    TS_ASSERT_EQUALS( g.getNumDims(), 2);
+    boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
+    g.setOriginalWorkspace(ws);
+    TS_ASSERT(g.hasOriginalWorkspace());
+
+    // Now transform
+    std::vector<double> scaling(2);
+    std::vector<double> offset(2);
+    scaling[0] = 2.0; scaling[1] = 4.0;
+    offset[0] = 0.5; offset[1] = -3;
+    g.transformDimensions(scaling, offset);
+
+    // resulting workspace
+    TSM_ASSERT("Clear the original workspace", !g.hasOriginalWorkspace());
+    TS_ASSERT_EQUALS( g.getDimension(0)->getName(), "Qx");
+    TS_ASSERT_EQUALS( g.getDimension(1)->getName(), "Qy");
+    TS_ASSERT_DELTA( g.getDimension(0)->getMinimum(), -1.5, 1e-4);
+    TS_ASSERT_DELTA( g.getDimension(0)->getMaximum(), +2.5, 1e-4);
+    TS_ASSERT_DELTA( g.getDimension(1)->getMinimum(), -11., 1e-4);
+    TS_ASSERT_DELTA( g.getDimension(1)->getMaximum(), +5.,  1e-4);
+
+    // Bad size throws
+    scaling.push_back(123);
+    TS_ASSERT_THROWS_ANYTHING( g.transformDimensions(scaling, offset) );
+  }
+
   void test_origin()
   {
     MDGeometry g;
@@ -76,6 +161,19 @@ public:
     boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
     g.setOriginalWorkspace(ws);
     TS_ASSERT(g.hasOriginalWorkspace());
+  }
+
+  void test_OriginalWorkspace_multiple()
+  {
+    MDGeometry g;
+    TS_ASSERT(!g.hasOriginalWorkspace());
+    boost::shared_ptr<WorkspaceTester> ws0(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> ws1(new WorkspaceTester());
+    g.setOriginalWorkspace(ws0);
+    g.setOriginalWorkspace(ws1, 1);
+    TS_ASSERT(g.hasOriginalWorkspace());
+    TS_ASSERT(g.hasOriginalWorkspace(1));
+    TS_ASSERT_EQUALS(g.numOriginalWorkspaces(), 2);
   }
 
   /** If a MDGeometry workspace holds a pointer to an original workspace

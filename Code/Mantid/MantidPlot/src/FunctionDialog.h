@@ -39,6 +39,7 @@ class QPushButton;
 class QSpinBox;
 class QLabel;
 class QTextEdit;
+class ApplicationWindow;
 
 //! Function dialog
 class FunctionDialog : public QDialog
@@ -46,7 +47,7 @@ class FunctionDialog : public QDialog
     Q_OBJECT
 
 public:
-    FunctionDialog( QWidget* parent = 0, Qt::WFlags fl = 0 );
+    FunctionDialog( ApplicationWindow* app, Graph* g = NULL, Qt::WFlags fl = 0 );
 
 protected:
 	QComboBox* boxXFunction;
@@ -87,13 +88,13 @@ public slots:
 	void insertParamFunctionsList(const QStringList& xList, const QStringList& yList);
 	void insertPolarFunctionsList(const QStringList& rList, const QStringList& thetaList);
 	void clearList();
-	void setGraph(Graph *g){graph = g;};
 
 signals:
 	void clearParamFunctionsList();
 	void clearPolarFunctionsList();
 
 private:
+  ApplicationWindow* d_app;
 	Graph *graph;
 	int curveID;
 };

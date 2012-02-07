@@ -6,7 +6,7 @@
  */
 ErrorBarSettings::ErrorBarSettings(QObject * parent)
   : QObject(parent), m_cap(6), m_plus(true), m_minus(true), 
-    m_through(false), m_width(1.0), m_color(Qt::black)
+    m_through(false), m_width(1.0), m_color(Qt::black), m_defaultColor(true)
 {}
 
 /// Return the length of the cap decoration on the error bars
@@ -43,6 +43,7 @@ QColor ErrorBarSettings::color() const
 void ErrorBarSettings::setColor(const QColor& c)
 {
   m_color = c;
+  m_defaultColor = false;
 }
 
 /// Returns whether the error bar lines are drawn through any symbol

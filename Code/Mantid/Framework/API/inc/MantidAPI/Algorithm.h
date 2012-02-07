@@ -179,8 +179,12 @@ public:
 
   };
 
+
+  //============================================================================
   Algorithm();
   virtual ~Algorithm();
+
+  /** @name Algorithm Information */
   /// function to return a name of the algorithm, must be overridden in all algorithms
   virtual const std::string name() const = 0;
   /// function to return a version of the algorithm, must be overridden in all algorithms
@@ -190,35 +194,33 @@ public:
   /// Function to return all of the categories that contain this algorithm
   virtual const std::vector<std::string> categories() const;
   /// Function to return the sperator token for the category string. A default implementation ';' is provided
-  virtual const std::string categorySeperator() const {return ";";}
+  virtual const std::string categorySeparator() const {return ";";}
   /// function to return any aliases to the algorithm;  A default implementation is provided
   virtual const std::string alias() const {return "";}
-
   /// Algorithm ID. Unmanaged algorithms return 0 (or NULL?) values. Managed ones have non-zero.
   AlgorithmID getAlgorithmID()const{return m_algorithmID;}
 
-  // IAlgorithm methods
+  /** @name IAlgorithm methods */
   void initialize();
   bool execute();
+  void executeAsSubAlg();
   virtual bool isInitialized() const;
   virtual bool isExecuted() const;
-  // End of IAlgorithm methods
   using Kernel::PropertyManagerOwner::getProperty;
 
-  /// To query whether algorithm is a child. Default to false
   bool isChild() const;
   void setChild(const bool isChild);
-
+  void setAlwaysStoreInADS(const bool doStore);
   void setRethrows(const bool rethrow);
 
-  /// Asynchronous execution.
+  /** @name Asynchronous Execution */
   Poco::ActiveResult<bool> executeAsync();
+  /// True if the algorithm is running asynchronously.
+  bool isRunningAsync(){return m_runningAsync;}
+  /// True if the algorithm is running.
+  bool isRunning(){return m_running;}
 
-  /// Set the maximum number of cores from Properties files
   void getOpenMPCores();
-
-  /// Execute as a sub-algorithm
-  void executeAsSubAlg();
 
   /// Add an observer for a notification
   void addObserver(const Poco::AbstractObserver& observer)const;
@@ -226,13 +228,10 @@ public:
   /// Remove an observer
   void removeObserver(const Poco::AbstractObserver& observer)const;
 
-  /// Raises the cancel flag. interuption_point() method if called inside exec() checks this flag
-  /// and if true terminates the algorithm.
-  virtual void cancel()const;
-  /// True if the algorithm is running asynchronously.
-  bool isRunningAsync(){return m_runningAsync;}
-  /// True if the algorithm is running.
-  bool isRunning(){return m_running;}
+  /// Raises the cancel flag.
+  virtual void cancel() const;
+  /// Returns the cancellation state
+  bool getCancel() const { return m_cancel; }
 
   ///Logging can be disabled by passing a value of false
   void setLogging(const bool value){g_log.setEnabled(value);}
@@ -240,16 +239,12 @@ public:
   bool isLogging() const {return g_log.getEnabled();}
   /// Returns a reference to the logger.
   Kernel::Logger& getLogger() const { return g_log; }
-  /// Returns the cancellation state
-  bool getCancel() const { return m_cancel; }
 
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs() {};
 
   /// function returns an optional message that will be displayed in the default GUI, at the top.
   const std::string getOptionalMessage() const { return m_OptionalMessage;}
 
-  /// Set  an optional message that will be displayed in the default GUI, at the top.
+  /// Set an optional message that will be displayed in the default GUI, at the top.
   void setOptionalMessage(const std::string optionalMessage) { m_OptionalMessage = optionalMessage;}
 
   /// Get a summary to be used in the wiki page.
@@ -279,37 +274,33 @@ public:
   static IAlgorithm_sptr fromHistory(const AlgorithmHistory & history);
   //@}
 
-  //creates a sub algorithm for use in this algorithm
   boost::shared_ptr<Algorithm> createSubAlgorithm(const std::string& name, const double startProgress = -1.,
       const double endProgress = -1., const bool enableLogging=true, const int& version = -1);
 
 protected:
 
-  // Equivalents of Gaudi's initialize & execute  methods
   /// Virtual method - must be overridden by concrete algorithm
   virtual void init() = 0;
   /// Virtual method - must be overridden by concrete algorithm
   virtual void exec() = 0;
+  /// Method defining summary, optional
+  virtual void initDocs() {};
+
+  void cacheWorkspaceProperties();
 
   friend class AlgorithmProxy;
-  /// Initialize with properties from an algorithm proxy
   void initializeFromProxy(const AlgorithmProxy&);
 
   void setInitialized();
   void setExecuted(bool state);
 
-//  // Make PropertyManager's declareProperty methods protected in Algorithm
-//  using Kernel::PropertyManagerOwner::declareProperty;
-
   /// Sends notifications to observers. Observers can subscribe to notificationCenter
   /// using Poco::NotificationCenter::addObserver(...);
   mutable Poco::NotificationCenter m_notificationCenter;
 
+  /** @name Progress Reporting functions */
   friend class Progress;
-  /// Sends ProgressNotification. p must be between 0 (just started) and 1 (finished)
   void progress(double p, const std::string& msg = "", double estimatedTime = 0.0, int progressPrecision = 0);
-  /// Interrupts algorithm execution if Algorithm::cancel() has been called.
-  /// Does nothing otherwise.
   void interruption_point();
 
   ///Observation slot for child algorithm progress notification messages, these are scaled and then signalled for this algorithm.
@@ -322,21 +313,17 @@ protected:
 
   ///checks the property is a workspace property
   bool isWorkspaceProperty(const Kernel::Property* const prop) const;
-  /// checks the property is input workspace property
-  bool isInputWorkspaceProperty(const Kernel::Property* const prop) const;
-  /// checks the property is output workspace property
-  bool isOutputWorkspaceProperty(const Kernel::Property* const prop) const;
-  /// This method checks the members workspaces are of similar names (example group_1,group_2) and returns true if they are.
-        bool isGroupWorkspacesofSimilarNames(const std::string&,const std::vector<std::string>& grpmembersNames); 
-                
-  /// process workspace groups
-  virtual bool processGroups(WorkspaceGroup_sptr ingrpws_sptr,const std::vector<Mantid::Kernel::Property*>&props);
-  /// virtual method to set non workspace properties for an algorithm,it's useful for checking the period number when a member in a group workspace is executed
-  virtual void setOtherProperties(IAlgorithm* alg,const std::string & propertyName,const std::string &propertyValue,int perioidNum);
 
-  mutable bool m_cancel;    ///< set to true to stop execution
-  bool m_parallelException; ///< Set if an exception is thrown, and not caught, within a parallel region
-  Kernel::Logger& g_log;    ///< reference to the logger class
+  /// Set to true to stop execution
+  mutable bool m_cancel;
+  /// Set if an exception is thrown, and not caught, within a parallel region
+  bool m_parallelException;
+  /// Reference to the logger class
+  Kernel::Logger& g_log;
+
+  // ------------------ For WorkspaceGroups ------------------------------------
+  virtual bool processGroups();
+  virtual void setOtherProperties(IAlgorithm * alg, const std::string & propertyName, const std::string & propertyValue, int periodNum);
 
 private:
 
@@ -345,35 +332,25 @@ private:
   /// Private assignment operator: NO ASSIGNMENT ALLOWED
   Algorithm& operator=(const Algorithm&);
 
+  void lockWorkspaces();
+  void unlockWorkspaces();
+
   void store();
   void fillHistory(Mantid::Kernel::DateAndTime, double,std::size_t);
   void findWorkspaceProperties(std::vector<Workspace_sptr>& inputWorkspaces,
       std::vector<Workspace_sptr>& outputWorkspaces) const;
-  void algorithm_info() const;
-
-  /// setting the input properties for an algorithm - to handle workspace groups
-  bool setInputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property* prop,const std::string& inMemberWSName );
-  /// setting the output properties for an algorithm -to handle workspace groups
-  bool setOutputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property* prop,const int nPeriod,
-      const std::string& inmemberwsName,WorkspaceGroup_sptr& outwsgrp_sptr,bool bSimilarNames,bool bequal);
-
-  /// This method gets the input workspace name
-  void getInputGroupWorkspaceName(const std::vector<Mantid::Kernel::Property*>& props,std::string& ingroupwsName);
-  /// This method returns true if the input and output workspaces are same
-  bool isInputequaltoOutPut(const std::vector<Mantid::Kernel::Property*>&props);
+  void logAlgorithmInfo() const;
 
 
   /// Poco::ActiveMethod used to implement asynchronous execution.
   Poco::ActiveMethod<bool, Poco::Void, Algorithm> m_executeAsync;
-  /** executeAsync() implementation.
-      @param i :: Unused argument
-   */
   bool executeAsyncImpl(const Poco::Void & i);
 
-
+  // --------------------- Private Members -----------------------------------
   bool m_isInitialized; ///< Algorithm has been initialized flag
   bool m_isExecuted; ///< Algorithm is executed flag
   bool m_isChildAlgorithm; ///< Algorithm is a child algorithm
+  bool m_alwaysStoreInADS; ///< Always store in the ADS, even for child algos
   bool m_runningAsync; ///< Algorithm is running asynchronously
   bool m_running; ///< Algorithm is running
   bool m_rethrow; ///< Algorithm should rethrow exceptions while executing
@@ -386,6 +363,36 @@ private:
   std::vector<IAlgorithm_wptr> m_ChildAlgorithms; ///< A list of weak pointers to any child algorithms created
 
   static size_t g_execCount; ///< Counter to keep track of algorithm execution order
+
+  /// Vector of all the workspaces that have been read-locked
+  std::vector<Workspace_sptr> m_readLockedWorkspaces;
+  /// Vector of all the workspaces that have been write-locked
+  std::vector<Workspace_sptr> m_writeLockedWorkspaces;
+
+  /// All the WorkspaceProperties that are Input or InOut. Set in execute()
+  std::vector<IWorkspaceProperty *> m_inputWorkspaceProps;
+  /// All the WorkspaceProperties that are Output or InOut. Set in execute()
+  std::vector<IWorkspaceProperty *> m_outputWorkspaceProps;
+  /// All the WorkspaceProperties that are Output (not inOut). Set in execute()
+  std::vector<IWorkspaceProperty *> m_pureOutputWorkspaceProps;
+
+  // ------------------ For WorkspaceGroups ------------------------------------
+  virtual void checkGroups();
+  void copyNonWorkspaceProperties(IAlgorithm * alg, int periodNum);
+
+  /// One vector of workspaces for each input workspace property
+  std::vector<std::vector<Workspace_sptr> > m_groups;
+  /// Pointer to the WorkspaceGroup (if any) for each input workspace property
+  std::vector<WorkspaceGroup_sptr> m_groupWorkspaces;
+  /// Flag set true if processGroups() should be called
+  bool m_processGroups;
+  /// If only one input is a group, this is its index. -1 if they are all groups
+  int m_singleGroup;
+  /// Size of the group(s) being processed
+  size_t m_groupSize;
+  /// All the groups have similar names (group_1, group_2 etc.)
+  bool m_groupsHaveSimilarNames;
+
 };
 
 ///Typedef for a shared pointer to an Algorithm

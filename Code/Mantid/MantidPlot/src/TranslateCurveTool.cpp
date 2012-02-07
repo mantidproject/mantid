@@ -54,10 +54,12 @@ TranslateCurveTool::TranslateCurveTool(Graph *graph, ApplicationWindow *app, Dir
 	d_sub_tool = new DataPickerTool(d_graph, app, DataPickerTool::Display, this, SIGNAL(statusText(const QString&)));
 	connect(dynamic_cast<DataPickerTool*>(d_sub_tool), SIGNAL(selected(QwtPlotCurve*,int)),
 			this, SLOT(selectCurvePoint(QwtPlotCurve*,int)));
+  //d_sub_tool = NULL;
 }
 
 void TranslateCurveTool::selectCurvePoint(QwtPlotCurve *curve, int point_index)
 {
+  if (!d_sub_tool) return;
 	if(dynamic_cast<PlotCurve *>(curve)->type() != Graph::Function){
 		DataCurve *c = dynamic_cast<DataCurve *>(curve);
 		Table *t = c->table();
@@ -91,6 +93,7 @@ void TranslateCurveTool::selectCurvePoint(QwtPlotCurve *curve, int point_index)
 
 void TranslateCurveTool::selectDestination(const QwtDoublePoint &point)
 {
+  if (!d_sub_tool) return;
 	delete d_sub_tool;
 	if (!d_selected_curve)
 		return;

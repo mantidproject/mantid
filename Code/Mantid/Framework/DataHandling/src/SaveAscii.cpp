@@ -174,7 +174,7 @@ namespace Mantid
                 file << " , Y" << *spec << " , E" << *spec;
                 if (write_dx) file << " , DX" << *spec;
             }
-        file << '\n';
+        file << std::endl;
 
         bool isHistogram = ws->isHistogramData();
 
@@ -224,7 +224,7 @@ namespace Mantid
           file << ws->readDx(0)[bin];
 				}
             }
-            file << '\n';
+            file << std::endl;
             progress.report();
         }
 

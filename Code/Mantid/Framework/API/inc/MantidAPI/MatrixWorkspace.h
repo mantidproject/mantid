@@ -26,6 +26,8 @@
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include <boost/scoped_ptr.hpp>
 
+using Mantid::API::MDNormalization;
+
 namespace Mantid
 {
   //----------------------------------------------------------------------------
@@ -87,6 +89,7 @@ namespace Mantid
       //@{
       Geometry::IDetector_const_sptr getDetector(const size_t workspaceIndex) const;
       double detectorTwoTheta(Geometry::IDetector_const_sptr det) const;
+      double detectorSignedTwoTheta(Geometry::IDetector_const_sptr det) const;
       double gravitationalDrop(Geometry::IDetector_const_sptr det, const double waveLength) const;
       //@}
 
@@ -266,7 +269,7 @@ namespace Mantid
       // ---------------------------------- MDGeometry methods -------------------------------
       virtual size_t getNumDims() const;
       virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(size_t index) const;
-      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimensionNamed(std::string id) const;
+      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimensionWithId(std::string id) const;
 
 
       // ---------------- IMDWorkspace Methods --------------------------------
@@ -276,6 +279,9 @@ namespace Mantid
       static const std::string xDimensionId;
       /// Dimensin id for y-dimension.
       static const std::string yDimensionId;
+
+      virtual void getLinePlot(const Mantid::Kernel::VMD & start, const Mantid::Kernel::VMD & end,
+          Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y, std::vector<signal_t> & e) const;
 
       void saveSpectraMapNexus(::NeXus::File * file, const std::vector<int>& spec,
           const ::NeXus::NXcompression compression = ::NeXus::LZW) const;

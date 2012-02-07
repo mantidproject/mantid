@@ -74,6 +74,7 @@ private slots:
   void plotSpectraDistributionErr();
   void drawColorFillPlot();
   void showDetectorTable();
+  void convertToMatrixWorkspace();
 
 private:
   void createWorkspaceMenuActions();
@@ -123,7 +124,8 @@ private:
   *m_colorFill, *m_showLogs, *m_showHist, *m_showMDPlot, *m_showListData,
   *m_saveNexus, *m_rename, *m_delete,
   *m_program, * m_ascendingSortAction,
-  *m_descendingSortAction, *m_byNameChoice, *m_byLastModifiedChoice, *m_showTransposed;
+  *m_descendingSortAction, *m_byNameChoice, *m_byLastModifiedChoice, *m_showTransposed,
+  *m_convertToMatrixWorkspace;
 
   static Mantid::Kernel::Logger& logObject;
 };

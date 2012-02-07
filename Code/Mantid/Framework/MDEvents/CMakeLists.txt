@@ -24,14 +24,13 @@ set ( SRC_FILES
 	src/MDBox.cpp
 	src/MDBoxIterator.cpp
 	src/MDEventFactory.cpp
-	src/MDEventWorkspace.cpp
-	src/MDWSDescription.cpp	
 	src/MDEventWSWrapper.cpp
+	src/MDEventWorkspace.cpp
 	src/MDGridBox.cpp
 	src/MDHistoWorkspace.cpp
 	src/MDHistoWorkspaceIterator.cpp
 	src/MDLeanEvent.cpp
-	src/MergeMD.cpp
+	src/MDWSDescription.cpp
 	src/OneStepMDEW.cpp
 	src/QueryMDWorkspace.cpp
 	src/SaveMD.cpp
@@ -76,14 +75,13 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDDimensionStats.h
 	inc/MantidMDEvents/MDEvent.h
 	inc/MantidMDEvents/MDEventFactory.h
+	inc/MantidMDEvents/MDEventWSWrapper.h
 	inc/MantidMDEvents/MDEventWorkspace.h
-	inc/MantidMDEvents/MDWSDescription.h		
-	inc/MantidMDEvents/MDEventWSWrapper.h	
 	inc/MantidMDEvents/MDGridBox.h
 	inc/MantidMDEvents/MDHistoWorkspace.h
 	inc/MantidMDEvents/MDHistoWorkspaceIterator.h
 	inc/MantidMDEvents/MDLeanEvent.h
-	inc/MantidMDEvents/MergeMD.h
+	inc/MantidMDEvents/MDWSDescription.h
 	inc/MantidMDEvents/OneStepMDEW.h
 	inc/MantidMDEvents/QueryMDWorkspace.h
 	inc/MantidMDEvents/SaveMD.h
@@ -118,13 +116,13 @@ set ( TEST_FILES
 	test/MDDimensionStatsTest.h
 	test/MDEventFactoryTest.h
 	test/MDEventTest.h
+	test/MDEventWSWrapperTest.h
 	test/MDEventWorkspaceTest.h
-	test/MDEventWSWrapperTest.h	
 	test/MDGridBoxTest.h
 	test/MDHistoWorkspaceIteratorTest.h
 	test/MDHistoWorkspaceTest.h
 	test/MDLeanEventTest.h
-	test/MergeMDTest.h
+	test/MDWSDescriptionTest.h
 	test/OneStepMDEWTest.h
 	test/QueryMDWorkspaceTest.h
 	test/SaveMDTest.h

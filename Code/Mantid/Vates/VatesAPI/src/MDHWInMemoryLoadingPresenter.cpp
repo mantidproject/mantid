@@ -96,7 +96,7 @@ namespace Mantid
 
       Workspace_sptr ws = m_repository->fetchWorkspace(m_wsName);
       IMDHistoWorkspace_sptr histoWs = boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws);
-      m_wsTypeName = typeid(*histoWs).name(); //Cache workspace type name
+      m_wsTypeName = histoWs->id();
       //Call base-class extraction method.
       this->extractMetadata(histoWs);
     }

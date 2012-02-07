@@ -14,12 +14,39 @@
 #include <Poco/Path.h>
 #include <Poco/File.h>
 #include <Poco/StringTokenizer.h>
+#include <Poco/RegularExpression.h>
 #include <boost/lexical_cast.hpp>
 
 #include <cctype>
 #include <algorithm>
 
 #include <boost/algorithm/string.hpp>
+
+namespace
+{
+  /**
+   * Functor used in conjunction with std::sort, to sort strings (file extensions) 
+   * based on the presence of a "*" wildcard.
+   */
+  struct wildCardSort
+  {
+    /**
+     * Inspects the two strings, and returns true only if j contains a "*",
+     * and i does not.  Else returns false.
+     *
+     * @param i :: first string to compare.
+     * @param j :: second string to compare
+     * @return true only if j contains a "*", and i does not.  Else returns false.
+     */
+    bool operator() (const std::string & i, const std::string & j)
+    {
+      std::size_t foundI = i.find('*');
+      std::size_t foundJ = j.find('*');
+
+      return foundI == std::string::npos && foundJ != std::string::npos;;
+    }
+  };
+}
 
 namespace Mantid
 {
@@ -425,6 +452,17 @@ namespace Mantid
       std::vector<std::string> filenames(3,filename);
       std::transform(filename.begin(),filename.end(),filenames[1].begin(),toupper);
       std::transform(filename.begin(),filename.end(),filenames[2].begin(),tolower);
+
+      // IMPROVEMENT FOR FINDING FILES ON LARGE NETWORK FOLDERS.
+      // Globbing across the network can be painfully slow for very large folders. (On the order of *minutes*.)
+      // If we rearrange the order of extenstions, so that those with a "*" wildcard are searched for last, 
+      // we save the slow globbing until all else fails.
+      std::sort(
+        extensions.begin(),
+        extensions.end(),
+        wildCardSort()
+        );
+
       std::vector<std::string>::const_iterator ext = extensions.begin();
       for (; ext != extensions.end(); ++ext)
       {
@@ -529,6 +567,12 @@ namespace Mantid
           int runNumber = boost::lexical_cast<int>(run);
           std::string runEnd = run;
           runEnd.replace(runEnd.end() - range[1].size(), runEnd.end(), range[1]);
+
+          // Throw if runEnd contains something else other than a digit.
+          Poco::RegularExpression digits("[0-9]+");
+          if (!digits.match(runEnd))
+            throw std::invalid_argument("Malformed range of runs: Part of the run has a non-digit character in it.");
+
           int runEndNumber = boost::lexical_cast<int>(runEnd);
           if (runEndNumber < runNumber)
           {

@@ -149,6 +149,17 @@ namespace MDEvents
 
 
 
+    // -------------------------------- Geometry/vertexes-Related -------------------------------------------
+
+    std::vector<Mantid::Kernel::VMD> getVertexes() const;
+
+    coord_t * getVertexesArray(size_t & numVertices) const;
+
+    coord_t * getVertexesArray(size_t & numVertices, const size_t outDimensions, const bool * maskDim) const;
+
+    virtual void transformDimensions(std::vector<double> & scaling, std::vector<double> & offset);
+
+
     // -------------------------------- Events-Related -------------------------------------------
 
     /// Clear all contained data
@@ -159,16 +170,6 @@ namespace MDEvents
 
     /// Return a copy of contained events
     virtual std::vector< MDE > * getEventsCopy() = 0;
-
-
-    // -------------------------------- Geometry/vertexes-Related -------------------------------------------
-
-    std::vector<Mantid::Kernel::VMD> getVertexes() const;
-
-    coord_t * getVertexesArray(size_t & numVertices) const;
-
-    coord_t * getVertexesArray(size_t & numVertices, const size_t outDimensions, const bool * maskDim) const;
-
 
     /// Add a single event
     virtual void addEvent(const MDE & point) = 0;

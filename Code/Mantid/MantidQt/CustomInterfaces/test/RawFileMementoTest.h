@@ -37,7 +37,7 @@ public:
 
   void testConstructThrowsWhenFileDoesntExist()
   {
-    TSM_ASSERT_THROWS("Unknown file, should throw.", new RawFileMemento("MadeUp.nxs"), std::runtime_error);
+    TSM_ASSERT_THROWS("Unknown file, should throw.", new RawFileMemento("MadeUp.nxs"), std::invalid_argument);
   }
 
   void testFetchItSucceedsWhenFileExists()
@@ -70,11 +70,35 @@ public:
 
   void testApplyActions()
   {
+    using Mantid::Geometry::Goniometer;
+    using Mantid::Kernel::V3D;
+
     RawFileMemento memento(getSuitableFileNamePath());
     memento.setUB(0,0,2,0,4,0,-8,0,0);
+    memento.setLogValue("A", "12", "Number");
+    memento.setLogValue("angle1", "1.234", "Number Series");
+    memento.setLogValue("angle2", "2", "Number Series");
+    memento.setGoniometer("angle1, 1.0,2.0,3.0,1","angle2, 1.1,2.1,3.1,-1","","","","");
+
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(memento.applyActions());
     TS_ASSERT(ws->getNumberHistograms() > 1);
     std::vector<double> ub = ws->sample().getOrientedLattice().getUB().get_vector();
+
+    TS_ASSERT_EQUALS("12", ws->run().getLogData("A")->value());
+    TS_ASSERT_THROWS_NOTHING(ws->run().getLogData("angle1")->value());
+    TS_ASSERT_THROWS_NOTHING(ws->run().getLogData("angle2")->value());
+    
+    Goniometer & gon = ws->mutableRun().getGoniometer();
+    TS_ASSERT_EQUALS( gon.getNumberAxes(), 2);
+
+    TS_ASSERT_EQUALS( gon.getAxis(0).name, "angle1");
+    TS_ASSERT_EQUALS( gon.getAxis(0).rotationaxis, V3D(1.0,2.0,3.0));
+    TS_ASSERT_EQUALS( gon.getAxis(0).sense, 1);
+
+    TS_ASSERT_EQUALS( gon.getAxis(1).name, "angle2");
+    TS_ASSERT_EQUALS( gon.getAxis(1).rotationaxis, V3D(1.1,2.1,3.1));
+    TS_ASSERT_EQUALS( gon.getAxis(1).sense, -1);
+
     TS_ASSERT_EQUALS(0, ub[0]);
     TS_ASSERT_EQUALS(0, ub[1]);
     TS_ASSERT_EQUALS(2, ub[2]);

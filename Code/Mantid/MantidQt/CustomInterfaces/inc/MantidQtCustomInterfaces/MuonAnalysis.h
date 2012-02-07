@@ -68,9 +68,6 @@ public:
   MuonAnalysis(QWidget *parent = 0);
 
 private slots:
-  /// Exit the interface
-  //void exitClicked();
-
   /// Guess Alpha clicked
   void guessAlphaClicked();
 
@@ -116,6 +113,9 @@ private slots:
   /// User select instrument
   void userSelectInstrument(const QString& prefix);
 
+  /// User clicks hide toolbars checkbox
+  void showHideToolbars(bool state);
+
   ///
   void runFrontPlotButton();
 
@@ -155,13 +155,14 @@ private slots:
   /// Update the pair plot based on changes on the group page.
   void settingsTabUpdatePlot();
 
-  /// Assigns a peak picker tool to the workspace
+  /// Assigns a peak picker tool to the workspace.
   void assignPeakPickerTool(const QString &);
 
-  /// Change the data style and color
-  void changeDataPlotType(const QStringList &);
-
+  /// Group the fitted workspaces.
   void groupFittedWorkspaces(QString);
+
+  /// Called when the plot function has been changed on the home page.
+  void changeHomeFunction();
 
 
 private:
@@ -195,9 +196,6 @@ private:
 
   /// Apply whatever grouping is specified in GUI tables to workspace
   bool applyGroupingToWS( const std::string& inputWS,  const std::string& outputWS);
-
-  /// Normalise the data
-  void normalise(const std::vector<double>& x, const std::vector<double>& y, QString workspace);
 
   /// Update front 
   void updateFront();
@@ -335,6 +333,9 @@ private:
 
   /// Boolean to show whether the gui is being updated
   bool m_updating;
+
+  /// Boolean to show when data has been loaded. (Can't auto-update data that hasn't been loaded)
+  bool m_loaded;
 
   /// Load auto saved values
   void loadAutoSavedValues(const QString& group);

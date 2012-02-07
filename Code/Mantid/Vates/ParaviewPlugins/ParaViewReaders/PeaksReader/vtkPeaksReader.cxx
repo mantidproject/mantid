@@ -117,7 +117,7 @@ int vtkPeaksReader::RequestInformation(
 
     Workspace_sptr result=AnalysisDataService::Instance().retrieve("LoadedPeaksWS");
     m_PeakWS = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(result);
-    m_wsTypeName = typeid(m_PeakWS).name();
+    m_wsTypeName = m_PeakWS->id();
     m_isSetup = true;
   }
 

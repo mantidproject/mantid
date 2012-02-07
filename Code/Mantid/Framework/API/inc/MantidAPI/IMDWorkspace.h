@@ -22,6 +22,20 @@ namespace Mantid
 
     class IMDIterator;
     
+    /** Enum describing different ways to normalize the signal
+     * in a MDWorkspace.
+     */
+    enum MDNormalization
+    {
+      /// Don't normalize = return raw counts
+      NoNormalization = 0,
+      /// Divide the signal by the volume of the box/bin
+      VolumeNormalization = 1,
+      /// Divide the signal by the number of events that contributed to it.
+      NumEventsNormalization  = 2
+    };
+
+
     /** Basic MD Workspace Abstract Class.
      *
      *  This defines the interface that allows one to iterate through several types of workspaces:
@@ -58,7 +72,10 @@ namespace Mantid
     class MANTID_API_DLL IMDWorkspace : public Workspace, public Mantid::API::MDGeometry
     {
     public:
-      
+      IMDWorkspace();
+      IMDWorkspace(const IMDWorkspace & other);
+      virtual ~IMDWorkspace();
+
       /// Get the number of points associated with the workspace.
       /// For MDEvenWorkspace it is the number of events contributing into the workspace
       /// For regularly gridded workspace (MDHistoWorkspace and MatrixWorkspace), it is
@@ -76,15 +93,16 @@ namespace Mantid
       }
 
       //-------------------------------------------------------------------------------------------
-      /// Returns the (normalized) signal at a given coordinates
+      /// Returns the signal (normalized by volume) at a given coordinates
       /// @param coords :: coordinate as a VMD vector
       signal_t getSignalAtCoord(const Mantid::Kernel::VMD & coords) const
       {
         return this->getSignalAtCoord(coords.getBareArray());
       }
 
-      virtual ~IMDWorkspace();
-
+      /// Method to generate a line plot through a MD-workspace
+      virtual void getLinePlot(const Mantid::Kernel::VMD & start, const Mantid::Kernel::VMD & end,
+          Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y, std::vector<signal_t> & e) const = 0;
     };
     
     /// Shared pointer to the IMDWorkspace base class

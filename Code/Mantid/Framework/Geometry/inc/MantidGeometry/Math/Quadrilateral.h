@@ -54,9 +54,7 @@ namespace Mantid
       ~Quadrilateral();
       /// Index access.
       virtual const Kernel::V2D& operator[](const size_t index) const;
-      /// Is a point inside this polygon
-      virtual bool contains(const Kernel::V2D & point) const;
-      /// Compute the area of the polygon using triangulation
+      /// Compute the area of the quadrilateral
       virtual double area() const;
       /// Compute the 'determinant' of the points
       virtual double determinant() const;

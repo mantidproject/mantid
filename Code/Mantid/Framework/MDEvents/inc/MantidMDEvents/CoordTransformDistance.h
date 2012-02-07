@@ -34,6 +34,7 @@ namespace MDEvents
   {
   public:
     CoordTransformDistance(const size_t inD, const coord_t * center, const bool * dimensionsUsed);
+    virtual CoordTransform * clone() const;
     virtual ~CoordTransformDistance();
     virtual std::string toXMLString() const;
 

@@ -16,6 +16,8 @@ void export_ConfigService()
     .staticmethod("Instance")
     .def("getDataSearchDirs",&ConfigServiceImpl::getDataSearchDirs, return_value_policy<copy_const_reference>(),
          "Return the current list of data search paths")
+    .def("appendDataSearchDir", &ConfigServiceImpl::appendDataSearchDir,
+        "Append a directory to the current list of data search paths")
     // Treat this as a dictionary
     .def("__getitem__", (std::string (ConfigServiceImpl::*)(const std::string &))&ConfigServiceImpl::getString)
     .def("__setitem__", &ConfigServiceImpl::setString)

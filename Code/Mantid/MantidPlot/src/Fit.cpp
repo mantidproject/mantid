@@ -35,6 +35,7 @@
 #include "ColorBox.h"
 #include "MultiLayer.h"
 #include "FitModelHandler.h"
+#include "Mantid/MantidCurve.h"
 
 #include <gsl/gsl_statistics.h>
 #include <gsl/gsl_blas.h>
@@ -218,7 +219,10 @@ void Fit::setDataCurve(int curve, double start, double end)
     Filter::setDataCurve(curve, start, end);
 
     d_w = new double[d_n];
-    if (d_graph && d_curve && (dynamic_cast<PlotCurve *>(d_curve))->type() != Graph::Function)
+    PlotCurve *plotCurve = dynamic_cast<PlotCurve *>(d_curve);
+    DataCurve *dataCurve = dynamic_cast<DataCurve *>(d_curve);
+    // if it is a DataCurve (coming from a Table)
+    if (d_graph && plotCurve && dataCurve && plotCurve->type() != Graph::Function)
     {
         QList<DataCurve *> lst = (dynamic_cast<DataCurve *>(d_curve))->errorBarsList();
         foreach (DataCurve *c, lst){
@@ -231,6 +235,18 @@ void Fit::setDataCurve(int curve, double start, double end)
                 return;
             }
         }
+    }
+    // if it is a MantidCurve
+    MantidCurve* mantidCurve = dynamic_cast<MantidCurve*>(d_curve);
+    if (mantidCurve && mantidCurve->hasErrorBars())
+    {
+      MantidQwtWorkspaceData* mantidData = mantidCurve->mantidData();
+      for (int i=0; i<d_n; i++)
+      {
+        double err = mantidData->e(i);
+        d_w[i] = (err > 0.0) ? err : 1.0;
+      }
+      return;
     }
 	// if no error bars initialize the weighting data to 1.0
     for (int i=0; i<d_n; i++)
@@ -365,84 +381,107 @@ QString Fit::legendInfo()
 
 bool Fit::setWeightingData(WeightingMethod w, const QString& colName)
 {
-	switch (w)
-	{
-		case NoWeighting:
-			{
-				weighting_dataset = QString::null;
-				for (int i=0; i<d_n; i++)
-					d_w[i] = 1.0;
-			}
-			break;
-		case Instrumental:
-			{
-				if (!d_graph && d_table){
-					QMessageBox::critical(dynamic_cast<ApplicationWindow *>(this->parent()), tr("MantidPlot - Error"),
-  	    				tr("You cannot use the instrumental weighting method."));
-  	    			return false;
-				}
+  switch (w)
+  {
+  case NoWeighting: // No Weighting
+    {
+      weighting_dataset = QString::null;
+      for (int i=0; i<d_n; i++)
+        d_w[i] = 1.0;
+    }
+    break;
+  case Instrumental: // Instrumental weighting
+    {
+      // if it's a MantidCurve
+      MantidCurve* mantidCurve = dynamic_cast<MantidCurve*>(d_curve);
+      if (mantidCurve)
+      {
+        if (mantidCurve->hasErrorBars())
+        {
+          MantidQwtWorkspaceData* mantidData = mantidCurve->mantidData();
+          for (int i=0; i<d_n; i++)
+          {
+            double err = mantidData->e(i);
+            d_w[i] = (err > 0.0) ? err : 1.0;
+          }
+        }
+        else
+        {
+          for (int i=0; i<d_n; i++)
+          {
+            d_w[i] = 1.0;
+          }
+        }
+        break;
+      }
+      // or if it's a Table curve
+      if (!d_graph && d_table){
+        QMessageBox::critical(dynamic_cast<ApplicationWindow *>(this->parent()), tr("MantidPlot - Error"),
+          tr("You cannot use the instrumental weighting method."));
+        return false;
+      }
 
-				bool error = true;
-				QwtErrorPlotCurve *er = 0;
-        if ((dynamic_cast<PlotCurve *>(d_curve))->type() != Graph::Function){
-          QList<DataCurve *> lst = (dynamic_cast<DataCurve *>(d_curve))->errorBarsList();
-                	foreach (DataCurve *c, lst){
-                      er = dynamic_cast<QwtErrorPlotCurve *>(c);
-                    	if (!er->xErrors()){
-                        	weighting_dataset = er->title().text();
-                        	error = false;
-                        	break;
-                    	}
-					}
-                }
-				if (error){
-					QMessageBox::critical(dynamic_cast<ApplicationWindow *>(this->parent()), tr("MantidPlot - Error"),
-					tr("The curve %1 has no associated Y error bars. You cannot use instrumental weighting method.").arg(d_curve->title().text()));
-					return false;
-				}
-				if (er){
-					for (int j=0; j<d_n; j++)
-						d_w[j] = er->errorValue(j); //d_w are equal to the error bar values
-				}
-			}
-			break;
-		case Statistical:
-			{
-				if (d_graph && d_curve)
-					weighting_dataset = d_curve->title().text();
-				else if (d_table)
-					weighting_dataset = d_y_col_name;
+      bool error = true;
+      QwtErrorPlotCurve *er = 0;
+      if ((dynamic_cast<PlotCurve *>(d_curve))->type() != Graph::Function){
+        QList<DataCurve *> lst = (dynamic_cast<DataCurve *>(d_curve))->errorBarsList();
+        foreach (DataCurve *c, lst){
+          er = dynamic_cast<QwtErrorPlotCurve *>(c);
+          if (!er->xErrors()){
+            weighting_dataset = er->title().text();
+            error = false;
+            break;
+          }
+        }
+      }
+      if (error){
+        QMessageBox::critical(dynamic_cast<ApplicationWindow *>(this->parent()), tr("MantidPlot - Error"),
+          tr("The curve %1 has no associated Y error bars. You cannot use instrumental weighting method.").arg(d_curve->title().text()));
+        return false;
+      }
+      if (er){
+        for (int j=0; j<d_n; j++)
+          d_w[j] = er->errorValue(j); //d_w are equal to the error bar values
+      }
+    }
+    break;
+  case Statistical: // Statistical weighting
+    {
+      if (d_graph && d_curve)
+        weighting_dataset = d_curve->title().text();
+      else if (d_table)
+        weighting_dataset = d_y_col_name;
 
-				for (int i=0; i<d_n; i++)
-					d_w[i] = sqrt(d_y[i]);
-			}
-			break;
-		case Dataset:
-			{//d_w are equal to the values of the arbitrary dataset
-				if (colName.isEmpty())
-					return false;
+      for (int i=0; i<d_n; i++)
+        d_w[i] = sqrt(d_y[i]);
+    }
+    break;
+  case Dataset: // Dataset weighting
+    {//d_w are equal to the values of the arbitrary dataset
+      if (colName.isEmpty())
+        return false;
 
-				Table* t = (dynamic_cast<ApplicationWindow *>(this->parent()))->table(colName);
-				if (!t)
-					return false;
+      Table* t = (dynamic_cast<ApplicationWindow *>(this->parent()))->table(colName);
+      if (!t)
+        return false;
 
-				if (t->numRows() < d_n){
-									QMessageBox::critical(dynamic_cast<ApplicationWindow *>(this->parent()), tr("MantidPlot - Error"),
-  	                tr("The column %1 has less points than the fitted data set. Please choose another column!.").arg(colName));
-  	                return false;
-  	            }
+      if (t->numRows() < d_n){
+        QMessageBox::critical(dynamic_cast<ApplicationWindow *>(this->parent()), tr("MantidPlot - Error"),
+          tr("The column %1 has less points than the fitted data set. Please choose another column!.").arg(colName));
+        return false;
+      }
 
-				weighting_dataset = colName;
+      weighting_dataset = colName;
 
-				int col = t->colIndex(colName);
-				for (int i=0; i<d_n; i++)
-					d_w[i] = t->cell(i, col);
-			}
-			break;
-	}
+      int col = t->colIndex(colName);
+      for (int i=0; i<d_n; i++)
+        d_w[i] = t->cell(i, col);
+    }
+    break;
+  }
 
-	d_weighting = w;
-	return true;
+  d_weighting = w;
+  return true;
 }
 
 Table* Fit::parametersTable(const QString& tableName)
