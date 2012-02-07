@@ -105,7 +105,7 @@ namespace Crystal
     declareProperty("Mosaic", 0.262, "Mosaic Spread (FWHM) (Degrees)");
     declareProperty("Cell", 255.0, "Unit Cell Volume (Angstroms^3)");
     declareProperty("RCrystallite", 6.0, "Becker-Coppens Crystallite Radius (micron)");
-    declareProperty("ScaleFactor", 1.2, "Multiply FSQ and sig(FSQ) by scaleFactor");
+    declareProperty("ScaleFactor", 1.0, "Multiply FSQ and sig(FSQ) by scaleFactor");
 
   }
 

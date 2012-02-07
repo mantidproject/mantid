@@ -191,7 +191,6 @@ namespace Crystal
     sig2.clear();
     setProperty<PeaksWorkspace_sptr>("OutputWorkspace", peaksW);
     setProperty("OutputChi2", Chisq);
-    std::cout << "Chisq = "<<Chisq<<"\n";
 
   }
   void SortHKL::Outliers(std::vector<double>& data, std::vector<double>& sig2)
