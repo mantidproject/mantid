@@ -68,7 +68,8 @@ int LoadDaveGrp::fileCheck(const std::string& filePath)
   if (this->line.substr(0,1) == "#")
   {
     bdgrp = true;
-  }
+  } else return 0;
+
   // Second line is an integer
   this->readLine();
   unsigned int value;
@@ -80,7 +81,8 @@ int LoadDaveGrp::fileCheck(const std::string& filePath)
   if (this->line.substr(0,1) == "#")
   {
     bdgrp = bdgrp && true;
-  }
+  } else return 0;
+
   // Fourth line is an integer
   this->readLine();
   // Clear all stream bits regardless of what happened before
