@@ -561,7 +561,15 @@ public:
     dets.insert(7);
     TSM_ASSERT("Detectors are not masked", !inst->isDetectorMasked(dets) );
     dets.insert(8);
-    TSM_ASSERT("At least one detector is masked: return true", inst->isDetectorMasked(dets) );
+    TSM_ASSERT("If any detector is not masked, return false", !inst->isDetectorMasked(dets) );
+    // Start again
+    dets.clear();
+    dets.insert(8);
+    TSM_ASSERT("If all detectors are not masked, return true", inst->isDetectorMasked(dets) );
+    dets.insert(9);
+    TSM_ASSERT("If all detectors are not masked, return true", inst->isDetectorMasked(dets) );
+    dets.insert(10);
+    TSM_ASSERT("If any detector is not masked, return false", !inst->isDetectorMasked(dets) );
   }
 
 

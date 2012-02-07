@@ -458,10 +458,14 @@ namespace Mantid
     }
 
     //--------------------------------------------------------------------------
-    /** Are any of the detectors in this list masked?
+    /** Is this group of detectors masked?
+     *
+     * This returns true (masked) if ALL of the detectors listed are masked.
+     * It returns false (not masked) if there are no detectors in the list
+     * It returns false (not masked) if any of the detectors are NOT masked.
      *
      * @param detector_ids :: set of detector IDs
-     * @return true if ANY of the detectors are masked. false if the list is empty
+     * @return true if masked.
      */
     bool Instrument::isDetectorMasked(const std::set<detid_t> &detector_ids) const
     {
@@ -470,10 +474,10 @@ namespace Mantid
 
       for (std::set<detid_t>::const_iterator it = detector_ids.begin(); it != detector_ids.end(); ++it)
       {
-        if (this->isDetectorMasked(*it))
-          return true;
+        if (!this->isDetectorMasked(*it))
+          return false;
       }
-      return false;
+      return true;
     }
 
     /**
