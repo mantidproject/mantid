@@ -58,6 +58,7 @@ namespace Mantid
 
       /// overwrite IFunction base class methods
       std::string name()const{return "DeltaFunction";}
+      virtual const std::string category() const { return "Peak";}
 
     protected:
       virtual void functionMW(double* out, const double* xValues, const size_t nData)const;

@@ -70,6 +70,10 @@ namespace Mantid
       }
 
       void fit(const std::vector<double>& X,const std::vector<double>& Y);
+
+      /// overwrite IFunction base class methods
+      virtual const std::string category() const { return "Background";}
+
     };
 
   } // namespace CurveFitting

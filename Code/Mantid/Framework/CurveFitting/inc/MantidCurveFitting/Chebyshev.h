@@ -53,6 +53,7 @@ namespace Mantid
 
       /// overwrite IFunction base class methods
       std::string name()const{return "Chebyshev";}
+      virtual const std::string category() const { return "Peak";}
       void functionMW(double* out, const double* xValues, const size_t nData)const;
       void functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData);
 
