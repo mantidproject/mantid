@@ -1091,15 +1091,10 @@ namespace Mantid
       {
         // First get a reference to the list for this spectrum (or create a new list)
         MaskList& binList = m_masks[spectrumIndex];
-        //see if the bin is already masked. Normally only a handfull of bins are masked, if it's 100s you might want to make this faster
-        for(MaskList::const_iterator it = binList.begin(); it != binList.end(); ++it)
+        MaskList::iterator it = binList.find(binIndex);
+        if( it != binList.end() )
         {
-          if ( it->first == binIndex )
-          {
-            //calling erase will invalidate the iterator! So we must call break immediately after
-            binList.erase(it);
-            break;
-          }
+          binList.erase(it);
         }
         binList.insert( std::make_pair(binIndex,weight) );
       }
