@@ -85,7 +85,8 @@ class ReflData(object):
         return self._scale
     
     def set_scale(self, scale):
-        self._edit_ctrl.setText("%-6.3g" % scale)
+        value_as_string = "%-6.3g" % scale
+        self._edit_ctrl.setText(value_as_string.strip())
         self._scale = scale
     
     def set_user_data(self, data):
