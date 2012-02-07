@@ -325,12 +325,50 @@ void InstrumentActor::loadColorMap(const QString& fname,bool reset_colors)
   }
 }
 
-size_t InstrumentActor::push_back_detid(Mantid::detid_t id, const Mantid::Kernel::V3D & pos)const
+//------------------------------------------------------------------------------
+/** Add a detector ID to the pick list (m_detIDs)
+ * The order of detids define the pickIDs for detectors.
+ *
+ * @param id :: detector ID to add.
+ * @return pick ID of the added detector
+ */
+size_t InstrumentActor::push_back_detid(Mantid::detid_t id)const
 {
   m_detIDs.push_back(id);
-  m_detPos.push_back(pos);
   return m_detIDs.size() - 1;
 }
+
+
+//------------------------------------------------------------------------------
+/** If needed, cache the detector positions for all detectors.
+ * Call this BEFORE getDetPos().
+ * Does nothing if the positions have already been cached.
+ */
+void InstrumentActor::cacheDetPos() const
+{
+  if (m_detPos.size() != m_detIDs.size())
+  {
+    m_detPos.clear();
+    for (size_t i=0; i<m_detIDs.size(); i++)
+    {
+      IDetector_const_sptr det = this->getDetector(i);
+      m_detPos.push_back( det->getPos() );
+    }
+  }
+}
+
+
+//------------------------------------------------------------------------------
+/** Get the cached detector position
+ *
+ * @param pickID :: pick Index maching the getDetector() calls;
+ * @return the real-space position of the detector
+ */
+const Mantid::Kernel::V3D & InstrumentActor::getDetPos(size_t pickID)const
+{
+  return m_detPos.at(pickID);
+}
+
 
 void InstrumentActor::changeScaleType(int type)
 {

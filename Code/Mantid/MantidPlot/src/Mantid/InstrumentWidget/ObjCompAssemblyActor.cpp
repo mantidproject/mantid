@@ -33,7 +33,7 @@ ObjCompAssemblyActor::ObjCompAssemblyActor(const InstrumentActor& instrActor,Man
     assert(det);
     detid_t id = det->getID();
     m_detIDs.push_back(id);
-    size_t pickID = instrActor.push_back_detid(id, det->getPos());
+    size_t pickID = instrActor.push_back_detid(id);
     setDetectorColor(m_pick_data,i,GLActor::makePickColor(pickID));
   }
   Mantid::Geometry::BoundingBox boundBox;

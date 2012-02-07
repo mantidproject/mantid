@@ -97,7 +97,10 @@ public:
   size_t ndetectors()const{return m_detIDs.size();}
   boost::shared_ptr<const Mantid::Geometry::IDetector> getDetector(size_t pickID)const;
   Mantid::detid_t getDetID(size_t pickID)const{return m_detIDs.at(pickID);}
-  const Mantid::Kernel::V3D & getDetPos(size_t pickID)const{return m_detPos.at(pickID);}
+
+  void cacheDetPos() const;
+  const Mantid::Kernel::V3D & getDetPos(size_t pickID)const;
+
   const std::vector<Mantid::detid_t>& getAllDetIDs()const{return m_detIDs;}
   GLColor getColor(Mantid::detid_t id)const;
   size_t getWorkspaceIndex(Mantid::detid_t id) const;
@@ -119,8 +122,9 @@ protected:
   void resetColors();
   void loadSettings();
   void saveSettings();
-  /// Add a detid to the m_detIDs. The order of detids define the pickIDs for detectors. Returns pickID for added detector
-  size_t push_back_detid(Mantid::detid_t, const Mantid::Kernel::V3D & pos)const;
+
+  size_t push_back_detid(Mantid::detid_t)const;
+
   const boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_workspace;
   MantidColorMap m_colorMap;
   /// integrated spectra

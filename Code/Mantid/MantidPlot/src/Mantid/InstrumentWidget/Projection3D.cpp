@@ -284,6 +284,12 @@ void Projection3D::setWireframe(bool on)
   m_wireframe = on;
 }
 
+//-----------------------------------------------------------------------------
+/** This seems to be called when the user has selected a rectangle
+ * using the mouse.
+ *
+ * @param dets :: returns a list of detector IDs selected.
+ */
 void Projection3D::getSelectedDetectors(QList<int>& dets)
 {
   dets.clear();
@@ -304,16 +310,15 @@ void Projection3D::getSelectedDetectors(QList<int>& dets)
   //                       << zmin << ' ' << zmax << "\n\n";
   size_t ndet = m_instrActor->ndetectors();
   Quat rot = m_trackball->getRotation();
-  //Instrument_const_sptr inst = m_instrActor->getInstrument();
-  //std::cerr << m_trackball->getModelCenter() << ' ' << rot << std::endl;
+
+  // Cache all the detector positions if needed. This is slow, but just once.
+  m_instrActor->cacheDetPos();
+
   for(size_t i = 0; i < ndet; ++i)
   {
     detid_t detId = m_instrActor->getDetID(i);
     V3D pos = m_instrActor->getDetPos(i);
-    //boost::shared_ptr<const IDetector> det = inst->getDetector(detId);
-    //V3D pos = det->getPos();
     rot.rotate(pos);
-    //std::cerr << "pos=" << pos << std::endl;
     if (pos.X() >= xLeft && pos.X() <= xRight &&
         pos.Y() >= yBottom && pos.Y() <= yTop)
     {
@@ -322,9 +327,18 @@ void Projection3D::getSelectedDetectors(QList<int>& dets)
   }
 }
 
+//-----------------------------------------------------------------------------
+/** Select detectors to mask, using the mouse.
+ * From the Instrument Window's mask tab.
+ *
+ * @param dets :: returns a list of detector IDs to mask.
+ */
 void Projection3D::getMaskedDetectors(QList<int>& dets)const
 {
   Quat rot = m_trackball->getRotation();
+
+  // Cache all the detector positions if needed. This is slow, but just once.
+  m_instrActor->cacheDetPos();
 
   // find the layer of visible detectors
   QList<QPoint> pixels;
@@ -337,22 +351,19 @@ void Projection3D::getMaskedDetectors(QList<int>& dets)const
     int id = getDetectorID(p.x(),p.y());
     if (ids.contains(id)) continue;
     ids.insert(id);
-    boost::shared_ptr<const IDetector> det = getDetector(p.x(),p.y());
-    if (det)
+    V3D pos = this->getDetectorPos(p.x(), p.y());
+    rot.rotate(pos);
+    double z = pos.Z();
+    if (zmin > zmax)
     {
-      V3D pos = det->getPos();
-      rot.rotate(pos);
-      double z = pos.Z();
-      if (zmin > zmax)
-      {
-        zmin = zmax = z;
-      }
-      else
-      {
-        if (zmin > z) zmin = z;
-        if (zmax < z) zmax = z;
-      }
+      zmin = zmax = z;
     }
+    else
+    {
+      if (zmin > z) zmin = z;
+      if (zmax < z) zmax = z;
+    }
+
   }
 
   // find masked detector in that layer
@@ -361,16 +372,19 @@ void Projection3D::getMaskedDetectors(QList<int>& dets)const
   size_t ndet = m_instrActor->ndetectors();
   for(size_t i = 0; i < ndet; ++i)
   {
-    boost::shared_ptr<const IDetector> det = m_instrActor->getDetector(i);
-    V3D pos = det->getPos();
+    // Find the cached ID and position. This is much faster than getting the detector.
+    V3D pos = m_instrActor->getDetPos(i);
+    detid_t id = m_instrActor->getDetID(i);
     rot.rotate(pos);
     if (pos.Z() < zmin || pos.Z() > zmax) continue;
     if (m_maskShapes.isMasked(pos.X(),pos.Y()))
     {
-      BoundingBox bb;
-      det->getBoundingBox(bb);
-      V3D width = bb.width();
-      dets.push_back(int(det->getID()));
+      // Note JZ Feb 7, 2012: The following method finds width but does not use it.
+      // I'm not sure what it is for so I'm commenting it out, it presumably does nothing.
+//      BoundingBox bb;
+//      det->getBoundingBox(bb);
+//      V3D width = bb.width();
+      dets.push_back(int(id));
     }
   }
 }
