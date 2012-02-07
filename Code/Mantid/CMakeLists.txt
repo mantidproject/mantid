@@ -1,5 +1,13 @@
-# This is mainly here so you don't get a complaint when running cmake
-cmake_minimum_required ( VERSION 2.6 )
+###########################################################################
+# CMake version check.
+# Windows requires 2.8.3 with a fix with the FindZLib module
+# everywhere else anything from the 2.8 series will do
+###########################################################################
+if ( WIN32 )
+  cmake_minimum_required ( VERSION 2.8.3 )
+else()
+  cmake_minimum_required ( VERSION 2.8 )
+endif ()
 
 # Add the path to our custom 'find' modules
 set ( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/Build/CMake")
