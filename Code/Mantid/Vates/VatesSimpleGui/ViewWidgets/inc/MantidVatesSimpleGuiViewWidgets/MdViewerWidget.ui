@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>974</width>
-    <height>674</height>
+    <width>958</width>
+    <height>666</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -134,6 +134,29 @@
     </layout>
    </item>
    <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <property name="spacing">
+      <number>1</number>
+     </property>
+     <item>
+      <widget class="Mantid::Vates::SimpleGui::ColorSelectionWidget" name="colorSelectionWidget" native="true"/>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_5">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
     <widget class="QSplitter" name="splitter_2">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -228,6 +251,12 @@
    <class>pqCameraToolbar</class>
    <extends>QWidget</extends>
    <header>pqCameraToolbar.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>Mantid::Vates::SimpleGui::ColorSelectionWidget</class>
+   <extends>QWidget</extends>
+   <header>MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

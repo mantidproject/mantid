@@ -2,7 +2,7 @@
 
 #include "MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h"
 #include "MantidVatesSimpleGuiQtWidgets/RotationPointDialog.h"
-#include "MantidVatesSimpleGuiViewWidgets/ColorSelectionDialog.h"
+#include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/MultisliceView.h"
 #include "MantidVatesSimpleGuiViewWidgets/SplatterPlotView.h"
 #include "MantidVatesSimpleGuiViewWidgets/StandardView.h"
@@ -120,7 +120,6 @@ void MdViewerWidget::internalSetup(bool pMode)
 {
   this->isPluginInitialized = false;
   this->pluginMode = pMode;
-  this->colorDialog = NULL;
   this->rotPointDialog = NULL;
 }
 
@@ -362,6 +361,8 @@ void MdViewerWidget::setParaViewComponentsForView()
                    this->ui.modeControlWidget,
                    SLOT(enableViewButton(ModeControlWidget::Views, bool)));
 
+  this->connectColorSelectionWidget();
+
   // Set animation (time) control widget <-> view signals/slots.
   QObject::connect(this->currentView,
                    SIGNAL(setAnimationControlState(bool)),
@@ -458,11 +459,8 @@ void MdViewerWidget::checkForUpdates()
     vtkSMDoubleVectorProperty *range = \
         vtkSMDoubleVectorProperty::SafeDownCast(\
           proxy->GetProperty("ThresholdBetween"));
-    if (NULL != this->colorDialog)
-    {
-      this->colorDialog->setColorScaleRange(range->GetElement(0),
-                                            range->GetElement(1));
-    }
+    this->ui.colorSelectionWidget->setColorScaleRange(range->GetElement(0),
+                                                      range->GetElement(1));
   }
 }
 
@@ -545,14 +543,8 @@ void MdViewerWidget::createMenus()
     menubar = qobject_cast<QMainWindow *>(this->parentWidget())->menuBar();
   }
 
-  QMenu *viewMenu = menubar->addMenu(QApplication::tr("&View"));
-
-  QAction *colorAction = new QAction(QApplication::tr("&Color Options"), this);
-  colorAction->setShortcut(QKeySequence::fromString("Ctrl+Shift+C"));
-  colorAction->setStatusTip(QApplication::tr("Open the color options dialog."));
-  QObject::connect(colorAction, SIGNAL(triggered()),
-                   this, SLOT(onColorOptions()));
-  viewMenu->addAction(colorAction);
+  QMenu *viewMenu = menubar->addMenu(QApplication::tr("&View"));\
+  UNUSED_ARG(viewMenu)
 
   QMenu *helpMenu = menubar->addMenu(QApplication::tr("&Help"));
 
@@ -577,23 +569,6 @@ void MdViewerWidget::createMenus()
 void MdViewerWidget::addMenus()
 {
   this->createMenus();
-}
-
-/**
- * This function handles creating the color options dialog box and setting
- * the signal and slot comminucation between it and the current view.
- */
-void MdViewerWidget::onColorOptions()
-{
-  if (NULL == this->colorDialog)
-  {
-    this->colorDialog = new ColorSelectionDialog(this);
-    this->connectColorOptionsDialog();
-    this->currentView->onAutoScale();
-  }
-  this->colorDialog->show();
-  this->colorDialog->raise();
-  this->colorDialog->activateWindow();
 }
 
 /**
@@ -629,11 +604,6 @@ void MdViewerWidget::onWikiHelp()
  */
 void MdViewerWidget::disconnectDialogs()
 {
-  if (NULL != this->colorDialog)
-  {
-    this->colorDialog->close();
-    QObject::disconnect(this->colorDialog, 0, this->currentView, 0);
-  }
   if (NULL != this->rotPointDialog)
   {
     this->rotPointDialog->close();
@@ -642,30 +612,27 @@ void MdViewerWidget::disconnectDialogs()
 }
 
 /**
- * This function sets up the connections between the color options dialog
- * and the current view.
+ * This function sets up the connections between the color selection widget
+ * items and the current view.
  */
-void MdViewerWidget::connectColorOptionsDialog()
+void MdViewerWidget::connectColorSelectionWidget()
 {
-  if (NULL != this->colorDialog)
-  {
-    // Set color selection widget <-> view signals/slots
-    QObject::connect(this->colorDialog,
-                     SIGNAL(colorMapChanged(const pqColorMapModel *)),
-                     this->currentView,
-                     SLOT(onColorMapChange(const pqColorMapModel *)));
-    QObject::connect(this->colorDialog,
-                     SIGNAL(colorScaleChanged(double, double)),
-                     this->currentView,
-                     SLOT(onColorScaleChange(double, double)));
-    QObject::connect(this->currentView, SIGNAL(dataRange(double, double)),
-                     this->colorDialog,
-                     SLOT(setColorScaleRange(double, double)));
-    QObject::connect(this->colorDialog, SIGNAL(autoScale()),
-                     this->currentView, SLOT(onAutoScale()));
-    QObject::connect(this->colorDialog, SIGNAL(logScale(int)),
-                     this->currentView, SLOT(onLogScale(int)));
-  }
+  // Set color selection widget <-> view signals/slots
+  QObject::connect(this->ui.colorSelectionWidget,
+                   SIGNAL(colorMapChanged(const pqColorMapModel *)),
+                   this->currentView,
+                   SLOT(onColorMapChange(const pqColorMapModel *)));
+  QObject::connect(this->ui.colorSelectionWidget,
+                   SIGNAL(colorScaleChanged(double, double)),
+                   this->currentView,
+                   SLOT(onColorScaleChange(double, double)));
+  QObject::connect(this->currentView, SIGNAL(dataRange(double, double)),
+                   this->ui.colorSelectionWidget,
+                   SLOT(setColorScaleRange(double, double)));
+  QObject::connect(this->ui.colorSelectionWidget, SIGNAL(autoScale()),
+                   this->currentView, SLOT(onAutoScale()));
+  QObject::connect(this->ui.colorSelectionWidget, SIGNAL(logScale(int)),
+                   this->currentView, SLOT(onLogScale(int)));
 }
 
 /**
@@ -689,7 +656,6 @@ void MdViewerWidget::connectRotationPointDialog()
  */
 void MdViewerWidget::connectDialogs()
 {
-  this->connectColorOptionsDialog();
   this->connectRotationPointDialog();
 }
 
