@@ -16,6 +16,11 @@ namespace Vates
 namespace SimpleGui
 {
 
+/**
+ * This is the class constructor. It sets up the UI and all the necessary
+ * sub-components and connections.
+ * @param parent the parent widget of the mode control widget
+ */
 ColorSelectionDialog::ColorSelectionDialog(QWidget *parent) : QDialog(parent)
 {
   this->ui.setupUi(this);
@@ -42,6 +47,10 @@ ColorSelectionDialog::ColorSelectionDialog(QWidget *parent) : QDialog(parent)
                    this, SLOT(useLogScaling(int)));
 }
 
+/**
+ * This function sets the status of the color selection widgets.
+ * @param status the state to set the color selection widgets to
+ */
 void ColorSelectionDialog::setEditorStatus(bool status)
 {
   this->ui.maxValLabel->setEnabled(status);
@@ -50,6 +59,10 @@ void ColorSelectionDialog::setEditorStatus(bool status)
   this->ui.minValLineEdit->setEnabled(status);
 }
 
+/**
+ * This function sets up various color maps. This is copied verbaitum from
+ * pqColorScaleEditor.
+ */
 void ColorSelectionDialog::loadBuiltinColorPresets()
 {
   pqColorMapModel colorMap;
@@ -105,6 +118,11 @@ void ColorSelectionDialog::loadBuiltinColorPresets()
   model->addBuiltinColorMap(colorMap, "CIELab Blue to Red");
 }
 
+/**
+ * This function enables or diables the min and max line edits based on state
+ * of the automatic scaling checkbox.
+ * @param state the current state of the checkbox
+ */
 void ColorSelectionDialog::autoOrManualScaling(int state)
 {
   switch (state)
@@ -119,6 +137,10 @@ void ColorSelectionDialog::autoOrManualScaling(int state)
   }
 }
 
+/**
+ * This function presents the user with the available color presets (maps) and
+ * gets the selection result from the user.
+ */
 void ColorSelectionDialog::loadPreset()
 {
   this->presets->setUsingCloseButton(false);
@@ -135,6 +157,10 @@ void ColorSelectionDialog::loadPreset()
   }
 }
 
+/**
+ * This function gets the new color scale range from the value widgets and
+ * passes a signal along with that new range.
+ */
 void ColorSelectionDialog::getColorScaleRange()
 {
   double min = this->ui.minValLineEdit->text().toDouble();
@@ -142,6 +168,11 @@ void ColorSelectionDialog::getColorScaleRange()
   emit this->colorScaleChanged(min, max);
 }
 
+/**
+ * This function sets the color scale range into the range widgets.
+ * @param min the minimum value of the color scale range
+ * @param max the maximum value of the color scale range
+ */
 void ColorSelectionDialog::setColorScaleRange(double min, double max)
 {
   if (this->ui.autoColorScaleCheckBox->isChecked())
@@ -157,6 +188,11 @@ void ColorSelectionDialog::setColorScaleRange(double min, double max)
   }
 }
 
+/**
+ * This function sets the flag for using log color scaling based on the
+ * associated checkbox.
+ * @param state flag for whether or not to use log color scaling
+ */
 void ColorSelectionDialog::useLogScaling(int state)
 {
   // Qt::Checked is 2, need it to be 1 for boolean true conversion
@@ -167,6 +203,6 @@ void ColorSelectionDialog::useLogScaling(int state)
   emit this->logScale(state);
 }
 
-}
-}
-}
+} // SimpleGui
+} // Vates
+} // Mantid
