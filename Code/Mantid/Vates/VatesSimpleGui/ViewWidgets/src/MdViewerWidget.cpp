@@ -78,11 +78,18 @@ using namespace MantidQt::API;
 
 REGISTER_VATESGUI(MdViewerWidget)
 
+/**
+ * This constructor is used in the plugin mode operation of the VSI.
+ */
 MdViewerWidget::MdViewerWidget() : VatesViewerInterface()
 {
   this->internalSetup(true);
 }
 
+/**
+ * This constructor is used in the standalone mode operation of the VSI.
+ * @param parent the parent widget for the main window
+ */
 MdViewerWidget::MdViewerWidget(QWidget *parent) : VatesViewerInterface(parent)
 {
   this->checkEnvSetup();
@@ -117,6 +124,10 @@ void MdViewerWidget::internalSetup(bool pMode)
   this->rotPointDialog = NULL;
 }
 
+/**
+ * This function uses VTK's system tools to check the environmental variables
+ * to make sure PV_PLUGIN_PATH is available.
+ */
 void MdViewerWidget::checkEnvSetup()
 {
   QString pv_plugin_path = vtksys::SystemTools::GetEnv("PV_PLUGIN_PATH");
@@ -128,6 +139,10 @@ void MdViewerWidget::checkEnvSetup()
   }
 }
 
+/**
+ * This function sets up the UI components and connects some of the main
+ * window's control buttons.
+ */
 void MdViewerWidget::setupUiAndConnections()
 {
   this->ui.setupUi(this);
@@ -148,6 +163,11 @@ void MdViewerWidget::setupUiAndConnections()
                    SLOT(onRotationPoint()));
 }
 
+/**
+ * This function places the standard view to the main window, installs an
+ * event filter, tweaks the UI layout for the view and calls the routine that
+ * sets up connections between ParaView and the main window widgets.
+ */
 void MdViewerWidget::setupMainView()
 {
   // Commented this out to only use Mantid supplied readers
@@ -169,6 +189,10 @@ void MdViewerWidget::setupMainView()
   this->setParaViewComponentsForView();
 }
 
+/**
+ * This function performs setup for the plugin mode of the Vates Simple
+ * Interface. It calls a number of defined functions to complete the process.
+ */
 void MdViewerWidget::setupPluginMode()
 {
   this->createAppCoreForPlugin();
@@ -182,6 +206,11 @@ void MdViewerWidget::setupPluginMode()
   this->setupMainView();
 }
 
+/**
+ * This function ensures that the main ParaView instance is only initialized
+ * once. On the second call, it checks to make sure one doesn't exist. This is
+ * only important for plugin mode operation of the VSI.
+ */
 void MdViewerWidget::createAppCoreForPlugin()
 {
   if (!pqApplicationCore::instance())
@@ -196,6 +225,11 @@ void MdViewerWidget::createAppCoreForPlugin()
   }
 }
 
+/**
+ * This function duplicates the nearly identical call in ParaView for their
+ * main program setup. This is necessary for the plugin mode since it does
+ * not have access to the QMainWindow of MantidPlot.
+ */
 void MdViewerWidget::setupParaViewBehaviors()
 {
   // Register ParaView interfaces.
@@ -229,6 +263,10 @@ void MdViewerWidget::setupParaViewBehaviors()
   new pqObjectPickingBehavior(this);
 }
 
+/**
+ * This function connects ParaView's data loader the given action.
+ * @param action the action to connect data loading to
+ */
 void MdViewerWidget::connectLoadDataReaction(QAction *action)
 {
   // We want the actionLoad to result in the showing up the ParaView's OpenData
@@ -238,12 +276,22 @@ void MdViewerWidget::connectLoadDataReaction(QAction *action)
                    this, SLOT(onDataLoaded(pqPipelineSource*)));
 }
 
+/**
+ * This function disconnects ParaView connections between pqActiveObjects
+ * and the pqProxyTabWidget. This is necessary for clean view switching.
+ */
 void MdViewerWidget::removeProxyTabWidgetConnections()
 {
   QObject::disconnect(&pqActiveObjects::instance(), 0,
                       this->ui.proxyTabWidget, 0);
 }
 
+/**
+ * This function creates the requested view on the main window.
+ * @param container the UI widget to associate the view mode with
+ * @param v the view mode to set on the main window
+ * @return the requested view
+ */
 ViewBase* MdViewerWidget::setMainViewWidget(QWidget *container,
                                             ModeControlWidget::Views v)
 {
@@ -277,6 +325,11 @@ ViewBase* MdViewerWidget::setMainViewWidget(QWidget *container,
   return view;
 }
 
+/**
+ * This function is responsible for setting up all the connections between
+ * ParaView's pqPipelineBrowser and pqProxyTabWidget and cetatin main window
+ * widgets.
+ */
 void MdViewerWidget::setParaViewComponentsForView()
 {
   // Extra setup stuff to hook up view to other items
@@ -332,12 +385,23 @@ void MdViewerWidget::setParaViewComponentsForView()
                    SLOT(onParallelProjection(bool)));
 }
 
+/**
+ * This function loads and renders data from the given source for the
+ * standalone mode.
+ * @param source a ParaView compatible source
+ */
 void MdViewerWidget::onDataLoaded(pqPipelineSource* source)
 {
   UNUSED_ARG(source);
   this->renderAndFinalSetup();
 }
 
+/**
+ * This function determines the type of source plugin and sets the workspace
+ * name so that the data can be retrieved and rendered.
+ * @param wsname the workspace name for the data
+ * @param wstype a numeric indicator of the workspace type
+ */
 void MdViewerWidget::renderWorkspace(QString wsname, int wstype)
 {
   QString sourcePlugin = "";
@@ -358,6 +422,11 @@ void MdViewerWidget::renderWorkspace(QString wsname, int wstype)
   this->renderAndFinalSetup();
 }
 
+/**
+ * This function tells the current view to render the data, perform any
+ * necessary checks on the view given the workspace type and update the
+ * animation controls if necessary.
+ */
 void MdViewerWidget::renderAndFinalSetup()
 {
   this->currentView->render();
@@ -365,6 +434,11 @@ void MdViewerWidget::renderAndFinalSetup()
   this->currentView->setTimeSteps();
 }
 
+/**
+ * This function is used during the post-apply process of particular pipeline
+ * filters to check for updates to anything that relies on information from the
+ * rendered data.
+ */
 void MdViewerWidget::checkForUpdates()
 {
   pqPipelineSource *src = pqActiveObjects::instance().activeSource();
@@ -391,6 +465,11 @@ void MdViewerWidget::checkForUpdates()
   }
 }
 
+/**
+ * This function executes the logic for switching views on the main level
+ * window.
+ * @param v the view mode to switch to
+ */
 void MdViewerWidget::switchViews(ModeControlWidget::Views v)
 {
   this->currentView->closeSubWindows();
@@ -414,6 +493,9 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   this->currentView->correctVisibility(this->ui.pipelineBrowser);
 }
 
+/**
+ * This function performs a standard pointer swap for the view switching.
+ */
 void MdViewerWidget::swapViews()
 {
   ViewBase *temp;

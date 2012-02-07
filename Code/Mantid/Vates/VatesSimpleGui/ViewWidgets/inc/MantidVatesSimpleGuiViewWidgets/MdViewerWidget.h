@@ -33,9 +33,8 @@ class ViewBase;
 /**
  *
   This class represents the central widget for handling VATES visualization
-  operations.
+  operations for 3D and 4D datasets.
 
-  @author Michael Reuter
   @date 11/08/2011
 
   Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -63,22 +62,16 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS MdViewerWidget : public Manti
   Q_OBJECT
 
 public:
-  /// No-op constructor used for plugin mode.
+  /// Plugin mode constructor.
   MdViewerWidget();
-  /**
-   * Default constructor.
-   * @param parent the parent widget for the main window
-   */
+  /// Standalone mode constructor.
   MdViewerWidget(QWidget *parent);
   /// Default destructor.
   virtual ~MdViewerWidget();
 
   /// Add extra menus for standalone mode.
   void addMenus();
-  /**
-   * Connect ParaView's data loader the given action.
-   * @param action the action to connect data loading to
-   */
+  /// Connect data loader.
   void connectLoadDataReaction(QAction *action);
   /// Filter events to check for hide.
   bool eventFilter(QObject *obj, QEvent *ev);
@@ -96,15 +89,9 @@ protected slots:
   void onRotationPoint();
   /// Show the wiki help in a browser.
   void onWikiHelp();
-  /**
-   * Load and render data from the given source.
-   * @param source a ParaView compatible source
-   */
+  /// Load and render data.
   void onDataLoaded(pqPipelineSource *source);
-  /**
-   * Execute the logic for switching views on the main level window.
-   * @param v the view mode to switch to
-   */
+  /// Execute view switch.
   void switchViews(ModeControlWidget::Views v);
 
 private:
@@ -120,7 +107,7 @@ private:
   Ui::MdViewerWidgetClass ui; ///< The MD viewer's UI form
   QHBoxLayout *viewLayout; ///< Layout manager for the view widget
 
-  /// Check the environmental variables to make sure PV_PLUGIN_PATH is available.
+  /// Check the environmental variables.
   void checkEnvSetup();
   /// Setup color options dialog connections.
   void connectColorOptionsDialog();
@@ -128,7 +115,7 @@ private:
   void connectDialogs();
   /// Setup rotation point dialog connections.
   void connectRotationPointDialog();
-  /// Function to create the pqPVApplicationCore object in plugin mode.
+  /// Create the pqPVApplicationCore object in plugin mode.
   void createAppCoreForPlugin();
   /// Add view specific stuff to a menu.
   void createMenus();
@@ -142,25 +129,20 @@ private:
   void renderAndFinalSetup();
   /// Set the signals/slots for the ParaView components based on the view.
   void setParaViewComponentsForView();
-  /// Function run the necessary setup for the main view.
+  /// Run the necessary setup for the main view.
   void setupMainView();
-  /// Function to mimic ParaView behavior setup without QMainWindow.
+  /// Mimic ParaView behavior setup without QMainWindow.
   void setupParaViewBehaviors();
-  /// Function that creates the UI and mode switch connection.
+  /// Creates the UI and mode switch connection.
   void setupUiAndConnections();
-  /**
-   * Create the requested view on the main window.
-   * @param container the UI widget to associate the view mode with
-   * @param v the view mode to set on the main window
-   * @return the requested view
-   */
+  /// Create the requested view.
   ViewBase *setMainViewWidget(QWidget *container, ModeControlWidget::Views v);
   /// Helper function to swap current and hidden view pointers.
   void swapViews();
 };
 
-}
-}
-}
+} // SimpleGui
+} // Vates
+} // Mantid
 
 #endif // MDVIEWERWIDGET_H_
