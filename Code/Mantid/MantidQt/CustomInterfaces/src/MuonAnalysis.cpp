@@ -1020,9 +1020,9 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     QString filenamePart = (Poco::Path(l_path.path()).getFileName()).c_str();
     filenamePart = filenamePart.toLower();
     bool foundInst = false;
-    for (int i = 0; i < m_uiForm.instrSelector->count(); i++)
+    for (int j=0; j < m_uiForm.instrSelector->count(); j++)
     {
-      QString instName = m_uiForm.instrSelector->itemText(i).toLower();
+      QString instName = m_uiForm.instrSelector->itemText(j).toLower();
     
       std::string sfilename = filenamePart.toStdString();
       std::string sinstName = instName.toStdString();
@@ -1030,7 +1030,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
       found = sfilename.find(sinstName);
       if ( found != std::string::npos )
       {
-        m_uiForm.instrSelector->setCurrentIndex(i);
+        m_uiForm.instrSelector->setCurrentIndex(j);
         foundInst = true;
         break;
       }
