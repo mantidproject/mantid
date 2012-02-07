@@ -541,36 +541,29 @@ namespace Mantid
       int numHistos = int(this->getNumberHistograms());
 
       std::string error("");
-      PRAGMA_OMP( parallel for if (this->threadSafe()) )
       for (int i=0; i < numHistos; i++)
       {
         size_t workspaceIndex = size_t(i);
 
-        //Get the spectrum # from the WS index
-        specid_t specNo = this->getSpectrum(workspaceIndex)->getSpectrumNo();
+        //Get the list of detectors from the WS index
+        const std::set<detid_t> & detList = this->getSpectrum(workspaceIndex)->getDetectorIDs();
 
-        //Now the list of detectors
-        std::vector<detid_t> detList = m_spectraMap->getDetectors(specNo);
         if (throwIfMultipleDets && (detList.size() > 1))
-          error = "MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(): more than 1 detector for one histogram! I cannot generate a map of detector ID to workspace index.";
+          throw std::runtime_error("MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(): more than 1 detector for one histogram! I cannot generate a map of detector ID to workspace index.");
 
         // Allow multiple detectors per workspace index, or,
         // If only one is allowed, then this has thrown already
-        for (std::vector<detid_t>::iterator it = detList.begin(); it != detList.end(); ++it)
+        for (std::set<detid_t>::const_iterator it = detList.begin(); it != detList.end(); ++it)
         {
           int index = *it + offset;
           if (index >= outSize)
-            error = "MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(): detector ID found is not within the min/max limits found. This indicates a logical error in Instrument->getMinMaxDetectorIDs(). Contact the development team.";
+            throw std::runtime_error("MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(): detector ID found is not within the min/max limits found. This indicates a logical error in Instrument->getMinMaxDetectorIDs(). Contact the development team.");
           else
             // Save it at that point.
             out[index] = workspaceIndex;
         }
 
       } // (for each workspace index)
-
-      // Throw at the end, since you can't break out.
-      if (!error.empty())
-        throw std::runtime_error(error);
     }
 
 

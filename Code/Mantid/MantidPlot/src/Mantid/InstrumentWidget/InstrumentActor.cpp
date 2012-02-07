@@ -82,7 +82,8 @@ m_sampleActor(NULL)
   setIntegrationRange(m_WkspBinMin,m_WkspBinMax);
   blockSignals(false);
 
-  m_id2wi_map.reset(m_workspace->getDetectorIDToWorkspaceIndexMap(false));
+  /// Cache a map (actually a vector) to workspace indexes.
+  m_workspace->getDetectorIDToWorkspaceIndexVector(m_id2wi_vector, m_id2wi_offset, false);
 
   // If the instrument is empty, maybe only having the sample and source
   if (getInstrument()->nelements() < 3)
@@ -169,12 +170,10 @@ IDetector_const_sptr InstrumentActor::getDetector(size_t i) const
  */
 size_t InstrumentActor::getWorkspaceIndex(Mantid::detid_t id) const
 {
-  Mantid::detid2index_map::const_iterator it = m_id2wi_map->find(id);
-  if ( it == m_id2wi_map->end() )
-  {
+  size_t index = size_t(id + this->m_id2wi_offset);
+  if (index > m_id2wi_vector.size())
     throw NotFoundError("No workspace index for detector",id);
-  }
-  return it->second;
+  return m_id2wi_vector[index];
 }
 
 void InstrumentActor::setIntegrationRange(const double& xmin,const double& xmax)
