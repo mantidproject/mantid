@@ -38,7 +38,7 @@ ViewBase::ViewBase(QWidget *parent) : QWidget(parent)
 
 /**
  * This function creates a single standard ParaView view instance.
- * @param container the UI widget to associate the view with
+ * @param widget the UI widget to associate the view with
  * @return the created view
  */
 pqRenderView* ViewBase::createRenderView(QWidget* widget)
