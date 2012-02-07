@@ -486,7 +486,7 @@ public:
     TSM_ASSERT("Nearest neigbhbours Product has not been used as expected", Mock::VerifyAndClearExpectations(product));
   }
 
-  void test_rebuld_after_reset_neighbours()
+  void test_rebuild_after_reset_neighbours()
   {
     SpectrumDistanceMap mapA, mapB, mapC;
 
@@ -524,6 +524,53 @@ public:
     TSM_ASSERT("Nearest neigbhbours ProductC has not been used as expected", Mock::VerifyAndClearExpectations(productC));
   }
 
+
+  /** Properly, this tests a method on Instrument, not MatrixWorkspace, but they
+   * are related.
+   */
+  void test_isDetectorMasked()
+  {
+    MatrixWorkspace * ws = makeWorkspaceWithDetectors(100, 10);
+    Instrument_const_sptr inst = ws->getInstrument();
+    // Make sure the instrument is parametrized so that the test is thorough
+    TS_ASSERT( inst->isParametrized() );
+    TS_ASSERT( !inst->isDetectorMasked(1) );
+    TS_ASSERT( !inst->isDetectorMasked(19) );
+    // Mask then check that it returns as masked
+    TS_ASSERT( ws->getSpectrum(19)->hasDetectorID(19) );
+    ws->maskWorkspaceIndex(19);
+    TS_ASSERT( inst->isDetectorMasked(19) );
+  }
+
+  /** Check if any of a list of detectors are masked */
+  void test_isDetectorMasked_onASet()
+  {
+    MatrixWorkspace * ws = makeWorkspaceWithDetectors(100, 10);
+    Instrument_const_sptr inst = ws->getInstrument();
+    // Make sure the instrument is parametrized so that the test is thorough
+    TS_ASSERT( inst->isParametrized() );
+
+    // Mask detector IDs 8 and 9
+    ws->maskWorkspaceIndex(8);
+    ws->maskWorkspaceIndex(9);
+
+    std::set<detid_t> dets;
+    TSM_ASSERT("No detector IDs = not masked", !inst->isDetectorMasked(dets) );
+    dets.insert(6);
+    TSM_ASSERT("Detector is not masked", !inst->isDetectorMasked(dets) );
+    dets.insert(7);
+    TSM_ASSERT("Detectors are not masked", !inst->isDetectorMasked(dets) );
+    dets.insert(8);
+    TSM_ASSERT("If any detector is not masked, return false", !inst->isDetectorMasked(dets) );
+    // Start again
+    dets.clear();
+    dets.insert(8);
+    TSM_ASSERT("If all detectors are not masked, return true", inst->isDetectorMasked(dets) );
+    dets.insert(9);
+    TSM_ASSERT("If all detectors are not masked, return true", inst->isDetectorMasked(dets) );
+    dets.insert(10);
+    TSM_ASSERT("If any detector is not masked, return false", !inst->isDetectorMasked(dets) );
+  }
 
 
 

@@ -432,6 +432,7 @@ namespace Mantid
       }
     }
 
+    //--------------------------------------------------------------------------
     /** Is the detector with the given ID masked?
      *
      * @param detector_id :: detector ID to look for.
@@ -439,22 +440,41 @@ namespace Mantid
      */
     bool Instrument::isDetectorMasked(const detid_t &detector_id) const
     {
-      detid2det_map::const_iterator it = m_detectorCache.find(detector_id);
-      if ( it == m_detectorCache.end() )
+      // With no parameter map, then no detector is EVER masked
+      if (!isParametrized())
         return false;
-      return it->second->isMasked();
+      // Find the (base) detector object in the map.
+      detid2det_map::const_iterator it = m_instr->m_detectorCache.find(detector_id);
+      if ( it == m_instr->m_detectorCache.end() )
+        return false;
+      // This is the detector
+      const Detector * det = dynamic_cast<const Detector*>(it->second.get());
+      if (det == NULL)
+         return false;
+      // Access the parameter map directly.
+      Parameter_sptr maskedParam = m_map->get(det, "masked");
+      // If the parameter is defined, then yes, it is masked.
+      return bool(maskedParam);
     }
 
+    //--------------------------------------------------------------------------
+    /** Is this group of detectors masked?
+     *
+     * This returns true (masked) if ALL of the detectors listed are masked.
+     * It returns false (not masked) if there are no detectors in the list
+     * It returns false (not masked) if any of the detectors are NOT masked.
+     *
+     * @param detector_ids :: set of detector IDs
+     * @return true if masked.
+     */
     bool Instrument::isDetectorMasked(const std::set<detid_t> &detector_ids) const
     {
       if (detector_ids.empty())
-      {
-        throw Kernel::Exception::NotFoundError("No detectors specified in isDetectorMasked", "");
-      }
+        return false;
 
       for (std::set<detid_t>::const_iterator it = detector_ids.begin(); it != detector_ids.end(); ++it)
       {
-        if (! this->isDetectorMasked(*it))
+        if (!this->isDetectorMasked(*it))
           return false;
       }
       return true;

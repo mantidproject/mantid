@@ -98,8 +98,10 @@ file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_links.sh "#!/bin/sh\n"
 )
 
 file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_empty_install.sh "#!/bin/sh\n"
-                                                             "find $RPM_INSTALL_PREFIX0 -mindepth 1 -type d -empty -delete\n"
-                                                             "rmdir --ignore-fail-on-non-empty -p $RPM_INSTALL_PREFIX0\n"
+                                                             "if [ ! -z \"$RPM_INSTALL_PREFIX0\" ]; then\n"
+                                                             "  find $RPM_INSTALL_PREFIX0 -mindepth 1 -type d -empty -delete\n"
+                                                             "  rmdir --ignore-fail-on-non-empty -p $RPM_INSTALL_PREFIX0\n"
+                                                             "fi\n"
 )
 
 # Note: On older versions of CMake, this line may mean that to do a "make package" without being root

@@ -260,7 +260,7 @@ namespace Mantid
       void flagMasked(const size_t& spectrumIndex, const size_t& binIndex, const double& weight = 1.0);
       bool hasMaskedBins(const size_t& spectrumIndex) const;
       /// Masked bins for each spectrum are stored as a set of pairs containing <bin index, weight>
-      typedef std::set< std::pair<size_t,double> > MaskList;
+      typedef std::map<size_t,double> MaskList;
       const MaskList& maskedBins(const size_t& spectrumIndex) const;
       // Causes the nearest neighbours map to be rebuilt.
       void rebuildNearestNeighbours();
