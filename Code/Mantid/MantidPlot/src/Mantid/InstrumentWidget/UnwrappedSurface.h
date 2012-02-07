@@ -89,7 +89,9 @@ protected:
   virtual void wheelEventMove(QWheelEvent*);
 
   /// calculate and assign udet.u and udet.v
+  virtual void project(double & u, double & v, double & uscale, double & vscale, const Mantid::Kernel::V3D & pos) const = 0;
   virtual void calcUV(UnwrappedDetector& udet) = 0;
+
   /// calculate rotation R for a udet
   virtual void calcRot(const UnwrappedDetector& udet, Mantid::Kernel::Quat& R)const = 0;
   virtual double uPeriod()const{return 0.0;}

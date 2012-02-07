@@ -19,6 +19,7 @@
 #include <limits>
 #include <cmath>
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/V3D.h"
 
 using namespace Mantid::Geometry;
 using Mantid::Kernel::Exception::NotFoundError;
@@ -739,8 +740,10 @@ void UnwrappedSurface::setPeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWo
   m_startPeakShapes = true;
 }
 
-/**
- * Create the peak labels from the peaks set by setPeaksWorkspace. The method is called from the draw(...) method
+//-----------------------------------------------------------------------------
+/** Create the peak labels from the peaks set by setPeaksWorkspace.
+ * The method is called from the draw(...) method
+ *
  * @param window :: The screen window rectangle in pixels.
  */
 void UnwrappedSurface::createPeakShapes(const QRect& window)const
@@ -753,16 +756,15 @@ void UnwrappedSurface::createPeakShapes(const QRect& window)const
   for(int i = 0; i < nPeaks; ++i)
   {
     Mantid::API::IPeak& peak = peakShapes.getPeak(i);
-    int detID = peak.getDetectorID();
-    foreach(UnwrappedDetector udet,m_unwrappedDetectors)
-    {
-      Mantid::Geometry::IDetector_const_sptr det = udet.detector;
-      if (! det ) continue;
-      if (det->getID() != detID) continue;
-      PeakMarker2D* r = new PeakMarker2D(peakShapes.realToUntransformed(QPointF(udet.u,udet.v)),style);
-      r->setPeak(peak,i);
-      peakShapes.addMarker(r);
-    }
+    const Mantid::Kernel::V3D & pos = peak.getDetPos();
+    // Project the peak (detector) position onto u,v coords
+    double u,v, uscale, vscale;
+    this->project(u,v,uscale,vscale, pos);
+
+    // Create a peak marker at this position
+    PeakMarker2D* r = new PeakMarker2D(peakShapes.realToUntransformed(QPointF(u,v)),style);
+    r->setPeak(peak,i);
+    peakShapes.addMarker(r);
   }
   peakShapes.deselectAll();
   m_startPeakShapes = false;
