@@ -31,6 +31,7 @@
 #define GL_MULTISAMPLE  0x809D
 #endif
 
+using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -303,17 +304,20 @@ void Projection3D::getSelectedDetectors(QList<int>& dets)
   //                       << zmin << ' ' << zmax << "\n\n";
   size_t ndet = m_instrActor->ndetectors();
   Quat rot = m_trackball->getRotation();
+  //Instrument_const_sptr inst = m_instrActor->getInstrument();
   //std::cerr << m_trackball->getModelCenter() << ' ' << rot << std::endl;
   for(size_t i = 0; i < ndet; ++i)
   {
-    boost::shared_ptr<const IDetector> det = m_instrActor->getDetector(i);
-    V3D pos = det->getPos();
+    detid_t detId = m_instrActor->getDetID(i);
+    V3D pos = m_instrActor->getDetPos(i);
+    //boost::shared_ptr<const IDetector> det = inst->getDetector(detId);
+    //V3D pos = det->getPos();
     rot.rotate(pos);
     //std::cerr << "pos=" << pos << std::endl;
     if (pos.X() >= xLeft && pos.X() <= xRight &&
         pos.Y() >= yBottom && pos.Y() <= yTop)
     {
-      dets.push_back(int(det->getID()));
+      dets.push_back(detId);
     }
   }
 }

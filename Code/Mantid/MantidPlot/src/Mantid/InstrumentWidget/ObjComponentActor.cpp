@@ -19,7 +19,7 @@ ObjComponentActor::ObjComponentActor(const InstrumentActor& instrActor,Mantid::G
   IDetector_const_sptr det = getDetector();
   if (det)
   {
-    size_t pickID = instrActor.push_back_detid(det->getID());
+    size_t pickID = instrActor.push_back_detid(det->getID(), det->getPos());
     m_pickColor = makePickColor(pickID);
   }
   else

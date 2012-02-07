@@ -325,9 +325,10 @@ void InstrumentActor::loadColorMap(const QString& fname,bool reset_colors)
   }
 }
 
-size_t InstrumentActor::push_back_detid(Mantid::detid_t id)const
+size_t InstrumentActor::push_back_detid(Mantid::detid_t id, const Mantid::Kernel::V3D & pos)const
 {
   m_detIDs.push_back(id);
+  m_detPos.push_back(pos);
   return m_detIDs.size() - 1;
 }
 

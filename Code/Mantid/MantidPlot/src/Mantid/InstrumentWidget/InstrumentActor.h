@@ -97,6 +97,7 @@ public:
   size_t ndetectors()const{return m_detIDs.size();}
   boost::shared_ptr<const Mantid::Geometry::IDetector> getDetector(size_t pickID)const;
   Mantid::detid_t getDetID(size_t pickID)const{return m_detIDs.at(pickID);}
+  const Mantid::Kernel::V3D & getDetPos(size_t pickID)const{return m_detPos.at(pickID);}
   const std::vector<Mantid::detid_t>& getAllDetIDs()const{return m_detIDs;}
   GLColor getColor(Mantid::detid_t id)const;
   size_t getWorkspaceIndex(Mantid::detid_t id) const;
@@ -119,7 +120,7 @@ protected:
   void loadSettings();
   void saveSettings();
   /// Add a detid to the m_detIDs. The order of detids define the pickIDs for detectors. Returns pickID for added detector
-  size_t push_back_detid(Mantid::detid_t)const;
+  size_t push_back_detid(Mantid::detid_t, const Mantid::Kernel::V3D & pos)const;
   const boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_workspace;
   MantidColorMap m_colorMap;
   /// integrated spectra
@@ -134,8 +135,15 @@ protected:
   bool m_autoscaling;
   boost::shared_ptr<const std::vector<boost::shared_ptr<const Mantid::Geometry::IObjComponent> > > m_plottables;
   boost::scoped_ptr<const Mantid::detid2index_map> m_id2wi_map;
-  mutable std::vector<Mantid::detid_t> m_detIDs; ///< all det ids in the instrument in order of pickIDs, populated by Obj..Actor constructors
-  mutable std::vector<GLColor> m_colors; ///< colors in order of workspace indexes
+
+  /// All det ids in the instrument in order of pickIDs, populated by Obj..Actor constructors
+  mutable std::vector<Mantid::detid_t> m_detIDs;
+
+  /// All detector positions, in order of pickIDs, populated by Obj..Actor constructors
+  mutable std::vector<Mantid::Kernel::V3D> m_detPos;
+
+  /// Colors in order of workspace indexes
+  mutable std::vector<GLColor> m_colors;
   QString m_currentColorMap;
   GLColor m_maskedColor; ///< Colour of a masked detector
   GLColor m_failedColor; ///< Colour of a "failed" detector

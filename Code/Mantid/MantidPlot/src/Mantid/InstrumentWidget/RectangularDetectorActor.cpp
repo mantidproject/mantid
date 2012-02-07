@@ -47,9 +47,12 @@ RectangularDetectorActor::RectangularDetectorActor(const InstrumentActor& instrA
   {
     for (int x=0; x < mDet->xpixels() ; x++)
     {
-      // Getting the detector is slow. Get the ID directly
-      detid_t id = mDet->getDetectorIDAtXY(x,y);
-      size_t pickID = instrActor.push_back_detid(id);
+      IDetector_const_sptr pixel = mDet->getAtXY(x,y);
+      detid_t id = pixel->getID();
+      size_t pickID = instrActor.push_back_detid(id, pixel->getPos());
+//      // Getting the detector is slow. Get the ID directly
+//      detid_t id = mDet->getDetectorIDAtXY(x,y);
+//      size_t pickID = instrActor.push_back_detid(id, mDet->get);
       m_pickIDs.push_back(pickID);
       clist.push_back(instrActor.getColor(id));
     }
