@@ -422,7 +422,8 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 self._lastpixel = int(detectors[0])
             if len(detectors) >= 2:
                 self._lastpixel2 = self._lastpixel+int(detectors[1])
-            if len(detectors) >= 2:
+                self._lastpixel3 = self._lastpixel2
+            if len(detectors) >= 3:
                 self._lastpixel3 = self._lastpixel2+int(detectors[2])
             pixelbin2 = self._xpixelbin*self._ypixelbin
             self._ccnumber = self.getProperty("CrossCorrelationPoints")
