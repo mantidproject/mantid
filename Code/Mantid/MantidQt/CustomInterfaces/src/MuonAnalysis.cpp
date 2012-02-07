@@ -90,6 +90,9 @@ void MuonAnalysis::initLayout()
 {
   m_uiForm.setupUi(this);
 
+  // alow appending files
+  m_uiForm.mwRunFiles->allowMultipleFiles(true);
+
   // Further set initial look
   startUpLook();
   createMicroSecondsLabels(m_uiForm);
@@ -425,8 +428,9 @@ void MuonAnalysis::runLoadCurrent()
         QString("does not seem to exist"));
       return;
     }
-    m_previousFilename = argusDAE;
-    inputFileChanged(argusDAE);
+    m_previousFilenames.clear();
+    m_previousFilenames.append(argusDAE);
+    inputFileChanged(m_previousFilenames);
     return;
   }
 
@@ -477,8 +481,9 @@ void MuonAnalysis::runLoadCurrent()
       return;
     }
 
-    m_previousFilename = psudoDAE;
-    inputFileChanged(psudoDAE);
+    m_previousFilenames.clear();
+    m_previousFilenames.append(psudoDAE);
+    inputFileChanged(m_previousFilenames);
     return;
   }
 
@@ -923,173 +928,152 @@ void MuonAnalysis::inputFileChanged_MWRunFiles()
     return;
   }
 
-  if ( m_previousFilename.compare(m_uiForm.mwRunFiles->getFirstFilename()) == 0 )
-    return;
-
-  m_previousFilename = m_uiForm.mwRunFiles->getFirstFilename();
-
-  //int appendSeparator(-1);
-  ////appendSeparator = m_previousFilename.find("-");
-
-  //if (appendSeparator != -1)
-  //{
-  //  int difference(0);
-
-  //  //if a range has been selected then open them all
-  //  //first split into files
-  //  QString currentFile = m_uiForm.mwRunFiles->getText();//m_previousFilename; // m_uiForm.mwRunFiles->getFirstFilename();
-  //  
-  //  int lowSize(-1);
-  //  int lowLimit(-1);
-  //  QString fileExtension("");
-  //  QString lowString("");
-
-  //  if (currentFile.contains("."))
-  //  {
-  //    //Get the file extension and then remove it from the current file
-  //    int temp(currentFile.size()-currentFile.find("."));
-  //    fileExtension = currentFile.right(temp);
-  //    currentFile.chop(temp);
-  //  
-  //    //Get the max value and then chop this off
-  //    QString maxString = currentFile.right(currentFile.size() - appendSeparator - 1);
-  //    int maxSize = maxString.size();
-  //    int maxLimit = maxString.toInt();
-  //    //include chopping off the "-" symbol
-  //    currentFile.chop(maxSize + 1);
-
-  //    separateMuonFile(currentFile, lowSize, lowLimit);
-  //    difference = maxLimit - lowLimit;
-
-  //    for(int i = 0; i<=difference; ++i)
-  //    {
-  //      lowString = lowString.setNum(lowLimit + i);
-  //      getFullCode(lowSize, lowString);
-  //      m_previousFilename = currentFile + lowString + fileExtension;
-  //      // in case file is selected from browser button check that it actually exist
-  //      Poco::File l_path( m_previousFilename.toStdString() );
-  //      if ( !l_path.exists() )
-  //      {
-  //        QMessageBox::warning(this,"Mantid - MuonAnalysis", m_previousFilename + "Specified data file does not exist.");
-  //        return;
-  //      }
-  //
-  //      // save selected browse file directory to be reused next time interface is started up
-  //      m_uiForm.mwRunFiles->saveSettings(m_settingsGroup + "mwRunFilesBrowse");
-
-  //      inputFileChanged(m_previousFilename);
-  //    }
-  //  }
-  //}
-  //else
-  //{
-  // in case file is selected from browser button check that it actually exist
-  try
+  QStringList runFiles = m_uiForm.mwRunFiles->getFilenames();
+  
+  if (runFiles.size() == m_previousFilenames.size())
   {
-    Poco::File l_path( m_previousFilename.toStdString() );
-    if ( !l_path.exists() )
-    {    
-      QString tempFilename;
-      if (m_previousFilename.contains('.'))
-      {
-        tempFilename = m_previousFilename.left(m_previousFilename.find('.'));
-      }
-      Poco::File l_path( tempFilename.toStdString() );
+    bool same(true);
+    for (int i=0; i<runFiles.size(); ++i)
+    {
+      if (runFiles[i] != m_previousFilenames[i])
+        same = false;
+    }
+    if (same == true)
+      return;
+  }
+
+  m_previousFilenames.clear();
+  m_previousFilenames = m_uiForm.mwRunFiles->getFilenames();
+
+  // in case file is selected from browser button check that it actually exist
+  for (int i=0; i<m_previousFilenames.size(); ++i)
+  {
+    try
+    {
+      Poco::File l_path( m_previousFilenames[i].toStdString() );
       if ( !l_path.exists() )
       {    
-        QMessageBox::warning(this,"Mantid - MuonAnalysis", m_previousFilename + " Specified data file does not exist.");
+        QString tempFilename;
+        if (m_previousFilenames[i].contains('.'))
+        {
+          tempFilename = m_previousFilenames[i].left(m_previousFilenames[i].find('.'));
+        }
+        Poco::File l_path( tempFilename.toStdString() );
+        if ( !l_path.exists() )
+        {    
+          QMessageBox::warning(this,"Mantid - MuonAnalysis", m_previousFilenames[i] + " Specified data file does not exist.");
+        }
+        return;
+      }
+    }
+    catch(std::exception &e)
+    {
+      //Specified a network drive.
+      QString tempFilename;
+      if (m_previousFilenames[i].contains('.'))
+      {
+        tempFilename = m_previousFilenames[i].left(m_previousFilenames[i].find('.'));
+      }
+      Poco::File l_path( tempFilename.toStdString() );
+      try
+      {
+        if ( !l_path.exists() )
+          QMessageBox::warning(this,"Mantid - MuonAnalysis", m_previousFilenames[i] + " Specified data file does not exist.");
+      }
+      catch (std::exception &e)
+      {
+        QMessageBox::warning(this,"Mantid - MuonAnalysis", tempFilename + " Specified directory does not exist.");
       }
       return;
     }
   }
-  catch(std::exception &e)
-  {
-    //Specified a network drive.
-    QString tempFilename;
-    if (m_previousFilename.contains('.'))
-    {
-      tempFilename = m_previousFilename.left(m_previousFilename.find('.'));
-    }
-    Poco::File l_path( tempFilename.toStdString() );
-    try
-    {
-      if ( !l_path.exists() )
-        QMessageBox::warning(this,"Mantid - MuonAnalysis", m_previousFilename + " Specified data file does not exist.");
-    }
-    catch (std::exception &e)
-    {
-      QMessageBox::warning(this,"Mantid - MuonAnalysis", tempFilename + " Specified directory does not exist.");
-    }
-    return;
-  }
   // save selected browse file directory to be reused next time interface is started up
   m_uiForm.mwRunFiles->saveSettings(m_settingsGroup + "mwRunFilesBrowse");
 
-  inputFileChanged(m_previousFilename);
-  //}
+  inputFileChanged(m_previousFilenames);
 }
 
+
 /**
- * Input file changed. Update GUI accordingly.
- * Note this method does no check of input filename assumed
- * done elsewhere depending on e.g. whether filename came from
- * MWRunFiles or 'get current run' button
- * @param filename Filename of new data file
+ * Input file changed. Update GUI accordingly. Note this method does no check of input filename assumed 
+ * done elsewhere depending on e.g. whether filename came from MWRunFiles or 'get current run' button.
+ *
+ * @param files :: All file names for the files loading.
  */
-void MuonAnalysis::inputFileChanged(const QString& filename)
+void MuonAnalysis::inputFileChanged(const QStringList& files)
 {
+  if (files.size() <= 0)
+    return;
+
   m_updating = true;
 
-  Poco::File l_path( filename.toStdString() );
-
-  // and check if file is from a recognised instrument and update instrument combo box
-  QString filenamePart = (Poco::Path(l_path.path()).getFileName()).c_str();
-  filenamePart = filenamePart.toLower();
-  bool foundInst = false;
-  for (int i = 0; i < m_uiForm.instrSelector->count(); i++)
-  {
-    QString instName = m_uiForm.instrSelector->itemText(i).toLower();
-    
-    std::string sfilename = filenamePart.toStdString();
-    std::string sinstName = instName.toStdString();
-    size_t found;
-    found = sfilename.find(sinstName);
-    if ( found != std::string::npos )
-    {
-      m_uiForm.instrSelector->setCurrentIndex(i);
-      foundInst = true;
-      break;
-    }
-  }
-  if ( !foundInst )
-  {
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Muon file " + filename + " not recognised.");
-    return;
-  }
-
-  QString pyString = "from mantidsimple import *\n"
-      "import sys\n"
-      "try:\n"
-      "  alg = LoadMuonNexus(r'" + filename + "','" + m_workspace_name.c_str() + "', AutoGroup='0')\n"
-      "  print alg.getPropertyValue('MainFieldDirection'), alg.getPropertyValue('TimeZero'), alg.getPropertyValue('FirstGoodData')\n"
-      "except SystemExit, message:\n"
-      "  print ''";
-  QString outputParams = runPythonCode( pyString ).trimmed();
-
-  if ( outputParams.isEmpty() )
-  {
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Problem when executing LoadMuonNexus algorithm.");
-    return;
-  }
-
-  nowDataAvailable();
-
-  // get hold of output parameters
-  std::stringstream strParam(outputParams.toStdString());
   std::string mainFieldDirection;
   double timeZero;
   double firstGoodData;
-  strParam >> mainFieldDirection >> timeZero >> firstGoodData;
+
+  for (int i=0; i<files.size(); ++i)
+  {
+    QString filename = files[i];
+    Poco::File l_path( filename.toStdString() );
+
+    // and check if file is from a recognised instrument and update instrument combo box
+    QString filenamePart = (Poco::Path(l_path.path()).getFileName()).c_str();
+    filenamePart = filenamePart.toLower();
+    bool foundInst = false;
+    for (int i = 0; i < m_uiForm.instrSelector->count(); i++)
+    {
+      QString instName = m_uiForm.instrSelector->itemText(i).toLower();
+    
+      std::string sfilename = filenamePart.toStdString();
+      std::string sinstName = instName.toStdString();
+      size_t found;
+      found = sfilename.find(sinstName);
+      if ( found != std::string::npos )
+      {
+        m_uiForm.instrSelector->setCurrentIndex(i);
+        foundInst = true;
+        break;
+      }
+    }
+    if ( !foundInst )
+    {
+      QMessageBox::warning(this,"Mantid - MuonAnalysis", "Muon file " + filename + " not recognised.");
+      deleteRangedWorkspaces();
+      return;
+    }
+
+    QString pyString = "from mantidsimple import *\n"
+        "import sys\n"
+        "try:\n"
+        "  alg = LoadMuonNexus(r'" + filename + "','" + m_workspace_name.c_str();
+    if (i > 0)  // add to end of m_workspace_name so that it will load all files seperately.
+    {
+      QString tempRangeName;
+      tempRangeName.setNum(i);
+      pyString += tempRangeName;
+    }
+    pyString += "', AutoGroup='0')\n"
+        "  print alg.getPropertyValue('MainFieldDirection'), alg.getPropertyValue('TimeZero'), alg.getPropertyValue('FirstGoodData')\n"
+        "except SystemExit, message:\n"
+        "  print ''";
+    QString outputParams = runPythonCode( pyString ).trimmed();
+
+    if ( outputParams.isEmpty() )
+    {
+      QMessageBox::warning(this,"Mantid - MuonAnalysis", "Problem when executing LoadMuonNexus algorithm.");
+      deleteRangedWorkspaces();
+      return;
+    }
+
+    // get hold of output parameters (presume same for all)
+    std::stringstream strParam(outputParams.toStdString());
+    strParam >> mainFieldDirection >> timeZero >> firstGoodData;
+  }
+
+  if (m_previousFilenames.size() > 1)
+    plusRangeWorkspaces();
+
+  nowDataAvailable();
 
   // Get hold of a pointer to a matrix workspace and apply grouping if applicatable
   Workspace_sptr workspace_ptr = AnalysisDataService::Instance().retrieve(m_workspace_name);
@@ -1110,7 +1094,7 @@ void MuonAnalysis::inputFileChanged(const QString& filename)
 
   // if grouping not set, first see if grouping defined in Nexus
   if ( !isGroupingSet() )
-    setGroupingFromNexus(filename);
+    setGroupingFromNexus(files[0]);
   // if grouping still not set, then take grouping from IDF
   if ( !isGroupingSet() )
     setGroupingFromIDF(mainFieldDirection, matrix_workspace);
@@ -1221,6 +1205,83 @@ void MuonAnalysis::inputFileChanged(const QString& filename)
     runFrontPlotButton();
 
   m_updating = false;
+}
+
+
+/**
+* Uses the algorithm plus to add all the workspaces from a range.
+*/
+void MuonAnalysis::plusRangeWorkspaces()
+{
+  // Start at 1 because 0 is MuonAnalysis without a number
+  for (int i=1; i<m_previousFilenames.size(); ++i)
+  {
+    QString tempNum;
+    tempNum.setNum(i);
+
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Plus");
+    alg->setPropertyValue("LHSWorkspace", m_workspace_name);
+    alg->setPropertyValue("RHSWorkspace", m_workspace_name + tempNum.toStdString());
+    alg->setPropertyValue("OutputWorkspace", m_workspace_name);
+    if (!alg->execute())
+      throw std::runtime_error("Error in adding range together.");
+  }
+  deleteRangedWorkspaces();
+}
+
+
+/**
+* Delete ranged workspaces.
+*/
+void MuonAnalysis::deleteRangedWorkspaces()
+{
+  // Start at 1 because 0 is MuonAnalysis without a number
+  for (int i=1; i<m_previousFilenames.size(); ++i)
+  {
+    QString tempNum;
+    tempNum.setNum(i);
+    if (Mantid::API::AnalysisDataService::Instance().doesExist(m_workspace_name + tempNum.toStdString() ) )
+      Mantid::API::AnalysisDataService::Instance().remove(m_workspace_name + tempNum.toStdString() );
+    if (Mantid::API::AnalysisDataService::Instance().doesExist(m_workspace_name + tempNum.toStdString() + "_1") )
+      Mantid::API::AnalysisDataService::Instance().remove(m_workspace_name + tempNum.toStdString() + "_1");
+    if (Mantid::API::AnalysisDataService::Instance().doesExist(m_workspace_name + tempNum.toStdString() + "_2") )
+      Mantid::API::AnalysisDataService::Instance().remove(m_workspace_name + tempNum.toStdString() + "_2");
+  }
+}
+
+
+/**
+* Get ranged name.
+*
+* @Return rangedName :: The name to be used to identify the workspace.
+*/
+std::string MuonAnalysis::getRangedName()
+{
+  QString filePath("");
+  QString firstFile(m_previousFilenames[0]);
+  QString lastFile(m_previousFilenames[m_previousFilenames.size()-1]);
+
+  QString firstRun("");
+  QString lastRun("");
+  int runSize(-1);
+  
+  separateMuonFile(filePath, firstFile, firstRun, runSize);
+
+  separateMuonFile(filePath, lastFile, lastRun, runSize);  
+  
+  for (int i=0; i<lastRun.size(); ++i)
+  {
+    if (firstRun[i] != lastRun[i])
+    {
+      lastRun = lastRun.right(lastRun.size() - i);
+      break;
+    }
+  }
+
+  if (firstFile.contains('.') )
+    firstFile.chop(firstFile.size()-firstFile.find('.') );
+
+  return (firstFile.toStdString() + '-' + lastRun.toStdString());
 }
 
 
@@ -1562,10 +1623,17 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
   {
     QTableWidgetItem *itemName = m_uiForm.groupTable->item(m_groupTableRowInFocus,0);
     QString groupName = itemName->text();
+    std::string workspaceGroupName("");
 
     // Decide on name for workspaceGroup
-    Poco::File l_path( m_previousFilename.toStdString() );
-    std::string workspaceGroupName = Poco::Path(l_path.path()).getFileName();
+    if (m_previousFilenames.size() == 1)
+    {
+      Poco::File l_path( m_previousFilenames[0].toStdString() );
+      workspaceGroupName = Poco::Path(l_path.path()).getFileName();
+    }
+    else
+      workspaceGroupName = getRangedName();
+
     std::size_t extPos = workspaceGroupName.find(".");
     if ( extPos!=std::string::npos)
       workspaceGroupName = workspaceGroupName.substr(0,extPos);
@@ -1728,10 +1796,17 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     QTableWidgetItem *item = m_uiForm.pairTable->item(m_pairTableRowInFocus,3);
     QTableWidgetItem *itemName = m_uiForm.pairTable->item(m_pairTableRowInFocus,0);
     QString pairName = itemName->text();
+    std::string workspaceGroupName("");
 
     // Decide on name for workspaceGroup
-    Poco::File l_path( m_previousFilename.toStdString() );
-    std::string workspaceGroupName = Poco::Path(l_path.path()).getFileName();
+    if (m_previousFilenames.size() == 1)
+    {
+      Poco::File l_path( m_previousFilenames[0].toStdString() );
+      workspaceGroupName = Poco::Path(l_path.path()).getFileName();
+    }
+    else
+      workspaceGroupName = getRangedName();
+    
     std::size_t extPos = workspaceGroupName.find(".");
     if ( extPos!=std::string::npos)
       workspaceGroupName = workspaceGroupName.substr(0,extPos);
@@ -2673,82 +2748,82 @@ void MuonAnalysis::checkAppendingNextRun()
 */
 void MuonAnalysis::setAppendingRun(int inc)
 {
-  //Use this for appending the next run
-  QString currentFile = m_uiForm.mwRunFiles->getText(); // m_uiForm.mwRunFiles->getFirstFilename();
+  QString filePath("");
 
-  int appendSeparator(-1);
-  int lowSize(-1);
-  int lowLimit(-1);
-  int maxLimit(-1);
-  int maxSize(-1);
-  QString fileExtension("");
-  
-  
-  //Find where the range starts, if can't find then what is returned?????????
-  appendSeparator = currentFile.find("-");
+  // Get hold of the files to increment or decrement the range to.
+  QStringList currentFiles(m_uiForm.mwRunFiles->getFilenames() );
+  if (currentFiles.empty())
+    currentFiles = m_previousFilenames;
 
-  //Get the file extension and then remove it from the current file
-  int temp(currentFile.size()-currentFile.find("."));
-  fileExtension = currentFile.right(temp);
-  currentFile.chop(temp);
+  // Name and size of the run to change.
+  QString run("");
+  int runSize(-1);
+ 
+  // The file number that needs to be incremented or decremented.
+  int fileNumber(-1);
 
-  //if there is a max limit indicated by the "-" symbol then...
-  if(appendSeparator != -1)
+  if (inc < 0) // If the files list only includes one file.
   {
-    QString maxString("");
-    //Get the max value and then chop this off
-    maxString = currentFile.right(currentFile.size() - appendSeparator - 1);
-    maxSize = maxString.size();
-    //include chopping off the "-" symbol
-    currentFile.chop(maxSize + 1);
-
-    if (inc > 0) //incrementing the range
-    {  
-    //Increment the max limit and then reconstruct the currentFile 
-    maxLimit = maxString.toInt();
-    ++maxLimit;
-    maxString.setNum(maxLimit);
-    getFullCode(maxSize, maxString);
-    currentFile = currentFile + "-" + maxString + fileExtension;
-    }
-    else //if you are decrementing the range
-    {
-    //Seperate the file out further into lowLimit and the currentFile now becomes the first part which usually contains the instrument. i.e. MUSR000431 becomes (MUSR, 6, 431)
-    separateMuonFile(currentFile, lowSize, lowLimit);
-    lowLimit += inc;  
-    QString lowString("");
-    lowString.setNum(lowLimit);
-    getFullCode(lowSize, lowString);
-    getFullCode(maxSize, maxString);
-    currentFile = currentFile + lowString + "-" + maxString + fileExtension;
-    }
+    fileNumber = 0; // Pick the first file in the list to decrement.
   }
-  else  //need to display new maxLimit
+  else // must be next that has been clicked.
   {
-    QString lowString("");
-    QString maxString("");
-    separateMuonFile(currentFile, lowSize, lowLimit);
-    if (inc > 0)  //incrementing the NEW range
-    {
-      maxSize = lowSize;
-      maxLimit = lowLimit + inc;
-      maxString.setNum(maxLimit);
-      lowString.setNum(lowLimit);
-    }
-    else //decrementing the NEW range
-    {
-      maxSize = lowSize;
-      maxString = lowString.setNum(lowLimit);
-      lowLimit += inc;
-      lowString.setNum(lowLimit);
-    }
-    getFullCode(lowSize, lowString);
-    getFullCode(maxSize, maxString);
-    currentFile = currentFile + lowString + "-" + maxString + fileExtension;
-  } 
+    fileNumber = currentFiles.size() - 1; // Pick the last file to increment.
+  }
 
-  m_previousFilename = currentFile;
-  m_uiForm.mwRunFiles->setText(m_previousFilename);
+  // File path should be the same for both.
+  separateMuonFile(filePath, currentFiles[fileNumber], run, runSize);
+
+  int fileExtensionSize(currentFiles[fileNumber].size()-currentFiles[fileNumber].find('.') );
+  QString fileExtension = currentFiles[fileNumber].right(fileExtensionSize);
+  currentFiles[fileNumber].chop(fileExtensionSize);
+
+  int firstRunNumber = currentFiles[fileNumber].right(runSize).toInt();
+  currentFiles[fileNumber].chop(runSize);
+
+  firstRunNumber = firstRunNumber + inc;
+  QString newRun("");
+  newRun.setNum(firstRunNumber);
+
+  getFullCode(runSize, newRun);
+
+  // Increment is positive (next button)
+  if (inc > 0)
+  {
+    // Add the file onto the end of the list.
+    m_previousFilenames.append(filePath + currentFiles[fileNumber] + newRun + fileExtension);
+    
+    QString firstName = m_previousFilenames[0];
+    separateMuonFile(filePath, firstName, run, runSize);
+    getFullCode(runSize, run);
+    m_uiForm.mwRunFiles->setUserInput(run + '-' + newRun);
+  }
+  else // Increment is negative (previous button)
+  {
+    // Add the file to the beginning of the list.
+    QStringList tempFiles(m_previousFilenames);
+    m_previousFilenames.clear();
+    m_previousFilenames.append(filePath + currentFiles[fileNumber] + newRun + fileExtension);
+    for (int i=0; i<tempFiles.size(); ++i)
+    {
+      m_previousFilenames.append(tempFiles[i]);
+    }
+
+    QString lastName = m_previousFilenames[m_previousFilenames.size()-1];
+    separateMuonFile(filePath, lastName, run, runSize);
+    getFullCode(runSize, run);
+    m_uiForm.mwRunFiles->setUserInput(newRun + '-' + run);
+  }
+  
+  // Check that the file exists.
+  Poco::File l_path(filePath + currentFiles[fileNumber] + newRun + fileExtension);
+  if ( !l_path.exists() )
+  {
+    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Specified data file does not exist.");
+    return;
+  }
+
+  inputFileChanged(m_previousFilenames);
 }
 
 /**
@@ -2759,11 +2834,57 @@ void MuonAnalysis::setAppendingRun(int inc)
 */
 void MuonAnalysis::changeRun(int amountToChange)
 {
-  int fileStart(-1);
-  int firstFileNumber(-1);
-  int lastFileNumber(-1);
-
+  QString filePath("");
   QString currentFile = m_uiForm.mwRunFiles->getFirstFilename();
+  if (currentFile.isEmpty())
+    currentFile = m_previousFilenames[0];
+  QString run("");
+  int runSize(-1);
+
+  separateMuonFile(filePath, currentFile, run, runSize);
+
+  int fileExtensionSize(currentFile.size()-currentFile.find('.') );
+  QString fileExtension(currentFile.right(fileExtensionSize) );
+  currentFile.chop(fileExtensionSize);
+
+  int runNumber = currentFile.right(runSize).toInt();
+  currentFile.chop(runSize);
+  
+  runNumber = runNumber + amountToChange;
+  QString newRun("");
+  newRun.setNum(runNumber);
+
+  getFullCode(runSize, newRun);
+
+  m_previousFilenames.clear();
+  m_previousFilenames.append(filePath + currentFile + newRun + fileExtension);
+  m_uiForm.mwRunFiles->setUserInput(newRun);
+
+  // in case file is selected from browser button check that it actually exist
+  Poco::File l_path( m_previousFilenames[0].toStdString() );
+  if ( !l_path.exists() )
+  {
+    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Specified data file does not exist.");
+    return;
+  }
+
+  inputFileChanged(m_previousFilenames);
+}
+
+
+/**
+*   Seperates the a given file into instrument, code and size of the code. 
+*   i.e c:/data/MUSR0002419.nxs becomes c:/data/, MUSR0002419.nxs, 2419, 7.
+*
+*   @param filePath :: The file path of the data file.
+*   @param currentFile :: This is the file with path. Can be network path. Return as file with extension.
+*   @param run :: The run as a string without 0's at the beginning.
+*   @param runSize :: contains the size of the run number.
+*/
+void MuonAnalysis::separateMuonFile(QString &filePath, QString &currentFile, QString &run, int &runSize)
+{
+  int fileStart(-1);
+  int firstRunDigit(-1);
 
   //Find where the file begins
   for (int i = 0; i<currentFile.size(); i++)
@@ -2774,107 +2895,47 @@ void MuonAnalysis::changeRun(int amountToChange)
     }
   }
 
-  for (int i = fileStart; i<currentFile.size(); i++)
+  filePath = currentFile.left(fileStart);
+  currentFile = currentFile.right(currentFile.size() - fileStart);
+
+  for (int i = 0; i<currentFile.size(); i++)
   {
     if(currentFile[i].isDigit())  //.isDigit())
     {
-      firstFileNumber = i;
+      firstRunDigit = i;
       break;
     }
   }
+
+  runSize = 0;
 
   //Find where the run number ends
-  for (int i = firstFileNumber; i<currentFile.size(); i++)
+  for (int i = firstRunDigit; i<currentFile.size(); i++)
   {
-    if(currentFile[i].isDigit())
-    {
-      lastFileNumber = i;
-    }
-  }
-
-  //Get the file extension, -1 because array starts at 0
-  int fileExtensionSize(currentFile.size() - lastFileNumber - 1);
-  QString fileExtension(currentFile.right(fileExtensionSize));
-
-  currentFile.chop(fileExtensionSize);
-  //Get the run number, +1 because we want the firstFileNumberIncluded and -1 again because array starts at 0
-  int runNumberSize(currentFile.size() - firstFileNumber + 1 - 1);
-  int runNumber = currentFile.right(runNumberSize).toInt();
-
-  currentFile.chop(runNumberSize);
-  
-  runNumber = runNumber + amountToChange;
-  QString previousRunNumber("");
-  previousRunNumber.setNum(runNumber);
-
-  //Put preceeding 0's back into the string
-  while (runNumberSize > previousRunNumber.size())
-  {
-    previousRunNumber = "0" + previousRunNumber;
-  }
-
-  m_previousFilename = (currentFile + previousRunNumber + fileExtension);
-  m_uiForm.mwRunFiles->setUserInput(currentFile + previousRunNumber);
-
-  // in case file is selected from browser button check that it actually exist
-  Poco::File l_path( m_previousFilename.toStdString() );
-  if ( !l_path.exists() )
-  {
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Specified data file does not exist.");
-    return;
-  }
-
-  // save selected browse file directory to be reused next time interface is started up
-  m_uiForm.mwRunFiles->saveSettings(m_settingsGroup + "mwRunFilesBrowse");
-
-  inputFileChanged(m_previousFilename);
-}
-
-
-/**
-*   Seperates the a given file into instrument, code and size of the code. 
-*   i.e MUSR0002419 becomes MUSR, 7, 2419
-*
-*   @param currentFile :: This is the file to convert in QString format and once
-*   finished will be returned containing the instrument used i.e MUSR or ELF.
-*   @param runNumberSize :: Size of the code
-*   @param runNumber :: contains the code as an integer, preceeding 0's are lost.
-*/
-void MuonAnalysis::separateMuonFile(QString &currentFile, int &runNumberSize, int &runNumber)
-{
-  int firstFileNumber(-1);
-
-  //Find where the run number begins
-  for (int i = 0; i<currentFile.size(); i++)
-  {
-    if(currentFile[i].isDigit())
-    {
-      firstFileNumber = i;
+    if(currentFile[i] == '.')
       break;
+    if(currentFile[i].isDigit())
+    {
+      ++runSize;
     }
   }
 
-  //Get the run number, +1 because we want the firstFileNumberIncluded and -1 again because array starts at 0
-  runNumberSize = currentFile.size() - firstFileNumber + 1 - 1;
-  runNumber = currentFile.right(runNumberSize).toInt();
-
-  currentFile.chop(runNumberSize);
+  run = currentFile.right(currentFile.size()-firstRunDigit);
+  run = run.left(runSize);
 }  
 
 
 /**
-*   Adds the 0's back onto the file code which were lost when converting 
-*   it to an integer.
+* Adds the 0's back onto the run which were lost when converting it to an integer.
 *   
-*   @param size :: The size of the original file code before conversion
-*   @param limitedCode :: This is the code after it was incremented or
-*   decremented and then converted back into a QString 
+* @param originalSize :: The size of the original run before conversion
+* @param run :: This is the run after it was incremented or decremented.
 */
-void MuonAnalysis::getFullCode(int size, QString & limitedCode)
+void MuonAnalysis::getFullCode(int originalSize, QString & run)
 {
-  while (size > limitedCode.size())
+  while (originalSize > run.size())
   {
-    limitedCode = "0" + limitedCode;
+    run = "0" + run;
   }
 }
 
