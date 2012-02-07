@@ -2874,7 +2874,7 @@ bool IndexingUtils::GetABC( const DblMatrix  & UB,
  *  @return true if the lattice_par vector was filled with the lattice
  *          parameters and false if the matrix could not be inverted.
  */
-bool IndexingUtils::GetLatticeParameters( const Kernel::DblMatrix   & UB,
+bool IndexingUtils::GetLatticeParameters( const DblMatrix   & UB,
                                           std::vector<double> & lattice_par )
 {
   V3D a_dir;
