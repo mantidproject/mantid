@@ -29,7 +29,6 @@ namespace SimpleGui
  *
   This class is an abstract base class for all of the Vates simple GUI's views.
 
-  @author Michael Reuter
   @date 24/05/2011
 
   Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -56,10 +55,7 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS ViewBase : public QWidget
 {
   Q_OBJECT
 public:
-  /**
-   * Default constructor.
-   * @param parent the parent widget for the view
-   */
+  /// Default constructor.
   ViewBase(QWidget *parent = 0);
   /// Default destructor.
   virtual ~ViewBase() {}
@@ -70,26 +66,13 @@ public:
   virtual void checkViewOnSwitch();
   /// Close view generated sub-windows.
   virtual void closeSubWindows();
-  /**
-   * Function used to correct post-accept visibility issues. Most
-   * views won't need to do anything.
-   */
+  /// Correct post-accept visibility issues.
   virtual void correctVisibility(pqPipelineBrowserWidget *pbw);
-  /**
-   * Function that creates a single view instance.
-   * @param container the UI widget to associate the view with
-   * @return the created view
-   */
+  /// Creates a single view instance.
   virtual pqRenderView *createRenderView(QWidget *container);
-  /**
-   * This function removes all filters of a given name: i.e. Slice.
-   * @param builder the ParaView object builder
-   * @param name the class name of the filters to remove
-   */
+  /// Remove all filters of a given name: i.e. Slice.
   virtual void destroyFilter(pqObjectBuilder *builder, const QString &name);
-  /**
-   * Destroy sources and view relevant to mode switching.
-   */
+  /// Destroy sources and view relevant to mode switching.
   virtual void destroyView() = 0;
   /// Retrieve the current time step.
   virtual double getCurrentTimeStep();
@@ -108,19 +91,13 @@ public:
   virtual bool isPeaksWorkspace(pqPipelineSource *src);
   /// Prints properties for given source.
   virtual void printProxyProps(pqPipelineSource *src);
-  /**
-   * This function makes the view render itself.
-   */
+  /// This function makes the view render itself.
   virtual void render() = 0;
-  /**
-   * This function only calls the render command for the view(s).
-   */
+  /// This function only calls the render command for the view(s).
   virtual void renderAll() = 0;
   /// Reset the camera for a given view.
   virtual void resetCamera() = 0;
-  /**
-   * This function resets the display(s) for the view(s).
-   */
+  /// This function resets the display(s) for the view(s).
   virtual void resetDisplay() = 0;
   /// Setup axis scales
   virtual void setAxisScales();
@@ -138,21 +115,11 @@ public:
 public slots:
   /// Set the color scale back to the original bounds.
   void onAutoScale();
-  /**
-   * Set the requested color map on the data.
-   * @param model the color map to use
-   */
+  /// Set the requested color map on the data.
   void onColorMapChange(const pqColorMapModel *model);
-  /**
-   * Set the data color scale range to the requested bounds.
-   * @param min the minimum bound for the color scale
-   * @param max the maximum bound for the color scale
-   */
+  /// Set the data color scale range to the requested bounds.
   void onColorScaleChange(double min, double max);
-  /**
-   * Set logarithmic color scaling on the data.
-   * @param state flag to determine whether or not to use log color scaling
-   */
+  /// Set logarithmic color scaling on the data.
   void onLogScale(int state);
   /// Set the view to use a parallel projection.
   void onParallelProjection(bool state);
@@ -184,7 +151,11 @@ signals:
    * @param numSteps the number of "time" steps
    */
   void setAnimationControlInfo(double start, double stop, int numSteps);
-  /// Signal to set the status of a specific view mode button.
+  /**
+   * Signal to set the status of a specific view mode button.
+   * @param mode the particular requested view
+   * @param state flag for setting enable/disable button state
+   */
   void setViewStatus(ModeControlWidget::Views mode, bool state);
   /**
    * Signal to set the status of the view mode buttons.
