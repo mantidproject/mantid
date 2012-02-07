@@ -66,8 +66,10 @@ public:
   void renderAll();
   /// @see ViewBase::resetCamera()
   void resetCamera();
-  /// @see ViewBase::resetDisplay();
+  /// @see ViewBase::resetDisplay()
   void resetDisplay();
+  /// @see ViewBase::updateUI()
+  void updateUI();
 
 protected slots:
   /// Add a slice to the current dataset.

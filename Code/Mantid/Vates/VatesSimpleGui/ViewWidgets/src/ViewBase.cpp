@@ -507,6 +507,14 @@ bool ViewBase::isMDHistoWorkspace(pqPipelineSource *src)
   return wsType.contains("MDHistoWorkspace");
 }
 
+/**
+ * This function is where one specifies updates to the UI components for a
+ * view.
+ */
+void ViewBase::updateUI()
+{
+}
+
 } // namespace SimpleGui
 } // namespace Vates
 } // namespace Mantid

@@ -129,6 +129,8 @@ public slots:
   void onResetCenterToPoint(double x, double y, double z);
   /// Setup the animation controls.
   void setTimeSteps(bool withUpdate = false);
+  /// Provide updates to UI.
+  virtual void updateUI();
 
 signals:
   /**

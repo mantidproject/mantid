@@ -451,6 +451,7 @@ void MdViewerWidget::checkForUpdates()
     pqActiveObjects::instance().setActiveSource(src);
     this->currentView->setTimeSteps(true);
     this->currentView->resetCamera();
+    this->currentView->updateUI();
   }
   if (QString(proxy->GetXMLName()).contains("Threshold"))
   {
