@@ -63,9 +63,13 @@ if ( ${UNIX_DIST} MATCHES "RedHatEnterprise" OR ${UNIX_DIST} MATCHES "Fedora")
       set ( CPACK_RPM_PACKAGE_RELEASE "${CPACK_RPM_PACKAGE_RELEASE}.fc16" )
     endif ( ${UNIX_CODENAME} MATCHES "Tikanga" )
     
+    # If CMAKE_SET_DESTDIR is ON then the Prefix doesn't get put in the spec file
+    if ( CMAKE_SET_DESTDIR )
+      set( CPACK_RPM_SPEC_MORE_DEFINE "Prefix: ${CPACK_PACKAGING_INSTALL_PREFIX}" )
+    endif()
+
     # according to rpm.org: name-version-release.architecture.rpm
     set ( CPACK_PACKAGE_FILE_NAME
       "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_RPM_PACKAGE_RELEASE}.${CPACK_RPM_PACKAGE_ARCHITECTURE}" )
-    set( CPACK_RPM_SPEC_MORE_DEFINE "Prefix: ${CPACK_PACKAGING_INSTALL_PREFIX}" ) 
   endif ( RPMBUILD_CMD)
 endif ( ${UNIX_DIST} MATCHES "RedHatEnterprise" OR ${UNIX_DIST} MATCHES "Fedora")

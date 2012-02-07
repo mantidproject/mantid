@@ -98,7 +98,7 @@ file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_links.sh "#!/bin/sh\n"
 )
 
 file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_empty_install.sh "#!/bin/sh\n"
-                                                             "if [ ! -z \"${RPM_INSTALL_PREFIX0}\" ]; then\n"
+                                                             "if [ ! -z \"$RPM_INSTALL_PREFIX0\" ]; then\n"
                                                              "  find $RPM_INSTALL_PREFIX0 -mindepth 1 -type d -empty -delete\n"
                                                              "  rmdir --ignore-fail-on-non-empty -p $RPM_INSTALL_PREFIX0\n"
                                                              "fi\n"
