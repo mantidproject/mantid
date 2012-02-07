@@ -258,12 +258,6 @@ void InstrumentActor::resetColors()
     double integratedValue = m_specIntegrs[wi];
     try
     {
-//      // FIXME: This getdetector call is very slow.
-//      Mantid::Geometry::IDetector_const_sptr det = m_workspace->getDetector(wi);
-//      // FIXME: This get on parameters is PARALLEL_CRITICAL, which kills the parallel loop.
-//      boost::shared_ptr<Mantid::Geometry::Parameter> maskedParam = m_workspace->instrumentParameters().get(det.get(),"masked");
-//      bool masked = bool(maskedParam);
-
       // Find if the detector is masked
       const std::set<detid_t>& dets = m_workspace->getSpectrum(wi)->getDetectorIDs();
       bool masked = inst->isDetectorMasked(dets);
