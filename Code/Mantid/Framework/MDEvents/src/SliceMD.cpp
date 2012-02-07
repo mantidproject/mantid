@@ -111,8 +111,8 @@ namespace MDEvents
         "  If not specified, a default of 40% of free physical memory is used.");
     //setPropertySettings("Memory", new EnabledWhenProperty(this, "OutputFilename", IS_NOT_DEFAULT));
 
-    declareProperty(new PropertyWithValue<int>("MaxRecursionDepth", 1000),
-      "Sets the maximum recursion depth to use. Can be used to constrain the workspace's internal structure");
+    //declareProperty(new PropertyWithValue<int>("MaxRecursionDepth", 1000),
+    //  "Sets the maximum recursion depth to use. Can be used to constrain the workspaces internal structure");
 
     setPropertyGroup("OutputFilename", "File Back-End");
     setPropertyGroup("Memory", "File Back-End");
@@ -171,8 +171,7 @@ namespace MDEvents
     for (size_t od=0; od < m_binDimensions.size(); od++)
       obc->setSplitInto(od, m_binDimensions[od]->getNBins());
     obc->setSplitThreshold(bc->getSplitThreshold());
-    size_t maxDepth = getProperty("MaxRecursionDepth");
-    obc->setMaxDepth(maxDepth);
+    obc->setMaxDepth(bc->getMaxDepth());
     obc->resetNumBoxes();
     // Perform the first box splitting
     outWS->splitBox();

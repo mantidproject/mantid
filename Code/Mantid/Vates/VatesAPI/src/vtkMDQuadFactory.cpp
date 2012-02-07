@@ -1,4 +1,5 @@
 #include "MantidVatesAPI/vtkMDQuadFactory.h"
+#include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/CoordTransform.h"
 #include <boost/shared_ptr.hpp>
