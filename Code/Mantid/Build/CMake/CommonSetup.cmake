@@ -82,7 +82,7 @@ set ( NOT_GIT_REPO "Not" )
 find_package ( Git )
 if ( GIT_FOUND )
   # Get the last revision
-  execute_process ( COMMAND ${GIT_EXECUTABLE} describe --tags --long 
+  execute_process ( COMMAND ${GIT_EXECUTABLE} describe --long
                     OUTPUT_VARIABLE GIT_DESCRIBE
                     ERROR_VARIABLE NOT_GIT_REPO
                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
