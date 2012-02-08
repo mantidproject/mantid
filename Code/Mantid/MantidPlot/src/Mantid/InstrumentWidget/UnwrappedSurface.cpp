@@ -210,10 +210,10 @@ void UnwrappedSurface::init()
   * @param comp :: A member of the assembly. The total area of the assembly is a sum of areas of its members
   * @param compRect :: A rect. area occupied by comp in uv space
   */
-void UnwrappedSurface::calcAssemblies(boost::shared_ptr<const Mantid::Geometry::IComponent> comp,const QRectF& compRect)
+void UnwrappedSurface::calcAssemblies(const Mantid::Geometry::IComponent * comp,const QRectF& compRect)
 {
-  boost::shared_ptr<const Mantid::Geometry::IComponent> parent = comp->getParent();
-//  IDetector_const_sptr det = boost::dynamic_pointer_cast<const IDetector>(parent);
+  // We don't need the parametrized version = use the bare parent for speed
+  const Mantid::Geometry::IComponent * parent = comp->getBareParent();
   if (parent)
   {
     QRectF& r = m_assemblies[parent->getComponentID()];
@@ -236,8 +236,8 @@ void UnwrappedSurface::cacheAllAssemblies()
 
     if (! udet.detector ) continue;
     // Get the BARE parent (not parametrized) to speed things up.
-    //boost::shared_ptr<const Mantid::Geometry::IComponent> parent(udet.detector->getBareParent()); // = udet.detector->getParent();
-    boost::shared_ptr<const Mantid::Geometry::IComponent> parent = udet.detector->getParent();
+    const Mantid::Geometry::IComponent * bareDet = udet.detector->getComponentID();
+    const Mantid::Geometry::IComponent * parent = bareDet->getBareParent();
     if (parent)
     {
       QRectF detRect;

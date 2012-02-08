@@ -102,7 +102,7 @@ protected:
   //void callback(boost::shared_ptr<const Mantid::Geometry::IDetector> det,const DetectorCallbackData& data);
   void setColor(int index,bool picking)const;
   void showPickedDetector();
-  void calcAssemblies(boost::shared_ptr<const Mantid::Geometry::IComponent> comp,const QRectF& compRect);
+  void calcAssemblies(const Mantid::Geometry::IComponent * comp,const QRectF& compRect);
   void cacheAllAssemblies();
   void findAndCorrectUGap();
   void createPeakShapes(const QRect& viewport)const;
