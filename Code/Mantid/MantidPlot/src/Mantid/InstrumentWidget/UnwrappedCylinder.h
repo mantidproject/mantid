@@ -12,7 +12,6 @@ public:
   UnwrappedCylinder(const InstrumentActor* rootActor,const Mantid::Kernel::V3D& origin,const Mantid::Kernel::V3D& axis);
 protected:
   void project(double & u, double & v, double & uscale, double & vscale, const Mantid::Kernel::V3D & pos) const;
-  void calcUV(UnwrappedDetector& udet);
   void calcRot(const UnwrappedDetector& udet, Mantid::Kernel::Quat& R)const;
   double uPeriod()const;
 };
