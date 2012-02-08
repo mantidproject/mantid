@@ -110,6 +110,12 @@ InstrumentActor::~InstrumentActor()
   saveSettings();
 }
 
+/** Used to set visibility of an actor corresponding to a particular component
+ * When selecting a component in the InstrumentTreeWidget
+ *
+ * @param visitor
+ * @return
+ */
 bool InstrumentActor::accept(const GLActorVisitor& visitor)
 {
   bool ok = m_scene.accept(visitor);
