@@ -73,8 +73,8 @@ public:
   /// Function to return all of the categories that contain this algorithm
   virtual const std::vector<std::string> categories() const =0;
 
-  /// Function to return the sperator token for the category string
-  virtual const std::string categorySeperator() const =0;
+  /// Function to return the separator token for the category string
+  virtual const std::string categorySeparator() const =0;
 
   /// function to return any aliases of the algorithm.
   virtual const std::string alias() const = 0;
@@ -130,6 +130,9 @@ public:
    *  @param isChild :: True - the algorithm is a child algorithm.  False - this is a full managed algorithm.
    */
   virtual void setChild(const bool isChild) = 0;
+
+  /// Set whether we always store the output in the analysis data service
+  virtual void setAlwaysStoreInADS(const bool doStore) = 0;
 
   /// To query whether an algorithm should rethrow exceptions when executing.
   virtual void setRethrows(const bool rethrow) = 0;

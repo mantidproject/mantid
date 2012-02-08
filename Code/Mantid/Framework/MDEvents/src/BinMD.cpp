@@ -40,13 +40,15 @@ if needed to make them orthogonal to each other. Only works in 3 dimensions!
 
 It is possible to rebin a [[MDHistoWorkspace]].
 Each MDHistoWorkspace holds a reference to the [[MDEventWorkspace]] that created it,
-as well as the coordinate transformation that was used.
-
-In this case, the rebinning is actually performed on the original MDEventWorkspace,
+as well as the coordinate transformation that was used. In this case, the rebinning is actually performed on the original MDEventWorkspace,
 after suitably transforming the basis vectors.
 
 Only the non-axis aligned binning method can be performed on a MDHistoWorkspace!
 Of course, your basis vectors can be aligned with the dimensions, which is equivalent.
+
+For more details on the coordinate transformations applied in this case, please see [[BinMD Coordinate Transformations]].
+
+[[File:BinMD_Coordinate_Transforms_withLine.png]]
 
 *WIKI*/
 
@@ -153,7 +155,7 @@ namespace MDEvents
   inline void BinMD::binMDBox(MDBox<MDE, nd> * box, size_t * chunkMin, size_t * chunkMax)
   {
     // An array to hold the rotated/transformed coordinates
-    coord_t * outCenter = new coord_t[outD];
+    coord_t * outCenter = new coord_t[m_outD];
 
     // Evaluate whether the entire box is in the same bin
     if (box->getNPoints() > (1 << nd) * 2)
@@ -181,7 +183,7 @@ namespace MDEvents
         badOne = false;
 
         /// Loop through the dimensions on which we bin
-        for (size_t bd=0; bd<outD; bd++)
+        for (size_t bd=0; bd<m_outD; bd++)
         {
           // What is the bin index in that dimension
           coord_t x = outCenter[bd];
@@ -252,7 +254,7 @@ namespace MDEvents
       bool badOne = false;
 
       /// Loop through the dimensions on which we bin
-      for (size_t bd=0; bd<outD; bd++)
+      for (size_t bd=0; bd<m_outD; bd++)
       {
         // What is the bin index in that dimension
         coord_t x = outCenter[bd];
@@ -298,8 +300,8 @@ namespace MDEvents
     outWS->setTo(0.0, 0.0);
 
     // Cache some data to speed up accessing them a bit
-    indexMultiplier = new size_t[outD];
-    for (size_t d=0; d<outD; d++)
+    indexMultiplier = new size_t[m_outD];
+    for (size_t d=0; d<m_outD; d++)
     {
       if (d > 0)
         indexMultiplier[d] = outWS->getIndexMultiplier()[d-1];
@@ -315,7 +317,7 @@ namespace MDEvents
 
     // How many bins (in that dimension) per chunk.
     // Try to split it so each core will get 2 tasks:
-    int chunkNumBins =  int(binDimensions[chunkDimension]->getNBins() / (Mantid::Kernel::ThreadPool::getNumPhysicalCores() * 2));
+    int chunkNumBins =  int(m_binDimensions[chunkDimension]->getNBins() / (Mantid::Kernel::ThreadPool::getNumPhysicalCores() * 2));
     if (chunkNumBins < 1) chunkNumBins = 1;
 
     // Do we actually do it in parallel?
@@ -323,7 +325,7 @@ namespace MDEvents
     // Not if file-backed!
     if (bc->isFileBacked()) doParallel = false;
     if (!doParallel)
-      chunkNumBins = int(binDimensions[chunkDimension]->getNBins());
+      chunkNumBins = int(m_binDimensions[chunkDimension]->getNBins());
 
     // Total number of steps
     size_t progNumSteps = 0;
@@ -334,22 +336,22 @@ namespace MDEvents
     // thread safe to write to it..
     // cppcheck-suppress syntaxError
     PRAGMA_OMP( parallel for schedule(dynamic,1) if (doParallel) )
-    for(int chunk=0; chunk < int(binDimensions[chunkDimension]->getNBins()); chunk += chunkNumBins)
+    for(int chunk=0; chunk < int(m_binDimensions[chunkDimension]->getNBins()); chunk += chunkNumBins)
     {
       PARALLEL_START_INTERUPT_REGION
       // Region of interest for this chunk.
-      size_t * chunkMin = new size_t[outD];
-      size_t * chunkMax = new size_t[outD];
-      for (size_t bd=0; bd<outD; bd++)
+      size_t * chunkMin = new size_t[m_outD];
+      size_t * chunkMax = new size_t[m_outD];
+      for (size_t bd=0; bd<m_outD; bd++)
       {
         // Same limits in the other dimensions
         chunkMin[bd] = 0;
-        chunkMax[bd] = binDimensions[bd]->getNBins();
+        chunkMax[bd] = m_binDimensions[bd]->getNBins();
       }
       // Parcel out a chunk in that single dimension dimension
       chunkMin[chunkDimension] = size_t(chunk);
-      if (size_t(chunk+chunkNumBins) > binDimensions[chunkDimension]->getNBins())
-        chunkMax[chunkDimension] = binDimensions[chunkDimension]->getNBins();
+      if (size_t(chunk+chunkNumBins) > m_binDimensions[chunkDimension]->getNBins())
+        chunkMax[chunkDimension] = m_binDimensions[chunkDimension]->getNBins();
       else
         chunkMax[chunkDimension] = size_t(chunk+chunkNumBins);
 
@@ -417,7 +419,7 @@ namespace MDEvents
     CPUTimer tim;
 
     // Number of output binning dimensions found
-    size_t outD = binDimensions.size();
+    size_t m_outD = m_binDimensions.size();
 
     //Since the costs are not known ahead of time, use a simple FIFO buffer.
     ThreadScheduler * ts = new ThreadSchedulerFIFO();
@@ -433,12 +435,12 @@ namespace MDEvents
     IMDBox<MDE,nd> * rootBox = ws->getBox();
 
     // This is the limit to loop over in each dimension
-    size_t * index_max = new size_t[outD];
-    for (size_t bd=0; bd<outD; bd++) index_max[bd] = binDimensions[bd]->getNBins();
+    size_t * index_max = new size_t[m_outD];
+    for (size_t bd=0; bd<m_outD; bd++) index_max[bd] = m_binDimensions[bd]->getNBins();
 
     // Cache a calculation to convert indices x,y,z,t into a linear index.
-    size_t * index_maker = new size_t[outD];
-    Utils::NestedForLoop::SetUpIndexMaker(outD, index_maker, index_max);
+    size_t * index_maker = new size_t[m_outD];
+    Utils::NestedForLoop::SetUpIndexMaker(m_outD, index_maker, index_max);
 
     int numPoints = int(outWS->getNPoints());
 
@@ -454,23 +456,23 @@ namespace MDEvents
       PARALLEL_START_INTERUPT_REGION
 
       size_t linear_index = size_t(i);
-      // nd >= outD in all cases so this is safe.
+      // nd >= m_outD in all cases so this is safe.
       size_t index[nd];
 
       // Get the index at each dimension for this bin.
-      Utils::NestedForLoop::GetIndicesFromLinearIndex(outD, linear_index, index_maker, index_max, index);
+      Utils::NestedForLoop::GetIndicesFromLinearIndex(m_outD, linear_index, index_maker, index_max, index);
 
       // Construct the bin and its coordinates
       MDBin<MDE,nd> bin;
-      for (size_t bd=0; bd<outD; bd++)
+      for (size_t bd=0; bd<m_outD; bd++)
       {
         // Index in this binning dimension (i_x, i_y, etc.)
         size_t idx = index[bd];
         // Dimension in the MDEventWorkspace
-        size_t d = dimensionToBinFrom[bd];
+        size_t d = m_dimensionToBinFrom[bd];
         // Corresponding extents
-        bin.m_min[d] = binDimensions[bd]->getX(idx);
-        bin.m_max[d] = binDimensions[bd]->getX(idx+1);
+        bin.m_min[d] = m_binDimensions[bd]->getX(idx);
+        bin.m_max[d] = m_binDimensions[bd]->getX(idx+1);
       }
       bin.m_index = linear_index;
 
@@ -541,15 +543,23 @@ namespace MDEvents
     prog = new Progress(this, 0, 1.0, 1); // This gets deleted by the thread pool; don't delete it in here.
 
     // Create the dense histogram. This allocates the memory
-    outWS = MDHistoWorkspace_sptr(new MDHistoWorkspace(binDimensions));
+    outWS = MDHistoWorkspace_sptr(new MDHistoWorkspace(m_binDimensions));
 
     // Saves the geometry transformation from original to binned in the workspace
-    outWS->setTransformFromOriginal( this->m_transformFromOriginal );
-    outWS->setTransformToOriginal( this->m_transformToOriginal );
+    outWS->setTransformFromOriginal( this->m_transformFromOriginal, 0 );
+    outWS->setTransformToOriginal( this->m_transformToOriginal, 0 );
     for (size_t i=0; i<m_bases.size(); i++)
       outWS->setBasisVector(i, m_bases[i]);
     outWS->setOrigin( this->m_origin );
-    outWS->setOriginalWorkspace(m_inWS);
+    outWS->setOriginalWorkspace(m_inWS, 0);
+
+    // And the intermediate WS one too, if any
+    if (m_intermediateWS)
+    {
+      outWS->setOriginalWorkspace(m_intermediateWS, 1);
+      outWS->setTransformFromOriginal(m_transformFromIntermediate, 1);
+      outWS->setTransformToOriginal(m_transformToIntermediate, 1);
+    }
 
     // Wrapper to cast to MDEventWorkspace then call the function
     bool IterateEvents = getProperty("IterateEvents");

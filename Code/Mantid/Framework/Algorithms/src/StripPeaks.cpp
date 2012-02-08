@@ -54,6 +54,9 @@ void StripPeaks::init()
   declareProperty("PeakPositions", "",
     "Optional: enter a comma-separated list of the expected X-position of the centre of the peaks. Only peaks near these positions will be fitted." );
 
+  declareProperty("PeakPositionTolerance", 0.01,
+      "Tolerance on the found peaks' positions against the input peak positions. Non-positive value indicates that this option is turned off.");
+
   std::vector<std::string> bkgdtypes;
   bkgdtypes.push_back("Linear");
   bkgdtypes.push_back("Quadratic");
@@ -100,9 +103,9 @@ void StripPeaks::exec()
  */
 API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS)
 {
-  g_log.information("Calling FindPeaks as a sub-algorithm");
+  g_log.debug("Calling FindPeaks as a sub-algorithm");
 
-  bool showlog = false;
+  bool showlog = true;
   API::IAlgorithm_sptr findpeaks = createSubAlgorithm("FindPeaks",0.0, 0.2, showlog);
   findpeaks->setProperty("InputWorkspace", WS);
   findpeaks->setProperty<int>("FWHM",getProperty("FWHM"));
@@ -114,6 +117,8 @@ API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS)
   findpeaks->setProperty<std::string>("PeakPositions", getProperty("PeakPositions"));
   findpeaks->setProperty<std::string>("BackgroundType", getProperty("BackgroundType"));
   findpeaks->setProperty<bool>("HighBackground", getProperty("HighBackground"));
+  findpeaks->setProperty<double>("PeakPositionTolerance", getProperty("PeakPositionTolerance"));
+  findpeaks->setProperty<double>("PeakHeightTolerance", 5);
 
   findpeaks->executeAsSubAlg();
   return findpeaks->getProperty("PeaksList");
@@ -128,7 +133,7 @@ API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS)
  */
 API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_const_sptr input, API::ITableWorkspace_sptr peakslist)
 {
-  g_log.information("Subtracting peaks");
+  g_log.debug("Subtracting peaks");
   // Create an output workspace - same size as input one
   MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(input);
   // Copy the data over from the input to the output workspace
@@ -148,7 +153,7 @@ API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_const_spt
   //progress from 0.3 to 1.0 here 
   prg=0.3;
   // Loop over the list of peaks
-  for (int i = 0; i < peakslist->rowCount(); ++i)
+  for (size_t i = 0; i < peakslist->rowCount(); ++i)
   {
     // Get references to the data
     const MantidVec &X = outputWS->readX(peakslist->getRef<int>("spectrum",i));
@@ -181,7 +186,7 @@ API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_const_spt
       // Subtract the calculated value from the data
       Y[j] -= funcVal;
     }
-    prg+=(0.7/peakslist->rowCount());
+    prg+=(0.7/static_cast<double>(peakslist->rowCount()));
     progress(prg);
   }
 

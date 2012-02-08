@@ -46,8 +46,8 @@
 #include <QApplication>
 #include <QMessageBox>
 
-AssociationsDialog::AssociationsDialog( QWidget* parent, Qt::WFlags fl )
-    : QDialog( parent, fl )
+AssociationsDialog::AssociationsDialog( Graph* g, Qt::WFlags fl )
+    : QDialog( g, fl )
 {
     setName( "AssociationsDialog" );
     setWindowTitle( tr( "MantidPlot - Plot Associations" ) );
@@ -96,6 +96,8 @@ AssociationsDialog::AssociationsDialog( QWidget* parent, Qt::WFlags fl )
 	connect(btnOK, SIGNAL(clicked()),this, SLOT(accept()));
 	connect(btnCancel, SIGNAL(clicked()),this, SLOT(close()));
 	connect(btnApply, SIGNAL(clicked()),this, SLOT(updateCurves()));
+
+  setGraph(g);
 }
 
 void AssociationsDialog::accept()

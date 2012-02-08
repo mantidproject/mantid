@@ -7,6 +7,9 @@ class SimpleAPITest(unittest.TestCase):
 
     def tearDown(self):
         mtd.clear()
+        
+    def test_version_number_equals_2(self):
+        self.assertEquals(simpleapi.apiVersion(), 2)
     
     def test_module_dict_seems_to_be_correct_size(self):
         # Check that the module has at least the same number
@@ -103,14 +106,14 @@ If false, then the workspace gets converted to a Workspace2D histogram.
     def test_Load_call_with_other_args_executes_correctly(self):
         try:
             raw = simpleapi.Load('IRS21360.raw',SpectrumMax=1)
-        except Runtime:
+        except RuntimeError:
             self.fail("Load with a filename and extra args should not raise an exception")
         self.assertEquals(1, raw.getNumberHistograms())
 
     def test_Load_call_with_args_that_do_not_apply_executes_correctly(self):
         try:
             raw = simpleapi.Load('IRS21360.raw',SpectrumMax=1,Append=True)
-        except Runtime:
+        except RuntimeError:
             self.fail("Load with a filename and extra args should not raise an exception")
         self.assertEquals(1, raw.getNumberHistograms())
     
@@ -122,6 +125,18 @@ If false, then the workspace gets converted to a Workspace2D histogram.
             if msg != "Can only display properties dialog in gui mode":
                 self.fail("Dialog function raised the correct exception type but the message was wrong")
                 
+    def test_call_inside_function_uses_object_name_not_variable_name(self):
+        def convert(workspace):
+            # Should replace the input workspace
+            workspace = simpleapi.ConvertUnits(workspace, Target='Energy')
+            return workspace
+        
+        raw = simpleapi.Load('IRS21360.raw',SpectrumMax=1)
+        raw = convert(raw)
+        # If this fails then the function above chose the name of the variabe
+        # over the actual object name
+        self.assertTrue('workspace' not in mtd)
+        
 
 if __name__ == '__main__':
     unittest.main()

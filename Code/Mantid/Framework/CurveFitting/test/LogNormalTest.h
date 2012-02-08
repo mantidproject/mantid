@@ -130,6 +130,11 @@
 		TS_ASSERT_DELTA( out->getParameter("Location"), 2.2 ,0.1);
 		TS_ASSERT_DELTA( out->getParameter("Scale"), 0.25 ,0.01);
 
+    // check its categories
+    const std::vector<std::string> categories = out->categories();
+    TS_ASSERT( categories.size() == 1 );
+    TS_ASSERT( categories[0] == "Peak" );
+
 		AnalysisDataService::Instance().remove(wsName);
 
 	  }

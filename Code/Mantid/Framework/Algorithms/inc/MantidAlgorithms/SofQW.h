@@ -58,13 +58,16 @@ public:
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Inelastic"; }
-
-protected:
-  API::MatrixWorkspace_sptr setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace, std::vector<double>& newAxis);
+  /// Create the output workspace
+  static API::MatrixWorkspace_sptr setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace,
+                                                        const std::vector<double> & binParams, std::vector<double>& newAxis);
+  /// Convert the workspace to a distribution
   void makeDistribution(API::MatrixWorkspace_sptr outputWS, const std::vector<double> qAxis);
+  /// Create the input properties on the given algorithm object
+  static void createInputProperties(API::Algorithm & alg);
+  /// Energy to K constant
+  static double energyToK();
 
-  /// Conversion constant
-  double m_EtoK;
 private:
   /// Sets documentation strings for this algorithm
   virtual void initDocs();

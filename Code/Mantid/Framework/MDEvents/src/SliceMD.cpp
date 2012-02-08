@@ -49,10 +49,11 @@ Of course, your basis vectors can be aligned with the dimensions, which is equiv
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using Mantid::Geometry::MDImplicitFunction;
+using namespace Mantid::Geometry;
 
 namespace Mantid
 {
@@ -110,6 +111,9 @@ namespace MDEvents
         "  If not specified, a default of 40% of free physical memory is used.");
     //setPropertySettings("Memory", new EnabledWhenProperty(this, "OutputFilename", IS_NOT_DEFAULT));
 
+    //declareProperty(new PropertyWithValue<int>("MaxRecursionDepth", 1000),
+    //  "Sets the maximum recursion depth to use. Can be used to constrain the workspaces internal structure");
+
     setPropertyGroup("OutputFilename", "File Back-End");
     setPropertyGroup("Memory", "File Back-End");
   }
@@ -157,15 +161,15 @@ namespace MDEvents
   {
     // Create the ouput workspace
     typename MDEventWorkspace<OMDE, ond>::sptr outWS(new MDEventWorkspace<OMDE, ond>());
-    for (size_t od=0; od < binDimensions.size(); od++)
-      outWS->addDimension(binDimensions[od]);
+    for (size_t od=0; od < m_binDimensions.size(); od++)
+      outWS->addDimension(m_binDimensions[od]);
     outWS->initialize();
     // Copy settings from the original box controller
     BoxController_sptr bc = ws->getBoxController();
     BoxController_sptr obc = outWS->getBoxController();
     // Use the "number of bins" as the "split into" parameter
-    for (size_t od=0; od < binDimensions.size(); od++)
-      obc->setSplitInto(od, binDimensions[od]->getNBins());
+    for (size_t od=0; od < m_binDimensions.size(); od++)
+      obc->setSplitInto(od, m_binDimensions[od]->getNBins());
     obc->setSplitThreshold(bc->getSplitThreshold());
     obc->setMaxDepth(bc->getMaxDepth());
     obc->resetNumBoxes();
@@ -293,25 +297,25 @@ namespace MDEvents
   template<typename MDE, size_t nd>
   void SliceMD::doExec(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
-    if (outD==0)
+    if (m_outD==0)
       throw std::runtime_error("No output dimensions specified!");
 
     // Templated method needs to call another templated method depending on the # of output dimensions.
     if (MDE::getTypeName() == "MDLeanEvent")
     {
-      if (outD==1)      this->slice<MDE,nd,MDLeanEvent<1>,1>(ws);
-      else if (outD==2) this->slice<MDE,nd,MDLeanEvent<2>,2>(ws);
-      else if (outD==3) this->slice<MDE,nd,MDLeanEvent<3>,3>(ws);
-      else if (outD==4) this->slice<MDE,nd,MDLeanEvent<4>,4>(ws);
+      if (m_outD==1)      this->slice<MDE,nd,MDLeanEvent<1>,1>(ws);
+      else if (m_outD==2) this->slice<MDE,nd,MDLeanEvent<2>,2>(ws);
+      else if (m_outD==3) this->slice<MDE,nd,MDLeanEvent<3>,3>(ws);
+      else if (m_outD==4) this->slice<MDE,nd,MDLeanEvent<4>,4>(ws);
       else
         throw std::runtime_error("Number of output dimensions > 4. This is not currently handled.");
     }
     else if (MDE::getTypeName() == "MDEvent")
     {
-      if (outD==1)      this->slice<MDE,nd,MDEvent<1>,1>(ws);
-      else if (outD==2) this->slice<MDE,nd,MDEvent<2>,2>(ws);
-      else if (outD==3) this->slice<MDE,nd,MDEvent<3>,3>(ws);
-      else if (outD==4) this->slice<MDE,nd,MDEvent<4>,4>(ws);
+      if (m_outD==1)      this->slice<MDE,nd,MDEvent<1>,1>(ws);
+      else if (m_outD==2) this->slice<MDE,nd,MDEvent<2>,2>(ws);
+      else if (m_outD==3) this->slice<MDE,nd,MDEvent<3>,3>(ws);
+      else if (m_outD==4) this->slice<MDE,nd,MDEvent<4>,4>(ws);
       else
         throw std::runtime_error("Number of output dimensions > 4. This is not currently handled.");
     }

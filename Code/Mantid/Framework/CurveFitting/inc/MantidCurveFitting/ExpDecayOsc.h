@@ -14,7 +14,7 @@ namespace Mantid
   namespace CurveFitting
   {
     /** 
-    Provide oscillating exponential decay function: h*exp(-(x-c)/t)*(cos(2pi*f*x+phi))
+    Provide oscillating exponential decay function: h*exp(-lambda.x)*(cos(2pi*f*x+phi))
    
      @author Karl Palmen, ISIS, RAL 
      @date 06/01/2012 
@@ -51,7 +51,7 @@ namespace Mantid
       std::string name()const{return "ExpDecayOsc";}
 
       /// overwrite IFunction base class methods
-      virtual const std::string category() const { return "General;Muon";}
+      virtual const std::string category() const { return "Muon";}
     protected:
       virtual void functionMW(double* out, const double* xValues, const size_t nData)const;
       virtual void functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData);

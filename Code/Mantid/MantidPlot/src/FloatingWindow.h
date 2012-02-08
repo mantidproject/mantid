@@ -28,7 +28,7 @@ protected:
   QWidget* widget() const;
   virtual bool event(QEvent * e);
   ApplicationWindow* d_app; ///< Pointer to the main window
-#ifdef _WIN32
+#ifdef Q_OS_WIN
   Qt::WindowFlags m_flags;  ///< Keeps a copy of window flags, used when re-parenting
 #endif
 };

@@ -9,6 +9,7 @@
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+using Mantid::API::CoordTransform;
 
 namespace Mantid
 {
@@ -37,6 +38,16 @@ namespace MDEvents
       m_dimensionsUsed[d] = dimensionsUsed[d];
     }
   }
+
+  //----------------------------------------------------------------------------------------------
+  /** Virtual cloner
+   * @return a copy of this object  */
+  CoordTransform * CoordTransformDistance::clone() const
+  {
+    CoordTransformDistance * out = new CoordTransformDistance(inD, m_center, m_dimensionsUsed);
+    return out;
+  }
+
     
   //----------------------------------------------------------------------------------------------
   /** Destructor

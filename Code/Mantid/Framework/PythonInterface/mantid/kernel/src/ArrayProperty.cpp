@@ -15,5 +15,6 @@ void export_ArrayProperty()
   EXPORT_ARRAY_PROP(double,dbl);
   EXPORT_ARRAY_PROP(int,int);
   EXPORT_ARRAY_PROP(size_t,size_t);
+  EXPORT_ARRAY_PROP(std::string, std_string);
 }
 

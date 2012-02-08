@@ -43,6 +43,7 @@ set ( SRC_FILES
 	src/Memory.cpp
 	src/MersenneTwister.cpp
 	src/MultiFileNameParser.cpp
+	src/MultiFileValidator.cpp
 	src/NeutronAtom.cpp
 	src/NexusTestHelper.cpp
 	src/ProgressBase.cpp
@@ -53,6 +54,7 @@ set ( SRC_FILES
 	src/PropertyManagerOwner.cpp
 	src/PropertyWithValue.cpp
 	src/Quat.cpp
+	src/ReadLock.cpp
 	src/RebinParamsValidator.cpp
 	src/RegexStrings.cpp
 	src/SignalChannel.cpp
@@ -149,6 +151,7 @@ set ( INC_FILES
 	inc/MantidKernel/MersenneTwister.h
 	inc/MantidKernel/MultiFileNameParser.h
 	inc/MantidKernel/MultiThreaded.h
+	inc/MantidKernel/MultiFileValidator.h
 	inc/MantidKernel/NeutronAtom.h
 	inc/MantidKernel/NexusTestHelper.h
 	inc/MantidKernel/NullValidator.h
@@ -162,6 +165,7 @@ set ( INC_FILES
 	inc/MantidKernel/PropertyWithValue.h
 	inc/MantidKernel/Quat.h
 	inc/MantidKernel/RandomNumberGenerator.h
+	inc/MantidKernel/ReadLock.h
 	inc/MantidKernel/RebinParamsValidator.h
 	inc/MantidKernel/RegexStrings.h
 	inc/MantidKernel/SignalChannel.h
@@ -233,6 +237,8 @@ set ( TEST_FILES
 	test/MemoryTest.h
 	test/MersenneTwisterTest.h
 	test/MultiFileNameParserTest.h
+	test/MutexTest.h
+	test/MultiFileValidatorTest.h
 	test/NeutronAtomTest.h
 	test/NullValidatorTest.h
 	test/ProgressBaseTest.h
@@ -243,6 +249,7 @@ set ( TEST_FILES
 	test/PropertyWithValueTest.h
 	test/QuatTest.h
 	test/RandomNumberGeneratorTest.h
+	test/ReadLockTest.h
 	test/RebinHistogramTest.h
 	test/RebinParamsValidatorTest.h
 	test/RegexStringsTest.h

@@ -97,6 +97,24 @@ public:
     }
   }
 
+  void doRunTest(const std::string & lhs, const std::string & rhs,
+                 const std::string & output, const double expectedCharge)
+  {
+    Plus alg;
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(
+    alg.setPropertyValue("LHSWorkspace",lhs);
+    alg.setPropertyValue("RHSWorkspace",rhs);
+    alg.setPropertyValue("OutputWorkspace",output);
+    );
+    alg.execute();
+
+    MatrixWorkspace_sptr work_out1;
+    TS_ASSERT_THROWS_NOTHING(work_out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(output)));
+
+    TS_ASSERT_DELTA(work_out1->run().getProtonCharge(), expectedCharge, 1e-8);
+
+  }
 
   /// The Plus algorithm sums values in the Run object. Minus does not.
   void test_RunAddition()
@@ -107,27 +125,18 @@ public:
       a->mutableRun().setProtonCharge(10.);
       MatrixWorkspace_sptr b = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2);
       b->mutableRun().setProtonCharge(5.);
-
       AnalysisDataService::Instance().add("a", a);
       AnalysisDataService::Instance().add("b", b);
 
-      Plus alg;
-      alg.initialize();
-      TS_ASSERT_THROWS_NOTHING(
-          alg.setPropertyValue("LHSWorkspace","a");
-      alg.setPropertyValue("RHSWorkspace","b");
-      alg.setPropertyValue("OutputWorkspace","c");
-      )
-      alg.execute();
-
-      MatrixWorkspace_sptr work_out1;
-      TS_ASSERT_THROWS_NOTHING(work_out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("c")));
-
-      TS_ASSERT_DELTA(work_out1->run().getProtonCharge(), 15.0, 1e-8);
+      doRunTest("a", "b", "c", 15.0);
+      AnalysisDataService::Instance().remove("c");
+      // In-place with LHS as output
+      doRunTest("a", "b", "a", 15.0);
+      // In-place with RHS as output
+      doRunTest("a", "b", "b", 20.0);
 
       AnalysisDataService::Instance().remove("a");
       AnalysisDataService::Instance().remove("b");
-      AnalysisDataService::Instance().remove("c");
     }
   }
 

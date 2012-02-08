@@ -19,10 +19,14 @@ from _api import *
 _dlopen.restore_flags(flags)
 
 ###############################################################################
+# Add importAll member to ADS 
+###############################################################################
+import _adsimports
+
+###############################################################################
 # Attach operators to workspaces 
 ###############################################################################
-import workspaceops as _ops
-_ops.add_operators_to_workspace()
+import _workspaceops
 
 ###############################################################################
 # Make the singleton objects available as named variables 
@@ -53,14 +57,14 @@ import mantid
 if mantid.__gui__ == True:
     # Save the original function
     _orig_execute = IAlgorithm.execute
-    import qti
-    def execute_wrapper(self):
+    import _qti
+    def _execute_wrapper(self):
         if hasattr(self, '__async__') and self.__async__:
-            success = qti.app.mantidUI.runAlgorithmAsync_PyCallback(self.name())
+            success = _qti.app.mantidUI.runAlgorithmAsync_PyCallback(self.name())
             if not success:
                 raise RuntimeError('An error occurred while running %s. See results log for details.' % self.name())
         else:
             _orig_execute(self)
     
     # Replace the attribute
-    setattr(IAlgorithm, 'execute', execute_wrapper)
+    setattr(IAlgorithm, 'execute', _execute_wrapper)

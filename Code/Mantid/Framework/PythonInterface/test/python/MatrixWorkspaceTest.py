@@ -91,6 +91,19 @@ class MatrixWorkspaceTest(unittest.TestCase):
         mem = self._test_ws.getMemorySize()
         self.assertTrue( (mem > 0) )
 
+    def test_read_data_members_give_readonly_numpy_array(self):
+        def do_numpy_test(arr):
+            self.assertEquals(type(arr), np.ndarray)
+            self.assertFalse(arr.flags.writeable)
+
+        x = self._test_ws.readX(0)
+        y = self._test_ws.readY(0)
+        e = self._test_ws.readE(0)
+        dx = self._test_ws.readDx(0)
+        
+        for attr in [x,y,e,dx]:
+            do_numpy_test(attr)
+
     def test_data_can_be_extracted_to_numpy_successfully(self):
         x = self._test_ws.extractX()
         y = self._test_ws.extractY()
@@ -100,34 +113,72 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertTrue(len(dx), 0)
         self._do_numpy_comparison(self._test_ws, x, y, e)
 
-    def _do_numpy_comparison(self, workspace, x_np, y_np, e_np):
-        nhist = workspace.getNumberHistograms()
+    def _do_numpy_comparison(self, workspace, x_np, y_np, e_np, index = None):
+        if index is None:
+            nhist = workspace.getNumberHistograms()
+            start = 0
+            end = nhist
+        else:
+            nhist = 1
+            start = index
+            end = index+nhist
+            
         blocksize = workspace.blocksize()
         for arr in (x_np, y_np, e_np):
             self.assertEquals(type(arr), np.ndarray)
         
-        self.assertEquals(x_np.shape, (nhist, blocksize + 1)) # 2 rows, 103 columns
-        self.assertEquals(y_np.shape, (nhist, blocksize)) # 2 rows, 102 columns
-        self.assertEquals(e_np.shape, (nhist, blocksize)) # 2 rows, 102 columns
+        if nhist > 1:
+            self.assertEquals(x_np.shape, (nhist, blocksize + 1)) # 2 rows, 103 columns
+            self.assertEquals(y_np.shape, (nhist, blocksize)) # 2 rows, 102 columns
+            self.assertEquals(e_np.shape, (nhist, blocksize)) # 2 rows, 102 columns
+        else:
+            self.assertEquals(x_np.shape, (blocksize + 1,)) # 2 rows, 103 columns
+            self.assertEquals(y_np.shape, (blocksize,)) # 2 rows, 102 columns
+            self.assertEquals(e_np.shape, (blocksize,)) # 2 rows, 102 columns
+            
         
-        for i in range(nhist):
+        for i in range(start, end):
+            if nhist > 1:
+                x_arr = x_np[i] 
+                y_arr = y_np[i]
+                e_arr = e_np[i]
+            else:
+                x_arr = x_np
+                y_arr = y_np
+                e_arr = e_np
             for j in range(blocksize):
-                self.assertEquals(x_np[i][j], workspace.readX(i)[j])
-                self.assertEquals(y_np[i][j], workspace.readY(i)[j])
-                self.assertEquals(e_np[i][j], workspace.readE(i)[j])
+                self.assertEquals(x_arr[j], workspace.readX(i)[j])
+                self.assertEquals(y_arr[j], workspace.readY(i)[j])
+                self.assertEquals(e_arr[j], workspace.readE(i)[j])
             # Extra X boundary
-            self.assertEquals(x_np[i][blocksize], workspace.readX(i)[blocksize])
+            self.assertEquals(x_arr[blocksize], workspace.readX(i)[blocksize])
+            
+    def test_data_members_give_writable_numpy_array(self):
+        def do_numpy_test(arr):
+            self.assertEquals(type(arr), np.ndarray)
+            self.assertTrue(arr.flags.writeable)
+            
+        x = self._test_ws.dataX(0)
+        y = self._test_ws.dataY(0)
+        e = self._test_ws.dataE(0)
+        dx = self._test_ws.dataDx(0)
+        
+        for attr in [x,y,e,dx]:
+            do_numpy_test(attr)
+        
+        self.assertTrue(len(dx), 0)
+        self._do_numpy_comparison(self._test_ws, x, y, e, 0)
+        
             
     def test_operators_with_workspaces_in_ADS(self):
-        run_algorithm('CreateWorkspace', OutputWorkspace='A',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
+        run_algorithm('CreateWorkspace', OutputWorkspace='a',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
         ads = AnalysisDataService.Instance()
-        A = ads['A']
-        run_algorithm('CreateWorkspace', OutputWorkspace='B', DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
-        B = ads['B']
+        A = ads['a']
+        run_algorithm('CreateWorkspace', OutputWorkspace='b', DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
+        B = ads['b']
         
         # Equality
         self.assertTrue(A.equals(B, 1e-8))
-#    
         # Two workspaces
         C = A + B
         C = A - B
@@ -137,16 +188,31 @@ class MatrixWorkspaceTest(unittest.TestCase):
         C += B
         C *= B
         C /= B
+        
         # Workspace + double
         B = 123.456
         C = A + B
         C = A - B
         C = A * B
         C = A / B
-        C -= B
-        C += B
+
+        ads.remove('C')
+        self.assertTrue('C' not in ads)
+        run_algorithm('CreateWorkspace', OutputWorkspace='ca', DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
+        C = ads['ca']
+
         C *= B
+        self.assertTrue('C' not in ads)
+        C -= B
+        self.assertTrue('C' not in ads)
+        C += B
+        self.assertTrue('C' not in ads)
         C /= B
+        self.assertTrue('C' not in ads)
+        # Check correct in place ops have been used
+        self.assertTrue('ca' in ads)
+        ads.remove('ca')
+
         # Commutative: double + workspace
         C = B * A
         C = B + A

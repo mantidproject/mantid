@@ -41,7 +41,19 @@ namespace API
    */
   void IMDEventWorkspace::setFileNeedsUpdating(bool value)
   {
-	  m_fileNeedsUpdating = value;
+    m_fileNeedsUpdating = value;
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /** Is the workspace thread-safe. For MDEventWorkspaces, this means operations
+   * on separate boxes in separate threads. Don't try to write to the
+   * same box on different threads.
+   *
+   * @return false if the workspace is file-backed.
+   */
+  bool IMDEventWorkspace::threadSafe() const
+  {
+    return !this->isFileBacked();
   }
 
 

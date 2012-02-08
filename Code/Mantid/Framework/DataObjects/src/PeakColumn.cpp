@@ -47,7 +47,7 @@ namespace DataObjects
    * @param s :: stream to output
    * @param index :: row index
    */
-  void PeakColumn::print(std::ostream& s, int index) const
+  void PeakColumn::print(size_t index, std::ostream& s) const
   {
     Peak & peak = peaks[index];
 
@@ -71,7 +71,7 @@ namespace DataObjects
    * @param text :: string to read
    * @param index :: index of the peak to modify
    */
-  void PeakColumn::read(const std::string & text, int index)
+  void PeakColumn::read(size_t index, const std::string & text)
   {
     // Don't modify read-only ones
     if (this->getReadOnly())
@@ -138,31 +138,31 @@ namespace DataObjects
 
 
   /// Sets the new column size.
-  void PeakColumn::resize(int /*count*/)
+  void PeakColumn::resize(size_t /*count*/)
   {
     throw std::runtime_error("Not implemented.");
   }
 
   /// Inserts an item.
-  void PeakColumn::insert(int /*index*/)
+  void PeakColumn::insert(size_t /*index*/)
   {
     throw std::runtime_error("Not implemented.");
   }
 
   /// Removes an item.
-  void PeakColumn::remove(int /*index*/)
+  void PeakColumn::remove(size_t /*index*/)
   {
     throw std::runtime_error("Not implemented.");
   }
 
   /// Pointer to a data element
-  void* PeakColumn::void_pointer(int /*index*/)
+  void* PeakColumn::void_pointer(size_t /*index*/)
   {
     throw std::runtime_error("void_pointer() not implemented. Looks to be unused?");
   }
 
   /// Pointer to a data element
-  const void* PeakColumn::void_pointer(int /*index*/) const
+  const void* PeakColumn::void_pointer(size_t /*index*/) const
   {
     throw std::runtime_error("const version of void_pointer() not implemented. Looks to be unused?");
   }
@@ -171,6 +171,16 @@ namespace DataObjects
   {
     PeakColumn* temp = new PeakColumn(this->peaks, this->m_name);
     return temp;
+  }
+
+  double PeakColumn::toDouble(size_t /*index*/)const
+  {
+    throw std::runtime_error("toDouble() not implemented.");
+  }
+
+  void PeakColumn::fromDouble(size_t /*index*/, double /*value*/)
+  {
+    throw std::runtime_error("fromDouble() not implemented.");
   }
 
 } // namespace Mantid

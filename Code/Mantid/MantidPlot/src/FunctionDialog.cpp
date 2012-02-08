@@ -43,8 +43,10 @@
 #include <QWidget>
 #include <QMessageBox>
 
-FunctionDialog::FunctionDialog( QWidget* parent, Qt::WFlags fl )
-: QDialog( parent, fl )
+FunctionDialog::FunctionDialog( ApplicationWindow* app, Graph* g, Qt::WFlags fl )
+: QDialog( g, fl ),
+  d_app(app),
+  graph(g)
 {
     setObjectName( "FunctionDialog" );
 	setWindowTitle( tr( "MantidPlot - Add function curve" ) );
@@ -179,7 +181,6 @@ FunctionDialog::FunctionDialog( QWidget* parent, Qt::WFlags fl )
 	connect( buttonClear, SIGNAL( clicked() ), this, SLOT(clearList() ) );
 
 	curveID = -1;
-	graph = 0;
 }
 
 void FunctionDialog::raiseWidget(int index)
@@ -325,10 +326,9 @@ void FunctionDialog::acceptFunction()
 	formulas+=formula;
 	if (!error)
 	{
-		ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
-		app->updateFunctionLists(type,formulas);
+    d_app->updateFunctionLists(type,formulas);
 		if (!graph)
-			app->newFunctionPlot(formulas, start, end, boxPoints->value(), "x", type);
+      d_app->newFunctionPlot(formulas, start, end, boxPoints->value(), "x", type);
 		else {
 			if (curveID >= 0)
 				graph->modifyFunctionCurve(curveID, type, formulas, "x", start, end, boxPoints->value());
@@ -425,10 +425,9 @@ void FunctionDialog::acceptParametric()
 	formulas+=yformula;
 	if (!error)
 	{
-		ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
-		app->updateFunctionLists(type,formulas);
+    d_app->updateFunctionLists(type,formulas);
 		if (!graph)
-			app->newFunctionPlot(formulas, start, end, boxParPoints->value(), boxParameter->text(), type);
+      d_app->newFunctionPlot(formulas, start, end, boxParPoints->value(), boxParameter->text(), type);
 		else {
 			if (curveID >= 0)
 				graph->modifyFunctionCurve(curveID, type, formulas, boxParameter->text(), start, end, boxParPoints->value());
@@ -525,11 +524,10 @@ void FunctionDialog::acceptPolar()
 	formulas+=tformula;
 	if (!error)
 	{
-		ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
-		app->updateFunctionLists(type,formulas);
+    d_app->updateFunctionLists(type,formulas);
 
 		if (!graph)
-			app->newFunctionPlot(formulas, start, end, boxPolarPoints->value(), boxPolarParameter->text(), type);
+      d_app->newFunctionPlot(formulas, start, end, boxPolarPoints->value(), boxPolarParameter->text(), type);
 		else {
 			if (curveID >= 0)
 				graph->modifyFunctionCurve(curveID, type, formulas, boxPolarParameter->text(), start, end, boxPolarPoints->value());

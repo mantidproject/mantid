@@ -46,7 +46,7 @@ include ( VersionNumber )
 # Look for dependencies - bail out if any not found
 ###########################################################################
 
-find_package ( Boost REQUIRED signals date_time regex )
+find_package ( Boost REQUIRED signals date_time regex ) 
 include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
 add_definitions ( -DBOOST_ALL_DYN_LINK )
 # Need this defined globally for our log time values
@@ -82,7 +82,7 @@ set ( NOT_GIT_REPO "Not" )
 find_package ( Git )
 if ( GIT_FOUND )
   # Get the last revision
-  execute_process ( COMMAND ${GIT_EXECUTABLE} describe --tags --long 
+  execute_process ( COMMAND ${GIT_EXECUTABLE} describe --long
                     OUTPUT_VARIABLE GIT_DESCRIBE
                     ERROR_VARIABLE NOT_GIT_REPO
                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}

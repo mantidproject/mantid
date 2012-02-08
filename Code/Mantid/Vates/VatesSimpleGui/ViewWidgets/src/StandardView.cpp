@@ -25,6 +25,11 @@ namespace Vates
 namespace SimpleGui
 {
 
+/**
+ * This function sets up the UI components, adds connections for the view's
+ * buttons and creates the rendering view.
+ * @param parent the parent widget for the standard view
+ */
 StandardView::StandardView(QWidget *parent) : ViewBase(parent)
 {
   this->ui.setupUi(this);
@@ -65,6 +70,16 @@ void StandardView::render()
   }
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
 
+  if (this->isMDHistoWorkspace(this->origSrc))
+  {
+    this->ui.rebinButton->setEnabled(false);
+  }
+  if (this->isPeaksWorkspace(this->origSrc))
+  {
+    this->ui.rebinButton->setEnabled(false);
+    this->ui.cutButton->setEnabled(false);
+  }
+
   // Show the data
   pqDataRepresentation *drep = builder->createDataRepresentation(\
         this->origSrc->getOutputPort(0), this->view);
@@ -97,6 +112,7 @@ void StandardView::onRebinButtonClicked()
     pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
     this->rebinCut = builder->createFilter("filters", "MDEWRebinningCutter",
                                            this->origSrc);
+    this->ui.cutButton->setEnabled(false);
   }
 }
 
@@ -115,6 +131,14 @@ void StandardView::resetCamera()
   this->view->resetCamera();
 }
 
+/**
+ * This function enables the cut button for the standard view.
+ */
+void StandardView::updateUI()
+{
+  this->ui.cutButton->setEnabled(true);
 }
-}
-}
+
+} // SimpleGui
+} // Vates
+} // Mantid

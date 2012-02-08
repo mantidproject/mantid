@@ -133,7 +133,7 @@ void EQSANSTofStructure::execEvent(Mantid::DataObjects::EventWorkspace_sptr inpu
     {
       it->m_tof += frame_offset;
       // Correct for the scattered neutron flight path
-      if (flight_path_correction) it->m_tof *= tof_factor;
+      if (flight_path_correction) it->m_tof /= tof_factor;
 
       while( it->m_tof < threshold ) it->m_tof += tmp_frame_width;
 

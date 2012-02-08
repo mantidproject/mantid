@@ -188,14 +188,13 @@ m_mantidui(mantidui)
   connect(m_filenameManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(stringChanged(QtProperty*)));
   connect(m_formulaManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(stringChanged(QtProperty*)));
 
-  connect(this,SIGNAL(xRangeChanged(double, double)), m_mantidui, SLOT(x_range_from_picker(double, double)));
-
   /* Create function group */
   QtProperty* functionsGroup = m_groupManager->addProperty("Functions");
   QtProperty* settingsGroup(NULL);
 
   if (!m_customFittings)
   {  
+    connect(this,SIGNAL(xRangeChanged(double, double)), m_mantidui, SLOT(x_range_from_picker(double, double)));
     /* Create input - output properties */  
     settingsGroup = m_groupManager->addProperty("Settings");    
     m_startX = addDoubleProperty("StartX");
@@ -234,15 +233,16 @@ m_mantidui(mantidui)
   settingsGroup->addSubProperty(m_workspaceIndex);
   settingsGroup->addSubProperty(m_startX);
   settingsGroup->addSubProperty(m_endX);
-  settingsGroup->addSubProperty(m_output);
+  
   
   // Only include the cost function when in the dock widget inside mantid plot, not on muon analysis widget
   // Include minimiser and plot difference under a different settings section.
   if (!customFittings)
   {
-  settingsGroup->addSubProperty(m_minimizer);
-  settingsGroup->addSubProperty(m_costFunction);
-  settingsGroup->addSubProperty(m_plotDiff);
+    settingsGroup->addSubProperty(m_output);
+    settingsGroup->addSubProperty(m_minimizer);
+    settingsGroup->addSubProperty(m_costFunction);
+    settingsGroup->addSubProperty(m_plotDiff);
   }
   
   /* Create editors and assign them to the managers */
@@ -337,7 +337,7 @@ m_mantidui(mantidui)
   m_setupActionCustomSetup = new QAction("Custom Setup",this);
   QAction* setupActionManageSetup = new QAction("Manage Setup",this);
   QAction* setupActionFindPeaks = new QAction("Find Peaks",this);
-  QAction* setupActionClearFit = new QAction("Clear Fit",this);
+  QAction* setupActionClearFit = new QAction("Clear Model",this);
 
   QMenu* setupSubMenuCustom = new QMenu(this);
   m_setupActionCustomSetup->setMenu(setupSubMenuCustom);
@@ -400,21 +400,14 @@ m_mantidui(mantidui)
 
   m_changeSlotsEnabled = true;
     
-  // Observe what workspaces are added and deleted unless it's a custom fitting, all workspaces for custom fitting (eg muon analysis) 
-  // should be manually added.
-  if (!m_customFittings)
-  {
-    observeAdd();
-  }
-  observePostDelete();
-
-  init();
+  populateFunctionNames();
 
   // Should only be done for the fitBrowser which is part of MantidPlot
   if (!m_customFittings)
   {
     if (m_mantidui->metaObject()->indexOfMethod("executeAlgorithm(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)") >= 0)
     {
+      // this make the progress bar work with Fit algorithm running form the fit browser
       connect(this,SIGNAL(executeFit(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)),
         m_mantidui,SLOT(executeAlgorithm(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)));
     }
@@ -914,6 +907,12 @@ std::string FitPropertyBrowser::workspaceName()const
 void FitPropertyBrowser::setWorkspaceName(const QString& wsName)
 {
   int i = m_workspaceNames.indexOf(wsName);
+  if (i < 0)
+  {
+    // workspace may not be found because add notification hasn't been processed yet
+    populateWorkspaceNames();
+    i = m_workspaceNames.indexOf(wsName);
+  }
   if (i >= 0)
   {
     m_enumManager->setValue(m_workspace,i);
@@ -1405,7 +1404,7 @@ void FitPropertyBrowser::fit()
       Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
       alg->initialize();
       if (rawData())
-        alg->setPropertyValue("InputWorkspace",wsName + "_raw");
+        alg->setPropertyValue("InputWorkspace",wsName + "_Raw");
       else
         alg->setPropertyValue("InputWorkspace",wsName);
       alg->setProperty("WorkspaceIndex",workspaceIndex());
@@ -1513,10 +1512,30 @@ void FitPropertyBrowser::populateWorkspaceNames()
   m_enumManager->setEnumNames(m_workspace, m_workspaceNames);
 }
 
-void FitPropertyBrowser::init()
+/**
+ * Connect to the AnalysisDataServis when shown
+ */
+void FitPropertyBrowser::showEvent(QShowEvent* e)
 {
-  populateFunctionNames();
+  (void)e;
+  // Observe what workspaces are added and deleted unless it's a custom fitting, all workspaces for custom fitting (eg muon analysis) 
+  // should be manually added.
+  if (!m_customFittings)
+  {
+    observeAdd();
+  }
+  observePostDelete();
   populateWorkspaceNames();
+}
+
+/**
+ * Disconnect from the AnalysisDataServis when hiden
+ */
+void FitPropertyBrowser::hideEvent(QHideEvent* e)
+{
+  (void)e;
+  observeAdd(false);
+  observePostDelete(false);
 }
 
 /// workspace was added
@@ -1757,7 +1776,14 @@ bool FitPropertyBrowser::isUndoEnabled()const
 void FitPropertyBrowser::setFitEnabled(bool yes)
 {
   m_fitActionFit->setEnabled(yes);
-  m_fitActionSeqFit->setEnabled(yes);
+  if (!m_customFittings)
+  {
+    m_fitActionSeqFit->setEnabled(yes);
+  }
+  else
+  {
+    m_fitActionSeqFit->setEnabled(false);
+  }
 }
 
 /// Returns true if the function is ready for a fit
@@ -2083,17 +2109,6 @@ void FitPropertyBrowser::plotOrRemoveGuessAll()
 void FitPropertyBrowser::clearAllPlots()
 {
   emit removeFitCurves();
-}
-
-/**
-* Customise the plot if it is a custom fitting. (i.e part of muon analysis)
-*
-* @param plotDetails :: The name of the workspace plot to be customised and the axis label seperated by a '.'
-*/
-void FitPropertyBrowser::customisation(const QStringList& plotDetails)
-{
-  if (m_customFittings)
-    emit customiseGraph(plotDetails);
 }
 
 /** Create a double property and set some settings
@@ -2475,7 +2490,7 @@ void FitPropertyBrowser::findPeaks()
     Mantid::API::ColumnVector<double> centre = ws->getVector("centre");
     Mantid::API::ColumnVector<double> width = ws->getVector("width");
     Mantid::API::ColumnVector<double> height = ws->getVector("height");
-    for(int i=0; i<centre.size(); ++i)
+    for(size_t i=0; i<centre.size(); ++i)
     {
       if (centre[i] < startX() || centre[i] > endX()) continue;
       Mantid::API::IPeakFunction* f = dynamic_cast<Mantid::API::IPeakFunction*>(

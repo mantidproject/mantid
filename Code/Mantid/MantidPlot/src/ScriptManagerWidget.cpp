@@ -40,10 +40,10 @@
 /**
  * Constructor
  */
-ScriptManagerWidget::ScriptManagerWidget(ScriptingEnv *env, QWidget *parent, bool interpreter_mode)
+ScriptManagerWidget::ScriptManagerWidget(ScriptingEnv *env, QWidget *parent, bool interpreter_mode, bool capturePrint)
   : QTabWidget(parent), Scripted(env), m_last_dir(""), m_script_runners(),
     m_cursor_pos(), m_findrep_dlg(NULL), 
-    m_interpreter_mode(interpreter_mode)
+    m_interpreter_mode(interpreter_mode), m_recentScriptList(), m_capturePrint(capturePrint)
 {
   //Create actions for this widget
   initActions();
@@ -1062,11 +1062,18 @@ void ScriptManagerWidget::open(bool newtab, const QString & filename)
 Script * ScriptManagerWidget::createScriptRunner(ScriptEditor *editor)
 {
   Script *script = scriptingEnv()->newScript("", this, editor->fileName(), true,
-					     m_toggle_progress->isChecked());
-  // Connect the signals that print output and error messages to the formatting functions
-  connect(script, SIGNAL(print(const QString &)), this, SLOT(displayOutput(const QString &)));
-  connect(script, SIGNAL(error(const QString &, const QString&, int)), this, 
-	  SLOT(displayError(const QString &)));
+                                             m_toggle_progress->isChecked());
+  if( m_capturePrint )
+  {
+    // Connect the signals that print output and error messages to the formatting functions
+    connect(script, SIGNAL(print(const QString &)), this, SLOT(displayOutput(const QString &)));
+    connect(script, SIGNAL(error(const QString &, const QString&, int)), this,
+            SLOT(displayError(const QString &)));
+  }
+  else
+  {
+    script->redirectStdOut(false);
+  }
   if( editor )
   {
     connect(script, SIGNAL(keywordsChanged(const QStringList&)), editor, 

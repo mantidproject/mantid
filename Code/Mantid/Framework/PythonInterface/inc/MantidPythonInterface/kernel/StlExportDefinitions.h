@@ -72,17 +72,15 @@ namespace Mantid
     {
       typename SequenceType::const_iterator iend = values.end();
       std::ostringstream os;
-      std::string retval;
       for( typename SequenceType::const_iterator itr = values.begin(); itr != iend; )
       {
         os << toString(*itr);
-        os << *itr;
         if( ++itr != iend )
         {
-          retval += ",";
+          os << ",";
         }
       }
-      return retval;
+      return os.str();
     }
 
     /**

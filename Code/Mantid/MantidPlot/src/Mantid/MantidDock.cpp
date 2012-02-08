@@ -333,6 +333,8 @@ void MantidDockWidget::createWorkspaceMenuActions()
   m_showTransposed = new QAction(tr("Show Transposed"),this);
   connect(m_showTransposed,SIGNAL(triggered()),m_mantidUI,SLOT(importTransposed()));
 
+  m_convertToMatrixWorkspace = new QAction(tr("Convert to MatrixWorkpace"),this);
+  connect(m_convertToMatrixWorkspace,SIGNAL(triggered()),this,SLOT(convertToMatrixWorkspace()));
 }
 
 /**
@@ -466,9 +468,9 @@ void MantidDockWidget::setItemIcon(QTreeWidgetItem* ws_item,  Mantid::API::Works
   {
     ws_item->setIcon(0,QIcon(getQPixmap("mantid_wsgroup_xpm")));
   }
-  else if( boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(workspace) )
+  else if( boost::dynamic_pointer_cast<Mantid::API::IMDWorkspace>(workspace) )
   {
-    ws_item->setIcon(0,QIcon(getQPixmap("mantid_mdews_xpm")));
+    ws_item->setIcon(0,QIcon(getQPixmap("mantid_mdws_xpm")));
   }
   // Assume it is a table workspace
   else if( boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(workspace) )
@@ -553,6 +555,10 @@ void MantidDockWidget::populateMDWorkspaceData(Mantid::API::IMDWorkspace_sptr wo
     std::ostringstream mess;
     IMDDimension_const_sptr dim = workspace->getDimension(i);
     mess << "Dim " << i << ": (" << dim->getName() << ") " << dim->getMinimum() << " to " << dim->getMaximum() << " in " << dim->getNBins() << " bins";
+    // Also show the dimension ID string, if different than name
+    if (dim->getDimensionId() != dim->getName())
+      mess << ". Id=" << dim->getDimensionId();
+
     std::string s = mess.str();
     MantidTreeWidgetItem* sub_data_item = new MantidTreeWidgetItem(QStringList(QString::fromStdString(s)), m_tree);
     sub_data_item->setFlags(Qt::NoItemFlags);
@@ -581,27 +587,9 @@ void MantidDockWidget::populateMDWorkspaceData(Mantid::API::IMDWorkspace_sptr wo
  */
 void MantidDockWidget::populateMDEventWorkspaceData(Mantid::API::IMDEventWorkspace_sptr workspace, QTreeWidgetItem* ws_item)
 {
-  MantidTreeWidgetItem* data_item = new MantidTreeWidgetItem(QStringList("Title: "+QString::fromStdString(workspace->getTitle())), m_tree);
-  data_item->setFlags(Qt::NoItemFlags);
-  excludeItemFromSort(data_item);
-  ws_item->addChild(data_item);
+  this->populateMDWorkspaceData(workspace, ws_item);
 
-  //data_item = new QTreeWidgetItem(QStringList("Dimensions: "));
-  //data_item->setFlags(Qt::NoItemFlags);
-  //ws_item->addChild(data_item);
-
-  // Now add each dimension
-  for (size_t i=0; i < workspace->getNumDims(); i++)
-  {
-    std::ostringstream mess;
-    IMDDimension_const_sptr dim = workspace->getDimension(i);
-    mess << "Dim " << i << ": (" << dim->getName() << ") " << dim->getMinimum() << " to " << dim->getMaximum() << " " << dim->getUnits();
-    std::string s = mess.str();
-    MantidTreeWidgetItem* sub_data_item = new MantidTreeWidgetItem(QStringList(QString::fromStdString(s)), m_tree);
-    sub_data_item->setFlags(Qt::NoItemFlags);
-    excludeItemFromSort(sub_data_item);
-    ws_item->addChild(sub_data_item);
-  }
+  MantidTreeWidgetItem* data_item;
 
   // Now box controller details
   std::vector<std::string> stats = workspace->getBoxControllerStats();
@@ -613,13 +601,10 @@ void MantidDockWidget::populateMDEventWorkspaceData(Mantid::API::IMDEventWorkspa
     ws_item->addChild(sub_data_item);
   }
 
-
   data_item = new MantidTreeWidgetItem(QStringList("Events: "+ QLocale(QLocale::English).toString(double(workspace->getNPoints()), 'd', 0)), m_tree);
   data_item->setFlags(Qt::NoItemFlags);
   excludeItemFromSort(data_item);
   ws_item->addChild(data_item);
-
-
 }
 
 
@@ -964,6 +949,7 @@ void MantidDockWidget::addTableWorkspaceMenuItems(QMenu * menu) const
   menu->addAction(m_showData);
   menu->addAction(m_showTransposed);
   menu->addAction(m_showHist);
+  menu->addAction(m_convertToMatrixWorkspace);
 }
 
 void MantidDockWidget::clickedWorkspace(QTreeWidgetItem* item, int)
@@ -1412,7 +1398,13 @@ void MantidDockWidget::treeSelectionChanged()
 
 }
 
-
+/**
+ * Convert selected TableWorkspace to a MatrixWorkspace.
+ */
+void MantidDockWidget::convertToMatrixWorkspace()
+{
+  m_mantidUI->executeAlgorithm("ConvertTableToMatrixWorkspace",-1);
+}
 
 //------------ MantidTreeWidget -----------------------//
 

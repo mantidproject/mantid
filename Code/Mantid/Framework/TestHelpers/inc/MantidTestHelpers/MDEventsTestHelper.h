@@ -10,6 +10,7 @@
 #include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidKernel/SingletonHolder.h"
 
 namespace Mantid
 {
@@ -43,7 +44,13 @@ namespace MDEventsTestHelper
 
   /// Make a fake n-dimensional MDHistoWorkspace
   Mantid::MDEvents::MDHistoWorkspace_sptr makeFakeMDHistoWorkspace(double signal, size_t numDims, size_t numBins = 10, double max = 10.0,
-      double errorSquared=1.0);
+      double errorSquared=1.0, std::string name="");
+
+  /// More general fake n-dimensionsal MDHistoWorkspace
+  Mantid::MDEvents::MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceGeneral(size_t numDims,
+      double signal, double errorSquared,
+      size_t * numBins, double * min, double * max,
+      std::string name="");
 
 
   //-------------------------------------------------------------------------------------
@@ -54,11 +61,15 @@ namespace MDEventsTestHelper
    * @param max :: extent of each dimension (max)
    * @param numEventsPerBox :: will create one MDLeanEvent in the center of each sub-box.
    *        0 = don't split box, don't add events
-   * @return
+   * @param wsName :: if specified, then add the workspace to the analysis data service
+   * @param axisNameFormat :: string for the axis name, processed via sprintf()
+   * @param axisIdFormat :: string for the axis ID, processed via sprintf()
+   * @return shared ptr to the created workspace
    */
   template<typename MDE, size_t nd>
   boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<MDE,nd> >
-    makeAnyMDEW(size_t splitInto, double min, double max, size_t numEventsPerBox = 0 )
+    makeAnyMDEW(size_t splitInto, double min, double max, size_t numEventsPerBox = 0, std::string wsName = "",
+        std::string axisNameFormat = "Axis%d", std::string axisIdFormat = "Axis%d")
   {
     boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<MDE,nd> >
             out(new Mantid::MDEvents::MDEventWorkspace<MDE,nd>());
@@ -68,9 +79,12 @@ namespace MDEventsTestHelper
 
     for (size_t d=0; d<nd;d++)
     {
-      std::ostringstream name;
-      name << "Axis" << d;
-      Mantid::Geometry::MDHistoDimension_sptr dim(new Mantid::Geometry::MDHistoDimension( name.str(),name.str(), "m", min, max, 10 ));
+      char name[200];
+      sprintf(name, axisNameFormat.c_str(), d);
+      char id[200];
+      sprintf(id, axisIdFormat.c_str(), d);
+      Mantid::Geometry::MDHistoDimension_sptr dim(
+          new Mantid::Geometry::MDHistoDimension( std::string(name), std::string(id), "m", min, max, 10 ));
       out->addDimension(dim);
     }
     out->initialize();
@@ -97,6 +111,10 @@ namespace MDEventsTestHelper
       }
       out->refreshCache();
     }
+
+    // Add to ADS on option
+    if (!wsName.empty())
+      Mantid::API::AnalysisDataService::Instance().addOrReplace(wsName, out);
 
     return out;
   }

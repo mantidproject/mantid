@@ -368,6 +368,8 @@ signals:
 	void createTable(const QString&,int,int,const QString&);
 
 protected:
+	void setColPlotDesignation(int col, int pd);
+
 	MyTable *d_table;
 
 private:

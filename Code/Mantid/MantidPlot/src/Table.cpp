@@ -387,6 +387,27 @@ void Table::setPlotDesignation(PlotDesignation pd, bool rightColumns)
 
 void Table::setColPlotDesignation(int col, PlotDesignation pd)
 {
+  int convertToInt = pd;
+  setColPlotDesignation(col, convertToInt);
+}
+
+void Table::setColPlotDesignation(int col, int pd)
+{
+  // check that input plot type pd is acceptable
+  // if not set it for now to None
+  bool wasFound = false;
+  for (int i = All; i <= Label; i++)
+    if ( i == pd )
+    {
+      wasFound = true;
+      break;
+    }
+  if ( !wasFound )
+  {
+    // here a warning should really be displayed to the user
+    pd = None;
+  }
+
   if (col < 0 || col >= d_table->numCols() || col_plot_type[col] == pd)
     return;
 

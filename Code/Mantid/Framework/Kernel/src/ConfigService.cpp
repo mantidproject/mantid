@@ -650,8 +650,13 @@ void ConfigServiceImpl::cacheUserSearchPaths()
  */
 bool ConfigServiceImpl::isInDataSearchList(const std::string & path) const
 {
+  // the path produced by poco will have \ on windows, but the searchdirs will always have /
+  std::string correctedPath=path;
+  replace( correctedPath.begin(), correctedPath.end(), '\\', '/' );
+
+
   std::vector<std::string>::const_iterator it = std::find_if(m_DataSearchDirs.begin(),
-      m_DataSearchDirs.end(), std::bind2nd(std::equal_to<std::string>(), path));
+      m_DataSearchDirs.end(), std::bind2nd(std::equal_to<std::string>(), correctedPath));
   return (it != m_DataSearchDirs.end());
 }
 
@@ -1357,7 +1362,7 @@ void ConfigServiceImpl::setParaViewPluginPath() const
     g_log.debug("ParaView plugin directory \"" + pv_plugin.path() + "\" does not exist");
     pv_plugin_path = Poco::Path(mantid_loc + "/../pvplugins");
     pv_plugin_path = pv_plugin_path.absolute();
-    Poco::File pv_plugin(pv_plugin_path.toString());
+    pv_plugin = Poco::File(pv_plugin_path.toString());
     if (!pv_plugin.exists() || !pv_plugin.isDirectory())
     {
       g_log.debug("ParaView plugin directory \"" + pv_plugin.path() + "\" does not exist");

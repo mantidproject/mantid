@@ -310,31 +310,31 @@ namespace MantidQt
       {
         m_uiForm.invsttableWidget->removeRow(i);
       }
-      m_uiForm.invsttableWidget->setRowCount(ws_sptr->rowCount());
-      m_uiForm.invsttableWidget->setColumnCount(ws_sptr->columnCount());
+      m_uiForm.invsttableWidget->setRowCount(static_cast<int>(ws_sptr->rowCount()));
+      m_uiForm.invsttableWidget->setColumnCount(static_cast<int>(ws_sptr->columnCount()));
 
-      for (int i=0;i<ws_sptr->rowCount();++i)
+      for (size_t i=0;i<ws_sptr->rowCount();++i)
       {
         //setting the row height of tableWidget
-        m_uiForm.invsttableWidget->setRowHeight(i,20);
+        m_uiForm.invsttableWidget->setRowHeight(static_cast<int>(i),20);
       }
 
       QStringList qlabelList;
-      for(int i=0;i<ws_sptr->columnCount();i++)
+      for(size_t i=0;i<ws_sptr->columnCount();i++)
       {
         Column_sptr col_sptr = ws_sptr->getColumn(i);
         //get the column name to display as the header of table widget
         QString colTitle = QString::fromStdString(col_sptr->name());
         qlabelList.push_back(colTitle);
 
-        for(int j=0;j<ws_sptr->rowCount();++j)
+        for(size_t j=0;j<ws_sptr->rowCount();++j)
         {
           std::ostringstream ostr;
-          col_sptr->print(ostr,j);
+          col_sptr->print(j,ostr);
 
           QTableWidgetItem *newItem  = new QTableWidgetItem(QString::fromStdString(ostr.str()));
           newItem->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-          m_uiForm.invsttableWidget->setItem(j,i, newItem);
+          m_uiForm.invsttableWidget->setItem(static_cast<int>(j),static_cast<int>(i), newItem);
           newItem->setToolTip(QString::fromStdString(ostr.str()));
 
         }
@@ -438,15 +438,15 @@ namespace MantidQt
         (AnalysisDataService::Instance().retrieve("datafiles"));
       }
       int64_t fileId=0;
-      const int col=0;
-      int row=0;
+      const size_t col=0;
+      size_t row=0;
       std::vector<std::string>::const_iterator citr;
       for(citr=fileNames.begin();citr!=fileNames.end();++citr)
       {
         try
         {
           ws_sptr->find(*citr,row,col);
-          fileId=ws_sptr->cell<int64_t>(row,col+2);//3rd column is the file id.
+          fileId=ws_sptr->cell<int64_t>(row,col+3); //4rd column is the id.
         }
         catch(std::range_error&)
         {
@@ -582,9 +582,14 @@ namespace MantidQt
       QString wsName;
       int index = filePath.lastIndexOf(".");
       int index1 = filePath.lastIndexOf("/");
+      int indexBackwardSlash = filePath.lastIndexOf("\\");
       if(index!=-1 && index1!=-1)
       {
         wsName=filePath.mid(index1+1,index-index1-1);
+      }
+      else if(index!=-1 && indexBackwardSlash!=-1)
+      {
+        wsName=filePath.mid(indexBackwardSlash+1,index-indexBackwardSlash-1);
       }
 
       if(!isLoadingControlled())

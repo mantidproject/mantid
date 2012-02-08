@@ -39,7 +39,7 @@ namespace Mantid
     void MDEWLoadingPresenter::extractMetadata(Mantid::API::IMDEventWorkspace_sptr eventWs)
     {
       using namespace Mantid::Geometry;
-      MDGeometryBuilderXML<StrictDimensionPolicy> refresh;
+      MDGeometryBuilderXML<NoDimensionPolicy> refresh;
       xmlBuilder= refresh; //Reassign.
       std::vector<MDDimensionExtents> ext = eventWs->getMinimumExtents(5);
       std::vector<IMDDimension_sptr> dimensions;
@@ -55,7 +55,7 @@ namespace Mantid
           max = 1.0;
         }
         //std::cout << "dim " << d << min << " to " <<  max << std::endl;
-        MDHistoDimension_sptr dim(new MDHistoDimension(inDim->getName(), inDim->getName(), inDim->getUnits(), min, max, size_t(10)));
+        MDHistoDimension_sptr dim(new MDHistoDimension(inDim->getName(), inDim->getName(), inDim->getUnits(), min, max, inDim->getNBins()));
         dimensions.push_back(dim);
       }
 
@@ -166,7 +166,7 @@ namespace Mantid
       {
         throw std::runtime_error("Have not yet run ::extractMetaData!");
       }
-      return xmlBuilder.hasTDimension();
+      return xmlBuilder.hasTDimension() && !xmlBuilder.hasIntegratedTDimension();
     }
 
        /*

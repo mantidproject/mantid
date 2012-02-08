@@ -1,5 +1,5 @@
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
-
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include <boost/functional/hash.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
@@ -307,6 +307,12 @@ template <typename CheckDimensionPolicy>
 bool MDGeometryBuilderXML<CheckDimensionPolicy>::hasTDimension() const
 {
   return NULL != this->m_spTDimension.get();
+}
+
+template <typename CheckDimensionPolicy>
+bool MDGeometryBuilderXML<CheckDimensionPolicy>::hasIntegratedTDimension() const
+{
+  return hasTDimension() && this->m_spTDimension->getIsIntegrated();
 }
 
 /**

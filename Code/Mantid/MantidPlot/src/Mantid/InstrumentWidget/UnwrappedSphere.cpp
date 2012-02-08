@@ -8,25 +8,34 @@ UnwrappedSphere::UnwrappedSphere(const InstrumentActor* rootActor, const Mantid:
   init();
 }
 
-void UnwrappedSphere::calcUV(UnwrappedDetector& udet)
+//------------------------------------------------------------------------------
+/** Convert physical position to UV projection
+ *
+ * @param u :: set to U
+ * @param v :: set to V
+ * @param pos :: position in 3D
+ */
+void UnwrappedSphere::project(double & u, double & v, double & uscale, double & vscale, const Mantid::Kernel::V3D & pos) const
 {
-  //static const double pi2 = 2*acos(-1.);
-  Mantid::Kernel::V3D pos = udet.detector->getPos() - m_pos;
-
   // projection to cylinder axis
-  udet.v = pos.scalar_prod(m_zaxis);
+  v = pos.scalar_prod(m_zaxis);
   double x = pos.scalar_prod(m_xaxis);
   double y = pos.scalar_prod(m_yaxis);
 
-  double r = sqrt(x*x+y*y+udet.v*udet.v);
-  udet.uscale = 1./sqrt(x*x+y*y);
-  udet.vscale = 1./r;
+  double r = sqrt(x*x+y*y+v*v);
+  uscale = 1./sqrt(x*x+y*y);
+  vscale = 1./r;
 
-  udet.u = -atan2(y,x);
-  udet.v = -acos(udet.v/r);
+  u = -atan2(y,x);
+  v = -acos(v/r);
+}
 
+
+void UnwrappedSphere::calcUV(UnwrappedDetector& udet)
+{
+  Mantid::Kernel::V3D pos = udet.detector->getPos() - m_pos;
+  this->project(udet.u, udet.v, udet.uscale, udet.vscale, pos);
   calcSize(udet,Mantid::Kernel::V3D(-1,0,0),Mantid::Kernel::V3D(0,1,0));
-
 }
 
 void UnwrappedSphere::calcRot(const UnwrappedDetector& udet, Mantid::Kernel::Quat& R)const

@@ -66,6 +66,18 @@ void Axis::setUnit(const std::string & unit)
   m_unit = Mantid::Kernel::UnitFactory::Instance().create(unit);
 }
 
+/**
+ *  Gets the value at the specified index. Easier to use with pointers than the operator()
+ *  @param index :: The index along the axis direction
+ *  @param verticalIndex :: The verticalIndex (used in RefAxis)
+ *  @returns The double value at the given index
+ */
+double Axis::getValue(const std::size_t& index, const std::size_t& verticalIndex) const
+{
+  return (*this)(index, verticalIndex);
+}
+
+
 /** Returns the spectrum number at the position given (Spectra axis only)
  *  @param  index The position for which the value is required
  *  @return The spectrum number as an int

@@ -55,15 +55,14 @@ namespace Mantid
       std::set<size_t,std::greater<size_t> >::iterator it = sortedRows.begin();
       for(; it != sortedRows.end(); ++it)
       {
-        int i = static_cast<int>(*it);
-        if (i < 0 || i >= tw->rowCount()) continue;
+        if (*it >= tw->rowCount()) continue;
         if (pw)
         {
-          pw->removePeak(i);
+          pw->removePeak(static_cast<int>(*it));
         }
         else
         {
-          tw->removeRow(i);
+          tw->removeRow(*it);
         }
       }
       setProperty("TableWorkspace",tw);

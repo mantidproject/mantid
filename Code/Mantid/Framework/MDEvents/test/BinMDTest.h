@@ -436,8 +436,9 @@ public:
    * @param binned1Name :: original, binned direct from MDEW
    * @param binned2Name :: binned from a MDHisto
    * @param origWS :: both should have this as its originalWorkspace
+   * @return binned2 shared pointer
    */
-  void do_compare_histo(std::string binned1Name, std::string binned2Name, std::string origWS)
+  MDHistoWorkspace_sptr do_compare_histo(std::string binned1Name, std::string binned2Name, std::string origWS)
   {
     MDHistoWorkspace_sptr binned1 = boost::dynamic_pointer_cast<MDHistoWorkspace>(AnalysisDataService::Instance().retrieve(binned1Name));
     MDHistoWorkspace_sptr binned2 = boost::dynamic_pointer_cast<MDHistoWorkspace>(AnalysisDataService::Instance().retrieve(binned2Name));
@@ -452,6 +453,7 @@ public:
       TS_ASSERT_DELTA( binned1->getSignalAt(i), binned2->getSignalAt(i), 1e-5);
     }
     TS_ASSERT_EQUALS( numErrors, 0);
+    return binned2;
   }
 
   /** Common setup for double-binning tests */
@@ -499,14 +501,174 @@ public:
         "InputWorkspace", "binned0",
         "OutputWorkspace", "binned1",
         "AxisAligned", "0",
-        "BasisVectorX", "rx,m, 1.0, 0.0, 20.0, 10",
-        "BasisVectorY", "ry,m, 0.0, 1.0, 20.0, 10",
+        "BasisVectorX", "rx,m, 1.0,0.0, 20.0, 10",
+        "BasisVectorY", "ry,m, 0.0,1.0, 20.0, 10",
         "ForceOrthogonal", "1",
         "Origin", "-10, -10");
 
-    do_compare_histo("binned0", "binned1", "mdew");
+    MDHistoWorkspace_sptr binned1 = do_compare_histo("binned0", "binned1", "mdew");
+
+    // Intermediate workspace (the MDHisto)
+    TS_ASSERT_EQUALS( binned1->numOriginalWorkspaces(), 2);
+    TS_ASSERT_EQUALS( binned1->getOriginalWorkspace(1)->name(), "binned0");
+    // Transforms to/from the INTERMEDIATE workspace exist
+    CoordTransform * toIntermediate = binned1->getTransformToOriginal(1);
+    CoordTransform * fromIntermediate = binned1->getTransformFromOriginal(1);
+    TS_ASSERT( toIntermediate);
+    TS_ASSERT( fromIntermediate );
+
+    // Transform from the BINNED to the INTERMEDIATE and check.
+    VMD binnedPos(0.1, 0.2);
+    VMD intermediatePos = toIntermediate->applyVMD(binnedPos);
+    TS_ASSERT_DELTA( intermediatePos[0], -9.9, 1e-5);
+    TS_ASSERT_DELTA( intermediatePos[1], -9.8, 1e-5);
+
   }
 
+
+  //---------------------------------------------------------------------------------------------
+  /** Bin a MDHistoWorkspace that was itself binned from a MDEW, axis-aligned, but swapping axes around */
+  void test_exec_AlignedSwappingAxes_then_nonAligned()
+  {
+    do_prepare_comparison();
+    // Bin aligned to original.
+    FrameworkManager::Instance().exec("BinMD", 10,
+        "InputWorkspace", "mdew",
+        "OutputWorkspace", "binned0",
+        "AxisAligned", "1",
+        "AlignedDimX", "y, -10, 10, 10",
+        "AlignedDimY", "x, -10, 10, 10");
+
+    // binned0.x is mdew.y
+    // binned0.y is mdew.x
+    // Bin, non-axis-aligned, with translation
+    FrameworkManager::Instance().exec("BinMD", 14,
+        "InputWorkspace", "binned0",
+        "OutputWorkspace", "binned1",
+        "AxisAligned", "0",
+        "BasisVectorX", "rx,m, 1.0,0.0, 20.0, 10",
+        "BasisVectorY", "ry,m, 0.0,1.0, 20.0, 10",
+        "ForceOrthogonal", "1",
+        "Origin", "-10, -5");
+
+    // Get the final binned workspace
+    MDHistoWorkspace_sptr binned1 = boost::dynamic_pointer_cast<MDHistoWorkspace>(AnalysisDataService::Instance().retrieve("binned1"));
+
+    // Intermediate workspace (the MDHisto) is binned0
+    TS_ASSERT_EQUALS( binned1->numOriginalWorkspaces(), 2);
+    TS_ASSERT_EQUALS( binned1->getOriginalWorkspace(1)->name(), "binned0");
+    // Transforms to/from the INTERMEDIATE workspace exist
+    CoordTransform * toIntermediate = binned1->getTransformToOriginal(1);
+    CoordTransform * fromIntermediate = binned1->getTransformFromOriginal(1);
+    TS_ASSERT( toIntermediate);
+    TS_ASSERT( fromIntermediate );
+
+    // Transforms to/from the REALLY ORIGINAL workspace exist
+    CoordTransform * toOriginal = binned1->getTransformToOriginal(0);
+    CoordTransform * fromOriginal = binned1->getTransformFromOriginal(0);
+    TS_ASSERT( toOriginal);
+    TS_ASSERT( fromOriginal );
+
+    // Transform from the BINNED coordinates.
+    // in binned1 : (0.1,   0.2)
+    // in binned0 : (-9.9, -4.8)
+    // in mdew :    (-4.8, -9.9)
+    VMD binned1Pos(0.1, 0.2);
+    VMD intermediatePos = toIntermediate->applyVMD(binned1Pos);
+    VMD originalPos = toOriginal->applyVMD(binned1Pos);
+    TS_ASSERT_DELTA( intermediatePos[0], -9.9, 1e-5);
+    TS_ASSERT_DELTA( intermediatePos[1], -4.8, 1e-5);
+    TS_ASSERT_DELTA( originalPos[0], -4.8, 1e-5);
+    TS_ASSERT_DELTA( originalPos[1], -9.9, 1e-5);
+
+    // Now check the reverse transforms
+    VMD originalToBinned = fromOriginal->applyVMD( VMD(-4.8, -9.9) );
+    TS_ASSERT_DELTA( originalToBinned[0], 0.1, 1e-5);
+    TS_ASSERT_DELTA( originalToBinned[1], 0.2, 1e-5);
+
+    VMD intermediateToBinned = fromIntermediate->applyVMD( VMD(-9.9, -4.8) );
+    TS_ASSERT_DELTA( intermediateToBinned[0], 0.1, 1e-5);
+    TS_ASSERT_DELTA( intermediateToBinned[1], 0.2, 1e-5);
+  }
+
+
+  //---------------------------------------------------------------------------------------------
+  /** Bin a MDHistoWorkspace that was itself binned from a MDEW, axis-aligned, but swapping axes around */
+  void test_exec_AlignedSwappingAxes_then_nonAligned_3D()
+  {
+    AnalysisDataService::Instance().remove("mdew3d");
+
+    FrameworkManager::Instance().exec("CreateMDWorkspace", 16,
+        "Dimensions", "3",
+        "Extents", "-10,10,-10,10,-10,10",
+        "Names", "A,B,C",
+        "Units", "m,m,m",
+        "SplitInto", "4",
+        "SplitThreshold", "100",
+        "MaxRecursionDepth", "20",
+        "OutputWorkspace", "mdew3d");
+
+    FrameworkManager::Instance().exec("BinMD", 12,
+        "InputWorkspace", "mdew3d",
+        "OutputWorkspace", "binned0",
+        "AxisAligned", "1",
+        "AlignedDimX", "B, -10, 10, 10",
+        "AlignedDimY", "C, -10, 10, 10",
+        "AlignedDimZ", "A, -10, 10, 10"
+        );
+
+    FrameworkManager::Instance().exec("BinMD", 16,
+        "InputWorkspace", "binned0",
+        "OutputWorkspace", "binned1",
+        "AxisAligned", "0",
+        "BasisVectorX", "rx,m, 1.0,0.0,0.0, 20.0, 10",
+        "BasisVectorY", "ry,m, 0.0,1.0,0.0, 20.0, 10",
+        "BasisVectorZ", "rz,m, 0.0,0.0,1.0, 20.0, 10",
+        "ForceOrthogonal", "1",
+        "Origin", "-10, -5, -3");
+
+    // Get the final binned workspace
+    MDHistoWorkspace_sptr binned1 = boost::dynamic_pointer_cast<MDHistoWorkspace>(AnalysisDataService::Instance().retrieve("binned1"));
+
+    // Intermediate workspace (the MDHisto) is binned0
+    TS_ASSERT_EQUALS( binned1->numOriginalWorkspaces(), 2);
+    TS_ASSERT_EQUALS( binned1->getOriginalWorkspace(1)->name(), "binned0");
+    // Transforms to/from the INTERMEDIATE workspace exist
+    CoordTransform * toIntermediate = binned1->getTransformToOriginal(1);
+    CoordTransform * fromIntermediate = binned1->getTransformFromOriginal(1);
+    TS_ASSERT( toIntermediate);
+    TS_ASSERT( fromIntermediate );
+
+    // Transforms to/from the REALLY ORIGINAL workspace exist
+    CoordTransform * toOriginal = binned1->getTransformToOriginal(0);
+    CoordTransform * fromOriginal = binned1->getTransformFromOriginal(0);
+    TS_ASSERT( toOriginal);
+    TS_ASSERT( fromOriginal );
+
+    // Transform from the BINNED coordinates.
+    // in binned1 : (0.1,   0.2, 0.3)
+    // in binned0 : (-9.9, -4.8, -2.7)
+    // in mdew3d :  (-2.7, -9.9, -4.8)
+    VMD binned1Pos(0.1, 0.2, 0.3);
+    VMD intermediatePos = toIntermediate->applyVMD(binned1Pos);
+    VMD originalPos = toOriginal->applyVMD(binned1Pos);
+    TS_ASSERT_DELTA( intermediatePos[0], -9.9, 1e-5);
+    TS_ASSERT_DELTA( intermediatePos[1], -4.8, 1e-5);
+    TS_ASSERT_DELTA( intermediatePos[2], -2.7, 1e-5);
+    TS_ASSERT_DELTA( originalPos[0], -2.7, 1e-5);
+    TS_ASSERT_DELTA( originalPos[1], -9.9, 1e-5);
+    TS_ASSERT_DELTA( originalPos[2], -4.8, 1e-5);
+
+//
+//    // Now check the reverse transforms
+//    VMD originalToBinned = fromOriginal->applyVMD( VMD(-4.8, -9.9) );
+//    TS_ASSERT_DELTA( originalToBinned[0], 0.1, 1e-5);
+//    TS_ASSERT_DELTA( originalToBinned[1], 0.2, 1e-5);
+//
+//    VMD intermediateToBinned = fromIntermediate->applyVMD( VMD(-9.9, -4.8) );
+//    TS_ASSERT_DELTA( intermediateToBinned[0], 0.1, 1e-5);
+//    TS_ASSERT_DELTA( intermediateToBinned[1], 0.2, 1e-5);
+  }
 
   //---------------------------------------------------------------------------------------------
   /** Bin a MDHistoWorkspace that was itself binned from a MDEW, not axis-aligned */
@@ -543,7 +705,15 @@ public:
         "ForceOrthogonal", "1",
         "Origin", "0, 0");
     // Check they are the same
-    do_compare_histo("binned0", "binned2", "mdew");
+    MDHistoWorkspace_sptr binned2 = do_compare_histo("binned0", "binned2", "mdew");
+
+    // Intermediate workspace (the MDHisto)
+    TS_ASSERT_EQUALS( binned2->numOriginalWorkspaces(), 2);
+    TS_ASSERT_EQUALS( binned2->getOriginalWorkspace(1)->name(), "binned1");
+    // Transforms to/from the INTERMEDIATE workspace exist
+    TS_ASSERT( binned2->getTransformToOriginal(1) );
+    TS_ASSERT( binned2->getTransformFromOriginal(1) );
+
   }
 
 

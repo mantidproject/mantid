@@ -205,7 +205,6 @@ private:
 
   QPushButton* buttonAxesFont, *buttonNumbersFont, *buttonLegendFont, *buttonTitleFont, *fontsBtn;
   QCheckBox *boxSearchUpdates, *boxOrthogonal, *logBox, *plotLabelBox, *scaleErrorsBox;
-  QCheckBox *boxSharedMenuBar;
   QCheckBox *boxTitle, *boxFrame, *boxPlots3D, *boxPlots2D, *boxTables, *boxNotes, *boxFolders,*boxInstrWindow;
   QCheckBox *boxSave, *boxBackbones, *boxShowLegend, *boxSmoothMesh;
   QCheckBox *boxAllAxes;
@@ -242,6 +241,7 @@ private:
   QSpinBox *undoStackSizeBox;
   QComboBox *boxEndLine;
   QCheckBox* cbApplyToMantid;
+  QCheckBox* cbEnableQtiPlotFitting;
 
 
 

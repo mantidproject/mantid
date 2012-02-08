@@ -29,7 +29,7 @@
  *                                                                         *
  ***************************************************************************/
 
-%Module qti
+%Module _qti
 %Import QtCore/QtCoremod.sip
 %Import QtGui/QtGuimod.sip
 
@@ -58,6 +58,8 @@ public:
   Folder* folder();
 
   void askOnCloseEvent(bool)/PyName=confirmClose/;
+  void show();
+  void hide();
   bool close();
 
 private:
@@ -421,7 +423,7 @@ private:
 class ImageSymbol : QwtSymbol
 {
 %TypeHeaderCode
-#include <plot2D/ImageSymbol.h>
+#include "src/plot2D/ImageSymbol.h"
 %End
 
 public:
@@ -874,7 +876,7 @@ private:
 class ErrorBarSettings : QObject
 {
 %TypeHeaderCode
-#include "../src/Mantid/ErrorBarSettings.h"
+#include "src/Mantid/ErrorBarSettings.h"
 %End
 public:
   int capLength();
@@ -1130,7 +1132,7 @@ public:
 
   void setWindowName(MdiSubWindow *, const QString &);
   void setPreferences(Graph*);
-  void selectMultiPeak(bool = true);
+  void selectMultiPeak(MultiLayer *, bool = true);
 
   void saveProjectAs(const QString& fileName = QString(), bool = false);
   MdiSubWindow* clone(MdiSubWindow*);
@@ -1261,7 +1263,6 @@ class InstrumentWindow: MdiSubWindow
 #include "src/Mantid/InstrumentWidget/InstrumentWindow.h"
 %End
 public:
-  void show() /PyName = showWindow/;
   void changeColormap() /PyName = changeColorMap/;
   void changeColormap(const QString & file) /PyName = changeColorMap/;
   void setColorMapMinValue(double);
@@ -1298,6 +1299,10 @@ public:
   MantidMatrix* getMantidMatrix(const QString &);
   QString getSelectedWorkspaceName();
   InstrumentWindow* getInstrumentView(const QString &, int tab = -1);
+%MethodCode
+  sipRes = sipCpp->getInstrumentView(*a0,a1);
+  sipRes->hide();
+%End
   MantidMatrix* importMatrixWorkspace(const QString&,int = -1, int = -1, bool = false, bool = false);
   Table* createTableFromSpectraList(const QString& tableName, const QString& workspaceName, 
       QList<int> indexList, bool errs=true, bool binCentres=false) /PyName = workspaceToTable/;

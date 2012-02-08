@@ -42,31 +42,31 @@ namespace MantidQt
       tablewidget->setSortingEnabled(false);
 
       tablewidget->verticalHeader()->setVisible(false);
-      tablewidget->setRowCount(ws_sptr->rowCount());
-      tablewidget->setColumnCount(ws_sptr->columnCount());
+      tablewidget->setRowCount(static_cast<int>(ws_sptr->rowCount()));
+      tablewidget->setColumnCount(static_cast<int>(ws_sptr->columnCount()));
 
-      for (int i=0;i<ws_sptr->rowCount();++i)
+      for (size_t i=0;i<ws_sptr->rowCount();++i)
       {
         //setting the row height of tableWidget
-        tablewidget->setRowHeight(i,20);
+        tablewidget->setRowHeight(static_cast<int>(i),20);
       }
 
       QStringList qlabelList;
-      for(int i=0;i<ws_sptr->columnCount();i++)
+      for(size_t i=0;i<ws_sptr->columnCount();i++)
       {
         Column_sptr col_sptr = ws_sptr->getColumn(i);
         //get the column name to display as the header of table widget
         QString colTitle = QString::fromStdString(col_sptr->name());
         qlabelList.push_back(colTitle);
 
-        for(int j=0;j<ws_sptr->rowCount();++j)
+        for(size_t j=0;j<ws_sptr->rowCount();++j)
         {
           std::ostringstream ostr;
-          col_sptr->print(ostr,j);
+          col_sptr->print(j,ostr);
 
           QTableWidgetItem *newItem  = new QTableWidgetItem(QString::fromStdString(ostr.str()));
           newItem->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-          tablewidget->setItem(j,i, newItem);
+          tablewidget->setItem(static_cast<int>(j),static_cast<int>(i), newItem);
           newItem->setToolTip(QString::fromStdString(ostr.str()));
         }
       }
@@ -234,7 +234,7 @@ namespace MantidQt
 
         instrlist= alg->getProperty("InstrumentList");
       }
-      catch (Mantid::Kernel::Exception::NotFoundError& e)
+      catch (Mantid::Kernel::Exception::NotFoundError&)
       {
         throw;
       }
@@ -247,7 +247,7 @@ namespace MantidQt
       {
         return  alg->getProperty("IsValid");
       }
-      catch (Mantid::Kernel::Exception::NotFoundError&e)
+      catch (Mantid::Kernel::Exception::NotFoundError&)
       {
         throw;
       }

@@ -136,9 +136,23 @@ public:
      */
     TS_ASSERT_THROWS(intersectionByLaszlo(rect2, parallelogram), Mantid::Geometry::NoIntersectionException);
     TS_ASSERT_THROWS(intersectionByLaszlo(parallelogram, rect2), Mantid::Geometry::NoIntersectionException);
+  }
 
+  void test_First_Shape_Engulfing_Second_Gives_Overlap_Of_Smaller()
+  {
+    ConvexPolygon smallRectangle = ConvexPolygon(7.0, 8.0,0.5, 1.5);
+    ConvexPolygon largeRectange(6.8, 8.6, -0.5, 2.0);
+
+    ConvexPolygon overlap = intersectionByLaszlo(smallRectangle,largeRectange);
+    TS_ASSERT_EQUALS(overlap.numVertices(), 4);
+    // Are they correct
+    TS_ASSERT_EQUALS(overlap[0], smallRectangle[0]);
+    TS_ASSERT_EQUALS(overlap[1], smallRectangle[1]);
+    TS_ASSERT_EQUALS(overlap[2], smallRectangle[2]);
+    TS_ASSERT_EQUALS(overlap[3], smallRectangle[3]);
 
   }
+
 
 };
 

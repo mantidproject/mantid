@@ -84,6 +84,11 @@ public:
     TS_ASSERT_DELTA( out->getParameter("A1"),0.0, 0.01);
     TS_ASSERT_DELTA( out->getParameter("A2"),1.0, 0.0001);
 
+    // check its categories
+    const std::vector<std::string> categories = out->categories();
+    TS_ASSERT( categories.size() == 1 );
+    TS_ASSERT( categories[0] == "Background" );
+
 
   }
 

@@ -42,6 +42,9 @@ namespace DataHandling
     declareProperty("LogName1", "", "One of the log to be merged");
     declareProperty("LogName2", "", "One of the log to be merged");
     declareProperty("MergedLogName", "", "Name of the merged log.");
+    declareProperty("ResetLogValue", false, "Reset both logs' values to unity for each one.");
+    declareProperty("LogValue1", 0.0, "Unity value of log 1.");
+    declareProperty("LogValue2", 1.0, "Unity value of log 2.");
 
     return;
   }
@@ -53,6 +56,9 @@ namespace DataHandling
     std::string logname1 = this->getProperty("LogName1");
     std::string logname2 = this->getProperty("LogName2");
     std::string mlogname = this->getProperty("MergedLogName");
+    bool resetlogvalue = this->getProperty("ResetLogValue");
+    double logvalue1 = this->getProperty("LogValue1");
+    double logvalue2 = this->getProperty("LogValue2");
 
     // 2. Check
     if (logname1.size() == 0 || logname2.size() == 0 || mlogname.size() == 0){
@@ -60,8 +66,12 @@ namespace DataHandling
       throw std::invalid_argument("One or more than one log name is not give");
     }
 
+    if (resetlogvalue && fabs(logvalue1-logvalue2)<1.0E-9){
+      g_log.warning() << "User re-defined log values of two logs are very close!" << std::endl;
+    }
+
     // 3. Merge log
-    this->mergeLogs(logname1, logname2, mlogname);
+    this->mergeLogs(logname1, logname2, mlogname, resetlogvalue, logvalue1, logvalue2);
 
     return;
   }
@@ -73,7 +83,8 @@ namespace DataHandling
    * @param ilogname2:  name of log 2 to be merged
    * @param ologname:   name of the merged log to be added to workspace
    */
-  void Merge2WorkspaceLogs::mergeLogs(std::string ilogname1, std::string ilogname2, std::string ologname){
+  void Merge2WorkspaceLogs::mergeLogs(std::string ilogname1, std::string ilogname2, std::string ologname,
+      bool resetlogvalue, double logvalue1, double logvalue2){
 
     // 1. Get log
     Kernel::TimeSeriesProperty<double> *p1 = getTimeSeriesLog(ilogname1);
@@ -113,11 +124,19 @@ namespace DataHandling
       if (launch1){
         // Add log1
         tmptime = times1[index1];
-        tmpvalue = p1->getSingleValue(tmptime);
+        if (resetlogvalue){
+          tmpvalue = logvalue1;
+        } else {
+          tmpvalue = p1->getSingleValue(tmptime);
+        }
       } else {
         // Add log 2
         tmptime = times2[index2];
-        tmpvalue = p2->getSingleValue(tmptime);
+        if (resetlogvalue){
+          tmpvalue = logvalue2;
+        } else {
+          tmpvalue = p2->getSingleValue(tmptime);
+        }
       }
 
       // iii. Add log

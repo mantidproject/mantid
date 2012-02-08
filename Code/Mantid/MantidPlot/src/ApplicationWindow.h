@@ -41,7 +41,6 @@ Description          : QtiPlot's main window
 #include <QLocale>
 #include <QSet>
 #include <QSettings>
-#include <QMutex>
 
 #include "Table.h"
 #include "ScriptingEnv.h"
@@ -90,6 +89,7 @@ class TextEditor;
 class AssociationsDialog;
 class MantidMatrix;
 class FloatingWindow;
+class MantidTable;
 
 // On Mac (and Ubuntu 11 Unity) the menubar must be shared between the main window and other floating windows.
 #ifdef Q_OS_MAC
@@ -184,7 +184,7 @@ public:
   //@}
 
   QList<QMenu *> menusList();
-  QList<QToolBar *> toolBarsList();
+  QList<QToolBar *> toolBarsList() const;
 
   MdiSubWindow *activeWindow(WindowType type = NoWindow);
   void addMdiSubWindow(MdiSubWindow *w, bool showNormal = true);
@@ -225,7 +225,8 @@ public slots:
   */
   ApplicationWindow * loadScript(const QString& fn, bool execute = false, bool quit = false);
 
-  QList<MdiSubWindow *> windowsList();
+  QList<MdiSubWindow *> windowsList() const;
+  QList<MdiSubWindow *> getAllWindows() const;
   void updateWindowLists(MdiSubWindow *w);
   /**
   Arranges all the visible project windows in a cascade pattern.
@@ -347,7 +348,7 @@ public slots:
   //@{
   MultiLayer * newFunctionPlot(QStringList &formulas, double start, double end, int points = 100, const QString& var = "x", int type = 0);
 
-  FunctionDialog* functionDialog();
+  FunctionDialog* functionDialog(Graph* g = NULL);
   FunctionDialog* showFunctionDialog();
   FunctionDialog* showFunctionDialog(Graph * g, int curve);
   void addFunctionCurve();
@@ -372,6 +373,8 @@ public slots:
   Matrix* newMatrix(const QString& caption, int r, int c);
   Matrix* matrix(const QString& name);
   Matrix* convertTableToMatrix();
+  void convertTableToWorkspace();
+  MantidTable* convertTableToTableWorkspace(Table* t);
   Matrix* tableToMatrix(Table* t);
   void initMatrix(Matrix* m, const QString& caption);
   void transposeMatrix();
@@ -517,6 +520,7 @@ public slots:
   bool setWindowName(MdiSubWindow *w, const QString &text);
 
   void maximizeWindow(Q3ListViewItem * lbi = 0);
+  void activateWindow(Q3ListViewItem * lbi);
   void maximizeWindow(MdiSubWindow *w);
   void minimizeWindow(MdiSubWindow *w = 0);
   //! Changes the geometry of the active MDI window
@@ -634,6 +638,7 @@ public slots:
   void pickPointerCursor();
   void disableTools();
   void selectMultiPeak(bool showFitPropertyBrowser=true);
+  void selectMultiPeak(MultiLayer* plot, bool showFitPropertyBrowser=true);
   void pickDataTool( QAction* action );
 
   void updateLog(const QString& result);
@@ -726,7 +731,7 @@ public slots:
   //! Connected to the context menu signal from lv; it's called when there are no items selected in the list
   void showListViewPopupMenu(const QPoint &p);
 
-  void showScriptWindow(bool forceVisible = false);
+  void showScriptWindow(bool forceVisible = false, bool quitting = false);
   void saveScriptWindowGeometry();
   void showScriptInterpreter();
   bool testForIPython();
@@ -974,7 +979,7 @@ public slots:
   void setShowWindowsPolicy(int p);
 
   //!  returns a pointer to the root project folder
-  Folder* projectFolder();
+  Folder* projectFolder() const;
 
   //!  used by the findDialog
   void find(const QString& s, bool windowNames, bool labels, bool folderNames,
@@ -1040,7 +1045,7 @@ public slots:
   void activateNewWindow();
 
   //   Methods for Floating windows
-  FloatingWindow* addMdiSubWindowAsFloating(MdiSubWindow* w, QPoint pos = QPoint(0,0));
+  FloatingWindow* addMdiSubWindowAsFloating(MdiSubWindow* w, QPoint pos = QPoint(-1,-1));
   QMdiSubWindow* addMdiSubWindowAsDocked(MdiSubWindow* w);
   void mdiWindowActivated(MdiSubWindow* w);
   void changeToFloating(MdiSubWindow* w);
@@ -1050,10 +1055,6 @@ public slots:
   bool isDefaultFloating(const MdiSubWindow* w) const;
   bool isDefaultFloating(const QString& aClassName) const;
   QMenuBar* myMenuBar();
-#ifdef SHARED_MENUBAR
-  bool isMenuBarShared() const {return m_sharedMenuBar != NULL;}
-  void shareMenuBar(bool yes);
-#endif
   void changeActiveToFloating();
   void changeActiveToDocked();
 
@@ -1072,7 +1073,7 @@ protected:
   virtual bool event(QEvent * e);
 
 private:
-  virtual QMenu * createPopupMenu(){return NULL;};
+  virtual QMenu * createPopupMenu(){return NULL;}
   ///void open spectrogram plot from project
   Spectrogram*  openSpectrogram(Graph*ag,const std::string &wsName,const QStringList &lst);
   Matrix* openMatrix(ApplicationWindow* app, const QStringList &flist);
@@ -1084,7 +1085,8 @@ private:
   void openInstrumentWindow(const QStringList &list);
   /// this method saves the data on project save
   void savedatainNexusFormat(const std::string& wsName,const std::string & fileName);
-  void updateOnTopFlags();
+  QPoint positionNewFloatinfWindow(QSize sz) const;
+  QPoint desktopTopLeft() const;
 
 
   private slots:
@@ -1392,7 +1394,7 @@ private:
   QAction *actionShowColumnOptionsDialog, *actionShowColumnValuesDialog, *actionShowColsDialog, *actionShowRowsDialog;
   QAction *actionTableRecalculate;
   QAction *actionAbout, *actionShowHelp, *actionChooseHelpFolder,*actionMantidConcepts,*actionMantidAlgorithms,*actionmantidplotHelp;
-  QAction *actionRename, *actionCloseWindow, *actionConvertTable;
+  QAction *actionRename, *actionCloseWindow, *actionConvertTable, *actionConvertTableToWorkspace;
   QAction *actionAddColToTable, *actionDeleteLayer, *actionInterpolate;
   QAction *actionResizeActiveWindow, *actionHideActiveWindow;
   QAction *actionShowMoreWindows, *actionPixelLineProfile, *actionIntensityTable;
@@ -1452,6 +1454,7 @@ private:
   QList<MantidMatrix*> m_mantidmatrixWindows;
 
   friend class MantidUI;
+  friend class ConfigDialog;
   QString m_nexusInputWSName;
 
   // Store initialized script environments
@@ -1463,7 +1466,8 @@ private:
   QList<FloatingWindow*> m_floatingWindows;
   // To block activating new window when a floating window is in process of resetting flags
   bool blockWindowActivation;
-  mutable QMutex m_active_window_mutex;
+  /// 
+  bool m_enableQtiPlotFitting;
 
 #ifdef SHARED_MENUBAR
   QMenuBar* m_sharedMenuBar; ///< Pointer to the shared menubar

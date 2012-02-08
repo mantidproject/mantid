@@ -18,6 +18,7 @@
 #include "MantidDataHandling/LoadLogsFromSNSNexus.h"
 #include <cxxtest/TestSuite.h>
 #include <iostream>
+#include <Poco/File.h>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
@@ -355,7 +356,48 @@ public:
     doTestSingleBank(false, false, "bankDoesNotExist", true);
   }
 
+  /** Test with a particular ARCS file that has 2 preprocessors,
+   * meaning different-sized pulse ID files.
+   */
+  void test_MultiplePreprocessors()
+  {
+    Mantid::API::FrameworkManager::Instance();
+    LoadEventNexus ld;
+    std::string outws_name = "arcs";
+    ld.initialize();
+    try
+    {
+      ld.setPropertyValue("Filename","ARCS_12954_event.nxs");
+    }
+    catch (...)
+    {
+      std::cout << "Skipping test since file does not exist.";
+      return;
+    }
+    ld.setPropertyValue("OutputWorkspace",outws_name);
+    ld.setPropertyValue("CompressTolerance", "-1");
+    ld.execute();
+    TS_ASSERT( ld.isExecuted() );
 
+    EventWorkspace_sptr WS;
+    TS_ASSERT_THROWS_NOTHING(
+        WS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outws_name)) );
+    //Valid WS and it is an EventWorkspace
+    TS_ASSERT( WS );
+    TS_ASSERT_EQUALS( WS->getNumberHistograms(), 117760);
+    TS_ASSERT_EQUALS( WS->getNumberEvents(), 10730482);
+    for (size_t wi = 0; wi <  WS->getNumberHistograms(); wi++)
+    {
+      // Times are NON-zero for ALL pixels.
+      if (WS->getEventList(wi).getNumberEvents() > 0)
+      {
+        int64_t nanosec = WS->getEventList(wi).getEvents()[0].m_pulsetime.total_nanoseconds();
+        TS_ASSERT_DIFFERS( nanosec, 0)
+        if (nanosec==0) { std::cout << "Failure at WI " << wi << std::endl; return; }
+      }
+    }
+
+  }
 };
 
 //------------------------------------------------------------------------------

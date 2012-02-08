@@ -555,13 +555,6 @@ p, li { white-space: pre-wrap; }
        </property>
       </spacer>
      </item>
-     <item>
-      <widget class="QPushButton" name="closeButton">
-       <property name="text">
-        <string>Close</string>
-       </property>
-      </widget>
-     </item>
     </layout>
    </item>
   </layout>

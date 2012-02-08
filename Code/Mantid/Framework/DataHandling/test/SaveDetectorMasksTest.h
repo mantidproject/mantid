@@ -35,6 +35,12 @@ public:
   }
 
 
+  /*
+   * (1) Load an existing masking file.
+   * (2) Save masking workspace to file.
+   * (3) Load the newly saved file, and compare with original masking workspace
+   * Notice: the prerequisit is that LoadMaskingFile() is correct.
+   */
   void test_SaveFile()
   {
     // 1. Init SaveDetectorMasking

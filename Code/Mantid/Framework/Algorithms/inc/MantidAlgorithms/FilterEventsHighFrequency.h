@@ -55,7 +55,7 @@ namespace Algorithms
     std::vector<double> mSEValues;
 
     std::vector<detid_t> mCalibDetectorIDs;
-    std::vector<int64_t> mCalibOffsets;  // in nano-second
+    std::vector<double> mCalibOffsets;  // TOF's percentage (ratio) offset
     int64_t mSensorSampleOffset;   // in nano-second
 
     Kernel::DateAndTime mRunStartTime;
@@ -64,6 +64,22 @@ namespace Algorithms
 
     double mLowerLimit;
     double mUpperLimit;
+
+    size_t mNumMissFire;
+
+    bool filterSingleSpectrum;
+    size_t wkspIndexToFilter;
+
+    int mFilterIntervals;
+
+    int numOutputEvents;
+
+    size_t numoverupperbound;
+    size_t numoverlowerbound;
+    size_t numnegtofs;
+    size_t numreversedevents;
+    size_t numreasonunknown;
+    double longest_tof, shortest_tof;
 
     virtual void initDocs();
 
@@ -79,7 +95,15 @@ namespace Algorithms
 
     void processTimeLog(std::string logname);
 
-    void processTimeLog(DataObjects::Workspace2D_const_sptr ws2d);
+    // void processTimeLog(DataObjects::Workspace2D_const_sptr ws2d);
+
+    void writeLog();
+
+    void filterSingleDetectorParallel(size_t wkspindex);
+
+    void filterSingleDetectorSequential(size_t wkspindex);
+
+    // void examLog(std::string logname, std::string outputdir, bool uselog,  bool checkvaluealter);
 
   };
 

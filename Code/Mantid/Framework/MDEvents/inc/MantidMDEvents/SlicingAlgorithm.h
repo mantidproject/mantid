@@ -16,6 +16,7 @@
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidMDEvents/SlicingAlgorithm.h"
+#include "MantidMDEvents/CoordTransformAffine.h"
 
 namespace Mantid
 {
@@ -81,11 +82,12 @@ namespace MDEvents
     /// Original (MDEventWorkspace) that inWS was based on. Used during basis vector constructor
     Mantid::API::IMDWorkspace_sptr m_originalWS;
 
-    /// Bin dimensions to actually use
-    std::vector<Mantid::Geometry::MDHistoDimension_sptr> binDimensions;
+    /** Bin dimensions to actually use. These are NEW dimensions created,
+     * or copied (not pointing to) the original workspace. */
+    std::vector<Mantid::Geometry::MDHistoDimension_sptr> m_binDimensions;
 
     /// Index of the dimension in the MDEW for the dimension in the output. Only for axis-aligned slices
-    std::vector<size_t> dimensionToBinFrom;
+    std::vector<size_t> m_dimensionToBinFrom;
 
     /// Coordinate transformation to apply. This transformation
     /// contains the scaling that makes the output coordinate = bin indexes in the output MDHistoWorkspace.
@@ -96,11 +98,18 @@ namespace MDEvents
     /// Coordinate transformation to save in the output workspace (binned->original)
     Mantid::API::CoordTransform * m_transformToOriginal;
 
+    /// Intermediate original workspace. Output -> intermediate (MDHisto) -> original (MDEvent)
+    Mantid::API::IMDWorkspace_sptr m_intermediateWS;
+    /// Coordinate transformation to save in the output WS, from the intermediate WS
+    Mantid::MDEvents::CoordTransformAffine * m_transformFromIntermediate;
+    /// Coordinate transformation to save in the intermediate WS
+    Mantid::MDEvents::CoordTransformAffine * m_transformToIntermediate;
+
     /// Set to true if the cut is aligned with the axes
     bool m_axisAligned;
 
     /// Number of dimensions in the output (binned) workspace.
-    size_t outD;
+    size_t m_outD;
 
     /// Basis vectors of the output dimensions, normalized to unity length
     std::vector<Mantid::Kernel::VMD> m_bases;

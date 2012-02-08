@@ -304,10 +304,19 @@ namespace DataHandling
         if (it != detID_to_wi->end())
         {
           size_t wi = it->second;
+
           if (select <= 0)
+          {
+            // Not selected, then mask this detector
             maskWS->maskWorkspaceIndex(wi);
-          else
             maskWS->dataY(wi)[0] = 1.0;
+          }
+          else
+          {
+            // Selected, set the value to be 0
+            maskWS->dataY(wi)[0] = 0.0;
+          }
+
         }
         else
         {

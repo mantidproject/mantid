@@ -4,26 +4,31 @@ from numpy import zeros
 from pylab import *
 import wks_utility
 
-#This will activate or not the various 2d or 1d plots
-bPlot = True
+#flags
+bPlot = True #display the plots
+bDataBack = True #with data background
+bNorm = True #with normalization
+bNormBack = True #with normalization background
 
-h=6.626e-34  #m^2 kg s^-1
-m=1.675e-27     #kg
+h = 6.626e-34  #m^2 kg s^-1
+m = 1.675e-27     #kg
 
 #dimension of the detector (256 by 304 pixels)
 maxX = 304
 maxY = 256
 
+#Parameter
 TOFrange = [9000, 23600] #microS
 
 #Due to the frame effect, it's sometimes necessary to narrow the range
 #over which we add all the pixels along the low resolution
+#Parameter
 Xrange = [115, 210]
 
-
-nexus_path = '/mnt/hgfs/j35/results/'
-list_data = ['66420',
-             '66421',
+#nexus_path = '/mnt/hgfs/j35/results/'
+nexus_path = '/home/j35/results/'
+list_data = ['66421',
+             '66420',
              '66422',
              '66423',
              '66424',
@@ -32,11 +37,12 @@ list_data = ['66420',
              '66309,66317,66325,66333,66341']
 list_norm = ['66196']
 
-rebin_parameters = '0,200,200000'
+rebin_parameters = '0,200,200000'  #microS
 
 pre = 'REF_L_'
 post = '_event.nxs'
 
+#Parameter
 list_data_peak = [[126, 134],
                   [126, 134],
                   [126, 134],
@@ -54,79 +60,68 @@ list_data_back = [[123, 137],
                   [123, 137],
                   [123, 137]]
                   
-list_norm_peak = [[125, 135]]
+# Same thing for normalization run
+list_norm_peak = [[127, 133]]
 list_norm_back = [[123, 137]]
 
+########################################################################
+########################################################################
 
-#check with first one first if it works
+
+
+#full path of data file
 data_file = nexus_path + pre + list_data[0] + post
 
-#load data
+##load the data into its workspace
 LoadEventNexus(Filename=data_file, OutputWorkspace='EventData')
 mt = mtd['EventData']
 
-#get the proton charge in picoCoulomb
-proton_charge = wks_utility.getProtonCharge(mt) #ex: 30961787025.2
-
-#rebin data
-rebin(InputWorkspace='EventData',
-      OutputWorkspace='HistoData',
-      Params=rebin_parameters)
-mt = mtd['HistoData']
-
-#retrieve geometry of instrument
+#Get metadata
+mt_run = mt.getRun()
+##get angles value
+ths_value = mt_run.getProperty('ths').value[0]
+ths_units = mt_run.getProperty('ths').units
+tthd_value = mt_run.getProperty('tthd').value[0]
+tthd_units = mt_run.getProperty('tthd').units
+ths_rad = wks_utility.angleUnitConversion(value=ths_value,
+                              from_units=ths_units,
+                              to_units='rad')
+tthd_rad = wks_utility.angleUnitConversion(value=tthd_value,
+                               from_units=tthd_units,
+                               to_units='rad')
+##retrieve geometry of instrument
 # distance Sample detector
-
 sample = mt.getInstrument().getSample()
 source = mt.getInstrument().getSource()
 dSM = sample.getDistance(source)
-print 'distance Sample-Moderator is %f' %dSM
-dPS_array = zeros((maxY,maxX))
+#create array of distances pixel->sample
+dPS_array = zeros((maxY, maxX))
 for x in range(maxX):
     for y in range(maxY):
-        _index = 256*x+y
+        _index = maxY * x + y
         detector = mt.getDetector(_index)
-        dPS_array[y,x] = sample.getDistance(detector)
-dSD_array = dPS_array + dSM
-if bPlot:
-    fig3 = figure()
-    plt.imshow(dSD_array)
-    colorbar()
-         
+        dPS_array[y, x] = sample.getDistance(detector)
+#array of distances pixel->source
+dMP_array = dPS_array + dSM
+#distance sample->center of detector
+dSD = dPS_array[maxY / 2, maxX / 2]
+#distance source->center of detector
+dMD = dSD + dSM
 
-#Normalized by Current (proton charge)
-NormaliseByCurrent(InputWorkspace='HistoData', OutputWorkspace='HistoData')
 
-###############
-##debugging only
-pixelXpixelY = wks_utility.getPixelXPixelY(mt, maxX=maxX, maxY=maxY)
-if bPlot:
-    fig1 = plt.figure(figsize=(10, 10))
-    ax = fig1.add_subplot(2, 2, 1)
-    plt.imshow(log(pixelXpixelY), aspect='auto', origin='lower')
-    colorbar()
-    xlabel('Pixel X')
-    ylabel('Pixel Y')
-    title('Pixel Y vs Pixel X')
+##rebin data (x-axis is in TOF)
+rebin(InputWorkspace='EventData', OutputWorkspace='HistoData', Params=rebin_parameters)
 
+##keep only range of TOF of interest
+CropWorkspace('HistoData','CropHistoData',XMin=TOFrange[0], XMax=TOFrange[1])
+
+##Normalized by Current (proton charge)
+NormaliseByCurrent(InputWorkspace='CropHistoData', OutputWorkspace='HistoData')
+mt = mtd['HistoData']
+
+##Calculation of the central pixel (using weighted average)
 pixelXtof_data = wks_utility.getPixelXTOF(mt, maxX=maxX, maxY=maxY)
-if bPlot:
-    fig1.add_subplot(2, 2, 2)
-    plt.imshow(log(pixelXtof_data), aspect='auto', origin='lower')
-    colorbar()
-    xlabel('Bins #')
-    ylabel('Pixel')
-    title('Pixel X vs TOF bins')
-
-#let's calculate here the exact pixel peak 
-# used to be the center of the peak-min and peak-max values, now
-# we gonna used a weighted calculation
-old_method_cpix = (list_data_peak[0][0] + list_data_peak[0][1]) / 2
-print 'data central pixel using old method: %f' %old_method_cpix
-
-#integrated over tof
 pixelXtof_1d = pixelXtof_data.sum(axis=1)
-
 #keep only range of pixels
 pixelXtof_roi = pixelXtof_1d[list_data_peak[0][0]:list_data_peak[0][1]]
 sz = pixelXtof_roi.size
@@ -135,285 +130,233 @@ _den = 0
 start_pixel = list_data_peak[0][0]
 for i in range(sz):
     _num += (start_pixel * pixelXtof_roi[i])
-    start_pixel=start_pixel+1
+    start_pixel = start_pixel + 1
     _den += pixelXtof_roi[i]
 data_cpix = _num / _den    
-print 'data central pixel using new method: %f' %data_cpix
-             
-#We need to create a new EventWorkspace of only the xRange of pixels of 
-#interest and normalize by the proton charge
 
-fromYpixel = list_data_back[0][0]
-toYpixel = list_data_back[0][1]
+##Background subtraction
+BackfromYpixel = list_data_back[0][0]
+BacktoYpixel = list_data_back[0][1]
 
+#Create a new event workspace of only the range of pixel of interest 
+#background range (along the y-axis) and of only the pixel
+#of interest along the x-axis (to avoid the frame effect)
 mt2 = wks_utility.createIntegratedWorkspace(mt, "IntegratedDataWks",
-#                                            proton_charge,
                                             fromXpixel=Xrange[0],
                                             toXpixel=Xrange[1],
-                                            fromYpixel=fromYpixel,
-                                            toYpixel=toYpixel,
+                                            fromYpixel=BackfromYpixel,
+                                            toYpixel=BacktoYpixel,
                                             maxX=maxX,
                                             maxY=maxY)
 
-if bPlot:
-    _tof_axis = mt2.readX(0)[:]
-    _y_axis = zeros((maxY, len(_tof_axis) - 1))
-    for x in range(maxY):
-        _y_axis[x, :] = mt2.readY(x)[:]
-    fig1.add_subplot(2, 2, 3)
-    plt.imshow(log(_y_axis), aspect='auto', origin='lower')
-    colorbar()
-    xlabel('Bins #')
-    ylabel('Pixel X')
-    title('Pixel X vs TOF (for only X and Y range of interest')
+theta = tthd_rad - ths_rad
+_tof_axis = mt2.readX(0)[:]
+########## This was used to test the R(Q) 
+##Convert the data without background subtraction to R(Q)
 
 
-if bPlot:
-    tof_axis = mt2.readX(0)[:]
-    counts_vs_tof = zeros(len(tof_axis) - 1)
-    for x in range(maxY):
-        counts_vs_tof += mt2.readY(x)[:]
-    index_tof_min = wks_utility.getIndex(TOFrange[0], tof_axis)
-    index_tof_max = wks_utility.getIndex(TOFrange[1], tof_axis)
-    _tof_axis = tof_axis[index_tof_min:index_tof_max]
-    _y_axis = counts_vs_tof[index_tof_min:index_tof_max]
-    fig1.add_subplot(2, 2, 4)
-    plt.plot(_tof_axis, _y_axis, 'b', label='Before background sub.')
-    xlabel('TOF (microS)')
-    ylabel('Counts')
-    title('Counts vs TOF')
-
-#Background subtraction ======================
-
-#Due to the way the FlatBackground algorithm works, we need to transpose the 
-#workspace
-# TOF axis which used to be DataX is now Pixels(MaxY)
-# 
-Transpose(InputWorkspace='IntegratedDataWks',
-          OutputWorkspace='TransposedID')
-ConvertToHistogram(InputWorkspace='TransposedID',
-                    OutputWorkspace='TransposedID')
-FlatBackground(InputWorkspace='TransposedID',
-               OutputWorkspace='TransposedFlatID',
-               StartX=fromYpixel,
-               EndX=list_data_peak[0][0])
-Transpose(InputWorkspace='TransposedFlatID',
-          OutputWorkspace='DataWks')
-
-if bPlot:
-    mt3 = mtd['DataWks']
-    tof_axis = mt3.readX(0)[:]
-    counts_vs_tof = zeros(len(tof_axis))
-    for x in range(maxY):
-        counts_vs_tof += mt3.readY(x)[:]
-    index_tof_min = wks_utility.getIndex(TOFrange[0], tof_axis)
-    index_tof_max = wks_utility.getIndex(TOFrange[1], tof_axis)
-    _tof_axis = tof_axis[index_tof_min:index_tof_max]
-    _y_axis = counts_vs_tof[index_tof_min:index_tof_max]
-    fig1.add_subplot(2, 2, 4)
-    plt.plot(_tof_axis, _y_axis, 'gx', label='After background sub.')
+##without geometry correction
+#q_array = wks_utility.convertToRvsQ(dMD=dMD,
+#                                    theta=theta,
+#                                    tof=_tof_axis)
+                                    
+##without geometry correction
+yrange = arange(int(list_data_peak[0][1]) - int(list_data_peak[0][0])) + int(list_data_peak[0][0])
+q_array = wks_utility.convertToRvsQWithCorrection(mt, 
+                                                  dMD=dMD,
+                                                  theta=theta,
+                                                  tof=_tof_axis,
+                                                  yrange = yrange,
+                                                  cpix=data_cpix)
 
 
 
 
+imshow(q_array)
+legend()
+show()
 
+sys.exit("stop")
 
-
-
-
-
-
-
-
-
-
-
-## Work on Normalization file now
-#check with first one first if it works
-norm_file = nexus_path + pre + list_norm[0] + post
-
-#load normalization file
-LoadEventNexus(Filename=norm_file, OutputWorkspace='EventData')
-mt = mtd['EventData']
-
-#get the proton charge in picoCoulomb
-proton_charge = wks_utility.getProtonCharge(mt) #ex: 30961787025.2
-
-#rebin data
-rebin(InputWorkspace='EventData',
-      OutputWorkspace='HistoData',
-      Params=rebin_parameters)
-mt = mtd['HistoData']
-
-#Normalized by Current (proton charge)
-NormaliseByCurrent(InputWorkspace='HistoData', OutputWorkspace='HistoData')
-
-###############
-##debugging only
-pixelXpixelY = wks_utility.getPixelXPixelY(mt, maxX=maxX, maxY=maxY)
-if bPlot:
-    fig2 = plt.figure(figsize=(10, 10))
-    ax = fig2.add_subplot(2, 2, 1)
-    plt.imshow(log(pixelXpixelY), aspect='auto', origin='lower')
-    colorbar()
-    xlabel('Pixel X')
-    ylabel('Pixel Y')
-    title('Pixel Y vs Pixel X')
-
-pixelXtof_norm = wks_utility.getPixelXTOF(mt, maxX=maxX, maxY=maxY)
-if bPlot:
-    subplot(2, 2, 2)
-    plt.imshow(log(pixelXtof_norm), aspect='auto', origin='lower')
-    colorbar()
-    xlabel('Bins #')
-    ylabel('Pixel')
-    title('Pixel X vs TOF bins')
-
-#We need to create a new EventWorkspace of only the xRange of pixels of 
-#interest and normalize by the proton charge
-
-fromYpixel = list_norm_back[0][0]
-toYpixel = list_norm_back[0][1]
-
-#let's calculate here the exact pixel peak 
-# used to be the center of the peak-min and peak-max values, now
-# we gonna used a weighted calculation
-old_method_cpix = (list_norm_peak[0][0] + list_norm_peak[0][1]) / 2
-print 'norm central pixel using old method: %f' %old_method_cpix
-
-#integrated over tof
-pixelXtof_1d = pixelXtof_norm.sum(axis=1)
-
-#keep only range of pixels
-pixelXtof_roi = pixelXtof_1d[list_norm_peak[0][0]:list_norm_peak[0][1]]
-sz = pixelXtof_roi.size
-_num = 0
-_den = 0
-start_pixel = list_data_peak[0][0]
-for i in range(sz):
-    _num += (start_pixel * pixelXtof_roi[i])
-    start_pixel=start_pixel+1
-    _den += pixelXtof_roi[i]
-norm_cpix = _num / _den    
-print 'norm central pixel using new method: %f' %data_cpix
-
-
-
-mt2 = wks_utility.createIntegratedWorkspace(mt, "IntegratedDataWks",
-#                                            proton_charge,
-                                            fromXpixel=Xrange[0],
-                                            toXpixel=Xrange[1],
-                                            fromYpixel=fromYpixel,
-                                            toYpixel=toYpixel,
-                                            maxX=maxX,
-                                            maxY=maxY)
-
-if bPlot:
-    _tof_axis = mt2.readX(0)[:]
-    _y_axis = zeros((maxY, len(_tof_axis) - 1))
-    for x in range(maxY):
-        _y_axis[x, :] = mt2.readY(x)[:]
-    subplot(2, 2, 3)
-    plt.imshow(log(_y_axis), aspect='auto', origin='lower')
-    colorbar()
-    xlabel('Bins #')
-    ylabel('Pixel X')
-    title('Pixel X vs TOF (for only X and Y range of interest')
-
-
-if bPlot:
-    tof_axis = mt2.readX(0)[:]
-    counts_vs_tof = zeros(len(tof_axis) - 1)
-    for x in range(maxY):
-        counts_vs_tof += mt2.readY(x)[:]
-    index_tof_min = wks_utility.getIndex(TOFrange[0], tof_axis)
-    index_tof_max = wks_utility.getIndex(TOFrange[1], tof_axis)
-    _tof_axis = tof_axis[index_tof_min:index_tof_max]
-    _y_axis = counts_vs_tof[index_tof_min:index_tof_max]
-    subplot(2, 2, 4)
-    plt.plot(_tof_axis, _y_axis, 'b', label='Before background sub.')
-    xlabel('TOF (microS)')
-    ylabel('Counts')
-    title('Counts vs TOF')
-
-#Background subtraction ======================
-
-#Due to the way the FlatBackground algorithm works, we need to transpose the 
-#workspace
-# TOF axis which used to be DataX is now Pixels(MaxY)
-# 
-Transpose(InputWorkspace='IntegratedDataWks',
-          OutputWorkspace='TransposedID')
-ConvertToHistogram(InputWorkspace='TransposedID',
-                    OutputWorkspace='TransposedID')
-FlatBackground(InputWorkspace='TransposedID',
-               OutputWorkspace='TransposedFlatID',
-               StartX=fromYpixel,
-               EndX=list_norm_peak[0][0])
-Transpose(InputWorkspace='TransposedFlatID',
-          OutputWorkspace='NormWks')
-
-if bPlot:
-    mt3 = mtd['NormWks']
-    tof_axis = mt3.readX(0)[:]
-    counts_vs_tof = zeros(len(tof_axis))
-    for x in range(maxY):
-        counts_vs_tof += mt3.readY(x)[:]
-    index_tof_min = wks_utility.getIndex(TOFrange[0], tof_axis)
-    index_tof_max = wks_utility.getIndex(TOFrange[1], tof_axis)
-    _tof_axis = tof_axis[index_tof_min:index_tof_max]
-    _y_axis = counts_vs_tof[index_tof_min:index_tof_max]
-    subplot(2, 2, 4)
-    plt.plot(_tof_axis, _y_axis, 'gx', label='After background sub.')
-
-
-
-#### divide data by normalize histo workspace
-Divide(LHSWorkspace='DataWks',
-         RHSWorkspace='NormWks',
-         OutputWorkspace='NormalizedWks')
-
-if bPlot:
-    figure()
-    mt = mtd['NormalizedWks']
-    _tof_axis = mt.readX(0)[:]
-    _y_axis = zeros((maxY, len(_tof_axis)))
-    for x in range(maxY):
-        _y_axis[x, :] = mt.readY(x)[:]
-#    subplot(2, 2, 1)
-    plt.imshow(log(_y_axis), aspect='auto', origin='lower')
-    colorbar()
-    xlabel('Bins #')
-    ylabel('Pixel X')
-    title('Normalized data')
-
-
-
-
-
-
-
+q_array_reversed = q_array[::-1]
 #if bPlot:
-#    figure()
-#    subplot(2,2,1)
-#    mt=mtd['NormalizedWks']
-#    pixelXpixelY = wks_utility.getPixelXPixelY(mt, maxX=maxX, maxY=maxY)
-#    plt.imshow(log(pixelXpixelY), aspect='auto', origin='lower')
-#    xlabel('Pixel X')
-#    ylabel('Pixel Y')
-#    title('Pixel Y vs Pixel X of normalized data')
-#    
-#    subplot(2,2,2)
-#    mt4 = mtd['NormalizedWks']
-#    tof_axis = mt4.readX(0)[:]
-#    counts_vs_tof = zeros(len(tof_axis))
+#    counts_vs_tof = zeros(len(_tof_axis) - 1)
 #    for x in range(maxY):
-#        counts_vs_tof += mt4.readY(x)[:]
-#    index_tof_min = wks_utility.getIndex(TOFrange[0], tof_axis)
-#    index_tof_max = wks_utility.getIndex(TOFrange[1], tof_axis)
-#    _tof_axis = tof_axis[index_tof_min:index_tof_max]
-#    _y_axis = counts_vs_tof[index_tof_min:index_tof_max]
-#    plt.plot(_tof_axis, _y_axis, 'gx', label='Normalized data')
+#        counts_vs_tof += mt2.readY(x)[:]
+#    _y_axis = counts_vs_tof
+#    
+#    fig2 = plt.figure(figsize=(10, 10))
+#    ax = fig2.add_subplot(2, 1, 1)
+#    _y_axis = _y_axis[::-1]
+#    plt.plot(q_array_reversed, _y_axis, 'b', label='Before back. subtraction')
+#    xlabel('Q(Angstroms^-1)')
+#    ylabel('Counts')
+#    title('R(Q)')
+
+if bDataBack:
+    Transpose(InputWorkspace='IntegratedDataWks',
+              OutputWorkspace='TransposedID')
+    ConvertToHistogram(InputWorkspace='TransposedID',
+                       OutputWorkspace='TransposedID')
+    FlatBackground(InputWorkspace='TransposedID',
+                   OutputWorkspace='TransposedFlatID',
+                   StartX=BackfromYpixel,
+                   Mode='Mean',
+                   EndX=list_data_peak[0][0])
+    Transpose(InputWorkspace='TransposedFlatID',
+              OutputWorkspace='DataWks')
+    
+#    if bPlot:
+#        mt3 = mtd['DataWks']
+#        counts_vs_tof = zeros(len(_tof_axis) - 1)
+#        for x in range(maxY):
+#            counts_vs_tof += mt3.readY(x)[:]
+#        _y_axis = counts_vs_tof
+#        _y_axis = _y_axis[::-1]
+#        plt.plot(q_array_reversed, _y_axis, 'r', label='After back. subtraction')
+
+if bNorm:
+    
+    ## Work on Normalization file now
+    #check with first one first if it works
+    norm_file = nexus_path + pre + list_norm[0] + post
+
+    #load normalization file
+    LoadEventNexus(Filename=norm_file, OutputWorkspace='EventNorm')
+    mt = mtd['EventNorm']
+
+    #rebin data
+    rebin(InputWorkspace='EventNorm',
+          OutputWorkspace='HistoNorm',
+          Params=rebin_parameters)
+
+    ##keep only range of TOF of interest
+    CropWorkspace('HistoNorm', 
+                  'CropHistoNorm', 
+                  XMin=TOFrange[0], 
+                  XMax=TOFrange[1])
+
+    #Normalized by Current (proton charge)
+    NormaliseByCurrent(InputWorkspace='CropHistoNorm', 
+                       OutputWorkspace='NormWks')
+    mt = mtd['NormWks']
+
+    if bNormBack:
+        
+        ##Background subtraction
+        BackfromYpixel = list_norm_back[0][0]
+        BacktoYpixel = list_norm_back[0][1]
+
+        #Create a new event workspace of only the range of pixel of interest 
+        #background range (along the y-axis) and of only the pixel
+        #of interest along the x-axis (to avoid the frame effect)
+        mt3_norm = wks_utility.createIntegratedWorkspace(mt, "IntegratedNormWks",
+                                            fromXpixel=Xrange[0],
+                                            toXpixel=Xrange[1],
+                                            fromYpixel=BackfromYpixel,
+                                            toYpixel=BacktoYpixel,
+                                            maxX=maxX,
+                                            maxY=maxY)
+
+        Transpose(InputWorkspace='IntegratedNormWks',
+                  OutputWorkspace='TransposedID')
+        
+        ConvertToHistogram(InputWorkspace='TransposedID',
+                           OutputWorkspace='TransposedID')
+        
+        FlatBackground(InputWorkspace='TransposedID',
+                       OutputWorkspace='TransposedFlatID',
+                       StartX=BackfromYpixel,
+                       Mode='Mean',
+                       EndX=list_norm_peak[0][0])
+
+        Transpose(InputWorkspace='TransposedFlatID',
+                  OutputWorkspace='NormWks')
+   
+#    #collapse data to 1 spectrum (peak region)
+#    Integration('NormWks',
+#                'IntegratedNormWks',
+#                StartWorkspaceIndex=list_norm_peak[0][0],
+#                EndWorkspaceIndex=list_norm_peak[0][1])
+
+    #perform the integration myself
+    mt_temp = mtd['NormWks']
+    x_axis = mt_temp.readX(0)[:]   #[9100,9300,.... 23500] (73,1)
+    from_peak = list_norm_peak[0][0]
+    to_peak = list_norm_peak[0][1]
+    NormPeakRange = arange(to_peak-from_peak+1) + from_peak
+    counts_vs_tof = zeros(len(x_axis))
+    for x in NormPeakRange:
+        #counts_vs_tof += mt_temp.readY(x)[:]
+        print mt_temp.readY(int(x))[:]
+    print counts_vs_tof
+    #sys.exit("stop here")
+#    raise SystemExit(0)
+    
+#    mt_NormWks = mtd['NormWks']
+#    _tof_axis = mt_NormWks.readX(0)[:]
+#    counts_vs_tof = zeros(len(_tof_axis))
+#    from_norm_peak = list_norm_peak[0][0]
+#    to_norm_peak = list_norm_peak[0][1]
+#    NormPeakRange = arange(to_norm_peak-from_norm_peak+1) + from_norm_peak
+#    for x in NormPeakRange:
+#        print x
+#        counts_vs_tof += mt_NormWks.readY(int(x))[:]
+#    CreateWorkspace('NormWks', DataX=_tof_axis, DataY=counts_vs_tof, DataE=counts_vs_tof, Nspec=1)
+   
+    SumSpectra(InputWorkspace='NormalizedWks', OutputWorkspace='NormalizedWks')
+    #### divide data by normalize histo workspace
+    Divide(LHSWorkspace='DataWks',
+           RHSWorkspace='NormWks',
+           OutputWorkspace='NormalizedWks')
+
+    mt4 = mtd['NormalizedWks']
+    
+else:
+    
+    mt4 = mtd['DataWks']
+    
+#SumSpectra(InputWorkspace="NormWks", OutputWorkspace="NormWks")
+#NormalizedWks = Divide("DataWks","NormWks")
+#ReplaceSpecialValues("NormalizedWks",NaNValue=0,NaNError=0, OutputWorkspace="NormalizedWks")
+#test=SumSpectra("NormalizedWks")
+    
+#ConvertToHistogram(InputWorkspace='NormalizedWks',
+#                   OutputWorkspace='NormalizedWksHisto')
+#    
+#    
+#Integration('NormalizedWksHisto','IntNormalizedWks')
+
+##replace NaN values
+#ReplaceSpecialValues(InputWorkspace='NormalizedWks',
+#                     Outputworkspace='NormalizedWks',
+#                     NaNValue=0)
+    
+GroupDetectors(InputWorkspace='NormalizedWks',
+               OutputWorkspace='GroupNormalizedWks',
+               DetectorList=range(255))
+    
+    
+#    _q_axis = mt4.readX(0)[:]
+#    counts_vs_q= zeros(len(_q_axis))
+#    for x in range(maxY):
+#        counts_vs_q += mt4.readY(x)[:]
+#    _y_axis = counts_vs_q
+    
+    
+mt = mtd['GroupNormalizedWks']
+_y_axis = mt.readY(0)[:]
+    
+if bPlot:
+
+    fig1 = plt.figure(figsize=(10, 10))
+    ax = fig1.add_subplot(2, 1, 1)
+    _y_axis = _y_axis[::-1]
+    plt.plot(q_array_reversed, _y_axis)
+    xlabel('Q(Angstroms^-1)')
+    ylabel('Counts')
+    title('R(Q) of Data/Norm')
+
 
 if bPlot: #show plots
     legend()

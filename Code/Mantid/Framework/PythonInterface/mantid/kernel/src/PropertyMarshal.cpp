@@ -3,6 +3,8 @@
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/PropertyMarshal.h"
 #include "MantidPythonInterface/kernel/PropertyHandler.h"
+#include "MantidPythonInterface/kernel/TypeRegistry.h"
+
 #include "MantidAPI/MatrixWorkspace.h"
 #include <boost/python/extract.hpp>
 
@@ -15,22 +17,6 @@ namespace Mantid
 
       namespace bpl = boost::python;
       using Kernel::IPropertyManager;
-
-      /// Typedef the map of python types to C++ functions
-      typedef std::map<PyTypeObject*, PropertyHandler*> PyTypeLookup;
-      /// There is no interface other than insert defined in the header so
-      /// it's isolated here
-      static PyTypeLookup typeHandlers;
-
-      /**
-       * Insert a new property handler
-       * @param typeObject :: A pointer to a type object
-       * @param handler :: An object to handle to corresponding templated C++ type
-       */
-      void registerHandler(PyTypeObject* typeObject, PropertyHandler* handler)
-      {
-        typeHandlers.insert(std::make_pair(typeObject, handler));
-      }
 
       /**
       * This static function allows a call to a method on an IAlgorithm object
@@ -46,53 +32,8 @@ namespace Mantid
       {
         // Find type handler
         PyTypeObject *pytype = value.ptr()->ob_type;
-        PyTypeLookup::const_iterator itr = typeHandlers.find(pytype);
-        if( itr != typeHandlers.end() )
-        {
-          itr->second->set(&self, name, value);
-        }
-        else
-        {
-          throw std::invalid_argument("PropertyMarshal::setProperty - No C++ function registered to handle python type '"
-              + std::string(pytype->tp_name) + "'");
-        }
-      }
-
-      /**
-       * Attempts to find an upcasted pointer type for the given object that is
-       * assumed to be of type DataItem
-       * @param value :: An object derived from DataItem
-       * @return A pointer to an upcasted type or NULL if one cannot be found
-       */
-      PyTypeObject * getUpcastedType(bpl::object value)
-      {
-        // This has to be a search as it is at runtime.
-        // Each of the registered type handlers is checked
-        // to see if its type is a subclass the value type.
-        // Each one is checked so that the most derived type
-        // can be found
-
-        PyTypeObject *result(NULL);
-
-        PyTypeLookup::const_iterator iend = typeHandlers.end();
-        PyObject *valueType = (PyObject*)value.ptr()->ob_type;
-        for(PyTypeLookup::const_iterator it = typeHandlers.begin(); it != iend; ++it)
-        {
-          if( PyObject_IsSubclass((PyObject*)it->first, valueType) )
-          {
-            if( !result && it->second->isInstance(value) )
-            {
-              result = it->first;
-            }
-            // Check if this match is further up the chain than the last
-            if( result && PyObject_IsSubclass((PyObject*)it->first, (PyObject*)result)
-                && it->second->isInstance(value) )
-            {
-              result = it->first;
-            }
-          }
-        }
-        return result;
+        TypeRegistry::PythonTypeHandler *entry = TypeRegistry::getHandler(pytype);
+        entry->set(&self, name, value);
       }
 
       /**
@@ -107,7 +48,7 @@ namespace Mantid
         PyTypeObject *cls = reg->get_class_object();
         if( PyObject_IsInstance(value.ptr(), (PyObject*)cls) ) // Is this a subtype of DataItem
         {
-          PyTypeObject *derivedType = getUpcastedType(value);
+          PyTypeObject *derivedType = TypeRegistry::getDerivedType(value);
           if( derivedType )
           {
             PyObject_SetAttrString(value.ptr(), "__class__", (PyObject*)derivedType);

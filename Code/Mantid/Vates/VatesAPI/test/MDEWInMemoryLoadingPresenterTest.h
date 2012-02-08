@@ -30,7 +30,7 @@ private:
   };
 
   // Helper method. Generates and returns a valid IMDEventWorkspace
-  static Mantid::API::Workspace_sptr getGoodWorkspace()
+  static Mantid::API::Workspace_sptr getReal4DWorkspace()
   {
     AnalysisDataService::Instance().remove("MD_EVENT_WS_ID");
     Mantid::MDEvents::LoadMD alg;
@@ -42,6 +42,7 @@ private:
     alg.execute(); 
     return AnalysisDataService::Instance().retrieve("MD_EVENT_WS_ID");
   }
+
 
   // Helper method. Generates a non-IMDEventWorkspace.
   static Mantid::API::Workspace_sptr getBadWorkspace()
@@ -102,7 +103,7 @@ public:
   void testCanLoadSucceeds()
   {
     MockWorkspaceProvider* repository = new MockWorkspaceProvider;
-    Mantid::API::Workspace_sptr goodWs = getGoodWorkspace();
+    Mantid::API::Workspace_sptr goodWs = getReal4DWorkspace();
     EXPECT_CALL(*repository, canProvideWorkspace(_)).WillOnce(Return(true)); //No matter what the argument, always returns true.
     EXPECT_CALL(*repository, fetchWorkspace(_)).WillOnce(Return(goodWs)); 
 
@@ -118,7 +119,7 @@ public:
     MockMDLoadingView* view = new MockMDLoadingView;
 
     MockWorkspaceProvider* repository = new MockWorkspaceProvider;
-    Mantid::API::Workspace_sptr ws = getGoodWorkspace();
+    Mantid::API::Workspace_sptr ws = getReal4DWorkspace();
     EXPECT_CALL(*repository, fetchWorkspace(_)).Times(1).WillRepeatedly(Return(ws));
 
     MDEWInMemoryLoadingPresenter presenter(view, repository, "_");
@@ -128,7 +129,7 @@ public:
     
     //Test that it does work when setup.
     presenter.executeLoadMetadata();
-    TSM_ASSERT("Should export geometry xml metadata on request.", !presenter.getGeometryXML().empty())
+    TSM_ASSERT("Should export geometry xml metadata on request.", !presenter.getGeometryXML().empty());
   }
 
   void testExecution()
@@ -146,7 +147,7 @@ public:
     EXPECT_CALL(factory, setRecursionDepth(_)).Times(1);
 
     MockWorkspaceProvider* repository = new MockWorkspaceProvider;
-    Mantid::API::Workspace_sptr ws = getGoodWorkspace();
+    Mantid::API::Workspace_sptr ws = getReal4DWorkspace();
     EXPECT_CALL(*repository, fetchWorkspace(_)).Times(2).WillRepeatedly(Return(ws));
 
     //Setup progress updates object
@@ -193,6 +194,10 @@ public:
     MDEWInMemoryLoadingPresenter presenter(new MockMDLoadingView, new MockWorkspaceProvider, "_");
     TSM_ASSERT_EQUALS("Characterisation Test Failed", "", presenter.getWorkspaceTypeName());
   }
+
+
+
+
 
 };
 

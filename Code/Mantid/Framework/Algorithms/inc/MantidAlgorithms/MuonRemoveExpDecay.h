@@ -66,6 +66,8 @@ namespace Mantid
       void init();
       void exec();
       void removeDecay(const MantidVec& inX, const MantidVec& inY, MantidVec& outY);
+      // calculate Muon normalisation constant
+      double calNormalisationConst(API::MatrixWorkspace_sptr ws, int wsIndex);
 
       
     };

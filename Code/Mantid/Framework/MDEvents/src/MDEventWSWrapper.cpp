@@ -34,12 +34,14 @@ MDEventWSWrapper::createEmptyMDWS(const MDWSDescription &WSD)
     this->dim_max.resize(n_dim);
     this->targ_dim_names.resize(n_dim);
     this->targ_dim_units.resize(n_dim);
+    this->targ_dim_ID.resize(n_dim);
 
     for(size_t i=0;i<n_dim;i++){
         this->dim_min[i]=WSD.dim_min[i];
         this->dim_max[i]=WSD.dim_max[i];
         this->targ_dim_names[i]= WSD.dim_names[i];
         this->targ_dim_units[i]= WSD.dim_units[i];
+        this->targ_dim_ID[i]   = WSD.dim_IDs[i];
     }
 
     wsCreator[n_dimensions]();

@@ -47,6 +47,7 @@ namespace Mantid
 
       /// overwrite IFunction base class methods
       std::string name()const{return "StretchExp";}
+      virtual const std::string category() const { return "General";}
     protected:
       virtual void functionMW(double* out, const double* xValues, const size_t nData)const;
       virtual void functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData);

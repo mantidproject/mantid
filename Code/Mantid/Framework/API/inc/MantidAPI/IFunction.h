@@ -244,7 +244,7 @@ public:
   /// Function to return all of the categories that contain this algorithm
   virtual const std::vector<std::string> categories() const;
   /// Function to return the sperator token for the category string. A default implementation ';' is provided
-  virtual const std::string categorySeperator() const {return ";";}
+  virtual const std::string categorySeparator() const {return ";";}
 
   /// Function you want to fit to. 
   /// @param domain :: The buffer for writing the calculated values. Must be big enough to accept dataSize() values

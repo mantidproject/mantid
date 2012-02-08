@@ -63,24 +63,23 @@ public:
 
 private slots:
   void helpResultsClicked();
-  void selectAllLogs();
-  void selectAllFittings();
+  void selectAllLogs(bool);
+  void selectAllFittings(bool);
   void createTable();
 
 private:
   void populateLogsAndValues(const QVector<QString>& fittedWsList);
   void populateFittings(const QVector<QString>& fittedWsList);
 
-  QVector<QString> getWorkspacesWithSameParams(const QVector<QString>& fittedWsList);
-
+  bool haveSameParameters(const QVector<QString>& wsList);
   QVector<QString> getSelectedWs();
   QVector<QString> getSelectedLogs();
   std::string getFileName();
+  QMap<int,int> getWorkspaceColors(const QVector<QString>& wsList);
 
   Ui::MuonAnalysis& m_uiForm;
   int m_numLogsdisplayed;
   QMap<QString, QMap<QString, double> > m_tableValues;
-  
 };
 
 }

@@ -18,6 +18,19 @@
 #include <cfloat>
 #include <limits>
 #include <cmath>
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/V3D.h"
+
+using namespace Mantid::Geometry;
+using Mantid::Kernel::Exception::NotFoundError;
+
+UnwrappedDetector::UnwrappedDetector():
+u(0), v(0), width(0), height(0), uscale(0), vscale(0), detector()
+{
+  color[0] = 0;
+  color[1] = 0;
+  color[2] = 0;
+}
 
 UnwrappedDetector::UnwrappedDetector(const unsigned char* c,
                      boost::shared_ptr<const Mantid::Geometry::IDetector> det
@@ -28,6 +41,30 @@ u(0), v(0), width(0), height(0), uscale(0), vscale(0), detector(det)
   color[1] = *(c+1);
   color[2] = *(c+2);
 }
+
+/** Copy constructor */
+UnwrappedDetector::UnwrappedDetector(const UnwrappedDetector & other)
+{
+  this->operator =(other);
+}
+
+/** Assignment operator */
+const UnwrappedDetector & UnwrappedDetector::operator=(const UnwrappedDetector & other)
+{
+  u = other.u;
+  v = other.v;
+  width = other.width;
+  height = other.height;
+  uscale = other.uscale;
+  vscale = other.vscale;
+  detector = other.detector;
+  color[0] = other.color[0];
+  color[1] = other.color[1];
+  color[2] = other.color[2];
+  return *this;
+}
+
+
 
 
 UnwrappedSurface::UnwrappedSurface(const InstrumentActor* rootActor,const Mantid::Kernel::V3D& origin,const Mantid::Kernel::V3D& axis):
@@ -58,83 +95,86 @@ void UnwrappedSurface::init()
   m_v_max = -DBL_MAX;
 
   size_t ndet = m_instrActor->ndetectors();
-  for(size_t i = 0; i < ndet; ++i)
+  m_unwrappedDetectors.resize(ndet);
+  Instrument_const_sptr inst = m_instrActor->getInstrument();
+
+  // TODO: When in parallel, this causes some incorrect results.
+  // I suspect the IComponent->getPos() method to not be properly thread safe.
+  //PRAGMA_OMP( parallel for )
+  for(int ii = 0; ii < int(ndet); ++ii)
   {
+    size_t i=size_t(ii);
+
     unsigned char color[3];
-    boost::shared_ptr<const Mantid::Geometry::IDetector> det = m_instrActor->getDetector(i);
-    if (!det || det->isMonitor())
+    Mantid::detid_t id = m_instrActor->getDetID(i);
+
+    boost::shared_ptr<const Mantid::Geometry::IDetector> det;
+    try
     {
-      m_unwrappedDetectors.append(UnwrappedDetector(&color[0],boost::shared_ptr<Mantid::Geometry::IDetector>()));
-      continue;
+      det = inst->getDetector(id);
     }
-    Mantid::detid_t id = -1;
-    id = m_instrActor->getDetID(i);
-    if (id < 0)
+    catch (Mantid::Kernel::Exception::NotFoundError & )
     {
-      m_unwrappedDetectors.append(UnwrappedDetector(&color[0],boost::shared_ptr<Mantid::Geometry::IDetector>()));
-      continue;
     }
-    m_instrActor->getColor(id).getUB3(&color[0]);
-    // first detector defines the surface's x axis
-    if (m_xaxis.nullVector())
+
+    if (!det || det->isMonitor() || (id < 0))
     {
-      Mantid::Kernel::V3D pos = det->getPos() - m_pos;
-      double z = pos.scalar_prod(m_zaxis);
-      if (z == 0.0)
+      // Not a detector or a monitor
+      // Make some blank, empty thing that won't draw
+      m_unwrappedDetectors[i] = UnwrappedDetector();
+    }
+    else
+    {
+      // A real detector.
+      m_instrActor->getColor(id).getUB3(&color[0]);
+      // first detector defines the surface's x axis
+      if (m_xaxis.nullVector())
       {
-        // find the sortest projection of m_zaxis and direct m_xaxis along it
-        bool isY = false;
-        bool isZ = false;
-        if (fabs(m_zaxis.Y()) < fabs(m_zaxis.X())) isY = true;
-        if (fabs(m_zaxis.Z()) < fabs(m_zaxis.Y())) isZ = true;
-        if (isZ)
+        Mantid::Kernel::V3D pos = det->getPos() - m_pos;
+        double z = pos.scalar_prod(m_zaxis);
+        if (z == 0.0)
         {
-          m_xaxis = Mantid::Kernel::V3D(0,0,1);
-        }
-        else if (isY)
-        {
-          m_xaxis = Mantid::Kernel::V3D(0,1,0);
+          // find the sortest projection of m_zaxis and direct m_xaxis along it
+          bool isY = false;
+          bool isZ = false;
+          if (fabs(m_zaxis.Y()) < fabs(m_zaxis.X())) isY = true;
+          if (fabs(m_zaxis.Z()) < fabs(m_zaxis.Y())) isZ = true;
+          if (isZ)
+          {
+            m_xaxis = Mantid::Kernel::V3D(0,0,1);
+          }
+          else if (isY)
+          {
+            m_xaxis = Mantid::Kernel::V3D(0,1,0);
+          }
+          else
+          {
+            m_xaxis = Mantid::Kernel::V3D(1,0,0);
+          }
         }
         else
         {
-          m_xaxis = Mantid::Kernel::V3D(1,0,0);
+          m_xaxis = pos - m_zaxis * z;
+          m_xaxis.normalize();
         }
+        m_yaxis = m_zaxis.cross_prod(m_xaxis);
       }
-      else
+      UnwrappedDetector udet(&color[0],det);
+      this->calcUV(udet);
+      // Not in parallel = no critical block
+      //PARALLEL_CRITICAL( UnwrappedSurface_minmaxUV )
       {
-        m_xaxis = pos - m_zaxis * z;
-        m_xaxis.normalize();
+        if (udet.u < m_u_min) m_u_min = udet.u;
+        if (udet.u > m_u_max) m_u_max = udet.u;
+        if (udet.v < m_v_min) m_v_min = udet.v;
+        if (udet.v > m_v_max) m_v_max = udet.v;
       }
-      m_yaxis = m_zaxis.cross_prod(m_xaxis);
-    }
-    UnwrappedDetector udet(&color[0],det);
-    this->calcUV(udet);
-    if (udet.u < m_u_min) m_u_min = udet.u;
-    if (udet.u > m_u_max) m_u_max = udet.u;
-    if (udet.v < m_v_min) m_v_min = udet.v;
-    if (udet.v > m_v_max) m_v_max = udet.v;
-    m_unwrappedDetectors.append(udet);
-  }
+      m_unwrappedDetectors[i] = udet;
+    } // is a real detectord
+  } // for each detector in pick order
 
   findAndCorrectUGap();
 
-  foreach(const UnwrappedDetector& udet,m_unwrappedDetectors)
-  {
-    if (! udet.detector ) continue;
-    boost::shared_ptr<const Mantid::Geometry::IComponent> parent = udet.detector->getParent();
-    if (parent)
-    {
-      QRectF detRect;
-      detRect.setLeft(udet.u - udet.width);
-      detRect.setRight(udet.u + udet.width);
-      detRect.setBottom(udet.v - udet.height);
-      detRect.setTop(udet.v + udet.height);
-      Mantid::Geometry::ComponentID id = parent->getComponentID();
-      QRectF& r = m_assemblies[id];
-      r |= detRect;
-      calcAssemblies(parent,r);
-    }
-  }
 
   double dU = fabs(m_u_max - m_u_min);
   double dV = fabs(m_v_max - m_v_min);
@@ -167,12 +207,13 @@ void UnwrappedSurface::init()
 
 /**
   * Calculate the rectangular region in uv coordinates occupied by an assembly.
-  * @param comp :: A member of the assebmly. The total area of the assembly is a sum of areas of its members
+  * @param comp :: A member of the assembly. The total area of the assembly is a sum of areas of its members
   * @param compRect :: A rect. area occupied by comp in uv space
   */
 void UnwrappedSurface::calcAssemblies(boost::shared_ptr<const Mantid::Geometry::IComponent> comp,const QRectF& compRect)
 {
   boost::shared_ptr<const Mantid::Geometry::IComponent> parent = comp->getParent();
+//  IDetector_const_sptr det = boost::dynamic_pointer_cast<const IDetector>(parent);
   if (parent)
   {
     QRectF& r = m_assemblies[parent->getComponentID()];
@@ -181,6 +222,38 @@ void UnwrappedSurface::calcAssemblies(boost::shared_ptr<const Mantid::Geometry::
   }
 }
 
+
+//------------------------------------------------------------------------------
+/** If needed, recalculate the cached bounding rectangles of all assemblies. */
+void UnwrappedSurface::cacheAllAssemblies()
+{
+  if (!m_assemblies.empty())
+    return;
+
+  for(size_t i=0;i<m_unwrappedDetectors.size();++i)
+  {
+    const UnwrappedDetector& udet = m_unwrappedDetectors[i];
+
+    if (! udet.detector ) continue;
+    // Get the BARE parent (not parametrized) to speed things up.
+    //boost::shared_ptr<const Mantid::Geometry::IComponent> parent(udet.detector->getBareParent()); // = udet.detector->getParent();
+    boost::shared_ptr<const Mantid::Geometry::IComponent> parent = udet.detector->getParent();
+    if (parent)
+    {
+      QRectF detRect;
+      detRect.setLeft(udet.u - udet.width);
+      detRect.setRight(udet.u + udet.width);
+      detRect.setBottom(udet.v - udet.height);
+      detRect.setTop(udet.v + udet.height);
+      Mantid::Geometry::ComponentID id = parent->getComponentID();
+      QRectF& r = m_assemblies[id];
+      r |= detRect;
+      calcAssemblies(parent,r);
+    }
+  }
+}
+
+//------------------------------------------------------------------------------
 /**
   * Draw the unwrapped instrument onto the screen
   * @param widget :: The widget to draw it on.
@@ -224,13 +297,13 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget,bool picking)const
 
   glLoadIdentity();
 
-  for(int i=0;i<m_unwrappedDetectors.size();++i)
+  for(size_t i=0;i<m_unwrappedDetectors.size();++i)
   {
     const UnwrappedDetector& udet = m_unwrappedDetectors[i];
 
     if (!udet.detector || !m_viewRect.contains(udet.u,udet.v)) continue;
 
-    setColor(i,picking);
+    setColor(int(i),picking);
 
     int iw = int(udet.width / dw);
     int ih = int(udet.height / dh);
@@ -382,6 +455,12 @@ bool hasParent(boost::shared_ptr<const Mantid::Geometry::IComponent> comp,Mantid
   return hasParent(parent,id);
 }
 
+//------------------------------------------------------------------------------
+/** This method is called when a component is selected in the InstrumentTreeWidget
+ * and zooms into that spot on the view.
+ *
+ * @param id :: ComponentID to zoom to.
+ */
 void UnwrappedSurface::componentSelected(Mantid::Geometry::ComponentID id)
 {
   boost::shared_ptr<const Mantid::Geometry::Instrument> instr = m_instrActor->getInstrument();
@@ -397,8 +476,11 @@ void UnwrappedSurface::componentSelected(Mantid::Geometry::ComponentID id)
   if (det)
   {
     int detID = det->getID();
-    foreach(const UnwrappedDetector& udet,m_unwrappedDetectors)
+
+    std::vector<UnwrappedDetector>::const_iterator it;
+    for (it = m_unwrappedDetectors.begin(); it != m_unwrappedDetectors.end(); it++)
     {
+      const UnwrappedDetector& udet = *it;
       if (udet.detector && udet.detector->getID() == detID)
       {
         double w = udet.width;
@@ -413,10 +495,13 @@ void UnwrappedSurface::componentSelected(Mantid::Geometry::ComponentID id)
   }
   if (ass)
   {
+    this->cacheAllAssemblies();
     QMap<Mantid::Geometry::ComponentID,QRectF>::iterator assRect = m_assemblies.find(ass->getComponentID());
     if (assRect != m_assemblies.end())
-    {
       zoom(*assRect);
+    else
+    {
+      // std::cout << "Assembly not found " << std::endl;
     }
   }
 }
@@ -479,7 +564,7 @@ void UnwrappedSurface::getSelectedDetectors(QList<int>& dets)
   }
 
   // select detectors with u,v within the allowed boundaries
-  for(int i = 0; i < m_unwrappedDetectors.size(); ++i)
+  for(size_t i = 0; i < m_unwrappedDetectors.size(); ++i)
   {
     UnwrappedDetector& udet = m_unwrappedDetectors[i];
     if (! udet.detector ) continue;
@@ -495,7 +580,7 @@ void UnwrappedSurface::getMaskedDetectors(QList<int>& dets)const
 {
   dets.clear();
   if (m_maskShapes.isEmpty()) return;
-  for(int i = 0; i < m_unwrappedDetectors.size(); ++i)
+  for(size_t i = 0; i < m_unwrappedDetectors.size(); ++i)
   {
     const UnwrappedDetector& udet = m_unwrappedDetectors[i];
     if (! udet.detector ) continue;
@@ -521,7 +606,7 @@ void UnwrappedSurface::findAndCorrectUGap()
     return;
   }
 
-  QList<UnwrappedDetector>::const_iterator ud = m_unwrappedDetectors.begin();
+  std::vector<UnwrappedDetector>::const_iterator ud = m_unwrappedDetectors.begin();
   for(;ud != m_unwrappedDetectors.end(); ++ud)
   {
     if (! ud->detector ) continue;
@@ -561,7 +646,7 @@ void UnwrappedSurface::findAndCorrectUGap()
   {
     double du = m_u_max - uTo;
     m_u_max = uFrom + du;
-    QList<UnwrappedDetector>::iterator ud = m_unwrappedDetectors.begin();
+    std::vector<UnwrappedDetector>::iterator ud = m_unwrappedDetectors.begin();
     for(;ud != m_unwrappedDetectors.end(); ++ud)
     {
       if (! ud->detector ) continue;
@@ -578,7 +663,7 @@ void UnwrappedSurface::findAndCorrectUGap()
 
 void UnwrappedSurface::changeColorMap()
 {
-  for(int i = 0; i < m_unwrappedDetectors.size(); ++i)
+  for(size_t i = 0; i < m_unwrappedDetectors.size(); ++i)
   {
     UnwrappedDetector& udet = m_unwrappedDetectors[i];
     if (! udet.detector ) continue;
@@ -664,8 +749,10 @@ void UnwrappedSurface::setPeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWo
   m_startPeakShapes = true;
 }
 
-/**
- * Create the peak labels from the peaks set by setPeaksWorkspace. The method is called from the draw(...) method
+//-----------------------------------------------------------------------------
+/** Create the peak labels from the peaks set by setPeaksWorkspace.
+ * The method is called from the draw(...) method
+ *
  * @param window :: The screen window rectangle in pixels.
  */
 void UnwrappedSurface::createPeakShapes(const QRect& window)const
@@ -678,16 +765,15 @@ void UnwrappedSurface::createPeakShapes(const QRect& window)const
   for(int i = 0; i < nPeaks; ++i)
   {
     Mantid::API::IPeak& peak = peakShapes.getPeak(i);
-    int detID = peak.getDetectorID();
-    foreach(UnwrappedDetector udet,m_unwrappedDetectors)
-    {
-      Mantid::Geometry::IDetector_const_sptr det = udet.detector;
-      if (! det ) continue;
-      if (det->getID() != detID) continue;
-      PeakMarker2D* r = new PeakMarker2D(peakShapes.realToUntransformed(QPointF(udet.u,udet.v)),style);
-      r->setPeak(peak,i);
-      peakShapes.addMarker(r);
-    }
+    const Mantid::Kernel::V3D & pos = peak.getDetPos();
+    // Project the peak (detector) position onto u,v coords
+    double u,v, uscale, vscale;
+    this->project(u,v,uscale,vscale, pos);
+
+    // Create a peak marker at this position
+    PeakMarker2D* r = new PeakMarker2D(peakShapes.realToUntransformed(QPointF(u,v)),style);
+    r->setPeak(peak,i);
+    peakShapes.addMarker(r);
   }
   peakShapes.deselectAll();
   m_startPeakShapes = false;

@@ -298,13 +298,6 @@
             </item>
            </layout>
           </item>
-          <item row="0" column="1" colspan="2">
-           <widget class="QCheckBox" name="appendRun">
-            <property name="text">
-             <string>Append</string>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="0">
            <layout class="QHBoxLayout" name="fileInputLayout">
             <item>
@@ -1322,7 +1315,7 @@
               </property>
               <item>
                <property name="text">
-                <string>Overwrite</string>
+                <string>Auto-Update + Overwrite</string>
                </property>
               </item>
               <item>
@@ -1332,7 +1325,7 @@
               </item>
               <item>
                <property name="text">
-                <string>Auto-Update + Overwrite</string>
+                <string>Overwrite</string>
                </property>
               </item>
               <item>
@@ -1346,6 +1339,20 @@
              <widget class="QLabel" name="label_7">
               <property name="text">
                <string>Plot Creation:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_8">
+              <property name="text">
+               <string>Hide Toolbars:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QCheckBox" name="hideToolbars">
+              <property name="text">
+               <string/>
               </property>
              </widget>
             </item>
@@ -1430,6 +1437,9 @@
               <property name="text">
                <string>Select/Deselect All</string>
               </property>
+              <property name="checked">
+               <bool>false</bool>
+              </property>
              </widget>
             </item>
             <item row="0" column="0">
@@ -1453,9 +1463,12 @@
              <number>100</number>
             </property>
             <attribute name="horizontalHeaderDefaultSectionSize">
-             <number>130</number>
+             <number>390</number>
             </attribute>
             <attribute name="horizontalHeaderStretchLastSection">
+             <bool>true</bool>
+            </attribute>
+            <attribute name="verticalHeaderHighlightSections">
              <bool>true</bool>
             </attribute>
             <attribute name="verticalHeaderStretchLastSection">
@@ -1568,20 +1581,10 @@
             </column>
             <column>
              <property name="text">
-              <string/>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string/>
-             </property>
-            </column>
-            <column>
-             <property name="text">
               <string>Include</string>
              </property>
             </column>
-            <item row="0" column="3">
+            <item row="0" column="1">
              <property name="text">
               <string/>
              </property>
@@ -1589,7 +1592,7 @@
               <set>AlignHCenter|AlignVCenter|AlignCenter</set>
              </property>
             </item>
-            <item row="1" column="3">
+            <item row="1" column="1">
              <property name="text">
               <string/>
              </property>
@@ -1597,7 +1600,7 @@
               <set>AlignHCenter|AlignVCenter|AlignCenter</set>
              </property>
             </item>
-            <item row="2" column="3">
+            <item row="2" column="1">
              <property name="text">
               <string/>
              </property>
@@ -1605,7 +1608,7 @@
               <set>AlignHCenter|AlignVCenter|AlignCenter</set>
              </property>
             </item>
-            <item row="3" column="3">
+            <item row="3" column="1">
              <property name="text">
               <string/>
              </property>
@@ -1613,7 +1616,7 @@
               <set>AlignHCenter|AlignVCenter|AlignCenter</set>
              </property>
             </item>
-            <item row="4" column="3">
+            <item row="4" column="1">
              <property name="text">
               <string/>
              </property>
@@ -1621,7 +1624,7 @@
               <set>AlignHCenter|AlignVCenter|AlignCenter</set>
              </property>
             </item>
-            <item row="5" column="3">
+            <item row="5" column="1">
              <property name="text">
               <string/>
              </property>
@@ -1629,7 +1632,7 @@
               <set>AlignHCenter|AlignVCenter|AlignCenter</set>
              </property>
             </item>
-            <item row="6" column="3">
+            <item row="6" column="1">
              <property name="text">
               <string/>
              </property>
@@ -1637,7 +1640,7 @@
               <set>AlignHCenter|AlignVCenter|AlignCenter</set>
              </property>
             </item>
-            <item row="7" column="3">
+            <item row="7" column="1">
              <property name="text">
               <string/>
              </property>
@@ -1645,7 +1648,7 @@
               <set>AlignHCenter|AlignVCenter|AlignCenter</set>
              </property>
             </item>
-            <item row="8" column="3">
+            <item row="8" column="1">
              <property name="text">
               <string/>
              </property>
@@ -1653,7 +1656,7 @@
               <set>AlignHCenter|AlignVCenter|AlignCenter</set>
              </property>
             </item>
-            <item row="9" column="3">
+            <item row="9" column="1">
              <property name="text">
               <string/>
              </property>
@@ -1661,7 +1664,7 @@
               <set>AlignHCenter|AlignVCenter|AlignCenter</set>
              </property>
             </item>
-            <item row="10" column="3">
+            <item row="10" column="1">
              <property name="text">
               <string/>
              </property>
@@ -1669,7 +1672,7 @@
               <set>AlignHCenter|AlignVCenter|AlignCenter</set>
              </property>
             </item>
-            <item row="11" column="3">
+            <item row="11" column="1">
              <property name="text">
               <string/>
              </property>
@@ -1677,7 +1680,7 @@
               <set>AlignHCenter|AlignVCenter|AlignCenter</set>
              </property>
             </item>
-            <item row="12" column="3">
+            <item row="12" column="1">
              <property name="text">
               <string/>
              </property>
@@ -1685,7 +1688,7 @@
               <set>AlignHCenter|AlignVCenter|AlignCenter</set>
              </property>
             </item>
-            <item row="13" column="3">
+            <item row="13" column="1">
              <property name="text">
               <string/>
              </property>
@@ -1693,7 +1696,7 @@
               <set>AlignHCenter|AlignVCenter|AlignCenter</set>
              </property>
             </item>
-            <item row="14" column="3">
+            <item row="14" column="1">
              <property name="text">
               <string/>
              </property>
@@ -1701,7 +1704,7 @@
               <set>AlignHCenter|AlignVCenter|AlignCenter</set>
              </property>
             </item>
-            <item row="15" column="3">
+            <item row="15" column="1">
              <property name="text">
               <string/>
              </property>
@@ -1709,7 +1712,7 @@
               <set>AlignHCenter|AlignVCenter|AlignCenter</set>
              </property>
             </item>
-            <item row="16" column="3">
+            <item row="16" column="1">
              <property name="text">
               <string/>
              </property>
@@ -1717,7 +1720,7 @@
               <set>AlignHCenter|AlignVCenter|AlignCenter</set>
              </property>
             </item>
-            <item row="17" column="3">
+            <item row="17" column="1">
              <property name="text">
               <string/>
              </property>
@@ -1725,7 +1728,7 @@
               <set>AlignHCenter|AlignVCenter|AlignCenter</set>
              </property>
             </item>
-            <item row="18" column="3">
+            <item row="18" column="1">
              <property name="text">
               <string/>
              </property>
@@ -1733,7 +1736,7 @@
               <set>AlignHCenter|AlignVCenter|AlignCenter</set>
              </property>
             </item>
-            <item row="19" column="3">
+            <item row="19" column="1">
              <property name="text">
               <string/>
              </property>
@@ -1764,6 +1767,9 @@
              <widget class="QCheckBox" name="selectAllFittingResults">
               <property name="text">
                <string>Select/Deselect All</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
@@ -2066,7 +2072,14 @@
   </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>instrSelector</tabstop>
+  <tabstop>timeZeroFront</tabstop>
+  <tabstop>firstGoodBinFront</tabstop>
   <tabstop>loadCurrent</tabstop>
+  <tabstop>mwRunFiles</tabstop>
+  <tabstop>previousRun</tabstop>
+  <tabstop>nextRun</tabstop>
   <tabstop>frontGroupGroupPairComboBox</tabstop>
   <tabstop>frontAlphaNumber</tabstop>
   <tabstop>homePeriodBox1</tabstop>
@@ -2088,8 +2101,27 @@
   <tabstop>pairTablePlotChoice</tabstop>
   <tabstop>pairTablePlotButton</tabstop>
   <tabstop>muonAnalysisHelpGrouping</tabstop>
+  <tabstop>connectPlotType</tabstop>
+  <tabstop>timeComboBox</tabstop>
+  <tabstop>timeAxisStartAtInput</tabstop>
+  <tabstop>timeAxisFinishAtInput</tabstop>
+  <tabstop>yAxisMinimumInput</tabstop>
+  <tabstop>yAxisMaximumInput</tabstop>
+  <tabstop>yAxisAutoscale</tabstop>
+  <tabstop>showErrorBars</tabstop>
   <tabstop>rebinComboBox</tabstop>
   <tabstop>optionStepSizeText</tabstop>
+  <tabstop>plotCreation</tabstop>
+  <tabstop>hideToolbars</tabstop>
+  <tabstop>muonAnalysisHelpPlotting</tabstop>
+  <tabstop>muonAnalysisHelpDataAnalysis</tabstop>
+  <tabstop>valueTable</tabstop>
+  <tabstop>selectAllLogValues</tabstop>
+  <tabstop>fittingResultsTable</tabstop>
+  <tabstop>selectAllFittingResults</tabstop>
+  <tabstop>tableName</tabstop>
+  <tabstop>createTableBtn</tabstop>
+  <tabstop>muonAnalysisHelpResults</tabstop>
  </tabstops>
  <resources/>
  <connections/>

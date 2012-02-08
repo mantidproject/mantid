@@ -10,7 +10,7 @@ import opcode
 import __builtin__
 import __main__
 try:
-    import qti
+    import _qti
     import PyQt4.QtCore as qtcore
     HAVE_GUI = True
 except:
@@ -21,6 +21,15 @@ try:
     HAVE_NUMPY = True
 except ImportError:
     HAVE_NUMPY = False
+
+###############################################################################
+# Define the api version
+###############################################################################
+def apiVersion():
+    """Indicates that this is version 1
+    of the API
+    """
+    return 1
 
 # Check whether MANTIDPATH is defined. If so, append it to the PYTHONPATH.
 if os.getenv("MANTIDPATH") is not None:
@@ -66,29 +75,30 @@ else:
     def get_libpath(mainlib, dependency):
         if platform.system() == 'Linux':
             cmd = 'ldd %s | grep %s' % (mainlib, dependency)
-            part = 2
-        else:
-            cmd = 'otool -L %s | grep %s' % (mainlib, dependency)
-            part = 0
-        subp = subprocess.Popen(cmd,stdout=subprocess.PIPE,
+            subp = subprocess.Popen(cmd,stdout=subprocess.PIPE,
                                 stderr=subprocess.STDOUT,shell=True)
-        out = subp.communicate()[0]
-        # ldd produces a string that always has 4 columns. The full path
-        # is in the 3rd column
-        return out.split()[part]
-    # stdc++ has to be loaded first or exceptions don't get translated 
-    # properly across bounadries
-    # NeXus has to be loaded as well as there seems to be an issue with
-    # the thread-local storage not being initialized properly unles
-    # it is loaded before other libraries.
+            out = subp.communicate()[0]
+            # ldd produces a string that always has 4 columns. The full path
+            # is in the 3rd column
+            libpath = out.split()[2]
+        else:
+            libpath = os.path.join(_bin, dependency + '.dylib')
+        return libpath
+        
     library_var = "LD_LIBRARY_PATH"
     if platform.system() == 'Darwin':
         library_var = 'DY' + library_var
     ldpath = os.environ.get(library_var, "")
     ldpath += ":" + _bin
     os.environ[library_var] = ldpath
-    dlloader(get_libpath(pythonlib, 'stdc++'))
-    dlloader(get_libpath(pythonlib, 'libNeXus'))
+    if platform.system() == 'Linux':
+        # stdc++ has to be loaded first or exceptions don't get translated 
+        # properly across bounadries
+        # NeXus has to be loaded as well as there seems to be an issue with
+        # the thread-local storage not being initialized properly unles
+        # it is loaded before other libraries.
+        dlloader(get_libpath(pythonlib, 'stdc++')) 
+        dlloader(get_libpath(pythonlib, 'libNeXus'))
     dlloader(get_libpath(pythonlib, 'libMantidKernel'))
     dlloader(get_libpath(pythonlib, 'libMantidGeometry'))
     dlloader(get_libpath(pythonlib, 'libMantidAPI'))
@@ -1056,7 +1066,7 @@ class IAlgorithmProxy(ProxyObject):
                 presets += name + '=' + _makeString(value) + '|'
 
         # finally run the configured dialog
-        dialog = qti.app.mantidUI.createPropertyInputDialog(self.name(), presets, message, enabled_list, disabled_list)
+        dialog = _qti.app.mantidUI.createPropertyInputDialog(self.name(), presets, message, enabled_list, disabled_list)
         if dialog == False:
             sys.exit('Information: Script execution cancelled')
 
@@ -1071,7 +1081,7 @@ class IAlgorithmProxy(ProxyObject):
         except AttributeError:
             run_async = False
         if run_async:
-            success = qti.app.mantidUI.runAlgorithmAsync_PyCallback(self.name()) 
+            success = _qti.app.mantidUI.runAlgorithmAsync_PyCallback(self.name()) 
             if success == False:
                 sys.exit('An error occurred while running %s. See results log for details.' % self.name())
         else:
@@ -1236,8 +1246,12 @@ class MantidPyFramework(FrameworkManager):
             return ialg
         if isinstance(ialg, str):
             if in_callstack('PyExec',inspect.currentframe()) == True:
+                # Algorithm is being called as part of a Python algorithm.
                 ialg = self.createUnmanagedAlgorithm(ialg, version)
                 ialg.__async__ = False
+                ialg.setChild(True)
+                ialg.setLogging(True)
+                ialg.setAlwaysStoreInADS(True)
             else:
                 ialg = self.createManagedAlgorithm(ialg, version) 
                 ialg.__async__ = HAVE_GUI

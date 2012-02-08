@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <facilities>
 
-<facility name="ISIS" zeropadding="5" FileExtensions=".nxs,.raw,.sav,.n*,.s*,">
+<facility name="ISIS" zeropadding="5" FileExtensions=".nxs,.raw,.sav,.n*,.s*,.add,">
   <archive>
     <archiveSearch plugin="ISISDataSearch" />
   </archive>
@@ -202,7 +202,7 @@
    
 </facility> 
 
-<facility name="SNS" delimiter="_" FileExtensions="_event.nxs,.nxs,.dat,_histo.nxs">
+<facility name="SNS" delimiter="_" FileExtensions="_event.nxs,.nxs,.dat,_runinfo.xml,_histo.nxs">
 
   <archive>
     <archiveSearch plugin="OrbiterDataSearch" />

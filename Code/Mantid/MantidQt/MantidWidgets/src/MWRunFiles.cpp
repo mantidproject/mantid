@@ -17,7 +17,7 @@ using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 
 MWRunFiles::MWRunFiles(QWidget *parent) 
-  : MantidWidget(parent), m_findRunFiles(true), m_allowMultipleFiles(true), 
+  : MantidWidget(parent), m_findRunFiles(true), m_allowMultipleFiles(false), 
     m_isOptional(false), m_multiEntry(false), m_buttonOpt(Text), m_fileProblem(""),
     m_entryNumProblem(""), m_algorithmProperty(""), m_fileExtensions(), m_extsAsSingleOption(true),
     m_foundFiles(), m_lastDir(), m_fileFilter()
@@ -732,21 +732,8 @@ void MWRunFiles::browseClicked()
   QString uFile = openFileDialog();
   if( uFile.trimmed().isEmpty() ) return;
 
-  if( this->allowMultipleFiles() )
-  {
-    if ( !m_uiForm.fileEditor->text().isEmpty() )
-    {
-      m_uiForm.fileEditor->setText(m_uiForm.fileEditor->text()+", " + uFile);
-    }
-    else
-    {
-      m_uiForm.fileEditor->setText(uFile);
-    }
-  }
-  else
-  {
-    m_uiForm.fileEditor->setText(uFile);
-  }
+  m_uiForm.fileEditor->setText(uFile);
+
   emit fileEditingFinished();
 }
 /** Currently just checks that entryNum contains an int > 0 and hence might be a

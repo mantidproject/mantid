@@ -18,11 +18,20 @@ algorithms and data objects that are:
 """
 
 ###############################################################################
+# Define the api version
+###############################################################################
+def apiVersion():
+    """Indicates that this is version 2
+    of the API
+    """
+    return 2
+
+###############################################################################
 # GUI - Do this as early as possible
 ###############################################################################
 # Flag indicating whether the GUI layer is loaded. 
 try:
-    import qti
+    import _qti
     __gui__ = True
 except ImportError:
     __gui__ = False

@@ -19,6 +19,7 @@ set ( EXPORT_FILES
   src/Instrument.cpp
   src/UnitCell.cpp
   src/OrientedLattice.cpp
+  src/ReferenceFrame.cpp
 )  
 
 set ( SRC_FILES

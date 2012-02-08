@@ -62,7 +62,12 @@ class WorkspaceGroupTest(unittest.TestCase):
        Q = n * AB
        Q = n + AB
         
-        
+    def test_size_method(self):
+       CreateWorkspace('A', DataX=[1,2,3], DataY=[2,3], DataE=[2,3])
+       CreateWorkspace('B', DataX=[1,2,3], DataY=[2,3], DataE=[2,3])
+       GroupWorkspaces(InputWorkspaces='A,B', OutputWorkspace='AB')
+       grouped_ws = mtd['AB']
+       self.assertEquals(2, grouped_ws.size())
 
 if __name__ == '__main__':
     unittest.main()

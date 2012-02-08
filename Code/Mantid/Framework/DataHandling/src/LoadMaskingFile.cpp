@@ -75,7 +75,7 @@ namespace DataHandling
    */
   LoadMaskingFile::~LoadMaskingFile()
   {
-    // TODO Auto-generated destructor stub
+    // Auto-generated destructor stub
   }
   
   /// Sets documentation strings for this algorithm
@@ -83,20 +83,14 @@ namespace DataHandling
     this->setWikiSummary("Loads an XML file or calibration file to generate MaskWorkspace.");
     this->setOptionalMessage("");
   }
+
   /// Initialise the properties
   void LoadMaskingFile::init(){
 
-    // 1. Setup
-    std::vector<std::string> instrumentnames;
-    instrumentnames.push_back("VULCAN");
-    instrumentnames.push_back("POWGEN");
-    instrumentnames.push_back("NOMAD");
-
-    // 2. Declare property
-    declareProperty("Instrument", "POWGEN", new ListValidator(instrumentnames),
-        "Instrument to mask");
+    // 1. Declare property
+    declareProperty("Instrument", "", "Name of instrument to mask.");
     declareProperty(new FileProperty("InputFile", "", FileProperty::Load, ".xml"),
-        "XML file for masking");
+        "XML file for masking. ");
     // declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace", "Masking", Direction::Output),
     declareProperty(new WorkspaceProperty<DataObjects::SpecialWorkspace2D>("OutputWorkspace", "Masking", Direction::Output),
         "Output Masking Workspace");
@@ -111,6 +105,7 @@ namespace DataHandling
     // 1. Load Instrument and create output Mask workspace
     const std::string instrumentname = getProperty("Instrument");
     mInstrumentName = instrumentname;
+
     this->intializeMaskWorkspace();
     setProperty("OutputWorkspace",mMaskWS);
 
@@ -154,12 +149,12 @@ namespace DataHandling
     if (mDefaultToUse){
       // Default is to use all detectors
       for (size_t i = 0; i < mMaskWS->getNumberHistograms(); i ++){
-        mMaskWS->dataY(i)[0] = 1;
+        mMaskWS->dataY(i)[0] = 0;
       }
     } else {
       // Default not to use any detectors
       for (size_t i = 0; i < mMaskWS->getNumberHistograms(); i ++){
-        mMaskWS->dataY(i)[0] = 0;
+        mMaskWS->dataY(i)[0] = 1;
       }
     }
 
@@ -187,9 +182,9 @@ namespace DataHandling
       if (it != indexmap->end()){
         size_t index = it->second;
         if (tomask)
-          mMaskWS->dataY(index)[0] = 0;
-        else
           mMaskWS->dataY(index)[0] = 1;
+        else
+          mMaskWS->dataY(index)[0] = 0;
       } else {
         g_log.error() << "Pixel w/ ID = " << detid << " Cannot Be Located" << std::endl;
       }
@@ -221,7 +216,7 @@ namespace DataHandling
 
       g_log.debug() << "Component name = " << componentnames[i] << std::endl;
 
-      // a) get componenet
+      // a) get component
       Geometry::IComponent_const_sptr component = minstrument->getComponentByName(componentnames[i]);
       g_log.debug() << "Component ID = " << component->getComponentID() << std::endl;
 
@@ -316,6 +311,10 @@ namespace DataHandling
     UNUSED_ARG(detectors)
     UNUSED_ARG(detectorpairslow)
     UNUSED_ARG(detectorpairsup)
+
+    if (singles.size() == 0 && pairslow.size() == 0)
+      return;
+
     g_log.error() << "SpectrumID in XML File (ids) Is Not Supported!  Spectrum IDs" << std::endl;
 
     for (size_t i = 0; i < singles.size(); i ++){
@@ -419,6 +418,8 @@ namespace DataHandling
       if (pNode->nodeName().compare("group") == 0){
         // Node "group"
         ingroup = true;
+        tomask = true;
+        /*
         // get type
         Poco::XML::NamedNodeMap* att = pNode->attributes();
         Poco::XML::Node* cNode = att->item(0);
@@ -429,7 +430,9 @@ namespace DataHandling
         } else {
           g_log.error() << "Type (" << cNode->localName() << ") = " << cNode->getNodeValue() << " is not supported!" << std::endl;
         }
-        g_log.information() << "Node Group:  child Node Name = " << cNode->localName() << ": " << cNode->getNodeValue() << std::endl;
+        g_log.information() << "Node Group:  child Node Name = " << cNode->localName() << ": " << cNode->getNodeValue()
+                << "(always)"<< std::endl;
+        */
 
       } else if (pNode->nodeName().compare("component") == 0){
         // Node "component"
@@ -459,18 +462,21 @@ namespace DataHandling
 
       } else if (pNode->nodeName().compare("detector-masking") == 0){
         // Node "detector-masking".  Check default value
+        mDefaultToUse = true;
+        /*
         Poco::XML::NamedNodeMap* att = pNode->attributes();
         if (att->length() > 0){
           Poco::XML::Node* cNode = att->item(0);
+          mDefaultToUse = true;
           if (cNode->localName().compare("default") == 0){
             if (cNode->getNodeValue().compare("use") == 0){
               mDefaultToUse = true;
             } else {
               mDefaultToUse = false;
             }
-          }
         } // if - att-length
-      }
+        */
+      } // END-IF-ELSE: pNode->nodeName()
 
       pNode = it.nextNode();
     } // ENDWHILE
@@ -663,6 +669,12 @@ namespace DataHandling
     childAlg->setPropertyValue("InstrumentName", mInstrumentName);
     childAlg->setProperty("RewriteSpectraMap", false);
     childAlg->executeAsSubAlg();
+
+    if (!childAlg->isExecuted())
+    {
+      g_log.error() << "Unable to load Instrument " << mInstrumentName << std::endl;
+      throw std::invalid_argument("Incorrect instrument name given!");
+    }
 
     // 2. Use the instrument in the temp Workspace for new MaskWorkspace
     Geometry::Instrument_const_sptr minstrument = tempWS->getInstrument();

@@ -169,12 +169,13 @@ add_custom_target( Framework DEPENDS ${FRAMEWORK_LIBS} )
 ###########################################################################
 
 # Create instrument directory and make it writable so vtp files can go there
-install ( DIRECTORY DESTINATION ${INBUNDLE}instrument 
+install ( DIRECTORY ../instrument/ DESTINATION ${INBUNDLE}instrument 
           DIRECTORY_PERMISSIONS OWNER_READ OWNER_EXECUTE OWNER_WRITE
                                 GROUP_READ GROUP_EXECUTE GROUP_WRITE
                                 WORLD_READ WORLD_EXECUTE WORLD_WRITE
+          PATTERN "*UNIT_TESTING*" EXCLUDE
 )
-file ( GLOB INSTRUMENT_FILES ../instrument/*.xml )
-install ( FILES ${INSTRUMENT_FILES} DESTINATION ${INBUNDLE}instrument )
+
+# Scripts
 install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN ".svn" EXCLUDE 
                                                  PATTERN "*.pyc" EXCLUDE )

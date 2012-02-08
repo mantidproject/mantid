@@ -89,10 +89,13 @@ IMDWorkspace_sptr makeDemoData(bool binned = false)
       "SplitThreshold", "100",
       "MaxRecursionDepth", "20",
       "OutputWorkspace", "mdew");
-  addPeak(15000,0,0,0, 1);
+  addPeak(15000,0,0,0, 3);
   addPeak(5000,0,0,0, 0.3);
   addPeak(5000,0,0,0, 0.2);
   addPeak(5000,0,0,0, 0.1);
+  addPeak(5000,1,0,0, 0.3);
+  addPeak(5000,2,0,0, 0.3);
+  addPeak(5000,2,1,0, 0.3);
 //  addPeak(12000,0,0,0, 0.03);
   IMDEventWorkspace_sptr mdew = boost::dynamic_pointer_cast<IMDEventWorkspace>( AnalysisDataService::Instance().retrieve("mdew") );
   mdew->splitAllIfNeeded(NULL);
@@ -111,11 +114,19 @@ IMDWorkspace_sptr makeDemoData(bool binned = false)
         "InputWorkspace", "mdew",
         "OutputWorkspace", "binned",
         "AxisAligned", "0",
-        "BasisVectorX", "rx, m, 1.0, 0.0, 0.0, 20.0, 100",
-        "BasisVectorY", "ry, m, 0.0, 1.0, 0.0, 20.0, 100",
-        "BasisVectorZ", "ry, m, 0.0, 0.0, 1.0, 20.0, 100",
+        "BasisVectorX", "rx, m, 1.0, 0.0, 0.0, 10.0, 100",
+        "BasisVectorY", "ry, m, 0.0, 1.0, 0.0, 10.0, 100",
+        "BasisVectorZ", "rz, m, 0.0, 0.0, 1.0, 10.0, 100",
         "ForceOrthogonal", "1",
-        "Origin", "-10, -10, -10");
+        "Origin", "-5, -5, -5");
+
+    FrameworkManager::Instance().exec("BinMD", 12,
+        "InputWorkspace", "mdew",
+        "OutputWorkspace", "binned_al",
+        "AxisAligned", "1",
+        "AlignedDimX", "k, -5, 5, 100",
+        "AlignedDimY", "l, -5, 5, 100",
+        "AlignedDimZ", "h, -5, 5, 100");
 
     return boost::dynamic_pointer_cast<IMDWorkspace>( AnalysisDataService::Instance().retrieve("binned") );
   }

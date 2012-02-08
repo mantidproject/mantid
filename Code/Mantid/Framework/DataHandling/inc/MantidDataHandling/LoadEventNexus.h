@@ -18,6 +18,27 @@ namespace Mantid
 
   namespace DataHandling
   {
+
+    /** This class defines the pulse times for a specific bank.
+     * Since some instruments (ARCS, VULCAN) have multiple preprocessors,
+     * this means that some banks have different lists of pulse times.
+     */
+    class BankPulseTimes
+    {
+    public:
+      BankPulseTimes(::NeXus::File & file);
+      BankPulseTimes(std::vector<Kernel::DateAndTime> & times);
+      ~BankPulseTimes();
+      bool equals(size_t otherNumPulse, std::string otherStartTime);
+
+      /// String describing the start time
+      std::string startTime;
+      /// Size of the array of pulse times
+      size_t numPulses;
+      /// Array of the pulse times
+      Kernel::DateAndTime * pulseTimes;
+    };
+
     /** @class LoadEventNexus LoadEventNexus.h Nexus/LoadEventNexus.h
 
     Load Event Nexus files.
@@ -28,7 +49,6 @@ namespace Mantid
     <LI> Workspace - The name of the workspace to output</LI>
     </UL>
 
-    @author Janik Zikovsky, SNS
     @date Sep 27, 2010
 
     Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -55,21 +75,11 @@ namespace Mantid
     public:
       /// Sets documentation strings for this algorithm
       virtual void initDocs();
-      /// Default constructor
       LoadEventNexus();
+      virtual ~LoadEventNexus();
 
-      /// Destructor
-      virtual ~LoadEventNexus()
-      {
-      }
-
-      /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "LoadEventNexus";};
-
-      /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1;};
-
-      /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Nexus";}
 
       /// do a quick check that this file can be loaded 
@@ -112,9 +122,6 @@ namespace Mantid
       /// Limits found to tof
       double shortest_tof;
 
-      /// List of the absolute time of each pulse
-      std::vector<Kernel::DateAndTime> pulseTimes;
-
       /// Do we pre-count the # of events in each pixel ID?
       bool precount;
 
@@ -139,6 +146,12 @@ namespace Mantid
       /// True if the event_id is spectrum no not pixel ID
       bool event_id_is_spec;
 
+      /// One entry of pulse times for each preprocessor
+      std::vector<BankPulseTimes*> m_bankPulseTimes;
+
+      /// Pulse times for ALL banks, taken from proton_charge log.
+      BankPulseTimes* m_allBanksPulseTimes;
+
       DataObjects::EventWorkspace_sptr createEmptyEventWorkspace();
       void makeMapToEventLists();
       void loadEvents(API::Progress * const prog, const bool monitors);
@@ -155,8 +168,8 @@ namespace Mantid
       static bool runLoadInstrument(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
           const std::string & top_entry_name, Algorithm * alg);
 
-      static bool runLoadNexusLogs(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
-          std::vector<Kernel::DateAndTime> & pulseTimes, Algorithm * alg);
+      static BankPulseTimes * runLoadNexusLogs(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
+          Algorithm * alg);
 
       /// Load a spectra mapping from the given file
       static Geometry::ISpectraDetectorMap * loadSpectraMapping(const std::string & filename, Geometry::Instrument_const_sptr inst,
@@ -171,7 +184,7 @@ namespace Mantid
       static void loadTimeOfFlightData(::NeXus::File& file, DataObjects::EventWorkspace_sptr WS, 
         const std::string& binsName,size_t start_wi = 0, size_t end_wi = 0);
 
-    private:
+    public:
       /// name of top level NXentry to use
       std::string m_top_entry_name;
       /// Set the top entry field name

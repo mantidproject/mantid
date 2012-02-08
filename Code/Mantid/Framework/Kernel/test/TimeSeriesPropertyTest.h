@@ -98,6 +98,8 @@ public:
     TS_ASSERT_EQUALS( time[1], DateAndTime("2007-11-30T16:17:10"));
     TS_ASSERT_EQUALS( time[2], DateAndTime("2007-11-30T16:17:20"));
     TS_ASSERT_EQUALS( time[3], DateAndTime("2007-11-30T16:17:30"));
+
+    delete p;
   }
 
   void test_addValues()
@@ -147,6 +149,9 @@ public:
     (*log) += log2;
 
     TS_ASSERT_EQUALS( log->size(), 5);
+
+    delete log;
+    delete log2;
   }
 
   //----------------------------------------------------------------------------
@@ -160,6 +165,8 @@ public:
     (*log) += log;
     // There is now a check and trying to do this does nothing.
     TS_ASSERT_EQUALS( log->size(), 2);
+
+    delete log;
   }
 
   //----------------------------------------------------------------------------
@@ -183,6 +190,8 @@ public:
     log->filterByTime(start, stop);
     TS_ASSERT_EQUALS( log->realSize(), 3);
     TS_ASSERT_EQUALS( log->getTotalValue(), 9);
+
+    delete log;
   }
 
 
@@ -202,6 +211,8 @@ public:
     // Still there!
     TS_ASSERT_EQUALS( log->realSize(), 1);
     TS_ASSERT_EQUALS( log->getTotalValue(), 1);
+
+    delete log;
   }
 
 
@@ -221,6 +232,8 @@ public:
     // Still there!
     TS_ASSERT_EQUALS( log->realSize(), 1);
     TS_ASSERT_EQUALS( log->getTotalValue(), 1);
+
+    delete log;
   }
 
 
@@ -257,7 +270,7 @@ public:
     t = DateAndTime("2007-11-30T16:17:41");
     TS_ASSERT_DELTA( s.stop(), t, 1e-3);
 
-
+    delete log;
   }
 
 
@@ -322,6 +335,12 @@ public:
     TS_ASSERT_EQUALS( dynamic_cast< TimeSeriesProperty<int> * >(outputs[3])->realSize(), 2);
     TS_ASSERT_EQUALS( dynamic_cast< TimeSeriesProperty<int> * >(outputs[4])->realSize(), 1);
 
+    delete log;
+    delete outputs[0];
+    delete outputs[1];
+    delete outputs[2];
+    delete outputs[3];
+    delete outputs[4];
   }
 
 
@@ -367,6 +386,8 @@ public:
 
     TS_ASSERT_EQUALS( dynamic_cast< TimeSeriesProperty<int> * >(outputs[0])->realSize(), 5);
 
+    delete log;
+    delete outputs[0];
   }
 
   //----------------------------------------------------------------------------
@@ -394,6 +415,8 @@ public:
     TS_ASSERT_DELTA( stats.mean, 6.0, 1e-3);
     TS_ASSERT_DELTA( stats.duration, 100.0, 1e-3);
     TS_ASSERT_DELTA( stats.standard_deviation, 3.1622, 1e-3);
+
+    delete log;
   }
 
   void test_empty_statistics()
@@ -406,6 +429,8 @@ public:
     TS_ASSERT( boost::math::isnan(stats.mean) );
     TS_ASSERT( boost::math::isnan(stats.standard_deviation) );
     TS_ASSERT( boost::math::isnan(stats.duration) );
+
+    delete log;
   }
 
   void test_PlusEqualsOperator_Incompatible_Types_dontThrow()
@@ -421,6 +446,32 @@ public:
     logi->operator+=(log);
     val->operator+=(log);
     val->operator+=(logi);
+
+    delete log;
+    delete logi;
+    delete val;
+  }
+
+  void test_PlusEqualsOperator_() {
+    TimeSeriesProperty<double> * lhs  = new TimeSeriesProperty<double>("doubleLog");
+    TS_ASSERT( lhs->addValue("2007-11-30T16:17:00",1) );
+    TS_ASSERT( lhs->addValue("2007-11-30T16:17:10",2) );
+    TS_ASSERT( lhs->addValue("2007-11-30T16:17:20",3) );
+    TS_ASSERT( lhs->addValue("2007-11-30T16:17:30",4) );
+    TS_ASSERT( lhs->addValue("2007-11-30T16:17:40",5) );
+    TimeSeriesProperty<double> * rhs  = new TimeSeriesProperty<double>("doubleLog");
+    TS_ASSERT( rhs->addValue("2007-11-30T16:17:00",1) );
+    TS_ASSERT( rhs->addValue("2007-11-30T16:17:10",2) );
+    TS_ASSERT( rhs->addValue("2007-11-30T16:17:20",3) );
+    TS_ASSERT( rhs->addValue("2007-11-30T16:17:30",4) );
+    TS_ASSERT( rhs->addValue("2007-11-30T16:17:40",5) );
+
+    lhs->operator+=(rhs);
+
+    TS_ASSERT_EQUALS(lhs->size(), rhs->size());
+
+    delete lhs;
+    delete rhs;
   }
 
   /*
@@ -455,6 +506,7 @@ public:
     double v5 = p->getSingleValue(time5);
     TS_ASSERT_DELTA( v5, 9.99, 1e-6);
 
+    delete p;
   }
 
 

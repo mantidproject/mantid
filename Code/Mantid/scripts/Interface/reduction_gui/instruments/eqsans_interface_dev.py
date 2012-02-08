@@ -18,7 +18,7 @@ from reduction_gui.reduction.sans.eqsans_data_proxy import DataProxy
 
 IS_IN_MANTIDPLOT = False
 try:
-    import qti
+    import _qti
     from reduction_gui.widgets.sans.stitcher import StitcherWidget
     IS_IN_MANTIDPLOT = True
 except:
@@ -32,6 +32,9 @@ class EQSANSInterface(InstrumentInterface):
     
     def __init__(self, name, settings):
         super(EQSANSInterface, self).__init__(name, settings)
+        
+        self.ERROR_REPORT_NAME = "sans_error_report.xml"    
+        self.LAST_REDUCTION_NAME = ".mantid_last_reduction.xml"    
         
         # Scripter object to interface with Mantid 
         self.scripter = EQSANSReductionScripter(name=name)        
@@ -54,3 +57,9 @@ class EQSANSInterface(InstrumentInterface):
         # Stitcher
         if IS_IN_MANTIDPLOT:
             self.attach(StitcherWidget(settings = self._settings))
+
+    def has_advanced_version(self):
+        """
+            Returns true if the instrument has simple and advanced views
+        """
+        return True

@@ -32,13 +32,14 @@ int main( int argc, char ** argv )
 {
   QApplication app(argc, argv);
   app.setApplicationName("SliceViewerWindow demo");
-  IMDWorkspace_sptr mdew = makeDemoData();
+  IMDWorkspace_sptr mdew = makeDemoData(true);
 
-  SliceViewerWindow * mainWin = new SliceViewerWindow("mdew");
+  SliceViewerWindow * mainWin = new SliceViewerWindow("binned_al");
   //mainWin->getSlicer()->getLineOverlay()->setSnap(0.5);
 //  mainWin->getSlicer()->getLineOverlay()->setSnapLength(0.1);
   mainWin->move(100, 100);
   mainWin->resize(700, 700);
+  mainWin->getSlicer()->setXYDim(0,1);
   mainWin->show();
 
   app.exec();

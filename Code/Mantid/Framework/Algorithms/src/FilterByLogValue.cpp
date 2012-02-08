@@ -14,7 +14,17 @@ Sample logs consist of a series of <Time, Value> pairs. The first step in filter
 There is no interpolation of log values between the discrete sample log times at this time.
 However, the log value is assumed to be constant at times before its first point and after its last. For example, if the first temperature measurement was at time=10 seconds and a temperature within the acceptable range, then all events between 0 and 10 seconds will be included also. If a log has a single point in time, then that log value is assumed to be constant for all time and if it falls within the range, then all events will be kept.
 
+==== PulseFilter ====
 
+If you select PulseFilter, then events will be filtered OUT in notches around each
+time in the selected sample log, and the MinValue/MaxValue parameters are ignored.
+For example:
+
+* If you have 3 entries at times:
+** 10, 20, 30 seconds.
+** A TimeTolerance of 1 second.
+* Then the events at the following times will be EXCLUDED from the output:
+** 9-11; 19-21; 29-30 seconds.
 
 
 
@@ -34,6 +44,7 @@ However, the log value is assumed to be constant at times before its first point
 #include "MantidAPI/FileProperty.h"
 
 #include <fstream>
+#include "MantidKernel/TimeSplitter.h"
 
 namespace Mantid
 {
@@ -102,6 +113,14 @@ void FilterByLogValue::init()
   types.push_back("Left");
   declareProperty("LogBoundary", "Centre", new Mantid::Kernel::ListValidator(types),
                   "How to treat log values as being measured in the centre of the time, or beginning (left) boundary");
+
+
+  declareProperty("PulseFilter", false,
+    "Optional. Filter out a notch of time for each entry in the sample log named.\n"
+    "A notch of width 2*TimeTolerance is centered at each log time. The value of the log is NOT used."
+    "This is used, for example, to filter out veto pulses.");
+
+
 }
 
 
@@ -119,9 +138,10 @@ void FilterByLogValue::exec()
   double max = getProperty("MaximumValue");
   double tolerance = getProperty("TimeTolerance");
   std::string logname = getPropertyValue("LogName");
+  bool PulseFilter = getProperty("PulseFilter");
 
   // Find the start and stop times of the run, but handle it if they are not found.
-  DateAndTime run_start, run_stop;
+  DateAndTime run_start(0), run_stop("2100-01-01");
   double handle_edge_values = false;
   try
   {
@@ -133,48 +153,67 @@ void FilterByLogValue::exec()
   {
   }
 
-
-  if (max <= min)
-    throw std::invalid_argument("MaximumValue should be > MinimumValue. Aborting.");
-
   // Now make the splitter vector
   TimeSplitterType splitter;
   //This'll throw an exception if the log doesn't exist. That is good.
   Kernel::TimeSeriesProperty<double> * log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( inputWS->run().getLogData(logname) );
   if (log)
   {
-    //This function creates the splitter vector we will use to filter out stuff.
-    std::string logBoundary(this->getPropertyValue("LogBoundary"));
-    std::transform(logBoundary.begin(), logBoundary.end(), logBoundary.begin(), tolower);
-    log->makeFilterByValue(splitter, min, max, tolerance, (logBoundary.compare("centre") == 0));
-
-    if (log->realSize() >= 1 && handle_edge_values)
+    if (PulseFilter)
     {
-      double val;
-      // Assume everything before the 1st value is constant
-      val = log->firstValue();
-      if ((val >= min) && (val <= max))
+      // ----- Filter at pulse times only -----
+      DateAndTime lastTime = run_start;
+      std::vector<DateAndTime> times = log->timesAsVector();
+      std::vector<DateAndTime>::iterator it;
+      for (it = times.begin(); it != times.end(); it++)
       {
-        TimeSplitterType extraFilter;
-        extraFilter.push_back( SplittingInterval(run_start, log->firstTime(), 0));
-        // Include everything from the start of the run to the first time measured (which may be a null time interval; this'll be ignored)
-        splitter = splitter | extraFilter;
+        SplittingInterval interval(lastTime, *it - tolerance, 0);
+        // Leave a gap +- tolerance
+        lastTime = (*it + tolerance);
+        splitter.push_back(interval);
       }
+      // And the last one
+      splitter.push_back(SplittingInterval(lastTime, run_stop, 0));
 
-      // Assume everything after the LAST value is constant
-      val = log->lastValue();
-      if ((val >= min) && (val <= max))
-      {
-        TimeSplitterType extraFilter;
-        extraFilter.push_back( SplittingInterval(log->lastTime(), run_stop, 0) );
-        // Include everything from the start of the run to the first time measured (which may be a null time interval; this'll be ignored)
-        splitter = splitter | extraFilter;
-      }
     }
+    else
+    {
+      // ----- Filter by value ------
+      if (max <= min)
+        throw std::invalid_argument("MaximumValue should be > MinimumValue. Aborting.");
+
+      //This function creates the splitter vector we will use to filter out stuff.
+      std::string logBoundary(this->getPropertyValue("LogBoundary"));
+      std::transform(logBoundary.begin(), logBoundary.end(), logBoundary.begin(), tolower);
+      log->makeFilterByValue(splitter, min, max, tolerance, (logBoundary.compare("centre") == 0));
+
+      if (log->realSize() >= 1 && handle_edge_values)
+      {
+        double val;
+        // Assume everything before the 1st value is constant
+        val = log->firstValue();
+        if ((val >= min) && (val <= max))
+        {
+          TimeSplitterType extraFilter;
+          extraFilter.push_back( SplittingInterval(run_start, log->firstTime(), 0));
+          // Include everything from the start of the run to the first time measured (which may be a null time interval; this'll be ignored)
+          splitter = splitter | extraFilter;
+        }
+
+        // Assume everything after the LAST value is constant
+        val = log->lastValue();
+        if ((val >= min) && (val <= max))
+        {
+          TimeSplitterType extraFilter;
+          extraFilter.push_back( SplittingInterval(log->lastTime(), run_stop, 0) );
+          // Include everything from the start of the run to the first time measured (which may be a null time interval; this'll be ignored)
+          splitter = splitter | extraFilter;
+        }
+      }
+    } // (filter by value)
 
 
 
-    // for (int i=0; i < splitter.size(); i++)   std::cout << splitter[i].start() << " to " << splitter[i].stop() << "\n";
   }
 
   g_log.information() << splitter.size() << " entries in the filter.\n";

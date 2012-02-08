@@ -68,9 +68,6 @@ public:
   MuonAnalysis(QWidget *parent = 0);
 
 private slots:
-  /// Exit the interface
-  //void exitClicked();
-
   /// Guess Alpha clicked
   void guessAlphaClicked();
 
@@ -116,6 +113,9 @@ private slots:
   /// User select instrument
   void userSelectInstrument(const QString& prefix);
 
+  /// User clicks hide toolbars checkbox
+  void showHideToolbars(bool state);
+
   ///
   void runFrontPlotButton();
 
@@ -155,13 +155,14 @@ private slots:
   /// Update the pair plot based on changes on the group page.
   void settingsTabUpdatePlot();
 
-  /// Assigns a peak picker tool to the workspace
+  /// Assigns a peak picker tool to the workspace.
   void assignPeakPickerTool(const QString &);
 
-  /// Change the data style and color
-  void changeDataPlotType(const QStringList &);
-
+  /// Group the fitted workspaces.
   void groupFittedWorkspaces(QString);
+
+  /// Called when the plot function has been changed on the home page.
+  void changeHomeFunction();
 
 
 private:
@@ -178,7 +179,7 @@ private:
   void showEvent(QShowEvent *e);
 
   /// Input file changed - update GUI accordingly
-  void inputFileChanged(const QString& filename);
+  void inputFileChanged(const QStringList& filenames);
 
   /// Return the pair which is in focus and -1 if none
   int pairInFocus();
@@ -196,9 +197,6 @@ private:
   /// Apply whatever grouping is specified in GUI tables to workspace
   bool applyGroupingToWS( const std::string& inputWS,  const std::string& outputWS);
 
-  /// Normalise the data
-  void normalise(const std::vector<double>& x, const std::vector<double>& y, QString workspace);
-
   /// Update front 
   void updateFront();
 
@@ -211,17 +209,25 @@ private:
   /// Return a vector of IDs for row number from string of type 1-3, 5, 10-15
   std::vector<int> spectrumIDs(const std::string& str) const;
 
+  void changeCurrentRun(std::string& workspaceGroupName);
+
   /// is string a number?
   bool isNumber(const std::string& s) const;
 
   /// Clear tables and front combo box
   void clearTablesAndCombo();
 
-  /// When no data loaded set various buttons etc to inactive
-  void noDataAvailable();
+  /// Adds the workspaces in a range.
+  void plusRangeWorkspaces();
 
-  /// When data loaded set various buttons etc to active
-  void nowDataAvailable();
+  /// Delete ranged workspaces.
+  void deleteRangedWorkspaces();
+
+  /// Get group workspace name
+  QString getGroupName();
+
+  /// Get a name for the ranged workspace.
+  std::string getRangedName();
 
   /// Check if grouping in table is consistent with data file
   std::string isGroupingAndDataConsistent();
@@ -272,7 +278,7 @@ private:
   int m_tabNumber;
 
   /// used to test that a new filename has been entered 
-  QString m_previousFilename;
+  QStringList m_previousFilenames;
 
   /// List of current group names 
   std::vector<std::string> m_groupNames;
@@ -336,6 +342,9 @@ private:
   /// Boolean to show whether the gui is being updated
   bool m_updating;
 
+  /// Boolean to show when data has been loaded. (Can't auto-update data that hasn't been loaded)
+  bool m_loaded;
+
   /// Load auto saved values
   void loadAutoSavedValues(const QString& group);
 
@@ -348,11 +357,11 @@ private:
   /// change and load the run depending on the value passed as a parameter
   void changeRun(int amountToChange);
 
-  /// Separate the muon file, current File becomes the beginning part of the file i.e the instrument in the file MUSR002413
-  void separateMuonFile(QString & currentFile, int & runNumberSize, int & runNumber);
+  /// Separate the muon file. The current File will remove the path (i.e MUSR002413.nxs)
+  void separateMuonFile(QString & filePath, QString & currentFile, QString & run, int & runSize);
 
   /// Include the 0's fromt eh beginning of the file that were lost in conversion from QString to int
-  void getFullCode(int size, QString & limitedCode);
+  void getFullCode(int originalSize, QString & run);
 
   /// Setup the signals for updating
   void connectAutoUpdate();

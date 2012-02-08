@@ -1,11 +1,11 @@
 set ( SRC_FILES src/CreateSampleShapeDialog.cpp
+                src/ConvertTableToMatrixWorkspaceDialog.cpp
                 src/LoadDialog.cpp
                 src/LoadAsciiDialog.cpp
                 src/LoadDAEDialog.cpp
                 src/LoadRawDialog.cpp
                 src/LOQScriptInputDialog.cpp
                 src/MantidGLWidget.cpp
-                src/PeakIntegrationDialog.cpp
                 src/PlotAsymmetryByLogValueDialog.cpp
                 src/SampleShapeHelpers.cpp
 )
@@ -14,30 +14,31 @@ set ( SRC_UNITY_IGNORE_FILES )
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES inc/MantidQtCustomDialogs/CreateSampleShapeDialog.h
+                inc/MantidQtCustomDialogs/ConvertTableToMatrixWorkspaceDialog.h
                 inc/MantidQtCustomDialogs/LoadDialog.h
                 inc/MantidQtCustomDialogs/LoadAsciiDialog.h
                 inc/MantidQtCustomDialogs/LoadDAEDialog.h
                 inc/MantidQtCustomDialogs/LoadRawDialog.h
                 inc/MantidQtCustomDialogs/LOQScriptInputDialog.h
                 inc/MantidQtCustomDialogs/MantidGLWidget.h
-                inc/MantidQtCustomDialogs/PeakIntegrationDialog.h
                 inc/MantidQtCustomDialogs/PlotAsymmetryByLogValueDialog.h
                 inc/MantidQtCustomDialogs/SampleShapeHelpers.h
 )
 
 set ( MOC_FILES inc/MantidQtCustomDialogs/CreateSampleShapeDialog.h
+                inc/MantidQtCustomDialogs/ConvertTableToMatrixWorkspaceDialog.h
                 inc/MantidQtCustomDialogs/LoadDialog.h
                 inc/MantidQtCustomDialogs/LoadAsciiDialog.h
                 inc/MantidQtCustomDialogs/LoadDAEDialog.h
                 inc/MantidQtCustomDialogs/LoadRawDialog.h
                 inc/MantidQtCustomDialogs/LOQScriptInputDialog.h
                 inc/MantidQtCustomDialogs/MantidGLWidget.h
-                inc/MantidQtCustomDialogs/PeakIntegrationDialog.h
                 inc/MantidQtCustomDialogs/PlotAsymmetryByLogValueDialog.h
                 inc/MantidQtCustomDialogs/SampleShapeHelpers.h
 )
 
 set ( UI_FILES inc/MantidQtCustomDialogs/CreateSampleShapeDialog.ui
+               inc/MantidQtCustomDialogs/ConvertTableToMatrixWorkspaceDialog.ui
                inc/MantidQtCustomDialogs/DiagScriptInputDialog.ui
                inc/MantidQtCustomDialogs/LOQScriptInputDialog.ui
                inc/MantidQtCustomDialogs/PlotAsymmetryByLogValueDialog.ui

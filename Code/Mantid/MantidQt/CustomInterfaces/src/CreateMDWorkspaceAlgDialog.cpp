@@ -1,4 +1,5 @@
 #include "MantidQtCustomInterfaces/CreateMDWorkspaceAlgDialog.h"
+#include "MantidKernel/ConfigService.h"
 #include <QComboBox>
 #include <QLineEdit>
 #include <QCheckBox>
@@ -13,11 +14,13 @@ CreateMDWorkspaceAlgDialog::CreateMDWorkspaceAlgDialog()
   connect(m_uiForm.buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 
   m_uiForm.combo_q_dimensions->addItem("|Q|");
-  m_uiForm.combo_q_dimensions->addItem("QxQyQz");
+  m_uiForm.combo_q_dimensions->addItem("QhQkQl");
 
   m_uiForm.combo_analysis_mode->addItem("Direct");
   m_uiForm.combo_analysis_mode->addItem("Elastic");
   m_uiForm.combo_analysis_mode->addItem("Indirect");
+
+  m_location = QString(Mantid::Kernel::ConfigService::Instance().getTempDir().c_str());
   
   this->setWindowTitle("Set MDWorkspace Creation Parameters");
 }

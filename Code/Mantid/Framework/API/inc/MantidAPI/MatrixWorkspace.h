@@ -26,6 +26,8 @@
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include <boost/scoped_ptr.hpp>
 
+using Mantid::API::MDNormalization;
+
 namespace Mantid
 {
   //----------------------------------------------------------------------------
@@ -87,6 +89,7 @@ namespace Mantid
       //@{
       Geometry::IDetector_const_sptr getDetector(const size_t workspaceIndex) const;
       double detectorTwoTheta(Geometry::IDetector_const_sptr det) const;
+      double detectorSignedTwoTheta(Geometry::IDetector_const_sptr det) const;
       double gravitationalDrop(Geometry::IDetector_const_sptr det, const double waveLength) const;
       //@}
 
@@ -118,6 +121,7 @@ namespace Mantid
       spec2index_map * getSpectrumToWorkspaceIndexMap() const;
       index2detid_map * getWorkspaceIndexToDetectorIDMap() const;
       detid2index_map * getDetectorIDToWorkspaceIndexMap( bool throwIfMultipleDets ) const;
+      void getDetectorIDToWorkspaceIndexVector( std::vector<size_t> & out, detid_t & offset, bool throwIfMultipleDets) const;
       void getIndicesFromSpectra(const std::vector<specid_t>& spectraList, std::vector<size_t>& indexList) const;
       size_t getIndexFromSpectrumNumber(const specid_t specNo) const;
       void getIndicesFromDetectorIDs(const std::vector<detid_t>& detIdList, std::vector<size_t>& indexList) const;
@@ -257,7 +261,7 @@ namespace Mantid
       void flagMasked(const size_t& spectrumIndex, const size_t& binIndex, const double& weight = 1.0);
       bool hasMaskedBins(const size_t& spectrumIndex) const;
       /// Masked bins for each spectrum are stored as a set of pairs containing <bin index, weight>
-      typedef std::set< std::pair<size_t,double> > MaskList;
+      typedef std::map<size_t,double> MaskList;
       const MaskList& maskedBins(const size_t& spectrumIndex) const;
       // Causes the nearest neighbours map to be rebuilt.
       void rebuildNearestNeighbours();
@@ -266,7 +270,7 @@ namespace Mantid
       // ---------------------------------- MDGeometry methods -------------------------------
       virtual size_t getNumDims() const;
       virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(size_t index) const;
-      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimensionNamed(std::string id) const;
+      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimensionWithId(std::string id) const;
 
 
       // ---------------- IMDWorkspace Methods --------------------------------
@@ -276,6 +280,9 @@ namespace Mantid
       static const std::string xDimensionId;
       /// Dimensin id for y-dimension.
       static const std::string yDimensionId;
+
+      virtual void getLinePlot(const Mantid::Kernel::VMD & start, const Mantid::Kernel::VMD & end,
+          Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y, std::vector<signal_t> & e) const;
 
       void saveSpectraMapNexus(::NeXus::File * file, const std::vector<int>& spec,
           const ::NeXus::NXcompression compression = ::NeXus::LZW) const;

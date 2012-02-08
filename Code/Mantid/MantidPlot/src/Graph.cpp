@@ -59,7 +59,7 @@
 #include "plot2D/ScaleEngine.h"
 #include "UserFunction.h"
 #include "Mantid/MantidMatrixCurve.h"
-#include "Mantid/MantidQwtMatrixWorkspaceData.h"
+#include "MantidQtAPI/MantidQwtMatrixWorkspaceData.h"
 #include "Mantid/ErrorBarSettings.h"
 
 #ifdef EMF_OUTPUT

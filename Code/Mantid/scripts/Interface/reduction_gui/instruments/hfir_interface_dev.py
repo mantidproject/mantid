@@ -19,7 +19,7 @@ from reduction_gui.reduction.sans.hfir_data_proxy import DataProxy
 
 IS_IN_MANTIDPLOT = False
 try:
-    import qti
+    import _qti
     from reduction_gui.widgets.sans.stitcher import StitcherWidget
     IS_IN_MANTIDPLOT = True
 except:
@@ -32,6 +32,9 @@ class HFIRInterface(InstrumentInterface):
     
     def __init__(self, name, settings):
         super(HFIRInterface, self).__init__(name, settings)
+        
+        self.ERROR_REPORT_NAME = "sans_error_report.xml"    
+        self.LAST_REDUCTION_NAME = ".mantid_last_HFIR_reduction.xml"    
         
         # Scripter object to interface with Mantid 
         self.scripter = HFIRReductionScripter(name=name)        

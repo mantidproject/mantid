@@ -67,10 +67,14 @@ public:
   void add(const std::string& wsName);
   /// Does a workspace exist within the group
   bool contains(const std::string & wsName) const;
-  /// Returns the workspaces that make up this group. Note that this returns a copy as the internal vector can mutate while the vector is being iterated over.
+  /// Returns the names of workspaces that make up this group. Note that this returns a copy as the internal vector can mutate while the vector is being iterated over.
   std::vector<std::string> getNames() const { return m_wsNames; }
   /// Return the number of entries within the group
-  int getNumberOfEntries() const { return static_cast<int>(m_wsNames.size()); }
+  int getNumberOfEntries() const { return static_cast<int>(this->size()); }
+  /// Return the size of the group, so it is more like a container
+  size_t size() const { return m_wsNames.size(); }
+  /// Return the ith workspace
+  Workspace_sptr getItem(const size_t index) const;
   /// Prints the group to the screen using the logger at debug
   void print() const;
   /// Remove a name from the group
@@ -81,6 +85,7 @@ public:
   void deepRemoveAll();
   /// This method returns true if the group is empty (no member workspace)
   bool isEmpty() const;
+  bool areNamesSimilar() const;
  
 
 private:

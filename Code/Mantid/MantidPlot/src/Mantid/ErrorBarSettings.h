@@ -56,6 +56,11 @@ private:
   
   double m_width; ///< Width of the error bars (only used for Mantid error bars)
   QColor m_color;  ///< Color of the error bars (only used for Mantid error bars)
+
+  bool m_defaultColor; ///< Whether the color has been explicitly set via setColor();
+
+  friend class MantidCurve;
+  friend class MantidMatrixCurve;
 };
 
 #endif

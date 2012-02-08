@@ -60,6 +60,9 @@ namespace MDEvents
     /// Returns the (normalized) signal at a given coordinates
     virtual signal_t getSignalAtCoord(const coord_t * coords) const;
 
+    virtual void getLinePlot(const Mantid::Kernel::VMD & start, const Mantid::Kernel::VMD & end,
+        MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y, std::vector<signal_t> & e) const;
+
     //------------------------ (END) IMDWorkspace Methods -----------------------------------------
 
     /** @returns the number of bytes of memory used by the workspace. */
@@ -86,9 +89,14 @@ namespace MDEvents
 
     virtual void splitAllIfNeeded(Kernel::ThreadScheduler * ts);
 
-    virtual  void splitBox();
+    virtual void splitBox();
 
-    virtual  void refreshCache();
+    virtual void refreshCache();
+
+    std::string getEventTypeName() const;
+
+    virtual void setMinRecursionDepth(size_t minDepth);
+
     //------------------------ (END) IMDEventWorkspace Methods -----------------------------------------
 
     Mantid::API::ITableWorkspace_sptr makeBoxTable(size_t start, size_t num);

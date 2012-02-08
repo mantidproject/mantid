@@ -4,7 +4,7 @@
 #include "MantidCurve.h"
 #include <boost/shared_ptr.hpp>
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidQwtIMDWorkspaceData.h"
+#include "MantidQtAPI/MantidQwtIMDWorkspaceData.h"
 
 // Forward definitions
 class MantidUI;
@@ -42,7 +42,7 @@ public:
 
   /// More complex constructor setting some defaults for the curve
   MantidMDCurve(const QString& wsName,Graph* g,
-              bool err=false,bool distr = false, Graph::CurveType style = Graph::Unspecified);
+              bool err=false,bool distr = false, Graph::CurveType style = Graph::HorizontalSteps);
 
   /// Copy constructor 
   MantidMDCurve(const MantidMDCurve& c);

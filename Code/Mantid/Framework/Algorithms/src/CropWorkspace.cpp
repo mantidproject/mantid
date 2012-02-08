@@ -279,6 +279,7 @@ void CropWorkspace::execEvent()
         break;
       }
     }
+    outEL.setSortOrder(el.getSortType());
 
     std::set<detid_t>& dets = eventW->getEventList(i).getDetectorIDs();
     std::set<detid_t>::iterator k;

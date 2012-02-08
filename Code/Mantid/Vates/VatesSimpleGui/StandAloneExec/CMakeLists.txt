@@ -44,6 +44,9 @@ VatesSimpleGuiViewWidgets
 )
 
 if( SQUISH_FOUND )
+  # Need to set the AUT first
+  set( SQUISH_AUT VatesSimpleGui )
+  set( SQUISH_AUT_PATH ${CMAKE_BINARY_DIR}/bin )
   squish_add_test_suite( ${TEST_SUITES} )
   set( auto_test_dir ${CMAKE_SOURCE_DIR} )
   string( REGEX REPLACE "Code/Mantid" "Test/AutoTestData" auto_test_dir ${auto_test_dir} )

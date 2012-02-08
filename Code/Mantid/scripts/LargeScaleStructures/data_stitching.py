@@ -3,7 +3,7 @@ import copy
 from MantidFramework import *
 mtd.initialise(False)
 from mantidsimple import *
-
+import _qti
 from PyQt4 import QtGui, QtCore
 
 class RangeSelector(object):
@@ -16,28 +16,38 @@ class RangeSelector(object):
     class _Selector(object):
         def __init__(self):
             self._call_back = None
-            self._graph = "StitcherRangeSelector"
+            self._graph = "Range Selector"
             
         def disconnect(self):
-            qti.app.disconnect(qti.app.mantidUI, QtCore.SIGNAL("x_range_update(double,double)"), self._call_back)
+            _qti.app.disconnect(_qti.app.mantidUI, QtCore.SIGNAL("x_range_update(double,double)"), self._call_back)
             
-        def connect(self, ws, call_back):
+        def connect(self, ws, call_back, xmin=None, xmax=None):
             self._call_back = call_back
-            qti.app.connect(qti.app.mantidUI, QtCore.SIGNAL("x_range_update(double,double)"), self._call_back)
-            g = qti.app.graph(self._graph)
-            if g is None:
-                g = qti.app.mantidUI.pyPlotSpectraList(ws,[0],True)
-                g.setName(self._graph)        
-            qti.app.selectMultiPeak(False)
-            qti.app.selectMultiPeak(False)
+            _qti.app.connect(_qti.app.mantidUI, QtCore.SIGNAL("x_range_update(double,double)"), self._call_back)
+            g = _qti.app.graph(self._graph)
+            if g is not None:
+                g.close()
+            g = _qti.app.mantidUI.pyPlotSpectraList(ws,[0],True)
+            g.setName(self._graph)        
+            l=g.activeLayer()
+            try:
+                title = ws[0].replace("_"," ")
+                title.strip()
+            except:
+                title = " "
+            l.setTitle(" ")
+            l.setCurveTitle(0, title)
+            if xmin is not None and xmax is not None:
+                l.setScale(2,xmin,xmax)
+            _qti.app.selectMultiPeak(g,False)
     
     @classmethod
-    def connect(cls, ws, call_back):
+    def connect(cls, ws, call_back, xmin=None, xmax=None):
         if RangeSelector.__instance is not None:
             RangeSelector.__instance.disconnect()
         else:
             RangeSelector.__instance = RangeSelector._Selector()
-        RangeSelector.__instance.connect(ws, call_back)            
+        RangeSelector.__instance.connect(ws, call_back, xmin=xmin, xmax=xmax)            
     
 class DataSet(object):
     """
@@ -145,10 +155,11 @@ class DataSet(object):
         Scale(InputWorkspace=self._ws_scaled, OutputWorkspace=self._ws_scaled,
               Operation="Multiply", Factor=1.0)
         
-    def load(self, update_range=False):
+    def load(self, update_range=False, restricted_range=False):
         """
             Load a data set from file
             @param upate_range: if True, the Q range of the data set will be udpated
+            @param restricted_range: if True, zeros at the beginning and end will be stripped
         """
         if os.path.isfile(self._file_path):
             self._ws_name = os.path.basename(self._file_path)
@@ -161,6 +172,19 @@ class DataSet(object):
             if update_range:
                 self._xmin = min(mtd[self._ws_name].readX(0))
                 self._xmax = max(mtd[self._ws_name].readX(0))
+                if restricted_range:
+                    y = mtd[self._ws_name].readY(0)
+                    x = mtd[self._ws_name].readX(0)
+                    
+                    for i in range(len(y)):
+                        if y[i]!=0.0:
+                            self._xmin = x[i]
+                            break
+                    for i in range(len(y)-1,-1,-1):
+                        if y[i]!=0.0:
+                            self._xmax = x[i]
+                            break
+                        
             self._npts = len(mtd[self._ws_name].readY(0))
             self._last_applied_scale = 1.0
         
@@ -263,7 +287,7 @@ class Stitcher(object):
         if len(self._data_sets)<2:
             return
         
-        for i in range(self._reference):
+        for i in range(self._reference-1,-1,-1):
             Stitcher.normalize(self._data_sets[i+1], self._data_sets[i])
         for i in range(self._reference,len(self._data_sets)-1):
             Stitcher.normalize(self._data_sets[i], self._data_sets[i+1])
@@ -321,16 +345,19 @@ class Stitcher(object):
         
         ws_combined = "combined_Iq"
         
-        # Copy over dQ
-        CloneWorkspace(InputWorkspace=self._data_sets[0].get_scaled_ws(),
-                       OutputWorkspace=ws_combined)
+        first_ws = self._data_sets[0].get_scaled_ws()
+        if first_ws is None:
+            return
 
-        x = mtd[ws_combined].dataX(0)
-        dx = mtd[ws_combined].dataDx(0)
-        y = mtd[ws_combined].dataY(0)
-        e = mtd[ws_combined].dataE(0)
-        if len(x)!=len(y) and len(x)!=len(e):
-            raise RuntimeError, "Stitcher expected distributions but got histo"
+        x = mtd[first_ws].dataX(0)
+        dx = mtd[first_ws].dataDx(0)
+        y = mtd[first_ws].dataY(0)
+        e = mtd[first_ws].dataE(0)
+        if len(x)==len(y)+1:
+            xtmp = [(x[i]+x[i+1])/2.0 for i in range(len(y))]
+            dxtmp = [(dx[i]+dx[i+1])/2.0 for i in range(len(y))]
+            x = xtmp
+            dx = dxtmp
         x, y, e, dx = self.trim_zeros(x, y, e, dx)
         
         for d in self._data_sets[1:]:
@@ -340,8 +367,12 @@ class Stitcher(object):
                 _y = mtd[ws].dataY(0)
                 _e = mtd[ws].dataE(0)
                 _dx = mtd[ws].dataDx(0)
-                if len(_x)!=len(_y) and len(_x)!=len(_e):
-                    raise RuntimeError, "Stitcher expected distributions but got histo"
+                if len(_x)==len(_y)+1:
+                    xtmp = [(_x[i]+_x[i+1])/2.0 for i in range(len(_y))]
+                    dxtmp = [(_dx[i]+_dx[i+1])/2.0 for i in range(len(_y))]
+                    _x = xtmp
+                    _dx = dxtmp
+                    
                 _x, _y, _e, _dx = self.trim_zeros(_x, _y, _e, _dx)
                 x.extend(_x)
                 y.extend(_y)
@@ -356,41 +387,17 @@ class Stitcher(object):
         combined = sorted(zipped, cmp)
         x,y,e,dx = zip(*combined)
         
-        xtmp = mtd[ws_combined].dataX(0)
-        ytmp = mtd[ws_combined].dataY(0)
-        etmp = mtd[ws_combined].dataE(0)
+        CreateWorkspace(DataX=x, DataY=y, DataE=e,
+                       OutputWorkspace=ws_combined,
+                       UnitX="MomentumTransfer",
+                       ParentWorkspace=first_ws)
+        
         dxtmp = mtd[ws_combined].dataDx(0)
         
-        # Use the space we have in the current data vectors
-        npts = len(ytmp)
-        if len(x)>=npts:
-            for i in range(npts):
-                xtmp[i] = x[i]
-                ytmp[i] = y[i]
-                etmp[i] = e[i]
-                dxtmp[i] = dx[i]
-            if len(x)>npts:
-                xtmp.extend(x[npts:])
-                ytmp.extend(y[npts:])
-                etmp.extend(e[npts:])
-                dxtmp.extend(dx[npts:])
-        else:
-            for i in range(len(x)):
-                xtmp[i] = x[i]
-                ytmp[i] = y[i]
-                etmp[i] = e[i]
-                dxtmp[i] = dx[i]
-            for i in range(len(x),npts):
-                xtmp[i] = xtmp[len(x)-1]+1.0
-                ytmp[i] = 0.0
-                etmp[i] = 0.0
-                dxtmp[i] = 0.0
-            CropWorkspace(InputWorkspace=ws_combined, OutputWorkspace=ws_combined, XMin=0.0, XMax=xtmp[len(x)-1])
-        return ws_combined
-        
-                    
-                    
+        # Fill out dQ
+        npts = len(x)
+        for i in range(npts):
+            dxtmp[i] = dx[i]
             
-        
-        
+        return ws_combined
         

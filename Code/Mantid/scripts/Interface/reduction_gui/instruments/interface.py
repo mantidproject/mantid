@@ -35,6 +35,9 @@ class InstrumentInterface(object):
         
         # Error report directory
         self.ERROR_REPORT_DIR = os.path.expanduser('~')
+        self.ERROR_REPORT_NAME = InstrumentInterface.ERROR_REPORT_DIR
+        self.LAST_REDUCTION_NAME = InstrumentInterface.LAST_REDUCTION_NAME
+
         
     def attach(self, widget):
         """
@@ -77,10 +80,9 @@ class InstrumentInterface(object):
             populate the UI with them
             @param file_name: XML file to be loaded
         """
-        #self.scripter = ReductionScripter(name=self.scripter.instrument_name)
-        #self.scripter.__class__(name=self.scripter.instrument_name)
-        self.scripter.from_xml(file_name)
-        self.scripter.push_state()
+        if self.scripter.check_xml_compatibility(file_name):
+            self.scripter.from_xml(file_name)
+            self.scripter.push_state()
         
     def save_file(self, file_name):
         """
@@ -189,6 +191,12 @@ class InstrumentInterface(object):
         """
         for widget in self.widgets:
             widget.is_running(is_running)
+        
+    def has_advanced_version(self):
+        """
+            Returns true if the instrument has simple and advanced views
+        """
+        return False
         
     def reset(self):
         """

@@ -73,7 +73,7 @@ namespace WorkflowAlgorithms
   {
     try
     {
-      int row = 0;
+      size_t row = 0;
       m_reductionTable->find(key, row, 0);
       return m_reductionTable->String(row, STRINGENTRY_COL);
     } catch(std::out_of_range&) {}
@@ -102,7 +102,7 @@ namespace WorkflowAlgorithms
   {
     try
     {
-      int row = 0;
+      size_t row = 0;
       m_reductionTable->find(key, row, 0);
       return m_reductionTable->Int(row, INTENTRY_COL);
     } catch(std::out_of_range&) {}
@@ -115,7 +115,7 @@ namespace WorkflowAlgorithms
   {
     try
     {
-      int row = 0;
+      size_t row = 0;
       m_reductionTable->find(key, row, 0);
       return m_reductionTable->Double(row, DOUBLEENTRY_COL);
     } catch(std::out_of_range&) {}
@@ -130,7 +130,7 @@ namespace WorkflowAlgorithms
     MatrixWorkspace_sptr pointer;
     try
     {
-      int row = 0;
+      size_t row = 0;
       m_reductionTable->find(key, row, 0);
       const std::string workspaceName = m_reductionTable->String(row, STRINGENTRY_COL);
       pointer = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(workspaceName));
@@ -155,7 +155,7 @@ namespace WorkflowAlgorithms
     {
       if (replace)
       {
-        int irow = 0;
+        size_t irow = 0;
         m_reductionTable->find(key, irow, 0);
         m_reductionTable->removeRow(irow);
       } else {
@@ -184,7 +184,7 @@ namespace WorkflowAlgorithms
     {
       if (replace)
       {
-        int irow = 0;
+        size_t irow = 0;
         m_reductionTable->find(key, irow, 0);
         m_reductionTable->removeRow(irow);
       } else {
@@ -213,7 +213,7 @@ namespace WorkflowAlgorithms
     {
       if (replace)
       {
-        int irow = 0;
+        size_t irow = 0;
         m_reductionTable->find(key, irow, 0);
         m_reductionTable->removeRow(irow);
       } else {

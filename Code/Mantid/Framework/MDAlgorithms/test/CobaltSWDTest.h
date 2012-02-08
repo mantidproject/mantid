@@ -158,7 +158,7 @@
 //        return(m_mdcells.at(dim1Increment));
 //    };
 //
-//    virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimensionNamed(std::string id) const
+//    virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimensionWithId(std::string id) const
 //    {
 //        // only one dimension in this mock up
 //        return m_xDim;

@@ -83,7 +83,7 @@ namespace MDAlgorithms
    *
    * Will do m_out_event += m_operand_event
    *
-   * @param ws ::  MDEventWorkspace to clone
+   * @param ws ::  MDEventWorkspace being added to
    */
   template<typename MDE, size_t nd>
   void PlusMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws)

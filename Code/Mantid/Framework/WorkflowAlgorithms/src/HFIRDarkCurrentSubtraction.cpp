@@ -67,8 +67,6 @@ void HFIRDarkCurrentSubtraction::exec()
   }
 
   const std::string fileName = getPropertyValue("Filename");
-  MatrixWorkspace_sptr darkWS = getProperty("OutputDarkCurrentWorkspace");
-  std::string darkWSName = getPropertyValue("OutputDarkCurrentWorkspace");
 
   // Get the reduction table workspace or create one
   TableWorkspace_sptr reductionTable = getProperty("ReductionTableWorkspace");
@@ -86,14 +84,16 @@ void HFIRDarkCurrentSubtraction::exec()
   // Look for an entry for the dark current in the reduction table
   Poco::Path path(fileName);
   const std::string entryName = "DarkCurrent"+path.getBaseName();
-  darkWS = reductionHandler.findWorkspaceEntry(entryName);
-  darkWSName = reductionHandler.findStringEntry(entryName);
+  MatrixWorkspace_sptr darkWS = reductionHandler.findWorkspaceEntry(entryName);
+  std::string darkWSName = reductionHandler.findStringEntry(entryName);
 
   if (darkWSName.size()==0) {
     darkWSName = getPropertyValue("OutputDarkCurrentWorkspace");
     if (darkWSName.size()==0)
+    {
       darkWSName = "__dark_current_"+path.getBaseName();
-    setPropertyValue("OutputDarkCurrentWorkspace", darkWSName);
+      setPropertyValue("OutputDarkCurrentWorkspace", darkWSName);
+    }
     reductionHandler.addEntry(entryName, darkWSName);
   }
 
@@ -130,8 +130,13 @@ void HFIRDarkCurrentSubtraction::exec()
   MatrixWorkspace_sptr scaledDarkWS = scaleAlg->getProperty("OutputWorkspace");
 
   // Zero out timer and monitor so that we don't subtract them out
-  cleanupDarkCurrent(scaledDarkWS);
-
+  for(size_t i=0; i<scaledDarkWS->dataY(0).size(); i++)
+  {
+    scaledDarkWS->dataY(DEFAULT_TIMER_ID)[i]=0.0;
+    scaledDarkWS->dataE(DEFAULT_TIMER_ID)[i]=0.0;
+    scaledDarkWS->dataY(DEFAULT_MONITOR_ID)[i]=0.0;
+    scaledDarkWS->dataE(DEFAULT_MONITOR_ID)[i]=0.0;
+  }
   IAlgorithm_sptr minusAlg = createSubAlgorithm("Minus", 0.5, 0.7);
   minusAlg->setProperty("LHSWorkspace", inputWS);
   minusAlg->setProperty("RHSWorkspace", scaledDarkWS);
@@ -160,30 +165,6 @@ double HFIRDarkCurrentSubtraction::getCountingTime(MatrixWorkspace_sptr inputWS)
     return timer[0];
   }
 }
-
-/// Zero out the timer and monitor channels from the dark current workspace
-/// so that we can keep them in the data workspace after subtraction
-/// @param scaledDarkWS :: dark current workspace to clean up
-void HFIRDarkCurrentSubtraction::cleanupDarkCurrent(MatrixWorkspace_sptr scaledDarkWS)
-{
-  // Set time and monitor channels to zero, so that we subtract only detectors
-  MantidVec& scaledDarkY = scaledDarkWS->dataY(DEFAULT_TIMER_ID);
-  MantidVec& scaledDarkE = scaledDarkWS->dataE(DEFAULT_TIMER_ID);
-  for(size_t i=0; i<scaledDarkY.size(); i++)
-  {
-    scaledDarkY[i] = 0.0;
-    scaledDarkE[i] = 0.0;
-  }
-
-  scaledDarkY = scaledDarkWS->dataY(DEFAULT_MONITOR_ID);
-  scaledDarkE = scaledDarkWS->dataE(DEFAULT_MONITOR_ID);
-  for(size_t i=0; i<scaledDarkY.size(); i++)
-  {
-    scaledDarkY[i] = 0.0;
-    scaledDarkE[i] = 0.0;
-  }
-}
-
 
 } // namespace WorkflowAlgorithms
 } // namespace Mantid

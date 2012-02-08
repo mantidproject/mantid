@@ -119,6 +119,11 @@
 		TS_ASSERT_DELTA( out->getParameter("Lifetime"), 4.0 ,0.04);
 		TS_ASSERT_DELTA( out->getParameter("Stretching"), 0.5 ,0.05);
 
+    // check its categories
+    const std::vector<std::string> categories = out->categories();
+    TS_ASSERT( categories.size() == 1 );
+    TS_ASSERT( categories[0] == "General" );
+
 		AnalysisDataService::Instance().remove(wsName);
 
 	  }

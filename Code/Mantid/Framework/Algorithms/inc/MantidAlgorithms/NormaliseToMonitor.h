@@ -82,8 +82,9 @@ private:
   void init();
   void exec();
 
+protected: // for testing
   void checkProperties(API::MatrixWorkspace_sptr inputWorkspace);
-  API::MatrixWorkspace_sptr getInWSMonitorSpectrum(API::MatrixWorkspace_sptr inputWorkspace);
+  API::MatrixWorkspace_sptr getInWSMonitorSpectrum(API::MatrixWorkspace_sptr inputWorkspace, int &spectra_num);
   API::MatrixWorkspace_sptr getMonitorWorkspace(API::MatrixWorkspace_sptr inputWorkspace);
   API::MatrixWorkspace_sptr extractMonitorSpectrum(API::MatrixWorkspace_sptr WS, const std::size_t index);
   bool setIntegrationProps();
@@ -94,7 +95,7 @@ private:
   void normaliseBinByBin(API::MatrixWorkspace_sptr inputWorkspace,
                          API::MatrixWorkspace_sptr& outputWorkspace);
   void normalisationFactor(const MantidVec& X, MantidVec* Y, MantidVec* E);
-
+private:
   /// A single spectrum workspace containing the monitor
   API::MatrixWorkspace_sptr m_monitor;
   /// Whether the input workspace has common bins
@@ -103,6 +104,9 @@ private:
   double m_integrationMin;
   /// The upper bound of the integration range
   double m_integrationMax;
+ /// logger -> to provide logging, for normalization operations
+ static Mantid::Kernel::Logger& g_log;
+
 };
 
 } // namespace Algorithm

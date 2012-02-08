@@ -45,22 +45,24 @@ class DataSetDialog : public QDialog
     Q_OBJECT
 
 public:
-    DataSetDialog( const QString& text, QWidget* parent = 0, Qt::WFlags fl = 0 );
+    DataSetDialog( const QString& text, ApplicationWindow* app, Graph* g = NULL, Qt::WFlags fl = 0 );
 
 public slots:
 	void accept();
 	void setCurveNames(const QStringList& names);
-	void setOperationType(ApplicationWindow::Analysis operation){d_operation = operation;};
+  void setOperationType(ApplicationWindow::Analysis operation){d_operation = operation;}
 	void setCurentDataSet(const QString& s);
-	void setGraph(Graph *g);
 
 signals:
 	void options(const QString&);
 
 private:
-	ApplicationWindow::Analysis d_operation;
+  void setGraph(Graph *g);
+
+  ApplicationWindow* d_app;
+  Graph *d_graph;
+  ApplicationWindow::Analysis d_operation;
 	QString windowTitle;
-	Graph *d_graph;
 
     QPushButton* buttonOk;
 	QPushButton* buttonCancel;

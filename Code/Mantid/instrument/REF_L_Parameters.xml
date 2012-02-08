@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "REF" valid-from="2011-12-08 11:36:21.935542" valid-to="2100-01-31 23:59:59">
+
+	<component-link name = "REF">
+	
+		<parameter name="number-of-x-pixels">
+		  <value val="304"/>
+		</parameter>
+		
+		<parameter name="number-of-y-pixels">
+		  <value val="256"/>
+		</parameter>
+	
+	</component-link>
+
+</parameter-file>
+

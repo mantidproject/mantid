@@ -70,7 +70,9 @@ namespace MantidQt
       readSettings();
 
       connect(m_uiForm.searchButton,SIGNAL(clicked()),this,SLOT(onSearch()));
-      connect(m_uiForm.closeButton,SIGNAL(clicked()),this,SLOT(onClose()));
+      // taken out because code did not close window properly
+      // and this button is not needed anyway
+      //connect(m_uiForm.closeButton,SIGNAL(clicked()),this,SLOT(onClose()));
       connect(m_uiForm.advSearchtableWidget,SIGNAL(itemDoubleClicked(QTableWidgetItem* )),
           this,SLOT(investigationSelected(QTableWidgetItem* )));
       connect(this,SIGNAL(error(const QString&)),parent()->parent(),SLOT(writeErrorToLogWindow(const QString& )));

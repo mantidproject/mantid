@@ -10,21 +10,18 @@ namespace Mantid
 {
 namespace Algorithms
 {
-/** Renames a workspace to a different name in the data service.  
-		If the same name is provided for input and output then the algorithm will fail with an error.
-		The Renaming is implemented as a removal of the original workspace from the data service
-		and re-addition under the new name.
+/** Renames a workspace to a different name in the data service.
+    If the same name is provided for input and output then the algorithm will fail with an error.
+    The renaming is implemented as a removal of the original workspace from the data service
+    and re-addition under the new name.
 
     Required Properties:
     <UL>
-    <LI> InputWorkspace - The name of the Workspace2D to take as input </LI>
+    <LI> InputWorkspace - The name of the Workspace to take as input </LI>
     <LI> OutputWorkspace - The name of the to rename the workspace to </LI>
     </UL>
 
-
-    @author Nicholas Draper, Tessella Support Services plc
-    @date 24/06/2009
-		Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -41,7 +38,6 @@ namespace Algorithms
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class DLLExport RenameWorkspace : public API::Algorithm
@@ -62,6 +58,8 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
+
+  bool processGroups();
 
 };
 

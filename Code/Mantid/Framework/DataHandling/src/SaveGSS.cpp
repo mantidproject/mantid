@@ -404,7 +404,7 @@ namespace Mantid
 
     inline double fixErrorValue(const double value)
     {
-      if (value < 0 || boost::math::isnan(value) || boost::math::isinf(value)) //Negative errors cannot be read by GSAS
+      if (value <= 0. || boost::math::isnan(value) || boost::math::isinf(value)) //Negative errors cannot be read by GSAS
         return 0.;
       else
         return value;

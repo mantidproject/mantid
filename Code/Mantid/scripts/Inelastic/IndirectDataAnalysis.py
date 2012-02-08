@@ -1,5 +1,5 @@
 from mantidsimple import *
-from mantidplotpy import *
+from mantidplot import *
 from IndirectCommon import *
 
 import math, re, os.path
@@ -49,11 +49,34 @@ def concatWSs(workspaces, unit, name):
     CreateWorkspace(name, dataX, dataY, dataE, NSpec=len(workspaces),
         UnitX=unit)
 
+def split(l, n):
+    #Yield successive n-sized chunks from l.
+    for i in xrange(0, len(l), n):
+        yield l[i:i+n]
+
+def segment(l, fromIndex, toIndex):
+    for i in xrange(fromIndex, toIndex + 1):
+        yield l[i]
+
+def trimData(nSpec, vals, min, max):
+    result = []
+    chunkSize = len(vals) / nSpec
+    assert min >= 0, 'trimData: min is less then zero'
+    assert max <= chunkSize - 1, 'trimData: max is greater than the number of spectra'
+    assert min <= max, 'trimData: min is greater than max'
+    chunks = split(vals,chunkSize)
+    for chunk in chunks:
+        seg = segment(chunk,min,max)
+        for val in seg:
+            result.append(val)
+    return result
+
 def confitParsToWS(Table, Data, BackG='FixF', specMin=0, specMax=-1):
     if ( specMax == -1 ):
         specMax = mtd[Data].getNumberHistograms() - 1
     dataX = createQaxis(Data)
     xAxisVals = []
+    xAxisTrimmed = []
     dataY = []
     dataE = []
     names = ''
@@ -63,7 +86,7 @@ def confitParsToWS(Table, Data, BackG='FixF', specMin=0, specMax=-1):
     for spec in range(0,nSpec):
         yAxis = cName[(spec*2)+1]
         if re.search('HWHM$', yAxis) or re.search('Height$', yAxis):
-            xAxisVals += dataX        
+            xAxisVals += dataX
             if (len(names) > 0):
                 names += ","
             names += yAxis
@@ -75,7 +98,8 @@ def confitParsToWS(Table, Data, BackG='FixF', specMin=0, specMax=-1):
             nSpec -= 1
     suffix = str(nSpec / 2) + 'L' + BackG
     outNm = Table + suffix
-    CreateWorkspace(outNm, xAxisVals, dataY, dataE, nSpec,
+    xAxisTrimmed = trimData(nSpec, xAxisVals, specMin, specMax)
+    CreateWorkspace(outNm, xAxisTrimmed, dataY, dataE, nSpec,
         UnitX='MomentumTransfer', VerticalAxisUnit='Text',
         VerticalAxisValues=names)
     return outNm
@@ -262,6 +286,7 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=True, Plot=False):
     verbOp = 'True'
     if verbOp:
         mtd.sendLogMessage('Starting MSDfit')
+    workdir = mantid.getConfigProperty('defaultsave.directory')
     log_type = 'sample'
     output = []
     DataX = []
@@ -279,9 +304,16 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=True, Plot=False):
         logy =[]
         loge =[]
         for i in range(0, len(inY)):
-            ly = math.log(inY[i])
+            if(inY[i] == 0):
+                ly = math.log(0.000000000001)
+            else:
+                ly = math.log(inY[i])
             logy.append(ly)
-            loge.append(math.log(inY[i]+inE[i])-ly)
+            if( inY[i]+inE[i] == 0 ):
+                le = math.log(0.000000000001)-ly
+            else:
+                le = math.log(inY[i]+inE[i])-ly
+            loge.append(le)
         lnWS = root[:-3] + 'lnI'
         CreateWorkspace(lnWS, inX, logy, loge, 1)
         log_name = root[0:8]+'_'+log_type
@@ -296,17 +328,17 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=True, Plot=False):
             tmp = run_logs[log_name].value
             temp = tmp[len(tmp)-1]
             mtd.sendLogMessage('Run : '+root[0:8] +' ; Temperature = '+str(temp))
-        outWS = root[:-3] + 'msd'
-        fit_alg = Linear(lnWS, outWS, WorkspaceIndex=0, StartX=startX, EndX=endX)
+        outWS = root[:-3] + 'msd_' + str(np)
+        function = 'name=LinearBackground, A0=0, A1=0'
+        fit_alg = Fit(lnWS, 0, startX, endX, function, Output=outWS)
         output.append(outWS)
-        A0 = fit_alg.getPropertyValue('FitIntercept')
-        A1 = fit_alg.getPropertyValue('FitSlope')
-        Cov00 = fit_alg.getPropertyValue('Cov00')
-        Cov11 = fit_alg.getPropertyValue('Cov11')
-        title = 'Intercept: '+A0+' ; Slope: '+A1
-        er0 = math.sqrt(float(Cov00))
-        er1 = math.sqrt(float(Cov11))
-        fit = 'Intercept: '+A0+' +- '+str(er0)+' ; Slope: '+A1+' +- '+str(er1)
+        params = mtd[outWS+'_Parameters'] #  get a TableWorkspace with the parameters and errors
+        A0 = params.getDouble('Value',0) # get the value of the first parameter
+        A0_Err = params.getDouble('Error',0) # get the error of the first parameter
+        A1 = params.getDouble('Value',1) # get the value of the second parameter
+        A1_Err = params.getDouble('Error',1) # get the error of the second parameter
+        title = 'Intercept: '+str(A0)+' ; Slope: '+str(A1)
+        fit = 'Intercept: '+str(A0)+' +- '+str(A0_Err)+' ; Slope: '+str(A1)+' +- '+str(A1_Err)
         if verbOp:
             mtd.sendLogMessage(fit)
         if (log_path == ''):
@@ -316,24 +348,27 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=True, Plot=False):
             DataX.append(temp)
             xlabel = 'Temperature (K)'
         DataY.append(-float(A1)*3.0)
-        DataE.append(er1*3.0)
+        DataE.append(A1_Err*3.0)
         np += 1
         if Plot:
-            graph=plotSpectrum([lnWS,outWS],0, 1)
-            graph.activeLayer().setTitle(title)
-            graph.activeLayer().setAxisTitle(Layer.Bottom,'Q^2')
-            graph.activeLayer().setAxisTitle(Layer.Left,'ln(intensity)')
+            data_plot=plotSpectrum(lnWS,0, True)
+            data_plot.activeLayer().setTitle(title)
+            data_plot.activeLayer().setAxisTitle(Layer.Bottom,'Q^2')
+            data_plot.activeLayer().setAxisTitle(Layer.Left,'ln(intensity)')
+            fit_plot=plotSpectrum(outWS+'_Workspace',(0,1),True)
+            mergePlots(data_plot,fit_plot)
     fitWS = root[0:8]+'_MsdFit'
     DataX.append(2*DataX[np-1]-DataX[np-2])
     CreateWorkspace(fitWS,DataX,DataY,DataE,1)
     if Plot:
-        graph1=plotSpectrum(fitWS,0,1)
-        graph1.activeLayer().setAxisTitle(Layer.Bottom,xlabel)
-        graph1.activeLayer().setAxisTitle(Layer.Left,'<u2>')
+        msd_plot=plotSpectrum(fitWS,0,True)
+        msd_plot.activeLayer().setAxisTitle(Layer.Bottom,xlabel)
+        msd_plot.activeLayer().setAxisTitle(Layer.Left,'<u2>')
     if Save:
-        SaveNexusProcessed(fitWS, fitWS+'.nxs', Title=fitWS)
-    if verbOp:
-        mtd.sendLogMessage('Output file : '+fitWS)  
+        fit_path = os.path.join(workdir, fitWS+'.nxs')					# path name for nxs file
+        SaveNexusProcessed(fitWS, fit_path, Title=fitWS)
+        if verbOp:
+            mtd.sendLogMessage('Output file : '+fit_path)  
     return output
 
 def plotFury(inWS_n, spec):
@@ -360,13 +395,13 @@ def plotInput(inputfiles,spectra=[]):
         layer = graph.activeLayer().setTitle(", ".join(workspaces))
         
 ###############################################################################
-## abscor (previously in SpencerAnalysis) #####################################
+## abscor #####################################################################
 ###############################################################################
 
 def CubicFit(inputWS, spec, verbose=False):
-    '''Uses the Mantid Fit Algorithm to fit a cubic function to the inputWS
+    '''Uses the Mantid Fit Algorithm to fit a quadratic to the inputWS
     parameter. Returns a list containing the fitted parameter values.'''
-    function = 'name=UserFunction, Formula=A0+A1*x+A2*x*x, A0=1, A1=0, A2=0'
+    function = 'name=Quadratic, A0=1, A1=0, A2=0'
     fit = Fit(inputWS, spec, Function=function)
     Abs = fit.getPropertyValue('Parameters')
     if verbose:
@@ -429,43 +464,49 @@ def abscorFeeder(sample, container, geom, useCor):
     verbOp = True
     Plot = True
     workdir = mantid.getConfigProperty('defaultsave.directory')
-    if useCor:
-        s_hist = mtd[sample].getNumberHistograms()       # no. of hist/groups in sam
-        if container != '':
-            c_hist = mtd[container].getNumberHistograms()
-            if s_hist != c_hist:	# check that no. groups are the same
-                error = 'Can histograms (' +str(c_hist) + ') not = Sample (' +str(s_hist) +')'	
-                exit(error)
-            else:
-                if verbOp:
-                    mtd.sendLogMessage('Correcting sample ' + sample + ' with ' + container)
+    s_hist = mtd[sample].getNumberHistograms()       # no. of hist/groups in sam
+    Xin = mtd[sample].readX(0)
+    sxlen = len(Xin)
+    if container != '':
+        c_hist = mtd[container].getNumberHistograms()
+        Xin = mtd[container].readX(0)
+        cxlen = len(Xin)
+        if s_hist != c_hist:	# check that no. groups are the same
+            error = 'Can histograms (' +str(c_hist) + ') not = Sample (' +str(s_hist) +')'	
+            exit(error)
         else:
-            if verbOp:
-                mtd.sendLogMessage('Correcting sample ' + sample)
-        file = sample[:-3] + geom +'_Abs.nxs'
-        path = os.path.join(workdir, file)					# path name for nxs file
+            if sxlen != cxlen:	# check that array lengths are the same
+                error = 'Can array length (' +str(cxlen) + ') not = Sample (' +str(sxlen) +')'	
+                exit(error)
+    if useCor:
         if verbOp:
-            mtd.sendLogMessage('Correction file :'+path)
-        corrections = [loadNexus(path)]
-        result = applyCorrections(sample, container, corrections, verbOp)
-        SaveNexusProcessed(result,os.path.join(workdir,result+'.nxs'))
-        plot_list = [result,sample]
+            mtd.sendLogMessage('Correcting sample ' + sample + ' with ' + container)
+        file = sample[:-3] + geom +'_Abs.nxs'
+        abs_path = os.path.join(workdir, file)					# path name for nxs file
+        if verbOp:
+            mtd.sendLogMessage('Correction file :'+abs_path)
+        corrections = [loadNexus(abs_path)]
+        cor_result = applyCorrections(sample, container, corrections, verbOp)
+        cor_path = os.path.join(workdir,cor_result+'.nxs')
+        SaveNexusProcessed(cor_result,cor_path)
+        plot_list = [cor_result,sample]
         if ( container != '' ):
             plot_list.append(container)
         if verbOp:
-            mtd.sendLogMessage('Output files created : '+workdir+result+'.nxs')
+            mtd.sendLogMessage('Output file created : '+cor_path)
         if Plot:
-           graph=plotSpectrum(plot_list,0)
+           cor_plot=plotSpectrum(plot_list,0)
     else:
         if ( container == '' ):
             sys.exit('Invalid options - nothing to do!')
         else:
-            result = sample[0:8] +'_Subtract_'+ container[3:8]
-            Minus(sample,container,result)
-            SaveNexusProcessed(result,os.path.join(workdir,result+'.nxs'))
+            sub_result = sample[0:8] +'_Subtract_'+ container[3:8]
+            Minus(sample,container,sub_result)
+            sub_path = os.path.join(workdir,sub_result+'.nxs')
+            SaveNexusProcessed(sub_result,sub_path)
             if verbOp:
 	            mtd.sendLogMessage('Subtracting '+container+' from '+sample)
-	            mtd.sendLogMessage('Output file created : '+workdir+result+'.nxs')
+	            mtd.sendLogMessage('Output file created : '+sub_path)
             if Plot:
-                graph=plotSpectrum([result,sample,container],0)
+                sub_plot=plotSpectrum([sub_result,sample,container],0)
     return

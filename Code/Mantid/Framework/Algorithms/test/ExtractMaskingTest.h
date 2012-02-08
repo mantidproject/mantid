@@ -118,12 +118,12 @@ private:
       
       if( inputDet && inputDet->isMasked() )
       {
-        expectedValue = 0.0;
+        expectedValue = 1.0;
         outputMasked = true;
       }
       else
       {
-        expectedValue = 1.0;
+        expectedValue = 0.0;
         outputMasked = false;
       }
       

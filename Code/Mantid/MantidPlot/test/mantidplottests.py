@@ -11,9 +11,8 @@ import sys
 import os
 import unittest
 import time
-import qti
+import _qti
 import datetime
-from mantidplotpy import proxies
 from PyQt4 import QtGui, QtCore
 
 # Try to import QTest. Not available on Windows?
@@ -147,10 +146,15 @@ def runTests(classname):
     #Run using either runner
     res = runner.run(suite)
     
+    # Process some events that ensure MantidPlot closes properly.
+    QtCore.QCoreApplication.processEvents()
+    QtCore.QCoreApplication.processEvents()
+    QtCore.QCoreApplication.processEvents()
+    
     # Set Mantid exit code
     if not res.wasSuccessful():
-        qti.app.setExitCode(1)
+        _qti.app.setExitCode(1)
     else:
-        qti.app.setExitCode(0)
+        _qti.app.setExitCode(0)
     
     return res

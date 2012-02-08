@@ -77,8 +77,8 @@ namespace DataHandling
     // 2. Convert Workspace to ...
     std::vector<detid_t> detid0s;
     for (size_t i = 0; i < inpWS->getNumberHistograms(); i ++){
-      if (inpWS->dataY(i)[0] < 1.0E-9){
-        // Basically it is 0
+      if (inpWS->dataY(i)[0] > 0.1){
+        // It is way from 0 but smaller than 1
         // a) workspace index -> spectrum -> detector ID
         const API::ISpectrum *spec = inpWS->getSpectrum(i);
         if (!spec){
@@ -138,7 +138,7 @@ namespace DataHandling
     idx0eds.push_back(i0ed);
 
     for (size_t i = 0; i < idx0sts.size(); i++){
-      g_log.notice() << "Section " << i << " : " << idx0sts[i] << "  ,  " << idx0eds[i] << std::endl;
+      g_log.information() << "Section " << i << " : " << idx0sts[i] << "  ,  " << idx0eds[i] << " to be masked and recorded."<< std::endl;
     }
 
     // 4. Write out to XML nodes
@@ -146,11 +146,11 @@ namespace DataHandling
     AutoPtr<Document> pDoc = new Document;
     AutoPtr<Element> pRoot = pDoc->createElement("detector-masking");
     pDoc->appendChild(pRoot);
-    pRoot->setAttribute("default", "use");
+    // pRoot->setAttribute("default", "use");
 
     // b) Append Group
     AutoPtr<Element> pChildGroup = pDoc->createElement("group");
-    pChildGroup->setAttribute("type", "notuse");
+    // pChildGroup->setAttribute("type", "notuse");
     pRoot->appendChild(pChildGroup);
 
     // c) Append detid

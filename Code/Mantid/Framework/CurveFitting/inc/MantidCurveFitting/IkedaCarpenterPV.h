@@ -56,6 +56,7 @@ namespace Mantid
 
       /// overwrite IFunction base class methods
       std::string name()const{return "IkedaCarpenterPV";}
+      virtual const std::string category() const { return "Peak";}
 
       // define these instead of functionLocal if you want to custom specify the calculation 
       // domain for this function

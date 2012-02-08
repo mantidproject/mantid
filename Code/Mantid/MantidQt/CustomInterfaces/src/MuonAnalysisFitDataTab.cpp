@@ -58,7 +58,7 @@ void MuonAnalysisFitDataTab::makeRawWorkspace(const std::string& wsName)
 * @param inputWorkspaces :: The name of the workspace the raw file is associated to.
 * @param groupName :: The name of the workspaceGroup to join with and what to call the output.
 */
-void MuonAnalysisFitDataTab::groupRawWorkspace(const std::vector<std::string> & inputWorkspaces, const std::string & groupName)
+void MuonAnalysisFitDataTab::groupWorkspaces(const std::vector<std::string> & inputWorkspaces, const std::string & groupName)
 {
   Mantid::API::IAlgorithm_sptr groupingAlg = Mantid::API::AlgorithmManager::Instance().create("GroupWorkspaces");
   groupingAlg->setProperty("InputWorkspaces", inputWorkspaces);
@@ -100,20 +100,21 @@ void MuonAnalysisFitDataTab::groupFittedWorkspaces(QString workspaceName)
 
   if (inputWorkspaces.size() > 1)
   {
-    groupRawWorkspace(inputWorkspaces, groupName);
+    groupWorkspaces(inputWorkspaces, groupName);
   }
 }
 
 
 /**
 * Set up the string that will contain all the data needed for changing the data.
-* [wsName, axisLabel, connectType, plotType, Errors, Color]
+* [wsName, connectType, plotType, Errors, Color]
 *
-* @param plotDetails :: The workspace name of the plot to be created and axis label.
+* @param plotDetails :: The workspace name of the plot to be created.
 */
-QStringList MuonAnalysisFitDataTab::getAllPlotDetails(const QStringList & plotDetails)
+QStringList MuonAnalysisFitDataTab::getAllPlotDetails(const QString & workspace)
 {
-  QStringList allPlotDetails(plotDetails);
+  QStringList allPlotDetails;
+  allPlotDetails.push_back(workspace);
 
   QString fitType("");
   fitType.setNum(m_uiForm.connectPlotType->currentIndex());

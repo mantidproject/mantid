@@ -1,14 +1,14 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/DataItem.h"
 #include "MantidPythonInterface/kernel/PropertyMarshal.h"
+#include "MantidPythonInterface/kernel/WeakPtr.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
 #include <boost/python/return_value_policy.hpp>
 #include <boost/python/reference_existing_object.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
-
-#include <boost/weak_ptr.hpp>
+#include <boost/python/list.hpp>
 
 using Mantid::API::AnalysisDataServiceImpl;
 using Mantid::API::AnalysisDataService;
@@ -18,31 +18,6 @@ using namespace boost::python;
 
 /// Weak pointer to DataItem typedef
 typedef boost::weak_ptr<DataItem> DataItem_wptr;
-
-namespace boost
-{
-  /**
-   * Boost.Python doesn't understand weak_ptrs out of the box. This acts an intermediary
-   * so that a bare pointer can be retrieved from the wrapper. The important
-   * bit here is that the weak pointer won't allow the bare pointer to be retrieved
-   * unless the object it points to still exists
-   * The name and arguments are dictated by boost
-   * @param dataItem :: A reference to the weak_ptr
-   * @return A bare pointer to the DataItem
-   */
-  inline DataItem * get_pointer(const DataItem_wptr & dataItem )
-  {
-    if( DataItem_sptr lockedItem = dataItem.lock() )
-    {
-      return lockedItem.get(); // Safe as we can guarantee that another reference exists
-    }
-    else
-    {
-      throw std::runtime_error("Variable invalidated, data has been deleted.");
-    }
-  }
-
-}
 
 namespace
 {
@@ -98,6 +73,25 @@ namespace
     Mantid::PythonInterface::PropertyMarshal::upcastFromDataItem(dataItem);
     return dataItem;
   }
+
+  /**
+   * Return a Python list of object names from the ADS as this is
+   * far easier to work with than a set
+   * @param self :: A reference to the ADS object that called this method
+   * @returns A python list created from the set of strings
+   */
+  object _getObjectNames(AnalysisDataServiceImpl& self)
+  {
+    boost::python::list names;
+    const std::set<std::string> keys = self.getObjectNames();
+    std::set<std::string>::const_iterator iend = keys.end();
+    for(std::set<std::string>::const_iterator itr = keys.begin(); itr != iend; ++itr)
+    {
+      names.append(*itr);
+    }
+    assert(names.attr("__len__")() == keys.size());
+    return names;
+  }
   ///@endcond
 }
 
@@ -115,6 +109,7 @@ void export_AnalysisDataService()
     .def("remove", &AnalysisDataServiceImpl::remove, "Remove a named object")
     .def("clear", &AnalysisDataServiceImpl::clear, "Removes all objects managed by the service.")
     .def("size", &AnalysisDataServiceImpl::size, "Returns the number of objects within the service")
+    .def("getObjectNames", &_getObjectNames, "Return the list of names currently known to the ADS")
     // Make it act like a dictionary
     .def("__len__", &AnalysisDataServiceImpl::size)
     .def("__getitem__", &retrieveUpcastedPtr)

@@ -25,6 +25,7 @@ public:
     ListAnyValidator<std::string> v(vec);
     TS_ASSERT_EQUALS( v.allowedValues().size(), 3 )
   }
+
   void testVectorConstructor2()
   {
     std::vector<int> vec;
@@ -38,14 +39,11 @@ public:
   void testIsValid()
   {
     ListAnyValidator<int> v;
-    //TS_ASSERT_EQUALS( v.isValid(""), "Select a value" )
 
     TS_ASSERT_EQUALS( v.isValid(1),
       "The value \"1\" is not in the list of allowed values")
 
     v.addAllowedValue(1);
-   // TS_ASSERT_EQUALS( v.isValid(""),
-   //   "Select a value" )
     TS_ASSERT_EQUALS( v.isValid(1), "" )
     TS_ASSERT_EQUALS( v.isValid(2),
       "The value \"2\" is not in the list of allowed values")
@@ -94,17 +92,18 @@ public:
     TS_ASSERT( ! dynamic_cast<IValidator<double>*>(v) )
     delete v;
   }
+
   void testAddStringVSIntValue()
   {
-      ListAnyValidator<int> v1;
-      ListAnyValidator<int> v2;
-      TS_ASSERT_THROWS_NOTHING(v1.addAllowedValue("1"));
-      TS_ASSERT_THROWS_NOTHING(v1.addAllowedValue(1));
-      TS_ASSERT_THROWS_NOTHING(v2.addAllowedValue("1"));
-      std::set<std::string> val1=v1.allowedValues();
-      std::set<std::string> val2=v2.allowedValues();
-      TS_ASSERT_EQUALS(1,val1.size());
-      TS_ASSERT_EQUALS(*val1.begin(),*val2.begin());
+    ListAnyValidator<int> v1;
+    ListAnyValidator<int> v2;
+    TS_ASSERT_THROWS_NOTHING(v1.addAllowedValue("1"));
+    TS_ASSERT_THROWS_NOTHING(v1.addAllowedValue(1));
+    TS_ASSERT_THROWS_NOTHING(v2.addAllowedValue("1"));
+    std::set<std::string> val1=v1.allowedValues();
+    std::set<std::string> val2=v2.allowedValues();
+    TS_ASSERT_EQUALS(1,val1.size());
+    TS_ASSERT_EQUALS(*val1.begin(),*val2.begin());
   }
   
 };

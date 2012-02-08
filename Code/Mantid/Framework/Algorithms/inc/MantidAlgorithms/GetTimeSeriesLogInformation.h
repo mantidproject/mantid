@@ -63,8 +63,21 @@ namespace Algorithms
 
      void exec();
 
-     void examLog(std::string logname, std::string outputdir, bool uselog,  bool checkvaluealter);
+     void examLog(std::string logname, std::string outputdir);
 
+     void generateCalibrationFile();
+
+     void doTimeRangeInformation();
+
+     void calDistributions(std::vector<Kernel::DateAndTime> timevec, double dts);
+
+     void doStatistic();
+
+     void exportErrorLog(API::MatrixWorkspace_sptr ws, std::vector<Kernel::DateAndTime> abstimevec, double dts);
+
+     void checkLogAlternating(std::vector<Kernel::DateAndTime>timevec, std::vector<double> values,  double delta);
+
+     void checkLogBasicInforamtion(API::MatrixWorkspace_sptr ws, std::string logname);
   };
 
 

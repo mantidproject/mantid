@@ -209,7 +209,15 @@ public slots:
   void displayOutput(const QString& msg, bool error);
   /// Overrride the paste command when in interpreter mode
   void paste();
-  
+  /// Override the zoomIn slot
+  virtual void zoomIn();
+  /// Override the zoomIn slot
+  virtual void zoomIn(int level);
+  /// Override the zoomOut slot
+  virtual void zoomOut();
+  /// Override the zoomOut slot
+  virtual void zoomOut(int level);
+
 signals:
   /// Inform observers that undo information is available
   void undoAvailable(bool);
@@ -223,6 +231,12 @@ signals:
   void executeMultiLine();
 
 private:
+  /// Settings group
+  QString settingsGroup() const;
+  /// Read settings from persistent store
+  void readSettings();
+  /// Write settings from persistent store
+  void writeSettings();
   ///Execute the code at a given line
   void executeCodeAtLine(int line);
   /// Disable window editing keys when we are in interpreter mode
@@ -280,7 +294,8 @@ private:
   int m_originalIndent;
  /// boolean used used for compilation status
   bool m_compiled;
-
+  /// How many times the zoom level is changed
+  int m_zoomLevel;
  
 };
 

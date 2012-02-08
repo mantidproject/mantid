@@ -40,23 +40,27 @@ namespace Kernel
 class  ListValidator : public ListAnyValidator<std::string>
 {
 public:
-    /// Default constructor. Sets up an empty list of valid values.
-    ListValidator():ListAnyValidator<std::string>(){};
-    /** Constructor
-     *  @param values :: A set of values consisting of the valid values     */
-    explicit ListValidator(const std::set<std::string>& values):
-    ListAnyValidator<std::string>(values){}
+  /// Default constructor. Sets up an empty list of valid values.
+  ListValidator():ListAnyValidator<std::string>()
+  {}
 
-    /** Constructor
-     *  @param values :: A vector of the valid values     */
+  /** Constructor
+   *  @param values :: A set of values consisting of the valid values     */
+  explicit ListValidator(const std::set<std::string>& values):
+        ListAnyValidator<std::string>(values)
+  {}
+
+  /** Constructor
+   *  @param values :: A vector of the valid values     */
   explicit ListValidator(const std::vector<std::string>& values):
-  ListAnyValidator<std::string>(values){}
+        ListAnyValidator<std::string>(values)
+  {}
 
   // overload this function to keep python happy (temporary?)
-   void addAllowedValue(const std::string &value){
-      ListAnyValidator<std::string>::addAllowedValue(value);
-   }
-
+  void addAllowedValue(const std::string &value)
+  {
+    ListAnyValidator<std::string>::addAllowedValue(value);
+  }
 
   virtual ~ListValidator(){};
 
@@ -64,22 +68,22 @@ public:
 
   
 protected:
-/** Checks if the string passed is in the list
- *  @param value :: The value to test
- *  @return "" if the value is on the list, or "The value is not in the list of allowed values"
- */
-    std::string checkValidity(const std::string &value) const
-    {
+  /** Checks if the string passed is in the list
+   *  @param value :: The value to test
+   *  @return "" if the value is on the list, or "The value is not in the list of allowed values"
+   */
+  std::string checkValidity(const std::string &value) const
+  {
     if ( m_allowedValues.count(value) )
     {
-        return "";
+      return "";
     }
     else
     {
-        if ( value.empty() ) return "Select a value";
-        else return "The value \"" + value + "\" is not in the list of allowed values";
+      if ( value.empty() ) return "Select a value";
+      else return "The value \"" + value + "\" is not in the list of allowed values";
     }
-} 
+  }
 
 };
 

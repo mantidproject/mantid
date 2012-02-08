@@ -135,6 +135,8 @@ void IndirectDataAnalysis::initLayout()
 
 void IndirectDataAnalysis::initLocalPython()
 {
+  QString pyInput = "from mantidsimple import *";
+  QString pyOutput = runPythonCode(pyInput).trimmed();
   loadSettings();
 }
 
@@ -1746,7 +1748,7 @@ void IndirectDataAnalysis::furyfitRun()
 
   if ( m_uiForm.furyfit_ckPlotOutput->isChecked() )
   {
-    QString pyInput = "from mantidplotpy import *\n"
+    QString pyInput = "from mantidplot import *\n"
       "plotSpectrum('" + QString::fromStdString(output) + "_Workspace', [0,1,2])\n";
     QString pyOutput = runPythonCode(pyInput);
   }
@@ -2472,7 +2474,7 @@ void IndirectDataAnalysis::absf2pRun()
     return;
   }
 
-  QString pyInput = "import SpencerAbsCor\n";
+  QString pyInput = "import IndirectAbsCor\n";
   
   QString geom;
   QString size;
@@ -2545,7 +2547,7 @@ void IndirectDataAnalysis::absf2pRun()
     "size = " + size + "\n"
     "avar = " + m_uiForm.absp_leavar->text() + "\n"
     "plotOpt = '" + m_uiForm.absp_cbPlotOutput->currentText() + "'\n"
-    "SpencerAbsCor.AbsRunFeeder(inputws, geom, beam, ncan, size, density, sigs, siga, avar, plotOpt=plotOpt)\n";
+    "IndirectAbsCor.AbsRunFeeder(inputws, geom, beam, ncan, size, density, sigs, siga, avar, plotOpt=plotOpt)\n";
 
   QString pyOutput = runPythonCode(pyInput).trimmed();
 }

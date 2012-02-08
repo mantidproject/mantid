@@ -1253,9 +1253,9 @@ namespace Mantid
       int newRowIndex = 0;
 
       if (dir > 0)
-        newRowIndex = TabWS->rowCount();
+        newRowIndex = static_cast<int>(TabWS->rowCount());
 
-      int TableRow = TabWS->insertRow(newRowIndex);
+      int TableRow = static_cast<int>(TabWS->insertRow(newRowIndex));
 
       int ncells = (int) (AttributeValues[ISS1]);
       double chisq= max<double>(Chisq, AttributeValues[IIntensities]/max<int>(ncells,1));

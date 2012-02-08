@@ -10,7 +10,7 @@ import ui.reflectometer.ui_parameters_refl
 
 IS_IN_MANTIDPLOT = False
 try:
-    import qti
+    import _qti
     from MantidFramework import *
     mtd.initialise(False)
     from mantidsimple import *

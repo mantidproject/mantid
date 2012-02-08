@@ -171,13 +171,12 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/MantidMatrix.cpp
                    src/Mantid/MantidMatrixCurve.cpp
                    src/Mantid/MantidMDCurve.cpp
+                   src/Mantid/MantidMDCurveDialog.cpp
                    src/Mantid/MantidMatrixDialog.cpp
                    src/Mantid/MantidSampleLogDialog.cpp
                    src/Mantid/MantidUI.cpp
                    src/Mantid/MantidTable.cpp
                    src/Mantid/MantidWSIndexDialog.cpp
-                   src/Mantid/MantidQwtIMDWorkspaceData.cpp
-                   src/Mantid/MantidQwtMatrixWorkspaceData.cpp
                    src/Mantid/PeakPickerTool.cpp
                    src/Mantid/Preferences.cpp
                    src/Mantid/RemoveErrorsDialog.cpp
@@ -388,15 +387,13 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/MantidLog.h
                    src/Mantid/MantidMatrixCurve.h
                    src/Mantid/MantidMDCurve.h
+                   src/Mantid/MantidMDCurveDialog.h
                    src/Mantid/MantidMatrixDialog.h
                    src/Mantid/MantidMatrix.h
                    src/Mantid/MantidSampleLogDialog.h
                    src/Mantid/MantidUI.h
                    src/Mantid/MantidWSIndexDialog.h
                    src/Mantid/MantidTable.h
-                   src/Mantid/MantidQwtIMDWorkspaceData.h
-                   src/Mantid/MantidQwtMatrixWorkspaceData.h
-                   src/Mantid/MantidQwtWorkspaceData.h
                    src/Mantid/PeakPickerTool.h
                    src/Mantid/Preferences.h
                    src/Mantid/RemoveErrorsDialog.h
@@ -451,7 +448,7 @@ separate_arguments ( PYQT4_SIP_FLAGS )
 set ( SIP_SPEC ${CMAKE_CURRENT_SOURCE_DIR}/src/qti.sip )
 set ( SIP_SRC_IN ${CMAKE_CURRENT_SOURCE_DIR}/src/sipqti.cpp.in )
 set ( SIP_SRC ${CMAKE_CURRENT_BINARY_DIR}/sipqti.cpp )
-set ( SIP_SRC_AUTO sipqtipart0.cpp )
+set ( SIP_SRC_AUTO sip_qtipart0.cpp )
 
 
 # We need to manually add all the headers that are in qti.sip
@@ -464,31 +461,16 @@ set ( SIP_HDRS src/MdiSubWindow.h
                src/LegendWidget.h
                src/Grid.h
                src/Graph.h
-               src/LegendWidget.h
                src/MultiLayer.h
                src/Note.h
                src/Graph3D.h
                src/ApplicationWindow.h
-               src/Fit.h
-               src/ExponentialFit.h
-               src/SigmoidalFit.h
-               src/LogisticFit.h
-               src/MultiPeakFit.h
-               src/NonLinearFit.h
-               src/PluginFit.h
-               src/PolynomialFit.h
-               src/Filter.h
-               src/Differentiation.h
-               src/Integration.h
-               src/Interpolation.h
-               src/SmoothFilter.h
-               src/FFTFilter.h
-               src/FFT.h
-               src/Correlation.h
-               src/Convolution.h
+               src/Spectrogram.h
                src/PythonScripting.h
                src/PythonScript.h
                src/Folder.h
+               src/plot2D/ImageSymbol.h
+               src/Mantid/ErrorBarSettings.h
                src/Mantid/MantidUI.h
                src/Mantid/MantidMatrix.h
                src/Mantid/InstrumentWidget/InstrumentWindow.h
@@ -656,14 +638,13 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/MantidLog.h
                        src/Mantid/MantidMatrixCurve.h
                        src/Mantid/MantidMDCurve.h
+                       src/Mantid/MantidMDCurveDialog.h
                        src/Mantid/MantidMatrixDialog.h
                        src/Mantid/MantidMatrix.h
                        src/Mantid/MantidSampleLogDialog.h
                        src/Mantid/MantidUI.h
                        src/Mantid/MantidWSIndexDialog.h
                        src/Mantid/MantidTable.h
-                       src/Mantid/MantidQwtIMDWorkspaceData.h
-                       src/Mantid/MantidQwtMatrixWorkspaceData.h
                        src/Mantid/PeakPickerTool.h
                        src/Mantid/RemoveErrorsDialog.h
                        src/Mantid/UserFitFunctionDialog.h
@@ -691,6 +672,7 @@ set ( UI_FILES src/SendToProgramDialog.ui
                src/Mantid/MantidAbout.ui
                src/Mantid/RemoveErrorsDialog.ui
                src/Mantid/ManageCustomMenus.ui
+               src/Mantid/MantidMDCurveDialog.ui
 )
 
 qt4_wrap_cpp ( MOCCED_FILES ${QTIPLOT_MOC_FILES} ${MANTID_MOC_FILES} )
@@ -734,6 +716,14 @@ include_directories ( SYSTEM ${QWTPLOT3D_INCLUDE_DIR} )
 
 find_package ( QScintilla REQUIRED )
 include_directories ( ${QSCINTILLA_INCLUDE_DIR} )
+
+###########################################################################
+# Add OpenMP flags here
+###########################################################################
+if ( OPENMP_FOUND )
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}" )
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}" )
+endif ()
 
 ###########################################################################
 # Now create the target and add its dependencies and flags
@@ -799,16 +789,19 @@ endif( WIN32 )
 # Now copy the required python files into the build destination
 ###########################################################################
 
-# Command to copy when MantidPlot rebuilds. Does not work if the .py files ONLY were modified!
-add_custom_command ( TARGET MantidPlot POST_BUILD 
-                     COMMAND ${CMAKE_COMMAND} ARGS -E copy
-                       ${CMAKE_CURRENT_SOURCE_DIR}/mantidplotrc.py
-                       ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
-                     DEPENDS  mantidplotrc.py
-                     COMMENT "Copying mantidplotrc.py" 
-)
-# Perform a copy at cmake run time
-configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/mantidplotrc.py ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} COPYONLY ) 
+set ( PYTHON_INSTALL_FILES mantidplotrc.py mantidplot.py)
+foreach ( PYFILE ${PYTHON_INSTALL_FILES} )
+  # Command to copy when MantidPlot rebuilds. Does not work if the .py files ONLY were modified!
+  add_custom_command ( TARGET MantidPlot POST_BUILD
+                       COMMAND ${CMAKE_COMMAND} ARGS -E copy
+                         ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE}
+                         ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
+                       DEPENDS ${PYFILE}
+                       COMMENT "Copying ${PYFILE}"
+  )
+  # Perform a copy at cmake run time
+  configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} COPYONLY ) 
+endforeach ( PYFILE ${PYTHON_INSTALL_FILES} )
 
 add_custom_command ( TARGET MantidPlot POST_BUILD
                      COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory
@@ -823,15 +816,21 @@ add_custom_command ( TARGET MantidPlot POST_BUILD
 )
 
 ###########################################################################
+# Documentation targets
+###########################################################################
+add_subdirectory( docs )
+
+###########################################################################
 # MantidPlot Python Unit Tests
 ###########################################################################
 
 # List of .py files than must be run WITHIN MantidPlot.
 set ( MANTIDPLOT_TEST_PY_FILES 
-	#MantidPlotSliceViewerTest.py #FIXME: Only works with old-style python API as of Jan 10, 2012
+	MantidPlotSliceViewerTest.py 
 	MantidPlot1DPlotTest.py
 	MantidPlotProxiesTest.py
-	#MantidPlotFoldersTest.py #FIXME: Only works with old-style python API as of Jan 10, 2012
+	MantidPlotPythonImportTest.py
+	MantidPlotFoldersTest.py 
 )
 
 if ( 0 )
@@ -886,7 +885,7 @@ endif()
 install ( TARGETS MantidPlot RUNTIME DESTINATION ${BIN_DIR} 
                              BUNDLE DESTINATION .
 )
-install ( FILES mantidplotrc.py DESTINATION ${BIN_DIR} )
+install ( FILES ${PYTHON_INSTALL_FILES} DESTINATION ${BIN_DIR} )
 install ( DIRECTORY mantidplotpy DESTINATION ${BIN_DIR} )
 install ( DIRECTORY ipython_plugin DESTINATION ${BIN_DIR} )
 

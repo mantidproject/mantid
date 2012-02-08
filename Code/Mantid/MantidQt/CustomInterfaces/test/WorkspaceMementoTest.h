@@ -22,54 +22,30 @@ class WorkspaceMementoTest : public CxxTest::TestSuite
 
 private:
 
-/// Helper type. Concrete Workspace Memento.
-class ConcreteWorkspaceMemento : public WorkspaceMemento
+/// Mock Workspace Memento helper
+class MockWorkspaceMemento : public WorkspaceMemento
 {
 public:
-
-  virtual std::string getId() const
-  {
-    throw std::runtime_error("Not implemented");
-  }
-
-  virtual std::string locationType() const 
-  {
-    throw std::runtime_error("Not implemented");
-  }
-
-  virtual bool checkStillThere() const
-  {
-    throw std::runtime_error("Not implemented");
-  }
-
-  virtual Mantid::API::Workspace_sptr fetchIt(FetchProtocol) const
-  {
-    throw std::runtime_error("Not implemented");
-  }
-
-  virtual void cleanUp()
-  {
-    throw std::runtime_error("Not implemented");
-  }
-
-  virtual Mantid::API::Workspace_sptr applyActions()
-  {
-    throw std::runtime_error("Not implemented");
-  }
+  MOCK_CONST_METHOD0(getId, std::string());
+  MOCK_CONST_METHOD0(locationType, std::string());
+  MOCK_CONST_METHOD0(checkStillThere, bool());
+  MOCK_CONST_METHOD1(fetchIt, Mantid::API::Workspace_sptr(FetchProtocol));
+  MOCK_METHOD0(cleanUp, void());
+  MOCK_METHOD0(applyActions, Mantid::API::Workspace_sptr());
+  ~MockWorkspaceMemento(){};
 };
-
 
 public:
 
   void testGetEmptyUB()
   {
-    ConcreteWorkspaceMemento memento;
+    MockWorkspaceMemento memento;
     TSM_ASSERT("Should be empty if no ub provided.", memento.getUB().empty());
   }
 
   void testSetUB()
   {
-    ConcreteWorkspaceMemento memento;
+    MockWorkspaceMemento memento;
     memento.setUB(1, 2, 3, 4, 5, 6, 7, 8, 9);
     std::vector<double> ub = memento.getUB();
     TS_ASSERT_EQUALS(1, ub[0]);
@@ -85,15 +61,28 @@ public:
 
   void testStatusWithoutUB()
   {
-    ConcreteWorkspaceMemento memento;
+    MockWorkspaceMemento memento;
     TS_ASSERT_EQUALS(WorkspaceMemento::NoOrientedLattice, memento.generateStatus());
   }
 
   void testStatusWithUB()
   {
-    ConcreteWorkspaceMemento memento;
+    MockWorkspaceMemento memento;
     memento.setUB(1, 2, 3, 4, 5, 6, 7, 8, 9);
     TS_ASSERT_EQUALS(WorkspaceMemento::Ready, memento.generateStatus());
+  }
+
+  void testScopedMemento()
+  {
+    MockWorkspaceMemento* mock = new MockWorkspaceMemento;
+    EXPECT_CALL(*mock, checkStillThere()).Times(1);
+    EXPECT_CALL(*mock, cleanUp()).Times(1);
+    WorkspaceMemento_sptr sptr(mock);
+    {
+      ScopedMemento memento(sptr);
+      TS_ASSERT_THROWS_NOTHING(memento->checkStillThere());
+    }
+    TSM_ASSERT("ScopedMemento has not been used as expected", Mock::VerifyAndClearExpectations(mock));
   }
 
 };

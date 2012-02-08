@@ -129,6 +129,28 @@ public:
     TS_ASSERT_DELTA(max.Z(), 2.5, 1e-08);
   }
 
+
+  void test_signed_two_theta()
+  {
+    //Create a cluster consisting of a single detector.
+    DetectorGroup cluster;
+    Detector* det = new Detector("det",0,0);
+    det->setPos(1, -1, 0);
+    bool warn = false;
+    cluster.addDetector(IDetector_const_sptr(det), warn);
+
+    V3D axis(1, 0, 0);
+    V3D sample(0, 0, 0);
+    V3D up(0,0,1);
+
+    double theta = cluster.getTwoTheta(sample, axis);
+    double signedThetaCluster = cluster.getSignedTwoTheta(sample, axis, up);
+    double signedThetaDetector = det->getSignedTwoTheta(sample, axis, up);
+    
+    TS_ASSERT_EQUALS(theta, std::abs(signedThetaCluster));
+    TSM_ASSERT_EQUALS("Should be same as for individual detector",signedThetaCluster, signedThetaDetector);
+  }
+
 private:
   boost::shared_ptr<DetectorGroup> m_detGroup;
   Component m_origin;

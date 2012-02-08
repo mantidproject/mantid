@@ -14,7 +14,7 @@ Kernel::Logger& TableRow::g_log = Kernel::Logger::get("TableRow");
   */
 TableRow::TableRow(const TableRowHelper& trh):m_row(trh.m_row),m_col(0),m_sep(",")
 {
-    for(int i=0;i<trh.m_workspace->columnCount();i++)
+    for(size_t i=0;i<trh.m_workspace->columnCount();i++)
         m_columns.push_back(trh.m_workspace->getColumn(i));
     if (m_columns.size()) m_nrows = int(m_columns[0]->size());
     else
@@ -24,9 +24,9 @@ TableRow::TableRow(const TableRowHelper& trh):m_row(trh.m_row),m_col(0),m_sep(",
 /**  Makes the TableRow point to i-th row in the TableWorkspace
      @param i :: New row number
  */
-void TableRow::row(int i)
+void TableRow::row(size_t i)
 {
-    if (i >= 0 && i < m_nrows)
+    if (i < m_nrows)
     {
         m_row = i;
         m_col = 0;
@@ -85,16 +85,16 @@ std::ostream& operator<<(std::ostream& s,const TableRow& row)
     if (row.m_columns.size() == 0) return s;
     if (row.m_columns.size() == 1)
     {
-        row.m_columns[0]->print(s,row.row());
+        row.m_columns[0]->print(row.row(), s);
         return s;
     }
     std::vector< boost::shared_ptr<Column> >::const_iterator ci = row.m_columns.begin();
     for(;ci!=row.m_columns.end()-1;++ci)
     {
-        (*ci)->print(s,row.row());
+        (*ci)->print(row.row(), s);
         s << row.m_sep;
     }
-    (*ci)->print(s,row.row());
+    (*ci)->print(row.row(), s);
     return s;
 }
 

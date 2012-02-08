@@ -117,7 +117,7 @@ namespace Mantid
         }
         // If the detector is either not found, a monitor or is masked do not include it
         if ( !det || det->isMonitor() || det->isMasked() ) continue;
-	
+    
         const double yValue = input->readY(i)[0];
         if ( yValue  < 0.0 )
         {
@@ -137,6 +137,10 @@ namespace Mantid
         PARALLEL_END_INTERUPT_REGION
       }
       PARALLEL_CHECK_INTERUPT_REGION
+
+      if(medianInput.empty()){
+          throw std::out_of_range(" no single valid histohrams identified in the workspace");
+      }
 
       // We need a sorted array to calculate the median
       std::sort(medianInput.begin(), medianInput.end());

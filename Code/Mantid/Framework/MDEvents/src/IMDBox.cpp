@@ -124,6 +124,26 @@ namespace MDEvents
     return numBad;
   }
 
+  //---------------------------------------------------------------------------------------------------
+  /** Transform the dimensions contained in this box
+   * x' = x*scaling + offset
+   *
+   * @param scaling :: multiply each coordinate by this value.
+   * @param offset :: after multiplying, add this offset.
+   */
+  TMDE(
+  void IMDBox)::transformDimensions(std::vector<double> & scaling, std::vector<double> & offset)
+  {
+    for (size_t d=0; d<nd; d++)
+    {
+      extents[d].min = (extents[d].min * scaling[d]) + offset[d];
+      extents[d].max = (extents[d].max * scaling[d]) + offset[d];
+    }
+    // Re-calculate the volume of the box
+    this->calcVolume();
+  }
+
+
   //-----------------------------------------------------------------------------------------------
   /** Return the vertices of corners of the box
    *

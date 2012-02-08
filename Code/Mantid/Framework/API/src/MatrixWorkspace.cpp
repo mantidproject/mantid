@@ -14,6 +14,7 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
 #include "MantidGeometry/Instrument/NearestNeighboursFactory.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/MatrixWSIndexCalculator.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -23,10 +24,13 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include <boost/math/special_functions/fpclassify.hpp>
+#include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/Strings.h"
 
 using Mantid::Kernel::DateAndTime;
 using Mantid::Kernel::TimeSeriesProperty;
 using NeXus::NXcompression;
+using Mantid::Kernel::Strings::toString;
 
 namespace Mantid
 {
@@ -512,6 +516,63 @@ namespace Mantid
 
 
     //---------------------------------------------------------------------------------------
+    /** Return a vector where:
+    *    The index into the vector = DetectorID (pixel ID) + offset
+    *    The value at that index = the corresponding Workspace Index
+    *
+    *  @param out :: vector set to above definition
+    *  @param offset :: add this to the detector ID to get the index into the vector.
+    *  @param throwIfMultipleDets :: set to true to make the algorithm throw an error
+    *         if there is more than one detector for a specific workspace index.
+    *  @throw runtime_error if there is more than one detector per spectrum (if throwIfMultipleDets is true)
+    */
+    void MatrixWorkspace::getDetectorIDToWorkspaceIndexVector( std::vector<size_t> & out, detid_t & offset, bool throwIfMultipleDets) const
+    {
+      // Make a correct initial size
+      out.clear();
+      detid_t minId = 0;
+      detid_t maxId = 0;
+      this->getInstrument()->getMinMaxDetectorIDs(minId, maxId);
+      offset = -minId;
+      // Allocate at once
+      out.resize(maxId - minId + 1, 0);
+      int outSize = int(out.size());
+
+      // Run in parallel if thread-safe.
+      // We should expect that there is only one workspace index per detector ID.
+      int numHistos = int(this->getNumberHistograms());
+
+      std::string error("");
+      for (int i=0; i < numHistos; i++)
+      {
+        size_t workspaceIndex = size_t(i);
+
+        //Get the list of detectors from the WS index
+        const std::set<detid_t> & detList = this->getSpectrum(workspaceIndex)->getDetectorIDs();
+
+        if (throwIfMultipleDets && (detList.size() > 1))
+          throw std::runtime_error("MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(): more than 1 detector for one histogram! I cannot generate a map of detector ID to workspace index.");
+
+        // Allow multiple detectors per workspace index, or,
+        // If only one is allowed, then this has thrown already
+        for (std::set<detid_t>::const_iterator it = detList.begin(); it != detList.end(); ++it)
+        {
+          int index = *it + offset;
+          if (index >= outSize)
+          {
+            //throw std::runtime_error("MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(): detector ID found (" + Mantid::Kernel::Strings::toString(*it) + ") is not within the min/max limits found. This indicates a logical error in Instrument->getMinMaxDetectorIDs(). Contact the development team.");
+            g_log.debug() << "MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(): detector ID found (" << *it << " at workspace index " << workspaceIndex << ") is invalid." << std::endl;
+          }
+          else
+            // Save it at that point.
+            out[index] = workspaceIndex;
+        }
+
+      } // (for each workspace index)
+    }
+
+
+    //---------------------------------------------------------------------------------------
     /** Return a map where:
     *    KEY is the Workspace Index
     *    VALUE is the DetectorID (pixel ID)
@@ -811,6 +872,34 @@ namespace Mantid
       return Geometry::IDetector_const_sptr( new Geometry::DetectorGroup(dets_ptr, false) );
     }
 
+
+    /** Returns the signed 2Theta scattering angle for a detector
+    *  @param det :: A pointer to the detector object (N.B. might be a DetectorGroup)
+    *  @return The scattering angle (0 < theta < pi)
+    *  @throws InstrumentDefinitionError if source or sample is missing, or they are in the same place
+    */
+    double MatrixWorkspace::detectorSignedTwoTheta(Geometry::IDetector_const_sptr det) const
+    {
+      Instrument_const_sptr instrument = getInstrument();
+      Geometry::IObjComponent_const_sptr source = instrument->getSource();
+      Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+      if ( source == NULL || sample == NULL )
+      {
+        throw Kernel::Exception::InstrumentDefinitionError("Instrument not sufficiently defined: failed to get source and/or sample");
+      }
+
+      const Kernel::V3D samplePos = sample->getPos();
+      const Kernel::V3D beamLine  = samplePos - source->getPos();
+
+      if ( beamLine.nullVector() )
+      {
+        throw Kernel::Exception::InstrumentDefinitionError("Source and sample are at same position!");
+      }
+      //Get the instrument up axis.
+      const V3D& instrumentUpAxis = instrument->getReferenceFrame()->vecPointingUp();
+      return det->getSignedTwoTheta(samplePos,beamLine, instrumentUpAxis);
+    }
+
     /** Returns the 2Theta scattering angle for a detector
      *  @param det :: A pointer to the detector object (N.B. might be a DetectorGroup)
      *  @return The scattering angle (0 < theta < pi)
@@ -1062,15 +1151,10 @@ namespace Mantid
       {
         // First get a reference to the list for this spectrum (or create a new list)
         MaskList& binList = m_masks[spectrumIndex];
-        //see if the bin is already masked. Normally only a handfull of bins are masked, if it's 100s you might want to make this faster
-        for(MaskList::const_iterator it = binList.begin(); it != binList.end(); ++it)
+        MaskList::iterator it = binList.find(binIndex);
+        if( it != binList.end() )
         {
-          if ( it->first == binIndex )
-          {
-            //calling erase will invalidate the iterator! So we must call break immediately after
-            binList.erase(it);
-            break;
-          }
+          binList.erase(it);
         }
         binList.insert( std::make_pair(binIndex,weight) );
       }
@@ -1318,7 +1402,7 @@ namespace Mantid
         throw std::invalid_argument("MatrixWorkspace only has 2 dimensions.");
     }
 
-    boost::shared_ptr<const Mantid::Geometry::IMDDimension> MatrixWorkspace::getDimensionNamed(std::string id) const
+    boost::shared_ptr<const Mantid::Geometry::IMDDimension> MatrixWorkspace::getDimensionWithId(std::string id) const
     { 
       int nAxes = this->axes();
       IMDDimension* dim = NULL;
@@ -1463,6 +1547,22 @@ namespace Mantid
       file->closeGroup();
     }
 
+    /** Obtain coordinates for a line plot through a MDWorkspace.
+     * Cross the workspace from start to end points, recording the signal along the line.
+     * Sets the x,y vectors to the histogram bin boundaries and counts
+     *
+     * @param start :: coordinates of the start point of the line
+     * @param end :: coordinates of the end point of the line
+     * @param normalize :: how to normalize the signal
+     * @param x :: is set to the boundaries of the bins, relative to start of the line.
+     * @param y :: is set to the normalized signal for each bin. Length = length(x) - 1
+     */
+    void MatrixWorkspace::getLinePlot(const Mantid::Kernel::VMD & start, const Mantid::Kernel::VMD & end,
+        Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y, std::vector<signal_t> & e) const
+    {
+      UNUSED_ARG(start);UNUSED_ARG(end);UNUSED_ARG(normalize);UNUSED_ARG(x);UNUSED_ARG(y);UNUSED_ARG(e);
+      throw std::runtime_error("MatrixWorkspace::getLinePlot() not yet implemented.");
+    }
 
 
   } // namespace API

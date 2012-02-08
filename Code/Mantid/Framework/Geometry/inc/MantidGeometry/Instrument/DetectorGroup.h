@@ -61,6 +61,7 @@ namespace Mantid
       Kernel::V3D getPos() const;
       double getDistance(const IComponent& comp) const;
       double getTwoTheta(const Kernel::V3D& observer, const Kernel::V3D& axis) const;
+      double getSignedTwoTheta(const Kernel::V3D& observer, const Kernel::V3D& axis, const Kernel::V3D& instrumentUp) const;
       double getPhi() const;
       double solidAngle(const Kernel::V3D& observer) const; 
       bool isParametrized() const;

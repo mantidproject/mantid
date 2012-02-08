@@ -344,7 +344,6 @@ void SANSRunWindow::connectFirstPageSignals()
 {
   //controls on the first tab page
 
-  connect(m_uiForm.smpl_offset, SIGNAL(textEdited(const QString&)), this, SLOT(runChanged()));
   connect(m_uiForm.outfile_edit, SIGNAL(textEdited(const QString&)),
     this, SLOT(enableOrDisableDefaultSave()));
 
@@ -2259,7 +2258,7 @@ void SANSRunWindow::handleDefSaveClick()
   const QString fileBase = m_uiForm.outfile_edit->text();
   if (fileBase.isEmpty())
   {
-    QMessageBox::warning(this, "Filename required", "A filename must be entred into the text box above to save this file");
+    QMessageBox::warning(this, "Filename required", "A filename must be entered into the text box above to save this file");
   }
 
   const QStringList algs(getSaveAlgs());
@@ -2268,7 +2267,10 @@ void SANSRunWindow::handleDefSaveClick()
   {
     QString ext = SaveWorkspaces::getSaveAlgExt(*alg);
     QString fname = fileBase.endsWith(ext) ? fileBase : fileBase+ext;
-    saveCommand += (*alg)+"('"+m_outputWS+"','"+fname+"')\n";
+    if ( (*alg) == "SaveRKH" )
+      saveCommand += (*alg)+"('"+m_outputWS+"','"+fname+"', Append=False)\n";
+    else
+      saveCommand += (*alg)+"('"+m_outputWS+"','"+fname+"')\n";
   }
 
   saveCommand += "print 'success'\n";
@@ -2277,8 +2279,6 @@ void SANSRunWindow::handleDefSaveClick()
   {
     QMessageBox::critical(this, "Error saving workspace", "Problem encountered saving workspace, does it still exist. There may be more information in the results console?");
   }
-
-  runPythonCode(saveCommand);
 }
 /**
  * Set up controls based on the users selection in the combination box

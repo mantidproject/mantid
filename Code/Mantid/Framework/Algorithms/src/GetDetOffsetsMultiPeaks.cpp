@@ -117,8 +117,8 @@ namespace Mantid
       {
         PARALLEL_START_INTERUPT_REGION
         double offset = 0.0;
-        const int YLength = static_cast<int>(inputW->readY(wi).size());
         const MantidVec& Y = inputW->readY(wi);
+        const int YLength = static_cast<int>(Y.size());
         double sumY = 0.0;
         for (int i = 0; i < YLength; i++) sumY += Y[i];
         if (sumY < 1.e-30)
@@ -193,11 +193,11 @@ namespace Mantid
           gsl_vector_free(ss);
           gsl_multimin_fminimizer_free (s);
         }
-        double mask=1.0;
+        double mask=0.0;
         if (std::abs(offset) > maxOffset)
         { 
           offset = 0.0;
-          mask = 0.0;
+          mask = 1.0;
         }
 
         // Get the list of detectors in this pixel
@@ -211,8 +211,17 @@ namespace Mantid
           for (it = dets.begin(); it != dets.end(); ++it)
           {
             outputW->setValue(*it, offset);
-            if (mask == 0.) maskWS->maskWorkspaceIndex((*pixel_to_wi)[*it]);
-            else maskWS->dataY((*pixel_to_wi)[*it])[0] = mask;
+            if (mask == 1.)
+            {
+              // Being masked
+              maskWS->maskWorkspaceIndex((*pixel_to_wi)[*it]);
+              maskWS->dataY((*pixel_to_wi)[*it])[0] = mask;
+            }
+            else
+            {
+              // Using the detector
+               maskWS->dataY((*pixel_to_wi)[*it])[0] = mask;
+            }
           }
         }
         prog.report();
@@ -259,7 +268,7 @@ namespace Mantid
       }
       peakPositions = mess.str();
 
-      API::IAlgorithm_sptr findpeaks = createSubAlgorithm("FindPeaks",0.0,0.2);
+      API::IAlgorithm_sptr findpeaks = createSubAlgorithm("FindPeaks",0.0,0.2, false);
       findpeaks->setProperty("InputWorkspace", inputW);
       findpeaks->setProperty<int>("FWHM",7);
       findpeaks->setProperty<int>("Tolerance",4);
@@ -276,7 +285,7 @@ namespace Mantid
       ITableWorkspace_sptr peakslist = findpeaks->getProperty("PeaksList");
       peakPos = Kernel::VectorHelper::splitStringIntoVector<double>(peakPositions);
       double errsum = 0.0;
-      for (int i = 0; i < peakslist->rowCount(); ++i)
+      for (size_t i = 0; i < peakslist->rowCount(); ++i)
       {
         // Get references to the data
         const double centre = peakslist->getRef<double>("centre",i);

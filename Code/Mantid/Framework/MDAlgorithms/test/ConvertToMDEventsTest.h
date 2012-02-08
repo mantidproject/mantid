@@ -33,11 +33,12 @@ public:
                               const std::vector<std::string> &other_dim_names,MDEvents::MDWSDescription &TWSD)
     {
        
-                              return ConvertToMDEvents::identifyTheAlg(inMatrixWS,Q_mode_req, dE_mode_req,other_dim_names,TWSD);
+                              return ConvertToMDEvents::identifyTheAlg(inMatrixWS,Q_mode_req, dE_mode_req,other_dim_names,false,TWSD);
     }
     std::string identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS,const std::string &Q_mode_req, const std::string &dE_mode_req,
-                                  std::vector<std::string> &outws_dim_names,std::vector<std::string> &outws_dim_units){
-        return ConvertToMDEvents::identifyMatrixAlg(inMatrixWS,Q_mode_req, dE_mode_req,outws_dim_names,outws_dim_units);
+                                  std::vector<std::string> &outws_dim_names,std::vector<std::string> &outws_dim_units,bool &is_detInfoLost){
+        
+        return ConvertToMDEvents::identifyMatrixAlg(inMatrixWS,Q_mode_req, dE_mode_req,outws_dim_names,outws_dim_units,is_detInfoLost);
     }
     //
     std::string parseQMode(const std::string &Q_mode_req,const std::vector<std::string> &ws_dim_names,const std::vector<std::string> &ws_dim_units,
@@ -56,6 +57,9 @@ public:
    }
    std::string parseConvMode(const std::string &Q_MODE_ID,const std::string &natural_units,const std::vector<std::string> &ws_dim_units){
        return ConvertToMDEvents::parseConvMode(Q_MODE_ID,natural_units,ws_dim_units);
+   }
+   void buildDimNames(MDEvents::MDWSDescription &TargWSDescription){
+       this->ConvertToMDEvents::buildDimNames(TargWSDescription);
    }
   
    void setAlgoID(const std::string &newID){
@@ -129,7 +133,7 @@ void testInit(){
     TS_ASSERT_THROWS_NOTHING( pAlg->initialize() )
     TS_ASSERT( pAlg->isInitialized() )
 
-    TSM_ASSERT_EQUALS("algortithm should have 13 propeties",13,(size_t)(pAlg->getProperties().size()));
+    TSM_ASSERT_EQUALS("algortithm should have 15 propeties",15,(size_t)(pAlg->getProperties().size()));
 }
 // TEST QMode
 void testParseQMode_WrongThrows()
@@ -176,12 +180,12 @@ void testParseQMode_Q3D()
      std::vector<std::string> out_dim_names,out_dim_units;
      int nQ_dims;
      std::string MODE;
-     TS_ASSERT_THROWS_NOTHING(MODE=pAlg->parseQMode("QxQyQz",ws_dim_names,ws_dim_units,out_dim_names,out_dim_units, nQ_dims));
+     TS_ASSERT_THROWS_NOTHING(MODE=pAlg->parseQMode("QhQkQl",ws_dim_names,ws_dim_units,out_dim_names,out_dim_units, nQ_dims));
      TS_ASSERT_EQUALS(3,nQ_dims);
-     TS_ASSERT_EQUALS("QxQyQz",MODE);
-     TS_ASSERT_EQUALS("Q_x",out_dim_names[0]);
-     TS_ASSERT_EQUALS("Q_y",out_dim_names[1]);
-     TS_ASSERT_EQUALS("Q_z",out_dim_names[2]);
+     TS_ASSERT_EQUALS("QhQkQl",MODE);
+     TS_ASSERT_EQUALS("Q1",out_dim_names[0]);
+     TS_ASSERT_EQUALS("Q2",out_dim_names[1]);
+     TS_ASSERT_EQUALS("Q3",out_dim_names[2]);
      TS_ASSERT_EQUALS("Momentum",out_dim_units[0]);
      TS_ASSERT_EQUALS("Momentum",out_dim_units[1]);
      TS_ASSERT_EQUALS("Momentum",out_dim_units[2]);
@@ -346,21 +350,24 @@ void testParseConv_ByTOF()
 void testNeedsNumericAxis(){
     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::Create2DWorkspace(4,10);
     ws2D->replaceAxis(0,new API::TextAxis(3));
-    std::vector<std::string> dim_names;
+    std::vector<std::string> dim_ID;
     std::vector<std::string> dim_units;
-    TS_ASSERT_THROWS(pAlg->identifyMatrixAlg(ws2D,"QxQyQz","",dim_names,dim_units),std::invalid_argument);
+    bool is_detInfoLost;
+    TS_ASSERT_THROWS(pAlg->identifyMatrixAlg(ws2D,"QhQkQl","",dim_ID,dim_units,is_detInfoLost),std::invalid_argument);
 }
 void testGetWS4DimIDFine(){
     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4,10,true);
 
-    std::vector<std::string> dim_names;
+    std::vector<std::string> dim_ID;
     std::vector<std::string> dim_units;
     std::string Alg_ID;
-    TS_ASSERT_THROWS_NOTHING(Alg_ID=pAlg->identifyMatrixAlg(ws2D,"QxQyQz","Direct",dim_names,dim_units));
+    bool is_detInfoLost;
+    TS_ASSERT_THROWS_NOTHING(Alg_ID=pAlg->identifyMatrixAlg(ws2D,"QhQkQl","Direct",dim_ID,dim_units,is_detInfoLost));
 
-    TSM_ASSERT_EQUALS("Inelastic workspace will produce 4 dimensions",4,dim_names.size());
+    TSM_ASSERT_EQUALS("Inelastic workspace will produce 4 dimensions",4,dim_ID.size());
     TSM_ASSERT_EQUALS("Last dimension of Inelastic transformation should be DeltaE","DeltaE",dim_units[3]);
-    TSM_ASSERT_EQUALS("Alg ID would be: ","WS2DQxQyQzDirectCnvNo",Alg_ID);
+    TSM_ASSERT_EQUALS("Alg ID would be: ","WS2DQhQkQlDirectCnvNo",Alg_ID);
+    TS_ASSERT(!is_detInfoLost);
 }
 void testGetWS3DimIDFine(){
     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4,10,true);
@@ -370,15 +377,16 @@ void testGetWS3DimIDFine(){
     ws2D->replaceAxis(0,pAx);
 
 
-    std::vector<std::string> dim_names;
+    std::vector<std::string> dim_ID;
     std::vector<std::string> dim_units;
     std::string Alg_ID;
-    TS_ASSERT_THROWS_NOTHING(Alg_ID=pAlg->identifyMatrixAlg(ws2D,"QxQyQz","Elastic",dim_names,dim_units));
+    bool is_detInfoLost;
+    TS_ASSERT_THROWS_NOTHING(Alg_ID=pAlg->identifyMatrixAlg(ws2D,"QhQkQl","Elastic",dim_ID,dim_units, is_detInfoLost));
 
-    TSM_ASSERT_EQUALS("Inelastic workspace will produce 3 dimensions",3,dim_names.size());
+    TSM_ASSERT_EQUALS("Inelastic workspace will produce 3 dimensions",3,dim_ID.size());
     TSM_ASSERT_EQUALS("Last dimension of Elastic transformation should be ","Momentum",dim_units[2]);
-    TSM_ASSERT_EQUALS("Alg ID would be: ","WS2DQxQyQzElasticCnvByTOF",Alg_ID);
-
+    TSM_ASSERT_EQUALS("Alg ID would be: ","WS2DQhQkQlElasticCnvByTOF",Alg_ID);
+    TS_ASSERT(!is_detInfoLost);
 }
 void testGetWSDimNames2AxisNoQ(){
     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::Create2DWorkspace(4,10);
@@ -393,14 +401,17 @@ void testGetWSDimNames2AxisNoQ(){
     pAx->setUnit("QSquared");
     ws2D->replaceAxis(1,pAx);
 
-    std::vector<std::string> dim_names;
+    std::vector<std::string> dim_ID;
     std::vector<std::string> dim_units;
     std::string AlgID;
-    TS_ASSERT_THROWS_NOTHING(AlgID=pAlg->identifyMatrixAlg(ws2D,"","",dim_names,dim_units));
+    bool is_detInfoLost;
+    TS_ASSERT_THROWS_NOTHING(AlgID=pAlg->identifyMatrixAlg(ws2D,"","",dim_ID,dim_units,  is_detInfoLost));
 
-    TS_ASSERT_EQUALS(2,dim_names.size());
-    TS_ASSERT_EQUALS("Dim1",dim_names[0]);
-    TS_ASSERT_EQUALS("Dim2",dim_names[1]);
+    TSM_ASSERT("Det info should be undefined an an numeric axis is along axis 2",is_detInfoLost);
+
+    TS_ASSERT_EQUALS(2,dim_ID.size());
+    TS_ASSERT_EQUALS("Dim1",dim_ID[0]);
+    TS_ASSERT_EQUALS("Dim2",dim_ID[1]);
 
     TS_ASSERT_EQUALS(2,dim_units.size());
     TS_ASSERT_EQUALS("dSpacing",dim_units[0]);
@@ -418,7 +429,7 @@ void testGetWSDimNames2AxisNoQ(){
 //
 //   std::vector<std::string> basic_properties(7);
 //   basic_properties[0]="|Q|";
-//   basic_properties[1]="QxQyQz";
+//   basic_properties[1]="QhQkQl";
 //   basic_properties[2]="DeltaE";
 //   basic_properties[3]="phi";
 //   basic_properties[4]="chi";
@@ -445,11 +456,12 @@ void testIdentifyMatrixAlg_1()
     pAx->title() = ws_dim_names[1];
     pAx->setUnit("QSquared");
     ws2D->replaceAxis(1,pAx);
+    bool is_detInfoLost;
 
-
-    TS_ASSERT_EQUALS("WS2DCnvNo",pAlg->identifyMatrixAlg(ws2D,"","",dim_names,dim_units));
+    TS_ASSERT_EQUALS("WS2DCnvNo",pAlg->identifyMatrixAlg(ws2D,"","",dim_names,dim_units,is_detInfoLost));
     TS_ASSERT_EQUALS(ws_dim_names[0],dim_names[0]);
     TS_ASSERT_EQUALS(ws_dim_names[1],dim_names[1]);
+    TSM_ASSERT("Det info should be undefined an an numeric axis is along axis 2",is_detInfoLost);
 
 }
 
@@ -458,39 +470,43 @@ void testIdentifyMatrixAlg_2()
 {  
     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::Create2DWorkspace(4,10);
     std::vector<std::string> dim_names,dim_units;
+    bool is_detInfoLost;
  
     API::NumericAxis *
     pAx = new API::NumericAxis(3);
     pAx->setUnit("TOF");
     ws2D->replaceAxis(0,pAx);
-    TSM_ASSERT_THROWS_NOTHING("Elastic conversion needs X-axis to be in an Energy-related units",pAlg->identifyMatrixAlg(ws2D,"|Q|","Elastic",dim_names,dim_units));
+    TSM_ASSERT_THROWS_NOTHING("Elastic conversion needs X-axis to be in an Energy-related units",pAlg->identifyMatrixAlg(ws2D,"|Q|","Elastic",dim_names,dim_units,is_detInfoLost));
+    TSM_ASSERT("Det info should be defined for conversion",!is_detInfoLost);
 
     pAx = new API::NumericAxis(3);
     pAx->setUnit("Wavelength");
     ws2D->replaceAxis(0,pAx);
     // This is probably bug in conversion --> does not work in elastic mode
-   TSM_ASSERT_THROWS_NOTHING("Elastic conversion needs X-axis to be in an Energy-related units",pAlg->identifyMatrixAlg(ws2D,"|Q|","Elastic",dim_names,dim_units));
+   TSM_ASSERT_THROWS_NOTHING("Elastic conversion needs X-axis to be in an Energy-related units",pAlg->identifyMatrixAlg(ws2D,"|Q|","Elastic",dim_names,dim_units,is_detInfoLost));
     //TSM_ASSERT_THROWS("Can not convert wavelength to momentum transfer in elastic mode ",pAlg->identifyMatrixAlg(ws2D,"|Q|","Elastic",dim_names,dim_units),std::invalid_argument);
+   TSM_ASSERT("Det info should be defined for conversion",!is_detInfoLost);
 
     pAx = new API::NumericAxis(3);
     pAx->setUnit("Energy");
     ws2D->replaceAxis(0,pAx);
     // This is probably bug in conversion --> does not work in elastic mode
-   TSM_ASSERT_THROWS_NOTHING("Elastic conversion needs X-axis to be in an Energy-related units",pAlg->identifyMatrixAlg(ws2D,"|Q|","Elastic",dim_names,dim_units));
+   TSM_ASSERT_THROWS_NOTHING("Elastic conversion needs X-axis to be in an Energy-related units",pAlg->identifyMatrixAlg(ws2D,"|Q|","Elastic",dim_names,dim_units,is_detInfoLost));
    // TSM_ASSERT_THROWS("Can not convert Energy to momentum transfer in elastic mode ",pAlg->identifyMatrixAlg(ws2D,"|Q|","Elastic",dim_names,dim_units),std::invalid_argument);
-
+   TSM_ASSERT("Det info should be defined for conversion",!is_detInfoLost);
 
     pAx = new API::NumericAxis(3);
     pAx->setUnit("dSpacing");
     ws2D->replaceAxis(0,pAx);
-    TSM_ASSERT_THROWS_NOTHING("Elastic conversion needs X-axis to be in an Energy-related units",pAlg->identifyMatrixAlg(ws2D,"|Q|","Elastic",dim_names,dim_units));
-
+    TSM_ASSERT_THROWS_NOTHING("Elastic conversion needs X-axis to be in an Energy-related units",pAlg->identifyMatrixAlg(ws2D,"|Q|","Elastic",dim_names,dim_units,is_detInfoLost));
+    TSM_ASSERT("Det info should be defined for conversion",!is_detInfoLost);
 
     pAx = new API::NumericAxis(3);
     pAx->setUnit("TOF");
     ws2D->replaceAxis(0,pAx);
-    TS_ASSERT_EQUALS("WS2D|Q|ElasticCnvFromTOF",pAlg->identifyMatrixAlg(ws2D,"|Q|","Elastic",dim_names,dim_units));
+    TS_ASSERT_EQUALS("WS2D|Q|ElasticCnvFromTOF",pAlg->identifyMatrixAlg(ws2D,"|Q|","Elastic",dim_names,dim_units,is_detInfoLost));
 
+    TSM_ASSERT("Det info should be defined for conversion",!is_detInfoLost);
     TSM_ASSERT_EQUALS("One dim name came from Q (this can be logically wrong)",1,dim_names.size());
     TS_ASSERT_EQUALS(dim_names[0],"|Q|");
 
@@ -500,49 +516,55 @@ void testIdentifyMatrixAlg_3()
 {  
     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::Create2DWorkspace(4,10);
     std::vector<std::string> dim_names,dim_units;
+    bool is_detInfoLost;
 
     API::NumericAxis *pAx = new API::NumericAxis(3);
     pAx->title()="A";
     pAx->setUnit("DeltaE");
     ws2D->replaceAxis(0,pAx);
 
-    TS_ASSERT_EQUALS("WS2D|Q|DirectCnvNo",pAlg->identifyMatrixAlg(ws2D,"|Q|","Direct",dim_names,dim_units));
+    TS_ASSERT_EQUALS("WS2D|Q|DirectCnvNo",pAlg->identifyMatrixAlg(ws2D,"|Q|","Direct",dim_names,dim_units,is_detInfoLost));
     TSM_ASSERT_EQUALS("One dimension comes from Q",2,dim_names.size());
     TS_ASSERT_EQUALS(dim_names[0],"|Q|");
     TS_ASSERT_EQUALS(dim_names[1],"DeltaE");
+     TSM_ASSERT("Det info should be defined for conversion",!is_detInfoLost);
 }
 
 void testIdentifyMatrixAlg_4()
 {  
      std::vector<std::string> dim_names,dim_units;
     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::Create2DWorkspace(4,10);
+    bool is_detInfoLost;
 
     API::NumericAxis *pAx = new API::NumericAxis(3);
     pAx->title()="A";
     pAx->setUnit("DeltaE");
     ws2D->replaceAxis(0,pAx);
 
-    TS_ASSERT_EQUALS("WS2D|Q|IndirectCnvNo",pAlg->identifyMatrixAlg(ws2D,"|Q|","Indirect",dim_names,dim_units));
+    TS_ASSERT_EQUALS("WS2D|Q|IndirectCnvNo",pAlg->identifyMatrixAlg(ws2D,"|Q|","Indirect",dim_names,dim_units,is_detInfoLost));
     TSM_ASSERT_EQUALS("One dim name came from Q (this can be wrong)",2,dim_names.size());
     TS_ASSERT_EQUALS(dim_names[0],"|Q|");
     TS_ASSERT_EQUALS(dim_names[1],"DeltaE");
+    TSM_ASSERT("Det info should be defined for conversion",!is_detInfoLost);
 }
 void testIdentifyMatrixAlg_5()
 {  
     std::vector<std::string> dim_names,dim_units;
     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::Create2DWorkspace(4,10);
+    bool is_detInfoLost;
 
     API::NumericAxis *pAx = new API::NumericAxis(3);
     pAx->title()="A";
     pAx->setUnit("DeltaE");
     ws2D->replaceAxis(0,pAx);
 
-    TS_ASSERT_EQUALS("WS2DQxQyQzIndirectCnvNo",pAlg->identifyMatrixAlg(ws2D,"QxQyQz","Indirect",dim_names,dim_units));
+    TS_ASSERT_EQUALS("WS2DQhQkQlIndirectCnvNo",pAlg->identifyMatrixAlg(ws2D,"QhQkQl","Indirect",dim_names,dim_units,is_detInfoLost));
     TSM_ASSERT_EQUALS("One dim name came from Q (this can be wrong)",4,dim_names.size());
-    TS_ASSERT_EQUALS(dim_names[0],"Q_x");
-    TS_ASSERT_EQUALS(dim_names[1],"Q_y");
-    TS_ASSERT_EQUALS(dim_names[2],"Q_z");
+    TS_ASSERT_EQUALS(dim_names[0],"Q1");
+    TS_ASSERT_EQUALS(dim_names[1],"Q2");
+    TS_ASSERT_EQUALS(dim_names[2],"Q3");
     TS_ASSERT_EQUALS(dim_names[3],"DeltaE");
+    TSM_ASSERT("Det info should be defined for conversion",!is_detInfoLost);
 }
 
 void testSetUpThrow()
@@ -620,7 +642,7 @@ void testExecQ3D()
     pAlg->setPropertyValue("OtherDimensions","phi,chi");
     pAlg->setPropertyValue("UsePreprocessedDetectors","0");
      
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions", "QxQyQz"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions", "QhQkQl"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Direct"));
     pAlg->setPropertyValue("MinValues","-10,-10,-10,  0,-10,-10");
     pAlg->setPropertyValue("MaxValues"," 10, 10, 10, 20, 40, 20");
@@ -630,6 +652,66 @@ void testExecQ3D()
     pAlg->execute();
     TSM_ASSERT("Shoud finish succesfully",pAlg->isExecuted());
     AnalysisDataService::Instance().remove("OutputWorkspace"); 
+}
+
+void test_buildDimNames(){
+
+    MDEvents::MDWSDescription TargWSDescription(4);
+
+    TargWSDescription.u=Kernel::V3D(1,0,0);
+    TargWSDescription.v=Kernel::V3D(0,1,0);
+    TargWSDescription.emode=1;
+    TargWSDescription.AlgID = "QhQkQl";
+    TargWSDescription.convert_to_hkl=true;
+    TargWSDescription.rotMatrix.assign(9,0);
+
+    pAlg->buildDimNames(TargWSDescription);
+    TS_ASSERT_EQUALS("[Qh,0,0]",TargWSDescription.dim_names[0]);
+    TS_ASSERT_EQUALS("[0,Qk,0]",TargWSDescription.dim_names[1]);
+    TS_ASSERT_EQUALS("[0,0,Ql]",TargWSDescription.dim_names[2]);
+    
+
+}
+
+
+//DO NOT DISABLE THIS TEST
+void testAlgorithmProperties()
+{
+  /*
+  The Create MD Workspace GUI runs this algorithm internally.
+  If property names and property allowed values here change, that interface will break.
+
+  This unit test is designed to flag up changes here. If property values and names here do need to be changed, 
+  1) They must also be updated in CreateMDWorkspaceAlgDialog.cpp. 
+  2) It should then be confirmed that that the Create MD Workspace custom interface still works!
+  3) Finally this unit test should be updated so that the tests pass.
+  */
+
+  ConvertToMDEvents alg;
+  alg.initialize();
+
+  Mantid::Kernel::Property *QDimProperty;
+  TSM_ASSERT_THROWS_NOTHING("Property name has changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", QDimProperty = alg.getProperty("QDimensions"));
+  TSM_ASSERT_THROWS_NOTHING("Property name has changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", QDimProperty = alg.getProperty("dEAnalysisMode"));
+  TSM_ASSERT_THROWS_NOTHING("Property name has changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", QDimProperty = alg.getProperty("OtherDimensions"));
+  TSM_ASSERT_THROWS_NOTHING("Property name has changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", QDimProperty = alg.getProperty("MinValues"));
+  TSM_ASSERT_THROWS_NOTHING("Property name has changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", QDimProperty = alg.getProperty("MaxValues"));
+
+  typedef std::set<std::string> PropertyAllowedValues;
+  QDimProperty =alg.getProperty("QDimensions");
+  PropertyAllowedValues QDimValues = QDimProperty->allowedValues();
+  TSM_ASSERT_EQUALS("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", 3, QDimValues.size());
+  TSM_ASSERT("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!",  QDimValues.find("") != QDimValues.end());
+  TSM_ASSERT("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", QDimValues.find("|Q|") != QDimValues.end());
+  TSM_ASSERT("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", QDimValues.find("QhQkQl") != QDimValues.end());
+
+  Mantid::Kernel::Property *dEAnalysisMode =alg.getProperty("dEAnalysisMode");
+  PropertyAllowedValues dEAnalysisModeValues = dEAnalysisMode->allowedValues();
+  TSM_ASSERT_EQUALS("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", 4, dEAnalysisModeValues.size());
+  TSM_ASSERT("dEAnalysisMode property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!",  dEAnalysisModeValues.find("") != dEAnalysisModeValues.end());
+  TSM_ASSERT("dEAnalysisMode property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", dEAnalysisModeValues.find("Direct") != dEAnalysisModeValues.end());
+  TSM_ASSERT("dEAnalysisMode property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", dEAnalysisModeValues.find("Indirect") != dEAnalysisModeValues.end());
+  TSM_ASSERT("dEAnalysisMode property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", dEAnalysisModeValues.find("Elastic") != dEAnalysisModeValues.end());
 }
 
 

@@ -91,6 +91,8 @@ public:
 };
 
 
+
+
 /***************************************************************************/
 /***************************************************************************/
 /***************************************************************************/
@@ -102,6 +104,7 @@ class LineViewer : QWidget
 
 
 public:
+
 void apply()   throw (std::runtime_error);
 
 void showPreview();
@@ -116,11 +119,11 @@ void setEndXY(double x, double y)   throw (std::runtime_error);
 
 
 //*WIKI* ==== Width ====
-void setWidth(double width);
+void setThickness(double width);
 
-void setWidth(int dim, double width)   throw (std::invalid_argument, std::runtime_error);
+void setThickness(int dim, double width)   throw (std::invalid_argument, std::runtime_error);
 
-void setWidth(const QString & dim, double width)   throw (std::invalid_argument, std::runtime_error);
+void setThickness(const QString & dim, double width)   throw (std::invalid_argument, std::runtime_error);
 
 void setPlanarWidth(double width);
 
@@ -139,6 +142,12 @@ bool getFixedBinWidthMode() const;
 int getNumBins() const;
 
 double getBinWidth() const;
+
+
+////*WIKI* ==== Plotting ====
+void setPlotAxis(int choice);
+
+int getPlotAxis() const;
 
 
 };
@@ -164,12 +173,18 @@ public:
 
   void openFromXML(const QString & xml)   throw (std::invalid_argument, std::runtime_error);
 
-  void saveImage(const QString & filename = QString());
+  QPixmap getImage();
+
+  void saveImage(const QString & filename);
+
+  void copyImageToClipboard();
+
   void setFastRender(bool fast);
 
   bool getFastRender() const;
 
-  void toggleLineMode(bool);
+  void toggleLineMode(bool lineMode);
+
 
   //*WIKI* ==== X/Y Dimension ====
   void setXYDim(int indexX, int indexY)     throw (std::invalid_argument);

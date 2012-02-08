@@ -50,7 +50,6 @@ namespace Mantid
       /// Convert a numpy array to a std::vector
       template<typename VectorElementType, typename NumpyType>
       DLLExport const std::vector<VectorElementType> toStdVectorFromNumpy(PyArrayObject *value);
-
     }
   }
 }

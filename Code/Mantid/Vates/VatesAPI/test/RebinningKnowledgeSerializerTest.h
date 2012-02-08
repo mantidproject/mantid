@@ -42,6 +42,10 @@ private:
     MOCK_CONST_METHOD0(getNonIntegratedDimensions, Mantid::Geometry::VecIMDDimension_const_sptr());
     MOCK_CONST_METHOD0(getGeometryXML,std::string());
 
+    virtual void getLinePlot(const Mantid::Kernel::VMD & , const Mantid::Kernel::VMD & ,
+        Mantid::API::MDNormalization , std::vector<Mantid::coord_t> & , std::vector<Mantid::signal_t> & , std::vector<Mantid::signal_t> & ) const
+    {}
+
     virtual uint64_t getNPoints() const
     {
       throw std::runtime_error("Not Implemented");
