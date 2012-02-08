@@ -217,17 +217,14 @@ private:
   /// Clear tables and front combo box
   void clearTablesAndCombo();
 
-  /// When no data loaded set various buttons etc to inactive
-  void noDataAvailable();
-
-  /// When data loaded set various buttons etc to active
-  void nowDataAvailable();
-
   /// Adds the workspaces in a range.
   void plusRangeWorkspaces();
 
   /// Delete ranged workspaces.
   void deleteRangedWorkspaces();
+
+  /// Get group workspace name
+  QString getGroupName();
 
   /// Get a name for the ranged workspace.
   std::string getRangedName();
