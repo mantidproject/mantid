@@ -117,8 +117,8 @@ namespace Mantid
       {
         PARALLEL_START_INTERUPT_REGION
         double offset = 0.0;
-        const int YLength = static_cast<int>(inputW->readY(wi).size());
         const MantidVec& Y = inputW->readY(wi);
+        const int YLength = static_cast<int>(Y.size());
         double sumY = 0.0;
         for (int i = 0; i < YLength; i++) sumY += Y[i];
         if (sumY < 1.e-30)
@@ -268,7 +268,7 @@ namespace Mantid
       }
       peakPositions = mess.str();
 
-      API::IAlgorithm_sptr findpeaks = createSubAlgorithm("FindPeaks",0.0,0.2);
+      API::IAlgorithm_sptr findpeaks = createSubAlgorithm("FindPeaks",0.0,0.2, false);
       findpeaks->setProperty("InputWorkspace", inputW);
       findpeaks->setProperty<int>("FWHM",7);
       findpeaks->setProperty<int>("Tolerance",4);
