@@ -137,8 +137,7 @@ namespace Crystal
       double sigfsq = peak1.getSigmaIntensity()*scaleFactor;
       double wl = peak1.getWavelength();
       double twoth = peak1.getScattering();
-      double tbar = 0.0;
-      //double transmission = absor_sphere(twoth, wl, tbar);
+      double tbar = absor_sphere(twoth, wl);
       // Extinction Correction
 
 
@@ -368,7 +367,7 @@ namespace Crystal
   *
   *       a. j. schultz, june, 2008
   */
-  double TOFExtinction::absor_sphere(double& twoth, double& wl, double& tbar)
+  double TOFExtinction::absor_sphere(double& twoth, double& wl)
   {
     int i;
     double mu, mur;         //mu is the linear absorption coefficient,
@@ -421,12 +420,13 @@ namespace Crystal
                                                  // trans = exp(-mu*tbar)
 
 //  calculate tbar as defined by coppens.
+    double tbar;
     if(mu == 0.0)
       tbar=0.0;
     else
       tbar = -(double)std::log(trans)/mu;
 
-    return trans;
+    return tbar;
   }
 
 

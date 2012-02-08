@@ -59,9 +59,11 @@ namespace Mantid
       std::string corrOption = p[1];
       std::string pointOption = p[2];
       std::string tofParams = p[3];
-      double mosaic = gsl_vector_get(v,0);
       std::vector<double> tofParam = Kernel::VectorHelper::splitStringIntoVector<double>(tofParams);
       double rcrystallite = tofParam[4];
+      double mosaic = tofParam[5];
+      if(corrOption.compare(5,2,"II")==0)rcrystallite = gsl_vector_get(v,0);
+      else mosaic = gsl_vector_get(v,0);
       if(v->size>1)rcrystallite = gsl_vector_get(v,1);
       Mantid::Algorithms::OptimizeExtinctionParameters u;
       return u.fitMosaic(mosaic, rcrystallite, inname, corrOption, pointOption, tofParams);
@@ -75,7 +77,6 @@ namespace Mantid
 
     declareProperty(new WorkspaceProperty<PeaksWorkspace>("InputWorkspace","",Direction::InOut),
         "An input PeaksWorkspace with an instrument.");
-    //declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace","",Direction::Output));
     std::vector<std::string> corrOptions;
     corrOptions.push_back("Type I Zachariasen" );
     corrOptions.push_back("Type I Gaussian" );
@@ -98,13 +99,14 @@ namespace Mantid
       "Linear absorption coefficient at 1.8 Angstroms in 1/cm");
     declareProperty("Radius", 0.10, "Radius of spherical crystal in cm");
     declareProperty("Cell", 255.0, "Unit Cell Volume (Angstroms^3)");
-    declareProperty("Mosaic", 0.262, "Mosaic Spread (FWHM) (Degrees)");
-    declareProperty("RCrystallite", 6.0, "Becker-Coppens Crystallite Radius (micron)");
+    declareProperty("Mosaic", 0.262, "Mosaic Spread (FWHM) (Degrees)",Direction::InOut);
+    declareProperty("RCrystallite", 6.0, "Becker-Coppens Crystallite Radius (micron)",Direction::InOut);
     std::vector<std::string> propOptions;
     for (size_t i=0; i<m_pointGroups.size(); ++i)
       propOptions.push_back( m_pointGroups[i]->getName() );
     declareProperty("PointGroup", propOptions[0],new ListValidator(propOptions),
       "Which point group applies to this crystal?");
+    declareProperty("OutputChi2", 0.0,Direction::Output);
 
       //Disable default gsl error handler (which is to call abort!)
       gsl_set_error_handler_off();
@@ -131,7 +133,7 @@ namespace Mantid
       double cell = getProperty("Cell");
       double r_crystallite = getProperty("RCrystallite");
       std::ostringstream strwi;
-      strwi<<smu<<","<<amu<<","<<radius<<","<<cell<<","<<r_crystallite;
+      strwi<<smu<<","<<amu<<","<<radius<<","<<cell<<","<<r_crystallite<<","<<mosaic;
       par[3] = strwi.str();
     
       const gsl_multimin_fminimizer_type *T =
@@ -143,14 +145,15 @@ namespace Mantid
       // finally do the fitting
     
       size_t nopt = 1;
-      if(type.compare("II")>0)nopt = 2;
+      if(type.compare(7,2,"II")==0)nopt = 2;
       size_t iter = 0;
       int status = 0;
       double size;
      
       /* Starting point */
       x = gsl_vector_alloc (nopt);
-      gsl_vector_set (x, 0, mosaic);
+      if(type.compare(5,2,"II")==0)gsl_vector_set (x, 0, r_crystallite);
+      else gsl_vector_set (x, 0, mosaic);
       if(nopt>1)gsl_vector_set (x, 1, r_crystallite);
     
       /* Set initial step sizes to 0.001 */
@@ -176,12 +179,13 @@ namespace Mantid
         status = gsl_multimin_test_size (size, 1e-4);
     
       }
-      while (status == GSL_CONTINUE && iter < 50);
+      while (status == GSL_CONTINUE && iter < 500);
     
       // Output summary to log file
       std::string reportOfDiffractionEventCalibrateDetectors = gsl_strerror(status);
       //g_log.debug() << 
-      mosaic = gsl_vector_get (s->x, 0);
+      if(type.compare(5,2,"II")==0)gsl_vector_get (s->x, 0);
+      else mosaic = gsl_vector_get (s->x, 0);
       if(nopt>1)r_crystallite = gsl_vector_get (s->x, 1);
       std::cout <<
         " Method used = " << " Simplex" << 
@@ -189,10 +193,13 @@ namespace Mantid
         " Status = " << reportOfDiffractionEventCalibrateDetectors << 
         " Minimize Sum = " << s->fval << 
         " Mosaic   = " << mosaic << 
-        " R_crystallite  = " << r_crystallite << "  \n";
+        " RCrystallite  = " << r_crystallite << "  \n";
       gsl_vector_free(x);
       gsl_vector_free(ss);
       gsl_multimin_fminimizer_free (s);
+      setProperty("Mosaic", mosaic);
+      setProperty("RCrystallite", r_crystallite);
+      setProperty("OutputChi2", s->fval);
 
     }
 
@@ -209,6 +216,7 @@ namespace Mantid
       PeaksWorkspace_sptr inputW = boost::dynamic_pointer_cast<PeaksWorkspace>
            (AnalysisDataService::Instance().retrieve(inname));
       std::vector<double> tofParam = Kernel::VectorHelper::splitStringIntoVector<double>(tofParams);
+      if (mosaic < 0.0 || rcrystallite < 0.0) return 1e300;
 
       API::IAlgorithm_sptr tofextinction = createSubAlgorithm("TOFExtinction",0.0,0.2);
       tofextinction->setProperty("InputWorkspace", inputW);
