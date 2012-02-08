@@ -1250,6 +1250,7 @@ class MantidPyFramework(FrameworkManager):
                 ialg = self.createUnmanagedAlgorithm(ialg, version)
                 ialg.__async__ = False
                 ialg.setChild(True)
+                ialg.setLogging(True)
                 ialg.setAlwaysStoreInADS(True)
             else:
                 ialg = self.createManagedAlgorithm(ialg, version) 

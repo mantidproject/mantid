@@ -294,8 +294,6 @@ namespace Mantid
      */
     void Algorithm::lockWorkspaces()
     {
-      return; //FIXME REMOVE
-
       // Do not lock workspace for child algos
       if (this->isChild())
         return;
@@ -410,8 +408,8 @@ namespace Mantid
       // Cache the workspace in/out properties for later use
       cacheWorkspaceProperties();
 
-      // no logging of input if a child algorithm
-      if (!m_isChildAlgorithm) logAlgorithmInfo();
+      // no logging of input if a child algorithm (except for python child algos)
+      if (!m_isChildAlgorithm || m_alwaysStoreInADS) logAlgorithmInfo();
 
       // Check all properties for validity
       if ( !validateProperties() )
