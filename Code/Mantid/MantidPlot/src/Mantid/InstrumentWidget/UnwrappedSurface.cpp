@@ -207,14 +207,14 @@ void UnwrappedSurface::init()
 
 /**
   * Calculate the rectangular region in uv coordinates occupied by an assembly.
-  * @param comp :: A member of the assebmly. The total area of the assembly is a sum of areas of its members
+  * @param comp :: A member of the assembly. The total area of the assembly is a sum of areas of its members
   * @param compRect :: A rect. area occupied by comp in uv space
   */
 void UnwrappedSurface::calcAssemblies(boost::shared_ptr<const Mantid::Geometry::IComponent> comp,const QRectF& compRect)
 {
   boost::shared_ptr<const Mantid::Geometry::IComponent> parent = comp->getParent();
-  IDetector_const_sptr det = boost::dynamic_pointer_cast<const IDetector>(parent);
-  if (det)
+//  IDetector_const_sptr det = boost::dynamic_pointer_cast<const IDetector>(parent);
+  if (parent)
   {
     QRectF& r = m_assemblies[parent->getComponentID()];
     r |= compRect;
@@ -230,9 +230,13 @@ void UnwrappedSurface::cacheAllAssemblies()
   if (!m_assemblies.empty())
     return;
 
-  foreach(const UnwrappedDetector& udet,m_unwrappedDetectors)
+  for(size_t i=0;i<m_unwrappedDetectors.size();++i)
   {
+    const UnwrappedDetector& udet = m_unwrappedDetectors[i];
+
     if (! udet.detector ) continue;
+    // Get the BARE parent (not parametrized) to speed things up.
+    //boost::shared_ptr<const Mantid::Geometry::IComponent> parent(udet.detector->getBareParent()); // = udet.detector->getParent();
     boost::shared_ptr<const Mantid::Geometry::IComponent> parent = udet.detector->getParent();
     if (parent)
     {
@@ -472,8 +476,11 @@ void UnwrappedSurface::componentSelected(Mantid::Geometry::ComponentID id)
   if (det)
   {
     int detID = det->getID();
-    foreach(const UnwrappedDetector& udet,m_unwrappedDetectors)
+
+    std::vector<UnwrappedDetector>::const_iterator it;
+    for (it = m_unwrappedDetectors.begin(); it != m_unwrappedDetectors.end(); it++)
     {
+      const UnwrappedDetector& udet = *it;
       if (udet.detector && udet.detector->getID() == detID)
       {
         double w = udet.width;
@@ -491,8 +498,10 @@ void UnwrappedSurface::componentSelected(Mantid::Geometry::ComponentID id)
     this->cacheAllAssemblies();
     QMap<Mantid::Geometry::ComponentID,QRectF>::iterator assRect = m_assemblies.find(ass->getComponentID());
     if (assRect != m_assemblies.end())
-    {
       zoom(*assRect);
+    else
+    {
+      // std::cout << "Assembly not found " << std::endl;
     }
   }
 }
