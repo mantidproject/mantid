@@ -123,6 +123,8 @@ void RectangularDetectorActor::draw(bool picking)const
 //------------------------------------------------------------------------------------------------
 /**
  * Accept a visitor. This sets the matching component's visibility to True.
+ * It looks if the given component is a child (pixel) of the parent rectangular
+ * detector, and sets the visibility of the whole panel to true if so.
  *
  * @param visitor :: A visitor.
  *

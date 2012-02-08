@@ -25,10 +25,12 @@
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/Strings.h"
 
 using Mantid::Kernel::DateAndTime;
 using Mantid::Kernel::TimeSeriesProperty;
 using NeXus::NXcompression;
+using Mantid::Kernel::Strings::toString;
 
 namespace Mantid
 {
@@ -557,7 +559,10 @@ namespace Mantid
         {
           int index = *it + offset;
           if (index >= outSize)
-            throw std::runtime_error("MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(): detector ID found is not within the min/max limits found. This indicates a logical error in Instrument->getMinMaxDetectorIDs(). Contact the development team.");
+          {
+            //throw std::runtime_error("MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(): detector ID found (" + Mantid::Kernel::Strings::toString(*it) + ") is not within the min/max limits found. This indicates a logical error in Instrument->getMinMaxDetectorIDs(). Contact the development team.");
+            g_log.debug() << "MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(): detector ID found (" << *it << " at workspace index " << workspaceIndex << ") is invalid." << std::endl;
+          }
           else
             // Save it at that point.
             out[index] = workspaceIndex;
