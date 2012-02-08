@@ -35,6 +35,7 @@ src/vtkDataSetToGeometry.cpp
 src/vtkDataSetToImplicitFunction.cpp
 src/vtkDataSetToWsName.cpp
 src/vtkDataSetToWsLocation.cpp
+src/vtkMDQuadFactory.cpp
 src/vtkSplatterPlotFactory.cpp
 src/vtkMDEWHexahedronFactory.cpp
 src/vtkPeakMarkerFactory.cpp
@@ -92,6 +93,7 @@ inc/MantidVatesAPI/vtkDataSetToGeometry.h
 inc/MantidVatesAPI/vtkDataSetToImplicitFunction.h
 inc/MantidVatesAPI/vtkDataSetToWsName.h
 inc/MantidVatesAPI/vtkDataSetToWsLocation.h
+inc/MantidVatesAPI/vtkMDQuadFactory.h
 inc/MantidVatesAPI/vtkMDEWHexahedronFactory.h
 inc/MantidVatesAPI/vtkSplatterPlotFactory.h
 inc/MantidVatesAPI/vtkPeakMarkerFactory.h
@@ -113,6 +115,7 @@ test/EscalatingRebinningActionManagerTest.h
 test/EventNexusLoadingPresenterTest.h
 test/vtkDataSetFactoryTest.h
 test/vtkDataSetToGeometryTest.h
+test/vtkMDQuadFactoryTest.h
 test/vtkMDEWHexahedronFactoryTest.h
 test/vtkSplatterPlotFactoryTest.h
 test/vtkPeakMarkerFactoryTest.h

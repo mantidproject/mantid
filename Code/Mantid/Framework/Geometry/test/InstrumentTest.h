@@ -358,6 +358,15 @@ public:
     TS_ASSERT_EQUALS( inst2->getValidToDate(), validTo);
   }
 
+  void test_getMinMaxDetectorIDs()
+  {
+    detid_t min = 0;
+    detid_t max = 0;
+    TS_ASSERT_THROWS_NOTHING( instrument.getMinMaxDetectorIDs(min,max) );
+    TS_ASSERT_EQUALS( min, 1);
+    TS_ASSERT_EQUALS( max, 11);
+  }
+
 private:
   Instrument instrument;
   Detector *det, *det2, *det3;

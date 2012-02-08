@@ -97,7 +97,8 @@ public:
     TS_ASSERT( alg2.isExecuted() );
 
     // test the output from fit is what you expect
-    double dummy = alg2.getProperty("OutputChi2overDoF");
+    //double dummy =
+    alg2.getProperty("OutputChi2overDoF");
     // TS_ASSERT_DELTA( dummy, 0.0, 1.0);
 
     // test the output from fit is what you expect

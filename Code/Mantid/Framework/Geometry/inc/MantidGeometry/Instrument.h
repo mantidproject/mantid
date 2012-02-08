@@ -119,6 +119,8 @@ namespace Mantid
 
       std::vector<detid_t> getDetectorIDs(bool skipMonitors = false) const;
 
+      void getMinMaxDetectorIDs(detid_t & min, detid_t & max) const;
+
       void getDetectorsInBank(std::vector<IDetector_const_sptr> & dets, const std::string & bankName) const;
 
       /// returns a list containing  detector ids of monitors

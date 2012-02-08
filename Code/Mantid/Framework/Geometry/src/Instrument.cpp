@@ -206,6 +206,26 @@ namespace Mantid
       return out;
     }
 
+    /** Get the minimum and maximum (inclusive) detector IDs
+     *
+     * @param min :: set to the min detector ID
+     * @param max :: set to the max detector ID
+     */
+    void Instrument::getMinMaxDetectorIDs(detid_t & min, detid_t & max) const
+    {
+      const detid2det_map * in_dets;
+      if (m_isParametrized)
+        in_dets = &dynamic_cast<const Instrument*>(m_base)->m_detectorCache;
+      else
+        in_dets = &this->m_detectorCache;
+
+      if (in_dets->empty())
+        throw std::runtime_error("No detectors on this instrument. Can't find min/max ids");
+      // Maps are sorted by key. So it is easy to find
+      min = in_dets->begin()->first;
+      max = in_dets->rbegin()->first;
+    }
+
 
     //------------------------------------------------------------------------------------------
     /** Fill a vector with all the detectors contained (at any depth) in a named component. For example,

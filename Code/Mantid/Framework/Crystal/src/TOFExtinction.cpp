@@ -105,7 +105,7 @@ namespace Crystal
     declareProperty("Mosaic", 0.262, "Mosaic Spread (FWHM) (Degrees)");
     declareProperty("Cell", 255.0, "Unit Cell Volume (Angstroms^3)");
     declareProperty("RCrystallite", 6.0, "Becker-Coppens Crystallite Radius (micron)");
-    declareProperty("ScaleFactor", 1.2, "Multiply FSQ and sig(FSQ) by scaleFactor");
+    declareProperty("ScaleFactor", 1.0, "Multiply FSQ and sig(FSQ) by scaleFactor");
 
   }
 
@@ -138,7 +138,7 @@ namespace Crystal
       double wl = peak1.getWavelength();
       double twoth = peak1.getScattering();
       double tbar = 0.0;
-      double transmission = absor_sphere(twoth, wl, tbar);
+      //double transmission = absor_sphere(twoth, wl, tbar);
       // Extinction Correction
 
 
@@ -243,8 +243,10 @@ namespace Crystal
   }
   double TOFExtinction::getEgLaue(double Eg, double twoth, double wl)
   {
+    UNUSED_ARG(wl)
+    UNUSED_ARG(twoth)
         // Tomiyoshi, Yamada and Watanabe
-        double EgLaue = Eg*std::tan(twoth/2.0)/wl;
+        //double EgLaue = Eg*std::tan(twoth/2.0)/wl;
         // Ask Xiaoping if this should be EqLaue
         return Eg;
   }
@@ -287,6 +289,8 @@ namespace Crystal
   }
   double TOFExtinction::getRg(double EgLaue, double EsLaue, double wl, double twoth)
   {
+        UNUSED_ARG(wl)
+        UNUSED_ARG(twoth)
         // Two-theta dependence by Becker & Coppens, Acta Cryst A 30, 129 (1974)
         // The factor is std::pow((std::sin(twoth/2)/wl),2) for tof neutron 
         //double Es = r*std::pow((1000.0*std::sin(twoth/2)/wl),2);

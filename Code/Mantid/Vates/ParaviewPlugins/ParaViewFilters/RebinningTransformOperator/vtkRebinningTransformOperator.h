@@ -75,6 +75,7 @@ public:
   void SetLengthB3(double length);
   void SetOrigin(double originX, double originY, double originZ);
   void SetForceOrthogonal(bool value);
+  void SetOutputHistogramWS(bool value);
   void SetInOriginalCoords(bool inOriginalCoords);
 
   const char* GetInputGeometryXML();
@@ -98,6 +99,7 @@ public:
   virtual double getLengthB2() const;
   virtual double getLengthB3() const;
   virtual bool getForceOrthogonal() const;
+  virtual bool getOutputHistogramWS() const;
 
 protected:
 
@@ -170,6 +172,8 @@ private:
   bool m_ForceOrthogonal;
   /// Flag indicating that visual results should be transformed into the original coordinate frame.
   bool m_bTransformVis;
+  /// Flag indicating that a histogram workspace should be provided.
+  bool m_bOutputHistogramWS;
 
 };
 #endif

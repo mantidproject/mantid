@@ -121,6 +121,7 @@ namespace Mantid
       spec2index_map * getSpectrumToWorkspaceIndexMap() const;
       index2detid_map * getWorkspaceIndexToDetectorIDMap() const;
       detid2index_map * getDetectorIDToWorkspaceIndexMap( bool throwIfMultipleDets ) const;
+      void getDetectorIDToWorkspaceIndexVector( std::vector<size_t> & out, detid_t & offset, bool throwIfMultipleDets) const;
       void getIndicesFromSpectra(const std::vector<specid_t>& spectraList, std::vector<size_t>& indexList) const;
       size_t getIndexFromSpectrumNumber(const specid_t specNo) const;
       void getIndicesFromDetectorIDs(const std::vector<detid_t>& detIdList, std::vector<size_t>& indexList) const;

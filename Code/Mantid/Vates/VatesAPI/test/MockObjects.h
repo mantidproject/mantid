@@ -79,8 +79,9 @@ public:
   MOCK_CONST_METHOD3(getSignalNormalizedAt, double(size_t index1, size_t index2, size_t index3));
   MOCK_CONST_METHOD4(getSignalNormalizedAt, double(size_t index1, size_t index2, size_t index3, size_t index4));
   MOCK_CONST_METHOD0(getNonIntegratedDimensions, Mantid::Geometry::VecIMDDimension_const_sptr());
+
   virtual void getLinePlot(const Mantid::Kernel::VMD & , const Mantid::Kernel::VMD & ,
-      Mantid::API::MDNormalization , std::vector<Mantid::coord_t> & , std::vector<Mantid::signal_t> & , std::vector<Mantid::signal_t> & ) const
+    Mantid::API::MDNormalization , std::vector<Mantid::coord_t> & , std::vector<Mantid::signal_t> & , std::vector<Mantid::signal_t> & ) const
   {}
 
   virtual Mantid::API::IMDIterator* createIterator(Mantid::Geometry::MDImplicitFunction * /*function*/ = NULL) const
@@ -148,6 +149,7 @@ public:
   MOCK_CONST_METHOD0(getLengthB2, double());
   MOCK_CONST_METHOD0(getLengthB3, double());
   MOCK_CONST_METHOD0(getForceOrthogonal, bool());
+  MOCK_CONST_METHOD0(getOutputHistogramWS, bool());
 };
 
 class MockClipper: public Mantid::VATES::Clipper

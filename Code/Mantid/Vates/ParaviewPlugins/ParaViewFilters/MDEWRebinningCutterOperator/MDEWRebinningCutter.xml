@@ -21,6 +21,13 @@
           Available timestep values.
         </Documentation>
        </DoubleVectorProperty>
+	   <IntVectorProperty
+         name="OutputHistoWorkspace"
+         command="SetOutputHistogramWS"
+         number_of_elements="1"
+		 default_values="1">
+		 <BooleanDomain name="bool"/>
+       </IntVectorProperty>
 	   <DoubleVectorProperty
          name="InputMinThreshold"
          command="GetInputMinThreshold"

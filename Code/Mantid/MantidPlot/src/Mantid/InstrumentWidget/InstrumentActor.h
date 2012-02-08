@@ -138,7 +138,12 @@ protected:
   double m_BinMinValue, m_BinMaxValue;
   bool m_autoscaling;
   boost::shared_ptr<const std::vector<boost::shared_ptr<const Mantid::Geometry::IObjComponent> > > m_plottables;
-  boost::scoped_ptr<const Mantid::detid2index_map> m_id2wi_map;
+
+  /// Vector where INDEX = (detector id + m_id2wi_offset); VALUE = workspace index.
+  std::vector<size_t> m_id2wi_vector;
+
+  /// Offset into m_id2wi_map above.
+  Mantid::detid_t m_id2wi_offset;
 
   /// All det ids in the instrument in order of pickIDs, populated by Obj..Actor constructors
   mutable std::vector<Mantid::detid_t> m_detIDs;

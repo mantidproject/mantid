@@ -82,7 +82,8 @@ m_sampleActor(NULL)
   setIntegrationRange(m_WkspBinMin,m_WkspBinMax);
   blockSignals(false);
 
-  m_id2wi_map.reset(m_workspace->getDetectorIDToWorkspaceIndexMap(false));
+  /// Cache a map (actually a vector) to workspace indexes.
+  m_workspace->getDetectorIDToWorkspaceIndexVector(m_id2wi_vector, m_id2wi_offset, false);
 
   // If the instrument is empty, maybe only having the sample and source
   if (getInstrument()->nelements() < 3)
@@ -169,12 +170,10 @@ IDetector_const_sptr InstrumentActor::getDetector(size_t i) const
  */
 size_t InstrumentActor::getWorkspaceIndex(Mantid::detid_t id) const
 {
-  Mantid::detid2index_map::const_iterator it = m_id2wi_map->find(id);
-  if ( it == m_id2wi_map->end() )
-  {
+  size_t index = size_t(id + this->m_id2wi_offset);
+  if (index > m_id2wi_vector.size())
     throw NotFoundError("No workspace index for detector",id);
-  }
-  return it->second;
+  return m_id2wi_vector[index];
 }
 
 void InstrumentActor::setIntegrationRange(const double& xmin,const double& xmax)
@@ -259,12 +258,6 @@ void InstrumentActor::resetColors()
     double integratedValue = m_specIntegrs[wi];
     try
     {
-//      // FIXME: This getdetector call is very slow.
-//      Mantid::Geometry::IDetector_const_sptr det = m_workspace->getDetector(wi);
-//      // FIXME: This get on parameters is PARALLEL_CRITICAL, which kills the parallel loop.
-//      boost::shared_ptr<Mantid::Geometry::Parameter> maskedParam = m_workspace->instrumentParameters().get(det.get(),"masked");
-//      bool masked = bool(maskedParam);
-
       // Find if the detector is masked
       const std::set<detid_t>& dets = m_workspace->getSpectrum(wi)->getDetectorIDs();
       bool masked = inst->isDetectorMasked(dets);

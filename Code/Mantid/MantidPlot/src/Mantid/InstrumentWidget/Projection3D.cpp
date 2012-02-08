@@ -46,18 +46,20 @@ Projection3D::Projection3D(const InstrumentActor* rootActor,int winWidth,int win
 {
 
   Instrument_const_sptr instr = rootActor->getInstrument();
-  std::vector<IComponent_const_sptr> allComponents;
-  instr->getChildren(allComponents,true);
-  std::vector<ComponentID> nonDetectors;
-  std::vector<IComponent_const_sptr>::const_iterator it = allComponents.begin();
-  for(; it != allComponents.end(); ++it)
-  {
-    IDetector_const_sptr det = boost::dynamic_pointer_cast<const IDetector>(*it);
-    if (!det)
-    {
-      nonDetectors.push_back((*it)->getComponentID());
-    }
-  }
+
+  // Janik Zikovsky Feb 7, 2012: The following lines do nothing and are very slow. Why are they here? Commented them out.
+//  std::vector<IComponent_const_sptr> allComponents;
+//  instr->getChildren(allComponents,true);
+//  std::vector<ComponentID> nonDetectors;
+//  std::vector<IComponent_const_sptr>::const_iterator it = allComponents.begin();
+//  for(; it != allComponents.end(); ++it)
+//  {
+//    IDetector_const_sptr det = boost::dynamic_pointer_cast<const IDetector>(*it);
+//    if (!det)
+//    {
+//      nonDetectors.push_back((*it)->getComponentID());
+//    }
+//  }
 
   m_viewport->resize(winWidth,winHeight);
   V3D minBounds,maxBounds;

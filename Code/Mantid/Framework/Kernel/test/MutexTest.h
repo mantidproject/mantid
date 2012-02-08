@@ -31,6 +31,7 @@ void reader()
   for (size_t i=0; i<shared_data.size(); i++)
   {
     double val = shared_data[i];
+    UNUSED_ARG(val)
   }
 //  std::cout << "Read finished" << std::endl;
 }

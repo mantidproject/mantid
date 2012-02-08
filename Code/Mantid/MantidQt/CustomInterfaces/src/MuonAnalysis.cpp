@@ -1630,6 +1630,7 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     {
       Poco::File l_path( m_previousFilenames[0].toStdString() );
       workspaceGroupName = Poco::Path(l_path.path()).getFileName();
+      changeCurrentRun(workspaceGroupName);
     }
     else
       workspaceGroupName = getRangedName();
@@ -1640,10 +1641,7 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     
     QString wsGroupName(workspaceGroupName.c_str());
 
-    if (wsGroupName.contains("_"))
-    {
-      wsGroupName.replace(wsGroupName.find("_"), 1, "-");
-    }
+    wsGroupName = wsGroupName.toUpper();
 
     QString cropWSfirstPart = wsGroupName + "; Group="
       + groupName + "; " + plotTypeTitle + "";
@@ -1803,6 +1801,7 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     {
       Poco::File l_path( m_previousFilenames[0].toStdString() );
       workspaceGroupName = Poco::Path(l_path.path()).getFileName();
+      changeCurrentRun(workspaceGroupName);
     }
     else
       workspaceGroupName = getRangedName();
@@ -1813,10 +1812,7 @@ void MuonAnalysis::plotPair(const std::string& plotType)
 
     QString wsGroupName(workspaceGroupName.c_str());
 
-    if (wsGroupName.contains("_"))
-    {
-      wsGroupName.replace(wsGroupName.find("_"), 1, "-");
-    }
+    wsGroupName = wsGroupName.toUpper();
 
     QString cropWSfirstPart = wsGroupName + "; Group=" + pairName + "; " + plotTypeTitle + "";
     
@@ -2115,6 +2111,43 @@ std::vector<int> MuonAnalysis::spectrumIDs(const std::string& str) const
     }
   }
   return retVal;
+}
+
+
+/*
+* Change the workspace group name to the instrument and run number if load current run was pressed.
+*
+* @params workspaceGroupName :: The name of the group that needs to be changed or is already in correct format.
+*/
+void MuonAnalysis::changeCurrentRun(std::string & workspaceGroupName)
+{
+  bool isAuto(false);
+
+  for (size_t i=0; i<workspaceGroupName.size(); ++i)
+  {
+    if (workspaceGroupName[i] == '_')
+    {
+      isAuto = true;
+      break;
+    }
+  }
+
+  if (isAuto)
+  {
+    Workspace_sptr workspace_ptr = AnalysisDataService::Instance().retrieve(m_workspace_name);
+    MatrixWorkspace_sptr matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
+    const Run& runDetails = matrix_workspace->run();
+    
+    std::string runNumber = runDetails.getProperty("run_number")->value();
+    QString instname = m_uiForm.instrSelector->currentText().toUpper();
+
+    for (size_t i=runNumber.size(); i<8; ++i)
+    {
+      runNumber = '0' + runNumber;
+    }
+
+    workspaceGroupName = instname.toStdString() + runNumber;
+  }
 }
 
 

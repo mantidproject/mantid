@@ -572,6 +572,20 @@ public:
     TSM_ASSERT("If any detector is not masked, return false", !inst->isDetectorMasked(dets) );
   }
 
+  void test_getDetectorIDToWorkspaceIndexVector()
+  {
+    MatrixWorkspace * ws = makeWorkspaceWithDetectors(100, 10);
+    std::vector<size_t> out;
+    detid_t offset = -1234;
+    TS_ASSERT_THROWS_NOTHING( ws->getDetectorIDToWorkspaceIndexVector(out, offset, false) );
+    TS_ASSERT_EQUALS( offset, 0);
+    TS_ASSERT_EQUALS( out.size(), 100);
+    TS_ASSERT_EQUALS( out[0], 0);
+    TS_ASSERT_EQUALS( out[1], 1);
+    TS_ASSERT_EQUALS( out[99], 99);
+
+  }
+
 
 
 private:
