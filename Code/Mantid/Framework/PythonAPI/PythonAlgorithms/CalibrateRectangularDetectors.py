@@ -420,6 +420,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             detectors = self.getProperty("DetectorsPeaks").strip().split(',')
             if detectors[0]:
                 self._lastpixel = int(detectors[0])
+                self._lastpixel3 = self._lastpixel
             if len(detectors) >= 2:
                 self._lastpixel2 = self._lastpixel+int(detectors[1])
                 self._lastpixel3 = self._lastpixel2
