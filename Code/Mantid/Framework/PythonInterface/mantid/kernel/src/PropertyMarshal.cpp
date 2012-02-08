@@ -2,7 +2,7 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/PropertyMarshal.h"
-#include "MantidPythonInterface/kernel/PropertyHandler.h"
+#include "MantidPythonInterface/kernel/PythonTypeHandler.h"
 #include "MantidPythonInterface/kernel/TypeRegistry.h"
 
 #include "MantidAPI/MatrixWorkspace.h"

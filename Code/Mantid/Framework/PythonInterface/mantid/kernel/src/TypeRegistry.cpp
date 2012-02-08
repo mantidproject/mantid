@@ -2,7 +2,7 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/TypeRegistry.h"
-#include "MantidPythonInterface/kernel/PropertyHandler.h"
+#include "MantidPythonInterface/kernel/PythonTypeHandler.h"
 #include <map>
 
 namespace Mantid
