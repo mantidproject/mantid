@@ -1279,7 +1279,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
       ") H = " << bestheight << std::endl;
 
 
-  g_log.notice() << "Chi2   Combine = " << fcost << " vs.  Background = " << bkgdchi2 << " + Gaussian = " << mincost << std::endl;
+  g_log.debug() << "Chi2   Combine = " << fcost << " vs.  Background = " << bkgdchi2 << " + Gaussian = " << mincost << std::endl;
 
   return;
 
