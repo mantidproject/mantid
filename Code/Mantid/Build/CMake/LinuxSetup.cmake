@@ -105,7 +105,7 @@ file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_empty_install.sh "#!/bin/sh\
                                                              "  rmdir --ignore-fail-on-non-empty -p $RPM_INSTALL_PREFIX0\n"
                                                              "else\n"
                                                              "    echo Install prefix does not contain the word mantid. Empty directories NOT removed.\n"
-                                                             "    exit(1)\n"
+                                                             "    exit 1\n"
                                                              "fi\n"
 )
 
