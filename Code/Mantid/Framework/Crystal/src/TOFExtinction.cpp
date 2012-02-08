@@ -242,12 +242,9 @@ namespace Crystal
   }
   double TOFExtinction::getEgLaue(double Eg, double twoth, double wl)
   {
-    UNUSED_ARG(wl)
-    UNUSED_ARG(twoth)
         // Tomiyoshi, Yamada and Watanabe
-        //double EgLaue = Eg*std::tan(twoth/2.0)/wl;
-        // Ask Xiaoping if this should be EqLaue
-        return Eg;
+        double EgLaue = Eg*std::tan(twoth/2.0)/wl;
+        return EgLaue;
   }
   double TOFExtinction::getXqt(double Eg, double cellV, double wl, double twoth, double tbar, double fsq)
   {
