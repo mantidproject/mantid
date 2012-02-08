@@ -301,16 +301,19 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget,bool picking)const
   {
     const UnwrappedDetector& udet = m_unwrappedDetectors[i];
 
-    if (!udet.detector || !m_viewRect.contains(udet.u,udet.v)) continue;
-
-    setColor(int(i),picking);
+    if (!udet.detector) continue;
 
     int iw = int(udet.width / dw);
     int ih = int(udet.height / dh);
+    double w = (iw == 0)?  dw : udet.width/2;
+    double h = (ih == 0)?  dh : udet.height/2;
+
+    if (!(m_viewRect.contains(udet.u-w, udet.v-h) || m_viewRect.contains(udet.u+w, udet.v+h))) continue;
+
+    setColor(int(i),picking);
+
     if (iw < 6 || ih < 6)
     {
-      double w = (iw == 0)?  dw : udet.width/2;
-      double h = (ih == 0)?  dh : udet.height/2;
       glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
       glRectd(udet.u-w,udet.v-h,udet.u+w,udet.v+h);
       glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
@@ -667,9 +670,8 @@ void UnwrappedSurface::changeColorMap()
   {
     UnwrappedDetector& udet = m_unwrappedDetectors[i];
     if (! udet.detector ) continue;
-    const boost::shared_ptr<const Mantid::Geometry::IDetector> det = udet.detector;
     unsigned char color[3];
-    m_instrActor->getColor(det->getID()).getUB3(&color[0]);
+    m_instrActor->getColor(udet.detector->getID()).getUB3(&color[0]);
     udet.color[0] = color[0];
     udet.color[1] = color[1];
     udet.color[2] = color[2];
