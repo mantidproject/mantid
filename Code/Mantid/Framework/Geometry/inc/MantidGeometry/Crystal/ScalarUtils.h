@@ -55,7 +55,10 @@ class MANTID_GEOMETRY_DLL ScalarUtils
   /// Get list of all possible conventional cells for UB, regardless of errors,
   /// using this UB, and three related "almost Niggli" cells obtained by 
   /// reflecting pairs of sides a, b, c.
-  static std::vector<ConventionalCell> GetCells(const Kernel::DblMatrix  & UB);  
+  static std::vector<ConventionalCell> GetCells(
+                                        const Kernel::DblMatrix  & UB,
+                                              bool                 best_only );
+  
   /// Get list of conventional cells for UB with specified type and centering,
   /// using this UB, and three related "almost Niggli" cells obtained by 
   /// reflecting pairs of sides a, b, c.
