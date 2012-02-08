@@ -27,14 +27,14 @@ namespace Mantid
 {
   namespace PythonInterface
   {
-    namespace PropertyMarshal
+    namespace TypeRegistry
     {
       /**
        * A property handler that deals with translation of multi-value
        * Python types, i.e. python arrays etc to/from Mantid algorithm properties
        * It does not handle Numpy arrays, @see NumpyTypeHandler
        */
-      struct DLLExport SequenceTypeHandler : PropertyHandler
+      struct DLLExport SequenceTypeHandler : PythonTypeHandler
       {
         /// Call to set a named property where the value is some container type
         virtual void set(Kernel::IPropertyManager* alg, const std::string &name, boost::python::object value);

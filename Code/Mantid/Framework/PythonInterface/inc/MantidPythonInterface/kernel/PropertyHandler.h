@@ -1,5 +1,5 @@
-#ifndef MANTID_PYTHONINTERFACE_PROPERTYHANDLER_H_
-#define MANTID_PYTHONINTERFACE_PROPERTYHANDLER_H_
+#ifndef MANTID_PYTHONINTERFACE_PYTHONTYPEHANDLER_H_
+#define MANTID_PYTHONINTERFACE_PYTHONTYPEHANDLER_H_
 /**
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -22,9 +22,7 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #include "MantidKernel/System.h"
-
 #include <boost/python/object.hpp>
-
 #include <string>
 
 namespace Mantid
@@ -36,17 +34,17 @@ namespace Mantid
   }
   namespace PythonInterface
   {
-      namespace PropertyMarshal
+      namespace TypeRegistry
       {
       /**
        * A non-template base class that can be stored in a map so that
        * its virtual functions are overridden in template derived classes
        * that can extract the correct type from the Python object
        */
-      struct DLLExport PropertyHandler
+      struct DLLExport PythonTypeHandler
       {
         /// Virtual Destructor
-        virtual ~PropertyHandler() {};
+        virtual ~PythonTypeHandler() {};
         /// Set function to handle Python -> C++ calls
         virtual void set(Kernel::IPropertyManager* alg, const std::string &name, boost::python::object value) = 0;
         /// Is the given object an instance the handler's type
@@ -56,4 +54,4 @@ namespace Mantid
   }
 }
 
-#endif /* MANTID_PYTHONINTERFACE_PROPERTYHANDLER_H_ */
+#endif /* MANTID_PYTHONINTERFACE_PYTHONTYPEHANDLER_H_ */
