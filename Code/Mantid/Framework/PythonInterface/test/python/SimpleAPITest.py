@@ -125,6 +125,18 @@ If false, then the workspace gets converted to a Workspace2D histogram.
             if msg != "Can only display properties dialog in gui mode":
                 self.fail("Dialog function raised the correct exception type but the message was wrong")
                 
+    def test_call_inside_function_uses_object_name_not_variable_name(self):
+        def convert(workspace):
+            # Should replace the input workspace
+            workspace = simpleapi.ConvertUnits(workspace, Target='Energy')
+            return workspace
+        
+        raw = simpleapi.Load('IRS21360.raw',SpectrumMax=1)
+        raw = convert(raw)
+        # If this fails then the function above chose the name of the variabe
+        # over the actual object name
+        self.assertTrue('workspace' not in mtd)
+        
 
 if __name__ == '__main__':
     unittest.main()
