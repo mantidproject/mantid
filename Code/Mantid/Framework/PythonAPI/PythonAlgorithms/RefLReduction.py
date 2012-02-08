@@ -119,7 +119,7 @@ class RefLReduction(PythonAlgorithm):
         Rebin(InputWorkspace=ws_event_data, OutputWorkspace=ws_histo_data, Params=[TOFrange[0], TOFsteps, TOFrange[1]])
         
         # Keep only range of TOF of interest
-        #CropWorkspace(ws_histo_data,ws_histo_data,XMin=TOFrange[0], XMax=TOFrange[1])
+        CropWorkspace(ws_histo_data,ws_histo_data,XMin=TOFrange[0], XMax=TOFrange[1])
 
         # Normalized by Current (proton charge)
         NormaliseByCurrent(InputWorkspace=ws_histo_data, OutputWorkspace=ws_histo_data)
@@ -219,22 +219,43 @@ class RefLReduction(PythonAlgorithm):
             ConvertToHistogram(InputWorkspace=ws_transposed,
                                OutputWorkspace=ws_transposed)
 
+            ws_transposed_1 = ws_transposed + '_1'
+            ws_transposed_2 = ws_transposed + '_2'
             FlatBackground(InputWorkspace=ws_transposed,
-                           OutputWorkspace=ws_transposed,
+                           OutputWorkspace=ws_transposed_1,
                            StartX=BackfromYpixel,
                            Mode='Mean',
                            EndX=data_peak[0],
                            OutputMode="Return Background")
 
-            ws_data_bck = "__DataBckWks"
-            Transpose(InputWorkspace=ws_transposed,
-                      OutputWorkspace=ws_data_bck)
+            FlatBackground(InputWorkspace=ws_transposed,
+                           OutputWorkspace=ws_transposed_2,
+                           StartX=data_peak[1],
+                           Mode='Mean',
+                           EndX=BacktoYpixel,
+                           OutputMode="Return Background")
 
-            ConvertToHistogram(ws_data_bck, OutputWorkspace=ws_data_bck)
-            RebinToWorkspace(WorkspaceToRebin=ws_data_bck, 
+            ws_data_bck = "__DataBckWks"
+            ws_data_bck_1 = ws_data_bck + "_1"
+            Transpose(InputWorkspace=ws_transposed,
+                      OutputWorkspace=ws_data_bck_1)
+            ws_data_bck_2 = ws_data_bck + "_2"
+            Transpose(InputWorkspace=ws_transposed,
+                      OutputWorkspace=ws_data_bck_2)
+
+            ConvertToHistogram(ws_data_bck_1, OutputWorkspace=ws_data_bck_1)
+            ConvertToHistogram(ws_data_bck_2, OutputWorkspace=ws_data_bck_2)
+
+            RebinToWorkspace(WorkspaceToRebin=ws_data_bck_1, 
                              WorkspaceToMatch=ws_integrated_data, 
-                             OutputWorkspace=ws_data_bck)
+                             OutputWorkspace=ws_data_bck_1)
                 
+            RebinToWorkspace(WorkspaceToRebin=ws_data_bck_2, 
+                             WorkspaceToMatch=ws_integrated_data, 
+                             OutputWorkspace=ws_data_bck_2)
+
+            WeightedMean(ws_data_bck_1, ws_data_bck_2, ws_data_bck)
+
             Minus(ws_integrated_data, ws_data_bck, OutputWorkspace=ws_data)
             
             # Clean up intermediary workspaces
@@ -270,7 +291,7 @@ class RefLReduction(PythonAlgorithm):
         Rebin(InputWorkspace=ws_norm_event_data, OutputWorkspace=ws_norm_histo_data, Params=[TOFrange[0], TOFsteps, TOFrange[1]])
     
         # Keep only range of TOF of interest
-        #CropWorkspace(ws_norm_histo_data, ws_norm_histo_data, XMin=TOFrange[0], XMax=TOFrange[1])
+        CropWorkspace(ws_norm_histo_data, ws_norm_histo_data, XMin=TOFrange[0], XMax=TOFrange[1])
     
         # Normalized by Current (proton charge)
         NormaliseByCurrent(InputWorkspace=ws_norm_histo_data, OutputWorkspace=ws_norm_histo_data)
@@ -295,40 +316,70 @@ class RefLReduction(PythonAlgorithm):
                                               theta=theta,
                                               geo_correction=False)
 
-        Transpose(InputWorkspace=ws_integrated_data,
-                  OutputWorkspace=ws_transposed)
-        
-        ConvertToHistogram(InputWorkspace=ws_transposed,
-                           OutputWorkspace=ws_transposed)
-        
+        ws_data_bck = "__NormBckWks"
         if subtract_norm_bck:
+            Transpose(InputWorkspace=ws_integrated_data,
+                      OutputWorkspace=ws_transposed)
+        
+            ConvertToHistogram(InputWorkspace=ws_transposed,
+                               OutputWorkspace=ws_transposed)
+    
+            BackfromYpixel = norm_back[0]
+            BacktoYpixel = norm_back[1]
+
             FlatBackground(InputWorkspace=ws_transposed,
-                           OutputWorkspace=ws_transposed,
+                           OutputWorkspace=ws_transposed_1,
                            StartX=BackfromYpixel,
                            Mode='Mean',
                            EndX=norm_peak[0],
                            OutputMode="Return Background")
     
-        ws_data_bck = "__NormBckWks"
-        Transpose(InputWorkspace=ws_transposed,
-                  OutputWorkspace=ws_data_bck)
+            Transpose(InputWorkspace=ws_transposed,
+                      OutputWorkspace=ws_data_bck_1)
+
+            FlatBackground(InputWorkspace=ws_transposed,
+                           OutputWorkspace=ws_transposed_2,
+                           StartX=norm_peak[1],
+                           Mode='Mean',
+                           EndX=BacktoYpixel,
+                           OutputMode="Return Background")
+
+            Transpose(InputWorkspace=ws_transposed,
+                      OutputWorkspace=ws_data_bck_2)
         
-        ConvertToHistogram(ws_data_bck, OutputWorkspace=ws_data_bck)
-        RebinToWorkspace(WorkspaceToRebin=ws_data_bck, WorkspaceToMatch=ws_integrated_data, OutputWorkspace=ws_data_bck)
+            ConvertToHistogram(ws_data_bck_1, OutputWorkspace=ws_data_bck_1)
+            ConvertToHistogram(ws_data_bck_2, OutputWorkspace=ws_data_bck_2)
+
+            RebinToWorkspace(WorkspaceToRebin=ws_data_bck_1, 
+                             WorkspaceToMatch=ws_integrated_data, 
+                             OutputWorkspace=ws_data_bck_1)
        
-        ws_norm = "__NormWks"
-        Minus(ws_integrated_data, ws_data_bck, OutputWorkspace=ws_norm)
+            RebinToWorkspace(WorkspaceToRebin=ws_data_bck_2, 
+                             WorkspaceToMatch=ws_integrated_data, 
+                             OutputWorkspace=ws_data_bck_2)
 
-        # Clean up intermediary workspaces
-        mtd.deleteWorkspace(ws_data_bck)
-        mtd.deleteWorkspace(ws_integrated_data)
-        mtd.deleteWorkspace(ws_transposed)
+            WeightedMean(ws_data_bck_1, ws_data_bck_2, ws_data_bck)
 
-        ws_norm_rebinned = "__NormRebinnedWks"
-        RebinToWorkspace(WorkspaceToRebin=ws_norm, 
-                         WorkspaceToMatch=ws_data,
-                         OutputWorkspace=ws_norm_rebinned)
+            ws_norm = "__NormWks"
+            Minus(ws_integrated_data, ws_data_bck, OutputWorkspace=ws_norm)
+
+            # Clean up intermediary workspaces
+            mtd.deleteWorkspace(ws_data_bck)
+            mtd.deleteWorkspace(ws_integrated_data)
+            mtd.deleteWorkspace(ws_transposed)
+
+            ws_norm_rebinned = "__NormRebinnedWks"
+            RebinToWorkspace(WorkspaceToRebin=ws_norm, 
+                             WorkspaceToMatch=ws_data,
+                             OutputWorkspace=ws_norm_rebinned)
    
+#        else:
+#            
+#            ws_norm_rebinned = "__NormRebinnedWks"
+#            RebinToWorkspace(WorkspaceToRebin=ws_norm, 
+#                             WorkspaceToMatch=ws_data,
+#                             OutputWorkspace=ws_norm_rebinned)
+            
         #perform the integration myself
         mt_temp = mtd[ws_norm_rebinned]
         x_axis = mt_temp.readX(0)[:]   #[9100,9300,.... 23500] (73,1)
