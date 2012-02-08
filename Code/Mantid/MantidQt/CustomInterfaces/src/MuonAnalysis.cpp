@@ -2123,7 +2123,7 @@ void MuonAnalysis::changeCurrentRun(std::string & workspaceGroupName)
 {
   bool isAuto(false);
 
-  for (int i=0; i<workspaceGroupName.size(); ++i)
+  for (size_t i=0; i<workspaceGroupName.size(); ++i)
   {
     if (workspaceGroupName[i] == '_')
     {
@@ -2141,7 +2141,7 @@ void MuonAnalysis::changeCurrentRun(std::string & workspaceGroupName)
     std::string runNumber = runDetails.getProperty("run_number")->value();
     QString instname = m_uiForm.instrSelector->currentText().toUpper();
 
-    for (int i=runNumber.size(); i<8; ++i)
+    for (size_t i=runNumber.size(); i<8; ++i)
     {
       runNumber = '0' + runNumber;
     }
