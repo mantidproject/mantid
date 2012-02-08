@@ -121,7 +121,7 @@ namespace Mantid
       Progress prog(this, 0, 1.0, nspec);
       // cppcheck-suppress syntaxError
       PRAGMA_OMP(parallel for schedule(dynamic, 1) )
-      for (int wi=0;wi<6000;++wi)
+      for (int wi=0;wi<nspec;++wi)
       {
         PARALLEL_START_INTERUPT_REGION
         double offset = 0.0;
