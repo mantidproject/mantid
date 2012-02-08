@@ -91,21 +91,17 @@ public:
 
   /// Number of active (in terms of fitting) parameters
   virtual size_t nActive()const{return m_indexMap.size();}
-  /// Returns "global" index of active parameter i
-  virtual size_t indexOfActive(size_t i)const;
   /// Returns the name of active parameter i
   virtual std::string nameOfActive(size_t i)const;
   /// Returns the name of active parameter i
   virtual std::string descriptionOfActive(size_t i)const;
 
   /// Check if a declared parameter i is active
-  virtual bool isActive(size_t i)const;
-  /// Get active index for a declared parameter i
-  virtual size_t activeIndex(size_t i)const;
+  virtual bool isFixed(size_t i)const;
   /// Removes a declared parameter i from the list of active
-  virtual void removeActive(size_t i);
+  virtual void fix(size_t i);
   /// Restores a declared parameter i to the active status
-  virtual void restoreActive(size_t i);
+  virtual void unfix(size_t i);
 
   /// Return parameter index from a parameter reference. Usefull for constraints and ties in composite functions
   virtual size_t getParameterIndex(const ParameterReference& ref)const;
@@ -149,6 +145,9 @@ protected:
 
   /// Nonvirtual member which removes all declared parameters
   void clearAllParameters();
+
+  size_t indexOfActive(size_t i)const;
+  size_t activeIndex(size_t i)const;
 
 private:
   /// The index map. m_indexMap[i] gives the total index for active parameter i

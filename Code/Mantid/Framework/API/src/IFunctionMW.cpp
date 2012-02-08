@@ -2,16 +2,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFunctionMW.h"
-#include "MantidAPI/Jacobian.h"
 #include "MantidAPI/IFunctionWithLocation.h"
-#include "MantidAPI/IConstraint.h"
-#include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/ConstraintFactory.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/Expression.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/Component.h"
@@ -33,154 +27,6 @@ namespace API
   
   Kernel::Logger& IFunctionMW::g_log = Kernel::Logger::get("IFunctionMW");
 
-  void IFunctionMW::setWorkspace(boost::shared_ptr<const Workspace> ws,bool)
-  {
-    MatrixWorkspace_const_sptr matrix = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
-    if (matrix)
-    {
-      m_workspace = boost::weak_ptr<const MatrixWorkspace>(matrix);
-    }
-    else
-    {
-      throw std::invalid_argument("Workspace has a wrong type (not a MatrixWorkspace)");
-    }
-  }
-  /** Set the workspace
-    * @param slicing :: A string identifying the data to be fitted. Format for IFunctionMW:
-    *  "WorkspaceIndex=int,StartX=double,EndX=double". StartX and EndX are optional.
-  */
-  void IFunctionMW::setSlicing(const std::string& slicing)
-  {
-    MatrixWorkspace_const_sptr mws = this->getMatrixWorkspace();
-    if (!mws) 
-    {// unset workspace
-      m_workspaceIndex = 0;
-      m_xMinIndex = 0;
-      m_xMaxIndex = 0;
-      m_dataSize = 0;
-      m_data = NULL;
-      m_weights.reset();
-      m_xValues.reset();
-      return;
-    }
-
-    try
-    {
-      size_t index = mws->getNumberHistograms();
-      double startX = 0;
-      double endX = 0;
-
-      Expression expr;
-      expr.parse(slicing);
-      if (expr.name() == ",")
-      {
-        for(size_t i = 0; i < expr.size(); ++i)
-        {
-          const Expression& e = expr[i];
-          if (e.size() == 2 && e.name() == "=")
-          {
-            if (e[0].name() == "WorkspaceIndex")
-            {
-              index = boost::lexical_cast<int>(e[1].str());
-            }
-            else if (e[0].name() == "StartX")
-            {
-              startX = boost::lexical_cast<double>(e[1].str());
-//              xMin = 0;
-            }
-            else if (e[0].name() == "EndX")
-            {
-              endX = boost::lexical_cast<double>(e[1].str());
-//              xMax = 0;
-            }
-          }
-        }
-      }
-      else if (expr.size() == 2 && expr.name() == "=" && expr[0].name() == "WorkspaceIndex")
-      {
-        index = boost::lexical_cast<int>(expr[1].name());
-      }
-
-      if (index >= mws->getNumberHistograms())
-      {
-        g_log.warning("WorkspaceIndex not set, defaulting to 0");
-        index = 0;
-      }
-      else if (index >= mws->getNumberHistograms())
-      {
-        throw std::range_error("WorkspaceIndex outside range");
-      }
-
-      setMatrixWorkspace(mws,index,startX,endX);
-      
-    }
-    catch(std::exception& e)
-    {
-      g_log.error() << "IFunctionMW::setWorkspace failed with error: " << e.what() << '\n';
-      throw;
-    }
-  }
-
-  /// Get the workspace
-  boost::shared_ptr<const API::Workspace> IFunctionMW::getWorkspace()const
-  {
-    return getMatrixWorkspace();
-  }
-
-  /// Returns the size of the fitted data (number of double values returned by the function)
-  size_t IFunctionMW::dataSize()const
-  {
-    return m_dataSize;
-  }
-
-  /// Returns a pointer to the fitted data. These data are taken from the workspace set by setWorkspace() method.
-  const double* IFunctionMW::getData()const
-  {
-    return m_data;
-  }
-
-  const double* IFunctionMW::getWeights()const
-  {
-    return &m_weights[0];
-  }
-
-  /// Function you want to fit to. 
-  /// @param out :: The buffer for writing the calculated values. Must be big enough to accept dataSize() values
-  void IFunctionMW::function(double* out)const
-  {
-    if (m_dataSize == 0) return;
-    functionMW(out,m_xValues.get(),m_dataSize);
-
-  }
-
-  /// Derivatives of function with respect to active parameters
-  void IFunctionMW::functionDeriv(Jacobian* out)
-  {
-    if (out == NULL) 
-    {
-      functionDerivMW(out,m_xValues.get(),0);
-      return;
-    }
-    if (m_dataSize == 0) return;
-    functionDerivMW(out,m_xValues.get(),m_dataSize);
-  }
-
-
-/** Base class implementation of derivative IFunctionMW throws error. This is to check if such a function is provided
-    by derivative class. In the derived classes this method must return the derivatives of the resuduals function
-    (defined in void Fit1D::function(const double*, double*, const double*, const double*, const double*, const int&))
-    with respect to the fit parameters. If this method is not reimplemented the derivative free simplex minimization
-    algorithm is used.
- * @param out :: Derivatives
- * @param xValues :: X values for data points
- * @param nData :: Number of data points
- */
-void IFunctionMW::functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
-{
-  UNUSED_ARG(out); UNUSED_ARG(xValues); UNUSED_ARG(nData);
-  throw Kernel::Exception::NotImplementedError("No derivative IFunctionMW provided");
-}
-
 /** Initialize the function providing it the workspace
  * @param workspace :: The workspace to set
  * @param wi :: The workspace index
@@ -189,100 +35,97 @@ void IFunctionMW::functionDerivMW(Jacobian* out, const double* xValues, const si
  */
 void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,size_t wi,double startX, double endX)
 {
-  m_workspaceIndex = wi;
-
-  m_workspace = boost::weak_ptr<const MatrixWorkspace>(workspace);
   if (!workspace) return; // unset the workspace
 
-  size_t n = workspace->blocksize(); // length of each Y vector
-  size_t xMin = 0;
-  size_t xMax = 0;
+  //size_t n = workspace->blocksize(); // length of each Y vector
+  //size_t xMin = 0;
+  //size_t xMax = 0;
 
-  if (wi >= workspace->getNumberHistograms())
-  {
-    throw std::range_error("Workspace index out of range");
-  }
+  //if (wi >= workspace->getNumberHistograms())
+  //{
+  //  throw std::range_error("Workspace index out of range");
+  //}
 
-  const MantidVec& x = workspace->readX(wi);
-  const MantidVec& y = workspace->readY(wi);
-  const MantidVec& e = workspace->readE(wi);
-  bool isHist = x.size() > y.size();
+  //const MantidVec& x = workspace->readX(wi);
+  //const MantidVec& y = workspace->readY(wi);
+  //const MantidVec& e = workspace->readE(wi);
+  //bool isHist = x.size() > y.size();
 
-  if (startX >= endX)
-  {
-    xMin = 0;
-    xMax = n - 1;
-  }
-  else
-  {
-    size_t m = isHist? n - 1 : n;
-    for(; xMax < m; ++xMax)
-    {
-      if (x[xMax] > endX)
-      {
-        if (xMax > 0) xMax--;
-        break;
-      }
-      if (x[xMax] <= startX)
-      {
-        xMin = xMax;
-      }
-    }
-  }
+  //if (startX >= endX)
+  //{
+  //  xMin = 0;
+  //  xMax = n - 1;
+  //}
+  //else
+  //{
+  //  size_t m = isHist? n - 1 : n;
+  //  for(; xMax < m; ++xMax)
+  //  {
+  //    if (x[xMax] > endX)
+  //    {
+  //      if (xMax > 0) xMax--;
+  //      break;
+  //    }
+  //    if (x[xMax] <= startX)
+  //    {
+  //      xMin = xMax;
+  //    }
+  //  }
+  //}
 
-  if (xMin > xMax)
-  {
-    std::swap(xMin,xMax);
-  }
+  //if (xMin > xMax)
+  //{
+  //  std::swap(xMin,xMax);
+  //}
 
-  if (xMax >= n) xMax = n - 1;
+  //if (xMax >= n) xMax = n - 1;
 
-  m_xMinIndex = xMin;
-  m_xMaxIndex = xMax;
+  //m_xMinIndex = xMin;
+  //m_xMaxIndex = xMax;
 
-  m_dataSize = xMax - xMin + 1;
-  m_data = &y[xMin];
-  m_xValues.reset(new double[m_dataSize]);
-  m_weights.reset(new double[m_dataSize]);
+  //m_dataSize = xMax - xMin + 1;
+  //m_data = &y[xMin];
+  //m_xValues.reset(new double[m_dataSize]);
+  //m_weights.reset(new double[m_dataSize]);
 
-  bool negativeError = false;
+  //bool negativeError = false;
 
-  for (size_t i = 0; i < m_dataSize; ++i)
-  {
-    if (isHist)
-    {
-      m_xValues[i] = 0.5*(x[xMin + i] + x[xMin + i + 1]);
-    }
-    else
-    {
-      m_xValues[i] = x[xMin + i];
-    }
-    if (e[xMin + i] == 0.0)
-    {
-      m_weights[i] = 1.0;
+  //for (size_t i = 0; i < m_dataSize; ++i)
+  //{
+  //  if (isHist)
+  //  {
+  //    m_xValues[i] = 0.5*(x[xMin + i] + x[xMin + i + 1]);
+  //  }
+  //  else
+  //  {
+  //    m_xValues[i] = x[xMin + i];
+  //  }
+  //  if (e[xMin + i] == 0.0)
+  //  {
+  //    m_weights[i] = 1.0;
 
-    }
-    else if(e[xMin + i] < 0.0)
-    {
-      negativeError = true;
-      m_weights[i] = 1./fabs(e[xMin + i]);   //1.0;
-    }
-    else
-      m_weights[i] = 1./e[xMin + i];
-  }
+  //  }
+  //  else if(e[xMin + i] < 0.0)
+  //  {
+  //    negativeError = true;
+  //    m_weights[i] = 1./fabs(e[xMin + i]);   //1.0;
+  //  }
+  //  else
+  //    m_weights[i] = 1./e[xMin + i];
+  //}
 
-  if ( negativeError )
-    g_log.warning() << "Negative error values found! These are set to absolute value\n";
+  //if ( negativeError )
+  //  g_log.warning() << "Negative error values found! These are set to absolute value\n";
 
-  if (workspace->hasMaskedBins(wi))
-  {
-    const MatrixWorkspace::MaskList& mlist = workspace->maskedBins(wi);
-    MatrixWorkspace::MaskList::const_iterator it = mlist.begin();
-    for(;it!=mlist.end();++it)
-    {
-      m_weights[it->first - xMin] = 0.;
-    }
-  }
+  //if (workspace->hasMaskedBins(wi))
+  //{
+  //  const MatrixWorkspace::MaskList& mlist = workspace->maskedBins(wi);
+  //  MatrixWorkspace::MaskList::const_iterator it = mlist.begin();
+  //  for(;it!=mlist.end();++it)
+  //  {
+  //    m_weights[it->first - xMin] = 0.;
+  //  }
+  //}
 
   try
   {

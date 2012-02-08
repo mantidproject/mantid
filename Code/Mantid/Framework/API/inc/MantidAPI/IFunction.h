@@ -227,7 +227,7 @@ public:
   virtual std::string asString()const;
   /// Set the workspace. Make 
   /// @param ws :: Shared pointer to a workspace
-  virtual void setWorkspace(boost::shared_ptr<const Workspace> ws) = 0;
+  virtual void setWorkspace(boost::shared_ptr<const Workspace> ws) {}
   /// Get the workspace
   //virtual boost::shared_ptr<const API::Workspace> getWorkspace()const = 0;
   /// Iinialize the function
@@ -276,26 +276,22 @@ public:
   /// Number of active (in terms of fitting) parameters
   virtual size_t nActive()const = 0;
   /// Value of i-th active parameter. Override this method to make fitted parameters different from the declared
-  virtual double activeParameter(size_t i)const;
+  virtual double activeParameter(size_t i)const = 0;
   /// Set new value of i-th active parameter. Override this method to make fitted parameters different from the declared
-  virtual void setActiveParameter(size_t i, double value);
-  /// Update parameters after a fitting iteration
-  virtual void updateActive(const double* in);
-  /// Returns "global" index of active parameter i
-  virtual size_t indexOfActive(size_t i)const = 0;
+  virtual void setActiveParameter(size_t i, double value) = 0;
   /// Returns the name of active parameter i
   virtual std::string nameOfActive(size_t i)const = 0;
   /// Returns the name of active parameter i
   virtual std::string descriptionOfActive(size_t i)const = 0;
 
   /// Check if a declared parameter i is active
-  virtual bool isActive(size_t i)const = 0;
+  virtual bool isFixed(size_t i)const = 0;
   /// Get active index for a declared parameter i
-  virtual size_t activeIndex(size_t i)const = 0;
+  //virtual size_t activeIndex(size_t i)const = 0;
   /// Removes a declared parameter i from the list of active
-  virtual void removeActive(size_t i) = 0;
+  virtual void fix(size_t i) = 0;
   /// Restores a declared parameter i to the active status
-  virtual void restoreActive(size_t i) = 0;
+  virtual void unfix(size_t i) = 0;
 
   /// Return parameter index from a parameter reference. Usefull for constraints and ties in composite functions
   virtual size_t getParameterIndex(const ParameterReference& ref)const = 0;
@@ -367,6 +363,9 @@ protected:
   virtual void init(){};
   /// Declare a new parameter
   virtual void declareParameter(const std::string& name, double initValue = 0, const std::string& description="") = 0;
+
+  //virtual size_t indexOfActive(size_t i)const = 0;
+  //virtual size_t activeIndex(size_t i)const = 0;
 
   /// Create an instance of a tie without actually tying it to anything
   virtual ParameterTie* createTie(const std::string& parName);

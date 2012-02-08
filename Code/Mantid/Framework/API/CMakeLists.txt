@@ -28,6 +28,7 @@ set ( SRC_FILES
 	src/FileProperty.cpp
 	src/FrameworkManager.cpp
 	src/FunctionDomain.cpp
+	src/FunctionDomain1D.cpp
 	src/FunctionFactory.cpp
 	src/FunctionProperty.cpp
 	src/IDataFileChecker.cpp
@@ -36,6 +37,7 @@ set ( SRC_FILES
 	src/IFitFunction.cpp
 	src/IFunction.cpp
 	src/IFunctionMD.cpp
+	src/IFunction1D.cpp
 	src/IFunctionMW.cpp
 	src/ILiveListener.cpp
 	src/IMDEventWorkspace.cpp
@@ -128,6 +130,7 @@ set ( INC_FILES
 	inc/MantidAPI/FileProperty.h
 	inc/MantidAPI/FrameworkManager.h
 	inc/MantidAPI/FunctionDomain.h
+	inc/MantidAPI/FunctionDomain1D.h
 	inc/MantidAPI/FunctionFactory.h
 	inc/MantidAPI/FunctionProperty.h
 	inc/MantidAPI/IAlgorithm.h
@@ -143,6 +146,7 @@ set ( INC_FILES
 	inc/MantidAPI/IFitFunction.h
 	inc/MantidAPI/IFunction.h
 	inc/MantidAPI/IFunctionMD.h
+	inc/MantidAPI/IFunction1D.h
 	inc/MantidAPI/IFunctionMW.h
 	inc/MantidAPI/IFunctionWithLocation.h
 	inc/MantidAPI/ILiveListener.h
@@ -230,6 +234,7 @@ set ( TEST_FILES
 	test/FunctionPropertyTest.h
 	test/FunctionTest.h
 	test/IEventListTest.h
+	test/IFunction1DTest.h
 	test/IFunctionMDTest.h
 	test/ILiveListenerTest.h
 	test/IMDWorkspaceTest.h

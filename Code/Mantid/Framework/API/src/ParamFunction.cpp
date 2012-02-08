@@ -231,19 +231,6 @@ void ParamFunction::declareParameter(const std::string& name,double initValue, c
 }
 
 /**
- * Returns the "global" index of an active parameter.
- * @param i :: The index of an active parameter
- * @return the global index of the requested parameter
- */
-size_t ParamFunction::indexOfActive(size_t i)const
-{
-  if (i >= nActive())
-    throw std::out_of_range("ParamFunction parameter index out of range.");
-
-  return m_indexMap[i];
-}
-
-/**
  * Returns the name of an active parameter.
  * @param i :: The index of an active parameter
  * @return the name of the active parameter
@@ -264,21 +251,21 @@ std::string ParamFunction::descriptionOfActive(size_t i)const
 }
 
 /**
- * query if the parameter is active
+ * query if the parameter is fixed
  * @param i :: The index of a declared parameter
  * @return true if parameter i is active
  */
-bool ParamFunction::isActive(size_t i)const
+bool ParamFunction::isFixed(size_t i)const
 {
   return std::find(m_indexMap.begin(),m_indexMap.end(),i) != m_indexMap.end();
 }
 
 /** This method doesn't create a tie
- * @param i :: A declared parameter index to be removed from active
+ * @param i :: A declared parameter index to be fixed
  */
-void ParamFunction::removeActive(size_t i)
+void ParamFunction::fix(size_t i)
 {
-  if (!isActive(i)) return;
+  if (isFixed(i)) return;
   if (i >= nParams())
     throw std::out_of_range("ParamFunction parameter index out of range.");
 
@@ -301,7 +288,7 @@ void ParamFunction::removeActive(size_t i)
 /** Makes a parameter active again. It doesn't change the parameter's tie.
  * @param i :: A declared parameter index to be restored to active
  */
-void ParamFunction::restoreActive(size_t i)
+void ParamFunction::unfix(size_t i)
 {
   if (i >= nParams())
     throw std::out_of_range("ParamFunction parameter index out of range.");
@@ -317,21 +304,6 @@ void ParamFunction::restoreActive(size_t i)
   {
     m_indexMap.push_back(i);
   }
-}
-
-/**
- * @param i :: The index of a declared parameter
- * @return The index of declared parameter i in the list of active parameters or throws std::invalid_argument
- *         if the parameter is tied.
- */
-size_t ParamFunction::activeIndex(size_t i)const
-{
-  std::vector<size_t >::const_iterator it = std::find(m_indexMap.begin(),m_indexMap.end(),i);
-  if (it == m_indexMap.end())
-  {
-    throw std::invalid_argument("Active parameter " + boost::lexical_cast<std::string>(i) + " not found");
-  };
-  return static_cast<size_t>(it - m_indexMap.begin());
 }
 
 /**
@@ -404,7 +376,7 @@ bool ParamFunction::removeTie(size_t i)
   {
     delete *it;
     m_ties.erase(it);
-    restoreActive(i);
+    unfix(i);
     return true;
   }
   return false;
@@ -435,7 +407,7 @@ void ParamFunction::clearTies()
   for(std::vector<ParameterTie*>::iterator it = m_ties.begin();it != m_ties.end(); ++it)
   {
     size_t i = getParameterIndex(**it);
-    restoreActive(i);
+    unfix(i);
     delete *it;
   }
   m_ties.clear();
@@ -589,6 +561,34 @@ IFunction* ParamFunction::getContainingFunction(const IFunction* fun)
     return this;
   }
   return NULL;
+}
+
+/**
+ * Returns the "global" index of an active parameter.
+ * @param i :: The index of an active parameter
+ * @return the global index of the requested parameter
+ */
+size_t ParamFunction::indexOfActive(size_t i)const
+{
+  if (i >= nActive())
+    throw std::out_of_range("ParamFunction parameter index out of range.");
+
+  return m_indexMap[i];
+}
+
+/**
+ * @param i :: The index of a declared parameter
+ * @return The index of declared parameter i in the list of active parameters or throws std::invalid_argument
+ *         if the parameter is tied.
+ */
+size_t ParamFunction::activeIndex(size_t i)const
+{
+  std::vector<size_t >::const_iterator it = std::find(m_indexMap.begin(),m_indexMap.end(),i);
+  if (it == m_indexMap.end())
+  {
+    throw std::invalid_argument("Active parameter " + boost::lexical_cast<std::string>(i) + " not found");
+  };
+  return static_cast<size_t>(it - m_indexMap.begin());
 }
 
 } // namespace API

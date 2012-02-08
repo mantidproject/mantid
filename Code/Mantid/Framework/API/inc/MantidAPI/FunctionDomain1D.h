@@ -1,23 +1,25 @@
-#ifndef MANTID_API_IFUNCTIONMW_H_
-#define MANTID_API_IFUNCTIONMW_H_
+#ifndef MANTID_API_FUNCTIONDOMAIN1D_H_
+#define MANTID_API_FUNCTIONDOMAIN1D_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/FunctionDomain.h"
+
+#include <vector>
 
 namespace Mantid
 {
-
 namespace API
 {
+/** Base class that represents the domain of a function.
+    A domain is a generalisation of x (argument) and y (value) arrays.
+    A domain consists at least of a list of function arguments for which a function should 
+    be evaluated and a buffer for the calculated values. If used in fitting also contains
+    the fit data and weights.
 
-/** This is an interface to a fitting function - a semi-abstarct class.
-    Functions derived from IFunctionMW can be used with the Fit algorithm.
-    IFunctionMW defines the structure of a fitting funtion.
-
-    @author Roman Tolchenov, Tessella Support Services plc
-    @date 16/10/2009
+    @author Roman Tolchenov, Tessella plc
+    @date 15/11/2011
 
     Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -39,32 +41,18 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL IFunctionMW: public virtual IFunction1D
+class MANTID_API_DLL FunctionDomain1D: public FunctionDomain
 {
 public:
-
-  /// Constructor
-  IFunctionMW():IFunction1D(){}
-
-  void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,size_t wi,double startX, double endX);
-
+  FunctionDomain1D(const std::vector<double>& xvalues);
+  /// get an x value
+  /// @param i :: Index
+  double getX(size_t i) const {return m_X.at(i);}
 protected:
-
-  /// Convert a value from one unit (inUnit) to unit defined in workspace (ws) 
-  double convertValue(double value, Kernel::Unit_sptr& inUnit, 
-                      boost::shared_ptr<const MatrixWorkspace> ws,
-                      size_t wsIndex)const;
-
-  void convertValue(std::vector<double>& values, Kernel::Unit_sptr& outUnit, 
-    boost::shared_ptr<const MatrixWorkspace> ws,
-    size_t wsIndex) const;
-
-  /// Static reference to the logger class
-  static Kernel::Logger& g_log;
-
+  std::vector<double> m_X; ///< vector of function arguments
 };
 
 } // namespace API
 } // namespace Mantid
 
-#endif /*MANTID_API_IFUNCTIONMW_H_*/
+#endif /*MANTID_API_FUNCTIONDOMAIN1D_H_*/

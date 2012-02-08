@@ -151,4 +151,14 @@ namespace API
 } // namespace API
 } // namespace Mantid
 
+/**
+ * Macro for declaring a new type of function to be used with the FunctionFactory
+ */
+#define DECLARE_FUNCTION(classname) \
+        namespace { \
+        Mantid::Kernel::RegistrationHelper register_function_##classname( \
+  ((Mantid::API::FunctionFactory::Instance().subscribe<classname>(#classname)) \
+        , 0)); \
+        }
+
 #endif /*MANTID_API_FUNCTIONFACTORY_H_*/

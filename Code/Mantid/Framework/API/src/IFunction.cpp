@@ -48,38 +48,6 @@ void IFunction::functionDeriv(FunctionDomain& domain, Jacobian& jacobian)
   throw ("No derivative IFunction provided");
 }
 
-
-
-/** Update active parameters. Ties are applied.
- *  @param in :: Pointer to an array with active parameters values. Must be at least nActive() doubles long.
- */
-void IFunction::updateActive(const double* in)
-{
-  if (in)
-    for(size_t i=0;i<nActive();i++)
-    {
-      setActiveParameter(i,in[i]);
-    }
-  applyTies();
-}
-
-/**
- * Sets active parameter i to value. Ties are not applied.
- * @param i :: The index of active parameter to set
- * @param value :: The new value for the parameter
- */
-void IFunction::setActiveParameter(size_t i,double value)
-{
-  size_t j = indexOfActive(i);
-  setParameter(j,value,false);
-}
-
-double IFunction::activeParameter(size_t i)const
-{
-  size_t j = indexOfActive(i);
-  return getParameter(j);
-}
-
 /** Create a new tie. IFunctions can have their own types of ties.
  * @param parName :: The parameter name for this tie
  * @return a new parameter tie
@@ -103,7 +71,7 @@ ParameterTie* IFunction::tie(const std::string& parName,const std::string& expr)
   size_t i = getParameterIndex(*tie);
   tie->set(expr);
   addTie(tie);
-  this->removeActive(i);
+  this->fix(i);
   return tie;
 }
 
