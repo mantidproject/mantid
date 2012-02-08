@@ -268,131 +268,135 @@ class RefLReduction(PythonAlgorithm):
             ConvertToHistogram(InputWorkspace=ws_integrated_data,
                                OutputWorkspace=ws_data)
 
+            # Work on Normalization file #########################################
+
+        s_normalization_run = str(normalization_run).strip()
+        s_normalization_run = '' #REMOVE_ME
+        if (s_normalization_run != ''):
         
-        # Work on Normalization file #########################################
-        # Find full path to event NeXus data file
-        f = FileFinder.findRuns("REF_L%d" %normalization_run)
-        if len(f)>0 and os.path.isfile(f[0]): 
-            norm_file = f[0]
-        else:
-            msg = "RefLReduction: could not find run %d\n" % run_numbers[0]
-            msg += "Add your data folder to your User Data Directories in the File menu"
-            raise RuntimeError(msg)
+            # Find full path to event NeXus data file
+            f = FileFinder.findRuns("REF_L%d" %normalization_run)
+            if len(f)>0 and os.path.isfile(f[0]): 
+                norm_file = f[0]
+            else:
+                msg = "RefLReduction: could not find run %d\n" % run_numbers[0]
+                msg += "Add your data folder to your User Data Directories in the File menu"
+                raise RuntimeError(msg)
             
-        #load normalization file
-        ws_name = "__normalization_refl%d" % run_numbers[0]
-        ws_norm_event_data = ws_name+"_evt"  
-        ws_norm_histo_data = ws_name+"_histo"  
+            #load normalization file
+            ws_name = "__normalization_refl%d" % run_numbers[0]
+            ws_norm_event_data = ws_name+"_evt"  
+            ws_norm_histo_data = ws_name+"_histo"  
 
-        if not mtd.workspaceExists(ws_norm_event_data):
-            LoadEventNexus(Filename=norm_file, OutputWorkspace=ws_norm_event_data)
+            if not mtd.workspaceExists(ws_norm_event_data):
+                LoadEventNexus(Filename=norm_file, OutputWorkspace=ws_norm_event_data)
     
-        # Rebin data
-        Rebin(InputWorkspace=ws_norm_event_data, OutputWorkspace=ws_norm_histo_data, Params=[TOFrange[0], TOFsteps, TOFrange[1]])
+            # Rebin data
+            Rebin(InputWorkspace=ws_norm_event_data, OutputWorkspace=ws_norm_histo_data, Params=[TOFrange[0], TOFsteps, TOFrange[1]])
     
-        # Keep only range of TOF of interest
-        CropWorkspace(ws_norm_histo_data, ws_norm_histo_data, XMin=TOFrange[0], XMax=TOFrange[1])
+            # Keep only range of TOF of interest
+            CropWorkspace(ws_norm_histo_data, ws_norm_histo_data, XMin=TOFrange[0], XMax=TOFrange[1])
     
-        # Normalized by Current (proton charge)
-        NormaliseByCurrent(InputWorkspace=ws_norm_histo_data, OutputWorkspace=ws_norm_histo_data)
+            # Normalized by Current (proton charge)
+            NormaliseByCurrent(InputWorkspace=ws_norm_histo_data, OutputWorkspace=ws_norm_histo_data)
     
-        ##Background subtraction
+            ##Background subtraction
 
-        #Create a new event workspace of only the range of pixel of interest 
-        #background range (along the y-axis) and of only the pixel
-        #of interest along the x-axis (to avoid the frame effect)
-        ws_integrated_data = "__IntegratedNormWks"
-        wks_utility.createIntegratedWorkspace(mtd[ws_norm_histo_data], 
-                                              ws_integrated_data,
-                                              fromXpixel=Xrange[0],
-                                              toXpixel=Xrange[1],
-                                              fromYpixel=BackfromYpixel,
-                                              toYpixel=BacktoYpixel,
-                                              maxX=maxX,
-                                              maxY=maxY,
-                                              cpix=data_cpix,
-                                              source_to_detector=dMD,
-                                              sample_to_detector=dSD,
-                                              theta=theta,
-                                              geo_correction=False)
+            #Create a new event workspace of only the range of pixel of interest 
+            #background range (along the y-axis) and of only the pixel
+            #of interest along the x-axis (to avoid the frame effect)
+            ws_integrated_data = "__IntegratedNormWks"
+            wks_utility.createIntegratedWorkspace(mtd[ws_norm_histo_data], 
+                                                  ws_integrated_data,
+                                                  fromXpixel=Xrange[0],
+                                                  toXpixel=Xrange[1],
+                                                  fromYpixel=BackfromYpixel,
+                                                  toYpixel=BacktoYpixel,
+                                                  maxX=maxX,
+                                                  maxY=maxY,
+                                                  cpix=data_cpix,
+                                                  source_to_detector=dMD,
+                                                  sample_to_detector=dSD,
+                                                  theta=theta,
+                                                  geo_correction=False)
 
-        ws_data_bck = "__NormBckWks"
-        if subtract_norm_bck:
-            Transpose(InputWorkspace=ws_integrated_data,
-                      OutputWorkspace=ws_transposed)
+            ws_data_bck = "__NormBckWks"
+            if subtract_norm_bck:
+                Transpose(InputWorkspace=ws_integrated_data,
+                          OutputWorkspace=ws_transposed)
         
-            ConvertToHistogram(InputWorkspace=ws_transposed,
-                               OutputWorkspace=ws_transposed)
+                ConvertToHistogram(InputWorkspace=ws_transposed,
+                                   OutputWorkspace=ws_transposed)
     
-            BackfromYpixel = norm_back[0]
-            BacktoYpixel = norm_back[1]
+                BackfromYpixel = norm_back[0]
+                BacktoYpixel = norm_back[1]
 
-            FlatBackground(InputWorkspace=ws_transposed,
-                           OutputWorkspace=ws_transposed_1,
-                           StartX=BackfromYpixel,
-                           Mode='Mean',
-                           EndX=norm_peak[0],
-                           OutputMode="Return Background")
+                FlatBackground(InputWorkspace=ws_transposed,
+                               OutputWorkspace=ws_transposed_1,
+                               StartX=BackfromYpixel,
+                               Mode='Mean',
+                               EndX=norm_peak[0],
+                               OutputMode="Return Background")
     
-            Transpose(InputWorkspace=ws_transposed,
-                      OutputWorkspace=ws_data_bck_1)
+                Transpose(InputWorkspace=ws_transposed,
+                          OutputWorkspace=ws_data_bck_1)
 
-            FlatBackground(InputWorkspace=ws_transposed,
-                           OutputWorkspace=ws_transposed_2,
-                           StartX=norm_peak[1],
-                           Mode='Mean',
-                           EndX=BacktoYpixel,
-                           OutputMode="Return Background")
+                FlatBackground(InputWorkspace=ws_transposed,
+                               OutputWorkspace=ws_transposed_2,
+                               StartX=norm_peak[1],
+                               Mode='Mean',
+                               EndX=BacktoYpixel,
+                               OutputMode="Return Background")
 
-            Transpose(InputWorkspace=ws_transposed,
-                      OutputWorkspace=ws_data_bck_2)
+                Transpose(InputWorkspace=ws_transposed,
+                          OutputWorkspace=ws_data_bck_2)
         
-            ConvertToHistogram(ws_data_bck_1, OutputWorkspace=ws_data_bck_1)
-            ConvertToHistogram(ws_data_bck_2, OutputWorkspace=ws_data_bck_2)
+                ConvertToHistogram(ws_data_bck_1, OutputWorkspace=ws_data_bck_1)
+                ConvertToHistogram(ws_data_bck_2, OutputWorkspace=ws_data_bck_2)
 
-            RebinToWorkspace(WorkspaceToRebin=ws_data_bck_1, 
-                             WorkspaceToMatch=ws_integrated_data, 
-                             OutputWorkspace=ws_data_bck_1)
+                RebinToWorkspace(WorkspaceToRebin=ws_data_bck_1, 
+                                 WorkspaceToMatch=ws_integrated_data, 
+                                 OutputWorkspace=ws_data_bck_1)
        
-            RebinToWorkspace(WorkspaceToRebin=ws_data_bck_2, 
-                             WorkspaceToMatch=ws_integrated_data, 
-                             OutputWorkspace=ws_data_bck_2)
+                RebinToWorkspace(WorkspaceToRebin=ws_data_bck_2, 
+                                 WorkspaceToMatch=ws_integrated_data, 
+                                 OutputWorkspace=ws_data_bck_2)
 
-            WeightedMean(ws_data_bck_1, ws_data_bck_2, ws_data_bck)
+                WeightedMean(ws_data_bck_1, ws_data_bck_2, ws_data_bck)
 
-            ws_norm = "__NormWks"
-            Minus(ws_integrated_data, ws_data_bck, OutputWorkspace=ws_norm)
+                ws_norm = "__NormWks"
+                Minus(ws_integrated_data, ws_data_bck, OutputWorkspace=ws_norm)
 
-            # Clean up intermediary workspaces
-            mtd.deleteWorkspace(ws_data_bck)
-            mtd.deleteWorkspace(ws_integrated_data)
-            mtd.deleteWorkspace(ws_transposed)
+                # Clean up intermediary workspaces
+                mtd.deleteWorkspace(ws_data_bck)
+                mtd.deleteWorkspace(ws_integrated_data)
+                mtd.deleteWorkspace(ws_transposed)
 
-            ws_norm_rebinned = "__NormRebinnedWks"
-            RebinToWorkspace(WorkspaceToRebin=ws_norm, 
-                             WorkspaceToMatch=ws_data,
-                             OutputWorkspace=ws_norm_rebinned)
-   
-#        else:
+                ws_norm_rebinned = "__NormRebinnedWks"
+                RebinToWorkspace(WorkspaceToRebin=ws_norm, 
+                                 WorkspaceToMatch=ws_data,
+                                 OutputWorkspace=ws_norm_rebinned)
+
+#            else:
 #            
-#            ws_norm_rebinned = "__NormRebinnedWks"
-#            RebinToWorkspace(WorkspaceToRebin=ws_norm, 
-#                             WorkspaceToMatch=ws_data,
-#                             OutputWorkspace=ws_norm_rebinned)
+#                ws_norm_rebinned = "__NormRebinnedWks"
+#                RebinToWorkspace(WorkspaceToRebin=ws_norm, 
+#                                 WorkspaceToMatch=ws_data,
+#                                 OutputWorkspace=ws_norm_rebinned)
             
-        #perform the integration myself
-        mt_temp = mtd[ws_norm_rebinned]
-        x_axis = mt_temp.readX(0)[:]   #[9100,9300,.... 23500] (73,1)
-        NormPeakRange = numpy.arange(to_peak-from_peak+1) + from_peak
-        counts_vs_tof = numpy.zeros(len(x_axis))
+            #perform the integration myself
+            mt_temp = mtd[ws_norm_rebinned]
+            x_axis = mt_temp.readX(0)[:]   #[9100,9300,.... 23500] (73,1)
+            NormPeakRange = numpy.arange(to_peak-from_peak+1) + from_peak
+            counts_vs_tof = numpy.zeros(len(x_axis))
 
-        # Normalization           
-        SumSpectra(InputWorkspace=ws_norm_rebinned, OutputWorkspace=ws_norm_rebinned)
+            #Normalization           
+            SumSpectra(InputWorkspace=ws_norm_rebinned, OutputWorkspace=ws_norm_rebinned)
         
-        #### divide data by normalize histo workspace
-        Divide(LHSWorkspace=ws_data,
-               RHSWorkspace=ws_norm_rebinned,
-               OutputWorkspace=ws_data)
+            #### divide data by normalize histo workspace
+            Divide(LHSWorkspace=ws_data,
+                   RHSWorkspace=ws_norm_rebinned,
+                   OutputWorkspace=ws_data)
 
         ReplaceSpecialValues(InputWorkspace=ws_data, NaNValue=0, NaNError=0, InfinityValue=0, InfinityError=0, OutputWorkspace=ws_data)
 
