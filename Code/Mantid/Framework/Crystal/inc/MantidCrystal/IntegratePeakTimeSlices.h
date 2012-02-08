@@ -19,6 +19,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/V3D.h"
 
 
 
@@ -91,31 +92,39 @@ private:
   Mantid::API::MatrixWorkspace_sptr inputW;  ///< A pointer to the input workspace, the data set
   Mantid::DataObjects::TableWorkspace_sptr outputW; ///< A pointer to the output workspace
 
-  std::string AttributeNames[16];
-  /// Map wi to detid
+  bool EdgePeak;
+
+  std::string AttributeNames[19];
+
   std::string ParameterNames[7];
 
-  double AttributeValues[16] ;
+  double AttributeValues[19] ;
   double ParameterValues[7] ;
 
   Mantid::detid2index_map * wi_to_detid_map;
+  Mantid::index2spec_map * wsIndx2specNo_map;
+  double R0 ;  ///<for Weak Peaks, these can be set using info from close
 
-  double RectWidth ;  //for Weak Peaks, these can be set using info from close
-  double RectHeight ; // Strong peaks.
+  Kernel::V3D  center;  ///< for Describing the Plane at the Peak
+  Kernel::V3D  xvec;    ///< for Describing the Plane at the Peak
+  Kernel::V3D yvec;     ///< for Describing the Plane at the Peak
+  double ROW;           ///< for Describing the Row(or 0) describing the center of the  Peak
+  double COL;           ///< for Describing the Column(or 0) describing the center of the  Peak
+  double CellWidth;     ///< for Describing the Plane at the Peak
+  double CellHeight;     ///< for Describing the Plane at the Peak
 
-  void SetUpData( Mantid::API::MatrixWorkspace_sptr                     &Data,
-                  Mantid::API::MatrixWorkspace_sptr               const &inpWkSpace,
-                  Mantid::Geometry::RectangularDetector_const_sptr const &panel,
-                  const int                                              chan,
-                  std::vector<int>                                       &Attr);
+  void SetUpData( API::MatrixWorkspace_sptr          & Data,
+                  API::MatrixWorkspace_sptr    const & inpWkSpace,
+                  const int                       chan,
+                  double                          CentX,
+                  double                          CentY,
+                  specid_t                      &CentDet,
+                  std::map< specid_t, Kernel::V3D >     &neighbors,
+                  double                        &neighborRadius,//from CentDet
+                  double                         Radius);
 
 
-  void findNumRowsColsinPanel(DataObjects::Peak const &peak,
-                              int                     &nPanelRows,
-                              int                     & nPanelCols,
-                              double                  & CellHeight,
-                              double                  & CellWidth,
-                              Mantid::Kernel::Logger  &g_log) ;
+
 
 
   int  CalculateTimeChannelSpan( DataObjects::Peak     const & peak,
@@ -124,28 +133,19 @@ private:
                                  const int                     specNum,
                                  int                         & Centerchan);
 
-  double CalculatePanelRowColSpan(  DataObjects::Peak const &peak,
-                                    const double             dQ,
-                                    const double             ystep,
-                                    const double             xstep);
+  double CalculatePositionSpan(  DataObjects::Peak const &peak,
+                                 const double             dQ );
 
   void InitializeColumnNamesInTableWorkspace( DataObjects::TableWorkspace_sptr &TabWS) ;
 
-  boost::shared_ptr<const Geometry::RectangularDetector> getPanel( DataObjects::Peak const &peak);
-
-  std::vector<int> CalculateStart_and_NRowsCols( const double CentRow,
-                                                 const double CentCol,
-                                                 const int dRow,
-                                                 const int dCol,
-                                                 const int nPanelRows,
-                                                 const int nPanelCols) ;
 
   void SetUpData1( API::MatrixWorkspace_sptr                                    &Data,
                    API::MatrixWorkspace_sptr                              const &inpWkSpace,
-                   Mantid::Geometry::RectangularDetector_const_sptr       const &panel,
                    const int                                              chan,
-                   std::vector<int>                                             &Attr,
-                   Mantid::detid2index_map                               *const  wi_to_detid_map,
+                   std::map< specid_t, Kernel::V3D > neighbors,
+                   double                     Radius,
+                   Kernel::V3D               CentPos,  ///< Center on Plane
+                   Kernel::V3D                CentDetPos,///< closes detector to center
                    Kernel::Logger                                               & g_log ) ;
 
 
@@ -180,8 +180,8 @@ private:
 
   void updateStats( const double          intensity,
                     const double          variance,
-                    const int             row,
-                    const int             col,
+                    const double          row,
+                    const double          col,
                     std::vector<double> & StatBase );
 
 
@@ -198,6 +198,10 @@ private:
                                      const double ChiSqOverDOF,
                                      const double TotIntensity,
                                      const int ncells);
+
+  void FindPlane( Kernel::V3D & center,Kernel:: V3D & xvec, Kernel::V3D& yvec,
+                  double &ROW, double &COL,
+                 double &pixWidthx, double&pixHeighty, DataObjects::Peak const &peak) const;
 
   int find( Mantid::MantidVec const & X,
             const double              time);

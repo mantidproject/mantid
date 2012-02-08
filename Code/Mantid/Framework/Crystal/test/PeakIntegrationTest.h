@@ -207,10 +207,17 @@ public:
     IPeak &peak = ws->getPeak(0);
 
     double intensity =peak.getIntensity();
-    TS_ASSERT_DELTA(intensity,3263, 600.0);
+    double intensity0=2697.48;//3682 pref avg
+    if( slices)
+      intensity0= 6284.6;
+    TS_ASSERT_DELTA(intensity,intensity0, 100.0);
   
+    double sig0=97.8525;//141 prev avg
+    if( slices)
+      sig0=215.962;
     double sigIntensity =peak.getSigmaIntensity();
-    TS_ASSERT_DELTA( sigIntensity,132.0, 50.0);
+
+    TS_ASSERT_DELTA( sigIntensity,sig0, 50.0);
   
     AnalysisDataService::Instance().remove("TOPAZ");
 
