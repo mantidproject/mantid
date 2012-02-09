@@ -20,6 +20,51 @@ using namespace Mantid::Kernel;
 
 class SliceMDTest : public CxxTest::TestSuite
 {
+
+private:
+
+  void doTestRecursionDepth(const bool bTakeDepthFromInput, const int maxDepth = 0)
+  {
+    SliceMD alg;
+    alg.initialize();
+
+    IMDEventWorkspace_sptr in_ws = MDEventsTestHelper::makeAnyMDEW<MDEvent<3>,3>(10, 0.0, 10.0, 1);
+    AnalysisDataService::Instance().addOrReplace("SliceMDTest_ws", in_ws);
+
+    alg.setPropertyValue("InputWorkspace", "SliceMDTest_ws");
+    alg.setPropertyValue("AlignedDimX", "Axis0,2.0,8.0, 3");
+    alg.setPropertyValue("AlignedDimY", "Axis1,2.0,8.0, 3");
+    alg.setPropertyValue("AlignedDimZ", "Axis2,2.0,8.0, 3");
+    alg.setRethrows(true);
+    alg.setPropertyValue("OutputWorkspace", "SliceMDTest_outWS");
+
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TakeMaxRecursionDepthFromInput", bTakeDepthFromInput));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxRecursionDepth", maxDepth));
+    alg.execute(); 
+    TS_ASSERT(alg.isExecuted());
+
+    IMDEventWorkspace_sptr out = boost::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve("SliceMDTest_outWS"));
+    
+    /*
+    Run some verifications according to whether TakeMaxRecursionDepthFromInput was chosen.
+    */
+    if(bTakeDepthFromInput)
+    {
+      //TSM_ASSERT("MaxRecusionDepth property should NOT be enabled", false, alg.getProperty("MaxRecursionDepth").isEnabled());
+      TSM_ASSERT_EQUALS("Should have passed the maxium depth onto the ouput workspace.", in_ws->getBoxController()->getMaxDepth(), out->getBoxController()->getMaxDepth());
+    }
+    else
+    {
+      //TSM_ASSERT("MaxRecusionDepth property should be enabled", true, alg.getProperty("MaxRecursionDepth").isEnabled());
+      TSM_ASSERT_EQUALS("Should have passed the maxium depth onto the ouput workspace from the input workspace.", size_t(maxDepth), out->getBoxController()->getMaxDepth());
+    }
+    
+    //Clean up test objects
+    AnalysisDataService::Instance().remove("SliceMDTest_ws");
+    AnalysisDataService::Instance().remove("SliceMDTest_outWS");
+  }
+
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -76,6 +121,8 @@ public:
     TS_ASSERT(out);
     if(!out) return;
 
+    TSM_ASSERT_EQUALS("Should default to TakeMaxRecursionDepthFromInput == true", in_ws->getBoxController()->getMaxDepth(), out->getBoxController()->getMaxDepth());
+
     // Took this many events out with the slice
     TS_ASSERT_EQUALS(out->getNPoints(), expectedNumPoints);
     // Output has this number of dimensions
@@ -122,6 +169,19 @@ public:
   { do_test_exec<MDEvent<3>,3>("Axis0,2.0,8.0, 3", "Axis1,2.0,8.0, 3", "Axis2,2.0,8.0, 3", "",  6*6*6 /*# of events*/, 3 /*dims*/, false /*WillFail*/, "SliceMDTest_output.nxs");
   }
 
+  void test_dont_use_max_recursion_depth()
+  {
+    bool bTakeDepthFromInput = true;
+    doTestRecursionDepth(bTakeDepthFromInput);
+  }
+
+  void test_max_recursion_depth()
+  {
+    bool bTakeDepthFromInput = false;
+    doTestRecursionDepth(bTakeDepthFromInput, 4);
+    //Test with another recursion depth just to make sure that there's nothing hard-coded.
+    doTestRecursionDepth(bTakeDepthFromInput, 5);
+  }
 
   /** Test the algorithm, with a coordinate transformation.
    *
