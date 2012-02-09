@@ -149,7 +149,7 @@ namespace CurveFitting
     // set-up minimizer
 
     std::string costFunction = getProperty("CostFunction");
-    IFuncMinimizer* minimizer = FuncMinimizerFactory::Instance().createUnwrapped(methodUsed);
+    boost::shared_ptr<IFuncMinimizer> minimizer = FuncMinimizerFactory::Instance().create(methodUsed);
     minimizer->initialize(m_function.get(), costFunction);
 
     // create and populate data containers. Warn user if nData < nParam 
@@ -204,8 +204,7 @@ namespace CurveFitting
               << "reporting the following: " << gsl_strerror(status) << "\n"
               << "Try using Simplex method instead\n";
             methodUsed = "Simplex";
-            delete minimizer;
-            minimizer = FuncMinimizerFactory::Instance().createUnwrapped(methodUsed);
+            minimizer = FuncMinimizerFactory::Instance().create(methodUsed);
             minimizer->initialize(m_function.get(), costFunction);
             iter = 0;
           }
@@ -234,8 +233,7 @@ namespace CurveFitting
           if (iter == 1)
           { 
             g_log.information() << "Simplex step size reduced to 0.1\n";
-            delete minimizer;
-            SimplexMinimizer* sm = new SimplexMinimizer;
+            boost::shared_ptr<SimplexMinimizer> sm(new SimplexMinimizer);
             sm->initialize(m_function.get(), costFunction);
             sm->resetSize(0.1, m_function.get(), costFunction);
             minimizer = sm;
@@ -258,22 +256,26 @@ namespace CurveFitting
 
     g_log.information() << "Method used = " << methodUsed << "\n" <<
       "Iteration = " << iter << "\n";
-    Mantid::API::ICostFunction* costfun 
-     = Mantid::API::CostFunctionFactory::Instance().createUnwrapped(costFunction);
-    if ( reportOfFit == "success" )
-      g_log.notice() << reportOfFit << "  " << costfun->shortName() << 
-         " (" << costfun->name() << ") = " << finalCostFuncVal << "\n";
-    else
-      g_log.warning() << reportOfFit << "  " << costfun->shortName() << 
-         " (" << costfun->name() << ") = " << finalCostFuncVal << "\n";
+    { // For scoping
+      boost::shared_ptr<API::ICostFunction> costfun
+          = API::CostFunctionFactory::Instance().create(costFunction);
+      if ( reportOfFit == "success" )
+      {
+        g_log.notice() << reportOfFit << "  " << costfun->shortName()
+                       << " (" << costfun->name() << ") = " << finalCostFuncVal << "\n";
+      }
+      else
+      {
+        g_log.warning() << reportOfFit << "  " << costfun->shortName()
+                        << " (" << costfun->name() << ") = " << finalCostFuncVal << "\n";
+      }
+    }
     for (size_t i = 0; i < m_function->nParams(); i++)
     {
       g_log.debug() << m_function->parameterName(i) << " = " << m_function->getParameter(i) << "  \n";
     }
 
-
     // also output summary to properties
-
     setProperty("OutputStatus", reportOfFit);
     setProperty("OutputChi2overDoF", finalCostFuncVal);
     setProperty("Minimizer", methodUsed);
@@ -418,8 +420,6 @@ namespace CurveFitting
     setProperty("Errors",errors);
     setProperty("ParameterNames",parNames);
     
-    // minimizer may have dynamically allocated memory hence make sure this memory is freed up
-    delete minimizer;
     return;
   }
 
