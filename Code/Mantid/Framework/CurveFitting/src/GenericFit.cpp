@@ -149,7 +149,7 @@ namespace CurveFitting
     // set-up minimizer
 
     std::string costFunction = getProperty("CostFunction");
-    boost::shared_ptr<IFuncMinimizer> minimizer = FuncMinimizerFactory::Instance().create(methodUsed);
+    IFuncMinimizer* minimizer = FuncMinimizerFactory::Instance().createUnwrapped(methodUsed);
     minimizer->initialize(m_function.get(), costFunction);
 
     // create and populate data containers. Warn user if nData < nParam 
@@ -204,7 +204,8 @@ namespace CurveFitting
               << "reporting the following: " << gsl_strerror(status) << "\n"
               << "Try using Simplex method instead\n";
             methodUsed = "Simplex";
-            minimizer = FuncMinimizerFactory::Instance().create(methodUsed);
+            delete minimizer;
+            minimizer = FuncMinimizerFactory::Instance().createUnwrapped(methodUsed);
             minimizer->initialize(m_function.get(), costFunction);
             iter = 0;
           }
@@ -233,7 +234,8 @@ namespace CurveFitting
           if (iter == 1)
           { 
             g_log.information() << "Simplex step size reduced to 0.1\n";
-            boost::shared_ptr<SimplexMinimizer> sm(new SimplexMinimizer);
+            delete minimizer;
+            SimplexMinimizer* sm = new SimplexMinimizer;
             sm->initialize(m_function.get(), costFunction);
             sm->resetSize(0.1, m_function.get(), costFunction);
             minimizer = sm;
@@ -420,6 +422,7 @@ namespace CurveFitting
     setProperty("Errors",errors);
     setProperty("ParameterNames",parNames);
     
+    delete minimizer;
     return;
   }
 
