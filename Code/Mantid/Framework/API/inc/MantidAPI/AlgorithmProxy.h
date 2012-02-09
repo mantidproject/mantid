@@ -93,9 +93,9 @@ namespace Mantid
       bool isExecuted() const;
 
       /// To query whether algorithm is a child. A proxy is always at top level, returns false
-      bool isChild() const {return false;}
+      bool isChild() const {return m_isChild;}
       void setAlwaysStoreInADS(const bool ) {}
-      void setChild(const bool) {} ///< Do nothing
+      void setChild(const bool val) {m_isChild = val;};
       void setRethrows(const bool rethrow);
 
       /** @name PropertyManager methods */
@@ -156,6 +156,7 @@ namespace Mantid
       bool m_isExecuted;     ///< Executed flag
       bool m_isLoggingEnabled;///< is the logging of the underlying algorithm enabled
       bool m_rethrow; ///< Whether or not to rethrow exceptions.
+      bool m_isChild; ///< Is this a child algo
 
       /// Temporary holder of external observers wishing to subscribe
       mutable std::vector<const Poco::AbstractObserver*> m_externalObservers;

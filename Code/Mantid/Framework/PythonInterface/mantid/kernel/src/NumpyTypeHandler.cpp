@@ -14,7 +14,7 @@ namespace Mantid
 {
   namespace PythonInterface
   {
-    namespace PropertyMarshal
+    namespace TypeRegistry
     {
       /**
        * Handle Python -> C++ calls to a property manager and get the correct type from the
@@ -23,12 +23,12 @@ namespace Mantid
        * @param name :: The name of the property
        * @param value :: A boost python object that points to a numpy array
        */
-      void NumpyTypeHandler::set(Kernel::IPropertyManager* alg,
-                                    const std::string &name, boost::python::object value)
+      void NumpyTypeHandler::set(Kernel::IPropertyManager* alg, const std::string &name, boost::python::object value)
       {
         if( !PyArray_Check(value.ptr()) )
         {
-          throw std::invalid_argument(std::string("NumpyTypeHandler::set - Cannot handle non-numpy array. Type passed: ") + value.ptr()->ob_type->tp_name);
+          throw std::invalid_argument(
+              std::string("NumpyTypeHandler  - Expected numpy array, type passed: ") + value.ptr()->ob_type->tp_name);
         }
         Kernel::Property *prop = alg->getPointerToProperty(name);
         const std::type_info & propTypeInfo = *(prop->type_info());

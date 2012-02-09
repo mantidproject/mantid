@@ -105,7 +105,7 @@ namespace Crystal
     declareProperty("Mosaic", 0.262, "Mosaic Spread (FWHM) (Degrees)");
     declareProperty("Cell", 255.0, "Unit Cell Volume (Angstroms^3)");
     declareProperty("RCrystallite", 6.0, "Becker-Coppens Crystallite Radius (micron)");
-    declareProperty("ScaleFactor", 1.2, "Multiply FSQ and sig(FSQ) by scaleFactor");
+    declareProperty("ScaleFactor", 1.0, "Multiply FSQ and sig(FSQ) by scaleFactor");
 
   }
 
@@ -137,8 +137,7 @@ namespace Crystal
       double sigfsq = peak1.getSigmaIntensity()*scaleFactor;
       double wl = peak1.getWavelength();
       double twoth = peak1.getScattering();
-      double tbar = 0.0;
-      double transmission = absor_sphere(twoth, wl, tbar);
+      double tbar = absor_sphere(twoth, wl);
       // Extinction Correction
 
 
@@ -245,8 +244,7 @@ namespace Crystal
   {
         // Tomiyoshi, Yamada and Watanabe
         double EgLaue = Eg*std::tan(twoth/2.0)/wl;
-        // Ask Xiaoping if this should be EqLaue
-        return Eg;
+        return EgLaue;
   }
   double TOFExtinction::getXqt(double Eg, double cellV, double wl, double twoth, double tbar, double fsq)
   {
@@ -287,6 +285,8 @@ namespace Crystal
   }
   double TOFExtinction::getRg(double EgLaue, double EsLaue, double wl, double twoth)
   {
+        UNUSED_ARG(wl)
+        UNUSED_ARG(twoth)
         // Two-theta dependence by Becker & Coppens, Acta Cryst A 30, 129 (1974)
         // The factor is std::pow((std::sin(twoth/2)/wl),2) for tof neutron 
         //double Es = r*std::pow((1000.0*std::sin(twoth/2)/wl),2);
@@ -364,7 +364,7 @@ namespace Crystal
   *
   *       a. j. schultz, june, 2008
   */
-  double TOFExtinction::absor_sphere(double& twoth, double& wl, double& tbar)
+  double TOFExtinction::absor_sphere(double& twoth, double& wl)
   {
     int i;
     double mu, mur;         //mu is the linear absorption coefficient,
@@ -417,12 +417,13 @@ namespace Crystal
                                                  // trans = exp(-mu*tbar)
 
 //  calculate tbar as defined by coppens.
+    double tbar;
     if(mu == 0.0)
       tbar=0.0;
     else
       tbar = -(double)std::log(trans)/mu;
 
-    return trans;
+    return tbar;
   }
 
 

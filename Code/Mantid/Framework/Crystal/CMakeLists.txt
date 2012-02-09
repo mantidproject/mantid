@@ -16,6 +16,7 @@ set ( SRC_FILES
 	src/LoadIsawUB.cpp
 	src/MaskPeaksWorkspace.cpp
 	src/NormaliseVanadium.cpp
+	src/OptimizeExtinctionParameters.cpp
 	src/PeakIntegration.cpp
 	src/PeakIntensityVsRadius.cpp
 	src/PredictPeaks.cpp
@@ -42,12 +43,14 @@ set ( INC_FILES
 	inc/MantidCrystal/IndexPeaks.h
 	inc/MantidCrystal/ShowPossibleCells.h
     inc/MantidCrystal/IndexSXPeaks.h
+        inc/MantidCrystal/GSLFunctions.h
 	inc/MantidCrystal/IntegratePeakTimeSlices.h
 	inc/MantidCrystal/LoadHKL.h
 	inc/MantidCrystal/LoadIsawPeaks.h
 	inc/MantidCrystal/LoadIsawUB.h
 	inc/MantidCrystal/MaskPeaksWorkspace.h
 	inc/MantidCrystal/NormaliseVanadium.h
+	inc/MantidCrystal/OptimizeExtinctionParameters.h
 	inc/MantidCrystal/PeakIntegration.h
 	inc/MantidCrystal/PeakIntensityVsRadius.h
 	inc/MantidCrystal/PredictPeaks.h

@@ -13,20 +13,17 @@ namespace API
 
 typedef Poco::StringTokenizer tokenizer;
 
+const std::string DEFAULT_OPS_STR[] = {";", ",", "=",
+                                   "== != > < <= >=",
+                                   "&& || ^^",
+                                   "+ -", "* /", "^"};
+
 Expression::Expression()
 {
 
   m_operators.reset(new Operators());
   // Define binary operators. Put them in the reverse precedence order (from lower to higher prec.)
-  std::vector<std::string> ops;
-  ops.push_back(";");
-  ops.push_back(",");
-  ops.push_back("=");
-  ops.push_back("== != > < <= >=");
-  ops.push_back("&& || ^^");
-  ops.push_back("+ -");
-  ops.push_back("* /");
-  ops.push_back("^");
+  std::vector<std::string> ops(DEFAULT_OPS_STR, DEFAULT_OPS_STR+8);
 
   add_operators(ops);
 
@@ -129,12 +126,12 @@ size_t Expression::op_prec(const std::string& op)const
 
 bool Expression::is_unary(const std::string& op)const
 {
-  return m_operators->unary.count(op) != 0;
+  return m_operators->unary.find(op) != m_operators->unary.end();
 }
 
 bool Expression::is_op_symbol(const char c)const
 {
-  return m_operators->symbols.count(c) != 0;
+  return m_operators->symbols.find(c) != m_operators->symbols.end();
 }
 
 void Expression::trim(std::string& str)

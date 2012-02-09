@@ -363,6 +363,11 @@ public:
     TS_ASSERT_DELTA( pk->height(), 97.8035 ,0.0001);
     TS_ASSERT_DELTA( pk->centre(), 11.2356 ,0.0001);
     TS_ASSERT_DELTA( pk->width(), 2.6237 ,0.0001);
+
+    // check its categories
+    const std::vector<std::string> categories = out->categories();
+    TS_ASSERT( categories.size() == 1 );
+    TS_ASSERT( categories[0] == "Peak" );
   }
 
   void testAgainstMockDataSimplex()

@@ -120,8 +120,6 @@ public:
         TS_ASSERT_EQUALS( alg->category() , "ProxyCat" );
         TS_ASSERT_EQUALS( alg->alias(), "Dog");
         TS_ASSERT( alg->isInitialized() );
-        alg->setChild(true);
-        TS_ASSERT( !alg->isChild() );
         TS_ASSERT( alg->existsProperty("prop1") );
         TS_ASSERT( alg->existsProperty("prop2") );
         TS_ASSERT( !alg->isRunning() );

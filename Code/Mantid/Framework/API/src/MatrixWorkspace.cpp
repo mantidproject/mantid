@@ -24,10 +24,13 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include <boost/math/special_functions/fpclassify.hpp>
+#include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/Strings.h"
 
 using Mantid::Kernel::DateAndTime;
 using Mantid::Kernel::TimeSeriesProperty;
 using NeXus::NXcompression;
+using Mantid::Kernel::Strings::toString;
 
 namespace Mantid
 {
@@ -509,6 +512,63 @@ namespace Mantid
         //Ignore if the detector list is empty.
       }
       return map;
+    }
+
+
+    //---------------------------------------------------------------------------------------
+    /** Return a vector where:
+    *    The index into the vector = DetectorID (pixel ID) + offset
+    *    The value at that index = the corresponding Workspace Index
+    *
+    *  @param out :: vector set to above definition
+    *  @param offset :: add this to the detector ID to get the index into the vector.
+    *  @param throwIfMultipleDets :: set to true to make the algorithm throw an error
+    *         if there is more than one detector for a specific workspace index.
+    *  @throw runtime_error if there is more than one detector per spectrum (if throwIfMultipleDets is true)
+    */
+    void MatrixWorkspace::getDetectorIDToWorkspaceIndexVector( std::vector<size_t> & out, detid_t & offset, bool throwIfMultipleDets) const
+    {
+      // Make a correct initial size
+      out.clear();
+      detid_t minId = 0;
+      detid_t maxId = 0;
+      this->getInstrument()->getMinMaxDetectorIDs(minId, maxId);
+      offset = -minId;
+      // Allocate at once
+      out.resize(maxId - minId + 1, 0);
+      int outSize = int(out.size());
+
+      // Run in parallel if thread-safe.
+      // We should expect that there is only one workspace index per detector ID.
+      int numHistos = int(this->getNumberHistograms());
+
+      std::string error("");
+      for (int i=0; i < numHistos; i++)
+      {
+        size_t workspaceIndex = size_t(i);
+
+        //Get the list of detectors from the WS index
+        const std::set<detid_t> & detList = this->getSpectrum(workspaceIndex)->getDetectorIDs();
+
+        if (throwIfMultipleDets && (detList.size() > 1))
+          throw std::runtime_error("MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(): more than 1 detector for one histogram! I cannot generate a map of detector ID to workspace index.");
+
+        // Allow multiple detectors per workspace index, or,
+        // If only one is allowed, then this has thrown already
+        for (std::set<detid_t>::const_iterator it = detList.begin(); it != detList.end(); ++it)
+        {
+          int index = *it + offset;
+          if (index >= outSize)
+          {
+            //throw std::runtime_error("MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(): detector ID found (" + Mantid::Kernel::Strings::toString(*it) + ") is not within the min/max limits found. This indicates a logical error in Instrument->getMinMaxDetectorIDs(). Contact the development team.");
+            g_log.debug() << "MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(): detector ID found (" << *it << " at workspace index " << workspaceIndex << ") is invalid." << std::endl;
+          }
+          else
+            // Save it at that point.
+            out[index] = workspaceIndex;
+        }
+
+      } // (for each workspace index)
     }
 
 
@@ -1091,15 +1151,10 @@ namespace Mantid
       {
         // First get a reference to the list for this spectrum (or create a new list)
         MaskList& binList = m_masks[spectrumIndex];
-        //see if the bin is already masked. Normally only a handfull of bins are masked, if it's 100s you might want to make this faster
-        for(MaskList::const_iterator it = binList.begin(); it != binList.end(); ++it)
+        MaskList::iterator it = binList.find(binIndex);
+        if( it != binList.end() )
         {
-          if ( it->first == binIndex )
-          {
-            //calling erase will invalidate the iterator! So we must call break immediately after
-            binList.erase(it);
-            break;
-          }
+          binList.erase(it);
         }
         binList.insert( std::make_pair(binIndex,weight) );
       }

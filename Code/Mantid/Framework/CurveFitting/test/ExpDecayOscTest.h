@@ -110,9 +110,8 @@ public:
 
     // check it categories
     const std::vector<std::string> categories = out->categories();
-    TS_ASSERT( categories.size() == 2 );
-    TS_ASSERT( categories[0] == "General" );
-    TS_ASSERT( categories[1] == "Muon" );
+    TS_ASSERT( categories.size() == 1 );
+    TS_ASSERT( categories[0] == "Muon" );
 
     AnalysisDataService::Instance().remove(wsName);
 

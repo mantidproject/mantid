@@ -1,10 +1,10 @@
-#ifndef COLORSELECTIONDIALOG_H_
-#define COLORSELECTIONDIALOG_H_
+#ifndef COLORSELECTIONWIDGET_H_
+#define COLORSELECTIONWIDGET_H_
 
-#include "ui_ColorSelectionDialog.h"
+#include "ui_ColorSelectionWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 
-#include <QDialog>
+#include <QWidget>
 
 class pqColorMapModel;
 class pqColorPresetManager;
@@ -20,7 +20,6 @@ namespace SimpleGui
   This class controls the color scale for the main level program viewed
   datasets.
 
-  @author Michael Reuter
   @date 07/06/2011
 
   Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -43,26 +42,18 @@ namespace SimpleGui
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS ColorSelectionDialog : public QDialog
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS ColorSelectionWidget : public QWidget
 {
   Q_OBJECT
 
 public:
-  /**
-   * Default constructor.
-   * @param parent the parent widget of the mode control widget
-   */
-  ColorSelectionDialog(QWidget *parent = 0);
+  /// Default constructor.
+  ColorSelectionWidget(QWidget *parent = 0);
   /// Default destructor.
-  virtual ~ColorSelectionDialog() {}
+  virtual ~ColorSelectionWidget() {}
 
 public slots:
-  /**
-   * Function to set the color scale range into the range widgets.
-   *
-   * @param min the minimum value of the color scale range
-   * @param max the maximum value of the color scale range
-   */
+  /// Set the color scale range into the range widgets.
   void setColorScaleRange(double min, double max);
 
 signals:
@@ -89,49 +80,27 @@ signals:
   void logScale(int state);
 
 protected slots:
-  /**
-   * Function that enables or diables the min and max line edits based on
-   * state of the automatic scaling checkbox.
-   *
-   * @param state the current state of the checkbox
-   */
+  /// Set state of the automatic scaling checkbox.
   void autoOrManualScaling(int state);
-  /**
-   * Function to get the new color scale range.
-   */
+  /// Get the new color scale range.
   void getColorScaleRange();
-  /**
-   * Function that presents the user with the available color presets and 
-   * gets the
-   * result from the user.
-   */
+  /// Show available color presets.
   void loadPreset();
-  /**
-   * Function that sets the flag for using log color scaling based on the
-   * associated checkbox.
-   * @param state flag for whether or not to use log color scaling
-   */
+  /// Set log color scaling.
   void useLogScaling(int state);
 
 private:
-  /**
-   * Function that sets up various colormaps. This is copied verbaitum from 
-   * pqColorScaleEditor.
-   */
+  /// Set up various color maps.
   void loadBuiltinColorPresets();
-  /**
-   * Function that sets the status of the editor widgets.
-   *
-   * @param status the state to set the editor widgets to
-   */
+  /// Set status of the color selection editor widgets.
   void setEditorStatus(bool status);
 
   pqColorPresetManager *presets; ///< Dialog for choosing color presets
-  Ui::ColorSelectionDialogClass ui; ///< The mode control widget's UI form
+  Ui::ColorSelectionWidgetClass ui; ///< The mode control widget's UI form
 };
 
-}
-}
-}
+} // SimpleGui
+} // Vates
+} // Mantid
 
 #endif // COLORSELECTIONWIDGET_H_

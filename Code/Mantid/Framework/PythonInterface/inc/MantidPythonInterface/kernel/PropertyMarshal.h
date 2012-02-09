@@ -68,13 +68,6 @@ namespace Mantid
      */
     namespace PropertyMarshal
     {
-      //-----------------------------------------------------------------------
-      // Forward declarations
-      //-----------------------------------------------------------------------
-      struct PropertyHandler;
-
-      /// Insert a new property handler
-      DLLExport void registerHandler(PyTypeObject* typeObject, PropertyHandler* handler);
       /// This static function allows a call to a method on an IPropertyManager object
       DLLExport void setProperty(Kernel::IPropertyManager &self, const std::string & name,
                                  boost::python::object value);

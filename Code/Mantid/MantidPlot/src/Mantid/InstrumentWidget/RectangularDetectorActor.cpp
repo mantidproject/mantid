@@ -10,8 +10,10 @@
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Exception.h"
 #include <cfloat>
+#include "MantidGeometry/IComponent.h"
 using namespace Mantid;
 using namespace Geometry;
 using Mantid::Kernel::V3D;
@@ -28,7 +30,8 @@ static const bool VERBOSE = false;
  */
 RectangularDetectorActor::RectangularDetectorActor(const InstrumentActor& instrActor, const Mantid::Geometry::ComponentID& compID)
 :
-    ICompAssemblyActor(instrActor,compID), mTextureID(0)
+    ICompAssemblyActor(instrActor,compID), mTextureID(0),
+    image_data(NULL), pick_data(NULL)
 {
   mNumberOfDetectors = 0;
   mDet = boost::dynamic_pointer_cast<const RectangularDetector>(getComponent());
@@ -69,6 +72,8 @@ RectangularDetectorActor::RectangularDetectorActor(const InstrumentActor& instrA
  */
 RectangularDetectorActor::~RectangularDetectorActor()
 {
+  delete [] image_data;
+  delete [] pick_data;
 }
 
 
@@ -120,7 +125,9 @@ void RectangularDetectorActor::draw(bool picking)const
 
 //------------------------------------------------------------------------------------------------
 /**
- * Accept a visitor.
+ * Accept a visitor. This sets the matching component's visibility to True.
+ * It looks if the given component is a child (pixel) of the parent rectangular
+ * detector, and sets the visibility of the whole panel to true if so.
  *
  * @param visitor :: A visitor.
  *
@@ -129,21 +136,48 @@ bool RectangularDetectorActor::accept(const GLActorVisitor& visitor)
 {
   if (visitor.visit(this)) return true;
 
+  // ID of the parent RectangularDetector
+  Mantid::Geometry::ComponentID thisID = this->m_id;
+
   const SetVisibleComponentVisitor* svv = dynamic_cast<const SetVisibleComponentVisitor*>(&visitor);
   if (svv)
   {
     Mantid::Geometry::ComponentID id = svv->getID();
-    for (int y=0; y < mDet->ypixels(); y++)
+    // We are pointing to the whole RectangularDetector
+    if (id == thisID)
     {
-      for (int x=0; x < mDet->xpixels() ; x++)
+      setVisibility(true);
+      return true;
+    }
+
+    // Is the ID passed the id of one of the pixels of this RectangularDetector?
+    // Find it and go UP the hierarchy to find out.
+
+    // Get the component object
+    IComponent_const_sptr comp = m_instrActor.getInstrument()->getComponentByID(id);
+    if (comp)
+    {
+      // Get the parent (e.g. the column)
+      IComponent_const_sptr parent1 = comp->getParent();
+      if (parent1)
       {
-        if (id == mDet->getAtXY(x,y)->getComponentID())
+        if (parent1->getComponentID() == thisID)
         {
           setVisibility(true);
           return true;
         }
-      }
-    }
+        // Go to grandparent
+        IComponent_const_sptr parent2 = parent1->getParent();
+        if (parent2)
+        {
+          if (parent2->getComponentID() == thisID)
+          {
+            setVisibility(true);
+            return true;
+          }
+        } // valid grandparent
+      } // valid parent
+    } // valid component
   }
   return false;
 }

@@ -24,7 +24,6 @@ namespace SimpleGui
  This class represents the initial view for the main program. It is meant to
  be a view to play with the data in an unstructured manner.
 
- @author Michael Reuter
  @date 24/05/2011
 
  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -52,36 +51,25 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS StandardView : public ViewBas
   Q_OBJECT
 
 public:
-  /**
-   * Default constructor.
-   * @param parent the parent widget for the standard view
-   */
+  /// Default constructor.
   StandardView(QWidget *parent = 0);
   /// Default destructor.
   virtual ~StandardView();
 
-  /**
-   * ViewBase::destroyView
-   */
+  /// @see ViewBase::destroyView
   void destroyView();
-  /**
-   * ViewBase::getView
-   */
+  /// @see ViewBase::getView
   pqRenderView* getView();
-  /**
-   * ViewBase::render
-   */
+  /// @see ViewBase::render
   void render();
-  /**
-   * ViewBase::renderAll
-   */
+  /// @see ViewBase::renderAll
   void renderAll();
-  /// ViewBase::resetCamera()
+  /// @see ViewBase::resetCamera()
   void resetCamera();
-  /**
-   * ViewBase::resetDisplay()
-   */
+  /// @see ViewBase::resetDisplay()
   void resetDisplay();
+  /// @see ViewBase::updateUI()
+  void updateUI();
 
 protected slots:
   /// Add a slice to the current dataset.
@@ -97,8 +85,8 @@ private:
   QPointer<pqRenderView> view; ///< The main view
 };
 
-}
-}
-}
+} // SimpleGui
+} // Vates
+} // Mantid
 
 #endif // STANDARDVIEW_H_

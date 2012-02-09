@@ -15,13 +15,14 @@
 #include "MantidVatesAPI/vtkDataSetToImplicitFunction.h"
 #include "MantidVatesAPI/vtkDataSetToWsLocation.h"
 #include "MantidVatesAPI/vtkDataSetToWsName.h"
-#include "MantidMDEvents/BinMD.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ImplicitFunctionFactory.h"
 #include "MantidKernel/VMD.h"
 #include <vtkDataSet.h>
 #include <vtkFieldData.h>
 #include <vtkPlane.h>
 
+using namespace Mantid::API;
 
 namespace Mantid
 {
@@ -46,7 +47,8 @@ namespace Mantid
       m_wsGeometry(""),
       m_serializer(LocationNotRequired),
       m_function(Mantid::Geometry::MDImplicitFunction_sptr(new Mantid::MDAlgorithms::NullImplicitFunction())),
-      m_applyClipping(false)
+      m_applyClipping(false),
+      m_bOutputHistogramWS(true)
     {
       using namespace Mantid::API;
       vtkFieldData* fd = input->GetFieldData();
@@ -141,6 +143,11 @@ namespace Mantid
       {
         m_request->ask(RecalculateVisualDataSetOnly);
       }
+      const bool bOutputHistogramWS = m_view->getOutputHistogramWS();
+      if(bOutputHistogramWS != m_bOutputHistogramWS)
+      {
+        m_request->ask(RecalculateAll);
+      }
 
       bool hasAppliedClipping = m_view->getApplyClip();
 
@@ -199,6 +206,7 @@ namespace Mantid
         m_lengthB2 = temp_length_b2;
         m_lengthB3 = temp_length_b3;
         m_ForceOrthogonal = m_view->getForceOrthogonal();
+        m_bOutputHistogramWS = m_view->getOutputHistogramWS();
       }
 
       if(m_view->getAppliedGeometryXML() != m_serializer.getWorkspaceGeometry())
@@ -211,6 +219,7 @@ namespace Mantid
       m_maxThreshold = m_view->getMaxThreshold(); 
       m_minThreshold = m_view->getMinThreshold();
       m_applyClipping = hasAppliedClipping;
+      m_bOutputHistogramWS = bOutputHistogramWS;
       addFunctionKnowledge(); //calls m_serializer.setImplicitFunction()
       m_serializer.setGeometryXML( m_view->getAppliedGeometryXML() );
     }
@@ -252,8 +261,8 @@ namespace Mantid
     vtkDataSet* MDEWRebinningPresenter::execute(vtkDataSetFactory* factory, ProgressAction& eventHandler)
     {
       std::string wsName = m_serializer.getWorkspaceName();
-      // Create a private output workspace name
-      std::string outWsName = wsName + "_mdhisto";
+
+      std::string outWsName = wsName + "_visual_md";
 
       using namespace Mantid::API;
       if(RecalculateAll == m_request->action())
@@ -261,66 +270,64 @@ namespace Mantid
         Mantid::Geometry::MDGeometryXMLParser sourceGeometry(m_view->getAppliedGeometryXML());
         sourceGeometry.execute();
 
-        Mantid::MDEvents::BinMD hist_alg;
-        hist_alg.initialize();
-
-        hist_alg.setPropertyValue("InputWorkspace", wsName); 
+        IAlgorithm_sptr binningAlg  =  m_bOutputHistogramWS  ? AlgorithmManager::Instance().create("BinMD") : AlgorithmManager::Instance().create("SliceMD");
+        binningAlg->initialize();
+        binningAlg->setPropertyValue("InputWorkspace", wsName); 
 
         if(m_view->getApplyClip())
         {
           using namespace Mantid::Kernel;
 
           V3D b3 = m_b1.cross_prod(m_b2);
-          hist_alg.setPropertyValue("Origin", VMD(m_origin).toString(",") );
-          hist_alg.setProperty("AxisAligned", false);
-          hist_alg.setProperty("ForceOrthogonal", m_ForceOrthogonal );
+          binningAlg->setPropertyValue("Origin", VMD(m_origin).toString(",") );
+          binningAlg->setProperty("AxisAligned", false);
+          binningAlg->setProperty("ForceOrthogonal", m_ForceOrthogonal );
           if(sourceGeometry.hasXDimension())
           {
-            hist_alg.setPropertyValue("BasisVectorX", extractFormattedPropertyFromDimension(VMD(m_b1), m_lengthB1, sourceGeometry.getXDimension()));
+            binningAlg->setPropertyValue("BasisVectorX", extractFormattedPropertyFromDimension(VMD(m_b1), m_lengthB1, sourceGeometry.getXDimension()));
           }
           if(sourceGeometry.hasYDimension())
           {
-            hist_alg.setPropertyValue("BasisVectorY", extractFormattedPropertyFromDimension(VMD(m_b2), m_lengthB2, sourceGeometry.getYDimension()));
+            binningAlg->setPropertyValue("BasisVectorY", extractFormattedPropertyFromDimension(VMD(m_b2), m_lengthB2, sourceGeometry.getYDimension()));
           }
           if(sourceGeometry.hasZDimension())
           {
-            hist_alg.setPropertyValue("BasisVectorZ", extractFormattedPropertyFromDimension(VMD(b3), m_lengthB3, sourceGeometry.getZDimension()));
+            binningAlg->setPropertyValue("BasisVectorZ", extractFormattedPropertyFromDimension(VMD(b3), m_lengthB3, sourceGeometry.getZDimension()));
           }
           if(sourceGeometry.hasTDimension())
           {
-            hist_alg.setPropertyValue("BasisVectorT", "");
+            binningAlg->setPropertyValue("BasisVectorT", "");
           }
         }
         else
         {
-          hist_alg.setProperty("AxisAligned", true);
+          binningAlg->setProperty("AxisAligned", true);
           if(sourceGeometry.hasXDimension())
           {
-            hist_alg.setPropertyValue("AlignedDimX",  extractFormattedPropertyFromDimension(sourceGeometry.getXDimension()));
+            binningAlg->setPropertyValue("AlignedDimX",  extractFormattedPropertyFromDimension(sourceGeometry.getXDimension()));
           }
           if(sourceGeometry.hasYDimension())
           {
-            hist_alg.setPropertyValue("AlignedDimY",  extractFormattedPropertyFromDimension(sourceGeometry.getYDimension()));
+            binningAlg->setPropertyValue("AlignedDimY",  extractFormattedPropertyFromDimension(sourceGeometry.getYDimension()));
           }
           if(sourceGeometry.hasZDimension())
           {
-            hist_alg.setPropertyValue("AlignedDimZ",  extractFormattedPropertyFromDimension(sourceGeometry.getZDimension()));
+            binningAlg->setPropertyValue("AlignedDimZ",  extractFormattedPropertyFromDimension(sourceGeometry.getZDimension()));
           }
           if(sourceGeometry.hasTDimension())
           {
-            hist_alg.setPropertyValue("AlignedDimT",  extractFormattedPropertyFromDimension(sourceGeometry.getTDimension()));
+            binningAlg->setPropertyValue("AlignedDimT",  extractFormattedPropertyFromDimension(sourceGeometry.getTDimension()));
           }
         }
-        hist_alg.setPropertyValue("Parallel", "1");
 
-        hist_alg.setPropertyValue("OutputWorkspace", outWsName);
+        binningAlg->setPropertyValue("OutputWorkspace", outWsName);
         Poco::NObserver<ProgressAction, Mantid::API::Algorithm::ProgressNotification> observer(eventHandler, &ProgressAction::handler);
         //Add observer.
-        hist_alg.addObserver(observer);
+        binningAlg->addObserver(observer);
         //Run the rebinning algorithm.
-        hist_alg.execute();
+        binningAlg->execute();
         //Remove observer
-        hist_alg.removeObserver(observer);
+        binningAlg->removeObserver(observer);
       }
 
       Mantid::API::Workspace_sptr result=Mantid::API::AnalysisDataService::Instance().retrieve(outWsName);

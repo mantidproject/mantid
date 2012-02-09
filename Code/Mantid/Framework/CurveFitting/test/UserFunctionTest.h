@@ -82,6 +82,11 @@ public:
       TS_ASSERT_DELTA(d,dtrue,0.03);
     }
 
+    // check its categories
+    const std::vector<std::string> categories = fun.categories();
+    TS_ASSERT( categories.size() == 1 );
+    TS_ASSERT( categories[0] == "General" );
+
   }
 };
 

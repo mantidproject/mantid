@@ -66,6 +66,7 @@ namespace Mantid
 
       /// overwrite IFunction base class methods
       std::string name()const{return "Gaussian";}
+      virtual const std::string category() const { return "Peak";}
       virtual void calJacobianForCovariance(API::Jacobian* out, const double* xValues, const size_t nData);
       virtual void setActiveParameter(size_t i,double value);
       virtual double activeParameter(size_t i)const;

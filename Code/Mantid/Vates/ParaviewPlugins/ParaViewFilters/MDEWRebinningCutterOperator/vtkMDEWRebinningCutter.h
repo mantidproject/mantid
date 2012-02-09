@@ -66,6 +66,7 @@ public:
   void SetAppliedGeometryXML(std::string xml);
   const char* GetInputGeometryXML();
   void SetThresholdRangeStrategyIndex(std::string selectedStrategyIndex);  
+  void SetOutputHistogramWS(bool value);
   double GetInputMinThreshold();
   double GetInputMaxThreshold();
   /// Paraview Related Commands. See *.xml proxy/property file --------------------------------
@@ -84,7 +85,7 @@ public:
   virtual double getLengthB2() const;
   virtual double getLengthB3() const;
   virtual bool getForceOrthogonal() const { throw std::runtime_error("Not implemented"); }
-
+  virtual bool getOutputHistogramWS() const;
 
 protected:
 
@@ -145,6 +146,7 @@ private:
   int m_thresholdMethodIndex;
   /// Mutex for progress updates
   Mantid::Kernel::Mutex progressMutex;
-
+  /// Flag indicating that a histogram workspace should be exported.
+  bool m_bOutputHistogramWS;
 };
 #endif

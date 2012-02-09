@@ -26,11 +26,14 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
+#include "MantidGeometry/Rendering/OpenGL_Headers.h"
+
 #include <qbitmap.h>
 
 #include <qwt3d_color.h>
 #include <qwt3d_plot.h>
 #include "Bar.h"
+
 
 using namespace Qwt3D;
 

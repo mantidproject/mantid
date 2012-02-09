@@ -60,6 +60,7 @@ public:
   void testUpdateModelWithNoChanges()
   {
     MockMDRebinningView* view = new MockMDRebinningView;
+    EXPECT_CALL(*view, getOutputHistogramWS()).WillRepeatedly(Return(true));
     EXPECT_CALL(*view, getTimeStep()).WillRepeatedly(Return(0));
     EXPECT_CALL(*view, getMaxThreshold()).WillRepeatedly(Return(0));
     EXPECT_CALL(*view, getMinThreshold()).WillRepeatedly(Return(0));
@@ -86,6 +87,7 @@ public:
   void testUpdateModelWithDifferentMaxThreshold()
   {
     MockMDRebinningView* view = new MockMDRebinningView;
+    EXPECT_CALL(*view, getOutputHistogramWS()).WillRepeatedly(Return(true));
     EXPECT_CALL(*view, getTimeStep()).WillRepeatedly(Return(0));
     EXPECT_CALL(*view, getMaxThreshold()).WillRepeatedly(Return(1)); //Maxthreshold non-zero
     EXPECT_CALL(*view, getMinThreshold()).WillRepeatedly(Return(0));
@@ -112,6 +114,7 @@ public:
   void testUpdateModelWithDifferentMinThreshold()
   {
     MockMDRebinningView* view = new MockMDRebinningView;
+    EXPECT_CALL(*view, getOutputHistogramWS()).WillRepeatedly(Return(true));
     EXPECT_CALL(*view, getTimeStep()).WillRepeatedly(Return(0));
     EXPECT_CALL(*view, getMaxThreshold()).WillRepeatedly(Return(0)); 
     EXPECT_CALL(*view, getMinThreshold()).WillRepeatedly(Return(1)); //Minthreshold non-zero
@@ -138,6 +141,7 @@ public:
   void testUpdateModelWithDifferentTimestep()
   {
     MockMDRebinningView* view = new MockMDRebinningView;
+    EXPECT_CALL(*view, getOutputHistogramWS()).WillRepeatedly(Return(true));
     EXPECT_CALL(*view, getTimeStep()).Times(2).WillRepeatedly(Return(1)); //Timestep updated
     EXPECT_CALL(*view, getMaxThreshold()).WillRepeatedly(Return(0));
     EXPECT_CALL(*view, getMinThreshold()).WillRepeatedly(Return(0));
@@ -164,6 +168,7 @@ public:
   void testUpdateModelWithMoreXBins()
   {
     MockMDRebinningView* view = new MockMDRebinningView;
+    EXPECT_CALL(*view, getOutputHistogramWS()).WillRepeatedly(Return(true));
     EXPECT_CALL(*view, getTimeStep()).WillRepeatedly(Return(0));
     EXPECT_CALL(*view, getMaxThreshold()).WillRepeatedly(Return(0));
     EXPECT_CALL(*view, getMinThreshold()).WillRepeatedly(Return(0));
@@ -190,6 +195,7 @@ public:
   void testUpdateModelWithMoreXYBins()
   {
     MockMDRebinningView* view = new MockMDRebinningView;
+    EXPECT_CALL(*view, getOutputHistogramWS()).WillRepeatedly(Return(true));
     EXPECT_CALL(*view, getTimeStep()).WillRepeatedly(Return(0));
     EXPECT_CALL(*view, getMaxThreshold()).WillRepeatedly(Return(0));
     EXPECT_CALL(*view, getMinThreshold()).WillRepeatedly(Return(0));
@@ -217,6 +223,7 @@ public:
   void testUpdateModelWithMoreXYZBins()
   {
     MockMDRebinningView* view = new MockMDRebinningView;
+    EXPECT_CALL(*view, getOutputHistogramWS()).WillRepeatedly(Return(true));
     EXPECT_CALL(*view, getTimeStep()).WillRepeatedly(Return(0));
     EXPECT_CALL(*view, getMaxThreshold()).WillRepeatedly(Return(0));
     EXPECT_CALL(*view, getMinThreshold()).WillRepeatedly(Return(0));
@@ -240,10 +247,38 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(pRequest));
   }
 
+  void testUpdateModelWithDifferentOutputType()
+  {
+    MockMDRebinningView* view = new MockMDRebinningView;
+    EXPECT_CALL(*view, getOutputHistogramWS()).WillRepeatedly(Return(false)); //Output a full MDEW workspace via SliceMD
+    EXPECT_CALL(*view, getTimeStep()).WillRepeatedly(Return(0));
+    EXPECT_CALL(*view, getMaxThreshold()).WillRepeatedly(Return(0));
+    EXPECT_CALL(*view, getMinThreshold()).WillRepeatedly(Return(0));
+    EXPECT_CALL(*view, getApplyClip()).WillRepeatedly(Return(false));
+    std::string viewXML = constrctGeometryOnlyXML("qx", "qy", "qz", "en");
+    EXPECT_CALL(*view, getAppliedGeometryXML()).WillRepeatedly(Return(viewXML.c_str()));
+
+    MockRebinningActionManager* pRequest = new MockRebinningActionManager;
+    EXPECT_CALL(*pRequest, ask(RecalculateAll)).Times(1); //Output type changed. Requires re-execution.
+
+    MockWorkspaceProvider wsProvider;
+    EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillRepeatedly(Return(true));
+
+    vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
+    dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
+
+    MDEWRebinningPresenter presenter(dataSet, pRequest, view, wsProvider);
+    presenter.updateModel();
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(view));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(pRequest));
+  }
+
   void testUpdateModelWithApplyClipping()
   {
 
     MockMDRebinningView* view = new MockMDRebinningView;
+    EXPECT_CALL(*view, getOutputHistogramWS()).WillRepeatedly(Return(true));
     EXPECT_CALL(*view, getTimeStep()).WillRepeatedly(Return(0));
     EXPECT_CALL(*view, getMaxThreshold()).WillRepeatedly(Return(0));
     EXPECT_CALL(*view, getMinThreshold()).WillRepeatedly(Return(0));
@@ -278,6 +313,7 @@ public:
   void testUpdateModelWithSameClipping()
   {
     MockMDRebinningView* view = new MockMDRebinningView;
+    EXPECT_CALL(*view, getOutputHistogramWS()).WillRepeatedly(Return(true));
     EXPECT_CALL(*view, getTimeStep()).WillRepeatedly(Return(0));
     EXPECT_CALL(*view, getMaxThreshold()).WillRepeatedly(Return(0));
     EXPECT_CALL(*view, getMinThreshold()).WillRepeatedly(Return(0));
@@ -318,6 +354,7 @@ public:
   void testUpdateModelWithDifferentClipping()
   {
     MockMDRebinningView* view = new MockMDRebinningView;
+    EXPECT_CALL(*view, getOutputHistogramWS()).WillRepeatedly(Return(true));
     EXPECT_CALL(*view, getTimeStep()).WillRepeatedly(Return(0));
     EXPECT_CALL(*view, getMaxThreshold()).WillRepeatedly(Return(0));
     EXPECT_CALL(*view, getMinThreshold()).WillRepeatedly(Return(0));

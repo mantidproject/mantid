@@ -191,7 +191,6 @@ bool WorkspaceGroup::areNamesSimilar() const
   std::vector<std::string>::const_iterator citr;
   for(citr=m_wsNames.begin(); citr!=m_wsNames.end(); ++citr)
   {
-    bool b;
     // Find the last underscore _
     std::size_t pos=(*citr).find_last_of("_");
     // No underscore = not similar

@@ -9,6 +9,7 @@ The [[FindPeaks]] algorithm is used to identify the peaks in the data.
 
 *WIKI*/
 #include "MantidAlgorithms/StripPeaks.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidAPI/TableRow.h"
 
@@ -51,7 +52,7 @@ void StripPeaks::init()
     "A measure of the strictness desired in meeting the condition on peak candidates,\n"
     "Mariscotti recommends 2 (default 4)");
   
-  declareProperty("PeakPositions", "",
+  declareProperty(new ArrayProperty<double>("PeakPositions"),
     "Optional: enter a comma-separated list of the expected X-position of the centre of the peaks. Only peaks near these positions will be fitted." );
 
   declareProperty("PeakPositionTolerance", 0.01,
@@ -114,7 +115,7 @@ API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS)
   findpeaks->setProperty<int>("WorkspaceIndex",getProperty("WorkspaceIndex"));
 
   //Get the specified peak positions, which is optional
-  findpeaks->setProperty<std::string>("PeakPositions", getProperty("PeakPositions"));
+  findpeaks->setProperty<std::vector<double> >("PeakPositions", getProperty("PeakPositions"));
   findpeaks->setProperty<std::string>("BackgroundType", getProperty("BackgroundType"));
   findpeaks->setProperty<bool>("HighBackground", getProperty("HighBackground"));
   findpeaks->setProperty<double>("PeakPositionTolerance", getProperty("PeakPositionTolerance"));

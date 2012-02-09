@@ -1,3 +1,7 @@
+/*****************************************************************************************/
+/********** PLEASE NOTE! THIS FILE WAS AUTO-GENERATED FROM CMAKE.  ***********************/
+/********** Source = kernel.cpp.in *******************************************************/
+/*****************************************************************************************/
 #include <boost/python/module.hpp>
 #include <boost/python/docstring_options.hpp>
 #include <boost/python/def.hpp>
@@ -13,8 +17,8 @@
 #include <boost/python/numeric.hpp>
 
 using namespace Mantid::PythonInterface;
-using PropertyMarshal::SingleValueTypeHandler;
-using PropertyMarshal::SequenceTypeHandler;
+using TypeRegistry::SingleValueTypeHandler;
+using TypeRegistry::SequenceTypeHandler;
 using boost::python::def;
 
 // Forward declare
@@ -32,13 +36,13 @@ BOOST_PYTHON_MODULE(_kernel)
       "Returns the Mantid version string in the form \"major.minor.patch\"");
   
   // Map builtin type objects to appropriate handler classes for properties
-  PropertyMarshal::registerHandler(&PyInt_Type, new SingleValueTypeHandler<int>());
-  PropertyMarshal::registerHandler(&PyBool_Type, new SingleValueTypeHandler<bool>());
-  PropertyMarshal::registerHandler(&PyFloat_Type, new SingleValueTypeHandler<double>());
-  PropertyMarshal::registerHandler(&PyString_Type, new SingleValueTypeHandler<std::string>());
-  PropertyMarshal::registerHandler(&PyList_Type, new SequenceTypeHandler());
-  PropertyMarshal::registerHandler(&PyTuple_Type, new SequenceTypeHandler());
-  PropertyMarshal::registerHandler(&PyArray_Type, new PropertyMarshal::NumpyTypeHandler()); // Numpy array
+  TypeRegistry::registerHandler(&PyInt_Type, new SingleValueTypeHandler<int>());
+  TypeRegistry::registerHandler(&PyBool_Type, new SingleValueTypeHandler<bool>());
+  TypeRegistry::registerHandler(&PyFloat_Type, new SingleValueTypeHandler<double>());
+  TypeRegistry::registerHandler(&PyString_Type, new SingleValueTypeHandler<std::string>());
+  TypeRegistry::registerHandler(&PyList_Type, new SequenceTypeHandler());
+  TypeRegistry::registerHandler(&PyTuple_Type, new SequenceTypeHandler());
+  TypeRegistry::registerHandler(&PyArray_Type, new TypeRegistry::NumpyTypeHandler()); // Numpy array
   
 
 @EXPORT_FUNCTIONS@

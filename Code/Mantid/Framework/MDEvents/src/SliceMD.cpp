@@ -111,6 +111,9 @@ namespace MDEvents
         "  If not specified, a default of 40% of free physical memory is used.");
     //setPropertySettings("Memory", new EnabledWhenProperty(this, "OutputFilename", IS_NOT_DEFAULT));
 
+    //declareProperty(new PropertyWithValue<int>("MaxRecursionDepth", 1000),
+    //  "Sets the maximum recursion depth to use. Can be used to constrain the workspaces internal structure");
+
     setPropertyGroup("OutputFilename", "File Back-End");
     setPropertyGroup("Memory", "File Back-End");
   }

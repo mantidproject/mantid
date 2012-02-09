@@ -197,6 +197,15 @@ namespace MDEvents
     return m_ws->getVertexesArray(m_pos, numVertices);
   }
 
+  coord_t * MDHistoWorkspaceIterator::getVertexesArray(size_t & numVertices, const size_t outDimensions, const bool * maskDim) const
+  {
+    //Do the same thing as is done in the IMDBox
+    UNUSED_ARG(numVertices);
+    UNUSED_ARG(outDimensions);
+    UNUSED_ARG(maskDim);
+    throw std::runtime_error("Not Implemented At present time");
+  }
+
   //----------------------------------------------------------------------------------------------
   /// Returns the position of the center of the box pointed to.
   Mantid::Kernel::VMD MDHistoWorkspaceIterator::getCenter() const

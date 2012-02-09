@@ -35,8 +35,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         #self.declareProperty("FileType", "Event NeXus",
         #                     Validator=ListValidator(types))
         self.declareListProperty("RunNumber", [0], Validator=ArrayBoundedValidator(Lower=0))
-        extensions = [ "_histo.nxs", "_event.nxs", "_neutron_event.dat",
-                      "_neutron0_event.dat", "_neutron1_event.dat", "_neutron0_event.dat and _neutron1_event.dat"]
+        extensions = [ "_histo.nxs", "_event.nxs", "_runinfo.xml"]
         self.declareProperty("Extension", "_event.nxs",
                              Validator=ListValidator(extensions))
         self.declareProperty("CompressOnRead", False,
@@ -79,60 +78,23 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         self.declareProperty("SaveAs", "calibration", ListValidator(outfiletypes))
         self.declareFileProperty("OutputDirectory", "", FileAction.Directory)
 
-    def _findData(self, runnumber, extension):
-        #self.log().information(str(dir()))
-        #self.log().information(str(dir(mantidsimple)))
-        result = FindSNSNeXus(Instrument=self._instrument,
-                              RunNumber=runnumber, Extension=extension)
-#        result = self.executeSubAlg("FindSNSNeXus", Instrument=self._instrument,
-#                                    RunNumber=runnumber, Extension=extension)
-        return result["ResultPath"].value
+    def _loadPreNeXusData(self, runnumber, extension, **kwargs):
+        mykwargs = {}
+        if kwargs.has_key("FilterByTimeStart"):
+            mykwargs["ChunkNumber"] = int(kwargs["FilterByTimeStart"])
+        if kwargs.has_key("FilterByTimeStop"):
+            mykwargs["TotalChunks"] = int(kwargs["FilterByTimeStop"])
 
-    def _addNeXusLogs(self, wksp, nxsfile, reloadInstr):
-        try:
-            LoadNexusLogs(Workspace=wksp, Filename=nxsfile)
-            if reloadInstr:
-                LoadInstrument(Workspace=wksp, InstrumentName=self._instrument, RewriteSpectraMap=False)
-            return True
-        except:
-            return False
-
-
-    def _loadPreNeXusData(self, runnumber, extension):
         # generate the workspace name
         name = "%s_%d" % (self._instrument, runnumber)
         filename = name + extension
 
-        try: # first just try loading the file
-            alg = LoadEventPreNexus(EventFilename=filename, OutputWorkspace=name)
-            wksp = alg['OutputWorkspace']
-        except:
-            # find the file to load
-            filename = self._findData(runnumber, extension)
-            # load the prenexus file
-            alg = LoadEventPreNexus(EventFilename=filename, OutputWorkspace=name)
-            wksp = alg['OutputWorkspace']
+        alg = LoadPreNexus(Filename=filename, OutputWorkspace=name, **mykwargs)
+        wksp = alg['OutputWorkspace']
 
         # add the logs to it
-        reloadInstr = (str(self._instrument) == "SNAP")
-
-        nxsfile = "%s_%d_event.nxs" % (self._instrument, runnumber)
-        if self._addNeXusLogs(wksp, nxsfile, reloadInstr):
-            return wksp
-
-        nxsfile = "%s_%d_histo.nxs" % (self._instrument, runnumber)
-        if self._addNeXusLogs(wksp, nxsfile, reloadInstr):
-            return wksp
-
-        nxsfile = self._findData(runnumber, "_event.nxs")
-        if self._addNeXusLogs(wksp, nxsfile, reloadInstr):
-            return wksp
-
-        nxsfile = self._findData(runnumber, "_histo.nxs")
-        if self._addNeXusLogs(wksp, nxsfile, reloadInstr):
-            return wksp
-
-        # TODO filter out events using timemin and timemax
+        if (str(self._instrument) == "SNAP"):
+            LoadInstrument(Workspace=wksp, InstrumentName=self._instrument, RewriteSpectraMap=False)
 
         return wksp
 
@@ -141,37 +103,14 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         name = "%s_%d" % (self._instrument, runnumber)
         filename = name + extension
 
-        try: # first just try loading the file
-            alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, **kwargs)
-
-            return alg.workspace()
-        except:
-            pass
-
-        # find the file to load
-        filename = self._findData(runnumber, extension)
-
-        # TODO use timemin and timemax to filter what events are being read
         alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, **kwargs)
-
         return alg.workspace()
 
     def _loadHistoNeXusData(self, runnumber, extension):
         name = "%s_%d" % (self._instrument, runnumber)
         filename = name + extension
 
-        try: # first just try loading the file
-            alg = LoadTOFRawNexus(Filename=filename, OutputWorkspace=name)
-
-            return alg.workspace()
-        except:
-            pass
-
-        # find the file to load
-        filename = self._findData(runnumber, extension)
-
         alg = LoadTOFRawNexus(Filename=filename, OutputWorkspace=name)
-
         return alg.workspace()
 
     def _loadData(self, runnumber, extension, filterWall=None):
@@ -189,16 +128,8 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             return self._loadEventNeXusData(runnumber, extension, **filter)
         elif extension.endswith("_histo.nxs"):
             return self._loadHistoNeXusData(runnumber, extension)
-        elif "and" in extension:
-            wksp0 = self._loadPreNeXusData(runnumber, "_neutron0_event.dat")
-            RenameWorkspace(InputWorkspace=wksp0,OutputWorkspace="tmp")
-            wksp1 = self._loadPreNeXusData(runnumber, "_neutron1_event.dat")
-            Plus(LHSWorkspace=wksp1, RHSWorkspace="tmp",OutputWorkspace=wksp1)
-            wksp1.getRun()['gd_prtn_chrg'] = wksp1.getRun()['gd_prtn_chrg'].value/2
-            mtd.deleteWorkspace("tmp")
-            return wksp1;
         else:
-            return self._loadPreNeXusData(runnumber, extension)
+            return self._loadPreNeXusData(runnumber, extension, **filter)
 
     def _cccalibrate(self, wksp, calib, filterLogs=None):
         if wksp is None:
@@ -379,10 +310,6 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         return wksp
 
     def PyExec(self):
-        # temporary hack for getting python algorithms working
-        import mantidsimple
-        globals()["FindSNSNeXus"] = mantidsimple.FindSNSNeXus
-
         # get generic information
         SUFFIX = self.getProperty("Extension")
         self._binning = self.getProperty("Binning")
@@ -420,9 +347,11 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             detectors = self.getProperty("DetectorsPeaks").strip().split(',')
             if detectors[0]:
                 self._lastpixel = int(detectors[0])
+                self._lastpixel3 = self._lastpixel
             if len(detectors) >= 2:
                 self._lastpixel2 = self._lastpixel+int(detectors[1])
-            if len(detectors) >= 2:
+                self._lastpixel3 = self._lastpixel2
+            if len(detectors) >= 3:
                 self._lastpixel3 = self._lastpixel2+int(detectors[2])
             pixelbin2 = self._xpixelbin*self._ypixelbin
             self._ccnumber = self.getProperty("CrossCorrelationPoints")

@@ -233,6 +233,15 @@ public:
     }
   }
 
+  void test_masked_get_vertexes_call_throws()
+  {
+    boost::scoped_ptr<MDHistoWorkspaceIterator> it(new MDHistoWorkspaceIterator(ws));
+    size_t numVertexes;
+    size_t outDimensions = 1;
+    bool maskDim[] = {true};
+    TSM_ASSERT_THROWS("Not implemented yet, should throw", it->getVertexesArray(numVertexes, outDimensions, maskDim), std::runtime_error);
+  }
+
 };
 
 
