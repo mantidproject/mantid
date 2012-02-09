@@ -144,25 +144,41 @@ namespace Mantid
     */
     void SynchronisingGeometryPresenter::insertMappedPresenter(DimPresenter_sptr candidateMappedDimension)
     {
-      if(!this->hasXDim())
+      /*
+      Check to see whether there is already a mapping for this presenter. If there is, don't create another one!
+      */
+      bool bAlreadyMapped = false;
+      MappingType::iterator it = m_mapping.begin();
+      for (it ; it != m_mapping.end(); ++it)
       {
-        m_mapping.insert(std::make_pair(X_AXIS, candidateMappedDimension));
-        candidateMappedDimension->setMapping(X_AXIS);
+        if (it->second == candidateMappedDimension)
+        {
+          bAlreadyMapped = true;
+          break;
+        }
       }
-      else if(!this->hasYDim())
+      if(!bAlreadyMapped)
       {
-        m_mapping.insert(std::make_pair(Y_AXIS, candidateMappedDimension));
-        candidateMappedDimension->setMapping(Y_AXIS);
-      }
-      else if(!hasZDim())
-      {
-        m_mapping.insert(std::make_pair(Z_AXIS, candidateMappedDimension));
-        candidateMappedDimension->setMapping(Z_AXIS);
-      }
-      else if(!hasTDim())
-      {
-        m_mapping.insert(std::make_pair(T_AXIS, candidateMappedDimension));
-        candidateMappedDimension->setMapping(T_AXIS);
+        if(!this->hasXDim())
+        {
+          m_mapping.insert(std::make_pair(X_AXIS, candidateMappedDimension));
+          candidateMappedDimension->setMapping(X_AXIS);
+        }
+        else if(!this->hasYDim())
+        {
+          m_mapping.insert(std::make_pair(Y_AXIS, candidateMappedDimension));
+          candidateMappedDimension->setMapping(Y_AXIS);
+        }
+        else if(!hasZDim())
+        {
+          m_mapping.insert(std::make_pair(Z_AXIS, candidateMappedDimension));
+          candidateMappedDimension->setMapping(Z_AXIS);
+        }
+        else if(!hasTDim())
+        {
+          m_mapping.insert(std::make_pair(T_AXIS, candidateMappedDimension));
+          candidateMappedDimension->setMapping(T_AXIS);
+        }
       }
     }
 

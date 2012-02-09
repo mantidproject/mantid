@@ -88,11 +88,9 @@ namespace Mantid
       while(true)
       {
         Mantid::signal_t signal_normalized= it->getNormalizedSignal();
-
         if (!boost::math::isnan( signal_normalized ) && m_thresholdRange->inRange(signal_normalized))
         {
           useBox[i] = true;
-
           signals->InsertNextValue(static_cast<float>(signal_normalized));
 
           coord_t* coords = it->getVertexesArray(nVertexes, nNonIntegrated, masks);
@@ -114,21 +112,18 @@ namespace Mantid
               points->SetPoint(id, coord[0], coord[1], 0);
             }
           }
-
           // Free memory
           delete [] coords;
-
         } // valid number of vertexes returned
         else
         {
           useBox[i] = false;
         }
-        ++i;
-
         if(!it->next())
         { 
           break; 
         }
+        ++i;
       }
       const size_t nCells = i;
       delete[] masks;
