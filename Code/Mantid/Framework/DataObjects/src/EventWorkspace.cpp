@@ -57,21 +57,24 @@ namespace DataObjects
    */
   bool EventWorkspace::threadSafe() const
   {
-    // see if somebody is trying the cheat and report it back
-    if (this->m_threadSafeOnce)
-    {
-      this->m_threadSafeOnce = false;
-      return true;
-    }
-
-    //Return false if ANY event list is not sorted. You can't have 2 threads trying to sort the
-    //  same event list simultaneously.
-    for (size_t i=0; i<data.size(); i++)
-      if (!data[i]->isSortedByTof()) {
-        g_log.debug() << "Workspace is not sorted therefore not thread safe\n";
-        return false;
-      }
+    // Since there is a mutex lock around sorting, EventWorkspaces are always safe.
     return true;
+//
+//    // see if somebody is trying the cheat and report it back
+//    if (this->m_threadSafeOnce)
+//    {
+//      this->m_threadSafeOnce = false;
+//      return true;
+//    }
+//
+//    //Return false if ANY event list is not sorted. You can't have 2 threads trying to sort the
+//    //  same event list simultaneously.
+//    for (size_t i=0; i<data.size(); i++)
+//      if (!data[i]->isSortedByTof()) {
+//        g_log.debug() << "Workspace is not sorted therefore not thread safe\n";
+//        return false;
+//      }
+//    return true;
   }
 
   /**
