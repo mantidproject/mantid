@@ -29,6 +29,7 @@ set ( SRC_FILES
 	src/FrameworkManager.cpp
 	src/FunctionDomain.cpp
 	src/FunctionFactory.cpp
+	src/FunctionProperty.cpp
 	src/IDataFileChecker.cpp
 	src/IEventList.cpp
 	src/IEventWorkspace.cpp
@@ -127,6 +128,7 @@ set ( INC_FILES
 	inc/MantidAPI/FrameworkManager.h
 	inc/MantidAPI/FunctionDomain.h
 	inc/MantidAPI/FunctionFactory.h
+	inc/MantidAPI/FunctionProperty.h
 	inc/MantidAPI/IAlgorithm.h
 	inc/MantidAPI/IArchiveSearch.h
 	inc/MantidAPI/IBackgroundFunction.h
@@ -223,6 +225,7 @@ set ( TEST_FILES
 	test/FilePropertyTest.h
 	test/FrameworkManagerTest.h
 	test/FunctionTest.h
+	test/FunctionPropertyTest.h
 	test/IEventListTest.h
 	test/IFunctionMDTest.h
 	test/IMDWorkspaceTest.h

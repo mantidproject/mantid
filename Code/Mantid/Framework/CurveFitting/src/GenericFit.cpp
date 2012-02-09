@@ -17,6 +17,7 @@ Setting the Output property defines the names of the output workspaces. One of t
 #include "MantidCurveFitting/GenericFit.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidCurveFitting/SimplexMinimizer.h"
+#include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/TableRow.h"
@@ -71,7 +72,7 @@ namespace CurveFitting
     declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input), "Name of the input Workspace");
     declareProperty("Input","","Workspace slicing parameters. Must be consistent with the Function type (see FitFunction::setWorkspace).");
 
-    declareProperty("Function","",Direction::InOut );
+    declareProperty(new API::FunctionProperty("Function"));
 
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
     mustBePositive->setLower(0);
