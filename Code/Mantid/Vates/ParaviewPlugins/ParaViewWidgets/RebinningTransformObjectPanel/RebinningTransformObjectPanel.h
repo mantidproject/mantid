@@ -50,8 +50,6 @@ private:
   ThresholdRangeWidget* m_thresholdWidget;
 
 private slots:
-  /// Handler for ignoring bin changes. i.e. 
-  void ignoreBinChangesListner();
 
 public:
 

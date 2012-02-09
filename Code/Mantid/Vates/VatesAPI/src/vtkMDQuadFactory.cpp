@@ -52,7 +52,7 @@ namespace Mantid
       ///Estimate the number of boxes needed.
       size_t maxSize = imdws->getBoxController()->getTotalNumMDBoxes();
       std::vector<size_t> list = imdws->getBoxController()->getNumMDBoxes();
-
+     
       // Create 4 points per box.
       vtkPoints *points = vtkPoints::New();
       points->SetNumberOfPoints(maxSize * 4);
@@ -119,11 +119,11 @@ namespace Mantid
         {
           useBox[i] = false;
         }
+        ++i;
         if(!it->next())
         { 
           break; 
         }
-        ++i;
       }
       const size_t nCells = i;
       delete[] masks;

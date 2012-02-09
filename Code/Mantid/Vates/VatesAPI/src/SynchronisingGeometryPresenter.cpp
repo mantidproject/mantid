@@ -99,8 +99,6 @@ namespace Mantid
     void SynchronisingGeometryPresenter::dimensionRealigned(DimensionPresenter* pDimensionPresenter)
     {
       swap(pDimensionPresenter->getMapping(), pDimensionPresenter->getVisDimensionName());
-
-      m_view->raiseNoClipping();
     }
 
     /**
@@ -239,8 +237,6 @@ namespace Mantid
         m_dimPresenters[i]->updateIfNotIntegrated();
       }
       pDimensionPresenter->acceptAppliedModel(); 
-      //Pass on via-view that clipping boxes should be disregarded.
-      m_view->raiseNoClipping();
     }
 
     /**

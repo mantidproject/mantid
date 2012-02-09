@@ -43,7 +43,6 @@ namespace Mantid
       virtual const DimensionViewFactory& getDimensionViewFactory() = 0;
       virtual ~GeometryView(){};
       virtual void raiseModified() = 0;
-      virtual void raiseNoClipping() = 0;
     };
   }
 }
