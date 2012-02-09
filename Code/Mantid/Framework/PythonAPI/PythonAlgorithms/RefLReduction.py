@@ -82,6 +82,8 @@ class RefLReduction(PythonAlgorithm):
         subtract_data_bck = self.getProperty("SubtractSignalBackground")
         subtract_norm_bck = self.getProperty("SubtractNormBackground")
         
+        
+        
         ########################################################################
         # Find full path to event NeXus data file
         f = FileFinder.findRuns("REF_L%d" %run_numbers[0])
@@ -271,7 +273,7 @@ class RefLReduction(PythonAlgorithm):
             # Work on Normalization file #########################################
 
         s_normalization_run = str(normalization_run).strip()
-        s_normalization_run = '' #REMOVE_ME
+#        s_normalization_run = '' #REMOVE_ME
         if (s_normalization_run != ''):
         
             # Find full path to event NeXus data file
