@@ -76,11 +76,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().addOrReplace(wsName, ws2D));
 
     // set up fitting function
-    GausDecay* fn = new GausDecay();
-    fn->initialize();
+    GausDecay fn;
+    fn.initialize();
 
     //alg2.setFunction(fn);
-    alg2.setPropertyValue("Function",*fn);
+    alg2.setPropertyValue("Function",fn);
 
 
     // Set which spectrum to fit against and initial starting values

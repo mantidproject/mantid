@@ -138,19 +138,19 @@ public:
     alg2.setPropertyValue("EndX","150");
 
     // set up fitting function and pass to Fit
-    IkedaCarpenterPV* icpv = new IkedaCarpenterPV();  
-    icpv->initialize();
+    IkedaCarpenterPV icpv;
+    icpv.initialize();
 
-    icpv->setParameter("I",1000);
-    icpv->tie("Alpha0", "1.597107");
-    icpv->tie("Alpha1", "1.496805");
-    icpv->tie("Beta0", "31.891718");
-    icpv->tie("Kappa", "46.025921");
+    icpv.setParameter("I",1000);
+    icpv.tie("Alpha0", "1.597107");
+    icpv.tie("Alpha1", "1.496805");
+    icpv.tie("Beta0", "31.891718");
+    icpv.tie("Kappa", "46.025921");
     //icpv->tie("SigmaSquared", "100.0");
-    icpv->setParameter("X0",45.0);
+    icpv.setParameter("X0",45.0);
     //icpv->tie("Gamma", "1.0");
 
-    alg2.setPropertyValue("Function",*icpv);
+    alg2.setPropertyValue("Function",icpv);
 
     // execute fit
     TS_ASSERT_THROWS_NOTHING(

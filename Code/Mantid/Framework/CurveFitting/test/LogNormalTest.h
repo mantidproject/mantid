@@ -83,13 +83,13 @@
 		TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().addOrReplace(wsName, ws2D));
 
 		// set up LogNormal fitting function
-		LogNormal* fn = new LogNormal();
-		fn->initialize();
+		LogNormal fn;
+		fn.initialize();
 
 		// get close to exact values. Otherwise algorithm fails to a local minimum
-		fn->setParameter("Height",90.0);
-		fn->setParameter("Location",2.0);
-		fn->setParameter("Scale",0.20);
+		fn.setParameter("Height",90.0);
+		fn.setParameter("Location",2.0);
+		fn.setParameter("Scale",0.20);
 
 		/*Parameters for Height, Location and Scale can be estimated from:
 		 * Let:	dx_i = (x_{i+1}-x_{i-1})/2
@@ -104,7 +104,7 @@
  		 *  */
 
 		//alg2.setFunction(fn);
-		alg2.setPropertyValue("Function",*fn);
+		alg2.setPropertyValue("Function",fn);
 
 
 		// Set which spectrum to fit against and initial starting values
