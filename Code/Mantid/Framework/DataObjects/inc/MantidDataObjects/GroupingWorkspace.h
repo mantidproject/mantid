@@ -27,6 +27,7 @@ namespace DataObjects
   public:
     GroupingWorkspace(Geometry::Instrument_const_sptr inst);
     GroupingWorkspace();
+    GroupingWorkspace(size_t numvectors);
     ~GroupingWorkspace();
     
     /** Gets the name of the workspace type
