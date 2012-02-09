@@ -79,7 +79,7 @@ namespace API
     virtual signal_t getInnerError(size_t index) const;
 
   private:
-    void calcWorkspacePos();
+    void calcWorkspacePos(size_t newWI);
 
     /// Workspace being iterated
     const MatrixWorkspace * m_ws;
@@ -100,19 +100,26 @@ namespace API
     size_t m_xIndex;
 
     /// Coordinates of the center at the current iterator pos
-    Mantid::Kernel::VMD m_center;
+    mutable Mantid::Kernel::VMD m_center;
 
-    /// Current signal
-    double m_Y;
+    /// Cached copies of X,Y,E at current workspace index
+    MantidVec m_X;
+    MantidVec m_Y;
+    mutable MantidVec m_E;
 
-    /// Current error
-    double m_E;
+    /// Error vector has been cached?
+    mutable bool m_errorIsCached;
 
     /// Is the matrix workspace binned (true) e.g. Y vector is 1 shorter than X
     bool m_isBinnedData;
 
     /// The Y (vertical, e.g. spectra) dimension
     Mantid::Geometry::IMDDimension_const_sptr m_dimY;
+
+    /// Blocksize of workspace
+    size_t m_blockSize;
+    /// Number of histograms in workspace
+    size_t m_numHistos;
   };
 
 
