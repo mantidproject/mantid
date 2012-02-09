@@ -73,9 +73,6 @@ namespace Mantid
           "", Direction::Input, wsValidator),
           "Name of the workspace to be saved.");
 
-      BoundedValidator<double> *mustBePositive =
-          new BoundedValidator<double> ();
-      mustBePositive->setLower(0.0);
       // if the value is not set, one should better have it invalid, e.g. NaN
       declareProperty("Efixed",SaveNXSPE::MASK_FLAG,
           "Value of the fixed energy to write into NXSPE file.");

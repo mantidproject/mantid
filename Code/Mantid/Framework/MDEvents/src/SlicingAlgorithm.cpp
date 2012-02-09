@@ -84,7 +84,7 @@ namespace MDEvents
     setPropertyGroup("Origin", "Non-Aligned Binning");
     setPropertyGroup("ForceOrthogonal", "Non-Aligned Binning");
     setPropertySettings("Origin", ps->clone() );
-    setPropertySettings("ForceOrthogonal", ps->clone() );
+    setPropertySettings("ForceOrthogonal", ps );
 
   }
 

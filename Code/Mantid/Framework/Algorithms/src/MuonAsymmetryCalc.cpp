@@ -29,8 +29,6 @@ void MuonAsymmetryCalc::init()
   declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "",
       Direction::Output), "The name of the workspace to be created as the output of the algorithm");
 
-  BoundedValidator<int> *zeroOrGreater = new BoundedValidator<int> ();
-  zeroOrGreater->setLower(1);
   declareProperty(new ArrayProperty<int> ("ForwardSpectra"),
       "The spectra numbers of the forward group");
   declareProperty(new ArrayProperty<int> ("BackwardSpectra"),

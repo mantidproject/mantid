@@ -75,7 +75,7 @@ namespace Crystal
 
     // use negative values, force user to input all parameters
     this->declareProperty(new PropertyWithValue<double>( "a",-1.0,
-          mustBePositive->clone(),Direction::Input),"Lattice parameter a");
+          mustBePositive,Direction::Input),"Lattice parameter a");
 
     this->declareProperty(new PropertyWithValue<double>( "b",-1.0,
           mustBePositive->clone(),Direction::Input),"Lattice parameter b");
@@ -84,7 +84,7 @@ namespace Crystal
           mustBePositive->clone(),Direction::Input),"Lattice parameter c");
 
     this->declareProperty(new PropertyWithValue<double>( "alpha",-1.0,
-          reasonable_angle->clone(),Direction::Input),"Lattice parameter alpha");
+          reasonable_angle,Direction::Input),"Lattice parameter alpha");
 
     this->declareProperty(new PropertyWithValue<double>("beta",-1.0,
           reasonable_angle->clone(),Direction::Input),"Lattice parameter beta");
