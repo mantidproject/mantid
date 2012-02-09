@@ -98,7 +98,7 @@ namespace API
       {
         m_pos++;
         m_xIndex++;
-        if (m_xIndex > m_blockSize)
+        if (m_xIndex >= m_blockSize)
         {
           m_xIndex = 0;
           this->calcWorkspacePos(m_workspaceIndex+1);
@@ -115,7 +115,7 @@ namespace API
       // Go through every point;
       m_pos++;
       m_xIndex++;
-      if (m_xIndex > m_blockSize)
+      if (m_xIndex >= m_blockSize)
       {
         m_xIndex = 0;
         this->calcWorkspacePos(m_workspaceIndex+1);
