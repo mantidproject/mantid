@@ -42,6 +42,8 @@ public:
 
   void setFastMode(bool fast);
 
+  void setZerosAsNan(bool val);
+
 protected:
   /// Workspace being shown
   Mantid::API::IMDWorkspace_sptr m_ws;
@@ -67,6 +69,9 @@ protected:
   /// When true, renders the view as quickly as the workspace resolution allows
   /// when false, renders one point per pixel
   bool m_fast;
+
+  /// Convert zeroes to NAN
+  bool m_zerosAsNan;
 };
 
 } // namespace SliceViewer

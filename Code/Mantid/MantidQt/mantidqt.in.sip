@@ -233,6 +233,7 @@ public:
   bool getColorScaleLog() const;
   void setColorScaleAutoFull();
   void setColorScaleAutoSlice() ;
+  void setTransparentZeros(bool transparent);
 
 
 };

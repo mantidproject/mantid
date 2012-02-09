@@ -15,7 +15,7 @@ using Mantid::Geometry::IMDDimension_const_sptr;
 //-------------------------------------------------------------------------
 /// Constructor
 QwtRasterDataMD::QwtRasterDataMD()
-: m_slicePoint(NULL), m_fast(true)
+: m_slicePoint(NULL), m_fast(true), m_zerosAsNan(true)
 {
   m_range = QwtDoubleInterval(0.0, 1.0);
   m_nd = 0;
@@ -47,6 +47,7 @@ QwtRasterData* QwtRasterDataMD::copy() const
     out->m_slicePoint[d] = this->m_slicePoint[d];
   out->m_ws = this->m_ws;
   out->m_fast = this->m_fast;
+  out->m_zerosAsNan = this->m_zerosAsNan;
   return out;
 }
 
@@ -84,7 +85,7 @@ double QwtRasterDataMD::value(double x, double y) const
   delete [] lookPoint;
 
   // Special case for 0 = show as NAN
-  if (value == 0.)
+  if (m_zerosAsNan && value == 0.)
     return nan;
 
   return value;
@@ -108,6 +109,17 @@ void QwtRasterDataMD::setFastMode(bool fast)
 {
   this->m_fast = fast;
 }
+
+//------------------------------------------------------------------------------------------------------
+/** Set to convert Zeros to NAN to make them transparent when displaying
+ *
+ * @param val :: true to make 0 = nan
+ */
+void QwtRasterDataMD::setZerosAsNan(bool val)
+{
+  this->m_zerosAsNan = val;
+}
+
 
 //------------------------------------------------------------------------------------------------------
 /** Return how many pixels this area should be rendered as
