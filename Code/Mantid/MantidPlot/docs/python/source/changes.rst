@@ -54,3 +54,5 @@ The major differences in the new API are as follows:
 
 * The *qti* module no longer exists. All user scripts should simply use the *mantidplot* module which contains
   all of the *qti* functionality but adds protection against crashes from closed windows.
+
+* The *getSampleDetails()* function has been removed. It should be replaced with *getRun()*.
