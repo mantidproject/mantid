@@ -61,7 +61,7 @@ namespace API
   }
 
   /// Calculate the workspace index/x index for this iterator position
-  void MatrixWorkspaceMDIterator::calcWorkspacePos(size_t newWI)
+  inline void MatrixWorkspaceMDIterator::calcWorkspacePos(size_t newWI)
   {
     if (newWI >= m_numHistos)
       return;
