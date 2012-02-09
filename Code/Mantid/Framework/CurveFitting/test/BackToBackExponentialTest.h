@@ -213,6 +213,11 @@ public:
     BackToBackExponential* fn = new BackToBackExponential();
     fn->initialize();
 
+    // Test categories
+    const std::vector<std::string> categories = fn->categories();
+    TS_ASSERT( categories.size() == 1 );
+    TS_ASSERT( categories[0] == "Peak" );
+
     fn->setParameter("I",237.0);
     fn->setParameter("A",0.4);
     fn->setParameter("B",0.03);
