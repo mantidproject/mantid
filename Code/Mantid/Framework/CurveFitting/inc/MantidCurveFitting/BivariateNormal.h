@@ -99,16 +99,15 @@ namespace Mantid
 
       std::vector< std::string > getAttributeNames () const;
 
-
       Mantid::API::IFitFunction::Attribute getAttribute(const std::string &attName)const;
 
-      void 	setAttribute (const std::string &attName, const  Mantid::API::IFitFunction::Attribute &att);
+      void setAttribute (const std::string &attName, const  Mantid::API::IFitFunction::Attribute &att);
 
-      bool   hasAttribute (const std::string &attName) const;
+      bool  hasAttribute (const std::string &attName) const;
 
       void  fit(const std::vector<double>& ,const std::vector<double>&);
-    protected:
 
+    protected:
       void init();
 
       /// Check for changes in parameters, etc. Calculates common values
@@ -137,16 +136,13 @@ namespace Mantid
       Syy,///<=&Sigma<sub>cell</sub> (row<sub>cell</sub>-my)<sup>2</sup>
       Sxy;///<=&Sigma<sub>cell</sub> (column<sub>cell</sub>-mx)*(row<sub>cell</sub>-my)
 
-
-
       double* expVals; ///< Save common exponential values for each cell
 
       double uu,
       coefNorm ,
       expCoeffx2 ,
       expCoeffy2 ,
-      expCoeffxy; //Other common values used in calculating values and
-      //derivatives
+      expCoeffxy; //Other common values used in calculating values and derivatives
 
       BoundaryConstraint *BackConstraint; ///< Constraint for background
 

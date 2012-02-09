@@ -46,14 +46,12 @@ namespace Mantid
 
     Kernel::Logger& BivariateNormal::g_log= Kernel::Logger::get("BivariateNormal");
 
-    BivariateNormal::BivariateNormal():BackgroundFunction()
+    BivariateNormal::BivariateNormal() : BackgroundFunction(), LastParams(NULL), expVals(NULL),
+        BackConstraint(NULL), MeanxConstraint(NULL), MeanyConstraint(NULL), IntensityConstraint(NULL)
     {
-      LastParams = 0;
       SIxx = SIyy = SIxy = Sxx = Syy = Sxy = -1; //Var and CoVar calc from parameters
-      expVals = 0;
       Attrib = new double[16];
-      if( AttNames.size() >1)
-        return;
+
       AttNames.push_back(std::string("StartRow"));
       AttNames.push_back(std::string("StartCol"));
       AttNames.push_back(std::string("NRows"));
@@ -74,28 +72,9 @@ namespace Mantid
 
     BivariateNormal::~BivariateNormal()
     {
-
-      if (!Attrib)
-        delete[] Attrib;
-
-      if (!expVals)
-        delete[] expVals;
-
-      if (!LastParams)
-        delete[] LastParams;
-
-      if (!BackConstraint)
-        delete BackConstraint;
-
-      if (!MeanxConstraint)
-        delete MeanxConstraint;
-
-      if (!MeanyConstraint)
-        delete MeanyConstraint;
-
-      if (!IntensityConstraint)
-        delete IntensityConstraint;
-
+      delete [] Attrib;
+      delete [] LastParams;
+      delete [] expVals;
     }
 
     // overwrite IFunction base class methods
