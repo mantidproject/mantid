@@ -146,8 +146,7 @@ namespace Mantid
       Check to see whether there is already a mapping for this presenter. If there is, don't create another one!
       */
       bool bAlreadyMapped = false;
-      MappingType::iterator it = m_mapping.begin();
-      for (it ; it != m_mapping.end(); ++it)
+      for (MappingType::iterator it = m_mapping.begin(); it != m_mapping.end(); ++it)
       {
         if (it->second == candidateMappedDimension)
         {

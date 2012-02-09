@@ -49,9 +49,9 @@ namespace Mantid
         bool bIntegrated = imdws->getDimension(i_dim)->getIsIntegrated();
         masks[i_dim] = !bIntegrated; //TRUE for unmaksed, integrated dimensions are masked.
       }
-      ///Estimate the number of boxes needed.
-      size_t maxSize = imdws->getBoxController()->getTotalNumMDBoxes();
-      std::vector<size_t> list = imdws->getBoxController()->getNumMDBoxes();
+
+      //Exact number of boxes given. Possible improvement - get this info via IMDMethods instead of IMDEventWorkspace methods to keep this generic.
+      const size_t maxSize = imdws->getBoxController()->getTotalNumMDBoxes();
      
       // Create 4 points per box.
       vtkPoints *points = vtkPoints::New();
@@ -73,24 +73,21 @@ namespace Mantid
       vtkIdList * quadPointList = vtkIdList::New();
       quadPointList->SetNumberOfIds(4);
 
-      bool* useBox = new bool[maxSize];
-
       Mantid::API::CoordTransform* transform = NULL;
       if (m_useTransform)
       {
         transform = imdws->getTransformToOriginal();
-        std::cout << "Using transform" << std::endl;
       }
 
       Mantid::coord_t out[2];
+      bool* useBox = new bool[maxSize];
 
-      size_t i = 0;
-      while(true)
+      for(size_t iBox = 0; iBox < maxSize; ++iBox)
       {
         Mantid::signal_t signal_normalized= it->getNormalizedSignal();
         if (!boost::math::isnan( signal_normalized ) && m_thresholdRange->inRange(signal_normalized))
         {
-          useBox[i] = true;
+          useBox[iBox] = true;
           signals->InsertNextValue(static_cast<float>(signal_normalized));
 
           coord_t* coords = it->getVertexesArray(nVertexes, nNonIntegrated, masks);
@@ -101,7 +98,7 @@ namespace Mantid
           for(size_t v = 0; v < nVertexes; ++v)
           {
             coord_t * coord = coords + v*2;
-            size_t id = i*4 + v;
+            size_t id = iBox*4 + v;
             if(m_useTransform)
             {
               transform->apply(coord, out);
@@ -117,18 +114,13 @@ namespace Mantid
         } // valid number of vertexes returned
         else
         {
-          useBox[i] = false;
+          useBox[iBox] = false;
         }
-        ++i;
-        if(!it->next())
-        { 
-          break; 
-        }
+        it->next();
       }
-      const size_t nCells = i;
-      delete[] masks;
 
-      for(size_t ii = 0; ii < nCells; ++ii)
+      delete[] masks;
+      for(size_t ii = 0; ii < maxSize ; ++ii)
       {
 
         if (useBox[ii] == true)
@@ -139,9 +131,7 @@ namespace Mantid
           quadPointList->SetId(1, pointIds + 1); //dxyz
           quadPointList->SetId(2, pointIds + 3); //dxdyz
           quadPointList->SetId(3, pointIds + 2); //xdyz
-
           visualDataSet->InsertNextCell(VTK_QUAD, quadPointList);
-
         } // valid number of vertexes returned
       }
 
