@@ -26,6 +26,7 @@
 #include <boost/math/special_functions/fpclassify.hpp>
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Strings.h"
+#include "MantidAPI/MatrixWorkspaceMDIterator.h"
 
 using Mantid::Kernel::DateAndTime;
 using Mantid::Kernel::TimeSeriesProperty;
@@ -1426,6 +1427,18 @@ namespace Mantid
 
 
     //--------------------------------------------------------------------------------------------
+    /** Create a IMDIterator from this 2D workspace
+     *
+     * @param function :: implicit function
+     * @return MatrixWorkspaceMDIterator
+     */
+    IMDIterator* MatrixWorkspace::createIterator(Mantid::Geometry::MDImplicitFunction * function) const
+    {
+      return new MatrixWorkspaceMDIterator(this, function);
+    }
+
+
+    //--------------------------------------------------------------------------------------------
     /** Save the spectra detector map to an open NeXus file.
      * @param file :: open NeXus file
      * @param spec :: list of the Workspace Indices to save.
@@ -1561,7 +1574,37 @@ namespace Mantid
         Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y, std::vector<signal_t> & e) const
     {
       UNUSED_ARG(start);UNUSED_ARG(end);UNUSED_ARG(normalize);UNUSED_ARG(x);UNUSED_ARG(y);UNUSED_ARG(e);
-      throw std::runtime_error("MatrixWorkspace::getLinePlot() not yet implemented.");
+      //throw std::runtime_error("MatrixWorkspace::getLinePlot() not yet implemented.");
+    }
+
+    /// Returns the (normalized) signal at a given coordinates
+    signal_t MatrixWorkspace::getSignalAtCoord(const coord_t * coords) const
+    {
+      coord_t x = coords[0];
+      coord_t y = coords[1];
+      size_t wi = size_t(y);
+      if (wi < this->getNumberHistograms())
+      {
+        const MantidVec & X = this->readX(wi);
+        MantidVec::const_iterator it = std::lower_bound(X.begin(), X.end(), x);
+        if (it == X.end())
+        {
+          // Out of range
+          return std::numeric_limits<double>::quiet_NaN();
+        }
+        else
+        {
+          size_t i = (it - X.begin());
+          if (i > 0)
+            return this->readY(wi)[i-1];
+          else
+            return std::numeric_limits<double>::quiet_NaN();
+        }
+
+      }
+      else
+        // Out of range
+        return std::numeric_limits<double>::quiet_NaN();
     }
 
 
