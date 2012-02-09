@@ -1338,6 +1338,7 @@ namespace Mantid
       return id;
     }
 
+    //===============================================================================
     class MWDimension: public Mantid::Geometry::IMDDimension
     {
     public:
@@ -1385,12 +1386,69 @@ namespace Mantid
     };
 
 
+
+    //===============================================================================
+    /** An implementation of IMDDimension for MatrixWorkspace that
+     * points to the X vector of the first spectrum.
+     */
+    class MWXDimension: public Mantid::Geometry::IMDDimension
+    {
+    public:
+
+      MWXDimension(const MatrixWorkspace * ws, const std::string & dimensionId):
+          m_ws(ws), m_dimensionId(dimensionId)
+      {
+        m_X = ws->readX(0);
+      }
+
+      virtual ~MWXDimension(){};
+
+      /// the name of the dimennlsion as can be displayed along the axis
+      virtual std::string getName() const {return m_ws->getAxis(0)->title();}
+
+      /// @return the units of the dimension as a string
+      virtual std::string getUnits() const {return m_ws->getAxis(0)->unit()->label();}
+
+      /// short name which identify the dimension among other dimension. A dimension can be usually find by its ID and various
+      /// various method exist to manipulate set of dimensions by their names.
+      virtual std::string getDimensionId() const {return m_dimensionId;}
+
+      /// if the dimension is integrated (e.g. have single bin)
+      virtual bool getIsIntegrated() const {return m_X.size() == 1;}
+
+      /// @return the minimum extent of this dimension
+      virtual double getMinimum() const {return m_X.front();}
+
+      /// @return the maximum extent of this dimension
+      virtual double getMaximum() const {return m_X.back();}
+
+      /// number of bins dimension have (an integrated has one). A axis directed along dimension would have getNBins+1 axis points.
+      virtual size_t getNBins() const {return m_X.size()-1;}
+
+      /// Change the extents and number of bins
+      virtual void setRange(size_t /*nBins*/, double /*min*/, double /*max*/){throw std::runtime_error("Not implemented");}
+
+      ///  Get coordinate for index;
+      virtual double getX(size_t ind)const {return m_X[ind];}
+
+      //Dimensions must be xml serializable.
+      virtual std::string toXMLString() const {throw std::runtime_error("Not implemented");}
+
+    private:
+      /// Workspace we refer to
+      const MatrixWorkspace * m_ws;
+      /// Cached X vector
+      MantidVec m_X;
+      /// Dimension ID string
+      const std::string m_dimensionId;
+    };
+
+
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> MatrixWorkspace::getDimension(size_t index)const
     { 
       if (index == 0)
       {
-        Axis* xAxis = this->getAxis(0);
-        MWDimension* dimension = new MWDimension(xAxis, xDimensionId);
+        MWXDimension* dimension = new MWXDimension(this, xDimensionId);
         return boost::shared_ptr<const Mantid::Geometry::IMDDimension>(dimension);
       }
       else if (index == 1)

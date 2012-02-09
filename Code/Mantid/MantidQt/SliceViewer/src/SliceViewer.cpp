@@ -439,7 +439,10 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
   // Copy the dimensions to this so they can be modified
   m_dimensions.clear();
   for (size_t d=0; d < m_ws->getNumDims(); d++)
+  {
     m_dimensions.push_back( MDHistoDimension_sptr(new MDHistoDimension(m_ws->getDimension(d).get())) );
+    std::cout << m_dimensions[d]->toXMLString() << std::endl;
+  }
 
   // Adjust the range to that of visible data
   if (mdew)
