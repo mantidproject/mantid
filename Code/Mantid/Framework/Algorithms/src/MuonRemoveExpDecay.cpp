@@ -57,9 +57,6 @@ void MuonRemoveExpDecay::exec()
   //Create output workspace with same dimensions as input
   API::MatrixWorkspace_sptr outputWS = API::WorkspaceFactory::Instance().create(inputWS);
 
-  // to hold normalised workspace or input workspace
-  API::MatrixWorkspace_sptr forNormalisationWS = API::WorkspaceFactory::Instance().create(inputWS);
-
   if (Spectra.empty())
   {
     Progress prog(this, 0.0, 1.0, numSpectra);
@@ -69,7 +66,10 @@ void MuonRemoveExpDecay::exec()
     {
 			PARALLEL_START_INTERUPT_REGION
       removeDecay(inputWS->readX(i), inputWS->readY(i), outputWS->dataY(i));
-      removeDecay(inputWS->readX(i), inputWS->readE(i), outputWS->dataE(i));
+      removeDecay(inputWS->readX(i), inputWS->readE(i), outputWS->dataE(i)); 
+      outputWS->dataX(i) = inputWS->readX(i);   
+
+      const MantidVec& xx = outputWS->readX(i);
 
       double normConst = calNormalisationConst(outputWS, i);
 
