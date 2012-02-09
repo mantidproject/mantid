@@ -97,21 +97,31 @@ private:
   /// group defaults are saved to
   const QString& m_settingsGroup;
 
-private slots: 
-  ///
+private slots:
+
+  /// Open the Muon Analysis Plotting help (Wiki).
   void muonAnalysisHelpSettingsClicked();
-  ///
+  
+  /// Save the settings of plot creation.
   void plotCreationChanged(int);
-  ///
+  
+  /// Save the settings of plot type.
   void plotTypeChanged(int);
-  ///
+  
+  /// Save the settings of whether to show error bars.
   void errorBarsChanged(bool);
-  ///
+  
+  /// Save the settings of whether to show the toolbars.
   void toolbarsChanged(bool);
-  ///
+
+  /// Validate the Y minimum.
   void validateYMin();
-  ///
+  
+  /// Validate the Y maximum.
   void validateYMax();
+  
+  /// Opens the managed directory dialog for easier access for the user.
+  void openDirectoryDialog();
 };
 
 }

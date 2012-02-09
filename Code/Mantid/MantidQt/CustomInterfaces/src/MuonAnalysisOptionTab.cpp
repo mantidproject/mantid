@@ -5,6 +5,7 @@
 #include "MantidKernel/ConfigService.h"
 
 #include "MantidQtAPI/UserSubWindow.h"
+#include "MantidQtAPI/ManageUserDirectories.h"
 
 #include <boost/shared_ptr.hpp>
 #include <fstream>  
@@ -41,6 +42,9 @@ namespace Muon
 
 void MuonAnalysisOptionTab::initLayout()
 {
+  // Help
+  connect(m_uiForm.muonAnalysisHelpPlotting, SIGNAL(clicked()), this, SLOT(muonAnalysisHelpSettingsClicked()));
+
   ////////////// Default Plot Style slots ///////////////
   connect(m_uiForm.timeComboBox, SIGNAL(currentIndexChanged(int)), this, 
            SLOT(runTimeComboBox(int)));
@@ -65,24 +69,26 @@ void MuonAnalysisOptionTab::initLayout()
   connect(m_uiForm.optionStepSizeText, SIGNAL(lostFocus()), this, 
            SLOT(runOptionStepSizeText()));
 
-  connect(m_uiForm.muonAnalysisHelpPlotting, SIGNAL(clicked()), this, SLOT(muonAnalysisHelpSettingsClicked()));
-
   ////////////// Auto Update  /////////////////
   connect(m_uiForm.connectPlotType, SIGNAL(currentIndexChanged(int)), this, SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.timeComboBox, SIGNAL(currentIndexChanged(int)), this, SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.timeAxisStartAtInput, SIGNAL(returnPressed ()), this, SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.timeAxisFinishAtInput, SIGNAL(returnPressed ()), this, SIGNAL(settingsTabUpdatePlot()));
   
-  //validate
+  // Validate
   connect(m_uiForm.yAxisMinimumInput, SIGNAL(editingFinished ()), this, SLOT(runyAxisMinimumInput()));
   connect(m_uiForm.yAxisMaximumInput, SIGNAL(editingFinished ()), this, SLOT(runyAxisMaximumInput()));
   
+  // Save settings
   connect(m_uiForm.yAxisMinimumInput, SIGNAL(returnPressed ()), this, SLOT(validateYMin()));
   connect(m_uiForm.yAxisMaximumInput, SIGNAL(returnPressed ()), this, SLOT(validateYMax()));
   connect(m_uiForm.optionStepSizeText, SIGNAL(returnPressed ()), this, SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.rebinComboBox, SIGNAL(currentIndexChanged(int)), this, SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.showErrorBars, SIGNAL(clicked()), this, SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.yAxisAutoscale, SIGNAL(clicked()), this, SIGNAL(settingsTabUpdatePlot()));
+
+  // Manage User Directories
+  connect(m_uiForm.manageDirectoriesBtn, SIGNAL(clicked()), this, SLOT(openDirectoryDialog() ) );
 }
 
 
@@ -376,6 +382,13 @@ void MuonAnalysisOptionTab::nowDataAvailable()
   m_uiForm.guessAlphaButton->setEnabled(true);
 }
 
+
+void MuonAnalysisOptionTab::openDirectoryDialog()
+{
+  MantidQt::API::ManageUserDirectories *ad = new MantidQt::API::ManageUserDirectories(this);
+  ad->show();
+  ad->setFocus();
+}
 
 }
 }
