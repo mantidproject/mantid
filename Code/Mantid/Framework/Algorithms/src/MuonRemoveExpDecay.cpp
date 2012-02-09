@@ -179,7 +179,7 @@ double MuonRemoveExpDecay::calNormalisationConst(API::MatrixWorkspace_sptr ws, i
     ss << "name=LinearBackground,A0=" << ws->readY(wsIndex)[0] << ",A1=" << 0.0;
     std::string function = ss.str();
 
-    fit->setProperty("Function", function);
+    fit->setPropertyValue("Function", function);
     fit->setProperty("Ties", "A1=0.0");
     fit->execute();
 
