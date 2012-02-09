@@ -8,6 +8,7 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include <map>
+#include "MantidAPI/IMDWorkspace.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -304,11 +305,25 @@ namespace MDEvents
    * @return the (normalized) signal at a given coordinates.
    *         NaN if outside the range of this workspace
    */
-  signal_t MDHistoWorkspace::getSignalAtCoord(const coord_t * coords) const
+  signal_t MDHistoWorkspace::getSignalAtCoord(const coord_t * coords, const Mantid::API::MDNormalization & normalization) const
   {
     size_t linearIndex = this->getLinearIndexAtCoord(coords);
     if (linearIndex < m_length)
-      return m_signals[linearIndex] * m_inverseVolume;
+    {
+      // What is our normalization factor?
+      switch (normalization)
+      {
+      case NoNormalization:
+        return m_signals[linearIndex];
+      case VolumeNormalization:
+        return m_signals[linearIndex] * m_inverseVolume;
+      case NumEventsNormalization:
+        //TOOD: track # of events
+        return m_signals[linearIndex] * 1;
+      }
+      // Should not reach here
+      return m_signals[linearIndex];
+    }
     else
       return std::numeric_limits<signal_t>::quiet_NaN();
   }

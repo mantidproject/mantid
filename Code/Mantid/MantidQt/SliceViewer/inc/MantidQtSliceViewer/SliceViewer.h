@@ -104,6 +104,7 @@ public slots:
   void setColorScaleAutoSlice();
   void setTransparentZeros(bool transparent);
   void setFastRender(bool fast);
+  void changeNormalization();
   // Slots that will be automatically connected via QMetaObject.connectSlotsByName
   void on_btnClearLine_clicked();
   QPixmap getImage();
@@ -198,6 +199,9 @@ private:
   QMenu *m_menuColorOptions, *m_menuView, *m_menuHelp, *m_menuLine, *m_menuFile;
   QAction *m_actionFileClose;
   QAction *m_actionTransparentZeros;
+  QAction *m_actionNormalizeNone;
+  QAction *m_actionNormalizeVolume;
+  QAction *m_actionNormalizeNumEvents;
 
   /// Synced menu/buttons
   MantidQt::API::SyncedCheckboxes *m_syncLineMode, *m_syncSnapToGrid;

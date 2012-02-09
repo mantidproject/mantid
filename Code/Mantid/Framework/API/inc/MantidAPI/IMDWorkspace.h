@@ -86,18 +86,19 @@ namespace Mantid
       virtual IMDIterator* createIterator(Mantid::Geometry::MDImplicitFunction * function = NULL) const;
 
       /// Returns the (normalized) signal at a given coordinates
-      virtual signal_t getSignalAtCoord(const coord_t * coords) const
+      virtual signal_t getSignalAtCoord(const coord_t * coords, const Mantid::API::MDNormalization & normalization) const
       {
         UNUSED_ARG(coords);
+        UNUSED_ARG(normalization);
         throw std::runtime_error("getSignalAtCoord() not implemented.");
       }
 
       //-------------------------------------------------------------------------------------------
       /// Returns the signal (normalized by volume) at a given coordinates
       /// @param coords :: coordinate as a VMD vector
-      signal_t getSignalAtCoord(const Mantid::Kernel::VMD & coords) const
+      signal_t getSignalAtCoord(const Mantid::Kernel::VMD & coords, const Mantid::API::MDNormalization & normalization) const
       {
-        return this->getSignalAtCoord(coords.getBareArray());
+        return this->getSignalAtCoord(coords.getBareArray(), normalization);
       }
 
       /// Method to generate a line plot through a MD-workspace

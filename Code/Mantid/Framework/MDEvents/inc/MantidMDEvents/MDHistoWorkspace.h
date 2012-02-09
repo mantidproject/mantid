@@ -148,7 +148,7 @@ namespace MDEvents
     Mantid::Kernel::VMD getCenter(size_t linearIndex) const;
 
     /// Returns the (normalized) signal at a given coordinates
-    signal_t getSignalAtCoord(const coord_t * coords) const;
+    signal_t getSignalAtCoord(const coord_t * coords, const Mantid::API::MDNormalization & normalization) const;
 
     /// Sets the signal at the specified index.
     void setSignalAt(size_t index, signal_t value)

@@ -1636,7 +1636,7 @@ namespace Mantid
     }
 
     /// Returns the (normalized) signal at a given coordinates
-    signal_t MatrixWorkspace::getSignalAtCoord(const coord_t * coords) const
+    signal_t MatrixWorkspace::getSignalAtCoord(const coord_t * coords, const Mantid::API::MDNormalization & normalization) const
     {
       coord_t x = coords[0];
       coord_t y = coords[1];
@@ -1654,15 +1654,30 @@ namespace Mantid
         {
           size_t i = (it - X.begin());
           if (i > 0)
-            return this->readY(wi)[i-1];
+          {
+            double y = this->readY(wi)[i-1];
+            // What is our normalization factor?
+            switch (normalization)
+            {
+            case NoNormalization:
+              return y;
+            case VolumeNormalization:
+              // TODO: calculate the Y size
+              return y / (X[i] - X[i-1]);
+            case NumEventsNormalization:
+              return y;
+            }
+            // This won't happen
+            return y;
+          }
           else
             return std::numeric_limits<double>::quiet_NaN();
         }
-
       }
       else
         // Out of range
         return std::numeric_limits<double>::quiet_NaN();
+
     }
 
 

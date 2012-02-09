@@ -254,6 +254,33 @@ void SliceViewer::initMenus()
   connect(action, SIGNAL(toggled(bool)), this, SLOT(setFastRender(bool)));
   m_menuView->addAction(action);
 
+  m_menuView->addSeparator();
+
+  QActionGroup* group = new QActionGroup( this );
+
+  action = new QAction(QPixmap(), "No Normalization", this);
+  connect(action, SIGNAL(triggered()), this, SLOT(changeNormalization()));
+  m_menuView->addAction(action);
+  action->setActionGroup(group);
+  action->setCheckable(true);
+  m_actionNormalizeNone = action;
+
+  action = new QAction(QPixmap(), "Volume Normalization", this);
+  connect(action, SIGNAL(triggered()), this, SLOT(changeNormalization()));
+  m_menuView->addAction(action);
+  action->setActionGroup(group);
+  action->setCheckable(true);
+  m_actionNormalizeVolume = action;
+
+  action = new QAction(QPixmap(), "Num. Events Normalization", this);
+  connect(action, SIGNAL(triggered()), this, SLOT(changeNormalization()));
+  m_menuView->addAction(action);
+  action->setActionGroup(group);
+  action->setCheckable(true);
+  m_actionNormalizeNumEvents = action;
+
+
+
   // --------------- Color options Menu ----------------------------------------
   m_menuColorOptions = new QMenu("&ColorMap", this);
 
@@ -595,6 +622,25 @@ void SliceViewer::setTransparentZeros(bool transparent)
   m_actionTransparentZeros->blockSignals(false);
   // Set and display
   m_data->setZerosAsNan(transparent );
+  this->updateDisplay();
+}
+
+
+//------------------------------------------------------------------------------------
+/// Slot called when changing the normalization menu
+void SliceViewer::changeNormalization()
+{
+  Mantid::API::MDNormalization normalization;
+  if (m_actionNormalizeNone->isChecked())
+      normalization = Mantid::API::NoNormalization;
+  else if (m_actionNormalizeVolume->isChecked())
+    normalization = Mantid::API::VolumeNormalization;
+  else if (m_actionNormalizeNumEvents->isChecked())
+    normalization = Mantid::API::NumEventsNormalization;
+  else
+    normalization = Mantid::API::NoNormalization;
+
+  m_data->setNormalization(normalization);
   this->updateDisplay();
 }
 
@@ -1001,7 +1047,7 @@ void SliceViewer::showInfoAt(double x, double y)
     coords[d] = m_dimWidgets[d]->getSlicePoint();
   coords[m_dimX] = x;
   coords[m_dimY] = y;
-  signal_t signal = m_ws->getSignalAtCoord(coords);
+  signal_t signal = m_ws->getSignalAtCoord(coords, this->m_data->getNormalization());
   ui.lblInfoX->setText(QString::number(x, 'g', 4));
   ui.lblInfoY->setText(QString::number(y, 'g', 4));
   ui.lblInfoSignal->setText(QString::number(signal, 'g', 4));

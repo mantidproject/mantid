@@ -2,6 +2,7 @@
 #include <math.h>
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidAPI/IMDWorkspace.h"
 
 namespace MantidQt
 {
@@ -15,7 +16,8 @@ using Mantid::Geometry::IMDDimension_const_sptr;
 //-------------------------------------------------------------------------
 /// Constructor
 QwtRasterDataMD::QwtRasterDataMD()
-: m_slicePoint(NULL), m_fast(true), m_zerosAsNan(true)
+: m_slicePoint(NULL), m_fast(true), m_zerosAsNan(true),
+  m_normalization(Mantid::API::VolumeNormalization)
 {
   m_range = QwtDoubleInterval(0.0, 1.0);
   m_nd = 0;
@@ -48,6 +50,7 @@ QwtRasterData* QwtRasterDataMD::copy() const
   out->m_ws = this->m_ws;
   out->m_fast = this->m_fast;
   out->m_zerosAsNan = this->m_zerosAsNan;
+  out->m_normalization = this->m_normalization;
   return out;
 }
 
@@ -81,7 +84,7 @@ double QwtRasterDataMD::value(double x, double y) const
       lookPoint[d] = m_slicePoint[d];
   }
   // Get the signal at that point
-  signal_t value = m_ws->getSignalAtCoord(lookPoint);
+  signal_t value = m_ws->getSignalAtCoord(lookPoint, m_normalization);
   delete [] lookPoint;
 
   // Special case for 0 = show as NAN
@@ -120,6 +123,21 @@ void QwtRasterDataMD::setZerosAsNan(bool val)
   this->m_zerosAsNan = val;
 }
 
+//------------------------------------------------------------------------------------------------------
+/** Set how the signal is normalized
+ *
+ * @param normalization :: option from MDNormalization enum.
+ */
+void QwtRasterDataMD::setNormalization(Mantid::API::MDNormalization normalization)
+{
+  m_normalization = normalization;
+}
+
+/** @return how the signal is normalized */
+Mantid::API::MDNormalization QwtRasterDataMD::getNormalization() const
+{
+  return m_normalization;
+}
 
 //------------------------------------------------------------------------------------------------------
 /** Return how many pixels this area should be rendered as

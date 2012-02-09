@@ -44,6 +44,9 @@ public:
 
   void setZerosAsNan(bool val);
 
+  void setNormalization(Mantid::API::MDNormalization normalization);
+  Mantid::API::MDNormalization getNormalization() const;
+
 protected:
   /// Workspace being shown
   Mantid::API::IMDWorkspace_sptr m_ws;
@@ -72,6 +75,9 @@ protected:
 
   /// Convert zeroes to NAN
   bool m_zerosAsNan;
+
+  /// Normalization of signals
+  Mantid::API::MDNormalization m_normalization;
 };
 
 } // namespace SliceViewer

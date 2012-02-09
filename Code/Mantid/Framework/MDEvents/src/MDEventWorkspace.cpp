@@ -213,10 +213,11 @@ namespace MDEvents
   /** Returns the (normalized) signal at a given coordinates
    *
    * @param coords :: nd-sized array of coordinates
+   * @param normalization :: how to normalize the signal.
    * @return the normalized signal of the box at the given coordinates. NaN if out of bounds
    */
   TMDE(
-  signal_t MDEventWorkspace)::getSignalAtCoord(const coord_t * coords) const
+  signal_t MDEventWorkspace)::getSignalAtCoord(const coord_t * coords, const Mantid::API::MDNormalization & normalization) const
   {
     // Do an initial bounds check
     for (size_t d=0; d<nd; d++)
@@ -229,7 +230,20 @@ namespace MDEvents
     // If you got here, then the point is in the workspace.
     const IMDBox<MDE,nd> * box = data->getBoxAtCoord(coords);
     if (box)
-      return box->getSignalNormalized();
+    {
+      // What is our normalization factor?
+      switch (normalization)
+      {
+      case NoNormalization:
+        return box->getSignal();
+      case VolumeNormalization:
+        return box->getInverseVolume() * box->getSignal();
+      case NumEventsNormalization:
+        return double(box->getNPoints()) * box->getSignal();
+      }
+      // Should not reach here
+      return box->getSignal();
+    }
     else
       return std::numeric_limits<signal_t>::quiet_NaN();
   }
