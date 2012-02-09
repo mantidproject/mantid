@@ -48,14 +48,15 @@ private:
     /*
     Run some verifications according to whether TakeMaxRecursionDepthFromInput was chosen.
     */
+    Mantid::Kernel::Property* p = alg.getProperty("MaxRecursionDepth");
     if(bTakeDepthFromInput)
     {
-      //TSM_ASSERT("MaxRecusionDepth property should NOT be enabled", false, alg.getProperty("MaxRecursionDepth").isEnabled());
+      TSM_ASSERT_EQUALS("MaxRecusionDepth property should NOT be enabled", false, p->isEnabled());
       TSM_ASSERT_EQUALS("Should have passed the maxium depth onto the ouput workspace.", in_ws->getBoxController()->getMaxDepth(), out->getBoxController()->getMaxDepth());
     }
     else
     {
-      //TSM_ASSERT("MaxRecusionDepth property should be enabled", true, alg.getProperty("MaxRecursionDepth").isEnabled());
+      TSM_ASSERT_EQUALS("MaxRecusionDepth property should be enabled", true,  p->isEnabled());
       TSM_ASSERT_EQUALS("Should have passed the maxium depth onto the ouput workspace from the input workspace.", size_t(maxDepth), out->getBoxController()->getMaxDepth());
     }
     
