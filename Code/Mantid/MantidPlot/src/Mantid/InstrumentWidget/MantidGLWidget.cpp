@@ -53,13 +53,13 @@ MantidGLWidget::MantidGLWidget(QWidget* parent):
 MantidGLWidget::~MantidGLWidget()
 {
   if (m_surface)
-  {
     delete m_surface;
-  }
 }
 
 void MantidGLWidget::setSurface(ProjectionSurface* surface)
 {
+  if (m_surface)
+    delete m_surface;
   m_surface = surface;
   m_firstFrame = true;
   initializeGL();

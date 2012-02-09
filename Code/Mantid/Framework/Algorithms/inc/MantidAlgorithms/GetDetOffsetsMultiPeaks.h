@@ -53,7 +53,7 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Diffraction"; }
   /// Call Gaussian as a sub-algorithm to fit the peak in a spectrum
-  double fitSpectra(const int64_t s, double offset, std::string inname, std::string peakPositions);
+  double fitSpectra(const int64_t s, const double offset, const std::string &inname, const std::string &peakPositions);
 
 private:
   /// Sets documentation strings for this algorithm

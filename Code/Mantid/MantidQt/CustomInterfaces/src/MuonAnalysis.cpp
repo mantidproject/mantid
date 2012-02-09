@@ -48,9 +48,7 @@
 #include <QSignalMapper>
 #include <QHeaderView>
 #include <QApplication>
-#include <QClipboard>
 #include <QTemporaryFile>
-#include <QDateTime>
 #include <QDesktopServices>
 #include <QUrl>
 
@@ -397,7 +395,7 @@ void MuonAnalysis::runClearGroupingButton()
   clearTablesAndCombo();
 
   // also disable plotting buttons and cal alpha button
-  noDataAvailable();
+  m_optionTab->noDataAvailable();
 }
 
 /**
@@ -504,12 +502,12 @@ void MuonAnalysis::runLoadCurrent()
   // if output is none empty something has gone wrong
   if ( !pyOutput.toStdString().empty() )
   {
-    noDataAvailable();
+    m_optionTab->noDataAvailable();
     QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Can't read from " + daename + ". Plotting disabled");
     return;
   }
 
-  nowDataAvailable();
+  m_optionTab->nowDataAvailable();
 
   // Get hold of a pointer to a matrix workspace and apply grouping if applicatable
   Workspace_sptr workspace_ptr = AnalysisDataService::Instance().retrieve(m_workspace_name);
@@ -1073,7 +1071,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
   if (m_previousFilenames.size() > 1)
     plusRangeWorkspaces();
 
-  nowDataAvailable();
+  m_optionTab->nowDataAvailable();
 
   // Get hold of a pointer to a matrix workspace and apply grouping if applicatable
   Workspace_sptr workspace_ptr = AnalysisDataService::Instance().retrieve(m_workspace_name);
@@ -1247,6 +1245,37 @@ void MuonAnalysis::deleteRangedWorkspaces()
     if (Mantid::API::AnalysisDataService::Instance().doesExist(m_workspace_name + tempNum.toStdString() + "_2") )
       Mantid::API::AnalysisDataService::Instance().remove(m_workspace_name + tempNum.toStdString() + "_2");
   }
+}
+
+
+/**
+* Get the group name for the workspace.
+*
+* @return wsGroupName :: The name of the group workspace. 
+*/
+QString MuonAnalysis::getGroupName()
+{
+  std::string workspaceGroupName("");
+
+  // Decide on name for workspaceGroup
+  if (m_previousFilenames.size() == 1)
+  {
+    Poco::File l_path( m_previousFilenames[0].toStdString() );
+    workspaceGroupName = Poco::Path(l_path.path()).getFileName();
+    changeCurrentRun(workspaceGroupName);
+  }
+  else
+  {
+    workspaceGroupName = getRangedName();
+  }
+
+  std::size_t extPos = workspaceGroupName.find(".");
+  if ( extPos!=std::string::npos)
+    workspaceGroupName = workspaceGroupName.substr(0,extPos);
+
+  QString wsGroupName(workspaceGroupName.c_str());
+  wsGroupName = wsGroupName.toUpper();
+  return wsGroupName;
 }
 
 
@@ -1623,25 +1652,7 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
   {
     QTableWidgetItem *itemName = m_uiForm.groupTable->item(m_groupTableRowInFocus,0);
     QString groupName = itemName->text();
-    std::string workspaceGroupName("");
-
-    // Decide on name for workspaceGroup
-    if (m_previousFilenames.size() == 1)
-    {
-      Poco::File l_path( m_previousFilenames[0].toStdString() );
-      workspaceGroupName = Poco::Path(l_path.path()).getFileName();
-      changeCurrentRun(workspaceGroupName);
-    }
-    else
-      workspaceGroupName = getRangedName();
-
-    std::size_t extPos = workspaceGroupName.find(".");
-    if ( extPos!=std::string::npos)
-      workspaceGroupName = workspaceGroupName.substr(0,extPos);
-    
-    QString wsGroupName(workspaceGroupName.c_str());
-
-    wsGroupName = wsGroupName.toUpper();
+    QString wsGroupName(getGroupName());
 
     QString cropWSfirstPart = wsGroupName + "; Group="
       + groupName + "; " + plotTypeTitle + "";
@@ -1795,24 +1806,7 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     QTableWidgetItem *itemName = m_uiForm.pairTable->item(m_pairTableRowInFocus,0);
     QString pairName = itemName->text();
     std::string workspaceGroupName("");
-
-    // Decide on name for workspaceGroup
-    if (m_previousFilenames.size() == 1)
-    {
-      Poco::File l_path( m_previousFilenames[0].toStdString() );
-      workspaceGroupName = Poco::Path(l_path.path()).getFileName();
-      changeCurrentRun(workspaceGroupName);
-    }
-    else
-      workspaceGroupName = getRangedName();
-    
-    std::size_t extPos = workspaceGroupName.find(".");
-    if ( extPos!=std::string::npos)
-      workspaceGroupName = workspaceGroupName.substr(0,extPos);
-
-    QString wsGroupName(workspaceGroupName.c_str());
-
-    wsGroupName = wsGroupName.toUpper();
+    QString wsGroupName(getGroupName());
 
     QString cropWSfirstPart = wsGroupName + "; Group=" + pairName + "; " + plotTypeTitle + "";
     
@@ -1916,7 +1910,6 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     m_currentDataName = titleLabel;
     m_uiForm.fitBrowser->manualAddWorkspace(m_currentDataName);
   }
-  
   m_updating = false;
 }
 
@@ -1992,14 +1985,14 @@ bool MuonAnalysis::applyGroupingToWS( const std::string& inputWS,  const std::st
     // if output is none empty something has gone wrong
     if ( !pyOutput.toStdString().empty() )
     {
-      noDataAvailable();
+      m_optionTab->noDataAvailable();
       QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Can't group data file according to group-table. Plotting disabled.");
       return false;
       //m_uiForm.frontWarningMessage->setText("Can't group data file according to group-table. Plotting disabled.");
     }
     else
     {
-      nowDataAvailable();
+      m_optionTab->nowDataAvailable();
       return true;
     }
   }
@@ -2017,14 +2010,14 @@ bool MuonAnalysis::applyGroupingToWS( const std::string& inputWS,  const std::st
     std::string complaint = isGroupingAndDataConsistent();
     if ( complaint.empty() )
     {
-      nowDataAvailable();
+      m_optionTab->nowDataAvailable();
       m_uiForm.frontWarningMessage->setText("");
     }
     else
     {
       if (m_uiForm.frontPlotButton->isEnabled() )
         QMessageBox::warning(this, "MantidPlot - MuonAnalysis", complaint.c_str());
-      noDataAvailable();
+      m_optionTab->noDataAvailable();
       return false;
     }
 
@@ -2114,7 +2107,7 @@ std::vector<int> MuonAnalysis::spectrumIDs(const std::string& str) const
 }
 
 
-/*
+/**
 * Change the workspace group name to the instrument and run number if load current run was pressed.
 *
 * @params workspaceGroupName :: The name of the group that needs to be changed or is already in correct format.
@@ -2174,30 +2167,6 @@ bool MuonAnalysis::isNumber(const std::string& s) const
   }
 
   return true;
-}
-
-/**
- * When no data loaded set various buttons etc to inactive
- */
-void MuonAnalysis::noDataAvailable()
-{
-  m_uiForm.frontPlotButton->setEnabled(false);
-  m_uiForm.groupTablePlotButton->setEnabled(false);
-  m_uiForm.pairTablePlotButton->setEnabled(false);
-
-  m_uiForm.guessAlphaButton->setEnabled(false);
-}
-
-/**
- * When data loaded set various buttons etc to active
- */
-void MuonAnalysis::nowDataAvailable()
-{
-  m_uiForm.frontPlotButton->setEnabled(true);
-  m_uiForm.groupTablePlotButton->setEnabled(true);
-  m_uiForm.pairTablePlotButton->setEnabled(true);
-
-  m_uiForm.guessAlphaButton->setEnabled(true);
 }
 
 

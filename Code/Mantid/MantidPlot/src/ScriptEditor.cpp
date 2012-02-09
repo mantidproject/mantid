@@ -210,7 +210,7 @@ ScriptEditor::ScriptEditor(QWidget *parent, bool interpreter_mode, QsciLexer *co
   {
 #ifdef __APPLE__
     // Make all fonts 4 points bigger on the Mac because otherwise they're tiny!
-    if( m_zoomLevel = 0 ) m_zoomLevel = 4;
+    if( m_zoomLevel == 0 ) m_zoomLevel = 4;
 #endif
 
     zoomIn(m_zoomLevel);

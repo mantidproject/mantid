@@ -26,7 +26,6 @@ namespace Vates
 namespace SimpleGui
 {
 
-class ColorSelectionDialog;
 class RotationPointDialog;
 class ViewBase;
 
@@ -83,8 +82,6 @@ public:
 protected slots:
   /// Check for certain updates when an accept is fired.
   void checkForUpdates();
-  /// Pop-up the color options dialog.
-  void onColorOptions();
   /// Pop-up the rotation point dialog.
   void onRotationPoint();
   /// Show the wiki help in a browser.
@@ -97,7 +94,6 @@ protected slots:
 private:
   Q_DISABLE_COPY(MdViewerWidget)
 
-  ColorSelectionDialog *colorDialog; ///< Holder for the color options dialog
   ViewBase *currentView; ///< Holder for the current view
   pqLoadDataReaction *dataLoader; ///< Holder for the load data reaction
   ViewBase *hiddenView; ///< Holder for the view that is being switched from
@@ -109,8 +105,8 @@ private:
 
   /// Check the environmental variables.
   void checkEnvSetup();
-  /// Setup color options dialog connections.
-  void connectColorOptionsDialog();
+  /// Setup color selection widget connections.
+  void connectColorSelectionWidget();
   /// Setup connections for all dialogs.
   void connectDialogs();
   /// Setup rotation point dialog connections.

@@ -140,7 +140,6 @@ void MuonAnalysisOptionTab::runOptionStepSizeText()
   }
 }
 
-
 ////////////// Default Plot Style slots ///////////////
 
 /**
@@ -271,6 +270,12 @@ void MuonAnalysisOptionTab::runyAxisMaximumInput()
   }
 }
 
+
+/**
+* Save the settings of plot creation.
+*
+* @params index :: The new index of plot creation combo box.
+*/
 void MuonAnalysisOptionTab::plotCreationChanged(int index)
 {
   // save this new choice
@@ -279,6 +284,12 @@ void MuonAnalysisOptionTab::plotCreationChanged(int index)
   group.setValue("plotCreation", index);
 }
 
+
+/**
+* Save the settings of plot type.
+*
+* @params index :: The new index of plot type combo box.
+*/
 void MuonAnalysisOptionTab::plotTypeChanged(int index)
 {
   QSettings group;
@@ -286,6 +297,12 @@ void MuonAnalysisOptionTab::plotTypeChanged(int index)
   group.setValue("connectPlotStyle", index);
 }
 
+
+/**
+* Save the settings of whether to show error bars.
+*
+* @params state :: The new state for the error bar check box.
+*/
 void MuonAnalysisOptionTab::errorBarsChanged(bool state)
 {
   QSettings group;
@@ -293,6 +310,12 @@ void MuonAnalysisOptionTab::errorBarsChanged(bool state)
   group.setValue("errorBars", state);
 }
 
+
+/**
+* Save the settings of whether to show the toolbars.
+*
+* @params state :: The new state for the toolbar check box.
+*/
 void MuonAnalysisOptionTab::toolbarsChanged(bool state)
 {
   //emit toolbarsOnOrOff(state);
@@ -302,6 +325,9 @@ void MuonAnalysisOptionTab::toolbarsChanged(bool state)
 }
 
 
+/**
+* Validate the Y Min.
+*/
 void MuonAnalysisOptionTab::validateYMin()
 {
   QString tempValue = m_uiForm.yAxisMinimumInput->text();
@@ -312,6 +338,10 @@ void MuonAnalysisOptionTab::validateYMin()
   }
 }
 
+
+/**
+* Validate the Y Min.
+*/
 void MuonAnalysisOptionTab::validateYMax()
 {
   QString tempValue = m_uiForm.yAxisMinimumInput->text();
@@ -320,6 +350,30 @@ void MuonAnalysisOptionTab::validateYMax()
   {
     emit settingsTabUpdatePlot();
   }
+}
+
+
+/**
+ * When no data loaded set various buttons etc to inactive
+ */
+void MuonAnalysisOptionTab::noDataAvailable()
+{
+  m_uiForm.frontPlotButton->setEnabled(false);
+  m_uiForm.groupTablePlotButton->setEnabled(false);
+  m_uiForm.pairTablePlotButton->setEnabled(false);
+  m_uiForm.guessAlphaButton->setEnabled(false);
+}
+
+
+/**
+ * When data loaded set various buttons etc to active
+ */
+void MuonAnalysisOptionTab::nowDataAvailable()
+{
+  m_uiForm.frontPlotButton->setEnabled(true);
+  m_uiForm.groupTablePlotButton->setEnabled(true);
+  m_uiForm.pairTablePlotButton->setEnabled(true);
+  m_uiForm.guessAlphaButton->setEnabled(true);
 }
 
 

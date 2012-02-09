@@ -294,8 +294,6 @@ namespace Mantid
      */
     void Algorithm::lockWorkspaces()
     {
-      return; //FIXME REMOVE
-
       // Do not lock workspace for child algos
       if (this->isChild())
         return;
@@ -410,8 +408,10 @@ namespace Mantid
       // Cache the workspace in/out properties for later use
       cacheWorkspaceProperties();
 
-      // no logging of input if a child algorithm
-      if (!m_isChildAlgorithm) logAlgorithmInfo();
+      // no logging of input if a child algorithm (except for python child algos)
+      if (!m_isChildAlgorithm || m_alwaysStoreInADS) logAlgorithmInfo();
+
+      g_log.debug() << this->name() << " is executing with isChild = " << this->isChild() << std::endl;
 
       // Check all properties for validity
       if ( !validateProperties() )
@@ -493,11 +493,13 @@ namespace Mantid
 
           // RJT, 19/3/08: Moved this up from below the catch blocks
           setExecuted(true);
-          if (!m_isChildAlgorithm) 
+          if (!m_isChildAlgorithm || m_alwaysStoreInADS)
           {
             g_log.notice() << name() << " successful, Duration "
               << std::fixed << std::setprecision(2) << duration << " seconds" << std::endl;
           }
+          else
+            g_log.debug() << name() << " finished with isChild = " << isChild() << std::endl;
           m_running = false;
         }
         catch(std::runtime_error& ex)
@@ -816,6 +818,7 @@ namespace Mantid
       copyPropertiesFrom(proxy);
       m_algorithmID = proxy.getAlgorithmID();
       setLogging(proxy.isLogging());
+      setChild(proxy.isChild());
     }
 
 
@@ -885,7 +888,10 @@ namespace Mantid
     /** Sends out algorithm parameter information to the logger */
     void Algorithm::logAlgorithmInfo() const
     {
-      g_log.notice() << name() << " started"<< std::endl;
+      g_log.notice() << name() << " started";
+      if (this->isChild())
+        g_log.notice() << " (child)";
+      g_log.notice() << std::endl;
       // Make use of the AlgorithmHistory class, which holds all the info we want here
       AlgorithmHistory AH(this);
       g_log.information() << AH;

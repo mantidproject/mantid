@@ -191,7 +191,9 @@ void SANSSensitivityCorrection::exec()
       if (!isEmpty(center_x) && loadAlg->existsProperty("BeamCenterX")) loadAlg->setProperty("BeamCenterX", center_x);
       if (!isEmpty(center_y) && loadAlg->existsProperty("BeamCenterY")) loadAlg->setProperty("BeamCenterY", center_y);
       loadAlg->execute();
-      rawFloodWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(rawFloodWSName));
+      rawFloodWS = loadAlg->getProperty("OutputWorkspace");
+      // rawFloodWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(rawFloodWSName));
+      //AnalysisDataService::Instance().addOrReplace(rawFloodWSName, rawFloodWS);
       m_output_message += "   |Loaded " + fileName + "\n";
       if (loadAlg->existsProperty("OutputMessage")) 
       {

@@ -60,12 +60,16 @@ class MuonAnalysisOptionTab : public QWidget
 {
  Q_OBJECT
 public:
+  /// Constructor
   MuonAnalysisOptionTab(Ui::MuonAnalysis& uiForm, const QString& group) : m_uiForm(uiForm), m_settingsGroup(group) {}
+  /// Initialise the layout of Muon Analysis.
   void initLayout();
+  /// When no data loaded set various buttons etc to inactive
+  void noDataAvailable();
+  /// When data loaded set various buttons etc to active
+  void nowDataAvailable();
 
 public slots:
-
-  ////////////// Default Plot Style slots ///////////////
   ///
   void runTimeComboBox(int index);
   ///
@@ -78,31 +82,24 @@ public slots:
   void runyAxisMaximumInput();
   ///
   void runyAxisAutoscale(bool state);
-
-  ////////////// Data Binning slots ///////////////
   ///
   void runRebinComboBox(int index);
   ///
   void runOptionStepSizeText();
 
 signals:
-
   ///
   void settingsTabUpdatePlot();
 
 private:
-
   ///
   Ui::MuonAnalysis& m_uiForm;
-
   /// group defaults are saved to
   const QString& m_settingsGroup;
 
-private slots:
-  
+private slots: 
   ///
   void muonAnalysisHelpSettingsClicked();
-
   ///
   void plotCreationChanged(int);
   ///

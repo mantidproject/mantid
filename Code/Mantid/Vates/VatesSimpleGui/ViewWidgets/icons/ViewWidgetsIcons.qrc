@@ -4,5 +4,6 @@
         <file>pqResetCenterToPoint24.png</file>
         <file>parallel_projection.png</file>
         <file>pvIcon.png</file>
+        <file>pqEditColor24.png</file>
     </qresource>
 </RCC>

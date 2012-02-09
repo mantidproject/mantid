@@ -122,7 +122,7 @@ namespace Mantid
         PARALLEL_START_INTERUPT_REGION
         // Fit the peak
         double offset=fitSpectra(wi);
-        double mask=1.0;
+        double mask=0.0;
         if (std::abs(offset) > maxOffset)
         { 
           offset = 0.0;

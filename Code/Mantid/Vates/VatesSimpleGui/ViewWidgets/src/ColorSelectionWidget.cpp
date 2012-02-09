@@ -1,4 +1,4 @@
-#include "MantidVatesSimpleGuiViewWidgets/ColorSelectionDialog.h"
+#include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 
 #include <pqChartValue.h>
 #include <pqColorMapModel.h>
@@ -21,7 +21,7 @@ namespace SimpleGui
  * sub-components and connections.
  * @param parent the parent widget of the mode control widget
  */
-ColorSelectionDialog::ColorSelectionDialog(QWidget *parent) : QDialog(parent)
+ColorSelectionWidget::ColorSelectionWidget(QWidget *parent) : QWidget(parent)
 {
   this->ui.setupUi(this);
   this->ui.autoColorScaleCheckBox->setChecked(true);
@@ -51,7 +51,7 @@ ColorSelectionDialog::ColorSelectionDialog(QWidget *parent) : QDialog(parent)
  * This function sets the status of the color selection widgets.
  * @param status the state to set the color selection widgets to
  */
-void ColorSelectionDialog::setEditorStatus(bool status)
+void ColorSelectionWidget::setEditorStatus(bool status)
 {
   this->ui.maxValLabel->setEnabled(status);
   this->ui.maxValLineEdit->setEnabled(status);
@@ -63,7 +63,7 @@ void ColorSelectionDialog::setEditorStatus(bool status)
  * This function sets up various color maps. This is copied verbaitum from
  * pqColorScaleEditor.
  */
-void ColorSelectionDialog::loadBuiltinColorPresets()
+void ColorSelectionWidget::loadBuiltinColorPresets()
 {
   pqColorMapModel colorMap;
   pqColorPresetModel *model = this->presets->getModel();
@@ -123,7 +123,7 @@ void ColorSelectionDialog::loadBuiltinColorPresets()
  * of the automatic scaling checkbox.
  * @param state the current state of the checkbox
  */
-void ColorSelectionDialog::autoOrManualScaling(int state)
+void ColorSelectionWidget::autoOrManualScaling(int state)
 {
   switch (state)
   {
@@ -141,7 +141,7 @@ void ColorSelectionDialog::autoOrManualScaling(int state)
  * This function presents the user with the available color presets (maps) and
  * gets the selection result from the user.
  */
-void ColorSelectionDialog::loadPreset()
+void ColorSelectionWidget::loadPreset()
 {
   this->presets->setUsingCloseButton(false);
   if (this->presets->exec() == QDialog::Accepted)
@@ -161,7 +161,7 @@ void ColorSelectionDialog::loadPreset()
  * This function gets the new color scale range from the value widgets and
  * passes a signal along with that new range.
  */
-void ColorSelectionDialog::getColorScaleRange()
+void ColorSelectionWidget::getColorScaleRange()
 {
   double min = this->ui.minValLineEdit->text().toDouble();
   double max = this->ui.maxValLineEdit->text().toDouble();
@@ -173,7 +173,7 @@ void ColorSelectionDialog::getColorScaleRange()
  * @param min the minimum value of the color scale range
  * @param max the maximum value of the color scale range
  */
-void ColorSelectionDialog::setColorScaleRange(double min, double max)
+void ColorSelectionWidget::setColorScaleRange(double min, double max)
 {
   if (this->ui.autoColorScaleCheckBox->isChecked())
   {
@@ -193,7 +193,7 @@ void ColorSelectionDialog::setColorScaleRange(double min, double max)
  * associated checkbox.
  * @param state flag for whether or not to use log color scaling
  */
-void ColorSelectionDialog::useLogScaling(int state)
+void ColorSelectionWidget::useLogScaling(int state)
 {
   // Qt::Checked is 2, need it to be 1 for boolean true conversion
   if (Qt::Checked == state)

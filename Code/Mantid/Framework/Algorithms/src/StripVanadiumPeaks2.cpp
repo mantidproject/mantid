@@ -120,7 +120,7 @@ DECLARE_ALGORITHM(StripVanadiumPeaks2)
     stripPeaks->setPropertyValue("OutputWorkspace", outputWSName);
     stripPeaks->setProperty("FWHM", param_fwhm);
     stripPeaks->setProperty("Tolerance", param_tolerance);
-    stripPeaks->setProperty("PeakPositions", peakpositions);
+    stripPeaks->setPropertyValue("PeakPositions", peakpositions);
     stripPeaks->setProperty<std::string>("BackgroundType", getProperty("BackgroundType"));
     stripPeaks->setProperty<bool>("HighBackground", getProperty("HighBackground"));
     if (singleSpectrum){

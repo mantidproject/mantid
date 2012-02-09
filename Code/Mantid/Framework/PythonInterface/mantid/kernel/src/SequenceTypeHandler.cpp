@@ -9,7 +9,7 @@ namespace Mantid
 {
   namespace PythonInterface
   {
-    namespace PropertyMarshal
+    namespace TypeRegistry
     {
 
 

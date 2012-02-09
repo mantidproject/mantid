@@ -89,7 +89,9 @@ protected:
   virtual void wheelEventMove(QWheelEvent*);
 
   /// calculate and assign udet.u and udet.v
-  virtual void calcUV(UnwrappedDetector& udet) = 0;
+  virtual void project(double & u, double & v, double & uscale, double & vscale, const Mantid::Kernel::V3D & pos) const = 0;
+  virtual void calcUV(UnwrappedDetector& udet, Mantid::Kernel::V3D & pos);
+
   /// calculate rotation R for a udet
   virtual void calcRot(const UnwrappedDetector& udet, Mantid::Kernel::Quat& R)const = 0;
   virtual double uPeriod()const{return 0.0;}
@@ -100,7 +102,7 @@ protected:
   //void callback(boost::shared_ptr<const Mantid::Geometry::IDetector> det,const DetectorCallbackData& data);
   void setColor(int index,bool picking)const;
   void showPickedDetector();
-  void calcAssemblies(boost::shared_ptr<const Mantid::Geometry::IComponent> comp,const QRectF& compRect);
+  void calcAssemblies(const Mantid::Geometry::IComponent * comp,const QRectF& compRect);
   void cacheAllAssemblies();
   void findAndCorrectUGap();
   void createPeakShapes(const QRect& viewport)const;

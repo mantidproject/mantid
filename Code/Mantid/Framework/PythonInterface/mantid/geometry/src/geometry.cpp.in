@@ -1,3 +1,7 @@
+/*****************************************************************************************/
+/********** PLEASE NOTE! THIS FILE WAS AUTO-GENERATED FROM CMAKE.  ***********************/
+/********** Source = geometry.cpp.in *****************************************************/
+/*****************************************************************************************/
 #include <boost/python/module.hpp>
 #include <boost/python/docstring_options.hpp>
 #include <boost/python/def.hpp>

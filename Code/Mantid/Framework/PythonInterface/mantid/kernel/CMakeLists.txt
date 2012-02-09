@@ -28,6 +28,7 @@ set ( SRC_FILES
   src/PropertyMarshal.cpp
   src/PyEnvironment.cpp
   src/SequenceTypeHandler.cpp
+  src/TypeRegistry.cpp
   src/VectorDelegate.cpp
   src/WrapperHelpers.cpp
 )
@@ -37,12 +38,14 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/NumpyTypeHandler.h
   ${HEADER_DIR}/kernel/PythonObjectInstantiator.h
   ${HEADER_DIR}/kernel/PropertyWithValue.h
-  ${HEADER_DIR}/kernel/PropertyHandler.h
+  ${HEADER_DIR}/kernel/PythonTypeHandler.h
   ${HEADER_DIR}/kernel/PropertyMarshal.h
   ${HEADER_DIR}/kernel/PyEnvironment.h
   ${HEADER_DIR}/kernel/SingleValueTypeHandler.h
   ${HEADER_DIR}/kernel/StlExportDefinitions.h
+  ${HEADER_DIR}/kernel/TypeRegistry.h
   ${HEADER_DIR}/kernel/VectorDelegate.h
+  ${HEADER_DIR}/kernel/upcast_returned_value.h
   ${HEADER_DIR}/kernel/WrapperHelpers.h
 )
 
