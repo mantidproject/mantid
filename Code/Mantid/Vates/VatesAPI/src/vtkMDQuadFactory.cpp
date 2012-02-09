@@ -1,5 +1,6 @@
 #include "MantidVatesAPI/vtkMDQuadFactory.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/CoordTransform.h"
 #include <boost/shared_ptr.hpp>
@@ -30,7 +31,7 @@ namespace Mantid
     vtkDataSet* vtkMDQuadFactory::create() const
     {
       validate();
-      IMDWorkspace_sptr imdws = boost::dynamic_pointer_cast<IMDWorkspace>(m_workspace);
+      IMDEventWorkspace_sptr imdws = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_workspace);
       if(!imdws || imdws->getNonIntegratedDimensions().size() != TwoDimensional)
       {
         return m_successor->create();
@@ -48,12 +49,9 @@ namespace Mantid
         bool bIntegrated = imdws->getDimension(i_dim)->getIsIntegrated();
         masks[i_dim] = !bIntegrated; //TRUE for unmaksed, integrated dimensions are masked.
       }
-
-      size_t maxSize = 1; 
-      for(size_t i_non_integrated = 0; i_non_integrated < nNonIntegrated; ++i_non_integrated)
-      {
-        maxSize *= imdws->getDimension(i_non_integrated)->getNBins();
-      }
+      ///Estimate the number of boxes needed.
+      size_t maxSize = imdws->getBoxController()->getTotalNumMDBoxes();
+      std::vector<size_t> list = imdws->getBoxController()->getNumMDBoxes();
 
       // Create 4 points per box.
       vtkPoints *points = vtkPoints::New();
@@ -61,16 +59,13 @@ namespace Mantid
 
       // One scalar per box
       vtkFloatArray * signals = vtkFloatArray::New();
-      signals->SetNumberOfValues(maxSize);
-
+      signals->Allocate(maxSize);
       signals->SetName(m_scalarName.c_str());
       signals->SetNumberOfComponents(1);
 
       size_t nVertexes;
       //Ensure destruction in any event.
       boost::scoped_ptr<IMDIterator> it(imdws->createIterator());
-
-      
 
       vtkUnstructuredGrid *visualDataSet = vtkUnstructuredGrid::New();
       visualDataSet->Allocate(maxSize);
@@ -189,7 +184,7 @@ namespace Mantid
     void vtkMDQuadFactory::initialize(Mantid::API::Workspace_sptr ws)
     {
       m_workspace = ws;
-      IMDWorkspace_sptr imdws = boost::dynamic_pointer_cast<IMDWorkspace>(ws);
+      IMDEventWorkspace_sptr imdws = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_workspace);
       if(!imdws || imdws->getNonIntegratedDimensions().size() != TwoDimensional)
       {
         if(this->hasSuccessor())
