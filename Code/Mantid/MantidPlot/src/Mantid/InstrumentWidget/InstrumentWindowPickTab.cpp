@@ -752,13 +752,15 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
     }
 
     double knorm=mN*(l1 + l2)/(hbar*tof*1e-6)/1e10;
-    knorm/=(2.*M_PI); //Peak constructor uses Q/(2*Pi)
+    //knorm/=(2.*M_PI); //Peak constructor uses Q/(2*Pi)
     Qx *= knorm;
     Qy *= knorm;
     Qz *= knorm;
 
+
     Mantid::API::IPeak* peak = tw->createPeak(Mantid::Kernel::V3D(Qx,Qy,Qz),l2);
     peak->setDetectorID(m_currentDetID);
+    peak->setGoniometerMatrix(ws->run().getGoniometer().getR());
     tw->addPeak(*peak);
     delete peak;
     tw->modified();

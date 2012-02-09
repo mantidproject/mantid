@@ -8,6 +8,7 @@ set ( SRC_FILES
 	src/FindUBUsingLatticeParameters.cpp
 	src/FindUBUsingMinMaxD.cpp
 	src/IndexPeaks.cpp
+        src/ShowPossibleCells.cpp
 	src/IntegratePeakTimeSlices.cpp
 	src/LoadHKL.cpp
 	src/LoadIsawPeaks.cpp
@@ -15,6 +16,7 @@ set ( SRC_FILES
 	src/LoadIsawUB.cpp
 	src/MaskPeaksWorkspace.cpp
 	src/NormaliseVanadium.cpp
+	src/OptimizeExtinctionParameters.cpp
 	src/PeakIntegration.cpp
 	src/PeakIntensityVsRadius.cpp
 	src/PredictPeaks.cpp
@@ -39,13 +41,16 @@ set ( INC_FILES
 	inc/MantidCrystal/FindUBUsingLatticeParameters.h
 	inc/MantidCrystal/FindUBUsingMinMaxD.h
 	inc/MantidCrystal/IndexPeaks.h
+	inc/MantidCrystal/ShowPossibleCells.h
     inc/MantidCrystal/IndexSXPeaks.h
+        inc/MantidCrystal/GSLFunctions.h
 	inc/MantidCrystal/IntegratePeakTimeSlices.h
 	inc/MantidCrystal/LoadHKL.h
 	inc/MantidCrystal/LoadIsawPeaks.h
 	inc/MantidCrystal/LoadIsawUB.h
 	inc/MantidCrystal/MaskPeaksWorkspace.h
 	inc/MantidCrystal/NormaliseVanadium.h
+	inc/MantidCrystal/OptimizeExtinctionParameters.h
 	inc/MantidCrystal/PeakIntegration.h
 	inc/MantidCrystal/PeakIntensityVsRadius.h
 	inc/MantidCrystal/PredictPeaks.h
@@ -69,6 +74,7 @@ set ( TEST_FILES
 	test/FindUBUsingLatticeParametersTest.h
 	test/FindUBUsingMinMaxDTest.h
 	test/IndexPeaksTest.h
+        test/ShowPossibleCellsTest.h
     test/IndexSXPeaksTest.h
 	test/IntegratePeakTimeSlicesTest.h
 	test/LoadIsawPeaksTest.h

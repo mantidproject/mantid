@@ -1,0 +1,223 @@
+#include "MantidVatesAPI/vtkMDQuadFactory.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/CoordTransform.h"
+#include <boost/shared_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
+#include <vtkUnstructuredGrid.h>
+#include <vtkFloatArray.h>
+#include <vtkQuad.h>
+#include <vtkCellData.h>
+#include <boost/math/special_functions/fpclassify.hpp>
+
+using namespace Mantid::API;
+
+namespace Mantid
+{
+  namespace VATES
+  {
+    /// Constructor
+    vtkMDQuadFactory::vtkMDQuadFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName) : m_thresholdRange(thresholdRange), m_scalarName(scalarName)
+    {
+    }
+
+    /// Destructor
+    vtkMDQuadFactory::~vtkMDQuadFactory()
+    {
+    }
+
+    /// Factory Method. Should also handle delegation to successors.
+    vtkDataSet* vtkMDQuadFactory::create() const
+    {
+      validate();
+      IMDWorkspace_sptr imdws = boost::dynamic_pointer_cast<IMDWorkspace>(m_workspace);
+      if(!imdws || imdws->getNonIntegratedDimensions().size() != TwoDimensional)
+      {
+        return m_successor->create();
+      }
+
+      const size_t nDims = imdws->getNumDims();
+      size_t nNonIntegrated = imdws->getNonIntegratedDimensions().size();
+
+      /*
+      Write mask array with correct order for each internal dimension.
+      */
+      bool* masks = new bool[nDims];
+      for(size_t i_dim = 0; i_dim < nDims; ++i_dim)
+      {
+        bool bIntegrated = imdws->getDimension(i_dim)->getIsIntegrated();
+        masks[i_dim] = !bIntegrated; //TRUE for unmaksed, integrated dimensions are masked.
+      }
+
+      size_t maxSize = 1; 
+      for(size_t i_non_integrated = 0; i_non_integrated < nNonIntegrated; ++i_non_integrated)
+      {
+        maxSize *= imdws->getDimension(i_non_integrated)->getNBins();
+      }
+
+      // Create 4 points per box.
+      vtkPoints *points = vtkPoints::New();
+      points->SetNumberOfPoints(maxSize * 4);
+
+      // One scalar per box
+      vtkFloatArray * signals = vtkFloatArray::New();
+      signals->SetNumberOfValues(maxSize);
+
+      signals->SetName(m_scalarName.c_str());
+      signals->SetNumberOfComponents(1);
+
+      size_t nVertexes;
+      //Ensure destruction in any event.
+      boost::scoped_ptr<IMDIterator> it(imdws->createIterator());
+
+      
+
+      vtkUnstructuredGrid *visualDataSet = vtkUnstructuredGrid::New();
+      visualDataSet->Allocate(maxSize);
+
+      vtkIdList * quadPointList = vtkIdList::New();
+      quadPointList->SetNumberOfIds(4);
+
+      bool* useBox = new bool[maxSize];
+
+      Mantid::API::CoordTransform* transform = NULL;
+      if (m_useTransform)
+      {
+        transform = imdws->getTransformToOriginal();
+        std::cout << "Using transform" << std::endl;
+      }
+
+      Mantid::coord_t out[2];
+
+      size_t i = 0;
+      while(true)
+      {
+        Mantid::signal_t signal_normalized= it->getNormalizedSignal();
+
+        if (!boost::math::isnan( signal_normalized ) && m_thresholdRange->inRange(signal_normalized))
+        {
+          useBox[i] = true;
+
+          signals->InsertNextValue(static_cast<float>(signal_normalized));
+
+          coord_t* coords = it->getVertexesArray(nVertexes, nNonIntegrated, masks);
+          delete [] coords;
+          coords = it->getVertexesArray(nVertexes, nNonIntegrated, masks);
+
+          //Iterate through all coordinates. Candidate for speed improvement.
+          for(size_t v = 0; v < nVertexes; ++v)
+          {
+            coord_t * coord = coords + v*2;
+            size_t id = i*4 + v;
+            if(m_useTransform)
+            {
+              transform->apply(coord, out);
+              points->SetPoint(id, out[0], out[1], 0);
+            }
+            else
+            {
+              points->SetPoint(id, coord[0], coord[1], 0);
+            }
+          }
+
+          // Free memory
+          delete [] coords;
+
+        } // valid number of vertexes returned
+        else
+        {
+          useBox[i] = false;
+        }
+        ++i;
+
+        if(!it->next())
+        { 
+          break; 
+        }
+      }
+      const size_t nCells = i;
+      delete[] masks;
+
+      for(size_t ii = 0; ii < nCells; ++ii)
+      {
+
+        if (useBox[ii] == true)
+        {
+          vtkIdType pointIds = ii * 4;
+
+          quadPointList->SetId(0, pointIds + 0); //xyx
+          quadPointList->SetId(1, pointIds + 1); //dxyz
+          quadPointList->SetId(2, pointIds + 3); //dxdyz
+          quadPointList->SetId(3, pointIds + 2); //xdyz
+
+          visualDataSet->InsertNextCell(VTK_QUAD, quadPointList);
+
+        } // valid number of vertexes returned
+      }
+
+      delete[] useBox;
+
+      signals->Squeeze();
+      points->Squeeze();
+
+      visualDataSet->SetPoints(points);
+      visualDataSet->GetCellData()->SetScalars(signals);
+      visualDataSet->Squeeze();
+
+      signals->Delete();
+      points->Delete();
+      quadPointList->Delete();
+
+      return visualDataSet;
+    }
+
+    /// Create as a mesh only.
+    vtkDataSet* vtkMDQuadFactory::createMeshOnly() const
+    {
+      //Legacy. For VisIT compatibility. This isn't used any more.
+      throw std::runtime_error("Not implemented");
+    }
+
+    /// Create the scalar array only.
+    vtkFloatArray* vtkMDQuadFactory::createScalarArray() const
+    {
+      //Legacy. For VisIT compatibility. This isn't used any more.
+      throw std::runtime_error("Not implemented");
+    }
+
+    /// Initalize with a target workspace.
+    void vtkMDQuadFactory::initialize(Mantid::API::Workspace_sptr ws)
+    {
+      m_workspace = ws;
+      IMDWorkspace_sptr imdws = boost::dynamic_pointer_cast<IMDWorkspace>(ws);
+      if(!imdws || imdws->getNonIntegratedDimensions().size() != TwoDimensional)
+      {
+        if(this->hasSuccessor())
+        {
+          m_successor->setUseTransform(m_useTransform);
+          m_successor->initialize(ws);
+        }
+        else
+        {
+          throw std::runtime_error("vtkMDQuadFactory has no successor");
+        }
+      }
+    }
+
+    /// Get the name of the type.
+    std::string vtkMDQuadFactory::getFactoryTypeName() const
+    {
+      return "vtkMDQuadFactory";
+    }
+
+    /// Template Method pattern to validate the factory before use.
+    void vtkMDQuadFactory::validate() const
+    {
+      if(NULL == m_workspace.get())
+      {
+        throw std::runtime_error("vtkMDQuadFactory has no workspace to run against");
+      }
+    }
+
+  }
+}

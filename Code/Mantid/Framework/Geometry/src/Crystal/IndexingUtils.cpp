@@ -26,16 +26,6 @@ using Mantid::Kernel::Quat;
 #define round(x) ((x)>=0?(int)((x)+0.5):(int)((x)-0.5))
 #define PI 3.141592653589793238
 
-/**
-   Comparator function for sorting list of 3D vectors based on their magnitude,
- */
-static bool CompareMagnitude( const V3D & v1, const V3D & v2 )
-{
-  double mag_sq_1 = v1[0]*v1[0] + v1[1]*v1[1] + v1[2]*v1[2];
-  double mag_sq_2 = v2[0]*v2[0] + v2[1]*v2[1] + v2[2]*v2[2];
-  return (mag_sq_1 < mag_sq_2);
-}
-
 
 /**
    Comparator function for sorting list of UB matrices based on the sum
@@ -100,6 +90,19 @@ static bool CompareDiffFrom90( const DblMatrix & UB_1, const DblMatrix & UB_2 )
   return ( sum_2 < sum_1 );
 }
 
+
+/**
+   Comparator function for sorting list of 3D vectors based on their magnitude.
+   @param v1  first vector
+   @param v2  seconde vector
+   @return true if v1.norm() < v2.norm().
+ */
+bool IndexingUtils::CompareMagnitude( const V3D & v1, const V3D & v2 )
+{
+  double mag_sq_1 = v1[0]*v1[0] + v1[1]*v1[1] + v1[2]*v1[2];
+  double mag_sq_2 = v2[0]*v2[0] + v2[1]*v2[1] + v2[2]*v2[2];
+  return (mag_sq_1 < mag_sq_2);
+}
 
 
 /** 
@@ -665,9 +668,9 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
         GetIndexedPeaks( UB, q_vectors, required_tolerance,
                          miller_ind, indexed_qs, fit_error );
       }
-      catch (std::exception & e)
+      catch ( std::exception )
       {
-        // failed to improve with all peaks, so keep the UB we had 
+        // failed to improve with all peaks, so just keep the UB we had 
       }
     }
   }
@@ -2858,6 +2861,52 @@ bool IndexingUtils::GetABC( const DblMatrix  & UB,
 
   return true;
 }
+
+
+/**
+ *  Get the lattice parameters, a, b, c, alpha, beta, gamma and cell volume
+ *  for the specified orientation matrix.
+ *
+ *  @param UB           A non-singular matrix representing an orientation
+ *                      matrix.
+ *  @param lattice_par  std::vector of doubles that will contain the lattice
+ *                      parameters and cell volume as it's first seven entries.
+ *  @return true if the lattice_par vector was filled with the lattice
+ *          parameters and false if the matrix could not be inverted.
+ */
+bool IndexingUtils::GetLatticeParameters( const DblMatrix   & UB,
+                                          std::vector<double> & lattice_par )
+{
+  V3D a_dir;
+  V3D b_dir;
+  V3D c_dir;
+
+  if ( ! GetABC( UB, a_dir, b_dir, c_dir ) )
+  {
+    return false;
+  }
+
+  lattice_par.clear();
+  lattice_par.push_back( a_dir.norm() );
+  lattice_par.push_back( b_dir.norm() );
+  lattice_par.push_back( c_dir.norm() );
+ 
+  double alpha = b_dir.angle( c_dir ) * 180.0/PI;
+  double beta  = c_dir.angle( a_dir ) * 180.0/PI;
+  double gamma = a_dir.angle( b_dir ) * 180.0/PI;
+
+  lattice_par.push_back( alpha );
+  lattice_par.push_back( beta  );
+  lattice_par.push_back( gamma );
+
+  V3D    acrossb = a_dir.cross_prod( b_dir );
+  double volume  = acrossb.scalar_prod( c_dir );
+  
+  lattice_par.push_back( fabs(volume) );    // keep volume > 0 even if 
+                                            // cell is left handed 
+  return true;
+}
+
 
 /**
     Check if a,b,c cell has angles satifying Niggli condition within epsilon.

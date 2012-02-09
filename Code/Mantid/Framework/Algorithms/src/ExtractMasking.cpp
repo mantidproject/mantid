@@ -117,13 +117,13 @@ namespace Mantid
 
         if( inputIsMasked )
         {
-          outSpec->dataY()[0] = 0.0;
-          outSpec->dataE()[0] = 0.0;
+          outSpec->dataY()[0] = 1.0;
+          outSpec->dataE()[0] = 1.0;
         }
         else
         {
-          outSpec->dataY()[0] = 1.0;
-          outSpec->dataE()[0] = 1.0;
+          outSpec->dataY()[0] = 0.0;
+          outSpec->dataE()[0] = 0.0;
         }
         prog.report();
 

@@ -2,37 +2,33 @@ import _qti
 from mantidsimple import *
 from reduction.instruments.reflectometer import wks_utility
 
-def tof_distribution(file_path):
+def tof_distribution(file_path, callback=None):
     """
         Plot counts as a function of TOF for a given REF_L data file
     """
-    ws = "__REFL_TOF_distribution"
-    graph_name = "TOF distribution"
+    ws = "__TOF_distribution"
     LoadEventNexus(Filename=file_path, OutputWorkspace=ws)
     Rebin(InputWorkspace=ws,OutputWorkspace=ws,Params="0,200,200000")
     SumSpectra(InputWorkspace=ws, OutputWorkspace=ws)
-    g = _qti.app.graph(graph_name)
-    if g is None:
-        g = _qti.app.mantidUI.pyPlotSpectraList([ws],[0],True)
-        g.setName(graph_name)
-        x = mtd[ws].readX(0)
-        y = mtd[ws].readY(0)
-        xmin = x[0]
-        xmax = None
-        for i in range(len(y)):
-            if y[i]==0.0 and xmax is None:
-                xmin = x[i]
-            if y[i]>0:
-                xmax = x[i]
-                
-        l=g.activeLayer()
-        l.setScale(2,xmin,xmax)
-        l.setTitle(" ")
+    
+    # Get range of TOF where we have data
+    x = mtd[ws].readX(0)
+    y = mtd[ws].readY(0)
+    xmin = x[0]
+    xmax = None
+    for i in range(len(y)):
+        if y[i]==0.0 and xmax is None:
+            xmin = x[i]
+        if y[i]>0:
+            xmax = x[i]
+    
+    if callback is not None:
+        from LargeScaleStructures import data_stitching
+        data_stitching.RangeSelector.connect([ws], callback, xmin=xmin, xmax=xmax)
     
 def counts_vs_y_distribution(file_path, callback=None):
     ws = "__REFL_data"
-    ws_output = "__REFL_Y_distribution"
-    graph_name = "Counts vs Y"
+    ws_output = "__Counts_vs_Y"
     LoadEventNexus(Filename=file_path, OutputWorkspace=ws)
     
     # 1D plot
@@ -60,28 +56,6 @@ def counts_vs_y_distribution(file_path, callback=None):
     
     if callback is not None:
         from LargeScaleStructures import data_stitching
-        #def callback(xmin,xmax):
-        #    print xmin,xmax
         data_stitching.RangeSelector.connect([ws_output], callback)
 
-    return
-
-    g = _qti.app.graph(graph_name)
-    if g is None:
-        g = _qti.app.mantidUI.pyPlotSpectraList([ws_output],[0],True)
-        g.setName(graph_name)  
-        x = mtd[ws_output].readX(0)
-        y = mtd[ws_output].readY(0)
-        xmin = x[0]
-        xmax = None
-        for i in range(len(y)):
-            if y[i]==0.0 and xmax is None:
-                xmin = x[i]
-            if y[i]>0:
-                xmax = x[i]
-                
-        l=g.activeLayer()
-        l.setScale(2,xmin,xmax)
-        l.setTitle(" ")
-        
     

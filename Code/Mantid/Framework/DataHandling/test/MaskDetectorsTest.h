@@ -99,10 +99,12 @@ public:
     }
     else
     {
+      // In case of SpecialWorkspace2D
       Mantid::DataObjects::SpecialWorkspace2D_sptr specspace(new  Mantid::DataObjects::SpecialWorkspace2D(instr));
       for (size_t i = 0; i < specspace->getNumberHistograms(); i ++)
       {
-        specspace->dataY(i)[0] = 1.0;
+        // default to use all the detectors
+        specspace->dataY(i)[0] = 0.0;
       }
       space = boost::dynamic_pointer_cast<MatrixWorkspace>(specspace);
     }
@@ -356,7 +358,7 @@ public:
     masked_indices.insert(4);
     for (int i = 0; i < static_cast<int>(existingMask->getNumberHistograms()); i ++)
       if (masked_indices.count(i) == 1)
-        existingMask->dataY(i)[0] = 0.0;
+        existingMask->dataY(i)[0] = 1.0;
 
     // 3. Set properties and execute
     MaskDetectors masker;

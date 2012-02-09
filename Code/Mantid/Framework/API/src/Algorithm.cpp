@@ -57,7 +57,7 @@ namespace Mantid
     PropertyManagerOwner(),m_progressObserver(*this, &Algorithm::handleChildProgressNotification),
       m_cancel(false),m_parallelException(false),g_log(Kernel::Logger::get("Algorithm")),
       m_executeAsync(this,&Algorithm::executeAsyncImpl),m_isInitialized(false),
-      m_isExecuted(false),m_isChildAlgorithm(false),m_runningAsync(false),
+      m_isExecuted(false),m_isChildAlgorithm(false),m_alwaysStoreInADS(false),m_runningAsync(false),
       m_running(false),m_rethrow(false),m_algorithmID(0)
     {
     }
@@ -123,6 +123,17 @@ namespace Mantid
     {
       m_isChildAlgorithm = isChild;
     }
+
+    /** Do we ALWAYS store in the AnalysisDataService? This is set to true
+     * for python algorithms' child algorithms
+     *
+     * @param doStore :: always store in ADS
+     */
+    void Algorithm::setAlwaysStoreInADS(const bool doStore)
+    {
+      m_alwaysStoreInADS = doStore;
+    }
+
 
     /** Set whether the algorithm will rethrow exceptions
      * @param rethrow :: true if you want to rethrow exception.
@@ -229,7 +240,7 @@ namespace Mantid
       {
         // Gaudi: A call to the auditor service is here
         // (1) perform the printout
-        g_log.fatal("UNKNOWN Exception is caught");
+        g_log.fatal("UNKNOWN Exception is caught in initialize()");
         throw;
       }
     }
@@ -301,6 +312,7 @@ namespace Mantid
               == m_writeLockedWorkspaces.end())
           {
             // Write-lock it if not already
+            g_log.debug() << "Write-locking " << ws->getName() << std::endl;
             ws->getLock()->writeLock();
             m_writeLockedWorkspaces.push_back(ws);
           }
@@ -318,6 +330,7 @@ namespace Mantid
               == m_writeLockedWorkspaces.end())
           {
             // Read-lock it if not already write-locked
+            g_log.debug() << "Read-locking " << ws->getName() << std::endl;
             ws->getLock()->readLock();
             m_readLockedWorkspaces.push_back(ws);
           }
@@ -339,13 +352,19 @@ namespace Mantid
       {
         Workspace_sptr ws = m_writeLockedWorkspaces[i];
         if (ws)
+        {
+          g_log.debug() << "Unlocking " << ws->getName() << std::endl;
           ws->getLock()->unlock();
+        }
       }
       for (size_t i=0; i<m_readLockedWorkspaces.size(); i++)
       {
         Workspace_sptr ws = m_readLockedWorkspaces[i];
         if (ws)
+        {
+          g_log.debug() << "Unlocking " << ws->getName() << std::endl;
           ws->getLock()->unlock();
+        }
       }
 
       // Don't double-unlock workspaces
@@ -389,8 +408,10 @@ namespace Mantid
       // Cache the workspace in/out properties for later use
       cacheWorkspaceProperties();
 
-      // no logging of input if a child algorithm
-      if (!m_isChildAlgorithm) logAlgorithmInfo();
+      // no logging of input if a child algorithm (except for python child algos)
+      if (!m_isChildAlgorithm || m_alwaysStoreInADS) logAlgorithmInfo();
+
+      g_log.debug() << this->name() << " is executing with isChild = " << this->isChild() << std::endl;
 
       // Check all properties for validity
       if ( !validateProperties() )
@@ -461,21 +482,24 @@ namespace Mantid
           this->exec();
           // Get how long this algorithm took to run
           const float duration = timer.elapsed();
+
           // need it to throw before trying to run fillhistory() on an algorithm which has failed
-          // Put any output workspaces into the AnalysisDataService - if this is not a child algorithm
           if (!isChild())
-          {
             fillHistory(start_time,duration,Algorithm::g_execCount);
+
+          // Put any output workspaces into the AnalysisDataService - if this is not a child algorithm
+          if (!isChild() || m_alwaysStoreInADS)
             this->store();
-          }
 
           // RJT, 19/3/08: Moved this up from below the catch blocks
           setExecuted(true);
-          if (!m_isChildAlgorithm) 
+          if (!m_isChildAlgorithm || m_alwaysStoreInADS)
           {
             g_log.notice() << name() << " successful, Duration "
               << std::fixed << std::setprecision(2) << duration << " seconds" << std::endl;
           }
+          else
+            g_log.debug() << name() << " finished with isChild = " << isChild() << std::endl;
           m_running = false;
         }
         catch(std::runtime_error& ex)
@@ -533,8 +557,8 @@ namespace Mantid
         m_runningAsync = false;
         m_running = false;
 
-        m_notificationCenter.postNotification(new ErrorNotification(this,"UNKNOWN Exception is caught "));
-        g_log.error() << this->name() << ": UNKNOWN Exception is caught\n";
+        m_notificationCenter.postNotification(new ErrorNotification(this,"UNKNOWN Exception is caught in exec()"));
+        g_log.error() << this->name() << ": UNKNOWN Exception is caught in exec()\n";
         this->unlockWorkspaces();
         throw;
       }
@@ -794,6 +818,7 @@ namespace Mantid
       copyPropertiesFrom(proxy);
       m_algorithmID = proxy.getAlgorithmID();
       setLogging(proxy.isLogging());
+      setChild(proxy.isChild());
     }
 
 
@@ -863,7 +888,10 @@ namespace Mantid
     /** Sends out algorithm parameter information to the logger */
     void Algorithm::logAlgorithmInfo() const
     {
-      g_log.notice() << name() << " started"<< std::endl;
+      g_log.notice() << name() << " started";
+      if (this->isChild())
+        g_log.notice() << " (child)";
+      g_log.notice() << std::endl;
       // Make use of the AlgorithmHistory class, which holds all the info we want here
       AlgorithmHistory AH(this);
       g_log.information() << AH;

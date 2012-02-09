@@ -149,3 +149,5 @@ Desktop.ini
 .DS_Store
 
 /Code/Mantid/Build/CMake/OutputBinaryTo.cmake
+
+Code/Mantid/instrument/Grouping/tempMuonAnalysisGrouping.xml

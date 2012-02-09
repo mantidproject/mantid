@@ -113,6 +113,11 @@ namespace Mantid
         return m_adaptee->updateAlgorithmProgress(progress);
       }
 
+      virtual bool getOutputHistogramWS() const
+      {
+        return m_adaptee->getOutputHistogramWS();
+      }
+
       virtual ~MDRebinningViewAdapter()
       {
         //Do not delete adaptee.

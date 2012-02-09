@@ -56,34 +56,35 @@ namespace Geometry
                    double a = 1,      double b = 1,     double c = 1,
                    double alpha = 90, double beta = 90, double gamma = 90 );
 
-      size_t            GetFormNum();
-      std::string       GetCellType();
-      std::string       GetCentering();
+      size_t            GetFormNum() const;
+      std::string       GetCellType() const;
+      std::string       GetCentering() const;
       
       // Get the "distance" between the scalars for this form and another form
-      double            WeightedDistance( const ReducedCell & other );
+      double            WeightedDistance( const ReducedCell & other ) const;
 
       // Get transformation between the Niggli cell and the conventional cell
       Kernel::DblMatrix GetTransformation();
 
+      enum { NUM_CELL_TYPES = 44 };
+
       // String constants for cell types
-      static const std::string NONE;
-      static const std::string CUBIC;
-      static const std::string HEXAGONAL;
-      static const std::string RHOMBOHEDRAL;
-      static const std::string TETRAGONAL;
-      static const std::string ORTHORHOMBIC;
-      static const std::string MONOCLINIC;
-      static const std::string TRICLINIC;
+      static const std::string NONE()            { return "None"; }
+      static const std::string CUBIC()           { return "Cubic"; }
+      static const std::string HEXAGONAL()       { return "Hexagonal"; }
+      static const std::string RHOMBOHEDRAL()    { return "Rhombohedral"; }
+      static const std::string TETRAGONAL()      { return "Tetragonal"; }
+      static const std::string ORTHORHOMBIC()    { return "Orthorhombic"; }
+      static const std::string MONOCLINIC()      { return "Monoclinic"; }
+      static const std::string TRICLINIC()       { return "Triclinic"; }
 
       // String constants for centerings
-      static const std::string F_CENTERED;
-      static const std::string I_CENTERED;
-      static const std::string C_CENTERED;
-      static const std::string P_CENTERED;
-      static const std::string R_CENTERED;
+      static const std::string F_CENTERED()      { return "F"; }
+      static const std::string I_CENTERED()      { return "I"; }
+      static const std::string C_CENTERED()      { return "C"; }
+      static const std::string P_CENTERED()      { return "P"; }
+      static const std::string R_CENTERED()      { return "R"; }
 
-      enum { NUM_CELL_TYPES = 44 };
 
     private:
       void                init( size_t form_num,
@@ -95,7 +96,7 @@ namespace Geometry
       void                foot_note_e( double a_a, double c_c, double a_c );
       void                foot_note_f( double b_b, double c_c, double a_c );
       void                premultiply( size_t index );
-      std::vector<double> norm_vals( const ReducedCell &info );
+      std::vector<double> norm_vals( const ReducedCell &info ) const;
 
       size_t            form_num;
       double            scalars[6];

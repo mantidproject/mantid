@@ -83,10 +83,10 @@ file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_all_links.sh "#!/bin/sh\n"
                                                              "if [ ! -f $RPM_INSTALL_PREFIX0/${PVPLUGINS_DIR}/libMantidParaViewSplatterPlotSMPlugin.so ];then\n"
                                                              "  rm -f $RPM_INSTALL_PREFIX0/${BIN_DIR}/mantidplot\n"
                                                              "fi\n"
-                                                             "if [ -f /etc/profile.d/mantid.sh ]; then\n"
+                                                             "if [ -h /etc/profile.d/mantid.sh ]; then\n"
                                                              "  rm /etc/profile.d/mantid.sh\n"
                                                              "fi\n"
-                                                             "if [ -f /etc/profile.d/mantid.csh ]; then\n"
+                                                             "if [ -h /etc/profile.d/mantid.csh ]; then\n"
                                                              "  rm /etc/profile.d/mantid.csh\n"
                                                              "fi\n"
 )
@@ -98,8 +98,15 @@ file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_links.sh "#!/bin/sh\n"
 )
 
 file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_empty_install.sh "#!/bin/sh\n"
-                                                             "find $RPM_INSTALL_PREFIX0 -mindepth 1 -type d -empty -delete\n"
-                                                             "rmdir --ignore-fail-on-non-empty -p $RPM_INSTALL_PREFIX0\n"
+                                                             "# If the install prefix contains mantid then prune empty directories.\n"
+                                                             "# Begin extra cautious here just in case some has set the something like Prefix=/usr\n"
+                                                             "if echo \"$RPM_INSTALL_PREFIX0\" | grep -qi mantid; then\n"
+                                                             "  find $RPM_INSTALL_PREFIX0 -mindepth 1 -type d -empty -delete\n"
+                                                             "  rmdir --ignore-fail-on-non-empty -p $RPM_INSTALL_PREFIX0\n"
+                                                             "else\n"
+                                                             "    echo Install prefix does not contain the word mantid. Empty directories NOT removed.\n"
+                                                             "    exit 1\n"
+                                                             "fi\n"
 )
 
 # Note: On older versions of CMake, this line may mean that to do a "make package" without being root

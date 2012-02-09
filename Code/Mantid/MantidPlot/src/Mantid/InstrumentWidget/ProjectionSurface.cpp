@@ -16,6 +16,9 @@
 #include <cfloat>
 #include <limits>
 #include <cmath>
+#include "MantidKernel/V3D.h"
+
+using Mantid::Kernel::V3D;
 
 /**
   * The constructor.
@@ -452,6 +455,7 @@ int ProjectionSurface::getDetectorID(int x, int y)const
   return getDetectorID((unsigned char)qRed(pixel),(unsigned char)qGreen(pixel),(unsigned char)qBlue(pixel));
 }
 
+//------------------------------------------------------------------------------
 boost::shared_ptr<const Mantid::Geometry::IDetector> ProjectionSurface::getDetector(int x, int y)const
 {
   if (!m_pickImage || !m_pickImage->valid(x,y)) return boost::shared_ptr<const Mantid::Geometry::IDetector>();
@@ -461,6 +465,25 @@ boost::shared_ptr<const Mantid::Geometry::IDetector> ProjectionSurface::getDetec
   return boost::shared_ptr<const Mantid::Geometry::IDetector>();
 }
 
+//------------------------------------------------------------------------------
+/** Return the detector position (in real-space) at the pixel coordinates.
+ *
+ * @param x :: x pixel coordinate
+ * @param y :: y pixel coordinate
+ * @return V3D of the detector position
+ */
+Mantid::Kernel::V3D ProjectionSurface::getDetectorPos(int x, int y) const
+{
+  if (!m_pickImage || !m_pickImage->valid(x,y)) return V3D();
+  QRgb pixel = m_pickImage->pixel(x,y);
+  int index = getDetectorIndex((unsigned char)qRed(pixel),(unsigned char)qGreen(pixel),(unsigned char)qBlue(pixel));
+  if ( index >= 0 )
+    return m_instrActor->getDetPos(index);
+  else
+    return V3D();
+}
+
+//------------------------------------------------------------------------------
 int ProjectionSurface::getDetectorIndex(unsigned char r,unsigned char g,unsigned char b)const
 {
   size_t index = GLActor::decodePickColor(r,g,b);

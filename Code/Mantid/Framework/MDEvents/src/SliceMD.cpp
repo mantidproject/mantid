@@ -111,6 +111,16 @@ namespace MDEvents
         "  If not specified, a default of 40% of free physical memory is used.");
     //setPropertySettings("Memory", new EnabledWhenProperty(this, "OutputFilename", IS_NOT_DEFAULT));
 
+
+    declareProperty("TakeMaxRecursionDepthFromInput", true, "Copy the maximum recursion depth from the input workspace.");
+
+    BoundedValidator<int> *mustBePositiveInteger = new BoundedValidator<int>();
+    mustBePositiveInteger->setLower(0.0);
+
+    declareProperty("MaxRecursionDepth", 1000, mustBePositiveInteger,
+    "Sets the maximum recursion depth to use. Can be used to constrain the workspaces internal structure");
+    setPropertySettings("MaxRecursionDepth", new EnabledWhenProperty(this, "TakeMaxRecursionDepthFromInput", IS_EQUAL_TO, "0"));
+
     setPropertyGroup("OutputFilename", "File Back-End");
     setPropertyGroup("Memory", "File Back-End");
   }
@@ -168,7 +178,12 @@ namespace MDEvents
     for (size_t od=0; od < m_binDimensions.size(); od++)
       obc->setSplitInto(od, m_binDimensions[od]->getNBins());
     obc->setSplitThreshold(bc->getSplitThreshold());
-    obc->setMaxDepth(bc->getMaxDepth());
+
+    bool bTakeDepthFromInputWorkspace = getProperty("TakeMaxRecursionDepthFromInput");
+    int tempDepth =  getProperty("MaxRecursionDepth");
+    size_t maxDepth = bTakeDepthFromInputWorkspace? bc->getMaxDepth() : size_t(tempDepth);
+    obc->setMaxDepth(maxDepth);
+
     obc->resetNumBoxes();
     // Perform the first box splitting
     outWS->splitBox();

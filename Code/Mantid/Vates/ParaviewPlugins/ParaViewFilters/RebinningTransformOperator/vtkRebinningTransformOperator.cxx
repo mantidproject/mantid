@@ -177,6 +177,11 @@ void vtkRebinningTransformOperator::updateAlgorithmProgress(double progress)
   progressMutex.unlock();
 }
 
+bool vtkRebinningTransformOperator::getOutputHistogramWS() const
+{
+  return m_bOutputHistogramWS;
+}
+
 vtkCxxRevisionMacro(vtkRebinningTransformOperator, "$Revision: 1.0 $")
   ;
 vtkStandardNewMacro(vtkRebinningTransformOperator)
@@ -340,6 +345,15 @@ void vtkRebinningTransformOperator::SetMinThreshold(double minThreshold)
   if (minThreshold != m_thresholdMin)
   {
     this->m_thresholdMin = minThreshold;
+    this->Modified();
+  }
+}
+
+void vtkRebinningTransformOperator::SetOutputHistogramWS(bool bOutputHistogramWS)
+{
+  if(bOutputHistogramWS != m_bOutputHistogramWS)
+  {
+    m_bOutputHistogramWS = bOutputHistogramWS;
     this->Modified();
   }
 }

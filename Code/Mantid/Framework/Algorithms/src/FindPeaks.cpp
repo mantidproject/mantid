@@ -17,6 +17,7 @@ FindPeaks uses the [[SmoothData]] algorithm to, well, smooth the data - a necess
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FindPeaks.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -127,7 +128,7 @@ void FindPeaks::init()
     "A measure of the strictness desired in meeting the condition on peak candidates,\n"
     "Mariscotti recommends 2 (default 4)");
   
-  declareProperty("PeakPositions", "",
+  declareProperty(new ArrayProperty<double>("PeakPositions"),
     "Optional: enter a comma-separated list of the expected X-position of the centre of the peaks. Only peaks near these positions will be fitted." );
 
   std::vector<std::string> bkgdtypes;
@@ -237,7 +238,7 @@ void FindPeaks::exec()
     usePeakHeightTolerance = false;
 
   // b) Get the specified peak positions, which is optional
-  std::string peakPositions = getProperty("PeakPositions");
+  std::vector<double> centers = getProperty("PeakPositions");
 
   // c) Background
   std::string backgroundtype = getProperty("BackgroundType");
@@ -246,11 +247,8 @@ void FindPeaks::exec()
   mHighBackground = getProperty("HighBackground");
 
   // 4. Fit
-  if (peakPositions.size() > 0)
+  if (!centers.empty())
   {
-    //Split the string and turn it into a vector.
-    std::vector<double> centers = Kernel::VectorHelper::splitStringIntoVector<double>(peakPositions);
-
     //Perform fit with fixed start positions.
     //std::cout << "Number of Centers = " << centers.size() << std::endl;
     this->findPeaksGivenStartingPoints(centers, backgroundtype);
@@ -1279,7 +1277,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
       ") H = " << bestheight << std::endl;
 
 
-  g_log.notice() << "Chi2   Combine = " << fcost << " vs.  Background = " << bkgdchi2 << " + Gaussian = " << mincost << std::endl;
+  g_log.debug() << "Chi2   Combine = " << fcost << " vs.  Background = " << bkgdchi2 << " + Gaussian = " << mincost << std::endl;
 
   return;
 

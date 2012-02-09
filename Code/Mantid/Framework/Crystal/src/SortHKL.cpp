@@ -15,8 +15,6 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Statistics.h"
 #include <boost/math/special_functions/fpclassify.hpp>
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/TableRow.h"
 #include <fstream>
 
 using namespace Mantid::Geometry;
@@ -53,8 +51,8 @@ namespace Crystal
   /// Sets documentation strings for this algorithm
   void SortHKL::initDocs()
   {
-    this->setWikiSummary("Sorts a PeaksWorkspace by HKL.");
-    this->setOptionalMessage("Sorts a PeaksWorkspace by HKL.");
+    this->setWikiSummary("Sorts a PeaksWorkspace by HKL. Averages intensities using point group.");
+    this->setOptionalMessage("Sorts a PeaksWorkspace by HKL. Averages intensities using point group.");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -70,7 +68,8 @@ namespace Crystal
     declareProperty("PointGroup", propOptions[0],new ListValidator(propOptions),
       "Which point group applies to this crystal?");
 
-    declareProperty(new WorkspaceProperty<API::ITableWorkspace>("DuplicatesStatisticsTable","Statistics",Direction::Output));
+    declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace","",Direction::Output));
+    declareProperty("OutputChi2",0.0, Direction::Output);
 
   }
 
@@ -93,22 +92,7 @@ namespace Crystal
       if (m_pointGroups[i]->getName() == pointGroupName)
         pointGroup = m_pointGroups[i];
 
-    API::ITableWorkspace_sptr t = WorkspaceFactory::Instance().createTable("TableWorkspace");
-    t->addColumn("double","h");
-    t->addColumn("double","k");
-    t->addColumn("double","l");
-    t->addColumn("str","BankName");
-    t->addColumn("int","duplicates");
-    t->addColumn("double","Intensity.mean");
-    t->addColumn("double","Intensity.std");
-    t->addColumn("double","Intensity.min");
-    t->addColumn("double","Intensity.max");
-    t->addColumn("double","Intensity.median");
-    t->addColumn("double","Sigma.mean");
-    t->addColumn("double","Sigma.std");
-    t->addColumn("double","Sigma.min");
-    t->addColumn("double","Sigma.max");
-    t->addColumn("double","Sigma.median");
+    double Chisq = 0.0;
     int NumberPeaks = peaksW->getNumberPeaks();
     for (int i = 0; i < NumberPeaks; i++)
     {
@@ -134,7 +118,8 @@ namespace Crystal
     InPeaksW->sort(criteria);
     peaksW->sort(criteria);
 
-    std::vector<double> data, err;
+    std::vector<double> data, sig2;
+    std::vector<int> peakno;
     V3D hkl1;
     std::string bank1;
     for (int i = 1; i < NumberPeaks; i++)
@@ -144,57 +129,71 @@ namespace Crystal
       bank1 = peak1.getBankName();
       if(i == 1)
       {
+        peakno.push_back(0);
         data.push_back(peak1.getIntensity());
-        err.push_back(peak1.getSigmaIntensity());
+        sig2.push_back(std::pow(peak1.getSigmaIntensity(),2));
       }
       Peak & peak2 = peaksW->getPeaks()[i];
       V3D hkl2 = peak2.getHKL();
       std::string bank2 = peak2.getBankName();
       if (hkl1 == hkl2 && bank1.compare(bank2) == 0)
       {
+        peakno.push_back(i);
         data.push_back(peak2.getIntensity());
-        err.push_back(peak2.getSigmaIntensity());
+        sig2.push_back(std::pow(peak2.getSigmaIntensity(),2));
         if(i == NumberPeaks-1)
         {
           if(static_cast<int>(data.size()) > 1)
           {
-            Outliers(data,err);
+            Outliers(data,sig2);
             Statistics stats = getStatistics(data);
-            TableRow r = t->appendRow();
-            r <<peak1.getH()<<peak1.getK()<<peak1.getL()<<bank1<<static_cast<int>(data.size())<<stats.mean<< stats.standard_deviation<< stats.minimum<< stats.maximum<< stats.median;
-            stats = getStatistics(err);
-            r <<stats.mean<< stats.standard_deviation<< stats.minimum<< stats.maximum<< stats.median;
+            Chisq += stats.standard_deviation/stats.mean;
+            Statistics stats2 = getStatistics(sig2);
+            std::vector<int>::iterator itpk;
+            for (itpk = peakno.begin(); itpk != peakno.end(); ++itpk)
+            {
+              peaksW->getPeaks()[*itpk].setIntensity(stats.mean);
+              peaksW->getPeaks()[*itpk].setSigmaIntensity(std::sqrt(stats2.mean));
+            }
           }
-          Outliers(data,err);
+          Outliers(data,sig2);
+          peakno.clear();
           data.clear();
-          err.clear();
+          sig2.clear();
         }
       }
       else
       {
         if(static_cast<int>(data.size()) > 1)
         {
-          Outliers(data,err);
+          Outliers(data,sig2);
           Statistics stats = getStatistics(data);
-          TableRow r = t->appendRow();
-          r <<peak1.getH()<<peak1.getK()<<peak1.getL()<<bank1<<static_cast<int>(data.size())<<stats.mean<< stats.standard_deviation<< stats.minimum<< stats.maximum<< stats.median;
-          stats = getStatistics(err);
-          r <<stats.mean<< stats.standard_deviation<< stats.minimum<< stats.maximum<< stats.median;
+          Chisq += stats.standard_deviation/stats.mean;
+          Statistics stats2 = getStatistics(sig2);
+          std::vector<int>::iterator itpk;
+          for (itpk = peakno.begin(); itpk != peakno.end(); ++itpk)
+          {
+            peaksW->getPeaks()[*itpk].setIntensity(stats.mean);
+            peaksW->getPeaks()[*itpk].setSigmaIntensity(std::sqrt(stats2.mean));
+          }
         }
+        peakno.clear();
         data.clear();
-        err.clear();
+        sig2.clear();
         hkl1 = hkl2;
         bank1 = bank2;
+        peakno.push_back(i);
         data.push_back(peak2.getIntensity());
-        err.push_back(peak2.getSigmaIntensity());
+        sig2.push_back(std::pow(peak2.getSigmaIntensity(),2));
       }
     }
     data.clear();
-    err.clear();
-    setProperty("DuplicatesStatisticsTable",t);
+    sig2.clear();
+    setProperty<PeaksWorkspace_sptr>("OutputWorkspace", peaksW);
+    setProperty("OutputChi2", Chisq);
 
   }
-  void SortHKL::Outliers(std::vector<double>& data, std::vector<double>& err)
+  void SortHKL::Outliers(std::vector<double>& data, std::vector<double>& sig2)
   {
       Statistics stats = getStatistics(data);
       if(stats.standard_deviation == 0.)return;
@@ -204,7 +203,7 @@ namespace Crystal
         if (zscore > 3.0)
         {
           data.erase(data.begin()+i);
-          err.erase(err.begin()+i);
+          sig2.erase(sig2.begin()+i);
         }
       }
   }

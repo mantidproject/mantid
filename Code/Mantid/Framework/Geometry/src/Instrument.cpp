@@ -206,6 +206,26 @@ namespace Mantid
       return out;
     }
 
+    /** Get the minimum and maximum (inclusive) detector IDs
+     *
+     * @param min :: set to the min detector ID
+     * @param max :: set to the max detector ID
+     */
+    void Instrument::getMinMaxDetectorIDs(detid_t & min, detid_t & max) const
+    {
+      const detid2det_map * in_dets;
+      if (m_isParametrized)
+        in_dets = &dynamic_cast<const Instrument*>(m_base)->m_detectorCache;
+      else
+        in_dets = &this->m_detectorCache;
+
+      if (in_dets->empty())
+        throw std::runtime_error("No detectors on this instrument. Can't find min/max ids");
+      // Maps are sorted by key. So it is easy to find
+      min = in_dets->begin()->first;
+      max = in_dets->rbegin()->first;
+    }
+
 
     //------------------------------------------------------------------------------------------
     /** Fill a vector with all the detectors contained (at any depth) in a named component. For example,
@@ -432,24 +452,49 @@ namespace Mantid
       }
     }
 
+    //--------------------------------------------------------------------------
+    /** Is the detector with the given ID masked?
+     *
+     * @param detector_id :: detector ID to look for.
+     * @return true if masked; false if not masked or if the detector was not found.
+     */
     bool Instrument::isDetectorMasked(const detid_t &detector_id) const
     {
-      detid2det_map::const_iterator it = m_detectorCache.find(detector_id);
-      if ( it == m_detectorCache.end() )
+      // With no parameter map, then no detector is EVER masked
+      if (!isParametrized())
         return false;
-      return it->second->isMasked();
+      // Find the (base) detector object in the map.
+      detid2det_map::const_iterator it = m_instr->m_detectorCache.find(detector_id);
+      if ( it == m_instr->m_detectorCache.end() )
+        return false;
+      // This is the detector
+      const Detector * det = dynamic_cast<const Detector*>(it->second.get());
+      if (det == NULL)
+         return false;
+      // Access the parameter map directly.
+      Parameter_sptr maskedParam = m_map->get(det, "masked");
+      // If the parameter is defined, then yes, it is masked.
+      return bool(maskedParam);
     }
 
+    //--------------------------------------------------------------------------
+    /** Is this group of detectors masked?
+     *
+     * This returns true (masked) if ALL of the detectors listed are masked.
+     * It returns false (not masked) if there are no detectors in the list
+     * It returns false (not masked) if any of the detectors are NOT masked.
+     *
+     * @param detector_ids :: set of detector IDs
+     * @return true if masked.
+     */
     bool Instrument::isDetectorMasked(const std::set<detid_t> &detector_ids) const
     {
       if (detector_ids.empty())
-      {
-        throw Kernel::Exception::NotFoundError("No detectors specified in isDetectorMasked", "");
-      }
+        return false;
 
       for (std::set<detid_t>::const_iterator it = detector_ids.begin(); it != detector_ids.end(); ++it)
       {
-        if (! this->isDetectorMasked(*it))
+        if (!this->isDetectorMasked(*it))
           return false;
       }
       return true;

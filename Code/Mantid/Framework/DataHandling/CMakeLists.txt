@@ -77,6 +77,7 @@ set ( SRC_FILES
 	src/Merge2WorkspaceLogs.cpp
 	src/MoveInstrumentComponent.cpp
 	src/OrbiterDataArchive.cpp
+	src/ProcessDasNexusLog.cpp
 	src/RawFileInfo.cpp
 	src/RenameLog.cpp
 	src/RotateInstrumentComponent.cpp
@@ -180,6 +181,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/Merge2WorkspaceLogs.h
 	inc/MantidDataHandling/MoveInstrumentComponent.h
 	inc/MantidDataHandling/OrbiterDataArchive.h
+	inc/MantidDataHandling/ProcessDasNexusLog.h
 	inc/MantidDataHandling/RawFileInfo.h
 	inc/MantidDataHandling/RenameLog.h
 	inc/MantidDataHandling/RotateInstrumentComponent.h
@@ -279,6 +281,7 @@ set ( TEST_FILES
 	test/Merge2WorkspaceLogsTest.h
 	test/MoveInstrumentComponentTest.h
 	test/OrbiterDataArchiveTest.h
+	test/ProcessDasNexusLogTest.h
 	test/RawFileInfoTest.h
 	test/RenameLogTest.h
 	test/SaveCSVTest.h

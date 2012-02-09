@@ -181,7 +181,7 @@ def create_algorithm(algorithm, version, _algm_object):
             _version = kwargs["Version"]
             del kwargs["Version"]
         algm = _framework.createAlgorithm(algorithm, _version)
-        lhs = _funcreturns.lhs_info()
+        lhs = _funcreturns.lhs_info(use_object_names=True)
         extra_args = get_additional_args(lhs, algm)
         kwargs.update(extra_args)
         _set_properties(algm, *args, **kwargs)
@@ -396,7 +396,7 @@ def Load(*args, **kwargs):
     # Create and execute
     algm = _framework.createAlgorithm('Load')
     algm.setProperty('Filename', filename) # Must be set first
-    lhs = _funcreturns.lhs_info()
+    lhs = _funcreturns.lhs_info(use_object_names=True)
     # If the output has not been assigned to anything, i.e. lhs[0] = 0 and kwargs does not have OutputWorkspace
     # then raise a more helpful error than what we would get from an algorithm
     if lhs[0] == 0 and 'OutputWorkspace' not in kwargs:

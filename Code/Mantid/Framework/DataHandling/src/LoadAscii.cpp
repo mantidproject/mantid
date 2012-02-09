@@ -405,8 +405,8 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace",
         "",Direction::Output), "The name of the workspace that will be created.");
 
-      std::string spacers[5][2] = { {"CSV", ","}, {"Tab", "\t"}, {"Space", " "}, 
-      {"Colon", ":"}, {"SemiColon", ";"} };
+      std::string spacers[6][6] = { {"Automatic", ",\t:; "}, {"CSV", ","},
+          {"Tab", "\t"}, {"Space", " "}, {"Colon", ":"}, {"SemiColon", ";"} };
       // For the ListValidator
       std::vector<std::string> sepOptions;
       for( size_t i = 0; i < 5; ++i )
@@ -415,8 +415,8 @@ namespace Mantid
         m_separatorIndex.insert(std::pair<std::string,std::string>(option, spacers[i][1]));
         sepOptions.push_back(option);
       }
-      declareProperty("Separator", "CSV", new ListValidator(sepOptions),
-        "The column separator character (default: CSV)");
+      declareProperty("Separator", "Automatic", new ListValidator(sepOptions),
+        "The column separator character (default: Automatic selection)");
 
       std::vector<std::string> units = UnitFactory::Instance().getKeys();
       units.insert(units.begin(),"Dimensionless");

@@ -69,6 +69,7 @@ namespace Crystal
 
     this->declareProperty(new PropertyWithValue<int>( "NumIndexed", 0,
           Direction::Output), "Gets set with the number of indexed peaks.");
+
     this->declareProperty(new PropertyWithValue<double>( "AverageError", 0.0,
           Direction::Output), "Gets set with the average HKL indexing error.");
   }

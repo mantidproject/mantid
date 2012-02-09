@@ -113,6 +113,8 @@ namespace Mantid
       double m_lengthB3;
       /// ForceOrthogonal coords
       bool m_ForceOrthogonal;
+      /// Force output in terms of a histogram workspace. Decides which rebinning algorithm to use.
+      bool m_bOutputHistogramWS;
     };
   }
 }

@@ -126,6 +126,9 @@ namespace Algorithms
       maskWS->dataY(i)[0] = newy;
     } // ENDFOR
 
+    g_log.warning() << "There are " << negvalue << " negative values in input Workspace " << inWS->getName() << std::endl;
+    g_log.warning() << "There are " << lt1value << " values larger than 1.0 in input Workspace " << inWS->getName() << std::endl;
+
     // 4. Set result
     this->setProperty("OutputWorkspace", maskWS);
 

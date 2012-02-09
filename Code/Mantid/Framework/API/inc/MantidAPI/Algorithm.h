@@ -210,6 +210,7 @@ public:
 
   bool isChild() const;
   void setChild(const bool isChild);
+  void setAlwaysStoreInADS(const bool doStore);
   void setRethrows(const bool rethrow);
 
   /** @name Asynchronous Execution */
@@ -349,6 +350,7 @@ private:
   bool m_isInitialized; ///< Algorithm has been initialized flag
   bool m_isExecuted; ///< Algorithm is executed flag
   bool m_isChildAlgorithm; ///< Algorithm is a child algorithm
+  bool m_alwaysStoreInADS; ///< Always store in the ADS, even for child algos
   bool m_runningAsync; ///< Algorithm is running asynchronously
   bool m_running; ///< Algorithm is running
   bool m_rethrow; ///< Algorithm should rethrow exceptions while executing

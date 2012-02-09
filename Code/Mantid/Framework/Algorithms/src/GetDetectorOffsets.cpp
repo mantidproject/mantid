@@ -122,11 +122,11 @@ namespace Mantid
         PARALLEL_START_INTERUPT_REGION
         // Fit the peak
         double offset=fitSpectra(wi);
-        double mask=1.0;
+        double mask=0.0;
         if (std::abs(offset) > maxOffset)
         { 
           offset = 0.0;
-          mask = 0.0;
+          mask = 1.0;
         }
 
         // Get the list of detectors in this pixel
@@ -140,8 +140,17 @@ namespace Mantid
           for (it = dets.begin(); it != dets.end(); ++it)
           {
             outputW->setValue(*it, offset);
-            if (mask == 0.) maskWS->maskWorkspaceIndex((*pixel_to_wi)[*it]);
-            else maskWS->dataY((*pixel_to_wi)[*it])[0] = mask;
+            if (mask == 1.)
+            {
+              // Being masked
+              maskWS->maskWorkspaceIndex((*pixel_to_wi)[*it]);
+              maskWS->dataY((*pixel_to_wi)[*it])[0] = mask;
+            }
+            else
+            {
+              // Using the detector
+              maskWS->dataY((*pixel_to_wi)[*it])[0] = mask;
+            }
           }
         }
         prog.report();

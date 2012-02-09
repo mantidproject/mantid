@@ -1,6 +1,8 @@
 #ifndef USERFUNCTION_H
 #define USERFUNCTION_H
 
+#include "MantidGeometry/Rendering/OpenGL_Headers.h"
+
 #include <qwt3d_function.h>
 #include <QString>
 using namespace Qwt3D;

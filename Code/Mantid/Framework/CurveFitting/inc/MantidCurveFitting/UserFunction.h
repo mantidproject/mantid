@@ -53,6 +53,8 @@ namespace Mantid
 
       /// Returns the function's name
       std::string name()const{return "UserFunction";}
+      // Returns Category
+      virtual const std::string category() const { return "General";}
 
       /// Function you want to fit to.
       void functionMW(double* out, const double* xValues, const size_t nData)const;

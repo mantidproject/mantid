@@ -42,11 +42,11 @@ namespace DataHandling
     virtual ~Merge2WorkspaceLogs();
     
     /// Algorithm's name for identification
-    virtual const std::string name() const { return "Merge2WorkspaceLogs";};
+    virtual const std::string name() const { return "MergeLogs";};
     /// Algorithm's version for identification
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
-    virtual const std::string category() const { return "DataHandling";}
+    virtual const std::string category() const { return "DataHandling\\Logs";}
 
   private:
     virtual void initDocs();
@@ -55,7 +55,8 @@ namespace DataHandling
 
     void exec();
 
-    void mergeLogs(std::string ilogname1, std::string ilogname2, std::string ologname);
+    void mergeLogs(std::string ilogname1, std::string ilogname2, std::string ologname,
+        bool resetlogvalue, double logvalue1, double logvalue2);
 
     Kernel::TimeSeriesProperty<double>* getTimeSeriesLog(std::string logname);
 

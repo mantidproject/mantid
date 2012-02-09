@@ -85,7 +85,8 @@ class ReflData(object):
         return self._scale
     
     def set_scale(self, scale):
-        self._edit_ctrl.setText("%-6.3g" % scale)
+        value_as_string = "%-6.3g" % scale
+        self._edit_ctrl.setText(value_as_string.strip())
         self._scale = scale
     
     def set_user_data(self, data):
@@ -169,6 +170,8 @@ class StitcherWidget(BaseWidget):
             item = self._workspace_list[i]
             data = DataSet(item.name)
             data.load(True, True)
+            xmin,xmax = data.get_range()
+            data.set_range(xmin+0.002,xmax-0.001)
             item.set_user_data(data)
 
             if item.is_selected():

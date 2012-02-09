@@ -1,7 +1,24 @@
 /*WIKI* 
- Exctinction correction algorithm
- Input is Fsq's saved in peak workspace
+                        Extinction Correction Program 
+ The program is to apply extinction correction for single crystal diffraction 
+ intensity data measured at the TOPAZ beam line, Spallation Neutron Source, 
+ Oak Ridge National Laboratory. The Zachariasen (1967) and Becker & Coppens 
+(1974) methods, initially developed for monochromatic-source, have been adopted 
+ for time-of-flight neutron-beam diffraction. The TOF formulation is necessary 
+ for correcting the nominal variations in crystal mosaic distributions with changes 
+ in neutron wavelength, Tomiyoshi et.al(1980). 
+    
+ Input is Fsq's saved in peaks workspace
+ The extinction coefficients are obtained from measured Fo_squared through 
+ an interation process,Maslen & Spadaccini(1993).
  Output is Fsq's corrected for extinction.
+
+                        Xiaoping Wang, January, 2012
+
+ Zachariasen, W. H. (1967). Acta Cryst. A23, 558.
+ Becker, P. J. & Coppens, P. (1974). Acta Cryst. A30, 129.
+ S. Tomiyoshi, M. Yamada and H. Watanabe, Acta Cryst. (1980). A36, 600.
+ Maslen, E. N.  & Spadaccini, N. Acta Cryst. (1993). A49, 661.
 *WIKI*/
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
@@ -52,8 +69,8 @@ namespace Crystal
   /// Sets documentation strings for this algorithm
   void TOFExtinction::initDocs()
   {
-    this->setWikiSummary("Sorts a PeaksWorkspace by HKL.");
-    this->setOptionalMessage("Sorts a PeaksWorkspace by HKL.");
+    this->setWikiSummary("Extinction correction for single crystal peaks.");
+    this->setOptionalMessage("Extinction correction for single crystal peaks.");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -64,6 +81,20 @@ namespace Crystal
     declareProperty(new WorkspaceProperty<PeaksWorkspace>("InputWorkspace","",Direction::InOut),
         "An input PeaksWorkspace with an instrument.");
     declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace","",Direction::Output));
+    std::vector<std::string> corrOptions;
+    corrOptions.push_back("Type I Zachariasen" );
+    corrOptions.push_back("Type I Gaussian" );
+    corrOptions.push_back("Type I Lorentzian" );
+    corrOptions.push_back("Type II Zachariasen" );
+    corrOptions.push_back("Type II Gaussian" );
+    corrOptions.push_back("Type II Lorentzian" );
+    corrOptions.push_back("Type I&II Zachariasen" );
+    corrOptions.push_back("Type I&II Gaussian" );
+    corrOptions.push_back("Type I&II Lorentzian" );
+    corrOptions.push_back( "None, Scaling Only" );
+    declareProperty("ExtinctionCorrectionType", corrOptions[0],new ListValidator(corrOptions),
+      "Select the type of extinction correction.");
+
     BoundedValidator<double> *mustBePositive = new BoundedValidator<double> ();
     mustBePositive->setLower(0.0);
     declareProperty("LinearScatteringCoef", -1.0, mustBePositive,
@@ -73,8 +104,8 @@ namespace Crystal
     declareProperty("Radius", 0.10, "Radius of spherical crystal in cm");
     declareProperty("Mosaic", 0.262, "Mosaic Spread (FWHM) (Degrees)");
     declareProperty("Cell", 255.0, "Unit Cell Volume (Angstroms^3)");
-    //declareProperty("RCrystallite", 6.0, "Becker-Coppens Crystallite Radius (micron)");
-    declareProperty("ScaleFactor", 1.2, "Multiply FSQ and sig(FSQ) by scaleFactor");
+    declareProperty("RCrystallite", 6.0, "Becker-Coppens Crystallite Radius (micron)");
+    declareProperty("ScaleFactor", 1.0, "Multiply FSQ and sig(FSQ) by scaleFactor");
 
   }
 
@@ -84,14 +115,21 @@ namespace Crystal
   void TOFExtinction::exec()
   {
 
-    PeaksWorkspace_sptr peaksW = getProperty("InputWorkspace");
+    PeaksWorkspace_sptr inPeaksW = getProperty("InputWorkspace");
+    /// Output peaks workspace, create if needed
+    PeaksWorkspace_sptr peaksW = getProperty("OutputWorkspace");
+    if (peaksW != inPeaksW)
+      peaksW = inPeaksW->clone();
 
+    std::string cType = getProperty("ExtinctionCorrectionType");
     int NumberPeaks = peaksW->getNumberPeaks();
     double mosaic = getProperty("Mosaic");
     double cell = getProperty("Cell");
-    //double r_crystallite = getProperty("RCrystallite");
+    double r_crystallite = getProperty("RCrystallite");
     double scaleFactor = getProperty("ScaleFactor");
     double Eg = getEg(mosaic); // defined by Zachariasen, W. H. (1967). Acta Cryst. A23, 558
+    double y_corr = 1.0;
+    double sigfsq_ys = 0.0;
     for (int i = 0; i < NumberPeaks; i++)
     {
       Peak & peak1 = peaksW->getPeaks()[i];
@@ -99,30 +137,96 @@ namespace Crystal
       double sigfsq = peak1.getSigmaIntensity()*scaleFactor;
       double wl = peak1.getWavelength();
       double twoth = peak1.getScattering();
-      double tbar = 0.0;
-      double transmission = absor_sphere(twoth, wl, tbar);
-      std::cout << twoth<<"  "<<wl <<"  "<<tbar<<"  "<<transmission<<"\n";
+      double tbar = absor_sphere(twoth, wl);
       // Extinction Correction
 
-      double Xqt = getXqt(Eg, cell, wl, twoth, tbar, fsq);
 
-      double y_corr = getTypeIZachariasen(Xqt);
-      //double y_corrI_G =getTypeIGaussian(Xqt, twoth);
-      //double y_corrI_L = getTypeILorentzian(Xqt, twoth);
+      if (cType.compare("Type I Zachariasen")==0)
+      {
+        // Apply correction to fsq with Type-I Z for testing
+        double EgLaueI = getEgLaue(Eg, twoth, wl);
+        double Xqt = getXqt(EgLaueI, cell, wl, twoth, tbar, fsq);
+        y_corr = getZachariasen(Xqt);
+        sigfsq_ys = getSigFsqr(EgLaueI, cell, wl, twoth, tbar, fsq, sigfsq);
+      }
+      else if (cType.compare( "Type I Gaussian")==0)
+      {
+        // Apply correction to fsq with Type-I BCG for testing
+        double EgLaueI = std::sqrt(2.0) * getEgLaue(Eg, twoth, wl) * 2.0 / 3.0;
+        double Xqt = getXqt(EgLaueI, cell, wl, twoth, tbar, fsq);
+        y_corr = getGaussian(Xqt,twoth);
+        sigfsq_ys = getSigFsqr(EgLaueI, cell, wl, twoth, tbar, fsq, sigfsq);
+      }
+      else if (cType.compare("Type I Lorentzian")==0)
+      {
+        // Apply correction to fsq with Type-I BCL for testing
+        double EgLaueI = getEgLaue(Eg, twoth, wl);
+        double Xqt = getXqt(EgLaueI, cell, wl, twoth, tbar, fsq);
+        y_corr = getLorentzian(Xqt, twoth);
+        sigfsq_ys = getSigFsqr(EgLaueI, cell, wl, twoth, tbar, fsq, sigfsq);
+      }
 
-      // Test for Type-II
-      //double Rg = getRg(Eg, r_crystallite, wl, twoth); // defined by Zachariasen, W. H. (1967). Acta Cryst. A23, 558
-      //double XqtII = getXqtII(Rg, cell, wl, twoth, tbar, fsq);
-      //double y_corrII_Z = getTypeIIZachariasen(XqtII);
-      //double y_corrII_G = getTypeIIGaussian(XqtII, twoth);
-      //double y_corrII_L = getTypeIILorentzian(XqtII, twoth);
+      else if (cType.compare("Type II Zachariasen")==0)
+      {
+        // Apply correction to fsq with Type-II Z for testing
+        double EsLaue = getEgLaue(r_crystallite, twoth, wl);
+        double Xqt = getXqt(EsLaue, cell, wl, twoth, tbar, fsq);
+        y_corr = getZachariasen(Xqt);
+        sigfsq_ys = getSigFsqr(EsLaue, cell, wl, twoth, tbar, fsq, sigfsq);
+      }
+      else if (cType.compare("Type II Gaussian")==0)
+      {
+        // Apply correction to fsq with Type-II BCG for testing
+        double EsLaue = getEgLaue(r_crystallite, twoth, wl);
+        double Xqt = getXqt(EsLaue, cell, wl, twoth, tbar, fsq);
+        y_corr = getGaussian(Xqt,twoth);
+        sigfsq_ys = getSigFsqr(EsLaue, cell, wl, twoth, tbar, fsq, sigfsq);
+      }
+      else if (cType.compare("Type II Lorentzian")==0)
+      {
+        // Apply correction to fsq with Type-II BCL for testing
+        double EsLaue = getEgLaue(r_crystallite, twoth, wl);
+        double Xqt = getXqt(EsLaue, cell, wl, twoth, tbar, fsq);
+        y_corr = getLorentzian(Xqt,twoth);
+        sigfsq_ys = getSigFsqr(EsLaue, cell, wl, twoth, tbar, fsq, sigfsq);
+      }
 
-      // Apply correction to fsq with Type-I Z for testing
-      double fsq_ys = fsq * y_corr;
-      double sigfsq_ys = sigfsq * y_corr;
-      sigfsq_ys = std::sqrt(1+sigfsq_ys*sigfsq_ys+std::pow(0.005*sigfsq_ys,2));   // Ad a constant 1 for background and 0.5% of Fsq for instrument error
+      else if (cType.compare("Type I&II Zachariasen")==0)
+      {
+        // Apply correction to fsq with Type-II Z for testing
+        double EgLaueI = getEgLaue(Eg, twoth, wl);
+        double EsLaue = getEgLaue(r_crystallite, twoth, wl);
+        double Rg = getRg(EgLaueI, EsLaue, wl, twoth);
+        double Xqt = getXqtII(Rg, cell, wl, twoth, tbar, fsq);
+        y_corr = getTypeIIZachariasen(Xqt);
+        sigfsq_ys = getSigFsqr(EsLaue, cell, wl, twoth, tbar, fsq, sigfsq);
+      }
+      else if (cType.compare("Type I&II Gaussian")==0)
+      {
+        // Apply correction to fsq with Type-II BCG for testing
+        double EgLaueI = getEgLaue(Eg, twoth, wl);
+        double Rg = getRgGaussian(EgLaueI, r_crystallite, wl, twoth);
+        double Xqt = getXqtII(Rg, cell, wl, twoth, tbar, fsq);
+        y_corr = getTypeIIGaussian(Xqt,twoth);
+        sigfsq_ys = getSigFsqr(Rg, cell, wl, twoth, tbar, fsq, sigfsq);
+      }
+      else if (cType.compare("Type I&II Lorentzian")==0)
+      {
+        // Apply correction to fsq with Type-II BCL for testing
+        double EgLaueI = getEgLaue(Eg, twoth, wl);
+        double Rg = getRgLorentzian(EgLaueI, r_crystallite, wl, twoth);
+        double Xqt = getXqtII(Rg, cell, wl, twoth, tbar, fsq);
+        y_corr = getTypeIILorentzian(Xqt,twoth);
+        sigfsq_ys = getSigFsqr(Rg, cell, wl, twoth, tbar, fsq, sigfsq);
+      }
+      else if (cType.compare("None, Scaling Only")==0)
+      {
+        y_corr = 1.0; // No extinction correction
+        sigfsq_ys = sigfsq;
+      }
 
-      peak1.setIntensity(fsq_ys);
+      peak1.setIntensity(fsq * y_corr);
+      sigfsq_ys = std::sqrt(1.0+sigfsq_ys*sigfsq_ys+std::pow(0.005*sigfsq_ys,2));
       peak1.setSigmaIntensity(sigfsq_ys);
 
       // output reflection to log file and to hkl file with SaveHKL
@@ -136,29 +240,33 @@ namespace Crystal
         double Eg = 2.0*std::sqrt(std::log(static_cast<double>(2.0))/(2*M_PI))/(mosaic*M_PI/180.0);
         return Eg;
   }
-;
+  double TOFExtinction::getEgLaue(double Eg, double twoth, double wl)
+  {
+        // Tomiyoshi, Yamada and Watanabe
+        double EgLaue = Eg*std::tan(twoth/2.0)/wl;
+        return EgLaue;
+  }
   double TOFExtinction::getXqt(double Eg, double cellV, double wl, double twoth, double tbar, double fsq)
   {
         // Xqt calculated from measured Fsqr;
-        double beta = Eg / std::pow(cellV,2) * std::pow(wl,4) / std::pow((std::sin(twoth/2)),2) * tbar * fsq/10;
+        // Maslen & Spadaccini
+        double beta = Eg / std::pow(cellV,2) * std::pow(wl,4)/2/ std::pow((std::sin(twoth/2)),2) * tbar * fsq/10;
         double Xqt = std::pow(beta,2) + beta * std::sqrt(std::pow(beta,2) + 1);
         return Xqt;
   }
-  double TOFExtinction::getTypeIZachariasen(double Xqt)
+  double TOFExtinction::getZachariasen(double Xqt)
   {
         // TYPE-I, Zachariasen, W. H. (1967). Acta Cryst. A23, 558 ;
         double y_ext = std::sqrt(1 + 2 * Xqt);
         return y_ext;
   }
-;
-  double TOFExtinction::getTypeIGaussian(double Xqt, double twoth)
+  double TOFExtinction::getGaussian(double Xqt, double twoth)
   {
         // Type-I, Gaussian, Becker, P. J. & Coppens, P. (1974). Acta Cryst. A30, 129;
         double y_ext =std::sqrt(1 + 2*Xqt + (0.58 + 0.48*std::cos(twoth) + 0.24*std::pow((std::cos(twoth)),2))*std::pow(Xqt,2)/(1 + (0.02 - 0.025*std::cos(twoth))*Xqt));
         return y_ext;
   }
-;
-  double TOFExtinction::getTypeILorentzian(double Xqt, double twoth)
+  double TOFExtinction::getLorentzian(double Xqt, double twoth)
   {
         //TYPE-I Lorentzian, Becker, P. J. & Coppens, P. (1974). Acta Cryst. A30, 129;
         double y_ext;
@@ -168,39 +276,59 @@ namespace Crystal
              y_ext =std::sqrt(1+2*Xqt+(0.025+0.285*std::cos(twoth))*std::pow(Xqt,2)/(1-0.45*Xqt*std::cos(twoth)));
         return y_ext;
   }
-;
-        // Type-II extinction correction;
-  double TOFExtinction::getRg(double Eg, double r_crystallite, double wl, double twoth)
+  double TOFExtinction::getEsLaue(double r, double twoth, double wl)
   {
-        double r = r_crystallite; // micron
+        // Type II mosaic distribution radius in micron
+        // Tomiyoshi, Yamada and Watanabe
+        double EsLaue = r*10000.0*2.0*std::pow(std::sin(twoth/2/wl),2);
+        return EsLaue;
+  }
+  double TOFExtinction::getRg(double EgLaue, double EsLaue, double wl, double twoth)
+  {
+        UNUSED_ARG(wl)
+        UNUSED_ARG(twoth)
         // Two-theta dependence by Becker & Coppens, Acta Cryst A 30, 129 (1974)
         // The factor is std::pow((std::sin(twoth/2)/wl),2) for tof neutron 
-        double Es = r*std::pow((1000.0*std::sin(twoth/2)/wl),2);
-        double Rg = Es/std::sqrt(1+std::pow((Es/Eg),2));
+        //double Es = r*std::pow((1000.0*std::sin(twoth/2)/wl),2);
+        double Rg = EsLaue/std::sqrt(1+EsLaue*EsLaue/EgLaue/EgLaue);
         return Rg;
   }
-;
+  double TOFExtinction::getRgGaussian(double EgLaue, double r_crystallite, double wl, double twoth)
+  {
+        // Combined Type I and Type II correction by Becker & Coppens
+        double r = r_crystallite; // micron
+        double Es = 1.5 * r * 10000 * 2 * pow(std::sin(twoth/2)/wl,2);
+        double RgGaussian = Es/std::sqrt(1.0+Es*Es/EgLaue/EgLaue/2.0);
+        RgGaussian = 2.0 / 3.0 * RgGaussian;
+        return RgGaussian;
+  }
+  double TOFExtinction::getRgLorentzian(double EgLaue, double r_crystallite, double wl, double twoth)
+  {
+        // Combined Type I and Type II correction by Becker & Coppens
+        double r = r_crystallite; // micron
+        double Es = 1.5 * r * 10000 * 2 * pow(std::sin(twoth/2)/wl,2);
+        double RgLorentzian = Es/(1+2*Es/EgLaue/3.0);
+        RgLorentzian = 2.0 / 3.0 * RgLorentzian;
+        return RgLorentzian;
+  }
   double TOFExtinction::getXqtII(double Rg, double cellV, double wl, double twoth, double tbar, double fsq)
   {
-        double betaII = Rg / std::pow(cellV,2) * std::pow(wl,4) / std::pow((std::sin(twoth/2)),2) * tbar * fsq/10;
+        double betaII = Rg / std::pow(cellV,2) * std::pow(wl,4)/2.0/ std::pow((std::sin(twoth/2)),2) * tbar * fsq/10;
         double XqtII = std::pow(betaII,2) + betaII * std::sqrt(std::pow(betaII,2) + 1);
         return XqtII;
   }
-;
   double TOFExtinction::getTypeIIZachariasen(double XqtII)
   {
         // TYPE-II, Zachariasen, W. H. (1967). Acta Cryst. A23, 558 ;
         double y_ext_II = std::sqrt(1 + 2 * XqtII);
         return y_ext_II;
   }
-;
   double TOFExtinction::getTypeIIGaussian(double XqtII, double twoth)
   {
         //Becker, P. J. & Coppens, P. (1974). Acta Cryst. A30, 129;
         double y_ext_II =std::sqrt(1 + 2*XqtII + (0.58 + 0.48*std::cos(twoth) + 0.24*std::pow((std::cos(twoth)),2))*std::pow(XqtII,2)/(1 + (0.02 - 0.025*std::cos(twoth))*XqtII));
         return y_ext_II;
   }
-;
   double TOFExtinction::getTypeIILorentzian(double XqtII, double twoth)
   {
         //TYPE-II Lorentzian, Becker, P. J. & Coppens, P. (1974). Acta Cryst. A30, 129;
@@ -210,6 +338,15 @@ namespace Crystal
         else
              y_ext_II =std::sqrt(1+2*XqtII+(0.025+0.285*std::cos(twoth))*std::pow(XqtII,2)/(1-0.45*XqtII*std::cos(twoth)));
         return y_ext_II;
+  }
+  double TOFExtinction::getSigFsqr(double Rg, double cellV, double wl, double twoth, double tbar, double fsq, double sigfsq)
+  {
+        double sig_Rg = 0.03 * Rg; // Estimated
+        double beta = Rg / std::pow(cellV,2) * std::pow(wl,4) /2/ std::pow(sin(twoth/2),2) * tbar * fsq/10;
+        double bb = beta * beta;
+        double sigSqr = std::pow(2*beta + bb/std::sqrt( bb + 1) + std::sqrt(bb + 1),2)*sigfsq*sigfsq + fsq*fsq*std::pow(beta/Rg,2)*std::pow(1 + beta/std::sqrt(bb + 1),2)*sig_Rg*sig_Rg;
+        double sig = std::sqrt(sigSqr);
+        return sig;
   }
  /**
   *       function to calculate a spherical absorption correction
@@ -227,7 +364,7 @@ namespace Crystal
   *
   *       a. j. schultz, june, 2008
   */
-  double TOFExtinction::absor_sphere(double& twoth, double& wl, double& tbar)
+  double TOFExtinction::absor_sphere(double& twoth, double& wl)
   {
     int i;
     double mu, mur;         //mu is the linear absorption coefficient,
@@ -280,12 +417,13 @@ namespace Crystal
                                                  // trans = exp(-mu*tbar)
 
 //  calculate tbar as defined by coppens.
+    double tbar;
     if(mu == 0.0)
       tbar=0.0;
     else
       tbar = -(double)std::log(trans)/mu;
 
-    return trans;
+    return tbar;
   }
 
 

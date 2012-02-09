@@ -388,17 +388,31 @@ void LoadEventPreNexus2::processImbedLogs(){
     PixelType pid = *pit;
     mit = this->wrongdetidmap.find(pid);
     size_t mindex = mit->second;
-    if (mindex > this->wrongdetid_abstimes.size()){
+    if (mindex > this->wrongdetid_pulsetimes.size())
+    {
       g_log.error() << "Wrong Index " << mindex << " for Pixel " << pid << std::endl;
       throw std::invalid_argument("Wrong array index for pixel from map");
-    } else {
-      g_log.notice() << "Processing imbed log marked by Pixel " << pid <<
-          " with size = " << this->wrongdetid_abstimes[mindex].size() << std::endl;
+    }
+    else
+    {
+      g_log.information() << "Processing imbed log marked by Pixel " << pid <<
+          " with size = " << this->wrongdetid_pulsetimes[mindex].size() << std::endl;
     }
 
+    std::stringstream ssname;
+    ssname << "Pixel" << pid;
+    std::string wsname = ssname.str();
+
+    /* Disabled
     // b. Create output workspace2D
     // i. Output information in workspaces
-    size_t nbins = this->wrongdetid_abstimes[mindex].size();
+    size_t nbins = this->wrongdetid_pulsetimes[mindex].size();
+    if (this->wrongdetid_tofs[mindex].size() != nbins)
+    {
+      g_log.error() << "For index " << mindex << ", pulse time vector and TOF vector have different length" << std::endl;
+      throw std::runtime_error("Fatal programming error");
+    }
+
     // ii.Create workspace
     DataObjects::Workspace2D_sptr ws2d = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, nbins, nbins));
@@ -431,23 +445,22 @@ void LoadEventPreNexus2::processImbedLogs(){
     std::stringstream ssws;
     ssws << "OutputPixel" << pid << "Workspace";
     std::string outputtitle = ssws.str();
-    std::stringstream ssname;
-    ssname << "Pixel" << pid;
-    std::string wsname = ssname.str();
+
     g_log.notice() << "Pixel " << pid << ": OutputWorkspace(" << outputtitle << ") <-- " << wsname << std::endl;
     this->declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outputtitle, wsname, Direction::Output),
         "Set the output sample environment data record");
     this->setProperty(outputtitle, ws2d);
+     */
 
     // d. Add this to log
     this->addToWorkspaceLog(wsname, mindex);
 
     // z. Check workspace
+    /*
     g_log.notice() << "For log @ " << wsname << ":  " << (nbins-numzerodiffs) << " events are individual" << std::endl;
     g_log.notice() << "For log @ " << wsname << ":  " << numzerodiffs << " events have same pulse time" << std::endl;
     g_log.notice() << "For log @ " << wsname << ":  " << numlessdiffs << " events are earlier than previous one" << std::endl;
-    //    TODO  This will be removed later
-    this->debugOutput(false, mindex);
+    */
 
     g_log.notice() << "End of Processing This Log " << std::endl << std::endl;
 
@@ -465,14 +478,18 @@ void LoadEventPreNexus2::processImbedLogs(){
 void LoadEventPreNexus2::addToWorkspaceLog(std::string logtitle, size_t mindex){
 
   // 1. Set data structure and constants
-  size_t nbins = this->wrongdetid_abstimes[mindex].size();
+  size_t nbins = this->wrongdetid_pulsetimes[mindex].size();
   TimeSeriesProperty<double>* property = new TimeSeriesProperty<double>(logtitle);
 
   // 2. Set data
-  double y0 = 1.0;
-  int msize = property->size();
+  // double y0 = 1.0;
+  // int msize = property->size();
   for (size_t k = 0; k < nbins; k ++){
     // a) Add log
+    property->addValue(this->wrongdetid_pulsetimes[mindex][k], this->wrongdetid_tofs[mindex][k]);
+
+    /* Diabled
+
     if (this->wrongdetid_abstimes[mindex][k] > this->wrongdetid_abstimes[mindex][k-1]){
       property->addValue(Kernel::DateAndTime(this->wrongdetid_abstimes[mindex][k]), y0);
     }
@@ -487,23 +504,23 @@ void LoadEventPreNexus2::addToWorkspaceLog(std::string logtitle, size_t mindex){
         g_log.error() << " This is the first entry to add to log!" << std::endl;
       }
     }
-    msize = property->size();
+    */
+    // msize = property->size();
 
     // c) Update log
-    y0 = 1.0 - y0;
+    // y0 = 1.0 - y0;
   } // ENDFOR
 
   this->localWorkspace->mutableRun().addProperty(property, false);
 
-  g_log.notice() << "Size of Property " << property->name() << " = " << property->size() <<
+  g_log.information() << "Size of Property " << property->name() << " = " << property->size() <<
       " vs Original Log Size = " << nbins << std::endl;
 
   return;
 }
 
 /*
- * Some output for debug purpose
- */
+ * Some output for debug purpose --- Disabled
 void LoadEventPreNexus2::debugOutput(bool doit, size_t mindex){
 
   if (!doit){
@@ -549,6 +566,7 @@ void LoadEventPreNexus2::debugOutput(bool doit, size_t mindex){
 
   return;
 }
+*/
 
 /**
  * Returns the name of the property to be considered as the Filename for Load
@@ -917,10 +935,11 @@ void LoadEventPreNexus2::procEvents(DataObjects::EventWorkspace_sptr & workspace
   workspace->setAllX(axis);
   this->pixel_to_wkspindex.clear();
 
-  // Final process on wrong detector id events
+  /* Disabled! Final process on wrong detector id events
   for (size_t vi = 0; vi < this->wrongdetid_abstimes.size(); vi ++){
     std::sort(this->wrongdetid_abstimes[vi].begin(), this->wrongdetid_abstimes[vi].end());
   }
+  */
 
   // Final message output
   g_log.notice() << "Read " << this->num_good_events << " events + "
@@ -938,7 +957,7 @@ void LoadEventPreNexus2::procEvents(DataObjects::EventWorkspace_sptr & workspace
   for (git = this->wrongdetidmap.begin(); git != this->wrongdetidmap.end(); ++git){
     PixelType tmpid = git->first;
     size_t vindex = git->second;
-    g_log.notice() << "Pixel " << tmpid << ":  Total number of events = " << this->wrongdetid_abstimes[vindex].size() << std::endl;
+    g_log.notice() << "Pixel " << tmpid << ":  Total number of events = " << this->wrongdetid_pulsetimes[vindex].size() << std::endl;
   }
 
   return;
@@ -977,7 +996,8 @@ void LoadEventPreNexus2::procEventsLinear(DataObjects::EventWorkspace_sptr & /*w
   double local_longest_tof = 0.;
 
   std::map<PixelType, size_t> local_pidindexmap;
-  std::vector<std::vector<int64_t> > local_abstimes;
+  std::vector<std::vector<Kernel::DateAndTime> > local_pulsetimes;
+  std::vector<std::vector<double> > local_tofs;
 
   std::set<PixelType> local_wrongdetids;
 
@@ -1076,11 +1096,13 @@ void LoadEventPreNexus2::procEventsLinear(DataObjects::EventWorkspace_sptr & /*w
       size_t theindex = 0;
       if (it == local_pidindexmap.end()){
         // Initialize it!
-        size_t newindex = local_abstimes.size();
+        size_t newindex = local_pulsetimes.size();
         local_pidindexmap[pid] = newindex;
 
-        std::vector<int64_t> tempvectime;
-        local_abstimes.push_back(tempvectime);
+        std::vector<Kernel::DateAndTime> tempvectime;
+        std::vector<double> temptofs;
+        local_pulsetimes.push_back(tempvectime);
+        local_tofs.push_back(temptofs);
 
         theindex = newindex;
       } else {
@@ -1089,11 +1111,9 @@ void LoadEventPreNexus2::procEventsLinear(DataObjects::EventWorkspace_sptr & /*w
       }
 
       // ii. calculate and add absolute time
-      int64_t abstime = (pulsetime.total_nanoseconds()+int64_t(tof*1000));
-      local_abstimes[theindex].push_back(abstime);
-
-      if (abstime == 666977093983629966)
-        g_log.error() << "Check Special Event: Pulse ID = " << pulse_i << "  Tof = " << temp.tof << std::endl;
+      // int64_t abstime = (pulsetime.total_nanoseconds()+int64_t(tof*1000));
+      local_pulsetimes[theindex].push_back(pulsetime);
+      local_tofs[theindex].push_back(tof);
 
     }
 
@@ -1118,11 +1138,13 @@ void LoadEventPreNexus2::procEventsLinear(DataObjects::EventWorkspace_sptr & /*w
       std::map<PixelType, size_t>::iterator git = this->wrongdetidmap.find(tmpid);
       if (git == this->wrongdetidmap.end()){
         // create entry
-        size_t newindex = this->wrongdetid_abstimes.size();
+        size_t newindex = this->wrongdetid_pulsetimes.size();
         this->wrongdetidmap[tmpid] = newindex;
 
-        std::vector<int64_t> temptimes;
-        this->wrongdetid_abstimes.push_back(temptimes);
+        std::vector<Kernel::DateAndTime> temppulsetimes;
+        std::vector<double> temptofs;
+        this->wrongdetid_pulsetimes.push_back(temppulsetimes);
+        this->wrongdetid_tofs.push_back(temptofs);
 
         mindex = newindex;
       } else {
@@ -1136,9 +1158,16 @@ void LoadEventPreNexus2::procEventsLinear(DataObjects::EventWorkspace_sptr & /*w
       // g_log.notice() << "Pixel " << tmpid << "  Global index = " << mindex << "  Local Index = " << localindex << std::endl;
 
       // 3. Sort and merge
+      /* Redo
       std::sort(local_abstimes[localindex].begin(), local_abstimes[localindex].end());
       for (size_t iv = 0; iv < local_abstimes[localindex].size(); iv ++){
         this->wrongdetid_abstimes[mindex].push_back(local_abstimes[localindex][iv]);
+      }
+      */
+      for (size_t iv = 0; iv < local_pulsetimes[localindex].size(); iv ++)
+      {
+        this->wrongdetid_pulsetimes[mindex].push_back(local_pulsetimes[localindex][iv]);
+        this->wrongdetid_tofs[mindex].push_back(local_tofs[localindex][iv]);
       }
       // std::sort(this->wrongdetid_abstimes[mindex].begin(), this->wrongdetid_abstimes[mindex].end());
 

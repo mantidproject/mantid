@@ -19,8 +19,9 @@
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-#include "MantidPythonInterface/kernel/PropertyHandler.h"
+#include "MantidPythonInterface/kernel/PythonTypeHandler.h"
 #include "MantidPythonInterface/kernel/PropertyMarshal.h"
+#include "MantidPythonInterface/kernel/TypeRegistry.h"
 #include "MantidKernel/IPropertyManager.h"
 
 #if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
@@ -33,7 +34,7 @@ namespace Mantid
 {
   namespace PythonInterface
   {
-    namespace PropertyMarshal
+    namespace TypeRegistry
     {
 
       /**
@@ -42,7 +43,7 @@ namespace Mantid
        * DECLARE_SINGLEVALUETYPEHANDLER macro whenever a new class is exported that will be used with PropertyWithValue
        */
       template<typename BaseType, typename DerivedType=BaseType>
-      struct DLLExport SingleValueTypeHandler : public PropertyHandler
+      struct DLLExport SingleValueTypeHandler : public PythonTypeHandler
       {
         /**
          * Set function to handle Python -> C++ calls and get the correct type
@@ -72,7 +73,7 @@ namespace Mantid
        * assigned polymorphically. This can be removed when the bug is fixed
        */
       template<>
-      struct DLLExport SingleValueTypeHandler<std::string> : public PropertyHandler
+      struct DLLExport SingleValueTypeHandler<std::string> : public PythonTypeHandler
       {
         /**
          * Set function to handle Python -> C++ calls and get the correct type
@@ -103,7 +104,7 @@ namespace Mantid
        * is of type double but an integer is passed.
        */
       template<>
-      struct DLLExport SingleValueTypeHandler<int> : public PropertyHandler
+      struct DLLExport SingleValueTypeHandler<int> : public PythonTypeHandler
       {
         /**
          * Set function to handle Python -> C++ calls and get the correct type
@@ -135,10 +136,7 @@ namespace Mantid
           boost::python::extract<int> extractor(value);
           return extractor.check();
         }
-
       };
-
-
     }
   }
 }
@@ -150,4 +148,4 @@ namespace Mantid
   */
 #define DECLARE_SINGLEVALUETYPEHANDLER(export_type, base_type) \
   const boost::python::converter::registration *reg = boost::python::converter::registry::query(typeid(export_type));\
-  Mantid::PythonInterface::PropertyMarshal::registerHandler(reg->get_class_object(), new Mantid::PythonInterface::PropertyMarshal::SingleValueTypeHandler<base_type, export_type>());
+  Mantid::PythonInterface::TypeRegistry::registerHandler(reg->get_class_object(), new Mantid::PythonInterface::TypeRegistry::SingleValueTypeHandler<base_type, export_type>());

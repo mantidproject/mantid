@@ -16,6 +16,7 @@
 #include <QScrollBar>
 #include <QClipboard>
 #include <QShortcut>
+#include <QSettings>
 
 // Qscintilla
 #include <Qsci/qscilexer.h> 
@@ -122,8 +123,8 @@ ScriptEditor::ScriptEditor(QWidget *parent, bool interpreter_mode, QsciLexer *co
   m_bmulti_line(false),
   m_multi_line_count(0),
   m_originalIndent(0),
-  m_compiled(false)
-
+  m_compiled(false),
+  m_zoomLevel(0)
 {
   // Undo action
   m_undo = new QAction(tr("&Undo"), this);
@@ -173,6 +174,8 @@ ScriptEditor::ScriptEditor(QWidget *parent, bool interpreter_mode, QsciLexer *co
   //Syntax highlighting and code completion
   setLexer(codelexer);
 
+  readSettings();
+
   if( interpreter_mode )
   {
     m_marker_handle = markerDefine(QsciScintilla::ThreeRightArrows);
@@ -199,16 +202,18 @@ ScriptEditor::ScriptEditor(QWidget *parent, bool interpreter_mode, QsciLexer *co
     else
     {
       setFont(f);
-    }      
+    }
+    if(m_zoomLevel > 0) zoomIn(m_zoomLevel);
+    else if(m_zoomLevel < 0) zoomOut(-1*m_zoomLevel);
   }
   else
   {
 #ifdef __APPLE__
     // Make all fonts 4 points bigger on the Mac because otherwise they're tiny!
-    zoomIn(4);
+    if( m_zoomLevel == 0 ) m_zoomLevel = 4;
 #endif
 
-
+    zoomIn(m_zoomLevel);
     m_marker_handle = markerDefine(QsciScintilla::RightArrow);
     setMarginLineNumbers(1,true);
     //Editor properties
@@ -226,6 +231,7 @@ ScriptEditor::ScriptEditor(QWidget *parent, bool interpreter_mode, QsciLexer *co
  */
 ScriptEditor::~ScriptEditor()
 {
+  writeSettings();
   if( m_completer )
   {
     delete m_completer;
@@ -724,10 +730,81 @@ void ScriptEditor::paste()
   }
 }
 
+/**
+ * Override the zoomIn slot to keep a count of the level
+ */
+void ScriptEditor::zoomIn()
+{
+  ++m_zoomLevel;
+  QsciScintilla::zoomIn();
+}
+
+/**
+ * Override the zoomIn slot to keep a count of the level
+ * @param level Increase font size by this many points
+ */
+void ScriptEditor::zoomIn(int level)
+{
+  m_zoomLevel = level;
+  QsciScintilla::zoomIn(level);
+}
+
+/**
+ * Override the zoomIn slot to keep a count of the level
+ */
+
+void ScriptEditor::zoomOut()
+{
+  --m_zoomLevel;
+  QsciScintilla::zoomOut();
+}
+/**
+ * Override the zoomIn slot to keep a count of the level
+ * @param level Decrease font size by this many points
+ */
+void ScriptEditor::zoomOut(int level)
+{
+  m_zoomLevel = -level;
+  QsciScintilla::zoomOut(level);
+}
 
 //------------------------------------------------
 // Private member functions
 //------------------------------------------------
+
+/// Settings group
+/**
+ * Returns a string containing the settings group to use
+ * @return A QString containing the group to use within the QSettings class
+ */
+QString ScriptEditor::settingsGroup() const
+{
+  if( m_interpreter_mode ) return "/ScriptInterpreter";
+  else return "/ScriptWindow";
+}
+
+/**
+ * Read settings saved to persistent store
+ */
+void ScriptEditor::readSettings()
+{
+  QSettings settings;
+  settings.beginGroup(settingsGroup());
+  m_zoomLevel = settings.readNumEntry("ZoomLevel", 0);
+  settings.endGroup();
+}
+
+/**
+ * Read settings saved to persistent store
+ */
+void ScriptEditor::writeSettings()
+{
+  QSettings settings;
+  settings.beginGroup(settingsGroup());
+  settings.setValue("ZoomLevel", m_zoomLevel);
+  settings.endGroup();
+}
+
 /**
 * Execute a line of code
 * @param lineno :: The line number of the code to execute

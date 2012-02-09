@@ -17,10 +17,12 @@
 #include <QMessageBox>
 
 #include <numeric>
+#include "MantidGeometry/IDTypes.h"
 
 using namespace Mantid::Kernel::Exception;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
+using namespace Mantid;
 
 double InstrumentActor::m_tolerance = 0.00001;
 
@@ -80,7 +82,8 @@ m_sampleActor(NULL)
   setIntegrationRange(m_WkspBinMin,m_WkspBinMax);
   blockSignals(false);
 
-  m_id2wi_map.reset(m_workspace->getDetectorIDToWorkspaceIndexMap(false));
+  /// Cache a map (actually a vector) to workspace indexes.
+  m_workspace->getDetectorIDToWorkspaceIndexVector(m_id2wi_vector, m_id2wi_offset, false);
 
   // If the instrument is empty, maybe only having the sample and source
   if (getInstrument()->nelements() < 3)
@@ -107,6 +110,12 @@ InstrumentActor::~InstrumentActor()
   saveSettings();
 }
 
+/** Used to set visibility of an actor corresponding to a particular component
+ * When selecting a component in the InstrumentTreeWidget
+ *
+ * @param visitor
+ * @return
+ */
 bool InstrumentActor::accept(const GLActorVisitor& visitor)
 {
   bool ok = m_scene.accept(visitor);
@@ -167,12 +176,10 @@ IDetector_const_sptr InstrumentActor::getDetector(size_t i) const
  */
 size_t InstrumentActor::getWorkspaceIndex(Mantid::detid_t id) const
 {
-  Mantid::detid2index_map::const_iterator it = m_id2wi_map->find(id);
-  if ( it == m_id2wi_map->end() )
-  {
+  size_t index = size_t(id + this->m_id2wi_offset);
+  if (index > m_id2wi_vector.size())
     throw NotFoundError("No workspace index for detector",id);
-  }
-  return it->second;
+  return m_id2wi_vector[index];
 }
 
 void InstrumentActor::setIntegrationRange(const double& xmin,const double& xmax)
@@ -247,12 +254,20 @@ void InstrumentActor::resetColors()
 {
   QwtDoubleInterval qwtInterval(m_DataMinScaleValue,m_DataMaxScaleValue);
   m_colors.resize(m_specIntegrs.size());
-  for (size_t wi=0; wi < m_specIntegrs.size(); wi++)
+
+  Instrument_const_sptr inst = m_workspace->getInstrument();
+
+  //PARALLEL_FOR1(m_workspace)
+  for (int iwi=0; iwi < int(m_specIntegrs.size()); iwi++)
   {
+    size_t wi = size_t(iwi);
     double integratedValue = m_specIntegrs[wi];
-    try {
-      Mantid::Geometry::IDetector_const_sptr det = m_workspace->getDetector(wi);
-      boost::shared_ptr<Mantid::Geometry::Parameter> masked = m_workspace->instrumentParameters().get(det.get(),"masked");
+    try
+    {
+      // Find if the detector is masked
+      const std::set<detid_t>& dets = m_workspace->getSpectrum(wi)->getDetectorIDs();
+      bool masked = inst->isDetectorMasked(dets);
+
       if (masked)
       {
         m_colors[wi] = m_maskedColor;
@@ -309,11 +324,50 @@ void InstrumentActor::loadColorMap(const QString& fname,bool reset_colors)
   }
 }
 
+//------------------------------------------------------------------------------
+/** Add a detector ID to the pick list (m_detIDs)
+ * The order of detids define the pickIDs for detectors.
+ *
+ * @param id :: detector ID to add.
+ * @return pick ID of the added detector
+ */
 size_t InstrumentActor::push_back_detid(Mantid::detid_t id)const
 {
   m_detIDs.push_back(id);
   return m_detIDs.size() - 1;
 }
+
+
+//------------------------------------------------------------------------------
+/** If needed, cache the detector positions for all detectors.
+ * Call this BEFORE getDetPos().
+ * Does nothing if the positions have already been cached.
+ */
+void InstrumentActor::cacheDetPos() const
+{
+  if (m_detPos.size() != m_detIDs.size())
+  {
+    m_detPos.clear();
+    for (size_t i=0; i<m_detIDs.size(); i++)
+    {
+      IDetector_const_sptr det = this->getDetector(i);
+      m_detPos.push_back( det->getPos() );
+    }
+  }
+}
+
+
+//------------------------------------------------------------------------------
+/** Get the cached detector position
+ *
+ * @param pickID :: pick Index maching the getDetector() calls;
+ * @return the real-space position of the detector
+ */
+const Mantid::Kernel::V3D & InstrumentActor::getDetPos(size_t pickID)const
+{
+  return m_detPos.at(pickID);
+}
+
 
 void InstrumentActor::changeScaleType(int type)
 {

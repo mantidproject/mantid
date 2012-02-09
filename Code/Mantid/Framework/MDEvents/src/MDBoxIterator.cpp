@@ -189,6 +189,11 @@ namespace MDEvents
     return m_current->getVertexesArray(numVertices);
   }
 
+  TMDE(coord_t * MDBoxIterator)::getVertexesArray(size_t & numVertices, const size_t outDimensions, const bool * maskDim) const
+  {
+    return m_current->getVertexesArray(numVertices, outDimensions, maskDim);
+  }
+
   /// Returns the position of the center of the box pointed to.
   TMDE(Mantid::Kernel::VMD MDBoxIterator)::getCenter() const
   {

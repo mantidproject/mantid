@@ -68,6 +68,8 @@ namespace MDEvents
 
     virtual coord_t * getVertexesArray(size_t & numVertices) const;
 
+    virtual coord_t * getVertexesArray(size_t & numVertices, const size_t outDimensions, const bool * maskDim) const;
+
     virtual Mantid::Kernel::VMD getCenter() const;
 
     virtual size_t getNumEvents() const;
