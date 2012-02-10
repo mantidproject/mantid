@@ -930,6 +930,8 @@ QwtDoubleInterval SliceViewer::getRange(IMDIterator * it)
     return QwtDoubleInterval(0., 1.0);
   if (!it->valid())
     return QwtDoubleInterval(0., 1.0);
+  // Use the current normalization
+  it->setNormalization(m_data->getNormalization());
 
   double minSignal = DBL_MAX;
   double maxSignal = -DBL_MAX;
@@ -959,6 +961,21 @@ QwtDoubleInterval SliceViewer::getRange(IMDIterator * it)
     else
       return QwtDoubleInterval(0., 1.0);
   }
+}
+
+//------------------------------------------------------------------------------------
+/** Get the range of signal, in parallel, given an iterator
+ *
+ * @param iterators :: vector of IMDIterator of what to find
+ * @return the min/max range, or 0-1.0 if not found
+ */
+QwtDoubleInterval SliceViewer::getRange(std::vector<IMDIterator *> & iterators)
+{
+//  PRAGMA_OMP( parallel for )
+//  for (int i=0; i < int(iterators.size(); i++)
+//  {
+//
+//  }
 }
 
 //------------------------------------------------------------------------------------

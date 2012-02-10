@@ -1496,10 +1496,10 @@ namespace Mantid
     {
       // Find the right number of cores to use
       size_t numCores = suggestedNumCores;
-      if (numCores < 1) numCores = 1;
       if (!this->threadSafe()) numCores = 1;
       size_t numElements = this->getNumberHistograms();
       if (numCores > numElements)  numCores = numElements;
+      if (numCores < 1) numCores = 1;
 
       // Create one iterator per core, splitting evenly amongst spectra
       std::vector<IMDIterator*> out;

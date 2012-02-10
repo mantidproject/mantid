@@ -37,7 +37,10 @@ namespace Mantid
        */
       IMDIterator* IMDWorkspace::createIterator(Mantid::Geometry::MDImplicitFunction * function) const
       {
-        return this->createIterators(1, function)[0];
+        std::vector<IMDIterator*> iterators = this->createIterators(1, function);
+        if (iterators.size() == 0)
+          throw std::runtime_error("IMDWorkspace::createIterator(): iterator creation was not successful. No iterators returned by " + this->id() );
+        return iterators[0];
       }
   }
 }

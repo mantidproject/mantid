@@ -362,10 +362,10 @@ namespace MDEvents
       Mantid::Geometry::MDImplicitFunction * function) const
   {
     size_t numCores = suggestedNumCores;
-    if (numCores < 1) numCores = 1;
     if (!this->threadSafe()) numCores = 1;
     size_t numElements = this->getNPoints();
     if (numCores > numElements)  numCores = numElements;
+    if (numCores < 1) numCores = 1;
 
     // Create one iterator per core, splitting evenly amongst spectra
     std::vector<IMDIterator*> out;

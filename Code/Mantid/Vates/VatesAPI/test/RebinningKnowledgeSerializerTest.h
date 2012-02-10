@@ -10,6 +10,7 @@
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
+#include "MockObjects.h"
 
 using namespace Mantid::VATES;
 
@@ -30,42 +31,6 @@ private:
     {
     }
   };
-
-  //Helper class. Not all methods can be mocked.
-
-  class MockIMDWorkspace: public Mantid::API::IMDWorkspace
-  {
-  public:
-
-    MOCK_CONST_METHOD0(id, const std::string());
-    MOCK_CONST_METHOD0(getMemorySize, size_t());
-    MOCK_CONST_METHOD0(getNonIntegratedDimensions, Mantid::Geometry::VecIMDDimension_const_sptr());
-    MOCK_CONST_METHOD0(getGeometryXML,std::string());
-
-    virtual void getLinePlot(const Mantid::Kernel::VMD & , const Mantid::Kernel::VMD & ,
-        Mantid::API::MDNormalization , std::vector<Mantid::coord_t> & , std::vector<Mantid::signal_t> & , std::vector<Mantid::signal_t> & ) const
-    {}
-
-    virtual uint64_t getNPoints() const
-    {
-      throw std::runtime_error("Not Implemented");
-    }
-
-    virtual signal_t getSignalAtCoord(const coord_t * , const Mantid::API::MDNormalization & ) const
-    {
-      return 0;
-    }
-
-    //constructor allows a workspace name to be provide.
-  MockIMDWorkspace(std::string name)
-  {
-    setName(name);
-  }
-
-  MockIMDWorkspace()
-  {
-  }
-};
 
 //Test methods
 
