@@ -296,7 +296,11 @@ class DataReflWidget(BaseWidget):
         if not IS_IN_MANTIDPLOT:
             return
         
-        f = FileFinder.findRuns("REF_L%s" % str(self._summary.data_run_number_edit.text()))
+        try:
+            f = FileFinder.findRuns(str(self._summary.data_run_number_edit.text()))
+        except:
+            f = FileFinder.findRuns("REF_L%s" % str(self._summary.data_run_number_edit.text()))
+
         if len(f)>0 and os.path.isfile(f[0]):
             def call_back(xmin, xmax):
                 self._summary.data_peak_from_pixel.setText("%-d" % int(xmin))
@@ -307,7 +311,11 @@ class DataReflWidget(BaseWidget):
         if not IS_IN_MANTIDPLOT:
             return
         
-        f = FileFinder.findRuns("REF_L%s" % str(self._summary.norm_run_number_edit.text()))
+        try:
+            f = FileFinder.findRuns(str(self._summary.norm_run_number_edit.text()))
+        except:
+            f = FileFinder.findRuns("REF_L%s" % str(self._summary.norm_run_number_edit.text()))
+            
         if len(f)>0 and os.path.isfile(f[0]):
             def call_back(xmin, xmax):
                 self._summary.data_from_tof.setText("%-d" % int(xmin))
