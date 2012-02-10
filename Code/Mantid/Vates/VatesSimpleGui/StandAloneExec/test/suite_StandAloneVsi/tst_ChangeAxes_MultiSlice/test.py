@@ -3,33 +3,33 @@ def main():
     source(findFile("scripts", "test_helpers.py"))
     source(findFile("scripts", "common_checks.py"))
     startApplication("VatesSimpleGui")
-    open_file("MDEW_4D.nxs")
+    open_file("SEQ_MDEW.nxs")
 
     clickButton(":splitter_2.Rebin_QPushButton")
-    set_ptw_lineedit_property(100, "Bins")
-    set_ptw_lineedit_property(100, "Bins", "2")
-    set_ptw_lineedit_property(100, "Bins", "3")
-    set_ptw_lineedit_property(3, "Bins", "4")
+    set_ptw_lineedit_property(20, "Bins")
+    set_ptw_lineedit_property(20, "Bins", "2")
+    set_ptw_lineedit_property(20, "Bins", "3")
+    set_ptw_lineedit_property(20, "Bins", "4")
     apply_ptw_settings()
 
     switch_mode("multiSlice")
     
     # Num slices: X = 3, Y = 2, Z = 1
-    make_slice("xAxisWidget", 0.0)
-    make_slice("yAxisWidget", 0.0)
-    make_slice("zAxisWidget", 0.0)
-    make_slice("xAxisWidget", 1.0)
-    make_slice("yAxisWidget", 1.0)
-    make_slice("xAxisWidget", -1.0)
+    make_slice("xAxisWidget", 0.1)
+    make_slice("yAxisWidget", -0.7)
+    make_slice("zAxisWidget", -0.7)
+    make_slice("xAxisWidget", 0.3)
+    make_slice("yAxisWidget", -0.4)
+    make_slice("xAxisWidget", 0.4)
     apply_ptw_settings()
   
     mouseClick(waitForObject(":splitter.pipelineBrowser_pqPipelineBrowserWidget"), 51, 56, 0, Qt.LeftButton)
     
     # Change the axis orientations
-    set_ptw_combobox_property("E", 1)
+    set_ptw_combobox_property("DeltaE", 1)
     apply_ptw_settings()
 
-    check_axis_parameters("xAxisWidget", "E", 0.0, 3.0)
+    check_axis_parameters("xAxisWidget", "DeltaE", 17.0, 19.0)
     
     check_slices("xAxisWidget", 0)
     check_slices("yAxisWidget", 2)

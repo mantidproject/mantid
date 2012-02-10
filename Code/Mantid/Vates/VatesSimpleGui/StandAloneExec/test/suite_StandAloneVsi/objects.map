@@ -26,6 +26,8 @@
 :ScrollArea.Bins_QLineEdit_2	{container=':objectInspector.ScrollArea_QScrollArea' leftWidget=':ScrollArea.Bins_QLabel_2' type='QLineEdit' unnamed='1' visible='1'}
 :ScrollArea.Bins_QLineEdit_3	{container=':objectInspector.ScrollArea_QScrollArea' leftWidget=':ScrollArea.Bins_QLabel_3' type='QLineEdit' unnamed='1' visible='1'}
 :ScrollArea.Bins_QLineEdit_4	{container=':objectInspector.ScrollArea_QScrollArea' leftWidget=':ScrollArea.Bins_QLabel_4' type='QLineEdit' unnamed='1' visible='1'}
+:ScrollArea.DeltaE_QComboBox	{container=':objectInspector.ScrollArea_QScrollArea' leftWidget=':ScrollArea.DeltaE_QLabel' type='QComboBox' unnamed='1' visible='1'}
+:ScrollArea.DeltaE_QLabel	{container=':objectInspector.ScrollArea_QScrollArea' text='DeltaE' type='QLabel' unnamed='1' visible='1'}
 :ScrollArea.E_QComboBox	{container=':objectInspector.ScrollArea_QScrollArea' leftWidget=':ScrollArea.E_QLabel' type='QComboBox' unnamed='1' visible='1'}
 :ScrollArea.E_QLabel	{container=':objectInspector.ScrollArea_QScrollArea' text='E' type='QLabel' unnamed='1' visible='1'}
 :ScrollArea.Editor_RebinningCutterObjectPanel	{container=':objectInspector.ScrollArea_QScrollArea' name='Editor' type='RebinningCutterObjectPanel' visible='1'}
@@ -62,6 +64,7 @@
 :ScrollArea.l_QComboBox	{container=':objectInspector.ScrollArea_QScrollArea' leftWidget=':ScrollArea.l_QLabel' type='QComboBox' unnamed='1' visible='1'}
 :ScrollArea.l_QLabel	{container=':objectInspector.ScrollArea_QScrollArea' text='l' type='QLabel' unnamed='1' visible='1'}
 :ScrollArea_DimensionWidget	{container=':objectInspector.ScrollArea_QScrollArea' occurrence='4' type='DimensionWidget' unnamed='1' visible='1'}
+:ScrollArea_GeometryWidget	{container=':objectInspector.ScrollArea_QScrollArea' type='GeometryWidget' unnamed='1' visible='1'}
 :ScrollArea_QScrollBar	{container=':objectInspector.ScrollArea_QScrollArea' type='QScrollBar' unnamed='1' visible='1'}
 :TimeControlWidget_Mantid::Vates::SimpleGui::TimeControlWidget	{name='timeControlWidget' type='Mantid::Vates::SimpleGui::TimeControlWidget' visible='1' window=':_VsgMainWindow' windowTitle='TimeControlWidget'}
 :Viewport_pqQVTKWidget	{name='Viewport' occurrence='2' type='pqQVTKWidget' visible='0'}
