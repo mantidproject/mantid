@@ -346,6 +346,7 @@ namespace Mantid
         int startCol = (int) getAttribute("StartCol").asDouble();
         int Nrows = (int) getAttribute("NRows").asDouble();
         int Ncols = (int) getAttribute("NCols").asDouble();
+        delete [] expVals;
         expVals = new double[Nrows * Ncols];
 
         for (int r = startRow; r < startRow + Nrows; r++)

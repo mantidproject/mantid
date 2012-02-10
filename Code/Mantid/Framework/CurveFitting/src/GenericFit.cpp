@@ -394,10 +394,10 @@ namespace CurveFitting
       row << "Cost function value" << finalCostFuncVal;      
       setProperty("OutputParameters",m_result);
 
-
-      if ( isDerivDefined ) 
-        gsl_matrix_free(covar);
     }
+
+    if ( covar )
+      gsl_matrix_free(covar);
 
     // Add Parameters, Errors and ParameterNames properties to output so they can be queried on the algorithm.
     declareProperty(new ArrayProperty<double> ("Parameters",new NullValidator<std::vector<double> >,Direction::Output));

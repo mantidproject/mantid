@@ -47,12 +47,14 @@ namespace Mantid
 
     /// Constructor
     PeakIntegration::PeakIntegration() :
-      API::Algorithm()
+      API::Algorithm(), pixel_to_wi(NULL)
     {}
 
     /// Destructor
     PeakIntegration::~PeakIntegration()
-    {}
+    {
+      delete pixel_to_wi;
+    }
 
     /** Initialisation method. Declares properties to be used in algorithm.
      *

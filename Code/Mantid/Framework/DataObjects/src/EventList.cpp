@@ -1408,6 +1408,7 @@ namespace DataObjects
         if (eOldData)
           delete eOldData;
       }
+      else delete eData;
 
       //And clear up the memory of the old one, if it is dropping out.
       if (yOldData)
