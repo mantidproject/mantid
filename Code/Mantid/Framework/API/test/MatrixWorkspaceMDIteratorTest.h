@@ -38,7 +38,7 @@ public:
   void test_iterating()
   {
     boost::shared_ptr<MatrixWorkspace> ws = makeFakeWS();
-    IMDIterator * it;
+    IMDIterator * it = NULL;
     TS_ASSERT_THROWS_NOTHING( it = ws->createIterator(NULL) );
     TS_ASSERT_EQUALS( it->getDataSize(), 20);
     TS_ASSERT_DELTA( it->getSignal(), 0.0, 1e-5);

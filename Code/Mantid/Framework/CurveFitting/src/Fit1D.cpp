@@ -291,7 +291,7 @@ void Fit1D::exec()
 
   // check if derivative defined in derived class
   bool isDerivDefined = true;
-  gsl_matrix * M;
+  gsl_matrix * M = NULL;
   try
   {
     const std::vector<double> inTest(m_parameterNames.size(),1.0);
