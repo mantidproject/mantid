@@ -62,7 +62,7 @@ namespace Mantid
 
     protected:
       virtual void functionMW(double* out, const double* xValues, const size_t nData)const;
-      virtual void functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData);
+      //virtual void functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData); //not yet implemented
       //std::vector<double> LorentzianCoefficients(double a);
 
     private:

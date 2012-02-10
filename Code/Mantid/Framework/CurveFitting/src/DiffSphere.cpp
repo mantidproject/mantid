@@ -87,12 +87,10 @@ void DiffSphere::initLinJlist(){
   }
 }
 
-DiffSphere::DiffSphere(){
+DiffSphere::DiffSphere() : lmax(24), divZone(0.1) {
   declareParameter("Radius", 1.0, "Sphere radius");
   declareParameter("Diffusion", 1.0, "Diffusion coefficient, in units of");
   declareParameter("Q",1.0, "Momentum transfer");
-  lmax = 24;
-  divZone=0.1;
   initXnlCoeff();   // initialize this->xnl with the list of coefficients xnlist
   initAlphaCoeff(); // initialize this->alpha, certain factors constant over the fit
   initLinJlist();   // initialize this->linJlist, linear interpolation around numerical divergence
@@ -159,6 +157,13 @@ void DiffSphere::functionMW(double* out, const double* xValues, const size_t nDa
     } // end of for(std::vector<xnlc>::const_iterator it....
   } // end of for (unsigned int i...
 } // end of void DiffSphere::functionMW
+
+/* calNumericalDeriv requires evaluation of four extra functionMW. We can avoid by requiring
+ *  the 'Simplex' algorithm, which does not require derivative
+void DiffSphere::functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData){
+  calNumericalDeriv(out, xValues, nData);
+}
+*/
 
 } // namespace CurveFitting
 } // namespace Mantid
