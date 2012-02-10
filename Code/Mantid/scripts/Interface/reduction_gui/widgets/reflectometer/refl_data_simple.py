@@ -392,6 +392,9 @@ class DataReflWidget(BaseWidget):
         
         self._summary.data_run_number_edit.setText(str(','.join([str(i) for i in state.data_files])))
         
+        #normalization flag
+        self._summary.norm_switch.setChecked(state.NormFlag)
+        
         # Normalization options
         self._summary.norm_run_number_edit.setText(str(state.norm_file))
         self._summary.norm_peak_from_pixel.setText(str(state.NormPeakPixels[0]))
@@ -425,7 +428,7 @@ class DataReflWidget(BaseWidget):
         # Angle offset
         angle_offset = float(self._summary.angle_offset_edit.text())
         angle_offset_error = float(self._summary.angle_offset_error_edit.text())
-        
+                
         for i in range(self._summary.angle_list.count()):
             data = self._summary.angle_list.item(i).data(QtCore.Qt.UserRole).toPyObject()
             # Over-write Q binning with common binning
@@ -435,6 +438,10 @@ class DataReflWidget(BaseWidget):
             # Over-write angle offset
             data.angle_offset = angle_offset
             data.angle_offset_error = angle_offset_error
+
+            ##
+            # Add here states that are relevant to the interface (all the runs)
+            ##
             
             state_list.append(data)
         state.data_sets = state_list
@@ -468,7 +475,10 @@ class DataReflWidget(BaseWidget):
         
         datafiles = str(self._summary.data_run_number_edit.text()).split(',')
         m.data_files = [int(i) for i in datafiles]
-        
+    
+        # Normalization flag
+        m.NormFlag = self._summary.norm_switch.isChecked()
+
         # Normalization options
         m.norm_file = int(self._summary.norm_run_number_edit.text())
         m.NormPeakPixels = [int(self._summary.norm_peak_from_pixel.text()),
@@ -486,5 +496,9 @@ class DataReflWidget(BaseWidget):
         #m.q_step = float(self._summary.q_step_edit.text())
         #if self._summary.log_scale_chk.isChecked():
         #    m.q_step = -m.q_step
-        
+
+        ##
+        # Add here states that are data file dependent
+        ##
+                
         return m

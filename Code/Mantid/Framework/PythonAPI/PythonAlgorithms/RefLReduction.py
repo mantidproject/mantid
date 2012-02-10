@@ -39,12 +39,15 @@ class RefLReduction(PythonAlgorithm):
         from reduction.instruments.reflectometer import wks_utility
         
         run_numbers = self.getProperty("RunNumbers")
-        
+
         mtd.sendLogMessage("RefLReduction: processing %s" % run_numbers)
         allow_multiple = False
         if len(run_numbers)>1 and not allow_multiple:
             raise RuntimeError("Not ready for multiple runs yet, please specify only one run number")
-    
+
+        #run with normalization or not    
+        NormFlag = self.getProperty("NormFlag")
+        
         normalization_run = self.getProperty("NormalizationRunNumber")
     
         data_peak = self.getProperty("SignalPeakPixelRange")
@@ -82,7 +85,7 @@ class RefLReduction(PythonAlgorithm):
         subtract_data_bck = self.getProperty("SubtractSignalBackground")
         subtract_norm_bck = self.getProperty("SubtractNormBackground")
         
-        
+
         
         ########################################################################
         # Find full path to event NeXus data file

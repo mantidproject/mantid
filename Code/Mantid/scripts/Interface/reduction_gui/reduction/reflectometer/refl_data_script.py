@@ -21,6 +21,7 @@ class DataSets(BaseScriptElement):
     norm_x_min = 115
     norm_x_max = 210
     
+    NormFlag = True
     NormPeakPixels = [120, 130]
     NormBackgroundFlag = False
     NormBackgroundRoi = [115, 137]
@@ -55,6 +56,7 @@ class DataSets(BaseScriptElement):
         script += "              SignalPeakPixelRange=%s,\n" % str(self.DataPeakPixels)
         script += "              SubtractSignalBackground=%s,\n" % str(self.DataBackgroundFlag)
         script += "              SignalBackgroundPixelRange=%s,\n" % str(self.DataBackgroundRoi[:2])
+        script += "              NormFlag=%s,\n" % str(self.NormFlag)
         script += "              NormPeakPixelRange=%s,\n" % str(self.NormPeakPixels)
         script += "              NormBackgroundPixelRange=%s,\n" % str(self.NormBackgroundRoi)
         script += "              SubtractNormBackground=%s,\n" % str(self.NormBackgroundFlag)
@@ -103,6 +105,8 @@ class DataSets(BaseScriptElement):
         xml += "<data_sets>%s</data_sets>\n" % ','.join([str(i) for i in self.data_files])
         xml += "<x_min_pixel>%s</x_min_pixel>\n" % str(self.x_range[0])
         xml += "<x_max_pixel>%s</x_max_pixel>\n" % str(self.x_range[1])
+
+        xml += "<norm_flag>%s</norm_flag>\n" % str(self.NormFlag)
         xml += "<norm_x_max>%s</norm_x_max>\n" % str(self.norm_x_max)
         xml += "<norm_x_min>%s</norm_x_min>\n" % str(self.norm_x_min)
         
@@ -174,6 +178,10 @@ class DataSets(BaseScriptElement):
 
         self.data_files = BaseScriptElement.getIntList(instrument_dom, "data_sets")
             
+        #with or without norm 
+        self.NormFlag = BaseScriptElement.getBoolElement(instrument_dom, "norm_flag",
+                                                         default=DataSets.NormFlag)
+        
         #Peak from/to pixels
         self.NormPeakPixels = [BaseScriptElement.getIntElement(instrument_dom, "norm_from_peak_pixels"),
                                BaseScriptElement.getIntElement(instrument_dom, "norm_to_peak_pixels")]
@@ -210,6 +218,7 @@ class DataSets(BaseScriptElement):
         self.DataTofRange = DataSets.DataTofRange
         self.data_files = DataSets.data_files
         
+        self.NormFlag = DataSets.NormFlag
         self.NormBackgroundFlag = DataSets.NormBackgroundFlag
         self.NormBackgroundRoi = DataSets.NormBackgroundRoi
         self.NormPeakPixels = DataSets.NormPeakPixels
