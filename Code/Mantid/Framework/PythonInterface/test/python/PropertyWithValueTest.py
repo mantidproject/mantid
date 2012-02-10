@@ -1,5 +1,6 @@
 import unittest
-from mantid.api import AlgorithmManager
+from mantid.api import AlgorithmManager, MatrixWorkspace
+from testhelpers import run_algorithm
 import numpy as np
 
 class PropertyWithValueTest(unittest.TestCase):
@@ -16,6 +17,12 @@ class PropertyWithValueTest(unittest.TestCase):
         if self._mask_dets is None:
             self.__class__._mask_dets = AlgorithmManager.Instance().createUnmanaged("MaskDetectors")
             self.__class__._mask_dets.initialize()
+  
+    def test_getproperty_value_returns_derived_type(self):
+        data = [1.0,2.0,3.0]
+        alg = run_algorithm('CreateWorkspace',DataX=data,DataY=data,NSpec=1,UnitX='Wavelength',child=True)
+        wksp = alg.getProperty("OutputWorkspace").value
+        self.assertTrue(isinstance(wksp,MatrixWorkspace))
   
     def test_set_property_int(self):
         self._integration.setProperty("StartWorkspaceIndex", 5) 
