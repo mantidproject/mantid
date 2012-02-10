@@ -357,7 +357,7 @@ namespace MDEvents
     /** Return the volume of the cell */
     coord_t getVolume() const
     {
-      return 1.0 / m_inverseVolume;
+      return coord_t(1.0) / m_inverseVolume;
     }
 
     //-----------------------------------------------------------------------------------------------

@@ -87,25 +87,19 @@ namespace Mantid
       virtual std::vector<IMDIterator*> createIterators(size_t suggestedNumCores = 1,
           Mantid::Geometry::MDImplicitFunction * function = NULL) const = 0;
 
-      /// Creates a new iterator pointing to the first cell in the workspace
-      IMDIterator* createIterator(Mantid::Geometry::MDImplicitFunction * function = NULL) const;
-
       /// Returns the (normalized) signal at a given coordinates
       virtual signal_t getSignalAtCoord(const coord_t * coords, const Mantid::API::MDNormalization & normalization) const = 0;
-
-      //-------------------------------------------------------------------------------------------
-      /// Returns the signal (normalized by volume) at a given coordinates
-      /// @param coords :: coordinate as a VMD vector
-      /// @param normalization :: how to normalize the signal returned
-      signal_t getSignalAtVMD(const Mantid::Kernel::VMD & coords,
-          const Mantid::API::MDNormalization & normalization = Mantid::API::VolumeNormalization) const
-      {
-        return this->getSignalAtCoord(coords.getBareArray(), normalization);
-      }
 
       /// Method to generate a line plot through a MD-workspace
       virtual void getLinePlot(const Mantid::Kernel::VMD & start, const Mantid::Kernel::VMD & end,
           Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y, std::vector<signal_t> & e) const = 0;
+
+
+      IMDIterator* createIterator(Mantid::Geometry::MDImplicitFunction * function = NULL) const;
+
+      signal_t getSignalAtVMD(const Mantid::Kernel::VMD & coords,
+          const Mantid::API::MDNormalization & normalization = Mantid::API::VolumeNormalization) const;
+
     };
     
     /// Shared pointer to the IMDWorkspace base class

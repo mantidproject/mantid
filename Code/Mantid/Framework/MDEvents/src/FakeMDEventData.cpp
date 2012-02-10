@@ -114,8 +114,8 @@ namespace MDEvents
     double desiredRadius = params.back();
 
     boost::mt19937 rng;
-    boost::uniform_real<double> u2(0, 1.0); // Random from 0 to 1.0
-    boost::variate_generator<boost::mt19937&, boost::uniform_real<double> > genUnit(rng, u2);
+    boost::uniform_real<coord_t> u2(0, 1.0); // Random from 0 to 1.0
+    boost::variate_generator<boost::mt19937&, boost::uniform_real<coord_t> > genUnit(rng, u2);
     int randomSeed = getProperty("RandomSeed");
     rng.seed((unsigned int)(randomSeed));
 
@@ -139,7 +139,7 @@ namespace MDEvents
         centers[d] /= radius;
 
       // Now place the point along this radius, scaled with ^1/n for uniformity.
-      double radPos = genUnit();
+      coord_t radPos = genUnit();
       radPos = pow(radPos, 1.0/double(nd));
       for (size_t d=0; d<nd; d++)
       {

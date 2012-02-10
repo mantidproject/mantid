@@ -107,7 +107,7 @@ namespace Geometry
       coord_t total = 0;
       for (size_t d=0; d<m_nd; d++)
       {
-        total += m_normal[d] * coords[d];
+        total += m_normal[d] * coord_t(coords[d]);
       }
       return (total >= m_inequality);
     }
@@ -164,8 +164,8 @@ namespace Geometry
       m_inequality = 0;
       for (size_t d=0; d<m_nd; d++)
       {
-        m_normal[d] = normal[d];
-        m_inequality += point[d] * m_normal[d];
+        m_normal[d] = coord_t(normal[d]);
+        m_inequality += coord_t(point[d]) * m_normal[d];
       }
     }
 

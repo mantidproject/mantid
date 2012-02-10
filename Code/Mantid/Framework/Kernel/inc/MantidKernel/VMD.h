@@ -192,6 +192,17 @@ namespace Kernel
       data = new double[nd];
       for (size_t d=0; d<nd; d++) data[d] = bareData[d];
     }
+    //-------------------------------------------------------------------------------------------
+    /** Constructor
+     * @param nd :: number of dimensions
+     * @param bareData :: pointer to a nd-sized bare data array */
+    VMD(size_t nd, const float * bareData)
+    : nd(nd)
+    {
+      if (nd <= 0) throw std::invalid_argument("nd must be > 0");
+      data = new double[nd];
+      for (size_t d=0; d<nd; d++) data[d] = double(bareData[d]);
+    }
 
     //-------------------------------------------------------------------------------------------
     /** Constructor
@@ -206,12 +217,13 @@ namespace Kernel
     //-------------------------------------------------------------------------------------------
     /** Constructor
      * @param vector :: vector of doubles */
-    VMD(const std::vector<double> & vector)
+    template<class T>
+    VMD(const std::vector<T> & vector)
     : nd(vector.size())
     {
       if (nd <= 0) throw std::invalid_argument("nd must be > 0");
       data = new double[nd];
-      for (size_t d=0; d<nd; d++) data[d] = vector[d];
+      for (size_t d=0; d<nd; d++) data[d] = double(vector[d]);
     }
 
     //-------------------------------------------------------------------------------------------
@@ -297,12 +309,16 @@ namespace Kernel
     }
 
     //-------------------------------------------------------------------------------------------
-    /** @return the vector as a std::vector */
-    std::vector<double> toVector() const
+    /** Get the vector as a vector
+     * @tparam T :: type to convert to (double/float)
+     * @return the vector as a std::vector
+     */
+    template<class T>
+    std::vector<T> toVector() const
     {
-      std::vector<double> out;
+      typename std::vector<T> out;
       for (size_t d=0; d<nd; d++)
-        out.push_back(data[d]);
+        out.push_back(T(data[d]));
       return out;
     }
 

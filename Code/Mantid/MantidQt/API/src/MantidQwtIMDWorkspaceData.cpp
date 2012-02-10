@@ -312,7 +312,7 @@ void MantidQwtIMDWorkspaceData::choosePlotAxis()
       VMD diff = originalEnd - originalStart;
 
       // Now we find the dimension with the biggest change
-      double largest = -1e100;
+      double largest = -1e30;
       // Default to 0
       m_currentPlotAxis = 0;
       for (size_t d=0; d<diff.getNumDims(); d++)

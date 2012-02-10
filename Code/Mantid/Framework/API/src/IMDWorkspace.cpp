@@ -42,6 +42,27 @@ namespace Mantid
           throw std::runtime_error("IMDWorkspace::createIterator(): iterator creation was not successful. No iterators returned by " + this->id() );
         return iterators[0];
       }
+
+
+      //-------------------------------------------------------------------------------------------
+      /** Returns the signal (normalized by volume) at a given coordinates
+       *
+       * @param coords :: coordinate as a VMD vector
+       * @param normalization :: how to normalize the signal returned
+       * @return normalized signal
+       */
+      signal_t IMDWorkspace::getSignalAtVMD(const Mantid::Kernel::VMD & coords,
+          const Mantid::API::MDNormalization & normalization) const
+      {
+#ifdef COORDT_IS_FLOAT
+        std::vector<coord_t> temp = coords.toVector<coord_t>();
+        signal_t out = this->getSignalAtCoord(&temp[0], normalization);
+        return out;
+#else
+        return this->getSignalAtCoord(coords.getBareArray(), normalization);
+#endif
+      }
+
   }
 }
 

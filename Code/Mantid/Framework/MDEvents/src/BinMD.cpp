@@ -471,8 +471,8 @@ namespace MDEvents
         // Dimension in the MDEventWorkspace
         size_t d = m_dimensionToBinFrom[bd];
         // Corresponding extents
-        bin.m_min[d] = m_binDimensions[bd]->getX(idx);
-        bin.m_max[d] = m_binDimensions[bd]->getX(idx+1);
+        bin.m_min[d] = coord_t(m_binDimensions[bd]->getX(idx));
+        bin.m_max[d] = coord_t(m_binDimensions[bd]->getX(idx+1));
       }
       bin.m_index = linear_index;
 

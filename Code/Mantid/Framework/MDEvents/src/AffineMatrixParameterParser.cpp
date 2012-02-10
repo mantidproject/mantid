@@ -24,7 +24,7 @@ namespace Mantid
       {
         //Convenience typedefs
         typedef std::vector<std::string> VecStrings;
-        typedef std::vector<double> VecDoubles;
+        typedef std::vector<coord_t> VecDoubles;
 
         std::string sParameterValue = parameterElement->getChildElement("Value")->innerText();
 
