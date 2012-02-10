@@ -24,7 +24,7 @@
 #include "MantidPythonInterface/kernel/PythonTypeHandler.h"
 
 //-----------------------------------------------------------------------------
-// Forward delcarations
+// Forward declarations
 //-----------------------------------------------------------------------------
 struct PyArrayObject;
 

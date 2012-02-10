@@ -25,7 +25,6 @@ set ( EXPORT_FILES
 set ( SRC_FILES
   src/NumpyConverters.cpp
   src/NumpyTypeHandler.cpp
-  src/PropertyMarshal.cpp
   src/PyEnvironment.cpp
   src/SequenceTypeHandler.cpp
   src/TypeRegistry.cpp
@@ -39,7 +38,6 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/PythonObjectInstantiator.h
   ${HEADER_DIR}/kernel/PropertyWithValue.h
   ${HEADER_DIR}/kernel/PythonTypeHandler.h
-  ${HEADER_DIR}/kernel/PropertyMarshal.h
   ${HEADER_DIR}/kernel/PyEnvironment.h
   ${HEADER_DIR}/kernel/SingleValueTypeHandler.h
   ${HEADER_DIR}/kernel/StlExportDefinitions.h

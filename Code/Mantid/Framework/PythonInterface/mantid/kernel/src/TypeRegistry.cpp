@@ -55,8 +55,8 @@ namespace Mantid
       }
 
       /**
-       * Attempts to find an upcasted pointer type for the given object from
-       * all of the types registered
+       * Attempts to find an upcasted PyTypeObject type for the given object from
+       * all of the types registered.
        * @param value :: An object derived from DataItem
        * @return A pointer to an upcasted type or NULL if one cannot be found
        */
@@ -90,6 +90,17 @@ namespace Mantid
           }
         }
         return result;
+      }
+
+      /**
+       * Attempts to find an upcasted PyTypeObject type for the given object from
+       * all of the types registered, overloaded for bare PyObject pointer.
+       * @param value :: An object derived from DataItem
+       * @return A pointer to an upcasted type or NULL if one cannot be found
+       */
+      PyTypeObject * getDerivedType(PyObject *value)
+      {
+        return getDerivedType(boost::python::object(boost::python::borrowed(value)));
       }
 
     }

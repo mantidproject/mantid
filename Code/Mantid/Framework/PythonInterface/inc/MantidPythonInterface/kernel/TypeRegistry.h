@@ -45,6 +45,8 @@ namespace Mantid
       DLLExport PythonTypeHandler *getHandler(PyTypeObject* typeObject);
       /// Get an upcasted type object for the given object
       DLLExport PyTypeObject * getDerivedType(boost::python::object value);
+      /// Overload. Get an upcasted type object for the given object
+      DLLExport PyTypeObject * getDerivedType(PyObject *value);
     }
   }
 }

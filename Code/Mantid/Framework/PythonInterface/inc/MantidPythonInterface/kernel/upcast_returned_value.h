@@ -21,11 +21,26 @@
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
+#include "MantidPythonInterface/kernel/TypeRegistry.h"
+#include <boost/shared_ptr.hpp>
+#include <boost/weak_ptr.hpp>
+
 #include <boost/python/detail/prefix.hpp>
 #include <boost/python/to_python_value.hpp>
 
+#include <boost/mpl/if.hpp>
+#include <boost/mpl/or.hpp>
+#include <boost/type_traits/is_convertible.hpp>
+
 namespace Mantid
 {
+  //---------------------------------------------------------------------------
+  // Forward declaration
+  //---------------------------------------------------------------------------
+  namespace Kernel
+  {
+    class DataItem;
+  }
   namespace PythonInterface
   {
 
@@ -33,7 +48,8 @@ namespace Mantid
     namespace detail
     {
       /**
-       * Converts a T object to a Python object and performs an upcast if it can
+       * Converts a T object to a Python object and performs an upcast if it can.
+       * Only used for DataItem's at the moment
        */
       template<class T>
       struct to_python_value_with_upcast
@@ -56,16 +72,6 @@ namespace Mantid
 
       };
 
-      /**
-       * Template to prevent compilation unless the function
-       * returns a shared_ptr
-       */
-      template <class R>
-      struct upcast_returned_value_requires_return
-#if defined(__GNUC__) && __GNUC__ >= 3 || defined(__EDG__)
-      {}
-#endif
-      ;
     } // namespace detail
     ///@endcond
 
@@ -79,7 +85,12 @@ namespace Mantid
       template <class T>
       struct apply
       {
-        typedef detail::to_python_value_with_upcast<T> type;
+        typedef typename boost::mpl::if_c<
+                      boost::mpl::or_<boost::is_convertible<T, boost::shared_ptr<Kernel::DataItem> >,
+                                      boost::is_convertible<T, boost::weak_ptr<Kernel::DataItem> > >::value
+                    , detail::to_python_value_with_upcast<T>
+                    , boost::python::to_python_value<T>
+                >::type type;
       };
     };
 
