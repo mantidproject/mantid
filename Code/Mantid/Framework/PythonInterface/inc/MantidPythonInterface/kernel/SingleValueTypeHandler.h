@@ -20,7 +20,6 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #include "MantidPythonInterface/kernel/PythonTypeHandler.h"
-#include "MantidPythonInterface/kernel/PropertyMarshal.h"
 #include "MantidPythonInterface/kernel/TypeRegistry.h"
 #include "MantidKernel/IPropertyManager.h"
 

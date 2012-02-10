@@ -1,5 +1,4 @@
 #include "MantidPythonInterface/api/AlgorithmWrapper.h"
-#include "MantidPythonInterface/kernel/PropertyMarshal.h"
 #include "MantidAPI/AlgorithmProxy.h"
 #include "MantidKernel/Strings.h"
 

@@ -1,6 +1,5 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/DataItem.h"
-#include "MantidPythonInterface/kernel/PropertyMarshal.h"
 #include "MantidPythonInterface/kernel/WeakPtr.h"
 #include "MantidPythonInterface/kernel/upcast_returned_value.h"
 
