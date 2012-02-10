@@ -32,7 +32,7 @@ namespace Mantid
     {
       validate();
       IMDEventWorkspace_sptr imdws = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_workspace);
-      if(!imdws || imdws->getNonIntegratedDimensions().size() != TwoDimensional)
+      if(!imdws || (doesCheckDimensionality() && imdws->getNonIntegratedDimensions().size() != TwoDimensional))
       {
         return m_successor->create();
       }
@@ -170,7 +170,7 @@ namespace Mantid
     {
       m_workspace = ws;
       IMDEventWorkspace_sptr imdws = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_workspace);
-      if(!imdws || imdws->getNonIntegratedDimensions().size() != TwoDimensional)
+      if(!imdws || (doesCheckDimensionality() && imdws->getNonIntegratedDimensions().size() != TwoDimensional))
       {
         if(this->hasSuccessor())
         {

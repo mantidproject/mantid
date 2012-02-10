@@ -6,7 +6,7 @@ namespace Mantid
 namespace VATES
 {
 
-vtkDataSetFactory::vtkDataSetFactory() : m_useTransform(false)
+vtkDataSetFactory::vtkDataSetFactory() : m_useTransform(false), m_bCheckDimensionality(true)
 {
 }
 
@@ -37,6 +37,25 @@ void vtkDataSetFactory::SetSuccessor(vtkDataSetFactory* pSuccessor)
 bool vtkDataSetFactory::hasSuccessor() const
 {
   return NULL != m_successor.get();
+}
+
+
+/*
+Set a flag indicating whether dimensionality should be checked
+@param flag : TRUE to check dimensionality otherwise FALSE.
+*/
+void vtkDataSetFactory::setCheckDimensionality(bool flag)
+{
+  m_bCheckDimensionality = flag;
+}
+
+/*
+Get a flag indicating whether dimensionality should be checked
+@return true if dimensionality is checked.
+*/
+bool vtkDataSetFactory::doesCheckDimensionality() const
+{
+  return m_bCheckDimensionality;
 }
 
 }

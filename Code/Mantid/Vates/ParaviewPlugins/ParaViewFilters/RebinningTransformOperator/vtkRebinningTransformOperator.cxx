@@ -20,6 +20,7 @@
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
 #include "MantidVatesAPI/vtkMDQuadFactory.h"
 #include "MantidVatesAPI/vtkMDLineFactory.h"
+#include "MantidVatesAPI/vtkMDEWHexahedronFactory.h"
 #include "MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h"
 #include "MantidVatesAPI/vtkThresholdingHexahedronFactory.h"
 #include "MantidVatesAPI/vtkThresholdingQuadFactory.h"
@@ -265,6 +266,7 @@ int vtkRebinningTransformOperator::RequestData(vtkInformation* vtkNotUsed(reques
     //Create Factory Object for chain. Chain-of-responsibility for translating imdworkspaces.
     vtkMDLineFactory* p_1dMDFactory =  new vtkMDLineFactory(m_ThresholdRange, scalarName);
     vtkMDQuadFactory* p_2dMDFactory = new vtkMDQuadFactory(m_ThresholdRange, scalarName);
+    vtkMDEWHexahedronFactory* p_3dMDFactory = new vtkMDEWHexahedronFactory(m_ThresholdRange, scalarName);
     vtkThresholdingLineFactory* p_1dHistoFactory = new vtkThresholdingLineFactory(m_ThresholdRange, scalarName);
     vtkThresholdingQuadFactory* p_2dHistoFactory = new vtkThresholdingQuadFactory(m_ThresholdRange,scalarName);
     vtkThresholdingHexahedronFactory* p_3dHistoFactory = new vtkThresholdingHexahedronFactory(m_ThresholdRange,scalarName);
@@ -272,7 +274,8 @@ int vtkRebinningTransformOperator::RequestData(vtkInformation* vtkNotUsed(reques
 
     //Assemble Chain-of-Reponsibility
     p_1dMDFactory->SetSuccessor(p_2dMDFactory);
-    p_2dMDFactory->SetSuccessor(p_1dHistoFactory);
+    p_2dMDFactory->SetSuccessor(p_3dMDFactory);
+    p_3dMDFactory->SetSuccessor(p_1dHistoFactory);
     p_1dHistoFactory->SetSuccessor(p_2dHistoFactory);
     p_2dHistoFactory->SetSuccessor(p_3dHistoFactory);
     p_3dHistoFactory->SetSuccessor(p_4dHistoFactory);

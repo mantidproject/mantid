@@ -5,6 +5,7 @@
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidMDEvents/SliceMD.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/UserDefinedThresholdRange.h"
@@ -29,6 +30,37 @@ using namespace testing;
 //=====================================================================================
 class vtkMDEWHexahedronFactoryTest : public CxxTest::TestSuite
 {
+private:
+
+  void doDimensionalityTesting(bool doCheckDimensionality)
+  {
+    Mantid::MDEvents::MDEventWorkspace3Lean::sptr input_ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
+
+    SliceMD slice;
+    slice.initialize();
+    slice.setProperty("InputWorkspace", input_ws);
+    slice.setPropertyValue("AlignedDimX", "Axis0, -10, 10, 1");
+    slice.setPropertyValue("AlignedDimX", "Axis1, -10, 10, 1");
+    slice.setPropertyValue("AlignedDimX", "Axis2, -10, 10, 1");
+    slice.setPropertyValue("OutputWorkspace", "binned");
+    slice.execute();
+
+    Workspace_sptr binned_ws = AnalysisDataService::Instance().retrieve("binned");
+
+    vtkMDEWHexahedronFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
+    factory.setCheckDimensionality(doCheckDimensionality);
+    if(doCheckDimensionality)
+    {
+      TS_ASSERT_THROWS(factory.initialize(binned_ws), std::runtime_error);
+    }
+    else
+    {
+      TS_ASSERT_THROWS_NOTHING(factory.initialize(binned_ws));
+      vtkDataSet* product = NULL;
+      TS_ASSERT_THROWS_NOTHING(product = factory.create());
+      product->Delete();
+    }
+  }
 
 public:
 
@@ -115,8 +147,16 @@ public:
     TS_ASSERT_THROWS(factory.create(), std::runtime_error);
   }
 
-
   /*Demonstrative tests*/
+  void testIgnoresDimensionality()
+  {
+    doDimensionalityTesting(true);
+  }
+
+  void testDoNotIgnoreDimensionality()
+  {
+    doDimensionalityTesting(false);
+  }
 
   void test_3DWorkspace()
   {

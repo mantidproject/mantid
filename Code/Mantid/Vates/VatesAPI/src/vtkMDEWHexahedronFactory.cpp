@@ -20,12 +20,12 @@ namespace Mantid
 {
   namespace VATES
   {
-  
-  /*Constructor
-  @Param thresholdRange : Threshold range strategy
-  @scalarName : Name for scalar signal array.
-  */
-  vtkMDEWHexahedronFactory::vtkMDEWHexahedronFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName, const size_t maxDepth) :
+
+    /*Constructor
+    @Param thresholdRange : Threshold range strategy
+    @scalarName : Name for scalar signal array.
+    */
+    vtkMDEWHexahedronFactory::vtkMDEWHexahedronFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName, const size_t maxDepth) :
   m_thresholdRange(thresholdRange), m_scalarName(scalarName), m_maxDepth(maxDepth), m_time(0)
   {
   }
@@ -37,8 +37,8 @@ namespace Mantid
 
   //-------------------------------------------------------------------------------------------------
   /* Generate the vtkDataSet from the objects input MDEventWorkspace (of a given type an dimensionality 3+)
-   *
-   * @return a fully constructed vtkUnstructuredGrid containing geometric and scalar data.
+  *
+  * @return a fully constructed vtkUnstructuredGrid containing geometric and scalar data.
   */
   template<typename MDE, size_t nd>
   void vtkMDEWHexahedronFactory::doCreate(typename MDEventWorkspace<MDE, nd>::sptr ws) const
@@ -58,14 +58,14 @@ namespace Mantid
 
     vtkIdType numBoxes = boxes.size();
     vtkIdType imageSizeActual = 0;
-    
+
     if (VERBOSE) std::cout << tim << " to retrieve the " << numBoxes << " boxes down to depth " << m_maxDepth << std::endl;
 
     // Create 8 points per box.
     vtkPoints *points = vtkPoints::New();
     points->Allocate(numBoxes * 8);
     points->SetNumberOfPoints(numBoxes * 8);
-    
+
     // One scalar per box
     vtkFloatArray * signals = vtkFloatArray::New();
     signals->Allocate(numBoxes);
@@ -79,7 +79,7 @@ namespace Mantid
     // True for boxes that we will use
     bool * useBox = new bool[numBoxes];
     memset(useBox, 0, sizeof(bool)*numBoxes);
-    
+
     // Create the data set
     vtkUnstructuredGrid * visualDataSet = vtkUnstructuredGrid::New();
     this->dataSet = visualDataSet;
@@ -91,94 +91,94 @@ namespace Mantid
     // This can be parallelized
     // cppcheck-suppress syntaxError
     PRAGMA_OMP( parallel for schedule (dynamic) )
-    for (int ii=0; ii<int(boxes.size()); ii++)
-    {
-      // Get the box here
-      size_t i = size_t(ii);
-      IMDBox<MDE,nd> * box = boxes[i];
-      Mantid::signal_t signal_normalized= box->getSignalNormalized();
-
-      if (!boost::math::isnan( signal_normalized ) && m_thresholdRange->inRange(signal_normalized))
+      for (int ii=0; ii<int(boxes.size()); ii++)
       {
-        // Cache the signal and using of it
-        signalArray[i] = float(signal_normalized);
-        useBox[i] = true;
+        // Get the box here
+        size_t i = size_t(ii);
+        IMDBox<MDE,nd> * box = boxes[i];
+        Mantid::signal_t signal_normalized= box->getSignalNormalized();
 
-        //Get the coordinates.
-        size_t numVertexes = 0;
-        coord_t * coords;
-
-        // If slicing down to 3D, specify which dimensions to keep.
-        if (this->slice)
-          coords = box->getVertexesArray(numVertexes, 3, this->sliceMask);
-        else
-          coords = box->getVertexesArray(numVertexes);
-
-        if (numVertexes == 8)
+        if (!boost::math::isnan( signal_normalized ) && m_thresholdRange->inRange(signal_normalized))
         {
-          //Iterate through all coordinates. Candidate for speed improvement.
-          for(size_t v = 0; v < numVertexes; v++)
+          // Cache the signal and using of it
+          signalArray[i] = float(signal_normalized);
+          useBox[i] = true;
+
+          //Get the coordinates.
+          size_t numVertexes = 0;
+          coord_t * coords;
+
+          // If slicing down to 3D, specify which dimensions to keep.
+          if (this->slice)
+            coords = box->getVertexesArray(numVertexes, 3, this->sliceMask);
+          else
+            coords = box->getVertexesArray(numVertexes);
+
+          if (numVertexes == 8)
           {
-            coord_t * coord = coords + v*3;
-            // Set the point at that given ID
-            points->SetPoint(i*8 + v, coord[0], coord[1], coord[2]);
-            std::string msg;
-          }
+            //Iterate through all coordinates. Candidate for speed improvement.
+            for(size_t v = 0; v < numVertexes; v++)
+            {
+              coord_t * coord = coords + v*3;
+              // Set the point at that given ID
+              points->SetPoint(i*8 + v, coord[0], coord[1], coord[2]);
+              std::string msg;
+            }
 
-        } // valid number of vertexes returned
+          } // valid number of vertexes returned
 
-        // Free memory
-        delete [] coords;
-      }
-    } // For each box
-
-    if (VERBOSE) std::cout << tim << " to create the necessary points." << std::endl;
-    //Add points
-    visualDataSet->SetPoints(points);
-
-    for (size_t i=0; i<boxes.size(); i++)
-    {
-      if (useBox[i])
-      {
-        // The bare point ID
-        vtkIdType pointIds = i * 8;
-
-        //Add signal
-        signals->InsertNextValue(signalArray[i]);
-
-        hexPointList->SetId(0, pointIds + 0); //xyx
-        hexPointList->SetId(1, pointIds + 1); //dxyz
-        hexPointList->SetId(2, pointIds + 3); //dxdyz
-        hexPointList->SetId(3, pointIds + 2); //xdyz
-        hexPointList->SetId(4, pointIds + 4); //xydz
-        hexPointList->SetId(5, pointIds + 5); //dxydz
-        hexPointList->SetId(6, pointIds + 7); //dxdydz
-        hexPointList->SetId(7, pointIds + 6); //xdydz
-
-        //Add cells
-        visualDataSet->InsertNextCell(VTK_HEXAHEDRON, hexPointList);
-        
-
-        double bounds[6];
-
-        visualDataSet->GetCellBounds(imageSizeActual, bounds);
-
-        if(bounds[0] < -10 || bounds[2] < -10 ||bounds[4]< -10)
-        {
-          std::string msg = "";
+          // Free memory
+          delete [] coords;
         }
-        imageSizeActual++;
-      }
-    } // for each box.
+      } // For each box
 
-    //Shrink to fit
-    signals->Squeeze();
-    visualDataSet->Squeeze();
+      if (VERBOSE) std::cout << tim << " to create the necessary points." << std::endl;
+      //Add points
+      visualDataSet->SetPoints(points);
 
-    //Add scalars
-    visualDataSet->GetCellData()->SetScalars(signals);
+      for (size_t i=0; i<boxes.size(); i++)
+      {
+        if (useBox[i])
+        {
+          // The bare point ID
+          vtkIdType pointIds = i * 8;
 
-    if (VERBOSE) std::cout << tim << " to create " << imageSizeActual << " hexahedrons." << std::endl;
+          //Add signal
+          signals->InsertNextValue(signalArray[i]);
+
+          hexPointList->SetId(0, pointIds + 0); //xyx
+          hexPointList->SetId(1, pointIds + 1); //dxyz
+          hexPointList->SetId(2, pointIds + 3); //dxdyz
+          hexPointList->SetId(3, pointIds + 2); //xdyz
+          hexPointList->SetId(4, pointIds + 4); //xydz
+          hexPointList->SetId(5, pointIds + 5); //dxydz
+          hexPointList->SetId(6, pointIds + 7); //dxdydz
+          hexPointList->SetId(7, pointIds + 6); //xdydz
+
+          //Add cells
+          visualDataSet->InsertNextCell(VTK_HEXAHEDRON, hexPointList);
+
+
+          double bounds[6];
+
+          visualDataSet->GetCellBounds(imageSizeActual, bounds);
+
+          if(bounds[0] < -10 || bounds[2] < -10 ||bounds[4]< -10)
+          {
+            std::string msg = "";
+          }
+          imageSizeActual++;
+        }
+      } // for each box.
+
+      //Shrink to fit
+      signals->Squeeze();
+      visualDataSet->Squeeze();
+
+      //Add scalars
+      visualDataSet->GetCellData()->SetScalars(signals);
+
+      if (VERBOSE) std::cout << tim << " to create " << imageSizeActual << " hexahedrons." << std::endl;
 
   }
 
@@ -193,7 +193,7 @@ namespace Mantid
     validate();
 
     IMDEventWorkspace_sptr imdws = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_workspace);
-    if(!imdws || imdws->getNonIntegratedDimensions().size() < ThreeDimensional)
+    if(!imdws || (doesCheckDimensionality() &&  imdws->getNonIntegratedDimensions().size() < ThreeDimensional))
     {
       return m_successor->create();
     }
@@ -250,7 +250,7 @@ namespace Mantid
     // The macro does not allow return calls, so we used a member variable.
     return this->dataSet;
   }
-  
+
   /*
   Create as Mesh Only. Legacy method
   @Return Nothing. throws on invoke.
@@ -269,7 +269,7 @@ namespace Mantid
     throw std::runtime_error("Invalid usage. Cannot call vtkMDEWHexahedronFactory::createScalarArray()");
   }
 
- /*
+  /*
   Initalize the factory with the workspace. This allows top level decision on what factory to use, but allows presenter/algorithms to pass in the
   dataobjects (workspaces) to run against at a later time. If workspace is not an IMDEventWorkspace, attempts to use any run-time successor set.
   @Param ws : Workspace to use.
@@ -282,8 +282,8 @@ namespace Mantid
     }
     m_workspace = ws;
     IMDEventWorkspace_sptr imdws = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_workspace);
-    
-    if(!imdws || imdws->getNonIntegratedDimensions().size() < ThreeDimensional)
+
+    if(!imdws || (doesCheckDimensionality() && imdws->getNonIntegratedDimensions().size() < ThreeDimensional))
     {
       if(this->hasSuccessor())
       {

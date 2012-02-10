@@ -77,6 +77,22 @@ public:
     TS_ASSERT_EQUALS(4, fourD);
   }
 
+  void testCheckDimensionalityByDefault()
+  {
+    MockvtkDataSetFactory factory;
+    TS_ASSERT(factory.doesCheckDimensionality());
+  }
+
+  void testSetCheckDimensionality()
+  {
+    MockvtkDataSetFactory factory;
+    factory.setCheckDimensionality(false);
+    TS_ASSERT(!factory.doesCheckDimensionality());
+    factory.setCheckDimensionality(true);
+    TS_ASSERT(factory.doesCheckDimensionality());
+  }
+
+
 };
 
 #endif
