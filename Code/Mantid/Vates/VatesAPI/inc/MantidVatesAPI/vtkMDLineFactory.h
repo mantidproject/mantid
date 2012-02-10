@@ -1,5 +1,5 @@
-#ifndef VATES_API_GENERIC_IMD_FACTORY
-#define VATES_API_GENERIC_IMD_FACTORY
+#ifndef VATES_MD_LINE_FACTORY
+#define VATES_MD_LINE_FACTORY
 
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/ThresholdRange.h"

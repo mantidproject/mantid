@@ -23,6 +23,7 @@
 #include "MantidVatesAPI/vtkThresholdingHexahedronFactory.h"
 #include "MantidVatesAPI/vtkThresholdingQuadFactory.h"
 #include "MantidVatesAPI/vtkThresholdingLineFactory.h"
+#include "MantidVatesAPI/vtkMDLineFactory.h"
 #include "MantidVatesAPI/vtkMDQuadFactory.h"
 #include "MantidVatesAPI/TimeToTimeStep.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
@@ -259,24 +260,28 @@ int vtkMDEWRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtk
       m_timestep =  outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0];
     }
 
-    //Create chain-of-responsibility for translating imdworkspaces.
     std::string scalarName = XMLDefinitions::signalName();
-    vtkMDQuadFactory* vtkGridFactory = new vtkMDQuadFactory(m_ThresholdRange, scalarName);
+    
+    //Create Factory Object for chain. Chain-of-responsibility for translating imdworkspaces.
+    vtkMDLineFactory* p_1dMDFactory =  new vtkMDLineFactory(m_ThresholdRange, scalarName);
+    vtkMDQuadFactory* p_2dMDFactory = new vtkMDQuadFactory(m_ThresholdRange, scalarName);
+    vtkThresholdingLineFactory* p_1dHistoFactory = new vtkThresholdingLineFactory(m_ThresholdRange, scalarName);
+    vtkThresholdingQuadFactory* p_2dHistoFactory = new vtkThresholdingQuadFactory(m_ThresholdRange,scalarName);
+    vtkThresholdingHexahedronFactory* p_3dHistoFactory = new vtkThresholdingHexahedronFactory(m_ThresholdRange,scalarName);
+    vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>* p_4dHistoFactory = new vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>(m_ThresholdRange,scalarName, m_timestep);
 
-    vtkThresholdingLineFactory* p_1dSuccessorFactory = new vtkThresholdingLineFactory(m_ThresholdRange, scalarName);
-    vtkThresholdingQuadFactory* p_2dSuccessorFactory = new vtkThresholdingQuadFactory(m_ThresholdRange,scalarName);
-    vtkThresholdingHexahedronFactory* p_3dSuccessorFactory = new vtkThresholdingHexahedronFactory(m_ThresholdRange,scalarName);
-    vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>* p_4dSuccessorFactory = new vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>(m_ThresholdRange,scalarName, m_timestep);
+    //Assemble Chain-of-Reponsibility
+    p_1dMDFactory->SetSuccessor(p_2dMDFactory);
+    p_2dMDFactory->SetSuccessor(p_1dHistoFactory);
+    p_1dHistoFactory->SetSuccessor(p_2dHistoFactory);
+    p_2dHistoFactory->SetSuccessor(p_3dHistoFactory);
+    p_3dHistoFactory->SetSuccessor(p_4dHistoFactory);
 
-    vtkGridFactory->SetSuccessor(p_1dSuccessorFactory);
-    p_1dSuccessorFactory->SetSuccessor(p_2dSuccessorFactory);
-    p_2dSuccessorFactory->SetSuccessor(p_3dSuccessorFactory);
-    p_3dSuccessorFactory->SetSuccessor(p_4dSuccessorFactory);
 
-    vtkDataSet* outData = m_presenter->execute(vtkGridFactory, updatehandler);
+    vtkDataSet* outData = m_presenter->execute(p_1dMDFactory, updatehandler);
     m_thresholdMax = m_ThresholdRange->getMaximum();
     m_thresholdMin = m_ThresholdRange->getMinimum();
-    delete vtkGridFactory;
+    delete p_1dMDFactory;
 
     output->ShallowCopy(outData);
 
