@@ -54,7 +54,7 @@ namespace Crystal
     /// Run the algorithm;
     void exec();
     double getEg(double mosaic);
-    double getEgLaue(double Eb, double twoth, double wl);
+    double getEgLaue(double Eb, double twoth, double wl, double divBeam, double betaBeam);
     double getXqt(double Eg, double cellV, double wl, double twoth, double tbar, double fsq);
     double getZachariasen(double Xqt);
     double getGaussian(double Xqt, double twoth);
