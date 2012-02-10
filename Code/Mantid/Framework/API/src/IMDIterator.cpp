@@ -8,6 +8,13 @@ namespace Mantid
 namespace API
 {
 
+  /** Default constructor */
+  IMDIterator::IMDIterator()
+  : m_normalization(Mantid::API::VolumeNormalization)
+  {
+  }
+
+
   /** Set how the signal will be normalized when calling getNormalizedSignal()
    *
    * @param normalization :: method to use

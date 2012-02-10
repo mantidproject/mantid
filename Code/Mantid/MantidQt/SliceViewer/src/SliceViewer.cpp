@@ -260,24 +260,25 @@ void SliceViewer::initMenus()
   QActionGroup* group = new QActionGroup( this );
 
   action = new QAction(QPixmap(), "No Normalization", this);
-  connect(action, SIGNAL(triggered()), this, SLOT(changeNormalization()));
   m_menuView->addAction(action);
   action->setActionGroup(group);
   action->setCheckable(true);
+  connect(action, SIGNAL(triggered()), this, SLOT(changeNormalization()));
   m_actionNormalizeNone = action;
 
   action = new QAction(QPixmap(), "Volume Normalization", this);
-  connect(action, SIGNAL(triggered()), this, SLOT(changeNormalization()));
   m_menuView->addAction(action);
   action->setActionGroup(group);
   action->setCheckable(true);
+  action->setChecked(true);
+  connect(action, SIGNAL(triggered()), this, SLOT(changeNormalization()));
   m_actionNormalizeVolume = action;
 
   action = new QAction(QPixmap(), "Num. Events Normalization", this);
-  connect(action, SIGNAL(triggered()), this, SLOT(changeNormalization()));
   m_menuView->addAction(action);
   action->setActionGroup(group);
   action->setCheckable(true);
+  connect(action, SIGNAL(triggered()), this, SLOT(changeNormalization()));
   m_actionNormalizeNumEvents = action;
 
 
