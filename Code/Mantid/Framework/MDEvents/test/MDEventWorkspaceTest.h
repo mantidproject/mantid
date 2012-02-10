@@ -147,6 +147,22 @@ public:
   }
 
   //-------------------------------------------------------------------------------------
+  /** Create several IMDIterators to run them in parallel */
+  void test_createIterators()
+  {
+    MDEventWorkspace3 * ew = new MDEventWorkspace3();
+    BoxController_sptr bc = ew->getBoxController();
+    bc->setSplitInto(4);
+    ew->splitBox();
+    std::vector<IMDIterator *> iterators = ew->createIterators(3);
+    TS_ASSERT_EQUALS(iterators.size(), 3);
+
+    TS_ASSERT_EQUALS(iterators[0]->getDataSize(), 21);
+    TS_ASSERT_EQUALS(iterators[1]->getDataSize(), 21);
+    TS_ASSERT_EQUALS(iterators[2]->getDataSize(), 22);
+  }
+
+  //-------------------------------------------------------------------------------------
   /** Method that makes a table workspace for use in MantidPlot */
   void test_makeBoxTable()
   {

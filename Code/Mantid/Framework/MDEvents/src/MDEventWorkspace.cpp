@@ -212,9 +212,9 @@ namespace MDEvents
     std::vector<IMDBox<MDE,nd> *> boxes;
     // TODO: Should this be leaf only? Depends on most common use case
     if (function)
-      data->getBoxes(boxes, 10000, true, function);
+      this->data->getBoxes(boxes, 10000, true, function);
     else
-      data->getBoxes(boxes, 10000, true);
+      this->data->getBoxes(boxes, 10000, true);
 
     // Calculate the right number of cores
     size_t numCores = suggestedNumCores;
