@@ -121,6 +121,8 @@ namespace Mantid
       /// overwrite IFunction base class methods
       std::string name()const{return "Convolution";}
       virtual const std::string category() const { return "General";}
+      /// Writes itself into a string
+      std::string asString()const;
       void functionMW(double* out, const double* xValues, const size_t nData)const;
       void functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData);
 
@@ -132,8 +134,6 @@ namespace Mantid
     protected:
       /// overwrite IFunction base class method, which declare function parameters
       virtual void init();
-      /// Writes itself into a string
-      std::string asString()const;
 
     private:
       /// To keep the Fourier transform of the resolution function (divided by the step in xValues)

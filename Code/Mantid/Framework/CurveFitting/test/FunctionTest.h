@@ -150,7 +150,7 @@ public:
     alg.setPropertyValue("InputWorkspace","Exp");
     alg.setPropertyValue("WorkspaceIndex","0");
     alg.setPropertyValue("Output","out");
-    alg.setPropertyValue("Function",*g);
+    alg.setPropertyValue("Function",g->asString());
     delete g;
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
@@ -226,7 +226,7 @@ public:
 
     alg.setPropertyValue("InputWorkspace","Exp");
     alg.setPropertyValue("WorkspaceIndex","0");
-    alg.setPropertyValue("Function",g);
+    alg.setPropertyValue("Function",g.asString());
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -262,7 +262,7 @@ public:
     alg.setPropertyValue("InputWorkspace","Exp");
     alg.setPropertyValue("WorkspaceIndex","0");
     alg.setPropertyValue("Output","out");
-    alg.setPropertyValue("Function",g);
+    alg.setPropertyValue("Function",g.asString());
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
     WS_type outWS = getWS("out_Workspace");

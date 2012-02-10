@@ -150,7 +150,7 @@ public:
     icpv.setParameter("X0",45.0);
     //icpv->tie("Gamma", "1.0");
 
-    alg2.setPropertyValue("Function",icpv);
+    alg2.setPropertyValue("Function",icpv.asString());
 
     // execute fit
     TS_ASSERT_THROWS_NOTHING(

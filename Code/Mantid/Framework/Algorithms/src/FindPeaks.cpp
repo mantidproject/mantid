@@ -20,6 +20,7 @@ FindPeaks uses the [[SmoothData]] algorithm to, well, smooth the data - a necess
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include <boost/algorithm/string.hpp>
 #include <numeric>
@@ -242,6 +243,9 @@ void FindPeaks::exec()
 
   // c) Background
   std::string backgroundtype = getProperty("BackgroundType");
+
+  // c.5) Create functions
+  createFunctions(backgroundtype);
 
   // d) Choice of fitting approach
   mHighBackground = getProperty("HighBackground");
@@ -806,18 +810,28 @@ void FindPeaks::fitPeakOneStep(const API::MatrixWorkspace_sptr &input, const int
     // b) Guess sigma
     const double in_sigma = (i0 + width < X.size()) ? X[i0 + width] - X[i0] : 0.;
 
-    // c) Construct Function string
-    std::stringstream ss;
+    // c) Set initial fitting parameters
     if (backgroundtype.compare("Linear") == 0)
     {
-      ss << "name=Gaussian,Height=" << in_height << ",PeakCentre=" << in_centre << ",Sigma="
-          << in_sigma << ";name=LinearBackground,A0=" << in_bg0 << ",A1=" << in_bg1;
+      m_peakAndBackgroundFunction->setParameter("f0.Height", in_height);
+      m_peakAndBackgroundFunction->setParameter("f0.PeakCentre", in_centre);
+      m_peakAndBackgroundFunction->setParameter("f0.Sigma", in_sigma);
+      m_peakAndBackgroundFunction->setParameter("f1.A0", in_bg0);
+      m_peakAndBackgroundFunction->setParameter("f1.A1", in_bg1);
+      //ss << "name=Gaussian,Height=" << in_height << ",PeakCentre=" << in_centre << ",Sigma="
+      //    << in_sigma << ";name=LinearBackground,A0=" << in_bg0 << ",A1=" << in_bg1;
     }
     else if (backgroundtype.compare("Quadratic") == 0)
     {
-      ss << "name=Gaussian,Height=" << in_height << ",PeakCentre=" << in_centre << ",Sigma="
-          << in_sigma << ";name=QuadraticBackground,A0=" << in_bg0 << ",A1=" << in_bg1 << ",A2="
-          << in_bg2;
+      m_peakAndBackgroundFunction->setParameter("f0.Height", in_height);
+      m_peakAndBackgroundFunction->setParameter("f0.PeakCentre", in_centre);
+      m_peakAndBackgroundFunction->setParameter("f0.Sigma", in_sigma);
+      m_peakAndBackgroundFunction->setParameter("f1.A0", in_bg0);
+      m_peakAndBackgroundFunction->setParameter("f1.A1", in_bg1);
+      m_peakAndBackgroundFunction->setParameter("f1.A2", in_bg2);
+      //ss << "name=Gaussian,Height=" << in_height << ",PeakCentre=" << in_centre << ",Sigma="
+      //    << in_sigma << ";name=QuadraticBackground,A0=" << in_bg0 << ",A1=" << in_bg1 << ",A2="
+      //    << in_bg2;
     }
     else
     {
@@ -825,15 +839,14 @@ void FindPeaks::fitPeakOneStep(const API::MatrixWorkspace_sptr &input, const int
           << std::endl;
       throw std::invalid_argument("Background type is not supported in FindPeak.cpp");
     }
-    std::string function = ss.str();
-    g_log.debug() << "  Function: " << function << "; Background Type = " << backgroundtype << std::endl;
+    g_log.debug() << "  Function: " << *m_peakAndBackgroundFunction << "; Background Type = " << backgroundtype << std::endl;
 
     // d) complete fit
     fit->setProperty("StartX", (X[i0] - 5 * (X[i0] - X[i2])));
     fit->setProperty("EndX", (X[i0] + 5 * (X[i0] - X[i2])));
     fit->setProperty("Minimizer", "Levenberg-Marquardt");
     fit->setProperty("CostFunction", "Least squares");
-    fit->setPropertyValue("Function", function);
+    fit->setProperty("Function", m_peakAndBackgroundFunction);
 
     // e) Fit and get result
     fit->executeAsSubAlg();
@@ -986,15 +999,19 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   fit->setProperty("WorkspaceIndex", 0);
   fit->setProperty("MaxIterations", 50);
 
-  // c) Construct Function string
-  std::stringstream ss;
+  // c) Set initial fitting parameters
   if (backgroundtype.compare("Linear") == 0)
   {
-    ss << "name=LinearBackground,A0=" << in_bg0 << ",A1=" << in_bg1;
+    m_backgroundFunction->setParameter("A0", in_bg0);
+    m_backgroundFunction->setParameter("A1", in_bg1);
+    //ss << "name=LinearBackground,A0=" << in_bg0 << ",A1=" << in_bg1;
   }
   else if (backgroundtype.compare("Quadratic") == 0)
   {
-    ss << "name=QuadraticBackground,A0=" << in_bg0 << ",A1=" << in_bg1 << ",A2="<< in_bg2;
+    m_backgroundFunction->setParameter("A0", in_bg0);
+    m_backgroundFunction->setParameter("A1", in_bg1);
+    m_backgroundFunction->setParameter("A2", in_bg2);
+    //ss << "name=QuadraticBackground,A0=" << in_bg0 << ",A1=" << in_bg1 << ",A2="<< in_bg2;
   }
   else
   {
@@ -1002,15 +1019,14 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
         << std::endl;
     throw std::invalid_argument("Background type is not supported in FindPeak.cpp");
   }
-  std::string function = ss.str();
-  g_log.debug() << "Background Type = " << backgroundtype << "  Function: " << function << std::endl;
+  g_log.debug() << "Background Type = " << backgroundtype << "  Function: " << *m_backgroundFunction << std::endl;
 
   // d) complete fit
   fit->setProperty("StartX", (X[i0] - 5 * (X[i0] - X[i2])));
   fit->setProperty("EndX", (X[i0] + 5 * (X[i0] - X[i2])));
   fit->setProperty("Minimizer", "Levenberg-Marquardt");
   fit->setProperty("CostFunction", "Least squares");
-  fit->setPropertyValue("Function", function);
+  fit->setProperty("Function", m_backgroundFunction);
 
   // e) Fit and get result of fitting background
   fit->executeAsSubAlg();
@@ -1098,19 +1114,21 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
     double in_centre = xPeak;
     double in_height = vPeak;
 
-    // c) Construct Function string
-    std::stringstream ss;
-    ss << "name=Gaussian,Height=" << in_height << ",PeakCentre=" << in_centre << ",Sigma=" << in_sigma;
-    std::string function = ss.str();
+    // c) Set initial fitting parameters
+    m_peakFunction->setParameter("Height", in_height);
+    m_peakFunction->setParameter("PeakCentre", in_centre);
+    m_peakFunction->setParameter("Sigma", in_sigma);
+    //ss << "name=Gaussian,Height=" << in_height << ",PeakCentre=" << in_centre << ",Sigma=" << in_sigma;
+    //std::string function = ss.str();
 
     // d) Complete fit
     gfit->setProperty("StartX", (X[i4] - 5 * (X[i0] - X[i2])));
     gfit->setProperty("EndX",   (X[i4] + 5 * (X[i0] - X[i2])));
     gfit->setProperty("Minimizer", "Levenberg-Marquardt");
     gfit->setProperty("CostFunction", "Least squares");
-    gfit->setPropertyValue("Function", function);
+    gfit->setProperty("Function", m_peakFunction);
 
-    g_log.debug() << "Function: " << function << "  From " << (X[i4] - 5 * (X[i0] - X[i2]))
+    g_log.debug() << "Function: " << *m_peakFunction<< "  From " << (X[i4] - 5 * (X[i0] - X[i2]))
         << "  to " << (X[i4] + 5 * (X[i0] - X[i2])) << std::endl;
 
     // e) Fit and get result
@@ -1187,17 +1205,27 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   lastfit->setProperty("WorkspaceIndex", spectrum);
   lastfit->setProperty("MaxIterations", 50);
 
-  // c) Construct Function string
-  std::stringstream ss2;
+  // c) Set initial fitting parameters
   if (backgroundtype.compare("Linear") == 0)
   {
-    ss2 << "name=Gaussian,Height=" << bestheight << ",PeakCentre=" << bestcenter << ",Sigma="
-        << bestsigma << ";name=LinearBackground,A0=" << a0 << ",A1=" << a1;
+    m_peakAndBackgroundFunction->setParameter("f0.Height", bestheight);
+    m_peakAndBackgroundFunction->setParameter("f0.PeakCentre", bestcenter);
+    m_peakAndBackgroundFunction->setParameter("f0.Sigma", bestsigma);
+    m_peakAndBackgroundFunction->setParameter("f1.A0", a0);
+    m_peakAndBackgroundFunction->setParameter("f1.A1", a1);
+    //ss2 << "name=Gaussian,Height=" << bestheight << ",PeakCentre=" << bestcenter << ",Sigma="
+    //    << bestsigma << ";name=LinearBackground,A0=" << a0 << ",A1=" << a1;
   }
   else if (backgroundtype.compare("Quadratic") == 0)
   {
-    ss2 << "name=Gaussian,Height=" << bestheight << ",PeakCentre=" << bestcenter << ",Sigma="
-        << bestsigma << ";name=QuadraticBackground,A0=" << a0 << ",A1=" << a1 << ",A2=" << a2;
+    m_peakAndBackgroundFunction->setParameter("f0.Height", bestheight);
+    m_peakAndBackgroundFunction->setParameter("f0.PeakCentre", bestcenter);
+    m_peakAndBackgroundFunction->setParameter("f0.Sigma", bestsigma);
+    m_peakAndBackgroundFunction->setParameter("f1.A0", a0);
+    m_peakAndBackgroundFunction->setParameter("f1.A1", a1);
+    m_peakAndBackgroundFunction->setParameter("f1.A2", a2);
+    //ss2 << "name=Gaussian,Height=" << bestheight << ",PeakCentre=" << bestcenter << ",Sigma="
+    //    << bestsigma << ";name=QuadraticBackground,A0=" << a0 << ",A1=" << a1 << ",A2=" << a2;
   }
   else
   {
@@ -1205,15 +1233,14 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
         << std::endl;
     throw std::invalid_argument("Background type is not supported in FindPeak.cpp");
   }
-  function = ss2.str();
-  g_log.debug() << "(High Background) Final Fit Function: " << function << std::endl;
+  g_log.debug() << "(High Background) Final Fit Function: " << *m_peakAndBackgroundFunction << std::endl;
 
   // d) complete fit
   lastfit->setProperty("StartX", (X[i4] - 2 * (X[i0] - X[i2])));
   lastfit->setProperty("EndX", (X[i4] + 2 * (X[i0] - X[i2])));
   lastfit->setProperty("Minimizer", "Levenberg-Marquardt");
   lastfit->setProperty("CostFunction", "Least squares");
-  lastfit->setPropertyValue("Function", function);
+  lastfit->setProperty("Function", m_peakAndBackgroundFunction);
 
   // e) Fit and get result
   lastfit->executeAsSubAlg();
@@ -1326,6 +1353,35 @@ bool FindPeaks::checkFitResultParameterNames(std::vector<std::string> paramnames
   errormessage = ss.str();
 
   return correct;
+}
+
+/**
+ * Create the functions for fitting.
+ * @param backgroundtype :: Type of the function to fit the background.
+ */
+void FindPeaks::createFunctions(const std::string& backgroundtype)
+{
+  m_peakFunction.reset(API::FunctionFactory::Instance().createFunction("Gaussian"));
+  if (backgroundtype.compare("Linear") == 0)
+  {
+    m_backgroundFunction.reset(API::FunctionFactory::Instance().createFunction("LinearBackground"));
+    m_peakAndBackgroundFunction.reset(API::FunctionFactory::Instance().createInitialized("name=Gaussian;name=LinearBackground"));
+    //ss2 << "name=Gaussian,Height=" << bestheight << ",PeakCentre=" << bestcenter << ",Sigma="
+    //    << bestsigma << ";name=LinearBackground,A0=" << a0 << ",A1=" << a1;
+  }
+  else if (backgroundtype.compare("Quadratic") == 0)
+  {
+    m_backgroundFunction.reset(API::FunctionFactory::Instance().createFunction("QuadraticBackground"));
+    m_peakAndBackgroundFunction.reset(API::FunctionFactory::Instance().createInitialized("name=Gaussian;name=QuadraticBackground"));
+    //ss2 << "name=Gaussian,Height=" << bestheight << ",PeakCentre=" << bestcenter << ",Sigma="
+    //    << bestsigma << ";name=QuadraticBackground,A0=" << a0 << ",A1=" << a1 << ",A2=" << a2;
+  }
+  else
+  {
+    g_log.error() << "Background type " << backgroundtype << " is not supported in FindPeak.cpp!"
+        << std::endl;
+    throw std::invalid_argument("Background type is not supported in FindPeak.cpp");
+  }
 }
 
 

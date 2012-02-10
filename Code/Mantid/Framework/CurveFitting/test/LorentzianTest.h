@@ -117,7 +117,7 @@ public:
     fnWithBk.addFunction(bk);
 
     //alg2.setFunction(fnWithBk);    
-    alg2.setPropertyValue("Function",fnWithBk);
+    alg2.setPropertyValue("Function",fnWithBk.asString());
 
 
     // Set which spectrum to fit against and initial starting values
@@ -182,7 +182,7 @@ public:
 
     //void setFunction(API::IFunction* fun);
     //alg2.setFunction(fn);
-    alg2.setPropertyValue("Function",fn);
+    alg2.setPropertyValue("Function",fn.asString());
 
 
     // Set which spectrum to fit against and initial starting values
@@ -258,7 +258,7 @@ public:
     fnWithBk.addFunction(bk);
 
     //alg2.setFunction(fnWithBk);
-    alg2.setPropertyValue("Function",fnWithBk);
+    alg2.setPropertyValue("Function",fnWithBk.asString());
 
 
     // Set which spectrum to fit against and initial starting values

@@ -189,7 +189,7 @@ public:
 
     TS_ASSERT_EQUALS(prodF.parameterLocalName(0),"a");
 
-    IFitFunction* fun = FunctionFactory::Instance().createInitialized(prodF);
+    IFitFunction* fun = FunctionFactory::Instance().createInitialized(prodF.asString());
     TS_ASSERT(fun);
 
     ProductFunctionMW* prodF1 = dynamic_cast<ProductFunctionMW*>(fun);
@@ -296,7 +296,7 @@ public:
     f1->setParameter("PeakCentre",c2+0.5);
     f1->setParameter("Height",h2+5.0);
     f1->tie("Sigma","0.5");
-    fit.setPropertyValue("Function",prodF);
+    fit.setPropertyValue("Function",prodF.asString());
 
     // execute fit
     TS_ASSERT_THROWS_NOTHING(

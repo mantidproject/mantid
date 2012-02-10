@@ -1351,7 +1351,7 @@ void FitPropertyBrowser::fit()
     {
       std::string ties;
       Mantid::API::Expression funExpr;
-      funExpr.parse(*m_compositeFunction);
+      funExpr.parse(m_compositeFunction->asString());
       funExpr.toList(";");
       for(size_t i = 0; i < funExpr.size(); ++i)
       {
@@ -1378,11 +1378,11 @@ void FitPropertyBrowser::fit()
     }
     else if (m_compositeFunction->nFunctions() > 1)
     {
-      funStr = *m_compositeFunction;
+      funStr = m_compositeFunction->asString();
     }
     else
     {
-      funStr = *(m_compositeFunction->getFunction(0));
+      funStr = (m_compositeFunction->getFunction(0))->asString();
     }
 
     if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsName+"_NormalisedCovarianceMatrix"))
@@ -2201,7 +2201,7 @@ void FitPropertyBrowser::saveFunction(const QString& fnName)
   {
     return;
   }
-  settings.setValue(fnName,QString::fromStdString(*theFunction()));
+  settings.setValue(fnName,QString::fromStdString(theFunction()->asString()));
   updateSetupMenus();
 }
 
@@ -2257,7 +2257,7 @@ void FitPropertyBrowser::loadFunction(const QString& funcString)
 void FitPropertyBrowser::copy()
 {
   QClipboard *clipboard = QApplication::clipboard();
-  clipboard->setText(QString::fromStdString(*theFunction()));
+  clipboard->setText(QString::fromStdString(theFunction()->asString()));
 }
 
 void FitPropertyBrowser::paste()
@@ -2269,7 +2269,7 @@ void FitPropertyBrowser::paste()
 
 void FitPropertyBrowser::reset()
 {
-  QString str = QString::fromStdString(*theFunction());
+  QString str = QString::fromStdString(theFunction()->asString());
   //getHandler()->removeAllPlots();// this crashes mantidplot
   clearBrowser();
   createCompositeFunction(str);
@@ -2501,7 +2501,7 @@ void FitPropertyBrowser::findPeaks()
       f->setCentre(centre[i]);
       f->setWidth(width[i]);
       f->setHeight(height[i]);
-      addFunction(*f);
+      addFunction(f->asString());
       delete f;
     }
   }
@@ -2664,7 +2664,7 @@ void FitPropertyBrowser::setupMultifit()
       {
         throw std::runtime_error("IFitFunction expected but func function of another type");
       }
-      QString fun1Ini = QString::fromStdString(*fun);
+      QString fun1Ini = QString::fromStdString(fun->asString());
       QString funIni = "composite=MultiBG;" + fun1Ini + ",Workspace="+wsName+",WSParam=(WorkspaceIndex=0);";
       QString tieStr;
       for(size_t i = 1; i < mws->getNumberHistograms(); ++i)

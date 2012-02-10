@@ -1348,7 +1348,7 @@ void PropertyHandler::fit()
     alg->setProperty("WorkspaceIndex",m_browser->workspaceIndex());
     alg->setProperty("StartX",m_browser->startX());
     alg->setProperty("EndX",m_browser->endX());
-    alg->setPropertyValue("Function",*m_fun);
+    alg->setPropertyValue("Function",m_fun->asString());
     alg->execute();
     std::string fitFun = alg->getPropertyValue("Function");
     Mantid::API::IFitFunction* f = Mantid::API::FunctionFactory::Instance().createInitialized(fitFun);

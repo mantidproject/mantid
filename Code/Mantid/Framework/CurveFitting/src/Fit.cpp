@@ -323,7 +323,7 @@ namespace CurveFitting
     // if Constraints property isn't empty change the function by adding the constraints to it
     if (!inputConstraints.empty())
     {
-      function_input = *m_function;
+      function_input = m_function->asString();
       std::string::size_type i = function_input.find_last_not_of(" \t\n\r");
       if (i == std::string::npos) return;
       if (function_input[i] == ';')
@@ -361,7 +361,7 @@ namespace CurveFitting
     {
       if (function_input.empty())
       {
-        function_input = *m_function;
+        function_input = m_function->asString();
       }
       if (function_input.find(';') != std::string::npos)
       {

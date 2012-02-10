@@ -209,7 +209,7 @@ public:
     fnWithBk.addFunction(bk);
     fnWithBk.addFunction(fn);
 
-    alg.setPropertyValue("Function",fnWithBk);
+    alg.setPropertyValue("Function",fnWithBk.asString());
 
     // execute fit
     TS_ASSERT_THROWS_NOTHING(
@@ -287,7 +287,7 @@ public:
     fnWithBk->addFunction(bk);
     fnWithBk->addFunction(fn);
 
-    alg.setPropertyValue("Function",*fnWithBk);
+    alg.setPropertyValue("Function",fnWithBk->asString());
 
     // execute fit
     TS_ASSERT_THROWS_NOTHING(
@@ -335,7 +335,7 @@ public:
     gaus.setHeight(100.7);
     gaus.setWidth(2.2);
 
-    alg2.setPropertyValue("Function",gaus);
+    alg2.setPropertyValue("Function",gaus.asString());
 
     // Set which spectrum to fit against and initial starting values
     alg2.setProperty("InputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(ws2D) );
@@ -395,7 +395,7 @@ public:
     gaus.setHeight(100.7);
     gaus.setWidth(2.2);
 
-    alg2.setPropertyValue("Function",gaus);
+    alg2.setPropertyValue("Function",gaus.asString());
 
     // Set which spectrum to fit against and initial starting values
     alg2.setPropertyValue("InputWorkspace", wsName);
@@ -453,7 +453,7 @@ public:
     gaus.setHeight(100.7);
     gaus.setWidth(2.2);
 
-    alg2.setPropertyValue("Function",gaus);
+    alg2.setPropertyValue("Function",gaus.asString());
 
     // Set which spectrum to fit against and initial starting values
     alg2.setPropertyValue("InputWorkspace", wsName);
@@ -511,7 +511,7 @@ public:
     gaus.setHeight(100.7);
     gaus.setWidth(2.2);
 
-    alg2.setPropertyValue("Function",gaus);
+    alg2.setPropertyValue("Function",gaus.asString());
 
     // Set which spectrum to fit against and initial starting values
     alg2.setPropertyValue("InputWorkspace", wsName);
@@ -569,7 +569,7 @@ public:
     gaus->setHeight(100.7);
     gaus->setWidth(2.2);
 
-    alg2.setPropertyValue("Function",*gaus);
+    alg2.setPropertyValue("Function",gaus->asString());
 
     // Set which spectrum to fit against and initial starting values
     alg2.setPropertyValue("InputWorkspace", wsName);
@@ -628,7 +628,7 @@ public:
     gaus.setHeight(100.7);
     gaus.setWidth(2.2);
 
-    alg2.setPropertyValue("Function",gaus);
+    alg2.setPropertyValue("Function",gaus.asString());
 
     // Set which spectrum to fit against and initial starting values
     alg2.setPropertyValue("InputWorkspace", wsName);
@@ -726,7 +726,7 @@ public:
     fnWithBk->addFunction(fn);
 
     //alg.setPropertyValue("Function",*fnWithBk);
-    alg.setPropertyValue("Function",*fnWithBk);
+    alg.setPropertyValue("Function",fnWithBk->asString());
     alg.setPropertyValue("Minimizer","Simplex");
 
     delete fnWithBk;
