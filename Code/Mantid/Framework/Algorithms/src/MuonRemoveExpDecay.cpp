@@ -69,8 +69,6 @@ void MuonRemoveExpDecay::exec()
       removeDecay(inputWS->readX(i), inputWS->readE(i), outputWS->dataE(i)); 
       outputWS->dataX(i) = inputWS->readX(i);   
 
-      const MantidVec& xx = outputWS->readX(i);
-
       double normConst = calNormalisationConst(outputWS, i);
 
       // do scaling and substract by minus 1.0
