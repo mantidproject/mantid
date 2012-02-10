@@ -37,7 +37,7 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/NumpyTypeHandler.h
   ${HEADER_DIR}/kernel/PythonObjectInstantiator.h
   ${HEADER_DIR}/kernel/PropertyWithValue.h
-  ${HEADER_DIR}/kernel/PythonTypeHandler.h
+  ${HEADER_DIR}/kernel/PropertyValueHandler.h
   ${HEADER_DIR}/kernel/PyEnvironment.h
   ${HEADER_DIR}/kernel/SingleValueTypeHandler.h
   ${HEADER_DIR}/kernel/StlExportDefinitions.h

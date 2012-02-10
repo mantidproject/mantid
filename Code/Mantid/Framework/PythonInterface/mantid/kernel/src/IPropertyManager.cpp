@@ -1,6 +1,6 @@
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidPythonInterface/kernel/TypeRegistry.h"
-#include "MantidPythonInterface/kernel/PythonTypeHandler.h"
+#include "MantidPythonInterface/kernel/PropertyValueHandler.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
