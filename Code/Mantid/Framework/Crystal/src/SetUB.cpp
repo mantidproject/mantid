@@ -92,7 +92,7 @@ namespace Crystal
     this->declareProperty(new PropertyWithValue<double>("gamma",90.0,reasonableAngle->clone(),Direction::Input),"Lattice parameter gamma(degrees) ");
     this->declareProperty(new ArrayProperty<double>("u",u0,mustBe3D),"Vector along k_i, when goniometer is at 0");
     this->declareProperty(new ArrayProperty<double>("v",v0,mustBe3D->clone()),"In plane vector perpendicular to k_i, when goniometer is at 0");
-    this->declareProperty(new ArrayProperty<double>("UB",zeroes,threeVthree->clone()),"UB Matrix");
+    this->declareProperty(new ArrayProperty<double>("UB",zeroes,threeVthree),"UB Matrix");
     this->declareProperty(new PropertyWithValue<int>("MDSampleNumber",EMPTY_INT(),Direction::Input),"For an MD workspace, the sample number to wich to attach an oriented lattice (starting from 0). No number, or negative number, means that it will copy to all samples" );
 
   }
