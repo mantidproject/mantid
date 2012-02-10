@@ -102,6 +102,7 @@ public slots:
   void helpLineViewer();
   void setColorScaleAutoFull();
   void setColorScaleAutoSlice();
+  void setTransparentZeros(bool transparent);
   void setFastRender(bool fast);
   // Slots that will be automatically connected via QMetaObject.connectSlotsByName
   void on_btnClearLine_clicked();
@@ -196,6 +197,7 @@ private:
   /// Menus
   QMenu *m_menuColorOptions, *m_menuView, *m_menuHelp, *m_menuLine, *m_menuFile;
   QAction *m_actionFileClose;
+  QAction *m_actionTransparentZeros;
 
   /// Synced menu/buttons
   MantidQt::API::SyncedCheckboxes *m_syncLineMode, *m_syncSnapToGrid;

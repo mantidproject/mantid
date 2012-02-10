@@ -64,8 +64,6 @@ void RebinningTransformObjectPanel::constructGeometry(QGridLayout* gLayout)
     m_geometryWidget = new GeometryWidget(new SynchronisingGeometryPresenter(xmlParser), false);
     gLayout->addWidget(m_geometryWidget, gLayout->rowCount() + 1, 0, 1, 2, Qt::AlignLeft);
 
-    connect(m_geometryWidget, SIGNAL(ignoreBinChanges()), this, SLOT(ignoreBinChangesListner()));
-
     // Property used as setter.
     vtkSMProperty * appliedGeometryXML = this->proxy()->GetProperty("AppliedGeometryXML");
 
@@ -164,28 +162,6 @@ void RebinningTransformObjectPanel::popWidget()
     {
       pWidget->setHidden(true);
       this->layout()->removeItem(pLayoutItem);
-    }
-  }
-}
-
-/// Listener for ignore bin changes.
-void RebinningTransformObjectPanel::ignoreBinChangesListner()
-{
-  QLayoutItem *child;
-  unsigned int size = layout()->count();
-  for(unsigned int i = 0; i < size; i++)
-  {
-    child = layout()->itemAt(i);
-    QWidget* pWidget = child->widget();
-    if (NULL != pWidget) // capability query of layout item.
-    {
-      QCheckBox* checkBox;
-      if((checkBox = dynamic_cast<QCheckBox*>(pWidget)) != NULL) //capability query of widget.
-      {
-        // Apply Clip check box set to unchecked.
-        checkBox->setChecked(false);
-        break;
-      }
     }
   }
 }

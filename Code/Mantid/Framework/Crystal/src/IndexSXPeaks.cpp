@@ -57,7 +57,7 @@ namespace Mantid
         "PeaksWorkspace","",Direction::InOut), "Input Peaks Workspace");
 
       declareProperty(new PropertyWithValue<double>( "a",-1.0,
-        mustBePositive->clone(),Direction::Input),"Lattice parameter a");
+        mustBePositive,Direction::Input),"Lattice parameter a");
 
       declareProperty(new PropertyWithValue<double>( "b",-1.0,
         mustBePositive->clone(),Direction::Input),"Lattice parameter b");
@@ -66,7 +66,7 @@ namespace Mantid
         mustBePositive->clone(),Direction::Input),"Lattice parameter c");
 
       declareProperty(new PropertyWithValue<double>( "alpha",-1.0,
-        reasonable_angle->clone(),Direction::Input),"Lattice parameter alpha");
+        reasonable_angle,Direction::Input),"Lattice parameter alpha");
 
       declareProperty(new PropertyWithValue<double>("beta",-1.0,
         reasonable_angle->clone(),Direction::Input),"Lattice parameter beta");

@@ -121,7 +121,51 @@ public:
     AnalysisDataService::Instance().remove("binned");
   }
 
+};
 
+//=====================================================================================
+// Peformance tests
+//=====================================================================================
+class vtkMDQuadFactoryTestPerformance : public CxxTest::TestSuite
+{
+
+public:
+
+  void setUp()
+  {
+    boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDEvent<2>,2> > input 
+      = MDEventsTestHelper::makeMDEWFull<2>(10, 10, 10, 1000);
+    //Rebin it to make it possible to compare cells to bins.
+    SliceMD slice;
+    slice.initialize();
+    slice.setProperty("InputWorkspace", input);
+    slice.setPropertyValue("AlignedDimX", "Axis0, -10, 10, 400");
+    slice.setPropertyValue("AlignedDimY", "Axis1, -10, 10, 400");
+    slice.setPropertyValue("OutputWorkspace", "binned");
+    slice.execute();
+  }
+
+  void tearDown()
+  {
+    AnalysisDataService::Instance().remove("binned");
+  }
+
+  void testCreationOnLargeWorkspace()
+  {
+    Workspace_sptr binned = Mantid::API::AnalysisDataService::Instance().retrieve("binned");
+
+    vtkMDQuadFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+    factory.initialize(binned);
+
+    vtkDataSet* product = factory.create();
+
+    TS_ASSERT(dynamic_cast<vtkUnstructuredGrid*>(product) != NULL);
+    TS_ASSERT_EQUALS(160000, product->GetNumberOfCells());
+    TS_ASSERT_EQUALS(640000, product->GetNumberOfPoints());
+
+    product->Delete();
+    
+  }
 };
 
 #endif

@@ -83,8 +83,8 @@
 		TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().addOrReplace(wsName, ws2D));
 
 		// set up StretchExp fitting function
-		StretchExp* fn = new StretchExp();
-		fn->initialize();
+		StretchExp fn;
+		fn.initialize();
 
 		// get close to exact values with an initial guess
 		//fn->setParameter("Height",1.5);
@@ -92,7 +92,7 @@
 		//fn->setParameter("Stretching",0.4);
 
 		//alg2.setFunction(fn);
-		alg2.setPropertyValue("Function",*fn);
+		alg2.setPropertyValue("Function",fn);
 
 
 		// Set which spectrum to fit against and initial starting values

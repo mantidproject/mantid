@@ -272,6 +272,13 @@ void SliceViewer::initMenus()
   { QIcon icon; icon.addFile(QString::fromUtf8(":/SliceViewer/icons/color-pallette-part.png"), QSize(), QIcon::Normal, QIcon::Off); action->setIcon(icon); }
   m_menuColorOptions->addAction(action);
 
+  action = new QAction(QPixmap(), "Transparent &Zeros", this);
+  action->setCheckable(true);
+  action->setChecked(true);
+  m_actionTransparentZeros = action;
+  connect(action, SIGNAL(toggled(bool)), this, SLOT(setTransparentZeros(bool)));
+  m_menuColorOptions->addAction(action);
+
   // --------------- Help Menu ----------------------------------------
   m_menuHelp = new QMenu("&Help", this);
   action = new QAction(QPixmap(), "&Slice Viewer Help (browser)", this);
@@ -573,6 +580,21 @@ void SliceViewer::setColorScaleAutoSlice()
 void SliceViewer::colorRangeChanged()
 {
   m_spect->setColorMap( m_colorBar->getColorMap() );
+  this->updateDisplay();
+}
+
+//------------------------------------------------------------------------------------
+/** Set whether to display 0 signal as "transparent" color.
+ *
+ * @param transparent :: true if you want zeros to be transparent.
+ */
+void SliceViewer::setTransparentZeros(bool transparent)
+{
+  m_actionTransparentZeros->blockSignals(true);
+  m_actionTransparentZeros->setChecked(transparent);
+  m_actionTransparentZeros->blockSignals(false);
+  // Set and display
+  m_data->setZerosAsNan(transparent );
   this->updateDisplay();
 }
 

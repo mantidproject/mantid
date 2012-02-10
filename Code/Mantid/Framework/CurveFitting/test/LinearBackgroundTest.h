@@ -52,13 +52,13 @@ public:
 
 
     // set up fitting function
-    LinearBackground* linB = new LinearBackground();
-    linB->initialize();
+    LinearBackground linB;
+    linB.initialize();
 
-    linB->setParameter("A0",1.0);
+    linB.setParameter("A0",1.0);
 
     //alg2.setFunction(linB);
-    alg2.setPropertyValue("Function",*linB);
+    alg2.setPropertyValue("Function",linB);
 
 
     // Set which spectrum to fit against and initial starting values

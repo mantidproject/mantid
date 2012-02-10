@@ -162,10 +162,10 @@ namespace Crystal
     reasonable_angle->setLower(5.0);
     reasonable_angle->setUpper(175.0);
     // put in negative values, so user is forced to input all parameters. no shortcuts :)
-    this->declareProperty(new PropertyWithValue<double>("a",-1.0,mustBePositive->clone(),Direction::Input),"Lattice parameter a");
+    this->declareProperty(new PropertyWithValue<double>("a",-1.0,mustBePositive,Direction::Input),"Lattice parameter a");
     this->declareProperty(new PropertyWithValue<double>("b",-1.0,mustBePositive->clone(),Direction::Input),"Lattice parameter b");
     this->declareProperty(new PropertyWithValue<double>("c",-1.0,mustBePositive->clone(),Direction::Input),"Lattice parameter c");
-    this->declareProperty(new PropertyWithValue<double>("alpha",-1.0,reasonable_angle->clone(),Direction::Input),"Lattice parameter alpha");
+    this->declareProperty(new PropertyWithValue<double>("alpha",-1.0,reasonable_angle,Direction::Input),"Lattice parameter alpha");
     this->declareProperty(new PropertyWithValue<double>("beta",-1.0,reasonable_angle->clone(),Direction::Input),"Lattice parameter beta");
     this->declareProperty(new PropertyWithValue<double>("gamma",-1.0,reasonable_angle->clone(),Direction::Input),"Lattice parameter gamma");
   }

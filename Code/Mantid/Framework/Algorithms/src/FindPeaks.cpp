@@ -833,7 +833,7 @@ void FindPeaks::fitPeakOneStep(const API::MatrixWorkspace_sptr &input, const int
     fit->setProperty("EndX", (X[i0] + 5 * (X[i0] - X[i2])));
     fit->setProperty("Minimizer", "Levenberg-Marquardt");
     fit->setProperty("CostFunction", "Least squares");
-    fit->setProperty("Function", function);
+    fit->setPropertyValue("Function", function);
 
     // e) Fit and get result
     fit->executeAsSubAlg();
@@ -1010,7 +1010,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   fit->setProperty("EndX", (X[i0] + 5 * (X[i0] - X[i2])));
   fit->setProperty("Minimizer", "Levenberg-Marquardt");
   fit->setProperty("CostFunction", "Least squares");
-  fit->setProperty("Function", function);
+  fit->setPropertyValue("Function", function);
 
   // e) Fit and get result of fitting background
   fit->executeAsSubAlg();
@@ -1108,7 +1108,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
     gfit->setProperty("EndX",   (X[i4] + 5 * (X[i0] - X[i2])));
     gfit->setProperty("Minimizer", "Levenberg-Marquardt");
     gfit->setProperty("CostFunction", "Least squares");
-    gfit->setProperty("Function", function);
+    gfit->setPropertyValue("Function", function);
 
     g_log.debug() << "Function: " << function << "  From " << (X[i4] - 5 * (X[i0] - X[i2]))
         << "  to " << (X[i4] + 5 * (X[i0] - X[i2])) << std::endl;
@@ -1213,7 +1213,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   lastfit->setProperty("EndX", (X[i4] + 2 * (X[i0] - X[i2])));
   lastfit->setProperty("Minimizer", "Levenberg-Marquardt");
   lastfit->setProperty("CostFunction", "Least squares");
-  lastfit->setProperty("Function", function);
+  lastfit->setPropertyValue("Function", function);
 
   // e) Fit and get result
   lastfit->executeAsSubAlg();

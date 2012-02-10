@@ -57,7 +57,7 @@ namespace MDEvents
       "or just one to split into the same number for all dimensions. Default " + SplitInto +".");
 
     declareProperty(
-      new PropertyWithValue<int>("SplitThreshold", SplitThreshold, mustBePositive->clone()),
+      new PropertyWithValue<int>("SplitThreshold", SplitThreshold, mustBePositive),
       "How many events in a box before it should be split. Default " + Strings::toString(SplitThreshold) + ".");
 
     declareProperty(

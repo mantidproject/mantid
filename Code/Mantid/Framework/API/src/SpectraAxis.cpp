@@ -171,7 +171,7 @@ void SpectraAxis::getIndexSpectraMap(index2spec_map& map)const
   map.clear();
   for (size_t i=0; i < nel; ++i )
   {
-    map.insert(std::make_pair<size_t,specid_t>(i, m_values[i]));
+    map.insert(std::make_pair(i, m_values[i]));
   }
 }
 
@@ -189,7 +189,7 @@ void SpectraAxis::getSpectraIndexMap(spec2index_map& map)const
   map.clear();
   for (size_t i=0; i < nel; ++i )
   {
-    map.insert(std::make_pair<specid_t,size_t>(m_values[i],i));
+    map.insert(std::make_pair(m_values[i],i));
   }
 }
 

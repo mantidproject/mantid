@@ -160,6 +160,8 @@ public:
 /// Overload operator <<
 MANTID_API_DLL std::ostream& operator<<(std::ostream& ostr,const IFitFunction& f);
 
+typedef boost::shared_ptr<IFitFunction> IFitFunction_sptr;
+
 /**
  * Classes inherited from FunctionHandler will handle the function.
  * The intended purpose is to help with displaying nested composite

@@ -572,13 +572,7 @@ PolyBase::solveQuadratic(std::complex<double>& AnsA,
       return (cf==0) ? 1 : 2;
     }
 
-  std::complex<double> CQ(-0.5*b,0);
-#ifndef MS_VISUAL_STUDIO
-  CQ.imag() = (b>=0) ?
-    -0.5*sqrt(-cf) : 0.5*sqrt(-cf);
-#else
-  CQ.imag((b>=0) ? -0.5*sqrt(-cf) : 0.5*sqrt(-cf));
-#endif
+  std::complex<double> CQ(-0.5*b, ( b>=0 ? -0.5*sqrt(-cf) : 0.5*sqrt(-cf) ) );
   AnsA = CQ;
   AnsB = c/CQ;
   return 2;

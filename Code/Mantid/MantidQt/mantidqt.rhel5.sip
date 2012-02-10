@@ -241,6 +241,8 @@ public:
 
   void setColorScaleAutoSlice() ;
 
+  void setTransparentZeros(bool transparent);
+
 
 
 };

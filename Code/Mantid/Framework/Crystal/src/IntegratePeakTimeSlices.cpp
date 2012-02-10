@@ -418,7 +418,7 @@ namespace Mantid
                 SSS += fun_str;
                 g_log.debug(SSS);
 
-                fit_alg->setProperty("Function", fun_str);
+                fit_alg->setPropertyValue("Function", fun_str);
 
                 fit_alg->executeAsSubAlg();
 

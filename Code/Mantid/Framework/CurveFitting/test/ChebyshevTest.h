@@ -65,14 +65,14 @@ public:
     fit.setPropertyValue("InputWorkspace","ChebyshevTest_ws");
     fit.setPropertyValue("WorkspaceIndex","0");
 
-    Chebyshev* cheb = new Chebyshev();
-    cheb->setAttribute("n",IFitFunction::Attribute(3));
-    fit.setPropertyValue("Function",*cheb);
+    Chebyshev cheb;
+    cheb.setAttribute("n",IFitFunction::Attribute(3));
+    fit.setPropertyValue("Function",cheb);
 
     fit.execute();
-    IFitFunction::Attribute StartX = cheb->getAttribute("StartX");
+    IFitFunction::Attribute StartX = cheb.getAttribute("StartX");
     TS_ASSERT_EQUALS(StartX.asDouble(),-1);
-    IFitFunction::Attribute EndX = cheb->getAttribute("EndX");
+    IFitFunction::Attribute EndX = cheb.getAttribute("EndX");
     TS_ASSERT_EQUALS(EndX.asDouble(),1);
     TS_ASSERT(fit.isExecuted());
 

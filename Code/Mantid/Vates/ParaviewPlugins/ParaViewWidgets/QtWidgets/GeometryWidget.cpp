@@ -45,8 +45,3 @@ void GeometryWidget::raiseModified()
 {
   emit valueChanged();
 }
-
-void GeometryWidget::raiseNoClipping()
-{
-  emit ignoreBinChanges();
-}

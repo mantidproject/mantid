@@ -212,7 +212,7 @@ namespace Mantid
 
       std::string fun_str = createFunctionString(peakHeight, peakLoc);
       
-      fit_alg->setProperty("Function",fun_str);
+      fit_alg->setPropertyValue("Function",fun_str);
       fit_alg->executeAsSubAlg();
       std::string fitStatus = fit_alg->getProperty("OutputStatus");
       //Pixel with large offset will be masked

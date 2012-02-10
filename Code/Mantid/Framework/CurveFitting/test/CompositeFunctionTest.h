@@ -185,13 +185,13 @@ public:
 
   void testFit()
   {
-    CompFunction *mfun = new CompFunction();
+    CompFunction mfun;
     CurveFittingGauss *g1 = new CurveFittingGauss(),*g2 = new CurveFittingGauss();
     CurveFittingLinear *bk = new CurveFittingLinear();
 
-    mfun->addFunction(bk);
-    mfun->addFunction(g1);
-    mfun->addFunction(g2);
+    mfun.addFunction(bk);
+    mfun.addFunction(g1);
+    mfun.addFunction(g2);
 
     g1->setParameter("c",3.1);
     g1->setParameter("h",1.1);
@@ -203,29 +203,29 @@ public:
 
     bk->setParameter("a",0.8);
 
-    TS_ASSERT_EQUALS(mfun->nParams(),8);
-    TS_ASSERT_EQUALS(mfun->nActive(),8);
+    TS_ASSERT_EQUALS(mfun.nParams(),8);
+    TS_ASSERT_EQUALS(mfun.nActive(),8);
 
-    TS_ASSERT_EQUALS(mfun->getParameter(0),0.8);
-    TS_ASSERT_EQUALS(mfun->getParameter(1),0.0);
-    TS_ASSERT_EQUALS(mfun->getParameter(2),3.1);
-    TS_ASSERT_EQUALS(mfun->getParameter(3),1.1);
-    TS_ASSERT_EQUALS(mfun->getParameter(4),1.0);
-    TS_ASSERT_EQUALS(mfun->getParameter(5),7.1);
-    TS_ASSERT_EQUALS(mfun->getParameter(6),1.1);
-    TS_ASSERT_EQUALS(mfun->getParameter(7),1.0);
+    TS_ASSERT_EQUALS(mfun.getParameter(0),0.8);
+    TS_ASSERT_EQUALS(mfun.getParameter(1),0.0);
+    TS_ASSERT_EQUALS(mfun.getParameter(2),3.1);
+    TS_ASSERT_EQUALS(mfun.getParameter(3),1.1);
+    TS_ASSERT_EQUALS(mfun.getParameter(4),1.0);
+    TS_ASSERT_EQUALS(mfun.getParameter(5),7.1);
+    TS_ASSERT_EQUALS(mfun.getParameter(6),1.1);
+    TS_ASSERT_EQUALS(mfun.getParameter(7),1.0);
 
     WS_type ws = mkWS(1,0,10,0.1);
     addNoise(ws,0.1);
     storeWS("mfun",ws);
 
-    TS_ASSERT_THROWS(mfun->setMatrixWorkspace(ws,7,12,3),std::range_error);
+    TS_ASSERT_THROWS(mfun.setMatrixWorkspace(ws,7,12,3),std::range_error);
     
-    mfun->setMatrixWorkspace(ws,0);
-    mfun->testInit(ws,0,0,static_cast<int>(ws->blocksize())-1);
+    mfun.setMatrixWorkspace(ws,0);
+    mfun.testInit(ws,0,0,static_cast<int>(ws->blocksize())-1);
 
-    mfun->setMatrixWorkspace(ws,0,1.0,3.3);
-    mfun->testInit(ws,0,10,32);
+    mfun.setMatrixWorkspace(ws,0,1.0,3.3);
+    mfun.testInit(ws,0,10,32);
 
     Fit alg;
     alg.initialize();
@@ -234,7 +234,7 @@ public:
     alg.setPropertyValue("WorkspaceIndex","0");
     alg.setPropertyValue("Output","out");
     //alg.setFunction(mfun);
-    alg.setPropertyValue("Function",*mfun);
+    alg.setPropertyValue("Function",mfun);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
     WS_type outWS = getWS("out_Workspace");

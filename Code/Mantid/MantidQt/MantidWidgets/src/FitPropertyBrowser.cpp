@@ -1476,8 +1476,8 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm* alg)
   {
     double quality = alg->getProperty("OutputChi2overDoF");
     std::string costFunction = alg->getProperty("CostFunction");
-    Mantid::API::ICostFunction* costfun 
-     = Mantid::API::CostFunctionFactory::Instance().createUnwrapped(costFunction); 
+    boost::shared_ptr<Mantid::API::ICostFunction> costfun
+     = Mantid::API::CostFunctionFactory::Instance().create(costFunction);
     emit changeWindowTitle(QString("Fit Function (") 
       + costfun->shortName().c_str() + " = " + QString::number(quality) + ")");
   }

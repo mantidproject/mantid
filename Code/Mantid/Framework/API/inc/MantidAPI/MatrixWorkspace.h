@@ -25,6 +25,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include <boost/scoped_ptr.hpp>
+#include "MantidAPI/IMDIterator.h"
 
 using Mantid::API::MDNormalization;
 
@@ -283,9 +284,11 @@ namespace Mantid
 
       virtual void getLinePlot(const Mantid::Kernel::VMD & start, const Mantid::Kernel::VMD & end,
           Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y, std::vector<signal_t> & e) const;
-
+      virtual signal_t getSignalAtCoord(const coord_t * coords) const;
       void saveSpectraMapNexus(::NeXus::File * file, const std::vector<int>& spec,
           const ::NeXus::NXcompression compression = ::NeXus::LZW) const;
+
+      IMDIterator* createIterator(Mantid::Geometry::MDImplicitFunction * function) const;
 
       void saveInstrumentNexus(::NeXus::File * file) const;
       void loadInstrumentNexus(::NeXus::File * file);

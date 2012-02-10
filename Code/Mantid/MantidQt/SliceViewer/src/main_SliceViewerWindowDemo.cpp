@@ -34,7 +34,7 @@ int main( int argc, char ** argv )
   app.setApplicationName("SliceViewerWindow demo");
   IMDWorkspace_sptr mdew = makeDemoData(true);
 
-  SliceViewerWindow * mainWin = new SliceViewerWindow("binned_al");
+  SliceViewerWindow * mainWin = new SliceViewerWindow("workspace_2d");
   //mainWin->getSlicer()->getLineOverlay()->setSnap(0.5);
 //  mainWin->getSlicer()->getLineOverlay()->setSnapLength(0.1);
   mainWin->move(100, 100);

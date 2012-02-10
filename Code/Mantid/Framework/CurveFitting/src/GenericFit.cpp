@@ -17,6 +17,7 @@ Setting the Output property defines the names of the output workspaces. One of t
 #include "MantidCurveFitting/GenericFit.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidCurveFitting/SimplexMinimizer.h"
+#include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/TableRow.h"
@@ -71,7 +72,7 @@ namespace CurveFitting
     declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input), "Name of the input Workspace");
     declareProperty("Input","","Workspace slicing parameters. Must be consistent with the Function type (see FitFunction::setWorkspace).");
 
-    declareProperty("Function","",Direction::InOut );
+    declareProperty(new API::FunctionProperty("Function"));
 
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
     mustBePositive->setLower(0);
@@ -257,22 +258,26 @@ namespace CurveFitting
 
     g_log.information() << "Method used = " << methodUsed << "\n" <<
       "Iteration = " << iter << "\n";
-    Mantid::API::ICostFunction* costfun 
-     = Mantid::API::CostFunctionFactory::Instance().createUnwrapped(costFunction);
-    if ( reportOfFit == "success" )
-      g_log.notice() << reportOfFit << "  " << costfun->shortName() << 
-         " (" << costfun->name() << ") = " << finalCostFuncVal << "\n";
-    else
-      g_log.warning() << reportOfFit << "  " << costfun->shortName() << 
-         " (" << costfun->name() << ") = " << finalCostFuncVal << "\n";
+    { // For scoping
+      boost::shared_ptr<API::ICostFunction> costfun
+          = API::CostFunctionFactory::Instance().create(costFunction);
+      if ( reportOfFit == "success" )
+      {
+        g_log.notice() << reportOfFit << "  " << costfun->shortName()
+                       << " (" << costfun->name() << ") = " << finalCostFuncVal << "\n";
+      }
+      else
+      {
+        g_log.warning() << reportOfFit << "  " << costfun->shortName()
+                        << " (" << costfun->name() << ") = " << finalCostFuncVal << "\n";
+      }
+    }
     for (size_t i = 0; i < m_function->nParams(); i++)
     {
       g_log.debug() << m_function->parameterName(i) << " = " << m_function->getParameter(i) << "  \n";
     }
 
-
     // also output summary to properties
-
     setProperty("OutputStatus", reportOfFit);
     setProperty("OutputChi2overDoF", finalCostFuncVal);
     setProperty("Minimizer", methodUsed);
@@ -417,7 +422,6 @@ namespace CurveFitting
     setProperty("Errors",errors);
     setProperty("ParameterNames",parNames);
     
-    // minimizer may have dynamically allocated memory hence make sure this memory is freed up
     delete minimizer;
     return;
   }

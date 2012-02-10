@@ -273,6 +273,12 @@ namespace Mantid
         IAlgorithm_sptr binningAlg  =  m_bOutputHistogramWS  ? AlgorithmManager::Instance().create("BinMD") : AlgorithmManager::Instance().create("SliceMD");
         binningAlg->initialize();
         binningAlg->setPropertyValue("InputWorkspace", wsName); 
+        if(!m_bOutputHistogramWS)
+        {
+          //SliceMD only! This means that iterators will only go through top-level boxes. So iterators will always hit boxes worth visualising.
+          binningAlg->setProperty("TakeMaxRecursionDepthFromInput", false);
+          binningAlg->setProperty("MaxRecursionDepth", 1) ;
+        }
 
         if(m_view->getApplyClip())
         {

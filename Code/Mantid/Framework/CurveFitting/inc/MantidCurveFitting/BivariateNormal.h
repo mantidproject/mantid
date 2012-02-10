@@ -57,10 +57,8 @@ namespace Mantid
       
       
     </UL>
-    @author Ruth Mikkelson, SNS ORNL
-    @date 11/4/2011
 
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2011-12 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -80,97 +78,84 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-
-    
-   class  DLLExport  BivariateNormal:public BackgroundFunction 
-                                   //public API::ParamFunction, public API::IFunctionMW
+    class  DLLExport  BivariateNormal:public BackgroundFunction
     {
-    
     public:
-    
-      
       BivariateNormal();
-      
       /// Destructor
       virtual ~BivariateNormal ();
-
-    
 
       /// overwrite IFunction base class methods
       std::string name()const {return "BivariateNormal";}
 
       virtual const std::string category() const { return "Peak";}
 
-      void 	functionMW  (double *out, const double *xValues, const size_t nData)const ;
-          
-      void 	functionDerivMW  (API::Jacobian  *out, const double *xValues, const size_t nData);
-      
-      size_t 	nAttributes  () const
-           { return 16;}
-           
+      void functionMW  (double *out, const double *xValues, const size_t nData)const ;
+
+      void functionDerivMW  (API::Jacobian  *out, const double *xValues, const size_t nData);
+
+      size_t nAttributes  () const
+      { return 16;}
+
       std::vector< std::string > getAttributeNames () const;
-    
- 	  
+
       Mantid::API::IFitFunction::Attribute getAttribute(const std::string &attName)const;
-      
-      void 	setAttribute (const std::string &attName, const  Mantid::API::IFitFunction::Attribute &att);
- 	  
-      bool   hasAttribute (const std::string &attName) const;
- 
+
+      void setAttribute (const std::string &attName, const  Mantid::API::IFitFunction::Attribute &att);
+
+      bool  hasAttribute (const std::string &attName) const;
+
       void  fit(const std::vector<double>& ,const std::vector<double>&);
+
     protected:
-   
       void init();
-      
+
       /// Check for changes in parameters, etc. Calculates common values
       void initCommon();
-      
+
       /// Check for changes in given parameters, etc. Calculates common values
       void initCommon(  double* LastParams,double* expVals,double &uu,
-                        double &coefNorm,double &expCoeffx2,double  &expCoeffy2,double  &expCoeffxy,
-                        bool &isNaNs) const;
+          double &coefNorm,double &expCoeffx2,double  &expCoeffy2,double  &expCoeffxy,
+          bool &isNaNs) const;
 
       double* Attrib; ///< Saves Attribute values
-      
+
       double* LastParams; ///< Saves previous/this set of parameters
-      
+
       std::vector<std::string> AttNames; ///< List of attribute names
-      
+
       double mIx,///< =&Sigma<sub>cell</sub>(Intensity<sub>cell</sub>*column<sub>cell</sub>)/TotalIntensity.
-             mx, ///< =&Sigma<sub>cell</sub>(column<sub>cell</sub>)/Ncells.
-             mIy,///< =&Sigma<sub>cell</sub>(Intensity<sub>cell</sub>*row<sub>cell</sub>)/TotalIntensity.
-             my; ///< =&Sigma<sub>cell</sub>(row<sub>cell</sub>)/Ncells
+      mx, ///< =&Sigma<sub>cell</sub>(column<sub>cell</sub>)/Ncells.
+      mIy,///< =&Sigma<sub>cell</sub>(Intensity<sub>cell</sub>*row<sub>cell</sub>)/TotalIntensity.
+      my; ///< =&Sigma<sub>cell</sub>(row<sub>cell</sub>)/Ncells
 
       double SIxx,///<=&Sigma<sub>cell</sub> Intensity<sub>cell</sub>*(column<sub>cell</sub>-mIx)<sup>2</sup>
-             SIyy,///<=&Sigma<sub>cell</sub> Intensity<sub>cell</sub>*(row<sub>cell</sub>-mIy)<sup>2</sup>
-             SIxy,///<=&Sigma<sub>cell</sub> Intensity<sub>cell</sub>*(column<sub>cell</sub>-mIx)*(row<sub>cell</sub>-mIy)
-             Sxx,///<=&Sigma<sub>cell</sub> (column<sub>cell</sub>-mI)<sup>2</sup>
-             Syy,///<=&Sigma<sub>cell</sub> (row<sub>cell</sub>-my)<sup>2</sup>
-             Sxy;///<=&Sigma<sub>cell</sub> (column<sub>cell</sub>-mx)*(row<sub>cell</sub>-my)
-   
-             
-             
+      SIyy,///<=&Sigma<sub>cell</sub> Intensity<sub>cell</sub>*(row<sub>cell</sub>-mIy)<sup>2</sup>
+      SIxy,///<=&Sigma<sub>cell</sub> Intensity<sub>cell</sub>*(column<sub>cell</sub>-mIx)*(row<sub>cell</sub>-mIy)
+      Sxx,///<=&Sigma<sub>cell</sub> (column<sub>cell</sub>-mI)<sup>2</sup>
+      Syy,///<=&Sigma<sub>cell</sub> (row<sub>cell</sub>-my)<sup>2</sup>
+      Sxy;///<=&Sigma<sub>cell</sub> (column<sub>cell</sub>-mx)*(row<sub>cell</sub>-my)
+
       double* expVals; ///< Save common exponential values for each cell
-      
+
       double uu,
-             coefNorm , 
-             expCoeffx2 , 
-             expCoeffy2 , 
-             expCoeffxy; //Other common values used in calculating values and
-                         //derivatives
-      
+      coefNorm ,
+      expCoeffx2 ,
+      expCoeffy2 ,
+      expCoeffxy; //Other common values used in calculating values and derivatives
+
       BoundaryConstraint *BackConstraint; ///< Constraint for background
 
       BoundaryConstraint *MeanxConstraint; ///< Constraint using mean x
-      
+
       BoundaryConstraint *MeanyConstraint; ///< Constraint using mean y
 
       BoundaryConstraint *IntensityConstraint; ///< Constraint using intensity
 
-     static Kernel::Logger & g_log;
+      static Kernel::Logger & g_log;
 
     };
-}
+  }
 }
 
 #endif

@@ -169,8 +169,7 @@ const char* vtkMDEWRebinningCutter::getAppliedGeometryXML() const
 
 bool vtkMDEWRebinningCutter::getOutputHistogramWS() const
 {
-  //return m_bOutputHistogramWS;
-  return true; //Hack to stop users using this before it's ready.
+  return m_bOutputHistogramWS;
 }
 
 /** Setter for the algorithm progress..
@@ -262,23 +261,22 @@ int vtkMDEWRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtk
 
     //Create chain-of-responsibility for translating imdworkspaces.
     std::string scalarName = XMLDefinitions::signalName();
-    //vtkMDQuadFactory* vtkGridFactory = new vtkMDQuadFactory(m_ThresholdRange, scalarName);
+    vtkMDQuadFactory* vtkGridFactory = new vtkMDQuadFactory(m_ThresholdRange, scalarName);
 
     vtkThresholdingLineFactory* p_1dSuccessorFactory = new vtkThresholdingLineFactory(m_ThresholdRange, scalarName);
     vtkThresholdingQuadFactory* p_2dSuccessorFactory = new vtkThresholdingQuadFactory(m_ThresholdRange,scalarName);
     vtkThresholdingHexahedronFactory* p_3dSuccessorFactory = new vtkThresholdingHexahedronFactory(m_ThresholdRange,scalarName);
     vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>* p_4dSuccessorFactory = new vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>(m_ThresholdRange,scalarName, m_timestep);
 
-
-    //vtkGridFactory->SetSuccessor(p_1dSuccessorFactory);
+    vtkGridFactory->SetSuccessor(p_1dSuccessorFactory);
     p_1dSuccessorFactory->SetSuccessor(p_2dSuccessorFactory);
     p_2dSuccessorFactory->SetSuccessor(p_3dSuccessorFactory);
     p_3dSuccessorFactory->SetSuccessor(p_4dSuccessorFactory);
 
-    vtkDataSet* outData = m_presenter->execute(p_1dSuccessorFactory, updatehandler);
+    vtkDataSet* outData = m_presenter->execute(vtkGridFactory, updatehandler);
     m_thresholdMax = m_ThresholdRange->getMaximum();
     m_thresholdMin = m_ThresholdRange->getMinimum();
-    delete p_1dSuccessorFactory;
+    delete vtkGridFactory;
 
     output->ShallowCopy(outData);
 

@@ -78,8 +78,12 @@ class DataReflWidget(BaseWidget):
         self._summary.norm_background_to_pixel1.setValidator(QtGui.QIntValidator(self._summary.norm_background_to_pixel1))
 
         # Event connections
+        self.connect(self._summary.data_low_res_range_switch, QtCore.SIGNAL("clicked(bool)"), self._data_low_res_clicked)
+        self.connect(self._summary.norm_low_res_range_switch, QtCore.SIGNAL("clicked(bool)"), self._norm_low_res_clicked)
+        self.connect(self._summary.norm_switch, QtCore.SIGNAL("clicked(bool)"), self._norm_clicked)
         self.connect(self._summary.norm_background_switch, QtCore.SIGNAL("clicked(bool)"), self._norm_background_clicked)
         self.connect(self._summary.data_background_switch, QtCore.SIGNAL("clicked(bool)"), self._data_background_clicked)
+        self.connect(self._summary.tof_range_switch, QtCore.SIGNAL("clicked(bool)"), self._tof_range_clicked)
         self.connect(self._summary.plot_count_vs_y_btn, QtCore.SIGNAL("clicked()"), self._plot_count_vs_y)
         self.connect(self._summary.plot_tof_btn, QtCore.SIGNAL("clicked()"), self._plot_tof)
         self.connect(self._summary.add_dataset_btn, QtCore.SIGNAL("clicked()"), self._add_data)
@@ -231,6 +235,63 @@ class DataReflWidget(BaseWidget):
         self._summary.norm_background_to_pixel1.setEnabled(is_checked)
         self._summary.norm_background_to_pixel1_label.setEnabled(is_checked)
         
+    def _data_low_res_clicked(self, is_checked):
+        """
+            This is reached when the user clicks the Data Low-Res axis range switch
+        """
+        self._summary.data_low_res_from_label.setEnabled(is_checked)
+        self._summary.x_min_edit.setEnabled(is_checked)
+        self._summary.data_low_res_to_label.setEnabled(is_checked)
+        self._summary.x_max_edit.setEnabled(is_checked)
+            
+    def _norm_low_res_clicked(self, is_checked):
+        """
+            This is reached when the user clicks the Data Low-Res axis range switch
+        """
+        self._summary.norm_low_res_from_label.setEnabled(is_checked)
+        self._summary.norm_x_min_edit.setEnabled(is_checked)
+        self._summary.norm_low_res_to_label.setEnabled(is_checked)
+        self._summary.norm_x_max_edit.setEnabled(is_checked)
+
+    def _norm_clicked(self, is_checked):
+        """
+            This is reached when the user clicks the Normalization switch and will
+            turn on/off all the option related to the normalization file
+        """
+        self._summary.norm_run_number_label.setEnabled(is_checked)
+        self._summary.norm_run_number_edit.setEnabled(is_checked)
+        self._summary.norm_peak_selection_label.setEnabled(is_checked)
+        self._summary.norm_peak_selection_from_label.setEnabled(is_checked)
+        self._summary.norm_peak_from_pixel.setEnabled(is_checked)
+        self._summary.norm_peak_selection_to_label.setEnabled(is_checked)
+        self._summary.norm_peak_to_pixel.setEnabled(is_checked)
+        
+        self._summary.norm_background_switch.setEnabled(is_checked)
+        if (not(is_checked)):
+            self._norm_background_clicked(False)
+        else:
+            NormBackFlag = self._summary.norm_background_switch.isChecked()
+            self._norm_background_clicked(NormBackFlag)
+        
+        self._summary.norm_low_res_range_switch.setEnabled(is_checked)
+        if (not(is_checked)):
+            self._norm_low_res_clicked(False)
+        else:
+            LowResFlag = self._summary.norm_low_res_range_switch.isChecked()
+            self._norm_low_res_clicked(LowResFlag)
+
+    def _tof_range_clicked(self, is_checked):
+        """
+            This is reached by the TOF range switch
+        """
+        self._summary.tof_min_label.setEnabled(is_checked)
+        self._summary.data_from_tof.setEnabled(is_checked)
+        self._summary.tof_min_label2.setEnabled(is_checked)
+        self._summary.tof_max_label.setEnabled(is_checked)
+        self._summary.data_to_tof.setEnabled(is_checked)
+        self._summary.tof_max_label2.setEnabled(is_checked)
+        self._summary.plot_tof_btn.setEnabled(is_checked)
+
     def _plot_count_vs_y(self):
         if not IS_IN_MANTIDPLOT:
             return
@@ -242,7 +303,6 @@ class DataReflWidget(BaseWidget):
                 self._summary.data_peak_to_pixel.setText("%-d" % int(xmax))
             data_manipulation.counts_vs_y_distribution(f[0], call_back)
                 
-
     def _plot_tof(self):
         if not IS_IN_MANTIDPLOT:
             return

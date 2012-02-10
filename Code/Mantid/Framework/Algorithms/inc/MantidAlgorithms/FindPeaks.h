@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IFitFunction.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
 namespace Mantid

@@ -64,17 +64,25 @@ namespace DataHandling
      void setByComponents();
      /// Set workspace->group ID map by detectors (range)
      void setByDetectors();
+     /// Set workspace index/group ID by spectraum ID
+     void setBySpectrumIDs();
      /// Convert detector ID combination string to vector of detectors
      void parseDetectorIDs(std::string inputstring, std::vector<detid_t>& detids);
+     /// Convert spectrum IDs combintation string to vector of spectrum ids
+     void parseSpectrumIDs(std::string inputstring, std::vector<int>& specids);
      /// Get attribute value from an XML node
      static std::string getAttributeValueByName(Poco::XML::Node* pNode, std::string attributename, bool& found);
      /// Split and convert string
      void parseRangeText(std::string inputstr, std::vector<int32_t>& singles, std::vector<int32_t>& pairs);
+     /// Generate a GroupingWorkspace w/o instrument
+     void generateNoInstrumentGroupWorkspace();
 
      /// Grouping Workspace
      DataObjects::GroupingWorkspace_sptr mGroupWS;
      /// Instrument name
      std::string mInstrumentName;
+     /// User-define instrument name
+     bool mUserGiveInstrument;
      /// XML document loaded
      Poco::XML::Document* pDoc;
      /// Root element of the parsed XML
@@ -83,6 +91,7 @@ namespace DataHandling
      /// Data structures to store XML to Group/Detector conversion map
      std::map<int, std::vector<std::string> > mGroupComponentsMap;
      std::map<int, std::vector<detid_t> > mGroupDetectorsMap;
+     std::map<int, std::vector<int> > mGroupSpectraMap;
 
 
 

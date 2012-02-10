@@ -19,15 +19,6 @@
 #include <QMessageBox>
 #include <QMenu>
 
-// Visual studio 2010 can't deal with NULL (for a pointer) being passed to the constructor of an std::pair
-// You have to use the c++0x keyword 'nullptr' instead.
-// _MSC_VER=1600 is Visual Studio 2010, so in all other cases I create a define to turn nullptr into NULL
-#if (_MSC_VER!=1600)
-  #ifndef nullptr
-    #define nullptr NULL
-  #endif
-#endif
-
 using std::size_t;
 
 namespace MantidQt
@@ -1223,7 +1214,10 @@ void PropertyHandler::addConstraint(QtProperty* parProp,bool lo,bool up,double l
   }
 
   m_browser->m_changeSlotsEnabled = false;
-  std::pair<QtProperty*,QtProperty*> cnew(nullptr,nullptr);
+  std::pair<QtProperty*,QtProperty*> cnew;//(nullptr,nullptr); - Can't do this in constructor in C++11
+  // Don't know if these 2 lines are necessary, but this code is hard to understand - it could really use some comments!
+  cnew.first = NULL;
+  cnew.second = NULL;
   std::ostringstream ostr;
   if (lo) 
   {

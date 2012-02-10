@@ -203,20 +203,20 @@ public:
 
   void testActive()
   {
-    FunctionTestGauss* g = new FunctionTestGauss();
+    FunctionTestGauss g;
 
-    g->setParameter("c",5.5);
-    g->setParameter("h",1.2);
-    g->setParameter("s",2.);
+    g.setParameter("c",5.5);
+    g.setParameter("h",1.2);
+    g.setParameter("s",2.);
 
-    g->tie("s","2");
+    g.tie("s","2");
 
-    TS_ASSERT_EQUALS(g->nParams(),3);
-    TS_ASSERT_EQUALS(g->nActive(),2);
+    TS_ASSERT_EQUALS(g.nParams(),3);
+    TS_ASSERT_EQUALS(g.nActive(),2);
 
-    TS_ASSERT(g->isActive(0));
-    TS_ASSERT(g->isActive(1));
-    TS_ASSERT(!g->isActive(2));
+    TS_ASSERT(g.isActive(0));
+    TS_ASSERT(g.isActive(1));
+    TS_ASSERT(!g.isActive(2));
 
     WS_type ws = mkWS(Exp(),1,0,10,0.1);
     storeWS("Exp",ws);
@@ -226,7 +226,7 @@ public:
 
     alg.setPropertyValue("InputWorkspace","Exp");
     alg.setPropertyValue("WorkspaceIndex","0");
-    alg.setPropertyValue("Function",*g);
+    alg.setPropertyValue("Function",g);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -346,7 +346,7 @@ private:
 
   void storeWS(const std::string& name,WS_type ws)
   {
-    AnalysisDataService::Instance().add(name,ws);
+    AnalysisDataService::Instance().addOrReplace(name,ws);
   }
 
   void removeWS(const std::string& name)

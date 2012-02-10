@@ -63,7 +63,7 @@
       <string>Set the minimum value for the color scale.</string>
      </property>
      <property name="maxLength">
-      <number>10</number>
+      <number>15</number>
      </property>
     </widget>
    </item>
@@ -83,7 +83,7 @@
       <string>Set the maximum value for the color scale.</string>
      </property>
      <property name="maxLength">
-      <number>10</number>
+      <number>15</number>
      </property>
     </widget>
    </item>

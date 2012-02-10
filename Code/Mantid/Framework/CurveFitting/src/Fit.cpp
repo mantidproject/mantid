@@ -132,6 +132,7 @@ This example repeats the previous one but with the Sigmas of the two Gaussians t
 #include "MantidCurveFitting/GenericFit.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidCurveFitting/SimplexMinimizer.h"
+#include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/TableRow.h"
@@ -193,7 +194,7 @@ namespace CurveFitting
       "(default the highest value of x)" );
 
     //declareProperty("Function","","Parameters defining the fitting function and its initial values",Direction::InOut );
-    declareProperty("Function","",Direction::InOut );
+    declareProperty(new API::FunctionProperty("Function"),"Parameters defining the fitting function and its initial values");
     declareProperty("Ties","","Math expressions that tie parameters to other parameters or to constants" );
     declareProperty("Constraints","","List of constraints" );
 
@@ -237,8 +238,7 @@ namespace CurveFitting
       input += ",EndX=" + getPropertyValue("EndX");
     }
 
-    // Process the Function property and create the function using FunctionFactory
-    // fills in m_function_input
+    // Process the Function property
     processParameters();
 
     boost::shared_ptr<GenericFit> fit = boost::dynamic_pointer_cast<GenericFit>(createSubAlgorithm("GenericFit"));
@@ -247,15 +247,15 @@ namespace CurveFitting
     fit->initialize();
     fit->setProperty("InputWorkspace",boost::dynamic_pointer_cast<API::Workspace>(ws));
     fit->setProperty("Input",input);
-    fit->setProperty("Function",m_function_input);
+    fit->setProperty("Function",m_function);
     fit->setProperty("Output",getPropertyValue("Output"));
     fit->setPropertyValue("MaxIterations",getPropertyValue("MaxIterations"));
     fit->setPropertyValue("Minimizer",getPropertyValue("Minimizer"));
     fit->setPropertyValue("CostFunction",getPropertyValue("CostFunction"));
     fit->execute();
 
-    m_function_input = fit->getPropertyValue("Function");
-    setProperty("Function",m_function_input);
+    m_function = fit->getProperty("Function");
+    setProperty("Function",m_function);
 
     // also output summary to properties
     setProperty("OutputStatus", fit->getPropertyValue("OutputStatus"));
@@ -315,33 +315,39 @@ namespace CurveFitting
     // are separated by ','. parameterName=value pairs are used to set a parameter value. For each function
     // "name" parameter must be set to a function name. E.g.
     // Function = "name=LinearBackground,A0=0,A1=1; name = Gaussian, PeakCentre=10.,Sigma=1"
-    m_function_input = getPropertyValue("Function");
-    if (m_function_input.empty()) return;
+    m_function = getProperty("Function");
+    if (!m_function) return;
 
-    std::string::size_type i = m_function_input.find_last_not_of(" \t\n\r");
-    if (i == std::string::npos) return;
-    if (m_function_input[i] == ';')
-    {
-      m_function_input.erase(i);
-    }
-
+    std::string function_input;
     std::string inputConstraints = getProperty("Constraints");
+    // if Constraints property isn't empty change the function by adding the constraints to it
     if (!inputConstraints.empty())
     {
-      if (m_function_input.find(';') != std::string::npos)
+      function_input = *m_function;
+      std::string::size_type i = function_input.find_last_not_of(" \t\n\r");
+      if (i == std::string::npos) return;
+      if (function_input[i] == ';')
       {
-        m_function_input += ";";
+        function_input.erase(i);
       }
-      else
+
+      if (!inputConstraints.empty())
       {
-        m_function_input += ",";
+        if (function_input.find(';') != std::string::npos)
+        {
+          function_input += ";";
+        }
+        else
+        {
+          function_input += ",";
+        }
+        std::string::size_type i = inputConstraints.find_last_not_of(" \t\n\r");
+        if (inputConstraints[i] == ',')
+        {
+          inputConstraints.erase(i);
+        }
+        function_input += "constraints=("+inputConstraints+")";
       }
-      std::string::size_type i = inputConstraints.find_last_not_of(" \t\n\r");
-      if (inputConstraints[i] == ',')
-      {
-        inputConstraints.erase(i);
-      }
-      m_function_input += "constraints=("+inputConstraints+")";
     }
 
     // Ties property is a comma separated list of formulas of the form:
@@ -353,20 +359,32 @@ namespace CurveFitting
     std::string inputTies = getProperty("Ties");
     if (!inputTies.empty())
     {
-      if (m_function_input.find(';') != std::string::npos)
+      if (function_input.empty())
       {
-        m_function_input += ";";
+        function_input = *m_function;
+      }
+      if (function_input.find(';') != std::string::npos)
+      {
+        function_input += ";";
       }
       else
       {
-        m_function_input += ",";
+        function_input += ",";
       }
       std::string::size_type i = inputTies.find_last_not_of(" \t\n\r");
       if (inputTies[i] == ',')
       {
         inputTies.erase(i);
       }
-      m_function_input += "ties=("+inputTies+")";
+      function_input += "ties=("+inputTies+")";
+    }
+    
+    // if function_input isn't empty then new function must be created
+    if (!function_input.empty())
+    {
+      // this creates a new function from definition in function_input
+      setPropertyValue("Function",function_input);
+      m_function = getProperty("Function");
     }
 
   }

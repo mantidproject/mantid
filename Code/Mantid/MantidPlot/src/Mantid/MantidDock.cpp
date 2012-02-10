@@ -852,6 +852,7 @@ void MantidDockWidget::addMatrixWorkspaceMenuItems(QMenu *menu, Mantid::API::Mat
   menu->addAction(m_colorFill);
   // Show the color fill plot if you have more than one histogram
   m_colorFill->setEnabled( ( matrixWS->axes() > 1 && matrixWS->getNumberHistograms() > 1) );
+  menu->addAction(m_showSliceViewer); // The 2D slice viewer
   menu->addSeparator();
   menu->addAction(m_showDetectors);
   menu->addAction(m_showLogs);

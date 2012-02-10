@@ -667,11 +667,18 @@ void MantidUI::showSliceViewer()
   QString wsName = getSelectedWorkspaceName();
   IMDWorkspace_sptr mdws = boost::dynamic_pointer_cast<IMDWorkspace>(
     AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
+  MatrixWorkspace_sptr mw = boost::dynamic_pointer_cast<MatrixWorkspace>(mdws);
   if (mdws)
   {
     // Create the slice viewer window
     SliceViewerWindow * w = MantidQt::Factory::WidgetFactory::Instance()->
       createSliceViewerWindow(wsName, "");
+
+    // Special options for viewing MatrixWorkspaces
+    if (mw)
+    {
+      w->getSlicer()->setTransparentZeros(false);
+    }
 
     // Connect the MantidPlot close() event with the the window's close().
     QObject::connect(appWindow(), SIGNAL(destroyed()), w, SLOT(close()));
