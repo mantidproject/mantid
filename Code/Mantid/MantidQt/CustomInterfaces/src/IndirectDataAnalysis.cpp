@@ -1691,7 +1691,7 @@ void IndirectDataAnalysis::furyfitRun()
   alg->setProperty("StartX", m_ffRangeManager->value(m_ffProp["StartX"]));
   alg->setProperty("EndX", m_ffRangeManager->value(m_ffProp["EndX"]));
   alg->setProperty("Ties", m_furyfitTies.toStdString());
-  alg->setPropertyValue("Function", *function);
+  alg->setPropertyValue("Function", function->asString());
   alg->setPropertyValue("Output", output);
   alg->execute();
 
@@ -1910,7 +1910,7 @@ void IndirectDataAnalysis::furyfitSequential()
     }
   }
 
-  std::string function = std::string(*func);
+  std::string function = std::string(func->asString());
   
   QString pyInput = "from IndirectDataAnalysis import furyfitSeq\n"
     "input = '" + QString::fromStdString(m_ffInputWSName) + "'\n"
@@ -2034,7 +2034,7 @@ void IndirectDataAnalysis::confitRun()
   alg->setProperty<int>("WorkspaceIndex", m_uiForm.confit_leSpecNo->text().toInt());
   alg->setProperty<double>("StartX", m_cfDblMng->value(m_cfProp["StartX"]));
   alg->setProperty<double>("EndX", m_cfDblMng->value(m_cfProp["EndX"]));
-  alg->setPropertyValue("Function", *function);
+  alg->setPropertyValue("Function", function->asString());
   alg->setPropertyValue("Output", output);
   alg->execute();
 
@@ -2308,7 +2308,7 @@ void IndirectDataAnalysis::confitSequential()
   }
 
   Mantid::API::CompositeFunction* func = confitCreateFunction();
-  std::string function = std::string(*func);
+  std::string function = std::string(func->asString());
   QString stX = m_cfProp["StartX"]->valueText();
   QString enX = m_cfProp["EndX"]->valueText();
 

@@ -92,7 +92,7 @@
 		//fn->setParameter("Stretching",0.4);
 
 		//alg2.setFunction(fn);
-		alg2.setPropertyValue("Function",fn);
+		alg2.setPropertyValue("Function",fn.asString());
 
 
 		// Set which spectrum to fit against and initial starting values

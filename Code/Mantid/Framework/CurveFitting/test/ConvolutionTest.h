@@ -204,7 +204,7 @@ public:
     TS_ASSERT_EQUALS(conv.parameterLocalName(6),"f1.h");
     TS_ASSERT_EQUALS(conv.parameterLocalName(10),"f2.s");
 
-    IFitFunction* fun = FunctionFactory::Instance().createInitialized(conv);
+    IFitFunction* fun = FunctionFactory::Instance().createInitialized(conv.asString());
     TS_ASSERT(fun);
 
     Convolution* conv1 = dynamic_cast<Convolution*>(fun);

@@ -650,7 +650,7 @@ void PeakPickerTool::replot(MantidQt::MantidWidgets::PropertyHandler* h) const
     if (indexForFC >= 0)
     {
       QStringList formulas = fc->formulas();
-      formulas[1] = QString::fromStdString(*h->ifun());
+      formulas[1] = QString::fromStdString(h->ifun()->asString());
       fc->setFormulas(formulas);
       fc->loadData();
     }

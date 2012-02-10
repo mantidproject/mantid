@@ -109,8 +109,9 @@ namespace CurveFitting
 
     Progress prog(this,0.0,1.0,maxInterations?maxInterations:1);
 
-    std::string funIni = getProperty("Function");
-    m_function.reset( API::FunctionFactory::Instance().createInitialized(funIni) );
+    //std::string funIni = getProperty("Function");
+    //m_function.reset( API::FunctionFactory::Instance().createInitialized(funIni) );
+    m_function = getProperty("Function");
 
     if (m_function.get() == NULL)
     {
@@ -281,7 +282,7 @@ namespace CurveFitting
     setProperty("OutputStatus", reportOfFit);
     setProperty("OutputChi2overDoF", finalCostFuncVal);
     setProperty("Minimizer", methodUsed);
-    setPropertyValue("Function",*m_function);
+    setProperty("Function",m_function);
     
 
     // if Output property is specified output additional workspaces

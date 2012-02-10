@@ -195,7 +195,7 @@ public:
         // Set which spectrum to fit against and initial starting values
         alg1.setPropertyValue("InputWorkspace", wsName);
 
-        alg1.setPropertyValue("Function",*fn);
+        alg1.setPropertyValue("Function",fn->asString());
 
         // execute fit NOT YET WORKING - needs MDIterator over MDCells, rather than MDPoints
         TS_ASSERT_THROWS_NOTHING(
@@ -224,7 +224,7 @@ public:
         // Set which spectrum to fit against and initial starting values
         alg2.setPropertyValue("InputWorkspace", testWrkspc2);
 
-        alg2.setPropertyValue("Function",*fn);
+        alg2.setPropertyValue("Function",fn->asString());
         alg2.setPropertyValue("Output","out2");
 
         // execute fit
@@ -265,7 +265,7 @@ public:
         // Set which spectrum to fit against and initial starting values
         alg3.setPropertyValue("InputWorkspace", testWrkspc3);
 
-        alg3.setPropertyValue("Function",*fn);
+        alg3.setPropertyValue("Function",fn->asString());
         alg3.setPropertyValue("Output","out3");
 
         // execute fit
@@ -337,7 +337,7 @@ public:
 
          alg1.setPropertyValue("InputWorkspace", testWrkspc3);
 
-         alg1.setPropertyValue("Function",*compFn);
+         alg1.setPropertyValue("Function",compFn->asString());
          alg1.setPropertyValue("Output","outcf");
 
          TS_ASSERT_THROWS_NOTHING(

@@ -67,7 +67,7 @@ public:
 
     Chebyshev cheb;
     cheb.setAttribute("n",IFitFunction::Attribute(3));
-    fit.setPropertyValue("Function",cheb);
+    fit.setPropertyValue("Function",cheb.asString());
 
     fit.execute();
     IFitFunction::Attribute StartX = cheb.getAttribute("StartX");

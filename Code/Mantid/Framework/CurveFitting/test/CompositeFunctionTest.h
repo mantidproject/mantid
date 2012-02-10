@@ -234,7 +234,7 @@ public:
     alg.setPropertyValue("WorkspaceIndex","0");
     alg.setPropertyValue("Output","out");
     //alg.setFunction(mfun);
-    alg.setPropertyValue("Function",mfun);
+    alg.setPropertyValue("Function",mfun.asString());
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
     WS_type outWS = getWS("out_Workspace");

@@ -58,7 +58,7 @@ public:
     linB.setParameter("A0",1.0);
 
     //alg2.setFunction(linB);
-    alg2.setPropertyValue("Function",linB);
+    alg2.setPropertyValue("Function",linB.asString());
 
 
     // Set which spectrum to fit against and initial starting values

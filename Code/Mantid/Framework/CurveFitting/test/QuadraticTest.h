@@ -60,7 +60,7 @@ public:
     quad.setParameter("A0",1.0);
 
     //alg2.setFunction(quad);
-    alg2.setPropertyValue("Function",quad);
+    alg2.setPropertyValue("Function",quad.asString());
 
 
     // Set which spectrum to fit against and initial starting values

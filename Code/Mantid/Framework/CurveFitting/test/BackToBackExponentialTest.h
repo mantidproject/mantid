@@ -228,7 +228,7 @@ public:
     fnWithBk.addFunction(bk);
 
     //alg2.setFunction(fnWithBk);
-    alg2.setPropertyValue("Function",fnWithBk);
+    alg2.setPropertyValue("Function",fnWithBk.asString());
 
     // execute fit
     TS_ASSERT_THROWS_NOTHING(
