@@ -313,16 +313,6 @@ void MantidDockWidget::createWorkspaceMenuActions()
 
   m_saveNexus = new QAction(tr("Save Nexus"),this);
   connect(m_saveNexus,SIGNAL(activated()),m_mantidUI,SLOT(saveNexusWorkspace()));
-
-  //m_saveToProgram = new QMenu(tr("Save to program"),this);
-
-  ////Sub-menu of save to programs
-  //m_program1 = new QAction(tr("Program 1"),this);
-  //connect(m_program1,SIGNAL(activated()),this,SLOT(saveToProgram1()));
-  //m_program2 = new QAction(tr("Program 2"),this);
-  //connect(m_program2,SIGNAL(activated()),this,SLOT(saveToProgram2()));
-  //m_program3 = new QAction(tr("Program 3"),this);
-  //connect(m_program3,SIGNAL(activated()),this,SLOT(saveToProgram3()));
  
   m_rename = new QAction(tr("Rename"),this);
   connect(m_rename,SIGNAL(activated()),this,SLOT(renameWorkspace()));
