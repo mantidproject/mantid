@@ -554,11 +554,14 @@ class SNSPowderReduction(PythonAlgorithm):
 
                     vbackRun = self.getProperty("VanadiumBackgroundNumber")
                     if vbackRun > 0:
-                        if self.getProperty("FilterCharacterizations"):
-                            vbackRun = self._loadData(vbackRun, SUFFIX, filterWall)
+                        if mtd.workspaceExists("%s_%d" % (self._instrument, vanRun)):
+                            vbackRun = mtd["%s_%d" % (self._instrument, vanRun)]
                         else:
-                            vbackRun = self._loadData(vbackRun, SUFFIX, (0., 0.))
-                        vbackRun = self._focus(vbackRun, calib, info, preserveEvents=False)
+                            if self.getProperty("FilterCharacterizations"):
+                                vbackRun = self._loadData(vbackRun, SUFFIX, filterWall)
+                            else:
+                                vbackRun = self._loadData(vbackRun, SUFFIX, (0., 0.))
+                            vbackRun = self._focus(vbackRun, calib, info, preserveEvents=False)
                         vanRun -= vbackRun
 
                     if self.getProperty("StripVanadiumPeaks"):
