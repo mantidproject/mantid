@@ -29,16 +29,11 @@ namespace Mantid
     class SampleEnvironment;
 
     /** 
-
       This class stores information about the sample used in particular 
       run. It is a type of ObjComponent meaning it has a shape, a position
       and a material.
 
-      @author Russell Taylor, Tessella plc
-      @author Martyn Gigg, Tessella plc
-      @date 26/11/2007
-      
-      Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+      Copyright &copy; 2007-2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
       
       This file is part of Mantid.
       
@@ -61,11 +56,9 @@ namespace Mantid
     class MANTID_API_DLL Sample
     {
     public:
-      /// Default constructor (required for cow_ptr)
       Sample();
-      /// Copy constructor. 
       Sample(const Sample& copy);
-      /// Private assignment operator. 
+      ~Sample();
       Sample& operator=(const Sample& rhs);
 
       void saveNexus(::NeXus::File * file, const std::string & group) const;
