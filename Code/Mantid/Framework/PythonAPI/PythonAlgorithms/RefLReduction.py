@@ -20,6 +20,7 @@ class RefLReduction(PythonAlgorithm):
         self.declareListProperty("SignalPeakPixelRange", [126, 134], Validator=ArrayBoundedValidator(Lower=0))
         self.declareProperty("SubtractSignalBackground", True)
         self.declareListProperty("SignalBackgroundPixelRange", [123, 137], Validator=ArrayBoundedValidator(Lower=0))
+        self.declareProperty("NormFlag", True)
         self.declareListProperty("NormPeakPixelRange", [127, 133], Validator=ArrayBoundedValidator(Lower=0))
         self.declareProperty("SubtractNormBackground", True)
         self.declareListProperty("NormBackgroundPixelRange", [123, 137], Validator=ArrayBoundedValidator(Lower=0))
@@ -84,8 +85,6 @@ class RefLReduction(PythonAlgorithm):
         
         subtract_data_bck = self.getProperty("SubtractSignalBackground")
         subtract_norm_bck = self.getProperty("SubtractNormBackground")
-        
-
         
         ########################################################################
         # Find full path to event NeXus data file
@@ -215,6 +214,7 @@ class RefLReduction(PythonAlgorithm):
         ws_data = "__DataWks"
         ws_transposed = '__TransposedID'
         if subtract_data_bck:
+            print 'in subtract_data_bck'
             ConvertToHistogram(InputWorkspace=ws_integrated_data,
                                OutputWorkspace=ws_integrated_data)
 
@@ -272,12 +272,9 @@ class RefLReduction(PythonAlgorithm):
         else:
             ConvertToHistogram(InputWorkspace=ws_integrated_data,
                                OutputWorkspace=ws_data)
-
-            # Work on Normalization file #########################################
-
-        s_normalization_run = str(normalization_run).strip()
-#        s_normalization_run = '' #REMOVE_ME
-        if (s_normalization_run != ''):
+        
+        # Work on Normalization file #########################################
+        if (NormFlag):
         
             # Find full path to event NeXus data file
             f = FileFinder.findRuns("REF_L%d" %normalization_run)
@@ -403,6 +400,8 @@ class RefLReduction(PythonAlgorithm):
                    RHSWorkspace=ws_norm_rebinned,
                    OutputWorkspace=ws_data)
 
+        mt =mtd[ws_data]
+        
         ReplaceSpecialValues(InputWorkspace=ws_data, NaNValue=0, NaNError=0, InfinityValue=0, InfinityError=0, OutputWorkspace=ws_data)
 
         output_ws = self.getPropertyValue("OutputWorkspace")        
@@ -416,8 +415,11 @@ class RefLReduction(PythonAlgorithm):
         
         # Clean up intermediary workspaces
         mtd.deleteWorkspace(ws_data)
-        mtd.deleteWorkspace(ws_norm)
-        mtd.deleteWorkspace(ws_norm_rebinned)
-        mtd.deleteWorkspace(ws_norm_histo_data)
+
+        if (NormFlag):
+            mtd.deleteWorkspace(ws_norm)
+            mtd.deleteWorkspace(ws_norm_rebinned)
+            mtd.deleteWorkspace(ws_norm_histo_data)
+        
             
 mtd.registerPyAlgorithm(RefLReduction())

@@ -453,6 +453,7 @@ class DataReflWidget(BaseWidget):
             
             state_list.append(data)
         state.data_sets = state_list
+        
         return state
     
     def get_editing_state(self):
@@ -508,5 +509,5 @@ class DataReflWidget(BaseWidget):
         ##
         # Add here states that are data file dependent
         ##
-                
+          
         return m

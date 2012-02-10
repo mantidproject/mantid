@@ -158,6 +158,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             self._interface.destroy()
             
         self._interface = instrument_factory(self._instrument, settings=self.general_settings)
+        
         if self._interface is not None:
             tab_list = self._interface.get_tabs()
             for tab in tab_list:
@@ -388,7 +389,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self.interface_chk.setEnabled(True)
         self.file_menu.setEnabled(True)
         self.tools_menu.setEnabled(True)
-        
+
     def open_file(self, file_path=None):
         """
             Open an XML file and populate the UI
