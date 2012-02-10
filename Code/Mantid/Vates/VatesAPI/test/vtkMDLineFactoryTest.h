@@ -23,18 +23,6 @@ class vtkMDLineFactoryTest : public CxxTest::TestSuite
 {
 public:
 
-  void testcreateMeshOnlyThrows()
-  {
-    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
-    TS_ASSERT_THROWS(factory.createMeshOnly(), std::runtime_error);
-  }
-
-  void testcreateScalarArray()
-  {
-    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
-    TS_ASSERT_THROWS(factory.createScalarArray(), std::runtime_error);
-  }
-
   void testGetFactoryTypeName()
   {
     vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");

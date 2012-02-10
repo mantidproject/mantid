@@ -84,20 +84,6 @@ public:
     TSM_ASSERT_THROWS("No workspace, so should not be possible to complete initialization.", factory.initialize(ws_sptr), std::runtime_error);
   }
 
-  void testCreateMeshOnlyThrows()
-  {
-    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory(ThresholdRange_scptr(pRange), "signal", 1);
-    TS_ASSERT_THROWS(factory.createMeshOnly() , std::runtime_error);
-  }
-
-  void testCreateScalarArrayThrows()
-  {
-    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory(ThresholdRange_scptr(pRange), "signal", 1);
-    TS_ASSERT_THROWS(factory.createScalarArray() , std::runtime_error);
-  }
-
   void testCreateWithoutInitializeThrows()
   {
     UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);

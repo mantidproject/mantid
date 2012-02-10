@@ -151,20 +151,6 @@ namespace Mantid
       return visualDataSet;
     }
 
-    /// Create as a mesh only.
-    vtkDataSet* vtkMDQuadFactory::createMeshOnly() const
-    {
-      //Legacy. For VisIT compatibility. This isn't used any more.
-      throw std::runtime_error("Not implemented");
-    }
-
-    /// Create the scalar array only.
-    vtkFloatArray* vtkMDQuadFactory::createScalarArray() const
-    {
-      //Legacy. For VisIT compatibility. This isn't used any more.
-      throw std::runtime_error("Not implemented");
-    }
-
     /// Initalize with a target workspace.
     void vtkMDQuadFactory::initialize(Mantid::API::Workspace_sptr ws)
     {

@@ -74,10 +74,6 @@ public:
   /// Factory method
   vtkDataSet* create() const;
 
-  vtkDataSet* createMeshOnly() const;
-
-  vtkFloatArray* createScalarArray() const;
-
   virtual std::string getFactoryTypeName() const
   {
     return "vtkPeakMarkerFactory";

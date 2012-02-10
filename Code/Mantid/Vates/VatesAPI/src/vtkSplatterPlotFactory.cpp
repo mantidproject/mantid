@@ -218,24 +218,6 @@ namespace Mantid
     // The macro does not allow return calls, so we used a member variable.
     return this->dataSet;
   }
-  
-  /*
-  Create as Mesh Only. Legacy method
-  @Return Nothing. throws on invoke.
-  */
-  vtkDataSet* vtkSplatterPlotFactory::createMeshOnly() const
-  {
-    throw std::runtime_error("Invalid usage. Cannot call vtkSplatterPlotFactory::createMeshOnly()");
-  }
-
-  /*
-  Create as Mesh Only. Legacy method
-  @Return Nothing. throws on invoke.
-  */
-  vtkFloatArray* vtkSplatterPlotFactory::createScalarArray() const
-  {
-    throw std::runtime_error("Invalid usage. Cannot call vtkSplatterPlotFactory::createScalarArray()");
-  }
 
  /*
   Initalize the factory with the workspace. This allows top level decision on what factory to use, but allows presenter/algorithms to pass in the

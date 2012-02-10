@@ -252,24 +252,6 @@ namespace Mantid
   }
 
   /*
-  Create as Mesh Only. Legacy method
-  @Return Nothing. throws on invoke.
-  */
-  vtkDataSet* vtkMDEWHexahedronFactory::createMeshOnly() const
-  {
-    throw std::runtime_error("Invalid usage. Cannot call vtkMDEWHexahedronFactory::createMeshOnly()");
-  }
-
-  /*
-  Create as Mesh Only. Legacy method
-  @Return Nothing. throws on invoke.
-  */
-  vtkFloatArray* vtkMDEWHexahedronFactory::createScalarArray() const
-  {
-    throw std::runtime_error("Invalid usage. Cannot call vtkMDEWHexahedronFactory::createScalarArray()");
-  }
-
-  /*
   Initalize the factory with the workspace. This allows top level decision on what factory to use, but allows presenter/algorithms to pass in the
   dataobjects (workspaces) to run against at a later time. If workspace is not an IMDEventWorkspace, attempts to use any run-time successor set.
   @Param ws : Workspace to use.

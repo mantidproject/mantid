@@ -24,18 +24,6 @@ class vtkMDQuadFactoryTest : public CxxTest::TestSuite
 
 public:
 
-  void testcreateMeshOnlyThrows()
-  {
-    vtkMDQuadFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
-    TS_ASSERT_THROWS(factory.createMeshOnly(), std::runtime_error);
-  }
-
-  void testcreateScalarArray()
-  {
-    vtkMDQuadFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
-    TS_ASSERT_THROWS(factory.createScalarArray(), std::runtime_error);
-  }
-
   void testGetFactoryTypeName()
   {
     vtkMDQuadFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");

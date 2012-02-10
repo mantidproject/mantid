@@ -136,16 +136,5 @@ namespace VATES
   vtkPeakMarkerFactory::~vtkPeakMarkerFactory()
   {
   }
-
-  vtkDataSet* vtkPeakMarkerFactory::createMeshOnly() const
-  {
-    throw std::runtime_error("::createMeshOnly() does not apply for this type of factory.");
-  }
-
-  vtkFloatArray* vtkPeakMarkerFactory::createScalarArray() const
-  {
-    throw std::runtime_error("::createScalarArray() does not apply for this type of factory.");
-  }
-
 }
 }

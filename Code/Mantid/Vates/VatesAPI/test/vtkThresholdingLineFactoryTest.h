@@ -26,18 +26,6 @@ class vtkThresholdingLineFactoryTest: public CxxTest::TestSuite
 
 public:
 
-  void testCreateMeshOnlyThrows()
-  {
-    vtkThresholdingLineFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
-    TS_ASSERT_THROWS(factory.createMeshOnly() , std::runtime_error);
-  }
-
-  void testCreateScalarArrayThrows()
-  {
-    vtkThresholdingLineFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
-    TS_ASSERT_THROWS(factory.createScalarArray() , std::runtime_error);
-  }
-
   void testIsValidThrowsWhenNoWorkspace()
   {
     IMDWorkspace* nullWorkspace = NULL;

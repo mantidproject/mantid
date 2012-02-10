@@ -77,18 +77,6 @@ class vtkThresholdingHexahedronFactoryTest: public CxxTest::TestSuite
     TSM_ASSERT_THROWS("No workspace, so should not be possible to complete initialization.", factory.initialize(ws_sptr), std::runtime_error);
   }
 
-  void testCreateMeshOnlyThrows()
-  {
-    vtkThresholdingHexahedronFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
-    TS_ASSERT_THROWS(factory.createMeshOnly() , std::runtime_error);
-  }
-
-  void testCreateScalarArrayThrows()
-  {
-    vtkThresholdingHexahedronFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
-    TS_ASSERT_THROWS(factory.createScalarArray() , std::runtime_error);
-  }
-
   void testCreateWithoutInitializeThrows()
   {
     vtkThresholdingHexahedronFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");

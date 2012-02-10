@@ -26,19 +26,6 @@ class vtkThresholdingQuadFactoryTest: public CxxTest::TestSuite
 {
 
 public:
-  void testCreateMeshOnlyThrows()
-  {
-    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
-    vtkThresholdingQuadFactory factory(ThresholdRange_scptr(pRange), "signal");
-    TS_ASSERT_THROWS(factory.createMeshOnly() , std::runtime_error);
-  }
-
-  void testCreateScalarArrayThrows()
-  {
-    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
-    vtkThresholdingQuadFactory factory(ThresholdRange_scptr(pRange), "signal");
-    TS_ASSERT_THROWS(factory.createScalarArray() , std::runtime_error);
-  }
 
   void testIsValidThrowsWhenNoWorkspace()
   {

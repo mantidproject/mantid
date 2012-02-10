@@ -115,20 +115,6 @@ namespace VATES
   {
   }
 
-  template<typename TimeMapper>
-  vtkDataSet* vtkThresholdingUnstructuredGridFactory<TimeMapper>::createMeshOnly() const
-  {
-    throw std::runtime_error("::createMeshOnly() does not apply for this type of factory.");
-  }
-
-  template<typename TimeMapper>
-  vtkFloatArray* vtkThresholdingUnstructuredGridFactory<TimeMapper>::createScalarArray() const
-  {
-    throw std::runtime_error("::createScalarArray() does not apply for this type of factory.");
-  }
-
-
-
   template class vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>;
   template class vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep>;
 

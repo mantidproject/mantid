@@ -58,10 +58,6 @@ however, some visualisation frameworks won't be able to treat these factories in
       /// Factory Method.
       virtual vtkDataSet* create() const;
 
-      virtual vtkDataSet* createMeshOnly() const;
-
-      virtual vtkFloatArray* createScalarArray() const;
-
       virtual void initialize(Mantid::API::Workspace_sptr);
 
       typedef std::vector<std::vector<UnstructuredPoint> > Plane;

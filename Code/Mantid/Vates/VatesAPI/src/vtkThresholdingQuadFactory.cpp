@@ -205,16 +205,6 @@ namespace Mantid
       }
     }
 
-    vtkDataSet* vtkThresholdingQuadFactory::createMeshOnly() const
-    {
-      throw std::runtime_error("::createMeshOnly() does not apply for this type of factory.");
-    }
-
-    vtkFloatArray* vtkThresholdingQuadFactory::createScalarArray() const
-    {
-      throw std::runtime_error("::createScalarArray() does not apply for this type of factory.");
-    }
-
     void vtkThresholdingQuadFactory::initialize(Mantid::API::Workspace_sptr wspace_sptr)
     {
       m_workspace = boost::dynamic_pointer_cast<MDHistoWorkspace>(wspace_sptr);
