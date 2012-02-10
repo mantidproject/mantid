@@ -185,7 +185,10 @@ namespace DataObjects
     m_Col(peak.m_Col),
     sourcePos(peak.sourcePos),
     samplePos(peak.samplePos),
-    detPos(peak.detPos)
+    detPos(peak.detPos),
+    orig_H(peak.orig_H),
+    orig_K(peak.orig_K),
+    orig_L(peak.orig_L)
   {
   }
 
@@ -587,9 +590,21 @@ namespace DataObjects
   /** Set all three H,K,L indices of the peak */
   void Peak::setHKL(double H, double K, double L)
   {
+    orig_H = m_H;
+    orig_K = m_K;
+    orig_L = m_L;
     m_H = H;
     m_K = K;
     m_L = L;
+  }
+
+  /** Reset all three H,K,L indices of the peak to values before setHKL */
+  void Peak::resetHKL()
+  {
+    if(orig_H == 0 && orig_K == 0 && orig_K == 0)return;
+    m_H = orig_H;
+    m_K = orig_K;
+    m_L = orig_L;
   }
 
   /** Set all HKL
@@ -598,6 +613,9 @@ namespace DataObjects
    */
   void Peak::setHKL(Mantid::Kernel::V3D HKL)
   {
+    orig_H = m_H;
+    orig_K = m_K;
+    orig_L = m_L;
     m_H = HKL.X();
     m_K = HKL.Y();
     m_L = HKL.Z();
