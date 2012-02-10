@@ -92,7 +92,7 @@ private:
   const std::string m_scalarName;
 
   /// Member workspace to generate vtkdataset from.
-  Mantid::API::IMDEventWorkspace_sptr m_workspace;
+  Mantid::API::Workspace_sptr m_workspace;
 
   /// Maximum recursion depth to use.
   size_t m_maxDepth;

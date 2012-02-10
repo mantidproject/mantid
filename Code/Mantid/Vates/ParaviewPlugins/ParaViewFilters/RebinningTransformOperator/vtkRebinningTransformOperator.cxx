@@ -277,7 +277,6 @@ int vtkRebinningTransformOperator::RequestData(vtkInformation* vtkNotUsed(reques
     p_2dHistoFactory->SetSuccessor(p_3dHistoFactory);
     p_3dHistoFactory->SetSuccessor(p_4dHistoFactory);
 
-
     vtkDataSet* outData = m_presenter->execute(p_1dMDFactory, updatehandler);
     m_thresholdMax = m_ThresholdRange->getMaximum();
     m_thresholdMin = m_ThresholdRange->getMinimum();

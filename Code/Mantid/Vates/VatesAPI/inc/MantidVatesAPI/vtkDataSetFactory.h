@@ -106,7 +106,7 @@ public:
   }
 
   /// Dimensionalities of interest.
-  enum{OneDimensional=1, TwoDimensional=2, ThreeDimensional=3, FourDimensional=4};
+  enum Dimensionality{OneDimensional=1, TwoDimensional=2, ThreeDimensional=3, FourDimensional=4};
 
 protected:
 

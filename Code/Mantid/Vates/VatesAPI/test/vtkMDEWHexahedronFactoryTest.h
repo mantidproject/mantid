@@ -5,9 +5,11 @@
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/UserDefinedThresholdRange.h"
 #include "MantidVatesAPI/vtkMDEWHexahedronFactory.h"
+#include "MantidVatesAPI/NoThresholdRange.h"
 #include "MockObjects.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -20,6 +22,7 @@ using namespace Mantid;
 using namespace Mantid::VATES;
 using namespace Mantid::API;
 using namespace Mantid::MDEvents;
+using namespace testing;
 
 //=====================================================================================
 // Functional tests
@@ -57,14 +60,61 @@ public:
     TSM_ASSERT_THROWS("This is a NULL workspace. Should throw.", factory.initialize( Workspace_sptr(ws) ), std::invalid_argument);
   }
 
-  void testInitalizeWithWrongWorkspaceTypeThrows()
-  {
-    IMDWorkspace* ws = new MockIMDWorkspace;
-    ws->setName("OTHER_WS_TYPE");
 
-    vtkMDEWHexahedronFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
-    TSM_ASSERT_THROWS("This is an invalid workspace. Should throw.", factory.initialize( Workspace_sptr(ws) ), std::invalid_argument);
+  void testGetFactoryTypeName()
+  {
+    vtkMDEWHexahedronFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+    TS_ASSERT_EQUALS("vtkMDEWHexahedronFactory", factory.getFactoryTypeName());
   }
+
+  void testInitializeDelegatesToSuccessor()
+  {
+    MockvtkDataSetFactory* mockSuccessor = new MockvtkDataSetFactory;
+    EXPECT_CALL(*mockSuccessor, initialize(_)).Times(1);
+    EXPECT_CALL(*mockSuccessor, getFactoryTypeName()).Times(1);
+
+    vtkMDEWHexahedronFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+    factory.SetSuccessor(mockSuccessor);
+
+    ITableWorkspace_sptr ws(new Mantid::DataObjects::TableWorkspace);
+    TS_ASSERT_THROWS_NOTHING(factory.initialize(ws));
+
+    TSM_ASSERT("Successor has not been used properly.", Mock::VerifyAndClearExpectations(mockSuccessor));
+  }
+
+  void testCreateDelegatesToSuccessor()
+  {
+    MockvtkDataSetFactory* mockSuccessor = new MockvtkDataSetFactory;
+    EXPECT_CALL(*mockSuccessor, initialize(_)).Times(1);
+    EXPECT_CALL(*mockSuccessor, create()).Times(1);
+    EXPECT_CALL(*mockSuccessor, getFactoryTypeName()).Times(1);
+
+    vtkMDEWHexahedronFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+    factory.SetSuccessor(mockSuccessor);
+
+    ITableWorkspace_sptr ws(new Mantid::DataObjects::TableWorkspace);
+    TS_ASSERT_THROWS_NOTHING(factory.initialize(ws));
+    TS_ASSERT_THROWS_NOTHING(factory.create());
+
+    TSM_ASSERT("Successor has not been used properly.", Mock::VerifyAndClearExpectations(mockSuccessor));
+  }
+
+  void testOnInitaliseCannotDelegateToSuccessor()
+  {
+    vtkMDEWHexahedronFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+    //factory.SetSuccessor(mockSuccessor); No Successor set.
+
+    ITableWorkspace_sptr ws(new Mantid::DataObjects::TableWorkspace);
+    TS_ASSERT_THROWS(factory.initialize(ws), std::runtime_error);
+  }
+
+  void testCreateWithoutInitializeThrows()
+  {
+    vtkMDEWHexahedronFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+    //initialize not called!
+    TS_ASSERT_THROWS(factory.create(), std::runtime_error);
+  }
+
 
   /*Demonstrative tests*/
 
@@ -130,11 +180,6 @@ public:
     product->Delete();
   }
 
-
-
-  //TODO more tests
-  //Check recurssion works properly.
-  //Check threshold and NAN signal values handled propertly
 
 };
 

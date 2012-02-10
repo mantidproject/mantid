@@ -192,7 +192,13 @@ namespace Mantid
   {
     validate();
 
-    size_t nd = m_workspace->getNumDims();
+    IMDEventWorkspace_sptr imdws = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_workspace);
+    if(!imdws || imdws->getNonIntegratedDimensions().size() < ThreeDimensional)
+    {
+      return m_successor->create();
+    }
+
+    size_t nd = imdws->getNumDims();
     if (nd > 3)
     {
       // Slice from >3D down to 3D
@@ -232,7 +238,7 @@ namespace Mantid
     }
 
     // Macro to call the right instance of the
-    CALL_MDEVENT_FUNCTION(this->doCreate, m_workspace);
+    CALL_MDEVENT_FUNCTION(this->doCreate, imdws);
 
     // Clean up
     if (this->slice)
@@ -265,16 +271,31 @@ namespace Mantid
 
  /*
   Initalize the factory with the workspace. This allows top level decision on what factory to use, but allows presenter/algorithms to pass in the
-  dataobjects (workspaces) to run against at a later time. If workspace is not an IMDEventWorkspace, throws an invalid argument exception.
+  dataobjects (workspaces) to run against at a later time. If workspace is not an IMDEventWorkspace, attempts to use any run-time successor set.
   @Param ws : Workspace to use.
   */
   void vtkMDEWHexahedronFactory::initialize(Mantid::API::Workspace_sptr ws)
   {
-    this->m_workspace = boost::dynamic_pointer_cast<IMDEventWorkspace>(ws);
-    if(!m_workspace)
+    if(!ws)
     {
-      throw std::invalid_argument("Workspace is null or not IMDEventWorkspace");
+      throw std::invalid_argument("Cannot initalize vtkMDEWHexahedronFactory with a NULL workspace.");
     }
+    m_workspace = ws;
+    IMDEventWorkspace_sptr imdws = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_workspace);
+    
+    if(!imdws || imdws->getNonIntegratedDimensions().size() < ThreeDimensional)
+    {
+      if(this->hasSuccessor())
+      {
+        m_successor->setUseTransform(m_useTransform);
+        m_successor->initialize(ws);
+      }
+      else
+      {
+        throw std::runtime_error("vtkMDEWHexahedronFactory has no successor");
+      }
+    }
+
     //Setup range values according to whatever strategy object has been injected.
     m_thresholdRange->setWorkspace(m_workspace);
     m_thresholdRange->calculate();
@@ -287,8 +308,6 @@ namespace Mantid
     {
       throw std::runtime_error("Invalid vtkMDEWHexahedronFactory. Workspace is null");
     }
-    if (m_workspace->getNumDims() < 3)
-      throw std::runtime_error("Invalid vtkMDEWHexahedronFactory. Workspace must have at least 3 dimensions.");
   }
 
   /** Sets the recursion depth to a specified level in the workspace.
