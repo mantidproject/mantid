@@ -21,10 +21,11 @@ public:
   }
   virtual std::string name()const {return "FunctionPropertyTest_Function";}
   virtual void setWorkspace(boost::shared_ptr<const Workspace>) {}
+  virtual void setWorkspace(boost::shared_ptr<const Workspace>,bool) {}
+  virtual void setWorkspace(boost::shared_ptr<const Workspace>,const std::string&,bool){}
+  virtual void setSlicing(const std::string&) {}
   virtual void function(FunctionDomain&)const {}
   virtual boost::shared_ptr<const Workspace> getWorkspace()const {return boost::shared_ptr<const Workspace>();}
-  virtual void setWorkspace(boost::shared_ptr<const Workspace>,bool) {}
-  virtual void setSlicing(const std::string&) {}
 
   /// Returns the size of the fitted data (number of double values returned by the function getData())
   virtual size_t dataSize()const {return 0;}

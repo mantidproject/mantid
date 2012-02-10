@@ -78,6 +78,16 @@ namespace Mantid
       /// Set the value of the property
       virtual std::string setValue( const std::string& value );
 
+      /**
+       * Set a property value via a DataItem
+       * @param data :: A shared pointer to a data item
+       * @return "" if the assignment was successful or a user level description of the problem
+       */
+      virtual std::string setValue(const boost::shared_ptr<Kernel::DataItem> data)
+      {
+        return Kernel::PropertyWithValue< boost::shared_ptr<IFitFunction> >::setValue(data);
+      }
+
       /// Checks whether the entered function is valid.
       std::string isValid() const;
 
