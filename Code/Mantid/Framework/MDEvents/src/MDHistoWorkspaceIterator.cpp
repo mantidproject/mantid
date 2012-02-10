@@ -21,9 +21,10 @@ namespace MDEvents
    * @param function :: The implicit function to use
    * @return
    */
-  MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(MDHistoWorkspace_const_sptr workspace, Mantid::Geometry::MDImplicitFunction * function)
+  MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(MDHistoWorkspace_const_sptr workspace, Mantid::Geometry::MDImplicitFunction * function,
+      size_t beginPos, size_t endPos)
   {
-    this->init(workspace.get(), function);
+    this->init(workspace.get(), function, beginPos, endPos);
   }
 
   //----------------------------------------------------------------------------------------------
@@ -33,9 +34,10 @@ namespace MDEvents
    * @param function :: The implicit function to use
    * @return
    */
-  MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(const MDHistoWorkspace * workspace, Mantid::Geometry::MDImplicitFunction * function)
+  MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(const MDHistoWorkspace * workspace, Mantid::Geometry::MDImplicitFunction * function,
+      size_t beginPos, size_t endPos)
   {
-    this->init(workspace, function);
+    this->init(workspace, function, beginPos, endPos);
   }
 
   //----------------------------------------------------------------------------------------------
@@ -45,14 +47,23 @@ namespace MDEvents
    * @param function :: implicit function or NULL for none. Gains ownership of the pointer.
    */
   void MDHistoWorkspaceIterator::init(const MDHistoWorkspace * workspace,
-      Mantid::Geometry::MDImplicitFunction * function)
+      Mantid::Geometry::MDImplicitFunction * function,
+      size_t beginPos, size_t endPos)
   {
     m_ws = workspace;
-    m_pos = 0;
-    m_function = function;
     if (m_ws == NULL)
       throw std::invalid_argument("MDHistoWorkspaceIterator::ctor(): NULL workspace given.");
-    m_max = m_ws->getNPoints();
+
+    m_begin = beginPos;
+    m_pos = m_begin;
+    m_function = function;
+
+    m_max = endPos;
+    if (m_max > m_ws->getNPoints())
+      m_max = m_ws->getNPoints();
+    if (m_max < m_pos)
+      throw std::invalid_argument("MDHistoWorkspaceIterator::ctor(): End point given is before the start point.");
+
     m_nd = m_ws->getNumDims();
     m_center = new coord_t[m_nd];
     m_origin = new coord_t[m_nd];
@@ -71,6 +82,10 @@ namespace MDEvents
       m_indexMax[d] = dim->getNBins();
     }
     Utils::NestedForLoop::SetUpIndexMaker(m_nd, m_indexMaker, m_indexMax);
+
+    // Initialize the current index from the start position.
+    Utils::NestedForLoop::GetIndicesFromLinearIndex(m_nd, m_pos, m_indexMaker, m_indexMax,
+        m_index);
 
     // Make sure that the first iteration is at a point inside the implicit function
     if (m_function)
@@ -102,7 +117,7 @@ namespace MDEvents
   /** @return the number of points to be iterated on */
   size_t MDHistoWorkspaceIterator::getDataSize() const
   {
-    return size_t(m_max);
+    return size_t(m_max - m_begin);
   }
 
 
@@ -114,7 +129,7 @@ namespace MDEvents
    */
   void MDHistoWorkspaceIterator::jumpTo(size_t index)
   {
-    m_pos = uint64_t(index);
+    m_pos = uint64_t(index + m_begin);
   }
 
   //----------------------------------------------------------------------------------------------

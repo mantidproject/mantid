@@ -80,6 +80,10 @@ public:
       it->next();
       TS_ASSERT_DELTA( it->getSignal(), double(i)*10 + 1.0, 1e-5);
       TS_ASSERT_DELTA( it->getError(), double(i)*20 + 2.0, 1e-5);
+      // Coordinates at X index = 1
+      TS_ASSERT_DELTA( it->getCenter()[0], 1.5, 1e-5);
+      // And this coordinate is the spectrum number
+      TS_ASSERT_DELTA( it->getCenter()[1], double(i), 1e-5);
       TS_ASSERT( it->next() );
       TS_ASSERT( it->next() );
       TS_ASSERT( it->next() );

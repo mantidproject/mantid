@@ -157,15 +157,36 @@ namespace API
   /// Returns the normalized signal for this box
   signal_t MatrixWorkspaceMDIterator::getNormalizedSignal() const
   {
-    // TODO: Normalize
-    return m_Y[m_xIndex];
+    // What is our normalization factor?
+    switch (m_normalization)
+    {
+    case NoNormalization:
+      return m_Y[m_xIndex];
+    case VolumeNormalization:
+      // TODO: calculate the Y size
+      return m_Y[m_xIndex] / (m_X[m_xIndex+1] - m_X[m_xIndex]);
+    case NumEventsNormalization:
+      return m_Y[m_xIndex];
+    }
+    return std::numeric_limits<signal_t>::quiet_NaN();
   }
 
+  //----------------------------------------------------------------------------------------------
   /// Returns the normalized error for this box
   signal_t MatrixWorkspaceMDIterator::getNormalizedError() const
   {
-    // TODO: Normalize
-    return this->getError();
+    // What is our normalization factor?
+    switch (m_normalization)
+    {
+    case NoNormalization:
+      return getError();
+    case VolumeNormalization:
+      // TODO: calculate the Y size
+      return getError() / (m_X[m_xIndex+1] - m_X[m_xIndex]);
+    case NumEventsNormalization:
+      return getError();
+    }
+    return std::numeric_limits<signal_t>::quiet_NaN();
   }
 
   /// Returns the signal for this box, same as innerSignal

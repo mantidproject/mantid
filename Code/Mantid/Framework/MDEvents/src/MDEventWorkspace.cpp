@@ -208,10 +208,31 @@ namespace MDEvents
   std::vector<Mantid::API::IMDIterator*>  MDEventWorkspace)::createIterators(size_t suggestedNumCores,
       Mantid::Geometry::MDImplicitFunction * function) const
   {
+    // Get all the boxes in this workspaces
+    std::vector<IMDBox<MDE,nd> *> boxes;
     // TODO: Should this be leaf only? Depends on most common use case
-    // TODO: handle parallelization
-    std::vector<Mantid::API::IMDIterator*> out;
-    out.push_back( new MDBoxIterator<MDE,nd>(data, 10000, true, function) );
+    if (function)
+      data->getBoxes(boxes, 10000, true, function);
+    else
+      data->getBoxes(boxes, 10000, true);
+
+    // Calculate the right number of cores
+    size_t numCores = suggestedNumCores;
+    if (numCores < 1) numCores = 1;
+    if (!this->threadSafe()) numCores = 1;
+    size_t numElements = this->getNPoints();
+    if (numCores > numElements)  numCores = numElements;
+
+    // Create one iterator per core, splitting evenly amongst spectra
+    std::vector<IMDIterator*> out;
+    for (size_t i=0; i<numCores; i++)
+    {
+      size_t begin = (i * numElements) / numCores;
+      size_t end = ((i+1) * numElements) / numCores;
+      if (end > numElements)
+        end = numElements;
+      out.push_back(new MDBoxIterator<MDE,nd>(boxes, begin, end));
+    }
     return out;
   }
 

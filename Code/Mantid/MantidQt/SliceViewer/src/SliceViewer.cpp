@@ -1047,7 +1047,7 @@ void SliceViewer::showInfoAt(double x, double y)
     coords[d] = m_dimWidgets[d]->getSlicePoint();
   coords[m_dimX] = x;
   coords[m_dimY] = y;
-  signal_t signal = m_ws->getSignalAtCoord(coords, this->m_data->getNormalization());
+  signal_t signal = m_ws->getSignalAtVMD(coords, this->m_data->getNormalization());
   ui.lblInfoX->setText(QString::number(x, 'g', 4));
   ui.lblInfoY->setText(QString::number(y, 'g', 4));
   ui.lblInfoSignal->setText(QString::number(signal, 'g', 4));

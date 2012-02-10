@@ -9,6 +9,7 @@
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include <map>
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IMDIterator.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -355,14 +356,28 @@ namespace MDEvents
    *
    * @param suggestedNumCores :: split the iterators into this many cores (if threadsafe)
    * @param function :: implicit function to limit range
-   * @return MatrixWorkspaceMDIterator vector
+   * @return MDHistoWorkspaceIterator vector
    */
-
   std::vector<Mantid::API::IMDIterator*> MDHistoWorkspace::createIterators(size_t suggestedNumCores,
       Mantid::Geometry::MDImplicitFunction * function) const
   {
-    //TODO:
-    return new MDHistoWorkspaceIterator(this,function);
+    size_t numCores = suggestedNumCores;
+    if (numCores < 1) numCores = 1;
+    if (!this->threadSafe()) numCores = 1;
+    size_t numElements = this->getNPoints();
+    if (numCores > numElements)  numCores = numElements;
+
+    // Create one iterator per core, splitting evenly amongst spectra
+    std::vector<IMDIterator*> out;
+    for (size_t i=0; i<numCores; i++)
+    {
+      size_t begin = (i * numElements) / numCores;
+      size_t end = ((i+1) * numElements) / numCores;
+      if (end > numElements)
+        end = numElements;
+      out.push_back(new MDHistoWorkspaceIterator(this, function, begin, end));
+    }
+    return out;
   }
 
 

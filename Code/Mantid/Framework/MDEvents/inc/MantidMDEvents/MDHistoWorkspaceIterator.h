@@ -42,11 +42,14 @@ namespace MDEvents
   class DLLExport MDHistoWorkspaceIterator : public Mantid::API::IMDIterator
   {
   public:
-    MDHistoWorkspaceIterator(MDHistoWorkspace_const_sptr workspace, Mantid::Geometry::MDImplicitFunction * function = NULL);
-    MDHistoWorkspaceIterator(const MDHistoWorkspace * workspace, Mantid::Geometry::MDImplicitFunction * function = NULL);
+    MDHistoWorkspaceIterator(MDHistoWorkspace_const_sptr workspace, Mantid::Geometry::MDImplicitFunction * function = NULL,
+        size_t beginPos = 0, size_t endPos = size_t(-1));
+    MDHistoWorkspaceIterator(const MDHistoWorkspace * workspace, Mantid::Geometry::MDImplicitFunction * function = NULL,
+        size_t beginPos = 0, size_t endPos = size_t(-1));
     ~MDHistoWorkspaceIterator();
 
-    void init(const MDHistoWorkspace * workspace, Mantid::Geometry::MDImplicitFunction * function);
+    void init(const MDHistoWorkspace * workspace, Mantid::Geometry::MDImplicitFunction * function,
+        size_t beginPos = 0, size_t endPos = size_t(-1));
 
     virtual size_t getDataSize() const;
 
@@ -90,6 +93,9 @@ namespace MDEvents
 
     /// The linear position/index into the MDHistoWorkspace.
     uint64_t m_pos;
+
+    /// The beginning linear index in the workspace
+    uint64_t m_begin;
 
     /// The maximum linear index in the workspace
     uint64_t m_max;

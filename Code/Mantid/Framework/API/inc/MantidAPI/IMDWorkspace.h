@@ -96,7 +96,9 @@ namespace Mantid
       //-------------------------------------------------------------------------------------------
       /// Returns the signal (normalized by volume) at a given coordinates
       /// @param coords :: coordinate as a VMD vector
-      signal_t getSignalAtVMD(const Mantid::Kernel::VMD & coords, const Mantid::API::MDNormalization & normalization) const
+      /// @param normalization :: how to normalize the signal returned
+      signal_t getSignalAtVMD(const Mantid::Kernel::VMD & coords,
+          const Mantid::API::MDNormalization & normalization = Mantid::API::VolumeNormalization) const
       {
         return this->getSignalAtCoord(coords.getBareArray(), normalization);
       }

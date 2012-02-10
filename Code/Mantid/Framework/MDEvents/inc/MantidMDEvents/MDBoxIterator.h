@@ -25,6 +25,8 @@ namespace MDEvents
   public:
     MDBoxIterator(IMDBox<MDE,nd> * topBox, size_t maxDepth, bool leafOnly,
         Mantid::Geometry::MDImplicitFunction * function = NULL);
+    MDBoxIterator(std::vector<IMDBox<MDE,nd>*> & boxes, size_t begin, size_t end);
+    void init(std::vector<IMDBox<MDE,nd>*> & boxes, size_t begin, size_t end);
     ~MDBoxIterator();
 
     /// Return a pointer to the current box pointed to by the iterator.
@@ -75,18 +77,6 @@ namespace MDEvents
     void getEvents() const;
 
     void releaseEvents() const;
-
-    /// Top-level box
-    IMDBox<MDE,nd> * m_topBox;
-
-    /// How deep to search
-    size_t m_maxDepth;
-
-    /// Return only leaf nodes.
-    bool m_leafOnly;
-
-    /// Implicit function for limiting where you iterate. NULL means no limits.
-    Mantid::Geometry::MDImplicitFunction * m_function;
 
     /// Current position in the vector of boxes
     size_t m_pos;

@@ -1494,23 +1494,97 @@ namespace Mantid
     std::vector<IMDIterator*> MatrixWorkspace::createIterators(size_t suggestedNumCores,
         Mantid::Geometry::MDImplicitFunction * function) const
     {
+      // Find the right number of cores to use
       size_t numCores = suggestedNumCores;
       if (numCores < 1) numCores = 1;
       if (!this->threadSafe()) numCores = 1;
-      if (numCores > this->getNumberHistograms())  numCores = this->getNumberHistograms();
+      size_t numElements = this->getNumberHistograms();
+      if (numCores > numElements)  numCores = numElements;
 
       // Create one iterator per core, splitting evenly amongst spectra
       std::vector<IMDIterator*> out;
       for (size_t i=0; i<numCores; i++)
       {
-        size_t beginWI = (i * this->getNumberHistograms()) / numCores;
-        size_t endWI = ((i+1) * this->getNumberHistograms()) / numCores;
-        if (endWI > this->getNumberHistograms())
-          endWI = this->getNumberHistograms();
-        out.push_back(new MatrixWorkspaceMDIterator(this, function, beginWI, endWI));
+        size_t begin = (i * numElements) / numCores;
+        size_t end = ((i+1) * numElements) / numCores;
+        if (end > numElements)
+          end = numElements;
+        out.push_back(new MatrixWorkspaceMDIterator(this, function, begin, end));
       }
       return out;
     }
+
+
+    //------------------------------------------------------------------------------------
+    /** Obtain coordinates for a line plot through a MDWorkspace.
+     * Cross the workspace from start to end points, recording the signal along the line.
+     * Sets the x,y vectors to the histogram bin boundaries and counts
+     *
+     * @param start :: coordinates of the start point of the line
+     * @param end :: coordinates of the end point of the line
+     * @param normalize :: how to normalize the signal
+     * @param x :: is set to the boundaries of the bins, relative to start of the line.
+     * @param y :: is set to the normalized signal for each bin. Length = length(x) - 1
+     */
+    void MatrixWorkspace::getLinePlot(const Mantid::Kernel::VMD & start, const Mantid::Kernel::VMD & end,
+        Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y, std::vector<signal_t> & e) const
+    {
+      UNUSED_ARG(start);UNUSED_ARG(end);UNUSED_ARG(normalize);UNUSED_ARG(x);UNUSED_ARG(y);UNUSED_ARG(e);
+      //throw std::runtime_error("MatrixWorkspace::getLinePlot() not yet implemented.");
+    }
+
+    //------------------------------------------------------------------------------------
+    /** Returns the (normalized) signal at a given coordinates
+     *
+     * @param coords :: bare array, size 2, of coordinates. X, Y
+     * @param normalization :: how to normalize the signal
+     * @return normalized signal.
+     */
+    signal_t MatrixWorkspace::getSignalAtCoord(const coord_t * coords, const Mantid::API::MDNormalization & normalization) const
+    {
+      coord_t x = coords[0];
+      coord_t y = coords[1];
+      size_t wi = size_t(y);
+      if (wi < this->getNumberHistograms())
+      {
+        const MantidVec & X = this->readX(wi);
+        MantidVec::const_iterator it = std::lower_bound(X.begin(), X.end(), x);
+        if (it == X.end())
+        {
+          // Out of range
+          return std::numeric_limits<double>::quiet_NaN();
+        }
+        else
+        {
+          size_t i = (it - X.begin());
+          if (i > 0)
+          {
+            double y = this->readY(wi)[i-1];
+            // What is our normalization factor?
+            switch (normalization)
+            {
+            case NoNormalization:
+              return y;
+            case VolumeNormalization:
+              // TODO: calculate the Y size
+              return y / (X[i] - X[i-1]);
+            case NumEventsNormalization:
+              return y;
+            }
+            // This won't happen
+            return y;
+          }
+          else
+            return std::numeric_limits<double>::quiet_NaN();
+        }
+      }
+      else
+        // Out of range
+        return std::numeric_limits<double>::quiet_NaN();
+    }
+
+
+
 
 
     //--------------------------------------------------------------------------------------------
@@ -1633,68 +1707,6 @@ namespace Mantid
       }
 
       file->closeGroup();
-    }
-
-    /** Obtain coordinates for a line plot through a MDWorkspace.
-     * Cross the workspace from start to end points, recording the signal along the line.
-     * Sets the x,y vectors to the histogram bin boundaries and counts
-     *
-     * @param start :: coordinates of the start point of the line
-     * @param end :: coordinates of the end point of the line
-     * @param normalize :: how to normalize the signal
-     * @param x :: is set to the boundaries of the bins, relative to start of the line.
-     * @param y :: is set to the normalized signal for each bin. Length = length(x) - 1
-     */
-    void MatrixWorkspace::getLinePlot(const Mantid::Kernel::VMD & start, const Mantid::Kernel::VMD & end,
-        Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y, std::vector<signal_t> & e) const
-    {
-      UNUSED_ARG(start);UNUSED_ARG(end);UNUSED_ARG(normalize);UNUSED_ARG(x);UNUSED_ARG(y);UNUSED_ARG(e);
-      //throw std::runtime_error("MatrixWorkspace::getLinePlot() not yet implemented.");
-    }
-
-    /// Returns the (normalized) signal at a given coordinates
-    signal_t MatrixWorkspace::getSignalAtCoord(const coord_t * coords, const Mantid::API::MDNormalization & normalization) const
-    {
-      coord_t x = coords[0];
-      coord_t y = coords[1];
-      size_t wi = size_t(y);
-      if (wi < this->getNumberHistograms())
-      {
-        const MantidVec & X = this->readX(wi);
-        MantidVec::const_iterator it = std::lower_bound(X.begin(), X.end(), x);
-        if (it == X.end())
-        {
-          // Out of range
-          return std::numeric_limits<double>::quiet_NaN();
-        }
-        else
-        {
-          size_t i = (it - X.begin());
-          if (i > 0)
-          {
-            double y = this->readY(wi)[i-1];
-            // What is our normalization factor?
-            switch (normalization)
-            {
-            case NoNormalization:
-              return y;
-            case VolumeNormalization:
-              // TODO: calculate the Y size
-              return y / (X[i] - X[i-1]);
-            case NumEventsNormalization:
-              return y;
-            }
-            // This won't happen
-            return y;
-          }
-          else
-            return std::numeric_limits<double>::quiet_NaN();
-        }
-      }
-      else
-        // Out of range
-        return std::numeric_limits<double>::quiet_NaN();
-
     }
 
 
