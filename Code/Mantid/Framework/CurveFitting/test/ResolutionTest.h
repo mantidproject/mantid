@@ -201,6 +201,14 @@ void tearDown()
     fit.execute();
 
   }
+ 
+  void testForCategories()
+  {
+    Resolution forCat;
+    const std::vector<std::string> categories = forCat.categories();
+    TS_ASSERT( categories.size() == 1 );
+    TS_ASSERT( categories[0] == "General" );
+  }
 
 private:
   const double resH,resS;

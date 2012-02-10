@@ -284,6 +284,15 @@ public:
     AnalysisDataService::Instance().remove(wsName);
   }
 
+  void testForCategories()
+  {
+    BackToBackExponential forCat;
+    const std::vector<std::string> categories = forCat.categories();
+    TS_ASSERT( categories.size() == 1 );
+    TS_ASSERT( categories[0] == "Peak" );
+  }
+
+
 };
 
 #endif /*BACKTOBACKEXPONENTIALTEST_H_*/

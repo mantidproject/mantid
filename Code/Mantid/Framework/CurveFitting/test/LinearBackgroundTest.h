@@ -27,8 +27,6 @@ class LinearBackgroundTest : public CxxTest::TestSuite
 {
 public:
 
-
-
   void testAgainstHRPDData()
   {
     // create mock data to test against
@@ -88,6 +86,14 @@ public:
     TS_ASSERT( categories[0] == "Background" );
 
 
+  }
+
+  void testForCategories()
+  {
+    LinearBackground forCat;
+    const std::vector<std::string> categories = forCat.categories();
+    TS_ASSERT( categories.size() == 1 );
+    TS_ASSERT( categories[0] == "Background" );
   }
 
 };

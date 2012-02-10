@@ -348,6 +348,15 @@ public:
     WS_type ws = mkWS(ConvolutionExp(),1,10,24,0.13);
   }
 
+  
+  void testForCategories()
+  {
+    Convolution forCat;
+    const std::vector<std::string> categories = forCat.categories();
+    TS_ASSERT( categories.size() == 1 );
+    TS_ASSERT( categories[0] == "General" );
+  }
+
 private:
 
   template<class Funct>

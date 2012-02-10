@@ -67,7 +67,7 @@ public:
     int timechannels = 18;
     Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
     Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
-    for (int i = 0; i < 17; i++) ws2D->dataX(0)[i] = i-8.0;
+    for (int i = 0; i < 16; i++) ws2D->dataX(0)[i] = i-8.0;
     Mantid::MantidVec& y = ws2D->dataY(0); // y-values (counts)
     Mantid::MantidVec& e = ws2D->dataE(0); // error values of counts
     getMockData(y, e);
@@ -97,14 +97,14 @@ public:
     TS_ASSERT( alg2.isExecuted() );
 
     // test the output from fit is what you expect
-    //double dummy =
+    double dummy =
     alg2.getProperty("OutputChi2overDoF");
-    // TS_ASSERT_DELTA( dummy, 0.0, 1.0);
+ //   TS_ASSERT_DELTA( dummy, 0.0, 1.0);
 
     // test the output from fit is what you expect
     IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
-    // TS_ASSERT_DELTA( out->getParameter("A"), 128.7 ,0.5);
-    // TS_ASSERT_DELTA( out->getParameter("Sigma"), 0.35 ,0.05);
+ //   TS_ASSERT_DELTA( out->getParameter("A"), 128.7 ,0.5);
+ //   TS_ASSERT_DELTA( out->getParameter("Sigma"), 0.35 ,0.005);
 
 
     // check its categories

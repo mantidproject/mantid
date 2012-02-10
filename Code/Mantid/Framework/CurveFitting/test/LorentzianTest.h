@@ -286,17 +286,17 @@ public:
     TS_ASSERT_DELTA( out->getParameter("f1.A0"), 0.0 ,0.01);
     TS_ASSERT_DELTA( out->getParameter("f1.A1"), 0.0 ,0.01);
 
-    // check its categories
- //   std::string name = out->name();
- //   TS_ASSERT( name == "Lorentzian");
- //   const std::vector<std::string> categories = out->categories();
-  //  TS_ASSERT( categories.size() == 1 );
- //   TS_ASSERT( categories[0] == "Peak" );
-
     AnalysisDataService::Instance().remove(wsName);
 
   }
 
+  void testForCategories()
+  {
+    Lorentzian forCat;
+    const std::vector<std::string> categories = forCat.categories();
+    TS_ASSERT( categories.size() == 1 );
+    TS_ASSERT( categories[0] == "Peak" );
+  }
 
 };
 

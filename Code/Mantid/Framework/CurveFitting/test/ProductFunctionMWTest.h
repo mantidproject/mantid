@@ -321,6 +321,14 @@ public:
 
     AnalysisDataService::Instance().remove(wsName);
   }
+ 
+  void testForCategories()
+  {
+    ProductFunctionMW forCat;
+    const std::vector<std::string> categories = forCat.categories();
+    TS_ASSERT( categories.size() == 1 );
+    TS_ASSERT( categories[0] == "General" );
+  }
 
 private:
 
