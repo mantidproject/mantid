@@ -351,9 +351,17 @@ namespace MDEvents
 
 
   //----------------------------------------------------------------------------------------------
-  /// Creates a new iterator pointing to the first cell in the workspace
-  Mantid::API::IMDIterator* MDHistoWorkspace::createIterator(Mantid::Geometry::MDImplicitFunction * function) const
+  /** Create IMDIterators from this MDHistoWorkspace
+   *
+   * @param suggestedNumCores :: split the iterators into this many cores (if threadsafe)
+   * @param function :: implicit function to limit range
+   * @return MatrixWorkspaceMDIterator vector
+   */
+
+  std::vector<Mantid::API::IMDIterator*> MDHistoWorkspace::createIterators(size_t suggestedNumCores,
+      Mantid::Geometry::MDImplicitFunction * function) const
   {
+    //TODO:
     return new MDHistoWorkspaceIterator(this,function);
   }
 

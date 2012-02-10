@@ -12,6 +12,7 @@
 #include <stdarg.h>
 #include "MantidAPI/MDGeometry.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
+#include "MantidAPI/IMDWorkspace.h"
 
 namespace Mantid
 {
@@ -83,20 +84,19 @@ namespace Mantid
       virtual uint64_t getNPoints() const = 0;
 
       /// Creates a new iterator pointing to the first cell in the workspace
-      virtual IMDIterator* createIterator(Mantid::Geometry::MDImplicitFunction * function = NULL) const;
+      virtual std::vector<IMDIterator*> createIterators(size_t suggestedNumCores = 1,
+          Mantid::Geometry::MDImplicitFunction * function = NULL) const = 0;
+
+      /// Creates a new iterator pointing to the first cell in the workspace
+      IMDIterator* createIterator(Mantid::Geometry::MDImplicitFunction * function = NULL) const;
 
       /// Returns the (normalized) signal at a given coordinates
-      virtual signal_t getSignalAtCoord(const coord_t * coords, const Mantid::API::MDNormalization & normalization) const
-      {
-        UNUSED_ARG(coords);
-        UNUSED_ARG(normalization);
-        throw std::runtime_error("getSignalAtCoord() not implemented.");
-      }
+      virtual signal_t getSignalAtCoord(const coord_t * coords, const Mantid::API::MDNormalization & normalization) const = 0;
 
       //-------------------------------------------------------------------------------------------
       /// Returns the signal (normalized by volume) at a given coordinates
       /// @param coords :: coordinate as a VMD vector
-      signal_t getSignalAtCoord(const Mantid::Kernel::VMD & coords, const Mantid::API::MDNormalization & normalization) const
+      signal_t getSignalAtVMD(const Mantid::Kernel::VMD & coords, const Mantid::API::MDNormalization & normalization) const
       {
         return this->getSignalAtCoord(coords.getBareArray(), normalization);
       }

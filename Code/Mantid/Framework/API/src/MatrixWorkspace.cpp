@@ -1485,14 +1485,31 @@ namespace Mantid
 
 
     //--------------------------------------------------------------------------------------------
-    /** Create a IMDIterator from this 2D workspace
+    /** Create IMDIterators from this 2D workspace
      *
-     * @param function :: implicit function
-     * @return MatrixWorkspaceMDIterator
+     * @param suggestedNumCores :: split the iterators into this many cores (if threadsafe)
+     * @param function :: implicit function to limit range
+     * @return MatrixWorkspaceMDIterator vector
      */
-    IMDIterator* MatrixWorkspace::createIterator(Mantid::Geometry::MDImplicitFunction * function) const
+    std::vector<IMDIterator*> MatrixWorkspace::createIterators(size_t suggestedNumCores,
+        Mantid::Geometry::MDImplicitFunction * function) const
     {
-      return new MatrixWorkspaceMDIterator(this, function);
+      size_t numCores = suggestedNumCores;
+      if (numCores < 1) numCores = 1;
+      if (!this->threadSafe()) numCores = 1;
+      if (numCores > this->getNumberHistograms())  numCores = this->getNumberHistograms();
+
+      // Create one iterator per core, splitting evenly amongst spectra
+      std::vector<IMDIterator*> out;
+      for (size_t i=0; i<numCores; i++)
+      {
+        size_t beginWI = (i * this->getNumberHistograms()) / numCores;
+        size_t endWI = ((i+1) * this->getNumberHistograms()) / numCores;
+        if (endWI > this->getNumberHistograms())
+          endWI = this->getNumberHistograms();
+        out.push_back(new MatrixWorkspaceMDIterator(this, function, beginWI, endWI));
+      }
+      return out;
     }
 
 

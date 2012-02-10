@@ -602,9 +602,9 @@ public:
         }
       }
     coord_t coords[2] = {0.5, 1.0};
-    TS_ASSERT_DELTA(ws->getSignalAtCoord(coords), 10.0, 1e-5);
+    TS_ASSERT_DELTA(ws->getSignalAtCoord(coords, Mantid::API::NoNormalization), 10.0, 1e-5);
     coords[0] = 1.5;
-    TS_ASSERT_DELTA(ws->getSignalAtCoord(coords), 11.0, 1e-5);
+    TS_ASSERT_DELTA(ws->getSignalAtCoord(coords, Mantid::API::NoNormalization), 11.0, 1e-5);
   }
 
 

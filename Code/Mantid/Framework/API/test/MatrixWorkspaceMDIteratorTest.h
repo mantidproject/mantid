@@ -17,7 +17,7 @@ class MatrixWorkspaceMDIteratorTest : public CxxTest::TestSuite
 {
 public:
 
-  void test_iterating()
+  boost::shared_ptr<MatrixWorkspace> makeFakeWS()
   {
     boost::shared_ptr<MatrixWorkspace> ws(new WorkspaceTester());
     // Matrix with 4 spectra, 5 bins each
@@ -32,6 +32,12 @@ public:
           ws->dataE(wi)[x] = double((wi*10 + x)*2);
         }
       }
+    return ws;
+  }
+
+  void test_iterating()
+  {
+    boost::shared_ptr<MatrixWorkspace> ws = makeFakeWS();
     IMDIterator * it;
     TS_ASSERT_THROWS_NOTHING( it = ws->createIterator(NULL) );
     TS_ASSERT_EQUALS( it->getDataSize(), 20);
@@ -51,7 +57,34 @@ public:
     TS_ASSERT_DELTA( it->getError(), 22.0, 1e-5);
     TS_ASSERT_DELTA( it->getCenter()[0], 1.5, 1e-5);
     TS_ASSERT_DELTA( it->getCenter()[1], 1.0, 1e-5);
+  }
 
+
+  /** Create a set of iterators that can be applied in parallel */
+  void test_parallel_iterators()
+  {
+    boost::shared_ptr<MatrixWorkspace> ws = makeFakeWS();
+    // The number of output cannot be larger than the number of histograms
+    TS_ASSERT_EQUALS( ws->createIterators(10, NULL).size(), 4);
+
+    // Split in 4 iterators
+    std::vector<IMDIterator*> iterators = ws->createIterators(4, NULL);
+    TS_ASSERT_EQUALS( iterators.size(), 4 );
+
+    for (size_t i=0; i<iterators.size(); i++)
+    {
+      IMDIterator * it = iterators[i];
+      // Only 5 elements per each iterator
+      TS_ASSERT_EQUALS( it->getDataSize(), 5);
+      TS_ASSERT_DELTA( it->getSignal(), double(i)*10 + 0.0, 1e-5);
+      it->next();
+      TS_ASSERT_DELTA( it->getSignal(), double(i)*10 + 1.0, 1e-5);
+      TS_ASSERT_DELTA( it->getError(), double(i)*20 + 2.0, 1e-5);
+      TS_ASSERT( it->next() );
+      TS_ASSERT( it->next() );
+      TS_ASSERT( it->next() );
+      TS_ASSERT( !it->next() );
+    }
   }
 
 

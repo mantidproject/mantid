@@ -40,7 +40,8 @@ namespace API
   class DLLExport MatrixWorkspaceMDIterator : public IMDIterator
   {
   public:
-    MatrixWorkspaceMDIterator(const MatrixWorkspace * workspace, Mantid::Geometry::MDImplicitFunction * function);
+    MatrixWorkspaceMDIterator(const MatrixWorkspace * workspace, Mantid::Geometry::MDImplicitFunction * function,
+        size_t beginWI = 0, size_t endWI = size_t(-1));
     virtual ~MatrixWorkspaceMDIterator();
     virtual size_t getDataSize() const;
 
@@ -118,8 +119,12 @@ namespace API
 
     /// Blocksize of workspace
     size_t m_blockSize;
-    /// Number of histograms in workspace
-    size_t m_numHistos;
+
+    /// Workspace index at which the iterator begins
+    size_t m_beginWI;
+
+    /// Workspace index at which the iterator ends
+    size_t m_endWI;
   };
 
 

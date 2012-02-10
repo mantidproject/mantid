@@ -288,7 +288,8 @@ namespace Mantid
       void saveSpectraMapNexus(::NeXus::File * file, const std::vector<int>& spec,
           const ::NeXus::NXcompression compression = ::NeXus::LZW) const;
 
-      IMDIterator* createIterator(Mantid::Geometry::MDImplicitFunction * function) const;
+      virtual std::vector<IMDIterator*> createIterators(size_t suggestedNumCores = 1,
+          Mantid::Geometry::MDImplicitFunction * function = NULL) const;
 
       void saveInstrumentNexus(::NeXus::File * file) const;
       void loadInstrumentNexus(::NeXus::File * file);

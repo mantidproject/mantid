@@ -27,12 +27,17 @@ namespace Mantid
       {
       }
 
-      /**
-        * Default implementation throws NotImplementedError exception.
-        */
-      IMDIterator* IMDWorkspace::createIterator(Mantid::Geometry::MDImplicitFunction * ) const
+      /** Creates a single iterator and returns it.
+       *
+       * This calls createIterators(), a pure virtual method on IMDWorkspace which
+       * has custom implementations for other workspaces.
+       *
+       * @param function :: Implicit function limiting space to look at
+       * @return a single IMDIterator pointer
+       */
+      IMDIterator* IMDWorkspace::createIterator(Mantid::Geometry::MDImplicitFunction * function) const
       {
-        throw Kernel::Exception::NotImplementedError("Iterator is not implemented for this workspace");
+        return this->createIterators(1, function)[0];
       }
   }
 }

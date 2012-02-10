@@ -64,7 +64,8 @@ namespace MDEvents
       return m_length;
     }
 
-    virtual Mantid::API::IMDIterator* createIterator(Mantid::Geometry::MDImplicitFunction * function = NULL) const;
+    virtual std::vector<Mantid::API::IMDIterator*> createIterators(size_t suggestedNumCores = 1,
+        Mantid::Geometry::MDImplicitFunction * function = NULL) const;
 
     virtual void getLinePlot(const Mantid::Kernel::VMD & start, const Mantid::Kernel::VMD & end,
         Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y, std::vector<signal_t> & e) const;

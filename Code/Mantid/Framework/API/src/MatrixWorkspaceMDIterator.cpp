@@ -14,21 +14,40 @@ namespace API
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
+   *
+   * @param workspace :: iterate through this workspace
+   * @param function :: limiting implicit function
+   * @param beginWI :: first workspace index to iterate
+   * @param endWI :: end when you reach this workspace index
    */
-  MatrixWorkspaceMDIterator::MatrixWorkspaceMDIterator(const MatrixWorkspace * workspace, Mantid::Geometry::MDImplicitFunction * function)
+  MatrixWorkspaceMDIterator::MatrixWorkspaceMDIterator(const MatrixWorkspace * workspace,
+      Mantid::Geometry::MDImplicitFunction * function,
+      size_t beginWI, size_t endWI)
   : m_ws(workspace), m_pos(0), m_max(0), m_function(function), m_errorIsCached(false)
   {
     if (!m_ws)
       throw std::runtime_error("MatrixWorkspaceMDIterator::ctor() NULL MatrixWorkspace");
-    m_max = m_ws->size();
     m_center = VMD(2);
     m_isBinnedData = m_ws->isHistogramData();
     m_dimY = m_ws->getDimension(1);
     m_blockSize = m_ws->blocksize();
-    m_numHistos = m_ws->getNumberHistograms();
-    m_workspaceIndex = -1;
+
+    m_beginWI = beginWI;
+    if (m_beginWI >= m_ws->getNumberHistograms())
+      throw std::runtime_error("MatrixWorkspaceMDIterator: Beginning workspace index passed is too high.");
+
+    // End point (handle default)
+    m_endWI = endWI;
+    if (m_endWI > m_ws->getNumberHistograms())
+      m_endWI = m_ws->getNumberHistograms();
+    if (m_endWI < m_beginWI)
+      throw std::runtime_error("MatrixWorkspaceMDIterator: End point is before the start point.");
+
+    m_max = (m_endWI - m_beginWI) * m_blockSize;
     m_xIndex = 0;
-    calcWorkspacePos(0);
+    // Trigger the calculation for the first index
+    m_workspaceIndex = -1;
+    calcWorkspacePos(m_beginWI);
   }
     
   //----------------------------------------------------------------------------------------------
@@ -56,14 +75,15 @@ namespace API
   {
     m_pos = uint64_t(index);
     m_xIndex = m_pos % m_blockSize;
-    size_t newWI = m_pos / m_blockSize;
+    size_t newWI = m_beginWI + (m_pos / m_blockSize);
     calcWorkspacePos(newWI);
   }
 
+  //----------------------------------------------------------------------------------------------
   /// Calculate the workspace index/x index for this iterator position
   inline void MatrixWorkspaceMDIterator::calcWorkspacePos(size_t newWI)
   {
-    if (newWI >= m_numHistos)
+    if (newWI >= m_endWI)
       return;
 
     if (newWI != m_workspaceIndex)

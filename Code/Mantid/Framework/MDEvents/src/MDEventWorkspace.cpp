@@ -199,14 +199,22 @@ namespace MDEvents
 
   //-----------------------------------------------------------------------------------------------
   /** Creates a new iterator pointing to the first cell (box) in the workspace
+   *
+   * @param suggestedNumCores :: split iterator over this many cores.
    * @param function :: Optional MDImplicitFunction limiting the iterator
+   * @param normalization :: how signal will be normalized
    */
   TMDE(
-  Mantid::API::IMDIterator*  MDEventWorkspace)::createIterator(Mantid::Geometry::MDImplicitFunction * function) const
+  std::vector<Mantid::API::IMDIterator*>  MDEventWorkspace)::createIterators(size_t suggestedNumCores,
+      Mantid::Geometry::MDImplicitFunction * function) const
   {
     // TODO: Should this be leaf only? Depends on most common use case
-    return new MDBoxIterator<MDE,nd>(data, 10000, true, function);
+    // TODO: handle parallelization
+    std::vector<Mantid::API::IMDIterator*> out;
+    out.push_back( new MDBoxIterator<MDE,nd>(data, 10000, true, function) );
+    return out;
   }
+
 
 
   //-----------------------------------------------------------------------------------------------
