@@ -1231,40 +1231,38 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
     {
       addTableWorkspaceMenuItems(menu);
     }
-    else {}
     
     //Get the names of the programs for the send to option
     std::vector<std::string> programNames = (Mantid::Kernel::ConfigService::Instance().getKeys("workspace.sendto.name"));
-
+    bool firstPass(true);
     //Check to see if any options aren't visible
-    std::map<std::string,std::string> programVisible;
-    bool allVisible(false);
     for (size_t i = 0; i<programNames.size(); i++)
     {
-      programVisible[programNames[i]] = Mantid::Kernel::ConfigService::Instance().getString("workspace.sendto." + programNames[i] + ".visible");
+      std::string visible = Mantid::Kernel::ConfigService::Instance().getString("workspace.sendto." + programNames[i] + ".visible");
       std::string target = Mantid::Kernel::ConfigService::Instance().getString("workspace.sendto." + programNames[i] + ".target");
-      if (Mantid::Kernel::ConfigService::Instance().isExecutable(target) && programVisible.find(programNames[i])->second == "Yes")
-        allVisible = true;
-    }
-
-    if(allVisible == true)
-    {
-	    m_saveToProgram = new QMenu(tr("Send to"),this);
-	    menu->addMenu(m_saveToProgram);
-
-	    //Sub-menu for program list
-	    m_programMapper = new QSignalMapper(this);  
-
-
-
-      for (size_t i = 0; i<programNames.size(); i++)
+      if (Mantid::Kernel::ConfigService::Instance().isExecutable(target) && visible == "Yes")
       {
-        //Find out if visible is selected for any of the programs
-        std::string visible = Mantid::Kernel::ConfigService::Instance().getString("workspace.sendto." + programNames[i] + ".visible");
-                 
-        if(visible == "Yes")
+        bool compatible(true);
+        std::string saveUsing(Mantid::Kernel::ConfigService::Instance().getString("workspace.sendto." + programNames[i] + ".saveusing") );
+        try
         {
-          //Convert name from std string to QString for use with QAction menu entry
+          Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create(saveUsing);
+          alg->setPropertyValue("InputWorkspace", selectedWsName.toStdString() );
+        }
+        catch(std::exception& ex)
+        {
+          compatible = false;
+        }
+        if (compatible != false)
+        {
+          if (firstPass == true)
+          {
+            m_saveToProgram = new QMenu(tr("Send to"),this);
+	          menu->addMenu(m_saveToProgram);
+
+	          //Sub-menu for program list
+	          m_programMapper = new QSignalMapper(this);
+          }
           QString name = QString::fromStdString(programNames[i]);
           //Setup new menu option for the program
           m_program = new QAction(tr(name),this);
@@ -1272,11 +1270,17 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
           //Send name of program when clicked
           m_programMapper->setMapping(m_program, name);
           m_saveToProgram->addAction(m_program);		
-	      }
-      }
-      //Tell the button what to listen for and what to do once clicked
-      connect(m_programMapper, SIGNAL(mapped(const QString &)), this, SLOT(saveToProgram(const QString &)));
+            
+          // Set first pass to false so that it doesn't set up another menu entry for all programs.
+          firstPass = false;
+        }
+      } 
     }
+    
+    //Tell the button what to listen for and what to do once clicked (if there is anything to connect it will be set to false)
+    if (firstPass == false)    
+      connect(m_programMapper, SIGNAL(mapped(const QString &)), this, SLOT(saveToProgram(const QString &)));
+
     //Rename is valid for all workspace types
     menu->addAction(m_rename);
     //separate delete
