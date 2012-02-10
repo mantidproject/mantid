@@ -51,6 +51,11 @@ private:
       throw std::runtime_error("Not Implemented");
     }
 
+    virtual signal_t getSignalAtCoord(const coord_t * , const Mantid::API::MDNormalization & ) const
+    {
+      return 0;
+    }
+
     //constructor allows a workspace name to be provide.
   MockIMDWorkspace(std::string name)
   {
