@@ -9,6 +9,7 @@ set ( SRC_FILES
 	src/FindUBUsingMinMaxD.cpp
 	src/IndexPeaks.cpp
         src/ShowPossibleCells.cpp
+        src/SelectCellOfType.cpp
 	src/IntegratePeakTimeSlices.cpp
 	src/LoadHKL.cpp
 	src/LoadIsawPeaks.cpp
@@ -42,6 +43,7 @@ set ( INC_FILES
 	inc/MantidCrystal/FindUBUsingMinMaxD.h
 	inc/MantidCrystal/IndexPeaks.h
 	inc/MantidCrystal/ShowPossibleCells.h
+        inc/MantidCrystal/SelectCellOfType.h
     inc/MantidCrystal/IndexSXPeaks.h
         inc/MantidCrystal/GSLFunctions.h
 	inc/MantidCrystal/IntegratePeakTimeSlices.h

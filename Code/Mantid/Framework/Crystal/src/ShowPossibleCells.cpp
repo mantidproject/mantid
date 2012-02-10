@@ -83,12 +83,9 @@ namespace Crystal
     this->declareProperty(new PropertyWithValue<double>( "MaxScalarError",0.2,
           mustBePositive,Direction::Input),"Max Scalar Error (0.2)");
 
-    this->declareProperty( "BestOnly", true, "Show at most one for each Bravais Lattice" );
-/*
-    this->declareProperty(
-             new PropertyWithValue<bool>("BestOnly", true, Direction::Input),
-            "Show at most one for each Bravais Lattice" );
-*/
+    this->declareProperty( "BestOnly", true, 
+                           "Show at most one for each Bravais Lattice" );
+
     this->declareProperty(
           new PropertyWithValue<int>( "NumberOfCells", 0,
           Direction::Output), "Gets set with the number of possible cells.");
