@@ -4,6 +4,7 @@
 #include "MantidMDEvents/MDBoxIterator.h"
 
 using namespace Mantid;
+using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
 namespace Mantid
@@ -42,7 +43,8 @@ namespace MDEvents
     m_max = m_boxes.size();
     // Get the first box
     if (m_max > 0)
-      m_current = m_boxes[0];  }
+      m_current = m_boxes[0];
+  }
 
 
   //----------------------------------------------------------------------------------------------
@@ -68,7 +70,6 @@ namespace MDEvents
   TMDE(
   void MDBoxIterator)::init(std::vector<IMDBox<MDE,nd>*> & boxes, size_t begin, size_t end)
   {
-    m_boxes.clear();
     if (begin >= boxes.size())
       throw std::runtime_error("MDBoxIterator::ctor(): invalid beginning position.");
     size_t theEnd = end;
@@ -78,7 +79,8 @@ namespace MDEvents
       theEnd = boxes.size();
 
     // Copy the pointers to boxes in the range.
-    m_boxes.assign(boxes.begin() + begin, boxes.begin() + end);
+    m_boxes.clear();
+    m_boxes.insert(m_boxes.begin(), boxes.begin() + begin, boxes.begin() + theEnd);
 
     m_max = m_boxes.size();
     // Get the first box
@@ -200,13 +202,33 @@ namespace MDEvents
   /// Returns the normalized signal for this box
   TMDE(signal_t MDBoxIterator)::getNormalizedSignal() const
   {
-    return m_current->getSignalNormalized();
+    // What is our normalization factor?
+    switch (m_normalization)
+    {
+    case NoNormalization:
+      return m_current->getSignal();
+    case VolumeNormalization:
+      return m_current->getSignal() * m_current->getInverseVolume();
+    case NumEventsNormalization:
+      return m_current->getSignal() * m_current->getNPoints();
+    }
+    return std::numeric_limits<signal_t>::quiet_NaN();
   }
 
   /// Returns the normalized error for this box
   TMDE(signal_t MDBoxIterator)::getNormalizedError() const
   {
-    return m_current->getError() * m_current->getInverseVolume();
+    // What is our normalization factor?
+    switch (m_normalization)
+    {
+    case NoNormalization:
+      return m_current->getError();
+    case VolumeNormalization:
+      return m_current->getError() * m_current->getInverseVolume();
+    case NumEventsNormalization:
+      return m_current->getError() * m_current->getNPoints();
+    }
+    return std::numeric_limits<signal_t>::quiet_NaN();
   }
 
   /// Returns the signal for this box

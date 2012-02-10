@@ -50,6 +50,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/ReadLock.h"
 #include "MantidQtAPI/SafeQwtPlot.h"
+#include "MantidKernel/MultiThreaded.h"
 
 
 using namespace Mantid;
@@ -922,7 +923,7 @@ void SliceViewer::resetAxis(int axis, Mantid::Geometry::IMDDimension_const_sptr 
 /** Get the range of signal given an iterator
  *
  * @param it :: IMDIterator of what to find
- * @return the min/max range, or 0-1.0 if not found
+ * @return the min/max range, or INFINITY if not found
  */
 QwtDoubleInterval SliceViewer::getRange(IMDIterator * it)
 {
@@ -946,6 +947,47 @@ QwtDoubleInterval SliceViewer::getRange(IMDIterator * it)
     }
   } while (it->next());
 
+
+  if (minSignal == DBL_MAX)
+  {
+    minSignal = m_inf;
+    maxSignal = m_inf;
+  }
+  return QwtDoubleInterval(minSignal, maxSignal);
+}
+
+//------------------------------------------------------------------------------------
+/** Get the range of signal, in parallel, given an iterator
+ *
+ * @param iterators :: vector of IMDIterator of what to find
+ * @return the min/max range, or 0-1.0 if not found
+ */
+QwtDoubleInterval SliceViewer::getRange(std::vector<IMDIterator *> iterators)
+{
+  std::vector<QwtDoubleInterval> intervals(iterators.size());
+
+  PRAGMA_OMP( parallel for schedule(dynamic, 1))
+  for (int i=0; i < int(iterators.size()); i++)
+  {
+    IMDIterator * it = iterators[i];
+    QwtDoubleInterval range = this->getRange(iterators[i]);
+    intervals[i] = range;
+    delete it;
+  }
+
+  // Combine the overall min/max
+  double minSignal = DBL_MAX;
+  double maxSignal = -DBL_MAX;
+  for (size_t i=0; i < iterators.size(); i++)
+  {
+    double signal;
+    signal = intervals[i].minValue();
+    if (signal != m_inf && signal > 0 && signal < minSignal) minSignal = signal;
+
+    signal = intervals[i].maxValue();
+    if (signal != m_inf && signal > maxSignal) maxSignal = signal;
+  }
+
   if (minSignal == DBL_MAX)
   {
     minSignal = 0.0;
@@ -959,23 +1001,9 @@ QwtDoubleInterval SliceViewer::getRange(IMDIterator * it)
       // Possibly only one value in range
       return QwtDoubleInterval(minSignal*0.5, minSignal*1.5);
     else
+      // Other default value
       return QwtDoubleInterval(0., 1.0);
   }
-}
-
-//------------------------------------------------------------------------------------
-/** Get the range of signal, in parallel, given an iterator
- *
- * @param iterators :: vector of IMDIterator of what to find
- * @return the min/max range, or 0-1.0 if not found
- */
-QwtDoubleInterval SliceViewer::getRange(std::vector<IMDIterator *> & iterators)
-{
-//  PRAGMA_OMP( parallel for )
-//  for (int i=0; i < int(iterators.size(); i++)
-//  {
-//
-//  }
 }
 
 //------------------------------------------------------------------------------------
@@ -988,9 +1016,8 @@ void SliceViewer::findRangeFull()
   ReadLock lock(*m_ws);
 
   // Iterate through the entire workspace
-  IMDIterator * it = m_ws->createIterator();
-  m_colorRangeFull = getRange(it);
-  delete it;
+  std::vector<IMDIterator *> iterators = m_ws->createIterators(PARALLEL_GET_MAX_THREADS);
+  m_colorRangeFull = getRange(iterators);
 }
 
 
@@ -1038,12 +1065,11 @@ void SliceViewer::findRangeSlice()
   MDBoxImplicitFunction * function = new MDBoxImplicitFunction(min, max);
 
   // Iterate through the slice
-  IMDIterator * it = m_ws->createIterator(function);
-  m_colorRangeSlice = getRange(it);
+  std::vector<IMDIterator *> iterators = m_ws->createIterators(PARALLEL_GET_MAX_THREADS, function);
+  m_colorRangeSlice = getRange(iterators);
   // In case of failure, use the full range instead
   if (m_colorRangeSlice == QwtDoubleInterval(0.0, 1.0))
     m_colorRangeSlice = m_colorRangeFull;
-  delete it;
 }
 
 
