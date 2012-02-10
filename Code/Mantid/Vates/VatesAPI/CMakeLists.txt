@@ -40,7 +40,6 @@ src/vtkMDQuadFactory.cpp
 src/vtkSplatterPlotFactory.cpp
 src/vtkMDEWHexahedronFactory.cpp
 src/vtkPeakMarkerFactory.cpp
-src/vtkStructuredGridFactory.cpp
 src/vtkThresholdingHexahedronFactory.cpp
 src/vtkThresholdingLineFactory.cpp
 src/vtkThresholdingQuadFactory.cpp
@@ -99,7 +98,6 @@ inc/MantidVatesAPI/vtkMDQuadFactory.h
 inc/MantidVatesAPI/vtkMDEWHexahedronFactory.h
 inc/MantidVatesAPI/vtkSplatterPlotFactory.h
 inc/MantidVatesAPI/vtkPeakMarkerFactory.h
-inc/MantidVatesAPI/vtkStructuredGridFactory.h
 inc/MantidVatesAPI/vtkThresholdingHexahedronFactory.h
 inc/MantidVatesAPI/vtkThresholdingLineFactory.h
 inc/MantidVatesAPI/vtkThresholdingQuadFactory.h
@@ -122,7 +120,6 @@ test/vtkMDQuadFactoryTest.h
 test/vtkMDEWHexahedronFactoryTest.h
 test/vtkSplatterPlotFactoryTest.h
 test/vtkPeakMarkerFactoryTest.h
-test/vtkStructuredGridFactoryTest.h
 test/vtkThresholdingUnstructuredGridFactoryTest.h
 test/vtkThresholdingHexahedronFactoryTest.h
 test/vtkThresholdingLineFactoryTest.h
