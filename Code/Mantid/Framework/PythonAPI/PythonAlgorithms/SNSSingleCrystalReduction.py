@@ -49,32 +49,6 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         self.declareFileProperty("OutputFile", "", FileAction.OptionalLoad, outfiletypes,  Description="Name of output file to write/append.")
         self.declareProperty("AppendHKLFile", False, Description="Append existing hkl file")
 
-    def _findData(self, runnumber, extension):
-        result = FindSNSNeXus(Instrument=self._instrument,
-                              RunNumber=runnumber, Extension=extension)
-        return result["ResultPath"].value
-
-    def _loadPreNeXusData(self, runnumber, extension):
-        # find the file to load
-        filename = self._findData(runnumber, extension)
-
-        # generate the workspace name
-        (path, name) = os.path.split(filename)
-        name = name.split('.')[0]
-        (name, num) = name.split('_neutron')
-        num = num.replace('_event', '') # TODO should do something with this
-
-        # load the prenexus file
-        alg = LoadEventPreNexus(EventFilename=filename, OutputWorkspace=name)
-        wksp = alg['OutputWorkspace']
-
-        # add the logs to it
-        nxsfile = self._findData(runnumber, ".nxs")
-        LoadLogsFromSNSNexus(Workspace=wksp, Filename=nxsfile)
-        # TODO filter out events using timemin and timemax
-
-        return wksp
-
     def _loadNeXusData(self, filename, name, bank, extension, **kwargs):
         alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, BankName=bank, SingleBankPixelsOnly=1, FilterByTofMin=self._binning[0], FilterByTofMax=self._binning[2], LoadMonitors=True, MonitorsAsEvents=True, **kwargs)
         wksp = alg['OutputWorkspace']
@@ -158,10 +132,6 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             PeakIntegration(InputWorkspace=wksp,InPeaksWorkspace=peaksWS,OutPeaksWorkspace=peaksWS)
 
     def PyExec(self):
-        # temporary hack for getting python algorithms working
-        import mantidsimple
-        globals()["FindSNSNeXus"] = mantidsimple.FindSNSNeXus
-
         # get generic information
         SUFFIX = "_event.nxs"
         self._binning = self.getProperty("Binning")
