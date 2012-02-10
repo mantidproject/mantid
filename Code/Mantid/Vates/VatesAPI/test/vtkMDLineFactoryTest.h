@@ -1,9 +1,9 @@
-#ifndef VTK_MD_QUAD_FACTORY_TEST
-#define VTK_MD_QUAD_FACTORY_TEST 
+#ifndef VTK_MD_LINE_FACTORY_TEST
+#define VTK_MD_LINE_FACTORY_TEST
 
 #include <cxxtest/TestSuite.h>
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidVatesAPI/vtkMDQuadFactory.h"
+#include "MantidVatesAPI/vtkMDLineFactory.h"
 #include "MantidVatesAPI/NoThresholdRange.h"
 #include "MockObjects.h"
 #include "MantidMDEvents/SliceMD.h"
@@ -19,27 +19,26 @@ using namespace testing;
 //=====================================================================================
 // Functional tests
 //=====================================================================================
-class vtkMDQuadFactoryTest : public CxxTest::TestSuite
+class vtkMDLineFactoryTest : public CxxTest::TestSuite
 {
-
 public:
 
   void testcreateMeshOnlyThrows()
   {
-    vtkMDQuadFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
     TS_ASSERT_THROWS(factory.createMeshOnly(), std::runtime_error);
   }
 
   void testcreateScalarArray()
   {
-    vtkMDQuadFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
     TS_ASSERT_THROWS(factory.createScalarArray(), std::runtime_error);
   }
 
   void testGetFactoryTypeName()
   {
-    vtkMDQuadFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
-    TS_ASSERT_EQUALS("vtkMDQuadFactory", factory.getFactoryTypeName());
+    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+    TS_ASSERT_EQUALS("vtkMDLineFactory", factory.getFactoryTypeName());
   }
 
   void testInitializeDelegatesToSuccessor()
@@ -48,7 +47,7 @@ public:
     EXPECT_CALL(*mockSuccessor, initialize(_)).Times(1);
     EXPECT_CALL(*mockSuccessor, getFactoryTypeName()).Times(1);
 
-    vtkMDQuadFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
     factory.SetSuccessor(mockSuccessor);
 
     ITableWorkspace_sptr ws(new Mantid::DataObjects::TableWorkspace);
@@ -64,7 +63,7 @@ public:
     EXPECT_CALL(*mockSuccessor, create()).Times(1);
     EXPECT_CALL(*mockSuccessor, getFactoryTypeName()).Times(1);
 
-    vtkMDQuadFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
     factory.SetSuccessor(mockSuccessor);
 
     ITableWorkspace_sptr ws(new Mantid::DataObjects::TableWorkspace);
@@ -76,45 +75,44 @@ public:
 
   void testOnInitaliseCannotDelegateToSuccessor()
   {
-    vtkMDQuadFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
     //factory.SetSuccessor(mockSuccessor); No Successor set.
 
     ITableWorkspace_sptr ws(new Mantid::DataObjects::TableWorkspace);
     TS_ASSERT_THROWS(factory.initialize(ws), std::runtime_error);
   }
 
-  void testCreateWithoutInitaliseThrows()
+  void testCreateWithoutInitializeThrows()
   {
-    vtkMDQuadFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
     //initialize not called!
     TS_ASSERT_THROWS(factory.create(), std::runtime_error);
   }
 
   void testCreation()
   {
-    boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDEvent<2>,2> >
-            ws = MDEventsTestHelper::makeMDEWFull<2>(10, 10, 10, 10);
+    boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDEvent<1>,1> >
+            ws = MDEventsTestHelper::makeMDEWFull<1>(10, 10, 10, 10);
 
     //Rebin it to make it possible to compare cells to bins.
     SliceMD slice;
     slice.initialize();
     slice.setProperty("InputWorkspace", ws);
-    slice.setPropertyValue("AlignedDimX", "Axis0, -10, 10, 10");
-    slice.setPropertyValue("AlignedDimY", "Axis1, -10, 10, 10");
+    slice.setPropertyValue("AlignedDimX", "Axis0, -10, 10, 100");
     slice.setPropertyValue("OutputWorkspace", "binned");
     slice.execute();
 
     Workspace_sptr binned = Mantid::API::AnalysisDataService::Instance().retrieve("binned");
 
-    vtkMDQuadFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
     factory.initialize(binned);
 
     vtkDataSet* product = factory.create();
 
     TS_ASSERT(dynamic_cast<vtkUnstructuredGrid*>(product) != NULL);
     TS_ASSERT_EQUALS(100, product->GetNumberOfCells());
-    TS_ASSERT_EQUALS(400, product->GetNumberOfPoints());
-    TS_ASSERT_EQUALS(VTK_QUAD, product->GetCellType(0));
+    TS_ASSERT_EQUALS(200, product->GetNumberOfPoints());
+    TS_ASSERT_EQUALS(VTK_LINE, product->GetCellType(0));
 
     product->Delete();
     AnalysisDataService::Instance().remove("binned");
@@ -125,21 +123,20 @@ public:
 //=====================================================================================
 // Peformance tests
 //=====================================================================================
-class vtkMDQuadFactoryTestPerformance : public CxxTest::TestSuite
+class vtkMDLineFactoryTestPerformance : public CxxTest::TestSuite
 {
 
 public:
 
   void setUp()
   {
-    boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDEvent<2>,2> > input 
-      = MDEventsTestHelper::makeMDEWFull<2>(10, 10, 10, 1000);
+    boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDEvent<1>,1> > input 
+      = MDEventsTestHelper::makeMDEWFull<1>(2, 10, 10, 4000);
     //Rebin it to make it possible to compare cells to bins.
     SliceMD slice;
     slice.initialize();
     slice.setProperty("InputWorkspace", input);
-    slice.setPropertyValue("AlignedDimX", "Axis0, -10, 10, 400");
-    slice.setPropertyValue("AlignedDimY", "Axis1, -10, 10, 400");
+    slice.setPropertyValue("AlignedDimX", "Axis0, -10, 10, 200000");
     slice.setPropertyValue("OutputWorkspace", "binned");
     slice.execute();
   }
@@ -153,14 +150,14 @@ public:
   {
     Workspace_sptr binned = Mantid::API::AnalysisDataService::Instance().retrieve("binned");
 
-    vtkMDQuadFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
     factory.initialize(binned);
 
     vtkDataSet* product = factory.create();
 
     TS_ASSERT(dynamic_cast<vtkUnstructuredGrid*>(product) != NULL);
-    TS_ASSERT_EQUALS(160000, product->GetNumberOfCells());
-    TS_ASSERT_EQUALS(640000, product->GetNumberOfPoints());
+    TS_ASSERT_EQUALS(200000, product->GetNumberOfCells());
+    TS_ASSERT_EQUALS(400000, product->GetNumberOfPoints());
 
     product->Delete();
     

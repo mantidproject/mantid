@@ -10,10 +10,10 @@ namespace Mantid
   namespace VATES
   {
 
-   /** Factory for creating a vtkDataSet from an IMDEventWorkspace with two non-integrated dimensions.
+   /** Factory for creating a vtkDataSet from an IMDEventWorkspace with a single non-integrated dimensions.
     Delegates processing to a successor if these conditions are not met.
     
-    @date 2012-02-09
+    @date 2012-02-10
 
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -35,15 +35,15 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-    class DLLExport vtkMDQuadFactory : public vtkDataSetFactory
+    class DLLExport vtkMDLineFactory : public vtkDataSetFactory
     {
 
     public:
       /// Constructor
-      vtkMDQuadFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName);
+      vtkMDLineFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName);
 
       /// Destructor
-      virtual ~vtkMDQuadFactory();
+      virtual ~vtkMDLineFactory();
 
       /// Factory Method. Should also handle delegation to successors.
       virtual vtkDataSet* create() const;
