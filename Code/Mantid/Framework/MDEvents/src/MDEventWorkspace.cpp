@@ -266,9 +266,9 @@ namespace MDEvents
       case NoNormalization:
         return box->getSignal();
       case VolumeNormalization:
-        return box->getInverseVolume() * box->getSignal();
+        return box->getSignal() * box->getInverseVolume();
       case NumEventsNormalization:
-        return double(box->getNPoints()) * box->getSignal();
+        return box->getSignal() / double(box->getNPoints());
       }
       // Should not reach here
       return box->getSignal();

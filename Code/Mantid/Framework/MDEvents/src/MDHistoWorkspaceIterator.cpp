@@ -184,19 +184,45 @@ namespace MDEvents
   /// Returns the normalized signal for this box
   signal_t MDHistoWorkspaceIterator::getNormalizedSignal() const
   {
-    return m_ws->getSignalNormalizedAt(m_pos);
+    // What is our normalization factor?
+    switch (m_normalization)
+    {
+    case NoNormalization:
+      return m_ws->getSignalAt(m_pos);
+    case VolumeNormalization:
+      return m_ws->getSignalAt(m_pos) * m_ws->getInverseVolume();
+    case NumEventsNormalization:
+      /// TODO: # of events normalization
+      return m_ws->getSignalAt(m_pos);
+    }
+    // Should not reach here
+    return std::numeric_limits<signal_t>::quiet_NaN();
   }
 
+  //----------------------------------------------------------------------------------------------
   /// Returns the normalized error for this box
   signal_t MDHistoWorkspaceIterator::getNormalizedError() const
   {
-    return m_ws->getErrorNormalizedAt(m_pos);
+    // What is our normalization factor?
+    switch (m_normalization)
+    {
+    case NoNormalization:
+      return m_ws->getErrorAt(m_pos);
+    case VolumeNormalization:
+      return m_ws->getErrorAt(m_pos) * m_ws->getInverseVolume();
+    case NumEventsNormalization:
+      /// TODO: # of events normalization
+      return m_ws->getErrorAt(m_pos);
+    }
+    // Should not reach here
+    return std::numeric_limits<signal_t>::quiet_NaN();
   }
 
+  //----------------------------------------------------------------------------------------------
   /// Returns the signal for this box, same as innerSignal
   signal_t MDHistoWorkspaceIterator::getSignal() const
   {
-    return m_ws->getSignalAt(m_pos);;
+    return m_ws->getSignalAt(m_pos);
   }
 
   /// Returns the error for this box, same as innerError
