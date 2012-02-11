@@ -41,8 +41,10 @@ namespace Kernel
 {
   namespace MultiFileNameParsing
   {
+    /// Parses a string consisting of only run number info, into a vector of vector of run numbers.
     MANTID_KERNEL_DLL std::vector<std::vector<unsigned int> > parseMultiRunString(std::string runString);
 
+    /// Regexs used to match / parse various strings.
     namespace Regexs
     {
       extern const std::string INST, UNDERSCORE, SPACE;
@@ -53,71 +55,118 @@ namespace Kernel
 
     /**
       This class takes a string representing multiple files and parses it into
-      a "VectOfStrings2StringMap" (std::map<std::vector<std::string>, std::string>)
-      which contains a map of vectors of fileNames to workspace name. 
-    
-      Filenames found together in the same vector are to be added - the workspace 
-      name reflects this.
+      a vector of vectors of file names.  Filenames to be added are placed in the
+      same sub vectors.
 
-      The string to parse will be of the format [dir][inst][runs][ext], where:
+      The string to parse should be of the format [dir][inst][under][runs][ext], where:
 
-      [dir]  (Optional) = The OS-specific file directory, e.g. "c:\data\"
-      [inst] (Required) = The instrument name including any underscores, e.g. "IRS" or "PG3_".
-      [runs] (Required) = The run numbers, e.g. "0102, 0110-0115, 0120, 0130:0140:2"
-      [ext]  (Optional) = The file extension, e.g. ".raw"
+      [dir]   (Optional) = The OS-specific file directory, e.g. "c:\data\"
+      [inst]  (Required) = The instrument name, e.g. "IRS" or "PG3"
+      [under] (Optional) = An underscore.
+      [runs]  (Required) = The run numbers, e.g. "0102, 0110-0115, 0120, 0130:0140:2"
+      [ext]   (Optional) = The file extension, e.g. ".raw"
     */
-    class MANTID_KERNEL_DLL MultiFileNameParser
+    class MANTID_KERNEL_DLL Parser
     {
     public:
       /// Constructor
-      MultiFileNameParser();
+      Parser();
       /// Destructor
-      ~MultiFileNameParser();
+      ~Parser();
 
-      /// Parse the multiFileNameString.  Returns error if failed, "" if successful.
-      std::string parse(const std::string & multiFileName);
-    
-      /// Returns the result of a call to parse.
-      //std::map<std::vector<std::string>, std::string> getFileNamesToWsNameMap() const;
-
-      /// Returns a vector of all the workspace names.
-      std::vector<std::string> getWsNames() const;
-
-      /// Returns a vector of vectors of all the filenames.
-      std::vector<std::vector<std::string> > getFileNames() const;
-
-      static std::string getPathDir(const std::string & path);
+      /// Parse the given multiFileNameString.
+      void parse(const std::string & multiFileName);
+      
+      /// Return the vector of vectors of parsed file names.
+      std::vector<std::vector<unsigned int> > runs() {return m_runs;}
+      /// Return the vector of vectors of parsed file names.
+      std::vector<std::vector<std::string> > fileNames() {return m_fileNames;}
+      /// Return the parsed directory string.
+      std::string dirString() {return m_dirString;}
+      /// Return the parsed instrument string.
+      std::string instString() {return m_instString;}
+      /// Return the parsed underscore string.
+      std::string underscoreString() {return m_underscoreString;}
+      /// Return the parsed run string.
+      std::string runString() {return m_runString;}
+      /// Return the parsed extension string.
+      std::string extString() {return m_extString;}
 
     private:
-      /// Clears all member variables.
+      /// Clear all member variables.
       void clear();
-
-      /// Does an initial split of the multiFileName string.
+      /// Split the string to parse into its component parts.
       void split();
-      /// Appends run numbers and corresponding wsNames to final map.
-      void populateMap(const std::pair<std::vector<unsigned int>, std::string> & pair);
-      /// Creates a file name from the given run and currently parsed info 
-      /// about file type, etc.
-      std::string createFileName(unsigned int run);
-      ///
-      std::string createZeroPaddedFileName(unsigned int run);
-      /// Zero pads the run number used in a file name to required length.
-      static std::string pad(std::string run, int count);
-      /// Returns the part of the given string that matches the given regex.
-      static std::string getMatchingString(const std::string & regexString, const std::string & toParse);
-      /// Generates a wsName from the given vector of runs.
-      static std::string getWorkspaceName(const std::vector<unsigned int> runs);
-
-      int m_zeroPadding;
-
+      
+      /// A vector of vectors of the parsed runs.
+      std::vector<std::vector<unsigned int> > m_runs;
+      /// A vector of vectors of the parsed file names.
+      std::vector<std::vector<std::string> > m_fileNames;
+      /// The given string to parse.
       std::string m_multiFileName;
-      std::string m_dir, m_inst, m_runs, m_ext;
-
-      std::map<std::vector<std::string>, std::string> m_fileNamesToWsNameMap;
-      UserStringParser m_parser;
+      /// The various sections of the given string to parse.
+      std::string m_dirString, m_instString, m_underscoreString, m_runString, m_extString;
+      /// The instrument-specific run zero padding value.
+      int m_zeroPadding;
     };
 
-  }
-}
-}
+    /**
+      A functor that generates a vector of file names from the given vector of runs, and other state
+      passed to it when constructed.
+     */
+    class MANTID_KERNEL_DLL GenerateFileName
+    {
+    public:
+      /// Constructor.
+      GenerateFileName(const std::string & prefix, const std::string & suffix, int zeroPadding);
+
+      /// Overloaded function operator that generates a vector of file names from a vector of runs.
+      std::vector<std::string> operator()(const std::vector<unsigned int> & runs);
+      /// Overloaded function operator that generates a file name from a run.
+      std::string operator()(unsigned int run);
+
+    private:
+      /// String that prefixes any generated file names.
+      std::string m_prefix;
+      /// String that suffixes any generated file names.
+      std::string m_suffix;
+      /// The length of zero padding needed.
+      int m_zeroPadding;
+    };
+    
+    /**
+     * A convenience function for the cases where we dont use the multi file parser to
+     * *add* files - only to list them.  It "flattens" the given vector of vectors
+     * into a single vector which is much easier to traverse.  For example a vector of vector of runs:
+     *
+     * ((1), (2), (30), (31), (32), (100), (102)) becomes (1, 2, 30, 31, 32, 100, 102)
+     *
+     * Used on a vector of vectors that *has* added filenames, the following behaviour is observed:
+     *
+     * ((1), (2), (30, 31, 32), (100), (102)) becomes (1, 2, 30, 31, 32, 100, 102)
+     *
+     * @param vecOfVecs :: a vector of vectors.
+     * @return a single vector with the entire contents of vecOfVecs.
+     */
+    template<typename TYPE>
+    MANTID_KERNEL_DLL std::vector<TYPE> flatten(const std::vector<std::vector<TYPE> > & vecOfVecs)
+    {
+      std::vector<TYPE> flatVector;
+      std::vector<std::vector<TYPE> >::const_iterator it = vecOfVecs.begin();
+
+      for(; it != fileNames.end(); ++it)
+      {
+        flattenedFileNames.insert(
+          flatVector.end(),
+          it->begin(), it->end());
+      }
+
+      return flatVector;
+    }
+
+  } // namespace MultiFileNameParsing
+
+} // namespace Kernel
+} // namespace Mantid
+
 #endif

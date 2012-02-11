@@ -3,6 +3,10 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/MultiFileNameParser.h"
 
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/InstrumentInfo.h"
+#include "MantidKernel/Exception.h"
+
 #include <algorithm>
 #include <numeric>
 #include <iterator>
@@ -15,6 +19,9 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
+#include <boost/bind.hpp>
+
+#include <Poco/Path.h>
 
 namespace Mantid
 {
@@ -47,7 +54,7 @@ namespace Kernel
 
       const std::string ANY  = "(" + ADD_STEP_RANGE + "|" + ADD_RANGE + "|" + ADD_LIST + "|" + STEP_RANGE + "|" + RANGE + "|" + SINGLE + ")";
       const std::string LIST = "(" + ANY + "(" + COMMA + ANY + ")*" + ")";
-    } // namespace Regexs
+    }
       
     /////////////////////////////////////////////////////////////////////////////
     // Forward declarations.
@@ -55,10 +62,13 @@ namespace Kernel
 
     namespace
     {
+      // Anonymous helper functions.
       std::vector<std::vector<unsigned int> > & parseToken(std::vector<std::vector<unsigned int> > & parsedRuns, const std::string & token);
       std::vector<std::vector<unsigned int> > generateRange(unsigned int from, unsigned int to, unsigned int stepSize, bool addRuns);
       void validateToken(const std::string & token);
       bool matchesFully(const std::string & stringToMatch, const std::string & regexString);
+      std::string getMatchingString(const std::string & regexString, const std::string & toParse);
+      std::string pad(std::string run, int count);
     }
     
     /////////////////////////////////////////////////////////////////////////////
@@ -107,6 +117,181 @@ namespace Kernel
         tokens.begin(), tokens.end(),
         std::vector<std::vector<unsigned int> >(),
         parseToken);
+    }
+
+    /////////////////////////////////////////////////////////////////////////////
+    // Public member functions of Parser class.
+    /////////////////////////////////////////////////////////////////////////////
+
+    /// Constructor.
+    Parser::Parser() :
+      m_runs(), m_fileNames(), m_multiFileName(), m_dirString(), m_instString(), 
+      m_underscoreString(), m_runString(), m_extString(), m_zeroPadding()
+    {}
+    
+    /// Destructor.
+    Parser::~Parser()
+    {}
+
+    /**
+     * Takes the given multiFileName string, and calls other parts of the parser
+     * to generate a corresponding vector of vectors of file names.
+     *
+     * @param multiFileName :: the string containing the multiple file names to be parsed.
+     */
+    void Parser::parse(const std::string & multiFileName)
+    {
+      // Clear any contents of the member variables.
+      clear();
+      
+      // Set the string to parse.
+      m_multiFileName = multiFileName;
+      
+      // Split the string to be parsed into sections, and do some validation.
+      split();
+
+      // Parse the run section into unsigned ints we can use.
+      m_runs = parseMultiRunString(m_runString);
+
+      // Set up helper functor.
+      GenerateFileName generateFileName(
+        m_dirString + m_instString + m_underscoreString,
+        m_extString,
+        m_zeroPadding);
+
+      // Generate complete file names for each run using helper functor.
+      std::transform(
+        m_runs.begin(), m_runs.end(),
+        std::back_inserter(m_fileNames),
+        generateFileName);
+    }
+
+    /////////////////////////////////////////////////////////////////////////////
+    // Private member functions of Parser class.
+    /////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Clears all member variables.
+     */
+    void Parser::clear()
+    {
+      m_runs.clear();
+      m_fileNames.clear();
+      m_multiFileName.clear();
+      m_dirString.clear();
+      m_instString.clear();
+      m_underscoreString.clear();
+      m_runString.clear();
+      m_extString.clear();
+    }
+
+    /**
+     * Splits up the m_multiFileName string into component parts, to be used elsewhere by
+     * the parser.  Some validation is done here, and exceptions thrown if required
+     * components are missing.
+     *
+     * @throws std::runtime_error if a required component is not present in the string.
+     */
+    void Parser::split()
+    {
+      if(m_multiFileName.empty())
+        throw std::runtime_error("No file name to parse.");
+
+      // (We shun the use of Poco::File here as it is unable to deal with certain 
+      // combinations of special characters, for example double commas.)
+
+      // Get the extension, if there is one.
+      size_t lastDot = m_multiFileName.find_last_of(".");
+      if(lastDot != std::string::npos)
+        m_extString = m_multiFileName.substr(lastDot);
+
+      // Get the directory, if there is one.
+      size_t lastSeparator = m_multiFileName.find_last_of("/\\");
+      if(lastSeparator != std::string::npos)
+        m_dirString = m_multiFileName.substr(0, lastSeparator);
+
+      // Slice off the directory and extension.
+      std::string base = m_multiFileName.substr(
+        m_dirString.size(), m_multiFileName.size() - (m_dirString.size() + m_extString.size()));
+
+      // Get the instrument name using a regex.  Throw if not found since this is required.
+      m_instString = getMatchingString("^" + Regexs::INST, base);
+      if(m_instString.empty())
+        throw std::runtime_error("There does not appear to be an instrument name present.");
+
+      // Check if instrument exists, if not then clear the parser, and rethrow an exception.
+      try
+      {
+        InstrumentInfo instInfo = ConfigService::Instance().getInstrument(m_instString);
+        m_zeroPadding = instInfo.zeroPadding();
+      }
+      catch (const Exception::NotFoundError &)
+      {
+        throw std::runtime_error("There does not appear to be a valid instrument name present.");
+      }
+
+      // Check for an underscore after the instrument name.
+      size_t underscore = base.find_first_of("_");
+      if(underscore == m_instString.size())
+        m_underscoreString = "_";
+
+      // We can now deduce the run string.  Throw if not found since this is required.
+      m_runString = base.substr(m_underscoreString.size() + m_instString.size());
+      if(m_instString.empty())
+        throw std::runtime_error("There does not appear to be any runs present.");
+    }
+
+    /////////////////////////////////////////////////////////////////////////////
+    // Helper functor.
+    /////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Constructor, to accept state used in generating file names.
+     *
+     * @param prefix      :: a string that prefixes the generated file names.
+     * @param suffix      :: a string that suffixes the generated file names.
+     * @param zeroPadding :: the number of zeros with which to pad the run number of genrerated file names.
+     */
+    GenerateFileName::GenerateFileName(const std::string & prefix, const std::string & suffix, int zeroPadding) :
+        m_prefix(prefix), m_suffix(suffix), m_zeroPadding(zeroPadding)
+      {}
+
+    /**
+     * Overloaded function operator that takes in a vector of runs, and returns a vector of file names.
+     *
+     * @param runs :: the vector of runs with which to make file names.
+     *
+     * @returns the generated vector of file names.
+     */
+    std::vector<std::string> GenerateFileName::operator()(const std::vector<unsigned int> & runs)
+    {
+      std::vector<std::string> fileNames; 
+
+      std::transform(
+        runs.begin(), runs.end(),
+        std::back_inserter(fileNames),
+        (*this) // Call other overloaded function operator.
+      );
+
+      return fileNames;
+    }
+
+    /**
+     * Overloaded function operator that takes in a runs, and returns a file name.
+     *
+     * @param runs :: the vector of runs with which to make file names.
+     *
+     * @returns the generated vector of file names.
+     */
+    std::string GenerateFileName::operator()(unsigned int run)
+    {
+      std::stringstream fileName;
+
+      fileName << m_prefix
+               << pad(boost::lexical_cast<std::string>(run), m_zeroPadding)
+               << m_suffix;
+
+      return fileName.str();
     }
 
     /////////////////////////////////////////////////////////////////////////////
@@ -327,6 +512,47 @@ namespace Kernel
       {
         const boost::regex regex("^(" + regexString + "$)");
         return boost::regex_match(stringToMatch, regex);
+      }
+
+      /**
+       * Finds a given regex in a given string, and returns the part of the string
+       * that matches the regex.  Returns "" if there is no occurance of the regex.
+       * 
+       * @param regex - the regular expression to find within the string
+       * @param toParse - the string within to find the regex
+       *
+       * @returns the part (if any) of the given string that matches the given regex
+       */
+      std::string getMatchingString(const std::string & regexString, const std::string & toParse)
+      {
+        boost::sregex_iterator it(
+          toParse.begin(), toParse.end(), 
+          boost::regex(regexString)
+        );
+
+        if(it == boost::sregex_iterator())
+          return "";
+
+        return it->str();
+      }
+
+      /**
+       * Zero pads the run number used in a file name to required length.
+       *
+       * @param run - the run number of the file.  May as well pass by value here.
+       * @param count - the required length of the string.
+       *
+       * @returns the string, padded to the required length.
+       * @throws std::runtime_error if run is longer than size of count.
+       */
+      std::string pad(std::string run, int count)
+      {
+        if(run.size() < count)
+          return run.insert(0, count - run.size(), '0');
+        else if(run.size() > count)
+          throw std::runtime_error("Could not parse run number \"" + run + 
+            "\" since the instrument run number length required is " + boost::lexical_cast<std::string>(count));
+        return run;
       }
 
     } // anonymous namespace
