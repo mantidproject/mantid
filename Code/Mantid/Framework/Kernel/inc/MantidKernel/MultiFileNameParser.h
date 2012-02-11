@@ -154,9 +154,9 @@ namespace Kernel
       std::vector<TYPE> flatVector;
       std::vector<std::vector<TYPE> >::const_iterator it = vecOfVecs.begin();
 
-      for(; it != fileNames.end(); ++it)
+      for(; it != vecOfVecs.end(); ++it)
       {
-        flattenedFileNames.insert(
+        flatVector.insert(
           flatVector.end(),
           it->begin(), it->end());
       }
