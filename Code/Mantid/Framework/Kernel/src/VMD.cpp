@@ -1,5 +1,6 @@
 #include "MantidKernel/VMD.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 
 using namespace Mantid::Kernel;
 
@@ -128,10 +129,13 @@ VMDBase<TYPE> VMDBase<TYPE>::getNormalVector(const std::vector<VMDBase<TYPE> > &
 }
 
 
-/// @cond
+/// Instantiate VMDBase classes
 template DLLExport class VMDBase<double>;
 template DLLExport class VMDBase<float>;
 
+/// Instantiate stream operators
+MANTID_KERNEL_DLL std::ostream& operator<<(std::ostream&, VMDBase<double>&);
+MANTID_KERNEL_DLL std::ostream& operator<<(std::ostream&, VMDBase<float>&);
 
 } // namespace Mantid
 } // namespace Kernel

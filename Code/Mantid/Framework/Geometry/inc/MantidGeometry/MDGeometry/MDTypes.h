@@ -44,8 +44,10 @@ namespace Mantid
 
   /// Define indicating that the coord_t type is a float (not double)
 #undef COORDT_IS_FLOAT
+//#define COORDT_IS_FLOAT
 
   /** Typedef for the signal recorded in a MDBox, etc.
+   * Note: MDEvents use 'float' internally to save memory
    */
   typedef double signal_t;
  

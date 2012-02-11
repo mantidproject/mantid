@@ -1,18 +1,15 @@
 #ifndef MANTID_KERNEL_VMD_H_
 #define MANTID_KERNEL_VMD_H_
     
-#include "MantidKernel/System.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/Tolerance.h"
 #include "MantidKernel/V3D.h"
-#include <cstddef>
-#include <stdexcept>
-#include <sstream>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
-
-using boost::algorithm::split;
-using boost::algorithm::is_any_of;
+#include <cstddef>
+#include <sstream>
+#include <stdexcept>
 
 
 namespace Mantid
@@ -245,6 +242,9 @@ namespace Kernel
     VMDBase(const std::string & str)
     : nd(nd)
     {
+      using boost::algorithm::split;
+      using boost::algorithm::is_any_of;
+
       std::vector<std::string> strs;
       boost::split(strs, str, boost::is_any_of(", "));
 
@@ -541,8 +541,11 @@ namespace Kernel
     TYPE * data;
   };
 
-  /// Define the VMD as using the double data type.
-  typedef VMDBase<double> VMD;
+  /// Underlying data type for the VMD type
+  typedef double VMD_t;
+
+  /// Define the VMD as using the double or float data type.
+  typedef VMDBase<VMD_t> VMD;
 
   // Overload operator <<
   MANTID_KERNEL_DLL std::ostream& operator<<(std::ostream&, const VMDBase<double>&);

@@ -227,13 +227,13 @@ void LineViewer::readTextboxes()
   bool ok;
   for (int d=0; d<int(m_ws->getNumDims()); d++)
   {
-    start[d] = m_startText[d]->text().toDouble(&ok);
+    start[d] = VMD_t(m_startText[d]->text().toDouble(&ok));
     allOk = allOk && ok;
 
-    end[d] = m_endText[d]->text().toDouble(&ok);
+    end[d] = VMD_t(m_endText[d]->text().toDouble(&ok));
     allOk = allOk && ok;
 
-    width[d] = m_thicknessText[d]->text().toDouble(&ok);
+    width[d] = VMD_t(m_thicknessText[d]->text().toDouble(&ok));
     allOk = allOk && ok;
   }
   // Now the planar width
@@ -275,11 +275,11 @@ void LineViewer::apply()
 
   // Build the basis vectors using the angles
   VMD basisX = m_start * 0;
-  basisX[m_freeDimX] = cos(angle);
-  basisX[m_freeDimY] = sin(angle);
+  basisX[m_freeDimX] = VMD_t(cos(angle));
+  basisX[m_freeDimY] = VMD_t(sin(angle));
   VMD basisY = m_start * 0;
-  basisY[m_freeDimX] = cos(perpAngle);
-  basisY[m_freeDimY] = sin(perpAngle);
+  basisY[m_freeDimX] = VMD_t(cos(perpAngle));
+  basisY[m_freeDimY] = VMD_t(sin(perpAngle));
 
   // Offset the origin in the plane by the width
   VMD origin = m_start - basisY * planeWidth;

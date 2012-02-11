@@ -132,7 +132,7 @@ namespace MDEvents
       for (size_t d=0; d<nd; ++d)
       {
         dimensionsUsed[d] = true; // Use all dimensions
-        center[d] = pos[d];
+        center[d] = coord_t(pos[d]);
       }
       CoordTransformDistance sphere(nd, center, dimensionsUsed);
 

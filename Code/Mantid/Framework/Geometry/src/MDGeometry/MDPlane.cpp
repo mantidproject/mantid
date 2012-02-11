@@ -80,7 +80,7 @@ namespace Geometry
         // Flip the normal over
         delete [] this->m_normal;
         for (size_t d=0; d<normal.getNumDims(); d++)
-          normal[d] = -1.0 * normal[d];
+          normal[d] = coord_t(-1.0) * normal[d];
         // And re-construct
         construct(normal, origin);
       }
