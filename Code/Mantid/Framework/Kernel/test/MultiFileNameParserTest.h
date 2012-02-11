@@ -311,44 +311,6 @@ public:
       std::string(re.what()),
       "There does not appear to be an instrument name present.");
   }
-
-  /*void test_errorThrownIfPassedInvalidInstrumentName()
-  {
-    Parser parser;
-
-    TS_ASSERT_THROWS_EQUALS(parser.parse("TSSC20:30.raw"),
-      const std::runtime_error & re, 
-      std::string(re.what()),
-      "There does not appear to be a valid instrument name present.");
-  }*/
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Testing of flatten function.
-  /////////////////////////////////////////////////////////////////////////////
-
-  /*void test_flattenVecOfVecs()
-  {
-    Parser parser;
-
-    parser.parse("TSC10-15, 30:40:2.raw");
-
-    std::vector<std::vector<std::string> > filenames = parser.fileNames();
-    std::vector<std::string> flattenedFilenames = flatten(filenames);
-
-    TS_ASSERT_EQUALS(flattenedFilenames[0], "TSC00010.raw");
-    TS_ASSERT_EQUALS(flattenedFilenames[1], "TSC00011.raw");
-    TS_ASSERT_EQUALS(flattenedFilenames[2], "TSC00012.raw");
-    TS_ASSERT_EQUALS(flattenedFilenames[3], "TSC00013.raw");
-    TS_ASSERT_EQUALS(flattenedFilenames[4], "TSC00014.raw");
-    TS_ASSERT_EQUALS(flattenedFilenames[5], "TSC00015.raw");
-
-    TS_ASSERT_EQUALS(flattenedFilenames[6],  "TSC00030.raw");
-    TS_ASSERT_EQUALS(flattenedFilenames[7],  "TSC00032.raw");
-    TS_ASSERT_EQUALS(flattenedFilenames[8],  "TSC00034.raw");
-    TS_ASSERT_EQUALS(flattenedFilenames[9],  "TSC00036.raw");
-    TS_ASSERT_EQUALS(flattenedFilenames[10], "TSC00038.raw");
-    TS_ASSERT_EQUALS(flattenedFilenames[11], "TSC00040.raw");
-  }*/
 };
 
 #endif /* MANTID_KERNEL_MULTIFILENAMEPARSERTEST_H_ */
