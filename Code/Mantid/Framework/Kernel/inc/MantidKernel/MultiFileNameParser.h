@@ -148,7 +148,7 @@ namespace Kernel
      * @param vecOfVecs :: a vector of vectors.
      * @return a single vector with the entire contents of vecOfVecs.
      */
-    template<typename TYPE>
+    /*template<typename TYPE>
     std::vector<TYPE> flatten(const std::vector<std::vector<TYPE> > & vecOfVecs)
     {
       std::vector<TYPE> flatVector;
@@ -162,7 +162,7 @@ namespace Kernel
       }
 
       return flatVector;
-    }
+    }*/
 
   } // namespace MultiFileNameParsing
 
