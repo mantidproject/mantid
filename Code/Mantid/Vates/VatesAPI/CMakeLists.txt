@@ -184,7 +184,7 @@ if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
                         ../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
                         ../../Framework/TestHelpers/src/MDEventsTestHelper.cpp )
   cxxtest_add_test( VatesAPITest ${TEST_FILES} )
-  target_link_libraries( VatesAPITest VatesAPI DataHandling ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
+  target_link_libraries( VatesAPITest VatesAPI DataHandling Kernel ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
   add_dependencies( FrameworkTests VatesAPITest )
   # Add to the 'UnitTests' group in VS
   set_property ( TARGET VatesAPITest PROPERTY FOLDER "UnitTests" )
