@@ -149,7 +149,7 @@ namespace Kernel
      * @return a single vector with the entire contents of vecOfVecs.
      */
     template<typename TYPE>
-    MANTID_KERNEL_DLL std::vector<TYPE> flatten(const std::vector<std::vector<TYPE> > & vecOfVecs)
+    std::vector<TYPE> flatten(const std::vector<std::vector<TYPE> > & vecOfVecs)
     {
       std::vector<TYPE> flatVector;
       std::vector<std::vector<TYPE> >::const_iterator it = vecOfVecs.begin();

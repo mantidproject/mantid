@@ -68,7 +68,7 @@ namespace Kernel
       void validateToken(const std::string & token);
       bool matchesFully(const std::string & stringToMatch, const std::string & regexString);
       std::string getMatchingString(const std::string & regexString, const std::string & toParse);
-      std::string pad(std::string run, int count);
+      std::string pad(std::string run, unsigned int padLength);
     }
     
     /////////////////////////////////////////////////////////////////////////////
@@ -545,13 +545,13 @@ namespace Kernel
        * @returns the string, padded to the required length.
        * @throws std::runtime_error if run is longer than size of count.
        */
-      std::string pad(std::string run, int count)
+      std::string pad(std::string run, unsigned int padLength)
       {
-        if(run.size() < count)
-          return run.insert(0, count - run.size(), '0');
-        else if(run.size() > count)
+        if(run.size() < padLength)
+          return run.insert(0, padLength - run.size(), '0');
+        else if(run.size() > padLength)
           throw std::runtime_error("Could not parse run number \"" + run + 
-            "\" since the instrument run number length required is " + boost::lexical_cast<std::string>(count));
+            "\" since the instrument run number length required is " + boost::lexical_cast<std::string>(padLength));
         return run;
       }
 
