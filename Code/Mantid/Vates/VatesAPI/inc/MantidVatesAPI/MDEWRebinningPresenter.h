@@ -10,10 +10,7 @@
 class vtkPlane;
 namespace Mantid
 {
-  namespace Kernel
-  {
-    class VMD;
-  }
+
   namespace VATES
   {
 
