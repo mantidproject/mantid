@@ -105,7 +105,7 @@ namespace Crystal
     // Sequence and run number
     int seqNum = 1;
     int firstrun = 0;
-    if(peaks.size()>0) firstrun = peaks[0].getRunNumber();
+    int runold = -1;
 
     std::fstream out;
     bool append = getProperty("AppendFile");
@@ -113,7 +113,7 @@ namespace Crystal
     {
       out.open( filename.c_str(), std::ios::in|std::ios::out|std::ios::ate);
       long pos = out.tellp();
-      out.seekp (50);
+      out.seekp (28);
       out >> firstrun;
       out.seekp (pos - 110);
       out >> seqNum;
@@ -199,17 +199,20 @@ namespace Crystal
                 <<  std::setw( 4 ) << Utils::round(-p.getK())
                 <<  std::setw( 4 ) << Utils::round(-p.getL());
 
-            out << " " << std::setw( 7 ) << std::fixed << std::setprecision( 2 ) << scaleFactor*p.getIntensity();
+            // SHELX can read data without the space between the l and intensity
+            out << std::setw( 8 ) << std::fixed << std::setprecision( 2 ) << scaleFactor*p.getIntensity();
 
-            out << " " << std::setw( 7 ) << std::fixed << std::setprecision( 2 ) << scaleFactor*p.getSigmaIntensity();
+            out << std::setw( 8 ) << std::fixed << std::setprecision( 2 ) << scaleFactor*p.getSigmaIntensity();
 
-            out << std::setw( 4 ) << run - firstrun + 1;
+            if (run != runold) firstrun++;
+            out << std::setw( 4 ) << firstrun;
 
             out << std::setw( 8 ) << std::fixed << std::setprecision( 4 ) << lambda;
 
             out << std::setw( 7 ) <<  std::fixed << std::setprecision( 4 ) << tbar;
 
             out <<  std::setw( 7 ) <<  run;
+            runold = run;
 
             out <<  std::setw( 7 ) <<  seqNum;
 
