@@ -6,6 +6,7 @@
 #include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
 #include "MantidVatesAPI/vtkDataSetToGeometry.h"
 #include <boost/scoped_ptr.hpp>
+#include "MantidKernel/VMD.h"
 
 class vtkPlane;
 namespace Mantid
