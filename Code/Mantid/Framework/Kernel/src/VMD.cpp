@@ -130,8 +130,8 @@ VMDBase<TYPE> VMDBase<TYPE>::getNormalVector(const std::vector<VMDBase<TYPE> > &
 
 
 /// Instantiate VMDBase classes
-template DLLExport class VMDBase<double>;
-template DLLExport class VMDBase<float>;
+template MANTID_KERNEL_DLL class VMDBase<double>;
+template MANTID_KERNEL_DLL class VMDBase<float>;
 
 /// Instantiate stream operators
 MANTID_KERNEL_DLL std::ostream& operator<<(std::ostream&, VMDBase<double>&);
