@@ -192,7 +192,7 @@ public:
 
        TS_ASSERT_LESS_THAN(fabs(intensity -59982.9), 100.0);
       //Not sure why this reduced the error so much in the test
-      TS_ASSERT_LESS_THAN(fabs(sigma -606.577), 1.0);
+      TS_ASSERT_LESS_THAN(fabs(sigma -623.577), 1.0);
 
       TS_ASSERT_EQUALS( Twk->rowCount(), 7);
       
@@ -201,21 +201,21 @@ public:
 
       TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> (std::string("Time"), 0) - 19250), 20);  
     
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> (std::string("Background"), 1) - 1.40532), .2);
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> (std::string("Background"), 1) - 1.42459), .2);
    
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("Intensity", 2) - 11201.5), 20);
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("Intensity", 2) - 11173), 20);
       
    
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("NCells", 3) -  401), 5);
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("NCells", 3) -  277), 5);
     
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("ChiSqrOverDOF", 4) -   133.909), 1.5);
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("ChiSqrOverDOF", 4) -   195), 1.5);
     
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("TotIntensity", 0) - 4311.4), 10);
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("TotIntensity", 0) - 4137), 10);
       
   
 
-     /*   std::vector<std::string> names = Twk->getColumnNames();
-      std::cout<<"Intensitty="<<pks->getPeak(0).getIntensity()<<"   sigma="<<pks->getPeak(0).getSigmaIntensity()<<
+      /*   std::vector<std::string> names = Twk->getColumnNames();
+      std::cout<<"Intensitty="<<intensity<<"   sigma="<<sigma<<
                "  Theoret intensity="<<TotIntensity<<std::endl;
       std::cout<<std::setw(15)<<"Act Int";
       for( int j=12; j< 12+Twk->rowCount();j++)
@@ -229,8 +229,8 @@ public:
        std::cout<<std::endl;
 
        }
-       */
-       /*
+
+
   Intensitty=59870.7   sigma=665.098
            Time       19250       19350       19450       19550       19650       19750       19850
         Channel          12          13          14          15          16          17          18

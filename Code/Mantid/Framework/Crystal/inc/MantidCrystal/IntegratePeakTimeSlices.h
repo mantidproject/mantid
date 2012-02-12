@@ -102,7 +102,8 @@ private:
   double ParameterValues[7] ;
 
   Mantid::detid2index_map * wi_to_detid_map;
-  Mantid::index2spec_map * wsIndx2specNo_map;
+
+  int*                     NeighborIDs;//Stores IDs of nearest neighbors
   double R0 ;  ///<for Weak Peaks, these can be set using info from close
 
   Kernel::V3D  center;  ///< for Describing the Plane at the Peak
@@ -115,17 +116,22 @@ private:
 
   void SetUpData( API::MatrixWorkspace_sptr          & Data,
                   API::MatrixWorkspace_sptr    const & inpWkSpace,
+                  boost::shared_ptr< Geometry::IComponent> comp,
                   const int                       chan,
                   double                          CentX,
                   double                          CentY,
-                  specid_t                      &CentDet,
-                  std::map< specid_t, Kernel::V3D >     &neighbors,
+                  Kernel::V3D                     &CentNghbr,
+
                   double                        &neighborRadius,//from CentDet
                   double                         Radius);
 
 
 
 
+  bool getNeighborPixIDs( boost::shared_ptr< Geometry::IComponent> comp,
+                          Kernel::V3D                             &Center,
+                          double                                  &Radius,
+                          int*                                    &ArryofID);
 
   int  CalculateTimeChannelSpan( DataObjects::Peak     const & peak,
                                  const double                  dQ,
@@ -142,11 +148,11 @@ private:
   void SetUpData1( API::MatrixWorkspace_sptr                                    &Data,
                    API::MatrixWorkspace_sptr                              const &inpWkSpace,
                    const int                                              chan,
-                   std::map< specid_t, Kernel::V3D > neighbors,
+
                    double                     Radius,
-                   Kernel::V3D               CentPos,  ///< Center on Plane
-                   Kernel::V3D                CentDetPos,///< closes detector to center
-                   Kernel::Logger                                               & g_log ) ;
+                   Kernel::V3D               CentPos  ///< Center on Plane
+
+                   ) ;
 
 
   std::string CalculateFunctionProperty_Fit(  ) ;

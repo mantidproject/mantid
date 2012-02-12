@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/Peak.h"
 
 namespace Mantid
 {
@@ -61,7 +62,7 @@ private:
   /// Read in all the input parameters
   void retrieveProperties();
   void sumneighbours(std::string det_name, int x0, int y0, int SumX, int SumY, double TOFPeakd, bool &haveMask, double PeakIntensity, int ***mask, int idet);
-  int fitneighbours(int ipeak, std::string det_name, int x0, int y0, int idet, double qspan);
+  int fitneighbours(int ipeak, std::string det_name, int x0, int y0, int idet, double qspan, DataObjects::Peak & peak);
   void neighbours(double **matrix, int i, int j, int m, int n, int **mask);
   void cluster(double **matrix, int m, int n, int **mask);
   void smooth(double **matrix, int m, int n, double **smmatrix);

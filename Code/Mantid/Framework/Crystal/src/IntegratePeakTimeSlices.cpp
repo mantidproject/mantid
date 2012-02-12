@@ -37,8 +37,11 @@ This Algorithm is also used by the PeakIntegration algorithm when the Fit tag is
 #include "MantidCrystal/IntegratePeakTimeSlices.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidGeometry/IComponent.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IFitFunction.h"
@@ -117,11 +120,13 @@ namespace Mantid
     {
       debug = false;
       wi_to_detid_map = 0;
-      wsIndx2specNo_map=0;
+
       if (debug)
         g_log.setLevel(7);
       EdgePeak = false;
-
+      NeighborIDs = new int[3];
+      NeighborIDs[0]=3;
+      NeighborIDs[1]=2;
       AttributeNames[0] = "StartRow";
       AttributeNames[1] = "StartCol";
       AttributeNames[2] = "NRows";
@@ -167,12 +172,12 @@ namespace Mantid
         wi_to_detid_map = 0;
 
       }
-    if( wsIndx2specNo_map)
-      {
-        delete wsIndx2specNo_map;
-        wsIndx2specNo_map = 0;
-      }
 
+    if(NeighborIDs)
+    {
+      delete NeighborIDs;
+      NeighborIDs = 0;
+    }
     }
 
     void IntegratePeakTimeSlices::initDocs()
@@ -207,6 +212,68 @@ namespace Mantid
 
 
     }
+
+    bool IntegratePeakTimeSlices::getNeighborPixIDs( boost::shared_ptr< Geometry::IComponent> comp,
+                                                     Kernel::V3D                           &Center,
+                                                     double                                &Radius,
+                                                     int*                                  &ArryofID)
+     {
+
+          int N = ArryofID[1];
+          int MaxN= ArryofID[0];
+
+          if( N >= MaxN)
+            return false;
+
+          Geometry::BoundingBox box;
+          comp->getBoundingBox( box);
+
+          double minx = Center.X() - Radius;
+          double miny = Center.Y() - Radius;
+          double minz = Center.Z() - Radius;
+          double maxx = Center.X() + Radius;
+          double maxy = Center.Y() + Radius;
+          double maxz = Center.Z() + Radius;
+
+          if( box.xMin()>=maxx)
+              return true;
+          if( box.xMax() <=minx)
+             return true;;
+          if( box.yMin()>=maxy)
+              return true;;
+          if( box.yMax() <=miny)
+             return true;;
+          if( box.zMin()>=maxz)
+              return true;;
+          if( box.zMax() <=minz)
+             return true;;
+
+          if( comp->type().compare("Detector")==0 || comp->type().compare("RectangularDetectorPixel")==0)
+           {
+                   boost::shared_ptr<Geometry::Detector> det =   boost::dynamic_pointer_cast<Geometry::Detector>( comp);
+                   if( (det->getPos()-Center).norm() <Radius)
+                   {
+                     ArryofID[N]=  det->getID();
+                      N++;
+                      ArryofID[1] = N;
+
+                   }
+                  return true;
+            }
+
+           boost::shared_ptr<const Geometry::CompAssembly> Assembly =
+               boost::dynamic_pointer_cast<const Geometry::CompAssembly>( comp);
+
+           if( !Assembly)
+              return true;
+
+           bool b = true;
+
+           for( int i=0; i< Assembly->nelements() && b; i++)
+              b= getNeighborPixIDs( Assembly->getChild(i),Center,Radius,ArryofID);
+
+           return b;
+     }
 
     double IntegratePeakTimeSlices::CalculatePositionSpan(  DataObjects::Peak const &peak,
                                                       const double                   dQ)
@@ -281,7 +348,24 @@ namespace Mantid
 
       IPeak &peak = peaksW->getPeak(indx);
 
+      boost::shared_ptr<const Geometry::IComponent> panel_const= peak.getInstrument()->getComponentByName( peak.getBankName());
 
+      boost::shared_ptr< Geometry::IComponent>panel =
+              boost::const_pointer_cast< Geometry::IComponent>( panel_const);
+      if( !panel  || !panel_const)
+      {
+        g_log.error( "Cannot get panel for a peak");
+        throw std::runtime_error("Cannot get panel for a peak");
+      }
+      BoundingBox box;
+      panel->getBoundingBox( box);
+
+      int detID = peak.getDetectorID();
+      if( !box.isPointInside( peak.getDetPos()))
+          {
+              g_log.error("Detector pixel is NOT inside the Peaks Bank");
+              throw std::runtime_error("Detector pixel is NOT inside the Peaks Bank");
+          }
       FindPlane(  center,  xvec,  yvec, ROW, COL, CellWidth, CellHeight, peak);
 
       sprintf(logInfo, std::string("   Peak Index %5d\n").c_str(), indx);
@@ -293,44 +377,32 @@ namespace Mantid
       double Row0 = lastRow;
       double lastCol = COL;
       double Col0 = lastCol;
-      std::cout<<"A"<<std::endl;
+
       // For quickly looking up workspace index from det id
-      wi_to_detid_map = inpWkSpace->getDetectorIDToWorkspaceIndexMap(true);
-      wsIndx2specNo_map=inpWkSpace->getWorkspaceIndexToSpectrumMap();
+      wi_to_detid_map = inpWkSpace->getDetectorIDToWorkspaceIndexMap( false );
+
       TableWorkspace_sptr TabWS = boost::shared_ptr<TableWorkspace>(new TableWorkspace(0));
 
-      std::cout<<"B"<<std::endl;
+
+
       try
       {
 
-        int detID = peak.getDetectorID();
+        Mantid::detid2index_map::iterator it1= wi_to_detid_map->begin();
+
 
         // Find the workspace index for this detector ID
         Mantid::detid2index_map::iterator it;
         it = (*wi_to_detid_map).find(detID);
         size_t wsIndx = (it->second);
-        specid_t spec=(specid_t)wsIndx;
 
-
-        std::cout<<"C"<<std::endl;
-        if( wsIndx2specNo_map->count( wsIndx )>0)
-          spec = wsIndx2specNo_map->find(wsIndx)->second;// inpWkSpace->getSpectrum( wsIndx)->getSpectrumNo();
-        else
-        {
-          g_log.error("Workspace index is not in workspace to spectrum map");
-          throw std::range_error ("Workspace index is not in workspace to spectrum map");
-        }
-
-
-        std::cout<<"D"<<std::endl;
         double R      = CalculatePositionSpan( peak, dQ )/2;
 
         R = min<double> (36*max<double>(CellWidth,CellHeight), R);
         R = max<double> (6*max<double>(CellWidth,CellHeight), R);
-        R=1.4*R;//Gets a few more background cells.
+        R=1.1*R;//Gets a few more background cells.
         int Chan;
 
-        std::cout<<"E, R="<<R<<","<<CellWidth<<","<<CellHeight<<std::endl;
         Mantid::MantidVec X = inpWkSpace->dataX(wsIndx);
         int dChan = CalculateTimeChannelSpan(peak, dQ, X, int(wsIndx), Chan);
 
@@ -342,25 +414,38 @@ namespace Mantid
         double Centy = Row0;
         double Centx = Col0;
         IDetector_const_sptr CenterDet =  peak.getDetector();
-        std::map< specid_t, V3D > neighbors;
+        //std::map< specid_t, V3D > neighbors;
 
 
         bool done = false;
-        specid_t   CentDetspec;//last for finding neighbors
+        //specid_t   CentDetspec;//last for finding neighbors
         double neighborRadius ;//last radius for finding neighbors
-        CentDetspec = spec;
-        neighborRadius = min<double>(10,4.8*R);
-        int Nneighbors = (int)(R*R/CellWidth/CellHeight*4*4*4);
+        //CentDetspec = spec;
+        neighborRadius = min<double>(10,1.5*R);
+        int Nneighbors = (int)(neighborRadius*neighborRadius/CellWidth/CellHeight*4);
 
-        std::cout<<"F,Nneighbors="<< Nneighbors<<std::endl;
+
         Nneighbors = min<int>(Nneighbors,(int)inpWkSpace->getNumberHistograms()-2);
-        inpWkSpace->buildNearestNeighbours( true);
-        neighbors = inpWkSpace->getNeighboursExact( spec, Nneighbors ,true);
+        //inpWkSpace->buildNearestNeighbours( true);
+        //neighbors = inpWkSpace->getNeighboursExact( spec, Nneighbors ,true);
 
-        neighbors  = inpWkSpace->getNeighbours( CentDetspec, neighborRadius, true);
-        neighbors[CentDetspec]=Kernel::V3D(0.0,0.0,0.0);
+        //neighbors  = inpWkSpace->getNeighbours( CentDetspec, neighborRadius, true);
+        //neighbors[CentDetspec]=Kernel::V3D(0.0,0.0,0.0);
+        delete NeighborIDs;
 
-        std::cout<<"G"<<std::endl;
+        NeighborIDs = new int[Nneighbors+2];
+        NeighborIDs[0]=Nneighbors+2;
+        NeighborIDs[1] = 2;
+        Kernel::V3D Cent =(center+xvec*(Centx-COL)+yvec*(Centy-ROW));
+
+        getNeighborPixIDs(panel,Cent,neighborRadius, NeighborIDs );
+       // std::cout<<"  R,#neighbors,neighborRadius="<<R<<","<<NeighborIDs[1]<<","<<neighborRadius<<std::endl;
+       // std::cout<<"Chan and dChan,Cell dims="<< Chan<<","<<dChan<<","<<CellWidth<<","<<CellHeight<<std::endl;
+        if( NeighborIDs[1] <10)
+        {
+          g_log.error("Not enough neighboring pixels to fit ");
+          throw std::runtime_error("Not enough neighboring pixels to fit ");
+        }
         for( int dir =1 ; dir >-2; dir -=2)
         for( int t= 0; t < dChan && !done; t++)
           if( dir < 0 &&  t==0 )
@@ -373,31 +458,37 @@ namespace Mantid
               done = true;
            else
            {
-             std::cout<<"H"<<std::endl;
+
+             int NN = NeighborIDs[1];
               MatrixWorkspace_sptr Data = WorkspaceFactory::Instance().create(
-                         std::string("Workspace2D"), 3,neighbors.size(),neighbors.size());
+                         std::string("Workspace2D"), 3,NN,NN);
 
               Kernel::V3D CentPos = center+yvec*(Centy-ROW)*CellHeight + xvec*(Centx-COL)*CellWidth;
-              SetUpData1(Data, inpWkSpace,  Chan+dir*t, neighbors, R ,CenterDet->getPos(),  CenterDet->getPos(),g_log);
-              
-              if( AttributeValues[IIntensities] > MaxCounts)
+              SetUpData1(Data, inpWkSpace,  Chan+dir*t,  R ,CenterDet->getPos());
+              if (AttributeValues[ISSIxx] > 0)
               {
-                 MaxCounts = AttributeValues[IIntensities];
-                 MaxChan = Chan+dir*t;
-               }
-               if( AttributeValues[IIntensities] >0)
-               {
-                  Centx = AttributeValues[ ISSIx]/AttributeValues[IIntensities];
-                  Centy = AttributeValues[ ISSIy]/AttributeValues[IIntensities];
-                }else
-                   done = true;
+                if (AttributeValues[IIntensities] > MaxCounts)
+                {
+                  MaxCounts = AttributeValues[IIntensities];
+                  MaxChan = Chan + dir * t;
+                }
+                if (AttributeValues[IIntensities] > 0)
+                {
+                  Centx = AttributeValues[ISSIx] / AttributeValues[IIntensities];
+                  Centy = AttributeValues[ISSIy] / AttributeValues[IIntensities];
+                }
+                else
+                  done = true;
+              }
+              else
+                done = true;
               
            }
 
 
         Chan = max<int>( Chan , MaxChan );
 
-        std::cout<<"I, Chan="<<Chan<<std::endl;
+
         sprintf(logInfo, std::string("   largest Channel,Radius,CellWidth,CellHeight = %d  %7.3f  %7.3f  %7.3f\n").c_str(),
                            Chan, R, CellWidth, CellHeight);
         g_log.debug(std::string(logInfo));
@@ -411,7 +502,6 @@ namespace Mantid
         InitializeColumnNamesInTableWorkspace(TabWS);
 
 
-        std::cout<<"J"<<std::endl;
         IAlgorithm_sptr fit_alg;
 
         double time;
@@ -437,7 +527,7 @@ namespace Mantid
             else
             {
 
-              std::cout<<"K"<<std::endl;
+
               int nchan = chan;
               int xchan = Chan + dir * chan;
               if (nchan <= 1)
@@ -456,9 +546,9 @@ namespace Mantid
                  Radius = R0;
 
               }
-
+              int NN= NeighborIDs[1];
               MatrixWorkspace_sptr Data = WorkspaceFactory::Instance().create(
-                  std::string("Workspace2D"), 3, neighbors.size(), neighbors.size());
+                  std::string("Workspace2D"), 3, NN,NN);//neighbors.size(), neighbors.size());
 
               sprintf(logInfo, string(
                               " A:chan= %d  time=%7.2f  Radius=%7.3f  row= %5.2f  col=%5.2f \n").c_str(),
@@ -466,14 +556,22 @@ namespace Mantid
               g_log.debug(std::string(logInfo));
 
 
-              SetUpData(Data, inpWkSpace,  xchan, lastCol,lastRow,CentDetspec,neighbors,neighborRadius, Radius);
+              SetUpData(Data, inpWkSpace, panel, xchan, lastCol,lastRow,Cent,//CentDetspec,//NeighborIDs,
+                                                      neighborRadius, Radius);
 
               ncells = (int) (AttributeValues[ISS1]);
 
               std::vector<double> params;
               std::vector<double> errs;
               std::vector<std::string> names;
+            /* std::cout<<"Attributes="<<std::endl;
+              for( int kk=0; kk<NAttributes;kk++)
+              {
+                std::cout<<"("<<kk<<")="<<AttributeValues[kk];
+              }
 
+              std::cout<<std::endl;
+ */
               if (IsEnoughData() && ParameterValues[ITINTENS] > 0)
               {
 
@@ -482,7 +580,7 @@ namespace Mantid
                 fit_alg->setProperty("InputWorkspace", Data);
                 fit_alg->setProperty("WorkspaceIndex", 0);
                 fit_alg->setProperty("StartX", 0.0);
-                fit_alg->setProperty("EndX", 0.0 + (double)neighbors.size());
+                fit_alg->setProperty("EndX", 0.0 + (double)NeighborIDs[1]);
                 fit_alg->setProperty("MaxIterations", 5000);
 
                 std::string fun_str = CalculateFunctionProperty_Fit();
@@ -602,9 +700,10 @@ namespace Mantid
 
       try
       {
-
-        peak.setIntensity(TotIntensity);
-        peak.setSigmaIntensity(sqrt(TotVariance));
+        //std::cout<<std::endl<<"Setting Peak and Intensity ,sigma="<<TotIntensity<<","<<
+        //       sqrt(TotVariance)<<std::endl;
+       // peak.setIntensity(TotIntensity);
+       // peak.setSigmaIntensity(sqrt(TotVariance));
 
         setProperty("OutputWorkspace", TabWS);
 
@@ -662,11 +761,11 @@ namespace Mantid
       Centerchan = chanCenter;
       int chanLeft = find(X, time - dtime);
       int chanRight = find(X, time + dtime);
-
       int dchan = abs(chanCenter - chanLeft);
 
       if (abs(chanRight - chanCenter) > dchan)
         dchan = abs(chanRight - chanCenter);
+
 
       dchan = max<int> (3,  dchan );
 
@@ -855,28 +954,32 @@ namespace Mantid
     //Data is the slice subdate, inpWkSpace is ALl the data,
     void IntegratePeakTimeSlices::SetUpData( MatrixWorkspace_sptr          & Data,
                                              MatrixWorkspace_sptr    const & inpWkSpace,
+                                             boost::shared_ptr< Geometry::IComponent> comp,
                                              const int                       chan,
                                              double                          CentX,
                                              double                          CentY,
-                                             specid_t                      &CentDetspec,
-                                             std::map< specid_t, V3D >     &neighbors,
+                                             Kernel::V3D                     &CentNghbr,
+                                             //specid_t                      &CentDetspec,
+                                             //int*                            nghbrs,//Not used
+                                            // std::map< specid_t, V3D >     &neighbors,
                                              double                        &neighborRadius,//from CentDetspec
                                              double                         Radius)
     {
-      size_t wsIndx = inpWkSpace->getIndexFromSpectrumNumber(CentDetspec);
+     // size_t wsIndx = inpWkSpace->getIndexFromSpectrumNumber(CentDetspec);
 
-      Geometry::IDetector_const_sptr CentDett= inpWkSpace->getDetector( wsIndx);
+     // Geometry::IDetector_const_sptr CentDett= inpWkSpace->getDetector( wsIndx);
 
-      Kernel::V3D CentPos = center + xvec*(CentX-COL)*CellWidth
+      Kernel::V3D CentPos1 = center + xvec*(CentX-COL)*CellWidth
                                    + yvec*(CentY-ROW)*CellHeight;
 
       SetUpData1(Data             , inpWkSpace, chan,
-                neighbors         , Radius    , CentPos,
-                CentDett->getPos(),  g_log);
+                 Radius            , CentPos1);
 
+      if( AttributeValues[ISSIxx]< 0)// Not enough data
+          return;
 
       double  DD = max<double>( sqrt(ParameterValues[IVYY])*CellHeight, sqrt(ParameterValues[IVXX])*CellWidth);
-      double NewRadius= 1.4* max<double>( 5*max<double>(CellWidth,CellHeight), 4*DD);
+      double NewRadius= 1.1* max<double>( 5*max<double>(CellWidth,CellHeight), 4*DD);
       //1.4 is needed to get more background cells. In rectangle the corners were background
 
       NewRadius = min<double>(30*max<double>(CellWidth,CellHeight),NewRadius);
@@ -891,79 +994,53 @@ namespace Mantid
 
       CentX= ParameterValues[IXMEAN];
       CentY=ParameterValues[IYMEAN];
-      CentPos = center + xvec*(CentX-COL)*CellWidth + yvec*(CentY-ROW)*CellHeight;
+      Kernel::V3D CentPos = center + xvec*(CentX-COL)*CellWidth + yvec*(CentY-ROW)*CellHeight;
 
 
-      DD =(CentPos - CentDett->getPos()).norm();
-      Kernel::V3D CentDetPos = CentDett->getPos();
+      DD =(CentPos - CentPos1).norm();
+     // Kernel::V3D CentDetPos = CentDett->getPos();
 
       if(DD +NewRadius >neighborRadius)
       {
-
-        std::map< specid_t, V3D >  neighbors1  = inpWkSpace->getNeighbours(    CentDetspec,DD+NewRadius, true);
-        double minSpecLength = DD;
-        neighbors1[CentDetspec]= Kernel::V3D(0.0,0.0,0.0);
-        specid_t minSpec = CentDetspec;
-
-        for( std::map<specid_t, V3D >::iterator it =neighbors.begin(); it !=neighbors.end(); it++)
-        {
-          if( (CentPos- ((*it).second+CentDett->getPos())).norm()< minSpecLength)
-          {
-            CentDetPos =(*it).second+CentDett->getPos();
-            minSpecLength = (CentPos- ((*it).second+CentDett->getPos())).norm();
-            minSpec = (*it).first;
-
-          }
-        }
-
-       if( (minSpec)>0)
-       {
-
-         wsIndx = inpWkSpace->getIndexFromSpectrumNumber(minSpec);
-         CentDetspec =minSpec;
-
-         neighborRadius =min<double>(10, DD+NewRadius*4);
-         int Nneighbors=4*(int)((NewRadius*2/CellWidth)*(NewRadius*2/CellHeight)*2.25+1);
-
-         inpWkSpace->getNeighboursExact( CentDetspec, Nneighbors , true);
-
-         neighbors = inpWkSpace->getNeighbours(    CentDetspec,neighborRadius, true);
-         neighbors[CentDetspec] = V3D(0.0,0.0,0.0);
-
-//         std::cout<<"&&&&&&&&&&&&&&&&&&&&&&&&&&"<< neighborRadius<<","<<CentDetspec<<std::endl;
-//         std::cout<<"RC Radius="<<CentX<<","<<CentY<< ","<<neighborRadius<<","<<neighbors.size()<<
-//                       ","<< Nneighbors<< std::endl;
-  /*       std::cout<<"------------------------------All Neighbors---------------------"<<std::endl;
-         for( std::map<specid_t, V3D >::iterator it = neighbors.begin();it !=neighbors.end();it++)
+         int NN= int(2*NewRadius*2*NewRadius*2.25/CellWidth/CellHeight);
+         if( NeighborIDs[0]< NN)
          {
-           Kernel::V3D pixPos = (*it).second;
-           //double row = ROW + (pixPos-center).scalar_prod(yvec)/CellHeight;
-           //double col = COL +(pixPos-center).scalar_prod(xvec)/CellWidth;
+           delete NeighborIDs;
+           NeighborIDs = new int[NN+2];
+           NeighborIDs[0]=NN+2;
+         }else
+           NN= NeighborIDs[0]-2;
+         NeighborIDs[1]=2;
+         neighborRadius = 1.5*NewRadius;
+         CentNghbr = CentPos;
+         getNeighborPixIDs(comp, CentPos, neighborRadius, NeighborIDs);
 
-           std::cout<<"("<<pixPos<<pixPos.norm()<<")";
 
-         }
-         std::cout<<std::endl<<"-------------------------------------------------------"<<std::endl;
- */      }
       }else// big enough neighborhood so
         neighborRadius -= DD;
 
-      SetUpData1(Data, inpWkSpace, chan, neighbors, NewRadius, CentPos,CentDetPos, g_log);
+      SetUpData1(Data, inpWkSpace, chan,
+                 NewRadius, CentPos );
 
     }
 
 
 
-    void  IntegratePeakTimeSlices:: SetUpData1(API::MatrixWorkspace_sptr                              &Data,
-                                               API::MatrixWorkspace_sptr                              const &inpWkSpace,
-                                               const int                                              chan,
-                                               std::map< specid_t, V3D >  neighbors,
-                                               double                     Radius,
-                                               Kernel::V3D                CentPos,//on plane
-                                               Kernel::V3D                CentDetPos,//closest detector
-                                               Kernel::Logger & g_log)
+    void  IntegratePeakTimeSlices:: SetUpData1(API::MatrixWorkspace_sptr              &Data,
+                                               API::MatrixWorkspace_sptr        const &inpWkSpace,
+                                               const int                               chan,
+
+                                               double                      Radius,
+                                               Kernel::V3D                 CentPos
+                                               )
     {
       UNUSED_ARG(g_log);
+      //std::cout<<"Start SetUpData1="<<Radius<<","<<CentPos<<","<<NeighborIDs[1]<< std::endl;
+      if( NeighborIDs[1] < 10)
+      {
+        AttributeValues[ISSIxx]= -1;
+        return;
+      }
       boost::shared_ptr<Workspace2D> ws = boost::shared_dynamic_cast<Workspace2D>(Data);
 
       std::vector<double> StatBase;
@@ -975,7 +1052,7 @@ namespace Mantid
       Mantid::MantidVecPtr pX;
 
       Mantid::MantidVec& xRef = pX.access();
-      for (size_t j = 0; j < neighbors.size(); j++)
+      for (int j = 0; j < NeighborIDs[1]; j++)
       {
         xRef.push_back((double)j);
       }
@@ -996,8 +1073,8 @@ namespace Mantid
 
       double TotBoundaryIntensities = 0;
       int nBoundaryCells = 0;
-      std::map<specid_t, V3D >::iterator it;
-      std::map<detid_t, size_t>::iterator det2wsInxIterator;
+     // std::map<specid_t, V3D >::iterator it;
+     // std::map<detid_t, size_t>::iterator det2wsInxIterator;
 
       int N=0;
       double BoundaryRadius=min<double>(.90*Radius, Radius-1.5*max<double>(CellWidth,CellHeight));
@@ -1005,56 +1082,77 @@ namespace Mantid
              maxRow =-1,
              minCol =20000,
              maxCol =-1;
-      for( it = neighbors.begin(); it != neighbors.end(); it++)
-        if((CentDetPos+ (*it).second -CentPos).norm()>Radius)
+      //for( it = neighbors.begin(); it != neighbors.end(); it++)
+     //   if((CentDetPos+ (*it).second -CentPos).norm()>Radius)
+      //  {
+
+     //   }else
+      for (int i = 2; i < NeighborIDs[1]; i++)
+      {
+        int DetID = NeighborIDs[i];
+
+        size_t workspaceIndex ;
+        if( wi_to_detid_map->count(DetID)>0)
+           workspaceIndex= wi_to_detid_map->find(DetID)->second;//inpWkSpace->getIndexFromSpectrumNumber(spec );
+        else
+        {
+         g_log.error("No workspaceIndex for detID="+DetID);
+         throw  std::runtime_error("No workspaceIndex for detID="+DetID);
+        }
+
+
+        IDetector_const_sptr Det = inpWkSpace->getDetector(workspaceIndex);
+
+        V3D pixPos = Det->getPos();
+
+        if ((pixPos - CentPos).norm() < Radius)
+
         {
 
-        }else
-        {
+          double row = ROW + (pixPos - center).scalar_prod(yvec) / CellHeight;
 
-          N++;
-          specid_t spec = (*it).first;//is spec number? yes
-          size_t workspaceIndex =inpWkSpace->getIndexFromSpectrumNumber(spec );
-
-          V3D pixPos = (V3D)((*it).second)+CentDetPos;
-
-          double row = ROW + (pixPos-center).scalar_prod(yvec)/CellHeight;
-          double col = COL +(pixPos-center).scalar_prod(xvec)/CellWidth;
-
+          double col = COL + (pixPos - center).scalar_prod(xvec) / CellWidth;
 
           Mantid::MantidVec histogram = inpWkSpace->readY(workspaceIndex);
+
           Mantid::MantidVec histoerrs = inpWkSpace->readE(workspaceIndex);
 
           double intensity = histogram[chan];
           double variance = histoerrs[chan] * histoerrs[chan];
 
+          N++;
           yvalB.push_back(intensity);
           double sigma = 1;
 
-          errB.push_back( sigma);
-          xvalB.push_back( (double)col );
-          YvalB.push_back((double)row);
 
-          //std::cout<<"("<<row<<","<<col<<","<<intensity<<","<<(*it).second<<")";
+          errB.push_back(sigma);
+          xvalB.push_back((double) col);
+          YvalB.push_back((double) row);
+
+          //std::cout<<"("<<row<<","<<col<<","<<intensity<<")";
+
 
           updateStats(intensity, variance, row, col, StatBase);
 
-          if((pixPos-CentPos).norm() > BoundaryRadius )
+
+          if ((pixPos - CentPos).norm() > BoundaryRadius)
           {
             TotBoundaryIntensities += intensity;
             nBoundaryCells++;
-           // std::cout<<"*";
+           //  std::cout<<"*";
           }
-          if( row < minRow)
-            minRow=row;
-          if( col < minCol)
-            minCol=col;
-          if( row > maxRow)
-            maxRow=row;
-          if( col> maxCol)
-            maxCol=col;
+
+          if (row < minRow)
+            minRow = row;
+          if (col < minCol)
+            minCol = col;
+          if (row > maxRow)
+            maxRow = row;
+          if (col > maxCol)
+            maxCol = col;
 
 
+        }
         }
 
      // std::cout<<std::endl<<"N elts="<<N<< ","<<TotBoundaryIntensities<<","<<nBoundaryCells<<std::endl;
@@ -1320,6 +1418,7 @@ namespace Mantid
         TotIntensity += TotSliceIntensity - params[IBACK] * ncells;
 
         TotVariance += err * err;
+
       }else
       {
        int IerrInt = find("Intensity", names);
@@ -1382,7 +1481,85 @@ namespace Mantid
       return true;
 
     }
+    /*
+       int* ArryofIDs = new int[500];
+        ArryofIDs[0]=500;
+        ArryofIDs[1]=2;
+        Kernel::V3D Center = pixelp->getPos();
+        double Radius = .5;
+        std::cout<<"IntegratePeakCheck G"<<std::endl;
+        boost::shared_ptr< Geometry::RectangularDetector> comp1 =
+                boost::const_pointer_cast< Geometry::RectangularDetector> (bankR);
+        boost::shared_ptr<Geometry::IComponent>comp =
+            boost::dynamic_pointer_cast<Geometry::IComponent>( comp1);
+        std::cout<<"IntegratePeakCheck H"<<std::endl;
+        std::cout<<"Neighbors="<<getNeighborPixIDs(comp, Center,Radius,ArryofIDs)<<","<<ArryofIDs[1]<<Center<<std::endl;
+        std::cout<<"IntegratePeakCheck I"<<std::endl;
+        for( int i=2; i<ArryofIDs[1];i++)
+        {
+          std::pair< int, int > res = bankR->getXYForDetectorID( ArryofIDs[i]);
+          std::cout<<"("<<res.first<<","<<res.second<<")";
 
+        }
+        std::cout<<std::endl;
+        delete ArryofIDs;
+
+      bool IntegratePeakTimeSlices:: getNeighborPixIDs( boost::shared_ptr< Geometry::IComponent> comp,
+                               Kernel::V3D &Center,
+                               double &Radius,
+                              int* &ArryofID)
+       {
+            std::cout<< comp->type()<<std::endl;
+            int N = ArryofID[1];
+            int MaxN= ArryofID[0];
+            if( N >= MaxN)
+              return false;
+            Geometry::BoundingBox box;
+            comp->getBoundingBox( box);
+
+            double minx = Center.X() - Radius;
+            double miny = Center.Y() - Radius;
+            double minz = Center.Z() - Radius;
+            double maxx = Center.X() + Radius;
+            double maxy = Center.Y() + Radius;
+            double maxz = Center.Z() + Radius;
+
+            if( box.xMin()>=maxx)
+                return true;
+            if( box.xMax() <=minx)
+               return true;;
+            if( box.yMin()>=maxy)
+                return true;;
+            if( box.yMax() <=miny)
+               return true;;
+            if( box.zMin()>=maxz)
+                return true;;
+            if( box.zMax() <=minz)
+               return true;;
+
+            if( comp->type().compare("Detector")==0 || comp->type().compare("RectangularDetectorPixel")==0)
+             {       std::cout<<"Detector case"<<std::endl;
+                     boost::shared_ptr<Geometry::Detector> det =   boost::dynamic_pointer_cast<Geometry::Detector>( comp);
+                     ArryofID[N]=  det->getID();
+                     N++;
+                     ArryofID[1] = N;
+                    return true;
+              }
+
+             boost::shared_ptr<const Geometry::CompAssembly> Assembly =
+                 boost::dynamic_pointer_cast<const Geometry::CompAssembly>( comp);
+
+             if( !Assembly)
+                return true;
+
+             bool b = true;
+             std::cout<<"#kids="<<Assembly->nelements()<<std::endl;
+             for( int i=0; i< Assembly->nelements() && b; i++)
+                b= getNeighborPixIDs( Assembly->getChild(i),Center,Radius,ArryofID);
+
+             return b;
+       }
+   */
     void IntegratePeakTimeSlices::FindPlane( V3D & center, V3D & xvec, V3D& yvec,
                                              double &ROW, double &COL,
                                              double &pixWidthx, double&pixHeighty,
@@ -1391,6 +1568,7 @@ namespace Mantid
 
       IDetector_const_sptr det = peak.getDetector();
       V3D detPos = det->getPos();
+
       center.setX( detPos.X());
       center.setY( detPos.Y());
       center.setZ( detPos.Z());
@@ -1480,8 +1658,7 @@ namespace Mantid
 
        }
 
-
-
+  // std::cout<<"Center,ROW,COL="<<center<<","<<ROW<<","<<COL<<","<<CellWidth<<","<<CellHeight<<std::endl;
     }
 }//namespace Crystal
 }//namespace Mantid

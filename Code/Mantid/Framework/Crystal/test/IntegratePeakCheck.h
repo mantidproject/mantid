@@ -12,6 +12,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidCrystal/IntegratePeakTimeSlices.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -54,6 +55,87 @@ public:
     Mantid::API::FrameworkManager::Instance();
     usePoisson = true;
   }
+/*
+   int* ArryofIDs = new int[500];
+    ArryofIDs[0]=500;
+    ArryofIDs[1]=2;
+    Kernel::V3D Center = pixelp->getPos();
+    double Radius = .5;
+    std::cout<<"IntegratePeakCheck G"<<std::endl;
+    boost::shared_ptr< Geometry::RectangularDetector> comp1 =
+            boost::const_pointer_cast< Geometry::RectangularDetector> (bankR);
+    boost::shared_ptr<Geometry::IComponent>comp =
+        boost::dynamic_pointer_cast<Geometry::IComponent>( comp1);
+    std::cout<<"IntegratePeakCheck H"<<std::endl;
+    std::cout<<"Neighbors="<<getNeighborPixIDs(comp, Center,Radius,ArryofIDs)<<","<<ArryofIDs[1]<<Center<<std::endl;
+    std::cout<<"IntegratePeakCheck I"<<std::endl;
+    for( int i=2; i<ArryofIDs[1];i++)
+    {
+      std::pair< int, int > res = bankR->getXYForDetectorID( ArryofIDs[i]);
+      std::cout<<"("<<res.first<<","<<res.second<<")";
+
+    }
+    std::cout<<std::endl;
+    delete ArryofIDs;
+ */
+  bool getNeighborPixIDs( boost::shared_ptr< Geometry::IComponent> comp,
+                           Kernel::V3D &Center,
+                           double &Radius,
+                          int* &ArryofID)
+   {
+
+        int N = ArryofID[1];
+        int MaxN= ArryofID[0];
+        if( N >= MaxN)
+          return false;
+        Geometry::BoundingBox box;
+        comp->getBoundingBox( box);
+
+        double minx = Center.X() - Radius;
+        double miny = Center.Y() - Radius;
+        double minz = Center.Z() - Radius;
+        double maxx = Center.X() + Radius;
+        double maxy = Center.Y() + Radius;
+        double maxz = Center.Z() + Radius;
+
+        if( box.xMin()>=maxx)
+            return true;
+        if( box.xMax() <=minx)
+           return true;;
+        if( box.yMin()>=maxy)
+            return true;;
+        if( box.yMax() <=miny)
+           return true;;
+        if( box.zMin()>=maxz)
+            return true;;
+        if( box.zMax() <=minz)
+           return true;;
+
+        if( comp->type().compare("Detector")==0 || comp->type().compare("RectangularDetectorPixel")==0)
+         {
+                 boost::shared_ptr<Geometry::Detector> det =   boost::dynamic_pointer_cast<Geometry::Detector>( comp);
+                 if( (det->getPos()-Center).norm() <Radius)
+                 {
+                   ArryofID[N]=  det->getID();
+                   N++;
+                    ArryofID[1] = N;
+                 }
+                return true;
+          }
+
+         boost::shared_ptr<const Geometry::CompAssembly> Assembly =
+             boost::dynamic_pointer_cast<const Geometry::CompAssembly>( comp);
+
+         if( !Assembly)
+            return true;
+
+         bool b = true;
+
+         for( int i=0; i< Assembly->nelements() && b; i++)
+            b= getNeighborPixIDs( Assembly->getChild(i),Center,Radius,ArryofID);
+
+         return b;
+   }
 
   void test_abc()
   {
@@ -94,7 +176,6 @@ public:
         Geometry::RectangularDetector>(bankC);
 
     boost::shared_ptr<Geometry::Detector> pixelp = bankR->getAtXY(PeakCol, PeakRow);
-
 
     //Now get Peak.
     double PeakTime = 18000 + (PeakChan + .5) * 100;
@@ -146,7 +227,29 @@ public:
 
         wsPtr->setData(wsIndex, dataY, dataE);
       }
+      std::cout<<"Start get Neighbors"<<std::endl;
+       double Radius = 40*.05;
+      int* ArryofIDs = new int[6500];
+       ArryofIDs[0]=6500;
+       ArryofIDs[1]=2;
+       Kernel::V3D Center = pixelp->getPos();
+       std::cout<<"IntegratePeakCheck G"<<std::endl;
+       boost::shared_ptr< Geometry::RectangularDetector> comp1 =
+               boost::const_pointer_cast< Geometry::RectangularDetector> (bankR);
+       boost::shared_ptr<Geometry::IComponent>comp =
+           boost::dynamic_pointer_cast<Geometry::IComponent>( comp1);
+       std::cout<<"IntegratePeakCheck H"<<std::endl;
+       std::cout<<"Neighbors="<<getNeighborPixIDs(comp, Center,Radius,ArryofIDs);
+           std::cout<<","<<ArryofIDs[1]<<Center<<std::endl;
+       std::cout<<"IntegratePeakCheck I"<<std::endl;
+       for( int i=2; i<ArryofIDs[1];i++)
+       {
+         std::pair< int, int > res = bankR->getXYForDetectorID( ArryofIDs[i]);
+         std::cout<<"("<<res.first<<","<<res.second<<")";
 
+       }
+       std::cout<<std::endl;
+       delete ArryofIDs;
     PeaksWorkspace_sptr pks(new PeaksWorkspace());
 
     pks->addPeak(peak);
@@ -171,7 +274,6 @@ public:
 
       algP.setPropertyValue("OutputWorkspace", "aaa");
 
-   
        double intensity = algP.getProperty("Intensity");
        double sigma = algP.getProperty("SigmaIntensity");
        TableWorkspace_sptr Twk = algP.getProperty("OutputWorkspace");
@@ -192,6 +294,7 @@ public:
             std::cout<< setw(10)<<Twk->cell<double>(j,i);
          std::cout<<std::endl;
       }
+
   /*    std::cout<<std::setw(15)<<"Act Int";
       for( int j=12; j< 12+Twk->rowCount();j++)
              std::cout<< setw(12)<<T[j];

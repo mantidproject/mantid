@@ -192,7 +192,7 @@ namespace Mantid
         int TOFPeak=0, TOFmin=0, TOFmax=0;
         if (slices)
         {
-          TOFmax = fitneighbours(i, bankName, XPeak, YPeak, i, qspan);
+          TOFmax = fitneighbours(i, bankName, XPeak, YPeak, i, qspan , peak);
           MantidVec& X = outputW->dataX(i);
           TOFPeak = VectorHelper::getBinIndex(X, TOFPeakd);
         }
@@ -608,7 +608,8 @@ void PeakIntegration::sumneighbours(std::string det_name, int x0, int y0, int Su
   haveMask = false;
 
 }
-int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0, int y0, int idet, double qspan)
+int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0, int y0, int idet, double qspan
+                                    ,Peak & peak)
 {
   // Number of slices
   int TOFmax = 0;
@@ -693,6 +694,8 @@ int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0, int 
       MantidVec& Yout=outputW->dataY(idet);
       MantidVec& Eout=outputW->dataE(idet);
       TableWorkspace_sptr logtable = slice_alg->getProperty("OutputWorkspace");
+      peak.setIntensity( slice_alg->getProperty("Intensity"));
+      peak.setSigmaIntensity(slice_alg->getProperty("SigmaIntensity"));
       TOFmax = static_cast<int>(logtable->rowCount());
       for (int iTOF=0; iTOF < TOFmax; iTOF++)
       {
