@@ -15,12 +15,17 @@ namespace Kernel
   @param v :: the vector to output
   @return the output stream
   */
-template<typename TYPE>
-std::ostream& operator<<(std::ostream& os, const VMDBase<TYPE>& v)
-{
-  os << v.toString();
-  return os;
-}
+  std::ostream& operator<<(std::ostream& os, const VMDBase<double>& v)
+  {
+    os << v.toString();
+    return os;
+  }
+
+  std::ostream& operator<<(std::ostream& os, const VMDBase<float>& v)
+  {
+    os << v.toString();
+    return os;
+  }
 
 //-------------------------------------------------------------------------------------------------
 /** Make an orthogonal system with 2 input 3D vectors.
@@ -133,9 +138,6 @@ VMDBase<TYPE> VMDBase<TYPE>::getNormalVector(const std::vector<VMDBase<TYPE> > &
 template MANTID_KERNEL_DLL class VMDBase<double>;
 template MANTID_KERNEL_DLL class VMDBase<float>;
 
-/// Instantiate stream operators
-MANTID_KERNEL_DLL std::ostream& operator<<(std::ostream&, VMDBase<double>&);
-MANTID_KERNEL_DLL std::ostream& operator<<(std::ostream&, VMDBase<float>&);
 
 } // namespace Mantid
 } // namespace Kernel
