@@ -52,14 +52,7 @@ namespace API
     if (inputVector.getNumDims() != inD)
       throw std::runtime_error("CoordTransform::apply(): inputVector has the wrong number of coordinates!");
     coord_t * outArray = new coord_t[outD];
-
-#ifdef COORDT_IS_FLOAT
-    std::vector<coord_t> temp = inputVector.toVector<coord_t>();
-    this->apply(&temp[0], outArray);
-#else
     this->apply(inputVector.getBareArray(), outArray);
-#endif
-
     VMD out(outD, outArray);
     delete [] outArray;
     return out;
