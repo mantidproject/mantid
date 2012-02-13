@@ -867,12 +867,10 @@ namespace MDEvents
   TMDE(
   inline void MDGridBox)::addEvent( const MDE & event)
   {
-//    std::cout << "\n nd " << nd << "; boxSize[d] " << boxSize[0] << "; min " << this->extents[0].min << "." << std::endl;
     size_t index = 0;
     for (size_t d=0; d<nd; d++)
     {
       coord_t x = event.getCenter(d);
-//      std::cout << x << ":" << ((x - this->extents[d].min) / boxSize[d]) << ",";
       int i = int((x - this->extents[d].min) / boxSize[d]);
       // NOTE: No bounds checking is done (for performance).
       //if (i < 0 || i >= int(split[d])) return;
@@ -884,11 +882,39 @@ namespace MDEvents
     // Add it to the contained box
     if (index < numBoxes) // avoid segfaults for floating point round-off errors.
       boxes[index]->addEvent(event);
-    else
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /** Add a single MDLeanEvent to the grid box. If the boxes
+   * contained within are also gridded, this will recursively push the event
+   * down to the deepest level.
+   *
+   * Warning! No bounds checking is done (for performance). It must
+   * be known that the event is within the bounds of the grid box before adding.
+   *
+   * Warning! Call is NOT thread-safe. Only 1 thread should be writing to this
+   * box (or any child boxes) at a time
+   *
+   * Note! nPoints, signal and error must be re-calculated using refreshCache()
+   * after all events have been added.
+   *
+   * @param event :: reference to a MDEvent to add.
+   * */
+  TMDE(
+  inline void MDGridBox)::addEventUnsafe(const MDE & event)
+  {
+    size_t index = 0;
+    for (size_t d=0; d<nd; d++)
     {
-      //std::cout << "\nEvent at " << event.getCenter(0) << " is skipped because index is " << index << "\n";
+      coord_t x = event.getCenter(d);
+      int i = int((x - this->extents[d].min) / boxSize[d]);
+      // Accumulate the index
+      index += (i * splitCumul[d]);
     }
 
+    // Add it to the contained box
+    if (index < numBoxes) // avoid segfaults for floating point round-off errors.
+      boxes[index]->addEventUnsafe(event);
   }
 
 

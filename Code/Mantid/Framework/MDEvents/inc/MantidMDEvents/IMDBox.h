@@ -174,17 +174,16 @@ namespace MDEvents
     /// Add a single event
     virtual void addEvent(const MDE & point) = 0;
 
-    /** Add several events from a vector
-     * @param events :: vector of MDEvents to add (all of it)
-     * @return the number of events that were rejected (because of being out of bounds)
-     */
-    virtual size_t addEvents(const std::vector<MDE> & events)
-    {
-      return addEvents(events, 0, events.size());
-    }
+    /// Add a single event, with no mutex locking
+    virtual void addEventUnsafe(const MDE & point) = 0;
 
     /// Add several events, within a given range
-    virtual size_t addEvents(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at);
+    virtual size_t addEventsPart(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at);
+    size_t addEvents(const std::vector<MDE> & events);
+
+    /// Add several events, within a given range, with no bounds checking
+    virtual size_t addEventsPartUnsafe(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at);
+    size_t addEventsUnsafe(const std::vector<MDE> & events);
 
     /** Perform centerpoint binning of events
      * @param bin :: MDBin object giving the limits of events to accept.

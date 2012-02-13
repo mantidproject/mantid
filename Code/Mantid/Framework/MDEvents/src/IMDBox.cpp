@@ -93,7 +93,7 @@ namespace MDEvents
    * @return the number of events that were rejected (because of being out of bounds)
    */
   TMDE(
-  size_t IMDBox)::addEvents(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at)
+  size_t IMDBox)::addEventsPart(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at)
   {
     size_t numBad = 0;
     // --- Go event by event and add them ----
@@ -123,6 +123,63 @@ namespace MDEvents
 
     return numBad;
   }
+
+  //-----------------------------------------------------------------------------------------------
+  /** Add several events, starting and stopping at particular point in a vector.
+   * This is the fastest way to add many events because:
+   *  - Bounds checking is NOT performed.
+   *  - This call is NOT thread-safe (no locking is made while adding).
+   *
+   * NOTE: You must call refreshCache() after you are done, to calculate the
+   *  nPoints, signal and error.
+   *
+   * @param events :: vector of events to be copied.
+   * @param start_at :: begin at this index in the array
+   * @param stop_at :: stop at this index in the array
+   * @return 0 (since no events were rejected)
+   */
+  TMDE(
+  size_t IMDBox)::addEventsPartUnsafe(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at)
+  {
+    // --- Go event by event and add them ----
+    typename std::vector<MDE>::const_iterator it = events.begin() + start_at;
+    typename std::vector<MDE>::const_iterator it_end = events.begin() + stop_at;
+    for (; it != it_end; ++it)
+    {
+      //Check out-of-bounds-ness
+      // Event was in bounds; add it
+      addEventUnsafe(*it);
+    }
+
+    return 0;
+  }
+
+  //---------------------------------------------------------------------------------------------------
+  /** Add all of the events contained in a vector, with:
+   * - No bounds checking.
+   * - No thread-safety.
+   *
+   * @param events :: Vector of MDEvent
+   */
+  TMDE(
+  size_t IMDBox)::addEventsUnsafe(const std::vector<MDE> & events)
+  {
+    return this->addEventsPartUnsafe(events, 0, events.size());
+  }
+
+  //---------------------------------------------------------------------------------------------------
+  /** Add all of the events contained in a vector, with:
+   * - Bounds checking.
+   * - Thread-safety.
+   *
+   * @param events :: Vector of MDEvent
+   */
+  TMDE(
+  size_t IMDBox)::addEvents(const std::vector<MDE> & events)
+  {
+    return this->addEventsPart(events, 0, events.size());
+  }
+
 
   //---------------------------------------------------------------------------------------------------
   /** Transform the dimensions contained in this box

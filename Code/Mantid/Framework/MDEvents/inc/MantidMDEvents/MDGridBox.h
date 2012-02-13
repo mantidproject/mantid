@@ -78,6 +78,8 @@ namespace MDEvents
 
     void addEvent(const MDE & point);
 
+    void addEventUnsafe(const MDE & point);
+
     void centerpointBin(MDBin<MDE,nd> & bin, bool * fullyContained) const;
 
     void generalBin(MDBin<MDE,nd> & /*bin*/, Mantid::Geometry::MDImplicitFunction & /*function*/) const {};
@@ -192,7 +194,7 @@ namespace MDEvents
       /// Add the events in the MDGridBox.
       void run()
       {
-        box->addEvents(events, start_at, stop_at);
+        box->addEventsPart(events, start_at, stop_at);
         if (prog)
         {
           std::ostringstream out;

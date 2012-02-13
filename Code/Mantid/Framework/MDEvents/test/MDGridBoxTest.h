@@ -773,7 +773,7 @@ public:
       }
 
     size_t numbad = 0;
-    TS_ASSERT_THROWS_NOTHING( numbad = b->addEvents( events, 50, 60 ); );
+    TS_ASSERT_THROWS_NOTHING( numbad = b->addEventsPart( events, 50, 60 ); );
     // Get the right totals again
     b->refreshCache(NULL);
     TS_ASSERT_EQUALS( numbad, 0);

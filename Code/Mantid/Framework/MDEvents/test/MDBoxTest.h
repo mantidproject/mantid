@@ -108,6 +108,22 @@ public:
     TS_ASSERT_DELTA( b.getSignal(), 1.2*1, 1e-5);
     TS_ASSERT_DELTA( b.getErrorSquared(), 3.4*1, 1e-5);
   }
+  /** Adding events in unsafe way also works */
+  void test_addEventUnsafe()
+  {
+    MDBox<MDLeanEvent<2>,2> b;
+    MDLeanEvent<2> ev(1.2, 3.4);
+    ev.setCenter(0, 2.0);
+    ev.setCenter(1, 3.0);
+    b.addEventUnsafe(ev);
+    TS_ASSERT_EQUALS( b.getNPoints(), 1)
+#ifndef MDBOX_TRACK_SIGNAL_WHEN_ADDING
+    b.refreshCache();
+#endif
+    // Did it keep a running total of the signal and error?
+    TS_ASSERT_DELTA( b.getSignal(), 1.2*1, 1e-5);
+    TS_ASSERT_DELTA( b.getErrorSquared(), 3.4*1, 1e-5);
+  }
 
 
   /** Add a vector of events */
@@ -143,7 +159,7 @@ public:
     for (size_t i=0; i<10; i++)
       vec.push_back(ev);
 
-    b.addEvents(vec, 5, 8);
+    b.addEventsPart(vec, 5, 8);
 #ifndef MDBOX_TRACK_SIGNAL_WHEN_ADDING
     b.refreshCache();
 #endif

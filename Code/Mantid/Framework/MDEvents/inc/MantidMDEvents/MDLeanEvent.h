@@ -7,6 +7,7 @@
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include <numeric>
 #include <cmath>
+#include <napi.h>
 
 namespace Mantid
 {
@@ -411,7 +412,12 @@ namespace MDEvents
       coord_t * data = new coord_t[dataSize];
 
 #ifdef COORDT_IS_FLOAT
-      if (file->getInfo().type == ::NeXus::FLOAT64)
+      // C-style call is much faster than the C++ call.
+      int dims[NX_MAXRANK];
+      int type = ::NeXus::FLOAT32;
+      int rank = 0;
+      NXgetinfo(file->getHandle(), &rank, dims, &type);
+      if (type == ::NeXus::FLOAT64)
       {
         // Handle old files that are recorded in DOUBLEs to load as FLOATS
         double * dblData = new double[dataSize];

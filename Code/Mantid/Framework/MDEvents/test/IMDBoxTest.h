@@ -68,6 +68,10 @@ public:
   virtual void addEvent(const MDE & /*point*/)
   {}
 
+  /// Add a single event
+  virtual void addEventUnsafe(const MDE & /*point*/)
+  {}
+
   /** Perform centerpoint binning of events
    * @param bin :: MDBin object giving the limits of events to accept.
    */
