@@ -54,13 +54,7 @@ namespace Mantid
       signal_t IMDWorkspace::getSignalAtVMD(const Mantid::Kernel::VMD & coords,
           const Mantid::API::MDNormalization & normalization) const
       {
-#ifdef COORDT_IS_FLOAT
-        std::vector<coord_t> temp = coords.toVector<coord_t>();
-        signal_t out = this->getSignalAtCoord(&temp[0], normalization);
-        return out;
-#else
         return this->getSignalAtCoord(coords.getBareArray(), normalization);
-#endif
       }
 
   }

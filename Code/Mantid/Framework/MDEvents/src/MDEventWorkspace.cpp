@@ -687,12 +687,7 @@ namespace MDEvents
      //TODO: make the logic/reuse in the following nicer.
       if (!outOfBounds)
       {
-#ifdef COORDT_IS_FLOAT
-        std::vector<coord_t> temp = coord.toVector<coord_t>();
-        box = this->data->getBoxAtCoord(&temp[0]);
-#else
         box = this->data->getBoxAtCoord(coord.getBareArray());
-#endif
 
         if(box != NULL) 
         {

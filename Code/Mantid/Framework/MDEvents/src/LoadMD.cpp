@@ -394,6 +394,15 @@ namespace Mantid
         file->openGroup("event_data", "NXdata");
         uint64_t totalNumEvents = MDE::openNexusData(file);
 
+#ifdef COORDT_IS_FLOAT
+        if (FileBackEnd && file->getInfo().type == ::NeXus::FLOAT64)
+        {
+          g_log.warning() << "You have loaded, in file-backed mode, an older NXS file where event_data is in doubles." << std::endl;
+          g_log.warning() << "Use this file in read-only mode! Adding or changing data will cause incorrect results!" << std::endl;
+          g_log.warning() << "It is highly recommended that you save to a new file under the new format." << std::endl;
+        }
+#endif
+
         for (size_t i=0; i<numBoxes; i++)
         {
           prog->report();
