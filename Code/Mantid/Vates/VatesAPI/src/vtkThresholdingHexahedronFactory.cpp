@@ -92,16 +92,16 @@ namespace VATES
     const int nBinsY = static_cast<int>( m_workspace->getYDimension()->getNBins() );
     const int nBinsZ = static_cast<int>( m_workspace->getZDimension()->getNBins() );
 
-    const double maxX = m_workspace-> getXDimension()->getMaximum();
-    const double minX = m_workspace-> getXDimension()->getMinimum();
-    const double maxY = m_workspace-> getYDimension()->getMaximum();
-    const double minY = m_workspace-> getYDimension()->getMinimum();
-    const double maxZ = m_workspace-> getZDimension()->getMaximum();
-    const double minZ = m_workspace-> getZDimension()->getMinimum();
+    const coord_t maxX = m_workspace->getXDimension()->getMaximum();
+    const coord_t minX = m_workspace->getXDimension()->getMinimum();
+    const coord_t maxY = m_workspace->getYDimension()->getMaximum();
+    const coord_t minY = m_workspace->getYDimension()->getMinimum();
+    const coord_t maxZ = m_workspace->getZDimension()->getMaximum();
+    const coord_t minZ = m_workspace->getZDimension()->getMinimum();
 
-    double incrementX = (maxX - minX) / (nBinsX);
-    double incrementY = (maxY - minY) / (nBinsY);
-    double incrementZ = (maxZ - minZ) / (nBinsZ);
+    coord_t incrementX = (maxX - minX) / coord_t(nBinsX);
+    coord_t incrementY = (maxY - minY) / coord_t(nBinsY);
+    coord_t incrementZ = (maxZ - minZ) / coord_t(nBinsZ);
 
     const int imageSize = (nBinsX ) * (nBinsY ) * (nBinsZ );
     vtkPoints *points = vtkPoints::New();
@@ -190,16 +190,16 @@ namespace VATES
     index = 0;
     for (int z = 0; z < nPointsZ; z++)
     {
-      in[2] = (minZ + (z * incrementZ)); //Calculate increment in z;
+      in[2] = (minZ + (coord_t(z) * incrementZ)); //Calculate increment in z;
       for (int y = 0; y < nPointsY; y++)
       {
-        in[1] = (minY + (y * incrementY)); //Calculate increment in y;
+        in[1] = (minY + (coord_t(y) * incrementY)); //Calculate increment in y;
         for (int x = 0; x < nPointsX; x++)
         {
           // Create the point only when needed
           if (pointNeeded[index])
           {
-            in[0] = (minX + (x * incrementX)); //Calculate increment in x;
+            in[0] = (minX + (coord_t(x) * incrementX)); //Calculate increment in x;
             if (transform)
             {
               transform->apply(in, out);

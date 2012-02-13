@@ -46,7 +46,7 @@ namespace API
     m_max = (m_endWI - m_beginWI) * m_blockSize;
     m_xIndex = 0;
     // Trigger the calculation for the first index
-    m_workspaceIndex = -1;
+    m_workspaceIndex = size_t(-1); // This makes sure calcWorkspacePos() updates
     calcWorkspacePos(m_beginWI);
   }
     
@@ -225,9 +225,9 @@ namespace API
   {
     // Place the point in X dimension
     if (m_isBinnedData)
-      m_center[0] = (m_X[m_xIndex] + m_X[m_xIndex+1]) / 2.0;
+      m_center[0] = VMD_t((m_X[m_xIndex] + m_X[m_xIndex+1]) / 2.0);
     else
-      m_center[0] = m_X[m_xIndex];
+      m_center[0] = VMD_t(m_X[m_xIndex]);
     return m_center;
   }
 

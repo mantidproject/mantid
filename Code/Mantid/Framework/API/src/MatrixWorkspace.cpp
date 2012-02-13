@@ -1361,19 +1361,19 @@ namespace Mantid
       virtual bool getIsIntegrated() const {return m_axis.length() == 1;}
 
       /// @return the minimum extent of this dimension
-      virtual double getMinimum() const {return m_axis(0);}
+      virtual coord_t getMinimum() const {return coord_t(m_axis(0));}
 
       /// @return the maximum extent of this dimension
-      virtual double getMaximum() const {return m_axis(m_axis.length()-1);}
+      virtual coord_t getMaximum() const {return coord_t(m_axis(m_axis.length()-1));}
 
       /// number of bins dimension have (an integrated has one). A axis directed along dimension would have getNBins+1 axis points. 
       virtual size_t getNBins() const {return m_axis.length();}
 
       /// Change the extents and number of bins
-      virtual void setRange(size_t /*nBins*/, double /*min*/, double /*max*/){throw std::runtime_error("Not implemented");}
+      virtual void setRange(size_t /*nBins*/, coord_t /*min*/, coord_t /*max*/){throw std::runtime_error("Not implemented");}
 
       ///  Get coordinate for index;
-      virtual double getX(size_t ind)const {return m_axis(ind);}
+      virtual coord_t getX(size_t ind)const {return coord_t(m_axis(ind));}
 
 
       //Dimensions must be xml serializable.
@@ -1416,20 +1416,20 @@ namespace Mantid
       /// if the dimension is integrated (e.g. have single bin)
       virtual bool getIsIntegrated() const {return m_X.size() == 1;}
 
-      /// @return the minimum extent of this dimension
-      virtual double getMinimum() const {return m_X.front();}
+      /// coord_t the minimum extent of this dimension
+      virtual coord_t getMinimum() const {return coord_t(m_X.front());}
 
       /// @return the maximum extent of this dimension
-      virtual double getMaximum() const {return m_X.back();}
+      virtual coord_t getMaximum() const {return coord_t(m_X.back());}
 
       /// number of bins dimension have (an integrated has one). A axis directed along dimension would have getNBins+1 axis points.
       virtual size_t getNBins() const {return m_X.size()-1;}
 
       /// Change the extents and number of bins
-      virtual void setRange(size_t /*nBins*/, double /*min*/, double /*max*/){throw std::runtime_error("Not implemented");}
+      virtual void setRange(size_t /*nBins*/, coord_t /*min*/, coord_t /*max*/){throw std::runtime_error("Not implemented");}
 
       ///  Get coordinate for index;
-      virtual double getX(size_t ind)const {return m_X[ind];}
+      virtual coord_t getX(size_t ind)const {return coord_t(m_X[ind]);}
 
       //Dimensions must be xml serializable.
       virtual std::string toXMLString() const {throw std::runtime_error("Not implemented");}

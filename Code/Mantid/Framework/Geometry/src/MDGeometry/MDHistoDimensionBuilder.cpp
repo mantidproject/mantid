@@ -143,7 +143,7 @@ namespace Mantid
       {
         throw std::invalid_argument("Cannot create MDHistogramDimension without setting a n bins.");
       }
-      return new MDHistoDimension(m_name, m_id, m_units, m_min, m_max, m_nbins);
+      return new MDHistoDimension(m_name, m_id, m_units, coord_t(m_min), coord_t(m_max), m_nbins);
     }
 
     /*

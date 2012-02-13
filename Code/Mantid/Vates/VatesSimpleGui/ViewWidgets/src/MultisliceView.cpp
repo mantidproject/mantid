@@ -600,9 +600,9 @@ void MultiSliceView::showCutInSliceViewer(const QString &name)
   pqPipelineSource *cut = smModel->findItem<pqPipelineSource *>(name);
   vtkSMProxy *plane = vtkSMPropertyHelper(cut->getProxy(),
                                           "CutFunction").GetAsProxy();
-  coord_t origin[3];
+  double origin[3];
   vtkSMPropertyHelper(plane, "Origin").Get(origin, 3);
-  coord_t orient[3];
+  double orient[3];
   vtkSMPropertyHelper(plane, "Normal").Get(orient, 3);
 
   // Create the XML holder

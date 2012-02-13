@@ -193,7 +193,7 @@ namespace MDEvents
     double scaling = double(numBins) / length;
 
     // Create the output dimension
-    MDHistoDimension_sptr out(new MDHistoDimension(name, id, units, min, max, numBins));
+    MDHistoDimension_sptr out(new MDHistoDimension(name, id, units, coord_t(min), coord_t(max), numBins));
 
     // Put both in the algo for future use
     m_bases.push_back(basis);
@@ -346,7 +346,7 @@ namespace MDEvents
         throw std::invalid_argument("Wrong number of values (3 are expected) after the name in the dimensions string: " + str);
 
       // Extract the arguments
-      double min, max;
+      coord_t min, max;
       int numBins = 0;
       Strings::convert(strs[0], min);
       Strings::convert(strs[1], max);
@@ -781,8 +781,8 @@ namespace MDEvents
     size_t nd = m_inWS->getNumDims();
     if (m_axisAligned)
     {
-      std::vector<coord_t> function_min(nd, -1e50); // default to all space if the dimension is not specified
-      std::vector<coord_t> function_max(nd, +1e50); // default to all space if the dimension is not specified
+      std::vector<coord_t> function_min(nd, coord_t(-1e30)); // default to all space if the dimension is not specified
+      std::vector<coord_t> function_max(nd, coord_t(+1e30)); // default to all space if the dimension is not specified
       for (size_t bd=0; bd<m_outD; bd++)
       {
         // Dimension in the MDEventWorkspace

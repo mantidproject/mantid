@@ -277,10 +277,10 @@ void SliceViewerWindow::setLineViewerValues(QPointF start2D, QPointF end2D, doub
 {
   VMD start = m_slicer->getSlicePoint();
   VMD end = start;
-  start[m_slicer->getDimX()] = start2D.x();
-  start[m_slicer->getDimY()] = start2D.y();
-  end[m_slicer->getDimX()] = end2D.x();
-  end[m_slicer->getDimY()] = end2D.y();
+  start[m_slicer->getDimX()] = VMD_t(start2D.x());
+  start[m_slicer->getDimY()] = VMD_t(start2D.y());
+  end[m_slicer->getDimX()] = VMD_t(end2D.x());
+  end[m_slicer->getDimY()] = VMD_t(end2D.y());
   m_liner->setStart(start);
   m_liner->setEnd(end);
   m_liner->setPlanarWidth(width);

@@ -139,7 +139,7 @@ namespace MDEvents
     coord_t volume = 1.0;
     for (size_t i=0; i < numDimensions; ++i)
       volume *= m_dimensions[i]->getBinWidth();
-    m_inverseVolume = 1.0 / volume;
+    m_inverseVolume = coord_t(1.0) / volume;
 
     // Continue with the vertexes array
     this->initVertexesArray();
@@ -294,7 +294,7 @@ namespace MDEvents
     VMD out(numDimensions);
     // Offset the 0th box by the position of this linear index, in each dimension, plus a half
     for (size_t d=0; d<numDimensions; d++)
-      out[d] = m_vertexesArray[d] + m_boxLength[d] * (coord_t(dimIndexes[d]) + 0.5);
+      out[d] = m_vertexesArray[d] + m_boxLength[d] * (coord_t(dimIndexes[d]) + coord_t(0.5));
     return out;
   }
 
@@ -456,7 +456,7 @@ namespace MDEvents
 
     // Unit-vector of the direction
     VMD dir = end - start;
-    double length = dir.normalize();
+    coord_t length = dir.normalize();
 
     // Vector with +1 where direction is positive, -1 where negative
     #define sgn(x) ((x<0)?-1:((x>0)?1:0))
@@ -477,7 +477,7 @@ namespace MDEvents
     }
 
     // Ordered list of boundaries in position-along-the-line coordinates
-    std::set<double> boundaries;
+    std::set<coord_t> boundaries;
 
     // Start with the start/end points, if they are within range.
     if (pointInWorkspace(this, start))
@@ -490,16 +490,16 @@ namespace MDEvents
     for (size_t d=0; d<nd; d++)
     {
       IMDDimension_const_sptr dim = this->getDimension(d);
-      double lineStartX = start[d];
+      coord_t lineStartX = start[d];
 
       if (dir[d] != 0.0)
       {
         for (size_t i=0; i<=dim->getNBins(); i++)
         {
           // Position in this coordinate
-          double thisX = dim->getX(i);
+          coord_t thisX = dim->getX(i);
           // Position along the line. Is this between the start and end of it?
-          double linePos = (thisX - lineStartX) / dir[d];
+          coord_t linePos = (thisX - lineStartX) / dir[d];
           if (linePos >= 0 && linePos <= length)
           {
             // Full position
@@ -518,17 +518,17 @@ namespace MDEvents
       // Nothing at all!
       // Make a single bin with NAN
       x.push_back(0);  x.push_back(length);
-      y.push_back(std::numeric_limits<double>::quiet_NaN());
-      e.push_back(std::numeric_limits<double>::quiet_NaN());
+      y.push_back(std::numeric_limits<signal_t>::quiet_NaN());
+      e.push_back(std::numeric_limits<signal_t>::quiet_NaN());
       return;
     }
     else
     {
       // Get the first point
-      std::set<double>::iterator it;
+      std::set<coord_t>::iterator it;
       it = boundaries.begin();
 
-      double lastLinePos = *it;
+      coord_t lastLinePos = *it;
       VMD lastPos = start + (dir * lastLinePos);
       x.push_back(lastLinePos);
 
@@ -537,7 +537,7 @@ namespace MDEvents
       for (; it != boundaries.end(); it++)
       {
         // This is our current position along the line
-        double linePos = *it;
+        coord_t linePos = *it;
         x.push_back(linePos);
 
         // This is the full position at this boundary
@@ -573,8 +573,8 @@ namespace MDEvents
         else
         {
           // Invalid index. This shouldn't happen
-          y.push_back(std::numeric_limits<double>::quiet_NaN());
-          e.push_back(std::numeric_limits<double>::quiet_NaN());
+          y.push_back(std::numeric_limits<signal_t>::quiet_NaN());
+          e.push_back(std::numeric_limits<signal_t>::quiet_NaN());
         }
       } // for each unique boundary
     } // if there is at least one point

@@ -129,7 +129,7 @@ namespace MDEvents
       coord_t radiusSquared = 0;
       for (size_t d=0; d<nd; d++)
       {
-        centers[d] = genUnit()-0.5; // Distribute around +- the center
+        centers[d] = genUnit()-coord_t(0.5); // Distribute around +- the center
         radiusSquared += centers[d]*centers[d];
       }
 
@@ -230,7 +230,7 @@ namespace MDEvents
     {
       coord_t centers[nd];
       for (size_t d=0; d<nd; d++)
-        centers[d] = (*gens[d])(); // use a different generator for each dimension
+        centers[d] = coord_t((*gens[d])()); // use a different generator for each dimension
 
       // Default or randomized error/signal
       float signal = 1.0;

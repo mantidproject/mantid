@@ -406,8 +406,8 @@ namespace Mantid
             std::vector<Mantid::Geometry::MDDimensionExtents> extentsVector(nd);
             for (size_t d=0; d<nd; d++)
             {
-              extentsVector[d].min = extents[i*nd*2 + d*2];
-              extentsVector[d].max = extents[i*nd*2 + d*2 + 1];
+              extentsVector[d].min = coord_t(extents[i*nd*2 + d*2]);
+              extentsVector[d].max = coord_t(extents[i*nd*2 + d*2 + 1]);
             }
 
             if (box_type == 1)

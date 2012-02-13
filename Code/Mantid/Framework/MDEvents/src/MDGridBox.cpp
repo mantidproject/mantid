@@ -91,10 +91,10 @@ namespace MDEvents
       throw std::runtime_error("MDGridBox::ctor(): Invalid splitting criterion (one was zero).");
 
     // Calculate the volume
-    double volume = 1;
+    coord_t volume = 1;
     for (size_t d=0; d<nd; d++)
       volume *= boxSize[d];
-    double inverseVolume = 1.0 / volume;
+    coord_t inverseVolume = coord_t(1.0) / volume;
 
     // Create the array of MDBox contents.
     boxes.clear();
@@ -120,7 +120,7 @@ namespace MDEvents
         // Set the extents of this box.
         for (size_t d=0; d<nd; d++)
         {
-          coord_t min = this->extents[d].min + boxSize[d] * double(indices[d]);
+          coord_t min = this->extents[d].min + boxSize[d] * coord_t(indices[d]);
           myBox->setExtents(d, min, min + boxSize[d]);
         }
         myBox->setInverseVolume(inverseVolume); // Set the cached inverse volume
@@ -230,7 +230,7 @@ namespace MDEvents
       splitCumul[d] = tot;
       tot *= split[d];
       // Length of the side of a box in this dimension
-      boxSize[d] = (this->extents[d].max - this->extents[d].min) / double(split[d]);
+      boxSize[d] = (this->extents[d].max - this->extents[d].min) / coord_t(split[d]);
       // Accumulate the squared diagonal length.
       diagonalSquared += boxSize[d] * boxSize[d];
     }
@@ -561,7 +561,7 @@ namespace MDEvents
         // Coordinates of this vertex
         coord_t vertexCoord[nd];
         for (size_t d=0; d<nd; ++d)
-          vertexCoord[d] = double(vertexIndex[d]) * boxSize[d] + this->extents[d].min;
+          vertexCoord[d] = coord_t(vertexIndex[d]) * boxSize[d] + this->extents[d].min;
 
         // Now check each plane to see if the vertex is bounded by it
         for (size_t p=0; p<numPlanes; p++)
@@ -1231,7 +1231,7 @@ namespace MDEvents
       // Coordinates of this vertex
       coord_t vertexCoord[nd];
       for (size_t d=0; d<nd; ++d)
-        vertexCoord[d] = double(vertexIndex[d]) * boxSize[d] + this->extents[d].min;
+        vertexCoord[d] = coord_t(vertexIndex[d]) * boxSize[d] + this->extents[d].min;
 
       // Is this vertex contained?
       coord_t out[nd];

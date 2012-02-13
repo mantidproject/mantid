@@ -204,7 +204,7 @@ namespace MDEvents
       for (; it != it_end; it++)
       {
         // Get the wavenumber in ang^-1 using the previously calculated constant.
-        coord_t wavenumber = wavenumber_in_angstrom_times_tof_in_microsec / it->tof();
+        coord_t wavenumber = coord_t(wavenumber_in_angstrom_times_tof_in_microsec / it->tof());
 
         // Q vector = K_final - K_initial = wavenumber * (output_direction - input_direction)
         coord_t center[3] = {Q_dir_x * wavenumber, Q_dir_y * wavenumber, Q_dir_z * wavenumber};
@@ -356,7 +356,7 @@ namespace MDEvents
       // Give all the dimensions
       for (size_t d=0; d<nd; d++)
       {
-        MDHistoDimension * dim = new MDHistoDimension(dimensionNames[d], dimensionNames[d], dimensionUnits, extents[d*2], extents[d*2+1], 10);
+        MDHistoDimension * dim = new MDHistoDimension(dimensionNames[d], dimensionNames[d], dimensionUnits, coord_t(extents[d*2]), coord_t(extents[d*2+1]), 10);
         ws->addDimension(MDHistoDimension_sptr(dim));
       }
       ws->initialize();

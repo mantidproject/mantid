@@ -48,7 +48,21 @@ namespace Geometry
    * @param normal :: normal to the plane. Points that are in the direction of the normal of the plane are considered to be bounded by it.
    * @param point :: any point that is on the plane
    */
-  MDPlane::MDPlane(const size_t nd, const coord_t * normal, const coord_t * point)
+  MDPlane::MDPlane(const size_t nd, const float * normal, const float * point)
+  : m_nd(nd)
+  {
+    if ((m_nd < 1) || (m_nd > 100)) throw std::invalid_argument("MDPlane::ctor(): Invalid number of dimensions in the workspace!");
+    construct(normal, point);
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Constructor with normal and point
+   *
+   * @param nd :: number of dimensions
+   * @param normal :: normal to the plane. Points that are in the direction of the normal of the plane are considered to be bounded by it.
+   * @param point :: any point that is on the plane
+   */
+  MDPlane::MDPlane(const size_t nd, const double * normal, const double * point)
   : m_nd(nd)
   {
     if ((m_nd < 1) || (m_nd > 100)) throw std::invalid_argument("MDPlane::ctor(): Invalid number of dimensions in the workspace!");

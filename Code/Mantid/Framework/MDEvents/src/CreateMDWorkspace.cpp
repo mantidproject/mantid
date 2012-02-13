@@ -167,7 +167,7 @@ namespace MDEvents
     // Give all the dimensions
     for (size_t d=0; d<ndims; d++)
     {
-      MDHistoDimension * dim = new MDHistoDimension(names[d], names[d], units[d], extents[d*2], extents[d*2+1], 1);
+      MDHistoDimension * dim = new MDHistoDimension(names[d], names[d], units[d], coord_t(extents[d*2]), coord_t(extents[d*2+1]), 1);
       out->addDimension(MDHistoDimension_sptr(dim));
     }
 

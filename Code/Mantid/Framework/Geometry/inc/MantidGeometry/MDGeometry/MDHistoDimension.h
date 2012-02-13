@@ -31,10 +31,10 @@ namespace Geometry
     * @param max :: maximum extent
     * @param numBins :: number of bins (evenly spaced)
     */
-    MDHistoDimension(std::string name, std::string ID, std::string units, double min, double max, size_t numBins)
+    MDHistoDimension(std::string name, std::string ID, std::string units, coord_t min, coord_t max, size_t numBins)
     : m_name(name), m_dimensionId(ID), m_units(units),
       m_min(min), m_max(max), m_numBins(numBins),
-      m_binWidth((max-min)/static_cast<double>(numBins))
+      m_binWidth((max-min)/static_cast<coord_t>(numBins))
     {
       if(max < min)
       {
@@ -80,13 +80,13 @@ namespace Geometry
     }
 
     /// Returns the maximum extent of this dimension
-    virtual double getMaximum() const
+    virtual coord_t getMaximum() const
     {
       return m_max;
     }
 
     /// Returns the minimum extent of this dimension
-    virtual double getMinimum() const
+    virtual coord_t getMinimum() const
     {
       return m_min;
     }
@@ -101,13 +101,13 @@ namespace Geometry
     virtual std::string toXMLString() const;
 
     ///  Get coordinate for index;
-    virtual double getX(size_t index) const
+    virtual coord_t getX(size_t index) const
     {
-      return static_cast<double>(index) * m_binWidth + m_min;
+      return static_cast<coord_t>(index) * m_binWidth + m_min;
     }
 
     /// Return the width of one bin.
-    double getBinWidth() const
+    coord_t getBinWidth() const
     {
       return m_binWidth;
     }
@@ -117,7 +117,7 @@ namespace Geometry
      * @param min :: extents minimum
      * @param max :: extents maximum
      */
-    void setRange(size_t nBins, double min, double max)
+    void setRange(size_t nBins, coord_t min, coord_t max)
     {
       if(max < min)
       {
@@ -126,7 +126,7 @@ namespace Geometry
       m_min = min;
       m_max = max;
       m_numBins = nBins;
-      m_binWidth = (m_max-m_min) / static_cast<double>(m_numBins);
+      m_binWidth = (m_max-m_min) / static_cast<coord_t>(m_numBins);
     }
 
   private:
@@ -140,16 +140,16 @@ namespace Geometry
     std::string m_units;
 
     /// Extent of dimension
-    double m_min;
+    coord_t m_min;
 
     /// Extent of dimension
-    double m_max;
+    coord_t m_max;
 
     /// Number of bins
     size_t m_numBins;
 
     /// Calculated bin size
-    double m_binWidth;
+    coord_t m_binWidth;
 
 
   };

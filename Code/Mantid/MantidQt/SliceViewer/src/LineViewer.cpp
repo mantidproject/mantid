@@ -535,7 +535,7 @@ void LineViewer::setPlanarWidth(double width)
   if (m_allDimsFree)
   {
     for (size_t d=0; d<m_thickness.getNumDims(); d++)
-      m_thickness[d] = width;
+      m_thickness[d] = VMD_t(width);
   }
   else
   {
@@ -544,7 +544,7 @@ void LineViewer::setPlanarWidth(double width)
     {
       // Only modify the locked onese
       if (m_thickness[d] == oldPlanarWidth)
-        m_thickness[d] = width;
+        m_thickness[d] = VMD_t(width);
     }
     // And always set the planar one
     m_planeWidth = width;
@@ -664,8 +664,8 @@ void LineViewer::setStartXY(double x, double y)
 {
   if (m_allDimsFree)
     throw std::runtime_error("LineViewer::setStartXY(): cannot use with all dimensions free.");
-  m_start[m_freeDimX] = x;
-  m_start[m_freeDimY] = y;
+  m_start[m_freeDimX] = VMD_t(x);
+  m_start[m_freeDimY] = VMD_t(y);
   updateStartEnd();
   // Send the signal that the positions changed
   emit changedStartOrEnd(m_start, m_end);
@@ -682,8 +682,8 @@ void LineViewer::setEndXY(double x, double y)
 {
   if (m_allDimsFree)
     throw std::runtime_error("LineViewer::setEndXY(): cannot use with all dimensions free.");
-  m_end[m_freeDimX] = x;
-  m_end[m_freeDimY] = y;
+  m_end[m_freeDimX] = VMD_t(x);
+  m_end[m_freeDimY] = VMD_t(y);
   updateStartEnd();
   // Send the signal that the positions changed
   emit changedStartOrEnd(m_start, m_end);
@@ -724,7 +724,7 @@ void LineViewer::setThickness(double width)
 {
   if (!m_ws) return;
   for (int i=0; i<int(m_ws->getNumDims()); i++)
-    m_thickness[i] = width;
+    m_thickness[i] = VMD_t(width);
   this->setPlanarWidth(width);
 }
 
@@ -744,7 +744,7 @@ void LineViewer::setThickness(int dim, double width)
   if (!m_ws) return;
   if (dim >= int(m_ws->getNumDims()) || dim < 0)
     throw std::invalid_argument("There is no dimension # " + Strings::toString(dim) + " in the workspace.");
-  m_thickness[dim] = width;
+  m_thickness[dim] = VMD_t(width);
   updateStartEnd();
 }
 

@@ -82,7 +82,7 @@ Mantid::Geometry::IMDDimension* IMDDimensionFactory::create() const
 Mantid::Geometry::IMDDimension* IMDDimensionFactory::create(int nBins, double min, double max) const
 {
   MDHistoDimension* product =  doCreate();
-  product->setRange(nBins, min, max); //Override the number of bins, min and max.
+  product->setRange(nBins, coord_t(min), coord_t(max)); //Override the number of bins, min and max.
   return product;
 }
 
@@ -126,7 +126,7 @@ Mantid::Geometry::MDHistoDimension* IMDDimensionFactory::doCreate() const
     lowerBounds = lowerLimit;
   }
 
-  return new MDHistoDimension(name, id, units, lowerBounds, upperBounds, nBins);
+  return new MDHistoDimension(name, id, units, coord_t(lowerBounds), coord_t(upperBounds), nBins);
 }
 
 /**
