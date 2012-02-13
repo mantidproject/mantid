@@ -5,23 +5,23 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/ExtractMasking.h"
+#include "MantidAlgorithms/ExtractMask.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
-using Mantid::Algorithms::ExtractMasking;
+using Mantid::Algorithms::ExtractMask;
 using Mantid::Kernel::Property;
 
-class ExtractMaskingTest : public CxxTest::TestSuite
+class ExtractMaskTest : public CxxTest::TestSuite
 {
 
 public:
   
   void test_Init_Gives_An_Input_And_An_Output_Workspace_Property()
   {
-    ExtractMasking maskExtractor;
+    ExtractMask maskExtractor;
     maskExtractor.initialize();
     std::vector<Property*> properties = maskExtractor.getProperties();
     TS_ASSERT_EQUALS(properties.size(), 3);
@@ -68,7 +68,7 @@ private:
   // The input workspace should be in the analysis data service
   MatrixWorkspace_sptr runExtractMask(const std::string & inputName)
   {
-    ExtractMasking maskExtractor;
+    ExtractMask maskExtractor;
     maskExtractor.initialize();
     maskExtractor.setPropertyValue("InputWorkspace", inputName);
     const std::string outputName("masking");

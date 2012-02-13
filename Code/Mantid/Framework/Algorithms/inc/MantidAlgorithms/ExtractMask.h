@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_EXTRACTMASKING_H_
-#define MANTID_ALGORITHMS_EXTRACTMASKING_H_
+#ifndef MANTID_ALGORITHMS_EXTRACTMASK_H_
+#define MANTID_ALGORITHMS_EXTRACTMASK_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -51,15 +51,15 @@ namespace Mantid
       File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
       Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport ExtractMasking : public Mantid::API::Algorithm
+    class DLLExport ExtractMask : public Mantid::API::Algorithm
     {
     public:
       /// Constructor
-      ExtractMasking() : Mantid::API::Algorithm() {}
+      ExtractMask() : Mantid::API::Algorithm() {}
       /// Virtual destructor
-      virtual ~ExtractMasking() {}
+      virtual ~ExtractMask() {}
       /// Algorithm's name
-      virtual const std::string name() const { return "ExtractMasking"; }
+      virtual const std::string name() const { return "ExtractMask"; }
       /// Algorithm's version
       virtual int version() const { return 1; }
       /// Algorithm's category for identification
@@ -77,4 +77,4 @@ namespace Mantid
   }
 }
 
-#endif // MANTID_ALGORITHMS_EXTRACTMASKING_H_
+#endif // MANTID_ALGORITHMS_EXTRACTMASK_H_

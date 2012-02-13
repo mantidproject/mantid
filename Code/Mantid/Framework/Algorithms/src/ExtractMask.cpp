@@ -11,7 +11,7 @@ The spectra containing 0 are also marked as masked and the instrument link is pr
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "MantidAlgorithms/ExtractMasking.h"
+#include "MantidAlgorithms/ExtractMask.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -24,10 +24,10 @@ namespace Mantid
   {
 
     // Register the algorithm into the AlgorithmFactory
-    DECLARE_ALGORITHM(ExtractMasking)
+    DECLARE_ALGORITHM(ExtractMask)
     
     /// Sets documentation strings for this algorithm
-    void ExtractMasking::initDocs()
+    void ExtractMask::initDocs()
     {
       this->setWikiSummary("Extracts the masking from a given workspace and places it in a new workspace. ");
       this->setOptionalMessage("Extracts the masking from a given workspace and places it in a new workspace.");
@@ -46,7 +46,7 @@ namespace Mantid
     /**
      * Declare the algorithm properties
      */
-    void ExtractMasking::init()
+    void ExtractMask::init()
     {
       declareProperty(
           new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","", Direction::Input),
@@ -64,7 +64,7 @@ namespace Mantid
     /**
      * Execute the algorithm
      */
-    void ExtractMasking::exec()
+    void ExtractMask::exec()
     {
       MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
 
