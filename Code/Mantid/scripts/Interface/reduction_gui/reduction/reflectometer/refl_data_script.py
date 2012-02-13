@@ -93,7 +93,7 @@ class DataSets(BaseScriptElement):
         """
             Create XML from the current data.
         """
-        xml  = "<Data>\n"
+        xml  = "<RefLData>\n"
         xml += "<peak_selection_type>%s</peak_selection_type>\n" % self.DataPeakSelectionType
         xml += "<from_peak_pixels>%s</from_peak_pixels>\n" % str(self.DataPeakPixels[0])
         xml += "<to_peak_pixels>%s</to_peak_pixels>\n" % str(self.DataPeakPixels[1])
@@ -111,7 +111,7 @@ class DataSets(BaseScriptElement):
         xml += "<x_range_flag>%s</x_range_flag>\n" % str(self.data_x_range_flag)
 
         xml += "<norm_flag>%s</norm_flag>\n" % str(self.NormFlag)
-        xml += "<nrom_x_range_flag>%s</norm_x_range_flag>\n" % str(self.norm_x_range_flag)
+        xml += "<norm_x_range_flag>%s</norm_x_range_flag>\n" % str(self.norm_x_range_flag)
         xml += "<norm_x_max>%s</norm_x_max>\n" % str(self.norm_x_range[0])
         xml += "<norm_x_min>%s</norm_x_min>\n" % str(self.norm_x_range[1])
         
@@ -131,7 +131,7 @@ class DataSets(BaseScriptElement):
         xml += "<angle_offset>%s</angle_offset>\n" % str(self.angle_offset)
         xml += "<angle_offset_error>%s</angle_offset_error>\n" % str(self.angle_offset_error)
         
-        xml += "</Data>\n"
+        xml += "</RefLData>\n"
 
         return xml
 
@@ -139,7 +139,7 @@ class DataSets(BaseScriptElement):
         self.reset()    
         dom = xml.dom.minidom.parseString(xml_str)
         self.from_xml_element(dom)
-        element_list = dom.getElementsByTagName("Data")
+        element_list = dom.getElementsByTagName("RefLData")
         if len(element_list)>0:
             instrument_dom = element_list[0]
 
