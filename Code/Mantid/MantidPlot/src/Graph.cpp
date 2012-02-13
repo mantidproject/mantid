@@ -4952,11 +4952,11 @@ void Graph::guessUniqueCurveLayout(int& colorIndex, int& symbolIndex)
     }
   }
   if (n_curves > 1)
-    colorIndex = (++colorIndex)%16;
+    colorIndex = (colorIndex+1)%16;
   if (colorIndex == 13) //avoid white invisible curves
     colorIndex = 0;
 
-  symbolIndex = (++symbolIndex)%15;
+  symbolIndex = (symbolIndex+1)%15;
   if (!symbolIndex)
     symbolIndex = 1;
 }
