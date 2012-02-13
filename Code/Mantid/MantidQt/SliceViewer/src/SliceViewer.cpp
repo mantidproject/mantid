@@ -1058,7 +1058,7 @@ void SliceViewer::findRangeSlice()
     else
     {
       // Is a slice. Take a slice of widht = binWidth
-      min[d] = VMD_t(widget->getSlicePoint()) - dim->getBinWidth() * VMD_t(0.45);
+      min[d] = VMD_t(widget->getSlicePoint()) - dim->getBinWidth() * 0.45f;
       max[d] = min[d] + dim->getBinWidth();
     }
   }

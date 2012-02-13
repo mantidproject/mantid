@@ -180,7 +180,7 @@ public:
     MDEventWorkspace3Lean::sptr ew = MDEventsTestHelper::makeMDEW<3>(4, 0.0, 4.0, 1);
     coord_t coords1[3] = {1.5,1.5,1.5};
     coord_t coords2[3] = {2.5,2.5,2.5};
-    coord_t coords3[3] = {coord_t(-0.1), 2, 2};
+    coord_t coords3[3] = {-0.1f, 2, 2};
     coord_t coords4[3] = {2, 2, 4.1f};
     ew->addEvent(MDLeanEvent<3>(2.0, 2.0, coords2));
     ew->refreshCache();

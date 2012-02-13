@@ -37,8 +37,8 @@ namespace Geometry
     /** Empty constructor - reset everything.
      *  */
     MDDimensionExtents() :
-      min( coord_t(1e30) ),
-      max( coord_t(-1e30) )
+      min( 1e30f ),
+      max( -1e30f )
     { }
 
     // ---- Public members ----------

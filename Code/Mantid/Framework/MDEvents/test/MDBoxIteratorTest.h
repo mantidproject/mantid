@@ -589,7 +589,7 @@ public:
       coord_t normal1[3] = {coord_t(+1.000), 0, 0};
       coord_t origin1[3] = {coord_t(+2.201), 0, 0};
       function->addPlane(MDPlane(3,normal1, origin1));
-      coord_t normal2[3] = {coord_t(-1.000), 0, 0};
+      coord_t normal2[3] = {-1.000f, 0, 0};
       coord_t origin2[3] = {coord_t(+2.399), 0, 0};
       function->addPlane(MDPlane(3,normal2, origin2));
       top->getBoxes(boxes, 20, leafOnly, function);
@@ -597,7 +597,7 @@ public:
     else if (ImplicitFunction==3)
     {
       // Box in 3D where -5 < (x,y,z) < +10
-      std::vector<coord_t> min(3, coord_t(-4.999));
+      std::vector<coord_t> min(3, -4.999f);
       std::vector<coord_t> max(3, coord_t(+9.999));
       function = new MDBoxImplicitFunction(min, max);
       top->getBoxes(boxes, 20, leafOnly, function);
