@@ -574,15 +574,21 @@ namespace API
 
     // Add new group that could contain instrument data
     file->makeGroup("new_group","NXData", true);
-    std::vector<double> angles(6);
-    for( int i=0; i<6; i++) angles[i] = 15.0*(i+1);
-    file->makeGroup("Detector_1","NXDetector", true);
-    file->writeData("Polar_angle",angles);
-    file->closeGroup();
-    file->makeGroup("Detector_2","NXDetector", true);
-    file->writeData("Polar_angle",angles);
-    file->closeGroup();
-    file->closeGroup();
+    std::vector<detid_t> detectorIDs;
+    std::vector<IDetector_const_sptr> detectors;
+    detectorIDs = getInstrument()->getDetectorIDs( false );
+    detectors = getInstrument()->getDetectors( detectorIDs );
+    file->makeGroup("Detectors","NXData", true);
+    file->writeData("Number_of_Detectors", detectorIDs.size() );
+    file->writeData("Detector_IDs", detectorIDs);
+    std::vector<double> angles( detectorIDs.size() );
+    for (int i=0; i < detectorIDs.size(); i++)
+    {
+      angles[i] = detectors[i]->getPhi();
+    }
+    file->writeData("Angles", angles);
+    file->closeGroup(); // Detector_IDs
+    file->closeGroup(); // new_group
 
     file->closeGroup(); // (close the instrument group)
 
