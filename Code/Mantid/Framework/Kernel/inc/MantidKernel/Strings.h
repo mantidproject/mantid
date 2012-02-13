@@ -82,6 +82,8 @@ MANTID_KERNEL_DLL std::string replaceAll(const std::string & input, const std::s
 MANTID_KERNEL_DLL int confirmStr(const std::string& S,const std::string& fullPhrase);
 /// Get a word from a string
 MANTID_KERNEL_DLL int extractWord(std::string& Line,const std::string& Word,const int cnt = 4);
+/// Get an int from the end of a word
+MANTID_KERNEL_DLL int endsWithInt(const std::string & word);
 
 /// strip all spaces
 MANTID_KERNEL_DLL std::string removeSpace(const std::string& CLine);

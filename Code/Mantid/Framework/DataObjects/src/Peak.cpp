@@ -294,11 +294,16 @@ namespace DataObjects
     parent = parent->getParent();
     // Use the parent if there is no grandparent.
     if (!parent) return;
+    // Find the ROW by looking at the string name of the parent. E.g. "pixel12" gives row 12.
+    m_Row = Strings::endsWithInt(parent->getName());
+
     // Use the parent if the grandparent is the instrument
     Instrument_const_sptr instrument = boost::dynamic_pointer_cast<const Instrument>(parent);
     if (instrument) return;
     // Use the grand-parent whenever possible
     m_BankName = parent->getName();
+    // Find the COLUMN by looking at the string name of the grandparent. E.g. "tube003" gives column 3.
+    m_Col = Strings::endsWithInt(parent->getName());
 
     // Special for rectangular detectors: find the row and column.
     RectangularDetector_const_sptr retDet = boost::dynamic_pointer_cast<const RectangularDetector>(parent);
