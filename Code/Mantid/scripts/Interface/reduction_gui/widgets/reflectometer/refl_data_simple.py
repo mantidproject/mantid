@@ -412,9 +412,13 @@ class DataReflWidget(BaseWidget):
         self._summary.data_peak_from_pixel.setText(str(state.DataPeakPixels[0]))
         self._summary.data_peak_to_pixel.setText(str(state.DataPeakPixels[1]))
         
+        #data low resolution range
+        self._summary.data_low_res_range_switch.setChecked(state.data_x_range_flag)
         self._summary.x_min_edit.setText(str(state.data_x_range[0]))
         self._summary.x_max_edit.setText(str(state.data_x_range[1]))
         
+        #norm low resolution range
+        self._summary.norm_low_res_range_switch.setChecked(state.norm_x_range_flag)
         self._summary.norm_x_min_edit.setText(str(state.norm_x_range[0]))
         self._summary.norm_x_max_edit.setText(str(state.norm_x_range[1]))
         

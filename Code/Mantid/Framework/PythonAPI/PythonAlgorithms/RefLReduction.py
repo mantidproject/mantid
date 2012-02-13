@@ -24,7 +24,9 @@ class RefLReduction(PythonAlgorithm):
         self.declareListProperty("NormPeakPixelRange", [127, 133], Validator=ArrayBoundedValidator(Lower=0))
         self.declareProperty("SubtractNormBackground", True)
         self.declareListProperty("NormBackgroundPixelRange", [123, 137], Validator=ArrayBoundedValidator(Lower=0))
+        self.declareProperty("LowResDataAxisPixelRangeFlag", True)
         self.declareListProperty("LowResDataAxisPixelRange", [115, 210], Validator=ArrayBoundedValidator(Lower=0))
+        self.declareProperty("LowResNormAxisPixelRangeFlag", True)
         self.declareListProperty("LowResNormAxisPixelRange", [115, 210], Validator=ArrayBoundedValidator(Lower=0))
         self.declareListProperty("TOFRange", [9000., 23600.], Validator=ArrayBoundedValidator(Lower=0))
         self.declareProperty("QMin", 0.001, Description="Minimum Q-value")
@@ -64,22 +66,28 @@ class RefLReduction(PythonAlgorithm):
         q_min = self.getProperty("QMin")
         q_step = self.getProperty("QStep")
                 
-        #Due to the frame effect, it's sometimes necessary to narrow the range
-        #over which we add all the pixels along the low resolution
-        #Parameter
-        Xrange = self.getProperty("LowResDataAxisPixelRange")
-        
-        print 'LowResDataAxisPixelRange'
-        print Xrange
-        print
-                
-        h = 6.626e-34  #m^2 kg s^-1
-        m = 1.675e-27     #kg
-        
         #dimension of the detector (256 by 304 pixels)
         maxX = 304
         maxY = 256
-        
+                
+        #Due to the frame effect, it's sometimes necessary to narrow the range
+        #over which we add all the pixels along the low resolution
+        #Parameter
+        DataXrangeFlag = self.getProperty("LowResDataAxisPixelRangeFlag")
+        if DataXrangeFlag:
+            Xrange = self.getProperty("LowResDataAxisPixelRange")
+        else:
+            Xrange = [0,maxX-1]
+
+        NormXrangeFlag = self.getProperty("LowResNormAxisPixelRangeFlag")
+        if NormXrangeFlag:
+            normXrange = self.getProperty("LowResNormAxisPixelRange")
+        else:
+            normXrange = [0,maxX-1]
+                
+        h = 6.626e-34  #m^2 kg s^-1
+        m = 1.675e-27     #kg
+                
         norm_back = self.getProperty("NormBackgroundPixelRange")
         BackfromYpixel = norm_back[0]
         BacktoYpixel = norm_back[1]
@@ -311,15 +319,6 @@ class RefLReduction(PythonAlgorithm):
     
             # Normalized by Current (proton charge)
             NormaliseByCurrent(InputWorkspace=ws_norm_histo_data, OutputWorkspace=ws_norm_histo_data)
-    
-            ##Background subtraction
-            Yrange = self.getProperty("LowResNormAxisPixelRange")
-            
-            print 'LowResDataAxisPixelRange'
-            print Yrange
-            print
-
-
 
             #Create a new event workspace of only the range of pixel of interest 
             #background range (along the y-axis) and of only the pixel
@@ -327,8 +326,8 @@ class RefLReduction(PythonAlgorithm):
             ws_integrated_data = "__IntegratedNormWks"
             wks_utility.createIntegratedWorkspace(mtd[ws_norm_histo_data], 
                                                   ws_integrated_data,
-                                                  fromXpixel=Yrange[0],
-                                                  toXpixel=Yrange[1],
+                                                  fromXpixel=normXrange[0],
+                                                  toXpixel=normXrange[1],
                                                   fromYpixel=BackfromYpixel,
                                                   toYpixel=BacktoYpixel,
                                                   maxX=maxX,
