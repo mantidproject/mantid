@@ -1,10 +1,11 @@
 #include "MantidDataObjects/Peak.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidKernel/System.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/System.h"
 #include <algorithm>
-#include <string>
 #include <cctype>
+#include <string>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
