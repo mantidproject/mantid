@@ -30,14 +30,6 @@ void UnwrappedSphere::project(double & u, double & v, double & uscale, double & 
   v = -acos(v/r);
 }
 
-
-void UnwrappedSphere::calcUV(UnwrappedDetector& udet)
-{
-  Mantid::Kernel::V3D pos = udet.detector->getPos() - m_pos;
-  this->project(udet.u, udet.v, udet.uscale, udet.vscale, pos);
-  calcSize(udet,Mantid::Kernel::V3D(-1,0,0),Mantid::Kernel::V3D(0,1,0));
-}
-
 void UnwrappedSphere::calcRot(const UnwrappedDetector& udet, Mantid::Kernel::Quat& R)const
 {
   // Basis vectors for a detector image on the screen

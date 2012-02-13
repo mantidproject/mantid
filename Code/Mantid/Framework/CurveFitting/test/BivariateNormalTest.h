@@ -198,5 +198,6 @@ public:
 
     }
  
+
 };
 #endif /* BIVARIATENORMALTEST_H_ */

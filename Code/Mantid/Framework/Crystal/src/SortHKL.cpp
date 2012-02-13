@@ -93,19 +93,18 @@ namespace Crystal
         pointGroup = m_pointGroups[i];
 
     double Chisq = 0.0;
+    std::vector<Peak> &peaks = peaksW->getPeaks();
     int NumberPeaks = peaksW->getNumberPeaks();
     for (int i = 0; i < NumberPeaks; i++)
     {
-      Peak & peak1 = peaksW->getPeaks()[i];
-      V3D hkl1 = peak1.getHKL();
-      std::string bank1 = peak1.getBankName();
+      V3D hkl1 = peaks[i].getHKL();
+      std::string bank1 = peaks[i].getBankName();
       for (int j = i+1; j < NumberPeaks; j++)
       {
-        Peak & peak2 = peaksW->getPeaks()[j];
-        V3D hkl2 = peak2.getHKL();
-        std::string bank2 = peak2.getBankName();
+        V3D hkl2 = peaks[j].getHKL();
+        std::string bank2 = peaks[j].getBankName();
         if (pointGroup->isEquivalent(hkl1,hkl2) && bank1.compare(bank2) == 0)
-          peaksW->getPeaks()[j].setHKL(hkl1);
+          peaks[j].setHKL(hkl1);
       }
     }
 
@@ -124,23 +123,21 @@ namespace Crystal
     std::string bank1;
     for (int i = 1; i < NumberPeaks; i++)
     {
-      Peak & peak1 = peaksW->getPeaks()[i-1];
-      hkl1 = peak1.getHKL();
-      bank1 = peak1.getBankName();
+      hkl1 = peaks[i-1].getHKL();
+      bank1 = peaks[i-1].getBankName();
       if(i == 1)
       {
         peakno.push_back(0);
-        data.push_back(peak1.getIntensity());
-        sig2.push_back(std::pow(peak1.getSigmaIntensity(),2));
+        data.push_back(peaks[i-1].getIntensity());
+        sig2.push_back(std::pow(peaks[i-1].getSigmaIntensity(),2));
       }
-      Peak & peak2 = peaksW->getPeaks()[i];
-      V3D hkl2 = peak2.getHKL();
-      std::string bank2 = peak2.getBankName();
+      V3D hkl2 = peaks[i].getHKL();
+      std::string bank2 = peaks[i].getBankName();
       if (hkl1 == hkl2 && bank1.compare(bank2) == 0)
       {
         peakno.push_back(i);
-        data.push_back(peak2.getIntensity());
-        sig2.push_back(std::pow(peak2.getSigmaIntensity(),2));
+        data.push_back(peaks[i].getIntensity());
+        sig2.push_back(std::pow(peaks[i].getSigmaIntensity(),2));
         if(i == NumberPeaks-1)
         {
           if(static_cast<int>(data.size()) > 1)
@@ -183,12 +180,17 @@ namespace Crystal
         hkl1 = hkl2;
         bank1 = bank2;
         peakno.push_back(i);
-        data.push_back(peak2.getIntensity());
-        sig2.push_back(std::pow(peak2.getSigmaIntensity(),2));
+        data.push_back(peaks[i].getIntensity());
+        sig2.push_back(std::pow(peaks[i].getSigmaIntensity(),2));
       }
     }
     data.clear();
     sig2.clear();
+    //Reset hkl of equivalent peaks to original value
+    for (int i = 0; i < NumberPeaks; i++)
+    {
+      peaks[i].resetHKL();
+    }
     setProperty<PeaksWorkspace_sptr>("OutputWorkspace", peaksW);
     setProperty("OutputChi2", Chisq);
 

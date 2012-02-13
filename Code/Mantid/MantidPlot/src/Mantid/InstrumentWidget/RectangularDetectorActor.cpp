@@ -30,7 +30,8 @@ static const bool VERBOSE = false;
  */
 RectangularDetectorActor::RectangularDetectorActor(const InstrumentActor& instrActor, const Mantid::Geometry::ComponentID& compID)
 :
-    ICompAssemblyActor(instrActor,compID), mTextureID(0)
+    ICompAssemblyActor(instrActor,compID), mTextureID(0),
+    image_data(NULL), pick_data(NULL)
 {
   mNumberOfDetectors = 0;
   mDet = boost::dynamic_pointer_cast<const RectangularDetector>(getComponent());
@@ -71,6 +72,8 @@ RectangularDetectorActor::RectangularDetectorActor(const InstrumentActor& instrA
  */
 RectangularDetectorActor::~RectangularDetectorActor()
 {
+  delete [] image_data;
+  delete [] pick_data;
 }
 
 

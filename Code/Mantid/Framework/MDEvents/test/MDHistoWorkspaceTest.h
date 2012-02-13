@@ -401,15 +401,15 @@ public:
     for (size_t i=0; i<100; i++)
       ws->setSignalAt(i, double(i));
     IMDWorkspace_sptr iws(ws);
-    TS_ASSERT_DELTA( iws->getSignalAtCoord(VMD(0.5, 0.5)), 0.0, 1e-6);
-    TS_ASSERT_DELTA( iws->getSignalAtCoord(VMD(1.5, 0.5)), 1.0, 1e-6);
-    TS_ASSERT_DELTA( iws->getSignalAtCoord(VMD(1.5, 1.5)), 11.0, 1e-6);
-    TS_ASSERT_DELTA( iws->getSignalAtCoord(VMD(9.5, 9.5)), 99.0, 1e-6);
+    TS_ASSERT_DELTA( iws->getSignalAtVMD(VMD(0.5, 0.5)), 0.0, 1e-6);
+    TS_ASSERT_DELTA( iws->getSignalAtVMD(VMD(1.5, 0.5)), 1.0, 1e-6);
+    TS_ASSERT_DELTA( iws->getSignalAtVMD(VMD(1.5, 1.5)), 11.0, 1e-6);
+    TS_ASSERT_DELTA( iws->getSignalAtVMD(VMD(9.5, 9.5)), 99.0, 1e-6);
     // Out of range = NaN
-    TS_ASSERT( boost::math::isnan(iws->getSignalAtCoord(VMD(-0.01, 2.5)) ) );
-    TS_ASSERT( boost::math::isnan(iws->getSignalAtCoord(VMD(3.5, -0.02)) ) );
-    TS_ASSERT( boost::math::isnan(iws->getSignalAtCoord(VMD(10.01, 2.5)) ) );
-    TS_ASSERT( boost::math::isnan(iws->getSignalAtCoord(VMD(3.5, 10.02)) ) );
+    TS_ASSERT( boost::math::isnan(iws->getSignalAtVMD(VMD(-0.01, 2.5)) ) );
+    TS_ASSERT( boost::math::isnan(iws->getSignalAtVMD(VMD(3.5, -0.02)) ) );
+    TS_ASSERT( boost::math::isnan(iws->getSignalAtVMD(VMD(10.01, 2.5)) ) );
+    TS_ASSERT( boost::math::isnan(iws->getSignalAtVMD(VMD(3.5, 10.02)) ) );
   }
 
   //---------------------------------------------------------------------------------------------------

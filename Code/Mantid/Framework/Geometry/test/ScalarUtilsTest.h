@@ -122,11 +122,17 @@ public:
     std::vector<ConventionalCell > list;
 
     Matrix<double> UB = getSiliconNiggliUB();   // cubic case
-    list = ScalarUtils::GetCells( UB );         // all types and centerings
+    list = ScalarUtils::GetCells( UB, false );  // all types and centerings
 
     TS_ASSERT_EQUALS( list.size(), 44 );        // should be 1 for each form
                                                 // need to set error limit to
                                                 // select reasonable forms
+
+    list = ScalarUtils::GetCells( UB, true );   // all types and centerings but
+                                                // only one per Bravais lattic
+ 
+    TS_ASSERT_EQUALS( list.size(), 15 );        // should be 1 for each Bravais 
+                                                // lattice plus triclinic
   }
 
   void test_RemoveHighErrorForms()
@@ -135,7 +141,7 @@ public:
     std::vector<ConventionalCell > list;
 
     Matrix<double> UB = getSiliconNiggliUB();   // cubic case
-    list = ScalarUtils::GetCells( UB );         // all types and centerings
+    list = ScalarUtils::GetCells( UB, false );  // all types and centerings
 
     TS_ASSERT_EQUALS( list.size(), 44 );        // should be 1 for each form
                                                 // need to set error limit to
@@ -181,7 +187,7 @@ public:
     info = ScalarUtils::GetCellBestError( list, false );
     TS_ASSERT_EQUALS( info.GetFormNum(), 9 );
 
-    list = ScalarUtils::GetCells( UB );
+    list = ScalarUtils::GetCells( UB, false );
 
     info = ScalarUtils::GetCellBestError( list, true );
     TS_ASSERT_EQUALS( info.GetFormNum(), 31 );

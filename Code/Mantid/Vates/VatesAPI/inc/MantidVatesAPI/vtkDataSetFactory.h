@@ -105,8 +105,12 @@ public:
     return m_useTransform;
   }
 
+  void setCheckDimensionality(bool flag);
+
+  bool doesCheckDimensionality() const;
+
   /// Dimensionalities of interest.
-  enum{OneDimensional=1, TwoDimensional=2, ThreeDimensional=3, FourDimensional=4};
+  enum Dimensionality{OneDimensional=1, TwoDimensional=2, ThreeDimensional=3, FourDimensional=4};
 
 protected:
 
@@ -118,9 +122,13 @@ protected:
   /// Template Method pattern to validate the factory before use.
   virtual void validate() const = 0;
 
-  
   /// Flag indicating whether a transformation should be used.
   bool m_useTransform;
+
+private:
+  
+  /// Dimensionality checking flag
+  bool m_bCheckDimensionality;
 };
 
 typedef boost::shared_ptr<vtkDataSetFactory> vtkDataSetFactory_sptr;

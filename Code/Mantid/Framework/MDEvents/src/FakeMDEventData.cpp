@@ -114,8 +114,8 @@ namespace MDEvents
     double desiredRadius = params.back();
 
     boost::mt19937 rng;
-    boost::uniform_real<double> u2(0, 1.0); // Random from 0 to 1.0
-    boost::variate_generator<boost::mt19937&, boost::uniform_real<double> > genUnit(rng, u2);
+    boost::uniform_real<coord_t> u2(0, 1.0); // Random from 0 to 1.0
+    boost::variate_generator<boost::mt19937&, boost::uniform_real<coord_t> > genUnit(rng, u2);
     int randomSeed = getProperty("RandomSeed");
     rng.seed((unsigned int)(randomSeed));
 
@@ -134,19 +134,19 @@ namespace MDEvents
       }
 
       // Make a unit vector pointing in this direction
-      coord_t radius = sqrt(radiusSquared);
+      coord_t radius = coord_t(sqrt(radiusSquared));
       for (size_t d=0; d<nd; d++)
         centers[d] /= radius;
 
       // Now place the point along this radius, scaled with ^1/n for uniformity.
-      double radPos = genUnit();
-      radPos = pow(radPos, 1.0/double(nd));
+      coord_t radPos = genUnit();
+      radPos = coord_t(pow(radPos, 1.0/double(nd)));
       for (size_t d=0; d<nd; d++)
       {
         // Multiply by the scaling and the desired peak radius
-        centers[d] *= (radPos * desiredRadius);
+        centers[d] *= (radPos * coord_t(desiredRadius));
         // Also offset by the center of the peak, as taken in Params
-        centers[d] += params[d+1];
+        centers[d] += coord_t(params[d+1]);
       }
 
       // Default or randomized error/signal

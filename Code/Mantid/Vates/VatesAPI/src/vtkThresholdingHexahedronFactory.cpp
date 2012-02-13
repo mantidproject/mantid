@@ -58,7 +58,7 @@ namespace VATES
     validateWsNotNull();
     // When the workspace can not be handled by this type, take action in the form of delegation.
     const size_t nonIntegratedSize = m_workspace->getNonIntegratedDimensions().size();
-    if(nonIntegratedSize != vtkDataSetFactory::ThreeDimensional)
+    if((doesCheckDimensionality() && nonIntegratedSize != vtkDataSetFactory::ThreeDimensional))
     {
       if(this->hasSuccessor())
       {
@@ -303,7 +303,7 @@ namespace VATES
     validate();
 
     const size_t nonIntegratedSize = m_workspace->getNonIntegratedDimensions().size();
-    if(nonIntegratedSize != vtkDataSetFactory::ThreeDimensional)
+    if((doesCheckDimensionality() && nonIntegratedSize != vtkDataSetFactory::ThreeDimensional))
     {
       return m_successor->create();
     }

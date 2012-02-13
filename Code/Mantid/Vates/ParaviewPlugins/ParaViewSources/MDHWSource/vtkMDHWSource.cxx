@@ -93,6 +93,7 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     vtkThresholdingHexahedronFactory* successor = new vtkThresholdingHexahedronFactory(thresholdRange, "signal");
     vtkThresholdingUnstructuredGridFactory<TimeToTimeStep> *factory = new vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>(thresholdRange, "signal", m_time);
     factory->SetSuccessor(successor);
+    factory->setCheckDimensionality(false);
 
     vtkDataSet* product = m_presenter->execute(factory, updateHandler);
 

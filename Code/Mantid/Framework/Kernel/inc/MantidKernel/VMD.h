@@ -1,18 +1,15 @@
 #ifndef MANTID_KERNEL_VMD_H_
 #define MANTID_KERNEL_VMD_H_
     
-#include "MantidKernel/System.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/Tolerance.h"
 #include "MantidKernel/V3D.h"
-#include <cstddef>
-#include <stdexcept>
-#include <sstream>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
-
-using boost::algorithm::split;
-using boost::algorithm::is_any_of;
+#include <cstddef>
+#include <sstream>
+#include <stdexcept>
 
 
 namespace Mantid
@@ -45,27 +42,28 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport VMD 
+  template<typename TYPE=double>
+  class DLLExport VMDBase
   {
   public:
     //-------------------------------------------------------------------------------------------
     /** Default constructor, build with 1 dimension */
-    VMD()
+    VMDBase()
     : nd(1)
     {
-      data = new double[nd];
-      for (size_t d=0; d<nd; d++) data[d] = 0.0;
+      data = new TYPE[nd];
+      for (size_t d=0; d<nd; d++) data[d] = TYPE(0.0);
     }
 
     //-------------------------------------------------------------------------------------------
     /** Constructor
      * @param nd :: number of dimensions  */
-    VMD(size_t nd)
+    VMDBase(size_t nd)
     : nd(nd)
     {
       if (nd <= 0) throw std::invalid_argument("nd must be > 0");
-      data = new double[nd];
-      for (size_t d=0; d<nd; d++) data[d] = 0.0;
+      data = new TYPE[nd];
+      for (size_t d=0; d<nd; d++) data[d] = TYPE(0.0);
     }
 
     //-------------------------------------------------------------------------------------------
@@ -73,12 +71,12 @@ namespace Kernel
      * @param val0 :: value at first dimension
      * @param val1 :: value at second dimension
      */
-    VMD(double val0, double val1)
+    VMDBase(double val0, double val1)
     : nd(2)
     {
-      data = new double[nd];
-      data[0] = val0;
-      data[1] = val1;
+      data = new TYPE[nd];
+      data[0] = TYPE(val0);
+      data[1] = TYPE(val1);
     }
 
     //-------------------------------------------------------------------------------------------
@@ -87,13 +85,13 @@ namespace Kernel
      * @param val1 :: value at second dimension
      * @param val2 :: value at third dimension
      */
-    VMD(double val0, double val1, double val2)
+    VMDBase(double val0, double val1, double val2)
     : nd(3)
     {
-      data = new double[nd];
-      data[0] = val0;
-      data[1] = val1;
-      data[2] = val2;
+      data = new TYPE[nd];
+      data[0] = TYPE(val0);
+      data[1] = TYPE(val1);
+      data[2] = TYPE(val2);
     }
 
     //-------------------------------------------------------------------------------------------
@@ -103,14 +101,14 @@ namespace Kernel
      * @param val2 :: value at third dimension
      * @param val3 :: value at fourth dimension
      */
-    VMD(double val0, double val1, double val2, double val3)
+    VMDBase(double val0, double val1, double val2, double val3)
     : nd(4)
     {
-      data = new double[nd];
-      data[0] = val0;
-      data[1] = val1;
-      data[2] = val2;
-      data[3] = val3;
+      data = new TYPE[nd];
+      data[0] = TYPE(val0);
+      data[1] = TYPE(val1);
+      data[2] = TYPE(val2);
+      data[3] = TYPE(val3);
     }
 
     //-------------------------------------------------------------------------------------------
@@ -121,15 +119,15 @@ namespace Kernel
      * @param val3 :: value at fourth dimension
      * @param val4 :: value at fifth dimension
      */
-    VMD(double val0, double val1, double val2, double val3, double val4)
+    VMDBase(double val0, double val1, double val2, double val3, double val4)
     : nd(5)
     {
-      data = new double[nd];
-      data[0] = val0;
-      data[1] = val1;
-      data[2] = val2;
-      data[3] = val3;
-      data[4] = val4;
+      data = new TYPE[nd];
+      data[0] = TYPE(val0);
+      data[1] = TYPE(val1);
+      data[2] = TYPE(val2);
+      data[3] = TYPE(val3);
+      data[4] = TYPE(val4);
     }
 
     //-------------------------------------------------------------------------------------------
@@ -141,26 +139,26 @@ namespace Kernel
      * @param val4 :: value at fifth dimension
      * @param val5 :: value at sixth dimension
      */
-    VMD(double val0, double val1, double val2, double val3, double val4, double val5)
+    VMDBase(double val0, double val1, double val2, double val3, double val4, double val5)
     : nd(6)
     {
-      data = new double[nd];
-      data[0] = val0;
-      data[1] = val1;
-      data[2] = val2;
-      data[3] = val3;
-      data[4] = val4;
-      data[5] = val5;
+      data = new TYPE[nd];
+      data[0] = TYPE(val0);
+      data[1] = TYPE(val1);
+      data[2] = TYPE(val2);
+      data[3] = TYPE(val3);
+      data[4] = TYPE(val4);
+      data[5] = TYPE(val5);
     }
 
     //-------------------------------------------------------------------------------------------
     /** Copy constructor
      * @param other :: other to copy */
-    VMD(const VMD & other)
+    VMDBase(const VMDBase & other)
     : nd(other.nd)
     {
       if (nd <= 0) throw std::invalid_argument("nd must be > 0");
-      data = new double[nd];
+      data = new TYPE[nd];
       for (size_t d=0; d<nd; d++) data[d] = other.data[d];
     }
 
@@ -169,13 +167,13 @@ namespace Kernel
     /** Assignment operator
      * @param other :: copy into this
      */
-    VMD& operator=(const VMD& other)
+    VMDBase& operator=(const VMDBase& other)
     {
       if ((other.nd) != nd)
       {
         nd = other.nd;
         delete [] data;
-        data = new double[nd];
+        data = new TYPE[nd];
       }
       for (size_t d=0; d<nd; d++) data[d] = other.data[d];
       return *this;
@@ -185,75 +183,91 @@ namespace Kernel
     /** Constructor
      * @param nd :: number of dimensions
      * @param bareData :: pointer to a nd-sized bare data array */
-    VMD(size_t nd, const double * bareData)
+    VMDBase(size_t nd, const double * bareData)
     : nd(nd)
     {
       if (nd <= 0) throw std::invalid_argument("nd must be > 0");
-      data = new double[nd];
-      for (size_t d=0; d<nd; d++) data[d] = bareData[d];
+      data = new TYPE[nd];
+      for (size_t d=0; d<nd; d++) data[d] = TYPE(bareData[d]);
+    }
+
+    //-------------------------------------------------------------------------------------------
+    /** Constructor
+     * @param nd :: number of dimensions
+     * @param bareData :: pointer to a nd-sized bare data array */
+    VMDBase(size_t nd, const float * bareData)
+    : nd(nd)
+    {
+      if (nd <= 0) throw std::invalid_argument("nd must be > 0");
+      data = new TYPE[nd];
+      for (size_t d=0; d<nd; d++) data[d] = TYPE(bareData[d]);
     }
 
     //-------------------------------------------------------------------------------------------
     /** Constructor
      * @param vector :: V3D */
-    VMD(const V3D & vector)
+    VMDBase(const V3D & vector)
     : nd(3)
     {
-      data = new double[nd];
-      for (size_t d=0; d<nd; d++) data[d] = vector[d];
+      data = new TYPE[nd];
+      for (size_t d=0; d<nd; d++) data[d] = TYPE(vector[d]);
     }
 
     //-------------------------------------------------------------------------------------------
     /** Constructor
      * @param vector :: vector of doubles */
-    VMD(const std::vector<double> & vector)
+    template<class T>
+    VMDBase(const std::vector<T> & vector)
     : nd(vector.size())
     {
       if (nd <= 0) throw std::invalid_argument("nd must be > 0");
-      data = new double[nd];
-      for (size_t d=0; d<nd; d++) data[d] = vector[d];
+      data = new TYPE[nd];
+      for (size_t d=0; d<nd; d++) data[d] = TYPE(vector[d]);
     }
 
     //-------------------------------------------------------------------------------------------
     /** Constructor
      * @param vector :: vector of floats */
-    VMD(const std::vector<float> & vector)
+    VMDBase(const std::vector<float> & vector)
     : nd(vector.size())
     {
       if (nd <= 0) throw std::invalid_argument("nd must be > 0");
-      data = new double[nd];
-      for (size_t d=0; d<nd; d++) data[d] = double(vector[d]);
+      data = new TYPE[nd];
+      for (size_t d=0; d<nd; d++) data[d] = TYPE(vector[d]);
     }
 
     //-------------------------------------------------------------------------------------------
     /** Constructor from string
      * @param str :: string of comma or space-separated numbers for each component */
-    VMD(const std::string & str)
+    VMDBase(const std::string & str)
     : nd(nd)
     {
+      using boost::algorithm::split;
+      using boost::algorithm::is_any_of;
+
       std::vector<std::string> strs;
       boost::split(strs, str, boost::is_any_of(", "));
 
-      std::vector<double> vals;
+      std::vector<TYPE> vals;
       for (size_t d=0; d<strs.size(); d++)
       {
         if (!strs[d].empty())
         {
-          double v;
+          TYPE v;
           if (!Strings::convert(strs[d], v))
-            throw std::invalid_argument("VMD: Unable to convert the string '" + strs[d] + "' to a number.");
+            throw std::invalid_argument("VMDBase: Unable to convert the string '" + strs[d] + "' to a number.");
           vals.push_back(v);
         }
       }
       nd = vals.size();
       if (nd <= 0) throw std::invalid_argument("nd must be > 0");
-      data = new double[nd];
+      data = new TYPE[nd];
       for (size_t d=0; d<nd; d++) data[d] = vals[d];
     }
 
     //-------------------------------------------------------------------------------------------
     /// Destructor
-    virtual ~VMD()
+    virtual ~VMDBase()
     {
       delete [] data;
     }
@@ -269,16 +283,16 @@ namespace Kernel
     { return nd; }
 
     /** @return the value at the index */
-    const double& operator[](const size_t index) const
+    const TYPE& operator[](const size_t index) const
     { return data[index]; }
 
     /** @return the value at the index */
-    double& operator[](const size_t index)
+    TYPE& operator[](const size_t index)
     { return data[index]; }
 
     //-------------------------------------------------------------------------------------------
     /** @return the bare data array directly. */
-    const double * getBareArray() const
+    const TYPE * getBareArray() const
     {
       return data;
     }
@@ -297,22 +311,26 @@ namespace Kernel
     }
 
     //-------------------------------------------------------------------------------------------
-    /** @return the vector as a std::vector */
-    std::vector<double> toVector() const
+    /** Get the vector as a vector
+     * @tparam T :: type to convert to (double/float)
+     * @return the vector as a std::vector
+     */
+    template<class T>
+    std::vector<T> toVector() const
     {
-      std::vector<double> out;
+      typename std::vector<T> out;
       for (size_t d=0; d<nd; d++)
-        out.push_back(data[d]);
+        out.push_back(T(data[d]));
       return out;
     }
 
 
     //-------------------------------------------------------------------------------------------
     /** Equals operator with tolerance factor
-      @param v :: VMD for comparison
+      @param v :: VMDBase for comparison
       @return true if the items are equal
      */
-    bool operator==(const VMD& v) const
+    bool operator==(const VMDBase& v) const
     {
       using namespace std;
       if (v.nd != nd) return false;
@@ -324,10 +342,10 @@ namespace Kernel
 
     //-------------------------------------------------------------------------------------------
     /** Not-equals operator with tolerance factor
-      @param v :: VMD for comparison
+      @param v :: VMDBase for comparison
       @return true if the items are equal
      */
-    bool operator!=(const VMD& v) const
+    bool operator!=(const VMDBase& v) const
     {
       return !operator==(v);
     }
@@ -335,9 +353,9 @@ namespace Kernel
     //-------------------------------------------------------------------------------------------
     /** Add two vectors together
      * @param v :: other vector, must match number of dimensions  */
-    VMD operator+(const VMD& v) const
+    VMDBase operator+(const VMDBase& v) const
     {
-      VMD out(*this);
+      VMDBase out(*this);
       out += v;
       return out;
     }
@@ -345,9 +363,9 @@ namespace Kernel
     //-------------------------------------------------------------------------------------------
     /** Add two vectors together
      * @param v :: other vector, must match number of dimensions  */
-    VMD & operator+=(const VMD& v)
+    VMDBase & operator+=(const VMDBase& v)
     {
-      if (v.nd != this->nd) throw std::runtime_error("Mismatch in number of dimensions in operation between two VMD vectors.");
+      if (v.nd != this->nd) throw std::runtime_error("Mismatch in number of dimensions in operation between two VMDBase vectors.");
       for (size_t d=0; d<nd; d++) data[d] += v.data[d];
       return *this;
     }
@@ -356,9 +374,9 @@ namespace Kernel
     /** Subtract two vectors
      * @param v
      *  :: other vector, must match number of dimensions  */
-    VMD operator-(const VMD& v) const
+    VMDBase operator-(const VMDBase& v) const
     {
-      VMD out(*this);
+      VMDBase out(*this);
       out -= v;
       return out;
     }
@@ -366,9 +384,9 @@ namespace Kernel
     //-------------------------------------------------------------------------------------------
     /** Subtract two vectors
      * @param v :: other vector, must match number of dimensions  */
-    VMD & operator-=(const VMD& v)
+    VMDBase & operator-=(const VMDBase& v)
     {
-      if (v.nd != this->nd) throw std::runtime_error("Mismatch in number of dimensions in operation between two VMD vectors.");
+      if (v.nd != this->nd) throw std::runtime_error("Mismatch in number of dimensions in operation between two VMDBase vectors.");
       for (size_t d=0; d<nd; d++) data[d] -= v.data[d];
       return *this;
     }
@@ -376,9 +394,9 @@ namespace Kernel
     //-------------------------------------------------------------------------------------------
     /** Inner product of two vectors (element-by-element)
      * @param v :: other vector, must match number of dimensions  */
-    VMD operator*(const VMD& v) const
+    VMDBase operator*(const VMDBase& v) const
     {
-      VMD out(*this);
+      VMDBase out(*this);
       out *= v;
       return out;
     }
@@ -386,9 +404,9 @@ namespace Kernel
     //-------------------------------------------------------------------------------------------
     /** Inner product of two vectors (element-by-element)
      * @param v :: other vector, must match number of dimensions  */
-    VMD & operator*=(const VMD& v)
+    VMDBase & operator*=(const VMDBase& v)
     {
-      if (v.nd != this->nd) throw std::runtime_error("Mismatch in number of dimensions in operation between two VMD vectors.");
+      if (v.nd != this->nd) throw std::runtime_error("Mismatch in number of dimensions in operation between two VMDBase vectors.");
       for (size_t d=0; d<nd; d++) data[d] *= v.data[d];
       return *this;
     }
@@ -396,9 +414,9 @@ namespace Kernel
     //-------------------------------------------------------------------------------------------
     /** Inner division of two vectors (element-by-element)
      * @param v :: other vector, must match number of dimensions  */
-    VMD operator/(const VMD& v) const
+    VMDBase operator/(const VMDBase& v) const
     {
-      VMD out(*this);
+      VMDBase out(*this);
       out /= v;
       return out;
     }
@@ -406,9 +424,9 @@ namespace Kernel
     //-------------------------------------------------------------------------------------------
     /** Inner division of two vectors (element-by-element)
      * @param v :: other vector, must match number of dimensions  */
-    VMD & operator/=(const VMD& v)
+    VMDBase & operator/=(const VMDBase& v)
     {
-      if (v.nd != this->nd) throw std::runtime_error("Mismatch in number of dimensions in operation between two VMD vectors.");
+      if (v.nd != this->nd) throw std::runtime_error("Mismatch in number of dimensions in operation between two VMDBase vectors.");
       for (size_t d=0; d<nd; d++) data[d] /= v.data[d];
       return *this;
     }
@@ -416,9 +434,9 @@ namespace Kernel
     //-------------------------------------------------------------------------------------------
     /** Multiply by a scalar
      * @param scalar :: double scalar to multiply each element  */
-    VMD operator*(const double scalar) const
+    VMDBase operator*(const double scalar) const
     {
-      VMD out(*this);
+      VMDBase out(*this);
       out *= scalar;
       return out;
     }
@@ -426,18 +444,18 @@ namespace Kernel
     //-------------------------------------------------------------------------------------------
     /** Multiply by a scalar
      * @param scalar :: double scalar to multiply each element  */
-    VMD & operator*=(const double scalar)
+    VMDBase & operator*=(const double scalar)
     {
-      for (size_t d=0; d<nd; d++) data[d] *= scalar;
+      for (size_t d=0; d<nd; d++) data[d] *= TYPE(scalar);
       return *this;
     }
 
     //-------------------------------------------------------------------------------------------
     /** Divide by a scalar
      * @param scalar :: double scalar to Divide each element  */
-    VMD operator/(const double scalar) const
+    VMDBase operator/(const double scalar) const
     {
-      VMD out(*this);
+      VMDBase out(*this);
       out /= scalar;
       return out;
     }
@@ -445,19 +463,19 @@ namespace Kernel
     //-------------------------------------------------------------------------------------------
     /** Divide by a scalar
      * @param scalar :: double scalar to Divide each element  */
-    VMD & operator/=(const double scalar)
+    VMDBase & operator/=(const double scalar)
     {
-      for (size_t d=0; d<nd; d++) data[d] /= scalar;
+      for (size_t d=0; d<nd; d++) data[d] /= TYPE(scalar);
       return *this;
     }
 
     //-------------------------------------------------------------------------------------------
     /** Scalar product of two vectors
      * @param v :: other vector, must match number of dimensions  */
-    double scalar_prod(const VMD& v) const
+    TYPE scalar_prod(const VMDBase& v) const
     {
-      double out=0;
-      if (v.nd != this->nd) throw std::runtime_error("Mismatch in number of dimensions in operation between two VMD vectors.");
+      TYPE out=0;
+      if (v.nd != this->nd) throw std::runtime_error("Mismatch in number of dimensions in operation between two VMDBase vectors.");
       for (size_t d=0; d<nd; d++)
         out += (data[d] * v.data[d]);
       return out;
@@ -466,26 +484,26 @@ namespace Kernel
     //-------------------------------------------------------------------------------------------
     /** Cross product of two vectors. Only works in 3D
      * @param v :: other vector, also 3D  */
-    VMD cross_prod(const VMD& v) const
+    VMDBase cross_prod(const VMDBase& v) const
     {
-      if (v.nd != this->nd) throw std::runtime_error("Mismatch in number of dimensions in operation between two VMD vectors.");
+      if (v.nd != this->nd) throw std::runtime_error("Mismatch in number of dimensions in operation between two VMDBase vectors.");
       if (v.nd != 3) throw std::runtime_error("Cross product of vectors only works in 3 dimensions.");
       V3D a(data[0], data[1], data[2]);
       V3D b(v.data[0], v.data[1], v.data[2]);
       V3D c = a.cross_prod(b);
-      VMD out(c);
+      VMDBase out(c);
       return out;
     }
 
     //-------------------------------------------------------------------------------------------
     /** @return the length of this vector */
-    double length() const
+    TYPE length() const
     {
-      return sqrt(this->scalar_prod(*this));
+      return TYPE(sqrt(this->scalar_prod(*this)));
     }
 
     /** @return the length of this vector */
-    double norm() const
+    TYPE norm() const
     {
       return this->length();
     }
@@ -494,9 +512,9 @@ namespace Kernel
     //-------------------------------------------------------------------------------------------
     /** Normalize this vector to unity length
      * @return the length of this vector BEFORE normalizing */
-    double normalize()
+    TYPE normalize()
     {
-      double length = this->length();
+      TYPE length = this->length();
       for (size_t d=0; d<nd; d++)
         data[d] /= length;
       return length;
@@ -508,25 +526,30 @@ namespace Kernel
      *  @param v :: The other vector
      *  @return The angle between the vectors in radians (0 < theta < pi)
      */
-    double angle(const VMD& v) const
+    TYPE angle(const VMDBase& v) const
     {
-      return acos( this->scalar_prod(v) / (this->norm() * v.norm()) );
+      return TYPE(acos( this->scalar_prod(v) / (this->norm() * v.norm()) ));
     }
 
-    static std::vector<VMD> makeVectorsOrthogonal(std::vector<VMD> & vectors);
-    static VMD getNormalVector(const std::vector<VMD> & vectors);
+    static std::vector<VMDBase> makeVectorsOrthogonal(std::vector<VMDBase> & vectors);
+    static VMDBase getNormalVector(const std::vector<VMDBase> & vectors);
 
   protected:
     /// Number of dimensions
     size_t nd;
     /// Data, an array of size nd
-    double * data;
+    TYPE * data;
   };
 
+  /// Underlying data type for the VMD type
+  typedef double VMD_t;
 
+  /// Define the VMD as using the double or float data type.
+  typedef VMDBase<VMD_t> VMD;
 
   // Overload operator <<
-  MANTID_KERNEL_DLL std::ostream& operator<<(std::ostream&, const VMD&);
+  MANTID_KERNEL_DLL std::ostream& operator<<(std::ostream&, const VMDBase<double>&);
+  MANTID_KERNEL_DLL std::ostream& operator<<(std::ostream&, const VMDBase<float>&);
 
 } // namespace Kernel
 } // namespace Mantid

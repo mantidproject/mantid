@@ -186,14 +186,14 @@ namespace MDEvents
       basis.normalize();
       // The row of the affine matrix = the unit vector
       for (size_t j=0; j<basis.size(); j++)
-        affineMatrix[i][j] = basis[j] * scaling[i];
+        affineMatrix[i][j] = coord_t(basis[j] * scaling[i]);
 
       // Now account for the translation
       coord_t transl = 0;
       for (size_t j=0; j<basis.size(); j++)
-        transl += origin[j] * basis[j]; // dot product of origin * basis aka ( X0 . U )
+        transl += coord_t(origin[j] * basis[j]); // dot product of origin * basis aka ( X0 . U )
       // The last column of the matrix = the translation movement
-      affineMatrix[i][inD] = -transl * scaling[i];
+      affineMatrix[i][inD] = -transl * coord_t(scaling[i]);
     }
 
     // Copy into the raw matrix (for speed)

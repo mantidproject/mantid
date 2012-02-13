@@ -356,8 +356,16 @@ namespace MDEvents
       if (numEvents == 0)
         return;
 
+#ifdef COORDT_IS_FLOAT
+      if (file->getInfo().type != ::NeXus::FLOAT32)
+      {
+        // TODO: Handle old files that are recorded in DOUBLEs to load as FLOATS
+        throw std::runtime_error("loadVectorFromNexusSlab(): cannot load legacy file that is in floats yet.");
+      }
+#else
+#endif
       // Allocate the data
-      double * data = new double[numEvents*(nd+2)];
+      coord_t * data = new coord_t[numEvents*(nd+2)];
 
       // Start/size descriptors
       std::vector<int> start(2,0);

@@ -44,6 +44,7 @@ namespace Mantid
                                tied. </UL>
     </UL>
 
+
     This is a bivariate function.  The workspace must have three histograms of equal length.
     Histogram 0: Contains the experimental values for each x and y, along with their errors.
     Histogram 1: Contains the corresponding x value for the data in Histogram 0
@@ -52,7 +53,8 @@ namespace Mantid
     @author Ruth Mikkelson, SNS ORNL
     @date 11/4/2011
 
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+
+    Copyright &copy; 2011-12 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -73,20 +75,16 @@ namespace Mantid
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
+
     
    class  DLLExport  BivariateNormal: public UserFunction
                                    //public API::ParamFunction, public BackgroundFunction ,API::IFunctionMW
+
     {
-    
     public:
-    
-      
       BivariateNormal();
-      
       /// Destructor
       virtual ~BivariateNormal ();
-
-    
 
       /// overwrite IFunction base class methods
       std::string name()const {return "BivariateNormal";}
@@ -149,8 +147,8 @@ namespace Mantid
         return false;
       }
 
+
     protected:
-   
       void init();
 
       int NCells ;
@@ -173,8 +171,9 @@ namespace Mantid
       double LastParams[9]; ///< Saves previous/this set of parameters
       
 
+
       double* expVals; ///< Save common exponential values for each cell
-      
+
       double uu,
              coefNorm , 
              expCoeffx2 , 
@@ -184,19 +183,20 @@ namespace Mantid
 
 
       
+
       BoundaryConstraint *BackConstraint; ///< Constraint for background
 
       BoundaryConstraint *MeanxConstraint; ///< Constraint using mean x
-      
+
       BoundaryConstraint *MeanyConstraint; ///< Constraint using mean y
 
       BoundaryConstraint *IntensityConstraint; ///< Constraint using intensity
 
-     static Kernel::Logger & g_log;
+      static Kernel::Logger & g_log;
 
 
     };
-}
+  }
 }
 
 #endif

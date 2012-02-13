@@ -98,7 +98,7 @@ namespace GPUAlgorithms
   void GPUAlgorithm::buildKernelFromCode(const std::string & code, const std::string & functionName,
       cl::Kernel & kernel, cl::CommandQueue & queue, cl::Context & context)
   {
-    bool verbose = false;
+    bool verbose = true;
     cl_int err;
     // Code is loaded in kernelStr
     const std::string & kernelStr = code;
@@ -138,13 +138,46 @@ namespace GPUAlgorithms
     if (devices.empty())
       throw std::runtime_error("OpenCL Error: No device available");
 
+    if (verbose) std::cout<<"Found " << devices.size() << " devices\n";
+
+    for (size_t i=0; i<devices.size(); i++)
+    {
+      cl::Device & dev = devices[i];
+      std::cout << "----------" << std::endl;
+      std::cout << "Device " << i << std::endl;
+      std::cout << "----------" << std::endl;
+
+      char deviceName[100];
+      dev.getInfo(CL_DEVICE_NAME, &deviceName);
+      std::cout << "CL_DEVICE_NAME = " << deviceName << std::endl;
+
+      cl_platform_id platformId;
+      dev.getInfo(CL_DEVICE_NAME, &platformId);
+      std::cout << "CL_DEVICE_PLATFORM = " << platformId << std::endl;
+
+      cl_ulong globalMemCacheSize = 0;
+      dev.getInfo(CL_DEVICE_GLOBAL_MEM_CACHE_SIZE, &globalMemCacheSize);
+      std::cout << "CL_DEVICE_GLOBAL_MEM_CACHE_SIZE = " << globalMemCacheSize << std::endl;
+
+      cl_ulong globalMemSize = 0;
+      dev.getInfo(CL_DEVICE_GLOBAL_MEM_SIZE, &globalMemSize);
+      std::cout << "CL_DEVICE_GLOBAL_MEM_SIZE = " << globalMemSize << std::endl;
+
+      cl_uint maxClockFrequency = 0;
+      dev.getInfo(CL_DEVICE_MAX_CLOCK_FREQUENCY, &maxClockFrequency);
+      std::cout << "CL_DEVICE_MAX_CLOCK_FREQUENCY = " << maxClockFrequency << std::endl;
+
+      cl_uint maxComputeUnits = 0;
+      dev.getInfo(CL_DEVICE_MAX_COMPUTE_UNITS, &maxComputeUnits);
+      std::cout << "CL_DEVICE_MAX_COMPUTE_UNITS = " << maxComputeUnits << std::endl;
+
+    }
 
     cl::Program::Sources sources(1, std::make_pair(kernelStr.c_str(), kernelStr.size()));
 
     cl::Program program = cl::Program(context, sources, &err);
     checkError("Program::Program() failed");
 
-    if (verbose) std::cout << devices.size() << " devices\n";
     // Build the kernel program
     err = program.build(devices);
     if (err != CL_SUCCESS) {

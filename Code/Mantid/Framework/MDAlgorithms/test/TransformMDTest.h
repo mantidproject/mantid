@@ -125,7 +125,7 @@ public:
 
     TS_ASSERT_DELTA( ws2->getInverseVolume(), 1./16., 1e-6);
     coord_t point[2] = {21.1, 21.1};
-    TS_ASSERT_DELTA( ws2->getSignalAtCoord(point), 1.23 * ws2->getInverseVolume(), 1e-6);
+    TS_ASSERT_DELTA( ws2->getSignalAtCoord(point, Mantid::API::NoNormalization), 1.23, 1e-6);
 
 
     // Remove workspace from the data service.

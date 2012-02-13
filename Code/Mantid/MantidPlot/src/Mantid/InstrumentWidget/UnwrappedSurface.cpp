@@ -89,6 +89,7 @@ void UnwrappedSurface::init()
 {
   // the actor calls this->callback for each detector
   m_unwrappedDetectors.clear();
+  m_assemblies.clear();
   m_u_min =  DBL_MAX;
   m_u_max = -DBL_MAX;
   m_v_min =  DBL_MAX;
@@ -96,11 +97,50 @@ void UnwrappedSurface::init()
 
   size_t ndet = m_instrActor->ndetectors();
   m_unwrappedDetectors.resize(ndet);
+  if (ndet == 0) return;
+
   Instrument_const_sptr inst = m_instrActor->getInstrument();
 
-  // TODO: When in parallel, this causes some incorrect results.
-  // I suspect the IComponent->getPos() method to not be properly thread safe.
-  //PRAGMA_OMP( parallel for )
+  // Pre-calculate all the detector positions (serial because
+  // I suspect the IComponent->getPos() method to not be properly thread safe)
+  m_instrActor->cacheDetPos();
+
+  // First detector defines the surface's x axis
+  if (m_xaxis.nullVector())
+  {
+    Mantid::Kernel::V3D pos = m_instrActor->getDetPos(0) - m_pos;
+    double z = pos.scalar_prod(m_zaxis);
+    if (z == 0.0)
+    {
+      // find the shortest projection of m_zaxis and direct m_xaxis along it
+      bool isY = false;
+      bool isZ = false;
+      if (fabs(m_zaxis.Y()) < fabs(m_zaxis.X())) isY = true;
+      if (fabs(m_zaxis.Z()) < fabs(m_zaxis.Y())) isZ = true;
+      if (isZ)
+      {
+        m_xaxis = Mantid::Kernel::V3D(0,0,1);
+      }
+      else if (isY)
+      {
+        m_xaxis = Mantid::Kernel::V3D(0,1,0);
+      }
+      else
+      {
+        m_xaxis = Mantid::Kernel::V3D(1,0,0);
+      }
+    }
+    else
+    {
+      m_xaxis = pos - m_zaxis * z;
+      m_xaxis.normalize();
+    }
+    m_yaxis = m_zaxis.cross_prod(m_xaxis);
+  }
+
+
+  // For each detector in the order of actors
+  PRAGMA_OMP( parallel for )
   for(int ii = 0; ii < int(ndet); ++ii)
   {
     size_t i=size_t(ii);
@@ -127,51 +167,31 @@ void UnwrappedSurface::init()
     {
       // A real detector.
       m_instrActor->getColor(id).getUB3(&color[0]);
-      // first detector defines the surface's x axis
-      if (m_xaxis.nullVector())
-      {
-        Mantid::Kernel::V3D pos = det->getPos() - m_pos;
-        double z = pos.scalar_prod(m_zaxis);
-        if (z == 0.0)
-        {
-          // find the sortest projection of m_zaxis and direct m_xaxis along it
-          bool isY = false;
-          bool isZ = false;
-          if (fabs(m_zaxis.Y()) < fabs(m_zaxis.X())) isY = true;
-          if (fabs(m_zaxis.Z()) < fabs(m_zaxis.Y())) isZ = true;
-          if (isZ)
-          {
-            m_xaxis = Mantid::Kernel::V3D(0,0,1);
-          }
-          else if (isY)
-          {
-            m_xaxis = Mantid::Kernel::V3D(0,1,0);
-          }
-          else
-          {
-            m_xaxis = Mantid::Kernel::V3D(1,0,0);
-          }
-        }
-        else
-        {
-          m_xaxis = pos - m_zaxis * z;
-          m_xaxis.normalize();
-        }
-        m_yaxis = m_zaxis.cross_prod(m_xaxis);
-      }
+
+      // Position, relative to origin
+      //Mantid::Kernel::V3D pos = det->getPos() - m_pos;
+      Mantid::Kernel::V3D pos = m_instrActor->getDetPos(i) - m_pos;
+
+      // Create the unwrapped shape
       UnwrappedDetector udet(&color[0],det);
-      this->calcUV(udet);
-      // Not in parallel = no critical block
-      //PARALLEL_CRITICAL( UnwrappedSurface_minmaxUV )
-      {
-        if (udet.u < m_u_min) m_u_min = udet.u;
-        if (udet.u > m_u_max) m_u_max = udet.u;
-        if (udet.v < m_v_min) m_v_min = udet.v;
-        if (udet.v > m_v_max) m_v_max = udet.v;
-      }
+      // Calculate its position/size in UV coordinates
+      this->calcUV(udet, pos);
+
       m_unwrappedDetectors[i] = udet;
     } // is a real detectord
   } // for each detector in pick order
+
+
+  // Now find the overall edges in U and V coords.
+  for(size_t i=0;i<m_unwrappedDetectors.size();++i)
+  {
+    const UnwrappedDetector& udet = m_unwrappedDetectors[i];
+    if (! udet.detector ) continue;
+    if (udet.u < m_u_min) m_u_min = udet.u;
+    if (udet.u > m_u_max) m_u_max = udet.u;
+    if (udet.v < m_v_min) m_v_min = udet.v;
+    if (udet.v > m_v_max) m_v_max = udet.v;
+  }
 
   findAndCorrectUGap();
 
@@ -205,15 +225,33 @@ void UnwrappedSurface::init()
 
 }
 
-/**
-  * Calculate the rectangular region in uv coordinates occupied by an assembly.
-  * @param comp :: A member of the assembly. The total area of the assembly is a sum of areas of its members
-  * @param compRect :: A rect. area occupied by comp in uv space
-  */
-void UnwrappedSurface::calcAssemblies(boost::shared_ptr<const Mantid::Geometry::IComponent> comp,const QRectF& compRect)
+
+
+//------------------------------------------------------------------------------
+/** Calculate the UV and size of the given detector
+ * Calls the pure virtual project() and calcSize() methods that
+ * depend on the type of projection
+ *
+ * @param udet :: detector to unwrap.
+ * @param pos :: detector position relative to the sample origin
+ */
+void UnwrappedSurface::calcUV(UnwrappedDetector& udet, Mantid::Kernel::V3D & pos )
 {
-  boost::shared_ptr<const Mantid::Geometry::IComponent> parent = comp->getParent();
-//  IDetector_const_sptr det = boost::dynamic_pointer_cast<const IDetector>(parent);
+  this->project(udet.u, udet.v, udet.uscale, udet.vscale, pos);
+  calcSize(udet,Mantid::Kernel::V3D(-1,0,0),Mantid::Kernel::V3D(0,1,0));
+}
+
+
+//------------------------------------------------------------------------------
+/** Calculate the rectangular region in uv coordinates occupied by an assembly.
+ *
+ * @param comp :: A member of the assembly. The total area of the assembly is a sum of areas of its members
+ * @param compRect :: A rect. area occupied by comp in uv space
+ */
+void UnwrappedSurface::calcAssemblies(const Mantid::Geometry::IComponent * comp,const QRectF& compRect)
+{
+  // We don't need the parametrized version = use the bare parent for speed
+  const Mantid::Geometry::IComponent * parent = comp->getBareParent();
   if (parent)
   {
     QRectF& r = m_assemblies[parent->getComponentID()];
@@ -236,8 +274,8 @@ void UnwrappedSurface::cacheAllAssemblies()
 
     if (! udet.detector ) continue;
     // Get the BARE parent (not parametrized) to speed things up.
-    //boost::shared_ptr<const Mantid::Geometry::IComponent> parent(udet.detector->getBareParent()); // = udet.detector->getParent();
-    boost::shared_ptr<const Mantid::Geometry::IComponent> parent = udet.detector->getParent();
+    const Mantid::Geometry::IComponent * bareDet = udet.detector->getComponentID();
+    const Mantid::Geometry::IComponent * parent = bareDet->getBareParent();
     if (parent)
     {
       QRectF detRect;
@@ -301,16 +339,19 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget,bool picking)const
   {
     const UnwrappedDetector& udet = m_unwrappedDetectors[i];
 
-    if (!udet.detector || !m_viewRect.contains(udet.u,udet.v)) continue;
-
-    setColor(int(i),picking);
+    if (!udet.detector) continue;
 
     int iw = int(udet.width / dw);
     int ih = int(udet.height / dh);
+    double w = (iw == 0)?  dw : udet.width/2;
+    double h = (ih == 0)?  dh : udet.height/2;
+
+    if (!(m_viewRect.contains(udet.u-w, udet.v-h) || m_viewRect.contains(udet.u+w, udet.v+h))) continue;
+
+    setColor(int(i),picking);
+
     if (iw < 6 || ih < 6)
     {
-      double w = (iw == 0)?  dw : udet.width/2;
-      double h = (ih == 0)?  dh : udet.height/2;
       glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
       glRectd(udet.u-w,udet.v-h,udet.u+w,udet.v+h);
       glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
@@ -354,6 +395,13 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget,bool picking)const
 
 }
 
+//------------------------------------------------------------------------------
+/** Calculate the size of the detector in U/V
+ *
+ * @param udet
+ * @param X
+ * @param Y
+ */
 void UnwrappedSurface::calcSize(UnwrappedDetector& udet,const Mantid::Kernel::V3D& X,
               const Mantid::Kernel::V3D& Y)
 {
@@ -667,9 +715,8 @@ void UnwrappedSurface::changeColorMap()
   {
     UnwrappedDetector& udet = m_unwrappedDetectors[i];
     if (! udet.detector ) continue;
-    const boost::shared_ptr<const Mantid::Geometry::IDetector> det = udet.detector;
     unsigned char color[3];
-    m_instrActor->getColor(det->getID()).getUB3(&color[0]);
+    m_instrActor->getColor(udet.detector->getID()).getUB3(&color[0]);
     udet.color[0] = color[0];
     udet.color[1] = color[1];
     udet.color[2] = color[2];

@@ -102,7 +102,7 @@ namespace DataHandling
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
     mustBePositive->setLower(0);
 
-    declareProperty("WorkspaceIndexMin", 0, mustBePositive->clone(), 
+    declareProperty("WorkspaceIndexMin", 0, mustBePositive,
         "Index number of first spectrum to write, only for single\n"
         "period data.");
     declareProperty("WorkspaceIndexMax", Mantid::EMPTY_INT(), mustBePositive->clone(),

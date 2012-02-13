@@ -8,6 +8,8 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include <map>
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IMDIterator.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -304,11 +306,25 @@ namespace MDEvents
    * @return the (normalized) signal at a given coordinates.
    *         NaN if outside the range of this workspace
    */
-  signal_t MDHistoWorkspace::getSignalAtCoord(const coord_t * coords) const
+  signal_t MDHistoWorkspace::getSignalAtCoord(const coord_t * coords, const Mantid::API::MDNormalization & normalization) const
   {
     size_t linearIndex = this->getLinearIndexAtCoord(coords);
     if (linearIndex < m_length)
-      return m_signals[linearIndex] * m_inverseVolume;
+    {
+      // What is our normalization factor?
+      switch (normalization)
+      {
+      case NoNormalization:
+        return m_signals[linearIndex];
+      case VolumeNormalization:
+        return m_signals[linearIndex] * m_inverseVolume;
+      case NumEventsNormalization:
+        //TOOD: track # of events
+        return m_signals[linearIndex] * 1;
+      }
+      // Should not reach here
+      return m_signals[linearIndex];
+    }
     else
       return std::numeric_limits<signal_t>::quiet_NaN();
   }
@@ -336,10 +352,32 @@ namespace MDEvents
 
 
   //----------------------------------------------------------------------------------------------
-  /// Creates a new iterator pointing to the first cell in the workspace
-  Mantid::API::IMDIterator* MDHistoWorkspace::createIterator(Mantid::Geometry::MDImplicitFunction * function) const
+  /** Create IMDIterators from this MDHistoWorkspace
+   *
+   * @param suggestedNumCores :: split the iterators into this many cores (if threadsafe)
+   * @param function :: implicit function to limit range
+   * @return MDHistoWorkspaceIterator vector
+   */
+  std::vector<Mantid::API::IMDIterator*> MDHistoWorkspace::createIterators(size_t suggestedNumCores,
+      Mantid::Geometry::MDImplicitFunction * function) const
   {
-    return new MDHistoWorkspaceIterator(this,function);
+    size_t numCores = suggestedNumCores;
+    if (!this->threadSafe()) numCores = 1;
+    size_t numElements = this->getNPoints();
+    if (numCores > numElements)  numCores = numElements;
+    if (numCores < 1) numCores = 1;
+
+    // Create one iterator per core, splitting evenly amongst spectra
+    std::vector<IMDIterator*> out;
+    for (size_t i=0; i<numCores; i++)
+    {
+      size_t begin = (i * numElements) / numCores;
+      size_t end = ((i+1) * numElements) / numCores;
+      if (end > numElements)
+        end = numElements;
+      out.push_back(new MDHistoWorkspaceIterator(this, function, begin, end));
+    }
+    return out;
   }
 
 

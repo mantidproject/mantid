@@ -187,7 +187,7 @@ public:
     alg.setPropertyValue("EndX","79600");
 
     // create function you want to fit against
-    CompositeFunction *fnWithBk = new CompositeFunctionMW();
+    CompositeFunctionMW fnWithBk;
 
     LinearBackground *bk = new LinearBackground();
     bk->initialize();
@@ -202,16 +202,14 @@ public:
     fn->setParameter("PeakCentre",79450.0);
     fn->setParameter("Height",200.0);
     fn->setParameter("Sigma",300.0);
-	BoundaryConstraint* bc = new BoundaryConstraint(fn,"Sigma",20.0,100.0);
-	//bc->setLower(20.0);
-	//bc->setUpper(100.0);
-	bc->setPenaltyFactor(1000.001);
-	fn->addConstraint(bc);
+    BoundaryConstraint* bc = new BoundaryConstraint(fn,"Sigma",20.0,100.0);
+    bc->setPenaltyFactor(1000.001);
+    fn->addConstraint(bc);
 
-    fnWithBk->addFunction(bk);
-    fnWithBk->addFunction(fn);
+    fnWithBk.addFunction(bk);
+    fnWithBk.addFunction(fn);
 
-    alg.setPropertyValue("Function",*fnWithBk);
+    alg.setPropertyValue("Function",fnWithBk.asString());
 
     // execute fit
     TS_ASSERT_THROWS_NOTHING(
@@ -289,7 +287,7 @@ public:
     fnWithBk->addFunction(bk);
     fnWithBk->addFunction(fn);
 
-    alg.setPropertyValue("Function",*fnWithBk);
+    alg.setPropertyValue("Function",fnWithBk->asString());
 
     // execute fit
     TS_ASSERT_THROWS_NOTHING(
@@ -331,13 +329,13 @@ public:
     TS_ASSERT( alg2.isInitialized() );
 
     // set up gaussian fitting function
-    Gaussian* gaus = new Gaussian();
-    gaus->initialize();
-    gaus->setCentre(11.2);
-    gaus->setHeight(100.7);
-    gaus->setWidth(2.2);
+    Gaussian gaus;
+    gaus.initialize();
+    gaus.setCentre(11.2);
+    gaus.setHeight(100.7);
+    gaus.setWidth(2.2);
 
-    alg2.setPropertyValue("Function",*gaus);
+    alg2.setPropertyValue("Function",gaus.asString());
 
     // Set which spectrum to fit against and initial starting values
     alg2.setProperty("InputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(ws2D) );
@@ -391,13 +389,13 @@ public:
     TS_ASSERT( alg2.isInitialized() );
 
     // set up gaussian fitting function
-    SimplexGaussian* gaus = new SimplexGaussian();
-    gaus->initialize();
-    gaus->setCentre(11.2);
-    gaus->setHeight(100.7);
-    gaus->setWidth(2.2);
+    SimplexGaussian gaus;
+    gaus.initialize();
+    gaus.setCentre(11.2);
+    gaus.setHeight(100.7);
+    gaus.setWidth(2.2);
 
-    alg2.setPropertyValue("Function",*gaus);
+    alg2.setPropertyValue("Function",gaus.asString());
 
     // Set which spectrum to fit against and initial starting values
     alg2.setPropertyValue("InputWorkspace", wsName);
@@ -449,13 +447,14 @@ public:
     TS_ASSERT( alg2.isInitialized() );
 
     // set up gaussian fitting function
-    Gaussian* gaus = new Gaussian();
-    gaus->initialize();
-    gaus->setCentre(11.2);
-    gaus->setHeight(100.7);
-    gaus->setWidth(2.2);
+    Gaussian gaus;
+    gaus.initialize();
+    gaus.setCentre(11.2);
+    gaus.setHeight(100.7);
+    gaus.setWidth(2.2);
 
-    alg2.setPropertyValue("Function",*gaus);
+    alg2.setPropertyValue("Function",gaus.asString());
+    std::cerr << gaus.asString() << std::endl;
 
     // Set which spectrum to fit against and initial starting values
     alg2.setPropertyValue("InputWorkspace", wsName);
@@ -479,9 +478,10 @@ public:
 
     IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out);
-    TS_ASSERT_DELTA( pk->height(), 97.8091 ,0.01);
+    TS_ASSERT_DELTA( pk->height(), 97.8091 ,0.05);
     TS_ASSERT_DELTA( pk->centre(), 11.2356 ,0.001);
     TS_ASSERT_DELTA( pk->width(), 2.6240 ,0.001);
+    std::cerr << pk->height() << std::endl;
 
     AnalysisDataService::Instance().remove(wsName);
   }
@@ -507,13 +507,13 @@ public:
     TS_ASSERT( alg2.isInitialized() );
 
     // set up gaussian fitting function
-    Gaussian* gaus = new Gaussian();
-    gaus->initialize();
-    gaus->setCentre(11.2);
-    gaus->setHeight(100.7);
-    gaus->setWidth(2.2);
+    Gaussian gaus;
+    gaus.initialize();
+    gaus.setCentre(11.2);
+    gaus.setHeight(100.7);
+    gaus.setWidth(2.2);
 
-    alg2.setPropertyValue("Function",*gaus);
+    alg2.setPropertyValue("Function",gaus.asString());
 
     // Set which spectrum to fit against and initial starting values
     alg2.setPropertyValue("InputWorkspace", wsName);
@@ -571,7 +571,7 @@ public:
     gaus->setHeight(100.7);
     gaus->setWidth(2.2);
 
-    alg2.setPropertyValue("Function",*gaus);
+    alg2.setPropertyValue("Function",gaus->asString());
 
     // Set which spectrum to fit against and initial starting values
     alg2.setPropertyValue("InputWorkspace", wsName);
@@ -624,13 +624,13 @@ public:
     TS_ASSERT( alg2.isInitialized() );
 
     // set up gaussian fitting function
-    Gaussian* gaus = new Gaussian();
-    gaus->initialize();
-    gaus->setCentre(11.2);
-    gaus->setHeight(100.7);
-    gaus->setWidth(2.2);
+    Gaussian gaus;
+    gaus.initialize();
+    gaus.setCentre(11.2);
+    gaus.setHeight(100.7);
+    gaus.setWidth(2.2);
 
-    alg2.setPropertyValue("Function",*gaus);
+    alg2.setPropertyValue("Function",gaus.asString());
 
     // Set which spectrum to fit against and initial starting values
     alg2.setPropertyValue("InputWorkspace", wsName);
@@ -728,7 +728,7 @@ public:
     fnWithBk->addFunction(fn);
 
     //alg.setPropertyValue("Function",*fnWithBk);
-    alg.setPropertyValue("Function",*fnWithBk);
+    alg.setPropertyValue("Function",fnWithBk->asString());
     alg.setPropertyValue("Minimizer","Simplex");
 
     delete fnWithBk;

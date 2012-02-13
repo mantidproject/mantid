@@ -106,6 +106,8 @@ namespace Crystal
     declareProperty("Cell", 255.0, "Unit Cell Volume (Angstroms^3)");
     declareProperty("RCrystallite", 6.0, "Becker-Coppens Crystallite Radius (micron)");
     declareProperty("ScaleFactor", 1.0, "Multiply FSQ and sig(FSQ) by scaleFactor");
+    declareProperty("DivBeam", 0.005, "Minimum beam divergence in radian");
+    declareProperty("BetaBeam", 0.5, "Wavelength dependence of beam divergence");
 
   }
 
@@ -127,6 +129,8 @@ namespace Crystal
     double cell = getProperty("Cell");
     double r_crystallite = getProperty("RCrystallite");
     double scaleFactor = getProperty("ScaleFactor");
+    double divBeam = getProperty("DivBeam");
+    double betaBeam = getProperty("BetaBeam");
     double Eg = getEg(mosaic); // defined by Zachariasen, W. H. (1967). Acta Cryst. A23, 558
     double y_corr = 1.0;
     double sigfsq_ys = 0.0;
@@ -144,7 +148,7 @@ namespace Crystal
       if (cType.compare("Type I Zachariasen")==0)
       {
         // Apply correction to fsq with Type-I Z for testing
-        double EgLaueI = getEgLaue(Eg, twoth, wl);
+        double EgLaueI = getEgLaue(Eg, twoth, wl, divBeam, betaBeam);
         double Xqt = getXqt(EgLaueI, cell, wl, twoth, tbar, fsq);
         y_corr = getZachariasen(Xqt);
         sigfsq_ys = getSigFsqr(EgLaueI, cell, wl, twoth, tbar, fsq, sigfsq);
@@ -152,7 +156,7 @@ namespace Crystal
       else if (cType.compare( "Type I Gaussian")==0)
       {
         // Apply correction to fsq with Type-I BCG for testing
-        double EgLaueI = std::sqrt(2.0) * getEgLaue(Eg, twoth, wl) * 2.0 / 3.0;
+        double EgLaueI = std::sqrt(2.0) * getEgLaue(Eg, twoth, wl, divBeam, betaBeam) * 2.0 / 3.0;
         double Xqt = getXqt(EgLaueI, cell, wl, twoth, tbar, fsq);
         y_corr = getGaussian(Xqt,twoth);
         sigfsq_ys = getSigFsqr(EgLaueI, cell, wl, twoth, tbar, fsq, sigfsq);
@@ -160,7 +164,7 @@ namespace Crystal
       else if (cType.compare("Type I Lorentzian")==0)
       {
         // Apply correction to fsq with Type-I BCL for testing
-        double EgLaueI = getEgLaue(Eg, twoth, wl);
+        double EgLaueI = getEgLaue(Eg, twoth, wl, divBeam, betaBeam);
         double Xqt = getXqt(EgLaueI, cell, wl, twoth, tbar, fsq);
         y_corr = getLorentzian(Xqt, twoth);
         sigfsq_ys = getSigFsqr(EgLaueI, cell, wl, twoth, tbar, fsq, sigfsq);
@@ -169,7 +173,7 @@ namespace Crystal
       else if (cType.compare("Type II Zachariasen")==0)
       {
         // Apply correction to fsq with Type-II Z for testing
-        double EsLaue = getEgLaue(r_crystallite, twoth, wl);
+        double EsLaue = getEgLaue(r_crystallite, twoth, wl, divBeam, betaBeam);
         double Xqt = getXqt(EsLaue, cell, wl, twoth, tbar, fsq);
         y_corr = getZachariasen(Xqt);
         sigfsq_ys = getSigFsqr(EsLaue, cell, wl, twoth, tbar, fsq, sigfsq);
@@ -177,7 +181,7 @@ namespace Crystal
       else if (cType.compare("Type II Gaussian")==0)
       {
         // Apply correction to fsq with Type-II BCG for testing
-        double EsLaue = getEgLaue(r_crystallite, twoth, wl);
+        double EsLaue = getEgLaue(r_crystallite, twoth, wl, divBeam, betaBeam);
         double Xqt = getXqt(EsLaue, cell, wl, twoth, tbar, fsq);
         y_corr = getGaussian(Xqt,twoth);
         sigfsq_ys = getSigFsqr(EsLaue, cell, wl, twoth, tbar, fsq, sigfsq);
@@ -185,7 +189,7 @@ namespace Crystal
       else if (cType.compare("Type II Lorentzian")==0)
       {
         // Apply correction to fsq with Type-II BCL for testing
-        double EsLaue = getEgLaue(r_crystallite, twoth, wl);
+        double EsLaue = getEgLaue(r_crystallite, twoth, wl, divBeam, betaBeam);
         double Xqt = getXqt(EsLaue, cell, wl, twoth, tbar, fsq);
         y_corr = getLorentzian(Xqt,twoth);
         sigfsq_ys = getSigFsqr(EsLaue, cell, wl, twoth, tbar, fsq, sigfsq);
@@ -194,8 +198,8 @@ namespace Crystal
       else if (cType.compare("Type I&II Zachariasen")==0)
       {
         // Apply correction to fsq with Type-II Z for testing
-        double EgLaueI = getEgLaue(Eg, twoth, wl);
-        double EsLaue = getEgLaue(r_crystallite, twoth, wl);
+        double EgLaueI = getEgLaue(Eg, twoth, wl, divBeam, betaBeam);
+        double EsLaue = getEgLaue(r_crystallite, twoth, wl, divBeam, betaBeam);
         double Rg = getRg(EgLaueI, EsLaue, wl, twoth);
         double Xqt = getXqtII(Rg, cell, wl, twoth, tbar, fsq);
         y_corr = getTypeIIZachariasen(Xqt);
@@ -204,7 +208,7 @@ namespace Crystal
       else if (cType.compare("Type I&II Gaussian")==0)
       {
         // Apply correction to fsq with Type-II BCG for testing
-        double EgLaueI = getEgLaue(Eg, twoth, wl);
+        double EgLaueI = getEgLaue(Eg, twoth, wl, divBeam, betaBeam);
         double Rg = getRgGaussian(EgLaueI, r_crystallite, wl, twoth);
         double Xqt = getXqtII(Rg, cell, wl, twoth, tbar, fsq);
         y_corr = getTypeIIGaussian(Xqt,twoth);
@@ -213,7 +217,7 @@ namespace Crystal
       else if (cType.compare("Type I&II Lorentzian")==0)
       {
         // Apply correction to fsq with Type-II BCL for testing
-        double EgLaueI = getEgLaue(Eg, twoth, wl);
+        double EgLaueI = getEgLaue(Eg, twoth, wl, divBeam, betaBeam);
         double Rg = getRgLorentzian(EgLaueI, r_crystallite, wl, twoth);
         double Xqt = getXqtII(Rg, cell, wl, twoth, tbar, fsq);
         y_corr = getTypeIILorentzian(Xqt,twoth);
@@ -240,14 +244,12 @@ namespace Crystal
         double Eg = 2.0*std::sqrt(std::log(static_cast<double>(2.0))/(2*M_PI))/(mosaic*M_PI/180.0);
         return Eg;
   }
-  double TOFExtinction::getEgLaue(double Eg, double twoth, double wl)
+  double TOFExtinction::getEgLaue(double Eg, double twoth, double wl, double divBeam, double betaBeam)
   {
-    UNUSED_ARG(wl)
-    UNUSED_ARG(twoth)
+        // divbeam is the default [minimum] beam divergence in radian.
         // Tomiyoshi, Yamada and Watanabe
-        //double EgLaue = Eg*std::tan(twoth/2.0)/wl;
-        // Ask Xiaoping if this should be EqLaue
-        return Eg;
+        double EgLaue = Eg/std::sqrt(std::pow(std::tan(twoth/2.0)/wl,2) + std::pow((1 + betaBeam*wl/std::tan(twoth/2))*Eg*divBeam,2));
+        return EgLaue;
   }
   double TOFExtinction::getXqt(double Eg, double cellV, double wl, double twoth, double tbar, double fsq)
   {

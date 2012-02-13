@@ -291,22 +291,23 @@ void Fit1D::exec()
 
   // check if derivative defined in derived class
   bool isDerivDefined = true;
+  gsl_matrix * M = NULL;
   try
   {
     const std::vector<double> inTest(m_parameterNames.size(),1.0);
     std::vector<double> outTest(m_parameterNames.size());
     const double xValuesTest = 0;
     JacobianImpl J;
-    gsl_matrix* M( gsl_matrix_alloc(m_parameterNames.size(),1) );
+    M = gsl_matrix_alloc(m_parameterNames.size(),1);
     J.setJ(M);
     // note nData set to zero (last argument) hence this should avoid further memory problems
     functionDeriv(&(inTest.front()), &J, &xValuesTest, 0);
-    gsl_matrix_free(M);
   }
   catch (Exception::NotImplementedError&)
   {
     isDerivDefined = false;
   }
+  gsl_matrix_free(M);
 
   // Try to retrieve optional properties
   int histNumber = getProperty("WorkspaceIndex");

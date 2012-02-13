@@ -29,6 +29,7 @@ set ( SRC_FILES
 	src/FrameworkManager.cpp
 	src/FunctionDomain.cpp
 	src/FunctionFactory.cpp
+	src/FunctionProperty.cpp
 	src/IDataFileChecker.cpp
 	src/IEventList.cpp
 	src/IEventWorkspace.cpp
@@ -55,11 +56,12 @@ set ( SRC_FILES
 	src/MDGeometry.cpp
 	src/MatrixWSIndexCalculator.cpp
 	src/MatrixWorkspace.cpp
+	src/MatrixWorkspaceMDIterator.cpp
 	src/MemoryManager.cpp
 	src/MultipleExperimentInfos.cpp
 	src/MultipleFileProperty.cpp
-	src/NumericAxis.cpp
 	src/NullCoordTransform.cpp
+	src/NumericAxis.cpp
 	src/ParamFunction.cpp
 	src/ParameterReference.cpp
 	src/ParameterTie.cpp
@@ -127,6 +129,7 @@ set ( INC_FILES
 	inc/MantidAPI/FrameworkManager.h
 	inc/MantidAPI/FunctionDomain.h
 	inc/MantidAPI/FunctionFactory.h
+	inc/MantidAPI/FunctionProperty.h
 	inc/MantidAPI/IAlgorithm.h
 	inc/MantidAPI/IArchiveSearch.h
 	inc/MantidAPI/IBackgroundFunction.h
@@ -168,11 +171,12 @@ set ( INC_FILES
 	inc/MantidAPI/MDGeometry.h
 	inc/MantidAPI/MatrixWSIndexCalculator.h
 	inc/MantidAPI/MatrixWorkspace.h
+	inc/MantidAPI/MatrixWorkspaceMDIterator.h
 	inc/MantidAPI/MemoryManager.h
 	inc/MantidAPI/MultipleExperimentInfos.h
 	inc/MantidAPI/MultipleFileProperty.h
-	inc/MantidAPI/NumericAxis.h
 	inc/MantidAPI/NullCoordTransform.h
+	inc/MantidAPI/NumericAxis.h
 	inc/MantidAPI/ParamFunction.h
 	inc/MantidAPI/ParameterReference.h
 	inc/MantidAPI/ParameterTie.h
@@ -223,6 +227,7 @@ set ( TEST_FILES
 	test/FilePropertyTest.h
 	test/FrameworkManagerTest.h
 	test/FunctionTest.h
+	test/FunctionPropertyTest.h
 	test/IEventListTest.h
 	test/IFunctionMDTest.h
 	test/IMDWorkspaceTest.h
@@ -230,6 +235,7 @@ set ( TEST_FILES
 	test/ImplicitFunctionParserFactoryTest.h
 	test/InstrumentDataServiceTest.h
 	test/MDGeometryTest.h
+	test/MatrixWorkspaceMDIteratorTest.h
 	test/MemoryManagerTest.h
 	test/MultipleExperimentInfosTest.h
 	test/MultipleFilePropertyTest.h

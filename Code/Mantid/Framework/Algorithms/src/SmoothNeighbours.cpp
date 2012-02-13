@@ -160,7 +160,7 @@ void SmoothNeighbours::init()
     "The radius around a pixel to look for nearest neighbours to average. \n"
     "If 0, will use the AdjX and AdjY parameters for rectangular detectors instead." );
 
-  declareProperty("NumberOfNeighbours", 8, mustBePositive->clone(), "Number of nearest neighbouring pixels.\n"
+  declareProperty("NumberOfNeighbours", 8, mustBePositive, "Number of nearest neighbouring pixels.\n"
     "Alternative to providing the radius. The default is 8.");
 
   declareProperty("IgnoreMaskedDetectors", true, "If true, do not consider masked detectors in the NN search.");

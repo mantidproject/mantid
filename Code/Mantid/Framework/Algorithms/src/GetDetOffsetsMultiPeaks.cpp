@@ -1,4 +1,4 @@
-/*WIKI* 
+/*WIKI*
 
 This algorithm requires a workspace that is both in d-spacing, but has also been preprocessed by the [[CrossCorrelate]] algorithm.  In this first step you select one spectrum to be the reference spectrum and all of the other spectrum are cross correlated against it.  Each output spectrum then contains a peak whose location defines the offset from the reference spectrum.
 
@@ -22,7 +22,9 @@ GetDetOffsetsMultiPeaks("InputW","OutputW",0.01,2.0,1.8,2.2,"output.cal")
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/CompositeFunctionMW.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
@@ -61,13 +63,31 @@ namespace Mantid
   
     static double gsl_costFunction(const gsl_vector *v, void *params)
     {
-      std::string *p = (std::string *)params;
-      std::string inname = p[0];
-      std::string peakPositions = p[2];
-      const int64_t wi = boost::lexical_cast<int64_t>(p[1]);
+      double *p = (double *)params;
+      std::vector<double> peakPosToFit, peakPosFitted;
+      size_t n = static_cast<size_t>(p[0]);
+      double minD = p[1];
+      double maxD = p[2];
+      for (size_t i = 0; i < n; i++)
+      {
+        peakPosToFit.push_back(p[i+3]);
+      }
+      for (size_t i = 0; i < n; i++)
+      {
+        peakPosFitted.push_back(p[i+n+3]);
+      }
+    
       double offset = gsl_vector_get(v, 0);
-      Mantid::Algorithms::GetDetOffsetsMultiPeaks u;
-      return u.fitSpectra(wi, offset, inname, peakPositions);
+      double errsum = 0.0;
+      for (size_t i = 0; i < n; ++i)
+      {
+        // Get references to the data
+        //See formula in AlignDetectors
+        double offsetAD = offset*peakPosToFit[i]/(1.+offset);
+        if(peakPosFitted[i] > minD && peakPosFitted[i] < maxD)
+          errsum += std::fabs(peakPosToFit[i]-(peakPosFitted[i]+offsetAD));
+      }
+      return errsum;
     }
   
     //-----------------------------------------------------------------------------------------
@@ -79,7 +99,7 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,
           new WorkspaceUnitValidator<>("dSpacing")),"A 2D workspace with X values of d-spacing");
 
-      declareProperty("DReference","2.0","Enter a comma-separated list of the expected X-position of the centre of the peaks. Only peaks near these positions will be fitted." );
+      declareProperty(new ArrayProperty<double>("DReference"),"Enter a comma-separated list of the expected X-position of the centre of the peaks. Only peaks near these positions will be fitted." );
 
       declareProperty(new FileProperty("GroupingFileName","", FileProperty::OptionalSave, ".cal"),
           "Optional: The name of the output CalFile to save the generated OffsetsWorkspace." );
@@ -109,6 +129,12 @@ namespace Mantid
       //To get the workspace index from the detector ID
       detid2index_map * pixel_to_wi = maskWS->getDetectorIDToWorkspaceIndexMap(true);
 
+      // some shortcuts for event workspaces
+      EventWorkspace_const_sptr eventW = boost::dynamic_pointer_cast<const EventWorkspace>( inputW );
+      bool isEvent = false;
+      if (eventW)
+        isEvent = true;
+
       // Fit all the spectra with a gaussian
       Progress prog(this, 0, 1.0, nspec);
       // cppcheck-suppress syntaxError
@@ -117,26 +143,46 @@ namespace Mantid
       {
         PARALLEL_START_INTERUPT_REGION
         double offset = 0.0;
-        const MantidVec& Y = inputW->readY(wi);
-        const int YLength = static_cast<int>(Y.size());
-        double sumY = 0.0;
-        for (int i = 0; i < YLength; i++) sumY += Y[i];
-        if (sumY < 1.e-30)
+        // checks for dead detectors
+        if ((isEvent) && (eventW->getEventList(wi).empty()))
         {
-          // Dead detector will be masked
-          offset=1000.;
+          // dead detector will be masked
+          offset = 1000.;
         }
-        else
+        else {
+          const MantidVec& Y = inputW->readY(wi);
+          const int YLength = static_cast<int>(Y.size());
+          double sumY = 0.0;
+          for (int i = 0; i < YLength; i++) sumY += Y[i];
+          if (sumY < 1.e-30)
+          {
+            // Dead detector will be masked
+            offset=1000.;
+          }
+        }
+        if (offset < 10.)
         {
           // Fit the peak
-          std::string par[3];
-          std::string inname = getProperty("InputWorkspace");
-          par[0] = inname;
-          std::ostringstream strwi;
-          strwi<<wi;
-          par[1] = strwi.str();
+          MatrixWorkspace_sptr inputW = getProperty("InputWorkspace");
           std::string peakPositions = getProperty("DReference");
-          par[2] = peakPositions;
+          std::vector<double> peakPosToFit, peakPosFitted;
+          size_t nparams;
+          double minD, maxD;
+          fitSpectra(wi, inputW, peakPositions, nparams, minD, maxD, peakPosToFit, peakPosFitted);
+          //double * params = new double[2*nparams+1];
+          double params[103];
+          if(nparams > 50) nparams = 50;
+          params[0] = static_cast<double>(nparams);
+          params[1] = minD;
+          params[2] = maxD;
+          for (size_t i = 0; i < nparams; i++)
+          {
+            params[i+3] = peakPosToFit[i];
+          }
+          for (size_t i = 0; i < nparams; i++)
+          {
+            params[i+3+nparams] = peakPosFitted[i];
+          }
     
           const gsl_multimin_fminimizer_type *T =
           gsl_multimin_fminimizer_nmsimplex;
@@ -162,7 +208,7 @@ namespace Mantid
           /* Initialize method and iterate */
           minex_func.n = nopt;
           minex_func.f = &Mantid::Algorithms::gsl_costFunction;
-          minex_func.params = &par;
+          minex_func.params = &params;
     
           s = gsl_multimin_fminimizer_alloc (T, nopt);
           gsl_multimin_fminimizer_set (s, &minex_func, x, ss);
@@ -192,6 +238,7 @@ namespace Mantid
           gsl_vector_free(x);
           gsl_vector_free(ss);
           gsl_multimin_fminimizer_free (s);
+          //delete [] params;
         }
         double mask=0.0;
         if (std::abs(offset) > maxOffset)
@@ -255,18 +302,17 @@ namespace Mantid
     *  @return The calculated offset value
     */
 
-    double GetDetOffsetsMultiPeaks::fitSpectra(const int64_t s, double offset, std::string inname, std::string peakPositions)
+    void GetDetOffsetsMultiPeaks::fitSpectra(const int64_t s, MatrixWorkspace_sptr inputW, const std::string &peakPositions, size_t &nparams, double &minD, double &maxD, std::vector<double>&peakPosToFit, std::vector<double>&peakPosFitted)
     {
-      MatrixWorkspace_sptr inputW = boost::dynamic_pointer_cast<MatrixWorkspace>
-           (AnalysisDataService::Instance().retrieve(inname));
-      double maxD = inputW->readX(s).back();
+      const MantidVec & X = inputW->readX(s);
+      minD = X.front();
+      maxD = X.back();
       std::vector<double> peakPos = Kernel::VectorHelper::splitStringIntoVector<double>(peakPositions);
-      std::ostringstream mess;
       for (int i = 0; i < static_cast<int>(peakPos.size()); ++i)
       {
-        if(peakPos[i] < maxD) mess << peakPos[i]<<",";
+        if((peakPos[i] > minD) && (peakPos[i] < maxD))
+          peakPosToFit.push_back(peakPos[i]);
       }
-      peakPositions = mess.str();
 
       API::IAlgorithm_sptr findpeaks = createSubAlgorithm("FindPeaks",0.0,0.2, false);
       findpeaks->setProperty("InputWorkspace", inputW);
@@ -276,28 +322,22 @@ namespace Mantid
       findpeaks->setProperty("WorkspaceIndex",static_cast<int>(s));
   
       //Get the specified peak positions, which is optional
-      findpeaks->setProperty("PeakPositions", peakPositions);
+      findpeaks->setProperty("PeakPositions", peakPosToFit);
       findpeaks->setProperty<std::string>("BackgroundType", "Linear");
       findpeaks->setProperty<bool>("HighBackground", true);
       findpeaks->setProperty<int>("MinGuessedPeakWidth",4);
       findpeaks->setProperty<int>("MaxGuessedPeakWidth",4);
       findpeaks->executeAsSubAlg();
       ITableWorkspace_sptr peakslist = findpeaks->getProperty("PeaksList");
-      peakPos = Kernel::VectorHelper::splitStringIntoVector<double>(peakPositions);
-      double errsum = 0.0;
       for (size_t i = 0; i < peakslist->rowCount(); ++i)
       {
         // Get references to the data
-        const double centre = peakslist->getRef<double>("centre",i);
-        //See formula in AlignDetectors
-        double offsetAD = offset*peakPos[i]/(1+offset);
-        if(centre > 0 && centre < maxD) 
-          errsum += std::fabs(peakPos[i]-(centre+offsetAD));
+        peakPosFitted.push_back(peakslist->getRef<double>("centre",i));
       }
+      nparams = peakPosFitted.size();
       peakPos.clear();
-      return errsum;
+      return;
     }
-
 
   } // namespace Algorithm
 } // namespace Mantid

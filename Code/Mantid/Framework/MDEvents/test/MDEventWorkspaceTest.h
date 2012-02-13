@@ -147,6 +147,22 @@ public:
   }
 
   //-------------------------------------------------------------------------------------
+  /** Create several IMDIterators to run them in parallel */
+  void test_createIterators()
+  {
+    MDEventWorkspace3 * ew = new MDEventWorkspace3();
+    BoxController_sptr bc = ew->getBoxController();
+    bc->setSplitInto(4);
+    ew->splitBox();
+    std::vector<IMDIterator *> iterators = ew->createIterators(3);
+    TS_ASSERT_EQUALS(iterators.size(), 3);
+
+    TS_ASSERT_EQUALS(iterators[0]->getDataSize(), 21);
+    TS_ASSERT_EQUALS(iterators[1]->getDataSize(), 21);
+    TS_ASSERT_EQUALS(iterators[2]->getDataSize(), 22);
+  }
+
+  //-------------------------------------------------------------------------------------
   /** Method that makes a table workspace for use in MantidPlot */
   void test_makeBoxTable()
   {
@@ -168,10 +184,10 @@ public:
     coord_t coords4[3] = {2, 2, 4.1};
     ew->addEvent(MDLeanEvent<3>(2.0, 2.0, coords2));
     ew->refreshCache();
-    TSM_ASSERT_DELTA("A regular box with a single event", ew->getSignalAtCoord(coords1), 1.0, 1e-5);
-    TSM_ASSERT_DELTA("The box with 2 events", ew->getSignalAtCoord(coords2), 3.0, 1e-5);
-    TSM_ASSERT("Out of bounds returns NAN", boost::math::isnan( ew->getSignalAtCoord(coords3) ) );
-    TSM_ASSERT("Out of bounds returns NAN", boost::math::isnan( ew->getSignalAtCoord(coords4) ) );
+    TSM_ASSERT_DELTA("A regular box with a single event", ew->getSignalAtCoord(coords1, Mantid::API::NoNormalization), 1.0, 1e-5);
+    TSM_ASSERT_DELTA("The box with 2 events", ew->getSignalAtCoord(coords2, Mantid::API::NoNormalization), 3.0, 1e-5);
+    TSM_ASSERT("Out of bounds returns NAN", boost::math::isnan( ew->getSignalAtCoord(coords3, Mantid::API::NoNormalization) ) );
+    TSM_ASSERT("Out of bounds returns NAN", boost::math::isnan( ew->getSignalAtCoord(coords4, Mantid::API::NoNormalization) ) );
   }
 
   //-------------------------------------------------------------------------------------

@@ -184,7 +184,7 @@ void CalMuonDeadTime::exec()
     ss << "name=LinearBackground,A0=" << in_bg0 << ",A1=" << in_bg1;
     std::string function = ss.str();
 
-    fit->setProperty("Function", function);
+    fit->setPropertyValue("Function", function);
     fit->executeAsSubAlg();
 
     std::string fitStatus = fit->getProperty("OutputStatus");

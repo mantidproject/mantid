@@ -64,7 +64,8 @@ namespace MDEvents
       return m_length;
     }
 
-    virtual Mantid::API::IMDIterator* createIterator(Mantid::Geometry::MDImplicitFunction * function = NULL) const;
+    virtual std::vector<Mantid::API::IMDIterator*> createIterators(size_t suggestedNumCores = 1,
+        Mantid::Geometry::MDImplicitFunction * function = NULL) const;
 
     virtual void getLinePlot(const Mantid::Kernel::VMD & start, const Mantid::Kernel::VMD & end,
         Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y, std::vector<signal_t> & e) const;
@@ -148,7 +149,7 @@ namespace MDEvents
     Mantid::Kernel::VMD getCenter(size_t linearIndex) const;
 
     /// Returns the (normalized) signal at a given coordinates
-    signal_t getSignalAtCoord(const coord_t * coords) const;
+    signal_t getSignalAtCoord(const coord_t * coords, const Mantid::API::MDNormalization & normalization) const;
 
     /// Sets the signal at the specified index.
     void setSignalAt(size_t index, signal_t value)

@@ -317,11 +317,11 @@ void SequentialFitDialog::accept()
   std::string funStr;
   if (m_fitBrowser->m_compositeFunction->nFunctions() > 1)
   {
-    funStr = *m_fitBrowser->m_compositeFunction;
+    funStr = m_fitBrowser->m_compositeFunction->asString();
   }
   else
   {
-    funStr = *(m_fitBrowser->m_compositeFunction->getFunction(0));
+    funStr = (m_fitBrowser->m_compositeFunction->getFunction(0))->asString();
   }
 
   Mantid::API::IAlgorithm_sptr alg = 

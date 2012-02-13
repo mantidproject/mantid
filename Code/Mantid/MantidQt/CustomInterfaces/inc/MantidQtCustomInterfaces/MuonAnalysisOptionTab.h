@@ -62,56 +62,80 @@ class MuonAnalysisOptionTab : public QWidget
 public:
   /// Constructor
   MuonAnalysisOptionTab(Ui::MuonAnalysis& uiForm, const QString& group) : m_uiForm(uiForm), m_settingsGroup(group) {}
+
   /// Initialise the layout of Muon Analysis.
   void initLayout();
+
   /// When no data loaded set various buttons etc to inactive
   void noDataAvailable();
+
   /// When data loaded set various buttons etc to active
   void nowDataAvailable();
 
+
 public slots:
-  ///
+  /// Set the run time in muon analysis and save into settings.
   void runTimeComboBox(int index);
-  ///
-  void runTimeAxisStartAtInput();
-  ///
-  void runTimeAxisFinishAtInput();
-  ///
-  void runyAxisMinimumInput();
-  ///
-  void runyAxisMaximumInput();
-  ///
+
+  /// Enable/Disable editing of Y axis and save the setting.
   void runyAxisAutoscale(bool state);
-  ///
+
+  /// Set whether the user can see and edit the rebin steps. Also saves setting.
   void runRebinComboBox(int index);
-  ///
-  void runOptionStepSizeText();
+
 
 signals:
-  ///
+  /// Update the plot because something has changed.
   void settingsTabUpdatePlot();
 
+
 private:
-  ///
+  /// The Muon Analysis UI file.
   Ui::MuonAnalysis& m_uiForm;
+  
   /// group defaults are saved to
   const QString& m_settingsGroup;
 
-private slots: 
-  ///
+
+private slots:  
+  /// Save the settings for time axis start and validate the entry.
+  void runTimeAxisStartAtInput();
+
+  /// Save the settings for time axis end and validate the entry.
+  void runTimeAxisFinishAtInput();
+
+  /// Save the settings for Y axis min and validate the entry.
+  void runyAxisMinimumInput();
+
+  /// Save the settings for Y axis max and validate the entry.
+  void runyAxisMaximumInput();
+
+  /// Save the settings for rebin steps and validate the entry.
+  void runOptionStepSizeText();
+
+  /// Open the Muon Analysis Plotting help (Wiki).
   void muonAnalysisHelpSettingsClicked();
-  ///
+  
+  /// Save the settings of plot creation.
   void plotCreationChanged(int);
-  ///
+  
+  /// Save the settings of plot type.
   void plotTypeChanged(int);
-  ///
+  
+  /// Save the settings of whether to show error bars.
   void errorBarsChanged(bool);
-  ///
+  
+  /// Save the settings of whether to show the toolbars.
   void toolbarsChanged(bool);
-  ///
+
+  /// Validate the Y minimum.
   void validateYMin();
-  ///
+  
+  /// Validate the Y maximum.
   void validateYMax();
+  
+  /// Opens the managed directory dialog for easier access for the user.
+  void openDirectoryDialog();
 };
 
 }

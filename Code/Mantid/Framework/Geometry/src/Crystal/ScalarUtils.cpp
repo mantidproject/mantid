@@ -75,13 +75,17 @@ static const std::string BRAVAIS_CENTERING[15] =
  *  @param UB         The lattice parameters for this UB matrix and matrices
  *                    related to it by reflecting pairs of sides, are 
  *                    used to form the list of possible conventional cells.
+ *  @param best_only  If true, only include the best form for each Bravais
+ *                    lattice.
  *
  *  @return a vector of conventional cell info objects, corresponding to the
  *          best matching forms for UB and cells related to UB by reflections
  *          of pairs of cell edges.
  */
 
-std::vector<ConventionalCell> ScalarUtils::GetCells( const DblMatrix & UB )
+std::vector<ConventionalCell> ScalarUtils::GetCells( 
+                                                  const DblMatrix & UB,
+                                                        bool        best_only )
 {
   std::vector<ConventionalCell> result;
   std::vector<ConventionalCell> temp;
@@ -91,7 +95,12 @@ std::vector<ConventionalCell> ScalarUtils::GetCells( const DblMatrix & UB )
   {
     std::vector<ConventionalCell>
                  temp = GetCells( UB, BRAVAIS_TYPE[i], BRAVAIS_CENTERING[i] );
-
+    if ( best_only )
+    {
+      ConventionalCell info = GetCellBestError( temp, true );
+      temp.clear();
+      temp.push_back( info );
+    }
     for ( size_t k = 0; k < temp.size(); k++ )
       AddIfBest( result, temp[k] );
   }

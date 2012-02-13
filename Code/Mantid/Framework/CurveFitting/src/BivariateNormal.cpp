@@ -14,10 +14,12 @@
 #include <cstdio>
 
 using namespace Mantid::API;
+
 namespace Mantid
 {
   namespace CurveFitting
   {
+
 DECLARE_FUNCTION(BivariateNormal)
 
 // Indicies into Attrib array( local variable in initCommon
@@ -62,78 +64,71 @@ BivariateNormal::~BivariateNormal()
     delete BackConstraint;
 
   if (!MeanxConstraint)
-    delete MeanxConstraint;
+      delete MeanxConstraint;
 
   if (!MeanyConstraint)
-    delete MeanyConstraint;
+      delete MeanyConstraint;
 
   if (!IntensityConstraint)
-    delete IntensityConstraint;
+      delete IntensityConstraint;
 
-}
+ }
+    // overwrite IFunction base class methods
 
+ void BivariateNormal::functionMW(double *out, const double *xValues, const size_t nData) const
+ {
 
+   UNUSED_ARG(xValues);
+   UNUSED_ARG(nData);
 
-void BivariateNormal::functionMW(double *out, const double *xValues, const size_t nData)const
-{
+   double coefNorm, expCoeffx2, expCoeffy2, expCoeffxy;
+   int NCells;
+   bool isNaNs;
+   API::MatrixWorkspace_const_sptr ws = getMatrixWorkspace();
+   MantidVec D = ws->dataY(0);
+   MantidVec X = ws->dataY(1);
+   MantidVec Y = ws->dataY(2);
 
-  UNUSED_ARG(xValues);
-  UNUSED_ARG( nData);
+   initCoeff(D, X, Y, coefNorm, expCoeffx2, expCoeffy2, expCoeffxy, NCells);
 
-  double coefNorm, expCoeffx2, expCoeffy2, expCoeffxy;
-  int NCells;
-  bool isNaNs;
-  API::MatrixWorkspace_const_sptr  ws= getMatrixWorkspace();
-  MantidVec D =ws->dataY(0);
-  MantidVec X =ws->dataY(1);
-  MantidVec Y =ws->dataY(2);
+   double Background = getParameter(IBACK);
+   double Intensity = getParameter(ITINTENS);
+   double Xmean = getParameter(IXMEAN);
+   double Ymean = getParameter(IYMEAN);
+   std::ostringstream inf;
 
-  initCoeff( D, X, Y, coefNorm,  expCoeffx2, expCoeffy2,  expCoeffxy,
-                NCells);
+   int x = 0;
+   isNaNs = false;
+   double chiSq = 0;
+   inf << "F Parameters=";
+   for (size_t k = 0; k < nParams(); k++)
+     inf << "," << getParameter(k);
+   inf << std::endl;
 
-
-
-  double Background = getParameter(IBACK);
-  double Intensity = getParameter(ITINTENS);
-  double Xmean = getParameter(IXMEAN);
-  double Ymean = getParameter(IYMEAN);
-  std::ostringstream inf;
-
-  int x=0;
-  isNaNs = false;
-  double chiSq=0;
-  inf << "F Parameters=" ;
-  for( size_t k=0; k < nParams() ;k++)
-    inf<<","<<getParameter(k);
-  inf<<std::endl;
-
-  for( int i=0; i< NCells; i++)
-  {
-     if( isNaNs)
-        out[x] =10000;
+   for (int i = 0; i < NCells; i++)
+   {
+     if (isNaNs)
+       out[x] = 10000;
      else
      {
-        double dx = X[i] - Xmean;
-        double dy = Y[i] - Ymean;
-        out[x] = Background + coefNorm * Intensity * 
-             exp(expCoeffx2 * dx * dx + expCoeffxy * dx * dy + expCoeffy2 * dy * dy);
-        
-      	if( out[x] !=out[x])
-	      {
-	        out[x]=100000;
-	        isNaNs=true;
-	       }
-        
-      }
-      if(X[i] >15 &&X[i]<19 &&Y[i]<14 && Y[i]>10)
-        inf <<"   out["<<Y[i]<<","<<X[i]<<"]="<<out[i]<<std::endl;
-       chiSq += (D[i]-out[i])*(D[i]-out[i]);
-       x++;
-  }
+       double dx = X[i] - Xmean;
+       double dy = Y[i] - Ymean;
+       out[x] = Background + coefNorm * Intensity * exp(expCoeffx2 * dx * dx + expCoeffxy * dx * dy
+           + expCoeffy2 * dy * dy);
+       if (out[x] != out[x])
+       {
+         out[x] = 100000;
+         isNaNs = true;
+       }
 
-  inf <<"    chiSq ="<<chiSq<<std::endl;
-  g_log.debug( inf.str());
-}
+     }
+
+     x++;
+   }
+
+   inf << "    chiSq =" << chiSq << std::endl;
+   g_log.debug(inf.str());
+ }
 
 
 
@@ -145,7 +140,7 @@ void BivariateNormal::functionDerivMW(API::Jacobian *out, const double *xValues,
   initCommon();
 
   std::ostringstream inf;
-  inf << "***D Parameters=" ;
+  inf << "***Parameters=" ;
   for( size_t k=0; k < nParams();k++)
     inf << "," << getParameter(k);
   inf << std::endl;
@@ -215,8 +210,7 @@ void BivariateNormal::functionDerivMW(API::Jacobian *out, const double *xValues,
           * (r - LastParams[IYMEAN]) * (r - LastParams[IYMEAN])));
 
       //out->set(x,7,0);
-    }
-
+   }
 }
 
 void BivariateNormal::init()
@@ -374,7 +368,6 @@ void BivariateNormal::initCommon()
         CommonsOK = true;
       }
 
-
   if (LastParams[IVXX] < 0)
   {
     ParamsOK = false;
@@ -421,7 +414,6 @@ void BivariateNormal::initCommon()
 
   }
 
-
 void BivariateNormal::initCoeff( MantidVec &D,
                                  MantidVec &X,
                                  MantidVec &Y,
@@ -444,5 +436,5 @@ void BivariateNormal::initCoeff( MantidVec &D,
    }
 
 
-}//namespace curveFitting
-}//namespaceMantid
+  }//namespace curveFitting
+  }//namespaceMantid

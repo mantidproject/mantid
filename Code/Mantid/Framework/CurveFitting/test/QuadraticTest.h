@@ -54,13 +54,13 @@ public:
 
 
     // set up gaussian fitting function
-    Quadratic* quad = new Quadratic();
-    quad->initialize();
+    Quadratic quad;
+    quad.initialize();
 
-    quad->setParameter("A0",1.0);
+    quad.setParameter("A0",1.0);
 
     //alg2.setFunction(quad);
-    alg2.setPropertyValue("Function",*quad);
+    alg2.setPropertyValue("Function",quad.asString());
 
 
     // Set which spectrum to fit against and initial starting values

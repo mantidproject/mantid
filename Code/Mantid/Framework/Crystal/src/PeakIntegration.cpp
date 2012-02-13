@@ -47,12 +47,14 @@ namespace Mantid
 
     /// Constructor
     PeakIntegration::PeakIntegration() :
-      API::Algorithm()
+      API::Algorithm(), pixel_to_wi(NULL)
     {}
 
     /// Destructor
     PeakIntegration::~PeakIntegration()
-    {}
+    {
+      delete pixel_to_wi;
+    }
 
     /** Initialisation method. Declares properties to be used in algorithm.
      *
@@ -279,7 +281,7 @@ namespace Mantid
           double Kappa = 46.0;
           std::ostringstream fun_str;
           fun_str << "name=IkedaCarpenterPV,I="<<peakHeight<<",Alpha0="<<Alpha0<<",Alpha1="<<Alpha1<<",Beta0="<<Beta0<<",Kappa="<<Kappa<<",SigmaSquared="<<SigmaSquared<<",Gamma="<<Gamma<<",X0="<<peakLoc;
-          fit_alg->setProperty("Function", fun_str.str());
+          fit_alg->setPropertyValue("Function", fun_str.str());
           if(Alpha0 != 1.6 || Alpha1 != 1.5 || Beta0 != 31.9 || Kappa != 46.0)
           {
             std::ostringstream tie_str;

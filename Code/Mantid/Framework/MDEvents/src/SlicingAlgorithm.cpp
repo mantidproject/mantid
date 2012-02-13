@@ -84,7 +84,7 @@ namespace MDEvents
     setPropertyGroup("Origin", "Non-Aligned Binning");
     setPropertyGroup("ForceOrthogonal", "Non-Aligned Binning");
     setPropertySettings("Origin", ps->clone() );
-    setPropertySettings("ForceOrthogonal", ps->clone() );
+    setPropertySettings("ForceOrthogonal", ps );
 
   }
 
@@ -446,8 +446,8 @@ namespace MDEvents
         m_dimensionToBinFrom, origin, scaling);
 
     // Transformation original->binned. There is no offset or scaling!
-    std::vector<double> unitScaling(m_outD, 1.0);
-    std::vector<double> zeroOrigin(m_outD, 0.0);
+    std::vector<coord_t> unitScaling(m_outD, 1.0);
+    std::vector<coord_t> zeroOrigin(m_outD, 0.0);
     m_transformFromOriginal = new CoordTransformAligned(inD, m_outD,
         m_dimensionToBinFrom, zeroOrigin, unitScaling);
 

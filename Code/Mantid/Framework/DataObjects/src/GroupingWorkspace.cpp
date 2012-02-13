@@ -24,6 +24,15 @@ namespace DataObjects
   {
   }
 
+  /** Constructor, buiding with give dimensions
+   * @param numvectors: input size of the vector/histogram number for this workspace
+   * @return created GroupingWorkspace
+   */
+  GroupingWorkspace::GroupingWorkspace(size_t numvectors)
+  {
+    this->init(numvectors, 1, 1);
+  }
+
   //----------------------------------------------------------------------------------------------
   /** Constructor, building from an instrument
    *

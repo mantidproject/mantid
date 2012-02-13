@@ -102,7 +102,9 @@ public slots:
   void helpLineViewer();
   void setColorScaleAutoFull();
   void setColorScaleAutoSlice();
+  void setTransparentZeros(bool transparent);
   void setFastRender(bool fast);
+  void changeNormalization();
   // Slots that will be automatically connected via QMetaObject.connectSlotsByName
   void on_btnClearLine_clicked();
   QPixmap getImage();
@@ -124,6 +126,7 @@ private:
   void updateDimensionSliceWidgets();
   void resetAxis(int axis, Mantid::Geometry::IMDDimension_const_sptr dim);
   QwtDoubleInterval getRange(Mantid::API::IMDIterator * it);
+  QwtDoubleInterval getRange(std::vector<Mantid::API::IMDIterator *> iterators);
 
   void findRangeFull();
   void findRangeSlice();
@@ -196,6 +199,10 @@ private:
   /// Menus
   QMenu *m_menuColorOptions, *m_menuView, *m_menuHelp, *m_menuLine, *m_menuFile;
   QAction *m_actionFileClose;
+  QAction *m_actionTransparentZeros;
+  QAction *m_actionNormalizeNone;
+  QAction *m_actionNormalizeVolume;
+  QAction *m_actionNormalizeNumEvents;
 
   /// Synced menu/buttons
   MantidQt::API::SyncedCheckboxes *m_syncLineMode, *m_syncSnapToGrid;

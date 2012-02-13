@@ -43,17 +43,28 @@ class AnalysisDataServiceTest(unittest.TestCase):
         del AnalysisDataService.Instance()[wsname]
         self.assertEquals(len(AnalysisDataService.Instance()), current_len - 1)
     
+    def do_check_for_matrix_workspace_type(self, workspace):
+        self.assertTrue(isinstance(workspace, MatrixWorkspace))
+        self.assertNotEquals(workspace.getName(), '')
+        self.assertTrue(hasattr(workspace, 'getNumberHistograms'))
+        self.assertTrue(hasattr(workspace, 'getMemorySize'))
+
+    
+    def test_retrieve_gives_back_derived_type_not_DataItem(self):
+        wsname = 'ADSTest_test_retrieve_gives_back_derived_type_not_DataItem'
+        self._run_createws(wsname)
+        self.do_check_for_matrix_workspace_type(AnalysisDataService.Instance().retrieve(wsname))
+        AnalysisDataService.Instance().remove(wsname)
+    
     def test_key_operator_does_same_as_retrieve(self):
         wsname = 'ADSTest_test_key_operator_does_same_as_retrieve'
         self._run_createws(wsname)
         ws_from_op = AnalysisDataService.Instance()[wsname]
         ws_from_method = AnalysisDataService.Instance().retrieve(wsname)
         
-        # Type check
-        self.assertTrue(isinstance(ws_from_op, MatrixWorkspace))
-        self.assertTrue(isinstance(ws_from_method, MatrixWorkspace))
-
-        self.assertNotEquals(ws_from_op.name(), '')
+        self.do_check_for_matrix_workspace_type(ws_from_op)
+        self.do_check_for_matrix_workspace_type(ws_from_method)
+        
         self.assertEquals(ws_from_op.name(), ws_from_method.name())
         self.assertEquals(ws_from_op.getMemorySize(), ws_from_method.getMemorySize())
 

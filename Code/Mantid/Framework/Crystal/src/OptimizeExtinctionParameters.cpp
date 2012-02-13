@@ -184,7 +184,7 @@ namespace Mantid
       // Output summary to log file
       std::string reportOfDiffractionEventCalibrateDetectors = gsl_strerror(status);
       //g_log.debug() << 
-      if(type.compare(5,2,"II")==0)gsl_vector_get (s->x, 0);
+      if(type.compare(5,2,"II")==0)r_crystallite = gsl_vector_get (s->x, 0);
       else mosaic = gsl_vector_get (s->x, 0);
       if(nopt>1)r_crystallite = gsl_vector_get (s->x, 1);
       std::cout <<

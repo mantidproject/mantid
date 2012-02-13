@@ -94,7 +94,7 @@ void MaskDetectorsIf::exec()
 			{
 			  std::set<detid_t>::const_iterator it = dets.begin();
 			  for (; it!=dets.end(); ++it)
-			    umap.insert(std::make_pair<detid_t,bool>(*it,select_on));
+			    umap.insert(std::make_pair(*it,select_on));
 			}
 		}
 		double p=static_cast<double>(i)/static_cast<double>(nspec);

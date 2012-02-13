@@ -15,9 +15,9 @@ namespace MDEvents
       : m_signal(0), m_errorSquared(0)
   {
     for (size_t d=0; d<nd; ++d)
-      m_min[d] = coord_t_min;
+      m_min[d] = -std::numeric_limits<coord_t>::max();
     for (size_t d=0; d<nd; ++d)
-      m_max[d] = coord_t_max;
+      m_max[d] = +std::numeric_limits<coord_t>::max();
   }
     
 

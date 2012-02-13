@@ -57,9 +57,6 @@ void MuonRemoveExpDecay::exec()
   //Create output workspace with same dimensions as input
   API::MatrixWorkspace_sptr outputWS = API::WorkspaceFactory::Instance().create(inputWS);
 
-  // to hold normalised workspace or input workspace
-  API::MatrixWorkspace_sptr forNormalisationWS = API::WorkspaceFactory::Instance().create(inputWS);
-
   if (Spectra.empty())
   {
     Progress prog(this, 0.0, 1.0, numSpectra);
@@ -69,7 +66,8 @@ void MuonRemoveExpDecay::exec()
     {
 			PARALLEL_START_INTERUPT_REGION
       removeDecay(inputWS->readX(i), inputWS->readY(i), outputWS->dataY(i));
-      removeDecay(inputWS->readX(i), inputWS->readE(i), outputWS->dataE(i));
+      removeDecay(inputWS->readX(i), inputWS->readE(i), outputWS->dataE(i)); 
+      outputWS->dataX(i) = inputWS->readX(i);   
 
       double normConst = calNormalisationConst(outputWS, i);
 
@@ -179,7 +177,7 @@ double MuonRemoveExpDecay::calNormalisationConst(API::MatrixWorkspace_sptr ws, i
     ss << "name=LinearBackground,A0=" << ws->readY(wsIndex)[0] << ",A1=" << 0.0;
     std::string function = ss.str();
 
-    fit->setProperty("Function", function);
+    fit->setPropertyValue("Function", function);
     fit->setProperty("Ties", "A1=0.0");
     fit->execute();
 

@@ -84,8 +84,27 @@ public:
     Mantid::API::MDNormalization , std::vector<Mantid::coord_t> & , std::vector<Mantid::signal_t> & , std::vector<Mantid::signal_t> & ) const
   {}
 
-  virtual Mantid::API::IMDIterator* createIterator(Mantid::Geometry::MDImplicitFunction * /*function*/ = NULL) const
-  { throw std::runtime_error("Mock createIterator() Not implemented.");
+  virtual std::vector<Mantid::API::IMDIterator*> createIterators(size_t  = 1,
+      Mantid::Geometry::MDImplicitFunction *  = NULL) const
+  {
+    throw std::runtime_error("Not Implemented");
+  }
+
+  virtual Mantid::signal_t getSignalAtCoord(const Mantid::coord_t * , const Mantid::API::MDNormalization & ) const
+  {
+    return 0;
+  }
+
+  //constructor allows a workspace name to be provide.
+  MockIMDWorkspace(std::string name)
+  : IMDWorkspace()
+  {
+    setName(name);
+  }
+
+  MockIMDWorkspace()
+  : IMDWorkspace()
+  {
   }
 
   virtual ~MockIMDWorkspace() {}

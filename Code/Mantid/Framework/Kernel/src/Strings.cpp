@@ -945,6 +945,7 @@ template MANTID_KERNEL_DLL int sectPartNum(std::string&,int&);
 template MANTID_KERNEL_DLL int sectionMCNPX(std::string&,double&);
 
 template MANTID_KERNEL_DLL int convert(const std::string&,double&);
+template MANTID_KERNEL_DLL int convert(const std::string&,float&);
 template MANTID_KERNEL_DLL int convert(const std::string&,std::string&);
 template MANTID_KERNEL_DLL int convert(const std::string&,int&);
 template MANTID_KERNEL_DLL int convert(const std::string&,std::size_t&);
@@ -954,6 +955,7 @@ template MANTID_KERNEL_DLL int convert(const char*,int&);
 template MANTID_KERNEL_DLL int convert(const char*,std::size_t&);
 
 template MANTID_KERNEL_DLL std::string toString(const double value);
+template MANTID_KERNEL_DLL std::string toString(const float value);
 template MANTID_KERNEL_DLL std::string toString(const int value);
 template MANTID_KERNEL_DLL std::string toString(const uint16_t value);
 template MANTID_KERNEL_DLL std::string toString(const size_t value); // Matches uint64_t on Linux 64 & Win 64

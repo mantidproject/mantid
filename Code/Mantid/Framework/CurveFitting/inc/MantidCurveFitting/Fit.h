@@ -79,7 +79,7 @@ namespace Mantid
       void processParameters();
 
       /// Function initialization string
-      std::string m_function_input;
+      boost::shared_ptr<API::IFitFunction> m_function;
 
       friend struct FitData1;
     };

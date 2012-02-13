@@ -542,7 +542,7 @@ public:
     TS_ASSERT_EQUALS(fun->getParameter(2),28.);
     TS_ASSERT_EQUALS(fun->getParameter(3),1.2);
 
-    IFitFunction* fun1 = FunctionFactory::Instance().createInitialized(*fun);
+    IFitFunction* fun1 = FunctionFactory::Instance().createInitialized(fun->asString());
 
     fun1->setParameter(0,0.);
     fun1->setParameter(1,0.);

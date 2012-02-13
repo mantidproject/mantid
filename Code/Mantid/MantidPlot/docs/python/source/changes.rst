@@ -44,13 +44,16 @@ The major differences in the new API are as follows:
     print run.getNumberHistograms()
 
 * The *mtd* object can now only be used to access workspaces from Mantid. In the v1 API there
-  were many additional functions attached to *mtd* such as sendLogMessage, deleteWorkspace. These
+  were many additional functions attached to *mtd* such as *sendLogMessage*, *deleteWorkspace* and *settings*. These
   are no longer available, there replacements are:
   
   * *mtd.sendLogMessage("msg")* -> *logger.information("msg")*
   * *mtd.deleteWorkspace(ws)* -> *DeleteWorkspace(ws)*
+  * *mtd.settings* -> *config*
 
 * *mtd* will now raise an *KeyError* if a workspace does not exist rather than returning *None*
 
 * The *qti* module no longer exists. All user scripts should simply use the *mantidplot* module which contains
   all of the *qti* functionality but adds protection against crashes from closed windows.
+
+* The *getSampleDetails()* function has been removed. It should be replaced with *getRun()*.

@@ -27,13 +27,6 @@ void UnwrappedCylinder::project(double & u, double & v, double & uscale, double 
   vscale = 1.;
 }
 
-void UnwrappedCylinder::calcUV(UnwrappedDetector& udet)
-{
-  Mantid::Kernel::V3D pos = udet.detector->getPos() - m_pos;
-  this->project(udet.u, udet.v, udet.uscale, udet.vscale, pos);
-  calcSize(udet,Mantid::Kernel::V3D(-1,0,0),Mantid::Kernel::V3D(0,1,0));
-
-}
 
 void UnwrappedCylinder::calcRot(const UnwrappedDetector& udet, Mantid::Kernel::Quat& R)const
 {

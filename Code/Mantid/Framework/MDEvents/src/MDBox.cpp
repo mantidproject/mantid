@@ -432,13 +432,13 @@ namespace MDEvents
       for (size_t d=0; d<nd; d++)
       {
         // Total up the coordinate weighted by the signal.
-        centroid[d] += event.getCenter(d) * signal;
+        centroid[d] += event.getCenter(d) * coord_t(signal);
       }
     }
 
     // Normalize by the total signal
     for (size_t d=0; d<nd; d++)
-      centroid[d] /= this->m_signal;
+      centroid[d] /= coord_t(this->m_signal);
   }
 
   //-----------------------------------------------------------------------------------------------

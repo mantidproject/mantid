@@ -1,5 +1,6 @@
 #include "MantidKernel/VMD.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 
 using namespace Mantid::Kernel;
 
@@ -14,11 +15,17 @@ namespace Kernel
   @param v :: the vector to output
   @return the output stream
   */
-std::ostream& operator<<(std::ostream& os, const VMD& v)
-{
-  os << v.toString();
-  return os;
-}
+  std::ostream& operator<<(std::ostream& os, const VMDBase<double>& v)
+  {
+    os << v.toString();
+    return os;
+  }
+
+  std::ostream& operator<<(std::ostream& os, const VMDBase<float>& v)
+  {
+    os << v.toString();
+    return os;
+  }
 
 //-------------------------------------------------------------------------------------------------
 /** Make an orthogonal system with 2 input 3D vectors.
@@ -27,20 +34,21 @@ std::ostream& operator<<(std::ostream& os, const VMD& v)
  * @param vectors :: list of 2 vectors with 3D
  * @return list of 3 vectors
  */
-std::vector<VMD> VMD::makeVectorsOrthogonal(std::vector<VMD> & vectors)
+template<typename TYPE>
+std::vector<VMDBase<TYPE> > VMDBase<TYPE>::makeVectorsOrthogonal(std::vector<VMDBase> & vectors)
 {
   if (vectors.size() != 2)
-    throw std::runtime_error("VMD::makeVectorsOrthogonal(): Need 2 input vectors.");
+    throw std::runtime_error("VMDBase::makeVectorsOrthogonal(): Need 2 input vectors.");
   if (vectors[0].getNumDims() != 3 || vectors[1].getNumDims() != 3)
-    throw std::runtime_error("VMD::makeVectorsOrthogonal(): Need 3D input vectors.");
+    throw std::runtime_error("VMDBase::makeVectorsOrthogonal(): Need 3D input vectors.");
   std::vector<V3D> in, out;
   for (size_t i=0; i<vectors.size(); i++)
     in.push_back( V3D( vectors[i][0], vectors[i][1], vectors[i][2]) );
   out = V3D::makeVectorsOrthogonal(in);
 
-  std::vector<VMD> retVal;
+  std::vector<VMDBase> retVal;
   for (size_t i=0; i<out.size(); i++)
-    retVal.push_back( VMD(out[i]) );
+    retVal.push_back( VMDBase(out[i]) );
   return retVal;
 }
 
@@ -73,29 +81,30 @@ std::vector<VMD> VMD::makeVectorsOrthogonal(std::vector<VMD> & vectors)
  * @throw if the vectors are collinear
  * @return the normal vector
  */
-VMD VMD::getNormalVector(const std::vector<VMD> & vectors)
+template<typename TYPE>
+VMDBase<TYPE> VMDBase<TYPE>::getNormalVector(const std::vector<VMDBase<TYPE> > & vectors)
 {
   if (vectors.size() <= 0)
-    throw std::invalid_argument("VMD::getNormalVector: Must give at least 1 vector");
+    throw std::invalid_argument("VMDBase::getNormalVector: Must give at least 1 vector");
   size_t nd = vectors[0].getNumDims();
   if (nd < 2)
-    throw std::invalid_argument("VMD::getNormalVector: Must have at least 2 dimensions!");
+    throw std::invalid_argument("VMDBase::getNormalVector: Must have at least 2 dimensions!");
   if (vectors.size() != nd-1)
-    throw std::invalid_argument("VMD::getNormalVector: Must have as many N-1 vectors if there are N dimensions.");
+    throw std::invalid_argument("VMDBase::getNormalVector: Must have as many N-1 vectors if there are N dimensions.");
   for (size_t i=0; i < vectors.size(); i++)
     if (vectors[i].getNumDims() != nd)
-      throw std::invalid_argument("VMD::getNormalVector: Inconsistent number of dimensions in the vectors given!");
+      throw std::invalid_argument("VMDBase::getNormalVector: Inconsistent number of dimensions in the vectors given!");
 
   // Start the normal vector
-  VMD normal = VMD(nd);
-  double sign = +1.0;
+  VMDBase normal = VMDBase(nd);
+  TYPE sign = +1.0;
   for (size_t d=0; d<nd; d++)
   {
     // Make the sub-determinant with the columns of every other dimension.
-    Matrix<double> mat(nd-1, nd-1);
+    Matrix<TYPE> mat(nd-1, nd-1);
     for (size_t row=0; row<vectors.size(); row++)
     {
-      VMD vec = vectors[row];
+      VMDBase vec = vectors[row];
       size_t col = 0;
       for (size_t i=0; i < nd; i++)
       {
@@ -107,23 +116,27 @@ VMD VMD::getNormalVector(const std::vector<VMD> & vectors)
       }
     } // Building the matrix rows
 
-    double det = mat.determinant();
+    TYPE det = mat.determinant();
 
     // The determinant of the sub-matrix = the normal at that dimension
     normal[d] = sign * det;
 
     // Sign flips each time
-    sign *= -1.0;
+    sign *= TYPE(-1.0);
   } // each dimension of the normal vector
 
   // Unity normal is better.
   double length = normal.normalize();
   if (length == 0)
-    throw std::runtime_error("VMD::getNormalVector: 0-length normal found. Are your vectors collinear?");
+    throw std::runtime_error("VMDBase::getNormalVector: 0-length normal found. Are your vectors collinear?");
 
   return normal;
 }
 
+
+/// Instantiate VMDBase classes
+template MANTID_KERNEL_DLL class VMDBase<double>;
+template MANTID_KERNEL_DLL class VMDBase<float>;
 
 
 } // namespace Mantid

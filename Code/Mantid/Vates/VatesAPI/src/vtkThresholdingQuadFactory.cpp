@@ -57,7 +57,7 @@ namespace Mantid
       validate();
       //use the successor factory's creation method if this type cannot handle the dimensionality of the workspace.
       const size_t nonIntegratedSize = m_workspace->getNonIntegratedDimensions().size();
-      if(nonIntegratedSize != vtkDataSetFactory::TwoDimensional)
+      if((doesCheckDimensionality() && nonIntegratedSize != vtkDataSetFactory::TwoDimensional))
       {
         return m_successor->create();
       }
@@ -221,7 +221,7 @@ namespace Mantid
       validate();
       // When the workspace can not be handled by this type, take action in the form of delegation.
       const size_t nonIntegratedSize = m_workspace->getNonIntegratedDimensions().size();
-      if(nonIntegratedSize != vtkDataSetFactory::TwoDimensional)
+      if((doesCheckDimensionality() && nonIntegratedSize != vtkDataSetFactory::TwoDimensional))
       {
         if(this->hasSuccessor())
         {

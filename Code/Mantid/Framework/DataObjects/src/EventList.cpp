@@ -4,16 +4,19 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/MultiThreaded.h"
+#include <cfloat>
 #include <functional>
 #include <limits>
 #include <math.h>
+#include <Poco/ScopedLock.h>
 #include <stdexcept>
-#include <cfloat>
 
 using std::ostream;
 using std::runtime_error;
 using std::size_t;
 using std::vector;
+using Mantid::Kernel::Mutex;
 
 namespace Mantid
 {
@@ -785,31 +788,6 @@ namespace DataObjects
   }
 
 
-  // --------------------------------------------------------------------------
-  /** Sort events by TOF */
-  void EventList::sortTof() const
-  {
-    if (this->order == TOF_SORT)
-    {
-      return; // nothing to do
-    }
-    switch (eventType)
-    {
-    case TOF:
-      std::sort(events.begin(), events.end(), compareEventTof<TofEvent>);
-      break;
-    case WEIGHTED:
-      std::sort(weightedEvents.begin(), weightedEvents.end(), compareEventTof<WeightedEvent>);
-      break;
-    case WEIGHTED_NOTIME:
-      std::sort(weightedEventsNoTime.begin(), weightedEventsNoTime.end(), compareEventTof<WeightedEventNoTime>);
-      break;
-    }
-    //Save the order to avoid unnecessary re-sorting.
-    this->order = TOF_SORT;
-  }
-
-
 
 //  // MergeSort from: http://en.literateprograms.org/Merge_sort_%28C_Plus_Plus%29#chunk%20def:merge
 //  template<typename IT, typename VT> void insert(IT begin, IT end, const VT &v)
@@ -1011,6 +989,36 @@ namespace DataObjects
   }
 
 
+
+  // --------------------------------------------------------------------------
+  /** Sort events by TOF in one thread */
+  void EventList::sortTof() const
+  {
+    if (this->order == TOF_SORT)
+      return; // nothing to do
+
+    // Avoid sorting from multiple threads
+    Poco::ScopedLock<Mutex> _lock(m_sortMutex);
+    // If the list was sorted while waiting for the lock, return.
+    if (this->order == TOF_SORT)
+      return;
+
+    switch (eventType)
+    {
+    case TOF:
+      std::sort(events.begin(), events.end(), compareEventTof<TofEvent>);
+      break;
+    case WEIGHTED:
+      std::sort(weightedEvents.begin(), weightedEvents.end(), compareEventTof<WeightedEvent>);
+      break;
+    case WEIGHTED_NOTIME:
+      std::sort(weightedEventsNoTime.begin(), weightedEventsNoTime.end(), compareEventTof<WeightedEventNoTime>);
+      break;
+    }
+    //Save the order to avoid unnecessary re-sorting.
+    this->order = TOF_SORT;
+  }
+
   // --------------------------------------------------------------------------
   /** Sort events by TOF, using two threads.
    *
@@ -1023,9 +1031,14 @@ namespace DataObjects
   void EventList::sortTof2() const
   {
     if (this->order == TOF_SORT)
-    {
       return; // nothing to do
-    }
+
+    // Avoid sorting from multiple threads
+    Poco::ScopedLock<Mutex> _lock(m_sortMutex);
+    // If the list was sorted while waiting for the lock, return.
+    if (this->order == TOF_SORT)
+      return;
+
     switch (eventType)
     {
     case TOF:
@@ -1054,9 +1067,14 @@ namespace DataObjects
   void EventList::sortTof4() const
   {
     if (this->order == TOF_SORT)
-    {
       return; // nothing to do
-    }
+
+    // Avoid sorting from multiple threads
+    Poco::ScopedLock<Mutex> _lock(m_sortMutex);
+    // If the list was sorted while waiting for the lock, return.
+    if (this->order == TOF_SORT)
+      return;
+
     switch (eventType)
     {
     case TOF:
@@ -1079,9 +1097,14 @@ namespace DataObjects
   void EventList::sortPulseTime() const
   {
     if (this->order == PULSETIME_SORT)
-    {
       return; // nothing to do
-    }
+
+    // Avoid sorting from multiple threads
+    Poco::ScopedLock<Mutex> _lock(m_sortMutex);
+    // If the list was sorted while waiting for the lock, return.
+    if (this->order == PULSETIME_SORT)
+      return;
+
     //Perform sort.
     switch (eventType)
     {
@@ -1105,10 +1128,14 @@ namespace DataObjects
    */
   void EventList::sortPulseTimeTOF() const
   {
-    if (this->order == PULSETIMETOF_SORT){
-      // already ordered.
+    if (this->order == PULSETIMETOF_SORT)
+      return; // already ordered.
+
+    // Avoid sorting from multiple threads
+    Poco::ScopedLock<Mutex> _lock(m_sortMutex);
+    // If the list was sorted while waiting for the lock, return.
+    if (this->order == PULSETIMETOF_SORT)
       return;
-    }
 
     switch (eventType)
     {
@@ -1381,6 +1408,7 @@ namespace DataObjects
         if (eOldData)
           delete eOldData;
       }
+      else delete eData;
 
       //And clear up the memory of the old one, if it is dropping out.
       if (yOldData)

@@ -266,6 +266,11 @@ namespace CxxTest
            : cpuStartTime(0), cpuStopTime(0), _o(o), _ostr(ostr), _os(os), stream_redirect(NULL)
         {}
 
+        virtual ~XmlFormatter()
+        {
+          delete _ostr;
+        }
+
         std::list<TestCaseInfo> info;
         std::list<TestCaseInfo>::iterator testcase;
         typedef std::list<ElementInfo>::iterator element_t;

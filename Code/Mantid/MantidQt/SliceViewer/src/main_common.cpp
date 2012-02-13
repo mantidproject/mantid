@@ -128,6 +128,20 @@ IMDWorkspace_sptr makeDemoData(bool binned = false)
         "AlignedDimY", "l, -5, 5, 100",
         "AlignedDimZ", "h, -5, 5, 100");
 
+    FrameworkManager::Instance().exec("LoadEventNexus", 4,
+        "Filename", "CNCS_7860_event.nxs",
+        "OutputWorkspace", "workspace_2d");
+
+    FrameworkManager::Instance().exec("Rebin", 8,
+        "Params", "40e3, 1e3, 70e3",
+        "PreserveEvents", "1",
+        "InputWorkspace", "workspace_2d",
+        "OutputWorkspace", "workspace_2d");
+
+
+
+
+
     return boost::dynamic_pointer_cast<IMDWorkspace>( AnalysisDataService::Instance().retrieve("binned") );
   }
   else

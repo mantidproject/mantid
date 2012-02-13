@@ -21,9 +21,10 @@ namespace MDEvents
    * @param function :: The implicit function to use
    * @return
    */
-  MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(MDHistoWorkspace_const_sptr workspace, Mantid::Geometry::MDImplicitFunction * function)
+  MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(MDHistoWorkspace_const_sptr workspace, Mantid::Geometry::MDImplicitFunction * function,
+      size_t beginPos, size_t endPos)
   {
-    this->init(workspace.get(), function);
+    this->init(workspace.get(), function, beginPos, endPos);
   }
 
   //----------------------------------------------------------------------------------------------
@@ -33,9 +34,10 @@ namespace MDEvents
    * @param function :: The implicit function to use
    * @return
    */
-  MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(const MDHistoWorkspace * workspace, Mantid::Geometry::MDImplicitFunction * function)
+  MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(const MDHistoWorkspace * workspace, Mantid::Geometry::MDImplicitFunction * function,
+      size_t beginPos, size_t endPos)
   {
-    this->init(workspace, function);
+    this->init(workspace, function, beginPos, endPos);
   }
 
   //----------------------------------------------------------------------------------------------
@@ -45,14 +47,23 @@ namespace MDEvents
    * @param function :: implicit function or NULL for none. Gains ownership of the pointer.
    */
   void MDHistoWorkspaceIterator::init(const MDHistoWorkspace * workspace,
-      Mantid::Geometry::MDImplicitFunction * function)
+      Mantid::Geometry::MDImplicitFunction * function,
+      size_t beginPos, size_t endPos)
   {
     m_ws = workspace;
-    m_pos = 0;
-    m_function = function;
     if (m_ws == NULL)
       throw std::invalid_argument("MDHistoWorkspaceIterator::ctor(): NULL workspace given.");
-    m_max = m_ws->getNPoints();
+
+    m_begin = beginPos;
+    m_pos = m_begin;
+    m_function = function;
+
+    m_max = endPos;
+    if (m_max > m_ws->getNPoints())
+      m_max = m_ws->getNPoints();
+    if (m_max < m_pos)
+      throw std::invalid_argument("MDHistoWorkspaceIterator::ctor(): End point given is before the start point.");
+
     m_nd = m_ws->getNumDims();
     m_center = new coord_t[m_nd];
     m_origin = new coord_t[m_nd];
@@ -72,12 +83,16 @@ namespace MDEvents
     }
     Utils::NestedForLoop::SetUpIndexMaker(m_nd, m_indexMaker, m_indexMax);
 
+    // Initialize the current index from the start position.
+    Utils::NestedForLoop::GetIndicesFromLinearIndex(m_nd, m_pos, m_indexMaker, m_indexMax,
+        m_index);
+
     // Make sure that the first iteration is at a point inside the implicit function
     if (m_function)
     {
       // Calculate the center of the 0-th bin
       for (size_t d=0; d<m_nd; d++)
-        m_center[d] = m_origin[d] + (0 + 0.5) * m_binWidth[d];
+        m_center[d] = m_origin[d] + coord_t(0.5) * m_binWidth[d];
       // Skip on if the first point is NOT contained
       if (!m_function->isPointContained(m_center))
         next();
@@ -102,7 +117,7 @@ namespace MDEvents
   /** @return the number of points to be iterated on */
   size_t MDHistoWorkspaceIterator::getDataSize() const
   {
-    return size_t(m_max);
+    return size_t(m_max - m_begin);
   }
 
 
@@ -114,7 +129,7 @@ namespace MDEvents
    */
   void MDHistoWorkspaceIterator::jumpTo(size_t index)
   {
-    m_pos = uint64_t(index);
+    m_pos = uint64_t(index + m_begin);
   }
 
   //----------------------------------------------------------------------------------------------
@@ -141,7 +156,7 @@ namespace MDEvents
         // Calculate the center
         for (size_t d=0; d<m_nd; d++)
         {
-          m_center[d] = m_origin[d] + (double(m_index[d]) + 0.5) * m_binWidth[d];
+          m_center[d] = m_origin[d] + (coord_t(m_index[d]) + coord_t(0.5)) * m_binWidth[d];
 //          std::cout << m_center[d] << ",";
         }
 //        std::cout<<std::endl;
@@ -169,19 +184,45 @@ namespace MDEvents
   /// Returns the normalized signal for this box
   signal_t MDHistoWorkspaceIterator::getNormalizedSignal() const
   {
-    return m_ws->getSignalNormalizedAt(m_pos);
+    // What is our normalization factor?
+    switch (m_normalization)
+    {
+    case NoNormalization:
+      return m_ws->getSignalAt(m_pos);
+    case VolumeNormalization:
+      return m_ws->getSignalAt(m_pos) * m_ws->getInverseVolume();
+    case NumEventsNormalization:
+      /// TODO: # of events normalization
+      return m_ws->getSignalAt(m_pos);
+    }
+    // Should not reach here
+    return std::numeric_limits<signal_t>::quiet_NaN();
   }
 
+  //----------------------------------------------------------------------------------------------
   /// Returns the normalized error for this box
   signal_t MDHistoWorkspaceIterator::getNormalizedError() const
   {
-    return m_ws->getErrorNormalizedAt(m_pos);
+    // What is our normalization factor?
+    switch (m_normalization)
+    {
+    case NoNormalization:
+      return m_ws->getErrorAt(m_pos);
+    case VolumeNormalization:
+      return m_ws->getErrorAt(m_pos) * m_ws->getInverseVolume();
+    case NumEventsNormalization:
+      /// TODO: # of events normalization
+      return m_ws->getErrorAt(m_pos);
+    }
+    // Should not reach here
+    return std::numeric_limits<signal_t>::quiet_NaN();
   }
 
+  //----------------------------------------------------------------------------------------------
   /// Returns the signal for this box, same as innerSignal
   signal_t MDHistoWorkspaceIterator::getSignal() const
   {
-    return m_ws->getSignalAt(m_pos);;
+    return m_ws->getSignalAt(m_pos);
   }
 
   /// Returns the error for this box, same as innerError
@@ -214,7 +255,7 @@ namespace MDEvents
     Utils::NestedForLoop::GetIndicesFromLinearIndex(m_nd, m_pos, m_indexMaker, m_indexMax, m_index);
     // Find the center
     for (size_t d=0; d<m_nd; d++)
-      m_center[d] = m_origin[d] + (double(m_index[d]) + 0.5) * m_binWidth[d];
+      m_center[d] = m_origin[d] + (coord_t(m_index[d]) + coord_t(0.5)) * m_binWidth[d];
     return VMD(m_nd, m_center);
   }
 

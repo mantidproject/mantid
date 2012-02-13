@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IFitFunction.h"
+#include "MantidAPI/IMDWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/VMD.h"
@@ -49,19 +50,23 @@ class IMDWorkspace;
   class MANTID_API_DLL IMDIterator
   {
   public:
+    IMDIterator();
+
+    void setNormalization(Mantid::API::MDNormalization normalization);
+    Mantid::API::MDNormalization getNormalization() const;
 
     /// Get the size of the data (number of entries that will be iterated through)
     virtual size_t getDataSize() const = 0;
+
+    /// Advance to the next cell. If the current cell is the last one in the workspace
+    /// do nothing and return false.
+    virtual bool next() = 0;
 
     /// Is the current position of the iterator valid?
     virtual bool valid() const = 0;
 
     /// Jump to the index^th cell.
     virtual void jumpTo(size_t index) = 0;
-
-    /// Advance to the next cell. If the current cell is the last one in the workspace
-    /// do nothing and return false.
-    virtual bool next() = 0;
 
     /// Advance, skipping a certain number of cells.
     virtual bool next(size_t skip) = 0;
@@ -105,6 +110,9 @@ class IMDWorkspace;
     /// Returns the error of a given event
     virtual signal_t getInnerError(size_t index) const = 0;
 
+  protected:
+    /// Normalization method for getNormalizedSignal()
+    Mantid::API::MDNormalization m_normalization;
 
   };
 

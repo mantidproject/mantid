@@ -101,7 +101,7 @@ void SaveNexus::init()
   // declareProperty("EntryNumber", Mantid::EMPTY_INT(), mustBePositive,
   //  "(Not implemented yet) The index number of the workspace within the Nexus file\n"
   // "(default leave unchanged)" );
-  declareProperty("WorkspaceIndexMin", 0, mustBePositive->clone(),
+  declareProperty("WorkspaceIndexMin", 0, mustBePositive,
       "Number of first WorkspaceIndex to read, only for single period data.\n"
         "Not yet implemented");
   declareProperty("WorkspaceIndexMax", Mantid::EMPTY_INT(), mustBePositive->clone(),

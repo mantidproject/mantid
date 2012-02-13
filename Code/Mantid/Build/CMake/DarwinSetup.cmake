@@ -24,8 +24,8 @@ endif ()
 ###########################################################################
 # Force 64-bit compiler as that's all we support
 ###########################################################################
-set ( CMAKE_C_FLAGS ${CMAKE_C_FLAGS} -m64 )
-set ( CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -m64 )
+set ( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m64" )
+set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64" )
 
 ###########################################################################
 # Mac-specific installation setup

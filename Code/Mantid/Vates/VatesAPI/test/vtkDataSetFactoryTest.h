@@ -64,6 +64,35 @@ public:
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(pSuccessor));
   }
 
+  void testEnumValues()
+  {
+    using Mantid::VATES::vtkDataSetFactory;
+    int oneD = vtkDataSetFactory::OneDimensional;
+    int twoD = vtkDataSetFactory::TwoDimensional;
+    int threeD = vtkDataSetFactory::ThreeDimensional;
+    int fourD = vtkDataSetFactory::FourDimensional;
+    TS_ASSERT_EQUALS(1, oneD);
+    TS_ASSERT_EQUALS(2, twoD);
+    TS_ASSERT_EQUALS(3, threeD);
+    TS_ASSERT_EQUALS(4, fourD);
+  }
+
+  void testCheckDimensionalityByDefault()
+  {
+    MockvtkDataSetFactory factory;
+    TS_ASSERT(factory.doesCheckDimensionality());
+  }
+
+  void testSetCheckDimensionality()
+  {
+    MockvtkDataSetFactory factory;
+    factory.setCheckDimensionality(false);
+    TS_ASSERT(!factory.doesCheckDimensionality());
+    factory.setCheckDimensionality(true);
+    TS_ASSERT(factory.doesCheckDimensionality());
+  }
+
+
 };
 
 #endif

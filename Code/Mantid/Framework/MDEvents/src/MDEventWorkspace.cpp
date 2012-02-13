@@ -199,24 +199,54 @@ namespace MDEvents
 
   //-----------------------------------------------------------------------------------------------
   /** Creates a new iterator pointing to the first cell (box) in the workspace
+   *
+   * @param suggestedNumCores :: split iterator over this many cores.
    * @param function :: Optional MDImplicitFunction limiting the iterator
+   * @param normalization :: how signal will be normalized
    */
   TMDE(
-  Mantid::API::IMDIterator*  MDEventWorkspace)::createIterator(Mantid::Geometry::MDImplicitFunction * function) const
+  std::vector<Mantid::API::IMDIterator*>  MDEventWorkspace)::createIterators(size_t suggestedNumCores,
+      Mantid::Geometry::MDImplicitFunction * function) const
   {
+    // Get all the boxes in this workspaces
+    std::vector<IMDBox<MDE,nd> *> boxes;
     // TODO: Should this be leaf only? Depends on most common use case
-    return new MDBoxIterator<MDE,nd>(data, 10000, true, function);
+    if (function)
+      this->data->getBoxes(boxes, 10000, true, function);
+    else
+      this->data->getBoxes(boxes, 10000, true);
+
+    // Calculate the right number of cores
+    size_t numCores = suggestedNumCores;
+    if (!this->threadSafe()) numCores = 1;
+    size_t numElements = boxes.size();
+    if (numCores > numElements)  numCores = numElements;
+    if (numCores < 1) numCores = 1;
+
+    // Create one iterator per core, splitting evenly amongst spectra
+    std::vector<IMDIterator*> out;
+    for (size_t i=0; i<numCores; i++)
+    {
+      size_t begin = (i * numElements) / numCores;
+      size_t end = ((i+1) * numElements) / numCores;
+      if (end > numElements)
+        end = numElements;
+      out.push_back(new MDBoxIterator<MDE,nd>(boxes, begin, end));
+    }
+    return out;
   }
+
 
 
   //-----------------------------------------------------------------------------------------------
   /** Returns the (normalized) signal at a given coordinates
    *
    * @param coords :: nd-sized array of coordinates
+   * @param normalization :: how to normalize the signal.
    * @return the normalized signal of the box at the given coordinates. NaN if out of bounds
    */
   TMDE(
-  signal_t MDEventWorkspace)::getSignalAtCoord(const coord_t * coords) const
+  signal_t MDEventWorkspace)::getSignalAtCoord(const coord_t * coords, const Mantid::API::MDNormalization & normalization) const
   {
     // Do an initial bounds check
     for (size_t d=0; d<nd; d++)
@@ -229,7 +259,20 @@ namespace MDEvents
     // If you got here, then the point is in the workspace.
     const IMDBox<MDE,nd> * box = data->getBoxAtCoord(coords);
     if (box)
-      return box->getSignalNormalized();
+    {
+      // What is our normalization factor?
+      switch (normalization)
+      {
+      case NoNormalization:
+        return box->getSignal();
+      case VolumeNormalization:
+        return box->getSignal() * box->getInverseVolume();
+      case NumEventsNormalization:
+        return box->getSignal() / double(box->getNPoints());
+      }
+      // Should not reach here
+      return box->getSignal();
+    }
     else
       return std::numeric_limits<signal_t>::quiet_NaN();
   }
@@ -625,7 +668,7 @@ namespace MDEvents
       // Coordinate along the line
       VMD coord = start + step * double(i);
       // Record the position along the line
-      x.push_back(stepLength * double(i));
+      x.push_back(coord_t(stepLength * double(i)));
 
       // Look for the box at this coordinate
       const IMDBox<MDE,nd> * box = NULL;
@@ -634,7 +677,7 @@ namespace MDEvents
       bool outOfBounds = false;
       for (size_t d=0; d<nd; d++)
       {
-        coord_t x = coord[d];
+        coord_t x = coord_t(coord[d]);
         MDDimensionExtents & extents = data->getExtents(d);
         if (x < extents.min || x >= extents.max)
           outOfBounds = true;
@@ -644,7 +687,13 @@ namespace MDEvents
      //TODO: make the logic/reuse in the following nicer.
       if (!outOfBounds)
       {
-        box = data->getBoxAtCoord(coord.getBareArray());
+#ifdef COORDT_IS_FLOAT
+        std::vector<coord_t> temp = coord.toVector<coord_t>();
+        box = this->data->getBoxAtCoord(&temp[0]);
+#else
+        box = this->data->getBoxAtCoord(coord.getBareArray());
+#endif
+
         if(box != NULL) 
         {
           // What is our normalization factor?

@@ -4,6 +4,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_multimin.h>
@@ -53,7 +54,7 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Diffraction"; }
   /// Call Gaussian as a sub-algorithm to fit the peak in a spectrum
-  double fitSpectra(const int64_t s, double offset, std::string inname, std::string peakPositions);
+  void fitSpectra(const int64_t s, API::MatrixWorkspace_sptr inputW, const std::string &peakPositions, size_t &nparams, double &minD, double &maxD, std::vector<double>&peakPosToFit, std::vector<double>&peakPosFitted);
 
 private:
   /// Sets documentation strings for this algorithm

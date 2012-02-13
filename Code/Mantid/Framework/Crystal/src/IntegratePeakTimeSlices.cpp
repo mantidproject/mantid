@@ -589,7 +589,7 @@ namespace Mantid
                 SSS += fun_str;
                 g_log.debug(SSS);
 
-                fit_alg->setProperty("Function", fun_str);
+                fit_alg->setPropertyValue("Function", fun_str);
 
                 std::string tie = getProperty("Ties");
                 if( tie.length() > (size_t)0)

@@ -60,8 +60,6 @@ namespace DataObjects
     SpecialWorkspace2D(const SpecialWorkspace2D&);
     /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
     SpecialWorkspace2D& operator=(const SpecialWorkspace2D&);
-
-    virtual void init(const size_t &NVectors, const size_t &XLength, const size_t &YLength);
     
     bool isCompatible(boost::shared_ptr<const SpecialWorkspace2D> ws);
 
@@ -69,6 +67,9 @@ namespace DataObjects
     Workspace2D::replaceSpectraMap;
 
   protected:
+
+    virtual void init(const size_t &NVectors, const size_t &XLength, const size_t &YLength);
+
     /** Vector with all the detector IDs, in the same order as the workspace indices.
      * Therefore, detectorIDs[workspaceIndex] = that detector ID.  */
     std::vector<detid_t> detectorIDs;
