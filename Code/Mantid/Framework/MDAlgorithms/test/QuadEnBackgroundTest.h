@@ -86,7 +86,7 @@ public:
         // add additional events to make data quadratic in 4th coordinate (energy)
         out->calcVolume();
 
-        coord_t pos[4];
+        double pos[4];
         uint16_t runIndex=1;
         int32_t detectorId;
         float signal;

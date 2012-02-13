@@ -29,6 +29,7 @@
 using Mantid::VATES::MDRebinningView;
 using Mantid::Geometry::MDHistoDimension;
 using Mantid::Geometry::MDHistoDimension_sptr;
+using Mantid::coord_t;
 
 //=====================================================================================
 // Test Helper Types. These are shared by several tests in VatesAPI
@@ -53,12 +54,12 @@ public:
   std::string getName() const {throw std::runtime_error("Not implemented");}
   std::string getUnits() const {throw std::runtime_error("Not implemented");}
   std::string getDimensionId() const {return m_id;}
-  double getMaximum() const {return 10;}
-  double getMinimum() const {return 0;};
+  coord_t getMaximum() const {return 10;}
+  coord_t getMinimum() const {return 0;};
   size_t getNBins() const {return m_nbins;};
   std::string toXMLString() const {throw std::runtime_error("Not implemented");};
-  double getX(size_t) const {throw std::runtime_error("Not implemented");};
-  virtual void setRange(size_t /*nBins*/, double /*min*/, double /*max*/){ };
+  coord_t getX(size_t) const {throw std::runtime_error("Not implemented");};
+  virtual void setRange(size_t /*nBins*/, coord_t /*min*/, coord_t /*max*/){ };
   virtual ~FakeIMDDimension()
   {
   }

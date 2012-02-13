@@ -20,7 +20,7 @@ public:
   {
     MDImplicitFunction f;
 
-    coord_t normal[3] = {1.234, 4.56, 6.78};
+    coord_t normal[3] = {1234, 456, 678};
     coord_t point[3] = {1,2,3};
     MDPlane p1(3, normal, point);
     MDPlane p2(2, normal, point);
@@ -36,9 +36,9 @@ public:
 
 
   /// Helper function for the 2D case
-  bool try2Dpoint(MDImplicitFunction & f, coord_t x, coord_t y)
+  bool try2Dpoint(MDImplicitFunction & f, double x, double y)
   {
-    coord_t centers[2] = {x,y};
+    coord_t centers[2] = {coord_t(x),coord_t(y)};
     return f.isPointContained(centers);
   }
 
@@ -96,11 +96,11 @@ public:
   }
 
 
-  void add2DVertex(std::vector<std::vector<coord_t> > & vertexes, coord_t x, coord_t y)
+  void add2DVertex(std::vector<std::vector<coord_t> > & vertexes, double x, double y)
   {
     std::vector<coord_t> vertex;
-    vertex.push_back(x);
-    vertex.push_back(y);
+    vertex.push_back(coord_t(x));
+    vertex.push_back(coord_t(y));
     vertexes.push_back(vertex);
   }
 
@@ -109,18 +109,18 @@ public:
    * @param vertexes :: returns the vertex array
    * @return also a bare-array version of the same thing
    */
-  coord_t * make2DVertexSquare(std::vector<std::vector<coord_t> > & vertexes, coord_t x1, coord_t y1, coord_t x2, coord_t y2)
+  coord_t * make2DVertexSquare(std::vector<std::vector<coord_t> > & vertexes, double x1, double y1, double x2, double y2)
   {
     coord_t * out = new coord_t[8];
     vertexes.clear();
     add2DVertex(vertexes, x1,y1);
-    out[0] = x1; out[1] = y1;
+    out[0] = coord_t(x1); out[1] = coord_t(y1);
     add2DVertex(vertexes, x2,y1);
-    out[2] = x2; out[3] = y1;
+    out[2] = coord_t(x2); out[3] = coord_t(y1);
     add2DVertex(vertexes, x2,y2);
-    out[4] = x2; out[5] = y2;
+    out[4] = coord_t(x2); out[5] = coord_t(y2);
     add2DVertex(vertexes, x1,y2);
-    out[6] = x1; out[7] = y2;
+    out[6] = coord_t(x1); out[7] = coord_t(y2);
 
     return out;
   }

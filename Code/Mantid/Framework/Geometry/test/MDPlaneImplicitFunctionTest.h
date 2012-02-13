@@ -15,7 +15,7 @@ public:
   {
     MDPlaneImplicitFunction f;
 
-    coord_t normal[3] = {1.234, 4.56, 6.78};
+    coord_t normal[3] = {1234, 456, 678};
     coord_t point[3] = {1,2,3};
     MDPlane p1(3, normal, point);
     MDPlane p2(3, normal, point);
@@ -29,7 +29,7 @@ public:
 
   void test_coordConstructor()
   {
-    coord_t normal[3] = {1.234, 4.56, 6.78};
+    coord_t normal[3] = {1234, 456, 678};
     coord_t point[3] = {1,2,3};
     MDPlaneImplicitFunction f(3, normal, point);
     TS_ASSERT_EQUALS( f.getNumDims(), 3 );
@@ -40,7 +40,7 @@ public:
 
   void test_xmlRep()
   {
-    coord_t normal[3] = {1.234, 4.56, 6.78};
+    coord_t normal[3] = {coord_t(123.4), 456, 678};
     coord_t point[3] = {1,2,3};
     MDPlaneImplicitFunction f(3, normal, point);
     TS_ASSERT_EQUALS( f.toXMLString(), getXmlRep() );
@@ -50,7 +50,7 @@ public:
   {
     MDPlaneImplicitFunction f;
 
-    coord_t normal[3] = {1.234, 4.56, 6.78};
+    coord_t normal[3] = {1.25, 4.5, 6.75};
     coord_t point[3] = {1,2,3};
     MDPlane p1(3, normal, point);
     f.addPlane(p1);

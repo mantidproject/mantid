@@ -136,6 +136,23 @@ namespace MDEvents
     {
     }
 
+#ifdef COORDT_IS_FLOAT
+    //---------------------------------------------------------------------------------------------
+    /** Constructor with signal and error and an array of centers, and the runIndex and detectorID
+     *
+     * @param signal :: signal (aka weight)
+     * @param errorSquared :: square of the error on the weight
+     * @param runIndex :: 0-based index of which run in the containing MDEventWorkspace
+     * @param detectorId :: ID of the detector that measured this event.
+     * @param centers :: pointer to a nd-sized array of values to set for all coordinates.
+     * */
+    MDEvent(const float signal, const float errorSquared, const uint16_t runIndex, const int32_t detectorId, const double * centers)
+    : MDLeanEvent<nd>(signal, errorSquared, centers),
+      runIndex(runIndex), detectorId(detectorId)
+    {
+    }
+#endif
+
     //---------------------------------------------------------------------------------------------
     /** @return the run index of this event in the containing MDEventWorkspace */
     uint16_t getRunIndex() const

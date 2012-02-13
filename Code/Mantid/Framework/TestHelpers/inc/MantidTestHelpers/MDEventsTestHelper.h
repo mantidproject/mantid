@@ -43,13 +43,13 @@ namespace MDEventsTestHelper
   Mantid::MDEvents::MDEventWorkspace3Lean::sptr makeFileBackedMDEW(std::string wsName, bool fileBacked);
 
   /// Make a fake n-dimensional MDHistoWorkspace
-  Mantid::MDEvents::MDHistoWorkspace_sptr makeFakeMDHistoWorkspace(double signal, size_t numDims, size_t numBins = 10, double max = 10.0,
+  Mantid::MDEvents::MDHistoWorkspace_sptr makeFakeMDHistoWorkspace(double signal, size_t numDims, size_t numBins = 10, coord_t max = 10.0,
       double errorSquared=1.0, std::string name="");
 
   /// More general fake n-dimensionsal MDHistoWorkspace
   Mantid::MDEvents::MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceGeneral(size_t numDims,
       double signal, double errorSquared,
-      size_t * numBins, double * min, double * max,
+      size_t * numBins, coord_t * min, coord_t * max,
       std::string name="");
 
 
@@ -68,7 +68,7 @@ namespace MDEventsTestHelper
    */
   template<typename MDE, size_t nd>
   boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<MDE,nd> >
-    makeAnyMDEW(size_t splitInto, double min, double max, size_t numEventsPerBox = 0, std::string wsName = "",
+    makeAnyMDEW(size_t splitInto, coord_t min, coord_t max, size_t numEventsPerBox = 0, std::string wsName = "",
         std::string axisNameFormat = "Axis%d", std::string axisIdFormat = "Axis%d")
   {
     boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<MDE,nd> >
@@ -102,7 +102,7 @@ namespace MDEventsTestHelper
           // Put an event in the middle of each box
           Mantid::coord_t centers[nd];
           for (size_t d=0; d<nd; d++)
-            centers[d] = min + (double(index[d])+0.5)*(max-min)/double(splitInto);
+            centers[d] = min + (coord_t(index[d])+coord_t(0.5))*(max-min)/coord_t(splitInto);
           out->addEvent( MDE(1.0, 1.0, centers) );
          }
 
@@ -123,7 +123,7 @@ namespace MDEventsTestHelper
   /** Make a MDEventWorkspace with MDLeanEvents */
   template<size_t nd>
   boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDLeanEvent<nd>,nd> >
-    makeMDEW(size_t splitInto, double min, double max, size_t numEventsPerBox = 0)
+    makeMDEW(size_t splitInto, coord_t min, coord_t max, size_t numEventsPerBox = 0)
   {
     return makeAnyMDEW<Mantid::MDEvents::MDLeanEvent<nd>,nd>(splitInto, min, max, numEventsPerBox);
   }
@@ -131,7 +131,7 @@ namespace MDEventsTestHelper
   /** Make a MDEventWorkspace with MDEvents  - updated to split dims by splitInto, not 10 */
   template<size_t nd>
   boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDEvent<nd>,nd> >
-    makeMDEWFull(size_t splitInto, double min, double max, size_t numEventsPerBox = 0 )
+    makeMDEWFull(size_t splitInto, coord_t min, coord_t max, size_t numEventsPerBox = 0 )
   {
     return makeAnyMDEW<Mantid::MDEvents::MDEvent<nd>,nd>(splitInto, min, max, numEventsPerBox );
   }
@@ -266,7 +266,7 @@ namespace MDEventsTestHelper
     // Set the size to splitInto*1.0 in all directions
     MDBox<MDLeanEvent<nd>,nd> * box = new MDBox<MDLeanEvent<nd>,nd>(splitter);
     for (size_t d=0; d<nd; d++)
-      box->setExtents(d, 0.0, double(splitInto));
+      box->setExtents(d, 0.0, coord_t(splitInto));
     // Split into the gridbox.
     MDGridBox<MDLeanEvent<nd>,nd> * gridbox = new MDGridBox<MDLeanEvent<nd>,nd>(box);
 

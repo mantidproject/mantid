@@ -367,15 +367,15 @@ public:
 
     TS_ASSERT_EQUALS( superbox->getNPoints(), 0 );
     { // One event in 0th box of the 0th box.
-      coord_t centers[2] = {0.05, 0.05};
+      double centers[2] = {0.05, 0.05};
       superbox->addEvent( MDLeanEvent<2>(2.0, 2.0, centers) );
     }
     { // One event in 1st box of the 0th box.
-      coord_t centers[2] = {0.15, 0.05};
+      double centers[2] = {0.15, 0.05};
       superbox->addEvent( MDLeanEvent<2>(2.0, 2.0, centers) );
     }
     { // One event in 99th box.
-      coord_t centers[2] = {9.5, 9.5};
+      double centers[2] = {9.5, 9.5};
       superbox->addEvent( MDLeanEvent<2>(2.0, 2.0, centers) );
     }
 
@@ -430,7 +430,7 @@ public:
 
     TS_ASSERT_DELTA(g->getVolume(), 30.0, 1e-5);
     MDLeanEvent<1> ev;
-    ev.setCenter(0, 30.9);
+    ev.setCenter(0, coord_t(30.9));
     g->addEvent(ev);
     TSM_ASSERT_EQUALS("New event was added in the right spot.", g->getChild(9)->getNPoints(), 2);
   }
@@ -493,7 +493,7 @@ public:
     // Function of everything x > 1.51
     MDImplicitFunction * function = new MDImplicitFunction;
     coord_t normal[1] = {+1};
-    coord_t origin[1] = {1.51};
+    coord_t origin[1] = {coord_t(1.51)};
     function->addPlane( MDPlane(1, normal, origin) );
 
     boxes.clear();
@@ -517,7 +517,7 @@ public:
 
     // Limit by another plane
     coord_t normal2[1] = {-1};
-    coord_t origin2[1] = {2.99};
+    coord_t origin2[1] = {coord_t(2.99)};
     function->addPlane( MDPlane(1, normal2, origin2) );
     boxes.clear();
     parent->getBoxes(boxes, 3, false, function);
@@ -541,7 +541,7 @@ public:
     // ----- Infinitely thin plane for an implicit function ------------
     function = new MDImplicitFunction;
     coord_t normal3[1] = {-1};
-    coord_t origin3[1] = {1.51};
+    coord_t origin3[1] = {coord_t(1.51)};
     function->addPlane( MDPlane(1, normal, origin) );
     function->addPlane( MDPlane(1, normal3, origin3) );
 
@@ -563,8 +563,8 @@ public:
     std::vector<IMDBox<MDLeanEvent<2>,2> *> boxes;
 
     // Function of x,y between 2 and 3
-    std::vector<coord_t> min(2, 1.99);
-    std::vector<coord_t> max(2, 3.01);
+    std::vector<coord_t> min(2, coord_t(1.99));
+    std::vector<coord_t> max(2, coord_t(3.01));
     MDImplicitFunction * function = new MDBoxImplicitFunction(min, max);
 
     boxes.clear();
@@ -608,8 +608,8 @@ public:
     std::vector<IMDBox<MDLeanEvent<2>,2> *> boxes;
 
     // Function of x,y with 0 width and height
-    std::vector<coord_t> min(2, 1.99);
-    std::vector<coord_t> max(2, 1.99);
+    std::vector<coord_t> min(2, coord_t(1.99));
+    std::vector<coord_t> max(2, coord_t(1.99));
     MDImplicitFunction * function = new MDBoxImplicitFunction(min, max);
 
     boxes.clear();
@@ -635,8 +635,8 @@ public:
     std::vector<IMDBox<MDLeanEvent<4>,4> *> boxes;
 
     // Function of x,y with 0 width and height
-    std::vector<coord_t> min(4, 1.99);
-    std::vector<coord_t> max(4, 1.99);
+    std::vector<coord_t> min(4, coord_t(1.99));
+    std::vector<coord_t> max(4, coord_t(1.99));
     MDImplicitFunction * function = new MDBoxImplicitFunction(min, max);
 
     boxes.clear();
@@ -679,7 +679,7 @@ public:
         {
           for (size_t i=0; i<num_to_repeat; i++)
           {
-            coord_t centers[2] = {x,y};
+            coord_t centers[2] = {coord_t(x),coord_t(y)};
             box->addEvent( MDLeanEvent<2>(2.0, 2.0, centers) );
           }
         }
@@ -709,7 +709,7 @@ public:
     for (double x=0.5; x < 10; x += 1.0)
       for (double y=0.5; y < 10; y += 1.0)
       {
-        coord_t centers[2] = {x,y};
+        coord_t centers[2] = {coord_t(x),coord_t(y)};
         events.push_back( MDLeanEvent<2>(2.0, 2.0, centers) );
       }
 
@@ -741,7 +741,7 @@ public:
     for (double x=-5.0; x < 20; x += 20.0)
       for (double y=-5.0; y < 20; y += 20.0)
       {
-        coord_t centers[2] = {x,y};
+        double centers[2] = {x,y};
         events.push_back( MDLeanEvent<2>(2.0, 2.0, centers) );
       }
     // Get the right totals again
@@ -768,7 +768,7 @@ public:
     for (double x=0.5; x < 10; x += 1.0)
       for (double y=0.5; y < 10; y += 1.0)
       {
-        coord_t centers[2] = {x,y};
+        double centers[2] = {x,y};
         events.push_back( MDLeanEvent<2>(2.0, 2.0, centers) );
       }
 
@@ -799,7 +799,7 @@ public:
       for (double x=0.5; x < 10; x += 1.0)
         for (double y=0.5; y < 10; y += 1.0)
         {
-          coord_t centers[2] = {x,y};
+          double centers[2] = {x,y};
           events.push_back( MDLeanEvent<2>(2.0, 2.0, centers) );
         }
       TS_ASSERT_THROWS_NOTHING( b->addEvents( events ); );
@@ -859,7 +859,7 @@ public:
     for (size_t i=0; i < num_repeat; i++)
     {
       // Make an event in the middle of each box
-      coord_t centers[2] = {1e-10, 1e-10};
+      double centers[2] = {1e-10, 1e-10};
       events.push_back( MDLeanEvent<2>(2.0, 2.0, centers) );
     }
     TS_ASSERT_THROWS_NOTHING( b->addEvents( events ); );
@@ -994,7 +994,7 @@ public:
     if (DODEBUG) num_repeat = 20;
     Timer tim;
     if (DODEBUG) std::cout << "Adding " << num_repeat*10000 << " events...\n";
-    MDEventsTestHelper::feedMDBox<2>(b, num_repeat, 100, 0.05, 0.1);
+    MDEventsTestHelper::feedMDBox<2>(b, num_repeat, 100, coord_t(0.05), coord_t(0.1));
     if (DODEBUG) std::cout << "Adding events done in " << tim.elapsed() << "!\n";
 
     // Split those boxes in parallel.
@@ -1042,10 +1042,10 @@ public:
   MDBin<MDLeanEvent<2>,2> makeMDBin2(double minX, double maxX, double minY, double maxY)
   {
     MDBin<MDLeanEvent<2>,2> bin;
-    bin.m_min[0] = minX;
-    bin.m_max[0] = maxX;
-    bin.m_min[1] = minY;
-    bin.m_max[1] = maxY;
+    bin.m_min[0] = coord_t(minX);
+    bin.m_max[0] = coord_t(maxX);
+    bin.m_min[1] = coord_t(minY);
+    bin.m_max[1] = coord_t(maxY);
     return bin;
   }
 
@@ -1133,17 +1133,17 @@ public:
    * @param radius :: radius to integrate
    * @param numExpected :: how many events should be in there
    */
-  void do_check_integrateSphere(MDGridBox<MDLeanEvent<2>,2> & box, coord_t x, coord_t y, const coord_t radius, double numExpected, std::string message)
+  void do_check_integrateSphere(MDGridBox<MDLeanEvent<2>,2> & box, double x, double y, const double radius, double numExpected, std::string message)
   {
     std::cout << "Sphere of radius " << radius << " at " << x << "," << y << "------" << message << "--\n";
     // The sphere transformation
     bool dimensionsUsed[2] = {true,true};
-    coord_t center[2] = {x,y};
+    coord_t center[2] = {coord_t(x),coord_t(y)};
     CoordTransformDistance sphere(2, center, dimensionsUsed);
 
     signal_t signal = 0;
     signal_t errorSquared = 0;
-    box.integrateSphere(sphere, radius*radius, signal, errorSquared);
+    box.integrateSphere(sphere, coord_t(radius*radius), signal, errorSquared);
     TSM_ASSERT_DELTA( message, signal, 1.0*numExpected, 1e-5);
     TSM_ASSERT_DELTA( message, errorSquared, 1.0*numExpected, 1e-5);
   }
@@ -1171,7 +1171,7 @@ public:
     do_check_integrateSphere(box, -1.0,0.5, 1.55,  1.0, "Off an edge but enough to get an event");
 
     // Now I add an event very near an edge
-    coord_t center[2] = {0.001, 0.5};
+    double center[2] = {0.001, 0.5};
     box.addEvent(MDLeanEvent<2>(1.0, 1.0, center));
     do_check_integrateSphere(box, -1.0,0.5, 1.01,  1.0, "Off an edge but just barely enough to get an event");
     do_check_integrateSphere(box, 0.0,0.5, 0.01,  1.0, "Tiny, but just barely enough to get an event");
@@ -1227,18 +1227,18 @@ public:
    * @param radius :: radius to integrate
    * @param numExpected :: how many events should be in there
    */
-  void do_check_integrateSphere3d(MDGridBox<MDLeanEvent<3>,3> & box, coord_t x, coord_t y, coord_t z,
-      const coord_t radius, double numExpected, std::string message)
+  void do_check_integrateSphere3d(MDGridBox<MDLeanEvent<3>,3> & box, double x, double y, double z,
+      const double radius, double numExpected, std::string message)
   {
     std::cout << "Sphere of radius " << radius << " at " << x << "," << y << "," << z << "--- " << message << " ---------\n";
     // The sphere transformation
     bool dimensionsUsed[3] = {true,true, true};
-    coord_t center[3] = {x,y,z};
+    coord_t center[3] = {coord_t(x),coord_t(y),coord_t(z)};
     CoordTransformDistance sphere(3, center, dimensionsUsed);
 
     signal_t signal = 0;
     signal_t errorSquared = 0;
-    box.integrateSphere(sphere, radius*radius, signal, errorSquared);
+    box.integrateSphere(sphere, coord_t(radius*radius), signal, errorSquared);
     TSM_ASSERT_DELTA( message, signal, 1.0*numExpected, 1e-5);
     TSM_ASSERT_DELTA( message, errorSquared, 1.0*numExpected, 1e-5);
   }
@@ -1258,7 +1258,7 @@ public:
     do_check_integrateSphere3d(box, 9.0,9.0,9.0,  1.70, 20.0, "Does NOT contains one box completely, at a corner");
 
     // Now I add an event very near an edge
-    coord_t center[3] = {0.001, 0.5, 0.5};
+    double center[3] = {0.001, 0.5, 0.5};
     box.addEvent(MDLeanEvent<3>(2.0, 2.0, center));
 //    do_check_integrateSphere(box, -1.0,0.5, 1.01,  1.0, "Off an edge but just barely enough to get an event");
 //    do_check_integrateSphere(box, 0.0,0.5, 0.01,  1.0, "Tiny, but just barely enough to get an event");
@@ -1276,15 +1276,15 @@ public:
    * @param xExpected :: expected centroid
    * @param yExpected :: expected centroid
    */
-  void do_check_centroidSphere(MDGridBox<MDLeanEvent<2>,2> & box, coord_t x, coord_t y,
-      const coord_t radius,
-      double numExpected, coord_t xExpected, coord_t yExpected,
+  void do_check_centroidSphere(MDGridBox<MDLeanEvent<2>,2> & box, double x, double y,
+      const double radius,
+      double numExpected, double xExpected, double yExpected,
       std::string message)
   {
     std::cout << "Centroid of sphere of radius " << radius << " at " << x << "," << y << "------" << message << "--\n";
     // The sphere transformation
     bool dimensionsUsed[2] = {true,true};
-    coord_t center[2] = {x,y};
+    coord_t center[2] = {coord_t(x),coord_t(y)};
     CoordTransformDistance sphere(2, center, dimensionsUsed);
 
     signal_t signal = 0;
@@ -1294,7 +1294,7 @@ public:
     if (signal != 0.0)
     {
       for (size_t d=0; d<2; d++)
-        centroid[d] /= signal;
+        centroid[d] /= coord_t(signal);
     }
 
     TSM_ASSERT_DELTA( message, signal, 1.0*numExpected, 1e-5);
@@ -1381,7 +1381,7 @@ public:
     boost::variate_generator<boost::mt19937&, boost::uniform_real<double> > gen(rng, u);
     for (size_t i=0; i<num; ++i)
     {
-      coord_t centers[3];
+      double centers[3];
       for (size_t d=0; d<3; d++)
         centers[d] = gen();
       // Create and add the event.

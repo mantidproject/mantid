@@ -99,6 +99,21 @@ namespace MDEvents
         center[i] = centers[i];
     }
 
+#ifdef COORDT_IS_FLOAT
+    //---------------------------------------------------------------------------------------------
+    /** Constructor with signal and error and an array of centers
+     *
+     * @param signal :: signal (aka weight)
+     * @param errorSquared :: square of the error on the weight
+     * @param centers :: pointer to a nd-sized array of values to set for all coordinates.
+     * */
+    MDLeanEvent(const float signal, const float errorSquared, const double * centers) :
+      signal(signal), errorSquared(errorSquared)
+    {
+      for (size_t i=0; i<nd; i++)
+        center[i] = coord_t(centers[i]);
+    }
+#endif
     //---------------------------------------------------------------------------------------------
     /** Copy constructor
      * @param rhs :: mdevent to copy
@@ -148,6 +163,18 @@ namespace MDEvents
     {
       center[n] = value;
     }
+
+#ifdef COORDT_IS_FLOAT
+    //---------------------------------------------------------------------------------------------
+    /** Sets the n-th coordinate axis value.
+     * @param n :: index (0-based) of the dimension you want to set
+     * @param value :: value to set.
+     * */
+    void setCenter(const size_t n, const double value)
+    {
+      center[n] = coord_t(value);
+    }
+#endif
 
     //---------------------------------------------------------------------------------------------
     /** Sets all the coordinates.

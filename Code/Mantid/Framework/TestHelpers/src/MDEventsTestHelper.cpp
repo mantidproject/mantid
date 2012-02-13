@@ -187,7 +187,7 @@ namespace MDEventsTestHelper
     std::vector<MDLeanEvent<1> > out;
     for (double i=0; i<num; i++)
     {
-      coord_t coords[1] = {i*1.0+0.5};
+      double coords[1] = {i*1.0+0.5};
       out.push_back( MDLeanEvent<1>(1.0, 1.0, coords) );
     }
     return out;
@@ -207,7 +207,7 @@ namespace MDEventsTestHelper
    * @return the MDHisto
    */
   Mantid::MDEvents::MDHistoWorkspace_sptr makeFakeMDHistoWorkspace(double signal, size_t numDims, size_t numBins,
-      double max, double errorSquared, std::string name)
+      coord_t max, double errorSquared, std::string name)
   {
     Mantid::MDEvents::MDHistoWorkspace * ws = NULL;
     if (numDims ==1)
@@ -260,7 +260,7 @@ namespace MDEventsTestHelper
    */
   Mantid::MDEvents::MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceGeneral(size_t numDims,
       double signal, double errorSquared,
-      size_t * numBins, double * min, double * max,
+      size_t * numBins, coord_t * min, coord_t * max,
       std::string name)
   {
     std::vector<std::string> names;

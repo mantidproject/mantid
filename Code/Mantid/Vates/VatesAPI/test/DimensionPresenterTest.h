@@ -5,9 +5,11 @@
 #include "MantidVatesAPI/DimensionPresenter.h"
 #include "MantidVatesAPI/GeometryPresenter.h"
 #include "MantidVatesAPI/DimensionView.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
  
+using namespace Mantid;
 using namespace Mantid::VATES;
 using namespace Mantid::Geometry;
 using namespace testing;
@@ -57,9 +59,9 @@ private:
     MOCK_CONST_METHOD0(getDimensionId,
       std::string());
     MOCK_CONST_METHOD0(getMaximum,
-      double());
+      coord_t());
     MOCK_CONST_METHOD0(getMinimum,
-      double());
+        coord_t());
     MOCK_CONST_METHOD0(getNBins,
       size_t());
     MOCK_CONST_METHOD0(toXMLString,
@@ -67,9 +69,9 @@ private:
     MOCK_CONST_METHOD0(getIsIntegrated,
       bool());
     MOCK_CONST_METHOD1(getX,
-      double(size_t ind));
+        coord_t(size_t ind));
     MOCK_METHOD3(setRange,
-      void(size_t, double, double));
+      void(size_t, coord_t, coord_t));
   };
 
 public:
