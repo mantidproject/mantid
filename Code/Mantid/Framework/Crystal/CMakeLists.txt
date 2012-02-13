@@ -77,6 +77,7 @@ set ( TEST_FILES
 	test/FindUBUsingMinMaxDTest.h
 	test/IndexPeaksTest.h
         test/ShowPossibleCellsTest.h
+        test/SelectCellOfTypeTest.h
     test/IndexSXPeaksTest.h
 	test/IntegratePeakTimeSlicesTest.h
 	test/LoadIsawPeaksTest.h

@@ -110,6 +110,12 @@ namespace Crystal
 
     this->declareProperty( "Apply", false, "Update UB and re-index the peaks");
     this->declareProperty( "Tolerance", 0.12, "Indexing Tolerance");
+
+    this->declareProperty(new PropertyWithValue<int>( "NumIndexed", 0,
+          Direction::Output), "The number of indexed peaks if apply==true.");
+
+    this->declareProperty(new PropertyWithValue<double>( "AverageError", 0.0,
+          Direction::Output), "The average HKL indexing error if apply==true.");
   }
 
   //--------------------------------------------------------------------------
@@ -203,6 +209,9 @@ namespace Crystal
 
       for ( size_t i = 0; i < n_peaks; i++ )
         peaks[i].setHKL( miller_indices[i] );
+
+      this->setProperty("NumIndexed", num_indexed);
+      this->setProperty("AverageError", average_error);
     }
   }
 
