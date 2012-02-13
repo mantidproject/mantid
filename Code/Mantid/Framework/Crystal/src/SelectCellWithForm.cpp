@@ -130,23 +130,13 @@ namespace Crystal
 
     ConventionalCell info = ScalarUtils::GetCellForForm( UB, form_num );
 
-    char buffer[200];
+    std::string message = info.GetDescription();
 
     DblMatrix newUB = info.GetNewUB();
     std::vector<double> lat_par;
     IndexingUtils::GetLatticeParameters( newUB, lat_par );
 
-    sprintf( buffer, std::string("Form #%2d").c_str(), info.GetFormNum());
-    std::string message( buffer );
-
-    sprintf( buffer, std::string(" Error: %7.4f").c_str(), info.GetError());
-    message += std::string( buffer );
-
-    sprintf(buffer,std::string(" %12s").c_str(), info.GetCellType().c_str());
-    message += std::string( buffer );
-
-    sprintf(buffer,std::string(" %2s ").c_str(),info.GetCentering().c_str());
-    message += std::string( buffer );
+    char buffer[100];
 
     sprintf( buffer,
              std::string("Lattice Params: %8.4f %8.4f %8.4f  %8.3f %8.3f %8.3f  %9.2f").c_str(),

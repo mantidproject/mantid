@@ -132,21 +132,11 @@ namespace Crystal
 
     for ( size_t i = 0; i < num_cells; i++ )
     {
+      std::string message = list[i].GetDescription();
+
       DblMatrix newUB = list[i].GetNewUB();
       std::vector<double> lat_par;
       IndexingUtils::GetLatticeParameters( newUB, lat_par );
-
-      sprintf( buffer, std::string("Form #%2d").c_str(), list[i].GetFormNum());
-      std::string message( buffer );
-
-      sprintf( buffer, std::string(" Error: %8.4f").c_str(), list[i].GetError());
-      message += std::string( buffer );
-
-      sprintf( buffer, std::string(" %12s").c_str(), list[i].GetCellType().c_str() );
-      message += std::string( buffer );
-
-      sprintf( buffer, std::string(" %2s  ").c_str(), list[i].GetCentering().c_str() );
-      message += std::string( buffer );
 
       sprintf( buffer,
                std::string("Lattice Parameters: %8.4f %8.4f %8.4f  %8.3f %8.3f %8.3f  %9.2f").c_str(),
