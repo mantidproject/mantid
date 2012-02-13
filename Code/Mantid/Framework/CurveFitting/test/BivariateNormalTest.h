@@ -91,7 +91,7 @@ public:
       TS_ASSERT_EQUALS( NormalFit.nAttributes(),1);
       TS_ASSERT_EQUALS( NormalFit.name() , std::string("BivariateNormal"));
 
-      int nCells = 30;
+      const int nCells = 30;
       MatrixWorkspace_sptr ws1 = WorkspaceFactory::Instance().create("Workspace2D",3,nCells,nCells);
       Workspace2D_sptr ws = boost::dynamic_pointer_cast<Workspace2D>(ws1);
 
