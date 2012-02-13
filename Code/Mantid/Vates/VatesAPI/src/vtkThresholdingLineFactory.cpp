@@ -9,6 +9,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/NullCoordTransform.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidKernel/ReadLock.h"
 
 using Mantid::API::IMDWorkspace;
 using Mantid::MDEvents::MDHistoWorkspace;
@@ -54,15 +55,15 @@ namespace Mantid
 
     vtkDataSet* vtkThresholdingLineFactory::create() const
     {
-      validate();
-      //use the successor factory's creation method if this type cannot handle the dimensionality of the workspace.
-      size_t nonIntegratedSize = m_workspace->getNonIntegratedDimensions().size();
-      if((doesCheckDimensionality() && nonIntegratedSize != vtkDataSetFactory::OneDimensional))
+      vtkDataSet* product = tryDelegatingCreation<MDHistoWorkspace, 1>(m_workspace);
+      if(product != NULL)
       {
-        return m_successor->create();
+        return product;
       }
       else
       {
+        size_t nonIntegratedSize = m_workspace->getNonIntegratedDimensions().size();
+        Mantid::Kernel::ReadLock lock(*m_workspace);
         const int nBinsX = static_cast<int>( m_workspace->getXDimension()->getNBins() );
 
         const double maxX = m_workspace-> getXDimension()->getMaximum();
@@ -146,24 +147,8 @@ namespace Mantid
 
     void vtkThresholdingLineFactory::initialize(Mantid::API::Workspace_sptr wspace_sptr)
     {
-      m_workspace = boost::dynamic_pointer_cast<MDHistoWorkspace>(wspace_sptr);
-      validate();
-      // When the workspace can not be handled by this type, take action in the form of delegation.
-      size_t nonIntegratedSize = m_workspace->getNonIntegratedDimensions().size();
-      if((doesCheckDimensionality() && nonIntegratedSize != vtkDataSetFactory::OneDimensional))
-      {
-        if(this->hasSuccessor())
-        {
-          m_successor->setUseTransform(m_useTransform);
-          m_successor->initialize(m_workspace);
-          return;
-        }
-        else
-        {
-          throw std::runtime_error("There is no successor factory set for this vtkThresholdingLineFactory type");
-        }
-      }
-
+      m_workspace = this->doInitialize<MDHistoWorkspace, 1>(wspace_sptr);
+      
       //Setup range values according to whatever strategy object has been injected.
       m_thresholdRange->setWorkspace(m_workspace);
       m_thresholdRange->calculate();

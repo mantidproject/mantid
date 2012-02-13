@@ -172,6 +172,8 @@ namespace Mantid
     validate();
 
     size_t nd = m_workspace->getNumDims();
+     
+    Mantid::Kernel::ReadLock lock(*m_workspace);
     if (nd > 3)
     {
       // Slice from >3D down to 3D

@@ -338,9 +338,7 @@ namespace Mantid
 
       Mantid::API::Workspace_sptr result=Mantid::API::AnalysisDataService::Instance().retrieve(outWsName);
 
-      factory->initialize(result);
-
-      vtkDataSet* temp = factory->create();
+      vtkDataSet* temp = factory->oneStepCreate(result);
 
       persistReductionKnowledge(temp, this->m_serializer, XMLDefinitions::metaDataId().c_str());
       m_request->reset();

@@ -300,8 +300,6 @@ int vtkRebinningTransformOperator::RequestInformation(vtkInformation* vtkNotUsed
   Status status=Good;
   if (Pending == m_setup)
   {
-    try
-    {
     vtkInformation * inputInf = inputVector[0]->GetInformationObject(0);
     vtkDataSet * inputDataset = vtkDataSet::SafeDownCast(inputInf->Get(vtkDataObject::DATA_OBJECT()));
 
@@ -314,11 +312,6 @@ int vtkRebinningTransformOperator::RequestInformation(vtkInformation* vtkNotUsed
     
     m_appliedGeometryXML = m_presenter->getAppliedGeometryXML();
     m_setup = SetupDone;
-
-    }
-    catch(std::exception& e)
-    {
-    }
   }
   setTimeRange(outputVector);
   return status;

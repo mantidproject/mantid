@@ -190,65 +190,67 @@ namespace Mantid
   */
   vtkDataSet* vtkMDEWHexahedronFactory::create() const
   {
-    validate();
-
-    IMDEventWorkspace_sptr imdws = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_workspace);
-    if(!imdws || (doesCheckDimensionality() &&  imdws->getNonIntegratedDimensions().size() < ThreeDimensional))
+    this->dataSet = tryDelegatingCreation<IMDEventWorkspace, 3>(m_workspace, false);
+    if(this->dataSet != NULL)
     {
-      return m_successor->create();
-    }
-
-    size_t nd = imdws->getNumDims();
-    if (nd > 3)
-    {
-      // Slice from >3D down to 3D
-      this->slice = true;
-      this->sliceMask = new bool[nd];
-      this->sliceImplicitFunction = new MDImplicitFunction();
-
-      // Make the mask of dimensions
-      // TODO: Smarter mapping
-      for (size_t d=0; d<nd; d++)
-        this->sliceMask[d] = (d<3);
-
-      // Define where the slice is in 4D
-      // TODO: Where to slice? Right now is just 0
-      std::vector<coord_t> point(nd, 0);
-      point[3] = m_time; //Specifically for 4th/time dimension.
-
-      // Define two opposing planes that point in all higher dimensions
-      std::vector<coord_t> normal1(nd, 0);
-      std::vector<coord_t> normal2(nd, 0);
-      for (size_t d=3; d<nd; d++)
-      {
-        normal1[d] = +1.0;
-        normal2[d] = -1.0;
-      }
-      // This creates a 0-thickness region to slice in.
-      sliceImplicitFunction->addPlane( MDPlane(normal1, point) );
-      sliceImplicitFunction->addPlane( MDPlane(normal2, point) );
-
-      //coord_t pointA[4] = {0, 0, 0, -1.0};
-      //coord_t pointB[4] = {0, 0, 0, +2.0};
+      return this->dataSet;
     }
     else
     {
-      // Direct 3D, so no slicing
-      this->slice = false;
+      IMDEventWorkspace_sptr imdws = this->castAndCheck<IMDEventWorkspace, 3>(m_workspace, false);
+
+      size_t nd = imdws->getNumDims();
+      if (nd > 3)
+      {
+        // Slice from >3D down to 3D
+        this->slice = true;
+        this->sliceMask = new bool[nd];
+        this->sliceImplicitFunction = new MDImplicitFunction();
+
+        // Make the mask of dimensions
+        // TODO: Smarter mapping
+        for (size_t d=0; d<nd; d++)
+          this->sliceMask[d] = (d<3);
+
+        // Define where the slice is in 4D
+        // TODO: Where to slice? Right now is just 0
+        std::vector<coord_t> point(nd, 0);
+        point[3] = m_time; //Specifically for 4th/time dimension.
+
+        // Define two opposing planes that point in all higher dimensions
+        std::vector<coord_t> normal1(nd, 0);
+        std::vector<coord_t> normal2(nd, 0);
+        for (size_t d=3; d<nd; d++)
+        {
+          normal1[d] = +1.0;
+          normal2[d] = -1.0;
+        }
+        // This creates a 0-thickness region to slice in.
+        sliceImplicitFunction->addPlane( MDPlane(normal1, point) );
+        sliceImplicitFunction->addPlane( MDPlane(normal2, point) );
+
+        //coord_t pointA[4] = {0, 0, 0, -1.0};
+        //coord_t pointB[4] = {0, 0, 0, +2.0};
+      }
+      else
+      {
+        // Direct 3D, so no slicing
+        this->slice = false;
+      }
+
+      // Macro to call the right instance of the
+      CALL_MDEVENT_FUNCTION(this->doCreate, imdws);
+
+      // Clean up
+      if (this->slice)
+      {
+        delete this->sliceMask;
+        delete this->sliceImplicitFunction;
+      }
+
+      // The macro does not allow return calls, so we used a member variable.
+      return this->dataSet;
     }
-
-    // Macro to call the right instance of the
-    CALL_MDEVENT_FUNCTION(this->doCreate, imdws);
-
-    // Clean up
-    if (this->slice)
-    {
-      delete this->sliceMask;
-      delete this->sliceImplicitFunction;
-    }
-
-    // The macro does not allow return calls, so we used a member variable.
-    return this->dataSet;
   }
 
   /*
@@ -258,26 +260,9 @@ namespace Mantid
   */
   void vtkMDEWHexahedronFactory::initialize(Mantid::API::Workspace_sptr ws)
   {
-    if(!ws)
-    {
-      throw std::invalid_argument("Cannot initalize vtkMDEWHexahedronFactory with a NULL workspace.");
-    }
-    m_workspace = ws;
-    IMDEventWorkspace_sptr imdws = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_workspace);
-
-    if(!imdws || (doesCheckDimensionality() && imdws->getNonIntegratedDimensions().size() < ThreeDimensional))
-    {
-      if(this->hasSuccessor())
-      {
-        m_successor->setUseTransform(m_useTransform);
-        m_successor->initialize(ws);
-      }
-      else
-      {
-        throw std::runtime_error("vtkMDEWHexahedronFactory has no successor");
-      }
-    }
-
+    IMDEventWorkspace_sptr imdws = doInitialize<IMDEventWorkspace, 3>(ws, false);
+    m_workspace = imdws;
+    
     //Setup range values according to whatever strategy object has been injected.
     m_thresholdRange->setWorkspace(m_workspace);
     m_thresholdRange->calculate();

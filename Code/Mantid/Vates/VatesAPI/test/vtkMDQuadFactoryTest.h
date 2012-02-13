@@ -10,6 +10,7 @@
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "vtkCellType.h"
 #include "vtkUnstructuredGrid.h"
+#include <vtkStructuredGrid.h>
 
 using namespace Mantid::VATES;
 using namespace Mantid::API;
@@ -49,7 +50,7 @@ public:
   {
     MockvtkDataSetFactory* mockSuccessor = new MockvtkDataSetFactory;
     EXPECT_CALL(*mockSuccessor, initialize(_)).Times(1);
-    EXPECT_CALL(*mockSuccessor, create()).Times(1);
+    EXPECT_CALL(*mockSuccessor, create()).Times(1).WillOnce(Return(vtkStructuredGrid::New()));
     EXPECT_CALL(*mockSuccessor, getFactoryTypeName()).Times(1);
 
     vtkMDQuadFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");

@@ -5,6 +5,7 @@
 #include "MantidAPI/IPeak.h"
 #include "MantidKernel/V3D.h"
 #include <vtkVertex.h>
+#include "MantidKernel/ReadLock.h"
 
 using Mantid::API::IPeaksWorkspace;
 using Mantid::API::IPeak;
@@ -74,6 +75,9 @@ namespace VATES
     validate();
 
     int numPeaks = m_workspace->getNumberPeaks();
+
+   // Acquire a scoped read-only lock to the workspace (prevent segfault from algos modifying ws)
+    Mantid::Kernel::ReadLock lock(*m_workspace);
 
     // Points generator
     vtkPoints *points = vtkPoints::New();

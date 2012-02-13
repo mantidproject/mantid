@@ -17,7 +17,7 @@
 #include <gtest/gtest.h>
 #include <vtkCellData.h>
 #include <vtkDataArray.h>
-
+#include <vtkStructuredGrid.h>
 
 using namespace Mantid;
 using namespace Mantid::VATES;
@@ -106,7 +106,7 @@ public:
   {
     MockvtkDataSetFactory* mockSuccessor = new MockvtkDataSetFactory;
     EXPECT_CALL(*mockSuccessor, initialize(_)).Times(1);
-    EXPECT_CALL(*mockSuccessor, create()).Times(1);
+    EXPECT_CALL(*mockSuccessor, create()).Times(1).WillOnce(Return(vtkStructuredGrid::New()));
     EXPECT_CALL(*mockSuccessor, getFactoryTypeName()).Times(1);
 
     vtkMDEWHexahedronFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");

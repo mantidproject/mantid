@@ -10,6 +10,7 @@
 #include "vtkSmartPointer.h" 
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <vector>
+#include "MantidKernel/ReadLock.h"
 
 using Mantid::API::IMDWorkspace;
 using Mantid::Kernel::CPUTimer;
@@ -54,15 +55,14 @@ namespace Mantid
 
     vtkDataSet* vtkThresholdingQuadFactory::create() const
     {
-      validate();
-      //use the successor factory's creation method if this type cannot handle the dimensionality of the workspace.
-      const size_t nonIntegratedSize = m_workspace->getNonIntegratedDimensions().size();
-      if((doesCheckDimensionality() && nonIntegratedSize != vtkDataSetFactory::TwoDimensional))
+      vtkDataSet* product = tryDelegatingCreation<MDHistoWorkspace, 2>(m_workspace);
+      if(product != NULL)
       {
-        return m_successor->create();
+        return product;
       }
       else
       {
+        Mantid::Kernel::ReadLock lock(*m_workspace);
         CPUTimer tim;
         const int nBinsX = static_cast<int>( m_workspace->getXDimension()->getNBins() );
         const int nBinsY = static_cast<int>( m_workspace->getYDimension()->getNBins() );
@@ -207,23 +207,7 @@ namespace Mantid
 
     void vtkThresholdingQuadFactory::initialize(Mantid::API::Workspace_sptr wspace_sptr)
     {
-      m_workspace = boost::dynamic_pointer_cast<MDHistoWorkspace>(wspace_sptr);
-      validate();
-      // When the workspace can not be handled by this type, take action in the form of delegation.
-      const size_t nonIntegratedSize = m_workspace->getNonIntegratedDimensions().size();
-      if((doesCheckDimensionality() && nonIntegratedSize != vtkDataSetFactory::TwoDimensional))
-      {
-        if(this->hasSuccessor())
-        {
-          m_successor->setUseTransform(m_useTransform);
-          m_successor->initialize(m_workspace);
-          return;
-        }
-        else
-        {
-          throw std::runtime_error("There is no successor factory set for this vtkThresholdingQuadFactory type");
-        }
-      }
+      m_workspace = doInitialize<MDHistoWorkspace, 2>(wspace_sptr);
 
       //Setup range values according to whatever strategy object has been injected.
       m_thresholdRange->setWorkspace(m_workspace);

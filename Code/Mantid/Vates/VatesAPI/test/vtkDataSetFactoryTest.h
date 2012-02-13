@@ -9,6 +9,13 @@
 #include "vtkDataSet.h"
 #include "vtkFloatArray.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include <vtkStructuredGrid.h>
+
+using namespace Mantid::API;
+using namespace Mantid::MDEvents;
+using namespace testing;
 
 class vtkDataSetFactoryTest : public CxxTest::TestSuite
 {
@@ -18,10 +25,6 @@ private:
   public:
     MOCK_CONST_METHOD0(create,
       vtkDataSet*());
-    MOCK_CONST_METHOD0(createMeshOnly,
-      vtkDataSet*());
-    MOCK_CONST_METHOD0(createScalarArray,
-      vtkFloatArray*());
     MOCK_METHOD1(initialize,
       void(boost::shared_ptr<Mantid::API::Workspace>));
     MOCK_CONST_METHOD0(validate,
@@ -90,6 +93,19 @@ public:
     TS_ASSERT(!factory.doesCheckDimensionality());
     factory.setCheckDimensionality(true);
     TS_ASSERT(factory.doesCheckDimensionality());
+  }
+
+  void testOneStepCreate()
+  {
+    MockvtkDataSetFactory factory;
+    EXPECT_CALL(factory, initialize(_)).Times(1);
+    EXPECT_CALL(factory, create()).Times(1).WillOnce(Return(vtkStructuredGrid::New()));
+
+    IMDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
+    vtkDataSet* product = factory.oneStepCreate(ws_sptr);
+    TS_ASSERT(product != NULL);
+    TSM_ASSERT_EQUALS("Output not wired up correctly to ::create() method", "vtkStructuredGrid", std::string(product->GetClassName()));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
   }
 
 

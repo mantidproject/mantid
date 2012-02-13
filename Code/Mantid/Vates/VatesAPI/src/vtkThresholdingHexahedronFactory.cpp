@@ -10,6 +10,7 @@
 #include "MantidKernel/ReadLock.h"
 
 using Mantid::API::IMDWorkspace;
+using Mantid::API::IMDHistoWorkspace;
 using Mantid::Kernel::CPUTimer;
 using namespace Mantid::MDEvents;
 using Mantid::Kernel::ReadLock;
@@ -53,24 +54,7 @@ namespace VATES
 
   void vtkThresholdingHexahedronFactory::initialize(Mantid::API::Workspace_sptr workspace)
   {
-    m_workspace = boost::dynamic_pointer_cast<MDHistoWorkspace>(workspace);
-    // Check that a workspace has been provided.
-    validateWsNotNull();
-    // When the workspace can not be handled by this type, take action in the form of delegation.
-    const size_t nonIntegratedSize = m_workspace->getNonIntegratedDimensions().size();
-    if((doesCheckDimensionality() && nonIntegratedSize != vtkDataSetFactory::ThreeDimensional))
-    {
-      if(this->hasSuccessor())
-      {
-        m_successor->setUseTransform(m_useTransform);
-        m_successor->initialize(m_workspace);
-        return;
-      }
-      else
-      {
-        throw std::runtime_error("There is no successor factory set for this vtkThresholdingHexahedronFactory type");
-      }
-    }
+    m_workspace = doInitialize<MDHistoWorkspace, 3>(workspace);
 
     //Setup range values according to whatever strategy object has been injected.
     m_thresholdRange->setWorkspace(m_workspace);
@@ -300,12 +284,10 @@ namespace VATES
    */
   vtkDataSet* vtkThresholdingHexahedronFactory::create() const
   {
-    validate();
-
-    const size_t nonIntegratedSize = m_workspace->getNonIntegratedDimensions().size();
-    if((doesCheckDimensionality() && nonIntegratedSize != vtkDataSetFactory::ThreeDimensional))
+    vtkDataSet* product = tryDelegatingCreation<MDHistoWorkspace, 3>(m_workspace);
+    if(product != NULL)
     {
-      return m_successor->create();
+      return product;
     }
     else
     {
