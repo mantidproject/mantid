@@ -22,7 +22,7 @@ namespace DataObjects
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(3,3,true),
     m_InverseGoniometerMatrix(3,3,true),
-    m_RunNumber(0)
+    m_RunNumber(0),orig_H(0),orig_K(0),orig_L(0)
   {
   }
 
@@ -40,7 +40,7 @@ namespace DataObjects
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(3,3,true),
     m_InverseGoniometerMatrix(3,3,true),
-    m_RunNumber(0)
+    m_RunNumber(0),orig_H(0),orig_K(0),orig_L(0)
   {
     this->setInstrument(m_inst);
     this->setQLabFrame(QLabFrame, detectorDistance);
@@ -64,7 +64,7 @@ namespace DataObjects
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(goniometer),
     m_InverseGoniometerMatrix(goniometer),
-    m_RunNumber(0)
+    m_RunNumber(0),orig_H(0),orig_K(0),orig_L(0)
   {
     if(fabs(m_InverseGoniometerMatrix.Invert())<1e-8) throw std::invalid_argument("Peak::ctor(): Goniometer matrix must non-singular.");
     this->setInstrument(m_inst);
@@ -86,7 +86,7 @@ namespace DataObjects
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(3,3,true),
     m_InverseGoniometerMatrix(3,3,true),
-    m_RunNumber(0)
+    m_RunNumber(0),orig_H(0),orig_K(0),orig_L(0)
   {
     this->setInstrument(m_inst);
     this->setDetectorID(m_DetectorID);
@@ -108,7 +108,7 @@ namespace DataObjects
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(3,3,true),
     m_InverseGoniometerMatrix(3,3,true),
-    m_RunNumber(0)
+    m_RunNumber(0),orig_H(0),orig_K(0),orig_L(0)
   {
     this->setInstrument(m_inst);
     this->setDetectorID(m_DetectorID);
@@ -130,7 +130,7 @@ namespace DataObjects
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(goniometer),
     m_InverseGoniometerMatrix(goniometer),
-    m_RunNumber(0)
+    m_RunNumber(0),orig_H(0),orig_K(0),orig_L(0)
   {
     if(fabs(m_InverseGoniometerMatrix.Invert())<1e-8) throw std::invalid_argument("Peak::ctor(): Goniometer matrix must non-singular.");
     this->setInstrument(m_inst);
@@ -150,7 +150,7 @@ namespace DataObjects
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(3,3,true),
     m_InverseGoniometerMatrix(3,3,true),
-    m_RunNumber(0)
+    m_RunNumber(0),orig_H(0),orig_K(0),orig_L(0)
   {
     this->setInstrument(m_inst);
     this->setWavelength(m_Wavelength);
@@ -590,9 +590,12 @@ namespace DataObjects
   /** Set all three H,K,L indices of the peak */
   void Peak::setHKL(double H, double K, double L)
   {
-    orig_H = m_H;
-    orig_K = m_K;
-    orig_L = m_L;
+    if(orig_H == 0 && orig_K == 0 && orig_K == 0)
+    {
+      orig_H = m_H;
+      orig_K = m_K;
+      orig_L = m_L;
+    }
     m_H = H;
     m_K = K;
     m_L = L;
@@ -613,9 +616,12 @@ namespace DataObjects
    */
   void Peak::setHKL(Mantid::Kernel::V3D HKL)
   {
-    orig_H = m_H;
-    orig_K = m_K;
-    orig_L = m_L;
+    if(orig_H == 0 && orig_K == 0 && orig_K == 0)
+    {
+      orig_H = m_H;
+      orig_K = m_K;
+      orig_L = m_L;
+    }
     m_H = HKL.X();
     m_K = HKL.Y();
     m_L = HKL.Z();
