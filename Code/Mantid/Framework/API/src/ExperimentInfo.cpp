@@ -572,6 +572,18 @@ namespace API
     file->writeData("type", "text/plain"); // mimetype
     file->closeGroup();
 
+    // Add new group that could contain instrument data
+    file->makeGroup("new_group","NXData", true);
+    std::vector<double> angles(6);
+    for( int i=0; i<6; i++) angles[i] = 15.0*(i+1);
+    file->makeGroup("Detector_1","NXDetector", true);
+    file->writeData("Polar_angle",angles);
+    file->closeGroup();
+    file->makeGroup("Detector_2","NXDetector", true);
+    file->writeData("Polar_angle",angles);
+    file->closeGroup();
+    file->closeGroup();
+
     file->closeGroup(); // (close the instrument group)
 
     m_sample->saveNexus(file, "sample");
