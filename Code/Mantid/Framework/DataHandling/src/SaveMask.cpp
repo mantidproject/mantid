@@ -7,7 +7,7 @@ This algorithm saves a SpecialWorkspace2D/MaskWorkspace to an XML file.
 
 *WIKI*/
 
-#include "MantidDataHandling/SaveDetectorMasks.h"
+#include "MantidDataHandling/SaveMask.h"
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidAPI/FileProperty.h"
@@ -34,30 +34,31 @@ namespace Mantid
 namespace DataHandling
 {
 
-  DECLARE_ALGORITHM(SaveDetectorMasks)
+  DECLARE_ALGORITHM(SaveMask)
 
   //----------------------------------------------------------------------------------------------
-  /** Constructor
+  /**
+   * Constructor
    */
-  SaveDetectorMasks::SaveDetectorMasks()
+  SaveMask::SaveMask()
   {
   }
-    
+
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  SaveDetectorMasks::~SaveDetectorMasks()
+  SaveMask::~SaveMask()
   {
   }
   
   /// Sets documentation strings for this algorithm
-  void SaveDetectorMasks::initDocs(){
+  void SaveMask::initDocs(){
     this->setWikiSummary("Save a MaskWorkspace/SpecialWorkspace2D to an XML file.");
     this->setOptionalMessage("Save a MaskWorkspace/SpecialWorkspace2D to an XML file.");
   }
 
   /// Define input parameters
-  void SaveDetectorMasks::init(){
+  void SaveMask::init(){
 
     declareProperty(new API::WorkspaceProperty<DataObjects::SpecialWorkspace2D>("InputWorkspace", "", Direction::Input),
         "MaskingWorkspace to output to XML file (SpecialWorkspace2D)");
@@ -67,7 +68,7 @@ namespace DataHandling
   }
 
   /// Main body to execute algorithm
-  void SaveDetectorMasks::exec(){
+  void SaveMask::exec(){
     // TODO This is a dummy prototype
 
     // 1. Get input

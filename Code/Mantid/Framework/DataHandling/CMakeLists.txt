@@ -48,8 +48,8 @@ set ( SRC_FILES
 	src/LoadNexusMonitors.cpp
 	src/LoadNexusProcessed.cpp
 	src/LoadParameterFile.cpp
-	src/LoadPreNexusMonitors.cpp
 	src/LoadPreNexus.cpp
+	src/LoadPreNexusMonitors.cpp
 	src/LoadQKK.cpp
 	src/LoadRKH.cpp
 	src/LoadRaw.cpp
@@ -94,6 +94,7 @@ set ( SRC_FILES
 	src/SaveGSS.cpp
 	src/SaveISISNexus.cpp
 	src/SaveIsawDetCal.cpp
+	src/SaveMask.cpp
 	src/SaveNISTDAT.cpp
 	src/SaveNXSPE.cpp
 	src/SaveNexus.cpp
@@ -157,8 +158,8 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadNexusMonitors.h
 	inc/MantidDataHandling/LoadNexusProcessed.h
 	inc/MantidDataHandling/LoadParameterFile.h
-	inc/MantidDataHandling/LoadPreNexusMonitors.h
 	inc/MantidDataHandling/LoadPreNexus.h
+	inc/MantidDataHandling/LoadPreNexusMonitors.h
 	inc/MantidDataHandling/LoadQKK.h
 	inc/MantidDataHandling/LoadRKH.h
 	inc/MantidDataHandling/LoadRaw.h
@@ -198,6 +199,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveGSS.h
 	inc/MantidDataHandling/SaveISISNexus.h
 	inc/MantidDataHandling/SaveIsawDetCal.h
+	inc/MantidDataHandling/SaveMask.h
 	inc/MantidDataHandling/SaveNISTDAT.h
 	inc/MantidDataHandling/SaveNXSPE.h
 	inc/MantidDataHandling/SaveNexus.h
@@ -289,11 +291,11 @@ set ( TEST_FILES
 	test/SaveCanSAS1dTest.h
 	test/SaveDASCTest.h
 	test/SaveDaveGrpTest.h
-	test/SaveDetectorMasksTest.h
 	test/SaveDetectorsGroupingTest.h
 	test/SaveDspacemapTest.h
 	test/SaveFocussedXYETest.h
 	test/SaveIsawDetCalTest.h
+	test/SaveMaskTest.h
 	test/SaveNISTDATTest.h
 	test/SaveNXSPETest.h
 	test/SaveNexusProcessedTest.h

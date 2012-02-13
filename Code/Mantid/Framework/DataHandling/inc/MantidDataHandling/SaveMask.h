@@ -33,14 +33,14 @@ namespace DataHandling
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport SaveDetectorMasks : public API::Algorithm
+  class DLLExport SaveMask : public API::Algorithm
   {
   public:
-    SaveDetectorMasks();
-    virtual ~SaveDetectorMasks();
+    SaveMask();
+    virtual ~SaveMask();
     
     /// Algorithm's name for identification
-    virtual const std::string name() const { return "SaveDetectorMasks";};
+    virtual const std::string name() const { return "SaveMask";};
     /// Algorithm's version for identification
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
