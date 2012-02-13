@@ -102,7 +102,7 @@ namespace MDEventsTestHelper
           // Put an event in the middle of each box
           Mantid::coord_t centers[nd];
           for (size_t d=0; d<nd; d++)
-            centers[d] = min + (coord_t(index[d])+coord_t(0.5))*(max-min)/coord_t(splitInto);
+            centers[d] = min + (coord_t(index[d])+0.5f)*(max-min)/coord_t(splitInto);
           out->addEvent( MDE(1.0, 1.0, centers) );
          }
 

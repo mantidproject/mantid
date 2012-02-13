@@ -432,7 +432,7 @@ namespace MDEvents
     for (size_t d=0; d<m_outD; d++)
     {
       origin[d] = m_binDimensions[d]->getMinimum();
-      scaling[d] = coord_t(1.0) / m_binDimensions[d]->getBinWidth();
+      scaling[d] = 1.0f / m_binDimensions[d]->getBinWidth();
       // Origin in the input
       m_origin[ m_dimensionToBinFrom[d] ] = origin[d];
       // Create a unit basis vector that corresponds to this

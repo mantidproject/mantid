@@ -367,7 +367,7 @@ public:
 
     dotest_integrateSphere(box, 5.0,5.0,5.0,  0.5,   1.0);
     dotest_integrateSphere(box, 0.5,0.5,0.5,  0.5,   0.0);
-    dotest_integrateSphere(box, 5.0,5.0,5.0,  coord_t(1.1),   7.0);
+    dotest_integrateSphere(box, 5.0,5.0,5.0,  1.1f,   7.0);
     dotest_integrateSphere(box, 5.0,5.0,5.0,  10., 9*9*9);
   }
 

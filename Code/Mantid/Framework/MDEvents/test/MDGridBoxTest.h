@@ -430,7 +430,7 @@ public:
 
     TS_ASSERT_DELTA(g->getVolume(), 30.0, 1e-5);
     MDLeanEvent<1> ev;
-    ev.setCenter(0, coord_t(30.9));
+    ev.setCenter(0, 30.9f);
     g->addEvent(ev);
     TSM_ASSERT_EQUALS("New event was added in the right spot.", g->getChild(9)->getNPoints(), 2);
   }
@@ -493,7 +493,7 @@ public:
     // Function of everything x > 1.51
     MDImplicitFunction * function = new MDImplicitFunction;
     coord_t normal[1] = {+1};
-    coord_t origin[1] = {coord_t(1.51)};
+    coord_t origin[1] = {1.51f};
     function->addPlane( MDPlane(1, normal, origin) );
 
     boxes.clear();
@@ -517,7 +517,7 @@ public:
 
     // Limit by another plane
     coord_t normal2[1] = {-1};
-    coord_t origin2[1] = {coord_t(2.99)};
+    coord_t origin2[1] = {2.99f};
     function->addPlane( MDPlane(1, normal2, origin2) );
     boxes.clear();
     parent->getBoxes(boxes, 3, false, function);
@@ -541,7 +541,7 @@ public:
     // ----- Infinitely thin plane for an implicit function ------------
     function = new MDImplicitFunction;
     coord_t normal3[1] = {-1};
-    coord_t origin3[1] = {coord_t(1.51)};
+    coord_t origin3[1] = {1.51f};
     function->addPlane( MDPlane(1, normal, origin) );
     function->addPlane( MDPlane(1, normal3, origin3) );
 
@@ -563,8 +563,8 @@ public:
     std::vector<IMDBox<MDLeanEvent<2>,2> *> boxes;
 
     // Function of x,y between 2 and 3
-    std::vector<coord_t> min(2, coord_t(1.99));
-    std::vector<coord_t> max(2, coord_t(3.01));
+    std::vector<coord_t> min(2, 1.99f);
+    std::vector<coord_t> max(2, 3.01f);
     MDImplicitFunction * function = new MDBoxImplicitFunction(min, max);
 
     boxes.clear();
@@ -608,8 +608,8 @@ public:
     std::vector<IMDBox<MDLeanEvent<2>,2> *> boxes;
 
     // Function of x,y with 0 width and height
-    std::vector<coord_t> min(2, coord_t(1.99));
-    std::vector<coord_t> max(2, coord_t(1.99));
+    std::vector<coord_t> min(2, 1.99f);
+    std::vector<coord_t> max(2, 1.99f);
     MDImplicitFunction * function = new MDBoxImplicitFunction(min, max);
 
     boxes.clear();
@@ -635,8 +635,8 @@ public:
     std::vector<IMDBox<MDLeanEvent<4>,4> *> boxes;
 
     // Function of x,y with 0 width and height
-    std::vector<coord_t> min(4, coord_t(1.99));
-    std::vector<coord_t> max(4, coord_t(1.99));
+    std::vector<coord_t> min(4, 1.99f);
+    std::vector<coord_t> max(4, 1.99f);
     MDImplicitFunction * function = new MDBoxImplicitFunction(min, max);
 
     boxes.clear();
@@ -994,7 +994,7 @@ public:
     if (DODEBUG) num_repeat = 20;
     Timer tim;
     if (DODEBUG) std::cout << "Adding " << num_repeat*10000 << " events...\n";
-    MDEventsTestHelper::feedMDBox<2>(b, num_repeat, 100, coord_t(0.05), coord_t(0.1));
+    MDEventsTestHelper::feedMDBox<2>(b, num_repeat, 100, 0.05f, 0.1f);
     if (DODEBUG) std::cout << "Adding events done in " << tim.elapsed() << "!\n";
 
     // Split those boxes in parallel.

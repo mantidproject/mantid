@@ -22,8 +22,8 @@ public:
     std::vector<coord_t> normal;
     std::vector<coord_t> point;
     TSM_ASSERT_THROWS_ANYTHING( "O-dimensions are not allowed.", MDPlane test(normal, point) );
-    normal.push_back(coord_t(1.234));
-    normal.push_back(coord_t(4.56));
+    normal.push_back(1.234f);
+    normal.push_back(4.56f);
     point.push_back(0);
     TSM_ASSERT_THROWS_ANYTHING( "Mismatched dimensions in normal/point are not allowed.", MDPlane test(normal, point) );
     point.push_back(0);
@@ -36,7 +36,7 @@ public:
 
   void test_constructor_bareArrays()
   {
-    coord_t normal[2] = {coord_t(1.234), coord_t(4.56)};
+    coord_t normal[2] = {1.234f, 4.56f};
     coord_t point[2] = {1.0, 0.0};
     TSM_ASSERT_THROWS_ANYTHING( "O-dimensions are not allowed.", MDPlane test(0, normal, point) );
     MDPlane p(2, normal, point);
@@ -281,10 +281,10 @@ public:
     coord_t point[4] = {1};
 
     std::vector<coord_t> pointA;
-    pointA.push_back(coord_t(0.111));
-    pointA.push_back(coord_t(0.222));
-    pointA.push_back(coord_t(0.333));
-    pointA.push_back(coord_t(0.444));
+    pointA.push_back(0.111f);
+    pointA.push_back(0.222f);
+    pointA.push_back(0.333f);
+    pointA.push_back(0.444f);
 
     MDPlane p(4, normal, point);
     bool res = false;
@@ -299,10 +299,10 @@ public:
 
   void test_3D_line()
   {
-    coord_t normal[3] = {coord_t(1.23), coord_t(2.34), coord_t(3.45)};
+    coord_t normal[3] = {1.23f, 2.34f, 3.45f};
     coord_t origin[3] = {3,0,0};
-    coord_t pointA[3] = {coord_t(0.111), coord_t(0.222), coord_t(0.333)};
-    coord_t pointB[3] = {coord_t(9.111), coord_t(9.222), coord_t(9.333)};
+    coord_t pointA[3] = {0.111f, 0.222f, 0.333f};
+    coord_t pointB[3] = {9.111f, 9.222f, 9.333f};
 
     MDPlane p(3, normal, origin);
     bool res = false;

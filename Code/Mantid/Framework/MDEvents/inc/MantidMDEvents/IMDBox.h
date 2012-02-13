@@ -260,7 +260,7 @@ namespace MDEvents
     void getCenter(coord_t * center) const
     {
       for (size_t d=0; d<nd; ++d)
-        center[d] = (extents[d].max + extents[d].min) / coord_t(2.0);
+        center[d] = (extents[d].max + extents[d].min) / 2.0f;
     }
 
     //-----------------------------------------------------------------------------------------------
@@ -275,7 +275,7 @@ namespace MDEvents
         volume *= (extents[d].max - extents[d].min);
       }
       /// Floating point multiplication is much faster than division, so cache 1/volume.
-      m_inverseVolume = coord_t(1.0) / volume;
+      m_inverseVolume = 1.0f / volume;
     }
 
     //-----------------------------------------------------------------------------------------------
@@ -357,7 +357,7 @@ namespace MDEvents
     /** Return the volume of the cell */
     coord_t getVolume() const
     {
-      return coord_t(1.0) / m_inverseVolume;
+      return 1.0f / m_inverseVolume;
     }
 
     //-----------------------------------------------------------------------------------------------

@@ -124,7 +124,7 @@ public:
     }
 
     TS_ASSERT_DELTA( ws2->getInverseVolume(), 1./16., 1e-6);
-    coord_t point[2] = {coord_t(21.1), coord_t(21.1)};
+    coord_t point[2] = {21.1f, 21.1f};
     TS_ASSERT_DELTA( ws2->getSignalAtCoord(point, Mantid::API::NoNormalization), 1.23, 1e-6);
 
 

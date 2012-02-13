@@ -139,7 +139,7 @@ namespace MDEvents
     coord_t volume = 1.0;
     for (size_t i=0; i < numDimensions; ++i)
       volume *= m_dimensions[i]->getBinWidth();
-    m_inverseVolume = coord_t(1.0) / volume;
+    m_inverseVolume = 1.0f / volume;
 
     // Continue with the vertexes array
     this->initVertexesArray();
@@ -294,7 +294,7 @@ namespace MDEvents
     VMD out(numDimensions);
     // Offset the 0th box by the position of this linear index, in each dimension, plus a half
     for (size_t d=0; d<numDimensions; d++)
-      out[d] = m_vertexesArray[d] + m_boxLength[d] * (coord_t(dimIndexes[d]) + coord_t(0.5));
+      out[d] = m_vertexesArray[d] + m_boxLength[d] * (coord_t(dimIndexes[d]) + 0.5f);
     return out;
   }
 

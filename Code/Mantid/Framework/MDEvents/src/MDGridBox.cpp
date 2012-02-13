@@ -94,7 +94,7 @@ namespace MDEvents
     coord_t volume = 1;
     for (size_t d=0; d<nd; d++)
       volume *= boxSize[d];
-    coord_t inverseVolume = coord_t(1.0) / volume;
+    coord_t inverseVolume = 1.0f / volume;
 
     // Create the array of MDBox contents.
     boxes.clear();

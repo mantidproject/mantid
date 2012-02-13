@@ -71,7 +71,7 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(Mantid::API::IMDWorkspace_c
         else
         {
           // Mid point along each dimension
-          m_start[d] = (dim->getMaximum() + dim->getMinimum()) / coord_t(2.0);
+          m_start[d] = (dim->getMaximum() + dim->getMinimum()) / 2.0f;
           m_end[d] = m_start[d];
         }
       }

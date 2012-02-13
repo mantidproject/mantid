@@ -391,9 +391,9 @@ public:
   void test_iterator_withImplicitFunction_between_37_and_39()
   {
     MDImplicitFunction * func = new MDImplicitFunction();
-    coord_t normal[1] = {+1.0}; coord_t origin[1] = {coord_t(37.1)};
+    coord_t normal[1] = {+1.0}; coord_t origin[1] = {37.1f};
     func->addPlane( MDPlane(1, normal, origin) );
-    coord_t normal2[1] = {-1.0}; coord_t origin2[1] = {coord_t(38.9)};
+    coord_t normal2[1] = {-1.0}; coord_t origin2[1] = {38.9f};
     func->addPlane( MDPlane(1, normal2, origin2) );
 
     // Create an iterator
@@ -414,9 +414,9 @@ public:
   void test_iterator_withImplicitFunction_between_37_and_39_leafOnly()
   {
     MDImplicitFunction * func = new MDImplicitFunction();
-    coord_t normal[1] = {+1.0}; coord_t origin[1] = {coord_t(37.1)};
+    coord_t normal[1] = {+1.0}; coord_t origin[1] = {37.1f};
     func->addPlane( MDPlane(1, normal, origin) );
-    coord_t normal2[1] = {-1.0}; coord_t origin2[1] = {coord_t(38.9)};
+    coord_t normal2[1] = {-1.0}; coord_t origin2[1] = {38.9f};
     func->addPlane( MDPlane(1, normal2, origin2) );
 
     // Create an iterator
@@ -492,8 +492,8 @@ public:
     MDBoxImplicitFunction * function = NULL;
     if (ImplicitFunction)
     {
-      std::vector<coord_t> min(3, coord_t(2.001));
-      std::vector<coord_t> max(3, coord_t(2.999));
+      std::vector<coord_t> min(3, 2.001f);
+      std::vector<coord_t> max(3, 2.999f);
       function = new MDBoxImplicitFunction(min, max);
     }
 
@@ -577,8 +577,8 @@ public:
     if (ImplicitFunction==1)
     {
       // Box in 3D where 2 < (x,y,z) < 3
-      std::vector<coord_t> min(3, coord_t(2.001));
-      std::vector<coord_t> max(3, coord_t(2.999));
+      std::vector<coord_t> min(3, 2.001f);
+      std::vector<coord_t> max(3, 2.999f);
       function = new MDBoxImplicitFunction(min, max);
       top->getBoxes(boxes, 20, leafOnly, function);
     }

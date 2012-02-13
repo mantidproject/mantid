@@ -21,9 +21,9 @@ public:
     std::vector<coord_t> min;
     std::vector<coord_t> max;
     TSM_ASSERT_THROWS_ANYTHING( "0 dimensions is bad.", MDBoxImplicitFunction f(min,max) );
-    min.push_back(coord_t(1.234));
+    min.push_back(1.234f);
     TSM_ASSERT_THROWS_ANYTHING( "Mismatch in nd", MDBoxImplicitFunction f(min,max) );
-    max.push_back(coord_t(4.56));
+    max.push_back(4.56f);
     TS_ASSERT_THROWS_NOTHING( MDBoxImplicitFunction f(min,max) );
   }
 
