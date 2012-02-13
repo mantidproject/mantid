@@ -290,13 +290,19 @@ namespace DataObjects
     // Go up 2 parents to find the rectangular detector
     IComponent_const_sptr parent = m_det->getParent();
     if (!parent) return;
-    m_BankName = parent->getName(); // Use the parent by default
+    m_BankName = parent->getName();
     parent = parent->getParent();
+    // Use the parent if there is no grandparent.
     if (!parent) return;
+    // Use the parent if the grandparent is the instrument
+    Instrument_const_sptr instrument = boost::dynamic_pointer_cast<const Instrument>(parent);
+    if (instrument) return;
+    // Use the grand-parent whenever possible
+    m_BankName = parent->getName();
+
+    // Special for rectangular detectors: find the row and column.
     RectangularDetector_const_sptr retDet = boost::dynamic_pointer_cast<const RectangularDetector>(parent);
     if (!retDet) return;
-    m_BankName = retDet->getName(); // Use the grand-parent for rectangular detectors
-
     std::pair<int,int> xy = retDet->getXYForDetectorID(m_DetectorID);
     m_Row = xy.second;
     m_Col = xy.first;
