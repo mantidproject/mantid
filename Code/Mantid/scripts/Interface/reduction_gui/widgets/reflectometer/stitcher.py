@@ -171,7 +171,6 @@ class StitcherWidget(BaseWidget):
             data = DataSet(item.name)
             data.load(True, True)
             xmin,xmax = data.get_range()
-            data.set_range(xmin+0.002,xmax-0.001)
             item.set_user_data(data)
 
             if item.is_selected():
