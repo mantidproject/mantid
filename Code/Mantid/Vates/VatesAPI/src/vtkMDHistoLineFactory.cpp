@@ -1,4 +1,4 @@
-#include "MantidVatesAPI/vtkThresholdingLineFactory.h"
+#include "MantidVatesAPI/vtkMDHistoLineFactory.h"
 #include "vtkCellArray.h"
 #include "vtkCellData.h"
 #include "vtkFloatArray.h"

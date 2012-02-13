@@ -9,7 +9,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/UserDefinedThresholdRange.h"
-#include "MantidVatesAPI/vtkMDEWHexahedronFactory.h"
+#include "MantidVatesAPI/vtkMDHexFactory.h"
 #include "MantidVatesAPI/NoThresholdRange.h"
 #include "MockObjects.h"
 #include <cxxtest/TestSuite.h>

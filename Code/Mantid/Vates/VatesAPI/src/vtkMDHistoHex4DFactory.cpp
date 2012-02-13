@@ -3,7 +3,7 @@
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidVatesAPI/TimeStepToTimeStep.h"
 #include "MantidVatesAPI/TimeToTimeStep.h"
-#include "MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h"
+#include "MantidVatesAPI/vtkMDHistoHex4DFactory.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 
 using Mantid::API::IMDWorkspace;
@@ -24,7 +24,7 @@ namespace VATES
 
     /**
   Assigment operator
-  @param other : vtkThresholdingHexahedronFactory to assign to this instance from.
+  @param other : vtkMDHistoHex4DFactory to assign to this instance from.
   @return ref to assigned current instance.
   */
   template<typename TimeMapper>

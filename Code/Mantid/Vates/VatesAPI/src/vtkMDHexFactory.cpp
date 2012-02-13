@@ -1,7 +1,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidMDEvents/MDEventFactory.h"
-#include "MantidVatesAPI/vtkMDEWHexahedronFactory.h"
+#include "MantidVatesAPI/vtkMDHexFactory.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <vtkCellData.h>
 #include <vtkFloatArray.h>

@@ -38,12 +38,12 @@ src/vtkDataSetToWsLocation.cpp
 src/vtkMDLineFactory.cpp
 src/vtkMDQuadFactory.cpp
 src/vtkSplatterPlotFactory.cpp
-src/vtkMDEWHexahedronFactory.cpp
+src/vtkMDHexFactory.cpp
 src/vtkPeakMarkerFactory.cpp
-src/vtkThresholdingHexahedronFactory.cpp
-src/vtkThresholdingLineFactory.cpp
-src/vtkThresholdingQuadFactory.cpp
-src/vtkThresholdingUnstructuredGridFactory.cpp
+src/vtkMDHistoHexFactory.cpp
+src/vtkMDHistoLineFactory.cpp
+src/vtkMDHistoQuadFactory.cpp
+src/vtkMDHistoHex4DFactory.cpp
 src/SQWLoadingPresenter.cpp
 )
 
@@ -95,13 +95,13 @@ inc/MantidVatesAPI/vtkDataSetToWsName.h
 inc/MantidVatesAPI/vtkDataSetToWsLocation.h
 inc/MantidVatesAPI/vtkMDLineFactory.h
 inc/MantidVatesAPI/vtkMDQuadFactory.h
-inc/MantidVatesAPI/vtkMDEWHexahedronFactory.h
+inc/MantidVatesAPI/vtkMDHexFactory.h
 inc/MantidVatesAPI/vtkSplatterPlotFactory.h
 inc/MantidVatesAPI/vtkPeakMarkerFactory.h
-inc/MantidVatesAPI/vtkThresholdingHexahedronFactory.h
-inc/MantidVatesAPI/vtkThresholdingLineFactory.h
-inc/MantidVatesAPI/vtkThresholdingQuadFactory.h
-inc/MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h
+inc/MantidVatesAPI/vtkMDHistoHexFactory.h
+inc/MantidVatesAPI/vtkMDHistoLineFactory.h
+inc/MantidVatesAPI/vtkMDHistoQuadFactory.h
+inc/MantidVatesAPI/vtkMDHistoHex4DFactory.h
 inc/MantidVatesAPI/WorkspaceProvider.h
 )
 
@@ -117,13 +117,13 @@ test/vtkDataSetFactoryTest.h
 test/vtkDataSetToGeometryTest.h
 test/vtkMDLineFactoryTest.h
 test/vtkMDQuadFactoryTest.h
-test/vtkMDEWHexahedronFactoryTest.h
+test/vtkMDHexFactoryTest.h
 test/vtkSplatterPlotFactoryTest.h
 test/vtkPeakMarkerFactoryTest.h
-test/vtkThresholdingUnstructuredGridFactoryTest.h
-test/vtkThresholdingHexahedronFactoryTest.h
-test/vtkThresholdingLineFactoryTest.h
-test/vtkThresholdingQuadFactoryTest.h
+test/vtkMDHistoHex4DFactoryTest.h
+test/vtkMDHistoHexFactoryTest.h
+test/vtkMDHistoLineFactoryTest.h
+test/vtkMDHistoQuadFactoryTest.h
 test/FieldDataToMetadataTest.h
 test/FilteringUpdateProgressActionTest.h
 test/MDLoadingViewAdapterTest.h

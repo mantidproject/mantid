@@ -1,7 +1,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
-#include "MantidVatesAPI/vtkThresholdingHexahedronFactory.h"
+#include "MantidVatesAPI/vtkMDHistoHexFactory.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <vtkImageData.h>
 #include <vtkRectilinearGrid.h>

@@ -2,7 +2,7 @@
 #include "MantidKernel/CPUTimer.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidAPI/NullCoordTransform.h"
-#include "MantidVatesAPI/vtkThresholdingQuadFactory.h"
+#include "MantidVatesAPI/vtkMDHistoQuadFactory.h"
 #include "vtkCellArray.h"
 #include "vtkCellData.h"
 #include "vtkFloatArray.h"
