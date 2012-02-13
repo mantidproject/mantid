@@ -1,5 +1,5 @@
-#ifndef MANTID_VATES_VTKUNSTRUCTUREDGRIDFACTORY_H_
-#define MANTID_VATES_VTKUNSTRUCTUREDGRIDFACTORY_H_
+#ifndef MANTID_VATES_VTK_MD_HISTO_HEX4D_FACTORY_H_
+#define MANTID_VATES_VTK_MD_HISTO_HEX4D_FACTORY_H_
 
 /** Concrete implementation of vtkDataSetFactory. Creates a vtkUnStructuredGrid. Uses Thresholding technique
  * to create sparse 4D representation of data.
@@ -43,22 +43,22 @@ namespace VATES
 {
 
 template<typename TimeMapper>
-class DLLExport vtkThresholdingUnstructuredGridFactory: public vtkThresholdingHexahedronFactory
+class DLLExport vtkMDHistoHex4DFactory: public vtkMDHistoHexFactory
 {
 public:
 
   /// Constructor
-  vtkThresholdingUnstructuredGridFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarname,
+  vtkMDHistoHex4DFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarname,
       const double timestep);
 
   /// Assignment operator
-  vtkThresholdingUnstructuredGridFactory& operator=(const vtkThresholdingUnstructuredGridFactory<TimeMapper>& other);
+  vtkMDHistoHex4DFactory& operator=(const vtkMDHistoHex4DFactory<TimeMapper>& other);
 
   /// Copy constructor.
-  vtkThresholdingUnstructuredGridFactory(const vtkThresholdingUnstructuredGridFactory<TimeMapper>& other);
+  vtkMDHistoHex4DFactory(const vtkMDHistoHex4DFactory<TimeMapper>& other);
 
   /// Destructor
-  ~vtkThresholdingUnstructuredGridFactory();
+  ~vtkMDHistoHex4DFactory();
 
   /// Initialize the object with a workspace.
   virtual void initialize(Mantid::API::Workspace_sptr workspace);
@@ -68,7 +68,7 @@ public:
 
   virtual std::string getFactoryTypeName() const
   {
-    return "vtkThresholdingUnstructuredGridFactory";
+    return "vtkMDHistoHex4DFactory";
   }
 
 protected:

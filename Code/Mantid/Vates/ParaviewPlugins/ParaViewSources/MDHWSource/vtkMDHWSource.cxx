@@ -90,8 +90,8 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     /*
     Will attempt to handle drawing in 4D case and then in 3D case if that fails.
     */
-    vtkThresholdingHexahedronFactory* successor = new vtkThresholdingHexahedronFactory(thresholdRange, "signal");
-    vtkThresholdingUnstructuredGridFactory<TimeToTimeStep> *factory = new vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>(thresholdRange, "signal", m_time);
+    vtkMDHistoHexFactory* successor = new vtkMDHistoHexFactory(thresholdRange, "signal");
+    vtkMDHistoHex4DFactory<TimeToTimeStep> *factory = new vtkMDHistoHex4DFactory<TimeToTimeStep>(thresholdRange, "signal", m_time);
     factory->SetSuccessor(successor);
     factory->setCheckDimensionality(false);
 

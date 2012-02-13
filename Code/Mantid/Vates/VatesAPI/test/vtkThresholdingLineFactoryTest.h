@@ -1,5 +1,5 @@
-#ifndef VTK_THRESHOLDING_LINE_FACTORY_TEST_H
-#define VTK_THRESHOLDING_LINE_FACTORY_TEST_H
+#ifndef VTK_MD_HISTO_LINE_FACTORY_TEST_H_
+#define VTK_MD_HISOT_LINE_FACTORY_TEST_H_
 
 #include "MantidAPI/IMDIterator.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
@@ -22,7 +22,7 @@ using namespace testing;
 //=====================================================================================
 // Functional tests
 //=====================================================================================
-class vtkThresholdingLineFactoryTest: public CxxTest::TestSuite
+class vtkMDHistoLineFactoryTest: public CxxTest::TestSuite
 {
 
 public:
@@ -32,14 +32,14 @@ public:
     IMDWorkspace* nullWorkspace = NULL;
     Mantid::API::IMDWorkspace_sptr ws_sptr(nullWorkspace);
 
-    vtkThresholdingLineFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
+    vtkMDHistoLineFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
 
     TSM_ASSERT_THROWS("No workspace, so should not be possible to complete initialization.", factory.initialize(ws_sptr), std::invalid_argument);
   }
 
   void testCreateWithoutInitializeThrows()
   {
-    vtkThresholdingLineFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
+    vtkMDHistoLineFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
     TS_ASSERT_THROWS(factory.create(), std::runtime_error);
   }
 
@@ -48,7 +48,7 @@ public:
     Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 1);
 
     //Thresholds have been set such that the signal values (hard-coded to 1, see above) will fall between the minimum 0 and maximum 2.
-    vtkThresholdingLineFactory inside(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 2)), "signal");
+    vtkMDHistoLineFactory inside(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 2)), "signal");
     inside.initialize(ws_sptr);
     vtkUnstructuredGrid* insideProduct = dynamic_cast<vtkUnstructuredGrid*>(inside.create());
 
@@ -64,7 +64,7 @@ public:
     Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 1);
 
     //Thresholds have been set such that the signal values (hard-coded to 1, see above) will fall above and outside the minimum 0 and maximum 0.5.
-    vtkThresholdingLineFactory above(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 0.5)), "signal");
+    vtkMDHistoLineFactory above(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 0.5)), "signal");
     above.initialize(ws_sptr);
     vtkUnstructuredGrid* aboveProduct = dynamic_cast<vtkUnstructuredGrid*>(above.create());
 
@@ -77,7 +77,7 @@ public:
     Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 1);
 
     //Thresholds have been set such that the signal values (hard-coded to 1, see above) will fall below and outside the minimum 1.5 and maximum 2.
-    vtkThresholdingLineFactory below(ThresholdRange_scptr(new UserDefinedThresholdRange(1.5, 2)), "signal");
+    vtkMDHistoLineFactory below(ThresholdRange_scptr(new UserDefinedThresholdRange(1.5, 2)), "signal");
     below.initialize(ws_sptr);
     vtkUnstructuredGrid* belowProduct = dynamic_cast<vtkUnstructuredGrid*>(below.create());
 
@@ -96,7 +96,7 @@ public:
     EXPECT_CALL(*pMockFactorySuccessor, getFactoryTypeName()).WillOnce(testing::Return("TypeA")); 
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
-    vtkThresholdingLineFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
+    vtkMDHistoLineFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
 
     //Successor is provided.
     factory.SetSuccessor(pMockFactorySuccessor);
@@ -112,7 +112,7 @@ public:
     Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
-    vtkThresholdingLineFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)),"signal");
+    vtkMDHistoLineFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)),"signal");
 
     TSM_ASSERT_THROWS("Should have thrown an execption given that no successor was available.", factory.initialize(ws_sptr), std::runtime_error);
   }
@@ -129,7 +129,7 @@ public:
     EXPECT_CALL(*pMockFactorySuccessor, getFactoryTypeName()).WillOnce(testing::Return("TypeA")); 
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
-    vtkThresholdingLineFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)),"signal");
+    vtkMDHistoLineFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)),"signal");
 
     //Successor is provided.
     factory.SetSuccessor(pMockFactorySuccessor);
@@ -142,8 +142,8 @@ public:
 
   void testTypeName()
   {
-    vtkThresholdingLineFactory factory (ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)),"signal");
-    TS_ASSERT_EQUALS("vtkThresholdingLineFactory", factory.getFactoryTypeName());
+    vtkMDHistoLineFactory factory (ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)),"signal");
+    TS_ASSERT_EQUALS("vtkMDHistoLineFactory", factory.getFactoryTypeName());
   }
 
 };
@@ -151,7 +151,7 @@ public:
 //=====================================================================================
 // Performance tests
 //=====================================================================================
-class vtkThresholdingLineFactoryTestPerformance : public CxxTest::TestSuite
+class vtkMDHistoLineFactoryTestPerformance : public CxxTest::TestSuite
 {
 
 private:
@@ -167,7 +167,7 @@ public:
 	void testGenerateVTKDataSet()
 	{
     //Thresholds have been set such that the signal values (hard-coded to 1, see above) will fall between the minimum 0 and maximum 2.
-    vtkThresholdingLineFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 2)),"signal");
+    vtkMDHistoLineFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 2)),"signal");
     factory.initialize(m_ws_sptr);
     TS_ASSERT_THROWS_NOTHING(factory.create());
 	}

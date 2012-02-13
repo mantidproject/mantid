@@ -20,17 +20,17 @@ namespace Mantid
 namespace VATES 
 {
 
-  vtkThresholdingHexahedronFactory::vtkThresholdingHexahedronFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName) :
+  vtkMDHistoHexFactory::vtkMDHistoHexFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName) :
   m_scalarName(scalarName), m_thresholdRange(thresholdRange)
   {
   }
 
   /**
   Assigment operator
-  @param other : vtkThresholdingHexahedronFactory to assign to this instance from.
+  @param other : vtkMDHistoHexFactory to assign to this instance from.
   @return ref to assigned current instance.
   */
-  vtkThresholdingHexahedronFactory& vtkThresholdingHexahedronFactory::operator=(const vtkThresholdingHexahedronFactory& other)
+  vtkMDHistoHexFactory& vtkMDHistoHexFactory::operator=(const vtkMDHistoHexFactory& other)
   {
     if(this != &other)
     {
@@ -45,14 +45,14 @@ namespace VATES
   Copy Constructor
   @param other : instance to copy from.
   */
-  vtkThresholdingHexahedronFactory::vtkThresholdingHexahedronFactory(const vtkThresholdingHexahedronFactory& other)
+  vtkMDHistoHexFactory::vtkMDHistoHexFactory(const vtkMDHistoHexFactory& other)
   {
    this->m_scalarName = other.m_scalarName;
    this->m_thresholdRange = other.m_thresholdRange;
    this->m_workspace = other.m_workspace;
   }
 
-  void vtkThresholdingHexahedronFactory::initialize(Mantid::API::Workspace_sptr workspace)
+  void vtkMDHistoHexFactory::initialize(Mantid::API::Workspace_sptr workspace)
   {
     m_workspace = doInitialize<MDHistoWorkspace, 3>(workspace);
 
@@ -61,7 +61,7 @@ namespace VATES
     m_thresholdRange->calculate();
   }
 
-  void vtkThresholdingHexahedronFactory::validateWsNotNull() const
+  void vtkMDHistoHexFactory::validateWsNotNull() const
   {
     
     if(NULL == m_workspace.get())
@@ -70,7 +70,7 @@ namespace VATES
     }
   }
 
-  void vtkThresholdingHexahedronFactory::validate() const
+  void vtkMDHistoHexFactory::validate() const
   {
     validateWsNotNull();
   }
@@ -83,7 +83,7 @@ namespace VATES
    * @param do4D :: if true, create a 4D dataset, else to 3D
    * @return the vtkDataSet created
    */
-  vtkDataSet* vtkThresholdingHexahedronFactory::create3Dor4D(size_t timestep, bool do4D) const
+  vtkDataSet* vtkMDHistoHexFactory::create3Dor4D(size_t timestep, bool do4D) const
   {
     // Acquire a scoped read-only lock to the workspace (prevent segfault from algos modifying ws)
     ReadLock lock(*m_workspace);
@@ -282,7 +282,7 @@ namespace VATES
    * will call the successor if the # of dimensions is not for this factory.
    * @return
    */
-  vtkDataSet* vtkThresholdingHexahedronFactory::create() const
+  vtkDataSet* vtkMDHistoHexFactory::create() const
   {
     vtkDataSet* product = tryDelegatingCreation<MDHistoWorkspace, 3>(m_workspace);
     if(product != NULL)
@@ -297,7 +297,7 @@ namespace VATES
   }
 
 
-  vtkThresholdingHexahedronFactory::~vtkThresholdingHexahedronFactory()
+  vtkMDHistoHexFactory::~vtkMDHistoHexFactory()
   {
   }
 

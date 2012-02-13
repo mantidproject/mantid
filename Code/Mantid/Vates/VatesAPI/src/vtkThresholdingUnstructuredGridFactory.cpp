@@ -16,8 +16,8 @@ namespace VATES
 {
 
   template<typename TimeMapper>
-  vtkThresholdingUnstructuredGridFactory<TimeMapper>::vtkThresholdingUnstructuredGridFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName, const double timestep)
-  : vtkThresholdingHexahedronFactory(thresholdRange,  scalarName),
+  vtkMDHistoHex4DFactory<TimeMapper>::vtkMDHistoHex4DFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName, const double timestep)
+  : vtkMDHistoHexFactory(thresholdRange,  scalarName),
     m_timestep(timestep)
   {
   }
@@ -28,7 +28,7 @@ namespace VATES
   @return ref to assigned current instance.
   */
   template<typename TimeMapper>
-  vtkThresholdingUnstructuredGridFactory<TimeMapper>& vtkThresholdingUnstructuredGridFactory<TimeMapper>::operator=(const vtkThresholdingUnstructuredGridFactory<TimeMapper>& other)
+  vtkMDHistoHex4DFactory<TimeMapper>& vtkMDHistoHex4DFactory<TimeMapper>::operator=(const vtkMDHistoHex4DFactory<TimeMapper>& other)
   {
     if(this != &other)
     {
@@ -46,8 +46,8 @@ namespace VATES
   @param other : instance to copy from.
   */
   template<typename TimeMapper>
-  vtkThresholdingUnstructuredGridFactory<TimeMapper>::vtkThresholdingUnstructuredGridFactory(const vtkThresholdingUnstructuredGridFactory<TimeMapper>& other)
-   : vtkThresholdingHexahedronFactory(other),
+  vtkMDHistoHex4DFactory<TimeMapper>::vtkMDHistoHex4DFactory(const vtkMDHistoHex4DFactory<TimeMapper>& other)
+   : vtkMDHistoHexFactory(other),
      m_timestep(other.m_timestep), m_timeMapper(other.m_timeMapper)
   {
     
@@ -55,7 +55,7 @@ namespace VATES
 
 
   template<typename TimeMapper>
-  void vtkThresholdingUnstructuredGridFactory<TimeMapper>::initialize(Mantid::API::Workspace_sptr workspace)
+  void vtkMDHistoHex4DFactory<TimeMapper>::initialize(Mantid::API::Workspace_sptr workspace)
   {
     m_workspace = doInitialize<MDHistoWorkspace, 4>(workspace);
     if(m_workspace != NULL)
@@ -73,13 +73,13 @@ namespace VATES
   }
 
   template<typename TimeMapper>
-  void vtkThresholdingUnstructuredGridFactory<TimeMapper>::validate() const
+  void vtkMDHistoHex4DFactory<TimeMapper>::validate() const
   {
     validateWsNotNull();
   }
 
   template<typename TimeMapper>
-  vtkDataSet* vtkThresholdingUnstructuredGridFactory<TimeMapper>::create() const
+  vtkDataSet* vtkMDHistoHex4DFactory<TimeMapper>::create() const
   {
     vtkDataSet* product = tryDelegatingCreation<MDHistoWorkspace, 4>(m_workspace);
     if(product != NULL)
@@ -95,12 +95,12 @@ namespace VATES
 
 
   template<typename TimeMapper>
-  vtkThresholdingUnstructuredGridFactory<TimeMapper>::~vtkThresholdingUnstructuredGridFactory()
+  vtkMDHistoHex4DFactory<TimeMapper>::~vtkMDHistoHex4DFactory()
   {
   }
 
-  template class vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>;
-  template class vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep>;
+  template class vtkMDHistoHex4DFactory<TimeToTimeStep>;
+  template class vtkMDHistoHex4DFactory<TimeStepToTimeStep>;
 
 }
 }

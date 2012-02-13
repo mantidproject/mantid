@@ -1,5 +1,5 @@
-#ifndef VTK_MDEW_HEXAHEDRON_FACTORY_TEST
-#define VTK_MDEW_HEXAHEDRON_FACTORY_TEST
+#ifndef VTK_MD_HEX_FACTORY_TEST
+#define VTK_MD_HEX_FACTORY_TEST
 
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
@@ -28,7 +28,7 @@ using namespace testing;
 //=====================================================================================
 // Functional tests
 //=====================================================================================
-class vtkMDEWHexahedronFactoryTest : public CxxTest::TestSuite
+class vtkMDHexFactoryTest : public CxxTest::TestSuite
 {
 private:
 
@@ -47,7 +47,7 @@ private:
 
     Workspace_sptr binned_ws = AnalysisDataService::Instance().retrieve("binned");
 
-    vtkMDEWHexahedronFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
+    vtkMDHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
     factory.setCheckDimensionality(doCheckDimensionality);
     if(doCheckDimensionality)
     {
@@ -68,13 +68,13 @@ public:
 
   void testCreateWithoutInitalizeThrows()
   {
-    vtkMDEWHexahedronFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
+    vtkMDHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
     TSM_ASSERT_THROWS("Have NOT initalized object. Should throw.", factory.create(), std::runtime_error);
   }
 
   void testInitalizeWithNullWorkspaceThrows()
   {
-    vtkMDEWHexahedronFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
+    vtkMDHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
 
     IMDEventWorkspace* ws = NULL;
     TSM_ASSERT_THROWS("This is a NULL workspace. Should throw.", factory.initialize( Workspace_sptr(ws) ), std::invalid_argument);
@@ -83,8 +83,8 @@ public:
 
   void testGetFactoryTypeName()
   {
-    vtkMDEWHexahedronFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
-    TS_ASSERT_EQUALS("vtkMDEWHexahedronFactory", factory.getFactoryTypeName());
+    vtkMDHexFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+    TS_ASSERT_EQUALS("vtkMDHexFactory", factory.getFactoryTypeName());
   }
 
   void testInitializeDelegatesToSuccessor()
@@ -93,7 +93,7 @@ public:
     EXPECT_CALL(*mockSuccessor, initialize(_)).Times(1);
     EXPECT_CALL(*mockSuccessor, getFactoryTypeName()).Times(1);
 
-    vtkMDEWHexahedronFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+    vtkMDHexFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
     factory.SetSuccessor(mockSuccessor);
 
     ITableWorkspace_sptr ws(new Mantid::DataObjects::TableWorkspace);
@@ -109,7 +109,7 @@ public:
     EXPECT_CALL(*mockSuccessor, create()).Times(1).WillOnce(Return(vtkStructuredGrid::New()));
     EXPECT_CALL(*mockSuccessor, getFactoryTypeName()).Times(1);
 
-    vtkMDEWHexahedronFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+    vtkMDHexFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
     factory.SetSuccessor(mockSuccessor);
 
     ITableWorkspace_sptr ws(new Mantid::DataObjects::TableWorkspace);
@@ -121,7 +121,7 @@ public:
 
   void testOnInitaliseCannotDelegateToSuccessor()
   {
-    vtkMDEWHexahedronFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+    vtkMDHexFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
     //factory.SetSuccessor(mockSuccessor); No Successor set.
 
     ITableWorkspace_sptr ws(new Mantid::DataObjects::TableWorkspace);
@@ -130,7 +130,7 @@ public:
 
   void testCreateWithoutInitializeThrows()
   {
-    vtkMDEWHexahedronFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+    vtkMDHexFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
     //initialize not called!
     TS_ASSERT_THROWS(factory.create(), std::runtime_error);
   }
@@ -149,7 +149,7 @@ public:
   void test_3DWorkspace()
   {
     Mantid::MDEvents::MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
-    vtkMDEWHexahedronFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
+    vtkMDHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
     factory.initialize(ws);
     vtkDataSet* product = NULL;
 
@@ -180,7 +180,7 @@ public:
   void test_4DWorkspace()
   {
     Mantid::MDEvents::MDEventWorkspace4Lean::sptr ws = MDEventsTestHelper::makeMDEW<4>(5, -10.0, 10.0, 1);
-    vtkMDEWHexahedronFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
+    vtkMDHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
     factory.initialize(ws);
     vtkDataSet* product = NULL;
 
@@ -214,7 +214,7 @@ public:
 //=====================================================================================
 // Performance tests
 //=====================================================================================
-class vtkMDEWHexahedronFactoryTestPerformance : public CxxTest::TestSuite
+class vtkMDHexFactoryTestPerformance : public CxxTest::TestSuite
 {
 
 private:
@@ -233,7 +233,7 @@ public :
   /* Create 1E6 cells*/
   void test_CreateDataSet_from3D()
   {
-    vtkMDEWHexahedronFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
+    vtkMDHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
     factory.initialize(m_ws3);
     vtkDataSet* product = NULL;
 
@@ -267,7 +267,7 @@ public :
   /* Create 1E6 cells*/
   void test_CreateDataSet_from4D()
   {
-    vtkMDEWHexahedronFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
+    vtkMDHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
     factory.initialize(m_ws4);
     vtkDataSet* product = NULL;
 

@@ -22,16 +22,16 @@ namespace Mantid
   namespace VATES
   {
 
-    vtkThresholdingQuadFactory::vtkThresholdingQuadFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName) : m_scalarName(scalarName), m_thresholdRange(thresholdRange)
+    vtkMDHistoQuadFactory::vtkMDHistoQuadFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName) : m_scalarName(scalarName), m_thresholdRange(thresholdRange)
     {
     }
 
           /**
   Assigment operator
-  @param other : vtkThresholdingQuadFactory to assign to this instance from.
+  @param other : vtkMDHistoQuadFactory to assign to this instance from.
   @return ref to assigned current instance.
   */
-  vtkThresholdingQuadFactory& vtkThresholdingQuadFactory::operator=(const vtkThresholdingQuadFactory& other)
+  vtkMDHistoQuadFactory& vtkMDHistoQuadFactory::operator=(const vtkMDHistoQuadFactory& other)
   {
     if(this != &other)
     {
@@ -46,14 +46,14 @@ namespace Mantid
   Copy Constructor
   @param other : instance to copy from.
   */
-  vtkThresholdingQuadFactory::vtkThresholdingQuadFactory(const vtkThresholdingQuadFactory& other)
+  vtkMDHistoQuadFactory::vtkMDHistoQuadFactory(const vtkMDHistoQuadFactory& other)
   {
    this->m_scalarName = other.m_scalarName;
    this->m_thresholdRange = other.m_thresholdRange;
    this->m_workspace = other.m_workspace;
   }
 
-    vtkDataSet* vtkThresholdingQuadFactory::create() const
+    vtkDataSet* vtkMDHistoQuadFactory::create() const
     {
       vtkDataSet* product = tryDelegatingCreation<MDHistoWorkspace, 2>(m_workspace);
       if(product != NULL)
@@ -205,7 +205,7 @@ namespace Mantid
       }
     }
 
-    void vtkThresholdingQuadFactory::initialize(Mantid::API::Workspace_sptr wspace_sptr)
+    void vtkMDHistoQuadFactory::initialize(Mantid::API::Workspace_sptr wspace_sptr)
     {
       m_workspace = doInitialize<MDHistoWorkspace, 2>(wspace_sptr);
 
@@ -214,7 +214,7 @@ namespace Mantid
       m_thresholdRange->calculate();
     }
 
-    void vtkThresholdingQuadFactory::validate() const
+    void vtkMDHistoQuadFactory::validate() const
     {
       if(NULL == m_workspace.get())
       {
@@ -222,7 +222,7 @@ namespace Mantid
       }
     }
 
-    vtkThresholdingQuadFactory::~vtkThresholdingQuadFactory()
+    vtkMDHistoQuadFactory::~vtkMDHistoQuadFactory()
     {
 
     }

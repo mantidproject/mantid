@@ -25,13 +25,13 @@ namespace Mantid
     @Param thresholdRange : Threshold range strategy
     @scalarName : Name for scalar signal array.
     */
-    vtkMDEWHexahedronFactory::vtkMDEWHexahedronFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName, const size_t maxDepth) :
+    vtkMDHexFactory::vtkMDHexFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName, const size_t maxDepth) :
   m_thresholdRange(thresholdRange), m_scalarName(scalarName), m_maxDepth(maxDepth), m_time(0)
   {
   }
 
   /// Destructor
-  vtkMDEWHexahedronFactory::~vtkMDEWHexahedronFactory()
+  vtkMDHexFactory::~vtkMDHexFactory()
   {
   }
 
@@ -41,7 +41,7 @@ namespace Mantid
   * @return a fully constructed vtkUnstructuredGrid containing geometric and scalar data.
   */
   template<typename MDE, size_t nd>
-  void vtkMDEWHexahedronFactory::doCreate(typename MDEventWorkspace<MDE, nd>::sptr ws) const
+  void vtkMDHexFactory::doCreate(typename MDEventWorkspace<MDE, nd>::sptr ws) const
   {
     bool VERBOSE = true;
     CPUTimer tim;
@@ -188,7 +188,7 @@ namespace Mantid
   Generate the vtkDataSet from the objects input IMDEventWorkspace
   @Return a fully constructed vtkUnstructuredGrid containing geometric and scalar data.
   */
-  vtkDataSet* vtkMDEWHexahedronFactory::create() const
+  vtkDataSet* vtkMDHexFactory::create() const
   {
     this->dataSet = tryDelegatingCreation<IMDEventWorkspace, 3>(m_workspace, false);
     if(this->dataSet != NULL)
@@ -258,7 +258,7 @@ namespace Mantid
   dataobjects (workspaces) to run against at a later time. If workspace is not an IMDEventWorkspace, attempts to use any run-time successor set.
   @Param ws : Workspace to use.
   */
-  void vtkMDEWHexahedronFactory::initialize(Mantid::API::Workspace_sptr ws)
+  void vtkMDHexFactory::initialize(Mantid::API::Workspace_sptr ws)
   {
     IMDEventWorkspace_sptr imdws = doInitialize<IMDEventWorkspace, 3>(ws, false);
     m_workspace = imdws;
@@ -269,17 +269,17 @@ namespace Mantid
   }
 
   /// Validate the current object.
-  void vtkMDEWHexahedronFactory::validate() const
+  void vtkMDHexFactory::validate() const
   { 
     if(!m_workspace)
     {
-      throw std::runtime_error("Invalid vtkMDEWHexahedronFactory. Workspace is null");
+      throw std::runtime_error("Invalid vtkMDHexFactory. Workspace is null");
     }
   }
 
   /** Sets the recursion depth to a specified level in the workspace.
   */
-  void vtkMDEWHexahedronFactory::setRecursionDepth(size_t depth)
+  void vtkMDHexFactory::setRecursionDepth(size_t depth)
   {
     m_maxDepth = depth;
   }
@@ -287,7 +287,7 @@ namespace Mantid
   /*
   Set the time value.
   */
-  void vtkMDEWHexahedronFactory::setTime(double time)
+  void vtkMDHexFactory::setTime(double time)
   {
     m_time = time;
   }

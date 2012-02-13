@@ -21,17 +21,17 @@ namespace Mantid
   namespace VATES
   {
 
-    vtkThresholdingLineFactory::vtkThresholdingLineFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName) : m_scalarName(scalarName),
+    vtkMDHistoLineFactory::vtkMDHistoLineFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName) : m_scalarName(scalarName),
       m_thresholdRange(thresholdRange)
     {
     }
 
       /**
   Assigment operator
-  @param other : vtkThresholdingLineFactory to assign to this instance from.
+  @param other : vtkMDHistoLineFactory to assign to this instance from.
   @return ref to assigned current instance.
   */
-  vtkThresholdingLineFactory& vtkThresholdingLineFactory::operator=(const vtkThresholdingLineFactory& other)
+  vtkMDHistoLineFactory& vtkMDHistoLineFactory::operator=(const vtkMDHistoLineFactory& other)
   {
     if(this != &other)
     {
@@ -46,14 +46,14 @@ namespace Mantid
   Copy Constructor
   @param other : instance to copy from.
   */
-  vtkThresholdingLineFactory::vtkThresholdingLineFactory(const vtkThresholdingLineFactory& other)
+  vtkMDHistoLineFactory::vtkMDHistoLineFactory(const vtkMDHistoLineFactory& other)
   {
    this->m_scalarName = other.m_scalarName;
    this->m_thresholdRange = other.m_thresholdRange;
    this->m_workspace = other.m_workspace;
   }
 
-    vtkDataSet* vtkThresholdingLineFactory::create() const
+    vtkDataSet* vtkMDHistoLineFactory::create() const
     {
       vtkDataSet* product = tryDelegatingCreation<MDHistoWorkspace, 1>(m_workspace);
       if(product != NULL)
@@ -144,7 +144,7 @@ namespace Mantid
       }
     }
 
-    void vtkThresholdingLineFactory::initialize(Mantid::API::Workspace_sptr wspace_sptr)
+    void vtkMDHistoLineFactory::initialize(Mantid::API::Workspace_sptr wspace_sptr)
     {
       m_workspace = this->doInitialize<MDHistoWorkspace, 1>(wspace_sptr);
       
@@ -153,7 +153,7 @@ namespace Mantid
       m_thresholdRange->calculate();
     }
 
-    void vtkThresholdingLineFactory::validate() const
+    void vtkMDHistoLineFactory::validate() const
     {
       if(NULL == m_workspace.get())
       {
@@ -161,7 +161,7 @@ namespace Mantid
       }
     }
 
-    vtkThresholdingLineFactory::~vtkThresholdingLineFactory()
+    vtkMDHistoLineFactory::~vtkMDHistoLineFactory()
     {
 
     }

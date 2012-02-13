@@ -1,5 +1,5 @@
-#ifndef MANTID_VATES_VTKTHRESHOLDING_HEXAHEDRON_FACTORY_H_
-#define MANTID_VATES_VTKTHRESHOLDING_HEXAHEDRON_FACTORY_H_
+#ifndef MANTID_VATES_VTK_MD_HISTO_HEX_FACTORY_H_
+#define MANTID_VATES_VTK_MD_HISTO_HEX_FACTORY_H_
 
 /** Concrete implementation of vtkDataSetFactory. Creates a vtkUnStructuredGrid. Uses Thresholding technique
  * to create sparse 3D representation of data. 
@@ -42,21 +42,21 @@ namespace Mantid
 namespace VATES
 {
 
-class DLLExport vtkThresholdingHexahedronFactory: public vtkDataSetFactory
+class DLLExport vtkMDHistoHexFactory: public vtkDataSetFactory
 {
 public:
 
   /// Constructor
-  vtkThresholdingHexahedronFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarname);
+  vtkMDHistoHexFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarname);
 
   /// Assignment operator
-  vtkThresholdingHexahedronFactory& operator=(const vtkThresholdingHexahedronFactory& other);
+  vtkMDHistoHexFactory& operator=(const vtkMDHistoHexFactory& other);
 
   /// Copy constructor.
-  vtkThresholdingHexahedronFactory(const vtkThresholdingHexahedronFactory& other);
+  vtkMDHistoHexFactory(const vtkMDHistoHexFactory& other);
 
   /// Destructor
-  ~vtkThresholdingHexahedronFactory();
+  ~vtkMDHistoHexFactory();
 
   /// Initialize the object with a workspace.
   virtual void initialize(Mantid::API::Workspace_sptr workspace);
@@ -66,7 +66,7 @@ public:
 
   virtual std::string getFactoryTypeName() const
   {
-    return "vtkThresholdingHexahedronFactory";
+    return "vtkMDHistoHexFactory";
   }
 
 protected:

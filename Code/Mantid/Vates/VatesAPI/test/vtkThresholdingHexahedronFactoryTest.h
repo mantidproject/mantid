@@ -1,5 +1,5 @@
-#ifndef VTK_THRESHOLDING_HEXAHEDRON_FACTORY_TEST_H_
-#define VTK_THRESHOLDING_HEXAHEDRON_FACTORY_TEST_H_
+#ifndef VTK_MD_HISTO_HEX_FACTORY_TEST_H_
+#define VTK_MD_HISTO_HEX_FACTORY_TEST_H_
 
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
@@ -21,7 +21,7 @@ using namespace testing;
 //=====================================================================================
 // Functional Tests
 //=====================================================================================
-class vtkThresholdingHexahedronFactoryTest: public CxxTest::TestSuite
+class vtkMDHistoHexFactoryTest: public CxxTest::TestSuite
 {
 
   public:
@@ -32,15 +32,15 @@ class vtkThresholdingHexahedronFactoryTest: public CxxTest::TestSuite
     MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
     ws_sptr->setTransformFromOriginal(new NullCoordTransform);
 
-    vtkThresholdingHexahedronFactory inside(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 2)), "signal");
+    vtkMDHistoHexFactory inside(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 2)), "signal");
     inside.initialize(ws_sptr);
     vtkUnstructuredGrid* insideProduct = dynamic_cast<vtkUnstructuredGrid*>(inside.create());
 
-    vtkThresholdingHexahedronFactory below(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 0.5)), "signal");
+    vtkMDHistoHexFactory below(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 0.5)), "signal");
     below.initialize(ws_sptr);
     vtkUnstructuredGrid* belowProduct = dynamic_cast<vtkUnstructuredGrid*>(below.create());
 
-    vtkThresholdingHexahedronFactory above(ThresholdRange_scptr(new UserDefinedThresholdRange(2, 3)), "signal");
+    vtkMDHistoHexFactory above(ThresholdRange_scptr(new UserDefinedThresholdRange(2, 3)), "signal");
     above.initialize(ws_sptr);
     vtkUnstructuredGrid* aboveProduct = dynamic_cast<vtkUnstructuredGrid*>(above.create());
 
@@ -56,7 +56,7 @@ class vtkThresholdingHexahedronFactoryTest: public CxxTest::TestSuite
     ws_sptr->setTransformFromOriginal(new NullCoordTransform);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
-    vtkThresholdingHexahedronFactory factory (ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
+    vtkMDHistoHexFactory factory (ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
     factory.initialize(ws_sptr);
 
     vtkDataSet* product = factory.create();
@@ -73,14 +73,14 @@ class vtkThresholdingHexahedronFactoryTest: public CxxTest::TestSuite
     IMDWorkspace* nullWorkspace = NULL;
     Mantid::API::IMDWorkspace_sptr ws_sptr(nullWorkspace);
     
-    vtkThresholdingHexahedronFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
+    vtkMDHistoHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
 
     TSM_ASSERT_THROWS("No workspace, so should not be possible to complete initialization.", factory.initialize(ws_sptr), std::invalid_argument);
   }
 
   void testCreateWithoutInitializeThrows()
   {
-    vtkThresholdingHexahedronFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
+    vtkMDHistoHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
     TS_ASSERT_THROWS(factory.create(), std::runtime_error);
   }
 
@@ -94,7 +94,7 @@ class vtkThresholdingHexahedronFactoryTest: public CxxTest::TestSuite
     EXPECT_CALL(*pMockFactorySuccessor, getFactoryTypeName()).WillOnce(testing::Return("TypeA")); 
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
-    vtkThresholdingHexahedronFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
+    vtkMDHistoHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
 
     //Successor is provided.
     factory.SetSuccessor(pMockFactorySuccessor);
@@ -110,7 +110,7 @@ class vtkThresholdingHexahedronFactoryTest: public CxxTest::TestSuite
     Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
-    vtkThresholdingHexahedronFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
+    vtkMDHistoHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
 
     TSM_ASSERT_THROWS("Should have thrown an execption given that no successor was available.", factory.initialize(ws_sptr), std::runtime_error);
   }
@@ -128,7 +128,7 @@ class vtkThresholdingHexahedronFactoryTest: public CxxTest::TestSuite
 
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
-    vtkThresholdingHexahedronFactory factory (ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
+    vtkMDHistoHexFactory factory (ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
 
     //Successor is provided.
     factory.SetSuccessor(pMockFactorySuccessor);
@@ -142,8 +142,8 @@ class vtkThresholdingHexahedronFactoryTest: public CxxTest::TestSuite
   void testTypeName()
   {
     using namespace Mantid::VATES;
-    vtkThresholdingHexahedronFactory factory (ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
-    TS_ASSERT_EQUALS("vtkThresholdingHexahedronFactory", factory.getFactoryTypeName());
+    vtkMDHistoHexFactory factory (ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
+    TS_ASSERT_EQUALS("vtkMDHistoHexFactory", factory.getFactoryTypeName());
   }
 
 };
@@ -151,7 +151,7 @@ class vtkThresholdingHexahedronFactoryTest: public CxxTest::TestSuite
 //=====================================================================================
 // Performance tests
 //=====================================================================================
-class vtkThresholdingHexahedronFactoryTestPerformance : public CxxTest::TestSuite
+class vtkMDHistoHexFactoryTestPerformance : public CxxTest::TestSuite
 {
 private:
 
@@ -169,7 +169,7 @@ public:
 	void testGenerateHexahedronVtkDataSet()
 	{
     //Create the factory.
-    vtkThresholdingHexahedronFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
+    vtkMDHistoHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
     factory.initialize(m_ws_sptr);
 
     TS_ASSERT_THROWS_NOTHING(factory.create());

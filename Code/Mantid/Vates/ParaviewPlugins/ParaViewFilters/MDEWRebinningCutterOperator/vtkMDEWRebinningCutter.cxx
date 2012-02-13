@@ -266,11 +266,11 @@ int vtkMDEWRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtk
      //Create Factory Object for chain. Chain-of-responsibility for translating imdworkspaces.
     vtkMDLineFactory* p_1dMDFactory =  new vtkMDLineFactory(m_ThresholdRange, scalarName);
     vtkMDQuadFactory* p_2dMDFactory = new vtkMDQuadFactory(m_ThresholdRange, scalarName);
-    vtkMDEWHexahedronFactory* p_3dMDFactory = new vtkMDEWHexahedronFactory(m_ThresholdRange, scalarName);
-    vtkThresholdingLineFactory* p_1dHistoFactory = new vtkThresholdingLineFactory(m_ThresholdRange, scalarName);
-    vtkThresholdingQuadFactory* p_2dHistoFactory = new vtkThresholdingQuadFactory(m_ThresholdRange,scalarName);
-    vtkThresholdingHexahedronFactory* p_3dHistoFactory = new vtkThresholdingHexahedronFactory(m_ThresholdRange,scalarName);
-    vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>* p_4dHistoFactory = new vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>(m_ThresholdRange,scalarName, m_timestep);
+    vtkMDHexFactory* p_3dMDFactory = new vtkMDHexFactory(m_ThresholdRange, scalarName);
+    vtkMDHistoLineFactory* p_1dHistoFactory = new vtkMDHistoLineFactory(m_ThresholdRange, scalarName);
+    vtkMDHistoQuadFactory* p_2dHistoFactory = new vtkMDHistoQuadFactory(m_ThresholdRange,scalarName);
+    vtkMDHistoHexFactory* p_3dHistoFactory = new vtkMDHistoHexFactory(m_ThresholdRange,scalarName);
+    vtkMDHistoHex4DFactory<TimeToTimeStep>* p_4dHistoFactory = new vtkMDHistoHex4DFactory<TimeToTimeStep>(m_ThresholdRange,scalarName, m_timestep);
 
     //Assemble Chain-of-Reponsibility
     p_1dMDFactory->SetSuccessor(p_2dMDFactory);

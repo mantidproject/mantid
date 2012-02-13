@@ -116,7 +116,7 @@ int vtkSQWEventReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInfo
     m_time =outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0];
   }
 
-  vtkMDEWHexahedronFactory* hexahedronFactory = new vtkMDEWHexahedronFactory(ThresholdRange_scptr(new IgnoreZerosThresholdRange()), "signal");
+  vtkMDHexFactory* hexahedronFactory = new vtkMDHexFactory(ThresholdRange_scptr(new IgnoreZerosThresholdRange()), "signal");
   hexahedronFactory->setTime(m_time);
   
   vtkDataSet* product = m_presenter->execute(hexahedronFactory, updateHandler);

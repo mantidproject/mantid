@@ -1,5 +1,5 @@
-#ifndef MANTID_VATES_VTK_MDEW_HEXAHEDRON_FACTORY_H_
-#define MANTID_VATES_VTK_MDEW_HEXAHEDRON_FACTORY_H_
+#ifndef MANTID_VATES_VTK_MD_HEX_FACTORY_H_
+#define MANTID_VATES_VTK_MD_HEX_FACTORY_H_
 
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
@@ -43,16 +43,16 @@ as the basis for generating visualisation cells. The recursion depth through the
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-class DLLExport vtkMDEWHexahedronFactory : public vtkDataSetFactory
+class DLLExport vtkMDHexFactory : public vtkDataSetFactory
 {
 
 public:
 
   /// Constructor
-  vtkMDEWHexahedronFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName, const size_t maxDepth = 1000);
+  vtkMDHexFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName, const size_t maxDepth = 1000);
 
   /// Destructor
-  virtual ~vtkMDEWHexahedronFactory();
+  virtual ~vtkMDHexFactory();
 
   /// Factory Method. Should also handle delegation to successors.
   virtual vtkDataSet* create() const;
@@ -63,7 +63,7 @@ public:
   /// Get the name of the type.
   virtual std::string getFactoryTypeName() const
   {
-    return "vtkMDEWHexahedronFactory";
+    return "vtkMDHexFactory";
   }
 
   virtual void setRecursionDepth(size_t depth);
