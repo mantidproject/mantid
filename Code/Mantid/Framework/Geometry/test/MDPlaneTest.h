@@ -189,10 +189,10 @@ public:
 
 
   /// Helper function for the 2D case of a line intersecting the plane
-  bool try2Dline(MDPlane & p, coord_t x1, coord_t y1, coord_t x2, coord_t y2)
+  bool try2Dline(MDPlane & p, double x1, double y1, double x2, double y2)
   {
-    coord_t centers1[2] = {x1,y1};
-    coord_t centers2[2] = {x2,y2};
+    coord_t centers1[2] = {coord_t(x1),coord_t(y1)};
+    coord_t centers2[2] = {coord_t(x2),coord_t(y2)};
     return p.doesLineIntersect(centers1, centers2);
   }
 
@@ -242,10 +242,10 @@ public:
 
   void test_3D_point()
   {
-    coord_t normal[3] = {1.23, 2.34, 3.45};
+    coord_t normal[3] = {1.25, 2.5, 3.5};
     coord_t point[3] = {1,0,0};
 
-    coord_t pointA[3] = {0.111, 0.222, 0.333};
+    coord_t pointA[3] = {0.111f, 0.222f, 0.333f};
 
     MDPlane p(3, normal, point);
     bool res = false;
@@ -259,10 +259,10 @@ public:
 
   void test_4D_point()
   {
-    coord_t normal[4] = {1.23, 2.34, 3.45, 4.56};
+    coord_t normal[4] = {1.25, 2.5, 3.5, 4.75};
     coord_t point[4] = {1};
 
-    coord_t pointA[4] = {0.111, 0.222, 0.333, 0.444};
+    coord_t pointA[4] = {0.111f, 0.222f, 0.333f, 0.444f};
 
     MDPlane p(4, normal, point);
     bool res = false;
@@ -277,7 +277,7 @@ public:
   /** Looks to be about 50% slower on linux in debug! */
   void test_4D_point_vectorVersion()
   {
-    coord_t normal[4] = {1.23, 2.34, 3.45, 4.56};
+    coord_t normal[4] = {1.25f, 2.5f, 3.5f, 4.75f};
     coord_t point[4] = {1};
 
     std::vector<coord_t> pointA;

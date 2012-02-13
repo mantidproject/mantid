@@ -215,7 +215,7 @@ namespace Mantid
         // Define where the slice is in 4D
         // TODO: Where to slice? Right now is just 0
         std::vector<coord_t> point(nd, 0);
-        point[3] = m_time; //Specifically for 4th/time dimension.
+        point[3] = coord_t(m_time); //Specifically for 4th/time dimension.
 
         // Define two opposing planes that point in all higher dimensions
         std::vector<coord_t> normal1(nd, 0);

@@ -49,17 +49,17 @@ private:
     const Mantid::Kernel::V3D& bz)
   {
     Mantid::Kernel::Matrix<coord_t> transform(4, 4);
-    transform[0][0] = ax.scalar_prod(bx);
-    transform[0][1] = ax.scalar_prod(by);
-    transform[0][2] = ax.scalar_prod(bz);
+    transform[0][0] = coord_t(ax.scalar_prod(bx));
+    transform[0][1] = coord_t(ax.scalar_prod(by));
+    transform[0][2] = coord_t(ax.scalar_prod(bz));
     transform[0][3] = 0;
-    transform[1][0] = ay.scalar_prod(bx);
-    transform[1][1] = ay.scalar_prod(by);
-    transform[1][2] = ay.scalar_prod(bz);
+    transform[1][0] = coord_t(ay.scalar_prod(bx));
+    transform[1][1] = coord_t(ay.scalar_prod(by));
+    transform[1][2] = coord_t(ay.scalar_prod(bz));
     transform[1][3] = 0;
-    transform[2][0] = az.scalar_prod(bx);
-    transform[2][1] = az.scalar_prod(by);
-    transform[2][2] = az.scalar_prod(bz);
+    transform[2][0] = coord_t(az.scalar_prod(bx));
+    transform[2][1] = coord_t(az.scalar_prod(by));
+    transform[2][2] = coord_t(az.scalar_prod(bz));
     transform[2][3] = 0;
     transform[3][0] = 0;
     transform[3][1] = 0;
@@ -199,13 +199,13 @@ public:
 
     // Point is along the X axis
     V3D exp1(0.2, 0.0, 0.0); q.rotate(exp1);
-    coord_t in1[3]  = {1.2, 1.0, 3.456};
+    coord_t in1[3]  = {1.25, 1.0, 3.75};
     ct.apply(in1, out);
     compare(2, out, exp1);
 
     // Some other random location
     V3D exp2(-2.4, 5.6, 0.0); q.rotate(exp2);
-    coord_t in2[3]  = {-1.4, 6.6, 8.987};
+    coord_t in2[3]  = {-1.5, 6.75, 8.5};
     ct.apply(in2, out);
     compare(2, out, exp2);
 
@@ -246,9 +246,9 @@ public:
 
     // Some other random location
     V3D exp2(-2.4, 5.6, 0.0); q.rotate(exp2);
-    coord_t in2[3]  = {-1.4, 6.6, 8.987};
+    coord_t in2[3]  = {-1.5, 6.5, 9.0};
     // The output gets scaled like this
-    coord_t scaledExp2[2] = {exp2[0]*2.0, exp2[1]*3.0};
+    coord_t scaledExp2[2] = {coord_t(exp2[0]*2.0), coord_t(exp2[1]*3.0)};
     ct.apply(in2, out);
     compare(2, out, scaledExp2);
 
@@ -351,8 +351,8 @@ public:
     ct1.buildOrthogonal( VMD(3.0, 4.0), bases1, VMD(5.5, -6.7) );
 
     size_t dimensionToBinFrom[2] = {1, 0};
-    coord_t origin[2] = {-12.34, +34.56};
-    coord_t scaling[2] = {-3.4, +2.3};
+    coord_t origin[2] = {-12.5, +34.5};
+    coord_t scaling[2] = {-3.5, +2.25};
     CoordTransformAligned ct2(2, 2, dimensionToBinFrom, origin, scaling);
 
     // And test
@@ -374,7 +374,7 @@ public:
     {
       for(int j = 0; j < 4; j++)
       {
-        transform[i][j] = count;
+        transform[i][j] = coord_t(count);
         count++;
       }
     }

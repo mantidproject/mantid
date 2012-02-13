@@ -62,7 +62,7 @@ namespace Mantid
       }
       else
       {
-        size_t nonIntegratedSize = m_workspace->getNonIntegratedDimensions().size();
+        //size_t nonIntegratedSize = m_workspace->getNonIntegratedDimensions().size();
         Mantid::Kernel::ReadLock lock(*m_workspace);
         const int nBinsX = static_cast<int>( m_workspace->getXDimension()->getNBins() );
 
@@ -93,7 +93,7 @@ namespace Mantid
         //Loop through dimensions
         for (int i = 0; i < nPointsX; i++)
         {
-          in[0] = minX + (i * incrementX); //Calculate increment in x;
+          in[0] = minX + (coord_t(i) * incrementX); //Calculate increment in x;
           
           signalScalar = static_cast<float>(m_workspace->getSignalNormalizedAt(i));
 
