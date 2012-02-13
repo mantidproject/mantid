@@ -380,11 +380,11 @@ class DataReflWidget(BaseWidget):
         self._summary.data_peak_from_pixel.setText(str(state.DataPeakPixels[0]))
         self._summary.data_peak_to_pixel.setText(str(state.DataPeakPixels[1]))
         
-        self._summary.x_min_edit.setText(str(state.x_range[0]))
-        self._summary.x_max_edit.setText(str(state.x_range[1]))
+        self._summary.x_min_edit.setText(str(state.data_x_range[0]))
+        self._summary.x_max_edit.setText(str(state.data_x_range[1]))
         
-        self._summary.norm_x_min_edit.setText(str(state.norm_x_min))
-        self._summary.norm_x_max_edit.setText(str(state.norm_x_max))
+        self._summary.norm_x_min_edit.setText(str(state.norm_x_range[0]))
+        self._summary.norm_x_max_edit.setText(str(state.norm_x_range[1]))
         
         #Background flag
         self._summary.data_background_switch.setChecked(state.DataBackgroundFlag)
@@ -399,10 +399,7 @@ class DataReflWidget(BaseWidget):
         self._summary.data_to_tof.setText(str(state.DataTofRange[1]))
         
         self._summary.data_run_number_edit.setText(str(','.join([str(i) for i in state.data_files])))
-        
-        #normalization flag
-        self._summary.norm_switch.setChecked(state.NormFlag)
-        
+                
         # Normalization options
         self._summary.norm_run_number_edit.setText(str(state.norm_file))
         self._summary.norm_peak_from_pixel.setText(str(state.NormPeakPixels[0]))
@@ -414,6 +411,10 @@ class DataReflWidget(BaseWidget):
         self._summary.norm_background_from_pixel1.setText(str(state.NormBackgroundRoi[0]))
         self._summary.norm_background_to_pixel1.setText(str(state.NormBackgroundRoi[1]))
         
+        #normalization flag
+        self._summary.norm_switch.setChecked(state.NormFlag)
+        self._norm_clicked(state.NormFlag)
+
         # Q binning
         #self._summary.q_min_edit.setText(str(state.q_min))
         #self._summary.log_scale_chk.setChecked(state.q_step<0)
@@ -463,11 +464,13 @@ class DataReflWidget(BaseWidget):
         m.DataPeakPixels = [int(self._summary.data_peak_from_pixel.text()),
                             int(self._summary.data_peak_to_pixel.text())] 
         
-        m.x_range = [int(self._summary.x_min_edit.text()),
+        m.data_x_range = [int(self._summary.x_min_edit.text()),
                      int(self._summary.x_max_edit.text())]
+        m.data_x_range_flag = self._summary.data_low_res_range_switch.isChecked()
         
-        m.norm_x_min = int(self._summary.norm_x_min_edit.text())
-        m.norm_x_max = int(self._summary.norm_x_max_edit.text())
+        m.norm_x_range = [int(self._summary.norm_x_min_edit.text()),
+                          int(self._summary.norm_x_max_edit.text())]
+        m.norm_x_range_flag = self._summary.norm_low_res_range_switch.isChecked()
         
         #Background flag
         m.DataBackgroundFlag = self._summary.data_background_switch.isChecked()
