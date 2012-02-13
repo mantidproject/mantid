@@ -107,21 +107,21 @@ namespace Crystal
     std::string line;
     do {   
       getline (in, line);
-      h = atof(line.substr(0,3).c_str());
-      k = atof(line.substr(4,7).c_str());
-      l = atof(line.substr(8,11).c_str());
+      h = atof(line.substr(0,4).c_str());
+      k = atof(line.substr(4,4).c_str());
+      l = atof(line.substr(8,4).c_str());
       if (h == 0.0 && k == 0 && l == 0) break;
-      Inti = atof(line.substr(12,19).c_str());
-      SigI = atof(line.substr(20,27).c_str());
-      run = atoi(line.substr(28,31).c_str());
-      wl = atof(line.substr(32,39).c_str());
-      tbar = atof(line.substr(40,46).c_str());
-      run = atoi(line.substr(47,53).c_str());
-      seqNum = atoi(line.substr(54,60).c_str());
-      transmission = atof(line.substr(61,67).c_str());
-      bank = atoi(line.substr(68,71).c_str());
-      scattering = atof(line.substr(72,80).c_str());
-      dspace = atof(line.substr(81,89).c_str());
+      Inti = atof(line.substr(12,8).c_str());
+      SigI = atof(line.substr(20,8).c_str());
+      run = atoi(line.substr(28,4).c_str());
+      wl = atof(line.substr(32,8).c_str());
+      tbar = atof(line.substr(40,7).c_str());
+      run = atoi(line.substr(47,7).c_str());
+      seqNum = atoi(line.substr(54,7).c_str());
+      transmission = atof(line.substr(61,7).c_str());
+      bank = atoi(line.substr(68,4).c_str());
+      scattering = atof(line.substr(72,9).c_str());
+      dspace = atof(line.substr(81,9).c_str());
   
       Peak peak(inst, scattering, wl);
       peak.setHKL(-h,-k,-l);
