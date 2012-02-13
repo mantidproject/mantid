@@ -295,14 +295,14 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
     def test_setColorScaleAutoFull(self):
         sv = self.sv
         sv.setColorScaleAutoFull()
-        self.assertEqual(sv.getColorScaleMin(), 27.0)
-        self.assertEqual(sv.getColorScaleMax(), 540.0)
+        self.assertAlmostEqual(sv.getColorScaleMin(), 27.0, 3)
+        self.assertAlmostEqual(sv.getColorScaleMax(), 540.0, 3)
                    
     def test_setColorScaleAutoSlice(self):
         sv = self.sv
         sv.setColorScaleAutoSlice()
-        self.assertEqual(sv.getColorScaleMin(), 27.0)
-        self.assertEqual(sv.getColorScaleMax(), 81.0)
+        self.assertAlmostEqual(sv.getColorScaleMin(), 27.0, 3)
+        self.assertAlmostEqual(sv.getColorScaleMax(), 81.0, 3)
             
     #==========================================================================
     #======================= Screenshots etc. =================================
