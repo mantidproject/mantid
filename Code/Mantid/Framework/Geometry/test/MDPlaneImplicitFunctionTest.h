@@ -40,7 +40,7 @@ public:
 
   void test_xmlRep()
   {
-    coord_t normal[3] = {coord_t(123.4), 456, 678};
+    coord_t normal[3] = {1.25, 4.5, 6.75};
     coord_t point[3] = {1,2,3};
     MDPlaneImplicitFunction f(3, normal, point);
     TS_ASSERT_EQUALS( f.toXMLString(), getXmlRep() );
@@ -65,7 +65,7 @@ private:
                        "<ParameterList>"\
                        "<Parameter>"\
                        "<Type>NormalParameter</Type>"\
-                       "<Value>1.234 4.56 6.78</Value>"\
+                       "<Value>1.25 4.5 6.75</Value>"\
                        "</Parameter>"\
                        "<Parameter>"\
                        "<Type>OriginParameter</Type>"\
@@ -83,7 +83,7 @@ private:
                        "<ParameterList>"\
                        "<Parameter>"\
                        "<Type>NormalParameter</Type>"\
-                       "<Value>1.234 4.56 6.78</Value>"\
+                       "<Value>1.25 4.5 6.75</Value>"\
                        "</Parameter>"\
                        "<Parameter>"\
                        "<Type>OriginParameter</Type>"\
@@ -100,7 +100,7 @@ private:
                        "<ParameterList>"\
                        "<Parameter>"\
                        "<Type>NormalParameter</Type>"\
-                       "<Value>1.234 4.56 6.78</Value>"\
+                       "<Value>1.25 4.5 6.75</Value>"\
                        "</Parameter>"\
                        "<Parameter>"\
                        "<Type>OriginParameter</Type>"\

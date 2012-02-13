@@ -1289,7 +1289,7 @@ public:
 
     signal_t signal = 0;
     coord_t centroid[2] = {0., 0.};
-    box.centroidSphere(sphere, radius*radius, centroid, signal);
+    box.centroidSphere(sphere, coord_t(radius*radius), centroid, signal);
     // Normalized
     if (signal != 0.0)
     {
@@ -1328,7 +1328,7 @@ public:
     do_check_centroidSphere(box, -1.0,0.5, 1.55,  1.0, 0.5, 0.5, "Off an edge but enough to get an event");
 
     // Now I add an event very near an edge
-    coord_t center[2] = {0.001, 0.5};
+    double center[2] = {0.001, 0.5};
     box.addEvent(MDLeanEvent<2>(1.0, 1.0, center));
     do_check_integrateSphere(box, -1.0,0.5, 1.01,  1.0, "Off an edge but just barely enough to get an event");
     do_check_integrateSphere(box, 0.0,0.5, 0.01,  1.0, "Tiny, but just barely enough to get an event");
@@ -1508,7 +1508,7 @@ public:
       if (signal != 0.0)
       {
         for (size_t d=0; d<3; d++)
-          centroid[d] /= signal;
+          centroid[d] /= coord_t(signal);
       }
     }
 

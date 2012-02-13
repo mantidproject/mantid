@@ -201,7 +201,7 @@ namespace MDEventsTestHelper
       // Generate the position from the counter
       coord_t centers[nd];
       for (size_t d=0;d<nd;d++)
-        centers[d] = double(counters[d])*step + start;
+        centers[d] = coord_t(counters[d])*step + start;
 
       // Add that event 'repeat' times
       for (size_t i=0; i<repeat; ++i)
