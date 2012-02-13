@@ -58,26 +58,24 @@ namespace Mantid
           bool bIntegrated = imdws->getDimension(i_dim)->getIsIntegrated();
           masks[i_dim] = !bIntegrated; //TRUE for unmaksed, integrated dimensions are masked.
         }
-
-        //Exact number of boxes given. Possible improvement - get this info via IMDMethods instead of IMDEventWorkspace methods to keep this generic.
-        const size_t maxSize = imdws->getBoxController()->getTotalNumMDBoxes();
+        
+        //Ensure destruction in any event.
+        boost::scoped_ptr<IMDIterator> it(imdws->createIterator());
 
         // Create 2 points per box.
         vtkPoints *points = vtkPoints::New();
-        points->SetNumberOfPoints(maxSize * 2);
+        points->SetNumberOfPoints(it->getDataSize() * 2);
 
         // One scalar per box
         vtkFloatArray * signals = vtkFloatArray::New();
-        signals->Allocate(maxSize);
+        signals->Allocate(it->getDataSize());
         signals->SetName(m_scalarName.c_str());
         signals->SetNumberOfComponents(1);
 
         size_t nVertexes;
-        //Ensure destruction in any event.
-        boost::scoped_ptr<IMDIterator> it(imdws->createIterator());
-
+        
         vtkUnstructuredGrid *visualDataSet = vtkUnstructuredGrid::New();
-        visualDataSet->Allocate(maxSize);
+        visualDataSet->Allocate(it->getDataSize());
 
         vtkIdList * linePointList = vtkIdList::New();
         linePointList->SetNumberOfIds(2);
@@ -89,9 +87,9 @@ namespace Mantid
         }
 
         Mantid::coord_t out[1];
-        bool* useBox = new bool[maxSize];
+        bool* useBox = new bool[it->getDataSize()];
 
-        for(size_t iBox = 0; iBox < maxSize; ++iBox)
+        for(size_t iBox = 0; iBox < it->getDataSize(); ++iBox)
         {
           Mantid::signal_t signal_normalized= it->getNormalizedSignal();
           if (!boost::math::isnan( signal_normalized ) && m_thresholdRange->inRange(signal_normalized))
@@ -129,7 +127,7 @@ namespace Mantid
         }
 
         delete[] masks;
-        for(size_t ii = 0; ii < maxSize ; ++ii)
+        for(size_t ii = 0; ii < it->getDataSize() ; ++ii)
         {
 
           if (useBox[ii] == true)

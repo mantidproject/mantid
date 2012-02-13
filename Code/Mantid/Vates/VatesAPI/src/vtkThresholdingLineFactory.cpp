@@ -62,7 +62,6 @@ namespace Mantid
       }
       else
       {
-        //size_t nonIntegratedSize = m_workspace->getNonIntegratedDimensions().size();
         Mantid::Kernel::ReadLock lock(*m_workspace);
         const int nBinsX = static_cast<int>( m_workspace->getXDimension()->getNBins() );
 
