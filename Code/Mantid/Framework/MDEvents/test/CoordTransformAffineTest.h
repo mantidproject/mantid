@@ -28,14 +28,14 @@ private:
   void compare(size_t numdims, coord_t * value, const Mantid::Kernel::V3D& expected)
   {
     for (size_t i=0; i< numdims; i++)
-      TS_ASSERT_DELTA( value[i], expected[i], 1e-5);
+      TS_ASSERT_DELTA( value[i], expected[i], 1e-4);
   }
 
   /** Helper to compare two "vectors" (bare float arrays) */
   void compare(size_t numdims, coord_t * value, const coord_t * expected)
   {
     for (size_t i=0; i< numdims; i++)
-      TS_ASSERT_DELTA( value[i], expected[i], 1e-5);
+      TS_ASSERT_DELTA( value[i], expected[i], 1e-4);
   }
 
 
@@ -199,13 +199,13 @@ public:
 
     // Point is along the X axis
     V3D exp1(0.2, 0.0, 0.0); q.rotate(exp1);
-    coord_t in1[3]  = {1.25, 1.0, 3.75};
+    coord_t in1[3]  = {1.2f, 1.0, 3.456f};
     ct.apply(in1, out);
     compare(2, out, exp1);
 
     // Some other random location
     V3D exp2(-2.4, 5.6, 0.0); q.rotate(exp2);
-    coord_t in2[3]  = {-1.5, 6.75, 8.5};
+    coord_t in2[3]  = {-1.4f, 6.6f, 8.987f};
     ct.apply(in2, out);
     compare(2, out, exp2);
 
@@ -246,7 +246,7 @@ public:
 
     // Some other random location
     V3D exp2(-2.4, 5.6, 0.0); q.rotate(exp2);
-    coord_t in2[3]  = {-1.5, 6.5, 9.0};
+    coord_t in2[3]  = {-1.4f, 6.6f, 8.987f};
     // The output gets scaled like this
     coord_t scaledExp2[2] = {coord_t(exp2[0]*2.0), coord_t(exp2[1]*3.0)};
     ct.apply(in2, out);
