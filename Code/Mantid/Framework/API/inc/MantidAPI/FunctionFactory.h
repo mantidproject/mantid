@@ -26,7 +26,7 @@ namespace API
 //----------------------------------------------------------------------
 // More forward declarations
 //----------------------------------------------------------------------
-  class IFitFunction;
+  class IFunction;
   class CompositeFunction;
   class Expression;
 
@@ -60,20 +60,20 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
 
-  class MANTID_API_DLL FunctionFactoryImpl : public Kernel::DynamicFactory<IFitFunction>
+  class MANTID_API_DLL FunctionFactoryImpl : public Kernel::DynamicFactory<IFunction>
   {
   public:
     /**Creates an instance of a function
      * @param type :: The function's type
      * @return A pointer to the created function
      */
-    IFitFunction* createFunction(const std::string& type) const;
+    IFunction* createFunction(const std::string& type) const;
 
     ///Creates an instance of a function
-    IFitFunction* createInitialized(const std::string& input) const;
+    IFunction* createInitialized(const std::string& input) const;
 
     ///Creates an instance of a function
-    IFitFunction* createFitFunction(const std::string& input) const;
+    IFunction* createFitFunction(const std::string& input) const;
 
     /// Query available functions based on the template type
     template<typename FunctionType>
@@ -92,26 +92,26 @@ namespace API
     virtual ~FunctionFactoryImpl();
 
     /// These methods shouldn't be used to create functions
-    using Kernel::DynamicFactory<IFitFunction>::create;
-    using Kernel::DynamicFactory<IFitFunction>::createUnwrapped;
+    using Kernel::DynamicFactory<IFunction>::create;
+    using Kernel::DynamicFactory<IFunction>::createUnwrapped;
 
     /// Create a simple function
-    IFitFunction* createSimple(const Expression& expr)const;
+    IFunction* createSimple(const Expression& expr)const;
     /// Create a composite function
     CompositeFunction* createComposite(const Expression& expr)const;
     ///Creates an instance of a function
-    IFitFunction* createFitFunction(const Expression& expr) const;
+    IFunction* createFitFunction(const Expression& expr) const;
 
     /// Throw an exception
     void inputError(const std::string& str="")const;
     /// Add constraints to the created function
-    void addConstraints(IFitFunction* fun,const Expression& expr)const;
+    void addConstraints(IFunction* fun,const Expression& expr)const;
     /// Add a single constraint to the created function
-    void addConstraint(IFitFunction* fun,const Expression& expr)const;
+    void addConstraint(IFunction* fun,const Expression& expr)const;
     /// Add ties to the created function
-    void addTies(IFitFunction* fun,const Expression& expr)const;
+    void addTies(IFunction* fun,const Expression& expr)const;
     /// Add a tie to the created function
-    void addTie(IFitFunction* fun,const Expression& expr)const;
+    void addTie(IFunction* fun,const Expression& expr)const;
 
     ///static reference to the logger class
     Kernel::Logger& g_log;
@@ -132,7 +132,7 @@ namespace API
     for( std::vector<std::string>::const_iterator it = names.begin(); 
          it != names.end(); ++it )
     {
-      IFitFunction *func = this->createFitFunction(*it);
+      IFunction *func = this->createFitFunction(*it);
       if( dynamic_cast<FunctionType*>(func) )
       {
         typeNames.push_back(*it);

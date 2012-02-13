@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/IFitFunction.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidAPI/Jacobian.h"
 #include <boost/shared_array.hpp>
 
@@ -12,7 +12,6 @@ namespace Mantid
 {
 namespace API
 {
-  class MatrixWorkspace;
 /** A composite function.
 
     @author Roman Tolchenov, Tessella Support Services plc
@@ -38,7 +37,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL CompositeFunction : public virtual IFitFunction
+class MANTID_API_DLL CompositeFunction : public virtual IFunction
 {
 public:
   /// Default constructor
@@ -52,8 +51,15 @@ public:
 
               /* Overriden methods */
 
+  /// Returns the function's name
+  virtual std::string name()const {return "CompositeFunction";}
   /// Writes itself into a string
   std::string asString()const;
+  /// Function you want to fit to. 
+  /// @param domain :: The buffer for writing the calculated values. Must be big enough to accept dataSize() values
+  virtual void function(const FunctionDomain& domain, FunctionValues& values)const;
+  /// Derivatives of function with respect to active parameters
+  virtual void functionDeriv(const FunctionDomain& domain, Jacobian& jacobian);
 
   /// Set i-th parameter
   void setParameter(size_t, const double& value, bool explicitlySet = true);
@@ -86,21 +92,17 @@ public:
   void setActiveParameter(size_t i, double value);
   /// Update parameters after a fitting iteration
   void updateActive(const double* in);
-  /// Returns "global" index of active parameter i
-  size_t indexOfActive(size_t i)const;
   /// Returns the name of active parameter i
   std::string nameOfActive(size_t i)const;
   /// Returns the name of active parameter i
   std::string descriptionOfActive(size_t i)const;
 
   /// Check if a parameter is active
-  bool isActive(size_t i)const;
-  /// Get active index for a declared parameter i
-  size_t activeIndex(size_t i)const;
+  bool isFixed(size_t i)const;
   /// Removes a parameter from the list of active
-  void removeActive(size_t i);
+  void fix(size_t i);
   /// Restores a declared parameter i to the active status
-  void restoreActive(size_t i);
+  void unfix(size_t i);
 
   /// Return parameter index from a parameter reference.
   size_t getParameterIndex(const ParameterReference& ref)const;

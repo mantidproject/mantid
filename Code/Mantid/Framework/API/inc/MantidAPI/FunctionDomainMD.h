@@ -1,12 +1,11 @@
-#ifndef MANTID_API_FUNCTIONDOMAIN_H_
-#define MANTID_API_FUNCTIONDOMAIN_H_
+#ifndef MANTID_API_FUNCTIONDOMAINMD_H_
+#define MANTID_API_FUNCTIONDOMAINMD_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/DllConfig.h"
-
-#include <stdexcept>
+#include "MantidAPI/FunctionDomain.h"
+#include "MantidAPI/IMDWorkspace.h"
 
 namespace Mantid
 {
@@ -41,18 +40,31 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL FunctionDomain
+class MANTID_API_DLL FunctionDomainMD: public FunctionDomain
 {
 public:
-  /// Virtual destructor
-  virtual ~FunctionDomain(){}
-  /// Return the number of points in the domain
-  virtual size_t size() const  = 0;
-  /// Reset the the domain so it can be reused. Implement this method for domains with a state.
-  virtual void reset() const {}
+  /// Constructor.
+  FunctionDomainMD(IMDWorkspace_const_sptr ws, size_t start = 0, size_t length = 0);
+  /// Destructor.
+  ~FunctionDomainMD();
+  /// Return the number of arguments in the domain
+  virtual size_t size() const  {return m_size;}
+  /// Reset the iterator to point to the start of the domain.
+  virtual void reset() const;
+  /// Next iterator.
+  const IMDIterator* getNextIterator() const;
+protected:
+  /// IMDIterator
+  mutable IMDIterator* m_iterator;
+  /// start of the domain, 0 <= m_startIndex < m_iterator->getDataSize()
+  const size_t m_startIndex;
+  /// track the iterator's index, 0 <= m_currentIndex < m_size.
+  mutable size_t m_currentIndex; 
+  /// The size of the domain
+  size_t m_size;
 };
 
 } // namespace API
 } // namespace Mantid
 
-#endif /*MANTID_API_FUNCTIONDOMAIN_H_*/
+#endif /*MANTID_API_FUNCTIONDOMAINMD_H_*/

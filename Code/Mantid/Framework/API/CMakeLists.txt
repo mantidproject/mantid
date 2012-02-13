@@ -14,9 +14,8 @@ set ( SRC_FILES
 	src/CloneableAlgorithm.cpp
 	src/Column.cpp
 	src/ColumnFactory.cpp
+	src/CompositeDomainMD.cpp
 	src/CompositeFunction.cpp
-	src/CompositeFunctionMD.cpp
-	src/CompositeFunctionMW.cpp
 	src/ConstraintFactory.cpp
 	src/CoordTransform.cpp
 	src/CostFunctionFactory.cpp
@@ -27,14 +26,14 @@ set ( SRC_FILES
 	src/FileFinder.cpp
 	src/FileProperty.cpp
 	src/FrameworkManager.cpp
-	src/FunctionDomain.cpp
 	src/FunctionDomain1D.cpp
+	src/FunctionDomainMD.cpp
 	src/FunctionFactory.cpp
 	src/FunctionProperty.cpp
+	src/FunctionValues.cpp
 	src/IDataFileChecker.cpp
 	src/IEventList.cpp
 	src/IEventWorkspace.cpp
-	src/IFitFunction.cpp
 	src/IFunction.cpp
 	src/IFunctionMD.cpp
 	src/IFunction1D.cpp
@@ -78,7 +77,6 @@ set ( SRC_FILES
 	src/SpectraAxis.cpp
 	src/SpectraDetectorMap.cpp
 	src/TableRow.cpp
-	src/TempFunction.cpp
 	src/TextAxis.cpp
 	src/Workspace.cpp
 	src/WorkspaceFactory.cpp
@@ -115,8 +113,8 @@ set ( INC_FILES
 	inc/MantidAPI/Column.h
 	inc/MantidAPI/ColumnFactory.h
 	inc/MantidAPI/CompositeFunction.h
-	inc/MantidAPI/CompositeFunctionMD.h
-	inc/MantidAPI/CompositeFunctionMW.h
+	inc/MantidAPI/CompositeDomain.h
+	inc/MantidAPI/CompositeDomainMD.h
 	inc/MantidAPI/ConstraintFactory.h
 	inc/MantidAPI/CoordTransform.h
 	inc/MantidAPI/CostFunctionFactory.h
@@ -131,8 +129,10 @@ set ( INC_FILES
 	inc/MantidAPI/FrameworkManager.h
 	inc/MantidAPI/FunctionDomain.h
 	inc/MantidAPI/FunctionDomain1D.h
+	inc/MantidAPI/FunctionDomainMD.h
 	inc/MantidAPI/FunctionFactory.h
 	inc/MantidAPI/FunctionProperty.h
+	inc/MantidAPI/FunctionValues.h
 	inc/MantidAPI/IAlgorithm.h
 	inc/MantidAPI/IArchiveSearch.h
 	inc/MantidAPI/IBackgroundFunction.h
@@ -143,7 +143,6 @@ set ( INC_FILES
 	inc/MantidAPI/IDataItem.h
 	inc/MantidAPI/IEventList.h
 	inc/MantidAPI/IEventWorkspace.h
-	inc/MantidAPI/IFitFunction.h
 	inc/MantidAPI/IFunction.h
 	inc/MantidAPI/IFunctionMD.h
 	inc/MantidAPI/IFunction1D.h
@@ -197,7 +196,6 @@ set ( INC_FILES
 	inc/MantidAPI/SpectraAxis.h
 	inc/MantidAPI/SpectraDetectorMap.h
 	inc/MantidAPI/TableRow.h
-	inc/MantidAPI/TempFunction.h
 	inc/MantidAPI/TextAxis.h
 	inc/MantidAPI/VectorParameter.h
 	inc/MantidAPI/VectorParameterParser.h
@@ -256,7 +254,6 @@ set ( TEST_FILES
 	test/SampleTest.h
 	test/SpectraAxisTest.h
 	test/SpectraDetectorMapTest.h
-	test/TempFunctionTest.h
 	test/TextAxisTest.h
 	test/VectorParameterParserTest.h
 	test/VectorParameterTest.h

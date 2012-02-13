@@ -1,5 +1,5 @@
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/IFitFunction.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/Expression.h"
 #include "MantidAPI/ConstraintFactory.h"
@@ -16,7 +16,7 @@ namespace Mantid
   namespace API
   {
 
-    FunctionFactoryImpl::FunctionFactoryImpl() : Kernel::DynamicFactory<IFitFunction>(), g_log(Kernel::Logger::get("FunctionFactory"))
+    FunctionFactoryImpl::FunctionFactoryImpl() : Kernel::DynamicFactory<IFunction>(), g_log(Kernel::Logger::get("FunctionFactory"))
     {
       // we need to make sure the library manager has been loaded before we 
       // are constructed so that it is destroyed after us and thus does
@@ -29,12 +29,12 @@ namespace Mantid
     {
     }
 
-    IFitFunction* FunctionFactoryImpl::createFunction(const std::string& type) const
+    IFunction* FunctionFactoryImpl::createFunction(const std::string& type) const
     {
-      IFitFunction* fun = dynamic_cast<IFitFunction*>(createUnwrapped(type));
+      IFunction* fun = dynamic_cast<IFunction*>(createUnwrapped(type));
       if (!fun)
       {
-        throw std::runtime_error("Function "+type+" cannot be cast to IFitFunction");
+        throw std::runtime_error("Function "+type+" cannot be cast to IFunction");
       }
       fun->initialize();
       return fun;
@@ -50,7 +50,7 @@ namespace Mantid
      * input = "name=LinearBackground,A0=0,A1=1; name = Gaussian, PeakCentre=10.,Sigma=1"
      * @return A pointer to the created function
      */
-    IFitFunction* FunctionFactoryImpl::createInitialized(const std::string& input) const
+    IFunction* FunctionFactoryImpl::createInitialized(const std::string& input) const
     {
       //std::vector<std::string> ops;
       //ops.push_back(";");
@@ -72,7 +72,7 @@ namespace Mantid
 
       if (e.name() == ";")
       {
-        IFitFunction* fun = createComposite(e);
+        IFunction* fun = createComposite(e);
         if (!fun) inputError();
         return fun;
       }
@@ -86,7 +86,7 @@ namespace Mantid
      * @param expr :: The input expression
      * @return A pointer to the created function
      */
-    IFitFunction* FunctionFactoryImpl::createSimple(const Expression& expr)const
+    IFunction* FunctionFactoryImpl::createSimple(const Expression& expr)const
     {
       if (expr.name() == "=" && expr.size() > 1)
       {
@@ -108,8 +108,7 @@ namespace Mantid
       }
       std::string fnName = term->terms()[1].name();
 
-      IFitFunction* fun = createFunction(fnName);
-      std::string wsName,wsParam;
+      IFunction* fun = createFunction(fnName);
       for(++term;term!=terms.end();++term)
       {// loop over function's parameters/attributes
         if (term->name() != "=") inputError(expr.str());
@@ -121,7 +120,7 @@ namespace Mantid
           {// remove the double quotes
             parValue = parValue.substr(1,parValue.size()-2);
           }
-          IFitFunction::Attribute att = fun->getAttribute(parName);
+          IFunction::Attribute att = fun->getAttribute(parName);
           att.fromString(parValue);
           fun->setAttribute(parName,att);
         }
@@ -133,34 +132,11 @@ namespace Mantid
         {
           addTies(fun,(*term)[1]);
         }
-        else if (parName == "Workspace")
-        {
-          wsName = parValue;
-        }
-        else if (parName == "WSParam")
-        {
-          wsParam = parValue;
-        }
-        else if (parName == "MDWorkspace")
-        {
-          std::string mdwsName = parValue;
-          if (!mdwsName .empty())
-          {
-            Workspace_sptr ws = AnalysisDataService::Instance().retrieve(mdwsName);
-            fun->setWorkspace(ws,"",false);
-          }
-        }
         else
         {// set initial parameter value
           fun->setParameter(parName,atof(parValue.c_str()));
         }
       }// for term
-
-      if (!wsName.empty())
-      {
-        Workspace_sptr ws = AnalysisDataService::Instance().retrieve(wsName);
-        fun->setWorkspace(ws,wsParam,true);
-      }
 
       return fun;
     }
@@ -184,7 +160,6 @@ namespace Mantid
       const Expression& term = it->bracketsRemoved();
 
       CompositeFunction* cfun = 0;
-      std::string wsName,wsParam;
       if (term.name() == "=")
       {
         if (term.terms()[0].name() == "composite")
@@ -238,7 +213,7 @@ namespace Mantid
       for(;it!=terms.end();++it)
       {
         const Expression& term = it->bracketsRemoved();
-        IFitFunction* fun = NULL;
+        IFunction* fun = NULL;
         if (term.name() == ";")
         {
           fun = createComposite(term);
@@ -258,26 +233,12 @@ namespace Mantid
             addTies(cfun,term[1]);
             continue;
           }
-          else if (parName == "Workspace")
-          {
-            wsName = parValue;
-          }
-          else if (parName == "WSParam")
-          {
-            wsParam = parValue;
-          }
           else
           {
             fun = createSimple(term);
           }
         }
         cfun->addFunction(fun);
-      }
-
-      if (!wsName.empty())
-      {
-        Workspace_sptr ws = AnalysisDataService::Instance().retrieve(wsName);
-        cfun->setWorkspace(ws,wsParam,true);
       }
 
       return cfun;
@@ -301,7 +262,7 @@ namespace Mantid
      *    expression such as "0 < Sigma < 1" or a list of constraint expressions separated by commas ','
      *    and enclosed in brackets "(...)" .
      */
-    void FunctionFactoryImpl::addConstraints(IFitFunction* fun,const Expression& expr)const
+    void FunctionFactoryImpl::addConstraints(IFunction* fun,const Expression& expr)const
     {
       if (expr.name() == ",")
       {
@@ -321,7 +282,7 @@ namespace Mantid
      * @param fun :: The function
      * @param expr :: The constraint expression.
      */
-    void FunctionFactoryImpl::addConstraint(IFitFunction* fun,const Expression& expr)const
+    void FunctionFactoryImpl::addConstraint(IFunction* fun,const Expression& expr)const
     {
       IConstraint* c = ConstraintFactory::Instance().createInitialized(fun,expr);
       fun->addConstraint(c);
@@ -332,7 +293,7 @@ namespace Mantid
      * @param expr :: The tie expression: either parName = TieString or a list
      *   of name = string pairs
      */
-    void FunctionFactoryImpl::addTies(IFitFunction* fun,const Expression& expr)const
+    void FunctionFactoryImpl::addTies(IFunction* fun,const Expression& expr)const
     {
       if (expr.name() == "=")
       {
@@ -351,7 +312,7 @@ namespace Mantid
      * @param fun :: The function
      * @param expr :: The tie expression: parName = TieString
      */
-    void FunctionFactoryImpl::addTie(IFitFunction* fun,const Expression& expr)const
+    void FunctionFactoryImpl::addTie(IFunction* fun,const Expression& expr)const
     {
       if (expr.size() > 1)
       {// if size > 2 it is interpreted as setting a tie (last expr.term) to multiple parameters, e.g 
@@ -369,7 +330,7 @@ namespace Mantid
       * Create a fitting function from a string.
       * @param input :: The input string, has a form of a function call: funName(attr1=val,param1=val,...,ties=(param3=2*param1,...),constraints=(p2>0,...))
       */
-    IFitFunction* FunctionFactoryImpl::createFitFunction(const std::string& input) const
+    IFunction* FunctionFactoryImpl::createFitFunction(const std::string& input) const
     {
       Expression expr;
       try
@@ -387,13 +348,13 @@ namespace Mantid
       * Create a fitting function from an expression.
       * @param expr :: The input expression made by parsing the input string to createFitFunction(const std::string& input)
       */
-    IFitFunction* FunctionFactoryImpl::createFitFunction(const Expression& expr) const
+    IFunction* FunctionFactoryImpl::createFitFunction(const Expression& expr) const
     {
       const Expression& e = expr.bracketsRemoved();
 
       std::string fnName = e.name();
 
-      IFitFunction* fun = createUnwrapped(fnName);
+      IFunction* fun = createUnwrapped(fnName);
       if (!fun)
       {
         throw std::runtime_error("Cannot create function "+fnName);
@@ -415,7 +376,7 @@ namespace Mantid
             {// remove the double quotes
               parValue = parValue.substr(1,parValue.size()-2);
             }
-            IFitFunction::Attribute att = fun->getAttribute(parName);
+            IFunction::Attribute att = fun->getAttribute(parName);
             att.fromString(parValue);
             fun->setAttribute(parName,att);
           }
@@ -434,13 +395,13 @@ namespace Mantid
         }
         else // if the term isn't a name=value pair it could be a member function of a composite function
         {
-          throw Kernel::Exception::NotImplementedError("Composite functions are not implemented yet for IFitFunction");
+          throw Kernel::Exception::NotImplementedError("Composite functions are not implemented yet for IFunction");
           //CompositeFunction* cfun = dynamic_cast<CompositeFunction*>(fun);
           //if (!cfun)
           //{
           //  throw std::runtime_error("Cannot add a function to a non-composite function "+fnName);
           //}
-          //IFitFunction* mem = createFitFunction(*term);
+          //IFunction* mem = createFitFunction(*term);
           //cfun->addFunction(mem);
         }
       }// for term

@@ -38,13 +38,9 @@ namespace API
     (defined in void Fit1D::function(const double*, double*, const double*, const double*, const double*, const int&))
     with respect to the fit parameters. If this method is not reimplemented the derivative free simplex minimization
     algorithm is used.
- * @param out :: Derivatives
- * @param xValues :: X values for data points
- * @param nData :: Number of data points
  */
-void IFunction1D::functionDeriv1D(FunctionDomain1D& domain, Jacobian& jacobian)
+void IFunction1D::functionDeriv1D(Jacobian*, const double*, const size_t)
 {
-  UNUSED_ARG(domain); UNUSED_ARG(jacobian);
   throw Kernel::Exception::NotImplementedError("No derivative IFunction1D provided");
 }
 
@@ -73,6 +69,26 @@ namespace
     size_t m_nParams; ///< number of parameters / second dimension
     std::vector<double> m_data; ///< data storage
   };
+}
+
+void IFunction1D::function(const FunctionDomain& domain,FunctionValues& values)const
+{
+  const FunctionDomain1D* d1d = dynamic_cast<const FunctionDomain1D*>(&domain);
+  if (!d1d)
+  {
+    throw std::invalid_argument("Unexpected domain in IFunction1D");
+  }
+  function1D(values.getPointerToCalculated(0),(*d1d)[0],d1d->size());
+}
+
+void IFunction1D::functionDeriv(const FunctionDomain& domain, Jacobian& jacobian)
+{
+  const FunctionDomain1D* d1d = dynamic_cast<const FunctionDomain1D*>(&domain);
+  if (!d1d)
+  {
+    throw std::invalid_argument("Unexpected domain in IFunction1D");
+  }
+  functionDeriv1D(&jacobian,(*d1d)[0],d1d->size());
 }
 
 /** 
@@ -168,58 +184,58 @@ namespace
  * @param xValues :: X values for data points
  * @param nData :: Number of data points
  */
-void IFunction1D::calNumericalDeriv(FunctionDomain1D& domain, Jacobian& jacobian)
-{
-    const double minDouble = std::numeric_limits<double>::min();
-    const double epsilon = std::numeric_limits<double>::epsilon();
-    double stepPercentage = 0.001; // step percentage
-    double step; // real step
-    double cutoff = 100.0*minDouble/stepPercentage;
-    size_t nParam = nParams();
+//void IFunction1D::calNumericalDeriv(FunctionDomain1D& domain, Jacobian& jacobian)
+//{
+    //const double minDouble = std::numeric_limits<double>::min();
+    //const double epsilon = std::numeric_limits<double>::epsilon();
+    //double stepPercentage = 0.001; // step percentage
+    //double step; // real step
+    //double cutoff = 100.0*minDouble/stepPercentage;
+    //size_t nParam = nParams();
 
-    // allocate memory if not already done
-    if (m_tmpFunctionOutputMinusStep.size() != domain.size())
-    {
-      m_tmpFunctionOutputMinusStep.resize(domain.size());
-      m_tmpFunctionOutputPlusStep.resize(domain.size());
-    }
+    //// allocate memory if not already done
+    //if (m_tmpFunctionOutputMinusStep.size() != domain.size())
+    //{
+    //  m_tmpFunctionOutputMinusStep.resize(domain.size());
+    //  m_tmpFunctionOutputPlusStep.resize(domain.size());
+    //}
 
-    functionMW(m_tmpFunctionOutputMinusStep.get(), xValues, nData);
+    //functionMW(m_tmpFunctionOutputMinusStep.get(), xValues, nData);
 
-    for (size_t iP = 0; iP < nParam; iP++)
-    {
-      if ( isActive(iP) )
-      {
-        const double& val = getParameter(iP);
-        if (fabs(val) < cutoff)
-        {
-          step = epsilon;
-        }
-        else
-        {
-          step = val*stepPercentage;
-        }
+    //for (size_t iP = 0; iP < nParam; iP++)
+    //{
+    //  if ( isActive(iP) )
+    //  {
+    //    const double& val = getParameter(iP);
+    //    if (fabs(val) < cutoff)
+    //    {
+    //      step = epsilon;
+    //    }
+    //    else
+    //    {
+    //      step = val*stepPercentage;
+    //    }
 
-        //double paramMstep = val - step;
-        //setParameter(iP, paramMstep);
-        //function(m_tmpFunctionOutputMinusStep.get(), xValues, nData);
+    //    //double paramMstep = val - step;
+    //    //setParameter(iP, paramMstep);
+    //    //function(m_tmpFunctionOutputMinusStep.get(), xValues, nData);
 
-        double paramPstep = val + step;
-        setParameter(iP, paramPstep);
-        functionMW(m_tmpFunctionOutputPlusStep.get(), xValues, nData);
+    //    double paramPstep = val + step;
+    //    setParameter(iP, paramPstep);
+    //    functionMW(m_tmpFunctionOutputPlusStep.get(), xValues, nData);
 
-        step = paramPstep - val;
-        setParameter(iP, val);
+    //    step = paramPstep - val;
+    //    setParameter(iP, val);
 
-        for (size_t i = 0; i < nData; i++) {
-         // out->set(i,iP, 
-         //   (m_tmpFunctionOutputPlusStep[i]-m_tmpFunctionOutputMinusStep[i])/(2.0*step));
-          out->set(i,iP, 
-            (m_tmpFunctionOutputPlusStep[i]-m_tmpFunctionOutputMinusStep[i])/step);
-        }
-      }
-    }
-}
+    //    for (size_t i = 0; i < nData; i++) {
+    //     // out->set(i,iP, 
+    //     //   (m_tmpFunctionOutputPlusStep[i]-m_tmpFunctionOutputMinusStep[i])/(2.0*step));
+    //      out->set(i,iP, 
+    //        (m_tmpFunctionOutputPlusStep[i]-m_tmpFunctionOutputMinusStep[i])/step);
+    //    }
+    //  }
+    //}
+//}
 
 } // namespace API
 } // namespace Mantid

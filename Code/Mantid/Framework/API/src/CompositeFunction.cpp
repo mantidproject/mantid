@@ -5,6 +5,7 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/IConstraint.h"
+#include "MantidAPI/FunctionFactory.h"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_array.hpp>
@@ -19,7 +20,7 @@ namespace API
 
 using std::size_t;
 
-//DECLARE_FUNCTION(CompositeFunction)
+DECLARE_FUNCTION(CompositeFunction)
 
 /// Copy contructor
 CompositeFunction::CompositeFunction(const CompositeFunction& f)
@@ -114,6 +115,35 @@ std::string CompositeFunction::asString()const
     ostr << ";ties=(" << ties << ")";
   }
   return ostr.str();
+}
+
+/** Function you want to fit to. 
+ *  @param domain :: The buffer for writing the calculated values. Must be big enough to accept dataSize() values
+ */
+void CompositeFunction::function(const FunctionDomain& domain, FunctionValues& values)const
+{
+  FunctionValues tmp(domain);
+  for(size_t iFun = 0; iFun < nFunctions(); ++iFun)
+  {
+    domain.reset();
+    m_functions[ iFun ]->function(domain,tmp);
+    values += tmp;
+  }
+}
+
+/**
+ * Derivatives of function with respect to active parameters
+ * @param domain :: Function domain to get the arguments from.
+ * @param jacobian :: A Jacobian to store the derivatives.
+ */
+void CompositeFunction::functionDeriv(const FunctionDomain& domain, Jacobian& jacobian)
+{
+  for(size_t iFun = 0; iFun < nFunctions(); ++iFun)
+  {
+    domain.reset();
+    PartialJacobian J(&jacobian,paramOffset(iFun),activeOffset(iFun));
+    getFunction(iFun)->functionDeriv(domain,J);
+  }
 }
 
 /** Sets a new value to the i-th parameter.
@@ -248,23 +278,6 @@ void CompositeFunction::setActiveParameter(size_t i, double value)
   m_functions[ iFun ]->setActiveParameter(i - m_activeOffsets[iFun],value);
 }
 
-/// Update parameters after a fitting iteration
-void CompositeFunction::updateActive(const double* in)
-{
-  for(size_t iFun = 0; iFun < m_functions.size(); iFun++)
-  {
-    m_functions[ iFun ]->updateActive(in + m_activeOffsets[ iFun ]);
-  }
-  applyTies();
-}
-
-/// Returns "global" index of active parameter i
-size_t CompositeFunction::indexOfActive(size_t i)const
-{
-  size_t iFun = functionIndexActive(i);
-  return m_paramOffsets[ iFun ] + m_functions[ iFun ]->indexOfActive(i - m_activeOffsets[iFun]);
-}
-
 /// Returns the name of active parameter i
 std::string CompositeFunction::nameOfActive(size_t i)const
 {
@@ -288,22 +301,27 @@ std::string CompositeFunction::descriptionOfActive(size_t i)const
  * @param i :: The index of a declared parameter
  * @return true if parameter i is active
  */
-bool CompositeFunction::isActive(size_t i)const
+bool CompositeFunction::isFixed(size_t i)const
 {
   size_t iFun = functionIndex(i);
-  return m_functions[ iFun ]->isActive(i - m_paramOffsets[iFun]);
+  return m_functions[ iFun ]->isFixed(i - m_paramOffsets[iFun]);
 }
 
 /**
  * @param i :: A declared parameter index to be removed from active
  */
-void CompositeFunction::removeActive(size_t i)
+void CompositeFunction::fix(size_t i)
 {
-  if (!isActive(i)) return;
+  if (isFixed(i)) return;
   size_t iFun = functionIndex(i);
-  size_t ia = m_activeOffsets[iFun] + m_functions[iFun]->activeIndex(i - m_paramOffsets[iFun]);
-  m_IFunctionActive.erase(m_IFunctionActive.begin()+ia);
-  m_functions[ iFun ]->removeActive(i - m_paramOffsets[iFun]);
+  std::vector<size_t>::iterator ia = std::find(m_IFunctionActive.begin(),m_IFunctionActive.end(),iFun);
+  if (ia == m_IFunctionActive.end())
+  {// isFixed(i) should have returned true
+    throw std::runtime_error("Inconsistency in CompositeFunction when fixing parameter "+
+      boost::lexical_cast<std::string>(i));
+  }
+  m_IFunctionActive.erase(ia);
+  m_functions[ iFun ]->fix(i - m_paramOffsets[iFun]);
 
   m_nActive--;
   for(size_t j=iFun+1;j<nFunctions();j++)
@@ -313,32 +331,17 @@ void CompositeFunction::removeActive(size_t i)
 /** Makes a parameter active again. It doesn't change the parameter's tie.
  * @param i :: A declared parameter index to be restored to active
  */
-void CompositeFunction::restoreActive(size_t i)
+void CompositeFunction::unfix(size_t i)
 {
+  if (!isFixed(i)) return;
   size_t iFun = functionIndex(i);
-  size_t ia = m_activeOffsets[iFun] + m_functions[iFun]->activeIndex(i - m_paramOffsets[iFun]);
 
-  std::vector<size_t>::iterator itFun = 
-    std::find_if(m_IFunctionActive.begin(),m_IFunctionActive.end(),std::bind2nd(std::greater<size_t>(),i));
-
-  m_IFunctionActive.insert(itFun,1,ia);
-  m_functions[ iFun ]->restoreActive(i - m_paramOffsets[iFun]);
+  m_IFunctionActive.insert(m_IFunctionActive.begin() + m_activeOffsets[iFun],iFun);
+  m_functions[ iFun ]->unfix(i - m_paramOffsets[iFun]);
 
   m_nActive++;
   for(size_t j=iFun+1;j<nFunctions();j++)
     m_activeOffsets[j] += 1;
-}
-
-/**
- * @param i :: The index of a declared parameter
- * @return The index of declared parameter i in the list of active parameters
- *         if the parameter is tied.
- */
-size_t CompositeFunction::activeIndex(size_t i)const
-{
-  size_t iFun = functionIndex(i);
-  size_t j = m_functions[iFun]->activeIndex(i - m_paramOffsets[iFun]);
-  return m_activeOffsets[iFun] + j;
 }
 
 /** Makes sure that the function is consistent. 

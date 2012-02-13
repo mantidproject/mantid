@@ -1,8 +1,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/FunctionDomain.h"
+#include "MantidAPI/FunctionValues.h"
 #include <iostream> 
+#include <algorithm>
 
 namespace Mantid
 {
@@ -13,13 +14,50 @@ namespace API
    * Constructs a domain base of size n.
    * @param n :: Size of the domain, i.e. number of values a function should calculate.
    */
-  FunctionDomain::FunctionDomain(size_t n)
+  FunctionValues::FunctionValues(const FunctionDomain& domain)
   {
-    if (n == 0)
+    if (domain.size() == 0)
     {
-      throw std::invalid_argument("FunctionDomain cannot have zero size.");
+      throw std::invalid_argument("FunctionValues cannot have zero size.");
     }
-    m_calculated.resize(n);
+    m_calculated.resize(domain.size());
+  }
+
+  /** Copy constructor.
+   *  @param values :: Values to copy from.
+   */
+  FunctionValues::FunctionValues(const FunctionValues& values):
+  m_calculated(values.m_calculated),
+  m_data(values.m_data),
+  m_weights(values.m_weights)
+  {
+  }
+
+  /**
+   * Get a pointer to calculated data at index i
+   * @param i :: Index.
+   */
+  double* FunctionValues::getPointerToCalculated(size_t i)
+  {
+    if (i < size())
+    {
+      return &m_calculated[i];
+    }
+    throw std::out_of_range("FunctionValue index out of range.");
+  }
+
+  /** Add other calculated values.
+   *  @param values :: Some other values to be added to this calculated values.
+   */
+  FunctionValues& FunctionValues::operator+=(const FunctionValues& values)
+  {
+    if (values.size() != size())
+    {
+      throw std::runtime_error("Cannot add function values: different sizes.");
+    }
+    std::transform(m_calculated.begin(),m_calculated.end(),values.m_calculated.begin(),m_calculated.begin(),
+      std::plus<double>());
+    return *this;
   }
 
   /**
@@ -27,7 +65,7 @@ namespace API
    * @param i :: Index
    * @param value :: Value
    */
-  void FunctionDomain::setFitData(size_t i,double value)
+  void FunctionValues::setFitData(size_t i,double value)
   {
     if (m_data.size() != m_calculated.size())
     {
@@ -40,7 +78,7 @@ namespace API
    * Set fitting data values.
    * @param values :: Values for fitting
    */
-  void FunctionDomain::setFitData(const std::vector<double>& values)
+  void FunctionValues::setFitData(const std::vector<double>& values)
   {
     if (values.size() != this->size())
     {
@@ -53,7 +91,7 @@ namespace API
    * Get a fitting data value
    * @param i :: Index
    */
-  double FunctionDomain::getFitData(size_t i) const
+  double FunctionValues::getFitData(size_t i) const
   {
     if (m_data.size() != m_calculated.size())
     {
@@ -67,7 +105,7 @@ namespace API
    * @param i :: Index
    * @param value :: Value
    */
-  void FunctionDomain::setFitWeight(size_t i,double value)
+  void FunctionValues::setFitWeight(size_t i,double value)
   {
     if (m_data.size() != m_calculated.size())
     {
@@ -80,7 +118,7 @@ namespace API
    * Set fitting data values.
    * @param values :: Values for fitting
    */
-  void FunctionDomain::setFitWeights(const std::vector<double>& values)
+  void FunctionValues::setFitWeights(const std::vector<double>& values)
   {
     if (values.size() != this->size())
     {
@@ -93,7 +131,7 @@ namespace API
    * Get a fitting weight.
    * @param i :: Index
    */
-  double FunctionDomain::getFitWeight(size_t i) const
+  double FunctionValues::getFitWeight(size_t i) const
   {
     if (m_data.size() != m_calculated.size())
     {
@@ -105,7 +143,7 @@ namespace API
   /**
    * Resize the fitting data and weight buffers to match the size of the calculated buffer.
    */
-  void FunctionDomain::setDataSize()
+  void FunctionValues::setDataSize()
   {
     m_data.resize(m_calculated.size());
     m_weights.resize(m_calculated.size());

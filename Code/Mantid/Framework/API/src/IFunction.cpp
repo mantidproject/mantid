@@ -41,7 +41,7 @@ namespace API
  * @param jacobian :: Pointer to a Jacobian matrix. If it is NULL the method is called in order to check whether it's implemented or not.
  *      If the derivatives are implemented the method must simply return, otherwise it must throw Kernel::Exception::NotImplementedError.
  */
-void IFunction::functionDeriv(FunctionDomain& domain, Jacobian& jacobian)
+void IFunction::functionDeriv(const FunctionDomain& domain, Jacobian& jacobian)
 {
   UNUSED_ARG(domain);
   UNUSED_ARG(jacobian);

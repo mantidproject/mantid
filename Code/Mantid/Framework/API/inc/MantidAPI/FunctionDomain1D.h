@@ -45,9 +45,11 @@ class MANTID_API_DLL FunctionDomain1D: public FunctionDomain
 {
 public:
   FunctionDomain1D(const std::vector<double>& xvalues);
-  /// get an x value
+  /// Return the number of arguments in the domain
+  virtual size_t size() const  {return m_X.size();}
+  /// Get an x value.
   /// @param i :: Index
-  double getX(size_t i) const {return m_X.at(i);}
+  const double* operator[](size_t i) const {return &m_X.at(i);}
 protected:
   std::vector<double> m_X; ///< vector of function arguments
 };

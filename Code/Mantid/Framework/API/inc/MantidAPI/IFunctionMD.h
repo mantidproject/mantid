@@ -7,7 +7,7 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/Exception.h"
-#include "MantidAPI/IFitFunction.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
@@ -113,34 +113,18 @@ class FunctionHandler;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL IFunctionMD: public virtual IFitFunction
+class MANTID_API_DLL IFunctionMD: public virtual IFunction
 {
 public:
 
-  /// Constructor
-  IFunctionMD():IFitFunction(),m_dataSize(0){}
-
   /* Overidden methods */
 
-  using IFitFunction::setWorkspace;
-  virtual void setWorkspace(boost::shared_ptr<const Workspace>){}
-  virtual void setWorkspace(boost::shared_ptr<const Workspace> ws, bool copyData);
-  virtual void setSlicing(const std::string&){}
-  virtual boost::shared_ptr<const Workspace> getWorkspace()const;
-  virtual void function(FunctionDomain& )const{}
+  /// Set the workspace.
+  /// @param ws :: Shared pointer to a workspace
+  virtual void setWorkspace(boost::shared_ptr<const Workspace> ws);
 
-  /// Returns the size of the fitted data (number of double values returned by the function)
-  virtual size_t dataSize()const;
-  /// Returns a reference to the fitted data. These data are taken from the workspace set by setWorkspace() method.
-  virtual const double* getData()const;
-  /// Returns a reference to the fitting weights.
-  virtual const double* getWeights()const;
-  /// Function you want to fit to. 
-  /// @param out :: The buffer for writing the calculated values. Must be big enough to accept dataSize() values
-  virtual void function(double* out)const;
-  /// Derivatives of function with respect to active parameters
-  virtual void functionDeriv(Jacobian* out);
-  void functionDeriv(API::FunctionDomain& domain, API::Jacobian& jacobian){API::IFunction::functionDeriv(domain,jacobian);}
+  virtual void function(const FunctionDomain& domain,FunctionValues& values)const;
+  virtual void functionDeriv(const FunctionDomain& domain, Jacobian& jacobian){calNumericalDeriv(domain,jacobian);}
 
 protected:
 
@@ -148,21 +132,7 @@ protected:
   /// Do finction initialization after useAllDimensions() was called
   virtual void initDimensions(){}
   /// Does the function evaluation. Must be implemented in derived classes.
-  virtual double functionMD(IMDIterator& r) const = 0;
-
-
-  //    fields for implementing IFitFunction interface
-
-  /// Shared pointer to the workspace
-  boost::shared_ptr<const API::IMDWorkspace> m_workspace;
-  /// Size of the fitted data
-  size_t m_dataSize;
-  /// Pointer to the fitted data
-  boost::shared_array<double> m_data;
-  /// Pointer to the fitting weights
-  boost::shared_array<double> m_weights;
-
-  //   fields supporting IMDWorkspace iteration
+  virtual double functionMD(const IMDIterator& r) const = 0;
 
   /// maps dimension id to its index in m_dimensions
   std::map<std::string,size_t> m_dimensionIndexMap;
@@ -170,16 +140,12 @@ protected:
   std::vector< boost::shared_ptr<const Mantid::Geometry::IMDDimension> > m_dimensions;
 
 
-  /// temporary containers for calculating numeric derivatives
-  boost::scoped_array<double> m_tmpFunctionOutputMinusStep;
-  boost::scoped_array<double> m_tmpFunctionOutputPlusStep;
-
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
 
 private:
   /// Use all the dimensions in the workspace
-  virtual void useAllDimensions();
+  virtual void useAllDimensions(boost::shared_ptr<const IMDWorkspace> workspace);
 
 };
 

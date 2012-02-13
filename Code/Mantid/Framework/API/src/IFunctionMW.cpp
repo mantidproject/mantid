@@ -6,6 +6,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/ConstraintFactory.h"
+#include "MantidAPI/IConstraint.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/Component.h"
@@ -403,17 +404,6 @@ void IFunctionMW::convertValue(std::vector<double>& values, Kernel::Unit_sptr& o
   }  
 }
 
-/**
- * Calculate the Jacobian with respect to parameters actually declared in the IFunctionMW
- * @param out :: The output Jacobian
- * @param xValues :: The x-values
- * @param nData :: The number of data points (and x-values).
- */
-void IFunctionMW::calJacobianForCovariance(Jacobian* out, const double* xValues, const size_t nData)
-{
-  this->functionDerivMW(out,xValues,nData);
-}
-
 namespace
 {
   /**
@@ -450,142 +440,85 @@ namespace
  * @param sd :: optional standard deviations of the parameters for calculating the error bars
  * @return created workspase
  */
-boost::shared_ptr<API::MatrixWorkspace> IFunctionMW::createCalculatedWorkspace(
-  boost::shared_ptr<const API::MatrixWorkspace> inWS, 
-  size_t wi,
-  const std::vector<double>& sd
-  )
-{
-      const MantidVec& inputX = inWS->readX(wi);
-      const MantidVec& inputY = inWS->readY(wi);
-      const MantidVec& inputE = inWS->readE(wi);
-      size_t nData = dataSize();
+//boost::shared_ptr<API::MatrixWorkspace> IFunctionMW::createCalculatedWorkspace(
+//  boost::shared_ptr<const API::MatrixWorkspace> inWS, 
+//  size_t wi,
+//  const std::vector<double>& sd
+//  )
+//{
+//      const MantidVec& inputX = inWS->readX(wi);
+//      const MantidVec& inputY = inWS->readY(wi);
+//      const MantidVec& inputE = inWS->readE(wi);
+//      size_t nData = dataSize();
+//
+//      size_t histN = inWS->isHistogramData() ? 1 : 0;
+//      API::MatrixWorkspace_sptr ws =
+//        Mantid::API::WorkspaceFactory::Instance().create(
+//            "Workspace2D",
+//            3,
+//            nData + histN,
+//            nData);
+//      ws->setTitle("");
+//      ws->setYUnitLabel(inWS->YUnitLabel());
+//      ws->setYUnit(inWS->YUnit());
+//      ws->getAxis(0)->unit() = inWS->getAxis(0)->unit();
+//      API::TextAxis* tAxis = new API::TextAxis(3);
+//      tAxis->setLabel(0,"Data");
+//      tAxis->setLabel(1,"Calc");
+//      tAxis->setLabel(2,"Diff");
+//      ws->replaceAxis(1,tAxis);
+//
+//      assert(m_xMaxIndex-m_xMinIndex+1 == nData);
+//
+//      for(size_t i=0;i<3;i++)
+//      {
+//        ws->dataX(i).assign(inputX.begin()+m_xMinIndex,inputX.begin()+m_xMaxIndex+1+histN);
+//      }
+//
+//      ws->dataY(0).assign(inputY.begin()+m_xMinIndex,inputY.begin()+m_xMaxIndex+1);
+//      ws->dataE(0).assign(inputE.begin()+m_xMinIndex,inputE.begin()+m_xMaxIndex+1);
+//
+//      MantidVec& Ycal = ws->dataY(1);
+//      MantidVec& Ecal = ws->dataE(1);
+//      MantidVec& E = ws->dataY(2);
+//
+//      double* lOut = new double[nData];  // to capture output from call to function()
+//      function( lOut );
+//
+//      for(size_t i=0; i<nData; i++)
+//      {
+//        Ycal[i] = lOut[i]; 
+//        E[i] = m_data[i] - Ycal[i];
+//      }
+//
+//      delete [] lOut; 
+//
+//      if (sd.size() == static_cast<size_t>(this->nParams()))
+//      {
+//        SimpleJacobian J(nData,this->nParams());
+//        try
+//        {
+//          this->functionDeriv(&J);
+//        }
+//        catch(...)
+//        {
+//          this->calNumericalDeriv(&J,&m_xValues[0],nData);
+//        }
+//        for(size_t i=0; i<nData; i++)
+//        {
+//          double err = 0.0;
+//          for(size_t j=0;j< static_cast<size_t>(nParams());++j)
+//          {
+//            double d = J.get(i,j) * sd[j];
+//            err += d*d;
+//          }
+//          Ecal[i] = sqrt(err);
+//        }
+//      }
+//
+//      return ws;
+//}
 
-      size_t histN = inWS->isHistogramData() ? 1 : 0;
-      API::MatrixWorkspace_sptr ws =
-        Mantid::API::WorkspaceFactory::Instance().create(
-            "Workspace2D",
-            3,
-            nData + histN,
-            nData);
-      ws->setTitle("");
-      ws->setYUnitLabel(inWS->YUnitLabel());
-      ws->setYUnit(inWS->YUnit());
-      ws->getAxis(0)->unit() = inWS->getAxis(0)->unit();
-      API::TextAxis* tAxis = new API::TextAxis(3);
-      tAxis->setLabel(0,"Data");
-      tAxis->setLabel(1,"Calc");
-      tAxis->setLabel(2,"Diff");
-      ws->replaceAxis(1,tAxis);
-
-      assert(m_xMaxIndex-m_xMinIndex+1 == nData);
-
-      for(size_t i=0;i<3;i++)
-      {
-        ws->dataX(i).assign(inputX.begin()+m_xMinIndex,inputX.begin()+m_xMaxIndex+1+histN);
-      }
-
-      ws->dataY(0).assign(inputY.begin()+m_xMinIndex,inputY.begin()+m_xMaxIndex+1);
-      ws->dataE(0).assign(inputE.begin()+m_xMinIndex,inputE.begin()+m_xMaxIndex+1);
-
-      MantidVec& Ycal = ws->dataY(1);
-      MantidVec& Ecal = ws->dataE(1);
-      MantidVec& E = ws->dataY(2);
-
-      double* lOut = new double[nData];  // to capture output from call to function()
-      function( lOut );
-
-      for(size_t i=0; i<nData; i++)
-      {
-        Ycal[i] = lOut[i]; 
-        E[i] = m_data[i] - Ycal[i];
-      }
-
-      delete [] lOut; 
-
-      if (sd.size() == static_cast<size_t>(this->nParams()))
-      {
-        SimpleJacobian J(nData,this->nParams());
-        try
-        {
-          this->functionDeriv(&J);
-        }
-        catch(...)
-        {
-          this->calNumericalDeriv(&J,&m_xValues[0],nData);
-        }
-        for(size_t i=0; i<nData; i++)
-        {
-          double err = 0.0;
-          for(size_t j=0;j< static_cast<size_t>(nParams());++j)
-          {
-            double d = J.get(i,j) * sd[j];
-            err += d*d;
-          }
-          Ecal[i] = sqrt(err);
-        }
-      }
-
-      return ws;
-}
-
-/** Calculate numerical derivatives.
- * @param out :: Derivatives
- * @param xValues :: X values for data points
- * @param nData :: Number of data points
- */
-void IFunctionMW::calNumericalDeriv(Jacobian* out, const double* xValues, const size_t& nData)
-{
-    const double minDouble = std::numeric_limits<double>::min();
-    const double epsilon = std::numeric_limits<double>::epsilon();
-    double stepPercentage = 0.001; // step percentage
-    double step; // real step
-    double cutoff = 100.0*minDouble/stepPercentage;
-    size_t nParam = nParams();
-
-    // allocate memory if not already done
-    if (!m_tmpFunctionOutputMinusStep && nData>0)
-    {
-      m_tmpFunctionOutputMinusStep.reset(new double[nData]);
-      m_tmpFunctionOutputPlusStep.reset(new double[nData]);
-    }
-
-    functionMW(m_tmpFunctionOutputMinusStep.get(), xValues, nData);
-
-    for (size_t iP = 0; iP < nParam; iP++)
-    {
-      if ( isActive(iP) )
-      {
-        const double& val = getParameter(iP);
-        if (fabs(val) < cutoff)
-        {
-          step = epsilon;
-        }
-        else
-        {
-          step = val*stepPercentage;
-        }
-
-        //double paramMstep = val - step;
-        //setParameter(iP, paramMstep);
-        //function(m_tmpFunctionOutputMinusStep.get(), xValues, nData);
-
-        double paramPstep = val + step;
-        setParameter(iP, paramPstep);
-        functionMW(m_tmpFunctionOutputPlusStep.get(), xValues, nData);
-
-        step = paramPstep - val;
-        setParameter(iP, val);
-
-        for (size_t i = 0; i < nData; i++) {
-         // out->set(i,iP, 
-         //   (m_tmpFunctionOutputPlusStep[i]-m_tmpFunctionOutputMinusStep[i])/(2.0*step));
-          out->set(i,iP, 
-            (m_tmpFunctionOutputPlusStep[i]-m_tmpFunctionOutputMinusStep[i])/step);
-        }
-      }
-    }
-}
 
 } // namespace API
 } // namespace Mantid

@@ -1,17 +1,20 @@
-#ifndef MANTID_API_FUNCTIONDOMAIN_H_
-#define MANTID_API_FUNCTIONDOMAIN_H_
+#ifndef MANTID_API_COMPOSITEDOMAINMD_H_
+#define MANTID_API_COMPOSITEDOMAINMD_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/DllConfig.h"
+#include "MantidAPI/CompositeDomain.h"
+#include "MantidAPI/IMDWorkspace.h"
 
-#include <stdexcept>
+#include <vector>
 
 namespace Mantid
 {
 namespace API
 {
+class FunctionDomainMD;
+
 /** Base class that represents the domain of a function.
     A domain is a generalisation of x (argument) and y (value) arrays.
     A domain consists at least of a list of function arguments for which a function should 
@@ -41,18 +44,24 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL FunctionDomain
+class MANTID_API_DLL CompositeDomainMD: public CompositeDomain
 {
 public:
-  /// Virtual destructor
-  virtual ~FunctionDomain(){}
-  /// Return the number of points in the domain
-  virtual size_t size() const  = 0;
-  /// Reset the the domain so it can be reused. Implement this method for domains with a state.
-  virtual void reset() const {}
+  CompositeDomainMD(IMDWorkspace_const_sptr ws, size_t maxDomainSize);
+  ~CompositeDomainMD();
+  /// Return the total number of arguments in the domain
+  virtual size_t size() const  {return m_totalSize;}
+  /// Return the number of parts in the domain
+  virtual size_t getNParts() const {return m_domains.size();}
+  /// Return i-th domain
+  virtual const FunctionDomain& getDomain(size_t i) const;
+protected:
+  mutable IMDIterator* m_iterator; ///< IMDIterator
+  size_t m_totalSize; ///< The total size of the domain
+  mutable std::vector<FunctionDomainMD*> m_domains; ///< smaller parts of the domain
 };
 
 } // namespace API
 } // namespace Mantid
 
-#endif /*MANTID_API_FUNCTIONDOMAIN_H_*/
+#endif /*MANTID_API_COMPOSITEDOMAINMD_H_*/

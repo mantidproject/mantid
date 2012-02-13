@@ -1,14 +1,27 @@
-#ifndef IFUNCTIONMDTEST_H_
-#define IFUNCTIONMDTEST_H_
+#ifndef IFUNCTION1DTEST_H_
+#define IFUNCTION1DTEST_H_
 
-#include "MantidAPI/IFunctionMD.h"
+#include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/ParamFunction.h"
+
 #include <cxxtest/TestSuite.h>
 #include <iostream>
 
 using namespace Mantid;
 using namespace Mantid::API;
 
-class IFunctionMDTest : public CxxTest::TestSuite
+const double A = 1.1;
+const double B = 2.2;
+
+class IFunction1DTest_Function: public virtual IFitFunction, public virtual ParamFunction
+{
+protected:
+  virtual void function1D(FunctionDomain1D&)const
+  {
+  }
+};
+
+class IFunction1DTest : public CxxTest::TestSuite
 {
 public:
 
@@ -34,4 +47,4 @@ public:
 
 };
 
-#endif /*IFUNCTIONMDTEST_H_*/
+#endif /*IFUNCTION1DTEST_H_*/

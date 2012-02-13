@@ -1,12 +1,13 @@
-#ifndef MANTID_API_FUNCTIONDOMAIN_H_
-#define MANTID_API_FUNCTIONDOMAIN_H_
+#ifndef MANTID_API_FUNCTIONVALUES_H_
+#define MANTID_API_FUNCTIONVALUES_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
+#include "MantidAPI/FunctionDomain.h"
 
-#include <stdexcept>
+#include <vector>
 
 namespace Mantid
 {
@@ -41,18 +42,42 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL FunctionDomain
+class MANTID_API_DLL FunctionValues
 {
 public:
-  /// Virtual destructor
-  virtual ~FunctionDomain(){}
-  /// Return the number of points in the domain
-  virtual size_t size() const  = 0;
-  /// Reset the the domain so it can be reused. Implement this method for domains with a state.
-  virtual void reset() const {}
+  /// Constructor.
+  FunctionValues(const FunctionDomain& domain);
+  /// Copy constructor.
+  FunctionValues(const FunctionValues& values);
+  /// Return the number of points, values, etc in the domain
+  size_t size() const {return m_calculated.size();}
+  /// store i-th calculated value. 0 <= i < size()
+  void setCalculated(size_t i,double value) {m_calculated[i] = value;}
+  /// get i-th calculated value. 0 <= i < size()
+  double getCalculated(size_t i) const {return m_calculated[i];}
+  /// Get a pointer to calculated data at index i
+  double* getPointerToCalculated(size_t i);
+  /// Add other calculated values
+  FunctionValues& operator+=(const FunctionValues& values);
+
+  /// set a fitting data value
+  void setFitData(size_t i,double value);
+  void setFitData(const std::vector<double>& values);
+  /// get a fitting data value
+  double getFitData(size_t i) const;
+  /// set a fitting weight
+  void setFitWeight(size_t i,double value);
+  void setFitWeights(const std::vector<double>& values);
+  /// get a fitting weight
+  double getFitWeight(size_t i) const;
+protected:
+  void setDataSize();
+  std::vector<double> m_calculated; ///< buffer for calculated values
+  std::vector<double> m_data;    ///< buffer for fit data
+  std::vector<double> m_weights; ///< buffer for fitting weights (reciprocal errors)
 };
 
 } // namespace API
 } // namespace Mantid
 
-#endif /*MANTID_API_FUNCTIONDOMAIN_H_*/
+#endif /*MANTID_API_FUNCTIONVALUES_H_*/

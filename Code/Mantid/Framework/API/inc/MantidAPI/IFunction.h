@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/FunctionDomain.h"
+#include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/Jacobian.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
@@ -225,7 +226,9 @@ public:
   virtual std::string name()const = 0;
   /// Writes itself into a string
   virtual std::string asString()const;
-  /// Set the workspace. Make 
+  /// The string operator
+  virtual operator std::string()const{return asString();}
+  /// Set the workspace.
   /// @param ws :: Shared pointer to a workspace
   virtual void setWorkspace(boost::shared_ptr<const Workspace> ws) {}
   /// Get the workspace
@@ -246,9 +249,9 @@ public:
 
   /// Function you want to fit to. 
   /// @param domain :: The buffer for writing the calculated values. Must be big enough to accept dataSize() values
-  virtual void function(FunctionDomain& domain)const = 0;
+  virtual void function(const FunctionDomain& domain,FunctionValues& values)const = 0;
   /// Derivatives of function with respect to active parameters
-  virtual void functionDeriv(FunctionDomain& domain, Jacobian& jacobian);
+  virtual void functionDeriv(const FunctionDomain& domain, Jacobian& jacobian);
 
   /// Set i-th parameter
   virtual void setParameter(size_t, const double& value, bool explicitlySet = true) = 0;
@@ -364,8 +367,8 @@ protected:
   /// Declare a new parameter
   virtual void declareParameter(const std::string& name, double initValue = 0, const std::string& description="") = 0;
 
-  //virtual size_t indexOfActive(size_t i)const = 0;
-  //virtual size_t activeIndex(size_t i)const = 0;
+  /// Calculate numerical derivatives
+  void calNumericalDeriv(const FunctionDomain& domain, Jacobian& out){}
 
   /// Create an instance of a tie without actually tying it to anything
   virtual ParameterTie* createTie(const std::string& parName);
@@ -380,6 +383,28 @@ protected:
 
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
+};
+
+/**
+ * Classes inherited from FunctionHandler will handle the function.
+ * The intended purpose is to help with displaying nested composite
+ * functions in a tree view. This way a display handler shows only
+ * single function and there is no need to duplicate the function tree
+ * structure.
+ */
+class FunctionHandler
+{
+public:
+  /// Constructor
+  FunctionHandler(IFunction* fun):m_fun(fun){}
+  /// Virtual destructor
+  virtual ~FunctionHandler(){}
+  /// abstract init method. It is called after setting handler to the function
+  virtual void init() = 0;
+  /// Return the handled function
+  const IFunction* function()const{return m_fun;}
+protected:
+  IFunction* m_fun;///< pointer to the handled function
 };
 
 } // namespace API

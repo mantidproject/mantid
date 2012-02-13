@@ -112,13 +112,10 @@ class MANTID_API_DLL IFunction1D: public virtual IFunction
 {
 public:
 
-  /// Constructor
-  IFunction1D():IFunction(){}
-
   /* Overidden methods */
 
-  virtual void function(FunctionDomain& )const;
-  void functionDeriv(FunctionDomain& domain, Jacobian& jacobian);
+  virtual void function(const FunctionDomain& domain,FunctionValues& values)const;
+  void functionDeriv(const FunctionDomain& domain, Jacobian& jacobian);
 
   //boost::shared_ptr<API::MatrixWorkspace> createCalculatedWorkspace(
   //  boost::shared_ptr<const API::MatrixWorkspace> inWS, 
@@ -129,15 +126,9 @@ public:
 protected:
 
   /// Function you want to fit to.
-  virtual void function1D(FunctionDomain1D&)const = 0;
+  virtual void function1D(double* out, const double* xValues, const size_t nData)const = 0;
   /// Derivatives of function with respect to active parameters
-  virtual void functionDeriv1D(FunctionDomain1D&, Jacobian& out);
-
-  /// Calculate numerical derivatives
-  void calNumericalDeriv(FunctionDomain1D& domain, Jacobian& out);
-
-  mutable std::vector<double> m_tmpFunctionOutputMinusStep;
-  mutable std::vector<double> m_tmpFunctionOutputPlusStep;
+  virtual void functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData);
 
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
