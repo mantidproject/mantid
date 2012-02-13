@@ -26,10 +26,11 @@ class RefMReduction(PythonAlgorithm):
         self.declareListProperty("NormPeakPixelRange", [90, 160], Validator=ArrayBoundedValidator(Lower=0))
         self.declareProperty("SubtractNormBackground", True)
         self.declareListProperty("NormBackgroundPixelRange", [80, 170], Validator=ArrayBoundedValidator(Lower=0))
-        self.declareListProperty("LowResAxisPixelRange", [100, 165], Validator=ArrayBoundedValidator(Lower=0))
+        self.declareListProperty("LowResDataAxisPixelRange", [100, 165], Validator=ArrayBoundedValidator(Lower=0))
+        self.declareListProperty("LowResNormAxisPixelRange", [100, 165], Validator=ArrayBoundedValidator(Lower=0))
         self.declareListProperty("TOFRange", [10700., 24500.], Validator=ArrayBoundedValidator(Lower=0))
-        self.declareProperty("QMin", 0.0001, Description="Minimum Q-value")
-        self.declareProperty("QStep", 0.0002, Description="Step-size in Q. Enter a negative value to get a log scale.")
+        self.declareProperty("QMin", 0.0025, Description="Minimum Q-value")
+        self.declareProperty("QStep", -0.01, Description="Step-size in Q. Enter a negative value to get a log scale.")
         self.declareProperty("Theta", 0.0, Description="Scattering angle (degrees)")
         self.declareProperty("WavelengthMin", 2.5)
         self.declareProperty("WavelengthMax", 6.5)
@@ -58,7 +59,7 @@ class RefMReduction(PythonAlgorithm):
         q_min = self.getProperty("QMin")
         q_step = self.getProperty("QStep")
                 
-        low_res_range = self.getProperty("LowResAxisPixelRange")
+        low_res_range = self.getProperty("LowResDataAxisPixelRange")
         
         h = 6.626e-34  # m^2 kg s^-1
         m = 1.675e-27  # kg
