@@ -11,6 +11,14 @@ namespace Mantid
 {
 namespace API
 {
+
+#ifdef _WIN32
+#pragma warning( push )
+// Disable 'multiple assignment operators specified' warning for this class
+//  - it's not an accident that we have more than one
+#pragma warning( disable: 4522 )
+#endif
+
   /**
      A specialized class for dealing with file properties. Mantid allows multiple
      search paths to be defined so that each of these is used when attempting to
@@ -89,6 +97,10 @@ public:
   /// Private, unimplemented copy assignment operator
   FileProperty& operator=( const FileProperty& right );
 };
+
+#ifdef _WIN32
+#pragma warning ( pop ) // Re-enable the warning about multiple assignment operators
+#endif
 
 }
 }

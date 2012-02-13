@@ -89,7 +89,7 @@ public:
     Algorithm *testInput = new testalg;
     testInput->initialize();
     testInput->setPropertyValue("arg2_param", "5");
-    AlgorithmHistory history(testInput, 10000.,1.5);
+    AlgorithmHistory history(testInput);
     
     IAlgorithm_sptr compareAlg = history.createAlgorithm();
     TS_ASSERT_EQUALS(compareAlg->name(), testInput->name());
