@@ -139,7 +139,7 @@ public:
   /// Helper function for the 2D case
   bool try2Dpoint(MDPlane & p, double x, double y)
   {
-    coord_t centers[2] = {coord_t(x),coord_t(y)};
+    coord_t centers[2] = {static_cast<coord_t>(x),static_cast<coord_t>(y)};
     return p.isPointBounded(centers);
   }
 
@@ -191,8 +191,8 @@ public:
   /// Helper function for the 2D case of a line intersecting the plane
   bool try2Dline(MDPlane & p, double x1, double y1, double x2, double y2)
   {
-    coord_t centers1[2] = {coord_t(x1),coord_t(y1)};
-    coord_t centers2[2] = {coord_t(x2),coord_t(y2)};
+    coord_t centers1[2] = {static_cast<coord_t>(x1),static_cast<coord_t>(y1)};
+    coord_t centers2[2] = {static_cast<coord_t>(x2),static_cast<coord_t>(y2)};
     return p.doesLineIntersect(centers1, centers2);
   }
 

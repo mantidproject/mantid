@@ -251,11 +251,11 @@ namespace MDEvents
         const MDEvent<nd> & event = *it;
         float signal = event.signal;
         float errorSquared = event.errorSquared;
-        data[index++] = coord_t(signal);
-        data[index++] = coord_t(errorSquared);
+        data[index++] = static_cast<coord_t>(signal);
+        data[index++] = static_cast<coord_t>(errorSquared);
         // Additional stuff for MDEvent
-        data[index++] = coord_t(event.runIndex);
-        data[index++] = coord_t(event.detectorId);
+        data[index++] = static_cast<coord_t>(event.runIndex);
+        data[index++] = static_cast<coord_t>(event.detectorId);
         for(size_t d=0; d<nd; d++)
           data[index++] = event.center[d];
         // Track the total signal

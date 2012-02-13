@@ -36,7 +36,7 @@ MDPlaneImplicitFunction::MDPlaneImplicitFunction(const size_t nd,
   this->origin = new coord_t[nd];
   for( std::size_t i = 0; i < nd; i++)
   {
-    this->origin[i] = coord_t(point[i]);
+    this->origin[i] = static_cast<coord_t>(point[i]);
   }
   this->addPlane(MDPlane(nd, normal, point));
 }
@@ -57,7 +57,7 @@ MDPlaneImplicitFunction::MDPlaneImplicitFunction(const size_t nd,
   this->origin = new coord_t[nd];
   for( std::size_t i = 0; i < nd; i++)
   {
-    this->origin[i] = coord_t(point[i]);
+    this->origin[i] = static_cast<coord_t>(point[i]);
   }
   this->addPlane(MDPlane(nd, normal, point));
 }

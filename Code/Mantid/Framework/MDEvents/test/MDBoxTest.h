@@ -73,7 +73,7 @@ public:
     MDLeanEvent<1> ev(1.23, 2.34);
     for (size_t i=0; i<15; i++)
     {
-      ev.setCenter(0, coord_t(i));
+      ev.setCenter(0, static_cast<coord_t>(i));
       box1.addEvent(ev);
     }
     // Do the copy
@@ -302,8 +302,8 @@ public:
       for (double y=0.5; y < 10.0; y += 1.0)
       {
         MDLeanEvent<2> ev(1.0, 1.5);
-        ev.setCenter(0, coord_t(x));
-        ev.setCenter(1, coord_t(y));
+        ev.setCenter(0, static_cast<coord_t>(x));
+        ev.setCenter(1, static_cast<coord_t>(y));
         box.addEvent(ev);
       }
     TS_ASSERT_EQUALS(box.getNPoints(), 100);
@@ -437,7 +437,7 @@ public:
     signal_t signal = 0.0;
     b.centroidSphere(sphere, 400., centroid, signal);
     for (size_t d=0; d<2; d++)
-      centroid[d] /= coord_t(signal);
+      centroid[d] /= static_cast<coord_t>(signal);
 
     // This should be the weighted centroid
     TS_ASSERT_DELTA( signal, 6.000, 0.001);
@@ -450,7 +450,7 @@ public:
       centroid[d] = 0.0;
     b.centroidSphere(sphere, 16., centroid, signal);
     for (size_t d=0; d<2; d++)
-      centroid[d] /= coord_t(signal);
+      centroid[d] /= static_cast<coord_t>(signal);
     // Only one event was contained
     TS_ASSERT_DELTA( signal, 2.000, 0.001);
     TS_ASSERT_DELTA( centroid[0], 2.000, 0.001);

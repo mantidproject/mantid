@@ -93,7 +93,7 @@ namespace Mantid
         //Loop through dimensions
         for (int i = 0; i < nPointsX; i++)
         {
-          in[0] = minX + (coord_t(i) * incrementX); //Calculate increment in x;
+          in[0] = minX + (static_cast<coord_t>(i) * incrementX); //Calculate increment in x;
           
           signalScalar = static_cast<float>(m_workspace->getSignalNormalizedAt(i));
 

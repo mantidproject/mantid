@@ -30,7 +30,7 @@ public:
   /// Helper function for the 2D case
   bool try2Dpoint(MDImplicitFunction & f, double x, double y)
   {
-    coord_t centers[2] = {coord_t(x),coord_t(y)};
+    coord_t centers[2] = {static_cast<coord_t>(x),static_cast<coord_t>(y)};
     return f.isPointContained(centers);
   }
 

@@ -1632,7 +1632,7 @@ void SliceViewer::openFromXML(const QString & xml)
     throw std::runtime_error("SliceViewer::openFromXML(): Could not find the normal of the plane. Plane must be along one of the axes!");
 
   // Get the plane origin and the dimension in the workspace dimensions
-  planeOrigin = coord_t(origin[normalDim]);
+  planeOrigin = static_cast<coord_t>(origin[normalDim]);
   normalDim = dimMap[normalDim];
 
   VMD slicePoint(m_ws->getNumDims());
@@ -1641,7 +1641,7 @@ void SliceViewer::openFromXML(const QString & xml)
   slicePoint[normalDim] = planeOrigin;
   // The "time" of the paraview view
   if (dimMap[3] > 0)
-    slicePoint[dimMap[3]] = coord_t(TimeValue);
+    slicePoint[dimMap[3]] = static_cast<coord_t>(TimeValue);
 
   // Now find the first unused dimensions = that is the X view dimension
   int xdim =-1;

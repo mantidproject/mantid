@@ -38,7 +38,7 @@ public:
   /// Helper function for the 2D case
   bool try2Dpoint(MDImplicitFunction & f, double x, double y)
   {
-    coord_t centers[2] = {coord_t(x),coord_t(y)};
+    coord_t centers[2] = {static_cast<coord_t>(x),static_cast<coord_t>(y)};
     return f.isPointContained(centers);
   }
 
@@ -99,8 +99,8 @@ public:
   void add2DVertex(std::vector<std::vector<coord_t> > & vertexes, double x, double y)
   {
     std::vector<coord_t> vertex;
-    vertex.push_back(coord_t(x));
-    vertex.push_back(coord_t(y));
+    vertex.push_back(static_cast<coord_t>(x));
+    vertex.push_back(static_cast<coord_t>(y));
     vertexes.push_back(vertex);
   }
 
@@ -114,13 +114,13 @@ public:
     coord_t * out = new coord_t[8];
     vertexes.clear();
     add2DVertex(vertexes, x1,y1);
-    out[0] = coord_t(x1); out[1] = coord_t(y1);
+    out[0] = static_cast<coord_t>(x1); out[1] = static_cast<coord_t>(y1);
     add2DVertex(vertexes, x2,y1);
-    out[2] = coord_t(x2); out[3] = coord_t(y1);
+    out[2] = static_cast<coord_t>(x2); out[3] = static_cast<coord_t>(y1);
     add2DVertex(vertexes, x2,y2);
-    out[4] = coord_t(x2); out[5] = coord_t(y2);
+    out[4] = static_cast<coord_t>(x2); out[5] = static_cast<coord_t>(y2);
     add2DVertex(vertexes, x1,y2);
-    out[6] = coord_t(x1); out[7] = coord_t(y2);
+    out[6] = static_cast<coord_t>(x1); out[7] = static_cast<coord_t>(y2);
 
     return out;
   }

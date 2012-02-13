@@ -114,7 +114,7 @@ public:
     {
       for(int j = 0; j < 4; j++)
       {
-        transform[i][j] = coord_t(count);
+        transform[i][j] = static_cast<coord_t>(count);
         count++;
       }
     }

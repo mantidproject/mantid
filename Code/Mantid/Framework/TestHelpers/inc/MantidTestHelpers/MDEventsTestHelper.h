@@ -102,7 +102,7 @@ namespace MDEventsTestHelper
           // Put an event in the middle of each box
           Mantid::coord_t centers[nd];
           for (size_t d=0; d<nd; d++)
-            centers[d] = min + (coord_t(index[d])+0.5f)*(max-min)/coord_t(splitInto);
+            centers[d] = min + (static_cast<coord_t>(index[d])+0.5f)*(max-min)/static_cast<coord_t>(splitInto);
           out->addEvent( MDE(1.0, 1.0, centers) );
          }
 
@@ -201,7 +201,7 @@ namespace MDEventsTestHelper
       // Generate the position from the counter
       coord_t centers[nd];
       for (size_t d=0;d<nd;d++)
-        centers[d] = coord_t(counters[d])*step + start;
+        centers[d] = static_cast<coord_t>(counters[d])*step + start;
 
       // Add that event 'repeat' times
       for (size_t i=0; i<repeat; ++i)
@@ -266,7 +266,7 @@ namespace MDEventsTestHelper
     // Set the size to splitInto*1.0 in all directions
     MDBox<MDLeanEvent<nd>,nd> * box = new MDBox<MDLeanEvent<nd>,nd>(splitter);
     for (size_t d=0; d<nd; d++)
-      box->setExtents(d, 0.0, coord_t(splitInto));
+      box->setExtents(d, 0.0, static_cast<coord_t>(splitInto));
     // Split into the gridbox.
     MDGridBox<MDLeanEvent<nd>,nd> * gridbox = new MDGridBox<MDLeanEvent<nd>,nd>(box);
 

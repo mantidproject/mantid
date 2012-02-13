@@ -99,9 +99,9 @@ namespace VATES
     const coord_t maxZ = m_workspace->getZDimension()->getMaximum();
     const coord_t minZ = m_workspace->getZDimension()->getMinimum();
 
-    coord_t incrementX = (maxX - minX) / coord_t(nBinsX);
-    coord_t incrementY = (maxY - minY) / coord_t(nBinsY);
-    coord_t incrementZ = (maxZ - minZ) / coord_t(nBinsZ);
+    coord_t incrementX = (maxX - minX) / static_cast<coord_t>(nBinsX);
+    coord_t incrementY = (maxY - minY) / static_cast<coord_t>(nBinsY);
+    coord_t incrementZ = (maxZ - minZ) / static_cast<coord_t>(nBinsZ);
 
     const int imageSize = (nBinsX ) * (nBinsY ) * (nBinsZ );
     vtkPoints *points = vtkPoints::New();
@@ -190,16 +190,16 @@ namespace VATES
     index = 0;
     for (int z = 0; z < nPointsZ; z++)
     {
-      in[2] = (minZ + (coord_t(z) * incrementZ)); //Calculate increment in z;
+      in[2] = (minZ + (static_cast<coord_t>(z) * incrementZ)); //Calculate increment in z;
       for (int y = 0; y < nPointsY; y++)
       {
-        in[1] = (minY + (coord_t(y) * incrementY)); //Calculate increment in y;
+        in[1] = (minY + (static_cast<coord_t>(y) * incrementY)); //Calculate increment in y;
         for (int x = 0; x < nPointsX; x++)
         {
           // Create the point only when needed
           if (pointNeeded[index])
           {
-            in[0] = (minX + (coord_t(x) * incrementX)); //Calculate increment in x;
+            in[0] = (minX + (static_cast<coord_t>(x) * incrementX)); //Calculate increment in x;
             if (transform)
             {
               transform->apply(in, out);

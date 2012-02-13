@@ -218,7 +218,7 @@ public:
       {
         for (size_t i=0; i < num_repeat; i++)
         {
-          coord_t centers[2] = {coord_t(x), coord_t(y)};
+          coord_t centers[2] = {static_cast<coord_t>(x), static_cast<coord_t>(y)};
           events.push_back( MDLeanEvent<2>(2.0, 2.0, centers) );
         }
       }
@@ -259,7 +259,7 @@ public:
 
   void addEvent(MDEventWorkspace2Lean::sptr b, double x, double y)
   {
-    coord_t centers[2] = {coord_t(x), coord_t(y)};
+    coord_t centers[2] = {static_cast<coord_t>(x), static_cast<coord_t>(y)};
     b->addEvent(MDLeanEvent<2>(2.0, 2.0, centers));
   }
 

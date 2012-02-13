@@ -146,14 +146,14 @@ namespace MDEvents
       for (size_t d=0; d<nd; ++d)
       {
         dimensionsUsed[d] = true; // Use all dimensions
-        center[d] = coord_t(pos[d]);
+        center[d] = static_cast<coord_t>(pos[d]);
       }
       CoordTransformDistance sphere(nd, center, dimensionsUsed);
 
       // Perform the integration into whatever box is contained within.
       signal_t signal = 0;
       signal_t errorSquared = 0;
-      ws->getBox()->integrateSphere(sphere, coord_t(PeakRadius*PeakRadius), signal, errorSquared);
+      ws->getBox()->integrateSphere(sphere, static_cast<coord_t>(PeakRadius*PeakRadius), signal, errorSquared);
 
       // Integrate around the background radius
       signal_t bgSignal = 0;
@@ -161,7 +161,7 @@ namespace MDEvents
       if (BackgroundRadius > PeakRadius)
       {
         // Get the total signal inside "BackgroundRadius"
-        ws->getBox()->integrateSphere(sphere, coord_t(BackgroundRadius*BackgroundRadius), bgSignal, bgErrorSquared);
+        ws->getBox()->integrateSphere(sphere, static_cast<coord_t>(BackgroundRadius*BackgroundRadius), bgSignal, bgErrorSquared);
 
         // Evaluate the signal inside "BackgroundStartRadius"
         signal_t interiorSignal = 0;
@@ -169,7 +169,7 @@ namespace MDEvents
 
         // Integrate this 3rd radius, if needed
         if (BackgroundStartRadius != PeakRadius)
-          ws->getBox()->integrateSphere(sphere, coord_t(BackgroundStartRadius*BackgroundStartRadius), interiorSignal, interiorErrorSquared);
+          ws->getBox()->integrateSphere(sphere, static_cast<coord_t>(BackgroundStartRadius*BackgroundStartRadius), interiorSignal, interiorErrorSquared);
         else
         {
           // PeakRadius == BackgroundStartRadius, so use the previous value

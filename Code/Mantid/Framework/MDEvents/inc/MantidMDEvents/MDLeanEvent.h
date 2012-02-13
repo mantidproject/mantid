@@ -111,7 +111,7 @@ namespace MDEvents
       signal(signal), errorSquared(errorSquared)
     {
       for (size_t i=0; i<nd; i++)
-        center[i] = coord_t(centers[i]);
+        center[i] = static_cast<coord_t>(centers[i]);
     }
 #endif
     //---------------------------------------------------------------------------------------------
@@ -172,7 +172,7 @@ namespace MDEvents
      * */
     void setCenter(const size_t n, const double value)
     {
-      center[n] = coord_t(value);
+      center[n] = static_cast<coord_t>(value);
     }
 #endif
 
@@ -355,8 +355,8 @@ namespace MDEvents
         const MDLeanEvent<nd> & event = *it;
         float signal = event.signal;
         float errorSquared = event.errorSquared;
-        data[index++] = coord_t(signal);
-        data[index++] = coord_t(errorSquared);
+        data[index++] = static_cast<coord_t>(signal);
+        data[index++] = static_cast<coord_t>(errorSquared);
         for(size_t d=0; d<nd; d++)
           data[index++] = event.center[d];
         // Track the total signal

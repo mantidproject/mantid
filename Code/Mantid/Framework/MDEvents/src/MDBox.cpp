@@ -432,7 +432,7 @@ namespace MDEvents
       for (size_t d=0; d<nd; d++)
       {
         // Total up the coordinate weighted by the signal.
-        centroid[d] += event.getCenter(d) * coord_t(signal);
+        centroid[d] += event.getCenter(d) * static_cast<coord_t>(signal);
       }
     }
 
@@ -677,7 +677,7 @@ namespace MDEvents
       radiusTransform.apply(it->getCenter(), out);
       if (out[0] < radiusSquared)
       {
-        coord_t eventSignal = coord_t(it->getSignal());
+        coord_t eventSignal = static_cast<coord_t>(it->getSignal());
         signal += signal_t(eventSignal);
         for (size_t d=0; d<nd; d++)
           centroid[d] += it->getCenter(d) * eventSignal;
@@ -706,7 +706,7 @@ namespace MDEvents
     {
       coord_t * center = it->getCenterNonConst();
       for (size_t d=0; d<nd; d++)
-        center[d] = (center[d] * coord_t(scaling[d])) + coord_t(offset[d]);
+        center[d] = (center[d] * static_cast<coord_t>(scaling[d])) + static_cast<coord_t>(offset[d]);
     }
     this->releaseEvents();
   }

@@ -77,9 +77,9 @@ double QwtRasterDataMD::value(double x, double y) const
   for (size_t d=0; d<m_nd; d++)
   {
     if (d==m_dimX)
-      lookPoint[d] = coord_t(x);
+      lookPoint[d] = static_cast<coord_t>(x);
     else if (d==m_dimY)
-      lookPoint[d] = coord_t(y);
+      lookPoint[d] = static_cast<coord_t>(y);
     else
       lookPoint[d] = m_slicePoint[d];
   }

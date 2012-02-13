@@ -136,8 +136,8 @@ namespace MDEvents
   {
     for (size_t d=0; d<nd; d++)
     {
-      extents[d].min = (extents[d].min * coord_t(scaling[d])) + coord_t(offset[d]);
-      extents[d].max = (extents[d].max * coord_t(scaling[d])) + coord_t(offset[d]);
+      extents[d].min = (extents[d].min * static_cast<coord_t>(scaling[d])) + static_cast<coord_t>(offset[d]);
+      extents[d].max = (extents[d].max * static_cast<coord_t>(scaling[d])) + static_cast<coord_t>(offset[d]);
     }
     // Re-calculate the volume of the box
     this->calcVolume();

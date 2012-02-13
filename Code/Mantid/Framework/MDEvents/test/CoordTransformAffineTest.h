@@ -248,7 +248,7 @@ public:
     V3D exp2(-2.4, 5.6, 0.0); q.rotate(exp2);
     coord_t in2[3]  = {-1.4f, 6.6f, 8.987f};
     // The output gets scaled like this
-    coord_t scaledExp2[2] = {coord_t(exp2[0]*2.0), coord_t(exp2[1]*3.0)};
+    coord_t scaledExp2[2] = {static_cast<coord_t>(exp2[0]*2.0), static_cast<coord_t>(exp2[1]*3.0)};
     ct.apply(in2, out);
     compare(2, out, scaledExp2);
 
@@ -374,7 +374,7 @@ public:
     {
       for(int j = 0; j < 4; j++)
       {
-        transform[i][j] = coord_t(count);
+        transform[i][j] = static_cast<coord_t>(count);
         count++;
       }
     }

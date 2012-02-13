@@ -134,19 +134,19 @@ namespace MDEvents
       }
 
       // Make a unit vector pointing in this direction
-      coord_t radius = coord_t(sqrt(radiusSquared));
+      coord_t radius = static_cast<coord_t>(sqrt(radiusSquared));
       for (size_t d=0; d<nd; d++)
         centers[d] /= radius;
 
       // Now place the point along this radius, scaled with ^1/n for uniformity.
       coord_t radPos = genUnit();
-      radPos = coord_t(pow(radPos, 1.0/double(nd)));
+      radPos = static_cast<coord_t>(pow(radPos, 1.0/double(nd)));
       for (size_t d=0; d<nd; d++)
       {
         // Multiply by the scaling and the desired peak radius
-        centers[d] *= (radPos * coord_t(desiredRadius));
+        centers[d] *= (radPos * static_cast<coord_t>(desiredRadius));
         // Also offset by the center of the peak, as taken in Params
-        centers[d] += coord_t(params[d+1]);
+        centers[d] += static_cast<coord_t>(params[d+1]);
       }
 
       // Default or randomized error/signal
@@ -230,7 +230,7 @@ namespace MDEvents
     {
       coord_t centers[nd];
       for (size_t d=0; d<nd; d++)
-        centers[d] = coord_t((*gens[d])()); // use a different generator for each dimension
+        centers[d] = static_cast<coord_t>((*gens[d])()); // use a different generator for each dimension
 
       // Default or randomized error/signal
       float signal = 1.0;

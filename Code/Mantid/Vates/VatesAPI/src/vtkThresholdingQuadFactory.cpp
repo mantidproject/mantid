@@ -72,8 +72,8 @@ namespace Mantid
         const coord_t maxY = m_workspace-> getYDimension()->getMaximum();
         const coord_t minY = m_workspace-> getYDimension()->getMinimum();
 
-        coord_t incrementX = (maxX - minX) / coord_t(nBinsX);
-        coord_t incrementY = (maxY - minY) / coord_t(nBinsY);
+        coord_t incrementX = (maxX - minX) / static_cast<coord_t>(nBinsX);
+        coord_t incrementY = (maxY - minY) / static_cast<coord_t>(nBinsY);
 
         const int imageSize = (nBinsX ) * (nBinsY );
         vtkPoints *points = vtkPoints::New();
@@ -145,13 +145,13 @@ namespace Mantid
         index = 0;
         for (int i = 0; i < nPointsX; i++)
         {
-          in[0] = minX + (coord_t(i) * incrementX); //Calculate increment in x;
+          in[0] = minX + (static_cast<coord_t>(i) * incrementX); //Calculate increment in x;
           for (int j = 0; j < nPointsY; j++)
           {
             // Create the point only when needed
             if (pointNeeded[index])
             {
-              in[1] = minY + (coord_t(j) * incrementY); //Calculate increment in y;
+              in[1] = minY + (static_cast<coord_t>(j) * incrementY); //Calculate increment in y;
               if (transform)
               {
                 transform->apply(in, out);

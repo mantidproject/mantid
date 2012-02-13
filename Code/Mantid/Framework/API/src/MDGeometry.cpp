@@ -338,8 +338,8 @@ namespace API
     for (size_t d=0; d<m_dimensions.size(); d++)
     {
       IMDDimension_sptr dim = m_dimensions[d];
-      coord_t min = (dim->getMinimum() * coord_t(scaling[d])) + coord_t(offset[d]);
-      coord_t max = (dim->getMaximum() * coord_t(scaling[d])) + coord_t(offset[d]);
+      coord_t min = (dim->getMinimum() * static_cast<coord_t>(scaling[d])) + static_cast<coord_t>(offset[d]);
+      coord_t max = (dim->getMaximum() * static_cast<coord_t>(scaling[d])) + static_cast<coord_t>(offset[d]);
       dim->setRange( dim->getNBins(), min, max);
     }
     // Clear the original workspace

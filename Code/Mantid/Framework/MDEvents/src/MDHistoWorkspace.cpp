@@ -271,7 +271,7 @@ namespace MDEvents
       size_t outIndex = i * numDimensions;
       // Offset the 0th box by the position of this linear index, in each dimension
       for (size_t d=0; d<numDimensions; d++)
-        out[outIndex+d] = m_vertexesArray[outIndex+d] + m_boxLength[d] * coord_t(dimIndexes[d]);
+        out[outIndex+d] = m_vertexesArray[outIndex+d] + m_boxLength[d] * static_cast<coord_t>(dimIndexes[d]);
     }
 
     return out;
@@ -294,7 +294,7 @@ namespace MDEvents
     VMD out(numDimensions);
     // Offset the 0th box by the position of this linear index, in each dimension, plus a half
     for (size_t d=0; d<numDimensions; d++)
-      out[d] = m_vertexesArray[d] + m_boxLength[d] * (coord_t(dimIndexes[d]) + 0.5f);
+      out[d] = m_vertexesArray[d] + m_boxLength[d] * (static_cast<coord_t>(dimIndexes[d]) + 0.5f);
     return out;
   }
 

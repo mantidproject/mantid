@@ -105,8 +105,8 @@ public:
     extentsVector.resize(3);
     for (size_t d=0; d<3; d++)
     {
-      extentsVector[d].min = coord_t(d) + 0.1f;
-      extentsVector[d].max = coord_t(d + 1);
+      extentsVector[d].min = static_cast<coord_t>(d) + 0.1f;
+      extentsVector[d].max = static_cast<coord_t>(d + 1);
     }
     IMDBoxTester<MDLeanEvent<3>,3> box(extentsVector);
     TS_ASSERT_DELTA( box.getExtents(0).min, 0.1, 1e-4 );

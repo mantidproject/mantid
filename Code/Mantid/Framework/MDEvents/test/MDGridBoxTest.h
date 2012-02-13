@@ -679,7 +679,7 @@ public:
         {
           for (size_t i=0; i<num_to_repeat; i++)
           {
-            coord_t centers[2] = {coord_t(x),coord_t(y)};
+            coord_t centers[2] = {static_cast<coord_t>(x),static_cast<coord_t>(y)};
             box->addEvent( MDLeanEvent<2>(2.0, 2.0, centers) );
           }
         }
@@ -709,7 +709,7 @@ public:
     for (double x=0.5; x < 10; x += 1.0)
       for (double y=0.5; y < 10; y += 1.0)
       {
-        coord_t centers[2] = {coord_t(x),coord_t(y)};
+        coord_t centers[2] = {static_cast<coord_t>(x),static_cast<coord_t>(y)};
         events.push_back( MDLeanEvent<2>(2.0, 2.0, centers) );
       }
 
@@ -1042,10 +1042,10 @@ public:
   MDBin<MDLeanEvent<2>,2> makeMDBin2(double minX, double maxX, double minY, double maxY)
   {
     MDBin<MDLeanEvent<2>,2> bin;
-    bin.m_min[0] = coord_t(minX);
-    bin.m_max[0] = coord_t(maxX);
-    bin.m_min[1] = coord_t(minY);
-    bin.m_max[1] = coord_t(maxY);
+    bin.m_min[0] = static_cast<coord_t>(minX);
+    bin.m_max[0] = static_cast<coord_t>(maxX);
+    bin.m_min[1] = static_cast<coord_t>(minY);
+    bin.m_max[1] = static_cast<coord_t>(maxY);
     return bin;
   }
 
@@ -1138,12 +1138,12 @@ public:
     std::cout << "Sphere of radius " << radius << " at " << x << "," << y << "------" << message << "--\n";
     // The sphere transformation
     bool dimensionsUsed[2] = {true,true};
-    coord_t center[2] = {coord_t(x),coord_t(y)};
+    coord_t center[2] = {static_cast<coord_t>(x),static_cast<coord_t>(y)};
     CoordTransformDistance sphere(2, center, dimensionsUsed);
 
     signal_t signal = 0;
     signal_t errorSquared = 0;
-    box.integrateSphere(sphere, coord_t(radius*radius), signal, errorSquared);
+    box.integrateSphere(sphere, static_cast<coord_t>(radius*radius), signal, errorSquared);
     TSM_ASSERT_DELTA( message, signal, 1.0*numExpected, 1e-5);
     TSM_ASSERT_DELTA( message, errorSquared, 1.0*numExpected, 1e-5);
   }
@@ -1233,12 +1233,12 @@ public:
     std::cout << "Sphere of radius " << radius << " at " << x << "," << y << "," << z << "--- " << message << " ---------\n";
     // The sphere transformation
     bool dimensionsUsed[3] = {true,true, true};
-    coord_t center[3] = {coord_t(x),coord_t(y),coord_t(z)};
+    coord_t center[3] = {static_cast<coord_t>(x),static_cast<coord_t>(y),static_cast<coord_t>(z)};
     CoordTransformDistance sphere(3, center, dimensionsUsed);
 
     signal_t signal = 0;
     signal_t errorSquared = 0;
-    box.integrateSphere(sphere, coord_t(radius*radius), signal, errorSquared);
+    box.integrateSphere(sphere, static_cast<coord_t>(radius*radius), signal, errorSquared);
     TSM_ASSERT_DELTA( message, signal, 1.0*numExpected, 1e-5);
     TSM_ASSERT_DELTA( message, errorSquared, 1.0*numExpected, 1e-5);
   }
@@ -1284,17 +1284,17 @@ public:
     std::cout << "Centroid of sphere of radius " << radius << " at " << x << "," << y << "------" << message << "--\n";
     // The sphere transformation
     bool dimensionsUsed[2] = {true,true};
-    coord_t center[2] = {coord_t(x),coord_t(y)};
+    coord_t center[2] = {static_cast<coord_t>(x),static_cast<coord_t>(y)};
     CoordTransformDistance sphere(2, center, dimensionsUsed);
 
     signal_t signal = 0;
     coord_t centroid[2] = {0., 0.};
-    box.centroidSphere(sphere, coord_t(radius*radius), centroid, signal);
+    box.centroidSphere(sphere, static_cast<coord_t>(radius*radius), centroid, signal);
     // Normalized
     if (signal != 0.0)
     {
       for (size_t d=0; d<2; d++)
-        centroid[d] /= coord_t(signal);
+        centroid[d] /= static_cast<coord_t>(signal);
     }
 
     TSM_ASSERT_DELTA( message, signal, 1.0*numExpected, 1e-5);
@@ -1508,7 +1508,7 @@ public:
       if (signal != 0.0)
       {
         for (size_t d=0; d<3; d++)
-          centroid[d] /= coord_t(signal);
+          centroid[d] /= static_cast<coord_t>(signal);
       }
     }
 

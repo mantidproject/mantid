@@ -193,7 +193,7 @@ namespace MDEvents
     double scaling = double(numBins) / length;
 
     // Create the output dimension
-    MDHistoDimension_sptr out(new MDHistoDimension(name, id, units, coord_t(min), coord_t(max), numBins));
+    MDHistoDimension_sptr out(new MDHistoDimension(name, id, units, static_cast<coord_t>(min), static_cast<coord_t>(max), numBins));
 
     // Put both in the algo for future use
     m_bases.push_back(basis);
