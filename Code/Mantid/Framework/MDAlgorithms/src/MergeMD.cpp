@@ -113,8 +113,8 @@ namespace MDAlgorithms
     size_t numDims = ws0->getNumDims();
 
     // Extents to create.
-    std::vector<coord_t> dimMin(numDims, coord_t(+1e30));
-    std::vector<coord_t> dimMax(numDims, coord_t(-1e30));
+    std::vector<coord_t> dimMin(numDims, +1e30f);
+    std::vector<coord_t> dimMax(numDims, -1e30f);
 
     // Validate each workspace
     for (size_t i=0; i < m_workspaces.size(); i++)

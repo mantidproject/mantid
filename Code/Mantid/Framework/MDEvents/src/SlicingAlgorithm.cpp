@@ -781,8 +781,8 @@ namespace MDEvents
     size_t nd = m_inWS->getNumDims();
     if (m_axisAligned)
     {
-      std::vector<coord_t> function_min(nd, coord_t(-1e30)); // default to all space if the dimension is not specified
-      std::vector<coord_t> function_max(nd, coord_t(+1e30)); // default to all space if the dimension is not specified
+      std::vector<coord_t> function_min(nd, -1e30f); // default to all space if the dimension is not specified
+      std::vector<coord_t> function_max(nd, +1e30f); // default to all space if the dimension is not specified
       for (size_t bd=0; bd<m_outD; bd++)
       {
         // Dimension in the MDEventWorkspace
