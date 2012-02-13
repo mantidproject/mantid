@@ -10,6 +10,7 @@ set ( SRC_FILES
 	src/IndexPeaks.cpp
         src/ShowPossibleCells.cpp
         src/SelectCellOfType.cpp
+        src/SelectCellWithForm.cpp
 	src/IntegratePeakTimeSlices.cpp
 	src/LoadHKL.cpp
 	src/LoadIsawPeaks.cpp
@@ -44,6 +45,7 @@ set ( INC_FILES
 	inc/MantidCrystal/IndexPeaks.h
 	inc/MantidCrystal/ShowPossibleCells.h
         inc/MantidCrystal/SelectCellOfType.h
+        inc/MantidCrystal/SelectCellWithForm.h
     inc/MantidCrystal/IndexSXPeaks.h
         inc/MantidCrystal/GSLFunctions.h
 	inc/MantidCrystal/IntegratePeakTimeSlices.h
@@ -78,6 +80,7 @@ set ( TEST_FILES
 	test/IndexPeaksTest.h
         test/ShowPossibleCellsTest.h
         test/SelectCellOfTypeTest.h
+        test/SelectCellWithFormTest.h
     test/IndexSXPeaksTest.h
 	test/IntegratePeakTimeSlicesTest.h
 	test/LoadIsawPeaksTest.h
