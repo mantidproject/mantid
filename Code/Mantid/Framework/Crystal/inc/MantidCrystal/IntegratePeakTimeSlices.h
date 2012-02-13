@@ -61,7 +61,7 @@ public:
   IntegratePeakTimeSlices();
   
   /// Destructor
- ~IntegratePeakTimeSlices();
+ virtual  ~IntegratePeakTimeSlices();
  
   /// Algorithm's name for identification overriding a virtual method
  virtual const std::string name() const 
@@ -205,9 +205,9 @@ private:
                                      const double TotIntensity,
                                      const int ncells);
 
-  void FindPlane( Kernel::V3D & center,Kernel:: V3D & xvec, Kernel::V3D& yvec,
-                  double &ROW, double &COL,
-                 double &pixWidthx, double&pixHeighty, DataObjects::Peak const &peak) const;
+  void FindPlane( Kernel::V3D & center,  Kernel:: V3D & xvec,    Kernel::V3D& yvec,
+                  double &ROW,          double &COL,             double &pixWidthx,
+                  double&pixHeighty,   DataObjects::Peak const &peak) const;
 
   int find( Mantid::MantidVec const & X,
             const double              time);
