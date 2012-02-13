@@ -542,7 +542,7 @@ namespace Kernel
   };
 
   /// Underlying data type for the VMD type
-  typedef double VMD_t;
+  typedef float VMD_t;
 
   /// Define the VMD as using the double or float data type.
   typedef VMDBase<VMD_t> VMD;
