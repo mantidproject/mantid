@@ -473,10 +473,8 @@ namespace Geometry
       throw std::range_error("UnitCell not properly initialized");
     }
     Gstar=G;
-    std::vector<double> rr = Gstar.get_vector();
     if (Gstar.Invert()==0)
             {throw std::range_error("UnitCell not properly initialized");}
-    std::vector<double> rr1 = Gstar.get_vector();
     return;
   }
 
