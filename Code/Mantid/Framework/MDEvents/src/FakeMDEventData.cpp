@@ -140,7 +140,7 @@ namespace MDEvents
 
       // Now place the point along this radius, scaled with ^1/n for uniformity.
       coord_t radPos = genUnit();
-      radPos = static_cast<coord_t>(pow(radPos, 1.0/double(nd)));
+      radPos = static_cast<coord_t>(pow(radPos, static_cast<coord_t>(1.0/static_cast<coord_t>(nd))));
       for (size_t d=0; d<nd; d++)
       {
         // Multiply by the scaling and the desired peak radius

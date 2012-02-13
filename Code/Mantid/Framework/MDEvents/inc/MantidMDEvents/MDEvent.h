@@ -297,17 +297,6 @@ namespace MDEvents
       if (numEvents == 0)
         return;
 
-#ifdef COORDT_IS_FLOAT
-      if (file->getInfo().type != ::NeXus::FLOAT32)
-      {
-        // TODO: Handle old files that are recorded in DOUBLEs to load as FLOATS
-        throw std::runtime_error("loadVectorFromNexusSlab(): cannot load legacy file that is in doubles yet.");
-      }
-#else
-#endif
-      // Allocate the data
-      coord_t * data = new coord_t[numEvents*(nd+4)];
-
       // Start/size descriptors
       std::vector<int> start(2,0);
       start[0] = int(indexStart); //TODO: What if # events > size of int32???
@@ -315,6 +304,34 @@ namespace MDEvents
       std::vector<int> size(2,0);
       size[0] = int(numEvents);
       size[1] = nd+4;
+
+      // Allocate the data
+      size_t dataSize = numEvents*(nd+4);
+      coord_t * data = new coord_t[dataSize];
+
+#ifdef COORDT_IS_FLOAT
+      if (file->getInfo().type == ::NeXus::FLOAT64)
+      {
+        // Handle old files that are recorded in DOUBLEs to load as FLOATS
+        double * dblData = new double[dataSize];
+        file->getSlab(dblData, start, size);
+        for (size_t i=0; i<dataSize;i++)
+          data[i] = static_cast<coord_t>(dblData[i]);
+        delete [] dblData;
+      }
+      else
+      {
+        // Get the slab into the allocated data
+        file->getSlab(data, start, size);
+      }
+#else /* coord_t is double */
+      if (file->getInfo().type == ::NeXus::FLOAT32)
+        throw std::runtime_error("The .nxs file's data is set as FLOATs but Mantid was compiled to work with data (coord_t) as doubles. Cannot load this file");
+
+      // Get the slab into the allocated data
+      file->getSlab(data, start, size);
+#endif
+
 
       // Get the slab into the allocated data
       file->getSlab(data, start, size);
