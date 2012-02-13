@@ -395,6 +395,8 @@ void BivariateNormal::initCommon()
     int NCells1;
     initCoeff( D, X, Y, coefNorm,  expCoeffx2, expCoeffy2,  expCoeffxy,
                    NCells1);
+    if( expVals)
+      delete expVals;
 
     expVals = new double[NCells];
     
