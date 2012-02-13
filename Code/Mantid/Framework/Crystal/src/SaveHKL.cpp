@@ -100,8 +100,6 @@ namespace Crystal
     double wlMin = getProperty("MinWavelength");
     double wlMax = getProperty("MaxWavelength");
 
-    std::vector<Peak> peaks = ws->getPeaks();
-
     // Sequence and run number
     int seqNum = 1;
     int firstrun = 0;
@@ -125,13 +123,12 @@ namespace Crystal
       out.open( filename.c_str(), std::ios::out);
     }
 
-    // We must sort the peaks first by bank #, and then by hkl
+    // We must sort the peaks by bank #
     std::vector< std::pair<std::string, bool> > criteria;
     criteria.push_back( std::pair<std::string, bool>("BankName", true) );
-    criteria.push_back( std::pair<std::string, bool>("H", true) );
-    criteria.push_back( std::pair<std::string, bool>("K", true) );
-    criteria.push_back( std::pair<std::string, bool>("L", true) );
     ws->sort(criteria);
+
+    std::vector<Peak> peaks = ws->getPeaks();
 
     // ============================== Save all Peaks =========================================
 
