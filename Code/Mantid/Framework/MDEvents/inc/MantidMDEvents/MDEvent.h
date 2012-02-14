@@ -136,6 +136,23 @@ namespace MDEvents
     {
     }
 
+#ifdef COORDT_IS_FLOAT
+    //---------------------------------------------------------------------------------------------
+    /** Constructor with signal and error and an array of centers, and the runIndex and detectorID
+     *
+     * @param signal :: signal (aka weight)
+     * @param errorSquared :: square of the error on the weight
+     * @param runIndex :: 0-based index of which run in the containing MDEventWorkspace
+     * @param detectorId :: ID of the detector that measured this event.
+     * @param centers :: pointer to a nd-sized array of values to set for all coordinates.
+     * */
+    MDEvent(const float signal, const float errorSquared, const uint16_t runIndex, const int32_t detectorId, const double * centers)
+    : MDLeanEvent<nd>(signal, errorSquared, centers),
+      runIndex(runIndex), detectorId(detectorId)
+    {
+    }
+#endif
+
     //---------------------------------------------------------------------------------------------
     /** @return the run index of this event in the containing MDEventWorkspace */
     uint16_t getRunIndex() const
@@ -188,7 +205,11 @@ namespace MDEvents
       chunk[0] = int(chunkSize);
 
       // Make and open the data
+#ifdef COORDT_IS_FLOAT
+      file->makeCompData("event_data", ::NeXus::FLOAT32, dims, ::NeXus::NONE, chunk, true);
+#else
       file->makeCompData("event_data", ::NeXus::FLOAT64, dims, ::NeXus::NONE, chunk, true);
+#endif
 
       // A little bit of description for humans to read later
       file->putAttr("description", "signal, errorSquared, runIndex, detectorId, center (each dim.)");
@@ -213,43 +234,52 @@ namespace MDEvents
         signal_t & totalSignal, signal_t & totalErrorSquared)
     {
       size_t numEvents = events.size();
-      std::vector<double> data;
-      data.reserve(numEvents*(nd+4));
-      std::vector<int> start(2,0);
+      coord_t * data = new coord_t[numEvents*(nd+4)];
+
       //TODO: WARNING NEXUS NEEDS TO BE UPDATED TO USE 64-bit ints on Windows.
+      std::vector<int> start(2,0);
       start[0] = int(startIndex);
 
       totalSignal = 0;
       totalErrorSquared = 0;
 
+      size_t index = 0;
       typename std::vector<MDEvent<nd> >::const_iterator it = events.begin();
       typename std::vector<MDEvent<nd> >::const_iterator it_end = events.end();
       for (; it != it_end; ++it)
       {
         const MDEvent<nd> & event = *it;
-        signal_t signal = event.signal;
-        signal_t errorSquared = event.errorSquared;
-        data.push_back( signal );
-        data.push_back( errorSquared );
+        float signal = event.signal;
+        float errorSquared = event.errorSquared;
+        data[index++] = static_cast<coord_t>(signal);
+        data[index++] = static_cast<coord_t>(errorSquared);
         // Additional stuff for MDEvent
-        data.push_back( double(event.runIndex) );
-        data.push_back( double(event.detectorId) );
-        // Each coordinate
+        data[index++] = static_cast<coord_t>(event.runIndex);
+        data[index++] = static_cast<coord_t>(event.detectorId);
         for(size_t d=0; d<nd; d++)
-          data.push_back( event.center[d] );
-
+          data[index++] = event.center[d];
         // Track the total signal
-        totalSignal += signal;
-        totalErrorSquared += errorSquared;
+        totalSignal += signal_t(signal);
+        totalErrorSquared += signal_t(errorSquared);
       }
 
       // Specify the dimensions
       std::vector<int> dims;
       dims.push_back(int(numEvents));
-      dims.push_back(int(nd+4));
+      dims.push_back(int(nd+2));
 
-      file->putSlab(data, start, dims);
-    }
+      try
+      {
+        file->putSlab(data, start, dims);
+      }
+      catch (std::exception &)
+      {
+        delete [] data;
+        throw;
+      }
+
+      delete [] data;
+     }
 
     //---------------------------------------------------------------------------------------------
     /** Static method to load part of a HDF block into a vector of MDEvents.
@@ -267,9 +297,6 @@ namespace MDEvents
       if (numEvents == 0)
         return;
 
-      // Allocate the data
-      double * data = new double[numEvents*(nd+4)];
-
       // Start/size descriptors
       std::vector<int> start(2,0);
       start[0] = int(indexStart); //TODO: What if # events > size of int32???
@@ -277,6 +304,39 @@ namespace MDEvents
       std::vector<int> size(2,0);
       size[0] = int(numEvents);
       size[1] = nd+4;
+
+      // Allocate the data
+      size_t dataSize = numEvents*(nd+4);
+      coord_t * data = new coord_t[dataSize];
+
+#ifdef COORDT_IS_FLOAT
+      // C-style call is much faster than the C++ call.
+      int dims[NX_MAXRANK];
+      int type = ::NeXus::FLOAT32;
+      int rank = 0;
+      NXgetinfo(file->getHandle(), &rank, dims, &type);
+      if (type == ::NeXus::FLOAT64)
+      {
+        // Handle old files that are recorded in DOUBLEs to load as FLOATS
+        double * dblData = new double[dataSize];
+        file->getSlab(dblData, start, size);
+        for (size_t i=0; i<dataSize;i++)
+          data[i] = static_cast<coord_t>(dblData[i]);
+        delete [] dblData;
+      }
+      else
+      {
+        // Get the slab into the allocated data
+        file->getSlab(data, start, size);
+      }
+#else /* coord_t is double */
+      if (file->getInfo().type == ::NeXus::FLOAT32)
+        throw std::runtime_error("The .nxs file's data is set as FLOATs but Mantid was compiled to work with data (coord_t) as doubles. Cannot load this file");
+
+      // Get the slab into the allocated data
+      file->getSlab(data, start, size);
+#endif
+
 
       // Get the slab into the allocated data
       file->getSlab(data, start, size);

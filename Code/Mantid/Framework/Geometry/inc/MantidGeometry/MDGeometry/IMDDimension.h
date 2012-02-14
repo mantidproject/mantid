@@ -1,11 +1,12 @@
 #ifndef I_MD_DIMENSION_H
 #define I_MD_DIMENSION_H
 
-#include <vector>
-#include <stdexcept>
 #include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/V3D.h"
 #include <boost/shared_ptr.hpp>
+#include <stdexcept>
+#include <vector>
 
 namespace Mantid
 {
@@ -57,10 +58,10 @@ namespace Mantid
     virtual std::string getDimensionId() const = 0;
 
     /// @return the minimum extent of this dimension
-    virtual double getMinimum() const = 0;
+    virtual coord_t getMinimum() const = 0;
 
     /// @return the maximum extent of this dimension
-    virtual double getMaximum() const = 0;
+    virtual coord_t getMaximum() const = 0;
 
     /// @return number of bins dimension have (an integrated has one). A axis directed along dimension would have getNBins+1 axis points.
     virtual size_t getNBins() const = 0;
@@ -69,14 +70,14 @@ namespace Mantid
     virtual std::string toXMLString() const = 0;
 
     /// Change the extents and number of bins
-    virtual void setRange(size_t nBins, double min, double max) = 0;
+    virtual void setRange(size_t nBins, coord_t min, coord_t max) = 0;
 
     /** @return coordinate of the axis at the given index
      * @param ind :: index into the axis  */
-    virtual double getX(size_t ind)const = 0;
+    virtual coord_t getX(size_t ind) const = 0;
 
     /** @return the width of each bin */
-    virtual double getBinWidth() const
+    virtual coord_t getBinWidth() const
     {
       return (getMaximum() - getMinimum())/getNBins();
     }

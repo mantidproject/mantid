@@ -97,7 +97,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().addOrReplace(wsName, ws2D));
 
     // create function you want to fit against
-    CompositeFunction *fnWithBk = new CompositeFunctionMW();
+    CompositeFunctionMW fnWithBk;
 
     LinearBackground *bk = new LinearBackground();
     bk->initialize();
@@ -113,11 +113,11 @@ public:
     fn->setHeight(100.7);
     fn->setWidth(2.2);
 
-    fnWithBk->addFunction(fn);
-    fnWithBk->addFunction(bk);
+    fnWithBk.addFunction(fn);
+    fnWithBk.addFunction(bk);
 
     //alg2.setFunction(fnWithBk);    
-    alg2.setPropertyValue("Function",*fnWithBk);
+    alg2.setPropertyValue("Function",fnWithBk.asString());
 
 
     // Set which spectrum to fit against and initial starting values
@@ -170,19 +170,19 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
     // set up Lorentzian fitting function
-    Lorentzian* fn = new Lorentzian();
-    fn->initialize();
-    fn->setCentre(11.2);
-    fn->setHeight(100.7);
-    fn->setWidth(2.2);
+    Lorentzian fn;
+    fn.initialize();
+    fn.setCentre(11.2);
+    fn.setHeight(100.7);
+    fn.setWidth(2.2);
 
     // add constraint to function
-    BoundaryConstraint* bc = new BoundaryConstraint(fn,"PeakCentre",11.3, 12.0);
-    fn->addConstraint(bc);
+    BoundaryConstraint* bc = new BoundaryConstraint(&fn,"PeakCentre",11.3, 12.0);
+    fn.addConstraint(bc);
 
     //void setFunction(API::IFunction* fun);
     //alg2.setFunction(fn);
-    alg2.setPropertyValue("Function",*fn);
+    alg2.setPropertyValue("Function",fn.asString());
 
 
     // Set which spectrum to fit against and initial starting values
@@ -233,7 +233,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
     // create function you want to fit against
-    CompositeFunction *fnWithBk = new CompositeFunctionMW();
+    CompositeFunctionMW fnWithBk;
 
     LinearBackground *bk = new LinearBackground();
     bk->initialize();
@@ -254,11 +254,11 @@ public:
     BoundaryConstraint* bc = new BoundaryConstraint(fn,"PeakCentre",11.3, 12.0);
     fn->addConstraint(bc);
 
-    fnWithBk->addFunction(fn);
-    fnWithBk->addFunction(bk);
+    fnWithBk.addFunction(fn);
+    fnWithBk.addFunction(bk);
 
     //alg2.setFunction(fnWithBk);
-    alg2.setPropertyValue("Function",*fnWithBk);
+    alg2.setPropertyValue("Function",fnWithBk.asString());
 
 
     // Set which spectrum to fit against and initial starting values
@@ -286,17 +286,17 @@ public:
     TS_ASSERT_DELTA( out->getParameter("f1.A0"), 0.0 ,0.01);
     TS_ASSERT_DELTA( out->getParameter("f1.A1"), 0.0 ,0.01);
 
-    // check its categories
- //   std::string name = out->name();
- //   TS_ASSERT( name == "Lorentzian");
- //   const std::vector<std::string> categories = out->categories();
-  //  TS_ASSERT( categories.size() == 1 );
- //   TS_ASSERT( categories[0] == "Peak" );
-
     AnalysisDataService::Instance().remove(wsName);
 
   }
 
+  void testForCategories()
+  {
+    Lorentzian forCat;
+    const std::vector<std::string> categories = forCat.categories();
+    TS_ASSERT( categories.size() == 1 );
+    TS_ASSERT( categories[0] == "Peak" );
+  }
 
 };
 

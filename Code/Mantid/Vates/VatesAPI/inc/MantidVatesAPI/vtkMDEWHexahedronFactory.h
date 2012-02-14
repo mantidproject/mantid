@@ -57,12 +57,6 @@ public:
   /// Factory Method. Should also handle delegation to successors.
   virtual vtkDataSet* create() const;
   
-  /// Create as a mesh only.
-  virtual vtkDataSet* createMeshOnly() const;
-
-  /// Create the scalar array only.
-  virtual vtkFloatArray* createScalarArray() const;
-
   /// Initalize with a target workspace.
   virtual void initialize(Mantid::API::Workspace_sptr);
 
@@ -92,7 +86,7 @@ private:
   const std::string m_scalarName;
 
   /// Member workspace to generate vtkdataset from.
-  Mantid::API::IMDEventWorkspace_sptr m_workspace;
+  Mantid::API::Workspace_sptr m_workspace;
 
   /// Maximum recursion depth to use.
   size_t m_maxDepth;

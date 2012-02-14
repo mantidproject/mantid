@@ -89,8 +89,8 @@ namespace Mantid
       Mantid::API::IMDEventWorkspace_sptr eventWs = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
 
       factory->setRecursionDepth(this->m_view->getRecursionDepth());
-      factory->initialize(eventWs);
-      vtkDataSet* visualDataSet = factory->create();
+      //Create visualisation in one-shot.
+      vtkDataSet* visualDataSet = factory->oneStepCreate(eventWs);
       
       /*extractMetaData needs to be re-run here because the first execution of this from ::executeLoadMetadata will not have ensured that all dimensions
         have proper range extents set.

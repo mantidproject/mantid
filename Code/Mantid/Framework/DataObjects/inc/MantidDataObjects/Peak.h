@@ -60,6 +60,7 @@ namespace DataObjects
     void setBankName(std::string m_BankName);
     void setHKL(double H, double K, double L);
     void setHKL(Mantid::Kernel::V3D HKL);
+    void resetHKL();
 
     Mantid::Kernel::V3D getQLabFrame() const;
     Mantid::Kernel::V3D getQSampleFrame() const;
@@ -158,6 +159,11 @@ namespace DataObjects
     Mantid::Kernel::V3D samplePos;
     /// Cached detector position
     Mantid::Kernel::V3D detPos;
+    
+    /// save values before setHKL is called for use in SortHKL
+    double orig_H;
+    double orig_K;
+    double orig_L;
 
   };
 

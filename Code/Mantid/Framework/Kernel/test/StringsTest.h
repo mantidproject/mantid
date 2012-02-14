@@ -203,7 +203,17 @@ public:
     TS_ASSERT_EQUALS( out, "Help,Me,I'm,Stuck,Inside,A,Test");
   }
 
-
+  void test_endsWithInt()
+  {
+    TS_ASSERT_EQUALS( endsWithInt("pixel22"), 22);
+    TS_ASSERT_EQUALS( endsWithInt("pixel000123"), 123);
+    TS_ASSERT_EQUALS( endsWithInt("pixel99"), 99);
+    TS_ASSERT_EQUALS( endsWithInt("bla123bla"), -1);
+    TS_ASSERT_EQUALS( endsWithInt(""), -1);
+    TS_ASSERT_EQUALS( endsWithInt("123bla"), -1);
+    TS_ASSERT_EQUALS( endsWithInt("123b"), -1);
+    TS_ASSERT_EQUALS( endsWithInt("123"), 123);
+  }
 
 
 

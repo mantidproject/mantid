@@ -26,6 +26,15 @@ public:
   {
   }
 
+    
+  void testForCategories()
+  {
+    QuadraticBackground forCat;
+    const std::vector<std::string> categories = forCat.categories();
+    TS_ASSERT( categories.size() == 1 );
+    TS_ASSERT( categories[0] == "Background" );
+  }
+
 
 };
 

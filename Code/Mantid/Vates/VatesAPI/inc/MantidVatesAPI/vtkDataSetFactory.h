@@ -69,15 +69,12 @@ public:
 
   /// Factory Method. Should also handle delegation to successors.
   virtual vtkDataSet* create() const=0;
-  
-  /// Create as a mesh only.
-  virtual vtkDataSet* createMeshOnly() const=0;
-
-  /// Create the scalar array only.
-  virtual vtkFloatArray* createScalarArray() const=0;
 
   /// Initalize with a target workspace.
   virtual void initialize(Mantid::API::Workspace_sptr)=0;
+
+  /// Create the product in one step.
+  virtual vtkDataSet* oneStepCreate(Mantid::API::Workspace_sptr);
 
   /// Add a chain-of-responsibility successor to this factory. Handle case where the factory cannot render the MDWorkspace owing to its dimensionality.
   virtual void SetSuccessor(vtkDataSetFactory* pSuccessor);
@@ -105,10 +102,107 @@ public:
     return m_useTransform;
   }
 
+  /// Setter to indicate that dimensionality should/should not be checked.
+  void setCheckDimensionality(bool flag);
+
+  /// Getter for the state of the dimensionality checking.
+  bool doesCheckDimensionality() const;
+
   /// Dimensionalities of interest.
-  enum{OneDimensional=1, TwoDimensional=2, ThreeDimensional=3, FourDimensional=4};
+  enum Dimensionality{OneDimensional=1, TwoDimensional=2, ThreeDimensional=3, FourDimensional=4};
 
 protected:
+  
+  /**
+  Try to cast it to the specified IMDType and then run checks based on the non-integrated dimensionality. 
+  The latter checks are only run if the factory is set to apply these checks.
+  @param: workspace : workspace to cast.
+  @param: bExactMatch : run an exact match on non-integarated dimensionality if TRUE, otherwise is less than or equal to ExpectedDimensions.
+  @return: correctly cast shared pointer or an empty shared pointer if cast or checks fail.
+  */
+  template<typename IMDWorkspaceType, size_t ExpectedNDimensions>
+  boost::shared_ptr<IMDWorkspaceType> castAndCheck(Mantid::API::Workspace_sptr workspace, bool bExactMatch=true) const
+  {
+    boost::shared_ptr<IMDWorkspaceType> temp;
+    boost::shared_ptr<IMDWorkspaceType> imdws = boost::dynamic_pointer_cast<IMDWorkspaceType>(workspace);
+    if(!imdws)
+    {
+      //Abort as imdws cannot be dynamically cast to the target type.
+      return temp;
+    }
+    bool bPassesDimensionalityCheck = false;
+    size_t actualNonIntegratedDimensionality = imdws->getNonIntegratedDimensions().size();
+    if(bExactMatch)
+    {
+      bPassesDimensionalityCheck = (ExpectedNDimensions == actualNonIntegratedDimensionality);
+    }
+    else
+    {
+      bPassesDimensionalityCheck = (actualNonIntegratedDimensionality >= ExpectedNDimensions);
+    }
+    if(this->doesCheckDimensionality() &&  !bPassesDimensionalityCheck)
+    {
+      //Abort as there are dimensionality checks to be applied and these checks fail.
+      return temp;
+    }
+    return imdws;
+  }
+
+  /**
+  Common initialization implementation. Most vtkDataSets will need this in order to correctly delegate initialization onto successors.
+  @param: workspace : workspace to cast.
+  @param: bExactMatch : run an exact match on non-integarated dimensionality if TRUE, otherwise is less than or equal to ExpectedDimensions.
+  @return: correctly cast shared pointer or an empty shared pointer if cast or checks fail.
+  */
+  template<typename IMDWorkspaceType, size_t ExpectedNDimensions>
+  boost::shared_ptr<IMDWorkspaceType> doInitialize(Mantid::API::Workspace_sptr workspace, bool bExactMatch=true) const
+  {
+    if(workspace == NULL)
+    {
+      std::string message = this->getFactoryTypeName() + " initialize cannot operate on a null workspace";
+      throw std::invalid_argument(message);
+    }
+    boost::shared_ptr<IMDWorkspaceType> imdws = castAndCheck<IMDWorkspaceType, ExpectedNDimensions>(workspace, bExactMatch);
+    if(!imdws)
+    {
+      if(this->hasSuccessor())
+      {
+        m_successor->setUseTransform(m_useTransform);
+        m_successor->initialize(workspace);
+      }
+      else
+      {
+        std::string message = this->getFactoryTypeName() + " has no successor";
+        throw std::runtime_error(message);
+      }
+    }
+    return imdws;
+  }
+
+  /**
+  Common creation implementation whereby delegation to successor is attempted if appropriate. 
+  @param: workspace : workspace to cast and create from.
+  @param: output : product vtkDataSet, set to NULL if FALSE is returned. Otherwise contains visualisation data if TRUE is returned.
+  @return: TRUE if delegation to successors has occured. Otherwise returns false.
+  */
+  template<typename IMDWorkspaceType, size_t ExpectedNDimensions>
+  vtkDataSet* tryDelegatingCreation(Mantid::API::Workspace_sptr workspace, bool bExactMatch=true) const
+  {
+    boost::shared_ptr<IMDWorkspaceType> imdws = castAndCheck<IMDWorkspaceType, ExpectedNDimensions>(workspace, bExactMatch);
+    if(!imdws)
+    {
+      if(this->hasSuccessor())
+      {
+        return m_successor->create();
+      }
+      else
+      {
+        std::string message = this->getFactoryTypeName() + " has no successor";
+        throw std::runtime_error(message);
+      }
+    }
+    return NULL;
+  }
 
   /// Typedef for internal unique shared pointer for successor types.
   typedef boost::shared_ptr<vtkDataSetFactory> SuccessorType;
@@ -118,9 +212,13 @@ protected:
   /// Template Method pattern to validate the factory before use.
   virtual void validate() const = 0;
 
-  
   /// Flag indicating whether a transformation should be used.
   bool m_useTransform;
+
+private:
+  
+  /// Dimensionality checking flag
+  bool m_bCheckDimensionality;
 };
 
 typedef boost::shared_ptr<vtkDataSetFactory> vtkDataSetFactory_sptr;

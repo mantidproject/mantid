@@ -878,6 +878,10 @@ void LoadEventNexus::init()
   setPropertyGroup("FilterByTimeStop", grp1);
 
   declareProperty(
+      new PropertyWithValue<string>("NXentryName", "", Direction::Input),
+    "Optional: Name of the NXentry to load if it's not the default.");
+
+  declareProperty(
       new PropertyWithValue<string>("BankName", "", Direction::Input),
     "Optional: To only include events from one bank. Any bank whose name does not match the given string will have no events.");
 
@@ -953,12 +957,22 @@ void LoadEventNexus::init()
 /// set the name of the top level NXentry m_top_entry_name
 void LoadEventNexus::setTopEntryName()
 {
+  std::string nxentryProperty = getProperty("NXentryName");
+  if (nxentryProperty.size()>0)
+  {
+    m_top_entry_name = nxentryProperty;
+    return;
+  }
   typedef std::map<std::string,std::string> string_map_t; 
   try
   {
     string_map_t::const_iterator it;
     ::NeXus::File file = ::NeXus::File(m_filename);
     string_map_t entries = file.getEntries();
+
+    // Choose the first entry as the default
+    m_top_entry_name = entries.begin()->first;
+
     for (it = entries.begin(); it != entries.end(); ++it)
     {
       if ( ((it->first == "entry") || (it->first == "raw_data_1")) && (it->second == "NXentry") )

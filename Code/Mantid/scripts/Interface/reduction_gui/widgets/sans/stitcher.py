@@ -386,6 +386,7 @@ class StitcherWidget(BaseWidget):
         if self._high_q_data is not None:
             xmin = util._check_and_get_float_line_edit(self._content.medium_min_edit)
             xmax = util._check_and_get_float_line_edit(self._content.medium_max_edit)
+            self._high_q_data.set_range(xmin,xmax)
             s.append(self._high_q_data)
             if self._referenceID==2:
                 scale = util._check_and_get_float_line_edit(self._content.high_scale_edit)

@@ -50,6 +50,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/ReadLock.h"
 #include "MantidQtAPI/SafeQwtPlot.h"
+#include "MantidKernel/MultiThreaded.h"
 
 
 using namespace Mantid;
@@ -254,6 +255,34 @@ void SliceViewer::initMenus()
   connect(action, SIGNAL(toggled(bool)), this, SLOT(setFastRender(bool)));
   m_menuView->addAction(action);
 
+  m_menuView->addSeparator();
+
+  QActionGroup* group = new QActionGroup( this );
+
+  action = new QAction(QPixmap(), "No Normalization", this);
+  m_menuView->addAction(action);
+  action->setActionGroup(group);
+  action->setCheckable(true);
+  connect(action, SIGNAL(triggered()), this, SLOT(changeNormalization()));
+  m_actionNormalizeNone = action;
+
+  action = new QAction(QPixmap(), "Volume Normalization", this);
+  m_menuView->addAction(action);
+  action->setActionGroup(group);
+  action->setCheckable(true);
+  action->setChecked(true);
+  connect(action, SIGNAL(triggered()), this, SLOT(changeNormalization()));
+  m_actionNormalizeVolume = action;
+
+  action = new QAction(QPixmap(), "Num. Events Normalization", this);
+  m_menuView->addAction(action);
+  action->setActionGroup(group);
+  action->setCheckable(true);
+  connect(action, SIGNAL(triggered()), this, SLOT(changeNormalization()));
+  m_actionNormalizeNumEvents = action;
+
+
+
   // --------------- Color options Menu ----------------------------------------
   m_menuColorOptions = new QMenu("&ColorMap", this);
 
@@ -270,6 +299,13 @@ void SliceViewer::initMenus()
   connect(action, SIGNAL(triggered()), this, SLOT(setColorScaleAutoSlice()));
   action->setIconVisibleInMenu(true);
   { QIcon icon; icon.addFile(QString::fromUtf8(":/SliceViewer/icons/color-pallette-part.png"), QSize(), QIcon::Normal, QIcon::Off); action->setIcon(icon); }
+  m_menuColorOptions->addAction(action);
+
+  action = new QAction(QPixmap(), "Transparent &Zeros", this);
+  action->setCheckable(true);
+  action->setChecked(true);
+  m_actionTransparentZeros = action;
+  connect(action, SIGNAL(toggled(bool)), this, SLOT(setTransparentZeros(bool)));
   m_menuColorOptions->addAction(action);
 
   // --------------- Help Menu ----------------------------------------
@@ -577,6 +613,40 @@ void SliceViewer::colorRangeChanged()
 }
 
 //------------------------------------------------------------------------------------
+/** Set whether to display 0 signal as "transparent" color.
+ *
+ * @param transparent :: true if you want zeros to be transparent.
+ */
+void SliceViewer::setTransparentZeros(bool transparent)
+{
+  m_actionTransparentZeros->blockSignals(true);
+  m_actionTransparentZeros->setChecked(transparent);
+  m_actionTransparentZeros->blockSignals(false);
+  // Set and display
+  m_data->setZerosAsNan(transparent );
+  this->updateDisplay();
+}
+
+
+//------------------------------------------------------------------------------------
+/// Slot called when changing the normalization menu
+void SliceViewer::changeNormalization()
+{
+  Mantid::API::MDNormalization normalization;
+  if (m_actionNormalizeNone->isChecked())
+      normalization = Mantid::API::NoNormalization;
+  else if (m_actionNormalizeVolume->isChecked())
+    normalization = Mantid::API::VolumeNormalization;
+  else if (m_actionNormalizeNumEvents->isChecked())
+    normalization = Mantid::API::NumEventsNormalization;
+  else
+    normalization = Mantid::API::NoNormalization;
+
+  m_data->setNormalization(normalization);
+  this->updateDisplay();
+}
+
+//------------------------------------------------------------------------------------
 /// Slot called when the btnDoLine button is checked/unchecked
 void SliceViewer::LineMode_toggled(bool checked)
 {
@@ -854,7 +924,7 @@ void SliceViewer::resetAxis(int axis, Mantid::Geometry::IMDDimension_const_sptr 
 /** Get the range of signal given an iterator
  *
  * @param it :: IMDIterator of what to find
- * @return the min/max range, or 0-1.0 if not found
+ * @return the min/max range, or INFINITY if not found
  */
 QwtDoubleInterval SliceViewer::getRange(IMDIterator * it)
 {
@@ -862,6 +932,8 @@ QwtDoubleInterval SliceViewer::getRange(IMDIterator * it)
     return QwtDoubleInterval(0., 1.0);
   if (!it->valid())
     return QwtDoubleInterval(0., 1.0);
+  // Use the current normalization
+  it->setNormalization(m_data->getNormalization());
 
   double minSignal = DBL_MAX;
   double maxSignal = -DBL_MAX;
@@ -876,6 +948,47 @@ QwtDoubleInterval SliceViewer::getRange(IMDIterator * it)
     }
   } while (it->next());
 
+
+  if (minSignal == DBL_MAX)
+  {
+    minSignal = m_inf;
+    maxSignal = m_inf;
+  }
+  return QwtDoubleInterval(minSignal, maxSignal);
+}
+
+//------------------------------------------------------------------------------------
+/** Get the range of signal, in parallel, given an iterator
+ *
+ * @param iterators :: vector of IMDIterator of what to find
+ * @return the min/max range, or 0-1.0 if not found
+ */
+QwtDoubleInterval SliceViewer::getRange(std::vector<IMDIterator *> iterators)
+{
+  std::vector<QwtDoubleInterval> intervals(iterators.size());
+
+  PRAGMA_OMP( parallel for schedule(dynamic, 1))
+  for (int i=0; i < int(iterators.size()); i++)
+  {
+    IMDIterator * it = iterators[i];
+    QwtDoubleInterval range = this->getRange(iterators[i]);
+    intervals[i] = range;
+    delete it;
+  }
+
+  // Combine the overall min/max
+  double minSignal = DBL_MAX;
+  double maxSignal = -DBL_MAX;
+  for (size_t i=0; i < iterators.size(); i++)
+  {
+    double signal;
+    signal = intervals[i].minValue();
+    if (signal != m_inf && signal > 0 && signal < minSignal) minSignal = signal;
+
+    signal = intervals[i].maxValue();
+    if (signal != m_inf && signal > maxSignal) maxSignal = signal;
+  }
+
   if (minSignal == DBL_MAX)
   {
     minSignal = 0.0;
@@ -889,6 +1002,7 @@ QwtDoubleInterval SliceViewer::getRange(IMDIterator * it)
       // Possibly only one value in range
       return QwtDoubleInterval(minSignal*0.5, minSignal*1.5);
     else
+      // Other default value
       return QwtDoubleInterval(0., 1.0);
   }
 }
@@ -903,9 +1017,8 @@ void SliceViewer::findRangeFull()
   ReadLock lock(*m_ws);
 
   // Iterate through the entire workspace
-  IMDIterator * it = m_ws->createIterator();
-  m_colorRangeFull = getRange(it);
-  delete it;
+  std::vector<IMDIterator *> iterators = m_ws->createIterators(PARALLEL_GET_MAX_THREADS);
+  m_colorRangeFull = getRange(iterators);
 }
 
 
@@ -934,18 +1047,18 @@ void SliceViewer::findRangeSlice()
     IMDDimension_const_sptr dim = m_dimensions[d];
     if (widget->getShownDim() == 0)
     {
-      min[d] = xint.minValue();
-      max[d] = xint.maxValue();
+      min[d] = VMD_t(xint.minValue());
+      max[d] = VMD_t(xint.maxValue());
     }
     else if (widget->getShownDim() == 1)
     {
-      min[d] = yint.minValue();
-      max[d] = yint.maxValue();
+      min[d] = VMD_t(yint.minValue());
+      max[d] = VMD_t(yint.maxValue());
     }
     else
     {
       // Is a slice. Take a slice of widht = binWidth
-      min[d] = widget->getSlicePoint() - dim->getBinWidth() * 0.45;
+      min[d] = VMD_t(widget->getSlicePoint()) - dim->getBinWidth() * 0.45f;
       max[d] = min[d] + dim->getBinWidth();
     }
   }
@@ -953,12 +1066,11 @@ void SliceViewer::findRangeSlice()
   MDBoxImplicitFunction * function = new MDBoxImplicitFunction(min, max);
 
   // Iterate through the slice
-  IMDIterator * it = m_ws->createIterator(function);
-  m_colorRangeSlice = getRange(it);
+  std::vector<IMDIterator *> iterators = m_ws->createIterators(PARALLEL_GET_MAX_THREADS, function);
+  m_colorRangeSlice = getRange(iterators);
   // In case of failure, use the full range instead
   if (m_colorRangeSlice == QwtDoubleInterval(0.0, 1.0))
     m_colorRangeSlice = m_colorRangeFull;
-  delete it;
 }
 
 
@@ -976,10 +1088,10 @@ void SliceViewer::showInfoAt(double x, double y)
   if (!m_ws) return;
   VMD coords(m_ws->getNumDims());
   for (size_t d=0; d<m_ws->getNumDims(); d++)
-    coords[d] = m_dimWidgets[d]->getSlicePoint();
-  coords[m_dimX] = x;
-  coords[m_dimY] = y;
-  signal_t signal = m_ws->getSignalAtCoord(coords);
+    coords[d] = VMD_t(m_dimWidgets[d]->getSlicePoint());
+  coords[m_dimX] = VMD_t(x);
+  coords[m_dimY] = VMD_t(y);
+  signal_t signal = m_ws->getSignalAtVMD(coords, this->m_data->getNormalization());
   ui.lblInfoX->setText(QString::number(x, 'g', 4));
   ui.lblInfoY->setText(QString::number(y, 'g', 4));
   ui.lblInfoSignal->setText(QString::number(signal, 'g', 4));
@@ -1027,7 +1139,7 @@ void SliceViewer::updateDisplay(bool resetAxes)
       m_dimX = d;
     if (widget->getShownDim() == 1)
       m_dimY = d;
-    slicePoint.push_back(widget->getSlicePoint());
+    slicePoint.push_back(VMD_t(widget->getSlicePoint()));
   }
   // Avoid going out of range
   if (m_dimX >= m_ws->getNumDims()) m_dimX = m_ws->getNumDims()-1;
@@ -1510,7 +1622,7 @@ void SliceViewer::openFromXML(const QString & xml)
   V3D normal, origin;
   normal.fromString(normalStr);
   origin.fromString(originStr);
-  double planeOrigin = 0;
+  coord_t planeOrigin = 0;
   int normalDim = -1;
   for (int i=0; i<3; i++)
     if (normal[i] > 0.99) normalDim = i;
@@ -1520,7 +1632,7 @@ void SliceViewer::openFromXML(const QString & xml)
     throw std::runtime_error("SliceViewer::openFromXML(): Could not find the normal of the plane. Plane must be along one of the axes!");
 
   // Get the plane origin and the dimension in the workspace dimensions
-  planeOrigin = origin[normalDim];
+  planeOrigin = static_cast<coord_t>(origin[normalDim]);
   normalDim = dimMap[normalDim];
 
   VMD slicePoint(m_ws->getNumDims());
@@ -1529,7 +1641,7 @@ void SliceViewer::openFromXML(const QString & xml)
   slicePoint[normalDim] = planeOrigin;
   // The "time" of the paraview view
   if (dimMap[3] > 0)
-    slicePoint[dimMap[3]] = TimeValue;
+    slicePoint[dimMap[3]] = static_cast<coord_t>(TimeValue);
 
   // Now find the first unused dimensions = that is the X view dimension
   int xdim =-1;

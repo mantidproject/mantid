@@ -211,6 +211,16 @@ public:
     return (static_cast<double>(std::rand()-RAND_MAX/2)/static_cast<double>(RAND_MAX/2)) * 0;
   }
 
+  
+  void testForCategories()
+  {
+    MultiBG forCat;
+    const std::vector<std::string> categories = forCat.categories();
+    TS_ASSERT( categories.size() == 1 );
+    TS_ASSERT( categories[0] == "Background" );
+  }
+
+
 private:
   double x0,dx;
   std::vector<double> a,b;

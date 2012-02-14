@@ -79,11 +79,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().addOrReplace(wsName, ws2D));
 
     // set up Lorentzian fitting function
-    ExpDecayMuon* fn = new ExpDecayMuon();
-    fn->initialize();
+    ExpDecayMuon fn;
+    fn.initialize();
 
     //alg2.setFunction(fn);
-    alg2.setPropertyValue("Function",*fn);
+    alg2.setPropertyValue("Function",fn.asString());
 
 
     // Set which spectrum to fit against and initial starting values

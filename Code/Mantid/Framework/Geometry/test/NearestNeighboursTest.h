@@ -257,7 +257,7 @@ public:
     NearestNeighbours nn(m_instrument, *spectramap);
     for(size_t i = 0; i < 2000; i++)
     {
-      nn.neighbours(1, true, 8.0);
+      nn.neighbours(1, true, 8);
     }
   }
 };

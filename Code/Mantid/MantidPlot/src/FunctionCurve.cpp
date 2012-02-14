@@ -69,7 +69,7 @@ FunctionCurve::FunctionCurve(const Mantid::API::IFitFunction* fun,
 	setType(Graph::Function);
 
   // Save construction information in d_formulas
-  d_formulas << "Mantid" << QString::fromStdString(*fun) << wsName << QString::number(wsIndex);
+  d_formulas << "Mantid" << QString::fromStdString(fun->asString()) << wsName << QString::number(wsIndex);
 }
 
 FunctionCurve::FunctionCurve(const FunctionCurve& c)

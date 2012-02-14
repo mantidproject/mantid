@@ -111,20 +111,6 @@ public:
     TSM_ASSERT_THROWS("No workspace, so should not be possible to complete initialization.", factory.initialize(ws_sptr), std::runtime_error);
   }
 
-  void testCreateMeshOnlyThrows()
-  {
-    using namespace Mantid::VATES;
-    vtkPeakMarkerFactory factory("signal");
-    TS_ASSERT_THROWS(factory.createMeshOnly() , std::runtime_error);
-  }
-
-  void testCreateScalarArrayThrows()
-  {
-    using namespace Mantid::VATES;
-    vtkPeakMarkerFactory factory("signal");
-    TS_ASSERT_THROWS(factory.createScalarArray() , std::runtime_error);
-  }
-
   void testCreateWithoutInitializeThrows()
   {
     using namespace Mantid::VATES;

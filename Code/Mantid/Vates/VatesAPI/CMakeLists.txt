@@ -35,11 +35,11 @@ src/vtkDataSetToGeometry.cpp
 src/vtkDataSetToImplicitFunction.cpp
 src/vtkDataSetToWsName.cpp
 src/vtkDataSetToWsLocation.cpp
+src/vtkMDLineFactory.cpp
 src/vtkMDQuadFactory.cpp
 src/vtkSplatterPlotFactory.cpp
 src/vtkMDEWHexahedronFactory.cpp
 src/vtkPeakMarkerFactory.cpp
-src/vtkStructuredGridFactory.cpp
 src/vtkThresholdingHexahedronFactory.cpp
 src/vtkThresholdingLineFactory.cpp
 src/vtkThresholdingQuadFactory.cpp
@@ -93,11 +93,11 @@ inc/MantidVatesAPI/vtkDataSetToGeometry.h
 inc/MantidVatesAPI/vtkDataSetToImplicitFunction.h
 inc/MantidVatesAPI/vtkDataSetToWsName.h
 inc/MantidVatesAPI/vtkDataSetToWsLocation.h
+inc/MantidVatesAPI/vtkMDLineFactory.h
 inc/MantidVatesAPI/vtkMDQuadFactory.h
 inc/MantidVatesAPI/vtkMDEWHexahedronFactory.h
 inc/MantidVatesAPI/vtkSplatterPlotFactory.h
 inc/MantidVatesAPI/vtkPeakMarkerFactory.h
-inc/MantidVatesAPI/vtkStructuredGridFactory.h
 inc/MantidVatesAPI/vtkThresholdingHexahedronFactory.h
 inc/MantidVatesAPI/vtkThresholdingLineFactory.h
 inc/MantidVatesAPI/vtkThresholdingQuadFactory.h
@@ -115,11 +115,11 @@ test/EscalatingRebinningActionManagerTest.h
 test/EventNexusLoadingPresenterTest.h
 test/vtkDataSetFactoryTest.h
 test/vtkDataSetToGeometryTest.h
+test/vtkMDLineFactoryTest.h
 test/vtkMDQuadFactoryTest.h
 test/vtkMDEWHexahedronFactoryTest.h
 test/vtkSplatterPlotFactoryTest.h
 test/vtkPeakMarkerFactoryTest.h
-test/vtkStructuredGridFactoryTest.h
 test/vtkThresholdingUnstructuredGridFactoryTest.h
 test/vtkThresholdingHexahedronFactoryTest.h
 test/vtkThresholdingLineFactoryTest.h
@@ -181,7 +181,7 @@ if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
                         ../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
                         ../../Framework/TestHelpers/src/MDEventsTestHelper.cpp )
   cxxtest_add_test( VatesAPITest ${TEST_FILES} )
-  target_link_libraries( VatesAPITest VatesAPI DataHandling ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
+  target_link_libraries( VatesAPITest VatesAPI DataHandling Kernel ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
   add_dependencies( FrameworkTests VatesAPITest )
   # Add to the 'UnitTests' group in VS
   set_property ( TARGET VatesAPITest PROPERTY FOLDER "UnitTests" )

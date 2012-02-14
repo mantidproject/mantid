@@ -36,9 +36,6 @@ class REFLReductionScripter(BaseReductionScripter):
             f.write(script)
             f.close()
         
-        
-        
-        
         return script
         
 

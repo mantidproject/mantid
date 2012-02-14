@@ -201,7 +201,7 @@ public:
     alg2.setPropertyValue("WorkspaceIndex","0");
 
     // create function you want to fit against
-    CompositeFunctionMW *fnWithBk = new CompositeFunctionMW();
+    CompositeFunctionMW fnWithBk;
 
     LinearBackground *bk = new LinearBackground();
     bk->initialize();
@@ -213,17 +213,22 @@ public:
     BackToBackExponential* fn = new BackToBackExponential();
     fn->initialize();
 
+    // Test categories
+    const std::vector<std::string> categories = fn->categories();
+    TS_ASSERT( categories.size() == 1 );
+    TS_ASSERT( categories[0] == "Peak" );
+
     fn->setParameter("I",237.0);
     fn->setParameter("A",0.4);
     fn->setParameter("B",0.03);
     fn->setParameter("X0",79400.0);
     fn->setParameter("S",8.0);
 
-    fnWithBk->addFunction(fn);
-    fnWithBk->addFunction(bk);
+    fnWithBk.addFunction(fn);
+    fnWithBk.addFunction(bk);
 
     //alg2.setFunction(fnWithBk);
-    alg2.setPropertyValue("Function",*fnWithBk);
+    alg2.setPropertyValue("Function",fnWithBk.asString());
 
     // execute fit
     TS_ASSERT_THROWS_NOTHING(
@@ -278,6 +283,15 @@ public:
 
     AnalysisDataService::Instance().remove(wsName);
   }
+
+  void testForCategories()
+  {
+    BackToBackExponential forCat;
+    const std::vector<std::string> categories = forCat.categories();
+    TS_ASSERT( categories.size() == 1 );
+    TS_ASSERT( categories[0] == "Peak" );
+  }
+
 
 };
 

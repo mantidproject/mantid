@@ -54,16 +54,18 @@ public:
   }
   void test_abc()
   {
-    int NRC = 30;
+    int NRC =60;// 30;
     int NTimes = 40;
-    int PeakRow = 12;
-    int PeakCol = 17;
+    int PeakRow = 22;// 12;
+    int PeakCol = 27;// 17;
     int PeakChan = 15;
     double MaxPeakIntensity = 600;
     double MaxPeakRCSpan = 5;
     double MaxPeakTimeSpan = 4;
 
+    double T[40]={0.0};
     Workspace2D_sptr wsPtr = create2DWorkspaceWithRectangularInstrument(1, NRC, .05, NTimes);
+
 
     wsPtr->getAxis(0)->setUnit("TOF");
 
@@ -78,6 +80,7 @@ public:
     Geometry::Instrument_const_sptr instP = wsPtr->getInstrument();
     IComponent_const_sptr bankC = instP->getComponentByName(std::string("bank1"));
 
+
     if (bankC->type().compare("RectangularDetector") != 0)
       throw std::runtime_error(" No Rect bank named bank 1");
 
@@ -85,6 +88,12 @@ public:
         Geometry::RectangularDetector>(bankC);
 
     boost::shared_ptr<Geometry::Detector> pixelp = bankR->getAtXY(PeakCol, PeakRow);
+
+    /*for( int r=PeakRow-3; r<=PeakRow+3;r++)
+      for( int c=PeakCol-3;c<=PeakCol+3;c++)
+        std::cout<<"("<<r<<","<<c<<")pos="<<bankR->getAtXY(c,r)->getPos()<<std::endl;
+    */
+    Geometry::IDetector_const_sptr pix= wsPtr->getDetector(522);
 
     //Now get Peak.
     double PeakTime = 18000 + (PeakChan + .5) * 100;
@@ -112,18 +121,29 @@ public:
     double Q0 = calcQ(bankR, instP, PeakRow, PeakCol, 1000.0 + 30.0 * 50);
 
     double TotIntensity = 0;
+
+    detid2index_map * map = wsPtr->getDetectorIDToWorkspaceIndexMap(true);
     for (int row = 0; row < NRC; row++)
       for (int col = 0; col < NRC; col++)
       {
+
+        boost::shared_ptr<Detector> detP = bankR->getAtXY(col, row);
+
+        detid2index_map::iterator it = map->find(detP->getID());
+        size_t wsIndex = (*it).second;
+
         double MaxR = max<double> (0.0, MaxPeakIntensity * (1 - abs(row - PeakRow) / MaxPeakRCSpan));
         double MaxRC = max<double> (0.0, MaxR * (1 - abs(col - PeakCol) / MaxPeakRCSpan));
         MantidVecPtr dataY;
         MantidVecPtr dataE;
 
+
         for (int chan = 0; chan < NTimes; chan++)
         {
           double val = max<double> (0.0, MaxRC * (1 - abs(chan - PeakChan) / MaxPeakTimeSpan));
           TotIntensity += val;
+
+          T[chan]+=val;
           val += 1.4;
 
           dataY.access().push_back(val);
@@ -135,14 +155,11 @@ public:
           }
         }
 
-        boost::shared_ptr<Detector> detP = bankR->getAtXY(col, row);
-        detid2index_map * map = wsPtr->getDetectorIDToWorkspaceIndexMap(true);
-
-        detid2index_map::iterator it = map->find(detP->getID());
-        size_t wsIndex = (*it).second;
 
         wsPtr->setData(wsIndex, dataY, dataE);
+
       }
+    delete map;
 
     PeaksWorkspace_sptr pks(new PeaksWorkspace());
 
@@ -161,7 +178,8 @@ public:
 
       algP.setProperty<PeaksWorkspace_sptr> ("Peaks", pks);
       algP.setPropertyValue("OutputWorkspace", "aaa");
-
+      algP.setProperty("CalculateVariances", true);
+      //algP.setProperty("Ties","Background=1.4");
       algP.execute();
 
       algP.setPropertyValue("OutputWorkspace", "aaa");
@@ -172,9 +190,9 @@ public:
        TableWorkspace_sptr Twk = algP.getProperty("OutputWorkspace");
   
 
-       TS_ASSERT_LESS_THAN(fabs(intensity - 59870.5), 100.0);
+       TS_ASSERT_LESS_THAN(fabs(intensity -59982.9), 100.0);
       //Not sure why this reduced the error so much in the test
-      TS_ASSERT_LESS_THAN(fabs(sigma - 665.1), 1.0);
+      TS_ASSERT_LESS_THAN(fabs(sigma -623.577), 1.0);
 
       TS_ASSERT_EQUALS( Twk->rowCount(), 7);
       
@@ -183,21 +201,26 @@ public:
 
       TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> (std::string("Time"), 0) - 19250), 20);  
     
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> (std::string("Background"), 1) - 1.523), .2);  
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> (std::string("Background"), 1) - 1.42459), .2);
    
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("Intensity", 2) - 11136.3), 20);
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("Intensity", 2) - 11173), 20);
       
    
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("NCells", 3) -  169), 5);  
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("NCells", 3) -  277), 5);
     
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("ChiSqrOverDOF", 4) - 321.3), 1.5);  
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("ChiSqrOverDOF", 4) -   195), 1.5);
     
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("TotIntensity", 0) - 3987), 10);
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("TotIntensity", 0) - 4137), 10);
       
   
-   /*
-       std::vector<std::string> names = Twk->getColumnNames();
-      std::cout<<"Intensitty="<<pks->getPeak(0).getIntensity()<<"   sigma="<<pks->getPeak(0).getSigmaIntensity()<<std::endl;
+
+      /*   std::vector<std::string> names = Twk->getColumnNames();
+      std::cout<<"Intensitty="<<intensity<<"   sigma="<<sigma<<
+               "  Theoret intensity="<<TotIntensity<<std::endl;
+      std::cout<<std::setw(15)<<"Act Int";
+      for( int j=12; j< 12+Twk->rowCount();j++)
+             std::cout<< setw(12)<<T[j];
+      std::cout<<std::endl;
        for( int i=0; i<Twk->columnCount();i++)
        {
          std::cout<<std::setw(15)<<names[i];
@@ -206,7 +229,8 @@ public:
        std::cout<<std::endl;
 
        }
-  
+
+
   Intensitty=59870.7   sigma=665.098
            Time       19250       19350       19450       19550       19650       19750       19850
         Channel          12          13          14          15          16          17          18
@@ -228,6 +252,59 @@ ISAWIntensityError     113.065     208.524     297.868      390.35     297.868  
         End Row          17          17          18          18          18          17          17
       Start Col          10          11          11          11          11          11          10
         End Col          22          23          23          23          23          23          22
+------------------------------------------------------------------------------------
+better-Calc new Variances instead of using attrib sent in  4 std dev
+Intensitty=59953.3   sigma=621.308  Theoret intensity=60000
+        Act Int        3750        7500       11250       15000       11250        7500        3750
+           Time       19250       19350       19450       19550       19650       19750       19850
+        Channel          12          13          14          15          16          17          18
+     Background     1.40659     1.42122     1.43184     1.44245     1.43184     1.42122     1.40659
+      Intensity     3728.63     7453.29     11179.9     14906.6     11179.9     7453.29     3728.63
+           Mcol          17          17          17          17          17          17          17
+           Mrow          12          12          12          12          12          12          12
+          SScol     3.98984     3.98363     3.98363     3.98363     3.98363     3.98363     3.98984
+          SSrow     3.98933     3.98363     3.98363     3.98363     3.98363     3.98363     3.98933
+           SSrc-6.21198e-14-1.64668e-12-1.28421e-12-9.32082e-13-1.28421e-12-1.64668e-12-6.21198e-14
+         NCells         289         289         289         289         289         289         289
+  ChiSqrOverDOF      20.689     83.3321     187.497     333.329     187.497     83.3321      20.689
+   TotIntensity      4154.6      7904.6     11654.6     15404.6     11654.6      7904.6      4154.6
+BackgroundError    0.294296    0.590553    0.885829     1.18111    0.885829    0.590553    0.294296
+FitIntensityError     35.4244     71.0317     106.547     142.063     106.547     71.0317     35.4244
+  ISAWIntensity      3748.1     7493.87     11240.8     14987.7     11240.8     7493.87      3748.1
+ISAWIntensityError     108.604     193.503      278.58     363.777      278.58     193.503     108.604
+  TotalBoundary        89.6        89.6        89.6        89.6        89.6        89.6        89.6
+ NBoundaryCells          64          64          64          64          64          64          64
+      Start Row           3           4           4           4           4           4           3
+        End Row          19          20          20          20          20          20          19
+      Start Col           9           9           9           9           9           9           9
+        End Col          25          25          25          25          25          25          25
+
+========================================================================================
+Circular regions
+Intensitty=59982.9   sigma=606.577  Theoret intensity=60000
+        Act Int        3750        7500       11250       15000       11250        7500        3750
+           Time       19250       19350       19450       19550       19650       19750       19850
+        Channel          12          13          14          15          16          17          18
+     Background     1.40266     1.40532     1.40798     1.41064     1.40798     1.40532     1.40266
+      Intensity     3733.82     7467.64     11201.5     14935.3     11201.5     7467.64     3733.82
+           Mcol          27          27          27          27          27          27          27
+           Mrow          22          22          22          22          22          22          22
+          SScol     3.99206     3.99206     3.99206     3.99206     3.99206     3.99206     3.99206
+          SSrow     3.99206     3.99206     3.99206     3.99206     3.99206     3.99206     3.99206
+           SSrc-5.34109e-12-5.46531e-12-4.38881e-12-2.48423e-12-4.38881e-12-5.46531e-12-5.34109e-12
+         NCells         401         401         401         401         401         401         401
+  ChiSqrOverDOF     14.8788     59.5151     133.909     238.061     133.909     59.5151     14.8788
+   TotIntensity      4311.4      8061.4     11811.4     15561.4     11811.4      8061.4      4311.4
+BackgroundError    0.205936    0.411872    0.617809    0.823745    0.617809    0.411872    0.205936
+FitIntensityError     29.2084     58.4169     87.6253     116.834     87.6253     58.4169     29.2084
+  ISAWIntensity     3748.93     7497.87     11246.8     14995.7     11246.8     7497.87     3748.93
+ISAWIntensityError     108.136     189.481     271.573     353.892     271.573     189.481     108.136
+  TotalBoundary       151.2       151.2       151.2       151.2       151.2       151.2       151.2
+ NBoundaryCells         108         108         108         108         108         108         108
+      Start Row          11          11          11          11          11          11          11
+        End Row          33          33          33          33          33          33          33
+      Start Col          16          16          16          16          16          16          16
+        End Col          38          38          38          38          38          38          38
 
        */
     } catch (char * s)
@@ -240,6 +317,7 @@ ISAWIntensityError     113.065     208.524     297.868      390.35     297.868  
     {
       std::cout << "Some Error Happened" << std::endl;
     }
+
   }
 
 

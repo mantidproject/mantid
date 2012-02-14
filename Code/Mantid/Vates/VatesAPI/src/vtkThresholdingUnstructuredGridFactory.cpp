@@ -57,33 +57,19 @@ namespace VATES
   template<typename TimeMapper>
   void vtkThresholdingUnstructuredGridFactory<TimeMapper>::initialize(Mantid::API::Workspace_sptr workspace)
   {
-    m_workspace = boost::dynamic_pointer_cast<MDHistoWorkspace>(workspace);
-    // Check that a workspace has been provided.
-    validateWsNotNull();
-    // When the workspace can not be handled by this type, take action in the form of delegation.
-    size_t nonIntegratedSize = m_workspace->getNonIntegratedDimensions().size();
-    if(nonIntegratedSize != vtkDataSetFactory::FourDimensional)
+    m_workspace = doInitialize<MDHistoWorkspace, 4>(workspace);
+    if(m_workspace != NULL)
     {
-      if(this->hasSuccessor())
-      {
-        m_successor->initialize(m_workspace);
-        return;
-      }
-      else
-      {
-        throw std::runtime_error("There is no successor factory set for this vtkThresholdingUnstructuredGridFactory type");
-      }
+      double tMax = m_workspace->getTDimension()->getMaximum();
+      double tMin = m_workspace->getTDimension()->getMinimum();
+      size_t nbins = m_workspace->getTDimension()->getNBins();
+
+      m_timeMapper = TimeMapper::construct(tMin, tMax, nbins);
+
+      //Setup range values according to whatever strategy object has been injected.
+      m_thresholdRange->setWorkspace(m_workspace);
+      m_thresholdRange->calculate();
     }
-
-    double tMax = m_workspace->getTDimension()->getMaximum();
-    double tMin = m_workspace->getTDimension()->getMinimum();
-    size_t nbins = m_workspace->getTDimension()->getNBins();
-
-    m_timeMapper = TimeMapper::construct(tMin, tMax, nbins);
-
-    //Setup range values according to whatever strategy object has been injected.
-    m_thresholdRange->setWorkspace(m_workspace);
-    m_thresholdRange->calculate();
   }
 
   template<typename TimeMapper>
@@ -95,15 +81,13 @@ namespace VATES
   template<typename TimeMapper>
   vtkDataSet* vtkThresholdingUnstructuredGridFactory<TimeMapper>::create() const
   {
-    validate();
-
-    size_t nonIntegratedSize = m_workspace->getNonIntegratedDimensions().size();
-    if(nonIntegratedSize != vtkDataSetFactory::FourDimensional)
+    vtkDataSet* product = tryDelegatingCreation<MDHistoWorkspace, 4>(m_workspace);
+    if(product != NULL)
     {
-      return m_successor->create();
+      return product;
     }
     else
-    { 
+    {
       // Create the mesh in a 4D mode
       return this->create3Dor4D(m_timeMapper(m_timestep), true);
     }
@@ -114,20 +98,6 @@ namespace VATES
   vtkThresholdingUnstructuredGridFactory<TimeMapper>::~vtkThresholdingUnstructuredGridFactory()
   {
   }
-
-  template<typename TimeMapper>
-  vtkDataSet* vtkThresholdingUnstructuredGridFactory<TimeMapper>::createMeshOnly() const
-  {
-    throw std::runtime_error("::createMeshOnly() does not apply for this type of factory.");
-  }
-
-  template<typename TimeMapper>
-  vtkFloatArray* vtkThresholdingUnstructuredGridFactory<TimeMapper>::createScalarArray() const
-  {
-    throw std::runtime_error("::createScalarArray() does not apply for this type of factory.");
-  }
-
-
 
   template class vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>;
   template class vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep>;

@@ -891,6 +891,17 @@ void SliceViewer::setColorScaleAutoSlice()
    
 %End
 
+  void setTransparentZeros(bool transparent);
+%Docstring
+void SliceViewer::setTransparentZeros(bool transparent)
+-------------------------------------------------------
+    Set whether to display 0 signal as "transparent" color.
+   
+    Args:
+        transparent :: true if you want zeros to be transparent.
+   
+%End
+
 
 
 };

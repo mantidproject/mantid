@@ -8,6 +8,8 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include <map>
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IMDIterator.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -137,7 +139,7 @@ namespace MDEvents
     coord_t volume = 1.0;
     for (size_t i=0; i < numDimensions; ++i)
       volume *= m_dimensions[i]->getBinWidth();
-    m_inverseVolume = 1.0 / volume;
+    m_inverseVolume = 1.0f / volume;
 
     // Continue with the vertexes array
     this->initVertexesArray();
@@ -269,7 +271,7 @@ namespace MDEvents
       size_t outIndex = i * numDimensions;
       // Offset the 0th box by the position of this linear index, in each dimension
       for (size_t d=0; d<numDimensions; d++)
-        out[outIndex+d] = m_vertexesArray[outIndex+d] + m_boxLength[d] * coord_t(dimIndexes[d]);
+        out[outIndex+d] = m_vertexesArray[outIndex+d] + m_boxLength[d] * static_cast<coord_t>(dimIndexes[d]);
     }
 
     return out;
@@ -292,7 +294,7 @@ namespace MDEvents
     VMD out(numDimensions);
     // Offset the 0th box by the position of this linear index, in each dimension, plus a half
     for (size_t d=0; d<numDimensions; d++)
-      out[d] = m_vertexesArray[d] + m_boxLength[d] * (coord_t(dimIndexes[d]) + 0.5);
+      out[d] = m_vertexesArray[d] + m_boxLength[d] * (static_cast<coord_t>(dimIndexes[d]) + 0.5f);
     return out;
   }
 
@@ -304,11 +306,25 @@ namespace MDEvents
    * @return the (normalized) signal at a given coordinates.
    *         NaN if outside the range of this workspace
    */
-  signal_t MDHistoWorkspace::getSignalAtCoord(const coord_t * coords) const
+  signal_t MDHistoWorkspace::getSignalAtCoord(const coord_t * coords, const Mantid::API::MDNormalization & normalization) const
   {
     size_t linearIndex = this->getLinearIndexAtCoord(coords);
     if (linearIndex < m_length)
-      return m_signals[linearIndex] * m_inverseVolume;
+    {
+      // What is our normalization factor?
+      switch (normalization)
+      {
+      case NoNormalization:
+        return m_signals[linearIndex];
+      case VolumeNormalization:
+        return m_signals[linearIndex] * m_inverseVolume;
+      case NumEventsNormalization:
+        //TOOD: track # of events
+        return m_signals[linearIndex] * 1;
+      }
+      // Should not reach here
+      return m_signals[linearIndex];
+    }
     else
       return std::numeric_limits<signal_t>::quiet_NaN();
   }
@@ -336,10 +352,32 @@ namespace MDEvents
 
 
   //----------------------------------------------------------------------------------------------
-  /// Creates a new iterator pointing to the first cell in the workspace
-  Mantid::API::IMDIterator* MDHistoWorkspace::createIterator(Mantid::Geometry::MDImplicitFunction * function) const
+  /** Create IMDIterators from this MDHistoWorkspace
+   *
+   * @param suggestedNumCores :: split the iterators into this many cores (if threadsafe)
+   * @param function :: implicit function to limit range
+   * @return MDHistoWorkspaceIterator vector
+   */
+  std::vector<Mantid::API::IMDIterator*> MDHistoWorkspace::createIterators(size_t suggestedNumCores,
+      Mantid::Geometry::MDImplicitFunction * function) const
   {
-    return new MDHistoWorkspaceIterator(this,function);
+    size_t numCores = suggestedNumCores;
+    if (!this->threadSafe()) numCores = 1;
+    size_t numElements = this->getNPoints();
+    if (numCores > numElements)  numCores = numElements;
+    if (numCores < 1) numCores = 1;
+
+    // Create one iterator per core, splitting evenly amongst spectra
+    std::vector<IMDIterator*> out;
+    for (size_t i=0; i<numCores; i++)
+    {
+      size_t begin = (i * numElements) / numCores;
+      size_t end = ((i+1) * numElements) / numCores;
+      if (end > numElements)
+        end = numElements;
+      out.push_back(new MDHistoWorkspaceIterator(this, function, begin, end));
+    }
+    return out;
   }
 
 
@@ -418,7 +456,7 @@ namespace MDEvents
 
     // Unit-vector of the direction
     VMD dir = end - start;
-    double length = dir.normalize();
+    coord_t length = dir.normalize();
 
     // Vector with +1 where direction is positive, -1 where negative
     #define sgn(x) ((x<0)?-1:((x>0)?1:0))
@@ -439,7 +477,7 @@ namespace MDEvents
     }
 
     // Ordered list of boundaries in position-along-the-line coordinates
-    std::set<double> boundaries;
+    std::set<coord_t> boundaries;
 
     // Start with the start/end points, if they are within range.
     if (pointInWorkspace(this, start))
@@ -452,16 +490,16 @@ namespace MDEvents
     for (size_t d=0; d<nd; d++)
     {
       IMDDimension_const_sptr dim = this->getDimension(d);
-      double lineStartX = start[d];
+      coord_t lineStartX = start[d];
 
       if (dir[d] != 0.0)
       {
         for (size_t i=0; i<=dim->getNBins(); i++)
         {
           // Position in this coordinate
-          double thisX = dim->getX(i);
+          coord_t thisX = dim->getX(i);
           // Position along the line. Is this between the start and end of it?
-          double linePos = (thisX - lineStartX) / dir[d];
+          coord_t linePos = (thisX - lineStartX) / dir[d];
           if (linePos >= 0 && linePos <= length)
           {
             // Full position
@@ -480,17 +518,17 @@ namespace MDEvents
       // Nothing at all!
       // Make a single bin with NAN
       x.push_back(0);  x.push_back(length);
-      y.push_back(std::numeric_limits<double>::quiet_NaN());
-      e.push_back(std::numeric_limits<double>::quiet_NaN());
+      y.push_back(std::numeric_limits<signal_t>::quiet_NaN());
+      e.push_back(std::numeric_limits<signal_t>::quiet_NaN());
       return;
     }
     else
     {
       // Get the first point
-      std::set<double>::iterator it;
+      std::set<coord_t>::iterator it;
       it = boundaries.begin();
 
-      double lastLinePos = *it;
+      coord_t lastLinePos = *it;
       VMD lastPos = start + (dir * lastLinePos);
       x.push_back(lastLinePos);
 
@@ -499,7 +537,7 @@ namespace MDEvents
       for (; it != boundaries.end(); it++)
       {
         // This is our current position along the line
-        double linePos = *it;
+        coord_t linePos = *it;
         x.push_back(linePos);
 
         // This is the full position at this boundary
@@ -535,8 +573,8 @@ namespace MDEvents
         else
         {
           // Invalid index. This shouldn't happen
-          y.push_back(std::numeric_limits<double>::quiet_NaN());
-          e.push_back(std::numeric_limits<double>::quiet_NaN());
+          y.push_back(std::numeric_limits<signal_t>::quiet_NaN());
+          e.push_back(std::numeric_limits<signal_t>::quiet_NaN());
         }
       } // for each unique boundary
     } // if there is at least one point

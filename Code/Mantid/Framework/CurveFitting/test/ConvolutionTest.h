@@ -204,7 +204,7 @@ public:
     TS_ASSERT_EQUALS(conv.parameterLocalName(6),"f1.h");
     TS_ASSERT_EQUALS(conv.parameterLocalName(10),"f2.s");
 
-    IFitFunction* fun = FunctionFactory::Instance().createInitialized(conv);
+    IFitFunction* fun = FunctionFactory::Instance().createInitialized(conv.asString());
     TS_ASSERT(fun);
 
     Convolution* conv1 = dynamic_cast<Convolution*>(fun);
@@ -346,6 +346,15 @@ public:
   {
     Fit fit;
     WS_type ws = mkWS(ConvolutionExp(),1,10,24,0.13);
+  }
+
+  
+  void testForCategories()
+  {
+    Convolution forCat;
+    const std::vector<std::string> categories = forCat.categories();
+    TS_ASSERT( categories.size() == 1 );
+    TS_ASSERT( categories[0] == "General" );
   }
 
 private:

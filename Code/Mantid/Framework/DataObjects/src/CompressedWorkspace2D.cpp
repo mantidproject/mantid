@@ -7,15 +7,6 @@
 #include <cstring>
 #include "MantidDataObjects/ManagedHistogram1D.h"
 
-// Visual studio 2010 can't deal with NULL (for a pointer) being passed to the constructor of an std::pair
-// You have to use the c++0x keyword 'nullptr' instead.
-// _MSC_VER=1600 is Visual Studio 2010, so in all other cases I create a define to turn nullptr into NULL
-#if (_MSC_VER!=1600)
-  #ifndef nullptr
-    #define nullptr NULL
-  #endif
-#endif
-
 namespace Mantid
 {
 namespace DataObjects
@@ -72,12 +63,10 @@ void CompressedWorkspace2D::init(const std::size_t &NVectors, const std::size_t 
   ManagedDataBlock2D *newBlock = m_blocks[0];
   newBlock->initialize();
   CompressedPointer tmpBuff = compressBlock(newBlock,0);
-  m_compressedData[0] = tmpBuff;
 
   for(size_t i=0;i<NVectors;i+=m_vectorsPerBlock)
   {
-    CompressedPointer p(nullptr,tmpBuff.second);
-    p.first = new Bytef[p.second];
+    CompressedPointer p = std::make_pair(new Bytef[tmpBuff.second],tmpBuff.second);
     memcpy(p.first,tmpBuff.first,p.second);
     m_compressedData[i] = p;
   }

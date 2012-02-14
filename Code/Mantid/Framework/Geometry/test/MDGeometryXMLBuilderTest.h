@@ -21,6 +21,7 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
+using namespace Mantid;
 using namespace Mantid::Geometry;
 using namespace testing;
 
@@ -38,9 +39,9 @@ private:
     MOCK_CONST_METHOD0(getDimensionId,
       std::string());
     MOCK_CONST_METHOD0(getMaximum,
-      double());
+      coord_t());
     MOCK_CONST_METHOD0(getMinimum,
-      double());
+      coord_t());
     MOCK_CONST_METHOD0(getNBins,
       size_t());
     MOCK_CONST_METHOD0(toXMLString,
@@ -48,9 +49,9 @@ private:
     MOCK_CONST_METHOD0(getIsIntegrated,
       bool());
     MOCK_CONST_METHOD1(getX,
-      double(size_t ind));
+      coord_t(size_t ind));
     MOCK_METHOD3(setRange,
-      void(size_t nBins, double min, double max));
+      void(size_t nBins, coord_t min, coord_t max));
   };
 
 static std::string createDimensionXMLString(unsigned int nbins, int min, int max, std::string name, std::string id)

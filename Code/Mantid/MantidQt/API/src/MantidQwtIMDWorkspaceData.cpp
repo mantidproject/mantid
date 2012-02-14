@@ -1,15 +1,17 @@
-#include "MantidQtAPI/MantidQwtIMDWorkspaceData.h"
-#include "MantidAPI/IMDIterator.h"
-#include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidAPI/NullCoordTransform.h"
 #include "MantidAPI/CoordTransform.h"
+#include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/NullCoordTransform.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidQtAPI/MantidQwtIMDWorkspaceData.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using Mantid::API::NullCoordTransform;
 using Mantid::API::CoordTransform;
 using Mantid::API::IMDWorkspace;
+using Mantid::coord_t;
 
 /** This is needed to successfully compile on windows. */
 QwtData & QwtData::operator=(class QwtData const &)
@@ -69,7 +71,7 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(Mantid::API::IMDWorkspace_c
         else
         {
           // Mid point along each dimension
-          m_start[d] = (dim->getMaximum() + dim->getMinimum()) / 2.0;
+          m_start[d] = (dim->getMaximum() + dim->getMinimum()) / 2.0f;
           m_end[d] = m_start[d];
         }
       }
@@ -312,7 +314,7 @@ void MantidQwtIMDWorkspaceData::choosePlotAxis()
       VMD diff = originalEnd - originalStart;
 
       // Now we find the dimension with the biggest change
-      double largest = -1e100;
+      double largest = -1e30;
       // Default to 0
       m_currentPlotAxis = 0;
       for (size_t d=0; d<diff.getNumDims(); d++)

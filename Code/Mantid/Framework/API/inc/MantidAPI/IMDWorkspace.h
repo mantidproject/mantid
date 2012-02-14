@@ -12,6 +12,7 @@
 #include <stdarg.h>
 #include "MantidAPI/MDGeometry.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
+#include "MantidAPI/IMDWorkspace.h"
 
 namespace Mantid
 {
@@ -83,26 +84,22 @@ namespace Mantid
       virtual uint64_t getNPoints() const = 0;
 
       /// Creates a new iterator pointing to the first cell in the workspace
-      virtual IMDIterator* createIterator(Mantid::Geometry::MDImplicitFunction * function = NULL) const;
+      virtual std::vector<IMDIterator*> createIterators(size_t suggestedNumCores = 1,
+          Mantid::Geometry::MDImplicitFunction * function = NULL) const = 0;
 
       /// Returns the (normalized) signal at a given coordinates
-      virtual signal_t getSignalAtCoord(const coord_t * coords) const
-      {
-        UNUSED_ARG(coords);
-        throw std::runtime_error("getSignalAtCoord() not implemented.");
-      }
-
-      //-------------------------------------------------------------------------------------------
-      /// Returns the signal (normalized by volume) at a given coordinates
-      /// @param coords :: coordinate as a VMD vector
-      signal_t getSignalAtCoord(const Mantid::Kernel::VMD & coords) const
-      {
-        return this->getSignalAtCoord(coords.getBareArray());
-      }
+      virtual signal_t getSignalAtCoord(const coord_t * coords, const Mantid::API::MDNormalization & normalization) const = 0;
 
       /// Method to generate a line plot through a MD-workspace
       virtual void getLinePlot(const Mantid::Kernel::VMD & start, const Mantid::Kernel::VMD & end,
           Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y, std::vector<signal_t> & e) const = 0;
+
+
+      IMDIterator* createIterator(Mantid::Geometry::MDImplicitFunction * function = NULL) const;
+
+      signal_t getSignalAtVMD(const Mantid::Kernel::VMD & coords,
+          const Mantid::API::MDNormalization & normalization = Mantid::API::VolumeNormalization) const;
+
     };
     
     /// Shared pointer to the IMDWorkspace base class

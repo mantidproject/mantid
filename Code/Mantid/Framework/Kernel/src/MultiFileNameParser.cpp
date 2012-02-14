@@ -3,307 +3,561 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/MultiFileNameParser.h"
 
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/InstrumentInfo.h"
+#include "MantidKernel/Exception.h"
+
 #include <algorithm>
 #include <numeric>
-#include <exception>
-#include <sstream>
+#include <iterator>
+#include <cassert>
+
+#include <ctype.h>
 
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/regex.hpp>
+#include <boost/bind.hpp>
 
 #include <Poco/Path.h>
 
 namespace Mantid
 {
-  namespace Kernel
+namespace Kernel
+{
+  namespace MultiFileNameParsing
   {
-    ////////////////////////////////////////////////////////////////////////////////////////
-    // STATIC CONSTANTS - regexs used to parse multi runs, built up and nested step by step.
-    ////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////
+    // Static constants.
+    /////////////////////////////////////////////////////////////////////////////
+    
+    namespace Regexs
+    {
+      const std::string INST = "([A-Za-z]+|PG3|pg3)";
 
-    const std::string MultiFileNameParser::INST = "([A-Za-z]+|PG3|pg3)";
+      const std::string UNDERSCORE = "(_{0,1})";
+      const std::string SPACE      = "(\\s*)";
 
-    const std::string MultiFileNameParser::UNDERSCORE = "(_{0,1})";
-    const std::string MultiFileNameParser::SPACE      = "(\\s*)";
+      const std::string COMMA = "(" + SPACE + "," + SPACE + ")";
+      const std::string PLUS  = "(" + SPACE + "\\+" + SPACE + ")";
+      const std::string MINUS = "(" + SPACE + "\\-" + SPACE + ")";
+      const std::string COLON = "(" + SPACE + ":" + SPACE + ")";
 
-    const std::string MultiFileNameParser::COMMA = "(" + SPACE + "," + SPACE + ")";
-    const std::string MultiFileNameParser::PLUS  = "(" + SPACE + "\\+" + SPACE + ")";
-    const std::string MultiFileNameParser::MINUS = "(" + SPACE + "\\-" + SPACE + ")";
-    const std::string MultiFileNameParser::COLON = "(" + SPACE + ":" + SPACE + ")";
+      const std::string SINGLE         = "([0-9]+)";
+      const std::string RANGE          = "(" + SINGLE + COLON + SINGLE + ")";
+      const std::string STEP_RANGE     = "(" + SINGLE + COLON + SINGLE + COLON + SINGLE + ")";
+      const std::string ADD_LIST       = "(" + SINGLE + "(" + PLUS + SINGLE + ")+" + ")";
+      const std::string ADD_RANGE      = "(" + SINGLE + MINUS + SINGLE + ")";
+      const std::string ADD_STEP_RANGE = "(" + SINGLE + MINUS + SINGLE + COLON + SINGLE + ")";
 
-    const std::string MultiFileNameParser::SINGLE         = "([0-9]+)";
-    const std::string MultiFileNameParser::RANGE          = "(" + SINGLE + COLON + SINGLE + ")";
-    const std::string MultiFileNameParser::STEP_RANGE     = "(" + SINGLE + COLON + SINGLE + COLON + SINGLE + ")";
-    const std::string MultiFileNameParser::ADD_LIST       = "(" + SINGLE + "(" + PLUS + SINGLE + ")+" + ")";
-    const std::string MultiFileNameParser::ADD_RANGE      = "(" + SINGLE + MINUS + SINGLE + ")";
-    const std::string MultiFileNameParser::ADD_STEP_RANGE = "(" + SINGLE + MINUS + SINGLE + COLON + SINGLE + ")";
-
-    const std::string MultiFileNameParser::ANY  = "(" + ADD_STEP_RANGE + "|" + ADD_RANGE + "|" + ADD_LIST + "|" + STEP_RANGE + "|" + RANGE + "|" + SINGLE + ")";
-    const std::string MultiFileNameParser::LIST = "(" + ANY + "(" + COMMA + ANY + ")*" + ")";
+      const std::string ANY  = "(" + ADD_STEP_RANGE + "|" + ADD_RANGE + "|" + ADD_LIST + "|" + STEP_RANGE + "|" + RANGE + "|" + SINGLE + ")";
+      const std::string LIST = "(" + ANY + "(" + COMMA + ANY + ")*" + ")";
+    }
+      
+    /////////////////////////////////////////////////////////////////////////////
+    // Forward declarations.
+    /////////////////////////////////////////////////////////////////////////////
 
     namespace
     {
-      /**
-       * Functor to convert a vector of run numbers, which only contains
-       * a single run, into a string containing a cast of that run.
-       *
-       * @param run - a single run contained in a vector of 
-       */
-      struct convertUIntVect2String
-      {
-        std::string operator()(std::vector<unsigned int> run)
-        {
-          //if(run.size() != 1)
-            //throw std::exception::exception("An unexpected run number was found during parsing.");
-
-          return boost::lexical_cast<std::string>(run.at(0));
-        }
-      };
-
-      /**
-       * Functor that takes in a map of run information parsed so far and a runString, parses
-       * parses the runString then appends the info to the map, returning it to the accumulate
-       * STL algo that called it.
-       *
-       * @param parsedRuns - the map of info relating to the runs parsed so far
-       * @param runString - the string containing new runs to be added to the map
-       * @returns the updated map, appended with the data from the runString
-       */
-      struct parseRunRange
-      {
-        std::map<std::vector<unsigned int>, std::string> & operator()(
-          std::map<std::vector<unsigned int>, 
-          std::string> & parsedRuns, 
-          const std::string & runString)
-        {
-          // Regex to separate non-added runs from the added runs.
-          boost::regex regex("(" + 
-            MultiFileNameParser::STEP_RANGE + "|" + 
-            MultiFileNameParser::RANGE + "|" + 
-            MultiFileNameParser::SINGLE + ")");
-
-          // Deal with the case where we have an added run range or list to append to the map.
-          if(!boost::regex_match(runString,regex))
-          {
-            // Use Sofia's run parser here, but it's only ever going to produce a vector with a 
-            // single vector inside, since we only ever feed in one added bunch of runs.
-            std::vector<unsigned int> runUInts = UserStringParser().parse(runString).at(0);
-
-            // Add the newly parsed runs and the ws name to the map, and return it.
-            parsedRuns.insert(
-              parsedRuns.end(),
-              std::pair<std::vector<unsigned int>, std::string>
-                (runUInts, runString));
-
-            return parsedRuns;
-          }
-          // We are left with the case where we have a NON-added run or run range to append to the map.
-          else
-          {
-            // In this case the run parser will spit out a vector of vectors, each of the inner vectors 
-            // containing only one run number.
-            std::vector<std::vector<unsigned int> > runUInts = UserStringParser().parse(runString);
-
-            // Convert the unsigned ints into strings.
-            std::vector<std::string> runStrings;
-            runStrings.resize(runUInts.size());
-            std::transform(
-              runUInts.begin(), runUInts.end(),
-              runStrings.begin(),
-              convertUIntVect2String());
-
-            // @TODO:
-            // Here would be the best place to insert code to make sure the run strings mantain any 
-            // of the original trailing zeros entered by the user.
-
-            // Add the newly parsed runs and the ws name to the map, and return it.
-            std::vector<std::string>::iterator s_it = runStrings.begin();
-            std::vector<std::vector<unsigned int> >::iterator vUI_it = runUInts.begin();
-            for( ; s_it != runStrings.end(); ++s_it, ++vUI_it)
-            {
-              parsedRuns.insert(
-                parsedRuns.end(), 
-                std::pair<std::vector<unsigned int>, std::string>
-                  (*vUI_it, *s_it));
-            }
-
-            return parsedRuns;
-          }
-        }
-      };
-    } // Anonymous namespace
-
-    /** 
-     * Constructor
-     */
-    MultiFileNameParser::MultiFileNameParser() : 
-      m_multiFileName(),
-      m_dir(), 
-      m_inst(),
-      m_runs(),
-      m_ext(),
-      m_fileNamesToWsNameMap(),
-      m_parser()
-    {
+      // Anonymous helper functions.
+      std::vector<std::vector<unsigned int> > & parseToken(std::vector<std::vector<unsigned int> > & parsedRuns, const std::string & token);
+      std::vector<std::vector<unsigned int> > generateRange(unsigned int from, unsigned int to, unsigned int stepSize, bool addRuns);
+      void validateToken(const std::string & token);
+      bool matchesFully(const std::string & stringToMatch, const std::string & regexString);
+      std::string getMatchingString(const std::string & regexString, const std::string & toParse);
+      std::string pad(std::string run, unsigned int padLength);
     }
     
-    /** 
-     * Destructor
+    /////////////////////////////////////////////////////////////////////////////
+    // Scoped, global functions.
+    /////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Parses a string containing a comma separated list of run "tokens", where each run
+     * token is of one of the allowed forms (a single run or a range of runs or an added
+     * range of runs, etc.)
+     *
+     * @param runString :: a string containing the runs to parse, in the correct format.
+     *
+     * @returns a vector of vectors of unsigned ints, one int for each run, where runs 
+     *    to be added are contained in the same sub-vector.
+     * @throws std::runtime_error when runString provided is in an incorrect format.
      */
-    MultiFileNameParser::~MultiFileNameParser()
+    std::vector<std::vector<unsigned int> > parseMultiRunString(std::string runString)
     {
+      // If the run string is empty, return no runs.
+      if(runString.empty())
+        return std::vector<std::vector<unsigned int> >();
+      
+      // Remove whitespace.
+      runString.erase(std::remove_if( // ("Erase-remove" idiom.)
+          runString.begin(), runString.end(),
+          isspace),
+        runString.end());
+
+      // Only numeric characters, or occurances of plus, minus, comma and colon are allowed.
+      if(!matchesFully(runString,"([0-9]|\\+|\\-|,|:)+"))
+        throw std::runtime_error(
+          "Non-numeric or otherwise unaccetable character(s) detected.");
+
+      // Tokenize on commas.
+      std::vector<std::string> tokens;
+      tokens = boost::split(tokens, runString, boost::is_any_of(","));
+
+      // Validate each token.
+      std::for_each(
+        tokens.begin(), tokens.end(),
+        validateToken);
+
+      // Parse each token, accumulate the results, and return them.
+      return std::accumulate(
+        tokens.begin(), tokens.end(),
+        std::vector<std::vector<unsigned int> >(),
+        parseToken);
+    }
+
+    /////////////////////////////////////////////////////////////////////////////
+    // Public member functions of Parser class.
+    /////////////////////////////////////////////////////////////////////////////
+
+    /// Constructor.
+    Parser::Parser() :
+      m_runs(), m_fileNames(), m_multiFileName(), m_dirString(), m_instString(), 
+      m_underscoreString(), m_runString(), m_extString(), m_zeroPadding()
+    {}
+    
+    /// Destructor.
+    Parser::~Parser()
+    {}
+
+    /**
+     * Takes the given multiFileName string, and calls other parts of the parser
+     * to generate a corresponding vector of vectors of file names.
+     *
+     * @param multiFileName :: the string containing the multiple file names to be parsed.
+     */
+    void Parser::parse(const std::string & multiFileName)
+    {
+      // Clear any contents of the member variables.
+      clear();
+      
+      // Set the string to parse.
+      m_multiFileName = multiFileName;
+      
+      // Split the string to be parsed into sections, and do some validation.
+      split();
+
+      // Parse the run section into unsigned ints we can use.
+      m_runs = parseMultiRunString(m_runString);
+
+      // Set up helper functor.
+      GenerateFileName generateFileName(
+        m_dirString + m_instString + m_underscoreString,
+        m_extString,
+        m_zeroPadding);
+
+      // Generate complete file names for each run using helper functor.
+      std::transform(
+        m_runs.begin(), m_runs.end(),
+        std::back_inserter(m_fileNames),
+        generateFileName);
+    }
+
+    /////////////////////////////////////////////////////////////////////////////
+    // Private member functions of Parser class.
+    /////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Clears all member variables.
+     */
+    void Parser::clear()
+    {
+      m_runs.clear();
+      m_fileNames.clear();
+      m_multiFileName.clear();
+      m_dirString.clear();
+      m_instString.clear();
+      m_underscoreString.clear();
+      m_runString.clear();
+      m_extString.clear();
     }
 
     /**
-     * Main entry point to the class.  Parses the given multiFileName string
-     * by calling all the helper private functions, and the functors.
+     * Splits up the m_multiFileName string into component parts, to be used elsewhere by
+     * the parser.  Some validation is done here, and exceptions thrown if required
+     * components are missing.
      *
-     * @param multiFileName - the string to parse into seperate file names
-     * @returns a string containing any errors, "" if successful
+     * @throws std::runtime_error if a required component is not present in the string.
      */
-    std::string MultiFileNameParser::parse(const std::string & multiFileName)
+    void Parser::split()
     {
+      if(m_multiFileName.empty())
+        throw std::runtime_error("No file name to parse.");
+
+      // (We shun the use of Poco::File here as it is unable to deal with certain 
+      // combinations of special characters, for example double commas.)
+
+      // Get the extension, if there is one.
+      size_t lastDot = m_multiFileName.find_last_of(".");
+      if(lastDot != std::string::npos)
+        m_extString = m_multiFileName.substr(lastDot);
+
+      // Get the directory, if there is one.
+      size_t lastSeparator = m_multiFileName.find_last_of("/\\");
+      if(lastSeparator != std::string::npos)
+        m_dirString = m_multiFileName.substr(0, lastSeparator);
+
+      // Slice off the directory and extension.
+      std::string base = m_multiFileName.substr(
+        m_dirString.size(), m_multiFileName.size() - (m_dirString.size() + m_extString.size()));
+
+      // Get the instrument name using a regex.  Throw if not found since this is required.
+      m_instString = getMatchingString("^" + Regexs::INST, base);
+      if(m_instString.empty())
+        throw std::runtime_error("There does not appear to be an instrument name present.");
+
+      // Check if instrument exists, if not then clear the parser, and rethrow an exception.
       try
       {
-        m_multiFileName = multiFileName;
-        split();
-
-        // Split the run string into tokens, tokenised by commas.
-        std::vector<std::string> tokens;
-        boost::split(tokens, m_runs, boost::is_any_of(","));
-
-        // Do some further tokenising of the tokens where necessary, and parse into
-        // a UIntVect2StringMap which maps vectors of unsigned int run numbers to 
-        // the eventual workspace name of that vector of runs.
-        std::map<std::vector<unsigned int>, std::string> runUIntsToWsNameMap;
-        runUIntsToWsNameMap = std::accumulate(
-          tokens.begin(), tokens.end(),
-          runUIntsToWsNameMap,
-          parseRunRange());
-
-        // Finally, convert the unsigned int run numbers back into full file names
-        // to get our finished map, by passing each pair in runUIntsToWsNameMap
-        // to populateMap.
-        std::for_each(
-          runUIntsToWsNameMap.begin(), runUIntsToWsNameMap.end(),
-          boost::bind(&MultiFileNameParser::populateMap, this, _1));
-
-        return "";
+        InstrumentInfo instInfo = ConfigService::Instance().getInstrument(m_instString);
+        m_zeroPadding = instInfo.zeroPadding();
       }
-      catch(const std::exception &e)
+      catch (const Exception::NotFoundError &)
       {
-        std::stringstream error;
-        error << "Could not parse \"" << multiFileName << "\": " << e.what() << ".";
-        clear();
-        return error.str();
+        throw std::runtime_error("There does not appear to be a valid instrument name present.");
       }
+
+      // Check for an underscore after the instrument name.
+      size_t underscore = base.find_first_of("_");
+      if(underscore == m_instString.size())
+        m_underscoreString = "_";
+
+      // We can now deduce the run string.  Throw if not found since this is required.
+      m_runString = base.substr(m_underscoreString.size() + m_instString.size());
+      if(m_instString.empty())
+        throw std::runtime_error("There does not appear to be any runs present.");
     }
 
+    /////////////////////////////////////////////////////////////////////////////
+    // Helper functor.
+    /////////////////////////////////////////////////////////////////////////////
+
     /**
-     * Getter for the m_fileNamesToWsNameMap.
+     * Constructor, to accept state used in generating file names.
      *
-     * @returns the map
+     * @param prefix      :: a string that prefixes the generated file names.
+     * @param suffix      :: a string that suffixes the generated file names.
+     * @param zeroPadding :: the number of zeros with which to pad the run number of genrerated file names.
      */
-    std::map<std::vector<std::string>, std::string> MultiFileNameParser::getFileNamesToWsNameMap() const
-    {
-      return m_fileNamesToWsNameMap;
-    }
+    GenerateFileName::GenerateFileName(const std::string & prefix, const std::string & suffix, int zeroPadding) :
+        m_prefix(prefix), m_suffix(suffix), m_zeroPadding(zeroPadding)
+      {}
 
     /**
-     * Clears all member variables, to be called when parsing exception caught.
-     */
-    void MultiFileNameParser::clear()
-    {
-      m_multiFileName.clear();
-      m_dir.clear();
-      m_inst.clear();
-      m_runs.clear();
-      m_ext.clear();
-      m_fileNamesToWsNameMap.clear();
-    }
-
-    /**
-     * Splits the string found at m_multiFileName into it's basic 
-     * dir/inst/run/ext components.
-     */
-    void MultiFileNameParser::split()
-    {
-      //if(m_multiFileName.empty())
-      //  throw std::exception("No file name to parse.");
-      
-      Poco::Path fullPath(m_multiFileName);
-      
-      // The extension is easy to parse, let's do it first.
-      m_ext = fullPath.getExtension();
-      if(!m_ext.empty()) m_ext = "." + m_ext;
-
-      // Parse instrument name and runs from the base name using regexs.  Throw if 
-      // not found since these are required.
-      std::string baseName = fullPath.getBaseName();
-      m_inst = getMatchingString("^" + INST + UNDERSCORE, baseName);
-      //if(m_inst.empty()) throw std::exception("Cannot parse instrument name.");
-      m_runs = getMatchingString(LIST + "$", baseName);
-      //if(m_runs.empty()) throw std::exception("Cannot parse run numbers.");
-      
-      // Lop off what we've found and we're left with the directory.
-      m_dir = m_multiFileName.substr(0, m_multiFileName.size() - (baseName.size() + m_ext.size()));
-    }
-
-    /**
-     * Takes in a pair consisting of a vector of run numbers and a ws name,
-     * converts the run numbers to full file names, and appends a new pair
-     * to the filename to wsName map.
+     * Overloaded function operator that takes in a vector of runs, and returns a vector of file names.
      *
-     * @param pair - a std::pair consisting of a vector of run numbers and a ws name
+     * @param runs :: the vector of runs with which to make file names.
+     *
+     * @returns the generated vector of file names.
      */
-    void MultiFileNameParser::populateMap(
-      const std::pair<std::vector<unsigned int>, std::string> & pair)
+    std::vector<std::string> GenerateFileName::operator()(const std::vector<unsigned int> & runs)
     {
-      // Convert vector of run numbers to vector of filenames
-      std::vector<unsigned int> runs = pair.first;
-      std::vector<std::string> fileNames;
-      fileNames.resize(runs.size());
+      std::vector<std::string> fileNames; 
+
       std::transform(
         runs.begin(), runs.end(),
-        fileNames.begin(),
-        boost::bind(&MultiFileNameParser::createFileName, this, _1));
+        std::back_inserter(fileNames),
+        (*this) // Call other overloaded function operator.
+      );
 
-      // Append to map
-      m_fileNamesToWsNameMap.insert(std::make_pair(fileNames, pair.second));
+      return fileNames;
     }
 
     /**
-     * Uses the run parameter and the other parts of the file name that have
-     * already been parsed to construct a new file name for this specific run.
-     * 
-     * @param run - the run number of the file
-     * @returns the full file name of the file with given run number
+     * Overloaded function operator that takes in a runs, and returns a file name.
+     *
+     * @param runs :: the vector of runs with which to make file names.
+     *
+     * @returns the generated vector of file names.
      */
-    std::string MultiFileNameParser::createFileName(unsigned int run)
+    std::string GenerateFileName::operator()(unsigned int run)
     {
       std::stringstream fileName;
-      fileName << m_dir << m_inst << boost::lexical_cast<std::string>(run) << m_ext;
+
+      fileName << m_prefix
+               << pad(boost::lexical_cast<std::string>(run), m_zeroPadding)
+               << m_suffix;
+
       return fileName.str();
     }
 
-    /**
-     * Finds a given regex in a given string, and returns the part of the string
-     * that matches the regex.  Returns "" if there is no occurance of the regex.
-     * 
-     * @param regex - the regular expression to find within the string
-     * @param toParse - the string within to find the regex
-     * @returns the part (if any) of the given string that matches the given regex
-     */
-    std::string MultiFileNameParser::getMatchingString(const std::string & regex, const std::string & toParse)
-    {
-      return boost::sregex_iterator(
-        toParse.begin(), toParse.end(), 
-        boost::regex(regex)
-      )->str();
-    }
-  }
-}
+    /////////////////////////////////////////////////////////////////////////////
+    // Anonymous helper functions.
+    /////////////////////////////////////////////////////////////////////////////
 
+    namespace // anonymous
+    {
+      /**
+       * Parses a string containing a run "token".
+       *
+       * Note that this function takes the form required by the "accumulate" algorithm:
+       * it takes in the parsed runs so far and a new token to parse, and then returns
+       * the result of appending the newly parsed token to the already parsed runs.
+       *
+       * @param parsedRuns :: the vector of vectors of runs parsed so far.
+       * @param token      :: the token to parse.
+       *
+       * @returns the newly parsed runs appended to the previously parsed runs.
+       * @throws std::runtime_error if 
+       */
+      std::vector<std::vector<unsigned int> > & parseToken(
+        std::vector<std::vector<unsigned int> > & parsedRuns, const std::string & token)
+      {
+        // Tokenise further, on plus, minus or colon.
+        std::vector<std::string> subTokens;
+        subTokens = boost::split(subTokens, token, boost::is_any_of("+-:"));
+
+        std::vector<unsigned int> rangeDetails;
+
+        // Convert the sub tokens to uInts.
+        std::transform(
+          subTokens.begin(), subTokens.end(),
+          std::back_inserter(rangeDetails),
+          boost::lexical_cast<unsigned int, std::string>);
+
+        // We should always end up with at least 1 unsigned int here.
+        assert(1 <= rangeDetails.size());
+        
+        std::vector<std::vector<unsigned int> > runs;
+
+        // E.g. "2012".
+        if(matchesFully(token, Regexs::SINGLE))
+        {
+          runs.push_back(std::vector<unsigned int>(1, rangeDetails[0]));
+        }
+        // E.g. "2012:2020".
+        else if(matchesFully(token, Regexs::RANGE))
+        {
+          runs = generateRange(
+            rangeDetails[0],
+            rangeDetails[1],
+            1,
+            false
+          );
+        }
+        // E.g. "2012:2020:4".
+        else if(matchesFully(token, Regexs::STEP_RANGE))
+        {
+          runs = generateRange(
+            rangeDetails[0],
+            rangeDetails[1],
+            rangeDetails[2],
+            false
+          );
+        }
+        // E.g. "2012+2013+2014+2015".
+        else if(matchesFully(token, Regexs::ADD_LIST))
+        {
+          // No need to generate the range here, it's already there for us.
+          runs = std::vector<std::vector<unsigned int> >(1, rangeDetails);
+        }
+        // E.g. "2012-2020".
+        else if(matchesFully(token, Regexs::ADD_RANGE))
+        {
+          runs = generateRange(
+            rangeDetails[0],
+            rangeDetails[1],
+            1,
+            true
+          );
+        }
+        // E.g. "2012-2020:4".
+        else if(matchesFully(token, Regexs::ADD_STEP_RANGE))
+        {
+          runs = generateRange(
+            rangeDetails[0],
+            rangeDetails[1],
+            rangeDetails[2],
+            true
+          );
+        }
+        else
+        {
+          // We should never reach here - the validation done on the token previously
+          // should prevent any other possible scenario.
+          assert(false);
+        }
+        
+        // Add the runs on to the end of parsedRuns, and return it.
+        std::copy(
+          runs.begin(), runs.end(),
+          std::back_inserter(parsedRuns));
+
+        return parsedRuns;
+      }
+      
+      /**
+       * Generates a range of runs between the given numbers, increasing
+       * or decreasing by the given step size. If addRuns is true, then the
+       * runs will all be in the same sub vector, if false they will each be
+       * in their own vector.
+       *
+       * @param from     :: the start of the range
+       * @param to       :: the end of the range
+       * @param stepSize :: the size of the steps with which to increase/decrease
+       * @param addRuns  :: whether or not to add the runs together (place in sume sub-vector)
+       *
+       * @returns a vector of vectors of runs.
+       * @throws std::runtime_error if a step size of zero is specified.
+       */
+      std::vector<std::vector<unsigned int> > generateRange(
+        unsigned int from, 
+        unsigned int to, 
+        unsigned int stepSize,
+        bool addRuns)
+      {
+        if(stepSize == 0)
+          throw std::runtime_error(
+            "Unable to generate a range with a step size of zero.");
+
+        unsigned int currentRun = from;
+        std::vector<std::vector<unsigned int> > runs;
+
+        // If ascending range
+        if(from <= to) 
+        {
+          while(currentRun <= to)
+          {
+            if(addRuns)
+            {
+              if(runs.empty())
+                runs.push_back(std::vector<unsigned int>(1, currentRun));
+              else
+                runs.at(0).push_back(currentRun);
+            }
+            else
+            {
+              runs.push_back(std::vector<unsigned int>(1, currentRun));
+            }
+
+            currentRun += stepSize;
+          }
+        }
+        // Else descending range
+        else
+        {
+          while(currentRun >= to)
+          {
+            if(addRuns)
+            {
+              if(runs.empty())
+                runs.push_back(std::vector<unsigned int>(1, currentRun));
+              else
+                runs.at(0).push_back(currentRun);
+            }
+            else
+            {
+              runs.push_back(std::vector<unsigned int>(1, currentRun));
+            }
+
+            // Guard against case where stepSize would take us into negative 
+            // numbers (not supported by unsigned ints ...).
+            if(static_cast<int>(currentRun) - static_cast<int>(stepSize) < 0)
+              break;
+
+            currentRun -= stepSize;
+          }
+        }
+
+        return runs;
+      }
+      
+      /**
+       * Validates the given run token.
+       *
+       * @param :: the run token to validate.
+       *
+       * @throws std::runtime_error if the token is of an incorrect form.
+       */
+      void validateToken(const std::string & token)
+      {
+        // Each token must be non-empty.
+        if(token.size() == 0)
+          throw std::runtime_error(
+            "A comma-separated token is empty.");
+
+        // Each token must begin and end with a numeric character.
+        if(!matchesFully(token, "[0-9].+[0-9]|[0-9]"))
+          throw std::runtime_error(
+            "The token \"" + token + "\" is of an incorrect form.  Does it begin or end with a plus, minus or colon?");
+
+        // Each token must be one of the acceptable forms, i.e. a single run, an added range of runs, etc.
+        if(!matchesFully(token, Regexs::ANY))
+          throw std::runtime_error(
+            "The token \"" + token + "\" is of an incorrect form.");
+      }
+
+      /**
+       * Convenience function that matches a *complete* given string to the given regex.
+       *
+       * @param stringToMatch :: the string to match with the given regex.
+       * @param regexString   :: the regex with which to match the given string.
+       *
+       * @returns true if the string matches fully, or false otherwise.
+       */
+      bool matchesFully(const std::string & stringToMatch, const std::string & regexString)
+      {
+        const boost::regex regex("^(" + regexString + "$)");
+        return boost::regex_match(stringToMatch, regex);
+      }
+
+      /**
+       * Finds a given regex in a given string, and returns the part of the string
+       * that matches the regex.  Returns "" if there is no occurance of the regex.
+       * 
+       * @param regex - the regular expression to find within the string
+       * @param toParse - the string within to find the regex
+       *
+       * @returns the part (if any) of the given string that matches the given regex
+       */
+      std::string getMatchingString(const std::string & regexString, const std::string & toParse)
+      {
+        boost::sregex_iterator it(
+          toParse.begin(), toParse.end(), 
+          boost::regex(regexString)
+        );
+
+        if(it == boost::sregex_iterator())
+          return "";
+
+        return it->str();
+      }
+
+      /**
+       * Zero pads the run number used in a file name to required length.
+       *
+       * @param run - the run number of the file.  May as well pass by value here.
+       * @param count - the required length of the string.
+       *
+       * @returns the string, padded to the required length.
+       * @throws std::runtime_error if run is longer than size of count.
+       */
+      std::string pad(std::string run, unsigned int padLength)
+      {
+        if(run.size() < padLength)
+          return run.insert(0, padLength - run.size(), '0');
+        else if(run.size() > padLength)
+          throw std::runtime_error("Could not parse run number \"" + run + 
+            "\" since the instrument run number length required is " + boost::lexical_cast<std::string>(padLength));
+        return run;
+      }
+
+    } // anonymous namespace
+
+  } // namespace MultiFileNameParsing
+
+} // namespace Kernel
+} // namespace Mantid

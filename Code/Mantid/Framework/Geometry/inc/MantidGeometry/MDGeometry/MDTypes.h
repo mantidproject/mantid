@@ -40,20 +40,18 @@ namespace Mantid
    * We can change this in order to compare
    * performance/memory/accuracy requirements.
    */
-  typedef double coord_t;  // moved our of here to the coordinate and the header itself -- from coordinate header to 
-  typedef double signal_t; // avoid strange conflict between numeric_limits and <climits> (presumably)
-  // win builds sometimes pick up macro max((a),(b)) (a)>(b)?((a):(b))
-#ifdef max
-#undef max
-#endif
+  typedef float coord_t;
+
+  /// Define indicating that the coord_t type is a float (not double)
+//#undef COORDT_IS_FLOAT
+#define COORDT_IS_FLOAT
+
+  /** Typedef for the signal recorded in a MDBox, etc.
+   * Note: MDEvents use 'float' internally to save memory
+   */
+  typedef double signal_t;
  
   
-  /// Minimum value (large negative number) that a coordinate can take
-  static const coord_t coord_t_min = -std::numeric_limits<coord_t>::max();
-
-  /// Maximum value (large positive number) that a coordinate can take
-  static const coord_t coord_t_max = std::numeric_limits<coord_t>::max();
-
 
   /** Macro TMDE to make declaring template functions
    * faster. Put this macro before function declarations.

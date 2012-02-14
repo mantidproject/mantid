@@ -170,9 +170,9 @@ namespace MDEvents
       V3D Q_dir = mat * Q_dir_lab_frame;
 
       // For speed we extract the components.
-      double Q_dir_x = Q_dir.X();
-      double Q_dir_y = Q_dir.Y();
-      double Q_dir_z = Q_dir.Z();
+      coord_t Q_dir_x = coord_t(Q_dir.X());
+      coord_t Q_dir_y = coord_t(Q_dir.Y());
+      coord_t Q_dir_z = coord_t(Q_dir.Z());
 
       // For lorentz correction, calculate  sin(theta))^2
       double sin_theta_squared = 0;
@@ -204,7 +204,7 @@ namespace MDEvents
       for (; it != it_end; it++)
       {
         // Get the wavenumber in ang^-1 using the previously calculated constant.
-        double wavenumber = wavenumber_in_angstrom_times_tof_in_microsec / it->tof();
+        coord_t wavenumber = coord_t(wavenumber_in_angstrom_times_tof_in_microsec / it->tof());
 
         // Q vector = K_final - K_initial = wavenumber * (output_direction - input_direction)
         coord_t center[3] = {Q_dir_x * wavenumber, Q_dir_y * wavenumber, Q_dir_z * wavenumber};
@@ -356,7 +356,7 @@ namespace MDEvents
       // Give all the dimensions
       for (size_t d=0; d<nd; d++)
       {
-        MDHistoDimension * dim = new MDHistoDimension(dimensionNames[d], dimensionNames[d], dimensionUnits, extents[d*2], extents[d*2+1], 10);
+        MDHistoDimension * dim = new MDHistoDimension(dimensionNames[d], dimensionNames[d], dimensionUnits, static_cast<coord_t>(extents[d*2]), static_cast<coord_t>(extents[d*2+1]), 10);
         ws->addDimension(MDHistoDimension_sptr(dim));
       }
       ws->initialize();

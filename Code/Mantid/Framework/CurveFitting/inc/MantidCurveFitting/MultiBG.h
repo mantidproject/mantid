@@ -65,6 +65,9 @@ public:
   virtual boost::shared_ptr<const API::Workspace> getWorkspace()const{return m_spectra[0].first;}
   /// Returns the function's name
   std::string name()const{return "MultiBG";}
+  /// Returns the function's category
+  virtual const std::string category() const { return "Background";}
+
   virtual void function(API::FunctionDomain& )const{}
 
   /// Returns the size of the fitted data (number of double values returned by the function)

@@ -114,7 +114,7 @@ private:
         for (size_t d=0; d<nd; d++)
         {
              Geometry::MDHistoDimension * dim = new Geometry::MDHistoDimension(this->targ_dim_names[d], this->targ_dim_ID[d], this->targ_dim_units[d], 
-                                                                          this->dim_min[d], this->dim_max[d], 10);
+                 coord_t(this->dim_min[d]), coord_t(this->dim_max[d]), 10);
               ws->addDimension(Geometry::MDHistoDimension_sptr(dim));
         }
         ws->initialize();

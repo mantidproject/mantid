@@ -667,11 +667,18 @@ void MantidUI::showSliceViewer()
   QString wsName = getSelectedWorkspaceName();
   IMDWorkspace_sptr mdws = boost::dynamic_pointer_cast<IMDWorkspace>(
     AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
+  MatrixWorkspace_sptr mw = boost::dynamic_pointer_cast<MatrixWorkspace>(mdws);
   if (mdws)
   {
     // Create the slice viewer window
     SliceViewerWindow * w = MantidQt::Factory::WidgetFactory::Instance()->
       createSliceViewerWindow(wsName, "");
+
+    // Special options for viewing MatrixWorkspaces
+    if (mw)
+    {
+      w->getSlicer()->setTransparentZeros(false);
+    }
 
     // Connect the MantidPlot close() event with the the window's close().
     QObject::connect(appWindow(), SIGNAL(destroyed()), w, SLOT(close()));
@@ -1776,8 +1783,8 @@ void MantidUI::logMessage(const Poco::Message& msg)
   }
   if (msg.getPriority() < Poco::Message::PRIO_ERROR)
     appWindow()->results->setTextColor(Qt::red);
-  else if (msg.getPriority() < Poco::Message::PRIO_WARNING)
-    appWindow()->results->setTextColor(Qt::darkRed);
+  else if (msg.getPriority() <= Poco::Message::PRIO_WARNING)
+    appWindow()->results->setTextColor(QColor::fromRgb(255, 100, 0)); // Orange
   else if (msg.getPriority() > Poco::Message::PRIO_INFORMATION)
     appWindow()->results->setTextColor(Qt::gray);
   else if (msg.getPriority() == Poco::Message::PRIO_NOTICE)

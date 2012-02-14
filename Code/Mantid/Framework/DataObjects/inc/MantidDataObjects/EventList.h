@@ -8,6 +8,7 @@
 #include "MantidAPI/IEventWorkspace.h" // get EventType declaration
 #include "MantidAPI/MatrixWorkspace.h" // get MantidVec declaration
 #include "MantidDataObjects/Events.h"
+#include "MantidDataObjects/EventWorkspaceMRU.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/System.h"
@@ -16,7 +17,7 @@
 #include <iostream>
 #include <set>
 #include <vector>
-#include "MantidDataObjects/EventWorkspaceMRU.h"
+#include "MantidKernel/MultiThreaded.h"
 
 namespace Mantid
 {
@@ -383,6 +384,9 @@ private:
 
   /// MRU lists of the parent EventWorkspace
   mutable EventWorkspaceMRU * mru;
+
+  /// Mutex that is locked while sorting an event list
+  mutable Mantid::Kernel::Mutex m_sortMutex;
 
   template<class T>
   static typename std::vector<T>::const_iterator findFirstEvent(const std::vector<T> & events, const double seek_tof);

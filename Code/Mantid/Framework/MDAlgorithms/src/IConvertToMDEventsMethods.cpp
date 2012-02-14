@@ -48,7 +48,7 @@ IConvertToMDEventsMethods::fillAddProperties(std::vector<coord_t> &Coord,size_t 
          Kernel::Property *pProperty = (inWS2D->run().getProperty(TWS.dim_names[i]));
          Kernel::TimeSeriesProperty<double> *run_property = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(pProperty);  
          if(run_property){
-                Coord[i]=run_property->firstValue();
+                Coord[i]=coord_t(run_property->firstValue());
          }else{
               // e.g Ei can be a property and dimenson
               Kernel::PropertyWithValue<double> *proc_property = dynamic_cast<Kernel::PropertyWithValue<double> *>(pProperty);  
@@ -56,7 +56,7 @@ IConvertToMDEventsMethods::fillAddProperties(std::vector<coord_t> &Coord,size_t 
                  convert_log.error()<<" property: "<<this->TWS.dim_names[i]<<" is neither a time series (run) property nor a property with double value\n";
                  throw(std::invalid_argument(" can not interpret property, used as dimension"));
               }
-              Coord[i]  = *(proc_property);
+              Coord[i]  = coord_t(*(proc_property));
          }
         if(Coord[i]<TWS.dim_min[i] || Coord[i]>=TWS.dim_max[i])return false;
      }

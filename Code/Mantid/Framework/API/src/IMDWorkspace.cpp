@@ -27,13 +27,36 @@ namespace Mantid
       {
       }
 
-      /**
-        * Default implementation throws NotImplementedError exception.
-        */
-      IMDIterator* IMDWorkspace::createIterator(Mantid::Geometry::MDImplicitFunction * ) const
+      /** Creates a single iterator and returns it.
+       *
+       * This calls createIterators(), a pure virtual method on IMDWorkspace which
+       * has custom implementations for other workspaces.
+       *
+       * @param function :: Implicit function limiting space to look at
+       * @return a single IMDIterator pointer
+       */
+      IMDIterator* IMDWorkspace::createIterator(Mantid::Geometry::MDImplicitFunction * function) const
       {
-        throw Kernel::Exception::NotImplementedError("Iterator is not implemented for this workspace");
+        std::vector<IMDIterator*> iterators = this->createIterators(1, function);
+        if (iterators.size() == 0)
+          throw std::runtime_error("IMDWorkspace::createIterator(): iterator creation was not successful. No iterators returned by " + this->id() );
+        return iterators[0];
       }
+
+
+      //-------------------------------------------------------------------------------------------
+      /** Returns the signal (normalized by volume) at a given coordinates
+       *
+       * @param coords :: coordinate as a VMD vector
+       * @param normalization :: how to normalize the signal returned
+       * @return normalized signal
+       */
+      signal_t IMDWorkspace::getSignalAtVMD(const Mantid::Kernel::VMD & coords,
+          const Mantid::API::MDNormalization & normalization) const
+      {
+        return this->getSignalAtCoord(coords.getBareArray(), normalization);
+      }
+
   }
 }
 

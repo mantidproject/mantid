@@ -152,6 +152,22 @@ namespace Mantid
       }
     };
 
+    /** ElementTraits for float element types.
+    */
+    template<>
+    struct ElementTraits<float>
+    {
+      typedef double ValueType;
+      static std::string formatCS(const ValueType& value)
+      {
+        return boost::str(boost::format("%.4f,") % value);
+      }
+      static std::string format(const ValueType& value)
+      {
+        return boost::str(boost::format("%.4f") % value);
+      }
+    };
+
     //------------------------------------------------------------------------------------
     // End ElementTraits TypeTraits region
     //------------------------------------------------------------------------------------

@@ -26,6 +26,7 @@
 #include <boost/math/special_functions/fpclassify.hpp>
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Strings.h"
+#include "MantidAPI/MatrixWorkspaceMDIterator.h"
 
 using Mantid::Kernel::DateAndTime;
 using Mantid::Kernel::TimeSeriesProperty;
@@ -1337,6 +1338,7 @@ namespace Mantid
       return id;
     }
 
+    //===============================================================================
     class MWDimension: public Mantid::Geometry::IMDDimension
     {
     public:
@@ -1359,19 +1361,19 @@ namespace Mantid
       virtual bool getIsIntegrated() const {return m_axis.length() == 1;}
 
       /// @return the minimum extent of this dimension
-      virtual double getMinimum() const {return m_axis(0);}
+      virtual coord_t getMinimum() const {return coord_t(m_axis(0));}
 
       /// @return the maximum extent of this dimension
-      virtual double getMaximum() const {return m_axis(m_axis.length()-1);}
+      virtual coord_t getMaximum() const {return coord_t(m_axis(m_axis.length()-1));}
 
       /// number of bins dimension have (an integrated has one). A axis directed along dimension would have getNBins+1 axis points. 
       virtual size_t getNBins() const {return m_axis.length();}
 
       /// Change the extents and number of bins
-      virtual void setRange(size_t /*nBins*/, double /*min*/, double /*max*/){throw std::runtime_error("Not implemented");}
+      virtual void setRange(size_t /*nBins*/, coord_t /*min*/, coord_t /*max*/){throw std::runtime_error("Not implemented");}
 
       ///  Get coordinate for index;
-      virtual double getX(size_t ind)const {return m_axis(ind);}
+      virtual coord_t getX(size_t ind)const {return coord_t(m_axis(ind));}
 
 
       //Dimensions must be xml serializable.
@@ -1384,12 +1386,69 @@ namespace Mantid
     };
 
 
+
+    //===============================================================================
+    /** An implementation of IMDDimension for MatrixWorkspace that
+     * points to the X vector of the first spectrum.
+     */
+    class MWXDimension: public Mantid::Geometry::IMDDimension
+    {
+    public:
+
+      MWXDimension(const MatrixWorkspace * ws, const std::string & dimensionId):
+          m_ws(ws), m_dimensionId(dimensionId)
+      {
+        m_X = ws->readX(0);
+      }
+
+      virtual ~MWXDimension(){};
+
+      /// the name of the dimennlsion as can be displayed along the axis
+      virtual std::string getName() const {return m_ws->getAxis(0)->title();}
+
+      /// @return the units of the dimension as a string
+      virtual std::string getUnits() const {return m_ws->getAxis(0)->unit()->label();}
+
+      /// short name which identify the dimension among other dimension. A dimension can be usually find by its ID and various
+      /// various method exist to manipulate set of dimensions by their names.
+      virtual std::string getDimensionId() const {return m_dimensionId;}
+
+      /// if the dimension is integrated (e.g. have single bin)
+      virtual bool getIsIntegrated() const {return m_X.size() == 1;}
+
+      /// coord_t the minimum extent of this dimension
+      virtual coord_t getMinimum() const {return coord_t(m_X.front());}
+
+      /// @return the maximum extent of this dimension
+      virtual coord_t getMaximum() const {return coord_t(m_X.back());}
+
+      /// number of bins dimension have (an integrated has one). A axis directed along dimension would have getNBins+1 axis points.
+      virtual size_t getNBins() const {return m_X.size()-1;}
+
+      /// Change the extents and number of bins
+      virtual void setRange(size_t /*nBins*/, coord_t /*min*/, coord_t /*max*/){throw std::runtime_error("Not implemented");}
+
+      ///  Get coordinate for index;
+      virtual coord_t getX(size_t ind)const {return coord_t(m_X[ind]);}
+
+      //Dimensions must be xml serializable.
+      virtual std::string toXMLString() const {throw std::runtime_error("Not implemented");}
+
+    private:
+      /// Workspace we refer to
+      const MatrixWorkspace * m_ws;
+      /// Cached X vector
+      MantidVec m_X;
+      /// Dimension ID string
+      const std::string m_dimensionId;
+    };
+
+
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> MatrixWorkspace::getDimension(size_t index)const
     { 
       if (index == 0)
       {
-        Axis* xAxis = this->getAxis(0);
-        MWDimension* dimension = new MWDimension(xAxis, xDimensionId);
+        MWXDimension* dimension = new MWXDimension(this, xDimensionId);
         return boost::shared_ptr<const Mantid::Geometry::IMDDimension>(dimension);
       }
       else if (index == 1)
@@ -1423,6 +1482,109 @@ namespace Mantid
       }
       return boost::shared_ptr<const Mantid::Geometry::IMDDimension>(dim);
     }
+
+
+    //--------------------------------------------------------------------------------------------
+    /** Create IMDIterators from this 2D workspace
+     *
+     * @param suggestedNumCores :: split the iterators into this many cores (if threadsafe)
+     * @param function :: implicit function to limit range
+     * @return MatrixWorkspaceMDIterator vector
+     */
+    std::vector<IMDIterator*> MatrixWorkspace::createIterators(size_t suggestedNumCores,
+        Mantid::Geometry::MDImplicitFunction * function) const
+    {
+      // Find the right number of cores to use
+      size_t numCores = suggestedNumCores;
+      if (!this->threadSafe()) numCores = 1;
+      size_t numElements = this->getNumberHistograms();
+      if (numCores > numElements)  numCores = numElements;
+      if (numCores < 1) numCores = 1;
+
+      // Create one iterator per core, splitting evenly amongst spectra
+      std::vector<IMDIterator*> out;
+      for (size_t i=0; i<numCores; i++)
+      {
+        size_t begin = (i * numElements) / numCores;
+        size_t end = ((i+1) * numElements) / numCores;
+        if (end > numElements)
+          end = numElements;
+        out.push_back(new MatrixWorkspaceMDIterator(this, function, begin, end));
+      }
+      return out;
+    }
+
+
+    //------------------------------------------------------------------------------------
+    /** Obtain coordinates for a line plot through a MDWorkspace.
+     * Cross the workspace from start to end points, recording the signal along the line.
+     * Sets the x,y vectors to the histogram bin boundaries and counts
+     *
+     * @param start :: coordinates of the start point of the line
+     * @param end :: coordinates of the end point of the line
+     * @param normalize :: how to normalize the signal
+     * @param x :: is set to the boundaries of the bins, relative to start of the line.
+     * @param y :: is set to the normalized signal for each bin. Length = length(x) - 1
+     */
+    void MatrixWorkspace::getLinePlot(const Mantid::Kernel::VMD & start, const Mantid::Kernel::VMD & end,
+        Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y, std::vector<signal_t> & e) const
+    {
+      UNUSED_ARG(start);UNUSED_ARG(end);UNUSED_ARG(normalize);UNUSED_ARG(x);UNUSED_ARG(y);UNUSED_ARG(e);
+      //throw std::runtime_error("MatrixWorkspace::getLinePlot() not yet implemented.");
+    }
+
+    //------------------------------------------------------------------------------------
+    /** Returns the (normalized) signal at a given coordinates
+     *
+     * @param coords :: bare array, size 2, of coordinates. X, Y
+     * @param normalization :: how to normalize the signal
+     * @return normalized signal.
+     */
+    signal_t MatrixWorkspace::getSignalAtCoord(const coord_t * coords, const Mantid::API::MDNormalization & normalization) const
+    {
+      coord_t x = coords[0];
+      coord_t y = coords[1];
+      size_t wi = size_t(y);
+      if (wi < this->getNumberHistograms())
+      {
+        const MantidVec & X = this->readX(wi);
+        MantidVec::const_iterator it = std::lower_bound(X.begin(), X.end(), x);
+        if (it == X.end())
+        {
+          // Out of range
+          return std::numeric_limits<double>::quiet_NaN();
+        }
+        else
+        {
+          size_t i = (it - X.begin());
+          if (i > 0)
+          {
+            double y = this->readY(wi)[i-1];
+            // What is our normalization factor?
+            switch (normalization)
+            {
+            case NoNormalization:
+              return y;
+            case VolumeNormalization:
+              // TODO: calculate the Y size
+              return y / (X[i] - X[i-1]);
+            case NumEventsNormalization:
+              return y;
+            }
+            // This won't happen
+            return y;
+          }
+          else
+            return std::numeric_limits<double>::quiet_NaN();
+        }
+      }
+      else
+        // Out of range
+        return std::numeric_limits<double>::quiet_NaN();
+    }
+
+
+
 
 
     //--------------------------------------------------------------------------------------------
@@ -1545,23 +1707,6 @@ namespace Mantid
       }
 
       file->closeGroup();
-    }
-
-    /** Obtain coordinates for a line plot through a MDWorkspace.
-     * Cross the workspace from start to end points, recording the signal along the line.
-     * Sets the x,y vectors to the histogram bin boundaries and counts
-     *
-     * @param start :: coordinates of the start point of the line
-     * @param end :: coordinates of the end point of the line
-     * @param normalize :: how to normalize the signal
-     * @param x :: is set to the boundaries of the bins, relative to start of the line.
-     * @param y :: is set to the normalized signal for each bin. Length = length(x) - 1
-     */
-    void MatrixWorkspace::getLinePlot(const Mantid::Kernel::VMD & start, const Mantid::Kernel::VMD & end,
-        Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y, std::vector<signal_t> & e) const
-    {
-      UNUSED_ARG(start);UNUSED_ARG(end);UNUSED_ARG(normalize);UNUSED_ARG(x);UNUSED_ARG(y);UNUSED_ARG(e);
-      throw std::runtime_error("MatrixWorkspace::getLinePlot() not yet implemented.");
     }
 
 

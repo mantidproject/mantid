@@ -22,8 +22,8 @@ public:
     std::vector<coord_t> normal;
     std::vector<coord_t> point;
     TSM_ASSERT_THROWS_ANYTHING( "O-dimensions are not allowed.", MDPlane test(normal, point) );
-    normal.push_back(1.234);
-    normal.push_back(4.56);
+    normal.push_back(1.234f);
+    normal.push_back(4.56f);
     point.push_back(0);
     TSM_ASSERT_THROWS_ANYTHING( "Mismatched dimensions in normal/point are not allowed.", MDPlane test(normal, point) );
     point.push_back(0);
@@ -36,7 +36,7 @@ public:
 
   void test_constructor_bareArrays()
   {
-    coord_t normal[2] = {1.234, 4.56};
+    coord_t normal[2] = {1.234f, 4.56f};
     coord_t point[2] = {1.0, 0.0};
     TSM_ASSERT_THROWS_ANYTHING( "O-dimensions are not allowed.", MDPlane test(0, normal, point) );
     MDPlane p(2, normal, point);
@@ -111,19 +111,19 @@ public:
 
   void test_copy_ctor()
   {
-    coord_t normal[2] = {1.234, 4.56};
+    coord_t normal[2] = {1.25, 4.5};
     coord_t point[2] = {1.0, 0.0};
     MDPlane p_orig(2, normal, point);
     MDPlane p(p_orig);
     TS_ASSERT_EQUALS( p.getNumDims(), 2);
-    TS_ASSERT_DELTA( p.getNormal()[0], 1.234, 1e-5);
-    TS_ASSERT_DELTA( p.getNormal()[1], 4.56,  1e-5);
+    TS_ASSERT_DELTA( p.getNormal()[0], 1.25, 1e-5);
+    TS_ASSERT_DELTA( p.getNormal()[1], 4.5,  1e-5);
     TS_ASSERT_DELTA( p.getInequality(), p_orig.getInequality(), 1e-5);
   }
 
   void test_assignment_operator()
   {
-    coord_t normal[2] = {1.234, 4.56};
+    coord_t normal[2] = {1.25, 4.5};
     coord_t point[2] = {1.0, 0.0};
     coord_t normal3[3] = {434, 456, 789};
     coord_t point3[3] = {1.0, 0.0, 0.0};
@@ -131,15 +131,15 @@ public:
     MDPlane p(3, normal3, point3);
     p = p_orig;
     TS_ASSERT_EQUALS( p.getNumDims(), 2);
-    TS_ASSERT_DELTA( p.getNormal()[0], 1.234, 1e-5);
-    TS_ASSERT_DELTA( p.getNormal()[1], 4.56,  1e-5);
-    TS_ASSERT_DELTA( p.getInequality(), 1.234, 1e-5);
+    TS_ASSERT_DELTA( p.getNormal()[0], 1.25, 1e-5);
+    TS_ASSERT_DELTA( p.getNormal()[1], 4.5,  1e-5);
+    TS_ASSERT_DELTA( p.getInequality(), 1.25, 1e-5);
   }
 
   /// Helper function for the 2D case
-  bool try2Dpoint(MDPlane & p, coord_t x, coord_t y)
+  bool try2Dpoint(MDPlane & p, double x, double y)
   {
-    coord_t centers[2] = {x,y};
+    coord_t centers[2] = {static_cast<coord_t>(x),static_cast<coord_t>(y)};
     return p.isPointBounded(centers);
   }
 
@@ -189,10 +189,10 @@ public:
 
 
   /// Helper function for the 2D case of a line intersecting the plane
-  bool try2Dline(MDPlane & p, coord_t x1, coord_t y1, coord_t x2, coord_t y2)
+  bool try2Dline(MDPlane & p, double x1, double y1, double x2, double y2)
   {
-    coord_t centers1[2] = {x1,y1};
-    coord_t centers2[2] = {x2,y2};
+    coord_t centers1[2] = {static_cast<coord_t>(x1),static_cast<coord_t>(y1)};
+    coord_t centers2[2] = {static_cast<coord_t>(x2),static_cast<coord_t>(y2)};
     return p.doesLineIntersect(centers1, centers2);
   }
 
@@ -242,10 +242,10 @@ public:
 
   void test_3D_point()
   {
-    coord_t normal[3] = {1.23, 2.34, 3.45};
+    coord_t normal[3] = {1.25, 2.5, 3.5};
     coord_t point[3] = {1,0,0};
 
-    coord_t pointA[3] = {0.111, 0.222, 0.333};
+    coord_t pointA[3] = {0.111f, 0.222f, 0.333f};
 
     MDPlane p(3, normal, point);
     bool res = false;
@@ -259,10 +259,10 @@ public:
 
   void test_4D_point()
   {
-    coord_t normal[4] = {1.23, 2.34, 3.45, 4.56};
+    coord_t normal[4] = {1.25, 2.5, 3.5, 4.75};
     coord_t point[4] = {1};
 
-    coord_t pointA[4] = {0.111, 0.222, 0.333, 0.444};
+    coord_t pointA[4] = {0.111f, 0.222f, 0.333f, 0.444f};
 
     MDPlane p(4, normal, point);
     bool res = false;
@@ -277,14 +277,14 @@ public:
   /** Looks to be about 50% slower on linux in debug! */
   void test_4D_point_vectorVersion()
   {
-    coord_t normal[4] = {1.23, 2.34, 3.45, 4.56};
+    coord_t normal[4] = {1.25f, 2.5f, 3.5f, 4.75f};
     coord_t point[4] = {1};
 
     std::vector<coord_t> pointA;
-    pointA.push_back(0.111);
-    pointA.push_back(0.222);
-    pointA.push_back(0.333);
-    pointA.push_back(0.444);
+    pointA.push_back(0.111f);
+    pointA.push_back(0.222f);
+    pointA.push_back(0.333f);
+    pointA.push_back(0.444f);
 
     MDPlane p(4, normal, point);
     bool res = false;
@@ -299,10 +299,10 @@ public:
 
   void test_3D_line()
   {
-    coord_t normal[3] = {1.23, 2.34, 3.45};
+    coord_t normal[3] = {1.23f, 2.34f, 3.45f};
     coord_t origin[3] = {3,0,0};
-    coord_t pointA[3] = {0.111, 0.222, 0.333};
-    coord_t pointB[3] = {9.111, 9.222, 9.333};
+    coord_t pointA[3] = {0.111f, 0.222f, 0.333f};
+    coord_t pointB[3] = {9.111f, 9.222f, 9.333f};
 
     MDPlane p(3, normal, origin);
     bool res = false;

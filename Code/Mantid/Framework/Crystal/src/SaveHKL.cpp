@@ -100,12 +100,10 @@ namespace Crystal
     double wlMin = getProperty("MinWavelength");
     double wlMax = getProperty("MaxWavelength");
 
-    std::vector<Peak> peaks = ws->getPeaks();
-
     // Sequence and run number
     int seqNum = 1;
     int firstrun = 0;
-    if(peaks.size()>0) firstrun = peaks[0].getRunNumber();
+    int bankold = -1;
 
     std::fstream out;
     bool append = getProperty("AppendFile");
@@ -113,7 +111,7 @@ namespace Crystal
     {
       out.open( filename.c_str(), std::ios::in|std::ios::out|std::ios::ate);
       long pos = out.tellp();
-      out.seekp (50);
+      out.seekp (28);
       out >> firstrun;
       out.seekp (pos - 110);
       out >> seqNum;
@@ -125,111 +123,83 @@ namespace Crystal
       out.open( filename.c_str(), std::ios::out);
     }
 
-    // We must sort the peaks first by run, then bank #, and save the list of workspace indices of it
-    typedef std::map<int, std::vector<size_t> > bankMap_t;
-    typedef std::map<int, bankMap_t> runMap_t;
-    std::set<int> uniqueBanks;
-    runMap_t runMap;
+    // We must sort the peaks by bank #
+    std::vector< std::pair<std::string, bool> > criteria;
+    criteria.push_back( std::pair<std::string, bool>("BankName", true) );
+    ws->sort(criteria);
 
-    for (size_t i=0; i < peaks.size(); ++i)
+    std::vector<Peak> peaks = ws->getPeaks();
+
+    // ============================== Save all Peaks =========================================
+
+    // Go through each peak at this run / bank
+    for (int wi=0; wi < ws->getNumberPeaks(); wi++)
     {
-      Peak & p = peaks[i];
+
+      Peak & p = peaks[wi];
+      if (p.getIntensity() == 0.0 || boost::math::isnan(p.getIntensity()) || 
+        boost::math::isnan(p.getSigmaIntensity())) continue;
       int run = p.getRunNumber();
       int bank = 0;
       std::string bankName = p.getBankName();
       if (bankName.size() <= 4)
       {
-        g_log.information() << "Could not interpret bank number of peak " << i << "(" << bankName << ")\n";
+        g_log.information() << "Could not interpret bank number of peak " << wi << "(" << bankName << ")\n";
         continue;
       }
       // Take out the "bank" part of the bank name and convert to an int
       bankName = bankName.substr(4, bankName.size()-4);
       Strings::convert(bankName, bank);
 
-      // Save in the map
-      runMap[run][bank].push_back(i);
-      // Track unique bank numbers
-      uniqueBanks.insert(bank);
-    }
+      double tbar = 0;
 
+      // Two-theta = polar angle = scattering angle = between +Z vector and the scattered beam
+      double scattering = p.getScattering();
+      double lambda =  p.getWavelength();
+      double dsp = p.getDSpacing();
+      double transmission = absor_sphere(scattering, lambda, tbar);
+      if(dsp < dMin || lambda < wlMin || lambda > wlMax) continue;
 
+      // Anvred write from Art Schultz
+      //hklFile.write('%4d%4d%4d%8.2f%8.2f%4d%8.4f%7.4f%7d%7d%7.4f%4d%9.5f%9.4f\n' 
+      //    % (H, K, L, FSQ, SIGFSQ, hstnum, WL, TBAR, CURHST, SEQNUM, TRANSMISSION, DN, TWOTH, DSP))
+      // HKL is flipped by -1 due to different q convention in ISAW vs mantid.
+      if (p.getH() == 0 && p.getK() == 0 && p.getL() == 0) continue;
+      out <<  std::setw( 4 ) << Utils::round(-p.getH())
+          <<  std::setw( 4 ) << Utils::round(-p.getK())
+          <<  std::setw( 4 ) << Utils::round(-p.getL());
 
-    // ============================== Save all Peaks =========================================
+      // SHELX can read data without the space between the l and intensity
+      out << std::setw( 8 ) << std::fixed << std::setprecision( 2 ) << scaleFactor*p.getIntensity();
 
-    // Go in order of run numbers
-    runMap_t::iterator runMap_it;
-    for (runMap_it = runMap.begin(); runMap_it != runMap.end(); ++runMap_it)
-    {
-      // Start of a new run
-      int run = runMap_it->first;
-      bankMap_t & bankMap = runMap_it->second;
+      out << std::setw( 8 ) << std::fixed << std::setprecision( 2 ) << scaleFactor*p.getSigmaIntensity();
 
-      bankMap_t::iterator bankMap_it;
-      for (bankMap_it = bankMap.begin(); bankMap_it != bankMap.end(); ++bankMap_it)
-      {
-        // Start of a new bank.
-        int bank = bankMap_it->first;
-        std::vector<size_t> & ids = bankMap_it->second;
+      if (bank != bankold) firstrun++;
+      out << std::setw( 4 ) << firstrun;
 
-        if (ids.size() > 0)
-        {
-          // Go through each peak at this run / bank
-          for (size_t i=0; i < ids.size(); i++)
-          {
-            size_t wi = ids[i];
-            Peak & p = peaks[wi];
-            if (p.getIntensity() == 0.0 || boost::math::isnan(p.getIntensity()) || 
-              boost::math::isnan(p.getSigmaIntensity())) continue;
+      out << std::setw( 8 ) << std::fixed << std::setprecision( 4 ) << lambda;
 
-            double tbar = 0;
+      out << std::setw( 7 ) <<  std::fixed << std::setprecision( 4 ) << tbar;
 
-            // Two-theta = polar angle = scattering angle = between +Z vector and the scattered beam
-            double scattering = p.getScattering();
-            double lambda =  p.getWavelength();
-            double dsp = p.getDSpacing();
-            double transmission = absor_sphere(scattering, lambda, tbar);
-            if(dsp < dMin || lambda < wlMin || lambda > wlMax) continue;
+      out <<  std::setw( 7 ) <<  run;
 
-            // Anvred write from Art Schultz
-            //hklFile.write('%4d%4d%4d%8.2f%8.2f%4d%8.4f%7.4f%7d%7d%7.4f%4d%9.5f%9.4f\n' 
-            //    % (H, K, L, FSQ, SIGFSQ, hstnum, WL, TBAR, CURHST, SEQNUM, TRANSMISSION, DN, TWOTH, DSP))
-            // HKL is flipped by -1 due to different q convention in ISAW vs mantid.
-            if (p.getH() == 0 && p.getK() == 0 && p.getL() == 0) continue;
-            out <<  std::setw( 4 ) << Utils::round(-p.getH())
-                <<  std::setw( 4 ) << Utils::round(-p.getK())
-                <<  std::setw( 4 ) << Utils::round(-p.getL());
+      out <<  std::setw( 7 ) <<  seqNum;
 
-            out << " " << std::setw( 7 ) << std::fixed << std::setprecision( 2 ) << scaleFactor*p.getIntensity();
+      out << std::setw( 7 ) <<  std::fixed << std::setprecision( 4 ) << transmission;
 
-            out << " " << std::setw( 7 ) << std::fixed << std::setprecision( 2 ) << scaleFactor*p.getSigmaIntensity();
+      out <<  std::setw( 4 ) << std::right <<  bank;
+      bankold = bank;
 
-            out << std::setw( 4 ) << run - firstrun + 1;
+      out << std::setw( 9 ) << std::fixed << std::setprecision( 5 )
+        << scattering; //two-theta scattering
 
-            out << std::setw( 8 ) << std::fixed << std::setprecision( 4 ) << lambda;
+      out << std::setw( 9 ) << std::fixed << std::setprecision( 4 )
+        << dsp;
 
-            out << std::setw( 7 ) <<  std::fixed << std::setprecision( 4 ) << tbar;
+      out << std::endl;
 
-            out <<  std::setw( 7 ) <<  run;
-
-            out <<  std::setw( 7 ) <<  seqNum;
-
-            out << std::setw( 7 ) <<  std::fixed << std::setprecision( 4 ) << transmission;
-
-            out <<  std::setw( 4 ) << std::right <<  bank;
-
-            out << std::setw( 9 ) << std::fixed << std::setprecision( 5 )
-              << scattering; //two-theta scattering
-
-            out << std::setw( 9 ) << std::fixed << std::setprecision( 4 )
-              << dsp;
-
-            out << std::endl;
-
-            // Count the sequence
-            seqNum++;
-          }
-        }
-      }
+      // Count the sequence
+      seqNum++;
     }
     out << "   0   0   0    0.00    0.00   0  0.0000 0.0000      0      0 0.0000   0";
     out << std::endl;

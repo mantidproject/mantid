@@ -27,8 +27,6 @@ class LinearBackgroundTest : public CxxTest::TestSuite
 {
 public:
 
-
-
   void testAgainstHRPDData()
   {
     // create mock data to test against
@@ -54,13 +52,13 @@ public:
 
 
     // set up fitting function
-    LinearBackground* linB = new LinearBackground();
-    linB->initialize();
+    LinearBackground linB;
+    linB.initialize();
 
-    linB->setParameter("A0",1.0);
+    linB.setParameter("A0",1.0);
 
     //alg2.setFunction(linB);
-    alg2.setPropertyValue("Function",*linB);
+    alg2.setPropertyValue("Function",linB.asString());
 
 
     // Set which spectrum to fit against and initial starting values
@@ -88,6 +86,14 @@ public:
     TS_ASSERT( categories[0] == "Background" );
 
 
+  }
+
+  void testForCategories()
+  {
+    LinearBackground forCat;
+    const std::vector<std::string> categories = forCat.categories();
+    TS_ASSERT( categories.size() == 1 );
+    TS_ASSERT( categories[0] == "Background" );
   }
 
 };

@@ -24,7 +24,7 @@ namespace Mantid
     using Kernel::V3D;
     
     /**
-     * Default constructor
+     * Default constructor. Required for cow_ptr.
      */
     Sample::Sample() : 
       m_name(), m_shape(), m_material(), m_environment(),
@@ -46,6 +46,12 @@ namespace Mantid
     {
       if (copy.m_lattice)
         m_lattice = new OrientedLattice(copy.getOrientedLattice());
+    }
+
+    /// Destructor
+    Sample::~Sample()
+    {
+      delete m_lattice;
     }
 
     /** Assignment operator 

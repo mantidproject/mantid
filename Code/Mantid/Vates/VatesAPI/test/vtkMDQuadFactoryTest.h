@@ -1,16 +1,16 @@
-#ifndef VTK_GENERIC_IMD_FACTORY_TEST
-#define VTK_GENERIC_IMD_FACTORY_TEST 
+#ifndef VTK_MD_QUAD_FACTORY_TEST
+#define VTK_MD_QUAD_FACTORY_TEST 
 
 #include <cxxtest/TestSuite.h>
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidVatesAPI/vtkMDQuadFactory.h"
 #include "MantidVatesAPI/NoThresholdRange.h"
 #include "MockObjects.h"
-#include "MantidMDEvents/OneStepMDEW.h"
 #include "MantidMDEvents/SliceMD.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "vtkCellType.h"
 #include "vtkUnstructuredGrid.h"
+#include <vtkStructuredGrid.h>
 
 using namespace Mantid::VATES;
 using namespace Mantid::API;
@@ -24,18 +24,6 @@ class vtkMDQuadFactoryTest : public CxxTest::TestSuite
 {
 
 public:
-
-  void testcreateMeshOnlyThrows()
-  {
-    vtkMDQuadFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
-    TS_ASSERT_THROWS(factory.createMeshOnly(), std::runtime_error);
-  }
-
-  void testcreateScalarArray()
-  {
-    vtkMDQuadFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
-    TS_ASSERT_THROWS(factory.createScalarArray(), std::runtime_error);
-  }
 
   void testGetFactoryTypeName()
   {
@@ -62,7 +50,7 @@ public:
   {
     MockvtkDataSetFactory* mockSuccessor = new MockvtkDataSetFactory;
     EXPECT_CALL(*mockSuccessor, initialize(_)).Times(1);
-    EXPECT_CALL(*mockSuccessor, create()).Times(1);
+    EXPECT_CALL(*mockSuccessor, create()).Times(1).WillOnce(Return(vtkStructuredGrid::New()));
     EXPECT_CALL(*mockSuccessor, getFactoryTypeName()).Times(1);
 
     vtkMDQuadFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
@@ -121,7 +109,51 @@ public:
     AnalysisDataService::Instance().remove("binned");
   }
 
+};
 
+//=====================================================================================
+// Peformance tests
+//=====================================================================================
+class vtkMDQuadFactoryTestPerformance : public CxxTest::TestSuite
+{
+
+public:
+
+  void setUp()
+  {
+    boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDEvent<2>,2> > input 
+      = MDEventsTestHelper::makeMDEWFull<2>(10, 10, 10, 1000);
+    //Rebin it to make it possible to compare cells to bins.
+    SliceMD slice;
+    slice.initialize();
+    slice.setProperty("InputWorkspace", input);
+    slice.setPropertyValue("AlignedDimX", "Axis0, -10, 10, 400");
+    slice.setPropertyValue("AlignedDimY", "Axis1, -10, 10, 400");
+    slice.setPropertyValue("OutputWorkspace", "binned");
+    slice.execute();
+  }
+
+  void tearDown()
+  {
+    AnalysisDataService::Instance().remove("binned");
+  }
+
+  void testCreationOnLargeWorkspace()
+  {
+    Workspace_sptr binned = Mantid::API::AnalysisDataService::Instance().retrieve("binned");
+
+    vtkMDQuadFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+    factory.initialize(binned);
+
+    vtkDataSet* product = factory.create();
+
+    TS_ASSERT(dynamic_cast<vtkUnstructuredGrid*>(product) != NULL);
+    TS_ASSERT_EQUALS(160000, product->GetNumberOfCells());
+    TS_ASSERT_EQUALS(640000, product->GetNumberOfPoints());
+
+    product->Delete();
+    
+  }
 };
 
 #endif

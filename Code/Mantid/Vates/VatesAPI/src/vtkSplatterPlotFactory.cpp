@@ -172,6 +172,8 @@ namespace Mantid
     validate();
 
     size_t nd = m_workspace->getNumDims();
+     
+    Mantid::Kernel::ReadLock lock(*m_workspace);
     if (nd > 3)
     {
       // Slice from >3D down to 3D
@@ -217,24 +219,6 @@ namespace Mantid
 
     // The macro does not allow return calls, so we used a member variable.
     return this->dataSet;
-  }
-  
-  /*
-  Create as Mesh Only. Legacy method
-  @Return Nothing. throws on invoke.
-  */
-  vtkDataSet* vtkSplatterPlotFactory::createMeshOnly() const
-  {
-    throw std::runtime_error("Invalid usage. Cannot call vtkSplatterPlotFactory::createMeshOnly()");
-  }
-
-  /*
-  Create as Mesh Only. Legacy method
-  @Return Nothing. throws on invoke.
-  */
-  vtkFloatArray* vtkSplatterPlotFactory::createScalarArray() const
-  {
-    throw std::runtime_error("Invalid usage. Cannot call vtkSplatterPlotFactory::createScalarArray()");
   }
 
  /*

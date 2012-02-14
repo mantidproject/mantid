@@ -77,6 +77,8 @@ public:
     }
   }
 
+
+
   void test_iterator_1D()
   {
     do_test_iterator(1, 10);
@@ -156,6 +158,41 @@ public:
     MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws, function);
 
     TSM_ASSERT( "This iterator is not valid at the start.", !it->valid() );
+  }
+
+
+  /** Create several parallel iterators */
+  void test_parallel_iterators()
+  {
+    size_t numPoints = 100;
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
+    for (size_t i=0; i<numPoints; i++)
+      ws->setSignalAt(i, double(i));
+
+    // Make 3 iterators
+    std::vector<IMDIterator *> iterators = ws->createIterators(3);
+    TS_ASSERT_EQUALS( iterators.size(), 3);
+
+    IMDIterator *it;
+
+    it = iterators[0];
+    TS_ASSERT_DELTA( it->getSignal(), 0.0, 1e-5);
+    TS_ASSERT_EQUALS( it->getDataSize(), 33);
+    TS_ASSERT_DELTA( it->getInnerPosition(0,0), 0.5, 1e-5);
+    TS_ASSERT_DELTA( it->getInnerPosition(0,1), 0.5, 1e-5);
+
+    it = iterators[1];
+    TS_ASSERT_DELTA( it->getSignal(), 33.0, 1e-5);
+    TS_ASSERT_EQUALS( it->getDataSize(), 33);
+    TS_ASSERT_DELTA( it->getInnerPosition(0,0), 3.5, 1e-5);
+    TS_ASSERT_DELTA( it->getInnerPosition(0,1), 3.5, 1e-5);
+
+    it = iterators[2];
+    TS_ASSERT_DELTA( it->getSignal(), 66.0, 1e-5);
+    TS_ASSERT_EQUALS( it->getDataSize(), 34);
+    TS_ASSERT_DELTA( it->getInnerPosition(0,0), 6.5, 1e-5);
+    TS_ASSERT_DELTA( it->getInnerPosition(0,1), 6.5, 1e-5);
+
   }
 
 };

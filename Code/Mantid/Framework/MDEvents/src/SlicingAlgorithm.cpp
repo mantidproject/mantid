@@ -84,7 +84,7 @@ namespace MDEvents
     setPropertyGroup("Origin", "Non-Aligned Binning");
     setPropertyGroup("ForceOrthogonal", "Non-Aligned Binning");
     setPropertySettings("Origin", ps->clone() );
-    setPropertySettings("ForceOrthogonal", ps->clone() );
+    setPropertySettings("ForceOrthogonal", ps );
 
   }
 
@@ -193,7 +193,7 @@ namespace MDEvents
     double scaling = double(numBins) / length;
 
     // Create the output dimension
-    MDHistoDimension_sptr out(new MDHistoDimension(name, id, units, min, max, numBins));
+    MDHistoDimension_sptr out(new MDHistoDimension(name, id, units, static_cast<coord_t>(min), static_cast<coord_t>(max), numBins));
 
     // Put both in the algo for future use
     m_bases.push_back(basis);
@@ -346,7 +346,7 @@ namespace MDEvents
         throw std::invalid_argument("Wrong number of values (3 are expected) after the name in the dimensions string: " + str);
 
       // Extract the arguments
-      double min, max;
+      coord_t min, max;
       int numBins = 0;
       Strings::convert(strs[0], min);
       Strings::convert(strs[1], max);
@@ -432,7 +432,7 @@ namespace MDEvents
     for (size_t d=0; d<m_outD; d++)
     {
       origin[d] = m_binDimensions[d]->getMinimum();
-      scaling[d] = coord_t(1.0) / m_binDimensions[d]->getBinWidth();
+      scaling[d] = 1.0f / m_binDimensions[d]->getBinWidth();
       // Origin in the input
       m_origin[ m_dimensionToBinFrom[d] ] = origin[d];
       // Create a unit basis vector that corresponds to this
@@ -446,8 +446,8 @@ namespace MDEvents
         m_dimensionToBinFrom, origin, scaling);
 
     // Transformation original->binned. There is no offset or scaling!
-    std::vector<double> unitScaling(m_outD, 1.0);
-    std::vector<double> zeroOrigin(m_outD, 0.0);
+    std::vector<coord_t> unitScaling(m_outD, 1.0);
+    std::vector<coord_t> zeroOrigin(m_outD, 0.0);
     m_transformFromOriginal = new CoordTransformAligned(inD, m_outD,
         m_dimensionToBinFrom, zeroOrigin, unitScaling);
 
@@ -781,8 +781,8 @@ namespace MDEvents
     size_t nd = m_inWS->getNumDims();
     if (m_axisAligned)
     {
-      std::vector<coord_t> function_min(nd, -1e50); // default to all space if the dimension is not specified
-      std::vector<coord_t> function_max(nd, +1e50); // default to all space if the dimension is not specified
+      std::vector<coord_t> function_min(nd, -1e30f); // default to all space if the dimension is not specified
+      std::vector<coord_t> function_max(nd, +1e30f); // default to all space if the dimension is not specified
       for (size_t bd=0; bd<m_outD; bd++)
       {
         // Dimension in the MDEventWorkspace

@@ -1,5 +1,6 @@
 #include "MantidCurveFitting/BivariateNormal.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidAPI/ParameterTie.h"
 #include "MantidKernel/System.h"
@@ -9,30 +10,31 @@
 #include <math.h>
 #include <iostream>
 #include <sstream>
+#include <string>
+#include <cstdio>
 
 using namespace Mantid::API;
+
 namespace Mantid
 {
   namespace CurveFitting
   {
+
 DECLARE_FUNCTION(BivariateNormal)
-//Indicies into the Attrib array
-#define StartRow   0
-#define StartCol   1
-#define NRows   2
-#define NCols   3
-#define S_int   4
-#define S_xint   5
-#define S_yint   6
-#define S_x2int   7
-#define S_y2int   8
-#define S_xyint   9
-#define S_y   10
-#define S_x   11
-#define S_x2   12
-#define S_y2   13
-#define S_xy   14
-#define S_1   15
+
+// Indicies into Attrib array( local variable in initCommon
+#define S_int   0
+#define S_xint   1
+#define S_yint   2
+#define S_x2int   3
+#define S_y2int   4
+#define S_xyint   5
+#define S_y   6
+#define S_x   7
+#define S_x2   8
+#define S_y2   9
+#define S_xy   10
+#define S_1   11
 
 //Indicies into the LastParams array
 #define IBACK   0
@@ -45,159 +47,122 @@ DECLARE_FUNCTION(BivariateNormal)
 
 Kernel::Logger& BivariateNormal::g_log= Kernel::Logger::get("BivariateNormal");
 
-BivariateNormal::BivariateNormal():BackgroundFunction()
+BivariateNormal::BivariateNormal() : UserFunction(), expVals(NULL),
+        BackConstraint(NULL), MeanxConstraint(NULL), MeanyConstraint(NULL), IntensityConstraint(NULL)
 {
-  LastParams = 0;
-  SIxx = SIyy = SIxy = Sxx = Syy = Sxy = -1; //Var and CoVar calc from parameters
-  expVals = 0;
-  Attrib = new double[16];
-  if( AttNames.size() >1)
-    return;
-  AttNames.push_back(std::string("StartRow"));
-  AttNames.push_back(std::string("StartCol"));
-  AttNames.push_back(std::string("NRows"));
-  AttNames.push_back(std::string("NCols"));
-  AttNames.push_back(std::string("Intensities"));
-  AttNames.push_back(std::string("SSIx"));
-  AttNames.push_back(std::string("SSIy"));
-  AttNames.push_back(std::string("SSIxx"));
-  AttNames.push_back(std::string("SSIyy"));
-  AttNames.push_back(std::string("SSIxy"));
-  AttNames.push_back(std::string("SSy"));
-  AttNames.push_back(std::string("SSx"));
-  AttNames.push_back(std::string("SSxx"));
-  AttNames.push_back(std::string("SSyy"));
-  AttNames.push_back(std::string("SSxy"));
-  AttNames.push_back(std::string("NCells")); //Not Set
-
- // g_log.setLevel(7);//debug level
+  LastParams[IVXX] = -1;
 }
 
 BivariateNormal::~BivariateNormal()
 {
-
-  if (!Attrib)
-    delete[] Attrib;
-
-  if (!expVals)
-    delete[] expVals;
-
-  if (!LastParams)
-    delete[] LastParams;
-
-  if (!BackConstraint)
-    delete BackConstraint;
-
-  if (!MeanxConstraint)
-    delete MeanxConstraint;
-
-  if (!MeanyConstraint)
-    delete MeanyConstraint;
-
-  if (!IntensityConstraint)
-    delete IntensityConstraint;
-
+  delete [] expVals;
 }
 
-/// overwrite IFunction base class methods
+// overwrite IFunction base class methods
 
+ void BivariateNormal::functionMW(double *out, const double *xValues, const size_t nData) const
+ {
 
+   UNUSED_ARG(xValues);
+   UNUSED_ARG(nData);
 
-void BivariateNormal::functionMW(double *out, const double *xValues, const size_t nData)const
-{
+   double coefNorm, expCoeffx2, expCoeffy2, expCoeffxy;
+   int NCells;
+   bool isNaNs;
+   API::MatrixWorkspace_const_sptr ws = getMatrixWorkspace();
+   MantidVec D = ws->dataY(0);
+   MantidVec X = ws->dataY(1);
+   MantidVec Y = ws->dataY(2);
 
-  UNUSED_ARG(xValues);
-  int Nrows = (int) getAttribute("NRows").asDouble();
-  int Ncols = (int) getAttribute("NCols").asDouble();
-//  double *Attrib = new double[nAttributes()];
-  double *LastParams = new double[7];
-  double *expVals = new double[Nrows*Ncols];
-  double uu,coefNorm,expCoeffx2,expCoeffy2,expCoeffxy;
-  bool isNaNs;
-  
+   initCoeff(D, X, Y, coefNorm, expCoeffx2, expCoeffy2, expCoeffxy, NCells);
 
- initCommon(  LastParams,expVals, uu,coefNorm,expCoeffx2,
-                         expCoeffy2,expCoeffxy,isNaNs);
-  std::ostringstream str;
-   str<<"Params="<<LastParams[0]<<","<<LastParams[1]<<","<<LastParams[2]<<","
-          <<LastParams[3]<<","<<LastParams[4]<<","<<LastParams[5]<<","<<LastParams[6] <<std::endl;
-  g_log.debug(str.str());
-  for (size_t i = 0; i < nData; i++)
-  {
-     if( isNaNs)
-        out[i] =10000;
+   double Background = getParameter(IBACK);
+   double Intensity = getParameter(ITINTENS);
+   double Xmean = getParameter(IXMEAN);
+   double Ymean = getParameter(IYMEAN);
+   std::ostringstream inf;
+
+   int x = 0;
+   isNaNs = false;
+   double chiSq = 0;
+   inf << "F Parameters=";
+   for (size_t k = 0; k < nParams(); k++)
+     inf << "," << getParameter(k);
+   inf << std::endl;
+
+   for (int i = 0; i < NCells; i++)
+   {
+     if (isNaNs)
+       out[x] = 10000;
      else
      {
-        out[i] = LastParams[IBACK] + coefNorm * LastParams[ITINTENS] * expVals[i];
-	if( out[i] !=out[i])
-	  {
-	    out[i]=100000;
-	    isNaNs=true;
-	  }
-      }
+       double dx = X[i] - Xmean;
+       double dy = Y[i] - Ymean;
+       out[x] = Background + coefNorm * Intensity * exp(expCoeffx2 * dx * dx + expCoeffxy * dx * dy
+           + expCoeffy2 * dy * dy);
+       if (out[x] != out[x])
+       {
+         out[x] = 100000;
+         isNaNs = true;
+       }
 
-  }
-  //delete[] Attrib;
-  delete[] LastParams;
-  delete[] expVals;
-}
-/*
-void BivariateNormal::setParameter(const std::string& name, const double& value, bool explicitlySet )
-{
-  std::cout<<"Set Param "<<name<<"="<<value<<std::endl;
-  API::ParamFunction::setParameter( name, value, explicitlySet);
-  initCommon();
-}
-void BivariateNormal::setParameter(int i , const double& value, bool explicitlySet )
-     {
-       std::cout<<"set Param i="<<i<<std::endl;
-       API::ParamFunction::setParameter( i, value, explicitlySet);
-       initCommon();
      }
 
-*/
-void BivariateNormal::fit(const std::vector<double>&,const std::vector<double>&)
-{
-  std::cout<<"In fit"<<std::endl; 
-  initCommon();
-}
+     x++;
+   }
+
+   inf << "    chiSq =" << chiSq << std::endl;
+   g_log.debug(inf.str());
+ }
+
+
+
 void BivariateNormal::functionDerivMW(API::Jacobian *out, const double *xValues, const size_t nData)
 {
   UNUSED_ARG(xValues);
   UNUSED_ARG(nData);
-  initCommon();
-  int x = 0;
- 
-  double uu = LastParams[IVXX] * LastParams[IVYY] - LastParams[IVXY] * LastParams[IVXY];
-  int startRow = (int) getAttribute("StartRow").asDouble();
-  int startCol = (int) getAttribute("StartCol").asDouble();
-  int Nrows = (int) getAttribute("NRows").asDouble();
-  int Ncols = (int) getAttribute("NCols").asDouble();
 
+  initCommon();
+
+  std::ostringstream inf;
+  inf << "***Parameters=" ;
+  for( size_t k=0; k < nParams();k++)
+    inf << "," << getParameter(k);
+  inf << std::endl;
+  g_log.debug( inf.str());
   if( nData <=0)
-     return;
-    
-  for (int r = startRow; r < startRow + Nrows; r++)
-    for (int c = startCol; c < startCol + Ncols; c++)
-    { 
+      return;
+
+  double uu = LastParams[IVXX] * LastParams[IVYY] - LastParams[IVXY] * LastParams[IVXY];
+
+  API::MatrixWorkspace_const_sptr  ws= getMatrixWorkspace();
+  MantidVec X =ws->dataY(1);
+  MantidVec Y =ws->dataY(2);
+
+  for( int x=0; x<NCells; x++)
+   {
+      double r = Y[x];
+      double c = X[x];
+
       out->set(x, IBACK, 1);
       out->set(x, ITINTENS, expVals[x] * coefNorm);
 
       double coefExp = coefNorm * LastParams[ITINTENS];
       double coefx = LastParams[IVYY] / uu;
       double coefy = -LastParams[IVXY] / uu;
+
       out->set(x, IXMEAN, coefExp * expVals[x] * (coefx * (c - LastParams[IXMEAN]) + coefy * (r
           - LastParams[IYMEAN])));
-     
-      uu = LastParams[IVXX] * LastParams[IVYY] - LastParams[IVXY] * LastParams[IVXY];
+
+
       coefExp = coefNorm * LastParams[ITINTENS];
       coefx = -LastParams[IVXY] / uu;
       coefy = LastParams[IVXX] / uu;
       out->set(x, IYMEAN, coefExp * expVals[x] * (coefx * (c - LastParams[IXMEAN]) + coefy * (r
           - LastParams[IYMEAN])));
     
-      uu = LastParams[IVXX] * LastParams[IVYY] - LastParams[IVXY] * LastParams[IVXY];
       coefExp = coefNorm * LastParams[ITINTENS];
+
       double coefx2 = LastParams[IVYY] * LastParams[IVYY] / 2 / uu / uu;
       double coefy2 = LastParams[IVXY] * LastParams[IVXY] / 2 / uu / uu;
 
@@ -207,7 +172,7 @@ void BivariateNormal::functionDerivMW(API::Jacobian *out, const double *xValues,
           - LastParams[IXMEAN]) + coefxy * (r - LastParams[IYMEAN]) * (c - LastParams[IXMEAN]) + coefy2
           * (r - LastParams[IYMEAN]) * (r - LastParams[IYMEAN])));
   
-      uu = LastParams[IVXX] * LastParams[IVYY] - LastParams[IVXY] * LastParams[IVXY];
+
       coefExp = coefNorm * LastParams[ITINTENS];
       coefx2 = LastParams[IVXY] * LastParams[IVXY] / 2 / uu / uu;
        
@@ -219,7 +184,7 @@ void BivariateNormal::functionDerivMW(API::Jacobian *out, const double *xValues,
           - LastParams[IXMEAN]) + coefxy * (r - LastParams[IYMEAN]) * (c - LastParams[IXMEAN]) + coefy2
           * (r - LastParams[IYMEAN]) * (r - LastParams[IYMEAN])));
  
-      uu = LastParams[IVXX] * LastParams[IVYY] - LastParams[IVXY] * LastParams[IVXY];
+
       coefExp = coefNorm * LastParams[ITINTENS];
       coefx2 = -LastParams[IVYY] * LastParams[IVXY] / uu / uu;
       coefy2 = -LastParams[IVXX] * LastParams[IVXY] / uu / uu;
@@ -229,86 +194,167 @@ void BivariateNormal::functionDerivMW(API::Jacobian *out, const double *xValues,
           - LastParams[IXMEAN]) + coefxy * (r - LastParams[IYMEAN]) * (c - LastParams[IXMEAN]) + coefy2
           * (r - LastParams[IYMEAN]) * (r - LastParams[IYMEAN])));
 
-      x++;
-    }
-
+      //out->set(x,7,0);
+   }
 }
 
 void BivariateNormal::init()
 {
-
   declareParameter("Background", 0.00);
-  declareParameter("Intensity", 0.00);
-  declareParameter("Mcol", 0.00);
-  declareParameter("Mrow", 0.00);
-  declareParameter("SScol", 0.00);
-  declareParameter("SSrow", 0.00);
-  declareParameter("SSrc", 0.00);
+  declareParameter("Intensity" , 0.00);
+  declareParameter("Mcol" , 0.00, "Mean column(x) value");
+  declareParameter("Mrow" , 0.00, "Mean row(y) value");
+  declareParameter("SScol", 0.00, "Variance of the column(x) values");
+  declareParameter("SSrow", 0.00, "Variance of the row(y) values");
+  declareParameter("SSrc" , 0.00, "Covariance of the column(x) and row(y) values");
+
+  CalcVariances = true;
+
+  NCells = -1;
+  LastParams[IVXX]=-1;
 
 }
 
 void BivariateNormal::initCommon()
  {
-  //std::cout<<"in INIt Common"<< std::endl;
+
   bool ParamsOK = true;
   bool CommonsOK = true;
-  if (!expVals)
+  if (!expVals )
     CommonsOK = false;
 
-  if (SIxx < 0)
+
+
+  API::MatrixWorkspace_const_sptr  ws= getMatrixWorkspace();
+  MantidVec D =ws->dataY(0);
+  MantidVec X =ws->dataY(1);
+  MantidVec Y =ws->dataY(2);
+
+  if( NCells < 0 )
   {
-    Attrib[S_1] = Attrib[NRows] * Attrib[NCols];
-    mIx = Attrib[S_xint] / Attrib[S_int];
-    mIy = Attrib[S_yint] / Attrib[S_int];
-    mx = Attrib[S_x] / Attrib[S_1];
-    my = Attrib[S_y] / Attrib[S_1];
-    SIxx = Attrib[S_x2int] - (Attrib[S_xint] * Attrib[S_xint]) / Attrib[S_int];
-
-    SIyy = Attrib[S_y2int] - (Attrib[S_yint]) * (Attrib[S_yint]) / Attrib[S_int];
-    SIxy = Attrib[S_xyint] - (Attrib[S_xint]) * (Attrib[S_yint]) / Attrib[S_int];
-    Sxx = Attrib[S_x2] - (Attrib[S_x]) * (Attrib[S_x]) / Attrib[S_1];
-
-    Syy = Attrib[S_y2] - (Attrib[S_y]) * (Attrib[S_y]) / Attrib[S_1];
-    Sxy = Attrib[S_xy] - (Attrib[S_x]) * (Attrib[S_y]) / Attrib[S_1];
-
-    ParamsOK = false;
+    NCells =(int) std::min<size_t>(D.size(), std::min<size_t>(X.size(), Y.size()));
     CommonsOK = false;
-
-    BackConstraint = (new BoundaryConstraint(this, "Background", 0, Attrib[S_int] / Attrib[S_1]));
-    addConstraint( BackConstraint);
-    double maxIntensity = Attrib[S_int] + 3 * sqrt(Attrib[S_int]);
-    if (maxIntensity < 100)
-      maxIntensity = 100;
-    IntensityConstraint = new BoundaryConstraint(this, "Intensity", 0, maxIntensity);
-    addConstraint( IntensityConstraint);
-
-    double minMeany = Attrib[StartRow] + Attrib[NRows] / 10;
-    if (minMeany < Attrib[StartRow] + 2)
-      minMeany = Attrib[StartRow] + 2;
-    double maxMeany = Attrib[NRows] * .9;
-    if (maxMeany > Attrib[NRows] - 2)
-      maxMeany = Attrib[NRows] - 2;
-    maxMeany += Attrib[StartRow];
-    MeanyConstraint = new BoundaryConstraint(this, "Mrow", minMeany, maxMeany);
-
-    addConstraint( MeanyConstraint);
-
-    double minMeanx = Attrib[NCols] / 10;
-    if (minMeanx < 3)
-      minMeanx = 3;
-    double maxMeanx = Attrib[NCols] * .9;
-    if (maxMeanx > Attrib[NCols] - 2)
-      maxMeanx = Attrib[NCols] - 2;
-    maxMeanx += Attrib[StartCol];
-    minMeanx += Attrib[StartCol];
-    MeanxConstraint = new BoundaryConstraint(this, "Mcol", minMeanx, maxMeanx);
-    addConstraint( MeanxConstraint);
-
   }
 
-  if (!LastParams)
+  double Attrib[12]={0.0};
+
+  double MinX, MinY, MaxX, MaxY;
+  MinX= MaxX = X[0];
+  MinY= MaxY = Y[0];
+
+  if (!CommonsOK)
+      {
+
+        for (int i = 0; i < NCells; i++)
+        {
+          Attrib[S_int] += D[i];
+          Attrib[S_xint] += D[i] * X[i];
+          Attrib[S_yint] += D[i] * Y[i];
+          Attrib[S_x2int] += D[i] * X[i] * X[i];
+          Attrib[S_y2int] += D[i] * Y[i] * Y[i];
+          Attrib[S_xyint] += D[i] * X[i] * Y[i];
+
+          Attrib[S_y] += Y[i];
+          Attrib[S_x] += X[i];
+          Attrib[S_x2] += X[i] * X[i];
+          Attrib[S_y2] += Y[i] * Y[i];
+          Attrib[S_xy] += X[i] * Y[i];
+          Attrib[S_1] += 1.0;
+
+          if (X[i] < MinX)
+            MinX = X[i];
+          if (X[i] > MaxX)
+            MaxX = X[i];
+          if (Y[i] < MinY)
+            MinY = Y[i];
+          if (Y[i] > MaxY)
+            MaxY = Y[i];
+
+        }
+
+        double mIx, mx, mIy, my;
+
+        double SIxx, SIyy, SIxy, Sxx, Syy, Sxy;
+
+        mIx = Attrib[S_xint] / Attrib[S_int];
+        mIy = Attrib[S_yint] / Attrib[S_int];
+        mx = Attrib[S_x] / Attrib[S_1];
+        my = Attrib[S_y] / Attrib[S_1];
+
+        SIxx = Attrib[S_x2int] - (Attrib[S_xint] * Attrib[S_xint]) / Attrib[S_int];
+        SIyy = Attrib[S_y2int] - (Attrib[S_yint]) * (Attrib[S_yint]) / Attrib[S_int];
+        SIxy = Attrib[S_xyint] - (Attrib[S_xint]) * (Attrib[S_yint]) / Attrib[S_int];
+
+        Sxx = Attrib[S_x2] - (Attrib[S_x]) * (Attrib[S_x]) / Attrib[S_1];
+        Syy = Attrib[S_y2] - (Attrib[S_y]) * (Attrib[S_y]) / Attrib[S_1];
+        Sxy = Attrib[S_xy] - (Attrib[S_x]) * (Attrib[S_y]) / Attrib[S_1];
+
+        CommonsOK = false;
+
+        BackConstraint = (new BoundaryConstraint(this, "Background", 0, Attrib[S_int] / Attrib[S_1]));
+        addConstraint(BackConstraint);
+
+        double maxIntensity = Attrib[S_int] + 3 * sqrt(Attrib[S_int]);
+
+        if (maxIntensity < 100)
+          maxIntensity = 100;
+
+        IntensityConstraint = new BoundaryConstraint(this, "Intensity", 0, maxIntensity);
+        addConstraint(IntensityConstraint);
+
+        double minMeany = MinY * .9 + .1 * MaxY;
+        double maxMeany = MinY * .1 + .9 * MaxY;
+
+        MeanyConstraint = new BoundaryConstraint(this, "Mrow", minMeany, maxMeany);
+        addConstraint(MeanyConstraint);
+
+        double minMeanx = MinX * .9 + .1 * MaxX;
+        double maxMeanx = MinX * .1 + .9 * MaxX;
+
+        MeanxConstraint = new BoundaryConstraint(this, "Mcol", minMeanx, maxMeanx);
+        addConstraint(MeanxConstraint);
+        if (CalcVariances)
+        {
+          std::ostringstream ssxx, ssyy, ssxy;
+
+          ssyy << std::string("(") << (SIyy) << "+(Mrow-" << (mIy) << ")*(Mrow-" << (mIy) << ")*"
+              << Attrib[S_int] << "-Background*" << (Syy) << "-Background*(Mrow-" << (my) << ")*(Mrow-"
+              << (my) << ")*" << Attrib[S_1] << ")/(" << (Attrib[S_int]) << "-Background*"
+              << (Attrib[S_1]) << ")";
+
+          if (getTie(IVYY) == NULL)
+          {
+            tie("SSrow", ssyy.str());
+
+          }
+
+          ssxx << std::string("(") << (SIxx) << "+(Mcol-" << (mIx) << ")*(Mcol-" << (mIx) << ")*"
+              << Attrib[S_int] << "-Background*" << (Sxx) << "-Background*(Mcol-" << (mx) << ")*(Mcol-"
+              << (mx) << ")*" << Attrib[S_1] << ")/(" << (Attrib[S_int]) << "-Background*"
+              << (Attrib[S_1]) << ")";
+
+          if (getTie(IVXX) == NULL)
+          {
+            tie("SScol", ssxx.str());
+
+          }
+
+          ssxy << std::string("(") << (SIxy) << "+(Mcol-" << (mIx) << ")*(Mrow-" << (mIy) << ")*"
+              << Attrib[S_int] << "-Background*" << (Sxy) << "-Background*(Mcol-" << (mx) << ")*(Mrow-"
+              << (my) << ")*" << Attrib[S_1] << ")/(" << (Attrib[S_int]) << "-Background*"
+              << (Attrib[S_1]) << ")";
+
+          if (getTie(IVXY) == NULL)
+          {
+            tie("SSrc", ssxy.str());
+
+          }
+        }
+        CommonsOK = true;
+      }
+
+  if (LastParams[IVXX] < 0)
   {
-    LastParams = new double[nParams()];
     ParamsOK = false;
     CommonsOK = false;
 
@@ -318,186 +364,60 @@ void BivariateNormal::initCommon()
       if (getParameter(i) != LastParams[i])
         ParamsOK = false;
 
+
   if (!ParamsOK)
   {
 
     for (size_t i = 0; i < nParams(); i++)
       LastParams[i] = getParameter(i);
 
-    std::ostringstream ssxx, ssyy, ssxy;
 
-    ssyy << std::string("(") << (SIyy) << "+(Mrow-" << (mIy) << ")*(Mrow-" << (mIy) << ")*"
-        << Attrib[S_int] << "-Background*" << (Syy) << "-Background*(Mrow-" << (my) << ")*(Mrow-"
-        << (my) << ")*" << Attrib[S_1] << ")/(" << (Attrib[S_int]) << "-Background*" << (Attrib[S_1])
-        << ")";
-
-    // std::cout<<"row formula="<< ssyy.str()<<std::endl;
-    //API::ParameterTie* pt =
-       if( getTie( IVYY) == NULL)
-       {
-         tie("SSrow", ssyy.str());
-
-       }
-    //  std::cout << "  ddK" <<pt->eval()<< std::endl;
-
-    ssxx << std::string("(") << (SIxx) << "+(Mcol-" << (mIx) << ")*(Mcol-" << (mIx) << ")*"
-        << Attrib[S_int] << "-Background*" << (Sxx) << "-Background*(Mcol-" << (mx) << ")*(Mcol-"
-        << (mx) << ")*" << Attrib[S_1] << ")/(" << (Attrib[S_int]) << "-Background*" << (Attrib[S_1])
-        << ")";
-
-    // std::cout<<"col formula="<< ssxx.str()<<std::endl;
-    //API::ParameterTie* ptx =
-    if( getTie( IVXX) == NULL)
-    {
-      tie("SScol", ssxx.str());
-
-    }
-    // std::cout << "  ddK" <<ptx->eval()<< std::endl;
-
-    ssxy << std::string("(") << (SIxy) << "+(Mcol-" << (mIx) << ")*(Mrow-" << (mIy) << ")*"
-        << Attrib[S_int] << "-Background*" << (Sxy) << "-Background*(Mcol-" << (mx) << ")*(Mrow-"
-        << (my) << ")*" << Attrib[S_1] << ")/(" << (Attrib[S_int]) << "-Background*" << (Attrib[S_1])
-        << ")";
-
-    //std::cout<<"cov formula="<< ssxy.str()<<std::endl;
-   // API::ParameterTie* ptxy =
-    if( getTie( IVXY) == NULL)
-    {
-      tie("SSrc", ssxy.str());
-
-    }
-    //std::cout << "   ddK" <<ptxy->eval()<< std::endl;
-
-
-    CommonsOK = false;
   }
 
-  if (!CommonsOK)
+  if (!CommonsOK || !ParamsOK)
   {
 
-    double uu = LastParams[IVXX] * LastParams[IVYY] - LastParams[IVXY] * LastParams[IVXY];
+    int NCells1;
+    initCoeff( D, X, Y, coefNorm,  expCoeffx2, expCoeffy2,  expCoeffxy,
+                   NCells1);
 
-    coefNorm = .5 / M_PI / sqrt(uu);
+    delete [] expVals;
+    expVals = new double[NCells];
 
-    expCoeffx2 = -LastParams[IVYY] / 2 / uu;
-    expCoeffxy = LastParams[IVXY] / uu;
-    expCoeffy2 = -LastParams[IVXX] / 2 / uu;
-
-    int x = 0;
-    int startRow = (int) getAttribute("StartRow").asDouble();
-    int startCol = (int) getAttribute("StartCol").asDouble();
-    int Nrows = (int) getAttribute("NRows").asDouble();
-    int Ncols = (int) getAttribute("NCols").asDouble();
-    expVals = new double[Nrows * Ncols];
-
-    for (int r = startRow; r < startRow + Nrows; r++)
-      for (int c = startCol; c < startCol + Ncols; c++)
+    for( int i=0; i< NCells;i++)
       {
 
-        double dx = c - LastParams[IXMEAN];
-        double dy = r - LastParams[IYMEAN];
-        expVals[x] = exp(expCoeffx2 * dx * dx + expCoeffxy * dx * dy + expCoeffy2 * dy * dy);
-        x++;
+        double dx = X[i] - LastParams[IXMEAN];
+        double dy = Y[i] - LastParams[IYMEAN];
+        expVals[i] = exp(expCoeffx2 * dx * dx + expCoeffxy * dx * dy + expCoeffy2 * dy * dy);
+
       }
 
   }
-}
 
-void BivariateNormal::initCommon( double* LastParams,double* expVals,
-              double &uu,double &coefNorm,double &expCoeffx2,double &expCoeffy2,double &expCoeffxy,
-	       bool &isNaNs)const
- {
-  //std::cout<<"in INIt Common1"<< std::endl;
-    isNaNs= false;
-    for (size_t i = 0; i < nParams(); i++)
-    {
-      LastParams[i] = getParameter(i);
-    }
-    uu = LastParams[IVXX] * LastParams[IVYY] - LastParams[IVXY] * LastParams[IVXY];
-
-    coefNorm = .5 / M_PI / sqrt(uu);
-
-    expCoeffx2 = -LastParams[IVYY] / 2 / uu;
-    expCoeffxy = LastParams[IVXY] / uu;
-    expCoeffy2 = -LastParams[IVXX] / 2 / uu;
-
-    int x = 0;
-    int startRow = (int) getAttribute("StartRow").asDouble();
-    int startCol = (int) getAttribute("StartCol").asDouble();
-    int Nrows = (int) getAttribute("NRows").asDouble();
-    int Ncols = (int) getAttribute("NCols").asDouble();
-    //expVals = new double[Nrows * Ncols];
-
-    for (int r = startRow; r < startRow + Nrows; r++)
-      for (int c = startCol; c < startCol + Ncols; c++)
-      {
-
-        double dx = c - LastParams[IXMEAN];
-        double dy = r - LastParams[IYMEAN];
-        expVals[x] = exp(expCoeffx2 * dx * dx + expCoeffxy * dx * dy + expCoeffy2 * dy * dy);
-	if( expVals[x]!=expVals[x])
-	   isNaNs=true;
-        x++;
-      }
-
-  
-}
-
-std::vector<std::string> BivariateNormal::getAttributeNames() const
-{
-  return AttNames;
-
-}
-
-Mantid::API::IFitFunction::Attribute BivariateNormal::getAttribute(const std::string &attName) const
-{
-  int I = -1;
-
-  for (size_t i = 0; i < nAttributes() && I < 0; i++)
-    if (attName.compare(AttNames[i]) == 0)
-      I = (int)i;
-
-  if (I >= 0)
-    return Mantid::API::IFitFunction::Attribute(Attrib[I]);
-
-  throw std::runtime_error("No such attribute");
-}
-
-
-void BivariateNormal::setAttribute(const std::string &attName,
-    const Mantid::API::IFitFunction::Attribute &att)
-{
-  int I = -1;
-  for (size_t i = 0; i < nAttributes() && I < 0; i++)
-  {
-        if (attName.compare(AttNames[i]) == 0)
-      I = (int)i;
   }
 
-  SIxx = -1;
-  if (I >= 0)
-  {
-    Attrib[I] = att.asDouble();
-   // initCommon();
-    return;
-  }
+void BivariateNormal::initCoeff( MantidVec &D,
+                                 MantidVec &X,
+                                 MantidVec &Y,
+                                 double &coefNorm,
+                                 double &expCoeffx2,
+                                 double & expCoeffy2,
+                                 double & expCoeffxy,
+                                 int   &NCells) const
+   {
+     double uu = getParameter(IVXX) * getParameter(IVYY) - getParameter(IVXY) * getParameter(IVXY);
 
-  throw std::runtime_error("No such attribute");
-}
+     coefNorm = .5 / M_PI / sqrt(uu);
+
+     expCoeffx2 = -getParameter(IVYY) / 2 / uu;
+     expCoeffxy = getParameter(IVXY) / uu;
+     expCoeffy2 = -getParameter(IVXX) / 2 / uu;
+
+     NCells =(int) std::min<size_t>( D.size(), std::min<size_t>(X.size(),Y.size()));
+
+   }
 
 
-bool BivariateNormal::hasAttribute(const std::string &attName) const
-{
-  int I = -1;
-
-  for (size_t i = 0; i < nAttributes() && I < 0; i++)
-    if (attName.compare(AttNames[i]) == 0)
-      I = (int)i;
-
-  if (I >= 0)
-    return true;
-
-  return false;
-}
-}//namespace curveFitting
-}//namespaceMantid
+  }//namespace curveFitting
+  }//namespaceMantid

@@ -58,12 +58,6 @@ public:
   /// Factory Method. Should also handle delegation to successors.
   virtual vtkDataSet* create() const;
   
-  /// Create as a mesh only.
-  virtual vtkDataSet* createMeshOnly() const;
-
-  /// Create the scalar array only.
-  virtual vtkFloatArray* createScalarArray() const;
-
   /// Initalize with a target workspace.
   virtual void initialize(Mantid::API::Workspace_sptr);
 

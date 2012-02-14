@@ -113,8 +113,7 @@ namespace Mantid
       m_wsTypeName = eventWs->id();
 
       factory->setRecursionDepth(this->m_view->getRecursionDepth());
-      factory->initialize(eventWs);
-      vtkDataSet* visualDataSet = factory->create();
+      vtkDataSet* visualDataSet = factory->oneStepCreate(eventWs);
 
       this->extractMetadata(eventWs);
       this->appendMetadata(visualDataSet, eventWs->getName());

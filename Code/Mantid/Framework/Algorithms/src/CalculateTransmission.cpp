@@ -68,7 +68,7 @@ void CalculateTransmission::init()
   zeroOrMore->setLower(0);
   // The defaults here are the correct detector numbers for LOQ
   declareProperty("IncidentBeamMonitor",EMPTY_INT(),"The UDET of the incident beam monitor");
-  declareProperty("TransmissionMonitor",3,zeroOrMore->clone(),"The UDET of the transmission monitor");
+  declareProperty("TransmissionMonitor",3,zeroOrMore,"The UDET of the transmission monitor");
 
   declareProperty(new ArrayProperty<double>("RebinParams"),
     "A comma separated list of first bin boundary, width, last bin boundary. Optionally\n"

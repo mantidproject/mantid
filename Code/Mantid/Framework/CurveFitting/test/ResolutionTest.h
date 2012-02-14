@@ -188,18 +188,26 @@ void tearDown()
     gauss->setParameter("h",2);
     gauss->setParameter("s",1);
     
-    Convolution* conv = new Convolution;
-    conv->addFunction(res);
-    conv->addFunction(gauss);
+    Convolution conv;
+    conv.addFunction(res);
+    conv.addFunction(gauss);
 
     Fit fit;
     fit.initialize();
     fit.setPropertyValue("InputWorkspace","ResolutionTest_WS");
     fit.setPropertyValue("WorkspaceIndex","0");
     //fit.setFunction(conv);
-    fit.setPropertyValue("Function",*conv);
+    fit.setPropertyValue("Function",conv.asString());
     fit.execute();
 
+  }
+ 
+  void testForCategories()
+  {
+    Resolution forCat;
+    const std::vector<std::string> categories = forCat.categories();
+    TS_ASSERT( categories.size() == 1 );
+    TS_ASSERT( categories[0] == "General" );
   }
 
 private:

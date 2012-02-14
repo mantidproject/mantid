@@ -31,18 +31,6 @@ public:
 
   /* Destructive tests. Test works correctly when misused.*/
 
-  void testGetMeshOnlyThrows()
-  {
-    vtkSplatterPlotFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
-    TSM_ASSERT_THROWS("Should throw. Method is not implemented.", factory.createMeshOnly(), std::runtime_error);
-  }
-
-  void testGetScalarArrayThrows()
-  {
-    vtkSplatterPlotFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
-    TSM_ASSERT_THROWS("Should throw. Method is not implemented.", factory.createScalarArray(), std::runtime_error);
-  }
-
   void testCreateWithoutInitalizeThrows()
   {
     vtkSplatterPlotFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");

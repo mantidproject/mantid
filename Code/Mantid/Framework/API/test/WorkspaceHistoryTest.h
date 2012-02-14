@@ -98,8 +98,8 @@ public:
     simplesum2.execute();
 
     WorkspaceHistory history;
-    AlgorithmHistory alg1(&simplesum, 1000.0,1.0);
-    AlgorithmHistory alg2(&simplesum2, 1000.0,1.0);
+    AlgorithmHistory alg1(&simplesum);
+    AlgorithmHistory alg2(&simplesum2);
     history.addHistory(alg1);
     history.addHistory(alg2);
 

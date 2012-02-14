@@ -24,7 +24,7 @@ namespace Mantid
       {
         //Convenience typedefs
         typedef std::vector<std::string> VecStrings;
-        typedef std::vector<double> VecDoubles;
+        typedef std::vector<coord_t> VecDoubles;
 
         std::string sParameterValue = parameterElement->getChildElement("Value")->innerText();
 
@@ -48,7 +48,7 @@ namespace Mantid
           col_it = vecStrCols.begin();
           while(col_it != vecStrCols.end())
           {
-            double val = atof(col_it->c_str());
+            coord_t val = coord_t(atof(col_it->c_str()));
             elements.push_back(val);
             ++col_it;
           }

@@ -118,6 +118,7 @@ int vtkMDEWNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInf
   FilterUpdateProgressAction<vtkMDEWNexusReader> updateHandler(this);
   vtkMDEWHexahedronFactory* hexahedronFactory = new vtkMDEWHexahedronFactory(ThresholdRange_scptr(new IgnoreZerosThresholdRange()), "signal");
   hexahedronFactory->setTime(m_time);
+  hexahedronFactory->setCheckDimensionality(false);
   vtkDataSet* product = m_presenter->execute(hexahedronFactory, updateHandler);
   
   //-------------------------------------------------------- Corrects problem whereby boundaries not set propertly in PV.

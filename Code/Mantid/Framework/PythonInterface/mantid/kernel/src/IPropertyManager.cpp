@@ -1,11 +1,32 @@
 #include "MantidKernel/IPropertyManager.h"
-#include "MantidPythonInterface/kernel/PropertyMarshal.h"
+#include "MantidPythonInterface/kernel/TypeRegistry.h"
+#include "MantidPythonInterface/kernel/PropertyValueHandler.h"
+
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::Kernel::IPropertyManager;
-namespace PropertyMarshal = Mantid::PythonInterface::PropertyMarshal;
+namespace TypeRegistry = Mantid::PythonInterface::TypeRegistry;
 using namespace boost::python;
+
+namespace
+{
+  /**
+   * Set the value of a property from the value within the
+   * boost::python object
+   * It is equivalent to a python method that starts with 'self'
+   * @param self :: A reference to the calling object
+   * @param name :: The name of the property
+   * @param value :: The value of the property as a bpl object
+   */
+  void setProperty(IPropertyManager &self, const std::string & name,
+                   boost::python::object value)
+  {
+    PyTypeObject *pytype = value.ptr()->ob_type;
+    TypeRegistry::PythonTypeHandler *entry = TypeRegistry::getHandler(pytype);
+    entry->set(&self, name, value);
+  }
+}
 
 void export_IPropertyManager()
 {
@@ -18,8 +39,8 @@ void export_IPropertyManager()
          "Returns a string representation of the named property's value")
     .def("setPropertyValue", &IPropertyManager::setPropertyValue, 
          "Set the value of the named property via a string")
-    .def("setProperty", &PropertyMarshal::setProperty, "Set the value of the named property")
-    // Special methods to act like dicctionary
+    .def("setProperty", &setProperty, "Set the value of the named property")
+    // Special methods to act like dictionary
     .def("__contains__", &IPropertyManager::existsProperty)
     ;
 }

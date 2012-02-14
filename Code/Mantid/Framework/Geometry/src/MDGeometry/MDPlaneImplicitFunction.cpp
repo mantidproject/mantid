@@ -29,14 +29,35 @@ MDPlaneImplicitFunction::MDPlaneImplicitFunction() : MDImplicitFunction()
  * @param point array of coorindates for the plane origin
  */
 MDPlaneImplicitFunction::MDPlaneImplicitFunction(const size_t nd,
-                                                 const coord_t *normal,
-                                                 const coord_t *point) :
+                                                 const float *normal,
+                                                 const float *point) :
   MDImplicitFunction()
 {
   this->origin = new coord_t[nd];
   for( std::size_t i = 0; i < nd; i++)
   {
-    this->origin[i] = point[i];
+    this->origin[i] = static_cast<coord_t>(point[i]);
+  }
+  this->addPlane(MDPlane(nd, normal, point));
+}
+
+/**
+ * This parameter constructor is used for when the origin of the implicit
+ * plane is needed in the future. The coordinate arrays MUST be the same
+ * length and match the specified number of dimensions.
+ * @param nd the number of dimensions for the implicit plane
+ * @param normal array of coordinates for the plane normal
+ * @param point array of coorindates for the plane origin
+ */
+MDPlaneImplicitFunction::MDPlaneImplicitFunction(const size_t nd,
+                                                 const double *normal,
+                                                 const double *point) :
+  MDImplicitFunction()
+{
+  this->origin = new coord_t[nd];
+  for( std::size_t i = 0; i < nd; i++)
+  {
+    this->origin[i] = static_cast<coord_t>(point[i]);
   }
   this->addPlane(MDPlane(nd, normal, point));
 }

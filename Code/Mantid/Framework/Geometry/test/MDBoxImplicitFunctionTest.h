@@ -21,16 +21,16 @@ public:
     std::vector<coord_t> min;
     std::vector<coord_t> max;
     TSM_ASSERT_THROWS_ANYTHING( "0 dimensions is bad.", MDBoxImplicitFunction f(min,max) );
-    min.push_back(1.234);
+    min.push_back(1.234f);
     TSM_ASSERT_THROWS_ANYTHING( "Mismatch in nd", MDBoxImplicitFunction f(min,max) );
-    max.push_back(4.56);
+    max.push_back(4.56f);
     TS_ASSERT_THROWS_NOTHING( MDBoxImplicitFunction f(min,max) );
   }
 
   /// Helper function for the 2D case
-  bool try2Dpoint(MDImplicitFunction & f, coord_t x, coord_t y)
+  bool try2Dpoint(MDImplicitFunction & f, double x, double y)
   {
-    coord_t centers[2] = {x,y};
+    coord_t centers[2] = {static_cast<coord_t>(x),static_cast<coord_t>(y)};
     return f.isPointContained(centers);
   }
 
@@ -103,7 +103,7 @@ public:
 
   void test_isPointBounded_3D_pointIsOutside()
   {
-    coord_t point[3] = {0.1,0.2,0.3};
+    coord_t point[3] = {0.25,0.25,0.25};
     MDBoxImplicitFunction f = get3DFunction();
     TS_ASSERT(!f.isPointContained(point) );
     bool res;

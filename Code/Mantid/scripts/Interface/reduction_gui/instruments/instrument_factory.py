@@ -14,6 +14,7 @@ INSTRUMENT_DICT = {"HFIR": {"BIOSANS": HFIRInterface,
                             "GPSANS": HFIRInterface},
                    "SNS":  {"EQSANS": EQSANSInterface,
                             "REFL": REFLInterface,
+                            "REFM": REFLInterface,
                             "Example": ExampleInterface}
                   }               
 

@@ -177,6 +177,37 @@ int extractWord(std::string& Line,const std::string& Word,const int cnt)
 }
 
 //------------------------------------------------------------------------------------------------
+/** If a word ends with a number representing a positive integer, return
+ * the value of that int.
+ *
+ * @param word :: string possibly ending in a number
+ * @return the number, or -1 if it does not end in a number
+ */
+int endsWithInt(const std::string & word)
+{
+  if (word.empty())
+    return -1;
+  int out = -1;
+  // Find the index of the first number in the string (if any)
+  int firstNumber = int(word.size());
+  for (int i=int(word.size())-1; i>=0; i--)
+  {
+    char c = word[i];
+    if ((c > '9') || (c < '0'))
+      break;
+    firstNumber = i;
+  }
+  // Convert the string of decimals to an int
+  if (firstNumber < int(word.size()))
+  {
+    std::string part = word.substr(firstNumber, word.size()-firstNumber);
+    if (!convert(part, out))
+      return -1;
+  }
+  return out;
+}
+
+//------------------------------------------------------------------------------------------------
 /**
   Check to see if S is the same as the
   first part of a phrase. (case insensitive)
@@ -945,6 +976,7 @@ template MANTID_KERNEL_DLL int sectPartNum(std::string&,int&);
 template MANTID_KERNEL_DLL int sectionMCNPX(std::string&,double&);
 
 template MANTID_KERNEL_DLL int convert(const std::string&,double&);
+template MANTID_KERNEL_DLL int convert(const std::string&,float&);
 template MANTID_KERNEL_DLL int convert(const std::string&,std::string&);
 template MANTID_KERNEL_DLL int convert(const std::string&,int&);
 template MANTID_KERNEL_DLL int convert(const std::string&,std::size_t&);
@@ -954,6 +986,7 @@ template MANTID_KERNEL_DLL int convert(const char*,int&);
 template MANTID_KERNEL_DLL int convert(const char*,std::size_t&);
 
 template MANTID_KERNEL_DLL std::string toString(const double value);
+template MANTID_KERNEL_DLL std::string toString(const float value);
 template MANTID_KERNEL_DLL std::string toString(const int value);
 template MANTID_KERNEL_DLL std::string toString(const uint16_t value);
 template MANTID_KERNEL_DLL std::string toString(const size_t value); // Matches uint64_t on Linux 64 & Win 64

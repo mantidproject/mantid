@@ -32,37 +32,35 @@ public:
   void test1()
   {
     // set up fitting function
-    Gaussian* gaus = new Gaussian();
-    gaus->initialize();
-    gaus->setCentre(11.2);
-    gaus->setHeight(100.7);
-    gaus->setParameter("Sigma",1.1);
+    Gaussian gaus;
+    gaus.initialize();
+    gaus.setCentre(11.2);
+    gaus.setHeight(100.7);
+    gaus.setParameter("Sigma",1.1);
 
-    BoundaryConstraint* bc = new BoundaryConstraint();
-    bc->reset(gaus,2);
+    BoundaryConstraint bc;
+    bc.reset(&gaus,2);
 
-    TS_ASSERT(!bc->hasLower());
-    TS_ASSERT(!bc->hasUpper());
+    TS_ASSERT(!bc.hasLower());
+    TS_ASSERT(!bc.hasUpper());
 
-    bc->setLower(1.0);
-    bc->setUpper(2.0);
+    bc.setLower(1.0);
+    bc.setUpper(2.0);
 
-    TS_ASSERT(bc->hasLower());
-    TS_ASSERT(bc->hasUpper());
+    TS_ASSERT(bc.hasLower());
+    TS_ASSERT(bc.hasUpper());
 
-    BoundaryConstraint* bc2 = new BoundaryConstraint();
-    bc2->reset(gaus,2);
-    bc2->setBounds(10,20);
+    BoundaryConstraint bc2;;
+    bc2.reset(&gaus,2);
+    bc2.setBounds(10,20);
 
-    TS_ASSERT_DELTA( bc2->lower(), 10 ,0.0001);
-    TS_ASSERT_DELTA( bc2->upper(), 20 ,0.0001);
+    TS_ASSERT_DELTA( bc2.lower(), 10 ,0.0001);
+    TS_ASSERT_DELTA( bc2.upper(), 20 ,0.0001);
 
-    TS_ASSERT_DELTA( gaus->getParameter("Sigma"), 1.1 ,0.0001);
+    TS_ASSERT_DELTA( gaus.getParameter("Sigma"), 1.1 ,0.0001);
     
-    bc2->setParamToSatisfyConstraint();
-    TS_ASSERT_DELTA( gaus->getParameter("Sigma"), 10.0 ,0.0001);
-
-    delete gaus;
+    bc2.setParamToSatisfyConstraint();
+    TS_ASSERT_DELTA( gaus.getParameter("Sigma"), 10.0 ,0.0001);
 
   }
 
@@ -156,7 +154,7 @@ public:
     TS_ASSERT( !bc->hasLower() );
 
     gaus.addConstraint(bc);
-    IFitFunction* fun = FunctionFactory::Instance().createInitialized(gaus);
+    IFitFunction* fun = FunctionFactory::Instance().createInitialized(gaus.asString());
     TS_ASSERT(fun);
 
     IConstraint* c = fun->getConstraint(2);
@@ -187,7 +185,7 @@ public:
     bcHeight->initialize(&gaus,exprHeight);
     gaus.addConstraint(bcHeight);
 
-    IFitFunction* fun = FunctionFactory::Instance().createInitialized(gaus);
+    IFitFunction* fun = FunctionFactory::Instance().createInitialized(gaus.asString());
     TS_ASSERT(fun);
 
     IConstraint* c = fun->getConstraint(2);

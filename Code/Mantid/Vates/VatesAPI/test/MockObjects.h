@@ -29,6 +29,7 @@
 using Mantid::VATES::MDRebinningView;
 using Mantid::Geometry::MDHistoDimension;
 using Mantid::Geometry::MDHistoDimension_sptr;
+using Mantid::coord_t;
 
 //=====================================================================================
 // Test Helper Types. These are shared by several tests in VatesAPI
@@ -53,12 +54,12 @@ public:
   std::string getName() const {throw std::runtime_error("Not implemented");}
   std::string getUnits() const {throw std::runtime_error("Not implemented");}
   std::string getDimensionId() const {return m_id;}
-  double getMaximum() const {return 10;}
-  double getMinimum() const {return 0;};
+  coord_t getMaximum() const {return 10;}
+  coord_t getMinimum() const {return 0;};
   size_t getNBins() const {return m_nbins;};
   std::string toXMLString() const {throw std::runtime_error("Not implemented");};
-  double getX(size_t) const {throw std::runtime_error("Not implemented");};
-  virtual void setRange(size_t /*nBins*/, double /*min*/, double /*max*/){ };
+  coord_t getX(size_t) const {throw std::runtime_error("Not implemented");};
+  virtual void setRange(size_t /*nBins*/, coord_t /*min*/, coord_t /*max*/){ };
   virtual ~FakeIMDDimension()
   {
   }
@@ -84,8 +85,27 @@ public:
     Mantid::API::MDNormalization , std::vector<Mantid::coord_t> & , std::vector<Mantid::signal_t> & , std::vector<Mantid::signal_t> & ) const
   {}
 
-  virtual Mantid::API::IMDIterator* createIterator(Mantid::Geometry::MDImplicitFunction * /*function*/ = NULL) const
-  { throw std::runtime_error("Mock createIterator() Not implemented.");
+  virtual std::vector<Mantid::API::IMDIterator*> createIterators(size_t  = 1,
+      Mantid::Geometry::MDImplicitFunction *  = NULL) const
+  {
+    throw std::runtime_error("Not Implemented");
+  }
+
+  virtual Mantid::signal_t getSignalAtCoord(const Mantid::coord_t * , const Mantid::API::MDNormalization & ) const
+  {
+    return 0;
+  }
+
+  //constructor allows a workspace name to be provide.
+  MockIMDWorkspace(std::string name)
+  : IMDWorkspace()
+  {
+    setName(name);
+  }
+
+  MockIMDWorkspace()
+  : IMDWorkspace()
+  {
   }
 
   virtual ~MockIMDWorkspace() {}

@@ -1,7 +1,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/DataItem.h"
-#include "MantidPythonInterface/kernel/PropertyMarshal.h"
 #include "MantidPythonInterface/kernel/WeakPtr.h"
+#include "MantidPythonInterface/kernel/upcast_returned_value.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
@@ -21,29 +21,15 @@ typedef boost::weak_ptr<DataItem> DataItem_wptr;
 
 namespace
 {
-  ///@cond
-
-  //----------------------------------------------------------------------------
-  //
-  // The next two methods work in conjunction with each other. The first
-  // adds a method to the Python wrapped ADS that returns the requested
-  // object as a DataItem pointer. The second method calls this and
-  // attempts to upcast the object to one of the most exported interface types
-  // e.g. IEventWorkspace, MatrixWorkspace.
-  // A custom return_value_policy would be nice but they seem set up for a 1:1
-  // mapping between C++ type and Python object type whereas we would want a
-  // 1:n DataItem:<Interface> policy.
-
   /**
-   * From Python retrieval of a DataItem needs to return a weak_ptr to avoid
-   * holding on to memory
+   * Retrieves a shared_ptr from the ADS and converts it into a weak_ptr
    * @param self :: A pointer to the object calling this function. Allows it to act
    * as a member function
    * @param name :: The name of the object to retrieve
    * @return A weak pointer to the named object. If the name does not exist it
    * sets a KeyError error indicator.
    */
-  DataItem_wptr retrieveAsDataItem(AnalysisDataServiceImpl& self, const std::string & name)
+  DataItem_wptr retrieveAsWeakPtr(AnalysisDataServiceImpl& self, const std::string & name)
   {
     DataItem_wptr item;
     try
@@ -57,22 +43,9 @@ namespace
       PyErr_SetString(PyExc_KeyError, err.c_str());
       throw boost::python::error_already_set();
     }
-    return DataItem_wptr(item);
+    return item;
   }
 
-  /**
-   * Upcast a Python object to one of the most exported type
-   * @param self :: A pointer to the object calling this function. Allows it to act
-   * as a member function
-   * @param name The name of the object to retrieve
-   * @return A boost python object of the upcasted type
-   */
-  object retrieveUpcastedPtr(object self, const std::string & name)
-  {
-    object dataItem = self.attr("retrieveAsDataItem")(name);
-    Mantid::PythonInterface::PropertyMarshal::upcastFromDataItem(dataItem);
-    return dataItem;
-  }
 
   /**
    * Return a Python list of object names from the ADS as this is
@@ -80,7 +53,7 @@ namespace
    * @param self :: A reference to the ADS object that called this method
    * @returns A python list created from the set of strings
    */
-  object _getObjectNames(AnalysisDataServiceImpl& self)
+  object getObjectNamesAsList(AnalysisDataServiceImpl& self)
   {
     boost::python::list names;
     const std::set<std::string> keys = self.getObjectNames();
@@ -92,7 +65,6 @@ namespace
     assert(names.attr("__len__")() == keys.size());
     return names;
   }
-  ///@endcond
 }
 
 
@@ -104,15 +76,15 @@ void export_AnalysisDataService()
     .def("Instance", &AnalysisDataService::Instance, return_value_policy<reference_existing_object>(),
          "Return a reference to the ADS singleton")
     .staticmethod("Instance")
-    .def("retrieveAsDataItem", &retrieveAsDataItem, "Retrieve the named object as data item. Raises an exception if the name does not exist")
-    .def("retrieve", &retrieveUpcastedPtr, "Retrieve the named object. Raises an exception if the name does not exist")
+    .def("retrieve", &retrieveAsWeakPtr, return_value_policy<Mantid::PythonInterface::upcast_returned_value>(),
+         "Retrieve the named object. Raises an exception if the name does not exist")
     .def("remove", &AnalysisDataServiceImpl::remove, "Remove a named object")
     .def("clear", &AnalysisDataServiceImpl::clear, "Removes all objects managed by the service.")
     .def("size", &AnalysisDataServiceImpl::size, "Returns the number of objects within the service")
-    .def("getObjectNames", &_getObjectNames, "Return the list of names currently known to the ADS")
+    .def("getObjectNames", &getObjectNamesAsList, "Return the list of names currently known to the ADS")
     // Make it act like a dictionary
     .def("__len__", &AnalysisDataServiceImpl::size)
-    .def("__getitem__", &retrieveUpcastedPtr)
+    .def("__getitem__", &retrieveAsWeakPtr, return_value_policy<Mantid::PythonInterface::upcast_returned_value>())
     .def("__contains__", &AnalysisDataServiceImpl::doesExist)
     .def("__delitem__", &AnalysisDataServiceImpl::remove)
     ;

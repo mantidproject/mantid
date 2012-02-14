@@ -85,7 +85,7 @@ namespace Crystal
    */
   void PredictPeaks::init()
   {
-    declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input,new InstrumentValidator<>),
+    declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input),
         "An input workspace (MatrixWorkspace or MDEventWorkspace) containing:\n"
         "  - The relevant Instrument (calibrated as needed).\n"
         "  - A sample with a UB matrix.\n"
@@ -223,7 +223,8 @@ namespace Crystal
     PeaksWorkspace_sptr HKLPeaksWorkspace = getProperty("HKLPeaksWorkspace");
 
     // Check the values.
-    if (!inWS) throw std::invalid_argument("Did not specify a valid InputWorkspace with a full instrument and sample.");
+    if (!inWS || !inWS->getInstrument()->getSample() )
+      throw std::invalid_argument("Did not specify a valid InputWorkspace with a full instrument and sample.");
     if (wlMin >= wlMax) throw std::invalid_argument("WavelengthMin must be < WavelengthMax.");
     if (wlMin < 1e-5) throw std::invalid_argument("WavelengthMin must be stricly positive.");
     if (minD < 1e-4) throw std::invalid_argument("MinDSpacing must be stricly positive.");

@@ -1,3 +1,12 @@
+
+###########################################################################
+# Add OpenMP flags here
+###########################################################################
+if ( OPENMP_FOUND )
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}" )
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}" )
+endif ()
+
 ###########################################################################
 # Now add the packages one-by-one, building up the dependencies as we go
 ###########################################################################
@@ -11,6 +20,7 @@ add_subdirectory ( CustomInterfaces )
 add_subdirectory ( DesignerPlugins )
 add_subdirectory ( SliceViewer )
 add_subdirectory ( Factory )
+
 
 ###########################################################################
 # Add a custom target to build all of the MantidQt packages

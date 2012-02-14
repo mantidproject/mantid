@@ -7,6 +7,7 @@
 #include "MantidVatesAPI/vtkThresholdingQuadFactory.h"
 #include "MockObjects.h"
 #include <cxxtest/TestSuite.h>
+#include <vtkStructuredGrid.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
@@ -26,19 +27,6 @@ class vtkThresholdingQuadFactoryTest: public CxxTest::TestSuite
 {
 
 public:
-  void testCreateMeshOnlyThrows()
-  {
-    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
-    vtkThresholdingQuadFactory factory(ThresholdRange_scptr(pRange), "signal");
-    TS_ASSERT_THROWS(factory.createMeshOnly() , std::runtime_error);
-  }
-
-  void testCreateScalarArrayThrows()
-  {
-    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
-    vtkThresholdingQuadFactory factory(ThresholdRange_scptr(pRange), "signal");
-    TS_ASSERT_THROWS(factory.createScalarArray() , std::runtime_error);
-  }
 
   void testIsValidThrowsWhenNoWorkspace()
   {
@@ -51,7 +39,7 @@ public:
     UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
     vtkThresholdingQuadFactory factory(ThresholdRange_scptr(pRange), "signal");
 
-    TSM_ASSERT_THROWS("No workspace, so should not be possible to complete initialization.", factory.initialize(ws_sptr), std::runtime_error);
+    TSM_ASSERT_THROWS("No workspace, so should not be possible to complete initialization.", factory.initialize(ws_sptr), std::invalid_argument);
   }
 
   void testCreateWithoutInitializeThrows()
@@ -152,7 +140,7 @@ public:
 
     MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
     EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); //expect it then to call initialize on the successor.
-    EXPECT_CALL(*pMockFactorySuccessor, create()).Times(1); //expect it then to call create on the successor.
+    EXPECT_CALL(*pMockFactorySuccessor, create()).Times(1).WillOnce(Return(vtkStructuredGrid::New())); //expect it then to call create on the successor.
     EXPECT_CALL(*pMockFactorySuccessor, getFactoryTypeName()).WillOnce(testing::Return("TypeA")); 
 
     //Constructional method ensures that factory is only suitable for providing mesh information.

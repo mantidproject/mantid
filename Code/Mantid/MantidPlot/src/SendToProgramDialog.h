@@ -27,17 +27,27 @@ public:
   std::pair<std::string,std::map<std::string,std::string> > getSettings() const;
 
 private slots:
+  /// Open up a new file browsing window.
   void browse();
+
+  /// Validate all user entered fields to enable/disable the save button.
   void validateAll();
+
+  /// See if user has entered a name for the program.
   void validateName();
+
+  /// Validate user specified target.
   void validateTarget();
+  
+  /// Validate user specified save algorithm.
   void validateSaveUsing();
+
+  /// Save the new/edited program.
   void save();
 
 private:
   bool validName, validTarget, validSaveUsing;
   Ui::SendToProgramDialog m_uiform;
-  //MantidUI * const m_mantidUI;
   std::pair<std::string,std::map<std::string,std::string> > m_settings;
 };
 

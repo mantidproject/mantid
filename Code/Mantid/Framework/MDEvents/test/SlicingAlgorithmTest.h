@@ -405,7 +405,7 @@ public:
     TS_ASSERT_EQUALS( alg->m_bases[1], baseY);
     TS_ASSERT_EQUALS( alg->m_bases[2], baseZ);
 
-    coord_t in[3] = {3.0, 1.0, 2.6};
+    coord_t in[3] = {3.0, 1.0, 2.6f};
     coord_t out[3];  VMD outV;
 
     // The "binning" transform
@@ -465,7 +465,7 @@ public:
     TS_ASSERT_EQUALS( alg->m_bases[1], baseY);
     TS_ASSERT_EQUALS( alg->m_bases[2], baseZ);
 
-    coord_t in[3] = {3.0, -1.0, 2.6};
+    coord_t in[3] = {3.0, -1.0, 2.6f};
     coord_t out[3];  VMD outV;
 
     // The "binning" transform

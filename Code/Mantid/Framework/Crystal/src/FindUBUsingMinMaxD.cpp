@@ -72,7 +72,7 @@ namespace Crystal
 
     // use negative values, force user to input all parameters
     this->declareProperty(new PropertyWithValue<double>( "MinD",-1.0,
-          mustBePositive->clone(),Direction::Input),
+          mustBePositive,Direction::Input),
           "Lower Bound on Lattice Parameters a, b, c");
 
     this->declareProperty(new PropertyWithValue<double>( "MaxD",-1.0,

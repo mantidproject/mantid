@@ -47,8 +47,8 @@ namespace Mantid
       for (size_t d=0; d<nDimensions; d++)
       {
         IMDDimension_const_sptr inDim = eventWs->getDimension(d);
-        double min = (ext[d].min);
-        double max = (ext[d].max);
+        coord_t min = (ext[d].min);
+        coord_t max = (ext[d].max);
         if (min > max)
         {
           min = 0.0;

@@ -225,8 +225,6 @@ public:
   virtual std::string name()const = 0;
   /// Writes itself into a string
   virtual std::string asString()const;
-  /// The string operator
-  virtual operator std::string()const{return asString();}
   /// Set the workspace. Make 
   /// @param ws :: Shared pointer to a workspace
   virtual void setWorkspace(boost::shared_ptr<const Workspace> ws) = 0;

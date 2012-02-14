@@ -51,29 +51,29 @@ public:
   {
     BoxController_sptr sc( new BoxController(1));
     std::vector<MDDimensionExtents> extents(1);
-    extents[0].min=1.23;
-    extents[0].max=2.34;
+    extents[0].min=123;
+    extents[0].max=234;
     MDBox<MDLeanEvent<1>,1> box(sc, 2, extents);
     TS_ASSERT_EQUALS( box.getNumDims(), 1);
     TS_ASSERT_EQUALS( box.getBoxController(), sc);
     TS_ASSERT_EQUALS( box.getNPoints(), 0);
     TS_ASSERT_EQUALS( box.getDepth(), 2);
     TS_ASSERT_EQUALS( box.getNumMDBoxes(), 1);
-    TS_ASSERT_DELTA( box.getExtents(0).min, 1.23, 1e-5);
-    TS_ASSERT_DELTA( box.getExtents(0).max, 2.34, 1e-5);
+    TS_ASSERT_DELTA( box.getExtents(0).min, 123, 1e-5);
+    TS_ASSERT_DELTA( box.getExtents(0).max, 234, 1e-5);
   }
 
   void test_copy_constructor()
   {
     BoxController_sptr sc( new BoxController(1));
     std::vector<MDDimensionExtents> extents(1);
-    extents[0].min=1.23;
-    extents[0].max=2.34;
+    extents[0].min=123;
+    extents[0].max=234;
     MDBox<MDLeanEvent<1>,1> box1(sc, 2, extents);
     MDLeanEvent<1> ev(1.23, 2.34);
     for (size_t i=0; i<15; i++)
     {
-      ev.setCenter(0, double(i)*1.0);
+      ev.setCenter(0, static_cast<coord_t>(i));
       box1.addEvent(ev);
     }
     // Do the copy
@@ -87,8 +87,8 @@ public:
     TS_ASSERT_DELTA( events[7].getCenter(0), 7.0, 1e-4);
     TS_ASSERT_EQUALS( box2.getDepth(), 2);
     TS_ASSERT_EQUALS( box2.getNumMDBoxes(), 1);
-    TS_ASSERT_DELTA( box2.getExtents(0).min, 1.23, 1e-5);
-    TS_ASSERT_DELTA( box2.getExtents(0).max, 2.34, 1e-5);
+    TS_ASSERT_DELTA( box2.getExtents(0).min, 123, 1e-5);
+    TS_ASSERT_DELTA( box2.getExtents(0).max, 234, 1e-5);
   }
 
 
@@ -100,6 +100,22 @@ public:
     ev.setCenter(0, 2.0);
     ev.setCenter(1, 3.0);
     b.addEvent(ev);
+    TS_ASSERT_EQUALS( b.getNPoints(), 1)
+#ifndef MDBOX_TRACK_SIGNAL_WHEN_ADDING
+    b.refreshCache();
+#endif
+    // Did it keep a running total of the signal and error?
+    TS_ASSERT_DELTA( b.getSignal(), 1.2*1, 1e-5);
+    TS_ASSERT_DELTA( b.getErrorSquared(), 3.4*1, 1e-5);
+  }
+  /** Adding events in unsafe way also works */
+  void test_addEventUnsafe()
+  {
+    MDBox<MDLeanEvent<2>,2> b;
+    MDLeanEvent<2> ev(1.2, 3.4);
+    ev.setCenter(0, 2.0);
+    ev.setCenter(1, 3.0);
+    b.addEventUnsafe(ev);
     TS_ASSERT_EQUALS( b.getNPoints(), 1)
 #ifndef MDBOX_TRACK_SIGNAL_WHEN_ADDING
     b.refreshCache();
@@ -143,7 +159,7 @@ public:
     for (size_t i=0; i<10; i++)
       vec.push_back(ev);
 
-    b.addEvents(vec, 5, 8);
+    b.addEventsPart(vec, 5, 8);
 #ifndef MDBOX_TRACK_SIGNAL_WHEN_ADDING
     b.refreshCache();
 #endif
@@ -298,12 +314,12 @@ public:
   void test_centerpointBin()
   {
     MDBox<MDLeanEvent<2>,2> box;
-    for (coord_t x=0.5; x < 10.0; x += 1.0)
-      for (coord_t y=0.5; y < 10.0; y += 1.0)
+    for (double x=0.5; x < 10.0; x += 1.0)
+      for (double y=0.5; y < 10.0; y += 1.0)
       {
         MDLeanEvent<2> ev(1.0, 1.5);
-        ev.setCenter(0, x);
-        ev.setCenter(1, y);
+        ev.setCenter(0, static_cast<coord_t>(x));
+        ev.setCenter(1, static_cast<coord_t>(y));
         box.addEvent(ev);
       }
     TS_ASSERT_EQUALS(box.getNPoints(), 100);
@@ -352,9 +368,9 @@ public:
   {
     // One event at each integer coordinate value between 1 and 9
     MDBox<MDLeanEvent<3>,3> box;
-    for (coord_t x=1.0; x < 10.0; x += 1.0)
-      for (coord_t y=1.0; y < 10.0; y += 1.0)
-        for (coord_t z=1.0; z < 10.0; z += 1.0)
+    for (double x=1.0; x < 10.0; x += 1.0)
+      for (double y=1.0; y < 10.0; y += 1.0)
+        for (double z=1.0; z < 10.0; z += 1.0)
         {
           MDLeanEvent<3> ev(1.0, 1.5);
           ev.setCenter(0, x);
@@ -367,7 +383,7 @@ public:
 
     dotest_integrateSphere(box, 5.0,5.0,5.0,  0.5,   1.0);
     dotest_integrateSphere(box, 0.5,0.5,0.5,  0.5,   0.0);
-    dotest_integrateSphere(box, 5.0,5.0,5.0,  1.1,   7.0);
+    dotest_integrateSphere(box, 5.0,5.0,5.0,  1.1f,   7.0);
     dotest_integrateSphere(box, 5.0,5.0,5.0,  10., 9*9*9);
   }
 
@@ -437,7 +453,7 @@ public:
     signal_t signal = 0.0;
     b.centroidSphere(sphere, 400., centroid, signal);
     for (size_t d=0; d<2; d++)
-      centroid[d] /= signal;
+      centroid[d] /= static_cast<coord_t>(signal);
 
     // This should be the weighted centroid
     TS_ASSERT_DELTA( signal, 6.000, 0.001);
@@ -450,7 +466,7 @@ public:
       centroid[d] = 0.0;
     b.centroidSphere(sphere, 16., centroid, signal);
     for (size_t d=0; d<2; d++)
-      centroid[d] /= signal;
+      centroid[d] /= static_cast<coord_t>(signal);
     // Only one event was contained
     TS_ASSERT_DELTA( signal, 2.000, 0.001);
     TS_ASSERT_DELTA( centroid[0], 2.000, 0.001);

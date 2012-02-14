@@ -74,8 +74,6 @@ Q_PROPERTY(QString GeometryXML READ getGeometryXML WRITE setGeometryXML NOTIFY v
 
 virtual void raiseModified();
 
-virtual void raiseNoClipping();
-
 ~GeometryWidget();
 
 /// Gets the chosen geometry configuration.

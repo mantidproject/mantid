@@ -1,8 +1,6 @@
 #ifndef WORKSPACETEST_H_
 #define WORKSPACETEST_H_
 
-#include "MantidTestHelpers/FakeObjects.h"
-#include "MantidTestHelpers/FakeGmockObjects.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
@@ -11,9 +9,12 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
+#include "MantidKernel/NexusTestHelper.h"
+#include "MantidTestHelpers/FakeGmockObjects.h"
+#include "MantidTestHelpers/FakeObjects.h"
 #include <boost/scoped_ptr.hpp>
 #include <cxxtest/TestSuite.h>
-#include "MantidKernel/NexusTestHelper.h"
+#include "MantidKernel/VMD.h"
 
 using std::size_t;
 using namespace Mantid::Kernel;
@@ -583,7 +584,27 @@ public:
     TS_ASSERT_EQUALS( out[0], 0);
     TS_ASSERT_EQUALS( out[1], 1);
     TS_ASSERT_EQUALS( out[99], 99);
+  }
 
+  void test_getSignalAtCoord()
+  {
+    boost::shared_ptr<MatrixWorkspace> ws(new WorkspaceTester());
+    // Matrix with 4 spectra, 5 bins each
+    ws->initialize(4,6,5);
+    for (size_t wi=0; wi<4; wi++)
+      for (size_t x=0; x<6; x++)
+      {
+        ws->dataX(wi)[x] = double(x);
+        if (x<5)
+        {
+          ws->dataY(wi)[x] = double(wi*10 + x);
+          ws->dataE(wi)[x] = double((wi*10 + x)*2);
+        }
+      }
+    coord_t coords[2] = {0.5, 1.0};
+    TS_ASSERT_DELTA(ws->getSignalAtCoord(coords, Mantid::API::NoNormalization), 10.0, 1e-5);
+    coords[0] = 1.5;
+    TS_ASSERT_DELTA(ws->getSignalAtCoord(coords, Mantid::API::NoNormalization), 11.0, 1e-5);
   }
 
 

@@ -147,6 +147,22 @@ public:
   }
 
   //-------------------------------------------------------------------------------------
+  /** Create several IMDIterators to run them in parallel */
+  void test_createIterators()
+  {
+    MDEventWorkspace3 * ew = new MDEventWorkspace3();
+    BoxController_sptr bc = ew->getBoxController();
+    bc->setSplitInto(4);
+    ew->splitBox();
+    std::vector<IMDIterator *> iterators = ew->createIterators(3);
+    TS_ASSERT_EQUALS(iterators.size(), 3);
+
+    TS_ASSERT_EQUALS(iterators[0]->getDataSize(), 21);
+    TS_ASSERT_EQUALS(iterators[1]->getDataSize(), 21);
+    TS_ASSERT_EQUALS(iterators[2]->getDataSize(), 22);
+  }
+
+  //-------------------------------------------------------------------------------------
   /** Method that makes a table workspace for use in MantidPlot */
   void test_makeBoxTable()
   {
@@ -164,14 +180,14 @@ public:
     MDEventWorkspace3Lean::sptr ew = MDEventsTestHelper::makeMDEW<3>(4, 0.0, 4.0, 1);
     coord_t coords1[3] = {1.5,1.5,1.5};
     coord_t coords2[3] = {2.5,2.5,2.5};
-    coord_t coords3[3] = {-0.1, 2, 2};
-    coord_t coords4[3] = {2, 2, 4.1};
+    coord_t coords3[3] = {-0.1f, 2, 2};
+    coord_t coords4[3] = {2, 2, 4.1f};
     ew->addEvent(MDLeanEvent<3>(2.0, 2.0, coords2));
     ew->refreshCache();
-    TSM_ASSERT_DELTA("A regular box with a single event", ew->getSignalAtCoord(coords1), 1.0, 1e-5);
-    TSM_ASSERT_DELTA("The box with 2 events", ew->getSignalAtCoord(coords2), 3.0, 1e-5);
-    TSM_ASSERT("Out of bounds returns NAN", boost::math::isnan( ew->getSignalAtCoord(coords3) ) );
-    TSM_ASSERT("Out of bounds returns NAN", boost::math::isnan( ew->getSignalAtCoord(coords4) ) );
+    TSM_ASSERT_DELTA("A regular box with a single event", ew->getSignalAtCoord(coords1, Mantid::API::NoNormalization), 1.0, 1e-5);
+    TSM_ASSERT_DELTA("The box with 2 events", ew->getSignalAtCoord(coords2, Mantid::API::NoNormalization), 3.0, 1e-5);
+    TSM_ASSERT("Out of bounds returns NAN", boost::math::isnan( ew->getSignalAtCoord(coords3, Mantid::API::NoNormalization) ) );
+    TSM_ASSERT("Out of bounds returns NAN", boost::math::isnan( ew->getSignalAtCoord(coords4, Mantid::API::NoNormalization) ) );
   }
 
   //-------------------------------------------------------------------------------------
@@ -202,7 +218,7 @@ public:
       {
         for (size_t i=0; i < num_repeat; i++)
         {
-          coord_t centers[2] = {x, y};
+          coord_t centers[2] = {static_cast<coord_t>(x), static_cast<coord_t>(y)};
           events.push_back( MDLeanEvent<2>(2.0, 2.0, centers) );
         }
       }
@@ -241,9 +257,9 @@ public:
     TS_ASSERT_DELTA( ext[1].max, ymax, 1e-4);
   }
 
-  void addEvent(MDEventWorkspace2Lean::sptr b, coord_t x, coord_t y)
+  void addEvent(MDEventWorkspace2Lean::sptr b, double x, double y)
   {
-    coord_t centers[2] = {x, y};
+    coord_t centers[2] = {static_cast<coord_t>(x), static_cast<coord_t>(y)};
     b->addEvent(MDLeanEvent<2>(2.0, 2.0, centers));
   }
 
@@ -264,7 +280,7 @@ public:
     for (double x=4.0005; x < 7; x += 1.0)
       for (double y=4.0005; y < 7; y += 1.0)
       {
-        coord_t centers[2] = {x, y};
+        double centers[2] = {x, y};
         events.push_back( MDLeanEvent<2>(2.0, 2.0, centers) );
       }
     // So it doesn't split
