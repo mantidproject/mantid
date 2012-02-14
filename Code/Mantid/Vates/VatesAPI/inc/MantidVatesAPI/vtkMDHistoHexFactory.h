@@ -62,7 +62,7 @@ public:
   virtual void initialize(Mantid::API::Workspace_sptr workspace);
 
   /// Factory method
-  vtkDataSet* create() const;
+  vtkDataSet* create(ProgressAction& progressUpdating) const;
 
   virtual std::string getFactoryTypeName() const
   {

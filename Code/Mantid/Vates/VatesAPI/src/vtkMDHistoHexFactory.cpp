@@ -2,6 +2,7 @@
 #include "MantidKernel/CPUTimer.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidVatesAPI/vtkMDHistoHexFactory.h"
+#include "MantidVatesAPI/ProgressAction.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <vtkImageData.h>
 #include <vtkRectilinearGrid.h>
@@ -278,13 +279,14 @@ namespace VATES
   }
 
 
-  /** Create the data set;
-   * will call the successor if the # of dimensions is not for this factory.
-   * @return
-   */
-  vtkDataSet* vtkMDHistoHexFactory::create() const
+  /**
+  Create the vtkStructuredGrid from the provided workspace
+  @param progressUpdating: Reporting object to pass progress information up the stack.
+  @return fully constructed vtkDataSet.
+  */
+  vtkDataSet* vtkMDHistoHexFactory::create(ProgressAction& progressUpdating) const
   {
-    vtkDataSet* product = tryDelegatingCreation<MDHistoWorkspace, 3>(m_workspace);
+    vtkDataSet* product = tryDelegatingCreation<MDHistoWorkspace, 3>(m_workspace, progressUpdating);
     if(product != NULL)
     {
       return product;

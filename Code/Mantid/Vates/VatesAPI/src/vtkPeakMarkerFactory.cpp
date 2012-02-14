@@ -1,4 +1,5 @@
 #include "MantidVatesAPI/vtkPeakMarkerFactory.h"
+#include "MantidVatesAPI/ProgressAction.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
@@ -66,11 +67,12 @@ namespace VATES
   }
 
 
-  /** Create a vtkDataSet of points, one per peak.
-   *
-   * @return vtkUnstructuredGrid with a bunch of points.
-   */
-  vtkDataSet* vtkPeakMarkerFactory::create() const
+  /**
+  Create the vtkStructuredGrid from the provided workspace
+  @param progressUpdating: Reporting object to pass progress information up the stack.
+  @return vtkUnStructuredGrid with a bunch of points.
+  */
+  vtkDataSet* vtkPeakMarkerFactory::create(ProgressAction& progressUpdating) const
   {
     validate();
 

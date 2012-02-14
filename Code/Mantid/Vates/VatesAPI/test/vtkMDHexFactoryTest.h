@@ -46,6 +46,7 @@ private:
     slice.execute();
 
     Workspace_sptr binned_ws = AnalysisDataService::Instance().retrieve("binned");
+    FakeProgressAction progressUpdater;
 
     vtkMDHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
     factory.setCheckDimensionality(doCheckDimensionality);
@@ -57,7 +58,7 @@ private:
     {
       TS_ASSERT_THROWS_NOTHING(factory.initialize(binned_ws));
       vtkDataSet* product = NULL;
-      TS_ASSERT_THROWS_NOTHING(product = factory.create());
+      TS_ASSERT_THROWS_NOTHING(product = factory.create(progressUpdater));
       product->Delete();
     }
   }
@@ -68,8 +69,9 @@ public:
 
   void testCreateWithoutInitalizeThrows()
   {
+    FakeProgressAction progressUpdater;
     vtkMDHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
-    TSM_ASSERT_THROWS("Have NOT initalized object. Should throw.", factory.create(), std::runtime_error);
+    TSM_ASSERT_THROWS("Have NOT initalized object. Should throw.", factory.create(progressUpdater), std::runtime_error);
   }
 
   void testInitalizeWithNullWorkspaceThrows()
@@ -104,9 +106,10 @@ public:
 
   void testCreateDelegatesToSuccessor()
   {
+    FakeProgressAction progressUpdater;
     MockvtkDataSetFactory* mockSuccessor = new MockvtkDataSetFactory;
     EXPECT_CALL(*mockSuccessor, initialize(_)).Times(1);
-    EXPECT_CALL(*mockSuccessor, create()).Times(1).WillOnce(Return(vtkStructuredGrid::New()));
+    EXPECT_CALL(*mockSuccessor, create(Ref(progressUpdater))).Times(1).WillOnce(Return(vtkStructuredGrid::New()));
     EXPECT_CALL(*mockSuccessor, getFactoryTypeName()).Times(1);
 
     vtkMDHexFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
@@ -114,13 +117,14 @@ public:
 
     ITableWorkspace_sptr ws(new Mantid::DataObjects::TableWorkspace);
     TS_ASSERT_THROWS_NOTHING(factory.initialize(ws));
-    TS_ASSERT_THROWS_NOTHING(factory.create());
+    TS_ASSERT_THROWS_NOTHING(factory.create(progressUpdater));
 
     TSM_ASSERT("Successor has not been used properly.", Mock::VerifyAndClearExpectations(mockSuccessor));
   }
 
   void testOnInitaliseCannotDelegateToSuccessor()
   {
+    FakeProgressAction progressUpdater;
     vtkMDHexFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
     //factory.SetSuccessor(mockSuccessor); No Successor set.
 
@@ -130,9 +134,10 @@ public:
 
   void testCreateWithoutInitializeThrows()
   {
+    FakeProgressAction progressUpdater;
     vtkMDHexFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
     //initialize not called!
-    TS_ASSERT_THROWS(factory.create(), std::runtime_error);
+    TS_ASSERT_THROWS(factory.create(progressUpdater), std::runtime_error);
   }
 
   /*Demonstrative tests*/
@@ -148,12 +153,14 @@ public:
 
   void test_3DWorkspace()
   {
+    FakeProgressAction progressUpdate;
+
     Mantid::MDEvents::MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
     vtkMDHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
     factory.initialize(ws);
     vtkDataSet* product = NULL;
 
-    TS_ASSERT_THROWS_NOTHING(product = factory.create());
+    TS_ASSERT_THROWS_NOTHING(product = factory.create(progressUpdate));
 
     const size_t expected_n_points = 8000;
     const size_t expected_n_cells = 1000;
@@ -179,12 +186,14 @@ public:
 
   void test_4DWorkspace()
   {
+    FakeProgressAction progressUpdate;
+
     Mantid::MDEvents::MDEventWorkspace4Lean::sptr ws = MDEventsTestHelper::makeMDEW<4>(5, -10.0, 10.0, 1);
     vtkMDHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
     factory.initialize(ws);
     vtkDataSet* product = NULL;
 
-    TS_ASSERT_THROWS_NOTHING(product = factory.create());
+    TS_ASSERT_THROWS_NOTHING(product = factory.create(progressUpdate));
 
     const size_t expected_n_points = 8*125;
     const size_t expected_n_cells = 125;
@@ -233,11 +242,13 @@ public :
   /* Create 1E6 cells*/
   void test_CreateDataSet_from3D()
   {
+    FakeProgressAction progressUpdate;
+
     vtkMDHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
     factory.initialize(m_ws3);
     vtkDataSet* product = NULL;
 
-    TS_ASSERT_THROWS_NOTHING(product = factory.create());
+    TS_ASSERT_THROWS_NOTHING(product = factory.create(progressUpdate));
 
     const size_t expected_n_points = 8000000;
     const size_t expected_n_cells = 1000000;
@@ -267,11 +278,13 @@ public :
   /* Create 1E6 cells*/
   void test_CreateDataSet_from4D()
   {
+    FakeProgressAction progressUpdate;
+
     vtkMDHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
     factory.initialize(m_ws4);
     vtkDataSet* product = NULL;
 
-    TS_ASSERT_THROWS_NOTHING(product = factory.create());
+    TS_ASSERT_THROWS_NOTHING(product = factory.create(progressUpdate));
 
     const size_t expected_n_points = 8*65536;
     const size_t expected_n_cells = 65536;

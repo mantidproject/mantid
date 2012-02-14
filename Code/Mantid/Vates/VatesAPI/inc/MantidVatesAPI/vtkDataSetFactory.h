@@ -20,6 +20,9 @@ namespace Mantid
 namespace VATES
 {
 
+  //Forward declaration
+  class ProgressAction;
+
   /* Helper struct allows recognition of points that we should not bother to draw.
   */
   struct UnstructuredPoint
@@ -68,13 +71,13 @@ public:
   virtual ~vtkDataSetFactory()=0;
 
   /// Factory Method. Should also handle delegation to successors.
-  virtual vtkDataSet* create() const=0;
+  virtual vtkDataSet* create(ProgressAction&) const=0;
 
   /// Initalize with a target workspace.
   virtual void initialize(Mantid::API::Workspace_sptr)=0;
 
   /// Create the product in one step.
-  virtual vtkDataSet* oneStepCreate(Mantid::API::Workspace_sptr);
+  virtual vtkDataSet* oneStepCreate(Mantid::API::Workspace_sptr,ProgressAction&);
 
   /// Add a chain-of-responsibility successor to this factory. Handle case where the factory cannot render the MDWorkspace owing to its dimensionality.
   virtual void SetSuccessor(vtkDataSetFactory* pSuccessor);
@@ -182,18 +185,19 @@ protected:
   /**
   Common creation implementation whereby delegation to successor is attempted if appropriate. 
   @param: workspace : workspace to cast and create from.
+  @param: progressUpdate : object used to pass progress information back up the stack.
   @param: output : product vtkDataSet, set to NULL if FALSE is returned. Otherwise contains visualisation data if TRUE is returned.
   @return: TRUE if delegation to successors has occured. Otherwise returns false.
   */
   template<typename IMDWorkspaceType, size_t ExpectedNDimensions>
-  vtkDataSet* tryDelegatingCreation(Mantid::API::Workspace_sptr workspace, bool bExactMatch=true) const
+  vtkDataSet* tryDelegatingCreation(Mantid::API::Workspace_sptr workspace, ProgressAction& progressUpdate, bool bExactMatch=true) const
   {
     boost::shared_ptr<IMDWorkspaceType> imdws = castAndCheck<IMDWorkspaceType, ExpectedNDimensions>(workspace, bExactMatch);
     if(!imdws)
     {
       if(this->hasSuccessor())
       {
-        return m_successor->create();
+        return m_successor->create(progressUpdate);
       }
       else
       {

@@ -9,6 +9,7 @@ public:
   vtkTypeRevisionMacro(vtkSplatterPlot,vtkUnstructuredGridAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
   void SetNumberOfPoints(int nPoints);
+  void updateAlgorithmProgress(double progress, const std::string& message);
 protected:
 
   vtkSplatterPlot();

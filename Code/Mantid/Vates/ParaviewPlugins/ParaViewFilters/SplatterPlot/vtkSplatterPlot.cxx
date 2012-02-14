@@ -14,6 +14,7 @@
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
 #include "MantidVatesAPI/FieldDataToMetadata.h"
 #include "MantidVatesAPI/vtkDataSetToWsName.h"
+#include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 
 using namespace Mantid::API;
 using namespace Mantid::VATES;
@@ -67,8 +68,9 @@ int vtkSplatterPlot::RequestData(vtkInformation *, vtkInformationVector **, vtkI
   std::string scalarName = "signal";
   vtkSplatterPlotFactory vtkGridFactory(ThresholdRange_scptr(new NoThresholdRange), scalarName, m_numberPoints);
   vtkGridFactory.initialize(result);
-
-  vtkDataSet* product = vtkGridFactory.create();
+  
+  FilterUpdateProgressAction<vtkSplatterPlot> drawUpdateProgress(this, "Drawing...");
+  vtkDataSet* product = vtkGridFactory.create(drawUpdateProgress);
   product->SetFieldData(input->GetFieldData());
   output->ShallowCopy(product);
 
@@ -83,6 +85,17 @@ int vtkSplatterPlot::RequestInformation(vtkInformation *request, vtkInformationV
 void vtkSplatterPlot::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
+}
+
+/**
+Output the progress information and progress text.
+@param : progress
+@param : message
+*/
+void vtkSplatterPlot::updateAlgorithmProgress(double progress, const std::string& message)
+{
+  this->SetProgress(progress);
+  this->SetProgressText(message.c_str());
 }
 
 

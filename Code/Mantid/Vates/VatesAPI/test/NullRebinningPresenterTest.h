@@ -26,9 +26,7 @@ private:
     virtual ~FakeDataSetFactory(){ }
   private:
     
-    virtual vtkDataSet* create() const{ throw std::runtime_error("Not implemented on test type");}
-    virtual vtkDataSet* createMeshOnly() const{ throw std::runtime_error("Not implemented on test type");}
-    virtual vtkFloatArray* createScalarArray() const{ throw std::runtime_error("Not implemented on test type");}
+    virtual vtkDataSet* create(ProgressAction&) const{ throw std::runtime_error("Not implemented on test type");}
     virtual void initialize(boost::shared_ptr<Mantid::API::Workspace>){throw std::runtime_error("Not implemented on test type");}
     virtual void SetSuccessor(vtkDataSetFactory*){ throw std::runtime_error("Not implemented on test type");}
     virtual bool hasSuccessor() const{ throw std::runtime_error("Not implemented on test type");}

@@ -4,6 +4,7 @@
 #include "MantidVatesAPI/TimeStepToTimeStep.h"
 #include "MantidVatesAPI/TimeToTimeStep.h"
 #include "MantidVatesAPI/vtkMDHistoHex4DFactory.h"
+#include "MantidVatesAPI/ProgressAction.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 
 using Mantid::API::IMDWorkspace;
@@ -78,10 +79,15 @@ namespace VATES
     validateWsNotNull();
   }
 
+  /**
+  Create the vtkStructuredGrid from the provided workspace
+  @param progressUpdating: Reporting object to pass progress information up the stack.
+  @return fully constructed vtkDataSet.
+  */
   template<typename TimeMapper>
-  vtkDataSet* vtkMDHistoHex4DFactory<TimeMapper>::create() const
+  vtkDataSet* vtkMDHistoHex4DFactory<TimeMapper>::create(ProgressAction& progressUpdating) const
   {
-    vtkDataSet* product = tryDelegatingCreation<MDHistoWorkspace, 4>(m_workspace);
+    vtkDataSet* product = tryDelegatingCreation<MDHistoWorkspace, 4>(m_workspace, progressUpdating);
     if(product != NULL)
     {
       return product;

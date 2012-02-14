@@ -48,6 +48,7 @@ public:
 
   void do_test(MockPeak & peak1, vtkPeakMarkerFactory::ePeakDimensions dims)
   {
+    FakeProgressAction updateProgress;
     boost::shared_ptr<MockPeaksWorkspace> pw_ptr(new MockPeaksWorkspace());
     MockPeaksWorkspace & pw = *pw_ptr;
 
@@ -57,7 +58,7 @@ public:
 
     vtkPeakMarkerFactory factory("signal", dims);
     factory.initialize(pw_ptr);
-    vtkDataSet * set = factory.create();
+    vtkDataSet * set = factory.create(updateProgress);
     TS_ASSERT(set);
     TS_ASSERT_EQUALS( set->GetNumberOfPoints(), 5);
     TS_ASSERT_EQUALS(set->GetPoint(0)[0], 1.0);
@@ -113,9 +114,10 @@ public:
 
   void testCreateWithoutInitializeThrows()
   {
+    FakeProgressAction progressUpdate;
     using namespace Mantid::VATES;
     vtkPeakMarkerFactory factory("signal");
-    TS_ASSERT_THROWS(factory.create(), std::runtime_error);
+    TS_ASSERT_THROWS(factory.create(progressUpdate), std::runtime_error);
   }
 
   void testTypeName()

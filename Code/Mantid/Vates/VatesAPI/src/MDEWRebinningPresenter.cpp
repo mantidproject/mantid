@@ -256,9 +256,10 @@ namespace Mantid
     /**
     Direct Mantid Algorithms and Workspaces to produce a visual dataset.
     @param factory : Factory, or chain of factories used for Workspace to VTK dataset conversion.
-    @param eventHandler : Handler for GUI updates while algorithm progresses.
+    @param rebinninActionReporting : Handler for GUI updates while algorithm progresses.
+    @param drawingActionReporting : Handler for GUI updates while vtkDataSetFactory::create occurs.
     */
-    vtkDataSet* MDEWRebinningPresenter::execute(vtkDataSetFactory* factory, ProgressAction& eventHandler)
+    vtkDataSet* MDEWRebinningPresenter::execute(vtkDataSetFactory* factory, ProgressAction& rebinninActionReporting)
     {
       std::string wsName = m_serializer.getWorkspaceName();
 
@@ -327,7 +328,7 @@ namespace Mantid
         }
 
         binningAlg->setPropertyValue("OutputWorkspace", outWsName);
-        Poco::NObserver<ProgressAction, Mantid::API::Algorithm::ProgressNotification> observer(eventHandler, &ProgressAction::handler);
+        Poco::NObserver<ProgressAction, Mantid::API::Algorithm::ProgressNotification> observer(rebinninActionReporting, &ProgressAction::handler);
         //Add observer.
         binningAlg->addObserver(observer);
         //Run the rebinning algorithm.
@@ -338,7 +339,7 @@ namespace Mantid
 
       Mantid::API::Workspace_sptr result=Mantid::API::AnalysisDataService::Instance().retrieve(outWsName);
 
-      vtkDataSet* temp = factory->oneStepCreate(result);
+      vtkDataSet* temp = factory->oneStepCreate(result, rebinninActionReporting);//HACK: progressUpdate should be argument for drawing!
 
       persistReductionKnowledge(temp, this->m_serializer, XMLDefinitions::metaDataId().c_str());
       m_request->reset();

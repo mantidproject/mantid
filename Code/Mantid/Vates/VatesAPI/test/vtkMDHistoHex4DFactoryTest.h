@@ -9,8 +9,6 @@
 #include "MantidVatesAPI/vtkMDHistoHex4DFactory.h"
 #include "MockObjects.h"
 #include <cxxtest/TestSuite.h>
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
 #include <vtkStructuredGrid.h>
 
 using namespace Mantid;
@@ -30,6 +28,8 @@ public:
 
   void testThresholds()
   {
+    FakeProgressAction progressAction;
+
     // Workspace with value 1.0 everywhere
     MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 4);
     ws_sptr->setTransformFromOriginal(new NullCoordTransform);
@@ -38,15 +38,15 @@ public:
 
     vtkMDHistoHex4DFactory<TimeStepToTimeStep> inside(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 2)), "signal", 0);
     inside.initialize(ws_sptr);
-    vtkUnstructuredGrid* insideProduct = dynamic_cast<vtkUnstructuredGrid*>(inside.create());
+    vtkUnstructuredGrid* insideProduct = dynamic_cast<vtkUnstructuredGrid*>(inside.create(progressAction));
 
     vtkMDHistoHex4DFactory<TimeStepToTimeStep> below(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 0.5)),"signal", 0);
     below.initialize(ws_sptr);
-    vtkUnstructuredGrid* belowProduct = dynamic_cast<vtkUnstructuredGrid*>(below.create());
+    vtkUnstructuredGrid* belowProduct = dynamic_cast<vtkUnstructuredGrid*>(below.create(progressAction));
 
     vtkMDHistoHex4DFactory<TimeStepToTimeStep> above(ThresholdRange_scptr(new UserDefinedThresholdRange(2, 3)), "signal", 0);
     above.initialize(ws_sptr);
-    vtkUnstructuredGrid* aboveProduct = dynamic_cast<vtkUnstructuredGrid*>(above.create());
+    vtkUnstructuredGrid* aboveProduct = dynamic_cast<vtkUnstructuredGrid*>(above.create(progressAction));
 
     TS_ASSERT_EQUALS((10*10*10), insideProduct->GetNumberOfCells());
     TS_ASSERT_EQUALS(0, belowProduct->GetNumberOfCells());
@@ -55,6 +55,8 @@ public:
 
   void testSignalAspects()
   {
+    FakeProgressAction progressUpdate;
+
     // Workspace with value 1.0 everywhere
     MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 4);
     ws_sptr->setTransformFromOriginal(new NullCoordTransform);
@@ -65,12 +67,13 @@ public:
       vtkMDHistoHex4DFactory<TimeStepToTimeStep> (ThresholdRange_scptr(pRange), "signal", 0);
     factory.initialize(ws_sptr);
 
-    vtkDataSet* product = factory.create();
+    vtkDataSet* product = factory.create(progressUpdate);
     TSM_ASSERT_EQUALS("A single array should be present on the product dataset.", 1, product->GetCellData()->GetNumberOfArrays());
     vtkDataArray* signalData = product->GetCellData()->GetArray(0);
     TSM_ASSERT_EQUALS("The obtained cell data has the wrong name.", std::string("signal"), signalData->GetName());
     const int correctCellNumber = 10*10*10;
     TSM_ASSERT_EQUALS("The number of signal values generated is incorrect.", correctCellNumber, signalData->GetSize());
+    
     product->Delete();
   }
 
@@ -87,9 +90,11 @@ public:
 
   void testCreateWithoutInitializeThrows()
   {
+    FakeProgressAction progressAction;
+
     UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
     vtkMDHistoHex4DFactory<TimeStepToTimeStep> factory(ThresholdRange_scptr(pRange), "signal", 1);
-    TS_ASSERT_THROWS(factory.create(), std::runtime_error);
+    TS_ASSERT_THROWS(factory.create(progressAction), std::runtime_error);
   }
 
   void testInitializationDelegates()
@@ -133,13 +138,15 @@ public:
 
   void testCreateDelegates()
   {
+    FakeProgressAction progressUpdate;
+
     //If the workspace provided is not a 4D imdworkspace, it should call the successor's initalization
     // 2D workspace
     MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
 
     MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
     EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); //expect it then to call initialize on the successor.
-    EXPECT_CALL(*pMockFactorySuccessor, create()).Times(1).WillOnce(Return(vtkStructuredGrid::New())); //expect it then to call create on the successor.
+    EXPECT_CALL(*pMockFactorySuccessor, create(Ref(progressUpdate))).Times(1).WillOnce(Return(vtkStructuredGrid::New())); //expect it then to call create on the successor.
     EXPECT_CALL(*pMockFactorySuccessor, getFactoryTypeName()).WillOnce(testing::Return("TypeA")); 
 
     UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
@@ -152,7 +159,7 @@ public:
     factory.SetSuccessor(pMockFactorySuccessor);
 
     factory.initialize(ws_sptr);
-    factory.create(); // should be called on successor.
+    factory.create(progressUpdate); // should be called on successor.
 
     TSM_ASSERT("successor factory not used as expected.", Mock::VerifyAndClearExpectations(pMockFactorySuccessor));
   }
@@ -190,10 +197,12 @@ public:
 
   void testGenerateVTKDataSet()
   {
+    FakeProgressAction progressUpdate;
+
     UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100000);
     vtkMDHistoHex4DFactory<TimeStepToTimeStep> factory(ThresholdRange_scptr(pRange), "signal", 0);
     factory.initialize(m_ws_sptr);
-    TS_ASSERT_THROWS_NOTHING(factory.create());
+    TS_ASSERT_THROWS_NOTHING(factory.create(progressUpdate));
   }
 
 };

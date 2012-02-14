@@ -56,7 +56,7 @@ however, some visualisation frameworks won't be able to treat these factories in
       virtual ~vtkMDHistoQuadFactory();
 
       /// Factory Method.
-      virtual vtkDataSet* create() const;
+      virtual vtkDataSet* create(ProgressAction& progressUpdating) const;
 
       virtual void initialize(Mantid::API::Workspace_sptr);
 

@@ -56,7 +56,7 @@ public:
   virtual ~vtkSplatterPlotFactory();
 
   /// Factory Method. Should also handle delegation to successors.
-  virtual vtkDataSet* create() const;
+  virtual vtkDataSet* create(ProgressAction& progressUpdating) const;
   
   /// Initalize with a target workspace.
   virtual void initialize(Mantid::API::Workspace_sptr);

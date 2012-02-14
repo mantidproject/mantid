@@ -28,21 +28,23 @@ class vtkMDHistoHexFactoryTest: public CxxTest::TestSuite
 
   void testThresholds()
   {
+    FakeProgressAction progressUpdate;
+
     // Workspace with value 1.0 everywhere
     MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
     ws_sptr->setTransformFromOriginal(new NullCoordTransform);
 
     vtkMDHistoHexFactory inside(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 2)), "signal");
     inside.initialize(ws_sptr);
-    vtkUnstructuredGrid* insideProduct = dynamic_cast<vtkUnstructuredGrid*>(inside.create());
+    vtkUnstructuredGrid* insideProduct = dynamic_cast<vtkUnstructuredGrid*>(inside.create(progressUpdate));
 
     vtkMDHistoHexFactory below(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 0.5)), "signal");
     below.initialize(ws_sptr);
-    vtkUnstructuredGrid* belowProduct = dynamic_cast<vtkUnstructuredGrid*>(below.create());
+    vtkUnstructuredGrid* belowProduct = dynamic_cast<vtkUnstructuredGrid*>(below.create(progressUpdate));
 
     vtkMDHistoHexFactory above(ThresholdRange_scptr(new UserDefinedThresholdRange(2, 3)), "signal");
     above.initialize(ws_sptr);
-    vtkUnstructuredGrid* aboveProduct = dynamic_cast<vtkUnstructuredGrid*>(above.create());
+    vtkUnstructuredGrid* aboveProduct = dynamic_cast<vtkUnstructuredGrid*>(above.create(progressUpdate));
 
     TS_ASSERT_EQUALS((10*10*10), insideProduct->GetNumberOfCells());
     TS_ASSERT_EQUALS(0, belowProduct->GetNumberOfCells());
@@ -51,6 +53,8 @@ class vtkMDHistoHexFactoryTest: public CxxTest::TestSuite
 
   void testSignalAspects()
   {
+    FakeProgressAction progressUpdate;
+
     // Workspace with value 1.0 everywhere
     MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
     ws_sptr->setTransformFromOriginal(new NullCoordTransform);
@@ -59,13 +63,14 @@ class vtkMDHistoHexFactoryTest: public CxxTest::TestSuite
     vtkMDHistoHexFactory factory (ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
     factory.initialize(ws_sptr);
 
-    vtkDataSet* product = factory.create();
+    vtkDataSet* product = factory.create(progressUpdate);
     TSM_ASSERT_EQUALS("A single array should be present on the product dataset.", 1, product->GetCellData()->GetNumberOfArrays());
     vtkDataArray* signalData = product->GetCellData()->GetArray(0);
     TSM_ASSERT_EQUALS("The obtained cell data has the wrong name.", std::string("signal"), signalData->GetName());
     const int correctCellNumber = 10 * 10 * 10;
     TSM_ASSERT_EQUALS("The number of signal values generated is incorrect.", correctCellNumber, signalData->GetSize());
     product->Delete();
+
   }
 
   void testIsValidThrowsWhenNoWorkspace()
@@ -80,8 +85,9 @@ class vtkMDHistoHexFactoryTest: public CxxTest::TestSuite
 
   void testCreateWithoutInitializeThrows()
   {
+    FakeProgressAction progressUpdate;
     vtkMDHistoHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
-    TS_ASSERT_THROWS(factory.create(), std::runtime_error);
+    TS_ASSERT_THROWS(factory.create(progressUpdate), std::runtime_error);
   }
 
   void testInitializationDelegates()
@@ -117,13 +123,14 @@ class vtkMDHistoHexFactoryTest: public CxxTest::TestSuite
 
   void testCreateDelegates()
   {
+    FakeProgressAction progressUpdate;
     //If the workspace provided is not a 4D imdworkspace, it should call the successor's initalization
     //2 dimensions on the workspace.
     Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
 
     MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
     EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); //expect it then to call initialize on the successor.
-    EXPECT_CALL(*pMockFactorySuccessor, create()).Times(1).WillOnce(Return(vtkStructuredGrid::New())); //expect it then to call create on the successor.
+    EXPECT_CALL(*pMockFactorySuccessor, create(Ref(progressUpdate))).Times(1).WillOnce(Return(vtkStructuredGrid::New())); //expect it then to call create on the successor.
     EXPECT_CALL(*pMockFactorySuccessor, getFactoryTypeName()).WillOnce(testing::Return("TypeA")); 
 
 
@@ -134,7 +141,7 @@ class vtkMDHistoHexFactoryTest: public CxxTest::TestSuite
     factory.SetSuccessor(pMockFactorySuccessor);
     
     factory.initialize(ws_sptr);
-    factory.create(); // should be called on successor.
+    factory.create(progressUpdate); // should be called on successor.
 
     TSM_ASSERT("successor factory not used as expected.", Mock::VerifyAndClearExpectations(pMockFactorySuccessor));
   }
@@ -168,11 +175,13 @@ public:
 
 	void testGenerateHexahedronVtkDataSet()
 	{
+    FakeProgressAction progressUpdate;
+
     //Create the factory.
     vtkMDHistoHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
     factory.initialize(m_ws_sptr);
 
-    TS_ASSERT_THROWS_NOTHING(factory.create());
+    TS_ASSERT_THROWS_NOTHING(factory.create(progressUpdate));
 	}
 };
 

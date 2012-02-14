@@ -1,4 +1,5 @@
 #include "MantidVatesAPI/vtkDataSetFactory.h"
+#include "MantidVatesAPI/ProgressAction.h"
 #include <stdexcept>
 
 namespace Mantid
@@ -62,12 +63,13 @@ bool vtkDataSetFactory::doesCheckDimensionality() const
 Convenience function. Creates an output visualisation data set in one-shot.
 
 @param ws : input workspace to interpret a vtkDataSet from.
+@param progressUpdater : object used to update the progress action.
 @result vtkDataSet* interpreted from input.
 */
-vtkDataSet* vtkDataSetFactory::oneStepCreate(Mantid::API::Workspace_sptr ws)
+vtkDataSet* vtkDataSetFactory::oneStepCreate(Mantid::API::Workspace_sptr ws, ProgressAction& progressUpdater)
 {
   this->initialize(ws);
-  return this->create();
+  return this->create(progressUpdater);
 }
 
 }

@@ -45,16 +45,16 @@ namespace Mantid
     /*
     Executes the underlying algorithm to create the MVP model.
     @param factory : visualisation factory to use.
-    @param eventHandler : object that encapuslates the direction of the gui change as the algorithm progresses.
+    @param progressUpdate : object that encapuslates the direction of the gui change as the algorithm progresses.
     */
-    vtkDataSet* SQWLoadingPresenter::execute(vtkDataSetFactory* factory, ProgressAction& eventHandler)
+    vtkDataSet* SQWLoadingPresenter::execute(vtkDataSetFactory* factory, ProgressAction& progressUpdate)
     {
       using namespace Mantid::API;
       using namespace Mantid::Geometry;
 
       if(this->shouldLoad())
       {
-        Poco::NObserver<ProgressAction, Mantid::API::Algorithm::ProgressNotification> observer(eventHandler, &ProgressAction::handler);
+        Poco::NObserver<ProgressAction, Mantid::API::Algorithm::ProgressNotification> observer(progressUpdate, &ProgressAction::handler);
         AnalysisDataService::Instance().remove("MD_EVENT_WS_ID");
         
         
@@ -80,7 +80,7 @@ namespace Mantid
 
       factory->setRecursionDepth(this->m_view->getRecursionDepth());
       
-      vtkDataSet* visualDataSet = factory->oneStepCreate(eventWs);
+      vtkDataSet* visualDataSet = factory->oneStepCreate(eventWs, progressUpdate);//HACK: progressUpdate should be argument for drawing!
 
       this->appendMetadata(visualDataSet, eventWs->getName());
       

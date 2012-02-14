@@ -20,6 +20,7 @@ using namespace Mantid;
 using namespace Mantid::VATES;
 using namespace Mantid::API;
 using namespace Mantid::MDEvents;
+using namespace testing;
 
 //=====================================================================================
 // Functional tests
@@ -33,8 +34,9 @@ public:
 
   void testCreateWithoutInitalizeThrows()
   {
+    FakeProgressAction progressUpdate;
     vtkSplatterPlotFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
-    TSM_ASSERT_THROWS("Have NOT initalized object. Should throw.", factory.create(), std::runtime_error);
+    TSM_ASSERT_THROWS("Have NOT initalized object. Should throw.", factory.create(progressUpdate), std::runtime_error);
   }
 
   void testInitalizeWithNullWorkspaceThrows()
@@ -58,12 +60,14 @@ public:
 
   void test_3DWorkspace()
   {
+    FakeProgressAction progressUpdate;
+
     Mantid::MDEvents::MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
     vtkSplatterPlotFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
     factory.initialize(ws);
     vtkDataSet* product = NULL;
 
-    TS_ASSERT_THROWS_NOTHING(product = factory.create());
+    TS_ASSERT_THROWS_NOTHING(product = factory.create(progressUpdate));
 
     const size_t expected_n_points = 1000;
     const size_t expected_n_cells = 999;
@@ -73,15 +77,6 @@ public:
     TSM_ASSERT_EQUALS("Wrong number of cells", expected_n_cells, product->GetNumberOfCells());
     TSM_ASSERT_EQUALS("No signal Array", "signal", std::string(product->GetCellData()->GetArray(0)->GetName()));
     TSM_ASSERT_EQUALS("Wrong sized signal Array", expected_n_signals, product->GetCellData()->GetArray(0)->GetSize());
-
-    /*Check dataset bounds*/
-    //double* bounds = product->GetBounds();
-    //TS_ASSERT_DELTA(0, bounds[0], 0.1);
-    //TS_ASSERT_DELTA(9.5, bounds[1], 0.1);
-    //TS_ASSERT_DELTA(0, bounds[2], 0.1);
-    //TS_ASSERT_DELTA(9.5, bounds[3], 0.1);
-    //TS_ASSERT_DELTA(0, bounds[4], 0.1);
-    //TS_ASSERT_DELTA(9.5, bounds[5], 0.1);
 
     product->Delete();
   }

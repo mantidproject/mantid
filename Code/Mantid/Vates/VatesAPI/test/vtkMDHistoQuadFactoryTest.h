@@ -44,13 +44,17 @@ public:
 
   void testCreateWithoutInitializeThrows()
   {
+    FakeProgressAction progressUpdate;
+
     UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
     vtkMDHistoQuadFactory factory(ThresholdRange_scptr(pRange), "signal");
-    TS_ASSERT_THROWS(factory.create(), std::runtime_error);
+    TS_ASSERT_THROWS(factory.create(progressUpdate), std::runtime_error);
   }
 
   void testInsideThresholds()
   {
+    FakeProgressAction progressUpdate;
+
     // WS with 2 dimensions
     Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
 
@@ -58,7 +62,7 @@ public:
     UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 2);
     vtkMDHistoQuadFactory inside(ThresholdRange_scptr(pRange), "signal");
     inside.initialize(ws_sptr);
-    vtkUnstructuredGrid* insideProduct = dynamic_cast<vtkUnstructuredGrid*>(inside.create());
+    vtkUnstructuredGrid* insideProduct = dynamic_cast<vtkUnstructuredGrid*>(inside.create(progressUpdate));
 
     TS_ASSERT_EQUALS((10*10), insideProduct->GetNumberOfCells());
     TS_ASSERT_EQUALS((11*11), insideProduct->GetNumberOfPoints());
@@ -66,6 +70,7 @@ public:
 
   void testAboveThreshold()
   {
+    FakeProgressAction progressUpdate;
     // WS with 2 dimensions
     Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
 
@@ -73,7 +78,7 @@ public:
     UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 0.5);
     vtkMDHistoQuadFactory above(ThresholdRange_scptr(pRange), "signal");
     above.initialize(ws_sptr);
-    vtkUnstructuredGrid* aboveProduct = dynamic_cast<vtkUnstructuredGrid*>(above.create());
+    vtkUnstructuredGrid* aboveProduct = dynamic_cast<vtkUnstructuredGrid*>(above.create(progressUpdate));
 
     // No points nor cells are created if nothing is within range
     TS_ASSERT_EQUALS(0, aboveProduct->GetNumberOfCells());
@@ -82,6 +87,7 @@ public:
 
   void testBelowThreshold()
   {
+    FakeProgressAction progressUpdate;
     // WS with 2 dimensions
     Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
 
@@ -90,7 +96,7 @@ public:
     vtkMDHistoQuadFactory below(ThresholdRange_scptr(pRange), "signal");
 
     below.initialize(ws_sptr);
-    vtkUnstructuredGrid* belowProduct = dynamic_cast<vtkUnstructuredGrid*>(below.create());
+    vtkUnstructuredGrid* belowProduct = dynamic_cast<vtkUnstructuredGrid*>(below.create(progressUpdate));
 
     // No points nor cells are created if nothing is within range
     TS_ASSERT_EQUALS(0, belowProduct->GetNumberOfCells());
@@ -134,13 +140,14 @@ public:
 
   void testCreateDelegates()
   {
+    FakeProgressAction progressUpdate;
     //If the workspace provided is not a 2D imdworkspace, it should call the successor's initalization
     // WS with 1 dimension
     Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 1);
 
     MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
     EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); //expect it then to call initialize on the successor.
-    EXPECT_CALL(*pMockFactorySuccessor, create()).Times(1).WillOnce(Return(vtkStructuredGrid::New())); //expect it then to call create on the successor.
+    EXPECT_CALL(*pMockFactorySuccessor, create(Ref(progressUpdate))).Times(1).WillOnce(Return(vtkStructuredGrid::New())); //expect it then to call create on the successor.
     EXPECT_CALL(*pMockFactorySuccessor, getFactoryTypeName()).WillOnce(testing::Return("TypeA")); 
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
@@ -151,7 +158,7 @@ public:
     factory.SetSuccessor(pMockFactorySuccessor);
     
     factory.initialize(ws_sptr);
-    factory.create(); // should be called on successor.
+    factory.create(progressUpdate); // should be called on successor.
 
     TSM_ASSERT("successor factory not used as expected.", Mock::VerifyAndClearExpectations(pMockFactorySuccessor));
   }
@@ -185,11 +192,12 @@ public:
 
 	void testGenerateVTKDataSet()
 	{
+    FakeProgressAction progressUpdate;
     //Thresholds have been set such that the signal values (hard-coded to 1, see above) will fall between the minimum 0 and maximum 2.
     UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 1);
     vtkMDHistoQuadFactory factory(ThresholdRange_scptr(pRange), "signal");
     factory.initialize(m_ws_sptr);
-    TS_ASSERT_THROWS_NOTHING(factory.create());
+    TS_ASSERT_THROWS_NOTHING(factory.create(progressUpdate));
 	}
 };
 

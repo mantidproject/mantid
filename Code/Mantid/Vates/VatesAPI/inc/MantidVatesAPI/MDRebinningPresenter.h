@@ -44,7 +44,8 @@ namespace Mantid
     {
     public:
       virtual void updateModel() = 0;
-      virtual vtkDataSet* execute(vtkDataSetFactory* factory, ProgressAction& eventHandler) = 0;
+      virtual vtkDataSet* execute(vtkDataSetFactory* factory, ProgressAction& rebinningActionReporting) = 0;
+      //virtual vtkDataSet* execute(vtkDataSetFactory* factory, ProgressAction& rebinningActionReporting, ProgressAction& drawingActionReporting ) = 0;
       virtual const std::string& getAppliedGeometryXML() const = 0;
       virtual bool hasTDimensionAvailable() const = 0;
       virtual std::vector<double> getTimeStepValues() const = 0;

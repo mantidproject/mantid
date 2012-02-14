@@ -2,6 +2,7 @@
 #include "MantidKernel/CPUTimer.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidVatesAPI/vtkMDHexFactory.h"
+#include "MantidVatesAPI/ProgressAction.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <vtkCellData.h>
 #include <vtkFloatArray.h>
@@ -186,11 +187,12 @@ namespace Mantid
   //-------------------------------------------------------------------------------------------------
   /*
   Generate the vtkDataSet from the objects input IMDEventWorkspace
+  @param progressUpdating: Reporting object to pass progress information up the stack.
   @Return a fully constructed vtkUnstructuredGrid containing geometric and scalar data.
   */
-  vtkDataSet* vtkMDHexFactory::create() const
+  vtkDataSet* vtkMDHexFactory::create(ProgressAction& progressUpdating) const
   {
-    this->dataSet = tryDelegatingCreation<IMDEventWorkspace, 3>(m_workspace, false);
+    this->dataSet = tryDelegatingCreation<IMDEventWorkspace, 3>(m_workspace, progressUpdating, false);
     if(this->dataSet != NULL)
     {
       return this->dataSet;

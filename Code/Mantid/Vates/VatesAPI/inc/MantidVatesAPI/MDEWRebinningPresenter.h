@@ -54,7 +54,8 @@ namespace Mantid
 
       virtual void updateModel();
 
-      virtual vtkDataSet* execute(vtkDataSetFactory* factory, ProgressAction& eventHandler);
+      virtual vtkDataSet* execute(vtkDataSetFactory* factory, ProgressAction& rebinningActionReporting);
+      //virtual vtkDataSet* execute(vtkDataSetFactory* factory, ProgressAction& rebinningActionReporting, ProgressAction& drawingActionReporting);
 
       virtual const std::string& getAppliedGeometryXML() const;
 

@@ -1,4 +1,5 @@
 #include "MantidVatesAPI/vtkMDHistoLineFactory.h"
+#include "MantidVatesAPI/ProgressAction.h"
 #include "vtkCellArray.h"
 #include "vtkCellData.h"
 #include "vtkFloatArray.h"
@@ -26,36 +27,41 @@ namespace Mantid
     {
     }
 
-      /**
-  Assigment operator
-  @param other : vtkMDHistoLineFactory to assign to this instance from.
-  @return ref to assigned current instance.
-  */
-  vtkMDHistoLineFactory& vtkMDHistoLineFactory::operator=(const vtkMDHistoLineFactory& other)
-  {
-    if(this != &other)
+    /**
+    Assigment operator
+    @param other : vtkMDHistoLineFactory to assign to this instance from.
+    @return ref to assigned current instance.
+    */
+    vtkMDHistoLineFactory& vtkMDHistoLineFactory::operator=(const vtkMDHistoLineFactory& other)
+    {
+      if(this != &other)
+      {
+        this->m_scalarName = other.m_scalarName;
+        this->m_thresholdRange = other.m_thresholdRange;
+        this->m_workspace = other.m_workspace;
+      }
+      return *this;
+    }
+
+    /**
+    Copy Constructor
+    @param other : instance to copy from.
+    */
+    vtkMDHistoLineFactory::vtkMDHistoLineFactory(const vtkMDHistoLineFactory& other)
     {
       this->m_scalarName = other.m_scalarName;
       this->m_thresholdRange = other.m_thresholdRange;
       this->m_workspace = other.m_workspace;
     }
-    return *this;
-  }
 
-  /**
-  Copy Constructor
-  @param other : instance to copy from.
-  */
-  vtkMDHistoLineFactory::vtkMDHistoLineFactory(const vtkMDHistoLineFactory& other)
-  {
-   this->m_scalarName = other.m_scalarName;
-   this->m_thresholdRange = other.m_thresholdRange;
-   this->m_workspace = other.m_workspace;
-  }
-
-    vtkDataSet* vtkMDHistoLineFactory::create() const
+    /**
+    Create the vtkStructuredGrid from the provided workspace
+    @param progressUpdating: Reporting object to pass progress information up the stack.
+    @return fully constructed vtkDataSet.
+    */
+    vtkDataSet* vtkMDHistoLineFactory::create(ProgressAction& progressUpdating) const
     {
-      vtkDataSet* product = tryDelegatingCreation<MDHistoWorkspace, 1>(m_workspace);
+      vtkDataSet* product = tryDelegatingCreation<MDHistoWorkspace, 1>(m_workspace, progressUpdating);
       if(product != NULL)
       {
         return product;
@@ -93,30 +99,30 @@ namespace Mantid
         for (int i = 0; i < nPointsX; i++)
         {
           in[0] = minX + (static_cast<coord_t>(i) * incrementX); //Calculate increment in x;
-          
+
           signalScalar = static_cast<float>(m_workspace->getSignalNormalizedAt(i));
 
-            if (boost::math::isnan( signalScalar ) || !m_thresholdRange->inRange(signalScalar))
-            {
-              //Flagged so that topological and scalar data is not applied.
-              unstructPoint.isSparse = true;
-            }
-            else
-            {
-              if (i < (nBinsX -1))
-              {
-                signal->InsertNextValue(static_cast<float>(signalScalar));
-              }
-              unstructPoint.isSparse = false;
-            }
-
-            transform.apply(in, out);
-
-            unstructPoint.pointId = points->InsertNextPoint(out);
-            column[i] = unstructPoint;
-
+          if (boost::math::isnan( signalScalar ) || !m_thresholdRange->inRange(signalScalar))
+          {
+            //Flagged so that topological and scalar data is not applied.
+            unstructPoint.isSparse = true;
           }
-        
+          else
+          {
+            if (i < (nBinsX -1))
+            {
+              signal->InsertNextValue(static_cast<float>(signalScalar));
+            }
+            unstructPoint.isSparse = false;
+          }
+
+          transform.apply(in, out);
+
+          unstructPoint.pointId = points->InsertNextPoint(out);
+          column[i] = unstructPoint;
+
+        }
+
         points->Squeeze();
         signal->Squeeze();
 
@@ -127,14 +133,14 @@ namespace Mantid
 
         for (int i = 0; i < nBinsX - 1; i++)
         {
-            //Only create topologies for those cells which are not sparse.
-            if (!column[i].isSparse)
-            {
-              vtkLine* line = vtkLine::New();
-              line->GetPointIds()->SetId(0, column[i].pointId);
-              line->GetPointIds()->SetId(1, column[i + 1].pointId);
-              visualDataSet->InsertNextCell(VTK_LINE, line->GetPointIds());
-            }
+          //Only create topologies for those cells which are not sparse.
+          if (!column[i].isSparse)
+          {
+            vtkLine* line = vtkLine::New();
+            line->GetPointIds()->SetId(0, column[i].pointId);
+            line->GetPointIds()->SetId(1, column[i + 1].pointId);
+            visualDataSet->InsertNextCell(VTK_LINE, line->GetPointIds());
+          }
         }
 
         points->Delete();
@@ -147,7 +153,7 @@ namespace Mantid
     void vtkMDHistoLineFactory::initialize(Mantid::API::Workspace_sptr wspace_sptr)
     {
       m_workspace = this->doInitialize<MDHistoWorkspace, 1>(wspace_sptr);
-      
+
       //Setup range values according to whatever strategy object has been injected.
       m_thresholdRange->setWorkspace(m_workspace);
       m_thresholdRange->calculate();

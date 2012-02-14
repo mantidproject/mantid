@@ -3,6 +3,7 @@
 #define VTKDATASETFACTORYTEST_H_
 
 #include "MantidVatesAPI/vtkDataSetFactory.h"
+#include "MantidVatesAPI/ProgressAction.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -20,11 +21,13 @@ using namespace testing;
 class vtkDataSetFactoryTest : public CxxTest::TestSuite
 {
 private:
+
+  /// Mocked helper type
   class MockvtkDataSetFactory : public Mantid::VATES::vtkDataSetFactory
   {
   public:
-    MOCK_CONST_METHOD0(create,
-      vtkDataSet*());
+    MOCK_CONST_METHOD1(create,
+      vtkDataSet*(Mantid::VATES::ProgressAction&));
     MOCK_METHOD1(initialize,
       void(boost::shared_ptr<Mantid::API::Workspace>));
     MOCK_CONST_METHOD0(validate,
@@ -37,6 +40,14 @@ private:
     bool hasSuccessorConcrete() const
     {
       return vtkDataSetFactory::hasSuccessor();
+    }
+  };
+
+  ///Fake helper type.
+  class FakeProgressAction : public Mantid::VATES::ProgressAction
+  {
+    virtual void eventRaised(double)
+    {
     }
   };
 
@@ -97,12 +108,14 @@ public:
 
   void testOneStepCreate()
   {
+    FakeProgressAction progressUpdater;
+
     MockvtkDataSetFactory factory;
     EXPECT_CALL(factory, initialize(_)).Times(1);
-    EXPECT_CALL(factory, create()).Times(1).WillOnce(Return(vtkStructuredGrid::New()));
+    EXPECT_CALL(factory, create(Ref(progressUpdater))).Times(1).WillOnce(Return(vtkStructuredGrid::New()));
 
     IMDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
-    vtkDataSet* product = factory.oneStepCreate(ws_sptr);
+    vtkDataSet* product = factory.oneStepCreate(ws_sptr, progressUpdater);
     TS_ASSERT(product != NULL);
     TSM_ASSERT_EQUALS("Output not wired up correctly to ::create() method", "vtkStructuredGrid", std::string(product->GetClassName()));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));

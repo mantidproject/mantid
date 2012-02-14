@@ -250,7 +250,9 @@ int vtkMDEWRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtk
     //Updating again at this point is the only way to pick-up changes to clipping.
     m_presenter->updateModel();
 
-    FilterUpdateProgressAction<vtkMDEWRebinningCutter> updatehandler(this, "Rebinning...");
+    FilterUpdateProgressAction<vtkMDEWRebinningCutter> rebinninActionReporting(this, "Rebinning...");
+    FilterUpdateProgressAction<vtkMDEWRebinningCutter> drawingActionReporting(this, "Drawing...");
+    UNUSED_ARG(drawingActionReporting);
 
     vtkInformation *outInfo = outputVector->GetInformationObject(0);
     vtkUnstructuredGrid *output = vtkUnstructuredGrid::SafeDownCast(outInfo->Get(
@@ -282,7 +284,7 @@ int vtkMDEWRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtk
     p_3dHistoFactory->SetSuccessor(p_4dHistoFactory);
 
 
-    vtkDataSet* outData = m_presenter->execute(p_1dMDFactory, updatehandler);
+    vtkDataSet* outData = m_presenter->execute(p_1dMDFactory, rebinninActionReporting);
     m_thresholdMax = m_ThresholdRange->getMaximum();
     m_thresholdMin = m_ThresholdRange->getMinimum();
     delete p_1dMDFactory;

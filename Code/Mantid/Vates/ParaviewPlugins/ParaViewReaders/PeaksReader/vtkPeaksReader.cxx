@@ -74,7 +74,9 @@ int vtkPeaksReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInforma
   vtkPeakMarkerFactory * p_peakFactory = new vtkPeakMarkerFactory("peaks", dim);
 
   p_peakFactory->initialize(m_PeakWS);
-  vtkDataSet * structuredMesh = p_peakFactory->create();
+
+  FilterUpdateProgressAction<vtkPeaksReader> drawingProgressUpdate(this, "Drawing...");
+  vtkDataSet * structuredMesh = p_peakFactory->create(drawingProgressUpdate);
 
   vtkCubeSource* cube = vtkCubeSource::New();
   cube->SetXLength(m_width);

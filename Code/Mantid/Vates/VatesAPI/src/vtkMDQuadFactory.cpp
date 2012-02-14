@@ -1,4 +1,5 @@
 #include "MantidVatesAPI/vtkMDQuadFactory.h"
+#include "MantidVatesAPI/ProgressAction.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
@@ -28,10 +29,14 @@ namespace Mantid
     {
     }
 
-    /// Factory Method. Should also handle delegation to successors.
-    vtkDataSet* vtkMDQuadFactory::create() const
+    /**
+    Create the vtkStructuredGrid from the provided workspace
+    @param progressUpdating: Reporting object to pass progress information up the stack.
+    @return fully constructed vtkDataSet.
+    */
+    vtkDataSet* vtkMDQuadFactory::create(ProgressAction& progressUpdating) const
     {
-      vtkDataSet* product = tryDelegatingCreation<IMDEventWorkspace, 2>(m_workspace);
+      vtkDataSet* product = tryDelegatingCreation<IMDEventWorkspace, 2>(m_workspace, progressUpdating);
       if(product != NULL)
       {
         return product;

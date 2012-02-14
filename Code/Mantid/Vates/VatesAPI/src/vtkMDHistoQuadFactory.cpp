@@ -3,6 +3,7 @@
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidAPI/NullCoordTransform.h"
 #include "MantidVatesAPI/vtkMDHistoQuadFactory.h"
+#include "MantidVatesAPI/ProgressAction.h"
 #include "vtkCellArray.h"
 #include "vtkCellData.h"
 #include "vtkFloatArray.h"
@@ -26,36 +27,41 @@ namespace Mantid
     {
     }
 
-          /**
-  Assigment operator
-  @param other : vtkMDHistoQuadFactory to assign to this instance from.
-  @return ref to assigned current instance.
-  */
-  vtkMDHistoQuadFactory& vtkMDHistoQuadFactory::operator=(const vtkMDHistoQuadFactory& other)
-  {
-    if(this != &other)
+    /**
+    Assigment operator
+    @param other : vtkMDHistoQuadFactory to assign to this instance from.
+    @return ref to assigned current instance.
+    */
+    vtkMDHistoQuadFactory& vtkMDHistoQuadFactory::operator=(const vtkMDHistoQuadFactory& other)
+    {
+      if(this != &other)
+      {
+        this->m_scalarName = other.m_scalarName;
+        this->m_thresholdRange = other.m_thresholdRange;
+        this->m_workspace = other.m_workspace;
+      }
+      return *this;
+    }
+
+    /**
+    Copy Constructor
+    @param other : instance to copy from.
+    */
+    vtkMDHistoQuadFactory::vtkMDHistoQuadFactory(const vtkMDHistoQuadFactory& other)
     {
       this->m_scalarName = other.m_scalarName;
       this->m_thresholdRange = other.m_thresholdRange;
       this->m_workspace = other.m_workspace;
     }
-    return *this;
-  }
 
-  /**
-  Copy Constructor
-  @param other : instance to copy from.
-  */
-  vtkMDHistoQuadFactory::vtkMDHistoQuadFactory(const vtkMDHistoQuadFactory& other)
-  {
-   this->m_scalarName = other.m_scalarName;
-   this->m_thresholdRange = other.m_thresholdRange;
-   this->m_workspace = other.m_workspace;
-  }
-
-    vtkDataSet* vtkMDHistoQuadFactory::create() const
+    /**
+    Create the vtkStructuredGrid from the provided workspace
+    @param progressUpdating: Reporting object to pass progress information up the stack.
+    @return fully constructed vtkDataSet.
+    */
+    vtkDataSet* vtkMDHistoQuadFactory::create(ProgressAction& progressUpdating) const
     {
-      vtkDataSet* product = tryDelegatingCreation<MDHistoWorkspace, 2>(m_workspace);
+      vtkDataSet* product = tryDelegatingCreation<MDHistoWorkspace, 2>(m_workspace, progressUpdating);
       if(product != NULL)
       {
         return product;
@@ -91,8 +97,8 @@ namespace Mantid
         const int nPointsY = nBinsY+1;
 
         /* The idea of the next chunk of code is that you should only
-         create the points that will be needed; so an array of pointNeeded
-         is set so that all required vertices are marked, and created in a second step. */
+        create the points that will be needed; so an array of pointNeeded
+        is set so that all required vertices are marked, and created in a second step. */
 
         // Array of the points that should be created, set to false
         bool * pointNeeded = new bool[nPointsX*nPointsY];
@@ -222,6 +228,7 @@ namespace Mantid
       }
     }
 
+    /// Destructor
     vtkMDHistoQuadFactory::~vtkMDHistoQuadFactory()
     {
 

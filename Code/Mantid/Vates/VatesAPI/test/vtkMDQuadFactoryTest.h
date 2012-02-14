@@ -48,9 +48,11 @@ public:
 
   void testCreateDelegatesToSuccessor()
   {
+    FakeProgressAction progressUpdate;
+
     MockvtkDataSetFactory* mockSuccessor = new MockvtkDataSetFactory;
     EXPECT_CALL(*mockSuccessor, initialize(_)).Times(1);
-    EXPECT_CALL(*mockSuccessor, create()).Times(1).WillOnce(Return(vtkStructuredGrid::New()));
+    EXPECT_CALL(*mockSuccessor, create(Ref(progressUpdate))).Times(1).WillOnce(Return(vtkStructuredGrid::New()));
     EXPECT_CALL(*mockSuccessor, getFactoryTypeName()).Times(1);
 
     vtkMDQuadFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
@@ -58,7 +60,7 @@ public:
 
     ITableWorkspace_sptr ws(new Mantid::DataObjects::TableWorkspace);
     TS_ASSERT_THROWS_NOTHING(factory.initialize(ws));
-    TS_ASSERT_THROWS_NOTHING(factory.create());
+    TS_ASSERT_THROWS_NOTHING(factory.create(progressUpdate));
 
     TSM_ASSERT("Successor has not been used properly.", Mock::VerifyAndClearExpectations(mockSuccessor));
   }
@@ -74,13 +76,17 @@ public:
 
   void testCreateWithoutInitaliseThrows()
   {
+    FakeProgressAction progressUpdate;
+
     vtkMDQuadFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
     //initialize not called!
-    TS_ASSERT_THROWS(factory.create(), std::runtime_error);
+    TS_ASSERT_THROWS(factory.create(progressUpdate), std::runtime_error);
   }
 
   void testCreation()
   {
+    FakeProgressAction progressUpdate;
+
     boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDEvent<2>,2> >
             ws = MDEventsTestHelper::makeMDEWFull<2>(10, 10, 10, 10);
 
@@ -98,7 +104,7 @@ public:
     vtkMDQuadFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
     factory.initialize(binned);
 
-    vtkDataSet* product = factory.create();
+    vtkDataSet* product = factory.create(progressUpdate);
 
     TS_ASSERT(dynamic_cast<vtkUnstructuredGrid*>(product) != NULL);
     TS_ASSERT_EQUALS(100, product->GetNumberOfCells());
@@ -140,12 +146,13 @@ public:
 
   void testCreationOnLargeWorkspace()
   {
+    FakeProgressAction progressUpdate;
     Workspace_sptr binned = Mantid::API::AnalysisDataService::Instance().retrieve("binned");
 
     vtkMDQuadFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
     factory.initialize(binned);
 
-    vtkDataSet* product = factory.create();
+    vtkDataSet* product = factory.create(progressUpdate);
 
     TS_ASSERT(dynamic_cast<vtkUnstructuredGrid*>(product) != NULL);
     TS_ASSERT_EQUALS(160000, product->GetNumberOfCells());

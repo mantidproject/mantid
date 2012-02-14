@@ -117,8 +117,8 @@ public:
 class MockvtkDataSetFactory : public Mantid::VATES::vtkDataSetFactory
 {
 public:
-  MOCK_CONST_METHOD0(create,
-    vtkDataSet*());
+  MOCK_CONST_METHOD1(create,
+    vtkDataSet*(Mantid::VATES::ProgressAction&));
   MOCK_CONST_METHOD0(createMeshOnly,
     vtkDataSet*());
   MOCK_CONST_METHOD0(createScalarArray,

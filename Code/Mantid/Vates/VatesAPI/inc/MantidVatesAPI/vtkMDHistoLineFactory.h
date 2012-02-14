@@ -55,7 +55,7 @@ namespace Mantid
       virtual ~vtkMDHistoLineFactory();
 
       /// Factory Method.
-      virtual vtkDataSet* create() const;
+      virtual vtkDataSet* create(ProgressAction& progressUpdating) const;
 
       virtual void initialize(Mantid::API::Workspace_sptr);
 

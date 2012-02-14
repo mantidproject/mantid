@@ -60,7 +60,8 @@ int vtkPeaksSource::RequestData(vtkInformation *, vtkInformationVector **,
   {
     vtkInformation *outInfo = outputVector->GetInformationObject(0);
 
-    FilterUpdateProgressAction<vtkPeaksSource> updateHandler(this, "Loading...");
+    //FilterUpdateProgressAction<vtkPeaksSource> loadingProgressUpdate(this, "Loading...");
+    FilterUpdateProgressAction<vtkPeaksSource> drawingProgressUpdate(this, "Drawing...");
 
     vtkPolyData *output = vtkPolyData::SafeDownCast(
                             outInfo->Get(vtkDataObject::DATA_OBJECT()));
@@ -69,7 +70,7 @@ int vtkPeaksSource::RequestData(vtkInformation *, vtkInformationVector **,
     vtkPeakMarkerFactory *p_peakFactory = new vtkPeakMarkerFactory("peaks");
 
     p_peakFactory->initialize(m_PeakWS);
-    vtkDataSet *structuredMesh = p_peakFactory->create();
+    vtkDataSet *structuredMesh = p_peakFactory->create(drawingProgressUpdate);
 
     vtkCubeSource *cube = vtkCubeSource::New();
     cube->SetXLength(m_width);
