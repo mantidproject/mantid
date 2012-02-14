@@ -115,10 +115,10 @@ namespace MDAlgorithms
       origin[d] = dim->getMinimum() + dim->getBinWidth()/2;
       // Size in each dimension (reverse order)
       size[2-d] = int(dim->getNBins());
-//      file->putAttr("direction_" + Strings::toString(d+1), direction);
+      file->writeData("direction_" + Strings::toString(d+1), direction);
     }
-//    file->putAttr("origin", origin);
-//    file->putAttr("size", size);
+    file->writeData("origin", origin);
+    file->writeData("size", size);
 
     // Copy data into a vector
     std::vector<double> data;

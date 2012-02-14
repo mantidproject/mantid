@@ -53,7 +53,8 @@ public:
         3, 1.0, 2.0, numBins, min, max, "mdhisto3");
     for (size_t x=0; x<10; x++)
       ws->setSignalAt(ws->getLinearIndex(x,0,0), double(x)+1.0);
-    std::string Filename =  do_test("mdhisto3", "SaveZODS_test.h5");
+    // Actually do the test
+    std::string Filename = do_test("mdhisto3", "SaveZODS_test.h5");
 
     // Check the results
     Poco::File file(Filename);

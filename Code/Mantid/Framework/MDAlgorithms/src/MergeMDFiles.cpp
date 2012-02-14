@@ -579,9 +579,18 @@ namespace MDAlgorithms
       {
         totalEventsInTasks += eventsPerBox[ib];
         MergeMDLoadToBoxTask<MDE,nd> * task = new MergeMDLoadToBoxTask<MDE,nd>(this, ib, outWS, boxesById, true);
-        task->run();
-        delete task;
-        //ts->push(task);
+
+        if (true)
+        {
+          // Run the task serially only
+          task->run();
+          delete task;
+        }
+        else
+        {
+          // Run in parallel
+          ts->push(task);
+        }
       }
     } // for each box
 
