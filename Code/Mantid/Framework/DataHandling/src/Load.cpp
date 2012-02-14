@@ -64,7 +64,7 @@ namespace
   {
     if(fileNames.size() == 1)
     {
-      std::vector<std::vector<std::string>>::const_iterator first = fileNames.begin();
+      std::vector<std::vector<std::string> >::const_iterator first = fileNames.begin();
       if(first->size() == 1)
         return true;
     }
