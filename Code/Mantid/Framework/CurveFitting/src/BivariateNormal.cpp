@@ -76,6 +76,8 @@ BivariateNormal::~BivariateNormal()
 
    initCoeff(D, X, Y, coefNorm, expCoeffx2, expCoeffy2, expCoeffxy, NCells);
 
+   NCells = std::min<int>(nData, NCells);
+
    double Background = getParameter(IBACK);
    double Intensity = getParameter(ITINTENS);
    double Xmean = getParameter(IXMEAN);
@@ -107,6 +109,8 @@ BivariateNormal::~BivariateNormal()
        }
 
      }
+     double diff = out[x]-Y[x];
+     chiSq +=diff*diff;
 
      x++;
    }

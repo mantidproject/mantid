@@ -223,22 +223,30 @@ namespace Mantid
           double maxy = Center.Y() + Radius;
           double maxz = Center.Z() + Radius;
 
+
           if( box.xMin()>=maxx)
               return true;
+
           if( box.xMax() <=minx)
              return true;;
+
           if( box.yMin()>=maxy)
-              return true;;
+              return true;
+
           if( box.yMax() <=miny)
-             return true;;
+             return true;
+
           if( box.zMin()>=maxz)
-              return true;;
+              return true;
+
           if( box.zMax() <=minz)
              return true;;
 
-          if( comp->type().compare("Detector")==0 || comp->type().compare("RectangularDetectorPixel")==0)
+          boost::shared_ptr<Geometry::Detector> det =   boost::dynamic_pointer_cast<Geometry::Detector>( comp);
+         // if( comp->type().compare(0,8,"Detector")==0 || comp->type().compare("RectangularDetectorPixel")==0)
+          if( det )
            {
-                   boost::shared_ptr<Geometry::Detector> det =   boost::dynamic_pointer_cast<Geometry::Detector>( comp);
+
                    if( (det->getPos()-Center).norm() <Radius)
                    {
                      ArryofID[N]=  det->getID();
@@ -249,8 +257,8 @@ namespace Mantid
                   return true;
             }
 
-           boost::shared_ptr<const Geometry::CompAssembly> Assembly =
-               boost::dynamic_pointer_cast<const Geometry::CompAssembly>( comp);
+           boost::shared_ptr<const Geometry::ICompAssembly> Assembly =
+               boost::dynamic_pointer_cast<const Geometry::ICompAssembly>( comp);
 
            if( !Assembly)
               return true;
@@ -406,9 +414,9 @@ namespace Mantid
 
 
         bool done = false;
-        //specid_t   CentDetspec;//last for finding neighbors
+
         double neighborRadius ;//last radius for finding neighbors
-        //CentDetspec = spec;
+
         neighborRadius = min<double>(10,1.5*R);
         int Nneighbors = (int)(neighborRadius*neighborRadius/CellWidth/CellHeight*4);
 
@@ -427,10 +435,10 @@ namespace Mantid
         Kernel::V3D Cent =(center+xvec*(Centx-COL)+yvec*(Centy-ROW));
 
         getNeighborPixIDs(panel,Cent,neighborRadius, NeighborIDs );
-       // std::cout<<"  R,#neighbors,neighborRadius="<<R<<","<<NeighborIDs[1]<<","<<neighborRadius<<std::endl;
-       // std::cout<<"Chan and dChan,Cell dims="<< Chan<<","<<dChan<<","<<CellWidth<<","<<CellHeight<<std::endl;
+
         if( NeighborIDs[1] <10)
         {
+          //std::cout<<"There were "<< NeighborIDs[1] <<"neighbors" <<std::endl;
           g_log.error("Not enough neighboring pixels to fit ");
           throw std::runtime_error("Not enough neighboring pixels to fit ");
         }
@@ -904,11 +912,11 @@ namespace Mantid
       double Mx, My, Sxx, Syy, Sxy;
 
       //Variances at background =0. Should be used to nail down initial parameters.
-      double Sxx0 = (StatBase[ISSIxx]-StatBase[ISSIx]*StatBase[ISSIx]/ StatBase[IIntensities])
-                                     / StatBase[IIntensities];
+   //   double Sxx0 = (StatBase[ISSIxx]-StatBase[ISSIx]*StatBase[ISSIx]/ StatBase[IIntensities])
+  //                                   / StatBase[IIntensities];
 
-      double Syy0 = (StatBase[ISSIyy]-StatBase[ISSIy]*StatBase[ISSIy]/ StatBase[IIntensities])
-                                 / StatBase[IIntensities];
+   //   double Syy0 = (StatBase[ISSIyy]-StatBase[ISSIy]*StatBase[ISSIy]/ StatBase[IIntensities])
+  //                               / StatBase[IIntensities];
       while (!done && ntimes<8)
       {
         Mx = StatBase[ISSIx] - b * StatBase[ISSx];

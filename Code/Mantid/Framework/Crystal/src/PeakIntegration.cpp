@@ -103,7 +103,7 @@ namespace Mantid
     void PeakIntegration::exec()
     {
       retrieveProperties();
-  
+
       /// Input peaks workspace
       PeaksWorkspace_sptr inPeaksW = getProperty("InPeaksWorkspace");
 
@@ -111,6 +111,7 @@ namespace Mantid
       PeaksWorkspace_sptr peaksW = getProperty("OutPeaksWorkspace");
       if (peaksW != inPeaksW)
         peaksW = inPeaksW->clone();
+
 
       double qspan = 0.01;
       bool slices = getProperty("FitSlices");
@@ -130,8 +131,9 @@ namespace Mantid
         
       }
 
+
       //To get the workspace index from the detector ID
-      pixel_to_wi = inputW->getDetectorIDToWorkspaceIndexMap(true);
+      pixel_to_wi = inputW->getDetectorIDToWorkspaceIndexMap(false);//true);
 
       //Sort events if EventWorkspace so it will run in parallel
       EventWorkspace_const_sptr inWS = boost::dynamic_pointer_cast<const EventWorkspace>( inputW );
@@ -139,6 +141,7 @@ namespace Mantid
       {
         inWS->sortAll(TOF_SORT, NULL);
       }
+
 
       //Get some stuff from the input workspace
       const int YLength = static_cast<int>(inputW->blocksize());
@@ -148,6 +151,8 @@ namespace Mantid
       size_t Numberwi = inputW->getNumberHistograms();
       int NumberPeaks = peaksW->getNumberPeaks();
       int MinPeaks = 0;
+
+
       for (int i = NumberPeaks-1; i >= 0; i--)
       {
         Peak & peak = peaksW->getPeaks()[i];
@@ -169,32 +174,39 @@ namespace Mantid
         return;
       }
 
+
       Progress prog(this, MinPeaks, 1.0, NumberPeaks);
       PARALLEL_FOR3(inputW, peaksW, outputW)
       for (int i = MinPeaks; i< NumberPeaks; i++)
       {
+
         PARALLEL_START_INTERUPT_REGION
   
         // Direct ref to that peak
         Peak & peak = peaksW->getPeaks()[i];
-  
+
+
         double col = peak.getCol();
         double row = peak.getRow();
-  
+
         //Average integer postion
         int XPeak = int(col+0.5);
         int YPeak = int(row+0.5);
+
         double TOFPeakd = peak.getTOF();
         std::string bankName = peak.getBankName();
 
         boost::shared_ptr<const IComponent> parent = inputW->getInstrument()->getComponentByName(bankName);
+
         if (!parent) continue;
-        if (parent->type().compare("RectangularDetector") != 0) continue;
+
+        if (parent->type().compare("RectangularDetector") != 0 && !slices) continue;
   
         int TOFPeak=0, TOFmin=0, TOFmax=0;
         if (slices)
         {
           TOFmax = fitneighbours(i, bankName, XPeak, YPeak, i, qspan , peak);
+
           MantidVec& X = outputW->dataX(i);
           TOFPeak = VectorHelper::getBinIndex(X, TOFPeakd);
         }
@@ -219,7 +231,7 @@ namespace Mantid
           TOFmax = TOFPeak+Binmax;
           sumneighbours(peak.getBankName(), XPeak+Xmin, YPeak+Ymin, Xmax-Xmin+1, Ymax-Ymin+1, TOFPeakd, haveMask, PeakIntensity, mask, i);
         }
-  
+
         double I=0., sigI=0.;
         // Find point of peak centre
         // Get references to the current spectrum
@@ -339,14 +351,16 @@ namespace Mantid
           I-= ratio*(Y[TOFmin] + Y[TOFmax]);
           sigI = sqrt(sigI+ratio*ratio*(E[TOFmin]*E[TOFmin] + E[TOFmax]*E[TOFmax]));
         }
-    
-        //std::cout << n<<"  "<<peak.getBankName()<< "  "<<peak.getIntensity()<<"  " << I << "  " << peak.getSigmaIntensity() << "  "<< sigI <<"\n";
+
         peak.setIntensity(I);
         peak.setSigmaIntensity(sigI);
   
         prog.report();
         PARALLEL_END_INTERUPT_REGION
+
       }
+
+
       PARALLEL_CHECK_INTERUPT_REGION
 
       // Save the output
@@ -361,6 +375,7 @@ namespace Mantid
       if (inputW->readY(0).size() <= 1)
         throw std::runtime_error("Must Rebin data with more than 1 bin");
       //Check if detectors are RectangularDetectors
+      bool slices = getProperty("FitSlices");
       Instrument_const_sptr inst = inputW->getInstrument();
       boost::shared_ptr<RectangularDetector> det;
       for (int i=0; i < inst->nelements(); i++)
@@ -368,7 +383,7 @@ namespace Mantid
         det = boost::dynamic_pointer_cast<RectangularDetector>( (*inst)[i] );
         if (det) break;
       }
-      if (!det)
+      if (!det && !slices)
         throw std::runtime_error("PeakIntegration only works for instruments with Rectangular Detectors.");
 
       Xmin = getProperty("XMin");
@@ -611,15 +626,19 @@ void PeakIntegration::sumneighbours(std::string det_name, int x0, int y0, int Su
 
 }
 int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0, int y0, int idet, double qspan
-                                    ,Peak & peak)
+                                    ,DataObjects::Peak & peak)
 {
+  UNUSED_ARG( ipeak);
+  UNUSED_ARG( det_name);
+  UNUSED_ARG( x0);
+  UNUSED_ARG( y0);
   // Number of slices
   int TOFmax = 0;
   //Get some stuff from the input workspace
-  Instrument_const_sptr inst = inputW->getInstrument();
+  /*   Instrument_const_sptr inst = inputW->getInstrument();
 
   //Build a list of Rectangular Detectors
-  std::vector<boost::shared_ptr<RectangularDetector> > detList;
+ std::vector<boost::shared_ptr<RectangularDetector> > detList;
   for (int i=0; i < inst->nelements(); i++)
   {
     boost::shared_ptr<RectangularDetector> det;
@@ -672,32 +691,38 @@ int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0, int 
 
   if (detList.empty())
     throw std::runtime_error("This instrument does not have any RectangularDetector's. PeakIntegration cannot operate on this instrument at this time.");
-
+*/
   //Loop through the RectangularDetector's we listed before.
-  for (int i=0; i < static_cast<int>(detList.size()); i++)
+
+ // for (int i=0; i < static_cast<int>(detList.size()); i++)
+//  for( int i=0; i< (int)peaksW->rowCount();i++)
   {
-    std::string det_name("");
-    boost::shared_ptr<RectangularDetector> det;
-    det = detList[i];
-    if (det)
+    //std::string det_name("");
+   // boost::shared_ptr<RectangularDetector> det;
+   // det = detList[i];
+   // if (det)
     {
       IAlgorithm_sptr slice_alg = createSubAlgorithm("IntegratePeakTimeSlices");
       slice_alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
       std::ostringstream tab_str;
-      tab_str << "LogTable" << i;
+      tab_str << "LogTable" << ipeak;
+
       slice_alg->setPropertyValue("OutputWorkspace", tab_str.str());
       slice_alg->setProperty<PeaksWorkspace_sptr>("Peaks", getProperty("InPeaksWorkspace"));
       slice_alg->setProperty("PeakIndex", ipeak);
       slice_alg->setProperty("PeakQspan", qspan);
       slice_alg->executeAsSubAlg();
       Mantid::API::MemoryManager::Instance().releaseFreeMemory();
-   
+
       MantidVec& Xout=outputW->dataX(idet);
       MantidVec& Yout=outputW->dataY(idet);
       MantidVec& Eout=outputW->dataE(idet);
       TableWorkspace_sptr logtable = slice_alg->getProperty("OutputWorkspace");
+
       peak.setIntensity( slice_alg->getProperty("Intensity"));
       peak.setSigmaIntensity(slice_alg->getProperty("SigmaIntensity"));
+
+
       TOFmax = static_cast<int>(logtable->rowCount());
       for (int iTOF=0; iTOF < TOFmax; iTOF++)
       {
@@ -708,7 +733,7 @@ int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0, int 
 
       outputW->getSpectrum(idet)->clearDetectorIDs();
       //Find the pixel ID at that XY position on the rectangular detector
-      int pixelID = det->getAtXY(x0,y0)->getID();
+      int pixelID = peak.getDetectorID();// det->getAtXY(x0,y0)->getID();
 
       //Find the corresponding workspace index, if any
       if (pixel_to_wi->find(pixelID) != pixel_to_wi->end())
@@ -718,6 +743,7 @@ int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0, int 
         outputW->getSpectrum(idet)->addDetectorIDs( inputW->getSpectrum(wi)->getDetectorIDs() );
       }
     }
+
   }
 
   return TOFmax-1;
