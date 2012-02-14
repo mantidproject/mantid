@@ -36,6 +36,8 @@ class DataSets(BaseScriptElement):
     
     # scattering angle
     theta = 0.0
+    center_pixel = 220
+    use_center_pixel = False
 
     def __init__(self):
         super(DataSets, self).__init__()
@@ -63,7 +65,9 @@ class DataSets(BaseScriptElement):
         script += "              QStep=%s,\n" % str(self.q_step)
         
         # Angle offset
-        if self.theta != 0.0:
+        if self.use_center_pixel:
+            script += "              CenterPixel=%s,\n" % str(self.center_pixel)
+        else:
             script += "              Theta=%s,\n" % str(self.theta)
             
         # The output should be slightly different if we are generating
@@ -119,6 +123,8 @@ class DataSets(BaseScriptElement):
         
         # Scattering angle
         xml += "<theta>%s</theta>\n" % str(self.theta)
+        xml += "<center_pixel>%s</center_pixel>\n" % str(self.center_pixel)
+        xml += "<use_center_pixel>%s</use_center_pixel>\n" % str(self.use_center_pixel)
         
         xml += "</RefMData>\n"
 
@@ -200,6 +206,10 @@ class DataSets(BaseScriptElement):
     
         # scattering angle
         self.theta = BaseScriptElement.getFloatElement(instrument_dom, "theta", default=DataSets.theta)
+        self.center_pixel = BaseScriptElement.getFloatElement(instrument_dom, "center_pixel", default=DataSets.center_pixel)
+        self.use_center_pixel = BaseScriptElement.getBoolElement(instrument_dom, 
+                                                                 "use_center_pixel", 
+                                                                 default=DataSets.use_center_pixel)
         
     def reset(self):
         """
@@ -227,3 +237,5 @@ class DataSets(BaseScriptElement):
         
         # Scattering angle
         self.theta = DataSets.theta
+        self.center_pixel = DataSets.center_pixel
+        self.use_center_pixel = DataSets.use_center_pixel

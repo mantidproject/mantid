@@ -871,7 +871,7 @@ Drag items to change the reduction order.</string>
                        <string>Plot detector counts versus Y pixel</string>
                       </property>
                       <property name="text">
-                       <string>Counts vs Pixels Y</string>
+                       <string>Counts vs Pixel</string>
                       </property>
                      </widget>
                     </item>
@@ -1238,6 +1238,25 @@ Drag items to change the reduction order.</string>
                       </property>
                      </spacer>
                     </item>
+                    <item>
+                     <widget class="QPushButton" name="plot_count_vs_x_btn">
+                      <property name="minimumSize">
+                       <size>
+                        <width>150</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>150</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
+                      <property name="text">
+                       <string>Counts vs Pixel</string>
+                      </property>
+                     </widget>
+                    </item>
                    </layout>
                   </item>
                   <item>
@@ -1246,7 +1265,7 @@ Drag items to change the reduction order.</string>
                      <number>0</number>
                     </property>
                     <item>
-                     <widget class="QLabel" name="angle_label">
+                     <widget class="QRadioButton" name="center_pix_radio">
                       <property name="minimumSize">
                        <size>
                         <width>170</width>
@@ -1259,6 +1278,45 @@ Drag items to change the reduction order.</string>
                         <height>16777215</height>
                        </size>
                       </property>
+                      <property name="text">
+                       <string>Center pixel</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLineEdit" name="center_pix_edit">
+                      <property name="minimumSize">
+                       <size>
+                        <width>80</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>80</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="horizontalSpacer_22">
+                      <property name="orientation">
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                      <property name="sizeType">
+                       <enum>QSizePolicy::Fixed</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>30</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                    <item>
+                     <widget class="QRadioButton" name="angle_radio">
                       <property name="text">
                        <string>Scattering angle</string>
                       </property>
@@ -2552,6 +2610,22 @@ Drag items to change the reduction order.</string>
                    </property>
                   </widget>
                  </item>
+                 <item>
+                  <spacer name="horizontalSpacer_23">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeType">
+                    <enum>QSizePolicy::Fixed</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>9</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
                 </layout>
                </item>
                <item>
@@ -2596,6 +2670,22 @@ Drag items to change the reduction order.</string>
                     <string>Save to list</string>
                    </property>
                   </widget>
+                 </item>
+                 <item>
+                  <spacer name="horizontalSpacer_24">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeType">
+                    <enum>QSizePolicy::Fixed</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>9</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
                  </item>
                 </layout>
                </item>

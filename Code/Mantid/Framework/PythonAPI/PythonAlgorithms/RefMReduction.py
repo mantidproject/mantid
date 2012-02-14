@@ -10,6 +10,7 @@ class RefMReduction(PythonAlgorithm):
     ON_ON   = 'On_On'
     OFF_ON  = 'Off_On'
     ON_OFF  = 'On_Off'
+    PIXEL_SIZE = 0.0007 # m
     
     def category(self):
         return "Reflectometry"
@@ -37,6 +38,7 @@ class RefMReduction(PythonAlgorithm):
         self.declareProperty("QMin", 0.0025, Description="Minimum Q-value")
         self.declareProperty("QStep", -0.01, Description="Step-size in Q. Enter a negative value to get a log scale.")
         self.declareProperty("Theta", 0.0, Description="Scattering angle (degrees)")
+        self.declareProperty("CenterPixel", 0.0, Description="Center pixel of the specular peak")
         self.declareProperty("WavelengthMin", 2.5)
         self.declareProperty("WavelengthMax", 6.5)
         self.declareProperty("WavelengthStep", 0.1)
@@ -55,6 +57,33 @@ class RefMReduction(PythonAlgorithm):
         
         self._process_polarization(RefMReduction.ON_OFF)
 
+
+    def _calculate_angle(self, workspace):
+        sangle = 0
+        if mtd[workspace].getRun().hasProperty("SANGLE"):
+            sangle = mtd[workspace].getRun().getProperty("SANGLE").value[0]
+            
+        dangle = 0
+        if mtd[workspace].getRun().hasProperty("DANGLE"):
+            dangle = mtd[workspace].getRun().getProperty("DANGLE").value[0]
+            
+        dangle0 = 0
+        if mtd[workspace].getRun().hasProperty("DANGLE0"):
+            dangle0 = mtd[workspace].getRun().getProperty("DANGLE0").value[0]
+            
+        det_distance = mtd[workspace].getInstrument().getDetector(0).getPos().getZ()
+
+        direct_beam_pix = 0
+        if mtd[workspace].getRun().hasProperty("DIRPIX"):
+            direct_beam_pix = mtd[workspace].getRun().getProperty("DIRPIX").value[0]
+        
+        center_pix = int(self.getProperty("CenterPixel"))
+        
+        delta = (dangle-dangle0)/2.0\
+            + ((direct_beam_pix-center_pix)*RefMReduction.PIXEL_SIZE)/ (2.0*det_distance)
+        
+        return sangle-delta
+        
     def _process_polarization(self, polarization):
         """
             Process a polarization state
@@ -174,7 +203,7 @@ class RefMReduction(PythonAlgorithm):
         
         # Extract the pixels that we count as signal
         # Detector ID = NY*x + y
-        pixel_size = 0.0007 # m
+        pixel_size = RefMReduction.PIXEL_SIZE # m
         nx_pixels = 304
         ny_pixels = 256
         xmin = (peak_range[0]-nx_pixels/2.0)*pixel_size
@@ -250,9 +279,11 @@ class RefMReduction(PythonAlgorithm):
             @param output_ws: output workspace of q data
         """
         # Get theta angle in degrees
-        #TODO: compute it from meta-data
         theta = float(self.getProperty("Theta"))
-        theta_radian = theta * math.pi / 180.
+        if theta>0:
+            theta_radian = theta * math.pi / 180.
+        else:
+            theta_radian = self._calculate_angle(input_ws)
 
         x = mtd[input_ws].readX(0)
         y = mtd[input_ws].readY(0)
