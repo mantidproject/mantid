@@ -5,6 +5,7 @@
 #include "MantidAPI/IPeak.h"
 #include "MantidKernel/V3D.h"
 #include <vtkVertex.h>
+#include "MantidKernel/ReadLock.h"
 
 using Mantid::API::IPeaksWorkspace;
 using Mantid::API::IPeak;
@@ -75,6 +76,9 @@ namespace VATES
 
     int numPeaks = m_workspace->getNumberPeaks();
 
+   // Acquire a scoped read-only lock to the workspace (prevent segfault from algos modifying ws)
+    Mantid::Kernel::ReadLock lock(*m_workspace);
+
     // Points generator
     vtkPoints *points = vtkPoints::New();
     points->Allocate(static_cast<int>(numPeaks));
@@ -136,16 +140,5 @@ namespace VATES
   vtkPeakMarkerFactory::~vtkPeakMarkerFactory()
   {
   }
-
-  vtkDataSet* vtkPeakMarkerFactory::createMeshOnly() const
-  {
-    throw std::runtime_error("::createMeshOnly() does not apply for this type of factory.");
-  }
-
-  vtkFloatArray* vtkPeakMarkerFactory::createScalarArray() const
-  {
-    throw std::runtime_error("::createScalarArray() does not apply for this type of factory.");
-  }
-
 }
 }

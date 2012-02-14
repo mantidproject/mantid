@@ -20,11 +20,11 @@
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
 #include "MantidVatesAPI/vtkMDQuadFactory.h"
 #include "MantidVatesAPI/vtkMDLineFactory.h"
-#include "MantidVatesAPI/vtkMDEWHexahedronFactory.h"
-#include "MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h"
-#include "MantidVatesAPI/vtkThresholdingHexahedronFactory.h"
-#include "MantidVatesAPI/vtkThresholdingQuadFactory.h"
-#include "MantidVatesAPI/vtkThresholdingLineFactory.h"
+#include "MantidVatesAPI/vtkMDHexFactory.h"
+#include "MantidVatesAPI/vtkMDHistoHex4DFactory.h"
+#include "MantidVatesAPI/vtkMDHistoHexFactory.h"
+#include "MantidVatesAPI/vtkMDHistoQuadFactory.h"
+#include "MantidVatesAPI/vtkMDHistoLineFactory.h"
 #include "MantidVatesAPI/TimeToTimeStep.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/Common.h"
@@ -266,11 +266,11 @@ int vtkRebinningTransformOperator::RequestData(vtkInformation* vtkNotUsed(reques
     //Create Factory Object for chain. Chain-of-responsibility for translating imdworkspaces.
     vtkMDLineFactory* p_1dMDFactory =  new vtkMDLineFactory(m_ThresholdRange, scalarName);
     vtkMDQuadFactory* p_2dMDFactory = new vtkMDQuadFactory(m_ThresholdRange, scalarName);
-    vtkMDEWHexahedronFactory* p_3dMDFactory = new vtkMDEWHexahedronFactory(m_ThresholdRange, scalarName);
-    vtkThresholdingLineFactory* p_1dHistoFactory = new vtkThresholdingLineFactory(m_ThresholdRange, scalarName);
-    vtkThresholdingQuadFactory* p_2dHistoFactory = new vtkThresholdingQuadFactory(m_ThresholdRange,scalarName);
-    vtkThresholdingHexahedronFactory* p_3dHistoFactory = new vtkThresholdingHexahedronFactory(m_ThresholdRange,scalarName);
-    vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>* p_4dHistoFactory = new vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>(m_ThresholdRange,scalarName, m_timestep);
+    vtkMDHexFactory* p_3dMDFactory = new vtkMDHexFactory(m_ThresholdRange, scalarName);
+    vtkMDHistoLineFactory* p_1dHistoFactory = new vtkMDHistoLineFactory(m_ThresholdRange, scalarName);
+    vtkMDHistoQuadFactory* p_2dHistoFactory = new vtkMDHistoQuadFactory(m_ThresholdRange,scalarName);
+    vtkMDHistoHexFactory* p_3dHistoFactory = new vtkMDHistoHexFactory(m_ThresholdRange,scalarName);
+    vtkMDHistoHex4DFactory<TimeToTimeStep>* p_4dHistoFactory = new vtkMDHistoHex4DFactory<TimeToTimeStep>(m_ThresholdRange,scalarName, m_timestep);
 
     //Assemble Chain-of-Reponsibility
     p_1dMDFactory->SetSuccessor(p_2dMDFactory);
@@ -300,8 +300,6 @@ int vtkRebinningTransformOperator::RequestInformation(vtkInformation* vtkNotUsed
   Status status=Good;
   if (Pending == m_setup)
   {
-    try
-    {
     vtkInformation * inputInf = inputVector[0]->GetInformationObject(0);
     vtkDataSet * inputDataset = vtkDataSet::SafeDownCast(inputInf->Get(vtkDataObject::DATA_OBJECT()));
 
@@ -314,11 +312,6 @@ int vtkRebinningTransformOperator::RequestInformation(vtkInformation* vtkNotUsed
     
     m_appliedGeometryXML = m_presenter->getAppliedGeometryXML();
     m_setup = SetupDone;
-
-    }
-    catch(std::exception& e)
-    {
-    }
   }
   setTimeRange(outputVector);
   return status;

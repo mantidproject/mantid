@@ -64,6 +64,7 @@ class DataSet(object):
         self._skip_last = 0
         self._skip_first = 0
         self._npts = None
+        self._restricted_range = False
         
     def __str__(self):
         return self._ws_name
@@ -151,6 +152,13 @@ class DataSet(object):
             y_scaled[i] = 0
             e_scaled[i] = 0
         
+        # Get rid of points with an error greater than the intensity
+        if self._restricted_range:
+            for i in range(len(y_scaled)):
+                if y_scaled[i]<=e_scaled[i]:
+                    y_scaled[i] = 0
+                    e_scaled[i] = 0   
+        
         # Dummy operation to update the plot
         Scale(InputWorkspace=self._ws_scaled, OutputWorkspace=self._ws_scaled,
               Operation="Multiply", Factor=1.0)
@@ -170,6 +178,7 @@ class DataSet(object):
         if mtd.workspaceExists(self._ws_name):
             self._ws_scaled = self._ws_name+"_scaled"
             if update_range:
+                self._restricted_range = restricted_range        
                 self._xmin = min(mtd[self._ws_name].readX(0))
                 self._xmax = max(mtd[self._ws_name].readX(0))
                 if restricted_range:

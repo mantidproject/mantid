@@ -1,11 +1,11 @@
-#ifndef MANTID_VATES_VTKTHRESHOLDING_HEXAHEDRON_FACTORY_H_
-#define MANTID_VATES_VTKTHRESHOLDING_HEXAHEDRON_FACTORY_H_
+#ifndef MANTID_VATES_VTK_MD_HISTO_HEX4D_FACTORY_H_
+#define MANTID_VATES_VTK_MD_HISTO_HEX4D_FACTORY_H_
 
 /** Concrete implementation of vtkDataSetFactory. Creates a vtkUnStructuredGrid. Uses Thresholding technique
- * to create sparse 3D representation of data. 
+ * to create sparse 4D representation of data.
 
  @author Owen Arnold, Tessella plc
- @date 06/05/2011
+ @date 24/01/2010
 
  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -28,35 +28,37 @@
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-#include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidVatesAPI/ThresholdRange.h"
-#include <vtkUnstructuredGrid.h>
-#include <vtkFloatArray.h>
+#include "MantidVatesAPI/vtkDataSetFactory.h"
+#include "MantidVatesAPI/vtkMDHistoHexFactory.h"
 #include <vtkCellData.h>
+#include <vtkFloatArray.h>
 #include <vtkHexahedron.h>
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include <vtkUnstructuredGrid.h>
 
 namespace Mantid
 {
 namespace VATES
 {
 
-class DLLExport vtkThresholdingHexahedronFactory: public vtkDataSetFactory
+template<typename TimeMapper>
+class DLLExport vtkMDHistoHex4DFactory: public vtkMDHistoHexFactory
 {
 public:
 
   /// Constructor
-  vtkThresholdingHexahedronFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarname);
+  vtkMDHistoHex4DFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarname,
+      const double timestep);
 
   /// Assignment operator
-  vtkThresholdingHexahedronFactory& operator=(const vtkThresholdingHexahedronFactory& other);
+  vtkMDHistoHex4DFactory& operator=(const vtkMDHistoHex4DFactory<TimeMapper>& other);
 
   /// Copy constructor.
-  vtkThresholdingHexahedronFactory(const vtkThresholdingHexahedronFactory& other);
+  vtkMDHistoHex4DFactory(const vtkMDHistoHex4DFactory<TimeMapper>& other);
 
   /// Destructor
-  ~vtkThresholdingHexahedronFactory();
+  ~vtkMDHistoHex4DFactory();
 
   /// Initialize the object with a workspace.
   virtual void initialize(Mantid::API::Workspace_sptr workspace);
@@ -64,33 +66,28 @@ public:
   /// Factory method
   vtkDataSet* create() const;
 
-  vtkDataSet* createMeshOnly() const;
-
-  vtkFloatArray* createScalarArray() const;
-
   virtual std::string getFactoryTypeName() const
   {
-    return "vtkThresholdingHexahedronFactory";
+    return "vtkMDHistoHex4DFactory";
   }
 
 protected:
 
   virtual void validate() const;
 
-  vtkDataSet* create3Dor4D(size_t timestep, bool do4D) const;
+private:
 
-  void validateWsNotNull() const;
+  typedef std::vector<std::vector<std::vector<UnstructuredPoint> > > PointMap;
 
-  void validateDimensionsPresent() const;
+  typedef std::vector<std::vector<UnstructuredPoint> > Plane;
 
-  /// Image from which to draw.
-  Mantid::MDEvents::MDHistoWorkspace_sptr m_workspace;
+  typedef std::vector<UnstructuredPoint> Column;
 
-  /// Name of the scalar to provide on mesh.
-  std::string m_scalarName;
+  /// timestep obtained from framework.
+  double m_timestep;
 
-  /// Threshold range.
-  mutable ThresholdRange_scptr m_thresholdRange;
+  /// Time mapper.
+  TimeMapper m_timeMapper;
 
 };
 

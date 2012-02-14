@@ -39,7 +39,6 @@ bool vtkDataSetFactory::hasSuccessor() const
   return NULL != m_successor.get();
 }
 
-
 /*
 Set a flag indicating whether dimensionality should be checked
 @param flag : TRUE to check dimensionality otherwise FALSE.
@@ -56,6 +55,19 @@ Get a flag indicating whether dimensionality should be checked
 bool vtkDataSetFactory::doesCheckDimensionality() const
 {
   return m_bCheckDimensionality;
+}
+
+
+/*
+Convenience function. Creates an output visualisation data set in one-shot.
+
+@param ws : input workspace to interpret a vtkDataSet from.
+@result vtkDataSet* interpreted from input.
+*/
+vtkDataSet* vtkDataSetFactory::oneStepCreate(Mantid::API::Workspace_sptr ws)
+{
+  this->initialize(ws);
+  return this->create();
 }
 
 }

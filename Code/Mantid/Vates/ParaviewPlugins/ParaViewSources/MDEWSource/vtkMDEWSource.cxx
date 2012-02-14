@@ -11,7 +11,7 @@
 #include "MantidVatesAPI/MDEWInMemoryLoadingPresenter.h"
 #include "MantidVatesAPI/MDLoadingViewAdapter.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
-#include "MantidVatesAPI/vtkMDEWHexahedronFactory.h"
+#include "MantidVatesAPI/vtkMDHexFactory.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
 
@@ -97,7 +97,7 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     }
 
     FilterUpdateProgressAction<vtkMDEWSource> updateHandler(this);
-    vtkMDEWHexahedronFactory* hexahedronFactory = new vtkMDEWHexahedronFactory(ThresholdRange_scptr(new IgnoreZerosThresholdRange()), "signal");
+    vtkMDHexFactory* hexahedronFactory = new vtkMDHexFactory(ThresholdRange_scptr(new IgnoreZerosThresholdRange()), "signal");
     hexahedronFactory->setTime(m_time);
     hexahedronFactory->setCheckDimensionality(false);
     vtkDataSet* product = m_presenter->execute(hexahedronFactory, updateHandler);

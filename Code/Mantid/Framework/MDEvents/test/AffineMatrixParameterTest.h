@@ -3,8 +3,10 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidMDEvents/AffineMatrixParameter.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
 
 using namespace Mantid::MDEvents;
+using namespace Mantid;
 
 class AffineMatrixParameterTest :    public CxxTest::TestSuite
 {
@@ -112,7 +114,7 @@ public:
     {
       for(int j = 0; j < 4; j++)
       {
-        transform[i][j] = count;
+        transform[i][j] = static_cast<coord_t>(count);
         count++;
       }
     }

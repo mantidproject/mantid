@@ -1,10 +1,11 @@
 #include "MantidDataObjects/Peak.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidKernel/System.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/System.h"
 #include <algorithm>
-#include <string>
 #include <cctype>
+#include <string>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -22,7 +23,7 @@ namespace DataObjects
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(3,3,true),
     m_InverseGoniometerMatrix(3,3,true),
-    m_RunNumber(0)
+    m_RunNumber(0),orig_H(0),orig_K(0),orig_L(0)
   {
   }
 
@@ -40,7 +41,7 @@ namespace DataObjects
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(3,3,true),
     m_InverseGoniometerMatrix(3,3,true),
-    m_RunNumber(0)
+    m_RunNumber(0),orig_H(0),orig_K(0),orig_L(0)
   {
     this->setInstrument(m_inst);
     this->setQLabFrame(QLabFrame, detectorDistance);
@@ -64,7 +65,7 @@ namespace DataObjects
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(goniometer),
     m_InverseGoniometerMatrix(goniometer),
-    m_RunNumber(0)
+    m_RunNumber(0),orig_H(0),orig_K(0),orig_L(0)
   {
     if(fabs(m_InverseGoniometerMatrix.Invert())<1e-8) throw std::invalid_argument("Peak::ctor(): Goniometer matrix must non-singular.");
     this->setInstrument(m_inst);
@@ -86,7 +87,7 @@ namespace DataObjects
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(3,3,true),
     m_InverseGoniometerMatrix(3,3,true),
-    m_RunNumber(0)
+    m_RunNumber(0),orig_H(0),orig_K(0),orig_L(0)
   {
     this->setInstrument(m_inst);
     this->setDetectorID(m_DetectorID);
@@ -108,7 +109,7 @@ namespace DataObjects
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(3,3,true),
     m_InverseGoniometerMatrix(3,3,true),
-    m_RunNumber(0)
+    m_RunNumber(0),orig_H(0),orig_K(0),orig_L(0)
   {
     this->setInstrument(m_inst);
     this->setDetectorID(m_DetectorID);
@@ -130,7 +131,7 @@ namespace DataObjects
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(goniometer),
     m_InverseGoniometerMatrix(goniometer),
-    m_RunNumber(0)
+    m_RunNumber(0),orig_H(0),orig_K(0),orig_L(0)
   {
     if(fabs(m_InverseGoniometerMatrix.Invert())<1e-8) throw std::invalid_argument("Peak::ctor(): Goniometer matrix must non-singular.");
     this->setInstrument(m_inst);
@@ -150,7 +151,7 @@ namespace DataObjects
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(3,3,true),
     m_InverseGoniometerMatrix(3,3,true),
-    m_RunNumber(0)
+    m_RunNumber(0),orig_H(0),orig_K(0),orig_L(0)
   {
     this->setInstrument(m_inst);
     this->setWavelength(m_Wavelength);
@@ -287,16 +288,31 @@ namespace DataObjects
     m_Row = -1;
     m_Col = -1;
 
-    // Go up 2 parents to find the rectangular detector
+    // Go up 2 parents to find the bank/rectangular detector
     IComponent_const_sptr parent = m_det->getParent();
+
+    // Find the ROW by looking at the string name of the pixel. E.g. "pixel12" gives row 12.
+    m_Row = Strings::endsWithInt(m_det->getName());
+
     if (!parent) return;
-    m_BankName = parent->getName(); // Use the parent by default
+    m_BankName = parent->getName();
+
+    // Find the COLUMN by looking at the string name of the parent. E.g. "tube003" gives column 3.
+    m_Col = Strings::endsWithInt(parent->getName());
+
     parent = parent->getParent();
+    // Use the parent if there is no grandparent.
     if (!parent) return;
+
+    // Use the parent if the grandparent is the instrument
+    Instrument_const_sptr instrument = boost::dynamic_pointer_cast<const Instrument>(parent);
+    if (instrument) return;
+    // Use the grand-parent whenever possible
+    m_BankName = parent->getName();
+
+    // Special for rectangular detectors: find the row and column.
     RectangularDetector_const_sptr retDet = boost::dynamic_pointer_cast<const RectangularDetector>(parent);
     if (!retDet) return;
-    m_BankName = retDet->getName(); // Use the grand-parent for rectangular detectors
-
     std::pair<int,int> xy = retDet->getXYForDetectorID(m_DetectorID);
     m_Row = xy.second;
     m_Col = xy.first;
@@ -590,9 +606,12 @@ namespace DataObjects
   /** Set all three H,K,L indices of the peak */
   void Peak::setHKL(double H, double K, double L)
   {
-    orig_H = m_H;
-    orig_K = m_K;
-    orig_L = m_L;
+    if(orig_H == 0 && orig_K == 0 && orig_K == 0)
+    {
+      orig_H = m_H;
+      orig_K = m_K;
+      orig_L = m_L;
+    }
     m_H = H;
     m_K = K;
     m_L = L;
@@ -613,9 +632,12 @@ namespace DataObjects
    */
   void Peak::setHKL(Mantid::Kernel::V3D HKL)
   {
-    orig_H = m_H;
-    orig_K = m_K;
-    orig_L = m_L;
+    if(orig_H == 0 && orig_K == 0 && orig_K == 0)
+    {
+      orig_H = m_H;
+      orig_K = m_K;
+      orig_L = m_L;
+    }
     m_H = HKL.X();
     m_K = HKL.Y();
     m_L = HKL.Z();

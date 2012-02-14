@@ -7,7 +7,7 @@
 #include <iostream>
 #include <iomanip>
 
-#include "MantidDataHandling/SaveDetectorMasks.h"
+#include "MantidDataHandling/SaveMask.h"
 #include "MantidDataHandling/LoadMaskingFile.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 
@@ -17,18 +17,18 @@ using namespace Mantid;
 using namespace Mantid::DataHandling;
 using namespace Mantid::API;
 
-class SaveDetectorMasksTest : public CxxTest::TestSuite
+class SaveMaskTest : public CxxTest::TestSuite
 {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SaveDetectorMasksTest *createSuite() { return new SaveDetectorMasksTest(); }
+  static SaveMaskTest *createSuite() { return new SaveMaskTest(); }
 
-  static void destroySuite( SaveDetectorMasksTest *suite ) { delete suite; }
+  static void destroySuite( SaveMaskTest *suite ) { delete suite; }
 
   void test_Initialize()
   {
-    SaveDetectorMasks savealg;
+    SaveMask savealg;
     savealg.initialize();
 
     TS_ASSERT(savealg.isInitialized());
@@ -44,7 +44,7 @@ public:
   void test_SaveFile()
   {
     // 1. Init SaveDetectorMasking
-    SaveDetectorMasks savealg;
+    SaveMask savealg;
     savealg.initialize();
 
     // 2. Run LoadMaskingFile

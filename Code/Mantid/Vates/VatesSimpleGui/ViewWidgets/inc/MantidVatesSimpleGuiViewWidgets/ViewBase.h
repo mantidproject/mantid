@@ -139,6 +139,11 @@ signals:
    * @param max the maximum value of the data
    */
   void dataRange(double min, double max);
+  /**
+   * Signal to disable all the color selection controls.
+   * @param state set to false to lock out all controls
+   */
+  void lockColorControls(bool state=false);
   /// Signal to trigger pipeline update.
   void triggerAccept();
   /**

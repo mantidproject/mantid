@@ -1,14 +1,15 @@
 #ifndef MANTID_GEOMETRY_MDHISTODIMENSIONTEST_H_
 #define MANTID_GEOMETRY_MDHISTODIMENSIONTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include <iostream>
-#include <iomanip>
-
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
+#include <iomanip>
+#include <iostream>
 
+using namespace Mantid;
 using namespace Mantid::Geometry;
 
 class MDHistoDimensionTest : public CxxTest::TestSuite
@@ -17,8 +18,8 @@ public:
  
   void test_constructor_throws()
   {
-    double min = 10;
-    double max = 1; //min > max !
+    coord_t min = 10;
+    coord_t max = 1; //min > max !
     TSM_ASSERT_THROWS("Should throw if min > max!", MDHistoDimension("name", "id", "Furlongs", min, max, 15), std::invalid_argument);
   }
 

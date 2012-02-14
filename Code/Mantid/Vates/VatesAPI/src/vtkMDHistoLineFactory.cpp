@@ -1,4 +1,4 @@
-#include "MantidVatesAPI/vtkThresholdingLineFactory.h"
+#include "MantidVatesAPI/vtkMDHistoLineFactory.h"
 #include "vtkCellArray.h"
 #include "vtkCellData.h"
 #include "vtkFloatArray.h"
@@ -9,6 +9,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/NullCoordTransform.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidKernel/ReadLock.h"
 
 using Mantid::API::IMDWorkspace;
 using Mantid::MDEvents::MDHistoWorkspace;
@@ -20,17 +21,17 @@ namespace Mantid
   namespace VATES
   {
 
-    vtkThresholdingLineFactory::vtkThresholdingLineFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName) : m_scalarName(scalarName),
+    vtkMDHistoLineFactory::vtkMDHistoLineFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName) : m_scalarName(scalarName),
       m_thresholdRange(thresholdRange)
     {
     }
 
       /**
   Assigment operator
-  @param other : vtkThresholdingLineFactory to assign to this instance from.
+  @param other : vtkMDHistoLineFactory to assign to this instance from.
   @return ref to assigned current instance.
   */
-  vtkThresholdingLineFactory& vtkThresholdingLineFactory::operator=(const vtkThresholdingLineFactory& other)
+  vtkMDHistoLineFactory& vtkMDHistoLineFactory::operator=(const vtkMDHistoLineFactory& other)
   {
     if(this != &other)
     {
@@ -45,24 +46,23 @@ namespace Mantid
   Copy Constructor
   @param other : instance to copy from.
   */
-  vtkThresholdingLineFactory::vtkThresholdingLineFactory(const vtkThresholdingLineFactory& other)
+  vtkMDHistoLineFactory::vtkMDHistoLineFactory(const vtkMDHistoLineFactory& other)
   {
    this->m_scalarName = other.m_scalarName;
    this->m_thresholdRange = other.m_thresholdRange;
    this->m_workspace = other.m_workspace;
   }
 
-    vtkDataSet* vtkThresholdingLineFactory::create() const
+    vtkDataSet* vtkMDHistoLineFactory::create() const
     {
-      validate();
-      //use the successor factory's creation method if this type cannot handle the dimensionality of the workspace.
-      size_t nonIntegratedSize = m_workspace->getNonIntegratedDimensions().size();
-      if((doesCheckDimensionality() && nonIntegratedSize != vtkDataSetFactory::OneDimensional))
+      vtkDataSet* product = tryDelegatingCreation<MDHistoWorkspace, 1>(m_workspace);
+      if(product != NULL)
       {
-        return m_successor->create();
+        return product;
       }
       else
       {
+        Mantid::Kernel::ReadLock lock(*m_workspace);
         const int nBinsX = static_cast<int>( m_workspace->getXDimension()->getNBins() );
 
         const double maxX = m_workspace-> getXDimension()->getMaximum();
@@ -92,7 +92,7 @@ namespace Mantid
         //Loop through dimensions
         for (int i = 0; i < nPointsX; i++)
         {
-          in[0] = minX + (i * incrementX); //Calculate increment in x;
+          in[0] = minX + (static_cast<coord_t>(i) * incrementX); //Calculate increment in x;
           
           signalScalar = static_cast<float>(m_workspace->getSignalNormalizedAt(i));
 
@@ -144,42 +144,16 @@ namespace Mantid
       }
     }
 
-    vtkDataSet* vtkThresholdingLineFactory::createMeshOnly() const
+    void vtkMDHistoLineFactory::initialize(Mantid::API::Workspace_sptr wspace_sptr)
     {
-      throw std::runtime_error("::createMeshOnly() does not apply for this type of factory.");
-    }
-
-    vtkFloatArray* vtkThresholdingLineFactory::createScalarArray() const
-    {
-      throw std::runtime_error("::createScalarArray() does not apply for this type of factory.");
-    }
-
-    void vtkThresholdingLineFactory::initialize(Mantid::API::Workspace_sptr wspace_sptr)
-    {
-      m_workspace = boost::dynamic_pointer_cast<MDHistoWorkspace>(wspace_sptr);
-      validate();
-      // When the workspace can not be handled by this type, take action in the form of delegation.
-      size_t nonIntegratedSize = m_workspace->getNonIntegratedDimensions().size();
-      if((doesCheckDimensionality() && nonIntegratedSize != vtkDataSetFactory::OneDimensional))
-      {
-        if(this->hasSuccessor())
-        {
-          m_successor->setUseTransform(m_useTransform);
-          m_successor->initialize(m_workspace);
-          return;
-        }
-        else
-        {
-          throw std::runtime_error("There is no successor factory set for this vtkThresholdingLineFactory type");
-        }
-      }
-
+      m_workspace = this->doInitialize<MDHistoWorkspace, 1>(wspace_sptr);
+      
       //Setup range values according to whatever strategy object has been injected.
       m_thresholdRange->setWorkspace(m_workspace);
       m_thresholdRange->calculate();
     }
 
-    void vtkThresholdingLineFactory::validate() const
+    void vtkMDHistoLineFactory::validate() const
     {
       if(NULL == m_workspace.get())
       {
@@ -187,7 +161,7 @@ namespace Mantid
       }
     }
 
-    vtkThresholdingLineFactory::~vtkThresholdingLineFactory()
+    vtkMDHistoLineFactory::~vtkMDHistoLineFactory()
     {
 
     }

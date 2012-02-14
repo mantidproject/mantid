@@ -4,7 +4,8 @@ import math
 import os
 import time
 import sys
-from reduction_gui.reduction.reflectometer.refl_data_script import DataSets
+from reduction_gui.reduction.reflectometer.refl_data_script import DataSets as REFLDataSets
+from reduction_gui.reduction.reflectometer.refm_data_script import DataSets as REFMDataSets
 from reduction_gui.reduction.reflectometer.refl_data_series import DataSeries
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
@@ -29,7 +30,8 @@ class DataReflWidget(BaseWidget):
     """
     ## Widget name
     name = "Data"      
-    GeneralSettings.instrument_name = 'REF_L'
+    instrument_name = 'REF_L'
+    short_name = 'REFL'
     peak_pixel_range = []
     background_pixel_range = []
 
@@ -40,7 +42,8 @@ class DataReflWidget(BaseWidget):
             def __init__(self, parent=None):
                 QtGui.QFrame.__init__(self, parent)
                 self.setupUi(self)
-
+                
+        self.short_name = name
         self._summary = SummaryFrame(self)
         self.initialize_content()
         self._layout.addWidget(self._summary)
@@ -69,6 +72,8 @@ class DataReflWidget(BaseWidget):
         self._summary.q_min_edit.setValidator(QtGui.QDoubleValidator(self._summary.q_min_edit))
         self._summary.q_step_edit.setValidator(QtGui.QDoubleValidator(self._summary.q_step_edit))
         
+        self._summary.angle_edit.setValidator(QtGui.QDoubleValidator(self._summary.angle_edit))
+        
         self._summary.angle_offset_edit.setValidator(QtGui.QDoubleValidator(self._summary.angle_offset_edit))
         self._summary.angle_offset_error_edit.setValidator(QtGui.QDoubleValidator(self._summary.angle_offset_error_edit))
 
@@ -96,10 +101,42 @@ class DataReflWidget(BaseWidget):
         self.connect(self._summary.auto_reduce_check, QtCore.SIGNAL("clicked(bool)"), self._auto_reduce)
         self.connect(self._summary.auto_reduce_btn, QtCore.SIGNAL("clicked()"), self._create_auto_reduce_template)
         
+        # Get instrument selection
+        if self.short_name == "REFL": 
+            self._summary.refl_radio.setChecked(True)
+        else:
+            self._summary.refm_radio.setChecked(True)
+        self.connect(self._summary.refl_radio, QtCore.SIGNAL("clicked()"), self._ref_instrument_selected)
+        self.connect(self._summary.refm_radio, QtCore.SIGNAL("clicked()"), self._ref_instrument_selected)
+        self._ref_instrument_selected()
+        self._summary.instrument_group_box.hide()
+        
         # If we do not have access to /SNS, don't display the automated reduction options
-        if not os.path.isdir("/SNS/REF_L"):
+        if not os.path.isdir("/SNS/%s" % self.instrument_name):
             self._summary.auto_reduce_check.hide()
         
+    def _ref_instrument_selected(self):
+        if self._summary.refl_radio.isChecked():
+            self.instrument_name = "REF_L"
+            self._summary.angle_label.hide()
+            self._summary.angle_edit.hide()
+            self._summary.angle_unit_label.hide()
+            self._summary.angle_offset_label.show()
+            self._summary.angle_offset_edit.show()
+            self._summary.angle_offset_pm_label.show()
+            self._summary.angle_offset_error_edit.show()
+            self._summary.angle_offset_unit_label.show()
+        else:
+            self.instrument_name = "REF_M"
+            self._summary.angle_label.show()
+            self._summary.angle_edit.show()
+            self._summary.angle_unit_label.show()
+            self._summary.angle_offset_label.hide()
+            self._summary.angle_offset_edit.hide()
+            self._summary.angle_offset_pm_label.hide()
+            self._summary.angle_offset_error_edit.hide()
+            self._summary.angle_offset_unit_label.hide()   
+                 
     def _create_auto_reduce_template(self):
         m = self.get_editing_state()
         m.data_files = ["runNumber"]
@@ -131,14 +168,14 @@ class DataReflWidget(BaseWidget):
         # Place holder for reduction script
         content += "\n"
         content += "# Place holder for python script\n"
-        content += "file_path = os.path.join(outputDir, 'REF_L_'+runNumber+'.py')\n"
+        content += "file_path = os.path.join(outputDir, '%s_'+runNumber+'.py')\n" % self.instrument_name
         content += "f=open(file_path,'w')\n"
         content += "f.write('# Empty file')\n"
         content += "f.close()\n\n"
         
         # Reduction option to load into Mantid
         xml_str = "<Reduction>\n"
-        xml_str += "  <instrument_name>REF_L</instrument_name>\n"
+        xml_str += "  <instrument_name>Reflectometry</instrument_name>\n" 
         xml_str += "  <timestamp>%s</timestamp>\n" % time.ctime()
         xml_str += "  <python_version>%s</python_version>\n" % sys.version
         if IS_IN_MANTIDPLOT:
@@ -147,13 +184,13 @@ class DataReflWidget(BaseWidget):
         xml_str += "</Reduction>\n"
         
         content += "# Reduction options for loading into Mantid\n"
-        content += "file_path = os.path.join(outputDir, 'REF_L_'+runNumber+'.xml')\n"
+        content += "file_path = os.path.join(outputDir, '%s_'+runNumber+'.xml')\n" % self.instrument_name
         content += "f=open(file_path,'w')\n"
         content += "f.write(\"\"\"%s\"\"\")\n" % xml_str
         content += "f.close()\n"
 
         home_dir = os.path.expanduser('~')
-        f=open(os.path.join(home_dir,"reduce_REF_L.py"),'w')
+        f=open(os.path.join(home_dir,"reduce_%s.py" % self.instrument_name),'w')
         f.write(content)
         f.close()
         
@@ -165,14 +202,14 @@ class DataReflWidget(BaseWidget):
             else:    
                 message += "The automated reduction script could not be saved.\n\n"
             message += "Your script has been saved in your home directory:\n"
-            message += os.path.join(home_dir,"reduce_REF_L.py")
+            message += os.path.join(home_dir,"reduce_%s.py" % self.instrument_name)
             message += "\n\nTry copying it by hand in %s\n" % sns_path
             QtGui.QMessageBox.warning(self, "Error saving automated reduction script", message)
         
-        sns_path = "/SNS/REF_L/shared/autoreduce"
+        sns_path = "/SNS/%s/shared/autoreduce" % self.instrument_name
         if os.path.isdir(sns_path):
             if os.access(sns_path, os.W_OK):
-                file_path = os.path.join(sns_path,"reduce_REF_L.py")
+                file_path = os.path.join(sns_path,"reduce_%s.py" % self.instrument_name)
                 if os.path.isfile(file_path) and not os.access(file_path, os.W_OK):
                     _report_error("You do not have permissions to overwrite %s." % file_path)
                     return
@@ -296,10 +333,7 @@ class DataReflWidget(BaseWidget):
         if not IS_IN_MANTIDPLOT:
             return
         
-        try:
-            f = FileFinder.findRuns(str(self._summary.data_run_number_edit.text()))
-        except:
-            f = FileFinder.findRuns("REF_L%s" % str(self._summary.data_run_number_edit.text()))
+        f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(self._summary.data_run_number_edit.text())))
 
         if len(f)>0 and os.path.isfile(f[0]):
             def call_back(xmin, xmax):
@@ -311,10 +345,7 @@ class DataReflWidget(BaseWidget):
         if not IS_IN_MANTIDPLOT:
             return
         
-        try:
-            f = FileFinder.findRuns(str(self._summary.norm_run_number_edit.text()))
-        except:
-            f = FileFinder.findRuns("REF_L%s" % str(self._summary.norm_run_number_edit.text()))
+        f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(self._summary.norm_run_number_edit.text())))
             
         if len(f)>0 and os.path.isfile(f[0]):
             def call_back(xmin, xmax):
@@ -371,8 +402,9 @@ class DataReflWidget(BaseWidget):
             self._summary.q_step_edit.setText(str(math.fabs(state.data_sets[0].q_step)))
             
             # Common angle offset
-            self._summary.angle_offset_edit.setText(str(state.data_sets[0].angle_offset))
-            self._summary.angle_offset_error_edit.setText(str(state.data_sets[0].angle_offset_error))
+            if hasattr(state.data_sets[0], "angle_offset"):
+                self._summary.angle_offset_edit.setText(str(state.data_sets[0].angle_offset))
+                self._summary.angle_offset_error_edit.setText(str(state.data_sets[0].angle_offset_error))
 
     def set_editing_state(self, state):
 
@@ -380,11 +412,15 @@ class DataReflWidget(BaseWidget):
         self._summary.data_peak_from_pixel.setText(str(state.DataPeakPixels[0]))
         self._summary.data_peak_to_pixel.setText(str(state.DataPeakPixels[1]))
         
-        self._summary.x_min_edit.setText(str(state.x_range[0]))
-        self._summary.x_max_edit.setText(str(state.x_range[1]))
+        #data low resolution range
+        self._summary.data_low_res_range_switch.setChecked(state.data_x_range_flag)
+        self._summary.x_min_edit.setText(str(state.data_x_range[0]))
+        self._summary.x_max_edit.setText(str(state.data_x_range[1]))
         
-        self._summary.norm_x_min_edit.setText(str(state.norm_x_min))
-        self._summary.norm_x_max_edit.setText(str(state.norm_x_max))
+        #norm low resolution range
+        self._summary.norm_low_res_range_switch.setChecked(state.norm_x_range_flag)
+        self._summary.norm_x_min_edit.setText(str(state.norm_x_range[0]))
+        self._summary.norm_x_max_edit.setText(str(state.norm_x_range[1]))
         
         #Background flag
         self._summary.data_background_switch.setChecked(state.DataBackgroundFlag)
@@ -399,10 +435,7 @@ class DataReflWidget(BaseWidget):
         self._summary.data_to_tof.setText(str(state.DataTofRange[1]))
         
         self._summary.data_run_number_edit.setText(str(','.join([str(i) for i in state.data_files])))
-        
-        #normalization flag
-        self._summary.norm_switch.setChecked(state.NormFlag)
-        
+                
         # Normalization options
         self._summary.norm_run_number_edit.setText(str(state.norm_file))
         self._summary.norm_peak_from_pixel.setText(str(state.NormPeakPixels[0]))
@@ -414,10 +447,19 @@ class DataReflWidget(BaseWidget):
         self._summary.norm_background_from_pixel1.setText(str(state.NormBackgroundRoi[0]))
         self._summary.norm_background_to_pixel1.setText(str(state.NormBackgroundRoi[1]))
         
+        #normalization flag
+        self._summary.norm_switch.setChecked(state.NormFlag)
+        self._norm_clicked(state.NormFlag)
+
         # Q binning
         #self._summary.q_min_edit.setText(str(state.q_min))
         #self._summary.log_scale_chk.setChecked(state.q_step<0)
         #self._summary.q_step_edit.setText(str(math.fabs(state.q_step)))
+        
+
+        # Scattering angle
+        if hasattr(state, "theta"):
+            self._summary.angle_edit.setText(str(state.theta))
 
     def get_state(self):
         """
@@ -444,8 +486,9 @@ class DataReflWidget(BaseWidget):
             data.q_step = q_step
         
             # Over-write angle offset
-            data.angle_offset = angle_offset
-            data.angle_offset_error = angle_offset_error
+            if hasattr(state, "angle_offset"):
+                data.angle_offset = angle_offset
+                data.angle_offset_error = angle_offset_error
 
             ##
             # Add here states that are relevant to the interface (all the runs)
@@ -457,17 +500,22 @@ class DataReflWidget(BaseWidget):
         return state
     
     def get_editing_state(self):
-        m = DataSets()
+        if self.instrument_name == "REF_L":
+            m = REFLDataSets()
+        else:
+            m = REFMDataSets()
         
         #Peak from/to pixels
         m.DataPeakPixels = [int(self._summary.data_peak_from_pixel.text()),
                             int(self._summary.data_peak_to_pixel.text())] 
         
-        m.x_range = [int(self._summary.x_min_edit.text()),
+        m.data_x_range = [int(self._summary.x_min_edit.text()),
                      int(self._summary.x_max_edit.text())]
+        m.data_x_range_flag = self._summary.data_low_res_range_switch.isChecked()
         
-        m.norm_x_min = int(self._summary.norm_x_min_edit.text())
-        m.norm_x_max = int(self._summary.norm_x_max_edit.text())
+        m.norm_x_range = [int(self._summary.norm_x_min_edit.text()),
+                          int(self._summary.norm_x_max_edit.text())]
+        m.norm_x_range_flag = self._summary.norm_low_res_range_switch.isChecked()
         
         #Background flag
         m.DataBackgroundFlag = self._summary.data_background_switch.isChecked()
@@ -505,6 +553,10 @@ class DataReflWidget(BaseWidget):
         #m.q_step = float(self._summary.q_step_edit.text())
         #if self._summary.log_scale_chk.isChecked():
         #    m.q_step = -m.q_step
+
+        # Scattering angle
+        if hasattr(m, "theta"):
+            m.theta = float(self._summary.angle_edit.text())
 
         ##
         # Add here states that are data file dependent

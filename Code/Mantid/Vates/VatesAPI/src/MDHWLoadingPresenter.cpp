@@ -46,8 +46,8 @@ namespace Mantid
       for (size_t d=0; d<nDimensions; d++)
       {
         IMDDimension_const_sptr inDim = histoWs->getDimension(d);
-        double min = inDim->getMinimum();
-        double max = inDim->getMaximum();
+        coord_t min = inDim->getMinimum();
+        coord_t max = inDim->getMaximum();
         if (min > max)
         {
           min = 0.0;

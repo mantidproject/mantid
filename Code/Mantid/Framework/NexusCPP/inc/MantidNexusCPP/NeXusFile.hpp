@@ -175,6 +175,12 @@ namespace NeXus {
     template<typename NumT>
     void free(NumT*& data);
 
+    /** Return the C-API handle to the open file */
+    NXhandle getHandle()
+    {
+      return m_file_id;
+    }
+
     /**
      * Create a new group.
      *

@@ -668,7 +668,7 @@ namespace MDEvents
       // Coordinate along the line
       VMD coord = start + step * double(i);
       // Record the position along the line
-      x.push_back(coord_t(stepLength * double(i)));
+      x.push_back(static_cast<coord_t>(stepLength * double(i)));
 
       // Look for the box at this coordinate
       const IMDBox<MDE,nd> * box = NULL;
@@ -677,7 +677,7 @@ namespace MDEvents
       bool outOfBounds = false;
       for (size_t d=0; d<nd; d++)
       {
-        coord_t x = coord_t(coord[d]);
+        coord_t x = static_cast<coord_t>(coord[d]);
         MDDimensionExtents & extents = data->getExtents(d);
         if (x < extents.min || x >= extents.max)
           outOfBounds = true;
@@ -687,12 +687,7 @@ namespace MDEvents
      //TODO: make the logic/reuse in the following nicer.
       if (!outOfBounds)
       {
-#ifdef COORDT_IS_FLOAT
-        std::vector<coord_t> temp = coord.toVector<coord_t>();
-        box = this->data->getBoxAtCoord(&temp[0]);
-#else
         box = this->data->getBoxAtCoord(coord.getBareArray());
-#endif
 
         if(box != NULL) 
         {

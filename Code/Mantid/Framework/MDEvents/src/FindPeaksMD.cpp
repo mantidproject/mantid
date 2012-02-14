@@ -513,7 +513,7 @@ namespace MDEvents
 
     // Other parameters
     double PeakDistanceThreshold = getProperty("PeakDistanceThreshold");
-    peakRadiusSquared = coord_t(PeakDistanceThreshold*PeakDistanceThreshold);
+    peakRadiusSquared = static_cast<coord_t>(PeakDistanceThreshold*PeakDistanceThreshold);
 
     DensityThresholdFactor = getProperty("DensityThresholdFactor");
     MaxPeaks = getProperty("MaxPeaks");

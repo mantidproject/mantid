@@ -47,8 +47,8 @@ public:
   void test_exec()
   {
     size_t numBins[3] = {10, 12, 2};
-    double min[3] = {0, 10, 0};
-    double max[3] = {10, 34, 10};
+    coord_t min[3] = {0, 10, 0};
+    coord_t max[3] = {10, 34, 10};
     MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(
         3, 1.0, 2.0, numBins, min, max, "mdhisto3");
     for (size_t x=0; x<10; x++)

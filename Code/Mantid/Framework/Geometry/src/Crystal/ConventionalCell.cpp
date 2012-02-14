@@ -2,6 +2,7 @@
 
 #include <stdexcept>
 #include <algorithm>
+#include <cstdio>
 
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Crystal/ConventionalCell.h"
@@ -120,6 +121,31 @@ namespace Geometry
     std::vector<double> lat_par;
     IndexingUtils::GetLatticeParameters( adjusted_UB, lat_par );
     return lat_par[0] + lat_par[1] + lat_par[2];
+  }
+
+
+  /**
+   *  Get a formatted string listing the form number, error in scalars,
+   *  the cell type and the centering.
+   *
+   *  @return a std::string with basic information about this cell.
+   */
+  std::string ConventionalCell::GetDescription() const
+  {
+    char buffer[100];
+    sprintf( buffer, std::string("Form #%2d").c_str(), GetFormNum());
+    std::string message( buffer );
+
+    sprintf( buffer, std::string("  Error:%7.4f").c_str(), GetError());
+    message += std::string( buffer );
+
+    sprintf(buffer,std::string("  %-12s").c_str(), GetCellType().c_str());
+    message += std::string( buffer );
+
+    sprintf(buffer,std::string("  %1s  ").c_str(), GetCentering().c_str());
+    message += std::string( buffer );
+
+    return message;
   }
 
 

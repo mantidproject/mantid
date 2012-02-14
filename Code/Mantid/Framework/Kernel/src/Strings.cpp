@@ -177,6 +177,37 @@ int extractWord(std::string& Line,const std::string& Word,const int cnt)
 }
 
 //------------------------------------------------------------------------------------------------
+/** If a word ends with a number representing a positive integer, return
+ * the value of that int.
+ *
+ * @param word :: string possibly ending in a number
+ * @return the number, or -1 if it does not end in a number
+ */
+int endsWithInt(const std::string & word)
+{
+  if (word.empty())
+    return -1;
+  int out = -1;
+  // Find the index of the first number in the string (if any)
+  int firstNumber = int(word.size());
+  for (int i=int(word.size())-1; i>=0; i--)
+  {
+    char c = word[i];
+    if ((c > '9') || (c < '0'))
+      break;
+    firstNumber = i;
+  }
+  // Convert the string of decimals to an int
+  if (firstNumber < int(word.size()))
+  {
+    std::string part = word.substr(firstNumber, word.size()-firstNumber);
+    if (!convert(part, out))
+      return -1;
+  }
+  return out;
+}
+
+//------------------------------------------------------------------------------------------------
 /**
   Check to see if S is the same as the
   first part of a phrase. (case insensitive)

@@ -2,7 +2,7 @@
 #include "MantidKernel/CPUTimer.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidAPI/NullCoordTransform.h"
-#include "MantidVatesAPI/vtkThresholdingQuadFactory.h"
+#include "MantidVatesAPI/vtkMDHistoQuadFactory.h"
 #include "vtkCellArray.h"
 #include "vtkCellData.h"
 #include "vtkFloatArray.h"
@@ -10,6 +10,7 @@
 #include "vtkSmartPointer.h" 
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <vector>
+#include "MantidKernel/ReadLock.h"
 
 using Mantid::API::IMDWorkspace;
 using Mantid::Kernel::CPUTimer;
@@ -21,16 +22,16 @@ namespace Mantid
   namespace VATES
   {
 
-    vtkThresholdingQuadFactory::vtkThresholdingQuadFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName) : m_scalarName(scalarName), m_thresholdRange(thresholdRange)
+    vtkMDHistoQuadFactory::vtkMDHistoQuadFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName) : m_scalarName(scalarName), m_thresholdRange(thresholdRange)
     {
     }
 
           /**
   Assigment operator
-  @param other : vtkThresholdingQuadFactory to assign to this instance from.
+  @param other : vtkMDHistoQuadFactory to assign to this instance from.
   @return ref to assigned current instance.
   */
-  vtkThresholdingQuadFactory& vtkThresholdingQuadFactory::operator=(const vtkThresholdingQuadFactory& other)
+  vtkMDHistoQuadFactory& vtkMDHistoQuadFactory::operator=(const vtkMDHistoQuadFactory& other)
   {
     if(this != &other)
     {
@@ -45,35 +46,34 @@ namespace Mantid
   Copy Constructor
   @param other : instance to copy from.
   */
-  vtkThresholdingQuadFactory::vtkThresholdingQuadFactory(const vtkThresholdingQuadFactory& other)
+  vtkMDHistoQuadFactory::vtkMDHistoQuadFactory(const vtkMDHistoQuadFactory& other)
   {
    this->m_scalarName = other.m_scalarName;
    this->m_thresholdRange = other.m_thresholdRange;
    this->m_workspace = other.m_workspace;
   }
 
-    vtkDataSet* vtkThresholdingQuadFactory::create() const
+    vtkDataSet* vtkMDHistoQuadFactory::create() const
     {
-      validate();
-      //use the successor factory's creation method if this type cannot handle the dimensionality of the workspace.
-      const size_t nonIntegratedSize = m_workspace->getNonIntegratedDimensions().size();
-      if((doesCheckDimensionality() && nonIntegratedSize != vtkDataSetFactory::TwoDimensional))
+      vtkDataSet* product = tryDelegatingCreation<MDHistoWorkspace, 2>(m_workspace);
+      if(product != NULL)
       {
-        return m_successor->create();
+        return product;
       }
       else
       {
+        Mantid::Kernel::ReadLock lock(*m_workspace);
         CPUTimer tim;
         const int nBinsX = static_cast<int>( m_workspace->getXDimension()->getNBins() );
         const int nBinsY = static_cast<int>( m_workspace->getYDimension()->getNBins() );
 
-        const double maxX = m_workspace-> getXDimension()->getMaximum();
-        const double minX = m_workspace-> getXDimension()->getMinimum();
-        const double maxY = m_workspace-> getYDimension()->getMaximum();
-        const double minY = m_workspace-> getYDimension()->getMinimum();
+        const coord_t maxX = m_workspace-> getXDimension()->getMaximum();
+        const coord_t minX = m_workspace-> getXDimension()->getMinimum();
+        const coord_t maxY = m_workspace-> getYDimension()->getMaximum();
+        const coord_t minY = m_workspace-> getYDimension()->getMinimum();
 
-        double incrementX = (maxX - minX) / (nBinsX);
-        double incrementY = (maxY - minY) / (nBinsY);
+        coord_t incrementX = (maxX - minX) / static_cast<coord_t>(nBinsX);
+        coord_t incrementY = (maxY - minY) / static_cast<coord_t>(nBinsY);
 
         const int imageSize = (nBinsX ) * (nBinsY );
         vtkPoints *points = vtkPoints::New();
@@ -145,13 +145,13 @@ namespace Mantid
         index = 0;
         for (int i = 0; i < nPointsX; i++)
         {
-          in[0] = minX + (i * incrementX); //Calculate increment in x;
+          in[0] = minX + (static_cast<coord_t>(i) * incrementX); //Calculate increment in x;
           for (int j = 0; j < nPointsY; j++)
           {
             // Create the point only when needed
             if (pointNeeded[index])
             {
-              in[1] = minY + (j * incrementY); //Calculate increment in y;
+              in[1] = minY + (static_cast<coord_t>(j) * incrementY); //Calculate increment in y;
               if (transform)
               {
                 transform->apply(in, out);
@@ -205,42 +205,16 @@ namespace Mantid
       }
     }
 
-    vtkDataSet* vtkThresholdingQuadFactory::createMeshOnly() const
+    void vtkMDHistoQuadFactory::initialize(Mantid::API::Workspace_sptr wspace_sptr)
     {
-      throw std::runtime_error("::createMeshOnly() does not apply for this type of factory.");
-    }
-
-    vtkFloatArray* vtkThresholdingQuadFactory::createScalarArray() const
-    {
-      throw std::runtime_error("::createScalarArray() does not apply for this type of factory.");
-    }
-
-    void vtkThresholdingQuadFactory::initialize(Mantid::API::Workspace_sptr wspace_sptr)
-    {
-      m_workspace = boost::dynamic_pointer_cast<MDHistoWorkspace>(wspace_sptr);
-      validate();
-      // When the workspace can not be handled by this type, take action in the form of delegation.
-      const size_t nonIntegratedSize = m_workspace->getNonIntegratedDimensions().size();
-      if((doesCheckDimensionality() && nonIntegratedSize != vtkDataSetFactory::TwoDimensional))
-      {
-        if(this->hasSuccessor())
-        {
-          m_successor->setUseTransform(m_useTransform);
-          m_successor->initialize(m_workspace);
-          return;
-        }
-        else
-        {
-          throw std::runtime_error("There is no successor factory set for this vtkThresholdingQuadFactory type");
-        }
-      }
+      m_workspace = doInitialize<MDHistoWorkspace, 2>(wspace_sptr);
 
       //Setup range values according to whatever strategy object has been injected.
       m_thresholdRange->setWorkspace(m_workspace);
       m_thresholdRange->calculate();
     }
 
-    void vtkThresholdingQuadFactory::validate() const
+    void vtkMDHistoQuadFactory::validate() const
     {
       if(NULL == m_workspace.get())
       {
@@ -248,7 +222,7 @@ namespace Mantid
       }
     }
 
-    vtkThresholdingQuadFactory::~vtkThresholdingQuadFactory()
+    vtkMDHistoQuadFactory::~vtkMDHistoQuadFactory()
     {
 
     }

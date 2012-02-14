@@ -1783,8 +1783,8 @@ void MantidUI::logMessage(const Poco::Message& msg)
   }
   if (msg.getPriority() < Poco::Message::PRIO_ERROR)
     appWindow()->results->setTextColor(Qt::red);
-  else if (msg.getPriority() < Poco::Message::PRIO_WARNING)
-    appWindow()->results->setTextColor(Qt::darkRed);
+  else if (msg.getPriority() <= Poco::Message::PRIO_WARNING)
+    appWindow()->results->setTextColor(QColor::fromRgb(255, 100, 0)); // Orange
   else if (msg.getPriority() > Poco::Message::PRIO_INFORMATION)
     appWindow()->results->setTextColor(Qt::gray);
   else if (msg.getPriority() == Poco::Message::PRIO_NOTICE)

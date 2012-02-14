@@ -88,6 +88,28 @@ std::string toString(const std::vector<T>& value)
   return result.str();
 }
 
+/// Specialisation for a property of type std::vector<std::vector>.
+template <typename T>
+std::string toString(const std::vector<std::vector<T> >& value)
+{
+  std::stringstream result;
+  std::size_t vsize = value.size();
+  for (std::size_t i = 0; i < vsize; ++i)
+  {
+    std::size_t innervsize = value[i].size();
+    for (std::size_t j = 0; j < innervsize; ++j)
+    {
+      result << value[i][j];
+      if (j + 1 != innervsize)
+        result << "+";
+    }
+
+    if (i + 1 != vsize)
+      result << ",";
+  }
+  return result.str();
+}
+
 // ------------- Convert strings to values
 template <typename T>
 inline void appendValue(const std::string& strvalue, std::vector<T>& value)
@@ -137,6 +159,28 @@ void toValue(const std::string& strvalue, std::vector<T>& value)
   for (tokenizer::Iterator it = values.begin(); it != values.end(); ++it)
   {
     value.push_back(boost::lexical_cast<T>(*it));
+  }
+}
+
+template <typename T>
+void toValue(const std::string& strvalue, std::vector<std::vector<T> >& value)
+{
+  // Split up comma-separated properties
+  typedef Poco::StringTokenizer tokenizer;
+  tokenizer tokens(strvalue, ",", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
+
+  value.clear();
+  value.reserve(tokens.count());
+
+  for (tokenizer::Iterator oIt = tokens.begin(); oIt != tokens.end(); ++oIt)
+  {
+    tokenizer values(*oIt, "+", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
+    std::vector<T> vect;
+
+    for (tokenizer::Iterator iIt = values.begin(); iIt != values.end(); ++iIt)
+      vect.push_back(boost::lexical_cast<T>(*iIt));
+
+    value.push_back(vect);
   }
 }
 

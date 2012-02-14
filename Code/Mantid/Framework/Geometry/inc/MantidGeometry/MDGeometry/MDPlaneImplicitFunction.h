@@ -41,8 +41,8 @@ public:
   /// Default constructor.
   MDPlaneImplicitFunction();
   /// Parameter constructor for setting origin.
-  MDPlaneImplicitFunction(const size_t nd, const coord_t * normal,
-                          const coord_t * point);
+  MDPlaneImplicitFunction(const size_t nd, const float * normal, const float * point);
+  MDPlaneImplicitFunction(const size_t nd, const double * normal, const double * point);
   /// Class destructor.
   virtual ~MDPlaneImplicitFunction();
 

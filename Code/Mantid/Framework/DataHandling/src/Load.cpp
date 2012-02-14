@@ -33,7 +33,7 @@ Load('event_ws', Filename='INSTR_1000_event.nxs',Precount=True)
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/Load.h"
-#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -43,8 +43,57 @@ Load('event_ws', Filename='INSTR_1000_event.nxs',Precount=True)
 
 #include <cctype>
 #include <algorithm>
+#include <functional>
+#include <numeric>
+#include <set>
 #include "MantidAPI/IMDEventWorkspace.h"
 #include <cstdio>
+
+
+namespace
+{
+  /**
+   * Convenience function that returns true if the passed vector of vector of strings
+   * contains a single string, false if contains more than that (or zero).
+   *
+   * @param fileNames :: a vector of vectors of file name strings.
+   *
+   * @returns true if there is exactly one string, else false.
+   */
+  bool isSingleFile(const std::vector<std::vector<std::string> > & fileNames)
+  {
+    if(fileNames.size() == 1)
+    {
+      std::vector<std::vector<std::string> >::const_iterator first = fileNames.begin();
+      if(first->size() == 1)
+        return true;
+    }
+    return false;
+  }
+
+  /**
+   * Helper function that takes a vector of runs, and generates a suggested workspace name.
+   * This will likely need to be improved and may have to include instrument name, etc.
+   *
+   * @param runs :: a vector of run numbers.
+   *
+   * @returns a string containing a suggested file name based on the given run numbers.
+   */
+  std::string generateWsName(std::vector<unsigned int> runs)
+  {
+    std::string wsName("");
+
+    for(size_t i = 0; i < runs.size(); ++i)
+    {
+      if(!wsName.empty())
+        wsName += "_";
+
+      wsName += boost::lexical_cast<std::string>(runs[i]);
+    }
+
+    return wsName;
+  }
+}
 
 namespace Mantid
 {
@@ -88,9 +137,15 @@ namespace Mantid
       std::transform(name.begin(),name.end(),NAME.begin(),toupper);
       if( NAME == "FILENAME" )
       {
-        // Get back full path before passing to getFileLoader method.
-        IDataFileChecker_sptr loader = getFileLoader(getPropertyValue(name));
-        if( loader ) declareLoaderProperties(loader);
+        // Get back full path before passing to getFileLoader method, and also
+        // find out whether this is a multi file load.
+        std::vector<std::vector<std::string> > fileNames = getProperty("Filename");
+        // If it's a single file load, then it's fine to change loader.
+        if(isSingleFile(fileNames))
+        {
+          IDataFileChecker_sptr loader = getFileLoader(getPropertyValue(name));
+          if( loader ) declareLoaderProperties(loader);
+        }
       }
     }
 
@@ -249,9 +304,10 @@ namespace Mantid
       exts.push_back(".grp");
       exts.push_back(".nxspe");
 
-      declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-        "The name of the file to read, including its full or relative\n"
-        "path. (N.B. case sensitive if running on Linux).");
+      declareProperty(new MultipleFileProperty("Filename", exts),
+        "The name of the file(s) to read, including the full or relative\n"
+        "path. (N.B. case sensitive if running on Linux). Multiple runs\n"
+        "can be loaded and added together, e.g. INST10,11+12,13.ext");
       declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",Direction::Output), 
         "The name of the workspace that will be created, filled with the\n"
         "read-in data and stored in the Analysis Data Service.");
@@ -268,12 +324,27 @@ namespace Mantid
     }
 
     /** 
-    *   Executes the algorithm.
-    */
+     * Executes the algorithm.
+     */
     void Load::exec()
     {
+      std::vector<std::vector<std::string> > fileNames = getProperty("Filename");
+      
+      if(isSingleFile(fileNames))
+      {
+        // This is essentially just the same code that was called before multiple files were supported.
+        loadSingleFile();
+      }
+      else
+      {
+        // Code that supports multiple file loading.
+        loadMultipleFiles();
+      }
+    }
+
+    void Load::loadSingleFile()
+    {
       std::string loaderName = getPropertyValue("LoaderName");
-      //IDataFileChecker_sptr loader;
       if( loaderName.empty() )
       {
         m_loader = getFileLoader(getPropertyValue("Filename"));
@@ -307,6 +378,101 @@ namespace Mantid
       m_loader->execute();
       // Set the workspace. Deals with possible multiple periods
       setOutputWorkspace(m_loader);
+    }
+
+
+    void Load::loadMultipleFiles()
+    {
+      MultipleFileProperty * multiFileProp = dynamic_cast<MultipleFileProperty*>(getPointerToProperty("Filename"));
+      
+      const std::vector<std::vector<std::string> > values = getProperty("Filename");
+      const std::vector<std::vector<unsigned int> > runs = multiFileProp->getRuns();
+      std::string outputWsName = getProperty("OutputWorkspace");
+
+      std::vector<std::string> loadedWsNames;
+
+      std::vector<std::vector<std::string> >::const_iterator values_it = values.begin();
+      std::vector<std::vector<unsigned int> >::const_iterator runs_it = runs.begin();
+
+      // Cycle through the fileNames and wsNames.
+      for(; values_it != values.end(); ++values_it, ++runs_it)
+      {
+        std::vector<std::string> fileNames = *values_it;
+        std::string wsName = generateWsName(*runs_it);
+
+        // If there is only one filename, then just load it to the given wsName.
+        if(fileNames.size() == 1)
+        {
+          loadFileToHiddenWs(fileNames.at(0), wsName);
+          loadedWsNames.push_back("__" + wsName);
+        }
+        // Else there is more than one filename.  Load them all, sum them, and rename the
+        // result to the given wsName.
+        else
+        {
+          // Load all files and place the resulting workspaces in a vector.
+          std::vector<Workspace_sptr> loadedWs;
+          std::vector<std::string>::const_iterator vIt = fileNames.begin();
+
+          for(; vIt != fileNames.end(); ++vIt)
+          {
+            Workspace_sptr ws = loadFileToHiddenWs(*vIt, (*vIt) + "_temp");
+            loadedWs.push_back(ws);
+          }
+
+          // Add all workspaces together, sticking the result in sum.
+          Workspace_sptr sum;
+          for(
+            size_t i = 1; // Start at second workspace in list.
+            i < loadedWs.size(); 
+            i++)
+          {
+            Workspace_sptr firstWsToAdd;
+            // If there have been no workspaces added yet, then the first workspace to add
+            // is the first workspace in the list.
+            if(sum == Workspace_sptr())
+              firstWsToAdd = loadedWs.at(i-1);
+            // Else the first workspace to add is "sum" itself.
+            else
+              firstWsToAdd = sum;
+            
+            Workspace_sptr secondWsToAdd = loadedWs.at(i);
+            sum = plusWs(firstWsToAdd, secondWsToAdd);
+          }
+
+          // Delete all of the temporarily loaded workspaces except the first one, so that we are left only
+          // with sum at this point.
+          for(size_t i = 1; i < fileNames.size(); i++)
+          {
+            deleteWs("__" + fileNames.at(i) + "_temp");
+          }
+
+          // Rename the sum and add to the list of loaded workspace names.
+          renameWs(sum->name(), "__" + wsName);
+          loadedWsNames.push_back("__" + wsName);
+        }
+      }
+
+      // If we only have one loaded ws, set it as the output.
+      if(loadedWsNames.size() == 1)
+      {
+        renameWs(loadedWsNames.at(0), outputWsName);
+        setProperty("OutputWorkspace", AnalysisDataService::Instance().retrieve(outputWsName.c_str()));
+      }
+      // Else we have multiple loaded workspaces - group them and set the group as output.
+      else
+      {
+        Mantid::API::IAlgorithm_sptr groupingAlg = 
+          Mantid::API::AlgorithmManager::Instance().create("GroupWorkspaces", 1);
+
+        groupingAlg->setProperty("InputWorkspaces",loadedWsNames);
+        groupingAlg->setProperty("OutputWorkspace",outputWsName.c_str());
+        groupingAlg->execute();
+
+        unhideWs(outputWsName);
+
+        setProperty("OutputWorkspace", AnalysisDataService::Instance().retrieve(outputWsName.c_str()));
+      }
     }
 
     /** 
@@ -449,13 +615,143 @@ namespace Mantid
     }
 
     /*
-     * Overrides the default cancel() method. Calls cancel() on the actual loader.
-     */
+    * Overrides the default cancel() method. Calls cancel() on the actual loader.
+    */
     void Load::cancel()const
     {
       if (m_loader)
       {
         m_loader->cancel();
+      }
+    }
+
+    /**
+     * Loads a file into a *hidden* workspace.
+     *
+     * @param fileName :: file name to load.
+     * @param wsName   :: workspace name, which will be prefixed by a "__"
+     *
+     * @returns a pointer to the loaded workspace
+     */
+    API::Workspace_sptr Load::loadFileToHiddenWs(
+      const std::string & fileName, 
+      const std::string & wsName)
+    {
+      Mantid::API::IAlgorithm_sptr loadAlg = createSubAlgorithm("Load", 1);
+      // Here, as a workaround for groupworkspaces who's members have names but no
+      // accompanying entries in the ADS, we set the sub algo to not be a child ...
+      loadAlg->setChild(false);
+      // ... and now, so that the the workspaces dont appear in the window, we prefix
+      // all workspace names with "__".
+      loadAlg->setPropertyValue("Filename",fileName);
+      loadAlg->setPropertyValue("OutputWorkspace","__" + wsName);
+      loadAlg->executeAsSubAlg();
+
+      return AnalysisDataService::Instance().retrieve("__" + wsName);
+    }
+
+    /**
+     * Plus two workspaces together, "in place".
+     *
+     * @param ws1 :: The first workspace.
+     * @param ws2 :: The second workspace.
+     *
+     * @returns a pointer to the result (the first workspace).
+     */
+   API::Workspace_sptr Load::plusWs(
+      Workspace_sptr ws1,
+      Workspace_sptr ws2)
+    {
+      Mantid::API::IAlgorithm_sptr plusAlg = createSubAlgorithm("Plus", 1);
+      plusAlg->setPropertyValue("LHSWorkspace", ws1->name());
+      plusAlg->setPropertyValue("RHSWorkspace", ws2->name());
+      plusAlg->setPropertyValue("OutputWorkspace", ws1->name());
+      plusAlg->executeAsSubAlg();
+
+      return ws1;
+    }
+
+    /**
+     * Renames a workspace.
+     *
+     * @param oldName :: the old workspace name.
+     * @param newName :: the new workspace name.
+     */
+    void Load::renameWs(
+      const std::string & oldName, 
+      const std::string & newName)
+    {
+      if(oldName == newName)
+        return;
+
+      Mantid::API::IAlgorithm_sptr renameAlg = createSubAlgorithm("RenameWorkspace", 1);
+      renameAlg->setChild(false);
+      renameAlg->setPropertyValue("InputWorkspace", oldName);
+      renameAlg->setPropertyValue("OutputWorkspace", newName);
+      renameAlg->executeAsSubAlg();
+    }
+
+    /**
+     * Deletes a given workspace.  If the given workspace is a group workspace,
+     * then this function calls itself recursively for each workspace in the group.
+     *
+     * @param wsName :: the name of the workspace to delete.
+     */
+    void Load::deleteWs(const std::string & wsName)
+    {
+      Workspace_sptr ws = AnalysisDataService::Instance().retrieve(wsName);
+      if(WorkspaceGroup_sptr wsGrpSptr =
+        boost::dynamic_pointer_cast<WorkspaceGroup>(ws))
+      {
+        std::vector<std::string> childWsNames = wsGrpSptr->getNames();
+        std::vector<std::string>::iterator vIt = childWsNames.begin();
+
+        for(; vIt != childWsNames.end(); ++vIt)
+        {
+          // Call this function recursively, to delete each child workspace.
+          deleteWs(*vIt);
+        }
+      }
+      else
+      {
+        Mantid::API::IAlgorithm_sptr deleteAlg = createSubAlgorithm("DeleteWorkspace", 1);
+
+        deleteAlg->setPropertyValue("Workspace", wsName);
+        deleteAlg->execute();
+      }
+    }
+
+    /**
+     * Unhides a given workspace (by removing the "__" prefix from its name if present).
+     * If the given workspace is a group workspace, then this function calls itself 
+     * recursively for each workspace in the group.
+     *
+     * @param wsName :: the name of the workspace to unhide.
+     */
+    void Load::unhideWs(const std::string & wsName)
+    {
+      std::set<std::string> adsContents1 = AnalysisDataService::Instance().getObjectNames();
+
+      Workspace_sptr ws = AnalysisDataService::Instance().retrieve(wsName);
+      if(WorkspaceGroup_sptr wsGrpSptr =
+        boost::dynamic_pointer_cast<WorkspaceGroup>(ws))
+      {
+        std::vector<std::string> childWsNames = wsGrpSptr->getNames();
+        std::vector<std::string>::iterator vIt = childWsNames.begin();
+
+        for(; vIt != childWsNames.end(); ++vIt)
+        {
+          // Call this function recursively, to unhide each child workspace.
+          unhideWs(*vIt);
+        }
+      }
+      else
+      {
+        if(boost::starts_with(wsName, "__"))
+        {
+          std::string newName = wsName.substr(2, (wsName.size() - 2));
+          renameWs(wsName, newName);
+        }
       }
     }
 

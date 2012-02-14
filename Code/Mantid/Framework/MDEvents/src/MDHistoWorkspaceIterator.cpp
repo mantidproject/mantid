@@ -92,7 +92,7 @@ namespace MDEvents
     {
       // Calculate the center of the 0-th bin
       for (size_t d=0; d<m_nd; d++)
-        m_center[d] = m_origin[d] + coord_t(0.5) * m_binWidth[d];
+        m_center[d] = m_origin[d] + 0.5f * m_binWidth[d];
       // Skip on if the first point is NOT contained
       if (!m_function->isPointContained(m_center))
         next();
@@ -156,7 +156,7 @@ namespace MDEvents
         // Calculate the center
         for (size_t d=0; d<m_nd; d++)
         {
-          m_center[d] = m_origin[d] + (coord_t(m_index[d]) + coord_t(0.5)) * m_binWidth[d];
+          m_center[d] = m_origin[d] + (coord_t(m_index[d]) + 0.5f) * m_binWidth[d];
 //          std::cout << m_center[d] << ",";
         }
 //        std::cout<<std::endl;
@@ -255,7 +255,7 @@ namespace MDEvents
     Utils::NestedForLoop::GetIndicesFromLinearIndex(m_nd, m_pos, m_indexMaker, m_indexMax, m_index);
     // Find the center
     for (size_t d=0; d<m_nd; d++)
-      m_center[d] = m_origin[d] + (coord_t(m_index[d]) + coord_t(0.5)) * m_binWidth[d];
+      m_center[d] = m_origin[d] + (coord_t(m_index[d]) + 0.5f) * m_binWidth[d];
     return VMD(m_nd, m_center);
   }
 

@@ -1,49 +1,46 @@
-#ifndef VTK_THRESHOLDING_UNSTRUCTURED_GRID_FACTORY_TEST_H_
-#define VTK_THRESHOLDING_UNSTRUCTURED_GRID_FACTORY_TEST_H_
+#ifndef VTK_MD_HISTO_HEX_FACTORY_TEST_H_
+#define VTK_MD_HISTO_HEX_FACTORY_TEST_H_
 
-#include "MantidAPI/IMDWorkspace.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidVatesAPI/TimeStepToTimeStep.h"
 #include "MantidVatesAPI/UserDefinedThresholdRange.h"
-#include "MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h"
+#include "MantidVatesAPI/vtkMDHistoHexFactory.h"
 #include "MockObjects.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <vtkStructuredGrid.h>
 
 using namespace Mantid;
+using namespace Mantid::API;
 using namespace Mantid::MDEvents;
 using namespace Mantid::VATES;
-using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace testing;
 
 //=====================================================================================
 // Functional Tests
 //=====================================================================================
-class vtkThresholdingUnstructuredGridFactoryTest: public CxxTest::TestSuite
+class vtkMDHistoHexFactoryTest: public CxxTest::TestSuite
 {
 
-public:
+  public:
 
   void testThresholds()
   {
     // Workspace with value 1.0 everywhere
-    MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 4);
+    MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
     ws_sptr->setTransformFromOriginal(new NullCoordTransform);
 
-    //Set up so that only cells with signal values == 1 should not be filtered out by thresholding.
-
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> inside(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 2)), "signal", 0);
+    vtkMDHistoHexFactory inside(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 2)), "signal");
     inside.initialize(ws_sptr);
     vtkUnstructuredGrid* insideProduct = dynamic_cast<vtkUnstructuredGrid*>(inside.create());
 
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> below(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 0.5)),"signal", 0);
+    vtkMDHistoHexFactory below(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 0.5)), "signal");
     below.initialize(ws_sptr);
     vtkUnstructuredGrid* belowProduct = dynamic_cast<vtkUnstructuredGrid*>(below.create());
 
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> above(ThresholdRange_scptr(new UserDefinedThresholdRange(2, 3)), "signal", 0);
+    vtkMDHistoHexFactory above(ThresholdRange_scptr(new UserDefinedThresholdRange(2, 3)), "signal");
     above.initialize(ws_sptr);
     vtkUnstructuredGrid* aboveProduct = dynamic_cast<vtkUnstructuredGrid*>(above.create());
 
@@ -55,75 +52,53 @@ public:
   void testSignalAspects()
   {
     // Workspace with value 1.0 everywhere
-    MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 4);
+    MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
     ws_sptr->setTransformFromOriginal(new NullCoordTransform);
-    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory =
-      vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> (ThresholdRange_scptr(pRange), "signal", 0);
+    vtkMDHistoHexFactory factory (ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
     factory.initialize(ws_sptr);
 
     vtkDataSet* product = factory.create();
     TSM_ASSERT_EQUALS("A single array should be present on the product dataset.", 1, product->GetCellData()->GetNumberOfArrays());
     vtkDataArray* signalData = product->GetCellData()->GetArray(0);
     TSM_ASSERT_EQUALS("The obtained cell data has the wrong name.", std::string("signal"), signalData->GetName());
-    const int correctCellNumber = 10*10*10;
+    const int correctCellNumber = 10 * 10 * 10;
     TSM_ASSERT_EQUALS("The number of signal values generated is incorrect.", correctCellNumber, signalData->GetSize());
     product->Delete();
   }
 
   void testIsValidThrowsWhenNoWorkspace()
   {
-
     IMDWorkspace* nullWorkspace = NULL;
     Mantid::API::IMDWorkspace_sptr ws_sptr(nullWorkspace);
-    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory(ThresholdRange_scptr(pRange), "signal", 1);
+    
+    vtkMDHistoHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
 
-    TSM_ASSERT_THROWS("No workspace, so should not be possible to complete initialization.", factory.initialize(ws_sptr), std::runtime_error);
-  }
-
-  void testCreateMeshOnlyThrows()
-  {
-    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory(ThresholdRange_scptr(pRange), "signal", 1);
-    TS_ASSERT_THROWS(factory.createMeshOnly() , std::runtime_error);
-  }
-
-  void testCreateScalarArrayThrows()
-  {
-    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory(ThresholdRange_scptr(pRange), "signal", 1);
-    TS_ASSERT_THROWS(factory.createScalarArray() , std::runtime_error);
+    TSM_ASSERT_THROWS("No workspace, so should not be possible to complete initialization.", factory.initialize(ws_sptr), std::invalid_argument);
   }
 
   void testCreateWithoutInitializeThrows()
   {
-    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory(ThresholdRange_scptr(pRange), "signal", 1);
+    vtkMDHistoHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
     TS_ASSERT_THROWS(factory.create(), std::runtime_error);
   }
 
   void testInitializationDelegates()
   {
     //If the workspace provided is not a 4D imdworkspace, it should call the successor's initalization
-    // 2D workspace
-    MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
+    Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
 
     MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
     EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); //expect it then to call initialize on the successor.
     EXPECT_CALL(*pMockFactorySuccessor, getFactoryTypeName()).WillOnce(testing::Return("TypeA")); 
 
-    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
-
     //Constructional method ensures that factory is only suitable for providing mesh information.
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory =
-      vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> (ThresholdRange_scptr(pRange), "signal", (double)0);
+    vtkMDHistoHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
 
     //Successor is provided.
     factory.SetSuccessor(pMockFactorySuccessor);
-
+    
     factory.initialize(ws_sptr);
 
     TSM_ASSERT("successor factory not used as expected.", Mock::VerifyAndClearExpectations(pMockFactorySuccessor));
@@ -132,14 +107,10 @@ public:
   void testInitializationDelegatesThrows()
   {
     //If the workspace provided is not a 4D imdworkspace, it should call the successor's initalization. If there is no successor an exception should be thrown.
-    // 2D workspace
-    MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
-
-    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
+    Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory =
-      vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> (ThresholdRange_scptr(pRange), "signal", (double)0);
+    vtkMDHistoHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
 
     TSM_ASSERT_THROWS("Should have thrown an execption given that no successor was available.", factory.initialize(ws_sptr), std::runtime_error);
   }
@@ -147,23 +118,21 @@ public:
   void testCreateDelegates()
   {
     //If the workspace provided is not a 4D imdworkspace, it should call the successor's initalization
-    // 2D workspace
-    MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
+    //2 dimensions on the workspace.
+    Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
 
     MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
     EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); //expect it then to call initialize on the successor.
-    EXPECT_CALL(*pMockFactorySuccessor, create()).Times(1); //expect it then to call create on the successor.
+    EXPECT_CALL(*pMockFactorySuccessor, create()).Times(1).WillOnce(Return(vtkStructuredGrid::New())); //expect it then to call create on the successor.
     EXPECT_CALL(*pMockFactorySuccessor, getFactoryTypeName()).WillOnce(testing::Return("TypeA")); 
 
-    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory =
-      vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> (ThresholdRange_scptr(pRange), "signal", (double)0);
+    vtkMDHistoHexFactory factory (ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
 
     //Successor is provided.
     factory.SetSuccessor(pMockFactorySuccessor);
-
+    
     factory.initialize(ws_sptr);
     factory.create(); // should be called on successor.
 
@@ -173,20 +142,16 @@ public:
   void testTypeName()
   {
     using namespace Mantid::VATES;
-
-    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
-
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory =
-      vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> (ThresholdRange_scptr(pRange), "signal", (double)0);
-    TS_ASSERT_EQUALS("vtkThresholdingUnstructuredGridFactory", factory.getFactoryTypeName());
+    vtkMDHistoHexFactory factory (ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
+    TS_ASSERT_EQUALS("vtkMDHistoHexFactory", factory.getFactoryTypeName());
   }
 
 };
 
 //=====================================================================================
-// Performance Tests
+// Performance tests
 //=====================================================================================
-class vtkThresholdingUnstructuredGridFactoryTestPerformance : public CxxTest::TestSuite
+class vtkMDHistoHexFactoryTestPerformance : public CxxTest::TestSuite
 {
 private:
 
@@ -196,20 +161,19 @@ public:
 
   void setUp()
   {
-    //Create a 4D workspace 50 ^ 4
-    m_ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 4, 50);
+    //Create the workspace. 20 bins in each dimension.
+    m_ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, 100);
     m_ws_sptr->setTransformFromOriginal(new NullCoordTransform);
   }
 
-  void testGenerateVTKDataSet()
-  {
-    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100000);
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory(ThresholdRange_scptr(pRange), "signal", 0);
+	void testGenerateHexahedronVtkDataSet()
+	{
+    //Create the factory.
+    vtkMDHistoHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
     factory.initialize(m_ws_sptr);
+
     TS_ASSERT_THROWS_NOTHING(factory.create());
-  }
-
+	}
 };
-
 
 #endif

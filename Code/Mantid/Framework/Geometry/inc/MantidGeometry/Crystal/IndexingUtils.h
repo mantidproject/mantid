@@ -265,6 +265,9 @@ class MANTID_GEOMETRY_DLL IndexingUtils
   static bool GetLatticeParameters( const Kernel::DblMatrix   & UB,
                                           std::vector<double> & lattice_par );
 
+  /// Get a formatted string listing the lattice parameters and cell volume
+  static std::string GetLatticeParameterString( const Kernel::DblMatrix & UB );
+
 
   /// Check if a,b,c cell has angles satifying Niggli condition within epsilon
   static bool HasNiggliAngles( const Kernel::V3D  & a_dir,

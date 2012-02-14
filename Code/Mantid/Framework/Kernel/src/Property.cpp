@@ -247,6 +247,7 @@ std::string getUnmangledTypeName(const std::type_info& type)
     typestrings.insert(make_pair(typeid(std::vector<int>).name(), string("int list")));
     typestrings.insert(make_pair(typeid(std::vector<int64_t>).name(), string("int list")));
     typestrings.insert(make_pair(typeid(std::vector<double>).name(), string("dbl list")));
+    typestrings.insert(make_pair(typeid(std::vector<std::vector<string> >).name(), string("list of str lists")));
 
     //Workspaces
     typestrings.insert(make_pair(typeid(boost::shared_ptr<Workspace>).name(), 

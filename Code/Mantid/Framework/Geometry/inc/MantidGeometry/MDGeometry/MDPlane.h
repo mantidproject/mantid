@@ -61,7 +61,8 @@ namespace Geometry
   public:
     MDPlane(const Mantid::Kernel::VMD & normal, const Mantid::Kernel::VMD & point);
     MDPlane(const std::vector<coord_t> & normal, const std::vector<coord_t> & point);
-    MDPlane(const size_t nd, const coord_t * normal, const coord_t * point);
+    MDPlane(const size_t nd, const float * normal, const float * point);
+    MDPlane(const size_t nd, const double * normal, const double * point);
     MDPlane(const std::vector<Mantid::Kernel::VMD> & vectors, const Mantid::Kernel::VMD & origin, const Mantid::Kernel::VMD & insidePoint);
     MDPlane(const MDPlane & other);
     MDPlane & operator=(const MDPlane & other);
@@ -107,7 +108,7 @@ namespace Geometry
       coord_t total = 0;
       for (size_t d=0; d<m_nd; d++)
       {
-        total += m_normal[d] * coord_t(coords[d]);
+        total += m_normal[d] * static_cast<coord_t>(coords[d]);
       }
       return (total >= m_inequality);
     }
@@ -164,8 +165,8 @@ namespace Geometry
       m_inequality = 0;
       for (size_t d=0; d<m_nd; d++)
       {
-        m_normal[d] = coord_t(normal[d]);
-        m_inequality += coord_t(point[d]) * m_normal[d];
+        m_normal[d] = static_cast<coord_t>(normal[d]);
+        m_inequality += static_cast<coord_t>(point[d]) * m_normal[d];
       }
     }
 

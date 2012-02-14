@@ -275,7 +275,7 @@ namespace Crystal
   {
         //TYPE-I Lorentzian, Becker, P. J. & Coppens, P. (1974). Acta Cryst. A30, 129;
         double y_ext;
-        if (twoth < M_PI)
+        if (twoth < M_PI/2.0)
              y_ext =std::sqrt(1+2*Xqt+(0.025+0.285*std::cos(twoth))*std::pow(Xqt,2)/(1 + 0.15*Xqt-0.2*std::pow((0.75-std::cos(twoth)),2)*Xqt));
         else
              y_ext =std::sqrt(1+2*Xqt+(0.025+0.285*std::cos(twoth))*std::pow(Xqt,2)/(1-0.45*Xqt*std::cos(twoth)));
@@ -344,9 +344,9 @@ namespace Crystal
              y_ext_II =std::sqrt(1+2*XqtII+(0.025+0.285*std::cos(twoth))*std::pow(XqtII,2)/(1-0.45*XqtII*std::cos(twoth)));
         return y_ext_II;
   }
-  double TOFExtinction::getSigFsqr(double Rg, double cellV, double wl, double twoth, double tbar, double fsq, double sigfsq)
+  double TOFExtinction::getSigFsqr(double Rg, double cellV, double wl, double twoth, double tbar, double fsq, double sigfsq, double relSigRg)
   {
-        double sig_Rg = 0.03 * Rg; // Estimated
+        double sig_Rg = relSigRg * Rg; // Estimated
         double beta = Rg / std::pow(cellV,2) * std::pow(wl,4) /2/ std::pow(sin(twoth/2),2) * tbar * fsq/10;
         double bb = beta * beta;
         double sigSqr = std::pow(2*beta + bb/std::sqrt( bb + 1) + std::sqrt(bb + 1),2)*sigfsq*sigfsq + fsq*fsq*std::pow(beta/Rg,2)*std::pow(1 + beta/std::sqrt(bb + 1),2)*sig_Rg*sig_Rg;

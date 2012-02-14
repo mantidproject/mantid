@@ -75,13 +75,9 @@ namespace Mantid
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
-
-    
    class  DLLExport  BivariateNormal: public UserFunction
-                                   //public API::ParamFunction, public BackgroundFunction ,API::IFunctionMW
-
-    {
-    public:
+   {
+   public:
       BivariateNormal();
       /// Destructor
       virtual ~BivariateNormal ();
@@ -91,9 +87,9 @@ namespace Mantid
 
       virtual const std::string category() const { return "Peak";}
 
-      void 	functionMW  (double *out, const double *xValues, const size_t nData)const ;
+      void functionMW  (double *out, const double *xValues, const size_t nData)const ;
           
-      void 	functionDerivMW  (API::Jacobian  *out, const double *xValues, const size_t nData);
+      void functionDerivMW  (API::Jacobian  *out, const double *xValues, const size_t nData);
 
 
       size_t   nAttributes () const

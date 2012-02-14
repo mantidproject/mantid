@@ -180,8 +180,8 @@ public:
     MDEventWorkspace3Lean::sptr ew = MDEventsTestHelper::makeMDEW<3>(4, 0.0, 4.0, 1);
     coord_t coords1[3] = {1.5,1.5,1.5};
     coord_t coords2[3] = {2.5,2.5,2.5};
-    coord_t coords3[3] = {-0.1, 2, 2};
-    coord_t coords4[3] = {2, 2, 4.1};
+    coord_t coords3[3] = {-0.1f, 2, 2};
+    coord_t coords4[3] = {2, 2, 4.1f};
     ew->addEvent(MDLeanEvent<3>(2.0, 2.0, coords2));
     ew->refreshCache();
     TSM_ASSERT_DELTA("A regular box with a single event", ew->getSignalAtCoord(coords1, Mantid::API::NoNormalization), 1.0, 1e-5);
@@ -218,7 +218,7 @@ public:
       {
         for (size_t i=0; i < num_repeat; i++)
         {
-          coord_t centers[2] = {x, y};
+          coord_t centers[2] = {static_cast<coord_t>(x), static_cast<coord_t>(y)};
           events.push_back( MDLeanEvent<2>(2.0, 2.0, centers) );
         }
       }
@@ -257,9 +257,9 @@ public:
     TS_ASSERT_DELTA( ext[1].max, ymax, 1e-4);
   }
 
-  void addEvent(MDEventWorkspace2Lean::sptr b, coord_t x, coord_t y)
+  void addEvent(MDEventWorkspace2Lean::sptr b, double x, double y)
   {
-    coord_t centers[2] = {x, y};
+    coord_t centers[2] = {static_cast<coord_t>(x), static_cast<coord_t>(y)};
     b->addEvent(MDLeanEvent<2>(2.0, 2.0, centers));
   }
 
@@ -280,7 +280,7 @@ public:
     for (double x=4.0005; x < 7; x += 1.0)
       for (double y=4.0005; y < 7; y += 1.0)
       {
-        coord_t centers[2] = {x, y};
+        double centers[2] = {x, y};
         events.push_back( MDLeanEvent<2>(2.0, 2.0, centers) );
       }
     // So it doesn't split

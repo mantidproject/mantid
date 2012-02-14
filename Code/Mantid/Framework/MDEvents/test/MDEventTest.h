@@ -53,13 +53,13 @@ public:
   void test_constructor_withCoords()
   {
     // Fixed-size array
-    coord_t coords[3] = {0.123, 1.234, 2.345};
+    coord_t coords[3] = {0.125, 1.25, 2.5};
     MDEvent<3> b(2.5, 1.5, 123, 456789, coords );
     TS_ASSERT_EQUALS( b.getSignal(), 2.5);
     TS_ASSERT_EQUALS( b.getErrorSquared(), 1.5);
-    TS_ASSERT_EQUALS( b.getCenter(0), 0.123);
-    TS_ASSERT_EQUALS( b.getCenter(1), 1.234);
-    TS_ASSERT_EQUALS( b.getCenter(2), 2.345);
+    TS_ASSERT_EQUALS( b.getCenter(0), 0.125);
+    TS_ASSERT_EQUALS( b.getCenter(1), 1.25);
+    TS_ASSERT_EQUALS( b.getCenter(2), 2.5);
     TS_ASSERT_EQUALS( b.getRunIndex(), 123);
     TS_ASSERT_EQUALS( b.getDetectorID(), 456789);
   }
@@ -67,15 +67,15 @@ public:
   /** Note: the copy constructor is not explicitely written but rather is filled in by the compiler */
   void test_CopyConstructor()
   {
-    coord_t coords[3] = {0.123, 1.234, 2.345};
+    coord_t coords[3] = {0.125, 1.25, 2.5};
     MDEvent<3> b(2.5, 1.5, 123, 456789, coords );
     MDEvent<3> a(b);
     TS_ASSERT_EQUALS( a.getNumDims(), 3);
     TS_ASSERT_EQUALS( a.getSignal(), 2.5);
     TS_ASSERT_EQUALS( a.getErrorSquared(), 1.5);
-    TS_ASSERT_EQUALS( a.getCenter(0), 0.123);
-    TS_ASSERT_EQUALS( a.getCenter(1), 1.234);
-    TS_ASSERT_EQUALS( a.getCenter(2), 2.345);
+    TS_ASSERT_EQUALS( b.getCenter(0), 0.125);
+    TS_ASSERT_EQUALS( b.getCenter(1), 1.25);
+    TS_ASSERT_EQUALS( b.getCenter(2), 2.5);
     TS_ASSERT_EQUALS( a.getRunIndex(), 123);
     TS_ASSERT_EQUALS( a.getDetectorID(), 456789);
   }
@@ -108,7 +108,7 @@ public:
     float error(2.5);
     uint16_t runIndex = 123;
     uint16_t detectorId = 45678;
-    coord_t center[3] = {1.23, 2.34, 3.45};
+    coord_t center[3] = {1.25, 2.5, 3.5};
     for (size_t i=0; i<num; i++)
       events3.push_back( MDEvent<3>(signal, error, runIndex, detectorId, center) );
   }
@@ -119,7 +119,7 @@ public:
     float error(2.5);
     uint16_t runIndex = 123;
     uint16_t detectorId = 45678;
-    coord_t center[4] = {1.23, 2.34, 3.45, 4.56};
+    coord_t center[4] = {1.25, 2.5, 3.5, 4.75};
     for (size_t i=0; i<num; i++)
       events4.push_back( MDEvent<4>(signal, error, runIndex, detectorId, center) );
   }
@@ -128,7 +128,7 @@ public:
   {
     float signal(1.5);
     float error(2.5);
-    coord_t center[3] = {1.23, 2.34, 3.45};
+    coord_t center[3] = {1.25, 2.5, 3.5};
     for (size_t i=0; i<num; i++)
       lean_events3.push_back( MDLeanEvent<3>(signal, error, center) );
   }
@@ -137,7 +137,7 @@ public:
   {
     float signal(1.5);
     float error(2.5);
-    coord_t center[4] = {1.23, 2.34, 3.45, 4.56};
+    coord_t center[4] = {1.25, 2.5, 3.5, 4.75};
     for (size_t i=0; i<num; i++)
       lean_events4.push_back( MDLeanEvent<4>(signal, error, center) );
   }

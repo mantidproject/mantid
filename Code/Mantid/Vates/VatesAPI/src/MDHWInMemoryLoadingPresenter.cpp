@@ -75,8 +75,7 @@ namespace Mantid
       IMDHistoWorkspace_sptr histoWs = boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws);
 
       //factory->setRecursionDepth(this->m_view->getRecursionDepth());
-      factory->initialize(histoWs);
-      vtkDataSet* visualDataSet = factory->create();
+      vtkDataSet* visualDataSet = factory->oneStepCreate(histoWs);
       
       /*extractMetaData needs to be re-run here because the first execution of this from ::executeLoadMetadata will not have ensured that all dimensions
         have proper range extents set.

@@ -1,5 +1,5 @@
-#ifndef VTK_THRESHOLDING_QUAD_FACTORY_H
-#define VTK_THRESHOLDING_QUAD_FACTORY_H
+#ifndef MANTID_VATES_VTK_MD_HISTO_QUAD_FACTORY_H_
+#define MANTID_VATES_VTK_MD_HISTO_QUAD_FACTORY_H_
 
 #include "MantidKernel/System.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
@@ -39,28 +39,24 @@ however, some visualisation frameworks won't be able to treat these factories in
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-    class DLLExport vtkThresholdingQuadFactory : public vtkDataSetFactory
+    class DLLExport vtkMDHistoQuadFactory : public vtkDataSetFactory
     {
     public:
 
       /// Constructor
-      vtkThresholdingQuadFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName);
+      vtkMDHistoQuadFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName);
 
       /// Assignment operator
-      vtkThresholdingQuadFactory& operator=(const vtkThresholdingQuadFactory& other);
+      vtkMDHistoQuadFactory& operator=(const vtkMDHistoQuadFactory& other);
 
       /// Copy constructor.
-      vtkThresholdingQuadFactory(const vtkThresholdingQuadFactory& other);
+      vtkMDHistoQuadFactory(const vtkMDHistoQuadFactory& other);
 
       /// Destructor
-      virtual ~vtkThresholdingQuadFactory();
+      virtual ~vtkMDHistoQuadFactory();
 
       /// Factory Method.
       virtual vtkDataSet* create() const;
-
-      virtual vtkDataSet* createMeshOnly() const;
-
-      virtual vtkFloatArray* createScalarArray() const;
 
       virtual void initialize(Mantid::API::Workspace_sptr);
 
@@ -70,7 +66,7 @@ however, some visualisation frameworks won't be able to treat these factories in
 
       virtual std::string getFactoryTypeName() const
       {
-        return "vtkThresholdingQuadFactory";
+        return "vtkMDHistoQuadFactory";
       }
 
     protected:

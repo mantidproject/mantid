@@ -432,7 +432,7 @@ namespace MDEvents
       for (size_t d=0; d<nd; d++)
       {
         // Total up the coordinate weighted by the signal.
-        centroid[d] += event.getCenter(d) * coord_t(signal);
+        centroid[d] += event.getCenter(d) * static_cast<coord_t>(signal);
       }
     }
 
@@ -464,7 +464,7 @@ namespace MDEvents
 
   //-----------------------------------------------------------------------------------------------
   /** Add a MDLeanEvent to the box.
-   * @param event :: reference to a MDLeanEvent to add.
+   * @param event :: reference to a MDEvent to add.
    * */
   TMDE(
   void MDBox)::addEvent( const MDE & event)
@@ -492,6 +492,33 @@ namespace MDEvents
   }
 
   //-----------------------------------------------------------------------------------------------
+  /** Add a MDLeanEvent to the box, in a NON-THREAD-SAFE manner.
+   * No lock is performed. This is only safe if no 2 threads will
+   * try to add to the same box at the same time.
+   *
+   * @param event :: reference to a MDEvent to add.
+   * */
+  TMDE(
+  void MDBox)::addEventUnsafe( const MDE & event)
+  {
+    this->data.push_back(event);
+    this->m_dataAdded = true;
+
+#ifdef MDBOX_TRACK_SIGNAL_WHEN_ADDING
+    // Keep the running total of signal and error
+    double signal = event.getSignal();
+    this->m_signal += signal;
+    this->m_errorSquared += event.getErrorSquared();
+#endif
+
+#ifdef MDBOX_TRACKCENTROID_WHENADDING
+    // Running total of the centroid
+    for (size_t d=0; d<nd; d++)
+      this->m_centroid[d] += event.getCenter(d) * signal;
+#endif
+  }
+
+  //-----------------------------------------------------------------------------------------------
   /** Add several events. No bounds checking is made!
    *
    * @param events :: vector of events to be copied.
@@ -500,7 +527,7 @@ namespace MDEvents
    * @return the number of events that were rejected (because of being out of bounds)
    */
   TMDE(
-  size_t MDBox)::addEvents(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at)
+  size_t MDBox)::addEventsPart(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at)
   {
     dataMutex.lock();
     typename std::vector<MDE>::const_iterator start = events.begin()+start_at;
@@ -530,6 +557,24 @@ namespace MDEvents
     dataMutex.unlock();
     return 0;
   }
+
+
+  //-----------------------------------------------------------------------------------------------
+  /** Add several events, within a given range, with no bounds checking,
+   * and not in a thread-safe way
+   *
+   * @param events :: vector of events to be copied.
+   * @param start_at :: index to start at in vector
+   * @param stop_at :: index to stop at in vector (exclusive)
+   * @return the number of events that were rejected (because of being out of bounds)
+   */
+  TMDE(
+  size_t MDBox)::addEventsPartUnsafe(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at)
+  {
+    // The regular MDBox is just as safe/unsafe
+    return this->addEventsPart(events, start_at, stop_at);
+  }
+
 
   //-----------------------------------------------------------------------------------------------
   /** Perform centerpoint binning of events.
@@ -677,8 +722,8 @@ namespace MDEvents
       radiusTransform.apply(it->getCenter(), out);
       if (out[0] < radiusSquared)
       {
-        double eventSignal = it->getSignal();
-        signal += eventSignal;
+        coord_t eventSignal = static_cast<coord_t>(it->getSignal());
+        signal += signal_t(eventSignal);
         for (size_t d=0; d<nd; d++)
           centroid[d] += it->getCenter(d) * eventSignal;
       }
@@ -706,7 +751,7 @@ namespace MDEvents
     {
       coord_t * center = it->getCenterNonConst();
       for (size_t d=0; d<nd; d++)
-        center[d] = (center[d] * scaling[d]) + offset[d];
+        center[d] = (center[d] * static_cast<coord_t>(scaling[d])) + static_cast<coord_t>(offset[d]);
     }
     this->releaseEvents();
   }

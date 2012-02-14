@@ -1,7 +1,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
-#include "MantidVatesAPI/vtkThresholdingHexahedronFactory.h"
+#include "MantidVatesAPI/vtkMDHistoHexFactory.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <vtkImageData.h>
 #include <vtkRectilinearGrid.h>
@@ -10,6 +10,7 @@
 #include "MantidKernel/ReadLock.h"
 
 using Mantid::API::IMDWorkspace;
+using Mantid::API::IMDHistoWorkspace;
 using Mantid::Kernel::CPUTimer;
 using namespace Mantid::MDEvents;
 using Mantid::Kernel::ReadLock;
@@ -19,17 +20,17 @@ namespace Mantid
 namespace VATES 
 {
 
-  vtkThresholdingHexahedronFactory::vtkThresholdingHexahedronFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName) :
+  vtkMDHistoHexFactory::vtkMDHistoHexFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName) :
   m_scalarName(scalarName), m_thresholdRange(thresholdRange)
   {
   }
 
   /**
   Assigment operator
-  @param other : vtkThresholdingHexahedronFactory to assign to this instance from.
+  @param other : vtkMDHistoHexFactory to assign to this instance from.
   @return ref to assigned current instance.
   */
-  vtkThresholdingHexahedronFactory& vtkThresholdingHexahedronFactory::operator=(const vtkThresholdingHexahedronFactory& other)
+  vtkMDHistoHexFactory& vtkMDHistoHexFactory::operator=(const vtkMDHistoHexFactory& other)
   {
     if(this != &other)
     {
@@ -44,40 +45,23 @@ namespace VATES
   Copy Constructor
   @param other : instance to copy from.
   */
-  vtkThresholdingHexahedronFactory::vtkThresholdingHexahedronFactory(const vtkThresholdingHexahedronFactory& other)
+  vtkMDHistoHexFactory::vtkMDHistoHexFactory(const vtkMDHistoHexFactory& other)
   {
    this->m_scalarName = other.m_scalarName;
    this->m_thresholdRange = other.m_thresholdRange;
    this->m_workspace = other.m_workspace;
   }
 
-  void vtkThresholdingHexahedronFactory::initialize(Mantid::API::Workspace_sptr workspace)
+  void vtkMDHistoHexFactory::initialize(Mantid::API::Workspace_sptr workspace)
   {
-    m_workspace = boost::dynamic_pointer_cast<MDHistoWorkspace>(workspace);
-    // Check that a workspace has been provided.
-    validateWsNotNull();
-    // When the workspace can not be handled by this type, take action in the form of delegation.
-    const size_t nonIntegratedSize = m_workspace->getNonIntegratedDimensions().size();
-    if((doesCheckDimensionality() && nonIntegratedSize != vtkDataSetFactory::ThreeDimensional))
-    {
-      if(this->hasSuccessor())
-      {
-        m_successor->setUseTransform(m_useTransform);
-        m_successor->initialize(m_workspace);
-        return;
-      }
-      else
-      {
-        throw std::runtime_error("There is no successor factory set for this vtkThresholdingHexahedronFactory type");
-      }
-    }
+    m_workspace = doInitialize<MDHistoWorkspace, 3>(workspace);
 
     //Setup range values according to whatever strategy object has been injected.
     m_thresholdRange->setWorkspace(m_workspace);
     m_thresholdRange->calculate();
   }
 
-  void vtkThresholdingHexahedronFactory::validateWsNotNull() const
+  void vtkMDHistoHexFactory::validateWsNotNull() const
   {
     
     if(NULL == m_workspace.get())
@@ -86,7 +70,7 @@ namespace VATES
     }
   }
 
-  void vtkThresholdingHexahedronFactory::validate() const
+  void vtkMDHistoHexFactory::validate() const
   {
     validateWsNotNull();
   }
@@ -99,7 +83,7 @@ namespace VATES
    * @param do4D :: if true, create a 4D dataset, else to 3D
    * @return the vtkDataSet created
    */
-  vtkDataSet* vtkThresholdingHexahedronFactory::create3Dor4D(size_t timestep, bool do4D) const
+  vtkDataSet* vtkMDHistoHexFactory::create3Dor4D(size_t timestep, bool do4D) const
   {
     // Acquire a scoped read-only lock to the workspace (prevent segfault from algos modifying ws)
     ReadLock lock(*m_workspace);
@@ -108,16 +92,16 @@ namespace VATES
     const int nBinsY = static_cast<int>( m_workspace->getYDimension()->getNBins() );
     const int nBinsZ = static_cast<int>( m_workspace->getZDimension()->getNBins() );
 
-    const double maxX = m_workspace-> getXDimension()->getMaximum();
-    const double minX = m_workspace-> getXDimension()->getMinimum();
-    const double maxY = m_workspace-> getYDimension()->getMaximum();
-    const double minY = m_workspace-> getYDimension()->getMinimum();
-    const double maxZ = m_workspace-> getZDimension()->getMaximum();
-    const double minZ = m_workspace-> getZDimension()->getMinimum();
+    const coord_t maxX = m_workspace->getXDimension()->getMaximum();
+    const coord_t minX = m_workspace->getXDimension()->getMinimum();
+    const coord_t maxY = m_workspace->getYDimension()->getMaximum();
+    const coord_t minY = m_workspace->getYDimension()->getMinimum();
+    const coord_t maxZ = m_workspace->getZDimension()->getMaximum();
+    const coord_t minZ = m_workspace->getZDimension()->getMinimum();
 
-    double incrementX = (maxX - minX) / (nBinsX);
-    double incrementY = (maxY - minY) / (nBinsY);
-    double incrementZ = (maxZ - minZ) / (nBinsZ);
+    coord_t incrementX = (maxX - minX) / static_cast<coord_t>(nBinsX);
+    coord_t incrementY = (maxY - minY) / static_cast<coord_t>(nBinsY);
+    coord_t incrementZ = (maxZ - minZ) / static_cast<coord_t>(nBinsZ);
 
     const int imageSize = (nBinsX ) * (nBinsY ) * (nBinsZ );
     vtkPoints *points = vtkPoints::New();
@@ -206,16 +190,16 @@ namespace VATES
     index = 0;
     for (int z = 0; z < nPointsZ; z++)
     {
-      in[2] = (minZ + (z * incrementZ)); //Calculate increment in z;
+      in[2] = (minZ + (static_cast<coord_t>(z) * incrementZ)); //Calculate increment in z;
       for (int y = 0; y < nPointsY; y++)
       {
-        in[1] = (minY + (y * incrementY)); //Calculate increment in y;
+        in[1] = (minY + (static_cast<coord_t>(y) * incrementY)); //Calculate increment in y;
         for (int x = 0; x < nPointsX; x++)
         {
           // Create the point only when needed
           if (pointNeeded[index])
           {
-            in[0] = (minX + (x * incrementX)); //Calculate increment in x;
+            in[0] = (minX + (static_cast<coord_t>(x) * incrementX)); //Calculate increment in x;
             if (transform)
             {
               transform->apply(in, out);
@@ -298,14 +282,12 @@ namespace VATES
    * will call the successor if the # of dimensions is not for this factory.
    * @return
    */
-  vtkDataSet* vtkThresholdingHexahedronFactory::create() const
+  vtkDataSet* vtkMDHistoHexFactory::create() const
   {
-    validate();
-
-    const size_t nonIntegratedSize = m_workspace->getNonIntegratedDimensions().size();
-    if((doesCheckDimensionality() && nonIntegratedSize != vtkDataSetFactory::ThreeDimensional))
+    vtkDataSet* product = tryDelegatingCreation<MDHistoWorkspace, 3>(m_workspace);
+    if(product != NULL)
     {
-      return m_successor->create();
+      return product;
     }
     else
     {
@@ -315,18 +297,8 @@ namespace VATES
   }
 
 
-  vtkThresholdingHexahedronFactory::~vtkThresholdingHexahedronFactory()
+  vtkMDHistoHexFactory::~vtkMDHistoHexFactory()
   {
-  }
-
-  vtkDataSet* vtkThresholdingHexahedronFactory::createMeshOnly() const
-  {
-    throw std::runtime_error("::createMeshOnly() does not apply for this type of factory.");
-  }
-
-  vtkFloatArray* vtkThresholdingHexahedronFactory::createScalarArray() const
-  {
-    throw std::runtime_error("::createScalarArray() does not apply for this type of factory.");
   }
 
 }

@@ -1,5 +1,5 @@
-#ifndef VTK_THRESHOLDING_LINE_FACTORY_H
-#define VTK_THRESHOLDING_LINE_FACTORY_H
+#ifndef MANTID_VATES_VTK_MD_HISTO_LINE_FACTORY_H_
+#define MANTID_VATES_VTK_MD_HISTO_LINE_FACTORY_H_
 
 #include "MantidKernel/System.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
@@ -38,28 +38,24 @@ namespace Mantid
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-    class DLLExport vtkThresholdingLineFactory : public vtkDataSetFactory
+    class DLLExport vtkMDHistoLineFactory : public vtkDataSetFactory
     {
     public:
 
       /// Constructor
-      vtkThresholdingLineFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName);
+      vtkMDHistoLineFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName);
 
       /// Assignment operator
-      vtkThresholdingLineFactory& operator=(const vtkThresholdingLineFactory& other);
+      vtkMDHistoLineFactory& operator=(const vtkMDHistoLineFactory& other);
 
       /// Copy constructor.
-      vtkThresholdingLineFactory(const vtkThresholdingLineFactory& other);
+      vtkMDHistoLineFactory(const vtkMDHistoLineFactory& other);
 
       /// Destructor
-      virtual ~vtkThresholdingLineFactory();
+      virtual ~vtkMDHistoLineFactory();
 
       /// Factory Method.
       virtual vtkDataSet* create() const;
-
-      virtual vtkDataSet* createMeshOnly() const;
-
-      virtual vtkFloatArray* createScalarArray() const;
 
       virtual void initialize(Mantid::API::Workspace_sptr);
 
@@ -67,7 +63,7 @@ namespace Mantid
 
       virtual std::string getFactoryTypeName() const
       {
-        return "vtkThresholdingLineFactory";
+        return "vtkMDHistoLineFactory";
       }
 
     protected:

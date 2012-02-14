@@ -10,6 +10,7 @@
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "vtkCellType.h"
 #include "vtkUnstructuredGrid.h"
+#include <vtkStructuredGrid.h>
 
 using namespace Mantid::VATES;
 using namespace Mantid::API;
@@ -23,18 +24,6 @@ class vtkMDQuadFactoryTest : public CxxTest::TestSuite
 {
 
 public:
-
-  void testcreateMeshOnlyThrows()
-  {
-    vtkMDQuadFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
-    TS_ASSERT_THROWS(factory.createMeshOnly(), std::runtime_error);
-  }
-
-  void testcreateScalarArray()
-  {
-    vtkMDQuadFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
-    TS_ASSERT_THROWS(factory.createScalarArray(), std::runtime_error);
-  }
 
   void testGetFactoryTypeName()
   {
@@ -61,7 +50,7 @@ public:
   {
     MockvtkDataSetFactory* mockSuccessor = new MockvtkDataSetFactory;
     EXPECT_CALL(*mockSuccessor, initialize(_)).Times(1);
-    EXPECT_CALL(*mockSuccessor, create()).Times(1);
+    EXPECT_CALL(*mockSuccessor, create()).Times(1).WillOnce(Return(vtkStructuredGrid::New()));
     EXPECT_CALL(*mockSuccessor, getFactoryTypeName()).Times(1);
 
     vtkMDQuadFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");

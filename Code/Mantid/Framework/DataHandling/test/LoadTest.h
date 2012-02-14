@@ -13,6 +13,20 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 
+namespace
+{
+  void removeGroupFromADS(WorkspaceGroup_sptr group)
+  {
+    const std::vector<std::string> wsNames = group->getNames();
+    std::vector<std::string>::const_iterator it = wsNames.begin();
+    AnalysisDataService::Instance().remove(group->name());
+    for(; it != wsNames.end(); ++it)
+    {
+      AnalysisDataService::Instance().remove(*it);
+    }
+  }
+}
+
 class LoadTest : public CxxTest::TestSuite
 {
 public:
@@ -183,7 +197,7 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
-  void test_ARGUS_NXS()
+  void _ARGUS_NXS()
   {
     Load loader;
     loader.initialize();
@@ -326,6 +340,135 @@ public:
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("LoadTest_Output"));
     TS_ASSERT(ws);
     AnalysisDataService::Instance().remove("LoadTest_Output");
+  }
+
+  
+
+  void testList()
+  {
+    Load loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "MUSR15189,15190,15191.nxs");
+    loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    WorkspaceGroup_sptr output = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("LoadTest_Output"));
+    TS_ASSERT(output);
+    TS_ASSERT_EQUALS(output->getNumberOfEntries(),6);
+    MatrixWorkspace_sptr ws1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("15189_1"));
+    TS_ASSERT(ws1);
+    MatrixWorkspace_sptr ws2 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("15189_2"));
+    TS_ASSERT(ws2);
+    MatrixWorkspace_sptr ws3 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("15190_1"));
+    TS_ASSERT(ws3);
+    MatrixWorkspace_sptr ws4 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("15190_2"));
+    TS_ASSERT(ws4);
+    MatrixWorkspace_sptr ws5 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("15191_1"));
+    TS_ASSERT(ws5);
+    MatrixWorkspace_sptr ws6 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("15191_2"));
+    TS_ASSERT(ws6);
+    removeGroupFromADS(output);
+  }
+
+  void testPlus()
+  {
+    Load loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "MUSR15189+15190.nxs");
+    loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+
+    WorkspaceGroup_sptr output = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("LoadTest_Output"));
+    TS_ASSERT(output);
+    MatrixWorkspace_sptr ws1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("LoadTest_Output_1"));
+    TS_ASSERT(ws1);
+    MatrixWorkspace_sptr ws2 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("LoadTest_Output_2"));
+    removeGroupFromADS(output);
+  }
+
+  void testRange()
+  {
+    Load loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "MUSR15189:15192.nxs");
+    loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    WorkspaceGroup_sptr output = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("LoadTest_Output"));
+    TS_ASSERT(output);
+    TS_ASSERT_EQUALS(output->getNumberOfEntries(),8);
+    MatrixWorkspace_sptr ws1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("15189_1"));
+    TS_ASSERT(ws1);
+    MatrixWorkspace_sptr ws2 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("15189_2"));
+    TS_ASSERT(ws2);
+    MatrixWorkspace_sptr ws3 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("15190_1"));
+    TS_ASSERT(ws3);
+    MatrixWorkspace_sptr ws4 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("15190_2"));
+    TS_ASSERT(ws4);
+    MatrixWorkspace_sptr ws5 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("15191_1"));
+    TS_ASSERT(ws5);
+    MatrixWorkspace_sptr ws6 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("15191_2"));
+    TS_ASSERT(ws6);
+    MatrixWorkspace_sptr ws7 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("15192_1"));
+    TS_ASSERT(ws7);
+    MatrixWorkspace_sptr ws8 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("15192_2"));
+    TS_ASSERT(ws8);
+    removeGroupFromADS(output);
+  }
+
+  void testSteppedRange()
+  {
+    Load loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "MUSR15189:15192:2.nxs");
+    loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    WorkspaceGroup_sptr output = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("LoadTest_Output"));
+    TS_ASSERT(output);
+    TS_ASSERT_EQUALS(output->getNumberOfEntries(),4);
+    MatrixWorkspace_sptr ws1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("15189_1"));
+    TS_ASSERT(ws1);
+    MatrixWorkspace_sptr ws2 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("15189_2"));
+    TS_ASSERT(ws2);
+    MatrixWorkspace_sptr ws3 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("15191_1"));
+    TS_ASSERT(ws3);
+    MatrixWorkspace_sptr ws4 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("15191_2"));
+    TS_ASSERT(ws4);
+    removeGroupFromADS(output);
+  }
+
+  void testAddedRange()
+  {
+    Load loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "MUSR15189-15192.nxs");
+    loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+
+    WorkspaceGroup_sptr output = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("LoadTest_Output"));
+    TS_ASSERT(output);
+    TS_ASSERT_EQUALS(output->getNumberOfEntries(),2);
+    MatrixWorkspace_sptr ws1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("LoadTest_Output_1"));
+    TS_ASSERT(ws1);
+    MatrixWorkspace_sptr ws2 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("LoadTest_Output_2"));
+    TS_ASSERT(ws2);
+    removeGroupFromADS(output);
+  }
+
+  void testAddedSteppedRange()
+  {
+    Load loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "MUSR15189-15192:2.nxs");
+    loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+
+    WorkspaceGroup_sptr output = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("LoadTest_Output"));
+    TS_ASSERT(output);
+    TS_ASSERT_EQUALS(output->getNumberOfEntries(),2);
+    MatrixWorkspace_sptr ws1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("LoadTest_Output_1"));
+    TS_ASSERT(ws1);
+    MatrixWorkspace_sptr ws2 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("LoadTest_Output_2"));
+    TS_ASSERT(ws2);
+    removeGroupFromADS(output);
   }
 };
 

@@ -203,6 +203,36 @@ void ColorSelectionWidget::useLogScaling(int state)
   emit this->logScale(state);
 }
 
+/**
+ * This function sets the state for all of the controls on the color selection
+ * widget.
+ * @param state the boolean to set the controls' state to
+ */
+void ColorSelectionWidget::enableControls(bool state)
+{
+  this->ui.colorSelectionLabel->setEnabled(state);
+  this->ui.autoColorScaleCheckBox->setEnabled(state);
+  this->ui.useLogScaleCheckBox->setEnabled(state);
+  int cbstate = this->ui.autoColorScaleCheckBox->isChecked();
+  if (state)
+  {
+    switch (cbstate)
+    {
+    case Qt::Unchecked:
+      this->setEditorStatus(true);
+      break;
+    case Qt::Checked:
+      this->setEditorStatus(false);
+      break;
+    }
+  }
+  else
+  {
+    this->setEditorStatus(false);
+  }
+  this->ui.presetButton->setEnabled(state);
+}
+
 } // SimpleGui
 } // Vates
 } // Mantid

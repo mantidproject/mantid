@@ -174,17 +174,16 @@ namespace MDEvents
     /// Add a single event
     virtual void addEvent(const MDE & point) = 0;
 
-    /** Add several events from a vector
-     * @param events :: vector of MDEvents to add (all of it)
-     * @return the number of events that were rejected (because of being out of bounds)
-     */
-    virtual size_t addEvents(const std::vector<MDE> & events)
-    {
-      return addEvents(events, 0, events.size());
-    }
+    /// Add a single event, with no mutex locking
+    virtual void addEventUnsafe(const MDE & point) = 0;
 
     /// Add several events, within a given range
-    virtual size_t addEvents(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at);
+    virtual size_t addEventsPart(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at);
+    size_t addEvents(const std::vector<MDE> & events);
+
+    /// Add several events, within a given range, with no bounds checking
+    virtual size_t addEventsPartUnsafe(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at);
+    size_t addEventsUnsafe(const std::vector<MDE> & events);
 
     /** Perform centerpoint binning of events
      * @param bin :: MDBin object giving the limits of events to accept.
@@ -260,7 +259,7 @@ namespace MDEvents
     void getCenter(coord_t * center) const
     {
       for (size_t d=0; d<nd; ++d)
-        center[d] = (extents[d].max + extents[d].min) / coord_t(2.0);
+        center[d] = (extents[d].max + extents[d].min) / 2.0f;
     }
 
     //-----------------------------------------------------------------------------------------------
@@ -275,7 +274,7 @@ namespace MDEvents
         volume *= (extents[d].max - extents[d].min);
       }
       /// Floating point multiplication is much faster than division, so cache 1/volume.
-      m_inverseVolume = coord_t(1.0) / volume;
+      m_inverseVolume = 1.0f / volume;
     }
 
     //-----------------------------------------------------------------------------------------------
@@ -357,7 +356,7 @@ namespace MDEvents
     /** Return the volume of the cell */
     coord_t getVolume() const
     {
-      return coord_t(1.0) / m_inverseVolume;
+      return 1.0f / m_inverseVolume;
     }
 
     //-----------------------------------------------------------------------------------------------

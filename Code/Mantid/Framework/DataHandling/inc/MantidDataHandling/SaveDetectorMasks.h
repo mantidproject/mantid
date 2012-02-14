@@ -1,19 +1,20 @@
-#ifndef MANTID_DATAHANDLING_SAVEMASKINGTOFILE_H_
-#define MANTID_DATAHANDLING_SAVEMASKINGTOFILE_H_
+#ifndef MANTID_DATAHANDLING_SAVEDETECTORMASKS_H_
+#define MANTID_DATAHANDLING_SAVEDETECTORMASKS_H_
 
-#include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
+#include "MantidDataHandling/SaveMask.h"
+
 
 namespace Mantid
 {
 namespace DataHandling
 {
 
-  /** SaveMaskingToFile : TODO: DESCRIPTION
+  /** SaveDetectorMasks : TODO: DESCRIPTION
     
-    @date 2011-11-09
+    @date 2012-02-13
 
-    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -33,28 +34,17 @@ namespace DataHandling
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport SaveDetectorMasks : public API::Algorithm
+  class DLLExport SaveDetectorMasks : public DataHandling::SaveMask, public API::DeprecatedAlgorithm
   {
   public:
     SaveDetectorMasks();
     virtual ~SaveDetectorMasks();
     
-    /// Algorithm's name for identification
-    virtual const std::string name() const { return "SaveDetectorMasks";};
-    /// Algorithm's version for identification
-    virtual int version() const { return 1;};
-    /// Algorithm's category for identification
-    virtual const std::string category() const { return "DataHandling;Transforms\\Masking";}
+    /// Algorithm's name for identification overriding a virtual method
+    virtual const std::string name() const {return "SaveDetectorMasks";};
 
-  private:
-
-    virtual void initDocs();
-
-    /// Define input parameters
-    void init();
-
-    /// Main body to execute algorithm
-    void exec();
+    /// Algorithm's version for identification overriding a virtual method
+    virtual int version() const {return 1;};
 
   };
 
@@ -62,4 +52,4 @@ namespace DataHandling
 } // namespace DataHandling
 } // namespace Mantid
 
-#endif  /* MANTID_DATAHANDLING_SAVEMASKINGTOFILE_H_ */
+#endif  /* MANTID_DATAHANDLING_SAVEDETECTORMASKS_H_ */

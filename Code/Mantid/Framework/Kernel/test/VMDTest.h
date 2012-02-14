@@ -68,7 +68,7 @@ public:
   void test_getBareArray()
   {
     VMD b(1,2,3,4);
-    const double * a = b.getBareArray();
+    const VMD_t * a = b.getBareArray();
     TS_ASSERT_DELTA( a[0], 1.0, 1e-5);
     TS_ASSERT_DELTA( a[1], 2.0, 1e-5);
     TS_ASSERT_DELTA( a[2], 3.0, 1e-5);

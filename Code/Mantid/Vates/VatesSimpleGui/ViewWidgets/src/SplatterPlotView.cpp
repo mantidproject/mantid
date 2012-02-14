@@ -115,6 +115,7 @@ void SplatterPlotView::onThresholdButtonClicked()
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
   this->threshSource = builder->createFilter("filters", "Threshold",
                                              this->splatSource);
+  emit this->lockColorControls();
 }
 
 void SplatterPlotView::checkView()
@@ -130,6 +131,6 @@ void SplatterPlotView::resetCamera()
   this->view->resetCamera();
 }
 
-}
-}
-}
+} // SimpleGui
+} // Vates
+} // Mantid

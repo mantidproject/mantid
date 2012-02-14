@@ -456,6 +456,7 @@ void MdViewerWidget::checkForUpdates()
   }
   if (QString(proxy->GetXMLName()).contains("Threshold"))
   {
+    this->ui.colorSelectionWidget->enableControls(true);
     vtkSMDoubleVectorProperty *range = \
         vtkSMDoubleVectorProperty::SafeDownCast(\
           proxy->GetProperty("ThresholdBetween"));
@@ -633,6 +634,9 @@ void MdViewerWidget::connectColorSelectionWidget()
                    this->currentView, SLOT(onAutoScale()));
   QObject::connect(this->ui.colorSelectionWidget, SIGNAL(logScale(int)),
                    this->currentView, SLOT(onLogScale(int)));
+  QObject::connect(this->currentView, SIGNAL(lockColorControls(bool)),
+                   this->ui.colorSelectionWidget,
+                   SLOT(enableControls(bool)));
 }
 
 /**

@@ -206,10 +206,10 @@ public:
       for (coord_t oy=0.5; oy<10; oy++)
         for (coord_t oz=0.5; oz<10; oz++)
         {
-          coord_t x = ox*cos(theta) - oy*sin(theta) + origin[0];
-          coord_t y = oy*cos(theta) + ox*sin(theta) + origin[1];
-          coord_t z = oz + origin[2];
-          coord_t center[3] = {x,y,z};
+          double x = ox*cos(theta) - oy*sin(theta) + origin[0];
+          double y = oy*cos(theta) + ox*sin(theta) + origin[1];
+          double z = oz + origin[2];
+          double center[3] = {x,y,z};
           MDLeanEvent<3> ev(1.0, 1.0, center);
 //          std::cout << x << "," << y << "," << z << std::endl;
           in_ws->addEvent(ev);

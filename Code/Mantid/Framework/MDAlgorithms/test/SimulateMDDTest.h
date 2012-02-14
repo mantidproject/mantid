@@ -60,7 +60,7 @@ public:
     	IMDBox<MDEvent<4>,4> * out = outnew2->getBox();
 
     	// add 2 additional events to the first two boxes to make the data less uniform
-    	coord_t pos[4];
+    	double pos[4];
     	out->calcVolume();
     	outnew->refreshCache();
     	for (size_t i=0;i<4;i++)

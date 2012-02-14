@@ -132,7 +132,7 @@ namespace MDEvents
       for (size_t d=0; d<nd; ++d)
       {
         dimensionsUsed[d] = true; // Use all dimensions
-        center[d] = coord_t(pos[d]);
+        center[d] = static_cast<coord_t>(pos[d]);
       }
       CoordTransformDistance sphere(nd, center, dimensionsUsed);
 
@@ -143,13 +143,13 @@ namespace MDEvents
         centroid[d] = 0.0;
 
       // Perform centroid
-      ws->getBox()->centroidSphere(sphere, coord_t(PeakRadius*PeakRadius), centroid, signal);
+      ws->getBox()->centroidSphere(sphere, static_cast<coord_t>(PeakRadius*PeakRadius), centroid, signal);
 
       // Normalize by signal
       if (signal != 0.0)
       {
         for (size_t d=0; d<nd; d++)
-          centroid[d] /= coord_t(signal);
+          centroid[d] /= static_cast<coord_t>(signal);
 
         V3D vecCentroid(centroid[0], centroid[1], centroid[2]);
 

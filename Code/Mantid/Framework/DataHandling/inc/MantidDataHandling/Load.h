@@ -72,6 +72,12 @@ namespace Mantid
       void init();
       /// Execute
       void exec();
+
+      /// Called when there is only one file to load.
+      void loadSingleFile();
+      /// Called when there are multiple files to load.
+      void loadMultipleFiles();
+
       /// Overrides the cancel() method to call m_loader->cancel()
       void cancel()const;
       /// Create the concrete instance use for the actual loading.
@@ -85,8 +91,18 @@ namespace Mantid
       /// Retrieve a pointer to the output workspace from the sub algorithm
       API::Workspace_sptr getOutputWorkspace(const std::string & propName, 
 					     const API::IDataFileChecker_sptr loader) const;
-      
 
+      /// Load a file to into a hidden workspace.
+      API::Workspace_sptr loadFileToHiddenWs(const std::string & fileName, const std::string & wsName);
+      /// Plus two workspaces together, "in place".
+      API::Workspace_sptr plusWs(API::Workspace_sptr ws1, API::Workspace_sptr ws2);
+      /// Delete a workspace with the given name.
+      void deleteWs(const std::string & wsName);
+      /// Rename a workspace with the given name.
+      void renameWs(const std::string & oldName, const std::string & newName);
+      /// Unhide the given workspace, if it is hidden.
+      void unhideWs(const std::string & wsName);
+      
     private:
       /// The base properties
       std::set<std::string> m_baseProps;

@@ -1047,18 +1047,18 @@ void SliceViewer::findRangeSlice()
     IMDDimension_const_sptr dim = m_dimensions[d];
     if (widget->getShownDim() == 0)
     {
-      min[d] = xint.minValue();
-      max[d] = xint.maxValue();
+      min[d] = VMD_t(xint.minValue());
+      max[d] = VMD_t(xint.maxValue());
     }
     else if (widget->getShownDim() == 1)
     {
-      min[d] = yint.minValue();
-      max[d] = yint.maxValue();
+      min[d] = VMD_t(yint.minValue());
+      max[d] = VMD_t(yint.maxValue());
     }
     else
     {
       // Is a slice. Take a slice of widht = binWidth
-      min[d] = widget->getSlicePoint() - dim->getBinWidth() * 0.45;
+      min[d] = VMD_t(widget->getSlicePoint()) - dim->getBinWidth() * 0.45f;
       max[d] = min[d] + dim->getBinWidth();
     }
   }
@@ -1088,9 +1088,9 @@ void SliceViewer::showInfoAt(double x, double y)
   if (!m_ws) return;
   VMD coords(m_ws->getNumDims());
   for (size_t d=0; d<m_ws->getNumDims(); d++)
-    coords[d] = m_dimWidgets[d]->getSlicePoint();
-  coords[m_dimX] = x;
-  coords[m_dimY] = y;
+    coords[d] = VMD_t(m_dimWidgets[d]->getSlicePoint());
+  coords[m_dimX] = VMD_t(x);
+  coords[m_dimY] = VMD_t(y);
   signal_t signal = m_ws->getSignalAtVMD(coords, this->m_data->getNormalization());
   ui.lblInfoX->setText(QString::number(x, 'g', 4));
   ui.lblInfoY->setText(QString::number(y, 'g', 4));
@@ -1139,7 +1139,7 @@ void SliceViewer::updateDisplay(bool resetAxes)
       m_dimX = d;
     if (widget->getShownDim() == 1)
       m_dimY = d;
-    slicePoint.push_back(widget->getSlicePoint());
+    slicePoint.push_back(VMD_t(widget->getSlicePoint()));
   }
   // Avoid going out of range
   if (m_dimX >= m_ws->getNumDims()) m_dimX = m_ws->getNumDims()-1;
@@ -1622,7 +1622,7 @@ void SliceViewer::openFromXML(const QString & xml)
   V3D normal, origin;
   normal.fromString(normalStr);
   origin.fromString(originStr);
-  double planeOrigin = 0;
+  coord_t planeOrigin = 0;
   int normalDim = -1;
   for (int i=0; i<3; i++)
     if (normal[i] > 0.99) normalDim = i;
@@ -1632,7 +1632,7 @@ void SliceViewer::openFromXML(const QString & xml)
     throw std::runtime_error("SliceViewer::openFromXML(): Could not find the normal of the plane. Plane must be along one of the axes!");
 
   // Get the plane origin and the dimension in the workspace dimensions
-  planeOrigin = origin[normalDim];
+  planeOrigin = static_cast<coord_t>(origin[normalDim]);
   normalDim = dimMap[normalDim];
 
   VMD slicePoint(m_ws->getNumDims());
@@ -1641,7 +1641,7 @@ void SliceViewer::openFromXML(const QString & xml)
   slicePoint[normalDim] = planeOrigin;
   // The "time" of the paraview view
   if (dimMap[3] > 0)
-    slicePoint[dimMap[3]] = TimeValue;
+    slicePoint[dimMap[3]] = static_cast<coord_t>(TimeValue);
 
   // Now find the first unused dimensions = that is the X view dimension
   int xdim =-1;

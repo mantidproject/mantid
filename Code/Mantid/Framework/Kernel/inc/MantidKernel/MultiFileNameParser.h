@@ -78,19 +78,19 @@ namespace Kernel
       void parse(const std::string & multiFileName);
       
       /// Return the vector of vectors of parsed file names.
-      std::vector<std::vector<unsigned int> > runs() {return m_runs;}
+      std::vector<std::vector<unsigned int> > runs() const {return m_runs;}
       /// Return the vector of vectors of parsed file names.
-      std::vector<std::vector<std::string> > fileNames() {return m_fileNames;}
+      std::vector<std::vector<std::string> > fileNames() const {return m_fileNames;}
       /// Return the parsed directory string.
-      std::string dirString() {return m_dirString;}
+      std::string dirString() const {return m_dirString;}
       /// Return the parsed instrument string.
-      std::string instString() {return m_instString;}
+      std::string instString() const {return m_instString;}
       /// Return the parsed underscore string.
-      std::string underscoreString() {return m_underscoreString;}
+      std::string underscoreString() const {return m_underscoreString;}
       /// Return the parsed run string.
-      std::string runString() {return m_runString;}
+      std::string runString() const {return m_runString;}
       /// Return the parsed extension string.
-      std::string extString() {return m_extString;}
+      std::string extString() const {return m_extString;}
 
     private:
       /// Clear all member variables.

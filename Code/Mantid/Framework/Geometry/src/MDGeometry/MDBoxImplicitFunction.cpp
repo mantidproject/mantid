@@ -67,7 +67,7 @@ namespace Geometry
       normal_min[d] = +1.0;
       // Origin just needs to have its X set to the value. Other coords are irrelevant
       std::vector<coord_t> origin_min(nd,0);
-      origin_min[d] = coord_t(min[d]);
+      origin_min[d] = static_cast<coord_t>(min[d]);
       // Build the plane
       MDPlane p_min(normal_min, origin_min);
       this->addPlane(p_min);
@@ -77,7 +77,7 @@ namespace Geometry
       normal_max[d] = -1.0;
       // Origin just needs to have its X set to the value. Other coords are irrelevant
       std::vector<coord_t> origin_max(nd,0);
-      origin_max[d] = coord_t(max[d]);
+      origin_max[d] = static_cast<coord_t>(max[d]);
       // Build the plane
       MDPlane p_max(normal_max, origin_max);
       this->addPlane(p_max);

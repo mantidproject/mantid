@@ -17,10 +17,12 @@ class DataSets(BaseScriptElement):
     DataBackgroundRoi = [115, 137,123, 137]
     DataTofRange = [9600., 21600.]
     
-    x_range = [115,210]
-    norm_x_min = 115
-    norm_x_max = 210
+    data_x_range_flag = True
+    data_x_range = [115,210]
     
+    norm_x_range_flag = True
+    norm_x_range = [115,210]
+
     NormFlag = True
     NormPeakPixels = [120, 130]
     NormBackgroundFlag = False
@@ -60,7 +62,10 @@ class DataSets(BaseScriptElement):
         script += "              NormPeakPixelRange=%s,\n" % str(self.NormPeakPixels)
         script += "              NormBackgroundPixelRange=%s,\n" % str(self.NormBackgroundRoi)
         script += "              SubtractNormBackground=%s,\n" % str(self.NormBackgroundFlag)
-        script += "              LowResAxisPixelRange=%s,\n" % str(self.x_range)
+        script += "              LowResDataAxisPixelRangeFlag=%s,\n" % str(self.data_x_range_flag)
+        script += "              LowResDataAxisPixelRange=%s,\n" % str(self.data_x_range)
+        script += "              LowResNormAxisPixelRangeFlag=%s,\n" % str(self.norm_x_range_flag)
+        script += "              LowResNormAxisPixelRange=%s,\n" % str(self.norm_x_range)
         script += "              TOFRange=%s,\n" % str(self.DataTofRange)
         script += "              QMin=%s,\n" % str(self.q_min)
         script += "              QStep=%s,\n" % str(self.q_step)
@@ -90,7 +95,7 @@ class DataSets(BaseScriptElement):
         """
             Create XML from the current data.
         """
-        xml  = "<Data>\n"
+        xml  = "<RefLData>\n"
         xml += "<peak_selection_type>%s</peak_selection_type>\n" % self.DataPeakSelectionType
         xml += "<from_peak_pixels>%s</from_peak_pixels>\n" % str(self.DataPeakPixels[0])
         xml += "<to_peak_pixels>%s</to_peak_pixels>\n" % str(self.DataPeakPixels[1])
@@ -103,12 +108,14 @@ class DataSets(BaseScriptElement):
         xml += "<from_tof_range>%s</from_tof_range>\n" % str(self.DataTofRange[0])
         xml += "<to_tof_range>%s</to_tof_range>\n" % str(self.DataTofRange[1])
         xml += "<data_sets>%s</data_sets>\n" % ','.join([str(i) for i in self.data_files])
-        xml += "<x_min_pixel>%s</x_min_pixel>\n" % str(self.x_range[0])
-        xml += "<x_max_pixel>%s</x_max_pixel>\n" % str(self.x_range[1])
+        xml += "<x_min_pixel>%s</x_min_pixel>\n" % str(self.data_x_range[0])
+        xml += "<x_max_pixel>%s</x_max_pixel>\n" % str(self.data_x_range[1])
+        xml += "<x_range_flag>%s</x_range_flag>\n" % str(self.data_x_range_flag)
 
         xml += "<norm_flag>%s</norm_flag>\n" % str(self.NormFlag)
-        xml += "<norm_x_max>%s</norm_x_max>\n" % str(self.norm_x_max)
-        xml += "<norm_x_min>%s</norm_x_min>\n" % str(self.norm_x_min)
+        xml += "<norm_x_range_flag>%s</norm_x_range_flag>\n" % str(self.norm_x_range_flag)
+        xml += "<norm_x_max>%s</norm_x_max>\n" % str(self.norm_x_range[0])
+        xml += "<norm_x_min>%s</norm_x_min>\n" % str(self.norm_x_range[1])
         
         xml += "<norm_from_peak_pixels>%s</norm_from_peak_pixels>\n" % str(self.NormPeakPixels[0])
         xml += "<norm_to_peak_pixels>%s</norm_to_peak_pixels>\n" % str(self.NormPeakPixels[1])
@@ -126,7 +133,7 @@ class DataSets(BaseScriptElement):
         xml += "<angle_offset>%s</angle_offset>\n" % str(self.angle_offset)
         xml += "<angle_offset_error>%s</angle_offset_error>\n" % str(self.angle_offset_error)
         
-        xml += "</Data>\n"
+        xml += "</RefLData>\n"
 
         return xml
 
@@ -134,7 +141,7 @@ class DataSets(BaseScriptElement):
         self.reset()    
         dom = xml.dom.minidom.parseString(xml_str)
         self.from_xml_element(dom)
-        element_list = dom.getElementsByTagName("Data")
+        element_list = dom.getElementsByTagName("RefLData")
         if len(element_list)>0:
             instrument_dom = element_list[0]
 
@@ -150,13 +157,19 @@ class DataSets(BaseScriptElement):
         self.DataPeakPixels = [BaseScriptElement.getIntElement(instrument_dom, "from_peak_pixels"),
                                BaseScriptElement.getIntElement(instrument_dom, "to_peak_pixels")]
         
-        self.x_range = [BaseScriptElement.getIntElement(instrument_dom, "x_min_pixel"),
-                        BaseScriptElement.getIntElement(instrument_dom, "x_max_pixel")]
         
-        self.norm_x_min = BaseScriptElement.getIntElement(instrument_dom, "norm_x_min", 
-                                                          default=DataSets.norm_x_min)
-        self.norm_x_max = BaseScriptElement.getIntElement(instrument_dom, "norm_x_max",
-                                                          default=DataSets.norm_x_max)
+        #low resolution range
+        self.data_x_range_flag = BaseScriptElement.getBoolElement(instrument_dom, "data_x_range_flag",
+                                                                  default=DataSets.data_x_range_flag)
+        
+        self.data_x_range = [BaseScriptElement.getIntElement(instrument_dom, "x_min_pixel"),
+                             BaseScriptElement.getIntElement(instrument_dom, "x_max_pixel")]
+        
+        self.norm_x_range_flag = BaseScriptElement.getBoolElement(instrument_dom, "norm_x_range_flag",
+                                                                  default=DataSets.norm_x_range_flag)
+
+        self.norm_x_range = [BaseScriptElement.getIntElement(instrument_dom, "norm_x_min"),
+                             BaseScriptElement.getIntElement(instrument_dom, "norm_x_max")]
         
         #discrete selection string
         self.DataPeakDiscreteSelection = BaseScriptElement.getStringElement(instrument_dom, "peak_discrete_selection")
@@ -223,9 +236,10 @@ class DataSets(BaseScriptElement):
         self.NormBackgroundRoi = DataSets.NormBackgroundRoi
         self.NormPeakPixels = DataSets.NormPeakPixels
         self.norm_file = DataSets.norm_file
-        self.x_range = DataSets.x_range
-        self.norm_x_max = DataSets.norm_x_max
-        self.norm_x_min = DataSets.norm_x_min
+        self.data_x_range_flag = DataSets.data_x_range_flag
+        self.data_x_range = DataSets.data_x_range
+        self.norm_x_range_flag = DataSets.norm_x_range_flag
+        self.norm_x_range = DataSets.norm_x_range
         
         # Q range
         self.q_min = DataSets.q_min

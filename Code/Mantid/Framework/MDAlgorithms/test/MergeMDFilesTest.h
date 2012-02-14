@@ -41,7 +41,7 @@ public:
   void do_test_exec(std::string OutputFilename)
   {
     // Create a bunch of input files
-    std::vector<std::string> filenames;
+    std::vector<std::vector<std::string> > filenames;
     std::vector<MDEventWorkspace3Lean::sptr> inWorkspaces;
     for (size_t i=0; i<3; i++)
     {
@@ -49,7 +49,7 @@ public:
       mess << "MergeMDFilesTestInput" << i;
       MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeFileBackedMDEW(mess.str(), true);
       inWorkspaces.push_back(ws);
-      filenames.push_back(ws->getBoxController()->getFilename());
+      filenames.push_back(std::vector<std::string>(1,ws->getBoxController()->getFilename()));
     }
 
     // Name of the output workspace.

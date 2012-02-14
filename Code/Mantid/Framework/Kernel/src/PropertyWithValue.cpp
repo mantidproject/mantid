@@ -23,6 +23,8 @@ namespace Mantid
     template DLLExport class PropertyWithValue<std::vector<int32_t> >;
     template DLLExport class PropertyWithValue<std::vector<uint64_t> >;
     template DLLExport class PropertyWithValue<std::vector<int64_t> >;
+
+    template DLLExport class PropertyWithValue<std::vector<std::vector<std::string> > >;
     /// @endcond
 
   } // namespace Kernel

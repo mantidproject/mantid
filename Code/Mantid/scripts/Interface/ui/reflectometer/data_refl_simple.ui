@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1298</width>
-    <height>1160</height>
+    <height>1461</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -36,8 +36,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>1274</width>
-        <height>1136</height>
+        <width>1280</width>
+        <height>1443</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -154,6 +154,36 @@ Drag items to change the reduction order.</string>
              <item>
               <layout class="QVBoxLayout" name="verticalLayout_4">
                <item>
+                <widget class="QGroupBox" name="instrument_group_box">
+                 <property name="title">
+                  <string>Instrument</string>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_17">
+                  <item>
+                   <layout class="QVBoxLayout" name="verticalLayout_9">
+                    <item>
+                     <widget class="QRadioButton" name="refm_radio">
+                      <property name="text">
+                       <string>Magnetic Reflectometer (REF_M)</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QRadioButton" name="refl_radio">
+                      <property name="text">
+                       <string>Liquids Reflectometer (REF_L)</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </item>
+                  <item>
+                   <layout class="QVBoxLayout" name="verticalLayout_10"/>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+               <item>
                 <widget class="QGroupBox" name="groupBox">
                  <property name="title">
                   <string>Data Set</string>
@@ -168,13 +198,13 @@ Drag items to change the reduction order.</string>
                      <widget class="QLabel" name="label">
                       <property name="minimumSize">
                        <size>
-                        <width>150</width>
+                        <width>170</width>
                         <height>0</height>
                        </size>
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>150</width>
+                        <width>170</width>
                         <height>16777215</height>
                        </size>
                       </property>
@@ -204,13 +234,13 @@ Drag items to change the reduction order.</string>
                      <widget class="QLabel" name="label_2">
                       <property name="minimumSize">
                        <size>
-                        <width>162</width>
+                        <width>170</width>
                         <height>0</height>
                        </size>
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>150</width>
+                        <width>170</width>
                         <height>16777215</height>
                        </size>
                       </property>
@@ -862,7 +892,7 @@ Drag items to change the reduction order.</string>
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>150</width>
+                        <width>170</width>
                         <height>16777215</height>
                        </size>
                       </property>
@@ -1046,6 +1076,18 @@ Drag items to change the reduction order.</string>
                     </property>
                     <item>
                      <widget class="QCheckBox" name="data_low_res_range_switch">
+                      <property name="minimumSize">
+                       <size>
+                        <width>170</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>170</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
                       <property name="text">
                        <string>Low-Res axis range     </string>
                       </property>
@@ -1198,6 +1240,71 @@ Drag items to change the reduction order.</string>
                     </item>
                    </layout>
                   </item>
+                  <item>
+                   <layout class="QHBoxLayout" name="horizontalLayout_18">
+                    <property name="spacing">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QLabel" name="angle_label">
+                      <property name="minimumSize">
+                       <size>
+                        <width>170</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>170</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
+                      <property name="text">
+                       <string>Scattering angle</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLineEdit" name="angle_edit">
+                      <property name="minimumSize">
+                       <size>
+                        <width>80</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>80</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
+                      <property name="text">
+                       <string>0.0</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="angle_unit_label">
+                      <property name="text">
+                       <string>  degrees</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="horizontalSpacer_21">
+                      <property name="orientation">
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>40</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                   </layout>
+                  </item>
                  </layout>
                 </widget>
                </item>
@@ -1218,21 +1325,21 @@ Drag items to change the reduction order.</string>
                 </spacer>
                </item>
                <item>
-                <widget class="QCheckBox" name="norm_switch">
-                 <property name="text">
-                  <string>Normalization</string>
-                 </property>
-                 <property name="checked">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item>
                 <widget class="QGroupBox" name="norm_group_box">
                  <property name="title">
-                  <string/>
+                  <string>Normalization</string>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_2">
+                  <item>
+                   <widget class="QCheckBox" name="norm_switch">
+                    <property name="text">
+                     <string>Apply normalization</string>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
                   <item>
                    <layout class="QHBoxLayout" name="horizontalLayout_2">
                     <property name="spacing">
@@ -1242,13 +1349,13 @@ Drag items to change the reduction order.</string>
                      <widget class="QLabel" name="norm_run_number_label">
                       <property name="minimumSize">
                        <size>
-                        <width>150</width>
+                        <width>170</width>
                         <height>0</height>
                        </size>
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>150</width>
+                        <width>170</width>
                         <height>16777215</height>
                        </size>
                       </property>
@@ -1278,13 +1385,13 @@ Drag items to change the reduction order.</string>
                      <widget class="QLabel" name="norm_peak_selection_label">
                       <property name="minimumSize">
                        <size>
-                        <width>162</width>
+                        <width>170</width>
                         <height>0</height>
                        </size>
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>150</width>
+                        <width>170</width>
                         <height>16777215</height>
                        </size>
                       </property>
@@ -2135,6 +2242,18 @@ Drag items to change the reduction order.</string>
                     </property>
                     <item>
                      <widget class="QCheckBox" name="norm_low_res_range_switch">
+                      <property name="minimumSize">
+                       <size>
+                        <width>170</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>170</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
                       <property name="text">
                        <string>Low-Res axis range     </string>
                       </property>
@@ -2644,7 +2763,7 @@ Drag items to change the reduction order.</string>
                      <number>0</number>
                     </property>
                     <item>
-                     <widget class="QLabel" name="label_23">
+                     <widget class="QLabel" name="angle_offset_label">
                       <property name="minimumSize">
                        <size>
                         <width>90</width>
@@ -2679,7 +2798,7 @@ Drag items to change the reduction order.</string>
                      </widget>
                     </item>
                     <item>
-                     <widget class="QLabel" name="label_24">
+                     <widget class="QLabel" name="angle_offset_pm_label">
                       <property name="text">
                        <string> ± </string>
                       </property>
@@ -2702,7 +2821,7 @@ Drag items to change the reduction order.</string>
                      </widget>
                     </item>
                     <item>
-                     <widget class="QLabel" name="label_25">
+                     <widget class="QLabel" name="angle_offset_unit_label">
                       <property name="text">
                        <string>degrees</string>
                       </property>

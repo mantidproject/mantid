@@ -1,7 +1,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidMDEvents/MDEventFactory.h"
-#include "MantidVatesAPI/vtkMDEWHexahedronFactory.h"
+#include "MantidVatesAPI/vtkMDHexFactory.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <vtkCellData.h>
 #include <vtkFloatArray.h>
@@ -25,13 +25,13 @@ namespace Mantid
     @Param thresholdRange : Threshold range strategy
     @scalarName : Name for scalar signal array.
     */
-    vtkMDEWHexahedronFactory::vtkMDEWHexahedronFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName, const size_t maxDepth) :
+    vtkMDHexFactory::vtkMDHexFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName, const size_t maxDepth) :
   m_thresholdRange(thresholdRange), m_scalarName(scalarName), m_maxDepth(maxDepth), m_time(0)
   {
   }
 
   /// Destructor
-  vtkMDEWHexahedronFactory::~vtkMDEWHexahedronFactory()
+  vtkMDHexFactory::~vtkMDHexFactory()
   {
   }
 
@@ -41,7 +41,7 @@ namespace Mantid
   * @return a fully constructed vtkUnstructuredGrid containing geometric and scalar data.
   */
   template<typename MDE, size_t nd>
-  void vtkMDEWHexahedronFactory::doCreate(typename MDEventWorkspace<MDE, nd>::sptr ws) const
+  void vtkMDHexFactory::doCreate(typename MDEventWorkspace<MDE, nd>::sptr ws) const
   {
     bool VERBOSE = true;
     CPUTimer tim;
@@ -188,85 +188,69 @@ namespace Mantid
   Generate the vtkDataSet from the objects input IMDEventWorkspace
   @Return a fully constructed vtkUnstructuredGrid containing geometric and scalar data.
   */
-  vtkDataSet* vtkMDEWHexahedronFactory::create() const
+  vtkDataSet* vtkMDHexFactory::create() const
   {
-    validate();
-
-    IMDEventWorkspace_sptr imdws = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_workspace);
-    if(!imdws || (doesCheckDimensionality() &&  imdws->getNonIntegratedDimensions().size() < ThreeDimensional))
+    this->dataSet = tryDelegatingCreation<IMDEventWorkspace, 3>(m_workspace, false);
+    if(this->dataSet != NULL)
     {
-      return m_successor->create();
-    }
-
-    size_t nd = imdws->getNumDims();
-    if (nd > 3)
-    {
-      // Slice from >3D down to 3D
-      this->slice = true;
-      this->sliceMask = new bool[nd];
-      this->sliceImplicitFunction = new MDImplicitFunction();
-
-      // Make the mask of dimensions
-      // TODO: Smarter mapping
-      for (size_t d=0; d<nd; d++)
-        this->sliceMask[d] = (d<3);
-
-      // Define where the slice is in 4D
-      // TODO: Where to slice? Right now is just 0
-      std::vector<coord_t> point(nd, 0);
-      point[3] = m_time; //Specifically for 4th/time dimension.
-
-      // Define two opposing planes that point in all higher dimensions
-      std::vector<coord_t> normal1(nd, 0);
-      std::vector<coord_t> normal2(nd, 0);
-      for (size_t d=3; d<nd; d++)
-      {
-        normal1[d] = +1.0;
-        normal2[d] = -1.0;
-      }
-      // This creates a 0-thickness region to slice in.
-      sliceImplicitFunction->addPlane( MDPlane(normal1, point) );
-      sliceImplicitFunction->addPlane( MDPlane(normal2, point) );
-
-      //coord_t pointA[4] = {0, 0, 0, -1.0};
-      //coord_t pointB[4] = {0, 0, 0, +2.0};
+      return this->dataSet;
     }
     else
     {
-      // Direct 3D, so no slicing
-      this->slice = false;
+      IMDEventWorkspace_sptr imdws = this->castAndCheck<IMDEventWorkspace, 3>(m_workspace, false);
+
+      size_t nd = imdws->getNumDims();
+      if (nd > 3)
+      {
+        // Slice from >3D down to 3D
+        this->slice = true;
+        this->sliceMask = new bool[nd];
+        this->sliceImplicitFunction = new MDImplicitFunction();
+
+        // Make the mask of dimensions
+        // TODO: Smarter mapping
+        for (size_t d=0; d<nd; d++)
+          this->sliceMask[d] = (d<3);
+
+        // Define where the slice is in 4D
+        // TODO: Where to slice? Right now is just 0
+        std::vector<coord_t> point(nd, 0);
+        point[3] = coord_t(m_time); //Specifically for 4th/time dimension.
+
+        // Define two opposing planes that point in all higher dimensions
+        std::vector<coord_t> normal1(nd, 0);
+        std::vector<coord_t> normal2(nd, 0);
+        for (size_t d=3; d<nd; d++)
+        {
+          normal1[d] = +1.0;
+          normal2[d] = -1.0;
+        }
+        // This creates a 0-thickness region to slice in.
+        sliceImplicitFunction->addPlane( MDPlane(normal1, point) );
+        sliceImplicitFunction->addPlane( MDPlane(normal2, point) );
+
+        //coord_t pointA[4] = {0, 0, 0, -1.0};
+        //coord_t pointB[4] = {0, 0, 0, +2.0};
+      }
+      else
+      {
+        // Direct 3D, so no slicing
+        this->slice = false;
+      }
+
+      // Macro to call the right instance of the
+      CALL_MDEVENT_FUNCTION(this->doCreate, imdws);
+
+      // Clean up
+      if (this->slice)
+      {
+        delete this->sliceMask;
+        delete this->sliceImplicitFunction;
+      }
+
+      // The macro does not allow return calls, so we used a member variable.
+      return this->dataSet;
     }
-
-    // Macro to call the right instance of the
-    CALL_MDEVENT_FUNCTION(this->doCreate, imdws);
-
-    // Clean up
-    if (this->slice)
-    {
-      delete this->sliceMask;
-      delete this->sliceImplicitFunction;
-    }
-
-    // The macro does not allow return calls, so we used a member variable.
-    return this->dataSet;
-  }
-
-  /*
-  Create as Mesh Only. Legacy method
-  @Return Nothing. throws on invoke.
-  */
-  vtkDataSet* vtkMDEWHexahedronFactory::createMeshOnly() const
-  {
-    throw std::runtime_error("Invalid usage. Cannot call vtkMDEWHexahedronFactory::createMeshOnly()");
-  }
-
-  /*
-  Create as Mesh Only. Legacy method
-  @Return Nothing. throws on invoke.
-  */
-  vtkFloatArray* vtkMDEWHexahedronFactory::createScalarArray() const
-  {
-    throw std::runtime_error("Invalid usage. Cannot call vtkMDEWHexahedronFactory::createScalarArray()");
   }
 
   /*
@@ -274,45 +258,28 @@ namespace Mantid
   dataobjects (workspaces) to run against at a later time. If workspace is not an IMDEventWorkspace, attempts to use any run-time successor set.
   @Param ws : Workspace to use.
   */
-  void vtkMDEWHexahedronFactory::initialize(Mantid::API::Workspace_sptr ws)
+  void vtkMDHexFactory::initialize(Mantid::API::Workspace_sptr ws)
   {
-    if(!ws)
-    {
-      throw std::invalid_argument("Cannot initalize vtkMDEWHexahedronFactory with a NULL workspace.");
-    }
-    m_workspace = ws;
-    IMDEventWorkspace_sptr imdws = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_workspace);
-
-    if(!imdws || (doesCheckDimensionality() && imdws->getNonIntegratedDimensions().size() < ThreeDimensional))
-    {
-      if(this->hasSuccessor())
-      {
-        m_successor->setUseTransform(m_useTransform);
-        m_successor->initialize(ws);
-      }
-      else
-      {
-        throw std::runtime_error("vtkMDEWHexahedronFactory has no successor");
-      }
-    }
-
+    IMDEventWorkspace_sptr imdws = doInitialize<IMDEventWorkspace, 3>(ws, false);
+    m_workspace = imdws;
+    
     //Setup range values according to whatever strategy object has been injected.
     m_thresholdRange->setWorkspace(m_workspace);
     m_thresholdRange->calculate();
   }
 
   /// Validate the current object.
-  void vtkMDEWHexahedronFactory::validate() const
+  void vtkMDHexFactory::validate() const
   { 
     if(!m_workspace)
     {
-      throw std::runtime_error("Invalid vtkMDEWHexahedronFactory. Workspace is null");
+      throw std::runtime_error("Invalid vtkMDHexFactory. Workspace is null");
     }
   }
 
   /** Sets the recursion depth to a specified level in the workspace.
   */
-  void vtkMDEWHexahedronFactory::setRecursionDepth(size_t depth)
+  void vtkMDHexFactory::setRecursionDepth(size_t depth)
   {
     m_maxDepth = depth;
   }
@@ -320,7 +287,7 @@ namespace Mantid
   /*
   Set the time value.
   */
-  void vtkMDEWHexahedronFactory::setTime(double time)
+  void vtkMDHexFactory::setTime(double time)
   {
     m_time = time;
   }

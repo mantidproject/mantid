@@ -1408,7 +1408,7 @@ namespace DataObjects
         if (eOldData)
           delete eOldData;
       }
-      else delete eData;
+      else delete eData; // Need to clear up this memory if it wasn't put into MRU
 
       //And clear up the memory of the old one, if it is dropping out.
       if (yOldData)

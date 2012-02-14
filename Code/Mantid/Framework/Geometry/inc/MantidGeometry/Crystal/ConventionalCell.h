@@ -77,6 +77,9 @@ namespace Geometry
       /// get the sum of the sides of the conventional unit cell
       double            GetSumOfSides() const;
 
+      /// get string listing form number, error, cell type and centering
+      std::string       GetDescription() const;
+
     private:
       void              init( const Kernel::DblMatrix & UB, 
                                     ReducedCell       & form_0,

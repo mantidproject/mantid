@@ -63,19 +63,19 @@ namespace MDAlgorithms
     void loadBoxData();
 
     template<typename MDE, size_t nd>
-    typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr createOutputWS(typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
-
-    template<typename MDE, size_t nd>
     typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr createOutputWSbyCloning(typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
-
-    template<typename MDE, size_t nd>
-    void doExec(typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
 
     template<typename MDE, size_t nd>
     void doExecByCloning(typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
 
     template<typename MDE, size_t nd>
     void finalizeOutput(typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr outWS);
+
+//    template<typename MDE, size_t nd>
+//    typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr createOutputWS(typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
+//
+//    template<typename MDE, size_t nd>
+//    void doExec(typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
 
   public:
 

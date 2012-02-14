@@ -116,10 +116,9 @@ namespace Mantid
 
 
     IntegratePeakTimeSlices::IntegratePeakTimeSlices() :
-      Algorithm(),R0(-1)
+      Algorithm(), wi_to_detid_map(NULL), R0(-1)
     {
       debug = false;
-      wi_to_detid_map = 0;
 
       if (debug)
         g_log.setLevel(7);
@@ -161,23 +160,12 @@ namespace Mantid
       for (int i = 0; i < NParameters; i++)
         ParameterValues[i] = 0;
     }
+
     /// Destructor
     IntegratePeakTimeSlices::~IntegratePeakTimeSlices()
     {
-
-      if (wi_to_detid_map)
-      {
-
-        delete wi_to_detid_map;
-        wi_to_detid_map = 0;
-
-      }
-
-    if(NeighborIDs)
-    {
-      delete NeighborIDs;
-      NeighborIDs = 0;
-    }
+      delete wi_to_detid_map;
+      delete [] NeighborIDs;
     }
 
     void IntegratePeakTimeSlices::initDocs()
@@ -431,7 +419,7 @@ namespace Mantid
 
         //neighbors  = inpWkSpace->getNeighbours( CentDetspec, neighborRadius, true);
         //neighbors[CentDetspec]=Kernel::V3D(0.0,0.0,0.0);
-        delete NeighborIDs;
+        delete [] NeighborIDs;
 
         NeighborIDs = new int[Nneighbors+2];
         NeighborIDs[0]=Nneighbors+2;
@@ -1013,7 +1001,7 @@ namespace Mantid
          int NN= int(2*NewRadius*2*NewRadius*2.25/CellWidth/CellHeight);
          if( NeighborIDs[0]< NN)
          {
-           delete NeighborIDs;
+           delete [] NeighborIDs;
            NeighborIDs = new int[NN+2];
            NeighborIDs[0]=NN+2;
          }else

@@ -83,12 +83,9 @@ namespace Crystal
     this->declareProperty(new PropertyWithValue<double>( "MaxScalarError",0.2,
           mustBePositive,Direction::Input),"Max Scalar Error (0.2)");
 
-    this->declareProperty( "BestOnly", true, "Show at most one for each Bravais Lattice" );
-/*
-    this->declareProperty(
-             new PropertyWithValue<bool>("BestOnly", true, Direction::Input),
-            "Show at most one for each Bravais Lattice" );
-*/
+    this->declareProperty( "BestOnly", true, 
+                           "Show at most one for each Bravais Lattice" );
+
     this->declareProperty(
           new PropertyWithValue<int>( "NumberOfCells", 0,
           Direction::Output), "Gets set with the number of possible cells.");
@@ -129,40 +126,16 @@ namespace Crystal
     // now tell the user the number of possible conventional cells:
     g_log.notice() << "Num Cells : " << num_cells << std::endl;
 
-
-    std::vector<std::string> result_string_list;
-    char buffer[200];
-
     for ( size_t i = 0; i < num_cells; i++ )
     {
       DblMatrix newUB = list[i].GetNewUB();
-      std::vector<double> lat_par;
-      IndexingUtils::GetLatticeParameters( newUB, lat_par );
-
-      sprintf( buffer, std::string("Form #%2d").c_str(), list[i].GetFormNum());
-      std::string message( buffer );
-
-      sprintf( buffer, std::string(" Error: %8.4f").c_str(), list[i].GetError());
-      message += std::string( buffer );
-
-      sprintf( buffer, std::string(" %12s").c_str(), list[i].GetCellType().c_str() );
-      message += std::string( buffer );
-
-      sprintf( buffer, std::string(" %2s  ").c_str(), list[i].GetCentering().c_str() );
-      message += std::string( buffer );
-
-      sprintf( buffer,
-               std::string("Lattice Parameters: %8.4f %8.4f %8.4f  %8.3f %8.3f %8.3f  %9.2f").c_str(),
-               lat_par[0], lat_par[1], lat_par[2], lat_par[3], lat_par[4], lat_par[5], lat_par[6]);
-      message += std::string( buffer );
+      std::string message = list[i].GetDescription() + " Lat Par:" +
+                            IndexingUtils::GetLatticeParameterString( newUB );
 
       g_log.notice( std::string(message) );
-
-      result_string_list.push_back(message);
     }
 
     this->setProperty("NumberOfCells", (int)num_cells );
-
   }
 
 

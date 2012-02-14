@@ -1,12 +1,13 @@
-#ifndef VTK_THRESHOLDING_QUAD_FACTORY_TEST_H
-#define VTK_THRESHOLDING_QUAD_FACTORY_TEST_H
+#ifndef VTK_MD_QUAD_FACTORY_TEST_H_
+#define VTK_MD_QUAD_FACTORY_TEST_H_
 
 #include "MantidAPI/IMDIterator.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/UserDefinedThresholdRange.h"
-#include "MantidVatesAPI/vtkThresholdingQuadFactory.h"
+#include "MantidVatesAPI/vtkMDHistoQuadFactory.h"
 #include "MockObjects.h"
 #include <cxxtest/TestSuite.h>
+#include <vtkStructuredGrid.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
@@ -22,23 +23,10 @@ using Mantid::MDEvents::MDEventsTestHelper::makeFakeMDHistoWorkspace;
 //=====================================================================================
 // Functional tests
 //=====================================================================================
-class vtkThresholdingQuadFactoryTest: public CxxTest::TestSuite
+class vtkMDHistoQuadFactoryTest: public CxxTest::TestSuite
 {
 
 public:
-  void testCreateMeshOnlyThrows()
-  {
-    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
-    vtkThresholdingQuadFactory factory(ThresholdRange_scptr(pRange), "signal");
-    TS_ASSERT_THROWS(factory.createMeshOnly() , std::runtime_error);
-  }
-
-  void testCreateScalarArrayThrows()
-  {
-    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
-    vtkThresholdingQuadFactory factory(ThresholdRange_scptr(pRange), "signal");
-    TS_ASSERT_THROWS(factory.createScalarArray() , std::runtime_error);
-  }
 
   void testIsValidThrowsWhenNoWorkspace()
   {
@@ -49,15 +37,15 @@ public:
     Mantid::API::IMDWorkspace_sptr ws_sptr(nullWorkspace);
 
     UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
-    vtkThresholdingQuadFactory factory(ThresholdRange_scptr(pRange), "signal");
+    vtkMDHistoQuadFactory factory(ThresholdRange_scptr(pRange), "signal");
 
-    TSM_ASSERT_THROWS("No workspace, so should not be possible to complete initialization.", factory.initialize(ws_sptr), std::runtime_error);
+    TSM_ASSERT_THROWS("No workspace, so should not be possible to complete initialization.", factory.initialize(ws_sptr), std::invalid_argument);
   }
 
   void testCreateWithoutInitializeThrows()
   {
     UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
-    vtkThresholdingQuadFactory factory(ThresholdRange_scptr(pRange), "signal");
+    vtkMDHistoQuadFactory factory(ThresholdRange_scptr(pRange), "signal");
     TS_ASSERT_THROWS(factory.create(), std::runtime_error);
   }
 
@@ -68,7 +56,7 @@ public:
 
     //Thresholds have been set such that the signal values (hard-coded to 1, see above) will fall between the minimum 0 and maximum 2.
     UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 2);
-    vtkThresholdingQuadFactory inside(ThresholdRange_scptr(pRange), "signal");
+    vtkMDHistoQuadFactory inside(ThresholdRange_scptr(pRange), "signal");
     inside.initialize(ws_sptr);
     vtkUnstructuredGrid* insideProduct = dynamic_cast<vtkUnstructuredGrid*>(inside.create());
 
@@ -83,7 +71,7 @@ public:
 
     //Thresholds have been set such that the signal values (hard-coded to 1, see above) will fall above and outside the minimum 0 and maximum 0.5.
     UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 0.5);
-    vtkThresholdingQuadFactory above(ThresholdRange_scptr(pRange), "signal");
+    vtkMDHistoQuadFactory above(ThresholdRange_scptr(pRange), "signal");
     above.initialize(ws_sptr);
     vtkUnstructuredGrid* aboveProduct = dynamic_cast<vtkUnstructuredGrid*>(above.create());
 
@@ -99,7 +87,7 @@ public:
 
     //Thresholds have been set such that the signal values (hard-coded to 1, see above) will fall below and outside the minimum 1.5 and maximum 2.
     UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(1.5, 2);
-    vtkThresholdingQuadFactory below(ThresholdRange_scptr(pRange), "signal");
+    vtkMDHistoQuadFactory below(ThresholdRange_scptr(pRange), "signal");
 
     below.initialize(ws_sptr);
     vtkUnstructuredGrid* belowProduct = dynamic_cast<vtkUnstructuredGrid*>(below.create());
@@ -121,7 +109,7 @@ public:
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 1);
-    vtkThresholdingQuadFactory factory(ThresholdRange_scptr(pRange), "signal");
+    vtkMDHistoQuadFactory factory(ThresholdRange_scptr(pRange), "signal");
 
     //Successor is provided.
     factory.SetSuccessor(pMockFactorySuccessor);
@@ -139,7 +127,7 @@ public:
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 1);
-    vtkThresholdingQuadFactory factory(ThresholdRange_scptr(pRange), "signal");
+    vtkMDHistoQuadFactory factory(ThresholdRange_scptr(pRange), "signal");
 
     TSM_ASSERT_THROWS("Should have thrown an execption given that no successor was available.", factory.initialize(ws_sptr), std::runtime_error);
   }
@@ -152,12 +140,12 @@ public:
 
     MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
     EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); //expect it then to call initialize on the successor.
-    EXPECT_CALL(*pMockFactorySuccessor, create()).Times(1); //expect it then to call create on the successor.
+    EXPECT_CALL(*pMockFactorySuccessor, create()).Times(1).WillOnce(Return(vtkStructuredGrid::New())); //expect it then to call create on the successor.
     EXPECT_CALL(*pMockFactorySuccessor, getFactoryTypeName()).WillOnce(testing::Return("TypeA")); 
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 1);
-    vtkThresholdingQuadFactory factory(ThresholdRange_scptr(pRange), "signal");
+    vtkMDHistoQuadFactory factory(ThresholdRange_scptr(pRange), "signal");
 
     //Successor is provided.
     factory.SetSuccessor(pMockFactorySuccessor);
@@ -172,8 +160,8 @@ public:
   void testTypeName()
   {
     UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 1);
-    vtkThresholdingQuadFactory factory(ThresholdRange_scptr(pRange), "signal");
-    TS_ASSERT_EQUALS("vtkThresholdingQuadFactory", factory.getFactoryTypeName());
+    vtkMDHistoQuadFactory factory(ThresholdRange_scptr(pRange), "signal");
+    TS_ASSERT_EQUALS("vtkMDHistoQuadFactory", factory.getFactoryTypeName());
   }
 
 };
@@ -181,7 +169,7 @@ public:
 //=====================================================================================
 // Performance tests
 //=====================================================================================
-class vtkThresholdingQuadFactoryTestPerformance : public CxxTest::TestSuite
+class vtkMDHistoQuadFactoryTestPerformance : public CxxTest::TestSuite
 {
 private:
   Mantid::API::IMDWorkspace_sptr m_ws_sptr;
@@ -199,7 +187,7 @@ public:
 	{
     //Thresholds have been set such that the signal values (hard-coded to 1, see above) will fall between the minimum 0 and maximum 2.
     UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 1);
-    vtkThresholdingQuadFactory factory(ThresholdRange_scptr(pRange), "signal");
+    vtkMDHistoQuadFactory factory(ThresholdRange_scptr(pRange), "signal");
     factory.initialize(m_ws_sptr);
     TS_ASSERT_THROWS_NOTHING(factory.create());
 	}

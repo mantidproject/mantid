@@ -67,7 +67,7 @@ namespace Crystal
     double getTypeIIZachariasen(double XqtII);
     double getTypeIIGaussian(double XqtII, double twoth);
     double getTypeIILorentzian(double XqtII, double twoth);
-    double getSigFsqr(double Rg, double cellV, double wl, double twoth, double tbar, double fsq, double sigfsq);
+    double getSigFsqr(double Rg, double cellV, double wl, double twoth, double tbar, double fsq, double sigfsq, double relSigRg = 0.03);
     double absor_sphere(double& twoth, double& wl) ;
   };
 } // namespace Mantid;
