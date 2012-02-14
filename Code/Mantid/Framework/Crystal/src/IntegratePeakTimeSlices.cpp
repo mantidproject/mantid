@@ -564,15 +564,15 @@ namespace Mantid
               std::vector<double> params;
               std::vector<double> errs;
               std::vector<std::string> names;
-            /* std::cout<<"Attributes="<<std::endl;
+            /*std::cout<<"Attributes="<<std::endl;
               for( int kk=0; kk<NAttributes;kk++)
               {
                 std::cout<<"("<<kk<<")="<<AttributeValues[kk];
               }
 
               std::cout<<std::endl;
- */
-              if (IsEnoughData() && ParameterValues[ITINTENS] > 0)
+              */
+               if (IsEnoughData() && ParameterValues[ITINTENS] > 0)
               {
 
                 fit_alg = createSubAlgorithm("Fit");
@@ -714,7 +714,7 @@ namespace Mantid
       {
 
         std::cout << "Error occurred XX " << ss.what() << std::endl;
-        throw ss;
+        throw std::runtime_error( ss.what());
       }
 
     }
@@ -915,6 +915,12 @@ namespace Mantid
       int ntimes = 0;
       double Mx, My, Sxx, Syy, Sxy;
 
+      //Variances at background =0. Should be used to nail down initial parameters.
+      double Sxx0 = (StatBase[ISSIxx]-StatBase[ISSIx]*StatBase[ISSIx]/ StatBase[IIntensities])
+                                     / StatBase[IIntensities];
+
+      double Syy0 = (StatBase[ISSIyy]-StatBase[ISSIy]*StatBase[ISSIy]/ StatBase[IIntensities])
+                                 / StatBase[IIntensities];
       while (!done && ntimes<8)
       {
         Mx = StatBase[ISSIx] - b * StatBase[ISSx];
@@ -928,8 +934,10 @@ namespace Mantid
         if (Sxx <= 0 || Syy <= 0 || Sxy * Sxy / Sxx / Syy > .8)
         {
           b = b*.6;
+
           if (ntimes +1 ==8)
             b=0;
+
           Den = StatBase[IIntensities] - b * nCells;
           if (Den <= 1)
             Den = 1;

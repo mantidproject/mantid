@@ -91,6 +91,8 @@ BivariateNormal::~BivariateNormal()
 
    initCoeff(D, X, Y, coefNorm, expCoeffx2, expCoeffy2, expCoeffxy, NCells);
 
+   NCells = std::min<int>(nData, nCells);
+
    double Background = getParameter(IBACK);
    double Intensity = getParameter(ITINTENS);
    double Xmean = getParameter(IXMEAN);
@@ -122,6 +124,8 @@ BivariateNormal::~BivariateNormal()
        }
 
      }
+     double diff = out[x]-Y[x];
+     chiSq +=diff*diff;
 
      x++;
    }
@@ -231,7 +235,7 @@ void BivariateNormal::init()
 }
 
 void BivariateNormal::initCommon()
- {
+{
 
   bool ParamsOK = true;
   bool CommonsOK = true;
@@ -400,12 +404,8 @@ void BivariateNormal::initCommon()
 
     expVals = new double[NCells];
     
-
-
-
     for( int i=0; i< NCells;i++)
       {
-
         double dx = X[i] - LastParams[IXMEAN];
         double dy = Y[i] - LastParams[IYMEAN];
         expVals[i] = exp(expCoeffx2 * dx * dx + expCoeffxy * dx * dy + expCoeffy2 * dy * dy);
@@ -413,8 +413,7 @@ void BivariateNormal::initCommon()
       }
 
   }
-
-  }
+}
 
 void BivariateNormal::initCoeff( MantidVec &D,
                                  MantidVec &X,
