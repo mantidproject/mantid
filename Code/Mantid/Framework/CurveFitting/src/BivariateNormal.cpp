@@ -76,7 +76,7 @@ BivariateNormal::~BivariateNormal()
 
    initCoeff(D, X, Y, coefNorm, expCoeffx2, expCoeffy2, expCoeffxy, NCells);
 
-   NCells = std::min<int>(nData, NCells);
+   NCells = std::min<int>((int)nData, NCells);
 
    double Background = getParameter(IBACK);
    double Intensity = getParameter(ITINTENS);
