@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_LOADMASKINGFILETEST_H_
-#define MANTID_DATAHANDLING_LOADMASKINGFILETEST_H_
+#ifndef MANTID_DATAHANDLING_LOADMASKTEST_H_
+#define MANTID_DATAHANDLING_LOADMASKTEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
@@ -9,25 +9,25 @@
 #include <fstream>
 #include "Poco/File.h"
 
-#include "MantidDataHandling/LoadMaskingFile.h"
+#include "MantidDataHandling/LoadMask.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;
 using namespace Mantid::API;
 
-class LoadMaskingFileTest : public CxxTest::TestSuite
+class LoadMaskTest : public CxxTest::TestSuite
 {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LoadMaskingFileTest *createSuite() { return new LoadMaskingFileTest(); }
-  static void destroySuite( LoadMaskingFileTest *suite ) { delete suite; }
+  static LoadMaskTest *createSuite() { return new LoadMaskTest(); }
+  static void destroySuite( LoadMaskTest *suite ) { delete suite; }
 
 
   void test_LoadXML()
   {
-    LoadMaskingFile loadfile;
+    LoadMask loadfile;
     loadfile.initialize();
 
     loadfile.setProperty("Instrument", "POWGEN");
@@ -51,7 +51,7 @@ public:
    */
   void test_LoadXMLThrow()
   {
-    LoadMaskingFile loadfile;
+    LoadMask loadfile;
     loadfile.initialize();
 
     loadfile.setProperty("Instrument", "WhatEver");
@@ -89,7 +89,7 @@ public:
     genMaskingFile(maskfname1, detids, banks1);
 
     // 2. Run
-    LoadMaskingFile loadfile;
+    LoadMask loadfile;
     loadfile.initialize();
 
     loadfile.setProperty("Instrument", "VULCAN");
@@ -151,7 +151,7 @@ public:
     genMaskingFile(maskfname2, detids, banks2);
 
     // 1. Generate Mask Workspace
-    LoadMaskingFile loadfile;
+    LoadMask loadfile;
     loadfile.initialize();
 
     loadfile.setProperty("Instrument", "VULCAN");
@@ -163,7 +163,7 @@ public:
           boost::dynamic_pointer_cast<DataObjects::SpecialWorkspace2D>(AnalysisDataService::Instance().retrieve("VULCAN_Mask1"));
 
     // 2. Generate Region of Interest Workspace
-    LoadMaskingFile loadfile2;
+    LoadMask loadfile2;
     loadfile2.initialize();
 
     loadfile2.setProperty("Instrument", "VULCAN");

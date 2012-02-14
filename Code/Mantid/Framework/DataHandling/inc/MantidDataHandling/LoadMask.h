@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_LOADMASKINGFILE_H_
-#define MANTID_DATAHANDLING_LOADMASKINGFILE_H_
+#ifndef MANTID_DATAHANDLING_LOADMASK_H_
+#define MANTID_DATAHANDLING_LOADMASK_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
@@ -11,7 +11,7 @@ namespace Mantid
 namespace DataHandling
 {
 
-  /** LoadMaskingFile : TODO: DESCRIPTION
+  /** LoadMask : TODO: DESCRIPTION
     
     @author
     @date 2011-11-02
@@ -36,14 +36,14 @@ namespace DataHandling
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport LoadMaskingFile : public API::Algorithm
+  class DLLExport LoadMask : public API::Algorithm
   {
   public:
-    LoadMaskingFile();
-    ~LoadMaskingFile();
+    LoadMask();
+    ~LoadMask();
     
     /// Algorithm's name for identification
-    virtual const std::string name() const { return "LoadMaskingFile";};
+    virtual const std::string name() const { return "LoadMask";};
     /// Algorithm's version for identification
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
@@ -121,4 +121,4 @@ namespace DataHandling
 } // namespace DataHandling
 } // namespace Mantid
 
-#endif  /* MANTID_DATAHANDLING_LOADMASKINGFILE_H_ */
+#endif  /* MANTID_DATAHANDLING_LOADMASK_H_ */

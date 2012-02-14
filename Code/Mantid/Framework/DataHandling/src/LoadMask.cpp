@@ -15,7 +15,7 @@ The format can be
 
 *WIKI*/
 
-#include "MantidDataHandling/LoadMaskingFile.h"
+#include "MantidDataHandling/LoadMask.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ListValidator.h"
@@ -55,12 +55,12 @@ namespace Mantid
 namespace DataHandling
 {
 
-  DECLARE_ALGORITHM(LoadMaskingFile)
+  DECLARE_ALGORITHM(LoadMask)
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  LoadMaskingFile::LoadMaskingFile()
+  LoadMask::LoadMask()
   {
     // mMaskWS = NULL;
     // mInstrumentName = "";
@@ -73,19 +73,19 @@ namespace DataHandling
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  LoadMaskingFile::~LoadMaskingFile()
+  LoadMask::~LoadMask()
   {
     // Auto-generated destructor stub
   }
   
   /// Sets documentation strings for this algorithm
-  void LoadMaskingFile::initDocs(){
+  void LoadMask::initDocs(){
     this->setWikiSummary("Loads an XML file or calibration file to generate MaskWorkspace.");
     this->setOptionalMessage("");
   }
 
   /// Initialise the properties
-  void LoadMaskingFile::init(){
+  void LoadMask::init(){
 
     // 1. Declare property
     declareProperty("Instrument", "", "Name of instrument to mask.");
@@ -100,7 +100,7 @@ namespace DataHandling
 
 
   /// Run the algorithm
-  void LoadMaskingFile::exec(){
+  void LoadMask::exec(){
 
     // 1. Load Instrument and create output Mask workspace
     const std::string instrumentname = getProperty("Instrument");
@@ -143,7 +143,7 @@ namespace DataHandling
     return;
   }
 
-  void LoadMaskingFile::initDetectors(){
+  void LoadMask::initDetectors(){
 
     // 1. Initialize
     if (mDefaultToUse){
@@ -166,7 +166,7 @@ namespace DataHandling
    *  params:
    *  @ tomask:  true to mask, false to unmask
    */
-  void LoadMaskingFile::processMaskOnDetectors(bool tomask, std::vector<int32_t> singledetids, std::vector<int32_t> pairdetids_low,
+  void LoadMask::processMaskOnDetectors(bool tomask, std::vector<int32_t> singledetids, std::vector<int32_t> pairdetids_low,
       std::vector<int32_t> pairdetids_up){
 
     // 1. Get index map
@@ -207,7 +207,7 @@ namespace DataHandling
    * @params
    *  -
    */
-  void LoadMaskingFile::componentToDetectors(std::vector<std::string> componentnames,
+  void LoadMask::componentToDetectors(std::vector<std::string> componentnames,
       std::vector<int32_t>& detectors){
 
     Geometry::Instrument_const_sptr minstrument = mMaskWS->getInstrument();
@@ -256,7 +256,7 @@ namespace DataHandling
   /*
    * Convert bank to detectors
    */
-  void LoadMaskingFile::bankToDetectors(std::vector<std::string> singlebanks,
+  void LoadMask::bankToDetectors(std::vector<std::string> singlebanks,
       std::vector<int32_t>& detectors,
       std::vector<int32_t>& detectorpairslow, std::vector<int32_t>& detectorpairsup){
 
@@ -304,7 +304,7 @@ namespace DataHandling
   /*
    * Convert spectrum to detectors
    */
-  void LoadMaskingFile::spectrumToDetectors(std::vector<int32_t> singles, std::vector<int32_t> pairslow, std::vector<int32_t> pairsup,
+  void LoadMask::spectrumToDetectors(std::vector<int32_t> singles, std::vector<int32_t> pairslow, std::vector<int32_t> pairsup,
       std::vector<int32_t>& detectors,
       std::vector<int32_t>& detectorpairslow, std::vector<int32_t>& detectorpairsup){
 
@@ -329,7 +329,7 @@ namespace DataHandling
   /*
    * Convert spectrum to detectors
    */
-  void LoadMaskingFile::detectorToDetectors(std::vector<int32_t> singles, std::vector<int32_t> pairslow, std::vector<int32_t> pairsup,
+  void LoadMask::detectorToDetectors(std::vector<int32_t> singles, std::vector<int32_t> pairslow, std::vector<int32_t> pairsup,
       std::vector<int32_t>& detectors,
       std::vector<int32_t>& detectorpairslow, std::vector<int32_t>& detectorpairsup){
     UNUSED_ARG(detectorpairslow)
@@ -363,7 +363,7 @@ namespace DataHandling
   /*
    * Initalize Poco XML Parser
    */
-  void LoadMaskingFile::initializeXMLParser(const std::string & filename)
+  void LoadMask::initializeXMLParser(const std::string & filename)
   {
     // const std::string instName
     std::cout << "Load File " << filename << std::endl;
@@ -396,11 +396,11 @@ namespace DataHandling
   /*
    * Parse XML file
    */
-  void LoadMaskingFile::parseXML()
+  void LoadMask::parseXML()
   {
     // 0. Check
     if (!pDoc)
-      throw std::runtime_error("Call LoadMaskingFile::initialize() before parseXML.");
+      throw std::runtime_error("Call LoadMask::initialize() before parseXML.");
 
     // 1. Parse and create a structure
     NodeList* pNL_type = pRootElem->getElementsByTagName("type");
@@ -490,7 +490,7 @@ namespace DataHandling
    * params:
    * @valutext:  must be bank name
    */
-  void LoadMaskingFile::parseComponent(std::string valuetext, bool tomask){
+  void LoadMask::parseComponent(std::string valuetext, bool tomask){
 
     // 1. Parse bank out
     /*
@@ -523,7 +523,7 @@ namespace DataHandling
   /*
    * Parse input string for spectrum ID
    */
-  void LoadMaskingFile::parseSpectrumIDs(std::string inputstr, bool tomask){
+  void LoadMask::parseSpectrumIDs(std::string inputstr, bool tomask){
 
     g_log.error() << "SpectrumID in XML File (ids) Is Not Supported!  Spectrum IDs: " << inputstr << std::endl;
 
@@ -557,7 +557,7 @@ namespace DataHandling
   /*
    * Parse input string for spectrum ID
    */
-  void LoadMaskingFile::parseDetectorIDs(std::string inputstr, bool tomask){
+  void LoadMask::parseDetectorIDs(std::string inputstr, bool tomask){
 
     // g_log.information() << "Detector IDs: " << inputstr << std::endl;
 
@@ -592,7 +592,7 @@ namespace DataHandling
    * Parse index range text to singles and pairs
    * Example: 3,4,9-10,33
    */
-  void LoadMaskingFile::parseRangeText(std::string inputstr, std::vector<int32_t>& singles, std::vector<int32_t>& pairs){
+  void LoadMask::parseRangeText(std::string inputstr, std::vector<int32_t>& singles, std::vector<int32_t>& pairs){
     // 1. Split ','
     std::vector<std::string> rawstrings;
     this->splitString(inputstr, rawstrings, ",");
@@ -646,7 +646,7 @@ namespace DataHandling
     return;
   }
 
-  void LoadMaskingFile::splitString(std::string inputstr, std::vector<std::string>& strings, std::string sep){
+  void LoadMask::splitString(std::string inputstr, std::vector<std::string>& strings, std::string sep){
 
     // std::vector<std::string> SplitVec;
     boost::split(strings, inputstr, boost::is_any_of(sep), boost::token_compress_on);
@@ -660,7 +660,7 @@ namespace DataHandling
   /*
    * Initialize the Mask Workspace with instrument
    */
-  void LoadMaskingFile::intializeMaskWorkspace(){
+  void LoadMask::intializeMaskWorkspace(){
 
     // 1. Execute algorithm LoadInstrument() to a temporary Workspace
     API::Algorithm_sptr childAlg =  createSubAlgorithm("LoadInstrument");

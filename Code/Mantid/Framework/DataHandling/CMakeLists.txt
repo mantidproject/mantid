@@ -38,7 +38,7 @@ set ( SRC_FILES
 	src/LoadLogsForSNSPulsedMagnet.cpp
 	src/LoadLogsFromSNSNexus.cpp
 	src/LoadMappingTable.cpp
-	src/LoadMaskingFile.cpp
+	src/LoadMask.cpp
 	src/LoadMuonLog.cpp
 	src/LoadMuonNexus.cpp
 	src/LoadMuonNexus2.cpp
@@ -148,7 +148,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadLogsForSNSPulsedMagnet.h
 	inc/MantidDataHandling/LoadLogsFromSNSNexus.h
 	inc/MantidDataHandling/LoadMappingTable.h
-	inc/MantidDataHandling/LoadMaskingFile.h
+	inc/MantidDataHandling/LoadMask.h
 	inc/MantidDataHandling/LoadMuonLog.h
 	inc/MantidDataHandling/LoadMuonNexus.h
 	inc/MantidDataHandling/LoadMuonNexus2.h
@@ -250,7 +250,7 @@ set ( TEST_FILES
 	test/LoadLogTest.h
 	test/LoadLogsFromSNSNexusTest.h
 	test/LoadMappingTableTest.h
-	test/LoadMaskingFileTest.h
+	test/LoadMaskTest.h
 	test/LoadMuonLogTest.h
 	test/LoadMuonNexus2Test.h
 	test/LoadMuonNexusTest.h
