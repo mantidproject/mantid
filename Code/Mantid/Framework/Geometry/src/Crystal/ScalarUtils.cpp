@@ -310,7 +310,7 @@ ConventionalCell ScalarUtils::GetCellBestError(
   bool min_found = false;
   for ( size_t i = 0; i < list.size(); i++ )
   {
-    std::string type( list[i].GetCellType() );
+    type = list[i].GetCellType();
     error = list[i].GetError();
     if ( ( use_triclinic || type != ReducedCell::TRICLINIC() ) &&
            error < min_error )
