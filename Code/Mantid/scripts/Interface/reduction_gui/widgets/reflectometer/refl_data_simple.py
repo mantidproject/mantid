@@ -464,11 +464,13 @@ class DataReflWidget(BaseWidget):
         self._summary.data_low_res_range_switch.setChecked(state.data_x_range_flag)
         self._summary.x_min_edit.setText(str(state.data_x_range[0]))
         self._summary.x_max_edit.setText(str(state.data_x_range[1]))
+        self._data_low_res_clicked(state.data_x_range_flag)
         
         #norm low resolution range
         self._summary.norm_low_res_range_switch.setChecked(state.norm_x_range_flag)
         self._summary.norm_x_min_edit.setText(str(state.norm_x_range[0]))
         self._summary.norm_x_max_edit.setText(str(state.norm_x_range[1]))
+        self._norm_low_res_clicked(state.data_x_range_flag)
         
         #Background flag
         self._summary.data_background_switch.setChecked(state.DataBackgroundFlag)

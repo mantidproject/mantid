@@ -342,8 +342,11 @@ class Stitcher(object):
                 data_started = True
                 zipped.append(trimmed[i])
         
-        x,y,e,dx = zip(*zipped)
-        return list(x), list(y), list(e), list(dx)
+        if len(zipped)>0:
+            x,y,e,dx = zip(*zipped)
+        else:
+            return [],[],[],[]
+        return list(x), list(y), list(e), list(dx)            
         
     def get_scaled_data(self):
         """
