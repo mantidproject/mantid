@@ -6,6 +6,11 @@ import numpy
 
 class RefMReduction(PythonAlgorithm):
 
+    OFF_OFF = 'Off_Off'
+    ON_ON   = 'On_On'
+    OFF_ON  = 'Off_On'
+    ON_OFF  = 'On_Off'
+    
     def category(self):
         return "Reflectometry"
 
@@ -43,12 +48,26 @@ class RefMReduction(PythonAlgorithm):
         self.TOFrange = self.getProperty("TOFRange")
         self.TOFsteps = 25.0
 
-        # Load the data with the chosen polarization
-        ws_name = self._load_data('Off_Off')
+        # Process each polarization state, use the OFF_OFF state
+        # for the outputworkspace
+        output_ws = self._process_polarization(RefMReduction.OFF_OFF)
+        self.setProperty("OutputWorkspace", mtd[output_ws])
         
-        # Subtract background
-        if self.getProperty("SubtractSignalBackground"):
-            pass
+        self._process_polarization(RefMReduction.ON_OFF)
+
+    def _process_polarization(self, polarization):
+        """
+            Process a polarization state
+            
+            @param polarization: polarization state
+        """
+        # Sanity check
+        if polarization not in [RefMReduction.OFF_OFF, RefMReduction.OFF_ON,
+                                RefMReduction.ON_OFF, RefMReduction.ON_ON]:
+            raise RuntimeError("RefMReduction: invalid polarization %s" % polarization)
+        
+        # Load the data with the chosen polarization
+        ws_name = self._load_data(polarization)
         
         # Crop the region of interest
         output_roi = self._crop_roi(ws_name)
@@ -57,10 +76,6 @@ class RefMReduction(PythonAlgorithm):
         # the direct beam
         if self.getProperty("PerformNormalization"):
             ws_wl_profile = self._process_normalization()
-            
-            # Subtract background
-            if self.getProperty("SubtractNormBackground"):
-                pass
             
             RebinToWorkspace(WorkspaceToRebin=ws_wl_profile, 
                              WorkspaceToMatch=output_roi,
@@ -75,27 +90,34 @@ class RefMReduction(PythonAlgorithm):
             
             if mtd.workspaceExists(ws_wl_profile):
                 mtd.deleteWorkspace(ws_wl_profile)
-        
+
         # Convert to Q
-        output_ws = self.getPropertyValue("OutputWorkspace")       
+        output_ws = self.getPropertyValue("OutputWorkspace")    
+        
+        # Rename for polarization
+        if polarization != RefMReduction.OFF_OFF:
+            if output_ws.find(RefMReduction.OFF_OFF)>0:
+                output_ws = output_ws.replace(RefMReduction.OFF_OFF, polarization)
+            else:
+                output_ws += '_%s' % polarization
+           
+        # Make sure the workspace doesn't exist
         if mtd.workspaceExists(output_ws):
             mtd.deleteWorkspace(output_ws)
+            
         self._convert_to_q(output_roi, output_ws)
-        self.setProperty("OutputWorkspace", mtd[output_ws])
         
         mtd.deleteWorkspace(output_roi)
         mtd.deleteWorkspace(ws_name)
+        
+        return output_ws
 
-    def _load_data(self, polarization='Off_Off'):
+    def _load_data(self, polarization):
         """
             Load the signal data
             
             @param polarization: Off_Off, Off_On, On_Off, or On_On
         """
-        # Sanity check
-        if polarization not in ['Off_Off', 'Off_On', 'On_Off', 'On_On']:
-            raise RuntimeError("RefMReduction: invalid polarization %s" % polarization)
-        
         run_numbers = self.getProperty("RunNumbers")
         mtd.sendLogMessage("RefMReduction: processing %s" % run_numbers)
         allow_multiple = False
@@ -119,6 +141,10 @@ class RefMReduction(PythonAlgorithm):
         if not mtd.workspaceExists(ws_name_raw):
             LoadEventNexus(Filename=data_file, NXentryName="entry-%s" % polarization, OutputWorkspace=ws_name_raw)
         
+        # Check whether we have events
+        if mtd[ws_name_raw].getNumberEvents()==0:
+            mtd.sendLogMessage("RefMReduction: no data in %s" % polarization)
+        
         # Rebin and crop out both sides of the TOF distribution
         Rebin(InputWorkspace=ws_name_raw, OutputWorkspace=ws_name, Params=[self.TOFrange[0], self.TOFsteps, self.TOFrange[1]], PreserveEvents=True)
         
@@ -131,7 +157,11 @@ class RefMReduction(PythonAlgorithm):
         wl_max = self.getProperty("WavelengthMax")
         wl_step = self.getProperty("WavelengthStep")
         Rebin(InputWorkspace=ws_name, OutputWorkspace=ws_name, Params=[wl_min, wl_step, wl_max], PreserveEvents=True)
-        
+
+        # Subtract background
+        if self.getProperty("SubtractSignalBackground"):
+            pass
+                
         return ws_name
  
     def _crop_roi(self, input_ws):
@@ -201,6 +231,10 @@ class RefMReduction(PythonAlgorithm):
 
             # Convert to wavelength
             ConvertUnits(InputWorkspace=ws_normalization, Target="Wavelength", OutputWorkspace=ws_normalization)
+        
+        # Subtract background
+        if self.getProperty("SubtractNormBackground"):
+            pass
         
         # Sum the normalization counts as a function of wavelength
         #peak_range = self.getProperty("NormPeakPixelRange")

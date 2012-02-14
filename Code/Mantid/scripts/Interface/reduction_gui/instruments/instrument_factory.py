@@ -9,12 +9,13 @@ from hfir_interface_dev import HFIRInterface
 from eqsans_interface_dev import EQSANSInterface
 from example_interface import ExampleInterface
 from reflectometer_l_interface_dev import REFLInterface
+from reflectometer_m_interface_dev import REFMInterface
 
 INSTRUMENT_DICT = {"HFIR": {"BIOSANS": HFIRInterface, 
                             "GPSANS": HFIRInterface},
                    "SNS":  {"EQSANS": EQSANSInterface,
                             "REFL": REFLInterface,
-                            "REFM": REFLInterface,
+                            "REFM": REFMInterface,
                             "Example": ExampleInterface}
                   }               
 
