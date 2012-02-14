@@ -582,11 +582,20 @@ namespace API
     file->writeData("Number_of_Detectors", detectorIDs.size() );
     file->writeData("Detector_IDs", detectorIDs);
     std::vector<double> angles( detectorIDs.size() );
+    std::vector<double> distances( detectorIDs.size() );
+    std::vector<int> isMonitor ( detectorIDs.size() );
+    std::vector<int> isMasked ( detectorIDs.size() );
     for (int i=0; i < detectorIDs.size(); i++)
     {
       angles[i] = detectors[i]->getPhi();
+      distances[i] = detectors[i]->getDistance( *getInstrument()->getSample());
+      isMonitor[i] = ( detectors[i]->isMonitor()? 1 : 0);
+      isMasked[i] = ( detectors[i]->isMasked()? 1 : 0);
     }
     file->writeData("Angles", angles);
+    file->writeData("Distances", distances);
+    file->writeData("isMonitor", isMonitor);
+    file->writeData("isMasked", isMasked );
     file->closeGroup(); // Detector_IDs
     file->closeGroup(); // new_group
 
