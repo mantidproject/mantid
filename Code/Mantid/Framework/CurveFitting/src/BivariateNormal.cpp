@@ -47,33 +47,18 @@ DECLARE_FUNCTION(BivariateNormal)
 
 Kernel::Logger& BivariateNormal::g_log= Kernel::Logger::get("BivariateNormal");
 
-BivariateNormal::BivariateNormal():UserFunction()//IFunctionMW()//BackgroundFunction()
+BivariateNormal::BivariateNormal() : UserFunction(), expVals(NULL),
+        BackConstraint(NULL), MeanxConstraint(NULL), MeanyConstraint(NULL), IntensityConstraint(NULL)
 {
   LastParams[IVXX] = -1;
-  expVals = 0;
-
- // g_log.setLevel(7);//debug level
 }
 
 BivariateNormal::~BivariateNormal()
 {
-  if (!expVals)
-    delete[] expVals;
+  delete [] expVals;
+}
 
-  if (!BackConstraint)
-    delete BackConstraint;
-
-  if (!MeanxConstraint)
-      delete MeanxConstraint;
-
-  if (!MeanyConstraint)
-      delete MeanyConstraint;
-
-  if (!IntensityConstraint)
-      delete IntensityConstraint;
-
- }
-    // overwrite IFunction base class methods
+// overwrite IFunction base class methods
 
  void BivariateNormal::functionMW(double *out, const double *xValues, const size_t nData) const
  {
@@ -90,8 +75,6 @@ BivariateNormal::~BivariateNormal()
    MantidVec Y = ws->dataY(2);
 
    initCoeff(D, X, Y, coefNorm, expCoeffx2, expCoeffy2, expCoeffxy, NCells);
-
-   NCells = std::min<int>(nData, nCells);
 
    double Background = getParameter(IBACK);
    double Intensity = getParameter(ITINTENS);
@@ -124,8 +107,6 @@ BivariateNormal::~BivariateNormal()
        }
 
      }
-     double diff = out[x]-Y[x];
-     chiSq +=diff*diff;
 
      x++;
    }
@@ -235,7 +216,7 @@ void BivariateNormal::init()
 }
 
 void BivariateNormal::initCommon()
-{
+ {
 
   bool ParamsOK = true;
   bool CommonsOK = true;
@@ -399,13 +380,13 @@ void BivariateNormal::initCommon()
     int NCells1;
     initCoeff( D, X, Y, coefNorm,  expCoeffx2, expCoeffy2,  expCoeffxy,
                    NCells1);
-    if( expVals)
-      delete expVals;
 
+    delete [] expVals;
     expVals = new double[NCells];
-    
+
     for( int i=0; i< NCells;i++)
       {
+
         double dx = X[i] - LastParams[IXMEAN];
         double dy = Y[i] - LastParams[IYMEAN];
         expVals[i] = exp(expCoeffx2 * dx * dx + expCoeffxy * dx * dy + expCoeffy2 * dy * dy);
@@ -413,7 +394,8 @@ void BivariateNormal::initCommon()
       }
 
   }
-}
+
+  }
 
 void BivariateNormal::initCoeff( MantidVec &D,
                                  MantidVec &X,
