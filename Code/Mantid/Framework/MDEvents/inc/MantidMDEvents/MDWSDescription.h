@@ -2,6 +2,7 @@
 #define H_MDEVENT_WS_DESCRIPTION
 
 #include "MantidMDEvents/MDEvent.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -12,7 +13,7 @@ namespace MDEvents
 {
  /**  Lighteweith class wrapping together all parameters, related to MDEventoWorkspace description used mainly to reduce number of parameters trasferred between 
     * an algorithm, creating MD workspace and UI.
-    * It also defines some auxiliary functions, used for convenient description of MD workspace e.g. 
+    * It also defines some auxiliary functions, used for convenient description of MD workspace, see below. 
     *   
         
     @date 2011-28-12
@@ -45,6 +46,8 @@ namespace MDEvents
      MDWSDescription():n_dims(0),emode(-1),Ei(std::numeric_limits<double>::quiet_NaN()){};
      /// mainly test constructor;
      MDWSDescription(size_t nDimesnions);
+     /// function build MD Event description from existing workspace
+     void build_from_MDWS(const API::IMDEventWorkspace_const_sptr &pWS);
     /// the variable which describes the number of the dimensions, in the target workspace. 
     /// Calculated from number of input properties and the operations, performed on input workspace;
     size_t n_dims;
@@ -63,7 +66,7 @@ namespace MDEvents
     /// the swich, specifying if the target Q3D -dimensions should be converted to hkl. Ignored in ModQ and NoQ mode and if no oriented lattice is found in input ws. 
     bool convert_to_hkl;
     /** vectors, which describe the projection plain the target ws is based on (notional coordinate system). The transformation matrix below 
-      * should bring the momentums from lab coordinate system into notional coordinate system */
+      * should bring the momentums from lab coordinate system into orthogonal, related to u,v vectors, coordinate system */
     Kernel::V3D u,v;
     /// the indicator, informing if the uv plain has been set as a parameter. If they are not, the UB matrix from the source workspace is be used uncnanged
     bool is_uv_default;

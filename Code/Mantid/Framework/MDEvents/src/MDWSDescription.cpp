@@ -6,6 +6,23 @@ namespace Mantid
 {
 namespace MDEvents
 {
+/** the function builds MD event WS description from existing workspace. 
+  * Primary used to 
+*/
+void 
+MDWSDescription::build_from_MDWS(const API::IMDEventWorkspace_const_sptr &pWS)
+{
+    this->n_dims = pWS->getNumDims();
+    // prepare all arrays:
+    this->dim_min.resize(n_dims);
+    this->dim_max.resize(n_dims);
+    this->dim_names.resize(n_dims);
+    this->dim_IDs.resize(n_dims);
+    this->dim_units.resize(n_dims);   
+
+
+
+}
 
 /** function verifies the consistency of the min and max dimsnsions values  checking if all necessary 
  * values vere defined and min values are smaller then mav values */
