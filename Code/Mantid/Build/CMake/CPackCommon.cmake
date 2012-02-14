@@ -7,10 +7,11 @@ set ( CPACK_PACKAGE_DESCRIPTION_SUMMARY "Neutron Scattering Data Analysis" )
 set ( CPACK_PACKAGE_VENDOR "ISIS Rutherford Appleton Laboratory and NScD Oak Ridge National Laboratory" )
 set ( CPACK_PACKAGE_URL http://www.mantidproject.org/ )
 set ( CPACK_PACKAGE_CONTACT mantid-help@mantidproject.org )
-set ( CPACK_PACKAGE_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${MtdVersion_WC_LAST_CHANGED_REV} )
+include ( PatchVersionNumber )
+set ( CPACK_PACKAGE_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH} )
 set ( CPACK_PACKAGE_VERSION_MAJOR ${VERSION_MAJOR} )
 set ( CPACK_PACKAGE_VERSION_MINOR ${VERSION_MINOR} )
-set ( CPACK_PACKAGE_VERSION_PATCH ${MtdVersion_WC_LAST_CHANGED_REV} )
+set ( CPACK_PACKAGE_VERSION_PATCH ${VERSION_PATCH} )
 
 if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows") # To avoid breaking Windows vates packaging
   set ( CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX} )
