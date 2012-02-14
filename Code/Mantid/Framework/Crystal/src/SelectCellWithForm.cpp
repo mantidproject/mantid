@@ -89,7 +89,7 @@ namespace Crystal
     mustBePositive->setLower(1);
 
     this->declareProperty(
-          new PropertyWithValue<int>("FormNumber",0,mustBePositive->clone(),Direction::Input),
+          new PropertyWithValue<int>("FormNumber",0,mustBePositive,Direction::Input),
          "Form number for the desired cell");
     this->declareProperty( "Apply", false, "Update UB and re-index the peaks");
     this->declareProperty( "Tolerance", 0.12, "Indexing Tolerance");
