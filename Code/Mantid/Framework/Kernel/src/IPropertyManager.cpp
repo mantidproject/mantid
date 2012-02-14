@@ -23,6 +23,7 @@ DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<int64_t>);
 DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<uint64_t>);
 DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<double>);
 DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<std::string>);
+DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<std::vector<std::string> >);
 
 namespace Mantid
 {

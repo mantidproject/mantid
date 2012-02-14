@@ -16,6 +16,8 @@ template DLLExport class ArrayProperty<size_t>;
 template DLLExport class ArrayProperty<double>;
 template DLLExport class ArrayProperty<std::string>;
 
+template DLLExport class ArrayProperty<std::vector<std::string> >;
+
 /// @endcond
 
 } // namespace Kernel

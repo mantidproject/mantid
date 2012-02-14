@@ -632,7 +632,8 @@ namespace MDAlgorithms
    */
   void MergeMDFiles::exec()
   {
-    m_filenames = getProperty("Filenames");
+    MultipleFileProperty * multiFileProp = dynamic_cast<MultipleFileProperty*>(getPointerToProperty("Filenames"));
+    m_filenames = MultipleFileProperty::flattenFileNames(multiFileProp->operator()());
     if (m_filenames.size() == 0)
       throw std::invalid_argument("Must specify at least one filename.");
     std::string firstFile = m_filenames[0];

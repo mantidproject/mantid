@@ -208,7 +208,7 @@ namespace Kernel
       // Get the directory, if there is one.
       size_t lastSeparator = m_multiFileName.find_last_of("/\\");
       if(lastSeparator != std::string::npos)
-        m_dirString = m_multiFileName.substr(0, lastSeparator);
+        m_dirString = m_multiFileName.substr(0, lastSeparator + 1);
 
       // Slice off the directory and extension.
       std::string base = m_multiFileName.substr(

@@ -1,9 +1,11 @@
 #ifndef MANTID_API_MULTIPLEFILEPROPERTY_H_
 #define MANTID_API_MULTIPLEFILEPROPERTY_H_
-    
-#include "MantidKernel/System.h"
-#include "MantidKernel/ArrayProperty.h"
 
+#include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/MultiFileNameParser.h"
+#include <vector>
+#include <set>
 
 namespace Mantid
 {
@@ -32,33 +34,40 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport MultipleFileProperty : public Kernel::ArrayProperty<std::string>
+  class DLLExport MultipleFileProperty : public Kernel::PropertyWithValue< std::vector< std::vector< std::string> > >
   {
   public:
-    MultipleFileProperty(const std::string & name, const std::vector<std::string> & exts = std::vector<std::string>(),
-        bool optional=false);
+    ///Constructor
+    MultipleFileProperty(const std::string & name,const std::vector<std::string> & exts = std::vector<std::string>());
 
     ~MultipleFileProperty();
 
-    ///Overridden setValue method
+    /// 'Virtual copy constructor
+    virtual MultipleFileProperty* clone() { return new MultipleFileProperty(*this); }
+
+    /// Overridden setValue method
     virtual std::string setValue(const std::string & propValue);
     /// Set a property value via a DataItem
     virtual std::string setValue(const boost::shared_ptr<Kernel::DataItem> data);
 
     /// @return the vector of suggested extensions. For use in GUIs showing files.
-    const std::set<std::string> & getExts() const
-    { return m_exts; }
+    std::set<std::string> getExts() const
+    { return std::set<std::string>(m_exts.begin(), m_exts.end()); }
+    /// @return the vector of ws names.  For use by loading algorithm to name multiple workspaces, especially summed workspaces.
+    std::vector<std::vector<unsigned int> > getRuns() const
+    { return m_parser.runs(); }
 
     // Unhide the PropertyWithValue assignment operator
-    using Kernel::ArrayProperty<std::string>::operator=;
+    using Kernel::PropertyWithValue< std::vector< std::vector< std::string> > >::operator=;
+
+    /// Return a "flattened" vector with the contents of the given vector of vectors.
+    static std::vector<std::string> flattenFileNames(const std::vector<std::vector<std::string> > & fileNames);
 
   private:
     /// Suggested extensions
-    std::set<std::string> m_exts;
-
-    /// Is the file optional?
-    bool m_optional;
-
+    std::vector<std::string> m_exts;
+    /// Parser used to parse multi-file strings.
+    Kernel::MultiFileNameParsing::Parser m_parser;
   };
 
 
