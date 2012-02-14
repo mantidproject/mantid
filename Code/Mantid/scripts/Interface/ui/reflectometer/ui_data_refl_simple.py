@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/reflectometer/data_refl_simple.ui'
 #
-# Created: Tue Feb 14 13:31:57 2012
+# Created: Tue Feb 14 14:04:49 2012
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -880,8 +880,8 @@ class Ui_Frame(object):
         self.data_from_tof.setObjectName("data_from_tof")
         self.horizontalLayout_9.addWidget(self.data_from_tof)
         self.tof_min_label2 = QtGui.QLabel(self.scrollAreaWidgetContents)
-        self.tof_min_label2.setMinimumSize(QtCore.QSize(70, 0))
-        self.tof_min_label2.setMaximumSize(QtCore.QSize(70, 16777215))
+        self.tof_min_label2.setMinimumSize(QtCore.QSize(50, 0))
+        self.tof_min_label2.setMaximumSize(QtCore.QSize(50, 16777215))
         self.tof_min_label2.setObjectName("tof_min_label2")
         self.horizontalLayout_9.addWidget(self.tof_min_label2)
         self.tof_max_label = QtGui.QLabel(self.scrollAreaWidgetContents)

@@ -2515,13 +2515,13 @@ Drag items to change the reduction order.</string>
                   <widget class="QLabel" name="tof_min_label2">
                    <property name="minimumSize">
                     <size>
-                     <width>70</width>
+                     <width>50</width>
                      <height>0</height>
                     </size>
                    </property>
                    <property name="maximumSize">
                     <size>
-                     <width>70</width>
+                     <width>50</width>
                      <height>16777215</height>
                     </size>
                    </property>
