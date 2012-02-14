@@ -327,7 +327,7 @@ class SNSPowderReduction2(PythonAlgorithm):
             whichones = {}
             whichones['MakeGroupingWorkspace'] = (not mtd.workspaceExists(self._instrument + "_group"))
             whichones['MakeOffsetsWorkspace'] = (not mtd.workspaceExists(self._instrument + "_offsets"))
-            whichones['MakeMaskWorkspace'] = (not mtd.workspaceExists(self._instrument + "_group"))
+            whichones['MakeMaskWorkspace'] = (not mtd.workspaceExists(self._instrument + "_mask"))
             LoadCalFile(InputWorkspace=wksp, CalFileName=calib, WorkspaceName=self._instrument,
                         **whichones)
 
@@ -596,12 +596,15 @@ class SNSPowderReduction2(PythonAlgorithm):
 
                     vbackRun = self.getProperty("VanadiumBackgroundNumber")
                     if vbackRun > 0:
-                        if self.getProperty("FilterCharacterizations"):
-                            vbackRun = self._focusChunks(vbackRun, SUFFIX, filterWall, calib,
-                               preserveEvents=False)
+                        if mtd.workspaceExists("%s_%d" % (self._instrument, vbackRun)):
+                            vbackRun = mtd["%s_%d" % (self._instrument, vbackRun)]
                         else:
-                            vbackRun = self._focusChunks(vbackRun, SUFFIX, (0., 0.), calib,
-                               preserveEvents=False)
+                            if self.getProperty("FilterCharacterizations"):
+                                vbackRun = self._focusChunks(vbackRun, SUFFIX, filterWall, calib,
+                                   preserveEvents=False)
+                            else:
+                                vbackRun = self._focusChunks(vbackRun, SUFFIX, (0., 0.), calib,
+                                   preserveEvents=False)
                         vanRun -= vbackRun
 
                     if self.getProperty("StripVanadiumPeaks"):
