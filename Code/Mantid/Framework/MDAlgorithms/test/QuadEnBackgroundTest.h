@@ -311,7 +311,7 @@ public:
      * uses the # of events normalization. This will cause a problem.
      * The following test fails, possibly because of that?
      */
-    void xtestGenericFitandCompositeFunctionMD()
+    void testGenericFitandCompositeFunctionMD()
      {
          // test GenericFit with Composite fucntionMD
          // Use same data as alg3 test above but with two functions to fit.

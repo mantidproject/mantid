@@ -53,7 +53,7 @@ void CompositeFunctionMD::function(double* out)const
     size_t nWS =  m_wsIndex[i].size();
     for(size_t k = 0;k < nWS; ++k)
     {
-      fun->setWorkspace(m_workspaces[k],"",false);
+      fun->setWorkspace(m_workspaces[k],"",true);
       size_t j = m_wsIndex[i][k];
       double *out1 = out + m_offset[j];
       double *tmp1 = tmpOut.get() + m_offset[j];
