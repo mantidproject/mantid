@@ -554,7 +554,7 @@ namespace DataHandling
     std::string value = "";
 
     // 2. Loop to find
-    for (size_t i = 0; i < att->length(); i ++){
+    for (unsigned long i = 0; i < att->length(); ++i){
       Poco::XML::Node* cNode = att->item(i);
       if (cNode->localName().compare(attributename) == 0){
         value = cNode->getNodeValue();

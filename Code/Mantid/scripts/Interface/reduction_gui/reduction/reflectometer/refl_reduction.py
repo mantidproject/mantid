@@ -20,7 +20,7 @@ class REFLReductionScripter(BaseReductionScripter):
             Spits out the text of a reduction script with the current state.
             @param file_name: name of the file to write the script to
         """
-        script = "# REF_L reduction script\n"
+        script = "# %s reduction script\n" % self.instrument_name
         script += "# Script automatically generated on %s\n\n" % time.ctime(time.time())
         
         script += "from MantidFramework import *\n"

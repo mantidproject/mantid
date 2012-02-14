@@ -320,6 +320,79 @@ namespace MDEvents
     }
 
 
+    //---------------------------------------------------------------------------------------------
+    /** Put a slab of MDEvent data into the nexus file.
+     * This is reused by both MDEvent and MDLeanEvent
+     *
+     * If needed, coerce it to the format of the output file (for old
+     * .nxs files in doubles)
+     *
+     * @param file :: open NXS file.
+     * @param data :: pointer to the numEvents*numColumn-sized array of data
+     *        This gets deleted by this method!
+     * @param startIndex :: index in the array to start saving to
+     * @param numEvents :: number of events to save.
+     * @param numColumns :: how many columns in the data set (depends on the data type)
+     */
+    static inline void putDataInNexus(::NeXus::File * file,
+        coord_t * data, const uint64_t startIndex,
+        const uint64_t numEvents, const size_t numColumns)
+    {
+      //TODO: WARNING NEXUS NEEDS TO BE UPDATED TO USE 64-bit ints on Windows.
+      std::vector<int> start(2,0);
+      start[0] = int(startIndex);
+
+      // Specify the dimensions
+      std::vector<int> dims;
+      dims.push_back(int(numEvents));
+      dims.push_back(int(numColumns));
+
+      // C-style call is much faster than the C++ call.
+      int dims_ignored[NX_MAXRANK];
+      int type = ::NeXus::FLOAT32;
+      int rank = 0;
+      NXgetinfo(file->getHandle(), &rank, dims_ignored, &type);
+
+      if (type == ::NeXus::FLOAT64)
+      {
+        // Handle file-backed OLD files that are in doubles.
+
+        // Convert the floats to doubles
+        size_t dataSize = (numEvents*numColumns);
+        double * dblData = new double[dataSize];
+        for (size_t i=0; i<dataSize;i++)
+          dblData[i] = static_cast<double>(data[i]);
+        delete [] data;
+
+        // And save as doubles
+        try
+        {
+          file->putSlab(dblData, start, dims);
+        }
+        catch (std::exception &)
+        {
+          delete [] dblData;
+          throw;
+        }
+
+        delete [] dblData;
+      }
+      else
+      {
+        /* ------------- Normal files, saved in floats -------- */
+        try
+        {
+          file->putSlab(data, start, dims);
+        }
+        catch (std::exception &)
+        {
+          delete [] data;
+          throw;
+        }
+        delete [] data;
+      }
+
+    }
 
     //---------------------------------------------------------------------------------------------
     /** Static method to save a vector of MDEvents of this type to a nexus file
@@ -339,11 +412,8 @@ namespace MDEvents
         signal_t & totalSignal, signal_t & totalErrorSquared)
     {
       size_t numEvents = events.size();
-      coord_t * data = new coord_t[numEvents*(nd+2)];
-
-      //TODO: WARNING NEXUS NEEDS TO BE UPDATED TO USE 64-bit ints on Windows.
-      std::vector<int> start(2,0);
-      start[0] = int(startIndex);
+      size_t numColumns = nd+2;
+      coord_t * data = new coord_t[numEvents*numColumns];
 
       totalSignal = 0;
       totalErrorSquared = 0;
@@ -365,39 +435,26 @@ namespace MDEvents
         totalErrorSquared += signal_t(errorSquared);
       }
 
-      // Specify the dimensions
-      std::vector<int> dims;
-      dims.push_back(int(numEvents));
-      dims.push_back(int(nd+2));
+      putDataInNexus(file, data, startIndex, numEvents, numColumns);
 
-      try
-      {
-        file->putSlab(data, start, dims);
-      }
-      catch (std::exception &)
-      {
-        delete [] data;
-        throw;
-      }
-
-      delete [] data;
     }
 
     //---------------------------------------------------------------------------------------------
-    /** Static method to load part of a HDF block into a vector of MDEvents.
-     * The data block MUST be already open, using e.g. openNexusData()
+    /** Get a slab of MDEvent data out of the nexus file.
+     * This is reused by both MDEvent and MDLeanEvent
      *
-     * This will be re-implemented by any other MDLeanEvent-like type.
+     * If needed, coerce it to the desired output data type (coord_t)
      *
-     * @param events :: reference to the vector of events to load. This is NOT cleared by the method before loading.
      * @param file :: open NXS file.
      * @param indexStart :: index (in events) in the data field to start at
      * @param numEvents :: number of events to load.
-     * */
-    static void loadVectorFromNexusSlab(std::vector<MDLeanEvent<nd> > & events, ::NeXus::File * file, uint64_t indexStart, uint64_t numEvents)
+     * @param numColumns :: how many columns in the data set (depends on the data type)
+     * @return a pointer to the allocated data array. Must be deleted by caller.
+     */
+    static inline coord_t * getDataFromNexus(::NeXus::File * file,
+        uint64_t indexStart, uint64_t numEvents,
+        size_t numColumns)
     {
-      if (numEvents == 0)
-        return;
 
       // Start/size descriptors
       std::vector<int> start(2,0);
@@ -405,18 +462,20 @@ namespace MDEvents
 
       std::vector<int> size(2,0);
       size[0] = int(numEvents);
-      size[1] = nd+2;
+      size[1] = int(numColumns);
 
       // Allocate the data
-      size_t dataSize = numEvents*(nd+2);
+      size_t dataSize = numEvents*(numColumns);
       coord_t * data = new coord_t[dataSize];
 
-#ifdef COORDT_IS_FLOAT
       // C-style call is much faster than the C++ call.
       int dims[NX_MAXRANK];
       int type = ::NeXus::FLOAT32;
       int rank = 0;
       NXgetinfo(file->getHandle(), &rank, dims, &type);
+
+#ifdef COORDT_IS_FLOAT
+      /* coord_t is a single-precision float */
       if (type == ::NeXus::FLOAT64)
       {
         // Handle old files that are recorded in DOUBLEs to load as FLOATS
@@ -431,24 +490,47 @@ namespace MDEvents
         // Get the slab into the allocated data
         file->getSlab(data, start, size);
       }
-#else /* coord_t is double */
-      if (file->getInfo().type == ::NeXus::FLOAT32)
+#else
+      /* coord_t is double */
+      if (type == ::NeXus::FLOAT32)
         throw std::runtime_error("The .nxs file's data is set as FLOATs but Mantid was compiled to work with data (coord_t) as doubles. Cannot load this file");
 
       // Get the slab into the allocated data
       file->getSlab(data, start, size);
 #endif
+      return data;
+    }
 
+    //---------------------------------------------------------------------------------------------
+    /** Static method to load part of a HDF block into a vector of MDEvents.
+     * The data block MUST be already open, using e.g. openNexusData()
+     *
+     * This will be re-implemented by any other MDLeanEvent-like type.
+     *
+     * @param events :: reference to the vector of events to load. This is NOT cleared by the method before loading.
+     * @param file :: open NXS file.
+     * @param indexStart :: index (in events) in the data field to start at
+     * @param numEvents :: number of events to load.
+     * */
+    static void loadVectorFromNexusSlab(std::vector<MDLeanEvent<nd> > & events, ::NeXus::File * file,
+        uint64_t indexStart, uint64_t numEvents)
+    {
+      if (numEvents == 0)
+        return;
+
+      // Number of columns = number of dimensions + 2 (signal/error)
+      size_t numColumns = nd+2;
+      // Load the data
+      coord_t * data = getDataFromNexus(file, indexStart, numEvents, numColumns);
 
       // Reserve the amount of space needed. Significant speed up (~30% thanks to this)
       events.reserve( events.size() + numEvents);
       for (size_t i=0; i<numEvents; i++)
       {
         // Index into the data array
-        size_t ii = i*(nd+2);
+        size_t ii = i*numColumns;
 
         // Point directly into the data block for the centers.
-        // WARNING: coord_t type must be same as double for this to work!
         coord_t * centers = data + ii+2;
 
         // Create the event with signal, error squared, and the centers

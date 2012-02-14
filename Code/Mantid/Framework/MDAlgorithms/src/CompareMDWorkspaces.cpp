@@ -265,7 +265,7 @@ namespace MDAlgorithms
               }
             }
           }
-          catch (CompareFailsException & e)
+          catch (CompareFailsException&)
           {
             // Boxes must release events if the check fails
             mdbox1->releaseEvents();

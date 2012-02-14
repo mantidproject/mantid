@@ -104,7 +104,7 @@ void ApplyDeadTimeCorr::exec()
 
                     setProperty("OutputWorkspace", outputWs);
                 }
-                catch(std::runtime_error& ex)
+                catch(std::runtime_error&)
                 {
                     throw std::invalid_argument("Invalid argument for algorithm.");
                 }

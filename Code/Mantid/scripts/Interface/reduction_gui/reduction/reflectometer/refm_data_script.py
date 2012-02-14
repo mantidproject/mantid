@@ -10,18 +10,16 @@ from reduction_gui.reduction.scripter import BaseScriptElement
 
 class DataSets(BaseScriptElement):
 
-    DataPeakSelectionType = 'narrow'
-    DataPeakPixels = [120, 130]
-    DataPeakDiscreteSelection = 'N/A'
+    DataPeakPixels = [215, 225]
     DataBackgroundFlag = False
     DataBackgroundRoi = [115, 137,123, 137]
-    DataTofRange = [9600., 21600.]
+    DataTofRange = [10700., 24500.]
     
     data_x_range_flag = True
     data_x_range = [115,210]
     
     norm_x_range_flag = True
-    norm_x_range = [115,210]
+    norm_x_range = [90, 160]
 
     NormFlag = True
     NormPeakPixels = [120, 130]
@@ -29,17 +27,17 @@ class DataSets(BaseScriptElement):
     NormBackgroundRoi = [115, 137]
 
     # Data files
-    #data_files = [66421]
-    #norm_file = 66196
     data_files = [0]
     norm_file = 0
     
     # Q range
-    q_min = 0.001
-    q_step = 0.001
+    q_min = 0.0025
+    q_step = -0.01
     
     # scattering angle
     theta = 0.0
+    center_pixel = 220
+    use_center_pixel = False
 
     def __init__(self):
         super(DataSets, self).__init__()
@@ -67,15 +65,17 @@ class DataSets(BaseScriptElement):
         script += "              QStep=%s,\n" % str(self.q_step)
         
         # Angle offset
-        if self.theta != 0.0:
+        if self.use_center_pixel:
+            script += "              CenterPixel=%s,\n" % str(self.center_pixel)
+        else:
             script += "              Theta=%s,\n" % str(self.theta)
             
         # The output should be slightly different if we are generating
         # a script for the automated reduction
         if for_automated_reduction:
-            script += "              OutputWorkspace='reflectivity_'+%s)" % str(self.data_files[0])
+            script += "              OutputWorkspace='reflectivity_Off_Off_'+%s)" % str(self.data_files[0])
         else:
-            script += "              OutputWorkspace='reflectivity_%s')" % str(self.data_files[0])
+            script += "              OutputWorkspace='reflectivity_Off_Off_%s')" % str(self.data_files[0])
         script += "\n"
 
         return script
@@ -91,10 +91,8 @@ class DataSets(BaseScriptElement):
             Create XML from the current data.
         """
         xml  = "<RefMData>\n"
-        xml += "<peak_selection_type>%s</peak_selection_type>\n" % self.DataPeakSelectionType
         xml += "<from_peak_pixels>%s</from_peak_pixels>\n" % str(self.DataPeakPixels[0])
         xml += "<to_peak_pixels>%s</to_peak_pixels>\n" % str(self.DataPeakPixels[1])
-        xml += "<peak_discrete_selection>%s</peak_discrete_selection>\n" % self.DataPeakDiscreteSelection
         xml += "<background_flag>%s</background_flag>\n" % str(self.DataBackgroundFlag)
         xml += "<back_roi1_from>%s</back_roi1_from>\n" % str(self.DataBackgroundRoi[0])
         xml += "<back_roi1_to>%s</back_roi1_to>\n" % str(self.DataBackgroundRoi[1])
@@ -125,6 +123,8 @@ class DataSets(BaseScriptElement):
         
         # Scattering angle
         xml += "<theta>%s</theta>\n" % str(self.theta)
+        xml += "<center_pixel>%s</center_pixel>\n" % str(self.center_pixel)
+        xml += "<use_center_pixel>%s</use_center_pixel>\n" % str(self.use_center_pixel)
         
         xml += "</RefMData>\n"
 
@@ -143,9 +143,6 @@ class DataSets(BaseScriptElement):
             Read in data from XML
             @param xml_str: text to read the data from
         """   
-        #Peak selection
-        self.DataPeakSelectionType = BaseScriptElement.getStringElement(instrument_dom, "peak_selection_type")
-        
         #Peak from/to pixels
         self.DataPeakPixels = [BaseScriptElement.getIntElement(instrument_dom, "from_peak_pixels"),
                                BaseScriptElement.getIntElement(instrument_dom, "to_peak_pixels")]
@@ -209,15 +206,17 @@ class DataSets(BaseScriptElement):
     
         # scattering angle
         self.theta = BaseScriptElement.getFloatElement(instrument_dom, "theta", default=DataSets.theta)
+        self.center_pixel = BaseScriptElement.getFloatElement(instrument_dom, "center_pixel", default=DataSets.center_pixel)
+        self.use_center_pixel = BaseScriptElement.getBoolElement(instrument_dom, 
+                                                                 "use_center_pixel", 
+                                                                 default=DataSets.use_center_pixel)
         
     def reset(self):
         """
             Reset state
         """
-        self.DataPeakSelectionType = DataSets.DataPeakSelectionType
         self.DataBackgroundFlag = DataSets.DataBackgroundFlag
         self.DataBackgroundRoi = DataSets.DataBackgroundRoi
-        self.DataPeakDiscreteSelection = DataSets.DataPeakDiscreteSelection
         self.DataPeakPixels = DataSets.DataPeakPixels
         self.DataTofRange = DataSets.DataTofRange
         self.data_files = DataSets.data_files
@@ -238,3 +237,5 @@ class DataSets(BaseScriptElement):
         
         # Scattering angle
         self.theta = DataSets.theta
+        self.center_pixel = DataSets.center_pixel
+        self.use_center_pixel = DataSets.use_center_pixel

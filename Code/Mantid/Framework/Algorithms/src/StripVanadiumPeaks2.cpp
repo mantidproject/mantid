@@ -53,7 +53,7 @@ DECLARE_ALGORITHM(StripVanadiumPeaks2)
       "If the input workspace is an EventWorkspace, then the output must be different (and will be made into a Workspace2D)." );
 
     BoundedValidator<int> *min = new BoundedValidator<int>();
-    min->setLower(1.0);
+    min->setLower(1);
     // The estimated width of a peak in terms of number of channels
     declareProperty("FWHM", 7, min,
       "The number of points covered, on average, by the fwhm of a peak. Passed through to FindPeaks. Default 7." );

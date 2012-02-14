@@ -1,10 +1,8 @@
 #ifndef MANTID_DATAHANDLING_LOADMASKINGFILE_H_
 #define MANTID_DATAHANDLING_LOADMASKINGFILE_H_
 
-#include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace.h"
-
+#include "MantidAPI/DeprecatedAlgorithm.h"
+#include "MantidDataHandling/LoadMask.h"
 
 namespace Mantid
 {
@@ -13,10 +11,9 @@ namespace DataHandling
 
   /** LoadMaskingFile : TODO: DESCRIPTION
     
-    @author
-    @date 2011-11-02
+    @date 2012-02-14
 
-    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -36,85 +33,17 @@ namespace DataHandling
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport LoadMaskingFile : public API::Algorithm
+  class DLLExport LoadMaskingFile : public DataHandling::LoadMask, public API::DeprecatedAlgorithm
   {
   public:
     LoadMaskingFile();
-    ~LoadMaskingFile();
+    virtual ~LoadMaskingFile();
+    /// Algorithm's name for identification overriding a virtual method
+    virtual const std::string name() const {return "LoadMaskingFile";};
+
+    /// Algorithm's version for identification overriding a virtual method
+    virtual int version() const {return 1;};
     
-    /// Algorithm's name for identification
-    virtual const std::string name() const { return "LoadMaskingFile";};
-    /// Algorithm's version for identification
-    virtual int version() const { return 1;};
-    /// Algorithm's category for identification
-    virtual const std::string category() const { return "DataHandling;Transforms\\Masking";}
-
-  private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
-    /// Initialise the properties
-    void init();
-    /// Run the algorithm
-    void exec();
-    /// Initialize XML parser
-    void initializeXMLParser(const std::string & filename);
-    /// Parse XML
-    void parseXML();
-    /// Convert value to data
-    void parseComponent(std::string valuetext, bool tomask);
-    /// Convert value to detector ids
-    void parseDetectorIDs(std::string inputstr, bool tomask);
-    /// Convert value to spectrum ids
-    void parseSpectrumIDs(std::string inputstr, bool tomask);
-    /// Split a string
-    void splitString(std::string inputstr, std::vector<std::string>& strings, std::string sep);
-    /// Split and convert string
-    void parseRangeText(std::string inputstr, std::vector<int32_t>& singles, std::vector<int32_t>& pairs);
-    /// Initialize a Mask Workspace
-    void intializeMaskWorkspace();
-    /// Convert component to detectors
-    void componentToDetectors(std::vector<std::string> componentnames, std::vector<int32_t>& detectors);
-    /// Convert bank to detector
-    void bankToDetectors(std::vector<std::string> singlebanks,
-        std::vector<int32_t>& detectors, std::vector<int32_t>& detectorpairslow, std::vector<int32_t>& detectorpairsup);
-    /// Convert spectrum to detector
-    void spectrumToDetectors(std::vector<int32_t> singles, std::vector<int32_t> pairslow, std::vector<int32_t> pairsup,
-        std::vector<int32_t>& detectors, std::vector<int32_t>& detectorpairslow, std::vector<int32_t>& detectorpairsup);
-    /// Convert input detector to detector
-    void detectorToDetectors(std::vector<int32_t> singles, std::vector<int32_t> pairslow, std::vector<int32_t> pairsup,
-        std::vector<int32_t>& detectors, std::vector<int32_t>& detectorpairslow, std::vector<int32_t>& detectorpairsup);
-    void processMaskOnDetectors(bool tomask, std::vector<int32_t> singledetids, std::vector<int32_t> pairdetids_low,
-        std::vector<int32_t> pairdetids_up);
-    void initDetectors();
-
-    /// Mask Workspace
-    API::MatrixWorkspace_sptr mMaskWS;
-    /// Instrument name
-    std::string mInstrumentName;
-    /// XML document loaded
-    Poco::XML::Document* pDoc;
-    /// Root element of the parsed XML
-    Poco::XML::Element* pRootElem;
-
-    /// Default setup.  If true, not masking, but use the pixel
-    bool mDefaultToUse;
-
-    std::vector<int32_t> mask_detid_single;
-    std::vector<int32_t> mask_specid_single;
-    std::vector<int32_t> mask_detid_pair_low;
-    std::vector<int32_t> mask_specid_pair_low;
-    std::vector<int32_t> mask_detid_pair_up;
-    std::vector<int32_t> mask_specid_pair_up;
-    std::vector<std::string> mask_bankid_single;
-
-    std::vector<int32_t> unmask_detid_single;
-    std::vector<int32_t> unmask_specid_single;
-    std::vector<int32_t> unmask_detid_pair_low;
-    std::vector<int32_t> unmask_specid_pair_low;
-    std::vector<int32_t> unmask_detid_pair_up;
-    std::vector<int32_t> unmask_specid_pair_up;
-    std::vector<std::string> unmask_bankid_single;
-
   };
 
 

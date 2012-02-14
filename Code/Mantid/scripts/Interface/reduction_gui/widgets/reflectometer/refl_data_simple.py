@@ -73,6 +73,7 @@ class DataReflWidget(BaseWidget):
         self._summary.q_step_edit.setValidator(QtGui.QDoubleValidator(self._summary.q_step_edit))
         
         self._summary.angle_edit.setValidator(QtGui.QDoubleValidator(self._summary.angle_edit))
+        self._summary.center_pix_edit.setValidator(QtGui.QDoubleValidator(self._summary.center_pix_edit))
         
         self._summary.angle_offset_edit.setValidator(QtGui.QDoubleValidator(self._summary.angle_offset_edit))
         self._summary.angle_offset_error_edit.setValidator(QtGui.QDoubleValidator(self._summary.angle_offset_error_edit))
@@ -90,6 +91,7 @@ class DataReflWidget(BaseWidget):
         self.connect(self._summary.data_background_switch, QtCore.SIGNAL("clicked(bool)"), self._data_background_clicked)
         self.connect(self._summary.tof_range_switch, QtCore.SIGNAL("clicked(bool)"), self._tof_range_clicked)
         self.connect(self._summary.plot_count_vs_y_btn, QtCore.SIGNAL("clicked()"), self._plot_count_vs_y)
+        self.connect(self._summary.plot_count_vs_x_btn, QtCore.SIGNAL("clicked()"), self._plot_count_vs_x)
         self.connect(self._summary.plot_tof_btn, QtCore.SIGNAL("clicked()"), self._plot_tof)
         self.connect(self._summary.add_dataset_btn, QtCore.SIGNAL("clicked()"), self._add_data)
         self.connect(self._summary.angle_list, QtCore.SIGNAL("itemSelectionChanged()"), self._angle_changed)
@@ -100,6 +102,12 @@ class DataReflWidget(BaseWidget):
         self._auto_reduce(False)
         self.connect(self._summary.auto_reduce_check, QtCore.SIGNAL("clicked(bool)"), self._auto_reduce)
         self.connect(self._summary.auto_reduce_btn, QtCore.SIGNAL("clicked()"), self._create_auto_reduce_template)
+        
+        # Set up the scattering angle options
+        self._summary.angle_radio.setChecked(True)
+        self._scattering_angle_changed()
+        self.connect(self._summary.angle_radio, QtCore.SIGNAL("clicked()"), self._scattering_angle_changed)
+        self.connect(self._summary.center_pix_radio, QtCore.SIGNAL("clicked()"), self._scattering_angle_changed)
         
         # Get instrument selection
         if self.short_name == "REFL": 
@@ -115,10 +123,20 @@ class DataReflWidget(BaseWidget):
         if not os.path.isdir("/SNS/%s" % self.instrument_name):
             self._summary.auto_reduce_check.hide()
         
+    def _scattering_angle_changed(self):
+        if self._summary.center_pix_radio.isChecked():
+            self._summary.angle_edit.setEnabled(False)
+            self._summary.center_pix_edit.setEnabled(True)
+        else:
+            self._summary.angle_edit.setEnabled(True)
+            self._summary.center_pix_edit.setEnabled(False)
+    
     def _ref_instrument_selected(self):
         if self._summary.refl_radio.isChecked():
             self.instrument_name = "REF_L"
-            self._summary.angle_label.hide()
+            self._summary.center_pix_radio.hide()
+            self._summary.center_pix_edit.hide()
+            self._summary.angle_radio.hide()
             self._summary.angle_edit.hide()
             self._summary.angle_unit_label.hide()
             self._summary.angle_offset_label.show()
@@ -128,7 +146,9 @@ class DataReflWidget(BaseWidget):
             self._summary.angle_offset_unit_label.show()
         else:
             self.instrument_name = "REF_M"
-            self._summary.angle_label.show()
+            self._summary.center_pix_radio.show()
+            self._summary.center_pix_edit.show()
+            self._summary.angle_radio.show()
             self._summary.angle_edit.show()
             self._summary.angle_unit_label.show()
             self._summary.angle_offset_label.hide()
@@ -330,6 +350,11 @@ class DataReflWidget(BaseWidget):
         self._summary.plot_tof_btn.setEnabled(is_checked)
 
     def _plot_count_vs_y(self):
+        """
+            Plot counts as a function of high-resolution pixels
+            For REFM, this is X
+            For REFL, this is Y
+        """
         if not IS_IN_MANTIDPLOT:
             return
         
@@ -339,7 +364,30 @@ class DataReflWidget(BaseWidget):
             def call_back(xmin, xmax):
                 self._summary.data_peak_from_pixel.setText("%-d" % int(xmin))
                 self._summary.data_peak_to_pixel.setText("%-d" % int(xmax))
-            data_manipulation.counts_vs_y_distribution(f[0], call_back)
+            is_pixel_y = True
+            if self.short_name == "REFM":
+                is_pixel_y = False
+            data_manipulation.counts_vs_pixel_distribution(f[0], is_pixel_y=is_pixel_y, callback=call_back)
+                
+    def _plot_count_vs_x(self):
+        """
+            Plot counts as a function of low-resolution pixels
+            For REFM, this is Y
+            For REFL, this is X
+        """
+        if not IS_IN_MANTIDPLOT:
+            return
+        
+        f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(self._summary.data_run_number_edit.text())))
+
+        if len(f)>0 and os.path.isfile(f[0]):
+            def call_back(xmin, xmax):
+                self._summary.x_min_edit.setText("%-d" % int(xmin))
+                self._summary.x_max_edit.setText("%-d" % int(xmax))
+            is_pixel_y = False
+            if self.short_name == "REFM":
+                is_pixel_y = True
+            data_manipulation.counts_vs_pixel_distribution(f[0], is_pixel_y=is_pixel_y, callback=call_back)
                 
     def _plot_tof(self):
         if not IS_IN_MANTIDPLOT:
@@ -416,11 +464,13 @@ class DataReflWidget(BaseWidget):
         self._summary.data_low_res_range_switch.setChecked(state.data_x_range_flag)
         self._summary.x_min_edit.setText(str(state.data_x_range[0]))
         self._summary.x_max_edit.setText(str(state.data_x_range[1]))
+        self._data_low_res_clicked(state.data_x_range_flag)
         
         #norm low resolution range
         self._summary.norm_low_res_range_switch.setChecked(state.norm_x_range_flag)
         self._summary.norm_x_min_edit.setText(str(state.norm_x_range[0]))
         self._summary.norm_x_max_edit.setText(str(state.norm_x_range[1]))
+        self._norm_low_res_clicked(state.data_x_range_flag)
         
         #Background flag
         self._summary.data_background_switch.setChecked(state.DataBackgroundFlag)
@@ -455,11 +505,16 @@ class DataReflWidget(BaseWidget):
         #self._summary.q_min_edit.setText(str(state.q_min))
         #self._summary.log_scale_chk.setChecked(state.q_step<0)
         #self._summary.q_step_edit.setText(str(math.fabs(state.q_step)))
-        
 
         # Scattering angle
-        if hasattr(state, "theta"):
-            self._summary.angle_edit.setText(str(state.theta))
+        if hasattr(state, "use_center_pixel"):
+            if state.use_center_pixel:
+                self._summary.center_pix_edit.setText(str(state.center_pixel))
+                self._summary.center_pix_radio.setChecked(True)
+            else:
+                self._summary.angle_edit.setText(str(state.theta))
+                self._summary.angle_radio.setChecked(True)
+            self._scattering_angle_changed()
 
     def get_state(self):
         """
@@ -555,8 +610,14 @@ class DataReflWidget(BaseWidget):
         #    m.q_step = -m.q_step
 
         # Scattering angle
-        if hasattr(m, "theta"):
-            m.theta = float(self._summary.angle_edit.text())
+        if self._summary.center_pix_radio.isChecked():
+            if hasattr(m, "center_pixel"):
+                m.center_pixel = float(self._summary.center_pix_edit.text())
+                m.use_center_pixel = True
+        else:
+            if hasattr(m, "theta"):
+                m.theta = float(self._summary.angle_edit.text())
+                m.use_center_pixel = False
 
         ##
         # Add here states that are data file dependent

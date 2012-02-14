@@ -182,7 +182,7 @@ namespace Mantid
         }
       }
       //catch all exceptions because the solid angle calculation is optional
-      catch(std::exception & e)
+      catch(std::exception&)
       {
         g_log.warning(
             "Precision warning:  Can't find detector geometry " + name() +

@@ -21,18 +21,23 @@ class StitcherState(BaseScriptElement):
 class ReflData(object):
     name = ""
     scale = 1.0
+    OFF_OFF = 0
+    OFF_ON  = 1
+    ON_OFF  = 2
+    ON_ON   = 3
+    
     def __init__(self, workspace, is_ref=False, scale=1.0, parent_layout=None):
         self.name = workspace
         self._scale = scale
-        self._data = None
+        self._data = [None, None, None, None]
         self._call_back = None
         
         # Widgets
         self._layout = QtGui.QHBoxLayout()
 
         self._label = QtGui.QLabel(workspace)
-        self._label.setMinimumSize(QtCore.QSize(150, 0))
-        self._label.setMaximumSize(QtCore.QSize(150, 16777215))
+        self._label.setMinimumSize(QtCore.QSize(250, 0))
+        self._label.setMaximumSize(QtCore.QSize(250, 16777215))
         
         self._radio = QtGui.QRadioButton()
         self._edit_ctrl = QtGui.QLineEdit()
@@ -57,13 +62,14 @@ class ReflData(object):
         return self._radio.isChecked()
     
     def _scale_updated(self):
-        if self._data is not None:
-            try:
-                self._scale = float(self._edit_ctrl.text())
-                self._data.set_scale(self._scale)
-                self._data.apply_scale()
-            except:
-                pass
+        for item in self._data:
+            if item is not None:
+                try:
+                    self._scale = float(self._edit_ctrl.text())
+                    item.set_scale(self._scale)
+                    item.apply_scale()
+                except:
+                    pass
             
         if self._call_back is not None:
             self._call_back()
@@ -88,12 +94,34 @@ class ReflData(object):
         value_as_string = "%-6.3g" % scale
         self._edit_ctrl.setText(value_as_string.strip())
         self._scale = scale
+        
+        # Update all polarization states
+        self._scale_updated()
     
     def set_user_data(self, data):
-        self._data = data
+        self._data[ReflData.OFF_OFF] = data
+        
+        if self.name.find("Off_Off")>0:
+            ws_name = self.name.replace("Off_Off", "On_Off")
+            if mtd.workspaceExists(ws_name):
+                self._data[ReflData.ON_OFF] = DataSet(ws_name)
+                self._data[ReflData.ON_OFF].load(True, True)
     
-    def get_user_data(self):
-        return self._data
+            ws_name = self.name.replace("Off_Off", "Off_On")
+            if mtd.workspaceExists(ws_name):
+                self._data[ReflData.OFF_ON] = DataSet(ws_name)
+                self._data[ReflData.OFF_ON].load(True, True)
+    
+            ws_name = self.name.replace("Off_Off", "On_On")
+            if mtd.workspaceExists(ws_name):
+                self._data[ReflData.ON_ON] = DataSet(ws_name)
+                self._data[ReflData.ON_ON].load(True, True)
+    
+    def get_user_data(self, polarization=0):
+        if polarization in [0,1,2,3]:
+            return self._data[polarization]
+        else: 
+            return self._data[ReflData.OFF_OFF]
     
     def connect_to_scale(self, call_back):
         self._call_back = call_back
@@ -121,11 +149,10 @@ class StitcherWidget(BaseWidget):
             settings = GeneralSettings()
         self._settings = settings
         
-        self._graph = "StitchedData"
+        self._graph = "Stitched Data"
         self._output_dir = None
         self._stitcher = None
         self._data_sets = []
-        self._plotted = False
         
         self._workspace_list = []
         self.initialize_content()
@@ -195,25 +222,33 @@ class StitcherWidget(BaseWidget):
         
         self.plot_result()
         
-    def plot_result(self):
+    def plot_result(self, polarization=None):
         """
             Plot the scaled data sets
         """
-        ws_list = []
-        
         self._stitcher.get_scaled_data()
         
-        for item in self._workspace_list:
-            ws_list.append(item.get_user_data().get_scaled_ws())
+        pol_dict = {"Off Off" : ReflData.OFF_OFF,
+                    "On Off" : ReflData.ON_OFF,
+                    "Off On" : ReflData.OFF_ON,
+                    "On On"  : ReflData.ON_ON }
         
-        if len(ws_list)>0:
-            g = _qti.app.graph(self._graph)
-            if g is None or not self._plotted:
+        for pol in pol_dict.keys():
+            ws_list = []
+            for item in self._workspace_list:
+                d = item.get_user_data( pol_dict[pol] )
+                if d is not None:
+                    ws_list.append(d.get_scaled_ws())
+            
+            if len(ws_list)>0:
+                plot_name = '%s: %s' % (self._graph, pol)
+                g = _qti.app.graph(plot_name)
+                if g is not None:
+                    g.close()
                 g = _qti.app.mantidUI.pyPlotSpectraList(ws_list,[0],True)
-                g.setName(self._graph)
+                g.setName(plot_name)
                 l=g.activeLayer()
-                l.setTitle(" ")
-                self._plotted = True
+                l.setTitle("Polarization state: %s" % pol)
                 
     def _save_result(self):
         """
@@ -241,7 +276,9 @@ class StitcherWidget(BaseWidget):
         
         # Refresh combo boxes
         for item in mtd.keys():
-            if item.startswith("reflectivity") and not item.endswith("scaled"):
+            if item.startswith("reflectivity") and not item.endswith("scaled")\
+            and item.find('On_Off')<0 and item.find('Off_On')<0\
+            and item.find('On_On')<0:
                 self._add_entry(item)
                 
         if len(self._workspace_list)>0:

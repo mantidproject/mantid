@@ -1373,7 +1373,7 @@ public:
     box3b = MDEventsTestHelper::makeRecursiveMDGridBox<3>(5,1);
 
     // Make the list of fake events, random dist.
-    size_t num = 1e6;
+    size_t num = 1000000;
     events.clear();
 
     boost::mt19937 rng;

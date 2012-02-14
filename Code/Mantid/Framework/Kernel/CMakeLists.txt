@@ -327,6 +327,9 @@ if ( NOT NOT_GIT_REPO OR NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersio
   configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp.in
                    ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp
   )
+  configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/../../Build/CMake/PatchVersionNumber.cmake.in
+                   ${CMAKE_CURRENT_SOURCE_DIR}/../../Build/CMake/PatchVersionNumber.cmake
+  )
 endif ()
 
 ###########################################################################

@@ -110,7 +110,7 @@ namespace Crystal
     if (append)
     {
       out.open( filename.c_str(), std::ios::in|std::ios::out|std::ios::ate);
-      long pos = out.tellp();
+      std::streamoff pos = out.tellp();
       out.seekp (28);
       out >> firstrun;
       out.seekp (pos - 110);

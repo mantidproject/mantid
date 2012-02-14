@@ -1,5 +1,4 @@
 #include "ICatTestHelper.h"
-#include "MantidICat/ICatExport.h"
 
 namespace ICatTestHelper
 {

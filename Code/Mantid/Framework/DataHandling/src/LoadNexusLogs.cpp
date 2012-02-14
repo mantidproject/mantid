@@ -233,7 +233,7 @@ namespace Mantid
       {
         file.openGroup("Veto_pulse", "NXgroup");
       }
-      catch (::NeXus::Exception & e)
+      catch (::NeXus::Exception&)
       {
         // No group. This is common in older files
         return;

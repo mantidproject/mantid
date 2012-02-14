@@ -14,7 +14,7 @@ Sample logs consist of a series of <Time, Value> pairs. The first step in filter
 There is no interpolation of log values between the discrete sample log times at this time.
 However, the log value is assumed to be constant at times before its first point and after its last. For example, if the first temperature measurement was at time=10 seconds and a temperature within the acceptable range, then all events between 0 and 10 seconds will be included also. If a log has a single point in time, then that log value is assumed to be constant for all time and if it falls within the range, then all events will be kept.
 
-==== PulseFilter ====
+==== PulseFilter (e.g. for Veto Pulses) ====
 
 If you select PulseFilter, then events will be filtered OUT in notches around each
 time in the selected sample log, and the MinValue/MaxValue parameters are ignored.
@@ -26,12 +26,15 @@ For example:
 * Then the events at the following times will be EXCLUDED from the output:
 ** 9-11; 19-21; 29-30 seconds.
 
+The typical use for this is to filter out "veto" pulses from a SNS event nexus file.
+Some of these files have a sample log called "veto_pulse_time" that only contains
+times of the pulses to be rejected. For example, this call will filter out veto
+pulses:
 
+ FilterByLogValue(InputWorkspace="ws", OutputWorkspace="ws", LogName="veto_pulse_time", PulseFilter="1")
 
 *WIKI*/
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+
 #include "MantidAlgorithms/FilterByLogValue.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"

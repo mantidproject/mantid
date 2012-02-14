@@ -8,7 +8,7 @@
 #include <iomanip>
 
 #include "MantidDataHandling/SaveMask.h"
-#include "MantidDataHandling/LoadMaskingFile.h"
+#include "MantidDataHandling/LoadMask.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 
 #include "Poco/File.h"
@@ -39,7 +39,7 @@ public:
    * (1) Load an existing masking file.
    * (2) Save masking workspace to file.
    * (3) Load the newly saved file, and compare with original masking workspace
-   * Notice: the prerequisit is that LoadMaskingFile() is correct.
+   * Notice: the prerequisit is that LoadMask() is correct.
    */
   void test_SaveFile()
   {
@@ -47,8 +47,8 @@ public:
     SaveMask savealg;
     savealg.initialize();
 
-    // 2. Run LoadMaskingFile
-    LoadMaskingFile loadfile;
+    // 2. Run LoadMask
+    LoadMask loadfile;
     loadfile.initialize();
 
     loadfile.setProperty("Instrument", "POWGEN");
@@ -70,7 +70,7 @@ public:
     std::string file1 = savealg.getPropertyValue("OutputFile");
 
     // 4. Load the new XML file
-    LoadMaskingFile loadfile2;
+    LoadMask loadfile2;
     loadfile2.initialize();
 
     loadfile2.setProperty("Instrument", "POWGEN");

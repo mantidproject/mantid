@@ -68,6 +68,7 @@ set ( SRC_FILES
 	src/ExponentialCorrection.cpp
 	src/ExtractFFTSpectrum.cpp
 	src/ExtractMask.cpp
+	src/ExtractMasking.cpp
 	src/ExtractSingleSpectrum.cpp
 	src/FFT.cpp
 	src/FFTDerivative.cpp
@@ -252,6 +253,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ExponentialCorrection.h
 	inc/MantidAlgorithms/ExtractFFTSpectrum.h
 	inc/MantidAlgorithms/ExtractMask.h
+	inc/MantidAlgorithms/ExtractMasking.h
 	inc/MantidAlgorithms/ExtractSingleSpectrum.h
 	inc/MantidAlgorithms/FFT.h
 	inc/MantidAlgorithms/FFTDerivative.h

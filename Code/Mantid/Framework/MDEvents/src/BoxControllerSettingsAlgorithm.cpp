@@ -37,7 +37,7 @@ namespace MDEvents
   void BoxControllerSettingsAlgorithm::initBoxControllerProps(const std::string & SplitInto, int SplitThreshold, int MaxRecursionDepth)
   {
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int> ();
-    mustBePositive->setLower(0.0);
+    mustBePositive->setLower(0);
     BoundedValidator<int> *mustBeMoreThen1 = new BoundedValidator<int> ();
     mustBeMoreThen1->setLower(1);
 

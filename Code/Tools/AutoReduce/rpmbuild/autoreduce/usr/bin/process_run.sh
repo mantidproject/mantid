@@ -7,8 +7,8 @@
 function process {
 # Initialize Overall Return Code, define logfile
 status=0
-logfile=~/autoreduce.log
-#logfile=/var/log/autoreduce/autoreduce.log
+#logfile=~/autoreduce.log
+logfile=/var/log/SNS_applications/autoreduce.log
 
 nexusFile=$1
 # Pass input data
@@ -85,7 +85,7 @@ echo
 
 # Reduce raw data
 echo "--------Reducing data--------"
-redCommand="python /SNS/PG3/shared/autoreduce/reduce_"$instrument".py"
+redCommand="python /SNS/"$instrument"/shared/autoreduce/reduce_"$instrument".py"
 echo $redCommand $runNumber $metadataDir
 echo $redCommand $runNumber $metadataDir  | sed "s/^/$(date)  /" >> $logfile
 start=`date +%x-%T`

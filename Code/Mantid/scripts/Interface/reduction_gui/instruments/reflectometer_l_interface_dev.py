@@ -1,9 +1,3 @@
-"""
-    This module defines the interface control for SNS REF_L
-    Each reduction method tab that needs to be presented is defined here.
-    The actual view/layout is define in .ui files. The state of the reduction
-    process is kept elsewhere (REFLReduction object)
-"""
 from interface import InstrumentInterface
 from reduction_gui.widgets.reflectometer.refl_data_simple import DataReflWidget
 try:
@@ -14,8 +8,6 @@ except:
 
     
 from reduction_gui.reduction.reflectometer.refl_reduction import REFLReductionScripter
-
-from reduction_gui.reduction.reflectometer.refl_data_proxy import DataProxy
 
 class REFLInterface(InstrumentInterface):
     """
