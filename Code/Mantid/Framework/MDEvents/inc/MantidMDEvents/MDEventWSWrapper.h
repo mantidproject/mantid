@@ -154,11 +154,23 @@ private:
         pWs->getBox()->refreshCentroid(NULL);
     }
    /// terminator for 0 dimensions, will throw
-   template<>void  calc_Centroid<0>(void);
+   template<>
+   void  calc_Centroid<0>(void){
+        //   g_log.error()<<" MDEventWSWrapper:calc_Centroid MDEventWSWrapper class has not been initiated with any number of dimensions\n";
+        throw(std::invalid_argument(" class has not been initiated"));
+   }
    /// terminator for 0 dimensions, will throw
-   template<>void createEmptyEventWS<0>(const Strings &,const Strings &,const Strings &,
-                                        const std::vector<double> &, const std::vector<double> &, size_t );
-   template<>void add_MDData<0>(float *,uint16_t *,uint32_t*,coord_t* ,size_t)const;
+   template<>
+   void createEmptyEventWS<0>(const Strings &,const Strings &,const Strings &,
+                                        const std::vector<double> &, const std::vector<double> &, size_t ){
+       throw(std::invalid_argument("MDEventWSWrapper:createEmptyEventWS can not be initated with 0 dimensions"));
+   }
+
+   template<>
+   void add_MDData<0>(float *,uint16_t *,uint32_t*,coord_t* ,size_t)const{
+    ///   g_log.error()<<" MDEvent WSWrapper class has not been initiated with any number of dimensions, can not add anything to 0-dimensional ws\n";
+       throw(std::invalid_argument(" class has not been initiated, can not add data to 0-dimensional workspace"));
+   }
 
  };
 

@@ -7,26 +7,7 @@ namespace MDEvents
 // logger for loading workspaces  
  //  Kernel::Logger& MDEventWSWrapper::g_log =Kernel::Logger::get("MD-Algorithms");
 
-//
-template<>
-void  MDEventWSWrapper::calc_Centroid<0>(void){
-     //   g_log.error()<<" MDEventWSWrapper:calc_Centroid MDEventWSWrapper class has not been initiated with any number of dimensions\n";
-        throw(std::invalid_argument(" class has not been initiated"));
-}
-   //
-template<>
-void MDEventWSWrapper::createEmptyEventWS<0>(const Strings &,const Strings &,const Strings &,
-                                             const std::vector<double> &, const std::vector<double> &, size_t )
-{
-       throw(std::invalid_argument("MDEventWSWrapper:createEmptyEventWS can not be initated with 0 dimensions"));
-}
-template<>
-void MDEventWSWrapper::add_MDData<0>(float *,uint16_t *,uint32_t*,coord_t* ,size_t)const{
-    ///   g_log.error()<<" MDEvent WSWrapper class has not been initiated with any number of dimensions, can not add anything to 0-dimensional ws\n";
-       throw(std::invalid_argument(" class has not been initiated, can not add data to 0-dimensional workspace"));
-}
-
-
+     
 /**function returns the number of dimensions in current MDEvent workspace or throws if the workspace has not been defined */
 size_t 
 MDEventWSWrapper::nDimensions()const
