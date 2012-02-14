@@ -275,8 +275,9 @@ namespace MDEvents
 
       if (!badOne)
       {
-        signals[linearIndex] += it->getSignal();
-        errors[linearIndex] += it->getErrorSquared();
+        // Sum the signals as doubles to preserve precision
+        signals[linearIndex] += static_cast<signal_t>(it->getSignal());
+        errors[linearIndex] += static_cast<signal_t>(it->getErrorSquared());
       }
     }
     // Done with the events list

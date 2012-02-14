@@ -362,8 +362,10 @@ namespace MDEvents
 
   //-----------------------------------------------------------------------------------------------
   /** Refresh the cache.
-   * For MDBox, the signal/error is tracked on adding, so
-   * this just calculates the centroid.
+   *
+   * For MDBox, if MDBOX_TRACK_SIGNAL_WHEN_ADDING is defined,
+   * then the signal/error is tracked on adding, so
+   * this does nothing.
    */
   TMDE(
   void MDBox)::refreshCache(Kernel::ThreadScheduler * /*ts*/)
@@ -380,8 +382,9 @@ namespace MDEvents
       for(typename std::vector<MDE>::const_iterator it = data.begin(); it != it_end; ++it)
       {
         const MDE & event = *it;
-        this->m_signal += event.getSignal();
-        this->m_errorSquared += event.getErrorSquared();
+        // Convert floats to doubles to preserve precision when adding them.
+        this->m_signal += static_cast<signal_t>(event.getSignal());
+        this->m_errorSquared += static_cast<signal_t>(event.getErrorSquared());
       }
     }
     else if (m_dataAdded)
@@ -391,8 +394,9 @@ namespace MDEvents
       for(typename std::vector<MDE>::const_iterator it = data.begin(); it != it_end; ++it)
       {
         const MDE & event = *it;
-        this->m_signal += event.getSignal();
-        this->m_errorSquared += event.getErrorSquared();
+        // Convert floats to doubles to preserve precision when adding them.
+        this->m_signal += static_cast<signal_t>(event.getSignal());
+        this->m_errorSquared += static_cast<signal_t>(event.getErrorSquared());
       }
     }
 #endif
@@ -477,9 +481,9 @@ namespace MDEvents
 
 #ifdef MDBOX_TRACK_SIGNAL_WHEN_ADDING
     // Keep the running total of signal and error
-    double signal = event.getSignal();
+    signal_t signal = static_cast<signal_t>(event.getSignal());
     this->m_signal += signal;
-    this->m_errorSquared += event.getErrorSquared();
+    this->m_errorSquared += static_cast<signal_t>(event.getErrorSquared());
 #endif
 
 #ifdef MDBOX_TRACKCENTROID_WHENADDING
@@ -506,9 +510,9 @@ namespace MDEvents
 
 #ifdef MDBOX_TRACK_SIGNAL_WHEN_ADDING
     // Keep the running total of signal and error
-    double signal = event.getSignal();
+    double signal = static_cast<signal_t>(event.getSignal());
     this->m_signal += signal;
-    this->m_errorSquared += event.getErrorSquared();
+    this->m_errorSquared += static_cast<signal_t>(event.getErrorSquared());
 #endif
 
 #ifdef MDBOX_TRACKCENTROID_WHENADDING
@@ -542,9 +546,9 @@ namespace MDEvents
     //Running total of signal/error
     for(typename std::vector<MDE>::const_iterator it = start; it != end; ++it)
     {
-      double signal = it->getSignal();
+      double signal = static_cast<signal_t>(it->getSignal());
       this->m_signal += signal;
-      this->m_errorSquared += it->getErrorSquared();
+      this->m_errorSquared += static_cast<signal_t>(it->getErrorSquared());
 
 #ifdef MDBOX_TRACKCENTROID_WHENADDING
     // Running total of the centroid
@@ -594,10 +598,9 @@ namespace MDEvents
       }
       if (d == nd)
       {
-//        std::cout << "MDBox at depth " << this->m_depth << " was fully contained in bin " << bin.m_index << ".\n";
         // All dimensions are fully contained, so just return the cached total signal instead of counting.
-        bin.m_signal += this->m_signal;
-        bin.m_errorSquared += this->m_errorSquared;
+        bin.m_signal += static_cast<signal_t>(this->m_signal);
+        bin.m_errorSquared += static_cast<signal_t>(this->m_errorSquared);
         return;
       }
     }
@@ -624,9 +627,9 @@ namespace MDEvents
       // If the loop reached the end, then it was all within bounds.
       if (d == nd)
       {
-        // Accumulate error and signal
-        bin.m_signal += it->getSignal();
-        bin.m_errorSquared += it->getErrorSquared();
+        // Accumulate error and signal (as doubles, to preserve precision)
+        bin.m_signal += static_cast<signal_t>(it->getSignal());
+        bin.m_errorSquared += static_cast<signal_t>(it->getErrorSquared());
       }
     }
 
@@ -656,8 +659,8 @@ namespace MDEvents
       if (function.isPointContained(it->getCenter())) //HACK
       {
         // Accumulate error and signal
-        bin.m_signal += it->getSignal();
-        bin.m_errorSquared += it->getErrorSquared();
+        bin.m_signal += static_cast<signal_t>(it->getSignal());
+        bin.m_errorSquared += static_cast<signal_t>(it->getErrorSquared());
       }
     }
   }
@@ -689,8 +692,8 @@ namespace MDEvents
       radiusTransform.apply(it->getCenter(), out);
       if (out[0] < radiusSquared)
       {
-        signal += it->getSignal();
-        errorSquared += it->getErrorSquared();
+        signal += static_cast<signal_t>(it->getSignal());
+        errorSquared += static_cast<signal_t>(it->getErrorSquared());
       }
     }
 
