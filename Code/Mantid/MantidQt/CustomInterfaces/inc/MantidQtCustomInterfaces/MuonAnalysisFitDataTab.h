@@ -22,7 +22,6 @@ namespace CustomInterfaces
 namespace Muon
 {
 
-
 /** 
 This is a Helper class for MuonAnalysis. In particular this helper class deals
 callbacks from the Plot Options tab.    
@@ -55,31 +54,30 @@ class MuonAnalysisFitDataTab : MantidQt::API::UserSubWindow
  Q_OBJECT
 
 public:
-
-  /// Constructor
+  /// Constructor.
   MuonAnalysisFitDataTab(Ui::MuonAnalysis& uiForm) : m_uiForm(uiForm) {}
+  /// Initialise.
   void init();
-
+  /// Copy the given raw workspace and keep for later.
   void makeRawWorkspace(const std::string & wsName);
+  /// Group the list of workspaces given to the workspace name given.
   void groupWorkspaces(const std::vector<std::string> & inputWorkspaces, const std::string & groupName);
-  void groupFittedWorkspaces(QString workspaceName);
-  
+  /// Get all plot details for a workspace [wsName, connectType, plotType, Errors, Color].
   QStringList getAllPlotDetails(const QString & workspace);
 
 signals:
 
 private:
-
-  /// Initialize the layout
+  /// Initialize the layout.
   virtual void initLayout() {};
-
-  /// reference to MuonAnalysis form
+  /// Reference to MuonAnalysis form.
   Ui::MuonAnalysis& m_uiForm;
 
 private slots:
-  
+  /// Open up the wiki help.
   void muonAnalysisHelpDataAnalysisClicked();
-
+  /// Group all the workspaces made after a fitting.
+  void groupFittedWorkspaces(QString workspaceName);
 };
 
 
@@ -87,4 +85,4 @@ private slots:
 }
 }
 
-#endif //MANTIDQTCUSTOMINTERFACES_MUONANALYSISDITDATATAB_H_
+#endif //MANTIDQTCUSTOMINTERFACES_MUONANALYSISFITDATATAB_H_

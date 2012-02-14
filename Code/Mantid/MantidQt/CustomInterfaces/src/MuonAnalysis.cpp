@@ -180,9 +180,6 @@ void MuonAnalysis::initLayout()
   // Detect when the tab is changed
   connect(m_uiForm.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(changeTab(int)));
 
-  // Detect when the fit has finished and group the workspaces that have been created as a result.
-  connect(m_uiForm.fitBrowser, SIGNAL(fittingDone(QString)), this, SLOT(groupFittedWorkspaces(QString)));
-
   connectAutoUpdate();
 
   // Muon scientists never fits peaks, hence they want the following parameter
@@ -2964,20 +2961,8 @@ void MuonAnalysis::assignPeakPickerTool(const QString & workspaceName)
 
 
 /**
-* Group the fitted workspaces that are created from the 'fit' algorithm
-*
-* @param workspaceName :: The workspaceName that the fit has been done against
+* Set up the signals and slots for auto updating the plots
 */
-void MuonAnalysis::groupFittedWorkspaces(QString workspaceName)
-{
-  m_fitDataTab->groupFittedWorkspaces(workspaceName);
-
-  //QStringList plotDetails;
-  //plotDetails.push_back(workspaceName);
-  //changeDataPlotType(plotDetails);
-}
-
-
 void MuonAnalysis::connectAutoUpdate()
 {
   // Home tab Auto Updates

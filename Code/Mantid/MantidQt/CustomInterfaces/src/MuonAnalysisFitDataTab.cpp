@@ -23,6 +23,9 @@ namespace Muon
 void MuonAnalysisFitDataTab::init()
 {
   connect(m_uiForm.muonAnalysisHelpDataAnalysis, SIGNAL(clicked()), this, SLOT(muonAnalysisHelpDataAnalysisClicked()));
+  
+  // Detect when the fit has finished and group the workspaces that have been created as a result.
+  connect(m_uiForm.fitBrowser, SIGNAL(fittingDone(QString)), this, SLOT(groupFittedWorkspaces(QString)));
 }
 
 
