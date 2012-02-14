@@ -1,0 +1,14 @@
+[Desktop Entry]
+Version=1.0
+Name=MantidPlot
+Comment=Neutron Data Reduction Framework
+GenericName=MantidPlot
+Exec=/opt/Mantid/bin/MantidPlot
+Terminal=false
+X-MultipleArgs=false
+Type=Application
+Categories=Education;Science;Qt
+Icon=mantidplot
+StartupNotify=false
+Name[en]=MantidPlot
+
