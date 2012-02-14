@@ -188,6 +188,10 @@ void MuonAnalysis::initLayout()
   // Muon scientists never fits peaks, hence they want the following parameter
   // set to a high number
   ConfigService::Instance().setString("curvefitting.peakRadius","99");
+
+  m_uiForm.mwRunDeadTimeFile->setVisible(false);
+  connect(m_uiForm.deadTimeType, SIGNAL(currentIndexChanged(int)), this, SLOT(changeDeadTimeType(int) ) );
+  connect(m_uiForm.mwRunDeadTimeFile, SIGNAL(fileEditingFinished()), this, SLOT(validateDeadTimeLoad() ) );
 }
 
 
@@ -946,44 +950,8 @@ void MuonAnalysis::inputFileChanged_MWRunFiles()
   // in case file is selected from browser button check that it actually exist
   for (int i=0; i<m_previousFilenames.size(); ++i)
   {
-    try
-    {
-      Poco::File l_path( m_previousFilenames[i].toStdString() );
-      if ( !l_path.exists() )
-      {    
-        QString tempFilename;
-        if (m_previousFilenames[i].contains('.'))
-        {
-          tempFilename = m_previousFilenames[i].left(m_previousFilenames[i].find('.'));
-        }
-        Poco::File l_path( tempFilename.toStdString() );
-        if ( !l_path.exists() )
-        {    
-          QMessageBox::warning(this,"Mantid - MuonAnalysis", m_previousFilenames[i] + " Specified data file does not exist.");
-        }
-        return;
-      }
-    }
-    catch(std::exception &e)
-    {
-      //Specified a network drive.
-      QString tempFilename;
-      if (m_previousFilenames[i].contains('.'))
-      {
-        tempFilename = m_previousFilenames[i].left(m_previousFilenames[i].find('.'));
-      }
-      Poco::File l_path( tempFilename.toStdString() );
-      try
-      {
-        if ( !l_path.exists() )
-          QMessageBox::warning(this,"Mantid - MuonAnalysis", m_previousFilenames[i] + " Specified data file does not exist.");
-      }
-      catch (std::exception &e)
-      {
-        QMessageBox::warning(this,"Mantid - MuonAnalysis", tempFilename + " Specified directory does not exist.");
-      }
+    if (!(isValidFile(m_previousFilenames[i]) ) )
       return;
-    }
   }
   // save selected browse file directory to be reused next time interface is started up
   m_uiForm.mwRunFiles->saveSettings(m_settingsGroup + "mwRunFilesBrowse");
@@ -3130,6 +3098,75 @@ void MuonAnalysis::showHideToolbars(bool state)
     emit hideToolbars();
   else
     emit showToolbars();
+}
+
+
+/**
+* Change what type of deadtime to use and the options available for the user's choice.
+*
+* @params choice :: The current index of dead time type combo box.
+*/
+void MuonAnalysis::changeDeadTimeType(int choice)
+{
+  if (choice == 0 || choice == 1) // if choice == none ||choice == from file
+  {
+    m_uiForm.mwRunDeadTimeFile->setVisible(false);
+  }
+  else // choice must be from workspace
+  {
+    m_uiForm.mwRunDeadTimeFile->setVisible(true);
+  }
+}
+
+
+/**
+* Validate the file path of the dead time table.
+*/
+bool MuonAnalysis::isValidFile(const QString & fileName)
+{
+  try
+  {
+    Poco::File l_path( fileName.toStdString() );
+    if ( !l_path.exists() )
+    {    
+      QString tempFilename;
+      if (fileName.contains('.'))
+      {
+        tempFilename = fileName.left(fileName.find('.'));
+      }
+      Poco::File l_path( tempFilename.toStdString() );
+      if ( !l_path.exists() )
+      {    
+        QMessageBox::warning(this,"Mantid - MuonAnalysis", fileName + " Specified data file does not exist.");
+        return false;
+      }
+    }
+  }
+  catch(std::exception &e)
+  {
+    //Specified a network drive.
+    QString tempFilename;
+    if (fileName.contains('.'))
+    {
+      tempFilename = fileName.left(fileName.find('.'));
+    }
+    Poco::File l_path( tempFilename.toStdString() );
+    try
+    {
+      if ( !l_path.exists() )
+      {
+        QMessageBox::warning(this,"Mantid - MuonAnalysis", fileName + " Specified data file does not exist.");
+        return false;
+      }
+    }
+    catch (std::exception &e)
+    {
+      QMessageBox::warning(this,"Mantid - MuonAnalysis", tempFilename + " Specified directory does not exist.");
+      return false;
+    }
+  }
+  // Must be valid so return true
+  return true;
 }
 
 
