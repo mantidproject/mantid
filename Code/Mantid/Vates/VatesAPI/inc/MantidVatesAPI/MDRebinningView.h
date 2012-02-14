@@ -52,7 +52,7 @@ namespace Mantid
       virtual bool getForceOrthogonal() const = 0;
       virtual bool getOutputHistogramWS() const = 0;
       virtual const char* getAppliedGeometryXML() const = 0;
-      virtual void updateAlgorithmProgress(double) = 0;
+      virtual void updateAlgorithmProgress(double, const std::string&) = 0;
       virtual ~MDRebinningView(){}
     };
   }

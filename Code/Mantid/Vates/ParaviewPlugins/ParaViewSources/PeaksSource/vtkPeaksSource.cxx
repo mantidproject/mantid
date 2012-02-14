@@ -60,7 +60,7 @@ int vtkPeaksSource::RequestData(vtkInformation *, vtkInformationVector **,
   {
     vtkInformation *outInfo = outputVector->GetInformationObject(0);
 
-    FilterUpdateProgressAction<vtkPeaksSource> updateHandler(this);
+    FilterUpdateProgressAction<vtkPeaksSource> updateHandler(this, "Loading...");
 
     vtkPolyData *output = vtkPolyData::SafeDownCast(
                             outInfo->Get(vtkDataObject::DATA_OBJECT()));
@@ -108,9 +108,9 @@ void vtkPeaksSource::PrintSelf(ostream& os, vtkIndent indent)
   this->Superclass::PrintSelf(os, indent);
 }
 
-void vtkPeaksSource::updateAlgorithmProgress(double progress)
+void vtkPeaksSource::updateAlgorithmProgress(double progress, const std::string& message)
 {
-  this->SetProgressText("Executing Peaks Source...");
+  this->SetProgressText(message.c_str());
   this->UpdateProgress(progress);
 }
 

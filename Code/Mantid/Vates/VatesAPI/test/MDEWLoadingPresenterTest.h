@@ -76,7 +76,7 @@ void testShouldLoadFirstTimeRound()
   EXPECT_CALL(view, getRecursionDepth()).Times(2); 
   EXPECT_CALL(view, getLoadInMemory()).Times(2); 
   EXPECT_CALL(view, getTime()).Times(2);
-  EXPECT_CALL(view, updateAlgorithmProgress(_)).Times(0);
+  EXPECT_CALL(view, updateAlgorithmProgress(_,_)).Times(0);
 
   ConcreteMDEWLoadingPresenter presenter(&view);
   TSM_ASSERT("Should request load on first usage.", presenter.shouldLoad());
@@ -93,7 +93,7 @@ void testTimeChanged()
   EXPECT_CALL(view, getTime()).Times(2)
     .WillOnce(Return(0)) 
     .WillOnce(Return(1));// Time has changed on 2nd call
-  EXPECT_CALL(view, updateAlgorithmProgress(_)).Times(0);
+  EXPECT_CALL(view, updateAlgorithmProgress(_,_)).Times(0);
 
   ConcreteMDEWLoadingPresenter presenter(&view);
   TSM_ASSERT("Should request load on first usage.", presenter.shouldLoad());
@@ -110,7 +110,7 @@ void testLoadInMemoryChanged()
     .WillOnce(Return(true)) 
     .WillOnce(Return(false)); // Load in memory changed
   EXPECT_CALL(view, getTime()).Times(2);
-  EXPECT_CALL(view, updateAlgorithmProgress(_)).Times(0);
+  EXPECT_CALL(view, updateAlgorithmProgress(_,_)).Times(0);
 
   ConcreteMDEWLoadingPresenter presenter(&view);
   TSM_ASSERT("Should request load on first usage.", presenter.shouldLoad());
@@ -127,7 +127,7 @@ void testDepthChanged()
     .WillOnce(Return(100)); // Recursion depth changed.
   EXPECT_CALL(view, getLoadInMemory()).Times(2);
   EXPECT_CALL(view, getTime()).Times(2);
-  EXPECT_CALL(view, updateAlgorithmProgress(_)).Times(0);
+  EXPECT_CALL(view, updateAlgorithmProgress(_,_)).Times(0);
 
   ConcreteMDEWLoadingPresenter presenter(&view);
   TSM_ASSERT("Should request load on first usage.", presenter.shouldLoad());

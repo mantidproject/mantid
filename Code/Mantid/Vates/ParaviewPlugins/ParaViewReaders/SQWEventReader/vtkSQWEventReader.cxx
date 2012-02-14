@@ -108,7 +108,7 @@ int vtkSQWEventReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInfo
   //get the info objects
   vtkInformation *outInfo = outputVector->GetInformationObject(0);
 
-  FilterUpdateProgressAction<vtkSQWEventReader> updateHandler(this);
+  FilterUpdateProgressAction<vtkSQWEventReader> updateHandler(this, "Loading...");
 
   if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS()))
   {
@@ -174,11 +174,12 @@ unsigned long vtkSQWEventReader::GetMTime()
 /**
   Update/Set the progress.
   @param progress : progress increment.
+  @param message : progress message
 */
-void vtkSQWEventReader::updateAlgorithmProgress(double progress)
+void vtkSQWEventReader::updateAlgorithmProgress(double progress, const std::string& message)
 {
   progressMutex.lock();
-  this->SetProgressText("Loading SQW MDEW...");
+  this->SetProgressText(message.c_str());
   this->UpdateProgress(progress);
   progressMutex.unlock();
 }

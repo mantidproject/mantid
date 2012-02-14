@@ -40,16 +40,19 @@ namespace VATES
 template<typename Filter>
 class DLLExport FilterUpdateProgressAction : public ProgressAction
 {
+  
+  /// Message associated with the progress action
+  std::string m_message;
 
 public:
 
-  FilterUpdateProgressAction(Filter* filter) : m_filter(filter)
+  FilterUpdateProgressAction(Filter* filter, const std::string& message) : m_filter(filter), m_message(message)
   {
   }
 
   virtual void eventRaised(double progress)
   {
-    m_filter->updateAlgorithmProgress(progress);
+    m_filter->updateAlgorithmProgress(progress, m_message);
   }
 
   ~FilterUpdateProgressAction()

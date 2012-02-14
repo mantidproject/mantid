@@ -25,7 +25,7 @@ public:
   //----------------------------------------------
 
   /// Called by presenter to force progress information updating.
-  void updateAlgorithmProgress(double progress);
+  void updateAlgorithmProgress(double progress, const std::string& message);
 
   /// Getter for the workspace type
   char* GetWorkspaceTypeName();

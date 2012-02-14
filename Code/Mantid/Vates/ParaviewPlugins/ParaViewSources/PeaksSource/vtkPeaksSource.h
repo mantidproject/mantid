@@ -44,7 +44,7 @@ public:
   void SetWidth(double width);
   void SetWsName(std::string wsName);
   /// Update the algorithm progress.
-  void updateAlgorithmProgress(double progress);
+  void updateAlgorithmProgress(double progress, const std::string& message);
   /// Getter for the workspace type
   char* GetWorkspaceTypeName();
 

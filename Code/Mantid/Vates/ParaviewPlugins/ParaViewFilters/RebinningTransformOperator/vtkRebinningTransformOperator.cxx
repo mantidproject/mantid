@@ -170,9 +170,10 @@ const char* vtkRebinningTransformOperator::getAppliedGeometryXML() const
 }
 
 /** Setter for the algorithm progress..
-@param progress the current progress value
+@param progress : The current progress value
+@param message : Progress message
 */
-void vtkRebinningTransformOperator::updateAlgorithmProgress(double progress)
+void vtkRebinningTransformOperator::updateAlgorithmProgress(double progress, const std::string& message)
 {
   progressMutex.lock();
   this->SetProgressText("Executing Mantid MDEvent Rebinning Algorithm...");
@@ -249,7 +250,7 @@ int vtkRebinningTransformOperator::RequestData(vtkInformation* vtkNotUsed(reques
     //Updating again at this point is the only way to pick-up changes to clipping.
     m_presenter->updateModel();
 
-    FilterUpdateProgressAction<vtkRebinningTransformOperator> updatehandler(this);
+    FilterUpdateProgressAction<vtkRebinningTransformOperator> updatehandler(this, "Rebinning...");
 
     vtkInformation *outInfo = outputVector->GetInformationObject(0);
     vtkUnstructuredGrid *output = vtkUnstructuredGrid::SafeDownCast(outInfo->Get(

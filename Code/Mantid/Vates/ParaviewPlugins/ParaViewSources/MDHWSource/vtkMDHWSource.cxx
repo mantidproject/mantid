@@ -83,7 +83,7 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
       m_time =outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0];
     }
 
-    FilterUpdateProgressAction<vtkMDHWSource> updateHandler(this);
+    FilterUpdateProgressAction<vtkMDHWSource> updateHandler(this, "Loading...");
 
     ThresholdRange_scptr thresholdRange(new IgnoreZerosThresholdRange());
 
@@ -187,10 +187,13 @@ double vtkMDHWSource::getTime() const
 
 /*
 Setter for the algorithm progress.
-@param :
+@param progress : progress increment
+@param message : progress message 
 */
-void vtkMDHWSource::updateAlgorithmProgress(double)
+void vtkMDHWSource::updateAlgorithmProgress(double progress, const std::string& message)
 {
+  this->SetProgress(progress);
+  this->SetProgressText(message.c_str());
 }
 
 /*

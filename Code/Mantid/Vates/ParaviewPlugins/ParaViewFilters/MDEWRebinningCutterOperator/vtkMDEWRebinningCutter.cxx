@@ -175,12 +175,13 @@ bool vtkMDEWRebinningCutter::getOutputHistogramWS() const
 }
 
 /** Setter for the algorithm progress..
-@param progress the current progress value
+@param progress : the current progress value
+@param message : progress message
 */
-void vtkMDEWRebinningCutter::updateAlgorithmProgress(double progress)
+void vtkMDEWRebinningCutter::updateAlgorithmProgress(double progress, const std::string& message)
 {
   progressMutex.lock();
-  this->SetProgressText("Executing Mantid MDEvent Rebinning Algorithm...");
+  this->SetProgressText(message.c_str());
   this->UpdateProgress(progress);
   progressMutex.unlock();
 }
@@ -249,7 +250,7 @@ int vtkMDEWRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtk
     //Updating again at this point is the only way to pick-up changes to clipping.
     m_presenter->updateModel();
 
-    FilterUpdateProgressAction<vtkMDEWRebinningCutter> updatehandler(this);
+    FilterUpdateProgressAction<vtkMDEWRebinningCutter> updatehandler(this, "Rebinning...");
 
     vtkInformation *outInfo = outputVector->GetInformationObject(0);
     vtkUnstructuredGrid *output = vtkUnstructuredGrid::SafeDownCast(outInfo->Get(

@@ -55,7 +55,7 @@ public:
   //----------------------------------------------
 
   /// Update the algorithm progress.
-  void updateAlgorithmProgress(double);
+  void updateAlgorithmProgress(double, const std::string&);
   /// Getter for the input geometry xml
   const char* GetInputGeometryXML();
   /// Getter for the workspace name

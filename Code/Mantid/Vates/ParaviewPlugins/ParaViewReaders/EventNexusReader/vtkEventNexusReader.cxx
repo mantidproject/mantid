@@ -115,7 +115,7 @@ int vtkEventNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
     m_time =outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0];
   }
 
-  FilterUpdateProgressAction<vtkEventNexusReader> updateHandler(this);
+  FilterUpdateProgressAction<vtkEventNexusReader> updateHandler(this, "Loading...");
   vtkMDHexFactory* hexahedronFactory = new vtkMDHexFactory(ThresholdRange_scptr(new IgnoreZerosThresholdRange()), "signal");
   hexahedronFactory->setTime(m_time);
   hexahedronFactory->setCheckDimensionality(false);
@@ -175,10 +175,10 @@ unsigned long vtkEventNexusReader::GetMTime()
   Update/Set the progress.
   @param progress : progress increment.
 */
-void vtkEventNexusReader::updateAlgorithmProgress(double progress)
+void vtkEventNexusReader::updateAlgorithmProgress(double progress, const std::string& message)
 {
   progressMutex.lock();
-  this->SetProgressText("Loading and Creating Event Nexus MDEW...");
+  this->SetProgressText(message.c_str());
   this->UpdateProgress(progress);
   progressMutex.unlock();
 }

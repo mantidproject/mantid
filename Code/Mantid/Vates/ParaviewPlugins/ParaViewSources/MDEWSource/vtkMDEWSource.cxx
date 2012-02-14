@@ -96,7 +96,7 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
       m_time =outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0];
     }
 
-    FilterUpdateProgressAction<vtkMDEWSource> updateHandler(this);
+    FilterUpdateProgressAction<vtkMDEWSource> updateHandler(this, "Loading...");
     vtkMDHexFactory* hexahedronFactory = new vtkMDHexFactory(ThresholdRange_scptr(new IgnoreZerosThresholdRange()), "signal");
     hexahedronFactory->setTime(m_time);
     hexahedronFactory->setCheckDimensionality(false);
@@ -192,10 +192,13 @@ double vtkMDEWSource::getTime() const
 
 /*
 Setter for the algorithm progress.
-@param :
+@param progress : progress increment
+@param message : progress message
 */
-void vtkMDEWSource::updateAlgorithmProgress(double)
+void vtkMDEWSource::updateAlgorithmProgress(double progress, const std::string& message)
 {
+  this->SetProgressText(message.c_str());
+  this->SetProgress(progress);
 }
 
 /*

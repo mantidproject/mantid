@@ -93,7 +93,7 @@ void testExecutionInMemory()
   EXPECT_CALL(*view, getRecursionDepth()).Times(AtLeast(1)); 
   EXPECT_CALL(*view, getLoadInMemory()).Times(AtLeast(1)).WillRepeatedly(Return(true)); // View setup to request loading in memory.
   EXPECT_CALL(*view, getTime()).Times(AtLeast(1));
-  EXPECT_CALL(*view, updateAlgorithmProgress(_)).Times(AnyNumber());
+  EXPECT_CALL(*view, updateAlgorithmProgress(_,_)).Times(AnyNumber());
 
   //Setup rendering factory
   MockvtkDataSetFactory factory;
@@ -102,7 +102,7 @@ void testExecutionInMemory()
   EXPECT_CALL(factory, setRecursionDepth(_)).Times(1);
 
   //Setup progress updates object
-  FilterUpdateProgressAction<MockMDLoadingView> progressAction(view);
+  FilterUpdateProgressAction<MockMDLoadingView> progressAction(view, "");
 
   //Create the presenter and runit!
   SQWLoadingPresenter presenter(view, getSuitableFileNamePath());

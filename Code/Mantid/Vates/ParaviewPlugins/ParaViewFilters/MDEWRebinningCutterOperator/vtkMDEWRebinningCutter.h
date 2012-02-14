@@ -72,7 +72,7 @@ public:
   /// Paraview Related Commands. See *.xml proxy/property file --------------------------------
 
   /// Called by presenter to force progress information updating.
-  void updateAlgorithmProgress(double progress);
+  void updateAlgorithmProgress(double progress, const std::string& message);
   virtual double getMaxThreshold() const;
   virtual double getMinThreshold() const;
   virtual bool getApplyClip() const;

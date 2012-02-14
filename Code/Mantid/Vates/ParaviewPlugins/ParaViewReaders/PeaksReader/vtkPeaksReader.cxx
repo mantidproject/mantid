@@ -108,7 +108,7 @@ int vtkPeaksReader::RequestInformation(
     alg->setPropertyValue("Filename", this->FileName);
     alg->setPropertyValue("OutputWorkspace", "LoadedPeaksWS");
 
-    FilterUpdateProgressAction<vtkPeaksReader> updateHandler(this);
+    FilterUpdateProgressAction<vtkPeaksReader> updateHandler(this, "Loading...");
     Poco::NObserver<ProgressAction, Mantid::API::Algorithm::ProgressNotification> observer(updateHandler, &ProgressAction::handler);
 
     alg->addObserver(observer);
@@ -143,10 +143,11 @@ unsigned long vtkPeaksReader::GetMTime()
 /**
   Update/Set the progress.
   @param progress : progress increment.
+  @param message : progress message
 */
-void vtkPeaksReader::updateAlgorithmProgress(double progress)
+void vtkPeaksReader::updateAlgorithmProgress(double progress, const std::string& message)
 {
-  this->SetProgressText("Executing Peaks Reader...");
+  this->SetProgressText(message.c_str());
   this->UpdateProgress(progress);
 }
 

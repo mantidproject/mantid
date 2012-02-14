@@ -108,9 +108,9 @@ namespace Mantid
         return m_adaptee->getAppliedGeometryXML();
       }
 
-      virtual void updateAlgorithmProgress(double progress)
+      virtual void updateAlgorithmProgress(double progress, const std::string& message)
       {
-        return m_adaptee->updateAlgorithmProgress(progress);
+        return m_adaptee->updateAlgorithmProgress(progress, message);
       }
 
       virtual bool getOutputHistogramWS() const

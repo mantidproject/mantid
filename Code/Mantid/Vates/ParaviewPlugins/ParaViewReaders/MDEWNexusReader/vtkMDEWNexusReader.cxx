@@ -115,7 +115,7 @@ int vtkMDEWNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInf
     m_time =outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0];
   }
 
-  FilterUpdateProgressAction<vtkMDEWNexusReader> updateHandler(this);
+  FilterUpdateProgressAction<vtkMDEWNexusReader> updateHandler(this, "Loading...");
   vtkMDHexFactory* hexahedronFactory = new vtkMDHexFactory(ThresholdRange_scptr(new IgnoreZerosThresholdRange()), "signal");
   hexahedronFactory->setTime(m_time);
   hexahedronFactory->setCheckDimensionality(false);
@@ -174,11 +174,12 @@ unsigned long vtkMDEWNexusReader::GetMTime()
 /**
   Update/Set the progress.
   @param progress : progress increment.
+  @param message : progress message.
 */
-void vtkMDEWNexusReader::updateAlgorithmProgress(double progress)
+void vtkMDEWNexusReader::updateAlgorithmProgress(double progress, const std::string& message)
 {
   progressMutex.lock();
-  this->SetProgressText("Loading MDEW file...");
+  this->SetProgressText(message.c_str());
   this->UpdateProgress(progress);
   progressMutex.unlock();
 }

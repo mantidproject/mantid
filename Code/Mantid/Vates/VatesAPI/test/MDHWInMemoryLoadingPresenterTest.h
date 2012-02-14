@@ -131,7 +131,7 @@ public:
     MockMDLoadingView* view = new MockMDLoadingView;
     EXPECT_CALL(*view, getRecursionDepth()).Times(0);
     EXPECT_CALL(*view, getLoadInMemory()).Times(0); //Not a question that needs asking for this presenter type.
-    EXPECT_CALL(*view, updateAlgorithmProgress(_)).Times(AnyNumber());
+    EXPECT_CALL(*view, updateAlgorithmProgress(_,_)).Times(AnyNumber());
 
     //Setup rendering factory
     MockvtkDataSetFactory factory;
@@ -143,7 +143,7 @@ public:
     EXPECT_CALL(*repository, fetchWorkspace(_)).Times(2).WillRepeatedly(Return(ws));
 
     //Setup progress updates object
-    FilterUpdateProgressAction<MockMDLoadingView> progressAction(view);
+    FilterUpdateProgressAction<MockMDLoadingView> progressAction(view, "");
 
     //Create the presenter and run it!
     MDHWInMemoryLoadingPresenter presenter(view, repository, "_");

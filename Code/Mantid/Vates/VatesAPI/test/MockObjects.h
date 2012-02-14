@@ -143,7 +143,7 @@ public:
   MOCK_CONST_METHOD0(getTime, double());
   MOCK_CONST_METHOD0(getRecursionDepth, size_t());
   MOCK_CONST_METHOD0(getLoadInMemory, bool());
-  MOCK_METHOD1(updateAlgorithmProgress, void(double));
+  MOCK_METHOD2(updateAlgorithmProgress, void(double, const std::string&));
   ~MockMDLoadingView(){}
 };
 
@@ -160,8 +160,8 @@ public:
     double());
   MOCK_CONST_METHOD0(getAppliedGeometryXML,
     const char*());
-  MOCK_METHOD1(updateAlgorithmProgress,
-    void(double));
+  MOCK_METHOD2(updateAlgorithmProgress,
+    void(double, const std::string&));
   MOCK_CONST_METHOD0(getOrigin, Mantid::Kernel::V3D());
   MOCK_CONST_METHOD0(getB1, Mantid::Kernel::V3D());
   MOCK_CONST_METHOD0(getB2, Mantid::Kernel::V3D());

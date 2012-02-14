@@ -26,7 +26,7 @@ public:
     EXPECT_CALL(view, getApplyClip()).Times(1);
     EXPECT_CALL(view, getTimeStep()).Times(1);
     EXPECT_CALL(view, getAppliedGeometryXML()).Times(1);
-    EXPECT_CALL(view, updateAlgorithmProgress(_)).Times(1);
+    EXPECT_CALL(view, updateAlgorithmProgress(_,_)).Times(1);
     EXPECT_CALL(view, getOrigin()).Times(1).WillOnce(Return(v));
     EXPECT_CALL(view, getB1()).Times(1).WillOnce(Return(v));
     EXPECT_CALL(view, getB2()).Times(1).WillOnce(Return(v));
@@ -48,7 +48,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alias.getApplyClip());
     TS_ASSERT_THROWS_NOTHING(alias.getTimeStep());
     TS_ASSERT_THROWS_NOTHING(alias.getAppliedGeometryXML());
-    TS_ASSERT_THROWS_NOTHING(alias.updateAlgorithmProgress(0));
+    TS_ASSERT_THROWS_NOTHING(alias.updateAlgorithmProgress(0,""));
     TS_ASSERT_THROWS_NOTHING(alias.getLengthB1());
     TS_ASSERT_THROWS_NOTHING(alias.getLengthB2());
     TS_ASSERT_THROWS_NOTHING(alias.getLengthB3());
