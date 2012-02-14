@@ -99,7 +99,7 @@
 		fn->setParameter("Q",0.7);
 		fn->tie("Q","0.7"); //set tie for Parameter Q, since it's supposed to be a constant
 
-		alg2.setPropertyValue("Function",*fn);
+		alg2.setPropertyValue("Function",fn->asString());
 
 		// Set which spectrum to fit against and initial starting values
 		alg2.setPropertyValue("InputWorkspace", wsName);
