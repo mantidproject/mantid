@@ -756,7 +756,7 @@ void PeakIntegration::cluster(double **matrix, int m, int n, int **mask)
   {
     for (int j=0; j<n; j++)
     {
-      mask[i][j] = 0.0;
+      mask[i][j] = 0;
       if(matrix[i][j] > max)
       {
         max = matrix[i][j];

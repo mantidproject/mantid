@@ -28,7 +28,7 @@ namespace Crystal
 
   const double STEPS_PER_ANGSTROM = 100;  // resolution of lamda table
 
-  const int NUM_WAVELENGTHS = std::ceil( MAX_WAVELENGTH * STEPS_PER_ANGSTROM);
+  const int NUM_WAVELENGTHS = static_cast<int>(std::ceil( MAX_WAVELENGTH * STEPS_PER_ANGSTROM));
 
   const double radtodeg_half = 180.0/M_PI/2.;
 

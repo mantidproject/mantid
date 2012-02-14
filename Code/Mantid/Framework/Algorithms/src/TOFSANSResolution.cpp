@@ -189,9 +189,9 @@ void TOFSANSResolution::exec()
 
       const double dwl_over_wl = 3.9560*getTOFResolution(itev->m_tof)/(1000.0*(L1+L2)*itev->m_tof);
       const double dq_over_q = std::sqrt(dTheta2/(theta*theta)+dwl_over_wl*dwl_over_wl);
-
+      
       PARALLEL_CRITICAL(iq)    /* Write to shared memory - must protect */
-      if (iq>=0 && iq < xLength-1 && !dq_over_q!=dq_over_q && dq_over_q>0)
+      if (iq>=0 && iq < xLength-1 && !boost::math::isnan(dq_over_q) && dq_over_q>0)
       {
         DxOut[iq] += q*dq_over_q*itev->m_weight;
         XNorm[iq] += itev->m_weight;

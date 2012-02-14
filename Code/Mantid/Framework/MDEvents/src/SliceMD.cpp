@@ -115,7 +115,7 @@ namespace MDEvents
     declareProperty("TakeMaxRecursionDepthFromInput", true, "Copy the maximum recursion depth from the input workspace.");
 
     BoundedValidator<int> *mustBePositiveInteger = new BoundedValidator<int>();
-    mustBePositiveInteger->setLower(0.0);
+    mustBePositiveInteger->setLower(0);
 
     declareProperty("MaxRecursionDepth", 1000, mustBePositiveInteger,
     "Sets the maximum recursion depth to use. Can be used to constrain the workspaces internal structure");

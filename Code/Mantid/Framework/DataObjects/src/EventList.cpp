@@ -583,7 +583,7 @@ namespace DataObjects
     case WEIGHTED:
       return weightedEvents[event_number];
     case WEIGHTED_NOTIME:
-      return WeightedEvent(weightedEventsNoTime[event_number].tof(), 0., weightedEventsNoTime[event_number].weight(), weightedEventsNoTime[event_number].errorSquared());
+      return WeightedEvent(weightedEventsNoTime[event_number].tof(), 0, weightedEventsNoTime[event_number].weight(), weightedEventsNoTime[event_number].errorSquared());
     }
     throw std::runtime_error("EventList: invalid event type value was found.");
   }

@@ -400,7 +400,7 @@ public:
       // First, get info about the event_time_zero field in this bank
       file.openData("event_time_zero");
     }
-    catch (::NeXus::Exception & e)
+    catch (::NeXus::Exception&)
     {
       // Field not found error is most likely.
       // Use the "proton_charge" das logs.

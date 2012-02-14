@@ -181,7 +181,7 @@ public:
     ev.setCenter(0, 2.0);
     ev.setCenter(1, 3.0);
 
-    int num = 5e5;
+    int num = 500000;
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i=0; i < num; i++)
     {
