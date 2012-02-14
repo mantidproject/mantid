@@ -151,18 +151,10 @@ namespace Crystal
 
     ConventionalCell info = ScalarUtils::GetCellBestError( list, true );
 
-    std::string message = info.GetDescription();
-
-    char buffer[200];
-
     DblMatrix newUB = info.GetNewUB();
-    std::vector<double> lat_par;
-    IndexingUtils::GetLatticeParameters( newUB, lat_par );
 
-    sprintf( buffer,
-             std::string("Lattice Params: %8.4f %8.4f %8.4f  %8.3f %8.3f %8.3f  %9.2f").c_str(),
-             lat_par[0], lat_par[1], lat_par[2], lat_par[3], lat_par[4], lat_par[5], lat_par[6]);
-    message += std::string( buffer );
+    std::string message = info.GetDescription() + " Lat Par:" +
+                          IndexingUtils::GetLatticeParameterString( newUB );
 
     g_log.notice( std::string(message) );
 
@@ -204,7 +196,6 @@ namespace Crystal
       this->setProperty("AverageError", average_error);
     }
   }
-
 
 } // namespace Mantid
 } // namespace Crystal

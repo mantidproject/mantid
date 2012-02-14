@@ -2909,6 +2909,29 @@ bool IndexingUtils::GetLatticeParameters( const DblMatrix   & UB,
 
 
 /**
+ *  Get a nicely formatted string listing the lattice parameters and cell 
+ *  volume.
+ *
+ *  @return a string listing the cell parameters.
+ */
+std::string IndexingUtils::GetLatticeParameterString( const DblMatrix & UB )
+{
+  std::vector<double> lat_par;
+  IndexingUtils::GetLatticeParameters( UB, lat_par );
+
+  char buffer[100];
+
+  sprintf( buffer,
+           std::string(" %8.4f %8.4f %8.4f  %8.3f %8.3f %8.3f  %9.2f").c_str(),
+           lat_par[0], lat_par[1], lat_par[2], 
+           lat_par[3], lat_par[4], lat_par[5], lat_par[6]);
+
+  std::string result( buffer );
+  return result;
+}
+
+
+/**
     Check if a,b,c cell has angles satifying Niggli condition within epsilon.
     Specifically, check if all angles are strictly less than 90 degrees,
     or all angles are greater than or equal to 90 degrees.  The inequality

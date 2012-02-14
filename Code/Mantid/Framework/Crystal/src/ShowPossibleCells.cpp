@@ -126,30 +126,16 @@ namespace Crystal
     // now tell the user the number of possible conventional cells:
     g_log.notice() << "Num Cells : " << num_cells << std::endl;
 
-
-    std::vector<std::string> result_string_list;
-    char buffer[200];
-
     for ( size_t i = 0; i < num_cells; i++ )
     {
-      std::string message = list[i].GetDescription();
-
       DblMatrix newUB = list[i].GetNewUB();
-      std::vector<double> lat_par;
-      IndexingUtils::GetLatticeParameters( newUB, lat_par );
-
-      sprintf( buffer,
-               std::string("Lattice Parameters: %8.4f %8.4f %8.4f  %8.3f %8.3f %8.3f  %9.2f").c_str(),
-               lat_par[0], lat_par[1], lat_par[2], lat_par[3], lat_par[4], lat_par[5], lat_par[6]);
-      message += std::string( buffer );
+      std::string message = list[i].GetDescription() + " Lat Par:" +
+                            IndexingUtils::GetLatticeParameterString( newUB );
 
       g_log.notice( std::string(message) );
-
-      result_string_list.push_back(message);
     }
 
     this->setProperty("NumberOfCells", (int)num_cells );
-
   }
 
 
