@@ -231,6 +231,26 @@ void ParamFunction::declareParameter(const std::string& name,double initValue, c
 }
 
 /**
+ * Returns the value of an active parameter.
+ * @param i :: The index of an active parameter
+ * @return the value of the active parameter
+ */
+double ParamFunction::activeParameter(size_t i)const
+{
+  return m_parameters[indexOfActive(i)];
+}
+
+/**
+ * Sets the value of an active parameter.
+ * @param i :: The index of an active parameter
+ * @param value :: A new value.
+ */
+void ParamFunction::setActiveParameter(size_t i, double value)
+{
+  m_parameters[indexOfActive(i)] = value;
+}
+
+/**
  * Returns the name of an active parameter.
  * @param i :: The index of an active parameter
  * @return the name of the active parameter
@@ -247,7 +267,7 @@ std::string ParamFunction::nameOfActive(size_t i)const
  */
 std::string ParamFunction::descriptionOfActive(size_t i)const
 {
-  return m_parameterDescriptions[indexOfActive(static_cast<int>(i))];
+  return m_parameterDescriptions[indexOfActive(i)];
 }
 
 /**

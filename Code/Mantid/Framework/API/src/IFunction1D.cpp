@@ -33,17 +33,6 @@ namespace API
   
   Kernel::Logger& IFunction1D::g_log = Kernel::Logger::get("IFunction1D");
 
-/** Base class implementation of derivative IFunction1D throws error. This is to check if such a function is provided
-    by derivative class. In the derived classes this method must return the derivatives of the resuduals function
-    (defined in void Fit1D::function(const double*, double*, const double*, const double*, const double*, const int&))
-    with respect to the fit parameters. If this method is not reimplemented the derivative free simplex minimization
-    algorithm is used.
- */
-void IFunction1D::functionDeriv1D(Jacobian*, const double*, const size_t)
-{
-  throw Kernel::Exception::NotImplementedError("No derivative IFunction1D provided");
-}
-
 namespace
 {
   /**
@@ -89,6 +78,17 @@ void IFunction1D::functionDeriv(const FunctionDomain& domain, Jacobian& jacobian
     throw std::invalid_argument("Unexpected domain in IFunction1D");
   }
   functionDeriv1D(&jacobian,(*d1d)[0],d1d->size());
+}
+
+/** Base class implementation of derivative IFunction1D throws error. This is to check if such a function is provided
+    by derivative class. In the derived classes this method must return the derivatives of the resuduals function
+    (defined in void Fit1D::function(const double*, double*, const double*, const double*, const double*, const int&))
+    with respect to the fit parameters. If this method is not reimplemented the derivative free simplex minimization
+    algorithm is used.
+ */
+void IFunction1D::functionDeriv1D(Jacobian*, const double*, const size_t)
+{
+  throw Kernel::Exception::NotImplementedError("No derivative IFunction1D provided");
 }
 
 /** 

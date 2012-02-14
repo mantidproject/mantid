@@ -91,6 +91,10 @@ public:
 
   /// Number of active (in terms of fitting) parameters
   virtual size_t nActive()const{return m_indexMap.size();}
+  /// Value of i-th active parameter. Override this method to make fitted parameters different from the declared
+  virtual double activeParameter(size_t i)const;
+  /// Set new value of i-th active parameter. Override this method to make fitted parameters different from the declared
+  virtual void setActiveParameter(size_t i, double value);
   /// Returns the name of active parameter i
   virtual std::string nameOfActive(size_t i)const;
   /// Returns the name of active parameter i
