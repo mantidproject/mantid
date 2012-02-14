@@ -74,9 +74,9 @@ template<>
 class LOOP<0>{
   public:
     static inline void EXEC(MDEventWSWrapper *pH){           
-            pH->wsCreator[0]    =&MDEventWSWrapper::createEmptyEventWS<0>;
-            pH->mdEvSummator[0] =&MDEventWSWrapper::add_MDData<0>;
-            pH->mdCalCentroid[0]=&MDEventWSWrapper::calc_Centroid<0>;
+            pH->wsCreator[0]    =&MDEventWSWrapper::createEmptyEventWS_wrong;
+            pH->mdEvSummator[0] =&MDEventWSWrapper::add_MDData_wrong;
+            pH->mdCalCentroid[0]=&MDEventWSWrapper::calc_Centroid_wrong;
       }
 };
 
