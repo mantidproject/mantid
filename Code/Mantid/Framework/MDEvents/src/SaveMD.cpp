@@ -162,6 +162,25 @@ namespace MDEvents
         file->putAttr("version", 1);
         ei->saveExperimentInfoNexus(file);
         file->closeGroup();
+
+        // Warning for high detector IDs.
+        // The routine in MDEvent::saveVectorToNexusSlab() converts detector IDs to single-precision floats
+        // Floats only have 24 bits of int precision = 16777216 as the max, precise detector ID
+        detid_t min = 0;
+        detid_t max = 0;
+        try
+        {
+          ei->getInstrument()->getMinMaxDetectorIDs(min, max);
+        }
+        catch (std::runtime_error &)
+        { /* Ignore error. Min/max will be 0 */ }
+
+        if (max > 16777216)
+        {
+          g_log.warning() << "This instrument (" << ei->getInstrument()->getName() <<
+              ") has detector IDs that are higher than can be saved in the .NXS file as single-precision floats." << std::endl;
+          g_log.warning() << "Detector IDs above 16777216 will not be precise. Please contact the developers." << std::endl;
+        }
       }
     }
 
