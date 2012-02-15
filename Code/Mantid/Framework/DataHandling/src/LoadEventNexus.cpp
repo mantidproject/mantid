@@ -239,6 +239,9 @@ public:
     // Will we need to compress?
     bool compress = (alg->compressTolerance >= 0);
 
+    // Which detector IDs were touched?
+    std::vector<bool> usedDetIds(alg->eventid_max+1, false);
+
     //Go through all events in the list
     for (std::size_t i = 0; i < numEvents; i++)
     {
@@ -287,6 +290,8 @@ public:
           if (tof < my_shortest_tof) { my_shortest_tof = tof;}
           if (tof > my_longest_tof) { my_longest_tof = tof;}
 
+          // Track all the touched wi
+          usedDetIds[detId] = true;
         } // valid detector IDs
 
       }
@@ -299,13 +304,16 @@ public:
       std::set<size_t>::iterator it;
       for (detid_t pixID = 0; pixID <= alg->eventid_max; pixID++)
       {
-        //Find the the workspace index corresponding to that pixel ID
-        size_t wi = pixelID_to_wi_vector[pixID+pixelID_to_wi_offset];
-        EventList * el = WS->getEventListPtr(wi);
-        if (compress)
-          el->compressEvents(alg->compressTolerance, el);
-        else if (pulsetimesincreasing)
-          el->setSortOrder(DataObjects::PULSETIME_SORT);
+        if (usedDetIds[pixID])
+        {
+          //Find the the workspace index corresponding to that pixel ID
+          size_t wi = pixelID_to_wi_vector[pixID+pixelID_to_wi_offset];
+          EventList * el = WS->getEventListPtr(wi);
+          if (compress)
+            el->compressEvents(alg->compressTolerance, el);
+          else if (pulsetimesincreasing)
+            el->setSortOrder(DataObjects::PULSETIME_SORT);
+        }
       }
     }
 
