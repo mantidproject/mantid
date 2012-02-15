@@ -6,6 +6,10 @@
 #include <Poco/Path.h>
 #include "MantidAPI/FileFinder.h"
 
+#include <ctype.h>
+
+#include <boost/algorithm/string.hpp>
+
 #include <functional>
 #include <numeric>
 
@@ -16,7 +20,7 @@ namespace Mantid
 {
 namespace API
 {
-  // Forward declaration of functor wrapped in anonymous namespace.
+  // Forward declarations
   namespace
   {
     class AppendFullFileName
@@ -30,6 +34,9 @@ namespace API
     private:
       const std::vector<std::string> & m_exts;
     };
+
+    std::vector<std::vector<std::string> > unflattenFileNames(
+      const std::vector<std::string> & flattenedFileNames);
   }
   
   /** Constructor
@@ -66,12 +73,20 @@ namespace API
     if( propValue.empty())
       return "No file(s) specified.";
 
+    std::string value = propValue;
+    
+    // Remove whitespace.
+    value.erase(std::remove_if( // ("Erase-remove" idiom.)
+        value.begin(), value.end(),
+        isspace),
+      value.end());
+    
     std::stringstream errorMsg;
 
+    // Assume a format of "dir/inst_1,2,...n.raw", and try to parse using parser.
     try
     {
-      // Parse the string into the vector of vectors of filenames.
-      m_parser.parse(propValue);
+      m_parser.parse(value);
     }
     catch(const std::runtime_error & re)
     {
@@ -83,16 +98,26 @@ namespace API
     AppendFullFileName appendFullFileName(m_exts);
     std::string fullFileNames("");
 
-    // If we have been unable to parse multiple "run" filenames, then we try treating the string as a single file name.
+    // If unsuccessful, then assume a format of:
+    //
+    // "dir/inst_1.raw, dir/inst_2.raw, ...  dir/inst_n.raw" (where n may equal 1).
+    //
+    // Tokenise on commas, and and try to find full files names of each token.
     if(fileNames.empty())
     {
+      std::vector<std::string> tokens;
+      tokens = boost::split(tokens, value, boost::is_any_of(","));
+      fileNames = unflattenFileNames(tokens);
       try
       {
-        fullFileNames = appendFullFileName(fullFileNames, propValue);
+        fullFileNames = std::accumulate(
+          fileNames.begin(), fileNames.end(),
+          std::string(""),
+          appendFullFileName);
       }
       catch(const std::runtime_error & re)
       {
-        errorMsg << "Tried to find single file, but also failed: \"" << re.what() << "\".";
+        errorMsg << "Tried to find as single file(s), but also failed: \"" << re.what() << "\".";
         return errorMsg.str();
       }
     }
@@ -233,6 +258,25 @@ namespace API
       // Append the file name to result, and return it.
       result += slaveFileProp();
       return result;
+    }
+
+    /**
+     * Turn (1, 2, 30, 31) into ((1), (2), (30), (31)).
+     */
+    std::vector<std::vector<std::string> > unflattenFileNames(
+      const std::vector<std::string> & flattenedFileNames)
+    {
+      std::vector<std::vector<std::string> > unflattenedFileNames;
+
+      std::vector<std::string>::const_iterator it = flattenedFileNames.begin();
+
+      for(; it != flattenedFileNames.end(); ++it)
+      {
+        unflattenedFileNames.push_back(
+          std::vector<std::string>(1,(*it)));
+      }
+
+      return unflattenedFileNames;
     }
   } // anonymous namespace
 

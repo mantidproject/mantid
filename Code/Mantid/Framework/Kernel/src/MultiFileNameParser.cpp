@@ -210,6 +210,11 @@ namespace Kernel
       if(lastSeparator != std::string::npos)
         m_dirString = m_multiFileName.substr(0, lastSeparator + 1);
 
+      // If the directory contains an instance of a comma, then the string is
+      // a comma separated list of single *full* file names to load.
+      if(std::string::npos != m_dirString.find(","))
+        throw std::runtime_error("Unable to parse.");
+
       // Slice off the directory and extension.
       std::string base = m_multiFileName.substr(
         m_dirString.size(), m_multiFileName.size() - (m_dirString.size() + m_extString.size()));
