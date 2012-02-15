@@ -13,7 +13,7 @@ namespace Mantid
 
       virtual void updateModel();
 
-      virtual vtkDataSet* execute(vtkDataSetFactory*, ProgressAction&);
+      virtual vtkDataSet* execute(vtkDataSetFactory*, ProgressAction&, ProgressAction&);
 
       virtual const std::string& getAppliedGeometryXML() const;
 

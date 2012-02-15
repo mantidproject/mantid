@@ -42,7 +42,7 @@ namespace Mantid
     {
     public:
       MDHWInMemoryLoadingPresenter(MDLoadingView* view, WorkspaceProvider* repository, std::string wsName);
-      virtual vtkDataSet* execute(vtkDataSetFactory* factory, ProgressAction& eventHandler);
+      virtual vtkDataSet* execute(vtkDataSetFactory* factory, ProgressAction& rebinningProgressUpdate, ProgressAction& drawingProgressUpdate);
       virtual void executeLoadMetadata();
       virtual ~MDHWInMemoryLoadingPresenter();
       virtual bool canReadFile() const;

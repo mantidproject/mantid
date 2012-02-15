@@ -74,13 +74,13 @@ void testExecution()
   EXPECT_CALL(factory, create(_)).WillOnce(testing::Return(vtkUnstructuredGrid::New()));
   EXPECT_CALL(factory, setRecursionDepth(_)).Times(1);
 
-  //Setup progress updates object
-  FilterUpdateProgressAction<MockMDLoadingView> progressAction(view, "");
+  MockProgressAction mockLoadingProgressUpdate;
+  MockProgressAction mockDrawingProgressUpdate;
 
   //Create the presenter and runit!
   EventNexusLoadingPresenter presenter(view, getSuitableFile());
   presenter.executeLoadMetadata();
-  vtkDataSet* product = presenter.execute(&factory, progressAction);
+  vtkDataSet* product = presenter.execute(&factory, mockLoadingProgressUpdate, mockDrawingProgressUpdate);
 
   TSM_ASSERT("Should have generated a vtkDataSet", NULL != product);
   TSM_ASSERT_EQUALS("Wrong type of output generated", "vtkUnstructuredGrid", std::string(product->GetClassName()));

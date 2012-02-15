@@ -38,7 +38,7 @@ namespace Mantid
     {
     public:
       EventNexusLoadingPresenter(MDLoadingView* view, const std::string fileName);
-      virtual vtkDataSet* execute(vtkDataSetFactory* factory, ProgressAction& eventHandler);
+      virtual vtkDataSet* execute(vtkDataSetFactory* factory, ProgressAction& loadingProgressUpdate, ProgressAction& drawingProgressUpdate);
       virtual void executeLoadMetadata();
       virtual bool hasTDimensionAvailable() const;
       virtual std::vector<double> getTimeStepValues() const;

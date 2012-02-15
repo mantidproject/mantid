@@ -115,11 +115,13 @@ int vtkEventNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
     m_time =outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0];
   }
 
-  FilterUpdateProgressAction<vtkEventNexusReader> updateHandler(this, "Loading...");
+  FilterUpdateProgressAction<vtkEventNexusReader> loadingProgressUpdate(this, "Loading...");
+  FilterUpdateProgressAction<vtkEventNexusReader> drawingProgressUpdate(this, "Drawing...");
+
   vtkMDHexFactory* hexahedronFactory = new vtkMDHexFactory(ThresholdRange_scptr(new IgnoreZerosThresholdRange()), "signal");
   hexahedronFactory->setTime(m_time);
   hexahedronFactory->setCheckDimensionality(false);
-  vtkDataSet* product = m_presenter->execute(hexahedronFactory, updateHandler);
+  vtkDataSet* product = m_presenter->execute(hexahedronFactory, loadingProgressUpdate, drawingProgressUpdate);
   
   //-------------------------------------------------------- Corrects problem whereby boundaries not set propertly in PV.
   vtkBox* box = vtkBox::New();

@@ -142,13 +142,14 @@ public:
     Mantid::API::Workspace_sptr ws = getGoodWorkspace();
     EXPECT_CALL(*repository, fetchWorkspace(_)).Times(2).WillRepeatedly(Return(ws));
 
-    //Setup progress updates object
-    FilterUpdateProgressAction<MockMDLoadingView> progressAction(view, "");
+    //Setup progress updates objects
+    MockProgressAction mockLoadingProgressAction;
+    MockProgressAction mockDrawingProgressAction;
 
     //Create the presenter and run it!
     MDHWInMemoryLoadingPresenter presenter(view, repository, "_");
     presenter.executeLoadMetadata();
-    vtkDataSet* product = presenter.execute(&factory, progressAction);
+    vtkDataSet* product = presenter.execute(&factory, mockLoadingProgressAction, mockDrawingProgressAction);
 
     TSM_ASSERT("Should have generated a vtkDataSet", NULL != product);
     TSM_ASSERT_EQUALS("Wrong type of output generated", "vtkUnstructuredGrid", std::string(product->GetClassName()));

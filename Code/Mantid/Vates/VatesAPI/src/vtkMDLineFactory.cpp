@@ -94,12 +94,12 @@ namespace Mantid
         Mantid::coord_t out[1];
         bool* useBox = new bool[it->getDataSize()];
 
-        double progressFactor = 50/it->getDataSize();
+        double progressFactor = 50/double(it->getDataSize());
         double progressOffset = 50;
 
         for(size_t iBox = 0; iBox < it->getDataSize(); ++iBox)
         {
-          progressUpdating.eventRaised(iBox*progressFactor);
+          progressUpdating.eventRaised(double(iBox)*progressFactor);
 
           Mantid::signal_t signal_normalized= it->getNormalizedSignal();
           if (!boost::math::isnan( signal_normalized ) && m_thresholdRange->inRange(signal_normalized))
@@ -139,7 +139,7 @@ namespace Mantid
         delete[] masks;
         for(size_t ii = 0; ii < it->getDataSize() ; ++ii)
         {
-          progressUpdating.eventRaised((ii*progressFactor) + progressOffset);
+          progressUpdating.eventRaised((double(ii)*progressFactor) + progressOffset);
 
           if (useBox[ii] == true)
           {

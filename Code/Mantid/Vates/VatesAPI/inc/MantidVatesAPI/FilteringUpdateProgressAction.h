@@ -40,9 +40,6 @@ namespace VATES
 template<typename Filter>
 class DLLExport FilterUpdateProgressAction : public ProgressAction
 {
-  
-  /// Message associated with the progress action
-  std::string m_message;
 
 public:
 
@@ -66,6 +63,9 @@ private:
   FilterUpdateProgressAction(FilterUpdateProgressAction&);
 
   Filter* m_filter;
+
+  /// Message associated with the progress action
+  std::string m_message;
 };
 
 }

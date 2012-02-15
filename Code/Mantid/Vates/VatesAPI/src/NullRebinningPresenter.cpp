@@ -14,7 +14,7 @@ namespace Mantid
     {
     }
 
-    vtkDataSet* NullRebinningPresenter::execute(vtkDataSetFactory*, ProgressAction&)
+    vtkDataSet* NullRebinningPresenter::execute(vtkDataSetFactory*, ProgressAction&, ProgressAction&)
     {
       throw std::runtime_error("NullRebinningPresenter does not implement this method. Misused");
     }

@@ -176,7 +176,7 @@ const char* vtkRebinningTransformOperator::getAppliedGeometryXML() const
 void vtkRebinningTransformOperator::updateAlgorithmProgress(double progress, const std::string& message)
 {
   progressMutex.lock();
-  this->SetProgressText("Executing Mantid MDEvent Rebinning Algorithm...");
+  this->SetProgressText(message.c_str());
   this->UpdateProgress(progress);
   progressMutex.unlock();
 }
@@ -250,7 +250,8 @@ int vtkRebinningTransformOperator::RequestData(vtkInformation* vtkNotUsed(reques
     //Updating again at this point is the only way to pick-up changes to clipping.
     m_presenter->updateModel();
 
-    FilterUpdateProgressAction<vtkRebinningTransformOperator> updatehandler(this, "Rebinning...");
+    FilterUpdateProgressAction<vtkRebinningTransformOperator> rebinningProgressUpdate(this, "Rebinning...");
+    FilterUpdateProgressAction<vtkRebinningTransformOperator> drawingProgressUpdate(this, "Drawing...");
 
     vtkInformation *outInfo = outputVector->GetInformationObject(0);
     vtkUnstructuredGrid *output = vtkUnstructuredGrid::SafeDownCast(outInfo->Get(
@@ -281,7 +282,7 @@ int vtkRebinningTransformOperator::RequestData(vtkInformation* vtkNotUsed(reques
     p_2dHistoFactory->SetSuccessor(p_3dHistoFactory);
     p_3dHistoFactory->SetSuccessor(p_4dHistoFactory);
 
-    vtkDataSet* outData = m_presenter->execute(p_1dMDFactory, updatehandler);
+    vtkDataSet* outData = m_presenter->execute(p_1dMDFactory, rebinningProgressUpdate, drawingProgressUpdate);
     m_thresholdMax = m_ThresholdRange->getMaximum();
     m_thresholdMin = m_ThresholdRange->getMinimum();
     delete p_1dMDFactory;

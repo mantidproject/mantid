@@ -44,7 +44,7 @@ private:
     {
     }
 
-    virtual vtkDataSet* execute(vtkDataSetFactory*, ProgressAction&)
+    virtual vtkDataSet* execute(vtkDataSetFactory*, ProgressAction&, ProgressAction&)
     {
       return vtkUnstructuredGrid::New(); 
     }

@@ -47,7 +47,7 @@ public:
     NullRebinningPresenter nullObject;
     FakeProgressAction progressAction;
     FakeDataSetFactory* pFactory = new FakeDataSetFactory;
-    TS_ASSERT_THROWS(nullObject.execute(pFactory, progressAction), std::runtime_error);
+    TS_ASSERT_THROWS(nullObject.execute(pFactory, progressAction, progressAction), std::runtime_error);
     delete pFactory;
   }
 

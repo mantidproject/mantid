@@ -106,13 +106,13 @@ namespace Mantid
         // Array with true where the voxel should be shown
         bool * voxelShown = new bool[nBinsX*nBinsY];
 
-        double progressFactor = 50/nBinsX;
+        double progressFactor = 50/double(nBinsX);
         double progressOffset = 50;
 
         size_t index = 0;
         for (int i = 0; i < nBinsX; i++)
         {
-          progressUpdating.eventRaised(progressFactor*i);
+          progressUpdating.eventRaised(progressFactor*double(i));
 
           for (int j = 0; j < nBinsY; j++)
           {
@@ -154,7 +154,7 @@ namespace Mantid
         index = 0;
         for (int i = 0; i < nPointsX; i++)
         {
-          progressUpdating.eventRaised((progressFactor*i) + progressOffset);
+          progressUpdating.eventRaised((progressFactor*double(i)) + progressOffset);
           in[0] = minX + (static_cast<coord_t>(i) * incrementX); //Calculate increment in x;
           for (int j = 0; j < nPointsY; j++)
           {

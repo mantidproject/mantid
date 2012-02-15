@@ -64,9 +64,10 @@ namespace Mantid
     /*
     Executes the underlying algorithm to create the MVP model.
     @param factory : visualisation factory to use.
-    @param progressUpdate : object that encapuslates the direction of the gui change as the algorithm progresses.
+    @param  : Handler for GUI updates while algorithm progresses.
+    @param drawingProgressUpdate : Handler for GUI updates while vtkDataSetFactory::create occurs.
     */
-    vtkDataSet* MDEWInMemoryLoadingPresenter::execute(vtkDataSetFactory* factory, ProgressAction& progressUpdate)
+    vtkDataSet* MDEWInMemoryLoadingPresenter::execute(vtkDataSetFactory* factory, ProgressAction&, ProgressAction& drawingProgressUpdate)
     {
       using namespace Mantid::API;
       using namespace Mantid::Geometry;
@@ -75,7 +76,7 @@ namespace Mantid
       IMDEventWorkspace_sptr eventWs = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(ws);
 
       factory->setRecursionDepth(this->m_view->getRecursionDepth());
-      vtkDataSet* visualDataSet = factory->oneStepCreate(eventWs, progressUpdate);//HACK: progressUpdate should be argument for drawing!
+      vtkDataSet* visualDataSet = factory->oneStepCreate(eventWs, drawingProgressUpdate);
       
       /*extractMetaData needs to be re-run here because the first execution of this from ::executeLoadMetadata will not have ensured that all dimensions
         have proper range extents set.

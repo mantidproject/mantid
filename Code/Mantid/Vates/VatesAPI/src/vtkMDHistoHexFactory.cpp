@@ -130,7 +130,7 @@ namespace VATES
     memset(pointNeeded, 0, nPointsX*nPointsY*nPointsZ*sizeof(bool));
     // Array with true where the voxel should be shown
     bool * voxelShown = new bool[nBinsX*nBinsY*nBinsZ];
-    double progressFactor = 50/nBinsZ;
+    double progressFactor = 50/double(nBinsZ);
     double progressOffset = 50;
 
     size_t index = 0;
@@ -138,7 +138,7 @@ namespace VATES
     for (int z = 0; z < nBinsZ; z++)
     {
       //Report progress updates for the first 50%
-      progressUpdate.eventRaised(z*progressFactor);
+      progressUpdate.eventRaised(double(z)*progressFactor);
       for (int y = 0; y < nBinsY; y++)
       {
         for (int x = 0; x < nBinsX; x++)
@@ -198,7 +198,7 @@ namespace VATES
     for (int z = 0; z < nPointsZ; z++)
     {
       //Report progress updates for the last 50%
-      progressUpdate.eventRaised(z*progressFactor + progressOffset);
+      progressUpdate.eventRaised(double(z)*progressFactor + progressOffset);
       in[2] = (minZ + (static_cast<coord_t>(z) * incrementZ)); //Calculate increment in z;
       for (int y = 0; y < nPointsY; y++)
       {

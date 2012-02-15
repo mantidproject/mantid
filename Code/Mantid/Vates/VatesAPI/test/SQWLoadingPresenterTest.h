@@ -88,7 +88,7 @@ void testCannotReadFileWithWrongExtension()
 void testExecutionInMemory()
 {
   using namespace testing;
-   //Setup view
+  //Setup view
   MockMDLoadingView* view = new MockMDLoadingView;
   EXPECT_CALL(*view, getRecursionDepth()).Times(AtLeast(1)); 
   EXPECT_CALL(*view, getLoadInMemory()).Times(AtLeast(1)).WillRepeatedly(Return(true)); // View setup to request loading in memory.
@@ -101,14 +101,17 @@ void testExecutionInMemory()
   EXPECT_CALL(factory, create(_)).WillOnce(testing::Return(vtkUnstructuredGrid::New()));
   EXPECT_CALL(factory, setRecursionDepth(_)).Times(1);
 
-  //Setup progress updates object
-  FilterUpdateProgressAction<MockMDLoadingView> progressAction(view, "");
+  //Setup progress updates objects
+  MockProgressAction mockLoadingProgressAction;
+  MockProgressAction mockDrawingProgressAction;
+  //Expectation checks that progress should be >= 0 and <= 100 and called at least once!
+  EXPECT_CALL(mockLoadingProgressAction, eventRaised(AllOf(Le(100),Ge(0)))).Times(AtLeast(1));
 
   //Create the presenter and runit!
   SQWLoadingPresenter presenter(view, getSuitableFileNamePath());
   presenter.executeLoadMetadata();
-  vtkDataSet* product = presenter.execute(&factory, progressAction);
-  
+  vtkDataSet* product = presenter.execute(&factory, mockLoadingProgressAction, mockDrawingProgressAction);
+
   std::string fileNameIfGenerated = getFileBackend(getSuitableFileNamePath());
   std::ifstream fileExists(fileNameIfGenerated.c_str(), ifstream::in);
   TSM_ASSERT("File Backend SHOULD NOT be generated.",  !fileExists.good());
@@ -123,6 +126,8 @@ void testExecutionInMemory()
 
   TS_ASSERT(Mock::VerifyAndClearExpectations(view));
   TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
+
+  TSM_ASSERT("Bad usage of loading algorithm progress updates", Mock::VerifyAndClearExpectations(&mockLoadingProgressAction));
 
   product->Delete();
 }

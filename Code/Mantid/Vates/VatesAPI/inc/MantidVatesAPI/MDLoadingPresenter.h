@@ -42,7 +42,7 @@ namespace Mantid
     class DLLExport MDLoadingPresenter
     {
     public:
-      virtual vtkDataSet* execute(vtkDataSetFactory* factory, ProgressAction& eventHandler) = 0;
+      virtual vtkDataSet* execute(vtkDataSetFactory* factory, ProgressAction& rebinningProgressUpdate, ProgressAction& drawingProgressUpdate) = 0;
       virtual void executeLoadMetadata() = 0;
       virtual bool hasTDimensionAvailable() const = 0;
       virtual std::vector<double> getTimeStepValues() const = 0;

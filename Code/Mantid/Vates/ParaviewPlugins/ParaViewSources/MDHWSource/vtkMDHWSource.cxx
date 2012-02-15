@@ -83,7 +83,8 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
       m_time =outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0];
     }
 
-    FilterUpdateProgressAction<vtkMDHWSource> updateHandler(this, "Loading...");
+    FilterUpdateProgressAction<vtkMDHWSource> loadingProgressUpdate(this, "Loading...");
+    FilterUpdateProgressAction<vtkMDHWSource> drawingProgressUpdate(this, "Drawing...");
 
     ThresholdRange_scptr thresholdRange(new IgnoreZerosThresholdRange());
 
@@ -95,7 +96,7 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     factory->SetSuccessor(successor);
     factory->setCheckDimensionality(false);
 
-    vtkDataSet* product = m_presenter->execute(factory, updateHandler);
+    vtkDataSet* product = m_presenter->execute(factory, loadingProgressUpdate, drawingProgressUpdate);
 
     //-------------------------------------------------------- Corrects problem whereby boundaries not set propertly in PV.
     vtkBox* box = vtkBox::New();

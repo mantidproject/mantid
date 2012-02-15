@@ -96,12 +96,12 @@ namespace VATES
     visualDataSet->SetPoints(points);
     visualDataSet->GetCellData()->SetScalars(signal);
 
-    double progressFactor = 100/numPeaks;
+    double progressFactor = 100/double(numPeaks);
 
     // Go peak-by-peak
     for (int i=0; i < numPeaks; i++)
     {
-      progressUpdating.eventRaised(i*progressFactor);
+      progressUpdating.eventRaised(double(i)*progressFactor);
 
       IPeak & peak = m_workspace->getPeak(i);
 
