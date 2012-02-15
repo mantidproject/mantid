@@ -72,6 +72,10 @@ ${UI_BUILT_SOURCES}
 ${RES_FILES}
 )
 
+set( TEST_SUITES
+    test/suite_MDHistoWorkspace
+)
+
 # For Windows
 add_definitions( -DIN_MANTID_VATES_SIMPLEGUI_VIEWWIDGETS )
 # Add the target for this directory
@@ -92,5 +96,16 @@ ${MANTID_SUBPROJECT_LIBS}
 MantidQtSliceViewer
 MantidQtFactory
 )
+
+if( SQUISH_FOUND )
+  # Need to set the AUT first
+  set( SQUISH_AUT MantidPlot )
+  set( SQUISH_AUT_PATH ${CMAKE_BINARY_DIR}/bin )
+  squish_add_test_suite( ${TEST_SUITES} )
+  squish_suite_envvars( ${TEST_SUITES}
+    PV_PLUGIN_PATH ${CMAKE_BINARY_DIR}/bin/${PVPLUGINS_DIR}
+    SCRIPTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/test/mp_scripts
+  )
+endif()
 
 install( TARGETS VatesSimpleGuiViewWidgets ${TARGET_TYPE} DESTINATION ${PLUGINS_DIR} )
