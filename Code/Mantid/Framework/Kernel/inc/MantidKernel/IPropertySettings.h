@@ -14,7 +14,8 @@ class IPropertyManager;
 class Property;
 
   /** Interface for modifiers to Property's that specify
-   * if they should be enabled or in a GUI.
+    if they should be enabled or visible in a GUI.
+    They are set on an algorithm via Algorithm::setPropertySettings()
     
     @author Janik Zikovsky
     @date 2011-08-26
