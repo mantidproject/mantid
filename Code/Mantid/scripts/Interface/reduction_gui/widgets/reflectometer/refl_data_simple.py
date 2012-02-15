@@ -54,7 +54,10 @@ class DataReflWidget(BaseWidget):
         if state is not None:
             self.set_state(state)
         else:
-            self.set_state(DataSeries())
+            if self.instrument_name == "REF_L":
+                self.set_state(DataSeries(data_class=REFLDataSets))
+            else:
+                self.set_state(DataSeries(data_class=REFMDataSets))
 
     def initialize_content(self):
         self._summary.edited_warning_label.hide()
@@ -176,7 +179,7 @@ class DataReflWidget(BaseWidget):
         self._summary.instrument_group_box.hide()
         
         # If we do not have access to /SNS, don't display the automated reduction options
-        if not os.path.isdir("/SNS/%s" % self.instrument_name):
+        if not self._settings.debug and not os.path.isdir("/SNS/%s" % self.instrument_name):
             self._summary.auto_reduce_check.hide()
         
     def _edit_event(self, text=None, ctrl=None):
@@ -265,13 +268,21 @@ class DataReflWidget(BaseWidget):
         content += "import os\n"
         content += "if (os.environ.has_key(\"MANTIDPATH\")):\n"
         content += "    del os.environ[\"MANTIDPATH\"]\n"
-        content += "sys.path.insert(0,'/opt/mantidnightly/bin')\n"
+        content += "sys.path.insert(0,'/opt/mantidunstable/bin')\n"
         content += "from MantidFramework import mtd\n"
         content += "mtd.initialize()\n"
         content += "from mantidsimple import *\n\n"
         
-        content += "runNumber=sys.argv[1]\n"
+        content += "eventFileAbs=sys.argv[1]\n"
         content += "outputDir=sys.argv[2]\n\n"
+
+        content += "eventFile = os.path.split(eventFileAbs)[-1]\n"
+        content += "nexusDir = eventFileAbs.replace(eventFile, '')\n"
+        content += "runNumber = eventFile.split('_')[1]\n"
+        content += "configService = mtd.getSettings()\n"
+        content += "dataSearchPath = configService.getDataSearchDirs()\n"
+        content += "dataSearchPath.append(nexusDir)\n"
+        content += "configService.setDataSearchDirs(dataSearchPath)\n\n"
 
         content += reduce_script
 
@@ -293,7 +304,7 @@ class DataReflWidget(BaseWidget):
         
         # Reduction option to load into Mantid
         xml_str = "<Reduction>\n"
-        xml_str += "  <instrument_name>Reflectometry</instrument_name>\n" 
+        xml_str += "  <instrument_name>%s</instrument_name>\n" % self.short_name 
         xml_str += "  <timestamp>%s</timestamp>\n" % time.ctime()
         xml_str += "  <python_version>%s</python_version>\n" % sys.version
         if IS_IN_MANTIDPLOT:
@@ -705,8 +716,9 @@ class DataReflWidget(BaseWidget):
             q_step = -q_step
         
         # Angle offset
-        angle_offset = float(self._summary.angle_offset_edit.text())
-        angle_offset_error = float(self._summary.angle_offset_error_edit.text())
+        if hasattr(m, "angle_offset"):
+            angle_offset = float(self._summary.angle_offset_edit.text())
+            angle_offset_error = float(self._summary.angle_offset_error_edit.text())
                 
         for i in range(self._summary.angle_list.count()):
             data = self._summary.angle_list.item(i).data(QtCore.Qt.UserRole).toPyObject()
@@ -715,7 +727,7 @@ class DataReflWidget(BaseWidget):
             data.q_step = q_step
         
             # Over-write angle offset
-            if hasattr(state, "angle_offset"):
+            if hasattr(data, "angle_offset"):
                 data.angle_offset = angle_offset
                 data.angle_offset_error = angle_offset_error
 

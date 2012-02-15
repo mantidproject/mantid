@@ -140,8 +140,11 @@ namespace Mantid
       /// Maximum (inclusive) event ID possible for this instrument
       int32_t eventid_max;
 
-      /// Pointer to the map (key = pixel ID, value = workspace index)
-      detid2index_map * pixelID_to_wi_map;
+      /// Vector where (index = pixel ID+pixelID_to_wi_offset), value = workspace index)
+      std::vector<size_t> pixelID_to_wi_vector;
+
+      /// Offset in the pixelID_to_wi_vector to use.
+      detid_t pixelID_to_wi_offset;
 
       /// True if the event_id is spectrum no not pixel ID
       bool event_id_is_spec;

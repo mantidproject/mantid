@@ -102,6 +102,7 @@ namespace Mantid
       /// Link a list of UDETs to the given spectrum
       void addSpectrumEntries(const specid_t spectrum, const std::vector<detid_t>& udetList);
       void addSpectrumEntries(const specid_t spectrum, const std::set<detid_t>& detectorIDs);
+      void addSpectrumEntry(const specid_t spectrum, const detid_t & udett);
 
       /// Move a detector from one spectrum to another
       void remap(const specid_t oldSpectrum, const specid_t newSpectrum);

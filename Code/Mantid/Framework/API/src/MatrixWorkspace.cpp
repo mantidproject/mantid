@@ -242,7 +242,7 @@ namespace Mantid
           // By default: Spectrum number = index +  1
           const specid_t specNo = specid_t(index + 1);
           // We keep the entry in the spectraDetectorMap. TODO: Deprecate spectraDetectorMap entirely.
-          spectramap->addSpectrumEntries(specNo, std::vector<detid_t>(1, detId));
+          spectramap->addSpectrumEntry(specNo, detId);
 
           // Also set the spectrum number in the axis(1). TODO: Remove this, it is redundant (but it is stuck everywhere)
           m_axes[1]->setValue(index, specNo);
@@ -460,6 +460,45 @@ namespace Mantid
         throw std::runtime_error("MatrixWorkspace::getSpectrumToWorkspaceIndexMap: no elements!");
       }
       return map;
+    }
+
+    //---------------------------------------------------------------------------------------
+    /** Return a vector where:
+    *    The index into the vector = spectrum number + offset
+    *    The value at that index = the corresponding Workspace Index
+    *
+    *  @param out :: vector set to above definition
+    *  @param offset :: add this to the detector ID to get the index into the vector.
+    */
+    void MatrixWorkspace::getSpectrumToWorkspaceIndexVector(std::vector<size_t> & out, specid_t & offset) const
+    {
+      SpectraAxis * ax = dynamic_cast<SpectraAxis * >( this->m_axes[1] );
+      if (!ax)
+        throw std::runtime_error("MatrixWorkspace::getSpectrumToWorkspaceIndexMap: axis[1] is not a SpectraAxis, so I cannot generate a map.");
+
+      // Find the min/max spectra IDs
+      specid_t min = 0;
+      specid_t max = 0;
+      size_t length = ax->length();
+      for (size_t i=0; i < length; i++)
+      {
+        specid_t spec = ax->spectraNo(i);
+        if (spec < min) min = spec;
+        if (spec > max) max = spec;
+      }
+
+      // Offset so that the "min" value goes to index 0
+      offset = -min;
+
+      // Resize correctly
+      out.resize(max-min+1, 0);
+
+      // Make the vector
+      for (size_t i=0; i < length; i++)
+      {
+        specid_t spec = ax->spectraNo(i);
+        out[spec+offset] = i;
+      }
     }
 
     //---------------------------------------------------------------------------------------
