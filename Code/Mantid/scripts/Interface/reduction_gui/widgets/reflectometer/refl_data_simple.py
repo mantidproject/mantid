@@ -4,6 +4,7 @@ import math
 import os
 import time
 import sys
+from functools import partial
 from reduction_gui.reduction.reflectometer.refl_data_script import DataSets as REFLDataSets
 from reduction_gui.reduction.reflectometer.refm_data_script import DataSets as REFMDataSets
 from reduction_gui.reduction.reflectometer.refl_data_series import DataSeries
@@ -54,6 +55,7 @@ class DataReflWidget(BaseWidget):
             self.set_state(DataSeries())
 
     def initialize_content(self):
+        self._summary.edited_warning_label.hide()
         
         # Validators
         self._summary.data_peak_from_pixel.setValidator(QtGui.QIntValidator(self._summary.data_peak_from_pixel))
@@ -101,6 +103,54 @@ class DataReflWidget(BaseWidget):
         self.connect(self._summary.angle_list, QtCore.SIGNAL("itemSelectionChanged()"), self._angle_changed)
         self.connect(self._summary.remove_btn, QtCore.SIGNAL("clicked()"), self._remove_item)
         
+        # Catch edited controls
+        call_back = partial(self._edit_event, ctrl=self._summary.data_peak_from_pixel)
+        self.connect(self._summary.data_peak_from_pixel, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        call_back = partial(self._edit_event, ctrl=self._summary.data_peak_to_pixel)
+        self.connect(self._summary.data_peak_to_pixel, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        call_back = partial(self._edit_event, ctrl=self._summary.data_background_from_pixel1)
+        self.connect(self._summary.data_background_from_pixel1, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        call_back = partial(self._edit_event, ctrl=self._summary.data_background_to_pixel1)
+        self.connect(self._summary.data_background_to_pixel1, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        call_back = partial(self._edit_event, ctrl=self._summary.data_from_tof)
+        self.connect(self._summary.data_from_tof, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        call_back = partial(self._edit_event, ctrl=self._summary.data_to_tof)
+        self.connect(self._summary.data_to_tof, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        call_back = partial(self._edit_event, ctrl=self._summary.x_min_edit)
+        self.connect(self._summary.x_min_edit, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        call_back = partial(self._edit_event, ctrl=self._summary.x_max_edit)
+        self.connect(self._summary.x_max_edit, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        call_back = partial(self._edit_event, ctrl=self._summary.norm_x_min_edit)
+        self.connect(self._summary.norm_x_min_edit, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        call_back = partial(self._edit_event, ctrl=self._summary.norm_x_max_edit)
+        self.connect(self._summary.norm_x_max_edit, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        #call_back = partial(self._edit_event, ctrl=self._summary.q_min_edit)
+        #self.connect(self._summary.q_min_edit, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        #call_back = partial(self._edit_event, ctrl=self._summary.q_step_edit)
+        #self.connect(self._summary.q_step_edit, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        call_back = partial(self._edit_event, ctrl=self._summary.angle_edit)
+        self.connect(self._summary.angle_edit, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        call_back = partial(self._edit_event, ctrl=self._summary.center_pix_edit)
+        self.connect(self._summary.center_pix_edit, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        call_back = partial(self._edit_event, ctrl=self._summary.angle_offset_edit)
+        self.connect(self._summary.angle_offset_edit, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        call_back = partial(self._edit_event, ctrl=self._summary.angle_offset_error_edit)
+        self.connect(self._summary.angle_offset_error_edit, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        call_back = partial(self._edit_event, ctrl=self._summary.norm_peak_from_pixel)
+        self.connect(self._summary.norm_peak_from_pixel, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        call_back = partial(self._edit_event, ctrl=self._summary.norm_peak_to_pixel)
+        self.connect(self._summary.norm_peak_to_pixel, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        call_back = partial(self._edit_event, ctrl=self._summary.norm_background_from_pixel1)
+        self.connect(self._summary.norm_background_from_pixel1, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        call_back = partial(self._edit_event, ctrl=self._summary.norm_background_to_pixel1)
+        self.connect(self._summary.norm_background_to_pixel1, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        call_back = partial(self._edit_event, ctrl=self._summary.norm_run_number_edit)
+        self.connect(self._summary.norm_run_number_edit, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        call_back = partial(self._edit_event, ctrl=self._summary.data_run_number_edit)
+        self.connect(self._summary.data_run_number_edit, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        #call_back = partial(self._edit_event, ctrl=self._summary.log_scale_chk)
+        #self.connect(self._summary.log_scale_chk, QtCore.SIGNAL("clicked()"), call_back)
+ 
         # Set up the automated reduction options
         self._summary.auto_reduce_check.setChecked(False)
         self._auto_reduce(False)
@@ -127,6 +177,46 @@ class DataReflWidget(BaseWidget):
         if not os.path.isdir("/SNS/%s" % self.instrument_name):
             self._summary.auto_reduce_check.hide()
         
+    def _edit_event(self, text=None, ctrl=None):
+        self._summary.edited_warning_label.show()
+        util.set_edited(ctrl,True)
+        
+    def _reset_warnings(self):
+        self._summary.edited_warning_label.hide()
+        util.set_edited(self._summary.data_peak_from_pixel, False)
+        util.set_edited(self._summary.data_peak_to_pixel, False)
+        util.set_edited(self._summary.data_background_from_pixel1, False)
+        util.set_edited(self._summary.data_background_to_pixel1, False)
+        util.set_edited(self._summary.data_from_tof, False)
+        util.set_edited(self._summary.data_to_tof, False)
+        util.set_edited(self._summary.x_min_edit, False)
+        util.set_edited(self._summary.x_max_edit, False)
+        util.set_edited(self._summary.norm_x_min_edit, False)
+        util.set_edited(self._summary.norm_x_max_edit, False)
+        util.set_edited(self._summary.q_min_edit, False)
+        util.set_edited(self._summary.q_step_edit, False)
+        util.set_edited(self._summary.angle_edit, False)
+        util.set_edited(self._summary.center_pix_edit, False)
+        util.set_edited(self._summary.angle_offset_edit, False)
+        util.set_edited(self._summary.angle_offset_error_edit, False)
+        util.set_edited(self._summary.norm_peak_from_pixel, False)
+        util.set_edited(self._summary.norm_peak_to_pixel, False)
+        util.set_edited(self._summary.norm_background_from_pixel1, False)
+        util.set_edited(self._summary.norm_background_to_pixel1, False)
+        util.set_edited(self._summary.norm_run_number_edit, False)
+        util.set_edited(self._summary.data_run_number_edit, False)
+        util.set_edited(self._summary.log_scale_chk, False)
+        util.set_edited(self._summary.angle_radio,False)
+        util.set_edited(self._summary.center_pix_radio,False)
+        util.set_edited(self._summary.data_background_switch, False)
+        util.set_edited(self._summary.norm_background_switch, False)
+        util.set_edited(self._summary.data_low_res_range_switch, False)
+        util.set_edited(self._summary.norm_low_res_range_switch, False)
+        util.set_edited(self._summary.norm_switch, False)
+        util.set_edited(self._summary.tof_range_switch, False)
+        util.set_edited(self._summary.q_min_edit, False)
+        util.set_edited(self._summary.q_step_edit, False)
+        
     def _scattering_angle_changed(self):
         if self._summary.center_pix_radio.isChecked():
             self._summary.angle_edit.setEnabled(False)
@@ -134,6 +224,8 @@ class DataReflWidget(BaseWidget):
         else:
             self._summary.angle_edit.setEnabled(True)
             self._summary.center_pix_edit.setEnabled(False)
+        util.set_edited(self._summary.angle_radio,True)
+        util.set_edited(self._summary.center_pix_radio,True)
     
     def _ref_instrument_selected(self):
         if self._summary.refl_radio.isChecked():
@@ -285,6 +377,7 @@ class DataReflWidget(BaseWidget):
         self._summary.data_background_from_pixel1_label.setEnabled(is_checked)
         self._summary.data_background_to_pixel1.setEnabled(is_checked)
         self._summary.data_background_to_pixel1_label.setEnabled(is_checked)
+        self._edit_event(None, self._summary.data_background_switch)
         
     def _norm_background_clicked(self, is_checked):
         """
@@ -295,6 +388,7 @@ class DataReflWidget(BaseWidget):
         self._summary.norm_background_from_pixel1_label.setEnabled(is_checked)
         self._summary.norm_background_to_pixel1.setEnabled(is_checked)
         self._summary.norm_background_to_pixel1_label.setEnabled(is_checked)
+        self._edit_event(None, self._summary.norm_background_switch)
         
     def _data_low_res_clicked(self, is_checked):
         """
@@ -304,6 +398,7 @@ class DataReflWidget(BaseWidget):
         self._summary.x_min_edit.setEnabled(is_checked)
         self._summary.data_low_res_to_label.setEnabled(is_checked)
         self._summary.x_max_edit.setEnabled(is_checked)
+        self._edit_event(None, self._summary.data_low_res_range_switch)
             
     def _norm_low_res_clicked(self, is_checked):
         """
@@ -313,6 +408,7 @@ class DataReflWidget(BaseWidget):
         self._summary.norm_x_min_edit.setEnabled(is_checked)
         self._summary.norm_low_res_to_label.setEnabled(is_checked)
         self._summary.norm_x_max_edit.setEnabled(is_checked)
+        self._edit_event(None, self._summary.norm_low_res_range_switch)
 
     def _norm_clicked(self, is_checked):
         """
@@ -340,6 +436,8 @@ class DataReflWidget(BaseWidget):
         else:
             LowResFlag = self._summary.norm_low_res_range_switch.isChecked()
             self._norm_low_res_clicked(LowResFlag)
+        
+        self._edit_event(None, self._summary.norm_switch)
 
     def _tof_range_clicked(self, is_checked):
         """
@@ -351,7 +449,9 @@ class DataReflWidget(BaseWidget):
         self._summary.tof_max_label.setEnabled(is_checked)
         self._summary.data_to_tof.setEnabled(is_checked)
         self._summary.tof_max_label2.setEnabled(is_checked)
-        self._summary.plot_tof_btn.setEnabled(is_checked)
+        #self._summary.plot_tof_btn.setEnabled(is_checked)
+        
+        self._edit_event(None, self._summary.tof_range_switch)
 
     def _plot_count_vs_y(self, is_peak=True):
         """
@@ -474,12 +574,14 @@ class DataReflWidget(BaseWidget):
         else:
             item_widget = QtGui.QListWidgetItem(run_numbers, self._summary.angle_list)
             item_widget.setData(QtCore.Qt.UserRole, state)
+        self._reset_warnings()
 
     def _angle_changed(self):
         current_item =  self._summary.angle_list.currentItem()
         if current_item is not None:
             state = current_item.data(QtCore.Qt.UserRole).toPyObject()
             self.set_editing_state(state)
+            self._reset_warnings()
 
     def set_state(self, state):
         """
@@ -505,7 +607,7 @@ class DataReflWidget(BaseWidget):
 
         if len(state.data_sets)>0:
             self.set_editing_state(state.data_sets[0])
-            self._summary.angle_list.setCurrentRow(0)
+            self._summary.angle_list.setCurrentRow(0, QtGui.QItemSelectionModel.Select)
             
             # Common Q binning
             self._summary.q_min_edit.setText(str(state.data_sets[0].q_min))
@@ -517,6 +619,8 @@ class DataReflWidget(BaseWidget):
                 self._summary.angle_offset_edit.setText(str(state.data_sets[0].angle_offset))
                 self._summary.angle_offset_error_edit.setText(str(state.data_sets[0].angle_offset_error))
 
+        self._reset_warnings()
+        
     def set_editing_state(self, state):
 
         #Peak from/to pixels

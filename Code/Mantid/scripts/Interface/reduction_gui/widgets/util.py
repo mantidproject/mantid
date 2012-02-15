@@ -9,6 +9,15 @@ CSS_INVALID = """QLineEdit {
                 background-color: #FFFF3C;
             }"""
 
+CSS_EDITED = """QLineEdit {
+                background-color: #DAF7F9;
+            }"""
+            
+CSS_EDITED_RADIO = """QRadioButton {
+                color: rgb(0,153,153);
+                background-color: transparent;
+            }"""
+
 CSS_DEFAULT = """QLineEdit{}"""
 
 def _check_and_get_float_line_edit(line_edit, min=None):
@@ -44,5 +53,16 @@ def set_valid(line_edit, is_valid):
         line_edit.setStyleSheet(CSS_DEFAULT)
     else:
         line_edit.setStyleSheet(CSS_INVALID)
+        
+def set_edited(control, is_edited):
+    class_name = control.__class__.__name__
+    if is_edited:
+        if class_name in ["QRadioButton", "QCheckBox"]:
+            new_style = CSS_EDITED_RADIO.replace("QRadioButton", class_name)
+        else:
+            new_style = CSS_EDITED.replace("QLineEdit", class_name)
+    else:
+        new_style = CSS_DEFAULT.replace("QLineEdit", class_name)
+    control.setStyleSheet(new_style)
         
     

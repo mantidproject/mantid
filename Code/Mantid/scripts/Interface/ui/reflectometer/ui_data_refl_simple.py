@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/reflectometer/data_refl_simple.ui'
 #
-# Created: Wed Feb 15 09:20:02 2012
+# Created: Wed Feb 15 11:14:55 2012
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -932,6 +932,10 @@ class Ui_Frame(object):
         self.horizontalLayout_7.setObjectName("horizontalLayout_7")
         spacerItem18 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_7.addItem(spacerItem18)
+        self.edited_warning_label = QtGui.QLabel(self.scrollAreaWidgetContents)
+        self.edited_warning_label.setTextFormat(QtCore.Qt.RichText)
+        self.edited_warning_label.setObjectName("edited_warning_label")
+        self.horizontalLayout_7.addWidget(self.edited_warning_label)
         self.add_dataset_btn = QtGui.QPushButton(self.scrollAreaWidgetContents)
         self.add_dataset_btn.setMinimumSize(QtCore.QSize(150, 0))
         self.add_dataset_btn.setMaximumSize(QtCore.QSize(150, 16777215))
@@ -1126,6 +1130,11 @@ class Ui_Frame(object):
         self.tof_max_label2.setText(QtGui.QApplication.translate("Frame", " µs", None, QtGui.QApplication.UnicodeUTF8))
         self.plot_tof_btn.setToolTip(QtGui.QApplication.translate("Frame", "Plot TOF distribution", None, QtGui.QApplication.UnicodeUTF8))
         self.plot_tof_btn.setText(QtGui.QApplication.translate("Frame", "TOF distribution", None, QtGui.QApplication.UnicodeUTF8))
+        self.edited_warning_label.setText(QtGui.QApplication.translate("Frame", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:\'Ubuntu\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-weight:600;color:rgb(0,153,153);\">Click Save To List to apply your changes  →  </span></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.add_dataset_btn.setToolTip(QtGui.QApplication.translate("Frame", "Click to add the data set above to the reduction list", None, QtGui.QApplication.UnicodeUTF8))
         self.add_dataset_btn.setText(QtGui.QApplication.translate("Frame", "Save to list", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBox_4.setTitle(QtGui.QApplication.translate("Frame", "Output Binning", None, QtGui.QApplication.UnicodeUTF8))
