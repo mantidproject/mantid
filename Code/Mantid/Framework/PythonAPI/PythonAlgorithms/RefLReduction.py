@@ -45,9 +45,6 @@ class RefLReduction(PythonAlgorithm):
         run_numbers = self.getProperty("RunNumbers")
 
         mtd.sendLogMessage("RefLReduction: processing %s" % run_numbers)
-        allow_multiple = False
-        if len(run_numbers)>1 and not allow_multiple:
-            raise RuntimeError("Not ready for multiple runs yet, please specify only one run number")
 
         #run with normalization or not    
         NormFlag = self.getProperty("NormFlag")
@@ -87,7 +84,7 @@ class RefLReduction(PythonAlgorithm):
                 
         h = 6.626e-34  #m^2 kg s^-1
         m = 1.675e-27     #kg
-                
+
         norm_back = self.getProperty("NormBackgroundPixelRange")
         BackfromYpixel = norm_back[0]
         BacktoYpixel = norm_back[1]
@@ -98,24 +95,63 @@ class RefLReduction(PythonAlgorithm):
         
         subtract_data_bck = self.getProperty("SubtractSignalBackground")
         subtract_norm_bck = self.getProperty("SubtractNormBackground")
-        
-        ########################################################################
-        # Find full path to event NeXus data file
-        f = FileFinder.findRuns("REF_L%d" %run_numbers[0])
-        if len(f)>0 and os.path.isfile(f[0]): 
-            data_file = f[0]
-        else:
-            msg = "RefLReduction: could not find run %d\n" % run_numbers[0]
-            msg += "Add your data folder to your User Data Directories in the File menu"
-            raise RuntimeError(msg)
-        
+
+#        ########################################################################
+#        # Find full path to event NeXus data file
+#        f = FileFinder.findRuns("REF_L%d" %run_numbers[0])
+#        if len(f)>0 and os.path.isfile(f[0]): 
+#            data_file = f[0]
+#        else:
+#            msg = "RefLReduction: could not find run %d\n" % run_numbers[0]
+#            msg += "Add your data folder to your User Data Directories in the File menu"
+#            raise RuntimeError(msg)
+
         # Pick a good workspace name
         ws_name = "refl%d" % run_numbers[0]
         ws_event_data = ws_name+"_evt"  
         
         # Load the data into its workspace
-        if not mtd.workspaceExists(ws_event_data):
-            LoadEventNexus(Filename=data_file, OutputWorkspace=ws_event_data)
+        allow_multiple = True        
+        if len(run_numbers)>1 and allow_multiple:
+            #add runs together
+#            raise RuntimeError("Not ready for multiple runs yet, please specify only one run number")
+
+#            if mtd.workspaceExists(ws_event_data):
+#                mtd.deleteWorkspace(ws_event_data)
+            
+            for _run in run_numbers:
+
+                ########################################################################
+                # Find full path to event NeXus data file
+                _File = FileFinder.findRuns("REF_L%d" %_run)
+                if len(_File)>0 and os.path.isfile(_File[0]): 
+                    data_file = _File[0]
+                else:
+                    msg = "RefLReduction: could not find run %d\n" % _run
+                    msg += "Add your data folder to your User Data Directories in the File menu"
+                    raise RuntimeError(msg)
+                
+                if not mtd.workspaceExists(ws_event_data):
+                    LoadEventNexus(Filename=data_file, OutputWorkspace=ws_event_data)
+                else:
+                    LoadEventNexus(Filename=data_file, OutputWorkspace='tmp')
+                    mt1 = mtd[ws_event_data]
+                    mt2 = mtd['tmp']
+                    Plus(LHSWorkspace=ws_event_data,
+                         RHSWorkspace='tmp',
+                         OutputWorkspace=ws_event_data)
+        else:
+            
+            _File = FileFinder.findRuns("REF_L%d" %run_numbers[0])
+            if len(_File)>0 and os.path.isfile(_File[0]): 
+                data_file = _File[0]    
+            else:
+                msg = "RefLReduction: could not find run %d\n" % _run
+                msg += "Add your data folder to your User Data Directories in the File menu"
+                raise RuntimeError(msg)
+
+            if not mtd.workspaceExists(ws_event_data):
+                LoadEventNexus(Filename=data_file, OutputWorkspace=ws_event_data)
         
         # Get metadata
         mt_run = mtd[ws_event_data].getRun()
@@ -228,7 +264,6 @@ class RefLReduction(PythonAlgorithm):
         ws_transposed = '__TransposedID'
         if subtract_data_bck:
 
-            print "with data background"
             ConvertToHistogram(InputWorkspace=ws_integrated_data,
                                OutputWorkspace=ws_integrated_data)
 
@@ -285,15 +320,12 @@ class RefLReduction(PythonAlgorithm):
 
         else:
 
-            print "without data background"
             ConvertToHistogram(InputWorkspace=ws_integrated_data,
                                OutputWorkspace=ws_data)
         
         # Work on Normalization file #########################################
         if (NormFlag):
-        
-        
-            print "with normalization"
+
             # Find full path to event NeXus data file
             f = FileFinder.findRuns("REF_L%d" %normalization_run)
             if len(f)>0 and os.path.isfile(f[0]): 

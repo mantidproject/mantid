@@ -243,39 +243,47 @@ void CropWorkspace::execEvent()
     {
       case TOF:
       {
-        std::vector<TofEvent>::iterator itev;
-        for (itev = el.getEvents().begin(); itev != el.getEvents().end(); ++itev)
+        std::vector<TofEvent>::const_iterator itev = el.getEvents().begin();
+        std::vector<TofEvent>::const_iterator end = el.getEvents().end();
+        std::vector<TofEvent> moreevents;
+        moreevents.reserve(el.getNumberEvents()); // assume all will make it
+        for (; itev != end; ++itev)
         {
           const double tof = itev->tof();
           if(tof <=  maxX_val && tof >= minX_val)
-            outEL += TofEvent(*itev);
+            moreevents.push_back(*itev);
         }
+        outEL += moreevents;
         break;
       }
       case WEIGHTED:
       {
-        std::vector<WeightedEvent>::iterator itev;
-        for (itev = el.getWeightedEvents().begin(); itev != el.getWeightedEvents().end(); ++itev)
+        std::vector<WeightedEvent>::const_iterator itev = el.getWeightedEvents().begin();
+        std::vector<WeightedEvent>::const_iterator end = el.getWeightedEvents().end();
+        std::vector<WeightedEvent> moreevents;
+        moreevents.reserve(el.getNumberEvents()); // assume all will make it
+        for (; itev != end; ++itev)
         {
           const double tof = itev->tof();
           if(tof <=  maxX_val && tof >= minX_val)
-            outEL += WeightedEvent(*itev);
+            moreevents.push_back(*itev);
         }
+        outEL += moreevents;
         break;
       }
       case WEIGHTED_NOTIME:
       {
-        std::vector<WeightedEventNoTime>::iterator itev;
-        for (itev = el.getWeightedEventsNoTime().begin(); itev != el.getWeightedEventsNoTime().end(); ++itev)
+        std::vector<WeightedEventNoTime>::const_iterator itev = el.getWeightedEventsNoTime().begin();
+        std::vector<WeightedEventNoTime>::const_iterator end  = el.getWeightedEventsNoTime().end();
+        std::vector<WeightedEventNoTime> moreevents;
+        moreevents.reserve(el.getNumberEvents()); // assume all will make it
+        for ( ; itev != end; ++itev)
         {
           const double tof = itev->tof();
-          // There is no += operator for a single weighted event with no time
-          std::vector< WeightedEventNoTime > moreevents;
-          moreevents.push_back(WeightedEventNoTime(*itev));
           if(tof <=  maxX_val && tof >= minX_val)
-            outEL += moreevents;
-          moreevents.clear();
+            moreevents.push_back(*itev);
         }
+        outEL += moreevents;
         break;
       }
     }

@@ -398,7 +398,6 @@ class BaseReductionScripter(object):
         """
         if HAS_MANTID:
             script = self.to_script(None)
-            
             try:
                 exec script
                 # Update scripter

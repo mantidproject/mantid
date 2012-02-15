@@ -45,6 +45,8 @@ class DataReflWidget(BaseWidget):
                 self.setupUi(self)
                 
         self.short_name = name
+        self._settings.instrument_name = name
+            
         self._summary = SummaryFrame(self)
         self.initialize_content()
         self._layout.addWidget(self._summary)
@@ -366,6 +368,11 @@ class DataReflWidget(BaseWidget):
         """
         super(DataReflWidget, self).is_running(is_running)
         self._summary.plot_count_vs_y_btn.setEnabled(not is_running)
+        self._summary.plot_count_vs_y_bck_btn.setEnabled(not is_running)
+        self._summary.plot_count_vs_x_btn.setEnabled(not is_running)
+        self._summary.norm_count_vs_y_btn.setEnabled(not is_running)
+        self._summary.norm_count_vs_y_bck_btn.setEnabled(not is_running)
+        self._summary.norm_count_vs_x_btn.setEnabled(not is_running)
         self._summary.plot_tof_btn.setEnabled(not is_running)
 
     def _data_background_clicked(self, is_checked):
@@ -751,7 +758,7 @@ class DataReflWidget(BaseWidget):
         from_tof = float(self._summary.data_from_tof.text())
         to_tof = float(self._summary.data_to_tof.text())
         m.DataTofRange = [from_tof, to_tof]
-        
+    
         datafiles = str(self._summary.data_run_number_edit.text()).split(',')
         m.data_files = [int(i) for i in datafiles]
     

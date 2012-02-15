@@ -53,7 +53,7 @@ class DataSets(BaseScriptElement):
             @param execute: if true, the script will be executed
         """
 
-        script =  "RefLReduction(RunNumbers=%s,\n" % ','.join([str(i) for i in self.data_files])
+        script =  "RefLReduction(RunNumbers=[%s],\n" % ','.join([str(i) for i in self.data_files])
         script += "              NormalizationRunNumber=%d,\n" % self.norm_file
         script += "              SignalPeakPixelRange=%s,\n" % str(self.DataPeakPixels)
         script += "              SubtractSignalBackground=%s,\n" % str(self.DataBackgroundFlag)
@@ -69,7 +69,7 @@ class DataSets(BaseScriptElement):
         script += "              TOFRange=%s,\n" % str(self.DataTofRange)
         script += "              QMin=%s,\n" % str(self.q_min)
         script += "              QStep=%s,\n" % str(self.q_step)
-        
+
         # Angle offset
         if self.angle_offset != 0.0:
             script += "              AngleOffset=%s,\n" % str(self.angle_offset)
@@ -115,7 +115,7 @@ class DataSets(BaseScriptElement):
         xml += "<norm_flag>%s</norm_flag>\n" % str(self.NormFlag)
         xml += "<norm_x_range_flag>%s</norm_x_range_flag>\n" % str(self.norm_x_range_flag)
         xml += "<norm_x_max>%s</norm_x_max>\n" % str(self.norm_x_range[1])
-        xml += "<norm_x_min>%s</norm_x_min>\n" % str(self.norm_x_range[2])
+        xml += "<norm_x_min>%s</norm_x_min>\n" % str(self.norm_x_range[0])
         
         xml += "<norm_from_peak_pixels>%s</norm_from_peak_pixels>\n" % str(self.NormPeakPixels[0])
         xml += "<norm_to_peak_pixels>%s</norm_to_peak_pixels>\n" % str(self.NormPeakPixels[1])
