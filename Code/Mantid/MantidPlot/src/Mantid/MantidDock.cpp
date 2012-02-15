@@ -1185,6 +1185,7 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
   {
     // Fresh menu
     menu = new QMenu(this);
+    menu->setObjectName("WorkspaceContextMenu");
     Mantid::API::Workspace_const_sptr ws;
     try
     {
