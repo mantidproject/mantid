@@ -526,9 +526,9 @@ namespace DataObjects
   // 
   //-----------------------------------------------------------------------------
   /** Pad the workspace with empty event lists for all the spectra in the workspace.
-   * This requires that a non-empty spectra-detector map
-   * Can do it in parallel, though my time tests show it takes MORE time in parallel :(
-   * This calls doneAddingEventLists() to finalize after the end.
+   * This requires that a non-empty spectra-detector map.
+   *
+   * This runs in parallel.
    */
   void EventWorkspace::padSpectra()
   {

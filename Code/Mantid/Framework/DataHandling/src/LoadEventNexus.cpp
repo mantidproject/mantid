@@ -1225,25 +1225,19 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
 
   prog->report("Initializing all pixels");
 
-
-  CPUTimer tim;
   //----------------- Pad Empty Pixels -------------------------------
   // Create the required spectra mapping so that the workspace knows what to pad to
   createSpectraMapping(m_filename, WS, monitors, onebank);
-  std::cout << tim << " to createSpectraMapping()" << std::endl;
   WS->padSpectra();
-  std::cout << tim << " to padSpectra()" << std::endl;
 
   //This map will be used to find the workspace index
   if( this->event_id_is_spec )
     WS->getSpectrumToWorkspaceIndexVector(pixelID_to_wi_vector, pixelID_to_wi_offset);
   else
     WS->getDetectorIDToWorkspaceIndexVector(pixelID_to_wi_vector, pixelID_to_wi_offset, true);
-  std::cout << tim << " to getDetectorIDToWorkspaceIndexVector" << std::endl;
 
   // Cache a map for speed.
   this->makeMapToEventLists();
-  std::cout << tim << " to makeMapToEventLists" << std::endl;
 
   // --------------------------- Time filtering ------------------------------------
   double filter_time_start_sec, filter_time_stop_sec;
