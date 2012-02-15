@@ -463,6 +463,45 @@ namespace Mantid
     }
 
     //---------------------------------------------------------------------------------------
+    /** Return a vector where:
+    *    The index into the vector = spectrum number + offset
+    *    The value at that index = the corresponding Workspace Index
+    *
+    *  @param out :: vector set to above definition
+    *  @param offset :: add this to the detector ID to get the index into the vector.
+    */
+    void MatrixWorkspace::getSpectrumToWorkspaceIndexVector(std::vector<size_t> & out, specid_t & offset) const
+    {
+      SpectraAxis * ax = dynamic_cast<SpectraAxis * >( this->m_axes[1] );
+      if (!ax)
+        throw std::runtime_error("MatrixWorkspace::getSpectrumToWorkspaceIndexMap: axis[1] is not a SpectraAxis, so I cannot generate a map.");
+
+      // Find the min/max spectra IDs
+      specid_t min = 0;
+      specid_t max = 0;
+      size_t length = ax->length();
+      for (size_t i=0; i < length; i++)
+      {
+        specid_t spec = ax->spectraNo(i);
+        if (spec < min) min = spec;
+        if (spec > max) max = spec;
+      }
+
+      // Offset so that the "min" value goes to index 0
+      offset = -min;
+
+      // Resize correctly
+      out.resize(max-min+1, 0);
+
+      // Make the vector
+      for (size_t i=0; i < length; i++)
+      {
+        specid_t spec = ax->spectraNo(i);
+        out[spec+offset] = i;
+      }
+    }
+
+    //---------------------------------------------------------------------------------------
     /** Return a map where:
     *    KEY is the DetectorID (pixel ID)
     *    VALUE is the Workspace Index

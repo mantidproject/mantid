@@ -586,6 +586,19 @@ public:
     TS_ASSERT_EQUALS( out[99], 99);
   }
 
+  void test_getSpectrumToWorkspaceIndexVector()
+  {
+    MatrixWorkspace * ws = makeWorkspaceWithDetectors(100, 10);
+    std::vector<size_t> out;
+    detid_t offset = -1234;
+    TS_ASSERT_THROWS_NOTHING( ws->getSpectrumToWorkspaceIndexVector(out, offset) );
+    TS_ASSERT_EQUALS( offset, 0);
+    TS_ASSERT_EQUALS( out.size(), 100);
+    TS_ASSERT_EQUALS( out[0], 0);
+    TS_ASSERT_EQUALS( out[1], 1);
+    TS_ASSERT_EQUALS( out[99], 99);
+  }
+
   void test_getSignalAtCoord()
   {
     boost::shared_ptr<MatrixWorkspace> ws(new WorkspaceTester());

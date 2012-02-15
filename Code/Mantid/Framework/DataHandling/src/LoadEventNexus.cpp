@@ -1255,8 +1255,10 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   std::cout << tim << " to padSpectra()" << std::endl;
 
   //This map will be used to find the workspace index
-  if( this->event_id_is_spec ) pixelID_to_wi_map = WS->getSpectrumToWorkspaceIndexMap();
-  else pixelID_to_wi_map = WS->getDetectorIDToWorkspaceIndexMap(true);
+  if( this->event_id_is_spec )
+    pixelID_to_wi_map = WS->getSpectrumToWorkspaceIndexMap();
+  else
+    pixelID_to_wi_map = WS->getDetectorIDToWorkspaceIndexMap(true);
   std::cout << tim << " to getDetectorIDToWorkspaceIndexMap" << std::endl;
 
   // Cache a map for speed.
