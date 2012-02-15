@@ -77,6 +77,9 @@ namespace MDAlgorithms
         "Optional: if specified, the workspace created will be file-backed. \n"
         "If not, it will be created in memory.");
 
+    declareProperty("Parallel", false, "Run the loading tasks in parallel.\n"
+        "This can be faster but might use more memory.");
+
     declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output),
         "An output MDEventWorkspace.");
   }
@@ -504,18 +507,22 @@ namespace MDAlgorithms
           // Now do a split on only this box.
 
           // On option, do the split in parallel
-          ThreadSchedulerFIFO * ts = NULL;
           if (m_parallelSplit)
-            ts = new ThreadSchedulerFIFO();
-          ThreadPool tp(ts);
-
-          outGridBox->splitAllIfNeeded(ts);
-
-          if (m_parallelSplit)
+          {
+            ThreadSchedulerFIFO * ts = new ThreadSchedulerFIFO();
+            ThreadPool tp(ts);
+            outGridBox->splitAllIfNeeded(ts);
             tp.joinAll();
+          }
+          else
+            outGridBox->splitAllIfNeeded(NULL);
 
+          // HDF5 is NOT thread safe (by default) even for accessing DIFFERENT files from different threads.
+          // Hence we need this mutex here :(
+          this->m_alg->fileMutex.lock();
           // Flush out any items to write.
           bc->getDiskBuffer().flushCache();
+          this->m_alg->fileMutex.unlock();
         }
       } // there was something loaded
 
@@ -541,6 +548,9 @@ namespace MDAlgorithms
   template<typename MDE, size_t nd>
   void MergeMDFiles::doExecByCloning(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
+    // Run the tasks in parallel?
+    bool Parallel = this->getProperty("Parallel");
+
     // First, load all the box data
     this->loadBoxData<MDE,nd>();
 
@@ -568,7 +578,7 @@ namespace MDAlgorithms
     this->totalLoaded = 0;
     // Prepare thread pool
     CPUTimer overallTime;
-    //ThreadSchedulerLargestCost * ts = new ThreadSchedulerLargestCost();
+
     ThreadSchedulerFIFO * ts = new ThreadSchedulerFIFO();
     ThreadPool tp(ts);
 
@@ -578,9 +588,9 @@ namespace MDAlgorithms
       if (this->eventsPerBox[ib] > 0)
       {
         totalEventsInTasks += eventsPerBox[ib];
-        MergeMDLoadToBoxTask<MDE,nd> * task = new MergeMDLoadToBoxTask<MDE,nd>(this, ib, outWS, boxesById, true);
+        MergeMDLoadToBoxTask<MDE,nd> * task = new MergeMDLoadToBoxTask<MDE,nd>(this, ib, outWS, boxesById, !Parallel);
 
-        if (true)
+        if (!Parallel)
         {
           // Run the task serially only
           task->run();
@@ -588,7 +598,7 @@ namespace MDAlgorithms
         }
         else
         {
-          // Run in parallel
+          // Enqueue to run in parallel (at the joinAll() call below).
           ts->push(task);
         }
       }
