@@ -5,7 +5,6 @@
 
 #include "MantidAlgorithms/ConjoinWorkspaces.h"
 #include "MantidDataHandling/LoadRaw3.h"
-#include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Kernel;
@@ -49,39 +48,15 @@ public:
     TS_ASSERT_THROWS_NOTHING( loader->execute() );
     TS_ASSERT( loader->isExecuted() );
     delete loader;
-
-    //Now some event workspaces
-    loader = new Mantid::DataHandling::LoadEventPreNexus;
-    loader->initialize();
-    loader->setPropertyValue("EventFilename", "VULCAN_2916_neutron0_event.dat");
-    loader->setPropertyValue("OutputWorkspace", "vulcan0");
-    TS_ASSERT_THROWS_NOTHING( loader->execute() );
-    TS_ASSERT( loader->isExecuted() );
-    delete loader;
-
-    loader = new Mantid::DataHandling::LoadEventPreNexus;
-    loader->initialize();
-    loader->setPropertyValue("EventFilename", "VULCAN_2916_neutron1_event.dat");
-    loader->setPropertyValue("OutputWorkspace", "vulcan1");
-    TS_ASSERT_THROWS_NOTHING( loader->execute() );
-    TS_ASSERT( loader->isExecuted() );
-    delete loader;
   }
 
   void testTheBasics()
   {
-    conj = new ConjoinWorkspaces();
-    TS_ASSERT_EQUALS( conj->name(), "ConjoinWorkspaces" );
-    TS_ASSERT_EQUALS( conj->version(), 1 );
-    delete conj;
-  }
-
-  void testInit()
-  {
-    conj = new ConjoinWorkspaces();
-    TS_ASSERT_THROWS_NOTHING( conj->initialize() );
-    TS_ASSERT( conj->isInitialized() );
-    delete conj;
+    ConjoinWorkspaces conj;
+    TS_ASSERT_EQUALS( conj.name(), "ConjoinWorkspaces" );
+    TS_ASSERT_EQUALS( conj.version(), 1 );
+    TS_ASSERT_THROWS_NOTHING( conj.initialize() );
+    TS_ASSERT( conj.isInitialized() );
   }
 
   //----------------------------------------------------------------------------------------------
@@ -89,8 +64,8 @@ public:
   {
     setupWS();
 
-    conj = new ConjoinWorkspaces();
-    if ( !conj->isInitialized() ) conj->initialize();
+    ConjoinWorkspaces conj;
+    if ( !conj.isInitialized() ) conj.initialize();
 
     // Get the two input workspaces for later
     MatrixWorkspace_sptr in1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("top"));
@@ -102,20 +77,20 @@ public:
     in2->maskWorkspaceIndex(maskBottom);
 
     // Check it fails if properties haven't been set
-    TS_ASSERT_THROWS( conj->execute(), std::runtime_error );
-    TS_ASSERT( ! conj->isExecuted() );
+    TS_ASSERT_THROWS( conj.execute(), std::runtime_error );
+    TS_ASSERT( ! conj.isExecuted() );
 
     // Check it fails if input overlap
-    TS_ASSERT_THROWS_NOTHING( conj->setPropertyValue("InputWorkspace1","top") );
-    TS_ASSERT_THROWS_NOTHING( conj->setPropertyValue("InputWorkspace2","top") );
-    TS_ASSERT_THROWS_NOTHING( conj->execute() );
-    TS_ASSERT( ! conj->isExecuted() );
+    TS_ASSERT_THROWS_NOTHING( conj.setPropertyValue("InputWorkspace1","top") );
+    TS_ASSERT_THROWS_NOTHING( conj.setPropertyValue("InputWorkspace2","top") );
+    TS_ASSERT_THROWS_NOTHING( conj.execute() );
+    TS_ASSERT( ! conj.isExecuted() );
 
     // Now it should succeed
-    TS_ASSERT_THROWS_NOTHING( conj->setPropertyValue("InputWorkspace1","top") );
-    TS_ASSERT_THROWS_NOTHING( conj->setPropertyValue("InputWorkspace2","bottom") );
-    TS_ASSERT_THROWS_NOTHING( conj->execute() );
-    TS_ASSERT( conj->isExecuted() );
+    TS_ASSERT_THROWS_NOTHING( conj.setPropertyValue("InputWorkspace1","top") );
+    TS_ASSERT_THROWS_NOTHING( conj.setPropertyValue("InputWorkspace2","bottom") );
+    TS_ASSERT_THROWS_NOTHING( conj.execute() );
+    TS_ASSERT( conj.isExecuted() );
 
     MatrixWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("top")) );
@@ -136,30 +111,26 @@ public:
 
     // Check that 2nd input workspace no longer exists
     TS_ASSERT_THROWS( AnalysisDataService::Instance().retrieve("bottom"), Exception::NotFoundError );
-    delete conj;
   }
 
   //----------------------------------------------------------------------------------------------
   void testExecMismatchedWorkspaces()
   {
-    setupWS();
+    MatrixWorkspace_sptr ews = WorkspaceCreationHelper::CreateEventWorkspace(10, 10);
 
     // Check it fails if input overlap
-    conj = new ConjoinWorkspaces();
-    conj->initialize();
-    TS_ASSERT_THROWS_NOTHING( conj->setPropertyValue("InputWorkspace1","vulcan1") );
-    TS_ASSERT_THROWS_NOTHING( conj->setPropertyValue("InputWorkspace2","vulcan1") );
-    conj->execute();
-    TS_ASSERT( ! conj->isExecuted() );
-    delete conj;
+    ConjoinWorkspaces conj;
+    conj.initialize();
+    TS_ASSERT_THROWS_NOTHING( conj.setProperty("InputWorkspace1",ews) );
+    TS_ASSERT_THROWS_NOTHING( conj.setProperty("InputWorkspace2",ews) );
+    conj.execute();
+    TS_ASSERT( ! conj.isExecuted() );
 
     // Check it fails if mixing event workspaces and workspace 2Ds
-    conj = new ConjoinWorkspaces();
-    conj->initialize();
-    TS_ASSERT_THROWS_NOTHING( conj->setPropertyValue("InputWorkspace1","vulcan1") );
-    TS_ASSERT_THROWS_NOTHING( conj->setPropertyValue("InputWorkspace2","bottom") );
-    conj->execute();
-    TS_ASSERT( ! conj->isExecuted() );
+    TS_ASSERT_THROWS_NOTHING( conj.setProperty("InputWorkspace1",ews) );
+    TS_ASSERT_THROWS_NOTHING( conj.setProperty("InputWorkspace2",WorkspaceCreationHelper::Create2DWorkspace(10, 10)) );
+    conj.execute();
+    TS_ASSERT( ! conj.isExecuted() );
   }
 
 
@@ -173,14 +144,14 @@ public:
     AnalysisDataService::Instance().add(ws1_name, ws1);
     ws2 = WorkspaceCreationHelper::CreateEventWorkspace(5, numBins);
 
-    conj = new ConjoinWorkspaces();
-    conj->initialize();
-    TS_ASSERT_THROWS_NOTHING( conj->setPropertyValue("InputWorkspace1",ws1_name) );
-    TS_ASSERT_THROWS_NOTHING( conj->setProperty("InputWorkspace2",ws2) );
-    TS_ASSERT_THROWS_NOTHING( conj->setProperty("CheckOverlapping",true) );
-    TS_ASSERT_THROWS_NOTHING(conj->execute());
+    ConjoinWorkspaces conj;
+    conj.initialize();
+    TS_ASSERT_THROWS_NOTHING( conj.setPropertyValue("InputWorkspace1",ws1_name) );
+    TS_ASSERT_THROWS_NOTHING( conj.setProperty("InputWorkspace2",ws2) );
+    TS_ASSERT_THROWS_NOTHING( conj.setProperty("CheckOverlapping",true) );
+    TS_ASSERT_THROWS_NOTHING(conj.execute());
     // Falls over as they overlap
-    TS_ASSERT( !conj->isExecuted() );
+    TS_ASSERT( !conj.isExecuted() );
 
     // Adjust second workspace
     Mantid::specid_t start = ws1->getSpectrum(numPixels - 1)->getSpectrumNo() + 10;
@@ -192,9 +163,9 @@ public:
       spec->addDetectorID(start + i);
     }
 
-    TS_ASSERT_THROWS_NOTHING( conj->setProperty("InputWorkspace2",ws2) );
-    TS_ASSERT_THROWS_NOTHING(conj->execute());
-    TS_ASSERT( conj->isExecuted() );
+    TS_ASSERT_THROWS_NOTHING( conj.setProperty("InputWorkspace2",ws2) );
+    TS_ASSERT_THROWS_NOTHING(conj.execute());
+    TS_ASSERT( conj.isExecuted() );
 
     // Test output
     MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(ws1_name));
@@ -206,7 +177,6 @@ public:
     TS_ASSERT_EQUALS( output->getSpectrum(10)->getSpectrumNo(), start);
 
     AnalysisDataService::Instance().remove(ws1_name);
-    delete conj;
   }
 
   void performTestNoOverlap(bool event)
@@ -227,13 +197,13 @@ public:
     AnalysisDataService::Instance().addOrReplace(ws1Name, ws1);
     AnalysisDataService::Instance().addOrReplace(ws2Name, ws2);
 
-    conj = new ConjoinWorkspaces();
-    conj->initialize();
-    TS_ASSERT_THROWS_NOTHING( conj->setPropertyValue("InputWorkspace1",ws1Name) );
-    TS_ASSERT_THROWS_NOTHING( conj->setPropertyValue("InputWorkspace2",ws2Name) );
-    TS_ASSERT_THROWS_NOTHING( conj->setProperty("CheckOverlapping",false) );
-    TS_ASSERT_THROWS_NOTHING( conj->execute(); )
-    TS_ASSERT( conj->isExecuted() );
+    ConjoinWorkspaces conj;
+    conj.initialize();
+    TS_ASSERT_THROWS_NOTHING( conj.setPropertyValue("InputWorkspace1",ws1Name) );
+    TS_ASSERT_THROWS_NOTHING( conj.setPropertyValue("InputWorkspace2",ws2Name) );
+    TS_ASSERT_THROWS_NOTHING( conj.setProperty("CheckOverlapping",false) );
+    TS_ASSERT_THROWS_NOTHING( conj.execute(); )
+    TS_ASSERT( conj.isExecuted() );
 
     TS_ASSERT_THROWS_NOTHING( out = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(ws1Name) ); )
     TS_ASSERT(out);
@@ -245,8 +215,6 @@ public:
     for(size_t wi=0; wi<out->getNumberHistograms(); wi++)
       for(size_t x=0; x<out->blocksize(); x++)
         TS_ASSERT_DELTA(out->readY(wi)[x], 2.0, 1e-5);
-
-    delete conj;
   }
 
   void test_DONTCheckForOverlap_Events()
@@ -259,10 +227,7 @@ public:
     performTestNoOverlap(false);
   }
 
-
-
 private:
-  ConjoinWorkspaces * conj;
   const std::string ws1Name;
   const std::string ws2Name;
 };
