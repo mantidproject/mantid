@@ -4,6 +4,7 @@
 #include "MantidAPI/IMDIterator.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/UserDefinedThresholdRange.h"
+#include "MantidVatesAPI/NoThresholdRange.h"
 #include "MantidVatesAPI/vtkMDHistoQuadFactory.h"
 #include "MockObjects.h"
 #include <cxxtest/TestSuite.h>
@@ -169,6 +170,22 @@ public:
     UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 1);
     vtkMDHistoQuadFactory factory(ThresholdRange_scptr(pRange), "signal");
     TS_ASSERT_EQUALS("vtkMDHistoQuadFactory", factory.getFactoryTypeName());
+  }
+
+  void testProgressUpdates()
+  {
+    MockProgressAction mockProgressAction;
+    //Expectation checks that progress should be >= 0 and <= 100 and called at least once!
+    EXPECT_CALL(mockProgressAction, eventRaised(AllOf(Le(100),Ge(0)))).Times(AtLeast(1));
+
+    MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
+    vtkMDHistoQuadFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+
+    factory.initialize(ws_sptr);
+    vtkDataSet* product= factory.create(mockProgressAction);
+
+    TSM_ASSERT("Progress Updates not used as expected.", Mock::VerifyAndClearExpectations(&mockProgressAction));
+    product->Delete();
   }
 
 };

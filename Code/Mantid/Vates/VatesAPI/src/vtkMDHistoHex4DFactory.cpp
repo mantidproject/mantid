@@ -95,7 +95,7 @@ namespace VATES
     else
     {
       // Create the mesh in a 4D mode
-      return this->create3Dor4D(m_timeMapper(m_timestep), true);
+      return this->create3Dor4D(m_timeMapper(m_timestep), true, progressUpdating);
     }
   }
 

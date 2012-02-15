@@ -73,7 +73,7 @@ protected:
 
   virtual void validate() const;
 
-  vtkDataSet* create3Dor4D(size_t timestep, bool do4D) const;
+  vtkDataSet* create3Dor4D(size_t timestep, bool do4D, ProgressAction & update) const;
 
   void validateWsNotNull() const;
 

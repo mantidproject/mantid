@@ -186,14 +186,15 @@ public:
 
   void test_4DWorkspace()
   {
-    FakeProgressAction progressUpdate;
+    MockProgressAction mockProgressAction;
+    EXPECT_CALL(mockProgressAction, eventRaised(_)).Times(AtLeast(1));
 
     Mantid::MDEvents::MDEventWorkspace4Lean::sptr ws = MDEventsTestHelper::makeMDEW<4>(5, -10.0, 10.0, 1);
     vtkMDHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
     factory.initialize(ws);
     vtkDataSet* product = NULL;
 
-    TS_ASSERT_THROWS_NOTHING(product = factory.create(progressUpdate));
+    TS_ASSERT_THROWS_NOTHING(product = factory.create(mockProgressAction));
 
     const size_t expected_n_points = 8*125;
     const size_t expected_n_cells = 125;
@@ -213,6 +214,8 @@ public:
     TS_ASSERT_EQUALS(10, bounds[3]);
     TS_ASSERT_EQUALS(-10, bounds[4]);
     TS_ASSERT_EQUALS(10, bounds[5]);
+
+    TSM_ASSERT("Progress reporting has not been conducted as expected", Mock::VerifyAndClearExpectations(&mockProgressAction));
 
     product->Delete();
   }

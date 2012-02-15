@@ -4,6 +4,7 @@
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/UserDefinedThresholdRange.h"
+#include "MantidVatesAPI/NoThresholdRange.h"
 #include "MantidVatesAPI/vtkMDHistoHexFactory.h"
 #include "MockObjects.h"
 #include <cxxtest/TestSuite.h>
@@ -70,7 +71,22 @@ class vtkMDHistoHexFactoryTest: public CxxTest::TestSuite
     const int correctCellNumber = 10 * 10 * 10;
     TSM_ASSERT_EQUALS("The number of signal values generated is incorrect.", correctCellNumber, signalData->GetSize());
     product->Delete();
+  }
 
+  void testProgressUpdating()
+  {
+    MockProgressAction mockProgressAction;
+    //Expectation checks that progress should be >= 0 and <= 100 and called at least once!
+    EXPECT_CALL(mockProgressAction, eventRaised(AllOf(Le(100),Ge(0)))).Times(AtLeast(1));
+
+    MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
+    vtkMDHistoHexFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+
+    factory.initialize(ws_sptr);
+    vtkDataSet* product= factory.create(mockProgressAction);
+
+    TSM_ASSERT("Progress Updates not used as expected.", Mock::VerifyAndClearExpectations(&mockProgressAction));
+    product->Delete();
   }
 
   void testIsValidThrowsWhenNoWorkspace()

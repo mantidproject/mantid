@@ -206,6 +206,12 @@ public:
   ~MockWorkspaceProvider(){}
 };
 
+class MockProgressAction : public Mantid::VATES::ProgressAction
+{
+public:
+  MOCK_METHOD1(eventRaised, void(double));
+};
+
 class FakeProgressAction : public Mantid::VATES::ProgressAction
 {
   virtual void eventRaised(double)

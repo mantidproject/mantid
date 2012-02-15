@@ -85,7 +85,9 @@ public:
 
   void testCreation()
   {
-    FakeProgressAction progressUpdate;
+    MockProgressAction mockProgressAction;
+    //Expectation checks that progress should be >= 0 and <= 100 and called at least once!
+    EXPECT_CALL(mockProgressAction, eventRaised(AllOf(Le(100),Ge(0)))).Times(AtLeast(1));
 
     boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDEvent<2>,2> >
             ws = MDEventsTestHelper::makeMDEWFull<2>(10, 10, 10, 10);
@@ -104,12 +106,13 @@ public:
     vtkMDQuadFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
     factory.initialize(binned);
 
-    vtkDataSet* product = factory.create(progressUpdate);
+    vtkDataSet* product = factory.create(mockProgressAction);
 
     TS_ASSERT(dynamic_cast<vtkUnstructuredGrid*>(product) != NULL);
     TS_ASSERT_EQUALS(100, product->GetNumberOfCells());
     TS_ASSERT_EQUALS(400, product->GetNumberOfPoints());
     TS_ASSERT_EQUALS(VTK_QUAD, product->GetCellType(0));
+    TSM_ASSERT("Progress Updates not used as expected.", Mock::VerifyAndClearExpectations(&mockProgressAction));
 
     product->Delete();
     AnalysisDataService::Instance().remove("binned");

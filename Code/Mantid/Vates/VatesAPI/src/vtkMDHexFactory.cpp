@@ -39,6 +39,7 @@ namespace Mantid
   //-------------------------------------------------------------------------------------------------
   /* Generate the vtkDataSet from the objects input MDEventWorkspace (of a given type an dimensionality 3+)
   *
+  * @param ws: workspace to draw from
   * @return a fully constructed vtkUnstructuredGrid containing geometric and scalar data.
   */
   template<typename MDE, size_t nd>
@@ -239,9 +240,10 @@ namespace Mantid
         // Direct 3D, so no slicing
         this->slice = false;
       }
-
+      progressUpdating.eventRaised(10);
       // Macro to call the right instance of the
       CALL_MDEVENT_FUNCTION(this->doCreate, imdws);
+      progressUpdating.eventRaised(100);
 
       // Clean up
       if (this->slice)

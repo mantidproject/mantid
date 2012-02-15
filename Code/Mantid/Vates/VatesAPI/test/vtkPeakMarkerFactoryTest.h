@@ -67,6 +67,34 @@ public:
 
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&pw));
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&peak1));
+    set->Delete();
+  }
+
+  void test_progress_updates()
+  {
+    MockPeak peak1;
+    EXPECT_CALL( peak1, getQLabFrame()).WillRepeatedly( Return( V3D(1,2,3) ));
+    EXPECT_CALL( peak1, getHKL()).Times(AnyNumber());
+    EXPECT_CALL( peak1, getQSampleFrame()).Times(AnyNumber());
+
+    MockProgressAction mockProgress;
+    //Expectation checks that progress should be >= 0 and <= 100 and called at least once!
+    EXPECT_CALL(mockProgress, eventRaised(AllOf(Le(100),Ge(0)))).Times(AtLeast(1));
+
+    boost::shared_ptr<MockPeaksWorkspace> pw_ptr(new MockPeaksWorkspace());
+    MockPeaksWorkspace & pw = *pw_ptr;
+
+    //Peaks workspace will return 5 identical peaks
+    EXPECT_CALL( pw, getNumberPeaks()).WillRepeatedly(Return(5));
+    EXPECT_CALL( pw, getPeak(_)).WillRepeatedly( ReturnRef( peak1 ));
+
+    vtkPeakMarkerFactory factory("signal", vtkPeakMarkerFactory::Peak_in_Q_lab);
+    factory.initialize(pw_ptr);
+    vtkDataSet * set = factory.create(mockProgress);
+    set->Delete();
+
+    TSM_ASSERT("Progress Updates not used as expected.", Mock::VerifyAndClearExpectations(&mockProgress));
+
   }
 
   void test_q_lab()

@@ -82,9 +82,10 @@ namespace VATES
    * @param timestep :: index of the time step (4th dimension) in the workspace.
    *        Set to 0 for a 3D workspace.
    * @param do4D :: if true, create a 4D dataset, else to 3D
+   * @param progressUpdate: Progress updating. passes progress information up the stack.
    * @return the vtkDataSet created
    */
-  vtkDataSet* vtkMDHistoHexFactory::create3Dor4D(size_t timestep, bool do4D) const
+  vtkDataSet* vtkMDHistoHexFactory::create3Dor4D(size_t timestep, bool do4D, ProgressAction & progressUpdate) const
   {
     // Acquire a scoped read-only lock to the workspace (prevent segfault from algos modifying ws)
     ReadLock lock(*m_workspace);
@@ -129,11 +130,15 @@ namespace VATES
     memset(pointNeeded, 0, nPointsX*nPointsY*nPointsZ*sizeof(bool));
     // Array with true where the voxel should be shown
     bool * voxelShown = new bool[nBinsX*nBinsY*nBinsZ];
+    double progressFactor = 50/nBinsZ;
+    double progressOffset = 50;
 
     size_t index = 0;
 
     for (int z = 0; z < nBinsZ; z++)
     {
+      //Report progress updates for the first 50%
+      progressUpdate.eventRaised(z*progressFactor);
       for (int y = 0; y < nBinsY; y++)
       {
         for (int x = 0; x < nBinsX; x++)
@@ -189,8 +194,11 @@ namespace VATES
     // Array with the point IDs (only set where needed)
     vtkIdType * pointIDs = new vtkIdType[nPointsX*nPointsY*nPointsZ];
     index = 0;
+
     for (int z = 0; z < nPointsZ; z++)
     {
+      //Report progress updates for the last 50%
+      progressUpdate.eventRaised(z*progressFactor + progressOffset);
       in[2] = (minZ + (static_cast<coord_t>(z) * incrementZ)); //Calculate increment in z;
       for (int y = 0; y < nPointsY; y++)
       {
@@ -227,6 +235,7 @@ namespace VATES
     // It is approx. 40 x faster to create the hexadron only once, and reuse it for each voxel.
     vtkHexahedron *theHex = vtkHexahedron::New();
     index = 0;
+    
     for (int z = 0; z < nBinsZ; z++)
     {
       for (int y = 0; y < nBinsY; y++)
@@ -294,7 +303,7 @@ namespace VATES
     else
     {
       // Create in 3D mode
-      return this->create3Dor4D(0, false);
+      return this->create3Dor4D(0, false, progressUpdating);
     }
   }
 

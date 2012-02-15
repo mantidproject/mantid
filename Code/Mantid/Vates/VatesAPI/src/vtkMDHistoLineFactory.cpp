@@ -95,9 +95,13 @@ namespace Mantid
         Mantid::coord_t in[3]; 
         Mantid::coord_t out[3];
 
+        double progressFactor = 50/nBinsX;
+        double progressOffset = 50;
+
         //Loop through dimensions
         for (int i = 0; i < nPointsX; i++)
         {
+          progressUpdating.eventRaised(progressFactor * i);
           in[0] = minX + (static_cast<coord_t>(i) * incrementX); //Calculate increment in x;
 
           signalScalar = static_cast<float>(m_workspace->getSignalNormalizedAt(i));
@@ -133,6 +137,7 @@ namespace Mantid
 
         for (int i = 0; i < nBinsX - 1; i++)
         {
+          progressUpdating.eventRaised((progressFactor * i) + progressOffset);
           //Only create topologies for those cells which are not sparse.
           if (!column[i].isSparse)
           {
