@@ -53,7 +53,7 @@ class DataSets(BaseScriptElement):
             @param execute: if true, the script will be executed
         """
 
-        script =  "RefLReduction(RunNumbers=%s,\n" % ','.join([str(i) for i in self.data_files])
+        script =  "RefLReduction(RunNumbers=[%s],\n" % ','.join([str(i) for i in self.data_files])
         script += "              NormalizationRunNumber=%d,\n" % self.norm_file
         script += "              SignalPeakPixelRange=%s,\n" % str(self.DataPeakPixels)
         script += "              SubtractSignalBackground=%s,\n" % str(self.DataBackgroundFlag)
@@ -69,7 +69,7 @@ class DataSets(BaseScriptElement):
         script += "              TOFRange=%s,\n" % str(self.DataTofRange)
         script += "              QMin=%s,\n" % str(self.q_min)
         script += "              QStep=%s,\n" % str(self.q_step)
-        
+
         # Angle offset
         if self.angle_offset != 0.0:
             script += "              AngleOffset=%s,\n" % str(self.angle_offset)

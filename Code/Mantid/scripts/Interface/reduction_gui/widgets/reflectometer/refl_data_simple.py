@@ -751,7 +751,7 @@ class DataReflWidget(BaseWidget):
         from_tof = float(self._summary.data_from_tof.text())
         to_tof = float(self._summary.data_to_tof.text())
         m.DataTofRange = [from_tof, to_tof]
-        
+    
         datafiles = str(self._summary.data_run_number_edit.text()).split(',')
         m.data_files = [int(i) for i in datafiles]
     
