@@ -188,7 +188,8 @@ void MuonAnalysis::initLayout()
 
   m_uiForm.mwRunDeadTimeFile->setVisible(false);
   connect(m_uiForm.deadTimeType, SIGNAL(currentIndexChanged(int)), this, SLOT(changeDeadTimeType(int) ) );
-  connect(m_uiForm.mwRunDeadTimeFile, SIGNAL(fileEditingFinished()), this, SLOT(validateDeadTimeLoad() ) );
+  // TO BE INCLUDED LATER FOR #4338
+  //connect(m_uiForm.mwRunDeadTimeFile, SIGNAL(fileEditingFinished()), this, SLOT(validateDeadTimeLoad() ) );
 }
 
 
