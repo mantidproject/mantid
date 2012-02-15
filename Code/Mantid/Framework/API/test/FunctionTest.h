@@ -417,7 +417,7 @@ public:
     TS_ASSERT(!f.isExplicitlySet(3));
   }
 
-  //void test_setWorkspace_works()
+  //void xtest_setWorkspace_works()
   //{
   //  MatrixWorkspace_sptr ws(new MocMatrixWorkspace(10,11,10));
 
@@ -438,7 +438,7 @@ public:
   //}
 
   /** Refs #3003: Test to make sure setMatrix works in parallel */
-  //void test_setWorkspace_works_inParallel()
+  //void xtest_setWorkspace_works_inParallel()
   //{
   //  double expected;
   //  int numpixels = 15000;

@@ -68,10 +68,10 @@ public:
   /// set a fitting weight
   void setFitWeight(size_t i,double value);
   void setFitWeights(const std::vector<double>& values);
-  /// get a fitting weight
+  void setFitWeights(const double& value);
+ /// get a fitting weight
   double getFitWeight(size_t i) const;
 protected:
-  void setDataSize();
   std::vector<double> m_calculated; ///< buffer for calculated values
   std::vector<double> m_data;    ///< buffer for fit data
   std::vector<double> m_weights; ///< buffer for fitting weights (reciprocal errors)

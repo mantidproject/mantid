@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidAPI/CompositeFunctionMW.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -171,7 +171,7 @@ public:
 
   std::string name()const{return "Linear";}
 
-  void functionMW(double* out, const double* xValues, const size_t nData)const
+  void function1D(double* out, const double* xValues, const size_t nData)const
   {
     double a = getParameter("a");
     double b = getParameter("b");
@@ -180,7 +180,7 @@ public:
       out[i] = a + b * xValues[i];
     }
   }
-  void functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
+  void functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData)
   {
     //throw Mantid::Kernel::Exception::NotImplementedError("");
     for(size_t i=0;i<nData;i++)
@@ -205,7 +205,7 @@ public:
 
   std::string name()const{return "Cubic";}
 
-  void functionMW(double* out, const double* xValues, const size_t nData)const
+  void function1D(double* out, const double* xValues, const size_t nData)const
   {
     double c0 = getParameter("c0");
     double c1 = getParameter("c1");
@@ -217,7 +217,7 @@ public:
       out[i] = c0 + x*(c1 + x*(c2 + x*c3));
     }
   }
-  void functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
+  void functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData)
   {
     for(size_t i=0;i<nData;i++)
     {
@@ -236,7 +236,7 @@ class CompositeFunctionTest : public CxxTest::TestSuite
 public:
   void testAdd()
   {
-    CompositeFunctionMW *mfun = new CompositeFunctionMW();
+    CompositeFunction *mfun = new CompositeFunction();
     Gauss *g1 = new Gauss(),*g2 = new Gauss();
     Linear *bk = new Linear();
     Cubic *cub = new Cubic();
@@ -333,7 +333,7 @@ public:
 
   void testTies()
   {
-    CompositeFunctionMW *mfun = new CompositeFunctionMW();
+    CompositeFunction *mfun = new CompositeFunction();
     Gauss *g1 = new Gauss(),*g2 = new Gauss();
     Linear *bk = new Linear();
     Cubic *cub = new Cubic();
@@ -379,38 +379,18 @@ public:
     TS_ASSERT_EQUALS(mfun->nameOfActive(4),"f3.c");
     TS_ASSERT_EQUALS(mfun->nameOfActive(5),"f3.s");
 
-    TS_ASSERT_EQUALS(mfun->indexOfActive(0),2);
-    TS_ASSERT_EQUALS(mfun->indexOfActive(1),3);
-    TS_ASSERT_EQUALS(mfun->indexOfActive(2),5);
-    TS_ASSERT_EQUALS(mfun->indexOfActive(3),8);
-    TS_ASSERT_EQUALS(mfun->indexOfActive(4),9);
-    TS_ASSERT_EQUALS(mfun->indexOfActive(5),11);
-
-    TS_ASSERT( ! mfun->isActive(0));
-    TS_ASSERT( ! mfun->isActive(1));
-    TS_ASSERT(   mfun->isActive(2));
-    TS_ASSERT(   mfun->isActive(3));
-    TS_ASSERT( ! mfun->isActive(4));
-    TS_ASSERT(   mfun->isActive(5));
-    TS_ASSERT( ! mfun->isActive(6));
-    TS_ASSERT( ! mfun->isActive(7));
-    TS_ASSERT(   mfun->isActive(8));
-    TS_ASSERT(   mfun->isActive(9));
-    TS_ASSERT( ! mfun->isActive(10));
-    TS_ASSERT(   mfun->isActive(11));
-
-    TS_ASSERT_THROWS(mfun->activeIndex(0),std::invalid_argument);
-    TS_ASSERT_THROWS(mfun->activeIndex(1),std::invalid_argument);
-    TS_ASSERT_EQUALS(mfun->activeIndex(2),0);
-    TS_ASSERT_EQUALS(mfun->activeIndex(3),1);
-    TS_ASSERT_THROWS(mfun->activeIndex(4),std::invalid_argument);
-    TS_ASSERT_EQUALS(mfun->activeIndex(5),2);
-    TS_ASSERT_THROWS(mfun->activeIndex(6),std::invalid_argument);
-    TS_ASSERT_THROWS(mfun->activeIndex(7),std::invalid_argument);
-    TS_ASSERT_EQUALS(mfun->activeIndex(8),3);
-    TS_ASSERT_EQUALS(mfun->activeIndex(9),4);
-    TS_ASSERT_THROWS(mfun->activeIndex(10),std::invalid_argument);
-    TS_ASSERT_EQUALS(mfun->activeIndex(11),5);
+    TS_ASSERT(   mfun->isFixed(0));
+    TS_ASSERT(   mfun->isFixed(1));
+    TS_ASSERT( ! mfun->isFixed(2));
+    TS_ASSERT( ! mfun->isFixed(3));
+    TS_ASSERT(   mfun->isFixed(4));
+    TS_ASSERT( ! mfun->isFixed(5));
+    TS_ASSERT(   mfun->isFixed(6));
+    TS_ASSERT(   mfun->isFixed(7));
+    TS_ASSERT( ! mfun->isFixed(8));
+    TS_ASSERT( ! mfun->isFixed(9));
+    TS_ASSERT(   mfun->isFixed(10));
+    TS_ASSERT( ! mfun->isFixed(11));
 
     TS_ASSERT_EQUALS(mfun->nParams(),12);
     TS_ASSERT_EQUALS(mfun->nActive(),6);
@@ -472,7 +452,7 @@ public:
 
   void testSetActive()
   {
-    CompositeFunctionMW *mfun = new CompositeFunctionMW();
+    CompositeFunction *mfun = new CompositeFunction();
     Gauss *g1 = new Gauss(),*g2 = new Gauss();
     Linear *bk = new Linear();
     Cubic *cub = new Cubic();
@@ -537,9 +517,9 @@ public:
     delete mfun;
   }
 
-  void testRemoveActive()
+  void testFix()
   {
-    CompositeFunctionMW *mfun = new CompositeFunctionMW();
+    CompositeFunction *mfun = new CompositeFunction();
     Gauss *g1 = new Gauss(),*g2 = new Gauss();
     Linear *bk = new Linear();
     Cubic *cub = new Cubic();
@@ -564,14 +544,14 @@ public:
     g2->setParameter("h",3.2);
     g2->setParameter("s",3.3);
 
-    mfun->removeActive(0);
-    mfun->removeActive(1);
-    mfun->removeActive(4);
-    //g1->removeActive(2);  // This doesn't work
-    mfun->removeActive(6);
-    mfun->removeActive(7);
-    mfun->removeActive(10);
-    //g2->removeActive(1);  // This doesn't work
+    mfun->fix(0);
+    mfun->fix(1);
+    mfun->fix(4);
+    //g1->fix(2);  // This doesn't work
+    mfun->fix(6);
+    mfun->fix(7);
+    mfun->fix(10);
+    //g2->fix(1);  // This doesn't work
 
     mfun->setActiveParameter(0,100);
     mfun->setActiveParameter(1,101);
@@ -608,7 +588,7 @@ public:
 
   void testApplyTies()
   {
-    CompositeFunctionMW *mfun = new CompositeFunctionMW();
+    CompositeFunction *mfun = new CompositeFunction();
     Gauss *g1 = new Gauss(),*g2 = new Gauss();
     Linear *bk = new Linear();
     Cubic *cub = new Cubic();
@@ -670,7 +650,7 @@ public:
 
   void testApplyTiesInWrongOrder()
   {
-    CompositeFunctionMW *mfun = new CompositeFunctionMW();
+    CompositeFunction *mfun = new CompositeFunction();
     Gauss *g1 = new Gauss(),*g2 = new Gauss();
     Linear *bk = new Linear();
     Cubic *cub = new Cubic();
@@ -733,7 +713,7 @@ public:
   void testRemoveFunction()
   {
 
-    CompositeFunctionMW *mfun = new CompositeFunctionMW();
+    CompositeFunction *mfun = new CompositeFunction();
     Gauss *g1 = new Gauss(),*g2 = new Gauss();
     Linear *bk = new Linear();
     Cubic *cub = new Cubic();
@@ -812,20 +792,6 @@ public:
     TS_ASSERT_EQUALS(mfun->parameterIndex("f2.h"),6);
     TS_ASSERT_EQUALS(mfun->parameterIndex("f2.s"),7);
 
-    TS_ASSERT_THROWS(mfun->activeIndex(0),std::invalid_argument);
-    TS_ASSERT_THROWS(mfun->activeIndex(1),std::invalid_argument);
-    TS_ASSERT_EQUALS(mfun->activeIndex(2),0);
-    TS_ASSERT_EQUALS(mfun->activeIndex(3),1);
-    TS_ASSERT_THROWS(mfun->activeIndex(4),std::invalid_argument);
-    TS_ASSERT_EQUALS(mfun->activeIndex(5),2);
-    TS_ASSERT_THROWS(mfun->activeIndex(6),std::invalid_argument);
-    TS_ASSERT_EQUALS(mfun->activeIndex(7),3);
-
-    TS_ASSERT_EQUALS(mfun->indexOfActive(0),2);
-    TS_ASSERT_EQUALS(mfun->indexOfActive(1),3);
-    TS_ASSERT_EQUALS(mfun->indexOfActive(2),5);
-    TS_ASSERT_EQUALS(mfun->indexOfActive(3),7);
-
     TS_ASSERT_EQUALS(mfun->nameOfActive(0),"f1.c");
     TS_ASSERT_EQUALS(mfun->nameOfActive(1),"f1.h");
     TS_ASSERT_EQUALS(mfun->nameOfActive(2),"f2.c");
@@ -836,14 +802,14 @@ public:
     TS_ASSERT_EQUALS(mfun->activeParameter(2),3.1);
     TS_ASSERT_EQUALS(mfun->activeParameter(3),3.3);
 
-    TS_ASSERT( ! mfun->isActive(0));
-    TS_ASSERT( ! mfun->isActive(1));
-    TS_ASSERT(   mfun->isActive(2));
-    TS_ASSERT(   mfun->isActive(3));
-    TS_ASSERT( ! mfun->isActive(4));
-    TS_ASSERT(   mfun->isActive(5));
-    TS_ASSERT( ! mfun->isActive(6));
-    TS_ASSERT(   mfun->isActive(7));
+    TS_ASSERT(   mfun->isFixed(0));
+    TS_ASSERT(   mfun->isFixed(1));
+    TS_ASSERT( ! mfun->isFixed(2));
+    TS_ASSERT( ! mfun->isFixed(3));
+    TS_ASSERT(   mfun->isFixed(4));
+    TS_ASSERT( ! mfun->isFixed(5));
+    TS_ASSERT(   mfun->isFixed(6));
+    TS_ASSERT( ! mfun->isFixed(7));
 
     delete mfun;
   }
@@ -851,7 +817,7 @@ public:
   // replacing function has fewer parameters
   void testReplaceFunction()
   {
-    CompositeFunctionMW *mfun = new CompositeFunctionMW();
+    CompositeFunction *mfun = new CompositeFunction();
     Gauss *g1 = new Gauss(),*g2 = new Gauss();
     Linear *bk = new Linear();
     Cubic *cub = new Cubic();
@@ -942,24 +908,6 @@ public:
     TS_ASSERT_EQUALS(mfun->parameterIndex("f3.h"),8);
     TS_ASSERT_EQUALS(mfun->parameterIndex("f3.s"),9);
 
-    TS_ASSERT_THROWS(mfun->activeIndex(0),std::invalid_argument);
-    TS_ASSERT_THROWS(mfun->activeIndex(1),std::invalid_argument);
-    TS_ASSERT_EQUALS(mfun->activeIndex(2),0);
-    TS_ASSERT_EQUALS(mfun->activeIndex(3),1);
-    TS_ASSERT_THROWS(mfun->activeIndex(4),std::invalid_argument);
-    TS_ASSERT_EQUALS(mfun->activeIndex(5),2);
-    TS_ASSERT_EQUALS(mfun->activeIndex(6),3);
-    TS_ASSERT_EQUALS(mfun->activeIndex(7),4);
-    TS_ASSERT_THROWS(mfun->activeIndex(8),std::invalid_argument);
-    TS_ASSERT_EQUALS(mfun->activeIndex(9),5);
-
-    TS_ASSERT_EQUALS(mfun->indexOfActive(0),2);
-    TS_ASSERT_EQUALS(mfun->indexOfActive(1),3);
-    TS_ASSERT_EQUALS(mfun->indexOfActive(2),5);
-    TS_ASSERT_EQUALS(mfun->indexOfActive(3),6);
-    TS_ASSERT_EQUALS(mfun->indexOfActive(4),7);
-    TS_ASSERT_EQUALS(mfun->indexOfActive(5),9);
-
     TS_ASSERT_EQUALS(mfun->nameOfActive(0),"f1.c");
     TS_ASSERT_EQUALS(mfun->nameOfActive(1),"f1.h");
     TS_ASSERT_EQUALS(mfun->nameOfActive(2),"f2.a");
@@ -974,16 +922,16 @@ public:
     TS_ASSERT_EQUALS(mfun->activeParameter(4),3.1);
     TS_ASSERT_EQUALS(mfun->activeParameter(5),3.3);
 
-    TS_ASSERT( ! mfun->isActive(0));
-    TS_ASSERT( ! mfun->isActive(1));
-    TS_ASSERT(   mfun->isActive(2));
-    TS_ASSERT(   mfun->isActive(3));
-    TS_ASSERT( ! mfun->isActive(4));
-    TS_ASSERT(   mfun->isActive(5));
-    TS_ASSERT(   mfun->isActive(6));
-    TS_ASSERT(   mfun->isActive(7));
-    TS_ASSERT( ! mfun->isActive(8));
-    TS_ASSERT(   mfun->isActive(9));
+    TS_ASSERT(   mfun->isFixed(0));
+    TS_ASSERT(   mfun->isFixed(1));
+    TS_ASSERT( ! mfun->isFixed(2));
+    TS_ASSERT( ! mfun->isFixed(3));
+    TS_ASSERT(   mfun->isFixed(4));
+    TS_ASSERT( ! mfun->isFixed(5));
+    TS_ASSERT( ! mfun->isFixed(6));
+    TS_ASSERT( ! mfun->isFixed(7));
+    TS_ASSERT(   mfun->isFixed(8));
+    TS_ASSERT( ! mfun->isFixed(9));
 
     clearDeleted();
     delete mfun;
@@ -996,7 +944,7 @@ public:
   // replacing function has more parameters
   void testReplaceFunction1()
   {
-    CompositeFunctionMW *mfun = new CompositeFunctionMW();
+    CompositeFunction *mfun = new CompositeFunction();
     Gauss *g1 = new Gauss(),*g2 = new Gauss();
     Linear *bk = new Linear();
     Cubic *cub = new Cubic();
@@ -1127,46 +1075,20 @@ public:
     TS_ASSERT_EQUALS(mfun->nameOfActive(8),"f3.c");
     TS_ASSERT_EQUALS(mfun->nameOfActive(9),"f3.s");
 
-    TS_ASSERT_EQUALS(mfun->indexOfActive(0),0);
-    TS_ASSERT_EQUALS(mfun->indexOfActive(1),1);
-    TS_ASSERT_EQUALS(mfun->indexOfActive(2),2);
-    TS_ASSERT_EQUALS(mfun->indexOfActive(3),3);
-    TS_ASSERT_EQUALS(mfun->indexOfActive(4),4);
-    TS_ASSERT_EQUALS(mfun->indexOfActive(5),5);
-    TS_ASSERT_EQUALS(mfun->indexOfActive(6),7);
-    TS_ASSERT_EQUALS(mfun->indexOfActive(7),10);
-    TS_ASSERT_EQUALS(mfun->indexOfActive(8),11);
-    TS_ASSERT_EQUALS(mfun->indexOfActive(9),13);
-
-    TS_ASSERT(   mfun->isActive(0));
-    TS_ASSERT(   mfun->isActive(1));
-    TS_ASSERT(   mfun->isActive(2));
-    TS_ASSERT(   mfun->isActive(3));
-    TS_ASSERT(   mfun->isActive(4));
-    TS_ASSERT(   mfun->isActive(5));
-    TS_ASSERT( ! mfun->isActive(6));
-    TS_ASSERT(   mfun->isActive(7));
-    TS_ASSERT( ! mfun->isActive(8));
-    TS_ASSERT( ! mfun->isActive(9));
-    TS_ASSERT(   mfun->isActive(10));
-    TS_ASSERT(   mfun->isActive(11));
-    TS_ASSERT( ! mfun->isActive(12));
-    TS_ASSERT(   mfun->isActive(13));
-
-    TS_ASSERT_EQUALS(mfun->activeIndex(0),0);
-    TS_ASSERT_EQUALS(mfun->activeIndex(1),1);
-    TS_ASSERT_EQUALS(mfun->activeIndex(2),2);
-    TS_ASSERT_EQUALS(mfun->activeIndex(3),3);
-    TS_ASSERT_EQUALS(mfun->activeIndex(4),4);
-    TS_ASSERT_EQUALS(mfun->activeIndex(5),5);
-    TS_ASSERT_THROWS(mfun->activeIndex(6),std::invalid_argument);
-    TS_ASSERT_EQUALS(mfun->activeIndex(7),6);
-    TS_ASSERT_THROWS(mfun->activeIndex(8),std::invalid_argument);
-    TS_ASSERT_THROWS(mfun->activeIndex(9),std::invalid_argument);
-    TS_ASSERT_EQUALS(mfun->activeIndex(10),7);
-    TS_ASSERT_EQUALS(mfun->activeIndex(11),8);
-    TS_ASSERT_THROWS(mfun->activeIndex(12),std::invalid_argument);
-    TS_ASSERT_EQUALS(mfun->activeIndex(13),9);
+    TS_ASSERT( ! mfun->isFixed(0));
+    TS_ASSERT( ! mfun->isFixed(1));
+    TS_ASSERT( ! mfun->isFixed(2));
+    TS_ASSERT( ! mfun->isFixed(3));
+    TS_ASSERT( ! mfun->isFixed(4));
+    TS_ASSERT( ! mfun->isFixed(5));
+    TS_ASSERT(   mfun->isFixed(6));
+    TS_ASSERT( ! mfun->isFixed(7));
+    TS_ASSERT(   mfun->isFixed(8));
+    TS_ASSERT(   mfun->isFixed(9));
+    TS_ASSERT( ! mfun->isFixed(10));
+    TS_ASSERT( ! mfun->isFixed(11));
+    TS_ASSERT(   mfun->isFixed(12));
+    TS_ASSERT( ! mfun->isFixed(13));
 
     clearDeleted();
     delete mfun;
@@ -1178,7 +1100,7 @@ public:
 
   void testAddFunctionsWithTies()
   {
-    CompositeFunctionMW *mfun = new CompositeFunctionMW();
+    CompositeFunction *mfun = new CompositeFunction();
     Gauss *g = new Gauss();
     Linear *bk = new Linear();
 
@@ -1200,11 +1122,11 @@ public:
     TS_ASSERT_EQUALS(mfun->nParams(),5);
     TS_ASSERT_EQUALS(mfun->nActive(),2);
 
-    TS_ASSERT(   mfun->isActive(0));
-    TS_ASSERT( ! mfun->isActive(1));
-    TS_ASSERT(   mfun->isActive(2));
-    TS_ASSERT( ! mfun->isActive(3));
-    TS_ASSERT( ! mfun->isActive(4));
+    TS_ASSERT( ! mfun->isFixed(0));
+    TS_ASSERT(   mfun->isFixed(1));
+    TS_ASSERT( ! mfun->isFixed(2));
+    TS_ASSERT(   mfun->isFixed(3));
+    TS_ASSERT(   mfun->isFixed(4));
 
     mfun->applyTies();
 
@@ -1219,7 +1141,7 @@ public:
 
   void testRemoveFunctionWithTies()
   {
-    CompositeFunctionMW *mfun = new CompositeFunctionMW();
+    CompositeFunction *mfun = new CompositeFunction();
     Gauss *g = new Gauss();
     Linear *bk = new Linear();
 
@@ -1244,9 +1166,9 @@ public:
     TS_ASSERT_EQUALS(mfun->nParams(),3);
     TS_ASSERT_EQUALS(mfun->nActive(),2);
 
-    TS_ASSERT(   mfun->isActive(0));
-    TS_ASSERT(   mfun->isActive(1));
-    TS_ASSERT( ! mfun->isActive(2));
+    TS_ASSERT( ! mfun->isFixed(0));
+    TS_ASSERT( ! mfun->isFixed(1));
+    TS_ASSERT(   mfun->isFixed(2));
 
     mfun->applyTies();
 
@@ -1259,9 +1181,9 @@ public:
 
   void testReplaceEmptyFunction()
   {
-    CompositeFunctionMW *mfun = new CompositeFunctionMW();
+    CompositeFunction *mfun = new CompositeFunction();
     Gauss *g = new Gauss();
-    CompositeFunctionMW *cf = new CompositeFunctionMW();
+    CompositeFunction *cf = new CompositeFunction();
     Linear *bk = new Linear();
     Cubic *cub = new Cubic();
 
@@ -1278,7 +1200,7 @@ public:
 
   void test_setWorkspaceWorks()
   {
-    CompositeFunctionMW *mfun = new CompositeFunctionMW();
+    CompositeFunction *mfun = new CompositeFunction();
     Gauss *g1 = new Gauss();
     Linear *bk = new Linear();
 
@@ -1298,9 +1220,7 @@ public:
 
     // Failing to explicitly construct a string here from the char* leads to the
     //   setWorkspace(Workspace_sptr, bool) overload getting called!!!
-    TS_ASSERT_THROWS_NOTHING(mfun->setWorkspace(ws,std::string("WorkspaceIndex=3,StartX=0.2,EndX = 0.8")));
-    TS_ASSERT_EQUALS(mfun->dataSize(),8);
-    TS_ASSERT_EQUALS(mfun->getData(),&y[2]);
+    //TS_ASSERT_THROWS_NOTHING(mfun->setWorkspace(ws,std::string("WorkspaceIndex=3,StartX=0.2,EndX = 0.8")));
   }
 
 private:
@@ -1313,13 +1233,6 @@ private:
   void clearDeleted()
   {
     CompositeFunctionTest_FunctionDeleted.clear();
-  }
-
-  void interrupt()
-  {
-    int iii;
-    std::cerr<<"Enter a number:";
-    std::cin>>iii;
   }
 
 };

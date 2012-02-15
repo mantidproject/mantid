@@ -49,7 +49,9 @@ public:
   virtual size_t size() const  {return m_X.size();}
   /// Get an x value.
   /// @param i :: Index
-  const double* operator[](size_t i) const {return &m_X.at(i);}
+  double operator[](size_t i) const {return m_X.at(i);}
+  /// Get a pointer to i-th value
+  const double* getPointerAt(size_t i) const {return &m_X.at(i);}
 protected:
   std::vector<double> m_X; ///< vector of function arguments
 };

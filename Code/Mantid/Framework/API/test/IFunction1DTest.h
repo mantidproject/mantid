@@ -3,6 +3,8 @@
 
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionValues.h"
 
 #include <cxxtest/TestSuite.h>
 #include <iostream>
@@ -36,6 +38,27 @@ protected:
   }
 };
 
+class IFunction1DTest_Jacobian: public Jacobian
+{
+public:
+  IFunction1DTest_Jacobian(size_t ny, size_t np):
+  m_np(np)
+  {
+    m_data.resize(ny * np);
+  }
+  virtual void set(size_t iY, size_t iP, double value)
+  {
+    m_data[iY*m_np + iP] = value;
+  }
+  virtual double get(size_t iY, size_t iP)
+  {
+    return m_data[iY*m_np + iP];
+  }
+private:
+  size_t m_np;
+  std::vector<double> m_data;
+};
+
 class IFunction1DTest : public CxxTest::TestSuite
 {
 public:
@@ -43,22 +66,26 @@ public:
   void testIFunction()
   {
     IFunction1DTest_Function function;
-    // What does this test do??
-    int i = 1;
-    TS_ASSERT(i);
-
-    // const int nx = 10;
-    // const int ny = 10;
-    // Mantid::DataObjects::Workspace2D_sptr ws = Create2DWorkspace(nx,ny);
-
-    // for(int i=0;i<nx;++i)
-    // {
-    //   for(int j=0;j<ny;++j)
-    //   {
-    //   }
-    // }
-
-    // std::cerr<<"\nn="<<ws->axes()<<"\n";
+    std::vector<double> x(10);
+    for(size_t i = 0; i < x.size(); ++i)
+    {
+      x[i] = 1.0 + 0.1 * i;
+    }
+    FunctionDomain1D domain(x);
+    FunctionValues values(domain);
+    function.function(domain,values);
+    for(size_t i = 0; i < domain.size(); ++i)
+    {
+      TS_ASSERT_EQUALS(values.getCalculated(i),A * (1.0 + 0.1 * i) + B);
+    }
+    
+    IFunction1DTest_Jacobian jacobian(10,2);
+    function.functionDeriv(domain,jacobian);
+    for(size_t i = 0; i < domain.size(); ++i)
+    {
+      TS_ASSERT_EQUALS(jacobian.get(i,0), 1.0 + 0.1 * i);
+      TS_ASSERT_EQUALS(jacobian.get(i,1), 1.0);
+    }
   }
 
 };

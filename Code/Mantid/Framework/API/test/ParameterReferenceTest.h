@@ -5,7 +5,7 @@
 
 #include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/ParamFunction.h"
-#include "MantidAPI/CompositeFunctionMW.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ParameterReference.h"
 
 using namespace Mantid;
@@ -21,7 +21,7 @@ public:
     declareParameter("c");
   }
   std::string name()const{return "ParameterReferenceTest_Fun";}
-  void functionMW(double*, const double*, const size_t)const
+  void function1D(double*, const double*, const size_t)const
   {
   }
 };
@@ -46,14 +46,14 @@ public:
 
   void testComposite()
   {
-    CompositeFunctionMW* cf = new CompositeFunctionMW;
+    CompositeFunction* cf = new CompositeFunction;
     ParameterReferenceTest_Fun* f0 = new ParameterReferenceTest_Fun;
 
-    CompositeFunctionMW* f1 = new CompositeFunctionMW;
+    CompositeFunction* f1 = new CompositeFunction;
 
     ParameterReferenceTest_Fun* f1_0 = new ParameterReferenceTest_Fun;
     ParameterReferenceTest_Fun* f1_1 = new ParameterReferenceTest_Fun;
-    CompositeFunctionMW* f1_2 = new CompositeFunctionMW;
+    CompositeFunction* f1_2 = new CompositeFunction;
     ParameterReferenceTest_Fun* f1_2_0 = new ParameterReferenceTest_Fun;
     ParameterReferenceTest_Fun* f1_2_1 = new ParameterReferenceTest_Fun;
 

@@ -128,8 +128,9 @@ set ( TEST_FILES
 	test/FitTest.h
 	test/FlatBackgroundTest.h
 	test/FuncMinimizerFactoryTest.h
-	test/FunctionFactoryTest.h
 	test/FunctionTest.h
+	test/FunctionFactoryTest.h
+	test/Gaussian1DTest.h
 	test/GausDecayTest.h
 	test/GausOscTest.h
 	test/Gaussian1DTest.h

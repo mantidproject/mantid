@@ -67,7 +67,7 @@ void IFunction1D::function(const FunctionDomain& domain,FunctionValues& values)c
   {
     throw std::invalid_argument("Unexpected domain in IFunction1D");
   }
-  function1D(values.getPointerToCalculated(0),(*d1d)[0],d1d->size());
+  function1D(values.getPointerToCalculated(0),d1d->getPointerAt(0),d1d->size());
 }
 
 void IFunction1D::functionDeriv(const FunctionDomain& domain, Jacobian& jacobian)
@@ -77,7 +77,7 @@ void IFunction1D::functionDeriv(const FunctionDomain& domain, Jacobian& jacobian
   {
     throw std::invalid_argument("Unexpected domain in IFunction1D");
   }
-  functionDeriv1D(&jacobian,(*d1d)[0],d1d->size());
+  functionDeriv1D(&jacobian,d1d->getPointerAt(0),d1d->size());
 }
 
 /** Base class implementation of derivative IFunction1D throws error. This is to check if such a function is provided

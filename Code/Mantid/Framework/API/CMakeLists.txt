@@ -230,7 +230,10 @@ set ( TEST_FILES
 	test/FilePropertyTest.h
 	test/FrameworkManagerTest.h
 	test/FunctionPropertyTest.h
+	test/FunctionDomainTest.h
+	test/FunctionFactoryTest.h
 	test/FunctionTest.h
+	test/FunctionValuesTest.h
 	test/IEventListTest.h
 	test/IFunction1DTest.h
 	test/IFunctionMDTest.h

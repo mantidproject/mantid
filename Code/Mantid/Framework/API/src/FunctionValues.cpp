@@ -69,7 +69,7 @@ namespace API
   {
     if (m_data.size() != m_calculated.size())
     {
-      setDataSize();
+      m_data.resize(m_calculated.size());
     }
     m_data[i] = value;
   }
@@ -107,9 +107,9 @@ namespace API
    */
   void FunctionValues::setFitWeight(size_t i,double value)
   {
-    if (m_data.size() != m_calculated.size())
+    if (m_weights.size() != m_calculated.size())
     {
-      setDataSize();
+      m_weights.resize(m_calculated.size());
     }
     m_weights[i] = value;
   }
@@ -128,25 +128,26 @@ namespace API
   }
 
   /**
+   * Set all weights to the same value.
+   * @param value :: The value to set.
+   */
+  void FunctionValues::setFitWeights(const double& value)
+  {
+    m_weights.resize(m_calculated.size(),value);
+  }
+
+
+  /**
    * Get a fitting weight.
    * @param i :: Index
    */
   double FunctionValues::getFitWeight(size_t i) const
   {
-    if (m_data.size() != m_calculated.size())
+    if (m_weights.size() != m_calculated.size())
     {
-      throw std::runtime_error("Fitting data was not set");
+      throw std::runtime_error("Fitting weights was not set");
     }
     return m_weights[i];
-  }
-
-  /**
-   * Resize the fitting data and weight buffers to match the size of the calculated buffer.
-   */
-  void FunctionValues::setDataSize()
-  {
-    m_data.resize(m_calculated.size());
-    m_weights.resize(m_calculated.size());
   }
 
 } // namespace API

@@ -277,7 +277,8 @@ std::string ParamFunction::descriptionOfActive(size_t i)const
  */
 bool ParamFunction::isFixed(size_t i)const
 {
-  return std::find(m_indexMap.begin(),m_indexMap.end(),i) != m_indexMap.end();
+  // fixed if i isn't found in m_indexMap
+  return std::find(m_indexMap.begin(),m_indexMap.end(),i) == m_indexMap.end();
 }
 
 /** This method doesn't create a tie

@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidAPI/CompositeFunctionMW.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/ParameterTie.h"
 
@@ -88,7 +88,7 @@ public:
     declareParameter("b");
   }
   std::string name()const{return "ParameterTieTest_Linear";}
-  void functionMW(double* out, const double* xValues, const size_t nData)const
+  void function1D(double* out, const double* xValues, const size_t nData)const
   {
     double a = getParameter("a");
     double b = getParameter("b");
@@ -97,7 +97,7 @@ public:
       out[i] = a + b * xValues[i];
     }
   }
-  void functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
+  void functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData)
   {
     //throw Mantid::Kernel::Exception::NotImplementedError("");
     for(size_t i=0;i<nData;i++)
@@ -118,7 +118,7 @@ public:
     declareParameter("B1e2Ta_");
   }
   std::string name()const{return "ParameterTieTest_Nothing";}
-  void functionMW(double* , const double*, const size_t)const{}
+  void function1D(double* , const double*, const size_t)const{}
 };
 
 class ParameterTieTest : public CxxTest::TestSuite
@@ -127,7 +127,7 @@ public:
 
   void testComposite()
   {
-    CompositeFunctionMW mfun;
+    CompositeFunction mfun;
     ParameterTieTest_Gauss *g1 = new ParameterTieTest_Gauss(),*g2 = new ParameterTieTest_Gauss();
     ParameterTieTest_Linear *bk = new ParameterTieTest_Linear();
 
@@ -163,7 +163,7 @@ public:
 
   void testComposite1()
   {
-    CompositeFunctionMW mfun;
+    CompositeFunction mfun;
     ParameterTieTest_Gauss *g1 = new ParameterTieTest_Gauss(),*g2 = new ParameterTieTest_Gauss();
     ParameterTieTest_Linear *bk1 = new ParameterTieTest_Linear(),*bk2 = new ParameterTieTest_Linear();
 
@@ -187,9 +187,9 @@ public:
 
   void testComposite2()
   {
-    CompositeFunctionMW mfun;
-    CompositeFunctionMW* mf1 = new CompositeFunctionMW;
-    CompositeFunctionMW* mf2 = new CompositeFunctionMW;
+    CompositeFunction mfun;
+    CompositeFunction* mf1 = new CompositeFunction;
+    CompositeFunction* mf2 = new CompositeFunction;
     ParameterTieTest_Gauss *g1 = new ParameterTieTest_Gauss(),*g2 = new ParameterTieTest_Gauss();
     ParameterTieTest_Linear *bk1 = new ParameterTieTest_Linear(),*bk2 = new ParameterTieTest_Linear();
     ParameterTieTest_Nothing* nth = new ParameterTieTest_Nothing;
@@ -274,11 +274,11 @@ private:
   {
     ParameterTie tie(fun,"f10.sig");
   }
-  void mustThrow4(IFitFunction* fun)
+  void mustThrow4(IFunction* fun)
   {
     ParameterTie tie(fun,"f1.a");
   }
-  void mustThrow5(IFitFunction* fun)
+  void mustThrow5(IFunction* fun)
   {
     ParameterTie tie(fun,"cen");
   }

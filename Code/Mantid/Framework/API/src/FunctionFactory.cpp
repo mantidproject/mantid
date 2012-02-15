@@ -52,12 +52,6 @@ namespace Mantid
      */
     IFunction* FunctionFactoryImpl::createInitialized(const std::string& input) const
     {
-      //std::vector<std::string> ops;
-      //ops.push_back(";");
-      //ops.push_back(",");
-      //ops.push_back("=");
-      //ops.push_back("== < > <= >=");
-
       Expression expr;
       try
       {
@@ -170,7 +164,7 @@ namespace Mantid
         }
         else if (term.terms()[0].name() == "name")
         {
-          cfun = dynamic_cast<CompositeFunction*>(createFunction("CompositeFunctionMW"));
+          cfun = dynamic_cast<CompositeFunction*>(createFunction("CompositeFunction"));
           if (!cfun) inputError(expr.str());
         }
         else
@@ -191,7 +185,7 @@ namespace Mantid
           }
           else if (firstTerm->terms()[0].name() == "name")
           {
-            cfun = dynamic_cast<CompositeFunction*>(createFunction("CompositeFunctionMW"));
+            cfun = dynamic_cast<CompositeFunction*>(createFunction("CompositeFunction"));
             if (!cfun) inputError(expr.str());
           }
           else
@@ -202,7 +196,7 @@ namespace Mantid
       }
       else if (term.name() == ";")
       {
-        cfun = dynamic_cast<CompositeFunction*>(createFunction("CompositeFunctionMW"));
+        cfun = dynamic_cast<CompositeFunction*>(createFunction("CompositeFunction"));
         if (!cfun) inputError(expr.str());
       }
       else
