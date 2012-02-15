@@ -290,8 +290,8 @@ public:
           if (tof < my_shortest_tof) { my_shortest_tof = tof;}
           if (tof > my_longest_tof) { my_longest_tof = tof;}
 
-          // Track all the touched wi
-          usedDetIds[detId] = true;
+          // Track all the touched wi (only necessary when compressing events, for thread safety)
+          if (compress) usedDetIds[detId] = true;
         } // valid detector IDs
 
       }
