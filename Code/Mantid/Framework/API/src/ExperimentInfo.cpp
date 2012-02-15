@@ -578,24 +578,30 @@ namespace API
     std::vector<IDetector_const_sptr> detectors;
     detectorIDs = getInstrument()->getDetectorIDs( false );
     detectors = getInstrument()->getDetectors( detectorIDs );
-    file->makeGroup("Detectors","NXData", true);
+    file->makeGroup("detectors","NXDetector", true);
     file->writeData("Number_of_Detectors", detectorIDs.size() );
-    file->writeData("Detector_IDs", detectorIDs);
-    std::vector<double> angles( detectorIDs.size() );
-    std::vector<double> distances( detectorIDs.size() );
-    std::vector<int> isMonitor ( detectorIDs.size() );
-    std::vector<int> isMasked ( detectorIDs.size() );
-    for (int i=0; i < detectorIDs.size(); i++)
-    {
-      angles[i] = detectors[i]->getPhi();
-      distances[i] = detectors[i]->getDistance( *getInstrument()->getSample());
-      isMonitor[i] = ( detectors[i]->isMonitor()? 1 : 0);
-      isMasked[i] = ( detectors[i]->isMasked()? 1 : 0);
+    if (detectorIDs.size() > 0) {
+      file->writeData("detector_number", detectorIDs);
+      std::vector<double> a_angles( detectorIDs.size() );
+      std::vector<double> p_angles( detectorIDs.size() );
+      std::vector<double> distances( detectorIDs.size() );
+      Geometry::IObjComponent_const_sptr sample = getInstrument()->getSample();
+      Kernel::V3D sample_pos = sample->getPos();
+      double discard1, discard2;
+      for (int i=0; i < detectorIDs.size(); i++)
+      {
+        a_angles[i] = detectors[i]->getPhi()*180.0/M_PI;
+        if( sample) 
+        {
+            distances[i] = detectors[i]->getDistance( *sample );
+            Kernel::V3D pos = detectors[i]->getPos() - sample_pos;
+            pos.getSpherical( discard1, p_angles[i], discard2);
+        }
+      }
+      if(sample) file->writeData("polar_angle", p_angles);
+      file->writeData("azimuthal_angle", a_angles);
+      if(sample) file->writeData("distance", distances);
     }
-    file->writeData("Angles", angles);
-    file->writeData("Distances", distances);
-    file->writeData("isMonitor", isMonitor);
-    file->writeData("isMasked", isMasked );
     file->closeGroup(); // Detector_IDs
     file->closeGroup(); // new_group
 
