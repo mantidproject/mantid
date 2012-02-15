@@ -44,6 +44,7 @@ class RefMReduction(PythonAlgorithm):
         self.declareProperty("WavelengthMin", 2.5)
         self.declareProperty("WavelengthMax", 6.5)
         self.declareProperty("WavelengthStep", 0.1)
+        self.declareProperty("RemoveIntermediateWorkspaces", True)
         # Output workspace to put the transmission histo into
         self.declareWorkspaceProperty("OutputWorkspace", "", Direction.Output)
 
@@ -61,6 +62,11 @@ class RefMReduction(PythonAlgorithm):
         self._process_polarization(RefMReduction.OFF_ON)
         self._process_polarization(RefMReduction.ON_ON)
 
+        # Clean up
+        if self.getProperty("RemoveIntermediateWorkspaces"):
+            for ws in mtd.keys():
+                if ws.startswith('__'):
+                    mtd.deleteWorkspace(ws)
 
     def _calculate_angle(self, workspace):
         """
@@ -125,9 +131,6 @@ class RefMReduction(PythonAlgorithm):
                                  NaNValue=0.0, NaNError=0.0,
                                  InfinityValue=0.0, InfinityError=0.0)
             
-            if mtd.workspaceExists(ws_wl_profile):
-                mtd.deleteWorkspace(ws_wl_profile)
-
         # Convert to Q
         output_ws = self.getPropertyValue("OutputWorkspace")    
         
@@ -139,8 +142,6 @@ class RefMReduction(PythonAlgorithm):
                 output_ws += '_%s' % polarization
            
         self._convert_to_q(output_roi, output_ws)
-        
-        #mtd.deleteWorkspace(output_roi)
         
         return output_ws
 
@@ -166,8 +167,8 @@ class RefMReduction(PythonAlgorithm):
             raise RuntimeError(msg)
         
         # Pick a good workspace name
-        ws_name = "refm_%d_%s" % (run_numbers[0], polarization)
-        ws_name_raw = ws_name+'_raw'
+        ws_name = "__refm_%d_%s" % (run_numbers[0], polarization)
+        ws_name_raw = "refm_%d_%s_raw" % (run_numbers[0], polarization)
         
         # Load the data into its workspace
         if not mtd.workspaceExists(ws_name_raw):
@@ -236,7 +237,7 @@ class RefMReduction(PythonAlgorithm):
         alg = FindDetectorsInShape(Workspace=input_ws, ShapeXML=xml_shape)
         det_list = alg.getPropertyValue("DetectorList")
 
-        output_roi = "__%s_%d_%d" % (input_ws, peak_range[0], peak_range[1])
+        output_roi = "%s_%d_%d" % (input_ws, peak_range[0], peak_range[1])
         GroupDetectors(InputWorkspace=input_ws, DetectorList=det_list, OutputWorkspace=output_roi)
         return output_roi, len(det_list)
  
@@ -246,7 +247,7 @@ class RefMReduction(PythonAlgorithm):
         """
         normalization_run = self.getProperty("NormalizationRunNumber")
         ws_normalization = "normalization_%d_raw" % normalization_run
-        ws_wl_profile = "tof_profile_%d" % normalization_run
+        ws_wl_profile = "__normalization_%d" % normalization_run
         
         # Find full path to event NeXus data file
         f = FileFinder.findRuns("REF_M%d" % normalization_run)

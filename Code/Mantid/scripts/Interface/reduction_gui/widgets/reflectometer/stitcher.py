@@ -144,11 +144,6 @@ class StitcherWidget(BaseWidget):
         self._content = DataFrame(self)
         self._layout.addWidget(self._content)
                 
-        # General GUI settings
-        if settings is None:
-            settings = GeneralSettings()
-        self._settings = settings
-        
         self._graph = "Stitched Data"
         self._output_dir = None
         self._stitcher = None
@@ -222,23 +217,23 @@ class StitcherWidget(BaseWidget):
         
         self.plot_result()
         
-    def plot_result(self, polarization=None):
+    def plot_result(self):
         """
             Plot the scaled data sets
         """
-        self._stitcher.get_scaled_data()
-        
         pol_dict = {"Off Off" : ReflData.OFF_OFF,
                     "On Off" : ReflData.ON_OFF,
                     "Off On" : ReflData.OFF_ON,
                     "On On"  : ReflData.ON_ON }
         
         for pol in pol_dict.keys():
+            s = Stitcher()
             ws_list = []
             for item in self._workspace_list:
                 d = item.get_user_data( pol_dict[pol] )
                 if d is not None:
                     ws_list.append(d.get_scaled_ws())
+                    s.append(d)
             
             if len(ws_list)>0:
                 plot_name = '%s: %s' % (self._graph, pol)
@@ -250,6 +245,12 @@ class StitcherWidget(BaseWidget):
                 l=g.activeLayer()
                 l.setTitle("Polarization state: %s" % pol)
                 
+                combined_ws = "ref_%s" % pol.replace(" ", "_")
+                if self._settings.instrument_name == "REFL":
+                    combined_ws = "ref_combined"
+                
+                s.get_scaled_data(combined_ws)
+                
     def _save_result(self):
         """
             Save the scaled output in one combined I(Q) file
@@ -257,7 +258,7 @@ class StitcherWidget(BaseWidget):
         if self._stitcher is not None:
             if self._output_dir is None or not os.path.isdir(self._output_dir):
                 self._output_dir = os.path.expanduser("~")
-            fname_qstr = QtGui.QFileDialog.getSaveFileName(self, "Save combined I(Q)",
+            fname_qstr = QtGui.QFileDialog.getSaveFileName(self, "Save combined reflectivity",
                                                            self._output_dir, 
                                                            "Data Files (*.txt)")
             fname = str(QtCore.QFileInfo(fname_qstr).filePath())

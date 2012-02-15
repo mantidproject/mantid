@@ -353,7 +353,7 @@ class Stitcher(object):
             return [],[],[],[]
         return list(x), list(y), list(e), list(dx)            
         
-    def get_scaled_data(self):
+    def get_scaled_data(self, workspace=None):
         """
             Return the data points for the scaled data set
         """
@@ -361,6 +361,8 @@ class Stitcher(object):
             return
         
         ws_combined = "combined_Iq"
+        if workspace is not None:
+            ws_combined = workspace
         
         first_ws = self._data_sets[0].get_scaled_ws()
         if first_ws is None:

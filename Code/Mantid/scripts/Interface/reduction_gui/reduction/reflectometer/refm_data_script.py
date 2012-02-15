@@ -1,7 +1,5 @@
 """
-    Classes for each reduction step. Those are kept separately 
-    from the the interface class so that the HFIRReduction class could 
-    be used independently of the interface implementation
+    Reduction script for REFM
 """
 import xml.dom.minidom
 import os
