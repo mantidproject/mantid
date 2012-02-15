@@ -58,6 +58,8 @@ class RefMReduction(PythonAlgorithm):
         self.setProperty("OutputWorkspace", mtd[output_ws])
         
         self._process_polarization(RefMReduction.ON_OFF)
+        self._process_polarization(RefMReduction.OFF_ON)
+        self._process_polarization(RefMReduction.ON_ON)
 
 
     def _calculate_angle(self, workspace):
@@ -102,6 +104,10 @@ class RefMReduction(PythonAlgorithm):
         
         # Load the data with the chosen polarization
         output_roi = self._load_data(polarization)
+        
+        # Return immediately if we don't have any events
+        if output_roi is None:
+            return None
         
         # Perform normalization according to wavelength distribution of
         # the direct beam
@@ -170,6 +176,7 @@ class RefMReduction(PythonAlgorithm):
         # Check whether we have events
         if mtd[ws_name_raw].getNumberEvents()==0:
             mtd.sendLogMessage("RefMReduction: no data in %s" % polarization)
+            return None
         
         # Rebin and crop out both sides of the TOF distribution
         Rebin(InputWorkspace=ws_name_raw, OutputWorkspace=ws_name, Params=[self.TOFrange[0], self.TOFsteps, self.TOFrange[1]], PreserveEvents=True)
@@ -278,10 +285,10 @@ class RefMReduction(PythonAlgorithm):
         peak_range = self.getProperty("NormPeakPixelRange")
 
         if False:
-            SumSpectra(InputWorkspace=ws_wl_profile, OutputWorkspace=ws_wl_profile+'_roi')
-            ws_wl_profile = ws_wl_profile+'_roi'
+            ws_wl_profile_roi = ws_wl_profile+'_roi'
+            SumSpectra(InputWorkspace=ws_wl_profile, OutputWorkspace=ws_wl_profile_roi)
         else:
-            ws_wl_profile, npix = self._crop_roi(ws_wl_profile, peak_range, low_res_range)
+            ws_wl_profile_roi, npix = self._crop_roi(ws_wl_profile, peak_range, low_res_range)
             # Subtract background
             if self.getProperty("SubtractNormBackground"):
                 bck_range = self.getProperty("NormBackgroundPixelRange")
@@ -289,12 +296,12 @@ class RefMReduction(PythonAlgorithm):
                 #scaling_factor = math.fabs(peak_range[1]-peak_range[0])/\
                 #                math.fabs(bck_range[1]-bck_range[0])
                 scaling_factor = npix/npix_bck
-                Scale(InputWorkspace=ws_wl_profile, OutputWorkspace=ws_wl_profile,
+                Scale(InputWorkspace=bck_ws, OutputWorkspace=bck_ws,
                       Factor=scaling_factor, Operation="Multiply")
-                Minus(LHSWorkspace=ws_wl_profile, RHSWorkspace=bck_ws,
-                      OutputWorkspace=ws_wl_profile)       
+                Minus(LHSWorkspace=ws_wl_profile_roi, RHSWorkspace=bck_ws,
+                      OutputWorkspace=ws_wl_profile_roi)       
         
-        return ws_wl_profile
+        return ws_wl_profile_roi
         
     def _convert_to_q(self, input_ws, output_ws):
         """
