@@ -296,17 +296,9 @@ public:
 
   /// Return parameter index from a parameter reference. Usefull for constraints and ties in composite functions
   virtual size_t getParameterIndex(const ParameterReference& ref)const = 0;
-  /// Get a function containing the parameter refered to by the reference. In case of a simple function
-  /// it will be the same as ParameterReference::getFunction(). In case of a CompositeFunction it returns
-  /// a top-level function that contains the parameter. The return function itself can be a CompositeFunction
-  /// @param ref :: The Parameter reference
-  /// @return A pointer to the containing function
-  virtual IFunction* getContainingFunction(const ParameterReference& ref)const = 0;
-  /// The same as the method above but the argument is a function
-  virtual IFunction* getContainingFunction(const IFunction* fun) = 0;
 
   /// Tie a parameter to other parameters (or a constant)
-  virtual ParameterTie* tie(const std::string& parName,const std::string& expr);
+  virtual ParameterTie* tie(const std::string& parName, const std::string& expr);
   /// Apply the ties
   virtual void applyTies() = 0;
   /// Removes the tie off a parameter
@@ -369,7 +361,7 @@ protected:
   void calNumericalDeriv(const FunctionDomain& domain, Jacobian& out){}
 
   /// Create an instance of a tie without actually tying it to anything
-  virtual ParameterTie* createTie(const std::string& parName);
+  //virtual ParameterTie* createTie(const std::string& parName);
   /// Add a new tie
   virtual void addTie(ParameterTie* tie) = 0;
 
@@ -404,6 +396,11 @@ public:
 protected:
   IFunction* m_fun;///< pointer to the handled function
 };
+
+  ///shared pointer to the function base class
+  typedef boost::shared_ptr<IFunction> IFunction_sptr;
+  ///shared pointer to the function base class (const version)
+  typedef boost::shared_ptr<const IFunction> IFunction_const_sptr;
 
 } // namespace API
 } // namespace Mantid

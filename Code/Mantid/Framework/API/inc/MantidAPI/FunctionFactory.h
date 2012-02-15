@@ -9,6 +9,8 @@
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
 
+#include <boost/shared_ptr.hpp>
+
 namespace Mantid
 {
         
@@ -67,13 +69,13 @@ namespace API
      * @param type :: The function's type
      * @return A pointer to the created function
      */
-    IFunction* createFunction(const std::string& type) const;
+    boost::shared_ptr<IFunction> createFunction(const std::string& type) const;
 
     ///Creates an instance of a function
-    IFunction* createInitialized(const std::string& input) const;
+    boost::shared_ptr<IFunction> createInitialized(const std::string& input) const;
 
     ///Creates an instance of a function
-    IFunction* createFitFunction(const std::string& input) const;
+    boost::shared_ptr<IFunction> createFitFunction(const std::string& input) const;
 
     /// Query available functions based on the template type
     template<typename FunctionType>
@@ -96,22 +98,22 @@ namespace API
     using Kernel::DynamicFactory<IFunction>::createUnwrapped;
 
     /// Create a simple function
-    IFunction* createSimple(const Expression& expr)const;
+    boost::shared_ptr<IFunction> createSimple(const Expression& expr)const;
     /// Create a composite function
-    CompositeFunction* createComposite(const Expression& expr)const;
+    boost::shared_ptr<CompositeFunction> createComposite(const Expression& expr)const;
     ///Creates an instance of a function
-    IFunction* createFitFunction(const Expression& expr) const;
+    boost::shared_ptr<IFunction> createFitFunction(const Expression& expr) const;
 
     /// Throw an exception
     void inputError(const std::string& str="")const;
     /// Add constraints to the created function
-    void addConstraints(IFunction* fun,const Expression& expr)const;
+    void addConstraints(boost::shared_ptr<IFunction> fun,const Expression& expr)const;
     /// Add a single constraint to the created function
-    void addConstraint(IFunction* fun,const Expression& expr)const;
+    void addConstraint(boost::shared_ptr<IFunction> fun,const Expression& expr)const;
     /// Add ties to the created function
-    void addTies(IFunction* fun,const Expression& expr)const;
+    void addTies(boost::shared_ptr<IFunction> fun,const Expression& expr)const;
     /// Add a tie to the created function
-    void addTie(IFunction* fun,const Expression& expr)const;
+    void addTie(boost::shared_ptr<IFunction> fun,const Expression& expr)const;
 
     ///static reference to the logger class
     Kernel::Logger& g_log;

@@ -7,7 +7,7 @@ namespace API
 {
 
 /// Default constructor
-ParameterReference::ParameterReference() : m_function(NULL), m_index(0)
+ParameterReference::ParameterReference() : m_function(), m_index(0)
 {}
 
 /// Constructor
@@ -37,7 +37,7 @@ void ParameterReference::reset(IFunction* fun, std::size_t index)
   while (cf)
   {
     size_t iFun = cf->functionIndex(iLocal); // TODO squashing the warning breaks the code
-    fLocal = cf->getFunction(iFun);
+    fLocal = cf->getFunction(iFun).get();
     iLocal = fLocal->parameterIndex(cf->parameterLocalName(iLocal));
     cf = dynamic_cast<CompositeFunction*>(fLocal);
   }

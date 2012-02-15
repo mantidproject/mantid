@@ -233,6 +233,7 @@ set ( TEST_FILES
 	test/FunctionDomainTest.h
 	test/FunctionFactoryTest.h
 	test/FunctionTest.h
+	test/FunctionPropertyTest.h
 	test/FunctionValuesTest.h
 	test/IEventListTest.h
 	test/IFunction1DTest.h

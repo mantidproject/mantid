@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
-#include "MantidAPI/IFitFunction.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
@@ -45,7 +45,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */	
-    class MANTID_API_DLL FunctionProperty : public Kernel::PropertyWithValue< boost::shared_ptr<IFitFunction> >
+    class MANTID_API_DLL FunctionProperty : public Kernel::PropertyWithValue< boost::shared_ptr<IFunction> >
     {
     public:
       /// Constructor.
@@ -58,7 +58,7 @@ namespace Mantid
       FunctionProperty& operator=( const FunctionProperty& right );
 
       /// Bring in the PropertyWithValue assignment operator explicitly (avoids VSC++ warning)
-      virtual boost::shared_ptr<IFitFunction>& operator=( const boost::shared_ptr<IFitFunction>& value );
+      virtual boost::shared_ptr<IFunction>& operator=( const boost::shared_ptr<IFunction>& value );
 
       ///Add the value of another property
       virtual FunctionProperty& operator+=( Kernel::Property const * );
@@ -77,6 +77,16 @@ namespace Mantid
 
       /// Set the value of the property
       virtual std::string setValue( const std::string& value );
+
+      /**
+       * Set a property value via a DataItem
+       * @param data :: A shared pointer to a data item
+       * @return "" if the assignment was successful or a user level description of the problem
+       */
+      virtual std::string setValue(const boost::shared_ptr<Kernel::DataItem> data)
+      {
+        return Kernel::PropertyWithValue< boost::shared_ptr<IFunction> >::setValue(data);
+      }
 
       /// Checks whether the entered function is valid.
       std::string isValid() const;

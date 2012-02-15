@@ -11,7 +11,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-class FunctionPropertyTest_Function: public virtual ParamFunction, public virtual IFitFunction
+class FunctionPropertyTest_Function: public virtual ParamFunction, public virtual IFunction
 {
 public:
   FunctionPropertyTest_Function()
@@ -20,21 +20,7 @@ public:
     this->declareParameter("B",2.0);
   }
   virtual std::string name()const {return "FunctionPropertyTest_Function";}
-  virtual void setWorkspace(boost::shared_ptr<const Workspace>) {}
-  virtual void setWorkspace(boost::shared_ptr<const Workspace>,bool) {}
-  virtual void setWorkspace(boost::shared_ptr<const Workspace>,const std::string&,bool){}
-  virtual void setSlicing(const std::string&) {}
-  virtual void function(FunctionDomain&)const {}
-  virtual boost::shared_ptr<const Workspace> getWorkspace()const {return boost::shared_ptr<const Workspace>();}
-
-  /// Returns the size of the fitted data (number of double values returned by the function getData())
-  virtual size_t dataSize()const {return 0;}
-  /// Returns a reference to the fitted data. These data are taken from the workspace set by setWorkspace() method.
-  virtual const double* getData()const {return NULL;}
-  virtual const double* getWeights()const {return NULL;}
-  /// Function you want to fit to. 
-  /// @param out :: The buffer for writing the calculated values. Must be big enough to accept dataSize() values
-  virtual void function(double*)const {}
+  virtual void function(const FunctionDomain&,FunctionValues&)const {}
 };
 
 DECLARE_FUNCTION(FunctionPropertyTest_Function);
@@ -58,7 +44,7 @@ public:
     std::string error;
     TS_ASSERT_THROWS_NOTHING(error = prop.setValue("name=FunctionPropertyTest_Function,A=3"));
     TS_ASSERT(error.empty());
-    boost::shared_ptr<IFitFunction> fun_p = prop;
+    boost::shared_ptr<IFunction> fun_p = prop;
     TS_ASSERT_EQUALS(fun_p->asString(),"name=FunctionPropertyTest_Function,A=3,B=2");
     TS_ASSERT_EQUALS(fun_p->getParameter("A"), 3.0);
     TS_ASSERT_EQUALS(fun_p->getParameter("B"), 2.0);
@@ -79,10 +65,10 @@ public:
   {
     FunctionProperty prop("fun");
     std::string error;
-    boost::shared_ptr<IFitFunction> fun_p(FunctionFactory::Instance().createInitialized("name=FunctionPropertyTest_Function,A=3"));
+    boost::shared_ptr<IFunction> fun_p(FunctionFactory::Instance().createInitialized("name=FunctionPropertyTest_Function,A=3"));
     TS_ASSERT(fun_p);
     prop = fun_p;
-    boost::shared_ptr<IFitFunction> fun1_p = prop;
+    boost::shared_ptr<IFunction> fun1_p = prop;
     TS_ASSERT(fun1_p);
     TS_ASSERT_EQUALS(fun_p,fun1_p);
     TS_ASSERT_EQUALS(fun1_p->asString(),"name=FunctionPropertyTest_Function,A=3,B=2");

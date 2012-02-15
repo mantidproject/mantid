@@ -559,32 +559,6 @@ size_t ParamFunction::getParameterIndex(const ParameterReference& ref)const
 }
 
 /**
- * @param ref :: The reference
- * @return A ParamFunction containing parameter pointed to by ref
- */
-IFunction* ParamFunction::getContainingFunction(const ParameterReference& ref)const
-{
-  if (ref.getFunction() == this && ref.getIndex() < nParams())
-  {
-    return ref.getFunction();
-  }
-  return NULL;
-}
-
-/**
- * @param fun :: The ParamFunction
- * @return A ParamFunction containing fun
- */
-IFunction* ParamFunction::getContainingFunction(const IFunction* fun)
-{
-  if (fun == this)
-  {
-    return this;
-  }
-  return NULL;
-}
-
-/**
  * Returns the "global" index of an active parameter.
  * @param i :: The index of an active parameter
  * @return the global index of the requested parameter

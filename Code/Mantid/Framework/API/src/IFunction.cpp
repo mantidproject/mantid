@@ -48,17 +48,6 @@ void IFunction::functionDeriv(const FunctionDomain& domain, Jacobian& jacobian)
   throw ("No derivative IFunction provided");
 }
 
-/** Create a new tie. IFunctions can have their own types of ties.
- * @param parName :: The parameter name for this tie
- * @return a new parameter tie
- */
-ParameterTie* IFunction::createTie(const std::string& parName)
-{
-  UNUSED_ARG(parName);
-  //throw Kernel::Exception::NotImplementedError("Ties are not implemented yet.");
-  return new ParameterTie(this,parName);
-}
-
 /**
  * Ties a parameter to other parameters
  * @param parName :: The name of the parameter to tie.
@@ -67,12 +56,10 @@ ParameterTie* IFunction::createTie(const std::string& parName)
  */
 ParameterTie* IFunction::tie(const std::string& parName,const std::string& expr)
 {
-  ParameterTie* tie = this->createTie(parName);
-  size_t i = getParameterIndex(*tie);
-  tie->set(expr);
-  addTie(tie);
-  this->fix(i);
-  return tie;
+  ParameterTie* ti = new ParameterTie(this,parName,expr);
+  addTie(ti);
+  this->fix(getParameterIndex(*ti));
+  return ti;
 }
 
 /** Removes the tie off a parameter. The parameter becomes active

@@ -48,12 +48,11 @@ class MANTID_API_DLL ParameterReference
 public:
   ParameterReference();
   ParameterReference(IFunction* fun, std::size_t index);
-  IFunction* getFunction() const;
   std::size_t getIndex() const;
   void reset(IFunction* fun, std::size_t index);
   void setParameter(const double& value);
   double getParameter() const;
-
+  IFunction* getFunction() const;
 private:
   IFunction* m_function; ///< pointer to the function
   std::size_t m_index; ///< parameter index
