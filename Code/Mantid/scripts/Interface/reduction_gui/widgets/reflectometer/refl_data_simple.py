@@ -675,11 +675,11 @@ class DataReflWidget(BaseWidget):
 
         # Scattering angle
         if hasattr(state, "use_center_pixel"):
+            self._summary.center_pix_edit.setText(str(state.center_pixel))
+            self._summary.angle_edit.setText(str(state.theta))
             if state.use_center_pixel:
-                self._summary.center_pix_edit.setText(str(state.center_pixel))
                 self._summary.center_pix_radio.setChecked(True)
             else:
-                self._summary.angle_edit.setText(str(state.theta))
                 self._summary.angle_radio.setChecked(True)
             self._scattering_angle_changed()
 

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/reflectometer/data_refl_simple.ui'
 #
-# Created: Wed Feb 15 11:14:55 2012
+# Created: Wed Feb 15 13:50:53 2012
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -1104,7 +1104,7 @@ class Ui_Frame(object):
         self.data_low_res_from_label.setText(QtGui.QApplication.translate("Frame", "from pixel", None, QtGui.QApplication.UnicodeUTF8))
         self.data_low_res_to_label.setText(QtGui.QApplication.translate("Frame", "to pixel", None, QtGui.QApplication.UnicodeUTF8))
         self.plot_count_vs_x_btn.setText(QtGui.QApplication.translate("Frame", "Counts vs Pixel", None, QtGui.QApplication.UnicodeUTF8))
-        self.center_pix_radio.setText(QtGui.QApplication.translate("Frame", "Center pixel", None, QtGui.QApplication.UnicodeUTF8))
+        self.center_pix_radio.setText(QtGui.QApplication.translate("Frame", "Reference pixel", None, QtGui.QApplication.UnicodeUTF8))
         self.angle_radio.setText(QtGui.QApplication.translate("Frame", "Scattering angle", None, QtGui.QApplication.UnicodeUTF8))
         self.angle_edit.setText(QtGui.QApplication.translate("Frame", "0.0", None, QtGui.QApplication.UnicodeUTF8))
         self.angle_unit_label.setText(QtGui.QApplication.translate("Frame", "  degrees", None, QtGui.QApplication.UnicodeUTF8))

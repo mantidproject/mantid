@@ -114,8 +114,8 @@ class DataSets(BaseScriptElement):
 
         xml += "<norm_flag>%s</norm_flag>\n" % str(self.NormFlag)
         xml += "<norm_x_range_flag>%s</norm_x_range_flag>\n" % str(self.norm_x_range_flag)
-        xml += "<norm_x_max>%s</norm_x_max>\n" % str(self.norm_x_range[0])
-        xml += "<norm_x_min>%s</norm_x_min>\n" % str(self.norm_x_range[1])
+        xml += "<norm_x_max>%s</norm_x_max>\n" % str(self.norm_x_range[1])
+        xml += "<norm_x_min>%s</norm_x_min>\n" % str(self.norm_x_range[2])
         
         xml += "<norm_from_peak_pixels>%s</norm_from_peak_pixels>\n" % str(self.NormPeakPixels[0])
         xml += "<norm_to_peak_pixels>%s</norm_to_peak_pixels>\n" % str(self.NormPeakPixels[1])

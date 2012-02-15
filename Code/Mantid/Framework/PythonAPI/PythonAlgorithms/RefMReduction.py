@@ -119,8 +119,8 @@ class RefMReduction(PythonAlgorithm):
                                  NaNValue=0.0, NaNError=0.0,
                                  InfinityValue=0.0, InfinityError=0.0)
             
-            #if mtd.workspaceExists(ws_wl_profile):
-            #    mtd.deleteWorkspace(ws_wl_profile)
+            if mtd.workspaceExists(ws_wl_profile):
+                mtd.deleteWorkspace(ws_wl_profile)
 
         # Convert to Q
         output_ws = self.getPropertyValue("OutputWorkspace")    
@@ -277,7 +277,7 @@ class RefMReduction(PythonAlgorithm):
         # Sum the normalization counts as a function of wavelength in ROI
         peak_range = self.getProperty("NormPeakPixelRange")
 
-        if True:
+        if False:
             SumSpectra(InputWorkspace=ws_wl_profile, OutputWorkspace=ws_wl_profile+'_roi')
             ws_wl_profile = ws_wl_profile+'_roi'
         else:

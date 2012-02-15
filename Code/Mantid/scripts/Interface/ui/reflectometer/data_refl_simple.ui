@@ -1298,7 +1298,7 @@ Drag items to change the reduction order.</string>
                        </size>
                       </property>
                       <property name="text">
-                       <string>Center pixel</string>
+                       <string>Reference pixel</string>
                       </property>
                      </widget>
                     </item>
