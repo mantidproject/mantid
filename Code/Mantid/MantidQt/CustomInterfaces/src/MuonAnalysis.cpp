@@ -1556,7 +1556,7 @@ void MuonAnalysis::createPlotWS(const std::string& groupName, const std::string&
       runPythonCode( reBinStr ).trimmed();
       tempWs->isDistribution(false);
     }
-    catch(std::exception &e)
+    catch(std::exception&)
     {
       QMessageBox::information(this, "Mantid - Muon Analysis", "The workspace couldn't be rebunched.");
     }
@@ -3128,7 +3128,7 @@ bool MuonAnalysis::isValidFile(const QString & fileName)
       }
     }
   }
-  catch(std::exception &e)
+  catch(std::exception&)
   {
     //Specified a network drive.
     QString tempFilename;
@@ -3145,7 +3145,7 @@ bool MuonAnalysis::isValidFile(const QString & fileName)
         return false;
       }
     }
-    catch (std::exception &e)
+    catch (std::exception&)
     {
       QMessageBox::warning(this,"Mantid - MuonAnalysis", tempFilename + " Specified directory does not exist.");
       return false;

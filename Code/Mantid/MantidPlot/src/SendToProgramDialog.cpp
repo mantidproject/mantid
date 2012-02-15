@@ -170,7 +170,7 @@ void SendToProgramDialog::validateSaveUsing()
   {
     Mantid::API::AlgorithmManager::Instance().create(m_uiform.saveUsingText->text().toStdString() );
   }
-  catch(std::exception& ex)
+  catch(std::exception&)
   {
     m_uiform.validateSaveUsing->setVisible(true); 
     validSaveUsing = false;

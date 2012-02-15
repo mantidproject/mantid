@@ -1131,7 +1131,7 @@ void MantidDockWidget::saveToProgram(const QString & name)
           QMessageBox::information(this, "Error", "User tried to open program from: " + QString::fromStdString(expTarget) + " There was an error opening the program. Please check the target and arguments list to ensure that these are correct");
         }
       }
-      catch(std::exception& ex)
+      catch(std::exception&)
       {
         QMessageBox::information(this, "Mantid - Send to Program", "A file property wasn't found. Please check that the correct"
           + QString("save algorithm was used.\n(View -> Preferences -> Mantid -> SendTo -> Edit -> SaveUsing)") );
@@ -1239,7 +1239,7 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
           Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create(saveUsing);
           alg->setPropertyValue("InputWorkspace", selectedWsName.toStdString() );
         }
-        catch(std::exception& ex)
+        catch(std::exception&)
         {
           compatible = false;
         }
@@ -1654,7 +1654,7 @@ bool MantidTreeWidgetItem::operator<(const QTreeWidgetItem &other)const
       {
         return false;
       }
-    } catch (Mantid::Kernel::Exception::NotFoundError & nfe)
+    } catch (Mantid::Kernel::Exception::NotFoundError&)
     {
       return false;
     }
