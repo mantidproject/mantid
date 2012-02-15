@@ -1,4 +1,4 @@
-/*WIKI* 
+/*WIKI*
 
 
 
@@ -361,6 +361,20 @@ void LoadEventPreNexus2::exec()
 
   // 7. Process the events into pixels
   this->procEvents(localWorkspace);
+
+  // set that the sort order on the event lists
+  if (this->num_pulses > 0 && this->pulsetimesincreasing)
+  {
+    const int64_t numberOfSpectra = localWorkspace->getNumberHistograms();
+    PARALLEL_FOR_NO_WSP_CHECK()
+    for (int64_t i = 0; i < numberOfSpectra; i++)
+    {
+      PARALLEL_START_INTERUPT_REGION
+      localWorkspace->getEventListPtr(i)->setSortOrder(DataObjects::PULSETIME_SORT);
+      PARALLEL_END_INTERUPT_REGION
+    }
+    PARALLEL_CHECK_INTERUPT_REGION
+  }
 
   // 8. Save output
   this->setProperty<IEventWorkspace_sptr>(OUT_PARAM, localWorkspace);
@@ -1299,6 +1313,7 @@ void LoadEventPreNexus2::readPulseidFile(const std::string &filename, const bool
 {
   this->proton_charge_tot = 0.;
   this->num_pulses = 0;
+  this->pulsetimesincreasing = true;
 
   // jump out early if there isn't a filename
   if (filename.empty()) {
@@ -1336,12 +1351,19 @@ void LoadEventPreNexus2::readPulseidFile(const std::string &filename, const bool
 
   if (num_pulses > 0)
   {
+    DateAndTime lastPulseDateTime(0, 0);
     this->pulsetimes.reserve(num_pulses);
     for (size_t i=0; i < num_pulses; i++)
     {
       Pulse & it = (*pulses)[i];
-      this->pulsetimes.push_back( DateAndTime( (int64_t) it.seconds, (int64_t) it.nanoseconds) );
+      DateAndTime pulseDateTime( (int64_t) it.seconds, (int64_t) it.nanoseconds);
+      this->pulsetimes.push_back(pulseDateTime);
       this->event_indices.push_back(it.event_index);
+
+      if (pulseDateTime < lastPulseDateTime)
+        this->pulsetimesincreasing = false;
+      else
+        lastPulseDateTime = pulseDateTime;
 
       temp = it.pCurrent;
       this->proton_charge.push_back(temp);

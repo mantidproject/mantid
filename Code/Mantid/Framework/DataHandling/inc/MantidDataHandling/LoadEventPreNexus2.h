@@ -186,6 +186,9 @@ private:
   /// Flag to allow for parallel loading
   bool parallelProcessing;
 
+  /// Whether or not the pulse times are sorted in increasing order.
+  bool pulsetimesincreasing;
+
   /// sample environment event
   std::vector<detid_t> mSEids;
   std::map<size_t, detid_t> mSEmap;
