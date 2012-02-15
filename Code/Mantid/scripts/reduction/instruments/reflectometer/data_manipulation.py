@@ -1,14 +1,21 @@
 import _qti
+import os
 from mantidsimple import *
 from reduction.instruments.reflectometer import wks_utility
 
-def tof_distribution(file_path, callback=None):
+def tof_distribution(file_path, callback=None,
+                     range_min=None, range_max=None):
     """
         Plot counts as a function of TOF for a given REF_L data file
     """
+    basename = os.path.basename(file_path)
+    ws_raw = "__%s" % basename
     ws = "__TOF_distribution"
-    LoadEventNexus(Filename=file_path, OutputWorkspace=ws)
-    Rebin(InputWorkspace=ws,OutputWorkspace=ws,Params="0,200,200000")
+    
+    if not mtd.workspaceExists(ws_raw):
+        LoadEventNexus(Filename=file_path, OutputWorkspace=ws_raw)
+    
+    Rebin(InputWorkspace=ws_raw, OutputWorkspace=ws,Params="0,200,200000")
     SumSpectra(InputWorkspace=ws, OutputWorkspace=ws)
     
     # Get range of TOF where we have data
@@ -24,15 +31,21 @@ def tof_distribution(file_path, callback=None):
     
     if callback is not None:
         from LargeScaleStructures import data_stitching
-        data_stitching.RangeSelector.connect([ws], callback, xmin=xmin, xmax=xmax)
+        data_stitching.RangeSelector.connect([ws], callback,
+                                             xmin=xmin, xmax=xmax,
+                                             range_min=range_min,
+                                             range_max=range_max)
     
-def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None):
-    ws = "__REF_data"
+def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
+                                 range_min=None, range_max=None):
+    basename = os.path.basename(file_path)
+    ws = "__%s" % basename
     ws_output = "Counts vs Y pixel"
     if is_pixel_y is False:
         ws_output = "Counts vs X pixel"
         
-    LoadEventNexus(Filename=file_path, OutputWorkspace=ws)
+    if not mtd.workspaceExists(ws):
+        LoadEventNexus(Filename=file_path, OutputWorkspace=ws)
     
     # 1D plot
     if is_pixel_y:
@@ -59,16 +72,19 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None):
     mtd[ws_output].getAxis(0).setUnit(units)
     
     # 2D plot
-    Rebin(InputWorkspace=ws,OutputWorkspace=ws,Params="0,200,200000")
+    output_2d = ws_output+'_2D'
+    Rebin(InputWorkspace=ws,OutputWorkspace=output_2d,Params="0,200,200000")
     if is_pixel_y:
-        GroupDetectors(InputWorkspace=ws, OutputWorkspace=ws_output+'_2D',
+        GroupDetectors(InputWorkspace=output_2d, OutputWorkspace=output_2d,
                        MapFile="Grouping/REFL_Detector_Grouping_Sum_X.xml")
     else:
-        GroupDetectors(InputWorkspace=ws, OutputWorkspace=ws_output+'_2D',
+        GroupDetectors(InputWorkspace=output_2d, OutputWorkspace=output_2d,
                        MapFile="Grouping/REFL_Detector_Grouping_Sum_Y.xml")
     
     if callback is not None:
         from LargeScaleStructures import data_stitching
-        data_stitching.RangeSelector.connect([ws_output], callback)
+        data_stitching.RangeSelector.connect([ws_output], callback,
+                                             range_min=range_min,
+                                             range_max=range_max)
 
     

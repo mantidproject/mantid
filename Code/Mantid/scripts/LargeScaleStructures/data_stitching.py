@@ -21,7 +21,7 @@ class RangeSelector(object):
         def disconnect(self):
             _qti.app.disconnect(_qti.app.mantidUI, QtCore.SIGNAL("x_range_update(double,double)"), self._call_back)
             
-        def connect(self, ws, call_back, xmin=None, xmax=None):
+        def connect(self, ws, call_back, xmin=None, xmax=None, range_min=None, range_max=None):
             self._call_back = call_back
             _qti.app.connect(_qti.app.mantidUI, QtCore.SIGNAL("x_range_update(double,double)"), self._call_back)
             g = _qti.app.graph(self._graph)
@@ -39,15 +39,20 @@ class RangeSelector(object):
             l.setCurveTitle(0, title)
             if xmin is not None and xmax is not None:
                 l.setScale(2,xmin,xmax)
-            _qti.app.selectMultiPeak(g,False)
+                
+            if range_min is not None and range_max is not None:
+                _qti.app.selectMultiPeak(g, False, range_min, range_max)            
+            else:
+                _qti.app.selectMultiPeak(g, False)
     
     @classmethod
-    def connect(cls, ws, call_back, xmin=None, xmax=None):
+    def connect(cls, ws, call_back, xmin=None, xmax=None, range_min=None, range_max=None):
         if RangeSelector.__instance is not None:
             RangeSelector.__instance.disconnect()
         else:
             RangeSelector.__instance = RangeSelector._Selector()
-        RangeSelector.__instance.connect(ws, call_back, xmin=xmin, xmax=xmax)            
+        RangeSelector.__instance.connect(ws, call_back, xmin=xmin, xmax=xmax,
+                                         range_min=range_min, range_max=range_max)            
     
 class DataSet(object):
     """

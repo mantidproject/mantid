@@ -1067,6 +1067,25 @@ Drag items to change the reduction order.</string>
                       </property>
                      </spacer>
                     </item>
+                    <item>
+                     <widget class="QPushButton" name="plot_count_vs_y_bck_btn">
+                      <property name="minimumSize">
+                       <size>
+                        <width>150</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>150</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
+                      <property name="text">
+                       <string>Counts vs PIxel</string>
+                      </property>
+                     </widget>
+                    </item>
                    </layout>
                   </item>
                   <item>
@@ -2062,6 +2081,25 @@ Drag items to change the reduction order.</string>
                       </property>
                      </spacer>
                     </item>
+                    <item>
+                     <widget class="QPushButton" name="norm_count_vs_y_btn">
+                      <property name="minimumSize">
+                       <size>
+                        <width>150</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>150</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
+                      <property name="text">
+                       <string>Counts vs Pixel</string>
+                      </property>
+                     </widget>
+                    </item>
                    </layout>
                   </item>
                   <item>
@@ -2291,6 +2329,25 @@ Drag items to change the reduction order.</string>
                       </property>
                      </spacer>
                     </item>
+                    <item>
+                     <widget class="QPushButton" name="norm_count_vs_y_bck_btn">
+                      <property name="minimumSize">
+                       <size>
+                        <width>150</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>150</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
+                      <property name="text">
+                       <string>Counts vs Pixel</string>
+                      </property>
+                     </widget>
+                    </item>
                    </layout>
                   </item>
                   <item>
@@ -2446,6 +2503,25 @@ Drag items to change the reduction order.</string>
                        </size>
                       </property>
                      </spacer>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="norm_count_vs_x_btn">
+                      <property name="minimumSize">
+                       <size>
+                        <width>150</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>150</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
+                      <property name="text">
+                       <string>Counts vs Pixel</string>
+                      </property>
+                     </widget>
                     </item>
                    </layout>
                   </item>
@@ -2662,6 +2738,49 @@ Drag items to change the reduction order.</string>
                      <width>150</width>
                      <height>16777215</height>
                     </size>
+                   </property>
+                   <property name="palette">
+                    <palette>
+                     <active>
+                      <colorrole role="Button">
+                       <brush brushstyle="SolidPattern">
+                        <color alpha="255">
+                         <red>223</red>
+                         <green>242</green>
+                         <blue>208</blue>
+                        </color>
+                       </brush>
+                      </colorrole>
+                     </active>
+                     <inactive>
+                      <colorrole role="Button">
+                       <brush brushstyle="SolidPattern">
+                        <color alpha="255">
+                         <red>223</red>
+                         <green>242</green>
+                         <blue>208</blue>
+                        </color>
+                       </brush>
+                      </colorrole>
+                     </inactive>
+                     <disabled>
+                      <colorrole role="Button">
+                       <brush brushstyle="SolidPattern">
+                        <color alpha="255">
+                         <red>223</red>
+                         <green>242</green>
+                         <blue>208</blue>
+                        </color>
+                       </brush>
+                      </colorrole>
+                     </disabled>
+                    </palette>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <weight>75</weight>
+                     <bold>true</bold>
+                    </font>
                    </property>
                    <property name="toolTip">
                     <string>Click to add the data set above to the reduction list</string>

@@ -61,6 +61,9 @@ class RefMReduction(PythonAlgorithm):
 
 
     def _calculate_angle(self, workspace):
+        """
+            Compute the scattering angle
+        """
         sangle = 0
         if mtd[workspace].getRun().hasProperty("SANGLE"):
             sangle = mtd[workspace].getRun().getProperty("SANGLE").value[0]
@@ -185,14 +188,15 @@ class RefMReduction(PythonAlgorithm):
         low_res_range = self.getProperty("LowResDataAxisPixelRange")
         # Sum the normalization counts as a function of wavelength in ROI
         peak_range = self.getProperty("SignalPeakPixelRange")
-        output_roi = self._crop_roi(ws_name, peak_range, low_res_range)
+        output_roi, npix = self._crop_roi(ws_name, peak_range, low_res_range)
 
         # Subtract background
         if self.getProperty("SubtractSignalBackground"):
             bck_range = self.getProperty("SignalBackgroundPixelRange")
-            bck_ws = self._crop_roi(ws_name, bck_range, low_res_range)
-            scaling_factor = math.fabs(peak_range[1]-peak_range[0])/\
-                            math.fabs(bck_range[1]-bck_range[0])
+            bck_ws, npix_bck = self._crop_roi(ws_name, bck_range, low_res_range)
+            #scaling_factor = math.fabs(peak_range[1]-peak_range[0])/\
+            #                math.fabs(bck_range[1]-bck_range[0])
+            scaling_factor = npix/npix_bck
             Scale(InputWorkspace=bck_ws, OutputWorkspace=bck_ws,
                   Factor=scaling_factor, Operation="Multiply")
             Minus(LHSWorkspace=output_roi, RHSWorkspace=bck_ws,
@@ -227,7 +231,7 @@ class RefMReduction(PythonAlgorithm):
 
         output_roi = "__%s_%d_%d" % (input_ws, peak_range[0], peak_range[1])
         GroupDetectors(InputWorkspace=input_ws, DetectorList=det_list, OutputWorkspace=output_roi)
-        return output_roi
+        return output_roi, len(det_list)
  
     def _process_normalization(self):
         """
@@ -277,11 +281,16 @@ class RefMReduction(PythonAlgorithm):
             SumSpectra(InputWorkspace=ws_wl_profile, OutputWorkspace=ws_wl_profile+'_roi')
             ws_wl_profile = ws_wl_profile+'_roi'
         else:
-            ws_wl_profile = self._crop_roi(ws_wl_profile, peak_range, low_res_range)
+            ws_wl_profile, npix = self._crop_roi(ws_wl_profile, peak_range, low_res_range)
             # Subtract background
             if self.getProperty("SubtractNormBackground"):
                 bck_range = self.getProperty("NormBackgroundPixelRange")
-                bck_ws = self._crop_roi(ws_wl_profile, bck_range, low_res_range)
+                bck_ws, npix_bck = self._crop_roi(ws_wl_profile, bck_range, low_res_range)
+                #scaling_factor = math.fabs(peak_range[1]-peak_range[0])/\
+                #                math.fabs(bck_range[1]-bck_range[0])
+                scaling_factor = npix/npix_bck
+                Scale(InputWorkspace=ws_wl_profile, OutputWorkspace=ws_wl_profile,
+                      Factor=scaling_factor, Operation="Multiply")
                 Minus(LHSWorkspace=ws_wl_profile, RHSWorkspace=bck_ws,
                       OutputWorkspace=ws_wl_profile)       
         

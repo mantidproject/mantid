@@ -7882,7 +7882,8 @@ void ApplicationWindow::selectMultiPeak(bool showFitPropertyBrowser)
  * @param plot :: The MultiLayer the tool will apply to.
  * @param showFitPropertyBrowser :: Set if FitPropertyBrowser must be shown as well.
  */
-void ApplicationWindow::selectMultiPeak(MultiLayer* plot, bool showFitPropertyBrowser)
+void ApplicationWindow::selectMultiPeak(MultiLayer* plot, bool showFitPropertyBrowser,
+    double xmin, double xmax)
 {
   setActiveWindow(plot);
 
@@ -7911,6 +7912,11 @@ void ApplicationWindow::selectMultiPeak(MultiLayer* plot, bool showFitPropertyBr
     {
       //Called when setting up usual peakPickerTool
       PeakPickerTool* ppicker = new PeakPickerTool(g, mantidUI->fitFunctionBrowser(), mantidUI, showFitPropertyBrowser);
+      if (xmin != xmax)
+      {
+        mantidUI->fitFunctionBrowser()->setStartX(xmin);
+        mantidUI->fitFunctionBrowser()->setEndX(xmax);
+      }
       g->setActiveTool(ppicker);
       // do we need this? PeakPickerTool::windowStateChanged does nothing
       //connect(plot,SIGNAL(windowStateChanged(Qt::WindowStates, Qt::WindowStates)),ppicker,SLOT(windowStateChanged(Qt::WindowStates, Qt::WindowStates)));

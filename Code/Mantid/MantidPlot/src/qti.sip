@@ -1132,7 +1132,7 @@ public:
 
   void setWindowName(MdiSubWindow *, const QString &);
   void setPreferences(Graph*);
-  void selectMultiPeak(MultiLayer *, bool = true);
+  void selectMultiPeak(MultiLayer *, bool = true, double = 0, double = 0);
 
   void saveProjectAs(const QString& fileName = QString(), bool = false);
   MdiSubWindow* clone(MdiSubWindow*);

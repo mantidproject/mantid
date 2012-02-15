@@ -60,8 +60,8 @@ class DataReflWidget(BaseWidget):
         self._summary.data_peak_to_pixel.setValidator(QtGui.QIntValidator(self._summary.data_peak_to_pixel))
         self._summary.data_background_from_pixel1.setValidator(QtGui.QIntValidator(self._summary.data_background_from_pixel1))
         self._summary.data_background_to_pixel1.setValidator(QtGui.QIntValidator(self._summary.data_background_to_pixel1))
-        self._summary.data_from_tof.setValidator(QtGui.QDoubleValidator(self._summary.data_from_tof))
-        self._summary.data_to_tof.setValidator(QtGui.QDoubleValidator(self._summary.data_to_tof))
+        self._summary.data_from_tof.setValidator(QtGui.QIntValidator(self._summary.data_from_tof))
+        self._summary.data_to_tof.setValidator(QtGui.QIntValidator(self._summary.data_to_tof))
         
         self._summary.x_min_edit.setValidator(QtGui.QDoubleValidator(self._summary.x_min_edit))
         self._summary.x_max_edit.setValidator(QtGui.QDoubleValidator(self._summary.x_max_edit))
@@ -92,6 +92,10 @@ class DataReflWidget(BaseWidget):
         self.connect(self._summary.tof_range_switch, QtCore.SIGNAL("clicked(bool)"), self._tof_range_clicked)
         self.connect(self._summary.plot_count_vs_y_btn, QtCore.SIGNAL("clicked()"), self._plot_count_vs_y)
         self.connect(self._summary.plot_count_vs_x_btn, QtCore.SIGNAL("clicked()"), self._plot_count_vs_x)
+        self.connect(self._summary.plot_count_vs_y_bck_btn, QtCore.SIGNAL("clicked()"), self._plot_count_vs_y_bck)
+        self.connect(self._summary.norm_count_vs_y_btn, QtCore.SIGNAL("clicked()"), self._norm_count_vs_y)
+        self.connect(self._summary.norm_count_vs_x_btn, QtCore.SIGNAL("clicked()"), self._norm_count_vs_x)
+        self.connect(self._summary.norm_count_vs_y_bck_btn, QtCore.SIGNAL("clicked()"), self._norm_count_vs_y_bck)
         self.connect(self._summary.plot_tof_btn, QtCore.SIGNAL("clicked()"), self._plot_tof)
         self.connect(self._summary.add_dataset_btn, QtCore.SIGNAL("clicked()"), self._add_data)
         self.connect(self._summary.angle_list, QtCore.SIGNAL("itemSelectionChanged()"), self._angle_changed)
@@ -349,57 +353,116 @@ class DataReflWidget(BaseWidget):
         self._summary.tof_max_label2.setEnabled(is_checked)
         self._summary.plot_tof_btn.setEnabled(is_checked)
 
-    def _plot_count_vs_y(self):
+    def _plot_count_vs_y(self, is_peak=True):
         """
             Plot counts as a function of high-resolution pixels
+            and select peak range
             For REFM, this is X
             For REFL, this is Y
         """
-        if not IS_IN_MANTIDPLOT:
-            return
-        
-        f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(self._summary.data_run_number_edit.text())))
-
-        if len(f)>0 and os.path.isfile(f[0]):
-            def call_back(xmin, xmax):
-                self._summary.data_peak_from_pixel.setText("%-d" % int(xmin))
-                self._summary.data_peak_to_pixel.setText("%-d" % int(xmax))
-            is_pixel_y = True
-            if self.short_name == "REFM":
-                is_pixel_y = False
-            data_manipulation.counts_vs_pixel_distribution(f[0], is_pixel_y=is_pixel_y, callback=call_back)
+        self._integrated_plot(True,
+                              self._summary.data_run_number_edit,
+                              self._summary.data_peak_from_pixel,
+                              self._summary.data_peak_to_pixel)
                 
+    def _plot_count_vs_y_bck(self):
+        """
+            Plot counts as a function of high-resolution pixels
+            and select background range
+            For REFM, this is X
+            For REFL, this is Y
+        """
+        self._integrated_plot(True,
+                              self._summary.data_run_number_edit,
+                              self._summary.data_background_from_pixel1,
+                              self._summary.data_background_to_pixel1)
+        
     def _plot_count_vs_x(self):
         """
             Plot counts as a function of low-resolution pixels
             For REFM, this is Y
             For REFL, this is X
         """
+        self._integrated_plot(False,
+                              self._summary.data_run_number_edit,
+                              self._summary.x_min_edit,
+                              self._summary.x_max_edit)
+    
+    def _norm_count_vs_y(self):
+        self._integrated_plot(True, 
+                              self._summary.norm_run_number_edit,
+                              self._summary.norm_peak_from_pixel,
+                              self._summary.norm_peak_to_pixel)
+
+    def _norm_count_vs_y_bck(self):
+        self._integrated_plot(True, 
+                              self._summary.norm_run_number_edit,
+                              self._summary.norm_background_from_pixel1,
+                              self._summary.norm_background_to_pixel1)
+
+    def _norm_count_vs_x(self):
+        self._integrated_plot(False,
+                              self._summary.norm_run_number_edit,                              
+                              self._summary.norm_x_min_edit,
+                              self._summary.norm_x_max_edit)
+
+    def _integrated_plot(self, is_high_res, file_ctrl, min_ctrl, max_ctrl):
+        """
+            Plot counts as a function of:
+            
+            Low-resolution pixels
+                For REFM, this is Y
+                For REFL, this is X
+                
+            High-resolution pixels
+                For REFM, this is X
+                For REFL, this is Y  
+                
+            @param is_high_res: True if we are plotting the high-res pixel distribution
+            @param file_ctrl: control widget containing the data file name
+            @param min_ctrl: control widget containing the range minimum
+            @param max_ctrl: control widget containing the range maximum
+        """
         if not IS_IN_MANTIDPLOT:
             return
         
-        f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(self._summary.data_run_number_edit.text())))
+        f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(file_ctrl.text())))
+
+        range_min = int(min_ctrl.text())
+        range_max = int(max_ctrl.text())
 
         if len(f)>0 and os.path.isfile(f[0]):
             def call_back(xmin, xmax):
-                self._summary.x_min_edit.setText("%-d" % int(xmin))
-                self._summary.x_max_edit.setText("%-d" % int(xmax))
-            is_pixel_y = False
+                min_ctrl.setText("%-d" % int(xmin))
+                max_ctrl.setText("%-d" % int(xmax))
+            
+            # For REFL, Y is high-res
+            is_pixel_y = is_high_res
+            # For REFM it's the other way around
             if self.short_name == "REFM":
-                is_pixel_y = True
-            data_manipulation.counts_vs_pixel_distribution(f[0], is_pixel_y=is_pixel_y, callback=call_back)
+                is_pixel_y = not is_pixel_y
                 
+            data_manipulation.counts_vs_pixel_distribution(f[0], is_pixel_y=is_pixel_y,
+                                                           callback=call_back,
+                                                           range_min=range_min,
+                                                           range_max=range_max)
+        
     def _plot_tof(self):
         if not IS_IN_MANTIDPLOT:
             return
         
         f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(self._summary.norm_run_number_edit.text())))
             
+        range_min = int(self._summary.data_from_tof.text())
+        range_max = int(self._summary.data_to_tof.text())
+
         if len(f)>0 and os.path.isfile(f[0]):
             def call_back(xmin, xmax):
                 self._summary.data_from_tof.setText("%-d" % int(xmin))
                 self._summary.data_to_tof.setText("%-d" % int(xmax))
-            data_manipulation.tof_distribution(f[0], call_back)
+            data_manipulation.tof_distribution(f[0], call_back,
+                                               range_min=range_min,
+                                               range_max=range_max)
 
     def _add_data(self):
         state = self.get_editing_state()
@@ -481,8 +544,8 @@ class DataReflWidget(BaseWidget):
         self._summary.data_background_to_pixel1.setText(str(state.DataBackgroundRoi[1]))
         
         #from TOF and to TOF
-        self._summary.data_from_tof.setText(str(state.DataTofRange[0]))
-        self._summary.data_to_tof.setText(str(state.DataTofRange[1]))
+        self._summary.data_from_tof.setText(str(int(state.DataTofRange[0])))
+        self._summary.data_to_tof.setText(str(int(state.DataTofRange[1])))
         
         self._summary.data_run_number_edit.setText(str(','.join([str(i) for i in state.data_files])))
                 

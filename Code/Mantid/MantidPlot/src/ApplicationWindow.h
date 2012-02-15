@@ -638,7 +638,7 @@ public slots:
   void pickPointerCursor();
   void disableTools();
   void selectMultiPeak(bool showFitPropertyBrowser=true);
-  void selectMultiPeak(MultiLayer* plot, bool showFitPropertyBrowser=true);
+  void selectMultiPeak(MultiLayer* plot, bool showFitPropertyBrowser=true, double xmin=0.0, double xmax=0.0);
   void pickDataTool( QAction* action );
 
   void updateLog(const QString& result);
