@@ -1,5 +1,5 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
-#include "MantidPythonInterface/kernel/SingleValueTypeHandler.h"
+#include "MantidPythonInterface/kernel/RegisterSingleValueHandler.h"
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/copy_non_const_reference.hpp>
@@ -36,7 +36,7 @@ void export_IMDHistoWorkspace()
          "Return the position of the center of a bin at a given position")
   ;
 
-  DECLARE_SINGLEVALUETYPEHANDLER(IMDHistoWorkspace, DataItem_sptr);
+  REGISTER_SINGLEVALUE_HANDLER(IMDHistoWorkspace_sptr);
 
 }
 

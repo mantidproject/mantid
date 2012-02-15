@@ -20,7 +20,6 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #include "MantidPythonInterface/kernel/PropertyValueHandler.h"
-#include "MantidPythonInterface/kernel/TypeRegistry.h"
 #include "MantidKernel/IPropertyManager.h"
 
 #if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
@@ -28,21 +27,32 @@
 #endif
 
 #include <boost/python/extract.hpp>
+#include <boost/type_traits/integral_constant.hpp>
 
 namespace Mantid
 {
   namespace PythonInterface
   {
-    namespace TypeRegistry
+    namespace Registry
     {
+      namespace
+      {
+        /// MPL struct to pick out shared_ptr<T> types. General one inherits from false
+        template <class T>
+        struct is_shared_ptr : boost::false_type {};
+        /// Specialization of MPL struct to inherit from true for shared_ptr<T> types
+        template <class T>
+        struct is_shared_ptr<boost::shared_ptr<T> > : boost::true_type {};
+      }
 
       /**
-       * A templated handler that calls the appropriate setProperty method for the type on the given PropertyManager
-       * A new typedhandler should be inserted into the type look up map with the
-       * DECLARE_SINGLEVALUETYPEHANDLER macro whenever a new class is exported that will be used with PropertyWithValue
+       * Templated struct to handle property types whose values
+       * are a single item .e.g. int, Workspace_sptr etc.
+       *
+       * @tparam PropertyType :: The PropertyWithValue<> template type
        */
-      template<typename BaseType, typename DerivedType=BaseType>
-      struct DLLExport SingleValueTypeHandler : public PythonTypeHandler
+      template<typename PropertyType>
+      struct DLLExport SingleValueTypeHandler : public PropertyValueHandler
       {
         /**
          * Set function to handle Python -> C++ calls and get the correct type
@@ -52,99 +62,52 @@ namespace Mantid
          */
         void set(Kernel::IPropertyManager* alg, const std::string &name, boost::python::object value)
         {
-          alg->setProperty<BaseType>(name, boost::python::extract<BaseType>(value));
+          alg->setProperty<PropertyType>(name, boost::python::extract<PropertyType>(value));
         }
-        /**
-         * Is the python object an instance of the Derived template type
-         * @param value ::
-         * @returns True if it is, false otherwise
-         */
-        bool isInstance(const boost::python::object & value) const
-        {
-          // Can we extract the derived type from the object?
-          boost::python::extract<DerivedType> extractor(value);
-          return extractor.check();
-        }
-      };
 
-      /**
-       * Specialized string version to avoid a current bug where string property values are not
-       * assigned polymorphically. This can be removed when the bug is fixed
-       */
-      template<>
-      struct DLLExport SingleValueTypeHandler<std::string> : public PythonTypeHandler
-      {
         /**
-         * Set function to handle Python -> C++ calls and get the correct type
-         * @param alg :: A pointer to an IPropertyManager
-         * @param name :: The name of the property
-         * @param value :: A boost python object that stores the value
+         * Is the object actually an instance of the derived type
+         * @param value :: A Python wrapped C object
          */
-        void set(Kernel::IPropertyManager* alg, const std::string &name, boost::python::object value)
+        bool isDerivedType(const boost::python::object & value) const
         {
-          alg->setPropertyValue(name, boost::python::extract<std::string>(value));
-        }
-        /**
-         * Is the python object an instance of the string template type
-         * @param value ::
-         * @returns True if it is, false otherwise
-         */
-        bool isInstance(const boost::python::object & value) const
-        {
-          // Can we extract the derived type from the object?
-          boost::python::extract<std::string> extractor(value);
+          boost::python::extract<PropertyType> extractor(value);
           return extractor.check();
         }
 
+        /**
+         * Return the PyTypeObject of the DerivedType
+         * @returns A PyTypeObject for the given DerivedType
+         */
+        const PyTypeObject * pythonType() const
+        {
+          using namespace boost::python;
+          const std::type_info & ctype = typeID<PropertyType>(is_shared_ptr<PropertyType>());
+          const converter::registration *regEntry = converter::registry::query(ctype);
+          return regEntry->get_class_object();
+        }
+      private:
+        /**
+         * Return the PyTypeObject of the DerivedType
+         * @returns A PyTypeObject for the given DerivedType
+         */
+        template<typename T>
+        const std::type_info& typeID(const boost::true_type &) const
+        {
+          return typeid(typename T::element_type);
+        }
+        /**
+         * Return the PyTypeObject of the DerivedType
+         * @returns A PyTypeObject for the given DerivedType
+         */
+        template<typename T>
+        const std::type_info& typeID(const boost::false_type &) const
+        {
+          return typeid(T);
+        }
+
       };
 
-      /**
-       * Specialized integer version to deal with situations where a property
-       * is of type double but an integer is passed.
-       */
-      template<>
-      struct DLLExport SingleValueTypeHandler<int> : public PythonTypeHandler
-      {
-        /**
-         * Set function to handle Python -> C++ calls and get the correct type
-         * @param alg :: A pointer to an IPropertyManager
-         * @param name :: The name of the property
-         * @param value :: A boost python object that stores the integer value
-         */
-        void set(Kernel::IPropertyManager* alg, const std::string &name, boost::python::object value)
-        {
-          int intValue = boost::python::extract<int>(value)();
-          try
-          {
-            alg->setProperty(name, intValue);
-          }
-          catch(std::invalid_argument&)
-          {
-            // Throws this also if the type is wrong. The type could be a double so check first and extract as a double if necessary
-            alg->setProperty(name, static_cast<double>(intValue));
-          }
-        }
-        /**
-         * Is the python object an instance of the string template type
-         * @param value ::
-         * @returns True if it is, false otherwise
-         */
-        bool isInstance(const boost::python::object & value) const
-        {
-          // Can we extract the derived type from the object?
-          boost::python::extract<int> extractor(value);
-          return extractor.check();
-        }
-      };
     }
   }
 }
-
-/**
-  * A macro to declare typed handlers.
-  * @param export_type :: The C++ type that is to be converted
-  * @param base_type :: The C++ type that the export_type is to be treated as
-  */
-#define DECLARE_SINGLEVALUETYPEHANDLER(export_type, base_type) \
-  const boost::python::converter::registration *reg = boost::python::converter::registry::query(typeid(export_type));\
-  Mantid::PythonInterface::TypeRegistry::registerHandler(reg->get_class_object(), new Mantid::PythonInterface::TypeRegistry::SingleValueTypeHandler<base_type, export_type>());

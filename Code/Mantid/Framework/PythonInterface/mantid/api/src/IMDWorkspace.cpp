@@ -1,5 +1,5 @@
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidPythonInterface/kernel/SingleValueTypeHandler.h"
+#include "MantidPythonInterface/kernel/RegisterSingleValueHandler.h"
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/self.hpp>
@@ -7,7 +7,6 @@
 using Mantid::API::IMDWorkspace;
 using Mantid::API::IMDWorkspace_sptr;
 using Mantid::API::Workspace;
-using Mantid::Kernel::DataItem_sptr;
 using namespace boost::python;
 
 void export_IMDWorkspace()
@@ -21,7 +20,7 @@ void export_IMDWorkspace()
     .def("getDimension", &IMDWorkspace::getDimension, "Return the chosen dimension of the workspace")
     ;
 
-  DECLARE_SINGLEVALUETYPEHANDLER(IMDWorkspace, DataItem_sptr);
+  REGISTER_SINGLEVALUE_HANDLER(IMDWorkspace_sptr);
 
 }
 

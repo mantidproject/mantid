@@ -1,5 +1,5 @@
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidPythonInterface/kernel/SingleValueTypeHandler.h"
+#include "MantidPythonInterface/kernel/RegisterSingleValueHandler.h"
 #include "MantidPythonInterface/kernel/upcast_returned_value.h"
 
 #include <boost/python/class.hpp>
@@ -11,7 +11,7 @@ using Mantid::API::WorkspaceGroup;
 using Mantid::API::WorkspaceGroup_sptr;
 using Mantid::API::Workspace;
 using Mantid::API::Workspace_sptr;
-using Mantid::Kernel::DataItem_sptr;
+
 using namespace boost::python;
 
 namespace
@@ -46,6 +46,6 @@ void export_WorkspaceGroup()
     .def("__getitem__",&getItemAsWeakPtr, return_value_policy<Mantid::PythonInterface::upcast_returned_value>())
   ;
 
-  DECLARE_SINGLEVALUETYPEHANDLER(WorkspaceGroup, DataItem_sptr);
+  REGISTER_SINGLEVALUE_HANDLER(WorkspaceGroup_sptr);
 }
 

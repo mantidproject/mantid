@@ -1,5 +1,5 @@
-#ifndef MANTID_PYTHONINTERFACE_TYPEREGISTRY_H_
-#define MANTID_PYTHONINTERFACE_TYPEREGISTRY_H_
+#ifndef MANTID_PYTHONINTERFACE_UPCASTREGISTRY_H_
+#define MANTID_PYTHONINTERFACE_UPCASTREGISTRY_H_
 /**
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -22,32 +22,27 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #include "MantidKernel/System.h"
+#include <string>
 #include <boost/python/object.hpp>
 
 namespace Mantid
 {
   namespace PythonInterface
   {
-    /**
-     * This namespace stores a lookup between a type_info object PropertyValueHandler
-     */
     namespace Registry
     {
-      //-----------------------------------------------------------------------
-      // Forward declarations
-      //-----------------------------------------------------------------------
-      struct PropertyValueHandler;
+      /// Returns an upcasting converter
+      DLLExport void registerIDForUpcasting(const std::string & id, const PyTypeObject * type);
+      /// Get an upcasted type object for the given object
+      DLLExport const PyTypeObject * getDerivedType(boost::python::object value);
+      /// Overload. Get an upcasted type object for the given object
+      DLLExport const PyTypeObject * getDerivedType(PyObject *value);
 
-      /// Register the built-in type handlers into the registry
-      void registerBuiltins();
-      /// Inserts a new property handler
-      DLLExport void registerHandler(const std::type_info& typeObject, PropertyValueHandler* handler);
-      /// Get a TypeHandler, throws if one does not exist
-      DLLExport PropertyValueHandler *getHandler(const std::type_info&  typeObject);
-      /// Attempts to find a derived type for the given object
-      DLLExport const PyTypeObject * findDerivedType(boost::python::object value);
     }
   }
 }
 
-#endif /* MANTID_PYTHONINTERFACE_TYPEREGISTRY_H_*/
+
+
+
+#endif /* MANTID_PYTHONINTERFACE_UPCASTREGISTRY_H_ */

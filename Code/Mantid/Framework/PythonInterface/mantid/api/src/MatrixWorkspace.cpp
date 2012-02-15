@@ -3,7 +3,7 @@
 #include "MantidAPI/WorkspaceOpOverloads.h"
 
 #include "MantidPythonInterface/kernel/PropertyWithValue.h"
-#include "MantidPythonInterface/kernel/SingleValueTypeHandler.h"
+#include "MantidPythonInterface/kernel/RegisterSingleValueHandler.h"
 #include "MantidPythonInterface/api/WorkspaceToNumpy.h"
 
 #include <boost/python/class.hpp>
@@ -92,7 +92,7 @@ void export_MatrixWorkspace()
     .def("equals", &Mantid::API::equals, "Performs a comparison operation on two workspaces, using the CheckWorkspacesMatch algorithm")
     ;
 
-  DECLARE_SINGLEVALUETYPEHANDLER(MatrixWorkspace, DataItem_sptr);
+  REGISTER_SINGLEVALUE_HANDLER(MatrixWorkspace_sptr);
 }
 
 void export_MatrixWorkspaceProperty()

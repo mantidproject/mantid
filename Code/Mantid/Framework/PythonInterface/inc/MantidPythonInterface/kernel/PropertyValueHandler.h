@@ -1,5 +1,5 @@
-#ifndef MANTID_PYTHONINTERFACE_PYTHONTYPEHANDLER_H_
-#define MANTID_PYTHONINTERFACE_PYTHONTYPEHANDLER_H_
+#ifndef MANTID_PYTHONINTERFACE_PROPERTYVALUEHANDLER_H_
+#define MANTID_PYTHONINTERFACE_PROPERTYVALUEHANDLER_H_
 /**
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -34,24 +34,28 @@ namespace Mantid
   }
   namespace PythonInterface
   {
-      namespace TypeRegistry
+      namespace Registry
       {
       /**
-       * A non-template base class that can be stored in a map so that
-       * its virtual functions are overridden in template derived classes
-       * that can extract the correct type from the Python object
+       * This class provides a base-class objects that are able to take
+       * a python object and set it on an algorithm property.
+       *
+       * The set function should call the setProperty method once it has the
+       * correct C++ type from the Python object
        */
-      struct DLLExport PythonTypeHandler
+      struct DLLExport PropertyValueHandler
       {
         /// Virtual Destructor
-        virtual ~PythonTypeHandler() {};
+        virtual ~PropertyValueHandler() {};
         /// Set function to handle Python -> C++ calls
         virtual void set(Kernel::IPropertyManager* alg, const std::string &name, boost::python::object value) = 0;
-        /// Is the given object an instance the handler's type
-        virtual bool isInstance(const boost::python::object&) const  = 0;
+        /// Is the given object a derived type of this objects Type
+        virtual bool isDerivedType(const boost::python::object & value) const = 0;
+        /// Return the Python type corresponding to this object. May return NULL
+        virtual const PyTypeObject * pythonType() const = 0;
       };
     }
   }
 }
 
-#endif /* MANTID_PYTHONINTERFACE_PYTHONTYPEHANDLER_H_ */
+#endif /* MANTID_PYTHONINTERFACE_PROPERTYVALUEHANDLER_H_ */

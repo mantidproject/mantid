@@ -1,5 +1,5 @@
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidPythonInterface/kernel/SingleValueTypeHandler.h"
+#include "MantidPythonInterface/kernel/RegisterSingleValueHandler.h"
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
@@ -23,7 +23,7 @@ void export_IMDEventWorkspace()
          "Returns the BoxController used in this workspace")
   ;
 
-  DECLARE_SINGLEVALUETYPEHANDLER(IMDEventWorkspace, DataItem_sptr);
+  REGISTER_SINGLEVALUE_HANDLER(IMDEventWorkspace_sptr);
 
 }
 

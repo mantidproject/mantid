@@ -2,16 +2,23 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/SequenceTypeHandler.h"
-#include "MantidPythonInterface/kernel/VectorDelegate.h"
+#include "MantidPythonInterface/kernel/Converters/PySequenceToVectorConverter.h"
+#include "MantidPythonInterface/kernel/Converters/NDArrayToVectorConverter.h"
 #include "MantidKernel/IPropertyManager.h"
+
+// See http://docs.scipy.org/doc/numpy/reference/c-api.array.html#PY_ARRAY_UNIQUE_SYMBOL
+#define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
+#define NO_IMPORT_ARRAY
+#include <numpy/ndarrayobject.h>
+
+#include <boost/python/extract.hpp>
 
 namespace Mantid
 {
   namespace PythonInterface
   {
-    namespace TypeRegistry
+    namespace Registry
     {
-
 
       /**
        * Set function to handle Python -> C++ calls to a property manager and get the correct type
@@ -19,65 +26,52 @@ namespace Mantid
        * @param name :: The name of the property
        * @param value :: A boost python object that stores the container values
        */
-      void SequenceTypeHandler::set(Kernel::IPropertyManager* alg,
-                                    const std::string &name, boost::python::object value)
+      template<typename ContainerType>
+      void SequenceTypeHandler<ContainerType>::set(Kernel::IPropertyManager* alg, const std::string &name,
+                                                   boost::python::object value)
       {
-        // We can't avoid a copy here as the final values will have reside in an array allocated
-        // by the C++ new operator
+        using boost::python::numeric::array;
+        using boost::python::len;
+        typedef typename ContainerType::value_type DestElementType;
 
-        // We need some way of instantiating the correct vector type. We'll take the type from the
-        // first element in the list
-        Kernel::Property *prop = alg->getPointerToProperty(name);
-        const std::type_info * propTypeInfo = prop->type_info();
-        PyObject *firstElement = PySequence_Fast_GET_ITEM(value.ptr(), 0);
-        if( PyString_Check(firstElement) || *propTypeInfo == typeid(std::vector<std::string>) )
+        // Check for a container-like object
+        Py_ssize_t length(0);
+        try
         {
-          std::vector<std::string> propValues = VectorDelegate::toStdVector<std::string>(value.ptr());
-          alg->setProperty(name, propValues);
+         length = len(value);
         }
-        else if( PyInt_Check(firstElement) || PyLong_Check(firstElement) )
+        catch(boost::python::error_already_set&)
         {
-          // The actual property could be a variety of flavours of integer type
-          // MG (2011/11/09): I'm not over the moon about this implementation but I don't
-          // have a better idea.
-          if( typeid(std::vector<int>) == *propTypeInfo )
-          {
-            std::vector<int> propValues = VectorDelegate::toStdVector<int>(value.ptr());
-            alg->setProperty(name, propValues);
-          }
-          else if( typeid(std::vector<size_t>) == *propTypeInfo )
-          {
-            std::vector<size_t> propValues = VectorDelegate::toStdVector<size_t>(value.ptr());
-            alg->setProperty(name, propValues);
-          }
-          else
-          {
-            throw std::invalid_argument("SequenceTypeHandler::set - The property type for '" + name  + "' could not been handled.");
-          }
+          throw std::invalid_argument(name + " property requires a list/array type but found a " + value.ptr()->ob_type->tp_name);
         }
-        else if( PyFloat_Check(firstElement) )
+
+        // numpy arrays requires special handling to extract their types. Hand-off to a more appropriate handler
+        if( PyArray_Check(value.ptr()) )
         {
-          std::vector<double> propValues = VectorDelegate::toStdVector<double>(value.ptr());
-          alg->setProperty(name, propValues);
+          alg->setProperty(name, NDArrayToVectorConverter<DestElementType>(value)());
+        }
+        else if( PySequence_Check(value.ptr()) )
+        {
+          alg->setProperty(name, PySequenceToVectorConverter<DestElementType>(value)());
         }
         else
         {
-          throw std::invalid_argument("SequenceTypeHandler::set - The first element of the value for the '" + name + "' property cannot be handled.");
+          throw std::invalid_argument(std::string("Unknown sequence type \"") + value.ptr()->ob_type->tp_name
+                                        + "\" found when setting " + name + " property.");
         }
-
       }
 
-      /**
-       * Is the python object an instance a sequence type
-       * @param value :: A python object
-       * @returns True if it is, false otherwise
-       */
-      bool SequenceTypeHandler::isInstance(const boost::python::object & value) const
-      {
-        UNUSED_ARG(value);
-        return false;
-      }
-
+      //-----------------------------------------------------------------------
+      // Concrete instantiations
+      //-----------------------------------------------------------------------
+      template DLLExport struct SequenceTypeHandler<std::vector<int16_t> >;
+      template DLLExport struct SequenceTypeHandler<std::vector<uint16_t> >;
+      template DLLExport struct SequenceTypeHandler<std::vector<int32_t> >;
+      template DLLExport struct SequenceTypeHandler<std::vector<uint32_t> >;
+      template DLLExport struct SequenceTypeHandler<std::vector<int64_t> >;
+      template DLLExport struct SequenceTypeHandler<std::vector<uint64_t> >;
+      template DLLExport struct SequenceTypeHandler<std::vector<double> >;
+      template DLLExport struct SequenceTypeHandler<std::vector<std::string> >;
     }
   }
 }

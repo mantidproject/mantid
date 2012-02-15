@@ -22,25 +22,42 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #include "MantidPythonInterface/kernel/PropertyValueHandler.h"
+#include <boost/python/numeric.hpp>
 
 namespace Mantid
 {
   namespace PythonInterface
   {
-    namespace TypeRegistry
+    namespace Registry
     {
       /**
-       * A property handler that deals with translation of multi-value
-       * Python types, i.e. python arrays etc to/from Mantid algorithm properties
-       * It does not handle Numpy arrays, @see NumpyTypeHandler
+       * A specialisation of PropertyValueHander to handle coercing a Python
+       * value into a C++ sequence/array property. The template type ContainerType
+       * should contain a type called value_type indicating the element type.
        */
-      struct DLLExport SequenceTypeHandler : PythonTypeHandler
+      template<typename ContainerType>
+      struct DLLExport SequenceTypeHandler : PropertyValueHandler
       {
         /// Call to set a named property where the value is some container type
         virtual void set(Kernel::IPropertyManager* alg, const std::string &name, boost::python::object value);
-        /// Is the given object an instance the handler's type
-        virtual bool isInstance(const boost::python::object&) const;
-      };
+        /**
+         * Is the object actually an instance of the derived type
+         * @param value :: A Python wrapped C object
+         */
+        bool isDerivedType(const boost::python::object & value) const
+        {
+          UNUSED_ARG(value);
+          return false;
+        }
+        /**
+         * Return the PyTypeObject of the DerivedType
+         * @returns A PyTypeObject for the given DerivedType
+         */
+        const PyTypeObject * pythonType() const
+        {
+          return &PyList_Type;
+        }
+       };
 
     }
   }

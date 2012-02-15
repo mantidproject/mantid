@@ -6,7 +6,7 @@
 #include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::Kernel::IPropertyManager;
-namespace TypeRegistry = Mantid::PythonInterface::TypeRegistry;
+namespace Registry = Mantid::PythonInterface::Registry;
 using namespace boost::python;
 
 namespace
@@ -22,9 +22,16 @@ namespace
   void setProperty(IPropertyManager &self, const std::string & name,
                    boost::python::object value)
   {
-    PyTypeObject *pytype = value.ptr()->ob_type;
-    TypeRegistry::PythonTypeHandler *entry = TypeRegistry::getHandler(pytype);
-    entry->set(&self, name, value);
+    if( PyString_Check(value.ptr()) ) // String values can be set directly
+    {
+      self.setPropertyValue(name, boost::python::extract<std::string>(value));
+    }
+    else
+    {
+      Mantid::Kernel::Property *p = self.getProperty(name);
+      Registry::PropertyValueHandler *entry = Registry::getHandler(*(p->type_info()));
+      entry->set(&self, name, value);
+    }
   }
 }
 

@@ -1,6 +1,6 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IPeak.h"
-#include "MantidPythonInterface/kernel/SingleValueTypeHandler.h"
+#include "MantidPythonInterface/kernel/RegisterSingleValueHandler.h"
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/return_internal_reference.hpp>
@@ -26,7 +26,7 @@ void export_IPeaksWorkspace()
     .def("createPeak", &IPeaksWorkspace::createPeak, return_internal_reference<>(), "Create a Peak and return it")
       ;
 
-  DECLARE_SINGLEVALUETYPEHANDLER(IPeaksWorkspace, DataItem_sptr);
+  REGISTER_SINGLEVALUE_HANDLER(IPeaksWorkspace_sptr);
 
 }
 

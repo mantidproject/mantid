@@ -21,7 +21,7 @@
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-#include "MantidPythonInterface/kernel/TypeRegistry.h"
+#include "MantidPythonInterface/kernel/Registry/UpcastRegistry.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 
@@ -57,7 +57,7 @@ namespace Mantid
         inline PyObject* operator()(const T & p) const
         {
           PyObject *pyo = boost::python::to_python_value<T>()(p);
-          PyTypeObject *const derivedType = TypeRegistry::getDerivedType(pyo);
+          const PyTypeObject * derivedType = Registry::getDerivedType(pyo);
           if( derivedType )
           {
             PyObject_SetAttrString(pyo, "__class__", (PyObject*)derivedType);

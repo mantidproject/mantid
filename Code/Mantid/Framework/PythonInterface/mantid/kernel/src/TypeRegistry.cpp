@@ -3,106 +3,119 @@
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/TypeRegistry.h"
 #include "MantidPythonInterface/kernel/PropertyWithValue.h"
-#include "MantidPythonInterface/kernel/PropertyValueHandler.h"
+#include "MantidPythonInterface/kernel/RegisterSingleValueHandler.h"
+#include "MantidPythonInterface/kernel/SequenceTypeHandler.h"
+
+#include "MantidKernel/Property.h" // provides getUnmangledTypeName
 #include <map>
 
 namespace Mantid
 {
   namespace PythonInterface
   {
-    namespace TypeRegistry
+    namespace Registry
     {
       namespace // <anonymous>
       {
-        /// Typedef the map of python types to C++ functions
-        typedef std::map<PyTypeObject*, PythonTypeHandler*> PyTypeLookup;
+        /// Typedef the map of type_info -> handler objects
+        typedef std::map<const std::type_info*, PropertyValueHandler*> TypeIDMap;
 
         /**
          * Returns a reference to the static type map
          * @return A reference to the type map
          */
-        PyTypeLookup & typeRegistry()
+        TypeIDMap & typeRegistry()
         {
-          static PyTypeLookup typeHandlers;
+          static TypeIDMap typeHandlers;
           return typeHandlers;
         }
       } // end <anonymous>
+
+      /**
+       * Register the built-in type handlers into the registry
+       */
+      void registerBuiltins()
+      {
+        // Register a handler for each basic type in IPropertyManager.cpp
+        REGISTER_SINGLEVALUE_HANDLER(int16_t);
+        REGISTER_SINGLEVALUE_HANDLER(uint16_t);
+        REGISTER_SINGLEVALUE_HANDLER(int32_t);
+        REGISTER_SINGLEVALUE_HANDLER(uint32_t);
+        REGISTER_SINGLEVALUE_HANDLER(int64_t);
+        REGISTER_SINGLEVALUE_HANDLER(uint64_t);
+        REGISTER_SINGLEVALUE_HANDLER(bool);
+        REGISTER_SINGLEVALUE_HANDLER(double);
+        REGISTER_SINGLEVALUE_HANDLER(std::string);
+
+       #define REGISTER_ARRAYPROPERTY_HANDLER(TYPE) \
+         registerHandler(typeid(TYPE), new SequenceTypeHandler<TYPE>());
+
+        REGISTER_ARRAYPROPERTY_HANDLER(std::vector<int16_t>);
+        REGISTER_ARRAYPROPERTY_HANDLER(std::vector<uint16_t>);
+        REGISTER_ARRAYPROPERTY_HANDLER(std::vector<int32_t>);
+        REGISTER_ARRAYPROPERTY_HANDLER(std::vector<uint32_t>);
+        REGISTER_ARRAYPROPERTY_HANDLER(std::vector<int64_t>);
+        REGISTER_ARRAYPROPERTY_HANDLER(std::vector<uint64_t>);
+        REGISTER_ARRAYPROPERTY_HANDLER(std::vector<double>);
+        REGISTER_ARRAYPROPERTY_HANDLER(std::vector<std::string>);
+
+      }
 
       /**
        * Insert a new property handler, possibly overwriting an existing one
        * @param typeObject :: A pointer to a type object
        * @param handler :: An object to handle to corresponding templated C++ type
        */
-      void registerHandler(PyTypeObject* typeObject, PythonTypeHandler* handler)
+      void registerHandler(const std::type_info& typeObject, PropertyValueHandler* handler)
       {
-        PyTypeLookup & typeHandlers = typeRegistry();
-        typeHandlers.insert(std::make_pair(typeObject, handler));
+        TypeIDMap & typeHandlers = typeRegistry();
+        typeHandlers.insert(std::make_pair(&typeObject, handler));
       }
 
       /**
        * Get a TypeHandler, throws if one does not exist
        * @param typeObject A pointer to a PyTypeObject
-       * @returns A pointer to a PythonTypeHandler
+       * @returns A pointer to a PropertyValueHandler
        */
-      PythonTypeHandler *getHandler(PyTypeObject* typeObject)
+      PropertyValueHandler *getHandler(const std::type_info& typeObject)
       {
-        PyTypeLookup & typeHandlers = typeRegistry();
-        PyTypeLookup::const_iterator itr = typeHandlers.find(typeObject);
+        TypeIDMap & typeHandlers = typeRegistry();
+        TypeIDMap::const_iterator itr = typeHandlers.find(&typeObject);
         if( itr == typeHandlers.end() )
         {
-          throw std::invalid_argument("No handler registered for python type '" + std::string(typeObject->tp_name) + "'");
+          throw std::invalid_argument("No handler registered for property type '" + Kernel::getUnmangledTypeName(typeObject) + "'");
         }
         return itr->second;
       }
 
       /**
-       * Attempts to find an upcasted PyTypeObject type for the given object from
-       * all of the types registered.
-       * @param value :: An object derived from DataItem
-       * @return A pointer to an upcasted type or NULL if one cannot be found
-       */
-      PyTypeObject * getDerivedType(boost::python::object value)
-      {
-        // This has to be a search as it is at runtime.
-        // Each of the registered type handlers is checked
-        // to see if its type is a subclass the value type.
-        // Each one is checked so that the most derived type
-        // can be found
+        * Attempts to find a derived type for the given object amongst the
+        * known converters (This could be slow)
+        */
+      const PyTypeObject * findDerivedType(boost::python::object value)
+       {
+         TypeIDMap & typeHandlers = typeRegistry();
+         TypeIDMap::const_iterator iend = typeHandlers.end();
+         const PyTypeObject *result(NULL);
 
-        PyTypeLookup & typeHandlers = typeRegistry();
-        PyTypeLookup::const_iterator iend = typeHandlers.end();
-        PyObject *valueType = (PyObject*)value.ptr()->ob_type;
-        PyTypeObject *result(NULL);
-
-        for(PyTypeLookup::const_iterator it = typeHandlers.begin(); it != iend; ++it)
-        {
-          if( PyObject_IsSubclass((PyObject*)it->first, valueType) )
-          {
-            if( !result && it->second->isInstance(value) )
-            {
-              result = it->first;
-            }
-            // Check if this match is further up the chain than the last
-            if( result && PyObject_IsSubclass((PyObject*)it->first, (PyObject*)result)
-                && it->second->isInstance(value) )
-            {
-              result = it->first;
-            }
-          }
-        }
-        return result;
-      }
-
-      /**
-       * Attempts to find an upcasted PyTypeObject type for the given object from
-       * all of the types registered, overloaded for bare PyObject pointer.
-       * @param value :: An object derived from DataItem
-       * @return A pointer to an upcasted type or NULL if one cannot be found
-       */
-      PyTypeObject * getDerivedType(PyObject *value)
-      {
-        return getDerivedType(boost::python::object(boost::python::borrowed(value)));
-      }
+         for(TypeIDMap::const_iterator it = typeHandlers.begin(); it != iend; ++it)
+         {
+           if( it->second->isDerivedType(value) )
+           {
+             const PyTypeObject *derivedType = it->second->pythonType();
+             if( !result )
+             {
+               result = derivedType;
+             }
+             // Further down the chain
+             else if( PyObject_IsSubclass((PyObject*)derivedType, (PyObject*)result) )
+             {
+               result = derivedType;
+             }
+           }
+         }
+         return result;
+       }
 
     }
   }

@@ -6,19 +6,14 @@
 #include <boost/python/docstring_options.hpp>
 #include <boost/python/def.hpp>
 
-#include "MantidPythonInterface/kernel/SingleValueTypeHandler.h"
-#include "MantidPythonInterface/kernel/SequenceTypeHandler.h"
-#include "MantidPythonInterface/kernel/NumpyTypeHandler.h"
 #include "MantidKernel/MantidVersion.h"
+#include "MantidPythonInterface/kernel/TypeRegistry.h"
 
 // See http://docs.scipy.org/doc/numpy/reference/c-api.array.html#PY_ARRAY_UNIQUE_SYMBOL
 #define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
 #include <numpy/arrayobject.h>
 #include <boost/python/numeric.hpp>
 
-using namespace Mantid::PythonInterface;
-using TypeRegistry::SingleValueTypeHandler;
-using TypeRegistry::SequenceTypeHandler;
 using boost::python::def;
 
 // Forward declare
@@ -34,15 +29,8 @@ BOOST_PYTHON_MODULE(_kernel)
   
   def("version_str", &Mantid::Kernel::MantidVersion::version, 
       "Returns the Mantid version string in the form \"major.minor.patch\"");
-  
-  // Map builtin type objects to appropriate handler classes for properties
-  TypeRegistry::registerHandler(&PyInt_Type, new SingleValueTypeHandler<int>());
-  TypeRegistry::registerHandler(&PyBool_Type, new SingleValueTypeHandler<bool>());
-  TypeRegistry::registerHandler(&PyFloat_Type, new SingleValueTypeHandler<double>());
-  TypeRegistry::registerHandler(&PyString_Type, new SingleValueTypeHandler<std::string>());
-  TypeRegistry::registerHandler(&PyList_Type, new SequenceTypeHandler());
-  TypeRegistry::registerHandler(&PyTuple_Type, new SequenceTypeHandler());
-  TypeRegistry::registerHandler(&PyArray_Type, new TypeRegistry::NumpyTypeHandler()); // Numpy array
+      
+  Mantid::PythonInterface::Registry::registerBuiltins();
   
 
 @EXPORT_FUNCTIONS@

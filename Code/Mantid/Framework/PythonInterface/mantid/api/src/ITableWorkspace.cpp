@@ -1,7 +1,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Column.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidPythonInterface/kernel/SingleValueTypeHandler.h"
+#include "MantidPythonInterface/kernel/RegisterSingleValueHandler.h"
 #include "MantidPythonInterface/kernel/PropertyWithValue.h"
 
 #include <boost/python/class.hpp>
@@ -95,7 +95,7 @@ void export_ITableWorkspace()
          "otherwise it is interpreted as a column name")
   ;
 
-  DECLARE_SINGLEVALUETYPEHANDLER(ITableWorkspace, Mantid::Kernel::DataItem_sptr);
+  REGISTER_SINGLEVALUE_HANDLER(ITableWorkspace_sptr);
 }
 
 void export_ITableWorkspaceProperty()

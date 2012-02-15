@@ -1,7 +1,7 @@
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/IEventList.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidPythonInterface/kernel/SingleValueTypeHandler.h"
+#include "MantidPythonInterface/kernel/RegisterSingleValueHandler.h"
 #include "MantidPythonInterface/kernel/PropertyWithValue.h"
 
 #include <boost/python/class.hpp>
@@ -29,7 +29,7 @@ void export_IEventWorkspace()
     .def("clearMRU", &IEventWorkspace::clearMRU, "Clear the most-recently-used lists")
     ;
 
-  DECLARE_SINGLEVALUETYPEHANDLER(IEventWorkspace, Mantid::Kernel::DataItem_sptr);
+  REGISTER_SINGLEVALUE_HANDLER(IEventWorkspace_sptr);
 }
 
 void export_IEventWorkspaceProperty()
