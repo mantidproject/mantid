@@ -176,7 +176,7 @@ class DataReflWidget(BaseWidget):
         self._summary.instrument_group_box.hide()
         
         # If we do not have access to /SNS, don't display the automated reduction options
-        if not os.path.isdir("/SNS/%s" % self.instrument_name):
+        if not self._settings.debug and not os.path.isdir("/SNS/%s" % self.instrument_name):
             self._summary.auto_reduce_check.hide()
         
     def _edit_event(self, text=None, ctrl=None):
@@ -265,13 +265,21 @@ class DataReflWidget(BaseWidget):
         content += "import os\n"
         content += "if (os.environ.has_key(\"MANTIDPATH\")):\n"
         content += "    del os.environ[\"MANTIDPATH\"]\n"
-        content += "sys.path.insert(0,'/opt/mantidnightly/bin')\n"
+        content += "sys.path.insert(0,'/opt/mantidunstable/bin')\n"
         content += "from MantidFramework import mtd\n"
         content += "mtd.initialize()\n"
         content += "from mantidsimple import *\n\n"
         
-        content += "runNumber=sys.argv[1]\n"
+        content += "eventFileAbs=sys.argv[1]\n"
         content += "outputDir=sys.argv[2]\n\n"
+
+        content += "eventFile = os.path.split(eventFileAbs)[-1]\n"
+        content += "nexusDir = eventFileAbs.replace(eventFile, '')\n"
+        content += "runNumber = eventFile.split('_')[1]\n"
+        content += "configService = mtd.getSettings()\n"
+        content += "dataSearchPath = configService.getDataSearchDirs()\n"
+        content += "dataSearchPath.append(nexusDir)\n"
+        content += "configService.setDataSearchDirs(dataSearchPath)\n\n"
 
         content += reduce_script
 

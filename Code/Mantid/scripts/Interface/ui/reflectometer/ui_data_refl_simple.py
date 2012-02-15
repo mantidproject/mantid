@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/reflectometer/data_refl_simple.ui'
 #
-# Created: Wed Feb 15 13:50:53 2012
+# Created: Wed Feb 15 16:06:19 2012
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -1040,7 +1040,7 @@ class Ui_Frame(object):
         self.horizontalLayout_16.addItem(spacerItem22)
         self.verticalLayout_8.addLayout(self.horizontalLayout_16)
         self.verticalLayout_4.addWidget(self.groupBox_4)
-        spacerItem23 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
+        spacerItem23 = QtGui.QSpacerItem(20, 25, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
         self.verticalLayout_4.addItem(spacerItem23)
         self.auto_reduce_help_label = QtGui.QLabel(self.scrollAreaWidgetContents)
         self.auto_reduce_help_label.setObjectName("auto_reduce_help_label")
