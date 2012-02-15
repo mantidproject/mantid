@@ -154,6 +154,14 @@ public:
     TS_ASSERT_THROWS_NOTHING( manager->setProperty("AProp",1) );
   }
 
+  void testSetStringProperty()
+  {
+    // Make sure we can handle std::strings as well as const char *.
+    TS_ASSERT_THROWS_NOTHING( manager->setProperty("yetAnotherProp","aValue") );
+    std::string aValue("aValue");
+    TS_ASSERT_THROWS_NOTHING( manager->setProperty("yetAnotherProp",aValue) );
+  }
+
   void testExistsProperty()
   {
     Property *p = new PropertyWithValue<int>("sjfudh",0);

@@ -135,6 +135,14 @@ public:
         this->setPropertyValue(name, std::string(value));
         return this;
     }
+
+    /// Further specialised version of setProperty template method.  Needed to explicitly handle std::string - const char * is not enough.
+    IPropertyManager* setProperty(const std::string &name, const std::string & value)
+    {
+        this->setPropertyValue(name, value);
+        return this;
+    }
+
     /// Return the property manager serialized as a string.
     virtual std::string asString(bool withDefaultValues = false) const = 0;
 
