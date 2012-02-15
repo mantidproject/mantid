@@ -14,6 +14,7 @@
 #include <limits>
 #include <numeric>
 #include "MantidAPI/ISpectrum.h"
+#include "MantidKernel/CPUTimer.h"
 
 using namespace boost::posix_time;
 using Mantid::API::ISpectrum;
@@ -553,9 +554,10 @@ namespace DataObjects
     this->clearData();
     data.resize(numSpectra);
     m_noVectors = numSpectra;
-    
-    for( size_t wi = 0; wi < numSpectra; ++wi )
+    PRAGMA_OMP( parallel for )
+    for( int iwi = 0; iwi < int(numSpectra); ++iwi )
     {
+      size_t wi = size_t(iwi);
       const specid_t specNo = ax1->spectraNo(wi);
       //Create an event list for here
       EventList * newel = new EventList(mru, specNo);
@@ -563,7 +565,7 @@ namespace DataObjects
       newel->setSpectrumNo( specNo );
       //Save it in the list
       data[wi] = newel;
-    }           
+    }
     
     //Clearing the MRU list is a good idea too.
     this->clearMRU();

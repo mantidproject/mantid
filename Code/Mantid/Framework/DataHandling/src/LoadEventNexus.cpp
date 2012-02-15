@@ -50,6 +50,7 @@ Veto pulses can be filtered out in a separate step using [[FilterByLogValue]]:
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/CPUTimer.h"
 
 using std::endl;
 using std::map;
@@ -1244,17 +1245,23 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
 
   prog->report("Initializing all pixels");
 
+
+  CPUTimer tim;
   //----------------- Pad Empty Pixels -------------------------------
   // Create the required spectra mapping so that the workspace knows what to pad to
   createSpectraMapping(m_filename, WS, monitors, onebank);
+  std::cout << tim << " to createSpectraMapping()" << std::endl;
   WS->padSpectra();
+  std::cout << tim << " to padSpectra()" << std::endl;
 
   //This map will be used to find the workspace index
   if( this->event_id_is_spec ) pixelID_to_wi_map = WS->getSpectrumToWorkspaceIndexMap();
   else pixelID_to_wi_map = WS->getDetectorIDToWorkspaceIndexMap(true);
+  std::cout << tim << " to getDetectorIDToWorkspaceIndexMap" << std::endl;
 
   // Cache a map for speed.
   this->makeMapToEventLists();
+  std::cout << tim << " to makeMapToEventLists" << std::endl;
 
   // --------------------------- Time filtering ------------------------------------
   double filter_time_start_sec, filter_time_stop_sec;
