@@ -135,11 +135,11 @@ namespace Mantid
         delete[] masks;
         for(size_t ii = 0; ii < it->getDataSize() ; ++ii)
         {
-          progressUpdating.eventRaised((progressFactor * ii) + progressOffset);
+          progressUpdating.eventRaised((progressFactor * double(ii)) + progressOffset);
 
           if (useBox[ii] == true)
           {
-            vtkIdType pointIds = double(ii) * 4;
+            vtkIdType pointIds = vtkIdType(ii * 4);
 
             quadPointList->SetId(0, pointIds + 0); //xyx
             quadPointList->SetId(1, pointIds + 1); //dxyz

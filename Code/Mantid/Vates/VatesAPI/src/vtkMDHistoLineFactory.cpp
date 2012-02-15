@@ -71,10 +71,10 @@ namespace Mantid
         Mantid::Kernel::ReadLock lock(*m_workspace);
         const int nBinsX = static_cast<int>( m_workspace->getXDimension()->getNBins() );
 
-        const double maxX = m_workspace-> getXDimension()->getMaximum();
-        const double minX = m_workspace-> getXDimension()->getMinimum();
+        const coord_t maxX = m_workspace-> getXDimension()->getMaximum();
+        const coord_t minX = m_workspace-> getXDimension()->getMinimum();
 
-        double incrementX = (maxX - minX) / (nBinsX-1);
+        coord_t incrementX = (maxX - minX) / coord_t(nBinsX-1);
 
         const int imageSize = nBinsX;
         vtkPoints *points = vtkPoints::New();
@@ -102,7 +102,7 @@ namespace Mantid
         for (int i = 0; i < nPointsX; i++)
         {
           progressUpdating.eventRaised(progressFactor * double(i));
-          in[0] = minX + (static_cast<coord_t>(i) * incrementX); //Calculate increment in x;
+          in[0] = minX + static_cast<coord_t>(i) * incrementX; //Calculate increment in x;
 
           signalScalar = static_cast<float>(m_workspace->getSignalNormalizedAt(i));
 
