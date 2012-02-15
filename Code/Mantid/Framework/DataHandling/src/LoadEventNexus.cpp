@@ -1106,11 +1106,12 @@ void LoadEventNexus::makeMapToEventLists()
   // Make an array where index = pixel ID
   // Set the value to the 0th workspace index by default
   eventVectors.resize(eventid_max+1, &WS->getEventList(0).getEvents() );
-  for (detid_t j=0; j<eventid_max+1; j++)
+
+  for (size_t j=size_t(pixelID_to_wi_offset); j<pixelID_to_wi_vector.size(); j++)
   {
-    size_t wi = pixelID_to_wi_vector[j+pixelID_to_wi_offset];
+    size_t wi = pixelID_to_wi_vector[j];
     // Save a POINTER to the vector<tofEvent>
-    eventVectors[j] = &WS->getEventList(wi).getEvents();
+    eventVectors[j-pixelID_to_wi_offset] = &WS->getEventList(wi).getEvents();
   }
 }
 
