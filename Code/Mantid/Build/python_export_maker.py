@@ -14,7 +14,7 @@ def get_exportfile(headerfile):
     # We need to find the submodule from the Mantid package
     submodule = get_submodule(headerfile)
     frameworkdir = get_frameworkdir(headerfile)
-    exportpath = os.path.join(frameworkdir, 'PythonInterface', 'mantid', submodule, 'src')
+    exportpath = os.path.join(frameworkdir, 'PythonInterface', 'mantid', submodule, 'src', 'Exports')
     exportfile = os.path.join(exportpath, os.path.basename(headerfile).replace('.h','.cpp'))
     return exportfile
 

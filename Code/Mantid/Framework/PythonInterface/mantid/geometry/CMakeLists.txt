@@ -5,21 +5,21 @@
 set ( MODULE_TEMPLATE src/geometry.cpp.in )
 
 set ( EXPORT_FILES
-  src/IComponent.cpp
-  src/ICompAssembly.cpp
-  src/IObjComponent.cpp
-  src/IDetector.cpp
-  src/IMDDimension.cpp
-  src/Component.cpp
-  src/CompAssembly.cpp
-  src/ObjComponent.cpp
-  src/ObjCompAssembly.cpp
-  src/Detector.cpp
-  src/DetectorGroup.cpp
-  src/Instrument.cpp
-  src/UnitCell.cpp
-  src/OrientedLattice.cpp
-  src/ReferenceFrame.cpp
+  src/Exports/IComponent.cpp
+  src/Exports/ICompAssembly.cpp
+  src/Exports/IObjComponent.cpp
+  src/Exports/IDetector.cpp
+  src/Exports/IMDDimension.cpp
+  src/Exports/Component.cpp
+  src/Exports/CompAssembly.cpp
+  src/Exports/ObjComponent.cpp
+  src/Exports/ObjCompAssembly.cpp
+  src/Exports/Detector.cpp
+  src/Exports/DetectorGroup.cpp
+  src/Exports/Instrument.cpp
+  src/Exports/UnitCell.cpp
+  src/Exports/OrientedLattice.cpp
+  src/Exports/ReferenceFrame.cpp
 )  
 
 set ( SRC_FILES

@@ -4,22 +4,25 @@
 
 set ( MODULE_TEMPLATE src/kernel.cpp.in )
 
+# Files containing export definitions, these are automatically processed
+# -- Do NOT sort this list. The order defines the order in which the export
+#    definitions occur and some depend on their base classes being exported first -- 
 set ( EXPORT_FILES
-  src/ConfigService.cpp
-  src/DataItem.cpp
-  src/IPropertyManager.cpp
-  src/Property.cpp
-  src/PropertyWithValue.cpp
-  src/ArrayProperty.cpp
-  src/Quat.cpp
-  src/V3D.cpp
-  src/StlContainers.cpp
-  src/Logger.cpp
-  src/Unit.cpp
-  src/IValidator.cpp
-  src/BoundedValidator.cpp
-  src/TimeSeriesProperty.cpp
-  src/DateAndTime.cpp
+  src/Exports/ConfigService.cpp
+  src/Exports/DataItem.cpp
+  src/Exports/IPropertyManager.cpp
+  src/Exports/Property.cpp
+  src/Exports/PropertyWithValue.cpp
+  src/Exports/ArrayProperty.cpp
+  src/Exports/Quat.cpp
+  src/Exports/V3D.cpp
+  src/Exports/StlContainers.cpp
+  src/Exports/Logger.cpp
+  src/Exports/Unit.cpp
+  src/Exports/IValidator.cpp
+  src/Exports/BoundedValidator.cpp
+  src/Exports/TimeSeriesProperty.cpp
+  src/Exports/DateAndTime.cpp
 )  
 
 set ( SRC_FILES

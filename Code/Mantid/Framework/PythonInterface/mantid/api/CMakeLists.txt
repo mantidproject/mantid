@@ -8,33 +8,33 @@ set ( MODULE_TEMPLATE src/api.cpp.in )
 # -- Do NOT sort this list. The order defines the order in which the export
 #    definitions occur and some depend on their base classes being exported first -- 
 set ( EXPORT_FILES
-  src/Algorithm.cpp
-  src/AlgorithmFactory.cpp
-  src/AlgorithmManager.cpp
-  src/AnalysisDataService.cpp
-  src/FileProperty.cpp
-  src/FrameworkManager.cpp
-  src/IEventList.cpp
-  src/ISpectrum.cpp
-  src/WorkspaceHistory.cpp
-  src/ExperimentInfo.cpp
-  src/MultipleExperimentInfos.cpp
-  src/Workspace.cpp
-  src/ITableWorkspace.cpp
-  src/IMDWorkspace.cpp
-  src/IMDHistoWorkspace.cpp
-  src/IMDEventWorkspace.cpp
-  src/MatrixWorkspace.cpp
-  src/IEventWorkspace.cpp
-  src/IPeaksWorkspace.cpp
-  src/BinaryOperations.cpp
-  src/WorkspaceGroup.cpp
-  src/Axis.cpp
-  src/IPeak.cpp
-  src/BoxController.cpp
-  src/FileFinder.cpp
-  src/Sample.cpp
-  src/Run.cpp
+  src/Exports/Algorithm.cpp
+  src/Exports/AlgorithmFactory.cpp
+  src/Exports/AlgorithmManager.cpp
+  src/Exports/AnalysisDataService.cpp
+  src/Exports/FileProperty.cpp
+  src/Exports/FrameworkManager.cpp
+  src/Exports/IEventList.cpp
+  src/Exports/ISpectrum.cpp
+  src/Exports/WorkspaceHistory.cpp
+  src/Exports/ExperimentInfo.cpp
+  src/Exports/MultipleExperimentInfos.cpp
+  src/Exports/Workspace.cpp
+  src/Exports/ITableWorkspace.cpp
+  src/Exports/IMDWorkspace.cpp
+  src/Exports/IMDHistoWorkspace.cpp
+  src/Exports/IMDEventWorkspace.cpp
+  src/Exports/MatrixWorkspace.cpp
+  src/Exports/IEventWorkspace.cpp
+  src/Exports/IPeaksWorkspace.cpp
+  src/Exports/BinaryOperations.cpp
+  src/Exports/WorkspaceGroup.cpp
+  src/Exports/Axis.cpp
+  src/Exports/IPeak.cpp
+  src/Exports/BoxController.cpp
+  src/Exports/FileFinder.cpp
+  src/Exports/Sample.cpp
+  src/Exports/Run.cpp
 )  
 
 # Files containing additional helper code that are not related to exporting class/functions
