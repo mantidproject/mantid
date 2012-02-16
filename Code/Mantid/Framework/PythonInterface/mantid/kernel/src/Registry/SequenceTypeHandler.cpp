@@ -30,7 +30,6 @@ namespace Mantid
       void SequenceTypeHandler<ContainerType>::set(Kernel::IPropertyManager* alg, const std::string &name,
                                                    boost::python::object value)
       {
-        using boost::python::numeric::array;
         using boost::python::len;
         typedef typename ContainerType::value_type DestElementType;
 

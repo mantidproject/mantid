@@ -23,11 +23,7 @@
 */
 #include "MantidKernel/System.h"
 #include <boost/python/detail/prefix.hpp> // Safe include of Python.h
-
-// See http://docs.scipy.org/doc/numpy/reference/c-api.array.html#PY_ARRAY_UNIQUE_SYMBOL
-#define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
-#define NO_IMPORT_ARRAY
-#include <numpy/ndarrayobject.h>
+#include <numpy/ndarraytypes.h>
 
 namespace Mantid
 {

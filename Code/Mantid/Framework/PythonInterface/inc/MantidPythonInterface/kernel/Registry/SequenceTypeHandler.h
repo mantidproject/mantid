@@ -22,7 +22,6 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
-#include <boost/python/numeric.hpp>
 
 namespace Mantid
 {

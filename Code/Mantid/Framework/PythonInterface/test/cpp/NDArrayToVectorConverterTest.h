@@ -2,9 +2,6 @@
 #define NDARRAYTOVECTORCONVETERTEST_H_
 
 #include "MantidPythonInterface/kernel/Converters/NDArrayToVectorConverter.h"
-#include <boost/python/detail/prefix.hpp> // Include Python.h safely
-#define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
-#include <numpy/ndarrayobject.h> // _import_array
 
 #include <boost/python/list.hpp>
 #include <boost/python/extract.hpp>
@@ -33,8 +30,8 @@ public:
 
   NDArrayToVectorConverterTest()
   {
-    _import_array(); // Import the numpy module for this process
-    boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
+    //_import_array(); // Import the numpy module for this process
+    //boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
   }
 
   void test_construction_succeeds_with_a_numpy_array()
@@ -71,7 +68,7 @@ public:
   {
     std::vector<Py_ssize_t> dims;
     boost::python::numeric::array testArray = create2DArray(dims);
-    const size_t nelements = PyArray_SIZE(testArray.ptr());
+    const size_t nelements = 40;
     std::vector<double> cvector;
     TS_ASSERT_THROWS_NOTHING(cvector = NumpyToVectorDouble(testArray)());
     TS_ASSERT_EQUALS(cvector.size(), nelements);

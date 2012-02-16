@@ -5,6 +5,10 @@
 #include "MantidPythonInterface/kernel/Converters/NDArrayTypeIndex.h"
 #include <boost/python/extract.hpp>
 
+//#define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
+#define NO_ARRAY_IMPORT
+#include <numpy/ndarrayobject.h> 
+
 namespace Mantid
 {
   namespace PythonInterface
