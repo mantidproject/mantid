@@ -37,6 +37,7 @@ DimensionWidget::DimensionWidget(bool readOnlyLimits)
   m_layout->addWidget(m_nBinsBox, 0, 3, Qt::AlignLeft);
 
   m_dimensionLabel = new QLabel();
+  m_dimensionLabel->setFixedWidth(100);
   m_layout->addWidget(m_dimensionLabel, 1, 0, Qt::AlignLeft);
   m_dimensionCombo = new QComboBox();
 
@@ -99,7 +100,8 @@ unsigned int DimensionWidget::getSelectedIndex() const
 
 void DimensionWidget::showAsNotIntegrated(Mantid::Geometry::VecIMDDimension_sptr)
 {
-  m_dimensionLabel->setText(m_pDimensionPresenter->getLabel().c_str());
+  setDimensionName(m_pDimensionPresenter->getLabel());
+
   m_nBinsBox->setHidden(false);
   m_nBinsLabel->setHidden(false);
   m_ckIntegrated->setChecked(false);
@@ -117,10 +119,21 @@ void DimensionWidget::showAsNotIntegrated(Mantid::Geometry::VecIMDDimension_sptr
 
   }
 }
+
+/*
+Helper method to set dimension names whereever required.
+@param name : name of the dimension to display
+*/
+void DimensionWidget::setDimensionName(const std::string& name)
+{
+  m_dimensionLabel->setText(name.c_str());
+  this->setToolTip(name.c_str());
+}
+
   
 void DimensionWidget::showAsIntegrated()
 {
-  m_dimensionLabel->setText(m_pDimensionPresenter->getModel()->getDimensionId().c_str());
+  setDimensionName(m_pDimensionPresenter->getModel()->getDimensionId());
   m_nBinsBox->setHidden(true);
   m_nBinsLabel->setHidden(true);
   m_ckIntegrated->setChecked(true);

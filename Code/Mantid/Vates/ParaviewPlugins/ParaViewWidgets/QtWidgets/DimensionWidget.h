@@ -71,6 +71,9 @@ private:
 
  Mantid::VATES::DimensionPresenter* m_pDimensionPresenter;
 
+ /// Helper method to set names in all places required.
+ void setDimensionName(const std::string& name);
+
 private slots:
 
   /// Handles dimension change events.
@@ -86,6 +89,9 @@ private slots:
 
 public:
 
+  //---------------------------------------------------------
+  // DimensionView implementations
+  //---------------------------------------------------------
   virtual void showAsNotIntegrated(Mantid::Geometry::VecIMDDimension_sptr nonIntegratedDims);
   
   virtual void showAsIntegrated();
@@ -105,7 +111,9 @@ public:
   virtual unsigned int getSelectedIndex() const;
 
   virtual bool getIsIntegrated() const;
-
+  //---------------------------------------------------------
+  // End DimensionView implementations
+  //---------------------------------------------------------
 
 };
 
