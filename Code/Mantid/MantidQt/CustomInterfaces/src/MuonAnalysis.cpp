@@ -971,9 +971,10 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
 
   m_updating = true;
 
-  std::string mainFieldDirection;
-  double timeZero;
-  double firstGoodData;
+  std::string mainFieldDirection("");
+  double timeZero(0.0);
+  double firstGoodData(0.0);
+  std::vector<double> deadTimes;
 
   for (int i=0; i<files.size(); ++i)
   {
@@ -1006,32 +1007,35 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
       return;
     }
 
-    QString pyString = "from mantidsimple import *\n"
-        "import sys\n"
-        "try:\n"
-        "  alg = LoadMuonNexus(r'" + filename + "','" + m_workspace_name.c_str();
-    if (i > 0)  // add to end of m_workspace_name so that it will load all files seperately.
+    // Setup Load Nexus Algorithm
+    Mantid::API::IAlgorithm_sptr loadMuonAlg = Mantid::API::AlgorithmManager::Instance().create("LoadMuonNexus");
+    //Mantid::API::Workspace_sptr inputWs = boost::dynamic_pointer_cast<Mantid::API::Workspace>(Mantid::API::AnalysisDataService::Instance().retrieve(filename.toStdString() ) );
+    loadMuonAlg->setPropertyValue("Filename", filename.toStdString() );
+    if (i > 0)
     {
-      QString tempRangeName;
-      tempRangeName.setNum(i);
-      pyString += tempRangeName;
+      QString tempRangeNum;
+      tempRangeNum.setNum(i);
+      loadMuonAlg->setPropertyValue("OutputWorkspace", m_workspace_name + tempRangeNum.toStdString() );
     }
-    pyString += "', AutoGroup='0')\n"
-        "  print alg.getPropertyValue('MainFieldDirection'), alg.getPropertyValue('TimeZero'), alg.getPropertyValue('FirstGoodData')\n"
-        "except SystemExit, message:\n"
-        "  print ''";
-    QString outputParams = runPythonCode( pyString ).trimmed();
-
-    if ( outputParams.isEmpty() )
+    else
+    {
+      loadMuonAlg->setPropertyValue("OutputWorkspace", m_workspace_name);
+    }
+    loadMuonAlg->setProperty("AutoGroup", false);
+    if (loadMuonAlg->execute() )
+    {
+      mainFieldDirection = loadMuonAlg->getProperty("MainFieldDirection");
+      timeZero = loadMuonAlg->getProperty("TimeZero");
+      firstGoodData = loadMuonAlg->getProperty("FirstGoodData");
+      if (m_uiForm.instrSelector->currentText().toUpper().toStdString() != "ARGUS")
+        deadTimes = loadMuonAlg->getProperty("DeadTimes");
+    }
+    else
     {
       QMessageBox::warning(this,"Mantid - MuonAnalysis", "Problem when executing LoadMuonNexus algorithm.");
       deleteRangedWorkspaces();
       return;
     }
-
-    // get hold of output parameters (presume same for all)
-    std::stringstream strParam(outputParams.toStdString());
-    strParam >> mainFieldDirection >> timeZero >> firstGoodData;
   }
 
   if (m_previousFilenames.size() > 1)
@@ -1066,7 +1070,6 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
   // message to user
   if ( !isGroupingSet() )
     setDummyGrouping(static_cast<int>(matrix_workspace->getInstrument()->getDetectorIDs().size()));
-
 
   if ( !applyGroupingToWS(m_workspace_name, m_workspace_name+"Grouped") )
     return;
@@ -2206,13 +2209,15 @@ void MuonAnalysis::setGroupingFromNexus(const QString& nexusFile)
 
   std::string groupedWS = m_workspace_name+"Grouped";
 
-  // Load nexus file with grouping
-  QString pyString = "LoadMuonNexus(r'";
-  pyString.append(nexusFile);
-  pyString.append("','");
-  pyString.append( groupedWS.c_str());
-  pyString.append("', AutoGroup=\"1\");");
-  runPythonCode( pyString ).trimmed();
+  // Setup Load Nexus Algorithm
+  Mantid::API::IAlgorithm_sptr loadMuonAlg = Mantid::API::AlgorithmManager::Instance().create("LoadMuonNexus");
+  loadMuonAlg->setPropertyValue("Filename", nexusFile.toStdString());
+  loadMuonAlg->setPropertyValue("OutputWorkspace", groupedWS);
+  loadMuonAlg->setProperty("AutoGroup", true);
+  if (! (loadMuonAlg->execute() ) )
+  {
+    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Problem when executing LoadMuonNexus algorithm.");
+  }
 
   // get hold of a matrix-workspace. If period data assume each period has 
   // the same grouping

@@ -52,6 +52,7 @@ The subalgorithms used by LoadMuonNexus are:
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include <Poco/Path.h>
@@ -130,6 +131,9 @@ namespace Mantid
 
       declareProperty("TimeZero", 0.0, "Time zero in units of micro-seconds (default to 0.0)", Direction::Output);
       declareProperty("FirstGoodData", 0.0, "First good data in units of micro-seconds (default to 0.0)", Direction::Output);
+      
+      std::vector<double> defaultDeadTimes;
+      declareProperty("DeadTimes", defaultDeadTimes, "The name of the vector in which to store the list of deadtimes for each spectrum", Direction::Output);
     }
 
     /** Executes the algorithm. Reading in the file and creating and populating
@@ -172,6 +176,23 @@ namespace Mantid
           double bin_size = static_cast<double>(root.getInt("run/histogram_data_1/resolution"))/1000000.0;
           setProperty("FirstGoodData", bin*bin_size);
         }
+      }
+      catch (::NeXus::Exception&)
+      {}
+
+      try
+      { 
+        std::vector<double>defaultDeadTimes;
+        NXFloat deadTimes = root.openNXFloat("run/instrument/detector/deadtimes");
+        deadTimes.load();
+        std::cout << "\n\n" << deadTimes.size();
+
+        int length = deadTimes.dim0();
+        for (int i = 0; i < length; i++)
+        {
+          defaultDeadTimes.push_back(*(deadTimes() + i) );
+        }
+        setProperty("DeadTimes", defaultDeadTimes);
       }
       catch (::NeXus::Exception&)
       {}

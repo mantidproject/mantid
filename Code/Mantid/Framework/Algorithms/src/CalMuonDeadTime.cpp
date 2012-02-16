@@ -39,7 +39,7 @@ void CalMuonDeadTime::init()
      Direction::Input); 
 
   declareProperty(new API::WorkspaceProperty<API::Workspace>("DataFitted","",Direction::Output),
-    "The data which the deadtime equation is fitted to" ); 
+    "The data which the deadtime equation is fitted to" );
 
 }
 

@@ -187,7 +187,9 @@ public:
     TS_ASSERT_DELTA( timeZero, 0.55,0.001);
     double firstgood = nxL.getProperty("FirstGoodData");
     TS_ASSERT_DELTA( firstgood, 0.656,0.001);
-
+    std::vector<double> deadTimes = nxL.getProperty("DeadTimes");
+    TS_ASSERT_DELTA( deadTimes[0], 0.006,0.001);
+    TS_ASSERT_DELTA( deadTimes[deadTimes.size()-1], 0.011,0.001);
   }
 
   void testExec2()
