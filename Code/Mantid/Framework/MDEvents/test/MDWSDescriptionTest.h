@@ -22,19 +22,19 @@ public:
       V3D dir1(1,0,0);
       std::string name;
 
-      TS_ASSERT_THROWS_NOTHING(name=makeAxisName(dir1,descr.defailt_qNames));
+      TS_ASSERT_THROWS_NOTHING(name=makeAxisName(dir1,descr.defailtQNames));
       TS_ASSERT_EQUALS("[Qh,0,0]",name);
 
-      TS_ASSERT_THROWS_NOTHING(name=makeAxisName(V3D(-1,0.99,-1.001),descr.defailt_qNames));
+      TS_ASSERT_THROWS_NOTHING(name=makeAxisName(V3D(-1,0.99,-1.001),descr.defailtQNames));
       TS_ASSERT_EQUALS("[-Qh,0.99Qk,-Ql]",name);
 
-      TS_ASSERT_THROWS_NOTHING(name=makeAxisName(V3D(-1,0.9999,-1.001),descr.defailt_qNames));
+      TS_ASSERT_THROWS_NOTHING(name=makeAxisName(V3D(-1,0.9999,-1.001),descr.defailtQNames));
       TS_ASSERT_EQUALS("[-Qh,Qk,-Ql]",name);
 
-      TS_ASSERT_THROWS_NOTHING(name=makeAxisName(V3D(-1,0.999,-1.01),descr.defailt_qNames));
+      TS_ASSERT_THROWS_NOTHING(name=makeAxisName(V3D(-1,0.999,-1.01),descr.defailtQNames));
       TS_ASSERT_EQUALS("[-Qh,0.999Qk,-1.01Ql]",name);
 
-      TS_ASSERT_THROWS_NOTHING(name=makeAxisName(V3D(2.01,0.9,-1.01),descr.defailt_qNames));
+      TS_ASSERT_THROWS_NOTHING(name=makeAxisName(V3D(2.01,0.9,-1.01),descr.defailtQNames));
       TS_ASSERT_EQUALS("[2.01Qh,0.9Qk,-1.01Ql]",name);
 
   }
