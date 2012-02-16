@@ -371,6 +371,7 @@ class RefLReduction(PythonAlgorithm):
                                                   geo_correction=False)
 
             ws_data_bck = "__NormBckWks"
+            ws_norm_rebinned = "__NormRebinnedWks"
             if subtract_norm_bck:
                 Transpose(InputWorkspace=ws_integrated_data,
                           OutputWorkspace=ws_transposed)
@@ -422,7 +423,6 @@ class RefLReduction(PythonAlgorithm):
                 mtd.deleteWorkspace(ws_integrated_data)
                 mtd.deleteWorkspace(ws_transposed)
 
-                ws_norm_rebinned = "__NormRebinnedWks"
                 RebinToWorkspace(WorkspaceToRebin=ws_norm, 
                                  WorkspaceToMatch=ws_data,
                                  OutputWorkspace=ws_norm_rebinned)
