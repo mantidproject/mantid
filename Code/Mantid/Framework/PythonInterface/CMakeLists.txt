@@ -110,7 +110,6 @@ set ( PYTEST_HELPERS test/python/testhelpers.py )
 
 # python unit tests
 if (PYUNITTEST_FOUND)
-  if ( UNIX )
   pyunittest_add_test ( VanillaPythonInterfaceTest.py ${TEST_PY_FILES} )
   # Helpers
   set ( VANILLA_TEST_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/VanillaPythonInterfaceTest )
@@ -131,7 +130,6 @@ if (PYUNITTEST_FOUND)
   add_dependencies ( FrameworkTests VanillaPythonInterfaceTest.py )
   # Add to the 'UnitTests' group in VS
   set_property ( TARGET VanillaPythonInterfaceTest.py PROPERTY FOLDER "UnitTests" )
-  endif()
 endif ()
 
 ###########################################################################

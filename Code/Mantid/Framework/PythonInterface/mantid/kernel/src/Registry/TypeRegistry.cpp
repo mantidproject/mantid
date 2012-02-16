@@ -2,12 +2,12 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
-//#include "MantidPythonInterface/kernel/PropertyWithValue.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterSingleValueHandler.h"
 #include "MantidPythonInterface/kernel/Registry/SequenceTypeHandler.h"
 
 #include "MantidKernel/Property.h" // provides getUnmangledTypeName
 #include <map>
+#include <boost/python/type_id.hpp>
 
 namespace Mantid
 {
@@ -18,7 +18,7 @@ namespace Mantid
       namespace // <anonymous>
       {
         /// Typedef the map of type_info -> handler objects
-        typedef std::map<const std::type_info*, PropertyValueHandler*> TypeIDMap;
+        typedef std::map<const boost::python::type_info, PropertyValueHandler*> TypeIDMap;
 
         /**
          * Returns a reference to the static type map
@@ -43,6 +43,7 @@ namespace Mantid
         REGISTER_SINGLEVALUE_HANDLER(uint32_t);
         REGISTER_SINGLEVALUE_HANDLER(int64_t);
         REGISTER_SINGLEVALUE_HANDLER(uint64_t);
+        REGISTER_SINGLEVALUE_HANDLER(unsigned int);
         REGISTER_SINGLEVALUE_HANDLER(bool);
         REGISTER_SINGLEVALUE_HANDLER(double);
         REGISTER_SINGLEVALUE_HANDLER(std::string);
@@ -72,7 +73,7 @@ namespace Mantid
       void registerHandler(const std::type_info& typeObject, PropertyValueHandler* handler)
       {
         TypeIDMap & typeHandlers = typeRegistry();
-        typeHandlers.insert(std::make_pair(&typeObject, handler));
+        typeHandlers.insert(std::make_pair(boost::python::type_info(typeObject), handler));
       }
 
       /**
@@ -83,7 +84,7 @@ namespace Mantid
       PropertyValueHandler *getHandler(const std::type_info& typeObject)
       {
         TypeIDMap & typeHandlers = typeRegistry();
-        TypeIDMap::const_iterator itr = typeHandlers.find(&typeObject);
+        TypeIDMap::const_iterator itr = typeHandlers.find(boost::python::type_info(typeObject));
         if( itr == typeHandlers.end() )
         {
           throw std::invalid_argument("No handler registered for property type '" + Kernel::getUnmangledTypeName(typeObject) + "'");
