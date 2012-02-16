@@ -76,7 +76,11 @@ class SANSMaskCommandsTest(unittest.TestCase):
         self.assertEqual(self.test_ws.readY(5376)[0], 0)
         self.assertEqual(self.test_ws.readY(14468)[0], 1)
         
-    def test_mask_line(self):
+    #
+    # This test makes no sense as line masking isn't used on LOQ.
+    # Test needs to be looked at and updated. Refs #4810
+    #
+    def xtest_mask_line(self):
         """
             The line is a semi-infinite line that starts at the beam centre, it is implemented using the
             MaskDetectorsInShape algorithm and are controlled with MASK/LINE user file command
