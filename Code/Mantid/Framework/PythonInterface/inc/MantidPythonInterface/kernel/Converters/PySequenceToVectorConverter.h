@@ -72,7 +72,7 @@ namespace Mantid
      * type is defined by the template type
      */
     template <typename DestElementType>
-    struct PySequenceToVectorConverter
+    struct DLLExport PySequenceToVectorConverter
     {
       PySequenceToVectorConverter(const boost::python::object & value)
         : m_obj(value.ptr())

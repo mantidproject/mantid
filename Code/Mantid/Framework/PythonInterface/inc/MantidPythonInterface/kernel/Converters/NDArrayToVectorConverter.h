@@ -35,7 +35,7 @@ namespace Mantid
      * type is defined by the template type
      */
     template <typename DestElementType>
-    struct NDArrayToVectorConverter
+    struct DLLExport NDArrayToVectorConverter
     {
       /// Constructor
       NDArrayToVectorConverter(const boost::python::object & value);

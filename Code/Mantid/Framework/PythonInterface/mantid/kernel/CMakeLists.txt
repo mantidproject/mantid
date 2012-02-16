@@ -32,7 +32,6 @@ set ( SRC_FILES
   src/Registry/UpcastRegistry.cpp
   src/PyEnvironment.cpp
   src/NumpyConverters.cpp
-  src/VectorDelegate.cpp
   src/WrapperHelpers.cpp
 )
 
@@ -51,7 +50,6 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/PropertyWithValue.h
   ${HEADER_DIR}/kernel/PyEnvironment.h
   ${HEADER_DIR}/kernel/StlExportDefinitions.h
-  ${HEADER_DIR}/kernel/VectorDelegate.h
   ${HEADER_DIR}/kernel/NumpyConverters.h
   ${HEADER_DIR}/kernel/WrapperHelpers.h
 )
