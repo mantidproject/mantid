@@ -21,6 +21,7 @@
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+#include "MantidKernel/System.h"
 #include <boost/python/object.hpp>
 #include <boost/python/extract.hpp>
 #include <vector>
