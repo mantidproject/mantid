@@ -117,7 +117,7 @@ class RefMReduction(PythonAlgorithm):
         
         # Perform normalization according to wavelength distribution of
         # the direct beam
-        if self.getProperty("PerformNormalization"):
+        if False and self.getProperty("PerformNormalization"):
             ws_wl_profile = self._process_normalization()
             
             RebinToWorkspace(WorkspaceToRebin=ws_wl_profile, 
@@ -191,6 +191,21 @@ class RefMReduction(PythonAlgorithm):
         wl_max = self.getProperty("WavelengthMax")
         wl_step = self.getProperty("WavelengthStep")
         Rebin(InputWorkspace=ws_name, OutputWorkspace=ws_name, Params=[wl_min, wl_step, wl_max], PreserveEvents=False)
+
+        # Perform normalization according to wavelength distribution of
+        # the direct beam
+        if self.getProperty("PerformNormalization"):
+            ws_wl_profile = self._process_normalization()
+            RebinToWorkspace(WorkspaceToRebin=ws_wl_profile, 
+                             WorkspaceToMatch=ws_name,
+                             OutputWorkspace=ws_wl_profile)
+            Divide(LHSWorkspace=ws_name,
+                   RHSWorkspace=ws_wl_profile,
+                   OutputWorkspace=ws_name)
+            ReplaceSpecialValues(InputWorkspace=ws_name,
+                                 OutputWorkspace=ws_name,
+                                 NaNValue=0.0, NaNError=0.0,
+                                 InfinityValue=0.0, InfinityError=0.0)
 
         # Get the integration range in the low-res direction
         low_res_range = self.getProperty("LowResDataAxisPixelRange")
@@ -300,7 +315,9 @@ class RefMReduction(PythonAlgorithm):
                 Scale(InputWorkspace=bck_ws, OutputWorkspace=bck_ws,
                       Factor=scaling_factor, Operation="Multiply")
                 Minus(LHSWorkspace=ws_wl_profile_roi, RHSWorkspace=bck_ws,
-                      OutputWorkspace=ws_wl_profile_roi)       
+                      OutputWorkspace=ws_wl_profile_roi)  
+            Scale(InputWorkspace=ws_wl_profile_roi, OutputWorkspace=ws_wl_profile_roi,
+                  Factor=1.0/(peak_range[1]-peak_range[0]), Operation="Multiply")     
         
         return ws_wl_profile_roi
         

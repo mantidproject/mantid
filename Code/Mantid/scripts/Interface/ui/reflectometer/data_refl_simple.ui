@@ -297,7 +297,7 @@ Drag items to change the reduction order.</string>
                      </widget>
                     </item>
                     <item>
-                     <widget class="QLabel" name="data_peak_from_pixel_missing">
+                     <widget class="QLabel" name="data_peak_from_pixel_estimate">
                       <property name="sizePolicy">
                        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                         <horstretch>0</horstretch>
@@ -306,13 +306,13 @@ Drag items to change the reduction order.</string>
                       </property>
                       <property name="minimumSize">
                        <size>
-                        <width>10</width>
+                        <width>40</width>
                         <height>0</height>
                        </size>
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>10</width>
+                        <width>40</width>
                         <height>16777215</height>
                        </size>
                       </property>
@@ -734,23 +734,10 @@ Drag items to change the reduction order.</string>
                       <property name="text">
                        <string/>
                       </property>
+                      <property name="alignment">
+                       <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
+                      </property>
                      </widget>
-                    </item>
-                    <item>
-                     <spacer name="horizontalSpacer_5">
-                      <property name="orientation">
-                       <enum>Qt::Horizontal</enum>
-                      </property>
-                      <property name="sizeType">
-                       <enum>QSizePolicy::Fixed</enum>
-                      </property>
-                      <property name="sizeHint" stdset="0">
-                       <size>
-                        <width>30</width>
-                        <height>20</height>
-                       </size>
-                      </property>
-                     </spacer>
                     </item>
                     <item>
                      <widget class="QLabel" name="data_peak_to_pixel_label">
@@ -794,7 +781,19 @@ Drag items to change the reduction order.</string>
                      </widget>
                     </item>
                     <item>
-                     <widget class="QLabel" name="data_peak_to_pixel_missing">
+                     <widget class="QLabel" name="data_peak_to_pixel_estimate">
+                      <property name="minimumSize">
+                       <size>
+                        <width>40</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>40</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
                       <property name="palette">
                        <palette>
                         <active>
@@ -834,6 +833,9 @@ Drag items to change the reduction order.</string>
                       </property>
                       <property name="text">
                        <string/>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
                       </property>
                      </widget>
                     </item>
@@ -964,7 +966,7 @@ Drag items to change the reduction order.</string>
                      </widget>
                     </item>
                     <item>
-                     <widget class="QLabel" name="label_5">
+                     <widget class="QLabel" name="data_background_from_pixel1_missing">
                       <property name="sizePolicy">
                        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                         <horstretch>0</horstretch>
@@ -973,13 +975,13 @@ Drag items to change the reduction order.</string>
                       </property>
                       <property name="minimumSize">
                        <size>
-                        <width>10</width>
+                        <width>40</width>
                         <height>0</height>
                        </size>
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>10</width>
+                        <width>40</width>
                         <height>16777215</height>
                        </size>
                       </property>
@@ -987,22 +989,6 @@ Drag items to change the reduction order.</string>
                        <string/>
                       </property>
                      </widget>
-                    </item>
-                    <item>
-                     <spacer name="horizontalSpacer_14">
-                      <property name="orientation">
-                       <enum>Qt::Horizontal</enum>
-                      </property>
-                      <property name="sizeType">
-                       <enum>QSizePolicy::Fixed</enum>
-                      </property>
-                      <property name="sizeHint" stdset="0">
-                       <size>
-                        <width>30</width>
-                        <height>20</height>
-                       </size>
-                      </property>
-                     </spacer>
                     </item>
                     <item>
                      <widget class="QLabel" name="data_background_to_pixel1_label">
@@ -1160,7 +1146,7 @@ Drag items to change the reduction order.</string>
                      </widget>
                     </item>
                     <item>
-                     <widget class="QLabel" name="label_8">
+                     <widget class="QLabel" name="x_min_estimate">
                       <property name="sizePolicy">
                        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                         <horstretch>0</horstretch>
@@ -1169,36 +1155,23 @@ Drag items to change the reduction order.</string>
                       </property>
                       <property name="minimumSize">
                        <size>
-                        <width>10</width>
+                        <width>40</width>
                         <height>0</height>
                        </size>
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>10</width>
+                        <width>40</width>
                         <height>16777215</height>
                        </size>
                       </property>
                       <property name="text">
                        <string/>
                       </property>
+                      <property name="alignment">
+                       <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
+                      </property>
                      </widget>
-                    </item>
-                    <item>
-                     <spacer name="horizontalSpacer_4">
-                      <property name="orientation">
-                       <enum>Qt::Horizontal</enum>
-                      </property>
-                      <property name="sizeType">
-                       <enum>QSizePolicy::Fixed</enum>
-                      </property>
-                      <property name="sizeHint" stdset="0">
-                       <size>
-                        <width>30</width>
-                        <height>20</height>
-                       </size>
-                      </property>
-                     </spacer>
                     </item>
                     <item>
                      <widget class="QLabel" name="data_low_res_to_label">
@@ -1238,6 +1211,28 @@ Drag items to change the reduction order.</string>
                         <width>50</width>
                         <height>16777215</height>
                        </size>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="x_max_estimate">
+                      <property name="minimumSize">
+                       <size>
+                        <width>40</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>40</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
+                      <property name="text">
+                       <string/>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
                       </property>
                      </widget>
                     </item>
@@ -1306,15 +1301,37 @@ Drag items to change the reduction order.</string>
                      <widget class="QLineEdit" name="center_pix_edit">
                       <property name="minimumSize">
                        <size>
-                        <width>80</width>
+                        <width>50</width>
                         <height>0</height>
                        </size>
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>80</width>
+                        <width>50</width>
                         <height>16777215</height>
                        </size>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="ref_pix_estimate">
+                      <property name="minimumSize">
+                       <size>
+                        <width>40</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>40</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
+                      <property name="text">
+                       <string/>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
                       </property>
                      </widget>
                     </item>
@@ -1525,7 +1542,7 @@ Drag items to change the reduction order.</string>
                      </widget>
                     </item>
                     <item>
-                     <widget class="QLabel" name="norm_peak_from_pixel_missing">
+                     <widget class="QLabel" name="norm_peak_from_pixel_estimate">
                       <property name="sizePolicy">
                        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                         <horstretch>0</horstretch>
@@ -1534,13 +1551,13 @@ Drag items to change the reduction order.</string>
                       </property>
                       <property name="minimumSize">
                        <size>
-                        <width>10</width>
+                        <width>40</width>
                         <height>0</height>
                        </size>
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>10</width>
+                        <width>40</width>
                         <height>16777215</height>
                        </size>
                       </property>
@@ -1962,23 +1979,10 @@ Drag items to change the reduction order.</string>
                       <property name="text">
                        <string/>
                       </property>
+                      <property name="alignment">
+                       <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
+                      </property>
                      </widget>
-                    </item>
-                    <item>
-                     <spacer name="horizontalSpacer_7">
-                      <property name="orientation">
-                       <enum>Qt::Horizontal</enum>
-                      </property>
-                      <property name="sizeType">
-                       <enum>QSizePolicy::Fixed</enum>
-                      </property>
-                      <property name="sizeHint" stdset="0">
-                       <size>
-                        <width>30</width>
-                        <height>20</height>
-                       </size>
-                      </property>
-                     </spacer>
                     </item>
                     <item>
                      <widget class="QLabel" name="norm_peak_selection_to_label">
@@ -2022,7 +2026,19 @@ Drag items to change the reduction order.</string>
                      </widget>
                     </item>
                     <item>
-                     <widget class="QLabel" name="norm_peak_to_pixel_missing">
+                     <widget class="QLabel" name="norm_peak_to_pixel_estimate">
+                      <property name="minimumSize">
+                       <size>
+                        <width>40</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>40</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
                       <property name="palette">
                        <palette>
                         <active>
@@ -2062,6 +2078,9 @@ Drag items to change the reduction order.</string>
                       </property>
                       <property name="text">
                        <string/>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
                       </property>
                      </widget>
                     </item>
@@ -2198,13 +2217,13 @@ Drag items to change the reduction order.</string>
                       </property>
                       <property name="minimumSize">
                        <size>
-                        <width>10</width>
+                        <width>40</width>
                         <height>0</height>
                        </size>
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>10</width>
+                        <width>40</width>
                         <height>16777215</height>
                        </size>
                       </property>
@@ -2249,22 +2268,6 @@ Drag items to change the reduction order.</string>
                        <string/>
                       </property>
                      </widget>
-                    </item>
-                    <item>
-                     <spacer name="horizontalSpacer_15">
-                      <property name="orientation">
-                       <enum>Qt::Horizontal</enum>
-                      </property>
-                      <property name="sizeType">
-                       <enum>QSizePolicy::Fixed</enum>
-                      </property>
-                      <property name="sizeHint" stdset="0">
-                       <size>
-                        <width>30</width>
-                        <height>20</height>
-                       </size>
-                      </property>
-                     </spacer>
                     </item>
                     <item>
                      <widget class="QLabel" name="norm_background_to_pixel1_label">
@@ -2422,39 +2425,26 @@ Drag items to change the reduction order.</string>
                      </widget>
                     </item>
                     <item>
-                     <widget class="QLabel" name="label_21">
+                     <widget class="QLabel" name="norm_xmin_estimate">
                       <property name="minimumSize">
                        <size>
-                        <width>10</width>
+                        <width>40</width>
                         <height>0</height>
                        </size>
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>10</width>
+                        <width>40</width>
                         <height>16777215</height>
                        </size>
                       </property>
                       <property name="text">
                        <string/>
                       </property>
+                      <property name="alignment">
+                       <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
+                      </property>
                      </widget>
-                    </item>
-                    <item>
-                     <spacer name="horizontalSpacer_17">
-                      <property name="orientation">
-                       <enum>Qt::Horizontal</enum>
-                      </property>
-                      <property name="sizeType">
-                       <enum>QSizePolicy::Fixed</enum>
-                      </property>
-                      <property name="sizeHint" stdset="0">
-                       <size>
-                        <width>30</width>
-                        <height>20</height>
-                       </size>
-                      </property>
-                     </spacer>
                     </item>
                     <item>
                      <widget class="QLabel" name="norm_low_res_to_label">
@@ -2488,6 +2478,28 @@ Drag items to change the reduction order.</string>
                         <width>50</width>
                         <height>16777215</height>
                        </size>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="norm_xmax_estimate">
+                      <property name="minimumSize">
+                       <size>
+                        <width>40</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>40</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
+                      <property name="text">
+                       <string/>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
                       </property>
                      </widget>
                     </item>

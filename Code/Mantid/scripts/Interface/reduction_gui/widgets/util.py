@@ -17,6 +17,14 @@ CSS_EDITED_RADIO = """QRadioButton {
                 color: rgb(0,153,153);
                 background-color: transparent;
             }"""
+            
+CSS_TINY = """QLabel {
+                color: gray;
+                font:10px arial,sans-serif;
+                vertical-align:bottom;
+                padding:1px;
+                background-color: transparent;
+            }"""
 
 CSS_DEFAULT = """QLineEdit{}"""
 
@@ -64,5 +72,14 @@ def set_edited(control, is_edited):
     else:
         new_style = CSS_DEFAULT.replace("QLineEdit", class_name)
     control.setStyleSheet(new_style)
+    
+def set_tiny(control, is_tiny=True):
+    class_name = control.__class__.__name__
+    if is_tiny:
+        new_style = CSS_TINY.replace("QLabel", class_name)
+    else:
+        new_style = CSS_DEFAULT.replace("QLineEdit", class_name)
+    control.setStyleSheet(new_style)
+    
         
     

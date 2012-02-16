@@ -478,10 +478,16 @@ class DataReflWidget(BaseWidget):
             For REFM, this is X
             For REFL, this is Y
         """
-        self._integrated_plot(True,
-                              self._summary.data_run_number_edit,
-                              self._summary.data_peak_from_pixel,
-                              self._summary.data_peak_to_pixel)
+        min, max = self._integrated_plot(True,
+                                         self._summary.data_run_number_edit,
+                                         self._summary.data_peak_from_pixel,
+                                         self._summary.data_peak_to_pixel)
+        self._summary.data_peak_from_pixel_estimate.setText(str(int(math.ceil(min))))
+        self._summary.data_peak_to_pixel_estimate.setText(str(int(math.ceil(max))))
+        self._summary.ref_pix_estimate.setText("%4.1f" % ((max+min)/2.0))
+        util.set_tiny(self._summary.data_peak_from_pixel_estimate)
+        util.set_tiny(self._summary.data_peak_to_pixel_estimate)
+        util.set_tiny(self._summary.ref_pix_estimate)
                 
     def _plot_count_vs_y_bck(self):
         """
@@ -501,16 +507,24 @@ class DataReflWidget(BaseWidget):
             For REFM, this is Y
             For REFL, this is X
         """
-        self._integrated_plot(False,
-                              self._summary.data_run_number_edit,
-                              self._summary.x_min_edit,
-                              self._summary.x_max_edit)
+        min, max = self._integrated_plot(False,
+                                         self._summary.data_run_number_edit,
+                                         self._summary.x_min_edit,
+                                         self._summary.x_max_edit)
+        self._summary.x_min_estimate.setText(str(int(math.ceil(min))))
+        self._summary.x_max_estimate.setText(str(int(math.ceil(max))))
+        util.set_tiny(self._summary.x_min_estimate)
+        util.set_tiny(self._summary.x_max_estimate)        
     
     def _norm_count_vs_y(self):
-        self._integrated_plot(True, 
-                              self._summary.norm_run_number_edit,
-                              self._summary.norm_peak_from_pixel,
-                              self._summary.norm_peak_to_pixel)
+        min, max = self._integrated_plot(True, 
+                                         self._summary.norm_run_number_edit,
+                                         self._summary.norm_peak_from_pixel,
+                                         self._summary.norm_peak_to_pixel)
+        self._summary.norm_peak_from_pixel_estimate.setText(str(int(math.ceil(min))))
+        self._summary.norm_peak_to_pixel_estimate.setText(str(int(math.ceil(max))))
+        util.set_tiny(self._summary.norm_peak_from_pixel_estimate)
+        util.set_tiny(self._summary.norm_peak_to_pixel_estimate)
 
     def _norm_count_vs_y_bck(self):
         self._integrated_plot(True, 
@@ -519,10 +533,15 @@ class DataReflWidget(BaseWidget):
                               self._summary.norm_background_to_pixel1)
 
     def _norm_count_vs_x(self):
-        self._integrated_plot(False,
-                              self._summary.norm_run_number_edit,                              
-                              self._summary.norm_x_min_edit,
-                              self._summary.norm_x_max_edit)
+        min, max = self._integrated_plot(False,
+                                         self._summary.norm_run_number_edit,                              
+                                         self._summary.norm_x_min_edit,
+                                         self._summary.norm_x_max_edit)
+        self._summary.norm_xmin_estimate.setText(str(int(math.ceil(min))))
+        self._summary.norm_xmax_estimate.setText(str(int(math.ceil(max))))
+        util.set_tiny(self._summary.norm_xmin_estimate)
+        util.set_tiny(self._summary.norm_xmax_estimate)
+        
 
     def _integrated_plot(self, is_high_res, file_ctrl, min_ctrl, max_ctrl):
         """
@@ -560,10 +579,13 @@ class DataReflWidget(BaseWidget):
             if self.short_name == "REFM":
                 is_pixel_y = not is_pixel_y
                 
-            data_manipulation.counts_vs_pixel_distribution(f[0], is_pixel_y=is_pixel_y,
-                                                           callback=call_back,
-                                                           range_min=range_min,
-                                                           range_max=range_max)
+            min, max = data_manipulation.counts_vs_pixel_distribution(f[0], is_pixel_y=is_pixel_y,
+                                                                      callback=call_back,
+                                                                      range_min=range_min,
+                                                                      range_max=range_max,
+                                                                      high_res=is_high_res,
+                                                                      instrument=self.short_name)
+            return min, max
         
     def _plot_tof(self):
         if not IS_IN_MANTIDPLOT:
