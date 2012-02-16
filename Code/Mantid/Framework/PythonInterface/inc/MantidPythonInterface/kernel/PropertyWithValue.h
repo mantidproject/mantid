@@ -24,7 +24,7 @@
 */
 
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidPythonInterface/kernel/upcast_returned_value.h"
+#include "MantidPythonInterface/kernel/Policies/upcast_returned_value.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/bases.hpp>

@@ -2,7 +2,7 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Registry/UpcastRegistry.h"
-#include "MantidPythonInterface/kernel/TypeRegistry.h"
+#include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
 #include <boost/python/extract.hpp>
 #include <map>
 #include <stdexcept>

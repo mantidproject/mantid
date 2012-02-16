@@ -1,7 +1,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Column.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidPythonInterface/kernel/RegisterSingleValueHandler.h"
+#include "MantidPythonInterface/kernel/Registry/RegisterSingleValueHandler.h"
 #include "MantidPythonInterface/kernel/PropertyWithValue.h"
 
 #include <boost/python/class.hpp>

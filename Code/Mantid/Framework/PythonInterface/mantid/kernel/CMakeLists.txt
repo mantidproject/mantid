@@ -23,28 +23,33 @@ set ( EXPORT_FILES
 )  
 
 set ( SRC_FILES
-  src/PyEnvironment.cpp
-  src/SequenceTypeHandler.cpp
-  src/NumpyConverters.cpp
   src/Converters/NDArrayToVectorConverter.cpp
-  src/TypeRegistry.cpp
+  src/Registry/SequenceTypeHandler.cpp
+  src/Registry/TypeRegistry.cpp
   src/Registry/UpcastRegistry.cpp
+  src/PyEnvironment.cpp
+  src/NumpyConverters.cpp
   src/VectorDelegate.cpp
   src/WrapperHelpers.cpp
 )
 
 set ( INC_FILES 
-  ${HEADER_DIR}/kernel/NumpyConverters.h
+  ${HEADER_DIR}/kernel/Converters/NDArrayToVectorConverter.h
+  ${HEADER_DIR}/kernel/Converters/NDArrayTypeIndex.h
+  ${HEADER_DIR}/kernel/Converters/PySequenceToVectorConverter.h
+  ${HEADER_DIR}/kernel/Policies/upcast_returned_value.h
+  ${HEADER_DIR}/kernel/Registry/PropertyValueHandler.h
+  ${HEADER_DIR}/kernel/Registry/RegisterSingleValueHandler.h
+  ${HEADER_DIR}/kernel/Registry/SequenceTypeHandler.h
+  ${HEADER_DIR}/kernel/Registry/SingleValueTypeHandler.h
+  ${HEADER_DIR}/kernel/Registry/TypeRegistry.h  
+  ${HEADER_DIR}/kernel/Registry/UpcastRegistry.h
   ${HEADER_DIR}/kernel/PythonObjectInstantiator.h
   ${HEADER_DIR}/kernel/PropertyWithValue.h
-  ${HEADER_DIR}/kernel/PropertyValueHandler.h
   ${HEADER_DIR}/kernel/PyEnvironment.h
-  ${HEADER_DIR}/kernel/SingleValueTypeHandler.h
   ${HEADER_DIR}/kernel/StlExportDefinitions.h
-  ${HEADER_DIR}/kernel/TypeRegistry.h
   ${HEADER_DIR}/kernel/VectorDelegate.h
-  ${HEADER_DIR}/kernel/upcast_returned_value.h
-  ${HEADER_DIR}/kernel/Registry/UpcastRegistry.h
+  ${HEADER_DIR}/kernel/NumpyConverters.h
   ${HEADER_DIR}/kernel/WrapperHelpers.h
 )
 

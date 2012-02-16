@@ -3,7 +3,7 @@
 #include "MantidAPI/WorkspaceOpOverloads.h"
 
 #include "MantidPythonInterface/kernel/PropertyWithValue.h"
-#include "MantidPythonInterface/kernel/RegisterSingleValueHandler.h"
+#include "MantidPythonInterface/kernel/Registry/RegisterSingleValueHandler.h"
 #include "MantidPythonInterface/api/WorkspaceToNumpy.h"
 
 #include <boost/python/class.hpp>

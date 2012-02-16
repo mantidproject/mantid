@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
-#include "MantidPythonInterface/kernel/SequenceTypeHandler.h"
+#include "MantidPythonInterface/kernel/Registry/SequenceTypeHandler.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVectorConverter.h"
 #include "MantidPythonInterface/kernel/Converters/NDArrayToVectorConverter.h"
 #include "MantidKernel/IPropertyManager.h"

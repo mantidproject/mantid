@@ -1,5 +1,5 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
-#include "MantidPythonInterface/kernel/RegisterSingleValueHandler.h"
+#include "MantidPythonInterface/kernel/Registry/RegisterSingleValueHandler.h"
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/copy_non_const_reference.hpp>

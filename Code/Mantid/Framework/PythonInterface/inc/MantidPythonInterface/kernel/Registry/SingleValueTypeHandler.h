@@ -19,7 +19,7 @@
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-#include "MantidPythonInterface/kernel/PropertyValueHandler.h"
+#include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
 #include "MantidKernel/IPropertyManager.h"
 
 #if defined(__GNUC__) && !(defined(__INTEL_COMPILER))

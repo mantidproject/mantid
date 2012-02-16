@@ -1,10 +1,10 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
-#include "MantidPythonInterface/kernel/TypeRegistry.h"
-#include "MantidPythonInterface/kernel/PropertyWithValue.h"
-#include "MantidPythonInterface/kernel/RegisterSingleValueHandler.h"
-#include "MantidPythonInterface/kernel/SequenceTypeHandler.h"
+#include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
+//#include "MantidPythonInterface/kernel/PropertyWithValue.h"
+#include "MantidPythonInterface/kernel/Registry/RegisterSingleValueHandler.h"
+#include "MantidPythonInterface/kernel/Registry/SequenceTypeHandler.h"
 
 #include "MantidKernel/Property.h" // provides getUnmangledTypeName
 #include <map>

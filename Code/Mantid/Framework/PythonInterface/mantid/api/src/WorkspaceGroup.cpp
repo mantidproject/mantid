@@ -1,6 +1,6 @@
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidPythonInterface/kernel/RegisterSingleValueHandler.h"
-#include "MantidPythonInterface/kernel/upcast_returned_value.h"
+#include "MantidPythonInterface/kernel/Registry/RegisterSingleValueHandler.h"
+#include "MantidPythonInterface/kernel/Policies/upcast_returned_value.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
