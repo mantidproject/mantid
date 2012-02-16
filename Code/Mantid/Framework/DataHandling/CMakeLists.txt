@@ -107,6 +107,7 @@ set ( SRC_FILES
 	src/SaveToSNSHistogramNexus.cpp
 	src/SaveVTK.cpp
 	src/SetScalingPSD.cpp
+	src/StartLiveData.cpp
 	src/UpdateInstrumentFromFile.cpp
 )
 
@@ -213,6 +214,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveToSNSHistogramNexus.h
 	inc/MantidDataHandling/SaveVTK.h
 	inc/MantidDataHandling/SetScalingPSD.h
+	inc/MantidDataHandling/StartLiveData.h
 	inc/MantidDataHandling/UpdateInstrumentFromFile.h
 	src/LoadRaw/byte_rel_comp.h
 	src/LoadRaw/isisraw.h
@@ -308,6 +310,7 @@ set ( TEST_FILES
 	test/SaveSPETest.h
 	test/SaveToSNSHistogramNexusTest.h
 	test/SetScalingPSDTest.h
+	test/StartLiveDataTest.h
 	test/UpdateInstrumentFromFileTest.h
 	test/XMLlogfileTest.h
 )
