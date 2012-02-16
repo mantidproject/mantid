@@ -107,7 +107,7 @@ namespace Crystal
     declareProperty("RCrystallite", 6.0, "Becker-Coppens Crystallite Radius (micron)");
     declareProperty("ScaleFactor", 1.0, "Multiply FSQ and sig(FSQ) by scaleFactor");
     declareProperty("DivBeam", 0.005, "Minimum beam divergence in radian");
-    declareProperty("BetaBeam", 0.5, "Wavelength dependence of beam divergence");
+    declareProperty("BetaBeam", 0.002, "Wavelength dependence of beam divergence");
 
   }
 
@@ -248,7 +248,8 @@ namespace Crystal
   {
         // divbeam is the default [minimum] beam divergence in radian.
         // Tomiyoshi, Yamada and Watanabe
-        double EgLaue = Eg/std::sqrt(std::pow(std::tan(twoth/2.0)/wl,2) + std::pow((1 + betaBeam*wl/std::tan(twoth/2))*Eg*divBeam,2));
+        UNUSED_ARG( wl); //Keep arguments consistent with tofExtinction.py
+        double EgLaue = 1.0/std::sqrt(std::pow(betaBeam*std::tan(twoth/2.0),2) + std::pow(divBeam,2) + 1.0/std::pow(Eg,2));
         return EgLaue;
   }
   double TOFExtinction::getXqt(double Eg, double cellV, double wl, double twoth, double tbar, double fsq)
