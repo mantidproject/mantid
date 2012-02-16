@@ -327,6 +327,9 @@ private:
   /// Get the new plot name
   QString getNewPlotName(const QString & cropWSfirstPart);
 
+  ///
+  void getDeadTimeFromData(std::vector<double> & deadTimes);
+
   /// set grouping in table from information from nexus raw file
   void setGroupingFromNexus(const QString& nexusFile); 
 
