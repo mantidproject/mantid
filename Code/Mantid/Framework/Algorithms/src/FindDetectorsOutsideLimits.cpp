@@ -51,9 +51,9 @@ namespace Mantid
         new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
           "Each histogram from the input workspace maps to a histogram in this\n"
           "workspace with one value that indicates if there was a dead detector" );
-      declareProperty("HighThreshold", 0.0,
+      declareProperty("HighThreshold", EMPTY_DBL(),
           "Spectra whose total number of counts are equal to or above this value\n"
-          "will be marked bad (default 0)" );
+          "will be marked bad (default off)" );
       declareProperty("LowThreshold", 0.0,
           "Spectra whose total number of counts are equal to or below this value\n"
           "will be marked bad (default 0)" );
@@ -85,7 +85,8 @@ namespace Mantid
     {
       double lowThreshold = getProperty("LowThreshold");
       double highThreshold = getProperty("HighThreshold");
-      if ( highThreshold <= lowThreshold )
+      bool useHighThreshold = !isEmpty(highThreshold);
+      if ( useHighThreshold &&  highThreshold <= lowThreshold )
       {
         throw std::invalid_argument("The high threshold must be higher than the low threshold");
       }
@@ -94,7 +95,7 @@ namespace Mantid
       int minIndex = getProperty("StartWorkspaceIndex");
       int maxIndex = getProperty("EndWorkspaceIndex");
       const int inputLength = static_cast<int>(inputWS->getNumberHistograms());
-      if( maxIndex == EMPTY_INT() ) maxIndex = inputLength - 1;
+      if( isEmpty(maxIndex) ) maxIndex = inputLength - 1;
       if( maxIndex < minIndex )
       {
         std::ostringstream os;
@@ -108,7 +109,6 @@ namespace Mantid
         os << "Workspace indices must be lower than workspace size. Size=" << inputLength << ", Min=" << minIndex << ",Max=" << maxIndex;
         throw std::invalid_argument(os.str());
       }
-
 
       const double rangeLower = getProperty("RangeLower");
       const double rangeUpper = getProperty("RangeUpper");
@@ -130,6 +130,7 @@ namespace Mantid
       PARALLEL_FOR2(countsWS, outputWS)
       for (int i = 0; i < diagLength; ++i)
       {
+        bool keepData = true;
         if (i % progStep == 0)
         {
           progress(static_cast<double>(i)/diagLength);
@@ -146,35 +147,44 @@ namespace Mantid
         // Mark no detector spectra as failed
         if( !det )
         {
-          outputWS->dataY(i)[0] = deadValue;
-          PARALLEL_ATOMIC
-          ++numFailed;
-          continue;
+          keepData = false;
         }
-        if( det->isMasked() ) continue;
-        if( det->isMonitor() )
+        else
         {
-          // Don't include but don't mask either
-          continue;
+          if( det->isMasked() )
+            keepData = false;
+          if( det->isMonitor() )
+          {
+            // Don't include but don't mask either
+            continue;
+          }
         }
 
         const double & yValue = countsWS->readY(i)[0];
         // Mask out NaN and infinite
         if( boost::math::isinf(yValue) || boost::math::isnan(yValue) )
         {
-          outputWS->dataY(i)[0] = deadValue;
-          PARALLEL_ATOMIC
-          ++numFailed;
-          continue;
+          keepData = false;
+        }
+        else
+        {
+          if ( yValue <= lowThreshold)
+          {
+            keepData = false;
+          }
+
+          if ( useHighThreshold && (yValue >= highThreshold) )
+          {
+            keepData = false;
+          }
         }
 
-        if ( yValue <= lowThreshold || yValue >= highThreshold)
+        if (!keepData)
         {
           outputWS->dataY(i)[0] = deadValue;
           PARALLEL_ATOMIC
           ++numFailed;
         }
-
       }
         
       g_log.information() << numFailed << " spectra fell outside the given limits.\n";
