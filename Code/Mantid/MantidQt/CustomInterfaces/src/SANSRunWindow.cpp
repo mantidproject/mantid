@@ -192,6 +192,10 @@ void SANSRunWindow::initLayout()
     m_uiForm.displayLayout->addWidget(m_displayTab);
   }
 
+  // connect up phi masking on analysis tab to be in sync with info on masking tab
+  connect(m_uiForm.mirror_phi, SIGNAL(clicked()), this, SLOT(phiMaskingChanged()));
+  connect(m_uiForm.phi_min, SIGNAL(editingFinished()), this, SLOT(phiMaskingChanged()));
+  connect(m_uiForm.phi_max, SIGNAL(editingFinished()), this, SLOT(phiMaskingChanged()));
   readSettings();
 }
 /** Ssetup the controls for the Analysis Tab on this form
@@ -782,15 +786,15 @@ bool SANSRunWindow::loadUserFile()
   {
     m_uiForm.detbank_sel->setCurrentIndex(index);
   }
-
-  //Masking table
-  updateMaskTable();
  
   // Phi values 
   m_uiForm.phi_min->setText(runReduceScriptFunction(
     "print i.ReductionSingleton().mask.phi_min"));
   m_uiForm.phi_max->setText(runReduceScriptFunction(
     "print i.ReductionSingleton().mask.phi_max"));
+
+  //Masking table
+  updateMaskTable();
 
   if ( runReduceScriptFunction(
     "print i.ReductionSingleton().mask.phi_mirror").trimmed() == "True" )
@@ -960,6 +964,31 @@ void SANSRunWindow::updateMaskTable()
       m_uiForm.mask_table->setItem(row, 2, new QTableWidgetItem("LINE " + arm_width + " " + arm_angle));      
     }
   }
+
+  // add phi masking to table
+  //QString phi_tag = runReduceScriptFunction(
+  //  "print i.ReductionSingleton().mask.get_phi_limits_tag()");
+
+  //if ( !phi_tag.isEmpty() )
+  //{
+    //phi_tag = phi_tag.mid(3);
+    //QStringList list = phi_tag.split("_");
+    QString phiMin = m_uiForm.phi_min->text();
+    QString phiMax = m_uiForm.phi_max->text();
+      int row = m_uiForm.mask_table->rowCount();
+      m_uiForm.mask_table->insertRow(row);
+      m_uiForm.mask_table->setItem(row, 0, new QTableWidgetItem("Phi"));
+      m_uiForm.mask_table->setItem(row, 1, new QTableWidgetItem(m_uiForm.detbank_sel->currentText()));
+      if ( m_uiForm.mirror_phi->isChecked() )
+      {
+        m_uiForm.mask_table->setItem(row, 2, new QTableWidgetItem("L/PHI " + phiMin + " " + phiMax));  
+        //m_uiForm.mask_table->setItem(row, 2, new QTableWidgetItem("L/PHI " + list[0] + " " + list[1]));
+      }   
+      else
+      {
+        m_uiForm.mask_table->setItem(row, 2, new QTableWidgetItem("L/PHI/NOMIRROR " + phiMin + " " + phiMax));   
+      }      
+  //}
 }
 
 /**
@@ -1141,7 +1170,7 @@ bool SANSRunWindow::isUserFileLoaded() const
  * Create the mask strings for spectra and times
  * @param exec_script Create userfile type execution script
  * @param importCommand
- * @param mType
+ * @param mType This parameter appears to take values PixelMask or TimeMask
  */
 void SANSRunWindow::addUserMaskStrings(QString& exec_script,const QString& importCommand, enum MaskType mType)
 {  
@@ -1176,32 +1205,41 @@ void SANSRunWindow::addUserMaskStrings(QString& exec_script,const QString& impor
 
     }
     //Details are in the third column
-    temp = importCommand + "('MASK";
-    exec_script += temp;
-    QString type = m_uiForm.mask_table->item(row, 0)->text();
-    if( type == "time")
+    // 'special' case for phi masking since it in fact uses the L command instead of the MASK command
+    
+    if ( m_uiForm.mask_table->item(row, 0)->text() == "Phi" )
     {
-      exec_script += "/TIME";
-    }
-    QString details = m_uiForm.mask_table->item(row, 2)->text();
-    QString detname = m_uiForm.mask_table->item(row, 1)->text().trimmed();
-    if( detname == "-" )
-    {
-      exec_script += " " + details;
-    }
-    else if( detname == "rear-detector" || detname == "main-detector-bank" )
-    {
-      if ( type != "Arm" )
-      {
-        exec_script += "/REAR " + details;
-      }
+      exec_script += importCommand + "('" + m_uiForm.mask_table->item(row, 2)->text()
+        + "')\n";
     }
     else
     {
-      exec_script += "/FRONT " + details;
+      exec_script += importCommand + "('MASK";
+      QString type = m_uiForm.mask_table->item(row, 0)->text();
+      if( type == "time")
+      {
+        exec_script += "/TIME";
+      }
+      QString details = m_uiForm.mask_table->item(row, 2)->text();
+      QString detname = m_uiForm.mask_table->item(row, 1)->text().trimmed();
+      if( detname == "-" )
+      {
+        exec_script += " " + details;
+      }
+      else if( detname == "rear-detector" || detname == "main-detector-bank" )
+      {
+        if ( type != "Arm" )
+        {
+          exec_script += "/REAR " + details;
+        }
+      }
+      else
+      {
+        exec_script += "/FRONT " + details;
+      }
+      exec_script += "')\n";
     }
-    exec_script += "')\n";
-  }
+  } // end of loop over rows in left hand table of Maskting tab
 
   
   //Spectra mask first
@@ -1833,8 +1871,8 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type)
   }
   exec_reduce += "i.LimitsQXY(0.0," + m_uiForm.qy_max->text().trimmed() + "," +
     m_uiForm.qy_dqy->text().trimmed() + ",'"
-    + m_uiForm.qy_dqy_opt->itemData(m_uiForm.qy_dqy_opt->currentIndex()).toString()+"')\n" +
-    "i.SetPhiLimit(" + m_uiForm.phi_min->text().trimmed() + "," + m_uiForm.phi_max->text().trimmed();
+    + m_uiForm.qy_dqy_opt->itemData(m_uiForm.qy_dqy_opt->currentIndex()).toString()+"')\n"; 
+  exec_reduce += "i.SetPhiLimit(" + m_uiForm.phi_min->text().trimmed() + "," + m_uiForm.phi_max->text().trimmed();
   if ( m_uiForm.mirror_phi->isChecked() )
   {
     exec_reduce += ", True";
@@ -2349,7 +2387,7 @@ void SANSRunWindow::handleShowMaskButtonClick()
 {
   QString analysis_script;
   addUserMaskStrings(analysis_script,"i.Mask",DefaultMask);
-  analysis_script += "\ni.DisplayMask()";//analysis_script += "\ni.ReductionSingleton().ViewCurrentMask()";
+  analysis_script += "\ni.DisplayMask()";
 
   m_uiForm.showMaskBtn->setEnabled(false);
   m_uiForm.showMaskBtn->setText("Working...");
@@ -3105,6 +3143,11 @@ void SANSRunWindow::issueWarning(const QString & title, const QString & info)
 {
   g_log.warning() << "::SANS::warning" << title.toStdString() << ": " << info.toStdString() << std::endl;
   QMessageBox::warning(this, title, info);
+}
+
+void SANSRunWindow::phiMaskingChanged()
+{
+  updateMaskTable();
 }
 
 } //namespace CustomInterfaces
