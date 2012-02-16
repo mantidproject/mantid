@@ -6,6 +6,7 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Exception.h"
 #include "MantidDataObjects/EventWorkspaceHelpers.h"
+#include "MantidDataObjects/SpecialWorkspace2D.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <gsl/gsl_statistics.h>
 #include <cfloat>
@@ -80,7 +81,41 @@ namespace Mantid
       return finalOutputW;
     }
 
-    
+    /**
+     * Create a masking workspace to return.
+     *
+     * @param inputWS The workspace to initialize from. The instrument is copied from this.
+     * @param initialize Whether or not to set all of the values to keep the data.
+     */
+    MatrixWorkspace_sptr DetectorDiagnostic::generateEmptyMask(API::MatrixWorkspace_sptr inputWS, const bool initialize)
+    {
+      // Create a new workspace for the results, copy from the input to ensure that we copy over the instrument and current masking
+      DataObjects::SpecialWorkspace2D* maskWS = new DataObjects::SpecialWorkspace2D();
+      maskWS->initialize(inputWS->getNumberHistograms(), 1, 1);
+      MatrixWorkspace_sptr outputWS(maskWS);
+      WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
+      outputWS->setTitle(inputWS->getTitle());
+
+      if (initialize) // initialize the mask as keep everything
+      {
+        // initialize the mask as keep everything
+        const double liveValue(0.0); // keep the data - delete is 1.0
+        const double errors(0.0); // uncertainty
+        int64_t size = outputWS->getNumberHistograms();
+        PARALLEL_FOR1(outputWS)
+        for (int64_t i = 0; i < size; i++)
+        {
+          PARALLEL_START_INTERUPT_REGION
+          outputWS->dataY(i)[0] = liveValue; // by default it stays
+          outputWS->dataE(i)[0] = errors;
+          PARALLEL_END_INTERUPT_REGION
+        }
+        PARALLEL_CHECK_INTERUPT_REGION
+      }
+
+      return outputWS;
+    }
+
     /** 
      *  Fnds the median of values in single bin histograms rejecting spectra from masked
      *  detectors and the results of divide by zero (infinite and NaN).  

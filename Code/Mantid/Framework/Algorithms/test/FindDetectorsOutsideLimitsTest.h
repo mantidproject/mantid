@@ -93,8 +93,8 @@ public:
     const int numFailed = alg.getProperty("NumberOfFailures");
     TS_ASSERT_EQUALS(numFailed, 11);
 
-    const double liveValue(1.0);
-    const double maskValue(0.0);
+    const double liveValue(0.0);
+    const double maskValue(1.0);
     for (int i=0; i< sizey; i++)
     {
       const double val = work_out->readY(i)[0];
@@ -102,16 +102,10 @@ public:
       // Check masking
       IDetector_const_sptr det;
       TS_ASSERT_THROWS_NOTHING(det = work_out->getDetector(i));
-      bool maskExpected(false);
       // Spectra set up with yVeryDead fail low counts or yStrange fail on high
       if ( i%2 == 0 || i == 19 )
       {
         valExpected = maskValue;
-        maskExpected = true;
-      }
-      if(det)
-      {
-        TS_ASSERT_EQUALS(det->isMasked(), maskExpected);
       }
 
       TS_ASSERT_DELTA(val,valExpected,1e-9);
@@ -136,16 +130,10 @@ public:
       // Check masking
       IDetector_const_sptr det;
       TS_ASSERT_THROWS_NOTHING(det = work_out->getDetector(i));
-      bool maskExpected(false);
       // Spectra set up with yVeryDead fail low counts or yStrange fail on high
       if ( i%2 == 0 )
       {
         valExpected = maskValue;
-        maskExpected = true;
-      }
-      if(det)
-      {
-        TS_ASSERT_EQUALS(det->isMasked(), maskExpected);
       }
 
       TS_ASSERT_DELTA(val,valExpected,1e-9);
@@ -183,10 +171,10 @@ public:
     MatrixWorkspace_sptr work_out;
     TS_ASSERT_THROWS_NOTHING(work_out = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("testdead_out")));
 
-    TS_ASSERT_EQUALS( work_out->dataY(0)[0], 1.0);
-    TS_ASSERT_EQUALS( work_out->dataY(9)[0], 1.0);
-    TS_ASSERT_EQUALS( work_out->dataY(10)[0], 0.0);
-    TS_ASSERT_EQUALS( work_out->dataY(11)[0], 1.0);
+    TS_ASSERT_EQUALS( work_out->dataY(0)[0], 0.0);
+    TS_ASSERT_EQUALS( work_out->dataY(9)[0], 0.0);
+    TS_ASSERT_EQUALS( work_out->dataY(10)[0], 1.0);
+    TS_ASSERT_EQUALS( work_out->dataY(11)[0], 0.0);
 
     AnalysisDataService::Instance().remove("testdead_in");
     AnalysisDataService::Instance().remove("testdead_out");

@@ -57,6 +57,8 @@ namespace Mantid
           const int indexMax, const double lower,
           const double upper, const bool outputWorkspace2D = false);
 
+      API::MatrixWorkspace_sptr generateEmptyMask(API::MatrixWorkspace_sptr inputWS, const bool initialize = true);
+
       /// Calculate the median of the given workspace. This assumes that the input workspace contains 
       /// integrated counts
       double calculateMedian(API::MatrixWorkspace_sptr input, bool excludeZeroes);

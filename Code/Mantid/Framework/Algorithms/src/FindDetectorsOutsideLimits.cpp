@@ -118,18 +118,16 @@ namespace Mantid
       if (boost::dynamic_pointer_cast<EventWorkspace>(countsWS))
         throw std::runtime_error("Error! Integration output is not a Workspace2D.");
 
-      // This will become the output workspace
-      countsWS->isDistribution(false);
-      countsWS->setYUnit("");
-      countsWS->instrumentParameters();
+      // Create a new workspace for the results, copy from the input to ensure that we copy over the instrument and current masking
+      MatrixWorkspace_sptr outputWS = this->generateEmptyMask(inputWS);
 
-      const double liveValue(1.0);
+      const double deadValue(1.0); // delete the data
 
       const int diagLength = static_cast<int>(countsWS->getNumberHistograms());
       const int progStep = static_cast<int>(std::ceil(diagLength / 100.0));
 
       int numFailed(0);
-      PARALLEL_FOR1(countsWS)
+      PARALLEL_FOR2(countsWS, outputWS)
       for (int i = 0; i < diagLength; ++i)
       {
         if (i % progStep == 0)
@@ -148,7 +146,7 @@ namespace Mantid
         // Mark no detector spectra as failed
         if( !det )
         {
-          countsWS->maskWorkspaceIndex(i);
+          outputWS->dataY(i)[0] = deadValue;
           PARALLEL_ATOMIC
           ++numFailed;
           continue;
@@ -157,7 +155,6 @@ namespace Mantid
         if( det->isMonitor() )
         {
           // Don't include but don't mask either
-          countsWS->dataY(i)[0] = liveValue;
           continue;
         }
 
@@ -165,7 +162,7 @@ namespace Mantid
         // Mask out NaN and infinite
         if( boost::math::isinf(yValue) || boost::math::isnan(yValue) )
         {
-          countsWS->maskWorkspaceIndex(i);
+          outputWS->dataY(i)[0] = deadValue;
           PARALLEL_ATOMIC
           ++numFailed;
           continue;
@@ -173,21 +170,17 @@ namespace Mantid
 
         if ( yValue <= lowThreshold || yValue >= highThreshold)
         {
-          countsWS->maskWorkspaceIndex(i);
+          outputWS->dataY(i)[0] = deadValue;
           PARALLEL_ATOMIC
           ++numFailed;
         }
-        else
-        {
-          // Value passed the tests, flag it.
-          countsWS->dataY(i)[0] = liveValue;
-        }
+
       }
         
       g_log.information() << numFailed << " spectra fell outside the given limits.\n";
       setProperty("NumberOfFailures", numFailed);
       // Assign it to the output workspace property
-      setProperty("OutputWorkspace", countsWS);
+      setProperty("OutputWorkspace", outputWS);
     }
 
   }
