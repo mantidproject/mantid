@@ -24,7 +24,9 @@
 #include "MantidKernel/System.h"
 #include <boost/python/detail/prefix.hpp> // Safe include of Python.h
 
-//#define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
+#ifndef _WIN32
+  #define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
+#endif
 #define NO_ARRAY_IMPORT
 #include <numpy/ndarrayobject.h> 
 
