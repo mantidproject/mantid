@@ -5,6 +5,7 @@
 #include <QtGui/qwidget.h>
 #include <qgridlayout.h>
 #include "MantidKernel/Property.h"
+#include <QLabel>
 
 
 namespace MantidQt
@@ -54,6 +55,9 @@ namespace API
 
     /// If using the GridLayout, this is the row where the widget was inserted.
     int m_row;
+
+    /// Label that is visible when the property is NOT valid.
+    QLabel * m_validLbl;
   };
 
 

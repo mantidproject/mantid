@@ -29,6 +29,14 @@ namespace API
           "QWidget { border: 1px solid gray;  }"
           );
     }
+
+    // Create the validator label (that red star)
+    m_validLbl = new QLabel("*");
+    QPalette pal = m_validLbl->palette();
+    pal.setColor(QPalette::WindowText, Qt::darkRed);
+    m_validLbl->setPalette(pal);
+    // Put it in the 4th column.
+    m_gridLayout->addWidget(m_validLbl, m_row, 4);
   }
     
   //----------------------------------------------------------------------------------------------
