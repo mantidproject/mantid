@@ -1,0 +1,63 @@
+#ifndef MANTID_API_PROPERTYWIDGET_H_
+#define MANTID_API_PROPERTYWIDGET_H_
+
+#include "MantidKernel/System.h"
+#include <QtGui/qwidget.h>
+#include <qgridlayout.h>
+#include "MantidKernel/Property.h"
+
+
+namespace MantidQt
+{
+namespace API
+{
+
+  /** Base class for widgets that will set
+   * Mantid::Kernel::Property* types
+    
+    @date 2012-02-16
+
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+
+    This file is part of Mantid.
+
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
+  */
+  class DLLExport PropertyWidget : public QWidget
+  {
+  public:
+    PropertyWidget(Mantid::Kernel::Property * prop, QWidget * parent = NULL, QGridLayout * layout = NULL, int row=-1);
+    virtual ~PropertyWidget();
+    
+    bool inGrid() const;
+
+  protected:
+    /// Property being looked at. This is NOT owned by the widget
+    Mantid::Kernel::Property * m_prop;
+
+    /// Grid layout of the dialog to which we are adding widgets
+    QGridLayout * m_gridLayout;
+
+    /// If using the GridLayout, this is the row where the widget was inserted.
+    int m_row;
+  };
+
+
+} // namespace API
+} // namespace MantidQt
+
+#endif  /* MANTID_API_PROPERTYWIDGET_H_ */

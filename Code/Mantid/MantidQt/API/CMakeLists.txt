@@ -1,27 +1,30 @@
 set ( SRC_FILES
 	src/AlgorithmDialog.cpp
 	src/AlgorithmInputHistory.cpp
+	src/BoolPropertyWidget.cpp
 	src/GenericDialog.cpp
 	src/InterfaceFactory.cpp
 	src/InterfaceManager.cpp
 	src/ManageUserDirectories.cpp
 	src/MantidColorMap.cpp
 	src/MantidDialog.cpp
+	src/MantidQwtIMDWorkspaceData.cpp
+	src/MantidQwtMatrixWorkspaceData.cpp
 	src/MantidWidget.cpp
+	src/PropertyWidget.cpp
 	src/PythonRunner.cpp
 	src/SafeQwtPlot.cpp
 	src/SyncedCheckboxes.cpp
 	src/UserSubWindow.cpp
 	src/VatesViewerInterface.cpp
 	src/WorkspaceObserver.cpp
-	src/MantidQwtIMDWorkspaceData.cpp
-	src/MantidQwtMatrixWorkspaceData.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES
 	inc/MantidQtAPI/AlgorithmDialog.h
 	inc/MantidQtAPI/AlgorithmInputHistory.h
+	inc/MantidQtAPI/BoolPropertyWidget.h
 	inc/MantidQtAPI/DllOption.h
 	inc/MantidQtAPI/FileDialogHandler.h
 	inc/MantidQtAPI/GenericDialog.h
@@ -31,10 +34,11 @@ set ( INC_FILES
 	inc/MantidQtAPI/ManageUserDirectories.h
 	inc/MantidQtAPI/MantidColorMap.h
 	inc/MantidQtAPI/MantidDialog.h
-	inc/MantidQtAPI/MantidWidget.h
 	inc/MantidQtAPI/MantidQwtIMDWorkspaceData.h
 	inc/MantidQtAPI/MantidQwtMatrixWorkspaceData.h
 	inc/MantidQtAPI/MantidQwtWorkspaceData.h
+	inc/MantidQtAPI/MantidWidget.h
+	inc/MantidQtAPI/PropertyWidget.h
 	inc/MantidQtAPI/PythonRunner.h
 	inc/MantidQtAPI/SafeQwtPlot.h
 	inc/MantidQtAPI/SyncedCheckboxes.h
@@ -102,13 +106,34 @@ if ( CXXTEST_FOUND )
   endif ()
 endif ()
 
+###########################################################################
+# DEMO/GUI TESTING APPLICATIONS
+###########################################################################
+
+if ( WIN32 )
+# Does not work on windows for some reason
+else ()
+
+include_directories ( ../../Framework/MDEvents/inc )
+include_directories ( ../../Framework/DataObjects/inc )
+include_directories ( ../../Framework/Algorithms/inc )
+include_directories ( ../../Framework/API/inc )
+include_directories ( ../../Framework/DataHandling/inc )
+include_directories ( ../../Framework/TestHelpers/inc )
+include_directories ( ../../Framework/Geometry/inc )
+
+# Extra, optional targets for demoing GUI elements
+add_executable ( PropertyWidgetsDemo EXCLUDE_FROM_ALL ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} test/main_PropertyWidgetsDemo.cpp  
+                           ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS} ${RES_FILES} ${MANTID_RC_FILE} )
+target_link_libraries ( PropertyWidgetsDemo 
+                       ${CORE_MANTIDLIBS} MantidQtAPI MantidWidgets  Geometry
+                       QtPropertyBrowser ${QT_LIBRARIES} ${ZLIB_LIBRARIES} ${QWT_LIBRARIES} )
+                       
+endif () # (not for windows)
+
 
 ###########################################################################
 # Installation settings
 ###########################################################################
 
 install ( TARGETS MantidQtAPI DESTINATION ${LIB_DIR} )
-
-set ( TEST_FILES
-	test/SyncedCheckboxesTest.h
-)
