@@ -96,16 +96,6 @@ class RefLReduction(PythonAlgorithm):
         subtract_data_bck = self.getProperty("SubtractSignalBackground")
         subtract_norm_bck = self.getProperty("SubtractNormBackground")
 
-#        ########################################################################
-#        # Find full path to event NeXus data file
-#        f = FileFinder.findRuns("REF_L%d" %run_numbers[0])
-#        if len(f)>0 and os.path.isfile(f[0]): 
-#            data_file = f[0]
-#        else:
-#            msg = "RefLReduction: could not find run %d\n" % run_numbers[0]
-#            msg += "Add your data folder to your User Data Directories in the File menu"
-#            raise RuntimeError(msg)
-
         # Pick a good workspace name
         ws_name = "refl%d" % run_numbers[0]
         ws_event_data = ws_name+"_evt"  
@@ -113,11 +103,6 @@ class RefLReduction(PythonAlgorithm):
         # Load the data into its workspace
         allow_multiple = True        
         if len(run_numbers)>1 and allow_multiple:
-            #add runs together
-#            raise RuntimeError("Not ready for multiple runs yet, please specify only one run number")
-
-#            if mtd.workspaceExists(ws_event_data):
-#                mtd.deleteWorkspace(ws_event_data)
             
             for _run in run_numbers:
 
@@ -226,11 +211,6 @@ class RefLReduction(PythonAlgorithm):
         theta += AngleOffset_rad
         
         if dMD is not None and theta is not None:
-#            _tof_axis = mtd[ws_histo_data].readX(0)
-#            print _tof_axis
-#            _const = float(4) * math.pi * m * dMD / h
-#            _q_axis = 1e-10 * _const * math.sin(theta) / (_tof_axis*1e-6)
-#            q_max = max(_q_axis)
                     
             _tof_axis = mtd[ws_histo_data].readX(0)
             _const = float(4) * math.pi * m * dMD / h
