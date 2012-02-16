@@ -12,6 +12,8 @@
 #include "MantidVatesAPI/MDLoadingViewAdapter.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidVatesAPI/vtkMDHexFactory.h"
+#include "MantidVatesAPI/vtkMDQuadFactory.h"
+#include "MantidVatesAPI/vtkMDLineFactory.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
 
@@ -99,9 +101,15 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     FilterUpdateProgressAction<vtkMDEWSource> loadingProgressUpdate(this, "Loading...");
     FilterUpdateProgressAction<vtkMDEWSource> drawingProgressUpdate(this, "Drawing...");
 
-    vtkMDHexFactory* hexahedronFactory = new vtkMDHexFactory(ThresholdRange_scptr(new IgnoreZerosThresholdRange()), "signal");
+    ThresholdRange_scptr thresholdRange(new IgnoreZerosThresholdRange());
+    vtkMDHexFactory* hexahedronFactory = new vtkMDHexFactory(thresholdRange, "signal");
+    vtkMDQuadFactory* quadFactory = new vtkMDQuadFactory(thresholdRange, "signal");
+    vtkMDLineFactory* lineFactory = new vtkMDLineFactory(thresholdRange, "signal");
+
+    hexahedronFactory->SetSuccessor(quadFactory);
+    quadFactory->SetSuccessor(lineFactory);
+
     hexahedronFactory->setTime(m_time);
-    hexahedronFactory->setCheckDimensionality(false);
     vtkDataSet* product = m_presenter->execute(hexahedronFactory, loadingProgressUpdate, drawingProgressUpdate);
 
     //-------------------------------------------------------- Corrects problem whereby boundaries not set propertly in PV.

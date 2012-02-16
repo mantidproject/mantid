@@ -94,7 +94,6 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     vtkMDHistoHexFactory* successor = new vtkMDHistoHexFactory(thresholdRange, "signal");
     vtkMDHistoHex4DFactory<TimeToTimeStep> *factory = new vtkMDHistoHex4DFactory<TimeToTimeStep>(thresholdRange, "signal", m_time);
     factory->SetSuccessor(successor);
-    factory->setCheckDimensionality(false);
 
     vtkDataSet* product = m_presenter->execute(factory, loadingProgressUpdate, drawingProgressUpdate);
 

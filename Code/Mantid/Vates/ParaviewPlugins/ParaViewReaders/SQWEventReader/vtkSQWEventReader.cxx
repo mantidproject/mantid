@@ -14,6 +14,8 @@
 #include "vtkBox.h"
 
 #include "MantidVatesAPI/vtkMDHexFactory.h"
+#include "MantidVatesAPI/vtkMDQuadFactory.h"
+#include "MantidVatesAPI/vtkMDLineFactory.h"
 #include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/MDLoadingViewAdapter.h"
@@ -117,11 +119,17 @@ int vtkSQWEventReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInfo
     m_time =outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0];
   }
 
-  vtkMDHexFactory* hexahedronFactory = new vtkMDHexFactory(ThresholdRange_scptr(new IgnoreZerosThresholdRange()), "signal");
+  ThresholdRange_scptr thresholdRange(new IgnoreZerosThresholdRange());
+  vtkMDHexFactory* hexahedronFactory = new vtkMDHexFactory(thresholdRange, "signal");
+  vtkMDQuadFactory* quadFactory = new vtkMDQuadFactory(thresholdRange, "signal");
+  vtkMDLineFactory* lineFactory = new vtkMDLineFactory(thresholdRange, "signal");
+
+  hexahedronFactory->SetSuccessor(quadFactory);
+  quadFactory->SetSuccessor(lineFactory);
+
   hexahedronFactory->setTime(m_time);
-  
   vtkDataSet* product = m_presenter->execute(hexahedronFactory, loadingProgressUpdate, drawingProgressUpdate);
-  
+
   //-------------------------------------------------------- Corrects problem whereby boundaries not set propertly in PV.
   vtkBox* box = vtkBox::New();
   box->SetBounds(product->GetBounds());
