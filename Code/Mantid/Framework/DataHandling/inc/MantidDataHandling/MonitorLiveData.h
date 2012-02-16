@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_LOADLIVEDATA_H_
-#define MANTID_DATAHANDLING_LOADLIVEDATA_H_
+#ifndef MANTID_DATAHANDLING_MONITORLIVEDATA_H_
+#define MANTID_DATAHANDLING_MONITORLIVEDATA_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
@@ -10,8 +10,9 @@ namespace Mantid
 namespace DataHandling
 {
 
-  /** Algorithm to load a chunk of live data.
-   * Called by StartLiveData and MonitorLiveData
+  /** Algorithm that repeatedly calls LoadLiveData, at a given
+   * update frequency. This is started asynchronously by
+   * StartLiveData.
     
     @date 2012-02-16
 
@@ -35,11 +36,11 @@ namespace DataHandling
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport LoadLiveData  : public LiveDataAlgorithm
+  class DLLExport MonitorLiveData  : public LiveDataAlgorithm
   {
   public:
-    LoadLiveData();
-    virtual ~LoadLiveData();
+    MonitorLiveData();
+    virtual ~MonitorLiveData();
     
     virtual const std::string name() const;
     virtual int version() const;
@@ -56,4 +57,4 @@ namespace DataHandling
 } // namespace DataHandling
 } // namespace Mantid
 
-#endif  /* MANTID_DATAHANDLING_LOADLIVEDATA_H_ */
+#endif  /* MANTID_DATAHANDLING_MONITORLIVEDATA_H_ */

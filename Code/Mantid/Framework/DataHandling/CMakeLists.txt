@@ -78,6 +78,7 @@ set ( SRC_FILES
 	src/MaskDetectors.cpp
 	src/MaskDetectorsInShape.cpp
 	src/Merge2WorkspaceLogs.cpp
+	src/MonitorLiveData.cpp
 	src/MoveInstrumentComponent.cpp
 	src/OrbiterDataArchive.cpp
 	src/ProcessDasNexusLog.cpp
@@ -187,6 +188,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/MaskDetectors.h
 	inc/MantidDataHandling/MaskDetectorsInShape.h
 	inc/MantidDataHandling/Merge2WorkspaceLogs.h
+	inc/MantidDataHandling/MonitorLiveData.h
 	inc/MantidDataHandling/MoveInstrumentComponent.h
 	inc/MantidDataHandling/OrbiterDataArchive.h
 	inc/MantidDataHandling/ProcessDasNexusLog.h
@@ -291,6 +293,7 @@ set ( TEST_FILES
 	test/MaskDetectorsInShapeTest.h
 	test/MaskDetectorsTest.h
 	test/Merge2WorkspaceLogsTest.h
+	test/MonitorLiveDataTest.h
 	test/MoveInstrumentComponentTest.h
 	test/OrbiterDataArchiveTest.h
 	test/ProcessDasNexusLogTest.h
