@@ -125,6 +125,12 @@ namespace API
     // then append it onto a comma- and plus-separated string.
     else
     {
+      // If there is only one file, then we should use the string passed to the property, which
+      // has not been tampered with. This will enable us to deal with the case where a user is 
+      // trying to load a single file with incorrect zero padding, or some other anomaly.
+      if(fileNames.size() == 1 && fileNames[0].size() == 1)
+        fileNames[0][0] = propValue;
+
       try
       {
         fullFileNames = std::accumulate(

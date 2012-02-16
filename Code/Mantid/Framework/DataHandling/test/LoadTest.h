@@ -342,6 +342,18 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
+  void testArgusFileLoadingWithIncorrectZeroPadding()
+  {
+    Load loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "argus0026287.nxs");
+    loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("LoadTest_Output"));
+    TS_ASSERT(ws);
+    AnalysisDataService::Instance().remove("LoadTest_Output");
+  }
+
   
 
   void testList()
