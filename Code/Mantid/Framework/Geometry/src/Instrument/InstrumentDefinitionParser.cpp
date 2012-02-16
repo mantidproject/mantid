@@ -249,9 +249,10 @@ namespace Geometry
     unsigned long numParameter = pNL_parameter->length();
     hasParameterElement.reserve(numParameter);
 
+    // It turns out that looping over all nodes and checking if their nodeName is equal
+    // to "parameter" is much quicker than looping over the pNL_parameter NodeList.
     Poco::XML::NodeIterator it(pRootElem, Poco::XML::NodeFilter::SHOW_ELEMENT);
     Poco::XML::Node* pNode = it.nextNode();
-
     while(pNode)
     {
         if (pNode->nodeName() == "parameter")
