@@ -12,6 +12,7 @@
 #include <QSplashScreen>
 #include <QThread>
 #include "MantidQtAPI/BoolPropertyWidget.h"
+#include "MantidQtAPI/TextPropertyWidget.h"
 
 using namespace Mantid::Kernel;
 using namespace MantidQt::API;
@@ -45,10 +46,15 @@ int main( int argc, char ** argv )
   QVBoxLayout * layout1 = new QVBoxLayout(frame1);
   QGridLayout * grid = new QGridLayout(frame2);
 
-  PropertyWithValue<bool> * boolProp = new PropertyWithValue<bool>("Boolean", true);
+  PropertyWithValue<bool> * boolProp = new PropertyWithValue<bool>("BooleanProp", true);
   BoolPropertyWidget * boolWidget1 = new BoolPropertyWidget(boolProp, frame1, NULL);
   layout1->addWidget(boolWidget1);
   BoolPropertyWidget * boolWidget2 = new BoolPropertyWidget(boolProp, frame2, grid, 2);
+
+  PropertyWithValue<std::string> * strProp = new PropertyWithValue<std::string>("StringProperty", "default value");
+  TextPropertyWidget * textWidget1 = new TextPropertyWidget(strProp, frame1, NULL);
+  layout1->addWidget(textWidget1);
+  TextPropertyWidget * textWidget2 = new TextPropertyWidget(strProp, frame1, grid, 3);
 
 //  SliceViewer * slicer = new SliceViewer(frame);
 //  slicer->resize(600,600);

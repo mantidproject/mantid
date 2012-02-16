@@ -15,6 +15,7 @@ set ( SRC_FILES
 	src/PythonRunner.cpp
 	src/SafeQwtPlot.cpp
 	src/SyncedCheckboxes.cpp
+	src/TextPropertyWidget.cpp
 	src/UserSubWindow.cpp
 	src/VatesViewerInterface.cpp
 	src/WorkspaceObserver.cpp
@@ -42,6 +43,7 @@ set ( INC_FILES
 	inc/MantidQtAPI/PythonRunner.h
 	inc/MantidQtAPI/SafeQwtPlot.h
 	inc/MantidQtAPI/SyncedCheckboxes.h
+	inc/MantidQtAPI/TextPropertyWidget.h
 	inc/MantidQtAPI/UserSubWindow.h
 	inc/MantidQtAPI/VatesViewerInterface.h
 	inc/MantidQtAPI/WorkspaceObserver.h
