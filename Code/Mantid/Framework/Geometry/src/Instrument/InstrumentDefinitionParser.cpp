@@ -148,11 +148,8 @@ namespace Geometry
     m_instrument->setFilename(m_filename);
     m_instrument->setXmlText(m_xmlText);
 
-
     setValidityRange(pRootElem);
-
     readDefaults(pRootElem->getChildElement("defaults"));
-
     // create maps: isTypeAssembly and mapTypeNameToShape
     Geometry::ShapeFactory shapeCreator;
 
@@ -246,17 +243,25 @@ namespace Geometry
     }
     pNL_type->release();
 
-
     // create hasParameterElement
     NodeList* pNL_parameter = pRootElem->getElementsByTagName("parameter");
 
     unsigned long numParameter = pNL_parameter->length();
     hasParameterElement.reserve(numParameter);
-    for (unsigned long i = 0; i < numParameter; i++)
+
+    Poco::XML::NodeIterator it(pRootElem, Poco::XML::NodeFilter::SHOW_ELEMENT);
+    Poco::XML::Node* pNode = it.nextNode();
+
+    while(pNode)
     {
-      Element* pParameterElem = static_cast<Element*>(pNL_parameter->item(i));
-      hasParameterElement.push_back( static_cast<Element*>(pParameterElem->parentNode()) );
+        if (pNode->nodeName() == "parameter")
+        {
+            Element* pParameterElem = static_cast<Element*>(pNode);
+            hasParameterElement.push_back( static_cast<Element*>(pParameterElem->parentNode()) );
+        }
+        pNode = it.nextNode();
     }
+
     pNL_parameter->release();
     hasParameterElement_beenSet = true;
 
