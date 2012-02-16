@@ -56,7 +56,6 @@ add_subdirectory ( mantid )
 # C++ unit tests
 set ( TEST_FILES
   test/cpp/PythonObjectInstantiatorTest.h
-  test/cpp/VectorDelegateTest.h
   test/cpp/PySequenceToVectorConverterTest.h
   test/cpp/NDArrayToVectorConverterTest.h
 )  
