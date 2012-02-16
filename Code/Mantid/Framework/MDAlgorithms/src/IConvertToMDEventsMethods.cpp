@@ -45,7 +45,7 @@ IConvertToMDEventsMethods::fillAddProperties(std::vector<coord_t> &Coord,size_t 
 {
      for(size_t i=n_ws_properties;i<nd;i++){
          //HACK: A METHOD, Which converts TSP into value, correspondent to time scale of matrix workspace has to be developed and deployed!
-         Kernel::Property *pProperty = (inWS2D->run().getProperty(TWS.dim_names[i]));
+         Kernel::Property *pProperty = (inWS2D->run().getProperty(TWS.dimNames[i]));
          Kernel::TimeSeriesProperty<double> *run_property = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(pProperty);  
          if(run_property){
                 Coord[i]=coord_t(run_property->firstValue());
@@ -53,12 +53,12 @@ IConvertToMDEventsMethods::fillAddProperties(std::vector<coord_t> &Coord,size_t 
               // e.g Ei can be a property and dimenson
               Kernel::PropertyWithValue<double> *proc_property = dynamic_cast<Kernel::PropertyWithValue<double> *>(pProperty);  
               if(!proc_property){
-                 convert_log.error()<<" property: "<<this->TWS.dim_names[i]<<" is neither a time series (run) property nor a property with double value\n";
+                 convert_log.error()<<" property: "<<this->TWS.dimNames[i]<<" is neither a time series (run) property nor a property with double value\n";
                  throw(std::invalid_argument(" can not interpret property, used as dimension"));
               }
               Coord[i]  = coord_t(*(proc_property));
          }
-        if(Coord[i]<TWS.dim_min[i] || Coord[i]>=TWS.dim_max[i])return false;
+        if(Coord[i]<TWS.dimMin[i] || Coord[i]>=TWS.dimMax[i])return false;
      }
      return true;
 }
@@ -74,8 +74,8 @@ IConvertToMDEventsMethods::setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS
      
         n_dims       = this->pWSWrapper->nDimensions();
         
-        dim_min.assign(WSD.dim_min.begin(),WSD.dim_min.end());
-        dim_max.assign(WSD.dim_max.begin(),WSD.dim_max.end());
+        dim_min.assign(WSD.dimMin.begin(),WSD.dimMin.end());
+        dim_max.assign(WSD.dimMax.begin(),WSD.dimMax.end());
         
         size_t n_spectra =inWS2D->getNumberHistograms();
         return n_spectra;

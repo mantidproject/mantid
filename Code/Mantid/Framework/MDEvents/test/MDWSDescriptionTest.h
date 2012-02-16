@@ -37,8 +37,6 @@ public:
       TS_ASSERT_THROWS_NOTHING(name=makeAxisName(V3D(2.01,0.9,-1.01),descr.defailt_qNames));
       TS_ASSERT_EQUALS("[2.01Qh,0.9Qk,-1.01Ql]",name);
 
-
-
   }
 
 MDWSDescriptionTest():descr(5)

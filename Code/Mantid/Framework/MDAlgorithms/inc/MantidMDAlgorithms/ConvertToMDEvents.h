@@ -132,6 +132,10 @@ namespace MDAlgorithms
        (C)- Busing, Levi 1967 coordinate system */
    std::vector<double> getTransfMatrix(API::MatrixWorkspace_sptr inWS2D,MDEvents::MDWSDescription &TargWSDescription, 
                                        bool is_powder=false)const;
+   /**function returns the linear representation for the transformation matrix, which transforms momentums from laboratory to target coordinate system
+     defined by existing workspace */
+    std::vector<double> getTransfMatrix( API::IMDEventWorkspace_sptr spws,API::MatrixWorkspace_sptr inWS,bool is_powder=false)const; 
+
    /// get transformation matrix currently defined for the algorithm
    std::vector<double> getTransfMatrix()const{return TWS.rotMatrix;}
    /// construct meaningful dimension names:

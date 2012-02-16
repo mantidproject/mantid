@@ -60,10 +60,10 @@ void test_TwoTransfMethods()
     
     TestWS.Ei   = *(dynamic_cast<Kernel::PropertyWithValue<double>  *>(ws2D->run().getProperty("Ei")));
     TestWS.emode= MDAlgorithms::Direct;
-    TestWS.dim_min.assign(4,-3);
-    TestWS.dim_max.assign(4,3);
-    TestWS.dim_names.assign(4,"Momentum");
-    TestWS.dim_names[3]="DeltaE";
+    TestWS.dimMin.assign(4,-3);
+    TestWS.dimMax.assign(4,3);
+    TestWS.dimNames.assign(4,"Momentum");
+    TestWS.dimNames[3]="DeltaE";
     TestWS.rotMatrix.assign(9,0);
     TestWS.rotMatrix[0]=1;
     TestWS.rotMatrix[4]=1;

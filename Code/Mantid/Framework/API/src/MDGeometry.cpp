@@ -268,7 +268,7 @@ namespace API
   {
     if (index >= m_basisVectors.size())
       throw std::invalid_argument("getBasisVector(): invalid index");
-    m_basisVectors[index] = vec;
+      m_basisVectors[index] = vec;
   }
 
 

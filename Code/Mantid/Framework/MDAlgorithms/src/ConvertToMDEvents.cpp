@@ -189,10 +189,10 @@ ConvertToMDEvents::init()
         "An input Matrix Workspace (Matrix 2D or Event) with units along X-axis and defined instrument with defined sample");
    
      declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output),
-                  "Name of the output MDEventWorkspace. If the workspace already exists, it will be replaced.");
-//TODO:    "Name of the output MDEventWorkspace. If the workspace already exists, new MD events will be added to it (this may be not very efficient for HDD-based workspaces)");
+                  "Name of the output MDEventWorkspace");
+     declareProperty(new PropertyWithValue<bool>("OverwriteExisting", true, Direction::Input),
+              "Unselect this if you want to add new events to the workspace, which already exist. Can be very inefficient for file-based workspaces.");
 
-     
      /// this variable describes default possible ID-s for Q-dimensions   
      declareProperty("QDimensions",Q_modes[NoQ],new ListValidator(Q_modes),
          "You can to transfer source workspace dimensions into target MD workspace directly by supplying empty string """" (NoQ), \n"
@@ -274,8 +274,7 @@ void ConvertToMDEvents::exec()
   // in case of subsequent calls
   this->algo_id="";
   // initiate class which would deal with any dimension workspaces, handling 
-  if(!pWSWrapper.get())
-  {
+  if(!pWSWrapper.get()){
     pWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
   }
   // -------- Input workspace
@@ -291,24 +290,28 @@ void ConvertToMDEvents::exec()
   if(!spws.get())
   {
     create_new_ws = true;
-  }else{ //HACK, TODO: fix it, implement additn to exisiting workspace
-      convert_log.warning()<< " Adding to existing workspace is not yet implemented, workspace: "<<spws->name()<<" will be replaced\n";
-      create_new_ws=true;
+  }else{ 
+      bool should_overwrite = getProperty("OverwriteExisting");
+      if (should_overwrite){
+          create_new_ws=true;
+      }else{
+          create_new_ws=false;
+      }
   }
+  if (create_new_ws){
+    //identify if u,v are present among input parameters and use defaults if not
+    std::vector<double> ut = getProperty("u");
+    std::vector<double> vt = getProperty("v");
+    this->checkUVsettings(ut,vt,TWS);
 
-  //identify if u,v are present among input parameters and use defaults if not
-  Kernel::V3D u,v;
-  std::vector<double> ut = getProperty("u");
-  std::vector<double> vt = getProperty("v");
-  this->checkUVsettings(ut,vt,TWS);
+    // set up target coordinate system
+    TWS.rotMatrix = getTransfMatrix(inWS2D,TWS);
+  }else{ // existing workspace defines target coordinate system:
+    TWS.rotMatrix = getTransfMatrix(spws,inWS2D);
+  }
+    // Collite and Analyze the requests to the job, which are specified by the input parameters
 
-  // set up target coordinate system
- TWS.rotMatrix = getTransfMatrix(inWS2D,TWS);
-
-  // if new workspace is created, its properties are determened by the user's input
-  if (create_new_ws)
-  {
-    // what dimension names requested by the user by:
+ // what dimension names requested by the user by:
     //a) Q selector:
     std::string Q_mod_req                    = getProperty("QDimensions");
     //b) the energy exchange mode
@@ -322,20 +325,21 @@ void ConvertToMDEvents::exec()
     algo_id = identifyTheAlg(inWS2D,Q_mod_req,dE_mod_req,other_dim_names,convert_to_hkl,TWS);
 
     // set the min and max values for the dimensions from the input porperties
-    TWS.dim_min = getProperty("MinValues");
-    TWS.dim_max = getProperty("MaxValues");
-    // verify that the number min/max values is equivalent to the number of dimensions defined by properties and min is less the
-    TWS.checkMinMaxNdimConsistent(convert_log);    
-  } 
-  else // the output dimensions and almost everything else is determined by the dimensions of the target workspace
+    TWS.dimMin = getProperty("MinValues");
+    TWS.dimMax = getProperty("MaxValues");
+
+  if(!create_new_ws) // let's check if target workspace redefines some settings:
   {    // user input is mainly ignored
-    TWS.n_dims   = spws->getNumDims();
-    TWS.dim_min.assign(TWS.n_dims,-1);
-    TWS.dim_max.assign(TWS.n_dims,1);
+    TWS.nDims   = spws->getNumDims();
+    TWS.dimMin.assign(TWS.nDims,-1);
+    TWS.dimMax.assign(TWS.nDims,1);
     throw(Kernel::Exception::NotImplementedError("Adding to existing MD workspace not Yet Implemented"));
   }
+  // verify that the number min/max values is equivalent to the number of dimensions defined by properties and min is less the
+  TWS.checkMinMaxNdimConsistent(convert_log);    
 
 
+  // Check what to do with detectors:  
   if(TWS.detInfoLost){ // in NoQ mode one may not have DetPositions any more. Neither this information is needed for anything except data conversion interface. 
       buildFakeDetectorsPositions(inWS2D,det_loc);
   }else{
@@ -357,7 +361,7 @@ void ConvertToMDEvents::exec()
     spws = pWSWrapper->createEmptyMDWS(TWS);
     if(!spws)
     {
-      g_log.error()<<"can not create target event workspace with :"<<TWS.n_dims<<" dimensions\n";
+      g_log.error()<<"can not create target event workspace with :"<<TWS.nDims<<" dimensions\n";
       throw(std::invalid_argument("can not create target workspace"));
     }
     // Build up the box controller
@@ -369,7 +373,7 @@ void ConvertToMDEvents::exec()
   // Do we split more due to MinRecursionDepth?
     int minDepth = this->getProperty("MinRecursionDepth");
     int maxDepth = this->getProperty("MaxRecursionDepth");
-    if (minDepth>maxDepth) throw std::invalid_argument("MinRecursionDepth must be >= MaxRecursionDepth and ");
+    if (minDepth>maxDepth) throw std::invalid_argument("MinRecursionDepth must be >= MaxRecursionDepth ");
     spws->setMinRecursionDepth(size_t(minDepth));  
   }
 
@@ -389,7 +393,7 @@ void ConvertToMDEvents::exec()
   }
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(spws));
 
-  // free the algorithm from the responsibility for the workspace to allow it to be deleted if necessary
+  // free the algorithm from the responsibility for the target workspace to allow it to be deleted if necessary
   pWSWrapper->releaseWorkspace();
   // free up the sp to the input workspace, which would be deleted if nobody needs it any more;
   inWS2D.reset();
@@ -724,14 +728,14 @@ ConvertToMDEvents::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS,const std
    
  
     // set up the target workspace description;
-    TargWSDescription.n_dims          = nDims;
-    TargWSDescription.emode           = emode;
-    TargWSDescription.detInfoLost     = is_detector_info_lost;
-    TargWSDescription.convert_to_hkl  = convert_to_hkl;
-    TargWSDescription.dim_names       = dim_IDs_requested;
-    TargWSDescription.dim_IDs         = dim_IDs_requested;
-    TargWSDescription.dim_units       = dim_units_requested;
-    TargWSDescription.AlgID           = the_algID;
+    TargWSDescription.nDims          = nDims;
+    TargWSDescription.emode          = emode;
+    TargWSDescription.detInfoLost    = is_detector_info_lost;
+    TargWSDescription.convert_to_hkl = convert_to_hkl;
+    TargWSDescription.dimNames       = dim_IDs_requested;
+    TargWSDescription.dimIDs         = dim_IDs_requested;
+    TargWSDescription.dimUnits       = dim_units_requested;
+    TargWSDescription.AlgID          = the_algID;
 
     // build meaningfull dimension names for Q-transformation if it is Q-transformation indeed 
     // also (temporary) redefines transformation matrix in convert to hkl mode
@@ -771,7 +775,7 @@ ConvertToMDEvents::getAddDimensionNames(MatrixWorkspace_const_sptr inMatrixWS,st
 }
 
 
-/** The matrix to convert neutron momentums into the fractional coordinate system   */
+/** The matrix to convert neutron momentums into the target coordinate system   */
 std::vector<double>
 ConvertToMDEvents::getTransfMatrix(API::MatrixWorkspace_sptr inWS,MDEvents::MDWSDescription &TargWSDescription,bool is_powder)const
 {
@@ -821,6 +825,17 @@ ConvertToMDEvents::getTransfMatrix(API::MatrixWorkspace_sptr inWS,MDEvents::MDWS
     std::vector<double> rotMat = mat.get_vector();
     return rotMat;
 }
+/** The matrix to convert neutron momentums into the target coordinate system, if the target coordinate system is already defined by existing 
+  *   MD workspace */
+std::vector<double>
+ConvertToMDEvents::getTransfMatrix( API::IMDEventWorkspace_sptr spws,API::MatrixWorkspace_sptr inWS, bool is_powder)const
+{
+    UNUSED_ARG(spws);
+    UNUSED_ARG(inWS);
+    UNUSED_ARG(is_powder);
+    throw(Kernel::Exception::NotImplementedError("Not yet implemented"));
+
+}
 
 /** Build meaningful dimension namse for different conversion modes
   * Currently modifies Q3D mode
@@ -830,12 +845,12 @@ void ConvertToMDEvents::buildDimNames(MDEvents::MDWSDescription &TargWSDescripti
 {
     // non-energy transformation modes currently do not change any units and dimension names
     //if(TargWSDescription.emode<0)return;
-     for(size_t i=0;i<TargWSDescription.dim_IDs.size();i++){
-         if(TargWSDescription.dim_IDs[i].empty()){
-               TargWSDescription.dim_IDs[i]="Dim"+boost::lexical_cast<std::string>(i);              
+     for(size_t i=0;i<TargWSDescription.dimIDs.size();i++){
+         if(TargWSDescription.dimIDs[i].empty()){
+               TargWSDescription.dimIDs[i]="Dim"+boost::lexical_cast<std::string>(i);              
          }
-         if(TargWSDescription.dim_names[i].empty()){
-                TargWSDescription.dim_names[i]=TargWSDescription.dim_IDs[i]; 
+         if(TargWSDescription.dimNames[i].empty()){
+                TargWSDescription.dimNames[i]=TargWSDescription.dimIDs[i]; 
          }
 
      }
@@ -868,14 +883,14 @@ void ConvertToMDEvents::buildDimNames(MDEvents::MDWSDescription &TargWSDescripti
         }
 
         for(int i=0;i<3;i++){
-            TargWSDescription.dim_names[i]=MDEvents::makeAxisName(dim_directions[i],TWS.defailt_qNames);
+            TargWSDescription.dimNames[i]=MDEvents::makeAxisName(dim_directions[i],TWS.defailtQNames);
             if(TargWSDescription.convert_to_hkl){
                 // lattice wave vector
                 double cr=TargWSDescription.Latt.a(i)/(2*M_PI);
                 for(int j=0;j<3;j++){
                     TargWSDescription.rotMatrix[3*i+j]*=cr;
                 }
-                TargWSDescription.dim_units[i] = "in "+MDEvents::sprintfd(1/cr,1.e-3)+" A^-1";
+                TargWSDescription.dimUnits[i] = "in "+MDEvents::sprintfd(1/cr,1.e-3)+" A^-1";
             }
 
         }

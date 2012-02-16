@@ -7,20 +7,28 @@ namespace Mantid
 namespace MDEvents
 {
 /** the function builds MD event WS description from existing workspace. 
-  * Primary used to 
+  * Primary used to obtain existing ws parameters 
 */
 void 
 MDWSDescription::build_from_MDWS(const API::IMDEventWorkspace_const_sptr &pWS)
 {
-    this->n_dims = pWS->getNumDims();
+    this->nDims = pWS->getNumDims();
     // prepare all arrays:
-    this->dim_min.resize(n_dims);
-    this->dim_max.resize(n_dims);
-    this->dim_names.resize(n_dims);
-    this->dim_IDs.resize(n_dims);
-    this->dim_units.resize(n_dims);   
-
-
+    this->dimMin.resize(nDims);
+    this->dimMax.resize(nDims);
+    this->dimNames.resize(nDims);
+    this->dimIDs.resize(nDims);
+    this->dimUnits.resize(nDims);   
+    this->nBins.resize(nDims);
+    for(size_t i=0;i<nDims;i++){
+        const Geometry::IMDDimension *pDim = pWS->getDimension(i).get();
+        dimMin[i]  = pDim->getMinimum();
+        dimMax[i]  = pDim->getMaximum();
+        dimNames[i]= pDim->getName();
+        dimIDs[i]  = pDim->getDimensionId();
+        dimUnits[i]= pDim->getUnits();   
+        nBins[i]   = pDim->getNBins();
+    }
 
 }
 
@@ -29,45 +37,45 @@ MDWSDescription::build_from_MDWS(const API::IMDEventWorkspace_const_sptr &pWS)
 void 
 MDWSDescription::checkMinMaxNdimConsistent(Mantid::Kernel::Logger& g_log)const
 {
-  if(this->dim_min.size()!=this->dim_max.size()||this->dim_min.size()!=this->n_dims)
+  if(this->dimMin.size()!=this->dimMax.size()||this->dimMin.size()!=this->nDims)
   {
-      g_log.error()<<" number of specified min dimension values: "<<dim_min.size()<<", number of max values: "<<dim_max.size()<<
-                     " and total number of target dimensions: "<<n_dims<<" are not consistent\n";
+      g_log.error()<<" number of specified min dimension values: "<<dimMin.size()<<", number of max values: "<<dimMax.size()<<
+                     " and total number of target dimensions: "<<nDims<<" are not consistent\n";
       throw(std::invalid_argument("wrong number of dimension limits"));
   }
     
-  for(size_t i=0; i<this->dim_min.size();i++)
+  for(size_t i=0; i<this->dimMin.size();i++)
   {
-    if(this->dim_max[i]<=this->dim_min[i])
+    if(this->dimMax[i]<=this->dimMin[i])
     {
-      g_log.error()<<" min value "<<dim_min[i]<<" not less then max value"<<dim_max[i]<<" in direction: "<<i<<std::endl;
+      g_log.error()<<" min value "<<dimMin[i]<<" not less then max value"<<dimMax[i]<<" in direction: "<<i<<std::endl;
       throw(std::invalid_argument("min limit not smaller then max limit"));
     }
   }
 }
 
 MDWSDescription::MDWSDescription(size_t nDimesnions):
-n_dims(nDimesnions),
+nDims(nDimesnions),
 emode(-1),
 Ei(std::numeric_limits<double>::quiet_NaN()),
-dim_min(nDimesnions,-1),
-dim_max(nDimesnions,1),
-dim_names(nDimesnions,"mdn"),
-dim_IDs(nDimesnions,"mdn_"),
-dim_units(nDimesnions,"Momentum"),
+dimMin(nDimesnions,-1),
+dimMax(nDimesnions,1),
+dimNames(nDimesnions,"mdn"),
+dimIDs(nDimesnions,"mdn_"),
+dimUnits(nDimesnions,"Momentum"),
 convert_to_hkl(false),
 u(1,0,0),
 v(0,1,0),
 is_uv_default(true),
-defailt_qNames(3),
+defailtQNames(3),
 detInfoLost(false)
 {
     for(size_t i=0;i<nDimesnions;i++){
-        dim_IDs[i]= dim_IDs[i]+boost::lexical_cast<std::string>(i);
+        dimIDs[i]= dimIDs[i]+boost::lexical_cast<std::string>(i);
     }
-    defailt_qNames[0]="Qh";
-    defailt_qNames[1]="Qk";
-    defailt_qNames[2]="Ql";
+    defailtQNames[0]="Qh";
+    defailtQNames[1]="Qk";
+    defailtQNames[2]="Ql";
 
 }
 std::string DLLExport sprintfd(const double data, const double eps)

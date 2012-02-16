@@ -27,11 +27,11 @@ public:
 
         TestWS.Ei   = *(dynamic_cast<Kernel::PropertyWithValue<double>  *>(pWS2D->run().getProperty("Ei")));
         TestWS.emode= MDAlgorithms::Direct;
-        TestWS.dim_min.assign(4,-3);
-        TestWS.dim_max.assign(4,3);
-        TestWS.dim_names[1]="phi";
-        TestWS.dim_names[2]="chi";
-        TestWS.dim_names[3]="omega";
+        TestWS.dimMin.assign(4,-3);
+        TestWS.dimMax.assign(4,3);
+        TestWS.dimNames[1]="phi";
+        TestWS.dimNames[2]="chi";
+        TestWS.dimNames[3]="omega";
 
         boost::shared_ptr<MDEvents::MDEventWSWrapper> pOutMDWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
         pOutMDWSWrapper->createEmptyMDWS(TestWS);
@@ -92,10 +92,10 @@ void test_CoordTransfQ3DDirect()
 
     TestWS.Ei   = *(dynamic_cast<Kernel::PropertyWithValue<double>  *>(ws2D->run().getProperty("Ei")));
     TestWS.emode= MDAlgorithms::Direct;
-    TestWS.dim_min.assign(4,-3);
-    TestWS.dim_max.assign(4,3);
-    TestWS.dim_names.assign(4,"Momentum");
-    TestWS.dim_names[3]="DeltaE";
+    TestWS.dimMin.assign(4,-3);
+    TestWS.dimMax.assign(4,3);
+    TestWS.dimNames.assign(4,"Momentum");
+    TestWS.dimNames[3]="DeltaE";
     TestWS.rotMatrix.assign(9,0);
     TestWS.rotMatrix[0]=1;
     TestWS.rotMatrix[4]=1;

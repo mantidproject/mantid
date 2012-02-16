@@ -22,14 +22,13 @@ MDEventWSWrapper::nDimensions()const
 API::IMDEventWorkspace_sptr
 MDEventWSWrapper::createEmptyMDWS(const MDWSDescription &WSD)
 {
-    if(WSD.n_dims<1||WSD.n_dims>MAX_N_DIM){
+    if(WSD.nDims<1||WSD.nDims>MAX_N_DIM){
    //     g_log.error()<< " Number of requested dimensions: "<<WSD.n_dims<<" exceeds the maxumal allowed numed or dimensions: "<<MAX_N_DIM<<std::endl;
         throw(std::invalid_argument(" Numer of requested dimensions exceeds maximal allowed number of dimensions"));
     }
-    this->n_dimensions = (int)WSD.n_dims;
- 
+    this->n_dimensions = (int)WSD.nDims;
 
-    (this->*(wsCreator[n_dimensions]))(WSD.dim_names,WSD.dim_units,WSD.dim_IDs,WSD.dim_min,WSD.dim_max,10);
+    (this->*(wsCreator[n_dimensions]))(WSD.dimNames,WSD.dimUnits,WSD.dimIDs,WSD.dimMin,WSD.dimMax,WSD.nBins);
 
     return workspace;
 }
@@ -40,7 +39,7 @@ MDEventWSWrapper::addMDData(std::vector<float> &sig_err,std::vector<uint16_t> &r
 {
     if(data_size==0)return;
 
-   // run the actual addition 
+   // perform the actual dimension-dependant addition 
    (this->*(mdEvSummator[n_dimensions]))(&sig_err[0],&run_index[0],&det_id[0],&Coord[0],data_size);
 
 }

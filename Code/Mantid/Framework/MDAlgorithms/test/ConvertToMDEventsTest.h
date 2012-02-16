@@ -133,7 +133,7 @@ void testInit(){
     TS_ASSERT_THROWS_NOTHING( pAlg->initialize() )
     TS_ASSERT( pAlg->isInitialized() )
 
-    TSM_ASSERT_EQUALS("algortithm should have 15 propeties",15,(size_t)(pAlg->getProperties().size()));
+    TSM_ASSERT_EQUALS("algortithm should have 16 propeties",16,(size_t)(pAlg->getProperties().size()));
 }
 // TEST QMode
 void testParseQMode_WrongThrows()
@@ -666,9 +666,9 @@ void test_buildDimNames(){
     TargWSDescription.rotMatrix.assign(9,0);
 
     pAlg->buildDimNames(TargWSDescription);
-    TS_ASSERT_EQUALS("[Qh,0,0]",TargWSDescription.dim_names[0]);
-    TS_ASSERT_EQUALS("[0,Qk,0]",TargWSDescription.dim_names[1]);
-    TS_ASSERT_EQUALS("[0,0,Ql]",TargWSDescription.dim_names[2]);
+    TS_ASSERT_EQUALS("[Qh,0,0]",TargWSDescription.dimNames[0]);
+    TS_ASSERT_EQUALS("[0,Qk,0]",TargWSDescription.dimNames[1]);
+    TS_ASSERT_EQUALS("[0,0,Ql]",TargWSDescription.dimNames[2]);
     
 
 }

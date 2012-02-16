@@ -46,7 +46,7 @@ typedef void (MDEventWSWrapper::*fpVoidMethod)();
 typedef void(MDEventWSWrapper::*fpAddData)(float *,uint16_t *,uint32_t*,coord_t*,size_t)const;
 /// signature for the internal templated function pointer to create workspace
 typedef  void(MDEventWSWrapper::*fpCreateWS)(const Strings &,const Strings &t,const Strings &,
-          const std::vector<double> &, const std::vector<double> &, size_t );
+          const std::vector<double> &, const std::vector<double> &, const std::vector<size_t> &);
 
 
 class DLLExport MDEventWSWrapper
@@ -96,18 +96,23 @@ private:
    /// helper function to create empty MDEventWorkspace with nd dimensions 
    template<size_t nd>
    void  createEmptyEventWS(const Strings &targ_dim_names,const Strings &targ_dim_ID,const Strings &targ_dim_units,
-                             const std::vector<double> &dim_min, const std::vector<double> &dim_max, size_t numBins)
+                             const std::vector<double> &dim_min, const std::vector<double> &dim_max,const std::vector<size_t> &numBins)
    {
 
-           boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> > ws = 
-           boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>, nd> >(new MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>, nd>());
-    
+        boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> > ws = 
+        boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>, nd> >(new MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>, nd>());
+        size_t nBins(10);
+
         // Give all the dimensions
         for (size_t d=0; d<nd; d++)
         {
-             Geometry::MDHistoDimension * dim = new Geometry::MDHistoDimension(targ_dim_names[d], targ_dim_ID[d], targ_dim_units[d], 
-                 coord_t(dim_min[d]), coord_t(dim_max[d]), numBins);
-                 ws->addDimension(Geometry::MDHistoDimension_sptr(dim));
+            if(!numBins.empty()){
+                nBins=numBins[d];
+            }
+
+            Geometry::MDHistoDimension * dim = new Geometry::MDHistoDimension(targ_dim_names[d], targ_dim_ID[d], targ_dim_units[d], 
+                                                                              coord_t(dim_min[d]), coord_t(dim_max[d]), nBins);
+            ws->addDimension(Geometry::MDHistoDimension_sptr(dim));
         }
         ws->initialize();
 
@@ -119,6 +124,12 @@ private:
      //ws->splitBox();
         this->workspace = ws;
    }
+   /// terminator for 0 dimensions, will throw
+   void createEmptyEventWS_wrong(const Strings &,const Strings &,const Strings &,
+                                        const std::vector<double> &, const std::vector<double> &, const std::vector<size_t> &){
+       throw(std::invalid_argument("MDEventWSWrapper:createEmptyEventWS can not be initated with 0 dimensions"));
+   }
+
     /// templated by number of dimesnions function to add multidimensional data to the workspace
    template<size_t nd>
    void add_MDData(float *sig_err,uint16_t *run_index,uint32_t* det_id,coord_t* Coord,size_t data_size)const
@@ -157,11 +168,6 @@ private:
    void  calc_Centroid_wrong(void){
         //   g_log.error()<<" MDEventWSWrapper:calc_Centroid MDEventWSWrapper class has not been initiated with any number of dimensions\n";
         throw(std::invalid_argument(" class has not been initiated"));
-   }
-   /// terminator for 0 dimensions, will throw
-   void createEmptyEventWS_wrong(const Strings &,const Strings &,const Strings &,
-                                        const std::vector<double> &, const std::vector<double> &, size_t ){
-       throw(std::invalid_argument("MDEventWSWrapper:createEmptyEventWS can not be initated with 0 dimensions"));
    }
 
    void add_MDData_wrong(float *,uint16_t *,uint32_t*,coord_t* ,size_t)const{
