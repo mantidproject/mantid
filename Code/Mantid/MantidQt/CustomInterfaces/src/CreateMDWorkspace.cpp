@@ -97,6 +97,15 @@ Initalize the layout.
 void CreateMDWorkspace::initLayout()
 {
   m_uiForm.setupUi(this);
+
+  std::string location;
+  if(!Mantid::Kernel::ConfigService::Instance().getValue("defaultsave.directory", location))
+  {
+    location = Mantid::Kernel::ConfigService::Instance().getTempDir().c_str();
+  }
+  m_uiForm.txt_location->setText(location.c_str());
+  m_uiForm.txt_location->setEnabled(false);
+
   connect(m_uiForm.ck_merge, SIGNAL(clicked(bool)), this, SLOT(mergeClicked(bool)));
   connect(m_uiForm.btn_create, SIGNAL(clicked()), this, SLOT(createMDWorkspaceClicked()));
   connect(m_uiForm.btn_add_workspace, SIGNAL(clicked()), this, SLOT(addWorkspaceClicked()));
@@ -108,6 +117,7 @@ void CreateMDWorkspace::initLayout()
   connect(m_uiForm.btn_set_goniometer, SIGNAL(clicked()), this, SLOT(setGoniometerClicked()));
   connect(m_uiForm.btn_add_logs, SIGNAL(clicked()), this, SLOT(setLogValueClicked()));
   connect(m_uiForm.btn_help, SIGNAL(clicked()), this, SLOT(helpClicked()));
+  connect(m_uiForm.btn_set_location, SIGNAL(clicked()), this, SLOT(setLocationClicked()));
   
   //Set MVC Model
   m_uiForm.tableView->setModel(m_model);
@@ -515,6 +525,16 @@ void CreateMDWorkspace::initLocalPython()
 {
 }
 
+/// Handler for setting the output location
+void CreateMDWorkspace::setLocationClicked()
+{
+  QString temp = QFileDialog::getExistingDirectory(this, tr("Open Directory"), "/home");
+  if(!temp.isEmpty())
+  {
+    m_uiForm.txt_location->setText(temp);
+  }
+}
+
 /*
 Run a generic confirmation dialog.
 @param message : The message to display.
@@ -531,6 +551,9 @@ int CreateMDWorkspace::runConfirmation(const std::string& message)
 void CreateMDWorkspace::createMDWorkspaceClicked()
 {
   QString mergedWorkspaceName = m_uiForm.txt_merged_workspace_name->text().trimmed();
+  
+  //Output location.
+  QString location = m_uiForm.txt_location->text();
 
   if(m_data.size() == 0)
   {
@@ -558,7 +581,6 @@ void CreateMDWorkspace::createMDWorkspaceClicked()
   QString analysisMode = algDlg.getAnalysisMode();
   QString otherDimensions = algDlg.getOtherDimensions();
   QString preProcessedDetectors = algDlg.getPreprocessedDetectors();
-  QString location = algDlg.getLocation();
   
   //2) Run ConvertToMDEvents on each workspace.
   QString fileNames;
@@ -607,7 +629,6 @@ void CreateMDWorkspace::createMDWorkspaceClicked()
     currentMemento->cleanUp();
   }
 
-
   //3) Run Merge algorithm (if required)
   if(m_uiForm.ck_merge->isChecked())
   {
@@ -625,7 +646,7 @@ void CreateMDWorkspace::createMDWorkspaceClicked()
     }
   }
   //Report successful conversion.
-  std::string msg = "Success. Ouput MD files have been written to : " + algDlg.getLocation().toStdString();
+  std::string msg = "Success. Ouput MD files have been written to : " + location.toStdString();
   runConfirmation(msg);
 }
 

@@ -5,11 +5,13 @@
 #include <QCheckBox>
 #include <QFileDialog>
 
+/**
+Constructor
+*/
 CreateMDWorkspaceAlgDialog::CreateMDWorkspaceAlgDialog()
 {
   m_uiForm.setupUi(this);
 
-  connect(m_uiForm.btn_output_location, SIGNAL(clicked()), this, SLOT(outputLocationClicked()));
   connect(m_uiForm.buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
   connect(m_uiForm.buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 
@@ -20,8 +22,6 @@ CreateMDWorkspaceAlgDialog::CreateMDWorkspaceAlgDialog()
   m_uiForm.combo_analysis_mode->addItem("Elastic");
   m_uiForm.combo_analysis_mode->addItem("Indirect");
 
-  m_location = QString(Mantid::Kernel::ConfigService::Instance().getTempDir().c_str());
-  
   this->setWindowTitle("Set MDWorkspace Creation Parameters");
 }
 
@@ -57,16 +57,6 @@ QString CreateMDWorkspaceAlgDialog::getPreprocessedDetectors() const
   return result;
 }
 
-QString CreateMDWorkspaceAlgDialog::getLocation() const
-{
-  return m_location;
-}
-
 CreateMDWorkspaceAlgDialog::~CreateMDWorkspaceAlgDialog()
 {
-}
-
-void CreateMDWorkspaceAlgDialog::outputLocationClicked()
-{
-  this->m_location = QFileDialog::getExistingDirectory(this, tr("Open Directory"), "/home");
 }

@@ -69,10 +69,16 @@ namespace MantidQt
 
       void helpClicked();
 
+      void setLocationClicked();
+
     private:
+      /// UI form
       Ui::CreateMDWorkspace  m_uiForm;
+      /// Collection of all mementos
       WorkspaceMementoCollection m_data;
+      /// Current memento
       WorkspaceMemento_sptr m_current;
+      /// QT model for MVC table view
       QtWorkspaceMementoModel* m_model;
     };
   }

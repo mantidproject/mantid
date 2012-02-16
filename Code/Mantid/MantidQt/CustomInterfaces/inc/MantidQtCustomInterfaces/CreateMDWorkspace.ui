@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>907</width>
+    <width>916</width>
     <height>757</height>
    </rect>
   </property>
@@ -341,6 +341,20 @@
                    <string>Name for the merged workspace</string>
                   </property>
                  </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="locationLayout">
+                <item>
+                 <widget class="QPushButton" name="btn_set_location">
+                  <property name="text">
+                   <string>Set Output Location</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="txt_location"/>
                 </item>
                </layout>
               </item>

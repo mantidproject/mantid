@@ -19,12 +19,7 @@ public:
   QString getOtherDimensions() const;
   QString getMaxExtents() const;
   QString getMinExtents() const;
-  QString getLocation() const;
   QString getPreprocessedDetectors() const;
-
-private slots:
-
-    void outputLocationClicked();
 
 private:
 
