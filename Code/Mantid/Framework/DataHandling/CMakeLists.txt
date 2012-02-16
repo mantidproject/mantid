@@ -9,6 +9,7 @@ set ( SRC_FILES
 	src/GroupDetectors.cpp
 	src/GroupDetectors2.cpp
 	src/ISISDataArchive.cpp
+	src/LiveDataAlgorithm.cpp
 	src/Load.cpp
 	src/LoadAscii.cpp
 	src/LoadCalFile.cpp
@@ -125,6 +126,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/GroupDetectors.h
 	inc/MantidDataHandling/GroupDetectors2.h
 	inc/MantidDataHandling/ISISDataArchive.h
+	inc/MantidDataHandling/LiveDataAlgorithm.h
 	inc/MantidDataHandling/Load.h
 	inc/MantidDataHandling/LoadAscii.h
 	inc/MantidDataHandling/LoadCalFile.h
@@ -236,6 +238,7 @@ set ( TEST_FILES
 	test/GroupDetectorsTest.h
 	test/ISISDataArchiveTest.h
 	test/InstrumentRayTracerTest.h
+	test/LiveDataAlgorithmTest.h
 	test/LoadAsciiTest.h
 	test/LoadCalFileTest.h
 	test/LoadCanSAS1dTest.h

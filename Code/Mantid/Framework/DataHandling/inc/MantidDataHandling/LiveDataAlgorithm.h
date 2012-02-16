@@ -1,25 +1,19 @@
-#ifndef MANTID_DATAHANDLING_STARTLIVEDATA_H_
-#define MANTID_DATAHANDLING_STARTLIVEDATA_H_
+#ifndef MANTID_DATAHANDLING_LIVEDATAALGORITHM_H_
+#define MANTID_DATAHANDLING_LIVEDATAALGORITHM_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataHandling/LiveDataAlgorithm.h"
 
 namespace Mantid
 {
 namespace DataHandling
 {
 
-  /** Algorithm that begins live data monitoring.
-   *
-   * The algorithm properties specify which instrument to observe,
-   * with which method and starting from when.
-   *
-   * The algorithm will run LoadLiveData ONCE, and return the result
-   * of the processing specified.
-   *
-   * This algorithm will launch MonitorLiveData ASYNCHRONOUSLY.
-   * The MonitorLiveData will repeatedly call LoadLiveData at the desired update frequency.
+  /** Abstract base class with common properties
+   * for the following algorithms dealing with live data:
+   * - StartLiveData
+   * - LoadLiveData
+   * - MonitorLiveData
     
     @date 2012-02-16
 
@@ -43,21 +37,14 @@ namespace DataHandling
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport StartLiveData  : public LiveDataAlgorithm
+  class DLLExport LiveDataAlgorithm  : public API::Algorithm
   {
   public:
-    StartLiveData();
-    virtual ~StartLiveData();
+    LiveDataAlgorithm();
+    virtual ~LiveDataAlgorithm();
     
-    virtual const std::string name() const;
-    virtual int version() const;
-    virtual const std::string category() const;
-
-  private:
-    virtual void initDocs();
-    void init();
-    void exec();
-
+  protected:
+    void initProps();
 
   };
 
@@ -65,4 +52,4 @@ namespace DataHandling
 } // namespace DataHandling
 } // namespace Mantid
 
-#endif  /* MANTID_DATAHANDLING_STARTLIVEDATA_H_ */
+#endif  /* MANTID_DATAHANDLING_LIVEDATAALGORITHM_H_ */
