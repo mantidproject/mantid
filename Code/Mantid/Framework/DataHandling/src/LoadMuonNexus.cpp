@@ -190,7 +190,7 @@ namespace Mantid
         int length = deadTimes.dim0();
         for (int i = 0; i < length; i++)
         {
-          defaultDeadTimes.push_back(*(deadTimes() + i) );
+          defaultDeadTimes.push_back(static_cast<double>(*(deadTimes() + i) ) );
         }
         setProperty("DeadTimes", defaultDeadTimes);
       }
