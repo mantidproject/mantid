@@ -63,6 +63,9 @@ namespace Mantid
       DEFINE_TYPE_MAPPING(int32_t, NPY_INT32);
       DEFINE_TYPE_MAPPING(uint32_t, NPY_UINT32);
       DEFINE_TYPE_MAPPING(int64_t, NPY_INT64);
+#ifdef __APPLE__
+      DEFINE_TYPE_MAPPING(unsigned long, NPY_ULONG);
+#endif
       DEFINE_TYPE_MAPPING(uint64_t, NPY_UINT64);
       DEFINE_TYPE_MAPPING(double, NPY_DOUBLE);
       // Not needed outside here

@@ -56,6 +56,9 @@ namespace Mantid
         REGISTER_ARRAYPROPERTY_HANDLER(std::vector<uint32_t>);
         REGISTER_ARRAYPROPERTY_HANDLER(std::vector<int64_t>);
         REGISTER_ARRAYPROPERTY_HANDLER(std::vector<uint64_t>);
+#ifdef __APPLE__
+        REGISTER_ARRAYPROPERTY_HANDLER(std::vector<unsigned long>);
+#endif
         REGISTER_ARRAYPROPERTY_HANDLER(std::vector<double>);
         REGISTER_ARRAYPROPERTY_HANDLER(std::vector<std::string>);
 

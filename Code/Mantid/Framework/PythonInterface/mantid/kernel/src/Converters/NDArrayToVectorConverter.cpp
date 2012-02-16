@@ -159,6 +159,9 @@ namespace Mantid
     template DLLExport struct NDArrayToVectorConverter<uint32_t>;
     template DLLExport struct NDArrayToVectorConverter<int64_t>;
     template DLLExport struct NDArrayToVectorConverter<uint64_t>;
+#ifdef __APPLE__
+    template DLLExport struct NDArrayToVectorConverter<unsigned long>;
+#endif
     template DLLExport struct NDArrayToVectorConverter<double>;
     template DLLExport struct NDArrayToVectorConverter<std::string>;
   }

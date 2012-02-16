@@ -70,6 +70,9 @@ namespace Mantid
       template DLLExport struct SequenceTypeHandler<std::vector<uint32_t> >;
       template DLLExport struct SequenceTypeHandler<std::vector<int64_t> >;
       template DLLExport struct SequenceTypeHandler<std::vector<uint64_t> >;
+#ifdef __APPLE__
+      template DLLExport struct SequenceTypeHandler<std::vector<unsigned long> >;
+#endif
       template DLLExport struct SequenceTypeHandler<std::vector<double> >;
       template DLLExport struct SequenceTypeHandler<std::vector<std::string> >;
     }
