@@ -51,7 +51,6 @@ namespace DataHandling
     
     virtual const std::string name() const;
     virtual int version() const;
-    virtual const std::string category() const;
 
   private:
     virtual void initDocs();

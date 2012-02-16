@@ -1,5 +1,6 @@
 #include "MantidDataHandling/LiveDataAlgorithm.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/DateAndTime.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -23,6 +24,8 @@ namespace DataHandling
   {
   }
   
+  /// Algorithm's category for identification. @see Algorithm::category
+  const std::string LiveDataAlgorithm::category() const { return "DataHandling//LiveData";}
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -67,6 +70,38 @@ namespace DataHandling
   }
 
 
+  //----------------------------------------------------------------------------------------------
+  /** @return the value of the StartTime property */
+  Mantid::Kernel::DateAndTime LiveDataAlgorithm::getStartTime() const
+  {
+    std::string date = getPropertyValue("StartTime");
+    if (date.empty())
+      return DateAndTime();
+    return DateAndTime(date);
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Using the ProcessingAlgorithm and AlgorithmProperties properties,
+   * create and initialize an algorithm for processing.
+   *
+   * @return shared pointer to the algorithm, ready for execution.
+   *         Returns an empty pointer if no algorithm was chosen.
+   */
+  IAlgorithm_sptr LiveDataAlgorithm::makeAlgorithm()
+  {
+    IAlgorithm_sptr alg;
+    std::string algoName = this->getPropertyValue("ProcessingAlgorithm");
+    algoName = Strings::strip(algoName);
+    if (algoName.empty())
+      return alg;
+
+    std::string props = this->getPropertyValue("AlgorithmProperties");
+
+    // Create the algorithm and pass it the properties
+    alg = IAlgorithm_sptr(FrameworkManager::Instance().createAlgorithm(algoName, props));
+
+    return alg;
+  }
 
 } // namespace Mantid
 } // namespace DataHandling

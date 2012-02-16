@@ -1,20 +1,16 @@
-#ifndef MANTID_DATAHANDLING_LIVEDATAALGORITHM_H_
-#define MANTID_DATAHANDLING_LIVEDATAALGORITHM_H_
+#ifndef MANTID_DATAHANDLING_LOADLIVEDATA_H_
+#define MANTID_DATAHANDLING_LOADLIVEDATA_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/DateAndTime.h"
 
 namespace Mantid
 {
 namespace DataHandling
 {
 
-  /** Abstract base class with common properties
-   * for the following algorithms dealing with live data:
-   * - StartLiveData
-   * - LoadLiveData
-   * - MonitorLiveData
+  /** Algorithm to load a chunk of live data.
+   * Called by StartLiveData and MonitorLiveData
     
     @date 2012-02-16
 
@@ -38,19 +34,20 @@ namespace DataHandling
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport LiveDataAlgorithm  : public API::Algorithm
+  class DLLExport LoadLiveData  : public LiveDataAlgorithm
   {
   public:
-    LiveDataAlgorithm();
-    virtual ~LiveDataAlgorithm();
-    virtual const std::string category() const;
+    LoadLiveData();
+    virtual ~LoadLiveData();
+    
+    virtual const std::string name() const;
+    virtual int version() const;
 
-  protected:
-    void initProps();
+  private:
+    virtual void initDocs();
+    void init();
+    void exec();
 
-    Mantid::Kernel::DateAndTime getStartTime() const;
-
-    Mantid::API::IAlgorithm_sptr makeAlgorithm();
 
   };
 
@@ -58,4 +55,4 @@ namespace DataHandling
 } // namespace DataHandling
 } // namespace Mantid
 
-#endif  /* MANTID_DATAHANDLING_LIVEDATAALGORITHM_H_ */
+#endif  /* MANTID_DATAHANDLING_LOADLIVEDATA_H_ */

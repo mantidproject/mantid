@@ -2,7 +2,7 @@
 TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
 *WIKI*/
 
-#include "MantidDataHandling/StartLiveData.h"
+#include "MantidDataHandling/LoadLiveData.h"
 #include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;
@@ -14,68 +14,53 @@ namespace DataHandling
 {
 
   // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(StartLiveData)
+  DECLARE_ALGORITHM(LoadLiveData)
   
-
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  StartLiveData::StartLiveData()
+  LoadLiveData::LoadLiveData()
   {
   }
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  StartLiveData::~StartLiveData()
+  LoadLiveData::~LoadLiveData()
   {
   }
   
 
   //----------------------------------------------------------------------------------------------
   /// Algorithm's name for identification. @see Algorithm::name
-  const std::string StartLiveData::name() const { return "StartLiveData";};
+  const std::string LoadLiveData::name() const { return "LoadLiveData";};
   
   /// Algorithm's version for identification. @see Algorithm::version
-  int StartLiveData::version() const { return 1;};
-
+  int LoadLiveData::version() const { return 1;};
+  
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
-  void StartLiveData::initDocs()
+  void LoadLiveData::initDocs()
   {
-    this->setWikiSummary("Begin live data monitoring.");
-    this->setOptionalMessage("Begin live data monitoring.");
+    this->setWikiSummary("Load a chunk of live data. You should call StartLiveData, and not this algorithm directly.");
+    this->setOptionalMessage("Load a chunk of live data. You should call StartLiveData, and not this algorithm directly.");
   }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
-  void StartLiveData::init()
+  void LoadLiveData::init()
   {
-    declareProperty(new PropertyWithValue<bool>("FromNow", true, Direction::Input),
-        "Process live data starting from the current time only.");
-
-    declareProperty(new PropertyWithValue<bool>("FromStartOfRun", false, Direction::Input),
-        "Record live data, but go back to the the start of the run and process all data since then.");
-
-    declareProperty(new PropertyWithValue<bool>("FromTime", false, Direction::Input),
-        "Record live data, but go back to a specific time and process all data since then.\n"
-        "You must specify the StartTime property if this is checked.");
-
-    declareProperty(new PropertyWithValue<double>("UpdateEvery", 60.0, Direction::Input),
-        "Frequency of updates, in seconds. Default 60.");
-
-    // Initialize the properties common to LiveDataAlgorithm.
-    initProps();
+    this->initProps();
   }
 
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
-  void StartLiveData::exec()
+  void LoadLiveData::exec()
   {
-    // TODO Auto-generated execute stub
+
   }
 
 

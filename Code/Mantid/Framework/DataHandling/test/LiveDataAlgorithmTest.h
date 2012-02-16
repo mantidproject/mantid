@@ -13,34 +13,46 @@ using namespace Mantid;
 using namespace Mantid::DataHandling;
 using namespace Mantid::API;
 
+//------------------------------------------------------------------------------------------------
+/** Concrete declaration of LiveDataAlgorithm for testing */
+class LiveDataAlgorithmImpl : public LiveDataAlgorithm
+{
+  // Make all the members public so I can test them.
+  friend class LiveDataAlgorithmTest;
+public:
+  virtual const std::string name() const { return "LiveDataAlgorithmImpl";};
+  virtual int version() const { return 1;};
+  virtual const std::string category() const { return "Testing";}
+  void init()
+  { this->initProps(); }
+  void exec() {}
+};
+
+
 class LiveDataAlgorithmTest : public CxxTest::TestSuite
 {
 public:
-//
-//  void test_exec()
-//  {
-//    // Name of the output workspace.
-//    std::string outWSName("LiveDataAlgorithmTest_OutputWS");
-//
-//    LiveDataAlgorithm alg;
-//    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-//    TS_ASSERT( alg.isInitialized() )
-//    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("REPLACE_PROPERTY_NAME_HERE!!!!", "value") );
-//    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
-//    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
-//    TS_ASSERT( alg.isExecuted() );
-//
-//    // Retrieve the workspace from data service. TODO: Change to your desired type
-//    Workspace_sptr ws;
-//    TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve(outWSName)) );
-//    TS_ASSERT(ws);
-//    if (!ws) return;
-//
-//    // TODO: Check the results
-//
-//    // Remove workspace from the data service.
-//    AnalysisDataService::Instance().remove(outWSName);
-//  }
+
+  void test_initProps()
+  {
+    LiveDataAlgorithmImpl alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initProps() )
+  }
+
+  void test_exec()
+  {
+    // Name of the output workspace.
+    std::string outWSName("LiveDataAlgorithmTest_OutputWS");
+
+    LiveDataAlgorithmImpl alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("StartTime", "2010-09-14T04:20:12.95") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSName);
+  }
   
   void test_Something()
   {
