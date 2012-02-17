@@ -22,7 +22,9 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 #include "MantidKernel/System.h"
-#include "MantidPythonInterface/kernel/NumpyConverters.h"
+#include "MantidPythonInterface/kernel/Converters/VectorToNDArray.h"
+#include "MantidPythonInterface/kernel/Converters/PyArrayType.h"
+
 #include <boost/type_traits/integral_constant.hpp>
 #include <boost/type_traits/is_reference.hpp>
 #include <boost/type_traits/remove_reference.hpp>
@@ -36,54 +38,6 @@ namespace Mantid
   {
     namespace Policies
     {
-      //-----------------------------------------------------------------------
-      // Conversion Policies
-      //-----------------------------------------------------------------------
-
-      /**
-       * WrapReadOnly is a policy for VectorToPython
-       * to wrap the vector in a read-only numpy array
-       * that looks at the original data. No copy is performed
-       */
-
-      struct WrapReadOnly
-      {
-        template<typename VectorType>
-        struct apply
-        {
-          /**
-           * Returns a read-only Numpy array wrapped around an existing vector
-           * @param cvector
-           * @return
-           */
-          static PyObject * create(const VectorType & cvector)
-          {
-            return Numpy::wrapWithReadOnlyNumpy(cvector);
-          }
-        };
-      };
-
-      /**
-       * WrapReadWrite is a policy for VectorToPython
-       * to wrap the vector in a read-write numpy array
-       * that looks at the original data. No copy is performed
-       */
-      struct WrapReadWrite
-      {
-        template<typename VectorType>
-        struct apply
-        {
-          /**
-           * Returns a read-write Numpy array wrapped around an existing vector
-           * @param cvector
-           * @return
-           */
-          static PyObject * create(const VectorType & cvector)
-          {
-            return Numpy::wrapWithNumpy(cvector);
-          }
-        };
-      };
 
       namespace // anonymous
       {
@@ -96,13 +50,12 @@ namespace Mantid
         {
           inline PyObject * operator()(const VectorType & cvector) const
           {
-            typedef typename ConversionPolicy::template apply<VectorType> policy;
-            return policy::create(cvector);
+            return Converters::VectorToNDArray<VectorType, ConversionPolicy>()(cvector);
           }
 
           inline PyTypeObject const* get_pytype() const
           {
-            return Numpy::getNDArrayType();
+            return Converters::getNDArrayType();
           }
         };
       }

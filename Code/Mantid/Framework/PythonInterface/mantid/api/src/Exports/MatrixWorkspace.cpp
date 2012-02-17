@@ -5,7 +5,7 @@
 #include "MantidPythonInterface/kernel/PropertyWithValue.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterSingleValueHandler.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
-#include "MantidPythonInterface/api/WorkspaceToNumpy.h"
+#include "MantidPythonInterface/api/CloneMatrixWorkspace.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
@@ -17,6 +17,7 @@ using Mantid::Geometry::IDetector_sptr;
 using Mantid::Kernel::PropertyWithValue;
 using Mantid::Kernel::DataItem_sptr;
 namespace Policies = Mantid::PythonInterface::Policies;
+namespace Converters = Mantid::PythonInterface::Converters;
 using namespace boost::python;
 
 namespace
@@ -34,9 +35,9 @@ void export_MatrixWorkspace()
   /// Typedef for data access, i.e. dataX,Y,E members
   typedef Mantid::MantidVec&(MatrixWorkspace::*data_modifier)(const std::size_t);
   /// return_value_policy for read-only numpy array
-  typedef return_value_policy<Policies::VectorToNumpy<Policies::WrapReadOnly> > return_readonly_numpy;
+  typedef return_value_policy<Policies::VectorToNumpy<Converters::WrapReadOnly> > return_readonly_numpy;
   /// return_value_policy for read-write numpy array
-  typedef return_value_policy<Policies::VectorToNumpy<Policies::WrapReadWrite> > return_readwrite_numpy;
+  typedef return_value_policy<Policies::VectorToNumpy<Converters::WrapReadWrite> > return_readwrite_numpy;
 
 
 
@@ -82,19 +83,19 @@ void export_MatrixWorkspace()
          "Creates a writable numpy wrapper around the original E data at the given index")
     .def("dataDx", (data_modifier)&MatrixWorkspace::dataDx, return_readwrite_numpy(),
         "Creates a writable numpy wrapper around the original Dx data at the given index")
-    .def("extractX", Mantid::PythonInterface::Numpy::cloneX, 
+    .def("extractX", Mantid::PythonInterface::cloneX,
          "Extracts (copies) the X data from the workspace into a 2D numpy array. "
          "Note: This can fail for large workspaces as numpy will require a block "
          "of memory free that will fit all of the data.")
-    .def("extractY", Mantid::PythonInterface::Numpy::cloneY, 
+    .def("extractY", Mantid::PythonInterface::cloneY,
          "Extracts (copies) the Y data from the workspace into a 2D numpy array. "
          "Note: This can fail for large workspaces as numpy will require a block "
          "of memory free that will fit all of the data.")
-    .def("extractE", Mantid::PythonInterface::Numpy::cloneE, 
+    .def("extractE", Mantid::PythonInterface::cloneE,
          "Extracts (copies) the E data from the workspace into a 2D numpy array. "
          "Note: This can fail for large workspaces as numpy will require a block "
          "of memory free that will fit all of the data.")
-    .def("extractDx", Mantid::PythonInterface::Numpy::cloneDx,
+    .def("extractDx", Mantid::PythonInterface::cloneDx,
          "Extracts (copies) the E data from the workspace into a 2D numpy array. "
          "Note: This can fail for large workspaces as numpy will require a block "
           "of memory free that will fit all of the data.")

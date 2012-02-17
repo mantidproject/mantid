@@ -1,5 +1,5 @@
-#ifndef MANTID_PYTHONINTERFACE_WORKSPACETONUMPY_H_
-#define MANTID_PYTHONINTERFACE_WORKSPACETONUMPY_H_
+#ifndef MANTID_PYTHONINTERFACE_CLONEMATRIXWORKSPACE__H_
+#define MANTID_PYTHONINTERFACE_CLONEMATRIXWORKSPACE_H_
 /*
   Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -33,9 +33,6 @@ namespace Mantid
 
   namespace PythonInterface
   {
-    namespace Numpy
-    {
-
       //** @name Numpy clones of data*/
       ///{
       /// Create a numpy array from the X values of the given workspace reference
@@ -48,9 +45,8 @@ namespace Mantid
       PyObject *cloneDx(API::MatrixWorkspace &self);
       ///@}
 
-    }
   }
 }
 
 
-#endif /* MANTID_PYTHONINTERFACE_WORKSPACETONUMPY_H_ */
+#endif /* MANTID_PYTHONINTERFACE_CLONEMATRIXWORKSPACE_H_ */

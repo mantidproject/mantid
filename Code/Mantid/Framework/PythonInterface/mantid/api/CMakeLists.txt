@@ -40,13 +40,13 @@ set ( EXPORT_FILES
 # Files containing additional helper code that are not related to exporting class/functions
 set ( SRC_FILES 
   src/AlgorithmWrapper.cpp
-  src/WorkspaceToNumpy.cpp
+  src/CloneMatrixWorkspace.cpp
 )
 
 set ( INC_FILES 
   ${HEADER_DIR}/api/AlgorithmWrapper.h
   ${HEADER_DIR}/api/BinaryOperations.h
-  ${HEADER_DIR}/api/WorkspaceToNumpy.h
+  ${HEADER_DIR}/api/CloneMatrixWorkspace.h
 )
 
 set ( PY_FILES 
