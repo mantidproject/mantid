@@ -114,7 +114,13 @@ namespace Mantid
                        << "\tNumber of failures - " << numFailed << "\n";
 
       setProperty("NumberOfFailures", numFailed);
-      setProperty("OutputWorkspace", countsWS);
+
+      // extract and set the mask result
+      IAlgorithm_sptr childAlg = createSubAlgorithm("ExtractMask");
+      childAlg->setProperty( "InputWorkspace", countsWS );
+      childAlg->executeAsSubAlg();
+      MatrixWorkspace_sptr maskWS = childAlg->getProperty("OutputWorkspace");
+      setProperty("OutputWorkspace", maskWS);
     }
 
     /** Loads and checks the values passed to the algorithm

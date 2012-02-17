@@ -190,7 +190,7 @@ private:
   double m_YSum;
   enum spectraIndexConsts{ THEMASKED = 40, SAVEDBYERRORBAR = 143, Nhist = 144 };
   //these values must match the values in MedianDetectorTest.h
-  enum FLAGS{ BAD_VAL = 0, GOOD_VAL = 1 };
+  enum FLAGS{ BAD_VAL = 1, GOOD_VAL = 0 };
 
 };
 
