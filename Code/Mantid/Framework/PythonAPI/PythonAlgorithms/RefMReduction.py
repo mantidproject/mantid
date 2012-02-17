@@ -216,14 +216,7 @@ class RefMReduction(PythonAlgorithm):
         # Subtract background
         if self.getProperty("SubtractSignalBackground"):
             bck_range = self.getProperty("SignalBackgroundPixelRange")
-            bck_ws, npix_bck = self._crop_roi(ws_name, bck_range, low_res_range)
-            #scaling_factor = math.fabs(peak_range[1]-peak_range[0])/\
-            #                math.fabs(bck_range[1]-bck_range[0])
-            scaling_factor = npix/npix_bck
-            Scale(InputWorkspace=bck_ws, OutputWorkspace=bck_ws,
-                  Factor=scaling_factor, Operation="Multiply")
-            Minus(LHSWorkspace=output_roi, RHSWorkspace=bck_ws,
-                  OutputWorkspace=output_roi)
+            self._subtract_bakcground(ws_name, output_roi, peak_range, npix, bck_range, low_res_range)
         
         return output_roi
  
@@ -308,18 +301,49 @@ class RefMReduction(PythonAlgorithm):
             # Subtract background
             if self.getProperty("SubtractNormBackground"):
                 bck_range = self.getProperty("NormBackgroundPixelRange")
-                bck_ws, npix_bck = self._crop_roi(ws_wl_profile, bck_range, low_res_range)
-                #scaling_factor = math.fabs(peak_range[1]-peak_range[0])/\
-                #                math.fabs(bck_range[1]-bck_range[0])
-                scaling_factor = npix/npix_bck
-                Scale(InputWorkspace=bck_ws, OutputWorkspace=bck_ws,
-                      Factor=scaling_factor, Operation="Multiply")
-                Minus(LHSWorkspace=ws_wl_profile_roi, RHSWorkspace=bck_ws,
-                      OutputWorkspace=ws_wl_profile_roi)  
+                self._subtract_bakcground(ws_wl_profile, ws_wl_profile_roi, peak_range, npix, bck_range, low_res_range)
+
             Scale(InputWorkspace=ws_wl_profile_roi, OutputWorkspace=ws_wl_profile_roi,
                   Factor=1.0/(peak_range[1]-peak_range[0]), Operation="Multiply")     
         
         return ws_wl_profile_roi
+        
+    def _subtract_bakcground(self, raw_ws, peak_ws, peak_range, npix_peak, bck_range, low_res_range):
+        """
+            Subtract background around a peak
+        """
+        # Look for overlaps
+        if bck_range[0]<peak_range[0] and bck_range[1]>peak_range[1]:
+            # Background on both sides
+            bck_ws1, npix_bck1 = self._crop_roi(raw_ws, [bck_range[0],peak_range[0]-1], low_res_range)
+            bck_ws2, npix_bck2 = self._crop_roi(raw_ws, [peak_range[1]+1,bck_range[0]], low_res_range)
+            
+            scaling_factor = npix_peak/(2.0*npix_bck1)
+            Scale(InputWorkspace=bck_ws1, OutputWorkspace=bck_ws1,
+                  Factor=scaling_factor, Operation="Multiply")
+            scaling_factor = npix_peak/(2.0*npix_bck2)
+            Scale(InputWorkspace=bck_ws2, OutputWorkspace=bck_ws2,
+                  Factor=scaling_factor, Operation="Multiply")
+            Plus(RHSWorkspace=bck_ws1, LHSWorkspace=bck_ws2,
+                OutputWorkspace=bck_ws1)
+            Minus(LHSWorkspace=peak_ws, RHSWorkspace=bck_ws1,
+                  OutputWorkspace=peak_ws)
+        else:
+            if bck_range[1]>peak_range[0] and bck_range[1]<peak_range[1]:
+                mtd.sendLogMessage("RefMReduction: background range overlaps with peak")
+                bck_range[1]=peak_range[0]-1
+                
+            if bck_range[0]<peak_range[1] and bck_range[0]>peak_range[0]:
+                mtd.sendLogMessage("RefMReduction: background range overlaps with peak")
+                bck_range[0]=peak_range[1]+1
+            
+            bck_ws, npix_bck = self._crop_roi(raw_ws, bck_range, low_res_range)
+            scaling_factor = npix_peak/npix_bck
+            Scale(InputWorkspace=bck_ws, OutputWorkspace=bck_ws,
+                  Factor=scaling_factor, Operation="Multiply")
+            Minus(LHSWorkspace=peak_ws, RHSWorkspace=bck_ws,
+                  OutputWorkspace=peak_ws)  
+            
         
     def _convert_to_q(self, input_ws, output_ws):
         """
