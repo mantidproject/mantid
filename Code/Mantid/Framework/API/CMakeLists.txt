@@ -51,6 +51,7 @@ set ( SRC_FILES
 	src/ImplicitFunctionParserFactory.cpp
 	src/ImplictFunctionFactory.cpp
 	src/InstrumentDataService.cpp
+	src/LiveListenerFactory.cpp
 	src/LoadAlgorithmFactory.cpp
 	src/LocatedDataRef.cpp
 	src/LocatedDataValue.cpp
@@ -167,6 +168,7 @@ set ( INC_FILES
 	inc/MantidAPI/ImplicitFunctionParserFactory.h
 	inc/MantidAPI/InstrumentDataService.h
 	inc/MantidAPI/Jacobian.h
+	inc/MantidAPI/LiveListenerFactory.h
 	inc/MantidAPI/LoadAlgorithmFactory.h
 	inc/MantidAPI/LocatedDataRef.h
 	inc/MantidAPI/LocatedDataValue.h
@@ -237,6 +239,7 @@ set ( TEST_FILES
 	test/ISpectrumTest.h
 	test/ImplicitFunctionParserFactoryTest.h
 	test/InstrumentDataServiceTest.h
+	test/LiveListenerFactoryTest.h
 	test/MDGeometryTest.h
 	test/MatrixWorkspaceMDIteratorTest.h
 	test/MemoryManagerTest.h

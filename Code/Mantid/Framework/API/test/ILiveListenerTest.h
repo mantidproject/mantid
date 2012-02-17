@@ -8,26 +8,25 @@
 
 using namespace Mantid::API;
 
+class MockILiveListener : public ILiveListener
+{
+public:
+  MockILiveListener() : ILiveListener()
+  {
+    // Set this flag to true for testing
+    m_dataReset = true;
+  }
+  MOCK_CONST_METHOD0(name, std::string());
+  MOCK_CONST_METHOD0(supportsHistory, bool());
+  MOCK_CONST_METHOD0(buffersEvents, bool());
+  MOCK_METHOD1(connect, bool(const Poco::Net::SocketAddress&));
+  MOCK_METHOD1(start, void(Mantid::Kernel::DateAndTime));
+  MOCK_METHOD0(extractData, boost::shared_ptr<MatrixWorkspace>());
+  MOCK_METHOD0(isConnected, bool());
+};
+
 class ILiveListenerTest : public CxxTest::TestSuite
 {
-private:
-  class MockILiveListener : public ILiveListener
-  {
-  public:
-    MockILiveListener() : ILiveListener()
-    {
-      // Set this flag to true for testing
-      m_dataReset = true;
-    }
-    MOCK_CONST_METHOD0(name, std::string());
-    MOCK_CONST_METHOD0(supportsHistory, bool());
-    MOCK_CONST_METHOD0(buffersEvents, bool());
-    MOCK_METHOD1(connect, bool(const Poco::Net::SocketAddress&));
-    MOCK_METHOD1(start, void(Mantid::Kernel::DateAndTime));
-    MOCK_METHOD0(extractData, boost::shared_ptr<MatrixWorkspace>());
-    MOCK_METHOD0(isConnected, bool());
-  };
-
 public:
   void testDataReset()
   {
