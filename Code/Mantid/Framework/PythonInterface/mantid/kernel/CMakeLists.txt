@@ -27,6 +27,7 @@ set ( EXPORT_FILES
 
 set ( SRC_FILES
   src/Converters/NDArrayToVectorConverter.cpp
+  src/Converters/NDArrayTypeIndex.cpp
   src/Registry/SequenceTypeHandler.cpp
   src/Registry/TypeRegistry.cpp
   src/Registry/UpcastRegistry.cpp

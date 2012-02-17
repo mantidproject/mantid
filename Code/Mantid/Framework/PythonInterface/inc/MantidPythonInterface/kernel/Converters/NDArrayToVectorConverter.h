@@ -29,25 +29,27 @@ namespace Mantid
 {
   namespace PythonInterface
   {
-
-    /**
-     * Converts a Python sequence type to a C++ std::vector, where the vector element
-     * type is defined by the template type
-     */
-    template <typename DestElementType>
-    struct DLLExport NDArrayToVectorConverter
+    namespace Converters
     {
-      /// Constructor
-      NDArrayToVectorConverter(const boost::python::object & value);
-      /// Do the conversion
-      const std::vector<DestElementType> operator()();
-    private:
-      /// Check the array is of the correct type and coerce it if not
-      void typeCheck();
-      /// Pointer to ndarray object
-      boost::python::object m_arr;
-    };
+      /**
+       * Converts a Python sequence type to a C++ std::vector, where the vector element
+       * type is defined by the template type
+       */
+      template <typename DestElementType>
+      struct DLLExport NDArrayToVectorConverter
+      {
+        /// Constructor
+        NDArrayToVectorConverter(const boost::python::object & value);
+        /// Do the conversion
+        const std::vector<DestElementType> operator()();
+      private:
+        /// Check the array is of the correct type and coerce it if not
+        void typeCheck();
+        /// Pointer to ndarray object
+        boost::python::object m_arr;
+      };
 
+    }
   }
 }
 

@@ -2,56 +2,18 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Converters/NDArrayToVectorConverter.h"
-//#include "MantidPythonInterface/kernel/Converters/NDArrayTypeIndex.h"
+#include "MantidPythonInterface/kernel/Converters/NDArrayTypeIndex.h"
 #include <boost/python/extract.hpp>
 
 // See http://docs.scipy.org/doc/numpy/reference/c-api.array.html#PY_ARRAY_UNIQUE_SYMBOL
 #define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
 #define NO_IMPORT_ARRAY
-#include <numpy/ndarrayobject.h>
+#include <numpy/arrayobject.h>
 
 namespace Mantid
 {
   namespace PythonInterface
   {
-    namespace Numpy
-    {
-                /**
-       * Defines a mapping between C++ type given by
-       * the template parameter and numpy type enum
-       * NPY_TYPES.
-       *
-       * There is no general definition, only specialized
-       * versions are defined. Each specialization should
-       * contain a static const NPY_TYPES definition giving
-       * the result of the mapping
-       */
-      template<typename T>
-      struct NDArrayTypeIndex
-      {};
-
-      /// Macro to define mappings between the CType and Numpy enum
-      #define DEFINE_TYPE_MAPPING(CType, NDTypeNum) \
-         template<>\
-         struct NDArrayTypeIndex<CType>\
-         {\
-           static int typenum() { return NDTypeNum; }\
-         };
-
-      DEFINE_TYPE_MAPPING(int16_t, NPY_INT16);
-      DEFINE_TYPE_MAPPING(uint16_t, NPY_UINT16);
-      DEFINE_TYPE_MAPPING(int32_t, NPY_INT32);
-      DEFINE_TYPE_MAPPING(uint32_t, NPY_UINT32);
-      DEFINE_TYPE_MAPPING(int64_t, NPY_INT64);
-#ifdef __APPLE__
-      DEFINE_TYPE_MAPPING(unsigned long, NPY_ULONG);
-#endif
-      DEFINE_TYPE_MAPPING(uint64_t, NPY_UINT64);
-      DEFINE_TYPE_MAPPING(double, NPY_DOUBLE);
-      // Not needed outside here
-      #undef DEFINE_TYPE_MAPPING
-
-    }
     namespace
     {
       //-------------------------------------------------------------------------
@@ -114,7 +76,7 @@ namespace Mantid
         boost::python::object operator()(const boost::python::object &arr)
         {
           int sourceType = PyArray_TYPE(arr.ptr());
-          int destType = Numpy::NDArrayTypeIndex<DestElementType>::typenum();
+          int destType = Converters::NDArrayTypeIndex<DestElementType>::typenum;
           boost::python::object result = arr;
           if( sourceType != destType )
           {
@@ -137,76 +99,78 @@ namespace Mantid
           return arr;
         }
       };
-
     }
 
-    //-------------------------------------------------------------------------
-    // NDArrayToVectorConverter definitions
-    //-------------------------------------------------------------------------
+    namespace Converters
+    {
+      //-------------------------------------------------------------------------
+      // NDArrayToVectorConverter definitions
+      //-------------------------------------------------------------------------
 
-    /**
-     * Constructor
-     * @param value :: A boost python object wrapping a numpy.ndarray
-     */
-    template<typename DestElementType>
-    NDArrayToVectorConverter<DestElementType>::
-    NDArrayToVectorConverter(const boost::python::object & value)
+      /**
+       * Constructor
+       * @param value :: A boost python object wrapping a numpy.ndarray
+       */
+      template<typename DestElementType>
+      NDArrayToVectorConverter<DestElementType>::
+      NDArrayToVectorConverter(const boost::python::object & value)
       : m_arr(value)
-    {
-      typeCheck();
-    }
+        {
+        typeCheck();
+        }
 
-    /**
-     * Creates a vector of the DestElementType from the numpy array of
-     * given input type
-     * @return A vector of the DestElementType created from the numpy array
-     */
-    template<typename DestElementType>
-    const std::vector<DestElementType>
-    NDArrayToVectorConverter<DestElementType>::operator()()
-    {
-      npy_intp length = PyArray_SIZE(m_arr.ptr()); // Returns the total number of elements in the array
-      std::vector<DestElementType> cvector(length);
-      if(length > 0)
+      /**
+       * Creates a vector of the DestElementType from the numpy array of
+       * given input type
+       * @return A vector of the DestElementType created from the numpy array
+       */
+      template<typename DestElementType>
+      const std::vector<DestElementType>
+      NDArrayToVectorConverter<DestElementType>::operator()()
       {
-        fill_vector<DestElementType>()((PyArrayObject*)m_arr.ptr(), cvector);
+        npy_intp length = PyArray_SIZE(m_arr.ptr()); // Returns the total number of elements in the array
+        std::vector<DestElementType> cvector(length);
+        if(length > 0)
+        {
+          fill_vector<DestElementType>()((PyArrayObject*)m_arr.ptr(), cvector);
+        }
+        return cvector;
       }
-      return cvector;
-    }
 
-    /**
-     * Checks if the python object points to a numpy.ndarray and also checks if the type
-     * is compatible with the DestElementType. If the types do not match the
-     * array is cast to the DestElementType
-     * @throws std::invalid_argument if the object is not of type numpy.ndarray
-     */
-    template<typename DestElementType>
-    void
-    NDArrayToVectorConverter<DestElementType>::typeCheck()
-    {
-      if( !PyArray_Check(m_arr.ptr()) )
+      /**
+       * Checks if the python object points to a numpy.ndarray and also checks if the type
+       * is compatible with the DestElementType. If the types do not match the
+       * array is cast to the DestElementType
+       * @throws std::invalid_argument if the object is not of type numpy.ndarray
+       */
+      template<typename DestElementType>
+      void
+      NDArrayToVectorConverter<DestElementType>::typeCheck()
       {
-        throw std::invalid_argument(std::string("NDArrayConverter expects ndarray type, found ")
-                                      + m_arr.ptr()->ob_type->tp_name);
+        if( !PyArray_Check(m_arr.ptr()) )
+        {
+          throw std::invalid_argument(std::string("NDArrayConverter expects ndarray type, found ")
+          + m_arr.ptr()->ob_type->tp_name);
+        }
+        m_arr = coerce_type<DestElementType>()(m_arr);
+
       }
-      m_arr = coerce_type<DestElementType>()(m_arr);
 
-    }
-
-    //------------------------------------------------------------------------
-    // Explicit instantiations
-    //------------------------------------------------------------------------
-    template DLLExport struct NDArrayToVectorConverter<int16_t>;
-    template DLLExport struct NDArrayToVectorConverter<uint16_t>;
-    template DLLExport struct NDArrayToVectorConverter<int32_t>;
-    template DLLExport struct NDArrayToVectorConverter<uint32_t>;
-    template DLLExport struct NDArrayToVectorConverter<int64_t>;
-    template DLLExport struct NDArrayToVectorConverter<uint64_t>;
+      //------------------------------------------------------------------------
+      // Explicit instantiations
+      //------------------------------------------------------------------------
+      template DLLExport struct NDArrayToVectorConverter<int16_t>;
+      template DLLExport struct NDArrayToVectorConverter<uint16_t>;
+      template DLLExport struct NDArrayToVectorConverter<int32_t>;
+      template DLLExport struct NDArrayToVectorConverter<uint32_t>;
+      template DLLExport struct NDArrayToVectorConverter<int64_t>;
+      template DLLExport struct NDArrayToVectorConverter<uint64_t>;
 #ifdef __APPLE__
-    template DLLExport struct NDArrayToVectorConverter<unsigned long>;
+      template DLLExport struct NDArrayToVectorConverter<unsigned long>;
 #endif
-    template DLLExport struct NDArrayToVectorConverter<double>;
-    template DLLExport struct NDArrayToVectorConverter<std::string>;
+      template DLLExport struct NDArrayToVectorConverter<double>;
+      template DLLExport struct NDArrayToVectorConverter<std::string>;
+    }
   }
 }
 

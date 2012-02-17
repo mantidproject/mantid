@@ -57,7 +57,6 @@ add_subdirectory ( mantid )
 set ( TEST_FILES
   test/cpp/PythonObjectInstantiatorTest.h
   test/cpp/PySequenceToVectorConverterTest.h
-#  test/cpp/NDArrayToVectorConverterTest.h
 )  
   
 if ( CXXTEST_FOUND )

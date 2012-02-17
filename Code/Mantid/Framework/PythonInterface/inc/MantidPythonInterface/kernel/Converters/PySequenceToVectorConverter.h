@@ -68,53 +68,56 @@ namespace Mantid
 
     } //end <anonymous>
 
-    /**
-     * Converts a Python sequence type to a C++ std::vector, where the element
-     * type is defined by the template type
-     */
-    template <typename DestElementType>
-    struct DLLExport PySequenceToVectorConverter
+    namespace Converters
     {
-      PySequenceToVectorConverter(const boost::python::object & value)
-        : m_obj(value.ptr())
-      {
-        check(value);
-      }
-
       /**
-       * Converts the Python object to a C++ vector
-       * @return A std::vector<ElementType> containing the values
-       * from the Python sequence
+       * Converts a Python sequence type to a C++ std::vector, where the element
+       * type is defined by the template type
        */
-      inline const std::vector<DestElementType> operator()()
+      template <typename DestElementType>
+      struct DLLExport PySequenceToVectorConverter
       {
-        Py_ssize_t length = PySequence_Size(m_obj);
-        std::vector<DestElementType> cvector(length);
-        if(length == 0) return cvector;
-        ExtractCType<DestElementType> elementConverter;
-        for( Py_ssize_t i = 0; i < length; ++i )
+        PySequenceToVectorConverter(const boost::python::object & value)
+        : m_obj(value.ptr())
         {
-          PyObject *item = PySequence_Fast_GET_ITEM(m_obj, i);
-          DestElementType element = elementConverter(item);
-          cvector[i] = element;
+          check(value);
         }
-        return cvector;
-      }
 
-    private:
-      inline void check(const boost::python::object & obj)
-      {
-        if( !PySequence_Check(obj.ptr()) )
+        /**
+         * Converts the Python object to a C++ vector
+         * @return A std::vector<ElementType> containing the values
+         * from the Python sequence
+         */
+        inline const std::vector<DestElementType> operator()()
         {
-          throw std::invalid_argument(std::string("PySequenceToVectorConverter expects Python sequence type, found ")
-                                        + obj.ptr()->ob_type->tp_name);
+          Py_ssize_t length = PySequence_Size(m_obj);
+          std::vector<DestElementType> cvector(length);
+          if(length == 0) return cvector;
+          ExtractCType<DestElementType> elementConverter;
+          for( Py_ssize_t i = 0; i < length; ++i )
+          {
+            PyObject *item = PySequence_Fast_GET_ITEM(m_obj, i);
+            DestElementType element = elementConverter(item);
+            cvector[i] = element;
+          }
+          return cvector;
         }
-      }
-      /// Python object to convert
-      PyObject *m_obj;
 
-    };
+      private:
+        inline void check(const boost::python::object & obj)
+        {
+          if( !PySequence_Check(obj.ptr()) )
+          {
+            throw std::invalid_argument(std::string("PySequenceToVectorConverter expects Python sequence type, found ")
+            + obj.ptr()->ob_type->tp_name);
+          }
+        }
+        /// Python object to convert
+        PyObject *m_obj;
 
+      };
+
+    }
   }
 }
 

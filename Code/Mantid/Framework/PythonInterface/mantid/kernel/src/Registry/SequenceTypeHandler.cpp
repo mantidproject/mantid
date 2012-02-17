@@ -9,7 +9,7 @@
 // See http://docs.scipy.org/doc/numpy/reference/c-api.array.html#PY_ARRAY_UNIQUE_SYMBOL
 #define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
 #define NO_IMPORT_ARRAY
-#include <numpy/ndarrayobject.h>
+#include <numpy/arrayobject.h>
 
 #include <boost/python/extract.hpp>
 
@@ -47,11 +47,11 @@ namespace Mantid
         // numpy arrays requires special handling to extract their types. Hand-off to a more appropriate handler
         if( PyArray_Check(value.ptr()) )
         {
-          alg->setProperty(name, NDArrayToVectorConverter<DestElementType>(value)());
+          alg->setProperty(name, Converters::NDArrayToVectorConverter<DestElementType>(value)());
         }
         else if( PySequence_Check(value.ptr()) )
         {
-          alg->setProperty(name, PySequenceToVectorConverter<DestElementType>(value)());
+          alg->setProperty(name, Converters::PySequenceToVectorConverter<DestElementType>(value)());
         }
         else
         {

@@ -7,7 +7,7 @@
 #include <boost/python/list.hpp>
 #include <cxxtest/TestSuite.h>
 
-using namespace Mantid::PythonInterface;
+using namespace Mantid::PythonInterface::Converters;
 
 class PySequenceToVectorConverterTest : public CxxTest::TestSuite
 {

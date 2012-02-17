@@ -14,7 +14,9 @@ using Mantid::API::AnalysisDataServiceImpl;
 using Mantid::API::AnalysisDataService;
 using Mantid::Kernel::DataItem;
 using Mantid::Kernel::DataItem_sptr;
+namespace Policies = Mantid::PythonInterface::Policies;
 using namespace boost::python;
+
 
 /// Weak pointer to DataItem typedef
 typedef boost::weak_ptr<DataItem> DataItem_wptr;
@@ -76,7 +78,7 @@ void export_AnalysisDataService()
     .def("Instance", &AnalysisDataService::Instance, return_value_policy<reference_existing_object>(),
          "Return a reference to the ADS singleton")
     .staticmethod("Instance")
-    .def("retrieve", &retrieveAsWeakPtr, return_value_policy<Mantid::PythonInterface::upcast_returned_value>(),
+    .def("retrieve", &retrieveAsWeakPtr, return_value_policy<Policies::upcast_returned_value>(),
          "Retrieve the named object. Raises an exception if the name does not exist")
     .def("remove", &AnalysisDataServiceImpl::remove, "Remove a named object")
     .def("clear", &AnalysisDataServiceImpl::clear, "Removes all objects managed by the service.")
@@ -84,7 +86,7 @@ void export_AnalysisDataService()
     .def("getObjectNames", &getObjectNamesAsList, "Return the list of names currently known to the ADS")
     // Make it act like a dictionary
     .def("__len__", &AnalysisDataServiceImpl::size)
-    .def("__getitem__", &retrieveAsWeakPtr, return_value_policy<Mantid::PythonInterface::upcast_returned_value>())
+    .def("__getitem__", &retrieveAsWeakPtr, return_value_policy<Policies::upcast_returned_value>())
     .def("__contains__", &AnalysisDataServiceImpl::doesExist)
     .def("__delitem__", &AnalysisDataServiceImpl::remove)
     ;

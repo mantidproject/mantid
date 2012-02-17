@@ -11,7 +11,7 @@ using Mantid::API::WorkspaceGroup;
 using Mantid::API::WorkspaceGroup_sptr;
 using Mantid::API::Workspace;
 using Mantid::API::Workspace_sptr;
-
+namespace Policies = Mantid::PythonInterface::Policies;
 using namespace boost::python;
 
 namespace
@@ -38,12 +38,12 @@ void export_WorkspaceGroup()
     .def("add", &WorkspaceGroup::add, "Add a name to the group")
     .def("size", &WorkspaceGroup::size, "Returns the number of workspaces contained in the group")
     .def("remove", &WorkspaceGroup::remove, "Remove a name from the group")
-    .def("getItem", &getItemAsWeakPtr, return_value_policy<Mantid::PythonInterface::upcast_returned_value>(),
+    .def("getItem", &getItemAsWeakPtr, return_value_policy<Policies::upcast_returned_value>(),
          "Returns the item at the given index")
     // ------------ Operators --------------------------------
     .def("__len__", &WorkspaceGroup::getNumberOfEntries)
     .def("__contains__", &WorkspaceGroup::contains)
-    .def("__getitem__",&getItemAsWeakPtr, return_value_policy<Mantid::PythonInterface::upcast_returned_value>())
+    .def("__getitem__",&getItemAsWeakPtr, return_value_policy<Policies::upcast_returned_value>())
   ;
 
   REGISTER_SINGLEVALUE_HANDLER(WorkspaceGroup_sptr);

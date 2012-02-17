@@ -4,8 +4,6 @@
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterSingleValueHandler.h"
 #include "MantidPythonInterface/kernel/Registry/SequenceTypeHandler.h"
-
-#include "MantidKernel/Property.h" // provides getUnmangledTypeName
 #include <map>
 #include <boost/python/type_id.hpp>
 
@@ -87,7 +85,8 @@ namespace Mantid
         TypeIDMap::const_iterator itr = typeHandlers.find(boost::python::type_info(typeObject));
         if( itr == typeHandlers.end() )
         {
-          throw std::invalid_argument("No handler registered for property type '" + Kernel::getUnmangledTypeName(typeObject) + "'");
+          throw std::invalid_argument(std::string("No handler registered for property value type '") +
+               boost::python::type_info(typeObject).name() + "'");
         }
         return itr->second;
       }

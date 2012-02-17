@@ -12,7 +12,7 @@
 // See http://docs.scipy.org/doc/numpy/reference/c-api.array.html#PY_ARRAY_UNIQUE_SYMBOL
 #define PY_ARRAY_UNIQUE_SYMBOL API_ARRAY_API
 #define NO_IMPORT_ARRAY
-#include <numpy/ndarrayobject.h>
+#include <numpy/arrayobject.h>
 
 
 using Mantid::API::Axis;

@@ -38,7 +38,7 @@
      boost::python::bases<Mantid::Kernel::Property>, boost::noncopyable>("PropertyWithValue_"#suffix, boost::python::no_init) \
      .add_property("value", \
                     make_function(&Mantid::Kernel::PropertyWithValue<type>::operator(),\
-                                  boost::python::return_value_policy<Mantid::PythonInterface::upcast_returned_value>())) \
+                                  boost::python::return_value_policy<Mantid::PythonInterface::Policies::upcast_returned_value>())) \
    ;
 
 #endif /* MANTID_PYTHONINTERFACE_PROPERTY_HPP_ */

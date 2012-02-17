@@ -45,7 +45,7 @@ namespace Mantid
   {
 
     ///@cond
-    namespace detail
+    namespace
     {
       /**
        * Converts a T object to a Python object and performs an upcast if it can.
@@ -72,28 +72,31 @@ namespace Mantid
 
       };
 
-    } // namespace detail
+    } // end <anonymous>
     ///@endcond
 
-    /**
-     * Implements the upcast_shared_ptr return_value_policy.
-     * This defines the required an internal type apply::type
-     * used by the return_value_policy mechanism
-     */
-    struct upcast_returned_value
+    namespace Policies
     {
-      template <class T>
-      struct apply
+      /**
+       * Implements the upcast_shared_ptr return_value_policy.
+       * This defines the required an internal type apply::type
+       * used by the return_value_policy mechanism
+       */
+      struct upcast_returned_value
       {
-        typedef typename boost::mpl::if_c<
-                      boost::mpl::or_<boost::is_convertible<T, boost::shared_ptr<Kernel::DataItem> >,
-                                      boost::is_convertible<T, boost::weak_ptr<Kernel::DataItem> > >::value
-                    , detail::to_python_value_with_upcast<T>
-                    , boost::python::to_python_value<T>
-                >::type type;
+        template <class T>
+        struct apply
+        {
+          typedef typename boost::mpl::if_c<
+              boost::mpl::or_<boost::is_convertible<T, boost::shared_ptr<Kernel::DataItem> >,
+                              boost::is_convertible<T, boost::weak_ptr<Kernel::DataItem> > >::value
+              , to_python_value_with_upcast<T>
+              , boost::python::to_python_value<T>
+              >::type type;
+        };
       };
-    };
 
+    } // Policies
   }
 } // namespace Mantid::PythonInterface
 

@@ -22,17 +22,12 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #include "MantidKernel/System.h"
-#include <boost/python/detail/prefix.hpp> // Safe include of Python.h
-
-//#define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
-//#define NO_ARRAY_IMPORT
-//#include <numpy/ndarrayobject.h> 
 
 namespace Mantid
 {
   namespace PythonInterface
   {
-    namespace Numpy
+    namespace Converters
     {
 
       /**
@@ -46,33 +41,13 @@ namespace Mantid
        * the result of the mapping
        */
       template<typename T>
-      struct NDArrayTypeIndex
-      {};
-
-      /// Macro to define mappings between the CType and Numpy enum
-      #define DEFINE_TYPE_MAPPING(CType, NDTypeNum) \
-         template<>\
-         struct NDArrayTypeIndex<CType>\
-         {\
-           static int typenum() { return NDTypeNum; }\
-         };
-
-      DEFINE_TYPE_MAPPING(int16_t, NPY_INT16);
-      DEFINE_TYPE_MAPPING(uint16_t, NPY_UINT16);
-      DEFINE_TYPE_MAPPING(int32_t, NPY_INT32);
-      DEFINE_TYPE_MAPPING(uint32_t, NPY_UINT32);
-      DEFINE_TYPE_MAPPING(int64_t, NPY_INT64);
-#ifdef __APPLE__
-      DEFINE_TYPE_MAPPING(unsigned long, NPY_ULONG);
-#endif
-      DEFINE_TYPE_MAPPING(uint64_t, NPY_UINT64);
-      DEFINE_TYPE_MAPPING(double, NPY_DOUBLE);
-      // Not needed outside here
-      #undef DEFINE_TYPE_MAPPING
+      struct DLLExport NDArrayTypeIndex
+      {
+        static int typenum;
+      };
 
     }
   }
 }
-
 
 #endif /* MANTID_PYTHONINTERFACE_NDARRAYTYPEINDEX_H_*/
