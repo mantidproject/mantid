@@ -144,14 +144,17 @@ namespace Mantid
           interruption_point();
         }
 
-        if (instrument->isMonitor(i))
+        if (checkForMask)
         {
-          continue; // do include or exclude from mask
-        }
+          if (instrument->isMonitor(i))
+          {
+            continue; // do include or exclude from mask
+          }
 
-        if (instrument->isDetectorMasked(i))
-        {
-          keepData = false;
+          if (instrument->isDetectorMasked(i))
+          {
+            keepData = false;
+          }
         }
 
         const double & yValue = countsWS->readY(i)[0];
