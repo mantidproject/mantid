@@ -179,63 +179,6 @@ void IFunction1D::functionDeriv1D(Jacobian*, const double*, const size_t)
 //      return ws;
 //}
 
-/** Calculate numerical derivatives.
- * @param out :: Derivatives
- * @param xValues :: X values for data points
- * @param nData :: Number of data points
- */
-//void IFunction1D::calNumericalDeriv(FunctionDomain1D& domain, Jacobian& jacobian)
-//{
-    //const double minDouble = std::numeric_limits<double>::min();
-    //const double epsilon = std::numeric_limits<double>::epsilon();
-    //double stepPercentage = 0.001; // step percentage
-    //double step; // real step
-    //double cutoff = 100.0*minDouble/stepPercentage;
-    //size_t nParam = nParams();
-
-    //// allocate memory if not already done
-    //if (m_tmpFunctionOutputMinusStep.size() != domain.size())
-    //{
-    //  m_tmpFunctionOutputMinusStep.resize(domain.size());
-    //  m_tmpFunctionOutputPlusStep.resize(domain.size());
-    //}
-
-    //functionMW(m_tmpFunctionOutputMinusStep.get(), xValues, nData);
-
-    //for (size_t iP = 0; iP < nParam; iP++)
-    //{
-    //  if ( isActive(iP) )
-    //  {
-    //    const double& val = getParameter(iP);
-    //    if (fabs(val) < cutoff)
-    //    {
-    //      step = epsilon;
-    //    }
-    //    else
-    //    {
-    //      step = val*stepPercentage;
-    //    }
-
-    //    //double paramMstep = val - step;
-    //    //setParameter(iP, paramMstep);
-    //    //function(m_tmpFunctionOutputMinusStep.get(), xValues, nData);
-
-    //    double paramPstep = val + step;
-    //    setParameter(iP, paramPstep);
-    //    functionMW(m_tmpFunctionOutputPlusStep.get(), xValues, nData);
-
-    //    step = paramPstep - val;
-    //    setParameter(iP, val);
-
-    //    for (size_t i = 0; i < nData; i++) {
-    //     // out->set(i,iP, 
-    //     //   (m_tmpFunctionOutputPlusStep[i]-m_tmpFunctionOutputMinusStep[i])/(2.0*step));
-    //      out->set(i,iP, 
-    //        (m_tmpFunctionOutputPlusStep[i]-m_tmpFunctionOutputMinusStep[i])/step);
-    //    }
-    //  }
-    //}
-//}
 
 } // namespace API
 } // namespace Mantid

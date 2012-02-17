@@ -2,8 +2,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Convolution.h"
-#include "MantidAPI/FunctionFactory.h"
 #include "MantidCurveFitting/DeltaFunction.h"
+#include "MantidAPI/FunctionFactory.h"
+
 #include <cmath>
 #include <algorithm>
 #include <functional>
@@ -45,7 +46,7 @@ void Convolution::init()
 /**
  * Calculates convolution of the two member functions. 
  */
-void Convolution::functionMW(double* out, const double* xValues, const size_t nData)const
+void Convolution::function1D(double* out, const double* xValues, const size_t nData)const
 {
   if (nFunctions() == 0)
   {

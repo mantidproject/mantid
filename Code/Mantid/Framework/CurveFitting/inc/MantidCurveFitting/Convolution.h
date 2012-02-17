@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/CompositeFunctionMW.h"
+#include "MantidAPI/CompositeFunction.h"
 #include <boost/shared_array.hpp>
 #include <cmath>
 
@@ -39,7 +39,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport Convolution : public API::CompositeFunctionMW
+    class DLLExport Convolution : public API::CompositeFunction
     {
     public:
 

@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/ParamFunction.h"
-#include "MantidAPI/IFunctionMW.h"
+#include "MantidAPI/IFunction1D.h"
 
 namespace Mantid
 {
@@ -38,7 +38,7 @@ namespace Mantid
      Code Documentation is available at: <http://doxygen.mantidproject.org> 
      */ 
 
-    class DLLExport ExpDecayMuon : public API::ParamFunction, public API::IFunctionMW
+    class DLLExport ExpDecayMuon : public API::ParamFunction, public API::IFunction1D
     {
     public:
 
@@ -51,8 +51,8 @@ namespace Mantid
       /// overwrite IFunction base class methods
       virtual const std::string category() const { return "Muon";}
     protected:
-      virtual void functionMW(double* out, const double* xValues, const size_t nData)const;
-      virtual void functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData);
+      virtual void function1D(double* out, const double* xValues, const size_t nData)const;
+      virtual void functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData);
 
       /// overwrite IFunction base class method that declares function parameters 
       virtual void init(); 

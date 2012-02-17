@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/UserFunction.h"
+#include "MantidAPI/FunctionFactory.h"
 #include <boost/tokenizer.hpp>
 #include "MantidGeometry/muParser_Silent.h"
 
@@ -59,7 +60,7 @@ namespace Mantid
     {
       if (attName != "Formula")
       {
-        IFitFunction::setAttribute(attName,value);
+        IFunction::setAttribute(attName,value);
         return;
       }
 
@@ -105,7 +106,7 @@ namespace Mantid
     *  @param xValues :: The array of nData x-values.
     *  @param nData :: The size of the fitted data.
     */
-    void UserFunction::functionMW(double* out, const double* xValues, const size_t nData)const
+    void UserFunction::function1D(double* out, const double* xValues, const size_t nData)const
     {
       for (size_t i = 0; i < nData; i++) 
       {
@@ -119,9 +120,9 @@ namespace Mantid
     * @param xValues :: X values for data points
     * @param nData :: Number of data points
     */
-    void UserFunction::functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
+    void UserFunction::functionDeriv(const API::FunctionDomain& domain, API::Jacobian& jacobian)
     {
-      IFunctionMW::calNumericalDeriv(out,xValues,nData);
+      calNumericalDeriv(domain,jacobian);
     }
 
   } // namespace CurveFitting

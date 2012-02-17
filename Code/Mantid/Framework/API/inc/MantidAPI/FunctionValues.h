@@ -45,10 +45,14 @@ namespace API
 class MANTID_API_DLL FunctionValues
 {
 public:
+  /// Default constructor.
+  FunctionValues(){}
   /// Constructor.
   FunctionValues(const FunctionDomain& domain);
   /// Copy constructor.
   FunctionValues(const FunctionValues& values);
+  /// Reset the values to match a new domain.
+  void reset(const FunctionDomain& domain);
   /// Return the number of points, values, etc in the domain
   size_t size() const {return m_calculated.size();}
   /// store i-th calculated value. 0 <= i < size()
@@ -76,6 +80,9 @@ protected:
   std::vector<double> m_data;    ///< buffer for fit data
   std::vector<double> m_weights; ///< buffer for fitting weights (reciprocal errors)
 };
+
+/// typedef for a shared pointer
+typedef boost::shared_ptr<FunctionValues> FunctionValues_sptr;
 
 } // namespace API
 } // namespace Mantid

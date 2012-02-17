@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/ParamFunction.h"
-#include "MantidAPI/IFunctionMW.h"
+#include "MantidAPI/IFunction1D.h"
 
 namespace Mantid
 {
@@ -40,7 +40,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL IFunctionWithLocation : public ParamFunction, public IFunctionMW
+class MANTID_API_DLL IFunctionWithLocation : public ParamFunction, public IFunction1D
 {
 public:
   /// Returns the centre of the function, which may be something as simple as the centre of

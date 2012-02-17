@@ -54,8 +54,8 @@ namespace Mantid
       /// overwrite IFunction base class methods
       std::string name()const{return "Chebyshev";}
       virtual const std::string category() const { return "Peak";}
-      void functionMW(double* out, const double* xValues, const size_t nData)const;
-      void functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData);
+      void function1D(double* out, const double* xValues, const size_t nData)const;
+      void functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData);
 
       /// Returns the number of attributes associated with the function
       size_t nAttributes()const{return 1;}

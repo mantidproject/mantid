@@ -409,5 +409,58 @@ void IFunction::Attribute::fromString(const std::string& str)
   apply(tmp);
 }
 
+/** Calculate numerical derivatives.
+ * @param out :: Derivatives
+ * @param xValues :: X values for data points
+ * @param nData :: Number of data points
+ */
+void IFunction::calNumericalDeriv(const FunctionDomain& domain, Jacobian& jacobian)
+{
+    const double minDouble = std::numeric_limits<double>::min();
+    const double epsilon = std::numeric_limits<double>::epsilon();
+    double stepPercentage = 0.001; // step percentage
+    double step; // real step
+    double cutoff = 100.0*minDouble/stepPercentage;
+    size_t nParam = nParams();
+    size_t nData = domain.size();
+
+    // allocate memory if not already done
+    if (m_minusStep.size() != domain.size())
+    {
+      m_minusStep.reset(domain);
+      m_plusStep.reset(domain);
+    }
+
+    function(domain,m_minusStep);
+
+    for (size_t iP = 0; iP < nParam; iP++)
+    {
+      if ( !isFixed(iP) )
+      {
+        const double& val = getParameter(iP);
+        if (fabs(val) < cutoff)
+        {
+          step = epsilon;
+        }
+        else
+        {
+          step = val*stepPercentage;
+        }
+
+        double paramPstep = val + step;
+        setParameter(iP, paramPstep);
+        function(domain,m_plusStep);
+
+        step = paramPstep - val;
+        setParameter(iP, val);
+
+        for (size_t i = 0; i < nData; i++) {
+          jacobian.set(i,iP, 
+            (m_plusStep.getCalculated(i) - m_minusStep.getCalculated(i))/step);
+        }
+      }
+    }
+}
+
 } // namespace API
 } // namespace Mantid

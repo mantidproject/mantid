@@ -7,6 +7,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/StretchExp.h"
+#include "MantidAPI/FunctionFactory.h"
 #include <cmath>
 
 namespace Mantid
@@ -27,7 +28,7 @@ StretchExp::StretchExp()
 }
 
 
-void StretchExp::functionMW(double* out, const double* xValues, const size_t nData)const
+void StretchExp::function1D(double* out, const double* xValues, const size_t nData)const
 {
     const double& h = getParameter("Height");
     const double& t = getParameter("Lifetime");
@@ -39,7 +40,7 @@ void StretchExp::functionMW(double* out, const double* xValues, const size_t nDa
     }
 }
 
-void StretchExp::functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
+void StretchExp::functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData)
 {
     const double& h = getParameter("Height");
     const double& t = getParameter("Lifetime");

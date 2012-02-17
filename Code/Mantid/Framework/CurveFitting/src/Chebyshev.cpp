@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Chebyshev.h"
+#include "MantidAPI/FunctionFactory.h"
 #include <boost/lexical_cast.hpp>
 
 #include <stdexcept>
@@ -21,7 +22,7 @@ Chebyshev::Chebyshev():m_n(0),m_StartX(-1.),m_EndX(1.)
   declareParameter("A0");
 };
 
-void Chebyshev::functionMW(double* out, const double* xValues, const size_t nData)const
+void Chebyshev::function1D(double* out, const double* xValues, const size_t nData)const
 {
   if (m_StartX >= m_EndX)
   {
@@ -47,7 +48,7 @@ void Chebyshev::functionMW(double* out, const double* xValues, const size_t nDat
   }
 }
 
-void Chebyshev::functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
+void Chebyshev::functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData)
 {
   if (m_n < 0)
   {
@@ -90,7 +91,7 @@ std::vector<std::string> Chebyshev::getAttributeNames()const
  * @param attName :: Attribute name. If it is not "n" exception is thrown.
  * @return a value of attribute attName
  */
-API::IFitFunction::Attribute Chebyshev::getAttribute(const std::string& attName)const
+API::IFunction::Attribute Chebyshev::getAttribute(const std::string& attName)const
 {
   if (attName == "n")
   {
@@ -111,7 +112,7 @@ API::IFitFunction::Attribute Chebyshev::getAttribute(const std::string& attName)
  * @param attName :: The attribute name. If it is not "n" exception is thrown.
  * @param att :: An int attribute containing the new value. The value cannot be negative.
  */
-void Chebyshev::setAttribute(const std::string& attName,const API::IFitFunction::Attribute& att)
+void Chebyshev::setAttribute(const std::string& attName,const API::IFunction::Attribute& att)
 {
   if (attName == "n")
   {// set the polynomial order

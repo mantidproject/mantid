@@ -27,7 +27,7 @@ Kernel::Logger& BoundaryConstraint::g_log = Kernel::Logger::get("BoundaryConstra
  * @param lowerBound :: The lower bound
  * @param upperBound :: The upper bound
  */
-BoundaryConstraint::BoundaryConstraint(API::IFitFunction* fun, const std::string paramName, const double lowerBound, const double upperBound) : 
+BoundaryConstraint::BoundaryConstraint(API::IFunction* fun, const std::string paramName, const double lowerBound, const double upperBound) : 
 m_penaltyFactor(1000.0),
 m_parameterName(paramName),
 m_hasLowerBound( true), 
@@ -54,7 +54,7 @@ m_lowerBound(lowerBound)
  * " 10 < Sigma < 20 " or
  * " Sigma > 20 "
  */
-void BoundaryConstraint::initialize(API::IFitFunction* fun, const API::Expression& expr)
+void BoundaryConstraint::initialize(API::IFunction* fun, const API::Expression& expr)
 {
   if ( expr.size() < 2 || expr.name() != "==")
   {

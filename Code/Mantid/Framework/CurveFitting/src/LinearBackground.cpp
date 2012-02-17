@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/LinearBackground.h"
+#include "MantidAPI/FunctionFactory.h"
 
 namespace Mantid
 {
@@ -20,7 +21,7 @@ void LinearBackground::init()
 } 
 
 
-void LinearBackground::functionMW(double* out, const double* xValues, const size_t nData)const
+void LinearBackground::function1D(double* out, const double* xValues, const size_t nData)const
 {
     const double& a0 = getParameter("A0");
     const double& a1 = getParameter("A1");
@@ -30,7 +31,7 @@ void LinearBackground::functionMW(double* out, const double* xValues, const size
     }
 }
 
-void LinearBackground::functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
+void LinearBackground::functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData)
 {
     for (size_t i = 0; i < nData; i++) {
         out->set(i,0, 1);

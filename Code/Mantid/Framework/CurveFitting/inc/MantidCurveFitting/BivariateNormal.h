@@ -4,9 +4,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-
 #include "MantidCurveFitting/UserFunction.h"
-#include "MantidAPI/IFitFunction.h"
+#include "MantidAPI/IFunction1D.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
@@ -87,9 +86,9 @@ namespace Mantid
 
       virtual const std::string category() const { return "Peak";}
 
-      void functionMW  (double *out, const double *xValues, const size_t nData)const ;
+      void function1D  (double *out, const double *xValues, const size_t nData)const ;
           
-      void functionDerivMW  (API::Jacobian  *out, const double *xValues, const size_t nData);
+      void functionDeriv1D  (API::Jacobian  *out, const double *xValues, const size_t nData);
 
 
       size_t   nAttributes () const

@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Gaussian.h"
+#include "MantidAPI/FunctionFactory.h"
 #include <cmath>
 
 namespace Mantid

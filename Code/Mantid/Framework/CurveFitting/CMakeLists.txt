@@ -7,10 +7,12 @@ set ( SRC_FILES
 	src/BoundaryConstraint.cpp
 	src/Chebyshev.cpp
 	src/Convolution.cpp
+	src/CostFuncFitting.cpp
 	src/CostFuncIgnorePosPeaks.cpp
 	src/CostFuncLeastSquares.cpp
 	src/DeltaFunction.cpp
 	src/DiffSphere.cpp
+	src/DerivMinimizer.cpp
 	src/ExpDecay.cpp
 	src/ExpDecayMuon.cpp
 	src/ExpDecayOsc.cpp
@@ -64,10 +66,12 @@ set ( INC_FILES
 	inc/MantidCurveFitting/BoundaryConstraint.h
 	inc/MantidCurveFitting/Chebyshev.h
 	inc/MantidCurveFitting/Convolution.h
+	inc/MantidCurveFitting/CostFuncFitting.h
 	inc/MantidCurveFitting/CostFuncIgnorePosPeaks.h
 	inc/MantidCurveFitting/CostFuncLeastSquares.h
 	inc/MantidCurveFitting/DeltaFunction.h
 	inc/MantidCurveFitting/DiffSphere.h
+	inc/MantidCurveFitting/DerivMinimizer.h
 	inc/MantidCurveFitting/DllConfig.h
 	inc/MantidCurveFitting/ExpDecay.h
 	inc/MantidCurveFitting/ExpDecayMuon.h
@@ -78,6 +82,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/FlatBackground.h
 	inc/MantidCurveFitting/FuncMinimizerFactory.h
 	inc/MantidCurveFitting/GSLFunctions.h
+	inc/MantidCurveFitting/GSLJacobian.h
 	inc/MantidCurveFitting/GausDecay.h
 	inc/MantidCurveFitting/GausOsc.h
 	inc/MantidCurveFitting/Gaussian.h

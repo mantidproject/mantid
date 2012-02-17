@@ -9,6 +9,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidAPI/IFunction1D.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -148,7 +149,7 @@ public:
 };
 
 
-class Linear: public ParamFunction, public IFunctionMW
+class Linear: public ParamFunction, public IFunction1D
 {
 public:
   Linear()
@@ -180,7 +181,7 @@ public:
 
 };
 
-class Cubic: public ParamFunction, public IFunctionMW
+class Cubic: public ParamFunction, public IFunction1D
 {
 public:
   Cubic()

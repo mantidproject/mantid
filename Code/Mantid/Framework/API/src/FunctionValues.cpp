@@ -16,11 +16,7 @@ namespace API
    */
   FunctionValues::FunctionValues(const FunctionDomain& domain)
   {
-    if (domain.size() == 0)
-    {
-      throw std::invalid_argument("FunctionValues cannot have zero size.");
-    }
-    m_calculated.resize(domain.size());
+    reset(domain);
   }
 
   /** Copy constructor.
@@ -31,6 +27,16 @@ namespace API
   m_data(values.m_data),
   m_weights(values.m_weights)
   {
+  }
+
+  /// Reset the values to match a new domain.
+  void FunctionValues::reset(const FunctionDomain& domain)
+  {
+    if (domain.size() == 0)
+    {
+      throw std::invalid_argument("FunctionValues cannot have zero size.");
+    }
+    m_calculated.resize(domain.size());
   }
 
   /**

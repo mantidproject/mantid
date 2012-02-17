@@ -66,7 +66,7 @@ namespace Mantid
     protected:
 
       virtual void functionLocal(double* out, const double* xValues, const size_t nData)const;
-      virtual void functionDerivLocal(API::Jacobian* out, const double* xValues, const size_t nData);
+      virtual void functionDeriv(const API::FunctionDomain& domain, API::Jacobian& jacobian);
 
       /// overwrite IFunction base class method, which declare function parameters
       virtual void init();

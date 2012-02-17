@@ -358,7 +358,7 @@ protected:
   virtual void declareParameter(const std::string& name, double initValue = 0, const std::string& description="") = 0;
 
   /// Calculate numerical derivatives
-  void calNumericalDeriv(const FunctionDomain& domain, Jacobian& out){}
+  void calNumericalDeriv(const FunctionDomain& domain, Jacobian& out);
 
   /// Create an instance of a tie without actually tying it to anything
   //virtual ParameterTie* createTie(const std::string& parName);
@@ -367,6 +367,11 @@ protected:
 
   friend class ParameterTie;
   friend class CompositeFunction;
+
+  /// Values storage for numeric derivatives
+  FunctionValues m_minusStep;
+  /// Values storage for numeric derivatives
+  FunctionValues m_plusStep;
 
   /// Pointer to a function handler
   FunctionHandler* m_handler;

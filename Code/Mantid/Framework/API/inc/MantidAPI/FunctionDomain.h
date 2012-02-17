@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
+#include "MantidKernel/PropertyManager.h"
 
 #include <stdexcept>
 
@@ -41,7 +42,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL FunctionDomain
+class MANTID_API_DLL FunctionDomain: public Kernel::PropertyManager
 {
 public:
   /// Virtual destructor
@@ -51,6 +52,9 @@ public:
   /// Reset the the domain so it can be reused. Implement this method for domains with a state.
   virtual void reset() const {}
 };
+
+/// typedef for a shared pointer
+typedef boost::shared_ptr<FunctionDomain> FunctionDomain_sptr;
 
 } // namespace API
 } // namespace Mantid

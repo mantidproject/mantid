@@ -117,12 +117,6 @@ public:
   virtual void function(const FunctionDomain& domain,FunctionValues& values)const;
   void functionDeriv(const FunctionDomain& domain, Jacobian& jacobian);
 
-  //boost::shared_ptr<API::MatrixWorkspace> createCalculatedWorkspace(
-  //  boost::shared_ptr<const API::MatrixWorkspace> inWS, 
-  //  size_t wi,
-  //  const std::vector<double>& sd = std::vector<double>()
-  //  );
-
 protected:
 
   /// Function you want to fit to.

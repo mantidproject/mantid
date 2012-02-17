@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/ExpDecayOsc.h"
+#include "MantidAPI/FunctionFactory.h"
 #include <cmath>
 
 
@@ -24,7 +25,7 @@ void ExpDecayOsc::init()
 }
 
 
-void ExpDecayOsc::functionMW(double* out, const double* xValues, const size_t nData)const
+void ExpDecayOsc::function1D(double* out, const double* xValues, const size_t nData)const
 {
   const double& gA0 = getParameter("A"); 
   const double& gs = getParameter("Lambda"); 
@@ -37,7 +38,7 @@ void ExpDecayOsc::functionMW(double* out, const double* xValues, const size_t nD
   } 
 }
 
-void ExpDecayOsc::functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
+void ExpDecayOsc::functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData)
 {
     const double& gA0 = getParameter("A");
     const double& gs = getParameter("Lambda");

@@ -5,6 +5,7 @@
 #include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidCurveFitting/SpecialFunctionSupport.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/UnitFactory.h"
 #include <cmath>
 #include <gsl/gsl_math.h>
@@ -377,9 +378,9 @@ void IkedaCarpenterPV::functionLocal(double* out, const double* xValues, const s
     }
 }
 
-void IkedaCarpenterPV::functionDerivLocal(API::Jacobian* out, const double* xValues, const size_t nData)
+void IkedaCarpenterPV::functionDeriv(const API::FunctionDomain& domain, API::Jacobian& jacobian)
 {
-  calNumericalDeriv(out, xValues, nData);
+  calNumericalDeriv(domain, jacobian);
 }
 
 
