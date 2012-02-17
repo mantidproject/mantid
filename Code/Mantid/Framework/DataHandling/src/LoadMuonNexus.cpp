@@ -185,7 +185,6 @@ namespace Mantid
         std::vector<double>defaultDeadTimes;
         NXFloat deadTimes = root.openNXFloat("run/instrument/detector/deadtimes");
         deadTimes.load();
-        std::cout << "\n\n" << deadTimes.size();
 
         int length = deadTimes.dim0();
         for (int i = 0; i < length; i++)
