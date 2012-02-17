@@ -867,7 +867,7 @@ void MantidDockWidget::addMDEventWorkspaceMenuItems(QMenu *menu, Mantid::API::IM
   }
   else
   {
-    std::size_t nDim = WS->getNumDims();
+    std::size_t nDim = WS->getNonIntegratedDimensions().size();
     m_showVatesGui->setEnabled(nDim >= 3 && nDim < 5);
   }
   menu->addAction(m_showSliceViewer); // The 2D slice viewer
@@ -886,7 +886,7 @@ void MantidDockWidget::addMDHistoWorkspaceMenuItems(QMenu *menu, Mantid::API::IM
   }
   else
   {
-    std::size_t nDim = WS->getNumDims();
+    std::size_t nDim = WS->getNonIntegratedDimensions().size();
     m_showVatesGui->setEnabled(nDim >= 3 && nDim < 5);
   }
   menu->addAction(m_showSliceViewer); // The 2D slice viewer
