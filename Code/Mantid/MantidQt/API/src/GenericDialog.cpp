@@ -74,6 +74,18 @@ bool haveInputWS(const std::vector<Property*> & prop_list)
 
 
 
+//--------------------------------------------------------------------------------------
+/** SLOT to be called whenever a property's value has just been changed
+ * and the widget has lost focus/value has been changed.
+ * @param pName :: name of the property that was changed
+ */
+void GenericDialog::propertyChanged(const QString & pName)
+{
+  this->storePropertyValue(pName, getValue( m_tied_properties[pName]) );
+  this->setPropertyValue(pName, true);
+}
+
+
 
 
 //----------------------------------
@@ -98,8 +110,9 @@ void GenericDialog::initLayout()
   setLayout(dialog_layout);
 
   // Create a grid of properties if there are any available
-
   const std::vector<Property*> & prop_list = getAlgorithm()->getProperties();
+  bool hasInputWS = haveInputWS(prop_list);
+
   if ( !prop_list.empty() )
   {
     //Put the property boxes in a grid
@@ -162,6 +175,12 @@ void GenericDialog::initLayout()
 
       // Whenever the value changes in the widget, this fires propertyChanged()
       connect(widget, SIGNAL( valueChanged(const QString &)), this, SLOT(propertyChanged(const QString &)));
+
+      // For clicking the "Replace Workspace" button (if any)
+      connect(widget, SIGNAL( replaceWorkspaceName(const QString &)), this, SLOT(replaceWSClicked(const QString &)));
+
+      // Only show the "Replace Workspace" button if the algorithm has an input workspace.
+      widget->showReplaceWSButton(hasInputWS);
 
       ++row;
     } //(end for each property)
@@ -281,15 +300,80 @@ void GenericDialog::hideOrDisableProperties()
   this->repaint(true);
 }
 
-//--------------------------------------------------------------------------------------
-/** SLOT to be called whenever a property's value has just been changed
- * and the widget has lost focus/value has been changed.
- * @param pName :: name of the property that was changed
+//-------------------------------------------------------------------------------------------------
+/** A slot to handle the replace workspace button click
+ * @param outputEdit :: The line edit that is associated, via the signalmapper, with this click
  */
-void GenericDialog::propertyChanged(const QString & pName)
+void GenericDialog::replaceWSClicked(const QString & propName)
 {
-  this->storePropertyValue(pName, getValue( m_tied_properties[pName]) );
-  this->setPropertyValue(pName, true);
-}
+  if (m_tied_properties.contains(propName))
+  {
+    QWidget * widget = m_tied_properties[propName];
+    PropertyWidget* propWidget = qobject_cast<PropertyWidget*>(widget);
+    if (propWidget)
+    {
+      // Find the name to put in the spot
+      QString wsName("");
+      QHash<QString, QWidget*>::iterator it;
+      for (it = m_tied_properties.begin(); it != m_tied_properties.end(); it++)
+      {
+        // Only look at workspace properties
+        Property * prop = this->getAlgorithmProperty(it.key());
+        IWorkspaceProperty * wsProp = dynamic_cast<IWorkspaceProperty*>(prop);
+        PropertyWidget* otherWidget = qobject_cast<PropertyWidget*>(it.value());
+        if (otherWidget && wsProp)
+        {
+          if (prop->direction() == Direction::Input)
+          {
+            // Input workspace property. Get the text typed in.
+            wsName = otherWidget->getValue();
+            break;
+          }
+        }
+      }
 
+      if (!wsName.isEmpty())
+        propWidget->setValue(wsName);
+    }
+  }
+
+//  QPushButton *btn = qobject_cast<QPushButton*>(m_signal_mapper->mapping(outputEdit));
+//  if( !btn ) return;
+//  int input =  m_wsbtn_tracker.value(btn);
+//
+//  QWidget *wsInputWidget = m_inputws_opts.value(input-1);
+//  QString wsname("");
+//  if( QComboBox *options = qobject_cast<QComboBox*>(wsInputWidget) )
+//  {
+//    wsname = options->currentText();
+//  }
+//  else if( QLineEdit *editField = qobject_cast<QLineEdit*>(wsInputWidget) )
+//  {
+//    wsname = editField->text();
+//  }
+//  else return;
+//
+//  //Adjust tracker
+//  input = (input % m_inputws_opts.size() ) + 1;
+//  m_wsbtn_tracker[btn] = input;
+//
+//  // Check if any of the other line edits have this name
+//  QVector<QLineEdit*>::const_iterator iend = m_outputws_fields.constEnd();
+//  for( QVector<QLineEdit*>::const_iterator itr = m_outputws_fields.constBegin();
+//       itr != iend; ++itr )
+//  {
+//    //Check that we are not the field we are actually comparing against
+//    if( (*itr) == outputEdit ) continue;
+//    if( (*itr)->text() == wsname )
+//    {
+//      wsname += "-1";
+//      break;
+//    }
+//  }
+//  QLineEdit *edit = qobject_cast<QLineEdit*>(outputEdit);
+//  if( edit )
+//  {
+//    edit->setText(wsname);
+//  }
+}
 

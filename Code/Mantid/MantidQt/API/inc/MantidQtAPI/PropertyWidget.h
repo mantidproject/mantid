@@ -69,6 +69,7 @@ namespace API
     int getGridRow()
     {return m_row; }
 
+    void showReplaceWSButton(bool show);
 
   public slots:
     void replaceWSButtonClicked();
@@ -76,7 +77,11 @@ namespace API
     void valueChangedSlot();
 
   signals:
+    /// Signal is emitted whenever the value (as entered by the user) in the GUI changes.
     void valueChanged(const QString & propName);
+
+    /// Signal is emitted whenever someone clicks the replace WS button.
+    void replaceWorkspaceName(const QString & propName);
 
   protected:
     /// Property being looked at. This is NOT owned by the widget

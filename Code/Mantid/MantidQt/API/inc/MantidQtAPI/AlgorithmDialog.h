@@ -218,9 +218,6 @@ protected slots:
   /// Help button clicked;
   virtual void helpClicked();
 
-  /// Replace WS
-  void replaceWSClicked(QWidget *outputEdit);
-
 private:
 
   /// Parse out the input from the dialog

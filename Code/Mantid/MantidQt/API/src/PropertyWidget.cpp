@@ -73,6 +73,20 @@ namespace API
   /** Slot called when someone clicks the "replace ws button" */
   void PropertyWidget::replaceWSButtonClicked()
   {
+    emit replaceWorkspaceName(QString::fromStdString(m_prop->name()));
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Show or hide the "Replace WS" button
+   *
+   * @param show :: true to show it */
+  void PropertyWidget::showReplaceWSButton(bool show)
+  {
+    if (m_replaceWSButton)
+    {
+      m_replaceWSButton->setVisible(show);
+      //std::cout << "m_replaceWSButton is " << show << std::endl;
+    }
   }
 
   //----------------------------------------------------------------------------------------------
@@ -82,7 +96,7 @@ namespace API
   void PropertyWidget::valueChangedSlot()
   {
     // This will be caught by the GenericDialog.
-    emit( valueChanged( QString::fromStdString(m_prop->name()) ) );
+    emit valueChanged( QString::fromStdString(m_prop->name()) ) ;
   }
 
   //----------------------------------------------------------------------------------------------

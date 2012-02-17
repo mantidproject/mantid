@@ -72,6 +72,9 @@ private slots:
   /// Any property changed
   void propertyChanged(const QString & pName);
 
+  /// Replace WS button was clicked
+  void replaceWSClicked(const QString & propName);
+
 private:
     /// The grid widget containing the input boxes
   QGridLayout *m_inputGrid;
