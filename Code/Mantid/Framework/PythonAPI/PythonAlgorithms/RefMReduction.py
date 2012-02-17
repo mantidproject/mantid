@@ -11,6 +11,8 @@ class RefMReduction(PythonAlgorithm):
     OFF_ON  = 'Off_On'
     ON_OFF  = 'On_Off'
     PIXEL_SIZE = 0.0007 # m
+    NX_PIXELS = 304
+    NY_PIXELS = 256
     
     def category(self):
         return "Reflectometry"
@@ -26,17 +28,18 @@ class RefMReduction(PythonAlgorithm):
         self.declareListProperty("SignalPeakPixelRange", [216, 226], Validator=ArrayBoundedValidator(Lower=0))
         self.declareProperty("SubtractSignalBackground", False)
         self.declareListProperty("SignalBackgroundPixelRange", [80, 170], Validator=ArrayBoundedValidator(Lower=0))
+        self.declareProperty("CropLowResDataAxis", False)
+        self.declareListProperty("LowResDataAxisPixelRange", [0, 255], Validator=ArrayBoundedValidator(Lower=0))
 
         self.declareProperty("PerformNormalization", True, Description="If true, the signal will be normalized")
         self.declareProperty("NormalizationRunNumber", 0, Description="Run number for the direct beam normalization run")
         self.declareListProperty("NormPeakPixelRange", [90, 160], Validator=ArrayBoundedValidator(Lower=0))
         self.declareProperty("SubtractNormBackground", False)
         self.declareListProperty("NormBackgroundPixelRange", [80, 170], Validator=ArrayBoundedValidator(Lower=0))
+        self.declareProperty("CropLowResNormAxis", False)
+        self.declareListProperty("LowResNormAxisPixelRange", [0, 255], Validator=ArrayBoundedValidator(Lower=0))
         
-        self.declareListProperty("LowResDataAxisPixelRange", [100, 165], Validator=ArrayBoundedValidator(Lower=0))
-        self.declareListProperty("LowResNormAxisPixelRange", [100, 165], Validator=ArrayBoundedValidator(Lower=0))
-        
-        self.declareListProperty("TOFRange", [10700., 24500.], Validator=ArrayBoundedValidator(Lower=0))
+        self.declareListProperty("TOFRange", [0., 0.], Validator=ArrayBoundedValidator(Lower=0))
         self.declareProperty("QMin", 0.0025, Description="Minimum Q-value")
         self.declareProperty("QStep", -0.01, Description="Step-size in Q. Enter a negative value to get a log scale.")
         self.declareProperty("Theta", 0.0, Description="Scattering angle (degrees)")
@@ -115,22 +118,6 @@ class RefMReduction(PythonAlgorithm):
         if output_roi is None:
             return None
         
-        # Perform normalization according to wavelength distribution of
-        # the direct beam
-        if False and self.getProperty("PerformNormalization"):
-            ws_wl_profile = self._process_normalization()
-            
-            RebinToWorkspace(WorkspaceToRebin=ws_wl_profile, 
-                             WorkspaceToMatch=output_roi,
-                             OutputWorkspace=ws_wl_profile)
-            Divide(LHSWorkspace=output_roi,
-                   RHSWorkspace=ws_wl_profile,
-                   OutputWorkspace=output_roi)
-            ReplaceSpecialValues(InputWorkspace=output_roi,
-                                 OutputWorkspace=output_roi,
-                                 NaNValue=0.0, NaNError=0.0,
-                                 InfinityValue=0.0, InfinityError=0.0)
-            
         # Convert to Q
         output_ws = self.getPropertyValue("OutputWorkspace")    
         
@@ -177,9 +164,14 @@ class RefMReduction(PythonAlgorithm):
         # Check whether we have events
         if mtd[ws_name_raw].getNumberEvents()==0:
             mtd.sendLogMessage("RefMReduction: no data in %s" % polarization)
+            mtd.deleteWorkspace(ws_name_raw)
             return None
         
         # Rebin and crop out both sides of the TOF distribution
+        if self.TOFrange[0] == self.TOFrange[1]:
+            self.TOFrange[0] = min(mtd[ws_name_raw].readX(0))
+            self.TOFrange[1] = max(mtd[ws_name_raw].readX(0))
+            
         Rebin(InputWorkspace=ws_name_raw, OutputWorkspace=ws_name, Params=[self.TOFrange[0], self.TOFsteps, self.TOFrange[1]], PreserveEvents=True)
         
         # Normalized by Current (proton charge)
@@ -208,7 +200,10 @@ class RefMReduction(PythonAlgorithm):
                                  InfinityValue=0.0, InfinityError=0.0)
 
         # Get the integration range in the low-res direction
-        low_res_range = self.getProperty("LowResDataAxisPixelRange")
+        low_res_range = [0, RefMReduction.NY_PIXELS-1]
+        if self.getProperty("CropLowResDataAxis"):
+            low_res_range = self.getProperty("LowResDataAxisPixelRange")
+            
         # Sum the normalization counts as a function of wavelength in ROI
         peak_range = self.getProperty("SignalPeakPixelRange")
         output_roi, npix = self._crop_roi(ws_name, peak_range, low_res_range)
@@ -227,13 +222,10 @@ class RefMReduction(PythonAlgorithm):
         """
         # Extract the pixels that we count as signal
         # Detector ID = NY*x + y
-        pixel_size = RefMReduction.PIXEL_SIZE # m
-        nx_pixels = 304
-        ny_pixels = 256
-        xmin = (peak_range[0]-nx_pixels/2.0)*pixel_size
-        xmax = (peak_range[1]-nx_pixels/2.0)*pixel_size
-        ymin = (low_res_range[0]-ny_pixels/2.0)*pixel_size
-        ymax = (low_res_range[1]-ny_pixels/2.0)*pixel_size
+        xmin = (peak_range[0]-RefMReduction.NX_PIXELS/2.0)*RefMReduction.PIXEL_SIZE
+        xmax = (peak_range[1]-RefMReduction.NX_PIXELS/2.0)*RefMReduction.PIXEL_SIZE
+        ymin = (low_res_range[0]-RefMReduction.NY_PIXELS/2.0)*RefMReduction.PIXEL_SIZE
+        ymax = (low_res_range[1]-RefMReduction.NY_PIXELS/2.0)*RefMReduction.PIXEL_SIZE
         
         xml_shape =  "<cuboid id=\"shape\">\n"
         xml_shape += "  <left-front-bottom-point x=\"%g\" y=\"%g\" z=\"-5.0\"  />\n" % (xmin,ymin)
@@ -289,7 +281,9 @@ class RefMReduction(PythonAlgorithm):
         Rebin(InputWorkspace=ws_wl_profile, OutputWorkspace=ws_wl_profile, Params=[wl_min, wl_step, wl_max], PreserveEvents=True)
         
         # Get the integration range in the low-res direction
-        low_res_range = self.getProperty("LowResNormAxisPixelRange")        
+        low_res_range = [0, RefMReduction.NY_PIXELS-1]
+        if self.getProperty("CropLowResNormAxis"):
+            low_res_range = self.getProperty("LowResNormAxisPixelRange")        
         # Sum the normalization counts as a function of wavelength in ROI
         peak_range = self.getProperty("NormPeakPixelRange")
 

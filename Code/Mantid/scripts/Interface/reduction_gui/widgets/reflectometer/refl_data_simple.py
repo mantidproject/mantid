@@ -690,6 +690,7 @@ class DataReflWidget(BaseWidget):
         #from TOF and to TOF
         self._summary.data_from_tof.setText(str(int(state.DataTofRange[0])))
         self._summary.data_to_tof.setText(str(int(state.DataTofRange[1])))
+        self._summary.tof_range_switch.setChecked(state.crop_TOF_range)
         
         self._summary.data_run_number_edit.setText(str(','.join([str(i) for i in state.data_files])))
                 
@@ -792,6 +793,7 @@ class DataReflWidget(BaseWidget):
         from_tof = float(self._summary.data_from_tof.text())
         to_tof = float(self._summary.data_to_tof.text())
         m.DataTofRange = [from_tof, to_tof]
+        m.crop_TOF_range = self._summary.tof_range_switch.isChecked()
     
         datafiles = str(self._summary.data_run_number_edit.text()).split(',')
         m.data_files = [int(i) for i in datafiles]

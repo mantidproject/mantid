@@ -12,6 +12,7 @@ class DataSets(BaseScriptElement):
     DataBackgroundFlag = False
     DataBackgroundRoi = [115, 137,123, 137]
     DataTofRange = [10700., 24500.]
+    crop_TOF_range = True
     
     data_x_range_flag = True
     data_x_range = [115,210]
@@ -56,9 +57,17 @@ class DataSets(BaseScriptElement):
         script += "              NormPeakPixelRange=%s,\n" % str(self.NormPeakPixels)
         script += "              NormBackgroundPixelRange=%s,\n" % str(self.NormBackgroundRoi)
         script += "              SubtractNormBackground=%s,\n" % str(self.NormBackgroundFlag)
-        script += "              LowResDataAxisPixelRange=%s,\n" % str(self.data_x_range)
-        script += "              LowResNormAxisPixelRange=%s,\n" % str(self.norm_x_range)
-        script += "              TOFRange=%s,\n" % str(self.DataTofRange)
+                        
+        script += "              CropLowResDataAxis=%s,\n" % str(self.data_x_range_flag)
+        if self.data_x_range_flag:
+            script += "              LowResDataAxisPixelRange=%s,\n" % str(self.data_x_range)
+            
+        script += "              CropLowResNormAxis=%s,\n" % str(self.norm_x_range_flag)
+        if self.norm_x_range_flag:
+            script += "              LowResNormAxisPixelRange=%s,\n" % str(self.norm_x_range)
+            
+        if self.crop_TOF_range:
+            script += "              TOFRange=%s,\n" % str(self.DataTofRange)
         script += "              QMin=%s,\n" % str(self.q_min)
         script += "              QStep=%s,\n" % str(self.q_step)
         
@@ -96,6 +105,7 @@ class DataSets(BaseScriptElement):
         xml += "<back_roi1_to>%s</back_roi1_to>\n" % str(self.DataBackgroundRoi[1])
         xml += "<back_roi2_from>%s</back_roi2_from>\n" % str(self.DataBackgroundRoi[2])
         xml += "<back_roi2_to>%s</back_roi2_to>\n" % str(self.DataBackgroundRoi[3])
+        xml += "<crop_tof>%s</crop_tof>\n" % str(self.crop_TOF_range)
         xml += "<from_tof_range>%s</from_tof_range>\n" % str(self.DataTofRange[0])
         xml += "<to_tof_range>%s</to_tof_range>\n" % str(self.DataTofRange[1])
         xml += "<data_sets>%s</data_sets>\n" % ','.join([str(i) for i in self.data_files])
@@ -174,6 +184,8 @@ class DataSets(BaseScriptElement):
                                   BaseScriptElement.getIntElement(instrument_dom, "back_roi2_to")]
 
         #from TOF and to TOF
+        self.crop_TOF_range = BaseScriptElement.getBoolElement(instrument_dom, "crop_tof",
+                                                               default=DataSets.crop_TOF_range)
         self.DataTofRange = [BaseScriptElement.getFloatElement(instrument_dom, "from_tof_range"),
                              BaseScriptElement.getFloatElement(instrument_dom, "to_tof_range")]
 
@@ -217,6 +229,7 @@ class DataSets(BaseScriptElement):
         self.DataBackgroundRoi = DataSets.DataBackgroundRoi
         self.DataPeakPixels = DataSets.DataPeakPixels
         self.DataTofRange = DataSets.DataTofRange
+        self.crop_TOF_range = DataSets.crop_TOF_range
         self.data_files = DataSets.data_files
         
         self.NormFlag = DataSets.NormFlag

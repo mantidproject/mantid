@@ -52,6 +52,7 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
             LoadEventNexus(Filename=file_path, OutputWorkspace=ws,
                            NXentryName=entry)
             if mtd[ws].getNumberEvents()==0:
+                mtd.deleteWorkspace(ws)
                 return
             
         # 1D plot
@@ -94,7 +95,7 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
         
             
     if instrument=="REFM":
-        for p in ['Off_Off', 'On_Off']:
+        for p in ['Off_Off', 'On_Off', 'Off_On', 'On_On']:
             ws = '%s_%s'%(ws_base,p)
             _load_entry("entry-%s" % p, ws, p)        
     else:
