@@ -309,7 +309,8 @@ class SNSPowderReduction2(PythonAlgorithm):
             wksp_chunk = self._focus(wksp_chunk, calib, self._info, filterLogs, preserveEvents, normByCurrent)
             if first:
                 first = False
-                RenameWorkspace(InputWorkspace=wksp_chunk, OutputWorkspace=wksp)
+                alg = RenameWorkspace(InputWorkspace=wksp_chunk, OutputWorkspace=wksp)
+                wksp = alg['OutputWorkspace']
             else:
                 Plus(LHSWorkspace=wksp, RHSWorkspace=wksp_chunk, OutputWorkspace=wksp)
                 DeleteWorkspace(wksp_chunk)
