@@ -36,33 +36,6 @@ namespace Mantid
     namespace Numpy
     {
 
-#define DECLARE_ACCESS_FN(functionName) \
-      PyObject *functionName(API::MatrixWorkspace &self, const size_t index);
-
-      //** @name Numpy read-only wrappers */
-      ///@{
-      /// Create a read-only numpy wrapper around the original X values at the given index
-      DECLARE_ACCESS_FN(readOnlyX);
-      /// Create a read-only numpy wrapper around the original Y values at the given index
-      DECLARE_ACCESS_FN(readOnlyY);
-      /// Create a read-only numpy wrapper around the original X values at the given index
-      DECLARE_ACCESS_FN(readOnlyE);
-      /// Create a read-only numpy wrapper around the original Dx values at the given index
-      DECLARE_ACCESS_FN(readOnlyDx);
-      ///@}
-      //** @name Numpy writable array wrappers */
-      ///@{
-      /// Create a writable wrapper around the original X values at the given index
-      DECLARE_ACCESS_FN(readWriteX);
-      /// Create a writable numpy wrapper around the original Y values at the given index
-      DECLARE_ACCESS_FN(readWriteY);
-      /// Create a writable numpy wrapper around the original X values at the given index
-      DECLARE_ACCESS_FN(readWriteE);
-      /// Create a writable numpy wrapper around the original Dx values at the given index
-      DECLARE_ACCESS_FN(readWriteDx);
-      ///@}
-#undef DECLARE_ACCESS_FN
-
       //** @name Numpy clones of data*/
       ///{
       /// Create a numpy array from the X values of the given workspace reference

@@ -33,6 +33,9 @@ namespace Mantid
   {
     namespace Numpy
     {
+      /**@name Array type */
+      DLLExport PyTypeObject * getNDArrayType();
+
       /** @name Create Numpy arrays */
       //@{
       /// Create a numpy array wrapper around existing vector. This is only possible for contiguous data

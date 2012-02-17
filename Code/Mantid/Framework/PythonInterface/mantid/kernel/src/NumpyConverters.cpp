@@ -15,6 +15,15 @@ namespace Mantid
   {
     namespace Numpy
     {
+      /**
+       * Returns a pointer to the PyArray_Type object
+       * @return
+       */
+      PyTypeObject * getNDArrayType()
+      {
+        return &PyArray_Type;
+      }
+
 
       /**
        *  Create a numpy array wrapper around existing data. This is only possible for contiguous data

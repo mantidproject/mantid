@@ -4,6 +4,7 @@
 
 #include "MantidPythonInterface/kernel/PropertyWithValue.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterSingleValueHandler.h"
+#include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 #include "MantidPythonInterface/api/WorkspaceToNumpy.h"
 
 #include <boost/python/class.hpp>
@@ -15,6 +16,7 @@ using namespace Mantid::API;
 using Mantid::Geometry::IDetector_sptr;
 using Mantid::Kernel::PropertyWithValue;
 using Mantid::Kernel::DataItem_sptr;
+namespace Policies = Mantid::PythonInterface::Policies;
 using namespace boost::python;
 
 namespace
@@ -27,8 +29,16 @@ namespace
 
 void export_MatrixWorkspace()
 {
-
   register_ptr_to_python<MatrixWorkspace_sptr>();
+
+  /// Typedef for data access, i.e. dataX,Y,E members
+  typedef Mantid::MantidVec&(MatrixWorkspace::*data_modifier)(const std::size_t);
+  /// return_value_policy for read-only numpy array
+  typedef return_value_policy<Policies::VectorToNumpy<Policies::WrapReadOnly> > return_readonly_numpy;
+  /// return_value_policy for read-write numpy array
+  typedef return_value_policy<Policies::VectorToNumpy<Policies::WrapReadWrite> > return_readwrite_numpy;
+
+
 
   class_<MatrixWorkspace, boost::python::bases<ExperimentInfo,IMDWorkspace>, boost::noncopyable>("MatrixWorkspace", no_init)
     //--------------------------------------- Meta information -----------------------------------------------------------------------
@@ -56,21 +66,21 @@ void export_MatrixWorkspace()
        return_value_policy<return_by_value>(), "Set distribution flag. If True the workspace has been divided by the bin-width.")
     .def("replaceAxis", &MatrixWorkspace::replaceAxis)
     //--------------------------------------- Data access ---------------------------------------------------------------------------
-    .def("readX", &Mantid::PythonInterface::Numpy::readOnlyX,
+    .def("readX", &MatrixWorkspace::readX, return_readonly_numpy(),
           "Creates a read-only numpy wrapper around the original X data at the given index")
-    .def("readY", &Mantid::PythonInterface::Numpy::readOnlyY,
+    .def("readY", &MatrixWorkspace::readY, return_readonly_numpy(),
           "Creates a read-only numpy wrapper around the original Y data at the given index")
-    .def("readE", &Mantid::PythonInterface::Numpy::readOnlyE,
+    .def("readE", &MatrixWorkspace::readE, return_readonly_numpy(),
           "Creates a read-only numpy wrapper around the original E data at the given index")
-    .def("readDx", &Mantid::PythonInterface::Numpy::readOnlyDx,
+    .def("readDx", &MatrixWorkspace::readDx, return_readonly_numpy(),
          "Creates a read-only numpy wrapper around the original Dx data at the given index")
-    .def("dataX", &Mantid::PythonInterface::Numpy::readWriteX,
+    .def("dataX", (data_modifier)&MatrixWorkspace::dataX, return_readwrite_numpy(),
          "Creates a writable numpy wrapper around the original X data at the given index")
-    .def("dataY", &Mantid::PythonInterface::Numpy::readWriteY,
+    .def("dataY", (data_modifier)&MatrixWorkspace::dataY, return_readwrite_numpy(),
          "Creates a writable numpy wrapper around the original Y data at the given index")
-    .def("dataE", &Mantid::PythonInterface::Numpy::readWriteE,
+    .def("dataE", (data_modifier)&MatrixWorkspace::dataE, return_readwrite_numpy(),
          "Creates a writable numpy wrapper around the original E data at the given index")
-    .def("dataDx", &Mantid::PythonInterface::Numpy::readWriteDx,
+    .def("dataDx", (data_modifier)&MatrixWorkspace::dataDx, return_readwrite_numpy(),
         "Creates a writable numpy wrapper around the original Dx data at the given index")
     .def("extractX", Mantid::PythonInterface::Numpy::cloneX, 
          "Extracts (copies) the X data from the workspace into a 2D numpy array. "

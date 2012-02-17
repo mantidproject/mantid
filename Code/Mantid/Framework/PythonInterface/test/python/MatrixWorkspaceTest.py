@@ -169,6 +169,12 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertTrue(len(dx), 0)
         self._do_numpy_comparison(self._test_ws, x, y, e, 0)
         
+        # Can we change something
+        ynow = y[0]
+        ynow *= 2.5
+        y[0] = ynow
+        self.assertEquals(self._test_ws.readY(0)[0], ynow)
+        
             
     def test_operators_with_workspaces_in_ADS(self):
         run_algorithm('CreateWorkspace', OutputWorkspace='a',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
