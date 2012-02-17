@@ -161,11 +161,7 @@ namespace Mantid
       g_log.information() << "Found " << numTubes << " tubes.\n";
       int numSpectraMasked(0), numTubesMasked(0);
       // Create a mask workspace for output
-      MatrixWorkspace_sptr outputWorkspace = 
-        API::WorkspaceFactory::Instance().create(inputWorkspace, numSpectra, 1, 1);
-      outputWorkspace->setYUnit("");
-      outputWorkspace->isDistribution(false);
-      outputWorkspace->setYUnitLabel("MaskValue");
+      MatrixWorkspace_sptr outputWorkspace = this->generateEmptyMask(inputWorkspace);
 
       PARALLEL_FOR2(inputWorkspace, outputWorkspace)
       for(int i = 0; i < numTubes; ++i )
@@ -182,10 +178,6 @@ namespace Mantid
             numSpectraMasked += static_cast<int>(tubeIndices.size());
           PARALLEL_ATOMIC
             numTubesMasked += 1;
-        }
-        else
-        {
-          markAsPassed(tubeIndices, outputWorkspace);
         }
 
         PARALLEL_END_INTERUPT_REGION
@@ -271,32 +263,16 @@ namespace Mantid
      * @param tubeIndices :: A list of the workspaces indices for the tube
      * @param workspace :: The workspace to accumulate the masking
      */
-    void CreatePSDBleedMask::maskTube(const std::vector<int> & tubeIndices, 
-				      API::MatrixWorkspace_sptr workspace)
+    void CreatePSDBleedMask::maskTube(const std::vector<int> & tubeIndices,
+                                      API::MatrixWorkspace_sptr workspace)
     {
+      const double deadValue(1.0); // delete the data
+
       std::vector<int>::const_iterator cend = tubeIndices.end();
       for(std::vector<int>::const_iterator citr = tubeIndices.begin();
-	  citr != cend; ++citr)
+          citr != cend; ++citr)
       {
-	workspace->maskWorkspaceIndex(*citr);
-      }
-    }
-
-    /**
-     * Mark a tube's data values as passing the tests
-     * @param tubeIndices :: A list of the workspaces indices for the tube
-     * @param workspace :: The workspace's data values to change
-     */
-    void CreatePSDBleedMask::markAsPassed(const std::vector<int> & tubeIndices, 
-					  API::MatrixWorkspace_sptr workspace)
-    {
-      // Mark as unmasked
-      std::vector<int>::const_iterator cend = tubeIndices.end();
-      for( std::vector<int>::const_iterator citr = tubeIndices.begin();
-	   citr != cend; ++citr )
-      {
-	workspace->dataY(*citr)[0] = 1.0;
-	workspace->dataE(*citr)[0] = 1.0;
+        workspace->dataY(*citr)[0] = deadValue;
       }
     }
 

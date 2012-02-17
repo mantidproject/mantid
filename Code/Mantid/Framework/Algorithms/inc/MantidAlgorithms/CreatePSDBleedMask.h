@@ -64,8 +64,6 @@ namespace Mantid
 			    API::MatrixWorkspace_const_sptr inputWS);
       /// Mask a tube with the given workspace indices
       void maskTube(const std::vector<int> & tubeIndices, API::MatrixWorkspace_sptr workspace);
-      /// Mark a tubes data values as passing the tests
-      void markAsPassed(const std::vector<int> & tubeIndices, API::MatrixWorkspace_sptr workspace);
 
       /// Maximum allowed rate
       double m_maxRate;

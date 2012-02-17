@@ -82,14 +82,12 @@ public:
     int failedIndexStart(50), failedIndexEnd(99);
     for( int i = failedIndexStart; i <= failedIndexEnd; ++i )
     {
-      IDetector_const_sptr det = outputWS->getDetector(i);
-      TS_ASSERT_EQUALS( det->isMasked(), true);
+      TS_ASSERT_EQUALS( outputWS->readY(i)[0], 1.);
     }
 
     for( int i = 0; i <= 49; ++i )
     {
-      IDetector_const_sptr det = outputWS->getDetector(i);
-      TS_ASSERT_EQUALS( det->isMasked(), false );
+      TS_ASSERT_EQUALS( outputWS->readY(i)[0], 0.);
     }
     
     dataStore.remove(outputName);
