@@ -25,6 +25,7 @@ namespace API
     // Create a browse button
     m_browseButton = new QPushButton(tr("Browse"), this);
     connect(m_browseButton, SIGNAL(clicked()), this, SLOT(browseClicked()));
+    m_widgets.push_back(m_browseButton);
 
     // Add to the 2nd column
     m_gridLayout->addWidget(m_browseButton, m_row, 2, 0);

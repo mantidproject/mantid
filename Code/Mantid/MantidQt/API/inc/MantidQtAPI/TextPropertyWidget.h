@@ -44,7 +44,12 @@ namespace API
   public:
     TextPropertyWidget(Mantid::Kernel::Property * prop, QWidget * parent = NULL, QGridLayout * layout = NULL, int row=-1);
     virtual ~TextPropertyWidget();
-    
+    QString getValue() const;
+    void setValue(const QString & value);
+
+    ///@return the main widget of this combo of widgets
+    QWidget * getMainWidget() {return m_textbox; }
+
   protected:
     /// Label (name of the property)
     QLabel * m_label;

@@ -50,8 +50,33 @@ namespace API
     
     bool inGrid() const;
 
+    /// Return the value of the property given the GUI state.
+    virtual QString getValue() const = 0;
+
+    /// Set the value of the property given into the GUI state.
+    virtual void setValue(const QString & value) = 0;
+
+    virtual QWidget * getMainWidget() = 0;
+
+    void setEnabled(bool val);
+    void setVisible(bool val);
+
+    /// @return the Layout object that these widget(s) are in.
+    QGridLayout * getGridLayout()
+    {return m_gridLayout; }
+
+    /// @return the row of the widgets in the Layout
+    int getGridRow()
+    {return m_row; }
+
+
   public slots:
     void replaceWSButtonClicked();
+
+    void valueChangedSlot();
+
+  signals:
+    void valueChanged(const QString & propName);
 
   protected:
     /// Property being looked at. This is NOT owned by the widget
@@ -71,6 +96,9 @@ namespace API
 
     /// Button to "replace input workspace"
     QPushButton * m_replaceWSButton;
+
+    /// All contained widgets
+    QVector<QWidget*> m_widgets;
   };
 
 

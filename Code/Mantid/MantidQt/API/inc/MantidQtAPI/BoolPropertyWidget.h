@@ -44,7 +44,12 @@ namespace API
   public:
     BoolPropertyWidget(Mantid::Kernel::PropertyWithValue<bool> * prop, QWidget * parent = NULL, QGridLayout * layout = NULL, int row=-1);
     virtual ~BoolPropertyWidget();
-    
+    QString getValue() const;
+    void setValue(const QString & value);
+
+    ///@return the main widget of this combo of widgets
+    QWidget * getMainWidget() {return m_checkBox; }
+
   protected:
     /// Checkbox widget
     QCheckBox * m_checkBox;

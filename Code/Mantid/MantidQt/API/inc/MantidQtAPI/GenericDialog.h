@@ -28,7 +28,6 @@ namespace API
     This class gives a basic dialog that is not tailored to a particular 
     algorithm.
 
-    @author Martyn Gigg, Tessella Support Services plc
     @date 24/02/2009
 
     Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -64,19 +63,14 @@ public:
   virtual ~GenericDialog();
 
 private:
-  /// This does the work and must be overridden in each deriving class
   virtual void initLayout();
+
+  void hideOrDisableProperties();
 
 private slots:
 
   /// Any property changed
   void propertyChanged(const QString & pName);
-
-  /// Browse for a file
-  void browseClicked(const QString & propName);
-
-  /// Browse for multiple files.
-  void browseMultipleClicked(const QString & propName);
 
 private:
     /// The grid widget containing the input boxes

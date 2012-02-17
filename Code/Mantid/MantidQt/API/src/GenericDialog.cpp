@@ -74,154 +74,6 @@ bool haveInputWS(const std::vector<Property*> & prop_list)
 
 
 
-//
-////---------------------------------------------------------------------------------------------------------------
-///** Layout a checkbox for a bool property
-// * @param prop :: Property to create controls for
-// * @param row :: insertion location for checkbox
-// */
-//void GenericDialog::layoutBoolProperty(PropertyWithValue<bool>* prop, int row)
-//{
-//  QString propName = QString::fromStdString(prop->name());
-//  QCheckBox *checkBox = new QCheckBox(propName);
-//  m_currentGrid->addWidget(new QLabel(""), row, 0, 0);
-//  m_currentGrid->addWidget(checkBox, row, 1, 0);
-//  tie(checkBox, propName, m_currentGrid);
-//
-//  // Map the check box state changing to the property name
-//  QSignalMapper * mapper = new QSignalMapper(this);
-//  connect(checkBox, SIGNAL( stateChanged(int)), mapper, SLOT(map()));
-//  mapper->setMapping(checkBox, propName);
-//  connect(mapper, SIGNAL(mapped(const QString &)), this, SLOT(propertyChanged(const QString &)));
-//  m_mappers.insert(propName, mapper);
-//
-//}
-//
-//
-////---------------------------------------------------------------------------------------------------------------
-///** Layout a combobox for a property with options
-// * @param prop :: Property to create controls for
-// * @param row :: insertion location for checkbox
-// */
-//void GenericDialog::layoutOptionsProperty(Property* prop, int row)
-//{
-//  QString propName = QString::fromStdString(prop->name());
-//  // The name and valid label
-//  QLabel *nameLbl = new QLabel(propName);
-//  nameLbl->setToolTip(  QString::fromStdString(prop->documentation()) );
-//  m_currentGrid->addWidget(nameLbl, row, 0, 0);
-//
-//  //It is a choice of certain allowed values and can use a combination box
-//  //Check if this is the row that matches the one that we want to link to the
-//  //output box and used the saved combo box
-//  QComboBox *optionsBox = new QComboBox;
-//  bool isWorkspaceProp(dynamic_cast<IWorkspaceProperty*>(prop));
-//  std::set<std::string> items = prop->allowedValues();
-//  std::set<std::string>::const_iterator vend = items.end();
-//  for(std::set<std::string>::const_iterator vitr = items.begin(); vitr != vend; ++vitr)
-//  {
-//    QString propValue = QString::fromStdString(*vitr);
-//    if ( isWorkspaceProp && ( ! m_showHidden ) && propValue.startsWith("__") ) continue;
-//    optionsBox->addItem(propValue);
-//  }
-//
-//  m_currentGrid->addWidget(optionsBox, row, 1, 0);
-//  tie(optionsBox, propName, m_currentGrid, true, nameLbl);
-//  if( isWorkspaceProp )
-//    flagInputWS(optionsBox);
-//
-//  // Map the options box to the property name
-//  QSignalMapper * mapper = new QSignalMapper(this);
-//  connect(optionsBox, SIGNAL( currentIndexChanged(int)), mapper, SLOT(map()));
-//  mapper->setMapping(optionsBox, propName);
-//  connect(mapper, SIGNAL(mapped(const QString &)), this, SLOT(propertyChanged(const QString &)));
-//  m_mappers.insert(propName, mapper);
-//}
-//
-//
-//
-////---------------------------------------------------------------------------------------------------------------
-///** Layout a textbox for a property with options
-// * @param prop :: Property to create controls for
-// * @param row :: insertion location for checkbox
-// */
-//void GenericDialog::layoutTextProperty(Property* prop, int row)
-//{
-//  QString propName = QString::fromStdString(prop->name());
-//  // The name and valid label
-//  QLabel *nameLbl = new QLabel(propName);
-//  nameLbl->setToolTip(  QString::fromStdString(prop->documentation()) );
-//  m_currentGrid->addWidget(nameLbl, row, 0, 0);
-//
-//  // The textbox
-//  QLineEdit *textBox = new QLineEdit;
-//  nameLbl->setBuddy(textBox);
-//
-//  //check this is a masked property
-//  Mantid::Kernel::MaskedProperty<std::string> * maskedProp = dynamic_cast<Mantid::Kernel::MaskedProperty<std::string> *>(prop);
-//  if(maskedProp)
-//    textBox->setEchoMode(QLineEdit::Password);
-//
-//  // If this is an output workspace property and there is an input workspace property
-//  // add a button that replaces the input workspace
-//  QPushButton *inputWSReplace = NULL;
-//  bool isWorkspaceProp(dynamic_cast<IWorkspaceProperty*>(prop));
-//  if( isWorkspaceProp )
-//  {
-//    if( prop->direction() == Direction::Output )
-//    {
-//      if( haveInputWS(getAlgorithm()->getProperties()) )
-//      {
-//        inputWSReplace = this->createReplaceWSButton(textBox);
-//        if (inputWSReplace)
-//          m_currentGrid->addWidget(inputWSReplace, row, 2, 0);
-//      }
-//    }
-//    else if( prop->direction() == Direction::Input )
-//    {
-//      flagInputWS(textBox);
-//    }
-//    else {}
-//  }
-//
-//  // For file properties
-//  QPushButton *browseBtn = NULL;
-//
-//  //Is this a FileProperty?
-//  Mantid::API::FileProperty* fileType = dynamic_cast<Mantid::API::FileProperty*>(prop);
-//  Mantid::API::MultipleFileProperty* multipleFileType = dynamic_cast<Mantid::API::MultipleFileProperty*>(prop);
-//  if( fileType || multipleFileType )
-//  {
-//    //Make a browser button
-//    browseBtn = new QPushButton(tr("Browse"));
-//    m_currentGrid->addWidget(browseBtn, row, 2, 0);
-//
-//    // Map click on the button to link to the browseMultipleClicked(PropName) method
-//    QSignalMapper * mapper = new QSignalMapper(this);
-//    connect(browseBtn, SIGNAL(clicked()), mapper, SLOT(map()));
-//    mapper->setMapping(browseBtn, propName);
-//    if (fileType)
-//      connect(mapper, SIGNAL(mapped(const QString &)), this, SLOT(browseClicked(const QString &)));
-//    else if (multipleFileType)
-//      connect(mapper, SIGNAL(mapped(const QString &)), this, SLOT(browseMultipleClicked(const QString &)));
-//    m_mappers.insert(propName, mapper);
-//  }
-//  else
-//  {
-//    // NON-file edit box
-//    // Map the edit box to the property name
-//    QSignalMapper * mapper = new QSignalMapper(this);
-//    connect(textBox, SIGNAL(editingFinished()), mapper, SLOT(map()));
-//    mapper->setMapping(textBox, propName);
-//    connect(mapper, SIGNAL(mapped(const QString &)), this, SLOT(propertyChanged(const QString &)));
-//    m_mappers.insert(propName, mapper);
-// }
-//
-//  //Add the widgets to the grid
-//  m_currentGrid->addWidget(textBox, row, 1, 0);
-//  tie(textBox, propName, m_currentGrid, true, nameLbl, browseBtn, inputWSReplace);
-//}
-
 
 
 //----------------------------------
@@ -303,12 +155,13 @@ void GenericDialog::initLayout()
         continue;
 
       // Create the appropriate widget at this row in the grid.
-      PropertyWidgetFactory::createWidget(prop, this, m_currentGrid, row);
+      PropertyWidget * widget = PropertyWidgetFactory::createWidget(prop, this, m_currentGrid, row);
 
+      // Record in the list of tied widgets (used in the base AlgorithmDialog)
+      tie(widget, propName, m_currentGrid);
 
-//      // the function analyses the property type and creates specific widget for it
-//      // in the vertical position, specified by row;
-//      this->createSpecificPropertyWidget(prop, row);
+      // Whenever the value changes in the widget, this fires propertyChanged()
+      connect(widget, SIGNAL( valueChanged(const QString &)), this, SLOT(propertyChanged(const QString &)));
 
       ++row;
     } //(end for each property)
@@ -351,6 +204,86 @@ void GenericDialog::initLayout()
 }
 
 
+//-------------------------------------------------------------------------------------------------
+/** Go through all the properties, and check their validators to determine
+ * whether they should be made disabled/invisible.
+ * It also shows/hids the validators.
+ * All properties' values should be set already, otherwise the validators
+ * will be running on old data.
+ */
+void GenericDialog::hideOrDisableProperties()
+{
+  std::cout << "hideOrDisableProperties===========================================================\n";
+  QStringList::const_iterator pend = m_algProperties.end();
+  for( QStringList::const_iterator pitr = m_algProperties.begin(); pitr != pend; ++pitr )
+  {
+    const QString propName = *pitr;
+    Mantid::Kernel::Property *prop = getAlgorithmProperty(propName);
+
+    // Find the widget for this property.
+    if (m_tied_properties.contains(propName))
+    {
+      QWidget* widget = m_tied_properties[propName];
+      PropertyWidget* propWidget = qobject_cast<PropertyWidget*>(widget);
+      if (propWidget)
+      {
+
+        // Set the enabled and visible flags based on what the validators say. Default is always true.
+        bool enabled = isWidgetEnabled(propName);
+        bool visible = prop->isVisible();
+
+        // Dynamic PropertySettings objects allow a property to change validators.
+        // This removes the old widget and creates a new one instead.
+        if (prop->isConditionChanged())
+        {
+          prop->getSettings()->applyChanges(prop);
+
+          // Delete the old widget
+          int row = propWidget->getGridRow();
+          QGridLayout * layout = propWidget->getGridLayout();
+          propWidget->deleteLater();
+
+          // Create the appropriate widget at this row in the grid.
+          propWidget = PropertyWidgetFactory::createWidget(prop, this, layout, row);
+          widget = propWidget;
+
+          // Record in the list of tied widgets (used in the base AlgorithmDialog)
+          tie(widget, propName, layout);
+
+          // Whenever the value changes in the widget, this fires propertyChanged()
+          connect(widget, SIGNAL( valueChanged(const QString &)), this, SLOT(propertyChanged(const QString &)));
+        }
+
+        // Show/hide the validator label (that red star)
+        QString error = "";
+        if (m_errors.contains(propName)) error = m_errors[propName];
+        // Always show controls that are in error
+        if (error.length() != 0)
+          visible = true;
+
+        std::cout << prop->name() << " enabled " << enabled << " visible " << visible << std::endl;
+
+        // Hide/disable the widget
+        propWidget->setEnabled( enabled );
+        propWidget->setVisible( visible );
+
+        if (visible)
+        {
+          QLabel *validator = getValidatorMarker(propName);
+          // If there's no validator then assume it's handling its own validation notification
+          if( validator && validator->parent() )
+          {
+            validator->setToolTip( error );
+            validator->setVisible( error.length() != 0);
+          }
+        }
+      } // is a PropertyWidget
+    } // widget is tied
+  } // for each property
+
+  this->repaint(true);
+}
+
 //--------------------------------------------------------------------------------------
 /** SLOT to be called whenever a property's value has just been changed
  * and the widget has lost focus/value has been changed.
@@ -358,72 +291,9 @@ void GenericDialog::initLayout()
  */
 void GenericDialog::propertyChanged(const QString & pName)
 {
+  std::cout << "propertyChanged(" << pName.toStdString() << ") called\n";
   this->storePropertyValue(pName, getValue( m_tied_properties[pName]) );
   this->setPropertyValue(pName, true);
-}
-
-
-//--------------------------------------------------------------------------------------
-/**
-* This slot is called when a browse button is clicked
-* @param propName :: Property being edited
-*/
-void GenericDialog::browseClicked(const QString & propName)
-{
-  //I mapped this to a QLineEdit, so cast it
-  QLineEdit *pathBox = qobject_cast<QLineEdit*>(m_tied_properties[propName]);
-
-  if( !pathBox->text().isEmpty() )
-  {
-    AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(pathBox->text()).absoluteDir().path());
-  }  
-  QString filepath = this->openFileDialog(propName);
-  if( !filepath.isEmpty() ) 
-  {
-    pathBox->clear();
-    pathBox->setText(filepath.trimmed());
-  }
-}
-
-
-//--------------------------------------------------------------------------------------
-/** This slot is called when a browse button for multiple files is clicked.
- *
-* @param propName :: The widget that is associated with the button that was clicked. In this case they are always QLineEdit widgets
-*/
-void GenericDialog::browseMultipleClicked(const QString & propName)
-{
-  //I mapped this to a QLineEdit, so cast it
-  QLineEdit *pathBox = qobject_cast<QLineEdit*>(m_tied_properties[propName]);
-
-  // Adjust the starting driectory
-  if( !pathBox->text().isEmpty() )
-  {
-    QStringList files =  pathBox->text().split(",");
-    if (files.size() > 0)
-    {
-      QString firstFile = files[0];
-      AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(firstFile).absoluteDir().path());
-    }
-  }
-  // Open multiple files in the dialog
-  QStringList files = FilePropertyWidget::openMultipleFileDialog( getAlgorithmProperty(propName) );
-
-  // Make into comma-sep string
-  QString output;
-  QStringList list = files;
-  QStringList::Iterator it = list.begin();
-  while(it != list.end())
-  {
-    if (it != list.begin()) output += ",";
-    output += *it;
-    it++;
-  }
-  if( !output.isEmpty() )
-  {
-    pathBox->clear();
-    pathBox->setText(output);
-  }
 }
 
 

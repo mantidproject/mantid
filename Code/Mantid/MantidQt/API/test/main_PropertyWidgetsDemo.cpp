@@ -17,11 +17,13 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MultipleFileProperty.h"
+#include "MantidAPI/WorkspaceProperty.h"
 
 using namespace Mantid::Kernel;
 using namespace MantidQt::API;
 using Mantid::API::FileProperty;
 using Mantid::API::MultipleFileProperty;
+using Mantid::API::WorkspaceProperty;
 
 /** Main application
  *
@@ -63,6 +65,10 @@ int main( int argc, char ** argv )
   props.push_back(new FileProperty("LoadFileProperty", "default.file.txt", FileProperty::Load, exts));
   props.push_back(new FileProperty("DirectoryFileProperty", "default.file.txt", FileProperty::Directory, exts));
   props.push_back(new MultipleFileProperty("MultipleFileProperty", exts));
+  props.push_back(new WorkspaceProperty<>("InputWorkspaceProp", "", Direction::Input));
+  props.push_back(new WorkspaceProperty<>("InOutWorkspaceProp", "", Direction::InOut));
+  props.push_back(new WorkspaceProperty<>("OutputWorkspaceProp", "", Direction::Output));
+  props.push_back(new WorkspaceProperty<>("OutputWorkspaceProp2", "", Direction::Output));
 
   std::vector<std::string> propOptions;
   propOptions.push_back("OptionA");

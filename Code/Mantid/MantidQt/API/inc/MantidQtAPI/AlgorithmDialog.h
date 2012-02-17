@@ -143,7 +143,7 @@ protected:
   /// Get an input value from the form, dealing with blank inputs etc
   QString getInputValue(const QString& propName) const;
   /// Get a property validator label
-  QLabel* getValidatorMarker(const QString & propname) const;
+  QLabel* getValidatorMarker(const QString & propname);
   
   /// Adds a property (name,value) pair to the stored map
   void storePropertyValue(const QString & name, const QString & value);
@@ -152,7 +152,7 @@ protected:
   bool setPropertyValues(const QStringList & skipList = QStringList());
   bool setPropertyValue(const QString pName, bool validateOthers);
 
-  void hideOrDisableProperties();
+  virtual void hideOrDisableProperties();
   //@}
 
   /** @name Dialog information */
@@ -176,8 +176,9 @@ protected:
   /** @name Helper functions */
   //@{
   ///Tie a widget to a property
-  QWidget* tie(QWidget* widget, const QString & property, QLayout* parent_layout, bool readHistory = true,
-      QWidget * otherWidget1 = NULL, QWidget * otherWidget2 = NULL, QWidget * otherWidget3 = NULL);
+  QWidget* tie(QWidget* widget, const QString & property, QLayout* parent_layout,
+      bool readHistory = true);
+
   ///Untie a widget to a property
   void untie(const QString & property);
 
@@ -254,9 +255,6 @@ protected:
   /// A list pointers to the widget for each property
   QHash<QString, QWidget*> m_tied_properties;
 
-  /// For each property, a list of ALL associated widgets
-  QHash<QString, QList<QWidget*> > m_tied_all_widgets;
-
   /// A boolean indicating whether this is for a script or not
   bool m_forScript;
   /// A list of property names that have been passed from Python
@@ -277,10 +275,10 @@ protected:
   bool m_showHidden;
 
   /// A list of labels to use as validation markers
-  mutable QHash<QString, QLabel*> m_validators;
+  QHash<QString, QLabel*> m_validators;
 
   /// A map where key = property name; value = the error for this property (i.e. it is not valid).
-  mutable QHash<QString, QString> m_errors;
+  QHash<QString, QString> m_errors;
 
   /// A list of property names whose widgets handle their own validation
   QStringList m_noValidation;
