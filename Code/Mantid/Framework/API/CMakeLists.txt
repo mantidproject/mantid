@@ -37,6 +37,7 @@ set ( SRC_FILES
 	src/IFunction.cpp
 	src/IFunctionMD.cpp
 	src/IFunctionMW.cpp
+	src/ILiveListener.cpp
 	src/IMDEventWorkspace.cpp
 	src/IMDHistoWorkspace.cpp
 	src/IMDIterator.cpp
@@ -145,6 +146,7 @@ set ( INC_FILES
 	inc/MantidAPI/IFunctionMD.h
 	inc/MantidAPI/IFunctionMW.h
 	inc/MantidAPI/IFunctionWithLocation.h
+	inc/MantidAPI/ILiveListener.h
 	inc/MantidAPI/ILocatedData.h
 	inc/MantidAPI/IMDEventWorkspace.h
 	inc/MantidAPI/IMDHistoWorkspace.h
@@ -226,10 +228,11 @@ set ( TEST_FILES
 	test/FileFinderTest.h
 	test/FilePropertyTest.h
 	test/FrameworkManagerTest.h
-	test/FunctionTest.h
 	test/FunctionPropertyTest.h
+	test/FunctionTest.h
 	test/IEventListTest.h
 	test/IFunctionMDTest.h
+	test/ILiveListenerTest.h
 	test/IMDWorkspaceTest.h
 	test/ISpectrumTest.h
 	test/ImplicitFunctionParserFactoryTest.h
