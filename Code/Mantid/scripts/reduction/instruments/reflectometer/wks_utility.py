@@ -108,7 +108,17 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
         returns the new workspace handle
     """
     _tof_axis = mt1.readX(0)[:]
-    
+
+    _fromXpixel = min([fromXpixel,toXpixel])
+    _toXpixel = max([fromXpixel,toXpixel])
+    fromXpixel = _fromXpixel
+    toXpixel = _toXpixel
+
+    _fromYpixel = min([fromYpixel,toYpixel])
+    _toYpixel = max([fromYpixel,toYpixel])
+    fromYpixel = _fromYpixel
+    toYpixel = _toYpixel
+
     if geo_correction:
         
         yrange = arange(toYpixel-fromYpixel+1) + fromYpixel
@@ -236,7 +246,7 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
         _y_axis = _y_axis[::-1]
         _y_error_axis = _y_error_axis[::-1]
 
-        CreateWorkspace(OutputWorkspace=outputWorkspace, 
+        CreateWorkspace(OutputWorkspace=outputWorkspace,
                         DataX=_q_axis, 
                         DataY=_y_axis, 
                         DataE=_y_error_axis, 

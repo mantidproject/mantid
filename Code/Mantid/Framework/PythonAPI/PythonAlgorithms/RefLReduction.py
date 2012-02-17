@@ -154,7 +154,10 @@ class RefLReduction(PythonAlgorithm):
 
         # Rebin data (x-axis is in TOF)
         ws_histo_data = "__"+ws_name+"_histo"
-        Rebin(InputWorkspace=ws_event_data, OutputWorkspace=ws_histo_data, Params=[TOFrange[0], TOFsteps, TOFrange[1]])
+        Rebin(InputWorkspace=ws_event_data, OutputWorkspace=ws_histo_data, 
+              Params=[TOFrange[0], 
+                      TOFsteps, 
+                      TOFrange[1]])
         
         # Keep only range of TOF of interest
         CropWorkspace(ws_histo_data,ws_histo_data,XMin=TOFrange[0], XMax=TOFrange[1])
@@ -224,7 +227,7 @@ class RefLReduction(PythonAlgorithm):
                 _q_axis[t] = _Q*1e-10
             q_max = max(_q_axis)
 
-        ws_integrated_data = "__IntegratedDataWks"
+        ws_integrated_data = "_IntegratedDataWks"
         wks_utility.createIntegratedWorkspace(mtd[ws_histo_data], 
                                               ws_integrated_data,
                                               fromXpixel=Xrange[0],
@@ -237,11 +240,11 @@ class RefLReduction(PythonAlgorithm):
                                               source_to_detector=dMD,
                                               sample_to_detector=dSD,
                                               theta=theta,
-                                              geo_correction=True,
+                                              geo_correction=False,
                                               q_binning=[q_min,q_step,q_max])
 
-        ws_data = "__DataWks"
-        ws_transposed = '__TransposedID'
+        ws_data = "_DataWks"
+        ws_transposed = '_TransposedID'
         if subtract_data_bck:
 
             ConvertToHistogram(InputWorkspace=ws_integrated_data,
@@ -269,7 +272,7 @@ class RefLReduction(PythonAlgorithm):
                            EndX=BacktoYpixel,
                            OutputMode="Return Background")
 
-            ws_data_bck = "__DataBckWks"
+            ws_data_bck = "_DataBckWks"
             ws_data_bck_1 = ws_data_bck + "_1"
             Transpose(InputWorkspace=ws_transposed,
                       OutputWorkspace=ws_data_bck_1)
@@ -293,10 +296,10 @@ class RefLReduction(PythonAlgorithm):
             Minus(ws_integrated_data, ws_data_bck, OutputWorkspace=ws_data)
             
             # Clean up intermediary workspaces
-            mtd.deleteWorkspace(ws_integrated_data)
-            mtd.deleteWorkspace(ws_histo_data)
-            mtd.deleteWorkspace(ws_data_bck)
-            mtd.deleteWorkspace(ws_transposed)
+#            mtd.deleteWorkspace(ws_integrated_data)
+#            mtd.deleteWorkspace(ws_histo_data)
+#            mtd.deleteWorkspace(ws_data_bck)
+#            mtd.deleteWorkspace(ws_transposed)
 
         else:
 
@@ -311,20 +314,23 @@ class RefLReduction(PythonAlgorithm):
             if len(f)>0 and os.path.isfile(f[0]): 
                 norm_file = f[0]
             else:
-                msg = "RefLReduction: could not find run %d\n" % run_numbers[0]
+                msg = "RefLReduction: could not find run %d\n" % normalization_run
                 msg += "Add your data folder to your User Data Directories in the File menu"
                 raise RuntimeError(msg)
             
             #load normalization file
-            ws_name = "__normalization_refl%d" % run_numbers[0]
+            ws_name = "_normalization_refl%d" % normalization_run
             ws_norm_event_data = ws_name+"_evt"  
             ws_norm_histo_data = ws_name+"_histo"  
 
             if not mtd.workspaceExists(ws_norm_event_data):
-                LoadEventNexus(Filename=norm_file, OutputWorkspace=ws_norm_event_data)
-    
+                LoadEventNexus(norm_file, ws_norm_event_data)
+            
             # Rebin data
-            Rebin(InputWorkspace=ws_norm_event_data, OutputWorkspace=ws_norm_histo_data, Params=[TOFrange[0], TOFsteps, TOFrange[1]])
+            Rebin(InputWorkspace=ws_norm_event_data, OutputWorkspace=ws_norm_histo_data, 
+                  Params=[TOFrange[0], 
+                          TOFsteps, 
+                          TOFrange[1]])
     
             # Keep only range of TOF of interest
             CropWorkspace(ws_norm_histo_data, ws_norm_histo_data, XMin=TOFrange[0], XMax=TOFrange[1])
@@ -335,7 +341,7 @@ class RefLReduction(PythonAlgorithm):
             #Create a new event workspace of only the range of pixel of interest 
             #background range (along the y-axis) and of only the pixel
             #of interest along the x-axis (to avoid the frame effect)
-            ws_integrated_data = "__IntegratedNormWks"
+            ws_integrated_data = "_IntegratedNormWks"
             wks_utility.createIntegratedWorkspace(mtd[ws_norm_histo_data], 
                                                   ws_integrated_data,
                                                   fromXpixel=normXrange[0],
@@ -350,8 +356,8 @@ class RefLReduction(PythonAlgorithm):
                                                   theta=theta,
                                                   geo_correction=False)
 
-            ws_data_bck = "__NormBckWks"
-            ws_norm_rebinned = "__NormRebinnedWks"
+            
+            ws_data_bck = "_NormBckWks"
             if subtract_norm_bck:
                 Transpose(InputWorkspace=ws_integrated_data,
                           OutputWorkspace=ws_transposed)
@@ -395,34 +401,39 @@ class RefLReduction(PythonAlgorithm):
 
                 WeightedMean(ws_data_bck_1, ws_data_bck_2, ws_data_bck)
 
-                ws_norm = "__NormWks"
+                ws_norm = "_NormWks"
                 Minus(ws_integrated_data, ws_data_bck, OutputWorkspace=ws_norm)
 
-                # Clean up intermediary workspaces
-                mtd.deleteWorkspace(ws_data_bck)
-                mtd.deleteWorkspace(ws_integrated_data)
-                mtd.deleteWorkspace(ws_transposed)
+                #Clean up intermediary workspaces
+#                mtd.deleteWorkspace(ws_data_bck)
+#                mtd.deleteWorkspace(ws_integrated_data)
+#                mtd.deleteWorkspace(ws_transposed)
 
+                ws_norm_rebinned = "_NormRebinnedWks"
                 RebinToWorkspace(WorkspaceToRebin=ws_norm, 
                                  WorkspaceToMatch=ws_data,
                                  OutputWorkspace=ws_norm_rebinned)
 
-#            else:
-#            
-#                ws_norm_rebinned = "__NormRebinnedWks"
-#                RebinToWorkspace(WorkspaceToRebin=ws_norm, 
-#                                 WorkspaceToMatch=ws_data,
-#                                 OutputWorkspace=ws_norm_rebinned)
+            else:
             
-            #perform the integration myself
-            mt_temp = mtd[ws_norm_rebinned]
-            x_axis = mt_temp.readX(0)[:]   #[9100,9300,.... 23500] (73,1)
-            NormPeakRange = numpy.arange(to_peak-from_peak+1) + from_peak
-            counts_vs_tof = numpy.zeros(len(x_axis))
+                ws_norm_rebinned = "_NormRebinnedWks"
+                RebinToWorkspace(WorkspaceToRebin=ws_integrated_data,
+                                 WorkspaceToMatch=ws_data,
+                                 OutputWorkspace=ws_norm_rebinned)
+                        
+
+                RebinToWorkspace(WorkspaceToRebin=ws_integrated_data,
+                                 WorkspaceToMatch=ws_data,
+                                 OutputWorkspace=ws_norm_rebinned)
+#perform the integration myself
+#            mt_temp = mtd[ws_norm_rebinned]
+#            x_axis = mt_temp.readX(0)[:]   #[9100,9300,.... 23500] (73,1)
+#            NormPeakRange = numpy.arange(to_peak-from_peak+1) + from_peak
+#            counts_vs_tof = numpy.zeros(len(x_axis))
 
             #Normalization           
             SumSpectra(InputWorkspace=ws_norm_rebinned, OutputWorkspace=ws_norm_rebinned)
-        
+
             #### divide data by normalize histo workspace
             Divide(LHSWorkspace=ws_data,
                    RHSWorkspace=ws_norm_rebinned,
@@ -434,20 +445,20 @@ class RefLReduction(PythonAlgorithm):
 
         output_ws = self.getPropertyValue("OutputWorkspace")        
         
-        if mtd.workspaceExists(output_ws):
-            mtd.deleteWorkspace(output_ws)
+#        if mtd.workspaceExists(output_ws):
+#            mtd.deleteWorkspace(output_ws)
             
         SumSpectra(InputWorkspace=ws_data, OutputWorkspace=output_ws)
         
         self.setProperty("OutputWorkspace", mtd[output_ws])
         
         # Clean up intermediary workspaces
-        mtd.deleteWorkspace(ws_data)
+        #mtd.deleteWorkspace(ws_data)
 
-        if (NormFlag):
-            mtd.deleteWorkspace(ws_norm)
-            mtd.deleteWorkspace(ws_norm_rebinned)
-            mtd.deleteWorkspace(ws_norm_histo_data)
+#        if (NormFlag):
+#            mtd.deleteWorkspace(ws_norm)
+#            mtd.deleteWorkspace(ws_norm_rebinned)
+#            mtd.deleteWorkspace(ws_norm_histo_data)
         
             
 mtd.registerPyAlgorithm(RefLReduction())
