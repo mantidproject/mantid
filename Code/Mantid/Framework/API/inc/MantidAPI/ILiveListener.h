@@ -75,7 +75,8 @@ namespace Mantid
 
       /** Get the data that's been buffered since the last call to this method
        *  (or since connect() was called).
-       *  The implementation should reset its internal buffer when this method is called.
+       *  The implementation should reset its internal buffer when this method is called
+       *    - the returned workspace is for the caller to do with as they wish.
        *  @return A pointer to the workspace containing the buffered data.
        *  TODO: Consider whether there should be a default implementation of this method
        */

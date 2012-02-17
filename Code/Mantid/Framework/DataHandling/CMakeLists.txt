@@ -3,6 +3,7 @@ set ( SRC_FILES
 	src/CreateSampleShape.cpp
 	src/DefineGaugeVolume.cpp
 	src/DeleteTableRows.cpp
+	src/FakeEventDataListener.cpp
 	src/FindDetectorsInShape.cpp
 	src/FindDetectorsPar.cpp
 	src/GetMaskedDetectors.cpp
@@ -122,6 +123,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/CreateSampleShape.h
 	inc/MantidDataHandling/DefineGaugeVolume.h
 	inc/MantidDataHandling/DeleteTableRows.h
+	inc/MantidDataHandling/FakeEventDataListener.h
 	inc/MantidDataHandling/FindDetectorsInShape.h
 	inc/MantidDataHandling/FindDetectorsPar.h
 	inc/MantidDataHandling/GetMaskedDetectors.h
@@ -235,6 +237,7 @@ set ( TEST_FILES
 	test/CreateSampleShapeTest.h
 	test/DefineGaugeVolumeTest.h
 	test/DeleteTableRowsTest.h
+	test/FakeEventDataListenerTest.h
 	test/FindDetectorsInShapeTest.h
 	test/FindDetectorsParTest.h
 	test/GetMaskedDetectorsTest.h
