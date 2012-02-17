@@ -293,8 +293,8 @@ class SNSPowderReduction2(PythonAlgorithm):
         # generate the workspace name
         wksp = "%s_%d" % (self._instrument, runnumber)
         chunks = range(1,2) #Default for one chunk
-        if self._chunks > 0:
-            alg = LoadPreNexus(Filename=wksp+'_runinfo.xml',MaxChunkSize=self._chunks,OutputWorkspace='Chunks')
+        if self._chunks > 0 and "runinfo" in extension:
+            alg = LoadPreNexus(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks')
             chunkwksp = alg['OutputWorkspace']
             chunks = chunkwksp.readY(0)
         if len(chunks) == 0:
@@ -315,7 +315,8 @@ class SNSPowderReduction2(PythonAlgorithm):
                 Plus(LHSWorkspace=wksp, RHSWorkspace=wksp_chunk, OutputWorkspace=wksp)
                 DeleteWorkspace(wksp_chunk)
         print "Done focussing data"
-        mtd.deleteWorkspace(str(chunkwksp))
+        if self._chunks > 0 and 'runinfo' in extension:
+            mtd.deleteWorkspace(str(chunkwksp))
 
         return wksp
 
