@@ -26,7 +26,7 @@ macro( SQUISH_ADD_TEST_SUITE )
              -P ${MANTID_CMAKE_MODULE_PATH}/SquishTestScript.cmake
             )
     set_tests_properties( ${testName} PROPERTIES FAIL_REGULAR_EXPRESSION
-                          "FAILED;ERROR;FATAL"
+                          "FAILURE;FAILED;ERROR;FATAL"
                         )
   endforeach( )
 endmacro( SQUISH_ADD_TEST_SUITE )
