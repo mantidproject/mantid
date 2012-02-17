@@ -140,7 +140,6 @@ namespace Mantid
       {
         checkForMask = ((instrument->getSource() != NULL) && (instrument->getSample() != NULL));
       }
-      std::cout << "checkForMask = " << checkForMask << std::endl; // REMOVE
 
       PARALLEL_FOR1(input)
       for (int i = 0; i < nhists; ++i)
