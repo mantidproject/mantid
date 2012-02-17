@@ -195,20 +195,20 @@ ConvertToMDEvents::init()
 
      /// this variable describes default possible ID-s for Q-dimensions   
      declareProperty("QDimensions",Q_modes[modQ],new ListValidator(Q_modes),
-         "You can to transfer source workspace dimensions into target MD workspace directly by supplying empty string """" (NoQ), \n"
+         "You can to transfer source workspace into target MD workspace directly by supplying string ""CopyToMD""\n"
+         " (No Q analysis, or Q conversion is performed),\n"
          "into mod(Q) (1 dimension) providing ""|Q|"" string or into 3 dimensions in Q space ""QhQkQl"". \n"
          " First mode used for copying data from input workspace into multidimensional target workspace, second -- mainly for powder analysis\n"
-         "(though crystal as powder is also included into this mode) and the third -- for crystal analysis.\n",Direction::InOut); 
-
+         "(though crystal as powder is also analysed in this mode) and the third -- for crystal analysis.\n",Direction::InOut); 
      // this switch allows to make units expressed in HKL, hkl is currently not supported by units conversion so the resulting workspace can not be subject to unit conversion
      declareProperty(new PropertyWithValue<bool>("QinHKL", true, Direction::Input),
          " Setting this property to true will normalize three momentums obtained in QhQkQl mode by reciprocal lattice vectors 2pi/a,2pi/b and 2pi/c\n"
-         " ignored in mod|Q| and NoQ modes and if a reciprocal lattice is not defined in the input workspace");
+         " ignored in mod|Q| and ""CopyToMD"" modes and if a reciprocal lattice is not defined in the input workspace");
      /// this variable describes implemented modes for energy transfer analysis
      declareProperty("dEAnalysisMode",dE_modes[Direct],new ListValidator(dE_modes),
-        "You can analyse neutron energy transfer in direct, indirect or elastic mode. The analysis mode has to correspond to experimental set up."
-        " Selecting inelastic mode increases the number of the target workspace dimensions by one. (by DeltaE -- the energy transfer) ",Direction::InOut);        
-
+        "You can analyse neutron energy transfer in direct, indirect or elastic mode. The analysis mode has to correspond to experimental set up.\n"
+        " Selecting inelastic mode increases the number of the target workspace dimensions by one. (by DeltaE -- the energy transfer)\n"
+        """NoDE"" choice corresponds to ""CopyToMD"" analysis mode and is selected automatically if the QDimensions is set to ""CopyToMD""",Direction::InOut);                
      
     declareProperty(new ArrayProperty<std::string>("OtherDimensions",Direction::Input),
         " List(comma separated) of additional to Q and DeltaE variables which form additional (orthogonal) to Q dimensions"
