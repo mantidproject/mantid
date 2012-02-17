@@ -192,6 +192,7 @@ class SNSPowderReduction2(PythonAlgorithm):
                              Description="Relative time to start filtering by in seconds. Applies only to sample.")
         self.declareProperty("FilterByTimeMax", 0.,
                              Description="Relative time to stop filtering by in seconds. Applies only to sample.")
+        self.declareProperty("MaxChunkSize", 0, Description="Specify maximum bytes of file to read in one chunk.  Default is whole file.")
         self.declareProperty("FilterCharacterizations", False,
                              Description="Filter the characterization runs using above parameters. This only works for event files.")
         self.declareListProperty("Binning", [0.,0.,0.],
@@ -213,12 +214,13 @@ class SNSPowderReduction2(PythonAlgorithm):
         self.declareFileProperty("OutputDirectory", "", FileAction.Directory)
         self.declareProperty("NormalizeByCurrent", True, Description="Normalized by Current")
         self.declareProperty("FinalDataUnits", "dSpacing", ListValidator(["dSpacing","MomentumTransfer"]))
-        self.declareProperty("NumberChunks", 1, Description="Save memory by reading file in chunks.  Default=1")
 
     def _loadPreNeXusData(self, runnumber, extension, **kwargs):
         mykwargs = {}
+        chunkNo = 1
         if kwargs.has_key("FilterByTimeStart"):
             mykwargs["ChunkNumber"] = int(kwargs["FilterByTimeStart"])
+            chunkNo = int(kwargs["FilterByTimeStart"])
         if kwargs.has_key("FilterByTimeStop"):
             mykwargs["TotalChunks"] = int(kwargs["FilterByTimeStop"])
 
@@ -227,7 +229,7 @@ class SNSPowderReduction2(PythonAlgorithm):
         filename = name + extension
         self.log().debug(filename)
 
-        name += "_%02d" % (int(kwargs["FilterByTimeStart"]))
+        name += "_%02d" % (chunkNo)
         alg = LoadPreNexus(Filename=filename, OutputWorkspace=name, **mykwargs)
         wksp = alg['OutputWorkspace']
 
@@ -279,21 +281,16 @@ class SNSPowderReduction2(PythonAlgorithm):
         else:
             return self._loadPreNeXusData(runnumber, extension, **filter)
 
-    def _determineChunks(self, extension):
-        if not "runinfo" in extension:
-          return [1]
-        numChunks = self._chunks
-        if numChunks > 0:
-          return range(1, numChunks+1) # high end is exclusive
-        else:
-          return [1]
-        
     def _focusChunks(self, runnumber, extension, filterWall, calib, filterLogs=None, preserveEvents=True,
                normByCurrent=True, filterBadPulsesOverride=True):
         first = True
         # generate the workspace name
         wksp = "%s_%d" % (self._instrument, runnumber)
-        chunks = self._determineChunks(extension)
+        chunks = range(1,2) #Default for one chunk
+        if self._chunks > 0:
+            alg = LoadPreNexus(Filename=wksp+'_runinfo.xml',MaxChunkSize=self._chunks,OutputWorkspace='Chunks')
+            chunkwksp = alg['OutputWorkspace']
+            chunks = chunkwksp.readY(0)
         if len(chunks) == 0:
             return False
         for chunk in chunks:
@@ -303,7 +300,6 @@ class SNSPowderReduction2(PythonAlgorithm):
             wksp_chunk = self._loadData(runnumber, extension, filterWall)
             if self._info is None:
                 self._info = self._getinfo(wksp_chunk)
-                print "Got info for ",chunk
             wksp_chunk = self._focus(wksp_chunk, calib, self._info, filterLogs, preserveEvents, normByCurrent)
             if first:
                 first = False
@@ -312,6 +308,7 @@ class SNSPowderReduction2(PythonAlgorithm):
                 Plus(LHSWorkspace=wksp, RHSWorkspace=wksp_chunk, OutputWorkspace=wksp)
                 DeleteWorkspace(wksp_chunk)
         print "Done focussing data"
+        mtd.deleteWorkspace(str(chunkwksp))
 
         return wksp
 
@@ -489,8 +486,8 @@ class SNSPowderReduction2(PythonAlgorithm):
         filterWall = (self.getProperty("FilterByTimeMin"), self.getProperty("FilterByTimeMax"))
         preserveEvents = self.getProperty("PreserveEvents")
         normbycurrent = self.getProperty("NormalizeByCurrent")
-        self._chunks = self.getProperty("NumberChunks")
         self._info = None
+        self._chunks = self.getProperty("MaxChunkSize")
 
         workspacelist = [] # all data workspaces that will be converted to d-spacing in the end
 

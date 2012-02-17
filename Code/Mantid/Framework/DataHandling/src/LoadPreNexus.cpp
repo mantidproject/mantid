@@ -121,7 +121,9 @@ namespace DataHandling
         "File containing the pixel mapping (DAS pixels to pixel IDs) file (typically INSTRUMENT_TS_YYYY_MM_DD.dat). The filename will be found automatically if not specified.");
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
     mustBePositive->setLower(1);
-    declareProperty("ChunkNumber", EMPTY_INT(), mustBePositive,
+    declareProperty("MaxChunkSize", EMPTY_INT(), mustBePositive,
+        "Get chunking strategy for chunks with this number of bytes.");
+    declareProperty("ChunkNumber", EMPTY_INT(), mustBePositive->clone(),
         "If loading the file by sections ('chunks'), this is the section number of this execution of the algorithm.");
     declareProperty("TotalChunks", EMPTY_INT(), mustBePositive->clone(),
         "If loading the file by sections ('chunks'), this is the total number of sections.");
@@ -153,6 +155,25 @@ namespace DataHandling
     string mapfile = this->getPropertyValue(MAP_PARAM);
     int chunkTotal = this->getProperty("TotalChunks");
     int chunkNumber = this->getProperty("ChunkNumber");
+    int maxChunk = this->getProperty("MaxChunkSize");
+    if (!isEmpty(maxChunk))
+    {
+      int NChunks = determineChunking(runinfo,maxChunk);
+      std::vector<double>y;
+      for (int i = 1; i <= NChunks; i++) 
+        y.push_back(i);
+      
+      IAlgorithm_sptr algo = createSubAlgorithm("CreateWorkspace", 0.7, 1.0);
+      algo->setProperty< std::vector<double> >("DataX", std::vector<double>(NChunks+1,0.0) );
+      algo->setProperty< std::vector<double> >("DataY", y );
+      algo->setProperty< std::vector<double> >("DataE", std::vector<double>(NChunks,0.0) );
+      algo->setProperty<int>("NSpec", 1 );
+      algo->execute();
+      MatrixWorkspace_sptr outws = algo->getProperty("OutputWorkspace");
+
+      this->setProperty("OutputWorkspace", outws);
+      return;
+    }
     if ( isEmpty(chunkTotal) || isEmpty(chunkNumber))
     {
       chunkNumber = EMPTY_INT();
@@ -386,6 +407,26 @@ namespace DataHandling
       g_log.warning() << "Failed to load monitors: " << e.what() << "\n";
     }
   }
+
+  int LoadPreNexus::determineChunking(const std::string& filename, size_t maxChunkSize)
+  {
+    vector<string> eventFilenames;
+    string dataDir;
+    this->parseRuninfo(filename, dataDir, eventFilenames);
+    size_t filesize = 0;
+    for (size_t i = 0; i < eventFilenames.size(); i++) {
+      filesize = std::max(filesize,static_cast<size_t>(Poco::File(dataDir + eventFilenames[i]).getSize()));
+    }
+    if (filesize == 0)
+      return 0;
+    int numChunks = static_cast<int>(filesize/maxChunkSize);
+    if (numChunks > 0)
+      return numChunks; // high end is exclusive
+    else
+      return 1;
+
+  }
+
 
 } // namespace Mantid
 } // namespace DataHandling
