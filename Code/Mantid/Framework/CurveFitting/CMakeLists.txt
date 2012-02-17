@@ -1,6 +1,6 @@
 set ( SRC_FILES
   src/Abragam.cpp
-#	src/BFGS_Minimizer.cpp
+	src/BFGS_Minimizer.cpp
 	src/BackToBackExponential.cpp
 	src/BackgroundFunction.cpp
 #	src/BivariateNormal.cpp
@@ -59,7 +59,7 @@ set ( SRC_UNITY_IGNORE_FILES src/Fit1D.cpp src/GSLFunctions.cpp )
 
 set ( INC_FILES
   inc/MantidCurveFitting/Abragam.h
-#	inc/MantidCurveFitting/BFGS_Minimizer.h
+	inc/MantidCurveFitting/BFGS_Minimizer.h
 	inc/MantidCurveFitting/BackToBackExponential.h
 	inc/MantidCurveFitting/BackgroundFunction.h
 #	inc/MantidCurveFitting/BivariateNormal.h
@@ -128,6 +128,7 @@ set ( TEST_FILES
 	test/StaticKuboToyabeTest.h
 	test/StretchExpMuonTest.h
 #	test/BackToBackExponentialTest.h
+	test/BFGSTest.h
 #	test/BivariateNormalTest.h
 #	test/BoundaryConstraintTest.h
 #	test/ChebyshevTest.h

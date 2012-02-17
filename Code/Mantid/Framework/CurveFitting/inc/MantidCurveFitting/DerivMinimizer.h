@@ -61,7 +61,7 @@ public:
 protected:
 
   /// Return a concrete type to initialize m_gslSolver with
-  virtual gsl_multimin_fdfminimizer_type* getGSLMinimizerType() = 0;
+  virtual const gsl_multimin_fdfminimizer_type* getGSLMinimizerType() = 0;
 
   /// Function to minimize.
   API::ICostFunction_sptr m_costFunction;

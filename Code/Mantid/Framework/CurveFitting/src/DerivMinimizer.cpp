@@ -75,7 +75,7 @@ void DerivMinimizer::initialize(API::ICostFunction_sptr function)
   m_gslMultiminContainer.fdf = &fundfun;
   m_gslMultiminContainer.params = this;
 
-  gsl_multimin_fdfminimizer *s = gsl_multimin_fdfminimizer_alloc( getGSLMinimizerType(), m_gslMultiminContainer.n );
+  m_gslSolver = gsl_multimin_fdfminimizer_alloc( getGSLMinimizerType(), m_gslMultiminContainer.n );
 
   size_t nParams = m_costFunction->nParams();
   // Starting point 
@@ -98,9 +98,18 @@ bool DerivMinimizer::iterate()
     throw std::runtime_error("Minimizer " + this->name() + " was not initialized.");
   }
   int status = gsl_multimin_fdfminimizer_iterate(m_gslSolver);
-  if (status) return false;
+  if (status)
+  {
+    m_errorString = gsl_strerror(status);
+    return false;
+  }
   status = gsl_multimin_test_gradient (m_gslSolver->gradient, 1e-3); //! <---------------
-  return status == GSL_CONTINUE;
+  if (status != GSL_CONTINUE)
+  {
+    m_errorString = gsl_strerror(status);
+    return false;
+  }
+  return true;
 }
 
 bool DerivMinimizer::minimize() 
