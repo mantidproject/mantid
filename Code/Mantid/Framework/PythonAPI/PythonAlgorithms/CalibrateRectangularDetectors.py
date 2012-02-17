@@ -28,7 +28,13 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         return "CalibrateRectangularDetectors"
 
     def PyInit(self):
-        instruments = ["PG3", "VULCAN", "SNAP", "NOM", "TOPAZ"]
+        sns = mtd.getSettings().facility("SNS")
+        instruments = []
+        for instr in sns.instruments():
+          for tech in instr.techniques():
+            if "Neutron Diffraction" == str(tech):
+              instruments.append(instr.shortName())
+              break
         self.declareProperty("Instrument", "PG3",
                              Validator=ListValidator(instruments))
         #types = ["Event preNeXus", "Event NeXus"]
