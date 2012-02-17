@@ -226,7 +226,7 @@ QLabel* AlgorithmDialog::getValidatorMarker(const QString & propname)
     QPalette pal = validLbl->palette();
     pal.setColor(QPalette::WindowText, Qt::darkRed);
     validLbl->setPalette(pal);
-    validLbl->setVisible(false);
+    validLbl->setVisible(true);
     m_validators[propname] = validLbl;
   }
   else
@@ -253,6 +253,28 @@ void AlgorithmDialog::storePropertyValue(const QString & name, const QString & v
 void AlgorithmDialog::hideOrDisableProperties()
 {
   // Do nothing for non-generic algorithm dialogs
+  QStringList::const_iterator pend = m_algProperties.end();
+  for( QStringList::const_iterator pitr = m_algProperties.begin(); pitr != pend; ++pitr )
+  {
+    const QString propName = *pitr;
+
+    // Find the widget for this property.
+    if (m_tied_properties.contains(propName))
+    {
+      // Show/hide the validator label (that red star)
+      QString error = "";
+      if (m_errors.contains(propName)) error = m_errors[propName];
+
+      QLabel *validator = getValidatorMarker(propName);
+      // If there's no validator then assume it's handling its own validation notification
+      if( validator && validator->parent() )
+      {
+        validator->setToolTip( error );
+        validator->setVisible( error.length() != 0);
+      }
+    } // widget is tied
+  } // for each property
+
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -284,7 +306,7 @@ bool AlgorithmDialog::setPropertyValue(const QString pName, bool validateOthers)
   // Go through all the other properties' validators
   if (validateOthers)
   {
-    std::cout << "setPropertyValue(" << pName.toStdString() << ") calling hideOrDisableProperties\n";
+    //std::cout << "setPropertyValue(" << pName.toStdString() << ") calling hideOrDisableProperties\n";
     this->hideOrDisableProperties();
   }
 

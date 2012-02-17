@@ -213,7 +213,7 @@ void GenericDialog::initLayout()
  */
 void GenericDialog::hideOrDisableProperties()
 {
-  std::cout << "hideOrDisableProperties===========================================================\n";
+  //std::cout << "hideOrDisableProperties===========================================================\n";
   QStringList::const_iterator pend = m_algProperties.end();
   for( QStringList::const_iterator pitr = m_algProperties.begin(); pitr != pend; ++pitr )
   {
@@ -261,21 +261,18 @@ void GenericDialog::hideOrDisableProperties()
         if (error.length() != 0)
           visible = true;
 
-        std::cout << prop->name() << " enabled " << enabled << " visible " << visible << std::endl;
+        //std::cout << prop->name() << " enabled " << enabled << " visible " << visible << std::endl;
 
         // Hide/disable the widget
         propWidget->setEnabled( enabled );
         propWidget->setVisible( visible );
 
-        if (visible)
+        QLabel *validator = getValidatorMarker(propName);
+        // If there's no validator then assume it's handling its own validation notification
+        if( validator )
         {
-          QLabel *validator = getValidatorMarker(propName);
-          // If there's no validator then assume it's handling its own validation notification
-          if( validator && validator->parent() )
-          {
-            validator->setToolTip( error );
-            validator->setVisible( error.length() != 0);
-          }
+          validator->setToolTip( error );
+          validator->setVisible( error.length() != 0);
         }
       } // is a PropertyWidget
     } // widget is tied
@@ -291,7 +288,6 @@ void GenericDialog::hideOrDisableProperties()
  */
 void GenericDialog::propertyChanged(const QString & pName)
 {
-  std::cout << "propertyChanged(" << pName.toStdString() << ") called\n";
   this->storePropertyValue(pName, getValue( m_tied_properties[pName]) );
   this->setPropertyValue(pName, true);
 }
