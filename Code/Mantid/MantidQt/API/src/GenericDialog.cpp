@@ -27,6 +27,7 @@
 #include "MantidAPI/MultipleFileProperty.h"
 #include <QGroupBox>
 #include <climits>
+#include "MantidQtAPI/FilePropertyWidget.h"
 
 // Dialog stuff is defined here
 using namespace MantidQt::API;
@@ -465,7 +466,7 @@ void GenericDialog::browseMultipleClicked(const QString & propName)
     }
   }
   // Open multiple files in the dialog
-  QStringList files = this->openMultipleFileDialog(propName);
+  QStringList files = FilePropertyWidget::openMultipleFileDialog( getAlgorithmProperty(propName) );
 
   // Make into comma-sep string
   QString output;

@@ -40,6 +40,8 @@ namespace API
   */
   class DLLExport PropertyWidget : public QWidget
   {
+    Q_OBJECT
+
   public:
     PropertyWidget(Mantid::Kernel::Property * prop, QWidget * parent = NULL, QGridLayout * layout = NULL, int row=-1);
     virtual ~PropertyWidget();

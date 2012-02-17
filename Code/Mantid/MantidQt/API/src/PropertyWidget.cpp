@@ -25,9 +25,7 @@ namespace API
       this->setLayout(m_gridLayout);
       // Will always go to row 0
       m_row = 0;
-      this->setStyleSheet(
-          "QWidget { border: 1px solid gray;  }"
-          );
+//      this->setStyleSheet(          "QWidget { border: 1px solid gray;  }"          );
     }
 
     // Create the validator label (that red star)

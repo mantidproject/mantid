@@ -39,16 +39,19 @@ namespace API
   */
   class DLLExport TextPropertyWidget : public PropertyWidget
   {
+    Q_OBJECT
+
   public:
     TextPropertyWidget(Mantid::Kernel::Property * prop, QWidget * parent = NULL, QGridLayout * layout = NULL, int row=-1);
     virtual ~TextPropertyWidget();
     
   protected:
+    /// Label (name of the property)
+    QLabel * m_label;
+
     /// The text box to edit
     QLineEdit * m_textbox;
 
-    /// Label (name of the property)
-    QLabel * m_label;
   };
 
 

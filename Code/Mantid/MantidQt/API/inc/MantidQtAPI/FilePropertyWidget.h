@@ -1,10 +1,13 @@
-#ifndef MANTID_API_BOOLPROPERTYWIDGET_H_
-#define MANTID_API_BOOLPROPERTYWIDGET_H_
+#ifndef MANTID_API_FILEPROPERTYWIDGET_H_
+#define MANTID_API_FILEPROPERTYWIDGET_H_
 
 #include "MantidKernel/System.h"
-#include "MantidKernel/PropertyWithValue.h"
-#include "MantidQtAPI/PropertyWidget.h"
-#include <qcheckbox.h>
+#include "MantidQtAPI/TextPropertyWidget.h"
+#include <QtCore/qstringlist.h>
+#include <QtCore/qstring.h>
+#include "MantidAPI/MultipleFileProperty.h"
+#include "MantidAPI/FileProperty.h"
+#include <qpushbutton.h>
 
 
 namespace MantidQt
@@ -12,10 +15,9 @@ namespace MantidQt
 namespace API
 {
 
-  /** Set of widgets representing a PropertyWithValue<bool>.
-   *
+  /** Widget for FileProperty, which has a "Browse" button.
     
-    @date 2012-02-16
+    @date 2012-02-17
 
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -37,21 +39,34 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport BoolPropertyWidget : public PropertyWidget
+  class DLLExport FilePropertyWidget : public TextPropertyWidget
   {
     Q_OBJECT
 
   public:
-    BoolPropertyWidget(Mantid::Kernel::PropertyWithValue<bool> * prop, QWidget * parent = NULL, QGridLayout * layout = NULL, int row=-1);
-    virtual ~BoolPropertyWidget();
+    FilePropertyWidget(Mantid::Kernel::Property * prop, QWidget * parent = NULL, QGridLayout * layout = NULL, int row=-1);
+    virtual ~FilePropertyWidget();
     
+    static QString openFileDialog(Mantid::Kernel::Property * baseProp);
+    static QStringList openMultipleFileDialog(Mantid::Kernel::Property * baseProp);
+
+  public slots:
+    void browseClicked();
+
   protected:
-    /// Checkbox widget
-    QCheckBox * m_checkBox;
+    /// "Browse" button
+    QPushButton * m_browseButton;
+
+    /// Is a file property
+    Mantid::API::FileProperty* m_fileProp;
+
+    /// Is a multiple file property
+    Mantid::API::MultipleFileProperty* m_multipleFileProp;
+
   };
 
 
 } // namespace API
 } // namespace MantidQt
 
-#endif  /* MANTID_API_BOOLPROPERTYWIDGET_H_ */
+#endif  /* MANTID_API_FILEPROPERTYWIDGET_H_ */

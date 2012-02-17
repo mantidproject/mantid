@@ -23,6 +23,7 @@
 #include <QUrl>
 #include <QHBoxLayout>
 #include <QSignalMapper>
+#include "MantidQtAPI/FilePropertyWidget.h"
 
 using namespace MantidQt::API;
 using Mantid::API::IAlgorithm;
@@ -574,30 +575,6 @@ QWidget* AlgorithmDialog::tie(QWidget* widget, const QString & property, QLayout
 }
 
 
-//-------------------------------------------------------------------------------------------------
-/** For file dialogs
- * @param exts :: vector of extensions
- * @return a string that filters files by extenstions
- */
-QString getFileDialogFilter(const std::set<std::string> & exts)
-{
-  QString filter;
-  if( !exts.empty() )
-  {
-    // --------- Load a File -------------
-    filter = "";
-    std::set<std::string>::const_iterator iend = exts.end();
-    // Push a wild-card onto the front of each file suffix
-    for( std::set<std::string>::const_iterator itr = exts.begin(); itr != iend; ++itr)
-    {
-      filter.append(QString::fromStdString(*itr) + " (*" + QString::fromStdString(*itr) + ");;");
-    }
-    filter.trimmed();
-  }
-  filter.append("All Files (*.*)");
-  return filter;
-}
-
 
 //-------------------------------------------------------------------------------------------------
 /**
@@ -608,103 +585,10 @@ QString getFileDialogFilter(const std::set<std::string> & exts)
 QString AlgorithmDialog::openFileDialog(const QString & propName)
 {
   if( propName.isEmpty() ) return "";
-  Mantid::API::FileProperty* prop = 
-    dynamic_cast< Mantid::API::FileProperty* >( getAlgorithmProperty(propName) );
-  if( !prop ) return "";
-
-  //The allowed values in this context are file extensions
-  std::set<std::string> exts = prop->allowedValues();
-  
-  /* MG 20/07/09: Static functions such as these that use native Windows and MAC dialogs 
-     in those environments are alot faster. This is unforunately at the expense of 
-     shell-like pattern matching, i.e. [0-9].      
-  */
-  QString filename;
-  if( prop->isLoadProperty() )
-  {
-    QString filter = getFileDialogFilter(exts);
-    filename = QFileDialog::getOpenFileName(this, "Open file", AlgorithmInputHistory::Instance().getPreviousDirectory(), filter);
-  }
-  else if ( prop->isSaveProperty() )
-  {
-    // --------- Save a File -------------
-    //Have each filter on a separate line with the default as the first
-    std::string defaultExt = prop->getDefaultExt();
-    QString filter; 
-    if( !defaultExt.empty() )
-    {
-      filter = "*" + QString::fromStdString(defaultExt) + ";;";
-    }
-    std::set<std::string>::const_iterator iend = exts.end();
-    for( std::set<std::string>::const_iterator itr = exts.begin(); itr != iend; ++itr)
-    {
-      if( (*itr) != defaultExt )
-      {
-        filter.append("*"+QString::fromStdString(*itr) + ";;");
-      }
-    }
-    //Remove last two semi-colons or else we get an extra empty option in the box
-    filter.chop(2);
-    // Prepend the default filter
-    QString selectedFilter;
-    filename = QFileDialog::getSaveFileName(this, "Save file", AlgorithmInputHistory::Instance().getPreviousDirectory(), filter, &selectedFilter);
-    
-    //Check the filename and append the selected filter if necessary
-    if( QFileInfo(filename).completeSuffix().isEmpty() )
-    {
-      // Hack off the first star that the filter returns
-      QString ext = selectedFilter;
-      if( selectedFilter.startsWith("*") )
-      {
-        // 1 character from the start
-        ext = ext.remove(0,1);
-      }
-      if( filename.endsWith(".") && ext.startsWith(".") )
-      {
-        ext = ext.remove(0,1);
-      }
-      // Construct the full file name
-      filename += ext;
-    }
-  }
-  else if ( prop->isDirectoryProperty() )
-  {
-    filename = QFileDialog::getExistingDirectory(this, "Choose a Directory", AlgorithmInputHistory::Instance().getPreviousDirectory() );
-  }
-  else
-  {
-    throw std::runtime_error("Invalid type of file property! This should not happen.");
-  }
-
-
-  if( !filename.isEmpty() ) 
-  {
-    AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(filename).absoluteDir().path());
-  }
-  return filename;
+  return FilePropertyWidget::openFileDialog( this->getAlgorithmProperty(propName) );
 }
 
 
-
-
-
-/** Open a file selection box to select Multiple files to load.
- *
- * @param propName :: property name that this is associated with.
- * @return list of full paths to files
- */
-QStringList AlgorithmDialog::openMultipleFileDialog(const QString & propName)
-{
-  if( propName.isEmpty() ) return QStringList();
-  Mantid::API::MultipleFileProperty* prop =
-    dynamic_cast< Mantid::API::MultipleFileProperty* >( getAlgorithmProperty(propName) );
-  if( !prop ) return QStringList();
-
-  QString filter = getFileDialogFilter(prop->getExts());
-  QStringList files = QFileDialog::getOpenFileNames(this, "Open Multiple Files", AlgorithmInputHistory::Instance().getPreviousDirectory(), filter);
-
-  return files;
-}
 
 
 //-------------------------------------------------------------------------------------------------

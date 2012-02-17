@@ -2,6 +2,7 @@ set ( SRC_FILES
 	src/AlgorithmDialog.cpp
 	src/AlgorithmInputHistory.cpp
 	src/BoolPropertyWidget.cpp
+	src/FilePropertyWidget.cpp
 	src/GenericDialog.cpp
 	src/InterfaceFactory.cpp
 	src/InterfaceManager.cpp
@@ -11,7 +12,9 @@ set ( SRC_FILES
 	src/MantidQwtIMDWorkspaceData.cpp
 	src/MantidQwtMatrixWorkspaceData.cpp
 	src/MantidWidget.cpp
+	src/OptionsPropertyWidget.cpp
 	src/PropertyWidget.cpp
+	src/PropertyWidgetFactory.cpp
 	src/PythonRunner.cpp
 	src/SafeQwtPlot.cpp
 	src/SyncedCheckboxes.cpp
@@ -28,6 +31,7 @@ set ( INC_FILES
 	inc/MantidQtAPI/BoolPropertyWidget.h
 	inc/MantidQtAPI/DllOption.h
 	inc/MantidQtAPI/FileDialogHandler.h
+	inc/MantidQtAPI/FilePropertyWidget.h
 	inc/MantidQtAPI/GenericDialog.h
 	inc/MantidQtAPI/GraphOptions.h
 	inc/MantidQtAPI/InterfaceFactory.h
@@ -39,7 +43,9 @@ set ( INC_FILES
 	inc/MantidQtAPI/MantidQwtMatrixWorkspaceData.h
 	inc/MantidQtAPI/MantidQwtWorkspaceData.h
 	inc/MantidQtAPI/MantidWidget.h
+	inc/MantidQtAPI/OptionsPropertyWidget.h
 	inc/MantidQtAPI/PropertyWidget.h
+	inc/MantidQtAPI/PropertyWidgetFactory.h
 	inc/MantidQtAPI/PythonRunner.h
 	inc/MantidQtAPI/SafeQwtPlot.h
 	inc/MantidQtAPI/SyncedCheckboxes.h
@@ -62,6 +68,12 @@ set ( MOC_FILES
 	inc/MantidQtAPI/WorkspaceObserver.h
 	inc/MantidQtAPI/MantidQwtIMDWorkspaceData.h
 	inc/MantidQtAPI/MantidQwtMatrixWorkspaceData.h
+	
+	inc/MantidQtAPI/PropertyWidget.h
+	inc/MantidQtAPI/OptionsPropertyWidget.h
+	inc/MantidQtAPI/FilePropertyWidget.h
+	inc/MantidQtAPI/TextPropertyWidget.h
+	inc/MantidQtAPI/BoolPropertyWidget.h
 )
 
 set ( UI_FILES 

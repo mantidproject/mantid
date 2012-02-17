@@ -1,10 +1,11 @@
-#ifndef MANTID_API_BOOLPROPERTYWIDGET_H_
-#define MANTID_API_BOOLPROPERTYWIDGET_H_
+#ifndef MANTID_API_OPTIONSPROPERTYWIDGET_H_
+#define MANTID_API_OPTIONSPROPERTYWIDGET_H_
 
+#include "MantidKernel/Property.h"
 #include "MantidKernel/System.h"
-#include "MantidKernel/PropertyWithValue.h"
 #include "MantidQtAPI/PropertyWidget.h"
-#include <qcheckbox.h>
+#include <qcombobox.h>
+#include <QLabel>
 
 
 namespace MantidQt
@@ -12,10 +13,10 @@ namespace MantidQt
 namespace API
 {
 
-  /** Set of widgets representing a PropertyWithValue<bool>.
-   *
+  /** Widget for displaying a Property that has a set of allowed values.
+   * The display is then a drop-down box instead of a Text box.
     
-    @date 2012-02-16
+    @date 2012-02-17
 
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -37,21 +38,25 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport BoolPropertyWidget : public PropertyWidget
+  class DLLExport OptionsPropertyWidget : public PropertyWidget
   {
     Q_OBJECT
 
   public:
-    BoolPropertyWidget(Mantid::Kernel::PropertyWithValue<bool> * prop, QWidget * parent = NULL, QGridLayout * layout = NULL, int row=-1);
-    virtual ~BoolPropertyWidget();
+    OptionsPropertyWidget(Mantid::Kernel::Property * prop, QWidget * parent = NULL, QGridLayout * layout = NULL, int row=-1);
+    virtual ~OptionsPropertyWidget();
     
   protected:
-    /// Checkbox widget
-    QCheckBox * m_checkBox;
+    /// Label (name of the property)
+    QLabel * m_label;
+
+    /// Combo box with the allowed options
+    QComboBox * m_combo;
+
   };
 
 
 } // namespace API
 } // namespace MantidQt
 
-#endif  /* MANTID_API_BOOLPROPERTYWIDGET_H_ */
+#endif  /* MANTID_API_OPTIONSPROPERTYWIDGET_H_ */

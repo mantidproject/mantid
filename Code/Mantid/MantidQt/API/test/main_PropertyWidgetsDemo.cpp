@@ -13,9 +13,15 @@
 #include <QThread>
 #include "MantidQtAPI/BoolPropertyWidget.h"
 #include "MantidQtAPI/TextPropertyWidget.h"
+#include "MantidQtAPI/PropertyWidgetFactory.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MultipleFileProperty.h"
 
 using namespace Mantid::Kernel;
 using namespace MantidQt::API;
+using Mantid::API::FileProperty;
+using Mantid::API::MultipleFileProperty;
 
 /** Main application
  *
@@ -46,20 +52,31 @@ int main( int argc, char ** argv )
   QVBoxLayout * layout1 = new QVBoxLayout(frame1);
   QGridLayout * grid = new QGridLayout(frame2);
 
-  PropertyWithValue<bool> * boolProp = new PropertyWithValue<bool>("BooleanProp", true);
-  BoolPropertyWidget * boolWidget1 = new BoolPropertyWidget(boolProp, frame1, NULL);
-  layout1->addWidget(boolWidget1);
-  BoolPropertyWidget * boolWidget2 = new BoolPropertyWidget(boolProp, frame2, grid, 2);
+  std::vector<Property*> props;
+  props.push_back(new PropertyWithValue<bool>("BooleanProp", true));
+  props.push_back(new PropertyWithValue<std::string>("StringProperty", "default value"));
 
-  PropertyWithValue<std::string> * strProp = new PropertyWithValue<std::string>("StringProperty", "default value");
-  TextPropertyWidget * textWidget1 = new TextPropertyWidget(strProp, frame1, NULL);
-  layout1->addWidget(textWidget1);
-  TextPropertyWidget * textWidget2 = new TextPropertyWidget(strProp, frame1, grid, 3);
+  std::vector<std::string> exts;
+  exts.push_back(".txt");
+  exts.push_back(".nxs");
+  props.push_back(new FileProperty("SaveFileProperty", "default.file.txt", FileProperty::Save, exts));
+  props.push_back(new FileProperty("LoadFileProperty", "default.file.txt", FileProperty::Load, exts));
+  props.push_back(new FileProperty("DirectoryFileProperty", "default.file.txt", FileProperty::Directory, exts));
+  props.push_back(new MultipleFileProperty("MultipleFileProperty", exts));
 
-//  SliceViewer * slicer = new SliceViewer(frame);
-//  slicer->resize(600,600);
-//  layout->addWidget(slicer);
-//  slicer->setWorkspace(mdew);
+  std::vector<std::string> propOptions;
+  propOptions.push_back("OptionA");
+  propOptions.push_back("OptionTwo");
+  propOptions.push_back("Yet Another Option");
+  props.push_back(new PropertyWithValue<std::string>("OptionsProperty", "OptionTwo", new ListValidator(propOptions)));
+
+  for (size_t i=0; i<props.size(); i++)
+  {
+    PropertyWidget * widget1 = PropertyWidgetFactory::createWidget(props[i], frame1, NULL);
+    layout1->addWidget(widget1);
+    PropertyWidget * widget2 = PropertyWidgetFactory::createWidget(props[i], frame2, grid, int(i));
+    UNUSED_ARG(widget2);
+  }
 
   mainWin->move(100, 100);
   mainWin->resize(700, 700);
