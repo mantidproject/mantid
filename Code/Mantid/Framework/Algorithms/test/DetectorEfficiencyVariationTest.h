@@ -175,7 +175,7 @@ private:
   double m_ramp, m_LargeValue;
   enum { Nhist = 84, NXs = 34, 
     //these values must match the values in DetectorEfficiencyVariation.h
-    BadVal  = 0, GoodVal = 1 };
+    BadVal  = 1, GoodVal = 0 };
 };
 
 

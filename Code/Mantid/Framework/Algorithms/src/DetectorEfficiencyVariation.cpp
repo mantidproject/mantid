@@ -214,12 +214,16 @@ namespace Mantid
       const int progStep = static_cast<int>(std::ceil(numSpec/30.0));
 
       // Create a workspace for the output
-      MatrixWorkspace_sptr maskWS = WorkspaceFactory::Instance().create(counts1); 
-      // Make sure the output is simple
-      maskWS->isDistribution(false);
-      maskWS->setYUnit("");
+      MatrixWorkspace_sptr maskWS = this->generateEmptyMask(counts1);
 
-      const double liveValue(1.0);
+      bool checkForMask = false;
+      Geometry::Instrument_const_sptr instrument = counts1->getInstrument();
+      if (instrument != NULL)
+      {
+        checkForMask = ((instrument->getSource() != NULL) && (instrument->getSample() != NULL));
+      }
+
+      const double deadValue(1.0);
       int numFailed(0);
       PARALLEL_FOR3(counts1, counts2, maskWS)
       for (int i = 0; i < numSpec; ++i)
@@ -233,20 +237,18 @@ namespace Mantid
           interruption_point();
         }
 
-        IDetector_const_sptr det;
-        try
+        if (checkForMask)
         {
-          det = counts1->getDetector(i);
+          if(instrument->isMonitor(i))
+            continue;
+          if(instrument->isDetectorMasked(i))
+          {
+            // Ensure it is masked on the output
+            maskWS->dataY(i)[0] = deadValue;
+            continue;
+          }
         }
-        catch(Exception::NotFoundError &)
-        {}
-        if(!det || det->isMonitor()) continue;
-        if( det->isMasked() )
-        {
-          // Ensure it is masked on the output
-          maskWS->maskWorkspaceIndex(i);
-          continue;
-        }
+
         const double signal1 = counts1->readY(i)[0];
         const double signal2 = counts2->readY(i)[0];
 
@@ -254,7 +256,7 @@ namespace Mantid
         if( boost::math::isinf(signal1) || boost::math::isnan(signal1) ||
             boost::math::isinf(signal2) || boost::math::isnan(signal2))
         {
-          maskWS->maskWorkspaceIndex(i);
+          maskWS->dataY(i)[0] = deadValue;
           PARALLEL_ATOMIC
           ++numFailed;
           continue;
@@ -265,14 +267,9 @@ namespace Mantid
         const double ratio = signal1/signal2;
         if( ratio < lowest || ratio > largest )
         {
-          maskWS->maskWorkspaceIndex(i);
+          maskWS->dataY(i)[0] = deadValue;
           PARALLEL_ATOMIC
           ++numFailed;
-        }
-        else
-        {
-          // Mark it with the "live" value
-          maskWS->dataY(i)[0] = liveValue;
         }
 
         PARALLEL_END_INTERUPT_REGION
