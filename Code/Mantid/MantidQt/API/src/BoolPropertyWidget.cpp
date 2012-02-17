@@ -16,6 +16,7 @@ namespace API
   : PropertyWidget(prop, parent, layout, row)
   {
     m_checkBox = new QCheckBox(QString::fromStdString(prop->name()), this);
+    m_checkBox->setToolTip(m_doc);
 
     // Add the checkbox at column 1
     m_gridLayout->addWidget(m_checkBox, m_row, 1, 0);

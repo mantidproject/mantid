@@ -72,6 +72,7 @@ int main( int argc, char ** argv )
 
   for (size_t i=0; i<props.size(); i++)
   {
+    props[i]->setDocumentation("Tooltip for " + props[i]->name());
     PropertyWidget * widget1 = PropertyWidgetFactory::createWidget(props[i], frame1, NULL);
     layout1->addWidget(widget1);
     PropertyWidget * widget2 = PropertyWidgetFactory::createWidget(props[i], frame2, grid, int(i));

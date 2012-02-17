@@ -265,10 +265,12 @@ void AlgorithmDialog::hideOrDisableProperties()
       bool enabled     = isWidgetEnabled(pName);
       bool visible     = p->isVisible();
 
-      if (p->isConditionChanged()){
+      if (p->isConditionChanged())
+      {
           p->getSettings()->applyChanges(p);
-          int row = this->deletePropertyWidgets(p);
-          this->createSpecificPropertyWidget(p,row);
+          // TODO: Handle replacing widgets
+//          int row = this->deletePropertyWidgets(p);
+//          this->createSpecificPropertyWidget(p,row);
       }
 
       // Show/hide the validator label (that red star)
@@ -635,41 +637,6 @@ void AlgorithmDialog::fillAndSetComboBox(const QString & propName, QComboBox* op
 
 //-------------------------------------------------------------------------------------------------
 /**
- * Takes the given property and QCheckBox pointer and sets the state based on either
- * the history or property value
- * @param propName :: The name of the property
- * @param checkBox :: checkbox to set property value from
- * @returns A newed QCheckBox
- */
-void AlgorithmDialog::setCheckBoxState(const QString & propName, QCheckBox* checkBox) const
-{
-  Mantid::Kernel::Property *property = getAlgorithmProperty(propName);
-  if( !property ) return;
-  
-  //Check boxes are special in that if they have a default value we need to display it
-  QString displayed("");
-  if( !isForScript() )
-  {
-    displayed = AlgorithmInputHistory::Instance().previousInput(m_algName, propName);
-  }
-  if( displayed.isEmpty() )
-  {
-    displayed = QString::fromStdString(property->value());
-  }
-
-  if( displayed == "0" )
-  {
-    checkBox->setCheckState(Qt::Unchecked);
-  }
-  else
-  {
-    checkBox->setCheckState(Qt::Checked);
-  }
-
-}
-
-//-------------------------------------------------------------------------------------------------
-/**
  * Set the input for a text box based on either the history or a script value
  * @param propName :: The name of the property
  * @param textField :: The QLineEdit field
@@ -730,27 +697,6 @@ QPushButton* AlgorithmDialog::createHelpButton(const QString & helpText) const
   return help;
 }
 
-
-//-------------------------------------------------------------------------------------------------
-/**
- * Create a button that when clicked will put the name of the input workspace into the
- * output box.
- * @param outputEdit :: The output text box that should contain the output name
- * @returns A new QPushButton linked to the appropriate widgets.
- */
-QPushButton* AlgorithmDialog::createReplaceWSButton(QLineEdit *outputEdit)
-{
-  QPushButton *btn = new QPushButton(QIcon(":/data_replace.png"), "");
-  // MG: There is no way with the QIcon class to actually ask what size it is so I had to hard
-  // code this number here to get it to a sensible size
-  btn->setMaximumWidth(32);
-  m_wsbtn_tracker[btn ] = 1;
-  btn->setToolTip("Replace input workspace");
-  m_outputws_fields.push_back(outputEdit);
-  connect(btn, SIGNAL(clicked()), m_signal_mapper, SLOT(map()));
-  m_signal_mapper->setMapping(btn, outputEdit);  
-  return btn;
-}
 
 
 /** 

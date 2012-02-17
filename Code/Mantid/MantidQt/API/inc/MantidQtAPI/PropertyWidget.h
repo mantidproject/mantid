@@ -6,6 +6,7 @@
 #include <qgridlayout.h>
 #include "MantidKernel/Property.h"
 #include <QLabel>
+#include <QtCore/qstring.h>
 
 
 namespace MantidQt
@@ -48,6 +49,9 @@ namespace API
     
     bool inGrid() const;
 
+  public slots:
+    void replaceWSButtonClicked();
+
   protected:
     /// Property being looked at. This is NOT owned by the widget
     Mantid::Kernel::Property * m_prop;
@@ -60,6 +64,12 @@ namespace API
 
     /// Label that is visible when the property is NOT valid.
     QLabel * m_validLbl;
+
+    /// Documentation string (tooltip)
+    QString m_doc;
+
+    /// Button to "replace input workspace"
+    QPushButton * m_replaceWSButton;
   };
 
 

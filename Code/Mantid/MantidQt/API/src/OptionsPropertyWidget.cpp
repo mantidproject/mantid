@@ -30,6 +30,7 @@ namespace API
   {
     // Label at column 0
     m_label = new QLabel(QString::fromStdString(prop->name()), this);
+    m_label->setToolTip(m_doc);
     m_gridLayout->addWidget(m_label, m_row, 0, 0);
 
     // Check whether we should display hidden workspaces in WS comboboxes
@@ -40,6 +41,8 @@ namespace API
     //Check if this is the row that matches the one that we want to link to the
     //output box and used the saved combo box
     m_combo = new QComboBox(this);
+    m_combo->setToolTip(m_doc);
+
     bool isWorkspaceProp(dynamic_cast<IWorkspaceProperty*>(prop));
     std::set<std::string> items = prop->allowedValues();
     std::set<std::string>::const_iterator vend = items.end();

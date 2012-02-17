@@ -191,9 +191,6 @@ protected:
   /// Fill a combo box for the named algorithm's allowed values
   void fillAndSetComboBox(const QString & propName, QComboBox* optionsBox) const;
 
-  /// Set the state of a check box for the named algorithm's boolean property
-  void setCheckBoxState(const QString & propName, QCheckBox* checkBox) const;
-  
   /// Fill in the necessary input for a text field 
   void fillLineEdit(const QString & propName, QLineEdit* field);
 
@@ -204,9 +201,6 @@ protected:
 
   /// Create a help button for this algorithm
   QPushButton* createHelpButton(const QString & helpText = QString("?")) const;
-  
-  /// Create a push button that when pressed will cause the input workspace to be replaced.
-  QPushButton* createReplaceWSButton(QLineEdit *outputEdit);
 
   /// Flag an input workspace combobox with its property name
   void flagInputWS(QWidget *inputWidget);
