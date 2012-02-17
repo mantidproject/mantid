@@ -134,25 +134,26 @@ namespace Mantid
       // The maximum possible length is that of workspace length
       medianInput.reserve(nhists);
 
+      bool checkForMask = false;
+      Geometry::Instrument_const_sptr instrument = input->getInstrument();
+      if (instrument != NULL)
+      {
+        checkForMask = ((instrument->getSource() != NULL) && (instrument->getSample() != NULL));
+      }
+      std::cout << "checkForMask = " << checkForMask << std::endl; // REMOVE
+
       PARALLEL_FOR1(input)
       for (int i = 0; i < nhists; ++i)
       {
         PARALLEL_START_INTERUPT_REGION
 
-        IDetector_const_sptr det;
-        try
-        {
-          det = input->getDetector(i);
+        if (checkForMask) {
+          if (instrument->isDetectorMasked(i))
+            continue;
+          if (instrument->isMonitor(i))
+            continue;
         }
-        catch (Kernel::Exception::NotFoundError&)
-        {
-          // Catch if no detector. Next line tests whether this happened - test placed
-          // outside here because Mac Intel compiler doesn't like 'continue' in a catch
-          // in an openmp block.
-        }
-        // If the detector is either not found, a monitor or is masked do not include it
-        if ( !det || det->isMonitor() || det->isMasked() ) continue;
-    
+
         const double yValue = input->readY(i)[0];
         if ( yValue  < 0.0 )
         {
