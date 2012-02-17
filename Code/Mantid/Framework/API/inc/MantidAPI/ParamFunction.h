@@ -89,17 +89,6 @@ public:
   /// Checks if a parameter has been set explicitly
   virtual bool isExplicitlySet(size_t i)const;
 
-  /// Number of active (in terms of fitting) parameters
-  virtual size_t nActive()const{return m_indexMap.size();}
-  /// Value of i-th active parameter. Override this method to make fitted parameters different from the declared
-  virtual double activeParameter(size_t i)const;
-  /// Set new value of i-th active parameter. Override this method to make fitted parameters different from the declared
-  virtual void setActiveParameter(size_t i, double value);
-  /// Returns the name of active parameter i
-  virtual std::string nameOfActive(size_t i)const;
-  /// Returns the name of active parameter i
-  virtual std::string descriptionOfActive(size_t i)const;
-
   /// Check if a declared parameter i is active
   virtual bool isFixed(size_t i)const;
   /// Removes a declared parameter i from the list of active
@@ -155,7 +144,7 @@ protected:
 
 private:
   /// The index map. m_indexMap[i] gives the total index for active parameter i
-  std::vector<size_t> m_indexMap;
+  std::vector<bool> m_isFixed;
   /// Keeps parameter names
   std::vector<std::string> m_parameterNames;
   /// Keeps parameter values

@@ -247,10 +247,12 @@ public:
 
   /// Function you want to fit to. 
   /// @param domain :: The buffer for writing the calculated values. Must be big enough to accept dataSize() values
-  virtual void function(const FunctionDomain& domain,FunctionValues& values)const = 0;
+  virtual void function(const FunctionDomain& domain, FunctionValues& values)const = 0;
   /// Derivatives of function with respect to active parameters
   virtual void functionDeriv(const FunctionDomain& domain, Jacobian& jacobian);
 
+  /** @name Function parameters */
+  //@{
   /// Set i-th parameter
   virtual void setParameter(size_t, const double& value, bool explicitlySet = true) = 0;
   /// Set i-th parameter description
@@ -274,21 +276,8 @@ public:
   /// Checks if a parameter has been set explicitly
   virtual bool isExplicitlySet(size_t i)const = 0;
 
-  /// Number of active (in terms of fitting) parameters
-  virtual size_t nActive()const = 0;
-  /// Value of i-th active parameter. Override this method to make fitted parameters different from the declared
-  virtual double activeParameter(size_t i)const = 0;
-  /// Set new value of i-th active parameter. Override this method to make fitted parameters different from the declared
-  virtual void setActiveParameter(size_t i, double value) = 0;
-  /// Returns the name of active parameter i
-  virtual std::string nameOfActive(size_t i)const = 0;
-  /// Returns the name of active parameter i
-  virtual std::string descriptionOfActive(size_t i)const = 0;
-
-  /// Check if a declared parameter i is active
+  /// Check if a declared parameter i is fixed
   virtual bool isFixed(size_t i)const = 0;
-  /// Get active index for a declared parameter i
-  //virtual size_t activeIndex(size_t i)const = 0;
   /// Removes a declared parameter i from the list of active
   virtual void fix(size_t i) = 0;
   /// Restores a declared parameter i to the active status
@@ -296,6 +285,22 @@ public:
 
   /// Return parameter index from a parameter reference. Usefull for constraints and ties in composite functions
   virtual size_t getParameterIndex(const ParameterReference& ref)const = 0;
+  //@}
+
+  /** @name Active parameters */
+  //@{
+  /// Value of i-th active parameter. Override this method to make fitted parameters different from the declared
+  virtual double activeParameter(size_t i)const;
+  /// Set new value of i-th active parameter. Override this method to make fitted parameters different from the declared
+  virtual void setActiveParameter(size_t i, double value);
+  /// Returns the name of active parameter i
+  virtual std::string nameOfActive(size_t i)const;
+  /// Returns the name of active parameter i
+  virtual std::string descriptionOfActive(size_t i)const;
+  /// Check if an active parameter i is actually active
+  virtual bool isActive(size_t i)const {return !isFixed(i);}
+  //@}
+
 
   /// Tie a parameter to other parameters (or a constant)
   virtual ParameterTie* tie(const std::string& parName, const std::string& expr);

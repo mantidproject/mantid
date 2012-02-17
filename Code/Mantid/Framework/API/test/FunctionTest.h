@@ -135,7 +135,6 @@ public:
     TS_ASSERT_EQUALS(f.parameterDescription(0),"this is the famous c0 blah...");
 
     TS_ASSERT_EQUALS(f.nParams(),4);
-    TS_ASSERT_EQUALS(f.nActive(),4);
 
     TS_ASSERT_EQUALS(f.getParameter(0),1.0);
     TS_ASSERT_EQUALS(f.getParameter(1),1.1);
@@ -191,18 +190,22 @@ public:
     f.fix(3);
 
     TS_ASSERT_EQUALS(f.nParams(),4);
-    TS_ASSERT_EQUALS(f.nActive(),2);
 
     TS_ASSERT_EQUALS(f.activeParameter(0),1.0);
-    TS_ASSERT_EQUALS(f.activeParameter(1),1.2);
+    TS_ASSERT_EQUALS(f.activeParameter(2),1.2);
 
     TS_ASSERT_EQUALS(f.nameOfActive(0),"c0");
-    TS_ASSERT_EQUALS(f.nameOfActive(1),"c2");
+    TS_ASSERT_EQUALS(f.nameOfActive(2),"c2");
 
     TS_ASSERT( ! f.isFixed(0));
     TS_ASSERT(   f.isFixed(1));
     TS_ASSERT( ! f.isFixed(2));
     TS_ASSERT(   f.isFixed(3));
+
+    TS_ASSERT_THROWS(double d = f.activeParameter(1),std::runtime_error);
+    TS_ASSERT_THROWS(double d = f.activeParameter(3),std::runtime_error);
+    TS_ASSERT_THROWS(f.setActiveParameter(1,0),std::runtime_error);
+    TS_ASSERT_THROWS(f.setActiveParameter(3,0),std::runtime_error);
 
   }
 
@@ -221,15 +224,14 @@ public:
     f.unfix(3);
 
     TS_ASSERT_EQUALS(f.nParams(),4);
-    TS_ASSERT_EQUALS(f.nActive(),3);
 
     TS_ASSERT_EQUALS(f.activeParameter(0),1.0);
-    TS_ASSERT_EQUALS(f.activeParameter(1),1.2);
-    TS_ASSERT_EQUALS(f.activeParameter(2),1.3);
+    TS_ASSERT_EQUALS(f.activeParameter(2),1.2);
+    TS_ASSERT_EQUALS(f.activeParameter(3),1.3);
 
     TS_ASSERT_EQUALS(f.nameOfActive(0),"c0");
-    TS_ASSERT_EQUALS(f.nameOfActive(1),"c2");
-    TS_ASSERT_EQUALS(f.nameOfActive(2),"c3");
+    TS_ASSERT_EQUALS(f.nameOfActive(2),"c2");
+    TS_ASSERT_EQUALS(f.nameOfActive(3),"c3");
 
     TS_ASSERT( ! f.isFixed(0));
     TS_ASSERT(   f.isFixed(1));
@@ -251,13 +253,12 @@ public:
     f.fix(3);
 
     TS_ASSERT_EQUALS(f.nParams(),4);
-    TS_ASSERT_EQUALS(f.nActive(),2);
 
     f.setActiveParameter(0,2.0);
-    f.setActiveParameter(1,2.1);
+    f.setActiveParameter(2,2.1);
 
     TS_ASSERT_EQUALS(f.activeParameter(0),2.0);
-    TS_ASSERT_EQUALS(f.activeParameter(1),2.1);
+    TS_ASSERT_EQUALS(f.activeParameter(2),2.1);
 
     TS_ASSERT_EQUALS(f.getParameter(0),2.0);
     TS_ASSERT_EQUALS(f.getParameter(1),1.1);
@@ -284,18 +285,22 @@ public:
     f.tie("c3","0");
 
     TS_ASSERT_EQUALS(f.nParams(),4);
-    TS_ASSERT_EQUALS(f.nActive(),2);
 
     TS_ASSERT_EQUALS(f.activeParameter(0),1.0);
-    TS_ASSERT_EQUALS(f.activeParameter(1),1.2);
+    TS_ASSERT_EQUALS(f.activeParameter(2),1.2);
 
     TS_ASSERT_EQUALS(f.nameOfActive(0),"c0");
-    TS_ASSERT_EQUALS(f.nameOfActive(1),"c2");
+    TS_ASSERT_EQUALS(f.nameOfActive(2),"c2");
 
     TS_ASSERT( ! f.isFixed(0));
     TS_ASSERT(   f.isFixed(1));
     TS_ASSERT( ! f.isFixed(2));
     TS_ASSERT(   f.isFixed(3));
+
+    TS_ASSERT(   f.isActive(0));
+    TS_ASSERT( ! f.isActive(1));
+    TS_ASSERT(   f.isActive(2));
+    TS_ASSERT( ! f.isActive(3));
 
   }
 
@@ -314,7 +319,6 @@ public:
     f.applyTies();
 
     TS_ASSERT_EQUALS(f.nParams(),4);
-    TS_ASSERT_EQUALS(f.nActive(),2);
 
     TS_ASSERT_EQUALS(f.getParameter("c0"),1.0);
     TS_ASSERT_EQUALS(f.getParameter("c1"),5.0);
@@ -338,7 +342,6 @@ public:
     f.applyTies();
 
     TS_ASSERT_EQUALS(f.nParams(),4);
-    TS_ASSERT_EQUALS(f.nActive(),2);
 
     TS_ASSERT_EQUALS(f.getParameter("c0"),1.0);
     TS_ASSERT_EQUALS(f.getParameter("c1"),5.0);
@@ -349,8 +352,6 @@ public:
     f.setParameter("c3",3.3);
 
     f.applyTies();
-
-    TS_ASSERT_EQUALS(f.nActive(),3);
 
     TS_ASSERT_EQUALS(f.getParameter("c0"),1.0);
     TS_ASSERT_EQUALS(f.getParameter("c1"),5.0);
@@ -378,7 +379,6 @@ public:
     f.applyTies();
 
     TS_ASSERT_EQUALS(f.nParams(),4);
-    TS_ASSERT_EQUALS(f.nActive(),2);
 
     TS_ASSERT_EQUALS(f.getParameter("c0"),1.0);
     TS_ASSERT_EQUALS(f.getParameter("c1"),5.0);
@@ -390,8 +390,6 @@ public:
     f.setParameter("c3",3.3);
 
     f.applyTies();
-
-    TS_ASSERT_EQUALS(f.nActive(),4);
 
     TS_ASSERT_EQUALS(f.getParameter("c0"),1.0);
     TS_ASSERT_EQUALS(f.getParameter("c1"),3.1);

@@ -253,7 +253,6 @@ public:
       g2->setParameter("s",3.3);
 
       TS_ASSERT_EQUALS(mfun->nParams(),12);
-      TS_ASSERT_EQUALS(mfun->nActive(),12);
 
       TS_ASSERT_EQUALS(mfun->getParameter(0),0.8);
       TS_ASSERT_EQUALS(mfun->getParameter(1),0.0);
@@ -352,19 +351,19 @@ public:
     mfun->tie("f2.c2","0");
     mfun->tie("f3.h","0");
 
-    TS_ASSERT_EQUALS(mfun->activeParameter(0),1.1);
-    TS_ASSERT_EQUALS(mfun->activeParameter(1),1.2);
-    TS_ASSERT_EQUALS(mfun->activeParameter(2),2.1);
-    TS_ASSERT_EQUALS(mfun->activeParameter(3),2.4);
-    TS_ASSERT_EQUALS(mfun->activeParameter(4),3.1);
-    TS_ASSERT_EQUALS(mfun->activeParameter(5),3.3);
+    TS_ASSERT_EQUALS(mfun->activeParameter(2),1.1);
+    TS_ASSERT_EQUALS(mfun->activeParameter(3),1.2);
+    TS_ASSERT_EQUALS(mfun->activeParameter(5),2.1);
+    TS_ASSERT_EQUALS(mfun->activeParameter(8),2.4);
+    TS_ASSERT_EQUALS(mfun->activeParameter(9),3.1);
+    TS_ASSERT_EQUALS(mfun->activeParameter(11),3.3);
 
-    TS_ASSERT_EQUALS(mfun->nameOfActive(0),"f1.c");
-    TS_ASSERT_EQUALS(mfun->nameOfActive(1),"f1.h");
-    TS_ASSERT_EQUALS(mfun->nameOfActive(2),"f2.c0");
-    TS_ASSERT_EQUALS(mfun->nameOfActive(3),"f2.c3");
-    TS_ASSERT_EQUALS(mfun->nameOfActive(4),"f3.c");
-    TS_ASSERT_EQUALS(mfun->nameOfActive(5),"f3.s");
+    TS_ASSERT_EQUALS(mfun->nameOfActive(2),"f1.c");
+    TS_ASSERT_EQUALS(mfun->nameOfActive(3),"f1.h");
+    TS_ASSERT_EQUALS(mfun->nameOfActive(5),"f2.c0");
+    TS_ASSERT_EQUALS(mfun->nameOfActive(8),"f2.c3");
+    TS_ASSERT_EQUALS(mfun->nameOfActive(9),"f3.c");
+    TS_ASSERT_EQUALS(mfun->nameOfActive(11),"f3.s");
 
     TS_ASSERT(   mfun->isFixed(0));
     TS_ASSERT(   mfun->isFixed(1));
@@ -380,7 +379,6 @@ public:
     TS_ASSERT( ! mfun->isFixed(11));
 
     TS_ASSERT_EQUALS(mfun->nParams(),12);
-    TS_ASSERT_EQUALS(mfun->nActive(),6);
 
     TS_ASSERT_EQUALS(mfun->getParameter(0),0.8);
     TS_ASSERT_EQUALS(mfun->getParameter(1),0.0);
@@ -451,20 +449,20 @@ public:
     mfun->addFunction(cub);
     mfun->addFunction(g2);
 
-    bk->setParameter("a",0.8);
+    bk->setParameter("a",0.8); //0
 
-    g1->setParameter("c",1.1);
-    g1->setParameter("h",1.2);
-    g1->setParameter("s",1.3);
+    g1->setParameter("c",1.1); //2
+    g1->setParameter("h",1.2); //3
+    g1->setParameter("s",1.3); //4
 
-    cub->setParameter("c0",2.1);
-    cub->setParameter("c1",2.2);
-    cub->setParameter("c2",2.3);
-    cub->setParameter("c3",2.4);
+    cub->setParameter("c0",2.1); //5
+    cub->setParameter("c1",2.2); //6
+    cub->setParameter("c2",2.3); //7
+    cub->setParameter("c3",2.4); //8
 
-    g2->setParameter("c",3.1);
-    g2->setParameter("h",3.2);
-    g2->setParameter("s",3.3);
+    g2->setParameter("c",3.1); //9
+    g2->setParameter("h",3.2); //10
+    g2->setParameter("s",3.3); //11
 
     mfun->tie("f0.a","-1");
     mfun->tie("f0.b","-2");
@@ -473,22 +471,21 @@ public:
     mfun->tie("f2.c2","-5");
     mfun->tie("f3.h","-6");
 
-    mfun->setActiveParameter(0,100);
-    mfun->setActiveParameter(1,101);
-    mfun->setActiveParameter(2,102);
-    mfun->setActiveParameter(3,103);
-    mfun->setActiveParameter(4,104);
-    mfun->setActiveParameter(5,105);
+    mfun->setActiveParameter(2,100);
+    mfun->setActiveParameter(3,101);
+    mfun->setActiveParameter(5,102);
+    mfun->setActiveParameter(8,103);
+    mfun->setActiveParameter(9,104);
+    mfun->setActiveParameter(11,105);
 
-    TS_ASSERT_EQUALS(mfun->activeParameter(0),100);
-    TS_ASSERT_EQUALS(mfun->activeParameter(1),101);
-    TS_ASSERT_EQUALS(mfun->activeParameter(2),102);
-    TS_ASSERT_EQUALS(mfun->activeParameter(3),103);
-    TS_ASSERT_EQUALS(mfun->activeParameter(4),104);
-    TS_ASSERT_EQUALS(mfun->activeParameter(5),105);
+    TS_ASSERT_EQUALS(mfun->activeParameter(2),100);
+    TS_ASSERT_EQUALS(mfun->activeParameter(3),101);
+    TS_ASSERT_EQUALS(mfun->activeParameter(5),102);
+    TS_ASSERT_EQUALS(mfun->activeParameter(8),103);
+    TS_ASSERT_EQUALS(mfun->activeParameter(9),104);
+    TS_ASSERT_EQUALS(mfun->activeParameter(11),105);
 
     TS_ASSERT_EQUALS(mfun->nParams(),12);
-    TS_ASSERT_EQUALS(mfun->nActive(),6);
 
     TS_ASSERT_EQUALS(mfun->getParameter(0),0.8);
     TS_ASSERT_EQUALS(mfun->getParameter(1),0.0);
@@ -544,22 +541,28 @@ public:
     mfun->fix(10);
     //g2->fix(1);  // This doesn't work
 
-    mfun->setActiveParameter(0,100);
-    mfun->setActiveParameter(1,101);
-    mfun->setActiveParameter(2,102);
-    mfun->setActiveParameter(3,103);
-    mfun->setActiveParameter(4,104);
-    mfun->setActiveParameter(5,105);
+    TS_ASSERT_THROWS(mfun->setActiveParameter(0,0),std::runtime_error);
+    TS_ASSERT_THROWS(mfun->setActiveParameter(1,0),std::runtime_error);
+    TS_ASSERT_THROWS(mfun->setActiveParameter(4,0),std::runtime_error);
+    TS_ASSERT_THROWS(mfun->setActiveParameter(6,0),std::runtime_error);
+    TS_ASSERT_THROWS(mfun->setActiveParameter(7,0),std::runtime_error);
+    TS_ASSERT_THROWS(mfun->setActiveParameter(10,0),std::runtime_error);
 
-    TS_ASSERT_EQUALS(mfun->activeParameter(0),100);
-    TS_ASSERT_EQUALS(mfun->activeParameter(1),101);
-    TS_ASSERT_EQUALS(mfun->activeParameter(2),102);
-    TS_ASSERT_EQUALS(mfun->activeParameter(3),103);
-    TS_ASSERT_EQUALS(mfun->activeParameter(4),104);
-    TS_ASSERT_EQUALS(mfun->activeParameter(5),105);
+    mfun->setActiveParameter(2,100);
+    mfun->setActiveParameter(3,101);
+    mfun->setActiveParameter(5,102);
+    mfun->setActiveParameter(8,103);
+    mfun->setActiveParameter(9,104);
+    mfun->setActiveParameter(11,105);
+
+    TS_ASSERT_EQUALS(mfun->activeParameter(2),100);
+    TS_ASSERT_EQUALS(mfun->activeParameter(3),101);
+    TS_ASSERT_EQUALS(mfun->activeParameter(5),102);
+    TS_ASSERT_EQUALS(mfun->activeParameter(8),103);
+    TS_ASSERT_EQUALS(mfun->activeParameter(9),104);
+    TS_ASSERT_EQUALS(mfun->activeParameter(11),105);
 
     TS_ASSERT_EQUALS(mfun->nParams(),12);
-    TS_ASSERT_EQUALS(mfun->nActive(),6);
 
     TS_ASSERT_EQUALS(mfun->getParameter(0),0.8);
     TS_ASSERT_EQUALS(mfun->getParameter(1),0.0);
@@ -615,15 +618,14 @@ public:
 
     mfun->applyTies();
 
-    TS_ASSERT_EQUALS(mfun->activeParameter(0),1.1);
-    TS_ASSERT_EQUALS(mfun->activeParameter(1),1.2);
-    TS_ASSERT_EQUALS(mfun->activeParameter(2),2.1);
-    TS_ASSERT_EQUALS(mfun->activeParameter(3),2.4);
-    TS_ASSERT_EQUALS(mfun->activeParameter(4),3.1);
-    TS_ASSERT_EQUALS(mfun->activeParameter(5),3.3);
+    TS_ASSERT_EQUALS(mfun->activeParameter(2),1.1);
+    TS_ASSERT_EQUALS(mfun->activeParameter(3),1.2);
+    TS_ASSERT_EQUALS(mfun->activeParameter(5),2.1);
+    TS_ASSERT_EQUALS(mfun->activeParameter(8),2.4);
+    TS_ASSERT_EQUALS(mfun->activeParameter(9),3.1);
+    TS_ASSERT_EQUALS(mfun->activeParameter(11),3.3);
 
     TS_ASSERT_EQUALS(mfun->nParams(),12);
-    TS_ASSERT_EQUALS(mfun->nActive(),6);
 
     TS_ASSERT_EQUALS(mfun->getParameter(0),154);
     TS_ASSERT_EQUALS(mfun->getParameter(1),77);
@@ -678,15 +680,14 @@ public:
 
     mfun->applyTies();
 
-    TS_ASSERT_EQUALS(mfun->activeParameter(0),1.1);
-    TS_ASSERT_EQUALS(mfun->activeParameter(1),1.2);
-    TS_ASSERT_EQUALS(mfun->activeParameter(2),2.1);
-    TS_ASSERT_EQUALS(mfun->activeParameter(3),2.4);
-    TS_ASSERT_EQUALS(mfun->activeParameter(4),3.1);
-    TS_ASSERT_EQUALS(mfun->activeParameter(5),3.3);
+    TS_ASSERT_EQUALS(mfun->activeParameter(2),1.1);
+    TS_ASSERT_EQUALS(mfun->activeParameter(3),1.2);
+    TS_ASSERT_EQUALS(mfun->activeParameter(5),2.1);
+    TS_ASSERT_EQUALS(mfun->activeParameter(8),2.4);
+    TS_ASSERT_EQUALS(mfun->activeParameter(9),3.1);
+    TS_ASSERT_EQUALS(mfun->activeParameter(11),3.3);
 
     TS_ASSERT_EQUALS(mfun->nParams(),12);
-    TS_ASSERT_EQUALS(mfun->nActive(),6);
 
     TS_ASSERT_DIFFERS(mfun->getParameter(0),154);
     TS_ASSERT_EQUALS(mfun->getParameter(1),77);
@@ -747,7 +748,6 @@ public:
     TS_ASSERT_EQUALS(mfun->nFunctions(),3);
 
     TS_ASSERT_EQUALS(mfun->nParams(),8);
-    TS_ASSERT_EQUALS(mfun->nActive(),4);
 
     TS_ASSERT_EQUALS(mfun->getParameter(0),101);
     TS_ASSERT_EQUALS(mfun->getParameter(1),102);
@@ -785,15 +785,15 @@ public:
     TS_ASSERT_EQUALS(mfun->parameterIndex("f2.h"),6);
     TS_ASSERT_EQUALS(mfun->parameterIndex("f2.s"),7);
 
-    TS_ASSERT_EQUALS(mfun->nameOfActive(0),"f1.c");
-    TS_ASSERT_EQUALS(mfun->nameOfActive(1),"f1.h");
-    TS_ASSERT_EQUALS(mfun->nameOfActive(2),"f2.c");
-    TS_ASSERT_EQUALS(mfun->nameOfActive(3),"f2.s");
+    TS_ASSERT_EQUALS(mfun->nameOfActive(2),"f1.c");
+    TS_ASSERT_EQUALS(mfun->nameOfActive(3),"f1.h");
+    TS_ASSERT_EQUALS(mfun->nameOfActive(5),"f2.c");
+    TS_ASSERT_EQUALS(mfun->nameOfActive(7),"f2.s");
 
-    TS_ASSERT_EQUALS(mfun->activeParameter(0),1.1);
-    TS_ASSERT_EQUALS(mfun->activeParameter(1),1.2);
-    TS_ASSERT_EQUALS(mfun->activeParameter(2),3.1);
-    TS_ASSERT_EQUALS(mfun->activeParameter(3),3.3);
+    TS_ASSERT_EQUALS(mfun->activeParameter(2),1.1);
+    TS_ASSERT_EQUALS(mfun->activeParameter(3),1.2);
+    TS_ASSERT_EQUALS(mfun->activeParameter(5),3.1);
+    TS_ASSERT_EQUALS(mfun->activeParameter(7),3.3);
 
     TS_ASSERT(   mfun->isFixed(0));
     TS_ASSERT(   mfun->isFixed(1));
@@ -856,7 +856,6 @@ public:
       TS_ASSERT_EQUALS(mfun->nFunctions(),4);
 
       TS_ASSERT_EQUALS(mfun->nParams(),10);
-      TS_ASSERT_EQUALS(mfun->nActive(),6);
 
       TS_ASSERT_EQUALS(mfun->getParameter(0),101);
       TS_ASSERT_EQUALS(mfun->getParameter(1),102);
@@ -902,19 +901,19 @@ public:
       TS_ASSERT_EQUALS(mfun->parameterIndex("f3.h"),8);
       TS_ASSERT_EQUALS(mfun->parameterIndex("f3.s"),9);
 
-      TS_ASSERT_EQUALS(mfun->nameOfActive(0),"f1.c");
-      TS_ASSERT_EQUALS(mfun->nameOfActive(1),"f1.h");
-      TS_ASSERT_EQUALS(mfun->nameOfActive(2),"f2.a");
-      TS_ASSERT_EQUALS(mfun->nameOfActive(3),"f2.b");
-      TS_ASSERT_EQUALS(mfun->nameOfActive(4),"f3.c");
-      TS_ASSERT_EQUALS(mfun->nameOfActive(5),"f3.s");
+      TS_ASSERT_EQUALS(mfun->nameOfActive(2),"f1.c");
+      TS_ASSERT_EQUALS(mfun->nameOfActive(3),"f1.h");
+      TS_ASSERT_EQUALS(mfun->nameOfActive(5),"f2.a");
+      TS_ASSERT_EQUALS(mfun->nameOfActive(6),"f2.b");
+      TS_ASSERT_EQUALS(mfun->nameOfActive(7),"f3.c");
+      TS_ASSERT_EQUALS(mfun->nameOfActive(9),"f3.s");
 
-      TS_ASSERT_EQUALS(mfun->activeParameter(0),1.1);
-      TS_ASSERT_EQUALS(mfun->activeParameter(1),1.2);
-      TS_ASSERT_EQUALS(mfun->activeParameter(2),4.1);
-      TS_ASSERT_EQUALS(mfun->activeParameter(3),4.2);
-      TS_ASSERT_EQUALS(mfun->activeParameter(4),3.1);
-      TS_ASSERT_EQUALS(mfun->activeParameter(5),3.3);
+      TS_ASSERT_EQUALS(mfun->activeParameter(2),1.1);
+      TS_ASSERT_EQUALS(mfun->activeParameter(3),1.2);
+      TS_ASSERT_EQUALS(mfun->activeParameter(5),4.1);
+      TS_ASSERT_EQUALS(mfun->activeParameter(6),4.2);
+      TS_ASSERT_EQUALS(mfun->activeParameter(7),3.1);
+      TS_ASSERT_EQUALS(mfun->activeParameter(9),3.3);
 
       TS_ASSERT(   mfun->isFixed(0));
       TS_ASSERT(   mfun->isFixed(1));
@@ -980,7 +979,6 @@ public:
       TS_ASSERT_EQUALS(mfun->nFunctions(),4);
 
       TS_ASSERT_EQUALS(mfun->nParams(),14);
-      TS_ASSERT_EQUALS(mfun->nActive(),10);
 
       TS_ASSERT_EQUALS(mfun->getParameter(0),4.1);
       TS_ASSERT_EQUALS(mfun->getParameter(1),4.2);
@@ -1048,10 +1046,10 @@ public:
       TS_ASSERT_EQUALS(mfun->activeParameter(3),4.4);
       TS_ASSERT_EQUALS(mfun->activeParameter(4),1.1);
       TS_ASSERT_EQUALS(mfun->activeParameter(5),1.2);
-      TS_ASSERT_EQUALS(mfun->activeParameter(6),2.1);
-      TS_ASSERT_EQUALS(mfun->activeParameter(7),2.4);
-      TS_ASSERT_EQUALS(mfun->activeParameter(8),3.1);
-      TS_ASSERT_EQUALS(mfun->activeParameter(9),3.3);
+      TS_ASSERT_EQUALS(mfun->activeParameter(7),2.1);
+      TS_ASSERT_EQUALS(mfun->activeParameter(10),2.4);
+      TS_ASSERT_EQUALS(mfun->activeParameter(11),3.1);
+      TS_ASSERT_EQUALS(mfun->activeParameter(13),3.3);
 
       TS_ASSERT_EQUALS(mfun->nameOfActive(0),"f0.c0");
       TS_ASSERT_EQUALS(mfun->nameOfActive(1),"f0.c1");
@@ -1059,10 +1057,10 @@ public:
       TS_ASSERT_EQUALS(mfun->nameOfActive(3),"f0.c3");
       TS_ASSERT_EQUALS(mfun->nameOfActive(4),"f1.c");
       TS_ASSERT_EQUALS(mfun->nameOfActive(5),"f1.h");
-      TS_ASSERT_EQUALS(mfun->nameOfActive(6),"f2.c0");
-      TS_ASSERT_EQUALS(mfun->nameOfActive(7),"f2.c3");
-      TS_ASSERT_EQUALS(mfun->nameOfActive(8),"f3.c");
-      TS_ASSERT_EQUALS(mfun->nameOfActive(9),"f3.s");
+      TS_ASSERT_EQUALS(mfun->nameOfActive(7),"f2.c0");
+      TS_ASSERT_EQUALS(mfun->nameOfActive(10),"f2.c3");
+      TS_ASSERT_EQUALS(mfun->nameOfActive(11),"f3.c");
+      TS_ASSERT_EQUALS(mfun->nameOfActive(13),"f3.s");
 
       TS_ASSERT( ! mfun->isFixed(0));
       TS_ASSERT( ! mfun->isFixed(1));
@@ -1104,7 +1102,6 @@ public:
     mfun->tie("f1.h","f0.b*4");
 
     TS_ASSERT_EQUALS(mfun->nParams(),5);
-    TS_ASSERT_EQUALS(mfun->nActive(),2);
 
     TS_ASSERT( ! mfun->isFixed(0));
     TS_ASSERT(   mfun->isFixed(1));
@@ -1144,12 +1141,10 @@ public:
     mfun->tie("f1.s","f1.h/4");
 
     TS_ASSERT_EQUALS(mfun->nParams(),5);
-    TS_ASSERT_EQUALS(mfun->nActive(),3);
 
     mfun->removeFunction(0);
 
     TS_ASSERT_EQUALS(mfun->nParams(),3);
-    TS_ASSERT_EQUALS(mfun->nActive(),2);
 
     TS_ASSERT( ! mfun->isFixed(0));
     TS_ASSERT( ! mfun->isFixed(1));

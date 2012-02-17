@@ -21,25 +21,20 @@ public:
   CostFunctionFactoryTest_A() {}
 
   std::string name()const {return "fido";}
+  double getParameter(size_t)const {return 0;}
+  void setParameter(size_t, const double& ) {}
+  size_t nParams()const {return 0;}
 
-  double val(const double* yData, const double* inverseError, double* yCal, const size_t& n)
+  double val()const
   {
-    UNUSED_ARG(yData);
-    UNUSED_ARG(inverseError);
-    UNUSED_ARG(yCal);
-    UNUSED_ARG(n);
     return 0.0;
   }
-  void deriv(const double* yData, const double* inverseError, const double* yCal, 
-    const double* jacobian, double* outDerivs, const size_t& p, const size_t& n)
+  void deriv(std::vector<double>&) const
   {
-    UNUSED_ARG(yData);
-    UNUSED_ARG(inverseError);
-    UNUSED_ARG(yCal);
-    UNUSED_ARG(jacobian);
-    UNUSED_ARG(outDerivs);
-    UNUSED_ARG(p);
-    UNUSED_ARG(n);
+  }
+  double valAndDeriv(std::vector<double>&) const
+  {
+    return 0.0;
   }
 
 };

@@ -20,7 +20,7 @@ namespace API
 /// Copy contructor
 ParamFunction::ParamFunction(const ParamFunction& f)
 {
-  m_indexMap.assign(f.m_indexMap.begin(),f.m_indexMap.end());
+  m_isFixed.assign(f.m_isFixed.begin(),f.m_isFixed.end());
   m_parameterNames.assign(f.m_parameterNames.begin(),f.m_parameterNames.end());
   m_parameterDescriptions.assign(f.m_parameterDescriptions.begin(),f.m_parameterDescriptions.end());
   m_parameters.assign(f.m_parameters.begin(),f.m_parameters.end());
@@ -29,7 +29,7 @@ ParamFunction::ParamFunction(const ParamFunction& f)
 ///Assignment operator
 ParamFunction& ParamFunction::operator=(const ParamFunction& f)
 {
-  m_indexMap.assign(f.m_indexMap.begin(),f.m_indexMap.end());
+  m_isFixed.assign(f.m_isFixed.begin(),f.m_isFixed.end());
   m_parameterNames.assign(f.m_parameterNames.begin(),f.m_parameterNames.end());
   m_parameterDescriptions.assign(f.m_parameterDescriptions.begin(),f.m_parameterDescriptions.end());
   m_parameters.assign(f.m_parameters.begin(),f.m_parameters.end());
@@ -223,51 +223,11 @@ void ParamFunction::declareParameter(const std::string& name,double initValue, c
     throw std::invalid_argument(msg.str());
   }
 
-  m_indexMap.push_back(nParams());
+  m_isFixed.push_back(false);
   m_parameterNames.push_back(ucName);
   m_parameterDescriptions.push_back(description);
   m_parameters.push_back(initValue);
   m_explicitlySet.push_back(false);
-}
-
-/**
- * Returns the value of an active parameter.
- * @param i :: The index of an active parameter
- * @return the value of the active parameter
- */
-double ParamFunction::activeParameter(size_t i)const
-{
-  return m_parameters[indexOfActive(i)];
-}
-
-/**
- * Sets the value of an active parameter.
- * @param i :: The index of an active parameter
- * @param value :: A new value.
- */
-void ParamFunction::setActiveParameter(size_t i, double value)
-{
-  m_parameters[indexOfActive(i)] = value;
-}
-
-/**
- * Returns the name of an active parameter.
- * @param i :: The index of an active parameter
- * @return the name of the active parameter
- */
-std::string ParamFunction::nameOfActive(size_t i)const
-{
-  return m_parameterNames[indexOfActive(i)];
-}
-
-/**
- * Returns the description of an active parameter.
- * @param i :: The index of an active parameter
- * @return the description of the active parameter
- */
-std::string ParamFunction::descriptionOfActive(size_t i)const
-{
-  return m_parameterDescriptions[indexOfActive(i)];
 }
 
 /**
@@ -277,8 +237,9 @@ std::string ParamFunction::descriptionOfActive(size_t i)const
  */
 bool ParamFunction::isFixed(size_t i)const
 {
-  // fixed if i isn't found in m_indexMap
-  return std::find(m_indexMap.begin(),m_indexMap.end(),i) == m_indexMap.end();
+  if (i >= nParams())
+    throw std::out_of_range("ParamFunction parameter index out of range.");
+  return m_isFixed[i];
 }
 
 /** This method doesn't create a tie
@@ -286,24 +247,8 @@ bool ParamFunction::isFixed(size_t i)const
  */
 void ParamFunction::fix(size_t i)
 {
-  if (isFixed(i)) return;
-  if (i >= nParams())
-    throw std::out_of_range("ParamFunction parameter index out of range.");
-
-  if (m_indexMap.size() == 0)// This should never happen
-  {
-    for(size_t j=0;j<nParams();j++)
-      if (j != i)
-        m_indexMap.push_back(j);
-  }
-  else
-  {
-    std::vector<size_t>::iterator it = std::find(m_indexMap.begin(),m_indexMap.end(),i);
-    if (it != m_indexMap.end())
-    {
-      m_indexMap.erase(it);
-    }
-  }
+  if ( isFixed(i) ) return;
+  m_isFixed[i] = true;
 }
 
 /** Makes a parameter active again. It doesn't change the parameter's tie.
@@ -311,20 +256,8 @@ void ParamFunction::fix(size_t i)
  */
 void ParamFunction::unfix(size_t i)
 {
-  if (i >= nParams())
-    throw std::out_of_range("ParamFunction parameter index out of range.");
-
-  if (nParams() == nActive()) return;
-
-  std::vector<size_t >::iterator it = std::find_if(m_indexMap.begin(),m_indexMap.end(),std::bind2nd(std::greater<size_t>(),i));
-  if (it != m_indexMap.end())
-  {
-    m_indexMap.insert(it,i);
-  }
-  else
-  {
-    m_indexMap.push_back(i);
-  }
+  if ( !isFixed(i) ) return;
+  m_isFixed[i] = false;
 }
 
 /**
@@ -519,7 +452,7 @@ void ParamFunction::clearAllParameters()
   m_parameters.clear();
   m_parameterNames.clear();
   m_parameterDescriptions.clear();
-  m_indexMap.clear();
+  m_isFixed.clear();
 }
 
 /// Get the address of the parameter
@@ -556,34 +489,6 @@ size_t ParamFunction::getParameterIndex(const ParameterReference& ref)const
     return ref.getIndex();
   }
   return nParams();
-}
-
-/**
- * Returns the "global" index of an active parameter.
- * @param i :: The index of an active parameter
- * @return the global index of the requested parameter
- */
-size_t ParamFunction::indexOfActive(size_t i)const
-{
-  if (i >= nActive())
-    throw std::out_of_range("ParamFunction parameter index out of range.");
-
-  return m_indexMap[i];
-}
-
-/**
- * @param i :: The index of a declared parameter
- * @return The index of declared parameter i in the list of active parameters or throws std::invalid_argument
- *         if the parameter is tied.
- */
-size_t ParamFunction::activeIndex(size_t i)const
-{
-  std::vector<size_t >::const_iterator it = std::find(m_indexMap.begin(),m_indexMap.end(),i);
-  if (it == m_indexMap.end())
-  {
-    throw std::invalid_argument("Active parameter " + boost::lexical_cast<std::string>(i) + " not found");
-  };
-  return static_cast<size_t>(it - m_indexMap.begin());
 }
 
 } // namespace API

@@ -409,6 +409,46 @@ void IFunction::Attribute::fromString(const std::string& str)
   apply(tmp);
 }
 
+/// Value of i-th active parameter. Override this method to make fitted parameters different from the declared
+double IFunction::activeParameter(size_t i)const 
+{
+  if ( !isActive(i) )
+  {
+    throw std::runtime_error("Attempt to use an inactive parameter");
+  }
+  return getParameter(i);
+}
+
+/// Set new value of i-th active parameter. Override this method to make fitted parameters different from the declared
+void IFunction::setActiveParameter(size_t i, double value) 
+{
+  if ( !isActive(i) )
+  {
+    throw std::runtime_error("Attempt to use an inactive parameter");
+  }
+  setParameter(i,value);
+}
+
+/// Returns the name of active parameter i
+std::string IFunction::nameOfActive(size_t i)const 
+{
+  if ( !isActive(i) )
+  {
+    throw std::runtime_error("Attempt to use an inactive parameter");
+  }
+  return parameterName(i);
+}
+
+/// Returns the name of active parameter i
+std::string IFunction::descriptionOfActive(size_t i)const 
+{
+  if ( !isActive(i) )
+  {
+    throw std::runtime_error("Attempt to use an inactive parameter");
+  }
+  return parameterDescription(i);
+}
+
 /** Calculate numerical derivatives.
  * @param out :: Derivatives
  * @param xValues :: X values for data points
@@ -435,9 +475,9 @@ void IFunction::calNumericalDeriv(const FunctionDomain& domain, Jacobian& jacobi
 
     for (size_t iP = 0; iP < nParam; iP++)
     {
-      if ( !isFixed(iP) )
+      if ( isActive(iP) )
       {
-        const double& val = getParameter(iP);
+        const double& val = activeParameter(iP);
         if (fabs(val) < cutoff)
         {
           step = epsilon;
@@ -448,11 +488,11 @@ void IFunction::calNumericalDeriv(const FunctionDomain& domain, Jacobian& jacobi
         }
 
         double paramPstep = val + step;
-        setParameter(iP, paramPstep);
+        setActiveParameter(iP, paramPstep);
         function(domain,m_plusStep);
 
         step = paramPstep - val;
-        setParameter(iP, val);
+        setActiveParameter(iP, val);
 
         for (size_t i = 0; i < nData; i++) {
           jacobian.set(i,iP, 

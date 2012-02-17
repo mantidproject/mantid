@@ -41,7 +41,7 @@ class MANTID_API_DLL CompositeFunction : public virtual IFunction
 {
 public:
   /// Default constructor
-  CompositeFunction():m_nActive(0),m_nParams(0){}
+  CompositeFunction():/*m_nActive(0),*/m_nParams(0){}
   /// Copy contructor
   CompositeFunction(const CompositeFunction&);
   ///Assignment operator
@@ -84,8 +84,13 @@ public:
   /// Checks if a parameter has been set explicitly
   bool isExplicitlySet(size_t i)const;
 
-  /// Number of active (in terms of fitting) parameters
-  size_t nActive()const;
+  /// Check if a parameter is active
+  bool isFixed(size_t i)const;
+  /// Removes a parameter from the list of active
+  void fix(size_t i);
+  /// Restores a declared parameter i to the active status
+  void unfix(size_t i);
+
   /// Value of i-th active parameter. Override this method to make fitted parameters different from the declared
   double activeParameter(size_t i)const;
   /// Set new value of i-th active parameter. Override this method to make fitted parameters different from the declared
@@ -96,13 +101,8 @@ public:
   std::string nameOfActive(size_t i)const;
   /// Returns the name of active parameter i
   std::string descriptionOfActive(size_t i)const;
-
-  /// Check if a parameter is active
-  bool isFixed(size_t i)const;
-  /// Removes a parameter from the list of active
-  void fix(size_t i);
-  /// Restores a declared parameter i to the active status
-  void unfix(size_t i);
+  /// Check if an active parameter i is actually active
+  bool isActive(size_t i)const;
 
   /// Return parameter index from a parameter reference.
   size_t getParameterIndex(const ParameterReference& ref)const;
@@ -148,7 +148,7 @@ public:
   /// Get the function index
   std::size_t functionIndex(std::size_t i)const;
   /// Get the function index
-  std::size_t functionIndexActive(std::size_t i)const;
+  //std::size_t functionIndexActive(std::size_t i)const;
   /// Returns the index of parameter i as it declared in its function
   size_t parameterLocalIndex(size_t i)const;
   /// Returns the name of parameter i as it declared in its function
@@ -165,7 +165,7 @@ protected:
   virtual void addTie(ParameterTie* tie);
 
   size_t paramOffset(size_t i)const{return m_paramOffsets[i];}
-  size_t activeOffset(size_t i)const{return m_activeOffsets[i];}
+  //size_t activeOffset(size_t i)const{return m_activeOffsets[i];}
 
 private:
 
@@ -176,16 +176,16 @@ private:
   std::vector<IFunction_sptr> m_functions;
   /// Individual function parameter offsets (function index in m_functions)
   /// e.g. m_functions[i]->activeParameter(m_activeOffsets[i]+1) gives second active parameter of i-th function
-  std::vector<size_t> m_activeOffsets;
+  //std::vector<size_t> m_activeOffsets;
   /// Individual function parameter offsets (function index in m_functions)
   /// e.g. m_functions[i]->parameter(m_paramOffsets[i]+1) gives second declared parameter of i-th function
   std::vector<size_t> m_paramOffsets;
   /// Keeps the function index for each declared parameter  (parameter declared index)
   std::vector<size_t> m_IFunction;
   /// Keeps the function index for each active parameter (parameter active index)
-  std::vector<size_t> m_IFunctionActive;
+  //std::vector<size_t> m_IFunctionActive;
   /// Number of active parameters
-  size_t m_nActive;
+  //size_t m_nActive;
   /// Total number of parameters
   size_t m_nParams;
   /// Function counter to be used in nextConstraint
@@ -204,14 +204,14 @@ class PartialJacobian: public Jacobian
 {
   Jacobian* m_J;  ///< pointer to the overall Jacobian
   size_t m_iP0;      ///< offset in the overall Jacobian for a particular function
-  size_t m_iaP0;      ///< offset in the active Jacobian for a particular function
+  //size_t m_iaP0;      ///< offset in the active Jacobian for a particular function
 public:
   /** Constructor
    * @param J :: A pointer to the overall Jacobian
    * @param iP0 :: The parameter index (declared) offset for a particular function
    * @param iap0 :: The active parameter index (declared) offset for a particular function
    */
-  PartialJacobian(Jacobian* J,size_t iP0, size_t iap0):m_J(J),m_iP0(iP0),m_iaP0(iap0)
+  PartialJacobian(Jacobian* J,size_t iP0):m_J(J),m_iP0(iP0)//,m_iaP0(iap0)
   {}
   /**
    * Overridden Jacobian::set(...).
@@ -236,9 +236,9 @@ public:
   *   @param value :: Value to add
   *   @param iActiveP :: The index of an active parameter.
   */
-  virtual void addNumberToColumn(const double& value, const size_t& iActiveP) 
+  virtual void addNumberToColumn(const double& value, const size_t& iP) 
   {
-    m_J->addNumberToColumn(value,m_iaP0+iActiveP);
+    m_J->addNumberToColumn(value,m_iP0+iP);
   }
 };
 
