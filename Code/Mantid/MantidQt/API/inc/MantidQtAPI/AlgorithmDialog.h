@@ -237,18 +237,6 @@ private:
   /// Set a value based on any old input that we have
   void setPreviousValue(QWidget *widget, const QString & property);
 protected:
- /** The function analyses the property type and creates specific widget for it; 
-     It used in dynamic propeties, which change as property contents, validators or settings change
-     @param pProp -- the pointer to the property
-     @param row   -- the vertical position of the property widget within the initated dialog box
-     Should be pure virtual but as current custom vidgets do not use it, made empty unless overloaded */
-  virtual void createSpecificPropertyWidget(Mantid::Kernel::Property *pProp, int row){UNUSED_ARG(pProp); UNUSED_ARG(row);};
- /** The function deletes widgets, associated with property;
-     It used in dynamic propeties, which change as property contents, validators or settings change
-     @param pProp -- the pointer to the property
-     @return-- the vertical position of the composite widget within the widget window;
-     Should be pure virtual but as current custom vidgets do not use it, made empty unless overloaded */
-    virtual int deletePropertyWidgets(Mantid::Kernel::Property *pProp){UNUSED_ARG(pProp); return -1;}
 
   /** @name Member variables. */
   //@{

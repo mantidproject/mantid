@@ -735,6 +735,8 @@ void AlgorithmDialog::accept()
   } 
 }
 
+
+//-------------------------------------------------------------------------------------------------
 /**
  * A slot to handle the help button click
  */
@@ -888,6 +890,7 @@ void AlgorithmDialog::isForScript(bool forScript)
   m_forScript = forScript;
 }
 
+//-------------------------------------------------------------------------------------------------
 /**
  * Set an optional message to be displayed at the top of the widget
  * @param message :: The message string
@@ -900,6 +903,7 @@ void AlgorithmDialog::setOptionalMessage(const QString & message)
   else m_msgAvailable = true;
 }
 
+//-------------------------------------------------------------------------------------------------
 /**
  * Get a value from a widget. The function needs to know about the types of widgets
  * that are being used. Currently it knows about QComboBox, QLineEdit, QCheckBox and MWRunFiles

@@ -7,6 +7,7 @@
 #include "MantidKernel/Property.h"
 #include <QLabel>
 #include <QtCore/qstring.h>
+#include <qpushbutton.h>
 
 
 namespace MantidQt

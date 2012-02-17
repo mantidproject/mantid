@@ -28,6 +28,7 @@
 #include <QGroupBox>
 #include <climits>
 #include "MantidQtAPI/FilePropertyWidget.h"
+#include "MantidQtAPI/PropertyWidgetFactory.h"
 
 // Dialog stuff is defined here
 using namespace MantidQt::API;
@@ -49,10 +50,6 @@ GenericDialog::GenericDialog(QWidget* parent) : AlgorithmDialog(parent)
 */
 GenericDialog::~GenericDialog()
 {
-  // Delete all the mappers
-  QHash<QString, QSignalMapper *>::iterator it;
-  for(it = m_mappers.begin(); it != m_mappers.end(); ++it)
-    delete it.value();
 }
 
 
@@ -351,60 +348,6 @@ void GenericDialog::initLayout()
   }
 
   dialog_layout->setSizeConstraint(QLayout::SetMinimumSize);
-}
-
-void
-GenericDialog::createSpecificPropertyWidget(Mantid::Kernel::Property *pProp, int row)
-{
-
-      // Look for specific property types
-      Mantid::API::FileProperty* fileType = dynamic_cast<Mantid::API::FileProperty*>(pProp);
-      Mantid::API::MultipleFileProperty* multipleFileType = dynamic_cast<Mantid::API::MultipleFileProperty*>(pProp);
-      PropertyWithValue<bool>* boolProp = dynamic_cast<PropertyWithValue<bool>* >(pProp);
-
-      if (boolProp)
-      { // CheckBox shown for BOOL properties
-        layoutBoolProperty(boolProp, row);
-      }
-      else if ( !pProp->allowedValues().empty() && !fileType && !multipleFileType )
-      { //Check if there are only certain allowed values for the property
-        layoutOptionsProperty(pProp, row);
-      }
-      else 
-      { //For everything else render a text box
-        layoutTextProperty(pProp, row);
-      }
-
-}
-//
-int
-GenericDialog::deletePropertyWidgets(Mantid::Kernel::Property *pProp)
-{
-   QString propName=QString::fromStdString(pProp->name());
-   //QHash<QString, QSignalMapper *>::iterator it;
-   //while((it = m_mappers.find(propName))!=m_mappers.end()){
-   //     delete it.value();
-   //     it=m_mappers.erase(it);
-   //} 
-   int iRow,iCol,irowSpan,icolSpan;
-
-
-  int nRow=INT_MAX;
-  QList<QWidget*> widgets = m_tied_all_widgets[propName];
-  for (int i=0; i<widgets.size(); i++){
-       int wInd = m_currentGrid->indexOf(widgets[i]);
-       m_currentGrid->getItemPosition(wInd,&iRow,&iCol,&irowSpan,&icolSpan);
-       if(iRow<nRow)nRow=iRow;
-
-       widgets[i]->setVisible(false);
-       widgets[i]->setEnabled(false);
-       widgets[i]->setAttribute(Qt::WA_DeleteOnClose);
-       widgets[i]->close();
-   }
-  m_currentGrid->parentWidget()->repaint(true);
-
-  
-  return nRow;
 }
 
 

@@ -64,19 +64,9 @@ public:
   virtual ~GenericDialog();
 
 private:
-
-  void layoutBoolProperty(Mantid::Kernel::PropertyWithValue<bool>* prop, int row);
-  void layoutOptionsProperty(Mantid::Kernel::Property* prop, int row);
-  void layoutTextProperty(Mantid::Kernel::Property* prop, int row);
-
   /// This does the work and must be overridden in each deriving class
   virtual void initLayout();
-protected:
- /// the function analyses the property type and creates specific widget for it 
-  void createSpecificPropertyWidget(Mantid::Kernel::Property *pProp, int row);
- /** The function deletes widgets, associated with property;
-     returns-- the vertical position of the composite widget within the widget window; */
-    virtual int deletePropertyWidgets(Mantid::Kernel::Property *pProp);
+
 private slots:
 
   /// Any property changed
@@ -89,15 +79,11 @@ private slots:
   void browseMultipleClicked(const QString & propName);
 
 private:
-  
-  /// The grid widget containing the input boxes
+    /// The grid widget containing the input boxes
   QGridLayout *m_inputGrid;
 
   /// The current grid widget for sub-boxes
   QGridLayout *m_currentGrid;
-
-  /// List of the QSignalMappers for each property
-  QHash<QString, QSignalMapper *> m_mappers;
 };
 
 }
