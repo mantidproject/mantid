@@ -199,8 +199,6 @@ private:
   void applyMask(const QString& wsName,bool time_pixel);
 
 private slots:
-  /// phi masking has changed
-  void phiMaskingChanged();
   /// Select the data directory
   void selectDataDir();
   /// Select the user file

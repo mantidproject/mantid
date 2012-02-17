@@ -475,13 +475,11 @@ class Mask_ISIS(sans_reduction_steps.Mask):
         self._lim_phi_xml = ''
         self.phi_min = -90.0
         self.phi_max = 90.0
-        
         # read only phi (only used in ...)
         # this option seems totally bizarre to me since it allow
         # set_phi_limit to be called but not setting the _lim_phi_xml
         # string.....
-        #self._readonly_phi = False  
-        
+        self._readonly_phi = False  
         # used to assess if set phi limit has been called just once
         # in which case exactly one phi range has been masked
         # and get_phi_limits  
@@ -509,20 +507,9 @@ class Mask_ISIS(sans_reduction_steps.Mask):
         """
         details = details.lstrip()
         details = details.upper()
-        if not details.startswith('MASK') and not details.startswith('L/PHI'):
+        if not details.startswith('MASK'):
             _issueWarning('Ignoring malformed mask line ' + details)
             return
-        
-        # deal with the special case of L/PHI which is fact is a mask instruction
-        phiParts = details.split()
-        if len(phiParts) == 3:
-            mirror = phiParts[0] != 'L/PHI/NOMIRROR'
-            phiMin = phiParts[1]
-            phiMax = phiParts[2]
-            self.set_phi_limit(float(phiMin), float(phiMax), mirror)
-        else:
-             _issueWarning('Unrecognized masking line "' + details + '"')                
-        
         
         parts = details.split('/')
         # A spectrum mask or mask range applied to both detectors
@@ -655,8 +642,7 @@ class Mask_ISIS(sans_reduction_steps.Mask):
     def _mask_phi(self, id, centre, phimin, phimax, use_mirror=True):
         '''
             Mask the detector bank such that only the region specified in the
-            phi range is left unmasked. 
-            Purpose of this method is to populate self._lim_phi_xml            
+            phi range is left unmasked
         '''
         # convert all angles to be between 0 and 360
         while phimax > 360 : phimax -= 360
@@ -722,12 +708,16 @@ class Mask_ISIS(sans_reduction_steps.Mask):
             pass
         return phi
 
-    def set_phi_limit(self, phimin, phimax, phimirror):
+    def set_phi_limit(self, phimin, phimax, phimirror, override=True):
         '''
-            Update attributes so reflect arguments
+            ... (tx to Richard for changes to this function 
+                 for ticket #)
             @param phimin:  
             @param phimax:            
             @param phimirror: 
+            @param override: This one I don't understand. It seem 
+               dangerous to be allowed to set this one to false.
+               Also this option cannot be set from the command interface
             @return: return xml shape string
         '''        
         if phimirror :
@@ -746,16 +736,12 @@ class Mask_ISIS(sans_reduction_steps.Mask):
 
         self.phi_mirror = phimirror
 
-        # 15/2/2012 removed some unintelligent code (or at least totally so for me)
-        # which seem to allow you to call this method but in fact only do half the
-        # job of setting the phi limits.... I find this totally confusion so have
-        # removed but it hoping this has no side effects
-        #if override:
-        #    self._readonly_phi = True
+        if override:
+            self._readonly_phi = True
             
-        #if (not self._readonly_phi) or override:
-        self._mask_phi(
-            'unique phi', [0,0,0], self.phi_min,self.phi_max,self.phi_mirror)
+        if (not self._readonly_phi) or override:
+            self._mask_phi(
+                'unique phi', [0,0,0], self.phi_min,self.phi_max,self.phi_mirror)
 
     def execute(self, reducer, workspace):
         instrument = reducer.instrument
@@ -1732,7 +1718,7 @@ class UserFile(ReductionStep):
                 maxval = maxval.split('/NOMIRROR')[0]
                 mirror = False
             reducer.mask.set_phi_limit(
-                float(minval), float(maxval), mirror)
+                float(minval), float(maxval), mirror, override=False)
         else:
             _issueWarning('Error in user file after L/, "%s" is not a valid limit line' % limit_type.upper())
 
