@@ -1,5 +1,5 @@
-#ifndef MANTID_CURVEFITTING_COSTFUNCLEASTSQUARES_H_
-#define MANTID_CURVEFITTING_COSTFUNCLEASTSQUARES_H_
+#ifndef MANTID_CURVEFITTING_COSTFUNCFITTING_H_
+#define MANTID_CURVEFITTING_COSTFUNCFITTING_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -41,7 +41,7 @@ namespace CurveFitting
 class DLLExport CostFuncFitting : public API::ICostFunction 
 {
 public:
-
+  
   /// Get i-th parameter
   /// @param i :: Index of a parameter
   /// @return :: Value of the parameter
@@ -66,13 +66,15 @@ public:
 protected:
 
   bool isValid() const;
+  void checkValidity() const;
   
   API::IFunction_sptr m_function;
   API::FunctionDomain_sptr m_domain;
   API::FunctionValues_sptr m_values;
+  std::vector<size_t> m_indexMap;
 };
 
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_COSTFUNCLEASTSQUARES_H_*/
+#endif /*MANTID_CURVEFITTING_COSTFUNCFITTING_H_*/

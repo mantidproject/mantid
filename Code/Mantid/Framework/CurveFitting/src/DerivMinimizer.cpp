@@ -76,18 +76,8 @@ void DerivMinimizer::initialize(API::ICostFunction_sptr function)
   m_gslMultiminContainer.params = this;
 
   gsl_multimin_fdfminimizer *s = gsl_multimin_fdfminimizer_alloc( getGSLMinimizerType(), m_gslMultiminContainer.n );
-}
-
-bool DerivMinimizer::minimize() 
-{
-
-  if (m_gslSolver == NULL)
-  {
-    throw std::runtime_error("Minimizer " + this->name() + " was not initialized.");
-  }
 
   size_t nParams = m_costFunction->nParams();
-
   // Starting point 
   m_x = gsl_vector_alloc (nParams);
   for(size_t i = 0; i < nParams; ++i)
@@ -97,22 +87,39 @@ bool DerivMinimizer::minimize()
 
   gsl_multimin_fdfminimizer_set (m_gslSolver, &m_gslMultiminContainer, m_x, 0.01, 1e-4);
 
+}
+
+/**
+ */
+bool DerivMinimizer::iterate() 
+{
+  if (m_gslSolver == NULL)
+  {
+    throw std::runtime_error("Minimizer " + this->name() + " was not initialized.");
+  }
+  int status = gsl_multimin_fdfminimizer_iterate(m_gslSolver);
+  if (status) return false;
+  status = gsl_multimin_test_gradient (m_gslSolver->gradient, 1e-3); //! <---------------
+  return status == GSL_CONTINUE;
+}
+
+bool DerivMinimizer::minimize() 
+{
+
   size_t iter = 0;
-  int status;
+  bool success = false;
   do
   {
     iter++;
-    status = gsl_multimin_fdfminimizer_iterate(m_gslSolver);
-
-    if (status) 
+    if ( !iterate() )
+    {
+      success = true;
       break;
-
-    status = gsl_multimin_test_gradient (m_gslSolver->gradient, 1e-3); //! <---------------
-
+    }
   }
-  while (status == GSL_CONTINUE && iter < 100); //! <---------------
+  while (iter < 100); //! <---------------
 
-  return status == GSL_SUCCESS;
+  return success;
 
 }
 

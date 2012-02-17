@@ -2,10 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/SimplexMinimizer.h"
-#include "MantidAPI/CostFunctionFactory.h"
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid
 {
@@ -16,87 +13,90 @@ DECLARE_FUNCMINIMIZER(SimplexMinimizer,Simplex)
 // Get a reference to the logger
 Kernel::Logger& SimplexMinimizer::g_log = Kernel::Logger::get("SimplexMinimizer");
 
-void SimplexMinimizer::initialize(double* X, const double* Y, double *sqrtWeight, 
-                                   const int& nData, const int& nParam, 
-                                   gsl_vector* startGuess,
-                                   API::IFitFunction* function, const std::string& costFunction) 
+/** Calculating cost function
+*
+* @param x :: Input function arguments
+* @param params :: Pointer to a SimplexMinimizer
+* @return Value of the cost function
+*/
+double SimplexMinimizer::fun(const gsl_vector * x, void *params)
 {
-  UNUSED_ARG(X);
-  UNUSED_ARG(Y);
-  UNUSED_ARG(sqrtWeight);
-  UNUSED_ARG(nData);
-  const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex;
-
-  // step size for simplex
-  m_simplexStepSize = gsl_vector_alloc(nParam);
-  gsl_vector_set_all (m_simplexStepSize, m_size);  
-
-  // set-up GSL container to be used with GSL simplex algorithm
-  m_data = new GSL_FitData(function,API::CostFunctionFactory::Instance().createUnwrapped(costFunction));
-
-  // setup simplex container
-  gslContainer.n = nParam;  
-  gslContainer.f = &gsl_costFunction;
-  gslContainer.params = m_data;
-
-  // setup minimizer
-  m_gslSolver = gsl_multimin_fminimizer_alloc(T, nParam);
-  gsl_multimin_fminimizer_set(m_gslSolver, &gslContainer, startGuess, m_simplexStepSize);
-
-  // for covariance matrix
-  m_gslLeastSquaresContainer.f = &gsl_f;
-  m_gslLeastSquaresContainer.df = &gsl_df;
-  m_gslLeastSquaresContainer.fdf = &gsl_fdf;
-  m_gslLeastSquaresContainer.n = function->dataSize();
-  m_gslLeastSquaresContainer.p = function->nActive();
-  m_gslLeastSquaresContainer.params = m_data;
+  SimplexMinimizer& minimizer = *static_cast<SimplexMinimizer*>(params);
+  // update function parameters
+  if (x->data)
+  {
+    for(size_t i = 0; i < minimizer.m_costFunction->nParams(); ++i)
+    {
+      minimizer.m_costFunction->setParameter(i, gsl_vector_get(x,i));
+    }
+  }
+  return minimizer.m_costFunction->val();
 }
 
-void SimplexMinimizer::initialize(API::IFitFunction* function, const std::string& costFunction) 
+
+SimplexMinimizer::SimplexMinimizer():
+m_gslSolver(NULL),
+m_size(1.0)
 {
+}
+
+void SimplexMinimizer::initialize(API::ICostFunction_sptr function) 
+{
+  m_costFunction = function;
+
   const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex;
 
+  size_t np = function->nParams();
   // step size for simplex
-  m_simplexStepSize = gsl_vector_alloc(function->nActive());
+  m_simplexStepSize = gsl_vector_alloc(np);
   gsl_vector_set_all (m_simplexStepSize, m_size);  
 
-  // set-up GSL container to be used with GSL simplex algorithm
-  m_data = new GSL_FitData(function,API::CostFunctionFactory::Instance().createUnwrapped(costFunction));
-
   // setup simplex container
-  gslContainer.n = function->nActive();  
-  gslContainer.f = &gsl_costFunction;
-  gslContainer.params = m_data;
+  gslContainer.n = np;
+  gslContainer.f = &fun;
+  gslContainer.params = this;
+
+  // fill in parameter values
+  m_startGuess = gsl_vector_alloc(np);
+  for (size_t i = 0; i < np; ++i)
+  {
+    gsl_vector_set(m_startGuess,i,function->getParameter(i));
+  }
 
   // setup minimizer
-  m_gslSolver = gsl_multimin_fminimizer_alloc(T, function->nActive());
-  gsl_multimin_fminimizer_set(m_gslSolver, &gslContainer, m_data->initFuncParams, m_simplexStepSize);
+  m_gslSolver = gsl_multimin_fminimizer_alloc(T, np);
+  gsl_multimin_fminimizer_set(m_gslSolver, &gslContainer, m_startGuess, m_simplexStepSize);
 
-  m_gslLeastSquaresContainer.f = &gsl_f;
-  m_gslLeastSquaresContainer.df = &gsl_df;
-  m_gslLeastSquaresContainer.fdf = &gsl_fdf;
-  m_gslLeastSquaresContainer.n = function->dataSize();
-  m_gslLeastSquaresContainer.p = function->nActive();
-  m_gslLeastSquaresContainer.params = m_data;
+}
+
+/**
+ * Do one iteration.
+ * @return :: true if iterations to be continued, false if they can stop
+ */
+bool SimplexMinimizer::iterate() 
+{
+  int status = gsl_multimin_fminimizer_iterate(m_gslSolver);
+  if (status)
+  {
+    m_errorString = gsl_strerror(status);
+    return false;
+  }
+  double size = gsl_multimin_fminimizer_size(m_gslSolver);
+  status = gsl_multimin_test_size(size, 1e-2);
+  if (status != GSL_CONTINUE)
+  {
+    m_errorString = gsl_strerror(status);
+    return false;
+  }
+  return true;
 }
 
 ///resets the size
-void SimplexMinimizer::resetSize(double* X, const double* Y, double *sqrtWeight, 
-                                   const int& nData, const int& nParam, 
-                                   gsl_vector* startGuess, const double& size,
-                                   API::IFitFunction* function, const std::string& costFunction) 
+void SimplexMinimizer::resetSize(const double& size) 
 {
   m_size = size;
   clearMemory();
-  initialize(X, Y, sqrtWeight, nData, nParam, startGuess, function, costFunction);
-}
-
-///resets the size
-void SimplexMinimizer::resetSize(const double& size,API::IFitFunction* function, const std::string& costFunction) 
-{
-  m_size = size;
-  clearMemory();
-  initialize(function, costFunction);
+  initialize(m_costFunction);
 }
 
 SimplexMinimizer::~SimplexMinimizer()
@@ -107,25 +107,9 @@ SimplexMinimizer::~SimplexMinimizer()
 /// clear memory
 void SimplexMinimizer::clearMemory()
 {
-  delete m_data;
   gsl_vector_free(m_simplexStepSize);
+  gsl_vector_free(m_startGuess);
   gsl_multimin_fminimizer_free(m_gslSolver);
-}
-
-std::string SimplexMinimizer::name()const
-{
-  return m_name;
-}
-
-int SimplexMinimizer::iterate() 
-{
-  return gsl_multimin_fminimizer_iterate(m_gslSolver);
-}
-
-int SimplexMinimizer::hasConverged()
-{
-  double size = gsl_multimin_fminimizer_size(m_gslSolver);
-  return gsl_multimin_test_size(size, 1e-2);
 }
 
 double SimplexMinimizer::costFunctionVal()
@@ -134,16 +118,16 @@ double SimplexMinimizer::costFunctionVal()
 }
 
 ///Calculates covariance matrix - not implemented
-void SimplexMinimizer::calCovarianceMatrix(double epsrel, gsl_matrix * covar)
+void SimplexMinimizer::calCovarianceMatrix(gsl_matrix * covar, double epsrel)
 {
-  gsl_matrix * holdCalculatedJacobian;
-  holdCalculatedJacobian =  gsl_matrix_alloc (m_gslLeastSquaresContainer.n, m_gslLeastSquaresContainer.p);
+  //gsl_matrix * holdCalculatedJacobian;
+  //holdCalculatedJacobian =  gsl_matrix_alloc (m_gslLeastSquaresContainer.n, m_gslLeastSquaresContainer.p);
 
-  int dummy = m_gslLeastSquaresContainer.df(m_gslSolver->x, m_gslLeastSquaresContainer.params, holdCalculatedJacobian);
-  (void) dummy;
-  gsl_multifit_covar (holdCalculatedJacobian, epsrel, covar);
+  //int dummy = m_gslLeastSquaresContainer.df(m_gslSolver->x, m_gslLeastSquaresContainer.params, holdCalculatedJacobian);
+  //(void) dummy;
+  //gsl_multifit_covar (holdCalculatedJacobian, epsrel, covar);
 
-  gsl_matrix_free (holdCalculatedJacobian);
+  //gsl_matrix_free (holdCalculatedJacobian);
 }
 
 } // namespace CurveFitting

@@ -47,6 +47,8 @@ public:
   /// Destructor
   ~DerivMinimizer();
 
+  /// Do one iteration.
+  bool iterate();
   /// Do the minimization.
   bool minimize();
   /// Return current value of the cost function

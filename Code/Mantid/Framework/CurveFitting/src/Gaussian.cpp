@@ -69,22 +69,26 @@ void Gaussian::calJacobianForCovariance(Jacobian* out, const double* xValues, co
 
 void Gaussian::setActiveParameter(size_t i,double value)
 {
-  size_t j = indexOfActive(i);
-
-  if (parameterName(j) == "Sigma") 
-    setParameter(j,sqrt(fabs(1./value)),false);
+  if ( !isActive(i) )
+  {
+    throw std::runtime_error("Attempt to use an inactive parameter");
+  }
+  if (parameterName(i) == "Sigma") 
+    setParameter(i,sqrt(fabs(1./value)),false);
   else
-    setParameter(j,value,false);
+    setParameter(i,value,false);
 }
 
 double Gaussian::activeParameter(size_t i)const
 {
-  size_t j = indexOfActive(i);
-
-  if (parameterName(j) == "Sigma") 
-    return 1./pow(getParameter(j),2);
+  if ( !isActive(i) )
+  {
+    throw std::runtime_error("Attempt to use an inactive parameter");
+  }
+  if (parameterName(i) == "Sigma") 
+    return 1./pow(getParameter(i),2);
   else
-    return getParameter(j);
+    return getParameter(i);
 }
 
 

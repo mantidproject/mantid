@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/ICostFunction.h"
+#include "MantidCurveFitting/CostFuncFitting.h"
 
 namespace Mantid
 {
@@ -35,7 +35,7 @@ namespace CurveFitting
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CostFuncLeastSquares : public API::ICostFunction 
+class DLLExport CostFuncLeastSquares : public CostFuncFitting
 {
 public:
   /// Virtual destructor
@@ -50,13 +50,17 @@ public:
   /// Get short name of minimizer - useful for say labels in guis
   virtual std::string shortName() const {return "Chi-sq";};
 
-  /// Calculate value of cost function from observed
-  /// and calculated values
-  virtual double val(const double* yData, const double* inverseError, double* yCal, const size_t& n);
+  /// Calculate value of cost function
+  virtual double val() const;
 
   /// Calculate the derivatives of the cost function
-  virtual void deriv(const double* yData, const double* inverseError, const double* yCal, 
-                     const double* jacobian, double* outDerivs, const size_t& p, const size_t& n);
+  /// @param der :: Container to output the derivatives
+  virtual void deriv(std::vector<double>& der) const;
+
+  /// Calculate the value and the derivatives of the cost function
+  /// @param der :: Container to output the derivatives
+  /// @return :: The value of the function
+  virtual double valAndDeriv(std::vector<double>& der) const;
 
 private:
   /// name of this minimizer

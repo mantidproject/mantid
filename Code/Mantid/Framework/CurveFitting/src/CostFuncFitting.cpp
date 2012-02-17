@@ -13,11 +13,8 @@ namespace CurveFitting
 /// @return :: Value of the parameter
 double CostFuncFitting::getParameter(size_t i)const
 {
-  if (!isValid())
-  {
-    throw std::runtime_error("Fitting cost function isn't set");
-  }
-  return m_function->activeParameter(i);
+  checkValidity();
+  return m_function->activeParameter(m_indexMap[i]);
 }
 
 /// Set i-th parameter
@@ -25,21 +22,15 @@ double CostFuncFitting::getParameter(size_t i)const
 /// @param value :: New value of the parameter
 void CostFuncFitting::setParameter(size_t i, const double& value)
 {
-  if (!isValid())
-  {
-    throw std::runtime_error("Fitting cost function isn't set");
-  }
-  m_function->setActiveParameter(i,value);
+  checkValidity();
+  m_function->setActiveParameter(m_indexMap[i],value);
 }
 
 /// Number of parameters
 size_t CostFuncFitting::nParams()const
 {
-  if (!isValid())
-  {
-    throw std::runtime_error("Fitting cost function isn't set");
-  }
-  return m_function->nActive();
+  checkValidity();
+  return m_indexMap.size();
 }
 
 /** Set fitting function, domain it will operate on, and container for values.
@@ -58,6 +49,14 @@ void CostFuncFitting::setFittingFunction(API::IFunction_sptr function,
   m_function = function;
   m_domain = domain;
   m_values = values;
+  m_indexMap.clear();
+  for(size_t i = 0; i < m_function->nParams(); ++i)
+  {
+    if (m_function->isActive(i))
+    {
+      m_indexMap.push_back(i);
+    }
+  }
 }
 
 /**
@@ -66,6 +65,17 @@ void CostFuncFitting::setFittingFunction(API::IFunction_sptr function,
 bool CostFuncFitting::isValid() const
 {
   return m_function != API::IFunction_sptr();
+}
+
+/**
+ * Throw a runtime_error if function is invalid.
+ */
+void CostFuncFitting::checkValidity() const
+{
+  if (!isValid())
+  {
+    throw std::runtime_error("Fitting cost function isn't set");
+  }
 }
 
 /** Calculates covariance matrix

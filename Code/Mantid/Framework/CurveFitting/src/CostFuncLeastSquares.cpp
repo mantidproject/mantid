@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/CostFuncLeastSquares.h"
+#include "MantidCurveFitting/Jacobian.h"
 
 namespace Mantid
 {
@@ -10,49 +11,89 @@ namespace CurveFitting
 
 DECLARE_COSTFUNCTION(CostFuncLeastSquares,Least squares)
 
-  /// Calculate value of cost function from observed and calculated values
-  /// note yCal modified for computational efficiency
-  /// @param yData :: Array of yData
-  /// @param inverseError :: Array of inverse error values
-  /// @param yCal :: Calculated y
-  /// @param n :: The number of points 
-  /// @return The calculated cost value
-  double CostFuncLeastSquares::val(const double* yData, const double* inverseError, double* yCal, const size_t& n)
+/// Calculate value of cost function
+/// @return :: The value of the function
+double CostFuncLeastSquares::val() const
+{
+  checkValidity();
+  m_function->function(*m_domain,*m_values);
+  size_t n = nParams();
+
+  double retVal = 0.0;
+
+  for (size_t i = 0; i < n; i++)
   {
-    for (size_t i = 0; i < n; i++)
-      yCal[i] = (  yCal[i] - yData[i] ) * inverseError[i];
-
-    double retVal = 0.0;
-
-    for (size_t i = 0; i < n; i++)
-      retVal += yCal[i]*yCal[i];
-
-    return retVal;
+    double val = ( m_values->getCalculated(i) - m_values->getFitData(i) ) * m_values->getFitWeight(i);
+    retVal += val * val;
   }
 
-  /// Calculate the derivatives of the cost function
-  /// @param yData :: Array of yData
-  /// @param inverseError :: Array of inverse error values
-  /// @param yCal :: Calculated y
-  /// @param jacobian :: Output jacobian 
-  /// @param outDerivs :: Output derivatives
-  /// @param p :: The number of parameters 
-  /// @param n :: The number of points 
-  void CostFuncLeastSquares::deriv(const double* yData, const double* inverseError, const double* yCal, 
-                     const double* jacobian, double* outDerivs, const size_t& p, const size_t& n)
+  return retVal;
+}
+
+/// Calculate the derivatives of the cost function
+/// @param der :: Container to output the derivatives
+void CostFuncLeastSquares::deriv(std::vector<double>& der) const
+{
+  checkValidity();
+  size_t np = nParams();        // number of active parameters 
+  size_t ny = m_domain->size(); // number of data points
+  Jacobian jacobian(ny,np);
+  // run function to make sure that the calculated values are upto date
+  // although if all minimizers always run val() before deriv() it could be omitted
+  m_function->function(*m_domain,*m_values);
+  m_function->functionDeriv(*m_domain,jacobian);
+  if (der.size() != np)
   {
-    for (size_t iP = 0; iP < p; iP++) 
+    der.resize(np);
+  }
+  for(size_t ip = 0; ip < np; ++ip)
+  {
+    double d = 0.0;
+    for(size_t i = 0; i < ny; ++i)
     {
-      outDerivs[iP] = 0.0;
-      for (size_t iY = 0; iY < n; iY++) 
+      double calc = m_values->getCalculated(i);
+      double obs = m_values->getFitData(i);
+      double w = m_values->getFitWeight(i);
+      d += w * ( calc - obs ) * jacobian.get(i,ip);
+    }
+    der[ip] = 2 * d;
+  }
+}
+
+/// Calculate the value and the derivatives of the cost function
+/// @param der :: Container to output the derivatives
+/// @return :: The value of the function
+double CostFuncLeastSquares::valAndDeriv(std::vector<double>& der) const
+{
+  checkValidity();
+  size_t np = nParams();        // number of active parameters 
+  size_t ny = m_domain->size(); // number of data points
+  Jacobian jacobian(ny,np);
+  m_function->function(*m_domain,*m_values);
+  m_function->functionDeriv(*m_domain,jacobian);
+  if (der.size() != np)
+  {
+    der.resize(np);
+  }
+  double fVal = 0.0;
+  for(size_t ip = 0; ip < np; ++ip)
+  {
+    double d = 0.0;
+    for(size_t i = 0; i < ny; ++i)
+    {
+      double calc = m_values->getCalculated(i);
+      double obs = m_values->getFitData(i);
+      double y = ( calc - obs ) * m_values->getFitWeight(i);
+      d += y * jacobian.get(i,ip);
+      if (i == 0)
       {
-        outDerivs[iP] += 2.0*(yCal[iY]-yData[iY]) * jacobian[iY*p + iP] 
-                        * inverseError[iY]*inverseError[iY];
+        fVal += y * y;
       }
     }
+    der[ip] = 2 * d;
   }
-
-
+  return fVal;
+}
 
 } // namespace CurveFitting
 } // namespace Mantid

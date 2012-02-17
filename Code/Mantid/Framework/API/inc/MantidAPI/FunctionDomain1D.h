@@ -56,6 +56,10 @@ protected:
   std::vector<double> m_X; ///< vector of function arguments
 };
 
+/// typedef for a shared pointer to a FunctionDomain1D
+typedef boost::shared_ptr<FunctionDomain1D> FunctionDomain1D_sptr;
+typedef boost::shared_ptr<const FunctionDomain1D> FunctionDomain1D_const_sptr;
+
 } // namespace API
 } // namespace Mantid
 

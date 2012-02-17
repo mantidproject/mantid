@@ -349,6 +349,8 @@ public:
   }
   /// Check if attribute attName exists
   virtual bool hasAttribute(const std::string& attName)const { (void)attName; return false;}
+  template<typename T>
+  void setAttributeValue(const std::string& attName,const T& value){setAttribute(attName,Attribute(value));}
 
   /// Set a function handler
   void setHandler(FunctionHandler* handler);

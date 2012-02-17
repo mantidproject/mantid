@@ -6,7 +6,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IFitFunction.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 
 // STL

@@ -56,9 +56,14 @@ public:
   /// Get name of minimizer
   virtual std::string name() const = 0;
 
+  /// Do one iteration
+  virtual bool iterate() = 0;
+
   /// Perform iteration with minimizer and return info about how well this went
   /// using the GSL status integer system. See gsl_errno.h for details.
-  virtual bool minimize() = 0;
+  virtual bool minimize();
+
+  virtual std::string getError() const {return m_errorString;}
 
   /// Get value of cost function 
   virtual double costFunctionVal() = 0;
@@ -69,6 +74,8 @@ public:
    * @param epsrel :: Is used to remove linear-dependent columns
    */
   virtual void calCovarianceMatrix(gsl_matrix * covar, double epsrel = 0.0001) = 0;
+protected:
+  std::string m_errorString;
 };
 
 } // namespace CurveFitting
