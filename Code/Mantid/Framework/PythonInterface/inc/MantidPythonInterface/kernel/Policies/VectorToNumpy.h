@@ -23,10 +23,11 @@
  */
 #include "MantidKernel/System.h"
 #include "MantidPythonInterface/kernel/NumpyConverters.h"
-//#include <boost/mpl/if.hpp>
-//#include <boost/mpl/or.hpp>
-//#include <boost/type_traits/is_convertible.hpp>
-
+#include <boost/type_traits/integral_constant.hpp>
+#include <boost/type_traits/is_reference.hpp>
+#include <boost/type_traits/remove_reference.hpp>
+#include <boost/type_traits/remove_const.hpp>
+#include <boost/mpl/and.hpp>
 #include <vector>
 
 namespace Mantid
@@ -109,6 +110,25 @@ namespace Mantid
       //-----------------------------------------------------------------------
       // return_value_policy
       //-----------------------------------------------------------------------
+      namespace
+      {
+        /// MPL struct to figure out if a type is a std::vector
+        /// The general one inherits from boost::false_type
+        template<typename T>
+        struct is_std_vector : boost::false_type
+        {};
+
+        /// Specialization for std::vector types to inherit from
+        /// boost::true_type
+        template<typename T>
+        struct is_std_vector<std::vector<T> > : boost::true_type
+        {};
+
+        template<typename T>
+        struct VectorToNumpy_Requires_StdVector_Return_Type
+        {};
+
+      }
       /**
        * Implements a return value policy that
        * returns a numpy array from a std::vector
@@ -120,10 +140,18 @@ namespace Mantid
       template<typename ConversionPolicy>
       struct VectorToNumpy
       {
+        // The boost::python framework calls return_value_policy::apply<T>::type
         template <class T>
         struct apply
         {
-          typedef ConvertVectorToNDArray<T, ConversionPolicy> type;
+          // Typedef that removes and const or reference qualifiers from the type
+          typedef typename boost::remove_const<typename boost::remove_reference<T>::type>::type non_const_type;
+          // MPL compile-time check that T is a reference to a std::vector
+          typedef typename boost::mpl::if_c<
+               boost::mpl::and_<boost::is_reference<T>, is_std_vector<non_const_type> >::value
+             , ConvertVectorToNDArray<T, ConversionPolicy>
+             , VectorToNumpy_Requires_StdVector_Return_Type<T>
+             >::type type;
         };
       };
 
