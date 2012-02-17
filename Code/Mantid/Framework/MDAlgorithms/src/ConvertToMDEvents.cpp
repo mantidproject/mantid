@@ -194,7 +194,7 @@ ConvertToMDEvents::init()
               "Unselect this if you want to add new events to the workspace, which already exist. Can be very inefficient for file-based workspaces.");
 
      /// this variable describes default possible ID-s for Q-dimensions   
-     declareProperty("QDimensions",Q_modes[NoQ],new ListValidator(Q_modes),
+     declareProperty("QDimensions",Q_modes[modQ],new ListValidator(Q_modes),
          "You can to transfer source workspace dimensions into target MD workspace directly by supplying empty string """" (NoQ), \n"
          "into mod(Q) (1 dimension) providing ""|Q|"" string or into 3 dimensions in Q space ""QhQkQl"". \n"
          " First mode used for copying data from input workspace into multidimensional target workspace, second -- mainly for powder analysis\n"
@@ -704,7 +704,8 @@ ConvertToMDEvents::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS,const std
     }
     // get emode
     int emode;
-    if (!Q_mode_req.empty()){
+    // if not found NoQ mode, then dE should be availible
+    if (Q_mode_req.find(Q_modes[NoQ])==std::string::npos){
         emode = getEMode(this);
     }else{
         emode = -1;  // no coordinate conversion
@@ -1033,9 +1034,9 @@ TWS(4)
      // strings to indentify possible momentum analysis modes
      Q_modes[modQ] = "|Q|";
      Q_modes[Q3D]  = "QhQkQl";    
-     Q_modes[NoQ]  = "";    // no Q dimension (does it have any interest&relevance to ISIS/SNS?) 
+     Q_modes[NoQ]  = "CopyToMD";    // no Q dimension; 
      // strings to indentify possible energy conversion modes
-     dE_modes[ANY_Mode]  = ""; // no Q uses it to run without conversion. 
+     dE_modes[ANY_Mode]  = "NoDE"; // no Q uses it to run without conversion. 
      dE_modes[Direct]    = "Direct";
      dE_modes[Indir]     = "Indirect";
      dE_modes[Elastic]   = "Elastic";

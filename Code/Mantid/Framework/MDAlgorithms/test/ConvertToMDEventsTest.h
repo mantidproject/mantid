@@ -152,9 +152,9 @@ void testParseQMode_NoQ()
      std::vector<std::string> out_dim_names,out_dim_units;
      int nQ_dims;
      std::string MODE;
-     TS_ASSERT_THROWS_NOTHING(MODE=pAlg->parseQMode("",ws_dim_names,ws_dim_units,out_dim_names,out_dim_units, nQ_dims));
+     TS_ASSERT_THROWS_NOTHING(MODE=pAlg->parseQMode("CopyToMD",ws_dim_names,ws_dim_units,out_dim_names,out_dim_units, nQ_dims));
      TS_ASSERT_EQUALS(2,nQ_dims);
-     TS_ASSERT_EQUALS("",MODE);
+     TS_ASSERT_EQUALS("CopyToMD",MODE);
      TS_ASSERT_EQUALS(ws_dim_names[0],out_dim_names[0]);
      TS_ASSERT_EQUALS(ws_dim_names[1],out_dim_names[1]);
      TS_ASSERT_EQUALS(ws_dim_units[0],out_dim_units[0]);
@@ -210,10 +210,10 @@ void testParseDEMode_NoQ()
      std::string natural_units;
      std::string EID;
 
-     TS_ASSERT_THROWS_NOTHING(EID=pAlg->parseDEMode("","Elastic",ws_dim_units,out_dim_names,out_dim_units,ndE_dims,natural_units));
+     TS_ASSERT_THROWS_NOTHING(EID=pAlg->parseDEMode("CopyToMD","Elastic",ws_dim_units,out_dim_names,out_dim_units,ndE_dims,natural_units));
      TS_ASSERT_EQUALS(0,ndE_dims);
 
-     TSM_ASSERT_EQUALS("Regardless of the dE mode, if Q-mode is NoQ, should return Any_Mode: ","",EID);
+     TSM_ASSERT_EQUALS("Regardless of the dE mode, if Q-mode is NoQ, should return Any_Mode (NoDE): ","NoDE",EID);
      TS_ASSERT(out_dim_names.empty());
      TS_ASSERT(out_dim_units.empty());
      TS_ASSERT_EQUALS(ws_dim_units[0],natural_units);
@@ -305,7 +305,7 @@ void testParseConv_NoQ()
      std::vector<std::string> ws_dim_units(1,"Any");
      std::string CONV_ID;
     
-     TS_ASSERT_THROWS_NOTHING(CONV_ID=pAlg->parseConvMode("","AnyUnits",ws_dim_units));
+     TS_ASSERT_THROWS_NOTHING(CONV_ID=pAlg->parseConvMode("CopyToMD","AnyUnits",ws_dim_units));
      TS_ASSERT_EQUALS("CnvNo",CONV_ID);
 }
 void testParseConv_NaturalNoQ()
@@ -313,7 +313,7 @@ void testParseConv_NaturalNoQ()
      std::vector<std::string> ws_dim_units(1,"dSpacing");
      std::string CONV_ID;
     
-     TS_ASSERT_THROWS_NOTHING(CONV_ID=pAlg->parseConvMode("","dSpacing",ws_dim_units));
+     TS_ASSERT_THROWS_NOTHING(CONV_ID=pAlg->parseConvMode("CopyToMD","dSpacing",ws_dim_units));
      TS_ASSERT_EQUALS("CnvNo",CONV_ID);
 }
 void testParseConv_QuickConvertsion()
@@ -353,7 +353,7 @@ void testNeedsNumericAxis(){
     std::vector<std::string> dim_ID;
     std::vector<std::string> dim_units;
     bool is_detInfoLost;
-    TS_ASSERT_THROWS(pAlg->identifyMatrixAlg(ws2D,"QhQkQl","",dim_ID,dim_units,is_detInfoLost),std::invalid_argument);
+    TS_ASSERT_THROWS(pAlg->identifyMatrixAlg(ws2D,"QhQkQl","CopyToMD",dim_ID,dim_units,is_detInfoLost),std::invalid_argument);
 }
 void testGetWS4DimIDFine(){
     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4,10,true);
@@ -405,7 +405,7 @@ void testGetWSDimNames2AxisNoQ(){
     std::vector<std::string> dim_units;
     std::string AlgID;
     bool is_detInfoLost;
-    TS_ASSERT_THROWS_NOTHING(AlgID=pAlg->identifyMatrixAlg(ws2D,"","",dim_ID,dim_units,  is_detInfoLost));
+    TS_ASSERT_THROWS_NOTHING(AlgID=pAlg->identifyMatrixAlg(ws2D,"CopyToMD","NoDE",dim_ID,dim_units,  is_detInfoLost));
 
     TSM_ASSERT("Det info should be undefined an an numeric axis is along axis 2",is_detInfoLost);
 
@@ -458,7 +458,7 @@ void testIdentifyMatrixAlg_1()
     ws2D->replaceAxis(1,pAx);
     bool is_detInfoLost;
 
-    TS_ASSERT_EQUALS("WS2DCnvNo",pAlg->identifyMatrixAlg(ws2D,"","",dim_names,dim_units,is_detInfoLost));
+    TS_ASSERT_EQUALS("WS2DCopyToMDNoDECnvNo",pAlg->identifyMatrixAlg(ws2D,"CopyToMD","NoDE",dim_names,dim_units,is_detInfoLost));
     TS_ASSERT_EQUALS(ws_dim_names[0],dim_names[0]);
     TS_ASSERT_EQUALS(ws_dim_names[1],dim_names[1]);
     TSM_ASSERT("Det info should be undefined an an numeric axis is along axis 2",is_detInfoLost);
@@ -599,9 +599,9 @@ void testExecNoQ()
     pAlg->setPropertyValue("InputWorkspace","testWSProcessed");
     pAlg->setPropertyValue("OutputWorkspace","WS3DNoQ");
     pAlg->setPropertyValue("UsePreprocessedDetectors","0");
-    pAlg->setPropertyValue("QDimensions","");
+    pAlg->setPropertyValue("QDimensions","CopyToMD");
     pAlg->setPropertyValue("OtherDimensions","phi,chi");
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", ""));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "NoDE"));
     //
     pAlg->setPropertyValue("MinValues","-10,0,-10");
     pAlg->setPropertyValue("MaxValues"," 10,20,40");
@@ -701,14 +701,14 @@ void testAlgorithmProperties()
   QDimProperty =alg.getProperty("QDimensions");
   PropertyAllowedValues QDimValues = QDimProperty->allowedValues();
   TSM_ASSERT_EQUALS("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", 3, QDimValues.size());
-  TSM_ASSERT("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!",  QDimValues.find("") != QDimValues.end());
+  TSM_ASSERT("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!",  QDimValues.find("CopyToMD") != QDimValues.end());
   TSM_ASSERT("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", QDimValues.find("|Q|") != QDimValues.end());
   TSM_ASSERT("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", QDimValues.find("QhQkQl") != QDimValues.end());
 
   Mantid::Kernel::Property *dEAnalysisMode =alg.getProperty("dEAnalysisMode");
   PropertyAllowedValues dEAnalysisModeValues = dEAnalysisMode->allowedValues();
   TSM_ASSERT_EQUALS("QDimensions property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", 4, dEAnalysisModeValues.size());
-  TSM_ASSERT("dEAnalysisMode property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!",  dEAnalysisModeValues.find("") != dEAnalysisModeValues.end());
+  TSM_ASSERT("dEAnalysisMode property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!",  dEAnalysisModeValues.find("NoDE") != dEAnalysisModeValues.end());
   TSM_ASSERT("dEAnalysisMode property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", dEAnalysisModeValues.find("Direct") != dEAnalysisModeValues.end());
   TSM_ASSERT("dEAnalysisMode property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", dEAnalysisModeValues.find("Indirect") != dEAnalysisModeValues.end());
   TSM_ASSERT("dEAnalysisMode property values have changed. This has broken Create MD Workspace GUI. Fix CreateMDWorkspaceGUI!", dEAnalysisModeValues.find("Elastic") != dEAnalysisModeValues.end());
