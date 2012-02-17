@@ -230,6 +230,7 @@
    <instrument name="BASIS" shortname="BSS" beamline="2"> 
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Indirect Geometry Spectroscopy</technique>
+    <technique>Neutron Diffraction</technique>
    </instrument> 
    
    <instrument name="SNAP" beamline="3">  
@@ -247,6 +248,7 @@
    <instrument name="CNCS" beamline="5"> 
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>
+    <technique>Neutron Diffraction</technique>
    </instrument> 
    
    <instrument name="EQ-SANS" shortname="EQSANS" beamline="6"> 
@@ -284,16 +286,19 @@
 
   <instrument name="VISION" shortname="VIS" beamline="16B">
     <technique>Neutron Spectroscopy</technique>
+    <technique>Neutron Diffraction</technique>
   </instrument>
 
    <instrument name="SEQUOIA" shortname="SEQ" beamline="17"> 
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>
+    <technique>Neutron Diffraction</technique>
    </instrument> 
    
    <instrument name="ARCS" beamline="18"> 
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>
+    <technique>Neutron Diffraction</technique>
    </instrument> 
    
    <instrument name="VENUS"> 
