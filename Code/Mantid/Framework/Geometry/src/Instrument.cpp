@@ -452,6 +452,19 @@ namespace Mantid
       }
     }
 
+    bool Instrument::isMonitor(const detid_t &detector_id) const
+    {
+      // Find the (base) detector object in the map.
+      detid2det_map::const_iterator it = m_instr->m_detectorCache.find(detector_id);
+      if ( it == m_instr->m_detectorCache.end() )
+        return false;
+      // This is the detector
+      const Detector * det = dynamic_cast<const Detector*>(it->second.get());
+      if (det == NULL)
+         return false;
+      return det->isMonitor();
+    }
+
     //--------------------------------------------------------------------------
     /** Is the detector with the given ID masked?
      *

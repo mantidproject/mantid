@@ -126,6 +126,13 @@ namespace Mantid
       const int diagLength = static_cast<int>(countsWS->getNumberHistograms());
       const int progStep = static_cast<int>(std::ceil(diagLength / 100.0));
 
+      bool checkForMask = false;
+      Geometry::Instrument_const_sptr instrument = inputWS->getInstrument();
+      if (instrument != NULL)
+      {
+        checkForMask = ((instrument->getSource() != NULL) && (instrument->getSample() != NULL));
+      }
+
       int numFailed(0);
       PARALLEL_FOR2(countsWS, outputWS)
       for (int i = 0; i < diagLength; ++i)
@@ -136,28 +143,15 @@ namespace Mantid
           progress(static_cast<double>(i)/diagLength);
           interruption_point();
         }
-        IDetector_const_sptr det;
-        try
+
+        if (instrument->isMonitor(i))
         {
-          det = countsWS->getDetector(i);
+          continue; // do include or exclude from mask
         }
-        catch(Exception::NotFoundError&)
-        {
-        }
-        // Mark no detector spectra as failed
-        if( !det )
+
+        if (instrument->isDetectorMasked(i))
         {
           keepData = false;
-        }
-        else
-        {
-          if( det->isMasked() )
-            keepData = false;
-          if( det->isMonitor() )
-          {
-            // Don't include but don't mask either
-            continue;
-          }
         }
 
         const double & yValue = countsWS->readY(i)[0];
