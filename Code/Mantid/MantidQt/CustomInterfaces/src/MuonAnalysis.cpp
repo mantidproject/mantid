@@ -1023,7 +1023,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     loadMuonAlg->setProperty("AutoGroup", false);
     if (loadMuonAlg->execute() )
     {
-      mainFieldDirection = loadMuonAlg->getProperty("MainFieldDirection");
+      mainFieldDirection = loadMuonAlg->getPropertyValue("MainFieldDirection");
       timeZero = loadMuonAlg->getProperty("TimeZero");
       firstGoodData = loadMuonAlg->getProperty("FirstGoodData");
       if (m_uiForm.instrSelector->currentText().toUpper().toStdString() != "ARGUS")
