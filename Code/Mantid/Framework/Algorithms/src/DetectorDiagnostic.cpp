@@ -87,7 +87,7 @@ namespace Mantid
      * @param inputWS The workspace to initialize from. The instrument is copied from this.
      * @param initialize Whether or not to set all of the values to keep the data.
      */
-    MatrixWorkspace_sptr DetectorDiagnostic::generateEmptyMask(API::MatrixWorkspace_sptr inputWS, const bool initialize)
+    MatrixWorkspace_sptr DetectorDiagnostic::generateEmptyMask(API::MatrixWorkspace_const_sptr inputWS, const bool initialize)
     {
       // Create a new workspace for the results, copy from the input to ensure that we copy over the instrument and current masking
       DataObjects::SpecialWorkspace2D* maskWS = new DataObjects::SpecialWorkspace2D();
