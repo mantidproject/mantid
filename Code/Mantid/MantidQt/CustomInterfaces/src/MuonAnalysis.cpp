@@ -1040,11 +1040,22 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
   if (m_previousFilenames.size() > 1)
     plusRangeWorkspaces();
 
+  // Get dead times from data.
   if ((m_uiForm.instrSelector->currentText().toUpper().toStdString() != "ARGUS") && (m_uiForm.deadTimeType->currentIndex() == 1) )
+  {
     getDeadTimeFromData(deadTimes);
-  //else if ((m_uiForm.instrSelector->currentText().toUpper().toStdString() != "ARGUS") && (m_uiForm.deadTimeType->currentIndex() == 2) )
-    //getDeadTimeFromFile();
+  }
+  // Get dead times from file.
+  else if ((m_uiForm.instrSelector->currentText().toUpper().toStdString() != "ARGUS") && (m_uiForm.deadTimeType->currentIndex() == 2) )
+  {
+    QString deadTimeFile(m_uiForm.mwRunDeadTimeFile->getFirstFilename() );
+    if (isValidFile(deadTimeFile) )
+      getDeadTimeFromFile(deadTimeFile);
+    else
+      QMessageBox::information(this, "Mantid - MuonAnalysis", "A problem occurred while applying dead times.");
+  }
 
+  // Make the options available
   m_optionTab->nowDataAvailable();
 
   // Get hold of a pointer to a matrix workspace and apply grouping if applicatable
@@ -1226,32 +1237,83 @@ void MuonAnalysis::deleteRangedWorkspaces()
 *
 * @params deadTimes :: a vector of all the dead times starting at spectrum 1.
 */
-void MuonAnalysis::getDeadTimeFromData(std::vector<double> & deadTimes)
+void MuonAnalysis::getDeadTimeFromData(const std::vector<double> & deadTimes)
 {
-  // Setup the dead time table.
-  Mantid::API::ITableWorkspace_sptr deadTimeTable = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-  deadTimeTable->addColumn("int","spectrum");
-  deadTimeTable->addColumn("double","dead-time");
-
-  for (size_t i=0; i<64; ++i)
+  int numData(0); // Number of data sets under muon analysis.
+  if (Mantid::API::AnalysisDataService::Instance().doesExist(m_workspace_name) )
   {
-    Mantid::API::TableRow row = deadTimeTable->appendRow();
-    row << boost::lexical_cast<int>(i+1) << deadTimes[i];
+    ++numData;
+    int loop(1);
+    while(loop == numData)
+    {
+      std::stringstream ss; //create a stringstream
+      ss << (numData + 1);
+      if (Mantid::API::AnalysisDataService::Instance().doesExist(m_workspace_name + '_' + ss.str() ) )
+      {
+        ++numData;
+      }
+      ++loop;
+    }
   }
 
-  // Add to the ADS for use with algorithm. (Unique name chosen so not to cause conflict)
-  Mantid::API::AnalysisDataService::Instance().add("tempMuonDeadTime123qwe", deadTimeTable);
+  // Setup the dead time table.
+  for (int i=1; i<=numData; ++i)
+  {
+    std::string workspaceName("");
+    Mantid::API::ITableWorkspace_sptr deadTimeTable = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+    deadTimeTable->addColumn("int","spectrum");
+    deadTimeTable->addColumn("double","dead-time");
 
-  // Setup and run the ApplyDeadTimeCorr algorithm.
-  Mantid::API::IAlgorithm_sptr applyDeadTimeAlg = Mantid::API::AlgorithmManager::Instance().create("ApplyDeadTimeCorr");
-  applyDeadTimeAlg->setPropertyValue("InputWorkspace", m_workspace_name );
-  applyDeadTimeAlg->setProperty("DeadTimeTable", deadTimeTable);
-  applyDeadTimeAlg->setPropertyValue("OutputWorkspace", m_workspace_name );
-  if (!applyDeadTimeAlg->execute())
-      throw std::runtime_error("Error in applying dead time.");
+    Mantid::API::MatrixWorkspace_sptr muonData;
 
-  // Make sure to remove the table from the ADS because it isn't used anymore.
-  Mantid::API::AnalysisDataService::Instance().remove("tempMuonDeadTime123qwe");
+    if (i==1 && 1==numData)
+    {
+      workspaceName = m_workspace_name;
+      muonData = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(workspaceName) );
+    }
+    else
+    {
+      std::stringstream ss; //create a stringstream
+      ss << i;
+      workspaceName = m_workspace_name + '_' + ss.str();
+      muonData = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(workspaceName) );
+    }
+
+    //check dead time size
+    if (deadTimes.size() >= (muonData->getNumberHistograms() + (i-1)*muonData->getNumberHistograms() ) )
+    {
+      for (size_t j=0; j<muonData->getNumberHistograms(); ++j)
+      {
+        Mantid::API::TableRow row = deadTimeTable->appendRow();
+        row << boost::lexical_cast<int>(j+1) << deadTimes[j+((i-1)*muonData->getNumberHistograms() ) ];
+      }
+    }
+
+    // Add to the ADS for use with algorithm. (Unique name chosen so not to cause conflict)
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("tempMuonDeadTime123qwe", deadTimeTable);
+
+    // Setup and run the ApplyDeadTimeCorr algorithm.
+    Mantid::API::IAlgorithm_sptr applyDeadTimeAlg = Mantid::API::AlgorithmManager::Instance().create("ApplyDeadTimeCorr");
+    applyDeadTimeAlg->setPropertyValue("InputWorkspace", workspaceName );
+    applyDeadTimeAlg->setProperty("DeadTimeTable", deadTimeTable);
+    applyDeadTimeAlg->setPropertyValue("OutputWorkspace", workspaceName );
+    if (!applyDeadTimeAlg->execute())
+      throw std::runtime_error("Error in applying dead time.");  
+    
+    // Make sure to remove the table from the ADS because it isn't used anymore.
+    Mantid::API::AnalysisDataService::Instance().remove("tempMuonDeadTime123qwe");
+  }
+}
+
+
+/**
+*
+*
+*
+*/
+void MuonAnalysis::getDeadTimeFromFile(const QString & fileName)
+{
+
 }
 
 
