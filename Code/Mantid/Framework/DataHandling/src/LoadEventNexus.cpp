@@ -530,16 +530,6 @@ public:
       }
     }
 
-    if (alg->chunk != EMPTY_INT()) // We are loading part - work out the event number range
-    {
-    size_t max_events = stop_event - start_event + 1;
-    size_t chunk_events = max_events/alg->totalChunks;
-    start_event += (alg->chunk - 1) * chunk_events;
-  // Need to add any remainder to the final chunk
-    stop_event = start_event + chunk_events;
-    if ( alg->chunk == alg->totalChunks ) stop_event += max_events%alg->totalChunks;
-  }
-
     // Make sure it is within range
     if (stop_event > static_cast<size_t>(dim0))
       stop_event = dim0;
@@ -1275,8 +1265,6 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   double filter_time_start_sec, filter_time_stop_sec;
   filter_time_start_sec = getProperty("FilterByTimeStart");
   filter_time_stop_sec = getProperty("FilterByTimeStop");
-  chunk = getProperty("ChunkNumber");
-  totalChunks = getProperty("TotalChunks");
 
   //Default to ALL pulse times
   bool is_time_filtered = false;
@@ -1318,7 +1306,21 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   ThreadScheduler * scheduler = new ThreadSchedulerLargestCost();
   ThreadPool pool(scheduler, 8);
   Mutex * diskIOMutex = new Mutex();
-  for (size_t i=0; i < bankNames.size(); i++)
+
+  size_t bank0 = 0;
+  size_t bankn = bankNames.size();
+  chunk = getProperty("ChunkNumber");
+  totalChunks = getProperty("TotalChunks");
+  if (chunk != EMPTY_INT()) // We are loading part - work out the bank number range
+  {
+    size_t max_banks = bankn - bank0;
+    size_t chunk_banks = max_banks/totalChunks;
+    bank0 += (chunk - 1) * chunk_banks;
+  // Need to add any remainder to the final chunk
+    bankn = bank0 + chunk_banks;
+    if ( chunk == totalChunks ) bankn += max_banks%totalChunks;
+  }
+  for (size_t i=bank0; i < bankn; i++)
   {
     // We make tasks for loading
     pool.schedule( new LoadBankFromDiskTask(this, bankNames[i], classType, prog2, diskIOMutex, scheduler) );
