@@ -222,13 +222,9 @@ class SNSPowderReduction2(PythonAlgorithm):
         self.declareProperty("FinalDataUnits", "dSpacing", ListValidator(["dSpacing","MomentumTransfer"]))
 
     def _loadPreNeXusData(self, runnumber, extension, **kwargs):
-        mykwargs = {}
         chunkNo = 1
-        if kwargs.has_key("FilterByTimeStart"):
-            mykwargs["ChunkNumber"] = int(kwargs["FilterByTimeStart"])
-            chunkNo = int(kwargs["FilterByTimeStart"])
-        if kwargs.has_key("FilterByTimeStop"):
-            mykwargs["TotalChunks"] = int(kwargs["FilterByTimeStop"])
+        if kwargs.has_key("ChunkNumber"):
+            chunkNo = int(kwargs["ChunkNumber"])
 
         # generate the workspace name
         name = "%s_%d" % (self._instrument, runnumber)
@@ -236,7 +232,7 @@ class SNSPowderReduction2(PythonAlgorithm):
         self.log().debug(filename)
 
         name += "_%02d" % (chunkNo)
-        alg = LoadPreNexus(Filename=filename, OutputWorkspace=name, **mykwargs)
+        alg = LoadPreNexus(Filename=filename, OutputWorkspace=name, **kwargs)
         wksp = alg['OutputWorkspace']
 
         # add the logs to it
@@ -246,19 +242,15 @@ class SNSPowderReduction2(PythonAlgorithm):
         return wksp
 
     def _loadEventNeXusData(self, runnumber, extension, **kwargs):
-        mykwargs = {}
         chunkNo = 1
-        if kwargs.has_key("FilterByTimeStart"):
-            mykwargs["ChunkNumber"] = int(kwargs["FilterByTimeStart"])
-            chunkNo = int(kwargs["FilterByTimeStart"])
-        if kwargs.has_key("FilterByTimeStop"):
-            mykwargs["TotalChunks"] = int(kwargs["FilterByTimeStop"])
+        if kwargs.has_key("ChunkNumber"):
+            chunkNo = int(kwargs["ChunkNumber"])
         kwargs["Precount"] = True
         name = "%s_%d" % (self._instrument, runnumber)
         filename = name + extension
 
         name += "_%02d" % (chunkNo)
-        alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, **mykwargs)
+        alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, **kwargs)
         return alg.workspace()
 
     def _loadHistoNeXusData(self, runnumber, extension):
@@ -269,13 +261,18 @@ class SNSPowderReduction2(PythonAlgorithm):
         alg = LoadTOFRawNexus(Filename=filename, OutputWorkspace=name)
         return alg.workspace()
 
-    def _loadData(self, runnumber, extension, filterWall=None):
+    def _loadData(self, runnumber, extension, filterWall=None, chunkParams=None):
         filter = {}
-        if filterWall is not None:
+        if filterWall is not None and extension.endswith("_event.nxs"):
             if filterWall[0] > 0.:
                 filter["FilterByTimeStart"] = filterWall[0]
             if filterWall[1] > 0.:
                 filter["FilterByTimeStop"] = filterWall[1]
+        if chunkParams is not None:
+            if chunkParams[0] > 0.:
+                filter["ChunkNumber"] = chunkParams[0]
+            if chunkParams[1] > 0.:
+                filter["TotalChunks"] = chunkParams[1]
 
         if  runnumber is None or runnumber <= 0:
             return None
@@ -309,8 +306,10 @@ class SNSPowderReduction2(PythonAlgorithm):
         for chunk in chunks:
             print "Working on chunk %d of %d" % (chunk, len(chunks))
             if len(chunks) > 1:
-                filterWall = (chunk, len(chunks))
-            wksp_chunk = self._loadData(runnumber, extension, filterWall)
+                chunkParams = (int(chunk), len(chunks))
+            else:
+                chunkParams = (0, 0)
+            wksp_chunk = self._loadData(runnumber, extension, filterWall, chunkParams)
             if self._info is None:
                 self._info = self._getinfo(wksp_chunk)
             wksp_chunk = self._focus(wksp_chunk, calib, self._info, filterLogs, preserveEvents, normByCurrent)
