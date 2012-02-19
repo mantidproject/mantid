@@ -42,6 +42,7 @@ Veto pulses can be filtered out in a separate step using [[FilterByLogValue]]:
 
 #include <fstream>
 #include <sstream>
+#include <climits>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_real.hpp>
@@ -529,6 +530,16 @@ public:
       }
     }
 
+    if (alg->chunk != EMPTY_INT()) // We are loading part - work out the event number range
+    {
+    size_t max_events = stop_event - start_event + 1;
+    size_t chunk_events = max_events/alg->totalChunks;
+    start_event += (alg->chunk - 1) * chunk_events;
+  // Need to add any remainder to the final chunk
+    stop_event = start_event + chunk_events;
+    if ( alg->chunk == alg->totalChunks ) stop_event += max_events%alg->totalChunks;
+  }
+
     // Make sure it is within range
     if (stop_event > static_cast<size_t>(dim0))
       stop_event = dim0;
@@ -919,9 +930,21 @@ void LoadEventNexus::init()
       new PropertyWithValue<double>("CompressTolerance", -1.0, Direction::Input),
       "Run CompressEvents while loading (optional, leave blank or negative to not do). \n"
       "This specified the tolerance to use (in microseconds) when compressing.");
+  BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+  mustBePositive->setLower(1);
+  declareProperty("ChunkNumber", EMPTY_INT(), mustBePositive,
+      "If loading the file by sections ('chunks'), this is the section number of this execution of the algorithm.");
+  declareProperty("TotalChunks", EMPTY_INT(), mustBePositive->clone(),
+      "If loading the file by sections ('chunks'), this is the total number of sections.");
+  // TotalChunks is only meaningful if ChunkNumber is set
+  // Would be nice to be able to restrict ChunkNumber to be <= TotalChunks at validation
+  setPropertySettings("TotalChunks", new VisibleWhenProperty(this, "ChunkNumber", IS_NOT_DEFAULT));
+
   std::string grp3 = "Reduce Memory Use";
   setPropertyGroup("Precount", grp3);
   setPropertyGroup("CompressTolerance", grp3);
+  setPropertyGroup("ChunkNumber", grp3);
+  setPropertyGroup("TotalChunks", grp3);
 
   declareProperty(
       new PropertyWithValue<bool>("LoadMonitors", false, Direction::Input),
@@ -1252,6 +1275,8 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   double filter_time_start_sec, filter_time_stop_sec;
   filter_time_start_sec = getProperty("FilterByTimeStart");
   filter_time_stop_sec = getProperty("FilterByTimeStop");
+  chunk = getProperty("ChunkNumber");
+  totalChunks = getProperty("TotalChunks");
 
   //Default to ALL pulse times
   bool is_time_filtered = false;

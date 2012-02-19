@@ -113,6 +113,10 @@ namespace Mantid
       Kernel::DateAndTime filter_time_start;
       /// Filter by stop time
       Kernel::DateAndTime filter_time_stop;
+      /// chunk number
+      int chunk;
+      /// number of chunks;
+      int totalChunks;
 
       /// Was the instrument loaded?
       bool instrument_loaded_correctly;
