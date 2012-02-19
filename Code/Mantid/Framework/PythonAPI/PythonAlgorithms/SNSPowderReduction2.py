@@ -198,7 +198,7 @@ class SNSPowderReduction2(PythonAlgorithm):
                              Description="Relative time to start filtering by in seconds. Applies only to sample.")
         self.declareProperty("FilterByTimeMax", 0.,
                              Description="Relative time to stop filtering by in seconds. Applies only to sample.")
-        self.declareProperty("MaxChunkSize", 0, Description="Specify maximum bytes of file to read in one chunk.  Default is whole file.")
+        self.declareProperty("MaxChunkSize", 0.0, Description="Specify maximum Gbytes of file to read in one chunk.  Default is whole file.")
         self.declareProperty("FilterCharacterizations", False,
                              Description="Filter the characterization runs using above parameters. This only works for event files.")
         self.declareListProperty("Binning", [0.,0.,0.],
@@ -246,12 +246,19 @@ class SNSPowderReduction2(PythonAlgorithm):
         return wksp
 
     def _loadEventNeXusData(self, runnumber, extension, **kwargs):
+        mykwargs = {}
+        chunkNo = 1
+        if kwargs.has_key("FilterByTimeStart"):
+            mykwargs["ChunkNumber"] = int(kwargs["FilterByTimeStart"])
+            chunkNo = int(kwargs["FilterByTimeStart"])
+        if kwargs.has_key("FilterByTimeStop"):
+            mykwargs["TotalChunks"] = int(kwargs["FilterByTimeStop"])
         kwargs["Precount"] = True
         name = "%s_%d" % (self._instrument, runnumber)
         filename = name + extension
 
-        name += "_%02d" % 1
-        alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, **kwargs)
+        name += "_%02d" % (chunkNo)
+        alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, **mykwargs)
         return alg.workspace()
 
     def _loadHistoNeXusData(self, runnumber, extension):
@@ -293,8 +300,8 @@ class SNSPowderReduction2(PythonAlgorithm):
         # generate the workspace name
         wksp = "%s_%d" % (self._instrument, runnumber)
         chunks = range(1,2) #Default for one chunk
-        if self._chunks > 0 and "runinfo" in extension:
-            alg = LoadPreNexus(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks')
+        if self._chunks > 0 and not "histo" in extension:
+            alg = LoadPreNexus(Filename=wksp+"_runinfo.xml",MaxChunkSize=self._chunks,OutputWorkspace='Chunks')
             chunkwksp = alg['OutputWorkspace']
             chunks = chunkwksp.readY(0)
         if len(chunks) == 0:
@@ -314,9 +321,9 @@ class SNSPowderReduction2(PythonAlgorithm):
             else:
                 Plus(LHSWorkspace=wksp, RHSWorkspace=wksp_chunk, OutputWorkspace=wksp)
                 DeleteWorkspace(wksp_chunk)
-        print "Done focussing data"
-        if self._chunks > 0 and 'runinfo' in extension:
+        if self._chunks > 0 and not "histo" in extension:
             mtd.deleteWorkspace(str(chunkwksp))
+        print "Done focussing data"
 
         return wksp
 
@@ -495,7 +502,7 @@ class SNSPowderReduction2(PythonAlgorithm):
         preserveEvents = self.getProperty("PreserveEvents")
         normbycurrent = self.getProperty("NormalizeByCurrent")
         self._info = None
-        self._chunks = self.getProperty("MaxChunkSize")
+        self._chunks = int(1024*1024*1024*self.getProperty("MaxChunkSize"))
 
         workspacelist = [] # all data workspaces that will be converted to d-spacing in the end
 
