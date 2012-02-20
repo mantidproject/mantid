@@ -40,15 +40,8 @@ namespace Mantid { namespace PythonInterface
       #define INSTANTIATE(ElementType) \
         template DLLExport PyObject * wrapWithNDArray<ElementType>(const Kernel::Matrix<ElementType> &, const WrapMode);
 
-      INSTANTIATE(int16_t);
-      INSTANTIATE(uint16_t);
-      INSTANTIATE(int32_t);
-      INSTANTIATE(uint32_t);
-      INSTANTIATE(int64_t);
-      INSTANTIATE(uint64_t);
-#ifdef __APPLE__
-      INSTANTIATE(unsigned long);
-#endif
+      INSTANTIATE(int);
+      INSTANTIATE(float);
       INSTANTIATE(double);
 
     }
