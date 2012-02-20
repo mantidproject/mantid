@@ -124,13 +124,11 @@ bool Detector::isMasked() const
   if (m_isParametrized)
   {
     Parameter_sptr par = m_map->get(m_base,"masked");
-    return par ? true : false;
+    if (par)
+      return par->value<bool>();
   }
-  else
-  {
-    // If you get to here, instead of the Detector method, then it isn't masked
-    return false;
-  }
+  // If you get to here, instead of the Detector method, then it isn't masked
+  return false;
 }
 
 /// Is the detector a monitor?
