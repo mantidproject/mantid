@@ -2,8 +2,8 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Registry/SequenceTypeHandler.h"
-#include "MantidPythonInterface/kernel/Converters/PySequenceToVectorConverter.h"
-#include "MantidPythonInterface/kernel/Converters/NDArrayToVectorConverter.h"
+#include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
+#include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
 #include "MantidKernel/IPropertyManager.h"
 
 // See http://docs.scipy.org/doc/numpy/reference/c-api.array.html#PY_ARRAY_UNIQUE_SYMBOL
