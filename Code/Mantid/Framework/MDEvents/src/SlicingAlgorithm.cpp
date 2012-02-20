@@ -58,9 +58,7 @@ namespace MDEvents
     }
 
     // --------------- NON-Axis-aligned properties ---------------------------------------
-//    declareProperty(new PropertyWithValue<std::string>("TransformationXML","",Direction::Input),
-//            "XML string describing the coordinate transformation that converts from the MDEventWorkspace dimensions to the output dimensions.\n");
-//    setPropertyGroup("TransformationXML", "Non-Aligned Binning");
+    std::string grpName = "Non-Aligned Binning";
 
     IPropertySettings * ps = new EnabledWhenProperty(this, "AxisAligned", IS_EQUAL_TO, "0") ;
     for (size_t i=0; i<dimChars.size(); i++)
@@ -75,7 +73,7 @@ namespace MDEvents
           "  x,y,z,...: vector definining the basis in the input dimensions space.\n"
           "Leave blank for NONE." );
       setPropertySettings(propName, ps->clone() );
-      setPropertyGroup(propName, "Non-Aligned Binning");
+      setPropertyGroup(propName, grpName);
     }
     declareProperty(new PropertyWithValue<std::string>("Translation","",Direction::Input),
         "Coordinates in the input workspace that corresponds to (0,0,0) in the OUTPUT workspace.\n"
@@ -96,9 +94,15 @@ namespace MDEvents
         "Force the input basis vectors to form an orthogonal coordinate system. Only works in 3 dimension!" );
 
     // For GUI niceness
-    setPropertyGroup("Origin", "Non-Aligned Binning");
-    setPropertyGroup("ForceOrthogonal", "Non-Aligned Binning");
-    setPropertySettings("Origin", ps->clone() );
+    setPropertyGroup("Translation", grpName);
+    setPropertyGroup("OutputExtents", grpName);
+    setPropertyGroup("OutputBins", grpName);
+    setPropertyGroup("NormalizeBasisVectors", grpName);
+    setPropertyGroup("ForceOrthogonal", grpName);
+    setPropertySettings("Translation", ps->clone() );
+    setPropertySettings("OutputExtents", ps->clone() );
+    setPropertySettings("OutputBins", ps->clone() );
+    setPropertySettings("NormalizeBasisVectors", ps->clone() );
     setPropertySettings("ForceOrthogonal", ps );
 
   }
