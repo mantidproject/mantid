@@ -32,9 +32,9 @@ private:
     AnalysisDataService::Instance().addOrReplace("SliceMDTest_ws", in_ws);
 
     alg.setPropertyValue("InputWorkspace", "SliceMDTest_ws");
-    alg.setPropertyValue("AlignedDimX", "Axis0,2.0,8.0, 3");
-    alg.setPropertyValue("AlignedDimY", "Axis1,2.0,8.0, 3");
-    alg.setPropertyValue("AlignedDimZ", "Axis2,2.0,8.0, 3");
+    alg.setPropertyValue("AlignedDim0", "Axis0,2.0,8.0, 3");
+    alg.setPropertyValue("AlignedDim1", "Axis1,2.0,8.0, 3");
+    alg.setPropertyValue("AlignedDim2", "Axis2,2.0,8.0, 3");
     alg.setRethrows(true);
     alg.setPropertyValue("OutputWorkspace", "SliceMDTest_outWS");
 
@@ -99,10 +99,10 @@ public:
     AnalysisDataService::Instance().addOrReplace("SliceMDTest_ws", in_ws);
 
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "SliceMDTest_ws") );
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDimX", name1));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDimY", name2));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDimZ", name3));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDimT", name4));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim0", name1));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim1", name2));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim2", name3));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim3", name4));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "SliceMDTest_outWS"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputFilename", OutputFilename));
 
@@ -240,10 +240,10 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "SliceMDTest_ws") );
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AxisAligned", false));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVectorX", "OutX,m," + baseX.toString(",") + "," + Strings::toString(lengthX) + ",3" ));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVectorY", "OutY,m," + baseY.toString(",") + "," + Strings::toString(lengthY) + ",3" ));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVectorZ", "OutZ,m," + baseZ.toString(",") + "," + Strings::toString(lengthZ) + ",3" ));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVectorT", ""));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVector0", "OutX,m," + baseX.toString(",") + "," + Strings::toString(lengthX) + ",3" ));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVector1", "OutY,m," + baseY.toString(",") + "," + Strings::toString(lengthY) + ",3" ));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVector2", "OutZ,m," + baseZ.toString(",") + "," + Strings::toString(lengthZ) + ",3" ));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVector3", ""));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Origin", origin.toString(",") ));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "SliceMDTest_outWS"));
 

@@ -45,7 +45,7 @@ CopySample(InputWorkspace=ws+'_peaksLattice',OutputWorkspace=ws,
 ConvertToDiffractionMDWorkspace(InputWorkspace=ws,OutputWorkspace=ws+'_HKL',
 		OutputDimensions='HKL',LorentzCorrection='1', SplitInto='2',SplitThreshold='150')
 # Bin to a regular grid
-BinMD(InputWorkspace='TOPAZ_3131_HKL',AlignedDimX='H, -20, 0, 200',AlignedDimY='K, -10, 10, 200',AlignedDimZ='L, -20, 0,  200',OutputWorkspace='TOPAZ_3131_binned')
+BinMD(InputWorkspace='TOPAZ_3131_HKL',AlignedDim0='H, -20, 0, 200',AlignedDim1='K, -10, 10, 200',AlignedDim2='L, -20, 0,  200',OutputWorkspace='TOPAZ_3131_binned')
 # Show in slice Viewer		
 sv = plotSlice('TOPAZ_3131_binned', xydim=('H','L'), slicepoint=[0, -2, 0], colorscalelog=True)
 # Save that for later viewing in paraview

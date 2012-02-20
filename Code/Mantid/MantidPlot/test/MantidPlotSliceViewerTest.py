@@ -16,7 +16,7 @@ import time
 CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace='mdw')
 FakeMDEventData(InputWorkspace="mdw",  UniformParams="1e5")
 FakeMDEventData(InputWorkspace="mdw",  PeakParams="1e4, 2,4,6, 1.5")
-BinMD(InputWorkspace="mdw", OutputWorkspace="uniform",  AxisAligned=True, AlignedDimX="x,0,10,30", AlignedDimY="y,0,10,30", AlignedDimZ="z,0,10,30", IterateEvents="1", Parallel="0")
+BinMD(InputWorkspace="mdw", OutputWorkspace="uniform",  AxisAligned=True, AlignedDim0="x,0,10,30", AlignedDim1="y,0,10,30", AlignedDim2="z,0,10,30", IterateEvents="1", Parallel="0")
 CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace='empty')
 CreateMDWorkspace(Dimensions='4',Extents='0,10,0,10,0,10,0,10',Names='x,y,z,e',Units='m,m,m,meV',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace='md4')
 

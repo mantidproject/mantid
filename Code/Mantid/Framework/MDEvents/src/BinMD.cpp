@@ -13,7 +13,7 @@ any points NOT belonging inside of the ImplicitFunction will be set as NaN (not-
 === Axis-Aligned Binning ===
 
 This is binning where the output axes are aligned with the original workspace.
-Specify each of the AlignedDimX, etc. parameters with these values, separated by commas:
+Specify each of the AlignedDim0, etc. parameters with these values, separated by commas:
 * First, the name of the dimension in the original workspace
 * Next, the start and end position along that dimension
 * Finally, the number of bins to use in that dimensions.

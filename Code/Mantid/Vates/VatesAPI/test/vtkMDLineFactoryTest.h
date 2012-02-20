@@ -95,7 +95,7 @@ public:
     SliceMD slice;
     slice.initialize();
     slice.setProperty("InputWorkspace", ws);
-    slice.setPropertyValue("AlignedDimX", "Axis0, -10, 10, 100");
+    slice.setPropertyValue("AlignedDim0", "Axis0, -10, 10, 100");
     slice.setPropertyValue("OutputWorkspace", "binned");
     slice.execute();
 
@@ -134,7 +134,7 @@ public:
     SliceMD slice;
     slice.initialize();
     slice.setProperty("InputWorkspace", input);
-    slice.setPropertyValue("AlignedDimX", "Axis0, -10, 10, 200000");
+    slice.setPropertyValue("AlignedDim0", "Axis0, -10, 10, 200000");
     slice.setPropertyValue("OutputWorkspace", "binned");
     slice.execute();
   }

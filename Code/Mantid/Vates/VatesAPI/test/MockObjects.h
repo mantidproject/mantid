@@ -345,17 +345,17 @@ class FakeProgressAction : public Mantid::VATES::ProgressAction
 
     binningAlg->initialize();
     binningAlg->setProperty("InputWorkspace", inputWs);
-    binningAlg->setPropertyValue("AlignedDimX","A,0,5,2");
-    binningAlg->setPropertyValue("AlignedDimY","B,0,5,2");
-    binningAlg->setPropertyValue("AlignedDimZ","C,0,5,2");
+    binningAlg->setPropertyValue("AlignedDim0","A,0,5,2");
+    binningAlg->setPropertyValue("AlignedDim1","B,0,5,2");
+    binningAlg->setPropertyValue("AlignedDim2","C,0,5,2");
 
     if(integratedTDimension)
     {
-      binningAlg->setPropertyValue("AlignedDimT","D,0,5,1");
+      binningAlg->setPropertyValue("AlignedDim3","D,0,5,1");
     }
     else
     {
-      binningAlg->setPropertyValue("AlignedDimT","D,0,5,2");
+      binningAlg->setPropertyValue("AlignedDim3","D,0,5,2");
     }
     binningAlg->setPropertyValue("OutputWorkspace", "binned");
     binningAlg->execute();

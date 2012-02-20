@@ -29,7 +29,7 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
             Units='m,m,m',SplitInto='5',SplitThreshold=100, MaxRecursionDepth='20',OutputWorkspace='mdw')
         FakeMDEventData("mdw",  UniformParams="1e4")
         FakeMDEventData("mdw",  PeakParams="1e3, 1, 2, 3, 1.0")
-        BinMD("mdw", "uniform",  AxisAligned=1, AlignedDimX="x,0,10,30",  AlignedDimY="y,0,10,30",  AlignedDimZ="z,0,10,30", IterateEvents="1", Parallel="0")
+        BinMD("mdw", "uniform",  AxisAligned=1, AlignedDim0="x,0,10,30",  AlignedDim1="y,0,10,30",  AlignedDim2="z,0,10,30", IterateEvents="1", Parallel="0")
         CreateWorkspace('workspace2d', '1,2,3', '2,3,4')
         CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z', Units='m,m,m',SplitInto='5',SplitThreshold=100, MaxRecursionDepth='20',OutputWorkspace='empty')
         # Get the factory to create the SliceViewerWindow in C++
@@ -151,7 +151,7 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         sv = self.sv
         self.setUpXML()
         BinMD(InputWorkspace="TOPAZ_3680", OutputWorkspace="TOPAZ_3680_mdhisto",
-              AxisAligned=1, AlignedDimX="Q_lab_x,0,10,20", AlignedDimY="Q_lab_y,0,10,20", AlignedDimZ="Q_lab_z,0,10,20")
+              AxisAligned=1, AlignedDim0="Q_lab_x,0,10,20", AlignedDim1="Q_lab_y,0,10,20", AlignedDim2="Q_lab_z,0,10,20")
         # Read the XML and set the view
         sv.openFromXML(self.xml_3d)
         # Check the settings

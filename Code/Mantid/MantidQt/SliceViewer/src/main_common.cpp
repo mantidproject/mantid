@@ -106,17 +106,17 @@ IMDWorkspace_sptr makeDemoData(bool binned = false)
 //        "InputWorkspace", "mdew",
 //        "OutputWorkspace", "binned",
 //        "AxisAligned", "1",
-//        "AlignedDimX", "h, -10, 10, 100",
-//        "AlignedDimY", "k, -10, 10, 100",
-//        "AlignedDimZ", "l, -10, 10, 100"
+//        "AlignedDim0", "h, -10, 10, 100",
+//        "AlignedDim1", "k, -10, 10, 100",
+//        "AlignedDim2", "l, -10, 10, 100"
 //        );
     FrameworkManager::Instance().exec("BinMD", 16,
         "InputWorkspace", "mdew",
         "OutputWorkspace", "binned",
         "AxisAligned", "0",
-        "BasisVectorX", "rx, m, 1.0, 0.0, 0.0, 10.0, 100",
-        "BasisVectorY", "ry, m, 0.0, 1.0, 0.0, 10.0, 100",
-        "BasisVectorZ", "rz, m, 0.0, 0.0, 1.0, 10.0, 100",
+        "BasisVector0", "rx, m, 1.0, 0.0, 0.0, 10.0, 100",
+        "BasisVector1", "ry, m, 0.0, 1.0, 0.0, 10.0, 100",
+        "BasisVector2", "rz, m, 0.0, 0.0, 1.0, 10.0, 100",
         "ForceOrthogonal", "1",
         "Origin", "-5, -5, -5");
 
@@ -124,9 +124,9 @@ IMDWorkspace_sptr makeDemoData(bool binned = false)
         "InputWorkspace", "mdew",
         "OutputWorkspace", "binned_al",
         "AxisAligned", "1",
-        "AlignedDimX", "k, -5, 5, 100",
-        "AlignedDimY", "l, -5, 5, 100",
-        "AlignedDimZ", "h, -5, 5, 100");
+        "AlignedDim0", "k, -5, 5, 100",
+        "AlignedDim1", "l, -5, 5, 100",
+        "AlignedDim2", "h, -5, 5, 100");
 
     FrameworkManager::Instance().exec("LoadEventNexus", 4,
         "Filename", "CNCS_7860_event.nxs",

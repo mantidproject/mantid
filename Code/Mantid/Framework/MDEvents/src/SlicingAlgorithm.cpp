@@ -1,11 +1,13 @@
-#include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidKernel/System.h"
-#include "MantidMDEvents/SlicingAlgorithm.h"
+#include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidGeometry/MDGeometry/MDPlane.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/System.h"
 #include "MantidMDEvents/CoordTransformAffine.h"
 #include "MantidMDEvents/CoordTransformAligned.h"
-#include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
-#include "MantidGeometry/MDGeometry/MDPlane.h"
+#include "MantidMDEvents/SlicingAlgorithm.h"
+#include "MantidKernel/ArrayProperty.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -44,12 +46,12 @@ namespace MDEvents
     // --------------- Axis-aligned properties ---------------------------------------
     declareProperty("AxisAligned", true, "Perform binning aligned with the axes of the input MDEventWorkspace?");
     setPropertyGroup("AxisAligned", "Axis-Aligned Binning");
-    for (size_t i=0; i<4; i++)
+    for (size_t i=0; i<dimChars.size(); i++)
     {
       std::string dim(" "); dim[0] = dimChars[i];
       std::string propName = "AlignedDim" + dim;
       declareProperty(new PropertyWithValue<std::string>(propName,"",Direction::Input),
-          "Binning parameters for the " + dim + " dimension.\n"
+          "Binning parameters for the " + Strings::toString(i) + "th dimension.\n"
           "Enter it as a comma-separated list of values with the format: 'name,minimum,maximum,number_of_bins'. Leave blank for NONE.");
       setPropertySettings(propName, new EnabledWhenProperty(this, "AxisAligned", IS_EQUAL_TO, "1") );
       setPropertyGroup(propName, "Axis-Aligned Binning");
@@ -61,25 +63,38 @@ namespace MDEvents
 //    setPropertyGroup("TransformationXML", "Non-Aligned Binning");
 
     IPropertySettings * ps = new EnabledWhenProperty(this, "AxisAligned", IS_EQUAL_TO, "0") ;
-    for (size_t i=0; i<4; i++)
+    for (size_t i=0; i<dimChars.size(); i++)
     {
       std::string dim(" "); dim[0] = dimChars[i];
       std::string propName = "BasisVector" + dim;
       declareProperty(new PropertyWithValue<std::string>(propName,"",Direction::Input),
-          "Description of the basis vector of the output dimension " + dim + "."
-          "Format: 'name, units, x,y,z,.., length, number_of_bins'.\n"
+          "Description of the basis vector of the " + Strings::toString(i) + "th output dimension."
+          "Format: 'name, units, x,y,z,..'.\n"
+          "  name : string for the name of the output dimension.\n"
+          "  units : string for the units of the output dimension.\n"
           "  x,y,z,...: vector definining the basis in the input dimensions space.\n"
-          "  length: length of this dimension in the input space.\n"
-          "  number_of_bins: separate 'length' into this many bins\n"
           "Leave blank for NONE." );
       setPropertySettings(propName, ps->clone() );
       setPropertyGroup(propName, "Non-Aligned Binning");
     }
-    declareProperty(new PropertyWithValue<std::string>("Origin","",Direction::Input),
-        "Origin (in the input workspace) that corresponds to (0,0,0) in the output MDHistoWorkspace.\n"
+    declareProperty(new PropertyWithValue<std::string>("Translation","",Direction::Input),
+        "Coordinates in the input workspace that corresponds to (0,0,0) in the OUTPUT workspace.\n"
         "Enter as a comma-separated string." );
+
+    declareProperty(new ArrayProperty<double>("OutputExtents", Direction::Input),
+        "The minimum/maximum edges of space in the dimensions of the OUTPUT workspace." );
+
+    declareProperty(new ArrayProperty<int>("OutputBins", Direction::Input),
+        "The number of bins for each dimension of the OUTPUT workspace." );
+
+    declareProperty(new PropertyWithValue<bool>("NormalizeBasisVectors", true, Direction::Input),
+        "Normalize the given basis vectors to unity. \n"
+        "If true, then a distance of 1 in the INPUT dimensions = 1 in the OUTPUT dimensions.\n"
+        "If false, then a distance of norm(basis_vector) in the INPUT dimension = 1 in the OUTPUT dimensions." );
+
     declareProperty(new PropertyWithValue<bool>("ForceOrthogonal", false, Direction::Input),
         "Force the input basis vectors to form an orthogonal coordinate system. Only works in 3 dimension!" );
+
     // For GUI niceness
     setPropertyGroup("Origin", "Non-Aligned Binning");
     setPropertyGroup("ForceOrthogonal", "Non-Aligned Binning");
@@ -92,7 +107,7 @@ namespace MDEvents
 
 
   //----------------------------------------------------------------------------------------------
-  /** Generate the MDHistoDimension and basis vector for a given string from BasisVectorX etc.
+  /** Generate the MDHistoDimension and basis vector for a given string from BasisVector0 etc.
    *
    * If the workspace being binned has an original workspace, then the vector
    * is transformed to THOSE coordinates.
@@ -215,7 +230,7 @@ namespace MDEvents
     std::string dimChars = "XYZT";
     for (size_t i=0; i<4; i++)
     {
-      std::string propName = "BasisVectorX"; propName[11] = dimChars[i];
+      std::string propName = "BasisVector0"; propName[11] = dimChars[i];
       try
       { makeBasisVectorFromString( getPropertyValue(propName) ); }
       catch (std::exception & e)
@@ -305,7 +320,7 @@ namespace MDEvents
 
 
   //----------------------------------------------------------------------------------------------
-  /** Generate a MDHistoDimension_sptr from a comma-sep string (for AlignedDimX, etc.)
+  /** Generate a MDHistoDimension_sptr from a comma-sep string (for AlignedDim0, etc.)
    * Must be called in order X,Y,Z,T.
    *
    * @param str :: name,minimum,maximum,number_of_bins
@@ -314,7 +329,7 @@ namespace MDEvents
   {
     if (str.empty())
     {
-      throw std::runtime_error("Empty string passed to one of the AlignedDimX parameters.");
+      throw std::runtime_error("Empty string passed to one of the AlignedDim0 parameters.");
     }
     else
     {
@@ -399,7 +414,7 @@ namespace MDEvents
     size_t numDims = 0;
     for (size_t i=0; i<4; i++)
     {
-      std::string propName = "AlignedDimX"; propName[10] = dimChars[i];
+      std::string propName = "AlignedDim0"; propName[10] = dimChars[i];
       std::string prop = Strings::strip(getPropertyValue(propName));
       if (!prop.empty()) numDims++;
       if (!prop.empty() && previousWasEmpty)
@@ -418,7 +433,7 @@ namespace MDEvents
     // Create the dimensions based on the strings from the user
     for (size_t i=0; i<numDims; i++)
     {
-      std::string propName = "AlignedDimX"; propName[10] = dimChars[i];
+      std::string propName = "AlignedDim0"; propName[10] = dimChars[i];
       makeAlignedDimensionFromString( getPropertyValue(propName));
     }
 

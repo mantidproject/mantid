@@ -145,10 +145,10 @@ public:
     alg->m_inWS = ws;
     alg->initSlicingProps();
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("AxisAligned", "1"));
-    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("AlignedDimX", name1));
-    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("AlignedDimY", name2));
-    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("AlignedDimZ", name3));
-    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("AlignedDimT", name4));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("AlignedDim0", name1));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("AlignedDim1", name2));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("AlignedDim2", name3));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("AlignedDim3", name4));
     alg->createTransform();
     return alg;
   }
@@ -366,10 +366,10 @@ public:
     alg->m_inWS = inWS;
     alg->initSlicingProps();
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("AxisAligned", "0"));
-    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("BasisVectorX", name1));
-    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("BasisVectorY", name2));
-    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("BasisVectorZ", name3));
-    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("BasisVectorT", name4));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("BasisVector0", name1));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("BasisVector1", name2));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("BasisVector2", name3));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("BasisVector3", name4));
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Origin", origin.toString(",")));
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("ForceOrthogonal", ForceOrthogonal));
     alg->createTransform();

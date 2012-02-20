@@ -33,7 +33,7 @@ for L in numpy.arange(-5.07, -4.9, 0.01):
 os.system("convert /home/8oz/Code/Mantid/Code/Mantid/MantidQt/SliceViewer/doc/anim*.png /home/8oz/Code/Mantid/Code/Mantid/MantidQt/SliceViewer/doc/SliceViewer_SlicePoint_Animation.gif")
 
 # ============= Line Viewer Animation ===========================
-BinMD(InputWorkspace='TOPAZ',AlignedDimX='Q_lab_x, 0, 6, 120',AlignedDimY='Q_lab_y, -3, 3, 120',AlignedDimZ='Q_lab_z, 0, 6, 120', OutputWorkspace='bin_q')
+BinMD(InputWorkspace='TOPAZ',AlignedDim0='Q_lab_x, 0, 6, 120',AlignedDim1='Q_lab_y, -3, 3, 120',AlignedDim2='Q_lab_z, 0, 6, 120', OutputWorkspace='bin_q')
 
 sv = plotSlice('bin_q', slicepoint=[0,0, 4.15], colorscalelog=True, limits=[2,4,-1,1])
 n = 0

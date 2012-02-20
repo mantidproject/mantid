@@ -91,9 +91,9 @@ public:
     {
       FrameworkManager::Instance().exec("BinMD", 14,
           "AxisAligned", "1",
-          "AlignedDimX", "Q_lab_x,-10,10,100",
-          "AlignedDimY", "Q_lab_y,-10,10,100",
-          "AlignedDimZ", "Q_lab_z,-10,10,100",
+          "AlignedDim0", "Q_lab_x,-10,10,100",
+          "AlignedDim1", "Q_lab_y,-10,10,100",
+          "AlignedDim2", "Q_lab_z,-10,10,100",
           "IterateEvents", "1",
           "InputWorkspace", "MDEWS",
           "OutputWorkspace", "MDEWS"

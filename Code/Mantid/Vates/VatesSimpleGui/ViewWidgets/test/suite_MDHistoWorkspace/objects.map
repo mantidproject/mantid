@@ -2,8 +2,8 @@
 :Algorithms.Execute_QPushButton	{container=':MantidPlot - untitled.Algorithms_AlgorithmDockWidget' text='Execute' type='QPushButton' unnamed='1' visible='1'}
 :AlignedDimX_QLineEdit	{buddy=':Axis-Aligned Binning.AlignedDimX_QLabel' type='QLineEdit' unnamed='1' visible='1'}
 :AlignedDimY_QLineEdit	{buddy=':Axis-Aligned Binning.AlignedDimY_QLabel' type='QLineEdit' unnamed='1' visible='1'}
-:Axis-Aligned Binning.AlignedDimX_QLabel	{container=':BinMD input dialog.Axis-Aligned Binning_QGroupBox' text='AlignedDimX' type='QLabel' unnamed='1' visible='1'}
-:Axis-Aligned Binning.AlignedDimY_QLabel	{container=':BinMD input dialog.Axis-Aligned Binning_QGroupBox' text='AlignedDimY' type='QLabel' unnamed='1' visible='1'}
+:Axis-Aligned Binning.AlignedDimX_QLabel	{container=':BinMD input dialog.Axis-Aligned Binning_QGroupBox' text='AlignedDim0' type='QLabel' unnamed='1' visible='1'}
+:Axis-Aligned Binning.AlignedDimY_QLabel	{container=':BinMD input dialog.Axis-Aligned Binning_QGroupBox' text='AlignedDim1' type='QLabel' unnamed='1' visible='1'}
 :BinMD input dialog.Axis-Aligned Binning_QGroupBox	{title='Axis-Aligned Binning' type='QGroupBox' unnamed='1' visible='1' window=':BinMD input dialog_MantidQt::API::GenericDialog'}
 :BinMD input dialog.OutputWorkspace_QLabel	{text='OutputWorkspace' type='QLabel' unnamed='1' visible='1' window=':BinMD input dialog_MantidQt::API::GenericDialog'}
 :BinMD input dialog.Run_QPushButton	{text='Run' type='QPushButton' unnamed='1' visible='1' window=':BinMD input dialog_MantidQt::API::GenericDialog'}

@@ -121,10 +121,10 @@ public:
     TS_ASSERT_EQUALS( in_ws->getNPoints(), 1000*numEventsPerBox);
 
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "BinMDTest_ws") );
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDimX", name1));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDimY", name2));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDimZ", name3));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDimT", name4));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim0", name1));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim1", name2));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim2", name3));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim3", name4));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ImplicitFunctionXML",functionXML));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("IterateEvents", IterateEvents));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "BinMDTest_ws"));
@@ -343,10 +343,10 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "BinMDTest_ws") );
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AxisAligned", false));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVectorX", "OutX,m," + baseX.toString(",") + ",10," + Strings::toString(binsX) ));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVectorY", "OutY,m," + baseY.toString(",") + ",10," + Strings::toString(binsY) ));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVectorZ", "OutZ,m," + baseZ.toString(",") + ",10," + Strings::toString(binsZ) ));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVectorT", ""));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVector0", "OutX,m," + baseX.toString(",") + ",10," + Strings::toString(binsX) ));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVector1", "OutY,m," + baseY.toString(",") + ",10," + Strings::toString(binsY) ));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVector2", "OutZ,m," + baseZ.toString(",") + ",10," + Strings::toString(binsZ) ));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVector3", ""));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Origin", origin.toString(",") ));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ForceOrthogonal", ForceOrthogonal ));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ImplicitFunctionXML",""));
@@ -493,16 +493,16 @@ public:
         "InputWorkspace", "mdew",
         "OutputWorkspace", "binned0",
         "AxisAligned", "1",
-        "AlignedDimX", "x, -10, 10, 10",
-        "AlignedDimY", "y, -10, 10, 10");
+        "AlignedDim0", "x, -10, 10, 10",
+        "AlignedDim1", "y, -10, 10, 10");
 
     // Bin, non-axis-aligned, with translation
     FrameworkManager::Instance().exec("BinMD", 14,
         "InputWorkspace", "binned0",
         "OutputWorkspace", "binned1",
         "AxisAligned", "0",
-        "BasisVectorX", "rx,m, 1.0,0.0, 20.0, 10",
-        "BasisVectorY", "ry,m, 0.0,1.0, 20.0, 10",
+        "BasisVector0", "rx,m, 1.0,0.0, 20.0, 10",
+        "BasisVector1", "ry,m, 0.0,1.0, 20.0, 10",
         "ForceOrthogonal", "1",
         "Origin", "-10, -10");
 
@@ -536,8 +536,8 @@ public:
         "InputWorkspace", "mdew",
         "OutputWorkspace", "binned0",
         "AxisAligned", "1",
-        "AlignedDimX", "y, -10, 10, 10",
-        "AlignedDimY", "x, -10, 10, 10");
+        "AlignedDim0", "y, -10, 10, 10",
+        "AlignedDim1", "x, -10, 10, 10");
 
     // binned0.x is mdew.y
     // binned0.y is mdew.x
@@ -546,8 +546,8 @@ public:
         "InputWorkspace", "binned0",
         "OutputWorkspace", "binned1",
         "AxisAligned", "0",
-        "BasisVectorX", "rx,m, 1.0,0.0, 20.0, 10",
-        "BasisVectorY", "ry,m, 0.0,1.0, 20.0, 10",
+        "BasisVector0", "rx,m, 1.0,0.0, 20.0, 10",
+        "BasisVector1", "ry,m, 0.0,1.0, 20.0, 10",
         "ForceOrthogonal", "1",
         "Origin", "-10, -5");
 
@@ -612,18 +612,18 @@ public:
         "InputWorkspace", "mdew3d",
         "OutputWorkspace", "binned0",
         "AxisAligned", "1",
-        "AlignedDimX", "B, -10, 10, 10",
-        "AlignedDimY", "C, -10, 10, 10",
-        "AlignedDimZ", "A, -10, 10, 10"
+        "AlignedDim0", "B, -10, 10, 10",
+        "AlignedDim1", "C, -10, 10, 10",
+        "AlignedDim2", "A, -10, 10, 10"
         );
 
     FrameworkManager::Instance().exec("BinMD", 16,
         "InputWorkspace", "binned0",
         "OutputWorkspace", "binned1",
         "AxisAligned", "0",
-        "BasisVectorX", "rx,m, 1.0,0.0,0.0, 20.0, 10",
-        "BasisVectorY", "ry,m, 0.0,1.0,0.0, 20.0, 10",
-        "BasisVectorZ", "rz,m, 0.0,0.0,1.0, 20.0, 10",
+        "BasisVector0", "rx,m, 1.0,0.0,0.0, 20.0, 10",
+        "BasisVector1", "ry,m, 0.0,1.0,0.0, 20.0, 10",
+        "BasisVector2", "rz,m, 0.0,0.0,1.0, 20.0, 10",
         "ForceOrthogonal", "1",
         "Origin", "-10, -5, -3");
 
@@ -681,8 +681,8 @@ public:
         "InputWorkspace", "mdew",
         "OutputWorkspace", "binned0",
         "AxisAligned", "0",
-        "BasisVectorX", "rx,m, 1.0, 0.0, 20.0, 10",
-        "BasisVectorY", "ry,m, 0.0, 1.0, 20.0, 10",
+        "BasisVector0", "rx,m, 1.0, 0.0, 20.0, 10",
+        "BasisVector1", "ry,m, 0.0, 1.0, 20.0, 10",
         "ForceOrthogonal", "1",
         "Origin", "-10, -10");
 
@@ -691,8 +691,8 @@ public:
         "InputWorkspace", "mdew",
         "OutputWorkspace", "binned1",
         "AxisAligned", "0",
-        "BasisVectorX", "rx,m, 0.98, 0.17, 20.0, 10",
-        "BasisVectorY", "ry,m, -.17, 0.98, 20.0, 10",
+        "BasisVector0", "rx,m, 0.98, 0.17, 20.0, 10",
+        "BasisVector1", "ry,m, -.17, 0.98, 20.0, 10",
         "ForceOrthogonal", "1",
         "Origin", "-10, -10");
     // Bin the binned output with the opposite rotation
@@ -700,8 +700,8 @@ public:
         "InputWorkspace", "binned1",
         "OutputWorkspace", "binned2",
         "AxisAligned", "0",
-        "BasisVectorX", "rrx,m, 0.98, -.17, 20.0, 10",
-        "BasisVectorY", "rry,m, 0.17, 0.98, 20.0, 10",
+        "BasisVector0", "rrx,m, 0.98, -.17, 20.0, 10",
+        "BasisVector1", "rry,m, 0.17, 0.98, 20.0, 10",
         "ForceOrthogonal", "1",
         "Origin", "0, 0");
     // Check they are the same
@@ -728,8 +728,8 @@ public:
         "InputWorkspace", "mdew",
         "OutputWorkspace", "binned0",
         "AxisAligned", "0",
-        "BasisVectorX", "rx,m, 1.0, 0.0, 20.0, 10",
-        "BasisVectorY", "ry,m, 0.0, 1.0, 20.0, 10",
+        "BasisVector0", "rx,m, 1.0, 0.0, 20.0, 10",
+        "BasisVector1", "ry,m, 0.0, 1.0, 20.0, 10",
         "ForceOrthogonal", "1",
         "Origin", "-10, -10");
 
@@ -738,8 +738,8 @@ public:
         "InputWorkspace", "mdew",
         "OutputWorkspace", "binned1",
         "AxisAligned", "0",
-        "BasisVectorX", "rx,m, 1.0, 0.0, 20.0, 10",
-        "BasisVectorY", "ry,m, 0.0, 1.0, 20.0, 10",
+        "BasisVector0", "rx,m, 1.0, 0.0, 20.0, 10",
+        "BasisVector1", "ry,m, 0.0, 1.0, 20.0, 10",
         "ForceOrthogonal", "1",
         "Origin", "-10, -10");
 
@@ -748,8 +748,8 @@ public:
         "InputWorkspace", "binned1",
         "OutputWorkspace", "binned2",
         "AxisAligned", "0",
-        "BasisVectorX", "rrx,m, 1.0, 0.0, 20.0, 10",
-        "BasisVectorY", "rry,m, 0.0, 1.0, 20.0, 10",
+        "BasisVector0", "rrx,m, 1.0, 0.0, 20.0, 10",
+        "BasisVector1", "rry,m, 0.0, 1.0, 20.0, 10",
         "ForceOrthogonal", "1",
         "Origin", "0, 0");
 
@@ -768,8 +768,8 @@ public:
         "InputWorkspace", "mdew",
         "OutputWorkspace", "binned0",
         "AxisAligned", "0",
-        "BasisVectorX", "rx,m, 1.0, 0.0, 20.0, 10",
-        "BasisVectorY", "ry,m, 0.0, 1.0, 20.0, 10",
+        "BasisVector0", "rx,m, 1.0, 0.0, 20.0, 10",
+        "BasisVector1", "ry,m, 0.0, 1.0, 20.0, 10",
         "ForceOrthogonal", "1",
         "Origin", "-10, -10");
 
@@ -778,8 +778,8 @@ public:
         "InputWorkspace", "binned0",
         "OutputWorkspace", "binned1",
         "AxisAligned", "1",
-        "AlignedDimX", "rx, 0, 20, 10",
-        "AlignedDimY", "ry, 0, 20, 10");
+        "AlignedDim0", "rx, 0, 20, 10",
+        "AlignedDim1", "ry, 0, 20, 10");
     TS_ASSERT( !alg->isExecuted() );
   }
 
@@ -822,10 +822,10 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "BinMDTest_ws") );
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDimX", "Axis0," + binParams));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDimY", "Axis1," + binParams));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDimZ", "Axis2," + binParams));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDimT", ""));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim0", "Axis0," + binParams));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim1", "Axis1," + binParams));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim2", "Axis2," + binParams));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim3", ""));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("IterateEvents", IterateEvents));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "BinMDTest_ws_histo"));
     TS_ASSERT_THROWS_NOTHING( alg.execute(); )

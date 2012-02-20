@@ -39,9 +39,9 @@ private:
     SliceMD slice;
     slice.initialize();
     slice.setProperty("InputWorkspace", input_ws);
-    slice.setPropertyValue("AlignedDimX", "Axis0, -10, 10, 1");
-    slice.setPropertyValue("AlignedDimX", "Axis1, -10, 10, 1");
-    slice.setPropertyValue("AlignedDimX", "Axis2, -10, 10, 1");
+    slice.setPropertyValue("AlignedDim0", "Axis0, -10, 10, 1");
+    slice.setPropertyValue("AlignedDim0", "Axis1, -10, 10, 1");
+    slice.setPropertyValue("AlignedDim0", "Axis2, -10, 10, 1");
     slice.setPropertyValue("OutputWorkspace", "binned");
     slice.execute();
 

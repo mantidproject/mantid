@@ -58,7 +58,7 @@ namespace MDEvents
     
     ///@return a string with the character that identifies each dimension in order (XYZT)
     static std::string getDimensionChars()
-    { return "XYZT"; }
+    { return "012345"; }
 
   protected:
     

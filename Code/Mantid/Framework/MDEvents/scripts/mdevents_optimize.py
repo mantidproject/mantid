@@ -80,18 +80,18 @@ for SplitInto in SplitInto_list:
 
         start = time.time()
         bin_str = "-6.0, 6.0, 100"
-        alg = BinMD(InputWorkspace="mdew", OutputWorkspace="mdhisto", AlignedDimX="Q_lab_x,%s" % bin_str, AlignedDimY="Q_lab_y,%s" % bin_str, AlignedDimZ="Q_lab_z,%s" % bin_str)
+        alg = BinMD(InputWorkspace="mdew", OutputWorkspace="mdhisto", AlignedDim0="Q_lab_x,%s" % bin_str, AlignedDim1="Q_lab_y,%s" % bin_str, AlignedDim2="Q_lab_z,%s" % bin_str)
         print time.time()-start, " secs to bin medium: %s." % bin_str
         par.MediumBinTime = time.time()-start
 
         bin_str = "-1.0, 1.0, 200"
-        alg = BinMD(InputWorkspace="mdew", OutputWorkspace="mdhisto", AlignedDimX="Q_lab_x,%s" % bin_str, AlignedDimY="Q_lab_y,%s" % bin_str, AlignedDimZ="Q_lab_z,%s" % bin_str)
+        alg = BinMD(InputWorkspace="mdew", OutputWorkspace="mdhisto", AlignedDim0="Q_lab_x,%s" % bin_str, AlignedDim1="Q_lab_y,%s" % bin_str, AlignedDim2="Q_lab_z,%s" % bin_str)
         print time.time()-start, " secs to bin fine, close up: %s." % bin_str
         par.FineBinTime = time.time()-start
     
         start = time.time()
         bin_str = "-6.0, 6.0, 20"
-        alg = BinMD(InputWorkspace="mdew", OutputWorkspace="mdhisto", AlignedDimX="Q_lab_x,%s" % bin_str, AlignedDimY="Q_lab_y,%s" % bin_str, AlignedDimZ="Q_lab_z,%s" % bin_str)
+        alg = BinMD(InputWorkspace="mdew", OutputWorkspace="mdhisto", AlignedDim0="Q_lab_x,%s" % bin_str, AlignedDim1="Q_lab_y,%s" % bin_str, AlignedDim2="Q_lab_z,%s" % bin_str)
         print time.time()-start, " secs to bin coarse: %s." % bin_str
         par.CoarseBinTime = time.time()-start
         

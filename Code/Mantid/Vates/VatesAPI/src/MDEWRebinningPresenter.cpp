@@ -291,19 +291,19 @@ namespace Mantid
           binningAlg->setProperty("ForceOrthogonal", m_ForceOrthogonal );
           if(sourceGeometry.hasXDimension())
           {
-            binningAlg->setPropertyValue("BasisVectorX", extractFormattedPropertyFromDimension(VMD(m_b1), m_lengthB1, sourceGeometry.getXDimension()));
+            binningAlg->setPropertyValue("BasisVector0", extractFormattedPropertyFromDimension(VMD(m_b1), m_lengthB1, sourceGeometry.getXDimension()));
           }
           if(sourceGeometry.hasYDimension())
           {
-            binningAlg->setPropertyValue("BasisVectorY", extractFormattedPropertyFromDimension(VMD(m_b2), m_lengthB2, sourceGeometry.getYDimension()));
+            binningAlg->setPropertyValue("BasisVector1", extractFormattedPropertyFromDimension(VMD(m_b2), m_lengthB2, sourceGeometry.getYDimension()));
           }
           if(sourceGeometry.hasZDimension())
           {
-            binningAlg->setPropertyValue("BasisVectorZ", extractFormattedPropertyFromDimension(VMD(b3), m_lengthB3, sourceGeometry.getZDimension()));
+            binningAlg->setPropertyValue("BasisVector2", extractFormattedPropertyFromDimension(VMD(b3), m_lengthB3, sourceGeometry.getZDimension()));
           }
           if(sourceGeometry.hasTDimension())
           {
-            binningAlg->setPropertyValue("BasisVectorT", "");
+            binningAlg->setPropertyValue("BasisVector3", "");
           }
         }
         else
@@ -311,19 +311,19 @@ namespace Mantid
           binningAlg->setProperty("AxisAligned", true);
           if(sourceGeometry.hasXDimension())
           {
-            binningAlg->setPropertyValue("AlignedDimX",  extractFormattedPropertyFromDimension(sourceGeometry.getXDimension()));
+            binningAlg->setPropertyValue("AlignedDim0",  extractFormattedPropertyFromDimension(sourceGeometry.getXDimension()));
           }
           if(sourceGeometry.hasYDimension())
           {
-            binningAlg->setPropertyValue("AlignedDimY",  extractFormattedPropertyFromDimension(sourceGeometry.getYDimension()));
+            binningAlg->setPropertyValue("AlignedDim1",  extractFormattedPropertyFromDimension(sourceGeometry.getYDimension()));
           }
           if(sourceGeometry.hasZDimension())
           {
-            binningAlg->setPropertyValue("AlignedDimZ",  extractFormattedPropertyFromDimension(sourceGeometry.getZDimension()));
+            binningAlg->setPropertyValue("AlignedDim2",  extractFormattedPropertyFromDimension(sourceGeometry.getZDimension()));
           }
           if(sourceGeometry.hasTDimension())
           {
-            binningAlg->setPropertyValue("AlignedDimT",  extractFormattedPropertyFromDimension(sourceGeometry.getTDimension()));
+            binningAlg->setPropertyValue("AlignedDim3",  extractFormattedPropertyFromDimension(sourceGeometry.getTDimension()));
           }
         }
 

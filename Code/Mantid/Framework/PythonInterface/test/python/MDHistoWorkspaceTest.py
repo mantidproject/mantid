@@ -11,8 +11,8 @@ class MDHistoWorkspaceTest(unittest.TestCase):
         run_algorithm('CreateMDWorkspace', Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',
                       MaxRecursionDepth='20',OutputWorkspace='mdw')
         run_algorithm('FakeMDEventData', InputWorkspace="mdw",  UniformParams="1e4")
-        run_algorithm('BinMD',InputWorkspace="mdw", OutputWorkspace="A", AxisAligned=True, AlignedDimX="x,0,10,10", AlignedDimY="y,0,10,10", AlignedDimZ="z,0,10,10", IterateEvents="1", Parallel="0")
-        run_algorithm('BinMD',InputWorkspace="mdw", OutputWorkspace="B", AxisAligned=True, AlignedDimX="x,0,10,10", AlignedDimY="y,0,10,10", AlignedDimZ="z,0,10,10", IterateEvents="1", Parallel="0")
+        run_algorithm('BinMD',InputWorkspace="mdw", OutputWorkspace="A", AxisAligned=True, AlignedDim0="x,0,10,10", AlignedDim1="y,0,10,10", AlignedDim2="z,0,10,10", IterateEvents="1", Parallel="0")
+        run_algorithm('BinMD',InputWorkspace="mdw", OutputWorkspace="B", AxisAligned=True, AlignedDim0="x,0,10,10", AlignedDim1="y,0,10,10", AlignedDim2="z,0,10,10", IterateEvents="1", Parallel="0")
             
     def tearDown(self):
         for name in ('A','B','C','D','E','F','G','H'):

@@ -306,11 +306,11 @@ void LineViewer::apply()
   alg->setProperty("AxisAligned", false);
 
   // The X basis vector
-  alg->setPropertyValue("BasisVectorX", "X,units," + basisX.toString(",")
+  alg->setPropertyValue("BasisVector0", "X,units," + basisX.toString(",")
         + "," + Strings::toString(length) + "," + Strings::toString(numBins) );
 
   // The Y basis vector, with one bin
-  alg->setPropertyValue("BasisVectorY", "Y,units," + basisY.toString(",")
+  alg->setPropertyValue("BasisVector1", "Y,units," + basisY.toString(",")
         + "," + Strings::toString(planeWidth*2.0) + ",1" );
 
   // Now each remaining dimension
