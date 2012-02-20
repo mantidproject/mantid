@@ -260,7 +260,14 @@ namespace Mantid
 
       const double live_value(1.0);
       int numFailed(0);
-      
+
+      bool checkForMask = false;
+      Geometry::Instrument_const_sptr instrument = countsWS->getInstrument();
+      if (instrument != NULL)
+      {
+        checkForMask = ((instrument->getSource() != NULL) && (instrument->getSample() != NULL));
+      }
+
       PARALLEL_FOR1(countsWS)
       for (int i = 0; i <= numSpec; ++i)
       {
@@ -272,28 +279,19 @@ namespace Mantid
           progress(advanceProgress(progStep*static_cast<double>(RTMarkDetects)/numSpec));
         }
 
-        IDetector_const_sptr det;
-        try
+        if (checkForMask)
         {
-          det = countsWS->getDetector(i);
-        }
-        catch(Exception::NotFoundError &)
-        {}
-        // Mark non-existant detectors as dead
-        if( !det )
-        {
-          countsWS->maskWorkspaceIndex(i);
-          continue;
-        }
-        if( det->isMasked() )
-        {
-          countsWS->dataY(i)[0] = 0.0;
-          continue;
-        }
-        if( det->isMonitor() )
-        {
-          // Don't include in calculation but don't mask it
-          countsWS->dataY(i)[0] = live_value;
+          const std::set<detid_t>& detids = countsWS->getSpectrum(i)->getDetectorIDs();
+          if (instrument->isDetectorMasked(detids))
+          {
+            countsWS->dataY(i)[0] = 0.0;
+            continue;
+          }
+          if (instrument->isMonitor(detids))
+          {
+            // Don't include in calculation but don't mask it
+            countsWS->dataY(i)[0] = live_value;
+          }
         }
 
         const double signal = countsWS->dataY(i)[0];
