@@ -26,6 +26,7 @@ set ( SRC_FILES
 	src/CloneWorkspace.cpp
 	src/CommutativeBinaryOperation.cpp
 	src/ConjoinWorkspaces.cpp
+	src/ConjoinWorkspaces2.cpp
 	src/ConvertFromDistribution.cpp
 	src/ConvertSpectrumAxis.cpp
 	src/ConvertTableToMatrixWorkspace.cpp
@@ -211,6 +212,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CloneWorkspace.h
 	inc/MantidAlgorithms/CommutativeBinaryOperation.h
 	inc/MantidAlgorithms/ConjoinWorkspaces.h
+	inc/MantidAlgorithms/ConjoinWorkspaces2.h
 	inc/MantidAlgorithms/ConvertFromDistribution.h
 	inc/MantidAlgorithms/ConvertSpectrumAxis.h
 	inc/MantidAlgorithms/ConvertTableToMatrixWorkspace.h
@@ -395,6 +397,7 @@ set ( TEST_FILES
 	test/CloneWorkspaceTest.h
 	test/CommutativeBinaryOperationTest.h
 	test/CompressedRebinTest.h
+	test/ConjoinWorkspaces2Test.h
 	test/ConjoinWorkspacesTest.h
 	test/ConvertFromDistributionTest.h
 	test/ConvertSpectrumAxisTest.h
