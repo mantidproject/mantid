@@ -178,6 +178,7 @@
 #include "Mantid/PeakPickerTool.h"
 #include "Mantid/ManageCustomMenus.h"
 #include "Mantid/FirstTimeSetup.h"
+#include "Mantid/SetUpParaview.h"
 
 #include "MantidQtAPI/InterfaceManager.h"
 #include "MantidQtAPI/UserSubWindow.h"
@@ -350,6 +351,12 @@ void ApplicationWindow::init(bool factorySettings)
   undoStackWindow->setWidget(d_undo_view);
   undoStackWindow->hide();
 
+  /*TODO: determine conditions for exposing paraview settings then run the dialog.
+  Very important to run this dialog before the call to mantidUI->init, because othewise the logs will be poluted with libary loading errors.
+  */
+  //SetUpParaview pv;
+  //int result = pv.exec();
+
   //Initialize Mantid
   // MG: 01/02/2009 - Moved this to before scripting so that the logging is connected when
   // we register Python algorithms
@@ -452,7 +459,6 @@ void ApplicationWindow::init(bool factorySettings)
   {
     showFirstTimeSetup();
   }
-
 }
 
 void ApplicationWindow::showLogWindowContextMenu(const QPoint & p)

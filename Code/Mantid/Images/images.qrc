@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/">
+    <file>pvIcon.png</file>
     <file>MantidSplashScreen.png</file>
     <file>MantidPlot_Icon_32offset.png</file>
     <file>SNS_logo_trans_back.gif</file>

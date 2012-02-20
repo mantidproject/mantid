@@ -180,6 +180,7 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/PeakPickerTool.cpp
                    src/Mantid/Preferences.cpp
                    src/Mantid/RemoveErrorsDialog.cpp
+                   src/Mantid/SetUpParaview.cpp				   
                    src/Mantid/UserFitFunctionDialog.cpp
                    src/Mantid/InstrumentWidget/BinDialog.cpp
                    src/Mantid/InstrumentWidget/CompAssemblyActor.cpp
@@ -217,7 +218,7 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/InstrumentWidget/DetSelector.cpp
                    src/Mantid/InstrumentWidget/XIntegrationControl.cpp
                    src/Mantid/InstrumentWidget/Shape2D.cpp
-                   src/Mantid/InstrumentWidget/Shape2DCollection.cpp
+                   src/Mantid/InstrumentWidget/Shape2DCollection.cpp				  
 )
 
 ###########################################################################
@@ -397,6 +398,7 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/PeakPickerTool.h
                    src/Mantid/Preferences.h
                    src/Mantid/RemoveErrorsDialog.h
+                   src/Mantid/SetUpParaview.h				   
                    src/Mantid/UserFitFunctionDialog.h
                    src/Mantid/InstrumentWidget/BinDialog.h
                    src/Mantid/InstrumentWidget/CompAssemblyActor.h
@@ -647,6 +649,7 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/MantidTable.h
                        src/Mantid/PeakPickerTool.h
                        src/Mantid/RemoveErrorsDialog.h
+                       src/Mantid/SetUpParaview.h					   
                        src/Mantid/UserFitFunctionDialog.h
                        src/Mantid/InstrumentWidget/XIntegrationControl.h
                        src/Mantid/InstrumentWidget/BinDialog.h
@@ -671,6 +674,7 @@ set ( UI_FILES src/SendToProgramDialog.ui
                src/Mantid/UserFitFunctionDialog.ui
                src/Mantid/MantidAbout.ui
                src/Mantid/RemoveErrorsDialog.ui
+               src/Mantid/SetUpParaview.ui			   
                src/Mantid/ManageCustomMenus.ui
                src/Mantid/MantidMDCurveDialog.ui
 )
