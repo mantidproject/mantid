@@ -239,9 +239,10 @@ namespace Mantid
 
         if (checkForMask)
         {
-          if(instrument->isMonitor(i))
+          const std::set<detid_t>& detids = counts1->getSpectrum(i)->getDetectorIDs();
+          if(instrument->isMonitor(detids))
             continue;
-          if(instrument->isDetectorMasked(i))
+          if(instrument->isDetectorMasked(detids))
           {
             // Ensure it is masked on the output
             maskWS->dataY(i)[0] = deadValue;

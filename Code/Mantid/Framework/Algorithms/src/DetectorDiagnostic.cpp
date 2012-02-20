@@ -147,9 +147,10 @@ namespace Mantid
         PARALLEL_START_INTERUPT_REGION
 
         if (checkForMask) {
-          if (instrument->isDetectorMasked(i))
+          const std::set<detid_t>& detids = input->getSpectrum(i)->getDetectorIDs();
+          if (instrument->isDetectorMasked(detids))
             continue;
-          if (instrument->isMonitor(i))
+          if (instrument->isMonitor(detids))
             continue;
         }
 
