@@ -222,8 +222,11 @@ class DirectEnergyConversion(object):
         if result_name is None:
             result_name = common.create_resultname(mono_van)
 
-        return self._do_mono(sample_data, sample_data, result_name, ei_guess, 
-                                   white_run, map_file, spectra_masks, Tzero)
+        monovan = self._do_mono(sample_data, sample_data, result_name, ei_guess, 
+                                white_run, map_file, spectra_masks, Tzero)
+        # Normalize by vanadium sample weight
+        monovan /= float(self.van_mass)/float(self.van_rmm)
+        return monovan
 
     def mono_sample(self, mono_run, ei_guess, white_run=None, map_file=None,
                     spectra_masks=None, result_name=None, Tzero=None):
@@ -451,7 +454,6 @@ class DirectEnergyConversion(object):
                                           self.spectra_masks, result_name, Tzero)
         if not norm_factor is None:
             sample_wkspace /= norm_factor
-
         
         #calculate psi from sample environment motor and offset 
         if (offset is None):
@@ -557,27 +559,28 @@ class DirectEnergyConversion(object):
             
         where only those detectors that are unmasked are used and the weight[i] = 1/errorValue[i].
         """
-
         e_low = self.monovan_integr_range[0]
         e_upp = self.monovan_integr_range[1]
         if e_low > e_upp:
             raise ValueError("Inconsistent mono-vanadium integration range defined!")
         Rebin(data_ws, data_ws, [e_low, 2.*(e_upp-e_low), e_upp])
-        
         ConvertToMatrixWorkspace(data_ws, data_ws)
-        
-        min_value = self.diag_tiny
-        max_value = self.diag_huge
-        median_lbound = self.monovan_lo_bound
-        median_ubound = self.monovan_hi_bound
-        median_frac_low = self.monovan_lo_frac
-        median_frac_hi = self.monovan_hi_frac
-        median_sig = self.diag_samp_sig
 
-        self.mask_detectors_outside_range(data_ws, min_value, max_value, median_lbound,
-                                          median_ubound, median_frac_low, median_frac_hi, median_sig)
+        args = {}
+        args['tiny'] = self.diag_tiny
+        args['huge'] = self.diag_huge
+        args['van_out_lo'] = self.monovan_lo_bound
+        args['van_out_hi'] = self.monovan_hi_bound
+        args['van_lo'] = self.monovan_lo_frac
+        args['van_hi'] = self.monovan_hi_frac
+        args['van_sig'] = self.diag_samp_sig
+
+        diagnostics.diagnose(data_ws, **args)
+        monovan_masks = ExtractMasking(data_ws, OutputWorkspace='monovan_masks').workspace()
+        MaskDetectors(data_ws, MaskedWorkspace=monovan_masks)
+        DeleteWorkspace(Workspace=monovan_masks)
+
         ConvertFromDistribution(data_ws)
-
         nhist = data_ws.getNumberHistograms()
         average_value = 0.0
         weight_sum = 0.0
@@ -594,7 +597,6 @@ class DirectEnergyConversion(object):
             weight = 1.0/data_ws.readE(i)[0]
             average_value += y_value * weight
             weight_sum += weight
-
         return average_value / weight_sum
 
     def monovan_abs(self, ei_workspace):
@@ -602,8 +604,7 @@ class DirectEnergyConversion(object):
         The given workspace must contain an Ei value. This will have happened if GetEi
         has been run
         """
-        averageY = self.calc_average(ei_workspace)
-        absnorm_factor = averageY * (float(self.van_rmm)/float(self.van_mass)) 
+        absnorm_factor = self.calc_average(ei_workspace)
         #  Scale by vanadium cross-section which is energy dependent up to a point
         run = ei_workspace.getRun()
         try:
@@ -618,32 +619,6 @@ class DirectEnergyConversion(object):
             xsection = 400.0 + (ei_value/10.0)
         absnorm_factor /= xsection
         return absnorm_factor * (float(self.sample_mass)/float(self.sample_rmm))
-
-    
-    def mask_detectors_outside_range(self, data_ws, min_value, max_value, median_lbound, 
-                                     median_ubound, median_frac_lo, median_frac_hi, median_sig):
-        """
-        Masks detecrors on the given workspace according the ranges given where:
-            min_value - lower bound of meaningful value;
-            max_value - upper bound of meaningful value;
-            median_lbound - lower bound defining outliers as fraction of median value;
-            median_ubound - upper bound defining outliers as fraction of median value;
-            median_frac_lo - lower acceptable bound as fraction of median value;
-            median_frac_hi - upper acceptable bound as fraction of median value;
-            media_sig - error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the
-                        difference with respect to the median value must also exceed this number of error bars.
-        """
-        # Limit test
-        median_tests_ws = '_tmp_abs_median_tests'
-        fdol_alg = FindDetectorsOutsideLimits(data_ws, median_tests_ws, HighThreshold=max_value, LowThreshold=min_value)
-        MaskDetectors(data_ws, MaskedWorkspace=fdol_alg.workspace())
-        # Median tests
-        median_test_alg = MedianDetectorTest(data_ws, median_tests_ws, LowThreshold=median_lbound, HighThreshold=median_ubound)
-        MaskDetectors(data_ws, MaskedWorkspace=median_test_alg.workspace())
-        median_test_alg = MedianDetectorTest(data_ws, median_tests_ws, SignificanceTest=median_sig,
-                                             LowThreshold=median_frac_lo, HighThreshold=median_frac_hi)
-        MaskDetectors(data_ws, MaskedWorkspace=median_test_alg.workspace())
-        mtd.deleteWorkspace(median_tests_ws)
 
     def save_results(self, workspace, save_path, formats = None):
         """
