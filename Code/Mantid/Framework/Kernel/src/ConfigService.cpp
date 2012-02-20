@@ -1598,7 +1598,7 @@ const InstrumentInfo & ConfigServiceImpl::getInstrument(const std::string& instr
       // Move along, there's nothing to see here...
     }
   }
-  g_log.error("Instrument " + instrumentName + " not found");
+  g_log.debug("Instrument " + instrumentName + " not found");
   throw Exception::NotFoundError("Instrument", instrumentName);
 }
 
