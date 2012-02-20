@@ -182,7 +182,7 @@ class RefMReduction(PythonAlgorithm):
         wl_min = self.getProperty("WavelengthMin")
         wl_max = self.getProperty("WavelengthMax")
         wl_step = self.getProperty("WavelengthStep")
-        Rebin(InputWorkspace=ws_name, OutputWorkspace=ws_name, Params=[wl_min, wl_step, wl_max], PreserveEvents=False)
+        Rebin(InputWorkspace=ws_name, OutputWorkspace=ws_name, Params=[wl_min, wl_step, wl_max], PreserveEvents=True)
 
         # Perform normalization according to wavelength distribution of
         # the direct beam
@@ -222,23 +222,27 @@ class RefMReduction(PythonAlgorithm):
         """
         # Extract the pixels that we count as signal
         # Detector ID = NY*x + y
-        xmin = (peak_range[0]-RefMReduction.NX_PIXELS/2.0)*RefMReduction.PIXEL_SIZE
-        xmax = (peak_range[1]-RefMReduction.NX_PIXELS/2.0)*RefMReduction.PIXEL_SIZE
-        ymin = (low_res_range[0]-RefMReduction.NY_PIXELS/2.0)*RefMReduction.PIXEL_SIZE
-        ymax = (low_res_range[1]-RefMReduction.NY_PIXELS/2.0)*RefMReduction.PIXEL_SIZE
-        
-        xml_shape =  "<cuboid id=\"shape\">\n"
-        xml_shape += "  <left-front-bottom-point x=\"%g\" y=\"%g\" z=\"-5.0\"  />\n" % (xmin,ymin)
-        xml_shape += "  <left-front-top-point x=\"%g\" y=\"%g\" z=\"-5.0\"  />\n" % (xmin, ymax)
-        xml_shape += "  <left-back-bottom-point x=\"%g\" y=\"%g\" z=\"5.0\"  />\n" % (xmin, ymin)
-        xml_shape += "  <right-front-bottom-point x=\"%g\" y=\"%g\" z=\"-5.0\"  />\n" % (xmax, ymin)
-        xml_shape += "</cuboid>\n<algebra val=\"shape\" />\n"
-
-        alg = FindDetectorsInShape(Workspace=input_ws, ShapeXML=xml_shape)
-        det_list = alg.getPropertyValue("DetectorList")
-
         output_roi = "%s_%d_%d" % (input_ws, peak_range[0], peak_range[1])
-        GroupDetectors(InputWorkspace=input_ws, DetectorList=det_list, OutputWorkspace=output_roi)
+
+        det_list = []
+        for ix in range(peak_range[0], peak_range[1]+1):
+            det_list.extend(range(RefMReduction.NY_PIXELS*ix+low_res_range[0],
+                                  RefMReduction.NY_PIXELS*ix+low_res_range[1]+1))
+        
+        y = numpy.zeros(len(mtd[input_ws].readY(0)))
+        e = numpy.zeros(len(y))
+        for i in det_list:
+            y_pix = mtd[input_ws].readY(i)
+            e_pix = mtd[input_ws].readE(i)
+            for itof in range(len(y)):
+                y[itof] += y_pix[itof]
+                e[itof] += e_pix[itof]*e_pix[itof]
+                
+        x = mtd[input_ws].readX(0)
+        e = numpy.sqrt(e)
+        CreateWorkspace(OutputWorkspace=output_roi, DataX=x, DataY=y, DataE=e,
+                        UnitX="Wavelength", ParentWorkspace=input_ws)
+        
         return output_roi, len(det_list)
  
     def _process_normalization(self):
@@ -252,10 +256,6 @@ class RefMReduction(PythonAlgorithm):
         # Find full path to event NeXus data file
         f = FileFinder.findRuns("REF_M%d" % normalization_run)
         
-        # FindRuns() is finding event workspaces, but we need histo
-        if len(f)>0:
-            f[0] = f[0].replace("event", "histo")
-            
         if len(f)>0 and os.path.isfile(f[0]): 
             data_file = f[0]
         else:
@@ -265,10 +265,12 @@ class RefMReduction(PythonAlgorithm):
         
         # Load the data into its workspace
         if not mtd.workspaceExists(ws_normalization):
-            LoadTOFRawNexus(Filename=data_file, OutputWorkspace=ws_normalization)
+            LoadEventNexus(Filename=data_file, OutputWorkspace=ws_normalization)
             
         # Trim TOF
-        Rebin(InputWorkspace=ws_normalization, OutputWorkspace=ws_wl_profile, Params=[self.TOFrange[0], self.TOFsteps, self.TOFrange[1]])
+        Rebin(InputWorkspace=ws_normalization, OutputWorkspace=ws_wl_profile, 
+              Params=[self.TOFrange[0], self.TOFsteps, self.TOFrange[1]],
+              PreserveEvents=True)
         
         # Normalized by Current (proton charge)
         NormaliseByCurrent(InputWorkspace=ws_wl_profile, OutputWorkspace=ws_wl_profile)
