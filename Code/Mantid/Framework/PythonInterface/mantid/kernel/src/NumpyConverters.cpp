@@ -16,32 +16,6 @@ namespace Mantid
     namespace Numpy
     {
 
-      /**
-       *  Create a numpy array wrapper around a Matrix.
-       *  @param data :: A const reference to an existing Matrix
-       *  @return A numpy wrapper around the existing data, no copy is performed. It is left in a read-write state.
-       */
-      PyObject *wrapWithNumpy(const Kernel::DblMatrix & data)
-      {
-        std::pair<size_t,size_t> matrixSize = data.size();
-        npy_intp dims[2] =  {matrixSize.first, matrixSize.second};
-        PyArrayObject * ndarray = 
-          (PyArrayObject*)PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE,(void*)&(data[0][0]));
-        return (PyObject*)ndarray;
-      }
-
-      /**
-       *  Create a read-only numpy array wrapper around a Matrix
-       *  @param data :: A const reference to an existing Matrix
-       *  @return A numpy wrapper around the existing data, no copy is performed. It is marked read-only.
-       */
-      PyObject *wrapWithReadOnlyNumpy(const Kernel::DblMatrix& data)
-      {
-        PyArrayObject *nparray = (PyArrayObject*)wrapWithNumpy(data);
-        nparray->flags &= ~NPY_WRITEABLE;
-        return (PyObject*)nparray;
-      }
-
       //--------------------------------------------------------------------------------------------
       // Creation of Mantid objects
       //--------------------------------------------------------------------------------------------

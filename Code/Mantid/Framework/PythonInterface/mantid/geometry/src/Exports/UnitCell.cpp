@@ -1,4 +1,5 @@
 #include "MantidGeometry/Crystal/UnitCell.h"
+#include "MantidPythonInterface/kernel/Converters/MatrixToNDArray.h"
 #include "MantidPythonInterface/kernel/NumpyConverters.h"
 #include <boost/python/class.hpp>
 #include <boost/python/enum.hpp>
@@ -20,20 +21,20 @@ namespace //<unnamed>
   /// Pass-through function to return the B matrix as a numpy array
   PyObject * getB(UnitCell& self)
   {
-    return Numpy::wrapWithReadOnlyNumpy(self.getB());
+    return Converters::MatrixToNDArray<double, Converters::WrapReadOnly>()(self.getB());
   }
 
   /// Pass-through function to return the B matrix as a numpy array
   PyObject * getG(UnitCell& self)
   {
-    return Numpy::wrapWithReadOnlyNumpy(self.getG());
+    return Converters::MatrixToNDArray<double, Converters::WrapReadOnly>()(self.getG());
   }
 
 
   /// Pass-through function to return the B matrix as a numpy array
   PyObject * getGstar(UnitCell& self)
   {
-    return Numpy::wrapWithReadOnlyNumpy(self.getGstar());
+    return Converters::MatrixToNDArray<double, Converters::WrapReadOnly>()(self.getGstar());
   }
 
   /// Pass-through function to set the unit cell from a 2D numpy array

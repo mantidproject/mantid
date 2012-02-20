@@ -26,6 +26,7 @@ set ( EXPORT_FILES
 )  
 
 set ( SRC_FILES
+  src/Converters/MatrixToNDArray.cpp
   src/Converters/NDArrayToVector.cpp
   src/Converters/NDArrayTypeIndex.cpp
   src/Converters/PyArrayType.cpp
@@ -39,6 +40,7 @@ set ( SRC_FILES
 )
 
 set ( INC_FILES 
+  ${HEADER_DIR}/kernel/Converters/MatrixToNDArray.h
   ${HEADER_DIR}/kernel/Converters/NDArrayToVector.h
   ${HEADER_DIR}/kernel/Converters/NDArrayTypeIndex.h
   ${HEADER_DIR}/kernel/Converters/VectorToNDArray.h

@@ -33,14 +33,6 @@ namespace Mantid
   {
     namespace Numpy
     {
-      /** @name Create Numpy arrays */
-      //@{
-      /// Create a read-only array wrapper around a double Matrix
-      DLLExport PyObject *wrapWithNumpy(const Kernel::DblMatrix & data);
-      /// Create a read-only array wrapper around a double Matrix
-      DLLExport PyObject *wrapWithReadOnlyNumpy(const Kernel::DblMatrix & data);
-      //@}
-
       /** @name Create Mantid objects from python sequences */
       //@{
       /// Try and create a Mantid V3D object from the given PyObject.
