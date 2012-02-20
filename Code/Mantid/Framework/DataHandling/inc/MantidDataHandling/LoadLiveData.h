@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataHandling/LiveDataAlgorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 namespace Mantid
 {
@@ -48,6 +49,12 @@ namespace DataHandling
     virtual void initDocs();
     void init();
     void exec();
+
+    Mantid::API::MatrixWorkspace_sptr processChunk(Mantid::API::MatrixWorkspace_sptr chunkWS);
+
+    void replaceOutput(Mantid::API::MatrixWorkspace_sptr chunkWS);
+    void addOutput(Mantid::API::MatrixWorkspace_sptr chunkWS);
+    void conjoinOutput(Mantid::API::MatrixWorkspace_sptr chunkWS);
 
 
   };

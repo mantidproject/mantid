@@ -110,6 +110,9 @@ namespace Mantid
       bool m_dataReset; ///< Indicates the receipt of a reset signal from the DAS.
     };
 
+    /// Shared pointer to an ILiveListener
+    typedef boost::shared_ptr<ILiveListener> ILiveListener_sptr;
+
   } // namespace API
 } // namespace Mantid
 

@@ -1,6 +1,7 @@
 #include "MantidDataHandling/LiveDataAlgorithm.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidAPI/LiveListenerFactory.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -67,6 +68,42 @@ namespace DataHandling
     declareProperty(new PropertyWithValue<std::string>("LastTimeStamp","",Direction::Output),
         "The time stamp of the last event, frame or pulse recorded.\n"
         "Date/time is in UTC time, in ISO8601 format, e.g. 2010-09-14T04:20:12.95");
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Return or create the ILiveListener for this algorithm.
+   *
+   * If the ILiveListener has not already been created, it creates it using
+   * the properties on the algorithm. It then starts the listener
+   * by calling the ILiveListener->start(StartTime) method.
+   *
+   * @return ILiveListener_sptr
+   */
+  ILiveListener_sptr LiveDataAlgorithm::getLiveListener()
+  {
+    if (m_listener)
+      return m_listener;
+
+    // Not stored? Need to create it
+    std::string inst = this->getPropertyValue("Instrument");
+    m_listener = LiveListenerFactory::Instance().create(inst);
+
+    // Start at the given date/time
+    m_listener->start( this->getStartTime() );
+
+    return m_listener;
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Directly set the LiveListener for this algorithm.
+   *
+   * @param listener :: ILiveListener_sptr
+   */
+  void LiveDataAlgorithm::setLiveListener(Mantid::API::ILiveListener_sptr listener)
+  {
+    m_listener = listener;
   }
 
 

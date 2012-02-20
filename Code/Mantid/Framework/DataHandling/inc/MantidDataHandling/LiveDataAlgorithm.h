@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidAPI/ILiveListener.h"
 
 namespace Mantid
 {
@@ -45,12 +46,18 @@ namespace DataHandling
     virtual ~LiveDataAlgorithm();
     virtual const std::string category() const;
 
+    Mantid::API::ILiveListener_sptr getLiveListener();
+    void setLiveListener(Mantid::API::ILiveListener_sptr listener);
+
   protected:
     void initProps();
 
     Mantid::Kernel::DateAndTime getStartTime() const;
 
     Mantid::API::IAlgorithm_sptr makeAlgorithm();
+
+    /// Live listener
+    Mantid::API::ILiveListener_sptr m_listener;
 
   };
 

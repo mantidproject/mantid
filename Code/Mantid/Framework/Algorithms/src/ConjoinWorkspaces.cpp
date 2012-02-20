@@ -198,7 +198,10 @@ void ConjoinWorkspaces::exec()
   this->fixSpectrumNumbers(ws1,ws2, output);
 
   // Delete the second input workspace from the ADS
-  AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace2"));
+  std::string workspace2Name = getPropertyValue("InputWorkspace2");
+  if (workspace2Name.empty())
+    AnalysisDataService::Instance().remove(workspace2Name);
+
   // Set the result workspace to the first input
   setProperty("InputWorkspace1",output);
 }
