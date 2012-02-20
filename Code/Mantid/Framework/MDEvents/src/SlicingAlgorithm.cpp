@@ -265,7 +265,8 @@ namespace MDEvents
     catch (std::exception & e)
     { throw std::invalid_argument("Error parsing the Origin parameter: " + std::string(e.what()) ); }
     if (origin.getNumDims() != inD)
-      throw std::invalid_argument("The number of dimensions in the Origin parameter is not consistent with the number of dimensions in the input workspace.");
+      throw std::invalid_argument("The number of dimensions in the Origin parameter is "
+          "not consistent with the number of dimensions in the input workspace.");
     m_origin = origin;
 
     // Now, convert the original vector to the coordinates of the ORIGNAL ws, if any
@@ -277,7 +278,8 @@ namespace MDEvents
 
     // Validate
     if (m_outD > inD)
-      throw std::runtime_error("More output dimensions were specified than input dimensions exist in the MDEventWorkspace. Cannot bin!");
+      throw std::runtime_error("More output dimensions were specified than input dimensions "
+          "exist in the MDEventWorkspace. Cannot bin!");
     if (m_scaling.size() != m_outD)
       throw std::runtime_error("Inconsistent number of entries in scaling vector.");
 
@@ -422,7 +424,8 @@ namespace MDEvents
       std::string prop = Strings::strip(getPropertyValue(propName));
       if (!prop.empty()) numDims++;
       if (!prop.empty() && previousWasEmpty)
-        throw std::invalid_argument("Please enter the AlignedDim parameters in the order X,Y,Z,T, without skipping any entries.");
+        throw std::invalid_argument("Please enter the AlignedDim parameters in the order 0,1,2, etc.,"
+            "without skipping any entries.");
       previousWasEmpty = prop.empty();
     }
 
@@ -432,7 +435,8 @@ namespace MDEvents
     if (numDims == 0)
       throw std::runtime_error("No output dimensions specified.");
     if (numDims > inD)
-      throw std::runtime_error("More output dimensions were specified than input dimensions exist in the MDEventWorkspace.");
+      throw std::runtime_error("More output dimensions were specified than input dimensions "
+          "exist in the MDEventWorkspace.");
 
     // Create the dimensions based on the strings from the user
     for (size_t i=0; i<numDims; i++)
@@ -519,12 +523,18 @@ namespace MDEvents
     if (m_originalWS)
     {
       if (m_axisAligned)
-        throw std::runtime_error("Cannot perform axis-aligned binning on a MDHistoWorkspace. Please use non-axis aligned binning.");
+        throw std::runtime_error("Cannot perform axis-aligned binning on a MDHistoWorkspace. "
+            "Please use non-axis aligned binning.");
+
       if (m_originalWS->getNumDims() != m_inWS->getNumDims())
-        throw std::runtime_error("SlicingAlgorithm::createTransform(): Cannot propagate a transformation if the number of dimensions has changed.");
+        throw std::runtime_error("SlicingAlgorithm::createTransform(): Cannot propagate "
+            "a transformation if the number of dimensions has changed.");
+
       if (!m_inWS->getTransformToOriginal())
-        throw std::runtime_error("SlicingAlgorithm::createTransform(): Cannot propagate a transformation. There is no transformation saved from "
+        throw std::runtime_error("SlicingAlgorithm::createTransform(): Cannot propagate "
+            "a transformation. There is no transformation saved from "
             + m_inWS->getName() + " back to " + m_originalWS->getName() + ".");
+
       g_log.notice() << "Performing " << this->name() << " on the original workspace, '" << m_originalWS->getName() << "'" << std::endl;
     }
 
