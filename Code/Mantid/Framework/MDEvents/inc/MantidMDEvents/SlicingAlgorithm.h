@@ -68,6 +68,7 @@ namespace MDEvents
     void createTransform();
 
     void createGeneralTransform();
+    void processGeneralTransformProperties();
     void createAlignedTransform();
 
     void makeAlignedDimensionFromString(const std::string & str);
@@ -114,12 +115,35 @@ namespace MDEvents
     /// Basis vectors of the output dimensions, normalized to unity length
     std::vector<Mantid::Kernel::VMD> m_bases;
 
-    /// Scaling factor to apply for each basis vector (to map to the bins)
-    std::vector<double> m_scaling;
+    /// Scaling factor to apply for each basis vector (to map to the bins).
+    /// i.e.. MULTIPLY the distance in the INPUT workspace by this = an index into the bin
+    std::vector<double> m_binningScaling;
 
-    /// Origin (this position in the input workspace = 0,0,0 in the output).
-    Mantid::Kernel::VMD m_origin;
+    /// Scaling factor to apply for each basis vector to transfor to the output dimensions.
+    /// i.e.. MULTIPLY the distance in the INPUT workspace by this = a distance in the OUTPUT dimension
+    std::vector<double> m_transformScaling;
 
+
+
+    /// Translation from the OUTPUT to the INPUT workspace
+    /// i.e. this position in the input workspace = 0,0,0 in the output.
+    Mantid::Kernel::VMD m_translation;
+
+    /// Coordinates in the INPUT workspace corresponding to the
+    /// minimum edge in all dimensions.
+    Mantid::Kernel::VMD m_inputMinPoint;
+
+    /// For non-aligned, the minimum coordinate extents in each OUTPUT dimension
+    std::vector<double> m_minExtents;
+
+    /// For non-aligned, the maximum coordinate extents in each OUTPUT dimension
+    std::vector<double> m_maxExtents;
+
+    /// For non-aligned, the number of bins in each OUTPUT dimension.
+    std::vector<int> m_numBins;
+
+    /// The NormalizeBasisVectors option
+    bool m_NormalizeBasisVectors;
 
   };
 

@@ -324,7 +324,7 @@ public:
     TSM_ASSERT_THROWS_NOTHING("", alg.makeBasisVectorFromString(" name, units  , 1,2,3, 10.0, 5"));
     TS_ASSERT_EQUALS(alg.m_bases.size(), 1);
     TS_ASSERT_EQUALS(alg.m_binDimensions.size(), 1);
-    TS_ASSERT_EQUALS(alg.m_scaling.size(), 1);
+    TS_ASSERT_EQUALS(alg.m_binningScaling.size(), 1);
 
     VMD basis(1,2,3);
     basis.normalize();
@@ -344,7 +344,7 @@ public:
     TSM_ASSERT_THROWS_NOTHING("", alg.makeBasisVectorFromString("[Dumb,Name], units  , 1,2,3, 10.0, 5"));
     TS_ASSERT_EQUALS(alg.m_bases.size(), 1);
     TS_ASSERT_EQUALS(alg.m_binDimensions.size(), 1);
-    TS_ASSERT_EQUALS(alg.m_scaling.size(), 1);
+    TS_ASSERT_EQUALS(alg.m_binningScaling.size(), 1);
     if (alg.m_bases.size() < 1) return;
 
     VMD basis(1,2,3);
@@ -399,7 +399,7 @@ public:
             "", VMD(1,1,0));
 
     TS_ASSERT_EQUALS( alg->m_bases.size(), 3);
-    TS_ASSERT_EQUALS( alg->m_origin, VMD(1,1,0));
+    TS_ASSERT_EQUALS( alg->m_translation, VMD(1,1,0));
     TS_ASSERT_EQUALS( alg->m_binDimensions.size(), 3);
     TS_ASSERT_EQUALS( alg->m_bases[0], baseX);
     TS_ASSERT_EQUALS( alg->m_bases[1], baseY);
@@ -459,7 +459,7 @@ public:
             "", VMD(0,0,0));
 
     TS_ASSERT_EQUALS( alg->m_bases.size(), 3);
-    TS_ASSERT_EQUALS( alg->m_origin, VMD(0,0,0));
+    TS_ASSERT_EQUALS( alg->m_translation, VMD(0,0,0));
     TS_ASSERT_EQUALS( alg->m_binDimensions.size(), 3);
     TS_ASSERT_EQUALS( alg->m_bases[0], baseX);
     TS_ASSERT_EQUALS( alg->m_bases[1], baseY);

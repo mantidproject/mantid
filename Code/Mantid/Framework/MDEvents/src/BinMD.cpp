@@ -551,7 +551,7 @@ namespace MDEvents
     outWS->setTransformToOriginal( this->m_transformToOriginal, 0 );
     for (size_t i=0; i<m_bases.size(); i++)
       outWS->setBasisVector(i, m_bases[i]);
-    outWS->setOrigin( this->m_origin );
+    outWS->setOrigin( this->m_translation );
     outWS->setOriginalWorkspace(m_inWS, 0);
 
     // And the intermediate WS one too, if any

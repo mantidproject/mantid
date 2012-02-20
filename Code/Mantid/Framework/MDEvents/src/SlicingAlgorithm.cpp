@@ -12,6 +12,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using Mantid::Kernel::Strings::strip;
 
 namespace Mantid
 {
@@ -80,7 +81,7 @@ namespace MDEvents
         "Enter as a comma-separated string." );
 
     declareProperty(new ArrayProperty<double>("OutputExtents", Direction::Input),
-        "The minimum/maximum edges of space in the dimensions of the OUTPUT workspace." );
+        "The minimum, maximum edges of space of each dimension of the OUTPUT workspace, as a comma-separated list" );
 
     declareProperty(new ArrayProperty<int>("OutputBins", Direction::Input),
         "The number of bins for each dimension of the OUTPUT workspace." );
@@ -117,7 +118,7 @@ namespace MDEvents
    * is transformed to THOSE coordinates.
    *
    *  "Format: 'name, units, x,y,z,..'.\n"
-   * Adds values to m_bases, m_binDimensions and m_scaling
+   * Adds values to m_bases, m_binDimensions and m_binningScaling
    *
    * @param str :: name,number_of_bins
    */
@@ -128,6 +129,9 @@ namespace MDEvents
       return;
     if (input.size() < 3)
       throw std::invalid_argument("Dimension string is too short to be valid: " + str);
+
+    // The current dimension index.
+    size_t dim = m_binDimensions.size();
 
     size_t n_first_comma = std::string::npos;
 
@@ -162,34 +166,47 @@ namespace MDEvents
     input = input.substr(n_first_comma+1);
     std::vector<std::string> strs;
     boost::split(strs, input, boost::is_any_of(","));
-    if (strs.size() != this->m_inWS->getNumDims() + 3)
-      throw std::invalid_argument("Wrong number of values (expected 4 + # of input dimensions) in the dimensions string: " + str);
+    if (strs.size() != this->m_inWS->getNumDims() + 1)
+      throw std::invalid_argument("Wrong number of values (expected 2 + # of input dimensions) in the dimensions string: " + str);
 
     // Extract the arguments
     std::string id = name;
     std::string units = Strings::strip(strs[0]);
 
-    int numBins = 0;
-    Strings::convert(strs[ strs.size()-1 ], numBins);
+    // Get the number of bins from
+    int numBins = m_numBins[dim];
     if (numBins < 1)
-      throw std::invalid_argument("number of bins should be >= 1.");
+      throw std::invalid_argument("Number of bins for output dimension "
+          + Strings::toString(dim) + " should be >= 1.");
 
-    double length = 0.0;
+    // Get the min/max extents in this OUTPUT dimension
+    double min = m_minExtents[dim];
+    double max = m_maxExtents[dim];
+    double length = max-min;
     Strings::convert(strs[ strs.size()-2 ], length);
     if (length <= 0)
-      throw std::invalid_argument("'length' parameter should be > 0.0.");
-
-    double min = 0.0;
-    double max = length;
+      throw std::invalid_argument("The maximum extents for dimension "
+          + Strings::toString(dim) + " should be > 0.");
 
     // Create the basis vector with the right # of dimensions
     VMD basis(this->m_inWS->getNumDims());
     for (size_t d=0; d<this->m_inWS->getNumDims(); d++)
       if (!Strings::convert(strs[d+1], basis[d]))
         throw std::invalid_argument("Error converting argument '" + strs[d+1] + "' in the dimensions string '" + str + "' to a number.");
-    double oldBasisLength = basis.normalize();
 
-    if (oldBasisLength <= 0)
+    // Normalize it to unity, if desized
+    double basisLength = basis.norm();
+    if (m_NormalizeBasisVectors)
+    {
+      // A distance of 1 in the INPUT space = a distance of 1.0 in the OUTPUT space
+      basis.normalize();
+      m_transformScaling[dim] = 1.0;
+    }
+    else
+      // A distance of |basisVector| in the INPUT space = a distance of 1.0 in the OUTPUT space
+      m_transformScaling[dim] = 1.0 / basisLength;
+
+    if (basisLength <= 0)
       throw std::invalid_argument("direction should not be 0-length.");
 
     // Now, convert the basis vector to the coordinates of the ORIGNAL ws, if any
@@ -197,15 +214,19 @@ namespace MDEvents
     {
       // Turn basis vector into two points
       VMD basis0(this->m_inWS->getNumDims());
-      VMD basis1 = basis * length;
+      VMD basis1 = basis * basisLength;
       // Convert the points to the original coordinates (from inWS to originalWS)
       CoordTransform * toOrig = m_inWS->getTransformToOriginal();
       VMD origBasis0 = toOrig->applyVMD(basis0);
       VMD origBasis1 = toOrig->applyVMD(basis1);
       // New basis vector, now in the original workspace
       basis = origBasis1 - origBasis0;
+      // What is the ratio of the ORIGINAL length vs the length
+      double lengthRatio = basis.norm() / basisLength;
       // New length of the vector (in original space).
-      length = basis.normalize();
+      length = length * lengthRatio;
+      // TODO IS THE ABOVE CORRECT???
+      // TODO: what about m_transformScaling
     }
 
     // Scaling factor, to convert from units in the inDim to the output BIN number
@@ -217,21 +238,52 @@ namespace MDEvents
     // Put both in the algo for future use
     m_bases.push_back(basis);
     m_binDimensions.push_back(out);
-    m_scaling.push_back(scaling);
+    m_binningScaling.push_back(scaling);
   }
 
 
   //----------------------------------------------------------------------------------------------
-  /** Loads the dimensions and create the coordinate transform, using the inputs.
-   * This is for the general (i.e. non-aligned) case
+  /** Reads the various Properties for the general (non-aligned) case
+   * and fills in members on the Algorithm for later use
+   *
+   * @throw if some of the inputs are invalid
    */
-  void SlicingAlgorithm::createGeneralTransform()
+  void SlicingAlgorithm::processGeneralTransformProperties()
   {
-    // Number of input dimensions
-    size_t inD = m_inWS->getNumDims();
+    // Count the number of output dimensions
+    m_outD = 0;
+    std::string dimChars = this->getDimensionChars();
+    for (size_t i=0; i<dimChars.size(); i++)
+    {
+      std::string propName = "BasisVector0"; propName[11] = dimChars[i];
+      if (Strings::strip(this->getPropertyValue(propName)).empty())
+        m_outD++;
+    }
+
+    std::vector<double> extents = this->getProperty("OutputExtents");
+    if (extents.size() != m_outD*2)
+      throw std::invalid_argument("The OutputExtents parameter must have 2 entries "
+          "for each dimension in the OUTPUT workspace.");
+
+    m_minExtents.clear();
+    m_maxExtents.clear();
+    for (size_t d=0; d<m_outD; d++)
+    {
+      m_minExtents.push_back(extents[d*2]);
+      m_maxExtents.push_back(extents[d*2+1]);
+    }
+
+    m_numBins = this->getProperty("OutputBins");
+    if (m_numBins.size() != m_outD)
+      throw std::invalid_argument("The OutputBins parameter must have 1 entry "
+          "for each dimension in the OUTPUT workspace.");
+
+    m_NormalizeBasisVectors = this->getProperty("NormalizeBasisVectors");
+
+    // Initialize the transformation scaling factor to 1.0 for each output dimension
+    m_transformScaling.resize(m_outD, 1.0);
 
     // Create the dimensions based on the strings from the user
-    std::string dimChars = this->getDimensionChars();
     for (size_t i=0; i<dimChars.size(); i++)
     {
       std::string propName = "BasisVector0"; propName[11] = dimChars[i];
@@ -246,6 +298,37 @@ namespace MDEvents
     if (m_outD == 0)
       throw std::runtime_error("No output dimensions were found in the MDEventWorkspace. Cannot bin!");
 
+    // Get the Translation parameter
+    try
+    { m_translation = VMD( getPropertyValue("Translation") ); }
+    catch (std::exception & e)
+    { throw std::invalid_argument("Error parsing the Translation parameter: " + std::string(e.what()) ); }
+    if (m_translation.getNumDims() != m_inWS->getNumDims())
+      throw std::invalid_argument("The number of dimensions in the Translation parameter is "
+          "not consistent with the number of dimensions in the input workspace.");
+
+    // Validate
+    if (m_outD > m_inWS->getNumDims())
+      throw std::runtime_error("More output dimensions were specified than input dimensions "
+          "exist in the MDEventWorkspace. Cannot bin!");
+    if (m_binningScaling.size() != m_outD)
+      throw std::runtime_error("Inconsistent number of entries in scaling vector.");
+
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Loads the dimensions and create the coordinate transform, using the inputs.
+   * This is for the general (i.e. non-aligned) case
+   */
+  void SlicingAlgorithm::createGeneralTransform()
+  {
+    // Process all the input properties
+    this->processGeneralTransformProperties();
+
+    // Number of input dimensions
+    size_t inD = m_inWS->getNumDims();
+
+    // ----- Make the basis vectors orthogonal -------------------------
     bool ForceOrthogonal = getProperty("ForceOrthogonal");
     if (ForceOrthogonal && m_bases[0].getNumDims() == 3 && m_bases.size() >= 2)
     {
@@ -262,40 +345,29 @@ namespace MDEvents
 
     }
 
-    // Get the origin
-    VMD origin;
-    try
-    { origin = VMD( getPropertyValue("Origin") ); }
-    catch (std::exception & e)
-    { throw std::invalid_argument("Error parsing the Origin parameter: " + std::string(e.what()) ); }
-    if (origin.getNumDims() != inD)
-      throw std::invalid_argument("The number of dimensions in the Origin parameter is "
-          "not consistent with the number of dimensions in the input workspace.");
-    m_origin = origin;
-
     // Now, convert the original vector to the coordinates of the ORIGNAL ws, if any
     if (m_originalWS)
     {
       CoordTransform * toOrig = m_inWS->getTransformToOriginal();
-      m_origin = toOrig->applyVMD(m_origin);
+      m_translation = toOrig->applyVMD(m_translation);
     }
 
-    // Validate
-    if (m_outD > inD)
-      throw std::runtime_error("More output dimensions were specified than input dimensions "
-          "exist in the MDEventWorkspace. Cannot bin!");
-    if (m_scaling.size() != m_outD)
-      throw std::runtime_error("Inconsistent number of entries in scaling vector.");
-
-    // Create the CoordTransformAffine with these basis vectors
+    // Create the CoordTransformAffine for BINNING with these basis vectors
     CoordTransformAffine * ct = new CoordTransformAffine(inD, m_outD);
-    ct->buildOrthogonal(m_origin, this->m_bases, VMD(this->m_scaling) ); // note the scaling makes the coordinate correspond to a bin index
+    // Note: the scaling makes the coordinate correspond to a bin index
+    ct->buildOrthogonal(m_translation, this->m_bases, VMD(this->m_binningScaling) );
     this->m_transform = ct;
 
+
+    // OK now find the min/max coordinates of the edges in the INPUT workspace
+    m_inputMinPoint = m_translation;
+    for (size_t d=0; d<m_outD; d++)
+      // Translate from the outCoords=(0,0,0) to outCoords=(min,min,min)
+      m_inputMinPoint += (m_bases[d] * m_binDimensions[d]->getMinimum());
+
     // Transformation original->binned
-    std::vector<double> unitScaling(m_outD, 1.0);
     CoordTransformAffine * ctFrom = new CoordTransformAffine(inD, m_outD);
-    ctFrom->buildOrthogonal(m_origin, this->m_bases, VMD(unitScaling) );
+    ctFrom->buildOrthogonal(m_inputMinPoint, this->m_bases, VMD(m_transformScaling) );
     m_transformFromOriginal = ctFrom;
 
     // Validate
@@ -453,7 +525,7 @@ namespace MDEvents
     m_outD = m_binDimensions.size();
 
     // Now we build the coordinate transformation object
-    m_origin = VMD(inD);
+    m_translation = VMD(inD);
     m_bases.clear();
     std::vector<coord_t> origin(m_outD), scaling(m_outD);
     for (size_t d=0; d<m_outD; d++)
@@ -461,7 +533,7 @@ namespace MDEvents
       origin[d] = m_binDimensions[d]->getMinimum();
       scaling[d] = 1.0f / m_binDimensions[d]->getBinWidth();
       // Origin in the input
-      m_origin[ m_dimensionToBinFrom[d] ] = origin[d];
+      m_translation[ m_dimensionToBinFrom[d] ] = origin[d];
       // Create a unit basis vector that corresponds to this
       VMD basis(inD);
       basis[ m_dimensionToBinFrom[d] ] = 1.0;
@@ -481,12 +553,7 @@ namespace MDEvents
     // Now the reverse transformation.
     if (m_outD == inD)
     {
-//      // Make the reverse map = if you're in the output dimension "od", what INPUT dimension index is that?
-//      std::vector<size_t> reverseDimensionMap(inD, 0);
-//      for (size_t od=0; od<m_dimensionToBinFrom.size(); od++)
-//        reverseDimensionMap[ m_dimensionToBinFrom[od] ] = od;
-//      m_transformToOriginal = new CoordTransformAligned(inD, m_outD,
-//          reverseDimensionMap, zeroOrigin, unitScaling);
+      // Make the reverse map = if you're in the output dimension "od", what INPUT dimension index is that?
       Matrix<coord_t> mat = m_transformFromOriginal->makeAffineMatrix();
       mat.Invert();
       CoordTransformAffine * tmp = new CoordTransformAffine(inD, m_outD);
@@ -652,9 +719,9 @@ namespace MDEvents
     MDImplicitFunction * func = new MDImplicitFunction;
 
     // First origin = 0,0,0 (offset if you specified a chunk)
-    VMD o1 = m_origin;
+    VMD o1 = m_translation;
     // Second origin = max of each basis vector
-    VMD o2 = m_origin;
+    VMD o2 = m_translation;
     // And this the list of basis vectors. Each vertex is given by o1+bases[i].
     std::vector<VMD> bases;
     VMD x,y,z,t;
