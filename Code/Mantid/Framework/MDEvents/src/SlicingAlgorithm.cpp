@@ -118,7 +118,8 @@ namespace MDEvents
    * is transformed to THOSE coordinates.
    *
    *  "Format: 'name, units, x,y,z,..'.\n"
-   * Adds values to m_bases, m_binDimensions and m_binningScaling
+   * Adds values to m_bases, m_binDimensions,
+   *    m_binningScaling and m_transformScaling
    *
    * @param str :: name,number_of_bins
    */
@@ -183,7 +184,6 @@ namespace MDEvents
     double min = m_minExtents[dim];
     double max = m_maxExtents[dim];
     double length = max-min;
-    Strings::convert(strs[ strs.size()-2 ], length);
     if (length <= 0)
       throw std::invalid_argument("The maximum extents for dimension "
           + Strings::toString(dim) + " should be > 0.");
@@ -200,11 +200,11 @@ namespace MDEvents
     {
       // A distance of 1 in the INPUT space = a distance of 1.0 in the OUTPUT space
       basis.normalize();
-      m_transformScaling[dim] = 1.0;
+      m_transformScaling.push_back(1.0);
     }
     else
       // A distance of |basisVector| in the INPUT space = a distance of 1.0 in the OUTPUT space
-      m_transformScaling[dim] = 1.0 / basisLength;
+      m_transformScaling.push_back(1.0 / basisLength);
 
     if (basisLength <= 0)
       throw std::invalid_argument("direction should not be 0-length.");
@@ -256,14 +256,15 @@ namespace MDEvents
     for (size_t i=0; i<dimChars.size(); i++)
     {
       std::string propName = "BasisVector0"; propName[11] = dimChars[i];
-      if (Strings::strip(this->getPropertyValue(propName)).empty())
+      if (!Strings::strip(this->getPropertyValue(propName)).empty())
         m_outD++;
     }
 
     std::vector<double> extents = this->getProperty("OutputExtents");
     if (extents.size() != m_outD*2)
-      throw std::invalid_argument("The OutputExtents parameter must have 2 entries "
-          "for each dimension in the OUTPUT workspace.");
+      throw std::invalid_argument("The OutputExtents parameter must have " +
+          Strings::toString(m_outD*2) + " entries "
+          "(2 for each dimension in the OUTPUT workspace).");
 
     m_minExtents.clear();
     m_maxExtents.clear();
@@ -279,9 +280,7 @@ namespace MDEvents
           "for each dimension in the OUTPUT workspace.");
 
     m_NormalizeBasisVectors = this->getProperty("NormalizeBasisVectors");
-
-    // Initialize the transformation scaling factor to 1.0 for each output dimension
-    m_transformScaling.resize(m_outD, 1.0);
+    m_transformScaling.clear();
 
     // Create the dimensions based on the strings from the user
     for (size_t i=0; i<dimChars.size(); i++)
@@ -352,22 +351,23 @@ namespace MDEvents
       m_translation = toOrig->applyVMD(m_translation);
     }
 
-    // Create the CoordTransformAffine for BINNING with these basis vectors
-    CoordTransformAffine * ct = new CoordTransformAffine(inD, m_outD);
-    // Note: the scaling makes the coordinate correspond to a bin index
-    ct->buildOrthogonal(m_translation, this->m_bases, VMD(this->m_binningScaling) );
-    this->m_transform = ct;
-
-
     // OK now find the min/max coordinates of the edges in the INPUT workspace
     m_inputMinPoint = m_translation;
     for (size_t d=0; d<m_outD; d++)
       // Translate from the outCoords=(0,0,0) to outCoords=(min,min,min)
       m_inputMinPoint += (m_bases[d] * m_binDimensions[d]->getMinimum());
+//    std::cout << m_inputMinPoint << " m_inputMinPoint " << std::endl;
+
+    // Create the CoordTransformAffine for BINNING with these basis vectors
+    CoordTransformAffine * ct = new CoordTransformAffine(inD, m_outD);
+    // Note: the scaling makes the coordinate correspond to a bin index
+    ct->buildOrthogonal(m_inputMinPoint, this->m_bases, VMD(this->m_binningScaling) );
+    this->m_transform = ct;
+
 
     // Transformation original->binned
     CoordTransformAffine * ctFrom = new CoordTransformAffine(inD, m_outD);
-    ctFrom->buildOrthogonal(m_inputMinPoint, this->m_bases, VMD(m_transformScaling) );
+    ctFrom->buildOrthogonal(m_translation, this->m_bases, VMD(m_transformScaling) );
     m_transformFromOriginal = ctFrom;
 
     // Validate
