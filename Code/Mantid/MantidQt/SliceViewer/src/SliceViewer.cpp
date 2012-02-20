@@ -1380,6 +1380,25 @@ void SliceViewer::setColorScale(double min, double max, bool log)
   this->colorRangeChanged();
 }
 
+//------------------------------------------------------------------------------------
+/** Set the "background" color to use in the color map. Default is white.
+ *
+ * This is the color that is shown when:
+ *
+ *  - The coordinate is out of bounds of the workspace.
+ *  - When a signal is NAN (not-a-number).
+ *  - When the signal is Zero, if that option is selected using setTransparentZeros()
+ *
+ * @param r :: red component, from 0-255
+ * @param g :: green component, from 0-255
+ * @param b :: blue component, from 0-255
+ */
+void SliceViewer::setColorMapBackground(int r, int g, int b)
+{
+  m_colorBar->getColorMap().setNanColor(r,g,b);
+  this->colorRangeChanged();
+}
+
 
 //------------------------------------------------------------------------------------
 /** Set the minimum value corresponding to the lowest color on the map

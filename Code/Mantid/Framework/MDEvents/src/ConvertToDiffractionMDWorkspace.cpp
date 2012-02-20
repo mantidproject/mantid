@@ -1,16 +1,26 @@
 /*WIKI* 
 
-
-
-The algorithm takes every event in a [[EventWorkspace]] from detector/time-of-flight space, and converts it into reciprocal space, and places the resulting MDEvents into a [[MDEventWorkspace]].
+The algorithm takes every event in a [[EventWorkspace]] from detector/time-of-flight space,
+and converts it into reciprocal space, and places the resulting MDEvents into a [[MDEventWorkspace]].
 
 The conversion can be done either to Q-space in the lab or sample frame, or to HKL of the crystal.
 
-If the OutputWorkspace does NOT already exist, a default one is created. In order to define more precisely the parameters of the [[MDEventWorkspace]], use the [[CreateMDWorkspace]] algorithm first.
+If the OutputWorkspace does NOT already exist, a default one is created.
+In order to define more precisely the parameters of the [[MDEventWorkspace]],
+use the [[CreateMDWorkspace]] algorithm first.
 
+==== Lorentz Correction ====
 
+If selected, the following Lorentz correction factor is applied on each event
+by multiplying its weight by L:
+
+<math>L = \frac{ sin(\theta)^2 } { \lambda^{4} } </math>
+
+Where <math>\theta</math> is ''half'' of the neutron scattering angle (conventionally called <math>2\theta</math>).
+<math>\lambda</math> is the neutron wavelength in ''Angstroms''.
 
 *WIKI*/
+
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceValidators.h"
@@ -178,8 +188,9 @@ namespace MDEvents
       double sin_theta_squared = 0;
       if (LorentzCorrection)
       {
-        // Scattering angle = angle between neutron beam direction and the detector (scattering) direction
-        double theta = detDir.angle(beamDir);
+        // Scattering angle = 2 theta = angle between neutron beam direction and the detector (scattering) direction
+        // The formula for Lorentz Correction is sin(theta), i.e. sin(half the scattering angle)
+        double theta = detDir.angle(beamDir) / 2.0;
         sin_theta_squared = sin(theta);
         sin_theta_squared = sin_theta_squared * sin_theta_squared; // square it
       }

@@ -23,7 +23,7 @@ namespace API
     m_multipleFileProp = dynamic_cast<Mantid::API::MultipleFileProperty*>(prop);
 
     // Create a browse button
-    m_browseButton = new QPushButton(tr("Browse"), this);
+    m_browseButton = new QPushButton(tr("Browse"), m_parent);
     connect(m_browseButton, SIGNAL(clicked()), this, SLOT(browseClicked()));
     m_widgets.push_back(m_browseButton);
 

@@ -241,6 +241,8 @@ public:
 
   void setColorScaleAutoSlice() ;
 
+  void setColorMapBackground(int r, int g, int b);
+
   void setTransparentZeros(bool transparent);
 
 

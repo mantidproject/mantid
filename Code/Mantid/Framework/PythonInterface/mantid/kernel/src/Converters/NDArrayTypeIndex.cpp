@@ -33,6 +33,8 @@ namespace Mantid
 #endif
       DEFINE_TYPE_MAPPING(uint64_t, NPY_UINT64);
       DEFINE_TYPE_MAPPING(double, NPY_DOUBLE);
+      DEFINE_TYPE_MAPPING(float, NPY_FLOAT);
+
     }
   }
 }

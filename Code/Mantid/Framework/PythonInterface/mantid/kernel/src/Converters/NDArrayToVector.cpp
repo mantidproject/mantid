@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
-#include "MantidPythonInterface/kernel/Converters/NDArrayToVectorConverter.h"
+#include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/kernel/Converters/NDArrayTypeIndex.h"
 #include <boost/python/extract.hpp>
 

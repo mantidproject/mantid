@@ -1,4 +1,5 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidPythonInterface/kernel/Converters/MatrixToNDArray.h"
 #include "MantidPythonInterface/kernel/NumpyConverters.h"
 #include <boost/python/class.hpp>
 
@@ -14,7 +15,7 @@ namespace //<unnamed>
   /// Return the U matrix as a 2D numpy array
   PyObject * getU(OrientedLattice &self)
   {
-    return Numpy::wrapWithReadOnlyNumpy(self.getU());
+    return Converters::MatrixToNDArray<double, Converters::WrapReadOnly>()(self.getU());
   }
 
   /// Set the U vector via a numpy array
@@ -26,7 +27,7 @@ namespace //<unnamed>
   /// Return the U matrix as a 2D numpy array
   PyObject * getUB(OrientedLattice &self)
   {
-    return Numpy::wrapWithReadOnlyNumpy(self.getUB());
+    return Converters::MatrixToNDArray<double, Converters::WrapReadOnly>()(self.getUB());
   }
 
   /// Set the U vector via a numpy array

@@ -67,6 +67,7 @@ public:
   void setColorScaleMax(double max);
   void setColorScaleLog(bool log);
   void setColorScale(double min, double max, bool log);
+  void setColorMapBackground(int r, int g, int b);
   double getColorScaleMin() const;
   double getColorScaleMax() const;
   bool getColorScaleLog() const;

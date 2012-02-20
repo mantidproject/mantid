@@ -891,6 +891,25 @@ void SliceViewer::setColorScaleAutoSlice()
    
 %End
 
+  void setColorMapBackground(int r, int g, int b);
+%Docstring
+void SliceViewer::setColorMapBackground(int r, int g, int b)
+------------------------------------------------------------
+    Set the "background" color to use in the color map. Default is white.
+   
+    This is the color that is shown when:
+   
+     - The coordinate is out of bounds of the workspace.
+     - When a signal is NAN (not-a-number).
+     - When the signal is Zero, if that option is selected using setTransparentZeros()
+   
+    Args:
+        r :: red component, from 0-255
+        g :: green component, from 0-255
+        b :: blue component, from 0-255
+   
+%End
+
   void setTransparentZeros(bool transparent);
 %Docstring
 void SliceViewer::setTransparentZeros(bool transparent)
