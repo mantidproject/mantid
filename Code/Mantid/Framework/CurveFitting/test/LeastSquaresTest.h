@@ -78,10 +78,46 @@ public:
     BFGS_Minimizer s;
     s.initialize(costFun);
     TS_ASSERT(s.minimize());
-    TS_ASSERT_DELTA(costFun->val(),0.0,1e-10);
-    TS_ASSERT_DELTA(fun->getParameter("Height"),3.3,1e-10);
-    TS_ASSERT_DELTA(fun->getParameter("Lifetime"),4.4,1e-10);
+    TS_ASSERT_DELTA(costFun->val(),0.0,1e-7);
+    TS_ASSERT_DELTA(fun->getParameter("Height"),9.9,1e-4);
+    TS_ASSERT_DELTA(fun->getParameter("Lifetime"),0.5,1e-4);
     TS_ASSERT_EQUALS(s.getError(),"success");
+
+  }
+
+  void test_val_deriv_valAndDeriv()
+  {
+    const double a = 1.0;
+    const double b = 2.0;
+    std::vector<double> x(3),y(3);
+    x[0] = 0.; y[0] = a * x[0] + b; // == 2.0
+    x[1] = 1.; y[1] = a * x[1] + b; // == 3.0
+    x[2] = 2.; y[2] = a * x[2] + b; // == 4.0
+    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1D(x));
+    API::FunctionValues_sptr values(new API::FunctionValues(*domain));
+    values->setFitData(y);
+    values->setFitWeights(1.0);
+
+    boost::shared_ptr<UserFunction> fun(new UserFunction);
+    fun->setAttributeValue("Formula","a*x+b");
+    fun->setParameter("a",1.1);
+    fun->setParameter("b",2.2);
+
+    boost::shared_ptr<CostFuncLeastSquares> costFun(new CostFuncLeastSquares);
+    costFun->setFittingFunction(fun,domain,values);
+    TS_ASSERT_DELTA(costFun->val(), 0.29, 1e-10); // == 0.2^2 + 0.3^2 + 0.4^2
+
+    std::vector<double> der;
+    costFun->deriv(der);
+    TS_ASSERT_EQUALS(der.size(),2);
+    TS_ASSERT_DELTA(der[0], 2.2, 1e-10); // == 2*(0 * 0.2 + 1 * 0.3 + 2 * 0.4)
+    TS_ASSERT_DELTA(der[1], 1.8, 1e-10); // == 2*(1 * 0.2 + 1 * 0.3 + 1 * 0.4)
+
+    std::vector<double> der1;
+    TS_ASSERT_DELTA(costFun->valAndDeriv(der1),0.29,1e-10);
+    TS_ASSERT_EQUALS(der1.size(),2);
+    TS_ASSERT_DELTA(der1[0], 2.2, 1e-10);
+    TS_ASSERT_DELTA(der1[1], 1.8, 1e-10);
   }
 
 };

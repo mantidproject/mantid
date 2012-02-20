@@ -17,11 +17,11 @@ double CostFuncLeastSquares::val() const
 {
   checkValidity();
   m_function->function(*m_domain,*m_values);
-  size_t n = nParams();
+  size_t ny = m_values->size();
 
   double retVal = 0.0;
 
-  for (size_t i = 0; i < n; i++)
+  for (size_t i = 0; i < ny; i++)
   {
     double val = ( m_values->getCalculated(i) - m_values->getFitData(i) ) * m_values->getFitWeight(i);
     retVal += val * val;
@@ -85,7 +85,7 @@ double CostFuncLeastSquares::valAndDeriv(std::vector<double>& der) const
       double obs = m_values->getFitData(i);
       double y = ( calc - obs ) * m_values->getFitWeight(i);
       d += y * jacobian.get(i,ip);
-      if (i == 0)
+      if (ip == 0)
       {
         fVal += y * y;
       }
