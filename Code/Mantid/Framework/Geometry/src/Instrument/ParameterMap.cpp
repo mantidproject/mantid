@@ -373,7 +373,7 @@ namespace Mantid
         {
           const ComponentID id = comp->getComponentID();
           pmap_cit it_found = m_map.find(id);
-          if( it_found != m_map.end() )
+          if( it_found->first && it_found != m_map.end() )
           {
             pmap_cit itr = m_map.lower_bound(id);
             pmap_cit itr_end = m_map.upper_bound(id);
