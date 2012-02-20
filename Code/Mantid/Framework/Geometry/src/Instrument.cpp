@@ -465,6 +465,19 @@ namespace Mantid
       return det->isMonitor();
     }
 
+    bool Instrument::isMonitor(const std::set<detid_t> &detector_ids) const
+    {
+      if (detector_ids.empty())
+        return false;
+
+      for (std::set<detid_t>::const_iterator it = detector_ids.begin(); it != detector_ids.end(); ++it)
+      {
+        if (this->isMonitor(*it))
+          return true;
+      }
+      return false;
+    }
+
     //--------------------------------------------------------------------------
     /** Is the detector with the given ID masked?
      *
