@@ -314,7 +314,7 @@ void LineViewer::apply()
         + "," + Strings::toString(planeWidth*2.0) + ",1" );
 
   // Now each remaining dimension
-  std::string dimChars = "XYZT"; // SlicingAlgorithm::getDimensionChars();
+  std::string dimChars = "012345"; // SlicingAlgorithm::getDimensionChars();
   size_t propNum = 2;
   for (int d=0; d<int(m_ws->getNumDims()); d++)
   {

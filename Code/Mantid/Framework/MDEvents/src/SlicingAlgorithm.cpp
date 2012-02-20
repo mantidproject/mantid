@@ -112,7 +112,7 @@ namespace MDEvents
    * If the workspace being binned has an original workspace, then the vector
    * is transformed to THOSE coordinates.
    *
-   *  "Format: 'name, units, x,y,z,.., length, number_of_bins'.\n"
+   *  "Format: 'name, units, x,y,z,..'.\n"
    * Adds values to m_bases, m_binDimensions and m_scaling
    *
    * @param str :: name,number_of_bins
@@ -122,7 +122,7 @@ namespace MDEvents
     std::string input = Strings::strip(str);
     if (input.empty())
       return;
-    if (input.size() < 4)
+    if (input.size() < 3)
       throw std::invalid_argument("Dimension string is too short to be valid: " + str);
 
     size_t n_first_comma = std::string::npos;
@@ -227,8 +227,8 @@ namespace MDEvents
     size_t inD = m_inWS->getNumDims();
 
     // Create the dimensions based on the strings from the user
-    std::string dimChars = "XYZT";
-    for (size_t i=0; i<4; i++)
+    std::string dimChars = this->getDimensionChars();
+    for (size_t i=0; i<dimChars.size(); i++)
     {
       std::string propName = "BasisVector0"; propName[11] = dimChars[i];
       try
@@ -294,9 +294,11 @@ namespace MDEvents
 
     // Validate
     if (m_transform->getInD() != inD)
-      throw std::invalid_argument("The number of input dimensions in the CoordinateTransform object is not consistent with the number of dimensions in the input workspace.");
+      throw std::invalid_argument("The number of input dimensions in the CoordinateTransform "
+          "object is not consistent with the number of dimensions in the input workspace.");
     if (m_transform->getOutD() != m_outD)
-      throw std::invalid_argument("The number of output dimensions in the CoordinateTransform object is not consistent with the number of dimensions specified in the OutDimX, etc. properties.");
+      throw std::invalid_argument("The number of output dimensions in the CoordinateTransform "
+          "object is not consistent with the number of dimensions specified in the OutDimX, etc. properties.");
 
     // Now the reverse transformation
     m_transformToOriginal = NULL;
@@ -358,7 +360,8 @@ namespace MDEvents
       std::vector<std::string> strs;
       boost::split(strs, input, boost::is_any_of(","));
       if (strs.size() != 3)
-        throw std::invalid_argument("Wrong number of values (3 are expected) after the name in the dimensions string: " + str);
+        throw std::invalid_argument("Wrong number of values (3 are expected) after the name "
+            "in the dimensions string: " + str);
 
       // Extract the arguments
       coord_t min, max;
@@ -388,7 +391,8 @@ namespace MDEvents
         }
         catch (std::runtime_error &)
         {
-          throw std::runtime_error("Dimension " + name + " was not found in the MDEventWorkspace! Cannot continue.");
+          throw std::runtime_error("Dimension " + name + " was not found in the "
+              "MDEventWorkspace! Cannot continue.");
         }
       }
 
@@ -407,12 +411,12 @@ namespace MDEvents
    */
   void SlicingAlgorithm::createAlignedTransform()
   {
-    std::string dimChars = "XYZT";
+    std::string dimChars = this->getDimensionChars();
 
     // Validate inputs
     bool previousWasEmpty = false;
     size_t numDims = 0;
-    for (size_t i=0; i<4; i++)
+    for (size_t i=0; i<dimChars.size(); i++)
     {
       std::string propName = "AlignedDim0"; propName[10] = dimChars[i];
       std::string prop = Strings::strip(getPropertyValue(propName));

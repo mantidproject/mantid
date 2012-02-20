@@ -1584,7 +1584,7 @@ void SliceViewer::openFromXML(const QString & xml)
   // For 4D workspace, the value of the "time"
   double TimeValue = 0.0;
 
-  std::string dimChars = "XYZT";
+  std::string dimChars = "012345";
   for (size_t ind=0; ind<4; ind++)
   {
     // X, Y, Z, or T

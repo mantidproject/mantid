@@ -56,7 +56,7 @@ namespace MDEvents
     SlicingAlgorithm();
     ~SlicingAlgorithm();
     
-    ///@return a string with the character that identifies each dimension in order (XYZT)
+    ///@return a string with the character that identifies each dimension in order (01234)
     static std::string getDimensionChars()
     { return "012345"; }
 
