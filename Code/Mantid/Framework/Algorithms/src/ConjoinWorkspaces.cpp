@@ -198,12 +198,15 @@ void ConjoinWorkspaces::exec()
   this->fixSpectrumNumbers(ws1,ws2, output);
 
   // Delete the second input workspace from the ADS
-  std::string workspace2Name = getPropertyValue("InputWorkspace2");
-  if (workspace2Name.empty())
-    AnalysisDataService::Instance().remove(workspace2Name);
+  if (!getPropertyValue("InputWorkspace2").empty())
+    AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace2"));
 
   // Set the result workspace to the first input
   setProperty("InputWorkspace1",output);
+//
+//  // Create & assign an output workspace property with the workspace name the same as the first input
+//  declareProperty(new WorkspaceProperty<>("Output",getPropertyValue("InputWorkspace1"),Direction::Output));
+//  setProperty("Output", boost::dynamic_pointer_cast<MatrixWorkspace>(output) );
 }
 
 
@@ -288,8 +291,10 @@ void ConjoinWorkspaces::execEvent()
   this->fixSpectrumNumbers(event_ws1, event_ws2, output);
 
   // Delete the input workspaces from the ADS
-  AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace1"));
-  AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace2"));
+  if (!getPropertyValue("InputWorkspace1").empty())
+    AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace1"));
+  if (!getPropertyValue("InputWorkspace2").empty())
+    AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace2"));
 
   // Create & assign an output workspace property with the workspace name the same as the first input
   declareProperty(new WorkspaceProperty<>("Output",getPropertyValue("InputWorkspace1"),Direction::Output));
