@@ -486,8 +486,10 @@ namespace Mantid
          return false;
       // Access the parameter map directly.
       Parameter_sptr maskedParam = m_map->get(det, "masked");
+      if (!maskedParam)
+        return false;
       // If the parameter is defined, then yes, it is masked.
-      return bool(maskedParam);
+      return maskedParam->value<bool>();
     }
 
     //--------------------------------------------------------------------------
