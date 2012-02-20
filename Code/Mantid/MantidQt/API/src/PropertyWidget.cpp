@@ -30,8 +30,10 @@ namespace API
       this->setLayout(m_gridLayout);
       // Will always go to row 0
       m_row = 0;
-//      this->setStyleSheet(          "QWidget { border: 1px solid gray;  }"          );
+      m_parent = parent;
     }
+    else
+      m_parent = this;
 
 //    // Create the validator label (that red star)
 //    m_validLbl = new QLabel("*");
@@ -49,7 +51,7 @@ namespace API
     IWorkspaceProperty * wsProp = dynamic_cast<IWorkspaceProperty*>(m_prop);
     if (wsProp && (m_prop->direction() == Direction::Output) )
     {
-      m_replaceWSButton = new QPushButton(QIcon(":/data_replace.png"), "", this);
+      m_replaceWSButton = new QPushButton(QIcon(":/data_replace.png"), "", m_parent);
       // MG: There is no way with the QIcon class to actually ask what size it is so I had to hard
       // code this number here to get it to a sensible size
       m_replaceWSButton->setMaximumWidth(32);

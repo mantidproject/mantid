@@ -15,7 +15,7 @@ namespace API
   BoolPropertyWidget::BoolPropertyWidget(Mantid::Kernel::PropertyWithValue<bool> * prop, QWidget * parent, QGridLayout * layout, int row)
   : PropertyWidget(prop, parent, layout, row)
   {
-    m_checkBox = new QCheckBox(QString::fromStdString(prop->name()), this);
+    m_checkBox = new QCheckBox(QString::fromStdString(prop->name()), m_parent);
     m_checkBox->setToolTip(m_doc);
     connect(m_checkBox, SIGNAL(stateChanged(int)), this, SLOT(valueChangedSlot()));
     m_widgets.push_back(m_checkBox);

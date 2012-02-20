@@ -90,6 +90,9 @@ namespace API
     /// Grid layout of the dialog to which we are adding widgets
     QGridLayout * m_gridLayout;
 
+    /// Parent widget to add sub-widgets to.
+    QWidget * m_parent;
+
     /// If using the GridLayout, this is the row where the widget was inserted.
     int m_row;
 
