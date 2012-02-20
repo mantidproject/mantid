@@ -69,7 +69,7 @@ namespace API
     int getGridRow()
     {return m_row; }
 
-    void showReplaceWSButton(bool show);
+    void addReplaceWSButton();
 
   public slots:
     void replaceWSButtonClicked();

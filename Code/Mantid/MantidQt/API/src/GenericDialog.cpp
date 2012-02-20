@@ -169,9 +169,11 @@ void GenericDialog::initLayout()
 
       // Create the appropriate widget at this row in the grid.
       PropertyWidget * widget = PropertyWidgetFactory::createWidget(prop, this, m_currentGrid, row);
+//      PropertyWidget * widget = PropertyWidgetFactory::createWidget(prop, this, NULL);
+//      m_currentGrid->addWidget(widget, row, 0);
 
       // Record in the list of tied widgets (used in the base AlgorithmDialog)
-      tie(widget, propName, m_currentGrid);
+      tie(widget, propName, widget->getGridLayout());
 
       // Whenever the value changes in the widget, this fires propertyChanged()
       connect(widget, SIGNAL( valueChanged(const QString &)), this, SLOT(propertyChanged(const QString &)));
@@ -180,7 +182,8 @@ void GenericDialog::initLayout()
       connect(widget, SIGNAL( replaceWorkspaceName(const QString &)), this, SLOT(replaceWSClicked(const QString &)));
 
       // Only show the "Replace Workspace" button if the algorithm has an input workspace.
-      widget->showReplaceWSButton(hasInputWS);
+      if (hasInputWS)
+        widget->addReplaceWSButton();
 
       ++row;
     } //(end for each property)
@@ -232,7 +235,6 @@ void GenericDialog::initLayout()
  */
 void GenericDialog::hideOrDisableProperties()
 {
-  //std::cout << "hideOrDisableProperties===========================================================\n";
   QStringList::const_iterator pend = m_algProperties.end();
   for( QStringList::const_iterator pitr = m_algProperties.begin(); pitr != pend; ++pitr )
   {
@@ -279,8 +281,6 @@ void GenericDialog::hideOrDisableProperties()
         // Always show controls that are in error
         if (error.length() != 0)
           visible = true;
-
-        //std::cout << prop->name() << " enabled " << enabled << " visible " << visible << std::endl;
 
         // Hide/disable the widget
         propWidget->setEnabled( enabled );
