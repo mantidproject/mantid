@@ -84,7 +84,7 @@ namespace Mantid
       /// Mask the outlier values to get a better median value
       int maskOutliers(const double median, API::MatrixWorkspace_sptr countsWS);
       /// Do the tests and mask those that fail
-      int doDetectorTests(const API::MatrixWorkspace_sptr countsWS, const double median);
+      int doDetectorTests(const API::MatrixWorkspace_sptr countsWS, const double median, API::MatrixWorkspace_sptr maskWS);
 
       /// Input workspace
       API::MatrixWorkspace_sptr m_inputWS;

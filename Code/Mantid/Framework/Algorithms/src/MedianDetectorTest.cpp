@@ -95,9 +95,7 @@ namespace Mantid
       MatrixWorkspace_sptr countsWS = integrateSpectra(m_inputWS, m_minSpec, m_maxSpec,
                                                        m_rangeLower, m_rangeUpper, true);
 
-      // Make sure the output is simple
-      countsWS->setYUnit("");
-      countsWS->instrumentParameters();
+      MatrixWorkspace_sptr maskWS = this->generateEmptyMask(countsWS);
 
       // 1. Calculate the median
       const bool excludeZeroes = getProperty("ExcludeZeroesFromMedian");
@@ -109,17 +107,11 @@ namespace Mantid
       median = calculateMedian(countsWS, excludeZeroes);
       g_log.information() << "Median value with outliers removed = " << median << "\n";
 
-      numFailed  += doDetectorTests(countsWS, median);
+      numFailed  += doDetectorTests(countsWS, median, maskWS);
       g_log.information() << "Median test results:\n"
                        << "\tNumber of failures - " << numFailed << "\n";
 
       setProperty("NumberOfFailures", numFailed);
-
-      // extract and set the mask result
-      IAlgorithm_sptr childAlg = createSubAlgorithm("ExtractMask");
-      childAlg->setProperty( "InputWorkspace", countsWS );
-      childAlg->executeAsSubAlg();
-      MatrixWorkspace_sptr maskWS = childAlg->getProperty("OutputWorkspace");
       setProperty("OutputWorkspace", maskWS);
     }
 
@@ -247,7 +239,7 @@ namespace Mantid
      * @return The number of detectors that failed the tests, not including those skipped
      */
     int MedianDetectorTest::doDetectorTests(const API::MatrixWorkspace_sptr countsWS,
-                                            const double median)
+                                            const double median, API::MatrixWorkspace_sptr maskWS)
     {
       g_log.debug("Applying the criteria to find failing detectors");
       // A spectra can't fail if the statistics show its value is consistent with the mean value, 
@@ -258,7 +250,7 @@ namespace Mantid
       const int numSpec(m_maxSpec - m_minSpec);
       const int progStep = static_cast<int>(ceil(numSpec/30.0));
 
-      const double live_value(1.0);
+      const double deadValue(1.0);
       int numFailed(0);
 
       bool checkForMask = false;
@@ -268,7 +260,7 @@ namespace Mantid
         checkForMask = ((instrument->getSource() != NULL) && (instrument->getSample() != NULL));
       }
 
-      PARALLEL_FOR1(countsWS)
+      PARALLEL_FOR2(countsWS, maskWS)
       for (int i = 0; i <= numSpec; ++i)
       {
         PARALLEL_START_INTERUPT_REGION
@@ -284,13 +276,12 @@ namespace Mantid
           const std::set<detid_t>& detids = countsWS->getSpectrum(i)->getDetectorIDs();
           if (instrument->isDetectorMasked(detids))
           {
-            countsWS->dataY(i)[0] = 0.0;
+            maskWS->dataY(i)[0] = deadValue;
             continue;
           }
           if (instrument->isMonitor(detids))
           {
             // Don't include in calculation but don't mask it
-            countsWS->dataY(i)[0] = live_value;
           }
         }
 
@@ -298,7 +289,7 @@ namespace Mantid
         // Mask out NaN and infinite
         if( boost::math::isinf(signal) || boost::math::isnan(signal) )
         {
-          countsWS->maskWorkspaceIndex(i);
+          maskWS->dataY(i)[0] = deadValue;
           PARALLEL_ATOMIC
           ++numFailed;
           continue;
@@ -309,16 +300,10 @@ namespace Mantid
         if( (signal < median*m_loFrac && (signal-median < -error)) ||
             (signal > median*m_hiFrac && (signal-median > error)) )
         {
-          countsWS->maskWorkspaceIndex(i);
+          maskWS->dataY(i)[0] = deadValue;
           PARALLEL_ATOMIC
           ++numFailed;
         }
-        else
-        {
-          // Reaching here passes the tests
-          countsWS->dataY(i)[0] = live_value;
-        }
-
         
         PARALLEL_END_INTERUPT_REGION
       }
