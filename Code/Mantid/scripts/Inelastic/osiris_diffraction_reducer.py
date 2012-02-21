@@ -31,23 +31,24 @@ class OsirisDiffractionReducer(Reducer):
         self.append_step(step)
 
     def post_process(self):
-        sam = self._reduction_steps[0]._sam_files
-        van = self._reduction_steps[0]._van_files
+        sams = self._reduction_steps[0]._sam_files
+        vans = self._reduction_steps[0]._van_files
         if self._verbose:
-            print sam
-            print van
-        if ( len(sam) != len(van) ):
-            raise RuntimeError("Something weird be happening.")
+            print sams
+            print vans
+        assert len(sams) == len(vans), "There are a different number of sample workspaces to vanadium workspaces."
         wsl = []
-        for i in range(1,6):
+        # zip together to allow looping over both maps, but in lock-step
+        for sam, van in zip(sams.itervalues(), vans.itervalues()):
             # Delete Vanadium workspaces
-            DeleteWorkspace(van[i])
-            wsl.append(sam[i])
+            DeleteWorkspace(van)
+            # Append sample workspace
+            wsl.append(sam)
         if self._result_workspace is None:
             self._result_workspace = wsl[0] + '-to-' + wsl[4][3:]
         MergeRuns(','.join(wsl), self._result_workspace)
-        for i in range(1,6):
-            DeleteWorkspace(sam[i])
+        for sam in sams.itervalues():
+            DeleteWorkspace(sam)
         # Divide/scale _result_workspace
         scale = self._create_scalar()
         Divide(self._result_workspace, scale, self._result_workspace)
