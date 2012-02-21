@@ -1347,7 +1347,7 @@ void MuonAnalysis::getDeadTimeFromFile(const QString & fileName)
       {
         std::vector<std::string> groupNames(deadTimeTables->getNames() );
 
-        int numData(0); // Number of data sets under muon analysis.
+        size_t numData(0); // Number of data sets under muon analysis.
         if (Mantid::API::AnalysisDataService::Instance().doesExist(m_workspace_name) )
         {
           ++numData;
@@ -1367,7 +1367,7 @@ void MuonAnalysis::getDeadTimeFromFile(const QString & fileName)
         if (numData == groupNames.size() )
         {
           bool allTables(true);
-          for (int i=0; i<groupNames.size(); ++i)
+          for (size_t i=0; i<groupNames.size(); ++i)
           {
             deadTimeTable = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(groupNames[i] ) );
             if (!deadTimeTable)
@@ -1375,7 +1375,7 @@ void MuonAnalysis::getDeadTimeFromFile(const QString & fileName)
           }
           if (allTables == true)
           {
-            for (int i=0; i<groupNames.size(); ++i)
+            for (size_t i=0; i<groupNames.size(); ++i)
             {
               std::string workspaceName("");
 
