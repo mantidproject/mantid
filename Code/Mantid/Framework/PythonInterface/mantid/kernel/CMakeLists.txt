@@ -43,9 +43,12 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/Converters/MatrixToNDArray.h
   ${HEADER_DIR}/kernel/Converters/NDArrayToVector.h
   ${HEADER_DIR}/kernel/Converters/NDArrayTypeIndex.h
+  ${HEADER_DIR}/kernel/Converters/NumpyWrapMode.h
   ${HEADER_DIR}/kernel/Converters/VectorToNDArray.h
   ${HEADER_DIR}/kernel/Converters/PyArrayType.h
   ${HEADER_DIR}/kernel/Converters/PySequenceToVector.h
+  ${HEADER_DIR}/kernel/Policies/MatrixToNumpy.h
+  ${HEADER_DIR}/kernel/Policies/VectorToNumpy.h
   ${HEADER_DIR}/kernel/Policies/upcast_returned_value.h
   ${HEADER_DIR}/kernel/Registry/PropertyValueHandler.h
   ${HEADER_DIR}/kernel/Registry/RegisterSingleValueHandler.h

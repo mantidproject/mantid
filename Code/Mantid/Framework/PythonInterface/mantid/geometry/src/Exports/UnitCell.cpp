@@ -1,5 +1,7 @@
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidPythonInterface/kernel/Converters/MatrixToNDArray.h"
+#include "MantidPythonInterface/kernel/Policies/MatrixToNumpy.h"
+
 #include "MantidPythonInterface/kernel/NumpyConverters.h"
 #include <boost/python/class.hpp>
 #include <boost/python/enum.hpp>
@@ -18,25 +20,6 @@ namespace //<unnamed>
 {
   using namespace Mantid::PythonInterface;
 
-  /// Pass-through function to return the B matrix as a numpy array
-  PyObject * getB(UnitCell& self)
-  {
-    return Converters::MatrixToNDArray<double, Converters::WrapReadOnly>()(self.getB());
-  }
-
-  /// Pass-through function to return the B matrix as a numpy array
-  PyObject * getG(UnitCell& self)
-  {
-    return Converters::MatrixToNDArray<double, Converters::WrapReadOnly>()(self.getG());
-  }
-
-
-  /// Pass-through function to return the B matrix as a numpy array
-  PyObject * getGstar(UnitCell& self)
-  {
-    return Converters::MatrixToNDArray<double, Converters::WrapReadOnly>()(self.getGstar());
-  }
-
   /// Pass-through function to set the unit cell from a 2D numpy array
   void recalculateFromGstar(UnitCell & self, PyObject* values)
   {
@@ -51,6 +34,9 @@ void export_UnitCell()
     .value("Degrees", angDegrees)
     .value("Radians", angRadians)
     .export_values();     
+
+  /// return_value_policy for read-only numpy array
+  typedef return_value_policy<Policies::MatrixToNumpy<Converters::WrapReadOnly> > return_readonly_numpy;
 
   class_< UnitCell >( "UnitCell", init< >() )    
     .def( init<UnitCell const &>(arg("other") ) )     
@@ -93,9 +79,9 @@ void export_UnitCell()
     .def( "setc", (void ( UnitCell::* )( double ) )( &UnitCell::setc ), ( arg("_c") ) )    
     .def( "setgamma", (void ( UnitCell::* )( double,int const ) )( &UnitCell::setgamma ), ( arg("_gamma"), arg("Unit")=(int)(angDegrees) ) )
     .def( "volume", (double ( UnitCell::* )() const) &UnitCell::volume)
-    .def( "getG", &getG)
-    .def( "getGstar", &getGstar)
-    .def( "getB", &getB )
+    .def( "getG", &UnitCell::getG, return_readonly_numpy())
+    .def( "getGstar", &UnitCell::getGstar, return_readonly_numpy())
+    .def( "getB", &UnitCell::getB, return_readonly_numpy() )
     .def( "recalculateFromGstar", &recalculateFromGstar)
     ;
 

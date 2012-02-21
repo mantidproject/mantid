@@ -15,17 +15,19 @@ namespace Mantid { namespace PythonInterface
     namespace Impl
     {
       /**
+       * Defines the wrapWithNDArray specialization for Matrix container types
+       *
        * Wraps a vector in a numpy array structure without copying the data
-       * @param cvector :: A reference to the std::vector to wrap
+       * @param cmatrix :: A reference to the Matrix wrap
        * @param mode :: A mode switch to define whether the final array is read only/read-write
        * @return A pointer to a numpy ndarray object
        */
-      template<typename ElementType>
-      PyObject *wrapWithNDArray(const Kernel::Matrix<ElementType> & cmatrix, const WrapMode mode)
+      template<typename ContainerType>
+      PyObject *wrapWithNDArray(const ContainerType & cmatrix, const NumpyWrapMode mode)
       {
         std::pair<size_t,size_t> matrixDims = cmatrix.size();
         npy_intp dims[2] =  {matrixDims.first, matrixDims.second};
-        int datatype = NDArrayTypeIndex<ElementType>::typenum;
+        int datatype = NDArrayTypeIndex<typename ContainerType::value_type>::typenum;
         PyObject * ndarray = PyArray_SimpleNewFromData(2, dims, datatype,(void*)&(cmatrix[0][0]));
         if( mode == ReadOnly )
         {
@@ -38,7 +40,7 @@ namespace Mantid { namespace PythonInterface
       // Explicit instantiations
       //-----------------------------------------------------------------------
       #define INSTANTIATE(ElementType) \
-        template DLLExport PyObject * wrapWithNDArray<ElementType>(const Kernel::Matrix<ElementType> &, const WrapMode);
+        template DLLExport PyObject * wrapWithNDArray<Kernel::Matrix<ElementType> >(const Kernel::Matrix<ElementType> &, const NumpyWrapMode);
 
       INSTANTIATE(int);
       INSTANTIATE(float);

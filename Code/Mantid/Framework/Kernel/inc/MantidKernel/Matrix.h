@@ -43,6 +43,10 @@ namespace Mantid
     template<typename T>
     class DLLExport Matrix
     {
+    public:
+      /// Enable users to retrive the element type
+      typedef T value_type;
+
     private:
 
       size_t nx;      ///< Number of rows    (x coordinate)

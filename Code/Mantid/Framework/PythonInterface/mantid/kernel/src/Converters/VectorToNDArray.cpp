@@ -10,22 +10,24 @@
 #include <numpy/arrayobject.h>
 
 namespace Mantid { namespace PythonInterface
-{
+  {
   namespace Converters
   {
     namespace Impl
     {
       /**
+       * Defines the wrapWithNDArray specialization for vector container types
+       *
        * Wraps a vector in a numpy array structure without copying the data
        * @param cvector :: A reference to the std::vector to wrap
        * @param mode :: A mode switch to define whether the final array is read only/read-write
        * @return A pointer to a numpy ndarray object
        */
-      template<typename VectorType>
-      PyObject *wrapWithNDArray(const VectorType & cvector, const WrapMode mode)
+      template<typename ContainerType>
+      PyObject *wrapWithNDArray(const ContainerType & cvector, const NumpyWrapMode mode)
       {
         npy_intp dims[1] = { cvector.size() };
-        int datatype = NDArrayTypeIndex<typename VectorType::value_type>::typenum;
+        int datatype = NDArrayTypeIndex<typename ContainerType::value_type>::typenum;
         PyObject *nparray = PyArray_SimpleNewFromData(1, dims, datatype,(void*)&(cvector[0]));
         if( mode == ReadOnly )
         {
@@ -40,11 +42,11 @@ namespace Mantid { namespace PythonInterface
        * @param cvector :: A reference to a std::vector
        * @return
        */
-      template<typename VectorType>
-      PyObject *cloneToNDArray(const VectorType & cvector)
+      template<typename ContainerType>
+      PyObject *cloneToNDArray(const ContainerType & cvector)
       {
         npy_intp dims[1] = { cvector.size() };
-        int datatype = NDArrayTypeIndex<typename VectorType::value_type>::typenum;
+        int datatype = NDArrayTypeIndex<typename ContainerType::value_type>::typenum;
         PyArrayObject *nparray = (PyArrayObject *)PyArray_NewFromDescr(&PyArray_Type,
             PyArray_DescrFromType(datatype),
             1, // rank 1
@@ -59,20 +61,21 @@ namespace Mantid { namespace PythonInterface
       //-----------------------------------------------------------------------
       // Explicit instantiations
       //-----------------------------------------------------------------------
-      #define INSTANTIATE(VectorType) \
-        template DLLExport PyObject * wrapWithNDArray<VectorType>(const VectorType &, const WrapMode);\
-        template DLLExport PyObject * cloneToNDArray<VectorType>(const VectorType &);
+      #define INSTANTIATE(ElementType) \
+        template DLLExport PyObject * wrapWithNDArray<std::vector<ElementType> >(const std::vector<ElementType> &, const NumpyWrapMode);\
+        template DLLExport PyObject * cloneToNDArray<std::vector<ElementType> >(const std::vector<ElementType> &);
 
-      INSTANTIATE(std::vector<int16_t>);
-      INSTANTIATE(std::vector<uint16_t>);
-      INSTANTIATE(std::vector<int32_t>);
-      INSTANTIATE(std::vector<uint32_t>);
-      INSTANTIATE(std::vector<int64_t>);
-      INSTANTIATE(std::vector<uint64_t>);
+      INSTANTIATE(int16_t);
+      INSTANTIATE(uint16_t);
+      INSTANTIATE(int32_t);
+      INSTANTIATE(uint32_t);
+      INSTANTIATE(int64_t);
+      INSTANTIATE(uint64_t);
 #ifdef __APPLE__
-      INSTANTIATE(std::vector<unsigned long>);
+      INSTANTIATE(unsigned long);
 #endif
-      INSTANTIATE(std::vector<double>);
+      INSTANTIATE(double);
+
     }
   }
 }}

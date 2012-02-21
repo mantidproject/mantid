@@ -1,5 +1,6 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidPythonInterface/kernel/Converters/MatrixToNDArray.h"
+#include "MantidPythonInterface/kernel/Policies/MatrixToNumpy.h"
 #include "MantidPythonInterface/kernel/NumpyConverters.h"
 #include <boost/python/class.hpp>
 
@@ -12,22 +13,10 @@ namespace //<unnamed>
 {
   using namespace Mantid::PythonInterface;
 
-  /// Return the U matrix as a 2D numpy array
-  PyObject * getU(OrientedLattice &self)
-  {
-    return Converters::MatrixToNDArray<double, Converters::WrapReadOnly>()(self.getU());
-  }
-
   /// Set the U vector via a numpy array
   void setU(OrientedLattice & self, PyObject *data)
   {
     self.setU(Numpy::createDoubleMatrix(data));
-  }
-
-  /// Return the U matrix as a 2D numpy array
-  PyObject * getUB(OrientedLattice &self)
-  {
-    return Converters::MatrixToNDArray<double, Converters::WrapReadOnly>()(self.getUB());
   }
 
   /// Set the U vector via a numpy array
@@ -47,6 +36,9 @@ namespace //<unnamed>
 
 void export_OrientedLattice()
 {
+  /// return_value_policy for read-only numpy array
+  typedef return_value_policy<Policies::MatrixToNumpy<Converters::WrapReadOnly> > return_readonly_numpy;
+
   class_<OrientedLattice, bases<UnitCell> >("OrientedLattice", init< >())
     .def( init< OrientedLattice const & >(( arg("other") )) )
     .def( init< double, double, double >(( arg("_a"), arg("_b"), arg("_c") )) )
@@ -55,9 +47,9 @@ void export_OrientedLattice()
     .def( init<UnitCell>( arg("uc") ) )
     .def( "getuVector", (&OrientedLattice::getuVector))
     .def( "getvVector", (&OrientedLattice::getvVector))
-    .def( "getU", &getU )
+    .def( "getU", &OrientedLattice::getU, return_readonly_numpy() )
     .def( "setU", &setU )
-    .def( "getUB",&getUB )
+    .def( "getUB",&OrientedLattice::getUB, return_readonly_numpy() )
     .def( "setUB",&setUB )
     .def( "setUFromVectors", &setUFromVectors)
 

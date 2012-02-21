@@ -22,7 +22,7 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 #include "MantidKernel/System.h"
-#include <boost/python/detail/prefix.hpp>
+#include "MantidPythonInterface/kernel/Converters/NumpyWrapMode.h"
 #include <vector>
 
 namespace Mantid
@@ -31,7 +31,6 @@ namespace Mantid
   {
     namespace Converters
     {
-
       //-----------------------------------------------------------------------
       // Converter implementation
       //-----------------------------------------------------------------------
@@ -42,12 +41,14 @@ namespace Mantid
        * The type of conversion is specified by another struct/class that
        * contains a static member create.
        */
-      template<typename VectorType, typename ConversionPolicy>
+      template<typename ElementType, typename ConversionPolicy>
       struct VectorToNDArray
       {
-        inline PyObject * operator()(const VectorType & cvector) const
+        inline PyObject * operator()(const std::vector<ElementType> & cvector) const
         {
-          typedef typename ConversionPolicy::template apply<VectorType> policy;
+          // Round about way of calling the wrapNDArray template function that is defined
+          // in the cpp file
+          typedef typename ConversionPolicy::template apply<std::vector<ElementType> > policy;
           return policy::create(cvector);
         }
       };
@@ -57,64 +58,14 @@ namespace Mantid
       //-----------------------------------------------------------------------
       namespace Impl
       {
-        enum WrapMode { ReadOnly, ReadWrite };
-
         /**
          * Helper functions to keep the numpy arrayobject header out
          * the header file
          */
-          /// Wrap a numpy array around existing data
-          template<typename VectorType>
-          PyObject *wrapWithNDArray(const VectorType &, const WrapMode);
           /// Clone the data into a new array
           template<typename VectorType>
           PyObject *cloneToNDArray(const VectorType &);
-
       }
-
-      /**
-       * WrapReadOnly is a policy for VectorToNDArray
-       * to wrap the vector in a read-only numpy array
-       * that looks at the original data. No copy is performed
-       */
-      struct WrapReadOnly
-      {
-        template<typename VectorType>
-        struct apply
-        {
-          /**
-           * Returns a read-only Numpy array wrapped around an existing vector
-           * @param cvector
-           * @return
-           */
-          static PyObject * create(const VectorType & cvector)
-          {
-            return Impl::wrapWithNDArray(cvector, Impl::ReadOnly);
-          }
-        };
-      };
-
-      /**
-       * WrapReadWrite is a policy for VectorToNDArray
-       * to wrap the vector in a read-write numpy array
-       * that looks at the original data. No copy is performed
-       */
-      struct WrapReadWrite
-      {
-        template<typename VectorType>
-        struct apply
-        {
-          /**
-           * Returns a read-write Numpy array wrapped around an existing vector
-           * @param cvector
-           * @return
-           */
-          static PyObject * create(const VectorType & cvector)
-          {
-            return Impl::wrapWithNDArray(cvector, Impl::ReadWrite);
-          }
-        };
-      };
 
       /**
        * Clone is a policy for VectorToNDArray
@@ -123,7 +74,7 @@ namespace Mantid
        */
       struct Clone
       {
-        template<typename VectorType>
+        template<typename ContainerType>
         struct apply
         {
           /**
@@ -131,9 +82,9 @@ namespace Mantid
            * @param cvector
            * @return
            */
-          static PyObject * create(const VectorType & cvector)
+          static PyObject * create(const ContainerType & cvector)
           {
-            return Impl::cloneToNDArray<VectorType>(cvector);
+            return Impl::cloneToNDArray<ContainerType>(cvector);
           }
         };
       };

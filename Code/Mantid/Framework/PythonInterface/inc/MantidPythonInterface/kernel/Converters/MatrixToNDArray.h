@@ -23,6 +23,7 @@
  */
 #include "MantidKernel/System.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidPythonInterface/kernel/Converters/NumpyWrapMode.h"
 #include <boost/python/detail/prefix.hpp>
 
 namespace Mantid
@@ -46,7 +47,7 @@ namespace Mantid
       {
         inline PyObject * operator()(const Kernel::Matrix<ElementType> & cmatrix) const
         {
-          typedef typename ConversionPolicy::template apply<ElementType> policy;
+          typedef typename ConversionPolicy::template apply<Kernel::Matrix<ElementType> > policy;
           return policy::create(cmatrix);
         }
       };
@@ -54,61 +55,60 @@ namespace Mantid
       //-----------------------------------------------------------------------
       // Conversion Policies
       //-----------------------------------------------------------------------
-      namespace Impl
-      {
-        enum WrapMode { ReadOnly, ReadWrite };
-        /**
-         * Helper functions to keep the numpy arrayobject header out
-         * the header file
-         */
-        /// Wrap a numpy array around existing data
-        template<typename ElementType>
-        PyObject *wrapWithNDArray(const Kernel::Matrix<ElementType>&, const WrapMode);
-      }
+//      namespace Impl
+//      {
+//        /**
+//         * Helper functions to keep the numpy arrayobject header out
+//         * the header file
+//         */
+//        /// Wrap a numpy array around existing data
+//        template<typename Co>
+//        PyObject *wrapWithNDArray(const Kernel::Matrix<ElementType>&, const NumpyWrapMode);
+//      }
 
-      /**
-       * WrapReadOnly is a policy for VectorToNDArray
-       * to wrap the vector in a read-only numpy array
-       * that looks at the original data. No copy is performed
-       */
-      struct WrapReadOnly
-      {
-        template<typename ElementType>
-        struct apply
-        {
-          /**
-           * Returns a read-only Numpy array wrapped around an existing vector
-           * @param cvector
-           * @return
-           */
-          static PyObject * create(const Kernel::Matrix<ElementType> & cmatrix)
-          {
-            return Impl::wrapWithNDArray(cmatrix, Impl::ReadOnly);
-          }
-        };
-      };
-
-      /**
-       * WrapReadWrite is a policy for MatrixToNDArray
-       * to wrap the vector in a read-write numpy array
-       * that looks at the original data. No copy is performed
-       */
-      struct WrapReadWrite
-      {
-        template<typename ElementType>
-        struct apply
-        {
-          /**
-           * Returns a read-write Numpy array wrapped around an existing vector
-           * @param cvector
-           * @return
-           */
-          static PyObject * create(const Kernel::Matrix<ElementType> & cmatrix)
-          {
-            return Impl::wrapWithNDArray(cmatrix, Impl::ReadWrite);
-          }
-        };
-      };
+//      /**
+//       * WrapReadOnly is a policy for VectorToNDArray
+//       * to wrap the vector in a read-only numpy array
+//       * that looks at the original data. No copy is performed
+//       */
+//      struct WrapReadOnly
+//      {
+//        template<typename ElementType>
+//        struct apply
+//        {
+//          /**
+//           * Returns a read-only Numpy array wrapped around an existing vector
+//           * @param cvector
+//           * @return
+//           */
+//          static PyObject * create(const Kernel::Matrix<ElementType> & cmatrix)
+//          {
+//            return Impl::wrapWithNDArray(cmatrix, ReadOnly);
+//          }
+//        };
+//      };
+//
+//      /**
+//       * WrapReadWrite is a policy for MatrixToNDArray
+//       * to wrap the vector in a read-write numpy array
+//       * that looks at the original data. No copy is performed
+//       */
+//      struct WrapReadWrite
+//      {
+//        template<typename ElementType>
+//        struct apply
+//        {
+//          /**
+//           * Returns a read-write Numpy array wrapped around an existing vector
+//           * @param cvector
+//           * @return
+//           */
+//          static PyObject * create(const Kernel::Matrix<ElementType> & cmatrix)
+//          {
+//            return Impl::wrapWithNDArray(cmatrix, ReadWrite);
+//          }
+//        };
+//      };
 
     }
   }
