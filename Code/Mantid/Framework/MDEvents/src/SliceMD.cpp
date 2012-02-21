@@ -5,6 +5,8 @@ It uses the same parameters as [[BinMD]] to determine a transformation to make f
 The difference is that [[BinMD]] sums events in a regular grid whereas SliceMD moves the events into the output workspace,
 which boxes itself.
 
+Please see [[BinMD]] for a detailed description of the parameters.
+
 === Axis-Aligned Slice ===
 
 Events outside the range of the slice are dropped. The new output
@@ -18,8 +20,9 @@ are along the basis vectors specified.
 
 === Splitting Parameters ===
 
-Instead of specifying a "Number of bins", as in [[BinMD]], you specify the "SplitInto" parameter for each dimension.
-For instance, if you want the output workspace to split in 2x2x2, you would specify a number of "bins" of 2.
+The '''OutputBins''' parameter is interpreted as the "SplitInto" parameter for each dimension.
+For instance, if you want the output workspace to split in 2x2x2,
+you would specify OutputBins="2,2,2".
 
 For 1D slices, it may make sense to specify a SplitInto parameter of 1 in every other dimension - that way, boxes
 will only be split along the 1D direction.

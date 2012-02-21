@@ -18,22 +18,43 @@ Specify each of the AlignedDim0, etc. parameters with these values, separated by
 * Next, the start and end position along that dimension
 * Finally, the number of bins to use in that dimensions.
 
-If you specify fewer output dimensions, then events in the remaining dimensions will be integrated.
+If you specify fewer output dimensions, then events in the remaining dimensions
+will be integrated along all space. If you wish to integrate only within a range,
+then specify the start and end points, with only 1 bin.
 
 === Non-Axis Aligned Binning ===
 
-This allows rebinning to a new arbitrary space. You must specify up to 4 basis vectors
-with these parameters, separated by commas: 'name, units, x,y,z,.., length, number_of_bins':
+This allows rebinning to a new arbitrary space, with rotations, translations,
+or skewing. This is given by a set of basis vectors and other parameters
+
+The '''BasisVector0...''' parameters allow you to specify the basis vectors
+relating the input coordinates to the output coordinates.
+They are string with these parameters, separated by commas: 'name, units, x,y,z,..,':
 * Name: of the new dimension
 * Units: string giving the units
 * x, y, z, etc.: a vector, matching the number of dimensions, giving the direction of the basis vector
-* Length: the length, along the basis vector direction, to take along the input dimension
-* number_of_bins: separate Length into this many bins.
 
-You must also specify a point for the origin.
-This point (in the input space) corresponds to 0,0,0 in the output space.
+The '''Translation''' parameter defines the translation between the spaces.
+The coordinates are given in the input space dimensions, and they
+correspond to 0,0,0 in the output space.
 
-Finally, the ForceOrthogonal parameter will modify your basis vectors
+The '''OutputExtents''' parameter specifies the min/max coordinates
+''in the output coordinate'' space. For example, if you the output X to range
+from -5 to 5, and output Y to go from 0 to 10, you would have: "-5,5, 0,10".
+
+The '''OutputBins''' parameter specifies how many bins to use in the output
+workspace for each dimension. For example, "10,20,30" will make
+10 bins in X, 20 bins in Y and 30 bins in Z.
+
+If the '''NormalizeBasisVectors''' parameter is '''True''', then the distances
+in the ''input'' space are the same as in the ''output'' space (no scaling).
+* For example, if BasisVector0=(1,1), a point at (1,1) transforms to <math>x=\sqrt{2}</math>, which is the same as the distance in the input dimension.
+
+If the '''NormalizeBasisVectors''' parameter is '''False''', then the algorithm
+will take into account the ''length'' of each basis vector.
+* For example, if BasisVector0=(1,1), a point at (1,1) transforms to <math>x=1</math>. The distance was scaled by <math>1/\sqrt{2}</math>
+
+Finally, the '''ForceOrthogonal''' parameter will modify your basis vectors
 if needed to make them orthogonal to each other. Only works in 3 dimensions!
 
 === Binning a MDHistoWorkspace ===
