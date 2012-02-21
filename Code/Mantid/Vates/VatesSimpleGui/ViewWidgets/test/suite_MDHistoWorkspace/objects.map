@@ -58,7 +58,9 @@
 :Terminate_QPushButton	{text='Terminate' type='QPushButton' unnamed='1' visible='1' window=':_QMessageBox'}
 :Vates Simple Interface.First Frame_QToolButton	{text='First Frame' type='QToolButton' unnamed='1' visible='1' window=':Vates Simple Interface_QMdiSubWindow'}
 :Vates Simple Interface.Play_QToolButton	{text='Play' type='QToolButton' unnamed='1' visible='1' window=':Vates Simple Interface_QMdiSubWindow'}
+:Vates Simple Interface.multiSliceButton_QPushButton	{name='multiSliceButton' type='QPushButton' visible='1' window=':Vates Simple Interface_QMdiSubWindow'}
 :Vates Simple Interface.splatterPlotButton_QPushButton	{name='splatterPlotButton' type='QPushButton' visible='1' window=':Vates Simple Interface_QMdiSubWindow'}
+:Vates Simple Interface.splitter_2_QSplitter	{name='splitter_2' type='QSplitter' visible='1' window=':Vates Simple Interface_QMdiSubWindow'}
 :Vates Simple Interface_QMdiSubWindow	{type='QMdiSubWindow' unnamed='1' visible='1' windowTitle='Vates Simple Interface'}
 :WorkspaceTree_QHeaderView	{container=':Workspaces.WorkspaceTree_MantidTreeWidget' orientation='1' type='QHeaderView' unnamed='1' visible='1'}
 :Workspaces.WorkspaceTree_MantidTreeWidget	{container=':MantidPlot - untitled.Workspaces_MantidDockWidget' name='WorkspaceTree' type='MantidTreeWidget' visible='1'}
@@ -69,8 +71,15 @@
 :fileNameEdit_QLineEdit	{buddy=':MantidPlot - Open a script from a file.File name:_QLabel' name='fileNameEdit' type='QLineEdit' visible='1'}
 :frame.stackedWidget_QStackedWidget	{container=':splitter.frame_QFrame' name='stackedWidget' type='QStackedWidget' visible='1'}
 :frame.stackedWidget_QStackedWidget_2	{container=':MantidPlot - Open a script from a file.frame_QFrame' name='stackedWidget' type='QStackedWidget' visible='1'}
+:objectInspector.Apply_QPushButton	{container=':qt_tabwidget_stackedwidget.objectInspector_pqObjectInspectorWidget' name='Accept' text='Apply' type='QPushButton' visible='1'}
+:qt_tabwidget_stackedwidget.objectInspector_pqObjectInspectorWidget	{container=':splitter.qt_tabwidget_stackedwidget_QStackedWidget' name='objectInspector' type='pqObjectInspectorWidget' visible='1'}
 :qt_tabwidget_stackedwidget_ScriptEditor	{container=':MantidPlot: Python Window.qt_tabwidget_stackedwidget_QStackedWidget' type='ScriptEditor' unnamed='1' visible='1'}
 :splitter.frame_QFrame	{container=':Open file.splitter_QSplitter' name='frame' type='QFrame' visible='1'}
+:splitter.qt_tabwidget_stackedwidget_QStackedWidget	{container=':splitter_2.splitter_QSplitter' name='qt_tabwidget_stackedwidget' type='QStackedWidget' visible='1'}
 :splitter.sidebar_QSidebar	{container=':Open file.splitter_QSplitter' name='sidebar' type='QSidebar' visible='1'}
+:splitter_2.Cut_QPushButton	{container=':Vates Simple Interface.splitter_2_QSplitter' name='cutButton' text='Cut' type='QPushButton' visible='1'}
+:splitter_2.Rebin_QPushButton	{container=':Vates Simple Interface.splitter_2_QSplitter' name='rebinButton' text='Rebin' type='QPushButton' visible='1'}
+:splitter_2.StandardView_Mantid::Vates::SimpleGui::StandardView	{container=':Vates Simple Interface.splitter_2_QSplitter' name='StandardView' type='Mantid::Vates::SimpleGui::StandardView' visible='1' windowTitle='StandardView'}
+:splitter_2.splitter_QSplitter	{container=':Vates Simple Interface.splitter_2_QSplitter' name='splitter' type='QSplitter' visible='1'}
 :stackedWidget.treeView_QTreeView	{container=':frame.stackedWidget_QStackedWidget' name='treeView' type='QTreeView' visible='1'}
 :stackedWidget.treeView_QTreeView_2	{container=':frame.stackedWidget_QStackedWidget_2' name='treeView' type='QTreeView' visible='1'}
