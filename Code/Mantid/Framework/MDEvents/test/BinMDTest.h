@@ -343,14 +343,19 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "BinMDTest_ws") );
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AxisAligned", false));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVector0", "OutX,m," + baseX.toString(",") + ",10," + Strings::toString(binsX) ));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVector1", "OutY,m," + baseY.toString(",") + ",10," + Strings::toString(binsY) ));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVector2", "OutZ,m," + baseZ.toString(",") + ",10," + Strings::toString(binsZ) ));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVector0", "OutX,m," + baseX.toString(",")  ));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVector1", "OutY,m," + baseY.toString(",")  ));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVector2", "OutZ,m," + baseZ.toString(",")  ));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVector3", ""));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Origin", origin.toString(",") ));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Translation", origin.toString(",") ));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ForceOrthogonal", ForceOrthogonal ));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ImplicitFunctionXML",""));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("IterateEvents", IterateEvents));
+
+    std::vector<int> OutputBins;    OutputBins.push_back(binsX);    OutputBins.push_back(binsY);    OutputBins.push_back(binsZ);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputBins", OutputBins));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputExtents", "0,10, 0,10, 0,10"));
+
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "BinMDTest_ws"));
 
     TS_ASSERT_THROWS_NOTHING( alg.execute(); )
@@ -497,14 +502,16 @@ public:
         "AlignedDim1", "y, -10, 10, 10");
 
     // Bin, non-axis-aligned, with translation
-    FrameworkManager::Instance().exec("BinMD", 14,
+    FrameworkManager::Instance().exec("BinMD", 18,
         "InputWorkspace", "binned0",
         "OutputWorkspace", "binned1",
         "AxisAligned", "0",
-        "BasisVector0", "rx,m, 1.0,0.0, 20.0, 10",
-        "BasisVector1", "ry,m, 0.0,1.0, 20.0, 10",
+        "BasisVector0", "rx,m, 1.0,0.0",
+        "BasisVector1", "ry,m, 0.0,1.0",
         "ForceOrthogonal", "1",
-        "Origin", "-10, -10");
+        "Translation", "-10, -10",
+        "OutputExtents", "0,20, 0,20",
+        "OutputBins", "10,10");
 
     MDHistoWorkspace_sptr binned1 = do_compare_histo("binned0", "binned1", "mdew");
 
@@ -542,14 +549,16 @@ public:
     // binned0.x is mdew.y
     // binned0.y is mdew.x
     // Bin, non-axis-aligned, with translation
-    FrameworkManager::Instance().exec("BinMD", 14,
+    FrameworkManager::Instance().exec("BinMD", 18,
         "InputWorkspace", "binned0",
         "OutputWorkspace", "binned1",
         "AxisAligned", "0",
-        "BasisVector0", "rx,m, 1.0,0.0, 20.0, 10",
-        "BasisVector1", "ry,m, 0.0,1.0, 20.0, 10",
+        "BasisVector0", "rx,m, 1.0,0.0",
+        "BasisVector1", "ry,m, 0.0,1.0",
         "ForceOrthogonal", "1",
-        "Origin", "-10, -5");
+        "Translation", "-10, -5",
+        "OutputExtents", "0,20, 0,20",
+        "OutputBins", "10,10");
 
     // Get the final binned workspace
     MDHistoWorkspace_sptr binned1 = boost::dynamic_pointer_cast<MDHistoWorkspace>(AnalysisDataService::Instance().retrieve("binned1"));
@@ -617,15 +626,17 @@ public:
         "AlignedDim2", "A, -10, 10, 10"
         );
 
-    FrameworkManager::Instance().exec("BinMD", 16,
+    FrameworkManager::Instance().exec("BinMD", 20,
         "InputWorkspace", "binned0",
         "OutputWorkspace", "binned1",
         "AxisAligned", "0",
-        "BasisVector0", "rx,m, 1.0,0.0,0.0, 20.0, 10",
-        "BasisVector1", "ry,m, 0.0,1.0,0.0, 20.0, 10",
-        "BasisVector2", "rz,m, 0.0,0.0,1.0, 20.0, 10",
+        "BasisVector0", "rx,m, 1.0,0.0,0.0",
+        "BasisVector1", "ry,m, 0.0,1.0,0.0",
+        "BasisVector2", "rz,m, 0.0,0.0,1.0",
         "ForceOrthogonal", "1",
-        "Origin", "-10, -5, -3");
+        "Translation", "-10, -5, -3",
+        "OutputExtents", "0,20, 0,20, 0,20",
+        "OutputBins", "10,10,10");
 
     // Get the final binned workspace
     MDHistoWorkspace_sptr binned1 = boost::dynamic_pointer_cast<MDHistoWorkspace>(AnalysisDataService::Instance().retrieve("binned1"));
@@ -677,33 +688,39 @@ public:
     do_prepare_comparison();
 
     // Bin NOT aligned to original, with translation
-    FrameworkManager::Instance().exec("BinMD", 14,
+    FrameworkManager::Instance().exec("BinMD", 18,
         "InputWorkspace", "mdew",
         "OutputWorkspace", "binned0",
         "AxisAligned", "0",
-        "BasisVector0", "rx,m, 1.0, 0.0, 20.0, 10",
-        "BasisVector1", "ry,m, 0.0, 1.0, 20.0, 10",
+        "BasisVector0", "rx,m, 1.0, 0.0",
+        "BasisVector1", "ry,m, 0.0, 1.0",
         "ForceOrthogonal", "1",
-        "Origin", "-10, -10");
+        "Translation", "-10, -10",
+        "OutputExtents", "0,20, 0,20",
+        "OutputBins", "10,10");
 
     // Bin with some rotation (10 degrees)
-    FrameworkManager::Instance().exec("BinMD", 14,
+    FrameworkManager::Instance().exec("BinMD", 18,
         "InputWorkspace", "mdew",
         "OutputWorkspace", "binned1",
         "AxisAligned", "0",
-        "BasisVector0", "rx,m, 0.98, 0.17, 20.0, 10",
-        "BasisVector1", "ry,m, -.17, 0.98, 20.0, 10",
+        "BasisVector0", "rx,m, 0.98, 0.17",
+        "BasisVector1", "ry,m, -.17, 0.98",
         "ForceOrthogonal", "1",
-        "Origin", "-10, -10");
+        "Translation", "-10, -10",
+        "OutputExtents", "0,20, 0,20",
+        "OutputBins", "10,10");
     // Bin the binned output with the opposite rotation
-    FrameworkManager::Instance().exec("BinMD", 14,
+    FrameworkManager::Instance().exec("BinMD", 18,
         "InputWorkspace", "binned1",
         "OutputWorkspace", "binned2",
         "AxisAligned", "0",
-        "BasisVector0", "rrx,m, 0.98, -.17, 20.0, 10",
-        "BasisVector1", "rry,m, 0.17, 0.98, 20.0, 10",
+        "BasisVector0", "rrx,m, 0.98, -.17",
+        "BasisVector1", "rry,m, 0.17, 0.98",
         "ForceOrthogonal", "1",
-        "Origin", "0, 0");
+        "Translation", "0, 0",
+        "OutputExtents", "0,20, 0,20",
+        "OutputBins", "10,10");
     // Check they are the same
     MDHistoWorkspace_sptr binned2 = do_compare_histo("binned0", "binned2", "mdew");
 
@@ -724,34 +741,40 @@ public:
     do_prepare_comparison();
 
     // Bin aligned to original
-    FrameworkManager::Instance().exec("BinMD", 14,
+    FrameworkManager::Instance().exec("BinMD", 18,
         "InputWorkspace", "mdew",
         "OutputWorkspace", "binned0",
         "AxisAligned", "0",
-        "BasisVector0", "rx,m, 1.0, 0.0, 20.0, 10",
-        "BasisVector1", "ry,m, 0.0, 1.0, 20.0, 10",
+        "BasisVector0", "rx,m, 1.0, 0.0",
+        "BasisVector1", "ry,m, 0.0, 1.0",
         "ForceOrthogonal", "1",
-        "Origin", "-10, -10");
+        "Translation", "-10, -10",
+        "OutputExtents", "0,20, 0,20",
+        "OutputBins", "10,10");
 
     // Bin with a translation. -10,-10 in MDEW becomes 0,0 in binned1
-    FrameworkManager::Instance().exec("BinMD", 14,
+    FrameworkManager::Instance().exec("BinMD", 18,
         "InputWorkspace", "mdew",
         "OutputWorkspace", "binned1",
         "AxisAligned", "0",
-        "BasisVector0", "rx,m, 1.0, 0.0, 20.0, 10",
-        "BasisVector1", "ry,m, 0.0, 1.0, 20.0, 10",
+        "BasisVector0", "rx,m, 1.0, 0.0",
+        "BasisVector1", "ry,m, 0.0, 1.0",
         "ForceOrthogonal", "1",
-        "Origin", "-10, -10");
+        "Translation", "-10, -10",
+        "OutputExtents", "0,20, 0,20",
+        "OutputBins", "10,10");
 
     // Bin the binned output with the opposite translation
-    FrameworkManager::Instance().exec("BinMD", 14,
+    FrameworkManager::Instance().exec("BinMD", 18,
         "InputWorkspace", "binned1",
         "OutputWorkspace", "binned2",
         "AxisAligned", "0",
-        "BasisVector0", "rrx,m, 1.0, 0.0, 20.0, 10",
-        "BasisVector1", "rry,m, 0.0, 1.0, 20.0, 10",
+        "BasisVector0", "rrx,m, 1.0, 0.0",
+        "BasisVector1", "rry,m, 0.0, 1.0",
         "ForceOrthogonal", "1",
-        "Origin", "0, 0");
+        "Translation", "0, 0",
+        "OutputExtents", "0,20, 0,20",
+        "OutputBins", "10,10");
 
     // Check they are the same
     do_compare_histo("binned0", "binned2", "mdew");
@@ -764,14 +787,16 @@ public:
     do_prepare_comparison();
 
     // Bin NOT aligned to original, translated. Coordinates change.
-    FrameworkManager::Instance().exec("BinMD", 14,
+    FrameworkManager::Instance().exec("BinMD", 18,
         "InputWorkspace", "mdew",
         "OutputWorkspace", "binned0",
         "AxisAligned", "0",
-        "BasisVector0", "rx,m, 1.0, 0.0, 20.0, 10",
-        "BasisVector1", "ry,m, 0.0, 1.0, 20.0, 10",
+        "BasisVector0", "rx,m, 1.0, 0.0",
+        "BasisVector1", "ry,m, 0.0, 1.0",
         "ForceOrthogonal", "1",
-        "Origin", "-10, -10");
+        "Translation", "-10, -10",
+        "OutputExtents", "0,20, 0,20",
+        "OutputBins", "10,10");
 
     // Bin aligned to binned0. This is not allowed!
     IAlgorithm_sptr alg = FrameworkManager::Instance().exec("BinMD", 10,

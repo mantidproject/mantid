@@ -240,11 +240,19 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "SliceMDTest_ws") );
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AxisAligned", false));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVector0", "OutX,m," + baseX.toString(",") + "," + Strings::toString(lengthX) + ",3" ));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVector1", "OutY,m," + baseY.toString(",") + "," + Strings::toString(lengthY) + ",3" ));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVector2", "OutZ,m," + baseZ.toString(",") + "," + Strings::toString(lengthZ) + ",3" ));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVector0", "OutX,m," + baseX.toString(",") ));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVector1", "OutY,m," + baseY.toString(",") ));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVector2", "OutZ,m," + baseZ.toString(",") ));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVector3", ""));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Origin", origin.toString(",") ));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Translation", origin.toString(",") ));
+
+    std::vector<double> OutputExtents;
+    OutputExtents.push_back(0); OutputExtents.push_back(lengthX);
+    OutputExtents.push_back(0); OutputExtents.push_back(lengthY);
+    OutputExtents.push_back(0); OutputExtents.push_back(lengthZ);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputExtents", OutputExtents));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputBins", "3,3,3"));
+
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "SliceMDTest_outWS"));
 
     TS_ASSERT_THROWS_NOTHING( alg.execute(); )
