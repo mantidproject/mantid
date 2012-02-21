@@ -77,9 +77,10 @@ namespace MDEvents
       setPropertySettings(propName, ps->clone() );
       setPropertyGroup(propName, grpName);
     }
-    declareProperty(new PropertyWithValue<std::string>("Translation","",Direction::Input),
-        "Coordinates in the input workspace that corresponds to (0,0,0) in the OUTPUT workspace.\n"
-        "Enter as a comma-separated string." );
+    declareProperty(new ArrayProperty<double>("Translation", Direction::Input),
+        "Coordinates in the INPUT workspace that corresponds to (0,0,0) in the OUTPUT workspace.\n"
+        "Enter as a comma-separated string.\n"
+        "Default: 0 in all dimensions (no translation)." );
 
     declareProperty(new ArrayProperty<double>("OutputExtents", Direction::Input),
         "The minimum, maximum edges of space of each dimension of the OUTPUT workspace, as a comma-separated list" );
@@ -300,10 +301,17 @@ namespace MDEvents
       throw std::runtime_error("No output dimensions were found in the MDEventWorkspace. Cannot bin!");
 
     // Get the Translation parameter
+    std::vector<double> translVector;
     try
-    { m_translation = VMD( getPropertyValue("Translation") ); }
+    { translVector = getProperty("Translation"); }
     catch (std::exception & e)
     { throw std::invalid_argument("Error parsing the Translation parameter: " + std::string(e.what()) ); }
+
+    // Default to 0,0,0 when not specified
+    if (translVector.size() == 0)
+      translVector.resize(m_inWS->getNumDims(), 0);
+    m_translation = VMD(translVector);
+
     if (m_translation.getNumDims() != m_inWS->getNumDims())
       throw std::invalid_argument("The number of dimensions in the Translation parameter is "
           "not consistent with the number of dimensions in the input workspace.");
