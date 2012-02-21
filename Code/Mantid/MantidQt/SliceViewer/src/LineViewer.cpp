@@ -281,14 +281,8 @@ void LineViewer::apply()
   basisY[m_freeDimX] = VMD_t(cos(perpAngle));
   basisY[m_freeDimY] = VMD_t(sin(perpAngle));
 
-  // Offset the origin in the plane by the width
-  VMD origin = m_start - basisY * planeWidth;
-  // And now offset by the width in each direction
-  for (int d=0; d<int(m_ws->getNumDims()); d++)
-  {
-    if ((d != m_freeDimX) && (d != m_freeDimY))
-      origin[d] -= m_thickness[d];
-  }
+  // This is the origin = Translation parameter
+  VMD origin = m_start;
 
   IAlgorithm * alg = NULL;
   size_t numBins = m_numBins;
@@ -312,12 +306,12 @@ void LineViewer::apply()
   alg->setPropertyValue("BasisVector0", "X,units," + basisX.toString(",") );
   OutputExtents.push_back(0);
   OutputExtents.push_back(length);
-  OutputBins.push_back(numBins);
+  OutputBins.push_back(int(numBins));
 
   // The Y basis vector, with one bin
   alg->setPropertyValue("BasisVector1", "Y,units," + basisY.toString(","));
-  OutputExtents.push_back(0);
-  OutputExtents.push_back(planeWidth*2.0);
+  OutputExtents.push_back(-planeWidth);
+  OutputExtents.push_back(+planeWidth);
   OutputBins.push_back(1);
 
   // Now each remaining dimension
@@ -334,8 +328,8 @@ void LineViewer::apply()
       basis[d] = 1.0;
       // Set the basis vector with the width *2 and 1 bin
       alg->setPropertyValue("BasisVector" + dim, dim +",units," + basis.toString(",") );
-      OutputExtents.push_back(0);
-      OutputExtents.push_back(m_thickness[d]*2.0);
+      OutputExtents.push_back(-m_thickness[d]);
+      OutputExtents.push_back(+m_thickness[d]);
       OutputBins.push_back(1);
 
       propNum++;
