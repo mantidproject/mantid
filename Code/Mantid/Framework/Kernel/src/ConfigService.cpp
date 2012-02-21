@@ -1226,6 +1226,15 @@ std::string ConfigServiceImpl::getCurrentDir()
   return m_pSysConfig->getString("system.currentDir");
 }
 
+/** Gets the absolute path of the current directory containing the dll. Const version.
+ *
+ * @returns The absolute path of the current directory containing the dll
+ */
+std::string ConfigServiceImpl::getCurrentDir() const
+{
+  return m_pSysConfig->getString("system.currentDir");
+}
+
 /** Gets the absolute path of the temp directory
  *
  * @returns The absolute path of the temp directory
@@ -1680,6 +1689,83 @@ void ConfigServiceImpl::addObserver(const Poco::AbstractObserver& observer) cons
 void ConfigServiceImpl::removeObserver(const Poco::AbstractObserver& observer) const
 {
   m_notificationCenter.removeObserver(observer);
+}
+
+/*
+Ammend paths to point to include the paraview core libraries.
+@param path : path to add
+*/
+void ConfigServiceImpl::setParaviewLibraryPath(const std::string& path)
+{
+  Poco::Path existingPath;
+  char separator = existingPath.pathSeparator();
+  std::string strSeparator;
+  strSeparator.push_back(separator);
+
+#ifdef _WIN32
+  existingPath = Poco::Environment::get("PATH");
+  existingPath.append(strSeparator);
+  existingPath.append(path);
+  Poco::Environment::set("PATH",existingPath.toString());
+#elif defined __linux__
+  existingPath = Poco::Environment::get("LD_LIBRARY_PATH");
+  existingPath.append(strSeparator);
+  existingPath.append(path);
+  Poco::Environment::set("LD_LIBRARY_PATH",existingPath.toString());
+#elif defined __APPLE__
+  existingPath = Poco::Environment::get("DYLD_LIBRARY_PATH");
+  existingPath.append(strSeparator);
+  existingPath.append(path);
+  Poco::Environment::set("DYLD_LIBRARY_PATH",existingPath.toString());
+#else
+  throw std::runtime_error("ConfigServiceImpl::setParaviewLibraryPath cannot determine the running platform and therefore cannot set the path to the Paraview libraries.");
+#endif 
+}
+
+/*
+Quick check to determine if VATES is installed.
+@return TRUE if available.
+*/
+bool ConfigServiceImpl::quickVatesCheck() const
+{
+  using boost::regex;
+  using boost::regex_search;
+
+  std::string path = this->getCurrentDir();
+
+  Poco::File dir(path);
+  typedef std::vector<std::string> VecFiles;
+
+  VecFiles files;
+  dir.list(files);
+  VecFiles::iterator it = files.begin();
+
+  bool found = false;
+  while(it != files.end())
+  {
+    std::string file = *it;
+    regex expression("^(VatesSimpleGui)", boost::regex::icase);
+    if(regex_search(file, expression))
+    {
+      found = true;
+      break;
+    }
+    ++it;
+  }
+
+  if(!found)
+  {
+    //On windows, the VSI gui is made available on the path.
+    try
+    {
+      Poco::Environment::get("MANTIDPARAVIEWPATH");
+      found = true;
+    }
+    catch(Poco::NotFoundException&)
+    {
+    }
+  }
+  return found;
 }
 
 /// \cond TEMPLATE

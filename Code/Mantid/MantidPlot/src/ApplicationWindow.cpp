@@ -170,6 +170,8 @@
 
 #include <gsl/gsl_sort.h>
 
+#include <boost/regex.hpp>
+
 //Mantid
 #include "ScriptingWindow.h"
 
@@ -351,11 +353,15 @@ void ApplicationWindow::init(bool factorySettings)
   undoStackWindow->setWidget(d_undo_view);
   undoStackWindow->hide();
 
-  /*TODO: determine conditions for exposing paraview settings then run the dialog.
-  Very important to run this dialog before the call to mantidUI->init, because othewise the logs will be poluted with libary loading errors.
+  /*
+  If applicable, set the Paraview path BEFORE libaries are loaded. Doing it here, before the call to MantidUI::init() prevents 
+  the logs being poluted with library loading errors.
   */
-  //SetUpParaview pv;
-  //int result = pv.exec();
+  if(hasVatesAvailable() && !hasParaviewPath())
+  {
+    SetUpParaview pv;
+    pv.exec();
+  }
 
   //Initialize Mantid
   // MG: 01/02/2009 - Moved this to before scripting so that the logging is connected when
@@ -459,6 +465,28 @@ void ApplicationWindow::init(bool factorySettings)
   {
     showFirstTimeSetup();
   }
+}
+
+/*
+Getter to determine if the vates paraview plugins are available.
+
+The code below may be used before MantidUI::init is called and therefore the implementation
+must not rely on the Vates Libraries to be loaded in order to determine whether Vates is available.
+
+@return TRUE if vates is available
+*/
+bool ApplicationWindow::hasVatesAvailable() const
+{
+  return Mantid::Kernel::ConfigService::Instance().quickVatesCheck();
+}
+
+/*
+Getter to determine if the paraview path has been set.
+*/
+bool ApplicationWindow::hasParaviewPath() const
+{
+  Mantid::Kernel::ConfigServiceImpl& config = Mantid::Kernel::ConfigService::Instance();
+  return config.hasProperty("paraview.path");
 }
 
 void ApplicationWindow::showLogWindowContextMenu(const QPoint & p)

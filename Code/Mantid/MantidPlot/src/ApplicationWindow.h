@@ -1087,7 +1087,8 @@ private:
   void savedatainNexusFormat(const std::string& wsName,const std::string & fileName);
   QPoint positionNewFloatinfWindow(QSize sz) const;
   QPoint desktopTopLeft() const;
-
+  bool hasParaviewPath() const;
+  bool hasVatesAvailable() const;
 
   private slots:
   //! \name Initialization

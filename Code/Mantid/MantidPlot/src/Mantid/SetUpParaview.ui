@@ -58,7 +58,7 @@
    <item>
     <widget class="QLabel" name="lblIcon">
      <property name="text">
-      <string>Paraview setup.
+      <string>Looks like you're setting up for 3D visualisation using VATES extensions.
 
 To make 3D visualisation available:
 1) Setup following instructions at http://download.mantidproject.org/VatesDownload.psp. You MUST do this first!
@@ -99,6 +99,13 @@ This dialog will allow you to complete the second stage.</string>
     </layout>
    </item>
    <item>
+    <widget class="QLabel" name="lbl_message">
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="layoutCommands">
      <item>
       <spacer name="horizontalSpacer">
@@ -132,6 +139,8 @@ This dialog will allow you to complete the second stage.</string>
   </layout>
  </widget>
  <resources>
+  <include location="../../../Images/images.qrc"/>
+  <include location="../../../Images/images.qrc"/>
   <include location="../../../Images/images.qrc"/>
  </resources>
  <connections/>

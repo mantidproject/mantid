@@ -152,6 +152,8 @@ namespace Mantid
       std::string getOSVersion();
       /// Returns the current directory
       std::string getCurrentDir();
+      /// Returns the current directory
+      std::string getCurrentDir() const;
       /// Returns the system's temp directory
       std::string getTempDir();
       //Return the executable path
@@ -203,6 +205,12 @@ namespace Mantid
 
       // Starts up the logging
       void configureLogging();
+
+      /// Set the path to the paraview libraries
+      void setParaviewLibraryPath(const std::string& path);
+
+      /// Quick check to determine if vates has been installed.
+      bool quickVatesCheck() const;
 
     private:
       friend struct Mantid::Kernel::CreateUsingNew<ConfigServiceImpl>;
