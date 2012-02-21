@@ -224,8 +224,8 @@ namespace Mantid
       m_serializer.setGeometryXML( m_view->getAppliedGeometryXML() );
     }
 
-    /**
-    Mantid properties for rebinning algorithm require formatted information.
+    /** Mantid properties for rebinning algorithm require formatted information.
+     * This is for the AlignedDim0... props
     @param dimension : dimension to extract property value for.
     @return true available, false otherwise.
     */
@@ -238,8 +238,9 @@ namespace Mantid
       return boost::str(boost::format("%s, %f, %f, %d") %id %min %max % nbins);
     }
 
-    /**
-    Mantid properties for rebinning algorithm require formatted information.
+    /**  Mantid properties for rebinning algorithm require formatted information.
+     * This is for the BasisVector0... parameters
+     *
     @param basis : basis vector.
     @param length : length of vector?
     @param dimension : dimension to extract property value for.
@@ -247,10 +248,10 @@ namespace Mantid
     */
     std::string MDEWRebinningPresenter::extractFormattedPropertyFromDimension(const Mantid::Kernel::VMD& basis, double length,  Mantid::Geometry::IMDDimension_sptr dimension) const
     {
+      UNUSED_ARG(length);
       std::string units = dimension->getUnits();
-      size_t nbins = dimension->getNBins();
       std::string id = dimension->getDimensionId();
-      return boost::str(boost::format("%s, %s, %s, %d, %f") %id %units %basis.toString(",") %length % nbins);
+      return boost::str(boost::format("%s, %s, %s") %id %units %basis.toString(",") );
     }
 
     /**
@@ -289,17 +290,28 @@ namespace Mantid
           binningAlg->setPropertyValue("Origin", VMD(m_origin).toString(",") );
           binningAlg->setProperty("AxisAligned", false);
           binningAlg->setProperty("ForceOrthogonal", m_ForceOrthogonal );
+          std::vector<int> OutputBins;
+          std::vector<double> OutputExtents;
           if(sourceGeometry.hasXDimension())
           {
             binningAlg->setPropertyValue("BasisVector0", extractFormattedPropertyFromDimension(VMD(m_b1), m_lengthB1, sourceGeometry.getXDimension()));
+            OutputExtents.push_back(0);
+            OutputExtents.push_back(m_lengthB1);
+            OutputBins.push_back(int(sourceGeometry.getXDimension()->getNBins()));
           }
           if(sourceGeometry.hasYDimension())
           {
             binningAlg->setPropertyValue("BasisVector1", extractFormattedPropertyFromDimension(VMD(m_b2), m_lengthB2, sourceGeometry.getYDimension()));
+            OutputExtents.push_back(0);
+            OutputExtents.push_back(m_lengthB2);
+            OutputBins.push_back(int(sourceGeometry.getYDimension()->getNBins()));
           }
           if(sourceGeometry.hasZDimension())
           {
             binningAlg->setPropertyValue("BasisVector2", extractFormattedPropertyFromDimension(VMD(b3), m_lengthB3, sourceGeometry.getZDimension()));
+            OutputExtents.push_back(0);
+            OutputExtents.push_back(m_lengthB3);
+            OutputBins.push_back(int(sourceGeometry.getYDimension()->getNBins()));
           }
           if(sourceGeometry.hasTDimension())
           {
