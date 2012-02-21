@@ -276,6 +276,7 @@ void MuonAnalysis::runFrontPlotButton()
 */
 void MuonAnalysis::userSelectInstrument(const QString& prefix)
 {
+  m_updating = true;
   if ( prefix != m_curInterfaceSetup )
   {
     runClearGroupingButton();
@@ -286,6 +287,7 @@ void MuonAnalysis::userSelectInstrument(const QString& prefix)
     group.beginGroup(m_settingsGroup + "instrument");
     group.setValue("name", prefix);
   }
+  m_updating = false;
 }
 
 
