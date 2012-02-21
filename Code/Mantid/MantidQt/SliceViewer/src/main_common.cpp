@@ -110,15 +110,18 @@ IMDWorkspace_sptr makeDemoData(bool binned = false)
 //        "AlignedDim1", "k, -10, 10, 100",
 //        "AlignedDim2", "l, -10, 10, 100"
 //        );
-    FrameworkManager::Instance().exec("BinMD", 16,
+    FrameworkManager::Instance().exec("BinMD", 20,
         "InputWorkspace", "mdew",
         "OutputWorkspace", "binned",
         "AxisAligned", "0",
-        "BasisVector0", "rx, m, 1.0, 0.0, 0.0, 10.0, 100",
-        "BasisVector1", "ry, m, 0.0, 1.0, 0.0, 10.0, 100",
-        "BasisVector2", "rz, m, 0.0, 0.0, 1.0, 10.0, 100",
+        "BasisVector0", "rx, m, 1.0, 0.0, 0.0",
+        "BasisVector1", "ry, m, 0.0, 1.0, 0.0",
+        "BasisVector2", "rz, m, 0.0, 0.0, 1.0",
         "ForceOrthogonal", "1",
-        "Origin", "-5, -5, -5");
+        "Translation", "-5, -5, -5",
+        "OutputExtents", "0, 10, 0,10, 0,10",
+        "OutputBins", "100, 100, 100"
+        );
 
     FrameworkManager::Instance().exec("BinMD", 12,
         "InputWorkspace", "mdew",

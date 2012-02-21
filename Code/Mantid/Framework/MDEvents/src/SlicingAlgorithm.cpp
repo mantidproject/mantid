@@ -8,6 +8,7 @@
 #include "MantidMDEvents/CoordTransformAligned.h"
 #include "MantidMDEvents/SlicingAlgorithm.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -54,14 +55,14 @@ namespace MDEvents
       declareProperty(new PropertyWithValue<std::string>(propName,"",Direction::Input),
           "Binning parameters for the " + Strings::toString(i) + "th dimension.\n"
           "Enter it as a comma-separated list of values with the format: 'name,minimum,maximum,number_of_bins'. Leave blank for NONE.");
-      setPropertySettings(propName, new EnabledWhenProperty(this, "AxisAligned", IS_EQUAL_TO, "1") );
+      setPropertySettings(propName, new VisibleWhenProperty(this, "AxisAligned", IS_EQUAL_TO, "1") );
       setPropertyGroup(propName, "Axis-Aligned Binning");
     }
 
     // --------------- NON-Axis-aligned properties ---------------------------------------
     std::string grpName = "Non-Aligned Binning";
 
-    IPropertySettings * ps = new EnabledWhenProperty(this, "AxisAligned", IS_EQUAL_TO, "0") ;
+    IPropertySettings * ps = new VisibleWhenProperty(this, "AxisAligned", IS_EQUAL_TO, "0") ;
     for (size_t i=0; i<dimChars.size(); i++)
     {
       std::string dim(" "); dim[0] = dimChars[i];

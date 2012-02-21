@@ -305,13 +305,20 @@ void LineViewer::apply()
   alg->setPropertyValue("OutputWorkspace", outWsName);
   alg->setProperty("AxisAligned", false);
 
+  std::vector<int> OutputBins;
+  std::vector<double> OutputExtents;
+
   // The X basis vector
-  alg->setPropertyValue("BasisVector0", "X,units," + basisX.toString(",")
-        + "," + Strings::toString(length) + "," + Strings::toString(numBins) );
+  alg->setPropertyValue("BasisVector0", "X,units," + basisX.toString(",") );
+  OutputExtents.push_back(0);
+  OutputExtents.push_back(length);
+  OutputBins.push_back(numBins);
 
   // The Y basis vector, with one bin
-  alg->setPropertyValue("BasisVector1", "Y,units," + basisY.toString(",")
-        + "," + Strings::toString(planeWidth*2.0) + ",1" );
+  alg->setPropertyValue("BasisVector1", "Y,units," + basisY.toString(","));
+  OutputExtents.push_back(0);
+  OutputExtents.push_back(planeWidth*2.0);
+  OutputBins.push_back(1);
 
   // Now each remaining dimension
   std::string dimChars = "012345"; // SlicingAlgorithm::getDimensionChars();
@@ -326,15 +333,21 @@ void LineViewer::apply()
       VMD basis = m_start * 0;
       basis[d] = 1.0;
       // Set the basis vector with the width *2 and 1 bin
-      alg->setPropertyValue("BasisVector" + dim, dim +",units," + basis.toString(",")
-            + "," + Strings::toString(m_thickness[d]*2.0) + ",1" );
+      alg->setPropertyValue("BasisVector" + dim, dim +",units," + basis.toString(",") );
+      OutputExtents.push_back(0);
+      OutputExtents.push_back(m_thickness[d]*2.0);
+      OutputBins.push_back(1);
+
       propNum++;
       if (propNum > dimChars.size())
         throw std::runtime_error("LineViewer::apply(): too many dimensions!");
+
     }
   }
 
-  alg->setPropertyValue("Origin", origin.toString(",") );
+  alg->setPropertyValue("Translation", origin.toString(",") );
+  alg->setProperty("OutputBins", OutputBins );
+  alg->setProperty("OutputExtents", OutputExtents );
   if (!adaptive)
   {
     alg->setProperty("IterateEvents", true);
