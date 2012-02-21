@@ -71,7 +71,9 @@ def loopmethod():
 
     for name in names[1:]:
             ConjoinWorkspaces(InputWorkspace1=names[0], InputWorkspace2=name,
-                              CheckOverlapping=False)
+                              CheckOverlapping=False,
+                              OutputWorkspace=names[0])
+            DeleteWorkspace(name)
     RenameWorkspace(InputWorkspace=names[0], OutputWorkspace="Mn5Si3")
     SaveNexus(InputWorkspace="Mn5Si3",Filename="nompi.nxs")
 

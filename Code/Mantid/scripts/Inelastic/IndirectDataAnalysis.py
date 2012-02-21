@@ -435,9 +435,9 @@ def applyCorrections(inputWS, canWS, corr, verbose=False):
             Ass = CubicFit(corrections[0], i, verbose)
             PolynomialCorrection(CorrectedSampleWS, CorrectedSampleWS, Ass, 'Divide')
             if ( i == 0 ):
-                CloneWorkspace(CorrectedSampleWS, CorrectedWS)
+                CloneWorkspace(InputWorkspace1=CorrectedSampleWS, InputWorkspace2=CorrectedWS, OutputWorkspace=CorrectedSampleWS)
             else:
-                ConjoinWorkspaces(CorrectedWS, CorrectedSampleWS)
+                ConjoinWorkspaces(InputWorkspace1=CorrectedWS, InputWorkspace2=CorrectedSampleWS, OutputWorkspace=CorrectedWS)
         else:
             ExtractSingleSpectrum(canWS, CorrectedCanWS, i)
             Acc = CubicFit(corrections[3], i, verbose)

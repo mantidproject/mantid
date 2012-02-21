@@ -54,7 +54,7 @@ class ConjoinFiles(PythonAlgorithm):
                 first = False
             else:
                 self.__load(directory, instr, run, loader, exts, run)
-                ConjoinWorkspaces(wksp, run, CheckOverlapping=False)
+                ConjoinWorkspaces(InputWorkspace1=wksp, InputWorkspace2=run, CheckOverlapping=False, OutputWorkspace=wksp)
                 mtd.deleteWorkspace(run)
 
         self.setProperty("OutputWorkspace", mtd[wksp])
