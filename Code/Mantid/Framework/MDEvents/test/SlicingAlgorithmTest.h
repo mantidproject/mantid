@@ -381,6 +381,7 @@ public:
     alg.m_minExtents.push_back(-5.0);
     alg.m_maxExtents.push_back(+5.0);
     alg.m_numBins.push_back(20);
+    alg.m_NormalizeBasisVectors = true;
 
     TS_ASSERT_EQUALS(alg.m_bases.size(), 0);
     TSM_ASSERT_THROWS_NOTHING("", alg.makeBasisVectorFromString("[Dumb,Name], units  , 1,2,3"));
@@ -391,7 +392,9 @@ public:
 
     VMD basis(1,2,3);
     basis.normalize();
-    TS_ASSERT_EQUALS( alg.m_bases[0], basis );
+    TS_ASSERT_DELTA( alg.m_bases[0][0], basis[0], 1e-5 );
+    TS_ASSERT_DELTA( alg.m_bases[0][1], basis[1], 1e-5 );
+    TS_ASSERT_DELTA( alg.m_bases[0][2], basis[2], 1e-5 );
     IMDDimension_sptr dim = alg.m_binDimensions[0];
     TS_ASSERT_EQUALS( dim->getName(), "[Dumb,Name]");
     TS_ASSERT_EQUALS( dim->getDimensionId(), "[Dumb,Name]");
