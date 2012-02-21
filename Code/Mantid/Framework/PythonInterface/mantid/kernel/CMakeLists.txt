@@ -30,6 +30,7 @@ set ( SRC_FILES
   src/Converters/NDArrayToVector.cpp
   src/Converters/NDArrayTypeIndex.cpp
   src/Converters/PyArrayType.cpp
+  src/Converters/PyObjectToV3D.cpp
   src/Converters/VectorToNDArray.cpp
   src/Registry/SequenceTypeHandler.cpp
   src/Registry/TypeRegistry.cpp

@@ -35,8 +35,6 @@ namespace Mantid
     {
       /** @name Create Mantid objects from python sequences */
       //@{
-      /// Try and create a Mantid V3D object from the given PyObject.
-      DLLExport Kernel::V3D createV3D(PyObject *data);
       /// Create a Matrix of doubles from a 2D numpy array
       DLLExport Kernel::DblMatrix createDoubleMatrix(PyObject* data);
       //@}
