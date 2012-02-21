@@ -62,7 +62,7 @@ class RefLReduction(PythonAlgorithm):
         # Q binning for output distribution
         q_min = self.getProperty("QMin")
         q_step = self.getProperty("QStep")
-                
+          
         #dimension of the detector (256 by 304 pixels)
         maxX = 304
         maxY = 256
@@ -240,7 +240,7 @@ class RefLReduction(PythonAlgorithm):
                                               source_to_detector=dMD,
                                               sample_to_detector=dSD,
                                               theta=theta,
-                                              geo_correction=False,
+                                              geo_correction=True,
                                               q_binning=[q_min,q_step,q_max])
 
         ws_data = "_DataWks"
@@ -305,6 +305,8 @@ class RefLReduction(PythonAlgorithm):
 
             ConvertToHistogram(InputWorkspace=ws_integrated_data,
                                OutputWorkspace=ws_data)
+        
+        Rebin(InputWorkspace=ws_data, OutputWorkspace=ws_data, Params=[q_step])
         
         # Work on Normalization file #########################################
         if (NormFlag):
@@ -421,10 +423,6 @@ class RefLReduction(PythonAlgorithm):
                                  WorkspaceToMatch=ws_data,
                                  OutputWorkspace=ws_norm_rebinned)
                         
-
-                RebinToWorkspace(WorkspaceToRebin=ws_integrated_data,
-                                 WorkspaceToMatch=ws_data,
-                                 OutputWorkspace=ws_norm_rebinned)
 #perform the integration myself
 #            mt_temp = mtd[ws_norm_rebinned]
 #            x_axis = mt_temp.readX(0)[:]   #[9100,9300,.... 23500] (73,1)

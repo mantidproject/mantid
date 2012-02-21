@@ -713,9 +713,9 @@ class DataReflWidget(BaseWidget):
         self._norm_clicked(state.NormFlag)
 
         # Q binning
-        #self._summary.q_min_edit.setText(str(state.q_min))
-        #self._summary.log_scale_chk.setChecked(state.q_step<0)
-        #self._summary.q_step_edit.setText(str(math.fabs(state.q_step)))
+        self._summary.q_min_edit.setText(str(state.q_min))
+        self._summary.log_scale_chk.setChecked(state.q_step<0)
+        self._summary.q_step_edit.setText(str(math.fabs(state.q_step)))
 
         # Scattering angle
         if hasattr(state, "use_center_pixel"):
