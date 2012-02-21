@@ -1,6 +1,14 @@
+#ifdef _MSC_VER
+  #pragma warning( disable: 4250 ) // Disable warning regarding inheritance via dominance, we have no way around it with the design
+#endif
+
 #include "MantidPythonInterface/api/AlgorithmWrapper.h"
 #include "MantidAPI/AlgorithmProxy.h"
 #include "MantidKernel/Strings.h"
+
+#ifdef _MSC_VER
+  #pragma warning( default: 4250 )
+#endif
 
 #include <boost/python/ssize_t.hpp>
 #include <boost/python/class.hpp>
