@@ -290,8 +290,15 @@ namespace API
 
 
   //---------------------------------------------------------------------------------------------------
-  /// @return the original workspace to which the basis vectors relate
-  /// @param index :: index into the vector of original workspaces
+  /** Get the "original" workspace (the workspace that was the source for a binned MDWorkspace).
+   *
+   *  In the case of a chain of workspaces: A->binned to B->binned to C:
+   *    Index 0 = the workspace that was binned, e.g. "A"
+   *    Index 1 = the intermediate workspace, e.g. "B"
+   *
+   * @return the original workspace to which the basis vectors relate
+   * @param index :: index into the vector of original workspaces.
+   */
   boost::shared_ptr<Workspace> MDGeometry::getOriginalWorkspace(size_t index) const
   {
     if (index >= m_originalWorkspaces.size())
@@ -299,9 +306,16 @@ namespace API
     return m_originalWorkspaces[index];
   }
 
-  /// Set the original workspace to which the basis vectors relate
-  /// @param ws :: original workspace shared pointer
-  /// @param index :: index into the vector of original workspaces
+  //---------------------------------------------------------------------------------------------------
+  /** Set the "original" workspace (the workspace that was the source for a binned MDWorkspace).
+   *
+   *  In the case of a chain of workspaces: A->binned to B->binned to C:
+   *    Index 0 = the workspace that was binned, e.g. "A"
+   *    Index 1 = the intermediate workspace, e.g. "B"
+   *
+   * @param ws :: original workspace shared pointer
+   * @param index :: index into the vector of original workspaces.
+   */
   void MDGeometry::setOriginalWorkspace(boost::shared_ptr<Workspace> ws, size_t index)
   {
     if (index >= m_originalWorkspaces.size())
@@ -378,8 +392,16 @@ namespace API
   }
 
   //---------------------------------------------------------------------------------------------------
-  /** @return Coordinate Transformation that goes from the original workspace to this workspace's coordinates.
-   * @param index :: index into the array of original workspaces */
+  /** Get the Coordinate Transformation that goes from the original workspace
+   * to this workspace's coordinates.
+   *
+   *  In the case of a chain of workspaces: A->binned to B->binned to C:
+   *    Index 0 = the workspace that was binned, e.g. "A"
+   *    Index 1 = the intermediate workspace, e.g. "B"
+   *
+   * @return CoordTransform pointer
+   * @param index :: index into the array of original workspaces
+   */
   Mantid::API::CoordTransform * MDGeometry::getTransformFromOriginal(size_t index) const
   {
     if (index >= m_transforms_FromOriginal.size())
@@ -387,9 +409,17 @@ namespace API
     return m_transforms_FromOriginal[index];
   }
 
-  /** Set Coordinate Transformation that goes from the original workspace to this workspace's coordinates.
+  //---------------------------------------------------------------------------------------------------
+  /** Sets the Coordinate Transformation that goes from the original workspace
+   * to this workspace's coordinates.
+   *
+   *  In the case of a chain of workspaces: A->binned to B->binned to C:
+   *    Index 0 = the workspace that was binned, e.g. "A"
+   *    Index 1 = the intermediate workspace, e.g. "B"
+   *
    * @param transform :: CoordTransform pointer (this assumes pointer ownership)
-   * @param index :: index into the array of original workspaces */
+   * @param index :: index into the array of original workspaces
+   */
   void MDGeometry::setTransformFromOriginal(Mantid::API::CoordTransform * transform, size_t index)
   {
     if (index >= m_transforms_FromOriginal.size())
@@ -400,8 +430,16 @@ namespace API
   }
 
   //---------------------------------------------------------------------------------------------------
-  /** @return Coordinate Transformation that goes from this workspace's coordinates to the original workspace coordinates.
-   * @param index :: index into the array of original workspaces */
+  /** Get the Coordinate Transformation that goes from THIS workspace's coordinates
+   * to the ORIGINAL workspace's coordinates
+   *
+   *  In the case of a chain of workspaces: A->binned to B->binned to C:
+   *    Index 0 = the workspace that was binned, e.g. "A"
+   *    Index 1 = the intermediate workspace, e.g. "B"
+   *
+   * @return CoordTransform pointer
+   * @param index :: index into the array of original workspaces
+   */
   Mantid::API::CoordTransform * MDGeometry::getTransformToOriginal(size_t index) const
   {
     if (index >= m_transforms_ToOriginal.size())
@@ -409,9 +447,17 @@ namespace API
     return m_transforms_ToOriginal[index];
   }
 
-  /** Set Coordinate Transformation that goes from this workspace's coordinates to the original workspace coordinates.
+  //---------------------------------------------------------------------------------------------------
+  /** Sets the Coordinate Transformation that goes from THIS workspace's coordinates
+   * to the ORIGINAL workspace's coordinates
+   *
+   *  In the case of a chain of workspaces: A->binned to B->binned to C:
+   *    Index 0 = the workspace that was binned, e.g. "A"
+   *    Index 1 = the intermediate workspace, e.g. "B"
+   *
    * @param transform :: CoordTransform pointer (this assumes pointer ownership)
-   * @param index :: index into the array of original workspaces */
+   * @param index :: index into the array of original workspaces
+   */
   void MDGeometry::setTransformToOriginal(Mantid::API::CoordTransform * transform, size_t index)
   {
     if (index >= m_transforms_ToOriginal.size())

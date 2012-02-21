@@ -195,8 +195,27 @@ namespace MDEvents
       if (!Strings::convert(strs[d+1], basis[d]))
         throw std::invalid_argument("Error converting argument '" + strs[d+1] + "' in the dimensions string '" + str + "' to a number.");
 
-    // Normalize it to unity, if desized
+    // If B was binned from A (m_originalWS), and we are binning C from B,
+    // convert the basis vector from B space -> A space
+    if (m_originalWS)
+    {
+      // Turn basis vector into two points
+      VMD basis0(this->m_inWS->getNumDims());
+      VMD basis1 = basis;
+      // Convert the points to the original coordinates (from inWS to originalWS)
+      CoordTransform * toOrig = m_inWS->getTransformToOriginal();
+      VMD origBasis0 = toOrig->applyVMD(basis0);
+      VMD origBasis1 = toOrig->applyVMD(basis1);
+      // New basis vector, now in the original workspace
+      basis = origBasis1 - origBasis0;
+    }
+
+    // Check on the length of the basis vector
     double basisLength = basis.norm();
+    if (basisLength <= 0)
+      throw std::invalid_argument("direction should not be 0-length.");
+
+    // Normalize it to unity, if desized
     double transformScaling = 1.0;
     if (m_NormalizeBasisVectors)
     {
@@ -208,31 +227,8 @@ namespace MDEvents
       // A distance of |basisVector| in the INPUT space = a distance of 1.0 in the OUTPUT space
       transformScaling = (1.0 / basisLength);
 
-    if (basisLength <= 0)
-      throw std::invalid_argument("direction should not be 0-length.");
-
     // This is the length of this dimension as measured in the INPUT space
     double lengthInInput = lengthInOutput / transformScaling;
-
-    // Now, convert the basis vector to the coordinates of the ORIGNAL ws, if any
-    if (m_originalWS)
-    {
-      // Turn basis vector into two points
-      VMD basis0(this->m_inWS->getNumDims());
-      VMD basis1 = basis * basisLength;
-      // Convert the points to the original coordinates (from inWS to originalWS)
-      CoordTransform * toOrig = m_inWS->getTransformToOriginal();
-      VMD origBasis0 = toOrig->applyVMD(basis0);
-      VMD origBasis1 = toOrig->applyVMD(basis1);
-      // New basis vector, now in the original workspace
-      basis = origBasis1 - origBasis0;
-      // What is the ratio of the ORIGINAL length vs the length
-      double lengthRatio = basis.norm() / basisLength;
-      // New length of the vector (in original space).
-      lengthInInput = lengthInInput * lengthRatio;
-      // TODO IS THE ABOVE CORRECT???
-      // TODO: what about m_transformScaling
-    }
 
     // Scaling factor, to convert from units in the INPUT dimensions to the output BIN number
     double binningScaling = double(numBins) / (lengthInInput);

@@ -809,6 +809,76 @@ public:
   }
 
 
+  //---------------------------------------------------------------------------------------------
+  /** A = a MDEventWorkspace
+   *  B = binned from A with translation and scaling
+   *  C = binned from B with translation and scaling
+   *  */
+  void test_exec_nonAligned_then_nonAligned_translation_scaling()
+  {
+    do_prepare_comparison();
+
+    // Make the reference bin, which is all space (-10 to 10) with 10 bins
+    FrameworkManager::Instance().exec("BinMD", 20,
+        "InputWorkspace", "mdew",
+        "OutputWorkspace", "reference",
+        "AxisAligned", "0",
+        "BasisVector0", "tx,m, 1.0, 0.0",
+        "BasisVector1", "ty,m, 0.0, 1.0",
+        "NormalizeBasisVectors", "0",
+        "ForceOrthogonal", "0",
+        "Translation", "-10, -10",
+        "OutputExtents", "0,20, 0,20",
+        "OutputBins", "10,10");
+
+    // Bin to workspace B. Have translation and scaling
+    FrameworkManager::Instance().exec("BinMD", 20,
+        "InputWorkspace", "mdew",
+        "OutputWorkspace", "B",
+        "AxisAligned", "0",
+        "BasisVector0", "tx, m, 2.0, 0.0",
+        "BasisVector1", "ty, m, 0.0, 2.0",
+        "NormalizeBasisVectors", "0",
+        "ForceOrthogonal", "0",
+        "Translation", "-2, -2",
+        "OutputExtents", "-4,6, -4,6", /* The extents are in the scaled OUTPUT dimensions */
+        "OutputBins", "10,10");
+
+    // Check that B turns out to be the same as "Reference"
+    do_compare_histo("reference", "B", "mdew");
+
+    // Bin the binned output with more translation and scaling,
+    // but it still ends up binning A from (-10 to 10) with 10 bins.
+    FrameworkManager::Instance().exec("BinMD", 20,
+        "InputWorkspace", "B",
+        "OutputWorkspace", "C",
+        "AxisAligned", "0",
+        "BasisVector0", "ttx,m, 2.0, 0.0", /* size 2 in B = size 4 in A */
+        "BasisVector1", "tty,m, 0.0, 2.0",
+        "NormalizeBasisVectors", "0",
+        "ForceOrthogonal", "0",
+        "Translation", "-1, -1", /* coords in B = (-4,-4) in A */
+        "OutputExtents", "-1.5, 3.5, -1.5, 3.5", /* size of 5 in C = size of 10 in B = size of 20 in A */
+        "OutputBins", "10,10");
+
+    // Finally, C maps back onto A (mdew) binned as reference
+    do_compare_histo("reference", "C", "mdew");
+
+    IMDWorkspace_sptr C = boost::dynamic_pointer_cast<IMDWorkspace>(AnalysisDataService::Instance().retrieve("C"));
+    TS_ASSERT(C);
+
+    VMD out;
+    // Check the mapping of coordinates from C to B
+    CoordTransform * transf_C_to_B = C->getTransformToOriginal(1);
+    out = transf_C_to_B->applyVMD(VMD(-1.5, -1.5));
+    TS_ASSERT_EQUALS( out, VMD(-4, -4) );
+
+    // And this is the mapping to the A workspace
+    CoordTransform * transf_C_to_A = C->getTransformToOriginal(0);
+    out = transf_C_to_A->applyVMD(VMD(-1.5, -1.5));
+    TS_ASSERT_EQUALS( out, VMD(-10, -10) );
+  }
+
 };
 
 
