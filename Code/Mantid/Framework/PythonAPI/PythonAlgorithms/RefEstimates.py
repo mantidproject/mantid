@@ -88,12 +88,17 @@ class RefEstimates(PythonAlgorithm):
                 self.setProperty("MaxTOF", int(math.ceil(max)))
 
             # 1D plot
+            instr_dir = mtd.getSettings().getInstrumentDirectory()
             if is_pixel_y:
+                grouping_file = os.path.join(instr_dir, "Grouping",
+                                             "REFL_Detector_Grouping_Sum_X.xml")
                 GroupDetectors(InputWorkspace=ws, OutputWorkspace=ws,
-                               MapFile="Grouping/REFL_Detector_Grouping_Sum_X.xml")
+                               MapFile=grouping_file)
             else:
+                grouping_file = os.path.join(instr_dir, "Grouping",
+                                             "REFL_Detector_Grouping_Sum_Y.xml")
                 GroupDetectors(InputWorkspace=ws, OutputWorkspace=ws,
-                               MapFile="Grouping/REFL_Detector_Grouping_Sum_Y.xml")
+                               MapFile=grouping_file)
                 
             Transpose(InputWorkspace=ws, OutputWorkspace=ws)
             
