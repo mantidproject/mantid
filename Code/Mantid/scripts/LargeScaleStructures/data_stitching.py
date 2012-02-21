@@ -217,6 +217,7 @@ class DataSet(object):
             
         x = mtd[self._ws_name].readX(0)
         y = mtd[self._ws_name].readY(0)
+        e = mtd[self._ws_name].readE(0)
         
         is_histo = len(x)==len(y)+1
         if not is_histo and len(x)!=len(y):
@@ -224,6 +225,9 @@ class DataSet(object):
         
         sum = 0.0
         for i in range(len(y)-1):
+            # Skip points compatible with zero within error
+            if self._restricted_range and y[i]<=e[i]:
+                continue
             if x[i]>=xmin and x[i+1]<=xmax:
                 sum += (y[i]+y[i+1])*(x[i+1]-x[i])/2.0
             elif x[i]<xmin and x[i+1]>xmin:

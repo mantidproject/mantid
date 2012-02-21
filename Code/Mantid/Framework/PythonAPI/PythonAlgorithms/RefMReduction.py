@@ -50,14 +50,19 @@ class RefMReduction(PythonAlgorithm):
         self.declareProperty("RemoveIntermediateWorkspaces", True)
         # Output workspace to put the transmission histo into
         self.declareWorkspaceProperty("OutputWorkspace", "", Direction.Output)
+        self.declareProperty("OutputMessage", "", Direction=Direction.Output)
 
     def PyExec(self):
+        self._output_message = ""
         # TOF range and binning
         self.TOFrange = self.getProperty("TOFRange")
         self.TOFsteps = 25.0
 
         # Process each polarization state, use the OFF_OFF state
-        # for the outputworkspace
+        # for the output workspace
+        output_ws_name = self.getPropertyValue("OutputWorkspace")
+        if mtd.workspaceExists(output_ws_name):
+            mtd.deleteWorkspace(output_ws_name)
         output_ws = self._process_polarization(RefMReduction.OFF_OFF)
         self.setProperty("OutputWorkspace", mtd[output_ws])
         
@@ -70,6 +75,8 @@ class RefMReduction(PythonAlgorithm):
             for ws in mtd.keys():
                 if ws.startswith('__'):
                     mtd.deleteWorkspace(ws)
+                    
+        self.setProperty("OutputMessage", self._output_message)
 
     def _calculate_angle(self, workspace):
         """
@@ -139,7 +146,8 @@ class RefMReduction(PythonAlgorithm):
             @param polarization: Off_Off, Off_On, On_Off, or On_On
         """
         run_numbers = self.getProperty("RunNumbers")
-        mtd.sendLogMessage("RefMReduction: processing %s" % run_numbers)
+        mtd.sendLogMessage("RefMReduction: processing %s [%s]" % (run_numbers, polarization))
+        self._output_message += "Processing %s [%s]\n" % (run_numbers, polarization)
         allow_multiple = False
         if len(run_numbers)>1 and not allow_multiple:
             raise RuntimeError("Not ready for multiple runs yet, please specify only one run number")
@@ -164,6 +172,7 @@ class RefMReduction(PythonAlgorithm):
         # Check whether we have events
         if mtd[ws_name_raw].getNumberEvents()==0:
             mtd.sendLogMessage("RefMReduction: no data in %s" % polarization)
+            self._output_message += "   No data for this polarization state\n"
             mtd.deleteWorkspace(ws_name_raw)
             return None
         
@@ -173,6 +182,7 @@ class RefMReduction(PythonAlgorithm):
             self.TOFrange[1] = max(mtd[ws_name_raw].readX(0))
             
         Rebin(InputWorkspace=ws_name_raw, OutputWorkspace=ws_name, Params=[self.TOFrange[0], self.TOFsteps, self.TOFrange[1]], PreserveEvents=True)
+        #self._output_message += "   Rebinned from %g to %g\n" % (self.TOFrange[0], self.TOFrange[1])
         
         # Normalized by Current (proton charge)
         NormaliseByCurrent(InputWorkspace=ws_name, OutputWorkspace=ws_name)
@@ -183,10 +193,12 @@ class RefMReduction(PythonAlgorithm):
         wl_max = self.getProperty("WavelengthMax")
         wl_step = self.getProperty("WavelengthStep")
         Rebin(InputWorkspace=ws_name, OutputWorkspace=ws_name, Params=[wl_min, wl_step, wl_max], PreserveEvents=True)
+        self._output_message += "   Rebinned in wavelength from %g to %g in steps of %g\n" % (wl_min, wl_max, wl_step)
 
         # Perform normalization according to wavelength distribution of
         # the direct beam
         if self.getProperty("PerformNormalization"):
+            self._output_message += "   Normalization:\n"
             ws_wl_profile = self._process_normalization()
             RebinToWorkspace(WorkspaceToRebin=ws_wl_profile, 
                              WorkspaceToMatch=ws_name,
@@ -207,11 +219,15 @@ class RefMReduction(PythonAlgorithm):
         # Sum the normalization counts as a function of wavelength in ROI
         peak_range = self.getProperty("SignalPeakPixelRange")
         output_roi, npix = self._crop_roi(ws_name, peak_range, low_res_range)
+        self._output_message += "   ROI x=(%g,%g) y=(%g,%g)\n" % (peak_range[0],peak_range[1],
+                                                                low_res_range[0], low_res_range[1])
 
         # Subtract background
         if self.getProperty("SubtractSignalBackground"):
             bck_range = self.getProperty("SignalBackgroundPixelRange")
             self._subtract_bakcground(ws_name, output_roi, peak_range, npix, bck_range, low_res_range)
+            self._output_message += "   Background: "
+            self._output_message += " x=(%g,%g)\n" % (bck_range[0], bck_range[1])
         
         return output_roi
  
@@ -250,6 +266,7 @@ class RefMReduction(PythonAlgorithm):
             Process the direct beam normalization run
         """
         normalization_run = self.getProperty("NormalizationRunNumber")
+        self._output_message += "      Processing %d\n" % normalization_run
         ws_normalization = "normalization_%d_raw" % normalization_run
         ws_wl_profile = "__normalization_%d" % normalization_run
         
@@ -281,6 +298,7 @@ class RefMReduction(PythonAlgorithm):
         wl_max = self.getProperty("WavelengthMax")
         wl_step = self.getProperty("WavelengthStep")
         Rebin(InputWorkspace=ws_wl_profile, OutputWorkspace=ws_wl_profile, Params=[wl_min, wl_step, wl_max], PreserveEvents=True)
+        self._output_message += "         Rebinned in wavelength from %g to %g in steps of %g\n" % (wl_min, wl_max, wl_step)
         
         # Get the integration range in the low-res direction
         low_res_range = [0, RefMReduction.NY_PIXELS-1]
@@ -294,10 +312,14 @@ class RefMReduction(PythonAlgorithm):
             SumSpectra(InputWorkspace=ws_wl_profile, OutputWorkspace=ws_wl_profile_roi)
         else:
             ws_wl_profile_roi, npix = self._crop_roi(ws_wl_profile, peak_range, low_res_range)
+            self._output_message += "         ROI x=(%g,%g) y=(%g,%g)\n" % (peak_range[0],peak_range[1],
+                                                                    low_res_range[0], low_res_range[1])
             # Subtract background
             if self.getProperty("SubtractNormBackground"):
                 bck_range = self.getProperty("NormBackgroundPixelRange")
                 self._subtract_bakcground(ws_wl_profile, ws_wl_profile_roi, peak_range, npix, bck_range, low_res_range)
+                self._output_message += "         Background: "
+                self._output_message += " x=(%g,%g)\n" % (bck_range[0], bck_range[1])
 
             Scale(InputWorkspace=ws_wl_profile_roi, OutputWorkspace=ws_wl_profile_roi,
                   Factor=1.0/(peak_range[1]-peak_range[0]), Operation="Multiply")     
@@ -312,7 +334,7 @@ class RefMReduction(PythonAlgorithm):
         if bck_range[0]<peak_range[0] and bck_range[1]>peak_range[1]:
             # Background on both sides
             bck_ws1, npix_bck1 = self._crop_roi(raw_ws, [bck_range[0],peak_range[0]-1], low_res_range)
-            bck_ws2, npix_bck2 = self._crop_roi(raw_ws, [peak_range[1]+1,bck_range[0]], low_res_range)
+            bck_ws2, npix_bck2 = self._crop_roi(raw_ws, [peak_range[1]+1,bck_range[1]], low_res_range)
             
             scaling_factor = npix_peak/(2.0*npix_bck1)
             Scale(InputWorkspace=bck_ws1, OutputWorkspace=bck_ws1,
@@ -388,5 +410,6 @@ class RefMReduction(PythonAlgorithm):
                 
         Rebin(InputWorkspace=output_ws, OutputWorkspace=output_ws,
               Params=[q_min, q_step, max(q)])
+        self._output_message += "   Converted to Q\n"
     
 mtd.registerPyAlgorithm(RefMReduction())

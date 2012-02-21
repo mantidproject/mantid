@@ -278,7 +278,7 @@ class DataReflWidget(BaseWidget):
 
         content += "eventFile = os.path.split(eventFileAbs)[-1]\n"
         content += "nexusDir = eventFileAbs.replace(eventFile, '')\n"
-        content += "runNumber = eventFile.split('_')[1]\n"
+        content += "runNumber = eventFile.split('_')[2]\n"
         content += "configService = mtd.getSettings()\n"
         content += "dataSearchPath = configService.getDataSearchDirs()\n"
         content += "dataSearchPath.append(nexusDir)\n"
@@ -287,10 +287,12 @@ class DataReflWidget(BaseWidget):
         content += reduce_script
 
         content += "\n"
-        content += "file_name = 'reflectivity_'+runNumber+'.txt'\n"
-        content += "file_path = os.path.join(outputDir,file_name)\n"
-        content += "SaveAscii(Filename=file_path,\n"
-        content += "          InputWorkspace='reflectivity_'+runNumber,\n" 
+        content += "for item in mtd.keys():\n"
+        content += "    if item.startswith('reflectivity_'):\n"
+        content += "        file_name = 'reflectivity_'+runNumber+'.txt'\n"
+        content += "        file_path = os.path.join(outputDir,file_name)\n"
+        content += "        SaveAscii(Filename=file_path,\n"
+        content += "          InputWorkspace=item,\n" 
         content += "          Separator='Tab',\n"
         content += "          CommentIndicator='# ')\n"
         

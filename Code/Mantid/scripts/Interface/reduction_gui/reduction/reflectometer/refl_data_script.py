@@ -53,7 +53,10 @@ class DataSets(BaseScriptElement):
             @param execute: if true, the script will be executed
         """
 
-        script =  "RefLReduction(RunNumbers=[%s],\n" % ','.join([str(i) for i in self.data_files])
+        if for_automated_reduction:
+            script =  "RefLReduction(RunNumbers=[%s],\n" % ','.join([str(i) for i in self.data_files])
+        else:
+            script =  "RefLReduction(RunNumbers=[int(%s)],\n" % str(self.data_files[0])
         script += "              NormalizationRunNumber=%d,\n" % self.norm_file
         script += "              SignalPeakPixelRange=%s,\n" % str(self.DataPeakPixels)
         script += "              SubtractSignalBackground=%s,\n" % str(self.DataBackgroundFlag)
