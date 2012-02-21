@@ -1351,7 +1351,7 @@ void MuonAnalysis::getDeadTimeFromFile(const QString & fileName)
         if (Mantid::API::AnalysisDataService::Instance().doesExist(m_workspace_name) )
         {
           ++numData;
-          int loop(1);
+          size_t loop(1);
           while(loop == numData)
           {
             std::stringstream ss; //create a stringstream
