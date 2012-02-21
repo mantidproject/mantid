@@ -301,7 +301,8 @@ class DataReflWidget(BaseWidget):
         content += "# Place holder for python script\n"
         content += "file_path = os.path.join(outputDir, '%s_'+runNumber+'.py')\n" % self.instrument_name
         content += "f=open(file_path,'w')\n"
-        content += "f.write('# Empty file')\n"
+        content += "f.write(\"runNumber=\%s \% runNumber\\n\")\n"
+        content += "f.write(\"\"\"%s\"\"\")\n" % reduce_script
         content += "f.close()\n\n"
         
         # Reduction option to load into Mantid

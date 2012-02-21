@@ -47,7 +47,9 @@ class DataSets(BaseScriptElement):
             Generate reduction script
             @param execute: if true, the script will be executed
         """
-
+        if for_automated_reduction:
+            return self._automated_reduction()
+        
         script =  "RefMReduction(RunNumbers=%s,\n" % ','.join([str(i) for i in self.data_files])
         script += "              NormalizationRunNumber=%d,\n" % self.norm_file
         script += "              SignalPeakPixelRange=%s,\n" % str(self.DataPeakPixels)
@@ -79,11 +81,46 @@ class DataSets(BaseScriptElement):
             
         # The output should be slightly different if we are generating
         # a script for the automated reduction
-        if for_automated_reduction:
-            script += "              OutputWorkspace='reflectivity_Off_Off_'+%s)" % str(self.data_files[0])
-        else:
-            script += "              OutputWorkspace='reflectivity_Off_Off_%s')" % str(self.data_files[0])
+        script += "              OutputWorkspace='reflectivity_Off_Off_%s')" % str(self.data_files[0])
         script += "\n"
+
+        return script
+
+    def _automated_reduction(self):
+        script =  "# REF_M automated reduction\n"
+        
+        script += "estimates = RefEstimates(RunNumber=runNumber)\n"
+        script += "peak_min = estimates.getProperty('PeakMin').value\n"
+        script += "peak_max = estimates.getProperty('PeakMax').value\n"
+        script += "ref_pixel = (peak_max+peak_min)/2.0\n\n"
+        
+        script += "estimates = RefEstimates(RunNumber=%s)\n" % str(self.norm_file)
+        script += "peak_min_norm = estimates.getProperty('PeakMin').value\n"
+        script += "peak_max_norm = estimates.getProperty('PeakMax').value\n\n"
+        
+        script += "RefMReduction(RunNumbers=%s,\n" % ','.join([str(i) for i in self.data_files])
+        script += "              NormalizationRunNumber=%d,\n" % self.norm_file
+        script += "              SignalPeakPixelRange=[peak_min, peak_max],\n"
+        script += "              SubtractSignalBackground=False,\n"
+        script += "              PerformNormalization=%s,\n" % str(self.NormFlag)
+        script += "              NormPeakPixelRange=[peak_min_norm, peak_max_norm],\n"
+        script += "              SubtractNormBackground=False,\n"
+                        
+        script += "              CropLowResDataAxis=%s,\n" % str(self.data_x_range_flag)
+        if self.data_x_range_flag:
+            script += "              LowResDataAxisPixelRange=%s,\n" % str(self.data_x_range)
+            
+        script += "              CropLowResNormAxis=%s,\n" % str(self.norm_x_range_flag)
+        if self.norm_x_range_flag:
+            script += "              LowResNormAxisPixelRange=%s,\n" % str(self.norm_x_range)
+            
+        script += "              QMin=%s,\n" % str(self.q_min)
+        script += "              QStep=%s,\n" % str(self.q_step)
+        script += "              Theta=ref_pixel,\n"
+            
+        # The output should be slightly different if we are generating
+        # a script for the automated reduction
+        script += "              OutputWorkspace='reflectivity_Off_Off_'+%s)\n" % str(self.data_files[0])
 
         return script
 
