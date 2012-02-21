@@ -358,13 +358,18 @@ public:
       if (alg.m_NormalizeBasisVectors)
       {
         TSM_ASSERT_DELTA("Unit transformation scaling if normalizing", alg.m_transformScaling[0], 1.0, 1e-5);
+        TSM_ASSERT_DELTA("A bin ranges from 0-0.5 in OUTPUT, which is 0.5 long in the INPUT, "
+            "so the binningScaling is 2.",
+            alg.m_binningScaling[0], 2., 1e-5);
       }
       else
       {
         TSM_ASSERT_DELTA("Length sqrt(14) in INPUT = 1.0 in output", alg.m_transformScaling[0], sqrt(1.0/14.0), 1e-5);
+        TSM_ASSERT_DELTA("A bin ranges from 0-0.5 in OUTPUT, which is 0.5/sqrt(14) long in the INPUT, "
+            "so the binningScaling is 2/sqrt(14)",
+            alg.m_binningScaling[0], 2./sqrt(14.0), 1e-5);
       }
 
-      TSM_ASSERT_DELTA("A bin ranges from 0-0.5, so the binningScaling is 2.0", alg.m_binningScaling[0], 2., 1e-5);
     }
   }
 
@@ -403,7 +408,8 @@ public:
       VMD translation,
       std::string extents,
       std::string numBins,
-      bool ForceOrthogonal=false)
+      bool ForceOrthogonal=false,
+      bool NormalizeBasisVectors=true)
   {
     SlicingAlgorithmImpl * alg = new SlicingAlgorithmImpl();
     alg->m_inWS = inWS;
@@ -416,6 +422,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputExtents", extents));
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputBins", numBins));
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Translation", translation.toString(",")));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("NormalizeBasisVectors", NormalizeBasisVectors));
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("ForceOrthogonal", ForceOrthogonal));
     alg->createTransform();
     return alg;
@@ -697,7 +704,8 @@ public:
     TS_ASSERT( !func->isPointContained( VMD(1.5, 11.5) ) );
   }
 
-  /** Simple 2D transform but the edge of space
+  //----------------------------------------------------------------------------
+  /** Simple (but general) 2D transform but the edge of space
    * in the output workspace is NOT 0,0.
    * (0,0) in the output = (1,1) in the input.
    * Minimum edge in the output = (-9,  -19) in the input
@@ -724,40 +732,106 @@ public:
     coord_t in[2] = {3, -11.0};
     coord_t out[2];  VMD outV;
 
-
     // The "binning" transform
     CoordTransform * trans = alg->m_transform;
     TS_ASSERT(trans);
     trans->apply(in, out);
-    std::cout << VMD(2,out) << std::endl;
     TS_ASSERT_EQUALS( VMD(2,out), VMD(3.0, 1.0) );
-//
-//    // The "real" transform from original
-//    CoordTransform * transFrom = alg->m_transformFromOriginal;
-//    TS_ASSERT(transFrom);
-//    transFrom->apply(in, out);
-//    TS_ASSERT_EQUALS( VMD(3,out), VMD(cos(angle), -sin(angle), 1.3)*2 );
-//
-//    // The "reverse" transform
-//    CoordTransform * transTo = alg->m_transformToOriginal;
-//    TS_ASSERT(transTo);
-//    transTo->apply(out, in);
-//    TS_ASSERT_EQUALS( VMD(3,in), VMD(3.0, 1.0, 2.6) );
-//
-//    // The implicit function
-//    MDImplicitFunction * func = alg->getImplicitFunctionForChunk(NULL, NULL);
-//    TS_ASSERT(func);
-//    TS_ASSERT_EQUALS( func->getNumPlanes(), 6);
-//    TS_ASSERT( func->isPointContained(VMD(1.5, 1.5, 2)) );
-//    TS_ASSERT( func->isPointContained(VMD(5.5, 5.5, 4)) );
-//    TS_ASSERT( !func->isPointContained(VMD(1.5, 1.5, -1)) );
-//    TS_ASSERT( !func->isPointContained(VMD(1.5, 1.5, +11)) );
-//    TS_ASSERT( !func->isPointContained(VMD(0.5, 1.5, 2)) );
-//    TS_ASSERT( !func->isPointContained(VMD(1.5, 0.5, 2)) );
-//    TS_ASSERT( !func->isPointContained(VMD(11.5, 1.5, 2)) );
-//    TS_ASSERT( !func->isPointContained(VMD(1.5, 11.5, 2)) );
+
+    // The "real" transform from original
+    CoordTransform * transFrom = alg->m_transformFromOriginal;
+    TS_ASSERT(transFrom);
+    transFrom->apply(in, out);
+    TS_ASSERT_EQUALS( VMD(2,out), VMD(+2, -12) );
+
+    // The "reverse" transform
+    CoordTransform * transTo = alg->m_transformToOriginal;
+    TS_ASSERT(transTo);
+    transTo->apply(out, in);
+    TS_ASSERT_EQUALS( VMD(2,in), VMD(3., -11.) );
+
+    // The implicit function
+    MDImplicitFunction * func = alg->getImplicitFunctionForChunk(NULL, NULL);
+    TS_ASSERT(func);
+    TS_ASSERT_EQUALS( func->getNumPlanes(), 4);
+    TS_ASSERT( func->isPointContained(VMD(-8.9, -18.9)) );
+    TS_ASSERT( func->isPointContained(VMD(-8.9, 0)) );
+    TS_ASSERT( func->isPointContained(VMD(0, -18.9)) );
+    TS_ASSERT( func->isPointContained(VMD(10.9, 20.9)) );
+
+    TS_ASSERT( !func->isPointContained(VMD(-9.1, 0)) );
+    TS_ASSERT( !func->isPointContained(VMD(0, +21.1)) );
+    TS_ASSERT( !func->isPointContained(VMD(+11.1, 0)) );
   }
 
+  //----------------------------------------------------------------------------
+  /** Simple (but general) 2D transform but the edge of space
+   * in the output workspace is NOT 0,0.
+   * Also, the basis vectors are length (2,5)
+   * (0,0) in the output = (1,1) in the input.
+   * Minimum edge in the output (-10,-20) = (-19,  -99) in the input
+   * Maximum edge in the output (+10,+20) = (+21, +101) in the input
+   */
+  void test_createGeneralTransform_2D_to_2D_withNonZeroOrigin_withScaling()
+  {
+    SlicingAlgorithmImpl * alg =
+        do_createGeneralTransform(ws2, "OutX,m, 2,0",  "OutY,m, 0,5",
+            "",  "", VMD(1,1),
+            "-10,10, -20,20", "5,5",
+            false /*force orthogonal*/,
+            false /*normalize basis vectors */ );
+
+    TSM_ASSERT_DELTA("Bins along X are sized 8 in the INPUT dimension",
+        alg->m_binningScaling[0], 0.125, 1e-5 );
+    TSM_ASSERT_DELTA("Bins along Y are sized 40 in the INPUT dimension)",
+        alg->m_binningScaling[1], 1./40., 1e-5 );
+
+    TSM_ASSERT_DELTA("Basis vectors were NOT normalized",
+        alg->m_transformScaling[0], 0.5, 1e-5 );
+    TSM_ASSERT_DELTA("Basis vectors were NOT normalized",
+        alg->m_transformScaling[1], 0.2, 1e-5 );
+
+    // This input coordinate translates to (+2,-12)
+    // and then scales to (+1,-2.4) in OUTPUT coords
+    coord_t in[2] = {3, -11.0};
+    coord_t out[2];  VMD outV;
+
+    // The "binning" transform
+    /* You are OUTPUT coordinates (+1,-2.4)
+       which is offset by (11, 17.6) from the minimum (-10, -20)
+       with bins of size (4,8) (in the OUTPUT dimensions),
+       which means the bin coordinate is (11/4, 17.6/8) */
+    CoordTransform * trans = alg->m_transform;
+    TS_ASSERT(trans);
+    trans->apply(in, out);
+    TS_ASSERT_EQUALS( VMD(2,out), VMD(11./4., 17.6/8.) );
+
+    // The "real" transform from original
+    CoordTransform * transFrom = alg->m_transformFromOriginal;
+    TS_ASSERT(transFrom);
+    transFrom->apply(in, out);
+    TS_ASSERT_EQUALS( VMD(2,out), VMD(+1., -2.4) );
+
+    // The "reverse" transform
+    CoordTransform * transTo = alg->m_transformToOriginal;
+    TS_ASSERT(transTo);
+    transTo->apply(out, in);
+    TS_ASSERT_EQUALS( VMD(2,in), VMD(3., -11.) );
+
+    // The implicit function
+    MDImplicitFunction * func = alg->getImplicitFunctionForChunk(NULL, NULL);
+    TS_ASSERT(func);
+    TS_ASSERT_EQUALS( func->getNumPlanes(), 4);
+    TS_ASSERT( func->isPointContained(VMD(-18.9, -98.9)) );
+    TS_ASSERT( func->isPointContained(VMD(+20.9, 100.9)) );
+
+    TS_ASSERT( !func->isPointContained(VMD(-19.1, 0)) );
+    TS_ASSERT( !func->isPointContained(VMD(0, -99.1)) );
+    TS_ASSERT( !func->isPointContained(VMD(0, +101.1)) );
+    TS_ASSERT( !func->isPointContained(VMD(+21.1, 0)) );
+  }
+
+  //----------------------------------------------------------------------------
   /** These non-orthogonal bases define a parallelogram sort of like this but at 45 degrees:
    *
    *    /``````/

@@ -183,8 +183,8 @@ namespace MDEvents
     // Get the min/max extents in this OUTPUT dimension
     double min = m_minExtents[dim];
     double max = m_maxExtents[dim];
-    double length = max-min;
-    if (length <= 0)
+    double lengthInOutput = max-min;
+    if (lengthInOutput <= 0)
       throw std::invalid_argument("The maximum extents for dimension "
           + Strings::toString(dim) + " should be > 0.");
 
@@ -196,18 +196,22 @@ namespace MDEvents
 
     // Normalize it to unity, if desized
     double basisLength = basis.norm();
+    double transformScaling = 1.0;
     if (m_NormalizeBasisVectors)
     {
       // A distance of 1 in the INPUT space = a distance of 1.0 in the OUTPUT space
       basis.normalize();
-      m_transformScaling.push_back(1.0);
+      transformScaling = 1.0;
     }
     else
       // A distance of |basisVector| in the INPUT space = a distance of 1.0 in the OUTPUT space
-      m_transformScaling.push_back(1.0 / basisLength);
+      transformScaling = (1.0 / basisLength);
 
     if (basisLength <= 0)
       throw std::invalid_argument("direction should not be 0-length.");
+
+    // This is the length of this dimension as measured in the INPUT space
+    double lengthInInput = lengthInOutput / transformScaling;
 
     // Now, convert the basis vector to the coordinates of the ORIGNAL ws, if any
     if (m_originalWS)
@@ -224,13 +228,13 @@ namespace MDEvents
       // What is the ratio of the ORIGINAL length vs the length
       double lengthRatio = basis.norm() / basisLength;
       // New length of the vector (in original space).
-      length = length * lengthRatio;
+      lengthInInput = lengthInInput * lengthRatio;
       // TODO IS THE ABOVE CORRECT???
       // TODO: what about m_transformScaling
     }
 
-    // Scaling factor, to convert from units in the inDim to the output BIN number
-    double scaling = double(numBins) / length;
+    // Scaling factor, to convert from units in the INPUT dimensions to the output BIN number
+    double binningScaling = double(numBins) / (lengthInInput);
 
     // Create the output dimension
     MDHistoDimension_sptr out(new MDHistoDimension(name, id, units, static_cast<coord_t>(min), static_cast<coord_t>(max), numBins));
@@ -238,7 +242,8 @@ namespace MDEvents
     // Put both in the algo for future use
     m_bases.push_back(basis);
     m_binDimensions.push_back(out);
-    m_binningScaling.push_back(scaling);
+    m_binningScaling.push_back(binningScaling);
+    m_transformScaling.push_back(transformScaling);
   }
 
 
@@ -356,7 +361,7 @@ namespace MDEvents
     for (size_t d=0; d<m_outD; d++)
       // Translate from the outCoords=(0,0,0) to outCoords=(min,min,min)
       m_inputMinPoint += (m_bases[d] * m_binDimensions[d]->getMinimum());
-//    std::cout << m_inputMinPoint << " m_inputMinPoint " << std::endl;
+    //std::cout << m_inputMinPoint << " m_inputMinPoint " << std::endl;
 
     // Create the CoordTransformAffine for BINNING with these basis vectors
     CoordTransformAffine * ct = new CoordTransformAffine(inD, m_outD);
@@ -718,7 +723,7 @@ namespace MDEvents
     // General implicit function
     MDImplicitFunction * func = new MDImplicitFunction;
 
-    // First origin = 0,0,0 (offset if you specified a chunk)
+    // First origin = min of each basis vector
     VMD o1 = m_translation;
     // Second origin = max of each basis vector
     VMD o2 = m_translation;
@@ -728,10 +733,12 @@ namespace MDEvents
 
     for (size_t d=0; d<m_bases.size(); d++)
     {
-      double xMin = 0;
-      double xMax = m_binDimensions[d]->getX(m_binDimensions[d]->getNBins());
+      double xMin = m_binDimensions[d]->getMinimum();
+      double xMax = m_binDimensions[d]->getMaximum();
+      // Move the position if you're using a chunk
       if (chunkMin != NULL) xMin = m_binDimensions[d]->getX(chunkMin[d]);
       if (chunkMax != NULL) xMax = m_binDimensions[d]->getX(chunkMax[d]);
+      // Offset the origin by the position along the basis vector
       o1 += (m_bases[d] * xMin);
       o2 += (m_bases[d] * xMax);
       VMD thisBase = m_bases[d] * (xMax-xMin);
