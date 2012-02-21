@@ -797,6 +797,7 @@ namespace Mantid
       TabWS->addColumn("double", "End Row");
       TabWS->addColumn("double", "Start Col");
       TabWS->addColumn("double", "End Col");
+      TabWS->addColumn("double", "TotIntensityError");
     }
 
 
@@ -1398,6 +1399,7 @@ namespace Mantid
       TabWS->getRef<double> (std::string("Start Col"), TableRow) = AttributeValues[IStartCol];
       TabWS->getRef<double> (std::string("End Col"), TableRow) = AttributeValues[IStartCol]
           + AttributeValues[INCol] - 1;
+      TabWS->getRef<double> (std::string("TotIntensityError"), TableRow) = sqrt(AttributeValues[IVariance]);
 
     }
 

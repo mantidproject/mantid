@@ -115,7 +115,7 @@ namespace Mantid
 
       double qspan = 0.01;
       bool slices = getProperty("FitSlices");
-      bool IC = getProperty("IkedaCarpenterTOF");
+      IC = getProperty("IkedaCarpenterTOF");
       bool matchRun = getProperty("MatchingRunNo");
       if (slices)
       {
@@ -340,7 +340,7 @@ namespace Mantid
           for (iTOF = TOFmin; iTOF <= TOFmax; iTOF++)I+=Y[iTOF];
     
 
-        if (slices)
+        if (slices && !IC)
         {
           sigI = peak.getSigmaIntensity();
         }
@@ -727,8 +727,16 @@ int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0, int 
       for (int iTOF=0; iTOF < TOFmax; iTOF++)
       {
         Xout[iTOF] = logtable->getRef<double>(std::string("Time"), iTOF);
-        Yout[iTOF] = logtable->getRef<double>(std::string("ISAWIntensity"), iTOF);
-        Eout[iTOF] = logtable->getRef<double>(std::string("ISAWIntensityError"), iTOF);
+        if(IC)//Ikeda-Carpenter fit
+        {
+          Yout[iTOF] = logtable->getRef<double>(std::string("TotIntensity"), iTOF);
+          Eout[iTOF] = logtable->getRef<double>(std::string("TotIntensityError"), iTOF);
+        }
+        else
+        {
+          Yout[iTOF] = logtable->getRef<double>(std::string("ISAWIntensity"), iTOF);
+          Eout[iTOF] = logtable->getRef<double>(std::string("ISAWIntensityError"), iTOF);
+        }
       }
 
       outputW->getSpectrum(idet)->clearDetectorIDs();

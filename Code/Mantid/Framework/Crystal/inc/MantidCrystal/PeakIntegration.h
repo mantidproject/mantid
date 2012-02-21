@@ -74,6 +74,7 @@ private:
   int Ymax;        ///< The end of the Y range for fitting
   int Binmin;        ///< The start of the Bin range for fitting
   int Binmax;        ///< The end of the TOF range for fitting
+  bool IC;           ///< Ikeida Carpenter fit of TOF
 
 };
 
