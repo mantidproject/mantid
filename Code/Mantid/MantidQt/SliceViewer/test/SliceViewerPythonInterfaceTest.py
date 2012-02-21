@@ -29,7 +29,7 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
             Units='m,m,m',SplitInto='5',SplitThreshold=100, MaxRecursionDepth='20',OutputWorkspace='mdw')
         FakeMDEventData("mdw",  UniformParams="1e4")
         FakeMDEventData("mdw",  PeakParams="1e3, 1, 2, 3, 1.0")
-        BinMD("mdw", "uniform",  AxisAligned=1, AlignedDim0="x,0,10,30",  AlignedDim1="y,0,10,30",  AlignedDim2="z,0,10,30", IterateEvents="1", Parallel="0")
+        BinMD(InputWorkspace="mdw", OutputWorkspace="uniform",  AxisAligned=1, AlignedDim0="x,0,10,30",  AlignedDim1="y,0,10,30",  AlignedDim2="z,0,10,30", IterateEvents="1", Parallel="0")
         CreateWorkspace('workspace2d', '1,2,3', '2,3,4')
         CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z', Units='m,m,m',SplitInto='5',SplitThreshold=100, MaxRecursionDepth='20',OutputWorkspace='empty')
         # Get the factory to create the SliceViewerWindow in C++
