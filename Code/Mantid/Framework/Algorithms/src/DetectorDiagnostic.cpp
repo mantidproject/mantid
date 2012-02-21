@@ -4,7 +4,9 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/DetectorDiagnostic.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidDataObjects/EventWorkspaceHelpers.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include <boost/math/special_functions/fpclassify.hpp>
@@ -16,12 +18,131 @@ namespace Mantid
 
   namespace Algorithms
   {
+    // Register the class into the algorithm factory
+    DECLARE_ALGORITHM(DetectorDiagnostic)
 
     using API::MatrixWorkspace_sptr;
     using API::IAlgorithm_sptr;
     using Geometry::IDetector_const_sptr;
+    using std::string;
     using namespace Mantid::DataObjects;
     using namespace Mantid::API;
+    using namespace Mantid::Kernel;
+
+    //--------------------------------------------------------------------------
+    // Functions to make this a proper workflow algorithm
+    //--------------------------------------------------------------------------
+    const std::string DetectorDiagnostic::category() const
+    {
+      return "Diagnostics";
+    }
+
+    const std::string DetectorDiagnostic::name() const
+    {
+      return "DetectorDiagnostic";
+    }
+
+    int DetectorDiagnostic::version() const
+    {
+      return 1;
+    }
+
+    void DetectorDiagnostic::initDocs()
+    {
+      this->setWikiSummary("Identifies histograms and their detectors that have total numbers of counts over a user defined maximum or less than the user define minimum. ");
+      this->setOptionalMessage("Identifies histograms and their detectors that have total numbers of counts over a user defined maximum or less than the user define minimum.");
+    }
+
+    void DetectorDiagnostic::init()
+    {
+      declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input),
+                      "Name of the input workspace" );
+      declareProperty(new WorkspaceProperty<>("OutputWorkspace","", Direction::Output),
+                      "A SpecialWorkspace2D containing the masked spectra as zeroes and ones.");
+      BoundedValidator<int> *mustBePosInt = new BoundedValidator<int>();
+      mustBePosInt->setLower(0);
+      declareProperty("StartWorkspaceIndex", 0, mustBePosInt,
+                      "The index number of the first spectrum to include in the calculation\n"
+                      "(default 0)" );
+      declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePosInt->clone(),
+                      "The index number of the last spectrum to include in the calculation\n"
+                      "(default the last histogram)" );
+      declareProperty("RangeLower", EMPTY_DBL(),
+          "No bin with a boundary at an x value less than this will be used\n"
+          "in the summation that decides if a detector is 'bad' (default: the\n"
+          "start of each histogram)" );
+      declareProperty("RangeUpper", EMPTY_DBL(),
+          "No bin with a boundary at an x value higher than this value will\n"
+          "be used in the summation that decides if a detector is 'bad'\n"
+          "(default: the end of each histogram)" );
+
+      string findDetOutLimGrp("Find Detectors Outside Limits");
+      declareProperty("LowThreshold", 0.0,
+          "Spectra whose total number of counts are equal to or below this value\n"
+          "will be marked bad (default 0)" );
+      this->setPropertyGroup("LowThreshold", findDetOutLimGrp);      declareProperty("HighThreshold", EMPTY_DBL(),
+          "Spectra whose total number of counts are equal to or above this value\n"
+          "will be marked bad (default off)" );
+      this->setPropertyGroup("HighThreshold", findDetOutLimGrp);
+
+      string medianDetTestGrp("Median Detector Test");
+      declareProperty("RunMedianDetectorTest", true, "");
+      this->setPropertyGroup("RunMedianDetectorTest", medianDetTestGrp);
+      BoundedValidator<double> *mustBePositiveDbl = new BoundedValidator<double>();
+      mustBePositiveDbl->setLower(0);
+      declareProperty("SignificanceTest", 3.3, mustBePositiveDbl,
+                      "Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the\n"
+                      "difference with respect to the median value must also exceed this number of error bars");
+      this->setPropertyGroup("SignificanceTest", medianDetTestGrp);
+      declareProperty("LowThresholdFraction", 0.1,
+                      "Lower acceptable bound as fraction of median value" );
+      this->setPropertyGroup("LowThresholdFraction", medianDetTestGrp);
+      declareProperty("HighThresholdFraction", 1.5,
+                      "Upper acceptable bound as fraction of median value");
+      this->setPropertyGroup("HighThresholdFraction", medianDetTestGrp);
+      declareProperty("LowOutlier", 0.01, "Lower bound defining outliers as fraction of median value");
+      this->setPropertyGroup("LowOutlier", medianDetTestGrp);
+      declareProperty("HighOutlier", 100., "Upper bound defining outliers as fraction of median value");
+      this->setPropertyGroup("HighOutlier", medianDetTestGrp);
+      declareProperty("ExcludeZeroesFromMedian", false, "If false (default) zeroes will be included in "
+                      "the median calculation, otherwise they will not be included but they will be left unmasked");
+      this->setPropertyGroup("ExcludeZeroesFromMedian", medianDetTestGrp);
+      setPropertySettings("SignificanceTest", new EnabledWhenProperty(this, "RunMedianDetectorTest", IS_EQUAL_TO, "1"));
+      setPropertySettings("LowThresholdFraction", new EnabledWhenProperty(this, "RunMedianDetectorTest", IS_EQUAL_TO, "1"));
+      setPropertySettings("HighThresholdFraction", new EnabledWhenProperty(this, "RunMedianDetectorTest", IS_EQUAL_TO, "1"));
+      setPropertySettings("LowOutlier", new EnabledWhenProperty(this, "RunMedianDetectorTest", IS_EQUAL_TO, "1"));
+      setPropertySettings("HighOutlier", new EnabledWhenProperty(this, "RunMedianDetectorTest", IS_EQUAL_TO, "1"));
+      setPropertySettings("ExcludeZeroesFromMedian", new EnabledWhenProperty(this, "RunMedianDetectorTest", IS_EQUAL_TO, "1"));
+
+      string detEffVarGrp("Detector Efficiency Variation");
+      declareProperty(new WorkspaceProperty<>("WhiteBeamCompare","",Direction::Input, true),
+                      "Name of a matching second white beam vanadium run from the same\n"
+                      "instrument" );
+      this->setPropertyGroup("WhiteBeamCompare", detEffVarGrp);
+      declareProperty("WhiteBeamVariation", 1.1, mustBePositiveDbl->clone(),
+                      "Identify spectra whose total number of counts has changed by more\n"
+                      "than this factor of the median change between the two input workspaces" );
+      this->setPropertyGroup("WhiteBeamVariation", detEffVarGrp);
+      setPropertySettings("WhiteBeamVariation", new EnabledWhenProperty(this, "WhiteBeamCompare", IS_NOT_DEFAULT));
+
+      string psdBleedMaskGrp("Create PSD Bleed Mask");
+      declareProperty("MaxTubeFramerate", 0.0, mustBePositiveDbl->clone(),
+          "The maximum rate allowed for a tube in counts/us/frame.");
+      this->setPropertyGroup("MaxTubeFramerate", psdBleedMaskGrp);
+      declareProperty("NIgnoredCentralPixels", 80, mustBePosInt->clone(),
+          "The number of pixels about the centre to ignore.");
+      this->setPropertyGroup("NIgnoredCentralPixels", psdBleedMaskGrp);
+      setPropertySettings("NIgnoredCentralPixels", new EnabledWhenProperty(this, "MaxTubeFramerate", IS_NOT_DEFAULT));
+
+    }
+
+    void DetectorDiagnostic::exec()
+    {
+//      FindDetectorsOutsideLimits (always)
+//      MedianDetectorTest (if selected)
+//      DetectorEfficiencyVariation (only if two workspaces are specified)
+//      CreatePSDBleedMask (if selected)
+    }
 
     //--------------------------------------------------------------------------
     // Public member functions

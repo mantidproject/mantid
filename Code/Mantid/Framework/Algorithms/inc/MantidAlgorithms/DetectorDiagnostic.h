@@ -47,9 +47,18 @@ namespace Mantid
       virtual ~DetectorDiagnostic() {};
 
       /// Algorithm's category for identification
-      virtual const std::string category() const { return "Diagnostics";}
+      virtual const std::string category() const;
+      /// Algorithm's name for identification overriding a virtual method
+      virtual const std::string name() const;
       /// Algorithm's version for identification overriding a virtual method
-      virtual int version() const { return 1;}
+      virtual int version() const;
+      /// Sets documentation strings for this algorithm
+      virtual void initDocs();
+
+    private:
+      // Overridden Algorithm methods
+      virtual void init();
+      virtual void exec();
 
     protected:
       /// Get the total counts for each spectra
