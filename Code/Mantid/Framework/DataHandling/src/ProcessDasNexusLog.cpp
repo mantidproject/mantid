@@ -123,7 +123,7 @@ namespace DataHandling
 
     for (size_t i = 1; i < timevec.size(); i ++)
     {
-      int64_t dtns = timevec[i].total_nanoseconds()-timevec[i-1].total_nanoseconds();
+      int64_t dtns = timevec[i].totalNanoseconds()-timevec[i-1].totalNanoseconds();
       double dtms = static_cast<double>(dtns)*1.0E-3;
 
       sum1dtms += dtms;
@@ -198,7 +198,7 @@ namespace DataHandling
 
     for (size_t i = 1; i < abstimevec.size(); i++)
     {
-      double tempdts = static_cast<double>(abstimevec[i].total_nanoseconds()-abstimevec[i-1].total_nanoseconds())*1.0E-9;
+      double tempdts = static_cast<double>(abstimevec[i].totalNanoseconds()-abstimevec[i-1].totalNanoseconds())*1.0E-9;
       double dev = (tempdts-dts)/dts;
       bool baddt = false;
       if (fabs(dev) > 0.5)
@@ -207,14 +207,14 @@ namespace DataHandling
       if (baddt)
       {
         numbaddt ++;
-        double deltapulsetimeSec1 = static_cast<double>(pulsetimes[i-1].total_nanoseconds()-t0.total_nanoseconds())*1.0E-9;
-        double deltapulsetimeSec2 = static_cast<double>(pulsetimes[i].total_nanoseconds()-t0.total_nanoseconds())*1.0E-9;
+        double deltapulsetimeSec1 = static_cast<double>(pulsetimes[i-1].totalNanoseconds()-t0.totalNanoseconds())*1.0E-9;
+        double deltapulsetimeSec2 = static_cast<double>(pulsetimes[i].totalNanoseconds()-t0.totalNanoseconds())*1.0E-9;
         int index1 = static_cast<int>(deltapulsetimeSec1*60);
         int index2 = static_cast<int>(deltapulsetimeSec2*60);
 
         ofs << "Error d(T) = " << tempdts << "   vs   Correct d(T) = " << dts << std::endl;
-        ofs << index1 << "\t\t" << pulsetimes[i-1].total_nanoseconds() << "\t\t" << orderedtofs[i-1] << std::endl;
-        ofs << index2 << "\t\t" << pulsetimes[i].total_nanoseconds() << "\t\t" << orderedtofs[i] << std::endl;
+        ofs << index1 << "\t\t" << pulsetimes[i-1].totalNanoseconds() << "\t\t" << orderedtofs[i-1] << std::endl;
+        ofs << index2 << "\t\t" << pulsetimes[i].totalNanoseconds() << "\t\t" << orderedtofs[i] << std::endl;
 
       }
     }
@@ -239,7 +239,7 @@ namespace DataHandling
 
     for (size_t i = 1; i < timevec.size(); i ++)
     {
-      double tempdts = static_cast<double>(timevec[i].total_nanoseconds()-timevec[i-1].total_nanoseconds())*1.0E-9;
+      double tempdts = static_cast<double>(timevec[i].totalNanoseconds()-timevec[i-1].totalNanoseconds())*1.0E-9;
       int index = static_cast<int>((tempdts-dts)/dts*100)+99;
       if (index < 0)
         index = 0;
@@ -258,7 +258,7 @@ namespace DataHandling
     std::vector<size_t> y2;
 
     size_t numperiods = 100;
-    int64_t spanns = timevec[timevec.size()-1].total_nanoseconds()-timevec[0].total_nanoseconds();
+    int64_t spanns = timevec[timevec.size()-1].totalNanoseconds()-timevec[0].totalNanoseconds();
     double timestepsec = static_cast<double>(spanns)*1.0E-9/static_cast<double>(numperiods);
 
     for (size_t i = 0; i < numperiods; i++)
@@ -270,7 +270,7 @@ namespace DataHandling
     size_t numbaddt = 0;
     for (size_t i = 1; i < timevec.size(); i ++)
     {
-      double tempdts = static_cast<double>(timevec[i].total_nanoseconds()-timevec[i-1].total_nanoseconds())*1.0E-9;
+      double tempdts = static_cast<double>(timevec[i].totalNanoseconds()-timevec[i-1].totalNanoseconds())*1.0E-9;
       double dev = (tempdts-dts)/dts;
       bool baddt = false;
       if (fabs(dev) > 0.5)
@@ -279,7 +279,7 @@ namespace DataHandling
       if (baddt)
       {
         numbaddt ++;
-        int index = static_cast<int>(static_cast<double>(timevec[i].total_nanoseconds()-timevec[0].total_nanoseconds())*1.0E-9/timestepsec);
+        int index = static_cast<int>(static_cast<double>(timevec[i].totalNanoseconds()-timevec[0].totalNanoseconds())*1.0E-9/timestepsec);
         if (index < 0)
           throw std::runtime_error("Impossible to have index less than 0");
         if (index >= static_cast<int>(numperiods))
@@ -342,10 +342,10 @@ namespace DataHandling
 
     g_log.information() << "Number of Equal Time Stamps    = " << countsame << std::endl;
     g_log.information() << "Number of Inverted Time Stamps = " << countinverse << std::endl;
-    g_log.information() << "Run Start = " << t0.total_nanoseconds() << std::endl;
-    g_log.information() << "First Log (Absolute Time, Relative Time): " << times[0].total_nanoseconds() << ", "
+    g_log.information() << "Run Start = " << t0.totalNanoseconds() << std::endl;
+    g_log.information() << "First Log (Absolute Time, Relative Time): " << times[0].totalNanoseconds() << ", "
         << Kernel::DateAndTime::nanosecondsFromDuration(dts) << std::endl;
-    g_log.information() << "Last  Log (Absolute Time, Relative Time): " << times[f].total_nanoseconds() << ", "
+    g_log.information() << "Last  Log (Absolute Time, Relative Time): " << times[f].totalNanoseconds() << ", "
         << Kernel::DateAndTime::nanosecondsFromDuration(dtf) << std::endl;
 
     return;
@@ -445,7 +445,7 @@ namespace DataHandling
           for (size_t j=0; j<tofs.size(); j++)
           {
             Kernel::DateAndTime temptime = prevtime+static_cast<int64_t>(tofs[j]*100);
-            ofs << temptime.total_nanoseconds() << "\t" << tnow.total_nanoseconds() << "\t"
+            ofs << temptime.totalNanoseconds() << "\t" << tnow.totalNanoseconds() << "\t"
                 << tofs[j]*0.1 << std::endl;
           }
           // (b) Clear
@@ -465,7 +465,7 @@ namespace DataHandling
         for (size_t j=0; j<tofs.size(); j++)
         {
           Kernel::DateAndTime temptime = prevtime+static_cast<int64_t>(tofs[j]*100);
-          ofs << temptime.total_nanoseconds() << "\t" << prevtime.total_nanoseconds() << "\t"
+          ofs << temptime.totalNanoseconds() << "\t" << prevtime.totalNanoseconds() << "\t"
               << tofs[j]*0.1 << std::endl;
         }
       }

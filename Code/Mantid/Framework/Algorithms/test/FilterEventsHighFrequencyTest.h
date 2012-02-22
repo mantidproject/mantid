@@ -56,7 +56,7 @@ public:
     size_t numevents = 10;
     size_t lenlog = 20;
 
-    std::cout << "Run Start Time = " << run_start << " / " << run_start.total_nanoseconds() << " ns" << std::endl;
+    std::cout << "Run Start Time = " << run_start << " / " << run_start.totalNanoseconds() << " ns" << std::endl;
 
     double detoffset = 1.0;
     double deltatof = 200;
@@ -108,7 +108,7 @@ public:
     std::vector<Kernel::DateAndTime> times = timeproperty->timesAsVector();
     std::cout << "Number of entries in time series = " << times.size() << std::endl;
     for (size_t i = 0; i < times.size(); i ++){
-      std::cout << "Log Time = " << times[i] << " / " << times[i].total_nanoseconds() << ":  " << timeproperty->getSingleValue(times[i]) << std::endl;
+      std::cout << "Log Time = " << times[i] << " / " << times[i].totalNanoseconds() << ":  " << timeproperty->getSingleValue(times[i]) << std::endl;
     }
 
     // iii. Check spectrum 1
@@ -119,7 +119,7 @@ public:
     std::cout << "(Out) Spectrum 0:  Number of Events = " << events0.getNumberEvents() << std::endl;
     for (size_t i = 0; i < events0.getNumberEvents(); i ++){
       DataObjects::WeightedEvent e0 = events0.getEvent(i);
-      int64_t abstime2 = e0.pulseTime().total_nanoseconds()+static_cast<int64_t>(e0.tof()*1000.0);
+      int64_t abstime2 = e0.pulseTime().totalNanoseconds()+static_cast<int64_t>(e0.tof()*1000.0);
       std::cout << "Selected Event " << i << " = " << e0.pulseTime() << ", " << e0.m_tof << " / " << abstime2<< std::endl;
     }
 
@@ -130,10 +130,10 @@ public:
 
     if (events0.getNumberEvents() > 2){
       e0 = events0.getEvent(0);
-      abstime2 = e0.pulseTime().total_nanoseconds()+static_cast<int64_t>(e0.tof()*1000.0);
+      abstime2 = e0.pulseTime().totalNanoseconds()+static_cast<int64_t>(e0.tof()*1000.0);
       TS_ASSERT_EQUALS(abstime2, 20002800000);
       e0 = events0.getEvent(1);
-      abstime2 = e0.pulseTime().total_nanoseconds()+static_cast<int64_t>(e0.tof()*1000.0);
+      abstime2 = e0.pulseTime().totalNanoseconds()+static_cast<int64_t>(e0.tof()*1000.0);
       TS_ASSERT_EQUALS(abstime2, 20001200000);
     }
 
@@ -141,7 +141,7 @@ public:
     {
       DataObjects::WeightedEvent event = eventsIn0.getEvent(i);
       std::cout << "Event " <<  std::setw(5) << i <<
-          event.pulseTime().total_nanoseconds()+static_cast<int64_t>(event.tof()*1000) << std::endl;
+          event.pulseTime().totalNanoseconds()+static_cast<int64_t>(event.tof()*1000) << std::endl;
     }
 
     // -1. Use Poco/file to delete generated temp file
@@ -167,7 +167,7 @@ public:
     double t0 = 0.0;
     double tf = 9.9;
     Kernel::DateAndTime run_start(20000000000);
-    std::cout << "Run Start Time = " << run_start << " / " << run_start.total_nanoseconds() << " ns" << std::endl;
+    std::cout << "Run Start Time = " << run_start << " / " << run_start.totalNanoseconds() << " ns" << std::endl;
     size_t numevents = 10;
     size_t lenlog = 20;
 
@@ -222,7 +222,7 @@ public:
      std::vector<Kernel::DateAndTime> times = timeproperty->timesAsVector();
      std::cout << "Number of entries in time series = " << times.size() << std::endl;
      for (size_t i = 0; i < times.size(); i ++){
-       std::cout << "Log Time = " << times[i] << " / " << times[i].total_nanoseconds() << ":  " << timeproperty->getSingleValue(times[i]) << std::endl;
+       std::cout << "Log Time = " << times[i] << " / " << times[i].totalNanoseconds() << ":  " << timeproperty->getSingleValue(times[i]) << std::endl;
      }
 
      // iii. Check spectrum 1
@@ -233,7 +233,7 @@ public:
      std::cout << "Spectrum 0:  Number of Events = " << events0.getNumberEvents() << std::endl;
      for (size_t i = 0; i < events0.getNumberEvents(); i ++){
        DataObjects::WeightedEvent e0 = events0.getEvent(i);
-       int64_t abstime2 = e0.pulseTime().total_nanoseconds()+static_cast<int64_t>(e0.tof()*1000.0);
+       int64_t abstime2 = e0.pulseTime().totalNanoseconds()+static_cast<int64_t>(e0.tof()*1000.0);
        std::cout << "Selected Event " << i << " = " << e0.pulseTime() << ", " << e0.m_tof << " / " << abstime2<< std::endl;
      }
 
@@ -243,10 +243,10 @@ public:
      TS_ASSERT_EQUALS(events0.getNumberEvents(), 5);
 
      e0 = events0.getEvent(0);
-     abstime2 = e0.pulseTime().total_nanoseconds()+static_cast<int64_t>(e0.tof()*1000.0);
+     abstime2 = e0.pulseTime().totalNanoseconds()+static_cast<int64_t>(e0.tof()*1000.0);
      TS_ASSERT_EQUALS(abstime2, 20002800000);
      e0 = events0.getEvent(3);
-     abstime2 = e0.pulseTime().total_nanoseconds()+static_cast<int64_t>(e0.tof()*1000.0);
+     abstime2 = e0.pulseTime().totalNanoseconds()+static_cast<int64_t>(e0.tof()*1000.0);
      TS_ASSERT_EQUALS(abstime2, 20001400000);
 
      // -1. Use Poco/file to delete generated temp file
@@ -272,7 +272,7 @@ public:
      double t0 = 0.0;
      double tf = 9.9;
      Kernel::DateAndTime run_start(20000000000);
-     std::cout << "Run Start Time = " << run_start << " / " << run_start.total_nanoseconds() << " ns" << std::endl;
+     std::cout << "Run Start Time = " << run_start << " / " << run_start.totalNanoseconds() << " ns" << std::endl;
      size_t numevents = 10;
      size_t lenlog = 20;
 
@@ -328,7 +328,7 @@ public:
       std::vector<Kernel::DateAndTime> times = timeproperty->timesAsVector();
       std::cout << "Number of entries in time series = " << times.size() << std::endl;
       for (size_t i = 0; i < times.size(); i ++){
-        std::cout << "Log Time = " << times[i] << " / " << times[i].total_nanoseconds() << ":  " << timeproperty->getSingleValue(times[i]) << std::endl;
+        std::cout << "Log Time = " << times[i] << " / " << times[i].totalNanoseconds() << ":  " << timeproperty->getSingleValue(times[i]) << std::endl;
       }
 
       // iii. Check spectrum 1
@@ -339,7 +339,7 @@ public:
       std::cout << "Spectrum 0:  Number of Events = " << events0.getNumberEvents() << std::endl;
       for (size_t i = 0; i < events0.getNumberEvents(); i ++){
         DataObjects::WeightedEvent e0 = events0.getEvent(i);
-        int64_t abstime2 = e0.pulseTime().total_nanoseconds()+static_cast<int64_t>(e0.tof()*1000.0);
+        int64_t abstime2 = e0.pulseTime().totalNanoseconds()+static_cast<int64_t>(e0.tof()*1000.0);
         std::cout << "Selected Event " << i << " = " << e0.pulseTime() << ", " << e0.m_tof << " / " << abstime2<< std::endl;
       }
 
@@ -349,10 +349,10 @@ public:
       TS_ASSERT_EQUALS(events0.getNumberEvents(), 5);
 
       e0 = events0.getEvent(0);
-      abstime2 = e0.pulseTime().total_nanoseconds()+static_cast<int64_t>(e0.tof()*1000.0);
+      abstime2 = e0.pulseTime().totalNanoseconds()+static_cast<int64_t>(e0.tof()*1000.0);
       TS_ASSERT_EQUALS(abstime2, 20001200000);
       e0 = events0.getEvent(3);
-      abstime2 = e0.pulseTime().total_nanoseconds()+static_cast<int64_t>(e0.tof()*1000.0);
+      abstime2 = e0.pulseTime().totalNanoseconds()+static_cast<int64_t>(e0.tof()*1000.0);
       TS_ASSERT_EQUALS(abstime2, 20002600000);
 
       // -1. Use Poco/file to delete generated temp file
@@ -432,7 +432,7 @@ public:
 
     // 4. Add Events
     std::cout << "Before Adding Events (spec 0): " << iws->getEventListPtr(0)->getNumberEvents() << std::endl;
-    int64_t pulsetime = run_start.total_nanoseconds();
+    int64_t pulsetime = run_start.totalNanoseconds();
 
     for (size_t isp=0; isp<iws->getNumberHistograms(); isp++){
       double dtof = 200;
@@ -478,7 +478,7 @@ public:
     // 2. Add a log at the same intervals to events added
     Kernel::TimeSeriesProperty<double> *timeprop = new Kernel::TimeSeriesProperty<double>(logname);
     double tof = 100;
-    int64_t t0 = run_start.total_nanoseconds();
+    int64_t t0 = run_start.totalNanoseconds();
     double value = 0;
     for (size_t i = 0; i < lenlog; i ++){
       int64_t st = t0+static_cast<int64_t>((tof+dtof*static_cast<double>(i))*1000);

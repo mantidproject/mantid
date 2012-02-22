@@ -658,7 +658,7 @@ using namespace DataObjects;
     for (it = events.begin(); it != it_end; it++)
     {
       if (writeTOF) tofs[i] = it->tof();
-      if (writePulsetime) pulsetimes[i] = it->pulseTime().total_nanoseconds();
+      if (writePulsetime) pulsetimes[i] = it->pulseTime().totalNanoseconds();
       if (writeWeight) weights[i] = it->weight();
       if (writeError) errorSquareds[i] = it->errorSquared();
       i++;

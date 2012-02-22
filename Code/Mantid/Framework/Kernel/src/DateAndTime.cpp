@@ -612,7 +612,7 @@ int DateAndTime::nanoseconds() const
 
 //------------------------------------------------------------------------------------------------
 /** Return the total # of nanoseconds since the epoch */
-int64_t DateAndTime::total_nanoseconds() const
+int64_t DateAndTime::totalNanoseconds() const
 {
   return this->_nanoseconds;
 }
@@ -836,7 +836,7 @@ double DateAndTime::secondsFromDuration(time_duration duration)
 {
 #ifdef BOOST_DATE_TIME_HAS_NANOSECONDS
   // Nanosecond resolution
-  return static_cast<double>(duration.total_nanoseconds()) / 1e9;
+  return static_cast<double>(duration.totalNanoseconds()) / 1e9;
 #else
   // Microsecond resolution
   return static_cast<double>(duration.total_microseconds()) / 1e6;
@@ -883,7 +883,7 @@ int64_t DateAndTime::nanosecondsFromDuration(const time_duration & td)
   int64_t nano;
 #ifdef BOOST_DATE_TIME_HAS_NANOSECONDS
   // Nanosecond resolution
-  nano = td.total_nanoseconds();
+  nano = td.totalNanoseconds();
 #else
   // Microsecond resolution
   nano = (td.total_microseconds()*1000);

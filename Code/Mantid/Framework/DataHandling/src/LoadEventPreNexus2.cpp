@@ -1125,7 +1125,7 @@ void LoadEventPreNexus2::procEventsLinear(DataObjects::EventWorkspace_sptr & /*w
       }
 
       // ii. calculate and add absolute time
-      // int64_t abstime = (pulsetime.total_nanoseconds()+int64_t(tof*1000));
+      // int64_t abstime = (pulsetime.totalNanoseconds()+int64_t(tof*1000));
       local_pulsetimes[theindex].push_back(pulsetime);
       local_tofs[theindex].push_back(tof);
 

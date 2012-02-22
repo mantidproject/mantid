@@ -1318,9 +1318,9 @@ public:
         //Unchanged size
         TS_ASSERT_EQUALS(old_num, this->el.getNumberEvents());
         //original times were 0, 1, etc. nansoeconds
-        TSM_ASSERT_EQUALS(this_type, this->el.getEvent(0).pulseTime().total_nanoseconds(), 123);
-        TSM_ASSERT_EQUALS(this_type, this->el.getEvent(1).pulseTime().total_nanoseconds(), 124);
-        TSM_ASSERT_EQUALS(this_type, this->el.getEvent(2).pulseTime().total_nanoseconds(), 125);
+        TSM_ASSERT_EQUALS(this_type, this->el.getEvent(0).pulseTime().totalNanoseconds(), 123);
+        TSM_ASSERT_EQUALS(this_type, this->el.getEvent(1).pulseTime().totalNanoseconds(), 124);
+        TSM_ASSERT_EQUALS(this_type, this->el.getEvent(2).pulseTime().totalNanoseconds(), 125);
       }
     }
   }

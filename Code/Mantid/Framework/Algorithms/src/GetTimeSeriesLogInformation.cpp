@@ -224,33 +224,33 @@ namespace Algorithms
         g_log.warning() << "For percentage Tf cannot be larger than 100.  Auto-reset to 100 percent." << std::endl;
       }
 
-      int64_t ts = times[0].total_nanoseconds();
-      int64_t te = times[times.size()-1].total_nanoseconds();
+      int64_t ts = times[0].totalNanoseconds();
+      int64_t te = times[times.size()-1].totalNanoseconds();
       mFilterT0 = times[0] + static_cast<int64_t>(static_cast<double>(te-ts)*t0r*0.01);
       mFilterTf = times[0] + static_cast<int64_t>(static_cast<double>(te-ts)*tfr*0.01);
     } // end-if-else
 
     // 2. Print out some information about log and run
     std::stringstream loginfoss;
-    int64_t dt0_ns = times[0].total_nanoseconds()-runstart.total_nanoseconds();
-    int64_t dtf_ns = times[times.size()-1].total_nanoseconds()-runstart.total_nanoseconds();
+    int64_t dt0_ns = times[0].totalNanoseconds()-runstart.totalNanoseconds();
+    int64_t dtf_ns = times[times.size()-1].totalNanoseconds()-runstart.totalNanoseconds();
     loginfoss << "Run Start Time = " << runstart << std::endl <<
-        "                 " << runstart.total_nanoseconds() << std::endl;
+        "                 " << runstart.totalNanoseconds() << std::endl;
     loginfoss << "Log Start Time = " << times[0] << std::endl <<
-        "                 " << times[0].total_nanoseconds() << "nano-second = "<<
-        (static_cast<double>(times[0].total_nanoseconds())*1.0E-9) << " seconds " << std::endl <<
+        "                 " << times[0].totalNanoseconds() << "nano-second = "<<
+        (static_cast<double>(times[0].totalNanoseconds())*1.0E-9) << " seconds " << std::endl <<
         "  To Run Start dT = " << dt0_ns << " ns" << std::endl <<
         "                    " << static_cast<double>(dt0_ns)/static_cast<double>(dtf_ns) << std::endl;
     loginfoss << "Log End   Time = " << times[times.size()-1] << std::endl <<
-        "                 " << times[times.size()-1].total_nanoseconds() << " nano-second  =  " <<
-        (static_cast<double>(times[times.size()-1].total_nanoseconds())*1.0E-9) << " seconds " << std::endl <<
+        "                 " << times[times.size()-1].totalNanoseconds() << " nano-second  =  " <<
+        (static_cast<double>(times[times.size()-1].totalNanoseconds())*1.0E-9) << " seconds " << std::endl <<
         "  To Run Start dT = " << dtf_ns << " ns" << std::endl <<
         "                    " << static_cast<double>(dtf_ns)/static_cast<double>(dtf_ns)*100 << " percent" << std::endl;;
 
     loginfoss << "User Filter:  T0 = " << mFilterT0 << std::endl <<
-        "                   " << mFilterT0.total_nanoseconds() << std::endl;
+        "                   " << mFilterT0.totalNanoseconds() << std::endl;
     loginfoss << "              Tf = " << mFilterTf << std::endl <<
-        "                   " << mFilterTf.total_nanoseconds() << std::endl;
+        "                   " << mFilterTf.totalNanoseconds() << std::endl;
 
     g_log.notice(loginfoss.str());
 
@@ -328,7 +328,7 @@ namespace Algorithms
         continue;
       }
 
-      int64_t dtns = times[i].total_nanoseconds() - times[i-1].total_nanoseconds();
+      int64_t dtns = times[i].totalNanoseconds() - times[i-1].totalNanoseconds();
 
       // (b) Check not-allowed situations
       if (dtns < 0)
@@ -358,10 +358,10 @@ namespace Algorithms
     msgss << "Time Range            = " << mFilterT0 << ", " << mFilterTf << ".  Delta(T) = " << mFilterTf-mFilterT0 << std::endl;
     msgss << "Number of Points In   = " << numevents << "(" << numpoints << "), Same Points = " << numzerodt << std::endl;
     msgss << "NUmber of Points Out  = " << numoutrange << std::endl;
-    msgss << "Min.             Time = " << times[0] << " / " << times[0].total_nanoseconds()
+    msgss << "Min.             Time = " << times[0] << " / " << times[0].totalNanoseconds()
         << "  ns " << std::endl;
     msgss << "Max.             Time = " << times[times.size() - 1] << " / " << times[times.size()
-        - 1].total_nanoseconds() << " ns" << std::endl;
+        - 1].totalNanoseconds() << " ns" << std::endl;
     msgss << "Average       Delta T = " << avgdeltatime << "  ns,  Standard Deviation = "
         << stddeltatime << std::endl;
 
@@ -377,7 +377,7 @@ namespace Algorithms
         continue;
       }
 
-      int64_t dtns = times[i].total_nanoseconds() - times[i - 1].total_nanoseconds();
+      int64_t dtns = times[i].totalNanoseconds() - times[i - 1].totalNanoseconds();
 
       if (fabs(static_cast<double> (dtns) - avgdeltatime) > stddeltatime)
       {
@@ -398,7 +398,7 @@ namespace Algorithms
     g_log.notice() << "Writing " << numwriteout << " events outside 1 sigma out of " << oddvalues.size() <<
         " to file " << sigfilename << std::endl;
 
-    int64_t timespan_ns = times[times.size() - 1].total_nanoseconds() - times[0].total_nanoseconds();
+    int64_t timespan_ns = times[times.size() - 1].totalNanoseconds() - times[0].totalNanoseconds();
 
     sigfs.open(sigfilename.c_str(), std::ios::out);
     sigfs << "Index" << std::setw(30) << "Time (ns)" << std::setw(30) << "Delta T (ns)"
@@ -406,9 +406,9 @@ namespace Algorithms
         << std::endl;
     for (size_t i = 0; i < oddvalues.size(); i++)
     {
-      int64_t temets_ns = oddtimes[i].total_nanoseconds() - times[0].total_nanoseconds();
+      int64_t temets_ns = oddtimes[i].totalNanoseconds() - times[0].totalNanoseconds();
       double timepercent = static_cast<double> (temets_ns) / static_cast<double> (timespan_ns) * 100;
-      sigfs << oddindicies[i] << std::setw(30) << oddtimes[i].total_nanoseconds() << std::setw(30)
+      sigfs << oddindicies[i] << std::setw(30) << oddtimes[i].totalNanoseconds() << std::setw(30)
           << std::setprecision(10) << (oddvalues[i] + avgdeltatime) << std::setw(30)
           << std::setprecision(10) << oddvalues[i] << std::setw(30) << timepercent << std::endl;
     }
@@ -435,7 +435,7 @@ namespace Algorithms
     double deltatns = ddt0f_ns/static_cast<double>(resolution);
     for (size_t i = 0; i < resolution; i ++){
       double xp = static_cast<double>(i)/static_cast<double>(resolution);
-      double xt = static_cast<double>(mFilterT0.total_nanoseconds())+static_cast<double>(i)*deltatns;
+      double xt = static_cast<double>(mFilterT0.totalNanoseconds())+static_cast<double>(i)*deltatns;
       timestatws->dataX(0)[i] = xt;
       timestatws->dataY(0)[i] = 0.0;
       percentstatws->dataX(0)[i] = xp;
@@ -445,7 +445,7 @@ namespace Algorithms
     // 5.2 go through all weird data points
     for (size_t i = 0; i < oddtimes.size(); i ++)
     {
-      double roughpos = static_cast<double>(oddtimes[i].total_nanoseconds()-mFilterT0.total_nanoseconds())/ddt0f_ns;
+      double roughpos = static_cast<double>(oddtimes[i].totalNanoseconds()-mFilterT0.totalNanoseconds())/ddt0f_ns;
       size_t pos = static_cast<size_t>(roughpos*static_cast<double>(resolution));
 
       if (pos == resolution)
@@ -518,21 +518,21 @@ namespace Algorithms
     ofs.open(opfname.c_str(), std::ios::out);
 
     for (size_t i = 0; i < numput; i ++){
-      ofs << times[i].total_nanoseconds()-1 << "   " << 0 << std::endl;
-      ofs << times[i].total_nanoseconds() << "   " << 1 << std::endl;
-      ofs << times[i].total_nanoseconds()+1 << "   " << 0 << std::endl;
+      ofs << times[i].totalNanoseconds()-1 << "   " << 0 << std::endl;
+      ofs << times[i].totalNanoseconds() << "   " << 1 << std::endl;
+      ofs << times[i].totalNanoseconds()+1 << "   " << 0 << std::endl;
     } // ENDFOR
     ofs << std::endl;
     for (size_t i = times.size()/2-numput/2; i < times.size()/2+numput/2; i ++){
-      ofs << times[i].total_nanoseconds()-1 << "   " << 0 << std::endl;
-      ofs << times[i].total_nanoseconds() << "   " << 1 << std::endl;
-      ofs << times[i].total_nanoseconds()+1 << "   " << 0 << std::endl;
+      ofs << times[i].totalNanoseconds()-1 << "   " << 0 << std::endl;
+      ofs << times[i].totalNanoseconds() << "   " << 1 << std::endl;
+      ofs << times[i].totalNanoseconds()+1 << "   " << 0 << std::endl;
     } // ENDFOR
     ofs << std::endl;
     for (size_t i = times.size()-1-numput; i < times.size(); i ++){
-      ofs << times[i].total_nanoseconds()-1 << "   " << 0 << std::endl;
-      ofs << times[i].total_nanoseconds() << "   " << 1 << std::endl;
-      ofs << times[i].total_nanoseconds()+1 << "   " << 0 << std::endl;
+      ofs << times[i].totalNanoseconds()-1 << "   " << 0 << std::endl;
+      ofs << times[i].totalNanoseconds() << "   " << 1 << std::endl;
+      ofs << times[i].totalNanoseconds()+1 << "   " << 0 << std::endl;
     } //ENDFOR
 
     ofs.close();
@@ -541,15 +541,15 @@ namespace Algorithms
     std::ofstream ofs2;
     ofs2.open(opfname2.c_str(), std::ios::out);
     for (size_t i = 0; i < numput; i ++){
-      ofs2 << times[i].total_nanoseconds() << "   " << values[i] << std::endl;
+      ofs2 << times[i].totalNanoseconds() << "   " << values[i] << std::endl;
     } // ENDFOR
     ofs2 << std::endl;
     for (size_t i = times.size()/2-numput/2; i < times.size()/2+numput/2; i ++){
-      ofs2 << times[i].total_nanoseconds() << "   " << values[i] << std::endl;
+      ofs2 << times[i].totalNanoseconds() << "   " << values[i] << std::endl;
     } // ENDFOR
     ofs << std::endl;
     for (size_t i = times.size()-1-numput; i < times.size(); i ++){
-      ofs2 << times[i].total_nanoseconds() << "   " << values[i] << std::endl;
+      ofs2 << times[i].totalNanoseconds() << "   " << values[i] << std::endl;
     } //ENDFOR
 
     ofs2.close();
@@ -607,7 +607,7 @@ namespace Algorithms
 
     for (size_t i = 1; i < timevec.size(); i ++)
     {
-      int64_t dtns = timevec[i].total_nanoseconds()-timevec[i-1].total_nanoseconds();
+      int64_t dtns = timevec[i].totalNanoseconds()-timevec[i-1].totalNanoseconds();
       double dtms = static_cast<double>(dtns)*1.0E-3;
 
       sum1dtms += dtms;
@@ -669,7 +669,7 @@ namespace Algorithms
 
     for (size_t i = 1; i < abstimevec.size(); i++)
     {
-      double tempdts = static_cast<double>(abstimevec[i].total_nanoseconds()-abstimevec[i-1].total_nanoseconds())*1.0E-9;
+      double tempdts = static_cast<double>(abstimevec[i].totalNanoseconds()-abstimevec[i-1].totalNanoseconds())*1.0E-9;
       double dev = (tempdts-dts)/dts;
       bool baddt = false;
       if (fabs(dev) > 0.5)
@@ -678,14 +678,14 @@ namespace Algorithms
       if (baddt)
       {
         numbaddt ++;
-        double deltapulsetimeSec1 = static_cast<double>(abstimevec[i-1].total_nanoseconds()-t0.total_nanoseconds())*1.0E-9;
-        double deltapulsetimeSec2 = static_cast<double>(abstimevec[i].total_nanoseconds()-t0.total_nanoseconds())*1.0E-9;
+        double deltapulsetimeSec1 = static_cast<double>(abstimevec[i-1].totalNanoseconds()-t0.totalNanoseconds())*1.0E-9;
+        double deltapulsetimeSec2 = static_cast<double>(abstimevec[i].totalNanoseconds()-t0.totalNanoseconds())*1.0E-9;
         int index1 = static_cast<int>(deltapulsetimeSec1*60);
         int index2 = static_cast<int>(deltapulsetimeSec2*60);
 
         ofs << "Error d(T) = " << tempdts << "   vs   Correct d(T) = " << dts << std::endl;
-        ofs << index1 << "\t\t" << abstimevec[i-1].total_nanoseconds()  <<
-            "\t\t" << index2 << "\t\t" << abstimevec[i].total_nanoseconds() << std::endl;
+        ofs << index1 << "\t\t" << abstimevec[i-1].totalNanoseconds()  <<
+            "\t\t" << index2 << "\t\t" << abstimevec[i].totalNanoseconds() << std::endl;
 
       }
     }
@@ -710,7 +710,7 @@ namespace Algorithms
 
     for (size_t i = 1; i < timevec.size(); i ++)
     {
-      double tempdts = static_cast<double>(timevec[i].total_nanoseconds()-timevec[i-1].total_nanoseconds())*1.0E-9;
+      double tempdts = static_cast<double>(timevec[i].totalNanoseconds()-timevec[i-1].totalNanoseconds())*1.0E-9;
       int index = static_cast<int>((tempdts-dts)/dts*100)+99;
       if (index < 0)
         index = 0;
@@ -729,7 +729,7 @@ namespace Algorithms
     std::vector<size_t> y2;
 
     size_t numperiods = 100;
-    int64_t spanns = timevec[timevec.size()-1].total_nanoseconds()-timevec[0].total_nanoseconds();
+    int64_t spanns = timevec[timevec.size()-1].totalNanoseconds()-timevec[0].totalNanoseconds();
     double timestepsec = static_cast<double>(spanns)*1.0E-9/static_cast<double>(numperiods);
 
     for (size_t i = 0; i < numperiods; i++)
@@ -741,7 +741,7 @@ namespace Algorithms
     size_t numbaddt = 0;
     for (size_t i = 1; i < timevec.size(); i ++)
     {
-      double tempdts = static_cast<double>(timevec[i].total_nanoseconds()-timevec[i-1].total_nanoseconds())*1.0E-9;
+      double tempdts = static_cast<double>(timevec[i].totalNanoseconds()-timevec[i-1].totalNanoseconds())*1.0E-9;
       double dev = (tempdts-dts)/dts;
       bool baddt = false;
       if (fabs(dev) > 0.5)
@@ -750,7 +750,7 @@ namespace Algorithms
       if (baddt)
       {
         numbaddt ++;
-        int index = static_cast<int>(static_cast<double>(timevec[i].total_nanoseconds()-timevec[0].total_nanoseconds())*1.0E-9/timestepsec);
+        int index = static_cast<int>(static_cast<double>(timevec[i].totalNanoseconds()-timevec[0].totalNanoseconds())*1.0E-9/timestepsec);
         if (index < 0)
           throw std::runtime_error("Impossible to have index less than 0");
         if (index >= static_cast<int>(numperiods))
@@ -814,10 +814,10 @@ namespace Algorithms
 
     g_log.information() << "Number of Equal Time Stamps    = " << countsame << std::endl;
     g_log.information() << "Number of Inverted Time Stamps = " << countinverse << std::endl;
-    g_log.information() << "Run Start = " << t0.total_nanoseconds() << std::endl;
-    g_log.information() << "First Log (Absolute Time, Relative Time): " << times[0].total_nanoseconds() << ", "
+    g_log.information() << "Run Start = " << t0.totalNanoseconds() << std::endl;
+    g_log.information() << "First Log (Absolute Time, Relative Time): " << times[0].totalNanoseconds() << ", "
         << Kernel::DateAndTime::nanosecondsFromDuration(dts) << std::endl;
-    g_log.information() << "Last  Log (Absolute Time, Relative Time): " << times[f].total_nanoseconds() << ", "
+    g_log.information() << "Last  Log (Absolute Time, Relative Time): " << times[f].totalNanoseconds() << ", "
         << Kernel::DateAndTime::nanosecondsFromDuration(dtf) << std::endl;
 
     return;
@@ -845,8 +845,8 @@ namespace Algorithms
         numocc ++;
 
         // An error message
-        ss << "@ " << i << "\tDelta = " << tempdelta << "\t\tTime From " << timevec[i-1].total_nanoseconds()
-            << " to " << timevec[i].total_nanoseconds() << std::endl;
+        ss << "@ " << i << "\tDelta = " << tempdelta << "\t\tTime From " << timevec[i-1].totalNanoseconds()
+            << " to " << timevec[i].totalNanoseconds() << std::endl;
       }
     }
 

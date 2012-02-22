@@ -355,7 +355,7 @@ namespace DataHandling
       if (tofs) tofs[i] = it->tof();
       if (weights) weights[i] = static_cast<float>(it->weight());
       if (errorSquareds) errorSquareds[i] = static_cast<float>(it->errorSquared());
-      if (pulsetimes) pulsetimes[i] = it->pulseTime().total_nanoseconds();
+      if (pulsetimes) pulsetimes[i] = it->pulseTime().totalNanoseconds();
       i++;
     }
   }

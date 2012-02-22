@@ -72,7 +72,7 @@ public:
   int minute() const;
   int second() const;
   int nanoseconds() const;
-  int64_t total_nanoseconds() const;
+  int64_t totalNanoseconds() const;
 
   bool operator==(const DateAndTime& rhs) const;
   bool operator==(const boost::posix_time::ptime& rhs) const;

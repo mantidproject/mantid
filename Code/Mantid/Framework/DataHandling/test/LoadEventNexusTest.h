@@ -391,7 +391,7 @@ public:
       // Times are NON-zero for ALL pixels.
       if (WS->getEventList(wi).getNumberEvents() > 0)
       {
-        int64_t nanosec = WS->getEventList(wi).getEvents()[0].m_pulsetime.total_nanoseconds();
+        int64_t nanosec = WS->getEventList(wi).getEvents()[0].m_pulsetime.totalNanoseconds();
         TS_ASSERT_DIFFERS( nanosec, 0)
         if (nanosec==0) { std::cout << "Failure at WI " << wi << std::endl; return; }
       }
