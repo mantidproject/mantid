@@ -35,6 +35,7 @@ Requires: sip-devel
 Requires: subversion 
 Requires: gmock-devel
 Requires: gtest-devel
+Requires: git
 
 BuildArch: noarch
 
