@@ -76,8 +76,26 @@ namespace DataHandling
    */
   Mantid::API::Workspace_sptr LoadLiveData::processChunk(Mantid::API::MatrixWorkspace_sptr chunkWS)
   {
-    // TODO: Data processing
-    return chunkWS;
+    // Make algorithm and set the properties
+    IAlgorithm * alg = this->makeAlgorithm(false);
+    if (alg)
+    {
+      g_log.notice() << "Performing chunk processing using " << alg->name() << std::endl;
+      // Run the processing algorithm
+      alg->setChild(true);
+      alg->setProperty("InputWorkspace", chunkWS);
+      alg->setPropertyValue("OutputWorkspace", "anonymous_processed_chunk");
+      alg->execute();
+      if (!alg->isExecuted())
+        throw std::runtime_error("Error processing the chunk workspace using " + alg->name() + ". See log for details.");
+
+      // Retrieve the output.
+      MatrixWorkspace_sptr temp = alg->getProperty("OutputWorkspace");
+      return temp;
+    }
+    else
+      // Don't do any processing.
+      return chunkWS;
   }
 
 

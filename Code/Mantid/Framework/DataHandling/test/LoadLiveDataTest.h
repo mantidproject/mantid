@@ -44,7 +44,9 @@ public:
    * @param AccumulationMethod :: parameter string
    * @return the created processed WS
    */
-  EventWorkspace_sptr doExecEvent(std::string AccumulationMethod)
+  EventWorkspace_sptr doExecEvent(std::string AccumulationMethod,
+      std::string ProcessingAlgorithm = "",
+      std::string ProcessingProperties = "")
   {
     LoadLiveData alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
@@ -52,6 +54,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Instrument", "FakeEventDataListener") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", "fake") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("AccumulationMethod", AccumulationMethod) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("ProcessingAlgorithm", ProcessingAlgorithm) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("ProcessingProperties", ProcessingProperties) );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
 
@@ -110,6 +114,19 @@ public:
     TSM_ASSERT( "Workspace being added stayed the same pointer", ws1 == ws2 );
   }
   
+
+  //--------------------------------------------------------------------------------------------
+  /** Simple processing of a chunk */
+  void test_processChunk()
+  {
+    EventWorkspace_sptr ws;
+    ws = doExecEvent("Replace", "Rebin", "Params=40e3, 1e3, 60e3");
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS(ws->getNumberEvents(), 200);
+    // Check that rebin was called
+    TS_ASSERT_EQUALS(ws->blocksize(), 20);
+    TS_ASSERT_DELTA(ws->dataX(0)[0], 40e3, 1e-4);
+  }
 
 };
 
