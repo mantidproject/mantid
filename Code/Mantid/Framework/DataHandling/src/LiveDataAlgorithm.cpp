@@ -42,12 +42,12 @@ namespace DataHandling
         "Specify the date/time in UTC time, in ISO8601 format, e.g. 2010-09-14T04:20:12.95");
 
     declareProperty(new PropertyWithValue<std::string>("ProcessingAlgorithm","",Direction::Input),
-        "Name of the algorithm that will be run to process the data.\n"
+        "Name of the algorithm that will be run to process each chunk of data.\n"
         "Optional. If blank, no processing will occur.");
 
-    declareProperty(new PropertyWithValue<std::string>("AlgorithmProperties","",Direction::Input),
-        "The properties to pass to the ProcessingAlgorithm, as a single string."
-        "The format is propName=value,propName=value,propName=value");
+    declareProperty(new PropertyWithValue<std::string>("ProcessingProperties","",Direction::Input),
+        "The properties to pass to the ProcessingAlgorithm, as a single string.\n"
+        "The format is propName=value;propName=value");
 
     declareProperty(new PropertyWithValue<std::string>("ProcessingScript","",Direction::Input),
         "Not currently supported, but reserved for future use.");
@@ -61,6 +61,18 @@ namespace DataHandling
         " - Add: the processed chunk will be summed to the previous outpu (default).\n"
         " - Replace: the processed chunk will replace the previous output.\n"
         " - Conjoin: the spectra of the chunk will be appended to the output workspace, increasing its size.");
+
+    declareProperty(new PropertyWithValue<std::string>("PostProcessingAlgorithm","",Direction::Input),
+        "Name of the algorithm that will be run to process the accumulated data.\n"
+        "Optional. If blank, no post-processing will occur.");
+
+    declareProperty(new PropertyWithValue<std::string>("PostProcessingProperties","",Direction::Input),
+        "The properties to pass to the PostProcessingAlgorithm, as a single string.\n"
+        "The format is propName=value;propName=value");
+
+    declareProperty(new PropertyWithValue<std::string>("PostProcessingScript","",Direction::Input),
+        "Not currently supported, but reserved for future use.");
+
 
     declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
         "Name of the processed output workspace.");
@@ -118,21 +130,29 @@ namespace DataHandling
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Using the ProcessingAlgorithm and AlgorithmProperties properties,
+  /** Using the [Post]ProcessingAlgorithm and [Post]ProcessingProperties properties,
    * create and initialize an algorithm for processing.
    *
+   * @param postProcessing :: true to create the PostProcessingAlgorithm.
+   *        false to create the ProcessingAlgorithm
    * @return shared pointer to the algorithm, ready for execution.
    *         Returns an empty pointer if no algorithm was chosen.
    */
-  IAlgorithm_sptr LiveDataAlgorithm::makeAlgorithm()
+  IAlgorithm_sptr LiveDataAlgorithm::makeAlgorithm(bool postProcessing)
   {
     IAlgorithm_sptr alg;
-    std::string algoName = this->getPropertyValue("ProcessingAlgorithm");
+    std::string prefix = "";
+    if (postProcessing)
+      prefix = "Post";
+
+    std::string algoName = this->getPropertyValue(prefix+"ProcessingAlgorithm");
     algoName = Strings::strip(algoName);
     if (algoName.empty())
       return alg;
 
-    std::string props = this->getPropertyValue("AlgorithmProperties");
+    std::string props = this->getPropertyValue(prefix+"ProcessingProperties");
+
+    // TODO: Handle script too.
 
     // Create the algorithm and pass it the properties
     alg = IAlgorithm_sptr(FrameworkManager::Instance().createAlgorithm(algoName, props));

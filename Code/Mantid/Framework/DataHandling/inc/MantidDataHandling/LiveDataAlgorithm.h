@@ -54,7 +54,7 @@ namespace DataHandling
 
     Mantid::Kernel::DateAndTime getStartTime() const;
 
-    Mantid::API::IAlgorithm_sptr makeAlgorithm();
+    Mantid::API::IAlgorithm_sptr makeAlgorithm(bool postProcessing);
 
     /// Live listener
     Mantid::API::ILiveListener_sptr m_listener;
