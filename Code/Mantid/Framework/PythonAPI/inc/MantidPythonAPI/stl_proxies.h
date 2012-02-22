@@ -47,7 +47,7 @@ namespace PythonAPI
 
   /// Convert a sequence of values to a string for printing
   template<typename SequenceType,typename ElementType>
-  std::string sequence_toFormattedString(const SequenceType & values)
+  std::string sequence_to_string(const SequenceType & values)
   {
     typename SequenceType::const_iterator iend = values.end();
     std::ostringstream os;
@@ -74,7 +74,7 @@ namespace PythonAPI
     ///A typedef of a vector of tempolate ElementTypes
     typedef std::vector<ElementType> w_t;
 
-    static std::string toFormattedString(const w_t & values)
+    static std::string to_string(const w_t & values)
     {
       if( values.empty() ) return "[]";
       std::string retval("[");
@@ -137,7 +137,7 @@ namespace PythonAPI
       return boost::python::make_tuple(boost::python::tuple(self));
     }
 
-    static std::string toFormattedString(const w_t & values)
+    static std::string to_string(const w_t & values)
     {
       if( values.empty() ) return "set()";
       std::string retval("set(");
