@@ -889,7 +889,7 @@ namespace Algorithms
 
       if (selected && static_cast<int>(iv) <= numOutputEvents)
       {
-        ofs << iv << "\t" << rawevent.pulseTime().totalNanoseconds() << "\t" << rawevent.tof() << "\t"
+        ofs << iv << "\t" << rawevent.pulseTime().total_nanoseconds() << "\t" << rawevent.tof() << "\t"
             << correctedtof << "\t" << mtime << "\t" << section << std::endl;
       }
     } // ENDFOR iv: each event
