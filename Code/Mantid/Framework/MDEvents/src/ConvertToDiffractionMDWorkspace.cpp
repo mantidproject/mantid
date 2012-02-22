@@ -86,7 +86,6 @@ namespace MDEvents
     // Input units must be TOF
     API::CompositeWorkspaceValidator<MatrixWorkspace> *wsValidator = new API::CompositeWorkspaceValidator<MatrixWorkspace>;
     wsValidator->add(new API::WorkspaceUnitValidator<MatrixWorkspace>("TOF"));
-    wsValidator->add(new API::RawCountValidator<MatrixWorkspace>);
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input, wsValidator),
         "An input workspace in time-of-flight. If you specify a Workspace2D, it gets converted to "
         "an EventWorkspace using ConvertToEventWorkspace.");
