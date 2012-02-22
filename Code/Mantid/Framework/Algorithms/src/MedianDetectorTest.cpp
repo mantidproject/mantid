@@ -95,7 +95,6 @@ namespace Mantid
       MatrixWorkspace_sptr countsWS = integrateSpectra(m_inputWS, m_minSpec, m_maxSpec,
                                                        m_rangeLower, m_rangeUpper, true);
 
-      MatrixWorkspace_sptr maskWS = this->generateEmptyMask(countsWS);
 
       // 1. Calculate the median
       const bool excludeZeroes = getProperty("ExcludeZeroesFromMedian");
@@ -107,6 +106,7 @@ namespace Mantid
       median = calculateMedian(countsWS, excludeZeroes);
       g_log.information() << "Median value with outliers removed = " << median << "\n";
 
+      MatrixWorkspace_sptr maskWS = this->generateEmptyMask(countsWS);
       numFailed  += doDetectorTests(countsWS, median, maskWS);
       g_log.information() << "Median test results:\n"
                        << "\tNumber of failures - " << numFailed << "\n";
@@ -208,10 +208,25 @@ namespace Mantid
       const int64_t nhist = static_cast<int64_t>(countsWS->getNumberHistograms());
       int numFailed(0);
 
+      bool checkForMask = false;
+      Geometry::Instrument_const_sptr instrument = countsWS->getInstrument();
+      if (instrument != NULL)
+      {
+        checkForMask = ((instrument->getSource() != NULL) && (instrument->getSample() != NULL));
+      }
+
       PARALLEL_FOR1(countsWS)
       for(int64_t i = 0; i < nhist; ++i)
       {
         const double value = countsWS->readY(i)[0];
+        if ((value == 0.) && checkForMask)
+        {
+          const std::set<detid_t>& detids = countsWS->getSpectrum(i)->getDetectorIDs();
+          if (instrument->isDetectorMasked(detids))
+          {
+            numFailed -= 1; // it was already masked
+          }
+        }
         if( (value < out_lo*median) && (value > 0.0) )
         {
           countsWS->maskWorkspaceIndex(i);
@@ -225,6 +240,8 @@ namespace Mantid
           ++numFailed;
         }
       }
+      PARALLEL_CHECK_INTERUPT_REGION
+
       return numFailed;
     }
 
@@ -242,6 +259,7 @@ namespace Mantid
                                             const double median, API::MatrixWorkspace_sptr maskWS)
     {
       g_log.debug("Applying the criteria to find failing detectors");
+
       // A spectra can't fail if the statistics show its value is consistent with the mean value, 
       // check the error and how many errorbars we are away
       const double minSigma = getProperty("SignificanceTest");
@@ -282,6 +300,7 @@ namespace Mantid
           if (instrument->isMonitor(detids))
           {
             // Don't include in calculation but don't mask it
+            continue;
           }
         }
 
