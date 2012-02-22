@@ -1,6 +1,6 @@
 Name:           mantid-developer
 Version:        1.0
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
 Group:          Development/Tools
