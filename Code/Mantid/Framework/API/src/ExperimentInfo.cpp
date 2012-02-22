@@ -573,7 +573,7 @@ namespace API
     file->closeGroup();
 
     // Add new group that could contain instrument data
-    file->makeGroup("new_group","NXData", true);
+    file->makeGroup("extra_data","NXdata", true);
     std::vector<detid_t> detectorIDs;
     std::vector<detid_t> detmonIDs;
     std::vector<IDetector_const_sptr> detectors;
@@ -581,44 +581,76 @@ namespace API
     detectorIDs = getInstrument()->getDetectorIDs( true );
     detmonIDs = getInstrument()->getDetectorIDs( false );
     detectors = getInstrument()->getDetectors( detectorIDs );
+    detmons = getInstrument()->getDetectors( detmonIDs );
     file->writeData("number_of_detectors_and_monitors", detmonIDs.size() );
-    file->makeGroup("Detectors","NXData", true);
-    file->writeData("number_of_detectors", detectorIDs.size() );
-    file->writeData("Detector_IDs", detectorIDs);
-    std::vector<double> a_angles( detectorIDs.size() );
-    std::vector<double> p_angles( detectorIDs.size() );
-    std::vector<double> distances( detectorIDs.size() );
-
-    if (detectorIDs.size() > 0) {
+    if( detmonIDs.size() > 0 )
+    {
+      // Add detectors group
+      file->makeGroup("detectors","NXdetector", true);
+      file->writeData("number_of_detectors", detectorIDs.size() );
 
       Geometry::IObjComponent_const_sptr sample = getInstrument()->getSample();
-      Kernel::V3D sample_pos = sample->getPos();
-      for (int i=0; i < detectorIDs.size(); i++)
-      {
-        if( sample) 
+      Kernel::V3D sample_pos;
+      if(sample) sample_pos = sample->getPos();
+
+      if (detectorIDs.size() > 0) {
+        std::vector<double> a_angles( detectorIDs.size() );
+        std::vector<double> p_angles( detectorIDs.size() );
+        std::vector<double> distances( detectorIDs.size() );
+
+        for (int i=0; i < detectorIDs.size(); i++)
         {
-          Kernel::V3D pos = detectors[i]->getPos() - sample_pos;
-          pos.getSpherical( distances[i], p_angles[i], a_angles[i]);
-        } else {
-          distances[i] = detectors[i]->getDistance( *sample );
-          a_angles[i] = detectors[i]->getPhi()*180.0/M_PI;
+          if( sample) 
+          {
+            Kernel::V3D pos = detectors[i]->getPos() - sample_pos;
+            pos.getSpherical( distances[i], p_angles[i], a_angles[i]);
+          } else {
+            a_angles[i] = detectors[i]->getPhi()*180.0/M_PI;
+          }
         }
+        file->writeData("detector_nummber", detectorIDs);
+        if(sample) file->writeData("polar_angle", p_angles);
+        file->writeData("azimuthal_angle", a_angles);
+        if(sample) file->writeData("distance", distances);
       }
-      file->makeGroup("detectors","NXDetector", true);
-      file->writeData("Number_of_Detectors", detectors.size() );
+      file->closeGroup(); // detectors
 
-      file->writeData("detector_number", detectorIDs);
-      if(sample) file->writeData("polar_angle", p_angles);
-      file->writeData("azimuthal_angle", a_angles);
-      if(sample) file->writeData("distance", distances);
-      file->closeGroup(); // Detectors
+      // Create Monitor IDs vector
+      std::vector<detid_t> monitorIDs;
+      for (int i=0; i < detmonIDs.size(); i++) 
+      {
+        if( detmons[i]->isMonitor()) monitorIDs.push_back( detmonIDs[i] );
+      }
+      std::vector<IDetector_const_sptr> monitors;
+      monitors = getInstrument()->getDetectors( monitorIDs );
+      // Add Monitors group
+      file->makeGroup("monitors","NXmonitor", true);
+      file->writeData("number_of_monitors", monitorIDs.size() );
+      if( monitorIDs.size() > 0)
+      {
+        std::vector<double> mon_a_angles( monitorIDs.size() );
+        std::vector<double> mon_p_angles( monitorIDs.size() );
+        std::vector<double> mon_distances( monitorIDs.size() );
+
+        for (int i=0; i < monitorIDs.size(); i++)
+        {
+          if( sample) 
+          {
+            Kernel::V3D pos = monitors[i]->getPos() - sample_pos;
+            pos.getSpherical( mon_distances[i], mon_p_angles[i], mon_a_angles[i]);
+          } else {
+            mon_distances[i] = monitors[i]->getDistance( *sample );
+            mon_a_angles[i] = monitors[i]->getPhi()*180.0/M_PI;
+          }
+        }
+        file->writeData("monitor_nummber", monitorIDs);
+        if(sample) file->writeData("polar_angle", mon_p_angles);
+        file->writeData("azimuthal_angle", mon_a_angles);
+        if(sample) file->writeData("distance", mon_distances);
+      }
+      file->closeGroup(); // monitors
     }
-    file->writeData("azimuthal_angle", a_angles);
-    file->writeData("polar_angle", p_angles);
-    file->writeData("distance", distances);
-
-    file->closeGroup(); // Detector_IDs
-    file->closeGroup(); // new_group
+    file->closeGroup(); // extra_data
 
     file->closeGroup(); // (close the instrument group)
 
