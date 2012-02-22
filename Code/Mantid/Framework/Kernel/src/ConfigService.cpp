@@ -28,6 +28,7 @@
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/join.hpp>
+#include <boost/regex.hpp>
 
 #include <fstream>
 #include <sstream>
