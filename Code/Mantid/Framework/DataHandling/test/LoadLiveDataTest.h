@@ -24,6 +24,12 @@ public:
   static LoadLiveDataTest *createSuite() { return new LoadLiveDataTest(); }
   static void destroySuite( LoadLiveDataTest *suite ) { delete suite; }
 
+  void setUp()
+  {
+    FrameworkManager::Instance();
+    if (AnalysisDataService::Instance().doesExist("fake"))
+      AnalysisDataService::Instance().remove("fake");
+  }
 
   void test_Init()
   {
@@ -32,40 +38,45 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
   
-  void doExecEvent(std::string AccumulationMethod)
+  //--------------------------------------------------------------------------------------------
+  /** Run a test with a fake output, no processing
+   *
+   * @param AccumulationMethod :: parameter string
+   * @return the created processed WS
+   */
+  EventWorkspace_sptr doExecEvent(std::string AccumulationMethod)
   {
     LoadLiveData alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Instrument", "FakeEventDataListener") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", "fake") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("AccumulationMethod", AccumulationMethod) );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
 
-    // Retrieve the workspace from data service. TODO: Change to your desired type
+    // Retrieve the workspace from data service.
     EventWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("fake")) );
+    TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("fake") );
     TS_ASSERT(ws);
-    if (!ws) return;
+    return ws;
 
   }
 
-  void test_exec()
+  //--------------------------------------------------------------------------------------------
+  void test_conjoin()
   {
-    // Name of the output workspace.
-    std::string outWSName("LoadLiveDataTest_OutputWS");
+    EventWorkspace_sptr ws;
 
+    // First go creates the fake ws
+    ws = doExecEvent("Conjoin");
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
 
-    // TODO: Check the results
-
-    // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove(outWSName);
+    // Next one actually conjoins
+    ws = doExecEvent("Conjoin");
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 4);
   }
   
-  void test_Something()
-  {
-  }
-
 
 };
 

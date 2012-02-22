@@ -129,7 +129,7 @@ namespace DataHandling
     }
     else
     {
-      outWS = alg->getProperty("InputWorkspace1");
+      outWS = alg->getProperty("OutputWorkspace");
       this->setProperty("OutputWorkspace", outWS);
     }
   }
@@ -162,6 +162,8 @@ namespace DataHandling
     // If the output does not exist, we always replace the output.
     if (!outWS)
       accum = "Replace";
+
+    g_log.notice() << "Performing the " << accum << " operation." << std::endl;
 
     // Perform the accumulation and set the output workspace
     if (accum == "Replace")

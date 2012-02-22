@@ -262,6 +262,8 @@ namespace Algorithms
     // Initialize the progress reporting object
     m_progress = new API::Progress(this, 0.0, 1.0, totalHists);
 
+    specid_t maxSpec = 0;
+
     const int64_t& nhist1 = event_ws1->getNumberHistograms();
     for (int64_t i = 0; i < nhist1; ++i)
     {
@@ -270,9 +272,16 @@ namespace Algorithms
       ISpectrum * outSpec = output->getSpectrum(i);
       const ISpectrum * inSpec = event_ws1->getSpectrum(i);
       outSpec->copyInfoFrom(*inSpec);
+      if (outSpec->getSpectrumNo() > maxSpec)
+        maxSpec = outSpec->getSpectrumNo();
 
       m_progress->report();
     }
+
+    // Should we fix the spectrum numbers of the 2nd workspace
+    bool fixSpecNumbers = false;
+    if (event_ws2->getSpectrum(0)->getSpectrumNo() <= maxSpec)
+      fixSpecNumbers = true;
 
     //For second loop we use the offset from the first
     const int64_t& nhist2 = event_ws2->getNumberHistograms();
@@ -285,6 +294,9 @@ namespace Algorithms
       ISpectrum * outSpec = output->getSpectrum(output_wi);
       const ISpectrum * inSpec = event_ws2->getSpectrum(j);
       outSpec->copyInfoFrom(*inSpec);
+      // If the spectrum numbers overlap, then just increment from the last spec# of workspace1
+      if (fixSpecNumbers)
+        outSpec->setSpectrumNo( specid_t( maxSpec+j+1) );
 
       // Propagate spectrum masking. First workspace will have been done by the factory
       Geometry::IDetector_const_sptr ws2Det;
@@ -308,8 +320,6 @@ namespace Algorithms
 
     //Set the same bins for all output pixels
     output->setAllX(XValues);
-
-    this->fixSpectrumNumbers(event_ws1, event_ws2, output);
 
     // Set the output workspace
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(output) );
