@@ -253,6 +253,12 @@ void MuonAnalysis::runFrontPlotButton()
   // get current index
   int index = m_uiForm.frontGroupGroupPairComboBox->currentIndex();
 
+  if (index < 0)
+  {
+    index = 0;
+    m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(index);
+  }
+
   if (index >= numGroups())
   {
     // i.e. index points to a pair
@@ -276,7 +282,6 @@ void MuonAnalysis::runFrontPlotButton()
 */
 void MuonAnalysis::userSelectInstrument(const QString& prefix)
 {
-  m_updating = true;
   if ( prefix != m_curInterfaceSetup )
   {
     runClearGroupingButton();
@@ -287,7 +292,6 @@ void MuonAnalysis::userSelectInstrument(const QString& prefix)
     group.beginGroup(m_settingsGroup + "instrument");
     group.setValue("name", prefix);
   }
-  m_updating = false;
 }
 
 

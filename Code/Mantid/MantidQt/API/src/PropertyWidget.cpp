@@ -38,7 +38,6 @@ namespace API
     {
       // Use the parent of the provided QGridLayout when adding widgets
       m_parent = parent;
-      m_parent->insertChild(this);
     }
 
 //    // Create the validator label (that red star)
