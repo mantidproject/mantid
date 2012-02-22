@@ -71,6 +71,7 @@ namespace Algorithms
     size_t wkspIndexToFilter;
 
     int mFilterIntervals;
+    int mSelectedInterval;
 
     int numOutputEvents;
 

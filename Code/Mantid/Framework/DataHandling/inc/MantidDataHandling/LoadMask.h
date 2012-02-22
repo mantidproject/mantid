@@ -77,15 +77,17 @@ namespace DataHandling
     /// Convert bank to detector
     void bankToDetectors(std::vector<std::string> singlebanks,
         std::vector<int32_t>& detectors, std::vector<int32_t>& detectorpairslow, std::vector<int32_t>& detectorpairsup);
-    /// Convert spectrum to detector
-    void spectrumToDetectors(std::vector<int32_t> singles, std::vector<int32_t> pairslow, std::vector<int32_t> pairsup,
-        std::vector<int32_t>& detectors, std::vector<int32_t>& detectorpairslow, std::vector<int32_t>& detectorpairsup);
     /// Convert input detector to detector
     void detectorToDetectors(std::vector<int32_t> singles, std::vector<int32_t> pairslow, std::vector<int32_t> pairsup,
         std::vector<int32_t>& detectors, std::vector<int32_t>& detectorpairslow, std::vector<int32_t>& detectorpairsup);
     void processMaskOnDetectors(bool tomask, std::vector<int32_t> singledetids, std::vector<int32_t> pairdetids_low,
         std::vector<int32_t> pairdetids_up);
+    /// Convert spectrum to detector
+    void processMaskOnWorkspaceIndex(bool mask, std::vector<int32_t> pairslow, std::vector<int32_t> pairsup);
     void initDetectors();
+
+    void loadISISMaskFile(std::string isisfilename);
+    void parseISISStringToVector(std::string ins, std::vector<int>& rangestartvec, std::vector<int>& rangeendvec);
 
     /// Mask Workspace
     API::MatrixWorkspace_sptr mMaskWS;

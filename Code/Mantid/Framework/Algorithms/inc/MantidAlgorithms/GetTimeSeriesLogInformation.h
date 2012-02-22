@@ -71,6 +71,8 @@ namespace Algorithms
 
      void calDistributions(std::vector<Kernel::DateAndTime> timevec, double dts);
 
+     void exportLog();
+
      void doStatistic();
 
      void exportErrorLog(API::MatrixWorkspace_sptr ws, std::vector<Kernel::DateAndTime> abstimevec, double dts);
