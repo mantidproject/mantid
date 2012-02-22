@@ -293,35 +293,31 @@ class SNSPowderReduction2(PythonAlgorithm):
 
     def _focusChunks(self, runnumber, extension, filterWall, calib, filterLogs=None, preserveEvents=True,
                normByCurrent=True, filterBadPulsesOverride=True):
-        first = True
         # generate the workspace name
         wksp = "%s_%d" % (self._instrument, runnumber)
-        chunks = range(1,2) #Default for one chunk
+        strategy = range(1,2) #Default for one chunk
         if self._chunks > 0 and not "histo" in extension:
             alg = LoadPreNexus(Filename=wksp+"_runinfo.xml",MaxChunkSize=self._chunks,OutputWorkspace='Chunks')
-            chunkwksp = alg['OutputWorkspace']
-            chunks = chunkwksp.readY(0)
-        if len(chunks) == 0:
-            return False
-        for chunk in chunks:
-            print "Working on chunk %d of %d" % (chunk, len(chunks))
-            if len(chunks) > 1:
-                strategyParams = (int(chunk), len(chunks))
+            strategy = alg['OutputWorkspace'].readY(0)
+        firstChunk = True
+        for chunk in strategy:
+            print "Working on chunk %d of %d" % (chunk, len(strategy))
+            if len(strategy) > 1:
+                strategyParams = (int(chunk), len(strategy))
             else:
                 strategyParams = (0, 0)
-            wksp_chunk = self._loadData(runnumber, extension, filterWall, strategyParams)
+            temp = self._loadData(runnumber, extension, filterWall, strategyParams)
             if self._info is None:
-                self._info = self._getinfo(wksp_chunk)
-            wksp_chunk = self._focus(wksp_chunk, calib, self._info, filterLogs, preserveEvents, normByCurrent)
-            if first:
-                first = False
-                alg = RenameWorkspace(InputWorkspace=wksp_chunk, OutputWorkspace=wksp)
-                wksp = alg['OutputWorkspace']
+                self._info = self._getinfo(temp)
+            temp = self._focus(temp, calib, self._info, filterLogs, preserveEvents, normByCurrent)
+            if firstChunk:
+                wksp = RenameWorkspace(InputWorkspace=temp, OutputWorkspace=wksp)
+                firstChunk = False
             else:
-                Plus(LHSWorkspace=wksp, RHSWorkspace=wksp_chunk, OutputWorkspace=wksp)
-                DeleteWorkspace(wksp_chunk)
+                wksp +=temp
+                DeleteWorkspace(temp)
         if self._chunks > 0 and not "histo" in extension:
-            mtd.deleteWorkspace(str(chunkwksp))
+            mtd.deleteWorkspace('Chunks')
         print "Done focussing data"
 
         return wksp
