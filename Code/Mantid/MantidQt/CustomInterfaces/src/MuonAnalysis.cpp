@@ -77,7 +77,7 @@ Logger& MuonAnalysis::g_log = Logger::get("MuonAnalysis");
 ///Constructor
 MuonAnalysis::MuonAnalysis(QWidget *parent) :
   UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_currentDataName(""), m_assigned(false), m_groupTableRowInFocus(0), m_pairTableRowInFocus(0),
-  m_tabNumber(0), m_groupNames(), m_settingsGroup("CustomInterfaces/MuonAnalysis/"), m_updating(false), m_loaded(false)
+  m_tabNumber(0), m_groupNames(), m_settingsGroup("CustomInterfaces/MuonAnalysis/"), m_updating(false), m_loaded(false), m_deadTimesChanged(false)
 {
   // this should work for now
   m_groupingTempFilename = ConfigService::Instance().getInstrumentDirectory()+"Grouping/tempMuonAnalysisGrouping.xml";
@@ -182,14 +182,11 @@ void MuonAnalysis::initLayout()
 
   connectAutoUpdate();
 
-  // Muon scientists never fits peaks, hence they want the following parameter
-  // set to a high number
+  // Muon scientists never fits peaks, hence they want the following parameter, set to a high number
   ConfigService::Instance().setString("curvefitting.peakRadius","99");
 
-  m_uiForm.mwRunDeadTimeFile->setVisible(false);
   connect(m_uiForm.deadTimeType, SIGNAL(currentIndexChanged(int)), this, SLOT(changeDeadTimeType(int) ) );
-  // TO BE INCLUDED LATER FOR #4338
-  //connect(m_uiForm.mwRunDeadTimeFile, SIGNAL(fileEditingFinished()), this, SLOT(validateDeadTimeLoad() ) );
+  connect(m_uiForm.mwRunDeadTimeFile, SIGNAL(fileEditingFinished()), this, SLOT(deadTimeFileSelected() ) );
 }
 
 
@@ -250,6 +247,12 @@ void MuonAnalysis::runFirstGoodBinFront()
 */
 void MuonAnalysis::runFrontPlotButton()
 {
+  if (m_deadTimesChanged)
+  {
+    inputFileChanged(m_previousFilenames);
+    return;
+  }
+
   // get current index
   int index = m_uiForm.frontGroupGroupPairComboBox->currentIndex();
 
@@ -411,6 +414,11 @@ void MuonAnalysis::runClearGroupingButton()
  */
 void MuonAnalysis::runGroupTablePlotButton()
 {
+  if (m_deadTimesChanged)
+  {
+    inputFileChanged(m_previousFilenames);
+    return;
+  }
   plotGroup(m_uiForm.groupTablePlotChoice->currentText().toStdString());
 }
 
@@ -604,6 +612,12 @@ void MuonAnalysis::runLoadCurrent()
  */
 void MuonAnalysis::runPairTablePlotButton()
 {
+  if (m_deadTimesChanged)
+  {
+    inputFileChanged(m_previousFilenames);
+    return;
+  }
+
   m_uiForm.frontPlotFuncs->setCurrentIndex(m_uiForm.pairTablePlotChoice->currentIndex());
   // if something sensible in row then update front
   int currentSelection(m_uiForm.pairTable->currentRow());
@@ -1061,13 +1075,13 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
       {
         getDeadTimeFromFile(deadTimeFile);
       }
-      catch (std::exception &e)
+      catch (std::exception&)
       {
         QMessageBox::information(this, "Mantid - MuonAnalysis", "A problem occurred while applying dead times.");
       }
     }
     else
-      QMessageBox::information(this, "Mantid - MuonAnalysis", "A problem occurred while applying dead times.");
+      QMessageBox::information(this, "Mantid - MuonAnalysis", "The dead time file could not be found. No dead times will be applied.");
   }
 
   // Make the options available
@@ -1196,11 +1210,13 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
   static const QChar MU_SYM(956);
   m_uiForm.optionLabelBinWidth->setText(QString("Data collected with histogram bins of ") + QString::number(binWidth) + QString(" %1s").arg(MU_SYM));
 
+  m_deadTimesChanged = false;
+
   // finally the preferred default by users are to by default
   // straight away plot the data
   if (m_uiForm.frontPlotButton->isEnabled() )
     runFrontPlotButton();
-
+  
   m_updating = false;
 }
 
@@ -2856,6 +2872,15 @@ void MuonAnalysis::loadAutoSavedValues(const QString& group)
 
   bool hideTools = prevSettingTabOptions.value("toolbars", 1).toBool();
   m_uiForm.hideToolbars->setChecked(hideTools);
+
+  // Load dead time options.
+  QSettings deadTimeOptions;
+  deadTimeOptions.beginGroup(group + "DeadTimeOptions");
+
+  int deadTimeTypeIndex = deadTimeOptions.value("deadTimes", 0).toInt();
+  m_uiForm.deadTimeType->setCurrentIndex(deadTimeTypeIndex);
+  if (deadTimeTypeIndex != 2)
+    m_uiForm.mwRunDeadTimeFile->setVisible(false);
 }
 
 
@@ -3309,14 +3334,33 @@ void MuonAnalysis::showHideToolbars(bool state)
 */
 void MuonAnalysis::changeDeadTimeType(int choice)
 {
+  m_deadTimesChanged = true;
   if (choice == 0 || choice == 1) // if choice == none ||choice == from file
   {
     m_uiForm.mwRunDeadTimeFile->setVisible(false);
+    homeTabUpdatePlot();
   }
   else // choice must be from workspace
   {
+    m_uiForm.mwRunDeadTimeFile->setText("");
     m_uiForm.mwRunDeadTimeFile->setVisible(true);
   }
+
+  QSettings group;
+  group.beginGroup(m_settingsGroup + "DeadTimeOptions");
+  group.setValue("deadTimes", choice);
+}
+
+
+/**
+* If the user selects/changes the file to be used to apply the dead times then 
+* see if the plot needs updating and make sure next time the user plots that the
+* dead times are applied.
+*/
+void MuonAnalysis::deadTimeFileSelected()
+{
+  m_deadTimesChanged = true;
+  homeTabUpdatePlot();
 }
 
 
@@ -3325,6 +3369,9 @@ void MuonAnalysis::changeDeadTimeType(int choice)
 */
 bool MuonAnalysis::isValidFile(const QString & fileName)
 {
+  if (fileName == "")
+    return false;
+
   try
   {
     Poco::File l_path( fileName.toStdString() );

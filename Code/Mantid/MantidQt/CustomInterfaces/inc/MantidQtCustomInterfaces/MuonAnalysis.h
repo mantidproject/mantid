@@ -116,16 +116,16 @@ private slots:
   /// User clicks hide toolbars checkbox
   void showHideToolbars(bool state);
 
-  ///
+  /// Run the plot button on the home tab.
   void runFrontPlotButton();
 
-  ///
+  /// 
   void runFrontGroupGroupPairComboBox(int index);
 
-  ///
+  /// Link to the wiki for the home tab
   void muonAnalysisHelpClicked();
 
-  ///
+  /// Link to the wiki for the grouping tab.
   void muonAnalysisHelpGroupingClicked();
   
   ///
@@ -137,10 +137,7 @@ private slots:
   /// Check to see if the user want to append the next run and set accordingly
   void checkAppendingNextRun();
 
-  /// Changes the format of the file string. i.e file MUSR001-06 are files 01-06
-  ///void appendSelected();
-
-  ///
+  /// When the tab has changed.
   void changeTab(int);
 
   /// Update the plot based on changes on the front page.
@@ -163,6 +160,9 @@ private slots:
 
   /// Change what type of deadtime to use and the options available for the user's choice.
   void changeDeadTimeType(int);
+
+  /// Change to the dead time file, make sure graph is updated next time it is plotted.
+  void deadTimeFileSelected();
 
 
 private:
@@ -353,6 +353,9 @@ private:
 
   /// Boolean to show when data has been loaded. (Can't auto-update data that hasn't been loaded)
   bool m_loaded;
+
+  ///
+  bool m_deadTimesChanged;
 
   /// Load auto saved values
   void loadAutoSavedValues(const QString& group);
