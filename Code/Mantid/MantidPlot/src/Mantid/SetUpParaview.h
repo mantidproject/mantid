@@ -2,7 +2,6 @@
 #define MANTIDPLOT_SETUP_PARAVIEW_WINDOW
 
 #include <QDialog>
-#include "MantidQtAPI\UserSubWindow.h"
 #include "ui_SetUpParaview.h"
 
 /**
