@@ -6,7 +6,6 @@
 #include "MantidKernel/System.h"
 #include <iostream>
 #include <iomanip>
-
 #include "MantidDataHandling/LoadLiveData.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
@@ -64,7 +63,6 @@ public:
     TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("fake") );
     TS_ASSERT(ws);
     return ws;
-
   }
 
   //--------------------------------------------------------------------------------------------

@@ -46,6 +46,8 @@ namespace DataHandling
     virtual ~LiveDataAlgorithm();
     virtual const std::string category() const;
 
+    void copyPropertyValuesFrom(const LiveDataAlgorithm & other);
+
     Mantid::API::ILiveListener_sptr getLiveListener();
     void setLiveListener(Mantid::API::ILiveListener_sptr listener);
 

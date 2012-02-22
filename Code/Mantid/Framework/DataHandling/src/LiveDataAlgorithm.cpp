@@ -86,6 +86,23 @@ namespace DataHandling
         "Date/time is in UTC time, in ISO8601 format, e.g. 2010-09-14T04:20:12.95");
   }
 
+
+  //----------------------------------------------------------------------------------------------
+  /** Copy the LiveDataAlgorithm-specific properties from "other" to "this"
+   *
+   * @param other :: LiveDataAlgorithm-type algo.
+   */
+  void LiveDataAlgorithm::copyPropertyValuesFrom(const LiveDataAlgorithm & other)
+  {
+    std::vector<Property*> props = this->getProperties();
+    for (size_t i=0; i < props.size(); i++)
+    {
+      Property*prop = props[i];
+      this->setPropertyValue(prop->name(), other.getPropertyValue(prop->name()));
+    }
+  }
+
+
   //----------------------------------------------------------------------------------------------
   /// @return true if there is a post-processing step
   bool LiveDataAlgorithm::hasPostProcessing() const
