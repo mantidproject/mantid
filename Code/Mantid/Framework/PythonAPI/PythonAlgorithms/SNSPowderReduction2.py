@@ -311,10 +311,11 @@ class SNSPowderReduction2(PythonAlgorithm):
                 self._info = self._getinfo(temp)
             temp = self._focus(temp, calib, self._info, filterLogs, preserveEvents, normByCurrent)
             if firstChunk:
-                wksp = RenameWorkspace(InputWorkspace=temp, OutputWorkspace=wksp)
+                alg = RenameWorkspace(InputWorkspace=temp, OutputWorkspace=wksp)
+                wksp = alg['OutputWorkspace']
                 firstChunk = False
             else:
-                wksp +=temp
+                wksp += temp
                 DeleteWorkspace(temp)
         if self._chunks > 0 and not "histo" in extension:
             mtd.deleteWorkspace('Chunks')
