@@ -137,6 +137,19 @@ public:
     removeFromADS(name);
   }
 
+  void testRetrieveWS()
+  {
+    const std::string name("MySpace");
+    Workspace_sptr work = addToADS(name);
+    MockWorkspace_sptr workBack;
+    TS_ASSERT_THROWS_NOTHING(workBack = AnalysisDataService::Instance().retrieveWS<MockWorkspace>(name));
+    TS_ASSERT_EQUALS(work, workBack);
+    //clean up the ADS for other tests
+    removeFromADS(name);
+  }
+
+
+
 private:
 
   /// If replace=true then usea addOrReplace

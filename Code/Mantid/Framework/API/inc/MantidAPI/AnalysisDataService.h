@@ -87,10 +87,26 @@ class DLLExport AnalysisDataServiceImpl : public Kernel::DataService<API::Worksp
    void setIllegalCharacterList(const std::string &);
    /// Is the given name a valid name for an object in the ADS
    const std::string isValid(const std::string & name) const;
-   /// Overwridden add member to attach the name to the workspace when a workspace object is added to the service
+   /// Overridden add member to attach the name to the workspace when a workspace object is added to the service
    virtual void add( const std::string& name, const boost::shared_ptr<API::Workspace>& workspace);
-   /// Overwridden addOrReplace member to attach the name to the workspace when a workspace object is added to the service
+   /// Overridden addOrReplace member to attach the name to the workspace when a workspace object is added to the service
    virtual void addOrReplace( const std::string& name, const boost::shared_ptr<API::Workspace>& workspace);
+
+   /** Retrieve a workspace and cast it to the given WSTYPE
+    *
+    * @param name :: name of the workspace
+    * @tparam WSTYPE :: type of workspace to cast to. Should sub-class Workspace
+    * @return a shared pointer of WSTYPE
+    */
+   template <typename WSTYPE>
+   boost::shared_ptr<WSTYPE> retrieveWS(const std::string& name)
+   {
+     // Get as a bare workspace
+     boost::shared_ptr<Mantid::API::Workspace> workspace = Kernel::DataService<API::Workspace>::retrieve(name);
+     // Cast to the desired type and return that.
+     return boost::dynamic_pointer_cast<WSTYPE>(workspace);
+   }
+
 
 private:
    /// Checks the name is valid, throwing if not
