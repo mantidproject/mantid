@@ -3,11 +3,11 @@
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidKernel/ConfigService.h"
 #include <boost/regex.hpp>
-#include <QFileDialog.h>
-#include <QProcess.h>
-#include <QPalette.h>
-#include <QDirIterator.h>
-#include <QDesktopServices.h>
+#include <QFileDialog>
+#include <QProcess>
+#include <QPalette>
+#include <QDirIterator>
+#include <QDesktopServices>
 #include <iostream> 
 
 
