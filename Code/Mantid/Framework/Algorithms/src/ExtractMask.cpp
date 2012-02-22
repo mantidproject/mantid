@@ -1,4 +1,4 @@
-/*WIKI* 
+/*WIKI*
 
 The masking from the InputWorkspace property is extracted by creating a new MatrixWorkspace with a single X bin where:
 * 0 = masked;
@@ -33,7 +33,9 @@ namespace Mantid
       this->setOptionalMessage("Extracts the masking from a given workspace and places it in a new workspace.");
     }
     
-
+    using DataObjects::SpecialWorkspace2D;
+    using DataObjects::SpecialWorkspace2D_const_sptr;
+    using DataObjects::SpecialWorkspace2D_sptr;
     using Kernel::Direction;
     using Geometry::IDetector_const_sptr;
     using namespace API;
@@ -75,6 +77,15 @@ namespace Mantid
       MatrixWorkspace_sptr outputWS(maskWS);
       WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
       outputWS->setTitle(inputWS->getTitle());
+      outputWS->getInstrument()->getParameterMap()->clearParametersByName("masked"); // turn off the mask bit
+
+      bool inputWSIsSpecial(false);
+      {
+        SpecialWorkspace2D_const_sptr temp = boost::dynamic_pointer_cast<const SpecialWorkspace2D>(inputWS);
+        if (temp)
+          inputWSIsSpecial = true;
+        g_log.notice() << "Input workspace is special\n";
+      }
 
       Progress prog(this,0.0,1.0,nHist);
       MantidVecPtr xValues;
@@ -95,14 +106,24 @@ namespace Mantid
         // Copy X, spectrum number and detector IDs
         outSpec->copyInfoFrom(*inSpec);
 
-        IDetector_const_sptr inputDet;
         bool inputIsMasked(false);
+
+        IDetector_const_sptr inputDet;
         try
         {
           inputDet = inputWS->getDetector(i);
-          if( inputDet->isMasked() )
+          if (inputWSIsSpecial) {
+            inputIsMasked = (inSpec->dataY()[0] > 0.5);
+          }
+          // special workspaces can mysteriously have the mask bit set
+          // but only check if we haven't already decided to mask the spectrum
+          if( !inputIsMasked && inputDet->isMasked() )
           {
             inputIsMasked = true;
+          }
+
+          if (inputIsMasked)
+          {
             detid_t id = inputDet->getID();
             PARALLEL_CRITICAL(name)
             {
@@ -131,6 +152,7 @@ namespace Mantid
       }
       PARALLEL_CHECK_INTERUPT_REGION
 
+      g_log.information() << detectorList.size() << " spectra are masked\n";
       setProperty("OutputWorkspace", outputWS);
       setProperty("DetectorList", detectorList);
     }
