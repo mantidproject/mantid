@@ -1,6 +1,6 @@
 Name:           mantid-developer
 Version:        1.0
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
 Group:          Development/Tools
@@ -57,6 +57,9 @@ required for Mantid development.
 %files
 
 %changelog
+* Wed Feb 22 2012 Stuart Campbell <campbellsi@ornl.gov>
+- Added git as a dependency
+
 * Mon Feb 20 2012 Stuart Campbell <campbellsi@ornl.gov>
 - Added dependency on NeXus development after nexus rpm split.
 - Updated CMake dependency to 2.8.5 following 'the virus'!
