@@ -20,7 +20,8 @@ import difflib
 
 #======================================================================
 def get_wiki_description(algo, version):
-    """
+    """ Extract the text between the *WIKI* tags in the .cpp file
+    
     @param algo :: name of the algorithm
     @param version :: version, -1 for latest 
     """
@@ -46,6 +47,7 @@ def get_wiki_description(algo, version):
 #======================================================================
 def make_group_header_line(group):
     """ Make a group header line for the property table
+    
      Args:
         group :: name of the group
     Returns:
@@ -58,7 +60,8 @@ def make_group_header_line(group):
     
 #======================================================================
 def make_property_table_line(propnum, p):
-    """ Make one line of property table
+    """ Make one line of the property table
+    
     Args:
         propnum :: number of the prop
         p :: Property object
@@ -110,7 +113,7 @@ def make_property_table_line(propnum, p):
     else:
       out += "|Mandatory\n"
     # Documentation
-    out += "|" + p.documentation.replace("\n", " ") + "\n"
+    out += "|" + p.documentation.replace("\n", "<br />") + "\n"
     # End of table line
     out += "|-\n"
     return out
