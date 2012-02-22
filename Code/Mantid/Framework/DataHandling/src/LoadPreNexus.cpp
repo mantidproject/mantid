@@ -121,9 +121,9 @@ namespace DataHandling
         "File containing the pixel mapping (DAS pixels to pixel IDs) file (typically INSTRUMENT_TS_YYYY_MM_DD.dat). The filename will be found automatically if not specified.");
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
     mustBePositive->setLower(1);
-    declareProperty("MaxChunkSize", EMPTY_INT(), mustBePositive,
-        "Get chunking strategy for chunks with this number of bytes.");
-    declareProperty("ChunkNumber", EMPTY_INT(), mustBePositive->clone(),
+    declareProperty("MaxChunkSize", EMPTY_DBL(),
+        "Get chunking strategy for chunks with this number of Gbytes.");
+    declareProperty("ChunkNumber", EMPTY_INT(), mustBePositive,
         "If loading the file by sections ('chunks'), this is the section number of this execution of the algorithm.");
     declareProperty("TotalChunks", EMPTY_INT(), mustBePositive->clone(),
         "If loading the file by sections ('chunks'), this is the total number of sections.");
@@ -155,7 +155,7 @@ namespace DataHandling
     string mapfile = this->getPropertyValue(MAP_PARAM);
     int chunkTotal = this->getProperty("TotalChunks");
     int chunkNumber = this->getProperty("ChunkNumber");
-    int maxChunk = this->getProperty("MaxChunkSize");
+    double maxChunk = this->getProperty("MaxChunkSize");
     if (!isEmpty(maxChunk))
     {
       int NChunks = determineChunking(runinfo,maxChunk);
@@ -409,14 +409,14 @@ namespace DataHandling
     }
   }
 
-  int LoadPreNexus::determineChunking(const std::string& filename, size_t maxChunkSize)
+  int LoadPreNexus::determineChunking(const std::string& filename, double maxChunkSize)
   {
     vector<string> eventFilenames;
     string dataDir;
     this->parseRuninfo(filename, dataDir, eventFilenames);
-    size_t filesize = 0;
+    double filesize = 0;
     for (size_t i = 0; i < eventFilenames.size(); i++) {
-      filesize += static_cast<size_t>(Poco::File(dataDir + eventFilenames[i]).getSize());
+      filesize += static_cast<double>(Poco::File(dataDir + eventFilenames[i]).getSize())/(1024.0*1024.0*1024.0);
     }
     if (filesize == 0)
       return 0;
