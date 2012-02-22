@@ -158,6 +158,9 @@ public:
   {
     Kernel::ConfigService::Instance().setString("curvefitting.peakRadius","100");
     FrameworkManager::Instance();
+    // intiate ws2D in the WS manager if the test is run alone and no ws2d has been created before
+    Workspace2D *pWS=new Workspace2D();
+    delete pWS;
   }
 
   void testFit()
