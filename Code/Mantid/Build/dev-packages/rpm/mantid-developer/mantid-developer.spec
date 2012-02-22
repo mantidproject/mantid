@@ -1,6 +1,6 @@
 Name:           mantid-developer
 Version:        1.0
-Release:        6%{?dist}
+Release:        7%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
 Group:          Development/Tools
@@ -36,6 +36,7 @@ Requires: subversion
 Requires: gmock-devel
 Requires: gtest-devel
 Requires: git
+Requires: openssl-devel
 
 BuildArch: noarch
 
@@ -60,6 +61,7 @@ required for Mantid development.
 %changelog
 * Wed Feb 22 2012 Stuart Campbell <campbellsi@ornl.gov>
 - Added git as a dependency
+- Added openssl-devel dependency
 
 * Mon Feb 20 2012 Stuart Campbell <campbellsi@ornl.gov>
 - Added dependency on NeXus development after nexus rpm split.
