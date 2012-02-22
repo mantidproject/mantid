@@ -357,10 +357,19 @@ void ApplicationWindow::init(bool factorySettings)
   If applicable, set the Paraview path BEFORE libaries are loaded. Doing it here, before the call to MantidUI::init() prevents 
   the logs being poluted with library loading errors.
   */
-  if(hasVatesAvailable() && !hasParaviewPath())
+  if(hasVatesAvailable())
   {
-    SetUpParaview pv;
-    pv.exec();
+    if(hasParaviewPath())
+    {
+      Mantid::Kernel::ConfigServiceImpl& confService = Mantid::Kernel::ConfigService::Instance();
+      std::string path = confService.getString("paraview.path");
+      Mantid::Kernel::ConfigService::Instance().setParaviewLibraryPath(path);
+    }
+    else
+    {
+      SetUpParaview pv;
+      pv.exec();
+    }
   }
 
   //Initialize Mantid

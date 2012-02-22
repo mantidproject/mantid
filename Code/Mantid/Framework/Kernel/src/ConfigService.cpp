@@ -1701,7 +1701,6 @@ void ConfigServiceImpl::setParaviewLibraryPath(const std::string& path)
   char separator = existingPath.pathSeparator();
   std::string strSeparator;
   strSeparator.push_back(separator);
-
 #ifdef _WIN32
   existingPath = Poco::Environment::get("PATH");
   existingPath.append(strSeparator);
@@ -1731,7 +1730,7 @@ bool ConfigServiceImpl::quickVatesCheck() const
   using boost::regex;
   using boost::regex_search;
 
-  std::string path = this->getCurrentDir();
+  std::string path = this->getDirectoryOfExecutable();
 
   Poco::File dir(path);
   typedef std::vector<std::string> VecFiles;
