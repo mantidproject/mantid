@@ -77,9 +77,9 @@ public:
     TS_ASSERT_EQUALS("en", d->getDimensionId());
 
     //Check Units
-    TS_ASSERT_EQUALS("Ang", a->getUnits());
-    TS_ASSERT_EQUALS("Ang", b->getUnits());
-    TS_ASSERT_EQUALS("Ang", c->getUnits());
+    TS_ASSERT_EQUALS("A^(-1)", a->getUnits());
+    TS_ASSERT_EQUALS("A^(-1)", b->getUnits());
+    TS_ASSERT_EQUALS("A^(-1)", c->getUnits());
     TS_ASSERT_EQUALS("MeV", d->getUnits());
 
     //Check Nbins
