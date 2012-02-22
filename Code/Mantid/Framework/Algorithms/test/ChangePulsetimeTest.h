@@ -54,9 +54,9 @@ public:
     for (size_t wi=10; wi < 20; wi++)
     {
       double secs;
-      secs = DateAndTime::seconds_from_duration(out_ws->getEventList(wi).getEvent(0).pulseTime() - DateAndTime("2010-01-01"));
+      secs = DateAndTime::secondsFromDuration(out_ws->getEventList(wi).getEvent(0).pulseTime() - DateAndTime("2010-01-01"));
       TS_ASSERT_DELTA(secs, 1000.0, 1e-5);
-      secs = DateAndTime::seconds_from_duration(out_ws->getEventList(wi).getEvent(2).pulseTime() - DateAndTime("2010-01-01"));
+      secs = DateAndTime::secondsFromDuration(out_ws->getEventList(wi).getEvent(2).pulseTime() - DateAndTime("2010-01-01"));
       TS_ASSERT_DELTA(secs, 1001.0, 1e-5);
     }
 
@@ -64,9 +64,9 @@ public:
     if (WorkspaceIndexList != "")
     {
       double secs;
-      secs = DateAndTime::seconds_from_duration(out_ws->getEventList(0).getEvent(2).pulseTime() - DateAndTime("2010-01-01"));
+      secs = DateAndTime::secondsFromDuration(out_ws->getEventList(0).getEvent(2).pulseTime() - DateAndTime("2010-01-01"));
       TS_ASSERT_DELTA(secs, 1.0, 1e-5);
-      secs = DateAndTime::seconds_from_duration(out_ws->getEventList(30).getEvent(2).pulseTime() - DateAndTime("2010-01-01"));
+      secs = DateAndTime::secondsFromDuration(out_ws->getEventList(30).getEvent(2).pulseTime() - DateAndTime("2010-01-01"));
       TS_ASSERT_DELTA(secs, 1.0, 1e-5);
     }
 
@@ -74,7 +74,7 @@ public:
     if (in_ws_name != out_ws_name)
     {
       double secs;
-      secs = DateAndTime::seconds_from_duration(in_ws->getEventList(0).getEvent(2).pulseTime() - DateAndTime("2010-01-01"));
+      secs = DateAndTime::secondsFromDuration(in_ws->getEventList(0).getEvent(2).pulseTime() - DateAndTime("2010-01-01"));
       TS_ASSERT_DELTA(secs, 1.0, 1e-5);
     }
 

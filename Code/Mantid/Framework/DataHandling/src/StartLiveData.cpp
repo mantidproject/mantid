@@ -91,7 +91,7 @@ namespace DataHandling
 
     // Adjust the StartTime if you are starting from run/now.
     if (FromNow)
-      this->setPropertyValue("StartTime", DateAndTime::get_current_time().to_ISO8601_string());
+      this->setPropertyValue("StartTime", DateAndTime::getCurrentTime().toISO8601String());
     else if (FromStartOfRun)
       // TODO: implement
       throw Kernel::Exception::NotImplementedError("Cannot start from the run start yet.");

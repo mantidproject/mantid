@@ -109,7 +109,7 @@ namespace DataObjects
    */
   ostream& operator<<(ostream &os, const TofEvent &event)
   {
-    os << event.m_tof << "," << event.m_pulsetime.to_simple_string();
+    os << event.m_tof << "," << event.m_pulsetime.toSimpleString();
     return os;
   }
 
@@ -229,7 +229,7 @@ namespace DataObjects
    */
   ostream& operator<<(ostream &os, const WeightedEvent &event)
   {
-    os << event.m_tof << "," << event.m_pulsetime.to_simple_string() << " (W" << event.m_weight << " +- " << event.error() << ")";
+    os << event.m_tof << "," << event.m_pulsetime.toSimpleString() << " (W" << event.m_weight << " +- " << event.error() << ")";
     return os;
   }
 

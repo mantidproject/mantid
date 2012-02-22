@@ -43,7 +43,7 @@ namespace DataHandling
                  WorkspaceFactory::Instance().create("EventWorkspace", 2, 2, 1) );
     // Set a sample tof range
     m_rand->setRange(40000,60000);
-    m_rand->setSeed(Kernel::DateAndTime::get_current_time().total_nanoseconds());
+    m_rand->setSeed(Kernel::DateAndTime::getCurrentTime().total_nanoseconds());
 
     return;
   }

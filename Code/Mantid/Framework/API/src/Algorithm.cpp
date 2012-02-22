@@ -473,7 +473,7 @@ namespace Mantid
         try
         {
           if (!m_isChildAlgorithm) m_running = true;
-          start_time = Mantid::Kernel::DateAndTime::get_current_time();
+          start_time = Mantid::Kernel::DateAndTime::getCurrentTime();
           //count used for defining the algorithm execution order
           ++Algorithm::g_execCount;
           // Start a timer

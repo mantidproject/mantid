@@ -473,7 +473,7 @@ public:
       std::string logname, size_t lenlog, double dtof){
 
     // 1. Add run_start
-    iws->mutableRun().addProperty("run_start", run_start.to_ISO8601_string(), true);
+    iws->mutableRun().addProperty("run_start", run_start.toISO8601String(), true);
 
     // 2. Add a log at the same intervals to events added
     Kernel::TimeSeriesProperty<double> *timeprop = new Kernel::TimeSeriesProperty<double>(logname);

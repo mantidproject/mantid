@@ -210,8 +210,8 @@ namespace DataHandling
     MatrixWorkspace_sptr chunkWS = listener->extractData();
 
     // TODO: Have the ILiveListener tell me exactly the time stamp
-    DateAndTime lastTimeStamp = DateAndTime::get_current_time();
-    this->setPropertyValue("LastTimeStamp", lastTimeStamp.to_ISO8601_string());
+    DateAndTime lastTimeStamp = DateAndTime::getCurrentTime();
+    this->setPropertyValue("LastTimeStamp", lastTimeStamp.toISO8601String());
 
     // Now we process the chunk
     Workspace_sptr processed = this->processChunk(chunkWS);

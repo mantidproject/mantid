@@ -117,8 +117,8 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
   */
   void Run::setStartAndEndTime(const Kernel::DateAndTime & start, const Kernel::DateAndTime & end)
   {
-    this->addProperty<std::string>("start_time", start.to_ISO8601_string(), true);
-    this->addProperty<std::string>("end_time", end.to_ISO8601_string(), true);
+    this->addProperty<std::string>("start_time", start.toISO8601String(), true);
+    this->addProperty<std::string>("end_time", end.toISO8601String(), true);
   }
 
   /// Return the run start time

@@ -764,11 +764,11 @@ namespace Mantid
       std::string isisDate = std::string(localISISRaw->rpb.r_enddate, 11);
       if ( isisDate[0] == ' ' ) isisDate[0] = '0';
       runDetails.addProperty("run_end", DateAndTime(isisDate.substr(7,4) + "-" + convertMonthLabelToIntStr(isisDate.substr(3,3)) 
-        + "-" + isisDate.substr(0,2) + "T" + std::string(localISISRaw->rpb.r_endtime, 8)).to_ISO8601_string());
+        + "-" + isisDate.substr(0,2) + "T" + std::string(localISISRaw->rpb.r_endtime, 8)).toISO8601String());
       isisDate = std::string(localISISRaw->hdr.hd_date, 11);
       if ( isisDate[0] == ' ' ) isisDate[0] = '0';
       runDetails.addProperty("run_start", DateAndTime(isisDate.substr(7,4) + "-" + convertMonthLabelToIntStr(isisDate.substr(3,3)) 
-        + "-" + isisDate.substr(0,2) + "T" + std::string(localISISRaw->hdr.hd_time, 8)).to_ISO8601_string());
+        + "-" + isisDate.substr(0,2) + "T" + std::string(localISISRaw->hdr.hd_time, 8)).toISO8601String());
     }
 
     /// To help transforming date stored in ISIS raw file into iso 8601

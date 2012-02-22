@@ -126,9 +126,9 @@ public:
       for (; it != logMap.end(); )
       {
         //Same times within a millisecond
-        //TS_ASSERT_DELTA( it->first, it2->first, DateAndTime::duration_from_seconds(1e-3));
+        //TS_ASSERT_DELTA( it->first, it2->first, DateAndTime::durationFromSeconds(1e-3));
         //Same times?
-        TS_ASSERT_LESS_THAN( fabs(DateAndTime::seconds_from_duration(it->first - it2->first)), 1); //TODO: Fix the nexus file times here
+        TS_ASSERT_LESS_THAN( fabs(DateAndTime::secondsFromDuration(it->first - it2->first)), 1); //TODO: Fix the nexus file times here
         //Same proton charge?
         TS_ASSERT_DELTA( it->second, it2->second, 1e-5);
         it++;

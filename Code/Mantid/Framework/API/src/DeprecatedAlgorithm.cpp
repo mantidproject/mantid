@@ -33,7 +33,7 @@ namespace API
       // TODO warn people that it wasn't set
       return;
     }
-    if (!Kernel::DateAndTime::string_isISO8601(date)) {
+    if (!Kernel::DateAndTime::stringIsISO8601(date)) {
       // TODO warn people that it wasn't set
       return;
     }

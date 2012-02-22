@@ -72,7 +72,7 @@ public:
         TS_ASSERT_DELTA( tsp->nthValue(1), 13715.55, 2);
 
         //The time diff between the 0th and 1st entry is 0.328 seconds
-        TS_ASSERT_DELTA( DateAndTime::seconds_from_duration(tsp->nthInterval(0).length()), 0.328, 0.01);
+        TS_ASSERT_DELTA( DateAndTime::secondsFromDuration(tsp->nthInterval(0).length()), 0.328, 0.01);
 
         //Now the stats
 

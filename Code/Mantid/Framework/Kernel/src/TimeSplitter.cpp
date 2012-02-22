@@ -42,7 +42,7 @@ DateAndTime SplittingInterval::stop() const
 /// Returns the duration in seconds
 double SplittingInterval::duration() const
 {
-  return DateAndTime::seconds_from_duration( m_stop - m_start );
+  return DateAndTime::secondsFromDuration( m_stop - m_start );
 }
 
 /// Return the index (destination of this split time block)

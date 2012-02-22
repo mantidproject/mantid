@@ -359,7 +359,7 @@ public:
     typename timeMap::iterator it;
     bool lastGood = false;
     bool isGood;
-    time_duration tol = DateAndTime::duration_from_seconds( TimeTolerance );
+    time_duration tol = DateAndTime::durationFromSeconds( TimeTolerance );
     int numgood = 0;
     DateAndTime lastTime, t;
     DateAndTime start, stop;
@@ -481,7 +481,7 @@ public:
     typename timeMap::const_iterator p = m_propertySeries.begin();
     Kernel::DateAndTime start = p->first;
     for (; p != m_propertySeries.end(); p++)
-      out.push_back( DateAndTime::seconds_from_duration(p->first - start) );
+      out.push_back( DateAndTime::secondsFromDuration(p->first - start) );
     return out;
   }
 
@@ -619,7 +619,7 @@ public:
     {
       try
       {
-        ins << p->first.to_simple_string();
+        ins << p->first.toSimpleString();
         ins << "  " << p->second << std::endl;
       }
       catch (...)
@@ -648,7 +648,7 @@ public:
     while (p != m_propertySeries.end())
     {
       std::stringstream line;
-      line << p->first.to_simple_string() << " " << p->second;
+      line << p->first.toSimpleString() << " " << p->second;
       values.push_back(line.str());
       p++;
     }
@@ -1090,7 +1090,7 @@ public:
     out.maximum = raw_stats.maximum;
     if (this->size() > 0)
     {
-      out.duration = DateAndTime::seconds_from_duration(this->lastTime() - this->firstTime());
+      out.duration = DateAndTime::secondsFromDuration(this->lastTime() - this->firstTime());
     }
     else
     {

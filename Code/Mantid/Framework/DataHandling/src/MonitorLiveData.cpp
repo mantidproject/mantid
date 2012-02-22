@@ -53,6 +53,9 @@ namespace DataHandling
    */
   void MonitorLiveData::init()
   {
+    declareProperty(new PropertyWithValue<double>("UpdateEvery", 60.0, Direction::Input),
+        "Frequency of updates, in seconds. Default 60.");
+
     this->initProps();
   }
 
@@ -61,6 +64,9 @@ namespace DataHandling
    */
   void MonitorLiveData::exec()
   {
+    // The last time we called LoadLiveData.
+    // Since StartLiveData _just_ called it, use the current time.
+    DateAndTime lastTime = DateAndTime::getCurrentTime();
   }
 
 

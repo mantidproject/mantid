@@ -117,7 +117,7 @@ namespace DataHandling
 
     // Header of the file
     std::ofstream fout(calFileName.c_str());
-    fout <<"# Calibration file for instrument " << inst->getName() << " written on " << DateAndTime::get_current_time().to_ISO8601_string() << ".\n";
+    fout <<"# Calibration file for instrument " << inst->getName() << " written on " << DateAndTime::getCurrentTime().toISO8601String() << ".\n";
     fout <<"# Format: number    UDET         offset    select    group\n";
 
     // Get all the detectors

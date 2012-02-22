@@ -176,12 +176,12 @@ public:
             found = l_filenamePart.find("_Definition");
             fromToEntry ft;
             ft.path = dir_itr->path();
-            ft.from.set_from_ISO8601_string(validFrom);
+            ft.from.setFromISO8601(validFrom);
             // Valid TO is optional
             if (validTo.length() > 0)
-              ft.to.set_from_ISO8601_string(validTo);
+              ft.to.setFromISO8601(validTo);
             else
-              ft.to.set_from_ISO8601_string("2100-01-01");
+              ft.to.setFromISO8601("2100-01-01");
 
             idfFiles.insert( std::pair<std::string,fromToEntry>(l_filenamePart.substr(0,found),
               ft) );

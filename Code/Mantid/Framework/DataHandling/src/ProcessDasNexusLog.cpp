@@ -344,9 +344,9 @@ namespace DataHandling
     g_log.information() << "Number of Inverted Time Stamps = " << countinverse << std::endl;
     g_log.information() << "Run Start = " << t0.total_nanoseconds() << std::endl;
     g_log.information() << "First Log (Absolute Time, Relative Time): " << times[0].total_nanoseconds() << ", "
-        << Kernel::DateAndTime::nanoseconds_from_duration(dts) << std::endl;
+        << Kernel::DateAndTime::nanosecondsFromDuration(dts) << std::endl;
     g_log.information() << "Last  Log (Absolute Time, Relative Time): " << times[f].total_nanoseconds() << ", "
-        << Kernel::DateAndTime::nanoseconds_from_duration(dtf) << std::endl;
+        << Kernel::DateAndTime::nanosecondsFromDuration(dtf) << std::endl;
 
     return;
   }

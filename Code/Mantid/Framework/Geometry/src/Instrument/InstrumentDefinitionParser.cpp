@@ -663,7 +663,7 @@ namespace Geometry
 
     if ( !pRootElem->hasAttribute("valid-to") )
     {
-      DateAndTime d = DateAndTime::get_current_time();
+      DateAndTime d = DateAndTime::getCurrentTime();
       m_instrument->setValidToDate(d);
       // Ticket #2335: no required valid-to date.
       //throw Kernel::Exception::InstrumentDefinitionError("<instrument> element must contain a valid-to tag", m_filename);

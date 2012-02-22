@@ -328,7 +328,7 @@ namespace Mantid
           t0=time; // start time of log
           first=false;
         }
-        times.push_back( Kernel::DateAndTime::seconds_from_duration(time-t0));
+        times.push_back( Kernel::DateAndTime::secondsFromDuration(time-t0));
       }
       // create log
       status=NXmakegroup(fileID,logName.c_str(),"NXlog");
@@ -345,7 +345,7 @@ namespace Mantid
       avalues.clear();
       // get ISO time, and save it as an attribute
       attributes.push_back("start");
-      avalues.push_back( t0.to_ISO8601_string() );
+      avalues.push_back( t0.toISO8601String() );
 
       writeNxFloatArray("time", times,  attributes, avalues);
       status=NXclosegroup(fileID);

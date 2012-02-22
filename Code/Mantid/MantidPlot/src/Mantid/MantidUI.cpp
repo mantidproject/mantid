@@ -2370,7 +2370,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
   }
 
   //Make a unique title, and put in the start time of the log
-  QString title = label + QString::fromStdString( " (" + startTime.to_simple_string() + ")" );
+  QString title = label + QString::fromStdString( " (" + startTime.toSimpleString() + ")" );
   appWindow()->initTable(t, appWindow()->generateUniqueName(title));
 
   // Make both columns read-only
@@ -2631,13 +2631,13 @@ std::string  MantidUI::extractLogTime(Mantid::Kernel::DateAndTime value,bool use
   if (useAbsoluteDate)
   {
     //Convert time into string
-    time_string = value.to_simple_string();
+    time_string = value.toSimpleString();
   }
   else
   {
     //How many seconds elapsed?
     Mantid::Kernel::time_duration elapsed = value - start;
-    double seconds = Mantid::Kernel::DateAndTime::seconds_from_duration(elapsed);
+    double seconds = Mantid::Kernel::DateAndTime::secondsFromDuration(elapsed);
 
     //Output with 6 decimal points
     std::ostringstream oss;

@@ -191,7 +191,7 @@ namespace PropertyNexus
       timeSec[i] = double(times[i].total_nanoseconds() - start.total_nanoseconds()) * 1e-9;
     file->writeData("time", timeSec);
     file->openData("time");
-    file->putAttr("start", start.to_ISO8601_string() );
+    file->putAttr("start", start.toISO8601String() );
     file->closeData();
   }
 

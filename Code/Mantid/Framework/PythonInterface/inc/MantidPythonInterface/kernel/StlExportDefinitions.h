@@ -92,7 +92,7 @@ namespace Mantid
       ///A typedef of a vector of template ElementTypes
       typedef std::vector<ElementType> w_t;
 
-      static std::string to_string(const w_t & values)
+      static std::string toFormattedString(const w_t & values)
       {
         if( values.empty() ) return "[]";
         std::string retval("[");
@@ -159,7 +159,7 @@ namespace Mantid
         return boost::python::make_tuple(boost::python::tuple(self));
       }
 
-      static std::string to_string(const w_t & values)
+      static std::string toFormattedString(const w_t & values)
       {
         if( values.empty() ) return "set()";
         std::string retval("set(");
