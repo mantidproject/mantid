@@ -7,6 +7,7 @@
 #include <QProcess.h>
 #include <QPalette.h>
 #include <QDirIterator.h>
+#include <QDesktopServices.h>
 #include <iostream> 
 
 
@@ -40,6 +41,15 @@ void SetUpParaview::initLayout()
   connect(m_uiForm.btn_choose_location, SIGNAL(clicked()), this, SLOT(onChoose()));
   connect(m_uiForm.btn_set, SIGNAL(clicked()), this, SLOT(onSet()));
   connect(m_uiForm.btn_cancel, SIGNAL(clicked()), this, SLOT(reject()));
+  connect(m_uiForm.btn_help, SIGNAL(clicked()), this, SLOT(onHelp()));
+  
+}
+
+///On help requested.
+void SetUpParaview::onHelp()
+{
+  QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
+				   "Paraview_setup"));
 }
 
 /// Set the result.

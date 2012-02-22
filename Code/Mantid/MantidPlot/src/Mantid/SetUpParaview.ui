@@ -121,6 +121,16 @@ This dialog will allow you to complete the second stage.</string>
       </spacer>
      </item>
      <item>
+      <widget class="QPushButton" name="btn_help">
+       <property name="toolTip">
+        <string>Help</string>
+       </property>
+       <property name="text">
+        <string>?</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="btn_cancel">
        <property name="text">
         <string>ASK ME NEXT TIME</string>
@@ -139,6 +149,8 @@ This dialog will allow you to complete the second stage.</string>
   </layout>
  </widget>
  <resources>
+  <include location="../../../Images/images.qrc"/>
+  <include location="../../../Images/images.qrc"/>
   <include location="../../../Images/images.qrc"/>
   <include location="../../../Images/images.qrc"/>
   <include location="../../../Images/images.qrc"/>
