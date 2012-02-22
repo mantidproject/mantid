@@ -54,6 +54,11 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("StartTime", "2010-09-14T04:20:12.95") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
 
+    TS_ASSERT( !alg.hasPostProcessing() );
+
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PostProcessingAlgorithm", "RenameWorkspace") );
+    TS_ASSERT( alg.hasPostProcessing() );
+
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
   }

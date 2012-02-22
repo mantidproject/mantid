@@ -56,6 +56,8 @@ namespace DataHandling
 
     Mantid::API::IAlgorithm * makeAlgorithm(bool postProcessing);
 
+    bool hasPostProcessing() const;
+
     /// Live listener
     Mantid::API::ILiveListener_sptr m_listener;
 

@@ -64,17 +64,50 @@ public:
   }
 
   //--------------------------------------------------------------------------------------------
+  void test_replace()
+  {
+    EventWorkspace_sptr ws1, ws2;
+
+    ws1 = doExecEvent("Replace");
+    TS_ASSERT_EQUALS(ws1->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS(ws1->getNumberEvents(), 200);
+
+    ws2 = doExecEvent("Replace");
+    TS_ASSERT_EQUALS(ws2->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS(ws2->getNumberEvents(), 200);
+    TSM_ASSERT( "Workspace changed when replaced", ws1 != ws2 );
+  }
+
+  //--------------------------------------------------------------------------------------------
   void test_conjoin()
   {
-    EventWorkspace_sptr ws;
+    EventWorkspace_sptr ws1, ws2;
 
     // First go creates the fake ws
-    ws = doExecEvent("Conjoin");
-    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
+    ws1 = doExecEvent("Conjoin");
+    TS_ASSERT_EQUALS(ws1->getNumberHistograms(), 2);
 
     // Next one actually conjoins
-    ws = doExecEvent("Conjoin");
-    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 4);
+    ws2 = doExecEvent("Conjoin");
+    TS_ASSERT_EQUALS(ws2->getNumberHistograms(), 4);
+  }
+
+  //--------------------------------------------------------------------------------------------
+  void test_add()
+  {
+    EventWorkspace_sptr ws1, ws2;
+
+    // First go creates the fake ws
+    ws1 = doExecEvent("Add");
+    TS_ASSERT_EQUALS(ws1->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS(ws1->getNumberEvents(), 200);
+
+    // Next one adds events, keeps # of histos the same
+    ws2 = doExecEvent("Add");
+    TS_ASSERT_EQUALS(ws2->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS(ws2->getNumberEvents(), 400);
+
+    TSM_ASSERT( "Workspace being added stayed the same pointer", ws1 == ws2 );
   }
   
 

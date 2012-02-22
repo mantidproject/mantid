@@ -26,7 +26,7 @@ namespace DataHandling
   }
   
   /// Algorithm's category for identification. @see Algorithm::category
-  const std::string LiveDataAlgorithm::category() const { return "DataHandling//LiveData";}
+  const std::string LiveDataAlgorithm::category() const { return "DataHandling\\LiveData";}
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -73,8 +73,12 @@ namespace DataHandling
     declareProperty(new PropertyWithValue<std::string>("PostProcessingScript","",Direction::Input),
         "Not currently supported, but reserved for future use.");
 
+    declareProperty(new WorkspaceProperty<Workspace>("AccumulationWorkspace","",Direction::Output, true),
+        "Optional, unless performing PostProcessing:\n"
+        " Give the name of the intermediate, accumulation workspace.\n"
+        " This is the workspace after accumulation but before post-processing steps.");
 
-    declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
+    declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output),
         "Name of the processed output workspace.");
 
     declareProperty(new PropertyWithValue<std::string>("LastTimeStamp","",Direction::Output),
@@ -82,6 +86,13 @@ namespace DataHandling
         "Date/time is in UTC time, in ISO8601 format, e.g. 2010-09-14T04:20:12.95");
   }
 
+  //----------------------------------------------------------------------------------------------
+  /// @return true if there is a post-processing step
+  bool LiveDataAlgorithm::hasPostProcessing() const
+  {
+    // TODO: Handle post-processing script too
+    return !this->getPropertyValue("PostProcessingAlgorithm").empty();
+  }
 
   //----------------------------------------------------------------------------------------------
   /** Return or create the ILiveListener for this algorithm.
