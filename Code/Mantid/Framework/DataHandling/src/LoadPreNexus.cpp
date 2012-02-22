@@ -160,6 +160,7 @@ namespace DataHandling
     {
       int NChunks = determineChunking(runinfo,maxChunk);
       std::vector<double>y;
+      NChunks++;  // For python range
       for (int i = 1; i <= NChunks; i++) 
         y.push_back(i);
       
@@ -415,7 +416,7 @@ namespace DataHandling
     this->parseRuninfo(filename, dataDir, eventFilenames);
     size_t filesize = 0;
     for (size_t i = 0; i < eventFilenames.size(); i++) {
-      filesize = std::max(filesize,static_cast<size_t>(Poco::File(dataDir + eventFilenames[i]).getSize()));
+      filesize += static_cast<size_t>(Poco::File(dataDir + eventFilenames[i]).getSize());
     }
     if (filesize == 0)
       return 0;
