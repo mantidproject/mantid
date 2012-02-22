@@ -63,7 +63,7 @@ public:
 
 
     MatrixWorkspace_sptr output;
-    output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
     
     //Get some stuff from the input workspace
     Instrument_const_sptr ins = output->getInstrument();

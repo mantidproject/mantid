@@ -78,7 +78,7 @@ public:
         alg.setPropertyValue("Table","tst");
         alg.execute();
         TableWorkspace_sptr table;
-        TS_ASSERT_THROWS_NOTHING(table = boost::dynamic_pointer_cast<TableWorkspace>(AnalysisDataService::Instance().retrieve("tst")));
+        TS_ASSERT_THROWS_NOTHING(table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("tst"));
         TS_ASSERT( table );
         TS_ASSERT_EQUALS( table->rowCount(), 10 );
         TableRow r = table->getFirstRow();

@@ -29,7 +29,7 @@ public:
         TS_ASSERT_THROWS_NOTHING(ld.execute());
         TS_ASSERT(ld.isExecuted());
 
-        MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
+        MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
         TS_ASSERT_EQUALS(ws->blocksize(),5);
         TS_ASSERT_EQUALS(ws->getNumberHistograms(),17792);
         TS_ASSERT_EQUALS(ws->readX(0)[0],5.);
@@ -94,7 +94,7 @@ public:
         TS_ASSERT_THROWS_NOTHING(ld.execute());
         TS_ASSERT(ld.isExecuted());
 
-            MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
+            MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
         TS_ASSERT_EQUALS(ws->blocksize(),5);
         TS_ASSERT_EQUALS(ws->getNumberHistograms(),14);
 
@@ -125,9 +125,9 @@ public:
         TS_ASSERT(ld.isExecuted());
                 
                 WorkspaceGroup_sptr grpout;//=WorkspaceGroup_sptr(new WorkspaceGroup);
-                TS_ASSERT_THROWS_NOTHING(grpout=boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("outWS")));
+                TS_ASSERT_THROWS_NOTHING(grpout=AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("outWS"));
 
-        MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outWS_1"));
+        MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS_1");
         TS_ASSERT_EQUALS(ws->blocksize(),995);
         TS_ASSERT_EQUALS(ws->getNumberHistograms(),10);
         TS_ASSERT_DELTA(ws->run().getProtonCharge(), 0.069991, 1e-6);
@@ -159,7 +159,7 @@ public:
         TS_ASSERT(ld.isExecuted());
                         
 
-        MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
+        MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
         TS_ASSERT_EQUALS(ws->blocksize(),995);
      //   TS_ASSERT_EQUALS(ws->getNumberHistograms(),14);
         TS_ASSERT_EQUALS(ws->getTitle(), "hello\\0");

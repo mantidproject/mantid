@@ -272,7 +272,7 @@ private:
 //  // This also should be very quick (nothing should get written to disk)
 //  void testReadValues()
 //  {
-//    MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace));
+//    MatrixWorkspace_const_sptr ws = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(outputSpace);
 //    TS_ASSERT( ws );
 //
 //    double x(0),y(0),e(0);

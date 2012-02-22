@@ -67,7 +67,7 @@ public:
  void testSNSResults(){
    // Get the resulting table workspace
      Mantid::DataObjects::TableWorkspace_sptr spResult =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(AnalysisDataService::Instance().retrieve("DET_PAR"));
+        AnalysisDataService::Instance().retrieveWS<Mantid::DataObjects::TableWorkspace>("DET_PAR");
 
        check_SNS_patterns(spResult);
        AnalysisDataService::Instance().remove("DET_PAR");
@@ -88,7 +88,7 @@ public:
  }
  void testParFileLoadedCorrectly(){
     Mantid::DataObjects::TableWorkspace_sptr spResult =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(AnalysisDataService::Instance().retrieve("DET_PAR_ASCII"));
+        AnalysisDataService::Instance().retrieveWS<Mantid::DataObjects::TableWorkspace>("DET_PAR_ASCII");
 
         TS_ASSERT_EQUALS(3,inputWS->getNumberHistograms());
 
@@ -125,7 +125,7 @@ public:
       remove(fileName.c_str());
       // check -- this workspace and wrong par file have to result in warning and internal algorithm excecuted;
       Mantid::DataObjects::TableWorkspace_sptr spResult =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(AnalysisDataService::Instance().retrieve("DET_PAR_ASCII"));
+        AnalysisDataService::Instance().retrieveWS<Mantid::DataObjects::TableWorkspace>("DET_PAR_ASCII");
 
       check_SNS_patterns(spResult);
       AnalysisDataService::Instance().remove("DET_PAR_ASCII");
@@ -144,7 +144,7 @@ public:
  }
  void testSingleRingResults(){
     Mantid::DataObjects::TableWorkspace_sptr spResult =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(AnalysisDataService::Instance().retrieve("DET_PAR2"));
+        AnalysisDataService::Instance().retrieveWS<Mantid::DataObjects::TableWorkspace>("DET_PAR2");
 
        TSM_ASSERT_DELTA("polar wrong ",      37.0858,  spResult->cell<double>(0,0),1.e-3);
        TSM_ASSERT_DELTA("azimut wrong",       0,       spResult->cell<double>(0,1),1.e-3);
@@ -171,7 +171,7 @@ public:
  }
  void testPHXProcessedCorrectly(){
     Mantid::DataObjects::TableWorkspace_sptr spResult =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(AnalysisDataService::Instance().retrieve("DET_PHX_ASCII"));
+        AnalysisDataService::Instance().retrieveWS<Mantid::DataObjects::TableWorkspace>("DET_PHX_ASCII");
 
        TSM_ASSERT_DELTA("polar wrong ",      5,       spResult->cell<double>(0,0),1.e-5);
        TSM_ASSERT_DELTA("azimut wrong",      6,       spResult->cell<double>(0,1),1.e-3);

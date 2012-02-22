@@ -35,7 +35,7 @@ public:
     TS_ASSERT( conj.isExecuted() );
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("top")) );
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("top") );
     TS_ASSERT_EQUALS( output->getNumberHistograms(), 12 );
 
     // Check that 2nd input workspace no longer exists

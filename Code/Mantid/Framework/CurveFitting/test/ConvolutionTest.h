@@ -402,12 +402,12 @@ private:
 
   WS_type getWS(const std::string& name)
   {
-    return boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(AnalysisDataService::Instance().retrieve(name));
+    return AnalysisDataService::Instance().retrieveWS<Mantid::DataObjects::Workspace2D>(name);
   }
 
   TWS_type getTWS(const std::string& name)
   {
-    return boost::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(AnalysisDataService::Instance().retrieve(name));
+    return AnalysisDataService::Instance().retrieveWS<Mantid::DataObjects::TableWorkspace>(name);
   }
 
   void addNoise(WS_type ws,double noise)

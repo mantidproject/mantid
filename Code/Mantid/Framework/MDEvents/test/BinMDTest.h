@@ -445,8 +445,8 @@ public:
    */
   MDHistoWorkspace_sptr do_compare_histo(std::string binned1Name, std::string binned2Name, std::string origWS)
   {
-    MDHistoWorkspace_sptr binned1 = boost::dynamic_pointer_cast<MDHistoWorkspace>(AnalysisDataService::Instance().retrieve(binned1Name));
-    MDHistoWorkspace_sptr binned2 = boost::dynamic_pointer_cast<MDHistoWorkspace>(AnalysisDataService::Instance().retrieve(binned2Name));
+    MDHistoWorkspace_sptr binned1 = AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>(binned1Name);
+    MDHistoWorkspace_sptr binned2 = AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>(binned2Name);
     TS_ASSERT_EQUALS( binned1->getOriginalWorkspace()->getName(), origWS);
     TS_ASSERT_EQUALS( binned2->getOriginalWorkspace()->getName(), origWS);
     TS_ASSERT(binned2);
@@ -561,7 +561,7 @@ public:
         "OutputBins", "10,10");
 
     // Get the final binned workspace
-    MDHistoWorkspace_sptr binned1 = boost::dynamic_pointer_cast<MDHistoWorkspace>(AnalysisDataService::Instance().retrieve("binned1"));
+    MDHistoWorkspace_sptr binned1 = AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>("binned1");
 
     // Intermediate workspace (the MDHisto) is binned0
     TS_ASSERT_EQUALS( binned1->numOriginalWorkspaces(), 2);
@@ -639,7 +639,7 @@ public:
         "OutputBins", "10,10,10");
 
     // Get the final binned workspace
-    MDHistoWorkspace_sptr binned1 = boost::dynamic_pointer_cast<MDHistoWorkspace>(AnalysisDataService::Instance().retrieve("binned1"));
+    MDHistoWorkspace_sptr binned1 = AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>("binned1");
 
     // Intermediate workspace (the MDHisto) is binned0
     TS_ASSERT_EQUALS( binned1->numOriginalWorkspaces(), 2);
@@ -864,7 +864,7 @@ public:
     // Finally, C maps back onto A (mdew) binned as reference
     do_compare_histo("reference", "C", "mdew");
 
-    IMDWorkspace_sptr C = boost::dynamic_pointer_cast<IMDWorkspace>(AnalysisDataService::Instance().retrieve("C"));
+    IMDWorkspace_sptr C = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("C");
     TS_ASSERT(C);
 
     VMD out;

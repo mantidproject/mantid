@@ -65,7 +65,7 @@ public:
     std::string name("RemoveLowResTOF");
     this->makeFakeEventWorkspace(name);
     EventWorkspace_sptr ws
-         = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(name));
+         = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(name);
     size_t num_events = ws->getNumberEvents();
     double min_event0 = ws->getEventList(0).getTofMin();
     double max_event0 = ws->getEventList(0).getTofMax();
@@ -82,7 +82,7 @@ public:
     TS_ASSERT(algo.isExecuted());
 
     // verify the output workspace
-    ws = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(name));
+    ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(name);
     TS_ASSERT_EQUALS(NUMPIXELS, ws->getNumberHistograms()); // shouldn't drop histograms
     TS_ASSERT(num_events > ws->getNumberEvents()); // should drop events
 

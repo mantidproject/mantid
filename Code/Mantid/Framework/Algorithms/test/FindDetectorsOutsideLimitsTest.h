@@ -88,7 +88,7 @@ public:
 
     // Get back the output workspace
     MatrixWorkspace_sptr work_out;
-    TS_ASSERT_THROWS_NOTHING(work_out = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("testdead_out")));
+    TS_ASSERT_THROWS_NOTHING(work_out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("testdead_out"));
 
     const int numFailed = alg.getProperty("NumberOfFailures");
     TS_ASSERT_EQUALS(numFailed, 11);
@@ -117,7 +117,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
     //retrieve the output workspace
-    TS_ASSERT_THROWS_NOTHING(work_out = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("testdead_out")));
+    TS_ASSERT_THROWS_NOTHING(work_out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("testdead_out"));
 
     const int numFailed2 = alg.getProperty("NumberOfFailures");
     TS_ASSERT_EQUALS(numFailed2, 10);
@@ -169,7 +169,7 @@ public:
     TS_ASSERT( alg.isExecuted() );
 
     MatrixWorkspace_sptr work_out;
-    TS_ASSERT_THROWS_NOTHING(work_out = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("testdead_out")));
+    TS_ASSERT_THROWS_NOTHING(work_out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("testdead_out"));
 
     TS_ASSERT_EQUALS( work_out->dataY(0)[0], 0.0);
     TS_ASSERT_EQUALS( work_out->dataY(9)[0], 0.0);

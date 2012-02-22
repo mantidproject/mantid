@@ -77,7 +77,7 @@ public:
     TS_ASSERT( expon3.isExecuted() )
     
     MatrixWorkspace_sptr result;
-    TS_ASSERT_THROWS_NOTHING( result = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("WSCor")) )
+    TS_ASSERT_THROWS_NOTHING( result = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("WSCor") )
     TS_ASSERT( result )
     
     for (size_t i = 0; i < result->getNumberHistograms(); ++i)
@@ -112,7 +112,7 @@ public:
     TS_ASSERT( expon3.isExecuted() )
     
     MatrixWorkspace_sptr result;
-    TS_ASSERT_THROWS_NOTHING( result = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("WSCor")) )
+    TS_ASSERT_THROWS_NOTHING( result = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("WSCor") )
     TS_ASSERT( result )
     
     for (size_t i = 0; i < result->getNumberHistograms(); ++i)

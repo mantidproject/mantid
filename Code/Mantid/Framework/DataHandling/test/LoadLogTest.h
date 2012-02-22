@@ -70,7 +70,7 @@ public:
 
     // Get back the saved workspace
     MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace));
 
     // boost::shared_ptr<Sample> sample = output->getSample();
 
@@ -122,7 +122,7 @@ public:
 
     // Get back the saved workspace
     MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace));
 
     //boost::shared_ptr<Sample> sample = output->getSample(); 
 
@@ -191,7 +191,7 @@ public:
 
     // Get back the saved workspace
     MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace));
 
     // boost::shared_ptr<Sample> sample = output->getSample();
 
@@ -239,7 +239,7 @@ public:
 
     // Get back the saved workspace
     MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace));
 
     //boost::shared_ptr<Sample> sample = output->getSample(); 
 
@@ -299,7 +299,7 @@ public:
 
     // Get back the saved workspace
     MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace));
 
     // boost::shared_ptr<Sample> sample = output->getSample();
 
@@ -368,7 +368,7 @@ public:
 
     // Get back the saved workspace
     MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace));
 
     Property *prop = 0;
     TimeSeriesProperty<double> *tsp;

@@ -48,7 +48,7 @@ public:
     TS_ASSERT( pbpv.isExecuted() );
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("out")) );
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out") );
 
     // Check a few values
     TS_ASSERT_DELTA( output->readY(1)[4], 2.9999, 0.0001 );

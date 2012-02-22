@@ -83,7 +83,7 @@ namespace Mantid
       const double fgparaP3 = getProperty("ForegroundModelP3");
 
       //boost::shared_ptr<Mantid::API::Workspace> inputWS = getProperty("InputWorkspaceTMP");
-      imdwCut = boost::dynamic_pointer_cast<Mantid::API::IMDWorkspace>(AnalysisDataService::Instance().retrieve(inputMDwrkspc));
+      imdwCut = AnalysisDataService::Instance().retrieveWS<Mantid::API::IMDWorkspace>(inputMDwrkspc);
       std::vector<double> cellBg;
       SimBackground(cellBg, bgmodel,bgparaP1,bgparaP2,bgparaP3,bgparaP4,bgparaP5,bgparaP6,bgparaP7,bgparaP8);
       // currently this does nothing, but will be called in future

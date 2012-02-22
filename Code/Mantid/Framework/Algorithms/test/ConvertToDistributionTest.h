@@ -48,7 +48,7 @@ public:
     TS_ASSERT( conv.isExecuted() )
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(dist)) )
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(dist) )
 
     const Mantid::MantidVec &X = output->dataX(0);
     const Mantid::MantidVec &Y = output->dataY(0);

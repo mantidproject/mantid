@@ -108,7 +108,7 @@ void testPowerCalculation()
   power.execute();
   TSM_ASSERT("The Power algorithm did not finish executing", power.isExecuted());
 
-  WorkspaceSingleValue_sptr output = boost::dynamic_pointer_cast<WorkspaceSingleValue>(AnalysisDataService::Instance().retrieve("WSCor"));
+  WorkspaceSingleValue_sptr output = AnalysisDataService::Instance().retrieveWS<WorkspaceSingleValue>("WSCor");
 
   Mantid::MantidVec expectedValue(1,4);
   TSM_ASSERT_EQUALS("Power has not been determined correctly", expectedValue, output->dataY(0));
@@ -132,7 +132,7 @@ void testPowerCalculationWithNegativeExponent()
   power.execute();
   TSM_ASSERT("The Power algorithm did not finish executing", power.isExecuted());
 
-  WorkspaceSingleValue_sptr output = boost::dynamic_pointer_cast<WorkspaceSingleValue>(AnalysisDataService::Instance().retrieve("WSCor"));
+  WorkspaceSingleValue_sptr output = AnalysisDataService::Instance().retrieveWS<WorkspaceSingleValue>("WSCor");
 
   Mantid::MantidVec expectedValue(1, 0.25);
   TSM_ASSERT_EQUALS("Power has not been determined correctly", expectedValue, output->dataY(0));
@@ -162,7 +162,7 @@ void testPowerErrorCalculation()
 
   power.execute();
 
-  WorkspaceSingleValue_sptr output = boost::dynamic_pointer_cast<WorkspaceSingleValue>(AnalysisDataService::Instance().retrieve("WSCor"));
+  WorkspaceSingleValue_sptr output = AnalysisDataService::Instance().retrieveWS<WorkspaceSingleValue>("WSCor");
 
   Mantid::MantidVec expectedError(1,16);
   TSM_ASSERT_EQUALS("Error has not been determined correctly", expectedError, output->dataE(0));
@@ -192,7 +192,7 @@ void testEvents()
   TS_ASSERT( !evout ); //should not be an event workspace
 
   MatrixWorkspace_sptr histo_out;
-  TS_ASSERT_THROWS_NOTHING(histo_out = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_ev_pow_out")));
+  TS_ASSERT_THROWS_NOTHING(histo_out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_ev_pow_out"));
   TS_ASSERT (histo_out); //this should be a 2d workspace
 
   for(size_t i=0;i<5;++i)

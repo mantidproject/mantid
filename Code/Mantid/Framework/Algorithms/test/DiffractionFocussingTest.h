@@ -55,7 +55,7 @@ public:
 	  TS_ASSERT( focus.isExecuted() );
 
 		MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("focusedWS")) );
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("focusedWS") );
 
      // only 1 group for this limited range of spectra 
     TS_ASSERT_EQUALS( output->getNumberHistograms(), 1 );

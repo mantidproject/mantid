@@ -57,9 +57,9 @@ public:
     TS_ASSERT( alg.isExecuted() );
 
     TS_ASSERT_THROWS_NOTHING(
-        input = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(inputName)) );
+        input = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(inputName) );
     TS_ASSERT_THROWS_NOTHING(
-        output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputName)) );
+        output = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputName) );
 
     // Avoid accessing empty pointer
     TS_ASSERT(output);

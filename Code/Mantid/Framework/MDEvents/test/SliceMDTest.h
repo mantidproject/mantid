@@ -43,7 +43,7 @@ private:
     alg.execute(); 
     TS_ASSERT(alg.isExecuted());
 
-    IMDEventWorkspace_sptr out = boost::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve("SliceMDTest_outWS"));
+    IMDEventWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>("SliceMDTest_outWS");
     
     /*
     Run some verifications according to whether TakeMaxRecursionDepthFromInput was chosen.

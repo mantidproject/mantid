@@ -66,7 +66,7 @@ public:
     // Test workspace data (copied from LoadRawTest.h)
     //
     MatrixWorkspace_sptr output;
-    output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace));
+    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace);
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 32 for file inputFile = "../../../../Test/Nexus/emu00006473.nxs";
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 32);
@@ -215,14 +215,14 @@ public:
 	if(entryNumber==0)
 	{
 		WorkspaceGroup_sptr outGrp;
-    TS_ASSERT_THROWS_NOTHING(outGrp = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(outputSpace)));
+    TS_ASSERT_THROWS_NOTHING(outGrp = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputSpace));
 
 	}
 	//if entry number is given
 	if(entryNumber==1)
 	{
 		MatrixWorkspace_sptr output;
-		output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace));
+		output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace);
 
 		Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
 		//Workspace2D_sptr output2D2 = boost::dynamic_pointer_cast<Workspace2D>(output2);
@@ -252,12 +252,12 @@ public:
 	//if no entry number load the group workspace
 	if(entryNumber==0)
 	{
-		TS_ASSERT_THROWS_NOTHING(outGrp = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(outputSpace)));
+		TS_ASSERT_THROWS_NOTHING(outGrp = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputSpace));
 
-		(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_1")));
-		(output2 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_2")));
-		(output3 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_3")));
-		(output4 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_4")));
+		(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace+"_1"));
+		(output2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace+"_2"));
+		(output3 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace+"_3"));
+		(output4 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace+"_4"));
 	
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     Workspace2D_sptr output2D2 = boost::dynamic_pointer_cast<Workspace2D>(output2);
@@ -308,19 +308,19 @@ public:
     // Test workspace data - should be 4 separate workspaces for this 4 period file
     //
 	WorkspaceGroup_sptr outGrp;
-    TS_ASSERT_THROWS_NOTHING(outGrp = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(outputSpace)));
+    TS_ASSERT_THROWS_NOTHING(outGrp = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputSpace));
 	
     MatrixWorkspace_sptr output,output2,output3,output4;
 	//WorkspaceGroup_sptr outGrp;
 	//if no entry number load the group workspace
 	if(entryNumber==0)
 	{
-		//TS_ASSERT_THROWS_NOTHING(outGrp = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(outputSpace)));
+		//TS_ASSERT_THROWS_NOTHING(outGrp = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputSpace));
 
-		(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_1")));
-		(output2 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_2")));
-		(output3 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_3")));
-		(output4 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_4")));
+		(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace+"_1"));
+		(output2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace+"_2"));
+		(output3 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace+"_3"));
+		(output4 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace+"_4"));
 	
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     Workspace2D_sptr output2D2 = boost::dynamic_pointer_cast<Workspace2D>(output2);
@@ -366,7 +366,7 @@ public:
     
     // Get back the saved workspace
     MatrixWorkspace_sptr output;
-    (output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outWS")));
+    (output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS"));
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     
     // Should be 6 for selected input

@@ -405,7 +405,7 @@ MantidMatrix* MantidUI::importMatrixWorkspace(const QString& wsName, int lower, 
   MatrixWorkspace_sptr ws;
   if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
   {
-    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
+    ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName.toStdString());
   }
 
   if (!ws.get()) return 0;
@@ -468,7 +468,7 @@ void MantidUI::importTransposed()
   ITableWorkspace_sptr ws;
   if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
   {
-    ws = boost::dynamic_pointer_cast<ITableWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
+    ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(wsName.toStdString());
     importTableWorkspace(wsName,true,true,true);
   }
   QApplication::restoreOverrideCursor();
@@ -730,7 +730,7 @@ Table* MantidUI::importTableWorkspace(const QString& wsName, bool, bool makeVisi
   ITableWorkspace_sptr ws;
   if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
   {
-    ws = boost::dynamic_pointer_cast<ITableWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
+    ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(wsName.toStdString());
   }
 
   if (!ws.get()) return 0;
@@ -926,7 +926,7 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
   MatrixWorkspace_sptr ws;
   if( AnalysisDataService::Instance().doesExist(wsName.toStdString()) )
   {
-    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
+    ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName.toStdString());
   }
 
   if( !ws ) 
@@ -2091,7 +2091,7 @@ MultiLayer* MantidUI::plotBin(const QString& wsName, int bin, bool errors, Graph
   MatrixWorkspace_sptr ws;
   if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
   {
-    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
+    ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName.toStdString());
   }
   if( !ws.get() )
   {
@@ -3270,7 +3270,7 @@ MantidMatrix* MantidUI::openMatrixWorkspace(ApplicationWindow* parent,const QStr
   MatrixWorkspace_sptr ws;
   if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
   {
-    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
+    ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName.toStdString());
   }
 
   if (!ws.get())return 0 ;

@@ -55,7 +55,7 @@ public:
   {
     //Retrieve Workspace
     this->setUp_Event();
-    WS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(inputWS));
+    WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(inputWS);
     TS_ASSERT( WS ); //workspace is loaded
 
     size_t num_events = WS->getNumberEvents();
@@ -78,7 +78,7 @@ public:
 
     //Retrieve Workspace changed
     EventWorkspace_sptr outWS;
-    outWS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputWS));
+    outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputWS);
     TS_ASSERT( outWS ); //workspace is loaded
 
     //Things that haven't changed
@@ -218,7 +218,7 @@ public:
 
     //Retrieve Workspace changed
     EventWorkspace_sptr outWS;
-    outWS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputWS));
+    outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputWS);
     TS_ASSERT( outWS ); //workspace is loaded
     if (!outWS) return;
 

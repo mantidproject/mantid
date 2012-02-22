@@ -114,7 +114,7 @@ public:
     TS_ASSERT( norm.isExecuted() )
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("normMon2")) )
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("normMon2") )
 
     // Check the non-monitor spectra
     for (size_t i = 1; i < output->getNumberHistograms(); ++i)
@@ -151,7 +151,7 @@ public:
     TS_ASSERT( norm2.isExecuted() )
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("normMon3")) )
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("normMon3") )
     TS_ASSERT( ! output->isDistribution() )
     TS_ASSERT( output->YUnit().empty() )
 
@@ -189,7 +189,7 @@ public:
     TS_ASSERT( norm3.isExecuted() )
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("normMon4")) )
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("normMon4") )
     TS_ASSERT( ! output->isDistribution() )
     TS_ASSERT( output->YUnit().empty() )
 

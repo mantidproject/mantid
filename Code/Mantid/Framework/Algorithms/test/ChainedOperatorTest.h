@@ -83,7 +83,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
     MatrixWorkspace_sptr work_out1;
-    TS_ASSERT_THROWS_NOTHING(work_out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsNameOut)));
+    TS_ASSERT_THROWS_NOTHING(work_out1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsNameOut));
 
     checkData(work_in1, work_in2, work_out1);
 

@@ -55,7 +55,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve("MedianDetectorTestOutput"));
     
     MatrixWorkspace_const_sptr input;
-    input = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(m_IWSName));
+    input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_IWSName);
     TS_ASSERT(input);
     TS_ASSERT(input->getInstrument()->getDetector(THEMASKED).get()->isMasked());
       

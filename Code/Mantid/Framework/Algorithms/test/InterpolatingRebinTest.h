@@ -47,7 +47,7 @@ public:
 
     //get the output workspace and test it
     MatrixWorkspace_sptr rebindata =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("InterpolatingRebinTest_outdist"));
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("InterpolatingRebinTest_outdist");
     TS_ASSERT_EQUALS(rebindata->getNumberHistograms(), 1);
     TS_ASSERT(rebindata)
 
@@ -109,7 +109,7 @@ public:
 
     //get the output workspace and test it
     MatrixWorkspace_sptr rebindata =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("InterpolatingRebinTest_out_nondist"));
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("InterpolatingRebinTest_out_nondist");
     TS_ASSERT(rebindata)
     const Mantid::MantidVec outX=rebindata->dataX(0);
     const Mantid::MantidVec outY=rebindata->dataY(0);
@@ -170,7 +170,7 @@ public:
 
     //get the output workspace and test it
     MatrixWorkspace_sptr rebindata =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("InterpolatingRebinTest_outclose"));
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("InterpolatingRebinTest_outclose");
     TS_ASSERT(rebindata)
 
     const Mantid::MantidVec outX=rebindata->dataX(0);
@@ -211,7 +211,7 @@ public:
 
     //get the output workspace and test it
     MatrixWorkspace_sptr rebindata =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("InterpolatingRebinTest_out_nulldata"));
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("InterpolatingRebinTest_out_nulldata");
     TS_ASSERT_EQUALS(rebindata->getNumberHistograms(), 2);
 
     Mantid::MantidVec outX=rebindata->dataX(0);

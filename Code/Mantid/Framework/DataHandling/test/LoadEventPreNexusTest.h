@@ -80,7 +80,7 @@ public:
     struct stat filestatus;
     stat(eventfile.c_str(), &filestatus);
 
-    EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(WSName));
+    EventWorkspace_sptr ew = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(WSName);
 
     //The # of events = size of the file / 8 bytes (per event)
     TS_ASSERT_EQUALS( ew->getNumberEvents(), filestatus.st_size / 8);

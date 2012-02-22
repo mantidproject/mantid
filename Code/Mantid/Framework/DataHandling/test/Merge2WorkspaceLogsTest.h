@@ -85,7 +85,7 @@ public:
     TS_ASSERT(merge.isExecuted());
 
     // 4. Check result
-    API::MatrixWorkspace_sptr mWSout = boost::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("TestDummy"));
+    API::MatrixWorkspace_sptr mWSout = AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>("TestDummy");
 
     Kernel::TimeSeriesProperty<double> *mergprop = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
         mWSout->run().getLogData("MergedLog"));

@@ -84,7 +84,7 @@ public:
 
     // Get the resulting table workspace
     Mantid::DataObjects::TableWorkspace_sptr table =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(AnalysisDataService::Instance().retrieve(outputWS));
+        AnalysisDataService::Instance().retrieveWS<Mantid::DataObjects::TableWorkspace>(outputWS);
 
     TS_ASSERT_EQUALS(table->rowCount(),2);
     TS_ASSERT_EQUALS(table->columnCount(),2);
@@ -116,7 +116,7 @@ public:
 
     // Get the resulting table workspace
     Mantid::DataObjects::TableWorkspace_sptr table =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(AnalysisDataService::Instance().retrieve(outputWS));
+        AnalysisDataService::Instance().retrieveWS<Mantid::DataObjects::TableWorkspace>(outputWS);
 
     TS_ASSERT_EQUALS(table->rowCount(),2);
     TS_ASSERT_EQUALS(table->columnCount(),2);
@@ -176,7 +176,7 @@ public:
     
     // Get the resulting table workspace
     Mantid::DataObjects::TableWorkspace_sptr table =
-    boost::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(AnalysisDataService::Instance().retrieve(outputWS));
+    AnalysisDataService::Instance().retrieveWS<Mantid::DataObjects::TableWorkspace>(outputWS);
 
     TS_ASSERT_EQUALS(table->rowCount(),2);
     TS_ASSERT_EQUALS(table->columnCount(),2);

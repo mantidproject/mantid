@@ -45,7 +45,7 @@ public:
     TS_ASSERT( alg.isExecuted() );
     // Retrieve the workspace from data service.
     Workspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outWSName)) );
+    TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName) );
     TS_ASSERT(ws);
     if (!ws) return;
     

@@ -46,7 +46,7 @@ public:
     alg.setPropertyValue("EFixed","7.5");
     alg.execute();
     TS_ASSERT( alg.isExecuted() );
-    Workspace2D_sptr result = boost::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve(outputWSname));
+    Workspace2D_sptr result = AnalysisDataService::Instance().retrieveWS<Workspace2D>(outputWSname);
     double ei,ef,factor,deltaE,stdval;
     for (size_t i = 0; i < result->blocksize(); ++i)
     {  
@@ -70,7 +70,7 @@ public:
     alg.setPropertyValue("EFixed","7.5");
     alg.execute();
     TS_ASSERT( alg.isExecuted() );
-    result = boost::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve(outputWSname));
+    result = AnalysisDataService::Instance().retrieveWS<Workspace2D>(outputWSname);
     for (size_t i = 0; i < result->blocksize(); ++i)
     {  
       ei = 7.5;
@@ -93,7 +93,7 @@ public:
     alg.setPropertyValue("EFixed","7.5");
     alg.execute();
     TS_ASSERT( alg.isExecuted() );
-    result = boost::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve(outputWSname));
+    result = AnalysisDataService::Instance().retrieveWS<Workspace2D>(outputWSname);
     for (size_t i = 0; i < result->blocksize(); ++i)
     {  
       ef = 7.5;
@@ -116,7 +116,7 @@ public:
     alg.setPropertyValue("EFixed","7.5");
     alg.execute();
     TS_ASSERT( alg.isExecuted() );
-    result = boost::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve(outputWSname));
+    result = AnalysisDataService::Instance().retrieveWS<Workspace2D>(outputWSname);
     for (size_t i = 0; i < result->blocksize(); ++i)
     {  
       ef = 7.5;

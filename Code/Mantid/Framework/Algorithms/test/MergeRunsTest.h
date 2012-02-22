@@ -46,19 +46,19 @@ public:
     size_t nev1, nev2, nevTot;
     double pc1, pc2, pcTot;
 
-    TS_ASSERT_THROWS_NOTHING( output =  boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("cncs1")); )
+    TS_ASSERT_THROWS_NOTHING( output =  AnalysisDataService::Instance().retrieveWS<EventWorkspace>("cncs1"); )
     log = dynamic_cast< TimeSeriesProperty<double>* > ( output->mutableRun().getProperty("proton_charge") );
     log1 = log->realSize();
     nev1 = output->getNumberEvents();
     pc1 = output->mutableRun().getProtonCharge();
 
-    TS_ASSERT_THROWS_NOTHING( output =  boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("cncs2")); )
+    TS_ASSERT_THROWS_NOTHING( output =  AnalysisDataService::Instance().retrieveWS<EventWorkspace>("cncs2"); )
     log = dynamic_cast< TimeSeriesProperty<double>* > ( output->mutableRun().getProperty("proton_charge") );
     log2 = log->realSize();
     nev2 = output->getNumberEvents();
     pc2 = output->mutableRun().getProtonCharge();
 
-    TS_ASSERT_THROWS_NOTHING( output =  boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(wsname)) );
+    TS_ASSERT_THROWS_NOTHING( output =  AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsname) );
     TS_ASSERT( output );
 
     //This many pixels total at CNCS
@@ -177,9 +177,9 @@ public:
     TS_ASSERT( merge.isExecuted() );
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outWS")) );
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS") );
 
-    MatrixWorkspace::const_iterator inIt(*(boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("in1"))));
+    MatrixWorkspace::const_iterator inIt(*(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("in1")));
     for (MatrixWorkspace::const_iterator it(*output); it != it.end(); ++it,++inIt)
     {
       TS_ASSERT_EQUALS( it->X(), inIt->X() );
@@ -200,7 +200,7 @@ public:
     mrg.execute();
     TS_ASSERT( mrg.isExecuted() );
     //Not an EventWorkspace
-    EventWorkspace_sptr outEvent =  boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
+    EventWorkspace_sptr outEvent =  AnalysisDataService::Instance().retrieveWS<EventWorkspace>("outWS");
     TS_ASSERT( !outEvent );
     EventTeardown();
   }
@@ -217,7 +217,7 @@ public:
 
     //Get the output event workspace
     EventWorkspace_const_sptr output;
-    output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
+    output = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("outWS");
     //This checks that it is indeed an EW
     TS_ASSERT( output  );
 
@@ -253,7 +253,7 @@ public:
 
     //Get the output event workspace
     EventWorkspace_const_sptr output;
-    output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
+    output = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("outWS");
     //This checks that it is indeed an EW
     TS_ASSERT( output  );
 
@@ -288,7 +288,7 @@ public:
 
     //Get the output event workspace
     EventWorkspace_const_sptr output;
-    output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
+    output = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("outWS");
     //This checks that it is indeed an EW
     TS_ASSERT( output  );
 
@@ -314,7 +314,7 @@ public:
 
     //Get the output event workspace
     EventWorkspace_const_sptr output;
-    output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
+    output = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("outWS");
     //This checks that it is indeed an EW
     TS_ASSERT( output  );
 
@@ -348,7 +348,7 @@ public:
 
     //Get the output event workspace
     EventWorkspace_const_sptr output;
-    output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
+    output = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("outWS");
     //This checks that it is indeed an EW
     TS_ASSERT( output  );
 
@@ -382,7 +382,7 @@ public:
 
     //Get the output event workspace
     EventWorkspace_const_sptr output;
-    output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
+    output = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("outWS");
     //This checks that it is indeed an EW
     TS_ASSERT( output  );
 
@@ -418,7 +418,7 @@ public:
 
     //Get the output event workspace
     EventWorkspace_const_sptr output;
-    output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
+    output = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("outWS");
     //This checks that it is indeed an EW
     TS_ASSERT( output  );
 
@@ -471,7 +471,7 @@ public:
     TS_ASSERT( alg.isExecuted() );
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outer")) );
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outer") );
 
     const Mantid::MantidVec &X = output->readX(0);
     TS_ASSERT_EQUALS( X.size(), 17 );
@@ -499,7 +499,7 @@ public:
     TS_ASSERT( alg.isExecuted() );
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outer")) );
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outer") );
 
     const Mantid::MantidVec &X = output->readX(0);
     TS_ASSERT_EQUALS( X.size(), 8 );
@@ -527,7 +527,7 @@ public:
     TS_ASSERT( alg.isExecuted() );
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outer")) );
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outer") );
 
     const Mantid::MantidVec &X = output->readX(0);
     TS_ASSERT_EQUALS( X.size(), 8 );

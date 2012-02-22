@@ -83,7 +83,7 @@ namespace Algorithms
     // 2. Configuration and check
     std::vector<MatrixWorkspace_const_sptr> inputWorkspaces;
     for (size_t i = 0; i < numspaces; i ++){
-      MatrixWorkspace_sptr tws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputWorkspaceNames[i]));
+      MatrixWorkspace_sptr tws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWorkspaceNames[i]);
       inputWorkspaces.push_back(tws);
     }
 

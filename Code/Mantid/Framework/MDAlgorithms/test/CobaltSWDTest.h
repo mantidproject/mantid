@@ -283,7 +283,7 @@
 //        TS_ASSERT_EQUALS(myCut->getNPoints(),0);
 //        TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().addOrReplace(FakeWSname, myCut) );
 //
-//        outCut = boost::dynamic_pointer_cast<TestQCut>(AnalysisDataService::Instance().retrieve(FakeWSname));
+//        outCut = AnalysisDataService::Instance().retrieveWS<TestQCut>(FakeWSname);
 //        TS_ASSERT_EQUALS(outCut->getNPoints(),0);
 //        TS_ASSERT_EQUALS(myCut->getXDimension()->getNBins(),4);
 //
@@ -368,7 +368,7 @@
 //
 //    TWS_type getTWS(const std::string& name)
 //    {
-//        return boost::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(AnalysisDataService::Instance().retrieve(name));
+//        return AnalysisDataService::Instance().retrieveWS<Mantid::DataObjects::TableWorkspace>(name);
 //    }
 //    void removeWS(const std::string& name)
 //    {

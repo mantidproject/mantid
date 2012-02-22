@@ -61,7 +61,7 @@ public:
 
     EventWorkspace_sptr WS;
     TS_ASSERT_THROWS_NOTHING(
-        WS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outws_name)) );
+        WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name) );
     //Valid WS and it is an EventWorkspace
     TS_ASSERT( WS );
     //Pixels have to be padded
@@ -90,7 +90,7 @@ public:
     ld2.execute();
     TS_ASSERT( ld2.isExecuted() );
 
-    EventWorkspace_sptr WS2 = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outws_name2));
+    EventWorkspace_sptr WS2 = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name2);
     //Valid WS and it is an EventWorkspace
     TS_ASSERT( WS2 );
 
@@ -110,7 +110,7 @@ public:
       load->setPropertyValue("MappingFilename","CNCS_TS_2008_08_18.dat");
       load->execute();
       TS_ASSERT( load->isExecuted() );
-      EventWorkspace_sptr WS2 = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("cncs_pre"));
+      EventWorkspace_sptr WS2 = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("cncs_pre");
       //Valid WS and it is an EventWorkspace
       TS_ASSERT( WS2 );
 
@@ -177,7 +177,7 @@ public:
     TS_ASSERT( ld->isExecuted() );
 
     TS_ASSERT_THROWS_NOTHING(
-        WS1 = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(ws1Name)); )
+        WS1 = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(ws1Name); )
     //Valid WS and it is an EventWorkspace
     TS_ASSERT( WS1 );
     //Pixels have to be padded
@@ -222,7 +222,7 @@ public:
     TS_ASSERT( alg->isExecuted() );
 
     TS_ASSERT_THROWS_NOTHING(
-        WS2 = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(ws1Name)); )
+        WS2 = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(ws1Name); )
     TS_ASSERT( WS2 );
     TS_ASSERT_EQUALS( WS2->getNumberHistograms(), 51200);
     TS_ASSERT_EQUALS( WS2->getNumberEvents(), 29753);
@@ -248,7 +248,7 @@ public:
 
     EventWorkspace_sptr WS;
     TS_ASSERT_THROWS_NOTHING(
-        WS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outws_name)) );
+        WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name) );
     //Valid WS and it is an EventWorkspace
     TS_ASSERT( WS );
     //Pixels have to be padded
@@ -278,7 +278,7 @@ public:
     TS_ASSERT( ld.isExecuted() );
 
     std::string mon_outws_name = outws_name + "_monitors";
-    MatrixWorkspace_sptr WS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(mon_outws_name));
+    MatrixWorkspace_sptr WS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(mon_outws_name);
     //Valid WS and it is an MatrixWorkspace
     TS_ASSERT( WS );
     //Correct number of monitors found
@@ -325,7 +325,7 @@ public:
     }
 
     TS_ASSERT( ld.isExecuted() );
-    TS_ASSERT_THROWS_NOTHING( WS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outws_name)));
+    TS_ASSERT_THROWS_NOTHING( WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name));
     //Valid WS and it is an EventWorkspace
     TS_ASSERT( WS );
     if (!WS) return;
@@ -381,7 +381,7 @@ public:
 
     EventWorkspace_sptr WS;
     TS_ASSERT_THROWS_NOTHING(
-        WS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outws_name)) );
+        WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name) );
     //Valid WS and it is an EventWorkspace
     TS_ASSERT( WS );
     TS_ASSERT_EQUALS( WS->getNumberHistograms(), 117760);

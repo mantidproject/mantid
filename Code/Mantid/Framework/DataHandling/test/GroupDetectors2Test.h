@@ -344,7 +344,7 @@ public:
     TS_ASSERT( nxLoad.isExecuted() );    
 
     MatrixWorkspace_sptr output;
-    output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_1"));
+    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace+"_1");
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 64);
 
@@ -357,7 +357,7 @@ public:
     TS_ASSERT( groupAlg.isExecuted() );
 
     MatrixWorkspace_sptr output1;
-    TS_ASSERT_THROWS_NOTHING(output1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("boevs")));    
+    TS_ASSERT_THROWS_NOTHING(output1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("boevs"));    
     Workspace2D_sptr output2D1 = boost::dynamic_pointer_cast<Workspace2D>(output1);
     TS_ASSERT_EQUALS( output2D1->getNumberHistograms(), 2);
 
@@ -384,7 +384,7 @@ public:
     TS_ASSERT( nxLoad.isExecuted() );    
 
     MatrixWorkspace_sptr output;
-    output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_1"));
+    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace+"_1");
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 64);
 
@@ -397,7 +397,7 @@ public:
     TS_ASSERT( groupAlg.isExecuted() );
 
     MatrixWorkspace_sptr output1;
-    TS_ASSERT_THROWS_NOTHING(output1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("boevs")));    
+    TS_ASSERT_THROWS_NOTHING(output1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("boevs"));    
     Workspace2D_sptr output2D1 = boost::dynamic_pointer_cast<Workspace2D>(output1);
     TS_ASSERT_EQUALS( output2D1->getNumberHistograms(), 2);
 
@@ -424,7 +424,7 @@ public:
     TS_ASSERT( nxLoad.isExecuted() );    
 
     MatrixWorkspace_sptr output;
-    output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_1"));
+    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace+"_1");
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 64);
 
@@ -437,7 +437,7 @@ public:
     TS_ASSERT( groupAlg.isExecuted() );
 
     MatrixWorkspace_sptr output1;
-    TS_ASSERT_THROWS_NOTHING(output1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("boevs")));    
+    TS_ASSERT_THROWS_NOTHING(output1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("boevs"));    
     Workspace2D_sptr output2D1 = boost::dynamic_pointer_cast<Workspace2D>(output1);
     TS_ASSERT_EQUALS( output2D1->getNumberHistograms(), 4);
 
@@ -472,7 +472,7 @@ public:
     gd2.setPropertyValue("Behaviour", "Average");
     TS_ASSERT_THROWS_NOTHING(gd2.execute());
 
-    MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("GroupDetectors2_testAverageBehaviour_Output"));
+    MatrixWorkspace_sptr output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("GroupDetectors2_testAverageBehaviour_Output");
 
     // Result should be 1 + 2 + 3 / 3 = 2
     TS_ASSERT_EQUALS(output->readY(0)[1], 2.0);

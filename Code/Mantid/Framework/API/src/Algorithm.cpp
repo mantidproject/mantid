@@ -942,7 +942,7 @@ namespace Mantid
         {
           // So try to use the name in the AnalysisDataService
           try {
-          wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(prop->value()));
+          wsGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(prop->value());
           }
           catch (Exception::NotFoundError&) { /* Do nothing */ }
         }

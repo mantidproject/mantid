@@ -142,7 +142,7 @@ public:
 
     TS_ASSERT(helper.isExecuted());
 
-    MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace));
+    MatrixWorkspace_sptr output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace);
     TS_ASSERT(output);
 
     for( int i = 0; i < nHist; ++i )

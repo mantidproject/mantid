@@ -38,7 +38,7 @@ public:
     {
       TS_ASSERT_EQUALS(loadfile.execute(), true);
       DataObjects::SpecialWorkspace2D_sptr maskws =
-          boost::dynamic_pointer_cast<DataObjects::SpecialWorkspace2D>(AnalysisDataService::Instance().retrieve("PG3Mask"));
+          AnalysisDataService::Instance().retrieveWS<DataObjects::SpecialWorkspace2D>("PG3Mask");
     }
     catch(std::runtime_error & e)
     {
@@ -98,7 +98,7 @@ public:
 
     TS_ASSERT_EQUALS(loadfile.execute(),true);
     DataObjects::SpecialWorkspace2D_sptr maskws =
-          boost::dynamic_pointer_cast<DataObjects::SpecialWorkspace2D>(AnalysisDataService::Instance().retrieve("VULCAN_Mask_Detectors"));
+          AnalysisDataService::Instance().retrieveWS<DataObjects::SpecialWorkspace2D>("VULCAN_Mask_Detectors");
 
     // 3. Check
     for (size_t iws=0; iws<maskws->getNumberHistograms(); iws++)
@@ -160,7 +160,7 @@ public:
 
     TS_ASSERT_EQUALS(loadfile.execute(),true);
     DataObjects::SpecialWorkspace2D_sptr maskws =
-          boost::dynamic_pointer_cast<DataObjects::SpecialWorkspace2D>(AnalysisDataService::Instance().retrieve("VULCAN_Mask1"));
+          AnalysisDataService::Instance().retrieveWS<DataObjects::SpecialWorkspace2D>("VULCAN_Mask1");
 
     // 2. Generate Region of Interest Workspace
     LoadMask loadfile2;
@@ -172,7 +172,7 @@ public:
 
     TS_ASSERT_EQUALS(loadfile2.execute(), true);
     DataObjects::SpecialWorkspace2D_sptr interestws =
-          boost::dynamic_pointer_cast<DataObjects::SpecialWorkspace2D>(AnalysisDataService::Instance().retrieve("VULCAN_Mask2"));
+          AnalysisDataService::Instance().retrieveWS<DataObjects::SpecialWorkspace2D>("VULCAN_Mask2");
 
     // 3. Check
     size_t sizemask = maskws->getNumberHistograms();

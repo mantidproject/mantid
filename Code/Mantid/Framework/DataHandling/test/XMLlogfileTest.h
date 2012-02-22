@@ -38,10 +38,10 @@ public:
 
     // Get back the workspaces
     MatrixWorkspace_sptr output1;
-    TS_ASSERT_THROWS_NOTHING( output1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("CRISPdata")) );
+    TS_ASSERT_THROWS_NOTHING( output1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("CRISPdata") );
     TS_ASSERT_EQUALS( output1->getNumberHistograms(), 4 )
     MatrixWorkspace_sptr output2;
-    TS_ASSERT_THROWS_NOTHING( output2 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("CRISPdata_2")) );
+    TS_ASSERT_THROWS_NOTHING( output2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("CRISPdata_2") );
     TS_ASSERT_EQUALS( output2->getNumberHistograms(), 4 )
 
     // get the parameter map for the period 1 CRISP data

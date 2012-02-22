@@ -47,7 +47,7 @@ public:
     TS_ASSERT( alg.isExecuted() );
 
     MatrixWorkspace_sptr outWS;
-    TS_ASSERT_THROWS_NOTHING(outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("testMW")) );
+    TS_ASSERT_THROWS_NOTHING(outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("testMW") );
 
     //Some basic checks
     TSM_ASSERT_EQUALS("Wrong number of histograms", inWS->getNumberHistograms(), outWS->getNumberHistograms());
@@ -127,7 +127,7 @@ public:
     {
       EventWorkspace_sptr ws;
       TS_ASSERT_THROWS_NOTHING(
-          ws = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("testEW")) );
+          ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("testEW") );
       TS_ASSERT(ws);
       if (!ws) return;
       size_t nevents = ws->getNumberEvents();
@@ -135,7 +135,7 @@ public:
     }
 
     // Check the values
-    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("testEW"));
+    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("testEW");
     TS_ASSERT(ws);
     if (!ws) return;
 

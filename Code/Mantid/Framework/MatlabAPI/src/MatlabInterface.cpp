@@ -619,7 +619,7 @@ int WorkspaceGetField(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]
   if( nrhs == 3 ) ispec = mxGetScalar(prhs[2]);
   MatrixWorkspace_sptr wksptr;
   try {
-      wksptr = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+      wksptr = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
   }
   catch (Exception::NotFoundError&)
   {

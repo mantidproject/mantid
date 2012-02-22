@@ -58,7 +58,7 @@ public:
       TS_ASSERT_EQUALS(this->binoperator.execute(),true);
 
       // DataObjects::SpecialWorkspace2D_sptr ws3 = this->binoperator.getProperty("OutputWorkspace");
-      DataObjects::SpecialWorkspace2D_sptr ws3 = boost::dynamic_pointer_cast<DataObjects::SpecialWorkspace2D>(AnalysisDataService::Instance().retrieve(ws3name));
+      DataObjects::SpecialWorkspace2D_sptr ws3 = AnalysisDataService::Instance().retrieveWS<DataObjects::SpecialWorkspace2D>(ws3name);
 
       TS_ASSERT_EQUALS(ws3->getValue(1), 1);
       TS_ASSERT_EQUALS(ws3->getValue(2), 0);
@@ -95,7 +95,7 @@ public:
     try
     {
       TS_ASSERT_EQUALS(this->binoperator.execute(),true);
-      ws4 = boost::dynamic_pointer_cast<DataObjects::SpecialWorkspace2D>(AnalysisDataService::Instance().retrieve(ws4name));
+      ws4 = AnalysisDataService::Instance().retrieveWS<DataObjects::SpecialWorkspace2D>(ws4name);
 
       if (ws4 == NULL){
         std::cout << "Workspace4 is NULL" << std::endl;
@@ -127,7 +127,7 @@ public:
     try
     {
       TS_ASSERT_EQUALS(this->binoperator.execute(),true);
-      DataObjects::SpecialWorkspace2D_sptr ws2 = boost::dynamic_pointer_cast<DataObjects::SpecialWorkspace2D>(AnalysisDataService::Instance().retrieve(ws2name));
+      DataObjects::SpecialWorkspace2D_sptr ws2 = AnalysisDataService::Instance().retrieveWS<DataObjects::SpecialWorkspace2D>(ws2name);
       for (size_t ih = 0; ih < ws2->getNumberHistograms(); ih ++){
         detid_t tempdetid = ws2->getDetectorID(ih);
         TS_ASSERT_EQUALS(ws2->getValue(tempdetid), 1);

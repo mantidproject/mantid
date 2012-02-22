@@ -73,8 +73,8 @@ public:
     if ( !conj.isInitialized() ) conj.initialize();
 
     // Get the two input workspaces for later
-    MatrixWorkspace_sptr in1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("top"));
-    MatrixWorkspace_sptr in2 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("bottom"));
+    MatrixWorkspace_sptr in1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("top");
+    MatrixWorkspace_sptr in2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("bottom");
 
     // Mask a spectrum and check it is carried over
     const size_t maskTop(5), maskBottom(10);
@@ -100,7 +100,7 @@ public:
     TS_ASSERT( conj.isExecuted() );
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("top")) );
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("top") );
     TS_ASSERT_EQUALS( output->getNumberHistograms(), 25 );
     // Check a few values
     TS_ASSERT_EQUALS( output->readX(0)[0], in1->readX(0)[0] );
@@ -175,7 +175,7 @@ public:
     TS_ASSERT( conj.isExecuted() );
 
     // Test output
-    MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(ws1_name));
+    MatrixWorkspace_sptr output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(ws1_name);
     TS_ASSERT(output);
     // Check the first spectrum has the correct ID
     TS_ASSERT_EQUALS( output->getNumberHistograms(), 15 );

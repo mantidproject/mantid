@@ -110,7 +110,7 @@ public:
     alg.execute();
 
     MatrixWorkspace_sptr work_out1;
-    TS_ASSERT_THROWS_NOTHING(work_out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(output)));
+    TS_ASSERT_THROWS_NOTHING(work_out1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(output));
 
     TS_ASSERT_DELTA(work_out1->run().getProtonCharge(), expectedCharge, 1e-8);
 
@@ -707,7 +707,7 @@ public:
     TSM_ASSERT_THROWS_NOTHING(message, alg->execute());
     TSM_ASSERT( message, alg->isExecuted() );
     MatrixWorkspace_sptr work_out1;
-    TSM_ASSERT_THROWS_NOTHING(message, work_out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsNameOut)));
+    TSM_ASSERT_THROWS_NOTHING(message, work_out1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsNameOut));
     TSM_ASSERT( message, work_out1 );
     if (work_out1)
     {
@@ -982,7 +982,7 @@ public:
 
     //The output!
     MatrixWorkspace_const_sptr work_out1;
-    TS_ASSERT_THROWS_NOTHING(work_out1 = boost::dynamic_pointer_cast<const MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsNameOut)));
+    TS_ASSERT_THROWS_NOTHING(work_out1 = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(wsNameOut));
     TS_ASSERT(work_out1);
     if (!work_out1)
       return;

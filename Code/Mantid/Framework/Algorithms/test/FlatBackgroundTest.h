@@ -83,8 +83,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( flatBG.execute() )
     TS_ASSERT( flatBG.isExecuted() )
     
-    MatrixWorkspace_sptr inputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("flatBG"));
-    MatrixWorkspace_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Removed"));
+    MatrixWorkspace_sptr inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("flatBG");
+    MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Removed");
     // The X vectors should be the same
     TS_ASSERT_EQUALS( inputWS->readX(0), outputWS->readX(0) )
     // Just do a spot-check on Y & E
@@ -112,8 +112,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( back.execute() )
     TS_ASSERT( back.isExecuted() )
     
-    MatrixWorkspace_sptr inputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("flatbackgroundtest_ramp"));
-    MatrixWorkspace_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("flatbackgroundtest_first"));
+    MatrixWorkspace_sptr inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("flatbackgroundtest_ramp");
+    MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("flatbackgroundtest_first");
     // The X vectors should be the same
     TS_ASSERT_EQUALS( inputWS->readX(0), outputWS->readX(0) )
 
@@ -166,8 +166,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( back.execute() )
     TS_ASSERT( back.isExecuted() )
     
-    MatrixWorkspace_sptr inputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("flatbackgroundtest_ramp"));
-    MatrixWorkspace_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("flatbackgroundtest_second"));
+    MatrixWorkspace_sptr inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("flatbackgroundtest_ramp");
+    MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("flatbackgroundtest_second");
     // The X vectors should be the same
     TS_ASSERT_EQUALS( inputWS->readX(0), outputWS->readX(0) )
 
@@ -234,7 +234,7 @@ public:
     back.execute();
     TS_ASSERT( back.isExecuted() )
     
-    MatrixWorkspace_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("flatbackgroundtest_third"));
+    MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("flatbackgroundtest_third");
     // The X vectors should be the same
     TS_ASSERT_EQUALS( WS->readX(0), outputWS->readX(0) )
 

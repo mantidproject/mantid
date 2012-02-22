@@ -164,7 +164,7 @@ public:
 
     MatrixWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("TOPAZ")) );
+        ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("TOPAZ") );
     TS_ASSERT(ws);
     if (!ws) return;
     TS_ASSERT_DELTA( ws->readY(5050)[5], 130.0, 6.0);

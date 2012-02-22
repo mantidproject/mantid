@@ -86,10 +86,10 @@ public:
     MatrixWorkspace_sptr test_output_WS;
     MatrixWorkspace_sptr gold_output_WS;
 
-    TS_ASSERT_THROWS_NOTHING( test_output_WS=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("SmoothedWS")) );
+    TS_ASSERT_THROWS_NOTHING( test_output_WS=AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("SmoothedWS") );
     TS_ASSERT( test_output_WS );
 
-    TS_ASSERT_THROWS_NOTHING( gold_output_WS=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("ZeroingGoldWS")) );
+    TS_ASSERT_THROWS_NOTHING( gold_output_WS=AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("ZeroingGoldWS") );
     TS_ASSERT( gold_output_WS );
 
     TS_ASSERT_EQUALS( test_output_WS->size(), gold_output_WS->size() );
@@ -134,10 +134,10 @@ public:
     MatrixWorkspace_sptr test_output_WS;
     MatrixWorkspace_sptr gold_output_WS;
 
-    TS_ASSERT_THROWS_NOTHING( test_output_WS=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("SmoothedWS")) );
+    TS_ASSERT_THROWS_NOTHING( test_output_WS=AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("SmoothedWS") );
     TS_ASSERT( test_output_WS );
 
-    TS_ASSERT_THROWS_NOTHING( gold_output_WS=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("ButterworthGoldWS")) );
+    TS_ASSERT_THROWS_NOTHING( gold_output_WS=AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("ButterworthGoldWS") );
     TS_ASSERT( gold_output_WS );
 
     TS_ASSERT_EQUALS( test_output_WS->size(), gold_output_WS->size() );
@@ -193,7 +193,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.execute() );
     TS_ASSERT( alg.isExecuted() );
 
-    TS_ASSERT_THROWS_NOTHING( out=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outName)) );
+    TS_ASSERT_THROWS_NOTHING( out=AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outName) );
     TS_ASSERT( out );
     if (!out) return;
 

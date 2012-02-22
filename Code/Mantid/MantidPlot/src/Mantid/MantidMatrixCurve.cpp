@@ -73,7 +73,7 @@ MantidMatrixCurve::MantidMatrixCurve(const MantidMatrixCurve& c)
  */
 void MantidMatrixCurve::init(Graph* g,bool distr,Graph::CurveType style)
 {
-  MatrixWorkspace_const_sptr workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(m_wsName.toStdString()) );
+  MatrixWorkspace_const_sptr workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_wsName.toStdString() );
 
   if ( !workspace || m_index >= static_cast<int>(workspace->getNumberHistograms()) )
   {

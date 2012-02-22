@@ -172,7 +172,7 @@ public:
 //    TS_ASSERT_THROWS_ANYTHING(myCut->getPoint(0));
 //    TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().add(FakeWSname, myCut) );
 //
-//    outCut = boost::dynamic_pointer_cast<TestCut>(AnalysisDataService::Instance().retrieve(FakeWSname));
+//    outCut = AnalysisDataService::Instance().retrieveWS<TestCut>(FakeWSname);
 //    TS_ASSERT_EQUALS(outCut->getNPoints(),0);
 //    TS_ASSERT_EQUALS(myCut->getXDimension()->getNBins(),2);
 //

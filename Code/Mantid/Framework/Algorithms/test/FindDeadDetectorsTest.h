@@ -93,7 +93,7 @@ public:
 
     // Get back the output workspace
     MatrixWorkspace_sptr work_out;
-    TS_ASSERT_THROWS_NOTHING(work_out = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("testdead_out")));
+    TS_ASSERT_THROWS_NOTHING(work_out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("testdead_out"));
 
     for (int i=0; i< sizey; i++)
     {

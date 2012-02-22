@@ -228,7 +228,7 @@ public:
 
     // Retrieve the workspace from data service.
     IMDEventWorkspace_sptr iws;
-    TS_ASSERT_THROWS_NOTHING( iws = boost::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve(outWSName)) );
+    TS_ASSERT_THROWS_NOTHING( iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(outWSName) );
     TS_ASSERT(iws);
     if (!iws) return;
 
@@ -277,7 +277,7 @@ public:
   {
     std::string outWSName("LoadMDTest_OutputWS");
     IMDEventWorkspace_sptr iws;
-    TS_ASSERT_THROWS_NOTHING( iws = boost::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve(outWSName)) );
+    TS_ASSERT_THROWS_NOTHING( iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(outWSName) );
     TS_ASSERT(iws); if (!iws) return;
     boost::shared_ptr<MDEventWorkspace<MDLeanEvent<nd>,nd> > ws2 = boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<nd>,nd> >(iws);
 
@@ -344,7 +344,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
 
-    TS_ASSERT_THROWS_NOTHING( iws = boost::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve("reloaded_again")) );
+    TS_ASSERT_THROWS_NOTHING( iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>("reloaded_again") );
     boost::shared_ptr<MDEventWorkspace<MDLeanEvent<nd>,nd> > ws3 = boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<nd>,nd> >(iws);
     TS_ASSERT(ws3); if (!ws3) return;
     ws3->refreshCache();
@@ -447,7 +447,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("MetadataOnly", true));
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
-    boost::shared_ptr<MDEventWorkspace<MDLeanEvent<2>,2> > ws = boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<2>,2> >(AnalysisDataService::Instance().retrieve(outWSName));
+    boost::shared_ptr<MDEventWorkspace<MDLeanEvent<2>,2> > ws = AnalysisDataService::Instance().retrieveWS<MDEventWorkspace<MDLeanEvent<2>,2> >(outWSName);
 
     TSM_ASSERT_EQUALS("Should have no events!", 0, ws->getNPoints());
     TSM_ASSERT_EQUALS("Wrong number of dimensions", 2, ws->getNumDims());

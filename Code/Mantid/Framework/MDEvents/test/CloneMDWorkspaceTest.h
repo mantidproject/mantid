@@ -76,7 +76,7 @@ public:
     
     // Retrieve the workspace from data service.
     MDEventWorkspace3Lean::sptr ws2;
-    TS_ASSERT_THROWS_NOTHING( ws2 = boost::dynamic_pointer_cast<MDEventWorkspace3Lean>(AnalysisDataService::Instance().retrieve(outWSName)) );
+    TS_ASSERT_THROWS_NOTHING( ws2 = AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>(outWSName) );
     TS_ASSERT(ws2); if (!ws2) return;
     
     // Compare the two workspaces
@@ -124,7 +124,7 @@ public:
 
     // Retrieve the workspace from data service.
     MDHistoWorkspace_sptr ws2;
-    TS_ASSERT_THROWS_NOTHING( ws2 = boost::dynamic_pointer_cast<MDHistoWorkspace>(AnalysisDataService::Instance().retrieve(outWSName)) );
+    TS_ASSERT_THROWS_NOTHING( ws2 = AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>(outWSName) );
     TS_ASSERT(ws2); if (!ws2) return;
 
     // Compare the WS

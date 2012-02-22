@@ -143,7 +143,7 @@ public:
     addPeak(1000, 2.,3.,4., 0.5);
     addPeak(1000, 6.,6.,6., 2.0);
 
-    MDEventWorkspace3Lean::sptr mdews = boost::dynamic_pointer_cast<MDEventWorkspace3Lean>(AnalysisDataService::Instance().retrieve("CentroidPeaksMDTest_MDEWS"));
+    MDEventWorkspace3Lean::sptr mdews = AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>("CentroidPeaksMDTest_MDEWS");
     TS_ASSERT_EQUALS( mdews->getNPoints(), 3000);
     TS_ASSERT_DELTA( mdews->getBox()->getSignal(), 3000.0, 1e-2);
 

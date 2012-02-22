@@ -1,13 +1,13 @@
 #ifndef MANTID_DATAHANDLING_LOADLIVEDATATEST_H_
 #define MANTID_DATAHANDLING_LOADLIVEDATATEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include <iostream>
-#include <iomanip>
 #include "MantidDataHandling/LoadLiveData.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
+#include <iomanip>
+#include <iostream>
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;

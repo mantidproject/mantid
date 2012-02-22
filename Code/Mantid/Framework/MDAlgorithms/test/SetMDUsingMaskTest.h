@@ -60,7 +60,7 @@ public:
       TS_ASSERT( alg.isExecuted() );
       // Retrieve the workspace from data service.
       IMDHistoWorkspace_sptr ws;
-      TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<IMDHistoWorkspace>(AnalysisDataService::Instance().retrieve(OutputWorkspace)) );
+      TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(OutputWorkspace) );
       TS_ASSERT(ws);
       if (!ws) return;
       TS_ASSERT_DELTA( ws->signalAt(0), expectedSignal, 1e-6);

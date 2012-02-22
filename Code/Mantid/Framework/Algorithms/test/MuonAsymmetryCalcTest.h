@@ -83,7 +83,7 @@ public:
       TS_FAIL(e.what());
     }
 
-    MatrixWorkspace_const_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Result"));
+    MatrixWorkspace_const_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Result");
 
     //Use a range as cxxtest seems to complain about the accuracy
     TS_ASSERT_DELTA(outputWS->dataY(0)[100],0.2965,0.005);

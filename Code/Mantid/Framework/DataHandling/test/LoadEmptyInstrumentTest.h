@@ -62,7 +62,7 @@ public:
 
 
     MatrixWorkspace_sptr output;
-    output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
     
     // Check the total number of elements in the map for SLS
     check_workspace_detectors(output, 683);
@@ -93,7 +93,7 @@ public:
 
 
     MatrixWorkspace_sptr output;
-    output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
     
     // Check the total number of elements in the map for SLS
     check_workspace_detectors(output, 2502);
@@ -123,7 +123,7 @@ public:
 
 
     MatrixWorkspace_sptr output;
-    output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
     
     // Check the total number of elements in the map for SLS
     check_workspace_detectors(output, 64);
@@ -146,7 +146,7 @@ public:
 
 
     MatrixWorkspace_sptr ws;
-    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+    ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
 
     // get parameter map
     ParameterMap& paramMap = ws->instrumentParameters();
@@ -426,7 +426,7 @@ public:
 
 
     MatrixWorkspace_sptr ws;
-    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+    ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
 
     boost::shared_ptr<const Instrument> i = ws->getInstrument();
 
@@ -538,7 +538,7 @@ public:
 
 
     MatrixWorkspace_sptr ws;
-    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+    ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
 
     // get parameter map
     ParameterMap& paramMap = ws->instrumentParameters();
@@ -567,7 +567,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     TS_ASSERT( loader.isExecuted() );
 
-    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+    ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
 
     ParameterMap& paramMap2 = ws->instrumentParameters();
 
@@ -600,7 +600,7 @@ public:
 
 
     MatrixWorkspace_sptr ws;
-    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+    ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
 
     // get parameter map
     ParameterMap& paramMap = ws->instrumentParameters();
@@ -625,7 +625,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     TS_ASSERT( loader.isExecuted() );
 
-    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName2));
+    ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName2);
 
     // get parameter map
     ParameterMap& paramMap2 = ws->instrumentParameters();
@@ -657,7 +657,7 @@ public:
     TS_ASSERT( loader.isExecuted() );
 
     MatrixWorkspace_sptr ws;
-    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+    ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
 
     // get parameter map
     ParameterMap& paramMap = ws->instrumentParameters();
@@ -712,7 +712,7 @@ public:
     TS_ASSERT( loader.isExecuted() );
 
     MatrixWorkspace_sptr ws;
-    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+    ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
     TS_ASSERT(ws);
     if (!ws) return;
 
@@ -783,7 +783,7 @@ public:
     TS_ASSERT( loader.isExecuted() );
 
     MatrixWorkspace_sptr ws;
-    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+    ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
 
     IDetector_const_sptr det = ws->getDetector(1);
     TS_ASSERT_EQUALS( (det->getNumberParameter("number-of-x-pixels"))[0], 192);
@@ -810,7 +810,7 @@ void testSANS2D()
     TS_ASSERT( loader.isExecuted() );
 
     MatrixWorkspace_sptr ws;
-    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+    ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
 
     // get parameter map
     boost::shared_ptr<const Instrument> i = ws->getInstrument();

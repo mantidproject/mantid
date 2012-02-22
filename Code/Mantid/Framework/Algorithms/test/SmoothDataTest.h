@@ -74,7 +74,7 @@ public:
     TS_ASSERT( smooth.isExecuted() );
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputWS)) );
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS) );
     const Mantid::MantidVec &Y = output->dataY(0);
     const Mantid::MantidVec &E = output->dataE(0);
     TS_ASSERT_EQUALS( Y[0], 2 );

@@ -49,7 +49,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( loader.execute() );
     TS_ASSERT_EQUALS(loader.isExecuted(),true);
 
-    MatrixWorkspace_sptr inputWs = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("EMU6473"));
+    MatrixWorkspace_sptr inputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("EMU6473");
 
     boost::shared_ptr<ITableWorkspace>tw(new Mantid::DataObjects::TableWorkspace);
     
@@ -103,7 +103,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( loader.execute() );
     TS_ASSERT_EQUALS(loader.isExecuted(),true);
 
-    MatrixWorkspace_sptr inputWs = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("EMU6473"));
+    MatrixWorkspace_sptr inputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("EMU6473");
 
     boost::shared_ptr<ITableWorkspace>tw(new Mantid::DataObjects::TableWorkspace);
     
@@ -145,7 +145,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( loader.execute() );
     TS_ASSERT_EQUALS(loader.isExecuted(),true);
 
-    MatrixWorkspace_sptr inputWs = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("EMU6473"));
+    MatrixWorkspace_sptr inputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("EMU6473");
 
     boost::shared_ptr<ITableWorkspace>tw(new Mantid::DataObjects::TableWorkspace);
     

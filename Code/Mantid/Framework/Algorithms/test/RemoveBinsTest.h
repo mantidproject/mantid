@@ -58,7 +58,7 @@ public:
 			TS_FAIL(e.what());
 		}
 
-		MatrixWorkspace_const_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("output"));
+		MatrixWorkspace_const_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("output");
 
 		//Should give:
 		//10   20   30   40   X
@@ -94,7 +94,7 @@ public:
 			TS_FAIL(e.what());
 		}
 
-		MatrixWorkspace_const_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("output2"));
+		MatrixWorkspace_const_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("output2");
 
 		//0   10   20   30    X
 		//   0     2     5        Y
@@ -131,7 +131,7 @@ public:
 			TS_FAIL(e.what());
 		}
 
-		MatrixWorkspace_const_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("output3"));
+		MatrixWorkspace_const_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("output3");
 
 		//0   10   20   30   40   X
 		//   0     2     4     6       Y
@@ -159,8 +159,8 @@ public:
 
     TS_ASSERT( rb.execute() )
 
-    MatrixWorkspace_const_sptr inputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("input2D"));
-    MatrixWorkspace_const_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("output4"));
+    MatrixWorkspace_const_sptr inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("input2D");
+    MatrixWorkspace_const_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("output4");
     TS_ASSERT_EQUALS( inputWS->readX(0), outputWS->readX(0) )
     TS_ASSERT_EQUALS( inputWS->readX(1), outputWS->readX(1) )
     TS_ASSERT_EQUALS( inputWS->readY(1), outputWS->readY(1) )
@@ -202,7 +202,7 @@ public:
 			TS_FAIL(e.what());
 		}
 		
-		MatrixWorkspace_const_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("result1"));
+		MatrixWorkspace_const_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("result1");
 		
 		TS_ASSERT_EQUALS(outputWS->dataX(0).size(), 1994);
 	}

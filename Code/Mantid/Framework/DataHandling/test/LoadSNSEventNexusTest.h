@@ -43,7 +43,7 @@ public:
     TS_ASSERT( ld.isExecuted() );
     DataObjects::EventWorkspace_sptr WS;
     TS_ASSERT_THROWS_NOTHING(
-        WS = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve(outws_name)); )
+        WS = AnalysisDataService::Instance().retrieveWS<DataObjects::EventWorkspace>(outws_name); )
     //Valid WS and it is an EventWorkspace
     TS_ASSERT( WS );
     if (!WS) return;

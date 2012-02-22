@@ -54,7 +54,7 @@ public:
 
     // identifynoisydetectors_output
     MatrixWorkspace_sptr workspace;
-    TS_ASSERT_THROWS_NOTHING(workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("identifynoisydetectors_output")));
+    TS_ASSERT_THROWS_NOTHING(workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("identifynoisydetectors_output"));
     
     // Check that it's got all the bad ones
     TS_ASSERT_EQUALS(workspace->readY(0)[0], 0.0);

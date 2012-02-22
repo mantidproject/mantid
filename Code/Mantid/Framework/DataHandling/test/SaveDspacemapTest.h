@@ -109,7 +109,7 @@ public:
     TS_ASSERT( load.isExecuted() );
 
     OffsetsWorkspace_sptr out;
-    out = boost::dynamic_pointer_cast<OffsetsWorkspace>(AnalysisDataService::Instance().retrieve("dummy"));
+    out = AnalysisDataService::Instance().retrieveWS<OffsetsWorkspace>("dummy");
     TS_ASSERT(out);
     if (!out) return;
     TS_ASSERT_DELTA( out->getValue(1), 0.10, 1e-5);

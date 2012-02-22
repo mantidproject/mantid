@@ -63,7 +63,7 @@ public:
     TS_ASSERT( offsets.isExecuted() );
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputWS)) );
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS) );
     if (!output) return;
 
     TS_ASSERT_DELTA( output->dataY(0)[0], -0.00196, 0.0002);

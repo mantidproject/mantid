@@ -225,40 +225,40 @@ public:
 
     // Get back the workspaces
     MatrixWorkspace_sptr output1;
-    TS_ASSERT_THROWS_NOTHING( output1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("multiperiod")) );
+    TS_ASSERT_THROWS_NOTHING( output1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("multiperiod") );
     TS_ASSERT_EQUALS( output1->getNumberHistograms(), 4 )
     MatrixWorkspace_sptr output2;
-    TS_ASSERT_THROWS_NOTHING( output2 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("multiperiod_2")) );
+    TS_ASSERT_THROWS_NOTHING( output2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("multiperiod_2") );
     TS_ASSERT_EQUALS( output2->getNumberHistograms(), 4 )
     MatrixWorkspace_sptr output3;
-    TS_ASSERT_THROWS_NOTHING( output3 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("multiperiod_3")) );
+    TS_ASSERT_THROWS_NOTHING( output3 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("multiperiod_3") );
     TS_ASSERT_EQUALS( output3->getNumberHistograms(), 4 )
     MatrixWorkspace_sptr output4;
-    TS_ASSERT_THROWS_NOTHING( output4 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("multiperiod_4")) );
+    TS_ASSERT_THROWS_NOTHING( output4 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("multiperiod_4") );
     TS_ASSERT_EQUALS( output4->getNumberHistograms(), 4 )
     MatrixWorkspace_sptr output5;
-    TS_ASSERT_THROWS_NOTHING( output5 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("multiperiod_5")) );
+    TS_ASSERT_THROWS_NOTHING( output5 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("multiperiod_5") );
     TS_ASSERT_EQUALS( output5->getNumberHistograms(), 4 )
     MatrixWorkspace_sptr output6;
-    TS_ASSERT_THROWS_NOTHING( output6 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("multiperiod_6")) );
+    TS_ASSERT_THROWS_NOTHING( output6 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("multiperiod_6") );
     TS_ASSERT_EQUALS( output6->getNumberHistograms(), 4 )
     MatrixWorkspace_sptr output7;
-    TS_ASSERT_THROWS_NOTHING( output7 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("multiperiod_7")) );
+    TS_ASSERT_THROWS_NOTHING( output7 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("multiperiod_7") );
     TS_ASSERT_EQUALS( output7->getNumberHistograms(), 4 )
     MatrixWorkspace_sptr output8;
-    TS_ASSERT_THROWS_NOTHING( output8 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("multiperiod_8")) );
+    TS_ASSERT_THROWS_NOTHING( output8 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("multiperiod_8") );
     TS_ASSERT_EQUALS( output8->getNumberHistograms(), 4 )
     MatrixWorkspace_sptr output9;
-    TS_ASSERT_THROWS_NOTHING( output9 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("multiperiod_9")) );
+    TS_ASSERT_THROWS_NOTHING( output9 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("multiperiod_9") );
     TS_ASSERT_EQUALS( output9->getNumberHistograms(), 4 )
     MatrixWorkspace_sptr output10;
-    TS_ASSERT_THROWS_NOTHING( output10 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("multiperiod_10")) );
+    TS_ASSERT_THROWS_NOTHING( output10 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("multiperiod_10") );
     TS_ASSERT_EQUALS( output10->getNumberHistograms(), 4 )
     MatrixWorkspace_sptr output11;
-    TS_ASSERT_THROWS_NOTHING( output11 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("multiperiod_11")) );
+    TS_ASSERT_THROWS_NOTHING( output11 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("multiperiod_11") );
     TS_ASSERT_EQUALS( output11->getNumberHistograms(), 4 )
     MatrixWorkspace_sptr output12;
-    TS_ASSERT_THROWS_NOTHING( output12 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("multiperiod_12")) );
+    TS_ASSERT_THROWS_NOTHING( output12 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("multiperiod_12") );
     TS_ASSERT_EQUALS( output12->getNumberHistograms(), 4 )
 
     // The histogram bins should be the same

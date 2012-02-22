@@ -122,7 +122,7 @@ public:
 
         IMDEventWorkspace_sptr outMDwrkspc;
         TS_ASSERT_THROWS_NOTHING( outMDwrkspc =
-            boost::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve(testWrkspc)) );
+            AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(testWrkspc) );
         TS_ASSERT_EQUALS( outMDwrkspc->getNPoints(),16);
         std::string res = alg.getPropertyValue("Residual");
         double resdble=atof(res.c_str());

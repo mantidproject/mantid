@@ -78,7 +78,7 @@ public:
 
     EventWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("testInEW")) );
+        ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("testInEW") );
     TS_ASSERT(ws);
     if (!ws) return;
     size_t nevents = ws->getNumberEvents();

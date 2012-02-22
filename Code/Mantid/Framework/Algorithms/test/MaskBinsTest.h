@@ -276,7 +276,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( masker2.execute() );
     TS_ASSERT( masker2.isExecuted() );
 
-    EventWorkspace_const_sptr constWS = boost::dynamic_pointer_cast<const EventWorkspace>(AnalysisDataService::Instance().retrieve(workspaceName+"2"));
+    EventWorkspace_const_sptr constWS = AnalysisDataService::Instance().retrieveWS<const EventWorkspace>(workspaceName+"2");
     std::size_t events_after = constWS->getNumberEvents();
 
     for (int wi=0; wi<numHist; wi++)

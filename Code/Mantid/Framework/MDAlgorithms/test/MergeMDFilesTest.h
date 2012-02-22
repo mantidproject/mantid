@@ -68,7 +68,7 @@ public:
 
     // Retrieve the workspace from data service.
     MDEventWorkspace3Lean::sptr ws;
-    TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<MDEventWorkspace3Lean>(AnalysisDataService::Instance().retrieve(outWSName)) );
+    TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>(outWSName) );
     TS_ASSERT(ws);
     if (!ws) return;
     

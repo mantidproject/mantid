@@ -150,7 +150,7 @@ public:
     TS_ASSERT( quickly.isExecuted() );
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("quickOut2")) );
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("quickOut2") );
     TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "Energy");
     TS_ASSERT_DELTA( output->dataX(1)[1], 10.10, 0.01 );
 
@@ -172,7 +172,7 @@ public:
     TS_ASSERT( quickly.isExecuted() );
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("quickOut")) );
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("quickOut") );
     TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "dSpacing");
     TS_ASSERT_EQUALS( &(output->dataX(0)[0]), &(output->dataX(0)[0]) );
     for (MatrixWorkspace::const_iterator it(*output); it != it.end(); ++it)
@@ -196,7 +196,7 @@ public:
     TS_ASSERT( loader.isExecuted() );
 
     MatrixWorkspace_const_sptr input;
-    TS_ASSERT_THROWS_NOTHING( input = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(ws)) );
+    TS_ASSERT_THROWS_NOTHING( input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(ws) );
     TS_ASSERT( input->getSpectrum(0)->hasDetectorID(3810));
 
     ConvertUnits conv;
@@ -210,7 +210,7 @@ public:
     conv.execute();
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)) );
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace) );
     TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "DeltaE");
     TS_ASSERT_EQUALS( output->blocksize(), 2068 );  // Value from IDF
 
@@ -227,7 +227,7 @@ public:
     conv2.setPropertyValue("Efixed","10");
     conv2.execute();
 
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)) );
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace) );
     TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "DeltaE_inWavenumber");
     TS_ASSERT_EQUALS( output->blocksize(), 2546 );
 
@@ -259,7 +259,7 @@ public:
     this->setup_Event();
 
     //Retrieve Workspace
-    EventWorkspace_sptr WS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(inputSpace));
+    EventWorkspace_sptr WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(inputSpace);
     TS_ASSERT( WS ); //workspace is loaded
     size_t start_blocksize = WS->blocksize();
     size_t num_events = WS->getNumberEvents();
@@ -340,7 +340,7 @@ public:
     conv.execute();
     TS_ASSERT( conv.isExecuted() );
 
-    EventWorkspace_sptr out = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("out"));
+    EventWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("out");
     TS_ASSERT(out);
     if (!out) return;
     TS_ASSERT_EQUALS( out->getNumberEvents(), 100*200);
