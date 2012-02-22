@@ -97,7 +97,7 @@ namespace DataHandling
     exts.push_back(".xml");
     exts.push_back(".msk");
     declareProperty(new FileProperty("InputFile", "", FileProperty::Load, exts),
-        "XML file for masking. ");
+        "Masking file for masking. Supported file format is XML and ISIS ASCII. ");
     declareProperty(new WorkspaceProperty<DataObjects::SpecialWorkspace2D>("OutputWorkspace", "Masking", Direction::Output),
         "Output Masking Workspace");
 

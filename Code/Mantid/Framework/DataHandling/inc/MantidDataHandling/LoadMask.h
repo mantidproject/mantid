@@ -11,7 +11,7 @@ namespace Mantid
 namespace DataHandling
 {
 
-  /** LoadMask : TODO: DESCRIPTION
+  /** LoadMask : Load masking file to generate a SpecialWorkspace2D object (masking workspace).
     
     @author
     @date 2011-11-02
