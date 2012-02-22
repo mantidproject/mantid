@@ -343,11 +343,11 @@ namespace Mantid
 
       //Horace Tags.
       qx.setId("qx");
-      qx.setUnits("Ang^(-1)");
+      qx.setUnits("A^(-1)");
       qy.setId("qy");
-      qy.setUnits("Ang^(-1)");
+      qy.setUnits("A^(-1)");
       qz.setId("qz");
-      qz.setUnits("Ang^(-1)");
+      qz.setUnits("A^(-1)");
       en.setId("en");
       en.setUnits("MeV");
 
