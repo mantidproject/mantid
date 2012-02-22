@@ -1728,9 +1728,6 @@ Quick check to determine if VATES is installed.
 */
 bool ConfigServiceImpl::quickVatesCheck() const
 {
-  using boost::regex;
-  using boost::regex_search;
-
   std::string path = this->getDirectoryOfExecutable();
 
   Poco::File dir(path);
@@ -1744,8 +1741,8 @@ bool ConfigServiceImpl::quickVatesCheck() const
   while(it != files.end())
   {
     std::string file = *it;
-    regex expression("^(VatesSimpleGui)", boost::regex::icase);
-    if(regex_search(file, expression))
+    boost::regex expression("^(VatesSimpleGui)", boost::regex::icase);
+    if(boost::regex_search(file, expression))
     {
       found = true;
       break;
