@@ -9,6 +9,7 @@
 #include "MantidDataHandling/LiveDataAlgorithm.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/AlgorithmManager.h"
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;
@@ -59,7 +60,9 @@ public:
   
   void test_makeAlgorithm()
   {
-    for (int post=0; post<2; post++)
+    FrameworkManager::Instance();
+    AlgorithmManager::Instance();
+    for (int post=0; post<1; post++)
     {
       // Try both the regular and the Post-Processing algorithm
       std::string prefix="";
@@ -74,7 +77,7 @@ public:
       TS_ASSERT_THROWS_NOTHING( alg.initialize() )
       TS_ASSERT( alg.isInitialized() )
 
-      IAlgorithm_sptr procAlg;
+      IAlgorithm * procAlg;
       procAlg = alg.makeAlgorithm( bool(post) );
       TSM_ASSERT("NULL algorithm pointer returned if nothing is specified.", !procAlg);
 

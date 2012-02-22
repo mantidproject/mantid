@@ -8,10 +8,13 @@
 #include <iomanip>
 
 #include "MantidDataHandling/LoadLiveData.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;
+using namespace Mantid::DataObjects;
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 
 class LoadLiveDataTest : public CxxTest::TestSuite
 {
@@ -29,30 +32,35 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
   
-//  void test_exec()
-//  {
-//    // Name of the output workspace.
-//    std::string outWSName("LoadLiveDataTest_OutputWS");
-//
-//    LoadLiveData alg;
-//    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-//    TS_ASSERT( alg.isInitialized() )
-//    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("REPLACE_PROPERTY_NAME_HERE!!!!", "value") );
-//    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
-//    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
-//    TS_ASSERT( alg.isExecuted() );
-//
-//    // Retrieve the workspace from data service. TODO: Change to your desired type
-//    Workspace_sptr ws;
-//    TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve(outWSName)) );
-//    TS_ASSERT(ws);
-//    if (!ws) return;
-//
-//    // TODO: Check the results
-//
-//    // Remove workspace from the data service.
-//    AnalysisDataService::Instance().remove(outWSName);
-//  }
+  void doExecEvent(std::string AccumulationMethod)
+  {
+    LoadLiveData alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Instrument", "FakeEventDataListener") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", "fake") );
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    TS_ASSERT( alg.isExecuted() );
+
+    // Retrieve the workspace from data service. TODO: Change to your desired type
+    EventWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("fake")) );
+    TS_ASSERT(ws);
+    if (!ws) return;
+
+  }
+
+  void test_exec()
+  {
+    // Name of the output workspace.
+    std::string outWSName("LoadLiveDataTest_OutputWS");
+
+
+    // TODO: Check the results
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSName);
+  }
   
   void test_Something()
   {

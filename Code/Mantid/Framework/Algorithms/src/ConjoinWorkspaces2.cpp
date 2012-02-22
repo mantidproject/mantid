@@ -408,8 +408,7 @@ namespace Algorithms
       {
         if ( spectrum > 0 && spectra.find(spectrum) != spectra.end() )
         {
-          g_log.error() << "The input workspaces have overlapping spectrum numbers " << spectrum << "\n";
-          throw std::invalid_argument("The input workspaces have overlapping spectrum numbers");
+          throw std::invalid_argument("The input workspaces have overlapping spectrum numbers " + Strings::toString(spectrum));
         }
       }
       const std::set<detid_t> & dets = spec->getDetectorIDs();
@@ -418,8 +417,7 @@ namespace Algorithms
       {
         if ( detectors.find(*it) != detectors.end() )
         {
-          g_log.error() << "The input workspaces have common detectors: " << (*it) << "\n";
-          throw std::invalid_argument("The input workspaces have common detectors");
+          throw std::invalid_argument("The input workspaces have common detectors: " + Strings::toString(*it));
         }
       }
     }

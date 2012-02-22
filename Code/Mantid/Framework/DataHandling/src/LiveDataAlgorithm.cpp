@@ -135,12 +135,12 @@ namespace DataHandling
    *
    * @param postProcessing :: true to create the PostProcessingAlgorithm.
    *        false to create the ProcessingAlgorithm
-   * @return shared pointer to the algorithm, ready for execution.
-   *         Returns an empty pointer if no algorithm was chosen.
+   * @return pointer to the algorithm, ready for execution.
+   *         Returns a NULL pointer if no algorithm was chosen.
+   *         This pointer is owned by the AlgorithmManager, so DO NOT DELETE!
    */
-  IAlgorithm_sptr LiveDataAlgorithm::makeAlgorithm(bool postProcessing)
+  IAlgorithm * LiveDataAlgorithm::makeAlgorithm(bool postProcessing)
   {
-    IAlgorithm_sptr alg;
     std::string prefix = "";
     if (postProcessing)
       prefix = "Post";
@@ -148,14 +148,14 @@ namespace DataHandling
     std::string algoName = this->getPropertyValue(prefix+"ProcessingAlgorithm");
     algoName = Strings::strip(algoName);
     if (algoName.empty())
-      return alg;
+      return NULL;
 
     std::string props = this->getPropertyValue(prefix+"ProcessingProperties");
 
     // TODO: Handle script too.
 
     // Create the algorithm and pass it the properties
-    alg = IAlgorithm_sptr(FrameworkManager::Instance().createAlgorithm(algoName, props));
+    IAlgorithm * alg = FrameworkManager::Instance().createAlgorithm(algoName, props);
 
     return alg;
   }
