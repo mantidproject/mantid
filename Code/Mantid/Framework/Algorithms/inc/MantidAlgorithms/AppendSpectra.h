@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_CONJOINWORKSPACES2_H_
-#define MANTID_ALGORITHMS_CONJOINWORKSPACES2_H_
+#ifndef MANTID_ALGORITHMS_APPENDSPECTRA_H_
+#define MANTID_ALGORITHMS_APPENDSPECTRA_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
@@ -40,11 +40,11 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport ConjoinWorkspaces2  : public API::Algorithm
+  class DLLExport AppendSpectra  : public API::Algorithm
   {
   public:
-    ConjoinWorkspaces2();
-    virtual ~ConjoinWorkspaces2();
+    AppendSpectra();
+    virtual ~AppendSpectra();
     
     virtual const std::string name() const;
     virtual int version() const;
@@ -58,10 +58,10 @@ namespace Algorithms
     void exec();
     void execEvent();
 
+    static void getMinMax(Mantid::API::MatrixWorkspace_const_sptr ws, specid_t& min, specid_t& max);
+
     void validateInputs(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2);
-    void checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2, bool checkSpectra) const;
     void fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2, API::MatrixWorkspace_sptr output);
-    bool processGroups();
 
     /// Progress reporting object
     API::Progress *m_progress;
@@ -78,4 +78,4 @@ namespace Algorithms
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif  /* MANTID_ALGORITHMS_CONJOINWORKSPACES2_H_ */
+#endif  /* MANTID_ALGORITHMS_APPENDSPECTRA_H_ */

@@ -1,32 +1,35 @@
 /*WIKI*
 
+This algorithm appends the spectra of two workspaces together.
 
-This algorithm can be useful when working with large datasets. It enables the raw file to
-be loaded in two parts (not necessarily of equal size), the data processed in turn and
-the results joined back together into a single dataset.
-This can help avoid memory problems either because intermediate workspaces
-will be smaller and/or because the data will be much reduced after processing.
-
-The output workspace from this algorithm, will be a copy of the first
+The output workspace from this algorithm will be a copy of the first
 input workspace, to which the data from the second input workspace
 will be appended.
+
 Workspace data members other than the data (e.g. instrument etc.) will be copied
 from the first input workspace (but if they're not identical anyway,
 then you probably shouldn't be using this algorithm!).
 
-The input workspaces will not be deleted.
-
 ==== Restrictions on the input workspace ====
 
-The input workspaces must come from the same instrument, have common
-units and bins and no detectors that contribute to spectra should overlap.
+For [[EventWorkspace]]s, there are no restrictions on the input workspaces if ValidateInputs=false.
 
-If you specify CheckOverlapping=False, then the check that spectra do not
-overlap is skipped.
+For [[Workspace2D]]s, the number of bins must be the same in both inputs.
+
+If ValidateInputs is selected, then the input workspaces must also:
+* Come from the same instrument
+* Have common units
+* Have common bin boundaries
+
+==== Spectrum Numbers ====
+
+If there is an overlap in the spectrum numbers of both inputs, then the output
+workspace will have its spectrum numbers reset starting at 0 and increasing by
+1 for each spectrum.
 
 *WIKI*/
 
-#include "MantidAlgorithms/ConjoinWorkspaces2.h"
+#include "MantidAlgorithms/AppendSpectra.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -42,14 +45,14 @@ namespace Algorithms
 {
 
   // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(ConjoinWorkspaces2)
+  DECLARE_ALGORITHM(AppendSpectra)
   
 
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  ConjoinWorkspaces2::ConjoinWorkspaces2()
+  AppendSpectra::AppendSpectra()
   : Algorithm(), m_progress(NULL), m_overlapChecked(false)
   {
   }
@@ -57,7 +60,7 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  ConjoinWorkspaces2::~ConjoinWorkspaces2()
+  AppendSpectra::~AppendSpectra()
   {
     if( m_progress )
     {
@@ -68,17 +71,17 @@ namespace Algorithms
 
   //----------------------------------------------------------------------------------------------
   /// Algorithm's name for identification. @see Algorithm::name
-  const std::string ConjoinWorkspaces2::name() const { return "ConjoinWorkspaces";};
+  const std::string AppendSpectra::name() const { return "AppendSpectra";};
   
   /// Algorithm's version for identification. @see Algorithm::version
-  int ConjoinWorkspaces2::version() const { return 2;};
+  int AppendSpectra::version() const { return 1;};
   
   /// Algorithm's category for identification. @see Algorithm::category
-  const std::string ConjoinWorkspaces2::category() const { return "Transforms\\Merging";}
+  const std::string AppendSpectra::category() const { return "Transforms\\Merging";}
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
-  void ConjoinWorkspaces2::initDocs()
+  void AppendSpectra::initDocs()
   {
     this->setWikiSummary("Join two workspaces together by appending their spectra.");
     this->setOptionalMessage("Join two workspaces together by appending their spectra.");
@@ -87,7 +90,7 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
-  void ConjoinWorkspaces2::init()
+  void AppendSpectra::init()
   {
     declareProperty(new WorkspaceProperty<>("InputWorkspace1",
       "", Direction::Input, new CommonBinsValidator<>),
@@ -95,8 +98,9 @@ namespace Algorithms
     declareProperty(new WorkspaceProperty<>("InputWorkspace2",
       "", Direction::Input, new CommonBinsValidator<>),
       "The name of the second input workspace");
-    declareProperty(new PropertyWithValue<bool>("CheckOverlapping", true, Direction::Input),
-                    "Verify that the supplied data do not overlap");
+
+    declareProperty("ValidateInputs", true,
+      "Perform a set of checks that the two input workspaces are compatible.");
 
     declareProperty(new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
       "The name of the output workspace");
@@ -105,7 +109,7 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
-  void ConjoinWorkspaces2::exec()
+  void AppendSpectra::exec()
   {
     // Retrieve the input workspaces
     MatrixWorkspace_const_sptr ws1 = getProperty("InputWorkspace1");
@@ -121,15 +125,24 @@ namespace Algorithms
       throw std::invalid_argument(message);
     }
 
+    bool ValidateInputs = this->getProperty("ValidateInputs");
+    if (ValidateInputs)
+    {
+      // Check that the input workspaces meet the requirements for this algorithm
+      this->validateInputs(ws1,ws2);
+    }
+
     if (event_ws1 && event_ws2)
     {
       //Both are event workspaces. Use the special method
       this->execEvent();
       return;
     }
+    // So it is a workspace 2D.
 
-    // Check that the input workspaces meet the requirements for this algorithm
-    this->validateInputs(ws1,ws2);
+    // The only restriction, even with ValidateInputs=false
+    if (ws1->blocksize() != ws2->blocksize())
+      throw std::runtime_error("Workspace2D's must have the same number of bins.");
 
     // Create the output workspace
     const size_t totalHists = ws1->getNumberHistograms() + ws2->getNumberHistograms();
@@ -235,16 +248,8 @@ namespace Algorithms
   /** Executes the algorithm
    *  @throw std::invalid_argument If the input workspaces do not meet the requirements of this algorithm
    */
-  void ConjoinWorkspaces2::execEvent()
+  void AppendSpectra::execEvent()
   {
-    //We do not need to check that binning is compatible, just that there is no overlap
-    // make sure we should bother checking
-    if (this->getProperty("CheckOverlapping"))
-    {
-      this->checkForOverlap(event_ws1, event_ws2, false);
-      m_overlapChecked = true;
-    }
-
     // Create the output workspace
     const size_t totalHists = event_ws1->getNumberHistograms() + event_ws2->getNumberHistograms();
     // Have the minimum # of histograms in the output.
@@ -262,8 +267,6 @@ namespace Algorithms
     // Initialize the progress reporting object
     m_progress = new API::Progress(this, 0.0, 1.0, totalHists);
 
-    specid_t maxSpec = 0;
-
     const int64_t& nhist1 = event_ws1->getNumberHistograms();
     for (int64_t i = 0; i < nhist1; ++i)
     {
@@ -272,16 +275,8 @@ namespace Algorithms
       ISpectrum * outSpec = output->getSpectrum(i);
       const ISpectrum * inSpec = event_ws1->getSpectrum(i);
       outSpec->copyInfoFrom(*inSpec);
-      if (outSpec->getSpectrumNo() > maxSpec)
-        maxSpec = outSpec->getSpectrumNo();
-
       m_progress->report();
     }
-
-    // Should we fix the spectrum numbers of the 2nd workspace
-    bool fixSpecNumbers = false;
-    if (event_ws2->getSpectrum(0)->getSpectrumNo() <= maxSpec)
-      fixSpecNumbers = true;
 
     //For second loop we use the offset from the first
     const int64_t& nhist2 = event_ws2->getNumberHistograms();
@@ -294,9 +289,6 @@ namespace Algorithms
       ISpectrum * outSpec = output->getSpectrum(output_wi);
       const ISpectrum * inSpec = event_ws2->getSpectrum(j);
       outSpec->copyInfoFrom(*inSpec);
-      // If the spectrum numbers overlap, then just increment from the last spec# of workspace1
-      if (fixSpecNumbers)
-        outSpec->setSpectrumNo( specid_t( maxSpec+j+1) );
 
       // Propagate spectrum masking. First workspace will have been done by the factory
       Geometry::IDetector_const_sptr ws2Det;
@@ -305,12 +297,10 @@ namespace Algorithms
         ws2Det = event_ws2->getDetector(j);
       }
       catch(Exception::NotFoundError &)
-      {
-      }
+      {  }
+
       if( ws2Det && ws2Det->isMasked() )
-      {
         output->maskWorkspaceIndex(output_wi);
-      }
 
       m_progress->report();
     }
@@ -320,6 +310,9 @@ namespace Algorithms
 
     //Set the same bins for all output pixels
     output->setAllX(XValues);
+
+    // Fix spectrum numbers if needed
+    this->fixSpectrumNumbers(event_ws1, event_ws2, output);
 
     // Set the output workspace
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(output) );
@@ -333,7 +326,7 @@ namespace Algorithms
    *  @param ws2 :: The second input workspace
    *  @throw std::invalid_argument If the workspaces are not compatible
    */
-  void ConjoinWorkspaces2::validateInputs(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2)
+  void AppendSpectra::validateInputs(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2)
   {
     // This is the full check for common binning
     if ( !WorkspaceHelpers::commonBoundaries(ws1) || !WorkspaceHelpers::commonBoundaries(ws2) )
@@ -375,62 +368,6 @@ namespace Algorithms
       throw std::invalid_argument(message);
     }
 
-    if (this->getProperty("CheckOverlapping") )
-    {
-      this->checkForOverlap(ws1,ws2, true);
-      m_overlapChecked = true;
-    }
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /** Checks that the two input workspaces have non-overlapping spectra numbers and contributing detectors
-   *  @param ws1 :: The first input workspace
-   *  @param ws2 :: The second input workspace
-   *  @param checkSpectra :: set to true to check for overlapping spectra numbers (non-sensical for event workspaces)
-   *  @throw std::invalid_argument If there is some overlap
-   */
-  void ConjoinWorkspaces2::checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2, bool checkSpectra) const
-  {
-    // Loop through the first workspace adding all the spectrum numbers & UDETS to a set
-    std::set<specid_t> spectra;
-    std::set<detid_t> detectors;
-    const size_t& nhist1 = ws1->getNumberHistograms();
-    for (size_t i = 0; i < nhist1; ++i)
-    {
-      const ISpectrum * spec = ws1->getSpectrum(i);
-      const specid_t spectrum = spec->getSpectrumNo();
-      spectra.insert(spectrum);
-      const std::set<detid_t> & dets = spec->getDetectorIDs();
-      std::set<detid_t>::const_iterator it;
-      for (it = dets.begin(); it != dets.end(); ++it)
-      {
-        detectors.insert(*it);
-      }
-    }
-
-    // Now go throught the spectrum numbers & UDETS in the 2nd workspace, making sure that there's no overlap
-    const size_t& nhist2 = ws2->getNumberHistograms();
-    for (size_t j = 0; j < nhist2; ++j)
-    {
-      const ISpectrum * spec = ws2->getSpectrum(j);
-      const specid_t spectrum = spec->getSpectrumNo();
-      if (checkSpectra)
-      {
-        if ( spectrum > 0 && spectra.find(spectrum) != spectra.end() )
-        {
-          throw std::invalid_argument("The input workspaces have overlapping spectrum numbers " + Strings::toString(spectrum));
-        }
-      }
-      const std::set<detid_t> & dets = spec->getDetectorIDs();
-      std::set<detid_t>::const_iterator it;
-      for (it = dets.begin(); it != dets.end(); ++it)
-      {
-        if ( detectors.find(*it) != detectors.end() )
-        {
-          throw std::invalid_argument("The input workspaces have common detectors: " + Strings::toString(*it));
-        }
-      }
-    }
   }
 
   //--------------------------------------------------------------------------------------------
@@ -441,7 +378,7 @@ namespace Algorithms
    * @param min The minimum id (output).
    * @param max The maximum id (output).
    */
-  void getMinMax(MatrixWorkspace_const_sptr ws, specid_t& min, specid_t& max)
+  void AppendSpectra::getMinMax(MatrixWorkspace_const_sptr ws, specid_t& min, specid_t& max)
   {
     specid_t temp;
     size_t length = ws->getNumberHistograms();
@@ -459,62 +396,35 @@ namespace Algorithms
   }
 
   //--------------------------------------------------------------------------------------------
-  /***
-   * This will ensure the spectrum numbers do not overlap by starting the second on at the first + 1
+  /** If there is an overlap in spectrum numbers between ws1 and ws2,
+   * then the spectrum numbers are reset as a simple 1-1 correspondence
+   * with the workspace index.
    *
    * @param ws1 The first workspace supplied to the algorithm.
    * @param ws2 The second workspace supplied to the algorithm.
    * @param output The workspace that is going to be returned by the algorithm.
    */
-  void ConjoinWorkspaces2::fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2,
+  void AppendSpectra::fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2,
                                              API::MatrixWorkspace_sptr output)
   {
-    // If check throws then we need to fix the output
-    bool needsFix(false);
-    try
-    {
-      if( !m_overlapChecked ) checkForOverlap(ws1, ws2, true);
-    }
-    catch(std::invalid_argument&)
-    {
-      needsFix = true;
-    }
-
-    if( !needsFix ) return;
-    // is everything possibly ok?
-    specid_t min;
-    specid_t max;
-    getMinMax(output, min, max);
-    if (max - min >= static_cast<specid_t>(output->getNumberHistograms())) // nothing to do then
-      return;
-
-    // information for remapping the spectra numbers
     specid_t ws1min;
     specid_t ws1max;
     getMinMax(ws1, ws1min, ws1max);
 
+    specid_t ws2min;
+    specid_t ws2max;
+    getMinMax(ws2, ws2min, ws2max);
+
+    // is everything possibly ok?
+    if (ws2min > ws1max)
+      return;
+
     // change the axis by adding the maximum existing spectrum number to the current value
-    for (size_t i = ws1->getNumberHistograms(); i < output->getNumberHistograms(); i++)
-    {
-      specid_t origid;
-      origid = output->getSpectrum(i)->getSpectrumNo();
-      output->getSpectrum(i)->setSpectrumNo(origid + ws1max);
-    }
+    for (size_t i = 0; i < output->getNumberHistograms(); i++)
+      output->getSpectrum(i)->setSpectrumNo( specid_t(i) );
+
     // To be deprecated:
     output->generateSpectraMap();
-  }
-
-  //--------------------------------------------------------------------------------------------
-  /// Appends the removal of the empty group after execution to the Algorithm::processGroups() method
-  bool ConjoinWorkspaces2::processGroups()
-  {
-    // Call the base class method for most of the functionality
-    const bool retval = Algorithm::processGroups();
-
-    // If that was successful, remove the now empty group in the second input workspace property
-    if (retval) AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace2"));
-
-    return retval;
   }
 
 
