@@ -39,7 +39,6 @@ def get_namespace(headerfile):
     """
     matches = re.match(r".*inc(/|\\)Mantid(\w+)(/|\\).*\.h", headerfile)
     if matches:
-        print matches.groups()
         namespace = matches.group(2)
     else:
         raise RuntimeError("Unknown header path style. Cannot extract Mantid namespace name.")
@@ -50,6 +49,7 @@ def get_frameworkdir(headerfile):
     Returns the Framework directory
     """
     if 'Framework' in headerfile:
+        matches = re.match(r"(.*Framework/).*\.h", headerfile)
         if matches:
             frameworkdir = matches.group(1)
         else:
@@ -71,7 +71,7 @@ def get_include(headerfile):
     """
     matches = re.match(r".*inc(/|\\)(Mantid[a-z,A-z]*(/|\\).*\.h)", headerfile)
     if matches:
-        return matches.group(1)
+        return matches.group(2)
     else:
         raise RuntimeError("Unable to determine include path from given header")
 

@@ -1,12 +1,12 @@
 import unittest
 
 from mantid.api import AlgorithmManager
-from mantid.api import (IAlgorithm, Algorithm, AlgorithmProxy, 
+from mantid.api import (IAlgorithm, Algorithm, AlgorithmProxy, PythonAlgorithm, 
                         registerAlgorithm)
 import sys
 
-class IsAnAlgorithm(Algorithm):
-    def init_(self):
+class IsAnAlgorithm(PythonAlgorithm):
+    def PyInit(self):
         pass
     
 class NotAnAlgorithm(object):

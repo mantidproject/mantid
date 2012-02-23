@@ -8,6 +8,7 @@ set ( MODULE_TEMPLATE src/api.cpp.in )
 # -- Do NOT sort this list. The order defines the order in which the export
 #    definitions occur and some depend on their base classes being exported first -- 
 set ( EXPORT_FILES
+  src/Exports/IAlgorithm.cpp
   src/Exports/Algorithm.cpp
   src/Exports/AlgorithmFactory.cpp
   src/Exports/AlgorithmManager.cpp

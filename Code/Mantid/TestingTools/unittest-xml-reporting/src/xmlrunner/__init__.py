@@ -42,7 +42,7 @@ class _TestInfo(object):
         """
         if not self.err:
             return ''
-        return self.test_result._exc_info_toFormattedString(self.err, \
+        return self.test_result._exc_info_to_string(self.err, \
             self.test_method)
 
 
