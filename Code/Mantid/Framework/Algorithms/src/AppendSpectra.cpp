@@ -27,6 +27,10 @@ If there is an overlap in the spectrum numbers of both inputs, then the output
 workspace will have its spectrum numbers reset starting at 0 and increasing by
 1 for each spectrum.
 
+==== See Also ====
+
+* [[ConjoinWorkspaces]] for joining parts of the same workspace.
+
 *WIKI*/
 
 #include "MantidAlgorithms/AppendSpectra.h"
