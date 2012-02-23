@@ -30,13 +30,13 @@ set ( SRC_FILES
   src/Converters/NDArrayToVector.cpp
   src/Converters/NDArrayTypeIndex.cpp
   src/Converters/PyArrayType.cpp
+  src/Converters/PyObjectToMatrix.cpp
   src/Converters/PyObjectToV3D.cpp
   src/Converters/VectorToNDArray.cpp
   src/Registry/SequenceTypeHandler.cpp
   src/Registry/TypeRegistry.cpp
   src/Registry/UpcastRegistry.cpp
   src/PyEnvironment.cpp
-  src/NumpyConverters.cpp
   src/WrapperHelpers.cpp
 )
 
@@ -47,6 +47,8 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/Converters/NumpyWrapMode.h
   ${HEADER_DIR}/kernel/Converters/VectorToNDArray.h
   ${HEADER_DIR}/kernel/Converters/PyArrayType.h
+  ${HEADER_DIR}/kernel/Converters/PyObjectToMatrix.h
+  ${HEADER_DIR}/kernel/Converters/PyObjectToV3D.h
   ${HEADER_DIR}/kernel/Converters/PySequenceToVector.h
   ${HEADER_DIR}/kernel/Policies/MatrixToNumpy.h
   ${HEADER_DIR}/kernel/Policies/VectorToNumpy.h
@@ -61,7 +63,6 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/PropertyWithValue.h
   ${HEADER_DIR}/kernel/PyEnvironment.h
   ${HEADER_DIR}/kernel/StlExportDefinitions.h
-  ${HEADER_DIR}/kernel/NumpyConverters.h
   ${HEADER_DIR}/kernel/WrapperHelpers.h
 )
 

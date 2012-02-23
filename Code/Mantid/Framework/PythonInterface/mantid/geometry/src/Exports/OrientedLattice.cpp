@@ -1,9 +1,9 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidPythonInterface/kernel/Converters/MatrixToNDArray.h"
 #include "MantidPythonInterface/kernel/Converters/PyObjectToV3D.h"
-#include "MantidPythonInterface/kernel/Policies/MatrixToNumpy.h"
+#include "MantidPythonInterface/kernel/Converters/PyObjectToMatrix.h"
 
-#include "MantidPythonInterface/kernel/NumpyConverters.h"
+#include "MantidPythonInterface/kernel/Policies/MatrixToNumpy.h"
 #include <boost/python/class.hpp>
 
 using Mantid::Geometry::OrientedLattice;
@@ -16,15 +16,15 @@ namespace //<unnamed>
   using namespace Mantid::PythonInterface;
 
   /// Set the U vector via a numpy array
-  void setU(OrientedLattice & self, PyObject *data)
+  void setU(OrientedLattice & self, object data)
   {
-    self.setU(Numpy::createDoubleMatrix(data));
+    self.setU(Converters::PyObjectToMatrix(data)());
   }
 
   /// Set the U vector via a numpy array
-  void setUB(OrientedLattice & self, PyObject *data)
+  void setUB(OrientedLattice & self, object data)
   {
-    self.setUB(Numpy::createDoubleMatrix(data));
+    self.setUB(Converters::PyObjectToMatrix(data)());
   }
 
   /// Set the U matrix from 2 Python objects representing a V3D type. This can be a V3D object, a list
