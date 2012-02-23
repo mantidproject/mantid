@@ -27,6 +27,7 @@ namespace API
     {
       // Create a LOCAL grid layout
       m_gridLayout = new QGridLayout(this, 1, 5);
+      m_gridLayout->setSpacing(5);
       this->setLayout(m_gridLayout);
       // Will always go to row 0
       m_row = 0;
