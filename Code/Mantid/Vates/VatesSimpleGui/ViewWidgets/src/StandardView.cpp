@@ -85,12 +85,12 @@ void StandardView::render()
   // Show the data
   pqDataRepresentation *drep = builder->createDataRepresentation(\
         this->origSrc->getOutputPort(0), this->view);
-  int reptype = VTK_SURFACE;
+  QString reptype = "Surface";
   if (this->isPeaksWorkspace(this->origSrc))
   {
-    reptype = VTK_WIREFRAME;
+    reptype = "Wireframe";
   }
-  vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(reptype);
+  vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(reptype.toStdString().c_str());
   drep->getProxy()->UpdateVTKObjects();
   this->origRep = qobject_cast<pqPipelineRepresentation*>(drep);
   this->origRep->colorByArray("signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);

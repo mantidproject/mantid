@@ -65,6 +65,7 @@ void SplatterPlotView::render()
   pqPipelineSource *src = NULL;
   src = pqActiveObjects::instance().activeSource();
 
+  QString renderType = "Surface";
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
 
   // Do not allow overplotting of MDWorkspaces
@@ -82,8 +83,6 @@ void SplatterPlotView::render()
     return;
   }
 
-  int renderType = VTK_SURFACE;
-
   if (!this->isPeaksWorkspace(src))
   {
     this->origSrc = src;
@@ -95,13 +94,13 @@ void SplatterPlotView::render()
   else
   {
     this->peaksSource.append(src);
-    renderType = VTK_WIREFRAME;
+    renderType = "Wireframe";
   }
 
   // Show the data
   pqDataRepresentation *drep = builder->createDataRepresentation(\
            src->getOutputPort(0), this->view);
-  vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(renderType);
+  vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(renderType.toStdString().c_str());
   drep->getProxy()->UpdateVTKObjects();
   pqPipelineRepresentation *prep = NULL;
   prep = qobject_cast<pqPipelineRepresentation*>(drep);

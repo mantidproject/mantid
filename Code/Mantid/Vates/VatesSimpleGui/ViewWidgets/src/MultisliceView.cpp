@@ -198,7 +198,7 @@ void MultiSliceView::setupData()
 
   pqDataRepresentation *drep = builder->createDataRepresentation(\
         this->origSrc->getOutputPort(0), this->mainView);
-  vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(VTK_SURFACE);
+  vtkSMPropertyHelper(drep->getProxy(), "Representation").Set("Surface");
   drep->getProxy()->UpdateVTKObjects();
   this->origRep = qobject_cast<pqPipelineRepresentation*>(drep);
   this->origRep->colorByArray("signal",
