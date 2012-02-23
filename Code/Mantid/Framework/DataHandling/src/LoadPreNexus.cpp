@@ -20,6 +20,7 @@ Workflow algorithm to load all of the preNeXus files.
 #include "MantidDataHandling/LoadPreNexus.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidAPI/TableRow.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -144,7 +145,7 @@ namespace DataHandling
                     "Load the monitors from the file.");
 
 
-    declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "An output workspace.");
+    declareProperty(new WorkspaceProperty<API::Workspace>("OutputWorkspace","",Direction::Output), "An output workspace.");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -159,20 +160,18 @@ namespace DataHandling
     if (!isEmpty(maxChunk))
     {
       int NChunks = determineChunking(runinfo,maxChunk);
-      std::vector<double>y;
       NChunks++;  // For python range
-      for (int i = 1; i <= NChunks; i++) 
-        y.push_back(i);
-      
-      IAlgorithm_sptr algo = createSubAlgorithm("CreateWorkspace", 0.7, 1.0);
-      algo->setProperty< std::vector<double> >("DataX", std::vector<double>(NChunks+1,0.0) );
-      algo->setProperty< std::vector<double> >("DataY", y );
-      algo->setProperty< std::vector<double> >("DataE", std::vector<double>(NChunks,0.0) );
-      algo->setProperty<int>("NSpec", 1 );
-      algo->execute();
-      MatrixWorkspace_sptr outws = algo->getProperty("OutputWorkspace");
+      Mantid::API::ITableWorkspace_sptr strategy = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+      strategy->addColumn("int","ChunkNumber");
+      strategy->addColumn("int","TotalChunks");
 
-      this->setProperty("OutputWorkspace", outws);
+      for (int i = 1; i <= NChunks; i++) 
+      {
+        Mantid::API::TableRow row = strategy->appendRow();
+        row << i << NChunks;
+      }
+      
+      this->setProperty("OutputWorkspace", strategy);
       return;
     }
     if ( isEmpty(chunkTotal) || isEmpty(chunkNumber))

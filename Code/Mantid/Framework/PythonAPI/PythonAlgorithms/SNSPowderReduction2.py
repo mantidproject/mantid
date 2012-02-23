@@ -285,13 +285,14 @@ class SNSPowderReduction2(PythonAlgorithm):
         strategy = []
         if self._chunks > 0 and not "histo" in extension:
             alg = LoadPreNexus(Filename=wksp+"_runinfo.xml",MaxChunkSize=self._chunks,OutputWorkspace='Chunks')
-            Chunks = alg['OutputWorkspace'].readY(0)
-            if len(Chunks) > 1:
-                for oneChunk in Chunks:
-                   chunk = {}
-                   chunk["ChunkNumber"] = int(oneChunk)
-                   chunk["TotalChunks"] = len(Chunks)
-                   strategy.append(chunk)
+            table = alg['OutputWorkspace']
+            cNames = table.getColumnNames()
+            if table.getRowCount() > 0:
+                for i in range(0,table.getRowCount()):
+                     chunk = {}
+                     for j in range(0,table.getColumnCount()):
+                         chunk[cNames[j]] = table.getInt(cNames[j],i)
+                     strategy.append(chunk)
             else:
                 chunk = {}
                 strategy.append(chunk)
