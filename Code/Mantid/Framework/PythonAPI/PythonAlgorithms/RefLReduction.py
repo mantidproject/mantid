@@ -430,7 +430,7 @@ class RefLReduction(PythonAlgorithm):
                                         source_to_detector=dMD,
                                         sample_to_detector=dSD,
                                         theta=theta,
-                                        geo_correction=True,
+                                        geo_correction=False,
                                         q_binning=[q_min,q_step,q_max])
 
         mt = mtd[ws_data_Q]
@@ -447,6 +447,37 @@ class RefLReduction(PythonAlgorithm):
 #            mtd.deleteWorkspace(output_ws)
             
         SumSpectra(InputWorkspace=ws_data_Q, OutputWorkspace=output_ws)
+
+        #keep only none zero values
+        mt = mtd[output_ws]
+        sz = shape(mt.readY(0)[:])[0]
+        data_x = []
+        data_y = []
+        data_y_error = []
+        for i in range(sz):
+            _y = mt.readY(0)[i]
+#            print '_y={0:3f} at i={1:2d}'.format(_y, i)
+            if _y != 0.:
+                data_x.append(mt.readX(0)[i])
+                data_y.append(_y)
+                data_y_error.append(mt.readE(0)[i])
+        
+        #if at least one non zero value found
+        if data_x != []:
+            CreateWorkspace(OutputWorkspace=output_ws,
+                            DataX=data_x,
+                            DataY=data_y,
+                            DataE=data_y_error,
+                            Nspec=1,
+                            UnitX="MomentumTransfer")
+ 
+#        if (list_of_rows_to_remove != []):
+#            list_of_rows_to_remove = ','.join(list_of_rows_to_remove)
+#            Transpose(InputWorkspace=output_ws,
+#                      OutputWorkspace=output_ws)
+#            DeleteTableRows(TableWorkspace=output_ws, Rows=list_of_rows_to_remove)        
+#            Transpose(InputWorkspace=output_ws,
+#                      OutputWorkspace=output_ws)
         
         self.setProperty("OutputWorkspace", mtd[output_ws])
 
