@@ -375,6 +375,7 @@ public slots:
   Matrix* matrix(const QString& name);
   Matrix* convertTableToMatrix();
   void convertTableToWorkspace();
+  void convertTableToMatrixWorkspace();
   MantidTable* convertTableToTableWorkspace(Table* t);
   Matrix* tableToMatrix(Table* t);
   void initMatrix(Matrix* m, const QString& caption);
@@ -1398,7 +1399,7 @@ private:
   QAction *actionShowColumnOptionsDialog, *actionShowColumnValuesDialog, *actionShowColsDialog, *actionShowRowsDialog;
   QAction *actionTableRecalculate;
   QAction *actionAbout, *actionShowHelp, *actionChooseHelpFolder,*actionMantidConcepts,*actionMantidAlgorithms,*actionmantidplotHelp;
-  QAction *actionRename, *actionCloseWindow, *actionConvertTable, *actionConvertTableToWorkspace;
+  QAction *actionRename, *actionCloseWindow, *actionConvertTable, *actionConvertTableToWorkspace, *actionConvertTableToMatrixWorkspace;
   QAction *actionAddColToTable, *actionDeleteLayer, *actionInterpolate;
   QAction *actionResizeActiveWindow, *actionHideActiveWindow;
   QAction *actionShowMoreWindows, *actionPixelLineProfile, *actionIntensityTable;

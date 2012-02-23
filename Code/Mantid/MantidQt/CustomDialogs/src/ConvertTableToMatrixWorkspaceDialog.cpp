@@ -56,12 +56,54 @@ namespace MantidQt
       if (!tws) return; // just in case
       m_form.cbColumnE->insertItem(""); // the default value
       std::vector<std::string> columns = tws->getColumnNames();
+      if (columns.empty()) return;
+      QString defaultXColumn;
+      QString defaultYColumn;
+      QString defaultEColumn;
       for(std::vector<std::string>::const_iterator column = columns.begin(); column != columns.end(); ++column)
       {
         QString qName = QString::fromStdString(*column);
         m_form.cbColumnX->insertItem(qName);
         m_form.cbColumnY->insertItem(qName);
         m_form.cbColumnE->insertItem(qName);
+        Mantid::API::Column_sptr col = tws->getColumn(*column);
+        if (col->getPlotType() == 1 && defaultXColumn.isEmpty()) // type X
+        {
+          defaultXColumn = qName;
+        }
+        if (col->getPlotType() == 2 && defaultYColumn.isEmpty()) // type Y
+        {
+          defaultYColumn = qName;
+        }
+        if (col->getPlotType() == 5 && defaultEColumn.isEmpty()) // type yErr
+        {
+          defaultEColumn = qName;
+        }
+      }
+      // set initial guesses for column names
+      if ( !defaultXColumn.isEmpty() )
+      {
+        int i = m_form.cbColumnX->findText(defaultXColumn);
+        if (i >= 0)
+        {
+          m_form.cbColumnX->setCurrentIndex(i);
+        }
+      }
+      if ( !defaultYColumn.isEmpty() )
+      {
+        int i = m_form.cbColumnY->findText(defaultYColumn);
+        if (i >= 0)
+        {
+          m_form.cbColumnY->setCurrentIndex(i);
+        }
+      }
+      if ( !defaultEColumn.isEmpty() )
+      {
+        int i = m_form.cbColumnE->findText(defaultEColumn);
+        if (i >= 0)
+        {
+          m_form.cbColumnE->setCurrentIndex(i);
+        }
       }
     }
 

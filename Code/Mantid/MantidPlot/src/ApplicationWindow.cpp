@@ -1429,6 +1429,7 @@ void ApplicationWindow::tableMenuAboutToShow()
   {
     tableMenu->addAction(actionConvertTableToWorkspace);
   }
+  tableMenu->addAction(actionConvertTableToMatrixWorkspace);
 
   tableMenu->insertSeparator();
   tableMenu->addAction(actionShowPlotWizard);
@@ -3504,6 +3505,24 @@ void ApplicationWindow::convertTableToWorkspace()
 }
 
 /**
+ * Convert Table in the active window to a TableWorkspace
+ */
+void ApplicationWindow::convertTableToMatrixWorkspace()
+{
+  Table* t = dynamic_cast<Table*>(activeWindow(TableWindow));
+  if (!t) return;
+  MantidTable* mt = dynamic_cast<MantidTable*>(t);
+  if (!mt)
+  {
+    mt = convertTableToTableWorkspace(t);
+  }
+  //mantidUI->executeAlgorithm("ConvertTableToMatrixWorkspace","InputWorkspace="+QString::fromStdString(mt->getWorkspaceName()));
+  QMap<QString,QString> params;
+  params["InputWorkspace"] = QString::fromStdString(mt->getWorkspaceName());
+  mantidUI->executeAlgorithmDlg("ConvertTableToMatrixWorkspace",params);
+}
+
+/**
  * Convert a Table to a TableWorkspace. Columns with plot designations X,Y,Z,xErr,yErr
  * are transformed to doubles, others - to strings.
  * @param t :: The Table to convert.
@@ -3517,17 +3536,21 @@ MantidTable* ApplicationWindow::convertTableToTableWorkspace(Table* t)
     Table::PlotDesignation des = (Table::PlotDesignation)t->colPlotDesignation(col);
     QString name = t->colLabel(col);
     std::string type;
+    int plotType = 6; // Label
     switch(des)
     {
-    case Table::X:
-    case Table::Y:
-    case Table::Z:
-    case Table::yErr:
-    case Table::xErr: type = "double"; break;
+    case Table::X: {plotType = 1; type = "double"; break;}
+    case Table::Y: {plotType = 2; type = "double"; break;}
+    case Table::Z: {plotType = 3; type = "double"; break;}
+    case Table::xErr:  {plotType = 4; type = "double"; break;}
+    case Table::yErr: {plotType = 5; type = "double"; break;}
     default:
-      type = "string";
+      type = "string"; plotType = 6;
     }
-    tws->addColumn(type,name.toStdString());
+    std::string columnName = name.toStdString();
+    tws->addColumn(type,columnName);
+    Mantid::API::Column_sptr column = tws->getColumn(columnName);
+    column->setPlotType(plotType);
   }
   tws->setRowCount(t->numRows());
   for(int col = 0; col < t->numCols(); ++col)
@@ -13145,8 +13168,11 @@ void ApplicationWindow::createActions()
   actionConvertTable= new QAction(tr("Convert to &Matrix"), this);
   connect(actionConvertTable, SIGNAL(activated()), this, SLOT(convertTableToMatrix()));
 
-  actionConvertTableToWorkspace= new QAction(tr("Convert to &Workspace"), this);
+  actionConvertTableToWorkspace= new QAction(tr("Convert to Table&Workspace"), this);
   connect(actionConvertTableToWorkspace, SIGNAL(activated()), this, SLOT(convertTableToWorkspace()));
+
+  actionConvertTableToMatrixWorkspace= new QAction(tr("Convert to MatrixWorkspace"), this);
+  connect(actionConvertTableToMatrixWorkspace, SIGNAL(activated()), this, SLOT(convertTableToMatrixWorkspace()));
 
   actionPlot3DWireFrame = new QAction(QIcon(getQPixmap("lineMesh_xpm")), tr("3D &Wire Frame"), this);
   connect(actionPlot3DWireFrame, SIGNAL(activated()), this, SLOT(plot3DWireframe()));
@@ -13827,7 +13853,8 @@ void ApplicationWindow::translateActionsStrings()
   actionExportMatrix->setMenuText(tr("&Export Image ..."));
 
   actionConvertTable->setMenuText(tr("Convert to &Matrix"));
-  actionConvertTableToWorkspace->setMenuText(tr("Convert to &Workspace"));
+  actionConvertTableToWorkspace->setMenuText(tr("Convert to Table&Workspace"));
+  actionConvertTableToMatrixWorkspace->setMenuText(tr("Convert to MatrixWorkspace"));
   actionPlot3DWireFrame->setMenuText(tr("3D &Wire Frame"));
   actionPlot3DHiddenLine->setMenuText(tr("3D &Hidden Line"));
   actionPlot3DPolygons->setMenuText(tr("3D &Polygons"));

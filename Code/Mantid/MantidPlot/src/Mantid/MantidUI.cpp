@@ -1292,15 +1292,33 @@ MantidQt::API::AlgorithmDialog*  MantidUI::createAlgorithmDialog(Mantid::API::IA
 {
   QHash<QString, QString> presets;
   QStringList enabled;
+
+  //If a property was explicitly set show it as preset in the dialog
+  const std::vector<Mantid::Kernel::Property*> props = alg->getProperties();
+  std::vector<Mantid::Kernel::Property*>::const_iterator p = props.begin();
+  for(; p != props.end(); ++p)
+  {
+    if ( !(**p).isDefault() )
+    {
+      QString property_name = QString::fromStdString((**p).name());
+      presets.insert(property_name, QString::fromStdString((**p).value()));
+      enabled.append(property_name);
+    }
+  }
+
   //If a workspace is selected in the dock then set this as a preset for the dialog
   QString selected = getSelectedWorkspaceName();
   if( !selected.isEmpty() )
   {
     QString property_name = findInputWorkspaceProperty(alg);
-    presets.insert(property_name,selected);
-    // Keep it enabled
-    enabled.append(property_name);
+    if ( !presets.contains(property_name) )
+    {
+      presets.insert(property_name,selected);
+      // Keep it enabled
+      enabled.append(property_name);
+    }
   }
+
   //Check if a workspace is selected in the dock and set this as a preference for the input workspace
   //This is an optional message displayed at the top of the GUI.
   QString optional_msg(alg->getOptionalMessage().c_str());
@@ -1364,6 +1382,30 @@ void MantidUI::executeAlgorithm(QString algName, QMap<QString,QString> paramList
     alg->setPropertyValue(it.key().toStdString(),it.value().toStdString());
   }
   executeAlgorithmAsync(alg);
+}
+
+/**
+* Execute an algorithm. Show the algorithm dialog before executing. The property widgets will be preset
+*   with values in paramList.
+* @param algName :: The algorithm name
+* @param paramList :: A list of algorithm properties to be passed to Algorithm::setProperties
+* @param obs :: A pointer to an instance of AlgorithmObserver which will be attached to the finish notification
+*/
+void MantidUI::executeAlgorithmDlg(QString algName, QMap<QString,QString> paramList,Mantid::API::AlgorithmObserver* obs)
+{
+  //Get latest version of the algorithm
+  Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, -1);
+  if( !alg ) return;
+  if (obs)
+  {
+    obs->observeFinish(alg);
+  }
+  for(QMap<QString,QString>::Iterator it = paramList.begin(); it != paramList.end(); ++it)
+  {
+    alg->setPropertyValue(it.key().toStdString(),it.value().toStdString());
+  }
+  MantidQt::API::AlgorithmDialog* dlg=createAlgorithmDialog(alg);
+  executeAlgorithm(dlg,alg);
 }
 
 /**
