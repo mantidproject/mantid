@@ -152,6 +152,21 @@ namespace Mantid
       MatrixWorkspace_sptr countsWS = integrateSpectra(inputWS, minIndex, maxIndex,
                                                        rangeLower, rangeUpper, true);
 
+      // calculate the number of tests for progress bar
+      double progStepWidth;
+      {
+        int numTests(1); // always do the first one
+        if (getProperty("RunMedianDetectorTest"))
+          numTests += 1;
+        if (!getPropertyValue("WhiteBeamCompare").empty())
+          numTests += 1;
+        double temp = getProperty("MaxTubeFramerate");
+        if (temp > 0.)
+          numTests += 1;
+
+        progStepWidth = (1.-m_fracDone) / static_cast<double>(numTests);
+      }
+
       int numFailed(0);
       MatrixWorkspace_sptr maskWS;
 
@@ -162,7 +177,8 @@ namespace Mantid
         double highThreshold = getProperty("HighThreshold");
 
         // run the subalgorithm
-        IAlgorithm_sptr alg = createSubAlgorithm("FindDetectorsOutsideLimits"); // should set progress bar
+        IAlgorithm_sptr alg = createSubAlgorithm("FindDetectorsOutsideLimits", m_fracDone, m_fracDone+progStepWidth);
+        m_fracDone += progStepWidth;
         alg->setProperty("InputWorkspace", countsWS);
         alg->setProperty("StartWorkspaceIndex", minIndex);
         alg->setProperty("EndWorkspaceIndex", maxIndex);
@@ -191,7 +207,8 @@ namespace Mantid
         bool excludeZeroes = getProperty("ExcludeZeroesFromMedian");
 
         // run the subalgorithm
-        IAlgorithm_sptr alg = createSubAlgorithm("MedianDetectorTest"); // should set progress bar
+        IAlgorithm_sptr alg = createSubAlgorithm("MedianDetectorTest", m_fracDone, m_fracDone+progStepWidth);
+        m_fracDone += progStepWidth;
         alg->setProperty("InputWorkspace", countsWS);
         alg->setProperty("StartWorkspaceIndex", minIndex);
         alg->setProperty("EndWorkspaceIndex", maxIndex);
@@ -221,7 +238,8 @@ namespace Mantid
         double variation = getProperty("WhiteBeamVariation");
 
         // run the subalgorithm
-        IAlgorithm_sptr alg = createSubAlgorithm("DetectorEfficiencyVariation"); // should set progress bar
+        IAlgorithm_sptr alg = createSubAlgorithm("DetectorEfficiencyVariation", m_fracDone, m_fracDone+progStepWidth);
+        m_fracDone += progStepWidth;
         alg->setProperty("WhiteBeamBase", countsWS);
         alg->setProperty("WhiteBeamCompare", compareWS);
         alg->setProperty("StartWorkspaceIndex", minIndex);
@@ -238,7 +256,6 @@ namespace Mantid
 
       // CreatePSDBleedMask (if selected)
       double maxTubeFrameRate = getProperty("MaxTubeFramerate");
-      g_log.notice() << "MaxTubeFramerate \"" << maxTubeFrameRate << "\"\n";
       if (maxTubeFrameRate > 0.)
       {
         // apply mask to what we are going to input
@@ -248,7 +265,8 @@ namespace Mantid
         int numIgnore = getProperty("NIgnoredCentralPixels");
 
         // run the subalgorithm
-        IAlgorithm_sptr alg = createSubAlgorithm("CreatePSDBleedMask"); // should set progress bar
+        IAlgorithm_sptr alg = createSubAlgorithm("CreatePSDBleedMask", m_fracDone, m_fracDone+progStepWidth);
+        m_fracDone += progStepWidth;
         alg->setProperty("InputWorkspace", inputWS);
         alg->setProperty("MaxTubeFramerate", maxTubeFrameRate);
         alg->setProperty("NIgnoredCentralPixels", numIgnore);
