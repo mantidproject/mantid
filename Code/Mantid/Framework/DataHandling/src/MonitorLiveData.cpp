@@ -6,6 +6,7 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 #include "MantidKernel/System.h"
 #include <unistd.h>
 #include "MantidDataHandling/LoadLiveData.h"
+#include <Poco/Thread.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -85,7 +86,8 @@ namespace DataHandling
       this->interruption_point();
 
       // Sleep for 50 msec
-      usleep(50000);
+      Poco::Thread::sleep(50);
+
       DateAndTime now = DateAndTime::getCurrentTime();
       double seconds = DateAndTime::secondsFromDuration( now - lastTime );
       if (seconds > UpdateEvery)

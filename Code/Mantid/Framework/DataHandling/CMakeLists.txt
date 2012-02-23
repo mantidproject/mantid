@@ -114,7 +114,7 @@ set ( SRC_FILES
 	src/StartLiveData.cpp
 	src/UpdateInstrumentFromFile.cpp
 	#TODO: remove this
-	test/TestDataListener.cpp 
+	#test/TestDataListener.cpp 
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/LoadDAE/idc.cpp
