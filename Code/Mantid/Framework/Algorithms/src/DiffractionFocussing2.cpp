@@ -173,16 +173,13 @@ void DiffractionFocussing2::exec()
 
   //No problem! It is a normal Workspace2D
   API::MatrixWorkspace_sptr out=API::WorkspaceFactory::Instance().create(m_matrixInputW,nGroups,nPoints+1,nPoints);
+  // Caching containers that are either only read from or unused. Initialize them once.
+  // Helgrind will show a race-condition but the data is completely unused so it is irrelevant
+  MantidVec weights_default(1,1.0), emptyVec(1,0.0), EOutDummy(nPoints);
 
-  // Now the real work
-  MantidVec limits(2), weights_default(1,1.0), emptyVec(1,0.0), EOutDummy(nPoints);  // Vectors for use with the masking stuff
-
-  // loop over groups
   Progress * prog;
   prog = new API::Progress(this, 0.2, 0.95, static_cast<int>(totalHistProcess) + nGroups);
-#ifndef __APPLE__
   PARALLEL_FOR2(m_matrixInputW, out)
-#endif
   for (int outWorkspaceIndex = 0; outWorkspaceIndex < static_cast<int>(m_validGroups.size()); outWorkspaceIndex++)
   {
     PARALLEL_START_INTERUPT_REGION
@@ -207,8 +204,7 @@ void DiffractionFocussing2::exec()
     MantidVec& Yout=outSpec->dataY();
     MantidVec& Eout=outSpec->dataE();
 
-    // Initialize the group's weight vector here too
-    //MantidVec& groupWgt = boost::shared_ptr<MantidVec>(new MantidVec(nPoints,0.0));
+    // Initialize the group's weight vector here and the dummy vector used for accumulating errors.
     MantidVec groupWgt(nPoints,0.0);
 
     // loop through the contributing histograms
@@ -264,19 +260,16 @@ void DiffractionFocussing2::exec()
           weight_bins.push_back(Xin.back());
         }
 
-        // Create a temporary vector for the rebinned angles
-        //MantidVec weightsTemp(groupWgt.size(),0.0);
-        //MantidVec zeroesTemp(groupWgt.size(),0.0);
         // Create a zero vector for the errors because we don't care about them here
         const MantidVec zeroes(weights.size(),0.0);
         // Rebin the weights - note that this is a distribution
-        //VectorHelper::rebin(weight_bins,weights,zeroes,Xout,weightsTemp,zeroesTemp,true);
         VectorHelper::rebin(weight_bins,weights,zeroes,Xout,groupWgt,EOutDummy,true,true);
-        // Add weights for this spectrum to the output weights vector
-        //std::transform(groupWgt.begin(),groupWgt.end(),weightsTemp.begin(),groupWgt.begin(),std::plus<double>());
       }
       else // If no masked bins we want to add 1 to the weight of the output bins that this input covers
       {
+        // Initialized within the loop to avoid having to wrap writing to it with a PARALLEL_CRITICAL sections
+        MantidVec limits(2);
+
         if (eventXMin > 0. && eventXMax > 0.)
         {
           limits[0] = eventXMin;
