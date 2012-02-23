@@ -38,6 +38,7 @@ namespace Kernel
   public:
     ArrayLengthValidator();
     ArrayLengthValidator(const size_t len);
+    ArrayLengthValidator(const size_t lenmin, const size_t lenmax);
     virtual ~ArrayLengthValidator();
 
     IValidator<std::vector<TYPE> >* clone();
@@ -46,12 +47,28 @@ namespace Kernel
 
     /// Return if it has a length
     bool hasLength() const;
+    /// Return if it has a length
+    bool hasMinLength() const;
+    /// Return if it has a length
+    bool hasMaxLength() const;
     /// Return the length
     const size_t& getLength()    const;
-    /// Set lower bound value
+    /// Return the minimum length
+    const size_t& getMinLength()    const;
+    /// Return the maximum length
+    const size_t& getMaxLength()    const;
+    /// Set length
     void setLength( const size_t& value );
     /// Clear the length
     void clearLength();
+    /// Set length min
+    void setLengthMin( const size_t& value );
+    /// Set length max
+    void setLengthMax( const size_t& value );
+    /// Clear minimum
+    void clearLengthMin();
+    /// Clear maximum
+    void clearLengthMax();
 
   private:
     std::string checkValidity( const std::vector<TYPE> &value ) const;
@@ -59,6 +76,14 @@ namespace Kernel
     size_t m_arraySize;
     /// private variable, true if size is set, false if not
     bool m_hasArraySize;
+    /// private variable containing the minimum size of the array
+    size_t m_arraySizeMin;
+    /// private variable, true if min size is set, false if not
+    bool m_hasArraySizeMin;
+    /// private variable containing the size max of the array
+    size_t m_arraySizeMax;
+    /// private variable, true if size max is set, false if not
+    bool m_hasArraySizeMax;
   };
 
 
