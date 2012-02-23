@@ -51,8 +51,8 @@ public:
     // Check the events are there
     TS_ASSERT_EQUALS( evbuf->getNumberHistograms(), 2 )
     // Should be around 200 events
-    TS_ASSERT_LESS_THAN( evbuf->getNumberEvents(), 250 )
-    TS_ASSERT_LESS_THAN( 150, evbuf->getNumberEvents() )
+    TS_ASSERT_LESS_THAN( evbuf->getNumberEvents(), 25 )
+    TS_ASSERT_LESS_THAN( 15, evbuf->getNumberEvents() )
 
     Poco::Thread::sleep(100);
     // Call it again, and check things again
@@ -67,8 +67,8 @@ public:
     // Check the events are there
     TS_ASSERT_EQUALS( evbuf->getNumberHistograms(), 2 )
     // Should be around 200 events
-    TS_ASSERT_LESS_THAN( evbuf->getNumberEvents(), 250 )
-    TS_ASSERT_LESS_THAN( 150, evbuf->getNumberEvents() )
+    TS_ASSERT_LESS_THAN( evbuf->getNumberEvents(), 25 )
+    TS_ASSERT_LESS_THAN( 15, evbuf->getNumberEvents() )
   }
 
 private:

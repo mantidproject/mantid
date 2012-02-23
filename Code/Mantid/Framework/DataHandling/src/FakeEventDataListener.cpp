@@ -5,7 +5,7 @@
 
 namespace {
   // The data rate to (attempt to) generate in events/sec
-  long DATA_RATE = 2000;
+  long DATA_RATE = 200;
 }
 
 using namespace Mantid::API;
