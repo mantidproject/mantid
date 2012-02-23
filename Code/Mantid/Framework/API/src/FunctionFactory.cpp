@@ -141,6 +141,15 @@ namespace Mantid
         {
           wsParam = parValue;
         }
+        else if (parName == "MDWorkspace")
+        {
+          std::string mdwsName = parValue;
+          if (!mdwsName .empty())
+          {
+            Workspace_sptr ws = AnalysisDataService::Instance().retrieve(mdwsName);
+            fun->setWorkspace(ws,"",false);
+          }
+        }
         else
         {// set initial parameter value
           fun->setParameter(parName,atof(parValue.c_str()));
