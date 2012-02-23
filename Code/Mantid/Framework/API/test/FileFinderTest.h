@@ -173,7 +173,7 @@ public:
     TS_ASSERT(path.find("CSP78173.raw") != std::string::npos);
     Poco::File file(path);
     TS_ASSERT(file.exists());
-    path = FileFinder::Instance().findRun("CSP74683");
+    path = FileFinder::Instance().findRun("CSP74683", std::vector<std::string>(1, ".s02"));
     TS_ASSERT(path.size() > 3);
     TS_ASSERT_EQUALS(path.substr(path.size() - 3), "s02");
 

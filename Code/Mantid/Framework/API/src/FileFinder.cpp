@@ -25,27 +25,19 @@
 namespace
 {
   /**
-   * Functor used in conjunction with std::sort, to sort strings (file extensions) 
-   * based on the presence of a "*" wildcard.
+   * Unary predicate for use with remove_if.  Checks for the existance of
+   * a "*" wild card in the file extension string passed to it.
+   *
+   * @param ext :: the extension to check.
+   *
+   * @returns true if extension contains a "*", else false.
    */
-  struct wildCardSort
+  bool containsWildCard(const std::string & ext)
   {
-    /**
-     * Inspects the two strings, and returns true only if j contains a "*",
-     * and i does not.  Else returns false.
-     *
-     * @param i :: first string to compare.
-     * @param j :: second string to compare
-     * @return true only if j contains a "*", and i does not.  Else returns false.
-     */
-    bool operator() (const std::string & i, const std::string & j)
-    {
-      std::size_t foundI = i.find('*');
-      std::size_t foundJ = j.find('*');
-
-      return foundI == std::string::npos && foundJ != std::string::npos;;
-    }
-  };
+    if (std::string::npos != ext.find("*"))
+      return true;
+    return false;
+  }
 }
 
 namespace Mantid
@@ -453,15 +445,11 @@ namespace Mantid
       std::transform(filename.begin(),filename.end(),filenames[1].begin(),toupper);
       std::transform(filename.begin(),filename.end(),filenames[2].begin(),tolower);
 
-      // IMPROVEMENT FOR FINDING FILES ON LARGE NETWORK FOLDERS.
-      // Globbing across the network can be painfully slow for very large folders. (On the order of *minutes*.)
-      // If we rearrange the order of extenstions, so that those with a "*" wildcard are searched for last, 
-      // we save the slow globbing until all else fails.
-      std::sort(
-        extensions.begin(),
-        extensions.end(),
-        wildCardSort()
-        );
+      // Remove wild cards.
+      extensions.erase(std::remove_if( // "Erase-remove" idiom.
+          extensions.begin(), extensions.end(), 
+          containsWildCard),
+        extensions.end());
 
       std::vector<std::string>::const_iterator ext = extensions.begin();
       for (; ext != extensions.end(); ++ext)
