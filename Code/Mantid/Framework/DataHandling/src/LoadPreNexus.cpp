@@ -123,7 +123,7 @@ namespace DataHandling
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
     mustBePositive->setLower(1);
     declareProperty("MaxChunkSize", EMPTY_DBL(),
-        "Get chunking strategy for chunks with this number of Gbytes.");
+        "Get chunking strategy for chunks with this number of Gbytes. File will not be loaded if this option is set.");
     declareProperty("ChunkNumber", EMPTY_INT(), mustBePositive,
         "If loading the file by sections ('chunks'), this is the section number of this execution of the algorithm.");
     declareProperty("TotalChunks", EMPTY_INT(), mustBePositive->clone(),
