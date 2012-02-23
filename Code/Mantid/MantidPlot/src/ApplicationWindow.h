@@ -140,7 +140,8 @@ class ApplicationWindow: public QMainWindow, public Scripted
 {
   Q_OBJECT
 public:
-  ApplicationWindow(bool factorySettings = false);
+  ApplicationWindow(bool factorySettings, const QStringList& args);
+  ApplicationWindow(bool factorySettings=false);
   ~ApplicationWindow();
 
   enum ShowWindowsPolicy{HideAll, ActiveFolder, SubFolders};
@@ -1089,13 +1090,15 @@ private:
   QPoint desktopTopLeft() const;
   bool hasParaviewPath() const;
   bool hasVatesAvailable() const;
+  bool shouldExecuteAndQuit(const QString& arg);
+  void trySetParaviewPath(const QStringList& commandArguments);
 
   private slots:
   //! \name Initialization
   //@{
   void insertTranslatedStrings();
   void translateActionsStrings();
-  void init(bool factorySettings = false);
+  void init(bool factorySettings, const QStringList& args);
   void initGlobalConstants();
   void createActions();
   void initMainMenu();
