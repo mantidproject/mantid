@@ -37,6 +37,7 @@ class RefLReduction(PythonAlgorithm):
         self.declareWorkspaceProperty("OutputWorkspace", "", Direction.Output)
 
     def PyExec(self):
+        
         import os
         import numpy
         import math
@@ -153,7 +154,7 @@ class RefLReduction(PythonAlgorithm):
                                                    to_units='rad')
 
         # Rebin data (x-axis is in TOF)
-        ws_histo_data = "__"+ws_name+"_histo"
+        ws_histo_data = "_"+ws_name+"_histo"
         Rebin(InputWorkspace=ws_event_data, OutputWorkspace=ws_histo_data, 
               Params=[TOFrange[0], 
                       TOFsteps, 
@@ -164,7 +165,7 @@ class RefLReduction(PythonAlgorithm):
 
         # Normalized by Current (proton charge)
         NormaliseByCurrent(InputWorkspace=ws_histo_data, OutputWorkspace=ws_histo_data)
-        
+
         # Calculation of the central pixel (using weighted average)
         pixelXtof_data = wks_utility.getPixelXTOF(mtd[ws_histo_data], maxX=maxX, maxY=maxY)
         pixelXtof_1d = pixelXtof_data.sum(axis=1)
@@ -208,25 +209,6 @@ class RefLReduction(PythonAlgorithm):
         # Create a new event workspace of only the range of pixel of interest 
         # background range (along the y-axis) and of only the pixel
         # of interest along the x-axis (to avoid the frame effect)
-        theta = tthd_rad - ths_rad
-        AngleOffset_deg = float(self.getProperty("AngleOffset"))
-        AngleOffset_rad = (AngleOffset_deg * math.pi) / 180.
-        theta += AngleOffset_rad
-        
-        if dMD is not None and theta is not None:
-                    
-            _tof_axis = mtd[ws_histo_data].readX(0)
-            _const = float(4) * math.pi * m * dMD / h
-            sz_tof = numpy.shape(_tof_axis)[0]
-            _q_axis = zeros(sz_tof-1)
-            for t in range(sz_tof-1):
-                tof1 = _tof_axis[t]
-                tof2 = _tof_axis[t+1]
-                tofm = (tof1+tof2)/2.
-                _Q = _const * math.sin(theta) / (tofm*1e-6)
-                _q_axis[t] = _Q*1e-10
-            q_max = max(_q_axis)
-
         ws_integrated_data = "_IntegratedDataWks"
         wks_utility.createIntegratedWorkspace(mtd[ws_histo_data], 
                                               ws_integrated_data,
@@ -235,14 +217,8 @@ class RefLReduction(PythonAlgorithm):
                                               fromYpixel=BackfromYpixel,
                                               toYpixel=BacktoYpixel,
                                               maxX=maxX,
-                                              maxY=maxY,
-                                              cpix=data_cpix,
-                                              source_to_detector=dMD,
-                                              sample_to_detector=dSD,
-                                              theta=theta,
-                                              geo_correction=True,
-                                              q_binning=[q_min,q_step,q_max])
-
+                                              maxY=maxY)     
+        
         ws_data = "_DataWks"
         ws_transposed = '_TransposedID'
         if subtract_data_bck:
@@ -301,14 +277,11 @@ class RefLReduction(PythonAlgorithm):
 #            mtd.deleteWorkspace(ws_data_bck)
 #            mtd.deleteWorkspace(ws_transposed)
 
-        else:
-
+        else:        
+        
             ConvertToHistogram(InputWorkspace=ws_integrated_data,
                                OutputWorkspace=ws_data)
-        
-        Rebin(InputWorkspace=ws_data, OutputWorkspace=ws_data, Params=[q_step])
-        
-        # Work on Normalization file #########################################
+                
         if (NormFlag):
 
             # Find full path to event NeXus data file
@@ -351,14 +324,8 @@ class RefLReduction(PythonAlgorithm):
                                                   fromYpixel=BackfromYpixel,
                                                   toYpixel=BacktoYpixel,
                                                   maxX=maxX,
-                                                  maxY=maxY,
-                                                  cpix=data_cpix,
-                                                  source_to_detector=dMD,
-                                                  sample_to_detector=dSD,
-                                                  theta=theta,
-                                                  geo_correction=False)
+                                                  maxY=maxY)
 
-            
             ws_data_bck = "_NormBckWks"
             if subtract_norm_bck:
                 Transpose(InputWorkspace=ws_integrated_data,
@@ -422,12 +389,7 @@ class RefLReduction(PythonAlgorithm):
                 RebinToWorkspace(WorkspaceToRebin=ws_integrated_data,
                                  WorkspaceToMatch=ws_data,
                                  OutputWorkspace=ws_norm_rebinned)
-                        
-#perform the integration myself
-#            mt_temp = mtd[ws_norm_rebinned]
-#            x_axis = mt_temp.readX(0)[:]   #[9100,9300,.... 23500] (73,1)
-#            NormPeakRange = numpy.arange(to_peak-from_peak+1) + from_peak
-#            counts_vs_tof = numpy.zeros(len(x_axis))
+
 
             #Normalization           
             SumSpectra(InputWorkspace=ws_norm_rebinned, OutputWorkspace=ws_norm_rebinned)
@@ -437,26 +399,55 @@ class RefLReduction(PythonAlgorithm):
                    RHSWorkspace=ws_norm_rebinned,
                    OutputWorkspace=ws_data)
 
-        mt =mtd[ws_data]
+        #This is where I need to move from TOF to Q (not before that)
+        #now we can convert to Q
         
-        ReplaceSpecialValues(InputWorkspace=ws_data, NaNValue=0, NaNError=0, InfinityValue=0, InfinityError=0, OutputWorkspace=ws_data)
+        theta = tthd_rad - ths_rad
+        AngleOffset_deg = float(self.getProperty("AngleOffset"))
+        AngleOffset_rad = (AngleOffset_deg * math.pi) / 180.
+        theta += AngleOffset_rad
+        
+        if dMD is not None and theta is not None:
+                    
+            _tof_axis = mtd[ws_histo_data].readX(0)
+            _const = float(4) * math.pi * m * dMD / h
+            sz_tof = numpy.shape(_tof_axis)[0]
+            _q_axis = zeros(sz_tof-1)
+            for t in range(sz_tof-1):
+                tof1 = _tof_axis[t]
+                tof2 = _tof_axis[t+1]
+                tofm = (tof1+tof2)/2.
+                _Q = _const * math.sin(theta) / (tofm*1e-6)
+                _q_axis[t] = _Q*1e-10
+            q_max = max(_q_axis)
+
+        ws_data_Q = ws_data + '_Q'
+        wks_utility.convertWorkspaceToQ(ws_data,
+                                        ws_data_Q,
+                                        fromYpixel=data_peak[0],
+                                        toYpixel=data_peak[1],
+                                        cpix=data_cpix,
+                                        source_to_detector=dMD,
+                                        sample_to_detector=dSD,
+                                        theta=theta,
+                                        geo_correction=True,
+                                        q_binning=[q_min,q_step,q_max])
+
+        mt = mtd[ws_data_Q]
+        ReplaceSpecialValues(InputWorkspace=ws_data, 
+                             NaNValue=0, 
+                             NaNError=0, 
+                             InfinityValue=0, 
+                             InfinityError=0, 
+                             OutputWorkspace=ws_data)
 
         output_ws = self.getPropertyValue("OutputWorkspace")        
         
 #        if mtd.workspaceExists(output_ws):
 #            mtd.deleteWorkspace(output_ws)
             
-        SumSpectra(InputWorkspace=ws_data, OutputWorkspace=output_ws)
+        SumSpectra(InputWorkspace=ws_data_Q, OutputWorkspace=output_ws)
         
         self.setProperty("OutputWorkspace", mtd[output_ws])
-        
-        # Clean up intermediary workspaces
-        #mtd.deleteWorkspace(ws_data)
 
-#        if (NormFlag):
-#            mtd.deleteWorkspace(ws_norm)
-#            mtd.deleteWorkspace(ws_norm_rebinned)
-#            mtd.deleteWorkspace(ws_norm_histo_data)
-        
-            
 mtd.registerPyAlgorithm(RefLReduction())
