@@ -283,18 +283,6 @@ class DataReflWidget(BaseWidget):
         content += "dataSearchPath = configService.getDataSearchDirs()\n"
         content += "dataSearchPath.append(nexusDir)\n"
         content += "configService.setDataSearchDirs(dataSearchPath)\n\n"
-
-        content += reduce_script
-
-        content += "\n"
-        content += "for item in mtd.keys():\n"
-        content += "    if item.startswith('reflectivity_'):\n"
-        content += "        file_name = 'reflectivity_'+runNumber+'.txt'\n"
-        content += "        file_path = os.path.join(outputDir,file_name)\n"
-        content += "        SaveAscii(Filename=file_path,\n"
-        content += "          InputWorkspace=item,\n" 
-        content += "          Separator='Tab',\n"
-        content += "          CommentIndicator='# ')\n"
         
         # Place holder for reduction script
         content += "\n"
@@ -320,6 +308,18 @@ class DataReflWidget(BaseWidget):
         content += "f=open(file_path,'w')\n"
         content += "f.write(\"\"\"%s\"\"\")\n" % xml_str
         content += "f.close()\n"
+        
+        content += reduce_script
+
+        content += "\n"
+        content += "for item in mtd.keys():\n"
+        content += "    if item.startswith('reflectivity_'):\n"
+        content += "        file_name = item+'.txt'\n"
+        content += "        file_path = os.path.join(outputDir,file_name)\n"
+        content += "        SaveAscii(Filename=file_path,\n"
+        content += "          InputWorkspace=item,\n" 
+        content += "          Separator='Tab',\n"
+        content += "          CommentIndicator='# ')\n"
 
         home_dir = os.path.expanduser('~')
         f=open(os.path.join(home_dir,"reduce_%s.py" % self.instrument_name),'w')

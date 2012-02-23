@@ -42,8 +42,10 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
     basename = os.path.basename(file_path)
     ws_base = "__%s" % basename
     ws_output_base = "Counts vs Y pixel"
+    x_title = "Y pixel"
     if is_pixel_y is False:
         ws_output_base = "Counts vs X pixel"
+        x_title = "X pixel"
         
     ws_list = []
     
@@ -106,7 +108,8 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
         from LargeScaleStructures import data_stitching
         data_stitching.RangeSelector.connect(ws_list, callback,
                                              range_min=range_min,
-                                             range_max=range_max)
+                                             range_max=range_max,
+                                             x_title=x_title)
 
     # Estimate peak limits
     ws_output = ws_base+'_all'

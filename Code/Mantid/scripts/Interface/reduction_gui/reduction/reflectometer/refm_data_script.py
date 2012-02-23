@@ -116,7 +116,7 @@ class DataSets(BaseScriptElement):
             
         script += "              QMin=%s,\n" % str(self.q_min)
         script += "              QStep=%s,\n" % str(self.q_step)
-        script += "              Theta=ref_pixel,\n"
+        script += "              CenterPixel=ref_pixel,\n"
             
         # The output should be slightly different if we are generating
         # a script for the automated reduction
