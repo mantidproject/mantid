@@ -113,6 +113,8 @@ set ( SRC_FILES
 	src/SetScalingPSD.cpp
 	src/StartLiveData.cpp
 	src/UpdateInstrumentFromFile.cpp
+	#TODO: remove this
+	test/TestDataListener.cpp 
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/LoadDAE/idc.cpp
