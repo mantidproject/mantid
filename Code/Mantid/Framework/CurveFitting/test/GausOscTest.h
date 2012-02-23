@@ -1,9 +1,9 @@
-#ifndef GAUSDECAYTEST_H_
-#define GAUSDECAYTEST_H_
+#ifndef GAUSOSCTEST_H_
+#define GAUSOSCTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/GausDecay.h"
+#include "MantidCurveFitting/GausOsc.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidCurveFitting/LinearBackground.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
@@ -26,7 +26,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 
 
-class GausDecayTest : public CxxTest::TestSuite
+class GausDecayOscTest : public CxxTest::TestSuite
 {
 public:
 
@@ -65,7 +65,7 @@ public:
     TS_ASSERT( alg2.isInitialized() );
 
     // create mock data to test against
-    std::string wsName = "GausDecayMockData";
+    std::string wsName = "GausOscMockData";
     int histogramNumber = 1;
     int timechannels = 18;
     Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
@@ -79,7 +79,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().addOrReplace(wsName, ws2D));
 
     // set up fitting function
-    GausDecay fn;
+    GausOsc fn;
     fn.initialize();
 
     //alg2.setFunction(fn);
@@ -123,4 +123,4 @@ public:
 
 };
 
-#endif /*GAUSDECAYTEST_H_*/
+#endif /*GAUSOSCTEST_H_*/

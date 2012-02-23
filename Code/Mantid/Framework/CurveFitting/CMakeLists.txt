@@ -18,6 +18,7 @@ set ( SRC_FILES
 	src/FuncMinimizerFactory.cpp
 	src/GSLFunctions.cpp
 	src/GausDecay.cpp
+	src/GausOsc.cpp
 	src/Gaussian.cpp
 	src/Gaussian1D.cpp
 	src/GaussianLinearBG1D.cpp
@@ -68,6 +69,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/FuncMinimizerFactory.h
 	inc/MantidCurveFitting/GSLFunctions.h
 	inc/MantidCurveFitting/GausDecay.h
+	inc/MantidCurveFitting/GausOsc.h
 	inc/MantidCurveFitting/Gaussian.h
 	inc/MantidCurveFitting/Gaussian1D.h
 	inc/MantidCurveFitting/GaussianLinearBG1D.h
@@ -113,6 +115,7 @@ set ( TEST_FILES
 	test/FunctionTest.h
 	test/Gaussian1DTest.h
 	test/GausDecayTest.h
+	test/GausOscTest.h
 	test/GaussianTest.h
 	test/IkedaCarpenterPVTest.h
 	test/LinearBackgroundTest.h
