@@ -63,7 +63,7 @@ namespace Mantid
        */
       virtual bool connect(const Poco::Net::SocketAddress& address) = 0;
 
-      /** Commence the collection of data from the DAS.
+      /** Commence the collection of data from the DAS. Must be called before extractData().
        *  This method facilitates requesting an historical startpoint. Implementations
        *  that don't support this may simply start collecting data when the connect() method
        *  is called (indeed this may be required by some protocols).
@@ -74,9 +74,10 @@ namespace Mantid
       virtual void start(Kernel::DateAndTime startTime = Kernel::DateAndTime()) = 0;
 
       /** Get the data that's been buffered since the last call to this method
-       *  (or since connect() was called).
+       *  (or since start() was called).
        *  The implementation should reset its internal buffer when this method is called
        *    - the returned workspace is for the caller to do with as they wish.
+       *  IF THIS METHOD IS CALLED BEFORE start() THEN THE RESULTS ARE UNDEFINED!!!
        *  @return A pointer to the workspace containing the buffered data.
        *  TODO: Consider whether there should be a default implementation of this method
        */
