@@ -59,6 +59,10 @@ namespace API
     virtual void maskTof(const double tofMin, const double tofMax) = 0;
     /// Return the list of TOF values
     virtual void getTofs(std::vector<double>& tofs) const = 0;
+    /// Return the list of TOF values
+    virtual std::vector<double> getTofs() const = 0;
+    /// Return the list of TOF values
+    virtual std::vector<Mantid::Kernel::DateAndTime> getPulseTimes() const = 0;
     /// Get the minimum TOF from the list
     virtual double getTofMin() const = 0;
     /// Get the maximum TOF from the list

@@ -1213,7 +1213,15 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
     AnalysisDataService::Instance().remove( outName );
 
   // set more properties on the workspace
-  loadEntryMetadata(m_filename, WS, m_top_entry_name);
+  try
+  {
+    loadEntryMetadata(m_filename, WS, m_top_entry_name);
+  }
+  catch (std::runtime_error & e)
+  {
+    // Missing metadata is not a fatal error. Log and go on with your life
+    g_log.error() << "Error loading metadata: " << e.what() << std::endl;
+  }
 
   if(metaDataOnly) {
     //Now, create a default X-vector for histogramming, with just 2 bins.
@@ -1615,7 +1623,9 @@ void LoadEventNexus::createSpectraMapping(const std::string &nxsfile,
       g_log.debug() << "Populated spectra map for single bank " << bankName << "\n";
     }
     else
-      throw std::runtime_error("Could not find the bank named " + bankName + " as a component assembly in the instrument tree; or it did not contain any detectors.");
+      throw std::runtime_error("Could not find the bank named " + bankName +
+          " as a component assembly in the instrument tree; or it did not contain any detectors."
+          " Try unchecking SingleBankPixelsOnly.");
   }
   else
   {

@@ -1168,6 +1168,16 @@ public:
   }
 
   //-----------------------------------------------------------------------------------------------
+  void test_getPulseTimes()
+  {
+    this->fake_uniform_time_data();
+    std::vector<DateAndTime> times = el.getPulseTimes();
+    TS_ASSERT_EQUALS( times[0].totalNanoseconds(), 0);
+    TS_ASSERT_EQUALS( times[1].totalNanoseconds(), 1);
+    TS_ASSERT_EQUALS( times[2].totalNanoseconds(), 2);
+  }
+
+  //-----------------------------------------------------------------------------------------------
   void test_convertTof_allTypes()
   {
     // Go through each possible EventType as the input
