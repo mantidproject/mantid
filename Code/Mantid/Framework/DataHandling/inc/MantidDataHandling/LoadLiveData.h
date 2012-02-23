@@ -54,7 +54,7 @@ namespace DataHandling
 
     void replaceChunk(Mantid::API::Workspace_sptr chunkWS);
     void addChunk(Mantid::API::Workspace_sptr chunkWS);
-    void conjoinChunk(Mantid::API::Workspace_sptr chunkWS);
+    void appendChunk(Mantid::API::Workspace_sptr chunkWS);
 
     void runPostProcessing();
 

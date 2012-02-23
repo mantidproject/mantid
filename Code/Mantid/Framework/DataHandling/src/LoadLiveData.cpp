@@ -33,6 +33,7 @@ namespace DataHandling
   /** Constructor
    */
   LoadLiveData::LoadLiveData()
+  : LiveDataAlgorithm()
   {
   }
     
@@ -153,23 +154,23 @@ namespace DataHandling
 
 
   //----------------------------------------------------------------------------------------------
-  /** Accumulate the data by conjoining the spectra (adding them)
-   * to the output workspace.
-   * Calls ConjoinWorkspaces algorithm.
+  /** Accumulate the data by appending the spectra into the
+   * the output workspace.
+   * Calls AppendSpectra algorithm.
    * Sets m_accumWS.
    *
    * @param chunkWS :: processed live data chunk workspace
    */
-  void LoadLiveData::conjoinChunk(Mantid::API::Workspace_sptr chunkWS)
+  void LoadLiveData::appendChunk(Mantid::API::Workspace_sptr chunkWS)
   {
-    IAlgorithm_sptr alg = this->createSubAlgorithm("ConjoinWorkspaces");
+    IAlgorithm_sptr alg = this->createSubAlgorithm("AppendSpectra");
     alg->setProperty("InputWorkspace1", m_accumWS);
     alg->setProperty("InputWorkspace2", chunkWS);
-    alg->setProperty("CheckOverlapping", false);
+    alg->setProperty("ValidateInputs", false);
     alg->execute();
     if (!alg->isExecuted())
     {
-      throw std::runtime_error("Error when calling ConjoinWorkspaces to conjoin the spectra of the chunk of live data. See log.");
+      throw std::runtime_error("Error when calling conjoinChunk to append the spectra of the chunk of live data. See log.");
     }
     else
     {
@@ -228,8 +229,8 @@ namespace DataHandling
     // Perform the accumulation and set the AccumulationWorkspace workspace
     if (accum == "Replace")
       this->replaceChunk(processed);
-    else if (accum == "Conjoin")
-      this->conjoinChunk(processed);
+    else if (accum == "Append")
+      this->appendChunk(processed);
     else
       // Default to Add.
       this->addChunk(processed);

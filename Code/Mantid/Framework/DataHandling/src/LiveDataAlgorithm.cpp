@@ -55,12 +55,12 @@ namespace DataHandling
     std::vector<std::string> propOptions;
     propOptions.push_back("Add");
     propOptions.push_back("Replace");
-    propOptions.push_back("Conjoin");
+    propOptions.push_back("Append");
     declareProperty("AccumulationMethod", "Add", new ListValidator(propOptions),
         "Method to use for accumulating each chunk of live data.\n"
         " - Add: the processed chunk will be summed to the previous outpu (default).\n"
         " - Replace: the processed chunk will replace the previous output.\n"
-        " - Conjoin: the spectra of the chunk will be appended to the output workspace, increasing its size.");
+        " - Append: the spectra of the chunk will be appended to the output workspace, increasing its size.");
 
     declareProperty(new PropertyWithValue<std::string>("PostProcessingAlgorithm","",Direction::Input),
         "Name of the algorithm that will be run to process the accumulated data.\n"

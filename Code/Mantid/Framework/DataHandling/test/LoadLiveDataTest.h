@@ -81,16 +81,16 @@ public:
   }
 
   //--------------------------------------------------------------------------------------------
-  void test_conjoin()
+  void test_append()
   {
     EventWorkspace_sptr ws1, ws2;
 
     // First go creates the fake ws
-    ws1 = doExecEvent("Conjoin");
+    ws1 = doExecEvent("Append");
     TS_ASSERT_EQUALS(ws1->getNumberHistograms(), 2);
 
     // Next one actually conjoins
-    ws2 = doExecEvent("Conjoin");
+    ws2 = doExecEvent("Append");
     TS_ASSERT_EQUALS(ws2->getNumberHistograms(), 4);
   }
 
