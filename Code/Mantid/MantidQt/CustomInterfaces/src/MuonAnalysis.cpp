@@ -261,8 +261,7 @@ void MuonAnalysis::runFrontPlotButton()
     index = 0;
     m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(index);
   }
-
-  if (index >= numGroups())
+  else if (index >= numGroups())
   {
     // i.e. index points to a pair
     m_pairTableRowInFocus = m_pairToRow[index-numGroups()];  // this can be improved
@@ -1133,10 +1132,35 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
   // since content of first-good-bin changed run this slot
   runFirstGoodBinFront();
 
+  std::string infoStr("");
+  
+  // Populate run information with the run number
+  QString run(getGroupName());
+  if (m_previousFilenames.size() > 1)
+    infoStr += "Runs: ";
+  else
+    infoStr += "Run: ";
+
+  // Remove instrument and leading zeros
+  int zeroCount(0);
+  for (int i=0; i<run.size(); ++i)
+  {
+    if ( (run[i] == '0') || (run[i].isLetter() ) )
+      ++zeroCount;
+    else
+    {
+      run = run.right(run.size() - zeroCount);
+      break;
+    }
+  }
+
+  // Add to run information.
+  infoStr += run.toStdString();
+
   // Populate run information text field
   m_title = matrix_workspace->getTitle();
-  std::string infoStr = "Title: ";
-  infoStr += m_title; 
+  infoStr += "\nTitle: ";
+  infoStr += m_title;
   
   // Add the comment to run information
   infoStr += "\nComment: ";
@@ -1169,8 +1193,9 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     }
   }
   std::ostringstream ss;
-  ss << counts;
+  ss << std::fixed << std::setprecision(12) << counts/1000000;
   infoStr += ss.str();
+  infoStr += " MeV";
 
   m_uiForm.infoBrowser->setText(infoStr.c_str());
 
