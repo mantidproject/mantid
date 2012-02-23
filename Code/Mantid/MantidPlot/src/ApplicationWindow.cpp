@@ -373,7 +373,8 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   If applicable, set the Paraview path BEFORE libaries are loaded. Doing it here, before the call to MantidUI::init() prevents 
   the logs being poluted with library loading errors.
   */
-  trySetParaviewPath(args);
+  UNUSED_ARG(args);
+  //trySetParaviewPath(args);
 
   //Initialize Mantid
   // MG: 01/02/2009 - Moved this to before scripting so that the logging is connected when
