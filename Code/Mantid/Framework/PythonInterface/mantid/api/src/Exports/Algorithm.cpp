@@ -1,7 +1,7 @@
 #ifdef _MSC_VER
   #pragma warning( disable: 4250 ) // Disable warning regarding inheritance via dominance, we have no way around it with the design
 #endif
-#include "MantidPythonInterface/api/AlgorithmWrapper.h"
+#include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmWrapper.h"
 #include "MantidAPI/AlgorithmProxy.h"
 #ifdef _MSC_VER
   #pragma warning( default: 4250 )

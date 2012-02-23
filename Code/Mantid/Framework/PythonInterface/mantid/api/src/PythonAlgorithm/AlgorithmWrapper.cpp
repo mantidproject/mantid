@@ -1,4 +1,4 @@
-#include "MantidPythonInterface/api/AlgorithmWrapper.h"
+#include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmWrapper.h"
 #include "MantidPythonInterface/kernel/WrapperHelpers.h"
 #include <boost/python/class.hpp>
 
