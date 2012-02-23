@@ -330,7 +330,7 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=True, Plot=False):
             mtd.sendLogMessage('Run : '+root[0:8] +' ; Temperature = '+str(temp))
         outWS = root[:-3] + 'msd_' + str(np)
         function = 'name=LinearBackground, A0=0, A1=0'
-        fit_alg = Fit(lnWS, 0, startX, endX, function, Output=outWS)
+        fit_alg = Fit(lnWS, WorkspaceIndex=0, StartX=startX, EndX=endX, Function=function, Output=outWS)
         output.append(outWS)
         params = mtd[outWS+'_Parameters'] #  get a TableWorkspace with the parameters and errors
         A0 = params.getDouble('Value',0) # get the value of the first parameter
@@ -402,7 +402,7 @@ def CubicFit(inputWS, spec, verbose=False):
     '''Uses the Mantid Fit Algorithm to fit a quadratic to the inputWS
     parameter. Returns a list containing the fitted parameter values.'''
     function = 'name=Quadratic, A0=1, A1=0, A2=0'
-    fit = Fit(inputWS, spec, Function=function)
+    fit = Fit(inputWS, WorkspaceIndex=spec, Function=function)
     Abs = fit.getPropertyValue('Parameters')
     if verbose:
         mtd.sendLogMessage('Group '+str(spec)+' of '+inputWS+' ; fit coefficients are : '+Abs)
@@ -435,9 +435,9 @@ def applyCorrections(inputWS, canWS, corr, verbose=False):
             Ass = CubicFit(corrections[0], i, verbose)
             PolynomialCorrection(CorrectedSampleWS, CorrectedSampleWS, Ass, 'Divide')
             if ( i == 0 ):
-                CloneWorkspace(InputWorkspace1=CorrectedSampleWS, InputWorkspace2=CorrectedWS, OutputWorkspace=CorrectedSampleWS)
+                CloneWorkspace(CorrectedSampleWS, CorrectedWS)
             else:
-                ConjoinWorkspaces(InputWorkspace1=CorrectedWS, InputWorkspace2=CorrectedSampleWS, OutputWorkspace=CorrectedWS)
+                ConjoinWorkspaces(CorrectedWS, CorrectedSampleWS,OutputWorkspace=CorrectedWS)
         else:
             ExtractSingleSpectrum(canWS, CorrectedCanWS, i)
             Acc = CubicFit(corrections[3], i, verbose)
@@ -450,11 +450,12 @@ def applyCorrections(inputWS, canWS, corr, verbose=False):
             if ( i == 0 ):
                 CloneWorkspace(CorrectedSampleWS, CorrectedWS)
             else:
-                ConjoinWorkspaces(CorrectedWS, CorrectedSampleWS)
+                ConjoinWorkspaces(CorrectedWS, CorrectedSampleWS,OutputWorkspace=CorrectedWS)
+    mtd.deleteWorkspace('__csam')
     ConvertUnits(inputWS, inputWS, 'DeltaE', 'Indirect', EFixed=efixed)
     ConvertUnits(CorrectedWS, CorrectedWS, 'DeltaE', 'Indirect', EFixed=efixed)
     if canWS != '':
-        mantid.deleteWorkspace(CorrectedCanWS)
+        mtd.deleteWorkspace(CorrectedCanWS)
         ConvertUnits(canWS, canWS, 'DeltaE', 'Indirect', EFixed=efixed)
     return CorrectedWS
                 
