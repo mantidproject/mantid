@@ -1,6 +1,6 @@
 Name:           mantid-developer
 Version:        1.0
-Release:        7%{?dist}
+Release:        8%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
 Group:          Development/Tools
@@ -19,6 +19,7 @@ Requires: hdf-devel
 Requires: hdf5-devel
 Requires: muParser-devel
 Requires: mxml-devel
+Requires: nexus >= 4.2
 Requires: nexus-devel >= 4.2
 Requires: numpy
 Requires: OpenCASCADE-devel
@@ -59,6 +60,9 @@ required for Mantid development.
 %files
 
 %changelog
+* Wed Feb 22 2012 Stuart Campbell <campbellsi@ornl.gov>
+- Added nexus as it is not required by it's devel package.
+
 * Wed Feb 22 2012 Stuart Campbell <campbellsi@ornl.gov>
 - Added git as a dependency
 - Added openssl-devel dependency
