@@ -4,7 +4,6 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 
 #include "MantidDataHandling/MonitorLiveData.h"
 #include "MantidKernel/System.h"
-#include <unistd.h>
 #include "MantidDataHandling/LoadLiveData.h"
 #include <Poco/Thread.h>
 
@@ -98,7 +97,7 @@ namespace DataHandling
         LoadLiveData loadAlg;
         loadAlg.initialize();
         // So the output gets put into the ADS
-        loadAlg.setChild(false);
+        loadAlg.setChild(true);
         // Too much logging
         loadAlg.setLogging(false);
         // Copy settings from THIS to LoadAlg

@@ -114,7 +114,7 @@ set ( SRC_FILES
 	src/StartLiveData.cpp
 	src/UpdateInstrumentFromFile.cpp
 	#TODO: remove this
-	#test/TestDataListener.cpp 
+	test/TestDataListener.cpp 
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/LoadDAE/idc.cpp
@@ -354,7 +354,8 @@ if ( CXXTEST_FOUND )
   # It will go out of scope at the end of this file so doesn't need un-setting
   set ( TESTHELPER_SRCS ../TestHelpers/src/ComponentCreationHelper.cpp
                         ../TestHelpers/src/WorkspaceCreationHelper.cpp
-                        test/TestDataListener.cpp )
+                        # test/TestDataListener.cpp #TODO: Re-enable this when you take it out above 
+                        )
   cxxtest_add_test ( DataHandlingTest ${TEST_FILES} )
   target_link_libraries( DataHandlingTest DataHandling )
   add_dependencies ( FrameworkTests DataHandlingTest )
