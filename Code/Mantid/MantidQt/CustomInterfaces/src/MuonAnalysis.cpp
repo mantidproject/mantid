@@ -2208,7 +2208,6 @@ bool MuonAnalysis::applyGroupingToWS( const std::string& inputWS,  const std::st
       m_optionTab->noDataAvailable();
       QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Can't group data file according to group-table. Plotting disabled.");
       return false;
-      //m_uiForm.frontWarningMessage->setText("Can't group data file according to group-table. Plotting disabled.");
     }
     else
     {
@@ -2231,7 +2230,6 @@ bool MuonAnalysis::applyGroupingToWS( const std::string& inputWS,  const std::st
     if ( complaint.empty() )
     {
       m_optionTab->nowDataAvailable();
-      m_uiForm.frontWarningMessage->setText("");
     }
     else
     {
