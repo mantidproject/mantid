@@ -159,18 +159,7 @@ namespace DataHandling
     double maxChunk = this->getProperty("MaxChunkSize");
     if (!isEmpty(maxChunk))
     {
-      int NChunks = determineChunking(runinfo,maxChunk);
-      NChunks++;  // For python range
-      Mantid::API::ITableWorkspace_sptr strategy = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-      strategy->addColumn("int","ChunkNumber");
-      strategy->addColumn("int","TotalChunks");
-
-      for (int i = 1; i <= NChunks; i++) 
-      {
-        Mantid::API::TableRow row = strategy->appendRow();
-        row << i << NChunks;
-      }
-      
+      Mantid::API::ITableWorkspace_sptr strategy = determineChunking(runinfo,maxChunk);
       this->setProperty("OutputWorkspace", strategy);
       return;
     }
@@ -408,7 +397,7 @@ namespace DataHandling
     }
   }
 
-  int LoadPreNexus::determineChunking(const std::string& filename, double maxChunkSize)
+  Mantid::API::ITableWorkspace_sptr LoadPreNexus::determineChunking(const std::string& filename, double maxChunkSize)
   {
     vector<string> eventFilenames;
     string dataDir;
@@ -417,13 +406,19 @@ namespace DataHandling
     for (size_t i = 0; i < eventFilenames.size(); i++) {
       filesize += static_cast<double>(Poco::File(dataDir + eventFilenames[i]).getSize())/(1024.0*1024.0*1024.0);
     }
-    if (filesize == 0)
-      return 0;
     int numChunks = static_cast<int>(filesize/maxChunkSize);
-    if (numChunks > 0)
-      return numChunks; // high end is exclusive
-    else
-      return 1;
+    numChunks ++; //So maxChunkSize is not exceeded 
+    if (numChunks < 0) numChunks = 1;
+    Mantid::API::ITableWorkspace_sptr strategy = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+    strategy->addColumn("int","ChunkNumber");
+    strategy->addColumn("int","TotalChunks");
+
+    for (int i = 1; i <= numChunks; i++) 
+    {
+      Mantid::API::TableRow row = strategy->appendRow();
+      row << i << numChunks;
+    }
+    return strategy;
 
   }
 

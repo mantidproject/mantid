@@ -47,7 +47,7 @@ namespace DataHandling
     virtual int version() const;
     virtual const std::string category() const;
     virtual const char * filePropertyName() const;
-    int determineChunking(const std::string& filename, double maxChunkSize);
+    Mantid::API::ITableWorkspace_sptr determineChunking(const std::string& filename, double maxChunkSize);
     bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
     int fileCheck(const std::string& filePath);
   private:
