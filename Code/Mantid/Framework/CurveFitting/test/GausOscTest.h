@@ -32,23 +32,25 @@ public:
 
   void getMockData(Mantid::MantidVec& y, Mantid::MantidVec& e)
   {
-    y[0] = 0.01;
-    y[1] = 0.16;
-    y[2] = 1.2;
-    y[3] = 5.6;
-    y[4] = 18.2;
-    y[5] = 43.68;
-    y[6] = 80.08;
+    const double sqrh = 0.70710678; // cos( 45 degrees )
+
+    y[0] = 0.01*sqrh;
+    y[1] = 0.00;
+    y[2] = -1.2*sqrh;
+    y[3] = -5.6;
+    y[4] = -18.2*sqrh;
+    y[5] = 0.0;
+    y[6] = 80.08*sqrh;
     y[7] = 114.4;
-    y[8] = 128.7;
-    y[9] = 114.4;
-    y[10] = 80.08;
-    y[11] = 43.68;
-    y[12] = 18.2;
-    y[13] = 5.6;
-    y[14] = 1.2;
+    y[8] = 128.7*sqrh;
+    y[9] = 0.0;
+    y[10] = -80.08*sqrh;
+    y[11] = -43.68;
+    y[12] = -18.2*sqrh;
+    y[13] = 0.0;
+    y[14] = 1.2*sqrh;
     y[15] = 0.16;
-    y[16] = 0.01;
+    y[16] = 0.01*sqrh;
     y[17] = 0.00;
 
     for (int i = 0; i <=17; i++)
@@ -108,8 +110,10 @@ public:
 
     // test the output from fit is what you expect
     IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
-    TS_ASSERT_DELTA( out->getParameter("A"), 128.7 ,0.5);
+    TS_ASSERT_DELTA( out->getParameter("A"), 128.7 ,0.9);
     TS_ASSERT_DELTA( out->getParameter("Sigma"), -0.35 ,0.005);
+    TS_ASSERT_DELTA( out->getParameter("Frequency"), 1/8.0 ,0.01);  // Period of 8
+    TS_ASSERT_DELTA( out->getParameter("Phi"), 3.1415926536*17.0/4.0 ,0.01);  // 720 + 45 degrees
 
     // check its categories
     const std::vector<std::string> categories = out->categories();

@@ -58,7 +58,7 @@ public:
 
   }
 
-  void testAgainstMockData()  // Parts of test disabled because it does not give result like that obtained in mantidplot.
+  void testAgainstMockData()  
   {
     Fit alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
