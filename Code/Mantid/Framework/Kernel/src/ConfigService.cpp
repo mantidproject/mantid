@@ -1704,7 +1704,7 @@ void ConfigServiceImpl::setParaviewLibraryPath(const std::string& path)
 #elif defined __linux__
   throw std::runtime_error("Cannot dynamically set the library path on Linux");
 #elif defined __APPLE__
-  throw std::runtime_error("Cannot dynamically set the library path on Mac")
+  throw std::runtime_error("Cannot dynamically set the library path on Mac");
 #else
   throw std::runtime_error("ConfigServiceImpl::setParaviewLibraryPath cannot determine the running platform and therefore cannot set the path to the Paraview libraries.");
 #endif 
