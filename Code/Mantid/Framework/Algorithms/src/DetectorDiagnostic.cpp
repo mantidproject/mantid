@@ -34,7 +34,7 @@ namespace Mantid
     //--------------------------------------------------------------------------
     const std::string DetectorDiagnostic::category() const
     {
-      return "Diagnostics";
+      return "Diagnostics;Workflow\\Diagnostics";
     }
 
     const std::string DetectorDiagnostic::name() const

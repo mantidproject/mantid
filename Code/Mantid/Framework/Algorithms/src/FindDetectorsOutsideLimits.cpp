@@ -35,7 +35,11 @@ namespace Mantid
       this->setOptionalMessage("Identifies histograms and their detectors that have total numbers of counts over a user defined maximum or less than the user define minimum.");
     }
     
-      
+    const std::string FindDetectorsOutsideLimits::category() const
+    {
+      return "Diagnostics";
+    }
+
     using namespace Kernel;
     using namespace API;
     using namespace DataObjects;

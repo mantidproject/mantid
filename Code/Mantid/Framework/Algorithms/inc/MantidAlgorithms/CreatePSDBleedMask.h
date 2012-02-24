@@ -51,6 +51,7 @@ namespace Mantid
       CreatePSDBleedMask();
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "CreatePSDBleedMask";}
+      virtual const std::string category() const;
 
     private:
       /// Sets documentation strings for this algorithm

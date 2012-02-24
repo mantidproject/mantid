@@ -38,6 +38,11 @@ namespace Mantid
     {
     };
 
+    const std::string MedianDetectorTest::category() const
+    {
+      return "Diagnostics";
+    }
+
     /// Declare algorithm properties
     void MedianDetectorTest::init()
     {
