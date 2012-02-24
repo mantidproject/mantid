@@ -46,7 +46,7 @@ using namespace MantidQt::CustomInterfaces;
 Indirect::Indirect(QWidget *parent, Ui::ConvertToEnergy & uiForm) : 
   UserSubWindow(parent), m_uiForm(uiForm), m_backgroundDialog(NULL),
   m_changeObserver(*this, &Indirect::handleDirectoryChange),
-  m_bgRemoval(false), m_valInt(NULL), m_valDbl(NULL), 
+  m_bgRemoval(false), m_valInt(NULL), m_valDbl(NULL), m_valPosDbl(NULL), 
   // Null pointers - Calibration Tab
   m_calCalPlot(NULL), m_calResPlot(NULL),
   m_calCalR1(NULL), m_calCalR2(NULL), m_calResR1(NULL),
@@ -100,10 +100,12 @@ void Indirect::initLayout()
   // create validators
   m_valInt = new QIntValidator(this);
   m_valDbl = new QDoubleValidator(this);
+  m_valPosDbl = new QDoubleValidator(this);
+  m_valPosDbl->setBottom(0.0);
 
   // apply validators
   m_uiForm.leNoGroups->setValidator(m_valInt);
-  m_uiForm.leDetailedBalance->setValidator(m_valInt);
+  m_uiForm.leDetailedBalance->setValidator(m_valPosDbl);
   m_uiForm.leSpectraMin->setValidator(m_valInt);
   m_uiForm.leSpectraMax->setValidator(m_valInt);
   m_uiForm.rebin_leELow->setValidator(m_valDbl);
