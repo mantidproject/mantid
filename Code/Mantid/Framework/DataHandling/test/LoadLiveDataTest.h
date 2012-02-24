@@ -45,7 +45,10 @@ public:
    */
   EventWorkspace_sptr doExecEvent(std::string AccumulationMethod,
       std::string ProcessingAlgorithm = "",
-      std::string ProcessingProperties = "")
+      std::string ProcessingProperties = "",
+      std::string PostProcessingAlgorithm = "",
+      std::string PostProcessingProperties = ""
+      )
   {
     LoadLiveData alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
@@ -55,6 +58,11 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("AccumulationMethod", AccumulationMethod) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("ProcessingAlgorithm", ProcessingAlgorithm) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("ProcessingProperties", ProcessingProperties) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PostProcessingAlgorithm", PostProcessingAlgorithm) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PostProcessingProperties", PostProcessingProperties) );
+    if (!PostProcessingAlgorithm.empty())
+      TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("AccumulationWorkspace", "fake_accum") );
+
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
 
@@ -122,6 +130,51 @@ public:
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(ws->getNumberEvents(), 200);
     // Check that rebin was called
+    TS_ASSERT_EQUALS(ws->blocksize(), 20);
+    TS_ASSERT_DELTA(ws->dataX(0)[0], 40e3, 1e-4);
+  }
+
+  //--------------------------------------------------------------------------------------------
+  /** Do PostProcessing */
+  void test_PostProcessing()
+  {
+    // No chunk processing, but PostProcessing
+    EventWorkspace_sptr ws = doExecEvent("Replace", "", "", "Rebin", "Params=40e3, 1e3, 60e3");
+    EventWorkspace_sptr ws_accum = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("fake_accum");
+    TS_ASSERT( ws )
+    TS_ASSERT( ws_accum )
+
+    // The accumulated workspace: it was NOT rebinned.
+    TS_ASSERT_EQUALS(ws_accum->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS(ws_accum->getNumberEvents(), 200);
+    TS_ASSERT_EQUALS(ws_accum->blocksize(), 1);
+
+    // The post-processed workspace: Check that rebin was called
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS(ws->getNumberEvents(), 200);
+    TS_ASSERT_EQUALS(ws->blocksize(), 20);
+    TS_ASSERT_DELTA(ws->dataX(0)[0], 40e3, 1e-4);
+  }
+
+  //--------------------------------------------------------------------------------------------
+  /** Perform both chunk and post-processing*/
+  void test_Chunk_and_PostProcessing()
+  {
+    // Process both times
+    EventWorkspace_sptr ws = doExecEvent("Replace", "Rebin", "Params=20e3, 1e3, 60e3", "Rebin", "Params=40e3, 1e3, 60e3");
+    EventWorkspace_sptr ws_accum = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("fake_accum");
+    TS_ASSERT( ws )
+    TS_ASSERT( ws_accum )
+
+    // The accumulated workspace: it was rebinned starting at 20e3
+    TS_ASSERT_EQUALS(ws_accum->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS(ws_accum->getNumberEvents(), 200);
+    TS_ASSERT_EQUALS(ws_accum->blocksize(), 40);
+    TS_ASSERT_DELTA(ws_accum->dataX(0)[0], 20e3, 1e-4);
+
+    // The post-processed workspace was rebinned starting at 40e3
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS(ws->getNumberEvents(), 200);
     TS_ASSERT_EQUALS(ws->blocksize(), 20);
     TS_ASSERT_DELTA(ws->dataX(0)[0], 40e3, 1e-4);
   }

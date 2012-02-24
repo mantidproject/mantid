@@ -50,13 +50,14 @@ namespace DataHandling
     void init();
     void exec();
 
+    Mantid::API::Workspace_sptr runProcessing(Mantid::API::Workspace_sptr inputWS, bool PostProcess);
     Mantid::API::Workspace_sptr processChunk(Mantid::API::MatrixWorkspace_sptr chunkWS);
+    void runPostProcessing();
 
     void replaceChunk(Mantid::API::Workspace_sptr chunkWS);
     void addChunk(Mantid::API::Workspace_sptr chunkWS);
     void appendChunk(Mantid::API::Workspace_sptr chunkWS);
 
-    void runPostProcessing();
 
     /// The "accumulation" workspace = after adding, but before post-processing
     Mantid::API::Workspace_sptr m_accumWS;
