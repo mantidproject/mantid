@@ -1200,6 +1200,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   map<string,string>::const_iterator it = entries.begin();
   std::string classType = monitors ? "NXmonitor" : "NXevent_data";
   size_t total_events = 0;
+  double maxChunk = this->getProperty("MaxChunkSize");
   std::vector<uint32_t> bank_events;
   for (; it != entries.end(); ++it)
   {
@@ -1208,19 +1209,29 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
     if ( entry_class == classType )
     {
       bankNames.push_back( entry_name );
-      file.openGroup(entry_name,entry_class);
-      file.openData("total_counts");
-      file.getData(bank_events);
-      total_events +=bank_events[0];
-      file.closeData();
-      file.closeGroup();
+      if (!isEmpty(maxChunk))
+      {
+        try
+        {
+          // Get total number of events for each bank
+          file.openGroup(entry_name,entry_class);
+          file.openData("total_counts");
+          file.getData(bank_events);
+          total_events +=bank_events[0];
+          file.closeData();
+          file.closeGroup();
+        }
+        catch (::NeXus::Exception&)
+        {
+          g_log.error() << "Unable to find total counts to determine chunking strategy." << std::endl;
+        }
+      }
     }
   }
 
   //Close up the file
   file.closeGroup();
   file.close();
-  double maxChunk = this->getProperty("MaxChunkSize");
   if (!isEmpty(maxChunk))
   {
     Mantid::API::ITableWorkspace_sptr strategy = determineChunking(total_events,maxChunk);
