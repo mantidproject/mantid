@@ -55,7 +55,8 @@ namespace Mantid
       DataObjects::EventWorkspace_sptr m_buffer; ///< Used to buffer events between calls to extractData()
       Kernel::RandomNumberGenerator * m_rand; ///< Used in generation of random events
       Poco::Timer m_timer; ///< Used to call the event-generating function on a schedule
-      long m_callbackloop; ///< Number of times to loop within each generateEvents() call
+      int m_datarate;     ///< The data rate to (attempt to) generate in events/sec
+      int m_callbackloop; ///< Number of times to loop within each generateEvents() call
     };
 
   } // namespace DataHandling
