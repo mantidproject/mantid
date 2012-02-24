@@ -65,7 +65,7 @@ namespace Kernel
       indexSort(const std::vector<T>& pVec,std::vector<int>& Index)
     {
       Index.resize(pVec.size());
-      std::vector<typename std::pair<T,int> > PartList;
+      std::vector<typename std::pair<T,int>> PartList;
       PartList.resize(pVec.size());
 
       transform(pVec.begin(),pVec.end(),PartList.begin(),PIndex<T>());
