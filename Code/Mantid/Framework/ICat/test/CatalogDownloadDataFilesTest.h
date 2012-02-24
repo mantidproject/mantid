@@ -20,6 +20,31 @@ using namespace Mantid::API;
 class CatalogDownloadDataFilesTest: public CxxTest::TestSuite
 {
 public:
+
+  /** Ping the  download.mantidproject.org and
+   * skip all tests if internet/server is down.
+   */
+  bool skipTests()
+  {
+    std::string cmdstring = "ping download.mantidproject.org -c 1 -w 1";
+    int status;
+    status = system(cmdstring.c_str());
+    if (status == -1)
+    {
+      // Some kind of system() failure
+    }
+    else
+      // Get the exit code
+      status = WEXITSTATUS(status);
+
+    if (status != 0)
+    {
+      std::cout << "Skipping test since '" << cmdstring << "' FAILED!" << std::endl;
+      return true;
+    }
+    return false;
+  }
+
 	void testInit()
 	{
 		TS_ASSERT_THROWS_NOTHING( downloadobj.initialize());
