@@ -373,8 +373,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   If applicable, set the Paraview path BEFORE libaries are loaded. Doing it here, before the call to MantidUI::init() prevents 
   the logs being poluted with library loading errors.
   */
-  UNUSED_ARG(args);
-  //trySetParaviewPath(args);
+  trySetParaviewPath(args);
 
   //Initialize Mantid
   // MG: 01/02/2009 - Moved this to before scripting so that the logging is connected when
@@ -483,6 +482,8 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
 /*
 Function tries to set the paraview path.
 
+This is a windows only feature. the PATH enviromental variable can be set at runtime on windows.
+
 - Abort if Vates libraries do not seem to be present.
 - Othwerise, if the paraview.path is already in the properties file, use it.
 - Otherwise, if the user is not using executeandquit command arguments launch the Setup gui.
@@ -491,12 +492,13 @@ Function tries to set the paraview path.
 */
 void ApplicationWindow::trySetParaviewPath(const QStringList& commandArguments)
 {
+#ifdef _WIN32
   if(this->hasVatesAvailable())
   {
     //Early check of execute and quit command arguments used by system tests.
     QString str;
     bool b_skipDialog = false;
-    foreach(str, commandArguments) 
+    foreach(str, commandArguments)
     {
       if(this->shouldExecuteAndQuit(str))
       {
@@ -523,6 +525,9 @@ void ApplicationWindow::trySetParaviewPath(const QStringList& commandArguments)
       }
     }
   }
+#else
+  UNUSED_ARG(commandArguments)
+#endif
 }
 
 

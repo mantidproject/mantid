@@ -1698,28 +1698,32 @@ Ammend paths to point to include the paraview core libraries.
 */
 void ConfigServiceImpl::setParaviewLibraryPath(const std::string& path)
 {
+  std::string platformPathName;
+#ifdef _WIN32
+  platformPathName = "PATH";
+#elif defined __linux__
+  throw std::runtime_error("Cannot dynamically set the library path on Linux");
+#elif defined __APPLE__
+  throw std::runtime_error("Cannot dynamically set the library path on Mac")
+#else
+  throw std::runtime_error("ConfigServiceImpl::setParaviewLibraryPath cannot determine the running platform and therefore cannot set the path to the Paraview libraries.");
+#endif 
   Poco::Path existingPath;
   char separator = existingPath.pathSeparator();
   std::string strSeparator;
   strSeparator.push_back(separator);
-#ifdef _WIN32
-  existingPath = Poco::Environment::get("PATH");
-  existingPath.append(strSeparator);
-  existingPath.append(path);
-  Poco::Environment::set("PATH",existingPath.toString());
-#elif defined __linux__
-  existingPath = Poco::Environment::get("LD_LIBRARY_PATH");
-  existingPath.append(strSeparator);
-  existingPath.append(path);
-  Poco::Environment::set("LD_LIBRARY_PATH",existingPath.toString());
-#elif defined __APPLE__
-  existingPath = Poco::Environment::get("DYLD_LIBRARY_PATH");
-  existingPath.append(strSeparator);
-  existingPath.append(path);
-  Poco::Environment::set("DYLD_LIBRARY_PATH",existingPath.toString());
-#else
-  throw std::runtime_error("ConfigServiceImpl::setParaviewLibraryPath cannot determine the running platform and therefore cannot set the path to the Paraview libraries.");
-#endif 
+
+  if(Poco::Environment::has(platformPathName))
+  {
+    existingPath = Poco::Environment::get(platformPathName);
+    existingPath.append(strSeparator);
+    existingPath.append(path);
+  }
+  else
+  {
+    existingPath = path;
+  }
+  Poco::Environment::set(platformPathName, path);
 }
 
 /*
