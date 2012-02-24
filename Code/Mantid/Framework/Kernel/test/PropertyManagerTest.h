@@ -137,6 +137,16 @@ public:
     TS_ASSERT( ! mgr.getPropertyValue("anotherProp").compare("1.3") );
   }
 
+  void testSetProperties_complicatedValueString()
+  {
+    PropertyManagerHelper mgr;
+    mgr.declareProperty("APROP", "1");
+    mgr.declareProperty("anotherProp", "1");
+    TS_ASSERT_THROWS_NOTHING( mgr.setProperties("APROP=equation=12+3;anotherProp=1.3,2.5") );
+    TS_ASSERT_EQUALS( mgr.getPropertyValue("APROP"), "equation=12+3" );
+    TS_ASSERT_EQUALS( mgr.getPropertyValue("anotherProp"), "1.3,2.5" );
+  }
+
   void testSetPropertyValue()
   {
     manager->setPropertyValue("APROP","10");

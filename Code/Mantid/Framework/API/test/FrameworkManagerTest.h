@@ -64,8 +64,6 @@ public:
     TS_ASSERT( ! prop.compare("V2") )
 
     TS_ASSERT_THROWS_NOTHING( FrameworkManager::Instance().createAlgorithm("ToyAlgorithm2","") )
-//    TS_ASSERT_THROWS_NOTHING( manager->createAlgorithm("ToyAlgorithm2","noValProp") )
-    TS_ASSERT_THROWS( FrameworkManager::Instance().createAlgorithm("ToyAlgorithm2","P1=P2=P3"), std::invalid_argument)
   }
 
   void testExec()

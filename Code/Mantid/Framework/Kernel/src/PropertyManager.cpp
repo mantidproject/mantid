@@ -211,7 +211,10 @@ namespace Mantid
     }
 
     //-----------------------------------------------------------------------------------------------
-    /** Set the ordered list of properties by one string of values.
+    /** Set the ordered list of properties by one string of values, separated by semicolons.
+     *
+     * The string should be of format "PropertyName=value;Property2=value2; etc..."
+     *
      *  @param propertiesArray :: The list of property values
      *  @throw invalid_argument if error in parameters
      */
@@ -227,23 +230,37 @@ namespace Mantid
       // Iterate over the properties
       for (tokenizer::iterator it = propPairs.begin(); it != propPairs.end(); ++it)
       {
-        boost::char_separator<char> sep2("=");
-        tokenizer properties(*it,sep2);
-        std::vector<std::string> property(properties.begin(), properties.end());
-        // Call the appropriate setProperty method on the algorithm
-        if ( property.size() == 2)
+        // Pair of the type "
+        std::string pair = *it;
+
+        size_t n = pair.find('=');
+        if (n == std::string::npos)
         {
-          setPropertyValue(property[0],property[1]);
-        }
-        else if ( property.size() == 1)
-        {
+          // No equals sign
           // This is for a property with no value. Not clear that we will want such a thing.
-          setPropertyOrdinal(index,property[0]);
+          // Interpret the string as the index^th property in the list,
+          setPropertyOrdinal(index,pair);
         }
-        // Throw if there's a problem with the string
         else
         {
-          throw std::invalid_argument("Misformed properties string");
+          // Normal "PropertyName=value" string.
+          std::string propName = "";
+          std::string value = "";
+
+          // Extract the value string
+          if (n < pair.size()-1)
+          {
+            propName = pair.substr(0, n);
+            value = pair.substr(n+1, pair.size()-n-1);
+          }
+          else
+          {
+            // String is "PropertyName="
+            propName = pair.substr(0, n);
+            value = "";
+          }
+          // Set it
+          setPropertyValue(propName,value);
         }
         index++;
       }  
