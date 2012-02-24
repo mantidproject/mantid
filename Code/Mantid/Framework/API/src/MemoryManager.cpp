@@ -91,9 +91,9 @@ bool MemoryManagerImpl::goForManagedWorkspace(std::size_t NVectors, std::size_t 
   else
       wsSize = NVectors * (YLength * 2 + XLength) / 1024;
 
-  g_log.debug() << "Requested memory: " << wsSize * sizeof(double) << " KB.\n";
-  g_log.debug() << "Available memory: " << mi.availMemory << " KB.\n";
-  g_log.debug() << "MWS trigger memory: " << triggerSize * sizeof(double) << " KB.\n";
+//  g_log.debug() << "Requested memory: " << (wsSize * sizeof(double))/1024 << " MB. " << std::endl;
+//  g_log.debug() << "Available memory: " << mi.availMemory << " KB.\n";
+//  g_log.debug() << "MWS trigger memory: " << triggerSize * sizeof(double) << " KB.\n";
 
   bool goManaged = (wsSize > triggerSize);
   // If we're on the cusp of going managed, add in the reserved but unused memory
@@ -103,13 +103,14 @@ bool MemoryManagerImpl::goForManagedWorkspace(std::size_t NVectors, std::size_t 
     // See Kernel/src/Memory.cpp - reservedMem() for more details
     Kernel::MemoryStats mem_stats;
     const size_t reserved = mem_stats.reservedMem();
-    g_log.debug() << "Windows - Adding reserved but unused memory of " << reserved << " KB\n";
+//    g_log.debug() << "Windows - Adding reserved but unused memory of " << reserved << " KB\n";
     mi.availMemory += reserved;
     triggerSize += reserved / 100 * availPercent / sizeof(double);
     goManaged = (wsSize > triggerSize);
 
-    g_log.debug() << "Available memory: " << mi.availMemory << " KB.\n";
-    g_log.debug() << "MWS trigger memory: " << triggerSize * sizeof(double) << " KB.\n";
+    g_log.debug() << "Requested memory: " << (wsSize * sizeof(double))/1024 << " MB." << std::endl;
+    g_log.debug() << "Available memory: " << (mi.availMemory)/1024 << " MB." << std::endl;
+    g_log.debug() << "ManagedWS trigger memory: " << (triggerSize * sizeof(double))/1024 << " MB." << std::endl;
   }
 
   if (isCompressedOK)

@@ -8,6 +8,7 @@
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
+#include "MantidKernel/SingletonHolder.h"
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;
@@ -68,6 +69,8 @@ public:
    * This checks that the properties are copied to LoadLiveData */
   void test_start_with_processChunk()
   {
+    // Declare all algorithms, e.g. Rebin
+    FrameworkManager::Instance();
     EventWorkspace_sptr ws;
     ws = doExecEvent("Replace", 0, "Rebin", "Params=40e3, 1e3, 60e3");
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
