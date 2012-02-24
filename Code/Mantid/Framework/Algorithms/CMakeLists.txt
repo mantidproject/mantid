@@ -124,6 +124,7 @@ set ( SRC_FILES
 	src/NormaliseToUnity.cpp
 	src/OneMinusExponentialCor.cpp
 	src/PDFFT.cpp
+	src/Pause.cpp
 	src/PlotAsymmetryByLogValue.cpp
 	src/Plus.cpp
 	src/PointByPointVCorrection.cpp
@@ -311,6 +312,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/NormaliseToUnity.h
 	inc/MantidAlgorithms/OneMinusExponentialCor.h
 	inc/MantidAlgorithms/PDFFT.h
+	inc/MantidAlgorithms/Pause.h
 	inc/MantidAlgorithms/PlotAsymmetryByLogValue.h
 	inc/MantidAlgorithms/Plus.h
 	inc/MantidAlgorithms/PointByPointVCorrection.h
@@ -482,6 +484,7 @@ set ( TEST_FILES
 	test/NormaliseToMonitorTest.h
 	test/OneMinusExponentialCorTest.h
 	test/PDFFTTest.h
+	test/PauseTest.h
 	test/PlotAsymmetryByLogValueTest.h
 	test/PlusTest.h
 	test/PointByPointVCorrectionTest.h
