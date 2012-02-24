@@ -178,7 +178,7 @@ namespace Algorithms
     for (size_t i = 0; i < static_cast<size_t>(numentries); i ++)
     {
       Kernel::DateAndTime tnow = times[i];
-      int64_t dt = tnow.total_nanoseconds()-runstart.total_nanoseconds();
+      int64_t dt = tnow.totalNanoseconds()-runstart.totalNanoseconds();
       ofs << i << "\t" << dt << "\t" << values[i] << std::endl;
     }
 
