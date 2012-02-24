@@ -1270,9 +1270,25 @@ void FitPropertyBrowser::populateFunctionNames()
     std::string fnName = names[i];
     QString qfnName = QString::fromStdString(fnName);
     if (qfnName == "MultiBG") continue;
-    m_registeredFunctions << qfnName;
+    
     boost::shared_ptr<Mantid::API::IFitFunction> f = boost::shared_ptr<Mantid::API::IFitFunction>(
       Mantid::API::FunctionFactory::Instance().createFitFunction(fnName));
+    if (!m_customFittings)
+      m_registeredFunctions << qfnName;
+    else
+    {
+      const std::vector<std::string> categories = f->categories();
+      bool muon = false;
+      for (size_t j=0; j<categories.size(); ++j)
+      {
+        if (categories[j] == "Muon")
+          muon = true;
+      }
+      if (muon == true)
+      {
+        m_registeredFunctions << qfnName;
+      }
+    }
     Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(f.get());
     //Mantid::API::CompositeFunction* cf = dynamic_cast<Mantid::API::CompositeFunction*>(f.get());
     if (pf)
