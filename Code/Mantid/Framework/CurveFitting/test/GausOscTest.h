@@ -26,7 +26,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 
 
-class GausDecayOscTest : public CxxTest::TestSuite
+class GausOscTest : public CxxTest::TestSuite
 {
 public:
 
