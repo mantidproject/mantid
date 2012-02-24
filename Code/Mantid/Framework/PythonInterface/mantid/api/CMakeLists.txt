@@ -10,6 +10,7 @@ set ( MODULE_TEMPLATE src/api.cpp.in )
 set ( EXPORT_FILES
   src/Exports/IAlgorithm.cpp
   src/Exports/Algorithm.cpp
+  src/Exports/PythonAlgorithmExport.cpp
   src/Exports/AlgorithmFactory.cpp
   src/Exports/AlgorithmManager.cpp
   src/Exports/AnalysisDataService.cpp
@@ -41,6 +42,7 @@ set ( EXPORT_FILES
 # Files containing additional helper code that are not related to exporting class/functions
 set ( SRC_FILES 
   src/PythonAlgorithm/AlgorithmWrapper.cpp
+  src/PythonAlgorithm/PythonAlgorithm.cpp
   src/CloneMatrixWorkspace.cpp
 )
 

@@ -27,13 +27,18 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 
+#include <boost/python/object.hpp>
+
 namespace Mantid
 {
   namespace PythonInterface
   {
     /**
-     * Provides a marker class that makes it simpler to distinguish a
-     * C++ algorithm from a Python algorithm.
+     * Provides a class that forms an interface between a Python algorithm
+     * and a C++ algorithm.
+     *
+     * It defines several functions for declaring properties that handle the
+     * fact that the type is only known at runtime
      *
      * It works in tandem with the AlgorithmWrapper such that
      * when the AlgorithmWrapper is exported to Python
