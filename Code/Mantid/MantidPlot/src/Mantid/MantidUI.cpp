@@ -2,6 +2,7 @@
 #include "MantidUI.h"
 #include "MantidMatrix.h"
 #include "MantidDock.h"
+#include "MantidRemoteAlg.h"
 #include "ImportWorkspaceDlg.h"
 #include "AlgorithmMonitor.h"
 #include "MantidSampleLogDialog.h"
@@ -110,6 +111,7 @@ m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
 
   m_exploreMantid = new MantidDockWidget(this,aw);
   m_exploreAlgorithms = new AlgorithmDockWidget(this,aw);
+  m_exploreRemoteAlgorithms = new RemoteAlgorithmDockWidget(this,aw);
 
   actionCopyRowToTable = new QAction(this);
   actionCopyRowToTable->setIcon(QIcon(getQPixmap("table_xpm")));
@@ -237,6 +239,10 @@ void MantidUI::addMenuItems(QMenu *menu)
   actionToggleAlgorithms = m_exploreAlgorithms->toggleViewAction();
   actionToggleAlgorithms->setShortcut( tr("Ctrl+Shift+A") );
   menu->addAction(actionToggleAlgorithms);
+  
+  actionToggleRemoteAlgorithms = m_exploreRemoteAlgorithms->toggleViewAction();
+  actionToggleRemoteAlgorithms->setShortcut( tr("Ctrl+Shift+R") );
+  menu->addAction(actionToggleRemoteAlgorithms);
 
   if (m_fitFunction)
   {

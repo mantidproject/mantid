@@ -175,10 +175,12 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/MantidMDCurve.cpp
                    src/Mantid/MantidMDCurveDialog.cpp
                    src/Mantid/MantidMatrixDialog.cpp
+                   src/Mantid/MantidRemoteAlg.cpp
                    src/Mantid/MantidSampleLogDialog.cpp
                    src/Mantid/MantidUI.cpp
                    src/Mantid/MantidTable.cpp
                    src/Mantid/MantidWSIndexDialog.cpp
+                   src/Mantid/NewClusterDialog.cpp
                    src/Mantid/PeakPickerTool.cpp
                    src/Mantid/Preferences.cpp
                    src/Mantid/RemoveErrorsDialog.cpp
@@ -402,10 +404,12 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/MantidMatrixDialog.h
                    src/Mantid/MantidMatrix.h
                    src/Mantid/MantidAlgorithmMetatype.h
+                   src/Mantid/MantidRemoteAlg.h
                    src/Mantid/MantidSampleLogDialog.h
                    src/Mantid/MantidUI.h
                    src/Mantid/MantidWSIndexDialog.h
                    src/Mantid/MantidTable.h
+                   src/Mantid/NewClusterDialog.h
                    src/Mantid/PeakPickerTool.h
                    src/Mantid/Preferences.h
                    src/Mantid/RemoveErrorsDialog.h
@@ -664,10 +668,12 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/MantidMDCurveDialog.h
                        src/Mantid/MantidMatrixDialog.h
                        src/Mantid/MantidMatrix.h
+                       src/Mantid/MantidRemoteAlg.h
                        src/Mantid/MantidSampleLogDialog.h
                        src/Mantid/MantidUI.h
                        src/Mantid/MantidWSIndexDialog.h
                        src/Mantid/MantidTable.h
+                       src/Mantid/NewClusterDialog.h
                        src/Mantid/PeakPickerTool.h
                        src/Mantid/RemoveErrorsDialog.h
                        src/Mantid/SetUpParaview.h					   
@@ -703,6 +709,7 @@ set ( UI_FILES src/SendToProgramDialog.ui
                src/Mantid/SetUpParaview.ui			   
                src/Mantid/ManageCustomMenus.ui
                src/Mantid/MantidMDCurveDialog.ui
+               src/Mantid/NewClusterDialog.ui
 )
 
 qt4_wrap_cpp ( MOCCED_FILES ${QTIPLOT_MOC_FILES} ${MANTID_MOC_FILES} )

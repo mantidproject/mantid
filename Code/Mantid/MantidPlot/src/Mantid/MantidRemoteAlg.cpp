@@ -1,0 +1,226 @@
+#include "MantidRemoteAlg.h"
+#include "MantidDock.h"
+#include "NewClusterDialog.h"
+#include "MantidUI.h"
+#include <QtGui>
+#include <QtNetwork/QNetworkAccessManager>
+#include <QtNetwork/QNetworkReply>
+#include <QtNetwork/QNetworkRequest>
+
+#include "MantidWSIndexDialog.h"
+#include "FlowLayout.h"
+
+#include <map>
+#include <vector>
+#include <iostream>
+#include <sstream>
+#include <MantidGeometry/Crystal/OrientedLattice.h>
+#include "MantidAPI/ExperimentInfo.h"
+#include <iomanip>
+#include <cstdio>
+#include <Poco/Path.h>
+#include <boost/algorithm/string.hpp>
+
+using namespace Mantid::API;
+using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
+
+
+Mantid::Kernel::Logger& RemoteAlgorithmDockWidget::logObject=Mantid::Kernel::Logger::get("remoteAlgorithmDockWidget");
+
+//----------------- RemoteAlgorithmDockWidget --------------------//
+RemoteAlgorithmDockWidget::RemoteAlgorithmDockWidget(MantidUI *mui, ApplicationWindow *w):
+QDockWidget(w),m_progressBar(NULL),m_mantidUI(mui)
+{
+    logObject.warning("Inside RemoteAlgorithmDockWidget constructor");
+
+    setWindowTitle(tr("Remote Algorithms"));
+    setObjectName("exploreRemoteAlgorithms"); // this is needed for QMainWindow::restoreState()
+    setMinimumHeight(150);
+    setMinimumWidth(200);
+    w->addDockWidget( Qt::RightDockWidgetArea, this );//*/
+
+    QFrame *f = new QFrame(this);
+    QLabel *chooseLabel = new QLabel( tr("Choose cluster:"), f);
+    m_clusterCombo = new QComboBox( f);
+    QPushButton *newCluster = new QPushButton( tr("New cluster:"), f);
+    QLabel *statusLabel = new QLabel( tr(""), f);  // Status is blank until user chooses a cluster
+    m_tree = new AlgorithmTreeWidget(f,mui);
+    m_tree->setHeaderLabel("Remote Algorithms");
+    QVBoxLayout *vbLayout = new QVBoxLayout();
+    QHBoxLayout *hbLayout = new QHBoxLayout();
+
+    hbLayout->addWidget(m_clusterCombo);
+    hbLayout->addWidget( newCluster);
+    vbLayout->addWidget(chooseLabel);
+    vbLayout->addLayout(hbLayout);
+    vbLayout->addWidget(statusLabel);
+    vbLayout->addWidget(m_tree);
+    f->setLayout(vbLayout);
+
+
+    QTreeWidgetItem *catItem = new QTreeWidgetItem(QStringList("Update() hasn't been called yet."));
+    m_tree->addTopLevelItem(catItem);
+
+    m_netManager = new QNetworkAccessManager();
+
+    QObject::connect( newCluster, SIGNAL( clicked()), this, SLOT( addNewCluster()));
+    QObject::connect( m_clusterCombo, SIGNAL( currentIndexChanged(int)), this, SLOT( clusterChoiceChanged(int)));
+
+
+  // -------------------------------------------------------------------- //
+  
+/*******************************
+  m_tree = new AlgorithmTreeWidget(f,mui);
+  m_tree->setHeaderLabel("Algorithms");
+  connect(m_tree,SIGNAL(itemSelectionChanged()),this,SLOT(treeSelectionChanged()));
+
+  QHBoxLayout * buttonLayout = new QHBoxLayout();
+  buttonLayout->setName("testC");
+  QPushButton *execButton = new QPushButton("Execute");
+  m_findAlg = new FindAlgComboBox;
+  m_findAlg->setEditable(true);
+  m_findAlg->completer()->setCompletionMode(QCompleter::PopupCompletion);
+
+  connect(m_findAlg,SIGNAL(editTextChanged(const QString&)),this,SLOT(findAlgTextChanged(const QString&)));
+  connect(m_findAlg,SIGNAL(enterPressed()),m_mantidUI,SLOT(executeAlgorithm()));
+  connect(execButton,SIGNAL(clicked()),m_mantidUI,SLOT(executeAlgorithm()));
+
+  buttonLayout->addWidget(execButton);
+  buttonLayout->addWidget(m_findAlg);
+  buttonLayout->addStretch();
+
+  m_runningLayout = new QHBoxLayout();
+  m_runningLayout->setName("testA");
+
+  m_runningButton = new QPushButton("Details");
+  m_runningLayout->addStretch();
+  m_runningLayout->addWidget(m_runningButton);
+  connect(m_runningButton,SIGNAL(clicked()),m_mantidUI,SLOT(showAlgMonitor()));
+  //
+  QVBoxLayout * layout = new QVBoxLayout();
+  f->setLayout(layout);
+  layout->addLayout(buttonLayout);
+  layout->addWidget(m_tree);
+  layout->addLayout(m_runningLayout);
+  //
+
+  m_treeChanged = false;
+  m_findAlgChanged = false;
+***************************/
+  setWidget(f);
+
+}
+
+RemoteAlgorithmDockWidget::~RemoteAlgorithmDockWidget()
+{
+    // save the cluster info in the combo box to the user config file
+    // (Replace the values in the config file with what's in the combo box.)
+    Mantid::Kernel::ConfigServiceImpl& config = Mantid::Kernel::ConfigService::Instance();
+
+
+
+
+
+   delete m_netManager;
+}
+
+void RemoteAlgorithmDockWidget::update()
+{
+    m_tree->clear();
+
+    QTreeWidgetItem *catItem;
+    if (m_configReply)
+    {
+      catItem = new QTreeWidgetItem(QStringList(m_configReply->read(25)));
+    }
+    else
+    {
+        catItem = new QTreeWidgetItem(QStringList("Update() has just been called."));
+    }
+    m_tree->addTopLevelItem(catItem);
+
+    // We're done with the network reply (assuming we used it at all), so schedule it for deletion
+    if (m_configReply)
+    {
+      m_configReply->deleteLater();
+      m_configReply = NULL;
+    }
+}
+
+// Shows a dialog box for the user to enter info about a cluster.  Adds that cluster to the
+// combo box.
+void RemoteAlgorithmDockWidget::addNewCluster()
+{
+  NewClusterDialog *theDialog = new NewClusterDialog();
+  if (theDialog->exec() == QDialog::Accepted)
+  {
+    // Grab the values the user entered
+    ClusterInfo cluster;
+    cluster.displayName = theDialog->getDisplayName();
+    cluster.serviceBaseURL = theDialog->getServiceBaseURL();
+    cluster.configFileURL = theDialog->getConfigFileURL();
+    m_clusterList.append( cluster);
+    
+    // Add the Display name to the combo box
+    m_clusterCombo->addItem( cluster.displayName);
+  }
+  
+}
+
+void RemoteAlgorithmDockWidget::clusterChoiceChanged(int index)
+{
+    // connect to the cluster and download the XML config file
+    QNetworkRequest request;
+    request.setUrl(m_clusterList[index].configFileURL);
+    if (request.url().isValid())
+    {
+        m_configReply = m_netManager->get(request);
+        // update() function will parse the downloaded XML file and populate the algorithm tree
+        QObject::connect(m_configReply, SIGNAL(finished()), this, SLOT(update()));
+    }
+    else
+    {
+        // Test for a valid URL is done in the dialog box when it was first entered,
+        // so in theory, we'll never get here.  But just in case we do (possibly
+        // because the URL came from a corrupt properties file?), show an error dialog
+        QMessageBox msgBox;
+        msgBox.setText("Invalid URL.");
+        msgBox.setInformativeText(QString(tr("The URL <")) + request.url().toString() + tr("> is invalid.  This cluster will be ignored."));
+        msgBox.exec();
+    }
+}
+
+void RemoteAlgorithmDockWidget::findAlgTextChanged(const QString& text)
+{
+  
+}
+
+void RemoteAlgorithmDockWidget::treeSelectionChanged()
+{
+  
+}
+
+void RemoteAlgorithmDockWidget::selectionChanged(const QString& algName)
+{
+  
+}
+
+void RemoteAlgorithmDockWidget::updateProgress(void* alg, const double p, const QString& msg,
+                                               double estimatedTime, int progressPrecision)
+{
+  
+}
+
+void RemoteAlgorithmDockWidget::algorithmStarted(void* alg)
+{
+  
+}
+
+void RemoteAlgorithmDockWidget::algorithmFinished(void* alg)
+{
+  
+}
+
+
+
