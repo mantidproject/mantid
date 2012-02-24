@@ -382,9 +382,6 @@ namespace DataHandling
       } // FOR EACH SpecID
     } // FOR EACH Pair
 
-    g_log.error() << "SpectrumID in XML File (ids) Is Not Supported!  Spectrum IDs" << std::endl;
-    throw std::runtime_error("Implement SpectrumToDetector!");
-
     return;
   }
 
