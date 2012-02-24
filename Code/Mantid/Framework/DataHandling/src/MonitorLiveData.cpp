@@ -79,9 +79,10 @@ namespace DataHandling
 
     size_t chunk = 0;
 
+    // Keep going until you get cancelled
     while (true)
     {
-      // Keep going until you get cancelled
+      // This call throws if the user presses cancel
       this->interruption_point();
 
       // Sleep for 50 msec
@@ -93,20 +94,26 @@ namespace DataHandling
       {
         lastTime = now;
         g_log.notice() << "Loading live data chunk " << chunk << " at " << now.toFormattedString("%H:%M:%S") << std::endl;
+
         // Time to run LoadLiveData again
-        LoadLiveData loadAlg;
-        loadAlg.initialize();
+        Algorithm_sptr alg = createSubAlgorithm("LoadLiveData");
+        LoadLiveData * loadAlg = dynamic_cast<LoadLiveData*>(alg.get());
+        if (!loadAlg)
+          throw std::runtime_error("Error creating LoadLiveData sub-algorithm");
+
+        loadAlg->setChild(true);
         // So the output gets put into the ADS
-        loadAlg.setChild(true);
+        loadAlg->setAlwaysStoreInADS(true);
         // Too much logging
-        loadAlg.setLogging(false);
+        loadAlg->setLogging(false);
+        loadAlg->initialize();
         // Copy settings from THIS to LoadAlg
-        loadAlg.copyPropertyValuesFrom(*this);
+        loadAlg->copyPropertyValuesFrom(*this);
         // Give the listener directly to LoadLiveData (don't re-create it)
-        loadAlg.setLiveListener(listener);
+        loadAlg->setLiveListener(listener);
 
         // Run the LoadLiveData
-        loadAlg.executeAsSubAlg();
+        loadAlg->executeAsSubAlg();
 
         chunk++;
       }
