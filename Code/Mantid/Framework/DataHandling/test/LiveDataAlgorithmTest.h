@@ -67,12 +67,13 @@ public:
   {
     FrameworkManager::Instance();
     AlgorithmManager::Instance();
-    for (int post=0; post<1; post++)
+    for (int post=0; post<2; post++)
     {
       // Try both the regular and the Post-Processing algorithm
       std::string prefix="";
       if (bool(post))
         prefix = "Post";
+      std::cout << prefix << "Processing algo" << std::endl;
 
       Workspace2D_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(5, 10);
       AnalysisDataService::Instance().addOrReplace("first", ws);
@@ -82,7 +83,7 @@ public:
       TS_ASSERT_THROWS_NOTHING( alg.initialize() )
       TS_ASSERT( alg.isInitialized() )
 
-      IAlgorithm * procAlg;
+      IAlgorithm_sptr procAlg;
       procAlg = alg.makeAlgorithm( bool(post) );
       TSM_ASSERT("NULL algorithm pointer returned if nothing is specified.", !procAlg);
 
@@ -94,7 +95,10 @@ public:
       TSM_ASSERT("Non-NULL algorithm pointer", procAlg);
       TS_ASSERT( procAlg->isInitialized() );
       TS_ASSERT_EQUALS( procAlg->getPropertyValue("InputWorkspace"), "first" );
+      TS_ASSERT_EQUALS( procAlg->getPropertyValue("OutputWorkspace"), "second" );
 
+      // Just so the ADS gets updated properly.
+      procAlg->setChild(false);
       // Run the algorithm and check that it was done correctly
       procAlg->execute();
       TS_ASSERT( !AnalysisDataService::Instance().doesExist("first") );

@@ -56,7 +56,7 @@ namespace DataHandling
 
     Mantid::Kernel::DateAndTime getStartTime() const;
 
-    Mantid::API::IAlgorithm * makeAlgorithm(bool postProcessing);
+    Mantid::API::IAlgorithm_sptr makeAlgorithm(bool postProcessing);
 
     bool hasPostProcessing() const;
 

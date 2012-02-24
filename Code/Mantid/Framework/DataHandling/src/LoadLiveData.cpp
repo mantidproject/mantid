@@ -78,7 +78,7 @@ namespace DataHandling
   Mantid::API::Workspace_sptr LoadLiveData::processChunk(Mantid::API::MatrixWorkspace_sptr chunkWS)
   {
     // Make algorithm and set the properties
-    IAlgorithm * alg = this->makeAlgorithm(false);
+    IAlgorithm_sptr alg = this->makeAlgorithm(false);
     if (alg)
     {
       g_log.notice() << "Performing chunk processing using " << alg->name() << std::endl;
