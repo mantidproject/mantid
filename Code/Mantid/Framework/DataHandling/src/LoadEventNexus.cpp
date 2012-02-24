@@ -2057,7 +2057,8 @@ void LoadEventNexus::loadTimeOfFlightData(::NeXus::File& file, DataObjects::Even
 }
   Mantid::API::ITableWorkspace_sptr LoadEventNexus::determineChunking(size_t total_events, double maxChunkSize)
   {
-    double filesize = static_cast<double>(total_events)*0.000000022; // 24/(1024*1024*1024) convert to Gbytes
+    // factor is 3 * 8 / (1024*1024*1024) to convert to Gbytes
+    double filesize = static_cast<double>(total_events) * 24.0 / (1024.0*1024.0*1024.0);
     int numChunks = static_cast<int>(filesize/maxChunkSize);
     numChunks ++; //So maxChunkSize is not exceeded 
     if (numChunks < 0) numChunks = 1;

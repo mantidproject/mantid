@@ -404,8 +404,8 @@ namespace DataHandling
     this->parseRuninfo(filename, dataDir, eventFilenames);
     double filesize = 0;
     for (size_t i = 0; i < eventFilenames.size(); i++) {
-      // factor is 2 * (1024*1024*1024) to convert to Gbytes
-      filesize += static_cast<double>(Poco::File(dataDir + eventFilenames[i]).getSize()) * 0.000000002;
+      // factor is 3 / (1024*1024*1024) to convert to Gbytes
+      filesize += static_cast<double>(Poco::File(dataDir + eventFilenames[i]).getSize()) * 3.0 / (1024.0*1024.0*1024.0);
     }
     int numChunks = static_cast<int>(filesize/maxChunkSize);
     numChunks ++; //So maxChunkSize is not exceeded 
