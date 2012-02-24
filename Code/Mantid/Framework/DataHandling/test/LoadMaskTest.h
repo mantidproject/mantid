@@ -160,6 +160,7 @@ public:
           AnalysisDataService::Instance().retrieveWS<DataObjects::SpecialWorkspace2D>("VULCAN_Mask_Detectors");
 
     // 3. Check
+    size_t errorcounts = 0;
     for (size_t iws=0; iws<maskws->getNumberHistograms(); iws++)
     {
       double y = maskws->dataY(iws)[0];
@@ -172,8 +173,14 @@ public:
       {
         // Unmasked
         TS_ASSERT_DELTA(y, 0.0, 1.0E-5);
+        if (fabs(y)>1.0E-5)
+        {
+          errorcounts ++;
+          std::cout << "Workspace Index " << iws << " has a wrong set on masks" << std::endl;
+        }
       }
     }
+    std::cout << "Total " << errorcounts << " errors " << std::endl;
 
     // 4. Clean
     Poco::File cleanfile(maskfname1);

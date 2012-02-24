@@ -115,6 +115,8 @@ namespace DataHandling
     this->intializeMaskWorkspace();
     setProperty("OutputWorkspace",mMaskWS);
 
+    mDefaultToUse = true;
+
     // 2. Parse Mask File
 
     std::string filename = getProperty("InputFile");
@@ -129,6 +131,7 @@ namespace DataHandling
     {
       // 2.2 ISIS Masking file
       loadISISMaskFile(filename);
+      mDefaultToUse = true;
     }
     else
     {
