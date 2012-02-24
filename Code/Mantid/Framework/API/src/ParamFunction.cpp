@@ -204,6 +204,35 @@ std::string ParamFunction::parameterDescription(size_t i)const
   return m_parameterDescriptions[i];
 }
 
+/** 
+ * Get the fitting error for a parameter
+ * @param i :: The index of a parameter
+ * @return :: the error
+ */
+double ParamFunction::getError(size_t i) const
+{
+  if (i >= nParams())
+  {
+    throw std::out_of_range("ParamFunction parameter index out of range.");
+  }
+  return m_errors[i];
+}
+
+/** 
+ * Set the fitting error for a parameter
+ * @param i :: The index of a parameter
+ * @param err :: The error value to set
+ */
+void ParamFunction::setError(size_t i, double err)
+{
+  if (i >= nParams())
+  {
+    throw std::out_of_range("ParamFunction parameter index out of range.");
+  }
+  m_errors[i] = err;
+}
+
+
 /**
  * Declare a new parameter. To used in the implementation'c constructor.
  * @param name :: The parameter name.
@@ -227,6 +256,7 @@ void ParamFunction::declareParameter(const std::string& name,double initValue, c
   m_parameterNames.push_back(ucName);
   m_parameterDescriptions.push_back(description);
   m_parameters.push_back(initValue);
+  m_errors.push_back(0.0);
   m_explicitlySet.push_back(false);
 }
 

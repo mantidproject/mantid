@@ -88,6 +88,10 @@ public:
   virtual std::string parameterDescription(size_t i)const;
   /// Checks if a parameter has been set explicitly
   virtual bool isExplicitlySet(size_t i)const;
+  /// Get the fitting error for a parameter
+  virtual double getError(size_t i) const;
+  /// Set the fitting error for a parameter
+  virtual void setError(size_t i, double err);
 
   /// Check if a declared parameter i is active
   virtual bool isFixed(size_t i)const;
@@ -149,6 +153,8 @@ private:
   std::vector<std::string> m_parameterNames;
   /// Keeps parameter values
   std::vector<double> m_parameters;
+  /// Keeps parameter errors
+  std::vector<double> m_errors;
   /// Holds parameter ties as <parameter index,tie pointer> 
   std::vector<ParameterTie*> m_ties;
   /// Holds the constraints added to function

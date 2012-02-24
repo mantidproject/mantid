@@ -15,7 +15,7 @@ Setting the Output property defines the names of the output workspaces. One of t
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/GenericFit.h"
-#include "MantidCurveFitting/BoundaryConstraint.h"
+//#include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidCurveFitting/SimplexMinimizer.h"
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/CompositeFunction.h"

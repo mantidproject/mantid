@@ -117,12 +117,12 @@ public:
   virtual void function(const FunctionDomain& domain,FunctionValues& values)const;
   void functionDeriv(const FunctionDomain& domain, Jacobian& jacobian);
 
-protected:
-
   /// Function you want to fit to.
   virtual void function1D(double* out, const double* xValues, const size_t nData)const = 0;
   /// Derivatives of function with respect to active parameters
   virtual void functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData);
+
+protected:
 
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
@@ -131,6 +131,8 @@ protected:
   friend class CurveFitting::Fit;
 
 };
+
+typedef boost::shared_ptr<IFunction1D> IFunction1D_sptr;
 
 } // namespace API
 } // namespace Mantid

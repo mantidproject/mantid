@@ -12,6 +12,7 @@
 
 #include <Poco/StringTokenizer.h>
 
+#include <limits>
 #include <sstream>
 #include <iostream> 
 
@@ -457,7 +458,7 @@ std::string IFunction::descriptionOfActive(size_t i)const
 void IFunction::calNumericalDeriv(const FunctionDomain& domain, Jacobian& jacobian)
 {
     const double minDouble = std::numeric_limits<double>::min();
-    const double epsilon = std::numeric_limits<double>::epsilon();
+    const double epsilon = std::numeric_limits<double>::epsilon() * 100;
     double stepPercentage = 0.001; // step percentage
     double step; // real step
     double cutoff = 100.0*minDouble/stepPercentage;
@@ -502,5 +503,66 @@ void IFunction::calNumericalDeriv(const FunctionDomain& domain, Jacobian& jacobi
     }
 }
 
+/**
+ * Return the transformation matrix T between parameters such that p_i = T_ij * ap_j,
+ * where ap_j is j-th active parameter.
+ * @param tm :: The output matrix
+ */
+void IFunction::getTransformationMatrix(Kernel::Matrix<double>& tm)
+{
+  size_t np = nParams();
+  tm.setMem(np, np);
+  tm.identityMatrix();
+}
+
+/**
+ * Calculate the transformation matrix T by numeric differentiation
+ * @param tm :: The output transformation matrix.
+ */
+void IFunction::calTransformationMatrixNumerically(Kernel::Matrix<double>& tm)
+{
+  double epsilon = std::numeric_limits<double>::epsilon() * 100;
+  size_t np = nParams();
+  tm.setMem(np,np);
+  for(size_t i = 0; i < np; ++i)
+  {
+    double p0 = getParameter(i);
+    for(size_t j = 0; j < np; ++j)
+    {
+      double ap = activeParameter(j);
+      double step = ap == 0.0? epsilon : ap * epsilon;
+      setActiveParameter( j, ap + step );
+      tm[i][j] = ( getParameter(i) - p0 ) / step;
+      setActiveParameter( j, ap );
+    }
+  }
+}
+
 } // namespace API
 } // namespace Mantid
+
+///\cond TEMPLATE
+namespace Mantid
+{
+namespace Kernel
+{
+
+template<> MANTID_API_DLL
+boost::shared_ptr<Mantid::API::IFunction> IPropertyManager::getValue<boost::shared_ptr<Mantid::API::IFunction> >(const std::string &name) const
+{
+  PropertyWithValue<boost::shared_ptr<Mantid::API::IFunction> >* prop =
+                    dynamic_cast<PropertyWithValue<boost::shared_ptr<Mantid::API::IFunction> >*>(getPointerToProperty(name));
+  if (prop)
+  {
+    return *prop;
+  }
+  else
+  {
+    std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected IFitFunction.";
+    throw std::runtime_error(message);
+  }
+}
+
+} // namespace Kernel
+} // namespace Mantid
+///\endcond TEMPLATE

@@ -123,6 +123,7 @@ std::string CompositeFunction::asString()const
 void CompositeFunction::function(const FunctionDomain& domain, FunctionValues& values)const
 {
   FunctionValues tmp(domain);
+  values.zeroCalculated();
   for(size_t iFun = 0; iFun < nFunctions(); ++iFun)
   {
     domain.reset();
@@ -256,6 +257,28 @@ std::string CompositeFunction::parameterDescription(size_t i)const
   std::ostringstream ostr;
   ostr << m_functions[ iFun ]->parameterDescription(i - m_paramOffsets[iFun]);
   return ostr.str();
+}
+
+/** 
+ * Get the fitting error for a parameter
+ * @param i :: The index of a parameter
+ * @return :: the error
+ */
+double CompositeFunction::getError(size_t i) const
+{
+  size_t iFun = functionIndex(i);
+  return m_functions[ iFun ]->getError(i - m_paramOffsets[iFun]);
+}
+
+/** 
+ * Set the fitting error for a parameter
+ * @param i :: The index of a parameter
+ * @param err :: The error value to set
+ */
+void CompositeFunction::setError(size_t i, double err)
+{
+  size_t iFun = functionIndex(i);
+  m_functions[ iFun ]->setError(i - m_paramOffsets[iFun], err);
 }
 
 /// Value of i-th active parameter. Override this method to make fitted parameters different from the declared
@@ -836,6 +859,51 @@ IFunction_sptr CompositeFunction::getContainingFunction(const ParameterReference
 //  }
 //  return IFunction_sptr();
 //}
+
+/// Is the transformation an identity?
+bool CompositeFunction::isTransformationIdentity() const 
+{
+  for(size_t iFun = 0; iFun < nFunctions(); ++iFun)
+  {
+    if ( !getFunction(iFun)->isTransformationIdentity() )
+    {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * Return the transformation matrix T between parameters such that p_i = T_ij * ap_j,
+ * where ap_j is j-th active parameter.
+ * @param tm :: The output matrix
+ */
+void CompositeFunction::getTransformationMatrix(Kernel::Matrix<double>& tm)
+{
+  size_t np = nParams();
+  tm.setMem(np, np);
+  tm.identityMatrix();
+  if ( this->isTransformationIdentity() ) return;
+  for(size_t iFun = 0; iFun < nFunctions(); ++iFun)
+  {
+    IFunction_sptr f = getFunction(iFun);
+    if ( !f->isTransformationIdentity() )
+    {
+      size_t i0 = m_paramOffsets[iFun];
+      size_t np1 = f->nParams();
+      Kernel::Matrix<double> tm1(np1,np1);
+      f->getTransformationMatrix(tm1);
+      for(size_t i = 0; i < np1; ++i)
+      {
+        for(size_t j = 0; j < np1; ++j)
+        {
+          tm[i0 + i][i0 + j] = tm1[i][j];
+        }
+      }
+    } // !identity
+  }
+}
+
 
 } // namespace API
 } // namespace Mantid

@@ -117,18 +117,5 @@ double SimplexMinimizer::costFunctionVal()
   return m_gslSolver->fval;
 }
 
-///Calculates covariance matrix - not implemented
-void SimplexMinimizer::calCovarianceMatrix(gsl_matrix * covar, double epsrel)
-{
-  //gsl_matrix * holdCalculatedJacobian;
-  //holdCalculatedJacobian =  gsl_matrix_alloc (m_gslLeastSquaresContainer.n, m_gslLeastSquaresContainer.p);
-
-  //int dummy = m_gslLeastSquaresContainer.df(m_gslSolver->x, m_gslLeastSquaresContainer.params, holdCalculatedJacobian);
-  //(void) dummy;
-  //gsl_multifit_covar (holdCalculatedJacobian, epsrel, covar);
-
-  //gsl_matrix_free (holdCalculatedJacobian);
-}
-
 } // namespace CurveFitting
 } // namespace Mantid

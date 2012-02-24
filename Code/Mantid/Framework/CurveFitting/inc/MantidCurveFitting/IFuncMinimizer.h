@@ -8,9 +8,6 @@
 #include "MantidAPI/ICostFunction.h"
 #include "MantidCurveFitting/FuncMinimizerFactory.h"
 
-#include <string>
-#include <gsl/gsl_multifit_nlin.h>
-
 namespace Mantid
 {
 namespace API
@@ -57,26 +54,23 @@ public:
   virtual std::string name() const = 0;
 
   /// Do one iteration
+  /// @return :: true if iterations should be continued or false to stop
   virtual bool iterate() = 0;
 
   /// Perform iteration with minimizer and return info about how well this went
   /// using the GSL status integer system. See gsl_errno.h for details.
-  virtual bool minimize();
+  virtual bool minimize(size_t maxIterations = 500);
 
   virtual std::string getError() const {return m_errorString;}
 
   /// Get value of cost function 
   virtual double costFunctionVal() = 0;
 
-  /** Calculates covariance matrix
-   *
-   * @param covar :: Returned covariance matrix, here as 
-   * @param epsrel :: Is used to remove linear-dependent columns
-   */
-  virtual void calCovarianceMatrix(gsl_matrix * covar, double epsrel = 0.0001) = 0;
 protected:
   std::string m_errorString;
 };
+
+typedef boost::shared_ptr<IFuncMinimizer> IFuncMinimizer_sptr;
 
 } // namespace CurveFitting
 } // namespace Mantid

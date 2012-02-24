@@ -3,9 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/BFGS_Minimizer.h"
 #include "MantidAPI/CostFunctionFactory.h"
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid
 {

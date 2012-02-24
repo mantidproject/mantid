@@ -120,6 +120,40 @@ public:
     TS_ASSERT_DELTA(der1[1], 1.8, 1e-10);
   }
 
+  void test_Fixing_parameter()
+  {
+    std::vector<double> x(10),y(10);
+    for(size_t i = 0; i < x.size(); ++i)
+    {
+      x[i] = 0.1 * i;
+      y[i] =  9.9 * exp( -(x[i])/0.5 );
+    }
+    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1D(x));
+    API::FunctionValues_sptr values(new API::FunctionValues(*domain));
+    values->setFitData(y);
+    values->setFitWeights(1.0);
+
+    API::IFunction_sptr fun(new ExpDecay);
+    fun->setParameter("Height",1.);
+    fun->setParameter("Lifetime",1.);
+    fun->fix(1);
+
+    boost::shared_ptr<CostFuncLeastSquares> costFun(new CostFuncLeastSquares);
+    costFun->setFittingFunction(fun,domain,values);
+
+    BFGS_Minimizer s;
+    s.initialize(costFun);
+
+    TS_ASSERT_DELTA(costFun->val(),224.0,0.1);
+    TS_ASSERT(s.minimize());
+    TS_ASSERT_DELTA(costFun->val(),15.7,0.1);
+
+    TS_ASSERT_DELTA(fun->getParameter("Height"),7.6,0.01);
+    TS_ASSERT_DELTA(fun->getParameter("Lifetime"),1.0,1e-9);
+    TS_ASSERT_EQUALS(s.getError(),"success");
+
+  }
+
 };
 
 #endif /*CURVEFITTING_LEASTSQUARESTEST_H_*/

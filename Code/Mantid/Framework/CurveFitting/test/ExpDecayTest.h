@@ -7,7 +7,7 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidCurveFitting/LinearBackground.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
-#include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/FitMW.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -60,7 +60,7 @@ public:
 
   void testAgainstMockData()
   {
-    Fit alg2;
+    FitMW alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
     TS_ASSERT( alg2.isInitialized() );
 
@@ -83,7 +83,7 @@ public:
     fn.initialize();
 
     //alg2.setFunction(fn);
-    alg2.setPropertyValue("Function",fn.asString());
+    alg2.setPropertyValue("Function",fn->asString());
 
 
     // Set which spectrum to fit against and initial starting values
@@ -103,7 +103,7 @@ public:
     double dummy = alg2.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 0.0001,0.0001);
 
-    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
+    IFunction_sptr out = alg2.getProperty("Function");
     TS_ASSERT_DELTA( out->getParameter("Height"), 5 ,0.0001);
     TS_ASSERT_DELTA( out->getParameter("Lifetime"), 3 ,0.001);
 

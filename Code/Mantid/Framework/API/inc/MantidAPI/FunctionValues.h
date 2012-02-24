@@ -63,6 +63,8 @@ public:
   double* getPointerToCalculated(size_t i);
   /// Add other calculated values
   FunctionValues& operator+=(const FunctionValues& values);
+  /// Set all calculated values to zero
+  void zeroCalculated();
 
   /// set a fitting data value
   void setFitData(size_t i,double value);

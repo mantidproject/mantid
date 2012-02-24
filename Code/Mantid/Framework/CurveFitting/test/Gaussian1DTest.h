@@ -9,16 +9,16 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataHandling/LoadRaw.h"
-#include "MantidDataHandling/LoadRaw3.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/System.h"
+//#include "MantidDataHandling/LoadRaw.h"
+//#include "MantidDataHandling/LoadRaw3.h"
+//#include "MantidKernel/Exception.h"
+//#include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using Mantid::CurveFitting::Gaussian1D;
 using namespace Mantid::DataObjects;
-using namespace Mantid::DataHandling;
+//using namespace Mantid::DataHandling;
 
 // Algorithm to force Gaussian1D to be run by simplex algorithm
 class ToyAlgorithm : public Gaussian1D

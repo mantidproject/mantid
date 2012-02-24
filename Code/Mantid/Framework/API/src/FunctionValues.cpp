@@ -66,6 +66,13 @@ namespace API
     return *this;
   }
 
+  /// Set all calculated values to zero
+  void FunctionValues::zeroCalculated()
+  {
+    std::fill(m_calculated.begin(),m_calculated.end(),0.0);
+  }
+
+
   /**
    * Set a fitting data value.
    * @param i :: Index

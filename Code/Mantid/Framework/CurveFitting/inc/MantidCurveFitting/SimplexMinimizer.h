@@ -50,8 +50,6 @@ public:
   bool iterate();
   /// Return current value of the cost function
   double costFunctionVal();
-  /// Calculate the covariance matrix.
-  void calCovarianceMatrix(gsl_matrix * covar, double epsrel = 0.0001);
   /// Initialize minimizer, i.e. pass a function to minimize.
   virtual void initialize(API::ICostFunction_sptr function);
 

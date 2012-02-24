@@ -44,7 +44,9 @@ namespace API
 class MANTID_API_DLL FunctionDomain1D: public FunctionDomain
 {
 public:
+  FunctionDomain1D(const double startX, const double endX, const size_t n);
   FunctionDomain1D(const std::vector<double>& xvalues);
+  FunctionDomain1D(std::vector<double>::const_iterator from, std::vector<double>::const_iterator to);
   /// Return the number of arguments in the domain
   virtual size_t size() const  {return m_X.size();}
   /// Get an x value.

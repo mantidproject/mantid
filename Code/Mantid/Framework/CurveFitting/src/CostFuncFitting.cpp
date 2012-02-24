@@ -2,6 +2,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/CostFuncFitting.h"
+#include "MantidCurveFitting/GSLJacobian.h"
+
+#include <gsl/gsl_multifit_nlin.h>
 
 namespace Mantid
 {
@@ -80,11 +83,72 @@ void CostFuncFitting::checkValidity() const
 
 /** Calculates covariance matrix
   *
-  * @param covar :: Returned covariance matrix, here as 
+  * @param covar :: Returned covariance matrix
   * @param epsrel :: Is used to remove linear-dependent columns
   */
-void CostFuncFitting::calCovarianceMatrix(gsl_matrix * covar, double epsrel)
+void CostFuncFitting::calCovarianceMatrix( Kernel::Matrix<double>& covar, double epsrel )
 {
+  // construct the jacobian
+  GSLJacobian J( m_function, m_values->size() );
+  size_t na = this->nParams(); // number of active parameters
+  assert( J.getJ()->size2 == na );
+
+  // calculate the derivatives
+  m_function->functionDeriv( *m_domain, J );
+
+  // let the GSL to compute the covariance matrix
+  gsl_matrix *c = gsl_matrix_alloc( na, na );
+  gsl_multifit_covar( J.getJ(), epsrel, c );
+
+  size_t np = m_function->nParams();
+  // the calculated matrix is for active parameters
+  // put it into a temporary Kernel::Matrix
+  Kernel::Matrix<double> activeCovar(np,np);
+  activeCovar.zeroMatrix();
+  for(size_t i = 0; i < np; ++i)
+  {
+    if ( !m_function->isActive(i) ) continue;
+    for(size_t j = 0; j <= i; ++j)
+    {
+      if ( !m_function->isActive(j) ) continue;
+      double val = gsl_matrix_get( c, i, j );
+      activeCovar[i][j] = val;
+      if ( i != j )
+      {
+        activeCovar[j][i] = val;
+      }
+    }
+  }
+
+  if (m_function->isTransformationIdentity())
+  {
+    // if the transformation is identity simply copy the matrix
+    covar = activeCovar;
+  }
+  else
+  {
+    // else do the transformation
+    m_function->getTransformationMatrix(covar);
+    covar *= activeCovar;
+  }
+
+  // clean up
+  gsl_matrix_free( c );
+}
+
+/**
+ * Calculate the fitting errors and assign them to the fitting function.
+ * @param covar :: A covariance matrix to use for error calculations.
+ *   It can be calculated with calCovarianceMatrix().
+ */
+void CostFuncFitting::calFittingErrors(const Kernel::Matrix<double>& covar)
+{
+  size_t np = m_function->nParams();
+  for(size_t i = 0; i < np; ++i)
+  {
+    double err = sqrt(covar[i][i]);
+    m_function->setError(i,err);
+  }
 }
 
 } // namespace CurveFitting

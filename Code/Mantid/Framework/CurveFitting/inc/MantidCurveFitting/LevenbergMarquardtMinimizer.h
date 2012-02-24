@@ -5,15 +5,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/IFuncMinimizer.h"
-#include <gsl/gsl_multifit_nlin.h>
-#include "MantidAPI/IFitFunction.h"
-//#include "MantidCurveFitting/Fit.h"
-#include "MantidCurveFitting/GSLFunctions.h"
 
 namespace Mantid
 {
 namespace CurveFitting
 {
+
+class CostFuncLeastSquares;
+
 /** Implementing Levenberg-Marquardt by wrapping the IFuncMinimizer interface
     around the GSL implementation of this algorithm.
 
@@ -43,36 +42,21 @@ namespace CurveFitting
 class DLLExport LevenbergMarquardtMinimizer : public IFuncMinimizer
 {
 public:
-  /// constructor and destructor
-  ~LevenbergMarquardtMinimizer();
-  LevenbergMarquardtMinimizer(): m_name("Levenberg-Marquardt") {}
+  /// Constructor
+  LevenbergMarquardtMinimizer():IFuncMinimizer(){}
+  /// Name of the minimizer.
+  std::string name() const {return "Levenberg-Marquardt";}
 
-  /// Overloading base class methods
-  std::string name()const;
-  int iterate();
-  int hasConverged();
-  double costFunctionVal();
-  void calCovarianceMatrix(double epsrel, gsl_matrix * covar);
-  void initialize(double* X, const double* Y, double *sqrtWeight, const int& nData, const int& nParam, 
-    gsl_vector* startGuess, API::IFitFunction* fit, const std::string& costFunction);
-  void initialize(API::IFitFunction* fit, const std::string& costFunction);
+  /// Initialize minimizer, i.e. pass a function to minimize.
+  virtual void initialize(API::ICostFunction_sptr function);
+  /// Do one iteration.
+  virtual bool iterate();
+  /// Return current value of the cost function
+  virtual double costFunctionVal();
 
 private:
-  /// name of this minimizer
-  const std::string m_name;
 
-  /// GSL data container
-  GSL_FitData *m_data;
-
-  /// GSL minimizer container
-  gsl_multifit_function_fdf gslContainer;
-
-  /// pointer to the GSL solver doing the work
-  gsl_multifit_fdfsolver *m_gslSolver;
-
-  /// Stored to access IFunction interface in iterate()
-  API::IFitFunction* m_function;
-
+  boost::shared_ptr<CostFuncLeastSquares> m_leastSquares;
 	/// Static reference to the logger class
 	static Kernel::Logger& g_log;
 };

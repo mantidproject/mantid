@@ -83,6 +83,10 @@ public:
   std::string parameterDescription(size_t i)const;
   /// Checks if a parameter has been set explicitly
   bool isExplicitlySet(size_t i)const;
+  /// Get the fitting error for a parameter
+  virtual double getError(size_t i) const;
+  /// Set the fitting error for a parameter
+  virtual void setError(size_t i, double err);
 
   /// Check if a parameter is active
   bool isFixed(size_t i)const;
@@ -103,6 +107,11 @@ public:
   std::string descriptionOfActive(size_t i)const;
   /// Check if an active parameter i is actually active
   bool isActive(size_t i)const;
+  /// Return the transformation matrix T between parameters such that p_i = T_ij * ap_j,
+  /// where ap_j is j-th active parameter.
+  virtual void getTransformationMatrix(Kernel::Matrix<double>& tm);
+  /// Is the transformation an identity?
+  virtual bool isTransformationIdentity() const;
 
   /// Return parameter index from a parameter reference.
   size_t getParameterIndex(const ParameterReference& ref)const;

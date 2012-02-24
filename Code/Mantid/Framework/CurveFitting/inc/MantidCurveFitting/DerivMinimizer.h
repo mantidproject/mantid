@@ -44,19 +44,20 @@ class DLLExport DerivMinimizer : public IFuncMinimizer
 public:
   /// Constructor
   DerivMinimizer();
+  DerivMinimizer(const double stepSize, const double tolerance);
   /// Destructor
   ~DerivMinimizer();
 
   /// Do one iteration.
   bool iterate();
-  /// Do the minimization.
-  bool minimize();
   /// Return current value of the cost function
   double costFunctionVal();
   /// Calculate the covariance matrix.
   void calCovarianceMatrix(gsl_matrix * covar, double epsrel = 0.0001);
   /// Initialize minimizer, i.e. pass a function to minimize.
   virtual void initialize(API::ICostFunction_sptr function);
+  /// Set maximum value of the gradient at which iterations can stop
+  void setStopGradient(const double value);
 
 protected:
 
@@ -74,6 +75,13 @@ protected:
 
   /// GSL vector with function parameters
   gsl_vector *m_x;
+
+  /// the norm of the gradient at which iterations stop
+  double m_stopGradient;
+  /// First trial step size
+  double m_stepSize;
+  /// Tolerance
+  double m_tolerance;
 
   static double fun(const gsl_vector * x, void * params);
   static void dfun(const gsl_vector * x, void * params, gsl_vector * g);

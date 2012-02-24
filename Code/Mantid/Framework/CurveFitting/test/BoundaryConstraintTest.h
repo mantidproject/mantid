@@ -6,16 +6,16 @@
 #include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidCurveFitting/Gaussian.h"
 #include "MantidCurveFitting/Lorentzian.h"
-#include "MantidCurveFitting/Fit.h"
+//#include "MantidCurveFitting/Fit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Expression.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataHandling/LoadRaw.h"
-#include "MantidKernel/Exception.h"
+//#include "MantidDataObjects/Workspace2D.h"
+//#include "MantidDataHandling/LoadRaw.h"
+//#include "MantidKernel/Exception.h"
 
 //using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -167,7 +167,7 @@ public:
     TS_ASSERT( !bc->hasLower() );
 
     gaus.addConstraint(bc);
-    IFitFunction* fun = FunctionFactory::Instance().createInitialized(gaus.asString());
+    IFunction_sptr fun = FunctionFactory::Instance().createInitialized(gaus.asString());
     TS_ASSERT(fun);
 
     IConstraint* c = fun->getConstraint(2);
@@ -198,7 +198,7 @@ public:
     bcHeight->initialize(&gaus,exprHeight);
     gaus.addConstraint(bcHeight);
 
-    IFitFunction* fun = FunctionFactory::Instance().createInitialized(gaus.asString());
+    IFunction_sptr fun = FunctionFactory::Instance().createInitialized(gaus.asString());
     TS_ASSERT(fun);
 
     IConstraint* c = fun->getConstraint(2);

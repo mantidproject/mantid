@@ -5,6 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/CostFuncFitting.h"
+#include "MantidCurveFitting/GSLMatrix.h"
+#include "MantidCurveFitting/GSLVector.h"
 
 namespace Mantid
 {
@@ -61,6 +63,8 @@ public:
   /// @param der :: Container to output the derivatives
   /// @return :: The value of the function
   virtual double valAndDeriv(std::vector<double>& der) const;
+
+  virtual double valDerivHessian(GSLVector& der, GSLMatrix& hessian) const;
 
 private:
   /// name of this minimizer

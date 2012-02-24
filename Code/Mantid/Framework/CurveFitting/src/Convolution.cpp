@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Convolution.h"
 #include "MantidCurveFitting/DeltaFunction.h"
+#include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/FunctionFactory.h"
 
 #include <cmath>
@@ -42,6 +43,22 @@ Convolution::~Convolution()
 void Convolution::init()
 {
 }
+
+void Convolution::function(const FunctionDomain& domain, FunctionValues& values)const
+{
+  const FunctionDomain1D* d1d = dynamic_cast<const FunctionDomain1D*>(&domain);
+  if (!d1d)
+  {
+    throw std::invalid_argument("Unexpected domain in Convolution");
+  }
+  function1D(values.getPointerToCalculated(0),d1d->getPointerAt(0),d1d->size());
+}
+
+void Convolution::functionDeriv(const FunctionDomain& domain, Jacobian& jacobian)
+{
+  calNumericalDeriv(domain,jacobian);
+}
+
 
 /**
  * Calculates convolution of the two member functions. 
@@ -83,13 +100,13 @@ void Convolution::function1D(double* out, const double* xValues, const size_t nD
     xr[0] = -n2*dx;
     if (odd) xr[nData-1] = -xr[0];
 
-    API::IFunctionMW* fun = dynamic_cast<API::IFunctionMW*>(getFunction(0));
+    IFunction1D_sptr fun = boost::dynamic_pointer_cast<IFunction1D>(getFunction(0));
     if (!fun)
     {
       delete [] xr;
       throw std::runtime_error("Convolution can work only with IFunctionMW");
     }
-    fun->functionMW(m_resolution,xr,nData);
+    fun->function1D(m_resolution,xr,nData);
 
     // rotate the data to produce the right transform
     if (odd)
@@ -126,17 +143,17 @@ void Convolution::function1D(double* out, const double* xValues, const size_t nD
     return;
   }
 
-  API::IFunctionMW* resolution = dynamic_cast<API::IFunctionMW*>(getFunction(0));
+  IFunction1D_sptr resolution = boost::dynamic_pointer_cast<IFunction1D>(getFunction(0));
 
   // check for delta functions
-  std::vector<DeltaFunction*> dltFuns;
+  std::vector< boost::shared_ptr<DeltaFunction> > dltFuns;
   double dltF = 0;
-  CompositeFunctionMW* cf = dynamic_cast<CompositeFunctionMW*>(getFunction(1));
+  CompositeFunction_sptr cf = boost::dynamic_pointer_cast<CompositeFunction>(getFunction(1));
   if (cf)
   {
     for(size_t i = 0; i < cf->nFunctions(); ++i)
     {
-      DeltaFunction* df = dynamic_cast<DeltaFunction*>(cf->getFunction(i));
+      boost::shared_ptr<DeltaFunction> df = boost::dynamic_pointer_cast<DeltaFunction>(cf->getFunction(i));
       if (df)
       {
         dltFuns.push_back(df);
@@ -146,21 +163,21 @@ void Convolution::function1D(double* out, const double* xValues, const size_t nD
     }
     if (dltFuns.size() == cf->nFunctions())
     {// all delta functions - return scaled reslution
-      resolution->functionMW(out,xValues,nData);
+      resolution->function1D(out,xValues,nData);
       std::transform(out,out+nData,out,std::bind2nd(std::multiplies<double>(),dltF));
       return;
     }
   }
-  else if (dynamic_cast<DeltaFunction*>(getFunction(1)))
+  else if (dynamic_cast<DeltaFunction*>(getFunction(1).get()))
   {// single delta function - return scaled reslution
     DeltaFunction* df = dynamic_cast<DeltaFunction*>(getFunction(1));
-    resolution->functionMW(out,xValues,nData);
+    resolution->function1D(out,xValues,nData);
     std::transform(out,out+nData,out,std::bind2nd(std::multiplies<double>(),df->getParameter("Height")*df->HeightPrefactor()));
     return;
   }
 
-  API::IFunctionMW* funct = dynamic_cast<API::IFunctionMW*>(getFunction(1));
-  funct->functionMW(out,xValues,nData);
+  IFunction1D_sptr funct = boost::dynamic_pointer_cast<IFunction1D>(getFunction(1));
+  funct->function1D(out,xValues,nData);
   gsl_fft_real_transform (out, 1, nData, wavetable, workspace);
   gsl_fft_real_wavetable_free (wavetable);
 
@@ -196,7 +213,7 @@ void Convolution::function1D(double* out, const double* xValues, const size_t nD
   if (dltF != 0.)
   {
     double* tmp = new double[nData];
-    resolution->functionMW(tmp,xValues,nData);
+    resolution->function1D(tmp,xValues,nData);
     std::transform(tmp,tmp+nData,tmp,std::bind2nd(std::multiplies<double>(),dltF));
     std::transform(out,out+nData,tmp,out,std::plus<double>());
     delete [] tmp;
@@ -204,45 +221,45 @@ void Convolution::function1D(double* out, const double* xValues, const size_t nD
 
 }
 
-void Convolution::functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
-{
-  if (nData == 0) return;
-  std::vector<double> dp(nParams());
-  std::vector<double> param(nParams());
-  for(size_t i=0;i<nParams();i++)
-  {
-    double param = getParameter(i);
-    if (param != 0.0)
-    {
-      dp[i] = param*0.01;
-    }
-    else
-    {
-      dp[i] = 0.01;
-    }
-  }
-
-  if (!m_tmp)
-  {
-    m_tmp.reset(new double[nData]);
-    m_tmp1.reset(new double[nData]);
-  }
-
-  functionMW(m_tmp.get(),xValues, nData);
-
-  for (size_t j = 0; j < nParams(); j++) 
-  {
-    double p0 = getParameter(j);
-    setParameter(j,p0 + dp[j],false);
-    functionMW(m_tmp1.get(),xValues, nData);
-    for (size_t i = 0; i < nData; i++)
-    {
-      out->set(i,j, (m_tmp1[i] - m_tmp[i])/dp[j]);
-    }
-    setParameter(j,p0,false);
-  }
-}
-
+//void Convolution::functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
+//{
+//  if (nData == 0) return;
+//  std::vector<double> dp(nParams());
+//  std::vector<double> param(nParams());
+//  for(size_t i=0;i<nParams();i++)
+//  {
+//    double param = getParameter(i);
+//    if (param != 0.0)
+//    {
+//      dp[i] = param*0.01;
+//    }
+//    else
+//    {
+//      dp[i] = 0.01;
+//    }
+//  }
+//
+//  if (!m_tmp)
+//  {
+//    m_tmp.reset(new double[nData]);
+//    m_tmp1.reset(new double[nData]);
+//  }
+//
+//  functionMW(m_tmp.get(),xValues, nData);
+//
+//  for (size_t j = 0; j < nParams(); j++) 
+//  {
+//    double p0 = getParameter(j);
+//    setParameter(j,p0 + dp[j],false);
+//    functionMW(m_tmp1.get(),xValues, nData);
+//    for (size_t i = 0; i < nData; i++)
+//    {
+//      out->set(i,j, (m_tmp1[i] - m_tmp[i])/dp[j]);
+//    }
+//    setParameter(j,p0,false);
+//  }
+//}
+//
 /**
  * The first function added must be the resolution. 
  * The second is the convoluted (model) function. If third, fourth and so on
@@ -251,13 +268,13 @@ void Convolution::functionDerivMW(Jacobian* out, const double* xValues, const si
  * @param f :: A pointer to the function to add
  * @return The index of the new function which will be 0 for the resolution and 1 for the model
  */
-size_t Convolution::addFunction(IFunction* f)
+size_t Convolution::addFunction(IFunction_sptr f)
 {
   if (nFunctions() == 0)
   {
     for(size_t i=0;i<f->nParams();i++)
     {
-      f->removeActive(i);
+      f->fix(i);
     }
   }
   size_t iFun = 0;
@@ -267,18 +284,18 @@ size_t Convolution::addFunction(IFunction* f)
   }
   else
   {
-    IFitFunction* f1 = dynamic_cast<IFitFunction*>(getFunction(1));
+    API::IFunction_sptr f1 = getFunction(1);
     if (!f1)
     {
       throw std::runtime_error("IFitFunction expected but function of another type found");
     }
-    CompositeFunctionMW* cf = dynamic_cast<CompositeFunctionMW*>(f1);
+    CompositeFunction_sptr cf = boost::dynamic_pointer_cast<CompositeFunction>(f1);
     if (cf == 0)
     {
-      cf = dynamic_cast<CompositeFunctionMW*>(API::FunctionFactory::Instance().createFunction("CompositeFunctionMW"));
-      removeFunction(1,false);// remove but don't delete
+      cf = boost::dynamic_pointer_cast<CompositeFunction>(API::FunctionFactory::Instance().createFunction("CompositeFunction"));
+      removeFunction(1);
       cf->addFunction(f1);
-      CompositeFunctionMW::addFunction(cf);
+      CompositeFunction::addFunction(cf);
     }
     cf->addFunction(f);
     checkFunction();
@@ -304,22 +321,22 @@ std::string Convolution::asString()const
   }
   std::ostringstream ostr;
   ostr<<"composite=Convolution;";
-  IFitFunction* res = dynamic_cast<IFitFunction*>(getFunction(0));
-  IFitFunction* fun = dynamic_cast<IFitFunction*>(getFunction(1));
+  IFunction_sptr res = getFunction(0);
+  IFunction_sptr fun = getFunction(1);
   if (!res || !fun)
   {
     throw std::runtime_error("IFitFunction expected but function of another type found");
   }
-  bool isCompRes = dynamic_cast<CompositeFunctionMW*>(res) != 0;
-  bool isCompFun = dynamic_cast<CompositeFunctionMW*>(fun) != 0;
+  bool isCompRes = boost::dynamic_pointer_cast<CompositeFunction>(res) != 0;
+  bool isCompFun = boost::dynamic_pointer_cast<CompositeFunction>(fun) != 0;
 
   if (isCompRes) ostr << '(';
-  ostr << *res ;
+  ostr << res->asString() ;
   if (isCompRes) ostr << ')';
   ostr << ';';
 
   if (isCompFun) ostr << '(';
-  ostr << *fun ;
+  ostr << fun->asString() ;
   if (isCompFun) ostr << ')';
 
   return ostr.str();

@@ -1,5 +1,5 @@
-#ifndef MANTID_CURVEFITTING_NEWFIT_H_
-#define MANTID_CURVEFITTING_NEWFIT_H_
+#ifndef MANTID_CURVEFITTING_FITMW_H_
+#define MANTID_CURVEFITTING_FITMW_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -13,6 +13,9 @@ namespace Mantid
   namespace API
   {
     class FunctionDomain;
+    class FunctionDomain1D;
+    class FunctionValues;
+    class MatrixWorkspace;
   }
 
   namespace CurveFitting
@@ -43,41 +46,37 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport NewFit : public API::Algorithm
+    class DLLExport FitMW : public API::Algorithm
     {
     public:
       /// Default constructor
-      NewFit() : API::Algorithm(),m_function() {};
-      /// Destructor
-      virtual ~NewFit();
+      FitMW() : API::Algorithm(),m_function() {};
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "NewFit";}
+      virtual const std::string name() const { return "FitMW";}
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return (1);}
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "Optimization";}
 
-      virtual void setPropertyValue(const std::string &name, const std::string &value);
-
-
     protected:
-      enum DomainType {Vector, MatrixWorkspace};
       /// Sets documentation strings for this algorithm
       virtual void initDocs();
       // Overridden Algorithm methods
       void init();
       void exec();
 
+      boost::shared_ptr<API::MatrixWorkspace> createOutputWorkspace(
+        boost::shared_ptr<const API::MatrixWorkspace> inWS,
+        size_t wi,
+        size_t startIndex,
+        boost::shared_ptr<API::FunctionDomain1D> domain,
+        boost::shared_ptr<API::FunctionValues> values
+        );
       /// calculates the derivative of a declared parameter over active parameter i
       double transformationDerivative(int i);
-      void declareWorkspaceDomainProperties();
-      void declareVectorDomainProperties();
-      API::FunctionDomain* createDomain() const;
-      void setWorkspace();
 
       /// Pointer to the fitting function
-      boost::shared_ptr<API::IFunction> m_function;
-      DomainType m_domainType;
+      API::IFunction_sptr m_function;
 
     };
 
@@ -85,4 +84,4 @@ namespace Mantid
   } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_NEWFIT_H_*/
+#endif /*MANTID_CURVEFITTING_FITMW_H_*/

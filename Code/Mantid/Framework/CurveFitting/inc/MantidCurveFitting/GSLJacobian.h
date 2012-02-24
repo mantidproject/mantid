@@ -2,6 +2,7 @@
 #define MANTID_CURVEFITTING_GSLFUNCTIONS_H_
 
 #include "MantidAPI/Jacobian.h"
+#include "MantidAPI/IFunction.h"
 #include <gsl/gsl_matrix.h>
 
 #include <vector>
@@ -39,14 +40,35 @@ namespace Mantid
     */
   class GSLJacobian: public API::Jacobian
   {
-  public:
     /// The pointer to the GSL's internal jacobian matrix
     gsl_matrix * m_J;
     /// Maps declared indeces to active. For fixed (tied) parameters holds -1
     std::vector<int> m_index;
+    
+  public:
+    /// Constructor
+    /// @param fun :: Function which derivatives to be stored in this Jacobian.
+    /// @param ny :: Size of the fitting data.
+    GSLJacobian(API::IFunction_const_sptr fun, const size_t ny)
+    {
+      m_index.resize(fun->nParams(),-1);
+      size_t np = 0; // number of active parameters
+      for (size_t i = 0; i < fun->nParams(); ++i)
+      {
+        m_index[i] = static_cast<int>(np);
+        if (fun->isActive(i)) ++np;
+      }
+      m_J = gsl_matrix_alloc(ny, np);
+    }
 
-    /// Set the pointer to the GSL's jacobian
-    void setJ(gsl_matrix * J){m_J = J;}
+    /// Destructor.
+    ~GSLJacobian()
+    {
+      gsl_matrix_free(m_J);
+    }
+
+    /// Get the pointer to the GSL's jacobian
+    gsl_matrix * getJ(){return m_J;}
 
     /// overwrite base method
     /// @param value :: the value

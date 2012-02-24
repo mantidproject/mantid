@@ -8,6 +8,7 @@
 #include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/Jacobian.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
 #include <boost/shared_ptr.hpp>
@@ -275,6 +276,10 @@ public:
   virtual std::string parameterDescription(size_t i)const = 0;
   /// Checks if a parameter has been set explicitly
   virtual bool isExplicitlySet(size_t i)const = 0;
+  /// Get the fitting error for a parameter
+  virtual double getError(size_t i) const = 0;
+  /// Set the fitting error for a parameter
+  virtual void setError(size_t i, double err) = 0;
 
   /// Check if a declared parameter i is fixed
   virtual bool isFixed(size_t i)const = 0;
@@ -299,6 +304,11 @@ public:
   virtual std::string descriptionOfActive(size_t i)const;
   /// Check if an active parameter i is actually active
   virtual bool isActive(size_t i)const {return !isFixed(i);}
+  /// Return the transformation matrix T between parameters such that p_i = T_ij * ap_j,
+  /// where ap_j is j-th active parameter.
+  virtual void getTransformationMatrix(Kernel::Matrix<double>& tm);
+  /// Is the transformation an identity?
+  virtual bool isTransformationIdentity() const {return true;}
   //@}
 
 
@@ -366,6 +376,8 @@ protected:
 
   /// Calculate numerical derivatives
   void calNumericalDeriv(const FunctionDomain& domain, Jacobian& out);
+  /// Calculate the transformation matrix T by numeric differentiation
+  void calTransformationMatrixNumerically(Kernel::Matrix<double>& tm);
 
   /// Create an instance of a tie without actually tying it to anything
   //virtual ParameterTie* createTie(const std::string& parName);

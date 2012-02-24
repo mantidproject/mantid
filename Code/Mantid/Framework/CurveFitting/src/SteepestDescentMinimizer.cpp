@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidCurveFitting/PRConjugateGradientMinimizer.h"
+#include "MantidCurveFitting/SteepestDescentMinimizer.h"
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidKernel/Logger.h"
 
@@ -9,17 +9,16 @@ namespace Mantid
 {
 namespace CurveFitting
 {
-///@cond nodoc
-DECLARE_FUNCMINIMIZER(PRConjugateGradientMinimizer,Conjugate gradient (Polak-Ribiere imp.))
-///@endcond
+DECLARE_FUNCMINIMIZER(SteepestDescentMinimizer,SteepestDescent)
 
 // Get a reference to the logger
-Kernel::Logger& PRConjugateGradientMinimizer::g_log = Kernel::Logger::get("PRConjugateGradientMinimizer");
+Kernel::Logger& SteepestDescentMinimizer::g_log = Kernel::Logger::get("SteepestDescentMinimizer");
+
 
 /// Return a concrete type to initialize m_gslSolver gsl_multimin_fdfminimizer_vector_bfgs2
-const gsl_multimin_fdfminimizer_type* PRConjugateGradientMinimizer::getGSLMinimizerType()
+const gsl_multimin_fdfminimizer_type* SteepestDescentMinimizer::getGSLMinimizerType()
 {
-  return gsl_multimin_fdfminimizer_conjugate_pr;
+  return  gsl_multimin_fdfminimizer_steepest_descent;
 }
 
 } // namespace CurveFitting

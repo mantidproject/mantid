@@ -53,7 +53,18 @@ void DerivMinimizer::fundfun (const gsl_vector * x, void * params, double * f, g
 
 /// Constructor
 DerivMinimizer::DerivMinimizer():
-m_gslSolver(NULL)
+m_gslSolver(NULL),
+m_stopGradient(1e-3),
+m_stepSize(0.1),
+m_tolerance(0.0001)
+{
+}
+
+DerivMinimizer::DerivMinimizer(const double stepSize, const double tolerance):
+m_gslSolver(NULL),
+m_stopGradient(1e-3),
+m_stepSize(stepSize),
+m_tolerance(tolerance)
 {
 }
 
@@ -85,7 +96,7 @@ void DerivMinimizer::initialize(API::ICostFunction_sptr function)
     gsl_vector_set (m_x, i, m_costFunction->getParameter(i));
   }
 
-  gsl_multimin_fdfminimizer_set (m_gslSolver, &m_gslMultiminContainer, m_x, 0.01, 1e-4);
+  gsl_multimin_fdfminimizer_set (m_gslSolver, &m_gslMultiminContainer, m_x, m_stepSize, m_tolerance);
 
 }
 
@@ -98,12 +109,21 @@ bool DerivMinimizer::iterate()
     throw std::runtime_error("Minimizer " + this->name() + " was not initialized.");
   }
   int status = gsl_multimin_fdfminimizer_iterate(m_gslSolver);
+  std::cerr << "iter " << status << ' ' << m_gslSolver->f << ' ' 
+    << gsl_vector_get(m_gslSolver->dx,0)/gsl_vector_get(m_gslSolver->gradient,0) << std::endl;
+  for(size_t i = 0; i < m_gslSolver->x->size; ++i)
+  {
+    std::cerr << "p " << i << ' ' << gsl_vector_get(m_gslSolver->x,i) << ' ' 
+      << gsl_vector_get(m_gslSolver->dx,i) << ' ' 
+      << gsl_vector_get(m_gslSolver->gradient,i) << ' ' 
+      << std::endl;
+  }
   if (status)
   {
     m_errorString = gsl_strerror(status);
     return false;
   }
-  status = gsl_multimin_test_gradient (m_gslSolver->gradient, 1e-3); //! <---------------
+  status = gsl_multimin_test_gradient (m_gslSolver->gradient, m_stopGradient);
   if (status != GSL_CONTINUE)
   {
     m_errorString = gsl_strerror(status);
@@ -112,41 +132,22 @@ bool DerivMinimizer::iterate()
   return true;
 }
 
-bool DerivMinimizer::minimize() 
+/**
+ * Set maximum value of the gradient at which iterations can stop
+ * @param value :: New value for the gradient, must be positive.
+ */
+void DerivMinimizer::setStopGradient(const double value)
 {
-
-  size_t iter = 0;
-  bool success = false;
-  do
+  if (value <= 0)
   {
-    iter++;
-    if ( !iterate() )
-    {
-      success = true;
-      break;
-    }
+    throw std::invalid_argument("Gradient norm must be a positive number");
   }
-  while (iter < 100); //! <---------------
-
-  return success;
-
+  m_stopGradient = value;
 }
 
 double DerivMinimizer::costFunctionVal()
 {
   return m_gslSolver->f;
-}
-
-void DerivMinimizer::calCovarianceMatrix(gsl_matrix * covar, double epsrel)
-{
-  //gsl_matrix * holdCalculatedJacobian;
-  //holdCalculatedJacobian =  gsl_matrix_alloc (m_gslLeastSquaresContainer.n, m_gslLeastSquaresContainer.p);
-
-  //int dummy = m_gslLeastSquaresContainer.df(m_gslSolver->x, m_gslLeastSquaresContainer.params, holdCalculatedJacobian);
-  //(void) dummy;
-  //gsl_multifit_covar (holdCalculatedJacobian, epsrel, covar);
-
-  //gsl_matrix_free (holdCalculatedJacobian);
 }
 
 } // namespace CurveFitting

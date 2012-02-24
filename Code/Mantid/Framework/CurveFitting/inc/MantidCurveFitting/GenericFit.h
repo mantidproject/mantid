@@ -5,9 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IFitFunction.h"
-#include "MantidCurveFitting/CostFuncLeastSquares.h"
-#include "MantidCurveFitting/CostFuncIgnorePosPeaks.h"
+#include "MantidAPI/IFunction.h"
 
 namespace Mantid
 {
@@ -71,7 +69,7 @@ namespace Mantid
       virtual const std::string category() const { return "Optimization";}
 
       /// Get the function for fitting
-      boost::shared_ptr<API::IFitFunction> getFunction()const{return m_function;}
+      API::IFunction_sptr getFunction()const{return m_function;}
 
     protected:
       /// Sets documentation strings for this algorithm
@@ -84,7 +82,7 @@ namespace Mantid
       double transformationDerivative(int i);
 
       /// Pointer to the fitting function
-      boost::shared_ptr<API::IFitFunction> m_function;
+      API::IFunction_sptr m_function;
 
       friend struct FitData1;
     };

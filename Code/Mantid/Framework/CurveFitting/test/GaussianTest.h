@@ -4,8 +4,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Gaussian.h"
-#include "MantidCurveFitting/Fit.h"
-#include "MantidAPI/CompositeFunctionMW.h"
+#include "MantidCurveFitting/FitMW.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidCurveFitting/LinearBackground.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidKernel/UnitFactory.h"
@@ -21,6 +21,7 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidKernel/System.h"
+#include "MantidAPI/FunctionFactory.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -177,7 +178,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
 	// Initialise algorithm
-    Fit alg;
+    FitMW alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT( alg.isInitialized() );
 
@@ -187,9 +188,9 @@ public:
     alg.setPropertyValue("EndX","79600");
 
     // create function you want to fit against
-    CompositeFunctionMW fnWithBk;
+    CompositeFunction_sptr fnWithBk( new CompositeFunction() );
 
-    LinearBackground *bk = new LinearBackground();
+    boost::shared_ptr<LinearBackground> bk( new LinearBackground() );
     bk->initialize();
 
     bk->setParameter("A0",0.0);
@@ -197,19 +198,21 @@ public:
     bk->tie("A1","0");
 
     // set up Gaussian fitting function
-    Gaussian* fn = new Gaussian();
+    boost::shared_ptr<Gaussian> fn( new Gaussian() );
     fn->initialize();
     fn->setParameter("PeakCentre",79450.0);
     fn->setParameter("Height",200.0);
     fn->setParameter("Sigma",300.0);
-    BoundaryConstraint* bc = new BoundaryConstraint(fn,"Sigma",20.0,100.0);
-    bc->setPenaltyFactor(1000.001);
-    fn->addConstraint(bc);
+    BoundaryConstraint* bc = new BoundaryConstraint(fn.get(),"Sigma",20.0,100.0);
+	//bc->setLower(20.0);
+	//bc->setUpper(100.0);
+	bc->setPenaltyFactor(1000.001);
+	fn->addConstraint(bc);
 
     fnWithBk.addFunction(bk);
     fnWithBk.addFunction(fn);
 
-    alg.setPropertyValue("Function",fnWithBk.asString());
+    alg.setProperty("Function",fnWithBk);
 
     // execute fit
     TS_ASSERT_THROWS_NOTHING(
@@ -221,8 +224,8 @@ public:
     double dummy = alg.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 5.04, 0.1);
 
-    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
-    IPeakFunction *pk = dynamic_cast<IPeakFunction *>(dynamic_cast<CompositeFunction*>(out)->getFunction(1));
+    IFunction_sptr out = alg.getProperty("Function");
+    IPeakFunction *pk = dynamic_cast<IPeakFunction *>(dynamic_cast<CompositeFunction*>(out.get())->getFunction(1).get());
     TS_ASSERT_DELTA( pk->height(), 232.1146 ,1);
     TS_ASSERT_DELTA( pk->centre(), 79430.1 ,10);
     TS_ASSERT_DELTA( pk->getParameter("Sigma"), 26.14 ,0.1);
@@ -250,7 +253,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
 	// Initialise algorithm
-    Fit alg;
+    FitMW alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT( alg.isInitialized() );
 
@@ -260,20 +263,20 @@ public:
     alg.setPropertyValue("EndX","79600");
 
     // create function you want to fit against
-    CompositeFunction *fnWithBk = new CompositeFunctionMW();
+    CompositeFunction_sptr fnWithBk( new CompositeFunction() );
 
-    LinearBackground *bk = new LinearBackground();
+    boost::shared_ptr<LinearBackground> bk( new LinearBackground() );
     bk->initialize();
 
     bk->setParameter("A0",0.0);
     bk->setParameter("A1",0.0);
     bk->tie("A1","0");
 
-    BoundaryConstraint* bc_b = new BoundaryConstraint(bk,"A0",0, 20.0);
+    BoundaryConstraint* bc_b = new BoundaryConstraint(bk.get(),"A0",0, 20.0);
     bk->addConstraint(bc_b);
 
     // set up Gaussian fitting function
-    Gaussian* fn = new Gaussian();
+    boost::shared_ptr<Gaussian> fn( new Gaussian() );
     fn->initialize();
 
     fn->setParameter("Height",200.0);   
@@ -281,13 +284,13 @@ public:
     fn->setParameter("Sigma",300.0);
 
     // add constraint to function
-    BoundaryConstraint* bc3 = new BoundaryConstraint(fn,"Sigma",20, 100.0);
+    BoundaryConstraint* bc3 = new BoundaryConstraint(fn.get(),"Sigma",20, 100.0);
     fn->addConstraint(bc3);
 
     fnWithBk->addFunction(bk);
     fnWithBk->addFunction(fn);
 
-    alg.setPropertyValue("Function",fnWithBk->asString());
+    alg.setProperty("Function",fnWithBk);
 
     // execute fit
     TS_ASSERT_THROWS_NOTHING(
@@ -299,8 +302,8 @@ public:
     double dummy = alg.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 0.0,0.1);
 
-    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
-    IPeakFunction *pk = dynamic_cast<IPeakFunction *>(dynamic_cast<CompositeFunction*>(out)->getFunction(1));
+    IFunction_sptr out = alg.getProperty("Function");
+    IPeakFunction *pk = dynamic_cast<IPeakFunction *>(dynamic_cast<CompositeFunction*>(out.get())->getFunction(1).get());
     TS_ASSERT_DELTA( pk->height(), 249.3187 ,0.01);
     TS_ASSERT_DELTA( pk->centre(), 79430 ,0.1);
     TS_ASSERT_DELTA( pk->getParameter("Sigma"), 25.3066 ,0.01);
@@ -324,7 +327,7 @@ public:
     Mantid::MantidVec& e = ws2D->dataE(0); // error values of counts
     getMockData(y, e);
 
-    Fit alg2;
+    FitMW alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
     TS_ASSERT( alg2.isInitialized() );
 
@@ -335,7 +338,7 @@ public:
     gaus.setHeight(100.7);
     gaus.setFwhm(2.2);
 
-    alg2.setPropertyValue("Function",gaus.asString());
+    alg2.setPropertyValue("Function",gaus->asString());
 
     // Set which spectrum to fit against and initial starting values
     alg2.setProperty("InputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(ws2D) );
@@ -356,8 +359,8 @@ public:
     double dummy = alg2.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 0.07,0.01);
 
-    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
-    IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out);
+    IFunction_sptr out = alg2.getProperty("Function");
+    IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out.get());
     TS_ASSERT_DELTA( pk->height(), 97.8035 ,0.0001);
     TS_ASSERT_DELTA( pk->centre(), 11.2356 ,0.0001);
     TS_ASSERT_DELTA( pk->fwhm(), 2.6237 ,0.0001);
@@ -384,7 +387,7 @@ public:
     //put this workspace in the data service
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
-    Fit alg2;
+    FitMW alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
     TS_ASSERT( alg2.isInitialized() );
 
@@ -395,7 +398,7 @@ public:
     gaus.setHeight(100.7);
     gaus.setFwhm(2.2);
 
-    alg2.setPropertyValue("Function",gaus.asString());
+    alg2.setPropertyValue("Function",gaus->asString());
 
     // Set which spectrum to fit against and initial starting values
     alg2.setPropertyValue("InputWorkspace", wsName);
@@ -417,8 +420,8 @@ public:
     TS_ASSERT_DELTA( dummy, 0.07,0.01);
 
 
-    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
-    IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out);
+    IFunction_sptr out = alg2.getProperty("Function");
+    IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out.get());
     TS_ASSERT_DELTA( pk->height(), 97.8091 ,0.01);
     TS_ASSERT_DELTA( pk->centre(), 11.2356 ,0.001);
     TS_ASSERT_DELTA( pk->fwhm(), 2.6240 ,0.001);
@@ -442,7 +445,7 @@ public:
     //put this workspace in the data service
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
-    Fit alg2;
+    FitMW alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
     TS_ASSERT( alg2.isInitialized() );
 
@@ -453,8 +456,7 @@ public:
     gaus.setHeight(100.7);
     gaus.setFwhm(2.2);
 
-    alg2.setPropertyValue("Function",gaus.asString());
-    std::cerr << gaus.asString() << std::endl;
+    alg2.setPropertyValue("Function",gaus->asString());
 
     // Set which spectrum to fit against and initial starting values
     alg2.setPropertyValue("InputWorkspace", wsName);
@@ -476,9 +478,9 @@ public:
     double dummy = alg2.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 0.07,0.01);
 
-    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
-    IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out);
-    TS_ASSERT_DELTA( pk->height(), 97.8091 ,0.05);
+    IFunction_sptr out = alg2.getProperty("Function");
+    IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out.get());
+    TS_ASSERT_DELTA( pk->height(), 97.8091 ,0.01);
     TS_ASSERT_DELTA( pk->centre(), 11.2356 ,0.001);
     TS_ASSERT_DELTA( pk->fwhm(), 2.6240 ,0.001);
     std::cerr << pk->height() << std::endl;
@@ -502,7 +504,7 @@ public:
     //put this workspace in the data service
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
-    Fit alg2;
+    FitMW alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
     TS_ASSERT( alg2.isInitialized() );
 
@@ -513,7 +515,7 @@ public:
     gaus.setHeight(100.7);
     gaus.setFwhm(2.2);
 
-    alg2.setPropertyValue("Function",gaus.asString());
+    alg2.setPropertyValue("Function",gaus->asString());
 
     // Set which spectrum to fit against and initial starting values
     alg2.setPropertyValue("InputWorkspace", wsName);
@@ -535,8 +537,8 @@ public:
     double dummy = alg2.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 0.07,0.01);
 
-    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
-    IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out);
+    IFunction_sptr out = alg2.getProperty("Function");
+    IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out.get());
     TS_ASSERT_DELTA( pk->height(), 97.7995 ,0.0001);
     TS_ASSERT_DELTA( pk->centre(), 11.2356 ,0.001);
     TS_ASSERT_DELTA( pk->fwhm(), 2.6240 ,0.001);
@@ -560,7 +562,7 @@ public:
     //put this workspace in the data service
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
-    Fit alg2;
+    FitMW alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
     TS_ASSERT( alg2.isInitialized() );
 
@@ -594,8 +596,8 @@ public:
     double dummy = alg2.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 0.0717,0.0001);
 
-    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
-    IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out);
+    IFunction_sptr out = alg2.getProperty("Function");
+    IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out.get());
     TS_ASSERT_DELTA( pk->height(), 97.7857 ,0.0001);
     TS_ASSERT_DELTA( pk->centre(), 11.2356 ,0.001);
     TS_ASSERT_DELTA( pk->fwhm(), 2.6240 ,0.001);
@@ -619,7 +621,7 @@ public:
     //put this workspace in the data service
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
-    Fit alg2;
+    FitMW alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
     TS_ASSERT( alg2.isInitialized() );
 
@@ -630,7 +632,7 @@ public:
     gaus.setHeight(100.7);
     gaus.setFwhm(2.2);
 
-    alg2.setPropertyValue("Function",gaus.asString());
+    alg2.setPropertyValue("Function",gaus->asString());
 
     // Set which spectrum to fit against and initial starting values
     alg2.setPropertyValue("InputWorkspace", wsName);
@@ -652,8 +654,8 @@ public:
     double dummy = alg2.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 0.07,0.01);
 
-    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
-    IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out);
+    IFunction_sptr out = alg2.getProperty("Function");
+    IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out.get());
     TS_ASSERT_DELTA( pk->height(), 97.8111 ,0.0001);
     TS_ASSERT_DELTA( pk->centre(), 11.2356 ,0.001);
     TS_ASSERT_DELTA( pk->fwhm(), 2.6240 ,0.001);
@@ -685,7 +687,7 @@ public:
     const std::string priorRadius = ConfigService::Instance().getString("curvefitting.peakRadius");
     ConfigService::Instance().setString("curvefitting.peakRadius","5");
 
-    Fit alg;
+    FitMW alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT( alg.isInitialized() );
 
@@ -695,9 +697,9 @@ public:
     alg.setPropertyValue("EndX","79600");
 
     // create function you want to fit against
-    CompositeFunction *fnWithBk = new CompositeFunctionMW();
+    CompositeFunction_sptr fnWithBk( new CompositeFunction() );
 
-    LinearBackground *bk = new LinearBackground();
+    boost::shared_ptr<LinearBackground> bk( new LinearBackground() );
     bk->initialize();
 
     bk->setParameter("A0",0.0);
@@ -709,7 +711,7 @@ public:
 
     // set up Gaussian fitting function
     //SimplexGaussian* fn = new SimplexGaussian();
-    Gaussian* fn = new Gaussian();
+    boost::shared_ptr<Gaussian> fn( new Gaussian() );
     fn->initialize();
 
     fn->setParameter("Height",200.0);
@@ -719,7 +721,7 @@ public:
     // add constraint to function
     //BoundaryConstraint* bc1 = new BoundaryConstraint(fn,"Height",100, 300.0);
     //BoundaryConstraint* bc2 = new BoundaryConstraint(fn,"PeakCentre",79200, 79700.0);
-    BoundaryConstraint* bc3 = new BoundaryConstraint(fn,"Sigma",20, 100.0);
+    BoundaryConstraint* bc3 = new BoundaryConstraint(fn.get(),"Sigma",20, 100.0);
     //fn->addConstraint(bc1);
     //fn->addConstraint(bc2);
     fn->addConstraint(bc3);
@@ -728,10 +730,8 @@ public:
     fnWithBk->addFunction(fn);
 
     //alg.setPropertyValue("Function",*fnWithBk);
-    alg.setPropertyValue("Function",fnWithBk->asString());
+    alg.setProperty("Function",fnWithBk);
     alg.setPropertyValue("Minimizer","Simplex");
-
-    delete fnWithBk;
 
     // execute fit
     TS_ASSERT_THROWS_NOTHING(
@@ -746,10 +746,10 @@ public:
     double dummy = alg.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 5.1604,1);
 
-    IFitFunction* fun = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
+    IFunction_sptr fun = alg.getProperty("Function");
     TS_ASSERT(fun);
     
-    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
+    IFunction_sptr out = alg.getProperty("Function");
     TS_ASSERT_DELTA( out->getParameter("f1.Height"), 216.419 ,1);
     TS_ASSERT_DELTA( out->getParameter("f1.PeakCentre"), 79430.1 ,1);
     TS_ASSERT_DELTA( out->getParameter("f1.Sigma"), 27.08 ,0.1);

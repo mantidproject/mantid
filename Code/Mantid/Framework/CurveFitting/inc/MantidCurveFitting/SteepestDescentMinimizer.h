@@ -1,5 +1,5 @@
-#ifndef MANTID_CURVEFITTING_FRCONJUGATEGRADIENTMINIMIZER_H_
-#define MANTID_CURVEFITTING_FRCONJUGATEGRADIENTMINIMIZER_H_
+#ifndef MANTID_CURVEFITTING_STEEPESTDESCENT_MINIMIZERMINIMIZER_H_
+#define MANTID_CURVEFITTING_STEEPESTDESCENT_MINIMIZERMINIMIZER_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -11,11 +11,11 @@ namespace Mantid
 {
 namespace CurveFitting
 {
-/** Implementing Fletcher-Reeves flavour of the conjugate gradient algorithm
+/** Implementing Broyden-Fletcher-Goldfarb-Shanno (BFGS) algorithm
     by wrapping the IFuncMinimizer interface around the GSL implementation of this algorithm.
 
     @author Anders Markvardsen, ISIS, RAL
-    @date 12/1/2010
+    @date 13/1/2010
 
     Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -37,25 +37,25 @@ namespace CurveFitting
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport FRConjugateGradientMinimizer : public DerivMinimizer
+class DLLExport SteepestDescentMinimizer : public DerivMinimizer
 {
 public:
   /// Constructor.
-  FRConjugateGradientMinimizer():DerivMinimizer()  {}
+  SteepestDescentMinimizer():DerivMinimizer()  {}
   /// Name of the minimizer.
-  std::string name() const {return "Conjugate gradient (Fletcher-Reeves imp.)";}
+  std::string name() const {return "SteepestDescentMinimizer";}
 
 protected:
 
   /// Return a concrete type to initialize m_gslSolver with
   virtual const gsl_multimin_fdfminimizer_type* getGSLMinimizerType();
 
-	/// Static reference to the logger class
-	static Kernel::Logger& g_log;
+  /// Static reference to the logger class
+  static Kernel::Logger& g_log;
 };
 
 
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_FRCONJUGATEGRADIENTMINIMIZER_H_*/
+#endif /*MANTID_CURVEFITTING_STEEPESTDESCENT_MINIMIZERMINIMIZER_H_*/
