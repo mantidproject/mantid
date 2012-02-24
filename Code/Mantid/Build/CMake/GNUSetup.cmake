@@ -12,7 +12,7 @@ STRING(REGEX REPLACE ".*([0-9]\\.[0-9]\\.[0-9]).*" "\\1" GCC_COMPILER_VERSION ${
 MESSAGE(STATUS "gcc version: ${GCC_COMPILER_VERSION}")
 
 # Global warning flags.
-set( GNUFLAGS "-Wall -Wextra -Wconversion -Winit-self -Wpointer-arith -Wcast-qual -Wcast-align -fno-common" ) 
+set( GNUFLAGS "-Wall -Wextra -Wconversion -Winit-self -Wpointer-arith -Wcast-qual -Wcast-align -Woverloaded-virtual -fno-common" ) 
 # Disable some warnings about deprecated headers and type conversions that
 # we can't do anything about
 # -Wno-deprecated: Do not warn about use of deprecated headers.
@@ -22,16 +22,16 @@ set( GNUFLAGS "${GNUFLAGS} -Wno-deprecated -Wno-write-strings")
 
 # Check if we have a new enough version for this flag
 IF (GCC_COMPILER_VERSION VERSION_GREATER "4.3")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-result")
+	set(GNUFLAGS "${GNUFLAGS} -Wno-unused-result")
 ENDIF (GCC_COMPILER_VERSION VERSION_GREATER "4.3")
 
 # Add some options for debug build to help the Zoom profiler
 set( CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fno-omit-frame-pointer" )
 set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer" )
 
-# Set the options fo gcc and g++
+# Set the options for gcc and g++
 set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GNUFLAGS}" )
-set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GNUFLAGS} -Woverloaded-virtual -fno-operator-names" )
+set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GNUFLAGS} -fno-operator-names -std=c++0x" )
 # Cleanup
 set ( GNUFLAGS )
 
