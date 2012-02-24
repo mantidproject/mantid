@@ -26,7 +26,13 @@ public:
    */
   bool skipTests()
   {
+#ifdef WIN32
+    // I don't know how to get exit status from windows.
+    return false;
+#else
+    // Ping once, with a 1 second wait.
     std::string cmdstring = "ping download.mantidproject.org -c 1 -w 1";
+
     int status;
     status = system(cmdstring.c_str());
     if (status == -1)
@@ -43,6 +49,8 @@ public:
       return true;
     }
     return false;
+#endif
+
   }
 
 	void testInit()
