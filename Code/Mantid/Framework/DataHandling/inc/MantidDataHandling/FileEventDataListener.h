@@ -1,0 +1,73 @@
+#ifndef MANTID_DATAHANDLING_FILEEVENTDATALISTENER_H_
+#define MANTID_DATAHANDLING_FILEEVENTDATALISTENER_H_
+
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
+#include "MantidAPI/ILiveListener.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include <Poco/ActiveMethod.h>
+#include <Poco/Void.h>
+
+namespace Mantid
+{
+  namespace DataHandling
+  {
+    /** An implementation of ILiveListener for testing purposes that reads from a
+        file and serves up 'chunks' when extractBuffer() is called.
+
+        To avoid polluting the interface the file to use and the number of chunks to
+        divide it into need to be set via configuration properties (i.e. programmatically
+        via the ConfigService or included in Mantud.user.properties):
+         - fileeventdatalistener.filename
+         - fileeventdatalistener.chunks
+
+        Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+
+        This file is part of Mantid.
+
+        Mantid is free software; you can redistribute it and/or modify
+        it under the terms of the GNU General Public License as published by
+        the Free Software Foundation; either version 3 of the License, or
+        (at your option) any later version.
+
+        Mantid is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        GNU General Public License for more details.
+
+        You should have received a copy of the GNU General Public License
+        along with this program.  If not, see <http://www.gnu.org/licenses/>.
+     */
+    class FileEventDataListener : public API::ILiveListener
+    {
+    public:
+      FileEventDataListener();
+      ~FileEventDataListener();
+
+      std::string name() const { return "FileEventDataListener"; }
+      bool supportsHistory() const { return false; } // For the time being at least
+      bool buffersEvents() const { return true; }
+
+      bool connect(const Poco::Net::SocketAddress& address);
+      void start(Kernel::DateAndTime startTime = Kernel::DateAndTime());
+      boost::shared_ptr<API::MatrixWorkspace> extractData();
+
+      bool isConnected();
+
+    private:
+      const std::string m_filename; ///< The file to read
+      int m_numChunks;        ///< The number of pieces to divide the file into
+      int m_nextChunk;              ///< The number of the next chunk to be loaded
+      DataObjects::EventWorkspace_sptr m_buffer; ///< Used to buffer events between calls to extractData()
+
+//      Poco::ActiveMethod<API::MatrixWorkspace_sptr, Poco::Void, FileEventDataListener> m_loadChunk;
+      API::MatrixWorkspace_sptr loadChunkImpl(Poco::Void);
+
+      static Kernel::Logger& g_log;    ///< reference to the logger class
+    };
+
+  } // namespace DataHandling
+} // namespace Mantid
+
+#endif  /* MANTID_DATAHANDLING_FILEEVENTDATALISTENER_H_ */
