@@ -273,7 +273,7 @@ void MaskDetectors::appendToIndexListFromMaskWS(std::vector<size_t>& indexList, 
   for (int64_t i = startIndex; i <= endIndex; ++i)
   {
 
-    if( maskedWorkspace->dataY(i)[0] > 0.5 && existingIndices.count(i) == 0 )
+    if( maskedWorkspace->dataY(i-startIndex)[0] > 0.5 && existingIndices.count(i) == 0 )
     {
       indexList.push_back(i);
     }
