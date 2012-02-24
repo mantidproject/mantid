@@ -51,13 +51,13 @@ public:
     //string
     d = DateAndTime("1990-01-02T00:01:02.345");
     TS_ASSERT_EQUALS(d, expected);
-    d.set_from_ISO8601_string("1990-01-02T00:01:02.345");
+    d.setFromISO8601("1990-01-02T00:01:02.345");
     TS_ASSERT_EQUALS(d, expected);
 
     //string with a space
     d = DateAndTime("1990-01-02 00:01:02.345");
     TS_ASSERT_EQUALS(d, expected);
-    d.set_from_ISO8601_string("1990-01-02 00:01:02.345");
+    d.setFromISO8601("1990-01-02 00:01:02.345");
     TS_ASSERT_EQUALS(d, expected);
   }
 
@@ -138,22 +138,22 @@ public:
 
   }
 
-  void test_to_string()
+  void test_toFormattedString()
   {
     DateAndTime a;
     a = DateAndTime("1990-01-02 03:04:05.678");
-    std::string s = a.to_simple_string();
+    std::string s = a.toSimpleString();
     TS_ASSERT_EQUALS( s.substr(0,20), "1990-Jan-02 03:04:05");
-    TS_ASSERT_EQUALS( a.to_string(), "1990-Jan-02 03:04:05");
-    TS_ASSERT_EQUALS( a.to_string("%Y-%m-%d"), "1990-01-02");
-    TS_ASSERT_EQUALS( a.to_ISO8601_string(), "1990-01-02T03:04:05");
+    TS_ASSERT_EQUALS( a.toFormattedString(), "1990-Jan-02 03:04:05");
+    TS_ASSERT_EQUALS( a.toFormattedString("%Y-%m-%d"), "1990-01-02");
+    TS_ASSERT_EQUALS( a.toISO8601String(), "1990-01-02T03:04:05");
   }
 
   void test_to_int64()
   {
     DateAndTime a;
     a = DateAndTime("1990-01-02 00:01:02.345");
-    int64_t nanosec = a.total_nanoseconds();
+    int64_t nanosec = a.totalNanoseconds();
     //1day, 1 minute, 2 seconds, 0.345 seconds = 86462345000000 nanosec
     TS_ASSERT_EQUALS( nanosec, int64_t(86462345000000LL) );
    }
@@ -164,10 +164,10 @@ public:
     std::ostringstream message;
     a = DateAndTime("1990-01-02 03:04:05.678");
     message << a;
-    TS_ASSERT_EQUALS( message.str(), a.to_simple_string() );
+    TS_ASSERT_EQUALS( message.str(), a.toSimpleString() );
     std::ostringstream message2;
     message2 << a << "\n";
-    TS_ASSERT_EQUALS( message2.str(), a.to_simple_string()+"\n" );
+    TS_ASSERT_EQUALS( message2.str(), a.toSimpleString()+"\n" );
   }
 
 
@@ -180,13 +180,13 @@ public:
     a = DateAndTime("1990-01-02 00:01:02.345");
     b = DateAndTime("1990-01-02 00:00:02.000");
     td = a-b;
-    TS_ASSERT_EQUALS( td, DateAndTime::duration_from_nanoseconds(int64_t(60345000000LL)) );
+    TS_ASSERT_EQUALS( td, DateAndTime::durationFromNanoseconds(int64_t(60345000000LL)) );
 
     a = DateAndTime("1990-01-02 00:01:02.345");
     p = boost::posix_time::from_iso_string("19900102T000002.000");
     //boost ptime gets converted to ptime implicitely
     td = a-p;
-    TS_ASSERT_EQUALS( td, DateAndTime::duration_from_nanoseconds(int64_t(60345000000LL)) );
+    TS_ASSERT_EQUALS( td, DateAndTime::durationFromNanoseconds(int64_t(60345000000LL)) );
   }
 
   void test_subtraction_of_times_limits()
@@ -199,11 +199,11 @@ public:
     b = DateAndTime("1800-01-02 00:01:02.345");
     td = a-b;
     //The difference won't be correct, but it is positive and ~2**62 nanoseconds
-    TS_ASSERT_LESS_THAN( 4.6e9, DateAndTime::seconds_from_duration(td) );
+    TS_ASSERT_LESS_THAN( 4.6e9, DateAndTime::secondsFromDuration(td) );
 
     td = b-a;
     //The difference won't be correct, but it is negative
-    TS_ASSERT_LESS_THAN( DateAndTime::seconds_from_duration(td), -4.6e9 );
+    TS_ASSERT_LESS_THAN( DateAndTime::secondsFromDuration(td), -4.6e9 );
   }
 
 
@@ -230,16 +230,16 @@ public:
     DateAndTime a,b,c;
     a = DateAndTime("1990-01-02 00:00:02.000");
     b = DateAndTime("1990-01-02 00:01:02.345");
-    c = a + DateAndTime::duration_from_nanoseconds(int64_t(60345000000LL));
+    c = a + DateAndTime::durationFromNanoseconds(int64_t(60345000000LL));
     TS_ASSERT_EQUALS( c, b);
-    a += DateAndTime::duration_from_nanoseconds(int64_t(60345000000LL));
+    a += DateAndTime::durationFromNanoseconds(int64_t(60345000000LL));
     TS_ASSERT_EQUALS( a, b);
 
     a = DateAndTime("1990-01-02 00:00:02.000");
     b = DateAndTime("1990-01-02 00:01:02.345");
-    c = b - DateAndTime::duration_from_nanoseconds(int64_t(60345000000LL));
+    c = b - DateAndTime::durationFromNanoseconds(int64_t(60345000000LL));
     TS_ASSERT_EQUALS( c, a);
-    b -= DateAndTime::duration_from_nanoseconds(int64_t(60345000000LL));
+    b -= DateAndTime::durationFromNanoseconds(int64_t(60345000000LL));
     TS_ASSERT_EQUALS( b, a);
   }
 
@@ -299,7 +299,7 @@ public:
   void testCurrentTime()
   {
     //Use the c-method to get current (local) time
-    std::time_t current_t = DateAndTime::get_current_time().to_time_t() ;
+    std::time_t current_t = DateAndTime::getCurrentTime().to_time_t() ;
     std::tm * current = gmtime( &current_t );
     //std::cout << "UTC time is " << current->tm_hour << "h" << current->tm_min << "\n";
     //Compare
@@ -350,7 +350,7 @@ public:
     TS_ASSERT_EQUALS( utc_time.to_localtime_t(), local_time_t);
 
     //Now the string
-    TS_ASSERT_EQUALS( utc_time.to_simple_string(), "2008-Feb-29 12:00:00");
+    TS_ASSERT_EQUALS( utc_time.toSimpleString(), "2008-Feb-29 12:00:00");
 
   }
 
@@ -362,7 +362,7 @@ public:
     DateAndTime time_no_fraction = DateAndTime("2010-03-24T14:12:51");
 
     //The conversion should handle the fraction
-    TS_ASSERT_DELTA(  Mantid::Kernel::DateAndTime::seconds_from_duration( time_no_tz-time_no_fraction ), 0.562, 0.0005);
+    TS_ASSERT_DELTA(  Mantid::Kernel::DateAndTime::secondsFromDuration( time_no_tz-time_no_fraction ), 0.562, 0.0005);
 
     //ZULU specified
     DateAndTime time_z = DateAndTime("2010-03-24T14:12:51.562Z");
@@ -375,42 +375,42 @@ public:
 
 
     //Now check the time zone difference
-    TS_ASSERT_DELTA(  Mantid::Kernel::DateAndTime::seconds_from_duration( time_no_tz-time_z ),  0.0, 1e-4);
-    TS_ASSERT_DELTA(  Mantid::Kernel::DateAndTime::seconds_from_duration( time_no_tz-time_positive_tz ),  0.0, 1e-4);
-    TS_ASSERT_DELTA(  Mantid::Kernel::DateAndTime::seconds_from_duration( time_no_tz-time_negative_tz ),  0.0, 1e-4);
-    TS_ASSERT_DELTA(  Mantid::Kernel::DateAndTime::seconds_from_duration( time_no_tz-time_positive_tz2 ),  0.0, 1e-4);
-    TS_ASSERT_DELTA(  Mantid::Kernel::DateAndTime::seconds_from_duration( time_no_tz-time_negative_tz2 ),  0.0, 1e-4);
+    TS_ASSERT_DELTA(  Mantid::Kernel::DateAndTime::secondsFromDuration( time_no_tz-time_z ),  0.0, 1e-4);
+    TS_ASSERT_DELTA(  Mantid::Kernel::DateAndTime::secondsFromDuration( time_no_tz-time_positive_tz ),  0.0, 1e-4);
+    TS_ASSERT_DELTA(  Mantid::Kernel::DateAndTime::secondsFromDuration( time_no_tz-time_negative_tz ),  0.0, 1e-4);
+    TS_ASSERT_DELTA(  Mantid::Kernel::DateAndTime::secondsFromDuration( time_no_tz-time_positive_tz2 ),  0.0, 1e-4);
+    TS_ASSERT_DELTA(  Mantid::Kernel::DateAndTime::secondsFromDuration( time_no_tz-time_negative_tz2 ),  0.0, 1e-4);
   }
 
 
   void testDurations()
   {
     time_duration onesec = time_duration(0,0,1,0);
-    TS_ASSERT_EQUALS( DateAndTime::seconds_from_duration(onesec), 1.0 );
+    TS_ASSERT_EQUALS( DateAndTime::secondsFromDuration(onesec), 1.0 );
 
-    onesec = DateAndTime::duration_from_seconds(1.0);
-    TS_ASSERT_EQUALS( DateAndTime::seconds_from_duration(onesec), 1.0 );
+    onesec = DateAndTime::durationFromSeconds(1.0);
+    TS_ASSERT_EQUALS( DateAndTime::secondsFromDuration(onesec), 1.0 );
 
-    time_duration td = DateAndTime::duration_from_seconds(1e-6);
-    TS_ASSERT_DELTA( DateAndTime::seconds_from_duration(td), 1e-6, 1e-9 );
+    time_duration td = DateAndTime::durationFromSeconds(1e-6);
+    TS_ASSERT_DELTA( DateAndTime::secondsFromDuration(td), 1e-6, 1e-9 );
 
     //Now difference between dates
     DateAndTime dt = DateAndTime(0);
     DateAndTime dt2 = dt + td;
-    TS_ASSERT_DELTA( DateAndTime::seconds_from_duration(dt2-dt), 1e-6, 1e-9 );
+    TS_ASSERT_DELTA( DateAndTime::secondsFromDuration(dt2-dt), 1e-6, 1e-9 );
 
-    td = DateAndTime::duration_from_seconds(12.345);
-    TS_ASSERT_DELTA( DateAndTime::seconds_from_duration(td), 12.345, 1e-9 );
+    td = DateAndTime::durationFromSeconds(12.345);
+    TS_ASSERT_DELTA( DateAndTime::secondsFromDuration(td), 12.345, 1e-9 );
 
 
-    dt2 = dt + DateAndTime::duration_from_seconds(123.5e-3);
-    TS_ASSERT_DELTA( DateAndTime::seconds_from_duration(dt2-dt), 123.5e-3, 1e-9 );
+    dt2 = dt + DateAndTime::durationFromSeconds(123.5e-3);
+    TS_ASSERT_DELTA( DateAndTime::secondsFromDuration(dt2-dt), 123.5e-3, 1e-9 );
 
-    dt2 = dt + DateAndTime::duration_from_seconds(15.2345);
-    TS_ASSERT_DELTA( DateAndTime::seconds_from_duration(dt2-dt), 15.2345, 1e-9 );
+    dt2 = dt + DateAndTime::durationFromSeconds(15.2345);
+    TS_ASSERT_DELTA( DateAndTime::secondsFromDuration(dt2-dt), 15.2345, 1e-9 );
 
-    dt2 = dt + DateAndTime::duration_from_seconds(152.345);
-    TS_ASSERT_DELTA( DateAndTime::seconds_from_duration(dt2-dt), 152.345, 1e-9 );
+    dt2 = dt + DateAndTime::durationFromSeconds(152.345);
+    TS_ASSERT_DELTA( DateAndTime::secondsFromDuration(dt2-dt), 152.345, 1e-9 );
   }
 
 
@@ -441,11 +441,11 @@ public:
   {
     time_duration onesec = time_duration(0,0,1,0);
     time_duration extreme;
-    extreme = DateAndTime::duration_from_seconds(1e20);
+    extreme = DateAndTime::durationFromSeconds(1e20);
     //Output value is positive
     TS_ASSERT_LESS_THAN(onesec, extreme);
 
-    extreme = DateAndTime::duration_from_seconds(-1e20);
+    extreme = DateAndTime::durationFromSeconds(-1e20);
     //Output value is negative
     TS_ASSERT_LESS_THAN(extreme, onesec);
   }
@@ -468,18 +468,18 @@ public:
     TS_ASSERT_EQUALS( times[3], DateAndTime("1990-01-02 03:04:02.000"));
   }
 
-  void test_string_isISO8601()
+  void test_stringIsISO8601()
   {
-    TS_ASSERT( DateAndTime::string_isISO8601("1990-01-02 03:04:02.000") );
-    TS_ASSERT( DateAndTime::string_isISO8601("1990-01-02T03:04:02.000") );
-    TS_ASSERT( DateAndTime::string_isISO8601("1990-01-02T03:04:02.000+05:30") );
-    TS_ASSERT( DateAndTime::string_isISO8601("1990-01-02 03:04") );
-    TS_ASSERT( DateAndTime::string_isISO8601("1990-01-02") );
-    TS_ASSERT( DateAndTime::string_isISO8601("1822-01-02") );
+    TS_ASSERT( DateAndTime::stringIsISO8601("1990-01-02 03:04:02.000") );
+    TS_ASSERT( DateAndTime::stringIsISO8601("1990-01-02T03:04:02.000") );
+    TS_ASSERT( DateAndTime::stringIsISO8601("1990-01-02T03:04:02.000+05:30") );
+    TS_ASSERT( DateAndTime::stringIsISO8601("1990-01-02 03:04") );
+    TS_ASSERT( DateAndTime::stringIsISO8601("1990-01-02") );
+    TS_ASSERT( DateAndTime::stringIsISO8601("1822-01-02") );
 
-    TS_ASSERT(!DateAndTime::string_isISO8601("January 1, 2345") );
-    TS_ASSERT(!DateAndTime::string_isISO8601("2010-31-56") );
-    TS_ASSERT(!DateAndTime::string_isISO8601("1990-01-02 45:92:22") );
+    TS_ASSERT(!DateAndTime::stringIsISO8601("January 1, 2345") );
+    TS_ASSERT(!DateAndTime::stringIsISO8601("2010-31-56") );
+    TS_ASSERT(!DateAndTime::stringIsISO8601("1990-01-02 45:92:22") );
   }
 
 };

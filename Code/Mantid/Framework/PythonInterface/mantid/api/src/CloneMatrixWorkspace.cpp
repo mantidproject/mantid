@@ -2,7 +2,6 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/api/CloneMatrixWorkspace.h"
-#include "MantidPythonInterface/kernel/NumpyConverters.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include <boost/python/extract.hpp>

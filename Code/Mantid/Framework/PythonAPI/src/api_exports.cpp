@@ -530,7 +530,9 @@ using namespace boost::python;
         .def("addTof", &IEventList::addTof)
         .def("addPulsetime", &IEventList::addPulsetime)
         .def("maskTof", &IEventList::maskTof)
-        .def("getTofs", &IEventList::getTofs)
+        .def("getTofs", (std::vector<double>(IEventList::*)(void)const) &IEventList::getTofs,
+            "Get a vector of the TOFs of the events")
+        .def("getPulseTimes", &IEventList::getPulseTimes, "Get a vector of the pulse times of the events")
         .def("getTofMin", &IEventList::getTofMin)
         .def("getTofMax", &IEventList::getTofMax)
         .def("setTofs", &IEventList::setTofs)

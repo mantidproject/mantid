@@ -9,8 +9,9 @@ void export_DateAndTime()
 {
 
   class_<DateAndTime>("DateAndTime", no_init)
-    .def("total_nanoseconds", &DateAndTime::total_nanoseconds)
-    .def("__str__", &Mantid::Kernel::DateAndTime::to_ISO8601_string)
+    .def("total_nanoseconds", &DateAndTime::totalNanoseconds)
+    .def("totalNanoseconds", &DateAndTime::totalNanoseconds)
+    .def("__str__", &Mantid::Kernel::DateAndTime::toISO8601String)
     // cppcheck-suppress duplicateExpression
     .def(self == self)
     // cppcheck-suppress duplicateExpression

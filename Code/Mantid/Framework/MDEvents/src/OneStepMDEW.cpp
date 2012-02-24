@@ -83,8 +83,8 @@ namespace MDEvents
     childAlg->executeAsSubAlg();
 
 //    Workspace_sptr tempWS = childAlg->getProperty<Workspace>("OutputWorkspace");
-//    IEventWorkspace_sptr tempEventWS = boost::dynamic_pointer_cast<IEventWorkspace>(AnalysisDataService::Instance().retrieve(tempWsName));
-    //    IEventWorkspace_sptr tempEventWS = boost::dynamic_pointer_cast<IEventWorkspace>(AnalysisDataService::Instance().retrieve(tempWsName));
+//    IEventWorkspace_sptr tempEventWS = AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(tempWsName);
+    //    IEventWorkspace_sptr tempEventWS = AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(tempWsName);
 
 
     // --------- Now Convert -------------------------------

@@ -44,7 +44,7 @@ public:
 		TS_ASSERT_THROWS_NOTHING(alg2D.execute());
 		TS_ASSERT( alg2D.isExecuted() );
 
-		MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(alg2D.getProperty("OutputWorkspace")));
+		MatrixWorkspace_sptr output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(alg2D.getProperty("OutputWorkspace"));
 
 		Mantid::MantidVec& Xold = input->dataX(0);
 		Mantid::MantidVec& Xnew = output->dataX(0);
@@ -65,7 +65,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg2D.execute());
 		TS_ASSERT( alg2D.isExecuted() );
 
-		output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("output2D_lims"));
+		output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("output2D_lims");
 
     //check hist 0 is unchanged
 		Mantid::MantidVec& Xold0 = input->dataX(0);
@@ -131,9 +131,9 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.execute() );
     TS_ASSERT( alg.isExecuted() );
 
-    EventWorkspace_sptr WSI = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(this->inputSpace));
+    EventWorkspace_sptr WSI = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(this->inputSpace);
     TS_ASSERT(WSI);
-    EventWorkspace_sptr WSO = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace));
+    EventWorkspace_sptr WSO = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputSpace);
     TS_ASSERT(WSO);
 
     std::size_t wkspIndex = 4348; // a good workspace index (with events)
@@ -146,7 +146,7 @@ public:
     alg.setPropertyValue("IndexMax", "4350");
     TS_ASSERT_THROWS_NOTHING( alg.execute() );
     TS_ASSERT( alg.isExecuted() );
-    WSO = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace));
+    WSO = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputSpace);
     TS_ASSERT(WSO);
     TS_ASSERT_DELTA(WSI->getEventList(wkspIndex).getEvents()[0].tof(),
         WSO->getEventList(wkspIndex).getEvents()[0].tof(),0.001); //should be unchanged

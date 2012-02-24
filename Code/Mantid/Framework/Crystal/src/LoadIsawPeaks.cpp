@@ -123,7 +123,7 @@ namespace Crystal
     std::string date;
     tag = getWord( in ,  false );
     if(tag.empty())
-      date = Kernel::DateAndTime::get_current_time().to_ISO8601_string();
+      date = Kernel::DateAndTime::getCurrentTime().toISO8601String();
     else if(tag == "Date:")
       date = getWord( in ,  false );
     readToEndOfLine( in ,  true );

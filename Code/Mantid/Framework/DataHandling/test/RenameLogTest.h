@@ -74,7 +74,7 @@ public:
     TS_ASSERT(renlog.isExecuted());
 
     // 4. Check
-    API::MatrixWorkspace_sptr rWS = boost::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("TestDummy"));
+    API::MatrixWorkspace_sptr rWS = AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>("TestDummy");
 
     Kernel::TimeSeriesProperty<double> *rp;
     TS_ASSERT_THROWS_NOTHING(rp = dynamic_cast<Kernel::TimeSeriesProperty<double>* >(rWS->run().getProperty("NewLog")));

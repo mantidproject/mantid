@@ -421,7 +421,7 @@ void testGetWSDimNames2AxisNoQ(){
 // --> GET ALL DIMENSION NAMES:
 //void xtestGetDimNames(){
 //    // get ws from the DS    
-//    Mantid::API::MatrixWorkspace_sptr ws2D = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("testWSProcessed"));
+//    Mantid::API::MatrixWorkspace_sptr ws2D = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("testWSProcessed");
 //    // check the private function
 //    std::vector<std::string> dim_names = pAlg->get_dimension_names(ws2D);
 //
@@ -572,7 +572,7 @@ void testSetUpThrow()
     //TODO: check if wrong WS throws (should on validator)
 
      // get ws from the DS    
-     Mantid::API::MatrixWorkspace_sptr ws2D = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("testWSProcessed"));
+     Mantid::API::MatrixWorkspace_sptr ws2D = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("testWSProcessed");
      // give it to algorithm
     TSM_ASSERT_THROWS_NOTHING("the inital ws is not in the units of energy transfer",pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
     // target ws fine
@@ -590,7 +590,7 @@ void testSetUpThrow()
 void testExecNoQ()
 {
 
-     Mantid::API::MatrixWorkspace_sptr ws2D = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("testWSProcessed"));
+     Mantid::API::MatrixWorkspace_sptr ws2D = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("testWSProcessed");
      API::NumericAxis *pAxis = new API::NumericAxis(3);
      pAxis->setUnit("dSpacing");
 
@@ -614,7 +614,7 @@ void testExecNoQ()
 void testExecModQ()
 {
 
-     Mantid::API::MatrixWorkspace_sptr ws2D = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("testWSProcessed"));
+     Mantid::API::MatrixWorkspace_sptr ws2D = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("testWSProcessed");
      API::NumericAxis *pAxis = new API::NumericAxis(3);
      pAxis->setUnit("dSpacing");
 

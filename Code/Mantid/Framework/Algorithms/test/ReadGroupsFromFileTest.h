@@ -61,7 +61,7 @@ public:
 
     // has the algorithm written a file to disk?
 
-    GroupingWorkspace_sptr groupWS = boost::dynamic_pointer_cast<GroupingWorkspace>(AnalysisDataService::Instance().retrieve("grp"));
+    GroupingWorkspace_sptr groupWS = AnalysisDataService::Instance().retrieveWS<GroupingWorkspace>("grp");
     std::string outputFile = "./INES_DspacemaptoCalTest.cal";
  
     SaveCalFile alg;

@@ -323,6 +323,13 @@ public:
   double getTofMin() const;
   double getTofMax() const;
 
+  std::vector<double> getTofs() const;
+
+  template<class T>
+  static void getPulseTimesHelper(const std::vector<T> & events, std::vector<Mantid::Kernel::DateAndTime> & times);
+  std::vector<Mantid::Kernel::DateAndTime> getPulseTimes() const;
+
+
   template<class T>
   static void setTofsHelper(std::vector<T> & events, const std::vector<double> & tofs);
   void setTofs(const MantidVec& tofs);

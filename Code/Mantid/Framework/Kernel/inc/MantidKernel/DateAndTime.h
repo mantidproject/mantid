@@ -51,19 +51,19 @@ public:
   std::time_t to_localtime_t() const;
   std::tm to_tm() const;
 
-  void set_from_ISO8601_string(const std::string str);
-  std::string to_simple_string() const;
-  std::string to_string(const std::string format = "%Y-%b-%d %H:%M:%S") const;
-  std::string to_ISO8601_string() const;
+  void setFromISO8601(const std::string str);
+  std::string toSimpleString() const;
+  std::string toFormattedString(const std::string format = "%Y-%b-%d %H:%M:%S") const;
+  std::string toISO8601String() const;
 
   /// Stream output operator
   friend std::ostream& operator<< (std::ostream& stream, const DateAndTime & t)
   {
-    stream << t.to_simple_string(); return stream;
+    stream << t.toSimpleString(); return stream;
   }
 
-  void set_to_maximum();
-  void set_to_minimum();
+  void setToMaximum();
+  void setToMinimum();
 
   int year() const;
   int month() const;
@@ -72,7 +72,7 @@ public:
   int minute() const;
   int second() const;
   int nanoseconds() const;
-  int64_t total_nanoseconds() const;
+  int64_t totalNanoseconds() const;
 
   bool operator==(const DateAndTime& rhs) const;
   bool operator==(const boost::posix_time::ptime& rhs) const;
@@ -101,17 +101,17 @@ public:
 
 
   //-------------- STATIC FUNCTIONS -----------------------
-  static DateAndTime get_current_time();
+  static DateAndTime getCurrentTime();
   static DateAndTime maximum();
   static DateAndTime minimum();
-  static double seconds_from_duration(time_duration td);
-  static time_duration duration_from_seconds(double seconds);
-  static int64_t nanoseconds_from_duration(const time_duration & td);
-  static int64_t nanoseconds_from_seconds(double sec);
-  static time_duration duration_from_nanoseconds(int64_t dur);
+  static double secondsFromDuration(time_duration td);
+  static time_duration durationFromSeconds(double seconds);
+  static int64_t nanosecondsFromDuration(const time_duration & td);
+  static int64_t nanosecondsFromSeconds(double sec);
+  static time_duration durationFromNanoseconds(int64_t dur);
   static const DateAndTime defaultTime();
   static void createVector(const DateAndTime start, const std::vector<double> & seconds, std::vector<DateAndTime> & out);
-  static bool string_isISO8601(const std::string & str);
+  static bool stringIsISO8601(const std::string & str);
 
 private:
   ///A signed 64-bit int of the # of nanoseconds since Jan 1, 1990.
@@ -200,7 +200,7 @@ public:
     /** Stream output operator  */
     friend std::ostream& operator<<(std::ostream& s,const Mantid::Kernel::TimeInterval& t)
     {
-      s << t.begin().to_simple_string() << " - " << t.end().to_simple_string();
+      s << t.begin().toSimpleString() << " - " << t.end().toSimpleString();
       return s;
     }
 

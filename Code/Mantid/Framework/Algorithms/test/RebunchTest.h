@@ -28,7 +28,7 @@ public:
     rebunch.setPropertyValue("OutputWorkspace","test_out");
     rebunch.setPropertyValue("NBunch", "5");
     rebunch.execute();
-    MatrixWorkspace_sptr rebunchdata = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out"));
+    MatrixWorkspace_sptr rebunchdata = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
     const Mantid::MantidVec outX=rebunchdata->dataX(0);
     const Mantid::MantidVec outY=rebunchdata->dataY(0);
     const Mantid::MantidVec outE=rebunchdata->dataE(0);
@@ -58,7 +58,7 @@ public:
     rebunch.setPropertyValue("OutputWorkspace","test_out");
     rebunch.setPropertyValue("NBunch", "7");
     rebunch.execute();
-    MatrixWorkspace_sptr rebunchdata = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out"));
+    MatrixWorkspace_sptr rebunchdata = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
 
     const Mantid::MantidVec outX=rebunchdata->dataX(0);
     const Mantid::MantidVec outY=rebunchdata->dataY(0);
@@ -92,7 +92,7 @@ public:
     rebunch.setPropertyValue("OutputWorkspace","test_out");
     rebunch.setPropertyValue("NBunch", "5");
     rebunch.execute();
-    MatrixWorkspace_sptr rebunchdata = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out"));
+    MatrixWorkspace_sptr rebunchdata = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
 
     const Mantid::MantidVec outX=rebunchdata->dataX(5);
     const Mantid::MantidVec outY=rebunchdata->dataY(5);
@@ -125,7 +125,7 @@ public:
     rebunch.setPropertyValue("OutputWorkspace","test_out");
     rebunch.setPropertyValue("NBunch", "7");
     rebunch.execute();
-    MatrixWorkspace_sptr rebunchdata = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out"));
+    MatrixWorkspace_sptr rebunchdata = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
     const Mantid::MantidVec outX=rebunchdata->dataX(5);
     const Mantid::MantidVec outY=rebunchdata->dataY(5);
     const Mantid::MantidVec outE=rebunchdata->dataE(5);

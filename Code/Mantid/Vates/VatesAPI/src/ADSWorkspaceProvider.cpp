@@ -27,7 +27,7 @@ namespace Mantid
         bool bCanProvide = false;
         try
         {
-          bCanProvide = (NULL != boost::dynamic_pointer_cast<Workspace_Type>(AnalysisDataService::Instance().retrieve(wsName)));
+          bCanProvide = (NULL != AnalysisDataService::Instance().retrieveWS<Workspace_Type>(wsName));
         }
         catch(Mantid::Kernel::Exception::NotFoundError&)
         {
@@ -39,7 +39,7 @@ namespace Mantid
       template<typename Workspace_Type>
       Mantid::API::Workspace_sptr ADSWorkspaceProvider<Workspace_Type>::fetchWorkspace(std::string wsName) const
       {
-        return boost::dynamic_pointer_cast<Workspace_Type>(AnalysisDataService::Instance().retrieve(wsName));
+        return AnalysisDataService::Instance().retrieveWS<Workspace_Type>(wsName);
       }
 
       template<typename Workspace_Type>

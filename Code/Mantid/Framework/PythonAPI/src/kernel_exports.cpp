@@ -186,7 +186,7 @@ namespace PythonAPI
     	      ;
 
     class_<Mantid::Kernel::DateAndTime>("DateAndTime", no_init)
-        .def("__str__", &Mantid::Kernel::DateAndTime::to_ISO8601_string)
+        .def("__str__", &Mantid::Kernel::DateAndTime::toISO8601String)
         // cppcheck-suppress duplicateExpression
         .def(self == self)
         // cppcheck-suppress duplicateExpression
@@ -197,7 +197,9 @@ namespace PythonAPI
         .def(self += int64_t())
         .def(self - int64_t())
         .def(self -= int64_t())
-        .def("total_nanoseconds", &Mantid::Kernel::DateAndTime::total_nanoseconds);
+        .def("total_nanoseconds", &Mantid::Kernel::DateAndTime::totalNanoseconds)
+        .def("totalNanoseconds", &Mantid::Kernel::DateAndTime::totalNanoseconds)
+        ;
   }
   
   void export_validators()

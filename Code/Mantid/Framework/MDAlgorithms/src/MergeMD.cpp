@@ -249,7 +249,7 @@ namespace MDAlgorithms
     std::vector<std::string> inputs;
     for (size_t i=0; i < inputs_orig.size(); i++)
     {
-      WorkspaceGroup_sptr wsgroup = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(inputs_orig[i]));
+      WorkspaceGroup_sptr wsgroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(inputs_orig[i]);
       if (wsgroup)
       {// Workspace group
         std::vector<std::string> group = wsgroup->getNames();

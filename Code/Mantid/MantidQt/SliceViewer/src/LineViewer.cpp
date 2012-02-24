@@ -351,7 +351,7 @@ void LineViewer::apply()
   if (alg->isExecuted())
   {
     //m_sliceWS = alg->getProperty("OutputWorkspace");
-    m_sliceWS = boost::dynamic_pointer_cast<IMDWorkspace>(AnalysisDataService::Instance().retrieve(outWsName));
+    m_sliceWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(outWsName);
     this->showFull();
   }
   else

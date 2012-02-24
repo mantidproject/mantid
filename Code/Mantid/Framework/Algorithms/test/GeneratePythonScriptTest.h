@@ -63,7 +63,7 @@ public:
         TS_ASSERT_THROWS_NOTHING(loader.execute());
         TS_ASSERT_EQUALS(loader.isExecuted(), true);
 
-        MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("LoadedWorkspace"));
+        MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadedWorkspace");
 
         TS_ASSERT(NULL != ws);
 

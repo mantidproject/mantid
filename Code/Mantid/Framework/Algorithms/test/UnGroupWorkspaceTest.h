@@ -58,11 +58,11 @@ public:
 		TS_ASSERT( ungrpwsalg.isExecuted() );
 		//EVS13895 gets deleted,so test it
 		WorkspaceGroup_sptr result;
-		TS_ASSERT_THROWS( result = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("CSP79590")),std::runtime_error );
+		TS_ASSERT_THROWS( result = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("CSP79590"),std::runtime_error );
 
 		Workspace_sptr result1;
-		TS_ASSERT_THROWS_NOTHING( result1 = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("CSP79590_1")) );
-		TS_ASSERT_THROWS_NOTHING( result1 = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("CSP79590_2")) );
+		TS_ASSERT_THROWS_NOTHING( result1 = AnalysisDataService::Instance().retrieveWS<Workspace>("CSP79590_1") );
+		TS_ASSERT_THROWS_NOTHING( result1 = AnalysisDataService::Instance().retrieveWS<Workspace>("CSP79590_2") );
 		
 	}
 	

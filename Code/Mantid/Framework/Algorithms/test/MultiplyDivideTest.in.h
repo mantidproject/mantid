@@ -712,7 +712,7 @@ public:
     TSM_ASSERT_THROWS_NOTHING(message, alg->execute());
     TSM_ASSERT( message, alg->isExecuted() );
     MatrixWorkspace_sptr work_out1;
-    TSM_ASSERT_THROWS_NOTHING(message, work_out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsNameOut)));
+    TSM_ASSERT_THROWS_NOTHING(message, work_out1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsNameOut));
     TSM_ASSERT( message, work_out1 );
     if (work_out1)
     {
@@ -933,7 +933,7 @@ public:
 
     TS_ASSERT(helper.isExecuted());
 
-    MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("work_in1"));
+    MatrixWorkspace_sptr output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("work_in1");
     TS_ASSERT(output);
 
     for( int i = 0; i < nHist; ++i )

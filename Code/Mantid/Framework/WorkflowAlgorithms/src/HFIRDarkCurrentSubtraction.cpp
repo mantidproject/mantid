@@ -113,7 +113,7 @@ void HFIRDarkCurrentSubtraction::exec()
       loadAlg->setProperty("Filename", fileName);
       loadAlg->setPropertyValue("OutputWorkspace", darkWSName);
       loadAlg->execute();
-      //darkWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(darkWSName));
+      //darkWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(darkWSName);
       darkWS = loadAlg->getProperty("OutputWorkspace");
     }
     setProperty("OutputDarkCurrentWorkspace", darkWS);

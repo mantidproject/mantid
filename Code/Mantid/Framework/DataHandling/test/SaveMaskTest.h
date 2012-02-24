@@ -57,7 +57,7 @@ public:
 
     TS_ASSERT_EQUALS(loadfile.execute(),true);
     DataObjects::SpecialWorkspace2D_sptr maskws =
-          boost::dynamic_pointer_cast<DataObjects::SpecialWorkspace2D>(AnalysisDataService::Instance().retrieve("PG3Mask"));
+          AnalysisDataService::Instance().retrieveWS<DataObjects::SpecialWorkspace2D>("PG3Mask");
 
     // 3. Set property and run
     TS_ASSERT(savealg.setProperty("InputWorkspace", maskws));
@@ -79,7 +79,7 @@ public:
 
     TS_ASSERT_EQUALS(loadfile2.execute(),true);
     DataObjects::SpecialWorkspace2D_sptr maskws2 =
-          boost::dynamic_pointer_cast<DataObjects::SpecialWorkspace2D>(AnalysisDataService::Instance().retrieve("PG3MaskCopy"));
+          AnalysisDataService::Instance().retrieveWS<DataObjects::SpecialWorkspace2D>("PG3MaskCopy");
 
     // 5. Compare
     TS_ASSERT_EQUALS(maskws->getNumberHistograms(), maskws2->getNumberHistograms());

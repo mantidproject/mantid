@@ -60,7 +60,7 @@ public:
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("QueryWS"));
 
-    ITableWorkspace_sptr table = boost::dynamic_pointer_cast<ITableWorkspace>(AnalysisDataService::Instance().retrieve("QueryWS"));
+    ITableWorkspace_sptr table = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("QueryWS");
 
     TSM_ASSERT("Workspace output is not an ITableWorkspace", table !=NULL);
     TSM_ASSERT_EQUALS("Four columns expected", 4, table->columnCount());
@@ -80,7 +80,7 @@ public:
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("QueryWS"));
 
-    ITableWorkspace_sptr table = boost::dynamic_pointer_cast<ITableWorkspace>(AnalysisDataService::Instance().retrieve("QueryWS"));
+    ITableWorkspace_sptr table = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("QueryWS");
 
     TSM_ASSERT("Workspace output is not an ITableWorkspace", table !=NULL);
     TSM_ASSERT_EQUALS("Four columns expected", 4, table->columnCount());

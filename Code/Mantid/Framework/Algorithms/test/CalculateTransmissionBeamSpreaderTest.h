@@ -83,7 +83,7 @@ public:
     TS_ASSERT( trans.isExecuted() )
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputWS)) )
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS) )
     if (!output) return;
     TS_ASSERT_DELTA( output->readY(0)[0], 0.5, 0.010 )
 

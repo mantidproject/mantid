@@ -46,6 +46,8 @@ namespace DataHandling
     virtual ~LiveDataAlgorithm();
     virtual const std::string category() const;
 
+    void copyPropertyValuesFrom(const LiveDataAlgorithm & other);
+
     Mantid::API::ILiveListener_sptr getLiveListener();
     void setLiveListener(Mantid::API::ILiveListener_sptr listener);
 
@@ -54,7 +56,9 @@ namespace DataHandling
 
     Mantid::Kernel::DateAndTime getStartTime() const;
 
-    Mantid::API::IAlgorithm_sptr makeAlgorithm();
+    Mantid::API::IAlgorithm * makeAlgorithm(bool postProcessing);
+
+    bool hasPostProcessing() const;
 
     /// Live listener
     Mantid::API::ILiveListener_sptr m_listener;

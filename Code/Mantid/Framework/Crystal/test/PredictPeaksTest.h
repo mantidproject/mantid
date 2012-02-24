@@ -83,7 +83,7 @@ public:
     
     // Retrieve the workspace from data service.
     PeaksWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve(outWSName)) );
+    TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(outWSName) );
     TS_ASSERT(ws);
     if (!ws) return;
     
@@ -160,7 +160,7 @@ public:
 
     // Retrieve the workspace from data service.
     PeaksWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve(outWSName)) );
+    TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(outWSName) );
     TS_ASSERT(ws);
     if (!ws) return;
 

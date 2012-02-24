@@ -90,7 +90,7 @@ public:
     }
 
     //check output
-    MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(alg.getProperty("Workspace")));
+    MatrixWorkspace_sptr output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(alg.getProperty("Workspace"));
     
     const Run& wSpaceRun = output->run();
     Property * prop = NULL;

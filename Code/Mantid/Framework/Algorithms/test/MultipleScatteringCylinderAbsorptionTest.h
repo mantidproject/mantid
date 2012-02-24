@@ -90,7 +90,7 @@ public:
     MatrixWorkspace_sptr test_output_WS;
     MatrixWorkspace_sptr gold_output_WS;
 
-    TS_ASSERT_THROWS_NOTHING( test_output_WS=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("TestOutputWS")) );
+    TS_ASSERT_THROWS_NOTHING( test_output_WS=AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("TestOutputWS") );
     TS_ASSERT( test_output_WS );
 
     // setup expected values

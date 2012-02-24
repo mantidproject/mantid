@@ -48,13 +48,13 @@
       </property>
       <layout class="QVBoxLayout" name="verticalLayoutControls">
        <property name="spacing">
-        <number>2</number>
+        <number>0</number>
        </property>
        <property name="sizeConstraint">
         <enum>QLayout::SetMinimumSize</enum>
        </property>
        <property name="margin">
-        <number>2</number>
+        <number>0</number>
        </property>
       </layout>
      </widget>
@@ -273,6 +273,13 @@
            </spacer>
           </item>
           <item>
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>x=</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QLabel" name="lblInfoX">
             <property name="minimumSize">
              <size>
@@ -292,11 +299,21 @@
  color : black; 
 }</string>
             </property>
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
+            </property>
             <property name="text">
              <string>-</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>y=</string>
             </property>
            </widget>
           </item>
@@ -320,11 +337,21 @@
  color : black; 
 }</string>
             </property>
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
+            </property>
             <property name="text">
              <string>-</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>z=</string>
             </property>
            </widget>
           </item>
@@ -347,6 +374,9 @@
  background-color : rgb(255, 255, 186);
  color : black; 
 }</string>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
             </property>
             <property name="text">
              <string>-</string>
@@ -411,6 +441,9 @@
  background-color : rgb(255, 255, 186);
  color : black; 
 }</string>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
             </property>
             <property name="text">
              <string>-</string>

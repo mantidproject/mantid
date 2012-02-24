@@ -180,8 +180,8 @@ namespace Algorithms
       }
 
       std::vector<Kernel::DateAndTime> times = tlog->timesAsVector();
-      int64_t ts = times[0].total_nanoseconds();
-      int64_t te = times[times.size()-1].total_nanoseconds();
+      int64_t ts = times[0].totalNanoseconds();
+      int64_t te = times[times.size()-1].totalNanoseconds();
       mFilterT0 = times[0] + static_cast<int64_t>(static_cast<double>(te-ts)*t0r*0.01);
       mFilterTf = times[0] + static_cast<int64_t>(static_cast<double>(te-ts)*tfr*0.01);
     }
@@ -244,7 +244,7 @@ namespace Algorithms
     std::vector<Kernel::DateAndTime> timevec = fastfreqlog->timesAsVector();
 
     // a) Index = 0 case
-    mSETimes.push_back(timevec[0].total_nanoseconds());
+    mSETimes.push_back(timevec[0].totalNanoseconds());
     double tv = fastfreqlog->getSingleValue(timevec[0]);
     mSEValues.push_back(tv);
 
@@ -257,7 +257,7 @@ namespace Algorithms
       if (timevec[i] > timevec[i-1])
       {
         // Normal case
-        mSETimes.push_back(timevec[i].total_nanoseconds());
+        mSETimes.push_back(timevec[i].totalNanoseconds());
         double tv = fastfreqlog->getSingleValue(timevec[i]);
         mSEValues.push_back(tv);
       }
@@ -265,7 +265,7 @@ namespace Algorithms
       {
         // Duplicate case
         numduplicates += 1;
-        int64_t dt = timevec[i].total_nanoseconds()-timevec[i-1].total_nanoseconds();
+        int64_t dt = timevec[i].totalNanoseconds()-timevec[i-1].totalNanoseconds();
         errss << "Time [" << i << "] = "
             << timevec[i] << " is duplicated with previous time "
             << timevec[i-1] << ".  dT = " << dt << std::endl;
@@ -275,7 +275,7 @@ namespace Algorithms
         // Reversed order case
         // Duplicate case
         numreversed += 1;
-        int64_t dt = timevec[i].total_nanoseconds()-timevec[i-1].total_nanoseconds();
+        int64_t dt = timevec[i].totalNanoseconds()-timevec[i-1].totalNanoseconds();
         errss << "Time [" << i << "] = "
             << timevec[i] << " is earlier than previous time "
             << timevec[i-1] << ".  dT = " << dt << std::endl;
@@ -578,12 +578,12 @@ namespace Algorithms
       }
 
       // ii.  Get raw event & time: Total time = pulse time (ns) + TOF*offset - sensor-sample-offset
-      int64_t mtime = rawevent.m_pulsetime.total_nanoseconds()+
+      int64_t mtime = rawevent.m_pulsetime.totalNanoseconds()+
           static_cast<int64_t>(rawevent.m_tof*1000*percentageoffsettof)-
           mSensorSampleOffset;
 
       // iii. Filter out if time falls out of (T0, Tf), and update loop variables
-      if (mtime < mFilterT0.total_nanoseconds() || mtime > mFilterTf.total_nanoseconds()){
+      if (mtime < mFilterT0.totalNanoseconds() || mtime > mFilterTf.totalNanoseconds()){
         islow = !islow;
         prevtime2 = prevtime1;
         prevtime1 = mtime;
@@ -656,7 +656,7 @@ namespace Algorithms
       // vi.  Check 2 (Usually won't happen)
       if (mindex >= mSETimes.size()){
         size_t numsetimes = mSETimes.size();
-        int64_t dt = mtime - mRunStartTime.total_nanoseconds();
+        int64_t dt = mtime - mRunStartTime.totalNanoseconds();
         g_log.error() << "Locate " << mtime << "  Time 0 = " << mSETimes[0] << ", Time f = " << mSETimes[numsetimes-1] << std::endl;
         g_log.error() << "Time = " << mtime << "  T-T0  = " << (static_cast<double>(dt)*1.0E-9) << " sec" << std::endl;
         throw std::invalid_argument("Flag 1616:  Wrong in searching.  Out of log boundary!!!");
@@ -690,8 +690,8 @@ namespace Algorithms
                preindex = index+1;
              }
              DataObjects::TofEvent preevent = events.getEvent(preindex);
-             int64_t currabstime = rawevent.pulseTime().total_nanoseconds()+static_cast<int64_t>(rawevent.tof()*1000);
-             int64_t prevabstime = preevent.pulseTime().total_nanoseconds()+static_cast<int64_t>(preevent.tof()*1000);
+             int64_t currabstime = rawevent.pulseTime().totalNanoseconds()+static_cast<int64_t>(rawevent.tof()*1000);
+             int64_t prevabstime = preevent.pulseTime().totalNanoseconds()+static_cast<int64_t>(preevent.tof()*1000);
              errmsg << "Pulse Time(prev, curr):  " << preevent.pulseTime() << " , " << rawevent.pulseTime() << std::endl;
              errmsg << "TOF       (prev, curr):  " << preevent.tof() << " , " << rawevent.tof() << std::endl;
              errmsg << "Raw Time              :  " << prevabstime << ", " << currabstime << std::endl;
@@ -818,13 +818,13 @@ namespace Algorithms
       }
 
       // ii.  Get raw event & time: Total time = pulse time (ns) + TOF*offset - sensor-sample-offset
-      int64_t mtime = rawevent.m_pulsetime.total_nanoseconds()+
+      int64_t mtime = rawevent.m_pulsetime.totalNanoseconds()+
           static_cast<int64_t>(rawevent.m_tof*1000*percentageoffsettof)-
           mSensorSampleOffset;
       double correctedtof = rawevent.m_tof*percentageoffsettof;
 
       // iii. Filter out if time falls out of (T0, Tf), and update loop variables
-      if (mtime < mFilterT0.total_nanoseconds() || mtime > mFilterTf.total_nanoseconds())
+      if (mtime < mFilterT0.totalNanoseconds() || mtime > mFilterTf.totalNanoseconds())
       {
         numeventsout ++;
         numoutrange ++;
@@ -877,15 +877,15 @@ namespace Algorithms
 
       if (selected && static_cast<int>(iv) <= numOutputEvents)
       {
-        ofs << iv << "\t" << rawevent.pulseTime().total_nanoseconds() << "\t" << rawevent.tof() << "\t"
+        ofs << iv << "\t" << rawevent.pulseTime().totalNanoseconds() << "\t" << rawevent.tof() << "\t"
             << correctedtof << "\t" << mtime << "\t" << section << std::endl;
-        std::cout << iv << "\t" << rawevent.pulseTime().total_nanoseconds() << "\t" << rawevent.tof() << "\t"
+        std::cout << iv << "\t" << rawevent.pulseTime().totalNanoseconds() << "\t" << rawevent.tof() << "\t"
             << correctedtof << "\t-->\t" << mtime << "\t" << section << std::endl;
       }
       /*
       else
       {
-        std::cout << rawevent.pulseTime().total_nanoseconds() << "\t" << rawevent.tof() << "\t"
+        std::cout << rawevent.pulseTime().totalNanoseconds() << "\t" << rawevent.tof() << "\t"
             << correctedtof << "\t" << "Not Selected" << std::endl;
       }
       */
@@ -922,9 +922,9 @@ namespace Algorithms
     g_log.information() << "NUmber of Events Outside Time Range = " << numoutrange <<
         ", Number of Events Not Within Value = " << numoutvalue << std::endl;
     g_log.information() << "Filter:  T0 = " << mFilterT0 << ", Tf = " << mFilterTf << std::endl;
-    g_log.information() << "Log:     T0 = " << mSETimes[0] << "  To Filter T0 " << mSETimes[0]-mFilterT0.total_nanoseconds() << std::endl;
+    g_log.information() << "Log:     T0 = " << mSETimes[0] << "  To Filter T0 " << mSETimes[0]-mFilterT0.totalNanoseconds() << std::endl;
     g_log.information() << "Log:     Tf = " << mSETimes[mSETimes.size()-1] << "  To Filter T0 " <<
-        mSETimes[mSETimes.size()-1]-mFilterT0.total_nanoseconds() << std::endl;
+        mSETimes[mSETimes.size()-1]-mFilterT0.totalNanoseconds() << std::endl;
     g_log.information() << "Neutron 0   :   Pulse Time = " << events.getEvent(0).m_pulsetime << std::endl;
     g_log.information() << "Neutron Last:   Pulse Time = " << events.getEvent(events.getNumberEvents()-1).m_pulsetime << std::endl;
     // PARALLEL_END_INTERUPT_REGION

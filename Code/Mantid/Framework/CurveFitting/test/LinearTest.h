@@ -82,8 +82,8 @@ public:
     const double cov01 = lin.getProperty("Cov01");
     TS_ASSERT( cov01 != 0.0 )
     
-    MatrixWorkspace_sptr inputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Line"));
-    MatrixWorkspace_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Fit"));
+    MatrixWorkspace_sptr inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Line");
+    MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Fit");
     // The X vectors should be the same
     TS_ASSERT_EQUALS( inputWS->readX(0), outputWS->readX(0) )
     // Just do a spot-check on Y & E

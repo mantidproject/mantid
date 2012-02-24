@@ -44,7 +44,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(ld.execute());
     TS_ASSERT(ld.isExecuted());
 
-    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outws_name));
+    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outws_name);
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->blocksize(),501);
     TS_ASSERT_EQUALS(ws->getNumberHistograms(),77824);

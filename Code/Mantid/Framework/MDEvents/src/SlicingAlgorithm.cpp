@@ -9,6 +9,7 @@
 #include "MantidMDEvents/SlicingAlgorithm.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidKernel/ArrayLengthValidator.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

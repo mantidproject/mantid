@@ -40,7 +40,7 @@ public:
     // Give it an instrument
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 16);
     IMDEventWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve("MDEWS")) );
+    TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>("MDEWS") );
     ExperimentInfo_sptr ei(new ExperimentInfo());
     ei->setInstrument(inst);
     // Give it a run number
@@ -114,7 +114,7 @@ public:
     
     // Retrieve the workspace from data service.
     PeaksWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve(outWSName)) );
+    TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(outWSName) );
     TS_ASSERT(ws);
     if (!ws) return;
     

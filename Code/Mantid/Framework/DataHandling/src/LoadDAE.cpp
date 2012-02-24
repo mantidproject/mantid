@@ -554,7 +554,7 @@ namespace Mantid
       int numSpectra = static_cast<int>(localWorkspace->getNumberHistograms());
       runDetails.addProperty("nspectra", numSpectra);
 
-      runDetails.addProperty("run_start", Kernel::DateAndTime::get_current_time().to_ISO8601_string());
+      runDetails.addProperty("run_start", Kernel::DateAndTime::getCurrentTime().toISO8601String());
     }
 
     double LoadDAE::dblSqrt(double in)

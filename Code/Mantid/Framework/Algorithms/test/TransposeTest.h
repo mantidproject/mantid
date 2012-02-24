@@ -56,7 +56,7 @@ public:
     }
 
     // Input workspace
-    MatrixWorkspace_const_sptr inputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("transpose_irs_r"));
+    MatrixWorkspace_const_sptr inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("transpose_irs_r");
 
     const size_t nHist = inputWS->getNumberHistograms();
     const size_t nBins = inputWS->blocksize();
@@ -71,7 +71,7 @@ public:
 
     // Get output workspace
     MatrixWorkspace_const_sptr outputWS;
-    TS_ASSERT_THROWS_NOTHING(outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("transpose_irs_t")));
+    TS_ASSERT_THROWS_NOTHING(outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("transpose_irs_t"));
 
     // Dimensions
     TS_ASSERT_EQUALS(inputWS->getNumberHistograms(), outputWS->blocksize());

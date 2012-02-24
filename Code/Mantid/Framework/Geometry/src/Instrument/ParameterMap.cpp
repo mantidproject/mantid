@@ -682,7 +682,7 @@ namespace Mantid
       file->makeGroup(group, "NXnote", true);
       file->putAttr("version", 1);
       file->writeData("author", "");
-      file->writeData("date", Kernel::DateAndTime::get_current_time().to_ISO8601_string());
+      file->writeData("date", Kernel::DateAndTime::getCurrentTime().toISO8601String());
       file->writeData("description", "A string representation of the parameter map. The format is either: |detID:id-value;param-type;param-name;param-value| for a detector or  |comp-name;param-type;param-name;param-value| for other components.");
       file->writeData("type", "text/plain");
       std::string s = this->asString();

@@ -403,8 +403,8 @@ ISAWIntensityError     108.136     189.481     271.573     353.892     271.573  
 
       if (!Table)
       {
-        Table = boost::dynamic_pointer_cast<TableWorkspace>(AnalysisDataService::Instance().retrieve(
-            "ccc"));
+        Table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+            "ccc");
         if (!Table)
           std::cout << "Could Not retrieve frome Analysys data service" << std::endl;
       }

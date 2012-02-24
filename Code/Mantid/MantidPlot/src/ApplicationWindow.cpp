@@ -209,7 +209,6 @@ void file_compress(const char  *file, const char  *mode);
 void file_uncompress(const char  *file);
 }
 
-
 ApplicationWindow::ApplicationWindow(bool factorySettings)
 : QMainWindow(), 
 Scripted(ScriptingLangManager::newEnv(this)),
@@ -222,16 +221,23 @@ m_exitCode(0),
   settings("ISIS", "MantidPlot")
 #endif
 {
-  QCoreApplication::setOrganizationName("ISIS");
-  QCoreApplication::setApplicationName("MantidPlot");
-#ifdef SHARED_MENUBAR
-    m_sharedMenuBar = new QMenuBar(NULL);
-    //setMenuBar(m_sharedMenuBar);
-    m_sharedMenuBar->setNativeMenuBar(true);
+  QStringList empty;
+  init(factorySettings, empty);
+}
+
+ApplicationWindow::ApplicationWindow(bool factorySettings, const QStringList& args)
+: QMainWindow(), 
+Scripted(ScriptingLangManager::newEnv(this)),
+blockWindowActivation(false),
+m_enableQtiPlotFitting(false),
+m_exitCode(0),
+#ifdef Q_OS_MAC // Mac
+  settings(QSettings::IniFormat,QSettings::UserScope, "ISIS", "MantidPlot")
+#else
+  settings("ISIS", "MantidPlot")
 #endif
-  mantidUI = new MantidUI(this);
-  setAttribute(Qt::WA_DeleteOnClose);
-  init(factorySettings);
+{
+  init(factorySettings, args);
 }
 
 /**
@@ -242,8 +248,18 @@ void ApplicationWindow::exitWithPresetCode()
   QCoreApplication::exit(m_exitCode);
 }
 
-void ApplicationWindow::init(bool factorySettings)
+void ApplicationWindow::init(bool factorySettings, const QStringList& args)
 {
+  QCoreApplication::setOrganizationName("ISIS");
+  QCoreApplication::setApplicationName("MantidPlot");
+#ifdef SHARED_MENUBAR
+  m_sharedMenuBar = new QMenuBar(NULL);
+  //setMenuBar(m_sharedMenuBar);
+  m_sharedMenuBar->setNativeMenuBar(true);
+#endif
+  mantidUI = new MantidUI(this);
+  setAttribute(Qt::WA_DeleteOnClose);
+
   setWindowTitle(tr("MantidPlot - untitled"));//Mantid
   setObjectName("main application");
   initGlobalConstants();
@@ -356,22 +372,8 @@ void ApplicationWindow::init(bool factorySettings)
   /*
   If applicable, set the Paraview path BEFORE libaries are loaded. Doing it here, before the call to MantidUI::init() prevents 
   the logs being poluted with library loading errors.
-  
-  if(hasVatesAvailable())
-  {
-    if(hasParaviewPath())
-    {
-      Mantid::Kernel::ConfigServiceImpl& confService = Mantid::Kernel::ConfigService::Instance();
-      std::string path = confService.getString("paraview.path");
-      Mantid::Kernel::ConfigService::Instance().setParaviewLibraryPath(path);
-    }
-    else
-    {
-      SetUpParaview pv;
-      pv.exec();
-    }
-  }
   */
+  trySetParaviewPath(args);
 
   //Initialize Mantid
   // MG: 01/02/2009 - Moved this to before scripting so that the logging is connected when
@@ -476,6 +478,58 @@ void ApplicationWindow::init(bool factorySettings)
     showFirstTimeSetup();
   }
 }
+
+/*
+Function tries to set the paraview path.
+
+This is a windows only feature. the PATH enviromental variable can be set at runtime on windows.
+
+- Abort if Vates libraries do not seem to be present.
+- Othwerise, if the paraview.path is already in the properties file, use it.
+- Otherwise, if the user is not using executeandquit command arguments launch the Setup gui.
+
+@param commandArguments : all command line arguments.
+*/
+void ApplicationWindow::trySetParaviewPath(const QStringList& commandArguments)
+{
+#ifdef _WIN32
+  if(this->hasVatesAvailable())
+  {
+    //Early check of execute and quit command arguments used by system tests.
+    QString str;
+    bool b_skipDialog = false;
+    foreach(str, commandArguments)
+    {
+      if(this->shouldExecuteAndQuit(str))
+      {
+        b_skipDialog = true;
+        break;
+      }
+    }
+
+    if(this->hasParaviewPath())
+    {
+      //Already have a path in the properties file, just apply it.
+      Mantid::Kernel::ConfigServiceImpl& confService = Mantid::Kernel::ConfigService::Instance();
+      std::string path = confService.getString("paraview.path");
+      confService.setParaviewLibraryPath(path);
+    }
+    else
+    {
+      //Only run the following if skipping is not implied.
+      if(!b_skipDialog)
+      {
+        //Launch the dialog to set the PV path.
+        SetUpParaview pv;
+        pv.exec();
+      }
+    }
+  }
+#else
+  UNUSED_ARG(commandArguments)
+#endif
+}
+
 
 /*
 Getter to determine if the vates paraview plugins are available.
@@ -1381,6 +1435,7 @@ void ApplicationWindow::tableMenuAboutToShow()
   {
     tableMenu->addAction(actionConvertTableToWorkspace);
   }
+  tableMenu->addAction(actionConvertTableToMatrixWorkspace);
 
   tableMenu->insertSeparator();
   tableMenu->addAction(actionShowPlotWizard);
@@ -3456,6 +3511,24 @@ void ApplicationWindow::convertTableToWorkspace()
 }
 
 /**
+ * Convert Table in the active window to a TableWorkspace
+ */
+void ApplicationWindow::convertTableToMatrixWorkspace()
+{
+  Table* t = dynamic_cast<Table*>(activeWindow(TableWindow));
+  if (!t) return;
+  MantidTable* mt = dynamic_cast<MantidTable*>(t);
+  if (!mt)
+  {
+    mt = convertTableToTableWorkspace(t);
+  }
+  //mantidUI->executeAlgorithm("ConvertTableToMatrixWorkspace","InputWorkspace="+QString::fromStdString(mt->getWorkspaceName()));
+  QMap<QString,QString> params;
+  params["InputWorkspace"] = QString::fromStdString(mt->getWorkspaceName());
+  mantidUI->executeAlgorithmDlg("ConvertTableToMatrixWorkspace",params);
+}
+
+/**
  * Convert a Table to a TableWorkspace. Columns with plot designations X,Y,Z,xErr,yErr
  * are transformed to doubles, others - to strings.
  * @param t :: The Table to convert.
@@ -3469,17 +3542,21 @@ MantidTable* ApplicationWindow::convertTableToTableWorkspace(Table* t)
     Table::PlotDesignation des = (Table::PlotDesignation)t->colPlotDesignation(col);
     QString name = t->colLabel(col);
     std::string type;
+    int plotType = 6; // Label
     switch(des)
     {
-    case Table::X:
-    case Table::Y:
-    case Table::Z:
-    case Table::yErr:
-    case Table::xErr: type = "double"; break;
+    case Table::X: {plotType = 1; type = "double"; break;}
+    case Table::Y: {plotType = 2; type = "double"; break;}
+    case Table::Z: {plotType = 3; type = "double"; break;}
+    case Table::xErr:  {plotType = 4; type = "double"; break;}
+    case Table::yErr: {plotType = 5; type = "double"; break;}
     default:
-      type = "string";
+      type = "string"; plotType = 6;
     }
-    tws->addColumn(type,name.toStdString());
+    std::string columnName = name.toStdString();
+    tws->addColumn(type,columnName);
+    Mantid::API::Column_sptr column = tws->getColumn(columnName);
+    column->setPlotType(plotType);
   }
   tws->setRowCount(t->numRows());
   for(int col = 0; col < t->numCols(); ++col)
@@ -13097,8 +13174,11 @@ void ApplicationWindow::createActions()
   actionConvertTable= new QAction(tr("Convert to &Matrix"), this);
   connect(actionConvertTable, SIGNAL(activated()), this, SLOT(convertTableToMatrix()));
 
-  actionConvertTableToWorkspace= new QAction(tr("Convert to &Workspace"), this);
+  actionConvertTableToWorkspace= new QAction(tr("Convert to Table&Workspace"), this);
   connect(actionConvertTableToWorkspace, SIGNAL(activated()), this, SLOT(convertTableToWorkspace()));
+
+  actionConvertTableToMatrixWorkspace= new QAction(tr("Convert to MatrixWorkspace"), this);
+  connect(actionConvertTableToMatrixWorkspace, SIGNAL(activated()), this, SLOT(convertTableToMatrixWorkspace()));
 
   actionPlot3DWireFrame = new QAction(QIcon(getQPixmap("lineMesh_xpm")), tr("3D &Wire Frame"), this);
   connect(actionPlot3DWireFrame, SIGNAL(activated()), this, SLOT(plot3DWireframe()));
@@ -13779,7 +13859,8 @@ void ApplicationWindow::translateActionsStrings()
   actionExportMatrix->setMenuText(tr("&Export Image ..."));
 
   actionConvertTable->setMenuText(tr("Convert to &Matrix"));
-  actionConvertTableToWorkspace->setMenuText(tr("Convert to &Workspace"));
+  actionConvertTableToWorkspace->setMenuText(tr("Convert to Table&Workspace"));
+  actionConvertTableToMatrixWorkspace->setMenuText(tr("Convert to MatrixWorkspace"));
   actionPlot3DWireFrame->setMenuText(tr("3D &Wire Frame"));
   actionPlot3DHiddenLine->setMenuText(tr("3D &Hidden Line"));
   actionPlot3DPolygons->setMenuText(tr("3D &Polygons"));
@@ -14574,6 +14655,15 @@ void ApplicationWindow::showBugTracker()
   QDesktopServices::openUrl(QUrl("mailto:mantid-help@mantidproject.org"));
 }
 
+/*
+@param arg: command argument
+@return TRUE if argument suggests execution and quiting
+*/
+bool ApplicationWindow::shouldExecuteAndQuit(const QString& arg)
+{
+  return arg.endsWith("--execandquit") || arg.endsWith("-xq");
+}
+
 void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
 {
   int num_args = args.count();
@@ -14606,7 +14696,7 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
       exec = true;
       quit = false;
     }
-    else if (str.endsWith("--execandquit") || str.endsWith("-xq"))
+    else if (shouldExecuteAndQuit(str))
     {
       exec = true;
       quit = true;

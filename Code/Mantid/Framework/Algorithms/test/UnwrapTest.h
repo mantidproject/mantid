@@ -63,8 +63,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( TS_ASSERT(unwrap.execute()) )
     TS_ASSERT( unwrap.isExecuted() )
 
-    boost::shared_ptr<MatrixWorkspace> inWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace));
-    boost::shared_ptr<MatrixWorkspace> outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("unwrappedWS"));
+    boost::shared_ptr<MatrixWorkspace> inWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace);
+    boost::shared_ptr<MatrixWorkspace> outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("unwrappedWS");
 
     TS_ASSERT_EQUALS( outWS->getAxis(0)->unit()->unitID(), "Wavelength" )
     TS_ASSERT_DIFFERS( outWS->size(), inWS->size() )

@@ -93,7 +93,7 @@ public:
     TS_ASSERT( loader5.isExecuted() )
 	
     WorkspaceGroup_sptr work_out;
-    TS_ASSERT_THROWS_NOTHING(work_out = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("multiperiod")));
+    TS_ASSERT_THROWS_NOTHING(work_out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("multiperiod"));
 	
     Workspace_sptr wsSptr=AnalysisDataService::Instance().retrieve("multiperiod");
     WorkspaceGroup_sptr sptrWSGrp=boost::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
@@ -112,16 +112,16 @@ public:
     for (;itr1!=wsNamevec.end();itr1++)
     {	
       MatrixWorkspace_sptr  outsptr;
-      TS_ASSERT_THROWS_NOTHING(outsptr=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*itr1))));
+      TS_ASSERT_THROWS_NOTHING(outsptr=AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>((*itr1)));
       TS_ASSERT_EQUALS( outsptr->getNumberHistograms(),1 )
 
     }
     std::vector<std::string>::const_iterator itr=wsNamevec.begin();
 
     MatrixWorkspace_sptr  outsptr1;
-    TS_ASSERT_THROWS_NOTHING(outsptr1=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*itr))));
+    TS_ASSERT_THROWS_NOTHING(outsptr1=AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>((*itr)));
     MatrixWorkspace_sptr  outsptr2;
-    TS_ASSERT_THROWS_NOTHING(outsptr2=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*++itr))));
+    TS_ASSERT_THROWS_NOTHING(outsptr2=AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>((*++itr)));
 		
     TS_ASSERT_EQUALS( outsptr1->dataX(0), outsptr2->dataX(0) )
 

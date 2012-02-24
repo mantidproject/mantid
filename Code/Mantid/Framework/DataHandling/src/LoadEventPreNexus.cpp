@@ -361,7 +361,7 @@ void LoadEventPreNexus::exec()
   {
     // add the start of the run as a ISO8601 date/time string. The start = the first pulse.
     // (this is used in LoadInstrument to find the right instrument file to use).
-    localWorkspace->mutableRun().addProperty("run_start", pulsetimes[0].to_ISO8601_string(), true );
+    localWorkspace->mutableRun().addProperty("run_start", pulsetimes[0].toISO8601String(), true );
   }
 
   // determine the run number and add it to the run object

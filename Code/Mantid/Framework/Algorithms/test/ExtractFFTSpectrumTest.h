@@ -50,7 +50,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(rebin.execute());
     TS_ASSERT(rebin.isExecuted());
 
-    MatrixWorkspace_sptr inputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("alg_irs_r"));
+    MatrixWorkspace_sptr inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("alg_irs_r");
 
     ExtractFFTSpectrum alg;
     alg.initialize();
@@ -65,7 +65,7 @@ public:
 
     // Get output workspace
     MatrixWorkspace_const_sptr outputWS;
-    TS_ASSERT_THROWS_NOTHING(outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("alg_irs_t")));
+    TS_ASSERT_THROWS_NOTHING(outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("alg_irs_t"));
 
     // Dimensions
     TS_ASSERT_EQUALS(inputWS->getNumberHistograms(), outputWS->getNumberHistograms());

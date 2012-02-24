@@ -208,7 +208,7 @@ int main( int argc, char ** argv )
     if (args.contains("-d") || args.contains("--default-settings"))
       factorySettings = true;
 
-    ApplicationWindow *mw = new ApplicationWindow(factorySettings);
+    ApplicationWindow *mw = new ApplicationWindow(factorySettings, args);
     mw->restoreApplicationGeometry();
     mw->parseCommandLineArguments(args);
     t.wait();

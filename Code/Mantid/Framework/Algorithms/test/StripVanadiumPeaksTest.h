@@ -54,7 +54,7 @@ public:
     TS_ASSERT( strip.isExecuted() );
 
     MatrixWorkspace_const_sptr output;
-    output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputWSName));
+    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWSName);
 
     //Get a spectrum
     MantidVec X = output->dataX(2);

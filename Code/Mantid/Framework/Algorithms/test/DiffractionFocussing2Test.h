@@ -74,7 +74,7 @@ public:
     TS_ASSERT( focus.isExecuted() );
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("focusedWS")) );
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("focusedWS") );
 
     // only 1 group for this limited range of spectra
     TS_ASSERT_EQUALS( output->getNumberHistograms(), 1 );
@@ -174,7 +174,7 @@ public:
     TS_ASSERT( focus.isExecuted() );
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<const MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputws)) );
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(outputws) );
     if (!output) return;
 
     // ---- Did we keep the event workspace ----
@@ -225,7 +225,7 @@ public:
       TS_ASSERT(rebin.isExecuted());
 
       /* Get the output ws again */
-      outputEvent = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputws));
+      outputEvent = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputws);
       double events_after_binning = 0;
       for (size_t workspace_index=0; workspace_index<outputEvent->getNumberHistograms(); workspace_index++)
       {
@@ -273,7 +273,7 @@ public:
     alg->setPropertyValue("OutputWorkspace", "SNAP_empty");
     alg->setPropertyValue("MakeEventWorkspace", "1");
     alg->execute();
-    ws = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("SNAP_empty"));
+    ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("SNAP_empty");
     ws->sortAll(TOF_SORT, NULL);
 
     // Fill a whole bunch of events
@@ -326,7 +326,7 @@ public:
     alg->setPropertyValue("OutputWorkspace", "SNAP_focus");
     alg->setPropertyValue("PreserveEvents", "1");
     alg->execute();
-    EventWorkspace_sptr outWS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("SNAP_focus"));
+    EventWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("SNAP_focus");
 
     TS_ASSERT_EQUALS( outWS->getNumberHistograms(), 1);
     TS_ASSERT_EQUALS( outWS->getNumberEvents(), 20*65536);
@@ -342,7 +342,7 @@ public:
     alg->setPropertyValue("OutputWorkspace", "SNAP_focus");
     alg->setPropertyValue("PreserveEvents", "1");
     alg->execute();
-    EventWorkspace_sptr outWS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("SNAP_focus"));
+    EventWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("SNAP_focus");
 
     TS_ASSERT_EQUALS( outWS->getNumberHistograms(), 6);
     TS_ASSERT_EQUALS( outWS->getNumberEvents(), 6*20*65536);
@@ -358,7 +358,7 @@ public:
     alg->setPropertyValue("OutputWorkspace", "SNAP_focus");
     alg->setPropertyValue("PreserveEvents", "0");
     alg->execute();
-    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("SNAP_focus"));
+    MatrixWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("SNAP_focus");
 
     TS_ASSERT_EQUALS( outWS->getNumberHistograms(), 1);
     AnalysisDataService::Instance().remove("SNAP_focus");
@@ -373,7 +373,7 @@ public:
     alg->setPropertyValue("OutputWorkspace", "SNAP_focus");
     alg->setPropertyValue("PreserveEvents", "0");
     alg->execute();
-    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("SNAP_focus"));
+    MatrixWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("SNAP_focus");
 
     TS_ASSERT_EQUALS( outWS->getNumberHistograms(), 6);
     AnalysisDataService::Instance().remove("SNAP_focus");

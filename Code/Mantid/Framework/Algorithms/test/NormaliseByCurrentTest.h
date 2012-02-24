@@ -56,7 +56,7 @@ public:
     TS_ASSERT( ! norm1.execute() );
     TS_ASSERT( ! norm1.isExecuted() );
     // Now set the charge
-    MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsNameIn));
+    MatrixWorkspace_sptr input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsNameIn);
     input->mutableRun().setProtonCharge(2.0);
     input->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("TOF");
     input->setYUnit("Counts");
@@ -65,7 +65,7 @@ public:
     TS_ASSERT( norm1.isExecuted() );
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<const MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsNameOut)) );
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(wsNameOut) );
 
     for (size_t i=0; i < output->getNumberHistograms(); i++)
     {
@@ -141,7 +141,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( norm1.setPropertyValue("OutputWorkspace","normOut") );
 
     // Set the charge to zero
-    MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("normIn"));
+    MatrixWorkspace_sptr input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("normIn");
     input->mutableRun().setProtonCharge(0.0);
     input->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("TOF");
     input->setYUnit("Counts");

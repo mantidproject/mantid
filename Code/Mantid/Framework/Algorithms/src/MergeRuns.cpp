@@ -78,7 +78,7 @@ void MergeRuns::exec()
   std::vector<std::string> inputs;
   for (size_t i=0; i < inputs_orig.size(); i++)
   {
-    WorkspaceGroup_sptr wsgroup = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(inputs_orig[i]));
+    WorkspaceGroup_sptr wsgroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(inputs_orig[i]);
     if (wsgroup)
     {// Workspace group
       std::vector<std::string> group = wsgroup->getNames();
@@ -377,7 +377,7 @@ bool MergeRuns::validateInputsForEventWorkspaces(const std::vector<std::string>&
   for ( size_t i = 0; i < inputWorkspaces.size(); ++i )
   {
     // Fetch the next input workspace as an - throw an error if it's not there
-    EventWorkspace_sptr ws = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(inputWorkspaces[i]));
+    EventWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(inputWorkspaces[i]);
 
     if (!ws)
     { //Either it is not found, or it is not an EventWorkspace
@@ -440,7 +440,7 @@ std::list<API::MatrixWorkspace_sptr> MergeRuns::validateInputs(const std::vector
     // Fetch the next input workspace - throw an error if it's not there
     try
     {
-        ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputWorkspaces[i]));
+        ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWorkspaces[i]);
         if (!ws)
         {
             g_log.error() << "Input workspace " << inputWorkspaces[i] << " not found." << std::endl;

@@ -61,8 +61,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( align.execute() );
     TS_ASSERT( align.isExecuted() );
 
-    boost::shared_ptr<MatrixWorkspace> inWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputWS));
-    boost::shared_ptr<MatrixWorkspace> outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputWS));
+    boost::shared_ptr<MatrixWorkspace> inWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS);
+    boost::shared_ptr<MatrixWorkspace> outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS);
 
     TS_ASSERT_EQUALS( outWS->getAxis(0)->unit()->unitID(), "dSpacing" );
     TS_ASSERT_EQUALS( outWS->size(), inWS->size() );
@@ -109,7 +109,7 @@ public:
     std::size_t wkspIndex = 1; // a good workspace index (with events)
 
     //Retrieve Workspace
-    WS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(inputWS));
+    WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(inputWS);
     TS_ASSERT( WS ); //workspace is loaded
     size_t start_blocksize = WS->blocksize();
     size_t num_events = WS->getNumberEvents();
@@ -144,7 +144,7 @@ public:
     std::size_t wkspIndex = 1; // a good workspace index (with events)
 
     //Retrieve Workspace
-    WS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(inputWS));
+    WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(inputWS);
     TS_ASSERT( WS ); //workspace is loaded
 
     //Start by init'ing the algorithm
@@ -162,7 +162,7 @@ public:
 
     //Retrieve Workspace changed
     EventWorkspace_sptr outWS;
-    outWS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputWS));
+    outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputWS);
     TS_ASSERT( outWS ); //workspace is loaded
 
     //Things that haven't changed

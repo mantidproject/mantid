@@ -184,7 +184,7 @@ public:
       algb->setPropertyValue("Params", "5760.,10.0,5920.");
       algb->setProperty("PreserveEvents", ev);
       algb->execute();
-      inputW = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("RebinResult"));
+      inputW = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("RebinResult");
     }
 
     CentroidPeaks alg;
@@ -200,7 +200,7 @@ public:
 
     PeaksWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = boost::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve("TOPAZ")) );
+        ws = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>("TOPAZ") );
     TS_ASSERT(ws);
     if (!ws) return;
     IPeak &peak = ws->getPeak(0);

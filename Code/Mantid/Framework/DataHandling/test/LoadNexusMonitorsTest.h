@@ -29,7 +29,7 @@ public:
     ld.execute();
     TS_ASSERT( ld.isExecuted() );
 
-    MatrixWorkspace_sptr WS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outws_name));
+    MatrixWorkspace_sptr WS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outws_name);
     //Valid WS and it is an MatrixWorkspace
     TS_ASSERT( WS );
     //Correct number of monitors found

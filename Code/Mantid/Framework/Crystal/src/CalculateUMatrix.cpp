@@ -187,7 +187,7 @@ namespace Crystal
     double H,K,L;
 
     PeaksWorkspace_sptr ws;
-    ws = boost::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve(this->getProperty("PeaksWorkspace")) );
+    ws = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(this->getProperty("PeaksWorkspace") );
     if (!ws) throw std::runtime_error("Problems reading the peaks workspace");
 
     size_t nIndexedpeaks=0;

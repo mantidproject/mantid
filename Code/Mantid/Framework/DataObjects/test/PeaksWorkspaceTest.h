@@ -142,7 +142,7 @@ public:
     inst_loader->setPropertyValue("OutputWorkspace", inst_output_ws);
     TS_ASSERT_THROWS_NOTHING(inst_loader->execute());
 
-    MatrixWorkspace_sptr dummyWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inst_output_ws));
+    MatrixWorkspace_sptr dummyWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inst_output_ws);
     Instrument_const_sptr inst = dummyWS->getInstrument();
 
 

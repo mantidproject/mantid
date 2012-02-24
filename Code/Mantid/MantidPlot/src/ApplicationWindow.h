@@ -140,7 +140,8 @@ class ApplicationWindow: public QMainWindow, public Scripted
 {
   Q_OBJECT
 public:
-  ApplicationWindow(bool factorySettings = false);
+  ApplicationWindow(bool factorySettings, const QStringList& args);
+  ApplicationWindow(bool factorySettings=false);
   ~ApplicationWindow();
 
   enum ShowWindowsPolicy{HideAll, ActiveFolder, SubFolders};
@@ -374,6 +375,7 @@ public slots:
   Matrix* matrix(const QString& name);
   Matrix* convertTableToMatrix();
   void convertTableToWorkspace();
+  void convertTableToMatrixWorkspace();
   MantidTable* convertTableToTableWorkspace(Table* t);
   Matrix* tableToMatrix(Table* t);
   void initMatrix(Matrix* m, const QString& caption);
@@ -1089,13 +1091,15 @@ private:
   QPoint desktopTopLeft() const;
   bool hasParaviewPath() const;
   bool hasVatesAvailable() const;
+  bool shouldExecuteAndQuit(const QString& arg);
+  void trySetParaviewPath(const QStringList& commandArguments);
 
   private slots:
   //! \name Initialization
   //@{
   void insertTranslatedStrings();
   void translateActionsStrings();
-  void init(bool factorySettings = false);
+  void init(bool factorySettings, const QStringList& args);
   void initGlobalConstants();
   void createActions();
   void initMainMenu();
@@ -1395,7 +1399,7 @@ private:
   QAction *actionShowColumnOptionsDialog, *actionShowColumnValuesDialog, *actionShowColsDialog, *actionShowRowsDialog;
   QAction *actionTableRecalculate;
   QAction *actionAbout, *actionShowHelp, *actionChooseHelpFolder,*actionMantidConcepts,*actionMantidAlgorithms,*actionmantidplotHelp;
-  QAction *actionRename, *actionCloseWindow, *actionConvertTable, *actionConvertTableToWorkspace;
+  QAction *actionRename, *actionCloseWindow, *actionConvertTable, *actionConvertTableToWorkspace, *actionConvertTableToMatrixWorkspace;
   QAction *actionAddColToTable, *actionDeleteLayer, *actionInterpolate;
   QAction *actionResizeActiveWindow, *actionHideActiveWindow;
   QAction *actionShowMoreWindows, *actionPixelLineProfile, *actionIntensityTable;

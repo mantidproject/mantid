@@ -119,7 +119,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( grouper2.execute());
     TS_ASSERT( grouper2.isExecuted() );
 
-    MatrixWorkspace_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("GroupTestWS"));
+    MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("GroupTestWS");
     std::vector<double> tens(6,10.0);
     std::vector<double> ones(5,1.0);
     std::vector<double> threes(5,3.0);

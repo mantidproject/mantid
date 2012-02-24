@@ -60,13 +60,11 @@ public:
   //
   PythonObjectInstantiatorTest() : m_creator(NULL)
   {
-    //Py_Initialize();
   }
 
   ~PythonObjectInstantiatorTest()
   {
     delete m_creator;
-    //Py_Finalize(); //- Causes Python 2.4 to fail. Need to find out why
   }
 
   void test_Bare_Pointer()
@@ -101,8 +99,8 @@ private:
       //Assume this is where the mantid package is too
       std::string code = "import sys\n"
         "sys.path.append(r'" + propDir + "')\n"
-        "from mantid.api import Algorithm\n"
-        "class PyAlg(Algorithm):\n"
+        "from mantid.api import PythonAlgorithm\n"
+        "class PyAlg(PythonAlgorithm):\n"
         "  pass\n";
       PyRun_SimpleString(code.c_str());
       PyObject *main = PyImport_AddModule("__main__");

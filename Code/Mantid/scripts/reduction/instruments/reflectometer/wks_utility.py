@@ -93,20 +93,48 @@ def getPixelXTOF(mt1, maxX=304, maxY=256):
             pixelX_vs_tof[y, :] += _array
     return pixelX_vs_tof
 
+def findQaxisMinMax(q_axis):
+    """
+        Find the position of the common Qmin and Qmax in 
+        each q array
+    """
+    
+    nbr_row = shape(q_axis)[0]
+    nbr_col = shape(q_axis)[1]
+    q_min = min(q_axis[0])
+    q_max = max(q_axis[0])
+    
+    for i in arange(nbr_row-1)+1:
+        _q_min = q_axis[i][-1]
+        _q_max = q_axis[i][0]
+        if (_q_min > q_min):
+            q_min = _q_min
+        if (_q_max < q_max):
+            q_max = _q_max
+    
+    #find now the index of those min and max in each row
+    _q_axis_min_max_index = zeros((nbr_row,2))
+    for i in arange(nbr_row):
+        _q_axis = q_axis[i]
+        for j in arange(nbr_col-1):
+            _q = q_axis[i,j]
+            _q_next = q_axis[i,j+1]
+            if (_q >= q_max) and (_q_next <= q_max):
+                _q_axis_min_max_index[i,0] = j
+            if (_q >= q_min) and (_q_next <= q_min):
+                _q_axis_min_max_index[i,1] = j
+
+    return _q_axis_min_max_index
+
 def createIntegratedWorkspace(mt1, outputWorkspace,
                               fromXpixel, toXpixel,
                               fromYpixel, toYpixel,
-                              maxX=304, maxY=256, 
-                              cpix=None,
-                              source_to_detector=None, 
-                              sample_to_detector=None,
-                              theta=None,
-                              geo_correction=False,
-                              q_binning=None):
+                              maxX=304, maxY=256):
     """
         This creates the integrated workspace over the second pixel range (304 here) and
         returns the new workspace handle
     """
+
     _tof_axis = mt1.readX(0)[:]
 
     _fromXpixel = min([fromXpixel,toXpixel])
@@ -114,6 +142,56 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
     fromXpixel = _fromXpixel
     toXpixel = _toXpixel
 
+    _fromYpixel = min([fromYpixel,toYpixel])
+    _toYpixel = max([fromYpixel,toYpixel])
+    fromYpixel = _fromYpixel
+    toYpixel = _toYpixel
+
+    _y_axis = zeros((maxY, len(_tof_axis) - 1))
+    _y_error_axis = zeros((maxY, len(_tof_axis) - 1))
+    
+    x_size = toXpixel - fromXpixel + 1 
+    x_range = arange(x_size) + fromXpixel
+    
+    y_size = toYpixel - fromYpixel + 1
+    y_range = arange(y_size) + fromYpixel
+    
+    for x in x_range:
+        for y in y_range:
+            _index = int((maxY) * x + y)
+            _y_axis[y, :] += mt1.readY(_index)[:]
+            _y_error_axis[y, :] += ((mt1.readE(_index)[:]) * (mt1.readE(_index)[:]))
+
+    _y_axis = _y_axis.flatten()
+    _y_error_axis = numpy.sqrt(_y_error_axis)
+    _y_error_axis = _y_error_axis.flatten()
+
+    CreateWorkspace(OutputWorkspace=outputWorkspace,
+                    DataX=_tof_axis, 
+                    DataY=_y_axis, 
+                    DataE=_y_error_axis, 
+                    Nspec=maxY,
+                    UnitX="TOF", 
+                    ParentWorkspace=mt1)
+    
+def convertWorkspaceToQ(ws_data, 
+                        outputWorkspace,
+                        fromYpixel, toYpixel,
+                        maxX=304, maxY=256, 
+                        cpix=None,
+                        source_to_detector=None, 
+                        sample_to_detector=None,
+                        theta=None,
+                        geo_correction=False,
+                        q_binning=None):
+    """
+        This creates the integrated workspace over the second pixel range (304 here) and
+        returns the new workspace handle
+    """
+
+    mt1 = mtd[ws_data]
+    _tof_axis = mt1.readX(0)[:]
+    
     _fromYpixel = min([fromYpixel,toYpixel])
     _toYpixel = max([fromYpixel,toYpixel])
     fromYpixel = _fromYpixel
@@ -129,6 +207,10 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
                                               yrange=yrange, 
                                               cpix=cpix)
 
+        #find the common Qmin and Qmax values and their index (position)
+        #in each _q_axis row
+        _q_axis_min_max_index = findQaxisMinMax(_q_axis)
+        
         #replace the _q_axis of the yrange of interest by the new 
         #individual _q_axis
         
@@ -137,15 +219,10 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
 
         _y_axis = zeros((maxY, len(_tof_axis) - 1))
         _y_error_axis = zeros((maxY, len(_tof_axis) - 1))
-    
-        x_size = toXpixel - fromXpixel + 1 
-        x_range = arange(x_size) + fromXpixel
-        
-        for x in x_range:
-            for y in y_range:
-                _index = int((maxY) * x + y)
-                _y_axis[y, :] += mt1.readY(_index)[:]
-                _y_error_axis[y, :] += ((mt1.readE(_index)[:]) * (mt1.readE(_index)[:]))
+
+        for y in y_range:
+                _y_axis[int(y), :] = mt1.readY(int(y))[:]
+                _y_error_axis[int(y), :] = mt1.readE(int(y))[:]
 
         for _q_index in range(y_size):
             
@@ -158,12 +235,23 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
             _y_axis_tmp = _y_axis_tmp.flatten()
 
             _y_error_axis_tmp = _y_error_axis[yrange[_q_index],:]
-            _y_error_axis_tmp = numpy.sqrt(_y_error_axis_tmp)
+#            _y_error_axis_tmp = numpy.sqrt(_y_error_axis_tmp)
             _y_error_axis_tmp = _y_error_axis_tmp.flatten()
+
+            #keep only the overlap region of Qs
+            _q_min = _q_axis_min_max_index[_q_index,0]
+            if (_q_min != 0):
+                _y_axis_tmp[0:_q_min] = 0
+                _y_error_axis_tmp[0:_q_min] = 0
+
+            _q_max = _q_axis_min_max_index[_q_index,1]
+            if (_q_max != shape(_y_axis_tmp)[0]):
+                _y_axis_tmp[_q_max:-1] = 0
+                _y_error_axis_tmp[_q_max:-1] = 0
 
             _y_axis_tmp = _y_axis_tmp[::-1]
             _y_error_axis_tmp = _y_error_axis_tmp[::-1]
-            
+
             CreateWorkspace(OutputWorkspace=_outputWorkspace,
                             DataX=q_axis,
                             DataY=_y_axis_tmp,
@@ -183,13 +271,14 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
             if _q_index == 0:
                 mt_tmp = mtd[_outputWorkspace_rebin]
 
-
         _mt = mtd['tmpOWks_0']
         _x_array = _mt.readX(0)[:]
 
         #create big y_array of the all the pixel of interest (yrange)
-        big_y_array = zeros((maxY, len(_x_array)))
-        big_y_error_array = zeros((maxY, len(_x_array)))
+        #big_y_array = zeros((maxY, len(_x_array)))
+        #big_y_error_array = zeros((maxY, len(_x_array)))
+        big_y_array = zeros((y_size, len(_x_array)))
+        big_y_error_array = zeros((y_size, len(_x_array)))
         
         for _q_index in range(y_size):
             
@@ -197,24 +286,31 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
             _mt = mtd[_wks]
             _tmp_y = _mt.readY(0)[:]
             _tmp_y_error = _mt.readE(0)[:]
-
-            big_y_array[yrange[_q_index],:] = _tmp_y
-            big_y_error_array[yrange[_q_index],:] = _tmp_y_error
+            
+#            big_y_array[int(yrange[int(_q_index)]),:] = _tmp_y
+#            print '.....'
+#            big_y_error_array[int(yrange[int(_q_index)]),:] = _tmp_y_error
+#            print '......'
+            
+            big_y_array[int(_q_index),:] = _tmp_y
+            big_y_error_array[int(_q_index),:] = _tmp_y_error
             
             mtd.deleteWorkspace(_wks)
 
         _x_axis = _x_array.flatten()        
         _y_axis = big_y_array.flatten()
         _y_error_axis = big_y_error_array.flatten()
+
+        nbr_pixel_in_peak = y_size
         
         CreateWorkspace(OutputWorkspace=outputWorkspace,
                         DataX=_x_axis,
                         DataY=_y_axis,
                         DataE=_y_error_axis,
-                        Nspec=maxY,
+                        Nspec=nbr_pixel_in_peak,
                         UnitX="MomentumTransfer",
                         ParentWorkspace=mt1)
-    
+
     else:
         
         if source_to_detector is not None and theta is not None:
@@ -223,23 +319,17 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
         else:
             _q_axis = _tof_axis
 
-        _y_axis = zeros((maxY, len(_q_axis) - 1))
-        _y_error_axis = zeros((maxY, len(_q_axis) - 1))
-    
-        x_size = toXpixel - fromXpixel + 1 
-        x_range = arange(x_size) + fromXpixel
+        _y_axis = zeros((maxY, len(_q_axis)-1))
+        _y_error_axis = zeros((maxY, len(_q_axis)-1))
     
         y_size = toYpixel - fromYpixel + 1
         y_range = arange(y_size) + fromYpixel
     
-        for x in x_range:
-            for y in y_range:
-                _index = int((maxY) * x + y)
-                _y_axis[y, :] += mt1.readY(_index)[:]
-                _y_error_axis[y, :] += ((mt1.readE(_index)[:]) * (mt1.readE(_index)[:]))
+        for y in y_range:
+            _y_axis[int(y),:] = mt1.readY(int(y))[:]
+            _y_error_axis[int(y), :] = mt1.readE(int(y))[:]
 
         _y_axis = _y_axis.flatten()
-        _y_error_axis = numpy.sqrt(_y_error_axis)
         _y_error_axis = _y_error_axis.flatten()
 
         _q_axis = _q_axis[::-1]
@@ -253,7 +343,7 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
                         Nspec=maxY,
                         UnitX="MomentumTransfer", 
                         ParentWorkspace=mt1)
-
+            
 def create_grouping(workspace=None, xmin=0, xmax=None, filename=".refl_grouping.xml"):
     # This should be read from the 
     npix_x = 304
@@ -425,24 +515,23 @@ def convertToRvsQWithCorrection(mt, dMD=-1, theta=-1,tof=None, yrange=None, cpix
     maxX = 304
     maxY = 256
     
-    dPS_array = zeros((maxY, maxX))
-    for x in range(maxX):
-        for y in range(maxY):
-            _index = maxY * x + y
-            detector = mt.getDetector(_index)
-            dPS_array[y, x] = sample.getDistance(detector)
+    dPS_array = zeros(maxY)
+    for y in range(maxY):
+        detector = mt.getDetector(y)
+        dPS_array[y] = sample.getDistance(detector)
+
     #array of distances pixel->source
     dMP_array = dPS_array + dSM
     #distance sample->center of detector
-    dSD = dPS_array[maxY / 2, maxX / 2]
+    dSD = dPS_array[maxY / 2]
 
     _const = float(4) * math.pi * m * dMD / h
     sz_tof = len(tof)
     q_array = zeros((len(yrange), sz_tof-1))
 
-    xrange = range(len(yrange))
-    for x in xrange:
-        _px = yrange[x]
+    yrange = range(len(yrange))
+    for y in yrange:
+        _px = yrange[y]
         dangle = ref_beamdiv_correct(cpix, mt, dSD, _px)
         
         if dangle is not None:
@@ -455,8 +544,8 @@ def convertToRvsQWithCorrection(mt, dMD=-1, theta=-1,tof=None, yrange=None, cpix
             tof2 = tof[t+1]
             tofm = (tof1+tof2)/2.
             _Q = _const * math.sin(_theta) / (tofm*1e-6)
-            q_array[x,t] = _Q*1e-10
-
+            q_array[y,t] = _Q*1e-10
+    
     return q_array
 
 def getQHisto(source_to_detector, theta, tof_array):

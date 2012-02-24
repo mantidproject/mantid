@@ -16,6 +16,7 @@ class DataSets(BaseScriptElement):
     DataBackgroundFlag = False
     DataBackgroundRoi = [115, 137,123, 137]
     DataTofRange = [9600., 21600.]
+    crop_TOF_range = True;
     
     data_x_range_flag = True
     data_x_range = [115,210]
@@ -252,3 +253,4 @@ class DataSets(BaseScriptElement):
         # Angle offset
         self.angle_offset = DataSets.angle_offset
         self.angle_offset_error = DataSets.angle_offset_error
+        

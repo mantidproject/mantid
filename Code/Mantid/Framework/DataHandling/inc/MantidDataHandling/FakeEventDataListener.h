@@ -7,6 +7,7 @@
 #include "MantidAPI/ILiveListener.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/RandomNumberGenerator.h"
+#include <Poco/Timer.h>
 
 namespace Mantid
 {
@@ -49,8 +50,12 @@ namespace Mantid
       bool isConnected();
 
     private:
-      DataObjects::EventWorkspace_sptr m_buffer;
-      Kernel::RandomNumberGenerator * m_rand;
+      void generateEvents(Poco::Timer&);
+
+      DataObjects::EventWorkspace_sptr m_buffer; ///< Used to buffer events between calls to extractData()
+      Kernel::RandomNumberGenerator * m_rand; ///< Used in generation of random events
+      Poco::Timer m_timer; ///< Used to call the event-generating function on a schedule
+      long m_callbackloop; ///< Number of times to loop within each generateEvents() call
     };
 
   } // namespace DataHandling

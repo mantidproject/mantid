@@ -90,7 +90,7 @@ private:
 
     // verify the results
     Workspace2D_sptr outWorkspace
-      = boost::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve(out_name));
+      = AnalysisDataService::Instance().retrieveWS<Workspace2D>(out_name);
     TimeSeriesProperty<double> *newlog
       = dynamic_cast<TimeSeriesProperty<double> *>(outWorkspace->run().getLogData(logname));
     TS_ASSERT(newlog);

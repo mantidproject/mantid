@@ -57,11 +57,11 @@ public:
 
     Workspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("WSRenamed")));
+        result = AnalysisDataService::Instance().retrieveWS<Workspace>("WSRenamed"));
     TS_ASSERT( result);
 
     TS_ASSERT_THROWS_ANYTHING(
-        result = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("InputWS")));
+        result = AnalysisDataService::Instance().retrieveWS<Workspace>("InputWS"));
 
     AnalysisDataService::Instance().remove("WSRenamed");
   }
@@ -81,7 +81,7 @@ public:
 
     Workspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("InputWS")));
+        result = AnalysisDataService::Instance().retrieveWS<Workspace>("InputWS"));
     TS_ASSERT( result);
 
     AnalysisDataService::Instance().remove("InputWS");

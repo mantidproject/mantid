@@ -2341,6 +2341,61 @@ namespace DataObjects
     }
   }
 
+  /** Get the times-of-flight of each event in this EventList.
+   *
+   * @return by copy a vector of doubles of the tof() value
+   */
+  std::vector<double> EventList::getTofs() const
+  {
+    std::vector<double> tofs;
+    this->getTofs(tofs);
+    return tofs;
+  }
+
+  // --------------------------------------------------------------------------
+  /** Get the pulsetimes of all events in a list
+   *
+   * @param events :: source vector of events
+   * @param times :: vector to fill
+   */
+  template<class T>
+  void EventList::getPulseTimesHelper(const std::vector<T> & events, std::vector<Mantid::Kernel::DateAndTime> & times)
+  {
+    typename std::vector<T>::const_iterator itev;
+    typename std::vector<T>::const_iterator itev_end = events.end(); //cache for speed
+    times.clear();
+    for (itev = events.begin(); itev != itev_end; itev++)
+      times.push_back(itev->pulseTime());
+  }
+
+  /** Get the pulse times of each event in this EventList.
+   *
+   * @return by copy a vector of DateAndTime times
+   */
+  std::vector<Mantid::Kernel::DateAndTime> EventList::getPulseTimes() const
+  {
+    std::vector<Mantid::Kernel::DateAndTime> times;
+    // Set the capacity of the vector to avoid multiple resizes
+    times.reserve(this->getNumberEvents());
+
+    //Convert the list
+    switch (eventType)
+    {
+    case TOF:
+      this->getPulseTimesHelper(this->events, times);
+      break;
+    case WEIGHTED:
+      this->getPulseTimesHelper(this->weightedEvents, times);
+      break;
+    case WEIGHTED_NOTIME:
+      this->getPulseTimesHelper(this->weightedEventsNoTime, times);
+      break;
+    }
+    return times;
+  }
+
+
+  // --------------------------------------------------------------------------
   /**
    * @return The minimum tof value for the list of the events.
    */

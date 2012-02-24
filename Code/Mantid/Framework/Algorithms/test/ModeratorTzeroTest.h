@@ -92,8 +92,8 @@ public:
 
     //retrieve pointers to input and output workspaces
     MatrixWorkspace_sptr inputWS, outputWS;
-    TS_ASSERT_THROWS_NOTHING(inputWS=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputWStr)));
-    TS_ASSERT_THROWS_NOTHING(outputWS=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputWStr)));
+    TS_ASSERT_THROWS_NOTHING(inputWS=AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWStr));
+    TS_ASSERT_THROWS_NOTHING(outputWS=AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWStr));
 
     //Spectrum index 422 of BSS_11841_event.nxs containing three events
     //std::size_t wkspIndex = 422;

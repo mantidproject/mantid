@@ -487,7 +487,7 @@ namespace Mantid
       {  // Duration taken to be stop_time minus stat_time
         DateAndTime start(start_time);
         DateAndTime end(stop_time);
-        double duration_in_secs = DateAndTime::seconds_from_duration( end - start);
+        double duration_in_secs = DateAndTime::secondsFromDuration( end - start);
         runDetails.addProperty("dur_secs",duration_in_secs);
       }
 

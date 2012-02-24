@@ -79,7 +79,7 @@ namespace
     // The current frame should know what an Algorithm is, or it
     // couldn't create one. Get the class object from the f_globals
     PyObject *defs = PyEval_GetFrame()->f_globals;
-    PyObject *pyalgClass = PyDict_GetItemString(defs, "Algorithm");
+    PyObject *pyalgClass = PyDict_GetItemString(defs, "PythonAlgorithm");
     if( !pyalgClass )
     {
       throw std::runtime_error("Unable to find Algorithm definition, cannot register algorithm.\nHas the definition been imported");
@@ -96,7 +96,7 @@ namespace
     }
     else
     {
-      throw std::invalid_argument("Cannot register an algorithm that does not derive from Algorithm.");
+      throw std::invalid_argument("Cannot register an algorithm that does not derive from PythonAlgorithm.");
     }
     boost::python::object classType(handle<>(borrowed(classObject)));
     AlgorithmFactory::Instance().subscribe(new PythonObjectInstantiator<Algorithm>(classType));

@@ -328,10 +328,10 @@ namespace Mantid
         Kernel::TimeInterval t = dp->nthInterval(static_cast<int>(i));
         Kernel::time_duration dt = t.length();
         total += dt;
-        res += dp->nthValue(static_cast<int>(i)) * Kernel::DateAndTime::seconds_from_duration(dt);
+        res += dp->nthValue(static_cast<int>(i)) * Kernel::DateAndTime::secondsFromDuration(dt);
       }
 
-      double total_seconds = Kernel::DateAndTime::seconds_from_duration(total);
+      double total_seconds = Kernel::DateAndTime::secondsFromDuration(total);
       if (total_seconds > 0) res /= total_seconds;
 
       return res;

@@ -28,7 +28,7 @@ public:
     alg->setPropertyValue("Output","UserFunction1D");
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     
-    ITableWorkspace_sptr params = boost::dynamic_pointer_cast<ITableWorkspace>(AnalysisDataService::Instance().retrieve("UserFunction1D_Parameters"));
+    ITableWorkspace_sptr params = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("UserFunction1D_Parameters");
     
     TS_ASSERT_EQUALS(params->String(0,0),"Chi^2/DoF");
     TS_ASSERT_EQUALS(params->String(1,0),"a");
@@ -45,7 +45,7 @@ public:
     alg1->setPropertyValue("Output","UserFunction1D1");
     TS_ASSERT_THROWS_NOTHING(alg1->execute());
 
-    ITableWorkspace_sptr params1 = boost::dynamic_pointer_cast<ITableWorkspace>(AnalysisDataService::Instance().retrieve("UserFunction1D1_Parameters"));
+    ITableWorkspace_sptr params1 = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("UserFunction1D1_Parameters");
 
     TS_ASSERT_EQUALS(params1->String(0,0),"Chi^2/DoF");
     TS_ASSERT_EQUALS(params1->String(1,0),"a");

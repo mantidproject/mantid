@@ -21,7 +21,7 @@ namespace MantidQt
         throw std::runtime_error("WorkspaceInADS:: Workspace does not exist in the ADS: " + wsName);
       }
       
-      MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(m_wsName));
+      MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_wsName);
       if(!ws)
       {
         throw std::invalid_argument("WorkspaceInADS:: Workspace is not a matrix workspace : " + wsName );

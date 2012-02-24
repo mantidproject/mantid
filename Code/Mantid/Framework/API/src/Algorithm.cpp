@@ -473,7 +473,7 @@ namespace Mantid
         try
         {
           if (!m_isChildAlgorithm) m_running = true;
-          start_time = Mantid::Kernel::DateAndTime::get_current_time();
+          start_time = Mantid::Kernel::DateAndTime::getCurrentTime();
           //count used for defining the algorithm execution order
           ++Algorithm::g_execCount;
           // Start a timer
@@ -942,7 +942,7 @@ namespace Mantid
         {
           // So try to use the name in the AnalysisDataService
           try {
-          wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(prop->value()));
+          wsGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(prop->value());
           }
           catch (Exception::NotFoundError&) { /* Do nothing */ }
         }

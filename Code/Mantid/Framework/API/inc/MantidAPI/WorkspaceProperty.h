@@ -158,7 +158,7 @@ namespace Mantid
         // Try and get the workspace from the ADS, but don't worry if we can't
         try {
           Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value =
-            boost::dynamic_pointer_cast<TYPE>(AnalysisDataService::Instance().retrieve(m_workspaceName));
+            AnalysisDataService::Instance().retrieveWS<TYPE>(m_workspaceName);
         }
         catch (Kernel::Exception::NotFoundError &)
         {
@@ -440,7 +440,7 @@ namespace Mantid
         // Try and get the workspace from the ADS, but don't worry if we can't
         try {
           Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value =
-            boost::dynamic_pointer_cast<TYPE>(AnalysisDataService::Instance().retrieve(m_workspaceName));
+            AnalysisDataService::Instance().retrieveWS<TYPE>(m_workspaceName);
         }
         catch (Kernel::Exception::NotFoundError &)
         {

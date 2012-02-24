@@ -100,7 +100,7 @@ public:
     grouper.execute();
     TS_ASSERT( grouper.isExecuted() );
 
-    MatrixWorkspace_sptr result = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inName));
+    MatrixWorkspace_sptr result = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inName);
 
     TS_ASSERT( result->getNumberHistograms() > 0 );
     TS_ASSERT( result->readY(0).size() > 0 );
@@ -216,7 +216,7 @@ public:
     grouper.execute();
     TS_ASSERT( grouper.isExecuted() );
     
-    MatrixWorkspace_sptr result = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+    MatrixWorkspace_sptr result = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
 
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 1);
     TS_ASSERT_DELTA(result->readY(0).front(), 10.07367566, 1e-8);

@@ -133,7 +133,7 @@ public:
     makeFakeGroupingFile(groupingFile);
 
     //Checks on the workspace
-    EventWorkspace_const_sptr inputW = boost::dynamic_pointer_cast<const EventWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+    EventWorkspace_const_sptr inputW = AnalysisDataService::Instance().retrieveWS<const EventWorkspace>(wsName);
     TS_ASSERT_EQUALS( inputW->getNumberHistograms(), NUMPIXELS);
     detid2index_map * m;
     m = inputW->getDetectorIDToWorkspaceIndexMap(true);
@@ -166,7 +166,7 @@ public:
     TS_ASSERT(gc.isExecuted());
 
     //Get the output workspace and check it
-    Workspace2D_sptr outWS = boost::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve(outwsName));
+    Workspace2D_sptr outWS = AnalysisDataService::Instance().retrieveWS<Workspace2D>(outwsName);
     TS_ASSERT( outWS );
 
     TS_ASSERT_EQUALS( outWS->getNumberHistograms(), NUMPIXELS/4 );

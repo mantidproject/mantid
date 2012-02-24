@@ -61,7 +61,7 @@ public:
     alg.execute();
 
     MatrixWorkspace_sptr work_out1;
-    TS_ASSERT_THROWS_NOTHING(work_out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out1")));
+    TS_ASSERT_THROWS_NOTHING(work_out1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out1"));
 
     checkData(work_in1, work_in2, work_out1);
 
@@ -89,7 +89,7 @@ public:
     alg.execute();
 
     MatrixWorkspace_sptr work_out1;
-    TS_ASSERT_THROWS_NOTHING(work_out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out1")));
+    TS_ASSERT_THROWS_NOTHING(work_out1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out1"));
 
     checkData(work_in1, work_in2, work_out1);
 
@@ -118,7 +118,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
     MatrixWorkspace_sptr work_out1;
-    TS_ASSERT_THROWS_NOTHING(work_out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out2")));
+    TS_ASSERT_THROWS_NOTHING(work_out1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out2"));
 
     checkData(work_in1, work_in2, work_out1);
 

@@ -212,7 +212,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( marker2.execute());
     TS_ASSERT( marker2.isExecuted() );
 
-    MatrixWorkspace_const_sptr outputWS = boost::dynamic_pointer_cast<const MatrixWorkspace>(AnalysisDataService::Instance().retrieve("testSpace"));
+    MatrixWorkspace_const_sptr outputWS = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>("testSpace");
     check_outputWS(outputWS);
 
     AnalysisDataService::Instance().remove("testSpace");
@@ -240,7 +240,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( marker2.execute());
     TS_ASSERT( marker2.isExecuted() );
 
-    MatrixWorkspace_const_sptr outputWS = boost::dynamic_pointer_cast<const MatrixWorkspace>(AnalysisDataService::Instance().retrieve("testSpace"));
+    MatrixWorkspace_const_sptr outputWS = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>("testSpace");
     check_outputWS(outputWS);
 
     AnalysisDataService::Instance().remove("testSpace");
@@ -254,7 +254,7 @@ public:
     setUpWS(false, inputWSName);
     setUpWS(false, existingMaskName);
     MatrixWorkspace_sptr existingMask = 
-      boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(existingMaskName));
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(existingMaskName);
 
     // Mask some detectors on the existing mask workspace
     std::set<int> masked_indices;
@@ -284,7 +284,7 @@ public:
 
     //Test the original has the correct spectra masked
     MatrixWorkspace_sptr originalWS = 
-      boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputWSName));
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWSName);
 
     TS_ASSERT(originalWS);
     if( !originalWS ) return;
@@ -319,9 +319,9 @@ public:
     setUpWS(false, inputWSName);
     setUpWS(false, existingMaskName, true);
     MatrixWorkspace_sptr existingMask =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(existingMaskName));
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(existingMaskName);
     MatrixWorkspace_sptr inputWS =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputWSName));
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWSName);
 
     /* Some test output.
     std::cout << std::endl;
@@ -373,7 +373,7 @@ public:
 
     // 4. Check result by testing the original has the correct spectra masked
     MatrixWorkspace_sptr originalWS =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputWSName));
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWSName);
 
     TS_ASSERT(originalWS);
     if( !originalWS ) return;

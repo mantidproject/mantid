@@ -82,7 +82,7 @@ public:
     this->setUp_Event();
 
     //Retrieve Workspace
-    WS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(inputWS));
+    WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(inputWS);
     TS_ASSERT( WS ); //workspace is loaded
 
     //Do the filtering now.
@@ -100,7 +100,7 @@ public:
 
     //Retrieve Workspace changed
     EventWorkspace_sptr outWS;
-    outWS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputWS));
+    outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputWS);
     TS_ASSERT( outWS ); //workspace is loaded
 
     //Things that haven't changed
@@ -125,7 +125,7 @@ public:
     TS_ASSERT( alg->isExecuted() );
 
     EventWorkspace_sptr outWS2;
-    outWS2 = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputWS));
+    outWS2 = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputWS);
     TS_ASSERT( outWS2 ); //workspace is loaded
 
     //Things that haven't changed

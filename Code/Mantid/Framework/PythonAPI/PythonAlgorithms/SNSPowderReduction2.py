@@ -221,10 +221,10 @@ class SNSPowderReduction2(PythonAlgorithm):
         self.declareProperty("NormalizeByCurrent", True, Description="Normalized by Current")
         self.declareProperty("FinalDataUnits", "dSpacing", ListValidator(["dSpacing","MomentumTransfer"]))
 
-    def _loadPreNeXusData(self, runnumber, extension, **strategy):
+    def _loadPreNeXusData(self, runnumber, extension, **chunk):
         chunkNo = 1
-        if strategy.has_key("ChunkNumber"):
-            chunkNo = int(strategy["ChunkNumber"])
+        if chunk.has_key("ChunkNumber"):
+            chunkNo = int(chunk["ChunkNumber"])
 
         # generate the workspace name
         name = "%s_%d" % (self._instrument, runnumber)
@@ -232,7 +232,7 @@ class SNSPowderReduction2(PythonAlgorithm):
         self.log().debug(filename)
 
         name += "_%02d" % (chunkNo)
-        alg = LoadPreNexus(Filename=filename, OutputWorkspace=name, **strategy)
+        alg = LoadPreNexus(Filename=filename, OutputWorkspace=name, **chunk)
         wksp = alg['OutputWorkspace']
 
         # add the logs to it
@@ -241,16 +241,22 @@ class SNSPowderReduction2(PythonAlgorithm):
 
         return wksp
 
-    def _loadEventNeXusData(self, runnumber, extension, **strategy):
+    def _loadEventNeXusData(self, runnumber, extension, filterWall=None, **chunk):
         chunkNo = 1
-        if strategy.has_key("ChunkNumber"):
-            chunkNo = int(strategy["ChunkNumber"])
-        strategy["Precount"] = True
+        if chunk.has_key("ChunkNumber"):
+            chunkNo = int(chunk["ChunkNumber"])
+        chunk["Precount"] = True
+        if filterWall is not None:
+            if filterWall[0] > 0.:
+                chunk["FilterByTimeStart"] = filterWall[0]
+            if filterWall[1] > 0.:
+                chunk["FilterByTimeStop"] = filterWall[1]
+
         name = "%s_%d" % (self._instrument, runnumber)
         filename = name + extension
 
         name += "_%02d" % (chunkNo)
-        alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, **strategy)
+        alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, **chunk)
         return alg.workspace()
 
     def _loadHistoNeXusData(self, runnumber, extension):
@@ -261,67 +267,55 @@ class SNSPowderReduction2(PythonAlgorithm):
         alg = LoadTOFRawNexus(Filename=filename, OutputWorkspace=name)
         return alg.workspace()
 
-    def _loadData(self, runnumber, extension, filterWall=None, strategyParams=None):
-        strategy = {}
-        if filterWall is not None and extension.endswith("_event.nxs"):
-            if filterWall[0] > 0.:
-                strategy["FilterByTimeStart"] = filterWall[0]
-            if filterWall[1] > 0.:
-                strategy["FilterByTimeStop"] = filterWall[1]
-        if strategyParams is not None:
-            if strategyParams[0] > 0.:
-                strategy["ChunkNumber"] = strategyParams[0]
-            if strategyParams[1] > 0.:
-                strategy["TotalChunks"] = strategyParams[1]
-
+    def _loadData(self, runnumber, extension, filterWall=None, **chunk):
         if  runnumber is None or runnumber <= 0:
             return None
 
         if extension.endswith("_event.nxs"):
-            return self._loadEventNeXusData(runnumber, extension, **strategy)
+            return self._loadEventNeXusData(runnumber, extension, filterWall, **chunk)
         elif extension.endswith("_histo.nxs"):
             return self._loadHistoNeXusData(runnumber, extension)
-        elif "and" in extension:
-            wksp0 = self._loadPreNeXusData(runnumber, "_neutron0_event.dat", **strategy)
-            RenameWorkspace(InputWorkspace=wksp0,OutputWorkspace="tmp")
-            wksp1 = self._loadPreNeXusData(runnumber, "_neutron1_event.dat", **strategy)
-            Plus(LHSWorkspace=wksp1, RHSWorkspace="tmp",OutputWorkspace=wksp1)
-            mtd.deleteWorkspace("tmp")
-            return wksp1;
         else:
-            return self._loadPreNeXusData(runnumber, extension, **strategy)
+            return self._loadPreNeXusData(runnumber, extension, **chunk)
 
     def _focusChunks(self, runnumber, extension, filterWall, calib, filterLogs=None, preserveEvents=True,
                normByCurrent=True, filterBadPulsesOverride=True):
-        first = True
         # generate the workspace name
         wksp = "%s_%d" % (self._instrument, runnumber)
-        chunks = range(1,2) #Default for one chunk
+        strategy = []
         if self._chunks > 0 and not "histo" in extension:
             alg = LoadPreNexus(Filename=wksp+"_runinfo.xml",MaxChunkSize=self._chunks,OutputWorkspace='Chunks')
-            chunkwksp = alg['OutputWorkspace']
-            chunks = chunkwksp.readY(0)
-        if len(chunks) == 0:
-            return False
-        for chunk in chunks:
-            print "Working on chunk %d of %d" % (chunk, len(chunks))
-            if len(chunks) > 1:
-                strategyParams = (int(chunk), len(chunks))
+            table = alg['OutputWorkspace']
+            cNames = table.getColumnNames()
+            if table.getRowCount() > 0:
+                for i in range(0,table.getRowCount()):
+                     chunk = {}
+                     for j in range(0,table.getColumnCount()):
+                         chunk[cNames[j]] = table.getInt(cNames[j],i)
+                     strategy.append(chunk)
             else:
-                strategyParams = (0, 0)
-            wksp_chunk = self._loadData(runnumber, extension, filterWall, strategyParams)
+                chunk = {}
+                strategy.append(chunk)
+        else:
+            chunk = {}
+            strategy.append(chunk)
+        firstChunk = True
+        for chunk in strategy:
+            if "ChunkNumber" in chunk:
+                print "Working on chunk %d of %d" % (chunk["ChunkNumber"], len(strategy))
+            temp = self._loadData(runnumber, extension, filterWall, **chunk)
             if self._info is None:
-                self._info = self._getinfo(wksp_chunk)
-            wksp_chunk = self._focus(wksp_chunk, calib, self._info, filterLogs, preserveEvents, normByCurrent)
-            if first:
-                first = False
-                alg = RenameWorkspace(InputWorkspace=wksp_chunk, OutputWorkspace=wksp)
+                self._info = self._getinfo(temp)
+            temp = self._focus(temp, calib, self._info, filterLogs, preserveEvents, normByCurrent)
+            if firstChunk:
+                alg = RenameWorkspace(InputWorkspace=temp, OutputWorkspace=wksp)
                 wksp = alg['OutputWorkspace']
+                firstChunk = False
             else:
-                Plus(LHSWorkspace=wksp, RHSWorkspace=wksp_chunk, OutputWorkspace=wksp)
-                DeleteWorkspace(wksp_chunk)
+                wksp += temp
+                DeleteWorkspace(temp)
         if self._chunks > 0 and not "histo" in extension:
-            mtd.deleteWorkspace(str(chunkwksp))
+            mtd.deleteWorkspace('Chunks')
         print "Done focussing data"
 
         return wksp
@@ -501,7 +495,7 @@ class SNSPowderReduction2(PythonAlgorithm):
         preserveEvents = self.getProperty("PreserveEvents")
         normbycurrent = self.getProperty("NormalizeByCurrent")
         self._info = None
-        self._chunks = int(1024*1024*1024*self.getProperty("MaxChunkSize"))
+        self._chunks = self.getProperty("MaxChunkSize")
 
         workspacelist = [] # all data workspaces that will be converted to d-spacing in the end
 

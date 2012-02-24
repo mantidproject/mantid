@@ -49,9 +49,9 @@ public:
     TS_ASSERT( alg.isExecuted() );
 
     Workspace2D_sptr inws,outws;
-    TS_ASSERT_THROWS_NOTHING( outws = boost::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve(outputWSname)) );
+    TS_ASSERT_THROWS_NOTHING( outws = AnalysisDataService::Instance().retrieveWS<Workspace2D>(outputWSname) );
     TS_ASSERT(outws);
-    TS_ASSERT_THROWS_NOTHING( inws = boost::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve(inputWSname)) );
+    TS_ASSERT_THROWS_NOTHING( inws = AnalysisDataService::Instance().retrieveWS<Workspace2D>(inputWSname) );
     TS_ASSERT(inws);
     if (!outws) return;
     
@@ -74,7 +74,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.execute() );
     TS_ASSERT( alg.isExecuted() );
     Workspace2D_sptr outws;
-    TS_ASSERT_THROWS_ANYTHING( outws = boost::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve(outputWSname)) );
+    TS_ASSERT_THROWS_ANYTHING( outws = AnalysisDataService::Instance().retrieveWS<Workspace2D>(outputWSname) );
 
     //AnalysisDataService::Instance().remove(outputWSname);
     AnalysisDataService::Instance().remove(inputWSname);

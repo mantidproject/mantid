@@ -87,11 +87,11 @@ public:
     if (!p) return;
     
     TS_ASSERT_EQUALS( p->size(), 3);
-    TS_ASSERT_EQUALS( p->nthTime(0).to_ISO8601_string(), "2007-11-30T16:17:05");
+    TS_ASSERT_EQUALS( p->nthTime(0).toISO8601String(), "2007-11-30T16:17:05");
     TS_ASSERT_DELTA( p->nthValue(0), 0.1, 1e-5);
-    TS_ASSERT_EQUALS( p->nthTime(1).to_ISO8601_string(), "2007-11-30T16:17:15");
+    TS_ASSERT_EQUALS( p->nthTime(1).toISO8601String(), "2007-11-30T16:17:15");
     TS_ASSERT_DELTA( p->nthValue(1), -0.2, 1e-5);
-    TS_ASSERT_EQUALS( p->nthTime(2).to_ISO8601_string(), "2007-11-30T16:17:25");
+    TS_ASSERT_EQUALS( p->nthTime(2).toISO8601String(), "2007-11-30T16:17:25");
     TS_ASSERT_DELTA( p->nthValue(2), 0.5, 1e-5);
   }
 
@@ -101,9 +101,9 @@ public:
     if (!p) return;
 
     TS_ASSERT_EQUALS( p->size(), 2);
-    TS_ASSERT_EQUALS( p->nthTime(0).to_ISO8601_string(), "2007-11-30T16:17:10");
+    TS_ASSERT_EQUALS( p->nthTime(0).toISO8601String(), "2007-11-30T16:17:10");
     TS_ASSERT_DELTA( p->nthValue(0), -0.03, 1e-5);
-    TS_ASSERT_EQUALS( p->nthTime(1).to_ISO8601_string(), "2007-11-30T16:17:20");
+    TS_ASSERT_EQUALS( p->nthTime(1).toISO8601String(), "2007-11-30T16:17:20");
     TS_ASSERT_DELTA( p->nthValue(1), 0.07, 1e-5);
   }
 
@@ -113,7 +113,7 @@ public:
     if (!p) return;
 
     TS_ASSERT_EQUALS( p->size(), 1);
-    TS_ASSERT_EQUALS( p->nthTime(0).to_ISO8601_string(), "2007-11-30T16:17:15");
+    TS_ASSERT_EQUALS( p->nthTime(0).toISO8601String(), "2007-11-30T16:17:15");
     TS_ASSERT_DELTA( p->nthValue(0), 0.01, 1e-5);
   }
 
@@ -123,9 +123,9 @@ public:
     TimeSeriesProperty<double> * p = do_test(1, false, true);
     if (!p) return;
     TS_ASSERT_EQUALS( p->size(), 5);
-    TS_ASSERT_EQUALS( p->nthTime(3).to_ISO8601_string(), "2007-11-30T16:17:35");
+    TS_ASSERT_EQUALS( p->nthTime(3).toISO8601String(), "2007-11-30T16:17:35");
     TS_ASSERT_DELTA( p->nthValue(3), 1.0, 1e-5);
-    TS_ASSERT_EQUALS( p->nthTime(4).to_ISO8601_string(), "2007-11-30T16:17:45");
+    TS_ASSERT_EQUALS( p->nthTime(4).toISO8601String(), "2007-11-30T16:17:45");
     TS_ASSERT_DELTA( p->nthValue(4), 0.5, 1e-5);
   }
 

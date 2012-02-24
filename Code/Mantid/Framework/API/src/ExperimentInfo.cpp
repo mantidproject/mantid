@@ -464,7 +464,7 @@ namespace API
     else
     {
       g_log.information("run_start not stored in workspace. Default to current date.");
-      date = Kernel::DateAndTime::get_current_time().to_ISO8601_string();
+      date = Kernel::DateAndTime::getCurrentTime().toISO8601String();
     }
     return date;
   }
@@ -508,9 +508,9 @@ namespace API
         // Use a default valid-to date if none was found.
         DateAndTime to;
         if (validTo.length() > 0)
-          to.set_from_ISO8601_string(validTo);
+          to.setFromISO8601(validTo);
         else
-          to.set_from_ISO8601_string("2100-01-01");
+          to.setFromISO8601("2100-01-01");
 
         if ( from <= d && d <= to )
         {
@@ -539,7 +539,7 @@ namespace API
   std::string ExperimentInfo::getInstrumentFilename(const std::string &instrumentName)
   {
       // Just use the current date
-      const std::string date = Kernel::DateAndTime::get_current_time().to_ISO8601_string();
+      const std::string date = Kernel::DateAndTime::getCurrentTime().toISO8601String();
       return ExperimentInfo::getInstrumentFilename(instrumentName, date);
   }
 

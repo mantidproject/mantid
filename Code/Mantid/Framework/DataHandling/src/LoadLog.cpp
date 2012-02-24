@@ -751,7 +751,7 @@ bool LoadLog::isAscii(const std::string& filename)
  */
 bool LoadLog::isDateTimeString(const std::string& str) const
 {
-  return DateAndTime::string_isISO8601(str.substr(0,19));
+  return DateAndTime::stringIsISO8601(str.substr(0,19));
 }
 
 

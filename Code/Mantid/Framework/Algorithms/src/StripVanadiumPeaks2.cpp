@@ -131,7 +131,7 @@ DECLARE_ALGORITHM(StripVanadiumPeaks2)
     stripPeaks->executeAsSubAlg();
 
     // 3. Get and set output workspace
-    // API::MatrixWorkspace_sptr outputWS = boost::dynamic_pointer_cast<API::MatrixWorkspace_sptr>(AnalysisDataService::Instance().retrieve(outputWSName));
+    // API::MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace_sptr>(outputWSName);
     // boost::shared_ptr<API::Workspace> outputWS = AnalysisDataService::Instance().retrieve(outputWSName);
     API::MatrixWorkspace_sptr outputWS = stripPeaks->getProperty("OutputWorkspace");
 

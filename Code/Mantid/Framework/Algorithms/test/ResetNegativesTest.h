@@ -55,7 +55,7 @@ public:
 
     // get the output workspace
     MatrixWorkspace_sptr outputWS;
-    TS_ASSERT_THROWS_NOTHING( outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(OUTPUT_WS_NAME)) );
+    TS_ASSERT_THROWS_NOTHING( outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(OUTPUT_WS_NAME) );
     TS_ASSERT(outputWS);
     if (!outputWS) return;
 
@@ -86,7 +86,7 @@ public:
 
     // get the output workspace
     MatrixWorkspace_sptr outputWS;
-    TS_ASSERT_THROWS_NOTHING( outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(OUTPUT_WS_NAME)) );
+    TS_ASSERT_THROWS_NOTHING( outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(OUTPUT_WS_NAME) );
     TS_ASSERT(outputWS);
     if (!outputWS) return;
 
@@ -119,7 +119,7 @@ public:
 
     // get the output workspace
     MatrixWorkspace_sptr outputWS;
-    TS_ASSERT_THROWS_NOTHING( outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(OUTPUT_WS_NAME)) );
+    TS_ASSERT_THROWS_NOTHING( outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(OUTPUT_WS_NAME) );
     TS_ASSERT(outputWS);
     if (!outputWS) return;
 

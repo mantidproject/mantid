@@ -31,7 +31,7 @@ public:
     rebin.setPropertyValue("Params", "1.5,2.0,20,-0.1,30,1.0,35");
     TS_ASSERT(rebin.execute())
     TS_ASSERT(rebin.isExecuted())
-    MatrixWorkspace_sptr rebindata = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out"));
+    MatrixWorkspace_sptr rebindata = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
 
     const Mantid::MantidVec outX=rebindata->dataX(5);
     const Mantid::MantidVec outY=rebindata->dataY(5);
@@ -70,7 +70,7 @@ public:
     rebin.setPropertyValue("Params", "1.5,2.0,20,-0.1,30,1.0,35");
     TS_ASSERT(rebin.execute())
     TS_ASSERT(rebin.isExecuted())
-    MatrixWorkspace_sptr rebindata = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out"));
+    MatrixWorkspace_sptr rebindata = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
     const Mantid::MantidVec outX=rebindata->dataX(5);
     const Mantid::MantidVec outY=rebindata->dataY(5);
     const Mantid::MantidVec outE=rebindata->dataE(5);

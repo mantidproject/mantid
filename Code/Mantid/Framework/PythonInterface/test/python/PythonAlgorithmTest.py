@@ -1,15 +1,16 @@
 import unittest
 
-from mantid.api import Algorithm, AlgorithmManager, registerAlgorithm
+from mantid.api import (PythonAlgorithm, AlgorithmProxy, Algorithm, IAlgorithm, 
+                        AlgorithmManager, registerAlgorithm)
 
-class TestPyAlgDefaultAttrs(Algorithm):
+class TestPyAlgDefaultAttrs(PythonAlgorithm):
     def PyInit(self):
         pass
     
     def PyExec(self):
         pass
 
-class TestPyAlgOverriddenAttrs(Algorithm):
+class TestPyAlgOverriddenAttrs(PythonAlgorithm):
     
     def name(self):
         return 'CoolAlgorithm'
@@ -42,6 +43,17 @@ class PythonAlgorithmTest(unittest.TestCase):
             callable(*args)
         except RuntimeError, exc:
             self.fail(str(exc))
+        
+    def test_managed_alg_is_descendent_of_AlgorithmProxy(self):
+        alg = AlgorithmManager.Instance().create("TestPyAlgDefaultAttrs")
+        self.assertTrue(isinstance(alg, AlgorithmProxy))
+        self.assertTrue(isinstance(alg, IAlgorithm))
+
+    def test_unmanaged_alg_is_descendent_of_PythonAlgorithm(self):
+        alg = AlgorithmManager.Instance().createUnmanaged("TestPyAlgDefaultAttrs")
+        self.assertTrue(isinstance(alg, PythonAlgorithm))
+        self.assertTrue(isinstance(alg, Algorithm))
+        self.assertTrue(isinstance(alg, IAlgorithm))
         
     def test_alg_with_default_attrs(self):
         self.raisesNothing(AlgorithmManager.Instance().createUnmanaged, "TestPyAlgDefaultAttrs")

@@ -1213,7 +1213,15 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
     AnalysisDataService::Instance().remove( outName );
 
   // set more properties on the workspace
-  loadEntryMetadata(m_filename, WS, m_top_entry_name);
+  try
+  {
+    loadEntryMetadata(m_filename, WS, m_top_entry_name);
+  }
+  catch (std::runtime_error & e)
+  {
+    // Missing metadata is not a fatal error. Log and go on with your life
+    g_log.error() << "Error loading metadata: " << e.what() << std::endl;
+  }
 
   if(metaDataOnly) {
     //Now, create a default X-vector for histogramming, with just 2 bins.
@@ -1566,7 +1574,7 @@ BankPulseTimes * LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilena
       Kernel::DateAndTime run_start = localWorkspace->getFirstPulseTime();
       // add the start of the run as a ISO8601 date/time string. The start = first non-zero time.
       // (this is used in LoadInstrument to find the right instrument file to use).
-      localWorkspace->mutableRun().addProperty("run_start", run_start.to_ISO8601_string(), true );
+      localWorkspace->mutableRun().addProperty("run_start", run_start.toISO8601String(), true );
     }
     else
       alg->getLogger().warning() << "Empty proton_charge sample log. You will not be able to filter by time.\n";
@@ -1615,7 +1623,9 @@ void LoadEventNexus::createSpectraMapping(const std::string &nxsfile,
       g_log.debug() << "Populated spectra map for single bank " << bankName << "\n";
     }
     else
-      throw std::runtime_error("Could not find the bank named " + bankName + " as a component assembly in the instrument tree; or it did not contain any detectors.");
+      throw std::runtime_error("Could not find the bank named " + bankName +
+          " as a component assembly in the instrument tree; or it did not contain any detectors."
+          " Try unchecking SingleBankPixelsOnly.");
   }
   else
   {

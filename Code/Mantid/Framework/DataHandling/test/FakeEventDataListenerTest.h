@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include <Poco/Thread.h>
 
 using namespace Mantid::API;
 
@@ -40,6 +41,7 @@ public:
   {
     using namespace Mantid::DataObjects;
     MatrixWorkspace_const_sptr buffer;
+    Poco::Thread::sleep(100);
     TS_ASSERT_THROWS_NOTHING( buffer = fakel->extractData())
     // Check this is the only surviving reference to it
     TS_ASSERT_EQUALS( buffer.use_count(), 1 )
@@ -48,8 +50,11 @@ public:
     TS_ASSERT( evbuf )
     // Check the events are there
     TS_ASSERT_EQUALS( evbuf->getNumberHistograms(), 2 )
-    TS_ASSERT_EQUALS( evbuf->getNumberEvents(), 200 )
+    // Should be around 200 events
+    TS_ASSERT_LESS_THAN( evbuf->getNumberEvents(), 25 )
+    TS_ASSERT_LESS_THAN( 10, evbuf->getNumberEvents() )
 
+    Poco::Thread::sleep(100);
     // Call it again, and check things again
     TS_ASSERT_THROWS_NOTHING( buffer = fakel->extractData())
     // Check this is the only surviving reference to it
@@ -61,7 +66,9 @@ public:
     TS_ASSERT( evbuf )
     // Check the events are there
     TS_ASSERT_EQUALS( evbuf->getNumberHistograms(), 2 )
-    TS_ASSERT_EQUALS( evbuf->getNumberEvents(), 200 )
+    // Should be around 200 events
+    TS_ASSERT_LESS_THAN( evbuf->getNumberEvents(), 25 )
+    TS_ASSERT_LESS_THAN( 10, evbuf->getNumberEvents() )
   }
 
 private:

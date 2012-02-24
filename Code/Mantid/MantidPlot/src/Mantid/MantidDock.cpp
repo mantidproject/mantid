@@ -612,8 +612,8 @@ void MantidDockWidget::populateExperimentInfoData(Mantid::API::ExperimentInfo_sp
 
   Instrument_const_sptr inst = workspace->getInstrument();
   out << "Instrument: " << inst->getName() << " ("
-      << inst->getValidFromDate().to_string("%Y-%b-%d")
-      << " to " << inst->getValidToDate().to_string("%Y-%b-%d") << ")";
+      << inst->getValidFromDate().toFormattedString("%Y-%b-%d")
+      << " to " << inst->getValidToDate().toFormattedString("%Y-%b-%d") << ")";
   s = out.str();
 
   data_item = new MantidTreeWidgetItem(QStringList(QString::fromStdString(s)), m_tree);

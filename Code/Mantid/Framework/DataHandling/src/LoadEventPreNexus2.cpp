@@ -339,7 +339,7 @@ void LoadEventPreNexus2::exec()
   {
     // add the start of the run as a ISO8601 date/time string. The start = the first pulse.
     // (this is used in LoadInstrument to find the right instrument file to use).
-    localWorkspace->mutableRun().addProperty("run_start", pulsetimes[0].to_ISO8601_string(), true );
+    localWorkspace->mutableRun().addProperty("run_start", pulsetimes[0].toISO8601String(), true );
   }
 
   // b. determine the run number and add it to the run object
@@ -1125,7 +1125,7 @@ void LoadEventPreNexus2::procEventsLinear(DataObjects::EventWorkspace_sptr & /*w
       }
 
       // ii. calculate and add absolute time
-      // int64_t abstime = (pulsetime.total_nanoseconds()+int64_t(tof*1000));
+      // int64_t abstime = (pulsetime.totalNanoseconds()+int64_t(tof*1000));
       local_pulsetimes[theindex].push_back(pulsetime);
       local_tofs[theindex].push_back(tof);
 

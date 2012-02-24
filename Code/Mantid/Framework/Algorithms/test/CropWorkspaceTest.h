@@ -118,7 +118,7 @@ public:
     std::string eventname("TestEvents");
     this->makeFakeEventWorkspace(eventname);
     EventWorkspace_sptr ws
-         = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(eventname));
+         = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(eventname);
 
     // run the algorithm
     CropWorkspace algo;
@@ -133,7 +133,7 @@ public:
     TS_ASSERT(algo.isExecuted());
 
     // verify the output workspace
-    ws = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(eventname));
+    ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(eventname);
     TS_ASSERT_EQUALS(3, ws->getNumberHistograms()); // reduced histograms
     TS_ASSERT_EQUALS(30, ws->getNumberEvents()); 
 
@@ -161,12 +161,12 @@ public:
     TS_ASSERT( crop.isExecuted() );
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputWS)) );
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS) );
 
     TS_ASSERT_EQUALS( output->getNumberHistograms(), 3 );
     TS_ASSERT_EQUALS( output->blocksize(), 3 );
 
-    MatrixWorkspace_const_sptr input = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("toCrop"));
+    MatrixWorkspace_const_sptr input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("toCrop");
     for (int i=0; i < 3; ++i)
     {
       for (int j = 0; j < 3; ++j)
@@ -191,8 +191,8 @@ public:
     TS_ASSERT( crop2.isExecuted() );
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("unCropped")) );
-    MatrixWorkspace_const_sptr input = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("toCrop"));
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("unCropped") );
+    MatrixWorkspace_const_sptr input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("toCrop");
 
     MatrixWorkspace::const_iterator inIt(*input);
     for (MatrixWorkspace::const_iterator it(*output); it != it.end(); ++it,++inIt)
@@ -219,8 +219,8 @@ public:
     TS_ASSERT( crop3.isExecuted() );
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("pointOut")) );
-    MatrixWorkspace_const_sptr input = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("point"));
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("pointOut") );
+    MatrixWorkspace_const_sptr input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("point");
 
     MatrixWorkspace::const_iterator inIt(*input);
     for (MatrixWorkspace::const_iterator it(*output); it != it.end(); ++it,++inIt)
@@ -236,7 +236,7 @@ public:
 
   void testRagged()
   {
-    MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("toCrop"));
+    MatrixWorkspace_sptr input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("toCrop");
     // Change the first X vector
     for (int k = 0; k < 6; ++k) {
       input->dataX(0)[k] = k+3;
@@ -252,7 +252,7 @@ public:
     TS_ASSERT( crop4.isExecuted() );
     
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("raggedOut")) );
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("raggedOut") );
 
     TS_ASSERT_EQUALS( output->size(), input->size() );
 
@@ -290,7 +290,7 @@ public:
     TS_ASSERT( crop4.isExecuted() );
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("raggedOut")) );
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("raggedOut") );
     // The number of bins is UNCHANGED because of ragged bins
     TS_ASSERT_EQUALS( output->size(), input->size() );
     TS_ASSERT_EQUALS( output->blocksize(), input->blocksize() );
@@ -317,7 +317,7 @@ public:
     TS_ASSERT( crop4.execute() );
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName)) );
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName) );
 
     TSM_ASSERT_EQUALS( "The number of bins", 3, output->blocksize() );
     TSM_ASSERT_EQUALS( "First bin boundary", -5, output->readX(0).front() );
@@ -363,7 +363,7 @@ public:
 
     // Check the output
     MatrixWorkspace_sptr outputWS;
-    TS_ASSERT_THROWS_NOTHING(outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName)));
+    TS_ASSERT_THROWS_NOTHING(outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
     if( !outputWS ) TS_FAIL("CropWorkspace did not execute correctly.");
 
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);

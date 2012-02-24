@@ -133,7 +133,7 @@ namespace WorkflowAlgorithms
       size_t row = 0;
       m_reductionTable->find(key, row, 0);
       const std::string workspaceName = m_reductionTable->String(row, STRINGENTRY_COL);
-      pointer = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(workspaceName));
+      pointer = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
     } catch(std::out_of_range&) {
       // Didn't find anything, will return a NULL pointer
     }

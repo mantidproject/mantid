@@ -84,7 +84,7 @@ public:
     TS_ASSERT(alg1.isExecuted());
 
     // 3. Check result
-    API::MatrixWorkspace_sptr outputWS = boost::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("testout"));
+    API::MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>("testout");
     bool wsexist = true;
     if (!outputWS)
       wsexist = false;

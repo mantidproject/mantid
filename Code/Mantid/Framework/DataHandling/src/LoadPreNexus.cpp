@@ -20,6 +20,7 @@ Workflow algorithm to load all of the preNeXus files.
 #include "MantidDataHandling/LoadPreNexus.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidAPI/TableRow.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -121,9 +122,9 @@ namespace DataHandling
         "File containing the pixel mapping (DAS pixels to pixel IDs) file (typically INSTRUMENT_TS_YYYY_MM_DD.dat). The filename will be found automatically if not specified.");
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
     mustBePositive->setLower(1);
-    declareProperty("MaxChunkSize", EMPTY_INT(), mustBePositive,
-        "Get chunking strategy for chunks with this number of bytes.");
-    declareProperty("ChunkNumber", EMPTY_INT(), mustBePositive->clone(),
+    declareProperty("MaxChunkSize", EMPTY_DBL(),
+        "Get chunking strategy for chunks with this number of Gbytes. File will not be loaded if this option is set.");
+    declareProperty("ChunkNumber", EMPTY_INT(), mustBePositive,
         "If loading the file by sections ('chunks'), this is the section number of this execution of the algorithm.");
     declareProperty("TotalChunks", EMPTY_INT(), mustBePositive->clone(),
         "If loading the file by sections ('chunks'), this is the total number of sections.");
@@ -144,7 +145,7 @@ namespace DataHandling
                     "Load the monitors from the file.");
 
 
-    declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "An output workspace.");
+    declareProperty(new WorkspaceProperty<API::Workspace>("OutputWorkspace","",Direction::Output), "An output workspace.");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -155,24 +156,11 @@ namespace DataHandling
     string mapfile = this->getPropertyValue(MAP_PARAM);
     int chunkTotal = this->getProperty("TotalChunks");
     int chunkNumber = this->getProperty("ChunkNumber");
-    int maxChunk = this->getProperty("MaxChunkSize");
+    double maxChunk = this->getProperty("MaxChunkSize");
     if (!isEmpty(maxChunk))
     {
-      int NChunks = determineChunking(runinfo,maxChunk);
-      std::vector<double>y;
-      NChunks++;  // For python range
-      for (int i = 1; i <= NChunks; i++) 
-        y.push_back(i);
-      
-      IAlgorithm_sptr algo = createSubAlgorithm("CreateWorkspace", 0.7, 1.0);
-      algo->setProperty< std::vector<double> >("DataX", std::vector<double>(NChunks+1,0.0) );
-      algo->setProperty< std::vector<double> >("DataY", y );
-      algo->setProperty< std::vector<double> >("DataE", std::vector<double>(NChunks,0.0) );
-      algo->setProperty<int>("NSpec", 1 );
-      algo->execute();
-      MatrixWorkspace_sptr outws = algo->getProperty("OutputWorkspace");
-
-      this->setProperty("OutputWorkspace", outws);
+      Mantid::API::ITableWorkspace_sptr strategy = determineChunking(runinfo,maxChunk);
+      this->setProperty("OutputWorkspace", strategy);
       return;
     }
     if ( isEmpty(chunkTotal) || isEmpty(chunkNumber))
@@ -409,22 +397,28 @@ namespace DataHandling
     }
   }
 
-  int LoadPreNexus::determineChunking(const std::string& filename, size_t maxChunkSize)
+  Mantid::API::ITableWorkspace_sptr LoadPreNexus::determineChunking(const std::string& filename, double maxChunkSize)
   {
     vector<string> eventFilenames;
     string dataDir;
     this->parseRuninfo(filename, dataDir, eventFilenames);
-    size_t filesize = 0;
+    double filesize = 0;
     for (size_t i = 0; i < eventFilenames.size(); i++) {
-      filesize += static_cast<size_t>(Poco::File(dataDir + eventFilenames[i]).getSize());
+      filesize += static_cast<double>(Poco::File(dataDir + eventFilenames[i]).getSize())/(1024.0*1024.0*1024.0);
     }
-    if (filesize == 0)
-      return 0;
     int numChunks = static_cast<int>(filesize/maxChunkSize);
-    if (numChunks > 0)
-      return numChunks; // high end is exclusive
-    else
-      return 1;
+    numChunks ++; //So maxChunkSize is not exceeded 
+    if (numChunks < 0) numChunks = 1;
+    Mantid::API::ITableWorkspace_sptr strategy = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+    strategy->addColumn("int","ChunkNumber");
+    strategy->addColumn("int","TotalChunks");
+
+    for (int i = 1; i <= numChunks; i++) 
+    {
+      Mantid::API::TableRow row = strategy->appendRow();
+      row << i << numChunks;
+    }
+    return strategy;
 
   }
 

@@ -74,7 +74,7 @@ public:
 
     MatrixWorkspace_sptr out;
     TS_ASSERT_THROWS_NOTHING(
-        out = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("out")) );
+        out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out") );
     TS_ASSERT(out);
     if (!out) return;
 

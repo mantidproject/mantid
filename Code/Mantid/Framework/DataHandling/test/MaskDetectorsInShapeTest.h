@@ -72,7 +72,7 @@ public:
     TS_ASSERT( alg.isExecuted() );
 
     MatrixWorkspace_const_sptr outWS =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
 
     checkDeadDetectors(outWS, expectedHits);
   }

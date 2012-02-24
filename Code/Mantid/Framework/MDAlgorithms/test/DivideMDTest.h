@@ -58,7 +58,7 @@ public:
   /** Get a MDEventWorkspace and check that all events have the given signal/error */
   void checkMDEWSignal(std::string wsName, signal_t expectedSignal, signal_t expectedError)
   {
-    IMDEventWorkspace_sptr ws = boost::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+    IMDEventWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(wsName);
     TS_ASSERT(ws); if (!ws) return;
     IMDIterator* it = ws->createIterator(NULL);
     do

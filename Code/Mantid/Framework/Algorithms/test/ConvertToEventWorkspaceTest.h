@@ -92,7 +92,7 @@ public:
     
     // Retrieve the workspace from data service.
     EventWorkspace_sptr outWS;
-    TS_ASSERT_THROWS_NOTHING( outWS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outWSName)) );
+    TS_ASSERT_THROWS_NOTHING( outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outWSName) );
     TS_ASSERT(outWS);
     if (!outWS) return;
     
@@ -203,7 +203,7 @@ public:
 
     // Retrieve the workspace from data service.
     EventWorkspace_sptr outWS;
-    TS_ASSERT_THROWS_NOTHING( outWS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outWSName)) );
+    TS_ASSERT_THROWS_NOTHING( outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outWSName) );
     TS_ASSERT(outWS);
     if (!outWS) return;
 

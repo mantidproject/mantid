@@ -8,6 +8,7 @@ set ( MODULE_TEMPLATE src/api.cpp.in )
 # -- Do NOT sort this list. The order defines the order in which the export
 #    definitions occur and some depend on their base classes being exported first -- 
 set ( EXPORT_FILES
+  src/Exports/IAlgorithm.cpp
   src/Exports/Algorithm.cpp
   src/Exports/AlgorithmFactory.cpp
   src/Exports/AlgorithmManager.cpp
@@ -39,12 +40,13 @@ set ( EXPORT_FILES
 
 # Files containing additional helper code that are not related to exporting class/functions
 set ( SRC_FILES 
-  src/AlgorithmWrapper.cpp
+  src/PythonAlgorithm/AlgorithmWrapper.cpp
   src/CloneMatrixWorkspace.cpp
 )
 
 set ( INC_FILES 
-  ${HEADER_DIR}/api/AlgorithmWrapper.h
+  ${HEADER_DIR}/api/PythonAlgorithm/AlgorithmWrapper.h
+  ${HEADER_DIR}/api/PythonAlgorithm/PythonAlgorithm.h
   ${HEADER_DIR}/api/BinaryOperations.h
   ${HEADER_DIR}/api/CloneMatrixWorkspace.h
 )

@@ -64,8 +64,8 @@ public:
     do_algorithm_run("theta", inputWS, outputWS);
     
     MatrixWorkspace_const_sptr input,output;
-    TS_ASSERT_THROWS_NOTHING( input = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputWS)) );
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputWS)) );
+    TS_ASSERT_THROWS_NOTHING( input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS) );
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS) );
     
     // Should now have a numeric axis up the side, with units of angle
     const Axis* thetaAxis = 0;
@@ -99,7 +99,7 @@ public:
     do_algorithm_run("signed_theta", inputWS, outputSignedThetaAxisWS);
 
     MatrixWorkspace_const_sptr outputSignedTheta;
-    TS_ASSERT_THROWS_NOTHING( outputSignedTheta = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSignedThetaAxisWS)) );
+    TS_ASSERT_THROWS_NOTHING( outputSignedTheta = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSignedThetaAxisWS) );
     
     // Check the signed theta axis
     const Axis* thetaAxis = 0;
@@ -140,8 +140,8 @@ public:
     TS_ASSERT( conv.isExecuted() );
 
     MatrixWorkspace_const_sptr input,output;
-    TS_ASSERT_THROWS_NOTHING( input = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputWS)) );
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputWS)) );
+    TS_ASSERT_THROWS_NOTHING( input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS) );
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS) );
 
     // Should now have a numeric axis up the side, with units of angle
     const Axis* thetaAxis = 0;

@@ -51,7 +51,7 @@ public:
     alg.execute();
 
     MatrixWorkspace_sptr work_out1;
-    TS_ASSERT_THROWS_NOTHING(work_out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_inLn")));
+    TS_ASSERT_THROWS_NOTHING(work_out1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_inLn"));
 
     TS_ASSERT_THROWS_NOTHING(
         AnalysisDataService::Instance().remove("test_outLn");
@@ -82,7 +82,7 @@ public:
     TS_ASSERT( alg.isExecuted() );
 
     MatrixWorkspace_sptr work_out2;
-    TS_ASSERT_THROWS_NOTHING(work_out2 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_outLn2")));
+    TS_ASSERT_THROWS_NOTHING(work_out2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_outLn2"));
 
     //    checkData(work_in1, work_in2, work_out1);
     AnalysisDataService::Instance().remove("test_inLn2");
@@ -111,7 +111,7 @@ public:
     TS_ASSERT( !evout ); //should not be an event workspace
 
     MatrixWorkspace_sptr histo_out;
-    TS_ASSERT_THROWS_NOTHING(histo_out = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_ev_log_out")));
+    TS_ASSERT_THROWS_NOTHING(histo_out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_ev_log_out"));
     TS_ASSERT (histo_out); //this should be a 2d workspace
 
     TS_ASSERT_DELTA(histo_out->readY(0)[0],123,1e-10);

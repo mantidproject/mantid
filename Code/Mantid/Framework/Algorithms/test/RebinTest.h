@@ -56,7 +56,7 @@ public:
     rebin.setPropertyValue("Params", "1.5,2.0,20,-0.1,30,1.0,35");
     TS_ASSERT(rebin.execute());
     TS_ASSERT(rebin.isExecuted());
-    MatrixWorkspace_sptr rebindata = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out"));
+    MatrixWorkspace_sptr rebindata = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
     const Mantid::MantidVec outX=rebindata->readX(0);
     const Mantid::MantidVec outY=rebindata->readY(0);
     const Mantid::MantidVec outE=rebindata->readE(0);
@@ -91,7 +91,7 @@ public:
     rebin.setPropertyValue("Params", "1.5,2.0,20,-0.1,30,1.0,35");
     TS_ASSERT(rebin.execute());
     TS_ASSERT(rebin.isExecuted());
-    MatrixWorkspace_sptr rebindata = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out"));
+    MatrixWorkspace_sptr rebindata = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
 
     const Mantid::MantidVec outX=rebindata->readX(0);
     const Mantid::MantidVec outY=rebindata->readY(0);
@@ -130,7 +130,7 @@ public:
     rebin.setPropertyValue("Params", "1.0,-1.0,1000.0");
     TS_ASSERT(rebin.execute());
     TS_ASSERT(rebin.isExecuted());
-    MatrixWorkspace_sptr rebindata = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out"));
+    MatrixWorkspace_sptr rebindata = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
     const Mantid::MantidVec outX=rebindata->readX(0);
     const Mantid::MantidVec outY=rebindata->readY(0);
     const Mantid::MantidVec outE=rebindata->readE(0);
@@ -161,7 +161,7 @@ public:
     rebin.setPropertyValue("Params", "1.5,2.0,20,-0.1,30,1.0,35");
     TS_ASSERT(rebin.execute());
     TS_ASSERT(rebin.isExecuted());
-    MatrixWorkspace_sptr rebindata = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out"));
+    MatrixWorkspace_sptr rebindata = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
 
     const Mantid::MantidVec outX=rebindata->readX(5);
     const Mantid::MantidVec outY=rebindata->readY(5);
@@ -368,11 +368,11 @@ public:
     rebin.setPropertyValue("Params", "1.5,3.0,12,-0.1,30");
     TS_ASSERT(rebin.execute());
     TS_ASSERT(rebin.isExecuted());
-    MatrixWorkspace_sptr rebindata = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_Rebin_masked_ws"));
+    MatrixWorkspace_sptr rebindata = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_Rebin_masked_ws");
     const MantidVec & outX = rebindata->readX(0);
     const MantidVec & outY = rebindata->readY(0);
 
-    MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_Rebin_mask_dist"));
+    MatrixWorkspace_sptr input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_Rebin_mask_dist");
     const MantidVec & inX=input->readX(0);
     const MantidVec & inY=input->readY(0);
 
@@ -418,7 +418,7 @@ public:
     rebin.setPropertyValue("Params", "1.5,3.0,12,-0.1,30");
     rebin.execute();
 
-    MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_Rebin_unmasked"));
+    MatrixWorkspace_sptr input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_Rebin_unmasked");
     const Mantid::MantidVec inX=input->readX(0);
     const Mantid::MantidVec inY=input->readY(0);
 
@@ -428,7 +428,7 @@ public:
     rebin.setPropertyValue("OutputWorkspace","test_Rebin_masked_ws");
     rebin.setPropertyValue("Params", "1.5,3.0,12,-0.1,30");
     rebin.execute();
-    MatrixWorkspace_sptr masked = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_Rebin_masked_ws"));
+    MatrixWorkspace_sptr masked = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_Rebin_masked_ws");
     const Mantid::MantidVec outX=masked->readX(0);
     const Mantid::MantidVec outY=masked->readY(0);
 

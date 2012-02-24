@@ -46,7 +46,7 @@ public:
     alg.execute();
     TS_ASSERT( alg.isExecuted() );
 
-    MatrixWorkspace_sptr result = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputWS));
+    MatrixWorkspace_sptr result = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS);
 
     // Monitor should be untouched
     TS_ASSERT_DELTA(result->readY(0).front(), 10.0, 1e-6);
@@ -71,7 +71,7 @@ public:
     alg.execute();
     TS_ASSERT( alg.isExecuted() );
 
-    MatrixWorkspace_sptr result = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputEvWS));
+    MatrixWorkspace_sptr result = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputEvWS);
     EventWorkspace_sptr ev_result = boost::dynamic_pointer_cast<EventWorkspace>(result);
 
     // Monitor events should be untouched
@@ -117,7 +117,7 @@ public:
     alg.execute();
     TS_ASSERT( alg.isExecuted() );
 
-    MatrixWorkspace_sptr result = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputWS));
+    MatrixWorkspace_sptr result = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS);
 
     // Monitor should be untouched
     TS_ASSERT_DELTA(result->readY(0).front(), 10.0, 1e-6);
@@ -143,7 +143,7 @@ public:
     alg.execute();
     TS_ASSERT( alg.isExecuted() );
 
-    MatrixWorkspace_sptr result = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputEvWS));
+    MatrixWorkspace_sptr result = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputEvWS);
     EventWorkspace_sptr ev_result = boost::dynamic_pointer_cast<EventWorkspace>(result);
 
     // Monitor should be untouched

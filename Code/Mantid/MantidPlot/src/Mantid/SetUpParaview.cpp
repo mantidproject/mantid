@@ -57,14 +57,21 @@ void SetUpParaview::onSet()
 {
   ConfigServiceImpl& config = ConfigService::Instance();
   
+  std::cout << "getting location" << m_candidateLocation.toStdString() << std::endl;
   config.setParaviewLibraryPath(m_candidateLocation.toStdString());
 
+  std::cout << "getting paraview path" << std::endl;
   config.setString("paraview.path", m_candidateLocation.toStdString());
+
+  std::cout << "getting file name" << std::endl;
   std::string filename = config.getUserFilename();
   //Save the result so that on the next start up we don't have to bother the user.
+
+  std::cout << "saving" << std::endl;
   config.saveConfig(filename);
 
-  QDialog::accept();
+  std::cout << "closing" << std::endl;
+  this->close();
 }
 
 /// Event handler for the onChoose event.

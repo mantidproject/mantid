@@ -181,7 +181,7 @@ public:
     TS_ASSERT(alg2.isExecuted());
 
     EventWorkspace_sptr output;
-    output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outName));
+    output = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outName);
     TS_ASSERT(output);
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 1);
     TS_ASSERT_EQUALS(output->getNumberEvents(), 9 * numEvents);

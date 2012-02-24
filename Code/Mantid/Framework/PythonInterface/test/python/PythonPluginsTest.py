@@ -7,9 +7,9 @@ import mantid.kernel.plugins as plugins
 from mantid import AlgorithmFactory, AlgorithmManager
 
 __TESTALG__ = \
-"""from mantid import Algorithm, registerAlgorithm
+"""from mantid import PythonAlgorithm, registerAlgorithm
 
-class TestPyAlg(Algorithm):
+class TestPyAlg(PythonAlgorithm):
 
     def PyInit(self):
         pass

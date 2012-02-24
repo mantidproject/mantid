@@ -224,10 +224,10 @@ public:
 
     // Get back the workspaces
     MatrixWorkspace_sptr output1;
-    TS_ASSERT_THROWS_NOTHING( output1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("multiperiod2")) );
+    TS_ASSERT_THROWS_NOTHING( output1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("multiperiod2") );
     TS_ASSERT_EQUALS( output1->getNumberHistograms(), 4 )
     MatrixWorkspace_sptr output2;
-    TS_ASSERT_THROWS_NOTHING( output2 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("multiperiod2_2")) );
+    TS_ASSERT_THROWS_NOTHING( output2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("multiperiod2_2") );
     TS_ASSERT_EQUALS( output2->getNumberHistograms(), 4 )
 
     // The histogram bins should be the same

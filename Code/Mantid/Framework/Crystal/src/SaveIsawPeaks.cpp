@@ -147,7 +147,7 @@ namespace Crystal
     //TODO: The experiment date might be more useful than the instrument date.
     // For now, this allows the proper instrument to be loaded back after saving.
     Kernel::DateAndTime expDate = inst->getValidFromDate() + 1.0;
-    out <<  expDate.to_ISO8601_string() << std::endl;
+    out <<  expDate.toISO8601String() << std::endl;
 
     out << "6         L1    T0_SHIFT" <<  std::endl;
     out << "7 "<< std::setw( 10 )  ;

@@ -69,7 +69,7 @@ namespace Mantid
   
       MantidVecPtr XValues;
       PeaksWorkspace_sptr peaksW;
-      peaksW = boost::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve(getProperty("InPeaksWorkspace")));
+      peaksW = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(getProperty("InPeaksWorkspace"));
 
 
       int i, XPeak, YPeak;

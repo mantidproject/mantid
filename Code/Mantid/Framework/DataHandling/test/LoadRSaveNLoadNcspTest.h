@@ -55,7 +55,7 @@ void testExecOnLoadraw()
     // get workspace
     //
     MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)) );
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace) );
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     if ( !saveNexusP.isInitialized() ) saveNexusP.initialize();
 
@@ -106,7 +106,7 @@ void testExecOnLoadraw()
 
     // Get back the saved workspace
    MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(myOutputSpace)));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(myOutputSpace));
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     // set to 4 for CSP78173
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 4);

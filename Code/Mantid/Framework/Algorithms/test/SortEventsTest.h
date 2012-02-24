@@ -55,7 +55,7 @@ public:
     TS_ASSERT(sort.execute());
     TS_ASSERT(sort.isExecuted());
 
-    EventWorkspace_const_sptr outWS = boost::dynamic_pointer_cast<const EventWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+    EventWorkspace_const_sptr outWS = AnalysisDataService::Instance().retrieveWS<const EventWorkspace>(wsName);
 
     std::vector<TofEvent> ve = outWS->getEventList(0).getEvents();
     TS_ASSERT_EQUALS( ve.size(), NUMBINS);
@@ -81,7 +81,7 @@ public:
     TS_ASSERT(sort.execute());
     TS_ASSERT(sort.isExecuted());
 
-    EventWorkspace_const_sptr outWS = boost::dynamic_pointer_cast<const EventWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+    EventWorkspace_const_sptr outWS = AnalysisDataService::Instance().retrieveWS<const EventWorkspace>(wsName);
     std::vector<TofEvent> ve = outWS->getEventList(0).getEvents();
     TS_ASSERT_EQUALS( ve.size(), NUMBINS);
     for (size_t i=0; i<ve.size()-1; i++)
@@ -105,7 +105,7 @@ public:
     TS_ASSERT(sort.execute());
     TS_ASSERT(sort.isExecuted());
 
-    EventWorkspace_const_sptr outWS = boost::dynamic_pointer_cast<const EventWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+    EventWorkspace_const_sptr outWS = AnalysisDataService::Instance().retrieveWS<const EventWorkspace>(wsName);
     std::vector<TofEvent> ve = outWS->getEventList(0).getEvents();
     TS_ASSERT_EQUALS( ve.size(), NUMBINS);
     for (size_t i=0; i<ve.size()-1; i++){
