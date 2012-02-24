@@ -1723,7 +1723,7 @@ void ConfigServiceImpl::setParaviewLibraryPath(const std::string& path)
   {
     existingPath = path;
   }
-  Poco::Environment::set(platformPathName, path);
+  Poco::Environment::set(platformPathName, existingPath.toString());
 }
 
 /*
