@@ -22,6 +22,8 @@
 #include <Poco/StringTokenizer.h>
 
 #include <iomanip>
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/MemoryManager.h"
 
 using namespace Mantid::Kernel;
 

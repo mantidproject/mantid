@@ -19,6 +19,7 @@ a copy of the input one.
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/VectorHelper.h"
 #include <iostream>
+#include "MantidAPI/MemoryManager.h"
 
 namespace 
 {

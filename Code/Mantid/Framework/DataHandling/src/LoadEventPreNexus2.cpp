@@ -48,6 +48,7 @@ The ChunkNumber and TotalChunks properties can be used to load only a section of
 
 #include <algorithm>
 #include <sstream>
+#include "MantidAPI/MemoryManager.h"
 
 namespace Mantid
 {

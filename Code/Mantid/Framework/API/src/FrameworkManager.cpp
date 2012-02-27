@@ -1,10 +1,11 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/InstrumentDataService.h"
+#include "MantidAPI/MemoryManager.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/Memory.h"
@@ -75,7 +76,7 @@ void FrameworkManagerImpl::clear()
   clearAlgorithms();
   clearInstruments();
   clearData();
-  MemoryManager::Instance().releaseFreeMemory();
+  Mantid::API::MemoryManager::Instance().releaseFreeMemory();
 }
 
 /**
@@ -92,7 +93,7 @@ void FrameworkManagerImpl::clearAlgorithms()
 void FrameworkManagerImpl::clearData()
 {
   AnalysisDataService::Instance().clear();
-  MemoryManager::Instance().releaseFreeMemory();
+  Mantid::API::MemoryManager::Instance().releaseFreeMemory();
 }
 
 /**

@@ -76,8 +76,6 @@ namespace Algorithms
     DateAndTime startTime = DateAndTime::getCurrentTime();
     double Duration = getProperty("Duration");
 
-    size_t chunk = 0;
-
     // Keep going until you get cancelled
     while (true)
     {

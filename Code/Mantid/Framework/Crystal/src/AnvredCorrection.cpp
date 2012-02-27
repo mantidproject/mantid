@@ -45,6 +45,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/V3D.h"
+#include "MantidAPI/MemoryManager.h"
 
 /*  Following A.J.Schultz's anvred, the weight factors should be:
  * 
