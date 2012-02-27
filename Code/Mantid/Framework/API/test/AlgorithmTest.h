@@ -416,15 +416,17 @@ public:
     do_test_locking("ws0", "ws0", "ws0", "ws0", "ws0");
   }
 
-  /** Have a workspace property that does NOT lock the workspace */
+  /** Have a workspace property that does NOT lock the workspace.
+   * The failure mode of this test is HANGING. */
   void test_workspace_notLocking()
   {
     boost::shared_ptr<WorkspaceTester> ws1(new WorkspaceTester());
     AnalysisDataService::Instance().addOrReplace("ws1", ws1);
 
     {
-      // TODO: Replace with a write-lock
-      ReadLock _lock(*ws1);
+      // Get a write lock.
+      WriteLock _lock(*ws1);
+      // The algorithm would hang waiting for the write-lock to release if the property were locking.
       WorkspaceAlgorithm2 alg;
       alg.initialize();
       alg.setPropertyValue("NonLockingInputWorkspace", "ws1");
