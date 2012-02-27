@@ -49,6 +49,20 @@ If BackgroundStartRadius is left blank, then '''BackgroundStartRadius''' = '''Pe
 
 [[File:IntegratePeaksMD_graph2.png]]
 
+=== Sample Usage ===
+
+<source lang="python">
+# Load a SCD data set and find the peaks
+LoadEventNexus(Filename=r'TOPAZ_3131_event.nxs',OutputWorkspace='TOPAZ_3131_nxs')
+ConvertToDiffractionMDWorkspace(InputWorkspace='TOPAZ_3131_nxs',OutputWorkspace='TOPAZ_3131_md',LorentzCorrection='1')
+FindPeaksMD(InputWorkspace='TOPAZ_3131_md',PeakDistanceThreshold='0.15',MaxPeaks='100',OutputWorkspace='peaks')
+FindUBUsingFFT(PeaksWorkspace='peaks',MinD='2',MaxD='16')
+
+# Perform the peak integration, in-place in the 'peaks' workspace.
+IntegratePeaksMD(InputWorkspace='TOPAZ_3131_md', PeaksWorkspace='peaks',
+    PeakRadius=0.12, BackgroundRadius=0.2, BackgroundStartRadius=0.16,
+    OutputWorkspace='peaks')
+</source>
 
 *WIKI*/
 #include "MantidAPI/IMDEventWorkspace.h"
