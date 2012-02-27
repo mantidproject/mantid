@@ -17,7 +17,7 @@ DECLARE_FUNCTION(GausOsc)
 
 void GausOsc::init()
 {
-   declareParameter("A", 5.0); 
+   declareParameter("A", 10.0); 
    declareParameter("Sigma", 0.2);
    declareParameter("Frequency", 0.1); 
    declareParameter("Phi", 0.0);
@@ -40,6 +40,16 @@ void GausOsc::functionMW(double* out, const double* xValues, const size_t nData)
 void GausOsc::functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
 {
   calNumericalDeriv(out, xValues, nData);
+}
+
+void GausOsc::setActiveParameter(size_t i,double value)
+{
+  size_t j = indexOfActive(i);
+
+  if (parameterName(j) == "Sigma") 
+    setParameter(j,fabs(value),false);  // Make sigma positive
+  else
+    setParameter(j,value,false);
 }
 
 

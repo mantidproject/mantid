@@ -111,9 +111,9 @@ public:
     // test the output from fit is what you expect
     IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
     TS_ASSERT_DELTA( out->getParameter("A"), 128.7 ,0.9);
-    TS_ASSERT_DELTA( fabs(out->getParameter("Sigma")), 0.35 ,0.005);
+    TS_ASSERT_DELTA( out->getParameter("Sigma"), 0.35 ,0.005);
     TS_ASSERT_DELTA( out->getParameter("Frequency"), 1/8.0 ,0.01);  // Period of 8
-    TS_ASSERT_DELTA( out->getParameter("Phi"), 3.1415926536*17.0/4.0 ,0.01);  // 720 + 45 degrees
+    TS_ASSERT_DELTA( out->getParameter("Phi"), 3.1415926536*9.0/4.0 ,0.01);  // 360 + 45 degrees
 
     // check its categories
     const std::vector<std::string> categories = out->categories();
