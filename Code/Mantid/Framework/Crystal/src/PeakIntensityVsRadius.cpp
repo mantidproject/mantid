@@ -18,6 +18,24 @@ parameters filled in:
 * '''BackgroundStartRadius''' = radius * BackgroundStartFactor
 * '''BackgroundRadius''' = radius * BackgroundEndFactor
 
+=== Sample Usage ===
+
+<source lang="python">
+# Load a SCD data set and find the peaks
+LoadEventNexus(Filename=r'TOPAZ_3131_event.nxs',OutputWorkspace='top_nxs')
+ConvertToDiffractionMDWorkspace(InputWorkspace='top_nxs',OutputWorkspace='top',LorentzCorrection='1')
+FindPeaksMD(InputWorkspace='top',PeakDistanceThreshold='0.15',MaxPeaks='100',OutputWorkspace='peaks')
+FindUBUsingFFT(PeaksWorkspace='peaks',MinD='2',MaxD='16')
+IndexPeaks(PeaksWorkspace='peaks')
+# Run the PeakIntensityVsRadius algorithm
+PeakIntensityVsRadius(InputWorkspace='top',PeaksWorkspace='peaks',
+  RadiusStart=0.00, RadiusEnd=0.15, NumSteps=51,
+  BackgroundStartFactor=1.5,BackgroundEndFactor=2,
+  OutputWorkspace='peak_vs_rad')
+# Plot a few of the peaks
+plotSpectrum('peak_vs_rad', [0,2,3], error_bars=True)
+</source>
+
 
 *WIKI*/
 
