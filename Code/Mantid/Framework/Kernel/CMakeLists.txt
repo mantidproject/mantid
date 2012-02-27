@@ -77,6 +77,7 @@ set ( SRC_FILES
 	src/VMD.cpp
 	src/VectorHelper.cpp
 	src/VisibleWhenProperty.cpp
+	src/WriteLock.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/Atom.cpp
@@ -191,6 +192,7 @@ set ( INC_FILES
 	inc/MantidKernel/VMD.h
 	inc/MantidKernel/VectorHelper.h
 	inc/MantidKernel/VisibleWhenProperty.h
+	inc/MantidKernel/WriteLock.h
 	inc/MantidKernel/cow_ptr.h
 )
 
@@ -273,6 +275,7 @@ set ( TEST_FILES
 	test/VMDTest.h
 	test/VectorHelperTest.h
 	test/VisibleWhenPropertyTest.h
+	test/WriteLockTest.h
 )
 
 if(UNITY_BUILD)
