@@ -8,6 +8,7 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidKernel/ReadLock.h"
+#include "MantidKernel/WriteLock.h"
 
 using namespace Mantid::Kernel; 
 using namespace Mantid::API;
