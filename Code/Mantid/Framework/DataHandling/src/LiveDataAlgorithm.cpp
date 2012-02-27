@@ -73,12 +73,14 @@ namespace DataHandling
     declareProperty(new PropertyWithValue<std::string>("PostProcessingScript","",Direction::Input),
         "Not currently supported, but reserved for future use.");
 
-    declareProperty(new WorkspaceProperty<Workspace>("AccumulationWorkspace","",Direction::Output, true),
+    declareProperty(new WorkspaceProperty<Workspace>("AccumulationWorkspace","",Direction::Output,
+        true /* optional */, false /* no locking */),
         "Optional, unless performing PostProcessing:\n"
         " Give the name of the intermediate, accumulation workspace.\n"
         " This is the workspace after accumulation but before post-processing steps.");
 
-    declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output),
+    declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output,
+        false /* not optional */, false /* no locking */),
         "Name of the processed output workspace.");
 
     declareProperty(new PropertyWithValue<std::string>("LastTimeStamp","",Direction::Output),

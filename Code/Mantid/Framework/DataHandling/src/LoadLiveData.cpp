@@ -16,6 +16,8 @@
 
 #include "MantidDataHandling/LoadLiveData.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/WriteLock.h"
+#include "MantidKernel/ReadLock.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -77,6 +79,11 @@ namespace DataHandling
    */
   Mantid::API::Workspace_sptr LoadLiveData::runProcessing(Mantid::API::Workspace_sptr inputWS, bool PostProcess)
   {
+    if (!inputWS)
+      throw std::runtime_error("LoadLiveData::runProcessing() called for an empty input workspace.");
+    // Prevent others writing to the workspace while we run.
+    ReadLock _lock(*inputWS);
+
     // Make algorithm and set the properties
     IAlgorithm_sptr alg = this->makeAlgorithm(PostProcess);
     if (alg)
@@ -139,6 +146,10 @@ namespace DataHandling
    */
   void LoadLiveData::addChunk(Mantid::API::Workspace_sptr chunkWS)
   {
+    // Acquire locks on the workspaces we use
+    WriteLock _lock1(*m_accumWS);
+    ReadLock _lock2(*chunkWS);
+
     IAlgorithm_sptr alg = this->createSubAlgorithm("Plus");
     alg->setProperty("LHSWorkspace", m_accumWS);
     alg->setProperty("RHSWorkspace", chunkWS);
@@ -181,21 +192,25 @@ namespace DataHandling
    */
   void LoadLiveData::appendChunk(Mantid::API::Workspace_sptr chunkWS)
   {
-    IAlgorithm_sptr alg = this->createSubAlgorithm("AppendSpectra");
-    alg->setProperty("InputWorkspace1", m_accumWS);
-    alg->setProperty("InputWorkspace2", chunkWS);
-    alg->setProperty("ValidateInputs", false);
-    alg->execute();
-    if (!alg->isExecuted())
+    IAlgorithm_sptr alg;
     {
-      throw std::runtime_error("Error when calling conjoinChunk to append the spectra of the chunk of live data. See log.");
-    }
-    else
-    {
-      // TODO: What about workspace groups?
-      MatrixWorkspace_sptr temp = alg->getProperty("OutputWorkspace");
-      m_accumWS = temp;
-    }
+      ReadLock _lock1(*m_accumWS);
+      ReadLock _lock2(*chunkWS);
+
+      alg = this->createSubAlgorithm("AppendSpectra");
+      alg->setProperty("InputWorkspace1", m_accumWS);
+      alg->setProperty("InputWorkspace2", chunkWS);
+      alg->setProperty("ValidateInputs", false);
+      alg->execute();
+      if (!alg->isExecuted())
+      {
+        throw std::runtime_error("Error when calling conjoinChunk to append the spectra of the chunk of live data. See log.");
+      }
+    } // Release the locks.
+
+    // TODO: What about workspace groups?
+    MatrixWorkspace_sptr temp = alg->getProperty("OutputWorkspace");
+    m_accumWS = temp;
   }
 
 

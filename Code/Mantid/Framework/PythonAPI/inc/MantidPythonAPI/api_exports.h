@@ -17,6 +17,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidKernel/MultiThreaded.h"
 
 namespace Mantid
 {
@@ -45,7 +46,10 @@ namespace PythonAPI
     
     void workspaceRemoved(const std::string & name)
     {
-      PyCall_OneArg<void, std::string>::dispatch(m_self,"_workspaceRemoved" ,name);
+      PARALLEL_CRITICAL( FrameworkProxyCallback_python )
+      {
+        PyCall_OneArg<void, std::string>::dispatch(m_self,"_workspaceRemoved" ,name);
+      }
     }
 
     static void default_workspaceRemoved(FrameworkManagerProxy& self, const std::string & name)
@@ -55,7 +59,10 @@ namespace PythonAPI
 
     void workspaceReplaced(const std::string & name)
     {
-      PyCall_OneArg<void,std::string>::dispatch(m_self,"_workspaceReplaced",name);
+      PARALLEL_CRITICAL( FrameworkProxyCallback_python )
+      {
+        PyCall_OneArg<void,std::string>::dispatch(m_self,"_workspaceReplaced",name);
+      }
     }
 
     static void default_workspaceReplaced(FrameworkManagerProxy& self, const std::string & name)
@@ -65,7 +72,10 @@ namespace PythonAPI
 
     void workspaceAdded(const std::string & name)
     {
-      PyCall_OneArg<void, std::string>::dispatch(m_self,"_workspaceAdded",name);
+      PARALLEL_CRITICAL( FrameworkProxyCallback_python )
+      {
+        PyCall_OneArg<void, std::string>::dispatch(m_self,"_workspaceAdded",name);
+      }
     }
 
     static void default_workspaceAdded(FrameworkManagerProxy& self, const std::string & name)
@@ -75,7 +85,10 @@ namespace PythonAPI
 
     void workspaceStoreCleared()
     {
-      PyCall_NoArg<void>::dispatch(m_self,"_workspaceStoreCleared");
+      PARALLEL_CRITICAL( FrameworkProxyCallback_python )
+      {
+        PyCall_NoArg<void>::dispatch(m_self,"_workspaceStoreCleared");
+      }
     }
 
     static void default_workspaceStoreCleared(FrameworkManagerProxy& self)
@@ -85,7 +98,10 @@ namespace PythonAPI
 
     void algorithmFactoryUpdated()
     {
-      PyCall_NoArg<void>::dispatch(m_self,"_algorithmFactoryUpdated");
+      PARALLEL_CRITICAL( FrameworkProxyCallback_python )
+      {
+        PyCall_NoArg<void>::dispatch(m_self,"_algorithmFactoryUpdated");
+      }
     }
 
     static void default_algorithmFactoryUpdated(FrameworkManagerProxy& self)
