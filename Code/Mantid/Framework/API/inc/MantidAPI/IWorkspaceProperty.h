@@ -48,6 +48,8 @@ public:
   virtual Workspace_sptr getWorkspace() const = 0;
   /// Is the input workspace property optional (can be blank)?
   virtual bool isOptional() const = 0;
+  /// Will the workspace be locked when starting an algorithm?
+  virtual bool isLocking() const = 0;
   /// Returns the direction of the workspace property
   //-virtual const unsigned int direction() const = 0;
   /// Virtual destructor

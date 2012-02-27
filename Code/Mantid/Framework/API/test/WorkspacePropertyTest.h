@@ -235,6 +235,27 @@ public:
     TS_ASSERT_EQUALS( wsp5->direction(), 0 );      
   }
 
+  void test_locking()
+  {
+    // All the default ones are locking.
+    TS_ASSERT( wsp1->isLocking());
+    TS_ASSERT( wsp2->isLocking());
+    TS_ASSERT( wsp3->isLocking());
+    TS_ASSERT( wsp4->isLocking());
+    TS_ASSERT( wsp5->isLocking());
+
+    // Create one that is not locking
+    WorkspaceProperty<Workspace> * p1 = new WorkspaceProperty<Workspace>("workspace1","ws1",Direction::Input, false, false);
+    TS_ASSERT( !p1->isLocking());
+
+    // Copy constructor, both ways
+    WorkspaceProperty<Workspace> * wsp1_copy = new WorkspaceProperty<Workspace>(*wsp1);
+    TS_ASSERT( wsp1_copy->isLocking());
+    WorkspaceProperty<Workspace> * p2 = new WorkspaceProperty<Workspace>(*p1);
+    TS_ASSERT( !p2->isLocking());
+
+  }
+
 private:
   WorkspaceProperty<Workspace> *wsp1;
   WorkspaceProperty<Workspace> *wsp2;
