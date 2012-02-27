@@ -1,15 +1,54 @@
 /*WIKI* 
 
-This algorithm takes two input workspaces: a MDEventWorkspace containing the events in multi-dimensional space,
-as well as a PeaksWorkspace containing single-crystal peak locations.
+This algorithm performs integration of single-crystal peaks within a radius (with optional background subtraction) in reciprocal space.
 
+=== Inputs ===
+
+The algorithms takes two input workspaces:
+
+* A MDEventWorkspace containing the events in multi-dimensional space. This would be the output of [[ConvertToDiffractionMDWorkspace]].
+* As well as a PeaksWorkspace containing single-crystal peak locations. This could be the output of [[FindPeaksMD]]
+* The OutputWorkspace will contain a copy of the input PeaksWorkspace, with the integrated intensity and error found being filled in.
+
+=== Calculations ===
+
+Integration is performed by summing the weights of each MDEvent within the provided radii. Errors are also summed in quadrature.
+
+[[File:IntegratePeaksMD_graph1.png]]
+
+* All the Radii are specified in <math>\AA^{-1}</math>
 * A sphere of radius '''PeakRadius''' is integrated around the center of each peak.
+** This gives the summed intensity <math>I_{peak}</math> and the summed squared error <math>\sigma I_{peak}^2</math>.
+** The volume of integration is <math>V_{peak}</math>.
 * If '''BackgroundRadius''' is specified, then a shell, with radius r where '''BackgroundStartRadius''' < r < '''BackgroundRadius''', is integrated.
+** This gives the summed intensity <math>I_{shell}</math> and the summed squared error <math>\sigma I_{shell}^2</math>.
+** The volume of integration is <math>V_{shell}</math>.
 ** '''BackgroundStartRadius''' allows you to give some space between the peak and the background area.
-** '''BackgroundStartRadius''' = '''PeakRadius''' if not specified.
 
-The OutputWorkspace will contain a copy of the input PeaksWorkspace, with the integrated intensity
-and error found being filled in.
+==== Background Subtraction ====
+
+The background signal within PeakRadius is calculated by scaling the background signal density in the shell to the volume of the peak:
+
+<math>I_{bg} = I_{shell} \frac{V_{peak}}{V_{shell}}</math>
+
+with the error squared on that value:
+
+<math>\sigma I_{bg}^2 = \frac{V_{peak}}{V_{shell}} \sigma I_{shell}^2</math>
+
+This is applied to the integrated peak intensity <math>I_{peak}</math> to give the corrected intensity <math>I_{corr}</math>:
+
+<math>I_{corr} = I_{peak} - I_{bg}</math>
+
+with the errors summed in quadrature:
+
+<math>\sigma I_{corr}^2 = \sigma I_{peak}^2 + \sigma I_{bg}^2 </math>
+
+=== If BackgroundStartRadius is Omitted ===
+
+If BackgroundStartRadius is left blank, then '''BackgroundStartRadius''' = '''PeakRadius''', and the integration is as follows:
+
+[[File:IntegratePeaksMD_graph2.png]]
+
 
 *WIKI*/
 #include "MantidAPI/IMDEventWorkspace.h"
