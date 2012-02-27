@@ -53,6 +53,8 @@ void SaveFocusedXYE::init()
   Split[1] = "False";
   declareProperty("SplitFiles", "True", new Kernel::ListValidator(Split),
     "Save each spectrum in a different file (default true)" );
+  declareProperty("Bank", 1, "Start bank (spectrum) numbers at this number in the file.  "
+      "The bank number in the file will be the workspace index + StartAtBankNumber.");
   declareProperty("Append", false, "If true and Filename already exists, append, else overwrite");
   declareProperty("IncludeHeader", true, "Whether to include the header lines (default: true)");
 }
@@ -78,6 +80,13 @@ void SaveFocusedXYE::exec()
   }
   const bool append = getProperty("Append");
   const bool headers = getProperty("IncludeHeader");
+
+  int startingbank = getProperty("Bank");
+  if (startingbank < 0)
+  {
+    g_log.error() << "Starting bank number cannot be less than 0. " << std::endl;
+    throw std::invalid_argument("Incorrect starting bank number");
+  }
 
   std::string split=getProperty("SplitFiles");
   std::ostringstream number;
@@ -118,7 +127,7 @@ void SaveFocusedXYE::exec()
       }
       if (headers)
       {
-        out << "# Data for spectra :"<< i << std::endl;
+        out << "# Data for spectra :"<< i+startingbank << std::endl;
         out << "# " << inputWS->getAxis(0)->unit()->caption() << "              Y                 E" <<std::endl;
       }
       const size_t datasize = Y.size();
