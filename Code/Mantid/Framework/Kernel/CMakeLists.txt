@@ -208,6 +208,7 @@ set ( TEST_FILES
 	test/CacheTest.h
 	test/CompositeValidatorTest.h
 	test/ConfigServiceTest.h
+	test/DataServiceTest.h
 	test/DateAndTimeTest.h
 	test/DateValidatorTest.h
 	test/DirectoryValidatorTest.h
@@ -239,8 +240,8 @@ set ( TEST_FILES
 	test/MemoryTest.h
 	test/MersenneTwisterTest.h
 	test/MultiFileNameParserTest.h
-	test/MutexTest.h
 	test/MultiFileValidatorTest.h
+	test/MutexTest.h
 	test/NeutronAtomTest.h
 	test/NullValidatorTest.h
 	test/ProgressBaseTest.h

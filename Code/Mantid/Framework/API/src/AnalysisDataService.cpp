@@ -57,6 +57,7 @@ namespace Mantid
     void AnalysisDataServiceImpl::addOrReplace( const std::string& name, const boost::shared_ptr<API::Workspace>& workspace)
     {
       verifyName(name);
+
       //Attach the name to the workspace
       if( workspace ) workspace->setName(name);
       Kernel::DataService<API::Workspace>::addOrReplace(name, workspace);
