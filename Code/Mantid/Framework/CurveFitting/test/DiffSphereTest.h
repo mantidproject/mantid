@@ -56,7 +56,7 @@
 	        0.0376237,0.0373293,0.0370381,0.0367502,0.0364655,0.036184,0.0359056,0.0356303,0.0353581,
 	        0.0350888,0.0348225,0.0345592,0.0342987,0.0340411,0.0337862,0.0335342,0.0332848,0.0330382,
 	        0.0327942,0.0325528,0.032314};
-	    double wi=0.0, dw=0.01; //initial, final, and delta frequency
+	    double wi=0.0, dw=0.01; //initial and delta frequency
 	    double w=wi;
 	    double cc=0.1; //estimate errors as ten percent of the structure factor
 	    for(unsigned int i=0; i<nvalues; i++){
@@ -90,7 +90,7 @@
 		TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().addOrReplace(wsName, ws2D));
 
 		// set up DiffSphere fitting function
-		DiffSphere* fn = new DiffSphere();
+		InelasticDiffSphere* fn = new InelasticDiffSphere();
 		fn->initialize();
 
 		//Start with standard initial values

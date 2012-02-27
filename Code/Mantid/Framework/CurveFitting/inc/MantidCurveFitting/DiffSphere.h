@@ -48,16 +48,17 @@ namespace Mantid
       double intercept;
     };
 
-    class DLLExport DiffSphere : public API::ParamFunction, public API::IFunctionMW
+    class DLLExport InelasticDiffSphere : public API::ParamFunction, public API::IFunctionMW
     {
     public:
       /// Constructor
-      DiffSphere();
+      InelasticDiffSphere();
       /// Destructor
-      virtual ~DiffSphere() {}
+      virtual ~InelasticDiffSphere() {}
 
       /// overwrite IFunction base class methods
-      std::string name()const{return "DiffSphere";}
+      std::string name()const{return "InelasticDiffSphere";}
+      virtual const std::string category() const { return "Optimization\\FitFunctions";}
       std::vector<double> LorentzianCoefficients(double a) const;
 
     protected:
@@ -77,7 +78,31 @@ namespace Mantid
       void initLinJlist();
     };
 
+    class DLLExport DiffSphere : public API::CompositeFunctionMW
+    {
+    public:
+      /// Constructor
+      DiffSphere() {};
+      /// Destructor
+      ~DiffSphere() {};
+
+      /// overwrite IFunction base class methods
+      std::string name()const{return "DiffSphere";}
+      virtual const std::string category() const { return "Optimization\\FitFunctions";}
+      void functionMW(double* out, const double* xValues, const size_t nData)const;
+      void functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData);
+
+    protected:
+      /// overwrite IFunction base class method, which declare function parameters
+      virtual void init() {};
+
+    private:
+      API::IFunctionMW* m_elastic;    //elastic intensity of the DiffSphere structure factor
+      API::IFunctionMW* m_inelastic;  //inelastic intensity of the DiffSphere structure factor
+      std::string m_exprTie;          //tie that constrains the elastic intensity based on the inelastic parameters
+    };
+
   } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /*MANTID_DIFFSPHERE_LOGNORMAL_H_*/
+#endif /*MANTID_DIFFSPHERE_H_*/

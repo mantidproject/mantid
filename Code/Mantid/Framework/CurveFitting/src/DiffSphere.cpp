@@ -21,7 +21,7 @@ DECLARE_FUNCTION(DiffSphere)
 
 
 // initialize class attribute xnl with a list of coefficients in string format
-void DiffSphere::initXnlCoeff(){
+void InelasticDiffSphere::initXnlCoeff(){
   /* List of 98 coefficients sorted by increasing value (F.Volino,Mol. Phys. 41,271-279,1980)
    * For each coefficient, the triad (coeff, l, n) is defined
    */
@@ -63,7 +63,7 @@ void DiffSphere::initXnlCoeff(){
 }
 
 //initialize a set of coefficients that will remain constant during fitting
-void DiffSphere::initAlphaCoeff(){
+void InelasticDiffSphere::initAlphaCoeff(){
   for(std::vector<xnlc>::const_iterator it=xnl.begin(); it!=xnl.end(); ++it){
     double x = it->x;
     double l = (double)(it->l);
@@ -72,7 +72,7 @@ void DiffSphere::initAlphaCoeff(){
 }
 
 //initialize linear interpolation of factor J around its numerical divergence point a = it->x
-void DiffSphere::initLinJlist(){
+void InelasticDiffSphere::initLinJlist(){
   for(std::vector<xnlc>::const_iterator it=xnl.begin(); it!=xnl.end(); ++it){
     linearJ abJ;
     double x = it->x;
@@ -87,17 +87,19 @@ void DiffSphere::initLinJlist(){
   }
 }
 
-DiffSphere::DiffSphere() : lmax(24), divZone(0.1) {
+InelasticDiffSphere::InelasticDiffSphere() : lmax(24), divZone(0.1) {
+  declareParameter("Intensity",1.0, "scaling factor");
   declareParameter("Radius", 1.0, "Sphere radius");
   declareParameter("Diffusion", 1.0, "Diffusion coefficient, in units of");
   declareParameter("Q",1.0, "Momentum transfer");
+
   initXnlCoeff();   // initialize this->xnl with the list of coefficients xnlist
   initAlphaCoeff(); // initialize this->alpha, certain factors constant over the fit
   initLinJlist();   // initialize this->linJlist, linear interpolation around numerical divergence
 }
 
 //calculate the coefficients for each Lorentzian
-std::vector<double> DiffSphere::LorentzianCoefficients(double a)const{
+std::vector<double> InelasticDiffSphere::LorentzianCoefficients(double a)const{
 
   //precompute the 2+lmax spherical bessel functions (26 in total)
   double jl[2+lmax];
@@ -136,7 +138,8 @@ std::vector<double> DiffSphere::LorentzianCoefficients(double a)const{
 } // end of LorentzianCoefficients
 
 
-void DiffSphere::functionMW(double* out, const double* xValues, const size_t nData)const{
+void InelasticDiffSphere::functionMW(double* out, const double* xValues, const size_t nData)const{
+  const double& I = getParameter("Intensity");
   const double& R = getParameter("Radius");
   const double& D = getParameter("Diffusion");
   const double& Q = getParameter("Q");
@@ -152,7 +155,7 @@ void DiffSphere::functionMW(double* out, const double* xValues, const size_t nDa
       double z = it->x;
       double zw = z*z*D/(R*R);
       double L = zw/(zw*zw+x*x); //Lorentzian
-      out[i] += (*itYJ) * L;
+      out[i] += I * (*itYJ) * L;
       ++itYJ;  //retrieve next coefficient
     } // end of for(std::vector<xnlc>::const_iterator it....
   } // end of for (unsigned int i...
@@ -160,7 +163,7 @@ void DiffSphere::functionMW(double* out, const double* xValues, const size_t nDa
 
 /* calNumericalDeriv requires evaluation of four extra functionMW. We can avoid by requiring
  *  the 'Simplex' algorithm, which does not require derivative
-void DiffSphere::functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData){
+void InelasticDiffSphere::functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData){
   calNumericalDeriv(out, xValues, nData);
 }
 */
