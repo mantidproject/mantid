@@ -57,9 +57,10 @@ namespace Mantid
       bool isConnected();
 
     private:
-      const std::string m_filename; ///< The file to read
-      int m_numChunks;              ///< The number of pieces to divide the file into
-      int m_nextChunk;              ///< The number of the next chunk to be loaded
+      const std::string m_filename;   ///< The file to read
+      const std::string m_tempWSname; ///< The name of the hidden workspace that holds the next chunk
+      int m_numChunks;                ///< The number of pieces to divide the file into
+      int m_nextChunk;                ///< The number of the next chunk to be loaded
 
       /// Future that holds the result of the latest call to LoadEventPreNexus
       Poco::ActiveResult<bool> * m_chunkload;
@@ -67,7 +68,7 @@ namespace Mantid
       /// Shared pointer to the LoadEventPreNexus instance - it needs to be kept alive.
       API::Algorithm_sptr m_loader;
 
-      static Kernel::Logger& g_log;    ///< reference to the logger class
+      static Kernel::Logger& g_log;   ///< reference to the logger class
     };
 
   } // namespace DataHandling

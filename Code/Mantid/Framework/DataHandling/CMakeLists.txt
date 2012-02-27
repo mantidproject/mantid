@@ -244,7 +244,7 @@ set ( TEST_FILES
 	test/DefineGaugeVolumeTest.h
 	test/DeleteTableRowsTest.h
 	test/FakeEventDataListenerTest.h
-	#test/FileEventDataListenerTest.h
+	test/FileEventDataListenerTest.h
 	test/FindDetectorsInShapeTest.h
 	test/FindDetectorsParTest.h
 	test/GetMaskedDetectorsTest.h

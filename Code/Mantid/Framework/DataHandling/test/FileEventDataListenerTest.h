@@ -1,0 +1,60 @@
+#ifndef MANTID_DATAHANDLING_FILEEVENTDATALISTENERTEST_H_
+#define MANTID_DATAHANDLING_FILEEVENTDATALISTENERTEST_H_
+
+#include <cxxtest/TestSuite.h>
+#include "MantidAPI/LiveListenerFactory.h"
+#include "MantidDataObjects/EventWorkspace.h"
+
+using namespace Mantid::Kernel;
+using namespace Mantid::API;
+
+class FileEventDataListenerTest : public CxxTest::TestSuite
+{
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static FileEventDataListenerTest *createSuite() { return new FileEventDataListenerTest(); }
+  static void destroySuite( FileEventDataListenerTest *suite ) { delete suite; }
+
+  // This is just a test class to help with development, so let's keep the test simple and all in one method
+  void testTheListener()
+  {
+    // Set the properties that are required by this listener
+    ConfigService::Instance().setString("fileeventdatalistener.filename","REF_L_32035_neutron_event.dat");
+    ConfigService::Instance().setString("fileeventdatalistener.chunks","2");
+
+    // Create the listener. Remember: this will call connect()
+    ILiveListener_sptr listener = LiveListenerFactory::Instance().create("FileEventDataListener");
+
+    // Test the 'property' methods
+    TS_ASSERT( listener )
+    TS_ASSERT_EQUALS( listener->name(), "FileEventDataListener")
+    TS_ASSERT( ! listener->supportsHistory() )
+    TS_ASSERT( listener->buffersEvents() )
+    TS_ASSERT( listener->isConnected() )
+
+    TS_ASSERT_THROWS_NOTHING( listener->start(0) );
+
+    MatrixWorkspace_const_sptr buffer;
+    TS_ASSERT_THROWS_NOTHING( buffer = listener->extractData())
+    // Check this is the only surviving reference to it
+    TS_ASSERT_EQUALS( buffer.use_count(), 1 )
+    TS_ASSERT_EQUALS( buffer->getNumberHistograms(), 77824 )
+
+    MatrixWorkspace_const_sptr buffer2;
+    // Call extractData again
+    TS_ASSERT_THROWS_NOTHING( buffer2 = listener->extractData())
+    // Check this is the only surviving reference to it
+    TS_ASSERT_EQUALS( buffer2.use_count(), 1 )
+    // Check it's a different workspace to last time
+    TS_ASSERT_DIFFERS( buffer.get(), buffer2.get() )
+    TS_ASSERT_EQUALS( buffer2->getNumberHistograms(), 77824 )
+
+    // Calling it again will throw as it's the end of the file
+    TS_ASSERT_THROWS( listener->extractData(), std::runtime_error )
+  }
+
+};
+
+
+#endif /* MANTID_DATAHANDLING_FILEEVENTDATALISTENERTEST_H_ */
