@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_LoadPreNexus_H_
-#define MANTID_DATAHANDLING_LoadPreNexus_H_
+#ifndef MANTID_DATAHANDLING_DetermineChunking_H_
+#define MANTID_DATAHANDLING_DetermineChunking_H_
 
 #include <string>
 #include <vector>
@@ -13,7 +13,7 @@ namespace Mantid
 namespace DataHandling
 {
 
-  /** LoadPreNexus : Workflow algorithm to load a collection of preNeXus files.
+  /** DetermineChunking : Workflow algorithm to load a collection of preNeXus files.
     
     @date 2012-01-30
 
@@ -37,26 +37,23 @@ namespace DataHandling
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport LoadPreNexus  :  public API::IDataFileChecker
+  class DLLExport DetermineChunking  :  public API::IDataFileChecker
   {
   public:
-    LoadPreNexus();
-    virtual ~LoadPreNexus();
+    DetermineChunking();
+    virtual ~DetermineChunking();
     
     virtual const std::string name() const;
     virtual int version() const;
     virtual const std::string category() const;
     virtual const char * filePropertyName() const;
-    void parseRuninfo(const std::string &runinfo, std::string &dataDir, std::vector<std::string> &eventFilenames);
     bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
     int fileCheck(const std::string& filePath);
   private:
     virtual void initDocs();
     void init();
     void exec();
-    void runLoadNexusLogs(const std::string &runinfo, const std::string &dataDir,
-                          Mantid::API::IEventWorkspace_sptr wksp, const double prog_start, const double prog_stop);
-    void runLoadMonitors(const double prog_start, const double prog_stop);
+    std::string setTopEntryName(std::string m_filename);
 
   };
 
@@ -64,4 +61,4 @@ namespace DataHandling
 } // namespace DataHandling
 } // namespace Mantid
 
-#endif  /* MANTID_DATAHANDLING_LoadPreNexus_H_ */
+#endif  /* MANTID_DATAHANDLING_DetermineChunking_H_ */
