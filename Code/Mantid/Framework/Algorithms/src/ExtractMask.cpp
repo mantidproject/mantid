@@ -77,7 +77,6 @@ namespace Mantid
       MatrixWorkspace_sptr outputWS(maskWS);
       WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
       outputWS->setTitle(inputWS->getTitle());
-      outputWS->getInstrument()->getParameterMap()->clearParametersByName("masked"); // turn off the mask bit
 
       bool inputWSIsSpecial(false);
       {

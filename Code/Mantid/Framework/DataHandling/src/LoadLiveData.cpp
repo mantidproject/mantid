@@ -69,6 +69,44 @@ namespace DataHandling
   }
 
   //----------------------------------------------------------------------------------------------
+  /** Run either the chunk or post-processing step
+   *
+   * @param inputWS :: workspace being processed
+   * @param PostProcess :: flag, TRUE if doing the post-processing
+   * @return the processed workspace. Will point to inputWS if no processing is to do
+   */
+  Mantid::API::Workspace_sptr LoadLiveData::runProcessing(Mantid::API::Workspace_sptr inputWS, bool PostProcess)
+  {
+    // Make algorithm and set the properties
+    IAlgorithm_sptr alg = this->makeAlgorithm(PostProcess);
+    if (alg)
+    {
+      if (PostProcess)
+        g_log.notice() << "Performing post-processing";
+      else
+        g_log.notice() << "Performing chunk processing";
+      g_log.notice() << " using " << alg->name() << std::endl;
+
+      // Run the processing algorithm
+      alg->setChild(true);
+      // TODO: Handle different inputs?
+      alg->setProperty("InputWorkspace", inputWS);
+      alg->setPropertyValue("OutputWorkspace", "anonymous_processed_chunk");
+      alg->execute();
+      if (!alg->isExecuted())
+        throw std::runtime_error("Error processing the chunk workspace using " + alg->name() + ". See log for details.");
+
+      // Retrieve the output.
+      //TODO: Handle other output types!!!
+      MatrixWorkspace_sptr temp = alg->getProperty("OutputWorkspace");
+      return temp;
+    }
+    else
+      // Don't do any processing.
+      return inputWS;
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Perform the processing on the chunk of workspace data, using the
    * algorithm or scrip given in the algorithm properties
    *
@@ -77,26 +115,7 @@ namespace DataHandling
    */
   Mantid::API::Workspace_sptr LoadLiveData::processChunk(Mantid::API::MatrixWorkspace_sptr chunkWS)
   {
-    // Make algorithm and set the properties
-    IAlgorithm * alg = this->makeAlgorithm(false);
-    if (alg)
-    {
-      g_log.notice() << "Performing chunk processing using " << alg->name() << std::endl;
-      // Run the processing algorithm
-      alg->setChild(true);
-      alg->setProperty("InputWorkspace", chunkWS);
-      alg->setPropertyValue("OutputWorkspace", "anonymous_processed_chunk");
-      alg->execute();
-      if (!alg->isExecuted())
-        throw std::runtime_error("Error processing the chunk workspace using " + alg->name() + ". See log for details.");
-
-      // Retrieve the output.
-      MatrixWorkspace_sptr temp = alg->getProperty("OutputWorkspace");
-      return temp;
-    }
-    else
-      // Don't do any processing.
-      return chunkWS;
+    return runProcessing(chunkWS, false);
   }
 
 
@@ -107,8 +126,7 @@ namespace DataHandling
    */
   void LoadLiveData::runPostProcessing()
   {
-    // TODO: Data processing
-    m_outputWS = m_accumWS;
+    m_outputWS = runProcessing(m_accumWS, true);
   }
 
 

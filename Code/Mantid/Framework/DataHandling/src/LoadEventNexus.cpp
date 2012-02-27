@@ -39,6 +39,7 @@ Veto pulses can be filtered out in a separate step using [[FilterByLogValue]]:
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/LoadAlgorithmFactory.h" // For the DECLARE_LOADALGORITHM macro
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/TableRow.h"
 
 #include <fstream>
 #include <sstream>
@@ -876,7 +877,7 @@ void LoadEventNexus::init()
       "The file name is typically of the form INST_####_event.nxs (N.B. case sensitive if running on Linux)." );
 
   this->declareProperty(
-    new WorkspaceProperty<IEventWorkspace>("OutputWorkspace", "", Direction::Output),
+    new WorkspaceProperty<Workspace>("OutputWorkspace", "", Direction::Output),
     "The name of the output EventWorkspace in which to load the EventNexus file." );
 
   declareProperty(
@@ -932,6 +933,8 @@ void LoadEventNexus::init()
       "This specified the tolerance to use (in microseconds) when compressing.");
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(1);
+  declareProperty("MaxChunkSize", EMPTY_DBL(),
+      "Get chunking strategy for chunks with this number of Gbytes. File will not be loaded if this option is set.");
   declareProperty("ChunkNumber", EMPTY_INT(), mustBePositive,
       "If loading the file by sections ('chunks'), this is the section number of this execution of the algorithm.");
   declareProperty("TotalChunks", EMPTY_INT(), mustBePositive->clone(),
@@ -943,6 +946,7 @@ void LoadEventNexus::init()
   std::string grp3 = "Reduce Memory Use";
   setPropertyGroup("Precount", grp3);
   setPropertyGroup("CompressTolerance", grp3);
+  setPropertyGroup("MaxChunkSize", grp3);
   setPropertyGroup("ChunkNumber", grp3);
   setPropertyGroup("TotalChunks", grp3);
 
@@ -1071,7 +1075,8 @@ void LoadEventNexus::exec()
   WS = createEmptyEventWorkspace(); // Algorithm currently relies on an object-level workspace ptr
   loadEvents(&prog, false); // Do not load monitor blocks
   //Save output
-  this->setProperty<IEventWorkspace_sptr>("OutputWorkspace", WS);
+  double maxChunk = this->getProperty("MaxChunkSize");
+  if (isEmpty(maxChunk)) this->setProperty<IEventWorkspace_sptr>("OutputWorkspace", WS);
   // Load the monitors
   if (load_monitors)
   {
@@ -1190,9 +1195,13 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
 
   //Now we want to go through all the bankN_event entries
   vector<string> bankNames;
+  typedef std::map<std::string,std::string> string_map_t; 
   map<string, string> entries = file.getEntries();
   map<string,string>::const_iterator it = entries.begin();
   std::string classType = monitors ? "NXmonitor" : "NXevent_data";
+  size_t total_events = 0;
+  double maxChunk = this->getProperty("MaxChunkSize");
+  std::vector<uint32_t> bank_events;
   for (; it != entries.end(); ++it)
   {
     std::string entry_name(it->first);
@@ -1200,12 +1209,35 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
     if ( entry_class == classType )
     {
       bankNames.push_back( entry_name );
+      if (!isEmpty(maxChunk))
+      {
+        try
+        {
+          // Get total number of events for each bank
+          file.openGroup(entry_name,entry_class);
+          file.openData("total_counts");
+          file.getData(bank_events);
+          total_events +=bank_events[0];
+          file.closeData();
+          file.closeGroup();
+        }
+        catch (::NeXus::Exception&)
+        {
+          g_log.error() << "Unable to find total counts to determine chunking strategy." << std::endl;
+        }
+      }
     }
   }
 
   //Close up the file
   file.closeGroup();
   file.close();
+  if (!isEmpty(maxChunk))
+  {
+    Mantid::API::ITableWorkspace_sptr strategy = determineChunking(total_events,maxChunk);
+    this->setProperty("OutputWorkspace", strategy);
+    return;
+  }
 
   // Delete the output workspace name if it existed
   std::string outName = getPropertyValue("OutputWorkspace");
@@ -2034,6 +2066,25 @@ void LoadEventNexus::loadTimeOfFlightData(::NeXus::File& file, DataObjects::Even
   } // for wi
   file.closeData();
 }
+  Mantid::API::ITableWorkspace_sptr LoadEventNexus::determineChunking(size_t total_events, double maxChunkSize)
+  {
+    // factor is 3 * 8 / (1024*1024*1024) to convert to Gbytes
+    double filesize = static_cast<double>(total_events) * 24.0 / (1024.0*1024.0*1024.0);
+    int numChunks = static_cast<int>(filesize/maxChunkSize);
+    numChunks ++; //So maxChunkSize is not exceeded 
+    if (numChunks < 0) numChunks = 1;
+    Mantid::API::ITableWorkspace_sptr strategy = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+    strategy->addColumn("int","ChunkNumber");
+    strategy->addColumn("int","TotalChunks");
+
+    for (int i = 1; i <= numChunks; i++) 
+    {
+      Mantid::API::TableRow row = strategy->appendRow();
+      row << i << numChunks;
+    }
+    return strategy;
+
+  }
 
 } // namespace DataHandling
 } // namespace Mantid

@@ -411,8 +411,6 @@ namespace Mantid
       // no logging of input if a child algorithm (except for python child algos)
       if (!m_isChildAlgorithm || m_alwaysStoreInADS) logAlgorithmInfo();
 
-      g_log.debug() << this->name() << " is executing with isChild = " << this->isChild() << std::endl;
-
       // Check all properties for validity
       if ( !validateProperties() )
       {

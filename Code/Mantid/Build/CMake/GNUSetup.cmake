@@ -22,16 +22,17 @@ set( GNUFLAGS "${GNUFLAGS} -Wno-deprecated -Wno-write-strings")
 
 # Check if we have a new enough version for this flag
 IF (GCC_COMPILER_VERSION VERSION_GREATER "4.3")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-result")
+	set(GNUFLAGS "${GNUFLAGS} -Wno-unused-result")
 ENDIF (GCC_COMPILER_VERSION VERSION_GREATER "4.3")
 
 # Add some options for debug build to help the Zoom profiler
 set( CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fno-omit-frame-pointer" )
 set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer" )
 
-# Set the options fo gcc and g++
+# Set the options for gcc and g++
 set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GNUFLAGS}" )
-set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GNUFLAGS} -Woverloaded-virtual -fno-operator-names" )
+# -Wno-overloaded-virtual is down here because it's not applicable to the C_FLAGS
+set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GNUFLAGS} -Woverloaded-virtual -fno-operator-names -std=c++0x" )
 # Cleanup
 set ( GNUFLAGS )
 

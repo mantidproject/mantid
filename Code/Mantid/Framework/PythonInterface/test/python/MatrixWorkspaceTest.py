@@ -241,6 +241,14 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertEquals(first.getPropertyValue("OutputWorkspace"), "raw")
         ads.remove('raw')
 
+    def test_setTitle(self):        
+        run_algorithm('CreateWorkspace', OutputWorkspace='ws1',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
+        ads = AnalysisDataService.Instance()
+        ws1 = ads['ws1']
+        title = 'test_title'
+        ws1.setTitle(title)
+        self.assertEquals(title, ws1.getTitle())
+
 if __name__ == '__main__':
     unittest.main()
             

@@ -32,6 +32,7 @@ void export_Workspace()
     .def("getName", &Workspace::getName, return_value_policy<copy_const_reference>(), 
          "Returns the name of the workspace. This could be an empty string")
     .def("getTitle", &Workspace::getTitle, "Returns the title of the workspace")
+    .def("setTitle", &Workspace::setTitle)
     .def("getComment", &Workspace::getComment, return_value_policy<copy_const_reference>(), "Returns the comment field on the workspace")
     .def("isDirty", &Workspace::isDirty, Workspace_isDirtyOverloads(args("n"), "True if the workspace has run more than n algorithms (Default=1)"))
     .def("getMemorySize", &Workspace::getMemorySize, "Returns the memory footprint of the workspace in KB")

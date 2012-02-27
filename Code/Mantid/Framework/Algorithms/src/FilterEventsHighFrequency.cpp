@@ -80,6 +80,7 @@ namespace Algorithms
 
     this->declareProperty("WorkspaceIndex", -1, "The index of the workspace to have its events filtered. ");
     this->declareProperty("NumberOfIntervals", 1, "Number of even intervals in the selected region. ");
+    this->declareProperty("SelectedInterval", -1, "The interval selected to be a Workspace. If not selected, all!");
 
     this->declareProperty("NumberOfWriteOutEvents", 1000,
         "Number of events filtered to be written in output file for debug.");
@@ -132,6 +133,13 @@ namespace Algorithms
     {
       g_log.error() << "Number of filter intervals (windows) cannot be less of equal to 0.  Input = " << mFilterIntervals << std::endl;
       throw std::invalid_argument("Non-positive number of filter intervals is not allowed.");
+    }
+    mSelectedInterval = getProperty("SelectedInterval");
+    if (mSelectedInterval >= mFilterIntervals)
+    {
+      g_log.warning() << "Input selected interval index is out of range " << mSelectedInterval
+          << "  .  All data filtered in will be used!" << std::endl;
+      mSelectedInterval = -1;
     }
     numOutputEvents = getProperty("NumberOfWriteOutEvents");
 
@@ -849,20 +857,6 @@ namespace Algorithms
         mindex = size_t(abstimeit-mSETimes.begin())-1;
       }
 
-      // v. Filter in/out? by VALUE
-      double msevalue = mSEValues[mindex];
-      bool selected = false;
-      if (msevalue >= mLowerLimit && msevalue <= mUpperLimit){
-        DataObjects::TofEvent newevent(rawevent.m_tof, rawevent.m_pulsetime);
-        newevents.push_back(newevent);
-        selected = true;
-        numeventsin ++;
-      } else
-      {
-        numeventsout ++;
-        numoutvalue ++;
-      }
-
       // vi. Determine section the event belonged to
       int section;
       if (mindex == mSETimes.size()-1)
@@ -875,20 +869,29 @@ namespace Algorithms
         section = static_cast<int>( static_cast<double>(deltime)/(static_cast<double>(window)/static_cast<double>(mFilterIntervals)) );
       }
 
+      // v. Filter in/out? by VALUE and section as an option
+      double msevalue = mSEValues[mindex];
+      bool selected = false;
+      if (msevalue >= mLowerLimit && msevalue <= mUpperLimit){
+        if (mSelectedInterval < 0 || section==mSelectedInterval)
+        {
+          // Be filtered again by interval
+          DataObjects::TofEvent newevent(rawevent.m_tof, rawevent.m_pulsetime);
+          newevents.push_back(newevent);
+          selected = true;
+          numeventsin ++;
+        }
+      } else
+      {
+        numeventsout ++;
+        numoutvalue ++;
+      }
+
       if (selected && static_cast<int>(iv) <= numOutputEvents)
       {
         ofs << iv << "\t" << rawevent.pulseTime().totalNanoseconds() << "\t" << rawevent.tof() << "\t"
             << correctedtof << "\t" << mtime << "\t" << section << std::endl;
-        std::cout << iv << "\t" << rawevent.pulseTime().totalNanoseconds() << "\t" << rawevent.tof() << "\t"
-            << correctedtof << "\t-->\t" << mtime << "\t" << section << std::endl;
       }
-      /*
-      else
-      {
-        std::cout << rawevent.pulseTime().totalNanoseconds() << "\t" << rawevent.tof() << "\t"
-            << correctedtof << "\t" << "Not Selected" << std::endl;
-      }
-      */
     } // ENDFOR iv: each event
 
     ofs.close();
@@ -925,9 +928,14 @@ namespace Algorithms
     g_log.information() << "Log:     T0 = " << mSETimes[0] << "  To Filter T0 " << mSETimes[0]-mFilterT0.totalNanoseconds() << std::endl;
     g_log.information() << "Log:     Tf = " << mSETimes[mSETimes.size()-1] << "  To Filter T0 " <<
         mSETimes[mSETimes.size()-1]-mFilterT0.totalNanoseconds() << std::endl;
-    g_log.information() << "Neutron 0   :   Pulse Time = " << events.getEvent(0).m_pulsetime << std::endl;
-    g_log.information() << "Neutron Last:   Pulse Time = " << events.getEvent(events.getNumberEvents()-1).m_pulsetime << std::endl;
-    // PARALLEL_END_INTERUPT_REGION
+    if (events.getNumberEvents() > 0)
+    {
+      g_log.information() << "Neutron 0   :   Pulse Time = " << events.getEvent(0).m_pulsetime << std::endl;
+      g_log.information() << "Neutron Last:   Pulse Time = " << events.getEvent(events.getNumberEvents()-1).m_pulsetime << std::endl;
+    } else
+    {
+      g_log.information() << "There is no events in this spectrum" << std::endl;
+    }
   }
 
 } // namespace Mantid

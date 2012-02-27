@@ -384,6 +384,7 @@ public:
         WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name) );
     //Valid WS and it is an EventWorkspace
     TS_ASSERT( WS );
+    if (!WS) return;
     TS_ASSERT_EQUALS( WS->getNumberHistograms(), 117760);
     TS_ASSERT_EQUALS( WS->getNumberEvents(), 10730482);
     for (size_t wi = 0; wi <  WS->getNumberHistograms(); wi++)

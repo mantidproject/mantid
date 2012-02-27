@@ -210,7 +210,7 @@ void MemoryStats::process_mem_system(size_t & sys_avail, size_t & sys_total)
   }
   // Can get the info on the memory that we've already obtained but aren't using right now
   const int unusedReserved = mallinfo().fordblks/1024;
-  g_log.debug() << "Linux - Adding reserved but unused memory of " << unusedReserved << " KB\n";
+  //g_log.debug() << "Linux - Adding reserved but unused memory of " << unusedReserved << " KB\n";
   sys_avail += unusedReserved;
 #elif __APPLE__
   // Get the total RAM of the system

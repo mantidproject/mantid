@@ -443,7 +443,7 @@ void EQSANSLoad::exec()
   IAlgorithm_sptr loadAlg = createSubAlgorithm("LoadEventNexus", 0, 0.2);
   loadAlg->setProperty("Filename", fileName);
   loadAlg->executeAsSubAlg();
-  IEventWorkspace_sptr dataWS_tmp = loadAlg->getProperty("OutputWorkspace");
+  Workspace_sptr dataWS_tmp = loadAlg->getProperty("OutputWorkspace");
   dataWS = boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS_tmp);
 
   // Get the sample-detector distance

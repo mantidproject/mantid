@@ -2,12 +2,9 @@
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/MersenneTwister.h"
+#include "MantidKernel/ConfigService.h"
 
-namespace {
-  // The data rate to (attempt to) generate in events/sec
-  long DATA_RATE = 200;
-}
-
+using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 namespace Mantid
@@ -20,6 +17,10 @@ namespace DataHandling
   FakeEventDataListener::FakeEventDataListener() : ILiveListener(),
       m_buffer(), m_rand(new Kernel::MersenneTwister), m_timer(), m_callbackloop(1)
   {
+    if ( ! ConfigService::Instance().getValue("fakeeventdatalistener.datarate",m_datarate) )
+    {
+      m_datarate = 200; // Default data rate. Low so that our lowest-powered buildserver can cope.
+    }
   }
     
   /// Destructor
@@ -53,12 +54,12 @@ namespace DataHandling
 
     // If necessary, calculate the number of events we need to generate on each call of generateEvents
     // Rather limited resolution of 2000 events/sec
-    if ( DATA_RATE > 2000 )
+    if ( m_datarate > 2000 )
     {
-      m_callbackloop = DATA_RATE / 2000;
+      m_callbackloop = m_datarate / 2000;
     }
     // Using a Poco::Timer here. Probably a real listener will want to use a Poco::Activity or ActiveMethod.
-    m_timer.setPeriodicInterval( (DATA_RATE > 2000 ? 1 : 2000/DATA_RATE) );
+    m_timer.setPeriodicInterval( (m_datarate > 2000 ? 1 : 2000/m_datarate) );
     m_timer.start(Poco::TimerCallback<FakeEventDataListener>(*this,&FakeEventDataListener::generateEvents));
 
     return;

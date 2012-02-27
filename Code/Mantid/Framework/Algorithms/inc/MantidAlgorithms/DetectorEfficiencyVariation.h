@@ -59,6 +59,7 @@ namespace Mantid
       virtual ~DetectorEfficiencyVariation() {};
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "DetectorEfficiencyVariation";}
+      virtual const std::string category() const;
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return (1);}
 

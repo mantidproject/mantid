@@ -1,14 +1,15 @@
 /*WIKI*
 
-
-
 This algorithm loads masking file to a SpecialWorkspace2D/MaskWorkspace.
 
 The format can be
 * XML
 * ... ...
 
-
+Supporting
+ * Component ID --> Detector IDs --> Workspace Indexes
+ * Detector ID --> Workspace Indexes
+ * Spectrum ID --> Workspace Indexes
 
 
 
@@ -25,6 +26,8 @@ The format can be
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDTypes.h"
+
+#include <fstream>
 
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
@@ -49,6 +52,7 @@ using Poco::XML::NodeFilter;
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace std;
 
 namespace Mantid
 {
@@ -89,9 +93,11 @@ namespace DataHandling
 
     // 1. Declare property
     declareProperty("Instrument", "", "Name of instrument to mask.");
-    declareProperty(new FileProperty("InputFile", "", FileProperty::Load, ".xml"),
-        "XML file for masking. ");
-    // declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace", "Masking", Direction::Output),
+    std::vector<std::string> exts;
+    exts.push_back(".xml");
+    exts.push_back(".msk");
+    declareProperty(new FileProperty("InputFile", "", FileProperty::Load, exts),
+        "Masking file for masking. Supported file format is XML and ISIS ASCII. ");
     declareProperty(new WorkspaceProperty<DataObjects::SpecialWorkspace2D>("OutputWorkspace", "Masking", Direction::Output),
         "Output Masking Workspace");
 
@@ -109,10 +115,29 @@ namespace DataHandling
     this->intializeMaskWorkspace();
     setProperty("OutputWorkspace",mMaskWS);
 
-    // 2. Parse XML File
-    std::string xmlfilename = getProperty("InputFile");
-    this->initializeXMLParser(xmlfilename);
-    this->parseXML();
+    mDefaultToUse = true;
+
+    // 2. Parse Mask File
+
+    std::string filename = getProperty("InputFile");
+
+    if (boost::ends_with(filename, "l") || boost::ends_with(filename, "L"))
+    {
+      // 2.1 XML File
+      this->initializeXMLParser(filename);
+      this->parseXML();
+    }
+    else if (boost::ends_with(filename, "k") || boost::ends_with(filename, "K"))
+    {
+      // 2.2 ISIS Masking file
+      loadISISMaskFile(filename);
+      mDefaultToUse = true;
+    }
+    else
+    {
+      g_log.error() << "File " << filename << " is not in supported format. " << std::endl;
+      return;
+    }
 
     // 3. Translate and set geometry
     g_log.information() << "To Mask: " << std::endl;
@@ -122,7 +147,7 @@ namespace DataHandling
 
     // this->bankToDetectors(mask_bankid_single, maskdetids, maskdetidpairsL, maskdetidpairsU); use generalized componentToDetectors()
     this->componentToDetectors(mask_bankid_single, maskdetids);
-    this->spectrumToDetectors(mask_specid_single, mask_specid_pair_low, mask_specid_pair_up, maskdetids, maskdetidpairsL, maskdetidpairsU);
+    // this->spectrumToDetectors(mask_specid_pair_low, mask_specid_pair_up, maskdetids);
     this->detectorToDetectors(mask_detid_single, mask_detid_pair_low, mask_detid_pair_up, maskdetids, maskdetidpairsL, maskdetidpairsU);
 
     g_log.information() << "To UnMask: " << std::endl;
@@ -131,13 +156,15 @@ namespace DataHandling
     std::vector<int32_t> unmaskdetidpairsU;
 
     this->bankToDetectors(unmask_bankid_single, unmaskdetids, unmaskdetidpairsL, unmaskdetidpairsU);
-    this->spectrumToDetectors(unmask_specid_single, unmask_specid_pair_low, unmask_specid_pair_up, unmaskdetids, unmaskdetidpairsL, unmaskdetidpairsU);
+    // this->spectrumToDetectors(unmask_specid_pair_low, unmask_specid_pair_up, unmaskdetids);
     this->detectorToDetectors(unmask_detid_single, unmask_detid_pair_low, unmask_detid_pair_up, unmaskdetids, unmaskdetidpairsL, unmaskdetidpairsU);
 
     // 4. Apply
 
     this->initDetectors();
     this->processMaskOnDetectors(true, maskdetids, maskdetidpairsL, maskdetidpairsU);
+    this->processMaskOnWorkspaceIndex(true, mask_specid_pair_low, mask_specid_pair_up);
+
     this->processMaskOnDetectors(false, unmaskdetids, unmaskdetidpairsL, unmaskdetidpairsU);
 
     return;
@@ -302,28 +329,63 @@ namespace DataHandling
   }
 
   /*
-   * Convert spectrum to detectors
+   * Set the mask on the spectrum IDs
    */
-  void LoadMask::spectrumToDetectors(std::vector<int32_t> singles, std::vector<int32_t> pairslow, std::vector<int32_t> pairsup,
-      std::vector<int32_t>& detectors,
-      std::vector<int32_t>& detectorpairslow, std::vector<int32_t>& detectorpairsup){
-
-    UNUSED_ARG(detectors)
-    UNUSED_ARG(detectorpairslow)
-    UNUSED_ARG(detectorpairsup)
-
-    if (singles.size() == 0 && pairslow.size() == 0)
+  void LoadMask::processMaskOnWorkspaceIndex(bool mask, std::vector<int32_t> pairslow, std::vector<int32_t> pairsup)
+  {
+    // 1. Check
+    if (pairslow.size() == 0)
       return;
-
-    g_log.error() << "SpectrumID in XML File (ids) Is Not Supported!  Spectrum IDs" << std::endl;
-
-    for (size_t i = 0; i < singles.size(); i ++){
-      g_log.information() << "Not Taking Into Account: Spectrum " << singles[i] << std::endl;
-    }
-    for (size_t i = 0; i < pairslow.size(); i ++){
-      g_log.information() << "Not Taking Into Account: Spectrum " << pairslow[i] << "  To " << pairsup[i] << std::endl;
+    if (pairslow.size() != pairsup.size())
+    {
+      g_log.error() << "Input spectrum IDs are not paired.  Size(low) = " << pairslow.size()
+          << ", Size(up) = " << pairsup.size() << std::endl;
+      throw std::invalid_argument("Input spectrum IDs are not paired. ");
     }
 
+    // 2. Get Map
+    // 1. Get map
+    spec2index_map* s2imap = mMaskWS->getSpectrumToWorkspaceIndexMap();
+    spec2index_map::iterator s2iter;
+
+    // 3. Set mask
+    for (size_t i = 0; i < pairslow.size(); i ++)
+    {
+      // TODO Make this function work!
+      g_log.warning() << "Mask Spectrum " << pairslow[i] << "  To " << pairsup[i] << std::endl;
+
+      for (int32_t specid=pairslow[i]; specid<=pairsup[i]; specid++)
+      {
+        s2iter = s2imap->find(specid);
+        if (s2iter == s2imap->end())
+        {
+          // spectrum not found.  bad brach
+          g_log.error() << "Spectrum " << specid << " does not have an entry in GroupWorkspace's spec2index map" << std::endl;
+          throw std::runtime_error("Logic error");
+        }
+        else
+        {
+          size_t wsindex = s2iter->second;
+          if (wsindex >= mMaskWS->getNumberHistograms())
+          {
+            // workspace index is out of range.  bad branch
+            g_log.error() << "Group workspace's spec2index map is set wrong: " <<
+                " Found workspace index = " << wsindex << " for spectrum ID " << specid <<
+                " with workspace size = " << mMaskWS->getNumberHistograms() << std::endl;
+          }
+          else
+          {
+            // Finally set the group workspace.  only good branch
+            if (mask)
+              mMaskWS->dataY(wsindex)[0] = 1.0;
+            else
+              mMaskWS->dataY(wsindex)[0] = 0.0;
+          } // IF-ELSE: ws index out of range
+        } // IF-ELSE: spectrum ID has an entry
+      } // FOR EACH SpecID
+    } // FOR EACH Pair
+
+    return;
   }
 
   /*
@@ -525,8 +587,6 @@ namespace DataHandling
    */
   void LoadMask::parseSpectrumIDs(std::string inputstr, bool tomask){
 
-    g_log.error() << "SpectrumID in XML File (ids) Is Not Supported!  Spectrum IDs: " << inputstr << std::endl;
-
     // 1. Parse range out
     std::vector<int32_t> singles;
     std::vector<int32_t> pairs;
@@ -652,6 +712,138 @@ namespace DataHandling
     boost::split(strings, inputstr, boost::is_any_of(sep), boost::token_compress_on);
 
     // g_log.information() << "Inside... split size = " << strings.size() << std::endl;
+
+    return;
+  }
+
+  /*
+   * Load and parse an ISIS masking file
+   */
+  void LoadMask::loadISISMaskFile(std::string isisfilename)
+  {
+
+    std::ifstream ifs;
+    ifs.open(isisfilename.c_str(), std::ios::in);
+    if (!ifs.is_open())
+    {
+      g_log.error() << "Cannot open ISIS mask file " << isisfilename << endl;
+      throw std::invalid_argument("Cannot open ISIS mask file");
+    }
+
+    std::string isisline;
+    while(getline(ifs, isisline))
+    {
+      boost::trim(isisline);
+
+      // a. skip empty line
+      if (isisline.size() == 0)
+        continue;
+
+      // b. skip comment line
+      if (isisline.c_str()[0] < '0' || isisline.c_str()[0] > '9')
+        continue;
+
+      // c. parse
+      g_log.notice() << "Input: " << isisline << std::endl;
+      parseISISStringToVector(isisline, mask_specid_pair_low, mask_specid_pair_up);
+    }
+
+    for (size_t i = 0; i < mask_specid_pair_low.size(); i ++)
+    {
+      g_log.notice() << i << ": " << mask_specid_pair_low[i] << ", " <<
+          mask_specid_pair_up[i] << std::endl;
+    }
+
+    ifs.close();
+
+    return;
+  }
+
+  /*
+   * Parse a line in an ISIS mask file string to vector
+   * Combination of 5 types of format for unit
+   * (1) a (2) a-b (3) a - b (4) a- b (5) a- b
+   * separated by space(s)
+   */
+  void LoadMask::parseISISStringToVector(string ins, std::vector<int>& rangestartvec, std::vector<int>& rangeendvec)
+  {
+    // 1. Split by space
+    std::vector<string> splitstrings;
+    boost::split(splitstrings, ins, boost::is_any_of(" "), boost::token_compress_on);
+
+    // 2. Replace a-b to a - b, remove a-b and insert a, -, b
+    bool tocontinue = true;
+    size_t index = 0;
+    while (tocontinue)
+    {
+      // a) Determine end of loop.  Note that loop size changes
+      if (index == splitstrings.size() - 1)
+      {
+        tocontinue = false;
+      }
+
+      // b) Need to split?
+      vector<string> temps;
+      boost::split(temps, splitstrings[index], boost::is_any_of("-"), boost::token_compress_on);
+      if (splitstrings[index].compare("-") == 0 || temps.size() == 1)
+      {
+        // Nothing to split
+        index++;
+      }
+      else if (temps.size() == 2)
+      {
+        // Has a '-' inside.  Delete and Replace
+        temps.insert(temps.begin() + 1, "-");
+        splitstrings.erase(splitstrings.begin() + index);
+        for (size_t ic = 0; ic < 3; ic++)
+        {
+          if (temps[ic].size() > 0)
+          {
+            splitstrings.insert(splitstrings.begin() + index, temps[ic]);
+            index++;
+          }
+        }
+      }
+      else
+      {
+        // Exception
+        g_log.error() << "String " << splitstrings[index] << " has a wrong format.  Too many '-'"
+            << std::endl;
+        throw std::invalid_argument("Invalid string in input");
+      }
+
+      if (index >= splitstrings.size())
+        tocontinue = false;
+
+    } // END WHILE
+
+    // 3. Put to output integer vector
+    tocontinue = true;
+    index = 0;
+    while (tocontinue)
+    {
+      // i)   push to the starting vector
+      rangestartvec.push_back(atoi(splitstrings[index].c_str()));
+
+      // ii)  push the ending vector
+      if (index == splitstrings.size() - 1 || splitstrings[index + 1].compare("-") != 0)
+      {
+        // the next one is not '-'
+        rangeendvec.push_back(atoi(splitstrings[index].c_str()));
+        index++;
+      }
+      else
+      {
+        // the next one is '-', thus read '-', next
+        rangeendvec.push_back(atoi(splitstrings[index + 2].c_str()));
+        index += 3;
+      }
+
+      if (index >= splitstrings.size())
+        tocontinue = false;
+    } // END-WHILE
+
+    splitstrings.clear();
 
     return;
   }

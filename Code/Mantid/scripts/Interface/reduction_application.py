@@ -286,6 +286,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
                 self.facility_combo.clear()
                 instruments = INSTRUMENT_DICT.keys()
                 instruments.sort()
+                instruments.reverse()
                 for facility in instruments:
                     self.facility_combo.addItem(QtGui.QApplication.translate("Dialog", facility, None, QtGui.QApplication.UnicodeUTF8))
 
@@ -294,7 +295,9 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
                 
             def _facility_changed(self, facility):
                 self.instr_combo.clear()
-                for item in INSTRUMENT_DICT[unicode(facility)]:
+                instr_list = INSTRUMENT_DICT[unicode(facility)].keys()
+                instr_list.sort()
+                for item in instr_list:
                     if self.instrument_list is None or item in self.instrument_list:
                         self.instr_combo.addItem(QtGui.QApplication.translate("Dialog", item, None, QtGui.QApplication.UnicodeUTF8))
                 

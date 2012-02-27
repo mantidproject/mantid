@@ -38,7 +38,11 @@ namespace Mantid
       this->setWikiSummary("Compares two white beam vanadium workspaces from the same instrument to find detectors whose efficiencies have changed beyond a threshold. ");
       this->setOptionalMessage("Compares two white beam vanadium workspaces from the same instrument to find detectors whose efficiencies have changed beyond a threshold.");
     }
-    
+
+    const std::string DetectorEfficiencyVariation::category() const
+    {
+      return "Diagnostics";
+    }
 
     using namespace Kernel;
     using namespace API;

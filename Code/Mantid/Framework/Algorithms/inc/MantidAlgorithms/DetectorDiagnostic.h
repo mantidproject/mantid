@@ -59,6 +59,7 @@ namespace Mantid
       // Overridden Algorithm methods
       virtual void init();
       virtual void exec();
+      void applyMask(API::MatrixWorkspace_sptr inputWS, API::MatrixWorkspace_sptr maskWS);
 
     protected:
       /// Get the total counts for each spectra

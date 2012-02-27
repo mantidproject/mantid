@@ -181,8 +181,8 @@ public:
     // Don't permit an empty name for the workspace
     if (name.empty())
     {
-      std::string error=" add Data Object with empty name";
-      g_log.error(error);
+      std::string error="Add Data Object with empty name";
+      g_log.debug() << error << std::endl;
       throw std::runtime_error(error);
     }
 
@@ -198,8 +198,7 @@ public:
     }
     else
     {
-      std::string information=" add Data Object '"+name+"' successful\n";
-      g_log.debug(information);
+      g_log.debug() << "Add Data Object " << name << " successful" << std::endl;
 
       //check the workspace invisible option set
       std::string name_startswith=name.substr(0,2);

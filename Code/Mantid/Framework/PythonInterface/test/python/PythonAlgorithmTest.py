@@ -3,6 +3,8 @@ import unittest
 from mantid.api import (PythonAlgorithm, AlgorithmProxy, Algorithm, IAlgorithm, 
                         AlgorithmManager, registerAlgorithm)
 
+########################### Test classes #####################################
+
 class TestPyAlgDefaultAttrs(PythonAlgorithm):
     def PyInit(self):
         pass
@@ -26,7 +28,16 @@ class TestPyAlgOverriddenAttrs(PythonAlgorithm):
     
     def PyExec(self):
         pass
+    
+class TestPyAlgDeclaringProps(PythonAlgorithm):
+    
+    def PyInit(self):
+        pass
+        
+    def PyExec(self):
+        pass
 
+###############################################################################
 
 class PythonAlgorithmTest(unittest.TestCase):
         

@@ -185,7 +185,7 @@ namespace Mantid
       if (current.get())
       {
         top_group=group_map[current->getName()]; // Return 0 if not in map
-        assemblies.push(std::make_pair<sptr_ICompAss,int>(current,top_group));
+        assemblies.push(std::make_pair(current,top_group));
       }
 
       std::string filename=getProperty("CalFilename");
@@ -210,9 +210,9 @@ namespace Mantid
             if (currentDet.get())// Is detector
             {
               if (overwrite) // Map will contains udet as the key
-                instrcalib[currentDet->getID()]=std::make_pair<int,int>(number++,top_group);
+                instrcalib[currentDet->getID()]=std::make_pair(number++,top_group);
               else          // Map will contains the entry number as the key
-                instrcalib[number++]=std::make_pair<int,int>(currentDet->getID(),top_group);
+                instrcalib[number++]=std::make_pair(currentDet->getID(),top_group);
             }
             else // Is an assembly, push in the queue
             {
@@ -222,7 +222,7 @@ namespace Mantid
                 child_group=group_map[currentchild->getName()];
                 if (child_group==0)
                   child_group=top_group;
-                assemblies.push(std::make_pair<sptr_ICompAss,int>(currentchild,child_group));
+                assemblies.push(std::make_pair(currentchild,child_group));
               }
             }
           }

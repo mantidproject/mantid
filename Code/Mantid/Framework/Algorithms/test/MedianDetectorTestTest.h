@@ -28,6 +28,14 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 
+const int THEMASKED(40);
+const int SAVEDBYERRORBAR(143);
+const int Nhist(144);
+
+//these values must match the values in MedianDetectorTest.h
+const double BAD_VAL(1.);
+const double GOOD_VAL(0.);
+
 class MedianDetectorTestTest : public CxxTest::TestSuite
 {
 public:
@@ -57,8 +65,8 @@ public:
     MatrixWorkspace_const_sptr input;
     input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_IWSName);
     TS_ASSERT(input);
-    TS_ASSERT(input->getInstrument()->getDetector(THEMASKED).get()->isMasked());
-      
+    //TS_ASSERT(input->getInstrument()->isDetectorMasked(input->getSpectrum(THEMASKED)->getDetectorIDs()));
+
     MatrixWorkspace_sptr outputMat = boost::dynamic_pointer_cast<MatrixWorkspace>(output);;
     TS_ASSERT( outputMat );
     TS_ASSERT_EQUALS( outputMat->YUnit(), "" );
@@ -68,36 +76,22 @@ public:
     const size_t numberOfSpectra = outputMat->getNumberHistograms();
     TS_ASSERT_EQUALS(numberOfSpectra, (int)Nhist);
     const int numFailed = alg.getProperty("NumberOfFailures");
-    TS_ASSERT_EQUALS(numFailed, 83);
+    TS_ASSERT_EQUALS(numFailed, 82);
     // the numbers below are threshold values that were found by trial and error running these tests
     const int firstGoodSpec = 36;
     const int lastGoodSpec = 95;
-    for (int lHist = 1; lHist < firstGoodSpec; lHist++)
+    for (int lHist=0; lHist < Nhist; lHist++)
     {
-      TS_ASSERT_EQUALS(outputMat->readY(lHist).front(), BAD_VAL )
+//      std::cout << "    " << lHist << " " << outputMat->readY(lHist).front() << std::endl;
+      double expected = BAD_VAL;
+      if (lHist >= firstGoodSpec && lHist <= lastGoodSpec)
+        expected = GOOD_VAL;
+      if (lHist == THEMASKED)
+        expected = BAD_VAL;
+      else if (lHist == SAVEDBYERRORBAR)
+        expected = GOOD_VAL;
+      TS_ASSERT_EQUALS(outputMat->readY(lHist).front(), expected );
     }
-    for (int lHist=firstGoodSpec; lHist < THEMASKED-1; lHist++)
-    {
-      TS_ASSERT_EQUALS(
-        outputMat->readY(lHist).front(), GOOD_VAL );
-    }
-    TS_ASSERT_EQUALS(outputMat->readY(THEMASKED-1).front(), BAD_VAL )
-    for (int lHist=THEMASKED; lHist <= lastGoodSpec; lHist++)
-    {
-      TS_ASSERT_EQUALS(
-        outputMat->readY(lHist).front(), GOOD_VAL )
-    }
-    for (int lHist = lastGoodSpec+1; lHist < SAVEDBYERRORBAR; lHist++)
-    {
-      TS_ASSERT_EQUALS(
-        outputMat->readY(lHist).front(), BAD_VAL )
-    }
-    for (int lHist = SAVEDBYERRORBAR; lHist < Nhist; lHist++)
-    {
-      TS_ASSERT_EQUALS(
-        outputMat->readY(lHist).front(), GOOD_VAL )
-    }
-  
   }
 
   MedianDetectorTestTest() : m_IWSName("MedianDetectorTestInput")
@@ -165,11 +159,7 @@ public:
     m_2DWS->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
     // mask the detector
-    Geometry::ParameterMap* m_Pmap = &(m_2DWS->instrumentParameters());    
-    boost::shared_ptr<const Instrument> instru = m_2DWS->getInstrument();
-    IDetector_const_sptr toMask = instru->getDetector(THEMASKED);
-    TS_ASSERT(toMask)
-    m_Pmap->addBool(toMask.get(), "masked", true);
+    m_2DWS->maskWorkspaceIndex(THEMASKED);
   }
 
 private:
@@ -188,10 +178,6 @@ private:
   std::string m_IWSName, m_OFileName;
   Workspace2D_sptr m_2DWS;
   double m_YSum;
-  enum spectraIndexConsts{ THEMASKED = 40, SAVEDBYERRORBAR = 143, Nhist = 144 };
-  //these values must match the values in MedianDetectorTest.h
-  enum FLAGS{ BAD_VAL = 1, GOOD_VAL = 0 };
-
 };
 
 #endif /*WBVMEDIANTESTTEST_H_*/

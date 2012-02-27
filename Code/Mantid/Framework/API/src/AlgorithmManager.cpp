@@ -77,7 +77,11 @@ namespace Mantid
         m_managed_algs.back()->initialize();
         
         // If this takes us beyond the maximum size, then remove the oldest one
-        if (m_managed_algs.size() > static_cast<std::deque<IAlgorithm_sptr>::size_type>(m_max_no_algs) ) m_managed_algs.pop_front();
+        if (m_managed_algs.size() > static_cast<std::deque<IAlgorithm_sptr>::size_type>(m_max_no_algs) )
+        {
+          g_log.debug() << "Popping out oldest algorithm " << m_managed_algs.front()->name() << std::endl;
+          m_managed_algs.pop_front();
+        }
       }
       catch(std::runtime_error& ex)
       {

@@ -99,6 +99,7 @@ class sfCalculator():
         #calculate y_axis of numerator/denominator
 #        self._x_axis_ratio = self._x_axis
         self.y_axis_ratio = self.y_axis_numerator / self.y_axis_denominator
+        
         self.y_axis_error_ratio = ((self.y_axis_error_numerator / 
                                     self.y_axis_numerator) ** 2 + 
                                     (self.y_axis_error_denominator / 
@@ -129,6 +130,7 @@ class sfCalculator():
         LoadEventNexus(Filename=nexus_file_numerator,
                        OutputWorkspace='EventDataWks')
         mt1 = mtd['EventDataWks']
+        
         proton_charge = self._getProtonCharge(mt1)
         rebin(InputWorkspace='EventDataWks',
               OutputWorkspace='HistoDataWks',
@@ -143,17 +145,42 @@ class sfCalculator():
                                         from_pixel=self.x_pixel_min,
                                         to_pixel=self.x_pixel_max)
 
+        ConvertToHistogram(InputWorkspace='IntegratedDataWks',
+                           OutputWorkspace='IntegratedDataWks')
         Transpose(InputWorkspace='IntegratedDataWks',
                   OutputWorkspace='TransposeIntegratedDataWks')
         ConvertToHistogram(InputWorkspace='TransposeIntegratedDataWks',
                            OutputWorkspace='TransposeIntegratedDataWks_t')
         FlatBackground(InputWorkspace='TransposeIntegratedDataWks_t',
-                       OutputWorkspace='TransposeHistoFlatDataWks',
+                       OutputWorkspace='TransposeHistoFlatDataWks_1',
                        StartX=self.back_pixel_min,
-                       EndX=self.peak_pixel_min)
-        Transpose(InputWorkspace='TransposeHistoFlatDataWks',
-                  OutputWorkspace='DataWks')
-        mt3 = mtd['DataWks']        
+                       EndX=self.peak_pixel_min,
+                       Mode='Mean',
+                       OutputMode="Return Background")
+        FlatBackground(InputWorkspace='TransposeIntegratedDataWks_t',
+                       OutputWorkspace='TransposeHistoFlatDataWks_2',
+                       StartX=self.peak_pixel_max,
+                       EndX=self.back_pixel_max,
+                       Mode='Mean',
+                       OutputMode="Return Background")
+        Transpose(InputWorkspace='TransposeHistoFlatDataWks_1',
+                  OutputWorkspace='DataWks_1')
+        Transpose(InputWorkspace='TransposeHistoFlatDataWks_2',
+                  OutputWorkspace='DataWks_2')
+        ConvertToHistogram('DataWks_1', 'DataWks_1')
+        ConvertToHistogram('DataWks_2', 'DataWks_2')
+        RebinToWorkspace(WorkspaceToRebin='DataWks_1',
+                         WorkspacetoMatch='IntegratedDataWks',
+                         OutputWorkspace='DataWks_1')
+        RebinToWorkspace(WorkspaceToRebin='DataWks_2',
+                         WorkspacetoMatch='IntegratedDataWks',
+                         OutputWorkspace='DataWks_2')
+        
+        
+        WeightedMean('DataWks_1','DataWks_2','DataWks')
+        Minus('IntegratedDataWks', 'DataWks','DataWks')
+        
+        mt3 = mtd['DataWks']
         self._calculateFinalAxis(Workspace=mt3,
                            bNumerator=bNumerator)
 
@@ -174,9 +201,10 @@ class sfCalculator():
         mt = Workspace
         x_axis = mt.readX(0)[:]
         self.x_axis = x_axis
+
+        counts_vs_tof = zeros(len(x_axis)-1)
+        counts_vs_tof_error = zeros(len(x_axis)-1)
         
-        counts_vs_tof = zeros(len(x_axis))
-        counts_vs_tof_error = zeros(len(x_axis))
         for x in range(self.alpha_pixel_nbr):
             counts_vs_tof += mt.readY(x)[:]
             counts_vs_tof_error += mt.readE(x)[:] ** 2
@@ -192,7 +220,7 @@ class sfCalculator():
             self.y_axis_denominator = counts_vs_tof[index_tof_min:index_tof_max]
             self.y_axis_error_denominator = counts_vs_tof_error[index_tof_min:index_tof_max]
             self.x_axis_ratio = self.x_axis[index_tof_min:index_tof_max]
-
+        
     def _createIntegratedWorkspace(self,
                                    InputWorkspace=None,
                                    OutputWorkspace=None,
@@ -216,6 +244,7 @@ class sfCalculator():
                 y_error_axis[y, :] += ((InputWorkspace.readE(index)[:]) * 
                                         (InputWorkspace.readE(index)[:]))
 
+        
         y_axis = y_axis.flatten()
         y_error_axis = sqrt(y_error_axis)
         #plot_y_error_axis = _y_error_axis #for output testing only    
@@ -229,7 +258,7 @@ class sfCalculator():
                         DataX=x_axis,
                         DataY=y_axis,
                         DataE=y_error_axis,
-                       Nspec=self.alpha_pixel_nbr)
+                        Nspec=self.alpha_pixel_nbr)
 #        mt3 = mtd[OutputWorkspace]
 #        return mt3 
             
@@ -502,7 +531,7 @@ def calculate(string_runs=None, list_peak_back=None, output_file=None):
                      '55901', '55902']
         list_attenuator = [0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 4, 4]
 
-        nexus_path = '/mnt/hgfs/j35/'
+        nexus_path = '/mnt/hgfs/j35/results/'
         pre = 'REF_L_'
         nexus_path_pre = nexus_path + pre
         post = '_event.nxs'

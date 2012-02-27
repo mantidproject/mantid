@@ -52,6 +52,7 @@ namespace Algorithms
     funcoptions.push_back("Overall Statistic");
     funcoptions.push_back("Time Range Info");
     funcoptions.push_back("Generate Calibration File");
+    funcoptions.push_back("Export Log");
     this->declareProperty("Function", "Time Range Info", new ListValidator(funcoptions),
         "Options for functionalities.");
 
@@ -80,6 +81,10 @@ namespace Algorithms
     this->declareProperty("DetectorOffset", 1.0, "Unified offset value of detectors.");
     this->declareProperty(new API::FileProperty("CalibrationFile", "", API::FileProperty::OptionalSave),
         "Name of the output calibration file.");
+
+    this->declareProperty("NumberEntriesExport", 0, "Number of entries of the log to be exported.");
+    this->declareProperty(new API::FileProperty("OutputPartialLogFile", "", API::FileProperty::OptionalSave),
+        "Column file to record the first N entries of the designated log.");
 
     this->declareProperty(new API::FileProperty("OutputDirectory", "", API::FileProperty::OptionalDirectory),
         "Directory where the information file will be written to.");
@@ -110,9 +115,74 @@ namespace Algorithms
       // 2c) Generate calibration file
       this->generateCalibrationFile();
     }
+    else if (funcoption.compare("Export Log") == 0)
+    {
+      // 2d) Export file
+      this->exportLog();
+    }
     else{
       g_log.error() << "Functionality option " << funcoption << " is not supported!" << std::endl;
     }
+
+    return;
+  }
+
+  /*
+   * Export part of designated log to an file in column format
+   */
+  void GetTimeSeriesLogInformation::exportLog()
+  {
+
+    // 1.  Get log, time, and etc.
+    std::string logname = getProperty("LogName");
+    std::vector<Kernel::DateAndTime> times;
+    std::vector<double> values;
+    if (logname.size() > 0)
+    {
+      // Log
+      Kernel::TimeSeriesProperty<double>* tlog = dynamic_cast<Kernel::TimeSeriesProperty<double>* >(
+          eventWS->run().getProperty(logname));
+      if (!tlog){
+        g_log.error() << "TimeSeriesProperty Log " << logname << " does not exist in workspace " <<
+            eventWS->getName() << std::endl;
+        throw std::invalid_argument("TimeSeriesProperty log cannot be found");
+      }
+      times = tlog->timesAsVector();
+      values = tlog->valuesAsVector();
+    }
+    else
+    {
+      throw std::invalid_argument("Log must be given!");
+    }
+
+
+
+    int numentries = this->getProperty("NumberEntriesExport");
+    if (numentries <= 0)
+    {
+      g_log.error() << "For Export Log, NumberEntriesExport must be greater than 0.  Input = "
+          << numentries << std::endl;
+      throw std::invalid_argument("NumberEntriesExport cannot be smaller and equal to 0. ");
+    }
+    if (static_cast<size_t>(numentries) > times.size())
+      numentries = static_cast<int>(times.size());
+
+    std::string outputfilename = this->getProperty("OutputPartialLogFile");
+
+    // 2. Output different in time
+    std::ofstream ofs;
+    ofs.open(outputfilename.c_str(), std::ios::out);
+
+    Kernel::DateAndTime runstart(eventWS->run().getProperty("run_start")->value());
+
+    for (size_t i = 0; i < static_cast<size_t>(numentries); i ++)
+    {
+      Kernel::DateAndTime tnow = times[i];
+      int64_t dt = tnow.totalNanoseconds()-runstart.totalNanoseconds();
+      ofs << i << "\t" << dt << "\t" << values[i] << std::endl;
+    }
+
+    ofs.close();
 
     return;
   }

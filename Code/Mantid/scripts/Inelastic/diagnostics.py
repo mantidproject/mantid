@@ -143,12 +143,9 @@ def diagnose(white_int, **kwargs):
 def add_masking(input_ws, mask_ws, start_index=None, end_index=None):
     """
     Mask the Detectors on the input workspace that are masked 
-    on the mask_ws. Avoids a current bug in using MaskDetectors with a MaskedWorkspace in a loop 
+    on the mask_ws. 
     """
-    #MaskDetectors(input_ws, MaskedWorkspace=mask_ws, StartWorkspaceIndex=start_index, EndWorkspaceIndex=end_index)
-    masked = ExtractMasking(mask_ws, '__tmp')
-    MaskDetectors(input_ws, DetectorList=masked.getPropertyValue("DetectorList"))
-    DeleteWorkspace(masked.workspace())
+    MaskDetectors(input_ws, MaskedWorkspace=mask_ws, StartWorkspaceIndex=start_index, EndWorkspaceIndex=end_index)
 
 #-------------------------------------------------------------------------------
 

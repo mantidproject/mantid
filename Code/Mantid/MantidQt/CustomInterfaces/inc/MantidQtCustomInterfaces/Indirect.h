@@ -141,6 +141,7 @@ namespace MantidQt
       /* Validators */
       QIntValidator *m_valInt; ///< validator for int inputs
       QDoubleValidator *m_valDbl; ///< validator for double inputs
+      QDoubleValidator *m_valPosDbl; ///< validator for positive double inputs
 
       // CALIBRATION MINIPLOTS (prefix: 'm_calCal' (calibration) and 'm_calRes' (resolution))
       QwtPlot* m_calCalPlot;

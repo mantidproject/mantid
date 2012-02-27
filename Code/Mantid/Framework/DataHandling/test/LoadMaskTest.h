@@ -123,6 +123,72 @@ public:
     return;
   }
 
+  /*
+   * Test mask by detector ID
+   * For VULCAN:
+   * workspaceindex:  detector ID  :  Spectrum ID
+   * 34           :   26284        :  35
+   * 1000         :   27250        :  1001
+   * 2000         :   28268        :  2001
+   * 36-39                            37-40
+   * 1001-1004                        1002-1005
+   */
+  void test_ISISFormat()
+  {
+    // 1. Generate masking files
+    std::vector<specid_t> singlespectra;
+    singlespectra.push_back(35);
+    singlespectra.push_back(1001);
+    singlespectra.push_back(2001);
+    std::vector<specid_t> pairspectra;
+    pairspectra.push_back(1002); pairspectra.push_back(1005);
+    pairspectra.push_back(37); pairspectra.push_back(40);
+
+    std::string maskfname1("isismask.msk");
+    genISISMaskingFile(maskfname1, singlespectra, pairspectra);
+
+    // 2. Run
+    LoadMask loadfile;
+    loadfile.initialize();
+
+    loadfile.setProperty("Instrument", "VULCAN");
+    loadfile.setProperty("InputFile", maskfname1);
+    loadfile.setProperty("OutputWorkspace", "VULCAN_Mask_Detectors");
+
+    TS_ASSERT_EQUALS(loadfile.execute(),true);
+    DataObjects::SpecialWorkspace2D_sptr maskws =
+          AnalysisDataService::Instance().retrieveWS<DataObjects::SpecialWorkspace2D>("VULCAN_Mask_Detectors");
+
+    // 3. Check
+    size_t errorcounts = 0;
+    for (size_t iws=0; iws<maskws->getNumberHistograms(); iws++)
+    {
+      double y = maskws->dataY(iws)[0];
+      if (iws==34 || iws==1000 || iws==2000 || (iws>=36 && iws<=39) || (iws>=1001 && iws<=1004))
+      {
+        // All these workspace index are masked
+        TS_ASSERT_DELTA(y, 1.0, 1.0E-5);
+      }
+      else
+      {
+        // Unmasked
+        TS_ASSERT_DELTA(y, 0.0, 1.0E-5);
+        if (fabs(y)>1.0E-5)
+        {
+          errorcounts ++;
+          std::cout << "Workspace Index " << iws << " has a wrong set on masks" << std::endl;
+        }
+      }
+    }
+    std::cout << "Total " << errorcounts << " errors " << std::endl;
+
+    // 4. Clean
+    Poco::File cleanfile(maskfname1);
+    cleanfile.remove(false);
+
+    return;
+  }
+
 
 
   /*
@@ -252,6 +318,39 @@ public:
 
     return;
   }
+
+  /*
+   * Create an ISIS format masking file
+   */
+  void genISISMaskingFile(std::string maskfilename, std::vector<specid_t> singlespectra, std::vector<specid_t> pairspectra)
+  {
+
+    std::ofstream ofs;
+    ofs.open(maskfilename.c_str(), std::ios::out);
+
+    // 1. Single spectra
+    for (size_t i = 0; i < singlespectra.size(); i ++)
+    {
+      ofs << singlespectra[i] << " ";
+    }
+    ofs << std::endl;
+
+    // 2. Spectra pair
+    // a) Make the list really has complete pairs
+    if (pairspectra.size()%2 == 1)
+      pairspectra.pop_back();
+
+    for (size_t i = 0; i < pairspectra.size(); i+=2)
+    {
+      ofs << pairspectra[i] << "-" << pairspectra[i+1] << "  ";
+    }
+    ofs << std::endl;
+
+    ofs.close();
+
+    return;
+  }
+
 };
 
 

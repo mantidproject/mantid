@@ -149,4 +149,35 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
     mean = (min_id+max_id)/2.0
     return mean-2*sigma, mean+2*sigma
     
+def get_logs(instrument, run):
+    f = FileFinder.findRuns("%s%s" % (instrument, run))
+    if len(f)>0:
+        basename = os.path.basename(f[0])
+        ws = "__%s" % basename
+        if instrument=="REFM":
+            ws = '%s_%s'%(ws, 'Off_Off')
+        LoadEventNexus(Filename=f[0], OutputWorkspace=ws, 
+                       NXentryName='entry-Off_Off', MetaDataOnly=True)
+        
+        sangle = 0
+        if mtd[ws].getRun().hasProperty("SANGLE"):
+            sangle = mtd[ws].getRun().getProperty("SANGLE").value[0]
+            
+        dangle = 0
+        if mtd[ws].getRun().hasProperty("DANGLE"):
+            dangle = mtd[ws].getRun().getProperty("DANGLE").value[0]
+            
+        dangle0 = 0
+        if mtd[ws].getRun().hasProperty("DANGLE0"):
+            dangle0 = mtd[ws].getRun().getProperty("DANGLE0").value[0]
+            
+        direct_beam_pix = 0
+        if mtd[ws].getRun().hasProperty("DIRPIX"):
+            direct_beam_pix = mtd[ws].getRun().getProperty("DIRPIX").value[0]
+        
+        return {"SANGLE":sangle,
+                "DANGLE":dangle,
+                "DANGLE0":dangle0,
+                "DIRPIX":direct_beam_pix}
+ 
     
