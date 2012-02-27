@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/ILiveListener.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include <Poco/ActiveMethod.h>
 #include <Poco/Void.h>
@@ -57,12 +58,14 @@ namespace Mantid
 
     private:
       const std::string m_filename; ///< The file to read
-      int m_numChunks;        ///< The number of pieces to divide the file into
+      int m_numChunks;              ///< The number of pieces to divide the file into
       int m_nextChunk;              ///< The number of the next chunk to be loaded
-      DataObjects::EventWorkspace_sptr m_buffer; ///< Used to buffer events between calls to extractData()
 
-//      Poco::ActiveMethod<API::MatrixWorkspace_sptr, Poco::Void, FileEventDataListener> m_loadChunk;
-      API::MatrixWorkspace_sptr loadChunkImpl(Poco::Void);
+      /// Future that holds the result of the latest call to LoadEventPreNexus
+      Poco::ActiveResult<bool> * m_chunkload;
+      void loadChunk();
+      /// Shared pointer to the LoadEventPreNexus instance - it needs to be kept alive.
+      API::Algorithm_sptr m_loader;
 
       static Kernel::Logger& g_log;    ///< reference to the logger class
     };
