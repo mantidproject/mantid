@@ -337,6 +337,9 @@ protected:
   QtProperty *m_plotDiff;
   QtProperty *m_rawData;
 
+  /// A copy of the edited function
+  Mantid::API::CompositeFunction* m_compositeFunction;
+
   QtTreePropertyBrowser* m_browser;
 
   QAction* m_fitActionUndoFit;
@@ -374,9 +377,6 @@ protected:
 
   /// To keep a copy of the initial parameters in case for undo fit
   std::vector<double> m_initialParameters;
-
-  /// A copy of the edited function
-  Mantid::API::CompositeFunction* m_compositeFunction;
 
 
 private:

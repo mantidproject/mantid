@@ -107,14 +107,14 @@ protected:
  */
 FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject* mantidui)
 :QDockWidget("Fit Function",parent),
-m_currentHandler(0),
 m_logValue(NULL),
 m_compositeFunction(0),
+m_changeSlotsEnabled(false),
+m_guessOutputName(true),
+m_currentHandler(0),
 m_defaultFunction("Gaussian"),
 m_defaultPeak("Gaussian"),
 m_defaultBackground("LinearBackground"),
-m_guessOutputName(true),
-m_changeSlotsEnabled(false),
 m_peakToolOn(false),
 m_auto_back(false),
 m_autoBgName(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("curvefitting.autoBackground"))),
@@ -2519,6 +2519,7 @@ void FitPropertyBrowser::manualAddWorkspace(const QString& wsName)
 */
 void FitPropertyBrowser::workspaceChange(const QString& wsName)
 {
+  UNUSED_ARG(wsName);
   if (m_guessOutputName)
   {
     if (isWorkspaceAGroup())
