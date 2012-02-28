@@ -16,6 +16,7 @@ The format is limited to saving 99 spectra in total. Trying to save more will ge
 #include "MantidDataHandling/SaveGSS.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/AlgorithmHistory.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <Poco/File.h>
@@ -375,8 +376,8 @@ namespace Mantid
         // print whether it is normalized by monitor or pcharge
         bool norm_by_current = false;
         bool norm_by_monitor = false;
-        const std::vector<AlgorithmHistory>& algohist = workspace->getHistory().getAlgorithmHistories();
-        for (std::vector<AlgorithmHistory>::const_iterator it = algohist.begin(); it != algohist.end(); ++it)
+        const WorkspaceHistory::AlgorithmHistories& algohist = workspace->getHistory().getAlgorithmHistories();
+        for (WorkspaceHistory::AlgorithmHistories::const_iterator it = algohist.begin(); it != algohist.end(); ++it)
         {
           if (it->name().compare("NormaliseByCurrent") == 0)
             norm_by_current = true;

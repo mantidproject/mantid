@@ -1671,15 +1671,15 @@ DateAndTime MantidTreeWidgetItem::getLastModified(const QTreeWidgetItem* workspa
   Mantid::API::Workspace_sptr ws = Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString());
   
   const Mantid::API::WorkspaceHistory wsHist = ws->getHistory();
-  const std::vector<AlgorithmHistory>& algHists = wsHist.getAlgorithmHistories();
 
-  if(algHists.size() == 0)
+  if(wsHist.empty())
   {
     throw std::out_of_range("The workspace \"" + wsName.toStdString() +
       "\" has no history and so cannot be sorted by date last modified.");
   }
 
-  AlgorithmHistory lastAlgHist = algHists.at(algHists.size() - 1);
+  const size_t indexOfLast = wsHist.size() - 1;
+  AlgorithmHistory lastAlgHist = wsHist.getAlgorithmHistory(indexOfLast);
   DateAndTime output = lastAlgHist.executionDate();
 
   return output;

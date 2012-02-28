@@ -63,19 +63,8 @@ public:
     // Test proton charge from the sample block
     TS_ASSERT_DELTA(matrix_ws->run().getProtonCharge(), 30.14816, 1e-5);
 
-    //Test history
-    const std::vector<AlgorithmHistory>& alghist = matrix_ws->getHistory().getAlgorithmHistories();
-    int nalgs = static_cast<int>(alghist.size());
-    TS_ASSERT_EQUALS(nalgs, 4);
-      
-    if( nalgs == 4 )
-    {
-      TS_ASSERT_EQUALS(alghist[0].name(), "LoadRaw");
-      TS_ASSERT_EQUALS(alghist[1].name(), "AlignDetectors");
-      TS_ASSERT_EQUALS(alghist[2].name(), "DiffractionFocussing");
-      TS_ASSERT_EQUALS(alghist[3].name(), "LoadNexusProcessed");
-    }
-    
+    doHistoryTest(matrix_ws);
+
     boost::shared_ptr<const Mantid::Geometry::Instrument> inst = matrix_ws->getInstrument();
     TS_ASSERT_EQUALS(inst->getName(), "GEM");
     TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17);
@@ -107,19 +96,7 @@ public:
 
 	  //Testing the number of histograms
     TS_ASSERT_EQUALS(matrix_ws->getNumberHistograms(),3);
-
-    //Test history
-    const std::vector<AlgorithmHistory>& alghist = matrix_ws->getHistory().getAlgorithmHistories();
-    int nalgs = static_cast<int>(alghist.size());
-    TS_ASSERT_EQUALS(nalgs, 4);
-      
-    if( nalgs == 4 )
-    {
-      TS_ASSERT_EQUALS(alghist[0].name(), "LoadRaw");
-      TS_ASSERT_EQUALS(alghist[1].name(), "AlignDetectors");
-      TS_ASSERT_EQUALS(alghist[2].name(), "DiffractionFocussing");
-      TS_ASSERT_EQUALS(alghist[3].name(), "LoadNexusProcessed");
-    }
+    doHistoryTest(matrix_ws);
     
     boost::shared_ptr<const Mantid::Geometry::Instrument> inst = matrix_ws->getInstrument();
     TS_ASSERT_EQUALS(inst->getName(), "GEM");
@@ -153,18 +130,8 @@ public:
     TS_ASSERT_EQUALS(matrix_ws->getNumberHistograms(),4);
 
     //Test history
-    const std::vector<AlgorithmHistory>& alghist = matrix_ws->getHistory().getAlgorithmHistories();
-    int nalgs = static_cast<int>(alghist.size());
-    TS_ASSERT_EQUALS(nalgs, 4);
-      
-    if( nalgs == 4 )
-    {
-      TS_ASSERT_EQUALS(alghist[0].name(), "LoadRaw");
-      TS_ASSERT_EQUALS(alghist[1].name(), "AlignDetectors");
-      TS_ASSERT_EQUALS(alghist[2].name(), "DiffractionFocussing");
-      TS_ASSERT_EQUALS(alghist[3].name(), "LoadNexusProcessed");
-    }
-    
+    doHistoryTest(matrix_ws);
+   
     boost::shared_ptr<const Mantid::Geometry::Instrument> inst = matrix_ws->getInstrument();
     TS_ASSERT_EQUALS(inst->getName(), "GEM");
     TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17);
@@ -198,17 +165,7 @@ public:
     TS_ASSERT_EQUALS(matrix_ws->getNumberHistograms(),5);
 
     //Test history
-    const std::vector<AlgorithmHistory>& alghist = matrix_ws->getHistory().getAlgorithmHistories();
-    int nalgs = static_cast<int>(alghist.size());
-    TS_ASSERT_EQUALS(nalgs, 4);
-      
-    if( nalgs == 4 )
-    {
-      TS_ASSERT_EQUALS(alghist[0].name(), "LoadRaw");
-      TS_ASSERT_EQUALS(alghist[1].name(), "AlignDetectors");
-      TS_ASSERT_EQUALS(alghist[2].name(), "DiffractionFocussing");
-      TS_ASSERT_EQUALS(alghist[3].name(), "LoadNexusProcessed");
-    }
+    doHistoryTest(matrix_ws);
     
     boost::shared_ptr<const Mantid::Geometry::Instrument> inst = matrix_ws->getInstrument();
     TS_ASSERT_EQUALS(inst->getName(), "GEM");
@@ -241,17 +198,7 @@ public:
     TS_ASSERT_EQUALS(matrix_ws->getNumberHistograms(),3);
 
     //Test history
-    const std::vector<AlgorithmHistory>& alghist = matrix_ws->getHistory().getAlgorithmHistories();
-    int nalgs = static_cast<int>(alghist.size());
-    TS_ASSERT_EQUALS(nalgs, 4);
-      
-    if( nalgs == 4 )
-    {
-      TS_ASSERT_EQUALS(alghist[0].name(), "LoadRaw");
-      TS_ASSERT_EQUALS(alghist[1].name(), "AlignDetectors");
-      TS_ASSERT_EQUALS(alghist[2].name(), "DiffractionFocussing");
-      TS_ASSERT_EQUALS(alghist[3].name(), "LoadNexusProcessed");
-    }
+    doHistoryTest(matrix_ws);
     
     boost::shared_ptr<const Mantid::Geometry::Instrument> inst = matrix_ws->getInstrument();
     TS_ASSERT_EQUALS(inst->getName(), "GEM");
@@ -284,17 +231,7 @@ public:
     TS_ASSERT_EQUALS(matrix_ws->getNumberHistograms(),3);
 
     //Test history
-    const std::vector<AlgorithmHistory>& alghist = matrix_ws->getHistory().getAlgorithmHistories();
-    int nalgs = static_cast<int>(alghist.size());
-    TS_ASSERT_EQUALS(nalgs, 4);
-      
-    if( nalgs == 4 )
-    {
-      TS_ASSERT_EQUALS(alghist[0].name(), "LoadRaw");
-      TS_ASSERT_EQUALS(alghist[1].name(), "AlignDetectors");
-      TS_ASSERT_EQUALS(alghist[2].name(), "DiffractionFocussing");
-      TS_ASSERT_EQUALS(alghist[3].name(), "LoadNexusProcessed");
-    }
+    doHistoryTest(matrix_ws);
     
     boost::shared_ptr<const Mantid::Geometry::Instrument> inst = matrix_ws->getInstrument();
     TS_ASSERT_EQUALS(inst->getName(), "GEM");
@@ -358,9 +295,6 @@ public:
      if( Poco::File(filename).exists() )
        Poco::File(filename).remove();
    }
-
-
-
 
    void dotest_LoadAnEventFile(EventType type)
    {
@@ -443,6 +377,21 @@ public:
    }
 
 private:
+  void doHistoryTest(MatrixWorkspace_sptr matrix_ws)
+  {
+    const WorkspaceHistory history = matrix_ws->getHistory();
+    int nalgs = static_cast<int>(history.size());
+    TS_ASSERT_EQUALS(nalgs, 4);
+      
+    if( nalgs == 4 )
+    {
+      TS_ASSERT_EQUALS(history[0].name(), "LoadRaw");
+      TS_ASSERT_EQUALS(history[1].name(), "AlignDetectors");
+      TS_ASSERT_EQUALS(history[2].name(), "DiffractionFocussing");
+      TS_ASSERT_EQUALS(history[3].name(), "LoadNexusProcessed");
+    }
+  }
+
   LoadNexusProcessed algToBeTested;
   std::string testFile, output_ws;
 };

@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/Algorithm.h"
 
 namespace Mantid
@@ -22,11 +23,11 @@ WorkspaceHistory::~WorkspaceHistory()
   @param A :: WorkspaceHistory Item to copy
  */
 WorkspaceHistory::WorkspaceHistory(const WorkspaceHistory& A) :
-  m_environment(A.m_environment),m_algorithms(A.m_algorithms)
+  m_environment(A.m_environment), m_algorithms(A.m_algorithms)
 {}
 
 /// Returns a const reference to the algorithmHistory
-const std::vector<AlgorithmHistory>& WorkspaceHistory::getAlgorithmHistories() const
+const WorkspaceHistory::AlgorithmHistories & WorkspaceHistory::getAlgorithmHistories() const
 {
   return m_algorithms;
 }
@@ -40,19 +41,21 @@ const Kernel::EnvironmentHistory& WorkspaceHistory::getEnvironmentHistory() cons
 void WorkspaceHistory::addHistory(const WorkspaceHistory& otherHistory)
 {
   // Don't copy one's own history onto oneself
-  if (this != &otherHistory)
+  if (this == &otherHistory)
   {
-    m_algorithms.insert(
-        m_algorithms.end(),
-        otherHistory.getAlgorithmHistories().begin(),
-        otherHistory.getAlgorithmHistories().end()    );
+    return;
   }
+
+  // Merge the histories
+  const AlgorithmHistories & otherAlgorithms = otherHistory.getAlgorithmHistories();
+  m_algorithms.insert(otherAlgorithms.begin(), otherAlgorithms.end());
+
 }
 
 /// Append an AlgorithmHistory to this WorkspaceHistory
 void WorkspaceHistory::addHistory(const AlgorithmHistory& algHistory)
 {
-  m_algorithms.push_back(algHistory);
+  m_algorithms.insert(algHistory);
 }
 
 /*
@@ -64,17 +67,40 @@ size_t WorkspaceHistory::size() const
 }
 
 /**
+ * Query if the history is empty or not
+ * @returns True if the list is empty, false otherwise
+ */
+bool WorkspaceHistory::empty() const
+{
+  return m_algorithms.empty();
+}
+
+/**
  * Retrieve an algorithm history by index
  * @param index ::  An index within the workspace history
  * @returns A reference to a const AlgorithmHistory object
+ * @throws std::out_of_range error if the index is invalid
  */
 const AlgorithmHistory & WorkspaceHistory::getAlgorithmHistory(const size_t index) const
 {
-  if( index > this->size() )
+  if( index >= this->size() )
   {
     throw std::out_of_range("WorkspaceHistory::getAlgorithmHistory() - Index out of range");
   }
-  return m_algorithms[index];
+  AlgorithmHistories::const_iterator start = m_algorithms.begin();
+  std::advance(start, index);
+  return *start;
+}
+
+/**
+ * Index operator[] access to a workspace history
+ * @param index ::  An index within the workspace history
+ * @returns A reference to a const AlgorithmHistory object
+ * @throws std::out_of_range error if the index is invalid
+ */
+const AlgorithmHistory & WorkspaceHistory::operator[](const size_t index) const
+{
+  return getAlgorithmHistory(index);
 }
 
 /**
@@ -109,7 +135,7 @@ void WorkspaceHistory::printSelf(std::ostream& os, const int indent)const
 
   os << std::string(indent,' ')  << m_environment << std::endl;
 
-  std::vector<AlgorithmHistory>::const_iterator it;
+  AlgorithmHistories::const_iterator it;
   os << std::string(indent,' ') << "Histories:" <<std::endl;
 
   for (it=m_algorithms.begin();it!=m_algorithms.end();++it)

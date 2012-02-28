@@ -320,6 +320,7 @@ protected:
   bool m_parallelException;
   /// Reference to the logger class
   Kernel::Logger& g_log;
+  static size_t g_execCount; ///< Counter to keep track of algorithm execution order
 
   // ------------------ For WorkspaceGroups ------------------------------------
   virtual bool processGroups();
@@ -362,7 +363,6 @@ private:
   std::string m_WikiDescription; ///< Description in the wiki page.
   std::vector<IAlgorithm_wptr> m_ChildAlgorithms; ///< A list of weak pointers to any child algorithms created
 
-  static size_t g_execCount; ///< Counter to keep track of algorithm execution order
 
   /// Vector of all the workspaces that have been read-locked
   std::vector<Workspace_sptr> m_readLockedWorkspaces;

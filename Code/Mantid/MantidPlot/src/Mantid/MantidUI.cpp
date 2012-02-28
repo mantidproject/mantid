@@ -701,7 +701,7 @@ void MantidUI::showAlgorithmHistory()
   if(NULL != wsptr) 
   {
     // If the workspace has any AlgorithHistory ...
-    if(!wsptr->getHistory().getAlgorithmHistories().empty())
+    if(!wsptr->getHistory().empty())
     {
       // ... create and display the window.
       AlgorithmHistoryWindow *palgHist = new AlgorithmHistoryWindow(m_appWindow,wsptr);

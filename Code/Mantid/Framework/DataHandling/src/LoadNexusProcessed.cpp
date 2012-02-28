@@ -1133,7 +1133,7 @@ bool UDlesserExecCount(NXClassInfo elem1,NXClassInfo elem2)
  */
 void LoadNexusProcessed::readAlgorithmHistory(NXEntry & mtd_entry, API::MatrixWorkspace_sptr local_workspace)
 {
-  int exeCount=0;
+
   NXMainClass history = mtd_entry.openNXClass<NXMainClass>("process");
   //Group will contain a class for each algorithm, called MantidAlgorithm_i and then an
   //environment class
@@ -1185,14 +1185,13 @@ void LoadNexusProcessed::readAlgorithmHistory(NXEntry & mtd_entry, API::MatrixWo
         g_log.warning() << "Error parsing start time in algorithm history entry." << "\n";
         return;
       }
-      //API::AlgorithmHistory alg_hist(algname, version, start_timedate.timestamp().epochTime(), dur);
-
-      ++exeCount;
       //Convert the timestamp to time_t to DateAndTime
       Mantid::Kernel::DateAndTime utc_start;
       utc_start.set_from_time_t( start_timedate.timestamp().epochTime() );
       //Create the algorithm history
-      API::AlgorithmHistory alg_hist(algName, version, utc_start, dur,exeCount);
+      API::AlgorithmHistory alg_hist(algName, version, utc_start, dur,Algorithm::g_execCount);
+      // Simulate running an algorithm
+      ++Algorithm::g_execCount;
 
       //Add property information
       for( size_t index = static_cast<size_t>(PARAMS)+1;index < nlines;++index )

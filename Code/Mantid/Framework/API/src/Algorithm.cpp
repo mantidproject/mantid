@@ -3,10 +3,14 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmProxy.h"
+#include "MantidAPI/AlgorithmHistory.h"
+
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/WorkspaceGroup.h"
+
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/DateAndTime.h"
@@ -18,7 +22,6 @@
 #include <Poco/StringTokenizer.h>
 
 #include <iomanip>
-#include "MantidAPI/WorkspaceGroup.h"
 
 using namespace Mantid::Kernel;
 
@@ -472,10 +475,13 @@ namespace Mantid
       {
         try
         {
-          if (!m_isChildAlgorithm) m_running = true;
+          if (!m_isChildAlgorithm) 
+          { 
+            m_running = true;
+            //count used for defining the algorithm execution order
+            ++Algorithm::g_execCount;
+          }
           start_time = Mantid::Kernel::DateAndTime::getCurrentTime();
-          //count used for defining the algorithm execution order
-          ++Algorithm::g_execCount;
           // Start a timer
           Timer timer;
           // Call the concrete algorithm's exec method

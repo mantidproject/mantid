@@ -22,7 +22,7 @@ public:
 
   void init()
   {
-    declareProperty(new WorkspaceProperty<Workspace>("arg1_param","x",Direction::Input));
+    declareProperty("arg1_param","x",Direction::Input);
     declareProperty("arg2_param",23);
   }
   void exec() {}
@@ -31,57 +31,29 @@ public:
 class AlgorithmHistoryTest : public CxxTest::TestSuite
 {
 public:
+  AlgorithmHistoryTest() : m_correctOutput(), m_execCount(0)
+  {
+  }
+
   void testPopulate()
   {
-    std::string correctOutput = "Algorithm: testalg ";
-    correctOutput = correctOutput + "v1\n";
-    correctOutput = correctOutput + "Execution Date: 2008-Feb-29 09:54:49\n";
-    correctOutput = correctOutput + "Execution Duration: 14 seconds\n";
-    correctOutput = correctOutput + "Parameters:\n";
-    correctOutput = correctOutput + "  Name: arg1_param, ";
-    correctOutput = correctOutput + "Value: 20, ";
-    correctOutput = correctOutput + "Default?: No, ";
-    correctOutput = correctOutput + "Direction: Input\n";
-    correctOutput = correctOutput + "  Name: arg2_param, ";
-    correctOutput = correctOutput + "Value: 23, ";
-    correctOutput = correctOutput + "Default?: Yes, ";
-    correctOutput = correctOutput + "Direction: Input\n";
-
-    //set the time
-    std::time_t rawtime;
-    std::tm * timeinfo = new std::tm;
-    timeinfo->tm_isdst = -1;
-
-    /* The datetime must match that in the strng above */
-    std::time ( &rawtime );
-    timeinfo->tm_year = 108;
-    timeinfo->tm_mon = 1;
-    timeinfo->tm_mday = 29;
-    timeinfo->tm_hour = 9;
-    timeinfo->tm_min = 54;
-    timeinfo->tm_sec = 49;
-    //Convert to time_t but assuming the tm is specified in UTC time.
-    std::time_t execTime_t =  Mantid::Kernel::DateAndTimeHelpers::utc_mktime ( timeinfo );
-    //Create a UTC datetime from it
-    Mantid::Kernel::DateAndTime execTime;
-    execTime.set_from_time_t( execTime_t );
-
-    // Not really much to test
-    Algorithm *alg = new testalg;
-    alg->initialize();
-    TS_ASSERT_THROWS( alg->setPropertyValue("arg1_param","20"),
-      std::invalid_argument );
-
-    AlgorithmHistory AH(alg, execTime, 14.0);
+    AlgorithmHistory AH = createTestHistory();
     //dump output to sting
     std::ostringstream output;
     output.exceptions( std::ios::failbit | std::ios::badbit );
     TS_ASSERT_THROWS_NOTHING(output << AH);
-    TS_ASSERT_EQUALS(output.str(),correctOutput);
-
-    delete timeinfo;
-    delete alg;
+    TS_ASSERT_EQUALS(output.str(), m_correctOutput);
+    // Does it equal itself
+    TS_ASSERT_EQUALS(AH, AH);
   }
+
+  void test_Less_Than_Returns_True_For_If_Execution_Order_Is_Lower()
+  {
+    AlgorithmHistory first = createTestHistory();
+    AlgorithmHistory second = createTestHistory();
+    TS_ASSERT_LESS_THAN(first, second);
+  }
+
 
   void test_Created_Algorithm_Matches_History()
   {
@@ -103,6 +75,55 @@ public:
 
   }
 
+private:
+  AlgorithmHistory createTestHistory()
+  {
+    m_correctOutput = "Algorithm: testalg ";
+    m_correctOutput +=  "v1\n";
+    m_correctOutput +=  "Execution Date: 2008-Feb-29 09:54:49\n";
+    m_correctOutput +=  "Execution Duration: 14 seconds\n";
+    m_correctOutput +=  "Parameters:\n";
+    m_correctOutput +=  "  Name: arg1_param, ";
+    m_correctOutput +=  "Value: y, ";
+    m_correctOutput +=  "Default?: No, ";
+    m_correctOutput +=  "Direction: Input\n";
+    m_correctOutput +=  "  Name: arg2_param, ";
+    m_correctOutput +=  "Value: 23, ";
+    m_correctOutput +=  "Default?: Yes, ";
+    m_correctOutput +=  "Direction: Input\n";
+
+    //set the time
+    std::time_t rawtime;
+    std::tm * timeinfo = new std::tm;
+    timeinfo->tm_isdst = -1;
+
+    /* The datetime must match that in the strng above */
+    std::time ( &rawtime );
+    timeinfo->tm_year = 108;
+    timeinfo->tm_mon = 1;
+    timeinfo->tm_mday = 29;
+    timeinfo->tm_hour = 9;
+    timeinfo->tm_min = 54;
+    timeinfo->tm_sec = 49;
+    //Convert to time_t but assuming the tm is specified in UTC time.
+    std::time_t execTime_t =  Mantid::Kernel::DateAndTimeHelpers::utc_mktime ( timeinfo );
+    //Create a UTC datetime from it
+    Mantid::Kernel::DateAndTime execTime;
+    execTime.set_from_time_t( execTime_t );
+
+    // Not really much to test
+    testalg alg;
+    alg.initialize();
+    alg.setPropertyValue("arg1_param", "y");
+    alg.execute();
+
+    delete timeinfo;
+
+    return AlgorithmHistory(&alg, execTime, 14.0,  m_execCount++);
+  }
+
+  std::string m_correctOutput;
+  size_t m_execCount;
 };
 
 #endif /* ALGORITHMHISTORYTEST_H_*/

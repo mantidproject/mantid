@@ -183,14 +183,9 @@ AlgHistScriptButton::~AlgHistScriptButton()
 {
 }
 
-AlgorithmHistoryWindow::AlgorithmHistoryWindow(QWidget *parent) : MantidDialog(parent),
-  m_scriptButton(NULL),m_Historytree(NULL),m_histPropWindow(NULL),
-  m_execSumGrpBox(NULL),m_envHistGrpBox(NULL),m_wsName("")
-{
-}
 
 AlgorithmHistoryWindow::AlgorithmHistoryWindow(QWidget *parent,const boost::shared_ptr<const Workspace> wsptr):
-MantidDialog(parent),m_algHist(wsptr->getHistory().getAlgorithmHistories()),m_histPropWindow(NULL),m_execSumGrpBox(NULL),m_envHistGrpBox(NULL),m_wsName(wsptr->getName().c_str())
+MantidDialog(parent),m_algHist(wsptr->getHistory()),m_histPropWindow(NULL),m_execSumGrpBox(NULL),m_envHistGrpBox(NULL),m_wsName(wsptr->getName().c_str())
 {
   setWindowTitle(tr("Algorithm History"));
   setMinimumHeight(400);
@@ -259,12 +254,13 @@ AlgExecSummaryGrpBox* AlgorithmHistoryWindow::createExecSummaryGrpBox()
   {
     //iterating through algorithm history to display exec duration,date
     //last executed algorithm exec duration,date will be displayed in gruopbox
-    for (std::vector <AlgorithmHistory>::const_iterator algIter= m_algHist.begin( );
-	 algIter != m_algHist.end( ); ++algIter )
+    const size_t noEntries = m_algHist.size();
+    for( size_t i = 0; i < noEntries; ++i)
     {
+      const AlgorithmHistory & entry = m_algHist.getAlgorithmHistory(i);
       double duration=0;
-      duration=(*algIter).executionDuration();
-      Mantid::Kernel::DateAndTime date=(*algIter).executionDate();
+      duration = entry.executionDuration();
+      Mantid::Kernel::DateAndTime date = entry.executionDate();
       pgrpBox->setData(duration,date);
     }
     return pgrpBox;
@@ -291,7 +287,8 @@ AlgEnvHistoryGrpBox* AlgorithmHistoryWindow::createEnvHistGrpBox(const Environme
 AlgHistoryProperties* AlgorithmHistoryWindow::createAlgHistoryPropWindow()
 {	
   std::vector<PropertyHistory> histProp;
-  std::vector <AlgorithmHistory>::reverse_iterator rIter=m_algHist.rbegin();
+  const WorkspaceHistory::AlgorithmHistories & entries = m_algHist.getAlgorithmHistories();
+  auto rIter = entries.rbegin();
   histProp=(*rIter).getProperties();
 
   //AlgHistoryProperties * phistPropWindow=new AlgHistoryProperties(this,m_algHist);
@@ -345,8 +342,9 @@ void AlgorithmHistoryWindow::writeToScriptFile()
 }
 
 void AlgorithmHistoryWindow::populateAlgHistoryTreeWidget()
-{	
-  std::vector<AlgorithmHistory>::reverse_iterator ralgHistory_Iter=m_algHist.rbegin( );
+{
+  const WorkspaceHistory::AlgorithmHistories & entries = m_algHist.getAlgorithmHistories();
+  auto ralgHistory_Iter = entries.rbegin();
   std::string algrithmName;
   algrithmName=(*ralgHistory_Iter).name();
   QString algName=algrithmName.c_str();
@@ -356,7 +354,7 @@ void AlgorithmHistoryWindow::populateAlgHistoryTreeWidget()
   QTreeWidgetItem * item= new	QTreeWidgetItem(QStringList(algName),QTreeWidgetItem::Type);
   if(m_Historytree)m_Historytree->addTopLevelItem(item);
   ++ralgHistory_Iter;
-  for ( ; ralgHistory_Iter != m_algHist.rend( ) ; ++ralgHistory_Iter )
+  for ( ; ralgHistory_Iter != entries.rend( ) ; ++ralgHistory_Iter )
   {
     algrithmName=(*ralgHistory_Iter).name();
     nAlgVersion=(*ralgHistory_Iter).version();
@@ -413,7 +411,7 @@ void AlgorithmHistoryWindow::updateAlgHistoryProperties(QString algName,int vers
 {
   std::vector<PropertyHistory> histProp;
   //getting the selcted algorithm at pos from History vector
-  const AlgorithmHistory & algHist=m_algHist.at(pos);
+  const AlgorithmHistory & algHist = m_algHist.getAlgorithmHistory(pos);
   std::string name=algHist.name();
   int nVer=algHist.version();
   //if name and version in the history is same as selected item
@@ -431,7 +429,7 @@ void AlgorithmHistoryWindow::updateAlgHistoryProperties(QString algName,int vers
 void AlgorithmHistoryWindow::updateExecSummaryGrpBox(const QString& algName,const int & version,int pos)
 {
   //getting the selcted algorithm at pos from History vector
-  const AlgorithmHistory & algHist=m_algHist.at(pos);
+  const AlgorithmHistory & algHist = m_algHist.getAlgorithmHistory(pos);
   std::string name=algHist.name();
   int nVer=algHist.version();
   //if name and version in the history is same as selected item
