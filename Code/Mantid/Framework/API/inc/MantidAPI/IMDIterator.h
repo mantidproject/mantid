@@ -110,6 +110,9 @@ class IMDWorkspace;
     /// Returns the error of a given event
     virtual signal_t getInnerError(size_t index) const = 0;
 
+    /// Returns true if masking is used.
+    virtual bool getIsMasked() const = 0;
+
   protected:
     /// Normalization method for getNormalizedSignal()
     Mantid::API::MDNormalization m_normalization;

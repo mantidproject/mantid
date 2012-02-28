@@ -87,6 +87,8 @@ namespace MDEvents
 
     virtual signal_t getInnerError(size_t index) const;
 
+    virtual bool getIsMasked() const{ throw std::runtime_error("MDHistoWorkspaceIterator::getIsMasked no implemented yet.");}
+
   protected:
     /// The MDHistoWorkspace being iterated.
     const MDHistoWorkspace * m_ws;

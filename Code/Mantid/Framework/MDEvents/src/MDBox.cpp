@@ -17,7 +17,7 @@ namespace MDEvents
    : IMDBox<MDE, nd>(),
      m_dataBusy(false), m_dataModified(false), m_dataAdded(false),
      m_fileIndexStart(0), m_fileNumEvents(0),
-     m_onDisk(false), m_inMemory(true)
+     m_onDisk(false), m_inMemory(true), m_bIsMasked(false)
   {
   }
 
@@ -30,8 +30,7 @@ namespace MDEvents
     : IMDBox<MDE, nd>(),
       m_dataBusy(false), m_dataModified(false), m_dataAdded(false),
       m_fileIndexStart(0), m_fileNumEvents(0),
-      m_onDisk(false), m_inMemory(true)
-
+      m_onDisk(false), m_inMemory(true), m_bIsMasked(false)
   {
     if (splitter->getNDims() != nd)
       throw std::invalid_argument("MDBox::ctor(): controller passed has the wrong number of dimensions.");
@@ -51,7 +50,7 @@ namespace MDEvents
       : IMDBox<MDE, nd>(extentsVector),
         m_dataBusy(false), m_dataModified(false), m_dataAdded(false),
         m_fileIndexStart(0), m_fileNumEvents(0),
-        m_onDisk(false), m_inMemory(true)
+        m_onDisk(false), m_inMemory(true), m_bIsMasked(false)
   {
     if (splitter->getNDims() != nd)
       throw std::invalid_argument("MDBox::ctor(): controller passed has the wrong number of dimensions.");
@@ -69,7 +68,7 @@ namespace MDEvents
      data(other.data),
      m_dataBusy(other.m_dataBusy), m_dataModified(other.m_dataModified), m_dataAdded(other.m_dataAdded),
      m_fileIndexStart(other.m_fileIndexStart), m_fileNumEvents(other.m_fileNumEvents),
-     m_onDisk(other.m_onDisk), m_inMemory(other.m_inMemory)
+     m_onDisk(other.m_onDisk), m_inMemory(other.m_inMemory), m_bIsMasked(other.m_bIsMasked)
   {
   }
 

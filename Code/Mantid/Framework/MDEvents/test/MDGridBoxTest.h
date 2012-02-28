@@ -31,15 +31,26 @@
 #include <memory>
 #include <Poco/File.h>
 #include <vector>
+#include <gmock/gmock.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using namespace testing;
 
 class MDGridBoxTest :    public CxxTest::TestSuite
 {
+private:
+  
+  ///Mock type to help determine if masking is being determined correctly
+  class MockMDBox : public MDBox<MDLeanEvent<1>, 1>
+  {
+  public:
+    MOCK_CONST_METHOD0(getIsMasked, bool());
+  };
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -1334,7 +1345,68 @@ public:
     do_check_integrateSphere(box, 0.0,0.5, 0.01,  1.0, "Tiny, but just barely enough to get an event");
   }
 
+  void test_getIsMasked_WhenNoMasking()
+  {
+    std::vector<IMDBox<MDLeanEvent<1>, 1> *> boxes;
 
+    MockMDBox* a = new MockMDBox;
+    MockMDBox* b = new MockMDBox;
+
+    EXPECT_CALL(*a, getIsMasked()).Times(1).WillOnce(Return(false)); //Not masked
+    EXPECT_CALL(*b, getIsMasked()).Times(1).WillOnce(Return(false)); //Not masked
+
+    boxes.push_back(a);
+    boxes.push_back(b);
+
+    MDGridBox<MDLeanEvent<1>,1> g;
+    g.setChildren(boxes, 0, 2);
+
+    TSM_ASSERT("No inner boxes were masked so the MDGridBox should not report that it is masked", !g.getIsMasked());
+    TS_ASSERT(Mock::VerifyAndClearExpectations(a));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(b));
+  }
+
+  void test_getIsMasked_WhenFirstMasked()
+  {
+    std::vector<IMDBox<MDLeanEvent<1>, 1> *> boxes;
+
+    MockMDBox* a = new MockMDBox;
+    MockMDBox* b = new MockMDBox;
+
+    EXPECT_CALL(*a, getIsMasked()).Times(1).WillOnce(Return(true)); //MASKED
+    EXPECT_CALL(*b, getIsMasked()).Times(0); //Not masked, but will never be called.
+
+    boxes.push_back(a);
+    boxes.push_back(b);
+
+    MDGridBox<MDLeanEvent<1>,1> g;
+    g.setChildren(boxes, 0, 2);
+
+    TSM_ASSERT("First inner box masked, so should return masked", g.getIsMasked());
+    TS_ASSERT(Mock::VerifyAndClearExpectations(a));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(b));
+  }
+
+  void test_getIsMasked_WhenLastMasked()
+  {
+    std::vector<IMDBox<MDLeanEvent<1>, 1> *> boxes;
+
+    MockMDBox* a = new MockMDBox;
+    MockMDBox* b = new MockMDBox;
+
+    EXPECT_CALL(*a, getIsMasked()).Times(1).WillOnce(Return(false)); //NOT MASKED
+    EXPECT_CALL(*b, getIsMasked()).Times(1).WillOnce(Return(true)); //MASKED
+
+    boxes.push_back(a);
+    boxes.push_back(b);
+
+    MDGridBox<MDLeanEvent<1>,1> g;
+    g.setChildren(boxes, 0, 2);
+
+    TSM_ASSERT("Second inner box masked, so should return masked", g.getIsMasked());
+    TS_ASSERT(Mock::VerifyAndClearExpectations(a));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(b));
+  }
 
 private:
   std::string message;

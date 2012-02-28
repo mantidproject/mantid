@@ -91,6 +91,15 @@ public:
     }
   }
 
+  void test_get_is_masked()
+  {
+    boost::shared_ptr<MatrixWorkspace> ws = makeFakeWS();
+    std::vector<IMDIterator*> iterators = ws->createIterators(1, NULL);
+
+    //Characterisation test. Lock-down current behaviour.
+    TS_ASSERT_THROWS(iterators[0]->getIsMasked(), std::runtime_error);
+  }
+
 
 };
 

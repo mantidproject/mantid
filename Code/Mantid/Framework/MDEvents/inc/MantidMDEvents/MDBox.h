@@ -150,6 +150,13 @@ namespace MDEvents
     void setDataBusy(const bool value)
     { m_dataBusy = value; }
 
+    /* Getter to determine if masking is applied.
+    @return true if masking is applied.
+    */
+    virtual bool getIsMasked() const
+    {
+      return m_bIsMasked;
+    }
 
     std::vector< MDE > & getEvents();
 
@@ -225,6 +232,9 @@ namespace MDEvents
 
     /// True when the events were loaded up from disk. Irrelevant if m_onDisk is false.
     mutable bool m_inMemory;
+
+    /// Flag indicating that masking has been applied.
+    bool m_bIsMasked;
 
   public:
     /// Typedef for a shared pointer to a MDBox

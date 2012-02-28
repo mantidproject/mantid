@@ -9,10 +9,12 @@
 #include "MantidMDEvents/MDBoxIterator.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDGridBox.h"
+#include "MantidMDEvents/MDBox.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
+#include <gmock/gmock.h>
 
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
@@ -461,6 +463,26 @@ public:
     TS_ASSERT( !it->next() );
   }
 
+  void test_getIsMasked()
+  {
+    //Mock MDBox. Only one method of interest to the mocking.
+    class MockMDBox : public MDBox<MDLeanEvent<2>, 2>
+    {
+    public:
+      MOCK_CONST_METHOD0(getIsMasked, bool());
+    };
+
+    MockMDBox mockBox;
+
+    MDBoxIterator<MDLeanEvent<2>, 2> it(&mockBox, 1, true);
+
+    //All that we want to test is that iterator::getIsMasked calls IMDBox::getIsMasked
+    EXPECT_CALL(mockBox, getIsMasked()).Times(1);
+    it.getIsMasked();
+
+    TSM_ASSERT("Iterator does not use boxes as expected", testing::Mock::VerifyAndClearExpectations(&mockBox));
+  }
+
 
 };
 
@@ -563,8 +585,6 @@ public:
     do_test_iterator_that_fills_a_vector(true);
   }
 
-
-
   // ---------------------------------------------------------------
   /** For comparison, let's use getBoxes() that fills a vector directly.
    * After that, we iterate through them to compare how long the whole operation takes.
@@ -649,9 +669,6 @@ public:
   {
     do_test_getBoxes(true, 3, 125*125*125);
   }
-
-
-
 
 };
 

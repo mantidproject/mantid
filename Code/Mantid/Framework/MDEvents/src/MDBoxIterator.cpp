@@ -314,6 +314,12 @@ namespace MDEvents
     return (*m_events)[index].getError();
   }
 
+  /// Returns the error of a given event
+  TMDE(bool MDBoxIterator)::getIsMasked() const
+  {
+      return m_current->getIsMasked();
+  }
+
 
 } // namespace Mantid
 } // namespace MDEvents

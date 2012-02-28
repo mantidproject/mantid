@@ -72,6 +72,8 @@ namespace MDEvents
 
     signal_t getInnerError(size_t index) const;
 
+    bool getIsMasked() const;
+
 
   private:
     void getEvents() const;

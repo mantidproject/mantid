@@ -271,6 +271,11 @@ namespace API
     return this->getError();
   }
 
+  bool MatrixWorkspaceMDIterator::getIsMasked() const
+  {
+    throw std::runtime_error("Mask determination not implemented on the MatrixWorkspaceMDIteraor yet");
+  }
+
 
 } // namespace Mantid
 } // namespace API

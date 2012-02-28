@@ -84,6 +84,11 @@ public:
   virtual void getBoxes(std::vector<IMDBox<MDE,nd> *>&  /*boxes*/, size_t /*maxDepth*/, bool, Mantid::Geometry::MDImplicitFunction *) {};
   virtual void generalBin(MDBin<MDE,nd> & /*bin*/, Mantid::Geometry::MDImplicitFunction & /*function*/) const {}
 
+  virtual bool getIsMasked() const
+  {
+    throw std::runtime_error("IMDBoxTester does not implement getIsMasked");
+  }
+
   uint64_t getFilePosition() const
   { return m_filePos; }
   uint64_t m_filePos;

@@ -279,6 +279,13 @@ public:
     TSM_ASSERT_THROWS("Not implemented yet, should throw", it->getVertexesArray(numVertexes, outDimensions, maskDim), std::runtime_error);
   }
 
+  void test_getIsMasked()
+  {
+    //Characterisation test
+    MDHistoWorkspaceIterator iterator(ws);
+    TSM_ASSERT_THROWS("Not implemented yet, should throw.", iterator.getIsMasked(), std::runtime_error);
+  }
+
 };
 
 

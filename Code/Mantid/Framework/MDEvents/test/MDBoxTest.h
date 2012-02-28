@@ -1057,6 +1057,12 @@ public:
   {
     do_test_fileBackEnd_binningOperations(true);
   }
+
+  void test_getIsMasked_Default()
+  {
+    MDBox<MDLeanEvent<1>, 1> box;
+    TSM_ASSERT("Default should be for a MDBox not to be masked!", !box.getIsMasked());
+  }
 };
 
 
