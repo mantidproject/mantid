@@ -144,8 +144,10 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
                 # instrument selection dialog
                 if self._instrument == '' or self._instrument is None:
                     self._change_instrument()
+                    return
             else:
                 self._change_instrument()
+                return
                 
         if self._instrument == '' or self._instrument is None:
             self.close()
