@@ -5,6 +5,9 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 #include "MantidDataHandling/StartLiveData.h"
 #include "MantidKernel/System.h"
 #include "MantidDataHandling/LoadLiveData.h"
+#include "MantidDataHandling/MonitorLiveData.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmProxy.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -122,7 +125,27 @@ namespace DataHandling
     double UpdateEvery = this->getProperty("UpdateEvery");
     if (UpdateEvery > 0)
     {
-      //TODO: Launch MonitorLiveData asynchronously
+      // Create the MonitorLiveData but DO NOT make a AlgorithmProxy to it
+      IAlgorithm_sptr algBase = AlgorithmManager::Instance().create("MonitorLiveData", -1, false);
+      MonitorLiveData * monitorAlg = dynamic_cast<MonitorLiveData*>(algBase.get());
+
+      if (!monitorAlg)
+        throw std::runtime_error("Error creating the MonitorLiveData algorithm");
+
+      // Copy settings from THIS to monitorAlg
+      monitorAlg->initialize();
+      monitorAlg->copyPropertyValuesFrom(*this);
+      monitorAlg->setProperty("UpdateEvery", UpdateEvery);
+
+      // Manually create the proxy and add it to the managed algorithms
+      //IAlgorithm_sptr algProxy(new AlgorithmProxy(algBase));
+      //AlgorithmManager::Instance().algorithms().push_back(algProxy);
+
+      // Give the listener directly to LoadLiveData (don't re-create it)
+      monitorAlg->setLiveListener(listener);
+
+      // Launch asyncronously
+      monitorAlg->executeAsync();
     }
 
   }

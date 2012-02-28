@@ -170,6 +170,16 @@ public:
     TS_ASSERT_DIFFERS(Bptr.get(),static_cast<Algorithm*>(0));
   }
 
+  void testCreateNoProxy()
+  {
+    AlgorithmManager::Instance().clear();
+    IAlgorithm_sptr Aptr, Bptr;
+    Aptr=AlgorithmManager::Instance().create("AlgTest", -1, true);
+    Bptr=AlgorithmManager::Instance().create("AlgTest", -1, false);
+    TSM_ASSERT("Was created as a AlgorithmProxy", dynamic_cast<AlgorithmProxy*>(Aptr.get()) );
+    TSM_ASSERT("Was NOT created as a AlgorithmProxy", dynamic_cast<AlgorithmProxy*>(Bptr.get())==NULL );
+  }
+
 };
 
 #endif /* AlgorithmManagerTest_H_*/

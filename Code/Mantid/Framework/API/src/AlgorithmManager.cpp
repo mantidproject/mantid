@@ -60,21 +60,33 @@ namespace Mantid
       return retVector;
     }
 
-    /** Creates and initialises an instance of an algorithm
-    *
-    *  @param  algName The name of the algorithm required
-    *  @param  version The version of the algorithm required, if not defined most recent version is used -> version =-1
-    *  @return A pointer to the created algorithm
-    *  @throw  NotFoundError Thrown if algorithm requested is not registered
-    *  @throw  std::runtime_error Thrown if properties string is ill-formed
+    /** Creates and initialises an instance of an algorithm.
+     *
+     * The algorithm gets tracked in the list of "managed" algorithms,
+     * which is shown in GUI for cancelling, etc.
+     *
+     * @param  algName :: The name of the algorithm required
+     * @param  version :: The version of the algorithm required, if not defined most recent version is used -> version =-1
+     * @param  makeProxy :: If true (default), create and return AlgorithmProxy of the given algorithm.
+     *         DO NOT SET TO FALSE unless you are really sure of what you are doing!
+     * @return A pointer to the created algorithm
+     * @throw  NotFoundError Thrown if algorithm requested is not registered
+     * @throw  std::runtime_error Thrown if properties string is ill-formed
     */
-    IAlgorithm_sptr AlgorithmManagerImpl::create(const std::string& algName, const int& version)
+    IAlgorithm_sptr AlgorithmManagerImpl::create(const std::string& algName, const int& version, bool makeProxy)
     {
+      IAlgorithm_sptr alg;
       try
       {
-        Algorithm_sptr alg = AlgorithmFactory::Instance().create(algName,version);// Throws on fail:
-        m_managed_algs.push_back(IAlgorithm_sptr(new AlgorithmProxy(alg)));      
-        m_managed_algs.back()->initialize();
+        Algorithm_sptr unmanagedAlg = AlgorithmFactory::Instance().create(algName,version);// Throws on fail:
+        if (makeProxy)
+          alg = IAlgorithm_sptr(new AlgorithmProxy(unmanagedAlg));
+        else
+          alg = unmanagedAlg;
+
+        // Add to list of managed ones
+        m_managed_algs.push_back(alg);
+        alg->initialize();
         
         // If this takes us beyond the maximum size, then remove the oldest one(s)
         while (m_managed_algs.size() >= static_cast<std::deque<IAlgorithm_sptr>::size_type>(m_max_no_algs) )
@@ -84,6 +96,7 @@ namespace Mantid
           {
             g_log.debug() << "Popping out oldest algorithm " << m_managed_algs.front()->name() << std::endl;
             m_managed_algs.pop_front();
+            // TODO: remove the second-oldest one
           }
           else
           {
@@ -99,7 +112,7 @@ namespace Mantid
         g_log.error()<<"AlgorithmManager:: Unable to create algorithm "<< algName << ' ' << ex.what() << std::endl;
         throw std::runtime_error("AlgorithmManager:: Unable to create algorithm " + algName + ' ' + ex.what());
       }
-      return m_managed_algs.back();
+      return alg;
     }
 
     /** 

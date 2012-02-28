@@ -47,7 +47,7 @@ class MANTID_API_DLL AlgorithmManagerImpl
 
 public:
   /// Creates a managed algorithm with the option of choosing a version
-  IAlgorithm_sptr create(const std::string& algName, const int& version = -1);
+  IAlgorithm_sptr create(const std::string& algName, const int& version = -1, bool makeProxy = true);
   /// Creates an unmanaged algorithm with the option of choosing a version
   boost::shared_ptr<Algorithm> createUnmanaged(const std::string& algName, const int& version = -1) const;
 

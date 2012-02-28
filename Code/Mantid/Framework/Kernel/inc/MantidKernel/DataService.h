@@ -290,7 +290,7 @@ public:
     }
 
     notificationCenter.postNotification(new PreDeleteNotification(foundName,it->second));
-    g_log.information("Data Object '"+ foundName +"' deleted from data service.\n");
+    g_log.information("Data Object '"+ foundName +"' deleted from data service.");
     datamap.erase(it);
     //API::MemoryManager::Instance().releaseFreeMemory();
     notificationCenter.postNotification(new PostDeleteNotification(foundName));
