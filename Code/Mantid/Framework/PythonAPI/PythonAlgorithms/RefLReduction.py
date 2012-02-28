@@ -97,7 +97,11 @@ class RefLReduction(PythonAlgorithm):
         subtract_data_bck = self.getProperty("SubtractSignalBackground")
         subtract_norm_bck = self.getProperty("SubtractNormBackground")
 
-        # Pick a good workspace name
+        #name of the sfCalculator txt file
+        sfCalculator = "/home/j35/Desktop/SFcalculator.txt"
+        slitsValuePrecision = 0.1       #precision of slits = 10% 
+
+        # Pick a good workspace n    ame
         ws_name = "refl%d" % run_numbers[0]
         ws_event_data = ws_name+"_evt"  
         
@@ -392,7 +396,8 @@ class RefLReduction(PythonAlgorithm):
 
 
             #Normalization           
-            SumSpectra(InputWorkspace=ws_norm_rebinned, OutputWorkspace=ws_norm_rebinned)
+            SumSpectra(InputWorkspace=ws_norm_rebinned, 
+                       OutputWorkspace=ws_norm_rebinned)
 
             #### divide data by normalize histo workspace
             Divide(LHSWorkspace=ws_data,
@@ -406,6 +411,11 @@ class RefLReduction(PythonAlgorithm):
         AngleOffset_deg = float(self.getProperty("AngleOffset"))
         AngleOffset_rad = (AngleOffset_deg * math.pi) / 180.
         theta += AngleOffset_rad
+
+#        this is where we need to apply the scaling factor
+        ws_data_scaled = wks_utility.applySF(ws_data,
+                                             slitsValuePrecision,
+                                             sfCalculatorFile=sfCalculator) 
         
         if dMD is not None and theta is not None:
                     
@@ -422,7 +432,7 @@ class RefLReduction(PythonAlgorithm):
             q_max = max(_q_axis)
 
         ws_data_Q = ws_data + '_Q'
-        wks_utility.convertWorkspaceToQ(ws_data,
+        wks_utility.convertWorkspaceToQ(ws_data_scaled,
                                         ws_data_Q,
                                         fromYpixel=data_peak[0],
                                         toYpixel=data_peak[1],
@@ -434,7 +444,7 @@ class RefLReduction(PythonAlgorithm):
                                         q_binning=[q_min,q_step,q_max])
 
         mt = mtd[ws_data_Q]
-        ReplaceSpecialValues(InputWorkspace=ws_data, 
+        ReplaceSpecialValues(InputWorkspace=ws_data_Q, 
                              NaNValue=0, 
                              NaNError=0, 
                              InfinityValue=0, 

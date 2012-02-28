@@ -1,6 +1,7 @@
 from numpy import zeros, arctan2, arange, shape
 from mantidsimple import *
 import math
+import os.path
 
 h = 6.626e-34 #m^2 kg s^-1
 m = 1.675e-27 #kg
@@ -190,8 +191,7 @@ def convertWorkspaceToQ(ws_data,
     """
 
     mt1 = mtd[ws_data]
-    _tof_axis = mt1.readX(0)[:]
-    
+    _tof_axis = mt1.readX(0)[:]    
     _fromYpixel = min([fromYpixel,toYpixel])
     _toYpixel = max([fromYpixel,toYpixel])
     fromYpixel = _fromYpixel
@@ -480,10 +480,6 @@ def convertToRvsQ(dMD=-1,theta=-1,tof=None):
             TOF: TOF of pixel
             theta: angle of detector
     """
-    print 'dMD: '
-    print dMD
-    print
-    
     _const = float(4) * math.pi * m * dMD / h
     sz_tof = numpy.shape(tof)[0]
     q_array = zeros(sz_tof-1)
@@ -724,5 +720,96 @@ def calc_center_of_mass(arr_x, arr_y, A):
         return (SIXTH * center_of_mass) / A
     else:
         return 0.0
+
+def applySF(InputWorkspace,
+            slitsValuePrecision,
+            sfCalculatorFile=None):
+    """
+    Function that apply scaling factor to data using sfCalculator.txt
+    file created by the sfCalculator procedure
+    """
+        
+    if (sfCalculatorFile is not None) and (os.path.isfile(sfCalculatorFile)):
+        
+        #parse file and put info into array
+        f = open(sfCalculatorFile,'r')
+        sfFactorTable = []
+        for line in f.read().split('\n'):
+            if (len(line) > 0 and line[0] != '#'):
+                sfFactorTable.append(line.split(' '))
+        f.close()
+        
+        sz_table = shape(sfFactorTable)
+        nbr_row = sz_table[0]
+        
+        #retrieve s1h and s2h values
+        s1h = getS1h(mtd[InputWorkspace])
+        s2h = getS2h(mtd[InputWorkspace])
+        
+        s1h_value = s1h[0]
+        s2h_value = s2h[0]
+        
+        #locate the row with s1h and s2h having the right value
+        s1h_precision = slitsValuePrecision * s1h_value
+        s1h_value_low = s1h_value - s1h_precision
+        s1h_value_high = s1h_value + s1h_precision
+        
+        s2h_precision = slitsValuePrecision * s2h_value
+        s2h_value_low = s2h_value - s2h_precision
+        s2h_value_high = s2h_value + s2h_precision
+        
+        for i in range(nbr_row):
+            _s1h_table_value = sfFactorTable[i][0]
+            _s2h_table_value = sfFactorTable[i][1]
+        
+            ### just for testing  REMOVE_ME
+            #_s1h_table_value = s1h_value_low
+            #_s2h_table_value = s2h_value_low
+            #### end of just testing  REMOVE_ME
+        
+            if (_s1h_table_value >= s1h_value_low and
+                _s1h_table_value <= s1h_value_high and
+                _s2h_table_value >= s2h_value_low and
+                _s2h_table_value <= s2h_value_high):
+               
+                a = float(sfFactorTable[i][2])
+                b = float(sfFactorTable[i][3])
+                a_error = float(sfFactorTable[i][4])
+                b_error = float(sfFactorTable[i][5])
+                
+                OutputWorkspace = _applySFtoArray(InputWorkspace,
+                                                  a,b,a_error,b_error)
+
+                return OutputWorkspace
+
+    return InputWorkspace
+
+def _applySFtoArray(workspace,a,b,a_error,b_error):
+    """
+    This function will create for each x-axis value the corresponding
+    scaling factor using the formula y=a+bx and 
+    """
     
-            
+    mt=mtd[workspace]
+    x_axis = mt.readX(0)[:]    
+    sz = len(x_axis)
+    x_axis_factors = zeros(sz)
+    x_axis_factors_error = zeros(sz)
+    for i in range(sz):
+        _x_value = float(x_axis[i])
+        _factor = _x_value * b + a
+        x_axis_factors[i] = _factor
+        _factor_error = _x_value * b_error + a_error
+        x_axis_factors_error[i] = _factor_error 
+
+    #create workspace
+    CreateWorkspace(OutputWorkspace='sfWorkspace',
+                    DataX=x_axis,
+                    DataY=x_axis_factors,
+                    DataE=x_axis_factors_error,
+                    Nspec=1,
+                    UnitX="TOF")
+    
+    Divide(workspace,'sfWorkspace',workspace)
+    return workspace
+        
