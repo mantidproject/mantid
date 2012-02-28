@@ -2,6 +2,7 @@
 #include "MantidMatrixCurve.h"
 #include "MantidUI.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
+#include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 #include "../FunctionCurve.h"
 #include "MantidQtMantidWidgets/PropertyHandler.h"
 
@@ -20,7 +21,7 @@
 
 #include <iostream>
 
-PeakPickerTool::PeakPickerTool(Graph *graph, MantidQt::MantidWidgets::FitPropertyBrowser *fitPropertyBrowser, MantidUI *mantidUI, bool showFitPropertyBrowser) :
+PeakPickerTool::PeakPickerTool(Graph *graph, MantidQt::MantidWidgets::FitPropertyBrowser *fitPropertyBrowser, MantidUI *mantidUI, bool showFitPropertyBrowser, bool customInterface) :
 QwtPlotPicker(graph->plotWidget()->canvas()),
 PlotToolInterface(graph),
 m_fitPropertyBrowser(fitPropertyBrowser),
@@ -84,7 +85,7 @@ m_width_set(true),m_width(0),m_addingPeak(false),m_resetting(false)
   {
     m_init = true;
     // If part of custom interface (i.e muon analysis)
-    if (m_fitPropertyBrowser->isCustomFittings())
+    if (customInterface)
     {
       // Set the vertical lines to correspond to the StartX and EndX stated on the custom interface.
       xMin(m_fitPropertyBrowser->startX());

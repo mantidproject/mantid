@@ -191,6 +191,7 @@
 #include "MantidQtMantidWidgets/ICatMyDataSearch.h"
 #include "MantidQtMantidWidgets/ICatAdvancedSearch.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
+#include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
@@ -17082,7 +17083,7 @@ void ApplicationWindow::runConnectFitting(MantidQt::MantidWidgets::FitPropertyBr
           foreach(Graph *g, layers)
           {
             // Go through and set up the PeakPickerTool for the new graph
-            PeakPickerTool* ppicker = new PeakPickerTool(g, fpb, mantidUI, true);
+            PeakPickerTool* ppicker = new PeakPickerTool(g, fpb, mantidUI, true, true);
             g->setActiveTool(ppicker);
           }
         }     

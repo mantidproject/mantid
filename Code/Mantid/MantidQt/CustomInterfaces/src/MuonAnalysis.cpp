@@ -9,6 +9,7 @@
 #include "MantidQtCustomInterfaces/IO_MuonGrouping.h"
 #include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
+#include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
@@ -87,6 +88,8 @@ MuonAnalysis::MuonAnalysis(QWidget *parent) :
 void MuonAnalysis::initLayout()
 {
   m_uiForm.setupUi(this);
+
+  m_uiForm.fitBrowser->init();
 
   // alow appending files
   m_uiForm.mwRunFiles->allowMultipleFiles(true);

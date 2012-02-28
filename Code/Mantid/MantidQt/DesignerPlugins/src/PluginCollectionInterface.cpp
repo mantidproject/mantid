@@ -7,6 +7,7 @@
 #include "MantidQtDesignerPlugins/InstrumentSelectorPlugin.h"
 #include "MantidQtDesignerPlugins/WorkspaceSelectorPlugin.h"
 #include "MantidQtDesignerPlugins/FitBrowserPlugin.h"
+#include "MantidQtDesignerPlugins/MuonFitBrowserPlugin.h"
 
 
 Q_EXPORT_PLUGIN2(LIBRARY_NAME, PluginCollectionInterface)
@@ -24,6 +25,7 @@ PluginCollectionInterface::PluginCollectionInterface(QObject *parent) : QObject(
   // development stage - only uncomment once they plugin
   // can be can be dragged in without breaking designer
   m_widgets.append(new FitBrowserPlugin(this));
+  m_widgets.append(new MuonFitBrowserPlugin(this));
 }
 
 /**

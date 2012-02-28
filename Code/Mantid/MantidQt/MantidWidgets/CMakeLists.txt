@@ -1,4 +1,5 @@
 set ( SRC_FILES src/DiagResults.cpp
+                src/FitPropertyBrowser.cpp
                 src/ICatAdvancedSearch.cpp
                 src/ICatInvestigation.cpp
                 src/ICatMyDataSearch.cpp
@@ -6,18 +7,18 @@ set ( SRC_FILES src/DiagResults.cpp
                 src/ICatUtils.cpp
                 src/InstrumentSelector.cpp
                 src/MultifitSetupDialog.cpp
+                src/MuonFitPropertyBrowser.cpp
                 src/MWDiag.cpp
                 src/MWRunFiles.cpp
+                src/PropertyHandler.cpp
                 src/pythonCalc.cpp
                 src/RangeSelector.cpp
                 src/RenameParDialog.cpp
                 src/SaveWorkspaces.cpp
+                src/SelectWorkspacesDialog.cpp
+                src/SequentialFitDialog.cpp
                 src/UserFunctionDialog.cpp
                 src/WorkspaceSelector.cpp
-                src/FitPropertyBrowser.cpp
-                src/SequentialFitDialog.cpp
-                src/SelectWorkspacesDialog.cpp
-                src/PropertyHandler.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/ICatAdvancedSearch.cpp
@@ -26,6 +27,7 @@ set ( SRC_UNITY_IGNORE_FILES src/ICatAdvancedSearch.cpp
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES inc/MantidQtMantidWidgets/DiagResults.h
+                inc/MantidQtMantidWidgets/FitPropertyBrowser.h
                 inc/MantidQtMantidWidgets/ICatAdvancedSearch.h
                 inc/MantidQtMantidWidgets/ICatInvestigation.h
                 inc/MantidQtMantidWidgets/ICatMyDataSearch.h
@@ -33,22 +35,23 @@ set ( INC_FILES inc/MantidQtMantidWidgets/DiagResults.h
                 inc/MantidQtMantidWidgets/ICatUtils.h
                 inc/MantidQtMantidWidgets/InstrumentSelector.h
                 inc/MantidQtMantidWidgets/MultifitSetupDialog.h
+                inc/MantidQtMantidWidgets/MuonFitPropertyBrowser.h
                 inc/MantidQtMantidWidgets/MWDiag.h
                 inc/MantidQtMantidWidgets/MWRunFiles.h
+                inc/MantidQtMantidWidgets/PropertyHandler.h
                 inc/MantidQtMantidWidgets/pythonCalc.h
                 inc/MantidQtMantidWidgets/RangeSelector.h
                 inc/MantidQtMantidWidgets/RenameParDialog.h
                 inc/MantidQtMantidWidgets/SaveWorkspaces.h
+                inc/MantidQtMantidWidgets/SelectWorkspacesDialog.h
+                inc/MantidQtMantidWidgets/SequentialFitDialog.h
                 inc/MantidQtMantidWidgets/UserFunctionDialog.h
                 inc/MantidQtMantidWidgets/WidgetDllOption.h
                 inc/MantidQtMantidWidgets/WorkspaceSelector.h
-                inc/MantidQtMantidWidgets/FitPropertyBrowser.h
-                inc/MantidQtMantidWidgets/SequentialFitDialog.h
-                inc/MantidQtMantidWidgets/SelectWorkspacesDialog.h
-                inc/MantidQtMantidWidgets/PropertyHandler.h
 )
 
 set ( MOC_FILES inc/MantidQtMantidWidgets/DiagResults.h
+                inc/MantidQtMantidWidgets/FitPropertyBrowser.h
                 inc/MantidQtMantidWidgets/ICatAdvancedSearch.h
                 inc/MantidQtMantidWidgets/ICatInvestigation.h
                 inc/MantidQtMantidWidgets/ICatMyDataSearch.h
@@ -56,18 +59,18 @@ set ( MOC_FILES inc/MantidQtMantidWidgets/DiagResults.h
                 inc/MantidQtMantidWidgets/ICatUtils.h
                 inc/MantidQtMantidWidgets/InstrumentSelector.h
                 inc/MantidQtMantidWidgets/MultifitSetupDialog.h
+                inc/MantidQtMantidWidgets/MuonFitPropertyBrowser.h
                 inc/MantidQtMantidWidgets/MWDiag.h
                 inc/MantidQtMantidWidgets/MWRunFiles.h
+                inc/MantidQtMantidWidgets/PropertyHandler.h
                 inc/MantidQtMantidWidgets/pythonCalc.h
                 inc/MantidQtMantidWidgets/RangeSelector.h
                 inc/MantidQtMantidWidgets/RenameParDialog.h
                 inc/MantidQtMantidWidgets/SaveWorkspaces.h
+                inc/MantidQtMantidWidgets/SelectWorkspacesDialog.h
+                inc/MantidQtMantidWidgets/SequentialFitDialog.h
                 inc/MantidQtMantidWidgets/UserFunctionDialog.h
                 inc/MantidQtMantidWidgets/WorkspaceSelector.h
-                inc/MantidQtMantidWidgets/FitPropertyBrowser.h
-                inc/MantidQtMantidWidgets/SequentialFitDialog.h
-                inc/MantidQtMantidWidgets/SelectWorkspacesDialog.h
-                inc/MantidQtMantidWidgets/PropertyHandler.h
 )
 
 set ( UI_FILES inc/MantidQtMantidWidgets/ICatAdvancedSearch.ui
@@ -78,8 +81,8 @@ set ( UI_FILES inc/MantidQtMantidWidgets/ICatAdvancedSearch.ui
                inc/MantidQtMantidWidgets/MWDiag.ui
                inc/MantidQtMantidWidgets/MWRunFiles.ui
                inc/MantidQtMantidWidgets/RenameParDialog.ui
-               inc/MantidQtMantidWidgets/UserFunctionDialog.ui
                inc/MantidQtMantidWidgets/SequentialFitDialog.ui
+               inc/MantidQtMantidWidgets/UserFunctionDialog.ui
 )
 
 

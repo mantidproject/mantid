@@ -173,8 +173,11 @@ void MantidUI::init()
   m_exploreAlgorithms->update();
   try
   {
-    m_fitFunction = new MantidQt::MantidWidgets::FitPropertyBrowser(m_appWindow, m_appWindow->mantidUI, false);
-    // m_fitFunction->init();
+    m_fitFunction = new MantidQt::MantidWidgets::FitPropertyBrowser(m_appWindow, m_appWindow->mantidUI);
+    m_fitFunction->init();
+        // this make the progress bar work with Fit algorithm running form the fit browser
+    connect(m_fitFunction,SIGNAL(executeFit(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)),
+      this,SLOT(executeAlgorithm(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)));
     m_fitFunction->hide();
     m_appWindow->addDockWidget( Qt::LeftDockWidgetArea, m_fitFunction );
 

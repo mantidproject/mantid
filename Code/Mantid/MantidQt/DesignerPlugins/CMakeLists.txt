@@ -5,6 +5,7 @@ include ( ${QT_USE_FILE} )
 set ( SRC_FILES src/FileFinderPlugin.cpp
                 src/FitBrowserPlugin.cpp 
                 src/InstrumentSelectorPlugin.cpp
+				src/MuonFitBrowserPlugin.cpp
                 src/PluginCollectionInterface.cpp
 				src/WorkspaceSelectorPlugin.cpp )
 
@@ -12,6 +13,7 @@ set ( SRC_FILES src/FileFinderPlugin.cpp
 set ( INC_FILES inc/MantidQtDesignerPlugins/FileFinderPlugin.h
                 inc/MantidQtDesignerPlugins/FitBrowserPlugin.h
                 inc/MantidQtDesignerPlugins/InstrumentSelectorPlugin.h
+				inc/MantidQtDesignerPlugins/MuonFitBrowserPlugin.h
                 inc/MantidQtDesignerPlugins/PluginCollectionInterface.h
 				inc/MantidQtDesignerPlugins/WorkspaceSelectorPlugin.h )
 

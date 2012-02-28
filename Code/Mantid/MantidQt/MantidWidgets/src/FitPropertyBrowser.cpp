@@ -67,6 +67,7 @@ namespace MantidQt
 namespace MantidWidgets
 {
 
+
 class FormulaDialogEditor: public StringDialogEditor
 {
 public:
@@ -84,6 +85,7 @@ protected slots:
   }
 };
 
+
 class FormulaDialogEditorFactory: public StringDialogEditorFactory
 {
 public:
@@ -97,15 +99,14 @@ protected:
   }
 };
 
+
 /**
  * Constructor
  * @param parent :: The parent widget - must be an ApplicationWindow
  * @param mantidui :: The UI form for MantidPlot
- * @param customFittings :: If true, use custom fittings
  */
-FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject* mantidui, bool customFittings)
+FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject* mantidui)
 :QDockWidget("Fit Function",parent),
-m_customFittings(customFittings),
 m_currentHandler(0),
 m_logValue(NULL),
 m_compositeFunction(0),
@@ -121,9 +122,6 @@ m_autoBackground(NULL),
 m_decimals(-1),
 m_mantidui(mantidui)
 {
-  QSettings settings;
-  settings.beginGroup("Mantid/FitBrowser");
-
   // Make sure plugins are loaded
   std::string libpath = Mantid::Kernel::ConfigService::Instance().getString("plugins.directory");
   if( !libpath.empty() )
@@ -162,55 +160,39 @@ m_mantidui(mantidui)
 
   QWidget* w = new QWidget(this);
 
-    /* Create property managers: they create, own properties, get and set values  */
-
-  m_groupManager =  new QtGroupPropertyManager(w);
+  /* Create property managers: they create, own properties, get and set values  */
+  m_groupManager = new QtGroupPropertyManager(w);
   m_doubleManager = new QtDoublePropertyManager(w);
   m_stringManager = new QtStringPropertyManager(w);
-  m_enumManager =   new QtEnumPropertyManager(w);
-  m_intManager =    new QtIntPropertyManager(w);
+  m_enumManager = new QtEnumPropertyManager(w);
+  m_intManager = new QtIntPropertyManager(w);
   m_boolManager = new QtBoolPropertyManager(w);
   m_filenameManager = new QtStringPropertyManager(w);
   m_formulaManager = new QtStringPropertyManager(w);
+  m_workspace = m_enumManager->addProperty("Workspace");
+}
 
-  // to be able to change windows title from tread
-  connect(this,SIGNAL(changeWindowTitle(const QString&)),this,SLOT(setWindowTitle(const QString&)));
 
-    /* Create the top level group */
+/**
+* Initialise the fit property browser
+*/
+void FitPropertyBrowser::init()
+{
+  QWidget* w = new QWidget(this);
 
-  /*QtProperty* fitGroup = */m_groupManager->addProperty("Fit");
-
-  connect(m_enumManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(enumChanged(QtProperty*)));
-  connect(m_boolManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(boolChanged(QtProperty*)));
-  connect(m_intManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(intChanged(QtProperty*)));
-  connect(m_doubleManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(doubleChanged(QtProperty*)));
-  connect(m_stringManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(stringChanged(QtProperty*)));
-  connect(m_filenameManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(stringChanged(QtProperty*)));
-  connect(m_formulaManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(stringChanged(QtProperty*)));
+  QSettings settings;
+  settings.beginGroup("Mantid/FitBrowser");
 
   /* Create function group */
   QtProperty* functionsGroup = m_groupManager->addProperty("Functions");
   QtProperty* settingsGroup(NULL);
 
-  if (!m_customFittings)
-  {  
-    connect(this,SIGNAL(xRangeChanged(double, double)), m_mantidui, SLOT(x_range_from_picker(double, double)));
-    /* Create input - output properties */  
-    settingsGroup = m_groupManager->addProperty("Settings");    
-    m_startX = addDoubleProperty("StartX");
-    m_endX = addDoubleProperty("EndX");
-  }
-  else
-  {
-    // Seperates the data and the settings into two seperate categories
-    settingsGroup = m_groupManager->addProperty("Data");
-    
-    // Have slightly different names as requested by the muon scientists. 
-    m_startX = addDoubleProperty(QString("Start (%1s)" ).arg(QChar(0x03BC))); //(mu); 
-    m_endX = addDoubleProperty(QString("End (%1s)" ).arg(QChar(0x03BC)));
-  }
+  connect(this,SIGNAL(xRangeChanged(double, double)), m_mantidui, SLOT(x_range_from_picker(double, double)));
+  /* Create input - output properties */  
+  settingsGroup = m_groupManager->addProperty("Settings");    
+  m_startX = addDoubleProperty("StartX");
+  m_endX = addDoubleProperty("EndX");
 
-  m_workspace = m_enumManager->addProperty("Workspace");
   m_workspaceIndex = m_intManager->addProperty("Workspace Index");
   m_output = m_stringManager->addProperty("Output");
   m_minimizer = m_enumManager->addProperty("Minimizer");  
@@ -237,52 +219,42 @@ m_mantidui(mantidui)
   
   // Only include the cost function when in the dock widget inside mantid plot, not on muon analysis widget
   // Include minimiser and plot difference under a different settings section.
-  if (!customFittings)
-  {
-    settingsGroup->addSubProperty(m_output);
-    settingsGroup->addSubProperty(m_minimizer);
-    settingsGroup->addSubProperty(m_costFunction);
-    settingsGroup->addSubProperty(m_plotDiff);
-  }
-  
+  settingsGroup->addSubProperty(m_output);
+  settingsGroup->addSubProperty(m_minimizer);
+  settingsGroup->addSubProperty(m_costFunction);
+  settingsGroup->addSubProperty(m_plotDiff);
+    
   /* Create editors and assign them to the managers */
-
-  QtCheckBoxFactory *checkBoxFactory = new QtCheckBoxFactory(w);
-  QtEnumEditorFactory *comboBoxFactory = new QtEnumEditorFactory(w);
-  QtSpinBoxFactory *spinBoxFactory = new QtSpinBoxFactory(w);
-  //QtDoubleSpinBoxFactory *doubleSpinBoxFactory = new QtDoubleSpinBoxFactory(w); //unused now
-  DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory(w);
-  QtLineEditFactory *lineEditFactory = new QtLineEditFactory(w);
-  StringDialogEditorFactory* stringDialogEditFactory = new StringDialogEditorFactory(w);
-  FormulaDialogEditorFactory* formulaDialogEditFactory = new FormulaDialogEditorFactory(w);
-
-  m_browser = new QtTreePropertyBrowser();
-  m_browser->setFactoryForManager(m_enumManager, comboBoxFactory);
-  m_browser->setFactoryForManager(m_boolManager, checkBoxFactory);
-  m_browser->setFactoryForManager(m_intManager, spinBoxFactory);
-  //m_browser->setFactoryForManager(m_doubleManager, doubleSpinBoxFactory);
-  m_browser->setFactoryForManager(m_doubleManager, doubleEditorFactory);
-  m_browser->setFactoryForManager(m_stringManager, lineEditFactory);
-  m_browser->setFactoryForManager(m_filenameManager, stringDialogEditFactory);
-  m_browser->setFactoryForManager(m_formulaManager, formulaDialogEditFactory);
+  createEditors(w);
 
   updateDecimals();
   
   m_functionsGroup = m_browser->addProperty(functionsGroup);
-  m_settingsGroup = m_browser->addProperty(settingsGroup);
+  m_settingsGroup = m_browser->addProperty(settingsGroup);  
 
-  // Custom settings that are specific and asked for by the muon scientists.
-  if (m_customFittings)
-  {
-    QtProperty* customSettingsGroup = m_groupManager->addProperty("Settings");
-    m_rawData = m_boolManager->addProperty("Fit To Raw Data");
-    bool data = settings.value("Fit To Raw Data",QVariant(false)).toBool();
-    m_boolManager->setValue(m_rawData,data);
-    customSettingsGroup->addSubProperty(m_minimizer);
-    customSettingsGroup->addSubProperty(m_plotDiff);
-    customSettingsGroup->addSubProperty(m_rawData);
-    m_customSettingsGroup = m_browser->addProperty(customSettingsGroup);
-  }
+  initLayout(w);
+}
+
+
+/**
+* Initialise the layout.
+*/
+void FitPropertyBrowser::initLayout(QWidget *w)
+{
+  // to be able to change windows title from tread
+  connect(this,SIGNAL(changeWindowTitle(const QString&)),this,SLOT(setWindowTitle(const QString&)));
+
+    /* Create the top level group */
+
+  /*QtProperty* fitGroup = */m_groupManager->addProperty("Fit");
+
+  connect(m_enumManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(enumChanged(QtProperty*)));
+  connect(m_boolManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(boolChanged(QtProperty*)));
+  connect(m_intManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(intChanged(QtProperty*)));
+  connect(m_doubleManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(doubleChanged(QtProperty*)));
+  connect(m_stringManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(stringChanged(QtProperty*)));
+  connect(m_filenameManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(stringChanged(QtProperty*)));
+  connect(m_formulaManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(stringChanged(QtProperty*)));
 
   QVBoxLayout* layout = new QVBoxLayout(w);
   QGridLayout* buttonsLayout = new QGridLayout();
@@ -401,18 +373,32 @@ m_mantidui(mantidui)
   m_changeSlotsEnabled = true;
     
   populateFunctionNames();
-
-  // Should only be done for the fitBrowser which is part of MantidPlot
-  if (!m_customFittings)
-  {
-    if (m_mantidui->metaObject()->indexOfMethod("executeAlgorithm(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)") >= 0)
-    {
-      // this make the progress bar work with Fit algorithm running form the fit browser
-      connect(this,SIGNAL(executeFit(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)),
-        m_mantidui,SLOT(executeAlgorithm(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)));
-    }
-  }
 }
+
+
+/**
+* Create editors and assign them to the managers 
+*/
+void FitPropertyBrowser::createEditors(QWidget *w)
+{
+  QtCheckBoxFactory *checkBoxFactory = new QtCheckBoxFactory(w);
+  QtEnumEditorFactory *comboBoxFactory = new QtEnumEditorFactory(w);
+  QtSpinBoxFactory *spinBoxFactory = new QtSpinBoxFactory(w);
+  DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory(w);
+  QtLineEditFactory *lineEditFactory = new QtLineEditFactory(w);
+  StringDialogEditorFactory* stringDialogEditFactory = new StringDialogEditorFactory(w);
+  FormulaDialogEditorFactory* formulaDialogEditFactory = new FormulaDialogEditorFactory(w);
+
+  m_browser = new QtTreePropertyBrowser();
+  m_browser->setFactoryForManager(m_enumManager, comboBoxFactory);
+  m_browser->setFactoryForManager(m_boolManager, checkBoxFactory);
+  m_browser->setFactoryForManager(m_intManager, spinBoxFactory);
+  m_browser->setFactoryForManager(m_doubleManager, doubleEditorFactory);
+  m_browser->setFactoryForManager(m_stringManager, lineEditFactory);
+  m_browser->setFactoryForManager(m_filenameManager, stringDialogEditFactory);
+  m_browser->setFactoryForManager(m_formulaManager, formulaDialogEditFactory);
+}
+
 
 /// Update setup menus according to how these are set in
 /// settings
@@ -507,10 +493,6 @@ void FitPropertyBrowser::executeSetupManageMenu(const QString& item)
 /// Destructor
 FitPropertyBrowser::~FitPropertyBrowser()
 {
-  QSettings settings;
-  settings.beginGroup("Mantid/FitBrowser");
-  bool plotDiff = m_boolManager->value(m_plotDiff);
-  settings.setValue("Plot Difference",plotDiff);
   if (m_compositeFunction) delete m_compositeFunction;
 }
 
@@ -654,10 +636,6 @@ void FitPropertyBrowser::popupMenu(const QPoint &)
     connect(action,SIGNAL(triggered()),this,SLOT(copy()));
     menu->addAction(action);
 
-    //action = new QAction("Paste",this);
-    //connect(action,SIGNAL(triggered()),this,SLOT(paste()));
-    //menu->addAction(action);
-
     menu->addSeparator();
   }
   else if (isFunctionsGroup || isSettingsGroup || isASetting)
@@ -726,7 +704,6 @@ void FitPropertyBrowser::popupMenu(const QPoint &)
 
     if (isTie)
     {
-      //menu->addSeparator();
       action = new QAction("Remove",this);
       connect(action,SIGNAL(triggered()),this,SLOT(deleteTie()));
       menu->addAction(action);
@@ -916,25 +893,22 @@ void FitPropertyBrowser::setWorkspaceName(const QString& wsName)
   if (i >= 0)
   {
     m_enumManager->setValue(m_workspace,i);
-    if (!m_customFittings)
+    Mantid::API::MatrixWorkspace_sptr mws;
+    try
     {
-      Mantid::API::MatrixWorkspace_sptr mws;
-      try
+      mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+      Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString()));
+    }
+    catch(Mantid::Kernel::Exception::NotFoundError&)
+    {
+    }
+    if (mws)
+    {
+      size_t wi = static_cast<size_t>(workspaceIndex());
+      if (wi < mws->getNumberHistograms() && !mws->readX(wi).empty())
       {
-        mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-        Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString()));
-      }
-      catch(Mantid::Kernel::Exception::NotFoundError&)
-      {
-      }
-      if (mws)
-      {
-        size_t wi = static_cast<size_t>(workspaceIndex());
-        if (wi < mws->getNumberHistograms() && !mws->readX(wi).empty())
-        {
-          setStartX(mws->readX(wi).front());
-          setEndX(mws->readX(wi).back());
-        }
+        setStartX(mws->readX(wi).front());
+        setEndX(mws->readX(wi).back());
       }
     }
   }
@@ -1018,6 +992,10 @@ void FitPropertyBrowser::boolChanged(QtProperty*)
 {
   if ( ! m_changeSlotsEnabled ) return;
 
+  QSettings settings;
+  settings.beginGroup("Mantid/FitBrowser");
+  bool plotDiff = m_boolManager->value(m_plotDiff);
+  settings.setValue("Plot Difference",plotDiff);
 }
 
 /** Called when an int property changed
@@ -1075,14 +1053,7 @@ void FitPropertyBrowser::doubleChanged(QtProperty* prop)
   {
     // call setWorkspace to change maxX in functions
     setWorkspace(m_compositeFunction);
-    if (!m_customFittings)
-    {
-      getHandler()->setAttribute("StartX",value);
-    }
-    else
-    {
-      getHandler()->setAttribute(QString("Start (%1s)" ).arg(QChar(0x03BC)), value); // (mu)
-    }
+    getHandler()->setAttribute("StartX",value);
     emit startXChanged(startX());
     emit xRangeChanged(startX(), endX());
     return;
@@ -1091,14 +1062,7 @@ void FitPropertyBrowser::doubleChanged(QtProperty* prop)
   {
     // call setWorkspace to change minX in functions
     setWorkspace(m_compositeFunction);
-    if (!m_customFittings)
-    {
-      getHandler()->setAttribute("EndX",value);
-    }
-    else
-    {
-      getHandler()->setAttribute(QString("End (%1s)" ).arg(QChar(0x03BC)), value); 
-    }
+    getHandler()->setAttribute("EndX",value);
     emit endXChanged(endX());
     emit xRangeChanged(startX(), endX());
     return;
@@ -1273,22 +1237,7 @@ void FitPropertyBrowser::populateFunctionNames()
     
     boost::shared_ptr<Mantid::API::IFitFunction> f = boost::shared_ptr<Mantid::API::IFitFunction>(
       Mantid::API::FunctionFactory::Instance().createFitFunction(fnName));
-    if (!m_customFittings)
-      m_registeredFunctions << qfnName;
-    else
-    {
-      const std::vector<std::string> categories = f->categories();
-      bool muon = false;
-      for (size_t j=0; j<categories.size(); ++j)
-      {
-        if (categories[j] == "Muon")
-          muon = true;
-      }
-      if (muon == true)
-      {
-        m_registeredFunctions << qfnName;
-      }
-    }
+    m_registeredFunctions << qfnName;
     Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(f.get());
     //Mantid::API::CompositeFunction* cf = dynamic_cast<Mantid::API::CompositeFunction*>(f.get());
     if (pf)
@@ -1413,16 +1362,24 @@ void FitPropertyBrowser::fit()
     {
       Mantid::API::FrameworkManager::Instance().deleteWorkspace(wsName+"_Workspace");
     }
-
-    // If it is in the custom fitting (muon analysis) i.e not a docked widget in mantidPlot
-    if (m_customFittings)
+    if (m_mantidui->metaObject()->indexOfMethod("executeAlgorithm(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)") >= 0)
+    {
+      QMap<QString,QString> algParams;
+      algParams["InputWorkspace"] = QString::fromStdString(wsName);
+      algParams["WorkspaceIndex"] = QString::number(workspaceIndex());
+      algParams["StartX"] = QString::number(startX());
+      algParams["EndX"] = QString::number(endX());
+      algParams["Output"] = QString::fromStdString(outputName());
+      algParams["Function"] = QString::fromStdString(funStr);
+      algParams["Minimizer"] = QString::fromStdString(minimizer());
+      algParams["CostFunction"] = QString::fromStdString(costFunction());
+      emit executeFit("Fit",algParams,this);
+    }
+    else
     {
       Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
       alg->initialize();
-      if (rawData())
-        alg->setPropertyValue("InputWorkspace",wsName + "_Raw");
-      else
-        alg->setPropertyValue("InputWorkspace",wsName);
+      alg->setPropertyValue("InputWorkspace",wsName);
       alg->setProperty("WorkspaceIndex",workspaceIndex());
       alg->setProperty("StartX",startX());
       alg->setProperty("EndX",endX());
@@ -1432,37 +1389,6 @@ void FitPropertyBrowser::fit()
       alg->setPropertyValue("CostFunction",costFunction());
       observeFinish(alg);
       alg->executeAsync();
-    }
-    else
-    {
-      if (m_mantidui->metaObject()->indexOfMethod("executeAlgorithm(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)") >= 0)
-      {
-        QMap<QString,QString> algParams;
-        algParams["InputWorkspace"] = QString::fromStdString(wsName);
-        algParams["WorkspaceIndex"] = QString::number(workspaceIndex());
-        algParams["StartX"] = QString::number(startX());
-        algParams["EndX"] = QString::number(endX());
-        algParams["Output"] = QString::fromStdString(outputName());
-        algParams["Function"] = QString::fromStdString(funStr);
-        algParams["Minimizer"] = QString::fromStdString(minimizer());
-        algParams["CostFunction"] = QString::fromStdString(costFunction());
-        emit executeFit("Fit",algParams,this);
-      }
-      else
-      {
-        Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
-        alg->initialize();
-        alg->setPropertyValue("InputWorkspace",wsName);
-        alg->setProperty("WorkspaceIndex",workspaceIndex());
-        alg->setProperty("StartX",startX());
-        alg->setProperty("EndX",endX());
-        alg->setPropertyValue("Output",outputName());
-        alg->setPropertyValue("Function",funStr);
-        alg->setPropertyValue("Minimizer",minimizer());
-        alg->setPropertyValue("CostFunction",costFunction());
-        observeFinish(alg);
-        alg->executeAsync();
-      }
     }
   }
   catch(std::exception& e)
@@ -1536,10 +1462,7 @@ void FitPropertyBrowser::showEvent(QShowEvent* e)
   (void)e;
   // Observe what workspaces are added and deleted unless it's a custom fitting, all workspaces for custom fitting (eg muon analysis) 
   // should be manually added.
-  if (!m_customFittings)
-  {
-    observeAdd();
-  }
+  observeAdd();
   observePostDelete();
   populateWorkspaceNames();
 }
@@ -1657,11 +1580,6 @@ void FitPropertyBrowser::setEndX(double value)
   m_doubleManager->setValue(m_endX,value);
 }
 
-/// Get whether the FitPropertyBrowser is in the Muon interface
-bool FitPropertyBrowser::isCustomFittings()const
-{
-  return m_customFittings;
-}
 
 ///
 QtBrowserItem* FitPropertyBrowser::findItem(QtBrowserItem* parent,QtProperty* prop)const
@@ -1792,14 +1710,7 @@ bool FitPropertyBrowser::isUndoEnabled()const
 void FitPropertyBrowser::setFitEnabled(bool yes)
 {
   m_fitActionFit->setEnabled(yes);
-  if (!m_customFittings)
-  {
-    m_fitActionSeqFit->setEnabled(yes);
-  }
-  else
-  {
-    m_fitActionSeqFit->setEnabled(false);
-  }
+  m_fitActionSeqFit->setEnabled(yes);
 }
 
 /// Returns true if the function is ready for a fit
@@ -2627,13 +2538,6 @@ void FitPropertyBrowser::workspaceChange(const QString& wsName)
   {
     //m_groupMember = workspaceName();
     removeLogValue();
-  }
-  
-  // If fit property browser is a custom fitting then emit signal that workspace has changed and to assign a new peak picker tool to it
-  if (m_customFittings)
-  {
-    // Sets up the peak picker tool for that workspace. Might not work if not on correct tab. i.e loading data on the first tab wouldn't work.
-     updatePPTool(wsName);
   }
 }
 
