@@ -301,6 +301,11 @@ namespace MDEvents
     return m_ws->getErrorAt(m_pos);
   }
 
+  bool MDHistoWorkspaceIterator::getIsMasked() const
+  { 
+    return m_ws->getIsMaskedAt(m_pos);
+  }
+
 } // namespace Mantid
 } // namespace MDEvents
 

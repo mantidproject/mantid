@@ -63,11 +63,13 @@ namespace MDEvents
     // Allocate the linear arrays
     m_signals = new signal_t[m_length];
     m_errorsSquared = new signal_t[m_length];
+    m_masks = new bool[m_length];
     // Now copy all the data
     for (size_t i=0; i<m_length; ++i)
     {
       m_signals[i] = other.m_signals[i];
       m_errorsSquared[i] = other.m_errorsSquared[i];
+      m_masks[i] = other.m_masks[i];
     }
   }
 
@@ -85,6 +87,7 @@ namespace MDEvents
     delete [] m_indexMaker;
     delete [] m_indexMax;
     delete [] m_origin;
+    delete [] m_masks;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -101,6 +104,7 @@ namespace MDEvents
     // Allocate the linear arrays
     m_signals = new signal_t[m_length];
     m_errorsSquared = new signal_t[m_length];
+    m_masks = new bool[m_length];
 
     // Initialize them to NAN (quickly)
     signal_t nan = std::numeric_limits<signal_t>::quiet_NaN();
@@ -157,6 +161,7 @@ namespace MDEvents
     {
       m_signals[i] = signal;
       m_errorsSquared[i] = errorSquared;
+      m_masks[i] = false; //Not masked by default;
     }
   }
 

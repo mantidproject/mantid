@@ -171,6 +171,7 @@ namespace Mantid
   */
   vtkDataSet* vtkSplatterPlotFactory::create(ProgressAction& progressUpdating) const
   {
+    UNUSED_ARG(progressUpdating);
     validate();
 
     size_t nd = m_workspace->getNumDims();

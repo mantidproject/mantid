@@ -78,6 +78,7 @@ public:
       TS_ASSERT( boost::math::isnan( ws.getErrorAt(i) ));
       TS_ASSERT( boost::math::isnan( ws.getSignalNormalizedAt(i) ));
       TS_ASSERT( boost::math::isnan( ws.getErrorNormalizedAt(i) ));
+      TS_ASSERT( !ws.getIsMaskedAt(i));
     }
 
     // Setting and getting

@@ -283,7 +283,13 @@ public:
   {
     //Characterisation test
     MDHistoWorkspaceIterator iterator(ws);
-    TSM_ASSERT_THROWS("Not implemented yet, should throw.", iterator.getIsMasked(), std::runtime_error);
+    for(size_t i =0; i < ws->getNPoints(); ++i)
+    {
+      std::stringstream stream;
+      stream << "Masking is different from the workspace at index: " << i;
+      TSM_ASSERT_EQUALS(stream.str(), ws->getIsMaskedAt(i), iterator.getIsMasked());
+      iterator.next();
+    }
   }
 
 };
