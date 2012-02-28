@@ -40,6 +40,7 @@
 #include <iostream>
 #include <sstream>
 #include <cstring>
+#include <stdexcept>
 
 
 namespace CxxTest
