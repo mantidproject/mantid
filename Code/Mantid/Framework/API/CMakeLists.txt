@@ -256,6 +256,7 @@ set ( TEST_FILES
 	test/VectorParameterParserTest.h
 	test/VectorParameterTest.h
 	test/WorkspaceFactoryTest.h
+	test/WorkspaceGroupTest.h
 	test/WorkspaceHistoryTest.h
 	test/WorkspacePropertyTest.h
 )

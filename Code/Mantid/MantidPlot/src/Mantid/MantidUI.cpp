@@ -60,6 +60,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidQtSliceViewer/SliceViewerWindow.h"
 #include "MantidQtFactory/WidgetFactory.h"
+#include "MantidAPI/MemoryManager.h"
 
 
 using namespace std;

@@ -134,8 +134,11 @@ void WorkspaceGroup::print() const
   }
 }
 
-/**
- * Callback for a workspace delete notification
+/** Callback for a workspace delete notification
+ *
+ * Removes any deleted entries from the group.
+ * This also deletes the workspace group when the last member of it gets deteleted.
+ *
  * @param notice :: A pointer to a workspace delete notificiation object
  */
 void WorkspaceGroup::workspaceDeleteHandle(Mantid::API::WorkspacePostDeleteNotification_ptr notice)
@@ -148,7 +151,7 @@ void WorkspaceGroup::workspaceDeleteHandle(Mantid::API::WorkspacePostDeleteNotif
     this->remove(deletedName);
     if(isEmpty())
     {
-     AnalysisDataService::Instance().remove(this->getName());
+      AnalysisDataService::Instance().remove(this->getName());
     }
   }
 }

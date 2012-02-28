@@ -21,6 +21,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MultiThreaded.h"
 #include <Poco/ScopedLock.h>
+#include <Poco/Mutex.h>
 
 namespace Mantid
 {
@@ -187,7 +188,7 @@ public:
   virtual void add( const std::string& name, const boost::shared_ptr<T>& Tobject)
   {
     // Make DataService access thread-safe
-    Mutex::ScopedLock _lock(m_mutex);
+    Poco::Mutex::ScopedLock _lock(m_mutex);
 
     // Don't permit an empty name for the workspace
     if (name.empty())
@@ -256,6 +257,7 @@ public:
         //if the name of workspace starts with __
         if(!name_startswith.compare("__"))
         {
+          m_mutex.unlock();
           return;
         }
       }
@@ -277,7 +279,7 @@ public:
   void remove( const std::string& name)
   {
     // Make DataService access thread-safe
-    Mutex::ScopedLock _lock(m_mutex);
+    Poco::Mutex::ScopedLock _lock(m_mutex);
 
     std::string foundName;
     svc_it it = this->findNameWithCaseSearch(name, foundName);
@@ -300,7 +302,7 @@ public:
   void clear()
   {
     // Make DataService access thread-safe
-    Mutex::ScopedLock _lock(m_mutex);
+    Poco::Mutex::ScopedLock _lock(m_mutex);
 
     datamap.clear();
     notificationCenter.postNotification(new ClearNotification());
@@ -313,7 +315,7 @@ public:
   boost::shared_ptr<T> retrieve( const std::string& name) const
   {
     // Make DataService access thread-safe
-    Mutex::ScopedLock _lock(m_mutex);
+    Poco::Mutex::ScopedLock _lock(m_mutex);
 
     std::string foundName;
     svc_it it = this->findNameWithCaseSearch(name, foundName);
@@ -331,7 +333,7 @@ public:
   bool doesExist(const std::string& name) const
   {
     // Make DataService access thread-safe
-    Mutex::ScopedLock _lock(m_mutex);
+    Poco::Mutex::ScopedLock _lock(m_mutex);
 
     std::string foundName;
     svc_it it = this->findNameWithCaseSearch(name, foundName);
@@ -350,7 +352,7 @@ public:
   std::set<std::string> getObjectNames() const
   {
     // Make DataService access thread-safe
-    Mutex::ScopedLock _lock(m_mutex);
+    Poco::Mutex::ScopedLock _lock(m_mutex);
 
     std::set<std::string> names;
     svc_constit it;
@@ -384,8 +386,8 @@ private:
   /// Private, unimplemented copy assignment operator
   DataService& operator=(const DataService&);
 
-  /// Mutex to avoid simultaneous access or notifications
-  mutable Mutex m_mutex;
+  /// Recursive mutex to avoid simultaneous access or notifications
+  mutable Poco::Mutex m_mutex;
 
 
   /**
