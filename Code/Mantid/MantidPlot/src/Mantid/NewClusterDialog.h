@@ -17,11 +17,12 @@ public:
     explicit NewClusterDialog(QWidget *parent = 0);
     ~NewClusterDialog();
 
-    const QString getDisplayName();
-    const QUrl getServiceBaseURL();
-    const QUrl getConfigFileURL();
+    const QString getDisplayName() const;
+    const QUrl getServiceBaseURL() const;
+    const QUrl getConfigFileURL() const;
+    const QString getUserName() const;
 private slots:    
-    bool validateInput();  // Will enable the OK button if the input is valid
+    bool validateInput() const;  // Will enable the OK button if the input is valid
 private:
     Ui::NewClusterDialog *ui;
 };

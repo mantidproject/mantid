@@ -38,14 +38,8 @@ class QHBoxLayout;
 class QSignalMapper;
 class QSortFilterProxyModel;
 
+class RemoteJobManager;
 
-// Holds information about a specific cluster that hosts remote algorithms
-struct ClusterInfo
-{
-    QString displayName;
-    QUrl serviceBaseURL;
-    QUrl configFileURL;
-};
 
 // Note: This is based closely on the AlgorithmDockWidget.  It might be
 // better to have it actually inherit from that instead of QDockWidget...
@@ -81,7 +75,7 @@ protected:
     QNetworkAccessManager *m_netManager;
     QNetworkReply * m_configReply;
     
-    QList <ClusterInfo> m_clusterList;  // these are in the same order as they're listed in the combo box
+    QList <RemoteJobManager *> m_clusterList;  // these are in the same order as they're listed in the combo box
 
     friend class MantidUI;
 private:

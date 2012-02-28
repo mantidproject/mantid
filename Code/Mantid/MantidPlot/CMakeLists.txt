@@ -183,6 +183,7 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/NewClusterDialog.cpp
                    src/Mantid/PeakPickerTool.cpp
                    src/Mantid/Preferences.cpp
+                   src/Mantid/RemoteJobManager.cpp
                    src/Mantid/RemoveErrorsDialog.cpp
                    src/Mantid/SetUpParaview.cpp				   
                    src/Mantid/UserFitFunctionDialog.cpp
@@ -413,6 +414,7 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/PeakPickerTool.h
                    src/Mantid/Preferences.h
                    src/Mantid/RemoveErrorsDialog.h
+                   src/Mantid/RemoteJobManager.h
                    src/Mantid/SetUpParaview.h				   
                    src/Mantid/UserFitFunctionDialog.h
                    src/Mantid/InstrumentWidget/BinDialog.h

@@ -2,6 +2,7 @@
 #include "MantidDock.h"
 #include "NewClusterDialog.h"
 #include "MantidUI.h"
+#include "RemoteJobManager.h"
 #include <QtGui>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
@@ -43,7 +44,8 @@ QDockWidget(w),m_progressBar(NULL),m_mantidUI(mui)
     QFrame *f = new QFrame(this);
     QLabel *chooseLabel = new QLabel( tr("Choose cluster:"), f);
     m_clusterCombo = new QComboBox( f);
-    QPushButton *newCluster = new QPushButton( tr("New cluster:"), f);
+    m_clusterCombo->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
+    QPushButton *newCluster = new QPushButton( tr("New Cluster"), f);
     QLabel *statusLabel = new QLabel( tr(""), f);  // Status is blank until user chooses a cluster
     m_tree = new AlgorithmTreeWidget(f,mui);
     m_tree->setHeaderLabel("Remote Algorithms");
@@ -66,6 +68,27 @@ QDockWidget(w),m_progressBar(NULL),m_mantidUI(mui)
 
     QObject::connect( newCluster, SIGNAL( clicked()), this, SLOT( addNewCluster()));
     QObject::connect( m_clusterCombo, SIGNAL( currentIndexChanged(int)), this, SLOT( clusterChoiceChanged(int)));
+
+
+    // Load the cluster info from the properties files
+    Mantid::Kernel::ConfigServiceImpl& config = Mantid::Kernel::ConfigService::Instance();
+
+    int numClusters;
+    if ( config.getValue( std::string("Cluster.NumClusters"), numClusters) )
+    {
+        for (int i = 0; i < numClusters; i++)
+        {
+            RemoteJobManager * manager = RemoteJobManagerFactory::createFromProperties( i);
+            if (manager != NULL)
+            {
+                m_clusterList.append( manager);
+                m_clusterCombo->addItem( QString::fromStdString( manager->getDisplayName()));
+            }
+        }
+    }
+    std::ostringstream tempStr;
+    tempStr << m_clusterList.size();
+    config.setString( std::string("Cluster.NumClusters"), tempStr.str());
 
 
   // -------------------------------------------------------------------- //
@@ -118,10 +141,22 @@ RemoteAlgorithmDockWidget::~RemoteAlgorithmDockWidget()
     // (Replace the values in the config file with what's in the combo box.)
     Mantid::Kernel::ConfigServiceImpl& config = Mantid::Kernel::ConfigService::Instance();
 
+    std::ostringstream tempStr;
+    tempStr << m_clusterList.size();
+    config.setString( std::string("Cluster.NumClusters"), tempStr.str());
+    for (int i = 0; i < m_clusterList.size(); i++)
+    {
+        m_clusterList[i]->saveProperties( i);
+    }
+    config.saveConfig( config.getUserFilename());
 
-
-
-
+    // The cluster list only contains pointers.  We have to delete the objects they point to manually
+    QList <RemoteJobManager *>::Iterator it = m_clusterList.begin();
+    while (it != m_clusterList.end())
+    {
+        delete (*it);
+        it++;
+    }
    delete m_netManager;
 }
 
@@ -156,14 +191,14 @@ void RemoteAlgorithmDockWidget::addNewCluster()
   if (theDialog->exec() == QDialog::Accepted)
   {
     // Grab the values the user entered
-    ClusterInfo cluster;
-    cluster.displayName = theDialog->getDisplayName();
-    cluster.serviceBaseURL = theDialog->getServiceBaseURL();
-    cluster.configFileURL = theDialog->getConfigFileURL();
-    m_clusterList.append( cluster);
+    MwsRemoteJobManager *manager = new  MwsRemoteJobManager( theDialog->getDisplayName().toStdString(),
+                                                             theDialog->getConfigFileURL().toString().toStdString(),
+                                                             theDialog->getServiceBaseURL().toString().toStdString(),
+                                                             theDialog->getUserName().toStdString());
+    m_clusterList.append( manager);
     
     // Add the Display name to the combo box
-    m_clusterCombo->addItem( cluster.displayName);
+    m_clusterCombo->addItem( theDialog->getDisplayName());
   }
   
 }
@@ -172,7 +207,9 @@ void RemoteAlgorithmDockWidget::clusterChoiceChanged(int index)
 {
     // connect to the cluster and download the XML config file
     QNetworkRequest request;
-    request.setUrl(m_clusterList[index].configFileURL);
+    QUrl configFileUrl( QString::fromStdString(m_clusterList[index]->getConfigFileUrl()));
+
+    request.setUrl( configFileUrl);
     if (request.url().isValid())
     {
         m_configReply = m_netManager->get(request);
@@ -181,7 +218,7 @@ void RemoteAlgorithmDockWidget::clusterChoiceChanged(int index)
     }
     else
     {
-        // Test for a valid URL is done in the dialog box when it was first entered,
+        // Testing for a valid URL is done in the dialog box when it was first entered,
         // so in theory, we'll never get here.  But just in case we do (possibly
         // because the URL came from a corrupt properties file?), show an error dialog
         QMessageBox msgBox;
