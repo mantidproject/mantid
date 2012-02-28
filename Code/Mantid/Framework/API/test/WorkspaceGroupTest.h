@@ -91,6 +91,12 @@ public:
   void test_areNamesSimilar()
   {
     WorkspaceGroup_sptr group(new WorkspaceGroup());
+    group->setName("name");
+    TSM_ASSERT( "Empty group is not similar", !group->areNamesSimilar() );
+    group->add("name");
+    TSM_ASSERT( "No underscore is not similar", !group->areNamesSimilar() );
+    group->removeAll();
+
     group->add("name_0");
     TS_ASSERT( group->areNamesSimilar() );
     group->add("name_12");
