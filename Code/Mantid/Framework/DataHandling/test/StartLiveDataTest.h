@@ -112,6 +112,9 @@ public:
         break;
       }
     }
+    // Cancel and wait for it to be cancelled
+    alg->cancel();
+    Poco::Thread::sleep(100);
   }
 
 };
