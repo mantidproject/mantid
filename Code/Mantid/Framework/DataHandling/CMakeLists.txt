@@ -3,6 +3,7 @@ set ( SRC_FILES
 	src/CreateSampleShape.cpp
 	src/DefineGaugeVolume.cpp
 	src/DeleteTableRows.cpp
+	src/DetermineChunking.cpp
 	src/FakeEventDataListener.cpp
 	src/FileEventDataListener.cpp
 	src/FindDetectorsInShape.cpp
@@ -126,6 +127,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/CreateSampleShape.h
 	inc/MantidDataHandling/DefineGaugeVolume.h
 	inc/MantidDataHandling/DeleteTableRows.h
+	inc/MantidDataHandling/DetermineChunking.h
 	inc/MantidDataHandling/FakeEventDataListener.h
 	inc/MantidDataHandling/FileEventDataListener.h
 	inc/MantidDataHandling/FindDetectorsInShape.h
@@ -242,7 +244,7 @@ set ( TEST_FILES
 	test/DefineGaugeVolumeTest.h
 	test/DeleteTableRowsTest.h
 	test/FakeEventDataListenerTest.h
-	#test/FileEventDataListenerTest.h
+	test/FileEventDataListenerTest.h
 	test/FindDetectorsInShapeTest.h
 	test/FindDetectorsParTest.h
 	test/GetMaskedDetectorsTest.h

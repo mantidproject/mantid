@@ -307,9 +307,10 @@ namespace Mantid
         Workspace_sptr ws = m_outputWorkspaceProps[i]->getWorkspace();
         if (ws)
         {
-          // Is it already write-locked?
-          if (std::find(m_writeLockedWorkspaces.begin(), m_writeLockedWorkspaces.end(), ws)
-              == m_writeLockedWorkspaces.end())
+          // The workspace property says to do locking,
+          // AND it has NOT already been write-locked
+          if (m_outputWorkspaceProps[i]->isLocking()
+              && std::find(m_writeLockedWorkspaces.begin(), m_writeLockedWorkspaces.end(), ws) == m_writeLockedWorkspaces.end())
           {
             // Write-lock it if not already
             g_log.debug() << "Write-locking " << ws->getName() << std::endl;
@@ -325,9 +326,10 @@ namespace Mantid
         Workspace_sptr ws = m_inputWorkspaceProps[i]->getWorkspace();
         if (ws)
         {
-          // Is it already write-locked?
-          if (std::find(m_writeLockedWorkspaces.begin(), m_writeLockedWorkspaces.end(), ws)
-              == m_writeLockedWorkspaces.end())
+          // The workspace property says to do locking,
+          // AND it has NOT already been write-locked
+          if (m_inputWorkspaceProps[i]->isLocking()
+              && std::find(m_writeLockedWorkspaces.begin(), m_writeLockedWorkspaces.end(), ws) == m_writeLockedWorkspaces.end())
           {
             // Read-lock it if not already write-locked
             g_log.debug() << "Read-locking " << ws->getName() << std::endl;

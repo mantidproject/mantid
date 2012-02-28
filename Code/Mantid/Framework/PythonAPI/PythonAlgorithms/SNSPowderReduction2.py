@@ -284,7 +284,7 @@ class SNSPowderReduction2(PythonAlgorithm):
         wksp = "%s_%d" % (self._instrument, runnumber)
         strategy = []
         if self._chunks > 0 and not "histo" in extension:
-            alg = LoadPreNexus(Filename=wksp+"_runinfo.xml",MaxChunkSize=self._chunks,OutputWorkspace='Chunks')
+            alg = DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks')
             table = alg['OutputWorkspace']
             cNames = table.getColumnNames()
             if table.getRowCount() > 0:
