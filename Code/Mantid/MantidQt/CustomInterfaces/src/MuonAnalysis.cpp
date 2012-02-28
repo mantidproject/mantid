@@ -3243,10 +3243,8 @@ void MuonAnalysis::connectAutoUpdate()
 
   // Grouping tab Auto Updates
   // Group Table
-  connect(m_uiForm.groupTable, SIGNAL(cellChanged(int,int)), this, SLOT(groupTabUpdateGroup()));
   connect(m_uiForm.groupTablePlotChoice, SIGNAL(currentIndexChanged(int)), this, SLOT(groupTabUpdateGroup()));
   // Pair Table (Guess Alpha button attached in another function)
-  connect(m_uiForm.pairTable, SIGNAL(cellChanged(int,int)), this, SLOT(groupTabUpdatePair()));
   connect(m_uiForm.pairTablePlotChoice, SIGNAL(currentIndexChanged(int)), this, SLOT(groupTabUpdatePair()));
 
   // Settings tab Auto Updates
