@@ -1,7 +1,7 @@
 #ifndef ALGORITHMHISTORYWINDOW_H 
 #define ALGORITHMHISTORYWINDOW_H
 
-#include "MantidAPI/AlgorithmHistory.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/EnvironmentHistory.h"
 #include "MantidKernel/Logger.h"
