@@ -199,8 +199,7 @@ namespace MDAlgorithms
 
     // Add the boxes in parallel. They should be spread out enough on each
     // core to avoid stepping on each other.
-    //PRAGMA_OMP( parallel for if (!ws2->isFileBacked()) schedule(dynamic, PARALLEL_GET_MAX_THREADS*2) )
-    //PRAGMA_OMP( parallel for if (!ws2->isFileBacked()) schedule(dynamic) )
+    // cppcheck-suppress syntaxError
     PRAGMA_OMP( parallel for if (!ws2->isFileBacked()) )
     for (int i=0; i<numBoxes; i++)
     {

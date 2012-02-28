@@ -1,5 +1,3 @@
-/* File: IndexingUtils.cpp */
-
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidKernel/Quat.h"
 #include <boost/math/special_functions/fpclassify.hpp>

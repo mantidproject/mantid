@@ -153,7 +153,7 @@ ConvertToMDEvents::~ConvertToMDEvents()
 
     std::map<std::string, IConvertToMDEventsMethods *>::iterator it;
 
-    for(it= alg_selector.begin(); it!=alg_selector.end();it++){
+    for(it= alg_selector.begin(); it!=alg_selector.end();++it){
         delete it->second;  
     }
     alg_selector.clear();

@@ -168,7 +168,7 @@ void FilterByLogValue::exec()
       DateAndTime lastTime = run_start;
       std::vector<DateAndTime> times = log->timesAsVector();
       std::vector<DateAndTime>::iterator it;
-      for (it = times.begin(); it != times.end(); it++)
+      for (it = times.begin(); it != times.end(); ++it)
       {
         SplittingInterval interval(lastTime, *it - tolerance, 0);
         // Leave a gap +- tolerance

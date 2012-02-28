@@ -10,6 +10,7 @@
 #include <map>
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
+#include <boost/scoped_array.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -464,16 +465,17 @@ namespace MDEvents
     coord_t length = dir.normalize();
 
     // Vector with +1 where direction is positive, -1 where negative
-    #define sgn(x) ((x<0)?-1:((x>0)?1:0))
+    #define sgn(x) ((x<0)?-1.0f:((x>0.)?1.0f:0.0f))
     VMD dirSign(nd);
     for (size_t d=0; d<nd; d++)
+    {
       dirSign[d] = sgn(dir[d]);
-
+    }
     size_t BADINDEX = size_t(-1);
 
     // Dimensions of the workspace
-    size_t * index = new size_t[nd];
-    size_t * numBins = new size_t[nd];
+    boost::scoped_array<size_t> index(new size_t[nd]);
+    boost::scoped_array<size_t> numBins(new size_t[nd]);
     for (size_t d=0; d<nd; d++)
     {
       IMDDimension_const_sptr dim = this->getDimension(d);
@@ -486,7 +488,7 @@ namespace MDEvents
 
     // Start with the start/end points, if they are within range.
     if (pointInWorkspace(this, start))
-      boundaries.insert(0);
+      boundaries.insert(0.0f);
     if (pointInWorkspace(this, end))
       boundaries.insert(length);
 
@@ -537,9 +539,9 @@ namespace MDEvents
       VMD lastPos = start + (dir * lastLinePos);
       x.push_back(lastLinePos);
 
-      it++;
+      ++it;
 
-      for (; it != boundaries.end(); it++)
+      for (; it != boundaries.end(); ++it)
       {
         // This is our current position along the line
         coord_t linePos = *it;

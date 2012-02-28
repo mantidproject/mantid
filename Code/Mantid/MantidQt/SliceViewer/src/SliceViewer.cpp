@@ -966,7 +966,7 @@ QwtDoubleInterval SliceViewer::getRange(IMDIterator * it)
 QwtDoubleInterval SliceViewer::getRange(std::vector<IMDIterator *> iterators)
 {
   std::vector<QwtDoubleInterval> intervals(iterators.size());
-
+  // cppcheck-suppress syntaxError
   PRAGMA_OMP( parallel for schedule(dynamic, 1))
   for (int i=0; i < int(iterators.size()); i++)
   {

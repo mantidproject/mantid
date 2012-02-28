@@ -749,7 +749,7 @@ namespace MDEvents
     std::vector<MDE> & events = this->getEvents();
     typename std::vector<MDE>::iterator it;
     typename std::vector<MDE>::iterator it_end = events.end();
-    for (it = events.begin(); it != it_end; it++)
+    for (it = events.begin(); it != it_end; ++it)
     {
       coord_t * center = it->getCenterNonConst();
       for (size_t d=0; d<nd; d++)

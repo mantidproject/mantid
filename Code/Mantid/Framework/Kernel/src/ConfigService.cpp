@@ -1701,13 +1701,6 @@ void ConfigServiceImpl::setParaviewLibraryPath(const std::string& path)
   std::string platformPathName;
 #ifdef _WIN32
   platformPathName = "PATH";
-#elif defined __linux__
-  throw std::runtime_error("Cannot dynamically set the library path on Linux");
-#elif defined __APPLE__
-  throw std::runtime_error("Cannot dynamically set the library path on Mac");
-#else
-  throw std::runtime_error("ConfigServiceImpl::setParaviewLibraryPath cannot determine the running platform and therefore cannot set the path to the Paraview libraries.");
-#endif 
   Poco::Path existingPath;
   char separator = existingPath.pathSeparator();
   std::string strSeparator;
@@ -1724,6 +1717,13 @@ void ConfigServiceImpl::setParaviewLibraryPath(const std::string& path)
     existingPath = path;
   }
   Poco::Environment::set(platformPathName, existingPath.toString());
+#elif defined __linux__
+  throw std::runtime_error("Cannot dynamically set the library path on Linux");
+#elif defined __APPLE__
+  throw std::runtime_error("Cannot dynamically set the library path on Mac");
+#else
+  throw std::runtime_error("ConfigServiceImpl::setParaviewLibraryPath cannot determine the running platform and therefore cannot set the path to the Paraview libraries.");
+#endif 
 }
 
 /*

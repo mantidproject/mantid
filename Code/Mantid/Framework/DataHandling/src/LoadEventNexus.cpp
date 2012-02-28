@@ -390,7 +390,8 @@ public:
   : Task(),
     alg(alg), entry_name(entry_name), entry_type(entry_type),
     pixelID_to_wi_vector(alg->pixelID_to_wi_vector), pixelID_to_wi_offset(alg->pixelID_to_wi_offset),
-    prog(prog), scheduler(scheduler)
+    prog(prog), scheduler(scheduler), thisBankPulseTimes(NULL), m_loadError(false),
+    m_oldNexusFileNames(false), m_loadStart(), m_loadSize(), m_event_id(NULL), m_event_time_of_flight(NULL)
   {
     setMutex(ioMutex);
   }

@@ -277,7 +277,7 @@ namespace Algorithms
       else
       {
           GroupNames = "";
-
+          // cppcheck-suppress syntaxError
           PRAGMA_OMP(parallel for schedule(dynamic, 1) )
           for (int num = 0; num < 200; ++num)
           {

@@ -21,6 +21,12 @@
  */
 
 #ifdef _MSC_VER
+  #pragma warning(push)
+  #pragma warning(disable:4244)
+  #pragma warning(disable:4267)
+  #pragma warning(disable:4250)
+  #pragma warning(disable:4005)
+  #pragma warning(disable:4503)
 #elif defined __GNUC__ && !(defined(__INTEL_COMPILER))
   #pragma GCC diagnostic ignored "-Wconversion"
   #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
@@ -62,4 +68,3 @@
 #include "boostpython/str.cpp"
 #include "boostpython/tuple.cpp"
 #include "boostpython/wrapper.cpp"
-

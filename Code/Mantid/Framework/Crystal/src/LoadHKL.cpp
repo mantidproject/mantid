@@ -121,7 +121,7 @@ namespace Crystal
       transmission = atof(line.substr(61,7).c_str());
       bank = atoi(line.substr(68,4).c_str());
       scattering = atof(line.substr(72,9).c_str());
-      dspace = atof(line.substr(81,9).c_str());
+      double dspace = atof(line.substr(81,9).c_str());
   
       Peak peak(inst, scattering, wl);
       peak.setHKL(-h,-k,-l);

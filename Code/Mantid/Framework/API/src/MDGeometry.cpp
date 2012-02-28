@@ -48,7 +48,7 @@ namespace API
 
     // Perform a deep copy of the coordinate transformations
     std::vector<CoordTransform*>::const_iterator it;
-    for (it = other.m_transforms_FromOriginal.begin(); it != other.m_transforms_FromOriginal.end(); it++)
+    for (it = other.m_transforms_FromOriginal.begin(); it != other.m_transforms_FromOriginal.end(); ++it)
     {
       if (*it)
         m_transforms_FromOriginal.push_back((*it)->clone());
@@ -56,7 +56,7 @@ namespace API
         m_transforms_FromOriginal.push_back(NULL);
     }
 
-    for (it = other.m_transforms_ToOriginal.begin(); it != other.m_transforms_ToOriginal.end(); it++)
+    for (it = other.m_transforms_ToOriginal.begin(); it != other.m_transforms_ToOriginal.end(); ++it)
     {
       if (*it)
         m_transforms_ToOriginal.push_back((*it)->clone());
