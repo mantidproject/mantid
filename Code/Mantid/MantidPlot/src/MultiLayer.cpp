@@ -1148,10 +1148,12 @@ QString MultiLayer::saveToString(const QString& geometry, bool saveAsTemplate)
 	s+="LayerCanvasSize\t"+QString::number(l_canvas_width)+"\t"+QString::number(l_canvas_height)+"\n";
 	s+="Alignement\t"+QString::number(hor_align)+"\t"+QString::number(vert_align)+"\n";
 
-	for (int i=0; i<(int)graphsList.count(); i++){
-		Graph* ag=(Graph*)graphsList.at(i);
-		s += ag->saveToString(saveAsTemplate);
-	}
+  foreach (Graph *g, graphsList)
+    s += g->saveToString(saveAsTemplate);
+
+  if ( d_is_waterfall_plot )
+    s += "<waterfall>1</waterfall>\n";
+
 	return s+"</multiLayer>\n";
 }
 

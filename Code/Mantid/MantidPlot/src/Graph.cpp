@@ -4137,6 +4137,20 @@ QString Graph::saveToString(bool saveAsTemplate)
   s+="AxesLineWidth\t"+QString::number(d_plot->axesLinewidth())+"\n";
   s+=saveLabelsRotation();
   s+=saveMarkers();
+
+  if (isWaterfallPlot())
+  {
+    s += "<waterfall>" + QString::number(d_waterfall_offset_x) + ",";
+    s += QString::number(d_waterfall_offset_y) + ",";
+    bool sideLines(false);
+    if ( d_plot->curvesList().size() > 0 )
+    {
+      PlotCurve *cv = dynamic_cast<PlotCurve*>(curve(0));
+      if ( cv && cv->sideLinesEnabled() ) sideLines = true;
+    }
+    s += QString::number(sideLines) + "</waterfall>\n";
+  }
+
   s+="</graph>\n";
   return s;
 }

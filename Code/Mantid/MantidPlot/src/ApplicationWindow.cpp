@@ -4733,6 +4733,18 @@ ApplicationWindow* ApplicationWindow::openProject(const QString& fn, bool factor
       while ( s!="</multiLayer>" )
       {//open layers
         s = t.readLine();
+
+        if (s.contains("<waterfall>")){
+          QStringList lst = s.trimmed().remove("<waterfall>").remove("</waterfall>").split(",");
+          Graph *ag = plot->activeGraph();
+          if (ag && lst.size() >= 2){
+            ag->setWaterfallOffset(lst[0].toInt(), lst[1].toInt());
+            if (lst.size() >= 3)
+              ag->setWaterfallSideLines(lst[2].toInt());
+          }
+          plot->setWaterfallLayout();
+        }
+
         if (s.left(7)=="<graph>")
         {	list.clear();
         while ( s!="</graph>" )
@@ -4982,6 +4994,7 @@ MdiSubWindow* ApplicationWindow::openTemplate(const QString& fn)
     if (templateType == "<multiLayer>"){
       w = multilayerPlot(generateUniqueName(tr("Graph")));
       if (w){
+        MultiLayer *ml = qobject_cast<MultiLayer *>(w);
         dynamic_cast<MultiLayer*>(w)->setCols(cols);
         dynamic_cast<MultiLayer*>(w)->setRows(rows);
         //restoreWindowGeometry(this, w, geometry);
@@ -4997,6 +5010,16 @@ MdiSubWindow* ApplicationWindow::openTemplate(const QString& fn)
         }
         while (!t.atEnd()){//open layers
           QString s=t.readLine();
+          if (s.contains("<waterfall>")){
+            QStringList lst = s.trimmed().remove("<waterfall>").remove("</waterfall>").split(",");
+            Graph *ag = ml->activeGraph();
+            if (ag && lst.size() >= 2){
+              ag->setWaterfallOffset(lst[0].toInt(), lst[1].toInt());
+              if (lst.size() >= 3)
+                ag->setWaterfallSideLines(lst[2].toInt());
+            }
+            ml->setWaterfallLayout();
+          }
           if (s.left(7)=="<graph>"){
             QStringList lst;
             while ( s!="</graph>" ){
@@ -12018,6 +12041,13 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
         Table *nw = app->table(colName);
         ag->setLabelsTextFormat(i, ag->axisType(i), colName, nw);
       }
+    } else if (s.contains("<waterfall>")){
+      QStringList lst = s.trimmed().remove("<waterfall>").remove("</waterfall>").split(",");
+      if (lst.size() >= 2)
+        ag->setWaterfallOffset(lst[0].toInt(), lst[1].toInt());
+      if (lst.size() >= 3)
+        ag->setWaterfallSideLines(lst[2].toInt());
+      ag->updateDataCurves();
     }
   }
   ag->replot();
