@@ -168,7 +168,7 @@ namespace Crystal
     frac = frac/5.;
     radius = radius*(1-frac) + radius1*frac;
     radius /= mu1;
-    std::cout << smu<<"  "<<amu<<"  "<<radius<<"\n";
+    //std::cout << smu<<"  "<<amu<<"  "<<radius<<"\n";
     API::Run & mrun = ws->mutableRun();
     mrun.addProperty<double>("LinearScatteringCoef", smu, true);
     mrun.addProperty<double>("LinearAbsorptionCoef", amu, true);
