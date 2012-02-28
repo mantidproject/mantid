@@ -206,7 +206,7 @@ void MergeRuns::buildAdditionTables()
         if (std::includes(outDets.begin(), outDets.end(), inDets.begin(), inDets.end()))
         {
           //We found the workspace index right away. No need to keep looking
-          table->push_back( std::pair<int64_t,int64_t>(inWI, outWI) );
+          table->push_back( std::pair<int64_t,int64_t>(static_cast<int64_t>(inWI), static_cast<int64_t>(outWI)) );
           done = true;
         }
       }

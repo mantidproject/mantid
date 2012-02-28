@@ -85,7 +85,7 @@ namespace Algorithms
         // This call throws if the user presses cancel
         this->interruption_point();
       }
-      catch (CancelException & e)
+      catch (CancelException &)
       {
         // Break out of the lo
         breakOut = true;

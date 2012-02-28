@@ -298,7 +298,7 @@ std::pair<int,int> UnwrapMonitor::handleFrameOverlapped(const MantidVec& xdata, 
   if ( minT > maxT )
   {
     g_log.warning() << "Invalid input, Ld (" << Ld << ") >> Lref (" << m_LRef << "). Current spectrum will not be unwrapped.\n";
-    return std::make_pair(0,xdata.size()-1);
+    return std::make_pair(0,static_cast<int>(xdata.size()-1));
   }
 
   int min = 0, max = static_cast<int>(xdata.size());
