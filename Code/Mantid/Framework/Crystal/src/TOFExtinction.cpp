@@ -95,13 +95,6 @@ namespace Crystal
     declareProperty("ExtinctionCorrectionType", corrOptions[0],new ListValidator(corrOptions),
       "Select the type of extinction correction.");
 
-    BoundedValidator<double> *mustBePositive = new BoundedValidator<double> ();
-    mustBePositive->setLower(0.0);
-    declareProperty("LinearScatteringCoef", -1.0, mustBePositive,
-      "Linear scattering coefficient in 1/cm");
-    declareProperty("LinearAbsorptionCoef", -1.0, mustBePositive->clone(),
-      "Linear absorption coefficient at 1.8 Angstroms in 1/cm");
-    declareProperty("Radius", 0.10, "Radius of spherical crystal in cm");
     declareProperty("Mosaic", 0.262, "Mosaic Spread (FWHM) (Degrees)");
     declareProperty("Cell", 255.0, "Unit Cell Volume (Angstroms^3)");
     declareProperty("RCrystallite", 6.0, "Becker-Coppens Crystallite Radius (micron)");
@@ -121,7 +114,36 @@ namespace Crystal
     /// Output peaks workspace, create if needed
     PeaksWorkspace_sptr peaksW = getProperty("OutputWorkspace");
     if (peaksW != inPeaksW)
-      peaksW = inPeaksW->clone();
+    peaksW = inPeaksW->clone();
+
+    const API::Run & run = inPeaksW->run();
+    if ( run.hasProperty("LinearScatteringCoef") )
+    {
+      Kernel::Property* prop = run.getProperty("LinearScatteringCoef");
+      smu = boost::lexical_cast<double,std::string>(prop->value());
+    }
+    else
+    {
+      throw std::invalid_argument("Could not retrieve LinearScatteringCoef from run object");
+    }
+    if ( run.hasProperty("LinearAbsorptionCoef") )
+    {
+      Kernel::Property* prop = run.getProperty("LinearAbsorptionCoef");
+      amu = boost::lexical_cast<double,std::string>(prop->value());
+    }
+    else
+    {
+      throw std::invalid_argument("Could not retrieve LinearAbsorptionCoef from run object");
+    }
+    if ( run.hasProperty("Radius") )
+    {
+      Kernel::Property* prop = run.getProperty("Radius");
+      radius = boost::lexical_cast<double,std::string>(prop->value());
+    }
+    else
+    {
+      throw std::invalid_argument("Could not retrieve Radius from run object");
+    }
 
     std::string cType = getProperty("ExtinctionCorrectionType");
     int NumberPeaks = peaksW->getNumberPeaks();
@@ -383,9 +405,6 @@ namespace Crystal
 //  order polynomial in excel. these values are given in the static array
 //  pc[][]
 
-    double smu = getProperty("LinearScatteringCoef");
-    double amu = getProperty("LinearAbsorptionCoef");
-    double radius = getProperty("Radius");
     mu = smu + (amu/1.8f)*wl;
 
     mur = mu*radius;

@@ -240,6 +240,11 @@ void AnvredCorrection::exec()
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
+  // set the absorption correction values in the run parameters
+  API::Run & run = correctionFactors->mutableRun();
+  run.addProperty<double>("LinearScatteringCoef", smu, true);
+  run.addProperty<double>("LinearAbsorptionCoef", amu, true);
+  run.addProperty<double>("Radius", radius, true);
   setProperty("OutputWorkspace", correctionFactors);
 
 }
@@ -345,6 +350,11 @@ void AnvredCorrection::execEvent()
   PARALLEL_CHECK_INTERUPT_REGION
 
   correctionFactors->doneAddingEventLists();
+  // set the absorption correction values in the run parameters
+  API::Run & run = correctionFactors->mutableRun();
+  run.addProperty<double>("LinearScatteringCoef", smu, true);
+  run.addProperty<double>("LinearAbsorptionCoef", amu, true);
+  run.addProperty<double>("Radius", radius, true);
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(correctionFactors));
 
   // Now do some cleaning-up since destructor may not be called immediately

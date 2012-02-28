@@ -132,6 +132,13 @@ namespace Crystal
     } while (!in.eof());
 
     in.close();
+    double smu = 0;
+    double amu = 0;
+    double radius = 0;
+    API::Run & mrun = ws->mutableRun();
+    mrun.addProperty<double>("LinearScatteringCoef", smu, true);
+    mrun.addProperty<double>("LinearAbsorptionCoef", amu, true);
+    mrun.addProperty<double>("Radius", radius, true);
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<PeaksWorkspace>(ws));
 
 

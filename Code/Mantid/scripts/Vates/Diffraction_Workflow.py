@@ -22,7 +22,7 @@ CentroidPeaksMD(InputWorkspace=ws+'_MD2',CoordinatesToUse='Q (sample frame)',Pea
 # Integrate peaks in Q space using spheres
 IntegratePeaksMD(InputWorkspace=ws+'_MD2',PeakRadius='0.12',BackgroundRadius='0.18',BackgroundStartRadius='0.15',PeaksWorkspace=ws+'_peaksLattice',OutputWorkspace=ws+'_peaksLattice')
 # Save for SHELX
-SaveHKL(InputWorkspace=ws+'_peaksLattice', Filename=ws+'.hkl',LinearScatteringCoef="0.451",LinearAbsorptionCoef="0.993",Radius="0.14")
+SaveHKL(InputWorkspace=ws+'_peaksLattice', Filename=ws+'.hkl')
 
 # Find peaks again for FFT
 FindPeaksMD(InputWorkspace=ws+'_MD2',MaxPeaks='100',OutputWorkspace=ws+'_peaksFFT')
@@ -35,7 +35,7 @@ CentroidPeaksMD(InputWorkspace=ws+'_MD2',CoordinatesToUse='Q (sample frame)',Pea
 # Integrate peaks in Q space using spheres
 IntegratePeaksMD(InputWorkspace=ws+'_MD2',PeakRadius='0.12',BackgroundRadius='0.18',BackgroundStartRadius='0.15',PeaksWorkspace=ws+'_peaksFFT',OutputWorkspace=ws+'_peaksFFT')
 # Save for SHELX
-SaveHKL(InputWorkspace=ws+'_peaksFFT', Filename=ws+'FFT.hkl',LinearScatteringCoef="0.451",LinearAbsorptionCoef="0.993",Radius="0.14")
+SaveHKL(InputWorkspace=ws+'_peaksFFT', Filename=ws+'FFT.hkl')
 
 
 # Copy the UB matrix back to the original workspace

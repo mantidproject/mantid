@@ -69,6 +69,10 @@ namespace Crystal
     double getTypeIILorentzian(double XqtII, double twoth);
     double getSigFsqr(double Rg, double cellV, double wl, double twoth, double tbar, double fsq, double sigfsq, double relSigRg = 0.03);
     double absor_sphere(double& twoth, double& wl) ;
+    double smu; ///< linear scattering coefficient in 1/cm
+    double amu; ///< linear absoprtion coefficient in 1/cm
+    double radius; ///< sample radius in cm
+
   };
 } // namespace Mantid;
 } // namespace Crystal;

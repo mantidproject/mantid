@@ -37,6 +37,10 @@ public:
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(4, 10, 1.0);
     PeaksWorkspace_sptr ws(new PeaksWorkspace());
     ws->setInstrument(inst);
+    API::Run & mrun = ws->mutableRun();
+    mrun.addProperty<double>("LinearScatteringCoef", 0.357, true);
+    mrun.addProperty<double>("LinearAbsorptionCoef", 0.011, true);
+    mrun.addProperty<double>("Radius", 0.1, true);
 
     for (int run=1000; run<numRuns+1000; run++)
       for (size_t b=1; b<=numBanks; b++)
@@ -59,9 +63,6 @@ public:
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", ws) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", outfile) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("LinearScatteringCoef", 0.357) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("LinearAbsorptionCoef", 0.011) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Radius", 0.1) );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
     
