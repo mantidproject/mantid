@@ -5,6 +5,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidCrystal/LoadHKL.h"
+#include "MantidCrystal/AnvredCorrection.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -48,7 +49,7 @@ namespace Crystal
   /// Sets documentation strings for this algorithm
   void LoadHKL::initDocs()
   {
-    this->setWikiSummary("Save a PeaksWorkspace to a ASCII .hkl file.");
+    this->setWikiSummary("Loads a ASCII .hkl file to a PeaksWorkspace.");
     this->setOptionalMessage("Save a PeaksWorkspace to a ASCII .hkl file.");
   }
 
@@ -99,6 +100,8 @@ namespace Crystal
     inst->markAsSource(source);
 
     std::string line;
+    bool first = true;
+    double mu1 = 0.0, mu2 = 0.0, wl1 = 0.0, wl2 = 0.0, sc1 = 0.0, astar1 = 0.0;
     do {   
       getline (in, line);
       double h = atof(line.substr(0,4).c_str());
@@ -109,13 +112,26 @@ namespace Crystal
       double SigI = atof(line.substr(20,8).c_str());
       int run = atoi(line.substr(28,4).c_str());
       double wl = atof(line.substr(32,8).c_str());
-      atof(line.substr(40,7).c_str()); //tbar
+      double tbar = atof(line.substr(40,7).c_str()); //tbar
       run = atoi(line.substr(47,7).c_str());
       atoi(line.substr(54,7).c_str()); //seqNum
-      atof(line.substr(61,7).c_str()); //transmission
+      double trans = atof(line.substr(61,7).c_str()); //transmission
       int bank = atoi(line.substr(68,4).c_str());
       double scattering = atof(line.substr(72,9).c_str());
       atof(line.substr(81,9).c_str()); //dspace
+      if (first)
+      {
+        mu1 = -(double)std::log(trans)/tbar;
+        wl1 = wl/1.8;
+        sc1 = scattering;
+        astar1 = 1.0/trans;
+        first = false;
+      }
+      else
+      {
+        mu2 = -(double)std::log(trans)/tbar;
+        wl2 = wl/1.8;
+      }
   
       Peak peak(inst, scattering, wl);
       peak.setHKL(-h,-k,-l);
@@ -132,9 +148,27 @@ namespace Crystal
     } while (!in.eof());
 
     in.close();
-    double smu = 0;
-    double amu = 0;
-    double radius = 0;
+    // solve 2 linear equations to find amu and smu
+    double amu = (mu2 - 1.0 * mu1) / (-1.0 * wl1 + wl2);
+    double smu = mu1 - wl1 * amu;
+    double theta = sc1*radtodeg_half;
+    int i = (int)(theta/5.);
+    double x0,x1,x2;
+    gsl_poly_solve_cubic(pc[2][i]/pc[3][i], pc[1][i]/pc[3][i],(pc[0][i]-astar1)/pc[3][i],&x0,&x1,&x2);
+    double radius = 0.0;
+    if (x0 > 0) radius = x0;
+    else if (x1 > 0) radius = x1;
+    else if (x2 > 0) radius = x2;
+    gsl_poly_solve_cubic(pc[2][i+1]/pc[3][i+1], pc[1][i+1]/pc[3][i+1],(pc[0][i+1]-astar1)/pc[3][i+1],&x0,&x1,&x2);
+    double radius1 = 0.0;
+    if (x0 > 0) radius1 = x0;
+    else if (x1 > 0) radius1 = x1;
+    else if (x2 > 0) radius1 = x2;
+    double frac = theta - static_cast<double>(static_cast<int>( theta / 5. )) * 5.;//theta%5.
+    frac = frac/5.;
+    radius = radius*(1-frac) + radius1*frac;
+    radius /= mu1;
+    std::cout << smu<<"  "<<amu<<"  "<<radius<<"\n";
     API::Run & mrun = ws->mutableRun();
     mrun.addProperty<double>("LinearScatteringCoef", smu, true);
     mrun.addProperty<double>("LinearAbsorptionCoef", amu, true);
