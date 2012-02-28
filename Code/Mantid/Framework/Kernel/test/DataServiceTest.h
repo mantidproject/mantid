@@ -20,7 +20,7 @@ class DumbDataServiceImpl : public DataService<int>
 {
 public:
   DumbDataServiceImpl():
-    DataService("DumbDataServiceImpl")
+    DataService<int>("DumbDataServiceImpl")
   {
   }
 };
