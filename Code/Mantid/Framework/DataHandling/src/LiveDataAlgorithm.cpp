@@ -174,21 +174,38 @@ namespace DataHandling
     if (postProcessing)
       prefix = "Post";
 
+    // Get the name of the algorithm to run
     std::string algoName = this->getPropertyValue(prefix+"ProcessingAlgorithm");
     algoName = Strings::strip(algoName);
-    if (algoName.empty())
+
+    // Get the script to run. Ignored if algo is specified
+    std::string script = this->getPropertyValue(prefix+"ProcessingScript");
+    script = Strings::strip(script);
+
+    if (!algoName.empty())
+    {
+      // Properties to pass to algo
+      std::string props = this->getPropertyValue(prefix+"ProcessingProperties");
+
+      // Create the UNMANAGED algorithm
+      IAlgorithm_sptr alg = this->createSubAlgorithm(algoName);
+      // ...and pass it the properties
+      alg->setProperties(props);
+
+      // Warn if someone put both values.
+      if (!script.empty())
+        g_log.warning() << "Running algorithm " << algoName << " and ignoring the script code in " << prefix+"ProcessingScript" << std::endl;
+      return alg;
+    }
+    else if (!script.empty())
+    {
+      // Run a snippet of python
+      IAlgorithm_sptr alg = this->createSubAlgorithm("RunPythonScript");
+      alg->setPropertyValue("Code", script);
+      return alg;
+    }
+    else
       return IAlgorithm_sptr();
-
-    std::string props = this->getPropertyValue(prefix+"ProcessingProperties");
-
-    // TODO: Handle script too.
-
-    // Create the UNMANAGED algorithm
-    IAlgorithm_sptr alg = this->createSubAlgorithm(algoName);
-    // ...and pass it the properties
-    alg->setProperties(props);
-
-    return alg;
   }
 
 } // namespace Mantid

@@ -96,9 +96,10 @@ namespace DataHandling
 
       // Run the processing algorithm
       alg->setChild(true);
+      AnalysisDataService::Instance().addOrReplace("__anonymous_livedata_input_chunk", inputWS);
       // TODO: Handle different inputs?
-      alg->setProperty("InputWorkspace", inputWS);
-      alg->setPropertyValue("OutputWorkspace", "anonymous_processed_chunk");
+      alg->setPropertyValue("InputWorkspace", "__anonymous_livedata_input_chunk");
+      alg->setPropertyValue("OutputWorkspace", "__anonymous_livedata_processed_chunk");
       alg->execute();
       if (!alg->isExecuted())
         throw std::runtime_error("Error processing the chunk workspace using " + alg->name() + ". See log for details.");
