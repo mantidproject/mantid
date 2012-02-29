@@ -16,3 +16,7 @@ def check_view_filter_button_state(bname, expected_state, message=None):
     button_state = fix_bool(button.enabled)
     test.compare(button_state, expected_state, message)
 
+def check_sv_opened(ws_name, slice_num, expected_state, message=None):
+    sv_name = ":Slice Viewer (%s) Slice%d_MantidQt::SliceViewer::SliceViewerWindow" % (ws_name, slice_num)
+    waitFor("object.exists('%s')" % sv_name, 20000)
+    test.compare(fix_bool(findObject(sv_name).enabled), expected_state, message)

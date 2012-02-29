@@ -40,8 +40,19 @@ def activate_vsi():
     vsi = get_vsi();
     activateItem(vsi)
     
+def switch_mode(mode):
+    clickButton(waitForObject(":Vates Simple Interface.%sButton_QPushButton" % mode))
+    
 def close_vsi():
     sendEvent("QCloseEvent", waitForObject(":Vates Simple Interface_QMdiSubWindow"))
+    
+def activate_sv(inumber):
+    if inumber > 1:
+        snum = "_%d" % inumber
+    else:
+        snum = ""
+    openContextMenu(waitForObject(":_QGraphicsItem%s" % snum), 5, 5, 0)
+    activateItem(waitForObjectItem(":_QMenu", "Show in SliceView"))
     
 def quit_program():
     sendEvent("QCloseEvent", waitForObject(":MantidPlot - untitled_ApplicationWindow"))
