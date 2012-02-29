@@ -1170,11 +1170,13 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
   infoStr += matrix_workspace->getComment();
   
   const Run& runDetails = matrix_workspace->run();
-  
+  Mantid::Kernel::DateAndTime start, end;
+
   // Add the start time for the run
   infoStr += "\nStart: ";
   if ( runDetails.hasProperty("run_start") )
   {
+    start = runDetails.getProperty("run_start")->value();
     infoStr += runDetails.getProperty("run_start")->value();
   }
 
@@ -1182,6 +1184,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
   infoStr += "\nEnd: ";
   if ( runDetails.hasProperty("run_end") )
   {
+    end = runDetails.getProperty("run_end")->value();
     infoStr += runDetails.getProperty("run_end")->value();
   }
 
@@ -1200,6 +1203,43 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
   infoStr += ss.str();
   infoStr += " MeV";
 
+  // Add average temperature.
+  infoStr += "\nAverage Temperature: ";
+  if ( runDetails.hasProperty("Temp_Sample") )
+  {
+    // Filter the temperatures by the start and end times for the run.
+    runDetails.getProperty("Temp_Sample")->filterByTime(start, end);
+    QString allRuns = QString::fromStdString(runDetails.getProperty("Temp_Sample")->value() );
+    QStringList runTemp = allRuns.split("\n");
+    int tempCount(0);
+    double total(0.0);
+
+    // Go through each temperature entry, remove the date and time, and total the temperatures.
+    for (int i=0; i<runTemp.size(); ++i)
+    {
+      if (runTemp[i].contains("  ") )
+      {
+        QStringList dateTimeTemperature = runTemp[i].split("  ");
+        total += dateTimeTemperature[dateTimeTemperature.size() - 1].toDouble();
+        ++tempCount;
+      }
+    }
+
+    // Find the average and display it.
+    double average(total/tempCount);
+    if (average != 0.0)
+    {
+      std::ostringstream ss;
+      ss << std::fixed << std::setprecision(12) << average;
+      infoStr += ss.str();
+    }
+    else // Show appropriate error message.
+      infoStr += "Errror - Not set in data file.";
+  }
+  else // Show appropriate error message. 
+    infoStr += "Errror - Not found in data file.";
+
+  // Include all the run information.
   m_uiForm.infoBrowser->setText(infoStr.c_str());
 
   // Populate period information
