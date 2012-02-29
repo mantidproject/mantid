@@ -152,6 +152,7 @@ using namespace boost::python;
       .def("executeAsync", &API::IAlgorithm::executeAsync)
       .def("isRunningAsync", &API::IAlgorithm::isRunningAsync)
       .def("isInitialized", &API::IAlgorithm::isInitialized)
+      .def("isLogging", &API::IAlgorithm::isLogging)
       .def("isExecuted", &API::IAlgorithm::isExecuted)
       .def("setChild", &API::IAlgorithm::setChild)
       .def("setLogging", &API::IAlgorithm::setLogging)

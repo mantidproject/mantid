@@ -383,7 +383,41 @@ def in_callstack(fn_name, frame):
         return True
     else:
         return False
-
+    
+    
+#-------------------------------------------------------------------------------
+def find_parent_python_algorithm(frame):
+    """ By inspecting the call stack looking for PyExec(), find the
+    parent PythonAlgorithm that is calling the current method.
+    
+    Returns
+    -------
+       The 'self' python algorithm object that is running PyExec().
+       or, None if not found.
+    """
+    
+    # We are looking for this method name, signifying PythonAlgorithm
+    fn_name = "PyExec"
+    
+    # Return the 'self' object of a given frame
+    def get_self(frame):
+        return frame.f_locals['self']
+    
+    # Look recursively for the PyExec method in the stack
+    if frame.f_code.co_name == fn_name: 
+        return get_self(frame)
+    while True:
+        if frame.f_back:
+            if frame.f_back.f_code.co_name == fn_name: 
+                return get_self(frame.f_back)
+            frame = frame.f_back
+        else:
+            break
+    if frame.f_code.co_name == fn_name: 
+        return get_self(frame)
+    else:
+        return None
+    
 #-------------------------------------------------------------------------------
 def mtdGlobalHelp():
     # first part is algorithm name, second is version
@@ -1245,12 +1279,19 @@ class MantidPyFramework(FrameworkManager):
         if isinstance(ialg, IAlgorithmProxy):
             return ialg
         if isinstance(ialg, str):
-            if in_callstack('PyExec',inspect.currentframe()) == True:
+            # Look for a parent python algorithm
+            parentAlg = find_parent_python_algorithm(inspect.currentframe())
+            if not parentAlg is None:
+                
                 # Algorithm is being called as part of a Python algorithm.
-                ialg = self.createUnmanagedAlgorithm(ialg, version)
+                ialg = parentAlg._createSubAlgorithm(ialg, version)
                 ialg.__async__ = False
-                ialg.setChild(True)
-                ialg.setLogging(True)
+                
+                # Children do not log if the parent is not logging
+                ialg.setLogging( parentAlg.isLogging() )
+                
+                # Most python algorithms use the NAMES of workspace, so each child
+                # will store its workspaces in the ADS.
                 ialg.setAlwaysStoreInADS(True)
             else:
                 ialg = self.createManagedAlgorithm(ialg, version) 
@@ -1515,7 +1556,7 @@ class PythonAlgorithm(PyAlgorithmBase):
         
     def category(self):
         return 'PythonAlgorithms'
-
+    
     def PyInit(self):
         raise NotImplementedError('PyInit() method must be defined for a Python algorithm')
 
