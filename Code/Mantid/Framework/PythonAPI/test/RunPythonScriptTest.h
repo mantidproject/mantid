@@ -58,6 +58,18 @@ public:
     // Empty code string.
     MatrixWorkspace_sptr ws = doRun("", "inputName");
   }
+
+  void test_do_simplePlus()
+  {
+    std::string code =
+        "Plus(LHSWorkspace=input, RHSWorkspace=input, OutputWorkspace=output)\n"
+        ""
+        ;
+    // Empty code string.
+    MatrixWorkspace_sptr ws = doRun(code, "outputName");
+    if (!ws) return;
+    TS_ASSERT_DELTA(ws->readY(0)[0], 4.0, 1e-5);
+  }
   
 
 };

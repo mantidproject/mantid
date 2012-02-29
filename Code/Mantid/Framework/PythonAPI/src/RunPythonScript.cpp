@@ -19,7 +19,7 @@ namespace PythonAPI
 {
 
   // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(RunPythonScript)
+//  DECLARE_ALGORITHM(RunPythonScript)
   
 
 
@@ -61,14 +61,14 @@ namespace PythonAPI
    */
   void RunPythonScript::init()
   {
-    declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input),
+    declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input, false, false),
         "An input workspace that the python code will modify.\n"
         "The name of the workspace will be in the python variable named 'input'.");
 
     declareProperty(new PropertyWithValue<std::string>("Code","",Direction::Input),
         "Python code (can be on multiple lines).");
 
-    declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output),
+    declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output, false, false),
         "An output workspace to be produced by the python code.\n"
         "The python code should create the workspace named by the python variable 'output'.");
   }
@@ -82,8 +82,8 @@ namespace PythonAPI
     std::string inputName = this->getPropertyValue("InputWorkspace");
     std::string outputName = this->getPropertyValue("OutputWorkspace");
 
-    // Initialization of python - run this before anything else
-    Py_Initialize();
+//    // Initialization of python - run this before anything else
+//    Py_Initialize();
 
 //    object result1 = eval("12 + 34");
 //    double val = extract<double>(result1);
@@ -100,16 +100,23 @@ namespace PythonAPI
     // Python variable called 'output' that contains the NAME of the output workspace
     globals["output"] = outputName;
 
+    // Execute the Code string
+    try
+    {
+      object result = boost::python::exec(Code.c_str(), globals, globals);
+      UNUSED_ARG(result);
+    }
+    catch (error_already_set)
+    {
+      PyErr_Print();
+    }
+
     // Handle the output workspace.
     Workspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<Workspace>(outputName);
     this->setProperty("OutputWorkspace", outWS);
 
-    // Execute the Code string
-    object result = boost::python::exec(Code.c_str(), globals, globals);
 
-    UNUSED_ARG(result);
-
-    Py_Finalize();
+//    Py_Finalize();
 
   }
 
