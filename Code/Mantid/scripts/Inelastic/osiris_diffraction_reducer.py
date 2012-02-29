@@ -45,7 +45,7 @@ class OsirisDiffractionReducer(Reducer):
             # Append sample workspace
             wsl.append(sam)
         if self._result_workspace is None:
-            self._result_workspace = wsl[0] + '-to-' + wsl[4][3:]
+            self._result_workspace = wsl[0] + '-to-' + wsl[len(wsl) - 1][3:]
         MergeRuns(','.join(wsl), self._result_workspace)
         for sam in sams.itervalues():
             DeleteWorkspace(sam)
@@ -84,6 +84,18 @@ class OsirisDiffractionReducer(Reducer):
             elif x < 5.2:
                 dataY.append(1); dataE.append(1)
             elif x < 5.3:
+                dataY.append(2); dataE.append(2)
+            elif x < 9.4:
+                dataY.append(1); dataE.append(1)
+            elif x < 9.5:
+                dataY.append(2); dataE.append(2)
+            elif x < 10.4:
+                dataY.append(1); dataE.append(1)
+            elif x < 10.6:
+                dataY.append(2); dataE.append(2)
+            elif x < 11:
+                dataY.append(1); dataE.append(1)
+            elif x < 11.6:
                 dataY.append(2); dataE.append(2)
             else:
                 dataY.append(1); dataE.append(1)
@@ -140,10 +152,30 @@ class DRangeIdentifier(ReductionStep):
         Guide", 3rd Edition, Table 2, page 32, 'Standard Diffraction Settings
         at 25Hz'
         """
-        self._timeRegimeToD = {1.17e4: 1, 2.94e4: 2, 4.71e4: 3, 6.48e4: 4,
-            8.25e4: 5}
-        self._drange_mask = {1: [0.7, 2.5], 2: [2.1, 3.3], 3: [3.1, 4.3],
-            4: [4.1, 5.3], 5: [5.2, 6.2] }
+        self._timeRegimeToD = {
+            1.17e4:  1, 
+            2.94e4:  2, 
+            4.71e4:  3, 
+            6.48e4:  4,
+            8.25e4:  5,
+           10.02e4:  6,
+           11.79e4:  7,
+           13.55e4:  8,
+           15.32e4:  9,
+           17.09e4: 10,
+           18.86e4: 11}
+        self._drange_mask = {
+            1: [ 0.7,  2.5],
+            2: [ 2.1,  3.3],
+            3: [ 3.1,  4.3],
+            4: [ 4.1,  5.3],
+            5: [ 5.2,  6.2],
+            6: [ 6.2,  7.3],
+            7: [ 7.3,  8.3],
+            8: [ 8.3,  9.5],
+            9: [ 9.4, 10.6],
+           10: [10.4, 11.6],
+           11: [11.0, 12.5]}
 
     def set_vanadium(self, Value):
         self._van = Value
