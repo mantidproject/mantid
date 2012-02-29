@@ -8,7 +8,6 @@ set ( SRC_FILES
 	src/PyAlgorithmWrapper.cpp
 	src/PythonInterfaceFunctions.cpp
 	src/PythonWrapper.cpp
-	src/RunPythonScript.cpp
 	src/WorkspaceProxies.cpp
 	src/api_exports.cpp
 	src/geometry_exports.cpp
@@ -25,7 +24,6 @@ set ( INC_FILES
 	inc/MantidPythonAPI/MantidVecHelper.h
 	inc/MantidPythonAPI/PyAlgorithmWrapper.h
 	inc/MantidPythonAPI/PythonInterfaceFunctions.h
-	inc/MantidPythonAPI/RunPythonScript.h
 	inc/MantidPythonAPI/WorkspaceProxies.h
 	inc/MantidPythonAPI/api_exports.h
 	inc/MantidPythonAPI/geometryhelper.h
