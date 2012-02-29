@@ -369,11 +369,7 @@ namespace Kernel
         return;
       
       // Else create a new range, containing a single run, and add it to the list.
-      std::pair<unsigned int, unsigned int> range;
-      range.first = run;
-      range.second = run;
-
-      m_rangeList.insert(range);
+      m_rangeList.insert(std::make_pair(run, run));
 
       // Now merge any ranges that are adjacent.
       m_rangeList = std::accumulate(
@@ -705,9 +701,7 @@ namespace Kernel
           {
             unsigned int from = ranges.rbegin()->first;
             unsigned int to = range.second;
-            std::pair<unsigned int, unsigned int> temp;
-            temp.first = from;
-            temp.second = to;
+            std::pair<unsigned int, unsigned int> temp(from, to);
 
             ranges.erase(--ranges.end(), ranges.end());
             ranges.insert(temp);
