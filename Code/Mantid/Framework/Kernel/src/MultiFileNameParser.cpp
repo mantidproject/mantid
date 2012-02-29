@@ -699,8 +699,10 @@ namespace Kernel
           // ... if the last one is adjacent to the new range, merge the two.
           if(ranges.rbegin()->second + 1 == range.first)
           {
-            std::pair<unsigned int, unsigned int> temp = std::make_pair<unsigned int, unsigned int>(
-              ranges.rbegin()->first, range.second);
+            unsigned int from = ranges.rbegin()->first;
+            unsigned int to = range.second;
+            
+            std::pair<unsigned int, unsigned int> temp = std::make_pair<unsigned int, unsigned int>(from, to);
 
             ranges.erase(--ranges.end(), ranges.end());
             ranges.insert(temp);
