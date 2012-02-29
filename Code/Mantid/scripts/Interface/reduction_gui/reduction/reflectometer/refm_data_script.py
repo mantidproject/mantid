@@ -58,7 +58,7 @@ class DataSets(BaseScriptElement):
         if for_automated_reduction:
             return self._automated_reduction()
         
-        script = "RefMReduction(RunNumbers=%s,\n" % ','.join([str(i) for i in self.data_files])
+        script = "a = RefMReduction(RunNumbers=%s,\n" % ','.join([str(i) for i in self.data_files])
         script += "              NormalizationRunNumber=%d,\n" % self.norm_file
         script += "              SignalPeakPixelRange=%s,\n" % str(self.DataPeakPixels)
         script += "              SubtractSignalBackground=%s,\n" % str(self.DataBackgroundFlag)
@@ -81,9 +81,19 @@ class DataSets(BaseScriptElement):
         script += "              QMin=%s,\n" % str(self.q_min)
         script += "              QStep=%s,\n" % str(self.q_step)
         
-        # Angle offset
+        # Scattering angle options
         if self.use_center_pixel:
             script += "              ReflectivityPixel=%s,\n" % str(self.center_pixel)
+            if self.set_detector_angle:
+                script += "              SetDetectorAngle=True\n"
+                script += "              DetectorAngle=%s\n" % str(self.detector_angle)
+            if self.set_detector_angle_offset:
+                script += "              SetDetectorAngle0=True\n"
+                script += "              DetectorAngle0=%s\n" % str(self.detector_angle_offset)
+            if self.set_direct_pixel:
+                script += "              SetDirectPixel=True\n"
+                script += "              DirectPixel=%s\n" % str(self.direct_pixel)
+                
         else:
             script += "              Theta=%s,\n" % str(self.theta)
             
@@ -91,6 +101,9 @@ class DataSets(BaseScriptElement):
         # a script for the automated reduction
         script += "              OutputWorkspace='reflectivity_Off_Off_%s')" % str(self.data_files[0])
         script += "\n"
+        
+        script += "global REF_RED_OUTPUT_MESSAGE\n"
+        script += "REF_RED_OUTPUT_MESSAGE=a.getPropertyValue('OutputMessage')\n" 
 
         return script
 

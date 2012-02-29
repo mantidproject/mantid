@@ -61,6 +61,12 @@
                <layout class="QVBoxLayout" name="verticalLayout_6">
                 <item>
                  <widget class="QLabel" name="label_10">
+                  <property name="maximumSize">
+                   <size>
+                    <width>260</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
                   <property name="font">
                    <font>
                     <italic>true</italic>
@@ -68,7 +74,7 @@
                   </property>
                   <property name="text">
                    <string>List of runs to be stitched together.
-Drag items to change the reduction order.</string>
+</string>
                   </property>
                  </widget>
                 </item>
@@ -82,7 +88,7 @@ Drag items to change the reduction order.</string>
                   </property>
                   <property name="minimumSize">
                    <size>
-                    <width>275</width>
+                    <width>260</width>
                     <height>0</height>
                    </size>
                   </property>
@@ -2819,8 +2825,20 @@ Drag items to change the reduction order.</string>
                    <property name="enabled">
                     <bool>true</bool>
                    </property>
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>50</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
                    <property name="text">
-                    <string>TOF range            </string>
+                    <string/>
                    </property>
                    <property name="checked">
                     <bool>true</bool>

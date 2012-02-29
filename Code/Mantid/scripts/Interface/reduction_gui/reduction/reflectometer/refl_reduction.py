@@ -4,6 +4,13 @@
 """
 import time
 from reduction_gui.reduction.scripter import BaseReductionScripter
+# Check whether Mantid is available
+try:
+    from MantidFramework import *
+    mtd.initialise(False)
+    HAS_MANTID = True
+except:
+    HAS_MANTID = False  
 
 class REFLReductionScripter(BaseReductionScripter):
     """
@@ -37,6 +44,34 @@ class REFLReductionScripter(BaseReductionScripter):
             f.close()
         
         return script
+   
+    def apply(self):
+        """
+            Apply the reduction process
+        """
+        if HAS_MANTID:
+            script = self.to_script(None)
+            try:
+                global REF_RED_OUTPUT_MESSAGE
+                REF_RED_OUTPUT_MESSAGE = ''
+                exec script
+                print REF_RED_OUTPUT_MESSAGE
+                # Update scripter
+                for item in self._observers:
+                    if item.state() is not None:
+                        item.state().update()
+            except:
+                # Update scripter [Duplicated code because we can't use 'finally' on python 2.4]
+                for item in self._observers:
+                    if item.state() is not None:
+                        # Things might be broken, so update what we can
+                        try:
+                            item.state().update()
+                        except:
+                            pass
+                raise RuntimeError, sys.exc_value
+        else:
+            raise RuntimeError, "Reduction could not be executed: Mantid could not be imported"
         
 
     

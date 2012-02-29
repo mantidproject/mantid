@@ -174,6 +174,7 @@ class DataReflWidget(BaseWidget):
         self.connect(self._summary.det_angle_edit, QtCore.SIGNAL("textChanged(QString)"), self._update_scattering_angle)
         self.connect(self._summary.det_angle_offset_edit, QtCore.SIGNAL("textChanged(QString)"), self._update_scattering_angle)
         self.connect(self._summary.direct_pixel_edit, QtCore.SIGNAL("textChanged(QString)"), self._update_scattering_angle)
+        self.connect(self._summary.center_pix_edit, QtCore.SIGNAL("textChanged(QString)"), self._update_scattering_angle)
         
         call_back = partial(self._edit_event, ctrl=self._summary.direct_pixel_check)
         self.connect(self._summary.direct_pixel_check, QtCore.SIGNAL("clicked()"), call_back)
@@ -311,9 +312,26 @@ class DataReflWidget(BaseWidget):
         if self._summary.center_pix_radio.isChecked():
             self._summary.angle_edit.setEnabled(False)
             self._summary.center_pix_edit.setEnabled(True)
+            self._summary.det_angle_check.setEnabled(True)
+            self._det_angle_chk_changed()
+            self._summary.det_angle_offset_check.setEnabled(True)
+            self._det_angle_offset_chk_changed()
+            self._summary.direct_pixel_check.setEnabled(True)
+            self._direct_pixel_chk_changed()
+            self._summary.det_angle_unit_label.setEnabled(True)   
+            self._summary.det_angle_offset_unit_label.setEnabled(True)   
         else:
             self._summary.angle_edit.setEnabled(True)
             self._summary.center_pix_edit.setEnabled(False)
+            self._summary.det_angle_check.setEnabled(False)
+            self._summary.det_angle_edit.setEnabled(False)
+            self._summary.det_angle_offset_check.setEnabled(False)
+            self._summary.det_angle_offset_edit.setEnabled(False)
+            self._summary.direct_pixel_check.setEnabled(False)
+            self._summary.direct_pixel_edit.setEnabled(False)   
+            self._summary.det_angle_unit_label.setEnabled(False)   
+            self._summary.det_angle_offset_unit_label.setEnabled(False)   
+            
         util.set_edited(self._summary.angle_radio,True)
         util.set_edited(self._summary.center_pix_radio,True)
     

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/reflectometer/data_refl_simple.ui'
 #
-# Created: Wed Feb 29 08:46:02 2012
+# Created: Wed Feb 29 11:46:57 2012
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -43,6 +43,7 @@ class Ui_Frame(object):
         self.verticalLayout_6 = QtGui.QVBoxLayout(self.groupBox_3)
         self.verticalLayout_6.setObjectName("verticalLayout_6")
         self.label_10 = QtGui.QLabel(self.groupBox_3)
+        self.label_10.setMaximumSize(QtCore.QSize(260, 16777215))
         font = QtGui.QFont()
         font.setItalic(True)
         self.label_10.setFont(font)
@@ -54,7 +55,7 @@ class Ui_Frame(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.angle_list.sizePolicy().hasHeightForWidth())
         self.angle_list.setSizePolicy(sizePolicy)
-        self.angle_list.setMinimumSize(QtCore.QSize(275, 0))
+        self.angle_list.setMinimumSize(QtCore.QSize(260, 0))
         self.angle_list.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.angle_list.setDragEnabled(True)
         self.angle_list.setDragDropMode(QtGui.QAbstractItemView.InternalMove)
@@ -965,6 +966,9 @@ class Ui_Frame(object):
         self.horizontalLayout_9.setObjectName("horizontalLayout_9")
         self.tof_range_switch = QtGui.QCheckBox(self.scrollAreaWidgetContents)
         self.tof_range_switch.setEnabled(True)
+        self.tof_range_switch.setMinimumSize(QtCore.QSize(0, 0))
+        self.tof_range_switch.setMaximumSize(QtCore.QSize(50, 16777215))
+        self.tof_range_switch.setText("")
         self.tof_range_switch.setChecked(True)
         self.tof_range_switch.setObjectName("tof_range_switch")
         self.horizontalLayout_9.addWidget(self.tof_range_switch)
@@ -1167,7 +1171,7 @@ class Ui_Frame(object):
         Frame.setWindowTitle(QtGui.QApplication.translate("Frame", "Frame", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBox_3.setTitle(QtGui.QApplication.translate("Frame", "Angle List", None, QtGui.QApplication.UnicodeUTF8))
         self.label_10.setText(QtGui.QApplication.translate("Frame", "List of runs to be stitched together.\n"
-"Drag items to change the reduction order.", None, QtGui.QApplication.UnicodeUTF8))
+"", None, QtGui.QApplication.UnicodeUTF8))
         self.remove_btn.setToolTip(QtGui.QApplication.translate("Frame", "Remove selected item", None, QtGui.QApplication.UnicodeUTF8))
         self.remove_btn.setText(QtGui.QApplication.translate("Frame", "Remove selected", None, QtGui.QApplication.UnicodeUTF8))
         self.instrument_group_box.setTitle(QtGui.QApplication.translate("Frame", "Instrument", None, QtGui.QApplication.UnicodeUTF8))
@@ -1198,7 +1202,7 @@ class Ui_Frame(object):
         self.center_pix_edit.setStatusTip(QtGui.QApplication.translate("Frame", "Reflectivity pixel", None, QtGui.QApplication.UnicodeUTF8))
         self.center_pix_edit.setText(QtGui.QApplication.translate("Frame", "0", None, QtGui.QApplication.UnicodeUTF8))
         self.angle_radio.setText(QtGui.QApplication.translate("Frame", "Scattering angle", None, QtGui.QApplication.UnicodeUTF8))
-        self.angle_edit.setStatusTip(QtGui.QApplication.translate("Frame", "Scattering angle", None, QtGui.QApplication.UnicodeUTF8))
+        self.angle_edit.setStatusTip(QtGui.QApplication.translate("Frame", "Scattering angle (corrected SANGLE)", None, QtGui.QApplication.UnicodeUTF8))
         self.angle_edit.setText(QtGui.QApplication.translate("Frame", "0.0", None, QtGui.QApplication.UnicodeUTF8))
         self.angle_unit_label.setText(QtGui.QApplication.translate("Frame", "  degrees", None, QtGui.QApplication.UnicodeUTF8))
         self.det_angle_check.setToolTip(QtGui.QApplication.translate("Frame", "Detector angle (DANGLE)", None, QtGui.QApplication.UnicodeUTF8))
@@ -1236,7 +1240,6 @@ class Ui_Frame(object):
         self.norm_low_res_to_label.setText(QtGui.QApplication.translate("Frame", "to pixel", None, QtGui.QApplication.UnicodeUTF8))
         self.norm_x_max_edit.setText(QtGui.QApplication.translate("Frame", "0", None, QtGui.QApplication.UnicodeUTF8))
         self.norm_count_vs_x_btn.setText(QtGui.QApplication.translate("Frame", "Counts vs Pixel", None, QtGui.QApplication.UnicodeUTF8))
-        self.tof_range_switch.setText(QtGui.QApplication.translate("Frame", "TOF range            ", None, QtGui.QApplication.UnicodeUTF8))
         self.tof_min_label.setText(QtGui.QApplication.translate("Frame", "TOF min", None, QtGui.QApplication.UnicodeUTF8))
         self.data_from_tof.setText(QtGui.QApplication.translate("Frame", "0", None, QtGui.QApplication.UnicodeUTF8))
         self.tof_min_label2.setText(QtGui.QApplication.translate("Frame", " µs", None, QtGui.QApplication.UnicodeUTF8))

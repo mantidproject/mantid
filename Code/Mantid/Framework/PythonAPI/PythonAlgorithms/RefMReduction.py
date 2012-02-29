@@ -100,6 +100,7 @@ class RefMReduction(PythonAlgorithm):
         dangle = 0
         if self.getProperty("SetDetectorAngle"):
             dangle = self.getProperty("DetectorAngle")
+            self._output_message += "   DANGLE set to %g" % dangle
         else:
             if mtd[workspace].getRun().hasProperty("DANGLE"):
                 dangle = mtd[workspace].getRun().getProperty("DANGLE").value[0]
@@ -107,6 +108,7 @@ class RefMReduction(PythonAlgorithm):
         dangle0 = 0
         if self.getProperty("SetDetectorAngle0"):
             dangle0 = self.getProperty("DetectorAngle0")
+            self._output_message += "   DANGLE0 set to %g" % dangle0
         else:
             if mtd[workspace].getRun().hasProperty("DANGLE0"):
                 dangle0 = mtd[workspace].getRun().getProperty("DANGLE0").value[0]
@@ -114,14 +116,22 @@ class RefMReduction(PythonAlgorithm):
         det_distance = mtd[workspace].getInstrument().getDetector(0).getPos().getZ()
 
         direct_beam_pix = 0
-        
         if self.getProperty("SetDirectPixel"):
             direct_beam_pix = self.getProperty("DirectPixel")
+            self._output_message += "   DIRPIX set to %g" % direct_beam_pixel
         else:
             if mtd[workspace].getRun().hasProperty("DIRPIX"):
                 direct_beam_pix = mtd[workspace].getRun().getProperty("DIRPIX").value[0]
         
         ref_pix = int(self.getProperty("ReflectivityPixel"))
+        
+        # If the reflectivity pixel is zero taken the position
+        # in the middle of the data peak range
+        if ref_pix==0:
+            peak_range = self.getProperty("SignalPeakPixelRange")
+            ref_pix = (peak_range[0]+peak_range[1])/2.0
+            self._output_message += "   Supplied reflectivity pixel is zero\n"
+            self._output_message += "     Taking peak mid-point: %g\n" % ref_pix
         
         delta = (dangle-dangle0)/2.0\
             + ((direct_beam_pix-ref_pix)*RefMReduction.PIXEL_SIZE)/ (2.0*det_distance)
