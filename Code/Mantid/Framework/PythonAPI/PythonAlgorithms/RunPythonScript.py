@@ -24,7 +24,7 @@ class RunPythonScript(PythonAlgorithm):
         self.declareWorkspaceProperty("InputWorkspace","", Direction=Direction.Input,
                 Description=
                     "An input workspace that the python code will modify.\n"
-                    "The name of the workspace will be in the python variable named 'input'.")
+                    "The workspace will be in the python variable named 'input'.")
         
         self.declareProperty("Code", "", Direction=Direction.Input,
                              Description="Python code (can be on multiple lines)." )
@@ -43,15 +43,15 @@ class RunPythonScript(PythonAlgorithm):
         wsOutputName = self.getPropertyValue("OutputWorkspace")
         code = self.getPropertyValue("Code")
 
-        input = wsInputName
+        # Prepare variables expected in the script code
+        input = mtd[wsInputName]
         output = wsOutputName
         
         # Run the script code passed
-        eval(code)
-        
+        exec(code)
 
         # 3. Set result
-        wsOut = mtd[wsOutputName]
+        wsOut = mtd[output]
         self.setProperty("OutputWorkspace",wsOut)
 
         return

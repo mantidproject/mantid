@@ -21,7 +21,6 @@ public:
   static RunPythonScriptTest *createSuite() { return new RunPythonScriptTest(); }
   static void destroySuite( RunPythonScriptTest *suite ) { delete suite; }
 
-
   void test_Init()
   {
     RunPythonScript alg;
