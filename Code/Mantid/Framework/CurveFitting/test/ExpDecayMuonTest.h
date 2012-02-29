@@ -7,21 +7,16 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidCurveFitting/LinearBackground.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
-#include "MantidCurveFitting/Fit.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidCurveFitting/FitMW.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataHandling/LoadRaw.h"
-#include "MantidKernel/Exception.h"
 #include "MantidAPI/FunctionFactory.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::DataObjects;
-using namespace Mantid::DataHandling;
 
 
 class ExpDecayMuonTest : public CxxTest::TestSuite
@@ -60,7 +55,7 @@ public:
 
   void testAgainstMockData()
   {
-    Fit alg2;
+    FitMW alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
     TS_ASSERT( alg2.isInitialized() );
 
@@ -103,7 +98,7 @@ public:
     double dummy = alg2.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 0.0001,0.0001);
 
-    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
+    IFunction_sptr out = alg2.getProperty("Function");
     TS_ASSERT_DELTA( out->getParameter("A"), 5 ,0.0001);
     TS_ASSERT_DELTA( out->getParameter("Lambda"), 0.3333 ,0.001);
 

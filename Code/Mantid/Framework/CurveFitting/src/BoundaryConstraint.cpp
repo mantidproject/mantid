@@ -197,10 +197,16 @@ double BoundaryConstraint::check()
 
   if (m_hasLowerBound)
     if ( paramValue < m_lowerBound )
-      penalty = (m_lowerBound-paramValue)* m_penaltyFactor;
+    {
+      double dp = m_lowerBound-paramValue;
+      penalty = m_penaltyFactor * dp * dp;
+    }
   if (m_hasUpperBound)
     if ( paramValue > m_upperBound )
-      penalty = (paramValue-m_upperBound)* m_penaltyFactor;
+    {
+      double dp = paramValue-m_upperBound;
+      penalty = m_penaltyFactor * dp * dp;
+    }
 
   return penalty;
 }
@@ -220,10 +226,39 @@ double BoundaryConstraint::checkDeriv()
 
   if (m_hasLowerBound)
     if ( paramValue < m_lowerBound )
-      penalty = -m_penaltyFactor;
+    {
+      double dp = m_lowerBound-paramValue;
+      penalty = 2 * m_penaltyFactor * dp;
+    }
   if (m_hasUpperBound)
     if ( paramValue > m_upperBound )
-      penalty = m_penaltyFactor;
+    {
+      double dp = paramValue-m_upperBound;
+      penalty = 2 * m_penaltyFactor * dp;
+    }
+
+  return penalty;
+}
+
+double BoundaryConstraint::checkDeriv2()
+{
+  double penalty = 0.0;
+
+  if (/*m_activeParameterIndex < 0 ||*/ !(m_hasLowerBound || m_hasUpperBound))
+  {
+    // no point in logging any warning here since checkDeriv() will always be called after
+    // check() is called 
+    return penalty;
+  } 
+
+  double paramValue = getFunction()->getParameter(getIndex());
+
+  if (m_hasLowerBound)
+    if ( paramValue < m_lowerBound )
+      penalty = 2 * m_penaltyFactor;
+  if (m_hasUpperBound)
+    if ( paramValue > m_upperBound )
+      penalty = 2 * m_penaltyFactor;
 
   return penalty;
 }

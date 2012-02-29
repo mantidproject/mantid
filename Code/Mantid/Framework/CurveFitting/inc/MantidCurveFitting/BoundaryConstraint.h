@@ -116,6 +116,7 @@ namespace Mantid
       /// overwrite IConstraint base class methods
       virtual double check();
       virtual double checkDeriv();
+      virtual double checkDeriv2();
       virtual void setParamToSatisfyConstraint();
       virtual std::string asString()const;
 

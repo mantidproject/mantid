@@ -5,6 +5,7 @@
 
 #include "MantidCurveFitting/UserFunction.h"
 #include "MantidAPI/Jacobian.h"
+#include "MantidAPI/FunctionDomain1D.h"
 
 using namespace Mantid::CurveFitting;
 using namespace Mantid::API;
@@ -36,7 +37,7 @@ public:
   void testIt()
   {
     UserFunction fun;
-    fun.setAttribute("Formula",IFitFunction::Attribute("h*sin(a*x-c)"));
+    fun.setAttribute("Formula",UserFunction::Attribute("h*sin(a*x-c)"));
     fun.setParameter("h",2.2);
     fun.setParameter("a",2.0);
     fun.setParameter("c",1.2);
@@ -54,14 +55,16 @@ public:
     {
       x[i] = 0.1*static_cast<double>(i);
     }
-    fun.functionMW(&y[0],&x[0],nData);
+    fun.function1D(&y[0],&x[0],nData);
     for(size_t i=0;i<nData;i++)
     {
       TS_ASSERT_DELTA(y[i],2.2*sin(2*x[i]-1.2),0.000001);
     }
 
+    FunctionDomain1D domain(x);
     UserTestJacobian J(nData,nParams);
-    fun.functionDerivMW(&J,&x[0],nData);
+    fun.functionDeriv(domain,J);
+
     for(size_t i=0;i<nData;i++)
     for(size_t j=0;j<nParams;j++)
     {

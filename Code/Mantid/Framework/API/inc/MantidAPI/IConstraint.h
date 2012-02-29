@@ -60,6 +60,9 @@ public:
   /// Returns the derivative of the penalty for each active parameter
   virtual double checkDeriv() = 0;
 
+  /// Returns the derivative of the penalty for each active parameter
+  virtual double checkDeriv2() = 0;
+
   /// Set the parameters of IFitFunction to satisfy constraint. For example
   /// for a BoundaryConstraint this if param value less than lower boundary
   /// it is set to that value and vice versa for if the param value is larger

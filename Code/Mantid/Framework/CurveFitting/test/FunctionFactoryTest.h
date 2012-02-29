@@ -156,7 +156,7 @@ public:
   void testCreateWithConstraint1()
   {
     std::string fnString = "name=FunctionFactoryConstraintTest_FunctA,a0=0.1,a1=1.1,constraint=0<a0<0.2";
-    IFunction* funa = FunctionFactory::Instance().createInitialized(fnString);
+    IFunction_sptr funa = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(funa);
     TS_ASSERT_EQUALS(funa->parameterName(0),"a0");
     TS_ASSERT_EQUALS(funa->parameterName(1),"a1");
@@ -169,11 +169,10 @@ public:
     TS_ASSERT_EQUALS(c->check(),0);
 
     funa->setParameter("a0",1);
-    TS_ASSERT_EQUALS(c->check(),800);
+    TS_ASSERT_EQUALS(c->check(),640);
 
     funa->setParameter("a0",-1);
     TS_ASSERT_EQUALS(c->check(),1000);
-    delete funa;
 
   }
 
@@ -181,7 +180,7 @@ public:
   {
     std::string fnString = "name=FunctionFactoryConstraintTest_FunctA,a0=0.1,a1=1.1,"
       "constraints=(0<a0<0.2,a1>10)";
-    IFunction* funa = FunctionFactory::Instance().createInitialized(fnString);
+    IFunction_sptr funa = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(funa);
     TS_ASSERT_EQUALS(funa->parameterName(0),"a0");
     TS_ASSERT_EQUALS(funa->parameterName(1),"a1");
@@ -194,19 +193,17 @@ public:
     TS_ASSERT_EQUALS(c0->check(),0);
 
     funa->setParameter("a0",1);
-    TS_ASSERT_EQUALS(c0->check(),800);
+    TS_ASSERT_EQUALS(c0->check(),640);
 
     funa->setParameter("a0",-1);
     TS_ASSERT_EQUALS(c0->check(),1000);
 
     IConstraint* c1 = funa->getConstraint(1);
     TS_ASSERT(c1);
-    TS_ASSERT_EQUALS(c1->check(),8900);
+    TS_ASSERT_EQUALS(c1->check(),79210);
 
     funa->setParameter("a1",11);
     TS_ASSERT_EQUALS(c1->check(),0);
-
-    delete funa;
 
   }
 
@@ -216,9 +213,9 @@ public:
       "name=FunctionFactoryConstraintTest_FunctA;name=FunctionFactoryConstraintTest_FunctB,b0=0.2,b1=1.2,"
       "constraints=(b0<1,b1>1)";
 
-    IFunction* fun = FunctionFactory::Instance().createInitialized(fnString);
+    IFunction_sptr fun = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(fun);
-    FunctionFactoryConstraintTest_CompFunctA* cf = dynamic_cast<FunctionFactoryConstraintTest_CompFunctA*>(fun);
+    FunctionFactoryConstraintTest_CompFunctA* cf = dynamic_cast<FunctionFactoryConstraintTest_CompFunctA*>(fun.get());
     TS_ASSERT(cf);
     TS_ASSERT_EQUALS(cf->nParams(),4);
     TS_ASSERT_EQUALS(cf->parameterName(0),"f0.a0");
@@ -243,9 +240,7 @@ public:
     TS_ASSERT(c);
     TS_ASSERT_EQUALS(c->check(),0);
     fun->setParameter("f1.b1",0.5);
-    TS_ASSERT_EQUALS(c->check(),500);
-
-    delete fun;
+    TS_ASSERT_EQUALS(c->check(),250);
   }
 
   void testCreateCompositeWithConstraints1()
@@ -254,9 +249,9 @@ public:
       "name=FunctionFactoryConstraintTest_FunctA;name=FunctionFactoryConstraintTest_FunctB,b0=0.2,b1=1.2;"
       "constraints=(f0.a0<1,f1.b1>1)";
 
-    IFunction* fun = FunctionFactory::Instance().createInitialized(fnString);
+    IFunction_sptr fun = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(fun);
-    FunctionFactoryConstraintTest_CompFunctA* cf = dynamic_cast<FunctionFactoryConstraintTest_CompFunctA*>(fun);
+    FunctionFactoryConstraintTest_CompFunctA* cf = dynamic_cast<FunctionFactoryConstraintTest_CompFunctA*>(fun.get());
     TS_ASSERT(cf);
     TS_ASSERT_EQUALS(cf->nParams(),4);
     TS_ASSERT_EQUALS(cf->parameterName(0),"f0.a0");
@@ -281,15 +276,13 @@ public:
     TS_ASSERT(c);
     TS_ASSERT_EQUALS(c->check(),0);
     fun->setParameter("f1.b1",0.5);
-    TS_ASSERT_EQUALS(c->check(),500);
-
-    delete fun;
+    TS_ASSERT_EQUALS(c->check(),250);
   }
 
   void testCreateWithTies()
   {
     std::string fnString = "name=FunctionFactoryConstraintTest_FunctA,a0=0.1,a1=1.1,ties=(a0=a1^2)";
-    IFunction* funa = FunctionFactory::Instance().createInitialized(fnString);
+    IFunction_sptr funa = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(funa);
     TS_ASSERT_EQUALS(funa->getParameter("a0"),0.1);
     TS_ASSERT_EQUALS(funa->getParameter("a1"),1.1);
@@ -298,15 +291,12 @@ public:
 
     TS_ASSERT_DELTA(funa->getParameter("a0"),1.21,0.0001);
     TS_ASSERT_EQUALS(funa->getParameter("a1"),1.1);
-
-    delete funa;
-
   }
 
   void testCreateWithTies1()
   {
     std::string fnString = "name=FunctionFactoryConstraintTest_FunctA,a0=0.1,a1=1.1,ties=(a0=a1=4)";
-    IFunction* funa = FunctionFactory::Instance().createInitialized(fnString);
+    IFunction_sptr funa = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(funa);
     TS_ASSERT_EQUALS(funa->getParameter("a0"),0.1);
     TS_ASSERT_EQUALS(funa->getParameter("a1"),1.1);
@@ -315,15 +305,12 @@ public:
 
     TS_ASSERT_EQUALS(funa->getParameter("a0"),4);
     TS_ASSERT_EQUALS(funa->getParameter("a1"),4);
-
-    delete funa;
-
   }
 
   void testCreateWithTies2()
   {
     std::string fnString = "name=FunctionFactoryConstraintTest_FunctA,a0=0.1,a1=1.1,ties=(a0=2,a1=4)";
-    IFunction* funa = FunctionFactory::Instance().createInitialized(fnString);
+    IFunction_sptr funa = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(funa);
     TS_ASSERT_EQUALS(funa->getParameter("a0"),0.1);
     TS_ASSERT_EQUALS(funa->getParameter("a1"),1.1);
@@ -332,9 +319,6 @@ public:
 
     TS_ASSERT_EQUALS(funa->getParameter("a0"),2);
     TS_ASSERT_EQUALS(funa->getParameter("a1"),4);
-
-    delete funa;
-
   }
 
   void testCreateCompositeWithTies()
@@ -343,7 +327,7 @@ public:
       "name=FunctionFactoryConstraintTest_FunctA,ties=(a0=a1=14);"
       "name=FunctionFactoryConstraintTest_FunctB,b0=0.2,b1=1.2;ties=(f1.b0=f0.a0+f0.a1)";
 
-    IFunction* fun = FunctionFactory::Instance().createInitialized(fnString);
+    IFunction_sptr fun = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(fun);
     TS_ASSERT_EQUALS(fun->getParameter(0),0.);
     TS_ASSERT_EQUALS(fun->getParameter(1),0.);
@@ -357,7 +341,7 @@ public:
     TS_ASSERT_EQUALS(fun->getParameter(2),28.);
     TS_ASSERT_EQUALS(fun->getParameter(3),1.2);
 
-    IFunction* fun1 = FunctionFactory::Instance().createInitialized(*fun);
+    IFunction_sptr fun1 = FunctionFactory::Instance().createInitialized(fun->asString());
 
     fun1->setParameter(0,0.);
     fun1->setParameter(1,0.);
@@ -376,51 +360,6 @@ public:
     TS_ASSERT_EQUALS(fun1->getParameter(2),28.);
     TS_ASSERT_EQUALS(fun1->getParameter(3),789);
 
-    delete fun;
-    delete fun1;
-  }
-
-  void xtest_All_Function_Name_Retrieval()
-  {
-    // Should be all of them
-    // TODO: Should this be 35 or 36?
-    doFunctionNameTest<IFunction>(37, "", "");
-  }
-
-  void xtest_PeakFunction_Name_Retrieval()
-  {
-    // Check peak types
-    doFunctionNameTest<IPeakFunction>(13, "LinearBackground", 
-                                      "Found a background function in the peak function list");
-  }
-  
-  void xtest_BackgroundFunction_Name_Retrieval()
-  {
-    // Check background types
-    doFunctionNameTest<IBackgroundFunction>(4, "Gaussian", 
-                                            "Found a peak function in the background function list");
-  }
-
-
-private:
-
-  template<typename TYPE>
-  void doFunctionNameTest(const size_t nexpected, const std::string & excludedName,
-                          const std::string & error)
-  {
-    std::vector<std::string> names = FunctionFactory::Instance().getFunctionNames<TYPE>();
-    // Due to the other tests and the fact that the function is a singleton
-    TS_ASSERT_EQUALS(names.size(), nexpected); 
-    if( excludedName.empty() == false )
-    {
-      for( size_t i = 0; i < names.size(); ++i )
-      {
-        if( names[i] == excludedName ) 
-        {
-          TS_FAIL(error);
-        }
-      }
-    }
   }
 
 };

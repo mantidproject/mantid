@@ -43,6 +43,7 @@ void LevenbergMarquardtMinimizer::initialize(API::ICostFunction_sptr function)
   m_mu = 0;
   m_nu = 2.0;
   m_rho = 0;
+  m_oldDder = 0.0;
 }
 
 /// Do one iteration.
@@ -75,20 +76,7 @@ bool LevenbergMarquardtMinimizer::iterate()
 
   // Calculate damping to hessian
   if (m_mu == 0) // first iteration
-  {// initial m_mu = m_tau * max( hessian[i,i] )
-    //double maxH = 0.0;
-    //for(size_t i = 0; i < n; ++i)
-    //{
-    //  double tmp = m_hessian.get(i,i);
-    //  if (tmp > maxH)
-    //  {
-    //    maxH = tmp;
-    //  }
-    //}
-    //if (maxH <= 0)
-    //{
-    //  throw std::runtime_error("Hessian in Levenberg-Marquardt must be positively defined");
-    //}
+  {
     m_mu = m_tau;// * maxH;
     m_nu = 2.0;
   }
@@ -99,35 +87,14 @@ bool LevenbergMarquardtMinimizer::iterate()
   }
   // copy the hessian
   GSLMatrix H(m_hessian);
-  GSLMatrix I(n,n);
-  I.identity();
-  I *= m_mu;
-  H += I;
-
-  if (debug)
+  for(size_t i = 0; i < n; ++i)
   {
-    std::cerr << "hessian:" << std::endl;
-    for(size_t i = 0; i < n; ++i)
-    {
-      for(size_t j = 0; j < n; ++j)
-      {
-        std::cerr << m_hessian.get(i,j) << ' ';
-      }
-      std::cerr << std::endl;
-    }
-    std::cerr << "\n";
+    double d = H.get(i,i) + m_mu * fabs(m_der.get(i));
+    H.set(i,i,d);
+  }
 
-    std::cerr << "I:" << std::endl;
-    for(size_t i = 0; i < n; ++i)
-    {
-      for(size_t j = 0; j < n; ++j)
-      {
-        std::cerr << I.get(i,j) << ' ';
-      }
-      std::cerr << std::endl;
-    }
-    std::cerr << "\n";
-
+  if (debug && m_rho > 0)
+  {
     std::cerr << "H:" << std::endl;
     for(size_t i = 0; i < n; ++i)
     {
@@ -155,7 +122,7 @@ bool LevenbergMarquardtMinimizer::iterate()
   {
     for(size_t j = 0; j < n; ++j)  {std::cerr << m_der.get(j) << ' '; } std::cerr << std::endl;
     for(size_t j = 0; j < n; ++j)  {std::cerr << dx.get(j) << ' '; } std::cerr << std::endl << std::endl;
-    system("pause");
+    //system("pause");
   }
 
   // Update the parameters of the cost function.
@@ -163,7 +130,10 @@ bool LevenbergMarquardtMinimizer::iterate()
   {
     double d = m_leastSquares->getParameter(i) + dx.get(i);
     m_leastSquares->setParameter(i,d);
-    //std::cerr << "P" << i << ' ' << d << std::endl;
+    if (debug)
+    {
+      std::cerr << "P" << i << ' ' << d << std::endl;
+    }
   }
   m_leastSquares->getFittingFunction()->applyTies();
   
@@ -188,27 +158,42 @@ bool LevenbergMarquardtMinimizer::iterate()
     std::cerr << "F " << m_F << ' ' << F1 << ' ' << dL << std::endl;
   }
   // Try the stop condition
-  if (fabs(dL) < m_relTol)
+  //if (fabs(dL) < m_relTol)
+  if (m_oldDder > 0.0 && fabs(m_oldDder - dder)/m_oldDder < 0.001 || dder < 0.001)
   {
+    if (debug)
+    std::cerr << "stopped at " << dder << ' ' << fabs(m_oldDder - dder)/m_oldDder << std::endl;
     return false;
   }
+  
+  m_oldDder = dder;
 
-  m_rho = (m_F - F1) / dL;
+  if (fabs(dL) == 0.0) m_rho = 0;
+  else
+    m_rho = (m_F - F1) / dL;
+  if (debug)
+  {
+    std::cerr << "rho=" << m_rho << std::endl;
+  }
+
   if (m_rho > 0)
   {// good progress, decrease m_mu but no more than by 1/3
     // rho = 1 - (2*rho - 1)^3
     m_rho = 2.0 * m_rho - 1.0;
     m_rho = 1.0 - m_rho * m_rho * m_rho;
     const double I3 = 1.0 / 3.0;
-    if (I3 > m_rho) m_rho = I3;
+    if (m_rho > I3) m_rho = I3;
+    if (m_rho < 0.0001) m_rho = 0.1;
     m_mu *= m_rho;
     m_nu = 2.0;
     m_F = F1;
+    if (debug)
+    std::cerr << "times " << m_rho << std::endl;
   }
   else
   {// bad iteration. increase m_mu and revert changes to parameters
     m_mu *= m_nu;
-    m_nu *= 2.0;
+    //m_nu *= 2.0;
     // undo parameter update
     for(size_t i = 0; i < n; ++i)
     {
@@ -220,10 +205,6 @@ bool LevenbergMarquardtMinimizer::iterate()
     m_F = m_leastSquares->val();
   }
 
-  if (debug)
-  {
-    std::cerr << "rho=" << m_rho << std::endl;
-  }
   return true;
 }
 

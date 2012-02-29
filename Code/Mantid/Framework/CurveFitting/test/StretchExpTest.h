@@ -7,7 +7,7 @@
 	#include "MantidAPI/CompositeFunction.h"
 	#include "MantidCurveFitting/LinearBackground.h"
 	#include "MantidCurveFitting/BoundaryConstraint.h"
-	#include "MantidCurveFitting/Fit.h"
+	#include "MantidCurveFitting/FitMW.h"
 	#include "MantidKernel/UnitFactory.h"
 	#include "MantidAPI/AnalysisDataService.h"
 	#include "MantidAPI/WorkspaceFactory.h"
@@ -63,7 +63,7 @@
 
 	  void testAgainstMockData()
 	  {
-		Fit alg2;
+		FitMW alg2;
 		TS_ASSERT_THROWS_NOTHING(alg2.initialize());
 		TS_ASSERT( alg2.isInitialized() );
 
@@ -74,7 +74,7 @@
 		Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
 		Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
 		//in this case, x-values are just the running index
-		for (int i = 0; i < 20; i++) ws2D->dataX(0)[i] = 1.0*i;
+		for (int i = 0; i < 20; i++) ws2D->dataX(0)[i] = 1.0*i + 0.00001;
 		Mantid::MantidVec& y = ws2D->dataY(0); // y-values (counts)
 		Mantid::MantidVec& e = ws2D->dataE(0); // error values of counts
 		getMockData(y, e);
@@ -87,12 +87,12 @@
 		fn.initialize();
 
 		// get close to exact values with an initial guess
-		//fn->setParameter("Height",1.5);
-		//fn->setParameter("Lifetime",5.0);
-		//fn->setParameter("Stretching",0.4);
+		fn.setParameter("Height",1.5);
+		fn.setParameter("Lifetime",5.0);
+		fn.setParameter("Stretching",0.4);
 
 		//alg2.setFunction(fn);
-		alg2.setPropertyValue("Function",fn.asString());
+    alg2.setPropertyValue("Function",fn.asString());
 
 
 		// Set which spectrum to fit against and initial starting values
@@ -112,7 +112,7 @@
 		double dummy = alg2.getProperty("OutputChi2overDoF");
 		TS_ASSERT_DELTA( dummy, 0.001,0.001);
 
-		IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
+		IFunction_sptr out = alg2.getProperty("Function");
 		//golden standard y(x)=2*exp(-(x/4)^0.5)
 		//allow for a 1% error in Height and Lifetime, and 10% error in the Stretching exponent
 		TS_ASSERT_DELTA( out->getParameter("Height"), 2.0 ,0.02);

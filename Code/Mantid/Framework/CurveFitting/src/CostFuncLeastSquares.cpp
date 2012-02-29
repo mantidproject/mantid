@@ -233,6 +233,14 @@ double CostFuncLeastSquares::valDerivHessian(GSLVector& der, GSLMatrix& hessian,
       {
         d += jacobian.get(k,i) * jacobian.get(k,j);
       }
+      if (i == j)
+      {
+        API::IConstraint* c = m_function->getConstraint(i);
+        if (c)
+        {
+          d += c->checkDeriv2();
+        }
+      }
       hessian.set(i1,i2,d);
       //std::cerr << "hess " << i1 << ' ' << i2 << std::endl;
       if (i1 != i2)

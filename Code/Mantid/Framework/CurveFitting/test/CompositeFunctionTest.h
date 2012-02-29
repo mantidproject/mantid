@@ -185,7 +185,7 @@ public:
     TS_ASSERT_EQUALS(mfun.getParameter(7),1.0);
 
     WS_type ws = mkWS(1,0,10,0.1);
-    //addNoise(ws,0.1);
+    addNoise(ws,0.1);
     storeWS("mfun",ws);
 
     IFunction_sptr out;
@@ -216,28 +216,28 @@ public:
     out = alg.getProperty("Function");
 
     TS_ASSERT_EQUALS(out->parameterName(0),"f0.a");
-    TS_ASSERT_DELTA(out->getParameter(0),1,0.0001);
+    TS_ASSERT_DELTA(out->getParameter(0),0.9956,0.0001);
 
     TS_ASSERT_EQUALS(out->parameterName(1),"f0.b");
-    TS_ASSERT_DELTA(out->getParameter(1),0.1,0.0001);
+    TS_ASSERT_DELTA(out->getParameter(1),0.1002,0.0001);
 
     TS_ASSERT_EQUALS(out->parameterName(2),"f1.c");
-    TS_ASSERT_DELTA(out->getParameter(2),4,0.0001);
+    TS_ASSERT_DELTA(out->getParameter(2),3.9887,0.0001);
 
     TS_ASSERT_EQUALS(out->parameterName(3),"f1.h");
-    TS_ASSERT_DELTA(out->getParameter(3),1,0.0001);
+    TS_ASSERT_DELTA(out->getParameter(3),1.0192,0.0001);
 
     TS_ASSERT_EQUALS(out->parameterName(4),"f1.s");
-    TS_ASSERT_DELTA(out->getParameter(4),2.0,0.001);
+    TS_ASSERT_DELTA(out->getParameter(4),2.1341,0.001);
 
     TS_ASSERT_EQUALS(out->parameterName(5),"f2.c");
     TS_ASSERT_DELTA(out->getParameter(5),6,0.2);
 
     TS_ASSERT_EQUALS(out->parameterName(6),"f2.h");
-    TS_ASSERT_DELTA(out->getParameter(6),2,0.0001);
+    TS_ASSERT_DELTA(out->getParameter(6),1.9823,0.0001);
 
     TS_ASSERT_EQUALS(out->parameterName(7),"f2.s");
-    TS_ASSERT_DELTA(out->getParameter(7),3.0,0.001);
+    TS_ASSERT_DELTA(out->getParameter(7),2.8530,0.001);
 
     TWS_type outParams = getTWS("mfun_0_Parameters");
     TS_ASSERT(outParams);

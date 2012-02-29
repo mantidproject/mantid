@@ -139,15 +139,12 @@ set ( TEST_FILES
 	test/CompositeFunctionTest.h
 #	test/ConvolutionTest.h
 	test/ExpDecayTest.h
-#	test/ExpDecayMuonTest.h
-#	test/ExpDecayOscTest.h
-#	test/FitTest.h
+	test/ExpDecayMuonTest.h
+	test/ExpDecayOscTest.h
 	test/FitMWTest.h
 	test/FRConjugateGradientTest.h
-#	test/NewFitTest.h
 #	test/FuncMinimizerFactoryTest.h
-#	test/FunctionTest.h
-#	test/FunctionFactoryTest.h
+	test/FunctionFactoryTest.h
 #	test/Gaussian1DTest.h
 	test/GausDecayTest.h
 	test/GaussianTest.h
@@ -169,9 +166,9 @@ set ( TEST_FILES
 	test/SimplexTest.h
 #	test/SpecialFunctionSupportTest.h
 #	test/SplineBackgroundTest.h
-#	test/StretchExpTest.h
+	test/StretchExpTest.h
 #	test/UserFunction1DTest.h
-#	test/UserFunctionTest.h
+	test/UserFunctionTest.h
 )
 
 

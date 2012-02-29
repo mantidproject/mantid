@@ -4,24 +4,16 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/ExpDecayOsc.h"
-#include "MantidAPI/CompositeFunction.h"
-#include "MantidCurveFitting/LinearBackground.h"
+#include "MantidCurveFitting/FitMW.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
-#include "MantidCurveFitting/Fit.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataHandling/LoadRaw.h"
-#include "MantidKernel/Exception.h"
-#include "MantidAPI/FunctionFactory.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::DataObjects;
-using namespace Mantid::DataHandling;
 
 
 class ExpDecayOscTest : public CxxTest::TestSuite
@@ -62,7 +54,7 @@ public:
 
   void testAgainstMockData()
   {
-    Fit alg2;
+    FitMW alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
     TS_ASSERT( alg2.isInitialized() );
 
@@ -83,6 +75,10 @@ public:
     // set up Lorentzian fitting function
     ExpDecayOsc fn;
     fn.initialize();
+    BoundaryConstraint* bc = new BoundaryConstraint(&fn,"Frequency",0.01,.2);
+    fn.addConstraint(bc);
+    bc = new BoundaryConstraint(&fn,"Phi",0.01,1.0);
+    fn.addConstraint(bc);
 
     //alg2.setFunction(fn);
     alg2.setPropertyValue("Function",fn.asString());
@@ -102,7 +98,7 @@ public:
     TS_ASSERT( alg2.isExecuted() );
 
     // test the output from fit is what you expect
-    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
+    IFunction_sptr out = alg2.getProperty("Function");
     TS_ASSERT_DELTA( out->getParameter("A"), 5 ,0.01);
     TS_ASSERT_DELTA( out->getParameter("Lambda"), 1/3.0 ,0.01);
     TS_ASSERT_DELTA( out->getParameter("Frequency"), 1/8.0 ,0.01);  // Period of 8

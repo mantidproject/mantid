@@ -75,6 +75,7 @@ private:
   GSLVector m_der;
   /// To keep second derivatives
   GSLMatrix m_hessian;
+  double m_oldDder;
 	/// Static reference to the logger class
 	static Kernel::Logger& g_log;
 };

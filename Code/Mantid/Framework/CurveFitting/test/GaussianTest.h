@@ -286,10 +286,10 @@ public:
 
     IFunction_sptr out = alg.getProperty("Function");
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(dynamic_cast<CompositeFunction*>(out.get())->getFunction(1).get());
-    TS_ASSERT_DELTA( pk->height(), 227.4 ,1);
+    TS_ASSERT_DELTA( pk->height(), 224. ,1);
     TS_ASSERT_DELTA( pk->centre(), 79430.1 ,10);
-    TS_ASSERT_DELTA( pk->getParameter("Sigma"), 26.5 ,0.1);
-    TS_ASSERT_DELTA( out->getParameter("f0.A0"), 9.5 ,0.1);
+    TS_ASSERT_DELTA( pk->getParameter("Sigma"), 27.4 ,0.1);
+    TS_ASSERT_DELTA( out->getParameter("f0.A0"), 9.0 ,0.1);
     TS_ASSERT_DELTA( out->getParameter("f0.A1"), 0.0 ,0.01); 
 
 	 AnalysisDataService::Instance().remove(wsName);
@@ -421,7 +421,7 @@ public:
 
     IFunction_sptr out = alg2.getProperty("Function");
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out.get());
-    TS_ASSERT_DELTA( pk->height(), 97.9680 ,0.0001);
+    TS_ASSERT_DELTA( pk->height(), 97.9728 ,0.0001);
     TS_ASSERT_DELTA( pk->centre(), 11.2194 ,0.0001);
     TS_ASSERT_DELTA( pk->width(), 2.6181 ,0.0001);
   }
