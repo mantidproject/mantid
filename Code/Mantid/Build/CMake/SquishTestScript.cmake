@@ -17,8 +17,18 @@ message(STATUS "squish_aut='${squish_aut}'")
 message(STATUS "squish_aut_path='${squish_aut_path}'")
 message(STATUS "squish_client_executable='${squish_client_executable}'")
 message(STATUS "squish_test_suite='${squish_test_suite}'")
+message(STATUS "squish_env_vars=${squish_env_vars}")
 message(STATUS "squish_results_dir='${squish_results_dir}'")
 message(STATUS "squish_results_file='${squish_results_file}'")
+
+# parse environment variables
+foreach(i ${squish_env_vars})
+  message(STATUS "parsing env var key/value pair ${i}")
+  string(REGEX MATCH "([^=]*)=(.*)" squish_env_name ${i})
+  message(STATUS "key=${CMAKE_MATCH_1}")
+  message(STATUS "value=${CMAKE_MATCH_2}")
+  set(ENV{${CMAKE_MATCH_1}} ${CMAKE_MATCH_2})
+endforeach()
 
 # run the test
 if (WIN32)

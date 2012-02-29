@@ -20,6 +20,7 @@ macro( SQUISH_ADD_TEST_SUITE )
              "-Dsquish_aut:STRING=${SQUISH_AUT}"
              "-Dsquish_aut_path:STRING=${SQUISH_AUT_PATH}"
              "-Dsquish_test_suite:STRING=${testSuite}"
+             "-Dsquish_env_vars:STRING=${SQUISH_ENV_VARS}"
              "-Dsquish_results_dir:STRING=${CMAKE_BINARY_DIR}/bin/Testing"
              "-Dsquish_results_file:STRING=${resultFile}"
              "-Dmantid_cmake_modules:STRING=${MANTID_CMAKE_MODULE_PATH}"
@@ -44,7 +45,7 @@ macro( SQUISH_SUITE_ENVVARS testSuites )
     set( pair_list ${pair_list} ${arg} )
   endforeach( arg )
   list( LENGTH pair_list count )
-  math( EXPR count "${count}/2" )
+  math( EXPR count "${count} - 1" )
   foreach( _test_suite_path ${testSuites} )
     set( testSuite ${CMAKE_CURRENT_SOURCE_DIR}/${_test_suite_path} )
     set( outFile ${testSuite}/${env_file} )

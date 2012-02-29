@@ -47,13 +47,23 @@ if( SQUISH_FOUND )
   # Need to set the AUT first
   set( SQUISH_AUT VatesSimpleGui )
   set( SQUISH_AUT_PATH ${CMAKE_BINARY_DIR}/bin )
-  squish_add_test_suite( ${TEST_SUITES} )
+
+  # Need to set environmental variables next
   set( auto_test_dir ${CMAKE_SOURCE_DIR} )
   string( REGEX REPLACE "Code/Mantid" "Test/AutoTestData" auto_test_dir ${auto_test_dir} )
-  squish_suite_envvars( ${TEST_SUITES}
-    PV_PLUGIN_PATH ${CMAKE_BINARY_DIR}/bin/${PVPLUGINS_DIR}
-    MANTID_AUTOTEST_DATA ${auto_test_dir}
+  set( SQUISH_ENV_VARS
+    PV_PLUGIN_PATH=${CMAKE_BINARY_DIR}/bin/${PVPLUGINS_DIR}
+    MANTID_AUTOTEST_DATA=${auto_test_dir}
+    SQUISH_SCRIPT_DIR=${VSI_GLOBAL_SCRIPTS}
   )
+
+  squish_add_test_suite( ${TEST_SUITES} )
+
+#  squish_suite_envvars( ${TEST_SUITES}
+#    PV_PLUGIN_PATH ${CMAKE_BINARY_DIR}/bin/${PVPLUGINS_DIR}
+#    MANTID_AUTOTEST_DATA ${auto_test_dir}
+#    SQUISH_SCRIPT_DIR ${VSI_GLOBAL_SCRIPTS}
+#  )
 endif()
 
 install( TARGETS VatesSimpleGui RUNTIME DESTINATION ${BIN_DIR} )
