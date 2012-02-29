@@ -96,17 +96,26 @@ namespace DataHandling
 
       // Run the processing algorithm
       alg->setChild(true);
-      AnalysisDataService::Instance().addOrReplace("__anonymous_livedata_input_chunk", inputWS);
-      // TODO: Handle different inputs?
-      alg->setPropertyValue("InputWorkspace", "__anonymous_livedata_input_chunk");
-      alg->setPropertyValue("OutputWorkspace", "__anonymous_livedata_processed_chunk");
+
+      // Make anonymous names for the ADS
+      std::string inputName = "__anonymous_livedata_input";
+      std::string outputName = "__anonymous_livedata_output";
+
+      // For python scripts to work we need to go through the ADS
+      AnalysisDataService::Instance().addOrReplace(inputName, inputWS);
+      alg->setPropertyValue("InputWorkspace", inputName);
+      alg->setPropertyValue("OutputWorkspace", outputName);
       alg->execute();
       if (!alg->isExecuted())
-        throw std::runtime_error("Error processing the chunk workspace using " + alg->name() + ". See log for details.");
+        throw std::runtime_error("Error processing the workspace using " + alg->name() + ". See log for details.");
 
       // Retrieve the output.
       //TODO: Handle other output types!!!
       MatrixWorkspace_sptr temp = alg->getProperty("OutputWorkspace");
+
+      // Remove the workspaces from the ADS, they are no longer needed.
+      AnalysisDataService::Instance().remove(inputName);
+      AnalysisDataService::Instance().remove(outputName);
       return temp;
     }
     else

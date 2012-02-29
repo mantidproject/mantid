@@ -45,6 +45,7 @@ set ( TEST_PY_FILES
   test/GoniometerTest.py
   test/ImportTest.py
   test/IPeaksWorkspaceTest.py
+  test/LoadLiveDataTest.py
   test/MatrixWorkspaceTest.py
   test/MDHistoWorkspaceTest.py
   test/NumpyTest.py

@@ -109,8 +109,8 @@ namespace DataHandling
   /// @return true if there is a post-processing step
   bool LiveDataAlgorithm::hasPostProcessing() const
   {
-    // TODO: Handle post-processing script too
-    return !this->getPropertyValue("PostProcessingAlgorithm").empty();
+    return (!this->getPropertyValue("PostProcessingAlgorithm").empty()
+        || !this->getPropertyValue("PostProcessingScript").empty());
   }
 
   //----------------------------------------------------------------------------------------------
