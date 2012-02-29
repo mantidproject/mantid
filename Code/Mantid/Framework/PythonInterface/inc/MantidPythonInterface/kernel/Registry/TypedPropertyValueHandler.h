@@ -23,16 +23,13 @@
 */
 #include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/IPropertyManager.h"
 #include <boost/python/object.hpp>
 #include <boost/python/extract.hpp>
 #include <string>
 
 namespace Mantid
 {
-  namespace Kernel
-  {
-    class IPropertyManager;
-  }
   namespace PythonInterface
   {
     namespace Registry

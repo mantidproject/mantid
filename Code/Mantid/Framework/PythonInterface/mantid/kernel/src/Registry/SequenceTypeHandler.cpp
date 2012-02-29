@@ -13,8 +13,6 @@
 
 #include <boost/python/extract.hpp>
 
-#include <boost/python/detail/wrap_python.hpp>
-
 namespace Mantid
 {
   namespace PythonInterface
