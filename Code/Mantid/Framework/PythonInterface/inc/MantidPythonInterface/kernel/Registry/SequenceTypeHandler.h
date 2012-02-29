@@ -21,7 +21,7 @@
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-#include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
+#include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 
 namespace Mantid
 {
@@ -35,19 +35,10 @@ namespace Mantid
        * should contain a type called value_type indicating the element type.
        */
       template<typename ContainerType>
-      struct DLLExport SequenceTypeHandler : PropertyValueHandler
+      struct DLLExport SequenceTypeHandler : TypedPropertyValueHandler<ContainerType>
       {
         /// Call to set a named property where the value is some container type
-        virtual void set(Kernel::IPropertyManager* alg, const std::string &name, boost::python::object value);
-        /**
-         * Is the object actually an instance of the derived type
-         * @param value :: A Python wrapped C object
-         */
-        bool isDerivedType(const boost::python::object & value) const
-        {
-          UNUSED_ARG(value);
-          return false;
-        }
+        void set(Kernel::IPropertyManager* alg, const std::string &name, const boost::python::object & value);
         /**
          * Return the PyTypeObject of the DerivedType
          * @returns A PyTypeObject for the given DerivedType

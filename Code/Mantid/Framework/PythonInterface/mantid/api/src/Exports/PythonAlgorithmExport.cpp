@@ -17,10 +17,15 @@ using namespace boost::python;
 
 void export_leaf_classes()
 {
+  // Function pointer to pick out correct declareProperty
+  typedef void(AlgorithmWrapper::*declarePropertyOverload1)(const std::string &, const boost::python::object &, const int);
+
   /**
    * Export the algorithm wrapper that boost.python makes look like a PythonAlgorithm
    */
   class_<AlgorithmWrapper, bases<Algorithm>, boost::noncopyable>("PythonAlgorithm", "Base class for all Python algorithms")
+    .def("declareProperty", (declarePropertyOverload1)&AlgorithmWrapper::declareProperty, args("name", "defaultValue", "direction"),
+         "Declares a named property where the type is taken from the type of the defaultValue and mapped to an appropriate C++ type")
     ;
   ;
 }

@@ -42,12 +42,14 @@ set ( EXPORT_FILES
 # Files containing additional helper code that are not related to exporting class/functions
 set ( SRC_FILES 
   src/PythonAlgorithm/AlgorithmWrapper.cpp
+  src/PythonAlgorithm/PropertyWithValueFactory.cpp
   src/PythonAlgorithm/PythonAlgorithm.cpp
   src/CloneMatrixWorkspace.cpp
 )
 
 set ( INC_FILES 
   ${HEADER_DIR}/api/PythonAlgorithm/AlgorithmWrapper.h
+  ${HEADER_DIR}/api/PythonAlgorithm/PropertyWithValueFactory.h
   ${HEADER_DIR}/api/PythonAlgorithm/PythonAlgorithm.h
   ${HEADER_DIR}/api/BinaryOperations.h
   ${HEADER_DIR}/api/CloneMatrixWorkspace.h

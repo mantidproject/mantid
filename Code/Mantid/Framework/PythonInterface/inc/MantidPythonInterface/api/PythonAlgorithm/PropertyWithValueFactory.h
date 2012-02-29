@@ -1,5 +1,5 @@
-#ifndef MANTID_PYTHONINTERFACE_PYTHONALGORITHM_H_
-#define MANTID_PYTHONINTERFACE_PYTHONALGORITHM_H_
+#ifndef MANTID_PYTHONINTERFACE_PROEPRTYWITHVALUEFACTORY_H_
+#define MANTID_PYTHONINTERFACE_PROEPRTYWITHVALUEFACTORY_H_
 /**
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -25,39 +25,35 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
-
+#include <string>
 #include <boost/python/object.hpp>
 
 namespace Mantid
 {
+  //---------------------------------------------------------------------------
+  // Forward declarations
+  //---------------------------------------------------------------------------
+  namespace Kernel
+  {
+    class Property;
+  }
+
   namespace PythonInterface
   {
     /**
-     * Provides a class that forms an interface between a Python algorithm
-     * and a C++ algorithm.
-     *
-     * It defines several functions for declaring properties that handle the
-     * fact that the type is only known at runtime
-     *
-     * It works in tandem with the AlgorithmWrapper such that
-     * when the AlgorithmWrapper is exported to Python
-     * a user sees the PythonAlgorithm class.
+     * Defines a static factory class that creates PropertyWithValue
+     * instances from python objects.
      */
-    class PythonAlgorithm : public API::Algorithm
+    class PropertyWithValueFactory
     {
-    public:
-      /// Declare a property using the type of the defaultValue
-      void declareProperty(const std::string & name, const boost::python::object & defaultValue,
-                           const int direction);
-    private:
-      /// Hide the base class variants as they are not required on this interface
-      using Mantid::API::Algorithm::declareProperty;
+      /// Creates a property from the given value and direction
+      static Kernel::Property * createProperty(const std::string & name, const boost::python::object & defaultValue, 
+                                               const unsigned int direction);
+      /// Creates a property from the value, validator and direction
+      static Kernel::Property * createProperty(const std::string & name, const boost::python::object & defaultValue, 
+                                               const boost::python::object & validator, const unsigned int direction);
     };
-
   }
 }
 
-
-
-#endif /* MANTID_PYTHONINTERFACE_PYTHONALGORITHM_H_ */
+#endif //MANTID_PYTHONINTERFACE_PROEPRTYWITHVALUEFACTORY_H_

@@ -13,13 +13,14 @@
 
 #include <boost/python/extract.hpp>
 
+#include <boost/python/detail/wrap_python.hpp>
+
 namespace Mantid
 {
   namespace PythonInterface
   {
     namespace Registry
     {
-
       /**
        * Set function to handle Python -> C++ calls to a property manager and get the correct type
        * @param alg :: A pointer to an IPropertyManager
@@ -28,7 +29,7 @@ namespace Mantid
        */
       template<typename ContainerType>
       void SequenceTypeHandler<ContainerType>::set(Kernel::IPropertyManager* alg, const std::string &name,
-                                                   boost::python::object value)
+                                                   const boost::python::object & value)
       {
         using boost::python::len;
         typedef typename ContainerType::value_type DestElementType;

@@ -1,7 +1,7 @@
 import unittest
 
-from mantid.api import (PythonAlgorithm, AlgorithmProxy, Algorithm, IAlgorithm, 
-                        AlgorithmManager, registerAlgorithm)
+from mantid import (PythonAlgorithm, AlgorithmProxy, Algorithm, IAlgorithm, 
+                    AlgorithmManager, registerAlgorithm, Direction)
 
 ########################### Test classes #####################################
 
@@ -32,7 +32,7 @@ class TestPyAlgOverriddenAttrs(PythonAlgorithm):
 class TestPyAlgDeclaringProps(PythonAlgorithm):
     
     def PyInit(self):
-        pass
+        self.declareProperty('Simplest', 1, Direction.Input) # Input property
         
     def PyExec(self):
         pass
@@ -48,6 +48,7 @@ class PythonAlgorithmTest(unittest.TestCase):
             self.__class__._registered = True
             registerAlgorithm(TestPyAlgDefaultAttrs)
             registerAlgorithm(TestPyAlgOverriddenAttrs)
+            registerAlgorithm(TestPyAlgDeclaringProps)
         
     def raisesNothing(self, callable, *args): # unittest does not have this for some reason
         try:
@@ -81,6 +82,12 @@ class PythonAlgorithmTest(unittest.TestCase):
         self.assertEquals(alg.name(), "CoolAlgorithm")
         self.assertEquals(alg.version(), 2)
         self.assertEquals(alg.category(), "BestAlgorithms")
+        
+    def test_property_declarations(self):
+        alg = AlgorithmManager.Instance().createUnmanaged("TestPyAlgDeclaringProps")
+        props = alg.getProperties()
+        self.assertEquals(0, len(props))
+        alg.initialize()
 
 if __name__ == '__main__':
     unittest.main()
