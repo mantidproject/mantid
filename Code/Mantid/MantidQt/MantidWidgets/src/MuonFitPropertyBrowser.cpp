@@ -213,7 +213,7 @@ void MuonFitPropertyBrowser::populateFunctionNames()
     bool muon = false;
     for (size_t j=0; j<categories.size(); ++j)
     {
-      if (categories[j] == "Muon" || "General")
+      if ((categories[j] == "Muon") || (categories[j] == "General") )
         muon = true;
     }
     if (muon == true)
