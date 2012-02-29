@@ -5,6 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/IFuncMinimizer.h"
+#include "MantidCurveFitting/GSLVector.h"
+#include "MantidCurveFitting/GSLMatrix.h"
 
 namespace Mantid
 {
@@ -43,7 +45,7 @@ class DLLExport LevenbergMarquardtMinimizer : public IFuncMinimizer
 {
 public:
   /// Constructor
-  LevenbergMarquardtMinimizer():IFuncMinimizer(){}
+  LevenbergMarquardtMinimizer();
   /// Name of the minimizer.
   std::string name() const {return "Levenberg-Marquardt";}
 
@@ -55,8 +57,24 @@ public:
   virtual double costFunctionVal();
 
 private:
-
+  /// Pointer to the cost function. Must be the least squares.
   boost::shared_ptr<CostFuncLeastSquares> m_leastSquares;
+  /// Relative tolerance.
+  double m_relTol;
+  /// The tau parameter in the Levenberg-Marquardt method.
+  double m_tau;
+  /// The damping mu parameter in the Levenberg-Marquardt method.
+  double m_mu;
+  /// The nu parameter in the Levenberg-Marquardt method.
+  double m_nu;
+  /// The rho parameter in the Levenberg-Marquardt method.
+  double m_rho;
+  /// To keep function value
+  double m_F;
+  /// To keep first derivatives
+  GSLVector m_der;
+  /// To keep second derivatives
+  GSLMatrix m_hessian;
 	/// Static reference to the logger class
 	static Kernel::Logger& g_log;
 };

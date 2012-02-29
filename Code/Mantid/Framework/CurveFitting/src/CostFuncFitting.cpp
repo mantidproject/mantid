@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/CostFuncFitting.h"
 #include "MantidCurveFitting/GSLJacobian.h"
+#include "MantidAPI/IConstraint.h"
 
 #include <gsl/gsl_multifit_nlin.h>
 
@@ -58,6 +59,11 @@ void CostFuncFitting::setFittingFunction(API::IFunction_sptr function,
     if (m_function->isActive(i))
     {
       m_indexMap.push_back(i);
+    }
+    API::IConstraint* c = m_function->getConstraint(i);
+    if (c)
+    {
+      c->setParamToSatisfyConstraint();
     }
   }
 }

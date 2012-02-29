@@ -1,5 +1,5 @@
-#ifndef MANTID_CURVEFITTING_GSLFUNCTIONS_H_
-#define MANTID_CURVEFITTING_GSLFUNCTIONS_H_
+#ifndef MANTID_CURVEFITTING_GSLJACOBIAN_H_
+#define MANTID_CURVEFITTING_GSLJACOBIAN_H_
 
 #include "MantidAPI/Jacobian.h"
 #include "MantidAPI/IFunction.h"
@@ -107,4 +107,4 @@ namespace Mantid
   } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_GSLFUNCTIONS_H_*/
+#endif /*MANTID_CURVEFITTING_GSLJACOBIAN_H_*/

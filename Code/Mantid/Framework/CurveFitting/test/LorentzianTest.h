@@ -104,13 +104,12 @@ public:
 
     bk->setParameter("A0",0.0);
     bk->setParameter("A1",0.0);
-    //bk->fix(1);  
 
     // set up Lorentzian fitting function
     boost::shared_ptr<Lorentzian> fn( new Lorentzian() );
     fn->initialize();
     fn->setCentre(11.2);
-    fn->setHeight(110.);
+    fn->setHeight(100.1);
     fn->setWidth(2.2);
 
     fnWithBk.addFunction(fn);
@@ -125,11 +124,6 @@ public:
     alg2.setPropertyValue("WorkspaceIndex","0");
     alg2.setPropertyValue("StartX","0");
     alg2.setPropertyValue("EndX","20");
-    //alg2.setPropertyValue("Minimizer","SteepestDescent");
-    //alg2.setPropertyValue("Minimizer","Conjugate gradient (Fletcher-Reeves imp.)");
-    //alg2.setPropertyValue("Minimizer","BFGS");
-    //alg2.setPropertyValue("Minimizer","Simplex");
-    alg2.setPropertyValue("Minimizer","Levenberg-Marquardt");
 
     // execute fit
     TS_ASSERT_THROWS_NOTHING(
@@ -138,9 +132,7 @@ public:
 
       TS_ASSERT( alg2.isExecuted() );
 
-    std::cerr << alg2.getPropertyValue("OutputStatus") << std::endl;
-
-    //return;
+    TS_ASSERT_EQUALS( alg2.getPropertyValue("OutputStatus"), "success" );
 
     // test the output from fit is what you expect
     double dummy = alg2.getProperty("OutputChi2overDoF");
@@ -148,17 +140,17 @@ public:
 
     IFunction_sptr out = alg2.getProperty("Function");
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(dynamic_cast<CompositeFunction*>(out.get())->getFunction(0).get());
-    TS_ASSERT_DELTA( pk->height(), 100.6900 ,0.0001);
-    TS_ASSERT_DELTA( pk->centre(), 11.1994 ,0.0001);
-    TS_ASSERT_DELTA( pk->fwhm(), 2.1988 ,0.0001);
-    TS_ASSERT_DELTA( out->getParameter("f1.A0"), 0.0000 ,0.0001);
-    TS_ASSERT_DELTA( out->getParameter("f1.A1"), -0.0007 ,0.0001);
+    TS_ASSERT_DELTA( pk->height(), 100.6879 ,0.01);
+    TS_ASSERT_DELTA( pk->centre(), 11.1995 ,0.001);
+    TS_ASSERT_DELTA( pk->width(), 2.1984 ,0.0001);
+    TS_ASSERT_DELTA( out->getParameter("f1.A0"), 0.0030 ,0.0001);
+    TS_ASSERT_DELTA( out->getParameter("f1.A1"), -0.0008 ,0.0001);
 
-    AnalysisDataService::Instance().remove(wsName);
+    AnalysisDataService::Instance().clear();
 
   }
 
-  void xtestAgainstMockDataWithConstraint()
+  void testAgainstMockDataWithConstraint()
   {
     FitMW alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
@@ -209,19 +201,19 @@ public:
 
     // test the output from fit is what you expect
     double dummy = alg2.getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA( dummy, 0.08,0.01);
+    TS_ASSERT_DELTA( dummy, 0.04,0.01);
 
     IFunction_sptr out = alg2.getProperty("Function");
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out.get());
 
     TS_ASSERT_DELTA( pk->height(), 100.7 ,0.0001);
     TS_ASSERT_DELTA( pk->centre(), 11.3 ,0.01);
-    TS_ASSERT_DELTA( pk->fwhm(), 2.1999 ,0.0001);
+    TS_ASSERT_DELTA( pk->width(), 2.2 ,0.0001);
 
-    AnalysisDataService::Instance().remove(wsName);
+    AnalysisDataService::Instance().clear();
   }
 
-  void xtestAgainstMockDataWithConstraintAndConstBackground()
+  void testAgainstMockDataWithConstraintAndConstBackground()
   {
     FitMW alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
@@ -267,7 +259,7 @@ public:
     fnWithBk.addFunction(bk);
 
     //alg2.setFunction(fnWithBk);
-    alg2.setProperty("Function",fnWithBk);
+    alg2.setProperty("Function",boost::dynamic_pointer_cast<IFunction>(fnWithBk));
 
 
     // Set which spectrum to fit against and initial starting values
@@ -285,17 +277,17 @@ public:
 
     // test the output from fit is what you expect
     double dummy = alg2.getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA( dummy, 0.09,0.01);
+    TS_ASSERT_DELTA( dummy, 0.045,0.01);
 
     IFunction_sptr out = alg2.getProperty("Function");
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(dynamic_cast<CompositeFunction*>(out.get())->getFunction(0).get());
     TS_ASSERT_DELTA( pk->height(), 100.7 ,0.0001);
     TS_ASSERT_DELTA( pk->centre(), 11.3 ,0.01);
-    TS_ASSERT_DELTA( pk->fwhm(), 2.1999 ,0.0001);
+    TS_ASSERT_DELTA( pk->width(), 2.2 ,0.0001);
     TS_ASSERT_DELTA( out->getParameter("f1.A0"), 0.0 ,0.01);
     TS_ASSERT_DELTA( out->getParameter("f1.A1"), 0.0 ,0.01);
 
-    AnalysisDataService::Instance().remove(wsName);
+    AnalysisDataService::Instance().clear();
 
   }
 

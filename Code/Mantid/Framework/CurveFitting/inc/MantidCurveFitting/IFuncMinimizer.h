@@ -59,7 +59,7 @@ public:
 
   /// Perform iteration with minimizer and return info about how well this went
   /// using the GSL status integer system. See gsl_errno.h for details.
-  virtual bool minimize(size_t maxIterations = 500);
+  virtual bool minimize(size_t maxIterations = 1000);
 
   virtual std::string getError() const {return m_errorString;}
 

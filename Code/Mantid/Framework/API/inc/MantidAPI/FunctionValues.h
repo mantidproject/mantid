@@ -77,6 +77,7 @@ public:
   void setFitWeights(const double& value);
  /// get a fitting weight
   double getFitWeight(size_t i) const;
+  void setFitDataFromCalculated(const FunctionValues& values);
 protected:
   std::vector<double> m_calculated; ///< buffer for calculated values
   std::vector<double> m_data;    ///< buffer for fit data

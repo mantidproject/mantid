@@ -163,5 +163,13 @@ namespace API
     return m_weights[i];
   }
 
+  /**
+   * Set fitting data copied from other FunctionValues' calculated values.
+   */
+  void FunctionValues::setFitDataFromCalculated(const FunctionValues& values)
+  {
+    m_data.assign(values.m_calculated.begin(),values.m_calculated.end());
+  }
+
 } // namespace API
 } // namespace Mantid

@@ -41,6 +41,8 @@ namespace Mantid
     
   public:
     /// Constructor
+    GSLVector():m_vector(NULL){}
+    /// Constructor
     GSLVector(const size_t n)
     {
       m_vector = gsl_vector_alloc(n);
@@ -49,7 +51,10 @@ namespace Mantid
     /// Destructor.
     ~GSLVector()
     {
-      gsl_vector_free(m_vector);
+      if (m_vector)
+      {
+        gsl_vector_free(m_vector);
+      }
     }
 
     /// Get the pointer to the GSL vector
@@ -62,7 +67,7 @@ namespace Mantid
     }
 
     /// Size of the vector
-    size_t size() const {return m_vector->size;}
+    size_t size() const {return m_vector? m_vector->size : 0;}
 
     /// set an element
     void set(size_t i, double value)
@@ -74,7 +79,7 @@ namespace Mantid
       }
     }
     /// get an element
-    double get(size_t i)
+    double get(size_t i) const
     {
       if (i < m_vector->size) return gsl_vector_get(m_vector,i);
       throw std::out_of_range("GSLVector index is out of range.");

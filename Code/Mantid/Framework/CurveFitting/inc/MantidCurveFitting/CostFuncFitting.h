@@ -7,8 +7,7 @@
 #include "MantidAPI/ICostFunction.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidKernel/Matrix.h"
-
-//#include <gsl/gsl_matrix.h>
+#include "MantidCurveFitting/GSLVector.h"
 
 namespace Mantid
 {
@@ -57,6 +56,9 @@ public:
   /// Set fitting function.
   virtual void setFittingFunction(API::IFunction_sptr function, 
     API::FunctionDomain_sptr domain, API::FunctionValues_sptr values);
+
+  /// Get fitting function.
+  virtual API::IFunction_sptr getFittingFunction(){return m_function;}
 
   /// Calculates covariance matrix
   /// @param covar :: Returned covariance matrix, here as 

@@ -64,7 +64,7 @@ public:
   /// @return :: The value of the function
   virtual double valAndDeriv(std::vector<double>& der) const;
 
-  virtual double valDerivHessian(GSLVector& der, GSLMatrix& hessian) const;
+  virtual double valDerivHessian(GSLVector& der, GSLMatrix& hessian, bool evalFunction = true) const;
 
 private:
   /// name of this minimizer

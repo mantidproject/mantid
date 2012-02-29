@@ -43,19 +43,34 @@ namespace Mantid
     
   public:
     /// Constructor
+    GSLMatrix():m_matrix(NULL){}
+    /// Constructor
     GSLMatrix(const size_t nx, const size_t ny)
     {
       m_matrix = gsl_matrix_alloc(nx,ny);
     }
 
+    /// Copy constructor
+    GSLMatrix(const GSLMatrix& M)
+    {
+      m_matrix = gsl_matrix_alloc(M.size1(),M.size2());
+      gsl_matrix_memcpy(m_matrix,M.gsl());
+    }
+
     /// Destructor.
     ~GSLMatrix()
     {
-      gsl_matrix_free(m_matrix);
+      if (m_matrix)
+      {
+        gsl_matrix_free(m_matrix);
+      }
     }
 
-    /// Get the pointer to the GSL's jacobian
+    /// Get the pointer to the GSL matrix
     gsl_matrix * gsl(){return m_matrix;}
+
+    /// Get the const pointer to the GSL matrix
+    const gsl_matrix * gsl() const {return m_matrix;}
 
     void resize(const size_t nx, const size_t ny)
     {
@@ -64,10 +79,10 @@ namespace Mantid
     }
 
     /// First size of the matrix
-    size_t size1() const {return m_matrix->size1;}
+    size_t size1() const {return m_matrix? m_matrix->size1 : 0;}
 
     /// Second size of the matrix
-    size_t size2() const {return m_matrix->size2;}
+    size_t size2() const {return m_matrix? m_matrix->size2 : 0;}
 
     /// set an element
     void set(size_t i, size_t j, double value)
@@ -79,10 +94,50 @@ namespace Mantid
       }
     }
     /// get an element
-    double get(size_t i, size_t j)
+    double get(size_t i, size_t j) const
     {
       if (i < m_matrix->size1 && j < m_matrix->size2) return gsl_matrix_get(m_matrix,i,j);
       throw std::out_of_range("GSLMatrix indices are out of range.");
+    }
+
+    // Set this matrix to identity matrix
+    void identity()
+    {
+      gsl_matrix_set_identity( m_matrix );
+    }
+
+    // Set all elements to zero
+    void zero()
+    {
+      gsl_matrix_set_zero( m_matrix );
+    }
+
+    // add a matrix to this
+    GSLMatrix& operator+=(const GSLMatrix& M)
+    {
+      gsl_matrix_add( m_matrix, M.gsl() );
+      return *this;
+    }
+
+    // add a constant to this matrix
+    GSLMatrix& operator+=(const double& d)
+    {
+      gsl_matrix_add_constant( m_matrix, d );
+      return *this;
+    }
+
+    // subtract a matrix from this
+    GSLMatrix& operator-=(const GSLMatrix& M)
+    {
+      gsl_matrix_sub( m_matrix, M.gsl() );
+      return *this;
+    }
+
+    // multiply this matrix by a number
+    GSLMatrix& operator*=(const double& d)
+    {
+      gsl_matrix_scale( m_matrix, d );
+      return *this;
     }
   };
 

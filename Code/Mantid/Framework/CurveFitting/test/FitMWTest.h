@@ -49,7 +49,7 @@ public:
 
     API::IFunction_sptr fun(new ExpDecay);
     fun->setParameter("Height",1.);
-    fun->setParameter("Lifetime",1.);
+    fun->setParameter("Lifetime",1.0);
 
     FitMW fit;
     fit.initialize();
@@ -69,7 +69,7 @@ public:
     double chi2 = fit.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA(chi2, 0.0, 1e-8);
     TS_ASSERT_DIFFERS(chi2, 0.0);
-    TS_ASSERT_EQUALS(fit.getPropertyValue("OutputStatus"), "Success");
+    TS_ASSERT_EQUALS(fit.getPropertyValue("OutputStatus"), "success");
 
     MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
       API::AnalysisDataService::Instance().retrieve("Output_0_Workspace"));

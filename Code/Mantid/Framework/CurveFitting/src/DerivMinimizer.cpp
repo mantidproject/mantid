@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/DerivMinimizer.h"
+#include "MantidCurveFitting/CostFuncFitting.h"
 
 namespace Mantid
 {
@@ -16,6 +17,11 @@ double DerivMinimizer::fun (const gsl_vector * x, void * params)
   {
     minimizer.m_costFunction->setParameter(i,gsl_vector_get(x, i));
   }
+  boost::shared_ptr<CostFuncFitting> fitting = boost::dynamic_pointer_cast<CostFuncFitting>(minimizer.m_costFunction);
+  if (fitting)
+  {
+    fitting->getFittingFunction()->applyTies();
+  }
   return minimizer.m_costFunction->val();
 }
 
@@ -26,6 +32,11 @@ void DerivMinimizer::dfun(const gsl_vector * x, void * params, gsl_vector * g)
   for(size_t i = 0;i < n; ++i)
   {
     minimizer.m_costFunction->setParameter(i,gsl_vector_get(x, i));
+  }
+  boost::shared_ptr<CostFuncFitting> fitting = boost::dynamic_pointer_cast<CostFuncFitting>(minimizer.m_costFunction);
+  if (fitting)
+  {
+    fitting->getFittingFunction()->applyTies();
   }
   std::vector<double> der(n);
   minimizer.m_costFunction->deriv(der);
@@ -42,6 +53,11 @@ void DerivMinimizer::fundfun (const gsl_vector * x, void * params, double * f, g
   for(size_t i = 0;i < n; ++i)
   {
     minimizer.m_costFunction->setParameter(i,gsl_vector_get(x, i));
+  }
+  boost::shared_ptr<CostFuncFitting> fitting = boost::dynamic_pointer_cast<CostFuncFitting>(minimizer.m_costFunction);
+  if (fitting)
+  {
+    fitting->getFittingFunction()->applyTies();
   }
   std::vector<double> der(n);
   *f = minimizer.m_costFunction->valAndDeriv(der);
@@ -109,15 +125,15 @@ bool DerivMinimizer::iterate()
     throw std::runtime_error("Minimizer " + this->name() + " was not initialized.");
   }
   int status = gsl_multimin_fdfminimizer_iterate(m_gslSolver);
-  std::cerr << "iter " << status << ' ' << m_gslSolver->f << ' ' 
-    << gsl_vector_get(m_gslSolver->dx,0)/gsl_vector_get(m_gslSolver->gradient,0) << std::endl;
-  for(size_t i = 0; i < m_gslSolver->x->size; ++i)
-  {
-    std::cerr << "p " << i << ' ' << gsl_vector_get(m_gslSolver->x,i) << ' ' 
-      << gsl_vector_get(m_gslSolver->dx,i) << ' ' 
-      << gsl_vector_get(m_gslSolver->gradient,i) << ' ' 
-      << std::endl;
-  }
+  //std::cerr << "iter " << status << ' ' << m_gslSolver->f << ' ' 
+  //  << gsl_vector_get(m_gslSolver->dx,0)/gsl_vector_get(m_gslSolver->gradient,0) << std::endl;
+  //for(size_t i = 0; i < m_gslSolver->x->size; ++i)
+  //{
+  //  std::cerr << "p " << i << ' ' << gsl_vector_get(m_gslSolver->x,i) << ' ' 
+  //    << gsl_vector_get(m_gslSolver->dx,i) << ' ' 
+  //    << gsl_vector_get(m_gslSolver->gradient,i) << ' ' 
+  //    << std::endl;
+  //}
   if (status)
   {
     m_errorString = gsl_strerror(status);

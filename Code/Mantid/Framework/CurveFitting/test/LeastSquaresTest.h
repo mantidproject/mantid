@@ -11,6 +11,7 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
 
+#include <gsl/gsl_blas.h>
 #include <sstream>
 
 using namespace Mantid;
@@ -105,19 +106,61 @@ public:
 
     boost::shared_ptr<CostFuncLeastSquares> costFun(new CostFuncLeastSquares);
     costFun->setFittingFunction(fun,domain,values);
-    TS_ASSERT_DELTA(costFun->val(), 0.29, 1e-10); // == 0.2^2 + 0.3^2 + 0.4^2
+    TS_ASSERT_DELTA(costFun->val(), 0.145, 1e-10); // == 0.5 *( 0.2^2 + 0.3^2 + 0.4^2 )
 
     std::vector<double> der;
     costFun->deriv(der);
     TS_ASSERT_EQUALS(der.size(),2);
-    TS_ASSERT_DELTA(der[0], 2.2, 1e-10); // == 2*(0 * 0.2 + 1 * 0.3 + 2 * 0.4)
-    TS_ASSERT_DELTA(der[1], 1.8, 1e-10); // == 2*(1 * 0.2 + 1 * 0.3 + 1 * 0.4)
+    TS_ASSERT_DELTA(der[0], 1.1, 1e-10); // == 0 * 0.2 + 1 * 0.3 + 2 * 0.4
+    TS_ASSERT_DELTA(der[1], 0.9, 1e-10); // == 1 * 0.2 + 1 * 0.3 + 1 * 0.4
 
     std::vector<double> der1;
-    TS_ASSERT_DELTA(costFun->valAndDeriv(der1),0.29,1e-10);
+    TS_ASSERT_DELTA(costFun->valAndDeriv(der1),0.145,1e-10);
     TS_ASSERT_EQUALS(der1.size(),2);
-    TS_ASSERT_DELTA(der1[0], 2.2, 1e-10);
-    TS_ASSERT_DELTA(der1[1], 1.8, 1e-10);
+    TS_ASSERT_DELTA(der1[0], 1.1, 1e-10);
+    TS_ASSERT_DELTA(der1[1], 0.9, 1e-10);
+
+    GSLVector g(2);
+    GSLMatrix H(2,2);
+    TS_ASSERT_DELTA(costFun->valDerivHessian(g,H),0.145,1e-10);
+    TS_ASSERT_DELTA(g.get(0), 1.1, 1e-10);
+    TS_ASSERT_DELTA(g.get(1), 0.9, 1e-10);
+  }
+
+  void test_linear_correction_is_good_approximation()
+  {
+    const double a = 1.0;
+    const double b = 2.0;
+    std::vector<double> x(3),y(3);
+    x[0] = 0.; y[0] = a * x[0] + b; // == 2.0
+    x[1] = 1.; y[1] = a * x[1] + b; // == 3.0
+    x[2] = 2.; y[2] = a * x[2] + b; // == 4.0
+    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1D(x));
+    API::FunctionValues_sptr values(new API::FunctionValues(*domain));
+    values->setFitData(y);
+    values->setFitWeights(1.0);
+
+    boost::shared_ptr<UserFunction> fun(new UserFunction);
+    fun->setAttributeValue("Formula","a*x+b");
+    fun->setParameter("a",1.1);
+    fun->setParameter("b",2.2);
+
+    boost::shared_ptr<CostFuncLeastSquares> costFun(new CostFuncLeastSquares);
+    costFun->setFittingFunction(fun,domain,values);
+    TS_ASSERT_DELTA(costFun->val(), 0.145, 1e-10); // == 0.5 *( 0.2^2 + 0.3^2 + 0.4^2 )
+
+    GSLVector g(2);
+    GSLMatrix H(2,2);
+    TS_ASSERT_DELTA(costFun->valDerivHessian(g,H),0.145,1e-10);
+
+    GSLVector dx(2);
+    dx.set(0,-0.1);
+    dx.set(1,-0.2);
+
+    double L; // = d*dx + 0.5 * dx * H * dx
+    gsl_blas_dgemv( CblasNoTrans,0.5,H.gsl(),dx.gsl(),1.,g.gsl() );
+    gsl_blas_ddot( g.gsl(), dx.gsl(), &L );
+    TS_ASSERT_DELTA(L, -0.145, 1e-10); // L + costFun->val() == 0
   }
 
   void test_Fixing_parameter()
@@ -144,9 +187,9 @@ public:
     BFGS_Minimizer s;
     s.initialize(costFun);
 
-    TS_ASSERT_DELTA(costFun->val(),224.0,0.1);
+    TS_ASSERT_DELTA(costFun->val(),112.0,0.1);
     TS_ASSERT(s.minimize());
-    TS_ASSERT_DELTA(costFun->val(),15.7,0.1);
+    TS_ASSERT_DELTA(costFun->val(),7.84,0.1);
 
     TS_ASSERT_DELTA(fun->getParameter("Height"),7.6,0.01);
     TS_ASSERT_DELTA(fun->getParameter("Lifetime"),1.0,1e-9);

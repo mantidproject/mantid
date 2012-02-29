@@ -153,6 +153,7 @@ set ( TEST_FILES
 	test/GaussianTest.h
 #	test/IkedaCarpenterPVTest.h
 	test/LeastSquaresTest.h
+	test/LevenbergMarquardtTest.h
 	test/LinearBackgroundTest.h
 #	test/LinearTest.h
 #	test/LogNormalTest.h

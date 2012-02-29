@@ -22,7 +22,13 @@
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionValues.h"
+#include "MantidCurveFitting/LevenbergMarquardtMinimizer.h"
+#include "MantidCurveFitting/UserFunction.h"
+#include "MantidCurveFitting/CostFuncLeastSquares.h"
 
+using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
@@ -155,6 +161,62 @@ public:
 		for (size_t i=0; i < 41; i++) e[i] = sqrt( y[i] );
 	}
 
+    void xtest_with_Levenberg_Marquardt()
+    {
+      API::FunctionDomain1D_sptr domain(new API::FunctionDomain1D( 79292.4, 79603.6, 41));
+      API::FunctionValues mockData(*domain);
+      UserFunction dataMaker;
+      dataMaker.setAttributeValue("Formula","b+h*exp(-((x-c)/s)^2)");
+      dataMaker.setParameter("b",0);
+      dataMaker.setParameter("h",232.11);
+      dataMaker.setParameter("c",79430.1);
+      dataMaker.setParameter("s",26.14);
+      dataMaker.function(*domain,mockData);
+
+      API::FunctionValues_sptr values(new API::FunctionValues(*domain));
+      values->setFitDataFromCalculated(mockData);
+      values->setFitWeights(1.0);
+
+      CompositeFunction_sptr fnWithBk( new CompositeFunction() );
+
+      boost::shared_ptr<LinearBackground> bk( new LinearBackground() );
+      bk->initialize();
+
+      bk->setParameter("A0",0.0);
+      bk->setParameter("A1",0.0);
+      bk->tie("A1","0");
+
+      // set up Gaussian fitting function
+      boost::shared_ptr<Gaussian> fn( new Gaussian() );
+      fn->initialize();
+      fn->setParameter("PeakCentre",79450.0);
+      fn->setParameter("Height",200.0);
+      fn->setParameter("Sigma",300.0);
+      BoundaryConstraint* bc = new BoundaryConstraint(fn.get(),"Sigma",20.0,100.0);
+	    //bc->setPenaltyFactor(1000.001);
+	    fn->addConstraint(bc);
+
+
+      fnWithBk->addFunction(bk);
+      fnWithBk->addFunction(fn);
+
+      boost::shared_ptr<CostFuncLeastSquares> costFun(new CostFuncLeastSquares);
+      costFun->setFittingFunction(fnWithBk,domain,values);
+      //TS_ASSERT_EQUALS(costFun->nParams(),3);
+
+      LevenbergMarquardtMinimizer s;
+      s.initialize(costFun);
+      TS_ASSERT(s.minimize());
+
+      API::IFunction_sptr res = costFun->getFittingFunction();
+      std::cerr << "result=" << s.getError() << std::endl;
+      std::cerr << "cost=" << costFun->val() << std::endl;
+      for(size_t i = 0; i < res->nParams(); ++i)
+      {
+        std::cerr << res->parameterName(i) << " = " << res->getParameter(i) << std::endl;
+      }
+
+    }
 
     // Also pick values taken from HRPD_for_UNIT_TESTING.xml
   // here we have an example where an upper constraint on Sigma <= 100 makes
@@ -204,15 +266,13 @@ public:
     fn->setParameter("Height",200.0);
     fn->setParameter("Sigma",300.0);
     BoundaryConstraint* bc = new BoundaryConstraint(fn.get(),"Sigma",20.0,100.0);
-	//bc->setLower(20.0);
-	//bc->setUpper(100.0);
-	bc->setPenaltyFactor(1000.001);
-	fn->addConstraint(bc);
+	  //bc->setPenaltyFactor(1000.001);
+	  fn->addConstraint(bc);
 
     fnWithBk.addFunction(bk);
     fnWithBk.addFunction(fn);
 
-    alg.setProperty("Function",fnWithBk);
+    alg.setProperty("Function",boost::dynamic_pointer_cast<IFunction>(fnWithBk));
 
     // execute fit
     TS_ASSERT_THROWS_NOTHING(
@@ -222,14 +282,14 @@ public:
 
     // test the output from fit is what you expect
     double dummy = alg.getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA( dummy, 5.04, 0.1);
+    TS_ASSERT_DELTA( dummy, 2.8, 0.1);
 
     IFunction_sptr out = alg.getProperty("Function");
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(dynamic_cast<CompositeFunction*>(out.get())->getFunction(1).get());
-    TS_ASSERT_DELTA( pk->height(), 232.1146 ,1);
+    TS_ASSERT_DELTA( pk->height(), 227.4 ,1);
     TS_ASSERT_DELTA( pk->centre(), 79430.1 ,10);
-    TS_ASSERT_DELTA( pk->getParameter("Sigma"), 26.14 ,0.1);
-    TS_ASSERT_DELTA( out->getParameter("f0.A0"), 8.06 ,0.1);
+    TS_ASSERT_DELTA( pk->getParameter("Sigma"), 26.5 ,0.1);
+    TS_ASSERT_DELTA( out->getParameter("f0.A0"), 9.5 ,0.1);
     TS_ASSERT_DELTA( out->getParameter("f0.A1"), 0.0 ,0.01); 
 
 	 AnalysisDataService::Instance().remove(wsName);
@@ -357,76 +417,13 @@ public:
 
     // test the output from fit is what you expect
     double dummy = alg2.getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA( dummy, 0.07,0.01);
+    TS_ASSERT_DELTA( dummy, 0.035,0.01);
 
     IFunction_sptr out = alg2.getProperty("Function");
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out.get());
-    TS_ASSERT_DELTA( pk->height(), 97.8035 ,0.0001);
-    TS_ASSERT_DELTA( pk->centre(), 11.2356 ,0.0001);
-    TS_ASSERT_DELTA( pk->fwhm(), 2.6237 ,0.0001);
-
-    // check its categories
-    const std::vector<std::string> categories = out->categories();
-    TS_ASSERT( categories.size() == 1 );
-    TS_ASSERT( categories[0] == "Peak" );
-  }
-
-  void testAgainstMockDataSimplex()
-  {
-    // create mock data to test against
-    std::string wsName = "GaussMockDataSimplex";
-    int histogramNumber = 1;
-    int timechannels = 20;
-    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
-    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
-    for (int i = 0; i < 20; i++) ws2D->dataX(0)[i] = i+1;
-    Mantid::MantidVec& y = ws2D->dataY(0); // y-values (counts)
-    Mantid::MantidVec& e = ws2D->dataE(0); // error values of counts
-    getMockData(y, e);
-
-    //put this workspace in the data service
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
-
-    FitMW alg2;
-    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
-    TS_ASSERT( alg2.isInitialized() );
-
-    // set up gaussian fitting function
-    SimplexGaussian gaus;
-    gaus.initialize();
-    gaus.setCentre(11.2);
-    gaus.setHeight(100.7);
-    gaus.setFwhm(2.2);
-
-    alg2.setPropertyValue("Function",gaus->asString());
-
-    // Set which spectrum to fit against and initial starting values
-    alg2.setPropertyValue("InputWorkspace", wsName);
-    alg2.setPropertyValue("WorkspaceIndex","0");
-    alg2.setPropertyValue("StartX","0");
-    alg2.setPropertyValue("EndX","20");
-
-    // execute fit
-    TS_ASSERT_THROWS_NOTHING(
-      TS_ASSERT( alg2.execute() )
-    )
-    TS_ASSERT( alg2.isExecuted() );
-
-    std::string minimizer = alg2.getProperty("Minimizer");
-    TS_ASSERT( minimizer.compare("Simplex") == 0 );
-
-    // test the output from fit is what you expect
-    double dummy = alg2.getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA( dummy, 0.07,0.01);
-
-
-    IFunction_sptr out = alg2.getProperty("Function");
-    IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out.get());
-    TS_ASSERT_DELTA( pk->height(), 97.8091 ,0.01);
-    TS_ASSERT_DELTA( pk->centre(), 11.2356 ,0.001);
-    TS_ASSERT_DELTA( pk->fwhm(), 2.6240 ,0.001);
-
-    AnalysisDataService::Instance().remove(wsName);
+    TS_ASSERT_DELTA( pk->height(), 97.9680 ,0.0001);
+    TS_ASSERT_DELTA( pk->centre(), 11.2194 ,0.0001);
+    TS_ASSERT_DELTA( pk->width(), 2.6181 ,0.0001);
   }
 
   void testAgainstMockDataSimplex2()
@@ -476,7 +473,7 @@ public:
 
     // test the output from fit is what you expect
     double dummy = alg2.getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA( dummy, 0.07,0.01);
+    TS_ASSERT_DELTA( dummy, 0.035,0.01);
 
     IFunction_sptr out = alg2.getProperty("Function");
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out.get());
@@ -484,181 +481,6 @@ public:
     TS_ASSERT_DELTA( pk->centre(), 11.2356 ,0.001);
     TS_ASSERT_DELTA( pk->fwhm(), 2.6240 ,0.001);
     std::cerr << pk->height() << std::endl;
-
-    AnalysisDataService::Instance().remove(wsName);
-  }
-
-  void testAgainstMockDataFRConjugateGradient()
-  {
-    // create mock data to test against
-    std::string wsName = "GaussMockDataFRConjugateGradient";
-    int histogramNumber = 1;
-    int timechannels = 20;
-    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
-    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
-    for (int i = 0; i < 20; i++) ws2D->dataX(0)[i] = i+1;
-    Mantid::MantidVec& y = ws2D->dataY(0); // y-values (counts)
-    Mantid::MantidVec& e = ws2D->dataE(0); // error values of counts
-    getMockData(y, e);
-
-    //put this workspace in the data service
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
-
-    FitMW alg2;
-    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
-    TS_ASSERT( alg2.isInitialized() );
-
-    // set up gaussian fitting function
-    Gaussian gaus;
-    gaus.initialize();
-    gaus.setCentre(11.2);
-    gaus.setHeight(100.7);
-    gaus.setFwhm(2.2);
-
-    alg2.setPropertyValue("Function",gaus->asString());
-
-    // Set which spectrum to fit against and initial starting values
-    alg2.setPropertyValue("InputWorkspace", wsName);
-    alg2.setPropertyValue("WorkspaceIndex","0");
-    alg2.setPropertyValue("StartX","0");
-    alg2.setPropertyValue("EndX","20");
-    alg2.setPropertyValue("Minimizer", "Conjugate gradient (Fletcher-Reeves imp.)");
-
-    // execute fit
-    TS_ASSERT_THROWS_NOTHING(
-      TS_ASSERT( alg2.execute() )
-    )
-    TS_ASSERT( alg2.isExecuted() );
-
-    std::string minimizer = alg2.getProperty("Minimizer");
-    TS_ASSERT( minimizer.compare("Conjugate gradient (Fletcher-Reeves imp.)") == 0 );
-
-    // test the output from fit is what you expect
-    double dummy = alg2.getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA( dummy, 0.07,0.01);
-
-    IFunction_sptr out = alg2.getProperty("Function");
-    IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out.get());
-    TS_ASSERT_DELTA( pk->height(), 97.7995 ,0.0001);
-    TS_ASSERT_DELTA( pk->centre(), 11.2356 ,0.001);
-    TS_ASSERT_DELTA( pk->fwhm(), 2.6240 ,0.001);
-
-    AnalysisDataService::Instance().remove(wsName);
-  }
-
-  void t11estAgainstMockDataPRConjugateGradient()
-  {
-    // create mock data to test against
-    std::string wsName = "GaussMockDataPRConjugateGradient";
-    int histogramNumber = 1;
-    int timechannels = 20;
-    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
-    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
-    for (int i = 0; i < 20; i++) ws2D->dataX(0)[i] = i+1;
-    Mantid::MantidVec& y = ws2D->dataY(0); // y-values (counts)
-    Mantid::MantidVec& e = ws2D->dataE(0); // error values of counts
-    getMockData(y, e);
-
-    //put this workspace in the data service
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
-
-    FitMW alg2;
-    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
-    TS_ASSERT( alg2.isInitialized() );
-
-    // set up gaussian fitting function
-    Gaussian* gaus = new Gaussian();
-    gaus->initialize();
-    gaus->setCentre(11.2);
-    gaus->setHeight(100.7);
-    gaus->setFwhm(2.2);
-
-    alg2.setPropertyValue("Function",gaus->asString());
-
-    // Set which spectrum to fit against and initial starting values
-    alg2.setPropertyValue("InputWorkspace", wsName);
-    alg2.setPropertyValue("WorkspaceIndex","0");
-    alg2.setPropertyValue("StartX","0");
-    alg2.setPropertyValue("EndX","20");
-    alg2.setPropertyValue("Minimizer", "Conjugate gradient (Polak-Ribiere imp.)");
-
-    // execute fit
-    TS_ASSERT_THROWS_NOTHING(
-      TS_ASSERT( alg2.execute() )
-    )
-    TS_ASSERT( alg2.isExecuted() );
-
-    std::string minimizer = alg2.getProperty("Minimizer");
-    TS_ASSERT( minimizer.compare("Conjugate gradient (Polak-Ribiere imp.)") == 0 );
-    std::cerr<<"\n"<<minimizer<<'\n';
-
-    // test the output from fit is what you expect
-    double dummy = alg2.getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA( dummy, 0.0717,0.0001);
-
-    IFunction_sptr out = alg2.getProperty("Function");
-    IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out.get());
-    TS_ASSERT_DELTA( pk->height(), 97.7857 ,0.0001);
-    TS_ASSERT_DELTA( pk->centre(), 11.2356 ,0.001);
-    TS_ASSERT_DELTA( pk->fwhm(), 2.6240 ,0.001);
-
-    AnalysisDataService::Instance().remove(wsName);
-  }
-
-  void testAgainstMockDataBFGS()
-  {
-    // create mock data to test against
-    std::string wsName = "GaussMockDataBFGS";
-    int histogramNumber = 1;
-    int timechannels = 20;
-    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
-    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
-    for (int i = 0; i < 20; i++) ws2D->dataX(0)[i] = i+1;
-    Mantid::MantidVec& y = ws2D->dataY(0); // y-values (counts)
-    Mantid::MantidVec& e = ws2D->dataE(0); // error values of counts
-    getMockData(y, e);
-
-    //put this workspace in the data service
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
-
-    FitMW alg2;
-    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
-    TS_ASSERT( alg2.isInitialized() );
-
-    // set up gaussian fitting function
-    Gaussian gaus;
-    gaus.initialize();
-    gaus.setCentre(11.2);
-    gaus.setHeight(100.7);
-    gaus.setFwhm(2.2);
-
-    alg2.setPropertyValue("Function",gaus->asString());
-
-    // Set which spectrum to fit against and initial starting values
-    alg2.setPropertyValue("InputWorkspace", wsName);
-    alg2.setPropertyValue("WorkspaceIndex","0");
-    alg2.setPropertyValue("StartX","0");
-    alg2.setPropertyValue("EndX","20");
-    alg2.setPropertyValue("Minimizer", "BFGS");
-
-    // execute fit
-    TS_ASSERT_THROWS_NOTHING(
-      TS_ASSERT( alg2.execute() )
-    )
-    TS_ASSERT( alg2.isExecuted() );
-
-    std::string minimizer = alg2.getProperty("Minimizer");
-    TS_ASSERT( minimizer.compare("BFGS") == 0 );
-
-    // test the output from fit is what you expect
-    double dummy = alg2.getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA( dummy, 0.07,0.01);
-
-    IFunction_sptr out = alg2.getProperty("Function");
-    IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out.get());
-    TS_ASSERT_DELTA( pk->height(), 97.8111 ,0.0001);
-    TS_ASSERT_DELTA( pk->centre(), 11.2356 ,0.001);
-    TS_ASSERT_DELTA( pk->fwhm(), 2.6240 ,0.001);
 
     AnalysisDataService::Instance().remove(wsName);
   }

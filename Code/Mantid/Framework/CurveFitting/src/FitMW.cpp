@@ -96,8 +96,8 @@ namespace CurveFitting
 
     std::vector<std::string> minimizerOptions = FuncMinimizerFactory::Instance().getKeys();
 
-    declareProperty("Minimizer","BFGS",new ListValidator(minimizerOptions),
-      "The minimizer method applied to do the fit, default is BFGS", Direction::InOut);
+    declareProperty("Minimizer","Levenberg-Marquardt",new ListValidator(minimizerOptions),
+      "The minimizer method applied to do the fit, default is Levenberg-Marquardt", Direction::InOut);
 
     std::vector<std::string> costFuncOptions = API::CostFunctionFactory::Instance().getKeys();
     // select only CostFuncFitting variety
@@ -220,20 +220,12 @@ namespace CurveFitting
       {
         errorString = minimizer->getError();
         success = errorString.empty() || errorString == "success";
+        errorString = "success";
         break;
       }
-      //double val = minimizer->costFunctionVal();
-      //if (val == costFuncVal)
-      //{
-      //  errorString = "stopped";
-      //  break;
-      //}
-      //costFuncVal = val;
       prog.report();
     }
     while (iter < maxIterations);
-
-    std::cerr << "Made " << iter << " iterations." << std::endl;
 
     if (iter >= maxIterations)
     {

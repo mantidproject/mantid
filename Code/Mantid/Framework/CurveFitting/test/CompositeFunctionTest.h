@@ -15,6 +15,7 @@
 
 #include "MantidCurveFitting/SimplexMinimizer.h"
 #include "MantidCurveFitting/BFGS_Minimizer.h"
+#include "MantidCurveFitting/LevenbergMarquardtMinimizer.h"
 #include "MantidCurveFitting/UserFunction.h"
 #include "MantidCurveFitting/ExpDecay.h"
 #include "MantidCurveFitting/CostFuncLeastSquares.h"
@@ -359,6 +360,48 @@ public:
     costFun->setFittingFunction(mfun,domain,values);
 
     BFGS_Minimizer s;
+    s.initialize(costFun);
+    TS_ASSERT(s.minimize());
+    TS_ASSERT_DELTA(costFun->val(),0.0,0.0001);
+    TS_ASSERT_DELTA(mfun->getParameter("f0.a"),3.3,0.01);
+    TS_ASSERT_DELTA(mfun->getParameter("f1.c"),0.1,0.01);
+    TS_ASSERT_DELTA(mfun->getParameter("f1.b"),4.4,0.01);
+    TS_ASSERT_EQUALS(s.getError(),"success");
+  }
+
+  void test_with_LM()
+  {
+    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1D( 0.0, 10.0, 10));
+    API::FunctionValues mockData(*domain);
+    UserFunction dataMaker;
+    dataMaker.setAttributeValue("Formula","a*x+b+c*x^2");
+    dataMaker.setParameter("a",3.3);
+    dataMaker.setParameter("b",4.4);
+    dataMaker.setParameter("c",0.1);
+    dataMaker.function(*domain,mockData);
+
+    API::FunctionValues_sptr values(new API::FunctionValues(*domain));
+    values->setFitDataFromCalculated(mockData);
+    values->setFitWeights(1.0);
+
+    boost::shared_ptr<CompositeFunction> mfun(new CompositeFunction);
+
+    boost::shared_ptr<UserFunction> fun1(new UserFunction);
+    fun1->setAttributeValue("Formula","a*x");
+    fun1->setParameter("a",1.1);
+
+    boost::shared_ptr<UserFunction> fun2(new UserFunction);
+    fun2->setAttributeValue("Formula","c*x^2 + b");
+    fun2->setParameter("c",0.00);
+    fun2->setParameter("b",2.2);
+
+    mfun->addFunction(fun1);
+    mfun->addFunction(fun2);
+
+    boost::shared_ptr<CostFuncLeastSquares> costFun(new CostFuncLeastSquares);
+    costFun->setFittingFunction(mfun,domain,values);
+
+    LevenbergMarquardtMinimizer s;
     s.initialize(costFun);
     TS_ASSERT(s.minimize());
     TS_ASSERT_DELTA(costFun->val(),0.0,0.0001);
