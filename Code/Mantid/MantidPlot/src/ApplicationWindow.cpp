@@ -338,7 +338,6 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   logWindow->setWidget(results);
   logWindow->hide();
 
-  //#ifdef SCRIPTING_CONSOLE
   consoleWindow = new QDockWidget(this);
   consoleWindow->setObjectName("consoleWindow"); // this is needed for QMainWindow::restoreState()
   consoleWindow->setWindowTitle(tr("Scripting Console"));
@@ -350,7 +349,6 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
 	  SLOT(showScriptConsoleContextMenu(const QPoint &)));
   consoleWindow->setWidget(console);
   consoleWindow->hide();
-  //#endif
   m_interpreterDock = new QDockWidget(this);
   m_interpreterDock->setObjectName("interpreterDock"); // this is needed for QMainWindow::restoreState()
   m_interpreterDock->setWindowTitle("Script Interpreter");
@@ -657,10 +655,6 @@ void ApplicationWindow::initGlobalConstants()
 
   savingTimerId = 0;
 
-#ifdef QTIPLOT_DEMO
-  QTimer::singleShot(600000, this, SLOT(close()));
-#endif
-
   autoSearchUpdatesRequest = false;
 
   show_windows_policy = ActiveFolder;
@@ -669,24 +663,9 @@ void ApplicationWindow::initGlobalConstants()
   QString aux = qApp->applicationDirPath();
   workingDir = aux;
 
-#ifdef TRANSLATIONS_PATH
-  d_translations_folder = TRANSLATIONS_PATH;
-#else
   d_translations_folder = aux + "/translations";
-#endif
-
-#ifdef MANUAL_PATH
-  helpFilePath = MANUAL_PATH;
-  helpFilePath += "/html/index.html";
-#else
   helpFilePath = aux + "/manual/index.html";
-#endif
-
-#ifdef PYTHON_CONFIG_PATH
-  d_python_config_folder = PYTHON_CONFIG_PATH;
-#else
   d_python_config_folder = aux;
-#endif
 
   fitPluginsPath = aux + "fitPlugins";
   fitModelsPath = QString::null;
@@ -1197,9 +1176,7 @@ void ApplicationWindow::insertTranslatedStrings()
   explorerWindow->setWindowTitle(tr("Project Explorer"));
   logWindow->setWindowTitle(tr("Results Log"));
   undoStackWindow->setWindowTitle(tr("Undo Stack"));
-  //#ifdef SCRIPTING_CONSOLE
   consoleWindow->setWindowTitle(tr("Scripting Console"));
-  //#endif
   displayBar->setWindowTitle(tr("Data Display"));
   tableTools->setWindowTitle(tr("Table"));
   columnTools->setWindowTitle(tr("Column"));
@@ -1251,9 +1228,7 @@ void ApplicationWindow::initMainMenu()
   view->addAction(actionShowExplorer);
   view->addAction(actionShowLog);
   //view->addAction(actionShowUndoStack);
-  //#ifdef SCRIPTING_CONSOLE
   view->addAction(actionShowConsole);
-  //#endif
 
   view->insertSeparator();
   view->addAction(actionShowScriptWindow);//Mantid
@@ -1519,9 +1494,6 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
   editMenuAboutToShow();
   myMenuBar()->insertItem(tr("&View"), view);
 
-  //#ifdef SCRIPTING_DIALOG
-  //	scriptingMenu->addAction(actionScriptingLang);
-  //#endif
   // these use the same keyboard shortcut (Ctrl+Return) and should not be enabled at the same time
   actionTableRecalculate->setEnabled(false);
 
@@ -6069,10 +6041,6 @@ bool ApplicationWindow::saveProject(bool compress)
     return true;;
   }
 
-#ifdef QTIPLOT_DEMO
-  showDemoVersionMessage();
-  return false;
-#else
   saveFolder(projectFolder(), projectname, compress);
 
   setWindowTitle("MantidPlot - " + projectname);
@@ -6087,8 +6055,8 @@ bool ApplicationWindow::saveProject(bool compress)
 
   QApplication::restoreOverrideCursor();
   return true;
-#endif
 }
+
 void ApplicationWindow::savetoNexusFile()
 {
   QString filter = tr("Mantid Files")+" (*.nxs *.nx5 *.xml);;";
@@ -6137,10 +6105,6 @@ void ApplicationWindow::loadDataFile()
 }
 void ApplicationWindow::saveProjectAs(const QString& fileName, bool compress)
 {
-#ifdef QTIPLOT_DEMO
-  showDemoVersionMessage();
-  return;
-#else
   QString fn = fileName;
   if (fileName.isEmpty()){
     QString filter = tr("MantidPlot project")+" (*.mantid);;"; //tr("QtiPlot project")+" (*.qti);;";
@@ -6196,7 +6160,6 @@ void ApplicationWindow::saveProjectAs(const QString& fileName, bool compress)
       item->folder()->setObjectName(baseName);
     }
   }
-#endif
 }
 
 void ApplicationWindow::saveNoteAs()
@@ -9273,9 +9236,6 @@ void ApplicationWindow::windowsMenuAboutToShow()
   QList<MdiSubWindow *> windows = current_folder->windowsList();
   int n = static_cast<int>(windows.count());
   if (!n ){
-    /*#ifdef SCRIPTING_PYTHON
-			windowsMenu->addAction(actionShowScriptWindow);
-		#endif*/
     return;
   }
 
@@ -9513,9 +9473,6 @@ void ApplicationWindow::dragMoveEvent( QDragMoveEvent* e )
 
 void ApplicationWindow::closeEvent( QCloseEvent* ce )
 {
-#ifdef QTIPLOT_DEMO
-  showDemoVersionMessage();
-#endif
 
   // Mantid changes here
 
@@ -12681,9 +12638,7 @@ void ApplicationWindow::createActions()
 
   actionShowUndoStack = undoStackWindow->toggleViewAction();
 
-    //#ifdef SCRIPTING_CONSOLE
   actionShowConsole = consoleWindow->toggleViewAction();
-    //#endif
 
   actionAddLayer = new QAction(QIcon(getQPixmap("newLayer_xpm")), tr("Add La&yer"), this);
   actionAddLayer->setShortcut( tr("Alt+L") );
@@ -13316,11 +13271,6 @@ void ApplicationWindow::createActions()
   // 	actionTechnicalSupport = new QAction(tr("Technical &Support"), this); // Mantid change
   // 	connect(actionTechnicalSupport, SIGNAL(activated()), this, SLOT(showSupportPage())); // Mantid change
 
-  //#ifdef SCRIPTING_DIALOG
-  //	actionScriptingLang = new QAction(tr("Scripting &language"), this);
-  //	connect(actionScriptingLang, SIGNAL(activated()), this, SLOT(showScriptingLangDialog()));
-  //#endif
-
 #ifdef SCRIPTING_PYTHON
   actionShowScriptWindow = new QAction(getQPixmap("python_xpm"), tr("Toggle &Script Window"), this);
 #ifdef __APPLE__
@@ -13588,10 +13538,8 @@ void ApplicationWindow::translateActionsStrings()
   actionShowUndoStack->setMenuText(tr("&Undo/Redo Stack"));
   actionShowUndoStack->setToolTip(tr("Show available undo/redo commands"));
 
-    //#ifdef SCRIPTING_CONSOLE
   actionShowConsole->setMenuText(tr("&Console"));
   actionShowConsole->setToolTip(tr("Show Scripting console"));
-    //#endif
 
 #ifdef SCRIPTING_PYTHON
   actionShowScriptWindow->setMenuText(tr("&Script Window"));
@@ -13926,10 +13874,6 @@ void ApplicationWindow::translateActionsStrings()
   //actionTranslations->setMenuText(tr("&Translations"));//Mantid change - commented out
   //actionDonate->setMenuText(tr("Make a &Donation"));
   //actionTechnicalSupport->setMenuText(tr("Technical &Support"));
-
-  //#ifdef SCRIPTING_DIALOG
-  //	actionScriptingLang->setMenuText(tr("Scripting &language"));
-  //#endif
 
   btnPointer->setMenuText(tr("Disable &tools"));
   btnPointer->setToolTip( tr( "Pointer" ) );
@@ -15109,29 +15053,6 @@ Folder* ApplicationWindow::appendProject(const QString& fn, Folder* parentFolder
   return new_folder;
 }
 
-#ifdef QTIPLOT_DEMO
-void ApplicationWindow::showDemoVersionMessage()
-{
-  saved = true;
-  /**
-	QMessageBox::critical(this, tr("MantidPlot - Demo Version"),//Mantid
-			tr("You are using the demonstration version of Qtiplot.\
-				It is identical with the full version, except that you can't save your work to project files and you can't use it for more than 10 minutes per session.\
-				<br><br>\
-				If you want to have ready-to-use, fully functional binaries, please subscribe for a\
-				<a href=\"http://soft.proindependent.com/individual_contract.html\">single-user binaries maintenance contract</a>.\
-				<br><br>\
-				QtiPlot is free software in the sense of free speech.\
-				If you know how to use it, you can get\
-				<a href=\"http://developer.berlios.de/project/showfiles.php?group_id=6626\">the source code</a>\
-				free of charge.\
-				Nevertheless, you are welcome to\
-				<a href=\"http://soft.proindependent.com/why_donate.html\">make a donation</a>\
-				in order to support the further development of QtiPlot."));
-   */
-}
-#endif
-
 void ApplicationWindow::saveFolder(Folder *folder, const QString& fn, bool compress)
 {
   QFile f( fn );
@@ -15252,10 +15173,6 @@ void ApplicationWindow::saveAsProject()
 
 void ApplicationWindow::saveFolderAsProject(Folder *f)
 {
-#ifdef QTIPLOT_DEMO
-  showDemoVersionMessage();
-  return;
-#else
   QString filter = tr("MantidPlot project")+" (*.qti);;";//Mantid
   filter += tr("Compressed MantidPlot project")+" (*.qti.gz)";
 
@@ -15270,7 +15187,6 @@ void ApplicationWindow::saveFolderAsProject(Folder *f)
 
     saveFolder(f, fn, selectedFilter.contains(".gz"));
   }
-#endif
 }
 
 void ApplicationWindow::showFolderPopupMenu(Q3ListViewItem *it, const QPoint &p, int)
