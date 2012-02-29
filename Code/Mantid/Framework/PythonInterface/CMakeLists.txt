@@ -55,6 +55,7 @@ add_subdirectory ( mantid )
 ###########################################################################
 # C++ unit tests
 set ( TEST_FILES
+  test/cpp/PropertyWithValueFactoryTest.h
   test/cpp/PythonObjectInstantiatorTest.h
   test/cpp/PySequenceToVectorConverterTest.h
 )  

@@ -2,15 +2,12 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/api/PythonAlgorithm/PythonAlgorithm.h"
-#include "MantidKernel/PropertyWithValue.h"
-#include <boost/python/extract.hpp>
+#include "MantidPythonInterface/api/PythonAlgorithm/PropertyWithValueFactory.h"
 
 namespace Mantid
 {
   namespace PythonInterface
   {
-    using Mantid::Kernel::Property;
-    using Mantid::Kernel::PropertyWithValue;
 
     /**
     * Declare a property using the type of the defaultValue
@@ -22,9 +19,7 @@ namespace Mantid
       const int direction)
     {
       using namespace boost::python;
-      //Property *p = new PropertyWithValue<int>(name, extract<int>(defaultValue)(), direction);
-      //Property *algProp = PropertyWithValueFactory::create(defaultValue);
-      //this->declareProperty(p);
+      this->declareProperty(PropertyWithValueFactory::create(name, defaultValue, direction));
     }
 
   }

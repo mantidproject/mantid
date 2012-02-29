@@ -88,6 +88,8 @@ class PythonAlgorithmTest(unittest.TestCase):
         props = alg.getProperties()
         self.assertEquals(0, len(props))
         alg.initialize()
+        props = alg.getProperties()
+        self.assertEquals(1, len(props))
 
 if __name__ == '__main__':
     unittest.main()
