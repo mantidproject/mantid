@@ -702,7 +702,7 @@ namespace Kernel
             unsigned int from = ranges.rbegin()->first;
             unsigned int to = range.second;
             
-            std::pair<unsigned int, unsigned int> temp = std::make_pair<unsigned int, unsigned int>(from, to);
+            std::pair<unsigned int, unsigned int> temp = std::make_pair(from, to);
 
             ranges.erase(--ranges.end(), ranges.end());
             ranges.insert(temp);
