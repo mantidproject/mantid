@@ -69,6 +69,20 @@ namespace Kernel
       bool matchesFully(const std::string & stringToMatch, const std::string & regexString);
       std::string getMatchingString(const std::string & regexString, const std::string & toParse);
       std::string pad(std::string run, unsigned int padLength);
+
+      std::set< std::pair<unsigned int, unsigned int> > & mergeAdjacentRanges(
+        std::set< std::pair<unsigned int, unsigned int> > & ranges, 
+        const std::pair<unsigned int, unsigned int> & range);
+
+      // Helper functor.
+      struct RangeContainsRun
+      {
+        bool operator()(std::pair<unsigned int, unsigned int> range, unsigned int run);
+        bool operator()(unsigned int run, std::pair<unsigned int, unsigned int> range);
+      };
+
+      std::string toString(const RunRangeList & runRangeList);
+      std::string & accumulateString(std::string & output, std::pair<unsigned int, unsigned int> runRange);
     }
     
     /////////////////////////////////////////////////////////////////////////////
@@ -117,6 +131,34 @@ namespace Kernel
         tokens.begin(), tokens.end(),
         std::vector<std::vector<unsigned int> >(),
         parseToken);
+    }
+
+    /**
+     * Suggests a workspace name for the given vector of file names (which, because they
+     * are in the same vector, we will assume they are to be added.)  Example:
+     *
+     * Parsing ["INST_4.ext", "INST_5.ext", "INST_6.ext", "INST_8.ext"] will return
+     * "INST_4_to_6_and_8" as a suggested workspace name.
+     *
+     * @param fileNames :: a vector of file names
+     *
+     * @returns a string containing a suggested workspace name.
+     * @throws std::runtime_error when runString provided is in an incorrect format.
+     */
+    std::string suggestWorkspaceName(const std::vector<std::string> & fileNames)
+    {
+      Parser parser;
+      RunRangeList runs;
+
+      // For each file name, parse the run number out of it, and add it to a RunRangeList.
+      for(size_t i = 0; i < fileNames.size(); ++i)
+      {
+        parser.parse(fileNames[i]);
+        runs.addRun(parser.runs()[0][0]);
+      }
+
+      // Return the suggested ws name.
+      return parser.instString() + parser.underscoreString() + toString(runs);
     }
 
     /////////////////////////////////////////////////////////////////////////////
@@ -297,6 +339,65 @@ namespace Kernel
                << m_suffix;
 
       return fileName.str();
+    }
+
+    /////////////////////////////////////////////////////////////////////////////
+    // Public member functions of RunRangeList class.
+    /////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Default constructor.
+     */
+    RunRangeList::RunRangeList() :
+      m_rangeList()
+    {
+
+    }
+
+    /**
+     * Adds a run to the list of run ranges.  Not particularly effecient.
+     *
+     * @param run :: the run to add.
+     */
+    void RunRangeList::addRun(unsigned int run)
+    {
+      // If the run is inside one of the ranges, do nothing.
+      if(std::binary_search(
+          m_rangeList.begin(), m_rangeList.end(),
+          run,
+          RangeContainsRun()))
+        return;
+      
+      // Else create a new range, containing a single run, and add it to the list.
+      m_rangeList.insert(std::make_pair<unsigned int, unsigned int>(run, run));
+
+      // Now merge any ranges that are adjacent.
+      m_rangeList = std::accumulate(
+        m_rangeList.begin(), m_rangeList.end(),
+        std::set< std::pair<unsigned int, unsigned int> >(),
+        mergeAdjacentRanges);
+    }
+    
+    /**
+     * Adds a range of runs of specified length to the list of run ranges.
+     *
+     * @param from :: the beginning of the run to add
+     * @param to   :: the end of the run to add
+     */
+    void RunRangeList::addRunRange(unsigned int from, unsigned int to)
+    {
+      for( ; from <= to; ++from)
+        addRun(from);
+    }
+    
+    /**
+     * Add a range of runs to the list of run ranges.
+     *
+     * @param range :: the range to add
+     */
+    void RunRangeList::addRunRange(std::pair<unsigned int, unsigned int> range)
+    {
+      addRunRange(range.first, range.second);
     }
 
     /////////////////////////////////////////////////////////////////////////////
@@ -558,6 +659,99 @@ namespace Kernel
           throw std::runtime_error("Could not parse run number \"" + run + 
             "\" since the instrument run number length required is " + boost::lexical_cast<std::string>(padLength));
         return run;
+      }
+
+      /**
+       * Overloaded function operators to be used by std::binary_search to test if a range and a run 
+       * are "equivalent", which in this case we choose to mean whether or not the run is 
+       * inside the range.
+       */
+      bool RangeContainsRun::operator()(std::pair<unsigned int, unsigned int> range, unsigned int run)
+      {
+        return range.second < run;
+      }
+      bool RangeContainsRun::operator()(unsigned int run, std::pair<unsigned int, unsigned int> range)
+      {
+        return run < range.first;
+      }
+
+      /**
+       * Function for use with std::accumulate, the goal of which is merge any ranges
+       * that are adjacent.
+       *
+       * @param ranges :: the set of ranges that have been accumulated so far.
+       * @param range  :: the range to add, or merge if it is adjacent
+       *
+       * @returns the original ranges, with the extra range added/merged.
+       */
+      std::set< std::pair<unsigned int, unsigned int> > & mergeAdjacentRanges(
+        std::set< std::pair<unsigned int, unsigned int> > & ranges, 
+        const std::pair<unsigned int, unsigned int> & range)
+      {
+        // If ranges is empty, just insert the new range.
+        if(ranges.empty())
+        {
+          ranges.insert(range);
+        }
+        // Else there are already some ranges present ...
+        else
+        {
+          // ... if the last one is adjacent to the new range, merge the two.
+          if(ranges.rbegin()->second + 1 == range.first)
+          {
+            std::pair<unsigned int, unsigned int> temp = std::make_pair<unsigned int, unsigned int>(
+              ranges.rbegin()->first, range.second);
+
+            ranges.erase(--ranges.end(), ranges.end());
+            ranges.insert(temp);
+          }
+          // ... else just insert it.
+          else
+          {
+            ranges.insert(range);
+          }
+        }
+        return ranges;
+      }
+
+      /**
+       * Function for use with std::accumulate.  Takes in a runRange, and appends its details onto the
+       * accumulated output string so far.
+       *
+       * @param output   :: the accumulate output so far.
+       * @param runRange :: the range who's details should be appended.
+       *
+       * @returns the updated output
+       */
+      std::string & accumulateString(std::string & output, std::pair<unsigned int, unsigned int> runRange)
+      {
+        if(!output.empty())
+          output += "_and_";
+        
+        if(runRange.first == runRange.second)
+          output += boost::lexical_cast<std::string>(runRange.first);
+        else
+          output += boost::lexical_cast<std::string>(runRange.first) + "_to_" + boost::lexical_cast<std::string>(runRange.second);
+
+        return output;
+      }
+
+      /**
+       * Converts a RunRangeList object into a readable (and wsName-friendly) string.
+       *
+       * @param runRangeList :: the runRangeList to convert to a string
+       *
+       * @returns the converted string.
+       */
+      std::string toString(const RunRangeList & runRangeList)
+      {
+        std::set<std::pair<unsigned int, unsigned int> > runRanges = runRangeList.rangeList();
+
+        // For each run range (pair of unsigned ints), call accumulateString and return the accumulated result.
+        return std::accumulate(
+          runRanges.begin(), runRanges.end(),
+          std::string(),
+          accumulateString);
       }
 
     } // anonymous namespace

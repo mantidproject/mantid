@@ -43,6 +43,8 @@ namespace Kernel
   {
     /// Parses a string consisting of only run number info, into a vector of vector of run numbers.
     MANTID_KERNEL_DLL std::vector<std::vector<unsigned int> > parseMultiRunString(std::string runString);
+    /// Suggests a workspace name, given a vector of file names. (Which we assume will be added.)
+    MANTID_KERNEL_DLL std::string suggestWorkspaceName(const std::vector<std::string> & fileNames);
 
     /// Regexs used to match / parse various strings.
     namespace Regexs
@@ -133,36 +135,32 @@ namespace Kernel
       /// The length of zero padding needed.
       int m_zeroPadding;
     };
-    
+
     /**
-     * A convenience function for the cases where we dont use the multi file parser to
-     * *add* files - only to list them.  It "flattens" the given vector of vectors
-     * into a single vector which is much easier to traverse.  For example a vector of vector of runs:
-     *
-     * ((1), (2), (30), (31), (32), (100), (102)) becomes (1, 2, 30, 31, 32, 100, 102)
-     *
-     * Used on a vector of vectors that *has* added filenames, the following behaviour is observed:
-     *
-     * ((1), (2), (30, 31, 32), (100), (102)) becomes (1, 2, 30, 31, 32, 100, 102)
-     *
-     * @param vecOfVecs :: a vector of vectors.
-     * @return a single vector with the entire contents of vecOfVecs.
+     * A class that holds a list of ranges of runs.  Each "range" is just a pair of unsigned ints.  
+     * Adding ranges to the list will merge them with what is already there.  This is essentially 
+     * just a wrapper around a std::set<std::pair<unsigned int,unsigned int>> object.
      */
-    /*template<typename TYPE>
-    std::vector<TYPE> flatten(const std::vector<std::vector<TYPE> > & vecOfVecs)
+    class MANTID_KERNEL_DLL RunRangeList
     {
-      std::vector<TYPE> flatVector;
-      std::vector<std::vector<TYPE> >::const_iterator it = vecOfVecs.begin();
+    public:
+      /// Constructor
+      RunRangeList();
 
-      for(; it != vecOfVecs.end(); ++it)
-      {
-        flatVector.insert(
-          flatVector.end(),
-          it->begin(), it->end());
-      }
+      // Returns the list of run ranges.
+      std::set< std::pair<unsigned int, unsigned int> > rangeList() const {return m_rangeList;};
 
-      return flatVector;
-    }*/
+      /// Add a run to the list of run ranges.
+      void addRun(unsigned int run);
+      /// Add a range of runs
+      void addRunRange(unsigned int from, unsigned int to);
+      /// Add a range of runs
+      void addRunRange(std::pair<unsigned int, unsigned int> range);
+
+    private:
+      /// A set of pairs of unsigned ints, where each pair represents a range of runs.
+      std::set< std::pair<unsigned int, unsigned int> > m_rangeList;
+    };
 
   } // namespace MultiFileNameParsing
 
