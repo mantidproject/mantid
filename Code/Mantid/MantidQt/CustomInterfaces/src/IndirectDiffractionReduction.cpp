@@ -4,16 +4,25 @@
 #include "MantidQtCustomInterfaces/IndirectDiffractionReduction.h"
 
 #include "MantidQtAPI/ManageUserDirectories.h"
+#include "MantidKernel/MultiFileNameParser.h"
 
 #include <QDesktopServices>
 #include <QUrl>
-
 
 //Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt
 {
 namespace CustomInterfaces
 {
+
+namespace // anon
+{
+  // Helper function for use with std::transform.
+  std::string toStdString(const QString & qString)
+  {
+    return qString.toStdString();
+  }
+} // anon namespace
 
 DECLARE_SUBWINDOW(IndirectDiffractionReduction);
 
@@ -24,66 +33,113 @@ using namespace MantidQt::CustomInterfaces;
 //----------------------
 ///Constructor
 IndirectDiffractionReduction::IndirectDiffractionReduction(QWidget *parent) :
-  UserSubWindow(parent), m_valInt(NULL), m_valDbl(NULL)
+  UserSubWindow(parent), m_valInt(NULL), m_valDbl(NULL), m_settingsGroup("CustomInterfaces/DEMON")
 {
+}
+
+///Destructor
+IndirectDiffractionReduction::~IndirectDiffractionReduction()
+{
+  saveSettings();
 }
 
 void IndirectDiffractionReduction::demonRun()
 {
-  if ( validateDemon() )
+  if ( !validateDemon() )
   {
-    if ( m_uiForm.cbInst->currentText() != "OSIRIS" )
-    {
-      // MSGDiffractionReduction
-      QString pfile = m_uiForm.cbInst->currentText() + "_diffraction_" + m_uiForm.cbReflection->currentText() + "_Parameters.xml";
-      QString pyInput =
-        "from IndirectDiffractionReduction import MSGDiffractionReducer\n"
-        "reducer = MSGDiffractionReducer()\n"
-        "reducer.set_instrument_name('" + m_uiForm.cbInst->currentText() + "')\n"
-        "reducer.set_detector_range("+m_uiForm.set_leSpecMin->text()+"-1, " +m_uiForm.set_leSpecMax->text()+"-1)\n"
-        "reducer.set_parameter_file('" + pfile + "')\n"
-        "files = [r'" + m_uiForm.dem_rawFiles->getFilenames().join("',r'") + "']\n"
-        "for file in files:\n"
-        "    reducer.append_data_file(file)\n";
+    showInformationBox("Input invalid.");
+    return;
+  }
+
+  if ( m_uiForm.cbInst->currentText() != "OSIRIS" )
+  {
+    // MSGDiffractionReduction
+    QString pfile = m_uiForm.cbInst->currentText() + "_diffraction_" + m_uiForm.cbReflection->currentText() + "_Parameters.xml";
+    QString pyInput =
+      "from IndirectDiffractionReduction import MSGDiffractionReducer\n"
+      "reducer = MSGDiffractionReducer()\n"
+      "reducer.set_instrument_name('" + m_uiForm.cbInst->currentText() + "')\n"
+      "reducer.set_detector_range("+m_uiForm.set_leSpecMin->text()+"-1, " +m_uiForm.set_leSpecMax->text()+"-1)\n"
+      "reducer.set_parameter_file('" + pfile + "')\n"
+      "files = [r'" + m_uiForm.dem_rawFiles->getFilenames().join("',r'") + "']\n"
+      "for file in files:\n"
+      "    reducer.append_data_file(file)\n";
         
-      if ( m_uiForm.dem_ckSumFiles->isChecked() )
-      {
-        pyInput += "reducer.set_sum_files(True)\n";
-      }
-
-      pyInput += "formats = []\n";
-      if ( m_uiForm.ckGSS->isChecked() ) pyInput += "formats.append('gss')\n";
-      if ( m_uiForm.ckNexus->isChecked() ) pyInput += "formats.append('nxs')\n";
-      if ( m_uiForm.ckAscii->isChecked() ) pyInput += "formats.append('ascii')\n";
-
-      QString rebin = m_uiForm.leRebinStart->text() + "," + m_uiForm.leRebinWidth->text() 
-        + "," + m_uiForm.leRebinEnd->text();
-      if ( rebin != ",," )
-      {
-        pyInput += "reducer.set_rebin_string('" + rebin +"')\n";
-      }
-
-      pyInput += "reducer.set_save_formats(formats)\n";
-      pyInput +=
-        "reducer.reduce()\n";
-
-      if ( m_uiForm.cbPlotType->currentText() == "Spectra" )
-      {
-        pyInput += "wslist = reducer.get_result_workspaces()\n"
-          "from mantidplot import *\n"
-          "plotSpectrum(wslist, 0)\n";
-      }
-
-      QString pyOutput = runPythonCode(pyInput).trimmed();
-    }
-    else
+    if ( m_uiForm.dem_ckSumFiles->isChecked() )
     {
-      // OSIRISDiffractionReduction
+      pyInput += "reducer.set_sum_files(True)\n";
     }
+
+    pyInput += "formats = []\n";
+    if ( m_uiForm.ckGSS->isChecked() ) pyInput += "formats.append('gss')\n";
+    if ( m_uiForm.ckNexus->isChecked() ) pyInput += "formats.append('nxs')\n";
+    if ( m_uiForm.ckAscii->isChecked() ) pyInput += "formats.append('ascii')\n";
+
+    QString rebin = m_uiForm.leRebinStart->text() + "," + m_uiForm.leRebinWidth->text() 
+      + "," + m_uiForm.leRebinEnd->text();
+    if ( rebin != ",," )
+    {
+      pyInput += "reducer.set_rebin_string('" + rebin +"')\n";
+    }
+
+    pyInput += "reducer.set_save_formats(formats)\n";
+    pyInput +=
+      "reducer.reduce()\n";
+
+    if ( m_uiForm.cbPlotType->currentText() == "Spectra" )
+    {
+      pyInput += "wslist = reducer.get_result_workspaces()\n"
+        "from mantidplot import *\n"
+        "plotSpectrum(wslist, 0)\n";
+    }
+
+    QString pyOutput = runPythonCode(pyInput).trimmed();
   }
   else
   {
-    showInformationBox("Input invalid.");
+    // Get the files names from MWRunFiles widget, and convert them from Qt forms into stl equivalents.
+    QStringList fileNames = m_uiForm.dem_rawFiles->getFilenames();
+    std::vector<std::string> stlFileNames;
+    stlFileNames.reserve(fileNames.size());
+    std::transform(fileNames.begin(),fileNames.end(),std::back_inserter(stlFileNames), toStdString);
+
+    // Use the file names to suggest a workspace name to use.  Report to logger and stop if unable to parse correctly.
+    QString outputWsName;
+    try
+    {
+      outputWsName = QString::fromStdString(Mantid::Kernel::MultiFileNameParsing::suggestWorkspaceName(stlFileNames));
+    }
+    catch(std::runtime_error)
+    {
+      // @TODO: Deal with this by reporting error to logger.
+      return;
+    }
+
+    QString pyInput = outputWsName + " = OSIRISDiffractionReduction("
+      "Sample=r'" + m_uiForm.dem_rawFiles->getFilenames().join(", ") + "', "
+      "Vanadium=r'" + m_uiForm.dem_vanadiumFile->getFilenames().join(", ") + "', "
+      "CalFile=r'" + m_uiForm.dem_calFile->getFirstFilename() + "')\n";
+    
+    if ( m_uiForm.ckGSS->isChecked() )
+    {
+      pyInput += "ConvertUnits(InputWorkspaceoutputWs, OutputWorkspace='__save_item_temp', Target='TOF')\n";
+      pyInput += "SaveGSS('__save_item_temp', " + outputWsName + ".getName() +'.gss')\n";
+      pyInput += "DeleteWorkspace('__save_item_temp')\n";
+    }
+
+    if ( m_uiForm.ckNexus->isChecked() ) 
+      pyInput += "SaveNexusProcessed(outputWs, " + outputWsName + ".getName() +'.nxs')\n";
+
+    if ( m_uiForm.ckAscii->isChecked() ) 
+      pyInput += "SaveAscii(outputWs, " + outputWsName + ".getName() +'.dat')\n";
+
+    if ( m_uiForm.cbPlotType->currentText() == "Spectra" )
+    {
+      pyInput += "from mantidplot import *\n"
+        "plotSpectrum(outputWs, 0)\n";
+    }
+
+    QString pyOutput = runPythonCode(pyInput).trimmed();
   }
 }
 
@@ -223,13 +279,25 @@ void IndirectDiffractionReduction::initLocalPython()
 void IndirectDiffractionReduction::loadSettings()
 {
   QSettings settings;
-  QString settingsGroup = "CustomInterfaces/DEMON/DataDir";
   QString dataDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories")).split(";")[0];
 
-  settings.beginGroup(settingsGroup);
+  settings.beginGroup(m_settingsGroup);
   settings.setValue("last_directory", dataDir);
   m_uiForm.dem_rawFiles->readSettings(settings.group());
   m_uiForm.dem_calFile->readSettings(settings.group());
+  m_uiForm.dem_calFile->setUserInput(settings.value("last_cal_file").toString());
+  m_uiForm.dem_vanadiumFile->setUserInput(settings.value("last_van_files").toString());
+  settings.endGroup();
+  
+}
+
+void IndirectDiffractionReduction::saveSettings()
+{
+  QSettings settings;
+
+  settings.beginGroup(m_settingsGroup);
+  settings.setValue("last_cal_file", m_uiForm.dem_calFile->getText());
+  settings.setValue("last_van_files", m_uiForm.dem_vanadiumFile->getText());
   settings.endGroup();
 }
 

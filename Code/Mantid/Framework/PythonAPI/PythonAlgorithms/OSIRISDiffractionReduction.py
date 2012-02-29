@@ -13,6 +13,8 @@ from mantidsimple import *
 
 import osiris_diffraction_reducer as odr
 
+import re
+
 class OSIRISDiffractionReduction(PythonAlgorithm):
     """This Python Algorithm handles the reducer for OSIRIS Diffraction Data.
     """
@@ -20,8 +22,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
     def PyInit(self):
         """Initialise algorithm.
         """
-        self.declareListProperty("Sample", int)
-        self.declareListProperty("Vanadium", int)
+        self.declareProperty("Sample", "")
+        self.declareProperty("Vanadium", "")
         self.declareProperty("CalFile", "")
         self.declareWorkspaceProperty("OutputWorkspace", "", Direction.Output)
 
@@ -29,20 +31,27 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         """Execute the reducer. Basically just runs the file finder for the run
         numbers given.
         """
+        
+        print "OutputWorkspace = " + self.getPropertyValue("OutputWorkspace")
+        
         mtd.settings["default.instrument"] = 'OSIRIS'
         if self.getPropertyValue("OutputWorkspace") != "":
             reducer = odr.OsirisDiffractionReducer(
                 OutputWorkspace=self.getPropertyValue("OutputWorkspace"))
         else:
             reducer = odr.OsirisDiffractionReducer()
-
-        for sam in self.getProperty("Sample"): # Sample files
+        
+        # tokenise on commas
+        sams = re.compile(r',').split(self.getProperty("Sample"))
+        vans = re.compile(r',').split(self.getProperty("Vanadium"))
+        
+        for sam in sams:
             try:
                 val = FileFinder.findRuns(str(sam))[0]
             except IndexError:
                 sys.exit("Unable to find run: "+str(sam))
             reducer.append_data_file(val)            
-        for van in self.getProperty("Vanadium"):
+        for van in vans:
             try:
                 val = FileFinder.findRuns(str(van))[0]
             except IndexError:

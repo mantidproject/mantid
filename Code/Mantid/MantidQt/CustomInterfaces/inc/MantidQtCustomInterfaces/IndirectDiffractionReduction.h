@@ -22,6 +22,7 @@ public:
 public:
   /// Default Constructor
   IndirectDiffractionReduction(QWidget *parent = 0);
+  ~IndirectDiffractionReduction();
 
 public slots:
   void demonRun();  
@@ -35,6 +36,7 @@ private:
   virtual void initLayout();
   void initLocalPython();
   void loadSettings();
+  void saveSettings();
 
   bool validateDemon();
 
@@ -43,6 +45,8 @@ private:
   Ui::IndirectDiffractionReduction m_uiForm;
   QIntValidator * m_valInt;
   QDoubleValidator * m_valDbl;
+  /// The settings group
+  QString m_settingsGroup;
 
 };
 
