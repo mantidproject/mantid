@@ -4482,7 +4482,7 @@ void ApplicationWindow::openRecentProject(int index)
     QFileInfo fi(projectname);
     QString pn = fi.absFilePath();
     if (fn == pn){
-      QMessageBox::warning(this, tr("MantidPlot - File openning error"),//Mantid
+      QMessageBox::warning(this, tr("MantidPlot - File open error"),//Mantid
           tr("The file: <p><b> %1 </b><p> is the current file!").arg(fn));
       return;
     }
@@ -4491,6 +4491,8 @@ void ApplicationWindow::openRecentProject(int index)
   if (!fn.isEmpty()){
     saveSettings();//the recent projects must be saved
     bool isSaved = saved;
+    // Have to change the working directory here because that is used when finding the nexus files to load
+    workingDir = QFileInfo(f).absolutePath();
     ApplicationWindow * a = open (fn,false,false);
     if (a && (fn.endsWith(".qti",Qt::CaseInsensitive) || fn.endsWith(".qti~",Qt::CaseInsensitive) ||
         fn.endsWith(".opj",Qt::CaseInsensitive) || fn.endsWith(".ogg", Qt::CaseInsensitive)))
@@ -11458,12 +11460,27 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
     }
     else if( s.contains("MantidMatrixCurve")) //1D plot curves
     {
-      QStringList curvelst=s.split("\t");
+      const QStringList curvelst=s.split("\t");
       if( !curvelst[1].isEmpty()&& !curvelst[2].isEmpty())
       {
         try {
-          PlotCurve *c = new MantidMatrixCurve(curvelst[1],ag,curvelst[3].toInt(),curvelst[4].toInt());
-          if ( curvelst.size() > 5 && !curvelst[5].isEmpty() ) c->setSkipSymbolsCount(curvelst[5].toInt());
+          if ( curvelst.size() < 7 ) // This was the case prior to 29 February, 2012
+          {
+            PlotCurve *c = new MantidMatrixCurve(curvelst[1],ag,curvelst[3].toInt(),curvelst[4].toInt());
+            // Deal with the brief period (Dec 29,2011-Feb 29, 2012) when any skip symbols count was just
+            // stuck as an integer on the end of the of the line
+            if ( curvelst.size() == 6 && !curvelst[5].isEmpty() ) c->setSkipSymbolsCount(curvelst[5].toInt());
+          }
+          else
+          {
+            // Anything saved with a version after 29 February 2012 comes here
+            PlotCurve *c = new MantidMatrixCurve(curvelst[1],ag,curvelst[3].toInt(),curvelst[4].toInt(),
+                                                 curvelst[5].toInt());
+            ag->setCurveType(curveID,curvelst[6].toInt());
+            // Fill in the curve settings and apply them to the created curve
+            CurveLayout cl = fillCurveSettings(curvelst,3);
+            ag->updateCurveLayout(c,&cl);
+          }
         } catch (Mantid::Kernel::Exception::NotFoundError &) {
           // Get here if workspace name is invalid - shouldn't be possible, but just in case
           closeWindow(plot);
@@ -11476,6 +11493,7 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
           closeWindow(plot);
           return 0;
         }
+        curveID++;
       }
     }
     else if (s.left(10) == "Background"){
@@ -11606,38 +11624,8 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
         }
       }
 
-      CurveLayout cl;
-      cl.connectType=curve[4].toInt();
-      cl.lCol=curve[5].toInt();
-      if (d_file_version <= 89)
-        cl.lCol = convertOldToNewColorIndex(cl.lCol);
-      cl.lStyle=curve[6].toInt();
-      cl.lWidth=curve[7].toFloat();
-      cl.sSize=curve[8].toInt();
-      if (d_file_version <= 78)
-        cl.sType=Graph::obsoleteSymbolStyle(curve[9].toInt());
-      else
-        cl.sType=curve[9].toInt();
-
-      cl.symCol=curve[10].toInt();
-      if (d_file_version <= 89)
-        cl.symCol = convertOldToNewColorIndex(cl.symCol);
-      cl.fillCol=curve[11].toInt();
-      if (d_file_version <= 89)
-        cl.fillCol = convertOldToNewColorIndex(cl.fillCol);
-      cl.filledArea=curve[12].toInt();
-      cl.aCol=curve[13].toInt();
-      if (d_file_version <= 89)
-        cl.aCol = convertOldToNewColorIndex(cl.aCol);
-      cl.aStyle=curve[14].toInt();
-      if(curve.count() < 16)
-        cl.penWidth = cl.lWidth;
-      else if ((d_file_version >= 79) && (curve[3].toInt() == Graph::Box))
-        cl.penWidth = curve[15].toFloat();
-      else if ((d_file_version >= 78) && (curve[3].toInt() <= Graph::LineSymbols))
-        cl.penWidth = curve[15].toFloat();
-      else
-        cl.penWidth = cl.lWidth;
+      // Filling of the CurveLayout struct moved out to a separate method for reuse by Mantid curves
+      CurveLayout cl = fillCurveSettings(curve);
 
       int plotType = curve[3].toInt();
       Table *w = app->table(curve[2]);
@@ -16382,6 +16370,49 @@ QString ApplicationWindow::versionString()
   QString version(Mantid::Kernel::MantidVersion::version());
   QString date(Mantid::Kernel::MantidVersion::releaseDate());
   return "This is MantidPlot version " + version + " of " + date;
+}
+
+/** A method to populate the CurveLayout struct on loading a project
+ *  @param curve  The list of numbers corresponding to settings loaded from the project file
+ *  @param offset An offset to add to each index. Used when loading a MantidMatrixCurve
+ *  @return The filled in CurveLayout struct
+ */
+CurveLayout ApplicationWindow::fillCurveSettings(const QStringList curve, unsigned int offset)
+{
+  CurveLayout cl;
+  cl.connectType=curve[4+offset].toInt();
+  cl.lCol=curve[5+offset].toInt();
+  if (d_file_version <= 89)
+    cl.lCol = convertOldToNewColorIndex(cl.lCol);
+  cl.lStyle=curve[6+offset].toInt();
+  cl.lWidth=curve[7+offset].toFloat();
+  cl.sSize=curve[8+offset].toInt();
+  if (d_file_version <= 78)
+    cl.sType=Graph::obsoleteSymbolStyle(curve[9+offset].toInt());
+  else
+    cl.sType=curve[9+offset].toInt();
+
+  cl.symCol=curve[10+offset].toInt();
+  if (d_file_version <= 89)
+    cl.symCol = convertOldToNewColorIndex(cl.symCol);
+  cl.fillCol=curve[11+offset].toInt();
+  if (d_file_version <= 89)
+    cl.fillCol = convertOldToNewColorIndex(cl.fillCol);
+  cl.filledArea=curve[12+offset].toInt();
+  cl.aCol=curve[13+offset].toInt();
+  if (d_file_version <= 89)
+    cl.aCol = convertOldToNewColorIndex(cl.aCol);
+  cl.aStyle=curve[14+offset].toInt();
+  if(curve.count() < 16)
+    cl.penWidth = cl.lWidth;
+  else if ((d_file_version >= 79) && (curve[3+offset].toInt() == Graph::Box))
+    cl.penWidth = curve[15+offset].toFloat();
+  else if ((d_file_version >= 78) && (curve[3+offset].toInt() <= Graph::LineSymbols))
+    cl.penWidth = curve[15+offset].toFloat();
+  else
+    cl.penWidth = cl.lWidth;
+
+  return cl;
 }
 
 int ApplicationWindow::convertOldToNewColorIndex(int cindex)

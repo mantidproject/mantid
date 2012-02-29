@@ -2415,7 +2415,13 @@ QString Graph::saveCurves()
         continue;
 
       if (it->rtti()==QwtPlotItem::Rtti_PlotUserItem){
-        s += dynamic_cast<MantidMatrixCurve*>(it)->saveToString();
+        MantidMatrixCurve * mmc = dynamic_cast<MantidMatrixCurve*>(it);
+        if (!mmc) continue;
+        s += mmc->saveToString();
+        s += saveCurveLayout(i);
+        s += "\n";
+        if (mmc->skipSymbolsCount() > 1)
+          s += "<SkipPoints>" + QString::number(mmc->skipSymbolsCount()) + "</SkipPoints>\n";
         continue;
       }
 

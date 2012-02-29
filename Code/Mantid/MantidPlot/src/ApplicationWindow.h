@@ -1338,6 +1338,9 @@ private:
   bool d_auto_update_table_values;
   int d_matrix_undo_stack_size;
 
+  /// A method to populate the CurveLayout struct on loading a project
+  CurveLayout fillCurveSettings(const QStringList curve, unsigned int offset = 0);
+
   //! Workaround for the new colors introduced in rev 447
   int convertOldToNewColorIndex(int cindex);
 
