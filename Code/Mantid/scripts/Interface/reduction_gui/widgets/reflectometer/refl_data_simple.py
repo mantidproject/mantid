@@ -242,8 +242,8 @@ class DataReflWidget(BaseWidget):
                     if not self._summary.angle_radio.isChecked():
                         angle_str = "%-4.4g"%logs["SANGLE"]
                         self._summary.angle_edit.setText(angle_str.strip())
-                        self._sangle_parameter = logs["SANGLE"]
-                        
+                                            
+                    self._sangle_parameter = logs["SANGLE"]
                     self._detector_distance = logs["DET_DISTANCE"]
                 except:
                     # Could not read in the parameters, skip.
@@ -340,7 +340,7 @@ class DataReflWidget(BaseWidget):
             delta = (dangle-dangle0)/2.0\
                 + ((direct_beam_pix-ref_pix)*PIXEL_SIZE)/ (2.0*self._detector_distance)
             
-            scattering_angle = self._sangle_parameter=delta
+            scattering_angle = self._sangle_parameter-delta
             scattering_angle_str = "%4.2g" % scattering_angle
             self._summary.angle_edit.setText(scattering_angle_str.strip())
      
