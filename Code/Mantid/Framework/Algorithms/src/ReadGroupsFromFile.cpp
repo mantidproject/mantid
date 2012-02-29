@@ -203,10 +203,10 @@ namespace Algorithms
       // Comment, not read
       if (str.empty() || str[0] == '#') continue;
       std::istringstream istr(str);
-      int64_t n,udet,sel,group;
+      int n,udet,sel,group;
       double offset;
       istr >> n >> udet >> offset >> sel >> group;
-      calibration[static_cast<int>(udet)]=std::make_pair<int,int>(static_cast<int>(group),static_cast<int>(sel));
+      calibration[udet] = std::make_pair(group,sel);
     }
     grFile.close();
     progress(0.7);
