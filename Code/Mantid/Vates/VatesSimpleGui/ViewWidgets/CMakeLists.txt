@@ -110,11 +110,6 @@ if( SQUISH_FOUND )
   )
   squish_add_test_suite( ${TEST_SUITES} )
 
-#  squish_suite_envvars( ${TEST_SUITES}
-#    PV_PLUGIN_PATH ${CMAKE_BINARY_DIR}/bin/${PVPLUGINS_DIR}
-#    SCRIPTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/test/mp_scripts
-#    SQUISH_SCRIPT_DIR ${VSI_GLOBAL_SCRIPTS}
-#  )
 endif()
 
 install( TARGETS VatesSimpleGuiViewWidgets ${TARGET_TYPE} DESTINATION ${PLUGINS_DIR} )

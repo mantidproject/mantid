@@ -59,11 +59,6 @@ if( SQUISH_FOUND )
 
   squish_add_test_suite( ${TEST_SUITES} )
 
-#  squish_suite_envvars( ${TEST_SUITES}
-#    PV_PLUGIN_PATH ${CMAKE_BINARY_DIR}/bin/${PVPLUGINS_DIR}
-#    MANTID_AUTOTEST_DATA ${auto_test_dir}
-#    SQUISH_SCRIPT_DIR ${VSI_GLOBAL_SCRIPTS}
-#  )
 endif()
 
 install( TARGETS VatesSimpleGui RUNTIME DESTINATION ${BIN_DIR} )
