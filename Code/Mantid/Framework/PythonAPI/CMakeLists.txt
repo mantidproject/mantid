@@ -8,6 +8,7 @@ set ( SRC_FILES
 	src/PyAlgorithmWrapper.cpp
 	src/PythonInterfaceFunctions.cpp
 	src/PythonWrapper.cpp
+	src/RunPythonScript.cpp
 	src/WorkspaceProxies.cpp
 	src/api_exports.cpp
 	src/geometry_exports.cpp
@@ -24,6 +25,7 @@ set ( INC_FILES
 	inc/MantidPythonAPI/MantidVecHelper.h
 	inc/MantidPythonAPI/PyAlgorithmWrapper.h
 	inc/MantidPythonAPI/PythonInterfaceFunctions.h
+	inc/MantidPythonAPI/RunPythonScript.h
 	inc/MantidPythonAPI/WorkspaceProxies.h
 	inc/MantidPythonAPI/api_exports.h
 	inc/MantidPythonAPI/geometryhelper.h
@@ -38,6 +40,7 @@ set ( PY_FILES MantidFramework.py __init__.py setup.py mantidsimple.py)
 # cxxtest unit tests
 set ( TEST_FILES
 	test/PythonFrameworkTests.h
+	test/RunPythonScriptTest.h
 )
 
 # Python unit tests
@@ -205,9 +208,16 @@ target_link_libraries ( PythonAPI ${PYTHON_DEPS} )
 ###########################################################################
 
 if ( CXXTEST_FOUND )
-  include_directories ( ../TestHelpers/inc ) # For FakeObjects.h
+  include_directories ( ../TestHelpers/inc ../DataObjects/inc )
+
+  # This variable is used within the cxxtest_add_test macro to build these helper classes into the test executable.
+  # It will go out of scope at the end of this file so doesn't need un-setting
+  set ( TESTHELPER_SRCS ../TestHelpers/src/ComponentCreationHelper.cpp 
+                        ../TestHelpers/src/WorkspaceCreationHelper.cpp )
+  
   cxxtest_add_test ( PythonAPITest ${TEST_FILES} )
-  target_link_libraries( PythonAPITest PythonAPI )
+  target_link_libraries( PythonAPITest PythonAPI DataObjects )
+  
   # Specify implicit dependency, but don't link to it
   add_dependencies ( PythonAPITest UserAlgorithms )
   add_dependencies ( FrameworkTests PythonAPITest )
