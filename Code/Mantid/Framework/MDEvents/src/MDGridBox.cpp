@@ -1422,6 +1422,29 @@ namespace MDEvents
     return isMasked;
   }
 
+  ///Setter for masking the box
+  TMDE(
+  void MDGridBox)::mask()
+  {
+    for (size_t i=0; i < numBoxes; ++i)
+    {
+      // Go through each contained box
+      IMDBox<MDE, nd> * box = boxes[i];
+      box->mask();
+    }
+  }
+
+  ///Setter for unmasking the box
+  TMDE(
+  void MDGridBox)::unmask()
+  {
+    for (size_t i=0; i < numBoxes; ++i)
+    {
+      // Go through each contained box
+      IMDBox<MDE, nd> * box = boxes[i];
+      box->unmask();
+    }
+  }
 
 }//namespace MDEvents
 

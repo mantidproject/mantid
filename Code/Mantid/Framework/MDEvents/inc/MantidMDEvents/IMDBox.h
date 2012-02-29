@@ -61,6 +61,12 @@ namespace MDEvents
     /// Getter for the masking
     virtual bool getIsMasked() const = 0;
 
+    ///Setter for masking the box
+    virtual void mask() = 0;
+
+    ///Setter for unmasking the box
+    virtual void unmask() = 0;
+
     // ----------------------------- ISaveable Methods ------------------------------------------------------
 
     /// Save the data - to be overriden

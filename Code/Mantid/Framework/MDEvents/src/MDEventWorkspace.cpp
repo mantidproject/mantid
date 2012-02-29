@@ -17,6 +17,7 @@
 #include "MantidMDEvents/MDSplitBox.h"
 #include <iomanip>
 #include <functional>
+#include <algorithm>
 #include "MantidMDEvents/MDBoxIterator.h"
 #include "MantidKernel/Memory.h"
 
@@ -726,6 +727,34 @@ namespace MDEvents
     x.push_back(  (end-start).norm() );
   }
 
+  /**
+  Setter for the masking region. 
+  Masking is not a compound operation. Old masks will be cleared when calling this.
+  @param maskingRegion : Implicit function defining mask region.
+  */
+  TMDE(
+  void MDEventWorkspace)::setMDMasking(Mantid::Geometry::MDImplicitFunction* maskingRegion)
+  {
+    std::vector<IMDBox<MDE,nd> *> toMaskBoxes;
+    std::vector<IMDBox<MDE,nd> *> allBoxes;
+    std::vector<IMDBox<MDE,nd> *> toNotMaskBoxes;
+    
+    //Clear old masks
+    this->data->getBoxes(allBoxes, 10000, true);
+    for(size_t i = 0; i < allBoxes.size(); ++i)
+    {
+      allBoxes[i]->unmask();
+    }
+
+    //Apply new masks
+    this->data->getBoxes(toMaskBoxes, 10000, true, maskingRegion);
+    for(size_t i = 0; i < toMaskBoxes.size(); ++i)
+    {
+      toMaskBoxes[i]->mask();
+    }
+
+    delete maskingRegion;
+  }
 
 }//namespace MDEvents
 

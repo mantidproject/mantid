@@ -49,6 +49,8 @@ private:
   {
   public:
     MOCK_CONST_METHOD0(getIsMasked, bool());
+    MOCK_METHOD0(mask, void());
+    MOCK_METHOD0(unmask, void());
   };
 
 public:
@@ -1404,6 +1406,50 @@ public:
     g.setChildren(boxes, 0, 2);
 
     TSM_ASSERT("Second inner box masked, so should return masked", g.getIsMasked());
+    TS_ASSERT(Mock::VerifyAndClearExpectations(a));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(b));
+  }
+
+  void test_mask()
+  {
+    std::vector<IMDBox<MDLeanEvent<1>, 1> *> boxes;
+
+    MockMDBox* a = new MockMDBox;
+    MockMDBox* b = new MockMDBox;
+
+    EXPECT_CALL(*a, mask()).Times(1); 
+    EXPECT_CALL(*b, mask()).Times(1); 
+
+    boxes.push_back(a);
+    boxes.push_back(b);
+
+    MDGridBox<MDLeanEvent<1>,1> griddedBox;
+    griddedBox.setChildren(boxes, 0, 2);
+
+    TS_ASSERT_THROWS_NOTHING(griddedBox.mask());//Mask the gridded box
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(a));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(b));
+  }
+
+  void test_unmask()
+  {
+    std::vector<IMDBox<MDLeanEvent<1>, 1> *> boxes;
+
+    MockMDBox* a = new MockMDBox;
+    MockMDBox* b = new MockMDBox;
+
+    EXPECT_CALL(*a, unmask()).Times(1); 
+    EXPECT_CALL(*b, unmask()).Times(1); 
+
+    boxes.push_back(a);
+    boxes.push_back(b);
+
+    MDGridBox<MDLeanEvent<1>,1> griddedBox;
+    griddedBox.setChildren(boxes, 0, 2);
+
+    TS_ASSERT_THROWS_NOTHING(griddedBox.unmask());//Un-Mask the gridded box
+
     TS_ASSERT(Mock::VerifyAndClearExpectations(a));
     TS_ASSERT(Mock::VerifyAndClearExpectations(b));
   }

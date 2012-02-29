@@ -351,8 +351,8 @@ namespace MDEvents
     virtual std::vector<signal_t> getSignalDataVector() const;
     virtual std::vector<signal_t> getErrorDataVector() const;
 
-
-
+    //Apply masking.
+    void setMDMasking(Mantid::Geometry::MDImplicitFunction* maskingRegion);
 
   private:
 

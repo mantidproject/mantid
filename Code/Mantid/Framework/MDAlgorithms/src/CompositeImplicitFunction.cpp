@@ -106,44 +106,6 @@ namespace Mantid
           return evalResult;
         }
 
-        /** Comparison operator */
-        bool CompositeImplicitFunction::operator==(const CompositeImplicitFunction &other) const
-        {
-
-            bool evalResult = false;
-            if(other.getNFunctions() != this->getNFunctions() )
-            {
-                evalResult = false;
-            }
-            else if(other.getNFunctions() == 0)
-            {
-                evalResult = false;
-            }
-            else
-            {
-                for(size_t i = 0; i < this->m_Functions.size(); i++)
-                {
-                    evalResult = false; //TODO call equals operations on nested implicit functions.
-                    if(!evalResult)
-                    {
-                        break;
-                    }
-                }
-            }
-            return evalResult;
-        }
-
-        //TODO. retire this function, call evaluate instead!
-        std::vector<Mantid::Geometry::MDImplicitFunction_sptr > CompositeImplicitFunction::getFunctions() const
-        {
-          return this->m_Functions;
-        }
-            
-        bool CompositeImplicitFunction::operator!=(const CompositeImplicitFunction &other) const
-        {
-            return !(*this == other);
-        }
-
 
     }
 }

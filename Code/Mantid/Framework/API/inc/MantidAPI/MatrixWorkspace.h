@@ -295,6 +295,8 @@ namespace Mantid
       void saveInstrumentNexus(::NeXus::File * file) const;
       void loadInstrumentNexus(::NeXus::File * file);
 
+       //Apply masking.
+       void setMDMasking(Mantid::Geometry::MDImplicitFunction* maskingRegion);
 
     protected:
       MatrixWorkspace(Mantid::Geometry::INearestNeighboursFactory* factory = new Mantid::Geometry::NearestNeighboursFactory);

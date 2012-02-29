@@ -1748,6 +1748,15 @@ namespace Mantid
       file->closeGroup();
     }
 
+    /*
+    MDMasking for a Matrix Workspace has not been implemented.
+    @param : 
+    */
+    void  MatrixWorkspace::setMDMasking(Mantid::Geometry::MDImplicitFunction*)
+    {
+      throw std::runtime_error("MatrixWorkspace::setMDMasking has no implementation");
+    }
+
 
   } // namespace API
 } // Namespace Mantid

@@ -201,6 +201,12 @@ namespace MDEvents
 
     void transformDimensions(std::vector<double> & scaling, std::vector<double> & offset);
 
+    ///Setter for masking the box
+    void mask();
+
+    ///Setter for unmasking the box
+    void unmask();
+
   protected:
 
     inline void loadEvents() const;

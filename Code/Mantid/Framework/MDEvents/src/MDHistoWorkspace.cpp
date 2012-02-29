@@ -1162,6 +1162,16 @@ namespace MDEvents
     }
   }
 
+  /**
+  Setter for the masking region. 
+  @param maskingRegion : Implicit function defining mask region.
+  */
+  void MDHistoWorkspace::setMDMasking(Mantid::Geometry::MDImplicitFunction* maskingRegion)
+  {
+    UNUSED_ARG(maskingRegion);
+    throw std::runtime_error("MDHistoWorkspace::setMDMasking not implemented yet.");
+  }
+
 
 } // namespace Mantid
 } // namespace MDEvents

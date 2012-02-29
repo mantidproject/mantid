@@ -758,6 +758,20 @@ namespace MDEvents
     this->releaseEvents();
   }
 
+    ///Setter for masking the box
+  TMDE(
+  void MDBox)::mask()
+  {
+    m_bIsMasked = true;
+  }
+
+  ///Setter for unmasking the box
+  TMDE(
+  void MDBox)::unmask()
+  {
+    m_bIsMasked = false;
+  }
+
 
 
 }//namespace MDEvents

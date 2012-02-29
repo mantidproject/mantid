@@ -89,6 +89,16 @@ public:
     throw std::runtime_error("IMDBoxTester does not implement getIsMasked");
   }
 
+  virtual void mask()
+  {
+    throw std::runtime_error("IMDBoxTester does not implement mask");
+  }
+
+  virtual void unmask()
+  {
+    throw std::runtime_error("IMDBoxTester does not implement unmask");
+  }
+
   uint64_t getFilePosition() const
   { return m_filePos; }
   uint64_t m_filePos;
