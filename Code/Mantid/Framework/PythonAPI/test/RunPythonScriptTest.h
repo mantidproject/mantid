@@ -53,13 +53,13 @@ public:
     return outWs;
   }
 
-  void test_doNothing()
+  void xtest_doNothing()
   {
     // Empty code string.
     MatrixWorkspace_sptr ws = doRun("", "inputName");
   }
 
-  void test_do_simplePlus()
+  void xtest_do_simplePlus()
   {
     std::string code =
         "Plus(LHSWorkspace=input, RHSWorkspace=input, OutputWorkspace=output)\n"
