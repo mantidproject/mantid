@@ -43,10 +43,21 @@ class RefMReduction(PythonAlgorithm):
         self.declareProperty("QMin", 0.0025, Description="Minimum Q-value")
         self.declareProperty("QStep", -0.01, Description="Step-size in Q. Enter a negative value to get a log scale.")
         self.declareProperty("Theta", 0.0, Description="Scattering angle (degrees)")
-        self.declareProperty("CenterPixel", 0.0, Description="Center pixel of the specular peak")
+        self.declareProperty("ReflectivityPixel", 0.0, Description="Reflectivity pixel of the specular peak (REFPIX)")
         self.declareProperty("WavelengthMin", 2.5)
         self.declareProperty("WavelengthMax", 6.5)
         self.declareProperty("WavelengthStep", 0.1)
+        
+        self.declareProperty("SetDetectorAngle", False,
+                             Description="If true, the DANGLE parameter will be replace by the given value")
+        self.declareProperty("DetectorAngle", 0.0)
+        self.declareProperty("SetDetectorAngle0", False,
+                             Description="If true, the DANGLE0 parameter will be replace by the given value")
+        self.declareProperty("DetectorAngle0", 0.0)
+        self.declareProperty("SetDirectPixel", False,
+                             Description="If true, the DIRPIX parameter will be replace by the given value")
+        self.declareProperty("DirectPixel", 0.0)
+        
         self.declareProperty("RemoveIntermediateWorkspaces", True)
         # Output workspace to put the transmission histo into
         self.declareWorkspaceProperty("OutputWorkspace", "", Direction.Output)
@@ -87,23 +98,33 @@ class RefMReduction(PythonAlgorithm):
             sangle = mtd[workspace].getRun().getProperty("SANGLE").value[0]
             
         dangle = 0
-        if mtd[workspace].getRun().hasProperty("DANGLE"):
-            dangle = mtd[workspace].getRun().getProperty("DANGLE").value[0]
+        if self.getProperty("SetDetectorAngle"):
+            dangle = self.getProperty("DetectorAngle")
+        else:
+            if mtd[workspace].getRun().hasProperty("DANGLE"):
+                dangle = mtd[workspace].getRun().getProperty("DANGLE").value[0]
             
         dangle0 = 0
-        if mtd[workspace].getRun().hasProperty("DANGLE0"):
-            dangle0 = mtd[workspace].getRun().getProperty("DANGLE0").value[0]
+        if self.getProperty("SetDetectorAngle0"):
+            dangle0 = self.getProperty("DetectorAngle0")
+        else:
+            if mtd[workspace].getRun().hasProperty("DANGLE0"):
+                dangle0 = mtd[workspace].getRun().getProperty("DANGLE0").value[0]
             
         det_distance = mtd[workspace].getInstrument().getDetector(0).getPos().getZ()
 
         direct_beam_pix = 0
-        if mtd[workspace].getRun().hasProperty("DIRPIX"):
-            direct_beam_pix = mtd[workspace].getRun().getProperty("DIRPIX").value[0]
         
-        center_pix = int(self.getProperty("CenterPixel"))
+        if self.getProperty("SetDirectPixel"):
+            direct_beam_pix = self.getProperty("DirectPixel")
+        else:
+            if mtd[workspace].getRun().hasProperty("DIRPIX"):
+                direct_beam_pix = mtd[workspace].getRun().getProperty("DIRPIX").value[0]
+        
+        ref_pix = int(self.getProperty("ReflectivityPixel"))
         
         delta = (dangle-dangle0)/2.0\
-            + ((direct_beam_pix-center_pix)*RefMReduction.PIXEL_SIZE)/ (2.0*det_distance)
+            + ((direct_beam_pix-ref_pix)*RefMReduction.PIXEL_SIZE)/ (2.0*det_distance)
         
         return sangle-delta
         

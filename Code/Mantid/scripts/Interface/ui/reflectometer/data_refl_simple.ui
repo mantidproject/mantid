@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1298</width>
-    <height>1461</height>
+    <height>1303</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -37,7 +37,7 @@
         <x>0</x>
         <y>0</y>
         <width>1280</width>
-        <height>1443</height>
+        <height>1285</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -185,6 +185,12 @@ Drag items to change the reduction order.</string>
                </item>
                <item>
                 <widget class="QGroupBox" name="groupBox">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="title">
                   <string>Data Set</string>
                  </property>
@@ -293,6 +299,9 @@ Drag items to change the reduction order.</string>
                         <width>50</width>
                         <height>16777215</height>
                        </size>
+                      </property>
+                      <property name="text">
+                       <string>0</string>
                       </property>
                      </widget>
                     </item>
@@ -778,6 +787,9 @@ Drag items to change the reduction order.</string>
                         <height>16777215</height>
                        </size>
                       </property>
+                      <property name="text">
+                       <string>0</string>
+                      </property>
                      </widget>
                     </item>
                     <item>
@@ -963,6 +975,9 @@ Drag items to change the reduction order.</string>
                         <height>0</height>
                        </size>
                       </property>
+                      <property name="text">
+                       <string>0</string>
+                      </property>
                      </widget>
                     </item>
                     <item>
@@ -1034,6 +1049,9 @@ Drag items to change the reduction order.</string>
                         <width>50</width>
                         <height>16777215</height>
                        </size>
+                      </property>
+                      <property name="text">
+                       <string>0</string>
                       </property>
                      </widget>
                     </item>
@@ -1143,6 +1161,9 @@ Drag items to change the reduction order.</string>
                         <height>16777215</height>
                        </size>
                       </property>
+                      <property name="text">
+                       <string>0</string>
+                      </property>
                      </widget>
                     </item>
                     <item>
@@ -1211,6 +1232,9 @@ Drag items to change the reduction order.</string>
                         <width>50</width>
                         <height>16777215</height>
                        </size>
+                      </property>
+                      <property name="text">
+                       <string>0</string>
                       </property>
                      </widget>
                     </item>
@@ -1293,7 +1317,7 @@ Drag items to change the reduction order.</string>
                        </size>
                       </property>
                       <property name="text">
-                       <string>Reference pixel</string>
+                       <string>Reflectivity pixel</string>
                       </property>
                      </widget>
                     </item>
@@ -1311,19 +1335,25 @@ Drag items to change the reduction order.</string>
                         <height>16777215</height>
                        </size>
                       </property>
+                      <property name="statusTip">
+                       <string>Reflectivity pixel</string>
+                      </property>
+                      <property name="text">
+                       <string>0</string>
+                      </property>
                      </widget>
                     </item>
                     <item>
                      <widget class="QLabel" name="ref_pix_estimate">
                       <property name="minimumSize">
                        <size>
-                        <width>40</width>
+                        <width>120</width>
                         <height>0</height>
                        </size>
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>40</width>
+                        <width>120</width>
                         <height>16777215</height>
                        </size>
                       </property>
@@ -1336,23 +1366,19 @@ Drag items to change the reduction order.</string>
                      </widget>
                     </item>
                     <item>
-                     <spacer name="horizontalSpacer_22">
-                      <property name="orientation">
-                       <enum>Qt::Horizontal</enum>
-                      </property>
-                      <property name="sizeType">
-                       <enum>QSizePolicy::Fixed</enum>
-                      </property>
-                      <property name="sizeHint" stdset="0">
+                     <widget class="QRadioButton" name="angle_radio">
+                      <property name="minimumSize">
                        <size>
-                        <width>30</width>
-                        <height>20</height>
+                        <width>190</width>
+                        <height>0</height>
                        </size>
                       </property>
-                     </spacer>
-                    </item>
-                    <item>
-                     <widget class="QRadioButton" name="angle_radio">
+                      <property name="maximumSize">
+                       <size>
+                        <width>190</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
                       <property name="text">
                        <string>Scattering angle</string>
                       </property>
@@ -1362,15 +1388,18 @@ Drag items to change the reduction order.</string>
                      <widget class="QLineEdit" name="angle_edit">
                       <property name="minimumSize">
                        <size>
-                        <width>80</width>
+                        <width>50</width>
                         <height>0</height>
                        </size>
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>80</width>
+                        <width>50</width>
                         <height>16777215</height>
                        </size>
+                      </property>
+                      <property name="statusTip">
+                       <string>Scattering angle (corrected SANGLE)</string>
                       </property>
                       <property name="text">
                        <string>0.0</string>
@@ -1388,6 +1417,228 @@ Drag items to change the reduction order.</string>
                      <spacer name="horizontalSpacer_21">
                       <property name="orientation">
                        <enum>Qt::Horizontal</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>40</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                   </layout>
+                  </item>
+                  <item>
+                   <layout class="QHBoxLayout" name="horizontalLayout_20">
+                    <property name="spacing">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QCheckBox" name="det_angle_check">
+                      <property name="minimumSize">
+                       <size>
+                        <width>170</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>170</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
+                      <property name="toolTip">
+                       <string>Detector angle (DANGLE)</string>
+                      </property>
+                      <property name="text">
+                       <string>Detector angle</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLineEdit" name="det_angle_edit">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>50</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>50</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
+                      <property name="toolTip">
+                       <string/>
+                      </property>
+                      <property name="statusTip">
+                       <string>Detector angle (DANGLE)</string>
+                      </property>
+                      <property name="text">
+                       <string>0.0</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="det_angle_unit_label">
+                      <property name="minimumSize">
+                       <size>
+                        <width>120</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>120</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
+                      <property name="text">
+                       <string>  degrees</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QCheckBox" name="det_angle_offset_check">
+                      <property name="minimumSize">
+                       <size>
+                        <width>190</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>190</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
+                      <property name="toolTip">
+                       <string>Detector angle reference (DANGLE0)</string>
+                      </property>
+                      <property name="statusTip">
+                       <string/>
+                      </property>
+                      <property name="text">
+                       <string>Det angle reference</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLineEdit" name="det_angle_offset_edit">
+                      <property name="minimumSize">
+                       <size>
+                        <width>50</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>50</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
+                      <property name="toolTip">
+                       <string/>
+                      </property>
+                      <property name="statusTip">
+                       <string>Detector angle reference (DANGLE0)</string>
+                      </property>
+                      <property name="text">
+                       <string>0.0</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="det_angle_offset_unit_label">
+                      <property name="text">
+                       <string>  degrees</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="horizontalSpacer_4">
+                      <property name="orientation">
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>40</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                   </layout>
+                  </item>
+                  <item>
+                   <layout class="QHBoxLayout" name="horizontalLayout_21">
+                    <property name="spacing">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QCheckBox" name="direct_pixel_check">
+                      <property name="minimumSize">
+                       <size>
+                        <width>170</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>170</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
+                      <property name="toolTip">
+                       <string>Direct beam pixel (DIRPIX)</string>
+                      </property>
+                      <property name="whatsThis">
+                       <string/>
+                      </property>
+                      <property name="text">
+                       <string>Direct pixel</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLineEdit" name="direct_pixel_edit">
+                      <property name="minimumSize">
+                       <size>
+                        <width>50</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>50</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
+                      <property name="toolTip">
+                       <string/>
+                      </property>
+                      <property name="statusTip">
+                       <string>Direct beam pixel (DIRPIX)</string>
+                      </property>
+                      <property name="text">
+                       <string>0.0</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="horizontalSpacer_5">
+                      <property name="orientation">
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                      <property name="sizeType">
+                       <enum>QSizePolicy::Expanding</enum>
                       </property>
                       <property name="sizeHint" stdset="0">
                        <size>
@@ -1538,6 +1789,9 @@ Drag items to change the reduction order.</string>
                         <width>50</width>
                         <height>16777215</height>
                        </size>
+                      </property>
+                      <property name="text">
+                       <string>0</string>
                       </property>
                      </widget>
                     </item>
@@ -2023,6 +2277,9 @@ Drag items to change the reduction order.</string>
                         <height>16777215</height>
                        </size>
                       </property>
+                      <property name="text">
+                       <string>0</string>
+                      </property>
                      </widget>
                     </item>
                     <item>
@@ -2205,6 +2462,9 @@ Drag items to change the reduction order.</string>
                         <height>0</height>
                        </size>
                       </property>
+                      <property name="text">
+                       <string>0</string>
+                      </property>
                      </widget>
                     </item>
                     <item>
@@ -2314,6 +2574,9 @@ Drag items to change the reduction order.</string>
                         <height>16777215</height>
                        </size>
                       </property>
+                      <property name="text">
+                       <string>0</string>
+                      </property>
                      </widget>
                     </item>
                     <item>
@@ -2422,6 +2685,9 @@ Drag items to change the reduction order.</string>
                         <height>16777215</height>
                        </size>
                       </property>
+                      <property name="text">
+                       <string>0</string>
+                      </property>
                      </widget>
                     </item>
                     <item>
@@ -2478,6 +2744,9 @@ Drag items to change the reduction order.</string>
                         <width>50</width>
                         <height>16777215</height>
                        </size>
+                      </property>
+                      <property name="text">
+                       <string>0</string>
                       </property>
                      </widget>
                     </item>
@@ -2597,6 +2866,9 @@ Drag items to change the reduction order.</string>
                      <height>16777215</height>
                     </size>
                    </property>
+                   <property name="text">
+                    <string>0</string>
+                   </property>
                   </widget>
                  </item>
                  <item>
@@ -2650,6 +2922,9 @@ Drag items to change the reduction order.</string>
                      <width>80</width>
                      <height>16777215</height>
                     </size>
+                   </property>
+                   <property name="text">
+                    <string>0</string>
                    </property>
                   </widget>
                  </item>
@@ -2891,6 +3166,9 @@ p, li { white-space: pre-wrap; }
                         <height>16777215</height>
                        </size>
                       </property>
+                      <property name="text">
+                       <string>0</string>
+                      </property>
                      </widget>
                     </item>
                     <item>
@@ -2944,6 +3222,9 @@ p, li { white-space: pre-wrap; }
                         <width>80</width>
                         <height>16777215</height>
                        </size>
+                      </property>
+                      <property name="text">
+                       <string>0</string>
                       </property>
                      </widget>
                     </item>
@@ -3030,6 +3311,9 @@ p, li { white-space: pre-wrap; }
                         <height>16777215</height>
                        </size>
                       </property>
+                      <property name="text">
+                       <string>0</string>
+                      </property>
                      </widget>
                     </item>
                     <item>
@@ -3052,6 +3336,9 @@ p, li { white-space: pre-wrap; }
                         <width>80</width>
                         <height>16777215</height>
                        </size>
+                      </property>
+                      <property name="text">
+                       <string>0</string>
                       </property>
                      </widget>
                     </item>

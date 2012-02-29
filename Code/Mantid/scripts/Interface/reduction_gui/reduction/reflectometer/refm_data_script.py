@@ -10,12 +10,12 @@ class DataSets(BaseScriptElement):
 
     DataPeakPixels = [215, 225]
     DataBackgroundFlag = False
-    DataBackgroundRoi = [115, 137,123, 137]
+    DataBackgroundRoi = [115, 137, 123, 137]
     DataTofRange = [10700., 24500.]
     crop_TOF_range = True
     
     data_x_range_flag = True
-    data_x_range = [115,210]
+    data_x_range = [115, 210]
     
     norm_x_range_flag = True
     norm_x_range = [90, 160]
@@ -37,6 +37,14 @@ class DataSets(BaseScriptElement):
     theta = 0.0
     center_pixel = 220
     use_center_pixel = False
+    
+    # Sample log overwrites
+    set_detector_angle = False
+    detector_angle = 0.0
+    set_detector_angle_offset = False
+    detector_angle_offset = 0.0
+    set_direct_pixel = False
+    direct_pixel = 0.0
 
     def __init__(self):
         super(DataSets, self).__init__()
@@ -50,7 +58,7 @@ class DataSets(BaseScriptElement):
         if for_automated_reduction:
             return self._automated_reduction()
         
-        script =  "RefMReduction(RunNumbers=%s,\n" % ','.join([str(i) for i in self.data_files])
+        script = "RefMReduction(RunNumbers=%s,\n" % ','.join([str(i) for i in self.data_files])
         script += "              NormalizationRunNumber=%d,\n" % self.norm_file
         script += "              SignalPeakPixelRange=%s,\n" % str(self.DataPeakPixels)
         script += "              SubtractSignalBackground=%s,\n" % str(self.DataBackgroundFlag)
@@ -75,7 +83,7 @@ class DataSets(BaseScriptElement):
         
         # Angle offset
         if self.use_center_pixel:
-            script += "              CenterPixel=%s,\n" % str(self.center_pixel)
+            script += "              ReflectivityPixel=%s,\n" % str(self.center_pixel)
         else:
             script += "              Theta=%s,\n" % str(self.theta)
             
@@ -87,7 +95,7 @@ class DataSets(BaseScriptElement):
         return script
 
     def _automated_reduction(self):
-        script =  "# REF_M automated reduction\n"
+        script = "# REF_M automated reduction\n"
         
         script += "estimates = RefEstimates(RunNumber=runNumber)\n"
         script += "peak_min = estimates.getProperty('PeakMin').value\n"
@@ -116,7 +124,7 @@ class DataSets(BaseScriptElement):
             
         script += "              QMin=%s,\n" % str(self.q_min)
         script += "              QStep=%s,\n" % str(self.q_step)
-        script += "              CenterPixel=ref_pixel,\n"
+        script += "              ReflectivityPixel=ref_pixel,\n"
             
         # The output should be slightly different if we are generating
         # a script for the automated reduction
@@ -134,7 +142,7 @@ class DataSets(BaseScriptElement):
         """
             Create XML from the current data.
         """
-        xml  = "<RefMData>\n"
+        xml = "<RefMData>\n"
         xml += "<from_peak_pixels>%s</from_peak_pixels>\n" % str(self.DataPeakPixels[0])
         xml += "<to_peak_pixels>%s</to_peak_pixels>\n" % str(self.DataPeakPixels[1])
         xml += "<background_flag>%s</background_flag>\n" % str(self.DataBackgroundFlag)
@@ -171,6 +179,14 @@ class DataSets(BaseScriptElement):
         xml += "<center_pixel>%s</center_pixel>\n" % str(self.center_pixel)
         xml += "<use_center_pixel>%s</use_center_pixel>\n" % str(self.use_center_pixel)
         
+        # Sample log overwrites
+        xml += "<set_detector_angle>%s</set_detector_angle>\n" % str(self.set_detector_angle)
+        xml += "<detector_angle>%s</detector_angle>\n" % str(self.detector_angle)
+        xml += "<set_detector_angle_offset>%s</set_detector_angle_offset>\n" % str(self.set_detector_angle_offset)
+        xml += "<detector_angle_offset>%s</detector_angle_offset>\n" % str(self.detector_angle_offset)
+        xml += "<set_direct_pixel>%s</set_direct_pixel>\n" % str(self.set_direct_pixel)
+        xml += "<direct_pixel>%s</direct_pixel>\n" % str(self.direct_pixel)
+        
         xml += "</RefMData>\n"
 
         return xml
@@ -180,7 +196,7 @@ class DataSets(BaseScriptElement):
         dom = xml.dom.minidom.parseString(xml_str)
         self.from_xml_element(dom)
         element_list = dom.getElementsByTagName("RefMData")
-        if len(element_list)>0:
+        if len(element_list) > 0:
             instrument_dom = element_list[0]
 
     def from_xml_element(self, instrument_dom):
@@ -237,8 +253,8 @@ class DataSets(BaseScriptElement):
                                BaseScriptElement.getIntElement(instrument_dom, "norm_to_peak_pixels")]
 
         #background flag
-        self.NormBackgroundFlag = BaseScriptElement.getBoolElement(instrument_dom, 
-                                                                   "norm_background_flag", 
+        self.NormBackgroundFlag = BaseScriptElement.getBoolElement(instrument_dom,
+                                                                   "norm_background_flag",
                                                                    default=DataSets.NormBackgroundFlag)
         
         #background from/to pixels
@@ -254,9 +270,29 @@ class DataSets(BaseScriptElement):
         # scattering angle
         self.theta = BaseScriptElement.getFloatElement(instrument_dom, "theta", default=DataSets.theta)
         self.center_pixel = BaseScriptElement.getFloatElement(instrument_dom, "center_pixel", default=DataSets.center_pixel)
-        self.use_center_pixel = BaseScriptElement.getBoolElement(instrument_dom, 
-                                                                 "use_center_pixel", 
+        self.use_center_pixel = BaseScriptElement.getBoolElement(instrument_dom,
+                                                                 "use_center_pixel",
                                                                  default=DataSets.use_center_pixel)
+        
+        # Sample log overwrites
+        self.set_detector_angle = BaseScriptElement.getBoolElement(instrument_dom,
+                                                                   "set_detector_angle",
+                                                                   default=DataSets.set_detector_angle)
+        self.detector_angle = BaseScriptElement.getFloatElement(instrument_dom,
+                                                                "detector_angle",
+                                                                default=DataSets.detector_angle)
+        self.set_detector_angle_offset = BaseScriptElement.getBoolElement(instrument_dom,
+                                                                          "set_detector_angle_offset",
+                                                                          default=DataSets.set_detector_angle_offset)
+        self.detector_angle_offset = BaseScriptElement.getFloatElement(instrument_dom,
+                                                                       "detector_angle_offset",
+                                                                       default=DataSets.detector_angle_offset)
+        self.set_direct_pixel = BaseScriptElement.getBoolElement(instrument_dom,
+                                                                 "set_direct_pixel",
+                                                                 default=DataSets.set_direct_pixel)
+        self.direct_pixel = BaseScriptElement.getFloatElement(instrument_dom,
+                                                              "direct_pixel",
+                                                              default=DataSets.direct_pixel)
         
     def reset(self):
         """
@@ -287,3 +323,12 @@ class DataSets(BaseScriptElement):
         self.theta = DataSets.theta
         self.center_pixel = DataSets.center_pixel
         self.use_center_pixel = DataSets.use_center_pixel
+        
+        # Sample log overwrites
+        self.set_detector_angle = DataSets.set_detector_angle
+        self.detector_angle = DataSets.detector_angle
+        self.set_detector_angle_offset = DataSets.set_detector_angle_offset
+        self.detector_angle_offset = DataSets.detector_angle_offset
+        self.set_direct_pixel = DataSets.set_direct_pixel
+        self.direct_pixel = DataSets.direct_pixel
+
