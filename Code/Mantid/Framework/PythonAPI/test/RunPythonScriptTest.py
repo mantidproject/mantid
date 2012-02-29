@@ -14,15 +14,25 @@ class RunPythonScriptTest(unittest.TestCase):
     def setUp(self):
         CreateWorkspace(OutputWorkspace='ws',DataX='1,2,3,4',DataY='1,2,3',DataE='1,2,3')
         
-    def test_emptyCode(self):
-        code = ""
-        RunPythonScript(InputWorkspace="ws", Code=code, OutputWorkspace='ws')
+    def test_emptyCode_inPlace(self):
+        RunPythonScript(InputWorkspace="ws", Code="", OutputWorkspace='ws')
         ws_out = mtd['ws']
-        
-        # Nothing was done to ws_out, which now points to ws
         self.assertAlmostEqual(ws_out.dataY(0)[0], 1.0, 3)
-        self.assertAlmostEqual(ws_out.dataY(0)[1], 2.0, 3)
-        self.assertAlmostEqual(ws_out.dataY(0)[2], 3.0, 3)
+        
+        
+    def test_emptyCode(self):
+        # When not done in-place and the script forgot to do anything,
+        # then RunPythonScript() clones the input
+        code = ""
+        RunPythonScript(InputWorkspace="ws", Code="", OutputWorkspace='ws_out')
+        ws = mtd['ws']
+        ws_out = mtd['ws_out']
+        # We can change the output
+        ws_out.dataY(0)[0] = 123.0
+        self.assertAlmostEqual(ws_out.dataY(0)[0], 123.0, 3)
+        # Without modifying the original, because it was cloned.
+        self.assertAlmostEqual(ws.dataY(0)[0], 1.0, 3)
+        
         
     def test_simplePlus(self):
         code = """

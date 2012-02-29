@@ -50,8 +50,15 @@ class RunPythonScript(PythonAlgorithm):
         # Run the script code passed
         exec(code)
 
-        # 3. Set result
-        wsOut = mtd[output]
+        if mtd.workspaceExists(output):
+            # The script did create the workspace; use it
+            wsOut = mtd[output]
+        else:
+            # The script did NOT create it
+            # So we take care of cloning it so that the output is valid
+            CloneWorkspace(InputWorkspace=wsInputName, OutputWorkspace=wsOutputName)
+            wsOut = mtd[wsOutputName]
+            
         self.setProperty("OutputWorkspace",wsOut)
 
         return
