@@ -42,6 +42,11 @@ def activate_vsi():
     vsi = get_vsi();
     activateItem(vsi)
     
+def view_filter(bname):
+    waitForObject(":splitter_2.splitter_QSplitter")
+    full_name = ":splitter_2.%s_QPushButton" % bname
+    clickButton(waitForObject(full_name))
+    
 def switch_mode(mode):
     clickButton(waitForObject(":Vates Simple Interface.%sButton_QPushButton" % mode))
     
