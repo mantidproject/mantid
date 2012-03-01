@@ -1632,11 +1632,6 @@ Mantid::API::IAlgorithm_sptr MantidUI::createAlgorithm(const QString& algName, i
 
 bool MantidUI::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg, const bool wait)
 {
-  if( m_algMonitor )  
-  { 
-    m_algMonitor->add(alg); 
-  }
-
   if( wait )
   {
     Poco::ActiveResult<bool> result(alg->executeAsync()); 
@@ -1701,7 +1696,6 @@ void MantidUI::executeDownloadDataFiles(const std::vector<std::string>& filenNam
     m_appWindow->writeToLogWindow(QString::fromStdString(e.what()), true);
     return;
   }
-  m_algMonitor->add(alg);
 
   try
   {

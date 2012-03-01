@@ -20,10 +20,13 @@ AlgorithmMonitor::AlgorithmMonitor(MantidUI *m) :
 m_finishedObserver(*this, &AlgorithmMonitor::handleAlgorithmFinishedNotification),
 m_progressObserver(*this, &AlgorithmMonitor::handleAlgorithmProgressNotification),
 m_errorObserver(*this, &AlgorithmMonitor::handleAlgorithmErrorNotification),
+m_startingObserver(*this, &AlgorithmMonitor::handleAlgorithmStartingNotification),
 m_mantidUI(m), m_nRunning(0)
 {
+  AlgorithmManager::Instance().notificationCenter.addObserver(m_startingObserver);
   m_monitorDlg = new MonitorDlg(m_mantidUI->appWindow(), this);
   m_monitorDlg->setVisible(false);
+
 }
 
 AlgorithmMonitor::~AlgorithmMonitor()
@@ -37,6 +40,7 @@ AlgorithmMonitor::~AlgorithmMonitor()
   wait(1000);
   exit();
   wait();
+  AlgorithmManager::Instance().notificationCenter.removeObserver(m_startingObserver);
 }
 
 void AlgorithmMonitor::add(Mantid::API::IAlgorithm_sptr alg)
@@ -79,13 +83,23 @@ void AlgorithmMonitor::handleAlgorithmFinishedNotification(const Poco::AutoPtr<A
 
 void AlgorithmMonitor::handleAlgorithmProgressNotification(const Poco::AutoPtr<Algorithm::ProgressNotification>& pNf)
 {
-    emit needUpdateProgress(pNf->algorithm()->getAlgorithmID(),static_cast<double>(pNf->progress*100), QString::fromStdString(pNf->message),
+  emit needUpdateProgress(pNf->algorithm()->getAlgorithmID(),static_cast<double>(pNf->progress*100), QString::fromStdString(pNf->message),
         double(pNf->estimatedTime), int(pNf->progressPrecision) );
 }
 
 void AlgorithmMonitor::handleAlgorithmErrorNotification(const Poco::AutoPtr<Algorithm::ErrorNotification>& pNf)
 {
-    remove(pNf->algorithm());
+  remove(pNf->algorithm());
+}
+
+/** Observer called when the AlgorithmManager reports that an algorithm
+ * is starting asynchronously
+ *
+ * @param pNf :: notification object
+ */
+void AlgorithmMonitor::handleAlgorithmStartingNotification(const Poco::AutoPtr<Mantid::API::AlgorithmStartingNotification>& pNf)
+{
+  add(pNf->getAlgorithm());
 }
 
 void AlgorithmMonitor::showDialog()

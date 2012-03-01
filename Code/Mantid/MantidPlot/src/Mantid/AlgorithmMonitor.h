@@ -9,6 +9,7 @@
 #include <QPushButton>
 #include <QThread>
 #include <QVector>
+#include "MantidAPI/AlgorithmManager.h"
 
 class QLabel;
 class QTreeWidget;
@@ -56,6 +57,8 @@ protected:
   void handleAlgorithmErrorNotification(const Poco::AutoPtr<Mantid::API::Algorithm::ErrorNotification>& pNf);
   Poco::NObserver<AlgorithmMonitor, Mantid::API::Algorithm::ErrorNotification> m_errorObserver;
 
+  void handleAlgorithmStartingNotification(const Poco::AutoPtr<Mantid::API::AlgorithmStartingNotification>& pNf);
+  Poco::NObserver<AlgorithmMonitor, Mantid::API::AlgorithmStartingNotification> m_startingObserver;
 
 public slots:
   void update();
