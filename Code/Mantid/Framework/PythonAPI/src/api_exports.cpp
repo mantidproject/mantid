@@ -199,9 +199,12 @@ using namespace boost::python;
     class_< PyAlgorithmBase, boost::shared_ptr<PyAlgorithmCallback>, bases<API::CloneableAlgorithm>, 
       boost::noncopyable >("PyAlgorithmBase")
       .enable_pickling()
+      .def("_setWorkspaceProperty", &PyAlgorithmBase::_setWorkspaceProperty)
       .def("_setMatrixWorkspaceProperty", &PyAlgorithmBase::_setMatrixWorkspaceProperty)
       .def("_setTableWorkspaceProperty", &PyAlgorithmBase::_setTableWorkspaceProperty)
       .def("_declareFileProperty", &PyAlgorithmBase::_declareFileProperty)
+      .def("_declareWorkspace", (void(PyAlgorithmBase::*)(const std::string &, const std::string &,const std::string &, const unsigned int))&PyAlgorithmBase::_declareWorkspace)
+      .def("_declareWorkspace", (void(PyAlgorithmBase::*)(const std::string &, const std::string &,Kernel::IValidator<boost::shared_ptr<API::Workspace> >&,const std::string &, const unsigned int))&PyAlgorithmBase::_declareWorkspace)
       .def("_declareMatrixWorkspace", (void(PyAlgorithmBase::*)(const std::string &, const std::string &,const std::string &, const unsigned int))&PyAlgorithmBase::_declareMatrixWorkspace)
       .def("_declareMatrixWorkspace", (void(PyAlgorithmBase::*)(const std::string &, const std::string &,Kernel::IValidator<boost::shared_ptr<API::MatrixWorkspace> >&,const std::string &, const unsigned int))&PyAlgorithmBase::_declareMatrixWorkspace)
       .def("_declareTableWorkspace", &PyAlgorithmBase::_declareTableWorkspace)

@@ -151,11 +151,39 @@ public:
    */
   template<typename TYPE>
   void _declareListProperty(const std::string & prop_name, boost::python::list values, const std::string &doc,
-			    const unsigned int direction)
+                            const unsigned int direction)
   {
     //Extract the values from the python list into a std vector
     this->IAlgorithm::declareProperty(prop_name, Conversions::toStdVector<TYPE>(values), doc, direction);
   }
+
+  /**
+     * Declare a generic Workspace property
+     * @param prop_name :: The name of the property
+     * @param default_wsname :: A default name to use for the workspace name
+     * @param description :: A string describing the property
+     * @param direction :: The direction
+     */
+    void _declareWorkspace(const std::string & prop_name, const std::string & default_wsname,
+                           const std::string & description, const unsigned int direction)
+    {
+      this->Algorithm::declareProperty(new API::WorkspaceProperty<API::Workspace>(prop_name, default_wsname, direction), description);
+    }
+
+    /**
+     * Declare a MatrixWorkspace property with a validator
+     * @param prop_name :: The name of the property
+     * @param default_wsname :: A default name to use for the workspace name
+     * @param validator :: A pointer to a validator object
+     * @param description :: A string describing the property
+     * @param direction :: The direction
+     */
+    void _declareWorkspace(const std::string & prop_name, const std::string & default_wsname,
+        Kernel::IValidator<API::Workspace_sptr> & validator,
+        const std::string & description, const unsigned int direction)
+    {
+      this->Algorithm::declareProperty(new API::WorkspaceProperty<API::Workspace>(prop_name, default_wsname, direction, validator.clone()), description);
+    }
 
   /**
    * Declare a MatrixWorkspace property
@@ -165,7 +193,7 @@ public:
    * @param direction :: The direction
    */
   void _declareMatrixWorkspace(const std::string & prop_name, const std::string & default_wsname, 
-			       const std::string & description, const unsigned int direction)
+                               const std::string & description, const unsigned int direction)
   {
     this->Algorithm::declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(prop_name, default_wsname, direction), description);
   }
@@ -248,7 +276,17 @@ public:
     std::vector<TYPE> retval = getProperty(prop_name);
     return retval;
   }
-  
+
+  /**
+   * Special function to set MatrixWorkspace
+   * @param prop_name :: The name of the property
+   * @param workspace :: A pointer to the workspace
+   */
+  void _setWorkspaceProperty(const std::string & prop_name, API::Workspace_sptr workspace)
+  {
+    this->IAlgorithm::setProperty(prop_name,workspace);
+  }
+
   /**
    * Special function to set MatrixWorkspace
    * @param prop_name :: The name of the property
