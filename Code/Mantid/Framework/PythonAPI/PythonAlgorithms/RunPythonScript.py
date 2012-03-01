@@ -21,7 +21,7 @@ class RunPythonScript(PythonAlgorithm):
         return "RunPythonScript"
 
     def PyInit(self):
-        self.declareWorkspaceProperty("InputWorkspace","", Direction=Direction.Input,
+        self.declareWorkspaceProperty("InputWorkspace","", Direction=Direction.Input, Type=Workspace,
                 Description=
                     "An input workspace that the python code will modify.\n"
                     "The workspace will be in the python variable named 'input'.")
@@ -29,7 +29,7 @@ class RunPythonScript(PythonAlgorithm):
         self.declareProperty("Code", "", Direction=Direction.Input,
                              Description="Python code (can be on multiple lines)." )
         
-        self.declareWorkspaceProperty("OutputWorkspace", "", Direction=Direction.Output, 
+        self.declareWorkspaceProperty("OutputWorkspace", "", Direction=Direction.Output, Type=Workspace,
                 Description=
                 "An output workspace to be produced by the python code.\n"
                 "The python code should create the workspace named by the python variable 'output'.")
@@ -49,15 +49,21 @@ class RunPythonScript(PythonAlgorithm):
         
         # Run the script code passed
         exec(code)
-
-        if mtd.workspaceExists(output):
-            # The script did create the workspace; use it
-            wsOut = mtd[output]
+        
+        # Did the code use an operator
+        # like "output = input * 2.0"
+        if isinstance(output, WorkspaceProxy):
+            wsOut = output
         else:
-            # The script did NOT create it
-            # So we take care of cloning it so that the output is valid
-            CloneWorkspace(InputWorkspace=wsInputName, OutputWorkspace=wsOutputName)
-            wsOut = mtd[wsOutputName]
+            # Output is (probably) still a string. Use the name
+            if mtd.workspaceExists(wsOutputName):
+                # The script did create the workspace; use it
+                wsOut = mtd[wsOutputName]
+            else:
+                # The script did NOT create it
+                # So we take care of cloning it so that the output is valid
+                CloneWorkspace(InputWorkspace=wsInputName, OutputWorkspace=wsOutputName)
+                wsOut = mtd[wsOutputName]
             
         self.setProperty("OutputWorkspace",wsOut)
 
