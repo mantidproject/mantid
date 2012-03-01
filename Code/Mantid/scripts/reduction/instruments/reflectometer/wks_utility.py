@@ -217,26 +217,124 @@ def convertWorkspaceToQ(ws_data,
         y_size = toYpixel - fromYpixel + 1
         y_range = arange(y_size) + fromYpixel
 
-        _y_axis = zeros((maxY, len(_tof_axis) - 1))
-        _y_error_axis = zeros((maxY, len(_tof_axis) - 1))
 
-        for y in y_range:
-                _y_axis[int(y), :] = mt1.readY(int(y))[:]
-                _y_error_axis[int(y), :] = mt1.readE(int(y))[:]
-
+#        #start of old code
+#        _y_axis = zeros((maxY, len(_tof_axis) - 1))
+#        _y_error_axis = zeros((maxY, len(_tof_axis) - 1))
+#
+#        for y in y_range:
+#                _y_axis[int(y), :] = mt1.readY(int(y))[:]
+#                _y_error_axis[int(y), :] = mt1.readE(int(y))[:]
+#
+#        for _q_index in range(y_size):
+#            
+#            _tmp_q_axis = _q_axis[_q_index]
+#            q_axis = _tmp_q_axis[::-1] #reverse the axis (now increasing order)
+#
+#            _y_axis_tmp = _y_axis[yrange[_q_index],:]
+#            _y_axis_tmp = _y_axis_tmp.flatten()
+#
+#            _y_error_axis_tmp = _y_error_axis[yrange[_q_index],:]
+##            _y_error_axis_tmp = numpy.sqrt(_y_error_axis_tmp)
+#            _y_error_axis_tmp = _y_error_axis_tmp.flatten()
+#
+#            #keep only the overlap region of Qs
+#            _q_min = _q_axis_min_max_index[_q_index,0]
+#            if (_q_min != 0):
+#                _y_axis_tmp[0:_q_min] = 0
+#                _y_error_axis_tmp[0:_q_min] = 0
+#
+#            _q_max = _q_axis_min_max_index[_q_index,1]
+#            if (_q_max != shape(_y_axis_tmp)[0]):
+#                _y_axis_tmp[_q_max:-1] = 0
+#                _y_error_axis_tmp[_q_max:-1] = 0
+#
+#            _y_axis_tmp = _y_axis_tmp[::-1] 
+#            _y_error_axis_tmp = _y_error_axis_tmp[::-1]
+#            
+#            _outputWorkspace = 'tmpOWks_' + str(_q_index)
+#            CreateWorkspace(OutputWorkspace=_outputWorkspace,
+#                            DataX=q_axis,
+#                            DataY=_y_axis_tmp,
+#                            DataE=_y_error_axis_tmp,
+#                            Nspec=1,
+#                            UnitX="MomentumTransfer")
+#
+#            if _q_index == 0:
+#                mt_tmp = mtd[_outputWorkspace]
+#
+#            _outputWorkspace_rebin = 'tmpOWks_' + str(_q_index)
+#            
+#            Rebin(InputWorkspace=_outputWorkspace,
+#                  OutputWorkspace=_outputWorkspace_rebin,
+#                  Params=str(_q_bin_width))
+#
+#            if _q_index == 0:
+#                mt_tmp = mtd[_outputWorkspace_rebin]
+#
+#        _mt = mtd['tmpOWks_0']
+#        _x_array = _mt.readX(0)[:]
+#
+#        #create big y_array of the all the pixel of interest (yrange)
+#        big_y_array = zeros((maxY, len(_x_array)))
+#        big_y_error_array = zeros((maxY, len(_x_array)))
+##        big_y_array = zeros((y_size, len(_x_array)))
+##        big_y_error_array = zeros((y_size, len(_x_array)))
+#        
+#        for _q_index in range(y_size):
+#            
+#            _wks = 'tmpOWks_' + str(_q_index)
+#            _mt = mtd[_wks]
+#            _tmp_y = _mt.readY(0)[:]
+#            _tmp_y_error = _mt.readE(0)[:]
+#            
+#            _index = y_range[_q_index]
+#            
+#            big_y_array[_index,:] = _tmp_y
+#            big_y_error_array[_index,:] = _tmp_y_error
+#            
+##            big_y_array[int(_q_index),:] = _tmp_y
+##            big_y_error_array[int(_q_index),:] = _tmp_y_error
+#            
+##            mtd.deleteWorkspace(_wks)
+#
+#        _x_axis = _x_array.flatten()        
+#        _y_axis = big_y_array.flatten()
+#        _y_error_axis = big_y_error_array.flatten()
+#
+#        nbr_pixel_in_peak = y_size
+#        
+#        print 'in with geometry correction'
+#        print 'shape(_x_axis):'
+#        print shape(_x_axis)
+#        print 'shape(_y_axis):'
+#        print shape(_y_axis)
+#        print 'nbr_pixel_in_peak: '
+#        print nbr_pixel_in_peak
+#
+#        CreateWorkspace(OutputWorkspace=outputWorkspace,
+#                        DataX=_x_axis,
+#                        DataY=_y_axis,
+#                        DataE=_y_error_axis,
+##                        Nspec=nbr_pixel_in_peak,
+#                        Nspec=maxY,
+#                        UnitX="MomentumTransfer",
+#                        ParentWorkspace=mt1)
+#
+#        #end of old code
+ 
+        _y_axis = zeros((y_size, len(_tof_axis) - 1))
+        _y_error_axis = zeros((y_size, len(_tof_axis) - 1))
+           
+        #now determine the y_axis    
         for _q_index in range(y_size):
             
             _tmp_q_axis = _q_axis[_q_index]
-            q_axis = _tmp_q_axis[::-1]
+            q_axis = _tmp_q_axis[::-1] #reverse the axis (now increasing order)
 
-            _outputWorkspace = 'tmpOWks_' + str(_q_index)
-
-            _y_axis_tmp = _y_axis[yrange[_q_index],:]
-            _y_axis_tmp = _y_axis_tmp.flatten()
-
-            _y_error_axis_tmp = _y_error_axis[yrange[_q_index],:]
-#            _y_error_axis_tmp = numpy.sqrt(_y_error_axis_tmp)
-            _y_error_axis_tmp = _y_error_axis_tmp.flatten()
+            _a = yrange[_q_index]
+            _y_axis_tmp = list(mt1.readY(int(_a))[:])
+            _y_error_axis_tmp = list(mt1.readE(int(_a))[:])
 
             #keep only the overlap region of Qs
             _q_min = _q_axis_min_max_index[_q_index,0]
@@ -244,72 +342,34 @@ def convertWorkspaceToQ(ws_data,
                 _y_axis_tmp[0:_q_min] = 0
                 _y_error_axis_tmp[0:_q_min] = 0
 
-            _q_max = _q_axis_min_max_index[_q_index,1]
-            if (_q_max != shape(_y_axis_tmp)[0]):
-                _y_axis_tmp[_q_max:-1] = 0
-                _y_error_axis_tmp[_q_max:-1] = 0
+            _q_max = int(_q_axis_min_max_index[_q_index,1])
+            sz = shape(_y_axis_tmp)[0]
+            if (_q_max != sz):
+                _index_q_max_range = arange(sz-_q_max)+_q_max
+                for i in _index_q_max_range:
+                    _y_axis_tmp[i] = 0
+                    _y_error_axis_tmp[i] = 0
 
-            _y_axis_tmp = _y_axis_tmp[::-1]
-            _y_error_axis_tmp = _y_error_axis_tmp[::-1]
-
-            CreateWorkspace(OutputWorkspace=_outputWorkspace,
-                            DataX=q_axis,
-                            DataY=_y_axis_tmp,
-                            DataE=_y_error_axis_tmp,
-                            Nspec=1,
-                            UnitX="MomentumTransfer")
-
-            if _q_index == 0:
-                mt_tmp = mtd[_outputWorkspace]
-
-            _outputWorkspace_rebin = 'tmpOWks_' + str(_q_index)
+            _y_axis[_q_index,:] = _y_axis_tmp[::-1]
+            _y_error_axis[_q_index,:] = _y_error_axis_tmp[::-1]
             
-            Rebin(InputWorkspace=_outputWorkspace,
-                  OutputWorkspace=_outputWorkspace_rebin,
-                  Params=q_binning)
-
-            if _q_index == 0:
-                mt_tmp = mtd[_outputWorkspace_rebin]
-
-        _mt = mtd['tmpOWks_0']
-        _x_array = _mt.readX(0)[:]
-
-        #create big y_array of the all the pixel of interest (yrange)
-        #big_y_array = zeros((maxY, len(_x_array)))
-        #big_y_error_array = zeros((maxY, len(_x_array)))
-        big_y_array = zeros((y_size, len(_x_array)))
-        big_y_error_array = zeros((y_size, len(_x_array)))
-        
-        for _q_index in range(y_size):
+        x_axis = q_axis.flatten()        
+        y_axis = _y_axis.flatten()
+        y_error_axis = _y_error_axis.flatten()
             
-            _wks = 'tmpOWks_' + str(_q_index)
-            _mt = mtd[_wks]
-            _tmp_y = _mt.readY(0)[:]
-            _tmp_y_error = _mt.readE(0)[:]
-            
-#            big_y_array[int(yrange[int(_q_index)]),:] = _tmp_y
-#            print '.....'
-#            big_y_error_array[int(yrange[int(_q_index)]),:] = _tmp_y_error
-#            print '......'
-            
-            big_y_array[int(_q_index),:] = _tmp_y
-            big_y_error_array[int(_q_index),:] = _tmp_y_error
-            
-            mtd.deleteWorkspace(_wks)
-
-        _x_axis = _x_array.flatten()        
-        _y_axis = big_y_array.flatten()
-        _y_error_axis = big_y_error_array.flatten()
-
-        nbr_pixel_in_peak = y_size
-        
         CreateWorkspace(OutputWorkspace=outputWorkspace,
-                        DataX=_x_axis,
-                        DataY=_y_axis,
-                        DataE=_y_error_axis,
-                        Nspec=nbr_pixel_in_peak,
+                        DataX=x_axis,
+                        DataY=y_axis,
+                        DataE=y_error_axis,
+                        Nspec=y_size,
                         UnitX="MomentumTransfer",
                         ParentWorkspace=mt1)
+        
+        mtd[outputWorkspace].setDistribution(True)
+        
+        Rebin(InputWorkspace=outputWorkspace,
+              OutputWorkspace=outputWorkspace,
+              Params=q_binning)
 
     else:
         
@@ -534,12 +594,13 @@ def convertToRvsQWithCorrection(mt, dMD=-1, theta=-1,tof=None, yrange=None, cpix
             _theta = theta + dangle
         else:
             _theta = theta
-        
+
         for t in range(sz_tof-1):
             tof1 = tof[t]
-            tof2 = tof[t+1]
-            tofm = (tof1+tof2)/2.
-            _Q = _const * math.sin(_theta) / (tofm*1e-6)
+#            tof2 = tof[t+1]
+#            tofm = (tof1+tof2)/2.
+#            _Q = _const * math.sin(_theta) / (tofm*1e-6)
+            _Q = _const * math.sin(_theta) / (tof1*1e-6)
             q_array[y,t] = _Q*1e-10
     
     return q_array

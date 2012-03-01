@@ -416,7 +416,7 @@ class RefLReduction(PythonAlgorithm):
         ws_data_scaled = wks_utility.applySF(ws_data,
                                              slitsValuePrecision,
                                              sfCalculatorFile=sfCalculator) 
-        
+
         if dMD is not None and theta is not None:
                     
             _tof_axis = mtd[ws_histo_data].readX(0)
@@ -440,7 +440,7 @@ class RefLReduction(PythonAlgorithm):
                                         source_to_detector=dMD,
                                         sample_to_detector=dSD,
                                         theta=theta,
-                                        geo_correction=False,
+                                        geo_correction=True,
                                         q_binning=[q_min,q_step,q_max])
 
         mt = mtd[ws_data_Q]
@@ -481,14 +481,6 @@ class RefLReduction(PythonAlgorithm):
                             Nspec=1,
                             UnitX="MomentumTransfer")
  
-#        if (list_of_rows_to_remove != []):
-#            list_of_rows_to_remove = ','.join(list_of_rows_to_remove)
-#            Transpose(InputWorkspace=output_ws,
-#                      OutputWorkspace=output_ws)
-#            DeleteTableRows(TableWorkspace=output_ws, Rows=list_of_rows_to_remove)        
-#            Transpose(InputWorkspace=output_ws,
-#                      OutputWorkspace=output_ws)
-        
         self.setProperty("OutputWorkspace", mtd[output_ws])
 
 mtd.registerPyAlgorithm(RefLReduction())
