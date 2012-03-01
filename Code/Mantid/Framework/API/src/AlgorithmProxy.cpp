@@ -78,10 +78,38 @@ namespace Mantid
       return m_isExecuted;
     }
 
-    /// Asynchronous execution of the algorithm.
+    /** Asynchronous execution of the algorithm.
+     * This will launch the AlgorithmProxy::executeAsyncImpl() method
+     * but in a separate thread.
+     *
+     * @return Poco::ActiveResult containing the result from the thread.
+     */
     Poco::ActiveResult<bool> AlgorithmProxy::executeAsync()
     {
+      AlgorithmManager::Instance().notifyAlgorithmStarting(this->getAlgorithmID());
       return _executeAsync(Poco::Void()); 
+    }
+
+    /** executeAsync() implementation.
+     * Calls execute and, when it has finished, deletes the real algorithm.
+    *  @param dummy :: An unused dummy variable
+    */
+    bool AlgorithmProxy::executeAsyncImpl(const Poco::Void & dummy)
+    {
+      createConcreteAlg();
+      // Call Algorithm::executeAsyncImpl rather than executeAsync() because the latter
+      // would spawn off another (3rd) thread which is unecessary.
+      try
+      {
+        m_alg->executeAsyncImpl(dummy); // Pass through dummy argument, though not used
+      }
+      catch(...)
+      {
+        m_alg.reset(); // Release the concrete algorithm instance
+        throw;
+      }
+      stopped();
+      return m_isExecuted;
     }
 
     /// True if the algorithm is running asynchronously.
@@ -204,26 +232,6 @@ namespace Mantid
       m_externalObservers.clear();
     }
 
-    /** executeAsync() implementation. Calls execute and when it has finished  deletes the real algorithm.
-    *  @param dummy :: A dummy variable
-    */
-    bool AlgorithmProxy::executeAsyncImpl(const Poco::Void & dummy)
-    {
-      createConcreteAlg();
-      // Call Algorithm::executeAsyncImpl rather than executeAsync() because the latter
-      // would spawn off another (3rd) thread which is unecessary.
-      try
-      {
-        m_alg->executeAsyncImpl(dummy); // Pass through dummy argument, though not used
-      }
-      catch(...)
-      {
-        m_alg.reset(); // Release the concrete algorithm instance
-        throw;
-      }
-      stopped();
-      return m_isExecuted;
-    }
     ///setting the child start progress
     void AlgorithmProxy::setChildStartProgress(const double startProgress)const
     {

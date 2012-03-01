@@ -138,5 +138,18 @@ namespace Mantid
       return IAlgorithm_sptr();
     }
 
+
+    /** Called by an algorithm that is executing asynchronously
+     * This sends out the notification.
+     *
+     * @param id :: ID of the algorithm being started
+     */
+    void AlgorithmManagerImpl::notifyAlgorithmStarting(AlgorithmID id)
+    {
+      IAlgorithm_sptr alg = this->getAlgorithm(id);
+      if (!alg) return;
+      notificationCenter.postNotification(new AlgorithmStartingNotification(alg));
+    }
+
   } // namespace API
 } // namespace Mantid

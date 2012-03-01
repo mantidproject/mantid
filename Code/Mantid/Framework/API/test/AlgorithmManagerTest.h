@@ -135,8 +135,6 @@ public:
   void testClear()
   {
     AlgorithmManager::Instance().clear();
-//    AlgorithmFactory::Instance().subscribe<AlgTest>();
-//    AlgorithmFactory::Instance().subscribe<AlgTestSecond>();
     TS_ASSERT_THROWS_NOTHING( AlgorithmManager::Instance().create("AlgTest") );
     TS_ASSERT_THROWS_NOTHING(AlgorithmManager::Instance().create("AlgTestSecond") );
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),2);
@@ -147,8 +145,6 @@ public:
   void testReturnType()
   {
     AlgorithmManager::Instance().clear();
-//    AlgorithmFactory::Instance().subscribe<AlgTest>();
-//    AlgorithmFactory::Instance().subscribe<AlgTestSecond>();
     IAlgorithm_sptr alg;
     TS_ASSERT_THROWS_NOTHING( alg = AlgorithmManager::Instance().create("AlgTest",1) );
     TS_ASSERT_DIFFERS(dynamic_cast<AlgorithmProxy*>(alg.get()),static_cast<AlgorithmProxy*>(0));
@@ -180,6 +176,38 @@ public:
     TSM_ASSERT("Was NOT created as a AlgorithmProxy", dynamic_cast<AlgorithmProxy*>(Bptr.get())==NULL );
   }
 
+  // This will be called back when an algo starts
+  void handleAlgorithmStartingNotification(const Poco::AutoPtr<AlgorithmStartingNotification>& /*pNf*/)
+  {
+    m_notificationValue = 12345;
+  }
+
+
+  /** When running an algorithm in async mode, the
+   * AlgorithmManager needs to send out a notification
+   */
+  void testStartingNotification()
+  {
+    AlgorithmManager::Instance().clear();
+    Poco::NObserver<AlgorithmManagerTest, Mantid::API::AlgorithmStartingNotification>
+      my_observer(*this, &AlgorithmManagerTest::handleAlgorithmStartingNotification);
+    AlgorithmManager::Instance().notificationCenter.addObserver(my_observer);
+
+    IAlgorithm_sptr Aptr, Bptr;
+    Aptr=AlgorithmManager::Instance().create("AlgTest", -1, true);
+    Bptr=AlgorithmManager::Instance().create("AlgTest", -1, false);
+
+    m_notificationValue = 0;
+    Bptr->executeAsync();
+    TSM_ASSERT_EQUALS( "Notification was received.", m_notificationValue, 12345 );
+
+    m_notificationValue = 0;
+    Aptr->executeAsync();
+    TSM_ASSERT_EQUALS( "Notification was received (proxy).", m_notificationValue, 12345 );
+
+  }
+
+int m_notificationValue;
 };
 
 #endif /* AlgorithmManagerTest_H_*/

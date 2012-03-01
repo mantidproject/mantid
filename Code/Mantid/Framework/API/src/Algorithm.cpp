@@ -1227,6 +1227,7 @@ namespace Mantid
     */
     Poco::ActiveResult<bool> Algorithm::executeAsync()
     {
+      AlgorithmManager::Instance().notifyAlgorithmStarting(this->getAlgorithmID());
       return m_executeAsync(Poco::Void());
     }
 
