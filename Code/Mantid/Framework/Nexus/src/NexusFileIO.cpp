@@ -950,7 +950,6 @@ using namespace DataObjects;
     status=NXopengroup(fileID,"process","NXprocess");
     //Mantid:API::Workspace xxx;
     const API::WorkspaceHistory history=localworkspace->getHistory();
-    const WorkspaceHistory::AlgorithmHistories& algHist = history.getAlgorithmHistories();
     std::stringstream output,algorithmNumber;
     EnvironmentHistory envHist;
 
