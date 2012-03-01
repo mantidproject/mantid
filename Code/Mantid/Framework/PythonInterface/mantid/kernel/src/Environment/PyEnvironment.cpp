@@ -1,11 +1,9 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
-#include "MantidPythonInterface/kernel/PyEnvironment.h"
+#include "MantidPythonInterface/kernel/Environment/PyEnvironment.h"
 
-// This is technically not necessary but it ensures that Python.h is included
-// correctly
-#include <boost/python/object.hpp>
+#include <boost/python/detail/wrap_python.hpp>
 #include <frameobject.h>
 #include <cstring>
 

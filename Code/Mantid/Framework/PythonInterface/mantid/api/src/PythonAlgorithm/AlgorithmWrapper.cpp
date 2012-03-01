@@ -1,5 +1,5 @@
 #include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmWrapper.h"
-#include "MantidPythonInterface/kernel/WrapperHelpers.h"
+#include "MantidPythonInterface/kernel/Environment/WrapperHelpers.h"
 #include <boost/python/class.hpp>
 
 using namespace boost::python;

@@ -1,7 +1,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidPythonInterface/kernel/PyEnvironment.h"
+#include "MantidPythonInterface/kernel/Environment/PyEnvironment.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>

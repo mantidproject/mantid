@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
-#include "MantidPythonInterface/kernel/WrapperHelpers.h"
+#include "MantidPythonInterface/kernel/Environment/WrapperHelpers.h"
 
 namespace Mantid
 {
