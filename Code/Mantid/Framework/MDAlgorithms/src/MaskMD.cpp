@@ -50,7 +50,7 @@ namespace MDAlgorithms
   /// Comparitor to allow sorting by dimension index.
   struct LessThanIndex : std::binary_function<InputArgument, InputArgument, bool>
   {
-    bool operator() (InputArgument a , InputArgument b) const
+    bool operator() (const InputArgument& a , const InputArgument& b) const
     {
       return a.index < b.index;
     }
@@ -189,8 +189,8 @@ namespace MDAlgorithms
       VMD maxs(nDims);
       for(size_t i = 0; i < nDims; ++i)
       {
-        mins[i] = arguments[i].min;
-        maxs[i] = arguments[i].max;
+        mins[i] = float(arguments[i].min);
+        maxs[i] = float(arguments[i].max);
       }
 
       //Add new masking.
