@@ -48,9 +48,9 @@ namespace MDAlgorithms
   };
 
   /// Comparitor to allow sorting by dimension index.
-  struct LessThanIndex : std::binary_function<InputArgument&, InputArgument&, bool>
+  struct LessThanIndex : std::binary_function<InputArgument, InputArgument, bool>
   {
-    bool operator() (InputArgument& a , InputArgument& b) const
+    bool operator() (InputArgument a , InputArgument b) const
     {
       return a.index < b.index;
     }
