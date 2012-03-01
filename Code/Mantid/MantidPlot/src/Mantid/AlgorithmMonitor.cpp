@@ -16,6 +16,8 @@ using namespace Mantid::API;
 
 QMutex AlgorithmMonitor::s_mutex;
 
+//-----------------------------------------------------------------------------
+/** Constructor */
 AlgorithmMonitor::AlgorithmMonitor(MantidUI *m) : 
 m_finishedObserver(*this, &AlgorithmMonitor::handleAlgorithmFinishedNotification),
 m_progressObserver(*this, &AlgorithmMonitor::handleAlgorithmProgressNotification),
@@ -26,9 +28,10 @@ m_mantidUI(m), m_nRunning(0)
   AlgorithmManager::Instance().notificationCenter.addObserver(m_startingObserver);
   m_monitorDlg = new MonitorDlg(m_mantidUI->appWindow(), this);
   m_monitorDlg->setVisible(false);
-
 }
 
+//-----------------------------------------------------------------------------
+/** Destructor */
 AlgorithmMonitor::~AlgorithmMonitor()
 {
   if( m_monitorDlg )
@@ -43,33 +46,43 @@ AlgorithmMonitor::~AlgorithmMonitor()
   AlgorithmManager::Instance().notificationCenter.removeObserver(m_startingObserver);
 }
 
+//-----------------------------------------------------------------------------
+/** Add a new algorithm to the list monitored
+ *
+ * @param alg :: algorithm to monitor.
+ */
 void AlgorithmMonitor::add(Mantid::API::IAlgorithm_sptr alg)
 {
-    lock();
-    alg->addObserver(m_finishedObserver);
-    alg->addObserver(m_errorObserver);
-    alg->addObserver(m_progressObserver);
-    m_algorithms.push_back(alg->getAlgorithmID());
-    ++m_nRunning;
-    emit algorithmStarted(alg->getAlgorithmID());
-    emit countChanged();
-    unlock();
-    m_mantidUI->showAlgWidget();
+  lock();
+  alg->addObserver(m_finishedObserver);
+  alg->addObserver(m_errorObserver);
+  alg->addObserver(m_progressObserver);
+  m_algorithms.push_back(alg->getAlgorithmID());
+  ++m_nRunning;
+  emit algorithmStarted(alg->getAlgorithmID());
+  emit countChanged();
+  unlock();
+  m_mantidUI->showAlgWidget();
 }
 
+//-----------------------------------------------------------------------------
+/** Remove an algorithm from the list monitored
+ *
+ * @param alg :: algorithm.
+ */
 void AlgorithmMonitor::remove(const IAlgorithm* alg)
 {
-    lock();
-    QVector<AlgorithmID>::iterator i = find(m_algorithms.begin(),m_algorithms.end(),alg->getAlgorithmID());
-    if (i != m_algorithms.end()) 
-    { 
-      m_algorithms.erase(i);
-      --m_nRunning;
-    }
-    emit algorithmFinished(alg->getAlgorithmID());
-    emit countChanged();
-    if (m_algorithms.empty()) emit allAlgorithmsStopped();
-    unlock();
+  lock();
+  QVector<AlgorithmID>::iterator i = find(m_algorithms.begin(),m_algorithms.end(),alg->getAlgorithmID());
+  if (i != m_algorithms.end())
+  {
+    m_algorithms.erase(i);
+    --m_nRunning;
+  }
+  emit algorithmFinished(alg->getAlgorithmID());
+  emit countChanged();
+  if (m_algorithms.empty()) emit allAlgorithmsStopped();
+  unlock();
 }
 
 void AlgorithmMonitor::update()
@@ -92,8 +105,10 @@ void AlgorithmMonitor::handleAlgorithmErrorNotification(const Poco::AutoPtr<Algo
   remove(pNf->algorithm());
 }
 
+//-----------------------------------------------------------------------------
 /** Observer called when the AlgorithmManager reports that an algorithm
- * is starting asynchronously
+ * is starting asynchronously.
+ * Adds the algorithm to the list.
  *
  * @param pNf :: notification object
  */
@@ -102,6 +117,8 @@ void AlgorithmMonitor::handleAlgorithmStartingNotification(const Poco::AutoPtr<M
   add(pNf->getAlgorithm());
 }
 
+//-----------------------------------------------------------------------------
+/** Slot called to show the monitor dialog */
 void AlgorithmMonitor::showDialog()
 {
   if( !m_monitorDlg->isVisible() )
@@ -111,43 +128,47 @@ void AlgorithmMonitor::showDialog()
   }
 }
 
+//-----------------------------------------------------------------------------
+/** Cancel the given algorithm's execution */
 void AlgorithmMonitor::cancel(Mantid::API::AlgorithmID id)
 {
-    IAlgorithm_sptr a = Mantid::API::AlgorithmManager::Instance().getAlgorithm(id);
-    if (!a.get()) return;
-    a->cancel();
+  IAlgorithm_sptr a = Mantid::API::AlgorithmManager::Instance().getAlgorithm(id);
+  if (!a.get()) return;
+  a->cancel();
 }
 
+//-----------------------------------------------------------------------------
+/** Cancel all running algorithms */
 void AlgorithmMonitor::cancelAll()
 {
-    const std::deque<IAlgorithm_sptr>& algs = Mantid::API::AlgorithmManager::Instance().algorithms();
-    for(std::deque<IAlgorithm_sptr>::const_iterator a = algs.begin();a!=algs.end();++a)
-        if ( std::find(m_algorithms.begin(),m_algorithms.end(),(**a).getAlgorithmID()) ) (**a).cancel();
-
+  const std::deque<IAlgorithm_sptr>& algs = Mantid::API::AlgorithmManager::Instance().algorithms();
+  for(std::deque<IAlgorithm_sptr>::const_iterator a = algs.begin();a!=algs.end();++a)
+    if ( std::find(m_algorithms.begin(),m_algorithms.end(),(**a).getAlgorithmID()) ) (**a).cancel();
 }
+
  
 //-----------------------------------------------------------------------------------------------//
 MonitorDlg::MonitorDlg(QWidget *parent,AlgorithmMonitor *algMonitor):QDialog(parent),m_algMonitor(algMonitor)
 {
-    m_tree = 0;
-    update();
-    connect(algMonitor,SIGNAL(countChanged()),this,SLOT(update()), Qt::QueuedConnection);
-    connect(algMonitor,SIGNAL(needUpdateProgress(void*, double, const QString&, double, int)),
-	    SLOT(updateProgress(void*, double, const QString&, double, int)));
+  m_tree = 0;
+  update();
+  connect(algMonitor,SIGNAL(countChanged()),this,SLOT(update()), Qt::QueuedConnection);
+  connect(algMonitor,SIGNAL(needUpdateProgress(void*, double, const QString&, double, int)),
+      SLOT(updateProgress(void*, double, const QString&, double, int)));
 
-    QHBoxLayout *buttonLayout = new QHBoxLayout;
-    QPushButton *closeButton = new QPushButton("Close");
-    connect(closeButton,SIGNAL(clicked()),this,SLOT(close()));
-    buttonLayout->addStretch();
-    buttonLayout->addWidget(closeButton);
+  QHBoxLayout *buttonLayout = new QHBoxLayout;
+  QPushButton *closeButton = new QPushButton("Close");
+  connect(closeButton,SIGNAL(clicked()),this,SLOT(close()));
+  buttonLayout->addStretch();
+  buttonLayout->addWidget(closeButton);
 
-    QVBoxLayout *layout = new QVBoxLayout;
-    layout->addWidget(m_tree);
-    layout->addLayout(buttonLayout);
-    setLayout(layout);
-    setWindowTitle("Mantid - Algorithm progress");
-    setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
-    resize(500,300);
+  QVBoxLayout *layout = new QVBoxLayout;
+  layout->addWidget(m_tree);
+  layout->addLayout(buttonLayout);
+  setLayout(layout);
+  setWindowTitle("Mantid - Algorithm progress");
+  setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
+  resize(500,300);
 }
 
 MonitorDlg::~MonitorDlg() 
@@ -156,61 +177,60 @@ MonitorDlg::~MonitorDlg()
 
 void MonitorDlg::update()
 {
-    if (!m_tree)
-    {
-      m_tree = new QTreeWidget(this);
-        m_tree->setColumnCount(3);
-        m_tree->setSelectionMode(QAbstractItemView::NoSelection);
-        QStringList hList;
-        hList<<"Algorithm"<<"Progress"<<"";
-        m_tree->setHeaderLabels(hList);
-        QHeaderView* hHeader = (QHeaderView*)m_tree->header();
-        hHeader->setResizeMode(1,QHeaderView::Stretch);
-        hHeader->setResizeMode(2,QHeaderView::Fixed);
-        hHeader->setStretchLastSection(false);
-    }
-    else
-        m_tree->clear();
+  if (!m_tree)
+  {
+    m_tree = new QTreeWidget(this);
+    m_tree->setColumnCount(3);
+    m_tree->setSelectionMode(QAbstractItemView::NoSelection);
+    QStringList hList;
+    hList<<"Algorithm"<<"Progress"<<"";
+    m_tree->setHeaderLabels(hList);
+    QHeaderView* hHeader = (QHeaderView*)m_tree->header();
+    hHeader->setResizeMode(1,QHeaderView::Stretch);
+    hHeader->setResizeMode(2,QHeaderView::Fixed);
+    hHeader->setStretchLastSection(false);
+  }
+  else
+    m_tree->clear();
 
-    if( !isVisible() ) return;
-    
-    m_algMonitor->lock();
-    QVector<Mantid::API::AlgorithmID>::const_iterator iend = m_algMonitor->algorithms().end();
-    for(QVector<Mantid::API::AlgorithmID>::const_iterator itr = m_algMonitor->algorithms().begin(); 
-	itr != iend; ++itr)
-    {
-      IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().getAlgorithm(*itr);
-      //m_algorithms << alg;
-      QStringList iList;
-      iList<<QString::fromStdString(alg->name());
-      QTreeWidgetItem *algItem = new QTreeWidgetItem(iList);
-      m_tree->addTopLevelItem(algItem);
-      QProgressBar *algProgress = new QProgressBar;
-      algProgress->setAlignment(Qt::AlignHCenter);
-      AlgButton *cancelButton = new AlgButton("Cancel", alg);
-      m_tree->setItemWidget(algItem,1,algProgress);
-      m_tree->setItemWidget(algItem,2,cancelButton);
-       const std::vector< Mantid::Kernel::Property* >& prop_list = alg->getProperties();
-        for(std::vector< Mantid::Kernel::Property* >::const_iterator prop=prop_list.begin();prop!=prop_list.end();++prop)
-	  {
-		  QStringList lstr;
-		  Mantid::Kernel::MaskedProperty<std::string> * maskedProp = dynamic_cast<Mantid::Kernel::MaskedProperty<std::string> *>(*prop);
-		  if(maskedProp)
-		  {
-			  lstr  << QString::fromStdString(maskedProp->name()) + ": " << QString::fromStdString(maskedProp->getMaskedValue());
-		  }
-		  else
-		  {
-            
-            lstr  << QString::fromStdString((**prop).name()) + ": " << QString::fromStdString((**prop).value());
-		  }
-            if ((**prop).isDefault()) lstr << " Default";
-            algItem->addChild(new QTreeWidgetItem(lstr));
-        }
+  if( !isVisible() ) return;
 
-        connect(cancelButton,SIGNAL(clicked(Mantid::API::AlgorithmID)),m_algMonitor,SLOT(cancel(Mantid::API::AlgorithmID)));
+  m_algMonitor->lock();
+  QVector<Mantid::API::AlgorithmID>::const_iterator iend = m_algMonitor->algorithms().end();
+  for(QVector<Mantid::API::AlgorithmID>::const_iterator itr = m_algMonitor->algorithms().begin();
+      itr != iend; ++itr)
+  {
+    IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().getAlgorithm(*itr);
+    //m_algorithms << alg;
+    QStringList iList;
+    iList<<QString::fromStdString(alg->name());
+    QTreeWidgetItem *algItem = new QTreeWidgetItem(iList);
+    m_tree->addTopLevelItem(algItem);
+    QProgressBar *algProgress = new QProgressBar;
+    algProgress->setAlignment(Qt::AlignHCenter);
+    AlgButton *cancelButton = new AlgButton("Cancel", alg);
+    m_tree->setItemWidget(algItem,1,algProgress);
+    m_tree->setItemWidget(algItem,2,cancelButton);
+    const std::vector< Mantid::Kernel::Property* >& prop_list = alg->getProperties();
+    for(std::vector< Mantid::Kernel::Property* >::const_iterator prop=prop_list.begin();prop!=prop_list.end();++prop)
+    {
+      QStringList lstr;
+      Mantid::Kernel::MaskedProperty<std::string> * maskedProp = dynamic_cast<Mantid::Kernel::MaskedProperty<std::string> *>(*prop);
+      if(maskedProp)
+      {
+        lstr  << QString::fromStdString(maskedProp->name()) + ": " << QString::fromStdString(maskedProp->getMaskedValue());
+      }
+      else
+      {
+        lstr  << QString::fromStdString((**prop).name()) + ": " << QString::fromStdString((**prop).value());
+      }
+      if ((**prop).isDefault()) lstr << " Default";
+      algItem->addChild(new QTreeWidgetItem(lstr));
     }
-    m_algMonitor->unlock();
+
+    connect(cancelButton,SIGNAL(clicked(Mantid::API::AlgorithmID)),m_algMonitor,SLOT(cancel(Mantid::API::AlgorithmID)));
+  }
+  m_algMonitor->unlock();
 }
 
 // The void* corresponds to Mantid::API::AlgorithmID, but Qt wasn't coping with the typedef

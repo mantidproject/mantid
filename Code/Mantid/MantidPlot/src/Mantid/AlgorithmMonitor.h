@@ -16,6 +16,8 @@ class QTreeWidget;
 class MantidUI;
 class MonitorDlg;
 
+
+//-----------------------------------------------------------------------------
 /** Monitor for reporting progress and canceling running algorithms
  *
  */
@@ -65,14 +67,22 @@ public slots:
   void showDialog();
   void cancel(Mantid::API::AlgorithmID);
   void cancelAll();
+
 private:
   MantidUI *m_mantidUI;
-  int m_nRunning;                    // number of running algorithms
-  QVector<Mantid::API::AlgorithmID> m_algorithms; // IDs of running algorithms
+  /// number of running algorithms
+  int m_nRunning;
+  /// IDs of running algorithms
+  QVector<Mantid::API::AlgorithmID> m_algorithms;
   MonitorDlg* m_monitorDlg;
   static QMutex s_mutex;
 };
 
+
+//-----------------------------------------------------------------------------
+/** Dialog that shows a list of algorithms running
+ * and cancel buttons for them.
+ */
 class MonitorDlg: public QDialog
 {
   Q_OBJECT
