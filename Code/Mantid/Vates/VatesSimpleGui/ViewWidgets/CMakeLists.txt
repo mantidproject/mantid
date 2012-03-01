@@ -73,6 +73,7 @@ ${RES_FILES}
 )
 
 set( TEST_SUITES
+    test/suite_MDEventWorkspace
     test/suite_MDHistoWorkspace
 )
 
