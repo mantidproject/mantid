@@ -52,7 +52,7 @@ namespace Mantid
         virtual void set(Kernel::IPropertyManager* alg, const std::string &name, const boost::python::object & value) = 0;
         /// Overload to create a Property type from the given value with no validation
         virtual Kernel::Property * create(const std::string & name, const boost::python::object & value, 
-                                          const unsigned int direction) const = 0;
+                                          const boost::python::object & validator, const unsigned int direction) const = 0;
         /// Is the given object a derived type of this objects Type
         virtual bool checkExtract(const boost::python::object & value) const = 0;
         /// Return the Python type corresponding to this object. May return NULL

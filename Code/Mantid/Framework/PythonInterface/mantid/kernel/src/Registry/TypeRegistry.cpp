@@ -35,8 +35,6 @@ namespace Mantid
       void registerBuiltins()
       {
         // Register a handler for each basic type in IPropertyManager.cpp
-        REGISTER_SINGLEVALUE_HANDLER(int16_t);
-        REGISTER_SINGLEVALUE_HANDLER(uint16_t);
         REGISTER_SINGLEVALUE_HANDLER(int32_t);
         REGISTER_SINGLEVALUE_HANDLER(uint32_t);
         REGISTER_SINGLEVALUE_HANDLER(int64_t);

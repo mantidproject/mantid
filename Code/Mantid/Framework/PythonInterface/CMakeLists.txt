@@ -94,7 +94,8 @@ set ( TEST_PY_FILES
   test/python/OrientedLatticeTest.py
   test/python/PythonPluginsTest.py
   test/python/PropertyWithValueTest.py
-  test/python/PythonAlgorithmTest.py
+  test/python/PythonAlgorithmPropertiesTest.py
+  test/python/PythonAlgorithmTraitsTest.py
   test/python/ReferenceFrameTest.py
   test/python/RunTest.py
   test/python/SimpleAPITest.py

@@ -20,7 +20,14 @@ namespace Mantid
       void initTypeLookup(PyTypeIndex & index)
       {
         assert(index.empty());
-        index.insert(std::make_pair(&PyInt_Type, new Registry::SingleValueTypeHandler<long>()));
+
+        #define REGISTER_MAPPING(PyType, CppType)\
+          index.insert(std::make_pair(&PyType, new Registry::SingleValueTypeHandler<CppType>()));
+
+        // Map the Python types to the best match in C++
+        REGISTER_MAPPING(PyFloat_Type, double);
+        REGISTER_MAPPING(PyInt_Type, long);
+        REGISTER_MAPPING(PyString_Type, std::string);
       }
 
       /**
@@ -39,22 +46,6 @@ namespace Mantid
      * The python type is mapped to a C type using the mapping defined by initPythonTypeMap()
      * @param name :: The name of the property
      * @param defaultValue :: A default value for this property.
-     * @param direction :: Specifies whether the property is Input, InOut or Output
-     * @returns A pointer to a new Property object
-     */
-    Kernel::Property *
-    PropertyWithValueFactory::create(const std::string & name , const boost::python::object & value, 
-                                     const unsigned int direction)
-    {
-      Registry::PropertyValueHandler *propHandle = lookup(value.ptr()->ob_type);
-      return propHandle->create(name, value, direction);
-    }
-
-    /**
-     * Creates a PropertyWithValue<Type> instance from the given information.
-     * The python type is mapped to a C type using the mapping defined by initPythonTypeMap()
-     * @param name :: The name of the property
-     * @param defaultValue :: A default value for this property.
      * @param validator :: A validator object
      * @param direction :: Specifies whether the property is Input, InOut or Output
      * @returns A pointer to a new Property object
@@ -63,8 +54,26 @@ namespace Mantid
     PropertyWithValueFactory::create(const std::string & name , const boost::python::object & value, 
                                      const boost::python::object & validator, const unsigned int direction)
     {
-      throw std::runtime_error("Not implemented");
+      Registry::PropertyValueHandler *propHandle = lookup(value.ptr()->ob_type);
+      return propHandle->create(name, value, validator, direction);
     }
+
+    /**
+     * Creates a PropertyWithValue<Type> instance from the given information.
+     * The python type is mapped to a C type using the mapping defined by initPythonTypeMap()
+     * @param name :: The name of the property
+     * @param defaultValue :: A default value for this property.
+     * @param direction :: Specifies whether the property is Input, InOut or Output
+     * @returns A pointer to a new Property object
+     */
+    Kernel::Property *
+    PropertyWithValueFactory::create(const std::string & name , const boost::python::object & value, 
+                                     const unsigned int direction)
+    {
+      boost::python::object validator; // Default construction gives None object
+      return create(name, value, validator, direction);
+    }
+
 
     //-------------------------------------------------------------------------
     // Private methods

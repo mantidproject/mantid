@@ -56,15 +56,26 @@ namespace Mantid
          * @param name :: The name of the property
          * @param defaultValue :: The defaultValue of the property. The object attempts to extract
          * a value of type ValueType from the python object
+         * @param validator :: A python object pointing to a validator instance, which can be None.
          * @param direction :: The direction of the property
          * @returns A pointer to a newly constructed property instance
          */
         Kernel::Property * create(const std::string & name, const boost::python::object & defaultValue, 
-                                  const unsigned int direction) const
+                                  const boost::python::object & validator, const unsigned int direction) const
         {
           using boost::python::extract;
           const ValueType valueInC = extract<ValueType>(defaultValue)();
-          return new Kernel::PropertyWithValue<ValueType>(name, valueInC, direction);
+          Kernel::Property *valueProp(NULL);
+          if( validator.is_none() )
+          {
+            valueProp = new Kernel::PropertyWithValue<ValueType>(name, valueInC, direction);
+          }
+          else
+          {
+            const Kernel::IValidator<ValueType> * propValidator = extract<Kernel::IValidator<ValueType> *>(validator);
+            valueProp = new Kernel::PropertyWithValue<ValueType>(name, valueInC, propValidator->clone(), direction);
+          }
+          return valueProp;
         }
         /// Is the given object a derived type of this objects Type
         bool checkExtract(const boost::python::object & value) const

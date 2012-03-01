@@ -47,6 +47,15 @@ namespace Mantid
     class PythonAlgorithm : public API::Algorithm
     {
     public:
+      /// Declare a property using the type of the defaultValue with a validator and doc string
+      void declareProperty(const std::string & name, const boost::python::object & defaultValue,
+                           const boost::python::object & validator = boost::python::object(),
+                           const std::string & doc = "", const int direction = Kernel::Direction::Input);
+
+      /// Declare a property with a documentation string
+      void declareProperty(const std::string & name, const boost::python::object & defaultValue,
+                           const std::string & doc, const int direction = Kernel::Direction::Input);
+
       /// Declare a property using the type of the defaultValue
       void declareProperty(const std::string & name, const boost::python::object & defaultValue,
                            const int direction);
