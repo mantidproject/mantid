@@ -97,7 +97,7 @@ public:
     {
       // Try both the regular and the Post-Processing algorithm
       std::string prefix="";
-      if (bool(post))
+      if ( post > 0 )
         prefix = "Post";
       std::cout << prefix << "Processing algo" << std::endl;
 
@@ -110,14 +110,14 @@ public:
       TS_ASSERT( alg.isInitialized() )
 
       IAlgorithm_sptr procAlg;
-      procAlg = alg.makeAlgorithm( bool(post) );
+      procAlg = alg.makeAlgorithm( post > 0 );
       TSM_ASSERT("NULL algorithm pointer returned if nothing is specified.", !procAlg);
 
       TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue(prefix + "ProcessingAlgorithm", "RenameWorkspace") );
       TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue(prefix + "ProcessingProperties",
           "InputWorkspace=first;OutputWorkspace=second") );
 
-      procAlg = alg.makeAlgorithm( bool(post) );
+      procAlg = alg.makeAlgorithm( post > 0 );
       TSM_ASSERT("Non-NULL algorithm pointer", procAlg);
       TS_ASSERT( procAlg->isInitialized() );
       TS_ASSERT_EQUALS( procAlg->getPropertyValue("InputWorkspace"), "first" );

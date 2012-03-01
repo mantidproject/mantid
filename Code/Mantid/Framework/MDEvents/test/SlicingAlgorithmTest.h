@@ -333,7 +333,7 @@ public:
       alg.m_minExtents.push_back(-5.0);
       alg.m_maxExtents.push_back(+5.0);
       alg.m_numBins.push_back(20);
-      alg.m_NormalizeBasisVectors = bool(normalize);
+      alg.m_NormalizeBasisVectors = (normalize > 0);
 
       TS_ASSERT_EQUALS(alg.m_bases.size(), 0);
       TSM_ASSERT_THROWS_NOTHING("", alg.makeBasisVectorFromString(" name, units  , 1,2,3"));
