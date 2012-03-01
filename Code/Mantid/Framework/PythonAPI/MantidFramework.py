@@ -1721,6 +1721,9 @@ class PythonAlgorithm(PyAlgorithmBase):
                 self._setMatrixWorkspaceProperty(Name, Value)
             elif isinstance(Value, ITableWorkspace):
                 self._setTableWorkspaceProperty(Name, Value)
+            elif isinstance(Value, Workspace):
+                # Generic workspace
+                self._setWorkspaceProperty(Name, Value)
             else:
                 raise TypeError('Attempting to set workspace property with value that is not a workspace.')
         else:
