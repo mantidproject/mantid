@@ -18,6 +18,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/WriteLock.h"
 #include "MantidKernel/ReadLock.h"
+#include "MantidAPI/Workspace.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -118,8 +119,11 @@ namespace DataHandling
         throw std::runtime_error("Error processing the workspace using " + alg->name() + ". See log for details.");
 
       // Retrieve the output.
-      //TODO: Handle other output types!!!
-      MatrixWorkspace_sptr temp = alg->getProperty("OutputWorkspace");
+      Property * prop = alg->getProperty("OutputWorkspace");
+      IWorkspaceProperty * wsProp = dynamic_cast<IWorkspaceProperty*>(prop);
+      if (!wsProp)
+        throw std::runtime_error("The " + alg->name() + " lgorithm's OutputWorkspace property is not a WorkspaceProperty!");
+      Workspace_sptr temp = wsProp->getWorkspace();
 
       if (!PostProcess)
       {
