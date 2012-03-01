@@ -254,40 +254,81 @@ public:
   /** Keep one algorithm running, drop the second-oldest one etc. */
   void testDroppingOldOnes_whenAnAlgorithmIsStillRunning()
   {
-    return; // TODO: finish up
-
     AlgorithmManager::Instance().clear();
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),0);
 
-    // Start one algorithm that never stops, give it some time to start
+    // Start one algorithm that never stops
     IAlgorithm_sptr first = AlgorithmManager::Instance().create("AlgRunsForever");
-    Poco::ActiveResult<bool> res = first->executeAsync();
+    Poco::ActiveResult<bool> res1 = first->executeAsync();
+
+    IAlgorithm_sptr second = AlgorithmManager::Instance().create("AlgTest");
+
+    // Another long-running algo
+    IAlgorithm_sptr third = AlgorithmManager::Instance().create("AlgRunsForever");
+    Poco::ActiveResult<bool> res3 = third->executeAsync();
+
+    // give it some time to start
     Poco::Thread::sleep(100);
 
-    // Now more regular algorithms
-    IAlgorithm_sptr second = AlgorithmManager::Instance().create("AlgTest");
-    for (size_t i=2; i<5; i++)
+    for (size_t i=3; i<5; i++)
       AlgorithmManager::Instance().create("AlgTest");
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),5);
 
     // The right ones are at the front
-    TS_ASSERT(AlgorithmManager::Instance().algorithms().front() == first);
+    TS_ASSERT( *(AlgorithmManager::Instance().algorithms().begin()+0) == first);
     TS_ASSERT( *(AlgorithmManager::Instance().algorithms().begin()+1) == second);
+    TS_ASSERT( *(AlgorithmManager::Instance().algorithms().begin()+2) == third);
 
     // Add one more, drops the SECOND oldest one
     AlgorithmManager::Instance().create("AlgTest");
-
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 5);
 
     TSM_ASSERT("The oldest algorithm (is still running) so it is still there",
-        AlgorithmManager::Instance().algorithms().front() == first);
-    TSM_ASSERT("The second oldest algorithm is gone",
-        *(AlgorithmManager::Instance().algorithms().begin()+1) != second);
+        *(AlgorithmManager::Instance().algorithms().begin()+0) == first);
+    TSM_ASSERT("The second oldest was popped, replaced with the 3rd",
+        *(AlgorithmManager::Instance().algorithms().begin()+1) == third);
 
-    // Cancel the long-running one
+    // One more time
+    AlgorithmManager::Instance().create("AlgTest");
+    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 5);
+
+    // The right ones are at the front
+    TSM_ASSERT("The oldest algorithm (is still running) so it is still there",
+        *(AlgorithmManager::Instance().algorithms().begin()+0) == first);
+    TSM_ASSERT("The third algorithm (is still running) so it is still there",
+        *(AlgorithmManager::Instance().algorithms().begin()+1) == third);
+
+    // Cancel the long-running ones
     first->cancel();
-    res.wait();
+    third->cancel();
+    res1.wait();
+    res3.wait();
+  }
 
+  /** Extreme case where your queue fills up and all algos are running */
+  void testDroppingOldOnes_extremeCase()
+  {
+    AlgorithmManager::Instance().clear();
+    std::vector<Poco::ActiveResult<bool>> results;
+    std::vector<IAlgorithm_sptr> algs;
+    for (size_t i=0; i<5; i++)
+    {
+      IAlgorithm_sptr alg = AlgorithmManager::Instance().create("AlgRunsForever");
+      algs.push_back(alg);
+      results.push_back(alg->executeAsync());
+    }
+    // give it some time to start
+    Poco::Thread::sleep(100);
+
+    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 5);
+    AlgorithmManager::Instance().create("AlgTest");
+    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 6);
+
+    for (size_t i=0; i<5; i++)
+    {
+      algs[i]->cancel();
+      results[i].wait();
+    }
   }
 
 

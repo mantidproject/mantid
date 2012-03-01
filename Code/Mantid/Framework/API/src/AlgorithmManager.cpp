@@ -83,31 +83,42 @@ namespace Mantid
           alg = IAlgorithm_sptr(new AlgorithmProxy(unmanagedAlg));
         else
           alg = unmanagedAlg;
+        
+        // If this takes us beyond the maximum size, then remove the oldest one(s)
+        while (m_managed_algs.size() >= static_cast<std::deque<IAlgorithm_sptr>::size_type>(m_max_no_algs) )
+        {
+          std::deque<IAlgorithm_sptr>::iterator it;
+          it = m_managed_algs.begin();
+
+          // Look for the first (oldest) algo that is NOT running right now.
+          while (it != m_managed_algs.end())
+          {
+            if (!(*it)->isRunning())
+              break;
+            it++;
+          }
+
+          if (it == m_managed_algs.end())
+          {
+            // Unusual case where ALL algorithms are running
+            g_log.warning() << "All algorithms in the AlgorithmManager are running. "
+                << "Cannot pop oldest algorithm. "
+                << "You should increase your 'algorithms.retained' value. "
+                << m_managed_algs.size() << " in queue." << std::endl;
+            break;
+          }
+          else
+          {
+            // Normal; erase that algorithm
+            g_log.debug() << "Popping out oldest algorithm " << (*it)->name() << std::endl;
+            m_managed_algs.erase(it);
+          }
+        }
 
         // Add to list of managed ones
         m_managed_algs.push_back(alg);
         alg->initialize();
-        
-        // If this takes us beyond the maximum size, then remove the oldest one(s)
-        while (m_managed_algs.size() > static_cast<std::deque<IAlgorithm_sptr>::size_type>(m_max_no_algs) )
-        {
-          // Don't delete any algorithms that are still running.
-          if (!m_managed_algs.front()->isRunning())
-          {
-            std::cout << "Popping out oldest algorithm " << m_managed_algs.front()->name() << std::endl;
-            g_log.debug() << "Popping out oldest algorithm " << m_managed_algs.front()->name() << std::endl;
-            m_managed_algs.pop_front();
-            // TODO: remove the second-oldest one
-          }
-          else
-          {
-            std::cout << "NOT Popping out oldest algorithm " << m_managed_algs.front()->name() << std::endl;
-            g_log.debug() << "Oldest algorithm " << m_managed_algs.front()->name() << " is running. Not popping. "
-                << m_managed_algs.size() << " in queue." << std::endl;
-            break;
-          }
 
-        }
       }
       catch(std::runtime_error& ex)
       {
