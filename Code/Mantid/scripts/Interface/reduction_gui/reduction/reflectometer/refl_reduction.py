@@ -52,8 +52,6 @@ class REFLReductionScripter(BaseReductionScripter):
         if HAS_MANTID:
             script = self.to_script(None)
             try:
-                global REF_RED_OUTPUT_MESSAGE
-                REF_RED_OUTPUT_MESSAGE = ''
                 exec script
                 print REF_RED_OUTPUT_MESSAGE
                 # Update scripter

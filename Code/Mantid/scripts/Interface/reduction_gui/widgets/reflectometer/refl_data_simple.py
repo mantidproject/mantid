@@ -847,8 +847,6 @@ class DataReflWidget(BaseWidget):
             self._det_angle_offset_chk_changed()
             self._direct_pixel_chk_changed()
         
-        self._summary.data_run_number_edit.setText(str(','.join([str(i) for i in state.data_files])))
-                
         # Normalization options
         self._summary.norm_run_number_edit.setText(str(state.norm_file))
         self._summary.norm_peak_from_pixel.setText(str(state.NormPeakPixels[0]))
@@ -878,6 +876,9 @@ class DataReflWidget(BaseWidget):
             else:
                 self._summary.angle_radio.setChecked(True)
             self._scattering_angle_changed()
+            
+        self._reset_warnings()
+        self._summary.data_run_number_edit.setText(str(','.join([str(i) for i in state.data_files])))
             
     def get_state(self):
         """

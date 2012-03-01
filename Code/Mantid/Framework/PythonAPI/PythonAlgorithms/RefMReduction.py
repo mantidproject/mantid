@@ -260,6 +260,14 @@ class RefMReduction(PythonAlgorithm):
             self._output_message += "   Background: "
             self._output_message += " x=(%g,%g)\n" % (bck_range[0], bck_range[1])
         
+        # 2D reduction
+        output2D = "refm_%d_%s_2D" % (run_numbers[0], polarization)
+        self._convert_to_q_2D(ws_name, output2D)        
+        
+        # Crop the 2D
+        GroupDetectors(InputWorkspace=output2D, OutputWorkspace="%s_%d_%d" % (output2D, peak_range[0], peak_range[1]),
+                       SpectraList=range(peak_range[0],peak_range[1]))
+
         return output_roi
  
     def _crop_roi(self, input_ws, peak_range, low_res_range):
@@ -432,15 +440,62 @@ class RefMReduction(PythonAlgorithm):
                         YUnitLabel="Reflectivity",
                         ParentWorkspace=input_ws)
         
-        # Make sure the system knows we are creating a distribution
-        mtd[output_ws].setDistribution(True)
+    def _convert_to_q_2D(self, input_ws, output_ws):
+        """
+            Convert a reduced event workspace to a pixel vs Q workspace
+            
+            NOTE: Assumes common binning for all spectra
+            
+        """
+        #TODO: Prototype code: Make this more efficient and clean up 
         
-        # Rebin in the requested Q binning
-        q_min = self.getProperty("QMin")
-        q_step = self.getProperty("QStep")
-                
-        Rebin(InputWorkspace=output_ws, OutputWorkspace=output_ws,
-              Params=[q_min, q_step, max(q)])
-        self._output_message += "   Converted to Q\n"
+        # Get theta angle in degrees
+        theta = float(self.getProperty("Theta"))
+        if theta>0:
+            theta_radian = theta * math.pi / 180.
+        else:
+            theta_radian = self._calculate_angle(input_ws)
+
+        x = mtd[input_ws].readX(0)
+        q = 4.0*math.pi*math.sin(theta_radian) / x
+        
+        instr_dir = mtd.getSettings().getInstrumentDirectory()
+        grouping_file = os.path.join(instr_dir, "Grouping",
+                                     "REFL_Detector_Grouping_Sum_Y.xml")
+        GroupDetectors(InputWorkspace=input_ws, OutputWorkspace=output_ws,
+                       MapFile=grouping_file)
+
+        ConvertToMatrixWorkspace(InputWorkspace=output_ws,
+                                 OutputWorkspace=output_ws)
+
+        tmp = "__tmp"
+        CloneWorkspace(output_ws, "__tmp")
+        nhist = mtd[output_ws].getNumberHistograms()
+        for i in range(nhist):
+            y = mtd[tmp].readY(i)
+            e = mtd[tmp].readE(i)
+            y_ = mtd[output_ws].dataY(i)
+            e_ = mtd[output_ws].dataE(i)
+            q_ = mtd[output_ws].dataX(i)
+            
+            for j in range(len(y)):
+                y_[j] = y[len(y)-1-j]
+                e_[j] = e[len(y)-1-j]
     
+            for j in range(len(q)):
+                q_[j] = q[len(q)-1-j]
+            
+        # Get the integration range in the low-res direction
+        #low_res_range = [0, RefMReduction.NY_PIXELS-1]
+        #if self.getProperty("CropLowResDataAxis"):
+        #    low_res_range = self.getProperty("LowResDataAxisPixelRange")
+            
+        # Sum the normalization counts as a function of wavelength in ROI
+        #peak_range = self.getProperty("SignalPeakPixelRange")
+        #output_roi, npix = self._crop_roi(output_ws, peak_range, low_res_range)
+            
+        #peak_range = self.getProperty("SignalPeakPixelRange")
+        #GroupDetectors(InputWorkspace=output_ws, OutputWorkspace='ref'+output_ws,
+        #                   SpectraList=range(peak_range[0],peak_range[1]))
+                               
 mtd.registerPyAlgorithm(RefMReduction())

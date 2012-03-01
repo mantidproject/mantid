@@ -102,7 +102,6 @@ class DataSets(BaseScriptElement):
         script += "              OutputWorkspace='reflectivity_Off_Off_%s')" % str(self.data_files[0])
         script += "\n"
         
-        script += "global REF_RED_OUTPUT_MESSAGE\n"
         script += "REF_RED_OUTPUT_MESSAGE=a.getPropertyValue('OutputMessage')\n" 
 
         return script
