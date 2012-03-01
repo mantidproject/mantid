@@ -6,6 +6,7 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 #include "MantidKernel/System.h"
 #include "MantidDataHandling/LoadLiveData.h"
 #include <Poco/Thread.h>
+#include "MantidAPI/AlgorithmManager.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -67,6 +68,25 @@ namespace DataHandling
   void MonitorLiveData::exec()
   {
     this->validateInputs();
+
+    std::string outName = this->getPropertyValue("OutputWorkspace");
+    std::string accumName = this->getPropertyValue("AccumulationWorkspace");
+
+    // Check that no other MonitorLiveData thread is running with the same settings
+    auto it = AlgorithmManager::Instance().algorithms().begin();
+    for (; it != AlgorithmManager::Instance().algorithms().end(); it++)
+    {
+      IAlgorithm_sptr alg = *it;
+      if (alg->name() == "MonitorLiveData" && (alg->getAlgorithmID() != this->getAlgorithmID()))
+      {
+        if (!accumName.empty() && alg->getPropertyValue("AccumulationWorkspace") == accumName)
+          throw std::runtime_error("Another MonitorLiveData thread is running with the same AccumulationWorkspace. "
+              "Please specify a different AccumulationWorkspace name.");
+        if (alg->getPropertyValue("OutputWorkspace") == outName)
+          throw std::runtime_error("Another MonitorLiveData thread is running with the same OutputWorkspace. "
+              "Please specify a different OutputWorkspace name.");
+      }
+    }
 
     double UpdateEvery = getProperty("UpdateEvery");
     if (UpdateEvery <= 0)
