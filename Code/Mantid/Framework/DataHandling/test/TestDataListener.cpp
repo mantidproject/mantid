@@ -2,8 +2,13 @@
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/MersenneTwister.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidGeometry/Instrument.h"
 
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
+using namespace Mantid::Geometry;
 
 namespace Mantid
 {
@@ -15,9 +20,8 @@ namespace DataHandling
   TestDataListener::TestDataListener() : ILiveListener(),
       m_buffer(), m_rand(new Kernel::MersenneTwister)
   {
-    // Set up the workspace buffer
-    m_buffer = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
-                 WorkspaceFactory::Instance().create("EventWorkspace", 2, 2, 1) );
+    // Set up the first workspace buffer
+    this->createEmptyWorkspace();
     // Set a sample tof range
     m_rand->setRange(40000,60000);
     m_rand->setSeed(Kernel::DateAndTime::getCurrentTime().totalNanoseconds());
@@ -45,6 +49,22 @@ namespace DataHandling
     return;
   }
 
+  /** Create the default empty event workspace */
+  void TestDataListener::createEmptyWorkspace()
+  {
+    // Create a new, empty workspace of the same dimensions and assign to the buffer variable
+    m_buffer = boost::dynamic_pointer_cast<EventWorkspace>(
+                 WorkspaceFactory::Instance().create("EventWorkspace",2,2,1) );
+    // Give detector IDs
+    for (size_t i=0; i<m_buffer->getNumberHistograms(); i++)
+      m_buffer->getSpectrum(i)->setDetectorID( detid_t(i) );
+    // Create in TOF units
+    m_buffer->getAxis(0)->setUnit("TOF");
+    // Load a fake instrument
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 10, 0.1);
+    m_buffer->setInstrument(inst);
+  }
+
   boost::shared_ptr<MatrixWorkspace> TestDataListener::extractData()
   {
     // Add a small number of uniformly distributed events to each event list.
@@ -59,9 +79,7 @@ namespace DataHandling
 
     // Copy the workspace pointer to a temporary variable
     EventWorkspace_sptr extracted = m_buffer;
-    // Create a new, empty workspace of the same dimensions and assign to the buffer variable
-    m_buffer = boost::dynamic_pointer_cast<EventWorkspace>(
-                 WorkspaceFactory::Instance().create("EventWorkspace",2,2,1) );
+    this->createEmptyWorkspace();
 
     return extracted;
   }

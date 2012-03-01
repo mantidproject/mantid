@@ -122,7 +122,7 @@ namespace DataHandling
       Property * prop = alg->getProperty("OutputWorkspace");
       IWorkspaceProperty * wsProp = dynamic_cast<IWorkspaceProperty*>(prop);
       if (!wsProp)
-        throw std::runtime_error("The " + alg->name() + " lgorithm's OutputWorkspace property is not a WorkspaceProperty!");
+        throw std::runtime_error("The " + alg->name() + " Algorithm's OutputWorkspace property is not a WorkspaceProperty!");
       Workspace_sptr temp = wsProp->getWorkspace();
 
       if (!PostProcess)
@@ -175,19 +175,28 @@ namespace DataHandling
     WriteLock _lock1(*m_accumWS);
     ReadLock _lock2(*chunkWS);
 
-    IAlgorithm_sptr alg = this->createSubAlgorithm("Plus");
+    // Choose the appropriate algorithm to add chunks
+    std::string algoName = "PlusMD";
+    MatrixWorkspace_sptr mws = boost::dynamic_pointer_cast<MatrixWorkspace>(chunkWS);
+    if (mws) algoName = "Plus";
+
+    IAlgorithm_sptr alg = this->createSubAlgorithm(algoName);
     alg->setProperty("LHSWorkspace", m_accumWS);
     alg->setProperty("RHSWorkspace", chunkWS);
     alg->setProperty("OutputWorkspace", m_accumWS);
     alg->execute();
     if (!alg->isExecuted())
     {
-      throw std::runtime_error("Error when calling Plus to add the chunk of live data. See log.");
+      throw std::runtime_error("Error when calling " + alg->name() + " to add the chunk of live data. See log.");
     }
     else
     {
-      // TODO: What about workspace groups?
-      MatrixWorkspace_sptr temp = alg->getProperty("OutputWorkspace");
+      // Get the output as the generic Workspace type
+      Property * prop = alg->getProperty("OutputWorkspace");
+      IWorkspaceProperty * wsProp = dynamic_cast<IWorkspaceProperty*>(prop);
+      if (!wsProp)
+        throw std::runtime_error("The " + alg->name() + " Algorithm's OutputWorkspace property is not a WorkspaceProperty!");
+      Workspace_sptr temp = wsProp->getWorkspace();
       m_accumWS = temp;
     }
   }

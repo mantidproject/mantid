@@ -42,7 +42,8 @@ public:
    * @param AccumulationMethod :: parameter string
    * @return the created processed WS
    */
-  EventWorkspace_sptr doExecEvent(std::string AccumulationMethod,
+  template <typename TYPE>
+  boost::shared_ptr<TYPE> doExec(std::string AccumulationMethod,
       std::string ProcessingAlgorithm = "",
       std::string ProcessingProperties = "",
       std::string PostProcessingAlgorithm = "",
@@ -66,8 +67,8 @@ public:
     TS_ASSERT( alg.isExecuted() );
 
     // Retrieve the workspace from data service.
-    EventWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("fake") );
+    boost::shared_ptr<TYPE> ws;
+    TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<TYPE>("fake") );
     TS_ASSERT(ws);
     return ws;
   }
@@ -77,11 +78,11 @@ public:
   {
     EventWorkspace_sptr ws1, ws2;
 
-    ws1 = doExecEvent("Replace");
+    ws1 = doExec<EventWorkspace>("Replace");
     TS_ASSERT_EQUALS(ws1->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(ws1->getNumberEvents(), 200);
 
-    ws2 = doExecEvent("Replace");
+    ws2 = doExec<EventWorkspace>("Replace");
     TS_ASSERT_EQUALS(ws2->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(ws2->getNumberEvents(), 200);
     TSM_ASSERT( "Workspace changed when replaced", ws1 != ws2 );
@@ -93,11 +94,11 @@ public:
     EventWorkspace_sptr ws1, ws2;
 
     // First go creates the fake ws
-    ws1 = doExecEvent("Append");
+    ws1 = doExec<EventWorkspace>("Append");
     TS_ASSERT_EQUALS(ws1->getNumberHistograms(), 2);
 
     // Next one actually conjoins
-    ws2 = doExecEvent("Append");
+    ws2 = doExec<EventWorkspace>("Append");
     TS_ASSERT_EQUALS(ws2->getNumberHistograms(), 4);
   }
 
@@ -107,12 +108,12 @@ public:
     EventWorkspace_sptr ws1, ws2;
 
     // First go creates the fake ws
-    ws1 = doExecEvent("Add");
+    ws1 = doExec<EventWorkspace>("Add");
     TS_ASSERT_EQUALS(ws1->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(ws1->getNumberEvents(), 200);
 
     // Next one adds events, keeps # of histos the same
-    ws2 = doExecEvent("Add");
+    ws2 = doExec<EventWorkspace>("Add");
     TS_ASSERT_EQUALS(ws2->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(ws2->getNumberEvents(), 400);
 
@@ -122,10 +123,10 @@ public:
 
   //--------------------------------------------------------------------------------------------
   /** Simple processing of a chunk */
-  void test_processChunk()
+  void test_ProcessChunk()
   {
     EventWorkspace_sptr ws;
-    ws = doExecEvent("Replace", "Rebin", "Params=40e3, 1e3, 60e3");
+    ws = doExec<EventWorkspace>("Replace", "Rebin", "Params=40e3, 1e3, 60e3");
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(ws->getNumberEvents(), 200);
     // Check that rebin was called
@@ -138,7 +139,7 @@ public:
   void test_PostProcessing()
   {
     // No chunk processing, but PostProcessing
-    EventWorkspace_sptr ws = doExecEvent("Replace", "", "", "Rebin", "Params=40e3, 1e3, 60e3");
+    EventWorkspace_sptr ws = doExec<EventWorkspace>("Replace", "", "", "Rebin", "Params=40e3, 1e3, 60e3");
     EventWorkspace_sptr ws_accum = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("fake_accum");
     TS_ASSERT( ws )
     TS_ASSERT( ws_accum )
@@ -160,7 +161,7 @@ public:
   void test_Chunk_and_PostProcessing()
   {
     // Process both times
-    EventWorkspace_sptr ws = doExecEvent("Replace", "Rebin", "Params=20e3, 1e3, 60e3", "Rebin", "Params=40e3, 1e3, 60e3");
+    EventWorkspace_sptr ws = doExec<EventWorkspace>("Replace", "Rebin", "Params=20e3, 1e3, 60e3", "Rebin", "Params=40e3, 1e3, 60e3");
     EventWorkspace_sptr ws_accum = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("fake_accum");
     TS_ASSERT( ws )
     TS_ASSERT( ws_accum )
@@ -176,6 +177,21 @@ public:
     TS_ASSERT_EQUALS(ws->getNumberEvents(), 200);
     TS_ASSERT_EQUALS(ws->blocksize(), 20);
     TS_ASSERT_DELTA(ws->dataX(0)[0], 40e3, 1e-4);
+  }
+
+  //--------------------------------------------------------------------------------------------
+  /** Do some processing that converts to a different type of workspace */
+  void test_ProcessToMDWorkspace_and_Add()
+  {
+    IMDWorkspace_sptr ws;
+    ws = doExec<IMDWorkspace>("Add", "ConvertToDiffractionMDWorkspace", "");
+    if (!ws) return;
+    TS_ASSERT_EQUALS(ws->getNumDims(), 3);
+    TS_ASSERT_EQUALS(ws->getNPoints(), 200);
+
+    // Does the adding work?
+    ws = doExec<IMDWorkspace>("Add", "ConvertToDiffractionMDWorkspace", "");
+    TS_ASSERT_EQUALS(ws->getNPoints(), 400);
   }
 
 };
