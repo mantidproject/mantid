@@ -41,7 +41,7 @@ class MANTID_KERNEL_DLL RebinParamsValidator : public IValidator<std::vector<dou
 public:
   RebinParamsValidator() {}
   virtual ~RebinParamsValidator() {}
-  Kernel::IValidator<std::vector<double> >* clone() { return new RebinParamsValidator(*this); }
+  Kernel::IValidator<std::vector<double> >* clone() const { return new RebinParamsValidator(*this); }
 
 private:
   std::string checkValidity( const std::vector<double> &value ) const;

@@ -47,7 +47,7 @@ public:
   ArrayBoundedValidator(BoundedValidator<TYPE> &bv);
   virtual ~ArrayBoundedValidator();
 
-  IValidator<std::vector<TYPE> >* clone();
+  IValidator<std::vector<TYPE> >* clone() const;
   BoundedValidator<TYPE>* getValidator() const;
   std::string isValid(const std::vector<TYPE> &value) const;
 

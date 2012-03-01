@@ -54,7 +54,7 @@ std::set<std::string> FileValidator::allowedValues() const
  * Clone the validator
  * @returns A pointer to a new validator with the same properties as this one
  */
-IValidator<std::string>* FileValidator::clone() 
+IValidator<std::string>* FileValidator::clone() const
 { 
   return new FileValidator(*this); 
 }

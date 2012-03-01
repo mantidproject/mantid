@@ -66,7 +66,7 @@ ArrayBoundedValidator<TYPE>::~ArrayBoundedValidator()
  * @return the cloned object
  */
 template <typename TYPE>
-IValidator<std::vector<TYPE> >* ArrayBoundedValidator<TYPE>::clone()
+IValidator<std::vector<TYPE> >* ArrayBoundedValidator<TYPE>::clone() const
 {
   return new ArrayBoundedValidator<TYPE>(*this);
 }

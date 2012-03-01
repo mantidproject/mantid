@@ -49,7 +49,7 @@ public:
   explicit MultiFileValidator(const std::vector<std::string>& extensions);
   virtual ~MultiFileValidator();
 
-  virtual IValidator<std::vector<std::vector<std::string> > >* clone();
+  virtual IValidator<std::vector<std::vector<std::string> > >* clone() const;
 
   /// Returns the set of allowed extensions.
   virtual std::set<std::string> allowedValues() const;

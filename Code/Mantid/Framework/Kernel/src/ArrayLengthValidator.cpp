@@ -176,7 +176,7 @@ ArrayLengthValidator<TYPE>::ArrayLengthValidator():IValidator<std::vector<TYPE> 
     @returns a clone of the validator
     */
   template <typename TYPE>
-  IValidator<std::vector <TYPE> >* ArrayLengthValidator<TYPE>::clone()
+  IValidator<std::vector <TYPE> >* ArrayLengthValidator<TYPE>::clone() const
   {
     return new ArrayLengthValidator(*this);
   }

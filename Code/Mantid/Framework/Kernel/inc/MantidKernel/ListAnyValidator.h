@@ -134,7 +134,7 @@ public:
     }
 
     /// Clone this validator
-    virtual IValidator<TYPE>* clone(){ return new ListAnyValidator<TYPE>(*this); }
+    virtual IValidator<TYPE>* clone() const{ return new ListAnyValidator<TYPE>(*this); }
 
 protected:
     /** Checks if the value passed is in the list

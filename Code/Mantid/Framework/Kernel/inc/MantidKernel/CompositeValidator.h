@@ -92,7 +92,7 @@ namespace Kernel
        
     }
     // ------------------------------------------------------------------------------------
-    Kernel::IValidator<TYPE>* clone()
+    Kernel::IValidator<TYPE>* clone() const
     {
       CompositeValidator<TYPE>* copy = new CompositeValidator<TYPE>();
       for (unsigned int i=0; i < m_children.size(); ++i)

@@ -41,7 +41,7 @@ namespace Kernel
     ArrayLengthValidator(const size_t lenmin, const size_t lenmax);
     virtual ~ArrayLengthValidator();
 
-    IValidator<std::vector<TYPE> >* clone();
+    IValidator<std::vector<TYPE> >* clone() const;
 
     std::string isValid(const std::vector<TYPE> &value) const;
 
