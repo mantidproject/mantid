@@ -298,6 +298,9 @@ namespace Mantid
        //Apply masking.
        void setMDMasking(Mantid::Geometry::MDImplicitFunction* maskingRegion);
 
+       //Clear exsting masking.
+       void clearMDMasking();
+
     protected:
       MatrixWorkspace(Mantid::Geometry::INearestNeighboursFactory* factory = new Mantid::Geometry::NearestNeighboursFactory);
 

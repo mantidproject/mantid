@@ -813,6 +813,18 @@ public:
     TS_ASSERT_DELTA( a->getSignalAt(2), 6.78, 1e-5);
   }
 
+  void test_setMDMasking()
+  {
+    MDHistoWorkspace_sptr anyHistoWorkspace = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 2, 5, 10.0, 3.0);
+    TSM_ASSERT_THROWS("Characterisation test. Should throw as not implemented.", anyHistoWorkspace->setMDMasking(NULL), std::runtime_error);
+  }
+
+  void test_clearMDMasking()
+  {
+    MDHistoWorkspace_sptr anyHistoWorkspace = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 2, 5, 10.0, 3.0);
+    TSM_ASSERT_THROWS("Characterisation test. Should throw as not implemented.", anyHistoWorkspace->clearMDMasking(), std::runtime_error);
+  }
+
 
 };
 

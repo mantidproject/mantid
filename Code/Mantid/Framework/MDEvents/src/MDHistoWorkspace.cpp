@@ -1172,6 +1172,12 @@ namespace MDEvents
     throw std::runtime_error("MDHistoWorkspace::setMDMasking not implemented yet.");
   }
 
+  /// Clear any existing masking.
+  void MDHistoWorkspace::clearMDMasking()
+  {
+    throw std::runtime_error("MDHistoWorkspace::clearMDMasking not implemented yet.");
+  }
+
 
 } // namespace Mantid
 } // namespace MDEvents

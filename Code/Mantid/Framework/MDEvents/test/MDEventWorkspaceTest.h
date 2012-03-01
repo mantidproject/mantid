@@ -35,6 +35,26 @@ using namespace Mantid::Geometry;
 
 class MDEventWorkspaceTest :    public CxxTest::TestSuite
 {
+private:
+
+  /// Helper function to return the number of masked bins in a workspace.
+  size_t getNumberMasked(IMDWorkspace_sptr ws)
+  {
+    std::vector<IMDIterator*> its = ws->createIterators(1, NULL);
+    size_t numberMasked = 0;
+    IMDIterator* it = its[0];
+    size_t counter = 0;
+    for(;counter < it->getDataSize(); ++counter)
+    {
+      if(it->getIsMasked())
+      {
+        ++numberMasked;
+      }
+      it->next();
+    }
+    return numberMasked;
+  }
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -404,17 +424,7 @@ public:
     ws->setMDMasking(function);
 
     std::vector<IMDIterator*> its = ws->createIterators(1, NULL);
-    size_t numberMasked = 0;
-    IMDIterator* it = its[0];
-    size_t counter = 0;
-    for(;counter < it->getDataSize(); ++counter)
-    {
-      if(it->getIsMasked())
-      {
-        ++numberMasked;
-      }
-      it->next();
-    }
+    size_t numberMasked = getNumberMasked(ws);
     TSM_ASSERT_EQUALS("Didn't perform the masking as expected", expectedNumberMasked, numberMasked);
   }
   
@@ -472,6 +482,27 @@ public:
     MDImplicitFunction* function = new MDBoxImplicitFunction(min, max);
 
     doTestMasking(function, 500); //500 out of 1000 bins masked
+  }
+
+  void test_clearMasking()
+  {
+    //Create a function that masks everything.
+    std::vector<coord_t> min;
+    std::vector<coord_t> max;
+    min.push_back(0);
+    min.push_back(0);
+    min.push_back(0);
+    max.push_back(10);
+    max.push_back(10);
+    max.push_back(10);
+    MDImplicitFunction* function = new MDBoxImplicitFunction(min, max);
+
+    MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1 /*event per box*/);
+    ws->setMDMasking(function);
+
+    TSM_ASSERT_EQUALS("Everything should be masked.", 1000, getNumberMasked(ws));
+    TS_ASSERT_THROWS_NOTHING(ws->clearMDMasking());
+    TSM_ASSERT_EQUALS("Nothing should be masked.", 0, getNumberMasked(ws));
   }
 };
 

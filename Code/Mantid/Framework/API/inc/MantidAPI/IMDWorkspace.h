@@ -102,6 +102,9 @@ namespace Mantid
       
       /// Setter for the masking region.
       virtual void setMDMasking(Mantid::Geometry::MDImplicitFunction* maskingRegion) = 0;
+
+      /// Clear existing masks
+      virtual void clearMDMasking() = 0;
     };
     
     /// Shared pointer to the IMDWorkspace base class

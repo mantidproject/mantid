@@ -626,6 +626,12 @@ public:
     TSM_ASSERT_THROWS("Characterisation test. This is not implemented.", ws->setMDMasking(NULL), std::runtime_error);
   }
 
+  void test_clearMDMasking()
+  {
+    boost::shared_ptr<MatrixWorkspace> ws(new WorkspaceTester());
+    TSM_ASSERT_THROWS("Characterisation test. This is not implemented.", ws->clearMDMasking(), std::runtime_error);
+  }
+
 private:
   boost::shared_ptr<MatrixWorkspace> ws;
 

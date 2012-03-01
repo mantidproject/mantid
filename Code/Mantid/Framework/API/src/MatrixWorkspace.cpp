@@ -1757,6 +1757,14 @@ namespace Mantid
       throw std::runtime_error("MatrixWorkspace::setMDMasking has no implementation");
     }
 
+    /*
+    Clear MDMasking for a Matrix Workspace has not been implemented.
+    */
+    void MatrixWorkspace::clearMDMasking()
+    {
+      throw std::runtime_error("MatrixWorkspace::clearMDMasking has no implementation");
+    }
+
 
   } // namespace API
 } // Namespace Mantid

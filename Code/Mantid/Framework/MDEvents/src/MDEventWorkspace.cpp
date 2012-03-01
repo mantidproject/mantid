@@ -729,22 +729,12 @@ namespace MDEvents
 
   /**
   Setter for the masking region. 
-  Masking is not a compound operation. Old masks will be cleared when calling this.
   @param maskingRegion : Implicit function defining mask region.
   */
   TMDE(
   void MDEventWorkspace)::setMDMasking(Mantid::Geometry::MDImplicitFunction* maskingRegion)
   {
     std::vector<IMDBox<MDE,nd> *> toMaskBoxes;
-    std::vector<IMDBox<MDE,nd> *> allBoxes;
-    std::vector<IMDBox<MDE,nd> *> toNotMaskBoxes;
-    
-    //Clear old masks
-    this->data->getBoxes(allBoxes, 10000, true);
-    for(size_t i = 0; i < allBoxes.size(); ++i)
-    {
-      allBoxes[i]->unmask();
-    }
 
     //Apply new masks
     this->data->getBoxes(toMaskBoxes, 10000, true, maskingRegion);
@@ -754,6 +744,21 @@ namespace MDEvents
     }
 
     delete maskingRegion;
+  }
+
+  /**
+  Clears ALL existing masks off the workspace.
+  */
+  TMDE(
+  void MDEventWorkspace)::clearMDMasking()
+  {    
+    std::vector<IMDBox<MDE,nd> *> allBoxes;
+    //Clear old masks
+    this->data->getBoxes(allBoxes, 10000, true);
+    for(size_t i = 0; i < allBoxes.size(); ++i)
+    {
+      allBoxes[i]->unmask();
+    }
   }
 
 }//namespace MDEvents

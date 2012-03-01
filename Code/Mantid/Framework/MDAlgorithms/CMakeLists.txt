@@ -20,6 +20,7 @@ set ( SRC_FILES
 	src/InvalidParameterParser.cpp
 	src/LessThanMD.cpp
 	src/LogarithmMD.cpp
+	src/MaskMD.cpp
 	src/MergeMD.cpp
 	src/MergeMDFiles.cpp
 	src/MinusMD.cpp
@@ -73,6 +74,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/InvalidParameterParser.h
 	inc/MantidMDAlgorithms/LessThanMD.h
 	inc/MantidMDAlgorithms/LogarithmMD.h
+	inc/MantidMDAlgorithms/MaskMD.h
 	inc/MantidMDAlgorithms/MergeMD.h
 	inc/MantidMDAlgorithms/MergeMDFiles.h
 	inc/MantidMDAlgorithms/MinusMD.h
@@ -118,6 +120,7 @@ set ( TEST_FILES
 	test/InvalidParameterTest.h
 	test/LessThanMDTest.h
 	test/LogarithmMDTest.h
+	test/MaskMDTest.h
 	test/MergeMDFilesTest.h
 	test/MergeMDTest.h
 	test/MinusMDTest.h
