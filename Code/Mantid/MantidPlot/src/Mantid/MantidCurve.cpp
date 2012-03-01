@@ -205,5 +205,3 @@ void MantidCurve::doDraw(QPainter *p,
     }
   }
 }
-
-

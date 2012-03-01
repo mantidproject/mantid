@@ -2420,6 +2420,8 @@ QString Graph::saveCurves()
         s += mmc->saveToString();
         s += saveCurveLayout(i);
         s += "\n";
+        if (mmc->hasErrorBars())
+          s += "<MantidYErrors>" + mmc->errorBarSettingsList().front()->toString() + "</MantidYErrors>\n";
         if (mmc->skipSymbolsCount() > 1)
           s += "<SkipPoints>" + QString::number(mmc->skipSymbolsCount()) + "</SkipPoints>\n";
         continue;
@@ -2453,12 +2455,7 @@ QString Graph::saveCurves()
         s += er->masterCurve()->xColumnName() + "\t";
         s += er->masterCurve()->title().text() + "\t";
         s += er->title().text() + "\t";
-        s += QString::number(er->width())+"\t";
-        s += QString::number(er->capLength())+"\t";
-        s += er->color().name()+"\t";
-        s += QString::number(er->throughSymbol())+"\t";
-        s += QString::number(er->plusSide())+"\t";
-        s += QString::number(er->minusSide())+"\n";
+        s += er->toString() + "\n";
       }
     }
   }

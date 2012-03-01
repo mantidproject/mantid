@@ -11453,6 +11453,12 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
         curveID++;
       }
     }
+    else if (s.contains("<MantidYErrors>")) // Error bars on a Mantid curve
+    {
+      MantidCurve *c = dynamic_cast<MantidCurve *>(ag->curve(curveID - 1));
+      if (c)
+        c->errorBarSettingsList().front()->fromString(s.remove("<MantidYErrors>").remove("</MantidYErrors>"));
+    }
     else if (s.left(10) == "Background"){
       QStringList fList = s.split("\t");
       QColor c = QColor(fList[1]);
@@ -16293,7 +16299,7 @@ QString ApplicationWindow::versionString()
  *  @param offset An offset to add to each index. Used when loading a MantidMatrixCurve
  *  @return The filled in CurveLayout struct
  */
-CurveLayout ApplicationWindow::fillCurveSettings(const QStringList curve, unsigned int offset)
+CurveLayout ApplicationWindow::fillCurveSettings(const QStringList & curve, unsigned int offset)
 {
   CurveLayout cl;
   cl.connectType=curve[4+offset].toInt();
