@@ -1,3 +1,5 @@
+source(findFile("scripts", "global_helpers.py"))
+
 import os
 def run_script(sname):
     ctx = currentApplicationContext()

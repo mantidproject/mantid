@@ -1,3 +1,5 @@
+source(findFile("scripts", "global_helpers.py"))
+
 import os
 def open_file(filename):
     activateItem(waitForObjectItem(":_QMenuBar", "File"))

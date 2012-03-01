@@ -1,5 +1,4 @@
 def main():
-    source(findFile("scripts", "global_helpers.py"))
     source(findFile("scripts", "test_helpers.py"))
     source(findFile("scripts", "common_checks.py"))
     startApplication("MantidPlot")
