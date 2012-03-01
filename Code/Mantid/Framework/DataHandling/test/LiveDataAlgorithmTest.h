@@ -63,6 +63,32 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
   }
   
+  void test_validateInputs()
+  {
+    LiveDataAlgorithmImpl alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT( !alg.hasPostProcessing() );
+
+    TSM_ASSERT_THROWS_ANYTHING("No OutputWorkspace",  alg.validateInputs() );
+    alg.setPropertyValue("OutputWorkspace", "out_ws");
+    TSM_ASSERT_THROWS_NOTHING("Is OK now",  alg.validateInputs() );
+
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PostProcessingScript", "Pause(1)") );
+    TS_ASSERT( alg.hasPostProcessing() );
+
+    TSM_ASSERT_THROWS_ANYTHING("No AccumulationWorkspace",  alg.validateInputs() );
+    alg.setPropertyValue("AccumulationWorkspace", "accum_ws");
+    TSM_ASSERT_THROWS_NOTHING("Is OK now",  alg.validateInputs() );
+
+    alg.setPropertyValue("AccumulationWorkspace", "out_ws");
+    TSM_ASSERT_THROWS_ANYTHING("AccumulationWorkspace == OutputWorkspace",  alg.validateInputs() );
+  }
+
+  /** Test creating the processing algorithm.
+   * NOTE: RunPythonScript is not available from unit tests, so
+   * this is tested in LoadLiveDataTest.py
+   */
   void test_makeAlgorithm()
   {
     FrameworkManager::Instance();
@@ -104,7 +130,6 @@ public:
       TS_ASSERT( !AnalysisDataService::Instance().doesExist("first") );
       TS_ASSERT( AnalysisDataService::Instance().doesExist("second") );
     }
-
   }
 
 

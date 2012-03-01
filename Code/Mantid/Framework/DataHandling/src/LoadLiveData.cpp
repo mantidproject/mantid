@@ -97,9 +97,17 @@ namespace DataHandling
       // Run the processing algorithm
       alg->setChild(true);
 
-      // Make anonymous names for the ADS
-      std::string inputName = "__anonymous_livedata_input";
-      std::string outputName = "__anonymous_livedata_output";
+      // Make a unique anonymous names for the workspace, to put in ADS
+      std::string inputName = "__anonymous_livedata_input_" + Strings::toString(this->g_execCount);
+      // Transform the chunk in-place.
+      std::string outputName = inputName;
+
+      // Except, no need for anonymous names with the post-processing
+      if (PostProcess)
+      {
+        inputName = this->getPropertyValue("AccumulationWorkspace");
+        outputName = this->getPropertyValue("OutputWorkspace");
+      }
 
       // For python scripts to work we need to go through the ADS
       AnalysisDataService::Instance().addOrReplace(inputName, inputWS);
@@ -113,9 +121,12 @@ namespace DataHandling
       //TODO: Handle other output types!!!
       MatrixWorkspace_sptr temp = alg->getProperty("OutputWorkspace");
 
-      // Remove the workspaces from the ADS, they are no longer needed.
-      AnalysisDataService::Instance().remove(inputName);
-      AnalysisDataService::Instance().remove(outputName);
+      if (!PostProcess)
+      {
+        // Remove the chunk workspace from the ADS, it is no longer needed there.
+        AnalysisDataService::Instance().remove(inputName);
+      }
+
       return temp;
     }
     else
@@ -229,6 +240,8 @@ namespace DataHandling
    */
   void LoadLiveData::exec()
   {
+    this->validateInputs();
+
     // The full, post-processed output workspace
     m_outputWS = this->getProperty("OutputWorkspace");
 

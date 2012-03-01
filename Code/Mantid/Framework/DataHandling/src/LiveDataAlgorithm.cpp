@@ -201,11 +201,35 @@ namespace DataHandling
     {
       // Run a snippet of python
       IAlgorithm_sptr alg = this->createSubAlgorithm("RunPythonScript");
+      alg->setLogging(false);
       alg->setPropertyValue("Code", script);
       return alg;
     }
     else
       return IAlgorithm_sptr();
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Perform validation of the inputs.
+   * This should be called before starting the listener to give fast feedback
+   * to the user that they did something wrong.
+   *
+   * @throw std::invalid_argument if there is a problem.
+   */
+  void LiveDataAlgorithm::validateInputs()
+  {
+    if (this->getPropertyValue("OutputWorkspace").empty())
+      throw std::invalid_argument("Must specify the OutputWorkspace.");
+
+    // Validate inputs
+    if (this->hasPostProcessing())
+    {
+      if (this->getPropertyValue("AccumulationWorkspace").empty())
+        throw std::invalid_argument("Must specify the AccumulationWorkspace parameter if using PostProcessing.");
+
+      if (this->getPropertyValue("AccumulationWorkspace") == this->getPropertyValue("OutputWorkspace"))
+        throw std::invalid_argument("The AccumulationWorkspace must be different than the OutputWorkspace, when using PostProcessing.");
+    }
   }
 
 } // namespace Mantid

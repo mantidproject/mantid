@@ -10,6 +10,7 @@
 #include <iostream>
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;
@@ -79,8 +80,30 @@ public:
     // Check that rebin was called
     TS_ASSERT_EQUALS(ws->blocksize(), 20);
     TS_ASSERT_DELTA(ws->dataX(0)[0], 40e3, 1e-4);
-
   }
+
+
+  //--------------------------------------------------------------------------------------------
+  /** If the OutputWorkspace exists (from a previous run),
+   * and you select "Add", it still REPLACES the input on the very first run.
+   */
+  void test_FirstCallReplacesTheOutputWorkspace()
+  {
+    // Declare all algorithms, e.g. Rebin
+    FrameworkManager::Instance();
+
+    // Make an existing output workspace "fake" that should be overwritten
+    AnalysisDataService::Instance().addOrReplace("fake", WorkspaceCreationHelper::Create2DWorkspace(23, 12));
+
+    EventWorkspace_sptr ws;
+    ws = doExecEvent("Add", 0, "", "");
+
+    // The "fake" workspace was replaced.
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS(ws->getNumberEvents(), 200);
+    TS_ASSERT_EQUALS(ws->blocksize(), 1);
+  }
+
 
   //--------------------------------------------------------------------------------------------
   /** Start and keep MonitorLiveData running */

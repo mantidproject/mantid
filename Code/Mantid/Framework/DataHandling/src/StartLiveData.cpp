@@ -80,6 +80,8 @@ namespace DataHandling
    */
   void StartLiveData::exec()
   {
+    this->validateInputs();
+
     // Validate the inputs
     bool FromNow = getProperty("FromNow");
     bool FromStartOfRun = getProperty("FromStartOfRun");
@@ -109,6 +111,8 @@ namespace DataHandling
     loadAlg.setChild(true);
     // Copy settings from THIS to LoadAlg
     loadAlg.copyPropertyValuesFrom(*this);
+    // Force replacing the output workspace on the first run, to clear out old junk.
+    loadAlg.setPropertyValue("AccumulationMethod", "Replace");
     // Give the listener directly to LoadLiveData (don't re-create it)
     loadAlg.setLiveListener(listener);
 
