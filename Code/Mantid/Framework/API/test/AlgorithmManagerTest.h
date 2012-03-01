@@ -9,6 +9,7 @@
 #include "MantidKernel/ConfigService.h"
 #include <stdexcept>
 #include <vector>
+#include <Poco/Thread.h>
 
 using namespace Mantid::API;
 
@@ -23,7 +24,6 @@ public:
   virtual const std::string name() const {return "AlgTest";}
   virtual int version() const {return(1);}
   virtual const std::string category() const {return("Cat1");}
-
 };
 
 class AlgTestFail : public Algorithm
@@ -65,10 +65,29 @@ public:
   virtual const std::string name() const {return "AlgTestSecond";}
   virtual int version() const {return(1);}
   virtual const std::string category() const {return("Cat3");}
-
 };
 
+
+/** Algorithm that runs until cancelled */
+class AlgRunsForever : public Algorithm
+{
+public:
+  AlgRunsForever() : Algorithm() {}
+  virtual ~AlgRunsForever() {}
+  void init() { }
+  void exec()
+  {
+    while (!this->m_cancel)
+      Poco::Thread::sleep(10);
+  }
+  virtual const std::string name() const {return "AlgRunsForever";}
+  virtual int version() const {return(1);}
+  virtual const std::string category() const {return("Cat1");}
+};
+
+
 DECLARE_ALGORITHM(AlgTest)
+DECLARE_ALGORITHM(AlgRunsForever)
 DECLARE_ALGORITHM(AlgTestSecond)
 
 class AlgorithmManagerTest : public CxxTest::TestSuite
@@ -82,7 +101,7 @@ public:
   AlgorithmManagerTest() 
   {
     // A test fails unless algorithms.retained is big enough
-    Mantid::Kernel::ConfigService::Instance().setString("algorithms.retained","100");
+    Mantid::Kernel::ConfigService::Instance().setString("algorithms.retained","5");
   }
 
   void testVersionFail()
@@ -198,14 +217,79 @@ public:
     Bptr=AlgorithmManager::Instance().create("AlgTest", -1, false);
 
     m_notificationValue = 0;
-    Bptr->executeAsync();
+    Poco::ActiveResult<bool> resB = Bptr->executeAsync();
+    resB.wait();
     TSM_ASSERT_EQUALS( "Notification was received.", m_notificationValue, 12345 );
 
     m_notificationValue = 0;
-    Aptr->executeAsync();
+    Poco::ActiveResult<bool> resA = Aptr->executeAsync();
+    resA.wait();
     TSM_ASSERT_EQUALS( "Notification was received (proxy).", m_notificationValue, 12345 );
 
   }
+
+  /** Keep the right number of algorithms in the list */
+  void testDroppingOldOnes()
+  {
+    AlgorithmManager::Instance().clear();
+    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),0);
+
+    IAlgorithm_sptr first = AlgorithmManager::Instance().create("AlgTest");
+    // Fill up the list
+    for (size_t i=1; i<5; i++)
+      AlgorithmManager::Instance().create("AlgTest");
+    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),5);
+
+    // The first one is at the front
+    TS_ASSERT(AlgorithmManager::Instance().algorithms().front() == first);
+
+    // Add one more, drops the oldest one
+    AlgorithmManager::Instance().create("AlgTest");
+    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),5);
+    TSM_ASSERT("The first(oldest) algorithm is gone",
+        AlgorithmManager::Instance().algorithms().front() != first);
+  }
+
+
+  /** Keep one algorithm running, drop the second-oldest one etc. */
+  void testDroppingOldOnes_whenAnAlgorithmIsStillRunning()
+  {
+    return; // TODO: finish up
+
+    AlgorithmManager::Instance().clear();
+    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),0);
+
+    // Start one algorithm that never stops, give it some time to start
+    IAlgorithm_sptr first = AlgorithmManager::Instance().create("AlgRunsForever");
+    Poco::ActiveResult<bool> res = first->executeAsync();
+    Poco::Thread::sleep(100);
+
+    // Now more regular algorithms
+    IAlgorithm_sptr second = AlgorithmManager::Instance().create("AlgTest");
+    for (size_t i=2; i<5; i++)
+      AlgorithmManager::Instance().create("AlgTest");
+    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),5);
+
+    // The right ones are at the front
+    TS_ASSERT(AlgorithmManager::Instance().algorithms().front() == first);
+    TS_ASSERT( *(AlgorithmManager::Instance().algorithms().begin()+1) == second);
+
+    // Add one more, drops the SECOND oldest one
+    AlgorithmManager::Instance().create("AlgTest");
+
+    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 5);
+
+    TSM_ASSERT("The oldest algorithm (is still running) so it is still there",
+        AlgorithmManager::Instance().algorithms().front() == first);
+    TSM_ASSERT("The second oldest algorithm is gone",
+        *(AlgorithmManager::Instance().algorithms().begin()+1) != second);
+
+    // Cancel the long-running one
+    first->cancel();
+    res.wait();
+
+  }
+
 
 int m_notificationValue;
 };

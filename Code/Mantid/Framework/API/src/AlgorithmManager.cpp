@@ -89,17 +89,19 @@ namespace Mantid
         alg->initialize();
         
         // If this takes us beyond the maximum size, then remove the oldest one(s)
-        while (m_managed_algs.size() >= static_cast<std::deque<IAlgorithm_sptr>::size_type>(m_max_no_algs) )
+        while (m_managed_algs.size() > static_cast<std::deque<IAlgorithm_sptr>::size_type>(m_max_no_algs) )
         {
           // Don't delete any algorithms that are still running.
           if (!m_managed_algs.front()->isRunning())
           {
+            std::cout << "Popping out oldest algorithm " << m_managed_algs.front()->name() << std::endl;
             g_log.debug() << "Popping out oldest algorithm " << m_managed_algs.front()->name() << std::endl;
             m_managed_algs.pop_front();
             // TODO: remove the second-oldest one
           }
           else
           {
+            std::cout << "NOT Popping out oldest algorithm " << m_managed_algs.front()->name() << std::endl;
             g_log.debug() << "Oldest algorithm " << m_managed_algs.front()->name() << " is running. Not popping. "
                 << m_managed_algs.size() << " in queue." << std::endl;
             break;
