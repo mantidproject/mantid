@@ -128,6 +128,9 @@ private slots:
   /// Save the settings of whether to show the toolbars.
   void toolbarsChanged(bool);
 
+  /// Save the settings of whether to show the previous graphs.
+  void hideGraphsChanged(bool);
+
   /// Validate the Y minimum.
   void validateYMin();
   

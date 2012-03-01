@@ -1332,6 +1332,20 @@ void MuonAnalysis::deleteRangedWorkspaces()
 
 
 /**
+* Delete all the open graphs that are associated with the muon fit property browser.
+*/
+void MuonAnalysis::deleteGraphs()
+{
+  QStringList names(m_uiForm.fitBrowser->getWorkspaceNames() );
+
+  for (int i=0; i<names.size(); ++i)
+  {
+    emit closeGraph(names[i] + "-1");
+  }
+}
+
+
+/**
 * Create a table of dead times and apply them to the data.
 *
 * @params deadTimes :: a vector of all the dead times starting at spectrum 1.
@@ -1897,6 +1911,9 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
 
   m_updating = true;
 
+  if (m_uiForm.hideGraphs->isChecked() )
+    deleteGraphs();
+
   QString plotTypeTitle("");
   if (plotType == "Asymmetry")
   {
@@ -2048,6 +2065,9 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     return;
 
   m_updating = true;
+
+  if (m_uiForm.hideGraphs->isChecked() )
+    deleteGraphs();
 
   QString plotTypeTitle("");
   if (plotType == "Asymmetry")
@@ -2938,6 +2958,9 @@ void MuonAnalysis::loadAutoSavedValues(const QString& group)
 
   bool hideTools = prevSettingTabOptions.value("toolbars", 1).toBool();
   m_uiForm.hideToolbars->setChecked(hideTools);
+
+  bool hideGraphs = prevSettingTabOptions.value("hiddenGraphs", 1).toBool();
+  m_uiForm.hideGraphs->setChecked(hideGraphs);
 
   // Load dead time options.
   QSettings deadTimeOptions;

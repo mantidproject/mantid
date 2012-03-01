@@ -58,10 +58,12 @@ void MuonAnalysisOptionTab::initLayout()
            SLOT(runyAxisMaximumInput()));
   connect(m_uiForm.yAxisAutoscale, SIGNAL(toggled(bool)), this,  
            SLOT(runyAxisAutoscale(bool)));
+
   connect(m_uiForm.plotCreation, SIGNAL(currentIndexChanged(int)), this, SLOT(plotCreationChanged(int)));
   connect(m_uiForm.connectPlotType, SIGNAL(currentIndexChanged(int)), this, SLOT(plotTypeChanged(int)));
   connect(m_uiForm.showErrorBars, SIGNAL(toggled(bool)), this, SLOT(errorBarsChanged(bool)));
   connect(m_uiForm.hideToolbars, SIGNAL(toggled(bool)), this, SLOT(toolbarsChanged(bool)));
+  connect(m_uiForm.hideGraphs, SIGNAL(toggled(bool)), this, SLOT(hideGraphsChanged(bool)));
 
   ////////////// Data Binning slots ///////////////
   connect(m_uiForm.rebinComboBox, SIGNAL(currentIndexChanged(int)), this, 
@@ -324,10 +326,24 @@ void MuonAnalysisOptionTab::errorBarsChanged(bool state)
 */
 void MuonAnalysisOptionTab::toolbarsChanged(bool state)
 {
-  //emit toolbarsOnOrOff(state);
   QSettings group;
   group.beginGroup(m_settingsGroup + "SettingOptions");
   group.setValue("toolbars", state);
+}
+
+
+/**
+* Save the settings of whether to show the previous graphs.
+*
+* @params state :: The new state for the hide graphs check box.
+*/
+void MuonAnalysisOptionTab::hideGraphsChanged(bool state)
+{
+  QSettings group;
+  group.beginGroup(m_settingsGroup + "SettingOptions");
+  group.setValue("hiddenGraphs", state);
+  if (state)
+    emit settingsTabUpdatePlot();
 }
 
 
