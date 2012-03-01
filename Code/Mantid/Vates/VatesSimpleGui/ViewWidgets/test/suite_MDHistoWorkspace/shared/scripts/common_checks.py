@@ -1,8 +1,4 @@
-def fix_bool(value):
-    if value:
-        return True
-    else:
-        return False
+source(findFile("scripts", "global_checks.py"))
 
 def check_vsi_state(expected_state, message=None):
     ws_ctx_menu = waitForObject(":MantidPlot - untitled.WorkspaceContextMenu_QMenu")
