@@ -83,7 +83,7 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
       if (rhs.m_manager.existsProperty(ADDABLE[i]))
       {
         // get a pointer to the property on the right-handside workspace
-        Property * right = rhs.m_manager.getProperty();
+        Property * right = rhs.m_manager.getProperty(ADDABLE[i]);
 
         // now deal with the left-handside
         if (m_manager.existsProperty(ADDABLE[i]))
