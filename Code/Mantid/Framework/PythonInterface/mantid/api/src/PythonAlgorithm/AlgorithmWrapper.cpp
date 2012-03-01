@@ -20,7 +20,7 @@ namespace Mantid
     {
       static const char * method = "name";
       std::string name;
-      if( WrapperHelpers::typeHasAttribute(*this, method) )
+      if( Environment::typeHasAttribute(*this, method) )
       {
         name = call<std::string>(get_override(method).ptr()); // Avoid a warning with just calling return fn() which docs say you can do.
       }
@@ -49,7 +49,7 @@ namespace Mantid
     {
       static const char * method = "version";
       int version(1);
-      if( WrapperHelpers::typeHasAttribute(*this, method) )
+      if( Environment::typeHasAttribute(*this, method) )
       {
         version = call<int>(get_override(method).ptr()); // Avoid a warning with just calling return fn() which docs say you can do.
       }
@@ -73,9 +73,9 @@ namespace Mantid
     {
       static const char * method = "category";
       std::string cat("PythonAlgorithms");
-      if (  WrapperHelpers::typeHasAttribute(*this, method) )
+      if (  Environment::typeHasAttribute(*this, method) )
       {
-        cat = boost::python::call<std::string>(this->get_override(method).ptr());
+        cat = call<std::string>(this->get_override(method).ptr());
       }
       return cat;
     }

@@ -7,7 +7,7 @@ namespace Mantid
 {
   namespace PythonInterface
   {
-    namespace WrapperHelpers
+    namespace Environment
     {
       /** Checks whether the given object's type dictionary contains the named attribute.
        *

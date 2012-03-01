@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
-#include "MantidPythonInterface/kernel/Environment/PyEnvironment.h"
+#include "MantidPythonInterface/kernel/Environment/CallStack.h"
 
 #include <boost/python/detail/wrap_python.hpp>
 #include <frameobject.h>
@@ -11,13 +11,13 @@ namespace Mantid
 {
   namespace PythonInterface
   {
-    namespace PyEnvironment
+    namespace Environment
     {
       /**
        * Is the given function name in the call stack
        * @param name :: The name of the function call to search for
        * @param startFrame :: An optional frame to start from, if NULL then the current frame is
-       * retrieved from the interpeter
+       * retrieved from the interpreter
        * @return True if the function name is found in the stack, false otherwise
        */
       bool isInCallStack(const char * name, PyFrameObject* startFrame)

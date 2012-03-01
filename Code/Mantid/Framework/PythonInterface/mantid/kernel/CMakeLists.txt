@@ -36,7 +36,7 @@ set ( SRC_FILES
   src/Registry/SequenceTypeHandler.cpp
   src/Registry/TypeRegistry.cpp
   src/Registry/UpcastRegistry.cpp
-  src/Environment/PyEnvironment.cpp
+  src/Environment/CallStack.cpp
   src/Environment/WrapperHelpers.cpp
 )
 
@@ -62,7 +62,7 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/Registry/UpcastRegistry.h
   ${HEADER_DIR}/kernel/PythonObjectInstantiator.h
   ${HEADER_DIR}/kernel/PropertyWithValue.h
-  ${HEADER_DIR}/kernel/Environment/PyEnvironment.h
+  ${HEADER_DIR}/kernel/Environment/CallStack.h
   ${HEADER_DIR}/kernel/StlExportDefinitions.h
   ${HEADER_DIR}/kernel/Environment/WrapperHelpers.h
 )

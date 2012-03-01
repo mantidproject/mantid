@@ -35,11 +35,7 @@ namespace Mantid
 {
   namespace PythonInterface
   {
-    /**
-     * The PyEnvironment namespace defines functions that query some aspect
-     * of the currently running Python environment
-     */
-    namespace PyEnvironment
+    namespace Environment
     {
       /// Is the given function name in the call stack
       DLLExport bool isInCallStack(const char * name, _frame* startFrame = NULL);

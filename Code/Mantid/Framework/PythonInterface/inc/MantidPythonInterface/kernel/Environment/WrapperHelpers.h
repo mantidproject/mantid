@@ -11,7 +11,7 @@ namespace Mantid
 {
   namespace PythonInterface
   {
-    namespace WrapperHelpers
+    namespace Environment
     {
       /**
       This namespace contains helper functions for classes that are overridden in Python
