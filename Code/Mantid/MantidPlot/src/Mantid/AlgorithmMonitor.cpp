@@ -182,6 +182,8 @@ void MonitorDlg::update()
     m_tree = new QTreeWidget(this);
     m_tree->setColumnCount(3);
     m_tree->setSelectionMode(QAbstractItemView::NoSelection);
+    // Make the algorithm name column wider
+    m_tree->setColumnWidth(0, 220);
     QStringList hList;
     hList<<"Algorithm"<<"Progress"<<"";
     m_tree->setHeaderLabels(hList);

@@ -63,7 +63,7 @@ namespace Mantid
       m_cancel(false),m_parallelException(false),g_log(Kernel::Logger::get("Algorithm")),
       m_executeAsync(this,&Algorithm::executeAsyncImpl),m_isInitialized(false),
       m_isExecuted(false),m_isChildAlgorithm(false),m_alwaysStoreInADS(false),m_runningAsync(false),
-      m_running(false),m_rethrow(false),m_algorithmID(0)
+      m_running(false),m_rethrow(false),m_algorithmID(this)
     {
     }
 
