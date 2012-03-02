@@ -23,6 +23,7 @@ Workflow algorithm to determine chunking strategy.
 #include "MantidKernel/System.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 using namespace ::NeXus;
 using namespace Mantid::Kernel;

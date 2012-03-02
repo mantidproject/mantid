@@ -8,6 +8,8 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 
 
 namespace Mantid

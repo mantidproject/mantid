@@ -13,6 +13,7 @@ Apply deadtime correction to each spectra of a workspace.
 #include "MantidKernel/PropertyWithValue.h"
 #include "boost/lexical_cast.hpp"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 
 #include <iostream>

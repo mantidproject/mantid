@@ -20,6 +20,7 @@ Setting the Output property defines the names of the output workspaces. One of t
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/UnitFactory.h"

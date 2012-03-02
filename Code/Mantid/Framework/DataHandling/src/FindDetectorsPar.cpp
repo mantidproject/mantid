@@ -38,6 +38,7 @@ When processed by this algorithm, 4th and 5th column are transformed into angula
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include <Poco/File.h>
 #include <limits>

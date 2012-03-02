@@ -4,6 +4,7 @@
 #include "MantidQtMantidWidgets/MultifitSetupDialog.h"
 
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/CompositeFunctionMW.h"

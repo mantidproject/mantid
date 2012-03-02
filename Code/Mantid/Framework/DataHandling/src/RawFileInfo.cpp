@@ -9,6 +9,7 @@ Extracts run parameters from the [[RAW_File | RAW]] file given as an input prope
 #include "MantidDataHandling/RawFileInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "LoadRaw/isisraw2.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include <cstdio>
 
