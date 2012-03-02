@@ -77,7 +77,9 @@ namespace DataHandling
     for (; it != AlgorithmManager::Instance().algorithms().end(); it++)
     {
       IAlgorithm_sptr alg = *it;
-      if (alg->name() == "MonitorLiveData" && (alg->getAlgorithmID() != this->getAlgorithmID()))
+      // MonitorLiveData thread that is running, except THIS one.
+      if (alg->name() == "MonitorLiveData" && (alg->getAlgorithmID() != this->getAlgorithmID())
+          && alg->isRunning())
       {
         if (!accumName.empty() && alg->getPropertyValue("AccumulationWorkspace") == accumName)
           throw std::runtime_error("Another MonitorLiveData thread is running with the same AccumulationWorkspace. "

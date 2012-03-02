@@ -3,6 +3,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/WriteLock.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -81,9 +82,13 @@ namespace DataHandling
 
     // Safety considerations suggest I should stop the thread here, but the below methods don't
     // seem to do what I'd expect and I haven't seen any problems from not having them (yet).
-    //m_timer.stop();
+    // m_timer.stop();
+
+    // Get an exclusive lock to the buffer workspace
+    // will wait for generateEvents() to finish before swapping
+    WriteLock _lock(*m_buffer);
     std::swap(m_buffer,temp);
-    //m_timer.restart();
+    // m_timer.restart();
 
     return temp;
   }
@@ -93,6 +98,7 @@ namespace DataHandling
    */
   void FakeEventDataListener::generateEvents(Poco::Timer&)
   {
+    WriteLock _lock(*m_buffer);
     for (long i = 0; i < m_callbackloop; ++i)
     {
       m_buffer->getEventList(0).addEventQuickly(DataObjects::TofEvent(m_rand->next()));
