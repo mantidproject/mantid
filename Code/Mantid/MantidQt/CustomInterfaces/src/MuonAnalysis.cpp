@@ -1859,13 +1859,23 @@ void MuonAnalysis::createPlotWS(const std::string& groupName, const std::string&
     try
     {
       Mantid::API::MatrixWorkspace_sptr tempWs =  boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsname));
-      tempWs->isDistribution(true);
-      double binSize = tempWs->dataX(0)[1]-tempWs->dataX(0)[0];
 
-      QString reBinStr = QString("Rebin(\"") + wsname.c_str() + "\",\""
-        + wsname.c_str() + QString("\",") + boost::lexical_cast<std::string>(m_uiForm.optionStepSizeText->text().toDouble()*binSize).c_str() + ");";
+      bool distributionBeforeBunching = false; // used to reset back this flag after bunching the data
+      if ( tempWs->isDistribution() )
+        distributionBeforeBunching = true;
+      else
+        tempWs->isDistribution(true);
+
+      // bunching the data
+      QString reBinStr = QString("Rebunch(\"") + wsname.c_str() + "\",\""
+        + wsname.c_str() + QString("\",") + m_uiForm.optionStepSizeText->text() + ");";
       runPythonCode( reBinStr ).trimmed();
-      tempWs->isDistribution(false);
+
+      // Somehow the shared pointer tempWs is lost during the
+      // the python call above. Hence the reset of the shared pointer below
+      tempWs =  boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsname));
+      if ( distributionBeforeBunching == false)
+        tempWs->isDistribution(false);
     }
     catch(std::exception&)
     {
