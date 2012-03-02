@@ -44,7 +44,6 @@ void GausDecay::functionDerivMW(Jacobian* out, const double* xValues, const size
     out->set(i,0, g);
     out->set(i,1, -2*G*x*x*A*g);
   }
-  // calNumericalDeriv(out, xValues, nData);
 }
 
 void GausDecay::setActiveParameter(size_t i,double value)
