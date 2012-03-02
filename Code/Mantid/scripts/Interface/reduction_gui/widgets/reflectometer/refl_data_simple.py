@@ -355,11 +355,11 @@ class DataReflWidget(BaseWidget):
             ref_pix = util._check_and_get_float_line_edit(self._summary.center_pix_edit)
             PIXEL_SIZE = 0.0007 # m
             
-            delta = (dangle-dangle0)/2.0\
+            delta = (dangle-dangle0)*math.pi/180.0/2.0\
                 + ((direct_beam_pix-ref_pix)*PIXEL_SIZE)/ (2.0*self._detector_distance)
             
-            scattering_angle = self._sangle_parameter-delta
-            scattering_angle_str = "%4.2g" % scattering_angle
+            scattering_angle = delta*180.0/math.pi
+            scattering_angle_str = "%4.3g" % scattering_angle
             self._summary.angle_edit.setText(scattering_angle_str.strip())
      
     def _ref_instrument_selected(self):
