@@ -6,6 +6,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IFunctionMW.h"
+#include "MantidGeometry/muParser_Silent.h"
+#include "MantidAPI/ParameterTie.h"
 
 namespace Mantid
 {
@@ -48,6 +50,23 @@ namespace Mantid
       double intercept;
     };
 
+    class DLLExport ElasticDiffSphere : public DeltaFunction
+    {
+    public:
+      /// Constructor
+      ElasticDiffSphere();
+      /// Destructor
+      virtual ~ElasticDiffSphere() {};
+      void setHeight(const double h);
+
+    protected:
+      double HeightPrefactor() const;
+
+    };
+
+    /* Class representing the inelastic portion of the DiffSphere algorithm.
+     * Contains the 98 Lorentzians.
+     */
     class DLLExport InelasticDiffSphere : public API::ParamFunction, public API::IFunctionMW
     {
     public:
@@ -97,8 +116,12 @@ namespace Mantid
       virtual void init() {};
 
     private:
+      double ElasticIntensityTie(double I, double R, double Q);
       API::IFunctionMW* m_elastic;    //elastic intensity of the DiffSphere structure factor
       API::IFunctionMW* m_inelastic;  //inelastic intensity of the DiffSphere structure factor
+      API::ParameterTie* m_tie;            //elastic intensity expression
+      mu::Parser m_parser;            //
+
       std::string m_exprTie;          //tie that constrains the elastic intensity based on the inelastic parameters
     };
 

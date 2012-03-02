@@ -71,6 +71,7 @@ namespace Mantid
       {
         UNUSED_ARG(out); UNUSED_ARG(xValues); UNUSED_ARG(nData);
       }
+      virtual double HeightPrefactor()const { return 1.0; }  //modulates the Height of the Delta function
     };
 
   } // namespace CurveFitting

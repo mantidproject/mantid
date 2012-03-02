@@ -5,6 +5,7 @@
 #include <cmath>
 #include <boost/math/special_functions/bessel.hpp>
 
+
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -19,6 +20,18 @@ using namespace API;
 
 DECLARE_FUNCTION(DiffSphere)
 
+ElasticDiffSphere::ElasticDiffSphere(){
+  declareParameter("Height", 1.0);
+  declareParameter("Radius", 1.0, "Sphere radius");
+  declareParameter("Q",1.0, "Momentum transfer");
+}
+
+double ElasticDiffSphere::HeightPrefactor() const{
+  const double& H = getParameter("Height");
+  const double& R = getParameter("Radius");
+  const double& Q = getParameter("Q");
+  return H * pow(3*boost::math::sph_bessel(1,Q*R)/(Q*R),2);
+}
 
 // initialize class attribute xnl with a list of coefficients in string format
 void InelasticDiffSphere::initXnlCoeff(){
@@ -167,6 +180,26 @@ void InelasticDiffSphere::functionDerivMW(API::Jacobian* out, const double* xVal
   calNumericalDeriv(out, xValues, nData);
 }
 */
+
+//Height of the deltaFunction is determined by parameters from the inelastic part
+double DiffSphere::ElasticIntensityTie(double I, double R, double Q) {
+  return I * pow( 3*boost::math::sph_bessel(1,Q*R)/(Q*R), 2 );
+}
+
+
+DiffSphere::DiffSphere() {
+  //instantiate m_elastic
+  m_elastic = dynamic_cast<DeltaFunction*>(API::FunctionFactory::Instance().createFunction("DeltaFunction"));
+  addFunction( m_elastic );
+  //instantiante m_inelastic
+  m_inelastic = dynamic_cast<InelasticDiffSphere*>(API::FunctionFactory::Instance().createFunction("InelasticDiffSphere"));
+  addFunction( m_inelastic );
+
+  m_tie=createTie("f1.H");
+  m_tie->m_parser.DefineFun("ElasticIntensityTie",DiffSphere::ElasticIntensityTie);
+  m_tie->set( "ElasticIntensityTie(f2.I,f2.R,f2.Q)" );
+
+}
 
 } // namespace CurveFitting
 } // namespace Mantid
