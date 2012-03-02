@@ -70,7 +70,7 @@ namespace API
     /** Removes the indicated peak
      * @param peakNum  the peak to remove. peakNum starts at 0
      */
-    virtual void removePeak(const int peakNum) = 0;
+    virtual void removePeak(int peakNum) = 0;
 
     //---------------------------------------------------------------------------------------------
     /** Add a peak to the list
@@ -83,7 +83,7 @@ namespace API
      * @param peakNum :: index of the peak to get.
      * @return a reference to a Peak object.
      */
-    virtual IPeak & getPeak(const int peakNum) = 0;
+    virtual IPeak & getPeak(int peakNum) = 0;
 
     //---------------------------------------------------------------------------------------------
     /** Return a pointer to the Peak
