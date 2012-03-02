@@ -87,12 +87,10 @@ private:
   /// Progress reporting
   API::Progress* m_progress;
 
-  /// List of input workspaces
-  std::list<Mantid::API::MatrixWorkspace_sptr> inWS;
   /// List of input EVENT workspaces
-  std::vector<Mantid::DataObjects::EventWorkspace_sptr> inEventWS;
+  std::vector<Mantid::DataObjects::EventWorkspace_sptr> m_inEventWS;
   /// Addition tables for event workspaces
-  std::vector<AdditionTable *> tables;
+  std::vector<boost::shared_ptr<AdditionTable>> m_tables;
 
 
 };
