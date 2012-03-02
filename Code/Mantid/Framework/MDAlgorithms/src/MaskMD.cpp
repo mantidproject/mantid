@@ -107,6 +107,30 @@ namespace MDAlgorithms
       "Extents {min, max} corresponding to each of the dimensions specified, according to the order those identifies have been specified." );
   }
 
+  /**
+  Free helper function.
+  try to fetch the workspace index.
+  @param ws : The workspace to find the dimensions in
+  @param candidateNameOrId: Either the name or the id of a dimension in the workspace.
+  @return the index of the dimension in the workspace.
+  @throws runtime_error if the requested dimension is unknown either by id, or by name in the workspace.
+  */
+  size_t tryFetchDimensionIndex(Mantid::API::IMDWorkspace_sptr ws, const std::string& candidateNameOrId)
+  {
+    size_t dimWorkspaceIndex;
+    try
+    {
+      dimWorkspaceIndex = ws->getDimensionIndexById(candidateNameOrId);
+    }
+    catch(std::runtime_error)
+    {
+      //this will throw if the name is unknown.
+      dimWorkspaceIndex = ws->getDimensionIndexByName(candidateNameOrId);
+    }
+    return dimWorkspaceIndex;
+  }
+
+
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
@@ -166,16 +190,12 @@ namespace MDAlgorithms
       //Loop over all arguments within the group. and construct InputArguments for sorting.
       for(size_t i = 0; i < nDims; ++i)
       {
-        size_t index = i + group;
+        size_t index = i + (group*nDims);
         InputArgument& arg = arguments[i];
-        try
-        {
-          arg.index = ws->getDimensionIndexById(dimensions[index]);
-        }
-        catch(std::runtime_error)
-        {
-          arg.index = ws->getDimensionIndexByName(dimensions[index]);
-        }
+        
+        //Try to get the index of the dimension in the workspace.
+        arg.index = tryFetchDimensionIndex(ws, dimensions[index]);
+    
         arg.min = extents[index*2];
         arg.max = extents[(index*2)+1];
       }
@@ -197,8 +217,6 @@ namespace MDAlgorithms
       ws->setMDMasking(new MDBoxImplicitFunction(mins, maxs));
     }
   }
-
-
 
 } // namespace Mantid
 } // namespace MDAlgorithms
