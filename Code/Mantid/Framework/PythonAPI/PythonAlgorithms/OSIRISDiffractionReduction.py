@@ -11,6 +11,8 @@ The source code for the reducer class which is used may be viewed at: [http://tr
 from MantidFramework import *
 from mantidsimple import *
 
+from reducer import Reducer
+
 import re
 import itertools
 from types import NoneType
