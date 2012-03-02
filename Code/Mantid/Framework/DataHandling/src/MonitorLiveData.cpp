@@ -149,6 +149,8 @@ namespace DataHandling
         loadAlg->executeAsSubAlg();
 
         chunk++;
+        //progress( double(chunk % 100)*0.01, "chunk " + Strings::toString(chunk));
+        progress( 0.0, "Live Data " + Strings::toString(chunk));
       }
     }
   }
