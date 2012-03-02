@@ -357,8 +357,11 @@ private:
   /// Boolean to show when data has been loaded. (Can't auto-update data that hasn't been loaded)
   bool m_loaded;
 
-  ///
+  /// If the dead times have changed.
   bool m_deadTimesChanged;
+
+  /// The working run or directory displayed in mwRunFiles
+  QString m_textToDisplay;
 
   /// Load auto saved values
   void loadAutoSavedValues(const QString& group);

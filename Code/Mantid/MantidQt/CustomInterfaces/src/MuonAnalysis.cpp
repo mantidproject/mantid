@@ -78,7 +78,7 @@ Logger& MuonAnalysis::g_log = Logger::get("MuonAnalysis");
 ///Constructor
 MuonAnalysis::MuonAnalysis(QWidget *parent) :
   UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_currentDataName(""), m_assigned(false), m_groupTableRowInFocus(0), m_pairTableRowInFocus(0),
-  m_tabNumber(0), m_groupNames(), m_settingsGroup("CustomInterfaces/MuonAnalysis/"), m_updating(false), m_loaded(false), m_deadTimesChanged(false)
+  m_tabNumber(0), m_groupNames(), m_settingsGroup("CustomInterfaces/MuonAnalysis/"), m_updating(false), m_loaded(false), m_deadTimesChanged(false), m_textToDisplay("")
 {
   // this should work for now
   m_groupingTempFilename = ConfigService::Instance().getInstrumentDirectory()+"Grouping/tempMuonAnalysisGrouping.xml";
@@ -947,36 +947,58 @@ void MuonAnalysis::inputFileChanged_MWRunFiles()
 
   if ( !m_uiForm.mwRunFiles->isValid() )
   {
+    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Specified data file does not exist.");
+    m_uiForm.mwRunFiles->setText(m_textToDisplay);
     return;
   }
 
-  QStringList runFiles = m_uiForm.mwRunFiles->getFilenames();
-  
-  if (runFiles.size() == m_previousFilenames.size())
+  if (!m_updating)
   {
-    bool same(true);
+    QStringList runFiles = m_uiForm.mwRunFiles->getFilenames();
+  
+    if (runFiles.size() == m_previousFilenames.size())
+    {
+      bool same(true);
+      for (int i=0; i<runFiles.size(); ++i)
+      {
+        if (runFiles[i] != m_previousFilenames[i])
+          same = false;
+      }
+      if (same == true)
+        return;
+    }
+
+    // in case file is selected from browser button check that it actually exist
     for (int i=0; i<runFiles.size(); ++i)
     {
-      if (runFiles[i] != m_previousFilenames[i])
-        same = false;
+      if (!(isValidFile(runFiles[i]) ) ) // If the file isn't valid...
+      {
+        if (m_previousFilenames.size() > 0) // If a previous file exists then reset the name.
+        {
+          if (runFiles.size() > 1) 
+          
+            m_uiForm.mwRunFiles->setText(m_textToDisplay);
+          else
+            m_uiForm.mwRunFiles->setText(m_textToDisplay);
+        }
+        else // Ohterwise set the text a blank string.
+          m_uiForm.mwRunFiles->setText("");
+
+        return;
+      }
     }
-    if (same == true)
-      return;
+  
+    m_previousFilenames.clear();
+    m_previousFilenames = runFiles;
+    m_textToDisplay =  m_uiForm.mwRunFiles->getText();
+
+    // save selected browse file directory to be reused next time interface is started up
+    m_uiForm.mwRunFiles->saveSettings(m_settingsGroup + "mwRunFilesBrowse");
+
+    inputFileChanged(m_previousFilenames);
   }
-
-  m_previousFilenames.clear();
-  m_previousFilenames = m_uiForm.mwRunFiles->getFilenames();
-
-  // in case file is selected from browser button check that it actually exist
-  for (int i=0; i<m_previousFilenames.size(); ++i)
-  {
-    if (!(isValidFile(m_previousFilenames[i]) ) )
-      return;
-  }
-  // save selected browse file directory to be reused next time interface is started up
-  m_uiForm.mwRunFiles->saveSettings(m_settingsGroup + "mwRunFilesBrowse");
-
-  inputFileChanged(m_previousFilenames);
+  else
+    m_updating = false;
 }
 
 
@@ -3095,42 +3117,22 @@ void MuonAnalysis::setAppendingRun(int inc)
   getFullCode(runSize, newRun);
 
   // Increment is positive (next button)
-  if (inc > 0)
+  if (inc < 0)
   {
-    // Add the file onto the end of the list.
-    m_previousFilenames.append(filePath + currentFiles[fileNumber] + newRun + fileExtension);
-    
-    QString firstName = m_previousFilenames[0];
-    separateMuonFile(filePath, firstName, run, runSize);
-    getFullCode(runSize, run);
-    m_uiForm.mwRunFiles->setUserInput(run + '-' + newRun);
-  }
-  else // Increment is negative (previous button)
-  {
-    // Add the file to the beginning of the list.
-    QStringList tempFiles(m_previousFilenames);
-    m_previousFilenames.clear();
-    m_previousFilenames.append(filePath + currentFiles[fileNumber] + newRun + fileExtension);
-    for (int i=0; i<tempFiles.size(); ++i)
-    {
-      m_previousFilenames.append(tempFiles[i]);
-    }
-
+    // Add the file to the beginning of mwRunFiles text box.
     QString lastName = m_previousFilenames[m_previousFilenames.size()-1];
     separateMuonFile(filePath, lastName, run, runSize);
     getFullCode(runSize, run);
     m_uiForm.mwRunFiles->setUserInput(newRun + '-' + run);
   }
-  
-  // Check that the file exists.
-  Poco::File l_path(filePath + currentFiles[fileNumber] + newRun + fileExtension);
-  if ( !l_path.exists() )
+  else // Increment is negative (previous button)
   {
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Specified data file does not exist.");
-    return;
+    // Add the file onto the end of mwRunFiles text box
+    QString firstName = m_previousFilenames[0];
+    separateMuonFile(filePath, firstName, run, runSize);
+    getFullCode(runSize, run);
+    m_uiForm.mwRunFiles->setUserInput(run + '-' + newRun);
   }
-
-  inputFileChanged(m_previousFilenames);
 }
 
 /**
@@ -3163,19 +3165,10 @@ void MuonAnalysis::changeRun(int amountToChange)
 
   getFullCode(runSize, newRun);
 
-  m_previousFilenames.clear();
-  m_previousFilenames.append(filePath + currentFile + newRun + fileExtension);
-  m_uiForm.mwRunFiles->setUserInput(newRun);
-
-  // in case file is selected from browser button check that it actually exist
-  Poco::File l_path( m_previousFilenames[0].toStdString() );
-  if ( !l_path.exists() )
-  {
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Specified data file does not exist.");
-    return;
-  }
-
-  inputFileChanged(m_previousFilenames);
+  if (m_textToDisplay.contains("\\") || m_textToDisplay.contains("/") )
+    m_uiForm.mwRunFiles->setUserInput(filePath + currentFile + newRun);
+  else
+    m_uiForm.mwRunFiles->setUserInput(newRun);
 }
 
 
@@ -3269,7 +3262,7 @@ void MuonAnalysis::changeTab(int tabNumber)
     m_assigned = false;
     // Update the peak picker tool with the current workspace.
     m_uiForm.fitBrowser->updatePPTool(m_currentDataName);
-  } 
+  }
   else
   {
     if (tabNumber == 4)
@@ -3290,7 +3283,7 @@ void MuonAnalysis::changeTab(int tabNumber)
 *   to attach a plot picker tool to.
 */
 void MuonAnalysis::assignPeakPickerTool(const QString & workspaceName)
-{ 
+{
   if ((m_tabNumber == 3 && !m_assigned) || (m_tabNumber == 3 && m_currentDataName != workspaceName))
   {
     m_assigned = true;
@@ -3481,8 +3474,9 @@ bool MuonAnalysis::isValidFile(const QString & fileName)
       }
       Poco::File l_path( tempFilename.toStdString() );
       if ( !l_path.exists() )
-      {    
-        QMessageBox::warning(this,"Mantid - MuonAnalysis", fileName + " Specified data file does not exist.");
+      { 
+        m_updating = true;
+        QMessageBox::warning(this,"Mantid - MuonAnalysis", tempFilename + " does not exist.");
         return false;
       }
     }
@@ -3500,13 +3494,15 @@ bool MuonAnalysis::isValidFile(const QString & fileName)
     {
       if ( !l_path.exists() )
       {
-        QMessageBox::warning(this,"Mantid - MuonAnalysis", fileName + " Specified data file does not exist.");
+        m_updating = true;
+        QMessageBox::warning(this,"Mantid - MuonAnalysis", tempFilename + " does not exist.");
         return false;
       }
     }
     catch (std::exception&)
     {
-      QMessageBox::warning(this,"Mantid - MuonAnalysis", tempFilename + " Specified directory does not exist.");
+      m_updating = true;
+      QMessageBox::warning(this,"Mantid - MuonAnalysis", tempFilename + " does not exist.");
       return false;
     }
   }
