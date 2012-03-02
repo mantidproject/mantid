@@ -8,6 +8,7 @@
 #include "MantidWorkflowAlgorithms/RefRoi.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/UnitFactory.h"
 
 namespace Mantid
 {
