@@ -810,6 +810,9 @@ def applySF(InputWorkspace,
         s1h_value = s1h[0]
         s2h_value = s2h[0]
         
+        print 's1h_value={0:f}'.format(s1h_value)
+        print 's2h_value={0:f}'.format(s2h_value)
+        
         #locate the row with s1h and s2h having the right value
         s1h_precision = slitsValuePrecision * s1h_value
         s1h_value_low = s1h_value - s1h_precision

@@ -143,6 +143,10 @@ class RefLReduction(PythonAlgorithm):
             if not mtd.workspaceExists(ws_event_data):
                 LoadEventNexus(Filename=data_file, OutputWorkspace=ws_event_data)
         
+        print 'Data File(s) #'
+        print run_numbers
+        
+        
         # Get metadata
         mt_run = mtd[ws_event_data].getRun()
         ##get angles value
