@@ -95,8 +95,8 @@ namespace MDAlgorithms
    */
   void MaskMD::init()
   {
-    declareProperty(new PropertyWithValue<bool>("ClearExistingMasks", "1", Direction::Input));
-    declareProperty(new WorkspaceProperty<IMDWorkspace>("Workspace","",Direction::InOut), "An input workspace.");
+    declareProperty(new PropertyWithValue<bool>("ClearExistingMasks", "1", Direction::Input), "Clears any existing masks before applying the provided masking.");
+    declareProperty(new WorkspaceProperty<IMDWorkspace>("Workspace","",Direction::InOut), "An input/output workspace.");
     declareProperty(new ArrayProperty<std::string>("Dimensions",new MandatoryValidator<std::vector<std::string> >,Direction::Input),
           "Dimension ids/names all comma separated.\n"
           "According to the dimensionality of the workspace, these names will be grouped,\n"
