@@ -137,7 +137,7 @@ void Convolution::functionMW(double* out, const double* xValues, const size_t nD
       if (df)
       {
         dltFuns.push_back(df);
-        dltF += df->getParameter("Height");
+        dltF += df->getParameter("Height") * df->HeightPrefactor();
       }
     }
     if (dltFuns.size() == cf->nFunctions())
@@ -149,8 +149,9 @@ void Convolution::functionMW(double* out, const double* xValues, const size_t nD
   }
   else if (dynamic_cast<DeltaFunction*>(getFunction(1)))
   {// single delta function - return scaled reslution
+    DeltaFunction* df = dynamic_cast<DeltaFunction*>(cf->getFunction(1));
     resolution->functionMW(out,xValues,nData);
-    std::transform(out,out+nData,out,std::bind2nd(std::multiplies<double>(),getFunction(1)->getParameter("Height")));
+    std::transform(out,out+nData,out,std::bind2nd(std::multiplies<double>(),df->getParameter("Height")*df->HeightPrefactor()));
     return;
   }
 
