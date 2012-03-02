@@ -1,5 +1,14 @@
 /*WIKI*
-TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
+
+The MonitorLiveData algorithm is started in the background
+by [[StartLiveData]] and repeatedly calls [[LoadLiveData]].
+'''It should not be necessary to call MonitorLiveData directly.'''
+
+This algorithm simply calls [[LoadLiveData]] at the given ''UpdateFrequency''.
+For more details, see [[StartLiveData]].
+
+For details on the way to specify the data processing steps, see: [[LoadLiveData#Description|LoadLiveData]].
+
 *WIKI*/
 
 #include "MantidDataHandling/MonitorLiveData.h"

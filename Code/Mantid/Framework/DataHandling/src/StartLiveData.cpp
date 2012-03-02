@@ -1,5 +1,37 @@
 /*WIKI*
-TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
+
+The StartLiveData algorithm launches a background job that monitors and processes live data.
+
+The background algorithm started is [[MonitorLiveData]], which simply calls [[LoadLiveData]] at a fixed interval.
+
+For details on the way to specify the data processing steps, see: [[LoadLiveData#Description|LoadLiveData]].
+
+=== Live Plots ===
+
+Once live data monitoring has started, you can open a plot in MantidPlot. For example, you can right-click a workspace and choose "Plot Spectra".
+
+As the data is acquired, this plot updates automatically.
+
+Another way to start plots is to use [[MantidPlot:_Help#Python_Scripting_in_MantidPlot|python MantidPlot commands]].
+The StartLiveData algorithm returns after the first chunk of data has been loaded and processed.
+This makes it simple to write a script that will open a live plot. For example:
+
+<source lang="python">
+StartLiveData(UpdateEvery='1.0',Instrument='FakeEventDataListener',
+  ProcessingAlgorithm='Rebin',ProcessingProperties='Params=10e3,1000,60e3;PreserveEvents=1',
+  OutputWorkspace='live')
+plotSpectrum('live', [0,1])
+</source>
+
+=== Multiple Live Data Sessions ===
+
+It is possible to have multiple live data sessions running at the same time.
+Simply call StartLiveData more than once, but make sure to specify unique
+names for the ''OutputWorkspace''.
+
+Please note that you may be limited in how much simultaneous processing you
+can do by your available memory and CPUs.
+
 *WIKI*/
 
 #include "MantidDataHandling/StartLiveData.h"
