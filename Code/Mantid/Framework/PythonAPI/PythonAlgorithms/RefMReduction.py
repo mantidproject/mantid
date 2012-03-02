@@ -40,13 +40,13 @@ class RefMReduction(PythonAlgorithm):
         self.declareListProperty("LowResNormAxisPixelRange", [0, 255], Validator=ArrayBoundedValidator(Lower=0))
         
         self.declareListProperty("TOFRange", [0., 0.], Validator=ArrayBoundedValidator(Lower=0))
-        self.declareProperty("QMin", 0.0025, Description="Minimum Q-value")
-        self.declareProperty("QStep", -0.01, Description="Step-size in Q. Enter a negative value to get a log scale.")
         self.declareProperty("Theta", 0.0, Description="Scattering angle (degrees)")
         self.declareProperty("ReflectivityPixel", 0.0, Description="Reflectivity pixel of the specular peak (REFPIX)")
         self.declareProperty("WavelengthMin", 2.5)
         self.declareProperty("WavelengthMax", 6.5)
         self.declareProperty("WavelengthStep", 0.1)
+        self.declareProperty("NBins", 0)
+        self.declareProperty("LogScale", True)
         
         self.declareProperty("SetDetectorAngle", False,
                              Description="If true, the DANGLE parameter will be replace by the given value")
@@ -383,6 +383,14 @@ class RefMReduction(PythonAlgorithm):
         wl_min = self.getProperty("WavelengthMin")
         wl_max = self.getProperty("WavelengthMax")
         wl_step = self.getProperty("WavelengthStep")
+        nbins = self.getProperty("NBins")
+        
+        wave_x = mtd[ws_name].readX(0)
+        wl_min = min(wave_x)
+        wl_max = max(wave_x)
+        if nbins>0:
+            wl_step = (wl_max-wl_min)/nbins
+        
         Rebin(InputWorkspace=ws_name, OutputWorkspace=ws_name, Params=[wl_min, wl_step, wl_max], PreserveEvents=True)
         self._output_message += "   Rebinned in wavelength from %g to %g in steps of %g\n" % (wl_min, wl_max, wl_step)
 

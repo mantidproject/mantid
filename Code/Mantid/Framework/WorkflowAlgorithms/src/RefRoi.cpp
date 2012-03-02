@@ -131,6 +131,9 @@ void RefRoi::extract2D()
       size_t t_index = XIn0.size()-1-t;
       XOut0[t] = 4.0 * M_PI * sin(theta*M_PI/180.0) / XIn0[t_index];
     }
+    outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
+    outputWS->setYUnitLabel("Reflectivity");
+    outputWS->isDistribution(true);
   }
   else
   {
@@ -177,8 +180,6 @@ void RefRoi::extract2D()
       }
     }
   }
-
-  //outputWS->isDistribution(false);
 
   setProperty("OutputWorkspace", outputWS);
 }
