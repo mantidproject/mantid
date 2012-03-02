@@ -35,7 +35,16 @@ void GausDecay::functionMW(double* out, const double* xValues, const size_t nDat
 
 void GausDecay::functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
 {
-  calNumericalDeriv(out, xValues, nData);
+  const double& A = getParameter("A"); 
+  const double& G = getParameter("Sigma");  
+
+  for (size_t i = 0; i < nData; i++) {
+    double x = xValues[i];
+    double g = exp(-G*G*x*x);
+    out->set(i,0, g);
+    out->set(i,1, -2*G*x*x*A*g);
+  }
+  // calNumericalDeriv(out, xValues, nData);
 }
 
 void GausDecay::setActiveParameter(size_t i,double value)
