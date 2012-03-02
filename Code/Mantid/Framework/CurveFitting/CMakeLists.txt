@@ -3,7 +3,7 @@ set ( SRC_FILES
 	src/BFGS_Minimizer.cpp
 	src/BackToBackExponential.cpp
 	src/BackgroundFunction.cpp
-#	src/BivariateNormal.cpp
+	src/BivariateNormal.cpp
 	src/BoundaryConstraint.cpp
 	src/Chebyshev.cpp
 	src/Convolution.cpp
@@ -29,18 +29,20 @@ set ( SRC_FILES
 	src/Gaussian1D.cpp
 	src/GaussianLinearBG1D.cpp
 #	src/GenericFit.cpp
+	src/GSLFunctions.cpp
 	src/IFuncMinimizer.cpp
-#	src/IkedaCarpenterPV.cpp
+	src/IkedaCarpenterPV.cpp
 	src/LevenbergMarquardtMinimizer.cpp
-#	src/Linear.cpp
+	src/LevenbergMarquardtMDMinimizer.cpp
+	src/Linear.cpp
 	src/LinearBackground.cpp
 	src/LogNormal.cpp
 	src/Lorentzian.cpp
 	src/Lorentzian1D.cpp
 #	src/MultiBG.cpp
 	src/PRConjugateGradientMinimizer.cpp
-#	src/PlotPeakByLogValue.cpp
-#	src/ProductFunctionMW.cpp
+	src/PlotPeakByLogValue.cpp
+	src/ProductFunction.cpp
 	src/Quadratic.cpp
 	src/QuadraticBackground.cpp
 	src/Resolution.cpp
@@ -48,7 +50,7 @@ set ( SRC_FILES
 	src/StaticKuboToyabe.cpp
 	src/SimplexMinimizer.cpp
 	src/SteepestDescentMinimizer.cpp
-#	src/SpecialFunctionHelper.cpp
+	src/SpecialFunctionHelper.cpp
 	src/SplineBackground.cpp
 	src/StretchExp.cpp
 	src/StretchExpMuon.cpp
@@ -63,7 +65,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/BFGS_Minimizer.h
 	inc/MantidCurveFitting/BackToBackExponential.h
 	inc/MantidCurveFitting/BackgroundFunction.h
-#	inc/MantidCurveFitting/BivariateNormal.h
+	inc/MantidCurveFitting/BivariateNormal.h
 	inc/MantidCurveFitting/BoundaryConstraint.h
 	inc/MantidCurveFitting/Chebyshev.h
 	inc/MantidCurveFitting/Convolution.h
@@ -87,6 +89,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/GSLJacobian.h
 	inc/MantidCurveFitting/GSLMatrix.h
 	inc/MantidCurveFitting/GSLVector.h
+	inc/MantidCurveFitting/GSLFunctions.h
 	inc/MantidCurveFitting/GausDecay.h
 	inc/MantidCurveFitting/GausOsc.h
 	inc/MantidCurveFitting/Gaussian.h
@@ -96,7 +99,8 @@ set ( INC_FILES
 	inc/MantidCurveFitting/IFuncMinimizer.h
 	inc/MantidCurveFitting/IkedaCarpenterPV.h
 	inc/MantidCurveFitting/LevenbergMarquardtMinimizer.h
-#	inc/MantidCurveFitting/Linear.h
+	inc/MantidCurveFitting/LevenbergMarquardtMDMinimizer.h
+	inc/MantidCurveFitting/Linear.h
 	inc/MantidCurveFitting/LinearBackground.h
 	inc/MantidCurveFitting/LogNormal.h
 	inc/MantidCurveFitting/Lorentzian.h
@@ -104,8 +108,8 @@ set ( INC_FILES
 	inc/MantidCurveFitting/MuonFInteraction.h
 #	inc/MantidCurveFitting/MultiBG.h
 	inc/MantidCurveFitting/PRConjugateGradientMinimizer.h
-#	inc/MantidCurveFitting/PlotPeakByLogValue.h
-#	inc/MantidCurveFitting/ProductFunctionMW.h
+	inc/MantidCurveFitting/PlotPeakByLogValue.h
+	inc/MantidCurveFitting/ProductFunction.h
 	inc/MantidCurveFitting/Quadratic.h
 	inc/MantidCurveFitting/QuadraticBackground.h
 	inc/MantidCurveFitting/Resolution.h
@@ -113,7 +117,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/StaticKuboToyabe.h
 	inc/MantidCurveFitting/SimplexMinimizer.h
 	inc/MantidCurveFitting/SteepestDescentMinimizer.h
-#	inc/MantidCurveFitting/SpecialFunctionSupport.h
+	inc/MantidCurveFitting/SpecialFunctionSupport.h
 	inc/MantidCurveFitting/SplineBackground.h
 	inc/MantidCurveFitting/StretchExp.h
 	inc/MantidCurveFitting/StretchExpMuon.h
@@ -131,43 +135,43 @@ set ( TEST_FILES
 	test/SCDPanelErrorsTest.h
 	test/StaticKuboToyabeTest.h
 	test/StretchExpMuonTest.h
-#	test/BackToBackExponentialTest.h
 	test/BFGSTest.h
-#	test/BivariateNormalTest.h
+	test/BivariateNormalTest.h
 	test/BoundaryConstraintTest.h
-#	test/ChebyshevTest.h
+	test/ChebyshevTest.h
 	test/CompositeFunctionTest.h
-#	test/ConvolutionTest.h
+	test/ConvolutionTest.h
 	test/ExpDecayTest.h
 	test/ExpDecayMuonTest.h
 	test/ExpDecayOscTest.h
 	test/FitMWTest.h
 	test/FRConjugateGradientTest.h
-#	test/FuncMinimizerFactoryTest.h
+	test/FuncMinimizerFactoryTest.h
 	test/FunctionFactoryTest.h
-#	test/Gaussian1DTest.h
+	test/Gaussian1DTest.h
 	test/GausDecayTest.h
 	test/GaussianTest.h
-#	test/IkedaCarpenterPVTest.h
+	test/IkedaCarpenterPVTest.h
 	test/LeastSquaresTest.h
 	test/LevenbergMarquardtTest.h
+	test/LevenbergMarquardtMDTest.h
 	test/LinearBackgroundTest.h
-#	test/LinearTest.h
-#	test/LogNormalTest.h
-#	test/Lorentzian1DTest.h
+	test/LinearTest.h
+	test/LogNormalTest.h
+	test/Lorentzian1DTest.h
 	test/LorentzianTest.h
 #	test/MultiBGTest.h
-#	test/PlotPeakByLogValueTest.h
+	test/PlotPeakByLogValueTest.h
 	test/PRConjugateGradientTest.h
-#	test/ProductFunctionMWTest.h
-#	test/QuadraticBackgroundTest.h
-#	test/QuadraticTest.h
-#	test/ResolutionTest.h
+	test/ProductFunctionTest.h
+	test/QuadraticBackgroundTest.h
+	test/QuadraticTest.h
+	test/ResolutionTest.h
 	test/SimplexTest.h
-#	test/SpecialFunctionSupportTest.h
-#	test/SplineBackgroundTest.h
+	test/SpecialFunctionSupportTest.h
+	test/SplineBackgroundTest.h
 	test/StretchExpTest.h
-#	test/UserFunction1DTest.h
+	test/UserFunction1DTest.h
 	test/UserFunctionTest.h
 )
 

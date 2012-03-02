@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/ParamFunction.h"
-#include "MantidAPI/IFunctionMW.h"
+#include "MantidAPI/IFunction1D.h"
 #include "MantidKernel/System.h"
 #include <cmath>
 
@@ -39,7 +39,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport Resolution : public API::ParamFunction, public API::IFunctionMW
+class DLLExport Resolution : public API::ParamFunction, public API::IFunction1D
 {
 public:
   /// Constructor

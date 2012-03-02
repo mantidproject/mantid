@@ -141,10 +141,10 @@ public:
     IFunction_sptr out = alg2.getProperty("Function");
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(dynamic_cast<CompositeFunction*>(out.get())->getFunction(0).get());
     TS_ASSERT_DELTA( pk->height(), 100.6879 ,0.01);
-    TS_ASSERT_DELTA( pk->centre(), 11.1995 ,0.001);
-    TS_ASSERT_DELTA( pk->width(), 2.1984 ,0.0001);
-    TS_ASSERT_DELTA( out->getParameter("f1.A0"), 0.0030 ,0.0001);
-    TS_ASSERT_DELTA( out->getParameter("f1.A1"), -0.0008 ,0.0001);
+    TS_ASSERT_DELTA( pk->centre(), 11.1995 ,0.01);
+    TS_ASSERT_DELTA( pk->width(), 2.1984 ,0.01);
+    TS_ASSERT_DELTA( out->getParameter("f1.A0"), 0.0030 ,0.01);
+    TS_ASSERT_DELTA( out->getParameter("f1.A1"), -0.0008 ,0.01);
 
     AnalysisDataService::Instance().clear();
 
@@ -201,14 +201,14 @@ public:
 
     // test the output from fit is what you expect
     double dummy = alg2.getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA( dummy, 0.04,0.01);
+    TS_ASSERT_DELTA( dummy, 0.08,0.01);
 
     IFunction_sptr out = alg2.getProperty("Function");
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out.get());
 
-    TS_ASSERT_DELTA( pk->height(), 100.63 ,0.01);
-    TS_ASSERT_DELTA( pk->centre(), 11.3 ,0.01);
-    TS_ASSERT_DELTA( pk->width(), 2.2 ,0.01);
+    TS_ASSERT_DELTA( pk->height(), 100.7 ,0.1);
+    TS_ASSERT_DELTA( pk->centre(), 11.3 ,0.1);
+    TS_ASSERT_DELTA( pk->width(), 2.2 ,0.1);
 
     AnalysisDataService::Instance().clear();
   }
@@ -277,13 +277,13 @@ public:
 
     // test the output from fit is what you expect
     double dummy = alg2.getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA( dummy, 0.045,0.01);
+    TS_ASSERT_DELTA( dummy, 0.08,0.01);
 
     IFunction_sptr out = alg2.getProperty("Function");
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(dynamic_cast<CompositeFunction*>(out.get())->getFunction(0).get());
-    TS_ASSERT_DELTA( pk->height(), 100.63 ,0.01);
-    TS_ASSERT_DELTA( pk->centre(), 11.3 ,0.01);
-    TS_ASSERT_DELTA( pk->width(), 2.2 ,0.01);
+    TS_ASSERT_DELTA( pk->height(), 100.7 ,0.1);
+    TS_ASSERT_DELTA( pk->centre(), 11.3 ,0.1);
+    TS_ASSERT_DELTA( pk->width(), 2.2 ,0.1);
     TS_ASSERT_DELTA( out->getParameter("f1.A0"), 0.0 ,0.01);
     TS_ASSERT_DELTA( out->getParameter("f1.A1"), 0.0 ,0.01);
 

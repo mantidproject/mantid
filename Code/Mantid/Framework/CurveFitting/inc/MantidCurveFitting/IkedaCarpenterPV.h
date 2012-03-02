@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/IFunctionMW.h"
 
 namespace Mantid
 {
@@ -37,7 +38,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport IkedaCarpenterPV : public API::IPeakFunction
+    class DLLExport IkedaCarpenterPV : virtual public API::IPeakFunction, virtual public API::IFunctionMW
     {
     public:
       /// Destructor
@@ -66,6 +67,7 @@ namespace Mantid
     protected:
 
       virtual void functionLocal(double* out, const double* xValues, const size_t nData)const;
+      virtual void functionDerivLocal(API::Jacobian* out, const double* xValues, const size_t nData);
       virtual void functionDeriv(const API::FunctionDomain& domain, API::Jacobian& jacobian);
 
       /// overwrite IFunction base class method, which declare function parameters

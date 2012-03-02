@@ -4,9 +4,10 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Resolution.h"
-#include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/FitMW.h"
 #include "MantidCurveFitting/Convolution.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/FunctionFactory.h"
 #include <Poco/File.h>
 
 
@@ -129,7 +130,7 @@ void tearDown()
   void testIt()
   {
     Resolution res;
-    res.setAttribute("FileName",IFitFunction::Attribute(resFileName));
+    res.setAttributeValue("FileName",resFileName);
     const int n = 50;
     double x[n];
     double y[n];
@@ -140,7 +141,7 @@ void tearDown()
     {
       x[i] = xStart + dx*i;
     }
-    res.functionMW(y,x,n);
+    res.function1D(y,x,n);
     for(int i=0;i<n;i++)
     {
       double xi = x[i];
@@ -180,10 +181,10 @@ void tearDown()
     X.back() = X[nY-1] + dx;
     AnalysisDataService::Instance().add("ResolutionTest_WS",ws);
 
-    Resolution* res = new Resolution;
-    res->setAttribute("FileName",IFitFunction::Attribute(resFileName));
+    IFunction_sptr res( new Resolution );
+    res->setAttributeValue("FileName",resFileName);
 
-    ResolutionTest_Gauss* gauss = new ResolutionTest_Gauss;
+    IFunction_sptr gauss( new ResolutionTest_Gauss );
     gauss->setParameter("c",5);
     gauss->setParameter("h",2);
     gauss->setParameter("s",1);
@@ -192,11 +193,10 @@ void tearDown()
     conv.addFunction(res);
     conv.addFunction(gauss);
 
-    Fit fit;
+    FitMW fit;
     fit.initialize();
     fit.setPropertyValue("InputWorkspace","ResolutionTest_WS");
     fit.setPropertyValue("WorkspaceIndex","0");
-    //fit.setFunction(conv);
     fit.setPropertyValue("Function",conv.asString());
     fit.execute();
 

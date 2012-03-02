@@ -66,6 +66,9 @@ public:
 
   virtual double valDerivHessian(GSLVector& der, GSLMatrix& hessian, bool evalFunction = true) const;
 
+  void setParameters(const GSLVector& params);
+  void getParameters(GSLVector& params) const;
+
 private:
   /// name of this minimizer
   const std::string m_name;

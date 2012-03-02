@@ -68,6 +68,8 @@ public:
 
   /// Calculate fitting errors
   virtual void calFittingErrors(const Kernel::Matrix<double>& covar);
+  API::FunctionDomain_sptr getDomain() const {return m_domain;}
+  API::FunctionValues_sptr getValues() const {return m_values;}
 
 protected:
 

@@ -69,7 +69,7 @@ void CostFuncLeastSquares::deriv(std::vector<double>& der) const
       double calc = m_values->getCalculated(i);
       double obs = m_values->getFitData(i);
       double w = m_values->getFitWeight(i);
-      d += w * ( calc - obs ) * jacobian.get(i,ip);
+      d += w * w * ( calc - obs ) * jacobian.get(i,ip);
     }
     API::IConstraint* c = m_function->getConstraint(ip);
     if (c)
@@ -106,7 +106,8 @@ double CostFuncLeastSquares::valAndDeriv(std::vector<double>& der) const
     {
       double calc = m_values->getCalculated(i);
       double obs = m_values->getFitData(i);
-      double y = ( calc - obs ) * m_values->getFitWeight(i);
+      double w = m_values->getFitWeight(i);
+      double y = ( calc - obs ) * w;
       d += y * jacobian.get(i,ip);
       if (iActiveP == 0)
       {
@@ -184,8 +185,9 @@ double CostFuncLeastSquares::valDerivHessian(GSLVector& der, GSLMatrix& hessian,
     {
       double calc = m_values->getCalculated(i);
       double obs = m_values->getFitData(i);
-      double y = ( calc - obs ) * m_values->getFitWeight(i);
-      d += y * jacobian.get(i,ip);
+      double w = m_values->getFitWeight(i);
+      double y = ( calc - obs ) * w;
+      d += y * jacobian.get(i,ip) * w;
       if (iActiveP == 0 && evalFunction)
       {
         fVal += y * y;
@@ -231,7 +233,8 @@ double CostFuncLeastSquares::valDerivHessian(GSLVector& der, GSLMatrix& hessian,
       double d = 0.0;
       for(size_t k = 0; k < ny; ++k) // over fitting data
       {
-        d += jacobian.get(k,i) * jacobian.get(k,j);
+        double w = m_values->getFitWeight(k);
+        d += jacobian.get(k,i) * jacobian.get(k,j) * w * w;
       }
       if (i == j)
       {
@@ -253,6 +256,30 @@ double CostFuncLeastSquares::valDerivHessian(GSLVector& der, GSLMatrix& hessian,
   }
 
   return fVal;
+}
+
+void CostFuncLeastSquares::setParameters(const GSLVector& params)
+{
+  if (nParams() != params.size())
+  {
+    throw std::runtime_error("Parameter vector has wrong size in CostFuncLeastSquares.");
+  }
+  for(size_t i = 0; i < nParams(); ++i)
+  {
+    setParameter(i,params.get(i));
+  }
+}
+
+void CostFuncLeastSquares::getParameters(GSLVector& params) const
+{
+  if (params.size() != nParams())
+  {
+    params.resize(nParams());
+  }
+  for(size_t i = 0; i < nParams(); ++i)
+  {
+    params.set(i,getParameter(i));
+  }
 }
 
 

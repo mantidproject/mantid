@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/IkedaCarpenterPV.h"
-#include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/FitMW.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidCurveFitting/LinearBackground.h"
@@ -112,7 +112,7 @@ public:
   // here tries to fit an IC peak to a Gaussian mock data peak
   void testAgainstMockData()
   {
-    Fit alg2;
+    FitMW alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
     TS_ASSERT( alg2.isInitialized() );
 
@@ -146,9 +146,9 @@ public:
     icpv.tie("Alpha1", "1.496805");
     icpv.tie("Beta0", "31.891718");
     icpv.tie("Kappa", "46.025921");
-    //icpv->tie("SigmaSquared", "100.0");
+    //icpv.tie("SigmaSquared", "100.0");
     icpv.setParameter("X0",45.0);
-    //icpv->tie("Gamma", "1.0");
+    //icpv.tie("Gamma", "1.0");
 
     alg2.setPropertyValue("Function",icpv.asString());
 
@@ -162,8 +162,8 @@ public:
     double dummy = alg2.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 13.13,1);
 
-    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function")); 
-    IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out); 
+    IFunction_sptr out = alg2.getProperty("Function");
+    IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out.get()); 
 
     TS_ASSERT_DELTA( pk->height(), 13.99 ,1);
     TS_ASSERT_DELTA( pk->centre(), 48.229 ,1);
@@ -184,7 +184,7 @@ public:
 
     const double* x = &ws2D->readX(0)[0];
     double *yy = new double[timechannels]; 
-    pk->functionMW(yy, x, timechannels);
+    pk->function1D(yy, x, timechannels);
 
     // note that fitting a none-totally optimized IC to a Gaussian peak so 
     // not a perfect fit - but pretty ok result

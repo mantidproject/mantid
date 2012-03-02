@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Chebyshev.h"
-#include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/FitMW.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -25,7 +25,7 @@ public:
       x[i] = i*0.1;
     }
     Chebyshev cheb;
-    cheb.setAttribute("n",IFitFunction::Attribute(10));
+    cheb.setAttributeValue("n",10);
     for(int n=0;n<=10;++n)
     {
       cheb.setParameter(n,1.);
@@ -33,7 +33,7 @@ public:
       {
         cheb.setParameter(n-1,0.);
       }
-      cheb.functionMW(&y[0],&x[0],N);
+      cheb.function1D(&y[0],&x[0],N);
       for(int i=0;i<N;++i)
       {
         TS_ASSERT_DELTA(y[i],cos(n*acos(x[i])),1e-12);
@@ -59,24 +59,24 @@ public:
 
     AnalysisDataService::Instance().add("ChebyshevTest_ws",ws);
 
-    Fit fit;
+    FitMW fit;
     fit.initialize();
 
     fit.setPropertyValue("InputWorkspace","ChebyshevTest_ws");
     fit.setPropertyValue("WorkspaceIndex","0");
 
     Chebyshev cheb;
-    cheb.setAttribute("n",IFitFunction::Attribute(3));
+    cheb.setAttributeValue("n",3);
     fit.setPropertyValue("Function",cheb.asString());
 
     fit.execute();
-    IFitFunction::Attribute StartX = cheb.getAttribute("StartX");
+    IFunction::Attribute StartX = cheb.getAttribute("StartX");
     TS_ASSERT_EQUALS(StartX.asDouble(),-1);
-    IFitFunction::Attribute EndX = cheb.getAttribute("EndX");
+    IFunction::Attribute EndX = cheb.getAttribute("EndX");
     TS_ASSERT_EQUALS(EndX.asDouble(),1);
     TS_ASSERT(fit.isExecuted());
 
-    IFitFunction *out = FunctionFactory::Instance().createInitialized(fit.getPropertyValue("Function"));
+    IFunction_sptr out = fit.getProperty("Function");
     TS_ASSERT_DELTA(out->getParameter("A0"),0,1e-12);
     TS_ASSERT_DELTA(out->getParameter("A1"),0.75,1e-12);
     TS_ASSERT_DELTA(out->getParameter("A2"),0,1e-12);

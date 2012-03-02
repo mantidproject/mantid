@@ -1,10 +1,10 @@
-#ifndef MANTID_CURVEFITTING_PRODUCTFUNCTIONMW_H_
-#define MANTID_CURVEFITTING_PRODUCTFUNCTIONMW_H_
+#ifndef MANTID_CURVEFITTING_PRODUCTFUNCTION_H_
+#define MANTID_CURVEFITTING_PRODUCTFUNCTION_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/CompositeFunctionMW.h"
+#include "MantidAPI/CompositeFunction.h"
 #include <boost/shared_array.hpp>
 #include <cmath>
 
@@ -39,19 +39,28 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport ProductFunctionMW : public API::CompositeFunctionMW
+    class DLLExport ProductFunction : public API::CompositeFunction
     {
     public:
       /// Constructor
-      ProductFunctionMW() {};
+      ProductFunction() {};
       /// Destructor
-      ~ProductFunctionMW() {};
+      ~ProductFunction() {};
 
       /// overwrite IFunction base class methods
+<<<<<<< HEAD:Code/Mantid/Framework/CurveFitting/inc/MantidCurveFitting/ProductFunctionMW.h
       std::string name()const{return "ProductFunctionMW";}
       virtual const std::string category() const { return "General";}
       void functionMW(double* out, const double* xValues, const size_t nData)const;
       void functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData);
+=======
+      std::string name()const{return "ProductFunction";}
+      /// Function you want to fit to. 
+      /// @param domain :: The buffer for writing the calculated values. Must be big enough to accept dataSize() values
+      virtual void function(const API::FunctionDomain& domain, API::FunctionValues& values)const;
+      /// Derivatives of function with respect to active parameters
+      virtual void functionDeriv(const API::FunctionDomain& domain, API::Jacobian& jacobian);
+>>>>>>> Re #4158. Returned the old Levenberg-Marquardt minimizer.:Code/Mantid/Framework/CurveFitting/inc/MantidCurveFitting/ProductFunction.h
 
     protected:
       /// overwrite IFunction base class method, which declare function parameters

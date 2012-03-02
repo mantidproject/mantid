@@ -39,6 +39,11 @@ public:
     AnalysisDataService::Instance().add("Line",WS);
   }
   
+  ~LinearTest()
+  {
+    AnalysisDataService::Instance().clear();
+  }
+
   void testName()
   {
     TS_ASSERT_EQUALS( lin.name(), "Linear" )
@@ -88,6 +93,7 @@ public:
     TS_ASSERT_EQUALS( inputWS->readX(0), outputWS->readX(0) )
     // Just do a spot-check on Y & E
     TS_ASSERT( outputWS->readY(0)[10] )
+
   }
 
 private:

@@ -1,12 +1,12 @@
-#ifndef CONVOLUTIONTEST_H_
-#define CONVOLUTIONTEST_H_
+#ifndef PRODUCTFUNCTIONTEST_H_
+#define PRODUCTFUNCTIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidCurveFitting/ProductFunctionMW.h"
-#include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/ProductFunction.h"
+#include "MantidCurveFitting/FitMW.h"
 #include "MantidCurveFitting/Gaussian.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -16,9 +16,10 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/CompositeFunctionMW.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/IFitFunction.h"
+
+#include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionValues.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -98,7 +99,7 @@ public:
 };
 
 
-class ProductFunctionMWTest_Linear: public ParamFunction, public IFunctionMW
+class ProductFunctionMWTest_Linear: public ParamFunction, public IFunction1D
 {
 public:
   ProductFunctionMWTest_Linear()
@@ -109,7 +110,7 @@ public:
 
   std::string name()const{return "ProductFunctionMWTest_Linear";}
 
-  void functionMW(double* out, const double* xValues, const size_t nData)const
+  void function1D(double* out, const double* xValues, const size_t nData)const
   {
     double a = getParameter("a");
     double b = getParameter("b");
@@ -118,7 +119,7 @@ public:
       out[i] = a + b * xValues[i];
     }
   }
-  void functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
+  void functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData)
   {
     for(size_t i=0;i<nData;i++)
     {
@@ -132,27 +133,27 @@ public:
 DECLARE_FUNCTION(ProductFunctionMWTest_Gauss);
 DECLARE_FUNCTION(ProductFunctionMWTest_Linear);
 
-class ProductFunctionMWTest : public CxxTest::TestSuite
+class ProductFunctionTest : public CxxTest::TestSuite
 {
 public:
 
   void testFunction()
   {
-    ProductFunctionMW prodF;
+    ProductFunction prodF;
 
-    ProductFunctionMWTest_Gauss* gauss1 = new ProductFunctionMWTest_Gauss();
+    IFunction_sptr gauss1( new ProductFunctionMWTest_Gauss );
     gauss1->setParameter(0,1.1);
     gauss1->setParameter(1,1.2);
     gauss1->setParameter(2,1.3);
-    ProductFunctionMWTest_Gauss* gauss2 = new ProductFunctionMWTest_Gauss();
+    IFunction_sptr gauss2( new ProductFunctionMWTest_Gauss );
     gauss2->setParameter(0,2.1);
     gauss2->setParameter(1,2.2);
     gauss2->setParameter(2,2.3);
-    ProductFunctionMWTest_Gauss* gauss3 = new ProductFunctionMWTest_Gauss();
+    IFunction_sptr gauss3( new ProductFunctionMWTest_Gauss );
     gauss3->setParameter(0,3.1);
     gauss3->setParameter(1,3.2);
     gauss3->setParameter(2,3.3);
-    ProductFunctionMWTest_Linear* linear = new ProductFunctionMWTest_Linear();
+    IFunction_sptr linear( new ProductFunctionMWTest_Linear );
     linear->setParameter(0,0.1);
     linear->setParameter(1,0.2);
 
@@ -167,7 +168,7 @@ public:
     TS_ASSERT_EQUALS(iFun,3);
 
     TS_ASSERT_EQUALS(prodF.nFunctions(),4);
-    TS_ASSERT_EQUALS(prodF.name(),"ProductFunctionMW");
+    TS_ASSERT_EQUALS(prodF.name(),"ProductFunction");
 
     CompositeFunction* cf = &prodF;
     TS_ASSERT(cf);
@@ -181,7 +182,6 @@ public:
     TS_ASSERT_EQUALS(prodF.parameterName(10),"f3.s");
     TS_ASSERT_EQUALS(prodF.getParameter(10),3.3);
 
-    TS_ASSERT_EQUALS(prodF.nActive(),11);
     TS_ASSERT_EQUALS(prodF.nameOfActive(0),"f0.a");
     TS_ASSERT_EQUALS(prodF.activeParameter(0),0.1);
     TS_ASSERT_EQUALS(prodF.nameOfActive(4),"f1.s");
@@ -189,14 +189,18 @@ public:
 
     TS_ASSERT_EQUALS(prodF.parameterLocalName(0),"a");
 
+<<<<<<< HEAD:Code/Mantid/Framework/CurveFitting/test/ProductFunctionMWTest.h
     IFitFunction* fun = FunctionFactory::Instance().createInitialized(prodF.asString());
+=======
+    IFunction_sptr fun = FunctionFactory::Instance().createInitialized(prodF.asString());
+>>>>>>> Re #4158. Returned the old Levenberg-Marquardt minimizer.:Code/Mantid/Framework/CurveFitting/test/ProductFunctionTest.h
     TS_ASSERT(fun);
 
-    ProductFunctionMW* prodF1 = dynamic_cast<ProductFunctionMW*>(fun);
+    ProductFunction* prodF1 = dynamic_cast<ProductFunction*>(fun.get());
     TS_ASSERT(prodF1);
 
     TS_ASSERT_EQUALS(prodF1->nFunctions(),4);
-    TS_ASSERT_EQUALS(prodF1->name(),"ProductFunctionMW");
+    TS_ASSERT_EQUALS(prodF1->name(),"ProductFunction");
 
     CompositeFunction* cf1 = prodF1;
     TS_ASSERT(cf1);
@@ -210,7 +214,6 @@ public:
     TS_ASSERT_EQUALS(prodF1->parameterName(10),"f3.s");
     TS_ASSERT_EQUALS(prodF1->getParameter(10),3.3);
 
-    TS_ASSERT_EQUALS(prodF1->nActive(),11);
     TS_ASSERT_EQUALS(prodF1->nameOfActive(0),"f0.a");
     TS_ASSERT_EQUALS(prodF1->activeParameter(0),0.1);
     TS_ASSERT_EQUALS(prodF1->nameOfActive(4),"f1.s");
@@ -218,17 +221,16 @@ public:
 
     TS_ASSERT_EQUALS(prodF1->parameterLocalName(0),"a");
 
-    delete fun;
   }
 
-  void testProductFunctionMW()
+  void testProductFunction()
   {
-    ProductFunctionMW prodF;
+    ProductFunction prodF;
 
     double c1 = 1.0;
     double h1 = 3.0;
     double s1 = 0.5;
-    Gaussian* f0 = new Gaussian();
+    IFunction_sptr f0( new Gaussian );
     f0->initialize();
     f0->setParameter("PeakCentre",c1);
     f0->setParameter("Height",h1);
@@ -237,16 +239,20 @@ public:
     prodF.addFunction(f0);
 
     const int N = 30;
-    double x[N],out[N],dx = 0.1;
+    std::vector<double> x(N);
+    const double dx = 0.1;
     for(int i=0;i<N;i++)
     {
       x[i] = i*dx;
     }
 
+    Mantid::API::FunctionDomain1D domain(x);
+    Mantid::API::FunctionValues out(domain);
+
     double c2 = 2;
     double h2 = 10.0;
     double s2 = 0.5;
-    Gaussian* f1 = new Gaussian();
+    IFunction_sptr f1( new Gaussian );
     f1->initialize();
     f1->setParameter("PeakCentre",c2);
     f1->setParameter("Height",h2);
@@ -254,15 +260,13 @@ public:
 
     prodF.addFunction(f1);
 
-    prodF.functionMW(out,x,N);
-
-
+    prodF.function(domain,out);
 
     // a product of two gaussians is another gaussian
 
     for(int i=0;i<N;i++)
     {
-      TS_ASSERT_DELTA(out[i],h1*exp(-0.5*(x[i]-c1)*(x[i]-c1)/(s1*s1))*
+      TS_ASSERT_DELTA(out.getCalculated(i),h1*exp(-0.5*(x[i]-c1)*(x[i]-c1)/(s1*s1))*
                              h2*exp(-0.5*(x[i]-c2)*(x[i]-c2)/(s2*s2)),1e-6);
     }
 
@@ -279,13 +283,13 @@ public:
     for(int i=0;i<N;i++)
     {
       xx[i] = x[i];
-      yy[i] = out[i];
+      yy[i] = out.getCalculated(i);
       ee[i] = 0.1;
     }
 
     AnalysisDataService::Instance().add(wsName,ws);
 
-    Fit fit;
+    FitMW fit;
     fit.initialize();
     fit.setPropertyValue("InputWorkspace",wsName);
     fit.setPropertyValue("WorkspaceIndex","0");
@@ -309,7 +313,7 @@ public:
     double dummy = fit.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 0.0,0.01);
 
-    IFitFunction *outF = FunctionFactory::Instance().createInitialized(fit.getPropertyValue("Function")); 
+    IFunction_sptr outF = fit.getProperty("Function"); 
     //CompositeFunctionMW *pk = dynamic_cast<CompositeFunctionMW *>(out);
 
     TS_ASSERT_DELTA( outF->getParameter("f0.PeakCentre"), 1.0 ,0.001);
@@ -334,4 +338,4 @@ private:
 
 };
 
-#endif /*CONVOLUTIONTEST_H_*/
+#endif /*PRODUCTFUNCTIONTEST_H_*/

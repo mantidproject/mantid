@@ -39,6 +39,13 @@ namespace API
     m_calculated.resize(domain.size());
   }
 
+
+  /// set all calculated values to same number
+  void FunctionValues::setCalculated(double value)
+  {
+    std::fill(m_calculated.begin(),m_calculated.end(),value);
+  }
+
   /**
    * Get a pointer to calculated data at index i
    * @param i :: Index.
@@ -66,10 +73,24 @@ namespace API
     return *this;
   }
 
+  /** Multiply this calculated values by others.
+   *  @param values :: Some other values to be added to this calculated values.
+   */
+  FunctionValues& FunctionValues::operator*=(const FunctionValues& values)
+  {
+    if (values.size() != size())
+    {
+      throw std::runtime_error("Cannot multiply function values: different sizes.");
+    }
+    std::transform(m_calculated.begin(),m_calculated.end(),values.m_calculated.begin(),m_calculated.begin(),
+      std::multiplies<double>());
+    return *this;
+  }
+
   /// Set all calculated values to zero
   void FunctionValues::zeroCalculated()
   {
-    std::fill(m_calculated.begin(),m_calculated.end(),0.0);
+    setCalculated(0.0);
   }
 
 

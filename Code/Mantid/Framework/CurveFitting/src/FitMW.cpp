@@ -26,6 +26,7 @@ Setting the Output property defines the names of the output workspaces. One of t
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/IFunctionMW.h"
 
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/TextAxis.h"
@@ -42,7 +43,7 @@ namespace CurveFitting
 {
 
   // Register the class into the algorithm factory
-  //DECLARE_ALGORITHM(FitMW)
+  DECLARE_ALGORITHM(FitMW)
   
   /// Sets documentation strings for this algorithm
   void FitMW::initDocs()
@@ -150,6 +151,12 @@ namespace CurveFitting
     }
     Mantid::MantidVec::const_iterator from = std::lower_bound(X.begin(),X.end(),startX);
     Mantid::MantidVec::const_iterator to = std::upper_bound(from,X.end(),endX);
+
+    API::IFunctionMW* funMW = dynamic_cast<API::IFunctionMW*>(m_function.get());
+    if (funMW)
+    {
+      funMW->setMatrixWorkspace(ws,wsIndex,startX,endX);
+    }
 
     API::FunctionDomain1D_sptr domain;
     if (ws->isHistogramData())

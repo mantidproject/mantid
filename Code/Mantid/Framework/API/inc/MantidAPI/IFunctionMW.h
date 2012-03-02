@@ -4,8 +4,11 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/IFunction.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Unit.h"
+
+#include <boost/weak_ptr.hpp>
 
 namespace Mantid
 {
@@ -40,12 +43,14 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL IFunctionMW: public virtual IFunction1D
+class MANTID_API_DLL IFunctionMW: public virtual IFunction
 {
 public:
 
   void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,size_t wi,double startX, double endX);
 
+  boost::shared_ptr<const API::MatrixWorkspace> getMatrixWorkspace() const;
+  size_t getWorkspaceIndex() const {return m_workspaceIndex;}
 protected:
 
   /// Convert a value from one unit (inUnit) to unit defined in workspace (ws) 
@@ -56,6 +61,10 @@ protected:
   void convertValue(std::vector<double>& values, Kernel::Unit_sptr& outUnit, 
     boost::shared_ptr<const MatrixWorkspace> ws,
     size_t wsIndex) const;
+  
+  boost::weak_ptr<const API::MatrixWorkspace> m_workspace;
+
+  size_t m_workspaceIndex;
 
   /// Static reference to the logger class
   static Kernel::Logger& g_log;

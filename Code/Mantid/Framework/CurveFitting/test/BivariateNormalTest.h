@@ -16,7 +16,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/cow_ptr.h"
-/*#include "MantidAPI/IFitFunction.h"
+/*#include "MantidAPI/IFunction.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidCurveFitting/GSLFunctions.h"
 #include "MantidKernel/UnitFactory.h"
@@ -149,7 +149,6 @@ public:
 
       NormalFit.setAttribute("CalcVariances", IFitFunction::Attribute(1));
 
-
       double out[nCells];
       NormalFit.functionMW(out, xx, nCells);
 
@@ -206,8 +205,6 @@ public:
     TS_ASSERT( categories[0] == "Peak" );
   }
 
-
- 
 
 };
 #endif /* BIVARIATENORMALTEST_H_ */

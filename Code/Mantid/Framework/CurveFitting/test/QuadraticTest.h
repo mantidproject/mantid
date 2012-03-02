@@ -5,7 +5,7 @@
 
 #include "MantidCurveFitting/Quadratic.h"
 
-#include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/FitMW.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -19,7 +19,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using Mantid::CurveFitting::Quadratic;
-using Mantid::CurveFitting::Fit;
+using Mantid::CurveFitting::FitMW;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 
@@ -48,7 +48,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
 
-    Fit alg2;
+    FitMW alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
     TS_ASSERT( alg2.isInitialized() );
 
@@ -79,7 +79,7 @@ public:
     double dummy = alg2.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 0.0,0.1);
 
-    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
+    IFunction_sptr out = alg2.getProperty("Function");
     TS_ASSERT_DELTA( out->getParameter("A0"),0.0, 0.01);
     TS_ASSERT_DELTA( out->getParameter("A1"),0.0, 0.01);
     TS_ASSERT_DELTA( out->getParameter("A2"),1.0, 0.0001);

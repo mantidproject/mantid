@@ -10,6 +10,9 @@
 #include "MantidCurveFitting/ExpDecay.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/CompositeFunction.h"
+#include "MantidCurveFitting/LinearBackground.h"
+#include "MantidCurveFitting/Gaussian.h"
 
 #include <gsl/gsl_blas.h>
 #include <sstream>
@@ -26,7 +29,7 @@ public:
   static LeastSquaresTest *createSuite() { return new LeastSquaresTest(); }
   static void destroySuite( LeastSquaresTest *suite ) { delete suite; }
 
-  void test_With_Simplex()
+  void xtest_With_Simplex()
   {
     std::vector<double> x(10),y(10);
     for(size_t i = 0; i < x.size(); ++i)
@@ -56,7 +59,7 @@ public:
     TS_ASSERT_EQUALS(s.getError(),"success");
   }
 
-  void test_With_BFGS()
+  void xtest_With_BFGS()
   {
     std::vector<double> x(10),y(10);
     for(size_t i = 0; i < x.size(); ++i)
@@ -86,7 +89,7 @@ public:
 
   }
 
-  void test_val_deriv_valAndDeriv()
+  void xtest_val_deriv_valAndDeriv()
   {
     const double a = 1.0;
     const double b = 2.0;
@@ -127,7 +130,7 @@ public:
     TS_ASSERT_DELTA(g.get(1), 0.9, 1e-10);
   }
 
-  void test_linear_correction_is_good_approximation()
+  void xtest_linear_correction_is_good_approximation()
   {
     const double a = 1.0;
     const double b = 2.0;
@@ -163,7 +166,7 @@ public:
     TS_ASSERT_DELTA(L, -0.145, 1e-10); // L + costFun->val() == 0
   }
 
-  void test_Fixing_parameter()
+  void xtest_Fixing_parameter()
   {
     std::vector<double> x(10),y(10);
     for(size_t i = 0; i < x.size(); ++i)
@@ -195,6 +198,75 @@ public:
     TS_ASSERT_DELTA(fun->getParameter("Lifetime"),1.0,1e-9);
     TS_ASSERT_EQUALS(s.getError(),"success");
 
+  }
+
+  void testDerivatives()
+  {
+    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1D(79300.,79600.,41));
+    API::FunctionValues_sptr data(new API::FunctionValues(*domain));
+    boost::shared_ptr<UserFunction> fun0(new UserFunction);
+    fun0->setAttributeValue("Formula","b + h * exp(-((x-c)/s)^2)");
+    fun0->setParameter("b",9);
+    fun0->setParameter("h",224.);
+    fun0->setParameter("c",79430.1);
+    fun0->setParameter("s",27.4);
+    fun0->function(*domain,*data);
+
+    API::FunctionValues_sptr values(new API::FunctionValues(*domain));
+    values->setFitDataFromCalculated(*data);
+    values->setFitWeights(1.0);
+
+    boost::shared_ptr<UserFunction> fun1(new UserFunction);
+    fun1->setAttributeValue("Formula","b + h * exp(-((x-c)/s)^2)");
+    fun1->setParameter("b",0);
+    fun1->setParameter("h",200.);
+    fun1->setParameter("c",79450.);
+    fun1->setParameter("s",300);
+    fun1->function(*domain,*data);
+
+    API::CompositeFunction_sptr fnWithBk( new API::CompositeFunction() );
+
+    boost::shared_ptr<LinearBackground> bk( new LinearBackground() );
+    bk->initialize();
+
+    bk->setParameter("A0",0.0);
+    bk->setParameter("A1",0.0);
+    bk->tie("A1","0");
+
+    // set up Gaussian fitting function
+    boost::shared_ptr<Gaussian> fn( new Gaussian() );
+    fn->initialize();
+    fn->setParameter("PeakCentre",79450.0);
+    fn->setParameter("Height",200.0);
+    fn->setParameter("Sigma",300);
+
+    fnWithBk->addFunction(bk);
+    fnWithBk->addFunction(fn);
+
+    boost::shared_ptr<CostFuncLeastSquares> costFun(new CostFuncLeastSquares);
+    //costFun->setFittingFunction(fun1,domain,values);
+    costFun->setFittingFunction(fnWithBk,domain,values);
+
+    size_t n = costFun->nParams();
+    //system("pause");
+    double f0 = costFun->val();
+    //std::cerr << "fun=" << f0 << std::endl;
+    GSLVector g(2);
+    GSLMatrix H(2,2);
+    costFun->valDerivHessian(g,H);
+
+    for(size_t i = 0; i < n; ++i)
+    {
+      double dp = 0.000001;
+      double p1 = costFun->getParameter(i) + dp;
+      costFun->setParameter(i,p1);
+      double f1 = costFun->val();
+      costFun->setParameter(i,p1-dp);
+      //std::cerr << "deriv " << i << ' ' << p1 << ' ' << (f1 - f0) / dp << ' ' << g.get(i)  << std::endl;
+      //for(size_t j = 0; j <= i; ++j)
+      //{
+      //}
+    }
   }
 
 };

@@ -472,6 +472,7 @@ void IFunction::calNumericalDeriv(const FunctionDomain& domain, Jacobian& jacobi
       m_plusStep.reset(domain);
     }
 
+    applyTies(); // just in case
     function(domain,m_minusStep);
 
     for (size_t iP = 0; iP < nParam; iP++)
@@ -490,12 +491,14 @@ void IFunction::calNumericalDeriv(const FunctionDomain& domain, Jacobian& jacobi
 
         double paramPstep = val + step;
         setActiveParameter(iP, paramPstep);
+        applyTies(); 
         function(domain,m_plusStep);
 
         step = paramPstep - val;
         setActiveParameter(iP, val);
 
-        for (size_t i = 0; i < nData; i++) {
+        for (size_t i = 0; i < nData; i++) 
+        {
           jacobian.set(i,iP, 
             (m_plusStep.getCalculated(i) - m_minusStep.getCalculated(i))/step);
         }

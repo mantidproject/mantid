@@ -5,15 +5,17 @@
 
 #include "MantidCurveFitting/BackToBackExponential.h"
 #include "MantidCurveFitting/LinearBackground.h"
-#include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/FitMW.h"
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/CompositeFunctionMW.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadRaw.h"
 #include "MantidKernel/System.h"
+
+#include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionValues.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -177,7 +179,7 @@ public:
 
   void testAgainstMockData()
   {
-    Fit alg2;
+    FitMW alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
     TS_ASSERT( alg2.isInitialized() );
 
@@ -201,16 +203,16 @@ public:
     alg2.setPropertyValue("WorkspaceIndex","0");
 
     // create function you want to fit against
-    CompositeFunctionMW fnWithBk;
+    CompositeFunction_sptr fnWithBk( new CompositeFunction );
 
-    LinearBackground *bk = new LinearBackground();
+    IFunction_sptr bk( new LinearBackground );
     bk->initialize();
 
     bk->setParameter("A0",6.0);
     bk->setParameter("A1",0.0);
-    bk->removeActive(1);    
+    bk->fix(1);    
 
-    BackToBackExponential* fn = new BackToBackExponential();
+    IFunction_sptr fn( new BackToBackExponential );
     fn->initialize();
 
     // Test categories
@@ -227,8 +229,7 @@ public:
     fnWithBk.addFunction(fn);
     fnWithBk.addFunction(bk);
 
-    //alg2.setFunction(fnWithBk);
-    alg2.setPropertyValue("Function",fnWithBk.asString());
+    alg2.setProperty("Function",boost::dynamic_pointer_cast<IFunction>(fnWithBk));
 
     // execute fit
     TS_ASSERT_THROWS_NOTHING(
@@ -243,43 +244,41 @@ public:
     TS_ASSERT( minimizer.compare("Levenberg-Marquardt") == 0 );
 
     double dummy = alg2.getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA( dummy, 1.713,0.01);
+    TS_ASSERT_DELTA( dummy, 1.686,0.01);
 
-    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function")); 
-    CompositeFunctionMW *pk = dynamic_cast<CompositeFunctionMW *>(out);
+    IFunction_sptr out = alg2.getProperty("Function"); 
 
-    TS_ASSERT_DELTA( out->getParameter("f0.I"), 230.67 ,0.2);
+    TS_ASSERT_DELTA( out->getParameter("f0.I"), 231.3 ,0.2);
     TS_ASSERT_DELTA( out->getParameter("f0.A"), 0.2522 ,0.01);
     TS_ASSERT_DELTA( out->getParameter("f0.B"), 0.0293 ,0.001);
     TS_ASSERT_DELTA( out->getParameter("f0.X0"), 79408.00 ,0.1);
     TS_ASSERT_DELTA( out->getParameter("f0.S"), 15.561 ,0.2);
 
-    TS_ASSERT_DELTA( out->getParameter("f1.A0"), 6.8327 ,0.2);
+    TS_ASSERT_DELTA( out->getParameter("f1.A0"), 4.0 ,0.2);
 
-    const double* xx = &ws2D->readX(0)[0];
-    double *yy = new double[timechannels]; 
-    pk->functionMW(yy, xx, timechannels);
+    FunctionDomain1D domain(ws2D->readX(0));
+    FunctionValues yy(domain);
+
+    out->function(domain,yy);
 
     // note that fitting a none-totally optimized IC to a Gaussian peak so 
     // not a perfect fit - but pretty ok result
-    TS_ASSERT_DELTA( yy[9], 4.1138 ,0.1);
-    TS_ASSERT_DELTA( yy[10], 4.6679 ,0.1);
-    TS_ASSERT_DELTA( yy[11], 6.8471 ,0.1);
-    TS_ASSERT_DELTA( yy[12], 13.7936, 0.1);
-    TS_ASSERT_DELTA( yy[13], 31.4458 ,0.1);
-    TS_ASSERT_DELTA( yy[14], 66.6687 ,0.1);
-    TS_ASSERT_DELTA( yy[15], 120.9065 ,0.1);
-    TS_ASSERT_DELTA( yy[16], 183.5634 ,0.1);
-    TS_ASSERT_DELTA( yy[17], 234.3267 ,0.1);
-    TS_ASSERT_DELTA( yy[18], 256.1503, 0.1);
-    TS_ASSERT_DELTA( yy[19], 246.6795 ,0.1);
-    TS_ASSERT_DELTA( yy[20], 216.7392 ,0.1);
-    TS_ASSERT_DELTA( yy[21], 180.0203 ,0.1);
-    TS_ASSERT_DELTA( yy[22], 145.4474, 0.1);
-    TS_ASSERT_DELTA( yy[23], 116.3506 ,0.1);
-    TS_ASSERT_DELTA( yy[24], 92.9199 ,0.1);
-
-    delete[] yy;
+    TS_ASSERT_DELTA( yy.getCalculated(9), 4.1138 ,0.3);
+    TS_ASSERT_DELTA( yy.getCalculated(10), 4.6679 ,0.3);
+    TS_ASSERT_DELTA( yy.getCalculated(11), 6.8471 ,0.3);
+    TS_ASSERT_DELTA( yy.getCalculated(12), 13.7936, 0.3);
+    TS_ASSERT_DELTA( yy.getCalculated(13), 31.4458 ,0.3);
+    TS_ASSERT_DELTA( yy.getCalculated(14), 66.6687 ,0.4);
+    TS_ASSERT_DELTA( yy.getCalculated(15), 120.9065 ,0.4);
+    TS_ASSERT_DELTA( yy.getCalculated(16), 183.5634 ,0.4);
+    TS_ASSERT_DELTA( yy.getCalculated(17), 234.3267 ,0.3);
+    TS_ASSERT_DELTA( yy.getCalculated(18), 256.1503, 0.3);
+    TS_ASSERT_DELTA( yy.getCalculated(19), 246.6795 ,0.3);
+    TS_ASSERT_DELTA( yy.getCalculated(20), 216.7392 ,0.3);
+    TS_ASSERT_DELTA( yy.getCalculated(21), 180.0203 ,0.3);
+    TS_ASSERT_DELTA( yy.getCalculated(22), 145.4474, 0.3);
+    TS_ASSERT_DELTA( yy.getCalculated(23), 116.3506 ,0.3);
+    TS_ASSERT_DELTA( yy.getCalculated(24), 92.9199 ,0.3);
 
     AnalysisDataService::Instance().remove(wsName);
   }

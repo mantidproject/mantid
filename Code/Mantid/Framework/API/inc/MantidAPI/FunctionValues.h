@@ -57,12 +57,17 @@ public:
   size_t size() const {return m_calculated.size();}
   /// store i-th calculated value. 0 <= i < size()
   void setCalculated(size_t i,double value) {m_calculated[i] = value;}
+  /// set all calculated values to same number
+  void setCalculated(double value);
   /// get i-th calculated value. 0 <= i < size()
   double getCalculated(size_t i) const {return m_calculated[i];}
+  void addToCalculated(size_t i, double value) {m_calculated[i] += value;}
   /// Get a pointer to calculated data at index i
   double* getPointerToCalculated(size_t i);
   /// Add other calculated values
   FunctionValues& operator+=(const FunctionValues& values);
+  /// Multiply by other calculated values
+  FunctionValues& operator*=(const FunctionValues& values);
   /// Set all calculated values to zero
   void zeroCalculated();
 

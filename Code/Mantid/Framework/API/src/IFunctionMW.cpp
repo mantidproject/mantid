@@ -37,97 +37,10 @@ namespace API
  */
 void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,size_t wi,double startX, double endX)
 {
+  m_workspace = workspace;
+  m_workspaceIndex = wi;
+
   if (!workspace) return; // unset the workspace
-
-  //size_t n = workspace->blocksize(); // length of each Y vector
-  //size_t xMin = 0;
-  //size_t xMax = 0;
-
-  //if (wi >= workspace->getNumberHistograms())
-  //{
-  //  throw std::range_error("Workspace index out of range");
-  //}
-
-  //const MantidVec& x = workspace->readX(wi);
-  //const MantidVec& y = workspace->readY(wi);
-  //const MantidVec& e = workspace->readE(wi);
-  //bool isHist = x.size() > y.size();
-
-  //if (startX >= endX)
-  //{
-  //  xMin = 0;
-  //  xMax = n - 1;
-  //}
-  //else
-  //{
-  //  size_t m = isHist? n - 1 : n;
-  //  for(; xMax < m; ++xMax)
-  //  {
-  //    if (x[xMax] > endX)
-  //    {
-  //      if (xMax > 0) xMax--;
-  //      break;
-  //    }
-  //    if (x[xMax] <= startX)
-  //    {
-  //      xMin = xMax;
-  //    }
-  //  }
-  //}
-
-  //if (xMin > xMax)
-  //{
-  //  std::swap(xMin,xMax);
-  //}
-
-  //if (xMax >= n) xMax = n - 1;
-
-  //m_xMinIndex = xMin;
-  //m_xMaxIndex = xMax;
-
-  //m_dataSize = xMax - xMin + 1;
-  //m_data = &y[xMin];
-  //m_xValues.reset(new double[m_dataSize]);
-  //m_weights.reset(new double[m_dataSize]);
-
-  //bool negativeError = false;
-
-  //for (size_t i = 0; i < m_dataSize; ++i)
-  //{
-  //  if (isHist)
-  //  {
-  //    m_xValues[i] = 0.5*(x[xMin + i] + x[xMin + i + 1]);
-  //  }
-  //  else
-  //  {
-  //    m_xValues[i] = x[xMin + i];
-  //  }
-  //  if (e[xMin + i] == 0.0)
-  //  {
-  //    m_weights[i] = 1.0;
-
-  //  }
-  //  else if(e[xMin + i] < 0.0)
-  //  {
-  //    negativeError = true;
-  //    m_weights[i] = 1./fabs(e[xMin + i]);   //1.0;
-  //  }
-  //  else
-  //    m_weights[i] = 1./e[xMin + i];
-  //}
-
-  //if ( negativeError )
-  //  g_log.warning() << "Negative error values found! These are set to absolute value\n";
-
-  //if (workspace->hasMaskedBins(wi))
-  //{
-  //  const MatrixWorkspace::MaskList& mlist = workspace->maskedBins(wi);
-  //  MatrixWorkspace::MaskList::const_iterator it = mlist.begin();
-  //  for(;it!=mlist.end();++it)
-  //  {
-  //    m_weights[it->first - xMin] = 0.;
-  //  }
-  //}
 
   try
   {
@@ -285,6 +198,14 @@ void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspac
   }
 }
 
+/**
+ * Get a shared pointer to the saved matrix workspace.
+ */
+boost::shared_ptr<const API::MatrixWorkspace> IFunctionMW::getMatrixWorkspace() const
+{
+  return m_workspace.lock();
+}
+
 /** Convert a value from unit defined in workspace (ws) to outUnit
  *
  *  @param value ::   assumed to be in unit of workspace
@@ -404,122 +325,6 @@ void IFunctionMW::convertValue(std::vector<double>& values, Kernel::Unit_sptr& o
     }
   }  
 }
-
-namespace
-{
-  /**
-   * A simple implementation of Jacobian.
-   */
-  class SimpleJacobian: public Jacobian
-  {
-  public:
-    /// Constructor
-    SimpleJacobian(size_t nData,size_t nParams):m_nData(nData),m_nParams(nParams),m_data(nData*nParams){}
-    /// Setter
-    virtual void set(size_t iY, size_t iP, double value)
-    {
-      m_data[iY * m_nParams + iP] = value;
-    }
-    /// Getter
-    virtual double get(size_t iY, size_t iP)
-    {
-      return m_data[iY * m_nParams + iP];
-    }
-  private:
-    size_t m_nData; ///< size of the data / first dimension
-    size_t m_nParams; ///< number of parameters / second dimension
-    std::vector<double> m_data; ///< data storage
-  };
-}
-
-/** 
- * Creates a workspace containing values calculated with this function. It takes a workspace and ws index
- * of a spectrum which this function may have been fitted to. The output contains the original spectrum 
- * (wi = 0), the calculated values (ws = 1), and the difference between them (ws = 2).
- * @param inWS :: input workspace
- * @param wi :: workspace index
- * @param sd :: optional standard deviations of the parameters for calculating the error bars
- * @return created workspase
- */
-//boost::shared_ptr<API::MatrixWorkspace> IFunctionMW::createCalculatedWorkspace(
-//  boost::shared_ptr<const API::MatrixWorkspace> inWS, 
-//  size_t wi,
-//  const std::vector<double>& sd
-//  )
-//{
-//      const MantidVec& inputX = inWS->readX(wi);
-//      const MantidVec& inputY = inWS->readY(wi);
-//      const MantidVec& inputE = inWS->readE(wi);
-//      size_t nData = dataSize();
-//
-//      size_t histN = inWS->isHistogramData() ? 1 : 0;
-//      API::MatrixWorkspace_sptr ws =
-//        Mantid::API::WorkspaceFactory::Instance().create(
-//            "Workspace2D",
-//            3,
-//            nData + histN,
-//            nData);
-//      ws->setTitle("");
-//      ws->setYUnitLabel(inWS->YUnitLabel());
-//      ws->setYUnit(inWS->YUnit());
-//      ws->getAxis(0)->unit() = inWS->getAxis(0)->unit();
-//      API::TextAxis* tAxis = new API::TextAxis(3);
-//      tAxis->setLabel(0,"Data");
-//      tAxis->setLabel(1,"Calc");
-//      tAxis->setLabel(2,"Diff");
-//      ws->replaceAxis(1,tAxis);
-//
-//      assert(m_xMaxIndex-m_xMinIndex+1 == nData);
-//
-//      for(size_t i=0;i<3;i++)
-//      {
-//        ws->dataX(i).assign(inputX.begin()+m_xMinIndex,inputX.begin()+m_xMaxIndex+1+histN);
-//      }
-//
-//      ws->dataY(0).assign(inputY.begin()+m_xMinIndex,inputY.begin()+m_xMaxIndex+1);
-//      ws->dataE(0).assign(inputE.begin()+m_xMinIndex,inputE.begin()+m_xMaxIndex+1);
-//
-//      MantidVec& Ycal = ws->dataY(1);
-//      MantidVec& Ecal = ws->dataE(1);
-//      MantidVec& E = ws->dataY(2);
-//
-//      double* lOut = new double[nData];  // to capture output from call to function()
-//      function( lOut );
-//
-//      for(size_t i=0; i<nData; i++)
-//      {
-//        Ycal[i] = lOut[i]; 
-//        E[i] = m_data[i] - Ycal[i];
-//      }
-//
-//      delete [] lOut; 
-//
-//      if (sd.size() == static_cast<size_t>(this->nParams()))
-//      {
-//        SimpleJacobian J(nData,this->nParams());
-//        try
-//        {
-//          this->functionDeriv(&J);
-//        }
-//        catch(...)
-//        {
-//          this->calNumericalDeriv(&J,&m_xValues[0],nData);
-//        }
-//        for(size_t i=0; i<nData; i++)
-//        {
-//          double err = 0.0;
-//          for(size_t j=0;j< static_cast<size_t>(nParams());++j)
-//          {
-//            double d = J.get(i,j) * sd[j];
-//            err += d*d;
-//          }
-//          Ecal[i] = sqrt(err);
-//        }
-//      }
-//
-//      return ws;
-//}
-
 
 } // namespace API
 } // namespace Mantid

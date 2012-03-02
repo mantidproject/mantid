@@ -6,7 +6,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidCurveFitting/Convolution.h"
-#include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/FitMW.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/IPeakFunction.h"
@@ -108,7 +108,7 @@ public:
 };
 
 
-class ConvolutionTest_Linear: public ParamFunction, public IFunctionMW
+class ConvolutionTest_Linear: public ParamFunction, public IFunction1D
 {
 public:
   ConvolutionTest_Linear()
@@ -119,7 +119,7 @@ public:
 
   std::string name()const{return "ConvolutionTest_Linear";}
 
-  void functionMW(double* out, const double* xValues, const size_t nData)const
+  void function1D(double* out, const double* xValues, const size_t nData)const
   {
     double a = getParameter("a");
     double b = getParameter("b");
@@ -128,7 +128,7 @@ public:
       out[i] = a + b * xValues[i];
     }
   }
-  void functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
+  void functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData)
   {
     //throw Mantid::Kernel::Exception::NotImplementedError("");
     for(size_t i=0;i<nData;i++)
@@ -150,19 +150,19 @@ public:
   {
     Convolution conv;
 
-    ConvolutionTest_Gauss* gauss1 = new ConvolutionTest_Gauss();
+    IFunction_sptr gauss1( new ConvolutionTest_Gauss );
     gauss1->setParameter(0,1.1);
     gauss1->setParameter(1,1.2);
     gauss1->setParameter(2,1.3);
-    ConvolutionTest_Gauss* gauss2 = new ConvolutionTest_Gauss();
+    IFunction_sptr gauss2( new ConvolutionTest_Gauss );
     gauss2->setParameter(0,2.1);
     gauss2->setParameter(1,2.2);
     gauss2->setParameter(2,2.3);
-    ConvolutionTest_Gauss* gauss3 = new ConvolutionTest_Gauss();
+    IFunction_sptr gauss3( new ConvolutionTest_Gauss );
     gauss3->setParameter(0,3.1);
     gauss3->setParameter(1,3.2);
     gauss3->setParameter(2,3.3);
-    ConvolutionTest_Linear* linear = new ConvolutionTest_Linear();
+    IFunction_sptr linear( new ConvolutionTest_Linear );
     linear->setParameter(0,0.1);
     linear->setParameter(1,0.2);
 
@@ -179,7 +179,7 @@ public:
     TS_ASSERT_EQUALS(conv.nFunctions(),2);
     TS_ASSERT_EQUALS(conv.name(),"Convolution");
 
-    CompositeFunction* cf = dynamic_cast<CompositeFunction*>(conv.getFunction(1));
+    CompositeFunction* cf = dynamic_cast<CompositeFunction*>(conv.getFunction(1).get());
     TS_ASSERT(cf);
     TS_ASSERT_EQUALS(conv.nParams(),11);
     TS_ASSERT_EQUALS(conv.parameterName(0),"f0.a");
@@ -191,29 +191,28 @@ public:
     TS_ASSERT_EQUALS(conv.parameterName(10),"f1.f2.s");
     TS_ASSERT_EQUALS(conv.getParameter(10),3.3);
 
-    TS_ASSERT_EQUALS(conv.nActive(),9);
-    TS_ASSERT_EQUALS(conv.nameOfActive(0),"f1.f0.c");
-    TS_ASSERT_EQUALS(conv.activeParameter(0),1.1);
-    TS_ASSERT_EQUALS(conv.nameOfActive(4),"f1.f1.h");
-    TS_ASSERT_EQUALS(conv.activeParameter(4),2.2);
-    TS_ASSERT_EQUALS(conv.nameOfActive(8),"f1.f2.s");
-    TS_ASSERT_EQUALS(conv.activeParameter(8),3.3);
+    TS_ASSERT_EQUALS(conv.nameOfActive(2),"f1.f0.c");
+    TS_ASSERT_EQUALS(conv.activeParameter(2),1.1);
+    TS_ASSERT_EQUALS(conv.nameOfActive(6),"f1.f1.h");
+    TS_ASSERT_EQUALS(conv.activeParameter(6),2.2);
+    TS_ASSERT_EQUALS(conv.nameOfActive(10),"f1.f2.s");
+    TS_ASSERT_EQUALS(conv.activeParameter(10),3.3);
 
     TS_ASSERT_EQUALS(conv.parameterLocalName(0),"a");
     TS_ASSERT_EQUALS(conv.parameterLocalName(2),"f0.c");
     TS_ASSERT_EQUALS(conv.parameterLocalName(6),"f1.h");
     TS_ASSERT_EQUALS(conv.parameterLocalName(10),"f2.s");
 
-    IFitFunction* fun = FunctionFactory::Instance().createInitialized(conv.asString());
+    IFunction_sptr fun = FunctionFactory::Instance().createInitialized(conv.asString());
     TS_ASSERT(fun);
 
-    Convolution* conv1 = dynamic_cast<Convolution*>(fun);
+    Convolution* conv1 = dynamic_cast<Convolution*>(fun.get());
     TS_ASSERT(conv1);
 
     TS_ASSERT_EQUALS(conv1->nFunctions(),2);
     TS_ASSERT_EQUALS(conv1->name(),"Convolution");
 
-    CompositeFunction* cf1 = dynamic_cast<CompositeFunction*>(conv1->getFunction(1));
+    CompositeFunction* cf1 = dynamic_cast<CompositeFunction*>(conv1->getFunction(1).get());
     TS_ASSERT(cf1);
     TS_ASSERT_EQUALS(conv1->nParams(),11);
     TS_ASSERT_EQUALS(conv1->parameterName(0),"f0.a");
@@ -225,20 +224,18 @@ public:
     TS_ASSERT_EQUALS(conv1->parameterName(10),"f1.f2.s");
     TS_ASSERT_EQUALS(conv1->getParameter(10),3.3);
 
-    TS_ASSERT_EQUALS(conv1->nActive(),9);
-    TS_ASSERT_EQUALS(conv1->nameOfActive(0),"f1.f0.c");
-    TS_ASSERT_EQUALS(conv1->activeParameter(0),1.1);
-    TS_ASSERT_EQUALS(conv1->nameOfActive(4),"f1.f1.h");
-    TS_ASSERT_EQUALS(conv1->activeParameter(4),2.2);
-    TS_ASSERT_EQUALS(conv1->nameOfActive(8),"f1.f2.s");
-    TS_ASSERT_EQUALS(conv1->activeParameter(8),3.3);
+    TS_ASSERT_EQUALS(conv1->nameOfActive(2),"f1.f0.c");
+    TS_ASSERT_EQUALS(conv1->activeParameter(2),1.1);
+    TS_ASSERT_EQUALS(conv1->nameOfActive(6),"f1.f1.h");
+    TS_ASSERT_EQUALS(conv1->activeParameter(6),2.2);
+    TS_ASSERT_EQUALS(conv1->nameOfActive(10),"f1.f2.s");
+    TS_ASSERT_EQUALS(conv1->activeParameter(10),3.3);
 
     TS_ASSERT_EQUALS(conv1->parameterLocalName(0),"a");
     TS_ASSERT_EQUALS(conv1->parameterLocalName(2),"f0.c");
     TS_ASSERT_EQUALS(conv1->parameterLocalName(6),"f1.h");
     TS_ASSERT_EQUALS(conv1->parameterLocalName(10),"f2.s");
 
-    delete fun;
   }
 
   void testResolution()
@@ -247,7 +244,7 @@ public:
 
     double a = 1.3;
     double h = 3.;
-    ConvolutionTest_Gauss* res = new ConvolutionTest_Gauss();
+    boost::shared_ptr<ConvolutionTest_Gauss> res( new ConvolutionTest_Gauss );
     res->setParameter("c",0);
     res->setParameter("h",h);
     res->setParameter("s",a);
@@ -263,10 +260,10 @@ public:
       xr[i] = x[i] - x0 - Dx/2;
     }
 
-    res->functionMW(out,xr,N);
+    res->function1D(out,xr,N);
 
     // When called with only 1 function attached returns its fourier transform
-    conv.functionMW(out,x,N);
+    conv.function1D(out,x,N);
 
     // Check that the transform is correct: F( exp(-a*x^2) ) == sqrt(pi/a)*exp(-(pi*x)^2/a)
     Convolution::HalfComplex hout(out,N);
@@ -296,7 +293,7 @@ public:
     double c1 = 0.;
     double h1 = 3;
     double s1 = pi/2;
-    ConvolutionTest_Gauss* res = new ConvolutionTest_Gauss();
+    boost::shared_ptr<ConvolutionTest_Gauss> res( new ConvolutionTest_Gauss );
     res->setParameter("c",c1);
     res->setParameter("h",h1);
     res->setParameter("s",s1);
@@ -314,14 +311,14 @@ public:
     double c2 = x0 + Dx/2;
     double h2 = 10.;
     double s2 = pi/3;
-    ConvolutionTest_Gauss* fun = new ConvolutionTest_Gauss();
+    boost::shared_ptr<ConvolutionTest_Gauss> fun( new ConvolutionTest_Gauss );
     fun->setParameter("c",c2);
     fun->setParameter("h",h2);
     fun->setParameter("s",s2);
 
     conv.addFunction(fun);
 
-    conv.functionMW(out,x,N);
+    conv.function1D(out,x,N);
 
     // a convolution of two gaussians is a gaussian with h == hp and s == sp
     double sp = s1*s2/(s1+s2);
@@ -344,7 +341,7 @@ public:
 
   void testFit()
   {
-    Fit fit;
+    FitMW fit;
     WS_type ws = mkWS(ConvolutionExp(),1,10,24,0.13);
   }
 
