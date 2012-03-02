@@ -86,6 +86,7 @@ public:
     TS_ASSERT_EQUALS(ws2->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(ws2->getNumberEvents(), 200);
     TSM_ASSERT( "Workspace changed when replaced", ws1 != ws2 );
+    TS_ASSERT_EQUALS(AnalysisDataService::Instance().size(), 1);
   }
 
   //--------------------------------------------------------------------------------------------
@@ -100,6 +101,7 @@ public:
     // Next one actually conjoins
     ws2 = doExec<EventWorkspace>("Append");
     TS_ASSERT_EQUALS(ws2->getNumberHistograms(), 4);
+    TS_ASSERT_EQUALS(AnalysisDataService::Instance().size(), 1);
   }
 
   //--------------------------------------------------------------------------------------------
@@ -118,6 +120,7 @@ public:
     TS_ASSERT_EQUALS(ws2->getNumberEvents(), 400);
 
     TSM_ASSERT( "Workspace being added stayed the same pointer", ws1 == ws2 );
+    TS_ASSERT_EQUALS(AnalysisDataService::Instance().size(), 1);
   }
   
 
@@ -132,6 +135,7 @@ public:
     // Check that rebin was called
     TS_ASSERT_EQUALS(ws->blocksize(), 20);
     TS_ASSERT_DELTA(ws->dataX(0)[0], 40e3, 1e-4);
+    TS_ASSERT_EQUALS(AnalysisDataService::Instance().size(), 1);
   }
 
   //--------------------------------------------------------------------------------------------
@@ -154,6 +158,7 @@ public:
     TS_ASSERT_EQUALS(ws->getNumberEvents(), 200);
     TS_ASSERT_EQUALS(ws->blocksize(), 20);
     TS_ASSERT_DELTA(ws->dataX(0)[0], 40e3, 1e-4);
+    TS_ASSERT_EQUALS(AnalysisDataService::Instance().size(), 2);
   }
 
   //--------------------------------------------------------------------------------------------
@@ -177,6 +182,7 @@ public:
     TS_ASSERT_EQUALS(ws->getNumberEvents(), 200);
     TS_ASSERT_EQUALS(ws->blocksize(), 20);
     TS_ASSERT_DELTA(ws->dataX(0)[0], 40e3, 1e-4);
+    TS_ASSERT_EQUALS(AnalysisDataService::Instance().size(), 2);
   }
 
   //--------------------------------------------------------------------------------------------

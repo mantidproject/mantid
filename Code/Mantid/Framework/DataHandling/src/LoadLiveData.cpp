@@ -96,11 +96,10 @@ namespace DataHandling
       g_log.notice() << " using " << alg->name() << std::endl;
 
       // Run the processing algorithm
-      alg->setChild(true);
 
       // Make a unique anonymous names for the workspace, to put in ADS
-      std::string inputName = "__anonymous_livedata_input_" + Strings::toString(this->g_execCount);
-      // Transform the chunk in-place.
+      std::string inputName = "__anonymous_livedata_input_" + this->getPropertyValue("OutputWorkspace");
+      // Transform the chunk in-place
       std::string outputName = inputName;
 
       // Except, no need for anonymous names with the post-processing
@@ -112,8 +111,12 @@ namespace DataHandling
 
       // For python scripts to work we need to go through the ADS
       AnalysisDataService::Instance().addOrReplace(inputName, inputWS);
+      if (!AnalysisDataService::Instance().doesExist(inputName))
+        g_log.error() << "Something really wrong happened when adding " << inputName << " to ADS. " << this->getPropertyValue("OutputWorkspace") << std::endl;
+
       alg->setPropertyValue("InputWorkspace", inputName);
       alg->setPropertyValue("OutputWorkspace", outputName);
+      alg->setChild(true);
       alg->execute();
       if (!alg->isExecuted())
         throw std::runtime_error("Error processing the workspace using " + alg->name() + ". See log for details.");
