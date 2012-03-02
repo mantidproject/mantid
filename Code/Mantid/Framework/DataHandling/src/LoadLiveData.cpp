@@ -4,6 +4,8 @@ This algorithm is called on a regular interval
 by the [[MonitorLiveData]] algorithm.
 '''It should not be necessary to call LoadLiveData directly.'''
 
+[[file:LoadLiveData_flow.png]]
+
 === Data Processing ===
 
 * Each time LoadLiveData is called, a chunk of data is loaded from the [[LiveListener]].
