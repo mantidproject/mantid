@@ -52,7 +52,7 @@ namespace Mantid
       m_spectraMap(new Geometry::OneToOneSpectraDetectorMap),
       m_YUnit(), m_YUnitLabel(), m_isDistribution(false),
       m_masks(), m_indexCalculator(),
-      m_nearestNeighboursFactory(nnFactory),
+      m_nearestNeighboursFactory((nnFactory == NULL) ? new NearestNeighboursFactory : nnFactory),
       m_nearestNeighbours()
     {
     }
