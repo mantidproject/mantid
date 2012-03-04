@@ -20,13 +20,17 @@
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/IPeaksWorkspace.h"
+
 namespace Mantid
 {
 namespace API
 {
+  //----------------------------------------------------------------------
+  // Forward declarations
+  //----------------------------------------------------------------------
+  class ITableWorkspace;
+  class IPeaksWorkspace;
+
 /** The WorkspaceFactory class is in charge of the creation of all types
     of workspaces. It inherits most of its implementation from
     the Dynamic Factory base class.
@@ -69,10 +73,10 @@ public:
                             const MatrixWorkspace_sptr child, const bool differentSize) const;
 
   /// Create a ITableWorkspace
-  ITableWorkspace_sptr createTable(const std::string& className = "TableWorkspace") const;
+  boost::shared_ptr<ITableWorkspace> createTable(const std::string& className = "TableWorkspace") const;
 
   /// Create a IPeaksWorkspace
-  IPeaksWorkspace_sptr createPeaks(const std::string& className = "PeaksWorkspace") const;
+  boost::shared_ptr<IPeaksWorkspace> createPeaks(const std::string& className = "PeaksWorkspace") const;
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<WorkspaceFactoryImpl>;

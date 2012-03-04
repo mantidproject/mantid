@@ -1,16 +1,45 @@
 /*WIKI*
 
-* First, a chunk of data is loaded from the [[LiveListener]].
-** This is saved in the '''ChunkWS''' workspace.
-* The '''ProcessingAlgorithm''' is called to process the ChunkWS.
-** The output is the '''ProcessedChunkWS'''.
-* The ProcessedChunkWS is added to the '''AccumulationWorkspace'''.
-** The process can be Add, Conjoin, or Replace.
+This algorithm is called on a regular interval
+by the [[MonitorLiveData]] algorithm.
+'''It should not be necessary to call LoadLiveData directly.'''
 
-* If you've specified '''PostProcessingAlgorithm''':
-** The AccumulationWorkspace is processed to create the '''OutputWorkspace'''.
-* If there is NO PostProcessingAlgorithm:
-** The OutputWorkspace is the same as the AccumulationWorkspace, which you do not need to specify.
+[[file:LoadLiveData_flow.png]]
+
+=== Data Processing ===
+
+* Each time LoadLiveData is called, a chunk of data is loaded from the [[LiveListener]].
+** This consists of all the data collected since the previous call.
+** The data is saved in a temporary [[workspace]].
+* You have two options on how to process this workspace:
+
+==== Processing with an Algorithm ====
+* Specify the name of the algorithm in the ''ProcessingAlgorithm'' property.
+** This could be, e.g. a [[Python Algorithm]] written for this purpose.
+** The algorithm ''must'' have at least 2 properties: ''InputWorkspace'' and ''OutputWorkspace''.
+** Any other properties are set from the string in ''ProcessingProperties''.
+** The algorithm is then run, and its OutputWorkspace is saved.
+
+==== Processing with a Python Script ====
+* Specify a python script in the ''ProcessingScript'' property.
+** This can have several lines.
+** Two variables have special meaning:
+*** ''input'' is the input workspace.
+*** ''output'' is the name of the processed, output workspace.
+** Otherwise, your script can contain any legal python code including calls to other Mantid algorithms.
+
+=== Data Accumulation ===
+
+* The ''AccumulationMethod'' specifies what to do with each chunk.
+** If you select 'Add', the chunks of processed data will be added using [[Plus]] or [[PlusMD]].
+** If you select 'Replace', then the output workspace will always be equal to the latest processed chunk.
+** If you select 'Append', then the spectra from each chunk will be appended to the output workspace.
+
+=== Post-Processing Step ===
+
+* Optionally, you can specify some processing to perform ''after'' accumulation.
+** You then need to specify the ''AccumulationWorkspace'' property.
+* Using either the ''PostProcessingAlgorithm'' or the ''PostProcessingScript'' (same way as above), the ''AccumulationWorkspace'' is processed into the ''OutputWorkspace''
 
 *WIKI*/
 
@@ -96,11 +125,10 @@ namespace DataHandling
       g_log.notice() << " using " << alg->name() << std::endl;
 
       // Run the processing algorithm
-      alg->setChild(true);
 
       // Make a unique anonymous names for the workspace, to put in ADS
-      std::string inputName = "__anonymous_livedata_input_" + Strings::toString(this->g_execCount);
-      // Transform the chunk in-place.
+      std::string inputName = "__anonymous_livedata_input_" + this->getPropertyValue("OutputWorkspace");
+      // Transform the chunk in-place
       std::string outputName = inputName;
 
       // Except, no need for anonymous names with the post-processing
@@ -112,8 +140,12 @@ namespace DataHandling
 
       // For python scripts to work we need to go through the ADS
       AnalysisDataService::Instance().addOrReplace(inputName, inputWS);
+      if (!AnalysisDataService::Instance().doesExist(inputName))
+        g_log.error() << "Something really wrong happened when adding " << inputName << " to ADS. " << this->getPropertyValue("OutputWorkspace") << std::endl;
+
       alg->setPropertyValue("InputWorkspace", inputName);
       alg->setPropertyValue("OutputWorkspace", outputName);
+      alg->setChild(true);
       alg->execute();
       if (!alg->isExecuted())
         throw std::runtime_error("Error processing the workspace using " + alg->name() + ". See log for details.");

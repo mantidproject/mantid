@@ -3146,7 +3146,7 @@ p, li { white-space: pre-wrap; }
                      <number>0</number>
                     </property>
                     <item>
-                     <widget class="QLabel" name="label_11">
+                     <widget class="QLabel" name="q_min_label">
                       <property name="sizePolicy">
                        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                         <horstretch>0</horstretch>
@@ -3190,7 +3190,7 @@ p, li { white-space: pre-wrap; }
                      </widget>
                     </item>
                     <item>
-                     <widget class="QLabel" name="label_12">
+                     <widget class="QLabel" name="q_min_unit_label">
                       <property name="minimumSize">
                        <size>
                         <width>70</width>
@@ -3209,7 +3209,14 @@ p, li { white-space: pre-wrap; }
                      </widget>
                     </item>
                     <item>
-                     <widget class="QLabel" name="label_13">
+                     <widget class="QLabel" name="q_bins_label">
+                      <property name="text">
+                       <string>Number of bins  </string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="q_step_label">
                       <property name="minimumSize">
                        <size>
                         <width>70</width>
@@ -3247,7 +3254,7 @@ p, li { white-space: pre-wrap; }
                      </widget>
                     </item>
                     <item>
-                     <widget class="QLabel" name="label_17">
+                     <widget class="QLabel" name="q_step_unit_label">
                       <property name="text">
                        <string> 1/Å</string>
                       </property>

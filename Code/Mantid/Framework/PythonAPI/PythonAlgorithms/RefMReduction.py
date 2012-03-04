@@ -40,13 +40,13 @@ class RefMReduction(PythonAlgorithm):
         self.declareListProperty("LowResNormAxisPixelRange", [0, 255], Validator=ArrayBoundedValidator(Lower=0))
         
         self.declareListProperty("TOFRange", [0., 0.], Validator=ArrayBoundedValidator(Lower=0))
-        self.declareProperty("QMin", 0.0025, Description="Minimum Q-value")
-        self.declareProperty("QStep", -0.01, Description="Step-size in Q. Enter a negative value to get a log scale.")
         self.declareProperty("Theta", 0.0, Description="Scattering angle (degrees)")
         self.declareProperty("ReflectivityPixel", 0.0, Description="Reflectivity pixel of the specular peak (REFPIX)")
         self.declareProperty("WavelengthMin", 2.5)
         self.declareProperty("WavelengthMax", 6.5)
         self.declareProperty("WavelengthStep", 0.1)
+        self.declareProperty("NBins", 0)
+        self.declareProperty("LogScale", True)
         
         self.declareProperty("SetDetectorAngle", False,
                              Description="If true, the DANGLE parameter will be replace by the given value")
@@ -113,7 +113,9 @@ class RefMReduction(PythonAlgorithm):
             if mtd[workspace].getRun().hasProperty("DANGLE0"):
                 dangle0 = mtd[workspace].getRun().getProperty("DANGLE0").value[0]
             
-        det_distance = mtd[workspace].getInstrument().getDetector(0).getPos().getZ()
+        det_distance = 2.562
+        if mtd[workspace].getRun().hasProperty("SampleDetDis"):
+            det_distance = mtd[workspace].getRun().getProperty("SampleDetDis").value[0]/1000.0
 
         direct_beam_pix = 0
         if self.getProperty("SetDirectPixel"):
@@ -133,10 +135,10 @@ class RefMReduction(PythonAlgorithm):
             self._output_message += "   Supplied reflectivity pixel is zero\n"
             self._output_message += "     Taking peak mid-point: %g\n" % ref_pix
         
-        delta = (dangle-dangle0)/2.0\
+        theta = (dangle-dangle0)*math.pi/180.0/2.0\
             + ((direct_beam_pix-ref_pix)*RefMReduction.PIXEL_SIZE)/ (2.0*det_distance)
         
-        return sangle-delta
+        return theta*180.0/math.pi
         
     def _process_polarization(self, polarization):
         """
@@ -149,13 +151,6 @@ class RefMReduction(PythonAlgorithm):
                                 RefMReduction.ON_OFF, RefMReduction.ON_ON]:
             raise RuntimeError("RefMReduction: invalid polarization %s" % polarization)
         
-        # Load the data with the chosen polarization
-        output_roi = self._load_data(polarization)
-        
-        # Return immediately if we don't have any events
-        if output_roi is None:
-            return None
-        
         # Convert to Q
         output_ws = self.getPropertyValue("OutputWorkspace")    
         
@@ -165,12 +160,17 @@ class RefMReduction(PythonAlgorithm):
                 output_ws = output_ws.replace(RefMReduction.OFF_OFF, polarization)
             else:
                 output_ws += '_%s' % polarization
-           
-        self._convert_to_q(output_roi, output_ws)
+
+        # Load the data with the chosen polarization
+        output_ws = self._load_data(polarization, output_ws)
+        
+        # Return immediately if we don't have any events
+        if output_ws is None:
+            return None
         
         return output_ws
 
-    def _load_data(self, polarization):
+    def _load_data(self, polarization, output_ws):
         """
             Load the signal data
             
@@ -179,6 +179,157 @@ class RefMReduction(PythonAlgorithm):
         run_numbers = self.getProperty("RunNumbers")
         mtd.sendLogMessage("RefMReduction: processing %s [%s]" % (run_numbers, polarization))
         self._output_message += "Processing %s [%s]\n" % (run_numbers, polarization)
+        
+        # Sum the normalization counts as a function of wavelength in ROI
+        peak_range = self.getProperty("SignalPeakPixelRange")
+
+        # Get the integration range in the low-res direction
+        low_res_range = [0, RefMReduction.NY_PIXELS-1]
+        if self.getProperty("CropLowResDataAxis"):
+            low_res_range = self.getProperty("LowResDataAxisPixelRange")
+                  
+        
+        # Subtract background
+        bck_range = None
+        if self.getProperty("SubtractSignalBackground"):
+            bck_range = self.getProperty("SignalBackgroundPixelRange")
+        
+        ws_name = self._process_2D(run_numbers, peak_range, 
+                                         low_res_range, bck_range, 
+                                         polarization=polarization)
+        
+        # Check whether we have valid data, otherwise return
+        if ws_name is None:
+            return
+                
+        # Perform normalization according to wavelength distribution of
+        # the direct beam
+        if self.getProperty("PerformNormalization"):
+            self._output_message += "   Normalization:\n"
+            ws_wl_profile = self._process_normalization()
+            RebinToWorkspace(WorkspaceToRebin=ws_wl_profile, 
+                             WorkspaceToMatch=ws_name,
+                             OutputWorkspace=ws_wl_profile)
+            Divide(LHSWorkspace=ws_name,
+                   RHSWorkspace=ws_wl_profile,
+                   OutputWorkspace=ws_name)
+            ReplaceSpecialValues(InputWorkspace=ws_name,
+                                 OutputWorkspace=ws_name,
+                                 NaNValue=0.0, NaNError=0.0,
+                                 InfinityValue=0.0, InfinityError=0.0)
+        
+        # 2D reduction
+        
+        # Get theta angle in degrees
+        theta = float(self.getProperty("Theta"))
+        if theta==0:
+            theta = self._calculate_angle(ws_name)
+            
+        self._output_message += "   Scattering angle: %g\n" % theta
+            
+        output_2D_ws = '2D_'+output_ws
+        RefRoi(InputWorkspace=ws_name, OutputWorkspace=output_2D_ws,
+               NXPixel=RefMReduction.NX_PIXELS, NYPixel=RefMReduction.NY_PIXELS,
+               ConvertToQ=True, IntegrateY=True,
+               YPixelMin=low_res_range[0], YPixelMax=low_res_range[1],
+               ScatteringAngle=theta)
+        
+        # Crop the 2D to get the 1D reflectivity
+        GroupDetectors(InputWorkspace=output_2D_ws, OutputWorkspace=output_ws,
+                       SpectraList=range(peak_range[0],peak_range[1]+1))
+
+        return output_ws
+  
+    def _process_normalization(self):
+        """
+            Process the direct beam normalization run
+        """
+        normalization_run = self.getProperty("NormalizationRunNumber")
+        
+        # Sum the normalization counts as a function of wavelength in ROI
+        peak_range = self.getProperty("NormPeakPixelRange")
+
+        # Get the integration range in the low-res direction
+        low_res_range = [0, RefMReduction.NY_PIXELS-1]
+        if self.getProperty("CropLowResNormAxis"):
+            low_res_range = self.getProperty("LowResNormAxisPixelRange")
+                  
+        
+        # Subtract background
+        bck_range = None
+        if self.getProperty("SubtractNormBackground"):
+            bck_range = self.getProperty("NormBackgroundPixelRange")
+        
+        ws_wl_profile = self._process_2D([normalization_run], peak_range, 
+                                         low_res_range, bck_range, 
+                                         polarization=None)
+                
+        output_roi = "%s_%d_%d" % (ws_wl_profile, peak_range[0], peak_range[1])
+
+        RefRoi(InputWorkspace=ws_wl_profile, OutputWorkspace=output_roi,
+               NXPixel=RefMReduction.NX_PIXELS, NYPixel=RefMReduction.NY_PIXELS,
+               ConvertToQ=False, IntegrateY=True, SumPixels=True,
+               YPixelMin=low_res_range[0], YPixelMax=low_res_range[1],
+               XPixelMin=peak_range[0], XPixelMax=peak_range[1],
+               NormalizeSum=True)               
+        
+        return output_roi
+        
+    def _subtract_bakckground(self, raw_ws, peak_ws, peak_range, bck_range, low_res_range):
+        """
+            Subtract background around a peak
+        """
+        # Look for overlaps
+        if bck_range[0]<peak_range[0] and bck_range[1]>peak_range[1]:
+            bck_ws1 = "%s_%d_%d" % (raw_ws, bck_range[0], peak_range[0]-1)
+            RefRoi(InputWorkspace=raw_ws, OutputWorkspace=bck_ws1,
+                   NXPixel=RefMReduction.NX_PIXELS, NYPixel=RefMReduction.NY_PIXELS,
+                   ConvertToQ=False, IntegrateY=True, SumPixels=True,
+                   YPixelMin=low_res_range[0], YPixelMax=low_res_range[1],
+                   XPixelMin=bck_range[0], XPixelMax=peak_range[0]-1,
+                   NormalizeSum=True)
+            
+            bck_ws2 = "%s_%d_%d" % (raw_ws, peak_range[1]+1, bck_range[1])
+            RefRoi(InputWorkspace=raw_ws, OutputWorkspace=bck_ws2,
+                   NXPixel=RefMReduction.NX_PIXELS, NYPixel=RefMReduction.NY_PIXELS,
+                   ConvertToQ=False, IntegrateY=True, SumPixels=True,
+                   YPixelMin=low_res_range[0], YPixelMax=low_res_range[1],
+                   XPixelMin=peak_range[1]+1, XPixelMax=bck_range[1],
+                   NormalizeSum=True)
+            
+            Plus(RHSWorkspace=bck_ws1, LHSWorkspace=bck_ws2,
+                OutputWorkspace=bck_ws1)
+            Scale(InputWorkspace=bck_ws1, OutputWorkspace=bck_ws1,
+                  Factor=0.5, Operation="Multiply")
+            Minus(LHSWorkspace=peak_ws, RHSWorkspace=bck_ws1,
+                  OutputWorkspace=peak_ws)
+        else:
+            if bck_range[1]>peak_range[0] and bck_range[1]<peak_range[1]:
+                mtd.sendLogMessage("RefMReduction: background range overlaps with peak")
+                bck_range[1]=peak_range[0]-1
+                
+            if bck_range[0]<peak_range[1] and bck_range[0]>peak_range[0]:
+                mtd.sendLogMessage("RefMReduction: background range overlaps with peak")
+                bck_range[0]=peak_range[1]+1
+            
+            bck_ws = "%s_%d_%d" % (raw_ws, bck_range[0], bck_range[1])
+            RefRoi(InputWorkspace=raw_ws, OutputWorkspace=bck_ws,
+                   NXPixel=RefMReduction.NX_PIXELS, NYPixel=RefMReduction.NY_PIXELS,
+                   ConvertToQ=False, IntegrateY=True, SumPixels=True,
+                   YPixelMin=low_res_range[0], YPixelMax=low_res_range[1],
+                   XPixelMin=bck_range[0], XPixelMax=bck_range[1],
+                   NormalizeSum=True)
+
+            Minus(LHSWorkspace=peak_ws, RHSWorkspace=bck_ws,
+                  OutputWorkspace=peak_ws)   
+                               
+    def _process_2D(self, run_numbers, peak_range, low_res_range, 
+                    bck_range=None, polarization=None):
+        """
+            Load the signal data
+            
+            @param polarization: Off_Off, Off_On, On_Off, or On_On
+        """
         allow_multiple = False
         if len(run_numbers)>1 and not allow_multiple:
             raise RuntimeError("Not ready for multiple runs yet, please specify only one run number")
@@ -198,22 +349,31 @@ class RefMReduction(PythonAlgorithm):
         
         # Load the data into its workspace
         if not mtd.workspaceExists(ws_name_raw):
-            LoadEventNexus(Filename=data_file, NXentryName="entry-%s" % polarization, OutputWorkspace=ws_name_raw)
+            if polarization is not None:
+                LoadEventNexus(Filename=data_file, NXentryName="entry-%s" % polarization, OutputWorkspace=ws_name_raw)
+                # Check whether we have events
+                if mtd[ws_name_raw].getNumberEvents()==0:
+                    mtd.sendLogMessage("RefMReduction: no data in %s" % polarization)
+                    self._output_message += "   No data for this polarization state\n"
+                    mtd.deleteWorkspace(ws_name_raw)
+                    return None
+            else:
+                LoadEventNexus(Filename=data_file, OutputWorkspace=ws_name_raw)
         
-        # Check whether we have events
-        if mtd[ws_name_raw].getNumberEvents()==0:
-            mtd.sendLogMessage("RefMReduction: no data in %s" % polarization)
-            self._output_message += "   No data for this polarization state\n"
-            mtd.deleteWorkspace(ws_name_raw)
-            return None
+        # Move the detector to its proper place
+        sdd = 2.562
+        det_distance = mtd[ws_name_raw].getInstrument().getDetector(0).getPos().getZ()
+        if mtd[ws_name_raw].getRun().hasProperty("SampleDetDis"):
+            sdd = mtd[ws_name_raw].getRun().getProperty("SampleDetDis").value[0]/1000.0
+        MoveInstrumentComponent(Workspace=ws_name_raw,
+                                ComponentName="detector1",
+                                Z=sdd-det_distance, RelativePosition=True)        
         
         # Rebin and crop out both sides of the TOF distribution
         if self.TOFrange[0] == self.TOFrange[1]:
             self.TOFrange[0] = min(mtd[ws_name_raw].readX(0))
             self.TOFrange[1] = max(mtd[ws_name_raw].readX(0))
-            
         Rebin(InputWorkspace=ws_name_raw, OutputWorkspace=ws_name, Params=[self.TOFrange[0], self.TOFsteps, self.TOFrange[1]], PreserveEvents=True)
-        #self._output_message += "   Rebinned from %g to %g\n" % (self.TOFrange[0], self.TOFrange[1])
         
         # Normalized by Current (proton charge)
         NormaliseByCurrent(InputWorkspace=ws_name, OutputWorkspace=ws_name)
@@ -223,279 +383,25 @@ class RefMReduction(PythonAlgorithm):
         wl_min = self.getProperty("WavelengthMin")
         wl_max = self.getProperty("WavelengthMax")
         wl_step = self.getProperty("WavelengthStep")
+        nbins = self.getProperty("NBins")
+        
+        wave_x = mtd[ws_name].readX(0)
+        wl_min = min(wave_x)
+        wl_max = max(wave_x)
+        if nbins>0:
+            wl_step = (wl_max-wl_min)/nbins
+        
         Rebin(InputWorkspace=ws_name, OutputWorkspace=ws_name, Params=[wl_min, wl_step, wl_max], PreserveEvents=True)
         self._output_message += "   Rebinned in wavelength from %g to %g in steps of %g\n" % (wl_min, wl_max, wl_step)
 
-        # Perform normalization according to wavelength distribution of
-        # the direct beam
-        if self.getProperty("PerformNormalization"):
-            self._output_message += "   Normalization:\n"
-            ws_wl_profile = self._process_normalization()
-            RebinToWorkspace(WorkspaceToRebin=ws_wl_profile, 
-                             WorkspaceToMatch=ws_name,
-                             OutputWorkspace=ws_wl_profile)
-            Divide(LHSWorkspace=ws_name,
-                   RHSWorkspace=ws_wl_profile,
-                   OutputWorkspace=ws_name)
-            ReplaceSpecialValues(InputWorkspace=ws_name,
-                                 OutputWorkspace=ws_name,
-                                 NaNValue=0.0, NaNError=0.0,
-                                 InfinityValue=0.0, InfinityError=0.0)
-
-        # Get the integration range in the low-res direction
-        low_res_range = [0, RefMReduction.NY_PIXELS-1]
-        if self.getProperty("CropLowResDataAxis"):
-            low_res_range = self.getProperty("LowResDataAxisPixelRange")
-            
-        # Sum the normalization counts as a function of wavelength in ROI
-        peak_range = self.getProperty("SignalPeakPixelRange")
-        output_roi, npix = self._crop_roi(ws_name, peak_range, low_res_range)
-        self._output_message += "   ROI x=(%g,%g) y=(%g,%g)\n" % (peak_range[0],peak_range[1],
-                                                                low_res_range[0], low_res_range[1])
-
         # Subtract background
-        if self.getProperty("SubtractSignalBackground"):
-            bck_range = self.getProperty("SignalBackgroundPixelRange")
-            self._subtract_bakcground(ws_name, output_roi, peak_range, npix, bck_range, low_res_range)
+        if bck_range is not None:
+            ConvertToMatrixWorkspace(InputWorkspace=ws_name,
+                                     OutputWorkspace=ws_name)
+            self._subtract_bakckground(ws_name, ws_name, peak_range, bck_range, low_res_range)
             self._output_message += "   Background: "
             self._output_message += " x=(%g,%g)\n" % (bck_range[0], bck_range[1])
         
-        # 2D reduction
-        output2D = "refm_%d_%s_2D" % (run_numbers[0], polarization)
-        self._convert_to_q_2D(ws_name, output2D)        
-        
-        # Crop the 2D
-        GroupDetectors(InputWorkspace=output2D, OutputWorkspace="%s_%d_%d" % (output2D, peak_range[0], peak_range[1]),
-                       SpectraList=range(peak_range[0],peak_range[1]))
-
-        return output_roi
- 
-    def _crop_roi(self, input_ws, peak_range, low_res_range):
-        """
-            Crop the region of interest and produce the sum of counts as
-            a function of wavelength
-        """
-        # Extract the pixels that we count as signal
-        # Detector ID = NY*x + y
-        output_roi = "%s_%d_%d" % (input_ws, peak_range[0], peak_range[1])
-
-        det_list = []
-        for ix in range(peak_range[0], peak_range[1]+1):
-            det_list.extend(range(RefMReduction.NY_PIXELS*ix+low_res_range[0],
-                                  RefMReduction.NY_PIXELS*ix+low_res_range[1]+1))
-        
-        y = numpy.zeros(len(mtd[input_ws].readY(0)))
-        e = numpy.zeros(len(y))
-        for i in det_list:
-            y_pix = mtd[input_ws].readY(i)
-            e_pix = mtd[input_ws].readE(i)
-            for itof in range(len(y)):
-                y[itof] += y_pix[itof]
-                e[itof] += e_pix[itof]*e_pix[itof]
-                
-        x = mtd[input_ws].readX(0)
-        e = numpy.sqrt(e)
-        CreateWorkspace(OutputWorkspace=output_roi, DataX=x, DataY=y, DataE=e,
-                        UnitX="Wavelength", ParentWorkspace=input_ws)
-        
-        return output_roi, len(det_list)
- 
-    def _process_normalization(self):
-        """
-            Process the direct beam normalization run
-        """
-        normalization_run = self.getProperty("NormalizationRunNumber")
-        self._output_message += "      Processing %d\n" % normalization_run
-        ws_normalization = "normalization_%d_raw" % normalization_run
-        ws_wl_profile = "__normalization_%d" % normalization_run
-        
-        # Find full path to event NeXus data file
-        f = FileFinder.findRuns("REF_M%d" % normalization_run)
-        
-        if len(f)>0 and os.path.isfile(f[0]): 
-            data_file = f[0]
-        else:
-            msg = "RefMReduction: could not find run %d\n" % normalization_run
-            msg += "Add your data folder to your User Data Directories in the File menu"
-            raise RuntimeError(msg)
-        
-        # Load the data into its workspace
-        if not mtd.workspaceExists(ws_normalization):
-            LoadEventNexus(Filename=data_file, OutputWorkspace=ws_normalization)
-            
-        # Trim TOF
-        Rebin(InputWorkspace=ws_normalization, OutputWorkspace=ws_wl_profile, 
-              Params=[self.TOFrange[0], self.TOFsteps, self.TOFrange[1]],
-              PreserveEvents=True)
-        
-        # Normalized by Current (proton charge)
-        NormaliseByCurrent(InputWorkspace=ws_wl_profile, OutputWorkspace=ws_wl_profile)
-
-        # Convert to wavelength
-        ConvertUnits(InputWorkspace=ws_wl_profile, Target="Wavelength", OutputWorkspace=ws_wl_profile)
-        wl_min = self.getProperty("WavelengthMin")
-        wl_max = self.getProperty("WavelengthMax")
-        wl_step = self.getProperty("WavelengthStep")
-        Rebin(InputWorkspace=ws_wl_profile, OutputWorkspace=ws_wl_profile, Params=[wl_min, wl_step, wl_max], PreserveEvents=True)
-        self._output_message += "         Rebinned in wavelength from %g to %g in steps of %g\n" % (wl_min, wl_max, wl_step)
-        
-        # Get the integration range in the low-res direction
-        low_res_range = [0, RefMReduction.NY_PIXELS-1]
-        if self.getProperty("CropLowResNormAxis"):
-            low_res_range = self.getProperty("LowResNormAxisPixelRange")        
-        # Sum the normalization counts as a function of wavelength in ROI
-        peak_range = self.getProperty("NormPeakPixelRange")
-
-        if False:
-            ws_wl_profile_roi = ws_wl_profile+'_roi'
-            SumSpectra(InputWorkspace=ws_wl_profile, OutputWorkspace=ws_wl_profile_roi)
-        else:
-            ws_wl_profile_roi, npix = self._crop_roi(ws_wl_profile, peak_range, low_res_range)
-            self._output_message += "         ROI x=(%g,%g) y=(%g,%g)\n" % (peak_range[0],peak_range[1],
-                                                                    low_res_range[0], low_res_range[1])
-            # Subtract background
-            if self.getProperty("SubtractNormBackground"):
-                bck_range = self.getProperty("NormBackgroundPixelRange")
-                self._subtract_bakcground(ws_wl_profile, ws_wl_profile_roi, peak_range, npix, bck_range, low_res_range)
-                self._output_message += "         Background: "
-                self._output_message += " x=(%g,%g)\n" % (bck_range[0], bck_range[1])
-
-            Scale(InputWorkspace=ws_wl_profile_roi, OutputWorkspace=ws_wl_profile_roi,
-                  Factor=1.0/(peak_range[1]-peak_range[0]), Operation="Multiply")     
-        
-        return ws_wl_profile_roi
-        
-    def _subtract_bakcground(self, raw_ws, peak_ws, peak_range, npix_peak, bck_range, low_res_range):
-        """
-            Subtract background around a peak
-        """
-        # Look for overlaps
-        if bck_range[0]<peak_range[0] and bck_range[1]>peak_range[1]:
-            # Background on both sides
-            bck_ws1, npix_bck1 = self._crop_roi(raw_ws, [bck_range[0],peak_range[0]-1], low_res_range)
-            bck_ws2, npix_bck2 = self._crop_roi(raw_ws, [peak_range[1]+1,bck_range[1]], low_res_range)
-            
-            scaling_factor = npix_peak/(2.0*npix_bck1)
-            Scale(InputWorkspace=bck_ws1, OutputWorkspace=bck_ws1,
-                  Factor=scaling_factor, Operation="Multiply")
-            scaling_factor = npix_peak/(2.0*npix_bck2)
-            Scale(InputWorkspace=bck_ws2, OutputWorkspace=bck_ws2,
-                  Factor=scaling_factor, Operation="Multiply")
-            Plus(RHSWorkspace=bck_ws1, LHSWorkspace=bck_ws2,
-                OutputWorkspace=bck_ws1)
-            Minus(LHSWorkspace=peak_ws, RHSWorkspace=bck_ws1,
-                  OutputWorkspace=peak_ws)
-        else:
-            if bck_range[1]>peak_range[0] and bck_range[1]<peak_range[1]:
-                mtd.sendLogMessage("RefMReduction: background range overlaps with peak")
-                bck_range[1]=peak_range[0]-1
-                
-            if bck_range[0]<peak_range[1] and bck_range[0]>peak_range[0]:
-                mtd.sendLogMessage("RefMReduction: background range overlaps with peak")
-                bck_range[0]=peak_range[1]+1
-            
-            bck_ws, npix_bck = self._crop_roi(raw_ws, bck_range, low_res_range)
-            scaling_factor = npix_peak/npix_bck
-            Scale(InputWorkspace=bck_ws, OutputWorkspace=bck_ws,
-                  Factor=scaling_factor, Operation="Multiply")
-            Minus(LHSWorkspace=peak_ws, RHSWorkspace=bck_ws,
-                  OutputWorkspace=peak_ws)  
-            
-        
-    def _convert_to_q(self, input_ws, output_ws):
-        """
-            Convert to Q
-            
-            @param input_ws: workspace of wavelength data
-            @param output_ws: output workspace of q data
-        """
-        # Get theta angle in degrees
-        theta = float(self.getProperty("Theta"))
-        if theta>0:
-            theta_radian = theta * math.pi / 180.
-        else:
-            theta_radian = self._calculate_angle(input_ws)
-
-        x = mtd[input_ws].readX(0)
-        y = mtd[input_ws].readY(0)
-        e = mtd[input_ws].readE(0)
-
-        q = 4.0*math.pi*math.sin(theta_radian) / x
-
-        zipped = zip(q,y,e)
-        def cmp(p1,p2):
-            if p2[0]==p1[0]:
-                return 0
-            return -1 if p2[0]>p1[0] else 1
-        combined = sorted(zipped, cmp)
-        q_,y_,e_ = zip(*combined)
-        
-        if len(q)>len(q_):
-            q_ = list(q_)
-            q_.insert(0,q[len(q)-1])
-
-        CreateWorkspace(DataX=q_, DataY=y_, DataE=e_,
-                        OutputWorkspace=output_ws,
-                        UnitX="MomentumTransfer",
-                        YUnitLabel="Reflectivity",
-                        ParentWorkspace=input_ws)
-        
-    def _convert_to_q_2D(self, input_ws, output_ws):
-        """
-            Convert a reduced event workspace to a pixel vs Q workspace
-            
-            NOTE: Assumes common binning for all spectra
-            
-        """
-        #TODO: Prototype code: Make this more efficient and clean up 
-        
-        # Get theta angle in degrees
-        theta = float(self.getProperty("Theta"))
-        if theta>0:
-            theta_radian = theta * math.pi / 180.
-        else:
-            theta_radian = self._calculate_angle(input_ws)
-
-        x = mtd[input_ws].readX(0)
-        q = 4.0*math.pi*math.sin(theta_radian) / x
-        
-        instr_dir = mtd.getSettings().getInstrumentDirectory()
-        grouping_file = os.path.join(instr_dir, "Grouping",
-                                     "REFL_Detector_Grouping_Sum_Y.xml")
-        GroupDetectors(InputWorkspace=input_ws, OutputWorkspace=output_ws,
-                       MapFile=grouping_file)
-
-        ConvertToMatrixWorkspace(InputWorkspace=output_ws,
-                                 OutputWorkspace=output_ws)
-
-        tmp = "__tmp"
-        CloneWorkspace(output_ws, "__tmp")
-        nhist = mtd[output_ws].getNumberHistograms()
-        for i in range(nhist):
-            y = mtd[tmp].readY(i)
-            e = mtd[tmp].readE(i)
-            y_ = mtd[output_ws].dataY(i)
-            e_ = mtd[output_ws].dataE(i)
-            q_ = mtd[output_ws].dataX(i)
-            
-            for j in range(len(y)):
-                y_[j] = y[len(y)-1-j]
-                e_[j] = e[len(y)-1-j]
-    
-            for j in range(len(q)):
-                q_[j] = q[len(q)-1-j]
-            
-        # Get the integration range in the low-res direction
-        #low_res_range = [0, RefMReduction.NY_PIXELS-1]
-        #if self.getProperty("CropLowResDataAxis"):
-        #    low_res_range = self.getProperty("LowResDataAxisPixelRange")
-            
-        # Sum the normalization counts as a function of wavelength in ROI
-        #peak_range = self.getProperty("SignalPeakPixelRange")
-        #output_roi, npix = self._crop_roi(output_ws, peak_range, low_res_range)
-            
-        #peak_range = self.getProperty("SignalPeakPixelRange")
-        #GroupDetectors(InputWorkspace=output_ws, OutputWorkspace='ref'+output_ws,
-        #                   SpectraList=range(peak_range[0],peak_range[1]))
+        return ws_name
                                
 mtd.registerPyAlgorithm(RefMReduction())

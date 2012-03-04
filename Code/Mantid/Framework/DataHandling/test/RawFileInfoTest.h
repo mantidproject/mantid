@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidDataHandling/RawFileInfo.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 #include <iostream>
 #include <iomanip>

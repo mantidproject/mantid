@@ -7,6 +7,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAlgorithms/CalMuonDeadTime.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 namespace Mantid
 {

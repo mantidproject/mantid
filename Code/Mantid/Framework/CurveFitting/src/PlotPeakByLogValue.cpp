@@ -44,6 +44,7 @@ In this example a group of three Matrix workspaces were fitted with a [[Gaussian
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFitFunction.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 namespace Mantid
 {

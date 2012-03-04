@@ -16,3 +16,8 @@ def check_sv_opened(ws_name, slice_num, expected_state, message=None):
     sv_name = ":Slice Viewer (%s) Slice%d_MantidQt::SliceViewer::SliceViewerWindow" % (ws_name, slice_num)
     waitFor("object.exists('%s')" % sv_name, 20000)
     test.compare(fix_bool(findObject(sv_name).enabled), expected_state, message)
+
+def check_mode_button_state(mode_name, expected_state, message=None):
+    mode_button_name = ':Vates Simple Interface.%sButton_QPushButton' % mode_name
+    waitFor("object.exists('%s')" % mode_button_name, 20000)
+    test.compare(fix_bool(findObject(mode_button_name).enabled), expected_state, message)

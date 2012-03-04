@@ -32,6 +32,8 @@ class DataSets(BaseScriptElement):
     # Q range
     q_min = 0.0025
     q_step = -0.01
+    q_bins = 10
+    q_log = True
     
     # scattering angle
     theta = 0.0
@@ -78,8 +80,8 @@ class DataSets(BaseScriptElement):
             
         if self.crop_TOF_range:
             script += "              TOFRange=%s,\n" % str(self.DataTofRange)
-        script += "              QMin=%s,\n" % str(self.q_min)
-        script += "              QStep=%s,\n" % str(self.q_step)
+        script += "              NBins=%s,\n" % str(self.q_bins)
+        script += "              LogScale=%s,\n" % str(self.q_log)
         
         # Scattering angle options
         if self.use_center_pixel:
@@ -134,8 +136,6 @@ class DataSets(BaseScriptElement):
         if self.norm_x_range_flag:
             script += "              LowResNormAxisPixelRange=%s,\n" % str(self.norm_x_range)
             
-        script += "              QMin=%s,\n" % str(self.q_min)
-        script += "              QStep=%s,\n" % str(self.q_step)
         script += "              ReflectivityPixel=ref_pixel,\n"
             
         # The output should be slightly different if we are generating
@@ -185,6 +185,8 @@ class DataSets(BaseScriptElement):
         # Q cut
         xml += "<q_min>%s</q_min>\n" % str(self.q_min)
         xml += "<q_step>%s</q_step>\n" % str(self.q_step)
+        xml += "<q_bins>%s</q_bins>\n" % str(self.q_bins)
+        xml += "<q_log>%s</q_log>\n" % str(self.q_log)
         
         # Scattering angle
         xml += "<theta>%s</theta>\n" % str(self.theta)
@@ -278,6 +280,8 @@ class DataSets(BaseScriptElement):
         # Q cut
         self.q_min = BaseScriptElement.getFloatElement(instrument_dom, "q_min", default=DataSets.q_min)    
         self.q_step = BaseScriptElement.getFloatElement(instrument_dom, "q_step", default=DataSets.q_step)
+        self.q_bins = BaseScriptElement.getIntElement(instrument_dom, "q_bins", default=DataSets.q_bins)
+        self.q_log = BaseScriptElement.getBoolElement(instrument_dom, "q_log", default=DataSets.q_log)
     
         # scattering angle
         self.theta = BaseScriptElement.getFloatElement(instrument_dom, "theta", default=DataSets.theta)
@@ -330,6 +334,8 @@ class DataSets(BaseScriptElement):
         # Q range
         self.q_min = DataSets.q_min
         self.q_step = DataSets.q_step
+        self.q_bins = DataSets.q_bins
+        self.q_log = DataSets.q_log
         
         # Scattering angle
         self.theta = DataSets.theta

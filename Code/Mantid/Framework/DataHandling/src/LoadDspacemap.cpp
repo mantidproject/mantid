@@ -382,7 +382,7 @@ namespace DataHandling
     {
       if (str.empty() || str[0] == '#') continue;
       std::istringstream istr(str);
-      int64_t udet;
+      int32_t udet;
       double correction;
       istr >> udet >> correction;
       vulcan.insert(std::make_pair(udet,correction));

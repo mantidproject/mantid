@@ -313,15 +313,10 @@ namespace Mantid
      */
     bool PropertyManager::existsProperty( const std::string& name ) const
     {
-      try
-      {
-        getPointerToProperty(name);
-        return true;
-      }
-      catch (Exception::NotFoundError&)
-      {
-        return false;
-      }
+      std::string ucName = name;
+      std::transform(ucName.begin(), ucName.end(), ucName.begin(), toupper);
+      auto it = m_properties.find(ucName);
+      return (it != m_properties.end());
     }
 
     //-----------------------------------------------------------------------------------------------

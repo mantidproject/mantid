@@ -48,6 +48,9 @@ private:
   /// The settings group
   QString m_settingsGroup;
 
+  //A reference to a logger
+  static Mantid::Kernel::Logger & g_log;
+
 };
 
 }

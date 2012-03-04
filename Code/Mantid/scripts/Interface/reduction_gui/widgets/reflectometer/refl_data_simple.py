@@ -80,7 +80,11 @@ class DataReflWidget(BaseWidget):
 
         self._summary.log_scale_chk.setChecked(True)
         self._summary.q_min_edit.setValidator(QtGui.QDoubleValidator(self._summary.q_min_edit))
-        self._summary.q_step_edit.setValidator(QtGui.QDoubleValidator(self._summary.q_step_edit))
+        
+        if self.instrument_name == "REF_L":
+            self._summary.q_step_edit.setValidator(QtGui.QDoubleValidator(self._summary.q_step_edit))
+        else:
+            self._summary.q_step_edit.setValidator(QtGui.QIntValidator(self._summary.q_step_edit))
         
         self._summary.angle_edit.setValidator(QtGui.QDoubleValidator(self._summary.angle_edit))
         self._summary.center_pix_edit.setValidator(QtGui.QDoubleValidator(self._summary.center_pix_edit))
@@ -355,11 +359,11 @@ class DataReflWidget(BaseWidget):
             ref_pix = util._check_and_get_float_line_edit(self._summary.center_pix_edit)
             PIXEL_SIZE = 0.0007 # m
             
-            delta = (dangle-dangle0)/2.0\
+            delta = (dangle-dangle0)*math.pi/180.0/2.0\
                 + ((direct_beam_pix-ref_pix)*PIXEL_SIZE)/ (2.0*self._detector_distance)
             
-            scattering_angle = self._sangle_parameter-delta
-            scattering_angle_str = "%4.2g" % scattering_angle
+            scattering_angle = delta*180.0/math.pi
+            scattering_angle_str = "%4.3g" % scattering_angle
             self._summary.angle_edit.setText(scattering_angle_str.strip())
      
     def _ref_instrument_selected(self):
@@ -383,6 +387,7 @@ class DataReflWidget(BaseWidget):
             self._summary.det_angle_unit_label.hide()
             self._summary.direct_pixel_check.hide()
             self._summary.direct_pixel_edit.hide()
+            self._summary.q_bins_label.hide()
         else:
             self.instrument_name = "REF_M"
             self._summary.center_pix_radio.show()
@@ -394,7 +399,15 @@ class DataReflWidget(BaseWidget):
             self._summary.angle_offset_edit.hide()
             self._summary.angle_offset_pm_label.hide()
             self._summary.angle_offset_error_edit.hide()
-            self._summary.angle_offset_unit_label.hide()   
+            self._summary.angle_offset_unit_label.hide()  
+            self._summary.q_step_label.hide()
+            self._summary.q_step_unit_label.hide()
+            self._summary.q_min_edit.hide()
+            self._summary.q_min_label.hide()
+            self._summary.q_min_unit_label.hide() 
+            
+            #TODO: allow log binning
+            self._summary.log_scale_chk.hide()
                  
     def _create_auto_reduce_template(self):
         m = self.get_editing_state()
@@ -793,7 +806,10 @@ class DataReflWidget(BaseWidget):
             # Common Q binning
             self._summary.q_min_edit.setText(str(state.data_sets[0].q_min))
             self._summary.log_scale_chk.setChecked(state.data_sets[0].q_step<0)
-            self._summary.q_step_edit.setText(str(math.fabs(state.data_sets[0].q_step)))
+            if isinstance(state.data_sets[0], REFMDataSets):
+                self._summary.q_step_edit.setText(str(state.data_sets[0].q_bins))
+            else:
+                self._summary.q_step_edit.setText(str(math.fabs(state.data_sets[0].q_step)))
             
             # Common angle offset
             if hasattr(state.data_sets[0], "angle_offset"):
@@ -865,7 +881,10 @@ class DataReflWidget(BaseWidget):
         # Q binning
         self._summary.q_min_edit.setText(str(state.q_min))
         self._summary.log_scale_chk.setChecked(state.q_step<0)
-        self._summary.q_step_edit.setText(str(math.fabs(state.q_step)))
+        if isinstance(state, REFMDataSets):
+            self._summary.q_step_edit.setText(str(state.q_bins))
+        else:
+            self._summary.q_step_edit.setText(str(math.fabs(state.q_step)))
 
         # Scattering angle
         if hasattr(state, "use_center_pixel"):
@@ -891,9 +910,13 @@ class DataReflWidget(BaseWidget):
         # Common Q binning
         q_min = float(self._summary.q_min_edit.text())
         q_step = float(self._summary.q_step_edit.text())
-        if self._summary.log_scale_chk.isChecked():
-            q_step = -q_step
-        
+        q_bins = 0
+        if self.instrument_name == "REF_L":
+            if self._summary.log_scale_chk.isChecked():
+                q_step = -q_step
+        else:
+            q_bins = int(math.ceil(float(self._summary.q_step_edit.text())))
+            
         # Angle offset
         if hasattr(m, "angle_offset"):
             angle_offset = float(self._summary.angle_offset_edit.text())
@@ -909,6 +932,10 @@ class DataReflWidget(BaseWidget):
             if hasattr(data, "angle_offset"):
                 data.angle_offset = angle_offset
                 data.angle_offset_error = angle_offset_error
+
+            if hasattr(data, "q_bins"):
+                data.q_bins = q_bins
+                data.q_log = self._summary.log_scale_chk.isChecked()
 
             ##
             # Add here states that are relevant to the interface (all the runs)

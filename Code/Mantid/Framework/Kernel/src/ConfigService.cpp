@@ -1718,6 +1718,7 @@ void ConfigServiceImpl::setParaviewLibraryPath(const std::string& path)
   }
   Poco::Environment::set(platformPathName, existingPath.toString());
 #elif defined __linux__
+  UNUSED_ARG(path)
   throw std::runtime_error("Cannot dynamically set the library path on Linux");
 #elif defined __APPLE__
   throw std::runtime_error("Cannot dynamically set the library path on Mac");

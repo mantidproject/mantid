@@ -185,6 +185,77 @@ namespace DataObjects
     std::stable_sort(peaks.begin(), peaks.end(), comparator);
   }
 
+  //---------------------------------------------------------------------------------------------
+  /** @return the number of peaks
+   */
+  int PeaksWorkspace::getNumberPeaks() const
+  {
+    return int(peaks.size());
+  }
+
+  //---------------------------------------------------------------------------------------------
+  /** Removes the indicated peak
+   * @param peakNum  the peak to remove. peakNum starts at 0
+   */
+  void PeaksWorkspace::removePeak(const int peakNum)
+  {
+    if (peakNum >= static_cast<int>(peaks.size()) || peakNum < 0 ) throw std::invalid_argument("PeaksWorkspace::removePeak(): peakNum is out of range.");
+    peaks.erase(peaks.begin()+peakNum);
+  }
+
+  //---------------------------------------------------------------------------------------------
+  /** Add a peak to the list
+   * @param ipeak :: Peak object to add (copy) into this.
+   */
+  void PeaksWorkspace::addPeak(const API::IPeak& ipeak)
+  {
+    if (dynamic_cast<const Peak*>(&ipeak))
+    {
+      peaks.push_back((const Peak&)ipeak);
+    }
+    else
+    {
+      peaks.push_back(Peak(ipeak));
+    }
+  }
+
+  //---------------------------------------------------------------------------------------------
+  /** Return a reference to the Peak
+   * @param peakNum :: index of the peak to get.
+   * @return a reference to a Peak object.
+   */
+  API::IPeak & PeaksWorkspace::getPeak(const int peakNum)
+  {
+    if (peakNum >= static_cast<int>(peaks.size()) || peakNum < 0 ) throw std::invalid_argument("PeaksWorkspace::getPeak(): peakNum is out of range.");
+    return peaks[peakNum];
+  }
+
+  //---------------------------------------------------------------------------------------------
+  /** Create an instance of a Peak
+   * @param QLabFrame :: Q of the center of the peak, in reciprocal space
+   * @param detectorDistance :: distance between the sample and the detector.
+   * @return a pointer to a new Peak object.
+   */
+  API::IPeak* PeaksWorkspace::createPeak(Kernel::V3D QLabFrame, double detectorDistance)
+  {
+    return new Peak(this->getInstrument(), QLabFrame, detectorDistance);
+  }
+
+  //---------------------------------------------------------------------------------------------
+  /** Return a reference to the Peaks vector */
+  std::vector<Peak> & PeaksWorkspace::getPeaks()
+  {
+    return peaks;
+  }
+
+
+
+  //---------------------------------------------------------------------------------------------
+  /// Return the memory used in bytes
+  size_t PeaksWorkspace::getMemorySize() const
+  {
+    return getNumberPeaks() * sizeof(Peak);
+  }
 
   //---------------------------------------------------------------------------------------------
   /** Destructor */

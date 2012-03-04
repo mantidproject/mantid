@@ -212,8 +212,10 @@ ArrayLengthValidator<TYPE>::ArrayLengthValidator():IValidator<std::vector<TYPE> 
     }
     return "";
   }
+
   // Required explicit instantiations
   template class ArrayLengthValidator<double>;
   template class ArrayLengthValidator<int>;
+  template class ArrayLengthValidator<std::string>;
 } // namespace Mantid
 } // namespace Kernel

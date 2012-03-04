@@ -86,10 +86,10 @@ echo
 # Reduce raw data
 echo "--------Reducing data--------"
 redCommand="python /SNS/"$instrument"/shared/autoreduce/reduce_"$instrument".py"
-echo $redCommand $runNumber $metadataDir
-echo $redCommand $runNumber $metadataDir  | sed "s/^/$(date)  /" >> $logfile
+echo $redCommand $nexusFile $redOutDir
+echo $redCommand $nexusFile $redOutDir  | sed "s/^/$(date)  /" >> $logfile
 start=`date +%x-%T`
-$redCommand $runNumber $redOutDir &>> $logfile
+$redCommand $nexusFile $redOutDir &>> $logfile
 end=`date +%x-%T`
 echo "Started at $start --- Ended at $end"
 echo

@@ -28,6 +28,8 @@ DECLARE_SUBWINDOW(IndirectDiffractionReduction);
 
 using namespace MantidQt::CustomInterfaces;
 
+Mantid::Kernel::Logger& IndirectDiffractionReduction::g_log = Mantid::Kernel::Logger::get("IndirectDiffractionReduction");
+
 //----------------------
 // Public member functions
 //----------------------
@@ -104,39 +106,47 @@ void IndirectDiffractionReduction::demonRun()
     std::transform(fileNames.begin(),fileNames.end(),std::back_inserter(stlFileNames), toStdString);
 
     // Use the file names to suggest a workspace name to use.  Report to logger and stop if unable to parse correctly.
-    QString outputWsName;
+    QString drangeWsName;
+    QString tofWsName;
     try
     {
-      outputWsName = QString::fromStdString(Mantid::Kernel::MultiFileNameParsing::suggestWorkspaceName(stlFileNames));
+      QString nameBase = QString::fromStdString(Mantid::Kernel::MultiFileNameParsing::suggestWorkspaceName(stlFileNames));
+      tofWsName = "'" + nameBase + "_tof'";
+      drangeWsName = "'" + nameBase + "_dRange'";
     }
-    catch(std::runtime_error)
+    catch(std::runtime_error & re)
     {
-      // @TODO: Deal with this by reporting error to logger.
+      g_log.error(re.what());
       return;
     }
 
-    QString pyInput = outputWsName + " = OSIRISDiffractionReduction("
+    QString pyInput = 
+      "from MantidFramework import *\n"
+      "from mantidsimple import *\n"
+      "OSIRISDiffractionReduction("
       "Sample=r'" + m_uiForm.dem_rawFiles->getFilenames().join(", ") + "', "
       "Vanadium=r'" + m_uiForm.dem_vanadiumFile->getFilenames().join(", ") + "', "
-      "CalFile=r'" + m_uiForm.dem_calFile->getFirstFilename() + "')\n";
+      "CalFile=r'" + m_uiForm.dem_calFile->getFirstFilename() + "', "
+      "OutputWorkspace=" + drangeWsName + ")\n";
+
+    pyInput += "ConvertUnits(InputWorkspace=" + drangeWsName + ", OutputWorkspace=" + tofWsName + ", Target='TOF')\n";
     
     if ( m_uiForm.ckGSS->isChecked() )
     {
-      pyInput += "ConvertUnits(InputWorkspaceoutputWs, OutputWorkspace='__save_item_temp', Target='TOF')\n";
-      pyInput += "SaveGSS('__save_item_temp', " + outputWsName + ".getName() +'.gss')\n";
-      pyInput += "DeleteWorkspace('__save_item_temp')\n";
+      pyInput += "SaveGSS(" + tofWsName + ", " + tofWsName + " + '.gss')\n";
     }
 
     if ( m_uiForm.ckNexus->isChecked() ) 
-      pyInput += "SaveNexusProcessed(outputWs, " + outputWsName + ".getName() +'.nxs')\n";
+      pyInput += "SaveNexusProcessed(" + drangeWsName + ", " + drangeWsName + "+'.nxs')\n";
 
     if ( m_uiForm.ckAscii->isChecked() ) 
-      pyInput += "SaveAscii(outputWs, " + outputWsName + ".getName() +'.dat')\n";
+      pyInput += "SaveAscii(" + drangeWsName + ", " + drangeWsName + " +'.dat')\n";
 
     if ( m_uiForm.cbPlotType->currentText() == "Spectra" )
     {
       pyInput += "from mantidplot import *\n"
-        "plotSpectrum(outputWs, 0)\n";
+        "plotSpectrum(" + drangeWsName + ", 0)\n"
+        "plotSpectrum(" + tofWsName + ", 0)\n";
     }
 
     QString pyOutput = runPythonCode(pyInput).trimmed();
@@ -207,6 +217,12 @@ void IndirectDiffractionReduction::instrumentSelected(int)
     {
       m_uiForm.swVanadium->setCurrentIndex(1);
     }
+
+    // Turn off summing files options for OSIRIS.
+    if ( m_uiForm.cbInst->currentText() != "OSIRIS" )
+      m_uiForm.dem_ckSumFiles->setEnabled(true);
+    else
+      m_uiForm.dem_ckSumFiles->setEnabled(false);
   }
 }
 

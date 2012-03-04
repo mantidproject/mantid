@@ -185,7 +185,9 @@ def get_logs(instrument, run):
         if mtd[ws].getRun().hasProperty("DIRPIX"):
             direct_beam_pix = mtd[ws].getRun().getProperty("DIRPIX").value[0]
         
-        det_distance = mtd[ws].getInstrument().getDetector(0).getPos().getZ()
+        det_distance = 2.562
+        if mtd[ws].getRun().hasProperty("SampleDetDis"):
+            det_distance = mtd[ws].getRun().getProperty("SampleDetDis").value[0]/1000.0
 
         return {"SANGLE":sangle,
                 "DANGLE":dangle,
