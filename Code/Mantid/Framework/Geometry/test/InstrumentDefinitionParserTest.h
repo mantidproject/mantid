@@ -390,6 +390,36 @@ public:
     TS_ASSERT( ptrRot->isValid(V3D(0.5,20.0,0.0)) );
     TS_ASSERT( ptrRot->isValid(V3D(-0.5,20.0,0.0)) );
 
+    // nested rotated cuboids which shape position moved 
+    ptrRot = i->getDetector(1360);
+    TS_ASSERT( ptrRot->isValid(V3D(1.0,0.0,0.0)) );
+    TS_ASSERT( !ptrRot->isValid(V3D(1.0,0.0,3.0)) );
+    TS_ASSERT( ptrRot->isValid(V3D(1.0,4.5,0.0)) );
+    TS_ASSERT( !ptrRot->isValid(V3D(1.0,4.5,3.0)) );
+    TS_ASSERT( !ptrRot->isValid(V3D(1.0,7.5,0.0)) );
+    TS_ASSERT( ptrRot->isValid(V3D(1.0,20.0,0.0)) );
+    TS_ASSERT( ptrRot->isValid(V3D(1.0,20.0,4.5)) );
+    TS_ASSERT( !ptrRot->isValid(V3D(1.0,20.0,5.5)) );
+    TS_ASSERT( ptrRot->isValid(V3D(1.0,20.0,-4.5)) );
+    TS_ASSERT( !ptrRot->isValid(V3D(2.5,20.0,0.5)) );
+    TS_ASSERT( ptrRot->isValid(V3D(1.5,20.0,0.0)) );
+    TS_ASSERT( ptrRot->isValid(V3D(0.5,20.0,0.0)) );
+
+    // nested rotated cuboids which shape position moved by the
+    // opposite amount as the location of its parent 
+    ptrRot = i->getDetector(1370);
+    TS_ASSERT( ptrRot->isValid(V3D(0.0,0.0,0.0)) );
+    TS_ASSERT( !ptrRot->isValid(V3D(0.0,0.0,3.0)) );
+    TS_ASSERT( ptrRot->isValid(V3D(0.0,4.5,0.0)) );
+    TS_ASSERT( !ptrRot->isValid(V3D(0.0,4.5,3.0)) );
+    TS_ASSERT( !ptrRot->isValid(V3D(0.0,7.5,0.0)) );
+    TS_ASSERT( ptrRot->isValid(V3D(0.0,20.0,0.0)) );
+    TS_ASSERT( ptrRot->isValid(V3D(0.0,20.0,4.5)) );
+    TS_ASSERT( !ptrRot->isValid(V3D(0.0,20.0,5.5)) );
+    TS_ASSERT( ptrRot->isValid(V3D(0.0,20.0,-4.5)) );
+    TS_ASSERT( !ptrRot->isValid(V3D(1.5,20.0,0.5)) );
+    TS_ASSERT( ptrRot->isValid(V3D(0.5,20.0,0.0)) );
+    TS_ASSERT( ptrRot->isValid(V3D(-0.5,20.0,0.0)) );
   }
 
 

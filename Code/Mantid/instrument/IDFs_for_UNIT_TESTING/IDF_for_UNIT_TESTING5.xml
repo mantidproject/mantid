@@ -43,6 +43,14 @@
   <location />
 </component>
 
+<component type="adjusted cuboid 3" idlist="adjust cuboid 3">
+  <location />
+</component>
+
+<component type="adjusted cuboid 3" idlist="adjust cuboid 4">
+  <location x="-1.0"/>
+</component>
+
 <component type="cuboid1" idlist="normal cuboid">
   <location z="3"/>
 </component>
@@ -82,6 +90,27 @@
   <algebra val="A : B" />
 </type>
 
+<type name="adjusted cuboid 3" is="detector">
+  <combine-components-into-one-shape />
+  <translate-rotate-combined-shape-to x="1.0" />
+  
+  <component type="cuboid1">
+    <location name="A"/>
+  </component>
+  <component type="nested cuboid">
+    <location name="B" y="20" />
+  </component>
+  <algebra val="A : B" />
+  
+  <bounding-box>
+    <x-min val="0.5"/>
+    <x-max val="1.5"/>
+    <y-min val="-5.0"/>
+    <y-max val="10.5"/>
+    <z-min val="-5.0"/>
+    <z-max val="5.0"/>
+  </bounding-box>
+</type>
 
 <type name="cuboid1" is="detector"> 
   <cuboid id="bob">
@@ -98,6 +127,14 @@
 
 <idlist idname="adjust cuboid 2">
   <id start="1350" end="1350" />
+</idlist>
+
+<idlist idname="adjust cuboid 3">
+  <id start="1360" end="1360" />
+</idlist>
+
+<idlist idname="adjust cuboid 4">
+  <id start="1370" end="1370" />
 </idlist>
 
 <idlist idname="normal cuboid">
