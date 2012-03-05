@@ -90,7 +90,7 @@ namespace MDEvents
    * @param end :: stop iterating at this point in the list
    */
   TMDE(MDBoxIterator)::MDBoxIterator(std::vector<IMDBox<MDE,nd>*> & boxes, size_t begin, size_t end)
-    : m_pos(0), m_current(NULL), m_currentMDBox(NULL), m_events(NULL)
+    : m_pos(0), m_current(NULL), m_currentMDBox(NULL), m_events(NULL), m_skippingPolicy(new SkipMaskedBins(this))
 
   {
     this->init(boxes, begin, end);
