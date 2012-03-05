@@ -270,7 +270,7 @@ public:
   /** ~Two million iterations */
   void test_iterator_3D_signalAndErrorOnly()
   {
-    MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws);
+    MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws, new SkipNothing);
     do
     {
       signal_t sig = it->getNormalizedSignal();
@@ -282,7 +282,7 @@ public:
   /** ~Two million iterations */
   void test_iterator_3D_withGetVertexes()
   {
-    MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws);
+    MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws, new SkipNothing);
     size_t numVertices;
     do
     {
@@ -297,7 +297,7 @@ public:
   /** ~Two million iterations */
   void test_iterator_3D_withGetCenter()
   {
-    MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws);
+    MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws, new SkipNothing);
     do
     {
       signal_t sig = it->getNormalizedSignal();
@@ -310,7 +310,7 @@ public:
   /** Use jumpTo() */
   void test_iterator_3D_withGetCenter_usingJumpTo()
   {
-    MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws);
+    MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws, new SkipNothing);
     int max = int(it->getDataSize());
     for (int i=0; i<max; i++)
     {
@@ -324,7 +324,7 @@ public:
 
   void test_masked_get_vertexes_call_throws()
   {
-    boost::scoped_ptr<MDHistoWorkspaceIterator> it(new MDHistoWorkspaceIterator(ws));
+    boost::scoped_ptr<MDHistoWorkspaceIterator> it(new MDHistoWorkspaceIterator(ws, new SkipNothing));
     size_t numVertexes;
     size_t outDimensions = 1;
     bool maskDim[] = {true};
@@ -334,7 +334,7 @@ public:
   void test_getIsMasked()
   {
     //Characterisation test
-    MDHistoWorkspaceIterator iterator(ws);
+    MDHistoWorkspaceIterator iterator(ws, new SkipNothing());
     for(size_t i =0; i < ws->getNPoints(); ++i)
     {
       std::stringstream stream;

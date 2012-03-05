@@ -586,7 +586,7 @@ public:
       function = new MDBoxImplicitFunction(min, max);
     }
 
-    MDBoxIterator<MDLeanEvent<3>,3> it(top, 20, leafOnly, function);
+    MDBoxIterator<MDLeanEvent<3>,3> it(top, 20, leafOnly, new SkipNothing, function);
 
     // Count all of them
     while (it.next())
@@ -625,7 +625,7 @@ public:
   void do_test_iterator_that_fills_a_vector(bool leafOnly)
   {
     IMDBox<MDLeanEvent<3>,3> * box;
-    MDBoxIterator<MDLeanEvent<3>,3> it(top, 20, leafOnly);
+    MDBoxIterator<MDLeanEvent<3>,3> it(top, 20, leafOnly, new SkipNothing);
     std::vector< IMDBox<MDLeanEvent<3>,3> * > boxes;
 
     // Iterate and fill the vector as you go.
