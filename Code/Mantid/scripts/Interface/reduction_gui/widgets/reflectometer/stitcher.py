@@ -40,11 +40,22 @@ class ReflData(object):
         self._label.setMaximumSize(QtCore.QSize(250, 16777215))
         
         self._radio = QtGui.QRadioButton()
+        self._radio.setMinimumSize(QtCore.QSize(20, 0))
+        self._radio.setMaximumSize(QtCore.QSize(20, 16777215))
         self._edit_ctrl = QtGui.QLineEdit()
         self._edit_ctrl.setMinimumSize(QtCore.QSize(80, 0))
         self._edit_ctrl.setMaximumSize(QtCore.QSize(80, 16777215))
         self._edit_ctrl.setValidator(QtGui.QDoubleValidator(self._edit_ctrl))
         
+        self._low_skip_ctrl = QtGui.QLineEdit()
+        self._low_skip_ctrl.setMinimumSize(QtCore.QSize(80, 0))
+        self._low_skip_ctrl.setMaximumSize(QtCore.QSize(80, 16777215))
+        self._low_skip_ctrl.setValidator(QtGui.QIntValidator(self._low_skip_ctrl))
+
+        self._high_skip_ctrl = QtGui.QLineEdit()
+        self._high_skip_ctrl.setMinimumSize(QtCore.QSize(80, 0))
+        self._high_skip_ctrl.setMaximumSize(QtCore.QSize(80, 16777215))
+        self._high_skip_ctrl.setValidator(QtGui.QIntValidator(self._high_skip_ctrl))
 
         self._spacer = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self._layout.addWidget(self._radio)
@@ -52,6 +63,11 @@ class ReflData(object):
         self._layout.addItem(self._spacer)
         self._layout.addWidget(self._edit_ctrl)
         self._edit_ctrl.setText(str(self._scale))
+        
+        self._layout.addWidget(self._low_skip_ctrl)
+        self._low_skip_ctrl.setText("0")
+        self._layout.addWidget(self._high_skip_ctrl)
+        self._high_skip_ctrl.setText("0")
         
         if parent_layout is not None:
             parent_layout.addLayout(self._layout)
@@ -123,6 +139,11 @@ class ReflData(object):
         else: 
             return self._data[ReflData.OFF_OFF]
     
+    def get_skipped(self):
+        low = int(self._low_skip_ctrl.text())
+        high = int(self._high_skip_ctrl.text())
+        return low, high
+    
     def connect_to_scale(self, call_back):
         self._call_back = call_back
     
@@ -192,12 +213,18 @@ class StitcherWidget(BaseWidget):
             item = self._workspace_list[i]
             data = DataSet(item.name)
             data.load(True, True)
-            xmin,xmax = data.get_range()
+            #xmin,xmax = data.get_range()
             item.set_user_data(data)
 
             if item.is_selected():
                 data.set_scale(item.get_scale())
                 refID = i
+            
+            # Set skipped points
+            low, high = item.get_skipped()
+            data.set_skipped_points(low, high)
+            xmin, xmax = data.get_skipped_range()
+            data.set_range(xmin, xmax)
             
             s.append(data)
         
@@ -236,20 +263,21 @@ class StitcherWidget(BaseWidget):
                     s.append(d)
             
             if len(ws_list)>0:
+                combined_ws = "ref_%s" % pol.replace(" ", "_")
+                if self._settings.instrument_name == "REFL":
+                    combined_ws = "ref_combined"
+                s.get_scaled_data(combined_ws)
+
                 plot_name = '%s: %s' % (self._graph, pol)
                 g = _qti.app.graph(plot_name)
                 if g is not None:
-                    g.close()
+                    return
                 g = _qti.app.mantidUI.pyPlotSpectraList(ws_list,[0],True)
                 g.setName(plot_name)
                 l=g.activeLayer()
                 l.setTitle("Polarization state: %s" % pol)
                 
-                combined_ws = "ref_%s" % pol.replace(" ", "_")
-                if self._settings.instrument_name == "REFL":
-                    combined_ws = "ref_combined"
                 
-                s.get_scaled_data(combined_ws)
                 
     def _save_result(self):
         """

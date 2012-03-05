@@ -104,6 +104,31 @@ class DataSet(object):
         self._skip_last = last
         self._skip_first = first
         
+    def get_skipped_range(self):
+        """
+            Get the non-zero x range of the data, excluding the skipped
+            points 
+        """
+        if self.is_loaded():
+            x = mtd[self._ws_name].readX(0)
+            y = mtd[self._ws_name].readY(0)
+            xmin = x[0]
+            xmax = x[len(x)-1]
+            
+            for i in range(len(y)):
+                if y[i]!=0.0:
+                    xmin = x[i+self._skip_first]
+                    break
+
+            for i in range(len(y)-1,-1,-1):
+                if y[i]!=0.0:
+                    xmax = x[i-self._skip_last]
+                    break
+            
+            return xmin, xmax
+        else:
+            return self.get_range()
+        
     def is_loaded(self):
         """
             Return True is this data set has been loaded
