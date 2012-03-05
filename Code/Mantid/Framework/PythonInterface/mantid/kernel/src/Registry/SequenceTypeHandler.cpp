@@ -62,17 +62,19 @@ namespace Mantid
       //-----------------------------------------------------------------------
       // Concrete instantiations
       //-----------------------------------------------------------------------
-      template DLLExport struct SequenceTypeHandler<std::vector<int16_t> >;
-      template DLLExport struct SequenceTypeHandler<std::vector<uint16_t> >;
-      template DLLExport struct SequenceTypeHandler<std::vector<int32_t> >;
-      template DLLExport struct SequenceTypeHandler<std::vector<uint32_t> >;
-      template DLLExport struct SequenceTypeHandler<std::vector<int64_t> >;
-      template DLLExport struct SequenceTypeHandler<std::vector<uint64_t> >;
-#ifdef __APPLE__
-      template DLLExport struct SequenceTypeHandler<std::vector<unsigned long> >;
-#endif
-      template DLLExport struct SequenceTypeHandler<std::vector<double> >;
-      template DLLExport struct SequenceTypeHandler<std::vector<std::string> >;
+      #define INSTANTIATE(ElementType)\
+        template DLLExport struct SequenceTypeHandler<std::vector<ElementType> >;
+
+      INSTANTIATE(int);
+      INSTANTIATE(long);
+      INSTANTIATE(long long);
+      INSTANTIATE(unsigned int);
+      INSTANTIATE(unsigned long);
+      INSTANTIATE(unsigned long long);
+      INSTANTIATE(double);
+      INSTANTIATE(std::string);
+      INSTANTIATE(bool);
+
     }
   }
 }

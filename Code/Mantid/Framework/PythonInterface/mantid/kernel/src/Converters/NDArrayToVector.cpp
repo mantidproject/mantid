@@ -159,17 +159,19 @@ namespace Mantid
       //------------------------------------------------------------------------
       // Explicit instantiations
       //------------------------------------------------------------------------
-      template DLLExport struct NDArrayToVectorConverter<int16_t>;
-      template DLLExport struct NDArrayToVectorConverter<uint16_t>;
-      template DLLExport struct NDArrayToVectorConverter<int32_t>;
-      template DLLExport struct NDArrayToVectorConverter<uint32_t>;
-      template DLLExport struct NDArrayToVectorConverter<int64_t>;
-      template DLLExport struct NDArrayToVectorConverter<uint64_t>;
-#ifdef __APPLE__
-      template DLLExport struct NDArrayToVectorConverter<unsigned long>;
-#endif
-      template DLLExport struct NDArrayToVectorConverter<double>;
-      template DLLExport struct NDArrayToVectorConverter<std::string>;
+      #define INSTANTIATE(ElementType)\
+        template DLLExport struct NDArrayToVectorConverter<ElementType>;
+
+      INSTANTIATE(int);
+      INSTANTIATE(long);
+      INSTANTIATE(long long);
+      INSTANTIATE(unsigned int);
+      INSTANTIATE(unsigned long);
+      INSTANTIATE(unsigned long long);
+      INSTANTIATE(double);
+      INSTANTIATE(bool);
+      INSTANTIATE(std::string);
+
     }
   }
 }

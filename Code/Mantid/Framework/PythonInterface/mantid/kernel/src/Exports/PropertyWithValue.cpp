@@ -2,22 +2,24 @@
 
 void export_BasicPropertyWithValueTypes()
 {
-  // See MantidPythonInterface/kernel/PropertyWithValue.h for macro definition
-  EXPORT_PROP_W_VALUE(int32_t, int32_t);
-  EXPORT_PROP_W_VALUE(std::vector<int32_t>, vector_int32_t);
-  EXPORT_PROP_W_VALUE(int64_t, int64_t);
-  EXPORT_PROP_W_VALUE(std::vector<int64_t>, vector_int64_t);
+  #define EXPORT_BASIC_INTEGER_TYPE(ctype, export_name)\
+    EXPORT_PROP_W_VALUE(ctype, export_name);\
+    EXPORT_PROP_W_VALUE(std::vector<ctype>, export_name);\
+    EXPORT_PROP_W_VALUE(unsigned ctype, unsigned ## _export_name);\
+    EXPORT_PROP_W_VALUE(std::vector<unsigned ctype>, vector_ ## export_name);
 
-  EXPORT_PROP_W_VALUE(size_t, size_t);
-  EXPORT_PROP_W_VALUE(std::vector<size_t>, vector_size_t);
+  #define EXPORT_BASIC_TYPE(ctype, export_name)\
+    EXPORT_PROP_W_VALUE(ctype, export_name);\
+    EXPORT_PROP_W_VALUE(std::vector<ctype>, vector_ ## export_name);
 
-  EXPORT_PROP_W_VALUE(double, dbl);
-  EXPORT_PROP_W_VALUE(std::vector<double>,vector_dbl);
+  // -- PropertyWithValueTypes
+  EXPORT_BASIC_INTEGER_TYPE(int, int);
+  EXPORT_BASIC_INTEGER_TYPE(long, long);
+  EXPORT_BASIC_INTEGER_TYPE(long long, long_long);
 
-  EXPORT_PROP_W_VALUE(bool, bool);
-
-  EXPORT_PROP_W_VALUE(std::string, string);
-  EXPORT_PROP_W_VALUE(std::vector<std::string>,vector_str);
+  EXPORT_BASIC_TYPE(double, double);
+  EXPORT_BASIC_TYPE(bool, bool);
+  EXPORT_BASIC_TYPE(std::string, string);
 }
 
 

@@ -65,17 +65,13 @@ namespace Mantid { namespace PythonInterface
         template DLLExport PyObject * wrapWithNDArray<std::vector<ElementType> >(const std::vector<ElementType> &, const NumpyWrapMode);\
         template DLLExport PyObject * cloneToNDArray<std::vector<ElementType> >(const std::vector<ElementType> &);
 
-      INSTANTIATE(int16_t);
-      INSTANTIATE(uint16_t);
-      INSTANTIATE(int32_t);
-      INSTANTIATE(uint32_t);
-      INSTANTIATE(int64_t);
-      INSTANTIATE(uint64_t);
-#ifdef __APPLE__
+      INSTANTIATE(int);
+      INSTANTIATE(long);
+      INSTANTIATE(long long);
+      INSTANTIATE(unsigned int);
       INSTANTIATE(unsigned long);
-#endif
+      INSTANTIATE(unsigned long long);
       INSTANTIATE(double);
-
     }
   }
 }}
