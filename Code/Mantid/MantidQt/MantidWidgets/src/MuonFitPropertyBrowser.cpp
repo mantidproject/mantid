@@ -386,5 +386,23 @@ void MuonFitPropertyBrowser::workspaceChange(const QString& wsName)
   updatePPTool(wsName);
 }
 
+
+/** Check if the workspace can be used in the fit. The accepted types are
+  * MatrixWorkspaces same size and that it isn't the generated raw file.
+  * @param ws :: The workspace
+  */
+bool MuonFitPropertyBrowser::isWorkspaceValid(Mantid::API::Workspace_sptr ws)const
+{
+  QString workspaceName(QString::fromStdString(ws->name() ) );
+  if (workspaceName.contains("_Raw") )
+    return false;
+
+  if (dynamic_cast<Mantid::API::MatrixWorkspace*>(ws.get()) != 0)
+    return true;
+  else
+    return false;
+}
+
+
 } // MantidQt
 } // API

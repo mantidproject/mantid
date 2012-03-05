@@ -1442,7 +1442,10 @@ void FitPropertyBrowser::populateWorkspaceNames()
   QStringList tmp;
   std::set<std::string> sv = Mantid::API::AnalysisDataService::Instance().getObjectNames();
   for (std::set<std::string>::const_iterator it = sv.begin(); it != sv.end(); ++it)
+  {
+    std::cout << "\n\n" << (*it) << "\n";
     tmp<<QString::fromStdString(*it);
+  }
 
   for(int i=0;i<tmp.size();i++)
   {
@@ -2485,33 +2488,6 @@ bool FitPropertyBrowser::rawData()const
 void FitPropertyBrowser::setTextPlotGuess(const QString text) 
 {
   m_displayActionPlotGuess->setText(text);
-}
-
-/**
-* Currently only called by the custom interface for the muon analysis fit browser.
-* It adds the name of a loaded workspace to a drop down property box . 
-*
-* @param wsName :: The workspace name to be added.
-*/
-void FitPropertyBrowser::manualAddWorkspace(const QString& wsName)
-{
-  QString oldName = QString::fromStdString(workspaceName());
-  int i = m_workspaceNames.indexOf(wsName);
-  // if new workspace append this workspace name
-  if (i < 0)
-  {
-    m_workspaceNames.append(wsName);
-    m_workspaceNames.sort();
-    m_enumManager->setEnumNames(m_workspace, m_workspaceNames);
-  }
-  // get hold of index of oldName
-  i = m_workspaceNames.indexOf(oldName);
-  if (i >= 0)
-  {
-    m_enumManager->setValue(m_workspace,i);
-  }    
-  //Set the workspace to the most recent one.
-  workspaceChange(wsName);
 }
 
 

@@ -194,9 +194,6 @@ public:
   void postDeleteHandle(const std::string& wsName);
   void addHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
 
-  /// Add a workspace property
-  void manualAddWorkspace(const QString& wsName);
-
   /// Update the PeakPickerTool with the current workspace to be displayed and which to associate itself with
   void updatePPTool(const QString& name);
 
@@ -388,7 +385,7 @@ private:
   /// Get the registered function names
   virtual void populateFunctionNames();
   /// Check if the workspace can be used in the fit
-  bool isWorkspaceValid(Mantid::API::Workspace_sptr)const;
+  virtual bool isWorkspaceValid(Mantid::API::Workspace_sptr)const;
   /// Called when the fit is finished
   void finishHandle(const Mantid::API::IAlgorithm* alg);
   /// Find QtBrowserItem for a property prop among the chidren of 

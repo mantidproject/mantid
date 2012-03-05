@@ -37,11 +37,12 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MuonFitPropertyBrowser: public MantidQt:
 
 public:
   /// Constructor.
-  MuonFitPropertyBrowser(QWidget *parent = NULL, QObject* mantidui = NULL);
-  /// Set the input workspace name
-  virtual void setWorkspaceName(const QString& wsName);
+  MuonFitPropertyBrowser(QWidget *parent = NULL, QObject* mantidui = NULL);  
   /// Initialise the layout.
   virtual void init();
+  /// Set the input workspace name
+  virtual void setWorkspaceName(const QString& wsName);
+
 
 public slots:
   /// Perform the fit algorithm
@@ -63,6 +64,8 @@ private:
   virtual void setFitEnabled(bool yes);
   /// Sets the new workspace to the current one
   virtual void workspaceChange(const QString& wsName);
+  /// Check if the workspace can be used in the fit
+  virtual bool isWorkspaceValid(Mantid::API::Workspace_sptr)const;
 
 };
 

@@ -2082,7 +2082,6 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     changePlotType(plotDetails);
 
     m_currentDataName = titleLabel;
-    m_uiForm.fitBrowser->manualAddWorkspace(m_currentDataName);
   }
   m_updating = false;
 }
@@ -2224,7 +2223,6 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     changePlotType(plotDetails);
     
     m_currentDataName = titleLabel;
-    m_uiForm.fitBrowser->manualAddWorkspace(m_currentDataName);
   }
   m_updating = false;
 }
