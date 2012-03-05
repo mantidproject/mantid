@@ -1870,23 +1870,35 @@ void MuonAnalysis::createPlotWS(const std::string& groupName, const std::string&
     try
     {
       Mantid::API::MatrixWorkspace_sptr tempWs =  boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsname));
+      double binSize = tempWs->dataX(0)[1]-tempWs->dataX(0)[0];
+      double bunchedBinSize = binSize*m_uiForm.optionStepSizeText->text().toDouble();      
 
-      bool distributionBeforeBunching = false; // used to reset back this flag after bunching the data
-      if ( tempWs->isDistribution() )
-        distributionBeforeBunching = true;
-      else
-        tempWs->isDistribution(true);
+      // bunch data
+      Mantid::API::IAlgorithm_sptr rebinAlg = Mantid::API::AlgorithmManager::Instance().create("Rebin");
+      rebinAlg->setPropertyValue("InputWorkspace", wsname);
+      rebinAlg->setPropertyValue("OutputWorkspace", wsname);
+      rebinAlg->setPropertyValue("Params", boost::lexical_cast<std::string>(bunchedBinSize));
+      rebinAlg->execute();
 
-      // bunching the data
-      QString reBinStr = QString("Rebunch(\"") + wsname.c_str() + "\",\""
-        + wsname.c_str() + QString("\",") + m_uiForm.optionStepSizeText->text() + ");";
-      runPythonCode( reBinStr ).trimmed();
-
-      // Somehow the shared pointer tempWs is lost during the
-      // the python call above. Hence the reset of the shared pointer below
+      // however muon group don't want last bin if shorter than previous bins
       tempWs =  boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsname));
-      if ( distributionBeforeBunching == false)
-        tempWs->isDistribution(false);
+      binSize = tempWs->dataX(0)[1]-tempWs->dataX(0)[0]; 
+      double firstX = tempWs->dataX(0)[0];
+      double lastX = tempWs->dataX(0)[tempWs->dataX(0).size()-1];
+      size_t numberOfFullBunchedBins =  static_cast<size_t>((lastX - firstX) / binSize );
+
+      if ( numberOfFullBunchedBins )
+      {
+        lastX = firstX + numberOfFullBunchedBins*binSize;
+
+        Mantid::API::IAlgorithm_sptr cropAlg = Mantid::API::AlgorithmManager::Instance().create("CropWorkspace");
+        cropAlg->setPropertyValue("InputWorkspace", wsname);
+        cropAlg->setPropertyValue("OutputWorkspace", wsname);
+        cropAlg->setPropertyValue("Xmax", boost::lexical_cast<std::string>(lastX));
+        cropAlg->setProperty("Xmax", lastX);
+        cropAlg->execute();
+      }
+
     }
     catch(std::exception&)
     {
