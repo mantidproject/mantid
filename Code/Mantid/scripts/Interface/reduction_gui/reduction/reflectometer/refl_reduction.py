@@ -30,10 +30,13 @@ class REFLReductionScripter(BaseReductionScripter):
         script = "# %s reduction script\n" % self.instrument_name
         script += "# Script automatically generated on %s\n\n" % time.ctime(time.time())
         
+        script += "import os\n"
         script += "from MantidFramework import *\n"
         script += "mtd.initialise(False)\n"
         script += "from mantidsimple import *\n\n"
                 
+        script += "REF_RED_OUTPUT_MESSAGE = ''\n\n"
+        
         for item in self._observers:
             if item.state() is not None:
                 script += str(item.state())

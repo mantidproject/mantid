@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1298</width>
-    <height>1303</height>
+    <height>1401</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -37,7 +37,7 @@
         <x>0</x>
         <y>0</y>
         <width>1280</width>
-        <height>1285</height>
+        <height>1383</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -192,7 +192,7 @@
                <item>
                 <widget class="QGroupBox" name="groupBox">
                  <property name="sizePolicy">
-                  <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                    <horstretch>0</horstretch>
                    <verstretch>0</verstretch>
                   </sizepolicy>
@@ -3137,7 +3137,7 @@ p, li { white-space: pre-wrap; }
                <item>
                 <widget class="QGroupBox" name="groupBox_4">
                  <property name="title">
-                  <string>Output Binning</string>
+                  <string>Output</string>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_8">
                   <item>
@@ -3155,13 +3155,13 @@ p, li { white-space: pre-wrap; }
                       </property>
                       <property name="minimumSize">
                        <size>
-                        <width>90</width>
+                        <width>150</width>
                         <height>0</height>
                        </size>
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>90</width>
+                        <width>150</width>
                         <height>16777215</height>
                        </size>
                       </property>
@@ -3210,6 +3210,24 @@ p, li { white-space: pre-wrap; }
                     </item>
                     <item>
                      <widget class="QLabel" name="q_bins_label">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>150</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>150</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
                       <property name="text">
                        <string>Number of bins  </string>
                       </property>
@@ -3305,15 +3323,21 @@ p, li { white-space: pre-wrap; }
                     </property>
                     <item>
                      <widget class="QLabel" name="angle_offset_label">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
                       <property name="minimumSize">
                        <size>
-                        <width>90</width>
+                        <width>150</width>
                         <height>0</height>
                        </size>
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>90</width>
+                        <width>150</width>
                         <height>16777215</height>
                        </size>
                       </property>
@@ -3370,7 +3394,7 @@ p, li { white-space: pre-wrap; }
                     <item>
                      <widget class="QLabel" name="angle_offset_unit_label">
                       <property name="text">
-                       <string>degrees</string>
+                       <string>  degrees</string>
                       </property>
                      </widget>
                     </item>
@@ -3386,6 +3410,67 @@ p, li { white-space: pre-wrap; }
                        </size>
                       </property>
                      </spacer>
+                    </item>
+                   </layout>
+                  </item>
+                  <item>
+                   <layout class="QHBoxLayout" name="horizontalLayout_19">
+                    <property name="spacing">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QLabel" name="outdir_label">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>150</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>150</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
+                      <property name="text">
+                       <string>Output directory</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLineEdit" name="outdir_edit">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="outdir_browse_button">
+                      <property name="minimumSize">
+                       <size>
+                        <width>150</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>150</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
+                      <property name="text">
+                       <string>Browse</string>
+                      </property>
+                     </widget>
                     </item>
                    </layout>
                   </item>

@@ -14,10 +14,10 @@ class DataSets(BaseScriptElement):
     DataTofRange = [10700., 24500.]
     crop_TOF_range = True
     
-    data_x_range_flag = True
+    data_x_range_flag = False
     data_x_range = [115, 210]
     
-    norm_x_range_flag = True
+    norm_x_range_flag = False
     norm_x_range = [90, 160]
 
     NormFlag = True
@@ -47,6 +47,8 @@ class DataSets(BaseScriptElement):
     detector_angle_offset = 0.0
     set_direct_pixel = False
     direct_pixel = 0.0
+    
+    output_dir = ''
 
     def __init__(self):
         super(DataSets, self).__init__()
@@ -104,7 +106,22 @@ class DataSets(BaseScriptElement):
         script += "              OutputWorkspace='reflectivity_Off_Off_%s')" % str(self.data_files[0])
         script += "\n"
         
-        script += "REF_RED_OUTPUT_MESSAGE=a.getPropertyValue('OutputMessage')\n" 
+        script += "REF_RED_OUTPUT_MESSAGE += a.getPropertyValue('OutputMessage')\n" 
+
+        # Save the reduced data
+        script += "ws_list = ['reflectivity_Off_Off_%s',\n" % str(self.data_files[0])
+        script += "           'reflectivity_On_Off_%s',\n" % str(self.data_files[0])
+        script += "           'reflectivity_Off_On_%s',\n" % str(self.data_files[0])
+        script += "           'reflectivity_On_On_%s']\n" % str(self.data_files[0])
+        
+        script += "outdir = '%s'\n" % self.output_dir
+        script += "if not os.path.isdir(outdir):\n"
+        script += "    outdir = os.path.expanduser('~')\n\n"
+        
+        script += "for ws in ws_list:\n"
+        script += "    if mtd.workspaceExists(ws):\n"
+        script += "        outpath = os.path.join(outdir, ws+'.txt')\n"
+        script += "        SaveAscii(Filename=outpath, InputWorkspace=ws, Separator='Space')\n\n"
 
         return script
 
@@ -201,6 +218,8 @@ class DataSets(BaseScriptElement):
         xml += "<set_direct_pixel>%s</set_direct_pixel>\n" % str(self.set_direct_pixel)
         xml += "<direct_pixel>%s</direct_pixel>\n" % str(self.direct_pixel)
         
+        xml += "<output_dir>%s</output_dir>\n" % str(self.output_dir)
+        
         xml += "</RefMData>\n"
 
         return xml
@@ -224,7 +243,7 @@ class DataSets(BaseScriptElement):
         
         
         #low resolution range
-        self.data_x_range_flag = BaseScriptElement.getBoolElement(instrument_dom, "data_x_range_flag",
+        self.data_x_range_flag = BaseScriptElement.getBoolElement(instrument_dom, "x_range_flag",
                                                                   default=DataSets.data_x_range_flag)
         
         self.data_x_range = [BaseScriptElement.getIntElement(instrument_dom, "x_min_pixel"),
@@ -310,6 +329,10 @@ class DataSets(BaseScriptElement):
                                                               "direct_pixel",
                                                               default=DataSets.direct_pixel)
         
+        self.output_dir = BaseScriptElement.getStringElement(instrument_dom,
+                                                             "output_dir",
+                                                             default=DataSets.output_dir)
+        
     def reset(self):
         """
             Reset state
@@ -349,4 +372,6 @@ class DataSets(BaseScriptElement):
         self.detector_angle_offset = DataSets.detector_angle_offset
         self.set_direct_pixel = DataSets.set_direct_pixel
         self.direct_pixel = DataSets.direct_pixel
+        
+        self.output_dir = DataSets.output_dir
 

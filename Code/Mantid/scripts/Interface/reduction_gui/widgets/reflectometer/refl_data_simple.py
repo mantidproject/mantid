@@ -190,6 +190,9 @@ class DataReflWidget(BaseWidget):
         self.connect(self._summary.data_peak_from_pixel, QtCore.SIGNAL("textChanged(QString)"), self._data_peak_range_changed)
         self.connect(self._summary.data_peak_to_pixel, QtCore.SIGNAL("textChanged(QString)"), self._data_peak_range_changed)
 
+        # Output directory
+        self._summary.outdir_edit.setText(os.path.expanduser('~'))
+        self.connect(self._summary.outdir_browse_button, QtCore.SIGNAL("clicked()"), self._output_dir_browse)
  
         # Set up the automated reduction options
         self._summary.auto_reduce_check.setChecked(False)
@@ -222,6 +225,14 @@ class DataReflWidget(BaseWidget):
         # If we do not have access to /SNS, don't display the automated reduction options
         if not self._settings.debug and not os.path.isdir("/SNS/%s" % self.instrument_name):
             self._summary.auto_reduce_check.hide()
+        
+    def _output_dir_browse(self):
+        output_dir = QtGui.QFileDialog.getExistingDirectory(self, "Output Directory - Choose a directory",
+                                                            os.path.expanduser('~'), 
+                                                            QtGui.QFileDialog.ShowDirsOnly
+                                                            | QtGui.QFileDialog.DontResolveSymlinks)
+        if output_dir:
+            self._summary.outdir_edit.setText(output_dir)   
         
     def _run_number_changed(self):
         self._edit_event(ctrl=self._summary.data_run_number_edit)
@@ -388,6 +399,11 @@ class DataReflWidget(BaseWidget):
             self._summary.direct_pixel_check.hide()
             self._summary.direct_pixel_edit.hide()
             self._summary.q_bins_label.hide()
+            
+            # Output directory
+            self._summary.outdir_label.hide()
+            self._summary.outdir_edit.hide()
+            self._summary.outdir_browse_button.hide()
         else:
             self.instrument_name = "REF_M"
             self._summary.center_pix_radio.show()
@@ -896,6 +912,10 @@ class DataReflWidget(BaseWidget):
                 self._summary.angle_radio.setChecked(True)
             self._scattering_angle_changed()
             
+        # Output directory
+        if hasattr(state, "output_dir"):
+            self._summary.outdir_edit.setText(str(state.output_dir))
+            
         self._reset_warnings()
         self._summary.data_run_number_edit.setText(str(','.join([str(i) for i in state.data_files])))
             
@@ -937,9 +957,8 @@ class DataReflWidget(BaseWidget):
                 data.q_bins = q_bins
                 data.q_log = self._summary.log_scale_chk.isChecked()
 
-            ##
-            # Add here states that are relevant to the interface (all the runs)
-            ##
+            if hasattr(data, "output_dir"):
+                data.output_dir = self._summary.outdir_edit.text()
             
             state_list.append(data)
         state.data_sets = state_list
