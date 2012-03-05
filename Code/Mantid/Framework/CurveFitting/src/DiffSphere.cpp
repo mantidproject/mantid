@@ -4,6 +4,7 @@
 #include "MantidCurveFitting/DiffSphere.h"
 #include <cmath>
 #include <boost/math/special_functions/bessel.hpp>
+#include "MantidAPI/ParameterTie.h"
 
 
 #ifndef M_PI
@@ -30,6 +31,7 @@ double ElasticDiffSphere::HeightPrefactor() const{
   const double& H = getParameter("Height");
   const double& R = getParameter("Radius");
   const double& Q = getParameter("Q");
+
   return H * pow(3*boost::math::sph_bessel(1,Q*R)/(Q*R),2);
 }
 
@@ -188,17 +190,20 @@ double DiffSphere::ElasticIntensityTie(double I, double R, double Q) {
 
 
 DiffSphere::DiffSphere() {
-  //instantiate m_elastic
-  m_elastic = dynamic_cast<DeltaFunction*>(API::FunctionFactory::Instance().createFunction("DeltaFunction"));
+  m_elastic = dynamic_cast<ElasticDiffSphere*>(API::FunctionFactory::Instance().createFunction("ElasticDiffSphere"));
   addFunction( m_elastic );
-  //instantiante m_inelastic
   m_inelastic = dynamic_cast<InelasticDiffSphere*>(API::FunctionFactory::Instance().createFunction("InelasticDiffSphere"));
   addFunction( m_inelastic );
-
-  m_tie=createTie("f1.H");
-  m_tie->m_parser.DefineFun("ElasticIntensityTie",DiffSphere::ElasticIntensityTie);
-  m_tie->set( "ElasticIntensityTie(f2.I,f2.R,f2.Q)" );
-
+  //Set the ties between Elastic and Inelastic parameters
+  API::ParameterTie* tie_H=new API::ParameterTie(this,"f0.Height");
+  tie_H->set("f0.Height=f1.Intensity");
+  addTie(tie_H);
+  API::ParameterTie* tie_R=new API::ParameterTie(this,"f0.Radius");
+  tie_R->set("f0.Radius=f1.Radius");
+  addTie(tie_R);
+  API::ParameterTie* tie_Q=new API::ParameterTie(this,"f0.Q");
+  tie_Q->set("f0.Q=f1.Q");
+  addTie(tie_Q);
 }
 
 } // namespace CurveFitting
