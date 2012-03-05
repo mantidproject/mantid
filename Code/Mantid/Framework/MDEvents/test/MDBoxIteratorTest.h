@@ -542,7 +542,7 @@ public:
     MDBoxIterator<MDLeanEvent<1>,1>* evaluationIterator = new MDBoxIterator<MDLeanEvent<1>,1>(A, 20, true, mockPolicy); //Using custom policy
 
     EXPECT_CALL(*mockPolicy, Die()).Times(1); //Should call destructor automatically within MDBoxIterator
-    EXPECT_CALL(*mockPolicy, keepGoing()).Times(evaluationIterator->getDataSize()); //Should apply test 
+    EXPECT_CALL(*mockPolicy, keepGoing()).Times(static_cast<int>(evaluationIterator->getDataSize())); //Should apply test 
 
     while(evaluationIterator->next()) //Keep calling next while true. Will iterate through all boxes.
     {
