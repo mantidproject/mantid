@@ -82,7 +82,6 @@ namespace MantidQt
       bool validateMsd();
       bool validateFury();
       bool validateConfit();
-      bool validateAbsorption();
       bool validateAbsorptionF2Py();
 
       // Run processes
@@ -91,7 +90,6 @@ namespace MantidQt
       void furyRun();
       void furyfitRun();
       void confitRun();
-      void absorptionRun();
 
       Mantid::API::CompositeFunctionMW* furyfitCreateFunction(bool tie=false);
       Mantid::API::IFitFunction* furyfitCreateUserFunction(const QString & name, bool tie=false);
@@ -159,9 +157,6 @@ namespace MantidQt
       void confitCheckBoxUpdate(QtProperty*, bool);
       void confitHwhmChanged(double);
       void confitHwhmUpdateRS(double);
-
-      // Absorption (Basic)
-      // (nothing for this)
 
       // Absorption (F2PY)
       void absf2pRun();
