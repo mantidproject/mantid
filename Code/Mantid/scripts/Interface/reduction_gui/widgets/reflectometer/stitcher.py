@@ -263,7 +263,25 @@ class StitcherWidget(BaseWidget):
                                                            "Data Files (*.txt)")
             fname = str(QtCore.QFileInfo(fname_qstr).filePath())
             if len(fname)>0:
-                self._stitcher.save_combined(fname, as_canSAS=False)
+                if self._settings.instrument_name == "REFL":
+                    self._stitcher.save_combined(fname, as_canSAS=False)
+                else:
+                    pol_list = ["Off_Off", "On_Off",
+                               "Off_On", "On_On"]
+                    for pol in pol_list:
+                        try:
+                            if mtd.workspaceExists('ref_'+pol):
+                                root, ext = os.path.splitext(os.path.basename(fname))
+                                outdir, filename = os.path.split(fname)
+                                outname = "%s_%s.txt" % (root, pol)
+                                
+                                file_path = os.path.join(outdir, outname)
+                                SaveAscii(Filename=file_path, 
+                                          InputWorkspace="ref_"+pol,
+                                          Separator="Space")
+                        except:
+                            mtd.sendLogMessage("Could not save polarization %s" % pol)
+                            
     
     def set_state(self, state):
         """
