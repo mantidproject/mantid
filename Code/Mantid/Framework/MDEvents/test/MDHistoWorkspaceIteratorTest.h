@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidMDEvents/MDHistoWorkspaceIterator.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
@@ -17,6 +18,7 @@ using namespace Mantid;
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
 using Mantid::Kernel::VMD;
+using Mantid::Geometry::MDHistoDimension;
 using Mantid::Geometry::MDImplicitFunction;
 using Mantid::Geometry::MDPlane;
 using Mantid::Geometry::MDPlane;
@@ -193,6 +195,53 @@ public:
     TS_ASSERT_DELTA( it->getInnerPosition(0,0), 6.5, 1e-5);
     TS_ASSERT_DELTA( it->getInnerPosition(0,1), 6.5, 1e-5);
 
+  }
+
+  void test_predictable_steps()
+  {
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
+    MDHistoWorkspaceIterator* histoIt = dynamic_cast<MDHistoWorkspaceIterator*>(ws->createIterator());
+    size_t expected = 0;
+    for(size_t i = 0; i < histoIt->getDataSize(); ++i)
+    {
+      size_t current = histoIt->getLinearIndex();
+      TSM_ASSERT_EQUALS("Has not proceeded in a incremental manner.", expected, current);
+      expected = current + 1;
+      histoIt->next();
+    }
+  }
+
+  void test_skip_masked_detectors()
+  {
+    using Mantid::Geometry::MDHistoDimension_sptr;
+    class WritableHistoWorkspace : public Mantid::MDEvents::MDHistoWorkspace
+    {
+    public:
+      WritableHistoWorkspace(MDHistoDimension_sptr x) : Mantid::MDEvents::MDHistoWorkspace(x)
+      {
+      }
+      void setMaskValueAt(size_t at, bool value)
+      {
+        m_masks[at] = value;
+      }
+    };
+
+    WritableHistoWorkspace* ws = new WritableHistoWorkspace(MDHistoDimension_sptr(new MDHistoDimension("x","x","m", 0.0, 10, 100)));
+
+    ws->setMaskValueAt(0, true);//Mask the first bin
+    ws->setMaskValueAt(1, true);//Mask the second bin
+    ws->setMaskValueAt(2, false);//NOT MASKED
+    ws->setMaskValueAt(3, true);//Mask the second bin
+    ws->setMaskValueAt(4, true);//Mask the second bin
+    ws->setMaskValueAt(5, false);//NOT MASKED
+
+    Mantid::MDEvents::MDHistoWorkspace_sptr ws_sptr(ws);
+
+    MDHistoWorkspaceIterator* histoIt = dynamic_cast<MDHistoWorkspaceIterator*>(ws_sptr->createIterator());
+    histoIt->next();
+    TSM_ASSERT_EQUALS("The first index hit should be 2 since that is the first unmasked one", 2, histoIt->getLinearIndex());
+    histoIt->next();
+    TSM_ASSERT_EQUALS("The first index hit should be 2 since that is the first unmasked one", 5, histoIt->getLinearIndex());
   }
 
 };

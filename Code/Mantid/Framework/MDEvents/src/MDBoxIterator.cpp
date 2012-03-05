@@ -128,7 +128,16 @@ namespace MDEvents
   TMDE(
   bool MDBoxIterator)::next()
   {
-    return this->next(1);
+    bool result = this->next(1);
+    while(this->getIsMasked()) 
+    {
+      result = this->next(1);
+      if(!result)
+      {
+        return result;
+      }
+    }
+    return result;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -317,7 +326,11 @@ namespace MDEvents
   /// Returns the error of a given event
   TMDE(bool MDBoxIterator)::getIsMasked() const
   {
-      return m_current->getIsMasked();
+      if(m_current)
+      {
+        return m_current->getIsMasked();
+      }
+      return false;
   }
 
 

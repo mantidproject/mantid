@@ -163,12 +163,17 @@ namespace MDEvents
         // Keep incrementing until you are in the implicit function
       } while (!m_function->isPointContained(m_center)
                && m_pos < m_max);
-      // Is the iteration finished?
-      return (m_pos < m_max);
     }
     else
-      // Go through every point;
-      return (++m_pos < m_max);
+    {
+      ++m_pos;
+    }
+    //Keep calling next if the current position is masked.
+    while(m_ws->getIsMaskedAt(m_pos) && this->next())
+    {
+    }
+    // Go through every point;
+    return (m_pos < m_max);
   }
 
   //----------------------------------------------------------------------------------------------
@@ -177,6 +182,7 @@ namespace MDEvents
   bool MDHistoWorkspaceIterator::next(size_t skip)
   {
     m_pos += skip;
+
     return (m_pos < m_max);
   }
 
@@ -304,6 +310,15 @@ namespace MDEvents
   bool MDHistoWorkspaceIterator::getIsMasked() const
   { 
     return m_ws->getIsMaskedAt(m_pos);
+  }
+
+  /**
+  Getter for the linear index
+  @return the linear index.
+  */
+  size_t MDHistoWorkspaceIterator::getLinearIndex() const
+  {
+    return m_pos;
   }
 
 } // namespace Mantid

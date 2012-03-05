@@ -74,6 +74,11 @@ namespace MDEvents
 
     bool getIsMasked() const;
 
+    /// Getter for the position of the iterator.
+    size_t getPosition() const
+    {
+      return m_pos;
+    }
 
   private:
     void getEvents() const;

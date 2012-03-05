@@ -393,9 +393,10 @@ namespace MDEvents
     /// Max index into each dimension
     size_t * m_indexMax;
 
+    protected:
+  
     /// Linear array of masks for each bin
     bool * m_masks;
-
   };
 
   /// A shared pointer to a MDHistoWorkspace

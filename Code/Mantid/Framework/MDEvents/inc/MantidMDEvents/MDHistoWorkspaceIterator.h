@@ -89,6 +89,8 @@ namespace MDEvents
 
     virtual bool getIsMasked() const;
 
+    size_t getLinearIndex() const;
+
   protected:
     /// The MDHistoWorkspace being iterated.
     const MDHistoWorkspace * m_ws;

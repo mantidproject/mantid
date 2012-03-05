@@ -483,6 +483,28 @@ public:
     TSM_ASSERT("Iterator does not use boxes as expected", testing::Mock::VerifyAndClearExpectations(&mockBox));
   }
 
+  void test_skip_masked_detectors()
+  {
+    MDBoxIterator<MDLeanEvent<1>,1>* setupIterator = new MDBoxIterator<MDLeanEvent<1>,1>(A, 20, true);
+  
+    //mask box 0, unmask 1 and Mask box 2. From box 3 onwards, boxes will be unmasked.
+    setupIterator->getBox()->mask();
+    setupIterator->next(1);
+    setupIterator->getBox()->unmask(); 
+    setupIterator->next(1);
+    setupIterator->getBox()->mask();
+    setupIterator->next(1);
+
+    MDBoxIterator<MDLeanEvent<1>,1>* evaluationIterator = new MDBoxIterator<MDLeanEvent<1>,1>(A, 20, true);
+    TS_ASSERT_THROWS_NOTHING(evaluationIterator->next());
+    TSM_ASSERT_EQUALS("Should have skipped to the first non-masked box", 1, evaluationIterator->getPosition());
+    TS_ASSERT_THROWS_NOTHING(evaluationIterator->next());
+    TSM_ASSERT_EQUALS("Should have skipped to the second non-masked box", 3, evaluationIterator->getPosition());
+    TSM_ASSERT("The last box should be masked", !evaluationIterator->getIsMasked());
+
+    delete setupIterator;
+    delete evaluationIterator;
+  }
 
 };
 
