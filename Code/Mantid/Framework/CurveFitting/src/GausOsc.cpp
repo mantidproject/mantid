@@ -39,7 +39,22 @@ void GausOsc::functionMW(double* out, const double* xValues, const size_t nData)
 
 void GausOsc::functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
 {
-  calNumericalDeriv(out, xValues, nData);
+  const double& A = getParameter("A"); 
+  const double& G = getParameter("Sigma");
+  const double& gf = getParameter("Frequency"); 
+  const double& gphi = getParameter("Phi");
+
+
+  for (size_t i = 0; i < nData; i++) {
+    double x = xValues[i];
+    double g = exp(-G*G*x*x);
+    double c = cos(2*M_PI*gf*x +gphi);
+    double s = sin(2*M_PI*gf*x +gphi);
+    out->set(i,0, g*c );
+    out->set(i,1, -2*G*x*x*A*g*c );
+    out->set(i,2, -A*g*2*M_PI*x*s );
+    out->set(i,3, -A*g*s );
+  }
 }
 
 void GausOsc::setActiveParameter(size_t i,double value)
