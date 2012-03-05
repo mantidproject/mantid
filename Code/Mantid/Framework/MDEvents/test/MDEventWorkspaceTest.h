@@ -50,10 +50,11 @@ private:
       {
         ++numberMasked;
       }
-      it->next();
+      it->next(1); //Doesn't perform skipping on masked, bins, but next() does.
     }
     return numberMasked;
   }
+
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically

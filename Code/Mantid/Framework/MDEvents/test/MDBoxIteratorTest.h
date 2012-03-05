@@ -506,6 +506,51 @@ public:
     delete evaluationIterator;
   }
 
+  void test_no_skipping_policy()
+  {
+    MDBoxIterator<MDLeanEvent<1>,1>* setupIterator = new MDBoxIterator<MDLeanEvent<1>,1>(A, 20, true);
+  
+    //mask box 0, unmask 1 and Mask box 2. From box 3 onwards, boxes will be unmasked.
+    setupIterator->getBox()->mask();
+    setupIterator->next(1);
+    setupIterator->getBox()->unmask(); 
+    setupIterator->next(1);
+    setupIterator->getBox()->mask();
+    setupIterator->next(1);
+
+    MDBoxIterator<MDLeanEvent<1>,1>* evaluationIterator = new MDBoxIterator<MDLeanEvent<1>,1>(A, 20, true, new SkipNothing); //Using skip nothing policy.
+    TS_ASSERT_THROWS_NOTHING(evaluationIterator->next());
+    TSM_ASSERT_EQUALS("Should NOT have skipped to the first box", 1, evaluationIterator->getPosition());
+    TS_ASSERT_THROWS_NOTHING(evaluationIterator->next());
+    TSM_ASSERT_EQUALS("Should NOT have skipped to the second box", 2, evaluationIterator->getPosition());
+    TS_ASSERT_THROWS_NOTHING(evaluationIterator->next());
+    TSM_ASSERT_EQUALS("Should NOT have skipped to the third box", 3, evaluationIterator->getPosition());
+  }
+
+  void test_custom_skipping_policy()
+  {
+    /// Mock Skipping Policy Type to inject.
+    class MockSkippingPolicy : public SkippingPolicy
+    {
+    public:
+      MOCK_CONST_METHOD0(keepGoing, bool());
+      MOCK_METHOD0(Die, void());
+      ~MockSkippingPolicy(){Die();}
+    };
+
+    MockSkippingPolicy* mockPolicy = new MockSkippingPolicy;
+    MDBoxIterator<MDLeanEvent<1>,1>* evaluationIterator = new MDBoxIterator<MDLeanEvent<1>,1>(A, 20, true, mockPolicy); //Using custom policy
+
+    EXPECT_CALL(*mockPolicy, Die()).Times(1); //Should call destructor automatically within MDBoxIterator
+    EXPECT_CALL(*mockPolicy, keepGoing()).Times(evaluationIterator->getDataSize()); //Should apply test 
+
+    while(evaluationIterator->next()) //Keep calling next while true. Will iterate through all boxes.
+    {
+    }
+    delete evaluationIterator;
+
+    TSM_ASSERT("Has not used SkippingPolicy as expected.", testing::Mock::VerifyAndClearExpectations(mockPolicy));
+  }
 };
 
 

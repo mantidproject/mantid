@@ -20,11 +20,27 @@ using namespace Mantid::API;
 using Mantid::Kernel::VMD;
 using Mantid::Geometry::MDHistoDimension;
 using Mantid::Geometry::MDImplicitFunction;
+using Mantid::Geometry::MDHistoDimension_sptr;
 using Mantid::Geometry::MDPlane;
 using Mantid::Geometry::MDPlane;
 
 class MDHistoWorkspaceIteratorTest : public CxxTest::TestSuite
 {
+private:
+
+  /// Helper type allows masking to take place directly on MDHistoWorkspaces for testing purposes.
+  class WritableHistoWorkspace : public Mantid::MDEvents::MDHistoWorkspace
+  {
+  public:
+    WritableHistoWorkspace(MDHistoDimension_sptr x) : Mantid::MDEvents::MDHistoWorkspace(x)
+    {
+    }
+    void setMaskValueAt(size_t at, bool value)
+    {
+      m_masks[at] = value;
+    }
+  };
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -213,19 +229,6 @@ public:
 
   void test_skip_masked_detectors()
   {
-    using Mantid::Geometry::MDHistoDimension_sptr;
-    class WritableHistoWorkspace : public Mantid::MDEvents::MDHistoWorkspace
-    {
-    public:
-      WritableHistoWorkspace(MDHistoDimension_sptr x) : Mantid::MDEvents::MDHistoWorkspace(x)
-      {
-      }
-      void setMaskValueAt(size_t at, bool value)
-      {
-        m_masks[at] = value;
-      }
-    };
-
     WritableHistoWorkspace* ws = new WritableHistoWorkspace(MDHistoDimension_sptr(new MDHistoDimension("x","x","m", 0.0, 10, 100)));
 
     ws->setMaskValueAt(0, true);//Mask the first bin

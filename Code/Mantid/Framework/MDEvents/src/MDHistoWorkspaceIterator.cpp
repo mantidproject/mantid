@@ -22,7 +22,7 @@ namespace MDEvents
    * @return
    */
   MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(MDHistoWorkspace_const_sptr workspace, Mantid::Geometry::MDImplicitFunction * function,
-      size_t beginPos, size_t endPos)
+      size_t beginPos, size_t endPos): m_skippingPolicy(new SkipMaskedBins(this))
   {
     this->init(workspace.get(), function, beginPos, endPos);
   }
@@ -35,7 +35,35 @@ namespace MDEvents
    * @return
    */
   MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(const MDHistoWorkspace * workspace, Mantid::Geometry::MDImplicitFunction * function,
-      size_t beginPos, size_t endPos)
+      size_t beginPos, size_t endPos) : m_skippingPolicy(new SkipMaskedBins(this))
+  {
+    this->init(workspace, function, beginPos, endPos);
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Constructor
+   *
+   * @param workspace :: MDHistoWorkspace_sptr being iterated
+   * @param function :: The implicit function to use
+   * @param skippingPolicy :: The skipping policy to use
+   * @return
+   */
+  MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(MDHistoWorkspace_const_sptr workspace, SkippingPolicy* skippingPolicy, Mantid::Geometry::MDImplicitFunction * function,
+      size_t beginPos, size_t endPos) : m_skippingPolicy(skippingPolicy)
+  {
+    this->init(workspace.get(), function, beginPos, endPos);
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Constructor
+   *
+   * @param workspace :: MDHistoWorkspace_sptr being iterated
+   * @param function :: The implicit function to use
+   * @param skippingPolicy :: The skipping policy to use
+   * @return
+   */
+  MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(const MDHistoWorkspace * workspace, SkippingPolicy* skippingPolicy, Mantid::Geometry::MDImplicitFunction * function,
+      size_t beginPos, size_t endPos) : m_skippingPolicy(skippingPolicy)
   {
     this->init(workspace, function, beginPos, endPos);
   }
@@ -169,7 +197,7 @@ namespace MDEvents
       ++m_pos;
     }
     //Keep calling next if the current position is masked.
-    while(m_ws->getIsMaskedAt(m_pos) && this->next())
+    while(m_skippingPolicy->keepGoing() && this->next())
     {
     }
     // Go through every point;

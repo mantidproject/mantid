@@ -7,11 +7,14 @@
 #include "MantidMDEvents/IMDBox.h"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDLeanEvent.h"
+#include "MantidMDEvents/SkippingPolicy.h"
 
 namespace Mantid
 {
 namespace MDEvents
 {
+  //Forward declaration.
+  class SkippingPolicy;
 
   /** MDBoxIterator: iterate through IMDBox
    * hierarchy down to a given maximum depth.
@@ -25,6 +28,8 @@ namespace MDEvents
   public:
     MDBoxIterator(IMDBox<MDE,nd> * topBox, size_t maxDepth, bool leafOnly,
         Mantid::Geometry::MDImplicitFunction * function = NULL);
+    MDBoxIterator(IMDBox<MDE,nd> * topBox, size_t maxDepth, bool leafOnly,
+        SkippingPolicy* skippingPolicy, Mantid::Geometry::MDImplicitFunction * function = NULL);
     MDBoxIterator(std::vector<IMDBox<MDE,nd>*> & boxes, size_t begin, size_t end);
     void init(std::vector<IMDBox<MDE,nd>*> & boxes, size_t begin, size_t end);
     ~MDBoxIterator();
@@ -81,6 +86,11 @@ namespace MDEvents
     }
 
   private:
+
+    /// Common code run my a few of the constructors.
+    void commonConstruct(IMDBox<MDE,nd> * topBox, size_t maxDepth, bool leafOnly,
+      Mantid::Geometry::MDImplicitFunction * function);
+
     void getEvents() const;
 
     void releaseEvents() const;
@@ -103,6 +113,8 @@ namespace MDEvents
     /// Pointer to the const events vector. Only initialized when needed.
     mutable const std::vector<MDE> * m_events;
 
+    // Skipping policy, controlls recursive calls to next().
+    SkippingPolicy_scptr m_skippingPolicy;
   };
 
 

@@ -5,6 +5,7 @@
 #include "MantidAPI/IMDIterator.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
+#include "MantidMDEvents/SkippingPolicy.h"
 
 namespace Mantid
 {
@@ -42,6 +43,10 @@ namespace MDEvents
   class DLLExport MDHistoWorkspaceIterator : public Mantid::API::IMDIterator
   {
   public:
+    MDHistoWorkspaceIterator(MDHistoWorkspace_const_sptr workspace, SkippingPolicy* skippingPolicy, Mantid::Geometry::MDImplicitFunction * function = NULL,
+        size_t beginPos = 0, size_t endPos = size_t(-1));
+    MDHistoWorkspaceIterator(const MDHistoWorkspace * workspace, SkippingPolicy* skippingPolicy, Mantid::Geometry::MDImplicitFunction * function = NULL,
+        size_t beginPos = 0, size_t endPos = size_t(-1));
     MDHistoWorkspaceIterator(MDHistoWorkspace_const_sptr workspace, Mantid::Geometry::MDImplicitFunction * function = NULL,
         size_t beginPos = 0, size_t endPos = size_t(-1));
     MDHistoWorkspaceIterator(const MDHistoWorkspace * workspace, Mantid::Geometry::MDImplicitFunction * function = NULL,
@@ -127,6 +132,9 @@ namespace MDEvents
 
     /// Array to find indices from linear indices
     size_t * m_indexMaker;
+
+    /// Skipping policy.
+    SkippingPolicy_scptr m_skippingPolicy;
 
   };
 
