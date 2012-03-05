@@ -732,18 +732,21 @@ namespace MDEvents
   @param maskingRegion : Implicit function defining mask region.
   */
   TMDE(
-  void MDEventWorkspace)::setMDMasking(Mantid::Geometry::MDImplicitFunction* maskingRegion)
+    void MDEventWorkspace)::setMDMasking(Mantid::Geometry::MDImplicitFunction* maskingRegion)
   {
-    std::vector<IMDBox<MDE,nd> *> toMaskBoxes;
-
-    //Apply new masks
-    this->data->getBoxes(toMaskBoxes, 10000, true, maskingRegion);
-    for(size_t i = 0; i < toMaskBoxes.size(); ++i)
+    if(maskingRegion != NULL)
     {
-      toMaskBoxes[i]->mask();
-    }
+      std::vector<IMDBox<MDE,nd> *> toMaskBoxes;
 
-    delete maskingRegion;
+      //Apply new masks
+      this->data->getBoxes(toMaskBoxes, 10000, true, maskingRegion);
+      for(size_t i = 0; i < toMaskBoxes.size(); ++i)
+      {
+        toMaskBoxes[i]->mask();
+      }
+
+      delete maskingRegion;
+    }
   }
 
   /**

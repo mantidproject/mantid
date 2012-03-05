@@ -137,6 +137,7 @@ namespace MDEvents
     delete [] m_binWidth;
     delete [] m_index;
     delete [] m_indexMax;
+
     if (m_function) delete m_function;
   }
   
@@ -185,23 +186,27 @@ namespace MDEvents
         for (size_t d=0; d<m_nd; d++)
         {
           m_center[d] = m_origin[d] + (coord_t(m_index[d]) + 0.5f) * m_binWidth[d];
-//          std::cout << m_center[d] << ",";
+          //          std::cout << m_center[d] << ",";
         }
-//        std::cout<<std::endl;
+        //        std::cout<<std::endl;
         // Keep incrementing until you are in the implicit function
       } while (!m_function->isPointContained(m_center)
-               && m_pos < m_max);
+        && m_pos < m_max);
     }
     else
     {
       ++m_pos;
     }
     //Keep calling next if the current position is masked.
-    while(m_skippingPolicy->keepGoing() && this->next())
+    bool ret = m_pos < m_max;
+    while(m_skippingPolicy->keepGoing())
     {
+      ret = this->next();
+      if(!ret)
+        break;
     }
     // Go through every point;
-    return (m_pos < m_max);
+    return ret;
   }
 
   //----------------------------------------------------------------------------------------------

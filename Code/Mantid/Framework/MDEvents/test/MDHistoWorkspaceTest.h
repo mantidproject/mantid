@@ -5,6 +5,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/VMD.h"
@@ -26,6 +27,23 @@ using namespace Mantid;
 
 class MDHistoWorkspaceTest : public CxxTest::TestSuite
 {
+private:
+    /// Helper function to return the number of masked bins in a workspace. TODO: move helper into test helpers
+  size_t getNumberMasked(Mantid::API::IMDWorkspace_sptr ws)
+  {
+    Mantid::API::IMDIterator* it = ws->createIterator(NULL);
+    size_t numberMasked = 0;
+    size_t counter = 0;
+    for(;counter < it->getDataSize(); ++counter)
+    {
+      if(it->getIsMasked())
+      {
+        ++numberMasked;
+      }
+      it->next(1);
+    }
+    return numberMasked;
+  }
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -813,16 +831,80 @@ public:
     TS_ASSERT_DELTA( a->getSignalAt(2), 6.78, 1e-5);
   }
 
-  void test_setMDMasking()
+
+  void doTestMasking(MDImplicitFunction* function, size_t expectedNumberMasked)
   {
-    MDHistoWorkspace_sptr anyHistoWorkspace = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 2, 5, 10.0, 3.0);
-    TSM_ASSERT_THROWS("Characterisation test. Should throw as not implemented.", anyHistoWorkspace->setMDMasking(NULL), std::runtime_error);
+    // 10x10x10 eventWorkspace
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 3, 10, 10.0);
+
+    ws->setMDMasking(function);
+
+    size_t numberMasked = getNumberMasked(ws);
+    TSM_ASSERT_EQUALS("Didn't perform the masking as expected", expectedNumberMasked, numberMasked);
   }
 
-  void test_clearMDMasking()
+  void test_maskNULL()
   {
-    MDHistoWorkspace_sptr anyHistoWorkspace = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 2, 5, 10.0, 3.0);
-    TSM_ASSERT_THROWS("Characterisation test. Should throw as not implemented.", anyHistoWorkspace->clearMDMasking(), std::runtime_error);
+    doTestMasking(NULL, 0); //1000 out of 1000 bins masked
+  }
+
+  void test_mask_everything()
+  {
+    std::vector<coord_t> min;
+    std::vector<coord_t> max;
+
+    //Make the box that covers half the bins in the workspace. 
+    min.push_back(0);
+    min.push_back(0);
+    min.push_back(0);
+    max.push_back(10);
+    max.push_back(10);
+    max.push_back(10);
+
+    //Create an function that encompases ALL of the total bins.
+    MDImplicitFunction* function = new MDBoxImplicitFunction(min, max);
+    doTestMasking(function, 1000); //1000 out of 1000 bins masked
+  }
+
+  
+  void test_maskHalf()
+  {
+    std::vector<coord_t> min;
+    std::vector<coord_t> max;
+
+    //Make the box that covers half the bins in the workspace. 
+    min.push_back(0);
+    min.push_back(0);
+    min.push_back(0);
+    max.push_back(10);
+    max.push_back(10);
+    max.push_back(4.99);
+
+    //Create an function that encompases 1/2 of the total bins.
+    MDImplicitFunction* function = new MDBoxImplicitFunction(min, max);
+    doTestMasking(function, 500); //500 out of 1000 bins masked
+  }
+
+
+  void test_clearMasking()
+  {
+    //Create a function that masks everything.
+    std::vector<coord_t> min;
+    std::vector<coord_t> max;
+    min.push_back(0);
+    min.push_back(0);
+    min.push_back(0);
+    max.push_back(10);
+    max.push_back(10);
+    max.push_back(10);
+    MDImplicitFunction* function = new MDBoxImplicitFunction(min, max);
+
+    MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1 /*event per box*/);
+    ws->setMDMasking(function);
+
+    TSM_ASSERT_EQUALS("Everything should be masked.", 1000, getNumberMasked(ws));
+    TS_ASSERT_THROWS_NOTHING(ws->clearMDMasking());
+    TSM_ASSERT_EQUALS("Nothing should be masked.", 0, getNumberMasked(ws));
   }
 
 

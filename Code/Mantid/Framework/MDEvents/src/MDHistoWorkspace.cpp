@@ -1168,14 +1168,23 @@ namespace MDEvents
   */
   void MDHistoWorkspace::setMDMasking(Mantid::Geometry::MDImplicitFunction* maskingRegion)
   {
-    UNUSED_ARG(maskingRegion);
-    throw std::runtime_error("MDHistoWorkspace::setMDMasking not implemented yet.");
+    if(maskingRegion != NULL)
+    {
+      for(size_t i = 0; i < this->getNPoints(); ++i)
+      {
+        m_masks[i] = maskingRegion->isPointContained(this->getCenter(i));
+      }
+      delete maskingRegion;
+    }
   }
 
   /// Clear any existing masking.
   void MDHistoWorkspace::clearMDMasking()
   {
-    throw std::runtime_error("MDHistoWorkspace::clearMDMasking not implemented yet.");
+    for(size_t i = 0; i < this->getNPoints(); ++i)
+    {
+      m_masks[i] = false;
+    }
   }
 
 

@@ -36,13 +36,11 @@ using namespace Mantid::Geometry;
 class MDEventWorkspaceTest :    public CxxTest::TestSuite
 {
 private:
-
-  /// Helper function to return the number of masked bins in a workspace.
-  size_t getNumberMasked(IMDWorkspace_sptr ws)
+    /// Helper function to return the number of masked bins in a workspace. TODO: move helper into test helpers
+  size_t getNumberMasked(Mantid::API::IMDWorkspace_sptr ws)
   {
-    std::vector<IMDIterator*> its = ws->createIterators(1, NULL);
+    Mantid::API::IMDIterator* it = ws->createIterator(NULL);
     size_t numberMasked = 0;
-    IMDIterator* it = its[0];
     size_t counter = 0;
     for(;counter < it->getDataSize(); ++counter)
     {
@@ -53,8 +51,8 @@ private:
       it->next(1); //Doesn't perform skipping on masked, bins, but next() does.
     }
     return numberMasked;
+    delete it;
   }
-
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -424,7 +422,6 @@ public:
 
     ws->setMDMasking(function);
 
-    std::vector<IMDIterator*> its = ws->createIterators(1, NULL);
     size_t numberMasked = getNumberMasked(ws);
     TSM_ASSERT_EQUALS("Didn't perform the masking as expected", expectedNumberMasked, numberMasked);
   }
@@ -445,6 +442,12 @@ public:
     MDImplicitFunction* function = new MDBoxImplicitFunction(min, max);
 
     doTestMasking(function, 1000); //1000 out of 1000 bins masked
+  }
+
+  void test_maskNULL()
+  {
+    //Should do nothing in terms of masking, but should not throw.
+    doTestMasking(NULL, 0); //0 out of 1000 bins masked
   }
 
   void test_maskNothing()
