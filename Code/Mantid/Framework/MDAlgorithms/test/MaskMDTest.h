@@ -48,7 +48,7 @@ private:
       {
         ++nMasked;
       }
-      it->next();
+      it->next(1);
     }
     
     TSM_ASSERT_EQUALS("The number actually masked is different from the expected value", expectedNMasked, nMasked);
