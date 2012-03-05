@@ -180,6 +180,8 @@ class StitcherWidget(BaseWidget):
         # Apply and save buttons
         self.connect(self._content.auto_scale_btn, QtCore.SIGNAL("clicked()"), self._apply)        
         self.connect(self._content.save_btn, QtCore.SIGNAL("clicked()"), self._save_result)
+        self._content.max_q_unity_edit.setText("0.01")
+        self._content.max_q_unity_edit.setValidator(QtGui.QDoubleValidator(self._content.max_q_unity_edit))
         
     def _add_entry(self, workspace):
         entry = ReflData(workspace, parent_layout=self._content.angle_list_layout)
@@ -207,6 +209,9 @@ class StitcherWidget(BaseWidget):
         """
             Perform auto-scaling
         """
+        scale_to_unity = self._content.scale_to_one_chk.isChecked()
+        max_q_unity = float(self._content.max_q_unity_edit.text())
+        
         s = Stitcher()
         refID = 0
         for i in range(len(self._workspace_list)):
@@ -216,15 +221,21 @@ class StitcherWidget(BaseWidget):
             #xmin,xmax = data.get_range()
             item.set_user_data(data)
 
-            if item.is_selected():
-                data.set_scale(item.get_scale())
-                refID = i
-            
             # Set skipped points
             low, high = item.get_skipped()
             data.set_skipped_points(low, high)
             xmin, xmax = data.get_skipped_range()
             data.set_range(xmin, xmax)
+
+            if item.is_selected():
+                data.set_scale(item.get_scale())
+                refID = i
+                
+                if scale_to_unity:
+                    scale = data.scale_to_unity(xmin, min(xmax,max_q_unity))
+                    data.set_scale(scale)
+                    item.set_scale(scale)
+            
             
             s.append(data)
         

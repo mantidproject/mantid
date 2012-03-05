@@ -1,5 +1,6 @@
 import os
 import copy
+import math
 from MantidFramework import *
 mtd.initialise(False)
 from mantidsimple import *
@@ -235,6 +236,23 @@ class DataSet(object):
                         
             self._npts = len(mtd[self._ws_name].readY(0))
             self._last_applied_scale = 1.0
+        
+    def scale_to_unity(self, xmin=None, xmax=None):
+        """
+            Compute a scaling factor for which the average of the 
+            data is 1 in the specified region
+        """
+        x = mtd[self._ws_name].readX(0)
+        y = mtd[self._ws_name].readY(0)
+        e = mtd[self._ws_name].readE(0)
+        sum = 0.0
+        sum_err = 0.0
+        for i in range(len(y)):
+            if x[i]>=xmin and x[i+1]<=xmax:
+                sum += y[i]/(e[i]*e[i])
+                sum_err += 1.0/(e[i]*e[i])
+
+        return sum_err/sum
         
     def integrate(self, xmin=None, xmax=None):
         """
