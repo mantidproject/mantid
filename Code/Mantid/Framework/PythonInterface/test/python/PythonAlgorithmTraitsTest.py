@@ -1,5 +1,5 @@
 import unittest
-
+import testhelpers
 from mantid import (PythonAlgorithm, AlgorithmProxy, Algorithm, IAlgorithm, 
                     AlgorithmManager, registerAlgorithm, Direction)
 
@@ -41,13 +41,7 @@ class PythonAlgorithmTest(unittest.TestCase):
             self.__class__._registered = True
             registerAlgorithm(TestPyAlgDefaultAttrs)
             registerAlgorithm(TestPyAlgOverriddenAttrs)
-        
-    def raisesNothing(self, callable, *args): # unittest does not have this for some reason
-        try:
-            callable(*args)
-        except RuntimeError, exc:
-            self.fail(str(exc))
-        
+            
     def test_managed_alg_is_descendent_of_AlgorithmProxy(self):
         alg = AlgorithmManager.Instance().create("TestPyAlgDefaultAttrs")
         self.assertTrue(isinstance(alg, AlgorithmProxy))
@@ -60,16 +54,16 @@ class PythonAlgorithmTest(unittest.TestCase):
         self.assertTrue(isinstance(alg, IAlgorithm))
         
     def test_alg_with_default_attrs(self):
-        self.raisesNothing(AlgorithmManager.Instance().createUnmanaged, "TestPyAlgDefaultAttrs")
+        testhelpers.assert_raises_nothing(self,AlgorithmManager.Instance().createUnmanaged, "TestPyAlgDefaultAttrs")
         alg = AlgorithmManager.Instance().createUnmanaged("TestPyAlgDefaultAttrs")
-        self.raisesNothing(alg.initialize)
+        testhelpers.assert_raises_nothing(self,alg.initialize)
        
         self.assertEquals(alg.name(), "TestPyAlgDefaultAttrs")
         self.assertEquals(alg.version(), 1)
         self.assertEquals(alg.category(), "PythonAlgorithms")
 
     def test_alg_with_overridden_attrs(self):
-        self.raisesNothing(AlgorithmManager.Instance().createUnmanaged, "CoolAlgorithm")
+        testhelpers.assert_raises_nothing(self,AlgorithmManager.Instance().createUnmanaged, "CoolAlgorithm")
         alg = AlgorithmManager.Instance().createUnmanaged("CoolAlgorithm")
         self.assertEquals(alg.name(), "CoolAlgorithm")
         self.assertEquals(alg.version(), 2)

@@ -17,7 +17,7 @@ namespace
 void export_IValidators()
 {
   EXPORT_IVALIDATOR(double,double);
-  EXPORT_IVALIDATOR(int,double);
+  EXPORT_IVALIDATOR(long,long);
   EXPORT_IVALIDATOR(std::string,std_string);
 }
 

@@ -1,6 +1,8 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
+#include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmWrapper.h"
+
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
 
@@ -75,22 +77,16 @@ namespace
   void registerAlgorithm(boost::python::object obj)
   {
     using Mantid::PythonInterface::PythonObjectInstantiator;
+    using Mantid::PythonInterface::AlgorithmWrapper;
     using Mantid::API::Algorithm;
-    // The current frame should know what an Algorithm is, or it
-    // couldn't create one. Get the class object from the f_globals
-    PyObject *defs = PyEval_GetFrame()->f_globals;
-    PyObject *pyalgClass = PyDict_GetItemString(defs, "PythonAlgorithm");
-    if( !pyalgClass )
-    {
-      throw std::runtime_error("Unable to find Algorithm definition, cannot register algorithm.\nHas the definition been imported");
-    }
+    static PyObject * const pyAlgClass = (PyObject*)converter::registered<AlgorithmWrapper>::converters.to_python_target_type();
     // obj could be or instance/class, check instance first
     PyObject *classObject(NULL);
-    if( PyObject_IsInstance(obj.ptr(), pyalgClass) )
+    if( PyObject_IsInstance(obj.ptr(), pyAlgClass) )
     {
       classObject = PyObject_GetAttrString(obj.ptr(), "__class__");
     }
-    else if(PyObject_IsSubclass(obj.ptr(), pyalgClass))
+    else if(PyObject_IsSubclass(obj.ptr(), pyAlgClass))
     {
       classObject = obj.ptr(); // We need to ensure the type of lifetime management so grab the raw pointer
     }

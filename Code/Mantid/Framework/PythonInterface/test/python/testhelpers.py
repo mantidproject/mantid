@@ -27,6 +27,22 @@ def run_algorithm(name, **kwargs):
     alg.execute()
     return alg
 
+def assert_raises_nothing(testobj, callable, *args): 
+    """
+        unittest does not have an assertRaisesNothing. This
+        provides that functionality
+    
+        Parameters:
+            testobj  - A unittest object
+            callable - A callable object
+            *args    - Positional arguments passed to the callable as they are
+    """
+    try:
+         return callable(*args)
+    except Exception, exc:
+        testobj.fail("Assertion error. An exception was caught where none was expected in %s. Message: %s" 
+                     % (callable.__name__, str(exc)))
+
 def can_be_instantiated(cls):
     """The Python unittest assertRaises does not
     seem to catch the assertion raised by being unable

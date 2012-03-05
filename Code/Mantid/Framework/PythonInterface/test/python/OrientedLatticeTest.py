@@ -1,4 +1,5 @@
 import unittest
+import testhelpers
 from mantid.geometry import OrientedLattice, UnitCell
 from mantid.kernel import V3D
 import numpy as np
@@ -24,10 +25,7 @@ class OrientedLatticeTest(unittest.TestCase):
     def test_setu_matrix_from_vectors(self):
         def run_test(v1, v2):
             cell = OrientedLattice()
-            try:
-                cell.setUFromVectors(v1, v2)
-            except RuntimeError:
-                self.fail("The unit transformation should not raise an error")
+            testhelpers.assert_raises_nothing(self, cell.setUFromVectors, v1, v2)
             rot = cell.getUB();
             expected = np.array([(0,1.,0.), (0.,0.,1.), (1.,0.,0.)])
             np.testing.assert_array_almost_equal(expected, rot, 8)

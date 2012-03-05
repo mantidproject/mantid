@@ -1,4 +1,5 @@
 import unittest
+import testhelpers
 from mantid.geometry import UnitCell, AngleUnits
 from mantid.kernel import V3D
 import numpy as np
@@ -29,11 +30,7 @@ class UnitCellTest(unittest.TestCase):
         gstar = np.array( [row0,row1,row2] )
         
         u = UnitCell()
-        try:
-            u.recalculateFromGstar(gstar)
-        except Exception:
-            self.fail("recalculateFromGstar should not raise an exception")
-        
+        testhelpers.assert_raises_nothing(self, u.recalculateFromGstar, gstar)
         self._check_cell(u)
 
     def _check_cell(self, cell):
