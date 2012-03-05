@@ -878,7 +878,7 @@ public:
     min.push_back(0);
     max.push_back(10);
     max.push_back(10);
-    max.push_back(4.99);
+    max.push_back(4.99f);
 
     //Create an function that encompases 1/2 of the total bins.
     MDImplicitFunction* function = new MDBoxImplicitFunction(min, max);
