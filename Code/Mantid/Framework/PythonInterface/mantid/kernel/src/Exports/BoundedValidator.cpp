@@ -29,6 +29,7 @@ namespace
 void export_BoundedValidator()
 {
   EXPORT_BOUNDEDVALIDATOR(double);
+  EXPORT_BOUNDEDVALIDATOR(int);
   EXPORT_BOUNDEDVALIDATOR(long);
 }
 

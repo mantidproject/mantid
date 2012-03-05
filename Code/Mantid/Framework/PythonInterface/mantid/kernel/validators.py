@@ -16,11 +16,13 @@ def BoundedValidator(lower = None, upper = None):
         raise TypeError("Cannot create a BoundedValidator with both lower and upper limit unset.")
     
     def get_validator_class(value):
-        from mantid.kernel import BoundedValidator_double, BoundedValidator_long
+        from mantid.kernel import BoundedValidator_double, BoundedValidator_int
         if type(value) == float:
+            from mantid.kernel import BoundedValidator_double
             return BoundedValidator_double
         elif type(value) == int:
-            return BoundedValidator_long
+            from mantid.kernel import BoundedValidator_int
+            return BoundedValidator_int
         else:
             raise TypeError("Unknown type passed for BoundedValidator: %s" % str(type(value)))
     #
