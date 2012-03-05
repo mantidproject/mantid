@@ -2,20 +2,26 @@
 find_package ( Qt4 COMPONENTS QtDesigner REQUIRED )
 include ( ${QT_USE_FILE} )
 
-set ( SRC_FILES src/FileFinderPlugin.cpp
-                src/FitBrowserPlugin.cpp 
-                src/InstrumentSelectorPlugin.cpp
-				src/MuonFitBrowserPlugin.cpp
-                src/PluginCollectionInterface.cpp
-				src/WorkspaceSelectorPlugin.cpp )
+set ( SRC_FILES 
+    src/FileFinderPlugin.cpp
+    src/FitBrowserPlugin.cpp 
+    src/InstrumentSelectorPlugin.cpp
+    src/ScriptEditorPlugin.cpp
+    src/MuonFitBrowserPlugin.cpp
+    src/PluginCollectionInterface.cpp
+    src/WorkspaceSelectorPlugin.cpp 
+)
 
 # Include files aren't required, but this makes them appear in Visual Studio
-set ( INC_FILES inc/MantidQtDesignerPlugins/FileFinderPlugin.h
-                inc/MantidQtDesignerPlugins/FitBrowserPlugin.h
-                inc/MantidQtDesignerPlugins/InstrumentSelectorPlugin.h
-				inc/MantidQtDesignerPlugins/MuonFitBrowserPlugin.h
-                inc/MantidQtDesignerPlugins/PluginCollectionInterface.h
-				inc/MantidQtDesignerPlugins/WorkspaceSelectorPlugin.h )
+set ( INC_FILES 
+    inc/MantidQtDesignerPlugins/FileFinderPlugin.h
+    inc/MantidQtDesignerPlugins/FitBrowserPlugin.h
+    inc/MantidQtDesignerPlugins/InstrumentSelectorPlugin.h
+    inc/MantidQtDesignerPlugins/ScriptEditorPlugin.h
+	inc/MantidQtDesignerPlugins/MuonFitBrowserPlugin.h
+    inc/MantidQtDesignerPlugins/PluginCollectionInterface.h
+	inc/MantidQtDesignerPlugins/WorkspaceSelectorPlugin.h 
+)
 
 set ( MOC_FILES ${INC_FILES} )
 
@@ -40,7 +46,9 @@ endif(UNITY_BUILD)
 add_library ( DesignerPlugins ${SRC_FILES} ${INC_FILES} ${MOCCED_FILES} )
 
 # Change the destination of the target as Qt expects this in a directory called "designer"
-SET_TARGET_OUTPUT_DIRECTORY( DesignerPlugins ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/designer )
+# This finds the qt plugins install folder. "/usr/lib/qt4/plugins" for me.
+_qt4_query_qmake(QT_INSTALL_PLUGINS qt_plugins_dir)
+SET_TARGET_OUTPUT_DIRECTORY( DesignerPlugins ${qt_plugins_dir}/designer )
 
 # Set the name of the generated library
 set_target_properties ( DesignerPlugins PROPERTIES OUTPUT_NAME ${LIB_NAME} )
