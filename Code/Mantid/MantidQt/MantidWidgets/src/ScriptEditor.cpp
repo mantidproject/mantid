@@ -1,7 +1,7 @@
 //---------------------------------------------
 // Includes
 //-----------------------------------------------
-#include "ScriptEditor.h"
+#include "MantidQtMantidWidgets/ScriptEditor.h"
 
 // Qt
 #include <QApplication>

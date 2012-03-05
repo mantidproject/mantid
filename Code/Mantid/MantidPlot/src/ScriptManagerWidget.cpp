@@ -1,12 +1,12 @@
 //-----------------------------------------------------
 // Includes
 //-----------------------------------------------------
-#include "ScriptManagerWidget.h"
-#include "ScriptEditor.h"
-#include "ScriptingEnv.h"
-#include "Script.h"
-#include "ScriptingLangDialog.h"
 #include "ApplicationWindow.h"
+#include "MantidQtMantidWidgets/ScriptEditor.h"
+#include "Script.h"
+#include "ScriptingEnv.h"
+#include "ScriptingLangDialog.h"
+#include "ScriptManagerWidget.h"
 // Qt
 #include <QPoint>
 #include <QAction>

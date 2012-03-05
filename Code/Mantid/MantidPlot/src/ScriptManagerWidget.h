@@ -28,7 +28,7 @@ class QMenu;
 class QStringList;
 
 /** 
-    This class manages ScriptEdit objects and displays them in a series
+    This class manages ScriptEditor objects and displays them in a series
     of tabs. It is also the single point of entry for executing scripts
     with in the current ScriptingEnv
     

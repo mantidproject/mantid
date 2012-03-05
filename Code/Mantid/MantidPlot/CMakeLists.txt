@@ -101,7 +101,6 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/Script.cpp
                    src/Scripted.cpp
                    src/ScriptEdit.cpp
-                   src/ScriptEditor.cpp
                    src/ScriptingEnv.cpp
                    src/ScriptingLangDialog.cpp
                    src/ScriptingWindow.cpp
@@ -326,7 +325,6 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/ScreenPickerTool.h
                    src/Scripted.h
                    src/ScriptEdit.h
-                   src/ScriptEditor.h
                    src/Script.h
                    src/ScriptingEnv.h
                    src/ScriptingLangDialog.h
@@ -588,7 +586,6 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/ScalePicker.h
                         src/ScreenPickerTool.h
                         src/ScriptEdit.h
-                        src/ScriptEditor.h
                         src/Script.h
                         src/ScriptingEnv.h
                         src/ScriptingLangDialog.h
