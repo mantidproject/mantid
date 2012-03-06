@@ -76,6 +76,8 @@ class SNSPowderReduction(PythonAlgorithm):
             temp = lines[0]
             temp = temp.replace("Instrument parameter file:", "")
             self.iparmFile = temp.strip()
+            if len(self.iparmFile) <= 0:
+                self.iparmFile = None
             lines = lines[1:] # delete this line
 
             # get the spectra into a buffer
@@ -378,7 +380,8 @@ class SNSPowderReduction(PythonAlgorithm):
         self.log().notice("FOCUS:" + str(focusPos))
         if not focusPos is None:
             EditInstrumentGeometry(Workspace=wksp, NewInstrument=False, **focusPos)
-            wksp.getRun()['iparm_file'] = self._config.iparmFile
+            if (self._config.iparmFile is not None) and (len(self._config.iparmFile) > 0):
+                wksp.getRun()['iparm_file'] = self._config.iparmFile
 
         ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
         if preserveEvents and not "histo" in self.getProperty("Extension"):
