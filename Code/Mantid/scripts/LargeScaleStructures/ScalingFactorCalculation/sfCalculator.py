@@ -552,7 +552,7 @@ def calculate(string_runs=None,
         post = '_event.nxs'
     
         for (offset, item) in enumerate(list_runs):
-            list_runs[offset] = nexus_path_pre + offset + post
+            list_runs[offset] = nexus_path_pre + offset + post''
 
     else:
         dico = createIndividualList(string_runs)

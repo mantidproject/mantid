@@ -98,7 +98,7 @@ class RefLReduction(PythonAlgorithm):
         subtract_norm_bck = self.getProperty("SubtractNormBackground")
 
         #name of the sfCalculator txt file
-        sfCalculatorPath = "/home/j35/Desktop/"
+#        sfCalculatorPath = "/home/j35/Desktop/"
         slitsValuePrecision = 0.1       #precision of slits = 10% 
 
         # Pick a good workspace n    ame
@@ -425,8 +425,7 @@ class RefLReduction(PythonAlgorithm):
 
 #        this is where we need to apply the scaling factor
         ws_data_scaled = wks_utility.applySF(ws_data,
-                                             slitsValuePrecision,
-                                             sfCalculatorPath=sfCalculatorPath) 
+                                             slitsValuePrecision)
 
         if dMD is not None and theta is not None:
                     

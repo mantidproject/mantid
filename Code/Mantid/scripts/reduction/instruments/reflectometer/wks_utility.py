@@ -1,5 +1,6 @@
 from numpy import zeros, arctan2, arange, shape
 from mantidsimple import *
+from MantidFramework import *
 import math
 import os.path
 
@@ -113,7 +114,7 @@ def findQaxisMinMax(q_axis):
     q_min = min(q_axis[0])
     q_max = max(q_axis[0])
     
-    for i in arange(nbr_row-1)+1:
+    for i in arange(nbr_row - 1) + 1:
         _q_min = q_axis[i][-1]
         _q_max = q_axis[i][0]
         if (_q_min > q_min):
@@ -122,16 +123,16 @@ def findQaxisMinMax(q_axis):
             q_max = _q_max
     
     #find now the index of those min and max in each row
-    _q_axis_min_max_index = zeros((nbr_row,2))
+    _q_axis_min_max_index = zeros((nbr_row, 2))
     for i in arange(nbr_row):
         _q_axis = q_axis[i]
-        for j in arange(nbr_col-1):
-            _q = q_axis[i,j]
-            _q_next = q_axis[i,j+1]
+        for j in arange(nbr_col - 1):
+            _q = q_axis[i, j]
+            _q_next = q_axis[i, j + 1]
             if (_q >= q_max) and (_q_next <= q_max):
-                _q_axis_min_max_index[i,0] = j
+                _q_axis_min_max_index[i, 0] = j
             if (_q >= q_min) and (_q_next <= q_min):
-                _q_axis_min_max_index[i,1] = j
+                _q_axis_min_max_index[i, 1] = j
 
     return _q_axis_min_max_index
 
@@ -146,13 +147,13 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
 
     _tof_axis = mt1.readX(0)[:]
 
-    _fromXpixel = min([fromXpixel,toXpixel])
-    _toXpixel = max([fromXpixel,toXpixel])
+    _fromXpixel = min([fromXpixel, toXpixel])
+    _toXpixel = max([fromXpixel, toXpixel])
     fromXpixel = _fromXpixel
     toXpixel = _toXpixel
 
-    _fromYpixel = min([fromYpixel,toYpixel])
-    _toYpixel = max([fromYpixel,toYpixel])
+    _fromYpixel = min([fromYpixel, toYpixel])
+    _toYpixel = max([fromYpixel, toYpixel])
     fromYpixel = _fromYpixel
     toYpixel = _toYpixel
 
@@ -176,19 +177,19 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
     _y_error_axis = _y_error_axis.flatten()
 
     CreateWorkspace(OutputWorkspace=outputWorkspace,
-                    DataX=_tof_axis, 
-                    DataY=_y_axis, 
-                    DataE=_y_error_axis, 
+                    DataX=_tof_axis,
+                    DataY=_y_axis,
+                    DataE=_y_error_axis,
                     Nspec=maxY,
-                    UnitX="TOF", 
+                    UnitX="TOF",
                     ParentWorkspace=mt1)
     
-def convertWorkspaceToQ(ws_data, 
+def convertWorkspaceToQ(ws_data,
                         outputWorkspace,
                         fromYpixel, toYpixel,
-                        maxX=304, maxY=256, 
+                        maxX=304, maxY=256,
                         cpix=None,
-                        source_to_detector=None, 
+                        source_to_detector=None,
                         sample_to_detector=None,
                         theta=None,
                         geo_correction=False,
@@ -200,19 +201,19 @@ def convertWorkspaceToQ(ws_data,
 
     mt1 = mtd[ws_data]
     _tof_axis = mt1.readX(0)[:]    
-    _fromYpixel = min([fromYpixel,toYpixel])
-    _toYpixel = max([fromYpixel,toYpixel])
+    _fromYpixel = min([fromYpixel, toYpixel])
+    _toYpixel = max([fromYpixel, toYpixel])
     fromYpixel = _fromYpixel
     toYpixel = _toYpixel
 
     if geo_correction:
         
-        yrange = arange(toYpixel-fromYpixel+1) + fromYpixel
-        _q_axis = convertToRvsQWithCorrection(mt1, 
+        yrange = arange(toYpixel - fromYpixel + 1) + fromYpixel
+        _q_axis = convertToRvsQWithCorrection(mt1,
                                               dMD=source_to_detector,
                                               theta=theta,
-                                              tof=_tof_axis, 
-                                              yrange=yrange, 
+                                              tof=_tof_axis,
+                                              yrange=yrange,
                                               cpix=cpix)
 
         #find the common Qmin and Qmax values and their index (position)
@@ -345,21 +346,21 @@ def convertWorkspaceToQ(ws_data,
             _y_error_axis_tmp = list(mt1.readE(int(_a))[:])
 
             #keep only the overlap region of Qs
-            _q_min = _q_axis_min_max_index[_q_index,0]
+            _q_min = _q_axis_min_max_index[_q_index, 0]
             if (_q_min != 0):
                 _y_axis_tmp[0:_q_min] = 0
                 _y_error_axis_tmp[0:_q_min] = 0
 
-            _q_max = int(_q_axis_min_max_index[_q_index,1])
+            _q_max = int(_q_axis_min_max_index[_q_index, 1])
             sz = shape(_y_axis_tmp)[0]
             if (_q_max != sz):
-                _index_q_max_range = arange(sz-_q_max)+_q_max
+                _index_q_max_range = arange(sz - _q_max) + _q_max
                 for i in _index_q_max_range:
                     _y_axis_tmp[i] = 0
                     _y_error_axis_tmp[i] = 0
 
-            _y_axis[_q_index,:] = _y_axis_tmp[::-1]
-            _y_error_axis[_q_index,:] = _y_error_axis_tmp[::-1]
+            _y_axis[_q_index, :] = _y_axis_tmp[::-1]
+            _y_error_axis[_q_index, :] = _y_error_axis_tmp[::-1]
             
         x_axis = q_axis.flatten()        
         y_axis = _y_axis.flatten()
@@ -383,18 +384,18 @@ def convertWorkspaceToQ(ws_data,
         
         if source_to_detector is not None and theta is not None:
             _const = float(4) * math.pi * m * source_to_detector / h
-            _q_axis = 1e-10 * _const * math.sin(theta) / (_tof_axis*1e-6)
+            _q_axis = 1e-10 * _const * math.sin(theta) / (_tof_axis * 1e-6)
         else:
             _q_axis = _tof_axis
 
-        _y_axis = zeros((maxY, len(_q_axis)-1))
-        _y_error_axis = zeros((maxY, len(_q_axis)-1))
+        _y_axis = zeros((maxY, len(_q_axis) - 1))
+        _y_error_axis = zeros((maxY, len(_q_axis) - 1))
     
         y_size = toYpixel - fromYpixel + 1
         y_range = arange(y_size) + fromYpixel
     
         for y in y_range:
-            _y_axis[int(y),:] = mt1.readY(int(y))[:]
+            _y_axis[int(y), :] = mt1.readY(int(y))[:]
             _y_error_axis[int(y), :] = mt1.readE(int(y))[:]
 
         _y_axis = _y_axis.flatten()
@@ -405,11 +406,11 @@ def convertWorkspaceToQ(ws_data,
         _y_error_axis = _y_error_axis[::-1]
 
         CreateWorkspace(OutputWorkspace=outputWorkspace,
-                        DataX=_q_axis, 
-                        DataY=_y_axis, 
-                        DataE=_y_error_axis, 
+                        DataX=_q_axis,
+                        DataY=_y_axis,
+                        DataE=_y_error_axis,
                         Nspec=maxY,
-                        UnitX="MomentumTransfer", 
+                        UnitX="MomentumTransfer",
                         ParentWorkspace=mt1)
             
 def create_grouping(workspace=None, xmin=0, xmax=None, filename=".refl_grouping.xml"):
@@ -422,7 +423,7 @@ def create_grouping(workspace=None, xmin=0, xmax=None, filename=".refl_grouping.
         if mtd[workspace].getInstrument().hasParameter("number-of-y-pixels"):
             npix_y = int(mtd[workspace].getInstrument().getNumberParameter("number-of-y-pixels")[0])
     
-    f = open(filename,'w')
+    f = open(filename, 'w')
     f.write("<detector-grouping description=\"Integrated over X\">\n")
     
     if xmax is None:
@@ -431,8 +432,8 @@ def create_grouping(workspace=None, xmin=0, xmax=None, filename=".refl_grouping.
     for y in range(npix_y):
         # index = max_y * x + y
         indices = []
-        for x in range(xmin, xmax+1):
-            indices.append(str(npix_y*x + y))
+        for x in range(xmin, xmax + 1):
+            indices.append(str(npix_y * x + y))
         
         # Detector IDs start at zero, but spectrum numbers start at 1
         # Grouping works on spectrum numbers
@@ -488,7 +489,7 @@ def convertToThetaVsLambda(_tof_axis,
     _lambda = _lambda * 1e10  #angstroms
   
     d_vec = (_pixel_axis - central_pixel) * pixel_size
-    theta_vec = arctan2(d_vec,dSD) + theta
+    theta_vec = arctan2(d_vec, dSD) + theta
 
     dico = {'lambda_vec': _lambda, 'theta_vec': theta_vec}
     
@@ -497,11 +498,11 @@ def convertToThetaVsLambda(_tof_axis,
 def _convertToRvsQ(_tof_axis,
                   _pixel_axis_of_peak,
                   data_of_peak,
-                  central_pixel, 
+                  central_pixel,
                   pixel_size=0.0007,
-                  theta=-1,
-                  dSD=-1,
-                  dMD=-1):
+                  theta= -1,
+                  dSD= -1,
+                  dMD= -1):
     """
     This function converts the pixel/tof array to the R(Q) array
     
@@ -518,7 +519,7 @@ def _convertToRvsQ(_tof_axis,
 #    _lambda = _lambda * 1e10  #angstroms
   
     d_vec = (_pixel_axis_of_peak - central_pixel) * pixel_size
-    theta_vec = arctan2(d_vec,dSD) + theta
+    theta_vec = arctan2(d_vec, dSD) + theta
     
     #create Q axis
     nbr_pixel = shape(_pixel_axis_of_peak)[0]
@@ -540,7 +541,7 @@ def _convertToRvsQ(_tof_axis,
 
 
 
-def convertToRvsQ(dMD=-1,theta=-1,tof=None):
+def convertToRvsQ(dMD= -1, theta= -1, tof=None):
     """
     This function converts the pixel/TOF array to the R(Q) array
     using Q = (4.Pi.Mn)/h  *  L.sin(theta/2)/TOF
@@ -550,17 +551,17 @@ def convertToRvsQ(dMD=-1,theta=-1,tof=None):
     """
     _const = float(4) * math.pi * m * dMD / h
     sz_tof = numpy.shape(tof)[0]
-    q_array = zeros(sz_tof-1)
-    for t in range(sz_tof-1):
+    q_array = zeros(sz_tof - 1)
+    for t in range(sz_tof - 1):
         tof1 = tof[t]
-        tof2 = tof[t+1]
-        tofm = (tof1+tof2)/2.
-        _Q = _const * math.sin(theta) / (tofm*1e-6)
-        q_array[t] = _Q*1e-10
+        tof2 = tof[t + 1]
+        tofm = (tof1 + tof2) / 2.
+        _Q = _const * math.sin(theta) / (tofm * 1e-6)
+        q_array[t] = _Q * 1e-10
 
     return q_array
         
-def convertToRvsQWithCorrection(mt, dMD=-1, theta=-1,tof=None, yrange=None, cpix=None):
+def convertToRvsQWithCorrection(mt, dMD= -1, theta= -1, tof=None, yrange=None, cpix=None):
     """
     This function converts the pixel/TOF array to the R(Q) array
     using Q = (4.Pi.Mn)/h  *  L.sin(theta/2)/TOF
@@ -591,7 +592,7 @@ def convertToRvsQWithCorrection(mt, dMD=-1, theta=-1,tof=None, yrange=None, cpix
 
     _const = float(4) * math.pi * m * dMD / h
     sz_tof = len(tof)
-    q_array = zeros((len(yrange), sz_tof-1))
+    q_array = zeros((len(yrange), sz_tof - 1))
 
     yrange = range(len(yrange))
     for y in yrange:
@@ -603,13 +604,13 @@ def convertToRvsQWithCorrection(mt, dMD=-1, theta=-1,tof=None, yrange=None, cpix
         else:
             _theta = theta
 
-        for t in range(sz_tof-1):
+        for t in range(sz_tof - 1):
             tof1 = tof[t]
 #            tof2 = tof[t+1]
 #            tofm = (tof1+tof2)/2.
 #            _Q = _const * math.sin(_theta) / (tofm*1e-6)
-            _Q = _const * math.sin(_theta) / (tof1*1e-6)
-            q_array[y,t] = _Q*1e-10
+            _Q = _const * math.sin(_theta) / (tof1 * 1e-6)
+            q_array[y, t] = _Q * 1e-10
     
     return q_array
 
@@ -618,13 +619,13 @@ def getQHisto(source_to_detector, theta, tof_array):
     sz_tof = len(tof_array)
     q_array = zeros(sz_tof)
     for t in range(sz_tof):
-        _Q = _const * math.sin(theta) / (tof_array[t]*1e-6)
-        q_array[t] = _Q*1e-10
+        _Q = _const * math.sin(theta) / (tof_array[t] * 1e-6)
+        q_array[t] = _Q * 1e-10
     
     return q_array
 
-def ref_beamdiv_correct(cpix, mt, det_secondary, 
-                        pixel_index, 
+def ref_beamdiv_correct(cpix, mt, det_secondary,
+                        pixel_index,
                         pixel_width=0.0007):
     """
     This function calculates the acceptance diagram, determines pixel overlap
@@ -649,11 +650,11 @@ def ref_beamdiv_correct(cpix, mt, det_secondary,
     
     _y = 0.5 * (first_slit_size + last_slit_size)
     _x = slit_dist
-    gamma_plus = math.atan2( _y, _x)
+    gamma_plus = math.atan2(_y, _x)
     
     _y = 0.5 * (first_slit_size - last_slit_size)
     _x = slit_dist 
-    gamma_minus = math.atan2( _y, _x)
+    gamma_minus = math.atan2(_y, _x)
     
     half_last_aperture = 0.5 * last_slit_size
     neg_half_last_aperture = -1.0 * half_last_aperture
@@ -746,13 +747,13 @@ def ref_beamdiv_correct(cpix, mt, det_secondary,
         return None
 
     #Calculate intersection polygon area
-    area = calc_area_2D_polygon(int_poly_x, 
+    area = calc_area_2D_polygon(int_poly_x,
                                 int_poly_y,
                                 len(int_poly_x) - 2)
 
 
-    center_of_mass = calc_center_of_mass(int_poly_x, 
-                                         int_poly_y, 
+    center_of_mass = calc_center_of_mass(int_poly_x,
+                                         int_poly_y,
                                          area)
         
     return center_of_mass
@@ -764,8 +765,8 @@ def calc_area_2D_polygon(x_coord, y_coord, size_poly):
     _range = arange(size_poly) + 1
     area = 0
     for i in _range:
-        area += (x_coord[i] * (y_coord[i+1] - y_coord[i-1]))
-    return area/2.
+        area += (x_coord[i] * (y_coord[i + 1] - y_coord[i - 1]))
+    return area / 2.
     
 def calc_center_of_mass(arr_x, arr_y, A):
     """
@@ -779,11 +780,11 @@ def calc_center_of_mass(arr_x, arr_y, A):
     """
     
     center_of_mass = 0.0
-    SIXTH = 1./6.
-    for j in arange(len(arr_x)-2):
-        center_of_mass += (arr_x[j] + arr_x[j+1]) \
-                * ((arr_x[j] * arr_y[j+1]) - \
-                   (arr_x[j+1] * arr_y[j]))
+    SIXTH = 1. / 6.
+    for j in arange(len(arr_x) - 2):
+        center_of_mass += (arr_x[j] + arr_x[j + 1]) \
+                * ((arr_x[j] * arr_y[j + 1]) - \
+                   (arr_x[j + 1] * arr_y[j]))
         
     if A != 0.0:
         return (SIXTH * center_of_mass) / A
@@ -791,8 +792,7 @@ def calc_center_of_mass(arr_x, arr_y, A):
         return 0.0
 
 def applySF(InputWorkspace,
-            slitsValuePrecision,
-            sfCalculatorPath=os.path.abspath('.')):
+            slitsValuePrecision):
     """
     Function that apply scaling factor to data using sfCalculator.txt
     file created by the sfCalculator procedure
@@ -809,23 +809,28 @@ def applySF(InputWorkspace,
 #    print '-> using delta range: {0:2f}'.format(delta_range)
     list_of_delta = _lr_value + 0.01 * (numpy.arange(11) - 5)
     list_of_output_pre = ''
-    output_ext = '.txt'
-    output_path= sfCalculatorPath
+    output_ext = '.txt'    
     sfCalculatorFile = None
     print '-> Checking if SF file of lambda requested exists'
     for i in list_of_delta:
         output_pre = 'SFcalculator_lr' + str(i)
-        _sfCalculatorFile = output_path + output_pre + output_ext
-        if (os.path.isfile(_sfCalculatorFile)):
-            sfCalculatorFile = _sfCalculatorFile
-#            print '--> File ' + _sfCalculatorFile + ' ... FOUND and will be used'
+        _sfCalculatorFile = output_pre + output_ext
+        print '_sfCalculatorFile: ' + _sfCalculatorFile
+        _sfCalculatorFileFullPath = FileFinder.getFullPath(_sfCalculatorFile)
+        print '_sfCalculatorFileFullPath: ' + _sfCalculatorFileFullPath
+        if (os.path.isfile(_sfCalculatorFileFullPath)):
+            sfCalculatorFileFullPath = _sfCalculatorFileFullPath
+            print '--> File ' + _sfCalculatorFile + ' ... FOUND and will be used'
+            break
+        else:
+            print '--> File ' + _sfCalculatorFile + ' ... NOT FOUND'
             
     if (sfCalculatorFile is not None):
         
-        print '--> Using scaling facto file ' + sfCalculatorFile
+        print '--> Using scaling factor file ' + sfCalculatorFile
         
         #parse file and put info into array
-        f = open(sfCalculatorFile,'r')
+        f = open(sfCalculatorFile, 'r')
         sfFactorTable = []
         for line in f.read().split('\n'):
             if (len(line) > 0 and line[0] != '#'):
@@ -874,7 +879,7 @@ def applySF(InputWorkspace,
                 b_error = float(sfFactorTable[i][5])
                 
                 OutputWorkspace = _applySFtoArray(InputWorkspace,
-                                                  a,b,a_error,b_error)
+                                                  a, b, a_error, b_error)
 
                 return OutputWorkspace
 
@@ -884,13 +889,13 @@ def applySF(InputWorkspace,
 
     return InputWorkspace
 
-def _applySFtoArray(workspace,a,b,a_error,b_error):
+def _applySFtoArray(workspace, a, b, a_error, b_error):
     """
     This function will create for each x-axis value the corresponding
     scaling factor using the formula y=a+bx and 
     """
     
-    mt=mtd[workspace]
+    mt = mtd[workspace]
     x_axis = mt.readX(0)[:]    
     sz = len(x_axis)
     x_axis_factors = zeros(sz)
@@ -910,6 +915,6 @@ def _applySFtoArray(workspace,a,b,a_error,b_error):
                     Nspec=1,
                     UnitX="TOF")
     
-    Divide(workspace,'sfWorkspace',workspace)
+    Divide(workspace, 'sfWorkspace', workspace)
     return workspace
         
