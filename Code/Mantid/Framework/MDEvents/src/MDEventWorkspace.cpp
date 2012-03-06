@@ -734,7 +734,7 @@ namespace MDEvents
   TMDE(
     void MDEventWorkspace)::setMDMasking(Mantid::Geometry::MDImplicitFunction* maskingRegion)
   {
-    if(maskingRegion != NULL)
+    if(maskingRegion)
     {
       std::vector<IMDBox<MDE,nd> *> toMaskBoxes;
 
