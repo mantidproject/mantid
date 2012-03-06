@@ -65,8 +65,8 @@ void MuonRemoveExpDecay::exec()
     for (int i = 0; i < numSpectra; ++i)
     {
 			PARALLEL_START_INTERUPT_REGION
-      removeDecay(inputWS->readX(i), inputWS->readY(i), outputWS->dataY(i));
-      removeDecay(inputWS->readX(i), inputWS->readE(i), outputWS->dataE(i)); 
+      removeDecayData(inputWS->readX(i), inputWS->readY(i), outputWS->dataY(i));
+      removeDecayError(inputWS->readX(i), inputWS->readE(i), outputWS->dataE(i)); 
       outputWS->dataX(i) = inputWS->readX(i);   
 
       double normConst = calNormalisationConst(outputWS, i);
@@ -116,8 +116,8 @@ void MuonRemoveExpDecay::exec()
         throw std::invalid_argument("Spectra size greater than the number of spectra!");
       }
 
-      removeDecay(inputWS->readX(Spectra[i]), inputWS->readY(Spectra[i]), outputWS->dataY(Spectra[i]));
-      removeDecay(inputWS->readX(Spectra[i]), inputWS->readE(Spectra[i]), outputWS->dataE(Spectra[i]));
+      removeDecayData(inputWS->readX(Spectra[i]), inputWS->readY(Spectra[i]), outputWS->dataY(Spectra[i]));
+      removeDecayError(inputWS->readX(Spectra[i]), inputWS->readE(Spectra[i]), outputWS->dataE(Spectra[i]));
       outputWS->dataX(Spectra[i]) = inputWS->readX(Spectra[i]);
 
       double normConst = calNormalisationConst(outputWS, Spectra[i]);
@@ -139,6 +139,26 @@ void MuonRemoveExpDecay::exec()
   setProperty("OutputWorkspace", outputWS);
 }
 
+/** This method corrects the errors for one spectra.
+ *	 The muon lifetime is in microseconds not seconds, i.e. 2.2 rather than 0.0000022.
+ *   This is because the data is in microseconds.
+ *   @param inX ::  The X vector
+ *   @param inY ::  The input error vector
+ *   @param outY :: The output error vector
+ */
+void MuonRemoveExpDecay::removeDecayError(const MantidVec& inX, const MantidVec& inY,
+    MantidVec& outY)
+{
+  //Do the removal
+  for (size_t i = 0; i < inY.size(); ++i)
+  {
+    if ( inY[i] )
+      outY[i] = inY[i] * exp(inX[i] / (Mantid::PhysicalConstants::MuonLifetime * 1000000.0));
+    else
+      outY[i] = 1.0 * exp(inX[i] / (Mantid::PhysicalConstants::MuonLifetime * 1000000.0));
+  }
+}
+
 /** This method corrects the data for one spectra.
  *	 The muon lifetime is in microseconds not seconds, i.e. 2.2 rather than 0.0000022.
  *   This is because the data is in microseconds.
@@ -146,13 +166,16 @@ void MuonRemoveExpDecay::exec()
  *   @param inY ::  The input data vector
  *   @param outY :: The output data vector
  */
-void MuonRemoveExpDecay::removeDecay(const MantidVec& inX, const MantidVec& inY,
+void MuonRemoveExpDecay::removeDecayData(const MantidVec& inX, const MantidVec& inY,
     MantidVec& outY)
 {
   //Do the removal
   for (size_t i = 0; i < inY.size(); ++i)
   {
-    outY[i] = inY[i] * exp(inX[i] / (Mantid::PhysicalConstants::MuonLifetime * 1000000.0));
+    if ( inY[i] )
+      outY[i] = inY[i] * exp(inX[i] / (Mantid::PhysicalConstants::MuonLifetime * 1000000.0));
+    else
+      outY[i] = 0.1 * exp(inX[i] / (Mantid::PhysicalConstants::MuonLifetime * 1000000.0));
   }
 }
 
