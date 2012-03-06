@@ -19,12 +19,12 @@ namespace bpl = boost::python;
 void export_ActionEnum()
 {
   bpl::enum_<FileProperty::FileAction>("FileAction")
-        .value("Save", FileProperty::FileAction::Save)
-        .value("OptionalSave", FileProperty::FileAction::OptionalSave)
-        .value("Load", FileProperty::FileAction::Load)
-        .value("OptionalLoad", FileProperty::FileAction::OptionalLoad)
-        .value("Directory", FileProperty::FileAction::Directory)
-        .value("OptionalDirectory", FileProperty::FileAction::OptionalDirectory)
+        .value("Save", FileProperty::Save)
+        .value("OptionalSave", FileProperty::OptionalSave)
+        .value("Load", FileProperty::Load)
+        .value("OptionalLoad", FileProperty::OptionalLoad)
+        .value("Directory", FileProperty::Directory)
+        .value("OptionalDirectory", FileProperty::OptionalDirectory)
   ;
 }
 
