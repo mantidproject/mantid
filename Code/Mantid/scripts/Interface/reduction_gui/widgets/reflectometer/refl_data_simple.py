@@ -435,7 +435,7 @@ class DataReflWidget(BaseWidget):
         content += "import os\n"
         content += "if (os.environ.has_key(\"MANTIDPATH\")):\n"
         content += "    del os.environ[\"MANTIDPATH\"]\n"
-        content += "sys.path.insert(0,'/opt/mantidunstable/bin')\n"
+        content += "sys.path.insert(0,'/opt/mantidnightly/bin')\n"
         content += "from MantidFramework import mtd\n"
         content += "mtd.initialize()\n"
         content += "from mantidsimple import *\n\n"
