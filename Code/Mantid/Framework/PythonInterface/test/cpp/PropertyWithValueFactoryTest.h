@@ -36,7 +36,7 @@ class PropertyWithValueFactoryTest: public CxxTest::TestSuite
 
     void test_builtin_type_creates_int_type_property_without_error()
     {
-      CREATE_PROPERTY_TEST_BODY(int, PyInt_FromLong(10));
+      CREATE_PROPERTY_TEST_BODY(long, PyInt_FromLong(10));
     }
 
     void test_builtin_type_creates_double_type_property_without_error()

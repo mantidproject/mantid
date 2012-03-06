@@ -6,25 +6,21 @@ namespace Mantid
 
   namespace Kernel
   {
-
     /// @cond
-    template DLLExport class PropertyWithValue<int32_t>;
-    template DLLExport class PropertyWithValue<int64_t>;
-    template DLLExport class PropertyWithValue<size_t>;
-    template DLLExport class PropertyWithValue<bool>;
-    template DLLExport class PropertyWithValue<double>;
-    template DLLExport class PropertyWithValue<std::string>;
+    #define INSTANTIATE(Type) \
+      template DLLExport class PropertyWithValue<Type>; \
+      template DLLExport class PropertyWithValue<std::vector<Type> >;
 
-    template DLLExport class PropertyWithValue<std::vector<double> >;
-    template DLLExport class PropertyWithValue<std::vector<std::string> >;
-    template DLLExport class PropertyWithValue<std::vector<uint16_t> >;
-    template DLLExport class PropertyWithValue<std::vector<int16_t> >;
-    template DLLExport class PropertyWithValue<std::vector<uint32_t> >;
-    template DLLExport class PropertyWithValue<std::vector<int32_t> >;
-    template DLLExport class PropertyWithValue<std::vector<uint64_t> >;
-    template DLLExport class PropertyWithValue<std::vector<int64_t> >;
-
-    template DLLExport class PropertyWithValue<std::vector<std::vector<std::string> > >;
+    // Explicit instantiations
+    INSTANTIATE(int);
+    INSTANTIATE(long);
+    INSTANTIATE(long long);
+    INSTANTIATE(unsigned int);
+    INSTANTIATE(unsigned long);
+    INSTANTIATE(unsigned long long);
+    INSTANTIATE(bool);
+    INSTANTIATE(double);
+    INSTANTIATE(std::string);
     /// @endcond
 
   } // namespace Kernel

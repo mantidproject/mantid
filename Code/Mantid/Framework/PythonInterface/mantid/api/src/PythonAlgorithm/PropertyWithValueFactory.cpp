@@ -26,7 +26,7 @@ namespace Mantid
 
         // Map the Python types to the best match in C++
         REGISTER_MAPPING(PyFloat_Type, double);
-        REGISTER_MAPPING(PyInt_Type, int);
+        REGISTER_MAPPING(PyInt_Type, long);
         REGISTER_MAPPING(PyString_Type, std::string);
       }
 
