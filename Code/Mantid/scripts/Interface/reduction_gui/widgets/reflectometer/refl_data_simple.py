@@ -538,9 +538,15 @@ class DataReflWidget(BaseWidget):
             self._summary.auto_reduce_btn.hide()
     
     def _remove_item(self):
+        if self._summary.angle_list.count()==0:
+            return
+        self._summary.angle_list.setEnabled(False)        
+        self._summary.remove_btn.setEnabled(False)  
         row = self._summary.angle_list.currentRow()
         if row>=0:
             self._summary.angle_list.takeItem(row)
+        self._summary.angle_list.setEnabled(True)        
+        self._summary.remove_btn.setEnabled(True)  
 
     def is_running(self, is_running):
         """
@@ -787,11 +793,17 @@ class DataReflWidget(BaseWidget):
         self._reset_warnings()
 
     def _angle_changed(self):
+        if self._summary.angle_list.count()==0:
+            return
+        self._summary.angle_list.setEnabled(False)  
+        self._summary.remove_btn.setEnabled(False)  
         current_item =  self._summary.angle_list.currentItem()
         if current_item is not None:
             state = current_item.data(QtCore.Qt.UserRole).toPyObject()
             self.set_editing_state(state)
             self._reset_warnings()
+        self._summary.angle_list.setEnabled(True)
+        self._summary.remove_btn.setEnabled(True)  
 
     def set_state(self, state):
         """
