@@ -914,7 +914,8 @@ class DataReflWidget(BaseWidget):
             
         # Output directory
         if hasattr(state, "output_dir"):
-            self._summary.outdir_edit.setText(str(state.output_dir))
+            if len(str(state.output_dir).strip())>0:
+                self._summary.outdir_edit.setText(str(state.output_dir))
             
         self._reset_warnings()
         self._summary.data_run_number_edit.setText(str(','.join([str(i) for i in state.data_files])))
