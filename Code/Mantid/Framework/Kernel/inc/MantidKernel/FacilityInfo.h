@@ -72,7 +72,7 @@ public:
   /// Return the soap endpoint name
   const std::string& getSoapEndPoint() const{return m_soapEndPoint;}
   /// Return the archive search interface names
-  const std::set<std::string>& archiveSearch()const{return m_archiveSearch;}
+  const std::vector<std::string>& archiveSearch()const{return m_archiveSearch;}
   /// Returns a list of instruments of this facility
   const std::vector<InstrumentInfo>& Instruments()const{return m_instruments;}
   /// Returns a list of instruments of given technique
@@ -93,7 +93,7 @@ private:
   std::string m_delimiter;               ///  default delimiter between instrument name and run number
   std::vector<std::string> m_extensions;       ///< file extensions in order of preference
   std::string m_soapEndPoint;                  ///< names of the soap end point
-  std::set<std::string> m_archiveSearch;       ///< names of the archive search interface
+  std::vector<std::string> m_archiveSearch;       ///< names of the archive search interface
   std::vector<InstrumentInfo> m_instruments;   ///< list of instruments of this facility
   std::string m_catalogName;                   ///< name of the catalog system of this facilty
   static Logger& g_log;                        ///< logger

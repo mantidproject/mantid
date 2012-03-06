@@ -88,6 +88,7 @@ set ( SRC_FILES
 	src/RawFileInfo.cpp
 	src/RenameLog.cpp
 	src/RotateInstrumentComponent.cpp
+        src/SNSDataArchive.cpp
 	src/SaveAscii.cpp
 	src/SaveCSV.cpp
 	src/SaveCalFile.cpp
@@ -201,6 +202,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/RawFileInfo.h
 	inc/MantidDataHandling/RenameLog.h
 	inc/MantidDataHandling/RotateInstrumentComponent.h
+        inc/MantidDataHandling/SNSDataArchive.h
 	inc/MantidDataHandling/SaveAscii.h
 	inc/MantidDataHandling/SaveCSV.h
 	inc/MantidDataHandling/SaveCalFile.h
@@ -307,6 +309,7 @@ set ( TEST_FILES
 	test/ProcessDasNexusLogTest.h
 	test/RawFileInfoTest.h
 	test/RenameLogTest.h
+        test/SNSDataArchiveTest.h
 	test/SaveCSVTest.h
 	test/SaveCalFileTest.h
 	test/SaveCanSAS1dTest.h

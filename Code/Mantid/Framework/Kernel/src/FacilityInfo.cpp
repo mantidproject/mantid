@@ -90,7 +90,7 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) :
       std::string plugin = elem->getAttribute("plugin");
       if (!plugin.empty())
       {
-        m_archiveSearch.insert(plugin);
+        m_archiveSearch.push_back(plugin);
       }
     }
     pNL_interfaces->release();
