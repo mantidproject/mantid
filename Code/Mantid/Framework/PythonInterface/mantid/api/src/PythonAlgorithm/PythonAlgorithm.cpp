@@ -8,6 +8,19 @@ namespace Mantid
 {
   namespace PythonInterface
   {
+
+    /**
+     * Declare a preconstructed property
+     * @param prop :: A pointer to a property
+     * @param doc :: An optional doc string
+     */
+    void PythonAlgorithm::declareProperty(Kernel::Property *prop, const std::string & doc)
+    {
+      // We need to clone the property so that python doesn't own the object that gets inserted
+      // into the manager
+      Algorithm::declareProperty(prop->clone(), doc);
+    }
+
     /**
      * Declare a property using the type of the defaultValue, a documentation string and validator
      * @param name :: The name of the new property

@@ -47,6 +47,8 @@ namespace Mantid
     class PythonAlgorithm : public API::Algorithm
     {
     public:
+      /// Declare a specialized property
+      void declareProperty(Kernel::Property *prop, const std::string &doc="");
       /// Declare a property using the type of the defaultValue with a validator and doc string
       void declareProperty(const std::string & name, const boost::python::object & defaultValue,
                            const boost::python::object & validator = boost::python::object(),
@@ -60,7 +62,7 @@ namespace Mantid
       void declareProperty(const std::string & name, const boost::python::object & defaultValue,
                            const int direction);
     private:
-      /// Hide the base class variants as they are not required on this interface
+      // Hide the base class variants as they are not required on this interface
       using Mantid::API::Algorithm::declareProperty;
     };
 

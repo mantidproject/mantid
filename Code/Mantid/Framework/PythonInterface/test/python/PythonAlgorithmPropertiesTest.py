@@ -2,7 +2,7 @@ import unittest
 import testhelpers
 
 from mantid import PythonAlgorithm, Direction
-from mantid import BoundedValidator
+from mantid import BoundedValidator, FileProperty, FileAction
 
     
 class BasicPropsAlg(PythonAlgorithm):
@@ -85,6 +85,33 @@ class PythonAlgorithmPropertiesTest(unittest.TestCase):
         self.assertNotEquals("", def_dir.isValid())
         self.assertRaises(ValueError, alg.setProperty, "NumPropWithDefaultDir", -10)
         testhelpers.assert_raises_nothing(self, alg.setProperty, "NumPropWithDefaultDir", 11)
+        
+    def test_specialized_property_declaration(self):
+        """
+            Test property declaration using a specialised property.
+            The property types should have their own tests too.
+        """
+        class SpecializedProperties(PythonAlgorithm):
+            
+            _testdocstring = 'This is a FileProperty'
+            def PyInit(self):
+                self.declareProperty(FileProperty("NoDocString", "", FileAction.Load))
+                self.declareProperty(FileProperty("WithDocString", "", FileAction.Load), self._testdocstring)
+            
+            def PyExec(self):
+                pass
+        ####################################################
+        alg = SpecializedProperties()
+        alg.initialize()
+        props = alg.getProperties()
+        self.assertEquals(2, len(props))
+        
+        nodoc = alg.getProperty("NoDocString")
+        self.assertTrue(isinstance(nodoc, FileProperty))
+        self.assertEquals("", nodoc.documentation)
+        withdoc = alg.getProperty("WithDocString")
+        self.assertTrue(isinstance(withdoc, FileProperty))
+        self.assertEquals(alg._testdocstring, withdoc.documentation)
         
 if __name__ == '__main__':
     unittest.main()
