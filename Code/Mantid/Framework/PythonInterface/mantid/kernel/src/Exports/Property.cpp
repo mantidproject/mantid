@@ -34,14 +34,15 @@ void export_Property()
                   "The name of the property")
     .add_property("documentation", make_function(&Mantid::Kernel::Property::documentation, return_value_policy<copy_const_reference>()),
                   "The property's doc string")
-    .add_property("direction", &Mantid::Kernel::Property::direction, "Input, Output, InOut or Unknown. See the Direction enum")
+    .add_property("direction", &Mantid::Kernel::Property::direction,
+                  "Input, Output, InOut or Unknown. See the Direction class")
     .add_property("units", &Mantid::Kernel::Property::units, "The units attached to this property")
     .add_property("valueAsStr", &Mantid::Kernel::Property::value, "The value of the property as a string. "
-        "For some property types, e.g. Workspaces, it is useful to be able to refer to the string value directly")
+                  "For some property types, e.g. Workspaces, it is useful to be able to refer to the string value directly")
+    .add_property("allowedValues", &Mantid::Kernel::Property::allowedValues, "A list of allowed values")
     .def("isValid", &Mantid::Kernel::Property::isValid, "An empty string if the property is valid, otherwise it contains an error message.")
-    .def("allowedValues", &Mantid::Kernel::Property::allowedValues, "A list of allowed values")
     .def("isDefault", &Mantid::Kernel::Property::isDefault, "Is the property set at the default value")
     .def("getGroup", &Mantid::Kernel::Property::getGroup, return_value_policy<copy_const_reference>(),
-          "Return the 'group' of the property, that is, the header in the algorithm's list of properties.")
+         "Return the 'group' of the property, that is, the header in the algorithm's list of properties.")
    ;
 }

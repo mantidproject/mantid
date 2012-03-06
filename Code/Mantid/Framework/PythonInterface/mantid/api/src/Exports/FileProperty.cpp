@@ -1,18 +1,77 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
 #include <boost/python/class.hpp>
 #include <boost/python/bases.hpp>
+#include <boost/python/enum.hpp>
+#include <boost/python/args.hpp>
+#include <boost/python/make_constructor.hpp>
+#include <boost/python/default_call_policies.hpp>
+#include <boost/python/overloads.hpp>
+#include <boost/make_shared.hpp>
+
 
 using Mantid::API::FileProperty;
 using Mantid::Kernel::PropertyWithValue;
+using Mantid::PythonInterface::Converters::PySequenceToVectorConverter;
+namespace bpl = boost::python;
 
-using boost::python::class_;
-using boost::python::no_init;
-using boost::python::bases;
+void export_ActionEnum()
+{
+  bpl::enum_<FileProperty::FileAction>("FileAction")
+        .value("Save", FileProperty::FileAction::Save)
+        .value("OptionalSave", FileProperty::FileAction::OptionalSave)
+        .value("Load", FileProperty::FileAction::Load)
+        .value("OptionalLoad", FileProperty::FileAction::OptionalLoad)
+        .value("Directory", FileProperty::FileAction::Directory)
+        .value("OptionalDirectory", FileProperty::FileAction::OptionalDirectory)
+  ;
+}
+
+namespace
+{
+  /**
+   * The FileProperty constructor can take a list of extensions but we want users to be
+   * able to pass in a python list so we need a proxy function to act as a constructor
+   * @param name :: The name of the property
+   * @param defaultValue :: A default value
+   * @param action :: A file action defined by FileProperty::FileAction
+   * @param extensions :: A list of possible extensions (default = [])
+   * @param The direction of the property (default = input)
+   */
+  boost::shared_ptr<FileProperty> createFileProperty(const std::string & name,const std::string& defaultValue,
+                                                     unsigned int action,
+                                                     const bpl::object & extensions = bpl::object(),
+                                                     unsigned direction = Mantid::Kernel::Direction::Input)
+  {
+    std::vector<std::string> extsAsVector;
+    if( !extensions.is_none() )
+    {
+      bpl::extract<std::string> extractor(extensions);
+      if(extractor.check())
+      {
+        extsAsVector = std::vector<std::string>(1, extractor());
+      }
+      else
+      {
+        extsAsVector = PySequenceToVectorConverter<std::string>(extensions)();
+      }
+    }
+    return boost::make_shared<FileProperty>(name, defaultValue, action, extsAsVector, direction);
+  }
+
+}
 
 void export_FileProperty()
 {
-  class_<FileProperty, bases<PropertyWithValue<std::string> >, boost::noncopyable>("FileProperty", no_init)
-    ;
+  bpl::class_<FileProperty, bpl::bases<PropertyWithValue<std::string> >, boost::noncopyable>("FileProperty", bpl::no_init)
+    .def("__init__",
+         bpl::make_constructor(&createFileProperty, bpl::default_call_policies(),
+                               (bpl::arg("name"), bpl::arg("defaultValue"), bpl::arg("action"),
+                                bpl::arg("extensions") = bpl::object(),
+                                bpl::arg("direction") = Mantid::Kernel::Direction::Input)
+                              )
+        )
+  ;
 }
 
