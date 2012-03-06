@@ -57,6 +57,14 @@ def getS2h(mt=None):
         return _h, units
     return None, None
 
+def getLambdaValue(mt):
+    """
+    return the lambdaRequest value
+    """
+    mt_run = mt.getRun()
+    _lambda = mt_run.getProperty('LambdaRequest').value
+    return _lambda
+
 def getPixelXPixelY(mt1, maxX=304, maxY=256):
     """
         returns the PixelX_vs_PixelY array of the workspace data specified
@@ -784,13 +792,23 @@ def calc_center_of_mass(arr_x, arr_y, A):
 
 def applySF(InputWorkspace,
             slitsValuePrecision,
-            sfCalculatorFile=None):
+            sfCalculatorPath=os.path.abspath('.')):
     """
     Function that apply scaling factor to data using sfCalculator.txt
     file created by the sfCalculator procedure
     """
         
-    if (sfCalculatorFile is not None) and (os.path.isfile(sfCalculatorFile)):
+    #retrieve the lambdaRequested and check if we can find the sfCalculator
+    #file corresponding to that lambda
+    _lr = getLambdaValue(mtd[InputWorkspace])
+    _lr_value = _lr[0]
+
+    output_path= sfCalculatorPath
+    output_pre = 'SFcalculator_lr' + str(_lr_value)
+    output_ext = '.txt'
+    sfCalculatorFile = output_path+ output_pre + output_ext
+    
+    if (os.path.isfile(sfCalculatorFile)):
         
         #parse file and put info into array
         f = open(sfCalculatorFile,'r')

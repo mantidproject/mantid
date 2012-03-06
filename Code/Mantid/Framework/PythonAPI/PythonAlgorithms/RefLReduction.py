@@ -98,7 +98,7 @@ class RefLReduction(PythonAlgorithm):
         subtract_norm_bck = self.getProperty("SubtractNormBackground")
 
         #name of the sfCalculator txt file
-        sfCalculator = "/home/j35/Desktop/SFcalculator.txt"
+        sfCalculatorPath = "/home/j35/Desktop/"
         slitsValuePrecision = 0.1       #precision of slits = 10% 
 
         # Pick a good workspace n    ame
@@ -142,10 +142,6 @@ class RefLReduction(PythonAlgorithm):
 
             if not mtd.workspaceExists(ws_event_data):
                 LoadEventNexus(Filename=data_file, OutputWorkspace=ws_event_data)
-        
-        print 'Data File(s) #'
-        print run_numbers
-        
         
         # Get metadata
         mt_run = mtd[ws_event_data].getRun()
@@ -307,19 +303,24 @@ class RefLReduction(PythonAlgorithm):
             ws_norm_histo_data = ws_name+"_histo"  
 
             if not mtd.workspaceExists(ws_norm_event_data):
-                LoadEventNexus(norm_file, ws_norm_event_data)
-            
+                LoadEventNexus(Filename=norm_file, 
+                               OutputWorkspace=ws_norm_event_data)
+ 
             # Rebin data
-            Rebin(InputWorkspace=ws_norm_event_data, OutputWorkspace=ws_norm_histo_data, 
+            Rebin(InputWorkspace=ws_norm_event_data, 
+                  OutputWorkspace=ws_norm_histo_data, 
                   Params=[TOFrange[0], 
                           TOFsteps, 
                           TOFrange[1]])
-    
+ 
             # Keep only range of TOF of interest
-            CropWorkspace(ws_norm_histo_data, ws_norm_histo_data, XMin=TOFrange[0], XMax=TOFrange[1])
+            CropWorkspace(InputWorkspace=ws_norm_histo_data, 
+                          OutputWorkspace=ws_norm_histo_data, 
+                          XMin=TOFrange[0], XMax=TOFrange[1])
     
             # Normalized by Current (proton charge)
-            NormaliseByCurrent(InputWorkspace=ws_norm_histo_data, OutputWorkspace=ws_norm_histo_data)
+            NormaliseByCurrent(InputWorkspace=ws_norm_histo_data, 
+                               OutputWorkspace=ws_norm_histo_data)
 
             #Create a new event workspace of only the range of pixel of interest 
             #background range (along the y-axis) and of only the pixel
@@ -365,8 +366,10 @@ class RefLReduction(PythonAlgorithm):
                 Transpose(InputWorkspace=ws_transposed,
                           OutputWorkspace=ws_data_bck_2)
         
-                ConvertToHistogram(ws_data_bck_1, OutputWorkspace=ws_data_bck_1)
-                ConvertToHistogram(ws_data_bck_2, OutputWorkspace=ws_data_bck_2)
+                ConvertToHistogram(InputWorkspace=ws_data_bck_1, 
+                                   OutputWorkspace=ws_data_bck_1)
+                ConvertToHistogram(InputWorkspace=ws_data_bck_2, 
+                                   OutputWorkspace=ws_data_bck_2)
 
                 RebinToWorkspace(WorkspaceToRebin=ws_data_bck_1, 
                                  WorkspaceToMatch=ws_integrated_data, 
@@ -376,10 +379,14 @@ class RefLReduction(PythonAlgorithm):
                                  WorkspaceToMatch=ws_integrated_data, 
                                  OutputWorkspace=ws_data_bck_2)
 
-                WeightedMean(ws_data_bck_1, ws_data_bck_2, ws_data_bck)
+                WeightedMean(InputWorkspace1=ws_data_bck_1, 
+                             InputWorkspace2=ws_data_bck_2, 
+                             OutputWorkspace=ws_data_bck)
 
                 ws_norm = "_NormWks"
-                Minus(ws_integrated_data, ws_data_bck, OutputWorkspace=ws_norm)
+                Minus(LHSWorkspace=ws_integrated_data,
+                      RHSWorkspace=ws_data_bck, 
+                      OutputWorkspace=ws_norm)
 
                 #Clean up intermediary workspaces
 #                mtd.deleteWorkspace(ws_data_bck)
@@ -419,7 +426,7 @@ class RefLReduction(PythonAlgorithm):
 #        this is where we need to apply the scaling factor
         ws_data_scaled = wks_utility.applySF(ws_data,
                                              slitsValuePrecision,
-                                             sfCalculatorFile=sfCalculator) 
+                                             sfCalculatorPath=sfCalculatorPath) 
 
         if dMD is not None and theta is not None:
                     

@@ -403,6 +403,14 @@ def createIndividualList(string_list_files):
     return {'list_runs':list_runs,
             'list_attenuator':list_attenuator}
     
+def getLambdaValue(mt):
+    """
+    return the lambdaRequest value
+    """
+    mt_run = mt.getRun()
+    _lambda = mt_run.getProperty('LambdaRequest').value
+    return _lambda
+    
 def getSh(mt, top_tag, bottom_tag):
     """
         returns the height and units of the given slit#
@@ -432,9 +440,9 @@ def getS2h(mt=None):
         return _h, units
     return None, None
 
-def getSlitsValue(full_list_runs, S1H, S2H):
+def getSlitsValueAndLambda(full_list_runs, S1H, S2H, lambdaRequest):
     """
-    Retrieve the S1H and S2H values
+    Retrieve the S1H, S2H and lambda requested values
     """
     _nbr_files = len(full_list_runs)
     for i in range(_nbr_files):
@@ -447,6 +455,9 @@ def getSlitsValue(full_list_runs, S1H, S2H):
         _s2h_value, _s2h_units = getS2h(mt1)
         S1H[i] = _s1h_value
         S2H[i] = _s2h_value
+        
+        _lambda_value = getLambdaValue(mt1)
+        lambdaRequest[i] = _lambda_value
 
 def isRunsSorted(list_runs, S1H, S2H):
     """
@@ -500,7 +511,7 @@ def calculateAndFit(numerator='',
         return cal1
 
 #if __name__ == '__main__':
-def calculate(string_runs=None, list_peak_back=None, output_file=None):  
+def calculate(string_runs=None, list_peak_back=None, output_path=None):  
     """
     In this current version, the program will automatically calculates
     the scaling function for up to, and included, 6 attenuators.
@@ -519,7 +530,7 @@ def calculate(string_runs=None, list_peak_back=None, output_file=None):
              [peak_min_run2, peak_max_run2, back_min_run2, back_max_run2],
              [...]]
              
-        output_file = full path to output file name (folder must exist)
+        output_path = where the scaling factor files will be written
         
     """    
     
@@ -571,10 +582,24 @@ def calculate(string_runs=None, list_peak_back=None, output_file=None):
     #####
     
     #retrieve the S1H and S2H val/units for each NeXus    
+    #retrieve the lambdaRequest value (Angstrom)
     S1H = {}
     S2H = {}
-    getSlitsValue(list_runs, S1H, S2H)
-  
+    lambdaRequest = {}
+    getSlitsValueAndLambda(list_runs, S1H, S2H, lambdaRequest)
+
+    #Make sure all the lambdaRequested are identical within a given range
+    lambdaRequestPrecision = 0.01 #1%
+    _lr = lambdaRequest[0]
+    for i in lambdaRequest:
+        _localValue = float(lambdaRequest[i][0])
+        _localValueRate = lambdaRequestPrecision * _localValue
+        _leftValue = _localValue - _localValueRate
+        _rightValue = _localValue + _localValueRate
+        
+        if (_localValue < _leftValue) or (_localValue > _rightValue):
+            raise Exception("lambda requested do not match !")
+    
     #make sure the file are sorted from smaller to bigger openning
     if isRunsSorted(list_runs, S1H, S2H):
         
@@ -627,7 +652,6 @@ def calculate(string_runs=None, list_peak_back=None, output_file=None):
                                        list_objects=list_objects)                                       
                 
                 recordSettings(a, b, error_a, error_b, name, cal)
-#                plotObject(cal)
                                 
                 if (i < (len(list_runs) - 1) and
                          list_attenuator[i + 1] == (_attenuator+1)):
@@ -636,10 +660,14 @@ def calculate(string_runs=None, list_peak_back=None, output_file=None):
             #record S1H and S2H
             finalS1H.append(S1H[index_numerator])
             finalS2H.append(S2H[index_numerator])
-
+            
         #output the fitting parameters in an ascii
-        if (output_file is None):
-            output_file = '/home/j35/Desktop/SFcalculator.txt'
+        if (output_path is None):
+            output_path = '/home/j35/Desktop/'
+        
+        output_pre = 'SFcalculator_lr' + str(lambdaRequest[0][0])
+        output_ext = '.txt'
+        output_file = output_path + output_pre + output_ext        
         
         outputFittingParameters(a, b, error_a, error_b, finalS1H, finalS2H, output_file)
 
