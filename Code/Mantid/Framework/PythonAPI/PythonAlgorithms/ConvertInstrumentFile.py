@@ -109,9 +109,9 @@ class ConvertInstrumentFile(PythonAlgorithm):
 
         if self.instrument == "PG3":
 
-            hz60_f = chopperhertz
-            hz30_f = chopperhertz
-            hz10_f = chopperhertz
+            hz60_f = chopperhertz==60
+            hz30_f = chopperhertz==30
+            hz10_f = chopperhertz==10
 
             if (hz60_f):
                 # 60 Hz
@@ -207,9 +207,9 @@ class ConvertInstrumentFile(PythonAlgorithm):
             elif line.startswith("TOFRG"):
                 # Tof-min(us)    step      Tof-max(us)
                 terms = line.split()
-                mdict[bank]["tof-min"] = float(terms[1])
-                mdict[bank]["tof-max"] = float(terms[3])
-                mdict[bank]["step"]    = float(terms[2])
+                mdict[bank]["tof-min"] = float(terms[1])*1.0E-3
+                mdict[bank]["tof-max"] = float(terms[3])*1.0E-3
+                mdict[bank]["step"]    = float(terms[2])*1.0E-3
     
             elif line.startswith("D2TOF"):
                 # Dtt1      Dtt2         Zero 
@@ -290,6 +290,21 @@ class ConvertInstrumentFile(PythonAlgorithm):
     
         return mdict
 
+
+    def makeParameterConsistent(self):
+        """ Make some parameters consistent between preset values and input values
+        """
+        for ib in self.mdict.keys():
+            try:
+                # If it is a dictionary
+                if self.mdict[ib].has_key("tof-min"):
+                    self.mxtofs[ib-1] = self.mdict[ib]["tof-max"]
+            except AttributeError:
+                # Not a dictionary
+                continue
+        # ENDFOR
+
+        return
 
     def convertToGSAS(self, banks, gsasinstrfilename):
         """ Convert to GSAS instrument file 
@@ -417,7 +432,7 @@ class ConvertInstrumentFile(PythonAlgorithm):
         if self.iL2 < 0:
             self.iL2 = calL2FromDtt1(difc=self.mdict[bank]["dtt1"], L1=self.iL1, twotheta=self.i2theta)
 
-        print "Debug: L2 = %f,  2Theta (irf) = %f,  2Theta (input) = %f" % (self.iL2, pardict["twotheta"], self.i2theta)
+        # print "Debug: L2 = %f,  2Theta (irf) = %f,  2Theta (input) = %f" % (self.iL2, pardict["twotheta"], self.i2theta)
 
         prmfile += ('INS %2i ICONS%10.3f%10.3f%10.3f          %10.3f%5i%10.3f\n' % 
                 (bank, instC*1.00009, 0.0, pardict["zero"],0.0,0,0.0))
@@ -480,6 +495,7 @@ class ConvertInstrumentFile(PythonAlgorithm):
 
         return
 
+
     def PyInit(self):
         """ Set Property
         """
@@ -538,6 +554,9 @@ class ConvertInstrumentFile(PythonAlgorithm):
         self.initConstants(self.frequency)
         if useirf is True: 
             self.parseFullprofResolutionFile(irffilename)
+
+        self.makeParameterConsistent()
+
         self.convertToGSAS(banks, outputfilename)
 
         return
