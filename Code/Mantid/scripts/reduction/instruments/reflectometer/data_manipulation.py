@@ -1,7 +1,6 @@
 import _qti
 import os
 from mantidsimple import *
-from reduction.instruments.reflectometer import wks_utility
 
 def tof_distribution(file_path, callback=None,
                      range_min=None, range_max=None):
