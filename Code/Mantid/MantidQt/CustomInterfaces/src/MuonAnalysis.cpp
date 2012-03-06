@@ -1885,7 +1885,7 @@ void MuonAnalysis::createPlotWS(const std::string& groupName, const std::string&
       binSize = tempWs->dataX(0)[1]-tempWs->dataX(0)[0]; 
       double firstX = tempWs->dataX(0)[0];
       double lastX = tempWs->dataX(0)[tempWs->dataX(0).size()-1];
-      size_t numberOfFullBunchedBins =  static_cast<size_t>((lastX - firstX) / binSize );
+      double numberOfFullBunchedBins =  std::floor((lastX - firstX) / binSize );
 
       if ( numberOfFullBunchedBins )
       {
