@@ -39,10 +39,10 @@ namespace
    * @param extensions :: A list of possible extensions (default = [])
    * @param The direction of the property (default = input)
    */
-  boost::shared_ptr<FileProperty> createFileProperty(const std::string & name,const std::string& defaultValue,
-                                                     unsigned int action,
-                                                     const bpl::object & extensions = bpl::object(),
-                                                     unsigned direction = Mantid::Kernel::Direction::Input)
+  FileProperty * createFileProperty(const std::string & name,const std::string& defaultValue,
+                                    unsigned int action,
+                                    const bpl::object & extensions = bpl::object(),
+                                    unsigned direction = Mantid::Kernel::Direction::Input)
   {
     std::vector<std::string> extsAsVector;
     if( !extensions.is_none() )
@@ -57,7 +57,7 @@ namespace
         extsAsVector = PySequenceToVectorConverter<std::string>(extensions)();
       }
     }
-    return boost::make_shared<FileProperty>(name, defaultValue, action, extsAsVector, direction);
+    return new FileProperty(name, defaultValue, action, extsAsVector, direction);
   }
 
 }
@@ -66,12 +66,11 @@ void export_FileProperty()
 {
   bpl::class_<FileProperty, bpl::bases<PropertyWithValue<std::string> >, boost::noncopyable>("FileProperty", bpl::no_init)
     .def("__init__",
-         bpl::make_constructor(&createFileProperty, bpl::default_call_policies(),
-                               (bpl::arg("name"), bpl::arg("defaultValue"), bpl::arg("action"),
-                                bpl::arg("extensions") = bpl::object(),
-                                bpl::arg("direction") = Mantid::Kernel::Direction::Input)
-                              )
-        )
+     bpl::make_constructor(&createFileProperty, bpl::default_call_policies(),
+                           (bpl::arg("name"), bpl::arg("defaultValue"), bpl::arg("action"),
+                            bpl::arg("extensions") = bpl::object(),
+                            bpl::arg("direction") = Mantid::Kernel::Direction::Input)
+                          ))
   ;
 }
 

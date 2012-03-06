@@ -2,7 +2,7 @@ import unittest,sys
 
 from testhelpers import run_algorithm, can_be_instantiated
 
-from mantid.api import (MatrixWorkspace, WorkspaceProperty_Workspace, Workspace,
+from mantid.api import (MatrixWorkspace, WorkspaceProperty, Workspace,
                         ExperimentInfo, AnalysisDataService)
 from mantid.geometry import Detector
 
@@ -83,7 +83,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
             self.assertEquals(expected[i], ids[i])
 
     def test_that_a_histogram_workspace_is_returned_as_a_MatrixWorkspace_from_a_property(self):
-        self.assertEquals(type(self._test_ws_prop), WorkspaceProperty_Workspace)
+        self.assertEquals(type(self._test_ws_prop), WorkspaceProperty)
         # Is Workspace in the hierarchy of the value
         self.assertTrue(isinstance(self._test_ws, Workspace))
         # Have got a MatrixWorkspace back and not just the generic interface

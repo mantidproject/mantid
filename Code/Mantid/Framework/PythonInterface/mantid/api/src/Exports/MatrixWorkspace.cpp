@@ -1,5 +1,4 @@
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 
 #include "MantidPythonInterface/kernel/PropertyWithValue.h"
@@ -105,13 +104,3 @@ void export_MatrixWorkspace()
 
   REGISTER_SINGLEVALUE_HANDLER(MatrixWorkspace_sptr);
 }
-
-void export_MatrixWorkspaceProperty()
-{
-  EXPORT_PROP_W_VALUE(MatrixWorkspace_sptr, MatrixWorkspace);
-  register_ptr_to_python<WorkspaceProperty<MatrixWorkspace>*>();
-  class_<WorkspaceProperty<MatrixWorkspace>, bases<PropertyWithValue<MatrixWorkspace_sptr>,IWorkspaceProperty>,
-         boost::noncopyable>("WorkspaceProperty_MatrixWorkspace", no_init)
-      ;
-}
-

@@ -22,12 +22,17 @@ set ( EXPORT_FILES
   src/Exports/ExperimentInfo.cpp
   src/Exports/MultipleExperimentInfos.cpp
   src/Exports/Workspace.cpp
+  src/Exports/IWorkspaceProperty.cpp
+  src/Exports/WorkspaceProperty.cpp
   src/Exports/ITableWorkspace.cpp
+  src/Exports/ITableWorkspaceProperty.cpp
   src/Exports/IMDWorkspace.cpp
   src/Exports/IMDHistoWorkspace.cpp
   src/Exports/IMDEventWorkspace.cpp
   src/Exports/MatrixWorkspace.cpp
+  src/Exports/MatrixWorkspaceProperty.cpp
   src/Exports/IEventWorkspace.cpp
+  src/Exports/IEventWorkspaceProperty.cpp
   src/Exports/IPeaksWorkspace.cpp
   src/Exports/BinaryOperations.cpp
   src/Exports/WorkspaceGroup.cpp
@@ -53,6 +58,7 @@ set ( INC_FILES
   ${HEADER_DIR}/api/PythonAlgorithm/PythonAlgorithm.h
   ${HEADER_DIR}/api/BinaryOperations.h
   ${HEADER_DIR}/api/CloneMatrixWorkspace.h
+  ${HEADER_DIR}/api/WorkspacePropertyMacro.h
 )
 
 set ( PY_FILES 
