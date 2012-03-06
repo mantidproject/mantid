@@ -877,6 +877,7 @@ class DataReflWidget(BaseWidget):
         self._summary.data_from_tof.setText(str(int(state.DataTofRange[0])))
         self._summary.data_to_tof.setText(str(int(state.DataTofRange[1])))
         self._summary.tof_range_switch.setChecked(state.crop_TOF_range)
+        self._tof_range_clicked(state.crop_TOF_range)
         
         if hasattr(state, "set_detector_angle"):
             self._summary.det_angle_check.setChecked(state.set_detector_angle)
