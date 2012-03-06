@@ -1163,7 +1163,8 @@ namespace MDEvents
   }
 
   /**
-  Setter for the masking region. 
+  Setter for the masking region.
+  Does not perform any clearing. Multiple calls are compounded.
   @param maskingRegion : Implicit function defining mask region.
   */
   void MDHistoWorkspace::setMDMasking(Mantid::Geometry::MDImplicitFunction* maskingRegion)
@@ -1172,7 +1173,11 @@ namespace MDEvents
     {
       for(size_t i = 0; i < this->getNPoints(); ++i)
       {
-        m_masks[i] = maskingRegion->isPointContained(this->getCenter(i));
+        //If the function masks the point, then mask it, otherwise leave it as it is.
+        if(maskingRegion->isPointContained(this->getCenter(i)) )
+        {
+          m_masks[i] =  true;
+        }
       }
       delete maskingRegion;
     }
