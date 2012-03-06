@@ -68,9 +68,9 @@ namespace DataObjects
     MantidVec m_data;
 
     /// Function returns a unique index, used for hashing for MRU list
-    int hashIndexFunction() const
+    size_t hashIndexFunction() const
     {
-      return int(m_index);
+      return m_index;
     }
 
     /// Set the unique index value.
@@ -86,10 +86,7 @@ namespace DataObjects
   /** This is a container for the MRU (most-recently-used) list
    * of generated histograms.
 
-    @author Janik Zikovsky
-    @date 2011-07-01
-
-    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2011-2 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

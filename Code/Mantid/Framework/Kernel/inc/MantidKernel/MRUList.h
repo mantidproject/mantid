@@ -26,10 +26,7 @@ namespace Kernel
       This class has been largely taken from one of the examples given in the
       Boost.MultiIndex documentation (<http://www.boost.org/libs/multi_index/doc/reference/index.html>)
 
-      @author Russell Taylor, Tessella Support Services plc
-      @date 22/01/2008
-
-      Copyright &copy; 2008-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+      Copyright &copy; 2008-2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
       This file is part of Mantid.
 
@@ -58,7 +55,7 @@ namespace Kernel
       T*,
       boost::multi_index::indexed_by<
         boost::multi_index::sequenced<>,
-        boost::multi_index::hashed_unique<BOOST_MULTI_INDEX_CONST_MEM_FUN(T,int,hashIndexFunction)>
+        boost::multi_index::hashed_unique<BOOST_MULTI_INDEX_CONST_MEM_FUN(T,std::size_t,hashIndexFunction)>
       >
     > item_list;
 
@@ -167,7 +164,7 @@ namespace Kernel
       using namespace boost::multi_index;
       typename ordered_item_list::iterator it;
       bool found_nothing;
-      it = il.get<1>().find(index);
+      it = il.get<1>().find((int)index);
       found_nothing = (it == il.get<1>().end());
       if (!found_nothing)
       {
@@ -196,7 +193,7 @@ namespace Kernel
       bool found_nothing;
       //PARALLEL_CRITICAL(MRUlist_map_access)
       {
-        it = il.get<1>().find(index);
+        it = il.get<1>().find(int(index));
         found_nothing = (it == il.get<1>().end());
       }
 

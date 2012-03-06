@@ -6,16 +6,13 @@
 //----------------------------------------------------------------------
 
 #include "MantidAPI/IEventWorkspace.h"
-#include "MantidAPI/Progress.h"
+#include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/EventList.h"
-#include "MantidDataObjects/EventWorkspaceMRU.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/MRUList.h"
 #include "MantidKernel/System.h"
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <string>
-#include "MantidAPI/ISpectrum.h"
 
 namespace Mantid
 {
@@ -26,10 +23,14 @@ namespace Kernel
 {
   class Logger;
 }
+namespace API
+{
+  class Progress;
+}
 
 namespace DataObjects
 {
-
+class EventWorkspaceMRU;
 
 ///Map to EventList objects, with the detector ID as the index.
 typedef std::map<detid_t, EventList*> EventListMap;

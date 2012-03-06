@@ -1,6 +1,7 @@
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/LocatedDataRef.h"
+#include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceIterator.h"
 #include "MantidAPI/WorkspaceIteratorCode.h"
 #include "MantidAPI/WorkspaceProperty.h"

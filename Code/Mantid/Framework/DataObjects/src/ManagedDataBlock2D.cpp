@@ -74,12 +74,6 @@ int ManagedDataBlock2D::minIndex() const // TODO this should return size_t but i
   return static_cast<int>(m_minIndex);
 }
 
-/// Function used by hash indexer (used by the MRUList) to ensure uniqueness
-int ManagedDataBlock2D::hashIndexFunction() const // TODO this should return size_t but it breaks lots of things
-{
-  return static_cast<int>(m_minIndex);
-}
-
 /** Flags whether the data has changed since being read in.
  *  In fact indicates whether the data has been accessed in a non-const fashion.
  *  @return True if the data has been changed.
