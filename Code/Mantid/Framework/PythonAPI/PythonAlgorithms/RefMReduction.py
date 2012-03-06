@@ -58,7 +58,6 @@ class RefMReduction(PythonAlgorithm):
                              Description="If true, the DIRPIX parameter will be replace by the given value")
         self.declareProperty("DirectPixel", 0.0)
         
-        self.declareProperty("RemoveIntermediateWorkspaces", True)
         # Output workspace to put the transmission histo into
         self.declareWorkspaceProperty("OutputWorkspace", "", Direction.Output)
         self.declareProperty("OutputMessage", "", Direction=Direction.Output)
@@ -81,12 +80,6 @@ class RefMReduction(PythonAlgorithm):
         self._process_polarization(RefMReduction.OFF_ON)
         self._process_polarization(RefMReduction.ON_ON)
 
-        # Clean up
-        if self.getProperty("RemoveIntermediateWorkspaces"):
-            for ws in mtd.keys():
-                if ws.startswith('__'):
-                    mtd.deleteWorkspace(ws)
-                    
         self.setProperty("OutputMessage", self._output_message)
 
     def _calculate_angle(self, workspace):
@@ -356,6 +349,7 @@ class RefMReduction(PythonAlgorithm):
                     mtd.sendLogMessage("RefMReduction: no data in %s" % polarization)
                     self._output_message += "   No data for this polarization state\n"
                     mtd.deleteWorkspace(ws_name_raw)
+                    mtd.sendLogMessage("RefMReduction: deleted empty workspace")
                     return None
             else:
                 LoadEventNexus(Filename=data_file, OutputWorkspace=ws_name_raw)

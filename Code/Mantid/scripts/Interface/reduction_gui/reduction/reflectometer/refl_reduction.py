@@ -55,8 +55,11 @@ class REFLReductionScripter(BaseReductionScripter):
         if HAS_MANTID:
             script = self.to_script(None)
             try:
+                t0 = time.time()
                 exec script
+                delta_t = time.time()-t0
                 print REF_RED_OUTPUT_MESSAGE
+                print "Reduction time: %5.2g sec" % delta_t
                 # Update scripter
                 for item in self._observers:
                     if item.state() is not None:

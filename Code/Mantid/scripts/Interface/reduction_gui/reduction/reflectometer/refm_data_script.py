@@ -32,7 +32,7 @@ class DataSets(BaseScriptElement):
     # Q range
     q_min = 0.0025
     q_step = -0.01
-    q_bins = 10
+    q_bins = 40
     q_log = True
     
     # scattering angle
