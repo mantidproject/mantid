@@ -145,8 +145,9 @@ class ConvertInstrumentFile(PythonAlgorithm):
             # ENDIFELSE
 
         else:
-            
+            # Cases are not supported
             print "Instrument %s Is Not Setup For CWL, Min/Max d-spacing, and etc"
+            raise NotImplementedError("Chopper frequency %d Hz is not supported" % (chopperhertz))
 
         # ENDIFELSE
 
@@ -191,7 +192,7 @@ class ConvertInstrumentFile(PythonAlgorithm):
                     terms = line.split("Bank")[1].split()
                     bank = int(terms[0])
                     mdict[bank] = {}
-                    if terms[1] == "CWL" and len(terms) >= 4:
+                    if len(terms) >= 4 and terms[1] == "CWL":
                         # center wave length
                         cwl = float(terms[3].split("A")[0])
                         mdict[bank]["CWL"] = cwl
@@ -534,7 +535,7 @@ class ConvertInstrumentFile(PythonAlgorithm):
             pcrfilename = inputfilename
 
         # 3. Run
-        self.initConstants(60)
+        self.initConstants(self.frequency)
         if useirf is True: 
             self.parseFullprofResolutionFile(irffilename)
         self.convertToGSAS(banks, outputfilename)
