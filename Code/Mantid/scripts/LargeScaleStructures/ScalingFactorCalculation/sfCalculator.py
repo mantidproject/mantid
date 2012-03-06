@@ -511,7 +511,10 @@ def calculateAndFit(numerator='',
         return cal1
 
 #if __name__ == '__main__':
-def calculate(string_runs=None, list_peak_back=None, output_path=None):  
+def calculate(string_runs=None, 
+              list_attenuator=None, 
+              list_peak_back=None, 
+              output_path=None):  
     """
     In this current version, the program will automatically calculates
     the scaling function for up to, and included, 6 attenuators.
@@ -523,6 +526,8 @@ def calculate(string_runs=None, list_peak_back=None, output_path=None):
         
         The string runs has to be specified this way:
         string_runs = "run#1:nbr_attenuator, run#2:nbr_attenuator...."
+        
+        list_attenuator: list of attenuators
         
         the list_peak_back is specified this way:
         list_peak_back = 
@@ -540,34 +545,32 @@ def calculate(string_runs=None, list_peak_back=None, output_path=None):
         list_runs = ['55889', '55890', '55891', '55892', '55893', '55894', 
                      '55895', '55896', '55897', '55898', '55899', '55900', 
                      '55901', '55902']
-        list_attenuator = [0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 4, 4]
-
+        
         nexus_path = '/mnt/hgfs/j35/results/'
         pre = 'REF_L_'
         nexus_path_pre = nexus_path + pre
         post = '_event.nxs'
     
         for (offset, item) in enumerate(list_runs):
-            list_runs[offset] = nexus_path_pre + list_runs[offset] + post
+            list_runs[offset] = nexus_path_pre + offset + post
 
     else:
-        #ex: string_runs="/mnt/hgfs/j35/REF_L_55889_event.nxs:0, 
-        # /mnt/hgfs/j35/REF_L_55890_event.nxs:1, 
-        # /mnt/hgfs/j35/REF_L_55891_event.nxs:1, 
-        # /mnt/hgfs/j35/REF_L_55892_event.nxs:1, 
-        # /mnt/hgfs/j35/REF_L_55893_event.nxs:1, 
-        # /mnt/hgfs/j35/REF_L_55894_event.nxs:1, 
-        # /mnt/hgfs/j35/REF_L_55895_event.nxs:1, 
-        # /mnt/hgfs/j35/REF_L_55896_event.nxs:2, 
-        # /mnt/hgfs/j35/REF_L_55897_event.nxs:2, 
-        # /mnt/hgfs/j35/REF_L_55898_event.nxs:2, 
-        # /mnt/hgfs/j35/REF_L_55899_event.nxs:3, 
-        # /mnt/hgfs/j35/REF_L_55900_event.nxs:3, 
-        # /mnt/hgfs/j35/REF_L_55901_event.nxs:4, 
-        # /mnt/hgfs/j35/REF_L_55902_event.nxs:4"
         dico = createIndividualList(string_runs)
         list_runs = dico['list_runs']
+
+        for (offset, item) in enumerate(list_runs):
+            _File = FileFinder.findRuns("REF_L%d" %item)
+            if len(_File)>0 and os.path.isfile(_File[0]): 
+                list_runs[offset] = _File[0]
+            else:
+                msg = "RefLReduction: could not find run %d\n" % _run
+                msg += "Add your data folder to your User Data Directories in the File menu"
+                raise RuntimeError(msg)
+                
         list_attenuator = dico['list_attenuator']
+
+    if (list_attenuator is None):
+        list_attenuator = [0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 4, 4]
 
     if (list_peak_back is None):
         list_peak_back = zeros((len(list_runs), 4))   #[peak_min, peak_max, back_min, back_max]
@@ -665,7 +668,9 @@ def calculate(string_runs=None, list_peak_back=None, output_path=None):
         if (output_path is None):
             output_path = '/home/j35/Desktop/'
         
-        output_pre = 'SFcalculator_lr' + str(lambdaRequest[0][0])
+        _lambdaRequest = "{0:.2f}".format(lambdaRequest[0][0])
+        
+        output_pre = 'SFcalculator_lr' + str(_lambdaRequest)
         output_ext = '.txt'
         output_file = output_path + output_pre + output_ext        
         

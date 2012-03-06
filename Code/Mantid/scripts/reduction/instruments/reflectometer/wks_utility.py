@@ -797,18 +797,32 @@ def applySF(InputWorkspace,
     Function that apply scaling factor to data using sfCalculator.txt
     file created by the sfCalculator procedure
     """
-        
+    
+    print 'Apply SF'    
     #retrieve the lambdaRequested and check if we can find the sfCalculator
     #file corresponding to that lambda
     _lr = getLambdaValue(mtd[InputWorkspace])
     _lr_value = _lr[0]
-
-    output_path= sfCalculatorPath
-    output_pre = 'SFcalculator_lr' + str(_lr_value)
+    _lr_value = float("{0:.2f}".format(_lr_value))
+    print '-> Lambda Requested: {0:2f}'.format(_lr_value)
+    delta_range = 0.05
+#    print '-> using delta range: {0:2f}'.format(delta_range)
+    list_of_delta = _lr_value + 0.01 * (numpy.arange(11) - 5)
+    list_of_output_pre = ''
     output_ext = '.txt'
-    sfCalculatorFile = output_path+ output_pre + output_ext
-    
-    if (os.path.isfile(sfCalculatorFile)):
+    output_path= sfCalculatorPath
+    sfCalculatorFile = None
+    print '-> Checking if SF file of lambda requested exists'
+    for i in list_of_delta:
+        output_pre = 'SFcalculator_lr' + str(i)
+        _sfCalculatorFile = output_path + output_pre + output_ext
+        if (os.path.isfile(_sfCalculatorFile)):
+            sfCalculatorFile = _sfCalculatorFile
+#            print '--> File ' + _sfCalculatorFile + ' ... FOUND and will be used'
+            
+    if (sfCalculatorFile is not None):
+        
+        print '--> Using scaling facto file ' + sfCalculatorFile
         
         #parse file and put info into array
         f = open(sfCalculatorFile,'r')
@@ -828,8 +842,8 @@ def applySF(InputWorkspace,
         s1h_value = s1h[0]
         s2h_value = s2h[0]
         
-        print 's1h_value={0:f}'.format(s1h_value)
-        print 's2h_value={0:f}'.format(s2h_value)
+#        print 's1h_value={0:f}'.format(s1h_value)
+#        print 's2h_value={0:f}'.format(s2h_value)
         
         #locate the row with s1h and s2h having the right value
         s1h_precision = slitsValuePrecision * s1h_value
@@ -863,6 +877,10 @@ def applySF(InputWorkspace,
                                                   a,b,a_error,b_error)
 
                 return OutputWorkspace
+
+    else:
+        
+        print '--> scaling factor file for requested lambda NOT FOUND!'
 
     return InputWorkspace
 
