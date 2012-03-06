@@ -399,6 +399,7 @@ class DataReflWidget(BaseWidget):
             self._summary.direct_pixel_check.hide()
             self._summary.direct_pixel_edit.hide()
             self._summary.q_bins_label.hide()
+            self._summary.ref_pix_estimate.hide()
             
             # Output directory
             self._summary.outdir_label.hide()
