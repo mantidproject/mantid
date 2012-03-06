@@ -373,7 +373,6 @@ if __name__ == "__main__":
     
     if platform.system() == 'Windows':
         os.environ['MANTIDPATH'] = args.mantidpath
-        print platform.system()
     
     initialize_Mantid(args.mantidpath)
     intialize_files()
