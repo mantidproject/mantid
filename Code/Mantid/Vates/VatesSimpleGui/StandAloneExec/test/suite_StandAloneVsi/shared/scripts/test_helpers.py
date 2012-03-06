@@ -22,6 +22,7 @@ def open_file(filename):
     for dir in dirs:
         if '' == dir:
             continue
+        dir = fix_slashes(dir)
         #test.log("Clicking Dir %s" % dir)
         waitForObjectItem(":Open File:  (open multiple files with <ctrl> key.).Files_QTreeView", dir)
         doubleClickItem(":Open File:  (open multiple files with <ctrl> key.).Files_QTreeView", dir, 27, 11, 0, Qt.LeftButton)

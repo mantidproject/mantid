@@ -18,10 +18,6 @@ def run_script(sname):
     activateItem(waitForObjectItem(":MantidPlot: Python Window_QMenuBar", "Execute"))
     activateItem(waitForObjectItem(":MantidPlot: Python Window.Execute_QMenu", "Execute"))
     waitForObject(":MantidPlot: Python Window.Script Output - Status: Stopped_ScriptOutputDock")
-    
-# This function is here to "fix" the workspace names for Squish's kind of silly convention.
-def fix_slashes(ws):
-    return ws.replace('_', '\\_')
 
 def get_workspace(workspace_name):
     workspace_tree = waitForObject(":Workspaces.WorkspaceTree_MantidTreeWidget")

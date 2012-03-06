@@ -1,3 +1,8 @@
+# This function is here to "fix" names for TreeViews and ContextMenus. Squish really
+# HATES underscores in these things.
+def fix_slashes(ws):
+    return ws.replace('_', '\\_')
+
 def apply_ptw_settings():
     clickButton(":objectInspector.Apply_QPushButton")
 
