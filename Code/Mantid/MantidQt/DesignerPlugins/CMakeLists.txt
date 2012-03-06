@@ -46,9 +46,8 @@ endif(UNITY_BUILD)
 add_library ( DesignerPlugins ${SRC_FILES} ${INC_FILES} ${MOCCED_FILES} )
 
 # Change the destination of the target as Qt expects this in a directory called "designer"
-# This finds the qt plugins install folder. "/usr/lib/qt4/plugins" for me.
-_qt4_query_qmake(QT_INSTALL_PLUGINS qt_plugins_dir)
-SET_TARGET_OUTPUT_DIRECTORY( DesignerPlugins ${qt_plugins_dir}/designer )
+# if you set QT_PLUGIN_PATH environment variable this might put it there???
+SET_TARGET_OUTPUT_DIRECTORY( DesignerPlugins ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/designer )
 
 # Set the name of the generated library
 set_target_properties ( DesignerPlugins PROPERTIES OUTPUT_NAME ${LIB_NAME} )
