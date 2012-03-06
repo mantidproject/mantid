@@ -329,7 +329,7 @@ namespace Mantid
         if (runinfo.hasProperty("iparm_file"))
         {
           Kernel::Property* prop = runinfo.getProperty("iparm_file");
-          if (prop != NULL)
+          if (prop != NULL && (!prop->value().empty()))
           {
             std::stringstream line;
             line << "Instrument parameter file: "
