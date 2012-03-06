@@ -99,11 +99,15 @@ include_directories ( ../../QtPropertyBrowser/src )
 
 qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
 
-
 set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
 
 qt4_wrap_ui ( UI_HDRS ${UI_FILES} ) 
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
+
+find_package ( QScintilla REQUIRED )
+include_directories ( ${QSCINTILLA_INCLUDE_DIR} )
+add_definitions ( -DQSCINTILLA_DLL )     # Will only have an effect on Windows (as is desired)
+
 
 # For Windows:
 add_definitions ( -DIN_MANTIDQT_MANTIDWIDGETS )
@@ -111,7 +115,10 @@ add_definitions ( -DIN_MANTIDQT_MANTIDWIDGETS )
 ADD_PRECOMPILED_HEADER( inc/MantidQtMantidWidgets/PrecompiledHeader.h MantidQtMantidWidgets src/PrecompiledHeader.cpp ALL_SRC INC_FILES )
 add_library ( MantidWidgets ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
-target_link_libraries ( MantidWidgets MantidQtAPI QtPropertyBrowser ${QT_LIBRARIES} ${QWT_LIBRARIES} )
+target_link_libraries ( MantidWidgets MantidQtAPI QtPropertyBrowser 
+    ${QT_LIBRARIES} ${QWT_LIBRARIES} 
+    ${QSCINTILLA_LIBRARIES}
+    )
 
 ###########################################################################
 # Installation settings

@@ -22,8 +22,7 @@ PluginCollectionInterface::PluginCollectionInterface(QObject *parent) : QObject(
   m_widgets.append(new FileFinderPlugin(this));
   m_widgets.append(new InstrumentSelectorPlugin(this));
   m_widgets.append(new WorkspaceSelectorPlugin(this));
-
-  //  m_widgets.append(new ScriptEditorPlugin(this));
+  m_widgets.append(new ScriptEditorPlugin(this));
 
   // for now adding the fit browser to qt-designer is in 
   // development stage - only uncomment once they plugin
