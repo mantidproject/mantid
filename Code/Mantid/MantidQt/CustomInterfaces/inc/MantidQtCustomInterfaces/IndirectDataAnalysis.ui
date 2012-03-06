@@ -1039,7 +1039,7 @@
      </widget>
      <widget class="QWidget" name="tabAbsF2P" >
       <attribute name="title" >
-       <string>Abs (F2PY)</string>
+       <string>Calculate Corrections</string>
       </attribute>
       <layout class="QVBoxLayout" name="layoutAbsF2P" >
        <item>
@@ -1600,17 +1600,17 @@
            </item>
            <item>
             <property name="text" >
-             <string>Both</string>
-            </property>
-           </item>
-           <item>
-            <property name="text" >
              <string>Wavelength</string>
             </property>
            </item>
            <item>
             <property name="text" >
              <string>Angle</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>Both</string>
             </property>
            </item>
           </widget>

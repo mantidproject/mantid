@@ -27,6 +27,10 @@
 #include <QDesktopServices>
 #include <QUrl>
 
+#include <QPalette>
+#include <QColor>
+#include <QApplication>
+
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1125
@@ -481,6 +485,9 @@ void IndirectDataAnalysis::setupAbsorptionF2Py()
   m_uiForm.absp_ler1->setValidator(m_valDbl);
   m_uiForm.absp_ler2->setValidator(m_valDbl);
   m_uiForm.absp_ler3->setValidator(m_valDbl);
+
+  // "Nudge" color of title of QGroupBox to change.
+  absf2pUseCanChecked(m_uiForm.absp_ckUseCan->isChecked());
 }
 
 void IndirectDataAnalysis::setupAbsCor()
@@ -2263,8 +2270,8 @@ void IndirectDataAnalysis::help()
     url += ":FuryFit";
   else if ( tabName == "ConvFit" )
     url += ":ConvFit";
-  else if ( tabName == "Abs (F2PY)" )
-    url += ":AbsF2P";
+  else if ( tabName == "Calculate Corrections" )
+    url += ":CalcCor";
   else if ( tabName == "Apply Corrections" )
     url += ":AbsCor";
   QDesktopServices::openUrl(QUrl(url));
@@ -2364,13 +2371,41 @@ void IndirectDataAnalysis::absf2pShape(int index)
   else if ( index == 1 ) { m_uiForm.absp_lbAvar->setText("Step Size"); }
 }
 
-void IndirectDataAnalysis::absf2pUseCanChecked(bool value)
+void IndirectDataAnalysis::absf2pUseCanChecked(bool checked)
 {
-  m_uiForm.absp_gbCan->setEnabled(value);
+  // Disable thickness fields/labels/asterisks.
+  m_uiForm.absp_lbtc1->setEnabled(checked);
+  m_uiForm.absp_lbtc2->setEnabled(checked);
+  m_uiForm.absp_letc1->setEnabled(checked);
+  m_uiForm.absp_letc2->setEnabled(checked);
+  m_uiForm.absp_valtc1->setVisible(checked);
+  m_uiForm.absp_valtc2->setVisible(checked);
 
-  m_uiForm.absp_lbR3->setEnabled(value);
-  m_uiForm.absp_ler3->setEnabled(value);
-  m_uiForm.absp_valR3->setEnabled(value);
+  // Disable R3 field/label/asterisk.
+  m_uiForm.absp_lbR3->setEnabled(checked);
+  m_uiForm.absp_ler3->setEnabled(checked);
+  m_uiForm.absp_valR3->setVisible(checked);
+
+  // Disable "Can Details" group and asterisks.
+  m_uiForm.absp_gbCan->setEnabled(checked);
+  m_uiForm.absp_valCanden->setVisible(checked);
+  m_uiForm.absp_valCansigs->setVisible(checked);
+  m_uiForm.absp_valCansiga->setVisible(checked);
+  
+  // Workaround for "disabling" title of the QGroupBox.
+  QPalette palette;
+  if(checked)
+    palette.setColor(
+      QPalette::Disabled, 
+      QPalette::WindowText,
+      QApplication::palette().color(QPalette::Disabled, QPalette::WindowText));
+  else
+    palette.setColor(
+      QPalette::Active, 
+      QPalette::WindowText,
+      QApplication::palette().color(QPalette::Active, QPalette::WindowText));
+
+  m_uiForm.absp_gbCan->setPalette(palette);
 }
 
 void IndirectDataAnalysis::absf2pTCSync()

@@ -161,7 +161,7 @@ namespace MantidQt
       // Absorption (F2PY)
       void absf2pRun();
       void absf2pShape(int index);
-      void absf2pUseCanChecked(bool value);
+      void absf2pUseCanChecked(bool checked);
       void absf2pTCSync();
 
       // abscor (PolynomialCorrection based)
