@@ -5,8 +5,8 @@ from pylab import *
 
 class sfCalculator():      
     
-    tof_min = 10000  #microS
-    tof_max = 21600  #microS
+    tof_min = None  #microS
+    tof_max = None  #microS
 
     #range of x pixel to use in the X integration (we found out that there 
     #is a frame effect that introduces noise)
@@ -55,7 +55,15 @@ class sfCalculator():
     y_axis_error_ratio = None
     x_axis_ratio = None
             
-    def __init__(self, numerator=None, denominator=None):
+    def __init__(self, numerator=None, denominator=None,
+                 tof_range=None):
+        
+        if (tof_range is None):
+            self.tof_min = 10000
+            self.tof_max = 20000
+        else:
+            self.tof_min = tof_range[0]
+            self.tof_max = tof_range[1]
         
         self.numerator = numerator
         self.denominator = denominator
@@ -305,12 +313,14 @@ class sfCalculator():
                         DataY=self.y_axis_ratio,
                         DataE=self.y_axis_error_ratio,
                         Nspec=1)
+
         Fit(InputWorkspace='DataToFit',
             Function="name=UserFunction, Formula=a+b*x, a=1, b=2",
             Output='Res')
         res = mtd['Res_Parameters']
+        
         self.a = res.getDouble("Value", 0)
-        self.b = res.getDouble("Value", 1)
+        self.b = res.getDouble("Value", 1)        
         self.error_a = res.getDouble("Error", 0)
         self.error_b = res.getDouble("Error", 1)            
 
@@ -486,9 +496,12 @@ def calculateAndFit(numerator='',
                     denominator='',
                     list_peak_back_numerator=None,
                     list_peak_back_denominator=None,
-                    list_objects=[]):                                       
+                    list_objects=[],
+                    tof_range=None):                                       
 
-    cal1 = sfCalculator(numerator=numerator, denominator=denominator)
+    cal1 = sfCalculator(numerator=numerator, 
+                        denominator=denominator,
+                        tof_range=tof_range)
                 
     cal1.setNumerator(minPeak=list_peak_back_numerator[0],
                       maxPeak=list_peak_back_numerator[1],
@@ -514,7 +527,8 @@ def calculateAndFit(numerator='',
 def calculate(string_runs=None, 
               list_attenuator=None, 
               list_peak_back=None, 
-              output_path=None):  
+              output_path=None,
+              tof_range=None):  
     """
     In this current version, the program will automatically calculates
     the scaling function for up to, and included, 6 attenuators.
@@ -552,18 +566,18 @@ def calculate(string_runs=None,
         post = '_event.nxs'
     
         for (offset, item) in enumerate(list_runs):
-            list_runs[offset] = nexus_path_pre + offset + post''
+            list_runs[offset] = nexus_path_pre + offset + post
 
     else:
         dico = createIndividualList(string_runs)
         list_runs = dico['list_runs']
 
         for (offset, item) in enumerate(list_runs):
-            _File = FileFinder.findRuns("REF_L%d" %item)
+            _File = FileFinder.findRuns("REF_L%d" %int(item))
             if len(_File)>0 and os.path.isfile(_File[0]): 
                 list_runs[offset] = _File[0]
             else:
-                msg = "RefLReduction: could not find run %d\n" % _run
+                msg = "RefLReduction: could not find run %s\n" %item
                 msg += "Add your data folder to your User Data Directories in the File menu"
                 raise RuntimeError(msg)
                 
@@ -650,9 +664,10 @@ def calculate(string_runs=None,
             
                 cal = calculateAndFit(numerator=list_runs[index_numerator],
                                        denominator=list_runs[index_denominator],
-                                       list_peak_back_numerator=list_peak_back[index_numerator,],
-                                       list_peak_back_denominator=list_peak_back[index_denominator,],
-                                       list_objects=list_objects)                                       
+                                       list_peak_back_numerator=list_peak_back[index_numerator],
+                                       list_peak_back_denominator=list_peak_back[index_denominator],
+                                       list_objects=list_objects,
+                                       tof_range=tof_range)                                       
                 
                 recordSettings(a, b, error_a, error_b, name, cal)
                                 
@@ -663,7 +678,7 @@ def calculate(string_runs=None,
             #record S1H and S2H
             finalS1H.append(S1H[index_numerator])
             finalS2H.append(S2H[index_numerator])
-            
+
         #output the fitting parameters in an ascii
         if (output_path is None):
             output_path = '/home/j35/Desktop/'
@@ -672,7 +687,7 @@ def calculate(string_runs=None,
         
         output_pre = 'SFcalculator_lr' + str(_lambdaRequest)
         output_ext = '.txt'
-        output_file = output_path + output_pre + output_ext        
+        output_file = output_path + '/' + output_pre + output_ext        
         
         outputFittingParameters(a, b, error_a, error_b, finalS1H, finalS2H, output_file)
 
