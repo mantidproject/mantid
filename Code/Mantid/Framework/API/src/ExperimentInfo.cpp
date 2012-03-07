@@ -608,10 +608,22 @@ namespace API
             a_angles[i] = detectors[i]->getPhi()*180.0/M_PI;
           }
         }
-        file->writeData("detector_nummber", detectorIDs);
-        if(sample) file->writeData("polar_angle", p_angles);
+        file->writeData("detector_number", detectorIDs);
         file->writeData("azimuthal_angle", a_angles);
-        if(sample) file->writeData("distance", distances);
+        file->openData("azimuthal_angle");
+        file->putAttr("units","degree");
+        file->closeData();
+        if(sample) 
+        {
+          file->writeData("polar_angle", p_angles);
+          file->openData("polar_angle");
+          file->putAttr("units","degree");
+          file->closeData();
+          file->writeData("distance", distances);
+          file->openData("distance");
+          file->putAttr("units","metre");
+          file->closeData();
+        }
       }
       file->closeGroup(); // detectors
 
@@ -639,14 +651,25 @@ namespace API
             Kernel::V3D pos = monitors[i]->getPos() - sample_pos;
             pos.getSpherical( mon_distances[i], mon_p_angles[i], mon_a_angles[i]);
           } else {
-            mon_distances[i] = monitors[i]->getDistance( *sample );
             mon_a_angles[i] = monitors[i]->getPhi()*180.0/M_PI;
           }
         }
-        file->writeData("monitor_nummber", monitorIDs);
-        if(sample) file->writeData("polar_angle", mon_p_angles);
+        file->writeData("dectector_number", monitorIDs);
         file->writeData("azimuthal_angle", mon_a_angles);
-        if(sample) file->writeData("distance", mon_distances);
+        file->openData("azimuthal_angle");
+        file->putAttr("units","degree");
+        file->closeData();
+        if(sample)
+        {
+          file->writeData("polar_angle", mon_p_angles);
+          file->openData("polar_angle");
+          file->putAttr("units","degree");
+          file->closeData();
+          file->writeData("distance", mon_distances);
+          file->openData("distance");
+          file->putAttr("units","metre");
+          file->closeData();
+        }
       }
       file->closeGroup(); // monitors
     }
