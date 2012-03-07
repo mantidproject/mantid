@@ -1,3 +1,7 @@
+"""Defines tests for the simple property declarations types within 
+Python algorithms
+"""
+
 import unittest
 import testhelpers
 

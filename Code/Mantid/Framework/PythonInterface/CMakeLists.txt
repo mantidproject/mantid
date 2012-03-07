@@ -96,6 +96,7 @@ set ( TEST_PY_FILES
   test/python/PropertyWithValueTest.py
   test/python/PythonAlgorithmPropertiesTest.py
   test/python/PythonAlgorithmTraitsTest.py
+  test/python/PythonAlgorithmWorkspacePropertyTest.py
   test/python/ReferenceFrameTest.py
   test/python/RunTest.py
   test/python/SimpleAPITest.py
@@ -105,6 +106,7 @@ set ( TEST_PY_FILES
   test/python/UnitCellTest.py
   test/python/WorkspaceTest.py
   test/python/WorkspaceGroupTest.py
+  test/python/WorkspacePropertiesTest.py
 )
 
 set ( PYTEST_HELPERS test/python/testhelpers.py )

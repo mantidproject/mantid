@@ -1,3 +1,7 @@
+"""Defines tests for the traits within Python algorithms
+such as name, version etc.
+"""
+
 import unittest
 import testhelpers
 from mantid import (PythonAlgorithm, AlgorithmProxy, Algorithm, IAlgorithm, 
