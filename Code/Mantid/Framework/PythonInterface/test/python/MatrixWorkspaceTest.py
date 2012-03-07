@@ -1,10 +1,11 @@
-import unittest,sys
-
+import unittest
+import sys 
+import math
 from testhelpers import run_algorithm, can_be_instantiated
-
 from mantid.api import (MatrixWorkspace, WorkspaceProperty_Workspace, Workspace,
                         ExperimentInfo, AnalysisDataService)
 from mantid.geometry import Detector
+from mantid.kernel import V3D
 
 import numpy as np
 
@@ -70,6 +71,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertTrue(isinstance(det, Detector))
         self.assertEquals(det.getID(), 1)
         self.assertFalse(det.isMasked())
+        self.assertAlmostEqual(math.pi, det.getTwoTheta(V3D(0,0,11), V3D(0,0,11)))
 
     def test_spectrum_retrieval(self):
         # Spectrum
