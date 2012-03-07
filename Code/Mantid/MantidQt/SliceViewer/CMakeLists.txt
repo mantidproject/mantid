@@ -141,7 +141,8 @@ else ()
 
 	if ( PYUNITTEST_FOUND )
 	  pyunittest_add_test ( SliceViewerMantidPlotTest.py ${TEST_PY_FILES} "" )
-	  add_dependencies ( SliceViewerMantidPlotTest.py MantidQt Algorithms )
+	  add_dependencies ( SliceViewerMantidPlotTest.py MantidQtAPI MantidWidgets CustomDialogs 
+	                     CustomInterfaces MantidQtSliceViewer Algorithms )
 	  add_dependencies ( GUITests SliceViewerMantidPlotTest.py )
 	  # Add to the 'UnitTests' group in VS
 	  set_property ( TARGET SliceViewerMantidPlotTest.py PROPERTY FOLDER "UnitTests" )
