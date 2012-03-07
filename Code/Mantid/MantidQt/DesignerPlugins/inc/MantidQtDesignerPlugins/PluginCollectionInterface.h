@@ -77,6 +77,8 @@ public: \
 
 
 //==============================================================================
+// Declare plugins for several types of widgets in MantidWidgets
+//==============================================================================
 DECLARE_WIDGET_PLUGIN(AlgorithmSelectorWidgetPlugin,
     MantidQt::MantidWidgets::AlgorithmSelectorWidget,
     "Widget for picking algorithms");

@@ -108,6 +108,7 @@ QString DesignerPlugin::includeFile() const
  */
 QString DesignerPlugin::domXml() const
 {
+  // Default name of a widget = class name, with first letter lower case.
   std::string name = this->getShortName();
   name[0] = static_cast<char>(tolower(static_cast<int>(name[0])));
 
