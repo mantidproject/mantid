@@ -611,24 +611,27 @@ bool IndirectDataAnalysis::validateAbsorptionF2Py()
       valid = false;
     }
 
-    if ( m_uiForm.absp_letc1->text() != "" )
+    if ( m_uiForm.absp_ckUseCan->isChecked() )
     {
-      m_uiForm.absp_valtc1->setText(" ");
-    }
-    else
-    {
-      m_uiForm.absp_valtc1->setText("*");
-      valid = false;
-    }
+      if ( m_uiForm.absp_letc1->text() != "" )
+      {
+        m_uiForm.absp_valtc1->setText(" ");
+      }
+      else
+      {
+        m_uiForm.absp_valtc1->setText("*");
+        valid = false;
+      }
 
-    if ( m_uiForm.absp_letc2->text() != "" )
-    {
-      m_uiForm.absp_valtc2->setText(" ");
-    }
-    else
-    {
-      m_uiForm.absp_valtc2->setText("*");
-      valid = false;
+      if ( m_uiForm.absp_letc2->text() != "" )
+      {
+        m_uiForm.absp_valtc2->setText(" ");
+      }
+      else
+      {
+        m_uiForm.absp_valtc2->setText("*");
+        valid = false;
+      }
     }
   }
 
@@ -1063,7 +1066,7 @@ void IndirectDataAnalysis::run()
   else if ( tabName == "Fury" ) { furyRun(); }
   else if ( tabName == "FuryFit" ) { furyfitRun(); }
   else if ( tabName == "ConvFit" ) { confitRun(); }
-  else if ( tabName == "Abs (F2PY)" ) { absf2pRun(); }
+  else if ( tabName == "Calculate Corrections" ) { absf2pRun(); }
   else if ( tabName == "Apply Corrections" ) { abscorRun(); }
   else { showInformationBox("This tab does not have a 'Run' action."); }
 }
@@ -2293,9 +2296,16 @@ void IndirectDataAnalysis::absf2pRun()
   if ( m_uiForm.absp_cbShape->currentText() == "Flat" )
   {
     geom = "flt";
-    size = "[" + m_uiForm.absp_lets->text() + ", " +
+    if ( m_uiForm.absp_ckUseCan->isChecked() ) 
+    {
+      size = "[" + m_uiForm.absp_lets->text() + ", " +
       m_uiForm.absp_letc1->text() + ", " +
       m_uiForm.absp_letc2->text() + "]";
+    }
+    else
+    {
+      size = "[" + m_uiForm.absp_lets->text() + ", 0.0, 0.0]";
+    }
   }
   else if ( m_uiForm.absp_cbShape->currentText() == "Cylinder" )
   {
