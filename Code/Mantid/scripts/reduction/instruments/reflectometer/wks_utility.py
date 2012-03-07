@@ -811,23 +811,20 @@ def applySF(InputWorkspace,
     list_of_output_pre = ''
     output_ext = '.txt'    
     sfCalculatorFile = None
-    print '-> Checking if SF file of lambda requested exists'
     for i in list_of_delta:
         output_pre = 'SFcalculator_lr' + str(i)
         _sfCalculatorFile = output_pre + output_ext
-        print '_sfCalculatorFile: ' + _sfCalculatorFile
         _sfCalculatorFileFullPath = FileFinder.getFullPath(_sfCalculatorFile)
-        print '_sfCalculatorFileFullPath: ' + _sfCalculatorFileFullPath
         if (os.path.isfile(_sfCalculatorFileFullPath)):
-            sfCalculatorFileFullPath = _sfCalculatorFileFullPath
-            print '--> File ' + _sfCalculatorFile + ' ... FOUND and will be used'
+            sfCalculatorFile = _sfCalculatorFileFullPath
+            print '-> File ' + _sfCalculatorFile + ' ... FOUND and will be used'
             break
-        else:
-            print '--> File ' + _sfCalculatorFile + ' ... NOT FOUND'
+#        else:
+#            print '--> File ' + _sfCalculatorFile + ' ... NOT FOUND'
+            
+    
             
     if (sfCalculatorFile is not None):
-        
-        print '--> Using scaling factor file ' + sfCalculatorFile
         
         #parse file and put info into array
         f = open(sfCalculatorFile, 'r')
@@ -885,7 +882,7 @@ def applySF(InputWorkspace,
 
     else:
         
-        print '--> scaling factor file for requested lambda NOT FOUND!'
+        print '-> scaling factor file for requested lambda NOT FOUND!'
 
     return InputWorkspace
 
