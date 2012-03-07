@@ -1024,11 +1024,12 @@ QwtPlotCurve* IndirectDataAnalysis::plotMiniplot(QwtPlot* plot, QwtPlotCurve* cu
     return NULL;
   }
 
-  const QVector<double> dataX = QVector<double>::fromStdVector(ws->readX(index));
-  const QVector<double> dataY = QVector<double>::fromStdVector(ws->readY(index));
+  using Mantid::MantidVec;
+  const MantidVec & dataX = ws->readX(index);
+  const MantidVec & dataY = ws->readY(index);
 
   curve = new QwtPlotCurve();
-  curve->setData(dataX, dataY);
+  curve->setData(&dataX[0], &dataY[0], static_cast<int>(ws->blocksize()));
   curve->attach(plot);
 
   plot->replot();
