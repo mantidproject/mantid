@@ -82,7 +82,7 @@ cd install
 
 echo "Starting Packaging"
 
-cpack -D CPACK_DEBIAN_PACKAGE_MAINTAINER="Owen Arnold, Martyn Gigg" -D CPACK_PACKAGING_INSTALL_PREFIX=/usr -G DEB --config ../build/Applications/ParaView/CPackParaView${dev_tag}Config.cmake
+cpack -D CPACK_DEBIAN_PACKAGE_DEPENDS=libqt4-dev -D CPACK_DEBIAN_PACKAGE_MAINTAINER="Owen Arnold, Martyn Gigg" -D CPACK_PACKAGING_INSTALL_PREFIX=/usr -G DEB --config ../build/Applications/ParaView/CPackParaView${dev_tag}Config.cmake
 
 echo "Finished Packaging"
 
