@@ -1057,65 +1057,6 @@ bool MantidUI::drop(QDropEvent* e)
   return false;
 }
 
-//void MantidUI::getSelectedAlgorithm(QString& algName, int& version)
-//{
-//  QList<QTreeWidgetItem*> items = m_exploreAlgorithms->m_tree->selectedItems();
-//  if ( items.size() == 0 )
-//  {
-//    //typed selection
-//    int i = m_exploreAlgorithms->m_findAlg->currentIndex(); //selected index in the combobox, could be from an old selection
-//    QString itemText = m_exploreAlgorithms->m_findAlg->itemText(i); //text in the combobox at the selected index
-//    QString typedText = m_exploreAlgorithms->m_findAlg->currentText(); //text as typed in the combobox
-//    if (i < 0 || itemText != typedText)
-//    {
-//      try
-//      {
-//        Mantid::API::IAlgorithm_sptr alg =Mantid::API::AlgorithmManager::Instance().createUnmanaged(typedText.toStdString(), -1);
-//        algName = QString::fromStdString(alg->name());
-//        version = alg->version();
-//      }
-//      catch ( std::runtime_error &) // not found
-//      {
-//        algName = "";
-//        version = -99;
-//      }
-//    }
-//    else
-//    {
-//      algName = itemText;
-//      version = -1;
-//    }
-//  }
-//  else if ( items[0]->childCount() != 0 && !items[0]->text(0).contains(" v."))
-//  {
-//    algName = "";
-//    version = 0;
-//  }
-//  else
-//  {
-//    QString str = items[0]->text(0);
-//    QStringList lst = str.split(" v.");
-//    algName = lst[0];
-//    version = lst[1].toInt();
-//  }
-//}
-//
-//void MantidUI::executeAlgorithm()
-//{
-//  QString algName;
-//  int version;
-//  m_exploreAlgorithms->m_selector->getSelectedAlgorithm(algName, version);
-//  if (version != -99) //not found, but we have already checked and we're fine with that
-//  {
-//    if (algName.isEmpty())
-//    {
-//      QMessageBox::warning(appWindow(),"Mantid","Please select an algorithm");
-//      return;
-//    }
-//    executeAlgorithm(algName, version);
-//  }
-//}
-
 /** 
 * Run the named algorithm asynchronously 
 */ 

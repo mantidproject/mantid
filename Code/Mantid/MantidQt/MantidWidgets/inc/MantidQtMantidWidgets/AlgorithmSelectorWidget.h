@@ -29,15 +29,13 @@ namespace MantidWidgets
   public:
     AlgorithmSelectorWidget(QWidget *parent);
     virtual ~AlgorithmSelectorWidget();
-
-    void findAlgTextChanged(const QString& text);
-    void treeSelectionChanged();
-    void selectionChanged(const QString& algName);
     void getSelectedAlgorithm(QString& algName, int& version);
 
   public slots:
     void update();
     void executeSelected();
+    void findAlgTextChanged(const QString& text);
+    void treeSelectionChanged();
 
   signals:
     void executeAlgorithm(const QString &, int);
@@ -45,10 +43,7 @@ namespace MantidWidgets
   protected:
     AlgorithmTreeWidget *m_tree;
     FindAlgComboBox* m_findAlg;
-    QPushButton *m_runningButton;
-    QHBoxLayout * m_runningLayout;
-    bool m_treeChanged;
-    bool m_findAlgChanged;
+    QPushButton *m_execButton;
 
   };
 

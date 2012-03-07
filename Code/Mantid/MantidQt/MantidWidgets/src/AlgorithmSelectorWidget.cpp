@@ -18,40 +18,37 @@ namespace MantidWidgets
   AlgorithmSelectorWidget::AlgorithmSelectorWidget(QWidget *parent)
   : QWidget(parent)
   {
-    QFrame *f = new QFrame(this);
-
-    m_tree = new AlgorithmTreeWidget(f);
-    m_tree->setHeaderLabel("Algorithms");
-    connect(m_tree,SIGNAL(itemSelectionChanged()),this,SLOT(treeSelectionChanged()));
 
     QHBoxLayout * buttonLayout = new QHBoxLayout();
-    buttonLayout->setName("testC");
-    QPushButton *execButton = new QPushButton("Execute");
-    m_findAlg = new FindAlgComboBox;
-    m_findAlg->setEditable(true);
-    m_findAlg->completer()->setCompletionMode(QCompleter::PopupCompletion);
 
-    connect(m_findAlg,SIGNAL(editTextChanged(const QString&)),
-        this,SLOT(findAlgTextChanged(const QString&)));
-
-    // Connect enter and double-clicked to execute
-    connect(m_findAlg,SIGNAL(enterPressed()),
-        this,SLOT(executeSelected()));
+    m_tree = new AlgorithmTreeWidget(this);
+    m_tree->setHeaderLabel("Algorithms");
+    connect(m_tree,SIGNAL(itemSelectionChanged()),
+        this,SLOT(treeSelectionChanged()));
     connect(m_tree,SIGNAL(executeAlgorithm(const QString &, int)),
         this,SLOT(executeSelected()));
 
-    buttonLayout->addWidget(execButton);
+    m_findAlg = new FindAlgComboBox;
+    m_findAlg->setEditable(true);
+    m_findAlg->completer()->setCompletionMode(QCompleter::PopupCompletion);
+    connect(m_findAlg,SIGNAL(enterPressed()),
+        this,SLOT(executeSelected()));
+    connect(m_findAlg,SIGNAL(editTextChanged(const QString&)),
+        this,SLOT(findAlgTextChanged(const QString&)));
+
+    m_execButton = new QPushButton("Execute");
+    connect(m_execButton,SIGNAL(clicked()),
+        this,SLOT(executeSelected()));
+    buttonLayout->addWidget(m_execButton);
+
     buttonLayout->addWidget(m_findAlg);
     buttonLayout->addStretch();
 
     // Layout the tree and combo box
-    QVBoxLayout * layout = new QVBoxLayout();
-    f->setLayout(layout);
+    QVBoxLayout * layout = new QVBoxLayout(this, 0 /*border*/, 4 /*spacing*/);
+    this->setLayout(layout);
     layout->addLayout(buttonLayout);
     layout->addWidget(m_tree);
-
-    m_treeChanged = false;
-    m_findAlgChanged = false;
 
   }
     
@@ -91,11 +88,10 @@ namespace MantidWidgets
   {
     int i = m_findAlg->findText(text,Qt::MatchFixedString);
     if (i >= 0) m_findAlg->setCurrentIndex(i);
-    if (!m_treeChanged)
-    {
-      m_findAlgChanged = true;
-      selectionChanged(text);
-    }
+    // De-select from the tree
+    m_tree->blockSignals(true);
+    m_tree->setCurrentIndex(QModelIndex());
+    m_tree->blockSignals(false);
   }
 
   //---------------------------------------------------------------------------
@@ -105,21 +101,10 @@ namespace MantidWidgets
     QString algName;
     int version;
     this->getSelectedAlgorithm(algName,version);
-    if (!m_findAlgChanged)
-    {
-      m_treeChanged = true;
-      this->selectionChanged(algName);
-    }
-  }
-
-  //---------------------------------------------------------------------------
-  /** Select the right algo in both boxes */
-  void AlgorithmSelectorWidget::selectionChanged(const QString& algName)
-  {
-    if (m_treeChanged) m_findAlg->setCurrentIndex(m_findAlg->findText(algName,Qt::MatchFixedString));
-    if (m_findAlgChanged) m_tree->setCurrentIndex(QModelIndex());
-    m_treeChanged = false;
-    m_findAlgChanged = false;
+    // Select in the combo box
+    m_findAlg->blockSignals(true);
+    m_findAlg->setCurrentIndex(m_findAlg->findText(algName,Qt::MatchFixedString));
+    m_findAlg->blockSignals(false);
   }
 
   //---------------------------------------------------------------------------
@@ -355,17 +340,9 @@ namespace MantidWidgets
     QString typedText = this->currentText(); //text as typed in the combobox
     if (i < 0 || itemText != typedText)
     {
-      try
-      {
-        Mantid::API::IAlgorithm_sptr alg =Mantid::API::AlgorithmManager::Instance().createUnmanaged(typedText.toStdString(), -1);
-        algName = QString::fromStdString(alg->name());
-        version = alg->version();
-      }
-      catch ( std::runtime_error &) // not found
-      {
-        algName = "";
-        version = -99;
-      }
+      // Typed text has priority over selected item
+      algName = typedText;
+      version = -1;
     }
     else
     {
