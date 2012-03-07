@@ -97,6 +97,10 @@ class ReflData(object):
             sip.delete(self._label)
         if self._edit_ctrl is not None:
             sip.delete(self._edit_ctrl)
+        if self._low_skip_ctrl is not None:
+            sip.delete(self._low_skip_ctrl)
+        if self._high_skip_ctrl is not None:
+            sip.delete(self._high_skip_ctrl)
         if self._layout is not None:
             sip.delete(self._layout)
 
