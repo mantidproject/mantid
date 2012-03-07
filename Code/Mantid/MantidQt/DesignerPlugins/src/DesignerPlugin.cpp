@@ -108,19 +108,14 @@ QString DesignerPlugin::includeFile() const
  */
 QString DesignerPlugin::domXml() const
 {
+  std::string name = this->getShortName();
+  name[0] = static_cast<char>(tolower(static_cast<int>(name[0])));
+
   return QString::fromStdString(
       "<widget class=\""
       + this->name().toStdString()
       + "\" name=\""
-      + this->getShortName() +
+      + name +
       "\">\n"
-    " <property name=\"geometry\">\n"
-    "  <rect>\n"
-    "   <x>0</x>\n"
-    "   <y>0</y>\n"
-    "   <width>300</width>\n"
-    "   <height>200</height>\n"
-    "  </rect>\n"
-    " </property>\n"
     "</widget>\n");
 }

@@ -6,6 +6,10 @@
 #include "MantidQtMantidWidgets/AlgorithmSelectorWidget.h"
 #include "MantidQtDesignerPlugins/DesignerPlugin.h"
 #include "MantidQtMantidWidgets/ScriptEditor.h"
+#include "MantidQtMantidWidgets/MWRunFiles.h"
+#include "MantidQtMantidWidgets/FitPropertyBrowser.h"
+#include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
+#include "MantidQtMantidWidgets/InstrumentSelector.h"
 
 /** 
 The PluginCollectionInterface implements the interface for the plugin library and holds a 
@@ -51,48 +55,53 @@ private:
 
 
 //==============================================================================
-/** Plugin for QtDesigner for the AlgorithmSelectorWidget */
-class AlgorithmSelectorWidgetPlugin : public DesignerPlugin
-{
-public:
-  AlgorithmSelectorWidgetPlugin(QObject * parent)
-  : DesignerPlugin(parent)
-  {}
-
-  /// Returns a pointer to a newly constructed widget for this plugin wraps
-  QWidget *createWidget(QWidget *parent)
-  {
-    return new MantidQt::MantidWidgets::AlgorithmSelectorWidget(parent);
-  }
-
-  /// Returns the fully-qualified class name
-  virtual QString name() const
-  {
-    return "MantidQt::MantidWidgets::AlgorithmSelectorWidget";
-  }
+/** Macro to REALLY quickly declare a plugin for
+ * a widget in MantidWidgets
+ *
+ * @param PluginClass :: name to give your plugin
+ * @param WidgetClass :: fully-qualified name of the widget class
+ * @param ToolTip :: a string with the tooltip
+ */
+#define DECLARE_WIDGET_PLUGIN(PluginClass, WidgetClass, ToolTip) \
+class PluginClass : public DesignerPlugin { \
+public: \
+  PluginClass(QObject * parent) : DesignerPlugin(parent) {} \
+  QWidget *createWidget(QWidget *parent) \
+  { return new WidgetClass(parent); } \
+  QString name() const \
+  { return #WidgetClass; } \
+  QString toolTip() const \
+  { return ToolTip; } \
 };
 
 
 //==============================================================================
-/** Plugin for QtDesigner for the ScriptEditor */
-class ScriptEditorPlugin : public DesignerPlugin
-{
-public:
-  ScriptEditorPlugin(QObject * parent)
-  : DesignerPlugin(parent)
-  {}
+DECLARE_WIDGET_PLUGIN(AlgorithmSelectorWidgetPlugin,
+    MantidQt::MantidWidgets::AlgorithmSelectorWidget,
+    "Widget for picking algorithms");
 
-  /// Returns a pointer to a newly constructed widget for this plugin wraps
-  QWidget *createWidget(QWidget *parent)
-  {
-    return new ScriptEditor(parent);
-  }
+DECLARE_WIDGET_PLUGIN(ScriptEditorPlugin,
+    ScriptEditor,
+    "Widget for editing python script");
 
-  /// Returns the fully-qualified class name
-  virtual QString name() const
-  {
-    return "ScriptEditor";
-  }
-};
+DECLARE_WIDGET_PLUGIN(FileFinderPlugin,
+    MantidQt::MantidWidgets::MWRunFiles,
+    "Searches for the given files within the paths defined by\nMantid's datasearch.directories property");
+
+DECLARE_WIDGET_PLUGIN(InstrumentSelectorPlugin,
+    MantidQt::MantidWidgets::InstrumentSelector,
+    "Sets the current instrument within Mantid");
+
+DECLARE_WIDGET_PLUGIN(MuonFitBrowserPlugin,
+    MantidQt::MantidWidgets::MuonFitPropertyBrowser,
+    "The menu for fitting functions within Muon Analysis");
+
+DECLARE_WIDGET_PLUGIN(FitBrowserPlugin,
+    MantidQt::MantidWidgets::FitPropertyBrowser,
+    "The menu for fitting functions");
+
+DECLARE_WIDGET_PLUGIN(WorkspaceSelectorPlugin,
+    MantidQt::MantidWidgets::WorkspaceSelector,
+    "Select a workspace for use in this operation");
 
 #endif
