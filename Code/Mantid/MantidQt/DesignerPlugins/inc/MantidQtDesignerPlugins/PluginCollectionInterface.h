@@ -10,6 +10,7 @@
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/InstrumentSelector.h"
+#include "MantidQtMantidWidgets/WorkspaceSelector.h"
 
 /** 
 The PluginCollectionInterface implements the interface for the plugin library and holds a 

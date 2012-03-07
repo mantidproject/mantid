@@ -3,12 +3,6 @@
 //-------------------------------------------------------
 #include "MantidQtDesignerPlugins/PluginCollectionInterface.h"
 
-#include "MantidQtDesignerPlugins/FileFinderPlugin.h"
-#include "MantidQtDesignerPlugins/InstrumentSelectorPlugin.h"
-#include "MantidQtDesignerPlugins/WorkspaceSelectorPlugin.h"
-#include "MantidQtDesignerPlugins/FitBrowserPlugin.h"
-#include "MantidQtDesignerPlugins/MuonFitBrowserPlugin.h"
-
 
 Q_EXPORT_PLUGIN2(LIBRARY_NAME, PluginCollectionInterface)
 
