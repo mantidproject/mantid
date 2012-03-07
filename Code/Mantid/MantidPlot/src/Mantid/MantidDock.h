@@ -18,6 +18,7 @@
 #include <QSortFilterProxyModel>
 #include <QStringList>
 #include <set>
+#include "MantidQtMantidWidgets/AlgorithmSelectorWidget.h"
 
 class MantidUI;
 class ApplicationWindow;
@@ -173,14 +174,6 @@ private:
   static Mantid::Kernel::DateAndTime getLastModified(const QTreeWidgetItem*);
 };
 
-class FindAlgComboBox:public QComboBox
-{
-    Q_OBJECT
-signals:
-    void enterPressed();
-protected:
-    void keyPressEvent(QKeyEvent *e);
-};
 
 class AlgorithmDockWidget: public QDockWidget
 {
@@ -189,9 +182,6 @@ public:
     AlgorithmDockWidget(MantidUI *mui, ApplicationWindow *w);
 public slots:
     void update();
-    void findAlgTextChanged(const QString& text);
-    void treeSelectionChanged();
-    void selectionChanged(const QString& algName);
     void updateProgress(void* alg, const double p, const QString& msg, double estimatedTime, int progressPrecision);
     void algorithmStarted(void* alg);
     void algorithmFinished(void* alg);
@@ -199,31 +189,15 @@ protected:
     void showProgressBar();
     void hideProgressBar();
 
-    QTreeWidget *m_tree;
-    FindAlgComboBox* m_findAlg;
+    MantidQt::MantidWidgets::AlgorithmSelectorWidget * m_selector;
     QPushButton *m_runningButton;
     QProgressBar* m_progressBar;
     QHBoxLayout * m_runningLayout;
-    bool m_treeChanged;
-    bool m_findAlgChanged;
     QVector<void*> m_algID;
     friend class MantidUI;
 private:
     MantidUI *m_mantidUI;
 };
 
-
-class AlgorithmTreeWidget:public QTreeWidget
-{
-    Q_OBJECT
-public:
-    AlgorithmTreeWidget(QWidget *w, MantidUI *mui):QTreeWidget(w),m_mantidUI(mui){}
-    void mousePressEvent (QMouseEvent *e);
-    void mouseMoveEvent(QMouseEvent *e);
-    void mouseDoubleClickEvent(QMouseEvent *e);
-private:
-    QPoint m_dragStartPosition;
-    MantidUI *m_mantidUI;
-};
 
 #endif

@@ -1,0 +1,379 @@
+#include "MantidQtMantidWidgets/AlgorithmSelectorWidget.h"
+#include "MantidKernel/System.h"
+#include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/AlgorithmManager.h"
+
+using namespace Mantid::Kernel;
+using namespace Mantid::API;
+
+namespace MantidQt
+{
+namespace MantidWidgets
+{
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Constructor
+   */
+  AlgorithmSelectorWidget::AlgorithmSelectorWidget(QWidget *parent)
+  : QWidget(parent)
+  {
+    QFrame *f = new QFrame(this);
+
+    m_tree = new AlgorithmTreeWidget(f);
+    m_tree->setHeaderLabel("Algorithms");
+    connect(m_tree,SIGNAL(itemSelectionChanged()),this,SLOT(treeSelectionChanged()));
+
+    QHBoxLayout * buttonLayout = new QHBoxLayout();
+    buttonLayout->setName("testC");
+    QPushButton *execButton = new QPushButton("Execute");
+    m_findAlg = new FindAlgComboBox;
+    m_findAlg->setEditable(true);
+    m_findAlg->completer()->setCompletionMode(QCompleter::PopupCompletion);
+
+    connect(m_findAlg,SIGNAL(editTextChanged(const QString&)),
+        this,SLOT(findAlgTextChanged(const QString&)));
+
+    // Connect enter and double-clicked to execute
+    connect(m_findAlg,SIGNAL(enterPressed()),
+        this,SLOT(executeSelected()));
+    connect(m_tree,SIGNAL(executeAlgorithm(const QString &, int)),
+        this,SLOT(executeSelected()));
+
+    buttonLayout->addWidget(execButton);
+    buttonLayout->addWidget(m_findAlg);
+    buttonLayout->addStretch();
+
+    // Layout the tree and combo box
+    QVBoxLayout * layout = new QVBoxLayout();
+    f->setLayout(layout);
+    layout->addLayout(buttonLayout);
+    layout->addWidget(m_tree);
+
+    m_treeChanged = false;
+    m_findAlgChanged = false;
+
+  }
+    
+  //----------------------------------------------------------------------------------------------
+  /** Destructor
+   */
+  AlgorithmSelectorWidget::~AlgorithmSelectorWidget()
+  {
+  }
+  
+
+
+  //---------------------------------------------------------------------------
+  /** Update the lists of algorithms */
+  void AlgorithmSelectorWidget::update()
+  {
+    m_findAlg->update();
+    m_tree->update();
+  }
+
+
+  //---------------------------------------------------------------------------
+  /** Slot called to execute whatever is the selected algorithm
+   **/
+  void AlgorithmSelectorWidget::executeSelected()
+  {
+    QString algName;
+    int version;
+    this->getSelectedAlgorithm(algName,version);
+    emit executeAlgorithm(algName, version);
+  }
+
+
+  //---------------------------------------------------------------------------
+  /** Show the selection in the tree when it changes in the combo */
+  void AlgorithmSelectorWidget::findAlgTextChanged(const QString& text)
+  {
+    int i = m_findAlg->findText(text,Qt::MatchFixedString);
+    if (i >= 0) m_findAlg->setCurrentIndex(i);
+    if (!m_treeChanged)
+    {
+      m_findAlgChanged = true;
+      selectionChanged(text);
+    }
+  }
+
+  //---------------------------------------------------------------------------
+  /** Show the selection in the combo when it changes in the tree */
+  void AlgorithmSelectorWidget::treeSelectionChanged()
+  {
+    QString algName;
+    int version;
+    this->getSelectedAlgorithm(algName,version);
+    if (!m_findAlgChanged)
+    {
+      m_treeChanged = true;
+      this->selectionChanged(algName);
+    }
+  }
+
+  //---------------------------------------------------------------------------
+  /** Select the right algo in both boxes */
+  void AlgorithmSelectorWidget::selectionChanged(const QString& algName)
+  {
+    if (m_treeChanged) m_findAlg->setCurrentIndex(m_findAlg->findText(algName,Qt::MatchFixedString));
+    if (m_findAlgChanged) m_tree->setCurrentIndex(QModelIndex());
+    m_treeChanged = false;
+    m_findAlgChanged = false;
+  }
+
+  //---------------------------------------------------------------------------
+  /** Return the selected algorithm.
+   * The tree has priority. If nothing is selected in the tree,
+   * return the ComboBox selection */
+  void AlgorithmSelectorWidget::getSelectedAlgorithm(QString& algName, int& version)
+  {
+    algName.clear();
+    m_tree->getSelectedAlgorithm(algName, version);
+    if (algName.isEmpty())
+      m_findAlg->getSelectedAlgorithm(algName, version);
+  }
+
+
+
+  //============================================================================
+  //============================================================================
+  //============================================================================
+  //Use an anonymous namespace to keep these at file scope
+  namespace {
+
+    bool Algorithm_descriptor_less(const Algorithm_descriptor& d1,const Algorithm_descriptor& d2)
+    {
+      if (d1.category < d2.category) return true;
+      else if (d1.category == d2.category && d1.name < d2.name) return true;
+      else if (d1.category == d2.category && d1.name == d2.name && d1.version > d2.version) return true;
+
+      return false;
+    }
+
+    bool Algorithm_descriptor_name_less(const Algorithm_descriptor& d1,const Algorithm_descriptor& d2)
+    {
+      return d1.name < d2.name;
+    }
+
+  }
+
+
+
+  //============================================================================
+  //======================= AlgorithmTreeWidget ================================
+  //============================================================================
+  /** Return the selected algorithm in the tree */
+  void AlgorithmTreeWidget::getSelectedAlgorithm(QString& algName, int& version)
+  {
+    QList<QTreeWidgetItem*> items = this->selectedItems();
+    if ( items.size() == 0 )
+    {
+      // Nothing selected
+      algName = "";
+      version = 0;
+    }
+    else if ( items[0]->childCount() != 0 && !items[0]->text(0).contains(" v."))
+    {
+      algName = "";
+      version = 0;
+    }
+    else
+    {
+      QString str = items[0]->text(0);
+      QStringList lst = str.split(" v.");
+      algName = lst[0];
+      version = lst[1].toInt();
+    }
+  }
+
+
+  //---------------------------------------------------------------------------
+  /** SLOT called when clicking the mouse around the tree */
+  void AlgorithmTreeWidget::mousePressEvent (QMouseEvent *e)
+  {
+    if (e->button() == Qt::LeftButton)
+    {
+      if( !itemAt(e->pos()) ) selectionModel()->clear();
+      m_dragStartPosition = e->pos();
+    }
+
+    QTreeWidget::mousePressEvent(e);
+  }
+
+  //---------------------------------------------------------------------------
+  /** SLOT called when dragging the mouse around the tree */
+  void AlgorithmTreeWidget::mouseMoveEvent(QMouseEvent *e)
+  {
+    if (!(e->buttons() & Qt::LeftButton))
+      return;
+    if ((e->pos() - m_dragStartPosition).manhattanLength() < QApplication::startDragDistance())
+      return;
+
+    // Start dragging
+    QDrag *drag = new QDrag(this);
+    QMimeData *mimeData = new QMimeData;
+
+    mimeData->setText("Algorithm");
+    drag->setMimeData(mimeData);
+
+    Qt::DropAction dropAction = drag->exec(Qt::CopyAction | Qt::MoveAction);
+    (void) dropAction;
+  }
+
+  //---------------------------------------------------------------------------
+  /** SLOT called when double-clicking on an entry in the tree */
+  void AlgorithmTreeWidget::mouseDoubleClickEvent(QMouseEvent *e)
+  {
+    QString algName;
+    int version;
+    this->getSelectedAlgorithm(algName,version);
+    if ( ! algName.isEmpty() )
+    {
+      // Emit the signal that we are executing
+      emit executeAlgorithm(algName, version);
+      return;
+    }
+    QTreeWidget::mouseDoubleClickEvent(e);
+  }
+
+  //---------------------------------------------------------------------------
+  /** Update the list of algos in the tree */
+  void AlgorithmTreeWidget::update()
+  {
+    this->clear();
+
+    typedef std::vector<Algorithm_descriptor> AlgNamesType;
+    AlgNamesType names = AlgorithmFactory::Instance().getDescriptors();
+
+    // sort by category/name/version to fill QTreeWidget
+    sort(names.begin(),names.end(),Algorithm_descriptor_less);
+
+    QMap<QString,QTreeWidgetItem*> categories;// keeps track of categories added to the tree
+    QMap<QString,QTreeWidgetItem*> algorithms;// keeps track of algorithms added to the tree (needed in case there are different versions of an algorithm)
+
+    for(AlgNamesType::const_iterator i=names.begin();i!=names.end();++i)
+    {
+      QString algName = QString::fromStdString(i->name);
+      QString catName = QString::fromStdString(i->category);
+      QStringList subCats = catName.split('\\');
+      if (!categories.contains(catName))
+      {
+        if (subCats.size() == 1)
+        {
+          QTreeWidgetItem *catItem = new QTreeWidgetItem(QStringList(catName));
+          categories.insert(catName,catItem);
+          this->addTopLevelItem(catItem);
+        }
+        else
+        {
+          QString cn = subCats[0];
+          QTreeWidgetItem *catItem = 0;
+          int n = subCats.size();
+          for(int j=0;j<n;j++)
+          {
+            if (categories.contains(cn))
+            {
+              catItem = categories[cn];
+            }
+            else
+            {
+              QTreeWidgetItem *newCatItem = new QTreeWidgetItem(QStringList(subCats[j]));
+              categories.insert(cn,newCatItem);
+              if (!catItem)
+              {
+                this->addTopLevelItem(newCatItem);
+              }
+              else
+              {
+                catItem->addChild(newCatItem);
+              }
+              catItem = newCatItem;
+            }
+            if (j != n-1) cn += "\\" + subCats[j+1];
+          }
+        }
+      }
+
+      QTreeWidgetItem *algItem = new QTreeWidgetItem(QStringList(algName+" v."+QString::number(i->version)));
+      QString cat_algName = catName+algName;
+      if (!algorithms.contains(cat_algName))
+      {
+        algorithms.insert(cat_algName,algItem);
+        categories[catName]->addChild(algItem);
+      }
+      else
+        algorithms[cat_algName]->addChild(algItem);
+
+    }
+  }
+
+  //============================================================================
+  //============================== FindAlgComboBox =============================
+  //============================================================================
+  /** Called when the combo box for finding algorithms has a key press
+   * event  */
+  void FindAlgComboBox::keyPressEvent(QKeyEvent *e)
+  {
+    if (e->key() == Qt::Key_Return)
+    {
+      emit enterPressed();
+      return;
+    }
+    QComboBox::keyPressEvent(e);
+  }
+
+   //---------------------------------------------------------------------------
+  /** Update the list of algos in the combo box */
+  void FindAlgComboBox::update()
+  {
+    typedef std::vector<Algorithm_descriptor> AlgNamesType;
+    AlgNamesType names = AlgorithmFactory::Instance().getDescriptors();
+
+    // sort by algorithm names only to fill this combobox
+    sort(names.begin(),names.end(),Algorithm_descriptor_name_less);
+
+    this->clear();
+    std::string prevName = "";
+    for(AlgNamesType::const_iterator i=names.begin();i!=names.end();++i)
+    {
+      if (i->name != prevName)
+        this->addItem(QString::fromStdString(i->name));
+      prevName = i->name;
+    }
+    this->setCurrentIndex(-1);
+
+  }
+
+  //---------------------------------------------------------------------------
+  /** Return the selected algorithm */
+  void FindAlgComboBox::getSelectedAlgorithm(QString& algName, int& version)
+  {
+    //typed selection
+    int i = this->currentIndex(); //selected index in the combobox, could be from an old selection
+    QString itemText = this->itemText(i); //text in the combobox at the selected index
+    QString typedText = this->currentText(); //text as typed in the combobox
+    if (i < 0 || itemText != typedText)
+    {
+      try
+      {
+        Mantid::API::IAlgorithm_sptr alg =Mantid::API::AlgorithmManager::Instance().createUnmanaged(typedText.toStdString(), -1);
+        algName = QString::fromStdString(alg->name());
+        version = alg->version();
+      }
+      catch ( std::runtime_error &) // not found
+      {
+        algName = "";
+        version = -99;
+      }
+    }
+    else
+    {
+      algName = itemText;
+      version = -1;
+    }
+  }
+
+
+} // namespace Mantid
+} // namespace MantidWidgets

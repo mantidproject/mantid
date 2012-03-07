@@ -1687,16 +1687,6 @@ DateAndTime MantidTreeWidgetItem::getLastModified(const QTreeWidgetItem* workspa
 
 //-------------------- AlgorithmDockWidget ----------------------//
 
-void FindAlgComboBox::keyPressEvent(QKeyEvent *e)
-{
-  if (e->key() == Qt::Key_Return)
-  {
-    emit enterPressed();
-    return;
-  }
-  QComboBox::keyPressEvent(e);
-}
-
 AlgorithmDockWidget::AlgorithmDockWidget(MantidUI *mui, ApplicationWindow *w):
 QDockWidget(w),m_progressBar(NULL),m_algID(),m_mantidUI(mui)
 {
@@ -1706,26 +1696,10 @@ QDockWidget(w),m_progressBar(NULL),m_algID(),m_mantidUI(mui)
   setMinimumWidth(200);
   w->addDockWidget( Qt::RightDockWidgetArea, this );//*/
 
-  QFrame *f = new QFrame(this);
-
-  m_tree = new AlgorithmTreeWidget(f,mui);
-  m_tree->setHeaderLabel("Algorithms");
-  connect(m_tree,SIGNAL(itemSelectionChanged()),this,SLOT(treeSelectionChanged()));
-
-  QHBoxLayout * buttonLayout = new QHBoxLayout();
-  buttonLayout->setName("testC");
-  QPushButton *execButton = new QPushButton("Execute");
-  m_findAlg = new FindAlgComboBox;
-  m_findAlg->setEditable(true);
-  m_findAlg->completer()->setCompletionMode(QCompleter::PopupCompletion);
-
-  connect(m_findAlg,SIGNAL(editTextChanged(const QString&)),this,SLOT(findAlgTextChanged(const QString&)));
-  connect(m_findAlg,SIGNAL(enterPressed()),m_mantidUI,SLOT(executeAlgorithm()));
-  connect(execButton,SIGNAL(clicked()),m_mantidUI,SLOT(executeAlgorithm()));
-
-  buttonLayout->addWidget(execButton);
-  buttonLayout->addWidget(m_findAlg);
-  buttonLayout->addStretch();
+  //Add the AlgorithmSelectorWidget
+  m_selector = new MantidQt::MantidWidgets::AlgorithmSelectorWidget(this);
+  connect(m_selector,SIGNAL(executeAlgorithm(const QString &, const int)),
+        m_mantidUI,SLOT(executeAlgorithm(const QString &, const int)));
 
   m_runningLayout = new QHBoxLayout();
   m_runningLayout->setName("testA");
@@ -1736,150 +1710,22 @@ QDockWidget(w),m_progressBar(NULL),m_algID(),m_mantidUI(mui)
   connect(m_runningButton,SIGNAL(clicked()),m_mantidUI,SLOT(showAlgMonitor()));
   //
   QVBoxLayout * layout = new QVBoxLayout();
+  QFrame *f = new QFrame(this);
   f->setLayout(layout);
-  layout->addLayout(buttonLayout);
-  layout->addWidget(m_tree);
+  layout->addWidget(m_selector);
   layout->addLayout(m_runningLayout);
   //
-
-  m_treeChanged = false;
-  m_findAlgChanged = false;
 
   setWidget(f);
 
 }
 
-//Use an anonymous namespace to keep these at file scope
-namespace {
-
-  bool Algorithm_descriptor_less(const Algorithm_descriptor& d1,const Algorithm_descriptor& d2)
-  {
-    if (d1.category < d2.category) return true;
-    else if (d1.category == d2.category && d1.name < d2.name) return true;
-    else if (d1.category == d2.category && d1.name == d2.name && d1.version > d2.version) return true;
-
-    return false;
-  }
-
-  bool Algorithm_descriptor_name_less(const Algorithm_descriptor& d1,const Algorithm_descriptor& d2)
-  {
-    return d1.name < d2.name;
-  }
-
-}
-
+/** Update the list of algorithms in the dock */
 void AlgorithmDockWidget::update()
 {
-  m_tree->clear();
-
-  typedef std::vector<Algorithm_descriptor> AlgNamesType;
-  AlgNamesType names = AlgorithmFactory::Instance().getDescriptors();
-
-  // sort by algorithm names only to fill m_findAlg combobox
-  sort(names.begin(),names.end(),Algorithm_descriptor_name_less);
-
-  m_findAlg->clear();
-  std::string prevName = "";
-  for(AlgNamesType::const_iterator i=names.begin();i!=names.end();++i)
-  {
-    if (i->name != prevName)
-      m_findAlg->addItem(QString::fromStdString(i->name));
-    prevName = i->name;
-  }
-  m_findAlg->setCurrentIndex(-1);
-
-  // sort by category/name/version to fill QTreeWidget m_tree
-  sort(names.begin(),names.end(),Algorithm_descriptor_less);
-
-  QMap<QString,QTreeWidgetItem*> categories;// keeps track of categories added to the tree
-  QMap<QString,QTreeWidgetItem*> algorithms;// keeps track of algorithms added to the tree (needed in case there are different versions of an algorithm)
-
-  for(AlgNamesType::const_iterator i=names.begin();i!=names.end();++i)
-  {
-    QString algName = QString::fromStdString(i->name);
-    QString catName = QString::fromStdString(i->category);
-    QStringList subCats = catName.split('\\');
-    if (!categories.contains(catName))
-    {
-      if (subCats.size() == 1)
-      {
-        QTreeWidgetItem *catItem = new QTreeWidgetItem(QStringList(catName));
-        categories.insert(catName,catItem);
-        m_tree->addTopLevelItem(catItem);
-      }
-      else
-      {
-        QString cn = subCats[0];
-        QTreeWidgetItem *catItem = 0;
-        int n = subCats.size();
-        for(int j=0;j<n;j++)
-        {
-          if (categories.contains(cn))
-          {
-            catItem = categories[cn];
-          }
-          else
-          {
-            QTreeWidgetItem *newCatItem = new QTreeWidgetItem(QStringList(subCats[j]));
-            categories.insert(cn,newCatItem);
-            if (!catItem)
-            {
-              m_tree->addTopLevelItem(newCatItem);
-            }
-            else
-            {
-              catItem->addChild(newCatItem);
-            }
-            catItem = newCatItem;
-          }
-          if (j != n-1) cn += "\\" + subCats[j+1];
-        }
-      }
-    }
-
-    QTreeWidgetItem *algItem = new QTreeWidgetItem(QStringList(algName+" v."+QString::number(i->version)));
-    QString cat_algName = catName+algName;
-    if (!algorithms.contains(cat_algName))
-    {
-      algorithms.insert(cat_algName,algItem);
-      categories[catName]->addChild(algItem);
-    }
-    else
-      algorithms[cat_algName]->addChild(algItem);
-
-  }
+  m_selector->update();
 }
 
-void AlgorithmDockWidget::findAlgTextChanged(const QString& text)
-{
-  int i = m_findAlg->findText(text,Qt::MatchFixedString);
-  if (i >= 0) m_findAlg->setCurrentIndex(i);
-  if (!m_treeChanged)
-  {
-    m_findAlgChanged = true;
-    selectionChanged(text);
-  }
-}
-
-void AlgorithmDockWidget::treeSelectionChanged()
-{
-  QString algName;
-  int version;
-  m_mantidUI->getSelectedAlgorithm(algName,version);
-  if (!m_findAlgChanged)
-  {
-    m_treeChanged = true;
-    selectionChanged(algName);
-  }
-}
-
-void AlgorithmDockWidget::selectionChanged(const QString& algName)
-{
-  if (m_treeChanged) m_findAlg->setCurrentIndex(m_findAlg->findText(algName,Qt::MatchFixedString));
-  if (m_findAlgChanged) m_tree->setCurrentIndex(QModelIndex());
-  m_treeChanged = false;
-  m_findAlgChanged = false;
-}
 
 void AlgorithmDockWidget::updateProgress(void* alg, const double p, const QString& msg, double estimatedTime, int progressPrecision)
 {
@@ -1963,47 +1809,5 @@ void AlgorithmDockWidget::hideProgressBar()
 }
 
 
-//-------------------- AlgorithmTreeWidget ----------------------//
+//--------------------  ----------------------//
 
-void AlgorithmTreeWidget::mousePressEvent (QMouseEvent *e)
-{
-  if (e->button() == Qt::LeftButton)
-  {
-    if( !itemAt(e->pos()) ) selectionModel()->clear();
-    m_dragStartPosition = e->pos();
-  }
-
-  QTreeWidget::mousePressEvent(e);
-}
-
-void AlgorithmTreeWidget::mouseMoveEvent(QMouseEvent *e)
-{
-  if (!(e->buttons() & Qt::LeftButton))
-    return;
-  if ((e->pos() - m_dragStartPosition).manhattanLength() < QApplication::startDragDistance())
-    return;
-
-  // Start dragging
-  QDrag *drag = new QDrag(this);
-  QMimeData *mimeData = new QMimeData;
-
-  mimeData->setText("Algorithm");
-  drag->setMimeData(mimeData);
-
-  Qt::DropAction dropAction = drag->exec(Qt::CopyAction | Qt::MoveAction);
-  (void) dropAction;
-}
-
-void AlgorithmTreeWidget::mouseDoubleClickEvent(QMouseEvent *e)
-{
-  QString algName;
-  int version;
-  m_mantidUI->getSelectedAlgorithm(algName,version);
-  if ( ! algName.isEmpty() )
-  {
-    m_mantidUI->executeAlgorithm(algName, version);
-    return;
-  }
-
-  QTreeWidget::mouseDoubleClickEvent(e);
-}

@@ -380,10 +380,8 @@ public slots:
     /// Common method to convert a plot of a set of spectra into a waterfall plot
     void convertToWaterfall(MultiLayer* ml);
 
-    // Execute selected algorithm
-    void executeAlgorithm();
     // Execute algorithm given name and version
-    bool executeAlgorithm(QString algName, int version = -1);
+    bool executeAlgorithm(const QString & algName, int version = -1);
     //Execute an algorithm with the given parameter list
     void executeAlgorithm(const QString & algName, const QString & paramList,Mantid::API::AlgorithmObserver* obs = NULL);
     //Execute an algorithm with the given parameter list
