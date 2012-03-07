@@ -1,11 +1,19 @@
 #include "DimensionWidgetFactory.h"
 #include "DimensionWidget.h"
 
-DimensionWidgetFactory::DimensionWidgetFactory(bool readOnlyLimits) : m_readOnlyLimits(readOnlyLimits)
+/**
+Constructor
+@param binDisplay : Enum indicating what type of bin display should be used.
+*/
+DimensionWidgetFactory::DimensionWidgetFactory(Mantid::VATES::BinDisplay binDisplay) : m_binDisplay(binDisplay)
 {
 }
 
+/**
+Factory Method.
+@return a new DimensionWidget
+*/
 Mantid::VATES::DimensionView* DimensionWidgetFactory::create() const
 {
-  return new DimensionWidget(m_readOnlyLimits);
+  return new DimensionWidget(m_binDisplay);
 }

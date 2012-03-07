@@ -19,20 +19,30 @@ class QCheckBox;
 
 namespace Mantid
 {
- namespace Geometry
- {
- class IMDDimension;
- }
+  namespace Geometry
+  {
+    /// Forward decs
+    class IMDDimension;
+  }
 }
 
+/**
+class is a Qt (QWidget) concrete version of a DimensionView.
 
+Displays dimension information as commanded by a DimensionPresenter.
+
+- DimensionWidgets are passed a DimensionPresenter, as part of the accept call, but DimensionWidgets do not own it!
+- Controlled by a DimensionPresenter
+- Has public methods to allow the DimensionPresenter to command changes
+
+*/
 class EXPORT_OPT_MANTIDPARVIEW DimensionWidget: public QWidget, public Mantid::VATES::DimensionView
 {
 Q_OBJECT
 public:
 
   /// Constructor.
-  DimensionWidget(bool readOnlyLimits);
+  DimensionWidget(Mantid::VATES::BinDisplay binDisplay);
 
   /// Destructor
   ~DimensionWidget();

@@ -15,7 +15,11 @@
 
 using namespace Mantid::VATES;
 
-DimensionWidget::DimensionWidget(bool readOnlyLimits)
+/**
+Constructor
+@param binDisplay : Enum indicating how to display bin information
+*/
+DimensionWidget::DimensionWidget(BinDisplay binDisplay)
 {
   using namespace Mantid::Geometry;
   QGridLayout* m_layout = new QGridLayout();
@@ -30,6 +34,7 @@ DimensionWidget::DimensionWidget(bool readOnlyLimits)
   connect(m_ckIntegrated, SIGNAL(clicked(bool)), this, SLOT(integratedChanged(bool)));
   m_layout->addWidget(m_ckIntegrated, 0, 1, Qt::AlignLeft);
   
+  // TODO if BinDisplay == LowHighStep, configure for lowHighStep, otherwise, keep as current. Wigitize?
   m_nBinsLabel = new QLabel("Bins");
   m_layout->addWidget(m_nBinsLabel, 0, 2, Qt::AlignLeft);
   m_nBinsBox = new QLineEdit();
@@ -55,9 +60,6 @@ DimensionWidget::DimensionWidget(bool readOnlyLimits)
   
   connect(m_maxBox, SIGNAL(editingFinished()), this, SLOT(maxBoxListener()));
   m_layout->addWidget(m_maxBox, 1, 5, Qt::AlignLeft);
-  
-  m_maxBox->setEnabled(!readOnlyLimits);
-  m_minBox->setEnabled(!readOnlyLimits);
 
   this->setLayout(m_layout);
 }
