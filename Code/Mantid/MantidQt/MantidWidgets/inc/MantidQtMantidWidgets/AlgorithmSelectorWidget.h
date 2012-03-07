@@ -25,11 +25,14 @@ namespace MantidWidgets
   class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS AlgorithmSelectorWidget : public QWidget
   {
     Q_OBJECT
+    Q_PROPERTY(bool showExecuteButton READ showExecuteButton WRITE showExecuteButton)
 
   public:
     AlgorithmSelectorWidget(QWidget *parent);
     virtual ~AlgorithmSelectorWidget();
     void getSelectedAlgorithm(QString& algName, int& version);
+    bool showExecuteButton() const;
+    void showExecuteButton(const bool);
 
   public slots:
     void update();

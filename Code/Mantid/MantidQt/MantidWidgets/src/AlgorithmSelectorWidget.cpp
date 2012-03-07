@@ -60,6 +60,17 @@ namespace MantidWidgets
   }
   
 
+  /** Is the the execute button visible */
+  bool AlgorithmSelectorWidget::showExecuteButton() const
+  {
+    return m_execButton->isVisible();
+  }
+
+  /** Show/hide the execute button */
+  void AlgorithmSelectorWidget::showExecuteButton(const bool val)
+  {
+    m_execButton->setVisible(val);
+  }
 
   //---------------------------------------------------------------------------
   /** Update the lists of algorithms */
