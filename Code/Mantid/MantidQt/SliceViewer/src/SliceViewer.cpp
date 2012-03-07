@@ -1646,9 +1646,9 @@ void SliceViewer::openFromXML(const QString & xml)
   for (int i=0; i<3; i++)
     if (normal[i] > 0.99) normalDim = i;
   if (normal.norm() > 1.01 || normal.norm() < 0.99)
-    throw std::runtime_error("SliceViewer::openFromXML(): Normal vector is not length 1.0!");
+    throw std::runtime_error("Normal vector is not length 1.0!");
   if (normalDim < 0)
-    throw std::runtime_error("SliceViewer::openFromXML(): Could not find the normal of the plane. Plane must be along one of the axes!");
+    throw std::runtime_error("Could not find the normal of the plane. Plane must be along one of the axes!");
 
   // Get the plane origin and the dimension in the workspace dimensions
   planeOrigin = static_cast<coord_t>(origin[normalDim]);
