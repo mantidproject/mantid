@@ -248,7 +248,10 @@ class DataSet(object):
         sum = 0.0
         sum_err = 0.0
         for i in range(len(y)):
-            if x[i]>=xmin and x[i+1]<=xmax:
+            upper_bound = x[i]
+            if len(x)==len(y)+1:
+                upper_bound = x[i+1]
+            if x[i]>=xmin and upper_bound<=xmax:
                 sum += y[i]/(e[i]*e[i])
                 sum_err += 1.0/(e[i]*e[i])
 

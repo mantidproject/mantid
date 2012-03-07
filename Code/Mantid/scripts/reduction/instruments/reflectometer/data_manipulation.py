@@ -75,7 +75,7 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
         
         # The Y pixel numbers start at 1 from the perspective of the users
         # They also read in reversed order
-        if is_pixel_y:
+        if False and is_pixel_y:
             x=mtd[ws_output].dataX(0)
             y_reversed=mtd[ws_output].dataY(0)
             y=[i for i in y_reversed]
