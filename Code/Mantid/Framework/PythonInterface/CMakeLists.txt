@@ -62,6 +62,9 @@ set ( TEST_FILES
   
 if ( CXXTEST_FOUND )
   cxxtest_add_test ( PythonInterfaceTest ${TEST_FILES} )
+  if ( WIN32 )
+    set_target_properties( PythonInterfaceTest PROPERTIES COMPILE_FLAGS "/w44244" )
+  endif ()
   target_link_libraries( PythonInterfaceTest PythonKernelModule PythonAPIModule )
   add_dependencies ( FrameworkTests PythonInterfaceTest )
   # Add to the 'UnitTests' group in VS
