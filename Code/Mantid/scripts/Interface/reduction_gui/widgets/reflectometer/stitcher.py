@@ -286,7 +286,10 @@ class StitcherWidget(BaseWidget):
                 g = _qti.app.mantidUI.pyPlotSpectraList(ws_list,[0],True)
                 g.setName(plot_name)
                 l=g.activeLayer()
-                l.setTitle("Polarization state: %s" % pol)
+                if self._settings.instrument_name == "REFL":
+                    l.setTitle("Reflectivity")
+                else:
+                    l.setTitle("Polarization state: %s" % pol)
                 
                 
                 
