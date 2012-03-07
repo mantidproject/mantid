@@ -3,6 +3,9 @@
 
 #include <QtDesigner>
 #include <QtPlugin>
+#include "MantidQtMantidWidgets/AlgorithmSelectorWidget.h"
+#include "MantidQtDesignerPlugins/DesignerPlugin.h"
+#include "MantidQtMantidWidgets/ScriptEditor.h"
 
 /** 
 The PluginCollectionInterface implements the interface for the plugin library and holds a 
@@ -43,6 +46,53 @@ public:
 
 private:
   QList<QDesignerCustomWidgetInterface*> m_widgets;
+};
+
+
+
+//==============================================================================
+/** Plugin for QtDesigner for the AlgorithmSelectorWidget */
+class AlgorithmSelectorWidgetPlugin : public DesignerPlugin
+{
+public:
+  AlgorithmSelectorWidgetPlugin(QObject * parent)
+  : DesignerPlugin(parent)
+  {}
+
+  /// Returns a pointer to a newly constructed widget for this plugin wraps
+  QWidget *createWidget(QWidget *parent)
+  {
+    return new MantidQt::MantidWidgets::AlgorithmSelectorWidget(parent);
+  }
+
+  /// Returns the fully-qualified class name
+  virtual QString name() const
+  {
+    return "MantidQt::MantidWidgets::AlgorithmSelectorWidget";
+  }
+};
+
+
+//==============================================================================
+/** Plugin for QtDesigner for the ScriptEditor */
+class ScriptEditorPlugin : public DesignerPlugin
+{
+public:
+  ScriptEditorPlugin(QObject * parent)
+  : DesignerPlugin(parent)
+  {}
+
+  /// Returns a pointer to a newly constructed widget for this plugin wraps
+  QWidget *createWidget(QWidget *parent)
+  {
+    return new ScriptEditor(parent);
+  }
+
+  /// Returns the fully-qualified class name
+  virtual QString name() const
+  {
+    return "ScriptEditor";
+  }
 };
 
 #endif

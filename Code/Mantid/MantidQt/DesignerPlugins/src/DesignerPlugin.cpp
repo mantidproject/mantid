@@ -1,4 +1,4 @@
-#include "MantidQtDesignerPlugins/AlgorithmSelectorPlugin.h"
+#include "MantidQtDesignerPlugins/DesignerPlugin.h"
 #include "MantidQtMantidWidgets/AlgorithmSelectorWidget.h"
 #include <QDesignerFormEditorInterface>
 #include <QtPlugin>
@@ -9,7 +9,7 @@ using namespace MantidQt::MantidWidgets;
  * Default constructor
  * @param parent :: The parent of the plugin (default: NULL)
  */
-AlgorithmSelectorPlugin::AlgorithmSelectorPlugin(QObject *parent) : QObject(parent), m_initialized(false)
+DesignerPlugin::DesignerPlugin(QObject *parent) : QObject(parent), m_initialized(false)
 {
 }
 
@@ -17,7 +17,7 @@ AlgorithmSelectorPlugin::AlgorithmSelectorPlugin(QObject *parent) : QObject(pare
  * Initialize the plugin
  * @param formEditor :: A pointer to the interface that will control this plugin
  */
-void AlgorithmSelectorPlugin::initialize(QDesignerFormEditorInterface * formEditor)
+void DesignerPlugin::initialize(QDesignerFormEditorInterface * formEditor)
 {
   (void) formEditor;
   if (m_initialized)
@@ -28,20 +28,10 @@ void AlgorithmSelectorPlugin::initialize(QDesignerFormEditorInterface * formEdit
 }
 
 /**
- * Create a widget of the type wrapped by the plugin
- * @param parent :: The parent widget
- * @returns A newly constructed widget for the wrapped type.
- */
-QWidget *AlgorithmSelectorPlugin::createWidget(QWidget *parent)
-{
-  return new AlgorithmSelectorWidget(parent);
-}
-
-/**
 * Returns whether the plugin initialized or not
 * @returns True if initialize() has been called, false otherwise
 */
-bool AlgorithmSelectorPlugin::isInitialized() const
+bool DesignerPlugin::isInitialized() const
 {
   return m_initialized;
 }
@@ -50,25 +40,16 @@ bool AlgorithmSelectorPlugin::isInitialized() const
  * Returns whether this widget can contain other widgets
  * @returns True if other widgets can be placed within this widget, false otherwise
  */
-bool AlgorithmSelectorPlugin::isContainer() const
+bool DesignerPlugin::isContainer() const
 {
   return false;
-}
-
-/**
- * Returns the class name of the widget that this plugin manages
- * @returns A string containing the fully qualified class name of the widget
- */
-QString AlgorithmSelectorPlugin::name() const
-{
-  return "MantidQt::MantidWidgets::AlgorithmSelectorWidget";
 }
 
 /**
  * Returns the group within the designer that this plugin should be placed
  * @returns The name of the group of widgets in the designer 
  */
-QString AlgorithmSelectorPlugin::group() const
+QString DesignerPlugin::group() const
 {
   return "MantidWidgets";
 }
@@ -77,7 +58,7 @@ QString AlgorithmSelectorPlugin::group() const
  * Returns the icon to display in the designer
  * @returns An icon that is used within the designer
  */
-QIcon AlgorithmSelectorPlugin::icon() const
+QIcon DesignerPlugin::icon() const
 {
   return QIcon();
 }
@@ -86,35 +67,53 @@ QIcon AlgorithmSelectorPlugin::icon() const
  * The tooltip for the widget
  * @returns A string containing the tooltip for this widget
  */
-QString AlgorithmSelectorPlugin::toolTip() const
+QString DesignerPlugin::toolTip() const
 {
-  return "Selects an algorithm from a list of categories.";
+  return "Creates a widget of type " + this->name();
 }
 
 /** A short description of the widget
  * @returns A string containing a short description of the widget
  */
-QString AlgorithmSelectorPlugin::whatsThis() const
+QString DesignerPlugin::whatsThis() const
 {  
-  return "A algorithm selector widget";
+  return this->toolTip();
+}
+
+
+/** @return the name of the widget without the namespace */
+std::string DesignerPlugin::getShortName() const
+{
+  std::string name = this->name().toStdString();
+  size_t n = name.rfind(':');
+  if (n != std::string::npos)
+  {
+    name = name.substr(n+1, name.size() - n);
+  }
+  return name;
 }
 
 /**
  * The include file to use when generating the header file
  * @returns A string containing the path to the widget's header file
  */
-QString AlgorithmSelectorPlugin::includeFile() const
+QString DesignerPlugin::includeFile() const
 {
-  return "MantidQtMantidWidgets/AlgorithmSelectorWidget.h";
+  return QString::fromStdString("MantidQtMantidWidgets/" + this->getShortName() + ".h");
 }
 
 /**
  * Returns the XML used to define the widget in the designer
  * @returns A string containing the XML for the widget
  */
-QString AlgorithmSelectorPlugin::domXml() const
+QString DesignerPlugin::domXml() const
 {
-  return "<widget class=\"MantidQt::MantidWidgets::AlgorithmSelectorWidget\" name=\"AlgorithmSelectorWidget\">\n"
+  return QString::fromStdString(
+      "<widget class=\""
+      + this->name().toStdString()
+      + "\" name=\""
+      + this->getShortName() +
+      "\">\n"
     " <property name=\"geometry\">\n"
     "  <rect>\n"
     "   <x>0</x>\n"
@@ -123,5 +122,5 @@ QString AlgorithmSelectorPlugin::domXml() const
     "   <height>200</height>\n"
     "  </rect>\n"
     " </property>\n"
-    "</widget>\n";
+    "</widget>\n");
 }

@@ -1,10 +1,10 @@
-#ifndef ALGORITHMSELECTORPLUGIN_H
-#define ALGORITHMSELECTORPLUGIN_H
+#ifndef DesignerPlugin_H
+#define DesignerPlugin_H
 
 #include <QDesignerCustomWidgetInterface>
 
 /** 
-The AlgorithmSelectorPlugin creates a Qt designer plugin of the AlgorithmSelectorWidget.
+The DesignerPlugin creates a Qt designer plugin of the AlgorithmSelectorWidget.
 
 @author Martyn Gigg, Tessella plc
 @date 03/08/2009
@@ -28,38 +28,47 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
-class AlgorithmSelectorPlugin : public QObject, public QDesignerCustomWidgetInterface
+class DesignerPlugin : public QObject, public QDesignerCustomWidgetInterface
 {
   Q_OBJECT
   Q_INTERFACES(QDesignerCustomWidgetInterface)
 
 public:
+  // ==== Methods you must overridde ==========
+
+  /// Returns a pointer to a newly constructed widget for this plugin wraps
+  virtual QWidget *createWidget(QWidget *parent) = 0;
+  /// Returns the fully-qualified class name
+  virtual QString name() const = 0;
+
+  // ==== Optionally overridden methods ==========
+
+  /// Returns a tool tip for the widget
+  virtual QString toolTip() const;
+  /// Returns the include file that appears at the top of the generated .h file
+  virtual QString includeFile() const;
+  /// Returns the XML that defines the widget and its properties
+  virtual QString domXml() const;
+
+
   /// Default constructor
-  AlgorithmSelectorPlugin(QObject *parent = 0);
+  DesignerPlugin(QObject *parent = 0);
   /// Initialize the plugin
   void initialize(QDesignerFormEditorInterface *core);
-  /// Returns a pointer to a newly constructed widget for this plugin wraps
-  QWidget *createWidget(QWidget *parent);
   /// Returns if the plugin is initliaized
   bool isInitialized() const;
   /// Returns if this plugins is able to contain other widgets
   bool isContainer() const;
-  /// Returns the fully-qualified class name
-  QString name() const;
-  /// Returns the group name within the designer 
+  /// Returns the group name within the designer
   QString group() const;
   /// Returns the icon to use
   QIcon icon() const;
-  /// Returns a tool tip for the widget
-  QString toolTip() const;
   /// Returns a short description of the widget
   QString whatsThis() const;
-  /// Returns the include file that appears at the top of the generated .h file
-  QString includeFile() const;
-  /// Returns the XML that defines the widget and its properties
-  QString domXml() const; 
 
 private:
+  std::string getShortName() const;
+
   /// Are we initialized? 
   bool m_initialized;
 };

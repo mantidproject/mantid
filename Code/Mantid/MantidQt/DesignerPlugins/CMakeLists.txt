@@ -3,11 +3,10 @@ find_package ( Qt4 COMPONENTS QtDesigner REQUIRED )
 include ( ${QT_USE_FILE} )
 
 set ( SRC_FILES 
-    src/AlgorithmSelectorPlugin.cpp
+    src/DesignerPlugin.cpp
     src/FileFinderPlugin.cpp
     src/FitBrowserPlugin.cpp 
     src/InstrumentSelectorPlugin.cpp
-    src/ScriptEditorPlugin.cpp
     src/MuonFitBrowserPlugin.cpp
     src/PluginCollectionInterface.cpp
     src/WorkspaceSelectorPlugin.cpp 
@@ -15,11 +14,10 @@ set ( SRC_FILES
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES 
-    inc/MantidQtDesignerPlugins/AlgorithmSelectorPlugin.h
+    inc/MantidQtDesignerPlugins/DesignerPlugin.h
     inc/MantidQtDesignerPlugins/FileFinderPlugin.h
     inc/MantidQtDesignerPlugins/FitBrowserPlugin.h
     inc/MantidQtDesignerPlugins/InstrumentSelectorPlugin.h
-    inc/MantidQtDesignerPlugins/ScriptEditorPlugin.h
 	inc/MantidQtDesignerPlugins/MuonFitBrowserPlugin.h
     inc/MantidQtDesignerPlugins/PluginCollectionInterface.h
 	inc/MantidQtDesignerPlugins/WorkspaceSelectorPlugin.h 
