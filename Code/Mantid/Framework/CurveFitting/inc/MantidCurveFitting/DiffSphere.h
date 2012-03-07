@@ -72,15 +72,12 @@ namespace Mantid
       /// Destructor
       virtual ~InelasticDiffSphere() {}
 
-      /// overwrite IFunction base class methods
-      std::string name()const{return "InelasticDiffSphere";}
-      virtual const std::string category() const { return "Optimization\\FitFunctions";}
-      std::vector<double> LorentzianCoefficients(double a) const;
+      //std::vector<double> LorentzianCoefficients(double a) const;
 
     protected:
       virtual void functionMW(double* out, const double* xValues, const size_t nData)const;
       //virtual void functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData); //not yet implemented
-      //std::vector<double> LorentzianCoefficients(double a);
+      std::vector<double> LorentzianCoefficients(double a) const;
 
     private:
       std::vector<xnlc> xnl;     //xnl coefficients
@@ -104,7 +101,9 @@ namespace Mantid
 
       /// overwrite IFunction base class methods
       std::string name()const{return "DiffSphere";}
-      virtual const std::string category() const { return "Optimization\\FitFunctions";}
+      virtual const std::string category() const { return "Optimization\\FitModels";}
+      virtual int version() const { return 1;}
+
       void functionMW(double* out, const double* xValues, const size_t nData)const;
       void functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData);
 

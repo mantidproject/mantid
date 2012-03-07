@@ -183,11 +183,6 @@ void InelasticDiffSphere::functionDerivMW(API::Jacobian* out, const double* xVal
 }
 */
 
-//Height of the deltaFunction is determined by parameters from the inelastic part
-double DiffSphere::ElasticIntensityTie(double I, double R, double Q) {
-  return I * pow( 3*boost::math::sph_bessel(1,Q*R)/(Q*R), 2 );
-}
-
 
 DiffSphere::DiffSphere() {
   m_elastic = dynamic_cast<ElasticDiffSphere*>(API::FunctionFactory::Instance().createFunction("ElasticDiffSphere"));
