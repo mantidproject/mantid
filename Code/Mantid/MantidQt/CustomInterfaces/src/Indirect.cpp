@@ -1322,8 +1322,6 @@ void Indirect::calibCreate()
   }
   else
   {
-    QString suffix = "_" + m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText() + "_calib";
-
     QString filenames = "[r'"+m_uiForm.cal_leRunNo->getFilenames().join("', r'")+"']";
 
     QString reducer = "from mantidsimple import *\n"
@@ -1335,6 +1333,8 @@ void Indirect::calibCreate()
         + m_calCalProp["BackMax"]->valueText() + ","
         + m_calCalProp["PeakMin"]->valueText() + ","
         + m_calCalProp["PeakMax"]->valueText() + ")\n"
+      "calib.set_analyser('" + m_uiForm.cbAnalyser->currentText() + "')\n"
+      "calib.set_reflection('" + m_uiForm.cbReflection->currentText() + "')\n"
       "calib.execute(None, None)\n"
       "result = calib.result_workspace()\n"
       "print result\n"
