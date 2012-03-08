@@ -6,6 +6,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IFunctionMW.h"
+#include "MantidAPI/CompositeFunctionMW.h"
+#include "DeltaFunction.h"
 
 namespace Mantid
 {
@@ -55,8 +57,6 @@ namespace Mantid
       ElasticDiffSphere();
       /// Destructor
       virtual ~ElasticDiffSphere() {};
-
-    protected:
       double HeightPrefactor() const;
 
     };
@@ -71,8 +71,6 @@ namespace Mantid
       InelasticDiffSphere();
       /// Destructor
       virtual ~InelasticDiffSphere() {}
-
-      //std::vector<double> LorentzianCoefficients(double a) const;
 
     protected:
       virtual void functionMW(double* out, const double* xValues, const size_t nData)const;
@@ -89,13 +87,13 @@ namespace Mantid
       void initXnlCoeff();
       void initAlphaCoeff();
       void initLinJlist();
-    };
+    }; // end of class InelasticDiffSphere
 
     class DLLExport DiffSphere : public API::CompositeFunctionMW
     {
     public:
       /// Constructor
-      DiffSphere() {};
+      DiffSphere();
       /// Destructor
       ~DiffSphere() {};
 

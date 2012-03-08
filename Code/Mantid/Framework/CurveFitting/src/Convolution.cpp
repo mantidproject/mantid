@@ -137,6 +137,7 @@ void Convolution::functionMW(double* out, const double* xValues, const size_t nD
       if (df)
       {
         dltFuns.push_back(df);
+
         dltF += df->getParameter("Height") * df->HeightPrefactor();
       }
     }

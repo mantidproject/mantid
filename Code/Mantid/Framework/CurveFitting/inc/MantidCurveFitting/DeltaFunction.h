@@ -55,7 +55,7 @@ namespace Mantid
       virtual void setCentre(const double c) { UNUSED_ARG(c); }
       virtual void setHeight(const double h) {setParameter("Height",h);}
       virtual void setWidth(const double w) { UNUSED_ARG(w); }
-
+      virtual double HeightPrefactor()const { return 1.0; }  //modulates the Height of the Delta function
       /// overwrite IFunction base class methods
       std::string name()const{return "DeltaFunction";}
       virtual const std::string category() const { return "Peak";}
@@ -71,7 +71,7 @@ namespace Mantid
       {
         UNUSED_ARG(out); UNUSED_ARG(xValues); UNUSED_ARG(nData);
       }
-      virtual double HeightPrefactor()const { return 1.0; }  //modulates the Height of the Delta function
+
     };
 
   } // namespace CurveFitting
