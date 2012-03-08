@@ -1084,9 +1084,6 @@ void LoadEventPreNexus2::procEventsLinear(DataObjects::EventWorkspace_sptr & /*w
     double tof = static_cast<double>(temp.tof) * TOF_CONVERSION;
 
     if (!iswrongdetid){
-      // a) Regular events
-      TofEvent event(tof, pulsetime);
-
       //Find the overall max/min tof
       if (tof < local_shortest_tof)
         local_shortest_tof = tof;
@@ -1098,7 +1095,7 @@ void LoadEventPreNexus2::procEventsLinear(DataObjects::EventWorkspace_sptr & /*w
 
       // This is equivalent to workspace->getEventList(this->pixel_to_wkspindex[pid]).addEventQuickly(event);
       // But should be faster as a bunch of these calls were cached.
-      arrayOfVectors[pid]->push_back(event);
+      arrayOfVectors[pid]->push_back(TofEvent(tof, pulsetime));
 
       // TODO work with period
       local_num_good_events++;

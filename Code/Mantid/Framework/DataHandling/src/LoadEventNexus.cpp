@@ -277,15 +277,12 @@ public:
       double tof = static_cast<double>( event_time_of_flight[i] );
       if ((tof >= alg->filter_tof_min) && (tof <= alg->filter_tof_max))
       {
-        //The event TOF passes the filter.
-        TofEvent event(tof, pulsetime);
-
         // We cached a pointer to the vector<tofEvent> -> so retrieve it and add the event
         detid_t detId = event_id[i];
         if (detId <= alg->eventid_max)
         {
           // We have cached the vector of events for this detector ID
-          alg->eventVectors[detId]->push_back( event );
+          alg->eventVectors[detId]->push_back( TofEvent(tof, pulsetime) );
 
           //Local tof limits
           if (tof < my_shortest_tof) { my_shortest_tof = tof;}
