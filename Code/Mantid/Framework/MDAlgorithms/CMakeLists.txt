@@ -9,6 +9,7 @@ set ( SRC_FILES
 	src/CompositeFunctionBuilder.cpp
 	src/CompositeImplicitFunction.cpp
 	src/CompositeImplicitFunctionParser.cpp
+	src/ConvertToDetectorFaceMD.cpp
 	src/ConvertToMDEvents.cpp
 	src/DivideMD.cpp
 	src/EqualToMD.cpp
@@ -57,6 +58,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CompositeFunctionBuilder.h
 	inc/MantidMDAlgorithms/CompositeImplicitFunction.h
 	inc/MantidMDAlgorithms/CompositeImplicitFunctionParser.h
+	inc/MantidMDAlgorithms/ConvertToDetectorFaceMD.h
 	inc/MantidMDAlgorithms/ConvertToMDEvents.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsCoordTransf.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsDetInfo.h
@@ -107,6 +109,7 @@ set ( TEST_FILES
 	test/BooleanBinaryOperationMDTest.h
 	test/CompareMDWorkspacesTest.h
 	test/ConvertEventsToMDEventsTest.h
+	test/ConvertToDetectorFaceMDTest.h
 	test/ConvertToMDEventsCoordTransfTest.h
 	test/ConvertToMDEventsMethodsTest.h
 	test/ConvertToMDEventsTest.h

@@ -1,0 +1,272 @@
+/*WIKI*
+TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
+*WIKI*/
+
+#include "MantidMDAlgorithms/ConvertToDetectorFaceMD.h"
+#include "MantidKernel/System.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/ArrayLengthValidator.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidMDAlgorithms/ConvertToMDEvents.h"
+#include "MantidKernel/Strings.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidMDEvents/MDEventFactory.h"
+
+using namespace Mantid::Kernel;
+using namespace Mantid::API;
+using namespace Mantid::DataObjects;
+using namespace Mantid::MDEvents;
+using namespace Mantid::Geometry;
+
+namespace Mantid
+{
+namespace MDAlgorithms
+{
+
+  // Register the algorithm into the AlgorithmFactory
+  DECLARE_ALGORITHM(ConvertToDetectorFaceMD)
+  
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Constructor
+   */
+  ConvertToDetectorFaceMD::ConvertToDetectorFaceMD()
+  : m_numXPixels(0), m_numYPixels(0)
+  {
+  }
+    
+  //----------------------------------------------------------------------------------------------
+  /** Destructor
+   */
+  ConvertToDetectorFaceMD::~ConvertToDetectorFaceMD()
+  {
+  }
+  
+
+  //----------------------------------------------------------------------------------------------
+  /// Algorithm's name for identification. @see Algorithm::name
+  const std::string ConvertToDetectorFaceMD::name() const { return "ConvertToDetectorFaceMD";};
+  
+  /// Algorithm's version for identification. @see Algorithm::version
+  int ConvertToDetectorFaceMD::version() const { return 1;};
+  
+  /// Algorithm's category for identification. @see Algorithm::category
+  const std::string ConvertToDetectorFaceMD::category() const { return "General";}
+
+  //----------------------------------------------------------------------------------------------
+  /// Sets documentation strings for this algorithm
+  void ConvertToDetectorFaceMD::initDocs()
+  {
+    this->setWikiSummary("Convert a MatrixWorkspace containing to a MD workspace for viewing the detector face.");
+    this->setOptionalMessage("Convert a MatrixWorkspace containing to a MD workspace for viewing the detector face.");
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Initialize the algorithm's properties.
+   */
+  void ConvertToDetectorFaceMD::init()
+  {
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
+        "An input MatrixWorkspace.");
+    declareProperty(new ArrayProperty<int>("BankNumbers", Direction::Input),
+        "A list of the bank numbers to convert. If empty, will use all banksMust have at least one entry.");
+
+    // Now the box controller settings
+    this->initBoxControllerProps("2", 200, 20);
+
+    declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output),
+        "Name of the output MDEventWorkspace.");
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Convert an event list to 3/4D detector face space add it to the MDEventWorkspace
+   *
+   * @tparam T :: the type of event in the input EventList (TofEvent, WeightedEvent, etc.)
+   * @tparam nd :: number of dimensions of the output
+   * @param workspaceIndex :: index into the workspace
+   * @param x :: x-coordinate for all output events
+   * @param y :: y-coordinate for all output events
+   * @param bankNum :: coordinate for the 4th dimension (optional)
+   */
+  template <class T, class MDE, size_t nd>
+  void ConvertToDetectorFaceMD::convertEventList(boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<MDE, nd>> outWS,
+      size_t workspaceIndex, coord_t x, coord_t y, coord_t bankNum)
+  {
+    EventList & el = in_ws->getEventList(workspaceIndex);
+
+    // The 3/4D MDEvents that will be added into the MDEventWorkspce
+    std::vector<MDE> out_events;
+    out_events.reserve( el.getNumberEvents() );
+
+    // This little dance makes the getting vector of events more general (since you can't overload by return type).
+    typename std::vector<T> * events_ptr;
+    getEventsFrom(el, events_ptr);
+    typename std::vector<T> & events = *events_ptr;
+
+    // Iterators to start/end
+    typename std::vector<T>::iterator it = events.begin();
+    typename std::vector<T>::iterator it_end = events.end();
+
+    for (; it != it_end; it++)
+    {
+      coord_t tof = static_cast<coord_t>(it->tof());
+      if (nd == 3)
+      {
+        coord_t center[3] = {x, y, tof};
+        out_events.push_back( MDE(float(it->weight()), float(it->errorSquared()), center) );
+      }
+      else if (nd == 4)
+      {
+        coord_t center[4] = {x, y, tof, bankNum};
+        out_events.push_back( MDE(float(it->weight()), float(it->errorSquared()), center) );
+      }
+      //TODO: 4D
+    }
+
+    // Add them to the MDEW
+    outWS->addEvents(out_events);
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Execute the algorithm.
+   */
+  void ConvertToDetectorFaceMD::exec()
+  {
+    // TODO convert matrix to event as needed
+    MatrixWorkspace_sptr mws = this->getProperty("InputWorkspace");
+
+    in_ws = boost::dynamic_pointer_cast<EventWorkspace>(mws);
+    if (!in_ws)
+      throw std::runtime_error("InputWorkspace is not an EventWorkspace");
+
+    // Fill the map, throw if there are grouped pixels.
+    in_ws->getDetectorIDToWorkspaceIndexVector(m_detID_to_WI, m_detID_to_WI_offset, true);
+
+    std::vector<int> bankNums = this->getProperty("BankNumbers");
+    std::sort(bankNums.begin(), bankNums.end());
+    Instrument_const_sptr inst = in_ws->getInstrument();
+
+    std::map<int, RectangularDetector_const_sptr> banks;
+    for (auto bankNum = bankNums.begin(); bankNum != bankNums.end(); bankNum++)
+    {
+      std::string bankName = "bank" + Mantid::Kernel::Strings::toString(*bankNum);
+      IComponent_const_sptr comp = inst->getComponentByName(bankName);
+      RectangularDetector_const_sptr det = boost::dynamic_pointer_cast<const RectangularDetector>(comp);
+      if (det)
+      {
+        // Track the largest detector
+        if (det->xpixels() > m_numXPixels) m_numXPixels = det->xpixels();
+        if (det->ypixels() > m_numYPixels) m_numYPixels = det->ypixels();
+        banks[*bankNum] = det;
+      }
+    }
+
+    // Find the size in the TOF dimension
+    double tof_min, tof_max;
+    in_ws->getXMinMax(tof_min, tof_max);
+
+    // ------------------ Build all the dimensions ----------------------------
+    MDHistoDimension_sptr dimX(new MDHistoDimension("x", "x", "pixel",
+        static_cast<coord_t>(0), static_cast<coord_t>(m_numXPixels), m_numXPixels));
+    MDHistoDimension_sptr dimY(new MDHistoDimension("y", "y", "pixel",
+        static_cast<coord_t>(0), static_cast<coord_t>(m_numYPixels), m_numYPixels));
+    Axis * ax0 = in_ws->getAxis(0);
+    std::string TOFname = ax0->title();
+    if (TOFname.empty()) TOFname = ax0->unit()->unitID();
+    MDHistoDimension_sptr dimTOF(new MDHistoDimension(TOFname, TOFname, ax0->unit()->label(),
+        static_cast<coord_t>(tof_min), static_cast<coord_t>(tof_max), ax0->length()));
+
+    std::vector<IMDDimension_sptr> dims;
+    dims.push_back(dimX);
+    dims.push_back(dimY);
+    dims.push_back(dimTOF);
+
+    if (bankNums.size() > 1)
+    {
+      int min = bankNums.front();
+      int max = bankNums.back()+1;
+      MDHistoDimension_sptr dimBanks(new MDHistoDimension("bank", "bank", "Bank Number",
+          static_cast<coord_t>( min ), static_cast<coord_t>( max ), max-min));
+      dims.push_back(dimBanks);
+    }
+
+    // Create the workspace with the right number of dimensions
+    size_t nd = dims.size();
+    IMDEventWorkspace_sptr outWS = MDEventFactory::CreateMDWorkspace(nd, "MDLeanEvent");
+    outWS->initGeometry(dims);
+    outWS->initialize();
+    this->setBoxController(outWS->getBoxController());
+    outWS->splitBox();
+
+    MDEventWorkspace3Lean::sptr outWS3 = boost::dynamic_pointer_cast<MDEventWorkspace3Lean>(outWS);
+    MDEventWorkspace4Lean::sptr outWS4 = boost::dynamic_pointer_cast<MDEventWorkspace4Lean>(outWS);
+
+    for (auto bankNum = bankNums.begin(); bankNum != bankNums.end(); bankNum++)
+    {
+      RectangularDetector_const_sptr det = banks[*bankNum];
+      for (int x=0; x<det->xpixels(); x++)
+        for (int y=0; y<det->ypixels(); y++)
+        {
+          // Find the workspace index for this pixel coordinate
+          detid_t detID = det->getDetectorIDAtXY(x,y);
+          size_t wi = m_detID_to_WI[detID + m_detID_to_WI_offset];
+          if (wi >= in_ws->getNumberHistograms())
+            throw std::runtime_error("Invalid workspace index found in bank " + det->getName() + "!");
+
+          coord_t xPos = static_cast<coord_t>(x);
+          coord_t yPos = static_cast<coord_t>(y);
+          coord_t bankPos = static_cast<coord_t>(*bankNum);
+
+          EventList & el = in_ws->getEventList(wi);
+
+          // We want to bind to the right templated function, so we have to know the type of TofEvent contained in the EventList.
+          boost::function<void ()> func;
+          switch (el.getEventType())
+          {
+          case TOF:
+            if (nd==3)
+              this->convertEventList<TofEvent, MDLeanEvent<3>, 3>(outWS3, wi, xPos, yPos, bankPos);
+            else if (nd==4)
+              this->convertEventList<TofEvent, MDLeanEvent<4>, 4>(outWS4, wi, xPos, yPos, bankPos);
+            break;
+          case WEIGHTED:
+            if (nd==3)
+              this->convertEventList<WeightedEvent, MDLeanEvent<3>, 3>(outWS3, wi, xPos, yPos, bankPos);
+            else if (nd==4)
+              this->convertEventList<WeightedEvent, MDLeanEvent<4>, 4>(outWS4, wi, xPos, yPos, bankPos);
+            break;
+          case WEIGHTED_NOTIME:
+            if (nd==3)
+              this->convertEventList<WeightedEventNoTime, MDLeanEvent<3>, 3>(outWS3, wi, xPos, yPos, bankPos);
+            else if (nd==4)
+              this->convertEventList<WeightedEventNoTime, MDLeanEvent<4>, 4>(outWS4, wi, xPos, yPos, bankPos);
+            break;
+          default:
+            throw std::runtime_error("EventList had an unexpected data type!");
+          }
+
+        }
+
+    }
+
+    // Create the thread pool that will run all of these.
+    ThreadScheduler * ts = new ThreadSchedulerLargestCost();
+    ThreadPool tp(ts);
+    outWS->splitAllIfNeeded(ts);
+    tp.joinAll();
+    outWS->refreshCache();
+
+    // Save the output workspace
+    this->setProperty("OutputWorkspace", outWS);
+  }
+
+
+
+} // namespace Mantid
+} // namespace MDAlgorithms
