@@ -581,7 +581,7 @@ namespace API
     {
       // Add detectors group
       file->makeGroup("physical_detectors","NXdetector", true);
-      file->writeData<size_t>("number_of_detectors", size_t(detectorIDs.size()) );
+  //    file->writeData<size_t>("number_of_detectors", size_t(detectorIDs.size()) );
       saveDetectorSetInfoToNexus ( file, detectorIDs );
       file->closeGroup(); // detectors
 
@@ -596,7 +596,7 @@ namespace API
 
       // Add Monitors group
       file->makeGroup("physical_monitors","NXmonitor", true);
-      file->writeData<size_t>("number_of_monitors", size_t(monitorIDs.size()) );
+   //   file->writeData<size_t>("number_of_monitors", size_t(monitorIDs.size()) );
       saveDetectorSetInfoToNexus ( file, monitorIDs );
       file->closeGroup(); // monitors
     }
