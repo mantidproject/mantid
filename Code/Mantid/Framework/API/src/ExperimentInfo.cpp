@@ -572,113 +572,88 @@ namespace API
     file->writeData("type", "text/plain"); // mimetype
     file->closeGroup();
 
-    // Add new group that could contain instrument data
-    file->makeGroup("extra_data","NXdata", true);
+    // Add physical detector and monitor data
     std::vector<detid_t> detectorIDs;
     std::vector<detid_t> detmonIDs;
-    std::vector<IDetector_const_sptr> detectors;
-    std::vector<IDetector_const_sptr> detmons;
     detectorIDs = getInstrument()->getDetectorIDs( true );
     detmonIDs = getInstrument()->getDetectorIDs( false );
-    detectors = getInstrument()->getDetectors( detectorIDs );
-    detmons = getInstrument()->getDetectors( detmonIDs );
-    file->writeData("number_of_detectors_and_monitors", detmonIDs.size() );
     if( detmonIDs.size() > 0 )
     {
       // Add detectors group
-      file->makeGroup("detectors","NXdetector", true);
+      file->makeGroup("physical_detectors","NXdetector", true);
       file->writeData("number_of_detectors", detectorIDs.size() );
-
-      Geometry::IObjComponent_const_sptr sample = getInstrument()->getSample();
-      Kernel::V3D sample_pos;
-      if(sample) sample_pos = sample->getPos();
-
-      if (detectorIDs.size() > 0) {
-        std::vector<double> a_angles( detectorIDs.size() );
-        std::vector<double> p_angles( detectorIDs.size() );
-        std::vector<double> distances( detectorIDs.size() );
-
-        for (int i=0; i < detectorIDs.size(); i++)
-        {
-          if( sample) 
-          {
-            Kernel::V3D pos = detectors[i]->getPos() - sample_pos;
-            pos.getSpherical( distances[i], p_angles[i], a_angles[i]);
-          } else {
-            a_angles[i] = detectors[i]->getPhi()*180.0/M_PI;
-          }
-        }
-        file->writeData("detector_number", detectorIDs);
-        file->writeData("azimuthal_angle", a_angles);
-        file->openData("azimuthal_angle");
-        file->putAttr("units","degree");
-        file->closeData();
-        if(sample) 
-        {
-          file->writeData("polar_angle", p_angles);
-          file->openData("polar_angle");
-          file->putAttr("units","degree");
-          file->closeData();
-          file->writeData("distance", distances);
-          file->openData("distance");
-          file->putAttr("units","metre");
-          file->closeData();
-        }
-      }
+      saveDetectorSetInfoToNexus ( file, detectorIDs );
       file->closeGroup(); // detectors
 
       // Create Monitor IDs vector
+      std::vector<IDetector_const_sptr> detmons;
+      detmons = getInstrument()->getDetectors( detmonIDs );
       std::vector<detid_t> monitorIDs;
       for (int i=0; i < detmonIDs.size(); i++) 
       {
         if( detmons[i]->isMonitor()) monitorIDs.push_back( detmonIDs[i] );
       }
-      std::vector<IDetector_const_sptr> monitors;
-      monitors = getInstrument()->getDetectors( monitorIDs );
-      // Add Monitors group
-      file->makeGroup("monitors","NXmonitor", true);
-      file->writeData("number_of_monitors", monitorIDs.size() );
-      if( monitorIDs.size() > 0)
-      {
-        std::vector<double> mon_a_angles( monitorIDs.size() );
-        std::vector<double> mon_p_angles( monitorIDs.size() );
-        std::vector<double> mon_distances( monitorIDs.size() );
 
-        for (int i=0; i < monitorIDs.size(); i++)
-        {
-          if( sample) 
-          {
-            Kernel::V3D pos = monitors[i]->getPos() - sample_pos;
-            pos.getSpherical( mon_distances[i], mon_p_angles[i], mon_a_angles[i]);
-          } else {
-            mon_a_angles[i] = monitors[i]->getPhi()*180.0/M_PI;
-          }
-        }
-        file->writeData("dectector_number", monitorIDs);
-        file->writeData("azimuthal_angle", mon_a_angles);
-        file->openData("azimuthal_angle");
-        file->putAttr("units","degree");
-        file->closeData();
-        if(sample)
-        {
-          file->writeData("polar_angle", mon_p_angles);
-          file->openData("polar_angle");
-          file->putAttr("units","degree");
-          file->closeData();
-          file->writeData("distance", mon_distances);
-          file->openData("distance");
-          file->putAttr("units","metre");
-          file->closeData();
-        }
-      }
+      // Add Monitors group
+      file->makeGroup("physical_monitors","NXmonitor", true);
+      file->writeData("number_of_monitors", monitorIDs.size() );
+      saveDetectorSetInfoToNexus ( file, monitorIDs );
       file->closeGroup(); // monitors
     }
-    file->closeGroup(); // extra_data
 
     file->closeGroup(); // (close the instrument group)
 
     m_sample->saveNexus(file, "sample");
     m_run->saveNexus(file, "logs");
+  }
+
+  /* A private helper function so save information about a set of detectors to Nexus
+  *  @param file :: open Nexus file ready to recieve the info about the set of detectors
+  *                 a group must be open that has only one call of this function.
+  *  @detIDs the dectector IDs of the detectors belonging to the set
+  */
+  void ExperimentInfo::saveDetectorSetInfoToNexus (::NeXus::File * file, std::vector<detid_t> detIDs ) const
+  { 
+    int nDets = detIDs.size();
+    if( nDets == 0) return;
+    std::vector<IDetector_const_sptr> detectors;
+    detectors = getInstrument()->getDetectors( detIDs );
+
+    Geometry::IObjComponent_const_sptr sample = getInstrument()->getSample();
+    Kernel::V3D sample_pos;
+    if(sample) sample_pos = sample->getPos();
+
+    std::vector<double> a_angles( nDets );
+    std::vector<double> p_angles( nDets );
+    std::vector<double> distances( nDets );
+
+    for (int i=0; i < nDets; i++)
+    {
+      if( sample) 
+      {
+        Kernel::V3D pos = detectors[i]->getPos() - sample_pos;
+        pos.getSpherical( distances[i], p_angles[i], a_angles[i]);
+      } else {
+        a_angles[i] = detectors[i]->getPhi()*180.0/M_PI;
+      }
+    }
+    file->writeData("detector_number", detIDs);
+    file->writeData("azimuthal_angle", a_angles);
+    file->openData("azimuthal_angle");
+    file->putAttr("units","degree");
+    file->closeData();
+    if(sample) 
+    {
+      file->writeData("polar_angle", p_angles);
+      file->openData("polar_angle");
+      file->putAttr("units","degree");
+      file->closeData();
+      file->writeData("distance", distances);
+      file->openData("distance");
+      file->putAttr("units","metre");
+      file->closeData();
+    }
+
   }
 
   //--------------------------------------------------------------------------------------------
