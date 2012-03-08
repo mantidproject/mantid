@@ -589,7 +589,7 @@ namespace API
       std::vector<IDetector_const_sptr> detmons;
       detmons = getInstrument()->getDetectors( detmonIDs );
       std::vector<detid_t> monitorIDs;
-      for (int i=0; i < detmonIDs.size(); i++) 
+      for (size_t i=0; i < detmonIDs.size(); i++)
       {
         if( detmons[i]->isMonitor()) monitorIDs.push_back( detmonIDs[i] );
       }
@@ -614,7 +614,7 @@ namespace API
   */
   void ExperimentInfo::saveDetectorSetInfoToNexus (::NeXus::File * file, std::vector<detid_t> detIDs ) const
   { 
-    int nDets = detIDs.size();
+    size_t nDets = detIDs.size();
     if( nDets == 0) return;
     std::vector<IDetector_const_sptr> detectors;
     detectors = getInstrument()->getDetectors( detIDs );
@@ -627,7 +627,7 @@ namespace API
     std::vector<double> p_angles( nDets );
     std::vector<double> distances( nDets );
 
-    for (int i=0; i < nDets; i++)
+    for (size_t i=0; i < nDets; i++)
     {
       if( sample) 
       {
