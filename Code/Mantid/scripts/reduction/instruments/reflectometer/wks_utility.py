@@ -538,9 +538,6 @@ def _convertToRvsQ(_tof_axis,
     
     return q_array
 
-
-
-
 def convertToRvsQ(dMD= -1, theta= -1, tof=None):
     """
     This function converts the pixel/TOF array to the R(Q) array
@@ -606,10 +603,10 @@ def convertToRvsQWithCorrection(mt, dMD= -1, theta= -1, tof=None, yrange=None, c
 
         for t in range(sz_tof - 1):
             tof1 = tof[t]
-#            tof2 = tof[t+1]
-#            tofm = (tof1+tof2)/2.
-#            _Q = _const * math.sin(_theta) / (tofm*1e-6)
-            _Q = _const * math.sin(_theta) / (tof1 * 1e-6)
+            tof2 = tof[t+1]
+            tofm = (tof1+tof2)/2.
+            _Q = _const * math.sin(_theta) / (tofm*1e-6)
+#            _Q = _const * math.sin(_theta) / (tof1 * 1e-6)
             q_array[y, t] = _Q * 1e-10
     
     return q_array
@@ -751,7 +748,6 @@ def ref_beamdiv_correct(cpix, mt, det_secondary,
                                 int_poly_y,
                                 len(int_poly_x) - 2)
 
-
     center_of_mass = calc_center_of_mass(int_poly_x,
                                          int_poly_y,
                                          area)
@@ -798,13 +794,12 @@ def applySF(InputWorkspace,
     file created by the sfCalculator procedure
     """
     
-    print 'Apply SF'    
     #retrieve the lambdaRequested and check if we can find the sfCalculator
     #file corresponding to that lambda
     _lr = getLambdaValue(mtd[InputWorkspace])
     _lr_value = _lr[0]
     _lr_value = float("{0:.2f}".format(_lr_value))
-    print '-> Lambda Requested: {0:2f}'.format(_lr_value)
+    print '--> Lambda Requested: {0:2f}'.format(_lr_value)
     delta_range = 0.05
 #    print '-> using delta range: {0:2f}'.format(delta_range)
     list_of_delta = _lr_value + 0.01 * (numpy.arange(11) - 5)
@@ -817,12 +812,10 @@ def applySF(InputWorkspace,
         _sfCalculatorFileFullPath = FileFinder.getFullPath(_sfCalculatorFile)
         if (os.path.isfile(_sfCalculatorFileFullPath)):
             sfCalculatorFile = _sfCalculatorFileFullPath
-            print '-> File ' + _sfCalculatorFile + ' ... FOUND and will be used'
+            print '--> File ' + _sfCalculatorFile + ' ... FOUND and will be used'
             break
 #        else:
 #            print '--> File ' + _sfCalculatorFile + ' ... NOT FOUND'
-            
-    
             
     if (sfCalculatorFile is not None):
         
@@ -844,9 +837,6 @@ def applySF(InputWorkspace,
         s1h_value = s1h[0]
         s2h_value = s2h[0]
         
-#        print 's1h_value={0:f}'.format(s1h_value)
-#        print 's2h_value={0:f}'.format(s2h_value)
-        
         #locate the row with s1h and s2h having the right value
         s1h_precision = slitsValuePrecision * s1h_value
         s1h_value_low = s1h_value - s1h_precision
@@ -857,13 +847,9 @@ def applySF(InputWorkspace,
         s2h_value_high = s2h_value + s2h_precision
         
         for i in range(nbr_row):
-            _s1h_table_value = sfFactorTable[i][0]
-            _s2h_table_value = sfFactorTable[i][1]
-        
-            ### just for testing  REMOVE_ME
-            #_s1h_table_value = s1h_value_low
-            #_s2h_table_value = s2h_value_low
-            #### end of just testing  REMOVE_ME
+            
+            _s1h_table_value = float(sfFactorTable[i][0])
+            _s2h_table_value = float(sfFactorTable[i][1])
         
             if (_s1h_table_value >= s1h_value_low and
                 _s1h_table_value <= s1h_value_high and
@@ -912,6 +898,11 @@ def _applySFtoArray(workspace, a, b, a_error, b_error):
                     Nspec=1,
                     UnitX="TOF")
     
+    mt_before = mtd[workspace]
+
     Divide(workspace, 'sfWorkspace', workspace)
+
+    mt_after = mtd[workspace]
+
     return workspace
         

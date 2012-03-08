@@ -51,7 +51,8 @@ class RefLReduction(PythonAlgorithm):
         NormFlag = self.getProperty("NormFlag")
         
         normalization_run = self.getProperty("NormalizationRunNumber")
-    
+
+        print '** Working with data runs: ' + str(run_numbers)
         data_peak = self.getProperty("SignalPeakPixelRange")
         data_back = self.getProperty("SignalBackgroundPixelRange")
 
@@ -98,7 +99,6 @@ class RefLReduction(PythonAlgorithm):
         subtract_norm_bck = self.getProperty("SubtractNormBackground")
 
         #name of the sfCalculator txt file
-#        sfCalculatorPath = "/home/j35/Desktop/"
         slitsValuePrecision = 0.1       #precision of slits = 10% 
 
         # Pick a good workspace n    ame
@@ -158,16 +158,20 @@ class RefLReduction(PythonAlgorithm):
                                                    to_units='rad')
 
         # Rebin data (x-axis is in TOF)
+        print '-> Rebin'
         ws_histo_data = "_"+ws_name+"_histo"
-        Rebin(InputWorkspace=ws_event_data, OutputWorkspace=ws_histo_data, 
+        Rebin(InputWorkspace=ws_event_data, 
+              OutputWorkspace=ws_histo_data, 
               Params=[TOFrange[0], 
                       TOFsteps, 
                       TOFrange[1]])
         
         # Keep only range of TOF of interest
+        print '-> Crop TOF range'
         CropWorkspace(ws_histo_data,ws_histo_data,XMin=TOFrange[0], XMax=TOFrange[1])
 
         # Normalized by Current (proton charge)
+        print '-> Normalize by proton charge'
         NormaliseByCurrent(InputWorkspace=ws_histo_data, OutputWorkspace=ws_histo_data)
 
         # Calculation of the central pixel (using weighted average)
@@ -186,6 +190,7 @@ class RefLReduction(PythonAlgorithm):
             start_pixel = start_pixel + 1
             _den += pixelXtof_roi[i]
         data_cpix = _num / _den    
+        print '-> Central pixel is {0:.1f}'.format(data_cpix)
         
         # Retrieve geometry of instrument
         # Sample-to-detector distance
@@ -214,6 +219,7 @@ class RefLReduction(PythonAlgorithm):
         # background range (along the y-axis) and of only the pixel
         # of interest along the x-axis (to avoid the frame effect)
         ws_integrated_data = "_IntegratedDataWks"
+        print '-> keep only range of pixel of interest'
         wks_utility.createIntegratedWorkspace(mtd[ws_histo_data], 
                                               ws_integrated_data,
                                               fromXpixel=Xrange[0],
@@ -227,6 +233,7 @@ class RefLReduction(PythonAlgorithm):
         ws_transposed = '_TransposedID'
         if subtract_data_bck:
 
+            print '-> substract background'
             ConvertToHistogram(InputWorkspace=ws_integrated_data,
                                OutputWorkspace=ws_integrated_data)
 
@@ -288,6 +295,7 @@ class RefLReduction(PythonAlgorithm):
                 
         if (NormFlag):
 
+            print '-> normalization file is ' + str(normalization_run)
             # Find full path to event NeXus data file
             f = FileFinder.findRuns("REF_L%d" %normalization_run)
             if len(f)>0 and os.path.isfile(f[0]): 
@@ -307,6 +315,7 @@ class RefLReduction(PythonAlgorithm):
                                OutputWorkspace=ws_norm_event_data)
  
             # Rebin data
+            print '-> rebin normalization'
             Rebin(InputWorkspace=ws_norm_event_data, 
                   OutputWorkspace=ws_norm_histo_data, 
                   Params=[TOFrange[0], 
@@ -319,6 +328,7 @@ class RefLReduction(PythonAlgorithm):
                           XMin=TOFrange[0], XMax=TOFrange[1])
     
             # Normalized by Current (proton charge)
+            print '-> normalized by current direct beam'
             NormaliseByCurrent(InputWorkspace=ws_norm_histo_data, 
                                OutputWorkspace=ws_norm_histo_data)
 
@@ -337,6 +347,8 @@ class RefLReduction(PythonAlgorithm):
 
             ws_data_bck = "_NormBckWks"
             if subtract_norm_bck:
+                
+                print '-> substract background to direct beam'
                 Transpose(InputWorkspace=ws_integrated_data,
                           OutputWorkspace=ws_transposed)
         
@@ -406,11 +418,13 @@ class RefLReduction(PythonAlgorithm):
                                  OutputWorkspace=ws_norm_rebinned)
 
 
-            #Normalization           
+            #Normalization    
+            print '-> Sum spectra'       
             SumSpectra(InputWorkspace=ws_norm_rebinned, 
                        OutputWorkspace=ws_norm_rebinned)
 
             #### divide data by normalize histo workspace
+            print '-> Divide data by direct beam'
             Divide(LHSWorkspace=ws_data,
                    RHSWorkspace=ws_norm_rebinned,
                    OutputWorkspace=ws_data)
@@ -424,6 +438,7 @@ class RefLReduction(PythonAlgorithm):
         theta += AngleOffset_rad
 
 #        this is where we need to apply the scaling factor
+        print '-> Apply SF'
         ws_data_scaled = wks_utility.applySF(ws_data,
                                              slitsValuePrecision)
 
@@ -442,6 +457,7 @@ class RefLReduction(PythonAlgorithm):
             q_max = max(_q_axis)
 
         ws_data_Q = ws_data + '_Q'
+        print '-> convert to Q'
         wks_utility.convertWorkspaceToQ(ws_data_scaled,
                                         ws_data_Q,
                                         fromYpixel=data_peak[0],
@@ -492,5 +508,8 @@ class RefLReduction(PythonAlgorithm):
                             UnitX="MomentumTransfer")
  
         self.setProperty("OutputWorkspace", mtd[output_ws])
+        
+        #space
+        print
 
 mtd.registerPyAlgorithm(RefLReduction())
