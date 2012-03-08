@@ -3,14 +3,21 @@
 
 #include <QWidget>
 
+/**
+Abstract bin widget
+*/
 class BinInputWidget : public QWidget
 {
   Q_OBJECT
 public:
-  virtual int getNBins() const = 0;
-  virtual void setValue(int value) = 0;
+  /// Getter for the number of bins
+  virtual int entered() const = 0;
+  /// Setter for the number of bins
+  virtual void entry(int value) = 0;
+  /// Destructor
   virtual ~BinInputWidget(){}
 Q_SIGNALS:
+  /// Signal
   virtual void valueChanged();
 };
 

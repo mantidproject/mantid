@@ -90,12 +90,12 @@ double DimensionWidget::getMaximum() const
 unsigned int DimensionWidget::getNBins() const
 {
   int nbins = static_cast<int>(m_pDimensionPresenter->getModel()->getNBins());
-  int entry = m_binWidget->getNBins();
+  int entry = m_binWidget->entered();
   if(entry == nbins || entry <= 1)
   {
-    m_binWidget->setValue(nbins);
+    m_binWidget->entry(nbins);
   }
-  return m_binWidget->getNBins();
+  return m_binWidget->entered();
 }
 
 void DimensionWidget::displayError(std::string message) const
@@ -117,16 +117,16 @@ void DimensionWidget::showAsNotIntegrated(Mantid::Geometry::VecIMDDimension_sptr
 
   m_binWidget->setHidden(false);
   m_ckIntegrated->setChecked(false);
-  if(m_binWidget->getNBins() <= 1)
+  if(m_binWidget->entered() <= 1)
   {
     size_t modelBins = m_pDimensionPresenter->getModel()->getNBins();
     if( modelBins > 1)
     {
-      m_binWidget->setValue(modelBins);
+      m_binWidget->entry(int(modelBins));
     }
     else
     {
-      m_binWidget->setValue(10);
+      m_binWidget->entry(10);
     }
 
   }
@@ -178,7 +178,7 @@ void DimensionWidget::configureStrongly()
 {
   configureWeakly();
 
-  m_binWidget->setValue(int(m_pDimensionPresenter->getModel()->getNBins()));
+  m_binWidget->entry(int(m_pDimensionPresenter->getModel()->getNBins()));
 
   std::string maxValueString = boost::str(boost::format("%i") % m_pDimensionPresenter->getModel()->getMaximum());
   m_maxBox->setText(maxValueString.c_str());

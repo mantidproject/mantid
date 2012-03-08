@@ -7,11 +7,11 @@ class LowHighStepInputWidget : public BinInputWidget
 {
 public:
   Q_OBJECT
-  virtual int getNBins() const
+  virtual int entered() const
   {
     return 1;
   }
-  virtual void setValue(int value)
+  virtual void entry(int value)
   {
   }
 };
