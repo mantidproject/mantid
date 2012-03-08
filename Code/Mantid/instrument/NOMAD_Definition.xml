@@ -57,7 +57,7 @@
   </component>
 
 
-  <type name="Group4">
+  <type name="Group1">
   <component type="one_inch" idstart="0" idfillbyfirst="y" idstepbyrow="128">
     <location x="-0.0900835" y="-0.50034125" z="1.940845" name="bank1" rot="-89.3663312172" axis-x="0" axis-y="1" axis-z="0">
       <rot val="92.7740541972">
@@ -157,7 +157,7 @@
   </component>
   </type>
 
-  <type name="Group3">
+  <type name="Group2">
   <component type="one_inch" idstart="14336" idfillbyfirst="y" idstepbyrow="128">
     <location x="-0.0915395" y="-0.836427" z="1.445654" name="bank15" rot="-90.0" axis-x="0" axis-y="1" axis-z="0">
       <rot val="90.0">
@@ -321,7 +321,7 @@
   </component>
   </type>
 
-  <type name="Group2">
+  <type name="Group3">
   <component type="one_inch" idstart="37888" idfillbyfirst="y" idstepbyrow="128">
     <location x="-0.7475175" y="-0.6555715" z="0.48373677" name="bank38" rot="-90.0" axis-x="0" axis-y="1" axis-z="0">
       <rot val="90.0">
@@ -422,7 +422,7 @@
   </component>
   </type>
 
-  <type name="Group1">
+  <type name="Group4">
   <component type="one_inch" idstart="52224" idfillbyfirst="y" idstepbyrow="128">
     <location x="-0.71647125" y="-0.5438845" z="-0.590803" name="bank52" rot="-100.380800509" axis-x="0" axis-y="1" axis-z="0">
       <rot val="82.7514091291">
@@ -509,7 +509,7 @@
   </component>
   </type>
 
-  <type name="Group6">
+  <type name="Group5">
   <component type="half_inch_back"  idstart="64512" idfillbyfirst="y" idstepbyrow="128">
     <location x="-0.503307" y="0.003906" z="-0.687783" name="bank64" rot="180.0" axis-x="0" axis-y="1" axis-z="0">
     </location>
@@ -584,7 +584,7 @@
   </component>
   </type>
 
-  <type name="Group5">
+  <type name="Group6">
   <component type="half_inch" idstart="82944" idfillbyfirst="y" idstepbyrow="128">
     <location x="-0.5457338" y="0.003906" z="2.51979" name="bank82" rot="180.0" axis-x="0" axis-y="1" axis-z="0">
     </location>
