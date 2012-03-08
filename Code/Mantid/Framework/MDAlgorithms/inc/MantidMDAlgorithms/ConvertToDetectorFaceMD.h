@@ -3,12 +3,11 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidMDEvents/BoxControllerSettingsAlgorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidMDEvents/BoxControllerSettingsAlgorithm.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDLeanEvent.h"
-
-using Mantid::MDEvents::MDLeanEvent;
 
 namespace Mantid
 {
@@ -56,9 +55,12 @@ namespace MDAlgorithms
     void init();
     void exec();
 
+    std::map<int, Geometry::RectangularDetector_const_sptr> getBanks();
+
     template <class T, class MDE, size_t nd>
     void convertEventList(boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<MDE, nd>> outWS,
-        size_t workspaceIndex, coord_t x, coord_t y, coord_t bankNum);
+        size_t workspaceIndex, coord_t x, coord_t y, coord_t bankNum,
+        uint16_t runIndex, int32_t detectorID);
 
     /// The input event workspace
     Mantid::DataObjects::EventWorkspace_sptr in_ws;

@@ -337,7 +337,9 @@ namespace WorkspaceCreationHelper
 
 
   //================================================================================================================
-  /** Create an Eventworkspace with an instrument that contains RectangularDetector's
+  /** Create an Eventworkspace with an instrument that contains RectangularDetector's.
+   * X axis = 100 histogrammed bins from 0.0 in steps of 1.0.
+   * 200 events per pixel.
    *
    * @param numBanks :: number of rectangular banks
    * @param numPixels :: each bank will be numPixels*numPixels
@@ -347,9 +349,18 @@ namespace WorkspaceCreationHelper
   Mantid::DataObjects::EventWorkspace_sptr createEventWorkspaceWithFullInstrument(int numBanks, int numPixels, bool clearEvents)
   {
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(numBanks, numPixels);
-    EventWorkspace_sptr ws = CreateEventWorkspace2(numBanks*numPixels*numPixels, 10);
+    EventWorkspace_sptr ws = CreateEventWorkspace2(numBanks*numPixels*numPixels, 100);
     ws->setInstrument(inst);
-    ws->getAxis(0)->setUnit("dSpacing");
+
+    // Set the X axes
+    MantidVec x = ws->readX(0);
+    NumericAxis * ax0 = new NumericAxis(x.size());
+    ax0->setUnit("dSpacing");
+    for (size_t i=0; i<x.size(); i++)
+      ax0->setValue(i, x[i]);
+    ws->replaceAxis(0, ax0);
+
+    // re-assign detector IDs to the rectangular detector
     int detID = numPixels*numPixels;
     for (int wi=0; wi< static_cast<int>(ws->getNumberHistograms()); wi++)
     {
@@ -360,7 +371,6 @@ namespace WorkspaceCreationHelper
       detID++;
     }
     ws->doneAddingEventLists();
-    // std::vector<int> dets = ws->getInstrument()->getDetectorIDs();  std::cout << dets.size() << " dets found " << dets[0] <<","<<dets[1]<<"\n";
     return ws;
   }
 
