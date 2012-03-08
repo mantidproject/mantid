@@ -77,6 +77,8 @@ public:
     TS_ASSERT(ws);
     if (!ws) return ws;
 
+    TS_ASSERT_EQUALS(ws->getNumExperimentInfo(), 1);
+
     for (size_t d=0; d<2; d++)
     {
       IMDDimension_const_sptr dim = ws->getDimension(d);
