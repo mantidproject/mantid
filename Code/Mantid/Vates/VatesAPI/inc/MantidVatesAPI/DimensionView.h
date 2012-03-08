@@ -7,7 +7,7 @@ namespace Mantid
   namespace VATES
   {
     /// Enum describing the type of display to use
-    enum BinDisplay{LowStepHigh, NumberOfBins};
+    enum BinDisplay{LowHighStep, Simple};
 
     /// Forward delaration
     class DimensionPresenter;

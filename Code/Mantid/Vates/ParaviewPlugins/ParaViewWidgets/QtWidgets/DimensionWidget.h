@@ -10,12 +10,12 @@
 #include "GeometryWidget.h"
 #include "MantidVatesAPI/DimensionPresenter.h"
 
-
 //Foward decs
 class QLabel;
 class QComboBox;
 class QLineEdit;
 class QCheckBox;
+class BinInputWidget;
 
 namespace Mantid
 {
@@ -61,7 +61,7 @@ signals:
 private:
   QGridLayout* m_layout;
 
-  QLineEdit* m_nBinsBox;
+  //QLineEdit* m_nBinsBox;
 
   QLineEdit* m_minBox;
 
@@ -71,7 +71,7 @@ private:
 
   QComboBox* m_dimensionCombo;
 
-  QLabel* m_nBinsLabel;
+  //QLabel* m_nBinsLabel;
 
   QLabel* m_dimensionLabel;
 
@@ -79,12 +79,15 @@ private:
 
   std::string m_name;
 
- Mantid::VATES::DimensionPresenter* m_pDimensionPresenter;
+  Mantid::VATES::DimensionPresenter* m_pDimensionPresenter;
 
- /// Helper method to set names in all places required.
- void setDimensionName(const std::string& name);
+  /// Widget for displaying bin information.
+  BinInputWidget* m_binWidget;
 
-private slots:
+  /// Helper method to set names in all places required.
+  void setDimensionName(const std::string& name);
+
+  private slots:
 
   /// Handles dimension change events.
   void dimensionSelectedListener();

@@ -61,7 +61,7 @@ void RebinningCutterObjectPanel::constructGeometry(QGridLayout* gLayout)
     }
 
     // Construct custom widget instance.
-    m_geometryWidget = new GeometryWidget(new SynchronisingGeometryPresenter(xmlParser), Mantid::VATES::NumberOfBins);
+    m_geometryWidget = new GeometryWidget(new SynchronisingGeometryPresenter(xmlParser), Mantid::VATES::Simple);
     gLayout->addWidget(m_geometryWidget, gLayout->rowCount() + 1, 0, Qt::AlignLeft);
 
     // Property used as setter.

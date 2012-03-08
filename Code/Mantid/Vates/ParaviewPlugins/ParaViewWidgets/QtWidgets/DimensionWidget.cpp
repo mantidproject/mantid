@@ -10,6 +10,8 @@
 #include <vector>
 #include <iostream>
 #include "DimensionWidget.h"
+#include "LowHighStepInputWidget.h"
+#include "SimpleBinInputWidget.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 
@@ -19,8 +21,22 @@ using namespace Mantid::VATES;
 Constructor
 @param binDisplay : Enum indicating how to display bin information
 */
-DimensionWidget::DimensionWidget(BinDisplay binDisplay)
+DimensionWidget::DimensionWidget(Mantid::VATES::BinDisplay binDisplay)
 {
+  //TODO: The following cascade can be refactored out.
+  if(binDisplay == Mantid::VATES::Simple)
+  {
+    m_binWidget = new SimpleBinInputWidget;
+  }
+  else if(binDisplay == Mantid::VATES::LowHighStep)
+  {
+    m_binWidget = new LowHighStepInputWidget;
+  }
+  else
+  {
+    throw std::runtime_error("Unknown bin display mode.");
+  }
+
   using namespace Mantid::Geometry;
   QGridLayout* m_layout = new QGridLayout();
 
@@ -34,12 +50,8 @@ DimensionWidget::DimensionWidget(BinDisplay binDisplay)
   connect(m_ckIntegrated, SIGNAL(clicked(bool)), this, SLOT(integratedChanged(bool)));
   m_layout->addWidget(m_ckIntegrated, 0, 1, Qt::AlignLeft);
   
-  // TODO if BinDisplay == LowHighStep, configure for lowHighStep, otherwise, keep as current. Wigitize?
-  m_nBinsLabel = new QLabel("Bins");
-  m_layout->addWidget(m_nBinsLabel, 0, 2, Qt::AlignLeft);
-  m_nBinsBox = new QLineEdit();
-  connect(m_nBinsBox, SIGNAL(editingFinished()), this, SLOT(nBinsListener()));
-  m_layout->addWidget(m_nBinsBox, 0, 3, Qt::AlignLeft);
+  m_layout->addWidget(m_binWidget, 0, 2, 1, 2, Qt::AlignLeft);
+  connect(m_binWidget, SIGNAL(valueChanged()), this, SLOT(nBinsListener()));
 
   m_dimensionLabel = new QLabel();
   m_dimensionLabel->setFixedWidth(100);
@@ -78,13 +90,12 @@ double DimensionWidget::getMaximum() const
 unsigned int DimensionWidget::getNBins() const
 {
   int nbins = static_cast<int>(m_pDimensionPresenter->getModel()->getNBins());
-  int entry = atoi(m_nBinsBox->text());
+  int entry = m_binWidget->getNBins();
   if(entry == nbins || entry <= 1)
   {
-    std::string nBinsString = boost::str(boost::format("%i") % nbins);
-    m_nBinsBox->setText(nBinsString.c_str());
+    m_binWidget->setValue(nbins);
   }
-  return atoi(m_nBinsBox->text().toStdString().c_str());
+  return m_binWidget->getNBins();
 }
 
 void DimensionWidget::displayError(std::string message) const
@@ -104,19 +115,18 @@ void DimensionWidget::showAsNotIntegrated(Mantid::Geometry::VecIMDDimension_sptr
 {
   setDimensionName(m_pDimensionPresenter->getLabel());
 
-  m_nBinsBox->setHidden(false);
-  m_nBinsLabel->setHidden(false);
+  m_binWidget->setHidden(false);
   m_ckIntegrated->setChecked(false);
-  if(atoi(m_nBinsBox->text()) <= 1)
+  if(m_binWidget->getNBins() <= 1)
   {
     size_t modelBins = m_pDimensionPresenter->getModel()->getNBins();
     if( modelBins > 1)
     {
-      m_nBinsBox->setText(boost::str(boost::format("%i") % modelBins).c_str());
+      m_binWidget->setValue(modelBins);
     }
     else
     {
-      m_nBinsBox->setText(boost::str(boost::format("%i") % 10).c_str());
+      m_binWidget->setValue(10);
     }
 
   }
@@ -136,8 +146,7 @@ void DimensionWidget::setDimensionName(const std::string& name)
 void DimensionWidget::showAsIntegrated()
 {
   setDimensionName(m_pDimensionPresenter->getModel()->getDimensionId());
-  m_nBinsBox->setHidden(true);
-  m_nBinsLabel->setHidden(true);
+  m_binWidget->setHidden(true);
   m_ckIntegrated->setChecked(true);
 }
 
@@ -169,8 +178,7 @@ void DimensionWidget::configureStrongly()
 {
   configureWeakly();
 
-  std::string nBinsString = boost::str(boost::format("%i") % m_pDimensionPresenter->getModel()->getNBins());
-  m_nBinsBox->setText(nBinsString.c_str());
+  m_binWidget->setValue(int(m_pDimensionPresenter->getModel()->getNBins()));
 
   std::string maxValueString = boost::str(boost::format("%i") % m_pDimensionPresenter->getModel()->getMaximum());
   m_maxBox->setText(maxValueString.c_str());
@@ -228,7 +236,7 @@ void DimensionWidget::integratedChanged(bool)
 
 DimensionWidget::~DimensionWidget()
 {
-
+  delete m_binWidget;
 }
 
 std::string DimensionWidget::getVisDimensionName() const
