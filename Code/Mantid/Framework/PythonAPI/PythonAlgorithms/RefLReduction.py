@@ -261,10 +261,14 @@ class RefLReduction(PythonAlgorithm):
 
             ws_data_bck = "_DataBckWks"
             ws_data_bck_1 = ws_data_bck + "_1"
-            Transpose(InputWorkspace=ws_transposed,
+#            Transpose(InputWorkspace=ws_transposed,
+#                      OutputWorkspace=ws_data_bck_1)
+            Transpose(InputWorkspace=ws_transposed_1,
                       OutputWorkspace=ws_data_bck_1)
             ws_data_bck_2 = ws_data_bck + "_2"
-            Transpose(InputWorkspace=ws_transposed,
+#            Transpose(InputWorkspace=ws_transposed,
+#                      OutputWorkspace=ws_data_bck_2)
+            Transpose(InputWorkspace=ws_transposed_2,
                       OutputWorkspace=ws_data_bck_2)
 
             ConvertToHistogram(ws_data_bck_1, OutputWorkspace=ws_data_bck_1)
@@ -365,7 +369,9 @@ class RefLReduction(PythonAlgorithm):
                                EndX=norm_peak[0],
                                OutputMode="Return Background")
     
-                Transpose(InputWorkspace=ws_transposed,
+#                Transpose(InputWorkspace=ws_transposed,
+#                          OutputWorkspace=ws_data_bck_1)
+                Transpose(InputWorkspace=ws_transposed_1,
                           OutputWorkspace=ws_data_bck_1)
 
                 FlatBackground(InputWorkspace=ws_transposed,
@@ -375,7 +381,9 @@ class RefLReduction(PythonAlgorithm):
                                EndX=BacktoYpixel,
                                OutputMode="Return Background")
 
-                Transpose(InputWorkspace=ws_transposed,
+#                Transpose(InputWorkspace=ws_transposed,
+#                          OutputWorkspace=ws_data_bck_2)
+                Transpose(InputWorkspace=ws_transposed_2,
                           OutputWorkspace=ws_data_bck_2)
         
                 ConvertToHistogram(InputWorkspace=ws_data_bck_1, 
