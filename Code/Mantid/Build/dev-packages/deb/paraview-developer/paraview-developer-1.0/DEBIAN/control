@@ -1,0 +1,11 @@
+Package: paraview-developer
+Version: 1.0
+Section: main
+Priority: optional
+Architecture: all
+Depends: cmake, build-essential, libqt4-dev, qt4-dev-tools, libxt-dev
+Installed-Size: 0
+Maintainer: Mantid Project
+Description: Installs all packages required for a paraview developer
+ A metapackage which requires all the dependencies and tools that are 
+ required to build paraview from source.
