@@ -151,6 +151,7 @@ set ( TEST_FILES
 	test/Gaussian1DTest.h
 	test/GausDecayTest.h
 	test/GaussianTest.h
+	test/GSLMatrixTest.h
 	test/IkedaCarpenterPVTest.h
 	test/LeastSquaresTest.h
 	test/LevenbergMarquardtTest.h

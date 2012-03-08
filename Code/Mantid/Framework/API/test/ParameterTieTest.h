@@ -5,7 +5,7 @@
 
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/IFunctionMW.h"
+#include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParameterTie.h"
 
 using namespace Mantid;
@@ -79,7 +79,7 @@ public:
 };
 
 
-class ParameterTieTest_Linear: public ParamFunction, public IFunctionMW
+class ParameterTieTest_Linear: public ParamFunction, public IFunction1D
 {
 public:
   ParameterTieTest_Linear()
@@ -108,7 +108,7 @@ public:
   }
 };
 
-class ParameterTieTest_Nothing: public ParamFunction, public IFunctionMW
+class ParameterTieTest_Nothing: public ParamFunction, public IFunction1D
 {
 public:
   ParameterTieTest_Nothing()

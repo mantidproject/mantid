@@ -1,7 +1,7 @@
 #ifndef PROPERTY_HANDLER_H
 #define PROPERTY_HANDLER_H
 
-#include "MantidAPI/IFitFunction.h"
+#include "MantidAPI/IFunction.h"
 #include "WidgetDllOption.h"
 
 /* Forward declarations */
@@ -40,15 +40,15 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS PropertyHandler:public QObject, public M
   Q_OBJECT
 public:
   // Constructor
-  PropertyHandler(Mantid::API::IFitFunction* fun,
-                  Mantid::API::CompositeFunction* parent,
+  PropertyHandler(Mantid::API::IFunction_sptr fun,
+                  boost::shared_ptr<Mantid::API::CompositeFunction> parent,
                   FitPropertyBrowser* browser,
                   QtBrowserItem* item = NULL);
 
   /// Destructor
   ~PropertyHandler();
 
-  /// overrides virtual init() which is called from IFitFunction::setHandler(...)
+  /// overrides virtual init() which is called from IFunction::setHandler(...)
   void init();
 
   PropertyHandler* addFunction(const std::string& fnName);
@@ -65,11 +65,11 @@ public:
   QString functionPrefix()const;
 
   // Return composite function
-  Mantid::API::CompositeFunction* cfun()const{return m_cf;}
+  boost::shared_ptr<Mantid::API::CompositeFunction> cfun()const{return m_cf;}
   // Return peak function
-  Mantid::API::IPeakFunction* pfun()const{return m_pf;}
-  // Return IFitFunction
-  Mantid::API::IFitFunction* ifun()const{return m_fun;}
+  boost::shared_ptr<Mantid::API::IPeakFunction> pfun()const{return m_pf;}
+  // Return IFunction
+  boost::shared_ptr<Mantid::API::IFunction> ifun()const{return m_fun;}
   // Return the browser item
   QtBrowserItem* item()const{return m_item;}
   // Return the parent handler
@@ -80,16 +80,17 @@ public:
    * calls findCompositeFunction recursively with all its children or
    * zero
    */
-  const Mantid::API::CompositeFunction* findCompositeFunction(QtBrowserItem* item)const;
+  boost::shared_ptr<const Mantid::API::CompositeFunction> findCompositeFunction(QtBrowserItem* item)const;
   /** Returns 'this' if item == m_item or
    * calls findFunction recursively with all its children or
    * zero
    */
-  const Mantid::API::IFitFunction* findFunction(QtBrowserItem* item)const;
+  boost::shared_ptr<const Mantid::API::IFunction> findFunction(QtBrowserItem* item)const;
 
   PropertyHandler* findHandler(QtProperty* prop);
 
-  PropertyHandler* findHandler(const Mantid::API::IFitFunction* fun);
+  PropertyHandler* findHandler(boost::shared_ptr<const Mantid::API::IFunction> fun);
+  PropertyHandler* findHandler(const Mantid::API::IFunction* fun);
 
   /**
    * Set function parameter value read from a QtProperty
@@ -138,7 +139,7 @@ public:
    * Change the type of the function (replace the function)
    * @param prop :: The "Type" property with new value
    */
-  Mantid::API::IFitFunction* changeType(QtProperty* prop);
+  boost::shared_ptr<Mantid::API::IFunction> changeType(QtProperty* prop);
 
   void setHeight(const double& h);
   void setCentre(const double& c);
@@ -192,10 +193,9 @@ protected:
 
 private:
   FitPropertyBrowser* m_browser;
-  Mantid::API::CompositeFunction* m_cf;//< if the function is composite holds pointer to it
-  Mantid::API::IPeakFunction* m_pf;//< if the function is peak holds pointer to it
-  //Mantid::API::IFitFunction* m_if;//< pointer to IFitFunction
-  Mantid::API::CompositeFunction* m_parent; //< if the function has parent holds pointer to it
+  boost::shared_ptr<Mantid::API::CompositeFunction> m_cf;//< if the function is composite holds pointer to it
+  boost::shared_ptr<Mantid::API::IPeakFunction> m_pf;//< if the function is peak holds pointer to it
+  boost::shared_ptr<Mantid::API::CompositeFunction> m_parent; //< if the function has parent holds pointer to it
   QtProperty* m_type;
   QtBrowserItem* m_item;//< the browser item
   QList<QtProperty*> m_attributes; //< function attribute properties

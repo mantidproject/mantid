@@ -107,18 +107,11 @@ public:
   std::string descriptionOfActive(size_t i)const;
   /// Check if an active parameter i is actually active
   bool isActive(size_t i)const;
-  /// Return the transformation matrix T between parameters such that p_i = T_ij * ap_j,
-  /// where ap_j is j-th active parameter.
-  virtual void getTransformationMatrix(Kernel::Matrix<double>& tm);
-  /// Is the transformation an identity?
-  virtual bool isTransformationIdentity() const;
 
   /// Return parameter index from a parameter reference.
   size_t getParameterIndex(const ParameterReference& ref)const;
   /// Get the containing function
   IFunction_sptr getContainingFunction(const ParameterReference& ref)const;
-  /// Get the containing function
-  //IFunction_sptr getContainingFunction(IFunction_sptr fun);
 
   /// Apply the ties
   void applyTies();
@@ -174,7 +167,6 @@ protected:
   virtual void addTie(ParameterTie* tie);
 
   size_t paramOffset(size_t i)const{return m_paramOffsets[i];}
-  //size_t activeOffset(size_t i)const{return m_activeOffsets[i];}
 
 private:
 
@@ -184,17 +176,10 @@ private:
   /// Pointers to the included funtions
   std::vector<IFunction_sptr> m_functions;
   /// Individual function parameter offsets (function index in m_functions)
-  /// e.g. m_functions[i]->activeParameter(m_activeOffsets[i]+1) gives second active parameter of i-th function
-  //std::vector<size_t> m_activeOffsets;
-  /// Individual function parameter offsets (function index in m_functions)
   /// e.g. m_functions[i]->parameter(m_paramOffsets[i]+1) gives second declared parameter of i-th function
   std::vector<size_t> m_paramOffsets;
   /// Keeps the function index for each declared parameter  (parameter declared index)
   std::vector<size_t> m_IFunction;
-  /// Keeps the function index for each active parameter (parameter active index)
-  //std::vector<size_t> m_IFunctionActive;
-  /// Number of active parameters
-  //size_t m_nActive;
   /// Total number of parameters
   size_t m_nParams;
   /// Function counter to be used in nextConstraint

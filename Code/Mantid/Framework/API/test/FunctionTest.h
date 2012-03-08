@@ -2,7 +2,7 @@
 #define IFUNCTIONTEST_H_
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/IFunctionMW.h"
+#include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/Jacobian.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ParamFunction.h"
@@ -78,7 +78,7 @@ private:
   size_t m_blocksize;
 };
 
-class IFT_Funct: public ParamFunction, public IFunctionMW
+class IFT_Funct: public ParamFunction, public IFunction1D
 {
 public:
   IFT_Funct()

@@ -30,7 +30,10 @@
 #include "MyParser.h"
 #include <MantidAPI/MatrixWorkspace.h>
 #include <MantidAPI/AnalysisDataService.h>
-#include <MantidAPI/IFunctionMW.h>
+#include <MantidAPI/IFunction.h>
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionValues.h"
 
 #include <QMessageBox>
 
@@ -51,13 +54,13 @@ FunctionCurve::FunctionCurve(const FunctionType& t, const QString& name):
 }
 
 /**
- * This constractor creates a function curve from a Mantid IFitFunction and uses a workspace for x values
+ * This constractor creates a function curve from a Mantid IFunction and uses a workspace for x values
  * @param fun :: A pointer to a Mantid function
  * @param wsName :: A name of a workspace to provide x values and to be passed to the function
  * @param wsIndex :: An index in the workspace
  * @param name :: A name of the curve
  */
-FunctionCurve::FunctionCurve(const Mantid::API::IFitFunction* fun, 
+FunctionCurve::FunctionCurve(const Mantid::API::IFunction* fun, 
     const QString& wsName, int wsIndex, const QString& name):
 	PlotCurve(name),
 	d_function_type(FunctionCurve::Normal),
@@ -136,7 +139,7 @@ QString FunctionCurve::legend()
 void FunctionCurve::loadData(int points)
 {
   if (d_variable.isEmpty() && !d_formulas.isEmpty() && d_formulas[0].compare("Mantid") == 0)
-  {// Mantid::API::IFitFunction is used to calculate the data points
+  {// Mantid::API::IFunction is used to calculate the data points
     if (d_formulas.size() < 4) return;
 
     QString fnInput = d_formulas[1];
@@ -161,7 +164,7 @@ void FunctionCurve::loadData(int points)
         d_to = wsX.back();
       }
 
-      QVarLengthArray<double> X;
+      std::vector<double> X;
       X.reserve(static_cast<int>(wsX.size()));
 
       if (ws->isHistogramData())
@@ -171,7 +174,7 @@ void FunctionCurve::loadData(int points)
           double x = (wsX[i] + wsX[i+1])/2;
           if (x < d_from) continue;
           if (x > d_to) break;
-          X.append(x);
+          X.push_back(x);
         }
       }
       else
@@ -181,21 +184,19 @@ void FunctionCurve::loadData(int points)
           double x = wsX[i];
           if (x < d_from) continue;
           if (x > d_to) break;
-          X.append(x);
+          X.push_back(x);
         }
       }
 
-      int nPoints = X.size();
-      QVarLengthArray<double> Y(nPoints);
       // Create the function and initialize it using fnInput which was saved in d_formulas[1]
-      boost::shared_ptr<Mantid::API::IFitFunction> f(Mantid::API::FunctionFactory::Instance().createInitialized(fnInput.toStdString()));
-      boost::shared_ptr<Mantid::API::IFunctionMW> fMW = boost::dynamic_pointer_cast<Mantid::API::IFunctionMW>(f);
-      if (!fMW) return;
-      fMW->setMatrixWorkspace(ws,wsIndex);
-      fMW->applyTies();
-      fMW->functionMW(Y.data(),X.constData(),nPoints);
+      auto f = Mantid::API::FunctionFactory::Instance().createInitialized(fnInput.toStdString());
+      f->setMatrixWorkspace(ws,wsIndex,d_from,d_to);
+      f->applyTies();
+      Mantid::API::FunctionDomain1D domain(X);
+      Mantid::API::FunctionValues Y(domain);
+      f->function(domain,Y);
 
-      setData(X.data(), Y.data(), nPoints);
+      setData(&X[0], Y.getPointerToCalculated(0), static_cast<int>(X.size()));
     }
     catch(...)
     {

@@ -53,15 +53,6 @@ public:
   size_t getWorkspaceIndex() const {return m_workspaceIndex;}
 protected:
 
-  /// Convert a value from one unit (inUnit) to unit defined in workspace (ws) 
-  double convertValue(double value, Kernel::Unit_sptr& inUnit, 
-                      boost::shared_ptr<const MatrixWorkspace> ws,
-                      size_t wsIndex)const;
-
-  void convertValue(std::vector<double>& values, Kernel::Unit_sptr& outUnit, 
-    boost::shared_ptr<const MatrixWorkspace> ws,
-    size_t wsIndex) const;
-  
   boost::weak_ptr<const API::MatrixWorkspace> m_workspace;
 
   size_t m_workspaceIndex;

@@ -52,5 +52,11 @@ FunctionDomain1D::FunctionDomain1D(const double startX, const double endX, const
   }
 }
 
+FunctionDomain1D::FunctionDomain1D(const double x)
+{
+  m_X.resize(1);
+  m_X[0] = x;
+}
+
 } // namespace API
 } // namespace Mantid

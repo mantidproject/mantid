@@ -54,7 +54,7 @@ public:
     TS_ASSERT( strip.isInitialized() );
   }
 
-  void testExec()
+  void xtestExec()
   {
     if ( !strip.isInitialized() ) strip.initialize();
 

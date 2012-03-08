@@ -250,6 +250,9 @@ void FindPeaks::exec()
   m_peakFuncType = getPropertyValue("PeakFunction");
   m_backgroundType = getPropertyValue("BackgroundType");
 
+  // c.5) Create functions
+  createFunctions(backgroundtype);
+
   // d) Choice of fitting approach
   m_highBackground = getProperty("HighBackground");
 
@@ -922,7 +925,7 @@ void FindPeaks::fitPeakOneStep(const API::MatrixWorkspace_sptr &input, const int
     try
     {
       // Fitting the candidate peaks to a Gaussian
-      fit = createSubAlgorithm("Fit", -1, -1, true);
+      fit = createSubAlgorithm("FitMW", -1, -1, true);
     } catch (Exception::NotFoundError &)
     {
       g_log.error("The StripPeaks algorithm requires the CurveFitting library");
@@ -1017,7 +1020,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   try
   {
     // Fitting the candidate peaks to a Gaussian
-    fit = createSubAlgorithm("Fit", -1, -1, true);
+    fit = createSubAlgorithm("FitMW", -1, -1, true);
   } catch (Exception::NotFoundError &)
   {
     g_log.error("The StripPeaks algorithm requires the CurveFitting library");
@@ -1042,8 +1045,9 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   fit->executeAsSubAlg();
 
   std::string fitStatus = fit->getProperty("OutputStatus");
-  std::vector<double> params = fit->getProperty("Parameters");
-  std::vector<std::string> paramnames = fit->getProperty("ParameterNames");
+  //std::vector<double> params = fit->getProperty("Parameters");
+  m_backgroundFunction = fit->getProperty("Function");
+  std::vector<std::string> paramnames = m_backgroundFunction->getParameterNames();//fit->getProperty("ParameterNames");
 
   double a0(0.0), a1(0.0), a2(0.0);
 
@@ -1085,7 +1089,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
     try
     {
       // Fitting the candidate peaks to a Gaussian
-      gfit = createSubAlgorithm("Fit", -1, -1, true);
+      gfit = createSubAlgorithm("FitMW", -1, -1, true);
     } catch (Exception::NotFoundError &)
     {
       g_log.error("The FindPeaks algorithm requires the CurveFitting library");
@@ -1112,8 +1116,9 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
     // e) Fit and get result
     gfit->executeAsSubAlg();
 
-    std::vector<double> params = gfit->getProperty("Parameters");
-    std::vector<std::string> paramnames = gfit->getProperty("ParameterNames");
+    //std::vector<double> params = gfit->getProperty("Parameters");
+    m_peakFunction = gfit->getProperty("Function");
+    std::vector<std::string> paramnames = m_peakFunction->getParameterNames();//gfit->getProperty("ParameterNames");
 
     this->updateFitResults(gfit, bestparams, bestRawParams, mincost, X[i4], in_height);
   } // ENDFOR
@@ -1131,7 +1136,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   try
   {
     // Fitting the candidate peaks to a Gaussian
-    lastfit = createSubAlgorithm("Fit", -1, -1, true);
+    lastfit = createSubAlgorithm("FitMW", -1, -1, true);
   } catch (Exception::NotFoundError &)
   {
     g_log.error("The StripPeaks algorithm requires the CurveFitting library");
@@ -1418,6 +1423,35 @@ int FindPeaks::backgroundOrder()
     return 2;
   else
     return 0;
+}
+
+/**
+ * Create the functions for fitting.
+ * @param backgroundtype :: Type of the function to fit the background.
+ */
+void FindPeaks::createFunctions(const std::string& backgroundtype)
+{
+  m_peakFunction = API::FunctionFactory::Instance().createFunction("Gaussian");
+  if (backgroundtype.compare("Linear") == 0)
+  {
+    m_backgroundFunction = API::FunctionFactory::Instance().createFunction("LinearBackground");
+    m_peakAndBackgroundFunction = API::FunctionFactory::Instance().createInitialized("name=Gaussian;name=LinearBackground");
+    //ss2 << "name=Gaussian,Height=" << bestheight << ",PeakCentre=" << bestcenter << ",Sigma="
+    //    << bestsigma << ";name=LinearBackground,A0=" << a0 << ",A1=" << a1;
+  }
+  else if (backgroundtype.compare("Quadratic") == 0)
+  {
+    m_backgroundFunction = API::FunctionFactory::Instance().createFunction("QuadraticBackground");
+    m_peakAndBackgroundFunction = API::FunctionFactory::Instance().createInitialized("name=Gaussian;name=QuadraticBackground");
+    //ss2 << "name=Gaussian,Height=" << bestheight << ",PeakCentre=" << bestcenter << ",Sigma="
+    //    << bestsigma << ";name=QuadraticBackground,A0=" << a0 << ",A1=" << a1 << ",A2=" << a2;
+  }
+  else
+  {
+    g_log.error() << "Background type " << backgroundtype << " is not supported in FindPeak.cpp!"
+        << std::endl;
+    throw std::invalid_argument("Background type is not supported in FindPeak.cpp");
+  }
 }
 
 

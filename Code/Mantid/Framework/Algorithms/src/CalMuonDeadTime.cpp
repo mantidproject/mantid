@@ -8,6 +8,7 @@
 #include "MantidAlgorithms/CalMuonDeadTime.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/IFunction.h"
 
 namespace Mantid
 {
@@ -175,7 +176,7 @@ void CalMuonDeadTime::exec()
     const double in_bg1 = 0.0;
 
     API::IAlgorithm_sptr fit;
-    fit = createSubAlgorithm("Fit", -1, -1, true);
+    fit = createSubAlgorithm("FitMW", -1, -1, true);
 
     const int wsindex = static_cast<int>(i);
     fit->setProperty("InputWorkspace", wsFitAgainst);
@@ -189,18 +190,19 @@ void CalMuonDeadTime::exec()
     fit->executeAsSubAlg();
 
     std::string fitStatus = fit->getProperty("OutputStatus");
-    std::vector<double> params = fit->getProperty("Parameters");
-    std::vector<std::string> paramnames = fit->getProperty("ParameterNames");
+    //std::vector<double> params = fit->getProperty("Parameters");
+    //std::vector<std::string> paramnames = fit->getProperty("ParameterNames");
+    API::IFunction_sptr result = fit->getProperty("Function");
 
     // Check order of names
-    if (paramnames[0].compare("A0") != 0)
+    if (result->parameterName(0).compare("A0") != 0)
     {
-      g_log.error() << "Parameter 0 should be A0, but is " << paramnames[0] << std::endl;
+      g_log.error() << "Parameter 0 should be A0, but is " << result->parameterName(0) << std::endl;
       throw std::invalid_argument("Parameters are out of order @ 0, should be A0");
     }
-    if (paramnames[1].compare("A1") != 0)
+    if (result->parameterName(1).compare("A1") != 0)
     {
-      g_log.error() << "Parameter 1 should be A1, but is " << paramnames[1]
+      g_log.error() << "Parameter 1 should be A1, but is " << result->parameterName(1)
             << std::endl;
       throw std::invalid_argument("Parameters are out of order @ 0, should be A1");
     }
@@ -210,8 +212,8 @@ void CalMuonDeadTime::exec()
 
     if (!fitStatus.compare("success"))
     {
-      const double A0 = params[0];
-      const double A1 = params[1];
+      const double A0 = result->getParameter(0);
+      const double A1 = result->getParameter(1);
 
       // add row to output table
       API::TableRow t = outTable->appendRow();

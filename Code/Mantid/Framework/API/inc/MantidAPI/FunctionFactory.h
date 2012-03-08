@@ -139,7 +139,6 @@ namespace API
       {
         typeNames.push_back(*it);
       }
-      delete func;
     }
     return typeNames;
   }

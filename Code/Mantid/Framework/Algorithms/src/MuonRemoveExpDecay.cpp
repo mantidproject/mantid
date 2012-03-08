@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAlgorithms/MuonRemoveExpDecay.h"
@@ -191,13 +192,13 @@ double MuonRemoveExpDecay::calNormalisationConst(API::MatrixWorkspace_sptr ws, i
   double retVal = 1.0; 
 
     API::IAlgorithm_sptr fit;
-    fit = createSubAlgorithm("Fit", -1, -1, true);
+    fit = createSubAlgorithm("FitMW", -1, -1, true);
 
     fit->setProperty("InputWorkspace", ws);
     fit->setProperty("WorkspaceIndex", wsIndex);
 
     std::stringstream ss;
-    ss << "name=LinearBackground,A0=" << ws->readY(wsIndex)[0] << ",A1=" << 0.0;
+    ss << "name=LinearBackground,A0=" << ws->readY(wsIndex)[0] << ",A1=" << 0.0 << ",ties=(A1=0.0)";
     std::string function = ss.str();
 
     fit->setPropertyValue("Function", function);
@@ -205,8 +206,8 @@ double MuonRemoveExpDecay::calNormalisationConst(API::MatrixWorkspace_sptr ws, i
     fit->execute();
 
     std::string fitStatus = fit->getProperty("OutputStatus");
-    std::vector<double> params = fit->getProperty("Parameters");
-    std::vector<std::string> paramnames = fit->getProperty("ParameterNames");
+    API::IFunction_sptr result = fit->getProperty("Function");
+    std::vector<std::string> paramnames = result->getParameterNames();
 
     // Check order of names
     if (paramnames[0].compare("A0") != 0)
@@ -223,7 +224,7 @@ double MuonRemoveExpDecay::calNormalisationConst(API::MatrixWorkspace_sptr ws, i
 
     if (!fitStatus.compare("success"))
     {
-      const double A0 = params[0];
+      const double A0 = result->getParameter(0);//params[0];
 
       if ( A0 < 0 ) 
       {

@@ -11,6 +11,8 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Unit.h"
+
 #include <boost/shared_ptr.hpp>
 #include <boost/variant.hpp>
 #include <string>
@@ -28,6 +30,7 @@ namespace API
 // Forward declaration
 //----------------------------------------------------------------------
 class Workspace;
+class MatrixWorkspace;
 class ParameterTie;
 class IConstraint;
 class ParameterReference;
@@ -230,8 +233,8 @@ public:
   /// Set the workspace.
   /// @param ws :: Shared pointer to a workspace
   virtual void setWorkspace(boost::shared_ptr<const Workspace> ws) {}
-  /// Get the workspace
-  //virtual boost::shared_ptr<const API::Workspace> getWorkspace()const = 0;
+  /// Set matrix workspace
+  void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,size_t wi,double startX, double endX);
   /// Iinialize the function
   virtual void initialize(){this->init();}
 
@@ -290,6 +293,8 @@ public:
 
   /// Return parameter index from a parameter reference. Usefull for constraints and ties in composite functions
   virtual size_t getParameterIndex(const ParameterReference& ref)const = 0;
+  /// Return a vector with all parameter names
+  std::vector<std::string> getParameterNames() const ;
   //@}
 
   /** @name Active parameters */
@@ -304,16 +309,13 @@ public:
   virtual std::string descriptionOfActive(size_t i)const;
   /// Check if an active parameter i is actually active
   virtual bool isActive(size_t i)const {return !isFixed(i);}
-  /// Return the transformation matrix T between parameters such that p_i = T_ij * ap_j,
-  /// where ap_j is j-th active parameter.
-  virtual void getTransformationMatrix(Kernel::Matrix<double>& tm);
-  /// Is the transformation an identity?
-  virtual bool isTransformationIdentity() const {return true;}
   //@}
 
 
   /// Tie a parameter to other parameters (or a constant)
   virtual ParameterTie* tie(const std::string& parName, const std::string& expr);
+  /// Add several ties
+  virtual void addTies(const std::string& ties);
   /// Apply the ties
   virtual void applyTies() = 0;
   /// Removes the tie off a parameter
@@ -325,16 +327,15 @@ public:
   /// Get the tie of i-th parameter
   virtual ParameterTie* getTie(size_t i)const = 0;
 
+
+  /// Add a list of conatraints from a string
+  virtual void addConstraints(const std::string& str);
   /// Add a constraint to function
   virtual void addConstraint(IConstraint* ic) = 0;
   /// Get constraint of i-th parameter
   virtual IConstraint* getConstraint(size_t i)const = 0;
   /// Remove a constraint
   virtual void removeConstraint(const std::string& parName) = 0;
-  /// Add a penalty to the output if some parameters do not satisfy constraints.
-  //virtual void addPenalty(FunctionDomain& domain)const; //?
-  /// Modify the derivatives to correct for a penalty
-  //virtual void addPenaltyDeriv(FunctionDomain& domain, Jacobian& jacobian)const;
 
   /// Set the parameters of the function to satisfy the constraints of
   /// of the function. For example
@@ -362,6 +363,9 @@ public:
   template<typename T>
   void setAttributeValue(const std::string& attName,const T& value){setAttribute(attName,Attribute(value));}
 
+  /// Calculate numerical derivatives
+  void calNumericalDeriv(const FunctionDomain& domain, Jacobian& out);
+
   /// Set a function handler
   void setHandler(FunctionHandler* handler);
   /// Return the handler
@@ -374,11 +378,15 @@ protected:
   /// Declare a new parameter
   virtual void declareParameter(const std::string& name, double initValue = 0, const std::string& description="") = 0;
 
-  /// Calculate numerical derivatives
-  void calNumericalDeriv(const FunctionDomain& domain, Jacobian& out);
-  /// Calculate the transformation matrix T by numeric differentiation
-  void calTransformationMatrixNumerically(Kernel::Matrix<double>& tm);
+  /// Convert a value from one unit (inUnit) to unit defined in workspace (ws) 
+  double convertValue(double value, Kernel::Unit_sptr& inUnit, 
+                      boost::shared_ptr<const MatrixWorkspace> ws,
+                      size_t wsIndex)const;
 
+  void convertValue(std::vector<double>& values, Kernel::Unit_sptr& outUnit, 
+    boost::shared_ptr<const MatrixWorkspace> ws,
+    size_t wsIndex) const;
+  
   /// Create an instance of a tie without actually tying it to anything
   //virtual ParameterTie* createTie(const std::string& parName);
   /// Add a new tie
@@ -399,6 +407,11 @@ protected:
   static Kernel::Logger& g_log;
 };
 
+///shared pointer to the function base class
+typedef boost::shared_ptr<IFunction> IFunction_sptr;
+///shared pointer to the function base class (const version)
+typedef boost::shared_ptr<const IFunction> IFunction_const_sptr;
+
 /**
  * Classes inherited from FunctionHandler will handle the function.
  * The intended purpose is to help with displaying nested composite
@@ -410,21 +423,16 @@ class FunctionHandler
 {
 public:
   /// Constructor
-  FunctionHandler(IFunction* fun):m_fun(fun){}
+  FunctionHandler(IFunction_sptr fun):m_fun(fun){}
   /// Virtual destructor
   virtual ~FunctionHandler(){}
   /// abstract init method. It is called after setting handler to the function
   virtual void init() = 0;
   /// Return the handled function
-  const IFunction* function()const{return m_fun;}
+  IFunction_sptr function()const{return m_fun;}
 protected:
-  IFunction* m_fun;///< pointer to the handled function
+  IFunction_sptr m_fun;///< pointer to the handled function
 };
-
-  ///shared pointer to the function base class
-  typedef boost::shared_ptr<IFunction> IFunction_sptr;
-  ///shared pointer to the function base class (const version)
-  typedef boost::shared_ptr<const IFunction> IFunction_const_sptr;
 
 } // namespace API
 } // namespace Mantid

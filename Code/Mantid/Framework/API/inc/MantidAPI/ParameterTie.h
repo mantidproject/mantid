@@ -49,7 +49,7 @@ namespace API
 {
 public:
   /// Constructor
-  ParameterTie(IFunction* funct,const std::string& parName,const std::string& expr);
+  ParameterTie(IFunction* funct,const std::string& parName,const std::string& expr = "");
   /// Destructor
   virtual ~ParameterTie();
   /// Set the tie expression

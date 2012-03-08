@@ -42,6 +42,33 @@ namespace Mantid
 namespace CurveFitting
 {
 
+namespace
+{
+  /**
+   * A simple implementation of Jacobian.
+   */
+  class SimpleJacobian: public API::Jacobian
+  {
+  public:
+    /// Constructor
+    SimpleJacobian(size_t nData,size_t nParams):m_nData(nData),m_nParams(nParams),m_data(nData*nParams){}
+    /// Setter
+    virtual void set(size_t iY, size_t iP, double value)
+    {
+      m_data[iY * m_nParams + iP] = value;
+    }
+    /// Getter
+    virtual double get(size_t iY, size_t iP)
+    {
+      return m_data[iY * m_nParams + iP];
+    }
+  private:
+    size_t m_nData; ///< size of the data / first dimension
+    size_t m_nParams; ///< number of parameters / second dimension
+    std::vector<double> m_data; ///< data storage
+  };
+}
+
   // Register the class into the algorithm factory
   DECLARE_ALGORITHM(FitMW)
   
@@ -116,8 +143,10 @@ namespace CurveFitting
     declareProperty("CostFunction","Least squares",new ListValidator(costFuncOptions),
       "The cost function to be used for the fit, default is Least squares", Direction::InOut);
     declareProperty("CreateOutput", false,
-      "Set to true to create output workspaces with the results if the fit"
+      "Set to true to create output workspaces with the results of the fit"
       "(default is false)." );
+    declareProperty("Output", "",
+      "A base name for the output workspaces (if not given default names will be created)." );
   }
 
   /** Executes the algorithm
@@ -138,19 +167,69 @@ namespace CurveFitting
     //m_function->setWorkspace(ws);
     int index = getProperty("WorkspaceIndex");
     size_t wsIndex = static_cast<size_t>(index);
+
     const Mantid::MantidVec& X = ws->readX(wsIndex);
     double startX = getProperty("StartX");
-    if (startX == EMPTY_DBL())
-    {
-      startX = X.front();
-    }
     double endX = getProperty("EndX");
-    if (endX == EMPTY_DBL())
+
+    if (X.empty())
     {
-      endX = X.back();
+      throw std::runtime_error("Workspace contains no data.");
     }
-    Mantid::MantidVec::const_iterator from = std::lower_bound(X.begin(),X.end(),startX);
-    Mantid::MantidVec::const_iterator to = std::upper_bound(from,X.end(),endX);
+
+    // find the fitting interval: from -> to
+    Mantid::MantidVec::const_iterator from;
+    Mantid::MantidVec::const_iterator to;
+
+    bool isXAscending = X.front() < X.back();
+
+    if (isXAscending)
+    {
+      if (startX == EMPTY_DBL() && endX == EMPTY_DBL())
+      {
+        startX = X.front();
+        from = X.begin();
+        endX = X.back();
+        to = X.end();
+      }
+      else if (startX == EMPTY_DBL() || endX == EMPTY_DBL())
+      {
+        throw std::invalid_argument("Both StartX and EndX must be given to set fitting interval.");
+      }
+      else
+      {
+        if (startX > endX)
+        {
+          std::swap(startX,endX);
+        }
+        from = std::lower_bound(X.begin(),X.end(),startX);
+        to = std::upper_bound(from,X.end(),endX);
+      }
+    }
+    else // x is descending
+    {
+      if (startX == EMPTY_DBL() && endX == EMPTY_DBL())
+      {
+        startX = X.front();
+        from = X.begin();
+        endX = X.back();
+        to = X.end();
+      }
+      else if (startX == EMPTY_DBL() || endX == EMPTY_DBL())
+      {
+        throw std::invalid_argument("Both StartX and EndX must be given to set fitting interval.");
+      }
+      else
+      {
+        if (startX < endX)
+        {
+          std::swap(startX,endX);
+        }
+        from = std::lower_bound(X.begin(),X.end(),startX,[](double x1,double x2)->bool{return x1 > x2;});
+        to = std::upper_bound(from,X.end(),endX,[](double x1,double x2)->bool{return x1 > x2;});
+      }
+    }
+
 
     API::IFunctionMW* funMW = dynamic_cast<API::IFunctionMW*>(m_function.get());
     if (funMW)
@@ -158,6 +237,7 @@ namespace CurveFitting
       funMW->setMatrixWorkspace(ws,wsIndex,startX,endX);
     }
 
+    // set function domain
     API::FunctionDomain1D_sptr domain;
     if (ws->isHistogramData())
     {
@@ -180,10 +260,11 @@ namespace CurveFitting
     API::FunctionValues_sptr values(new API::FunctionValues(*domain));
     size_t ifrom = static_cast<size_t>( from - X.begin() );
     size_t n = values->size();
+    size_t ito = ifrom + n;
     const Mantid::MantidVec& Y = ws->readY( wsIndex );
     const Mantid::MantidVec& E = ws->readE( wsIndex );
     bool foundZeroOrNegativeError = false;
-    for(size_t i = ifrom; i < n; ++i)
+    for(size_t i = ifrom; i < ito; ++i)
     {
       size_t j = i - ifrom;
       values->setFitData( j, Y[i] );
@@ -256,25 +337,30 @@ namespace CurveFitting
     // fit ended, creating output
 
     bool doCreateOutput = getProperty("CreateOutput");
+    std::string baseName = getPropertyValue("Output");
+    if ( !baseName.empty() )
+    {
+      doCreateOutput = true;
+    }
+
     if (doCreateOutput)
     {
-      std::string baseName = ws->name();
       if (baseName.empty())
       {
-        baseName = "Output";
+        baseName = ws->name();
+        if (baseName.empty())
+        {
+          baseName = "Output";
+        }
+        baseName += "_" + boost::lexical_cast<std::string>(wsIndex) + "_";
       }
-      baseName += "_" + boost::lexical_cast<std::string>(wsIndex) + "_";
-
-      // Create a workspace with calculated values
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
-        "Name of the output Workspace holding resulting simulated spectrum");
-      setPropertyValue("OutputWorkspace",baseName+"Workspace");
-      
-      API::MatrixWorkspace_sptr outWS = createOutputWorkspace(ws,wsIndex,ifrom,domain,values);
-      setProperty("OutputWorkspace",outWS);
+      else
+      {
+        baseName += "_";
+      }
 
       // Calculate the covariance matrix and the errors.
-      Kernel::Matrix<double> covar;
+      GSLMatrix covar;
       costFunc->calCovarianceMatrix(covar);
       costFunc->calFittingErrors(covar);
 
@@ -287,30 +373,36 @@ namespace CurveFitting
         covariance->addColumn("str","Name");
         // set plot type to Label = 6
         covariance->getColumn(covariance->columnCount()-1)->setPlotType(6);
-        std::vector<std::string> paramThatAreFitted; // used for populating 1st "name" column
+        //std::vector<std::string> paramThatAreFitted; // used for populating 1st "name" column
         for(size_t i=0; i < m_function->nParams(); i++)
         {
           if (m_function->isActive(i)) 
           {
             covariance->addColumn("double",m_function->parameterName(i));
-            paramThatAreFitted.push_back(m_function->parameterName(i));
+            //paramThatAreFitted.push_back(m_function->parameterName(i));
           }
         }
 
         size_t np = m_function->nParams();
+        size_t ia = 0;
         for(size_t i = 0; i < np; i++)
         {
+          if (m_function->isFixed(i)) continue;
           Mantid::API::TableRow row = covariance->appendRow();
-          row << paramThatAreFitted[i];
+          row << m_function->parameterName(i);
+          size_t ja = 0;
           for(size_t j = 0; j < np; j++)
           {
+            if (m_function->isFixed(j)) continue;
             if (j == i)
               row << 100.0;
             else
             {
-              row << 100.0*covar[i][j]/sqrt(covar[i][i]*covar[j][j]);
+              row << 100.0*covar.get(ia,ja)/sqrt(covar.get(ia,ia)*covar.get(ja,ja));
             }
+            ++ja;
           }
+          ++ia;
         }
 
         setProperty("OutputNormalisedCovarianceMatrix",covariance);
@@ -344,6 +436,14 @@ namespace CurveFitting
       Mantid::API::TableRow row = result->appendRow();
       row << "Cost function value" << finalCostFuncVal;      
       setProperty("OutputParameters",result);
+
+      // Create a workspace with calculated values
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
+        "Name of the output Workspace holding resulting simulated spectrum");
+      setPropertyValue("OutputWorkspace",baseName+"Workspace");
+      
+      API::MatrixWorkspace_sptr outWS = createOutputWorkspace(ws,wsIndex,ifrom,domain,values);
+      setProperty("OutputWorkspace",outWS);
 
     }
 
@@ -391,11 +491,11 @@ namespace CurveFitting
 
       for(size_t i=0;i<3;i++)
       {
-        ws->dataX(i).assign( inputX.begin() + startIndex, inputX.begin() + nData + histN );
+        ws->dataX(i).assign( inputX.begin() + startIndex, inputX.begin() + startIndex + nData + histN );
       }
 
-      ws->dataY(0).assign( inputY.begin() + startIndex, inputY.begin() + nData);
-      ws->dataE(0).assign( inputE.begin() + startIndex, inputE.begin() + nData );
+      ws->dataY(0).assign( inputY.begin() + startIndex, inputY.begin() + startIndex + nData);
+      ws->dataE(0).assign( inputE.begin() + startIndex, inputE.begin() + startIndex + nData );
 
       MantidVec& Ycal = ws->dataY(1);
       MantidVec& Ecal = ws->dataE(1);
@@ -407,28 +507,26 @@ namespace CurveFitting
         Diff[i] = values->getFitData(i) - Ycal[i];
       }
 
-      //if (sd.size() == static_cast<size_t>(this->nParams()))
-      //{
-      //  SimpleJacobian J(nData,this->nParams());
-      //  try
-      //  {
-      //    this->functionDeriv(&J);
-      //  }
-      //  catch(...)
-      //  {
-      //    this->calNumericalDeriv(&J,&m_xValues[0],nData);
-      //  }
-      //  for(size_t i=0; i<nData; i++)
-      //  {
-      //    double err = 0.0;
-      //    for(size_t j=0;j< static_cast<size_t>(nParams());++j)
-      //    {
-      //      double d = J.get(i,j) * sd[j];
-      //      err += d*d;
-      //    }
-      //    Ecal[i] = sqrt(err);
-      //  }
-      //}
+      SimpleJacobian J(nData,m_function->nParams());
+      try
+      {
+        m_function->functionDeriv(*domain,J);
+      }
+      catch(...)
+      {
+        m_function->calNumericalDeriv(*domain,J);
+      }
+      for(size_t i=0; i<nData; i++)
+      {
+        double err = 0.0;
+        for(size_t j=0;j< m_function->nParams();++j)
+        {
+          double d = J.get(i,j) * m_function->getError(j);
+          err += d*d;
+        }
+        Ecal[i] = sqrt(err);
+      }
+
       return ws;
   }
 

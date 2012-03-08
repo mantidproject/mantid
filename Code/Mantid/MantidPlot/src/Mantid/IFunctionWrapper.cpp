@@ -1,27 +1,27 @@
 #include "IFunctionWrapper.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/CompositeFunctionMW.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 
 void IFunctionWrapper::setFunction(const QString& name)
 {
   try
   {
-    m_function = dynamic_cast<Mantid::API::CompositeFunctionMW*>(Mantid::API::FunctionFactory::Instance().createFunction(name.toStdString()));
-    m_compositeFunction = dynamic_cast<Mantid::API::CompositeFunctionMW*>(m_function);
-    m_peakFunction = dynamic_cast<Mantid::API::IPeakFunction*>(m_function);
+    m_function = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(Mantid::API::FunctionFactory::Instance().createFunction(name.toStdString()));
+    m_compositeFunction = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(m_function);
+    m_peakFunction = boost::dynamic_pointer_cast<Mantid::API::IPeakFunction>(m_function);
   }
   catch(...)
   {
-    m_function = NULL;
-    m_compositeFunction = NULL;
-    m_peakFunction = NULL;
+    m_function.reset();
+    m_compositeFunction.reset();
+    m_peakFunction.reset();
   }
 }
 
-void IFunctionWrapper::setFunction(Mantid::API::IFitFunction* function)
+void IFunctionWrapper::setFunction(Mantid::API::IFunction_sptr function)
 {
   m_function = function;
-  m_compositeFunction = dynamic_cast<Mantid::API::CompositeFunctionMW*>(m_function);
-  m_peakFunction = dynamic_cast<Mantid::API::IPeakFunction*>(m_function);
+  m_compositeFunction = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(m_function);
+  m_peakFunction = boost::dynamic_pointer_cast<Mantid::API::IPeakFunction>(m_function);
 }

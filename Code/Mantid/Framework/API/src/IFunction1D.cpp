@@ -33,33 +33,6 @@ namespace API
   
   Kernel::Logger& IFunction1D::g_log = Kernel::Logger::get("IFunction1D");
 
-namespace
-{
-  /**
-   * A simple implementation of Jacobian.
-   */
-  class SimpleJacobian: public Jacobian
-  {
-  public:
-    /// Constructor
-    SimpleJacobian(size_t nData,size_t nParams):m_nData(nData),m_nParams(nParams),m_data(nData*nParams){}
-    /// Setter
-    virtual void set(size_t iY, size_t iP, double value)
-    {
-      m_data[iY * m_nParams + iP] = value;
-    }
-    /// Getter
-    virtual double get(size_t iY, size_t iP)
-    {
-      return m_data[iY * m_nParams + iP];
-    }
-  private:
-    size_t m_nData; ///< size of the data / first dimension
-    size_t m_nParams; ///< number of parameters / second dimension
-    std::vector<double> m_data; ///< data storage
-  };
-}
-
 void IFunction1D::function(const FunctionDomain& domain,FunctionValues& values)const
 {
   const FunctionDomain1D* d1d = dynamic_cast<const FunctionDomain1D*>(&domain);
@@ -90,95 +63,6 @@ void IFunction1D::functionDeriv1D(Jacobian*, const double*, const size_t)
 {
   throw Kernel::Exception::NotImplementedError("No derivative IFunction1D provided");
 }
-
-/** 
- * Creates a workspace containing values calculated with this function. It takes a workspace and ws index
- * of a spectrum which this function may have been fitted to. The output contains the original spectrum 
- * (wi = 0), the calculated values (ws = 1), and the difference between them (ws = 2).
- * @param inWS :: input workspace
- * @param wi :: workspace index
- * @param sd :: optional standard deviations of the parameters for calculating the error bars
- * @return created workspase
- */
-//boost::shared_ptr<API::MatrixWorkspace> IFunction1D::createCalculatedWorkspace(
-//  boost::shared_ptr<const API::MatrixWorkspace> inWS, 
-//  size_t wi,
-//  const std::vector<double>& sd
-//  )
-//{
-//      const MantidVec& inputX = inWS->readX(wi);
-//      const MantidVec& inputY = inWS->readY(wi);
-//      const MantidVec& inputE = inWS->readE(wi);
-//      size_t nData = dataSize();
-//
-//      size_t histN = inWS->isHistogramData() ? 1 : 0;
-//      API::MatrixWorkspace_sptr ws =
-//        Mantid::API::WorkspaceFactory::Instance().create(
-//            "Workspace2D",
-//            3,
-//            nData + histN,
-//            nData);
-//      ws->setTitle("");
-//      ws->setYUnitLabel(inWS->YUnitLabel());
-//      ws->setYUnit(inWS->YUnit());
-//      ws->getAxis(0)->unit() = inWS->getAxis(0)->unit();
-//      API::TextAxis* tAxis = new API::TextAxis(3);
-//      tAxis->setLabel(0,"Data");
-//      tAxis->setLabel(1,"Calc");
-//      tAxis->setLabel(2,"Diff");
-//      ws->replaceAxis(1,tAxis);
-//
-//      assert(m_xMaxIndex-m_xMinIndex+1 == nData);
-//
-//      for(size_t i=0;i<3;i++)
-//      {
-//        ws->dataX(i).assign(inputX.begin()+m_xMinIndex,inputX.begin()+m_xMaxIndex+1+histN);
-//      }
-//
-//      ws->dataY(0).assign(inputY.begin()+m_xMinIndex,inputY.begin()+m_xMaxIndex+1);
-//      ws->dataE(0).assign(inputE.begin()+m_xMinIndex,inputE.begin()+m_xMaxIndex+1);
-//
-//      MantidVec& Ycal = ws->dataY(1);
-//      MantidVec& Ecal = ws->dataE(1);
-//      MantidVec& E = ws->dataY(2);
-//
-//      double* lOut = new double[nData];  // to capture output from call to function()
-//      function( lOut );
-//
-//      for(size_t i=0; i<nData; i++)
-//      {
-//        Ycal[i] = lOut[i]; 
-//        E[i] = m_data[i] - Ycal[i];
-//      }
-//
-//      delete [] lOut; 
-//
-//      if (sd.size() == static_cast<size_t>(this->nParams()))
-//      {
-//        SimpleJacobian J(nData,this->nParams());
-//        try
-//        {
-//          this->functionDeriv(&J);
-//        }
-//        catch(...)
-//        {
-//          this->calNumericalDeriv(&J,&m_xValues[0],nData);
-//        }
-//        for(size_t i=0; i<nData; i++)
-//        {
-//          double err = 0.0;
-//          for(size_t j=0;j< static_cast<size_t>(nParams());++j)
-//          {
-//            double d = J.get(i,j) * sd[j];
-//            err += d*d;
-//          }
-//          Ecal[i] = sqrt(err);
-//        }
-//      }
-//
-//      return ws;
-//}
-
 
 } // namespace API
 } // namespace Mantid

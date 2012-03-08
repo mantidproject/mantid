@@ -27,6 +27,7 @@ Moves the detectors in an instrument to optimize the maximum intensity of each d
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -232,7 +233,7 @@ namespace Algorithms
     try
     {
       //set the subalgorithm no to log as this will be run once per spectra
-      fit_alg = createSubAlgorithm("Fit",-1,-1,false);
+      fit_alg = createSubAlgorithm("FitMW",-1,-1,false);
     } catch (Exception::NotFoundError&)
     {
       g_log.error("Can't locate Fit algorithm");
@@ -251,7 +252,12 @@ namespace Algorithms
 
     if (debug) std::cout << tim << " to Fit" << std::endl;
 
-    std::vector<double> params = fit_alg->getProperty("Parameters");
+    std::vector<double> params;// = fit_alg->getProperty("Parameters");
+    Mantid::API::IFunction_sptr fun_res = fit_alg->getProperty("Function");
+    for(size_t i = 0; i < fun_res->nParams(); ++i)
+    {
+      params.push_back(fun_res->getParameter(i));
+    }
     peakHeight = params[0];
     peakLoc = params[1];
 

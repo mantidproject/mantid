@@ -12,6 +12,9 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionValues.h"
 
 #include "qttreepropertybrowser.h"
 #include "qtpropertymanager.h"
@@ -27,13 +30,13 @@ namespace MantidWidgets
 {
 
 // Constructor
-PropertyHandler::PropertyHandler(Mantid::API::IFitFunction* fun,
-                Mantid::API::CompositeFunction* parent,
+PropertyHandler::PropertyHandler(Mantid::API::IFunction_sptr fun,
+                Mantid::API::CompositeFunction_sptr parent,
                 FitPropertyBrowser* browser,
                 QtBrowserItem* item)
                 :FunctionHandler(fun),m_browser(browser),
-                m_cf(dynamic_cast<Mantid::API::CompositeFunction*>(fun)),
-                m_pf(dynamic_cast<Mantid::API::IPeakFunction*>(fun)),
+                m_cf(boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun)),
+                m_pf(boost::dynamic_pointer_cast<Mantid::API::IPeakFunction>(fun)),
                 m_parent(parent),
                 m_type(NULL),
                 m_item(item),
@@ -48,7 +51,7 @@ PropertyHandler::~PropertyHandler()
 {
 }
 
-/// overrides virtual init() which is called from IFitFunction::setHandler(...)
+/// overrides virtual init() which is called from IFunction::setHandler(...)
 void PropertyHandler::init()
 {
   m_browser->m_changeSlotsEnabled = false;
@@ -128,10 +131,10 @@ void PropertyHandler::init()
   {
     for(size_t i=0;i<m_cf->nFunctions();i++)
     {
-      Mantid::API::IFitFunction* f = dynamic_cast<Mantid::API::IFitFunction*>(m_cf->getFunction(i));
+      Mantid::API::IFunction_sptr f = boost::dynamic_pointer_cast<Mantid::API::IFunction>(m_cf->getFunction(i));
       if (!f)
       {
-        throw std::runtime_error("IFitFunction expected but func function of another type");
+        throw std::runtime_error("IFunction expected but func function of another type");
       }
       PropertyHandler* h = new PropertyHandler(f,m_cf,m_browser);
       f->setHandler(h);
@@ -146,7 +149,7 @@ void PropertyHandler::init()
  * Attribute visitor to create a QtProperty. Depending on the attribute type
  * the appropriate apply method is used.
  */
-class CreateAttributeProperty: public Mantid::API::IFitFunction::ConstAttributeVisitor<QtProperty*>
+class CreateAttributeProperty: public Mantid::API::IFunction::ConstAttributeVisitor<QtProperty*>
 {
 public:
   CreateAttributeProperty(FitPropertyBrowser* browser,const QString& name)
@@ -193,7 +196,7 @@ void PropertyHandler::initAttributes()
   for(size_t i=0;i<attNames.size();i++)
   {
     QString aName = QString::fromStdString(attNames[i]);
-    Mantid::API::IFitFunction::Attribute att = function()->getAttribute(attNames[i]);
+    Mantid::API::IFunction::Attribute att = function()->getAttribute(attNames[i]);
     CreateAttributeProperty tmp(m_browser,aName);
     QtProperty* prop = att.apply(tmp);
     m_item->property()->addSubProperty(prop);
@@ -226,7 +229,7 @@ void PropertyHandler::initParameters()
     if (tie)
     {
       QStringList qtie = 
-        QString::fromStdString(tie->asString(m_browser->theFunction())).split("=");
+        QString::fromStdString(tie->asString(m_browser->theFunction().get())).split("=");
       if (qtie.size() > 1)
       {
         QtProperty* tieProp = m_browser->m_stringManager->addProperty("Tie");
@@ -289,41 +292,41 @@ void PropertyHandler::initWorkspace()
 {
   if (m_parent && m_parent->name() == "MultiBG")
   {
-    m_workspace = m_browser->m_enumManager->addProperty("Workspace");
-    QtProperty* fnProp = m_item->property();
-    fnProp->addSubProperty(m_workspace);
-    m_workspaceIndex = m_browser->m_intManager->addProperty("Workspace Index");
-    if (! m_browser->m_workspaceNames.isEmpty() )
-    {
-      QStringList names("All");
-      foreach(QString name,m_browser->m_workspaceNames)
-      {
-        names.append(name);
-      }
-      m_browser->m_enumManager->setEnumNames(m_workspace, names);
-      int iWorkspace = 0;
-      int iWorkspaceIndex = 0;
-      if (ifun()->getWorkspace())
-      {
-        Mantid::API::IFunctionMW* ifmw = dynamic_cast<Mantid::API::IFunctionMW*>(ifun());
-        if (ifmw)
-        {
-          std::string wsName = ifmw->getMatrixWorkspace()->getName();
-          iWorkspace = names.indexOf(QString::fromStdString(wsName));
-          if (iWorkspace >= 0)
-          {
-            iWorkspaceIndex = static_cast<int>(ifmw->getWorkspaceIndex());
-            fnProp->addSubProperty(m_workspaceIndex);
-          }
-          else
-          {
-            iWorkspace = 0;
-          }
-        }
-      }
-      m_browser->m_enumManager->setValue(m_workspace,iWorkspace);
-      m_browser->m_intManager->setValue(m_workspaceIndex,iWorkspaceIndex);
-    }
+    //m_workspace = m_browser->m_enumManager->addProperty("Workspace");
+    //QtProperty* fnProp = m_item->property();
+    //fnProp->addSubProperty(m_workspace);
+    //m_workspaceIndex = m_browser->m_intManager->addProperty("Workspace Index");
+    //if (! m_browser->m_workspaceNames.isEmpty() )
+    //{
+    //  QStringList names("All");
+    //  foreach(QString name,m_browser->m_workspaceNames)
+    //  {
+    //    names.append(name);
+    //  }
+    //  m_browser->m_enumManager->setEnumNames(m_workspace, names);
+    //  int iWorkspace = 0;
+    //  int iWorkspaceIndex = 0;
+    //  if (ifun()->getWorkspace())
+    //  {
+    //    Mantid::API::IFunctionMW* ifmw = dynamic_cast<Mantid::API::IFunctionMW*>(ifun());
+    //    if (ifmw)
+    //    {
+    //      std::string wsName = ifmw->getMatrixWorkspace()->getName();
+    //      iWorkspace = names.indexOf(QString::fromStdString(wsName));
+    //      if (iWorkspace >= 0)
+    //      {
+    //        iWorkspaceIndex = static_cast<int>(ifmw->getWorkspaceIndex());
+    //        fnProp->addSubProperty(m_workspaceIndex);
+    //      }
+    //      else
+    //      {
+    //        iWorkspace = 0;
+    //      }
+    //    }
+    //  }
+    //  m_browser->m_enumManager->setValue(m_workspace,iWorkspace);
+    //  m_browser->m_intManager->setValue(m_workspaceIndex,iWorkspaceIndex);
+    //}
   }
   else
   {
@@ -340,7 +343,7 @@ PropertyHandler* PropertyHandler::addFunction(const std::string& fnName)
 {
   if (!m_cf) return NULL;
   m_browser->disableUndo();
-  Mantid::API::IFitFunction* f = 0;
+  Mantid::API::IFunction_sptr f;
   // Create new function
   if (fnName.find("=") == std::string::npos)
   {// either from name
@@ -355,7 +358,7 @@ PropertyHandler* PropertyHandler::addFunction(const std::string& fnName)
   m_browser->m_changeSlotsEnabled = false;
 
   // Check if it's a peak and set its width
-  Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(f);
+  boost::shared_ptr<Mantid::API::IPeakFunction> pf = boost::dynamic_pointer_cast<Mantid::API::IPeakFunction>(f);
   if (pf)
   {
     if (!m_browser->workspaceName().empty() && 
@@ -459,7 +462,7 @@ void PropertyHandler::removeFunction()
       m_browser->m_autoBackground = NULL;
     }
     ph->item()->property()->removeSubProperty(m_item->property());
-    Mantid::API::CompositeFunction* cf = ph->cfun();
+    Mantid::API::CompositeFunction_sptr cf = ph->cfun();
     for(int i=0;i<static_cast<int>(cf->nFunctions());i++)
     {
       if (cf->getFunction(i) == function())
@@ -520,7 +523,7 @@ QString PropertyHandler::functionPrefix()const
   if (ph)
   {
     int iFun = -1;
-    Mantid::API::CompositeFunction* cf = ph->cfun();
+    Mantid::API::CompositeFunction_sptr cf = ph->cfun();
     for(int i=0;i<static_cast<int>(cf->nFunctions());i++)
     {
       if (cf->getFunction(i) == function())
@@ -554,31 +557,31 @@ PropertyHandler* PropertyHandler::getHandler(std::size_t i)const
 * calls findCompositeFunction recursively with all its children or
 * zero
 */
-const Mantid::API::CompositeFunction* PropertyHandler::findCompositeFunction(QtBrowserItem* item)const
+Mantid::API::CompositeFunction_const_sptr PropertyHandler::findCompositeFunction(QtBrowserItem* item)const
 {
-  if (!m_cf) return 0;
+  if (!m_cf) return Mantid::API::CompositeFunction_sptr();
   if (item == m_item) return m_cf;
   for(size_t i=0;i<m_cf->nFunctions();i++)
   {
-    const Mantid::API::CompositeFunction* res = getHandler(i)->findCompositeFunction(item);
+    Mantid::API::CompositeFunction_const_sptr res = getHandler(i)->findCompositeFunction(item);
     if (res != NULL) return res;
   }
-  return 0;
+  return Mantid::API::CompositeFunction_sptr();
 }
 /** Returns 'this' if item == m_item or
 * calls findFunction recursively with all its children or
 * zero
 */
-const Mantid::API::IFitFunction* PropertyHandler::findFunction(QtBrowserItem* item)const
+Mantid::API::IFunction_const_sptr PropertyHandler::findFunction(QtBrowserItem* item)const
 {
-  if (item == m_item) return static_cast<const Mantid::API::IFitFunction*>(function());
-  if (!m_cf) return 0;
+  if (item == m_item) return function();
+  if (!m_cf) return Mantid::API::IFunction_sptr();
   for(size_t i=0;i<m_cf->nFunctions();i++)
   {
-    const Mantid::API::IFitFunction* res = getHandler(i)->findFunction(item);
+    Mantid::API::IFunction_const_sptr res = getHandler(i)->findFunction(item);
     if (res != NULL) return res;
   }
-  return 0;
+  return Mantid::API::IFunction_sptr();
 }
 
 PropertyHandler* PropertyHandler::findHandler(QtProperty* prop)
@@ -608,9 +611,23 @@ PropertyHandler* PropertyHandler::findHandler(QtProperty* prop)
   return NULL;
 }
 
-PropertyHandler* PropertyHandler::findHandler(const Mantid::API::IFitFunction* fun)
+PropertyHandler* PropertyHandler::findHandler(Mantid::API::IFunction_const_sptr fun)
 {
   if (fun == function()) return this;
+  if (m_cf)
+  {
+    for(size_t i=0;i<m_cf->nFunctions();i++)
+    {
+      PropertyHandler* h = getHandler(i)->findHandler(fun);
+      if (h) return h;
+    }
+  }
+  return NULL;
+}
+
+PropertyHandler* PropertyHandler::findHandler(const Mantid::API::IFunction* fun)
+{
+  if (fun == function().get()) return this;
   if (m_cf)
   {
     for(size_t i=0;i<m_cf->nFunctions();i++)
@@ -634,7 +651,7 @@ bool PropertyHandler::setParameter(QtProperty* prop)
     std::string parName = prop->propertyName().toStdString();
     double parValue = m_browser->m_doubleManager->value(prop);
     m_fun->setParameter(parName,parValue);
-    m_browser->sendParameterChanged(m_fun);
+    m_browser->sendParameterChanged(m_fun.get());
     return true;
   }
   if (m_cf)
@@ -652,7 +669,7 @@ bool PropertyHandler::setParameter(QtProperty* prop)
  * Visitor setting new attribute value. Depending on the attribute type
  * the appropriate apply method is used.
  */
-class SetAttribute: public Mantid::API::IFitFunction::AttributeVisitor<>
+class SetAttribute: public Mantid::API::IFunction::AttributeVisitor<>
 {
 public:
   SetAttribute(FitPropertyBrowser* browser,QtProperty* prop)
@@ -683,7 +700,7 @@ private:
  * Visitor setting new attribute value. Depending on the attribute type
  * the appropriate apply method is used.
  */
-class SetAttributeProperty: public Mantid::API::IFitFunction::ConstAttributeVisitor<>
+class SetAttributeProperty: public Mantid::API::IFunction::ConstAttributeVisitor<>
 {
 public:
   SetAttributeProperty(FitPropertyBrowser* browser,QtProperty* prop)
@@ -728,7 +745,7 @@ bool PropertyHandler::setAttribute(QtProperty* prop)
     QString attName = prop->propertyName();
     try
     {
-      Mantid::API::IFitFunction::Attribute att = 
+      Mantid::API::IFunction::Attribute att = 
         m_fun->getAttribute(attName.toStdString());
       SetAttribute tmp(m_browser,prop);
       att.apply(tmp);
@@ -765,7 +782,7 @@ void PropertyHandler::setAttribute(const QString& attName, const double& attValu
   {
     try
     {
-      m_fun->setAttribute(attName.toStdString(),Mantid::API::IFitFunction::Attribute(attValue));
+      m_fun->setAttribute(attName.toStdString(),Mantid::API::IFunction::Attribute(attValue));
       m_browser->compositeFunction()->checkFunction();
       foreach(QtProperty* prop,m_attributes)
       {
@@ -796,7 +813,7 @@ void PropertyHandler::setAttribute(const QString& attName, const QString& attVal
   const std::string name = attName.toStdString();
   if (m_fun->hasAttribute(name))
   {
-    Mantid::API::IFitFunction::Attribute att = m_fun->getAttribute(name);
+    Mantid::API::IFunction::Attribute att = m_fun->getAttribute(name);
     att.fromString(attValue.toStdString());
     m_fun->setAttribute(name,att);
     m_browser->compositeFunction()->checkFunction();
@@ -837,7 +854,7 @@ void PropertyHandler::updateParameters()
 * Change the type of the function (replace the function)
 * @param prop :: The "Type" property with new value
 */
-Mantid::API::IFitFunction* PropertyHandler::changeType(QtProperty* prop)
+Mantid::API::IFunction_sptr PropertyHandler::changeType(QtProperty* prop)
 {
   if (prop == m_type)
   {
@@ -847,7 +864,7 @@ Mantid::API::IFitFunction* PropertyHandler::changeType(QtProperty* prop)
     int i = m_browser->m_enumManager->value(prop);
     QStringList functionNames = m_browser->m_enumManager->enumNames(prop);
     const QString& fnName = functionNames[i];
-    Mantid::API::IFitFunction* f = NULL;
+    Mantid::API::IFunction_sptr f;
     try
     {
       f = Mantid::API::FunctionFactory::Instance().
@@ -857,14 +874,14 @@ Mantid::API::IFitFunction* PropertyHandler::changeType(QtProperty* prop)
     {
       QMessageBox::critical(NULL,"Mantid - Error","Cannot create function "+fnName+
         "\n"+e.what());
-      return NULL;
+      return Mantid::API::IFunction_sptr();
     }
 
     // turn of the change slots (doubleChanged() etc) to avoid infinite loop
     m_browser->m_changeSlotsEnabled = false;
 
     // Check if it's a peak and set its width
-    Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(f);
+    Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(f.get());
     if (pf)
     {
       if (!m_pf)
@@ -901,11 +918,11 @@ Mantid::API::IFitFunction* PropertyHandler::changeType(QtProperty* prop)
 
     emit m_browser->removePlotSignal(this);
 
-    const Mantid::API::IFitFunction* f_old = static_cast<const Mantid::API::IFitFunction*>(function());
+    Mantid::API::IFunction_sptr f_old = function();
     PropertyHandler* h = new PropertyHandler(f,m_parent,m_browser,m_item);
     if (this == m_browser->m_autoBackground)
     {
-      if (dynamic_cast<Mantid::API::IBackgroundFunction*>(f))
+      if (dynamic_cast<Mantid::API::IBackgroundFunction*>(f.get()))
       {
         m_browser->m_autoBackground = h;
         h->fit();
@@ -934,11 +951,11 @@ Mantid::API::IFitFunction* PropertyHandler::changeType(QtProperty* prop)
   {
     for(size_t i=0;i<m_cf->nFunctions();i++)
     {
-      Mantid::API::IFitFunction* f = getHandler(i)->changeType(prop);
+      Mantid::API::IFunction_sptr f = getHandler(i)->changeType(prop);
       if (f) return f;
     }
   }
-  return NULL;
+  return Mantid::API::IFunction_sptr();
 }
 
 bool PropertyHandler::isParameter(QtProperty* prop)
@@ -1064,12 +1081,12 @@ void PropertyHandler::removeTie(const QString& parName)
 void PropertyHandler::calcBase()
 {
   if (!m_browser->m_autoBackground) return;
-  Mantid::API::IFunctionMW* fMW = dynamic_cast<Mantid::API::IFunctionMW*>(m_fun);
-  if (!fMW) return;
-  Mantid::API::MatrixWorkspace_const_sptr ws = fMW->getMatrixWorkspace();
+  Mantid::API::IFunction1D_sptr f1D = boost::dynamic_pointer_cast<Mantid::API::IFunction1D>(m_fun);
+  if (!f1D) return;
+  auto ws = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(m_browser->getWorkspace());
   if (ws)
   {
-    size_t wi = fMW->getWorkspaceIndex();
+    size_t wi = m_browser->workspaceIndex();
     const Mantid::MantidVec& X = ws->readX(wi);
     const Mantid::MantidVec& Y = ws->readY(wi);
     int n = static_cast<int>(Y.size()) - 1;
@@ -1079,10 +1096,10 @@ void PropertyHandler::calcBase()
     }
     else
     {
-      double x = X[m_ci];
-      double y = 0;
-      dynamic_cast<const Mantid::API::IFunctionMW*>(m_browser->m_autoBackground->function())->functionMW(&y,&x,1);
-      m_base = y;
+      Mantid::API::FunctionDomain1D x(X[m_ci]);
+      Mantid::API::FunctionValues y(x);
+      m_browser->m_autoBackground->function()->function(x,y);
+      m_base = y[0];
     }
   }
   else
@@ -1122,32 +1139,34 @@ void PropertyHandler::setCentre(const double& c)
   if (m_pf)
   {
     m_pf->setCentre(c);
-    Mantid::API::MatrixWorkspace_const_sptr ws = m_pf->getMatrixWorkspace();
-    if (ws)
-    {
-      size_t wi = m_pf->getWorkspaceIndex();
-      const Mantid::MantidVec& X = ws->readX(wi);
-      int n = static_cast<int>(X.size()) - 2;
-      if (m_ci < 0) m_ci = 0;
-      if (m_ci > n) m_ci = n;
-      double x = X[m_ci];
-      if (x < c)
-      {
-        for(;m_ci<=n;++m_ci)
-        {
-          x = X[m_ci];
-          if (x > c) break;
-        }
-      }
-      else
-      {
-        for(;m_ci>=0;--m_ci)
-        {
-          x = X[m_ci];
-          if (x < c) break;
-        }
-      }
-    }
+    //                        What does it do ?
+
+    //Mantid::API::MatrixWorkspace_const_sptr ws = m_pf->getMatrixWorkspace();
+    //if (ws)
+    //{
+    //  size_t wi = m_pf->getWorkspaceIndex();
+    //  const Mantid::MantidVec& X = ws->readX(wi);
+    //  int n = static_cast<int>(X.size()) - 2;
+    //  if (m_ci < 0) m_ci = 0;
+    //  if (m_ci > n) m_ci = n;
+    //  double x = X[m_ci];
+    //  if (x < c)
+    //  {
+    //    for(;m_ci<=n;++m_ci)
+    //    {
+    //      x = X[m_ci];
+    //      if (x > c) break;
+    //    }
+    //  }
+    //  else
+    //  {
+    //    for(;m_ci>=0;--m_ci)
+    //    {
+    //      x = X[m_ci];
+    //      if (x < c) break;
+    //    }
+    //  }
+    //}
   }
 }
 
@@ -1257,7 +1276,7 @@ void PropertyHandler::addConstraint(QtProperty* parProp,bool lo,bool up,double l
   m_constraints.insert(parProp->propertyName(),cnew);
 
   Mantid::API::IConstraint* c = 
-    Mantid::API::ConstraintFactory::Instance().createInitialized(m_fun,ostr.str());
+    Mantid::API::ConstraintFactory::Instance().createInitialized(m_fun.get(),ostr.str());
   m_fun->addConstraint(c);
   m_browser->m_changeSlotsEnabled = true;
 }
@@ -1342,21 +1361,22 @@ void PropertyHandler::fit()
   {
     if (m_browser->workspaceName().empty()) return;
 
-    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("FitMW");
     alg->initialize();
     alg->setPropertyValue("InputWorkspace",m_browser->workspaceName());
     alg->setProperty("WorkspaceIndex",m_browser->workspaceIndex());
     alg->setProperty("StartX",m_browser->startX());
     alg->setProperty("EndX",m_browser->endX());
-    alg->setPropertyValue("Function",m_fun->asString());
+    alg->setProperty("Function",m_fun);
     alg->execute();
-    std::string fitFun = alg->getPropertyValue("Function");
-    Mantid::API::IFitFunction* f = Mantid::API::FunctionFactory::Instance().createInitialized(fitFun);
-    for(size_t i=0;i<f->nParams();++i)
-    {
-      m_fun->setParameter(i,f->getParameter(i));
+    Mantid::API::IFunction_sptr f = alg->getProperty("Function");
+    if (f != m_fun)
+    {// this should never happen, just in case...
+      for(size_t i=0;i<f->nParams();++i)
+      {
+        m_fun->setParameter(i,f->getParameter(i));
+      }
     }
-    delete f;
     m_browser->getHandler()->calcBaseAll();
     updateParameters();
   }
@@ -1404,19 +1424,27 @@ void PropertyHandler::setFunctionWorkspace()
     {
       std::string wsName = m_browser->m_workspaceNames[index].toStdString();
       Mantid::API::Workspace_sptr ws = Mantid::API::AnalysisDataService::Instance().retrieve(wsName);
-      QString wsPar = QString("WorkspaceIndex=%1").arg(m_browser->m_intManager->value(m_workspaceIndex));
-      ifun()->setWorkspace(ws,wsPar.toStdString(),true);
+      int wsIndex = m_browser->m_intManager->value(m_workspaceIndex);
+      auto mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
+      if (mws)
+      {
+        ifun()->setMatrixWorkspace(mws,size_t(wsIndex),m_browser->startX(),m_browser->endX());
+      }
+      else
+      {
+        ifun()->setWorkspace(ws);
+      }
       m_item->property()->insertSubProperty(m_workspaceIndex,m_workspace);
     }
     else
     {
-      ifun()->setWorkspace(Mantid::API::MatrixWorkspace_sptr(),"");
+      ifun()->setWorkspace(Mantid::API::Workspace_sptr());
       m_item->property()->removeSubProperty(m_workspaceIndex);
     }
   }
   else
   {
-    ifun()->setWorkspace(Mantid::API::MatrixWorkspace_sptr(),"");
+    ifun()->setWorkspace(Mantid::API::Workspace_sptr());
   }
 }
 

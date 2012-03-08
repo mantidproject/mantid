@@ -275,7 +275,7 @@ namespace Mantid
           IAlgorithm_sptr fit_alg;
           try
           {
-            fit_alg = createSubAlgorithm("Fit", -1, -1, false);
+            fit_alg = createSubAlgorithm("FitMW", -1, -1, false);
           } catch (Exception::NotFoundError&)
           {
             g_log.error("Can't locate Fit algorithm");
@@ -319,8 +319,8 @@ namespace Mantid
           //setProperty("OutputWorkspace", ws);
       
           //Evaluate fit at points
-          IFitFunction *out = FunctionFactory::Instance().createInitialized(funct);
-          IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out);
+          IFunction_sptr out = FunctionFactory::Instance().createInitialized(funct);
+          IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out.get());
           double *x = new double[n];
           double *y = new double[n];
           //double dx=(X[TOFmax]-X[TOFmin])/double(n-1);
@@ -329,8 +329,8 @@ namespace Mantid
             x[iTOF] = X[TOFmin+iTOF];
             //x[iTOF] = X[TOFmin]+iTOF*dx;
           }
-          pk->setMatrixWorkspace(outputW, i);
-          pk->functionMW(y,x,n);
+          //pk->setMatrixWorkspace(outputW, i);
+          pk->function1D(y,x,n);
       
           //Calculate intensity
           for (iTOF = 0; iTOF < n; iTOF++) if ( !boost::math::isnan(y[iTOF]) && !boost::math::isinf(y[iTOF]))I+= y[iTOF];

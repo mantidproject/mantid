@@ -6,8 +6,9 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/ICostFunction.h"
 #include "MantidAPI/IFunction.h"
-#include "MantidKernel/Matrix.h"
+//#include "MantidKernel/Matrix.h"
 #include "MantidCurveFitting/GSLVector.h"
+#include "MantidCurveFitting/GSLMatrix.h"
 
 namespace Mantid
 {
@@ -64,10 +65,10 @@ public:
   /// @param covar :: Returned covariance matrix, here as 
   /// @param epsrel :: Is used to remove linear-dependent columns
   ///
-  virtual void calCovarianceMatrix(Kernel::Matrix<double>& covar, double epsrel = 0.0001);
+  virtual void calCovarianceMatrix(GSLMatrix& covar, double epsrel = 0.0001);
 
   /// Calculate fitting errors
-  virtual void calFittingErrors(const Kernel::Matrix<double>& covar);
+  virtual void calFittingErrors(const GSLMatrix& covar);
   API::FunctionDomain_sptr getDomain() const {return m_domain;}
   API::FunctionValues_sptr getValues() const {return m_values;}
 
@@ -75,6 +76,7 @@ protected:
 
   bool isValid() const;
   void checkValidity() const;
+  void calTransformationMatrixNumerically(GSLMatrix& tm);
   
   API::IFunction_sptr m_function;
   API::FunctionDomain_sptr m_domain;

@@ -1,7 +1,10 @@
 #ifndef MANTID_CURVEFITTING_GSLMATRIX_H_
 #define MANTID_CURVEFITTING_GSLMATRIX_H_
 
+#include "MantidCurveFitting/DllConfig.h"
+
 #include <gsl/gsl_matrix.h>
+#include <gsl/gsl_blas.h>
 
 #include <vector>
 #include <stdexcept>
@@ -10,6 +13,57 @@ namespace Mantid
 {
   namespace CurveFitting
   {
+    class GSLMatrix;
+
+    // matrix transpose helper
+    struct Tr
+    {
+      const GSLMatrix& matrix;
+      Tr(const GSLMatrix& m):matrix(m){}
+    };
+
+    // mutrix multiplication helper
+    struct GSLMatrixMult2
+    {
+      const GSLMatrix& m_1;
+      const GSLMatrix& m_2;
+      const bool tr1;
+      const bool tr2;
+      GSLMatrixMult2(const GSLMatrix& m1,const GSLMatrix& m2):
+      m_1(m1),m_2(m2),tr1(false),tr2(false){}
+
+      GSLMatrixMult2(const Tr& m1,const GSLMatrix& m2):
+      m_1(m1.matrix),m_2(m2),tr1(true),tr2(false){}
+
+      GSLMatrixMult2(const GSLMatrix& m1,const Tr& m2):
+      m_1(m1),m_2(m2.matrix),tr1(false),tr2(true){}
+
+      GSLMatrixMult2(const Tr& m1,const Tr& m2):
+      m_1(m1.matrix),m_2(m2.matrix),tr1(true),tr2(true){}
+    };
+
+    // mutrix multiplication helper
+    struct GSLMatrixMult3
+    {
+      const GSLMatrix& m_1;
+      const GSLMatrix& m_2;
+      const GSLMatrix& m_3;
+      const bool tr1;
+      const bool tr2;
+      const bool tr3;
+      GSLMatrixMult3(const GSLMatrix& m1,const GSLMatrixMult2& mm):
+      m_1(m1),m_2(mm.m_1),m_3(mm.m_2),tr1(false),tr2(mm.tr1),tr3(mm.tr2){}
+
+      GSLMatrixMult3(const Tr& m1,const GSLMatrixMult2& mm):
+      m_1(m1.matrix),m_2(mm.m_1),m_3(mm.m_2),tr1(true),tr2(mm.tr1),tr3(mm.tr2){}
+
+      GSLMatrixMult3(const GSLMatrixMult2& mm, const GSLMatrix& m2):
+      m_1(mm.m_1),m_2(mm.m_2),m_3(m2),tr1(mm.tr1),tr2(mm.tr2),tr3(false){}
+
+      GSLMatrixMult3(const GSLMatrixMult2& mm, const Tr& m2):
+      m_1(mm.m_1),m_2(mm.m_2),m_3(m2.matrix),tr1(mm.tr1),tr2(mm.tr2),tr3(true){}
+    };
+
     /**
     An implementation of Jacobian using gsl_matrix.
 
@@ -66,6 +120,13 @@ namespace Mantid
       }
     }
 
+    GSLMatrix& operator=(const GSLMatrix& M)
+    {
+      resize( M.size1(), M.size2() );
+      gsl_matrix_memcpy( m_matrix, M.gsl() );
+      return *this;
+    }
+
     /// Get the pointer to the GSL matrix
     gsl_matrix * gsl(){return m_matrix;}
 
@@ -74,7 +135,10 @@ namespace Mantid
 
     void resize(const size_t nx, const size_t ny)
     {
-      gsl_matrix_free(m_matrix);
+      if (m_matrix)
+      {
+        gsl_matrix_free(m_matrix);
+      }
       m_matrix = gsl_matrix_alloc(nx,ny);
     }
 
@@ -139,8 +203,96 @@ namespace Mantid
       gsl_matrix_scale( m_matrix, d );
       return *this;
     }
+
+    GSLMatrix& operator=(const GSLMatrixMult2& mult2)
+    {
+      // sizes of the result matrix
+      size_t n1 = mult2.tr1 ? mult2.m_1.size2() : mult2.m_1.size1();
+      size_t n2 = mult2.tr2 ? mult2.m_2.size1() : mult2.m_2.size2();
+
+      this->resize(n1,n2);
+
+      CBLAS_TRANSPOSE tr1 = mult2.tr1? CblasTrans : CblasNoTrans;
+      CBLAS_TRANSPOSE tr2 = mult2.tr2? CblasTrans : CblasNoTrans;
+
+      // this = m_1 * m_2
+      gsl_blas_dgemm (tr1, tr2,
+                      1.0, mult2.m_1.gsl(), mult2.m_2.gsl(),
+                      0.0, gsl());
+
+      return *this;
+    }
+
+    GSLMatrix& operator=(const GSLMatrixMult3& mult3)
+    {
+      // sizes of the result matrix
+      size_t n1 = mult3.tr1 ? mult3.m_1.size2() : mult3.m_1.size1();
+      size_t n2 = mult3.tr3 ? mult3.m_3.size1() : mult3.m_3.size2();
+
+      this->resize(n1,n2);
+
+      // intermediate matrix 
+      GSLMatrix AB( n1, mult3.m_2.size2() );
+
+      CBLAS_TRANSPOSE tr1 = mult3.tr1? CblasTrans : CblasNoTrans;
+      CBLAS_TRANSPOSE tr2 = mult3.tr2? CblasTrans : CblasNoTrans;
+      CBLAS_TRANSPOSE tr3 = mult3.tr3? CblasTrans : CblasNoTrans;
+
+      // AB = m_1 * m_2
+      gsl_blas_dgemm (tr1, tr2,
+                      1.0, mult3.m_1.gsl(), mult3.m_2.gsl(),
+                      0.0, AB.gsl());
+
+      // this = AB * m_3
+      gsl_blas_dgemm (CblasNoTrans, tr3,
+                      1.0, AB.gsl(), mult3.m_3.gsl(),
+                      0.0, gsl());
+
+      return *this;
+    }
   };
 
+  inline GSLMatrixMult2 operator*(const GSLMatrix& m1, const GSLMatrix& m2)
+  {
+    return GSLMatrixMult2(m1,m2);
+  }
+
+  inline GSLMatrixMult2 operator*(const Tr& m1, const GSLMatrix& m2)
+  {
+    return GSLMatrixMult2(m1,m2);
+  }
+
+  inline GSLMatrixMult2 operator*(const GSLMatrix& m1, const Tr& m2)
+  {
+    return GSLMatrixMult2(m1,m2);
+  }
+
+  inline GSLMatrixMult2 operator*(const Tr& m1, const Tr& m2)
+  {
+    return GSLMatrixMult2(m1,m2);
+  }
+
+  inline GSLMatrixMult3 operator*(const GSLMatrix& m, const GSLMatrixMult2& mm)
+  {
+    return GSLMatrixMult3(m,mm);
+  }
+
+  inline GSLMatrixMult3 operator*( const GSLMatrixMult2& mm, const GSLMatrix& m )
+  {
+    return GSLMatrixMult3(mm,m);
+  }
+
+  inline GSLMatrixMult3 operator*(const Tr& m, const GSLMatrixMult2& mm)
+  {
+    return GSLMatrixMult3(m,mm);
+  }
+
+  inline GSLMatrixMult3 operator*( const GSLMatrixMult2& mm, const Tr& m )
+  {
+    return GSLMatrixMult3(mm,m);
+  }
+
+  
   } // namespace CurveFitting
 } // namespace Mantid
 

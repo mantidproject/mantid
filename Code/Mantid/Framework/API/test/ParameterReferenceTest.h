@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/IFunctionMW.h"
+#include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ParameterReference.h"
@@ -11,7 +11,7 @@
 using namespace Mantid;
 using namespace Mantid::API;
 
-class ParameterReferenceTest_Fun: public ParamFunction, public IFunctionMW
+class ParameterReferenceTest_Fun: public ParamFunction, public IFunction1D
 {
 public:
   ParameterReferenceTest_Fun()

@@ -44,7 +44,7 @@ This Algorithm is also used by the [[PeakIntegration]] algorithm when the Fit ta
 #include "MantidGeometry/IComponent.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/IFitFunction.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -571,7 +571,7 @@ namespace Mantid
                if (IsEnoughData() && ParameterValues[ITINTENS] > 0)
               {
 
-                fit_alg = createSubAlgorithm("Fit");
+                fit_alg = createSubAlgorithm("FitMW");
 
                 fit_alg->setProperty("InputWorkspace", Data);
                 fit_alg->setProperty("WorkspaceIndex", 0);

@@ -602,7 +602,11 @@ namespace Algorithms
       // iv.  Search... need to consider more situation as outside of boundary, on the grid and etc
       abstimeit = std::lower_bound(mSETimes.begin()+posoffsetL, mSETimes.end()-posoffsetU, mtime);
       size_t mindex;
-      if (*abstimeit == mtime){
+      if (abstimeit == mSETimes.end())
+      {// I am not sure if it's right but otherwise tests fail when run in debug in MSVC
+        mindex = mSETimes.size() - 1;
+      }
+      else if (*abstimeit == mtime){
         // (1) On the grid
         mindex = size_t(abstimeit-mSETimes.begin());
       }
@@ -796,7 +800,7 @@ namespace Algorithms
     std::ofstream ofs;
     std::string dir = this->getProperty("OutputDirectory");
     std::string filename;
-    if (dir[dir.size()-1]=='/')
+    if (!dir.empty() && dir[dir.size()-1]=='/')
       filename = dir+"eventsfilterlist.txt";
     else
       filename = dir+"/eventsfilterlist.txt";

@@ -38,7 +38,7 @@ namespace Mantid
 {
   namespace API
   {
-    class IFitFunction;
+    class IFunction;
     class CompositeFunction;
     class MatrixWorkspace;
   }
@@ -107,7 +107,7 @@ private slots:
   void algorithmFinished(const QString&);
   void workspaceIndexChanged(int i);
   void workspaceNameChanged(const QString&);
-  void parameterChanged(const Mantid::API::IFitFunction*);
+  void parameterChanged(const Mantid::API::IFunction*);
   void startXChanged(double);
   void endXChanged(double);
 

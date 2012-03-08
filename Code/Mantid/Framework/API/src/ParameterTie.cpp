@@ -21,7 +21,10 @@ namespace API
                        "abcdefghijklmnopqrstuvwxyz"
                        "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
     m_parser->SetVarFactory(AddVariable, this);
-    set(expr);
+    if (!expr.empty())
+    {
+      set(expr);
+    }
   }
 
   /// Destructor

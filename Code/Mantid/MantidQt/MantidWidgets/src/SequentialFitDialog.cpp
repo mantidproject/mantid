@@ -321,7 +321,11 @@ void SequentialFitDialog::accept()
   }
   else
   {
+<<<<<<< HEAD
     funStr = (m_fitBrowser->m_compositeFunction->getFunction(0))->asString();
+=======
+    funStr = m_fitBrowser->m_compositeFunction->getFunction(0)->asString();
+>>>>>>> Re #4158. MantidPlot compiles now.
   }
 
   Mantid::API::IAlgorithm_sptr alg = 

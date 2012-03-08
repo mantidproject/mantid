@@ -22,7 +22,7 @@ GetDetectorOffsets("InputW","OutputW",0.01,2.0,1.8,2.2,"output.cal")
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/IBackgroundFunction.h"
-#include "MantidAPI/CompositeFunctionMW.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
@@ -200,7 +200,7 @@ namespace Mantid
       try
       {
         //set the subalgorithm no to log as this will be run once per spectra
-        fit_alg = createSubAlgorithm("Fit",-1,-1,false);
+        fit_alg = createSubAlgorithm("FitMW",-1,-1,false);
       } catch (Exception::NotFoundError&)
       {
         g_log.error("Can't locate Fit algorithm");
@@ -220,8 +220,9 @@ namespace Mantid
       //Pixel with large offset will be masked
       if ( fitStatus.compare("success") ) return (1000.);
 
-      std::vector<double> params = fit_alg->getProperty("Parameters");
-      double offset = params[3]; // f1.PeakCentre
+      //std::vector<double> params = fit_alg->getProperty("Parameters");
+      API::IFunction_sptr function = fit_alg->getProperty("Function");
+      double offset = function->getParameter(3);//params[3]; // f1.PeakCentre
       offset = -1.*offset*step/(dreference+offset*step);
       //factor := factor * (1+offset) for d-spacemap conversion so factor cannot be negative
       return offset;
@@ -235,10 +236,9 @@ namespace Mantid
     IFitFunction_sptr GetDetectorOffsets::createFunction(const double peakHeight, const double peakLoc)
     {
       FunctionFactoryImpl & creator = FunctionFactory::Instance();
-      IBackgroundFunction *background = 
-        dynamic_cast<IBackgroundFunction*>(creator.createFunction("LinearBackground"));
-      IPeakFunction *peak =
-        dynamic_cast<IPeakFunction*>(creator.createFunction(getProperty("PeakFunction")));
+      auto background = creator.createFunction("LinearBackground");
+      auto peak = 
+        boost::dynamic_pointer_cast<IPeakFunction>(creator.createFunction(getProperty("PeakFunction")));
       peak->setHeight(peakHeight);
       peak->setCentre(peakLoc);
       const double sigma(10.0);
