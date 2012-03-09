@@ -114,8 +114,10 @@ namespace Algorithms
 
     Geometry::ParameterMap& pmap = WS->instrumentParameters();
     // Add a parameter for the new scale factors
-    pmap.addDouble(det.get(), "scalex", ScaleX);
-    pmap.addDouble(det.get(), "scaley", ScaleY);
+    pmap.addDouble(det->getComponentID(), "scalex", ScaleX);
+    pmap.addDouble(det->getComponentID(), "scaley", ScaleY);
+
+    pmap.clearCache();
   }
 
 

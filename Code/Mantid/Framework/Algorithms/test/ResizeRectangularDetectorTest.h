@@ -13,6 +13,7 @@
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
+#include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -57,12 +58,23 @@ public:
     TS_ASSERT_EQUALS( pos,V3D(0.008*2, 0.008*0.5, 5.0) );
     TS_ASSERT_DELTA( det->xstep(), 0.008 * 2, 1e-6);
 
+    // Check that accessing through getDetector() also works
+    IDetector_const_sptr pixel;
+    const RectangularDetectorPixel * recDetPix;
+    pixel = ws->getDetector(11);
+    recDetPix = dynamic_cast<const RectangularDetectorPixel*>(det->getAtXY(1,1).get());
+    TSM_ASSERT("getDetector() returns a RectangularDetectorPixel", recDetPix);
+    pos = pixel->getPos();
+    TS_ASSERT_EQUALS( pos,V3D(0.008*2, 0.008*0.5, 5.0) );
+
     // Bank 2 did not get scaled
     det = boost::dynamic_pointer_cast<const RectangularDetector>(inst->getComponentByName("bank2"));
     pos = det->getAtXY(1,1)->getPos();
     TS_ASSERT_EQUALS( pos,V3D(0.008*1.0, 0.008*1.0, 10.0) );
     TS_ASSERT_DELTA( det->xstep(), 0.008 * 1, 1e-6);
     
+
+
   }
   
 
