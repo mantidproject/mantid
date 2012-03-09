@@ -165,6 +165,9 @@
                   <string>Instrument</string>
                  </property>
                  <layout class="QHBoxLayout" name="horizontalLayout_17">
+                  <property name="spacing">
+                   <number>2</number>
+                  </property>
                   <item>
                    <layout class="QVBoxLayout" name="verticalLayout_9">
                     <item>
@@ -201,6 +204,9 @@
                   <string>Data Set</string>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout">
+                  <property name="spacing">
+                   <number>2</number>
+                  </property>
                   <item>
                    <layout class="QHBoxLayout" name="horizontalLayout">
                     <property name="spacing">
@@ -259,6 +265,9 @@
                       <property name="text">
                        <string>Peak selection</string>
                       </property>
+                      <property name="indent">
+                       <number>0</number>
+                      </property>
                      </widget>
                     </item>
                     <item>
@@ -277,12 +286,15 @@
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>150</width>
+                        <width>80</width>
                         <height>16777215</height>
                        </size>
                       </property>
                       <property name="text">
                        <string>from pixel</string>
+                      </property>
+                      <property name="indent">
+                       <number>0</number>
                       </property>
                      </widget>
                     </item>
@@ -943,12 +955,15 @@
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>150</width>
+                        <width>80</width>
                         <height>16777215</height>
                        </size>
                       </property>
                       <property name="text">
                        <string>from pixel</string>
+                      </property>
+                      <property name="indent">
+                       <number>0</number>
                       </property>
                      </widget>
                     </item>
@@ -1141,12 +1156,15 @@
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>150</width>
+                        <width>80</width>
                         <height>16777215</height>
                        </size>
                       </property>
                       <property name="text">
                        <string>from pixel</string>
+                      </property>
+                      <property name="indent">
+                       <number>0</number>
                       </property>
                      </widget>
                     </item>
@@ -1681,6 +1699,9 @@
                   <string>Normalization</string>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_2">
+                  <property name="spacing">
+                   <number>2</number>
+                  </property>
                   <item>
                    <widget class="QCheckBox" name="norm_switch">
                     <property name="text">
@@ -1749,6 +1770,9 @@
                       <property name="text">
                        <string>Peak selection</string>
                       </property>
+                      <property name="indent">
+                       <number>0</number>
+                      </property>
                      </widget>
                     </item>
                     <item>
@@ -1767,12 +1791,15 @@
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>150</width>
+                        <width>80</width>
                         <height>16777215</height>
                        </size>
                       </property>
                       <property name="text">
                        <string>from pixel</string>
+                      </property>
+                      <property name="indent">
+                       <number>0</number>
                       </property>
                      </widget>
                     </item>
@@ -2430,12 +2457,15 @@
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>150</width>
+                        <width>80</width>
                         <height>16777215</height>
                        </size>
                       </property>
                       <property name="text">
                        <string>from pixel</string>
+                      </property>
+                      <property name="indent">
+                       <number>0</number>
                       </property>
                      </widget>
                     </item>
@@ -2665,12 +2695,15 @@
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>150</width>
+                        <width>80</width>
                         <height>16777215</height>
                        </size>
                       </property>
                       <property name="text">
                        <string>from pixel</string>
+                      </property>
+                      <property name="indent">
+                       <number>0</number>
                       </property>
                      </widget>
                     </item>
@@ -3140,6 +3173,9 @@ p, li { white-space: pre-wrap; }
                   <string>Output</string>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_8">
+                  <property name="spacing">
+                   <number>2</number>
+                  </property>
                   <item>
                    <layout class="QHBoxLayout" name="horizontalLayout_14">
                     <property name="spacing">
