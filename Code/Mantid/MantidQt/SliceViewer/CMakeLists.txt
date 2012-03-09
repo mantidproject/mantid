@@ -87,7 +87,7 @@ add_definitions ( -DIN_MANTIDQT_SLICEVIEWER )
 add_library ( MantidQtSliceViewer ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
 # ... and links to other required libs
-target_link_libraries ( MantidQtSliceViewer MantidQtAPI QtPropertyBrowser ${QT_LIBRARIES} ${QWT_LIBRARIES} )
+target_link_libraries ( MantidQtSliceViewer MantidQtAPI MantidWidgets QtPropertyBrowser ${QT_LIBRARIES} ${QWT_LIBRARIES} )
 
 ###########################################################################
 # DEMO/GUI TESTING APPLICATIONS
