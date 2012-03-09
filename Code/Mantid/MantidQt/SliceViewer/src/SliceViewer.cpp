@@ -49,7 +49,7 @@
 #include <vector>
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/ReadLock.h"
-#include "MantidQtAPI/SafeQwtPlot.h"
+#include "MantidQtMantidWidgets/SafeQwtPlot.h"
 #include "MantidKernel/MultiThreaded.h"
 
 
@@ -65,7 +65,6 @@ using Poco::XML::Node;
 using Poco::XML::NodeList;
 using Poco::XML::NodeIterator;
 using Poco::XML::NodeFilter;
-using MantidQt::API::SafeQwtPlot;
 
 namespace MantidQt
 {
@@ -89,7 +88,7 @@ SliceViewer::SliceViewer(QWidget *parent)
 
 	// Create the plot
   m_spectLayout = new QHBoxLayout(ui.frmPlot);
-	m_plot = new SafeQwtPlot();
+	m_plot = new MantidQt::MantidWidgets::SafeQwtPlot();
   m_plot->autoRefresh();
   m_spectLayout->addWidget(m_plot, 1, 0);
 

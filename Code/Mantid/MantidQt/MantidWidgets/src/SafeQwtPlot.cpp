@@ -1,4 +1,4 @@
-#include "MantidQtAPI/SafeQwtPlot.h"
+#include "MantidQtMantidWidgets/SafeQwtPlot.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/ReadLock.h"
 
@@ -6,7 +6,7 @@ using namespace Mantid::Kernel;
 
 namespace MantidQt
 {
-namespace API
+namespace MantidWidgets
 {
 
 
@@ -63,4 +63,4 @@ namespace API
   }
 
 } // namespace MantidQt
-} // namespace API
+} // namespace MantidWidgets

@@ -62,6 +62,7 @@ set ( TEST_PY_FILES
 
 include_directories ( inc )
 include_directories ( ../../QtPropertyBrowser/src )
+include_directories ( ../MantidWidgets/inc )
 
 
 ###########################################################################

@@ -12,6 +12,9 @@
 #include "MantidQtMantidWidgets/InstrumentSelector.h"
 #include "MantidQtMantidWidgets/WorkspaceSelector.h"
 #include "MantidQtSliceViewer/ColorBarWidget.h"
+#include "MantidQtSliceViewer/SliceViewer.h"
+#include "MantidQtSliceViewer/LineViewer.h"
+#include "MantidQtMantidWidgets/SafeQwtPlot.h"
 
 /** 
 The PluginCollectionInterface implements the interface for the plugin library and holds a 
@@ -112,5 +115,17 @@ DECLARE_WIDGET_PLUGIN(WorkspaceSelectorPlugin,
 DECLARE_WIDGET_PLUGIN(ColorBarWidgetPlugin,
     MantidQt::SliceViewer::ColorBarWidget,
     "Shows a color scale and allow user to change it");
+
+DECLARE_WIDGET_PLUGIN(SliceViewerPlugin,
+    MantidQt::SliceViewer::SliceViewer,
+    "Shows 2D slices of MDWorkspaces");
+
+DECLARE_WIDGET_PLUGIN(LineViewerPlugin,
+    MantidQt::SliceViewer::LineViewer,
+    "Shows 1D lines selected in a LineViewer");
+
+DECLARE_WIDGET_PLUGIN(SafeQwtPlotPlugin,
+    MantidQt::MantidWidgets::SafeQwtPlot,
+    "Version of QwtPlot with workspace-level thread safety");
 
 #endif

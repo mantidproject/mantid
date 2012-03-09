@@ -15,6 +15,7 @@ set ( SRC_FILES
 	src/PropertyHandler.cpp
 	src/RangeSelector.cpp
 	src/RenameParDialog.cpp
+	src/SafeQwtPlot.cpp
 	src/SaveWorkspaces.cpp
 	src/ScriptEditor.cpp
 	src/SelectWorkspacesDialog.cpp
@@ -29,34 +30,7 @@ set ( SRC_UNITY_IGNORE_FILES
     src/ICatSearch.cpp
 )
 
-# Include files aren't required, but this makes them appear in Visual Studio
-set ( INC_FILES
-	inc/MantidQtMantidWidgets/AlgorithmSelectorWidget.h
-	inc/MantidQtMantidWidgets/DiagResults.h
-	inc/MantidQtMantidWidgets/FitPropertyBrowser.h
-	inc/MantidQtMantidWidgets/ICatAdvancedSearch.h
-	inc/MantidQtMantidWidgets/ICatInvestigation.h
-	inc/MantidQtMantidWidgets/ICatMyDataSearch.h
-	inc/MantidQtMantidWidgets/ICatSearch.h
-	inc/MantidQtMantidWidgets/ICatUtils.h
-	inc/MantidQtMantidWidgets/InstrumentSelector.h
-	inc/MantidQtMantidWidgets/MWDiag.h
-	inc/MantidQtMantidWidgets/MWRunFiles.h
-	inc/MantidQtMantidWidgets/MultifitSetupDialog.h
-	inc/MantidQtMantidWidgets/MuonFitPropertyBrowser.h
-	inc/MantidQtMantidWidgets/PropertyHandler.h
-	inc/MantidQtMantidWidgets/RangeSelector.h
-	inc/MantidQtMantidWidgets/RenameParDialog.h
-	inc/MantidQtMantidWidgets/SaveWorkspaces.h
-	inc/MantidQtMantidWidgets/ScriptEditor.h
-	inc/MantidQtMantidWidgets/SelectWorkspacesDialog.h
-	inc/MantidQtMantidWidgets/SequentialFitDialog.h
-	inc/MantidQtMantidWidgets/UserFunctionDialog.h
-	inc/MantidQtMantidWidgets/WidgetDllOption.h
-	inc/MantidQtMantidWidgets/WorkspaceSelector.h
-	inc/MantidQtMantidWidgets/pythonCalc.h
-)
-
+# Header files with Q_OBJECT that qmake will "moc"
 set ( MOC_FILES 
 	inc/MantidQtMantidWidgets/AlgorithmSelectorWidget.h
     inc/MantidQtMantidWidgets/DiagResults.h
@@ -75,6 +49,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/pythonCalc.h
     inc/MantidQtMantidWidgets/RangeSelector.h
     inc/MantidQtMantidWidgets/RenameParDialog.h
+	inc/MantidQtMantidWidgets/SafeQwtPlot.h
     inc/MantidQtMantidWidgets/SaveWorkspaces.h
     inc/MantidQtMantidWidgets/ScriptEditor.h
     inc/MantidQtMantidWidgets/SelectWorkspacesDialog.h
@@ -83,6 +58,13 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/WorkspaceSelector.h
 )
 
+# Add the include files are NOT already in MOC_FILES
+set ( INC_FILES
+    ${MOC_FILES}
+	inc/MantidQtMantidWidgets/WidgetDllOption.h
+)
+
+# QtDesigner UI files to process
 set ( UI_FILES 
     inc/MantidQtMantidWidgets/ICatAdvancedSearch.ui
     inc/MantidQtMantidWidgets/ICatInvestigation.ui

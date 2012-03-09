@@ -19,6 +19,7 @@ set ( TEST_FILES
 
 include_directories ( inc )
 include_directories ( ../SliceViewer/inc )
+include_directories ( ../MantidWidgets/inc )
 
 ###########################################################################
 # Main Library Target

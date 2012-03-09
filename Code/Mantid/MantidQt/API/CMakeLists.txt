@@ -16,7 +16,6 @@ set ( SRC_FILES
 	src/PropertyWidget.cpp
 	src/PropertyWidgetFactory.cpp
 	src/PythonRunner.cpp
-	src/SafeQwtPlot.cpp
 	src/SyncedCheckboxes.cpp
 	src/TextPropertyWidget.cpp
 	src/UserSubWindow.cpp
@@ -47,7 +46,6 @@ set ( INC_FILES
 	inc/MantidQtAPI/PropertyWidget.h
 	inc/MantidQtAPI/PropertyWidgetFactory.h
 	inc/MantidQtAPI/PythonRunner.h
-	inc/MantidQtAPI/SafeQwtPlot.h
 	inc/MantidQtAPI/SyncedCheckboxes.h
 	inc/MantidQtAPI/TextPropertyWidget.h
 	inc/MantidQtAPI/UserSubWindow.h

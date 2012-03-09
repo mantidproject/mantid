@@ -1,5 +1,5 @@
-#ifndef MANTID_API_SAFEQWTPLOT_H_
-#define MANTID_API_SAFEQWTPLOT_H_
+#ifndef MANTID_MANTIDWIDGETS_SAFEQWTPLOT_H_
+#define MANTID_MANTIDWIDGETS_SAFEQWTPLOT_H_
 
 #include "MantidKernel/System.h"
 #include <qwt_plot.h>
@@ -10,7 +10,7 @@
 
 namespace MantidQt
 {
-namespace API
+namespace MantidWidgets
 {
 
   /** A version of QwtPlot that adds a layer of thread safety.
@@ -46,6 +46,8 @@ namespace API
   */
   class DLLExport SafeQwtPlot : public QwtPlot
   {
+    Q_OBJECT
+
   public:
     explicit SafeQwtPlot(QWidget * parent = NULL);
     explicit SafeQwtPlot(const QwtText &title, QWidget *p = NULL);
@@ -62,7 +64,7 @@ namespace API
   };
 
 
-} // namespace API
+} // namespace MantidWidgets
 } // namespace MantidQt
 
-#endif  /* MANTID_API_SAFEQWTPLOT_H_ */
+#endif  /* MANTID_MANTIDWIDGETS_SAFEQWTPLOT_H_ */
