@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>577</width>
-    <height>414</height>
+    <width>834</width>
+    <height>814</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -474,6 +474,14 @@
          <property name="frameShadow">
           <enum>QFrame::Raised</enum>
          </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <item>
+           <widget class="MantidQt::MantidWidgets::SafeQwtPlot" name="safeQwtPlot"/>
+          </item>
+          <item>
+           <widget class="MantidQt::SliceViewer::ColorBarWidget" name="colorBarWidget"/>
+          </item>
+         </layout>
         </widget>
        </item>
       </layout>
@@ -483,6 +491,23 @@
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>MantidQt::SliceViewer::ColorBarWidget</class>
+   <extends>QWidget</extends>
+   <header>MantidQtMantidWidgets/ColorBarWidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::SafeQwtPlot</class>
+   <extends>QwtPlot</extends>
+   <header>MantidQtMantidWidgets/SafeQwtPlot.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QwtPlot</class>
+   <extends>QFrame</extends>
+   <header>qwt_plot.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../../icons/SliceViewerIcons.qrc"/>
  </resources>

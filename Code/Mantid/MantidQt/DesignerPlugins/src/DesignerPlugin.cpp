@@ -99,7 +99,21 @@ std::string DesignerPlugin::getShortName() const
  */
 QString DesignerPlugin::includeFile() const
 {
-  return QString::fromStdString("MantidQtMantidWidgets/" + this->getShortName() + ".h");
+  std::string thisNamespace = "MantidWidgets";
+  std::string name = this->name().toStdString();
+  size_t n = name.rfind("::");
+  if (n != std::string::npos)
+  {
+    name = name.substr(0, n-1);
+    size_t n = name.rfind("::");
+    if (n == std::string::npos)
+      n = 0;
+    else
+      n = n + 2;
+    thisNamespace = name.substr(n, name.size()-n);
+  }
+  // Find the namespace
+  return QString::fromStdString("MantidQt" + thisNamespace + "/" + this->getShortName() + ".h");
 }
 
 /**

@@ -86,35 +86,22 @@ SliceViewer::SliceViewer(QWidget *parent)
 
 	m_inf = std::numeric_limits<double>::infinity();
 
-	// Create the plot
-  m_spectLayout = new QHBoxLayout(ui.frmPlot);
-	m_plot = new MantidQt::MantidWidgets::SafeQwtPlot();
-  m_plot->autoRefresh();
-  m_spectLayout->addWidget(m_plot, 1, 0);
+	// Point m_plot to the plot created in QtDesigner
+	m_plot = ui.safeQwtPlot;
+  // Add a spectrograph
+  m_spect = new QwtPlotSpectrogram();
+  m_spect->attach(m_plot);
 
-	// Add a spectrograph
-	m_spect = new QwtPlotSpectrogram();
-	m_spect->attach(m_plot);
-
-  QwtDoubleInterval range(0.0, 10.0);
-
-  // --- Create a color bar on the right axis ---------------
-  m_colorBar = new ColorBarWidget(this);
-  m_colorBar->setViewRange( range.minValue(), range.maxValue() );
+  // Set up the ColorBarWidget
+  m_colorBar = ui.colorBarWidget;
+  m_colorBar->setViewRange( 0, 10);
   m_colorBar->setLog(true);
-  m_spectLayout->addWidget(m_colorBar, 0, 0);
   QObject::connect(m_colorBar, SIGNAL(changedColorRange(double,double,bool)), this, SLOT(colorRangeChanged()));
 
   // ---- Set the color map on the data ------
   m_data = new QwtRasterDataMD();
   m_spect->setColorMap( m_colorBar->getColorMap() );
   m_plot->autoRefresh();
-
-//  m_colorBar = m_plot->axisWidget(QwtPlot::yRight);
-//  m_colorBar->setColorBarEnabled(true);
-//  m_colorBar->setColorMap(range, m_colorMap);
-//  m_plot->setAxisScale(QwtPlot::yRight, range.minValue(), range.maxValue() );
-//  m_plot->enableAxis(QwtPlot::yRight);
 
   // Make the splitter use the minimum size for the controls and not stretch out
   ui.splitter->setStretchFactor(0, 0);
