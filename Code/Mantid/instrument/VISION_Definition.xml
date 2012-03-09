@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='ASCII'?>
-<instrument valid-to="2100-01-31 23:59:59" name="VISION" valid-from="2012-03-09 09:33:44.887039">
+<instrument valid-to="2100-01-31 23:59:59" name="VISION" valid-from="2012-03-09 11:44:35.283768">
   <!-- Created by Stuart Campbell -->
   <defaults>
     <length unit="metre"/>
@@ -1380,8 +1380,8 @@
     <component type="eightpack-inelastic">
       <location y="0.365857048586" x="0.365857048586" z="0.01">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
-          <rot axis-z="0" axis-x="1" axis-y="0" val="0.0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="135.0"/>
           </rot>
         </rot>
       </location>
@@ -1391,8 +1391,8 @@
     <component type="eightpack-inelastic">
       <location y="0.365857048586" x="0.365857048586" z="-0.01">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
-          <rot axis-z="0" axis-x="1" axis-y="0" val="0.0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="135.0"/>
           </rot>
         </rot>
       </location>
@@ -1402,8 +1402,8 @@
     <component type="eightpack-inelastic">
       <location y="0.0" x="0.5174" z="0.01">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
-          <rot axis-z="0" axis-x="1" axis-y="0" val="0.0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="90.0"/>
           </rot>
         </rot>
       </location>
@@ -1413,8 +1413,8 @@
     <component type="eightpack-inelastic">
       <location y="0.0" x="0.5174" z="-0.01">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
-          <rot axis-z="0" axis-x="1" axis-y="0" val="0.0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="90.0"/>
           </rot>
         </rot>
       </location>
@@ -1424,8 +1424,8 @@
     <component type="eightpack-inelastic">
       <location y="-0.365857048586" x="0.365857048586" z="0.01">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
-          <rot axis-z="0" axis-x="1" axis-y="0" val="0.0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="45.0"/>
           </rot>
         </rot>
       </location>
@@ -1435,8 +1435,8 @@
     <component type="eightpack-inelastic">
       <location y="-0.365857048586" x="0.365857048586" z="-0.01">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
-          <rot axis-z="0" axis-x="1" axis-y="0" val="0.0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="45.0"/>
           </rot>
         </rot>
       </location>
@@ -1446,8 +1446,8 @@
     <component type="eightpack-inelastic">
       <location y="-0.5174" x="3.16816126939e-17" z="0.01">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
-          <rot axis-z="0" axis-x="1" axis-y="0" val="0.0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0.0"/>
           </rot>
         </rot>
       </location>
@@ -1457,8 +1457,8 @@
     <component type="eightpack-inelastic">
       <location y="-0.5174" x="3.16816126939e-17" z="-0.01">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
-          <rot axis-z="0" axis-x="1" axis-y="0" val="0.0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="0.0"/>
           </rot>
         </rot>
       </location>
@@ -1468,8 +1468,8 @@
     <component type="eightpack-inelastic">
       <location y="-0.365857048586" x="-0.365857048586" z="0.01">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
-          <rot axis-z="0" axis-x="1" axis-y="0" val="0.0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="-45.0"/>
           </rot>
         </rot>
       </location>
@@ -1479,8 +1479,8 @@
     <component type="eightpack-inelastic">
       <location y="-0.365857048586" x="-0.365857048586" z="-0.01">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
-          <rot axis-z="0" axis-x="1" axis-y="0" val="0.0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="-45.0"/>
           </rot>
         </rot>
       </location>
@@ -1490,8 +1490,8 @@
     <component type="eightpack-inelastic">
       <location y="6.33632253879e-17" x="-0.5174" z="0.01">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
-          <rot axis-z="0" axis-x="1" axis-y="0" val="0.0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="270.0"/>
           </rot>
         </rot>
       </location>
@@ -1501,8 +1501,8 @@
     <component type="eightpack-inelastic">
       <location y="6.33632253879e-17" x="-0.5174" z="-0.01">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
-          <rot axis-z="0" axis-x="1" axis-y="0" val="0.0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="270.0"/>
           </rot>
         </rot>
       </location>
@@ -1512,8 +1512,8 @@
     <component type="eightpack-inelastic">
       <location y="0.365857048586" x="-0.365857048586" z="0.01">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
-          <rot axis-z="0" axis-x="1" axis-y="0" val="0.0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="225.0"/>
           </rot>
         </rot>
       </location>
@@ -1523,8 +1523,8 @@
     <component type="eightpack-inelastic">
       <location y="0.365857048586" x="-0.365857048586" z="-0.01">
         <rot axis-z="0" axis-x="0" axis-y="1" val="0">
-          <rot axis-z="0" axis-x="1" axis-y="0" val="0.0">
-            <rot axis-z="1" axis-x="0" axis-y="0" val="0"/>
+          <rot axis-z="0" axis-x="1" axis-y="0" val="0">
+            <rot axis-z="1" axis-x="0" axis-y="0" val="225.0"/>
           </rot>
         </rot>
       </location>
@@ -2518,7 +2518,7 @@
   <type is="detector" name="pixel-bs-elastic-short-tube">
     <cylinder id="cyl-approx">
       <centre-of-bottom-base p="0.0" r="0.0" t="0.0"/>
-      <axis y="0.0" x="0.0" z="1.0"/>
+      <axis y="1.0" x="0.0" z="0.0"/>
       <radius val="0.00635"/>
       <height val="0.00148828125"/>
     </cylinder>
