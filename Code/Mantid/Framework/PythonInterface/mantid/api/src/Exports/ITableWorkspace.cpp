@@ -8,6 +8,7 @@
 #include <boost/python/list.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/converter/builtin_converters.hpp>
+#include <vector>
 
 using Mantid::API::ITableWorkspace;
 using Mantid::API::ITableWorkspace_sptr;
@@ -83,6 +84,11 @@ namespace
     return result;
   }
 
+  /**
+   * Access a cell and return a corresponding Python type
+   * @param self A reference to the TableWorkspace python object that we were called on
+   * @param value A python object containing a column name or index
+   */
   bpl::list column(ITableWorkspace &self, bpl::object value)
   {
     // Find the column and row
@@ -93,53 +99,53 @@ namespace
     }
     else
     {
-      throw std::runtime_error("Failed to specify valid column name");
+      column = self.getColumn(extract<int>(value)());
     }
 
     // Boost.Python doesn't have a searchable registry for builtin types so
     // this is yet another lookup. There must be a better way to do this!
     const std::type_info & typeID = column->get_type_info();
-    const std::size_t length = column->size();
+    const std::size_t numRows = column->size();
 
     bpl::list result;
     if( typeID == typeid(double) )
     {
-      for (size_t i = 0; i < length; i++)
+      for (size_t i = 0; i < numRows; i++)
       {
         result.append(column->cell<double>(i));
       }
     }
     else if( typeID == typeid(std::string) )
     {
-      for (size_t i = 0; i < length; i++)
+      for (size_t i = 0; i < numRows; i++)
       {
         result.append(column->cell<std::string>(i));
       }
     }
     else if( typeID == typeid(int) )
     {
-      for (size_t i = 0; i < length; i++)
+      for (size_t i = 0; i < numRows; i++)
       {
         result.append(column->cell<int>(i));
       }
     }
     else if( typeID == typeid(int64_t) )
     {
-      for (size_t i = 0; i < length; i++)
+      for (size_t i = 0; i < numRows; i++)
       {
         result.append(column->cell<int64_t>(i));
       }
     }
     else if( typeID == typeid(bool) )
     {
-      for (size_t i = 0; i < length; i++)
+      for (size_t i = 0; i < numRows; i++)
       {
         result.append(column->cell<bool>(i));
       }
     }
     else if( typeID == typeid(float) )
     {
-      for (size_t i = 0; i < length; i++)
+      for (size_t i = 0; i < numRows; i++)
       {
         result.append(column->cell<float>(i));
       }
@@ -148,7 +154,7 @@ namespace
     {
       const converter::registration *entry = converter::registry::query(typeid(Mantid::Kernel::V3D));
       if(!entry) throw std::invalid_argument("ITableWorkspace::cell - Cannot find convert to V3D type.");
-      for (size_t i = 0; i < length; i++)
+      for (size_t i = 0; i < numRows; i++)
       {
         result.append(column->cell<Mantid::Kernel::V3D>(i));
       }
@@ -156,6 +162,72 @@ namespace
     else
     {
       throw std::invalid_argument("ITableWorkspace::cell - Cannot convert column data type to python: " + column->type());
+    }
+
+    return result;
+  }
+  /**
+   * Access a cell and return a corresponding Python type
+   * @param self A reference to the TableWorkspace python object that we were called on
+   * @param row An integer giving the row
+   */
+  PyObject * row(ITableWorkspace &self, int row)
+  {
+    if (row < 0)
+        throw std::invalid_argument("Cannot specify negative row number");
+    if (row >= static_cast<int>(self.rowCount()))
+        throw std::invalid_argument("Cannot specify row larger than number of rows");
+
+    int numCols = static_cast<int>(self.columnCount());
+
+    PyObject *result = PyDict_New();
+
+    for (int col = 0; col < numCols; col++)
+    {
+        Mantid::API::Column_const_sptr column = self.getColumn(col);
+
+        // Boost.Python doesn't have a searchable registry for builtin types so
+        // this is yet another lookup. There must be a better way to do this!
+
+        const std::type_info & typeID = column->get_type_info();
+        PyObject *value(NULL);
+        if( typeID == typeid(double) )
+        {
+          value = to_python_value<const double&>()(column->cell<double>(row));
+        }
+        else if( typeID == typeid(std::string) )
+        {
+          value =  to_python_value<const std::string&>()(column->cell<std::string>(row));
+        }
+        else if( typeID == typeid(int) )
+        {
+          value =  to_python_value<const int &>()(column->cell<int>(row));
+        }
+        else if( typeID == typeid(int64_t) )
+        {
+          value =  to_python_value<const int64_t &>()(column->cell<int64_t>(row));
+        }
+        else if( typeID == typeid(bool) )
+        {
+          value =  to_python_value<const bool &>()(column->cell<bool>(row));
+        }
+        else if( typeID == typeid(float) )
+        {
+          value =  to_python_value<const float &>()(column->cell<float>(row));
+        }
+        else if( typeID == typeid(Mantid::Kernel::V3D) )
+        {
+          const converter::registration *entry = converter::registry::query(typeid(Mantid::Kernel::V3D));
+          if(!entry) throw std::invalid_argument("ITableWorkspace::cell - Cannot find convert to V3D type.");
+          value = entry->to_python((const void *)&column->cell<Mantid::Kernel::V3D>(row));
+        }
+        else
+        {
+          throw std::invalid_argument("ITableWorkspace::cell - Cannot convert column data type to python: " + column->type());
+        }
+
+        if (PyDict_SetItemString(result, column->name().c_str(), value))
+            throw std::runtime_error("Error while building dict");
     }
 
     return result;
@@ -172,7 +244,8 @@ void export_ITableWorkspace()
     .def("__len__",  &ITableWorkspace::rowCount, "Returns the number of rows within the workspace")
     .def("getColumnNames",&ITableWorkspace::getColumnNames, "Return a list of the column names")
     .def("keys",          &ITableWorkspace::getColumnNames, "Return a list of the column names")
-    .def("column", &column, "Return all values of a specific column")
+    .def("column", &column, "Return all values of a specific column as a list")
+    .def("row", &row, "Return all values of a specific row as a dict")
     .def("cell", &cell, "Return the given cell. If the first argument is a number then it is interpreted as a row"
          "otherwise it is interpreted as a column name")
   ;
