@@ -129,32 +129,20 @@ void GenericDialog::initLayout()
 
   QCoreApplication::processEvents();
 
-//  propsWidget->m_scroll->setWidgetResizable(false);
+  // At this point, all the widgets have been added and are visible.
+  // This makes sure the viewport does not get scaled smaller, even if some controls are hidden.
+  QWidget * viewport = propsWidget->m_viewport;
+  viewport->layout()->update();
 
-//  // At this point, all the widgets have been added and are visible.
-//  // This makes sure the viewport does not get scaled smaller, even if some controls are hidden.
-//  QWidget * viewport = propsWidget->m_viewport;
-//  viewport->layout()->update();
-//  std::cout << viewport->minimumHeight() << " min height" << std::endl;
-//  std::cout << viewport->height() << " height" << std::endl;
-//  viewport = propsWidget->m_scroll->takeWidget();
-//  dialog_layout->addWidget(viewport);
-//  viewport->layout()->update();
-//  QCoreApplication::processEvents();
-//  QCoreApplication::processEvents();
-//  std::cout << viewport->minimumHeight() << " min height after TAKE" << std::endl;
-//  std::cout << viewport->height() << " height" << std::endl;
-//  //viewport->setMinimumHeight( viewport->height() + 10 );
-//
-//  const int screenHeight = QApplication::desktop()->height();
-//  const int dialogHeight = viewport->height();
+  const int screenHeight = QApplication::desktop()->height();
+  const int dialogHeight = viewport->sizeHint().height();
 
-//  // If the thing won't end up too big compared to the screen height,
-//  // resize the scroll area so we don't get a scroll bar
-//  if ( (dialogHeight+100) < 0.8*screenHeight )
-//    this->resize(this->width(), viewport->height()+10);
-//
-//  dialog_layout->setSizeConstraint(QLayout::SetMinimumSize);
+  // If the thing won't end up too big compared to the screen height,
+  // resize the scroll area so we don't get a scroll bar
+  if ( (dialogHeight+100) < 0.8*screenHeight )
+    propsWidget->m_scroll->setFixedHeight(dialogHeight+10);
+
+  dialog_layout->setSizeConstraint(QLayout::SetMinimumSize);
 }
 
 
