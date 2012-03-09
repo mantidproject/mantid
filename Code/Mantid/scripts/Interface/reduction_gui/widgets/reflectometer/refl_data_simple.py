@@ -236,34 +236,6 @@ class DataReflWidget(BaseWidget):
         
     def _run_number_changed(self):
         self._edit_event(ctrl=self._summary.data_run_number_edit)
-        if IS_IN_MANTIDPLOT and self.short_name == "REFM":
-            if self._run_number_first_edit:
-                self._run_number_first_edit = False
-            else:
-                try:
-                    run_entry = str(self._summary.data_run_number_edit.text()).strip()
-                    if len(run_entry)==0 or run_entry=="0":
-                        return
-                    
-                    logs = data_manipulation.get_logs(self.instrument_name, run_entry)
-                    if not self._summary.direct_pixel_check.isChecked():
-                        angle_str = "%-4.3g"%logs["DIRPIX"]
-                        self._summary.direct_pixel_edit.setText(angle_str.strip())
-                    if not self._summary.det_angle_offset_check.isChecked():
-                        angle_str = "%-4.4g"%logs["DANGLE0"]
-                        self._summary.det_angle_offset_edit.setText(angle_str.strip())
-                    if not self._summary.det_angle_check.isChecked():
-                        angle_str = "%-4.4g"%logs["DANGLE"]
-                        self._summary.det_angle_edit.setText(angle_str.strip())
-                    if not self._summary.angle_radio.isChecked():
-                        angle_str = "%-4.4g"%logs["SANGLE"]
-                        self._summary.angle_edit.setText(angle_str.strip())
-                                            
-                    self._sangle_parameter = logs["SANGLE"]
-                    self._detector_distance = logs["DET_DISTANCE"]
-                except:
-                    # Could not read in the parameters, skip.
-                    pass
         
     def _edit_event(self, text=None, ctrl=None):
         self._summary.edited_warning_label.show()
@@ -792,7 +764,34 @@ class DataReflWidget(BaseWidget):
         else:
             item_widget = QtGui.QListWidgetItem(run_numbers, self._summary.angle_list)
             item_widget.setData(QtCore.Qt.UserRole, state)
+        
+        if IS_IN_MANTIDPLOT and self.short_name == "REFM":
+            try:
+                run_entry = str(self._summary.data_run_number_edit.text()).strip()
+                if len(run_entry)==0 or run_entry=="0":
+                    return
+                
+                logs = data_manipulation.get_logs(self.instrument_name, run_entry)
+                if not self._summary.direct_pixel_check.isChecked():
+                    angle_str = "%-4.3g"%logs["DIRPIX"]
+                    self._summary.direct_pixel_edit.setText(angle_str.strip())
+                if not self._summary.det_angle_offset_check.isChecked():
+                    angle_str = "%-4.4g"%logs["DANGLE0"]
+                    self._summary.det_angle_offset_edit.setText(angle_str.strip())
+                if not self._summary.det_angle_check.isChecked():
+                    angle_str = "%-4.4g"%logs["DANGLE"]
+                    self._summary.det_angle_edit.setText(angle_str.strip())
+                if not self._summary.angle_radio.isChecked():
+                    angle_str = "%-4.4g"%logs["SANGLE"]
+                    self._summary.angle_edit.setText(angle_str.strip())
+                                        
+                self._sangle_parameter = logs["SANGLE"]
+                self._detector_distance = logs["DET_DISTANCE"]
+            except:
+                # Could not read in the parameters, skip.
+                pass
         self._reset_warnings()
+
 
     def _angle_changed(self):
         if self._summary.angle_list.count()==0:
