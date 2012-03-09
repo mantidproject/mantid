@@ -495,7 +495,7 @@
   <customwidget>
    <class>MantidQt::SliceViewer::ColorBarWidget</class>
    <extends>QWidget</extends>
-   <header>MantidQtMantidWidgets/ColorBarWidget.h</header>
+   <header>MantidQtSliceViewer/ColorBarWidget.h</header>
   </customwidget>
   <customwidget>
    <class>MantidQt::MantidWidgets::SafeQwtPlot</class>
