@@ -5,6 +5,7 @@
 #include "MantidPythonInterface/kernel/PropertyWithValue.h"
 
 #include <boost/python/class.hpp>
+#include <boost/python/list.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/converter/builtin_converters.hpp>
 
@@ -81,6 +82,84 @@ namespace
 
     return result;
   }
+
+  bpl::list column(ITableWorkspace &self, bpl::object value)
+  {
+    // Find the column and row
+    Mantid::API::Column_const_sptr column;
+    if( PyString_Check(value.ptr()) )
+    {
+      column = self.getColumn( extract<std::string>(value)());
+    }
+    else
+    {
+      throw std::runtime_error("Failed to specify valid column name");
+    }
+
+    // Boost.Python doesn't have a searchable registry for builtin types so
+    // this is yet another lookup. There must be a better way to do this!
+    const std::type_info & typeID = column->get_type_info();
+    const std::size_t length = column->size();
+
+    bpl::list result;
+    if( typeID == typeid(double) )
+    {
+      for (size_t i = 0; i < length; i++)
+      {
+        result.append(column->cell<double>(i));
+      }
+    }
+    else if( typeID == typeid(std::string) )
+    {
+      for (size_t i = 0; i < length; i++)
+      {
+        result.append(column->cell<std::string>(i));
+      }
+    }
+    else if( typeID == typeid(int) )
+    {
+      for (size_t i = 0; i < length; i++)
+      {
+        result.append(column->cell<int>(i));
+      }
+    }
+    else if( typeID == typeid(int64_t) )
+    {
+      for (size_t i = 0; i < length; i++)
+      {
+        result.append(column->cell<int64_t>(i));
+      }
+    }
+    else if( typeID == typeid(bool) )
+    {
+      for (size_t i = 0; i < length; i++)
+      {
+        result.append(column->cell<bool>(i));
+      }
+    }
+    else if( typeID == typeid(float) )
+    {
+      for (size_t i = 0; i < length; i++)
+      {
+        result.append(column->cell<float>(i));
+      }
+    }
+    else if( typeID == typeid(Mantid::Kernel::V3D) )
+    {
+      const converter::registration *entry = converter::registry::query(typeid(Mantid::Kernel::V3D));
+      if(!entry) throw std::invalid_argument("ITableWorkspace::cell - Cannot find convert to V3D type.");
+      for (size_t i = 0; i < length; i++)
+      {
+        result.append(column->cell<Mantid::Kernel::V3D>(i));
+      }
+    }
+    else
+    {
+      throw std::invalid_argument("ITableWorkspace::cell - Cannot convert column data type to python: " + column->type());
+    }
+
+    return result;
+  }
 }
 
 void export_ITableWorkspace()
@@ -90,7 +169,10 @@ void export_ITableWorkspace()
   class_<ITableWorkspace,bases<Workspace>, boost::noncopyable>("ITableWorkspace", no_init)
     .def("columnCount", &ITableWorkspace::columnCount, "Returns the number of columns in the workspace")
     .def("rowCount", &ITableWorkspace::rowCount, "Returns the number of rows within the workspace")
+    .def("__len__",  &ITableWorkspace::rowCount, "Returns the number of rows within the workspace")
     .def("getColumnNames",&ITableWorkspace::getColumnNames, "Return a list of the column names")
+    .def("keys",          &ITableWorkspace::getColumnNames, "Return a list of the column names")
+    .def("column", &column, "Return all values of a specific column")
     .def("cell", &cell, "Return the given cell. If the first argument is a number then it is interpreted as a row"
          "otherwise it is interpreted as a column name")
   ;
