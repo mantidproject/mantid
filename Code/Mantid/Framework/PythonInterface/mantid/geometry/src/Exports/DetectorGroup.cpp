@@ -8,7 +8,7 @@ using namespace boost::python;
 void export_DetectorGroup()
 {
   class_<DetectorGroup, bases<IDetector>, boost::noncopyable>("DetectorGroup", no_init)
-    .def("getDetectorIds", &DetectorGroup::getDetectorIDs, "Returns the list of detector IDs within this group")
+    .def("getDetectorIDs", &DetectorGroup::getDetectorIDs, "Returns the list of detector IDs within this group")
     ;
 }
 
