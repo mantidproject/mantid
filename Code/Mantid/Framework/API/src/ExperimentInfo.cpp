@@ -581,7 +581,7 @@ namespace API
     {
       // Add detectors group
       file->makeGroup("physical_detectors","NXdetector", true);
-  //    file->writeData<size_t>("number_of_detectors", size_t(detectorIDs.size()) );
+      file->writeData("number_of_detectors", uint64_t(detectorIDs.size()) );
       saveDetectorSetInfoToNexus ( file, detectorIDs );
       file->closeGroup(); // detectors
 
@@ -589,14 +589,14 @@ namespace API
       std::vector<IDetector_const_sptr> detmons;
       detmons = getInstrument()->getDetectors( detmonIDs );
       std::vector<detid_t> monitorIDs;
-      for (size_t i=0; i < detmonIDs.size(); i++)
+      for (size_t i=0; i < detmonIDs.size(); i++) 
       {
         if( detmons[i]->isMonitor()) monitorIDs.push_back( detmonIDs[i] );
       }
 
       // Add Monitors group
       file->makeGroup("physical_monitors","NXmonitor", true);
-   //   file->writeData<size_t>("number_of_monitors", size_t(monitorIDs.size()) );
+      file->writeData("number_of_monitors", uint64_t(monitorIDs.size()) );
       saveDetectorSetInfoToNexus ( file, monitorIDs );
       file->closeGroup(); // monitors
     }
