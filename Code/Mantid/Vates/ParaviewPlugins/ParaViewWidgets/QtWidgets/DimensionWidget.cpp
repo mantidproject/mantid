@@ -90,12 +90,14 @@ double DimensionWidget::getMaximum() const
 unsigned int DimensionWidget::getNBins() const
 {
   int nbins = static_cast<int>(m_pDimensionPresenter->getModel()->getNBins());
-  int entry = m_binWidget->entered();
+  double max = m_pDimensionPresenter->getModel()->getMaximum();
+  double min = m_pDimensionPresenter->getModel()->getMinimum();
+  int entry = m_binWidget->getEntry(min, max);
   if(entry == nbins || entry <= 1)
   {
-    m_binWidget->entry(nbins);
+    m_binWidget->setEntry(nbins, min, max);
   }
-  return m_binWidget->entered();
+  return m_binWidget->getEntry(min, max);
 }
 
 void DimensionWidget::displayError(std::string message) const
@@ -114,19 +116,20 @@ unsigned int DimensionWidget::getSelectedIndex() const
 void DimensionWidget::showAsNotIntegrated(Mantid::Geometry::VecIMDDimension_sptr)
 {
   setDimensionName(m_pDimensionPresenter->getLabel());
-
+  double max = m_pDimensionPresenter->getModel()->getMaximum();
+  double min = m_pDimensionPresenter->getModel()->getMinimum();
   m_binWidget->setHidden(false);
   m_ckIntegrated->setChecked(false);
-  if(m_binWidget->entered() <= 1)
+  if(m_binWidget->getEntry(min, max) <= 1)
   {
     size_t modelBins = m_pDimensionPresenter->getModel()->getNBins();
     if( modelBins > 1)
     {
-      m_binWidget->entry(int(modelBins));
+      m_binWidget->setEntry(int(modelBins), min, max);
     }
     else
     {
-      m_binWidget->entry(10);
+      m_binWidget->setEntry(10, min, max);
     }
 
   }
@@ -177,8 +180,9 @@ void DimensionWidget::configureWeakly()
 void DimensionWidget::configureStrongly()
 {
   configureWeakly();
-
-  m_binWidget->entry(int(m_pDimensionPresenter->getModel()->getNBins()));
+  double max = m_pDimensionPresenter->getModel()->getMaximum();
+  double min = m_pDimensionPresenter->getModel()->getMinimum();
+  m_binWidget->setEntry(int(m_pDimensionPresenter->getModel()->getNBins()),min,max);
 
   std::string maxValueString = boost::str(boost::format("%i") % m_pDimensionPresenter->getModel()->getMaximum());
   m_maxBox->setText(maxValueString.c_str());

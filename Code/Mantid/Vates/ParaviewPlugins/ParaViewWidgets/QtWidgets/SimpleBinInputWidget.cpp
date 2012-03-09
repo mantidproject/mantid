@@ -2,6 +2,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QBoxLayout>
+#include <QIntValidator>
 #include <sstream>
 
 /**
@@ -10,7 +11,13 @@ Constructor
 SimpleBinInputWidget::SimpleBinInputWidget()
 {
   QLabel* binLabel = new QLabel("Bins");
+  
+  QIntValidator* validator = new QIntValidator;
+  validator->setBottom(2);
+  validator->setTop(1000);
+
   m_nBinsBox = new QLineEdit;
+  m_nBinsBox->setValidator(validator);
   QHBoxLayout* layout = new QHBoxLayout;
 
   layout->addWidget(binLabel);
@@ -24,10 +31,10 @@ SimpleBinInputWidget::SimpleBinInputWidget()
 Entry setter.
 @param value : value that the entry should take.
 */
-void SimpleBinInputWidget::entry(int value)
+void SimpleBinInputWidget::setEntry(int nBins,double,double)
 {
   std::stringstream stream;
-  stream << value;
+  stream << nBins;
   m_nBinsBox->setText(stream.str().c_str());
 }
 
@@ -35,7 +42,7 @@ void SimpleBinInputWidget::entry(int value)
 Getter for the current entry.
 @return current entry value
 */
-int SimpleBinInputWidget::entered() const
+int SimpleBinInputWidget::getEntry(double, double) const
 {
   return atoi(m_nBinsBox->text());
 }

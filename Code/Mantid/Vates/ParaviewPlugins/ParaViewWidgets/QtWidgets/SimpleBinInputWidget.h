@@ -17,9 +17,9 @@ public:
   /// Constructor
   SimpleBinInputWidget();
   /// Setter for the entry
-  virtual void entry(int value);
+  virtual void setEntry(int nBins, double min, double max);
   /// Getter for the entry
-  virtual int entered() const;
+  virtual int getEntry(double, double) const;
   /// Destructor
   ~SimpleBinInputWidget();
 private slots:
