@@ -29,6 +29,8 @@
 #include <climits>
 #include "MantidQtAPI/FilePropertyWidget.h"
 #include "MantidQtAPI/PropertyWidgetFactory.h"
+#include "MantidQtAPI/AlgorithmPropertiesWidget.h"
+#include "MantidQtAPI/PropertyWidget.h"
 
 // Dialog stuff is defined here
 using namespace MantidQt::API;
@@ -94,133 +96,65 @@ bool haveInputWS(const std::vector<Property*> & prop_list)
 */
 void GenericDialog::initLayout()
 {
-  // Create a scroll area for the (rare) occasion when an algorithm has
-  // so many properties it won't fit on the screen
-  QScrollArea *scroll = new QScrollArea(this);
-
-  QWidget *viewport = new QWidget(this);
-  // Put everything in a vertical box and put it inside the scroll area
-  QVBoxLayout *mainLay = new QVBoxLayout();
-  viewport->setLayout(mainLay);
 
   // Add a layout for QDialog
   QVBoxLayout *dialog_layout = new QVBoxLayout();
   setLayout(dialog_layout);
+  // Add the helpful summary message
+  if( isMessageAvailable() )
+    this->addOptionalMessage(dialog_layout);
 
-  // Create a grid of properties if there are any available
-  const std::vector<Property*> & prop_list = getAlgorithm()->getProperties();
-  bool hasInputWS = haveInputWS(prop_list);
+  // Make the widget with all the properties
+  AlgorithmPropertiesWidget * propsWidget = new AlgorithmPropertiesWidget(this);
+  dialog_layout->addWidget(propsWidget);
+  propsWidget->setAlgorithm(this->getAlgorithm());
 
-  if ( !prop_list.empty() )
+  // Create and add the OK/Cancel/Help. buttons
+  dialog_layout->addLayout(this->createDefaultButtonLayout());
+
+  for( auto it = propsWidget->m_propWidgets.begin(); it != propsWidget->m_propWidgets.end(); it++)
   {
-    //Put the property boxes in a grid
-    m_inputGrid = new QGridLayout;
-    m_currentGrid = m_inputGrid;
+    // This is the created PropertyWidget
+    PropertyWidget * widget = *it;
 
-    std::string group = "";
+    // Record in the list of tied widgets (used in the base AlgorithmDialog)
+    tie(widget, QString::fromStdString(widget->getProperty()->name()), widget->getGridLayout());
 
-    //Each property is on its own row
-    int row = 0;
+    // Whenever the value changes in the widget, this fires propertyChanged()
+    connect(widget, SIGNAL( valueChanged(const QString &)), this, SLOT(propertyChanged(const QString &)));
 
-    for(std::vector<Property*>::const_iterator pIter = prop_list.begin();
-      pIter != prop_list.end(); ++pIter)
-    {
-      Property* prop = *pIter;
-      QString propName = QString::fromStdString(prop->name());
+    // For clicking the "Replace Workspace" button (if any)
+    connect(widget, SIGNAL( replaceWorkspaceName(const QString &)), this, SLOT(replaceWSClicked(const QString &)));
+  } //(end for each PropertyWidget)
 
-      // Are we entering a new group?
-      if (prop->getGroup() != group)
-      {
-        group = prop->getGroup();
+  QCoreApplication::processEvents();
 
-        if (group == "")
-        {
-          // Return to the original grid
-          m_currentGrid = m_inputGrid;
-        }
-        else
-        {
-          // Make a groupbox with a border and a light background
-          QGroupBox * grpBox = new QGroupBox(QString::fromStdString(group) );
-          grpBox->setAutoFillBackground(true);
-          grpBox->setStyleSheet(
-              "QGroupBox { border: 1px solid gray;  border-radius: 4px; font-weight: bold; margin-top: 4px; margin-bottom: 4px; padding-top: 16px; }"
-              "QGroupBox::title { background-color: transparent;  subcontrol-position: top center;  padding-top:4px; padding-bottom:4px; } ");
-          QPalette pal = grpBox->palette();
-          pal.setColor(grpBox->backgroundRole(), pal.alternateBase().color());
-          grpBox->setPalette(pal);
+//  propsWidget->m_scroll->setWidgetResizable(false);
 
-          // Put the frame in the main grid
-          m_inputGrid->addWidget(grpBox, row, 0, 1, 4);
+//  // At this point, all the widgets have been added and are visible.
+//  // This makes sure the viewport does not get scaled smaller, even if some controls are hidden.
+//  QWidget * viewport = propsWidget->m_viewport;
+//  viewport->layout()->update();
+//  std::cout << viewport->minimumHeight() << " min height" << std::endl;
+//  std::cout << viewport->height() << " height" << std::endl;
+//  viewport = propsWidget->m_scroll->takeWidget();
+//  dialog_layout->addWidget(viewport);
+//  viewport->layout()->update();
+//  QCoreApplication::processEvents();
+//  QCoreApplication::processEvents();
+//  std::cout << viewport->minimumHeight() << " min height after TAKE" << std::endl;
+//  std::cout << viewport->height() << " height" << std::endl;
+//  //viewport->setMinimumHeight( viewport->height() + 10 );
+//
+//  const int screenHeight = QApplication::desktop()->height();
+//  const int dialogHeight = viewport->height();
 
-          // Make a layout in the grp box
-          m_currentGrid = new QGridLayout;
-          grpBox->setLayout(m_currentGrid);
-          row++;
-        }
-      }
-
-      // Only accept input for output properties or workspace properties
-      bool isWorkspaceProp(dynamic_cast<IWorkspaceProperty*>(prop));
-      if( prop->direction() == Direction::Output && !isWorkspaceProp )
-        continue;
-
-      // Create the appropriate widget at this row in the grid.
-      PropertyWidget * widget = PropertyWidgetFactory::createWidget(prop, this, m_currentGrid, row);
-//      PropertyWidget * widget = PropertyWidgetFactory::createWidget(prop, this, NULL);
-//      m_currentGrid->addWidget(widget, row, 0);
-
-      // Record in the list of tied widgets (used in the base AlgorithmDialog)
-      tie(widget, propName, widget->getGridLayout());
-
-      // Whenever the value changes in the widget, this fires propertyChanged()
-      connect(widget, SIGNAL( valueChanged(const QString &)), this, SLOT(propertyChanged(const QString &)));
-
-      // For clicking the "Replace Workspace" button (if any)
-      connect(widget, SIGNAL( replaceWorkspaceName(const QString &)), this, SLOT(replaceWSClicked(const QString &)));
-
-      // Only show the "Replace Workspace" button if the algorithm has an input workspace.
-      if (hasInputWS)
-        widget->addReplaceWSButton();
-
-      ++row;
-    } //(end for each property)
-
-    // Add the helpful summary message
-    if( isMessageAvailable() )
-      this->addOptionalMessage(dialog_layout);
-
-    //The property boxes
-    mainLay->addLayout(m_inputGrid);
-
-  }
-  // Add a stretchy item to allow the properties grid to be top-aligned
-  mainLay->addStretch(1);
-
-  dialog_layout->addWidget(scroll); // add scroll to the QDialog's layout
-  // Add the help, run and cancel buttons
-  dialog_layout->addLayout(createDefaultButtonLayout());
-
-  scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-  scroll->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-  scroll->setWidget(viewport);
-  scroll->setWidgetResizable(true);
-  scroll->setAlignment(Qt::AlignLeft & Qt::AlignTop);
-
-  // At this point, all the widgets have been added and are visible.
-  // This makes sure the viewport does not get scaled smaller, even if some controls are hidden.
-  viewport->setMinimumHeight( viewport->height() + 10 );
-
-  const int screenHeight = QApplication::desktop()->height();
-  const int dialogHeight = viewport->height();
-  // If the thing won't end up too big compared to the screen height,
-  // resize the scroll area so we don't get a scroll bar
-  if ( (dialogHeight+100) < 0.8*screenHeight )
-  {
-    scroll->setFixedHeight(viewport->height()+10);
-  }
-
-  dialog_layout->setSizeConstraint(QLayout::SetMinimumSize);
+//  // If the thing won't end up too big compared to the screen height,
+//  // resize the scroll area so we don't get a scroll bar
+//  if ( (dialogHeight+100) < 0.8*screenHeight )
+//    this->resize(this->width(), viewport->height()+10);
+//
+//  dialog_layout->setSizeConstraint(QLayout::SetMinimumSize);
 }
 
 

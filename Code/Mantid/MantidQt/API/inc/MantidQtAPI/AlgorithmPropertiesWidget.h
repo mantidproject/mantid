@@ -55,22 +55,13 @@ namespace API
     void initLayout();
 
     Mantid::API::IAlgorithm * getAlgorithm();
+    void setAlgorithm(Mantid::API::IAlgorithm * algo);
 
     QString getAlgorithmName() const;
     void setAlgorithmName(QString name);
 
-  private:
-    /// Chosen algorithm name
-    QString m_algoName;
-
-    /// Shared pointer to the algorithm to view
-    Mantid::API::Algorithm_sptr m_algo;
-
-    /// The grid widget containing the input boxes
-    QGridLayout *m_inputGrid;
-
-    /// The current grid widget for sub-boxes
-    QGridLayout *m_currentGrid;
+    /// Each dynamically created PropertyWidget
+    QVector<PropertyWidget*> m_propWidgets;
 
     /// Viewport containing the grid of property widgets
     QWidget * m_viewport;
@@ -78,9 +69,21 @@ namespace API
     /// Scroll area containing the viewport
     QScrollArea * m_scroll;
 
-    /// Each dynamically created PropertyWidget
-    QVector<PropertyWidget*> m_propWidgets;
+  private:
+    /// Chosen algorithm name
+    QString m_algoName;
 
+    /// Pointer to the algorithm to view
+    Mantid::API::IAlgorithm * m_algo;
+
+    /// The grid widget containing the input boxes
+    QGridLayout *m_inputGrid;
+
+    /// The current grid widget for sub-boxes
+    QGridLayout *m_currentGrid;
+
+    /// We own the m_algo pointer and need to delete it.
+    bool m_deleteAlgo;
   };
 
 

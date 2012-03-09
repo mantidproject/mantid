@@ -8,11 +8,15 @@
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AlgorithmProxy.h"
 
 using namespace Mantid::Kernel;
 using Mantid::API::IWorkspaceProperty;
 using Mantid::API::AlgorithmManager;
 using Mantid::API::FrameworkManager;
+using Mantid::API::Algorithm_sptr;
+using Mantid::API::AlgorithmProxy;
 
 namespace MantidQt
 {
@@ -25,7 +29,8 @@ namespace API
    */
   AlgorithmPropertiesWidget::AlgorithmPropertiesWidget(QWidget * parent)
   : QWidget(parent),
-    m_algoName("")
+    m_algoName(""),
+    m_algo(NULL), m_deleteAlgo(false)
   {
 //    // Create a m_scroll area for the (rare) occasion when an algorithm has
 //    // so many properties it won't fit on the screen
@@ -111,33 +116,61 @@ namespace API
    */
   AlgorithmPropertiesWidget::~AlgorithmPropertiesWidget()
   {
+    if (m_deleteAlgo) delete m_algo;
   }
   
 
+  //----------------------------------------------------------------------------------------------
+  ///@return the algorithm being viewed
   Mantid::API::IAlgorithm * AlgorithmPropertiesWidget::getAlgorithm()
   {
-    return m_algo.get();
+    return m_algo;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Directly set the algorithm to view. Sets the name to match
+   *
+   * @param algo :: IAlgorithm bare ptr */
+  void AlgorithmPropertiesWidget::setAlgorithm(Mantid::API::IAlgorithm * algo)
+  {
+    if (!algo) return;
+    if (m_deleteAlgo) delete m_algo;
+    m_algo = algo;
+    m_algoName = QString::fromStdString(m_algo->name());
+    this->initLayout();
+    // Caller should replace this value as needed
+    m_deleteAlgo = false;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  ///@return the name of the algorithm being displayed
   QString AlgorithmPropertiesWidget::getAlgorithmName() const
   {
     return m_algoName;
   }
 
+  /** Set the algorithm to view using its name
+   *
+   * @param algo :: IAlgorithm bare ptr */
   void AlgorithmPropertiesWidget::setAlgorithmName(QString name)
   {
     FrameworkManager::Instance();
     m_algoName = name;
     try
     {
-      m_algo = AlgorithmManager::Instance().createUnmanaged(m_algoName.toStdString());
-      m_algo->initialize();
+      Algorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(m_algoName.toStdString());
+      AlgorithmProxy * algProxy = new AlgorithmProxy(alg);
+      algProxy->initialize();
+
+      // Set the algorithm ptr. This will redo the layout
+      this->setAlgorithm(algProxy);
+
+      // Take ownership of the pointer
+      m_deleteAlgo = true;
     }
     catch (std::runtime_error & )
     {
-      m_algo.reset();
     }
-    this->initLayout();
   }
 
 
