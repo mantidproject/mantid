@@ -8,6 +8,7 @@
 #include "MantidQtAPI/PropertyWidget.h"
 #include "MantidAPI/Algorithm.h"
 #include <QtGui>
+#include "DllOption.h"
 
 
 namespace MantidQt
@@ -42,7 +43,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport AlgorithmPropertiesWidget : public QWidget
+  class EXPORT_OPT_MANTIDQT_API AlgorithmPropertiesWidget : public QWidget
   {
     Q_OBJECT
     Q_PROPERTY( QString algorithmName READ getAlgorithmName WRITE setAlgorithmName )
