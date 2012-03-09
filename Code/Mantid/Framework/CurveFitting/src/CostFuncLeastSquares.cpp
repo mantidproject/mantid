@@ -18,6 +18,8 @@ DECLARE_COSTFUNCTION(CostFuncLeastSquares,Least squares)
 /// @return :: The value of the function
 double CostFuncLeastSquares::val() const
 {
+  if ( !m_dirtyVal ) return m_value;
+
   checkValidity();
   m_function->function(*m_domain,*m_values);
   size_t ny = m_values->size();
@@ -42,6 +44,7 @@ double CostFuncLeastSquares::val() const
     }
   }
 
+  m_dirtyVal = false;
   return retVal;
 }
 
@@ -79,6 +82,7 @@ void CostFuncLeastSquares::deriv(std::vector<double>& der) const
     der[iActiveP] = d;
     ++iActiveP;
   }
+   m_dirtyDeriv = false;
 }
 
 /// Calculate the value and the derivatives of the cost function
@@ -132,6 +136,8 @@ double CostFuncLeastSquares::valAndDeriv(std::vector<double>& der) const
       fVal += c->check();
     }
   }
+  m_dirtyVal = false;
+  m_dirtyDeriv = false;
   return fVal;
 }
 
@@ -142,8 +148,16 @@ double CostFuncLeastSquares::valAndDeriv(std::vector<double>& der) const
  *    It is for efficiency reasons.
  *  @return :: The value of the function if evalFunction is true.
  */
-double CostFuncLeastSquares::valDerivHessian(GSLVector& der, GSLMatrix& hessian, bool evalFunction) const
+double CostFuncLeastSquares::valDerivHessian(bool evalFunction) const
 {
+  if (m_pushed)
+  {
+    return val();
+  }
+
+  if (!m_dirtyVal && !m_dirtyDeriv && !m_dirtyHessian) return m_value;
+  if (m_dirtyVal) evalFunction = true;
+
   checkValidity();
   size_t np = m_function->nParams();  // number of parameters 
   size_t ny = m_domain->size(); // number of data points
@@ -171,9 +185,9 @@ double CostFuncLeastSquares::valDerivHessian(GSLVector& der, GSLMatrix& hessian,
   }
   //---------------------------------------------
 
-  if (der.size() != nParams())
+  if (m_der.size() != nParams())
   {
-    der.resize(nParams());
+    m_der.resize(nParams());
   }
   size_t iActiveP = 0;
   double fVal = 0.0;
@@ -198,7 +212,7 @@ double CostFuncLeastSquares::valDerivHessian(GSLVector& der, GSLMatrix& hessian,
     {
       d += c->checkDeriv();
     }
-    der.set(iActiveP, d);
+    m_der.set(iActiveP, d);
     //std::cerr << "der " << ip << ' ' << der[iActiveP] << std::endl;
     ++iActiveP;
   }
@@ -214,12 +228,13 @@ double CostFuncLeastSquares::valDerivHessian(GSLVector& der, GSLMatrix& hessian,
         fVal += c->check();
       }
     }
+    m_value = fVal;
   }
 
-  size_t na = der.size(); // number of active parameters
-  if (hessian.size1() != na || hessian.size2() != na)
+  size_t na = m_der.size(); // number of active parameters
+  if (m_hessian.size1() != na || m_hessian.size2() != na)
   {
-    hessian.resize(na,na);
+    m_hessian.resize(na,na);
   }
 
   size_t i1 = 0; // active parameter index
@@ -244,18 +259,83 @@ double CostFuncLeastSquares::valDerivHessian(GSLVector& der, GSLMatrix& hessian,
           d += c->checkDeriv2();
         }
       }
-      hessian.set(i1,i2,d);
+      m_hessian.set(i1,i2,d);
       //std::cerr << "hess " << i1 << ' ' << i2 << std::endl;
       if (i1 != i2)
       {
-        hessian.set(i2,i1,d);
+        m_hessian.set(i2,i1,d);
       }
       ++i2;
     }
     ++i1;
   }
 
-  return fVal;
+  m_dirtyVal = false;
+  m_dirtyDeriv = false;
+  m_dirtyHessian = false;
+  return m_value;
+}
+
+const GSLVector& CostFuncLeastSquares::getDeriv() const
+{
+  if (m_pushed)
+  {
+    return m_der;
+  }
+  if (m_dirtyVal || m_dirtyDeriv || m_dirtyHessian)
+  {
+    valDerivHessian();
+  }
+  return m_der;
+}
+
+const GSLMatrix& CostFuncLeastSquares::getHessian() const
+{
+  if (m_pushed)
+  {
+    return m_hessian;
+  }
+  if (m_dirtyVal || m_dirtyDeriv || m_dirtyHessian)
+  {
+    valDerivHessian();
+  }
+  return m_hessian;
+}
+
+void CostFuncLeastSquares::push()
+{
+  if (m_pushed)
+  {
+    throw std::runtime_error("Least squares: double push.");
+  }
+  // make sure we are not dirty
+  m_pushedValue = valDerivHessian();
+  getParameters(m_pushedParams);
+  m_pushed = true;
+}
+
+void CostFuncLeastSquares::pop()
+{
+  if ( !m_pushed )
+  {
+    throw std::runtime_error("Least squares: empty stack.");
+  }
+  setParameters(m_pushedParams);
+  m_value = m_pushedValue;
+  m_pushed = false;
+  m_dirtyVal = false;
+  m_dirtyDeriv = false;
+  m_dirtyHessian = false;
+}
+
+void CostFuncLeastSquares::drop()
+{
+  if ( !m_pushed )
+  {
+    throw std::runtime_error("Least squares: empty stack.");
+  }
+  m_pushed = false;
+  setDirty();
 }
 
 void CostFuncLeastSquares::setParameters(const GSLVector& params)
@@ -268,6 +348,7 @@ void CostFuncLeastSquares::setParameters(const GSLVector& params)
   {
     setParameter(i,params.get(i));
   }
+  m_function->applyTies();
 }
 
 void CostFuncLeastSquares::getParameters(GSLVector& params) const
@@ -282,6 +363,14 @@ void CostFuncLeastSquares::getParameters(GSLVector& params) const
   }
 }
 
+/**
+  * Calculates covariance matrix for fitting function's active parameters. 
+  */
+void CostFuncLeastSquares::calActiveCovarianceMatrix(GSLMatrix& covar, double epsrel)
+{
+  covar = m_hessian;
+  covar.invert();
+}
 
 } // namespace CurveFitting
 } // namespace Mantid

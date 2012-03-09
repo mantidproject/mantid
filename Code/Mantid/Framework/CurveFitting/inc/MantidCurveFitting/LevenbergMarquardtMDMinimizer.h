@@ -71,11 +71,6 @@ private:
   double m_rho;
   /// To keep function value
   double m_F;
-  /// To keep first derivatives
-  GSLVector m_der;
-  /// To keep second derivatives
-  GSLMatrix m_hessian;
-  double m_oldDder;
   std::vector<double> m_D;
 	/// Static reference to the logger class
 	static Kernel::Logger& g_log;

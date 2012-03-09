@@ -12,6 +12,20 @@ namespace Mantid
 namespace CurveFitting
 {
 
+CostFuncFitting::CostFuncFitting():
+m_dirtyVal(true),
+m_dirtyDeriv(true),
+m_dirtyHessian(true)
+{
+}
+
+void CostFuncFitting::setDirty()
+{
+  m_dirtyVal = true;
+  m_dirtyDeriv = true;
+  m_dirtyHessian = true;
+}
+
 /// Get i-th parameter
 /// @param i :: Index of a parameter
 /// @return :: Value of the parameter
@@ -28,6 +42,7 @@ void CostFuncFitting::setParameter(size_t i, const double& value)
 {
   checkValidity();
   m_function->setActiveParameter(m_indexMap[i],value);
+  setDirty();
 }
 
 /// Number of parameters
@@ -87,6 +102,36 @@ void CostFuncFitting::checkValidity() const
   }
 }
 
+/**
+  * Calculates covariance matrix for fitting function's active parameters. 
+  */
+void CostFuncFitting::calActiveCovarianceMatrix(GSLMatrix& covar, double epsrel)
+{
+  // construct the jacobian
+  GSLJacobian J( m_function, m_values->size() );
+  size_t na = this->nParams(); // number of active parameters
+  assert( J.getJ()->size2 == na );
+  covar.resize(na,na);
+
+  // calculate the derivatives
+  m_function->functionDeriv( *m_domain, J );
+
+  //std::cerr << "J=\n";
+  //for(size_t i = 0; i < J.getJ()->size1; ++i)
+  //{
+  //  for(size_t j = 0; j < J.getJ()->size2; ++j)
+  //  {
+  //    std::cerr << std::scientific << std::setprecision(6) << std::setw(13);
+  //    std::cerr << gsl_matrix_get(J.getJ(),i,j) << ' ';
+  //  }
+  //  std::cerr << std::endl;
+  //}
+
+  // let the GSL to compute the covariance matrix
+  gsl_multifit_covar( J.getJ(), epsrel, covar.gsl() );
+  
+}
+
 /** Calculates covariance matrix
   *
   * @param covar :: Returned covariance matrix
@@ -94,17 +139,8 @@ void CostFuncFitting::checkValidity() const
   */
 void CostFuncFitting::calCovarianceMatrix( GSLMatrix& covar, double epsrel )
 {
-  // construct the jacobian
-  GSLJacobian J( m_function, m_values->size() );
-  size_t na = this->nParams(); // number of active parameters
-  assert( J.getJ()->size2 == na );
-
-  // calculate the derivatives
-  m_function->functionDeriv( *m_domain, J );
-
-  // let the GSL to compute the covariance matrix
-  GSLMatrix c( na, na );
-  gsl_multifit_covar( J.getJ(), epsrel, c.gsl() );
+  GSLMatrix c;
+  calActiveCovarianceMatrix( c, epsrel );
 
   size_t np = m_function->nParams();
 
@@ -118,6 +154,7 @@ void CostFuncFitting::calCovarianceMatrix( GSLMatrix& covar, double epsrel )
     ++ii;
   }
 
+  //std::cerr << "c=\n" << c << std::endl;
   if (isTransformationIdentity)
   {
     // if the transformation is identity simply copy the matrix
@@ -129,7 +166,10 @@ void CostFuncFitting::calCovarianceMatrix( GSLMatrix& covar, double epsrel )
     GSLMatrix tm;
     calTransformationMatrixNumerically(tm);
     covar = Tr(tm) * c * tm;
+    //std::cerr << "tm:\n" << tm << std::endl;
   }
+
+  //std::cerr << "Covar:\n" << covar << std::endl;
 
 }
 

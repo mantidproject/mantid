@@ -1078,11 +1078,13 @@ void PropertyHandler::removeTie(const QString& parName)
   if (prop) removeTie(prop);
 }
 
+/**
+ * Calculate m_base: the baseline level under the peak (if this function is a peak and auto background is on)
+ */
 void PropertyHandler::calcBase()
 {
   if (!m_browser->m_autoBackground) return;
-  Mantid::API::IFunction1D_sptr f1D = boost::dynamic_pointer_cast<Mantid::API::IFunction1D>(m_fun);
-  if (!f1D) return;
+
   auto ws = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(m_browser->getWorkspace());
   if (ws)
   {
@@ -1108,6 +1110,10 @@ void PropertyHandler::calcBase()
   }
 }
 
+/**
+ * If the handled function is composite calculate the peak baselines for all members.
+ * If auto background is off does nothing.
+ */
 void PropertyHandler::calcBaseAll()
 {
   if (!m_browser->m_autoBackground) return;
@@ -1126,6 +1132,9 @@ void PropertyHandler::calcBaseAll()
   }
 }
 
+/**
+ * Set the height of the handled peak function.
+ */
 void PropertyHandler::setHeight(const double& h)
 {
   if (m_pf)
@@ -1134,39 +1143,43 @@ void PropertyHandler::setHeight(const double& h)
   }
 }
 
+/**
+ * Set the centre of the handled peak function.
+ * Find m_ci: x-index of the peakcentre.
+ */
 void PropertyHandler::setCentre(const double& c)
 {
   if (m_pf)
   {
     m_pf->setCentre(c);
-    //                        What does it do ?
 
-    //Mantid::API::MatrixWorkspace_const_sptr ws = m_pf->getMatrixWorkspace();
-    //if (ws)
-    //{
-    //  size_t wi = m_pf->getWorkspaceIndex();
-    //  const Mantid::MantidVec& X = ws->readX(wi);
-    //  int n = static_cast<int>(X.size()) - 2;
-    //  if (m_ci < 0) m_ci = 0;
-    //  if (m_ci > n) m_ci = n;
-    //  double x = X[m_ci];
-    //  if (x < c)
-    //  {
-    //    for(;m_ci<=n;++m_ci)
-    //    {
-    //      x = X[m_ci];
-    //      if (x > c) break;
-    //    }
-    //  }
-    //  else
-    //  {
-    //    for(;m_ci>=0;--m_ci)
-    //    {
-    //      x = X[m_ci];
-    //      if (x < c) break;
-    //    }
-    //  }
-    //}
+    //  find m_ci: x-index of the peakcentre
+    auto ws = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(m_browser->getWorkspace());
+    if (ws)
+    {
+      size_t wi = m_browser->workspaceIndex();
+      const Mantid::MantidVec& X = ws->readX(wi);
+      int n = static_cast<int>(X.size()) - 2;
+      if (m_ci < 0) m_ci = 0;
+      if (m_ci > n) m_ci = n;
+      double x = X[m_ci];
+      if (x < c)
+      {
+        for(;m_ci<=n;++m_ci)
+        {
+          x = X[m_ci];
+          if (x > c) break;
+        }
+      }
+      else
+      {
+        for(;m_ci>=0;--m_ci)
+        {
+          x = X[m_ci];
+          if (x < c) break;
+        }
+      }
+    }
   }
 }
 

@@ -42,7 +42,7 @@ namespace CurveFitting
 class DLLExport CostFuncFitting : public API::ICostFunction 
 {
 public:
-  
+  CostFuncFitting();
   /// Get i-th parameter
   /// @param i :: Index of a parameter
   /// @return :: Value of the parameter
@@ -65,7 +65,7 @@ public:
   /// @param covar :: Returned covariance matrix, here as 
   /// @param epsrel :: Is used to remove linear-dependent columns
   ///
-  virtual void calCovarianceMatrix(GSLMatrix& covar, double epsrel = 0.0001);
+  virtual void calCovarianceMatrix(GSLMatrix& covar, double epsrel = 1e-8);
 
   /// Calculate fitting errors
   virtual void calFittingErrors(const GSLMatrix& covar);
@@ -74,14 +74,24 @@ public:
 
 protected:
 
+  /**
+   * Calculates covariance matrix for fitting function's active parameters. 
+   */
+  virtual void calActiveCovarianceMatrix(GSLMatrix& covar, double epsrel = 1e-8);
+
   bool isValid() const;
   void checkValidity() const;
   void calTransformationMatrixNumerically(GSLMatrix& tm);
+  void setDirty();
   
   API::IFunction_sptr m_function;
   API::FunctionDomain_sptr m_domain;
   API::FunctionValues_sptr m_values;
   std::vector<size_t> m_indexMap;
+
+  mutable bool m_dirtyVal;
+  mutable bool m_dirtyDeriv;
+  mutable bool m_dirtyHessian;
 };
 
 } // namespace CurveFitting

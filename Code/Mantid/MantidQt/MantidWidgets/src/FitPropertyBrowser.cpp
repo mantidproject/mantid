@@ -203,11 +203,12 @@ void FitPropertyBrowser::init()
                << "Simplex"
                << "Conjugate gradient (Fletcher-Reeves imp.)"
                << "Conjugate gradient (Polak-Ribiere imp.)"
-               << "BFGS";
+               << "BFGS"
+                << "Levenberg-MarquardtMD";
   m_enumManager->setEnumNames(m_minimizer, m_minimizers);
   m_costFunction = m_enumManager->addProperty("Cost function");
-  m_costFunctions << "Least squares"
-                  << "Ignore positive peaks";
+  m_costFunctions << "Least squares";
+                  //<< "Ignore positive peaks";
   m_enumManager->setEnumNames(m_costFunction,m_costFunctions);
 
   m_plotDiff = m_boolManager->addProperty("Plot Difference");

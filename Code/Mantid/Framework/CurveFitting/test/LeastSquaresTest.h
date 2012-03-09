@@ -123,9 +123,9 @@ public:
     TS_ASSERT_DELTA(der1[0], 1.1, 1e-10);
     TS_ASSERT_DELTA(der1[1], 0.9, 1e-10);
 
-    GSLVector g(2);
-    GSLMatrix H(2,2);
-    TS_ASSERT_DELTA(costFun->valDerivHessian(g,H),0.145,1e-10);
+    TS_ASSERT_DELTA(costFun->valDerivHessian(),0.145,1e-10);
+    const GSLVector& g = costFun->getDeriv();
+    const GSLMatrix& H = costFun->getHessian();
     TS_ASSERT_DELTA(g.get(0), 1.1, 1e-10);
     TS_ASSERT_DELTA(g.get(1), 0.9, 1e-10);
   }
@@ -152,9 +152,9 @@ public:
     costFun->setFittingFunction(fun,domain,values);
     TS_ASSERT_DELTA(costFun->val(), 0.145, 1e-10); // == 0.5 *( 0.2^2 + 0.3^2 + 0.4^2 )
 
-    GSLVector g(2);
-    GSLMatrix H(2,2);
-    TS_ASSERT_DELTA(costFun->valDerivHessian(g,H),0.145,1e-10);
+    TS_ASSERT_DELTA(costFun->valDerivHessian(),0.145,1e-10);
+    GSLVector g = costFun->getDeriv();
+    const GSLMatrix& H = costFun->getHessian();
 
     GSLVector dx(2);
     dx.set(0,-0.1);
@@ -251,9 +251,8 @@ public:
     //system("pause");
     double f0 = costFun->val();
     //std::cerr << "fun=" << f0 << std::endl;
-    GSLVector g(2);
-    GSLMatrix H(2,2);
-    costFun->valDerivHessian(g,H);
+    const GSLVector& g = costFun->getDeriv();
+    const GSLMatrix& H = costFun->getHessian();
 
     for(size_t i = 0; i < n; ++i)
     {

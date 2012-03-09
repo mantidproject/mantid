@@ -40,14 +40,13 @@ namespace CurveFitting
 class DLLExport CostFuncLeastSquares : public CostFuncFitting
 {
 public:
+  /// Constructor
+  CostFuncLeastSquares():CostFuncFitting(),m_value(0),m_pushed(false){}
   /// Virtual destructor
   virtual ~CostFuncLeastSquares() {}
 
-  /// Constructor
-  CostFuncLeastSquares() : m_name("Least squares") { }
-
   /// Get name of minimizer
-  virtual std::string name() const { return m_name;}
+  virtual std::string name() const { return "Least squares";}
 
   /// Get short name of minimizer - useful for say labels in guis
   virtual std::string shortName() const {return "Chi-sq";};
@@ -64,14 +63,30 @@ public:
   /// @return :: The value of the function
   virtual double valAndDeriv(std::vector<double>& der) const;
 
-  virtual double valDerivHessian(GSLVector& der, GSLMatrix& hessian, bool evalFunction = true) const;
+  virtual double valDerivHessian(bool evalFunction = true) const;
+  const GSLVector& getDeriv() const;
+  const GSLMatrix& getHessian() const;
+  void push();
+  void pop();
+  void drop();
 
   void setParameters(const GSLVector& params);
   void getParameters(GSLVector& params) const;
 
+protected:
+
+  virtual void calActiveCovarianceMatrix(GSLMatrix& covar, double epsrel = 1e-8);
+
 private:
-  /// name of this minimizer
-  const std::string m_name;
+
+  mutable double m_value;
+  mutable GSLVector m_der;
+  mutable GSLMatrix m_hessian;
+
+  mutable bool m_pushed;
+  mutable double m_pushedValue;
+  mutable GSLVector m_pushedParams;
+
 };
 
 } // namespace CurveFitting

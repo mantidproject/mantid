@@ -2,12 +2,16 @@
 #define MANTID_CURVEFITTING_GSLMATRIX_H_
 
 #include "MantidCurveFitting/DllConfig.h"
+#include "MantidCurveFitting/GSLVector.h"
 
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_blas.h>
+#include <gsl/gsl_linalg.h>
 
 #include <vector>
 #include <stdexcept>
+#include <iostream>
+#include <iomanip>
 
 namespace Mantid
 {
@@ -250,6 +254,43 @@ namespace Mantid
 
       return *this;
     }
+
+    /// Solve system of linear equations M*x == rhs, M is this matrix
+    /// This matrix is destroyed.
+    void solve(const GSLVector& rhs, GSLVector& x)
+    {
+      if (size1() != size2())
+      {
+        throw std::runtime_error("System of linear equations: the matrix must be square.");
+      }
+      size_t n = size1();
+      if (rhs.size() != n)
+      {
+        throw std::runtime_error("System of linear equations: right-hand side vector has wrong size.");
+      }
+      x.resize(n);
+      int s;
+      gsl_permutation * p = gsl_permutation_alloc( n );
+      gsl_linalg_LU_decomp( gsl(), p, &s ); // matrix is modified at this moment
+      gsl_linalg_LU_solve( gsl(), p, rhs.gsl(), x.gsl() );
+      gsl_permutation_free( p );
+    }
+
+    /// Invert this matrix
+    void invert()
+    {
+      if (size1() != size2())
+      {
+        throw std::runtime_error("Matrix inverse: the matrix must be square.");
+      }
+      size_t n = size1();
+      int s;
+      GSLMatrix LU(*this);
+      gsl_permutation * p = gsl_permutation_alloc( n );
+      gsl_linalg_LU_decomp( LU.gsl(), p, &s );
+      gsl_linalg_LU_invert( LU.gsl(), p, gsl() );
+      gsl_permutation_free( p );
+    }
   };
 
   inline GSLMatrixMult2 operator*(const GSLMatrix& m1, const GSLMatrix& m2)
@@ -292,6 +333,19 @@ namespace Mantid
     return GSLMatrixMult3(mm,m);
   }
 
+  inline std::ostream& operator<<(std::ostream& ostr, const GSLMatrix& m)
+  {
+    ostr << std::scientific << std::setprecision(6);
+    for(size_t i = 0; i < m.size1(); ++i)
+    {
+      for(size_t j = 0; j < m.size2(); ++j)
+      {
+        ostr << std::setw(13) << m.get(i,j) << ' ';
+      }
+      ostr << std::endl;
+    }
+    return ostr;
+  }
   
   } // namespace CurveFitting
 } // namespace Mantid
