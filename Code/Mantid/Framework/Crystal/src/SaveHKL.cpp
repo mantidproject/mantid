@@ -62,13 +62,7 @@ namespace Crystal
 
     BoundedValidator<double> *mustBePositive = new BoundedValidator<double> ();
     mustBePositive->setLower(0.0);
-    declareProperty("LinearScatteringCoef", -1.0, mustBePositive,
-      "Linear scattering coefficient in 1/cm");
-    declareProperty("LinearAbsorptionCoef", -1.0, mustBePositive->clone(),
-      "Linear absorption coefficient at 1.8 Angstroms in 1/cm");
-    declareProperty("Radius", -1.0, mustBePositive->clone(),
-      "Radius of the sample in centimeters");
-    declareProperty("ScalePeaks", 1.0, mustBePositive->clone(),
+    declareProperty("ScalePeaks", 1.0, mustBePositive,
       "Multiply FSQ and sig(FSQ) by scaleFactor");
     declareProperty("MinDSpacing", 0.0, "Minimum d-spacing (Angstroms)");
     declareProperty("MinWavelength", 0.0, "Minimum wavelength (Angstroms)");
@@ -92,9 +86,35 @@ namespace Crystal
 
     std::string filename = getPropertyValue("Filename");
     PeaksWorkspace_sptr ws = getProperty("InputWorkspace");
-    smu = getProperty("LinearScatteringCoef"); // in 1/cm
-    amu = getProperty("LinearAbsorptionCoef"); // in 1/cm
-    radius = getProperty("Radius"); // in cm
+    const API::Run & run = ws->run();
+    if ( run.hasProperty("LinearScatteringCoef") )
+    {
+      Kernel::Property* prop = run.getProperty("LinearScatteringCoef");
+      smu = boost::lexical_cast<double,std::string>(prop->value());
+    }
+    else
+    {
+      throw std::invalid_argument("Could not retrieve LinearScatteringCoef from run object");
+    }
+    if ( run.hasProperty("LinearAbsorptionCoef") )
+    {
+      Kernel::Property* prop = run.getProperty("LinearAbsorptionCoef");
+      amu = boost::lexical_cast<double,std::string>(prop->value());
+    }
+    else
+    {
+      throw std::invalid_argument("Could not retrieve LinearAbsorptionCoef from run object");
+    }
+    if ( run.hasProperty("Radius") )
+    {
+      Kernel::Property* prop = run.getProperty("Radius");
+      radius = boost::lexical_cast<double,std::string>(prop->value());
+    }
+    else
+    {
+      throw std::invalid_argument("Could not retrieve Radius from run object");
+    }
+
     double scaleFactor = getProperty("ScalePeaks"); 
     double dMin = getProperty("MinDSpacing");
     double wlMin = getProperty("MinWavelength");

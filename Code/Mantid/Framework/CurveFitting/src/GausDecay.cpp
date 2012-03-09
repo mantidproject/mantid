@@ -17,7 +17,7 @@ DECLARE_FUNCTION(GausDecay)
 
 void GausDecay::init()
 {
-   declareParameter("A", 5.0); 
+   declareParameter("A", 10.0); 
    declareParameter("Sigma", 0.2);  
 }
 
@@ -35,7 +35,25 @@ void GausDecay::functionMW(double* out, const double* xValues, const size_t nDat
 
 void GausDecay::functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
 {
-  calNumericalDeriv(out, xValues, nData);
+  const double& A = getParameter("A"); 
+  const double& G = getParameter("Sigma");  
+
+  for (size_t i = 0; i < nData; i++) {
+    double x = xValues[i];
+    double g = exp(-G*G*x*x);
+    out->set(i,0, g);
+    out->set(i,1, -2*G*x*x*A*g);
+  }
+}
+
+void GausDecay::setActiveParameter(size_t i,double value)
+{
+  size_t j = indexOfActive(i);
+
+  if (parameterName(j) == "Sigma") 
+    setParameter(j,fabs(value),false);  // Make sigma positive
+  else
+    setParameter(j,value,false);
 }
 
 

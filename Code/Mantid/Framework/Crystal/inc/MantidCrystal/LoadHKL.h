@@ -4,6 +4,9 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include <gsl/gsl_blas.h>
+#include <gsl/gsl_poly.h>
+
 
 namespace Mantid
 {

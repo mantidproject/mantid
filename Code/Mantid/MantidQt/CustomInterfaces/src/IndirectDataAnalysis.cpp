@@ -27,6 +27,10 @@
 #include <QDesktopServices>
 #include <QUrl>
 
+#include <QPalette>
+#include <QColor>
+#include <QApplication>
+
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1125
@@ -116,21 +120,6 @@ void IndirectDataAnalysis::initLayout()
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(run()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(openDirectoryDialog()));
-
-  // absorption
-  connect(m_uiForm.abs_cbShape, SIGNAL(currentIndexChanged(int)), m_uiForm.abs_swDetails, SLOT(setCurrentIndex(int)));
-  // apply validators - absorption
-  m_uiForm.abs_leAttenuation->setValidator(m_valDbl);
-  m_uiForm.abs_leScatter->setValidator(m_valDbl);
-  m_uiForm.abs_leDensity->setValidator(m_valDbl);
-  m_uiForm.abs_leFlatHeight->setValidator(m_valDbl);
-  m_uiForm.abs_leWidth->setValidator(m_valDbl);
-  m_uiForm.abs_leThickness->setValidator(m_valDbl);
-  m_uiForm.abs_leElementSize->setValidator(m_valDbl);
-  m_uiForm.abs_leCylHeight->setValidator(m_valDbl);
-  m_uiForm.abs_leRadius->setValidator(m_valDbl);
-  m_uiForm.abs_leSlices->setValidator(m_valInt);
-  m_uiForm.abs_leAnnuli->setValidator(m_valInt);
 }
 
 void IndirectDataAnalysis::initLocalPython()
@@ -155,7 +144,6 @@ void IndirectDataAnalysis::loadSettings()
   m_uiForm.furyfit_inputFile->readSettings(settings.group());
   m_uiForm.confit_inputFile->readSettings(settings.group());
   m_uiForm.confit_resInput->readSettings(settings.group());
-  m_uiForm.abs_inputFile->readSettings(settings.group());
   m_uiForm.absp_inputFile->readSettings(settings.group());
   m_uiForm.abscor_sample->readSettings(settings.group());
   m_uiForm.abscor_can->readSettings(settings.group());
@@ -497,6 +485,9 @@ void IndirectDataAnalysis::setupAbsorptionF2Py()
   m_uiForm.absp_ler1->setValidator(m_valDbl);
   m_uiForm.absp_ler2->setValidator(m_valDbl);
   m_uiForm.absp_ler3->setValidator(m_valDbl);
+
+  // "Nudge" color of title of QGroupBox to change.
+  absf2pUseCanChecked(m_uiForm.absp_ckUseCan->isChecked());
 }
 
 void IndirectDataAnalysis::setupAbsCor()
@@ -593,135 +584,6 @@ bool IndirectDataAnalysis::validateConfit()
   return valid;
 }
 
-bool IndirectDataAnalysis::validateAbsorption()
-{
-  bool valid = true;
-
-  if ( ! m_uiForm.abs_inputFile->isValid() )
-  {
-    valid = false;
-  }
-
-  if ( m_uiForm.abs_leAttenuation->text() == "" )
-  {
-    m_uiForm.abs_valAttenuation->setText("*");
-    valid = false;
-  }
-  else
-  {
-    m_uiForm.abs_valAttenuation->setText(" ");
-  }
-
-  if ( m_uiForm.abs_leScatter->text() == "" )
-  {
-    m_uiForm.abs_valScatter->setText("*");
-    valid = false;
-  }
-  else
-  {
-    m_uiForm.abs_valScatter->setText(" ");
-  }
-
-  if ( m_uiForm.abs_leDensity->text() == "" )
-  {
-    m_uiForm.abs_valDensity->setText("*");
-    valid = false;
-  }
-  else
-  {
-    m_uiForm.abs_valDensity->setText(" ");
-  }
-
-  if ( m_uiForm.abs_cbShape->currentText() == "Flat Plate" )
-  {
-    // ... FLAT PLATE
-    if ( m_uiForm.abs_leFlatHeight->text() == "" )
-    {
-      m_uiForm.abs_valFlatHeight->setText("*");
-      valid = false;
-    }
-    else
-    {
-      m_uiForm.abs_valFlatHeight->setText(" ");
-    }
-
-    if ( m_uiForm.abs_leWidth->text() == "" )
-    {
-      m_uiForm.abs_valWidth->setText("*");
-      valid = false;
-    }
-    else
-    {
-      m_uiForm.abs_valWidth->setText(" ");
-    }
-
-    if ( m_uiForm.abs_leThickness->text() == "" )
-    {
-      m_uiForm.abs_valThickness->setText("*");
-      valid = false;
-    }
-    else
-    {
-      m_uiForm.abs_valThickness->setText(" ");
-    }
-
-    if ( m_uiForm.abs_leElementSize->text() == "" )
-    {
-      m_uiForm.abs_valElementSize->setText("*");
-      valid = false;
-    }
-    else
-    {
-      m_uiForm.abs_valElementSize->setText(" ");
-    }
-  }
-  else
-  {
-    // ... CYLINDER
-    if ( m_uiForm.abs_leCylHeight->text() == "" )
-    {
-      m_uiForm.abs_valCylHeight->setText("*");
-      valid = false;
-    }
-    else
-    {
-      m_uiForm.abs_valCylHeight->setText(" ");
-    }
-
-    if ( m_uiForm.abs_leRadius->text() == "" )
-    {
-      m_uiForm.abs_valRadius->setText("*");
-      valid = false;
-    }
-    else
-    {
-      m_uiForm.abs_valRadius->setText(" ");
-    }
-
-    if ( m_uiForm.abs_leSlices->text() == "" )
-    {
-      m_uiForm.abs_valSlices->setText("*");
-      valid = false;
-    }
-    else
-    {
-      m_uiForm.abs_valSlices->setText(" ");
-    }
-
-    if ( m_uiForm.abs_leAnnuli->text() == "" )
-    {
-      m_uiForm.abs_valAnnuli->setText("*");
-      valid = false;
-    }
-    else
-    {
-      m_uiForm.abs_valAnnuli->setText(" ");
-    }
-  }
-
-  return valid;
-}
-
 bool IndirectDataAnalysis::validateAbsorptionF2Py()
 {
   bool valid = true;
@@ -749,24 +611,27 @@ bool IndirectDataAnalysis::validateAbsorptionF2Py()
       valid = false;
     }
 
-    if ( m_uiForm.absp_letc1->text() != "" )
+    if ( m_uiForm.absp_ckUseCan->isChecked() )
     {
-      m_uiForm.absp_valtc1->setText(" ");
-    }
-    else
-    {
-      m_uiForm.absp_valtc1->setText("*");
-      valid = false;
-    }
+      if ( m_uiForm.absp_letc1->text() != "" )
+      {
+        m_uiForm.absp_valtc1->setText(" ");
+      }
+      else
+      {
+        m_uiForm.absp_valtc1->setText("*");
+        valid = false;
+      }
 
-    if ( m_uiForm.absp_letc2->text() != "" )
-    {
-      m_uiForm.absp_valtc2->setText(" ");
-    }
-    else
-    {
-      m_uiForm.absp_valtc2->setText("*");
-      valid = false;
+      if ( m_uiForm.absp_letc2->text() != "" )
+      {
+        m_uiForm.absp_valtc2->setText(" ");
+      }
+      else
+      {
+        m_uiForm.absp_valtc2->setText("*");
+        valid = false;
+      }
     }
   }
 
@@ -1159,11 +1024,12 @@ QwtPlotCurve* IndirectDataAnalysis::plotMiniplot(QwtPlot* plot, QwtPlotCurve* cu
     return NULL;
   }
 
-  const QVector<double> dataX = QVector<double>::fromStdVector(ws->readX(index));
-  const QVector<double> dataY = QVector<double>::fromStdVector(ws->readY(index));
+  using Mantid::MantidVec;
+  const MantidVec & dataX = ws->readX(index);
+  const MantidVec & dataY = ws->readY(index);
 
   curve = new QwtPlotCurve();
-  curve->setData(dataX, dataY);
+  curve->setData(&dataX[0], &dataY[0], static_cast<int>(ws->blocksize()));
   curve->attach(plot);
 
   plot->replot();
@@ -1201,8 +1067,7 @@ void IndirectDataAnalysis::run()
   else if ( tabName == "Fury" ) { furyRun(); }
   else if ( tabName == "FuryFit" ) { furyfitRun(); }
   else if ( tabName == "ConvFit" ) { confitRun(); }
-  else if ( tabName == "Absorption" ) { absorptionRun(); }
-  else if ( tabName == "Abs (F2PY)" ) { absf2pRun(); }
+  else if ( tabName == "Calculate Corrections" ) { absf2pRun(); }
   else if ( tabName == "Apply Corrections" ) { abscorRun(); }
   else { showInformationBox("This tab does not have a 'Run' action."); }
 }
@@ -2386,54 +2251,6 @@ void IndirectDataAnalysis::confitCheckBoxUpdate(QtProperty* prop, bool checked)
   }
 }
 
-void IndirectDataAnalysis::absorptionRun()
-{
-  if ( ! validateAbsorption() )
-  {
-    showInformationBox("Please check your input.");
-    return;
-  }
-
-  QString pyInput =
-    "from IndirectDataAnalysis import absorption\n"
-    "file = r'" + m_uiForm.abs_inputFile->getFirstFilename() + "'\n"
-    "mode = '" + m_uiForm.abs_cbShape->currentText() + "'\n"
-    "sample = [ %1, %2, %3 ]\n"
-    "can = [ %4, %5, %6, %7 ]\n";
-
-  pyInput = pyInput.arg(m_uiForm.abs_leAttenuation->text());
-  pyInput = pyInput.arg(m_uiForm.abs_leScatter->text());
-  pyInput = pyInput.arg(m_uiForm.abs_leDensity->text());
-
-  if ( m_uiForm.abs_cbShape->currentText() == "Flat Plate" )
-  {
-    pyInput = pyInput.arg(m_uiForm.abs_leFlatHeight->text());
-    pyInput = pyInput.arg(m_uiForm.abs_leWidth->text());
-    pyInput = pyInput.arg(m_uiForm.abs_leThickness->text());
-    pyInput = pyInput.arg(m_uiForm.abs_leElementSize->text());
-  }
-  else
-  {
-    pyInput = pyInput.arg(m_uiForm.abs_leCylHeight->text());
-    pyInput = pyInput.arg(m_uiForm.abs_leRadius->text());
-    pyInput = pyInput.arg(m_uiForm.abs_leSlices->text());
-    pyInput = pyInput.arg(m_uiForm.abs_leAnnuli->text());
-  }
-
-  if ( m_uiForm.abs_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
-  else pyInput += "verbose = False\n";
-
-  if ( m_uiForm.abs_ckPlot->isChecked() ) pyInput += "plot = True\n";
-  else pyInput += "plot = False\n";
-
-  if ( m_uiForm.abs_ckSave->isChecked() ) pyInput += "save = True\n";
-  else pyInput += "save = False\n";
-
-  pyInput +=
-    "absorption(file, mode, sample, can, Save=save, Verbose=verbose, Plot=plot)\n";
-  QString pyOutput = runPythonCode(pyInput).trimmed();
-}
-
 void IndirectDataAnalysis::openDirectoryDialog()
 {
   MantidQt::API::ManageUserDirectories *ad = new MantidQt::API::ManageUserDirectories(this);
@@ -2457,10 +2274,8 @@ void IndirectDataAnalysis::help()
     url += ":FuryFit";
   else if ( tabName == "ConvFit" )
     url += ":ConvFit";
-  else if ( tabName == "Absorption" )
-    url += ":Absorption";
-  else if ( tabName == "Abs (F2PY)" )
-    url += ":AbsF2P";
+  else if ( tabName == "Calculate Corrections" )
+    url += ":CalcCor";
   else if ( tabName == "Apply Corrections" )
     url += ":AbsCor";
   QDesktopServices::openUrl(QUrl(url));
@@ -2482,9 +2297,16 @@ void IndirectDataAnalysis::absf2pRun()
   if ( m_uiForm.absp_cbShape->currentText() == "Flat" )
   {
     geom = "flt";
-    size = "[" + m_uiForm.absp_lets->text() + ", " +
+    if ( m_uiForm.absp_ckUseCan->isChecked() ) 
+    {
+      size = "[" + m_uiForm.absp_lets->text() + ", " +
       m_uiForm.absp_letc1->text() + ", " +
       m_uiForm.absp_letc2->text() + "]";
+    }
+    else
+    {
+      size = "[" + m_uiForm.absp_lets->text() + ", 0.0, 0.0]";
+    }
   }
   else if ( m_uiForm.absp_cbShape->currentText() == "Cylinder" )
   {
@@ -2560,13 +2382,41 @@ void IndirectDataAnalysis::absf2pShape(int index)
   else if ( index == 1 ) { m_uiForm.absp_lbAvar->setText("Step Size"); }
 }
 
-void IndirectDataAnalysis::absf2pUseCanChecked(bool value)
+void IndirectDataAnalysis::absf2pUseCanChecked(bool checked)
 {
-  m_uiForm.absp_gbCan->setEnabled(value);
+  // Disable thickness fields/labels/asterisks.
+  m_uiForm.absp_lbtc1->setEnabled(checked);
+  m_uiForm.absp_lbtc2->setEnabled(checked);
+  m_uiForm.absp_letc1->setEnabled(checked);
+  m_uiForm.absp_letc2->setEnabled(checked);
+  m_uiForm.absp_valtc1->setVisible(checked);
+  m_uiForm.absp_valtc2->setVisible(checked);
 
-  m_uiForm.absp_lbR3->setEnabled(value);
-  m_uiForm.absp_ler3->setEnabled(value);
-  m_uiForm.absp_valR3->setEnabled(value);
+  // Disable R3 field/label/asterisk.
+  m_uiForm.absp_lbR3->setEnabled(checked);
+  m_uiForm.absp_ler3->setEnabled(checked);
+  m_uiForm.absp_valR3->setVisible(checked);
+
+  // Disable "Can Details" group and asterisks.
+  m_uiForm.absp_gbCan->setEnabled(checked);
+  m_uiForm.absp_valCanden->setVisible(checked);
+  m_uiForm.absp_valCansigs->setVisible(checked);
+  m_uiForm.absp_valCansiga->setVisible(checked);
+  
+  // Workaround for "disabling" title of the QGroupBox.
+  QPalette palette;
+  if(checked)
+    palette.setColor(
+      QPalette::Disabled, 
+      QPalette::WindowText,
+      QApplication::palette().color(QPalette::Disabled, QPalette::WindowText));
+  else
+    palette.setColor(
+      QPalette::Active, 
+      QPalette::WindowText,
+      QApplication::palette().color(QPalette::Active, QPalette::WindowText));
+
+  m_uiForm.absp_gbCan->setPalette(palette);
 }
 
 void IndirectDataAnalysis::absf2pTCSync()

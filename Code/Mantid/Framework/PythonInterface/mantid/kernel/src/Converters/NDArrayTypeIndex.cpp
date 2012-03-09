@@ -23,15 +23,13 @@ namespace Mantid
         int NDArrayTypeIndex<CType>::typenum = NDTypeNum;\
         template DLLExport struct NDArrayTypeIndex<CType>;
 
-      DEFINE_TYPE_MAPPING(int16_t, NPY_INT16);
-      DEFINE_TYPE_MAPPING(uint16_t, NPY_UINT16);
-      DEFINE_TYPE_MAPPING(int32_t, NPY_INT32);
-      DEFINE_TYPE_MAPPING(uint32_t, NPY_UINT32);
-      DEFINE_TYPE_MAPPING(int64_t, NPY_INT64);
-#ifdef __APPLE__
+      DEFINE_TYPE_MAPPING(int, NPY_INT);
+      DEFINE_TYPE_MAPPING(long, NPY_LONG);
+      DEFINE_TYPE_MAPPING(long long, NPY_LONGLONG);
+      DEFINE_TYPE_MAPPING(unsigned int, NPY_UINT);
       DEFINE_TYPE_MAPPING(unsigned long, NPY_ULONG);
-#endif
-      DEFINE_TYPE_MAPPING(uint64_t, NPY_UINT64);
+      DEFINE_TYPE_MAPPING(unsigned long long, NPY_ULONGLONG);
+      DEFINE_TYPE_MAPPING(bool, NPY_BOOL);
       DEFINE_TYPE_MAPPING(double, NPY_DOUBLE);
       DEFINE_TYPE_MAPPING(float, NPY_FLOAT);
 

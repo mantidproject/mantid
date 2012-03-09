@@ -25,6 +25,7 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/TableColumn.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/AlgorithmHistory.h"
 
 #include <boost/tokenizer.hpp>
 #include <boost/shared_ptr.hpp>
@@ -949,7 +950,6 @@ using namespace DataObjects;
     status=NXopengroup(fileID,"process","NXprocess");
     //Mantid:API::Workspace xxx;
     const API::WorkspaceHistory history=localworkspace->getHistory();
-    const std::vector<AlgorithmHistory>& algHist = history.getAlgorithmHistories();
     std::stringstream output,algorithmNumber;
     EnvironmentHistory envHist;
 
@@ -962,17 +962,16 @@ using namespace DataObjects;
     writeNxNote("MantidEnvironment","mantid",buffer,"Mantid Environment data",output.str());
     typedef std::map <std::size_t,std::string> orderedHistMap;
     orderedHistMap ordMap;
-    for(std::size_t i=0;i<algHist.size();i++)
+    for(std::size_t i=0;i<history.size();i++)
     {
       std::stringstream algNumber,algData;
-      // algNumber << "MantidAlgorithm_" << i;
-      algHist[i].printSelf(algData);
+      const API::AlgorithmHistory & entry = history.getAlgorithmHistory(i);
+      entry.printSelf(algData);
 
       //get execute count
-      std::size_t nexecCount=algHist[i].execCount();
+      std::size_t nexecCount=entry.execCount();
       //order by execute count
       ordMap.insert(orderedHistMap::value_type(nexecCount,algData.str()));
-      //writeNxNote(algNumber.str(),"mantid","","Mantid Algorithm data",algData.str());
     }
     int num=0;
     std::map <std::size_t,std::string>::iterator m_Iter;

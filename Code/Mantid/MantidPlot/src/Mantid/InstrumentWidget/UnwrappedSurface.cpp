@@ -526,7 +526,7 @@ void UnwrappedSurface::componentSelected(Mantid::Geometry::ComponentID id)
     int detID = det->getID();
 
     std::vector<UnwrappedDetector>::const_iterator it;
-    for (it = m_unwrappedDetectors.begin(); it != m_unwrappedDetectors.end(); it++)
+    for (it = m_unwrappedDetectors.begin(); it != m_unwrappedDetectors.end(); ++it)
     {
       const UnwrappedDetector& udet = *it;
       if (udet.detector && udet.detector->getID() == detID)

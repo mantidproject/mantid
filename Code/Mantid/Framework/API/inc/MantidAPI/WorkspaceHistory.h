@@ -6,14 +6,16 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidKernel/EnvironmentHistory.h"
+#include <boost/shared_ptr.hpp>
 #include <ctime>
-#include <vector>
+#include <list>
 
 namespace Mantid
 {
 namespace API
 {
   class IAlgorithm;
+
   /** This class stores information about the Workspace History used by algorithms
     on a workspace and the environment history.
 
@@ -43,11 +45,17 @@ namespace API
 class MANTID_API_DLL WorkspaceHistory
 {
 public:
+  /// History container
+  typedef std::set<AlgorithmHistory> AlgorithmHistories;
+
+  /// Default constructor
   WorkspaceHistory();
+  /// Destructor
   virtual ~WorkspaceHistory();
+  /// Copy constructor
   WorkspaceHistory(const WorkspaceHistory&);
   /// Retrieve the algorithm history list
-  const std::vector<AlgorithmHistory>& getAlgorithmHistories() const;
+  const AlgorithmHistories & getAlgorithmHistories() const;
   /// Retrieve the environment history
   const Kernel::EnvironmentHistory& getEnvironmentHistory() const;
   /// Append an workspace history to this one
@@ -56,8 +64,12 @@ public:
   void addHistory(const AlgorithmHistory& algHistory);
   /// How many entries are there
   size_t size() const;
+  /// Is the history empty
+  bool empty() const;
   /// Retrieve an algorithm history by index
   const AlgorithmHistory & getAlgorithmHistory(const size_t index) const;
+  /// Add operator[] access
+  const AlgorithmHistory & operator[](const size_t index) const;
   /// Create an algorithm from a history record at a given index
   boost::shared_ptr<IAlgorithm> getAlgorithm(const size_t index) const;
   /// Convenience function for retrieving the last algorithm
@@ -73,7 +85,7 @@ private:
   /// The environment of the workspace
   const Kernel::EnvironmentHistory m_environment;
   /// The algorithms which have been called on the workspace
-  std::vector<AlgorithmHistory> m_algorithms;
+  AlgorithmHistories m_algorithms;
   
 };
 

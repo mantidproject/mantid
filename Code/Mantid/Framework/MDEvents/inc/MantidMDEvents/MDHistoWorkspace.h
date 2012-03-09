@@ -188,7 +188,13 @@ namespace MDEvents
       return std::sqrt(m_errorsSquared[index1 + indexMultiplier[0]*index2 + indexMultiplier[1]*index3 + indexMultiplier[2]*index4]);
     }
 
-
+    /**
+    Getter for the masking at a specified linear index.
+    */
+    bool getIsMaskedAt(size_t index) const
+    {
+      return m_masks[index];
+    }
 
     /// Get the signal at the specified index.
     signal_t getSignalAt(size_t index) const
@@ -345,8 +351,11 @@ namespace MDEvents
     virtual std::vector<signal_t> getSignalDataVector() const;
     virtual std::vector<signal_t> getErrorDataVector() const;
 
+    /// Apply masking.
+    void setMDMasking(Mantid::Geometry::MDImplicitFunction* maskingRegion);
 
-
+    /// Clear masking.
+    void clearMDMasking();
 
   private:
 
@@ -384,6 +393,10 @@ namespace MDEvents
     /// Max index into each dimension
     size_t * m_indexMax;
 
+    protected:
+  
+    /// Linear array of masks for each bin
+    bool * m_masks;
   };
 
   /// A shared pointer to a MDHistoWorkspace

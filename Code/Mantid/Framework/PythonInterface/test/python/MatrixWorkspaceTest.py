@@ -1,10 +1,11 @@
-import unittest,sys
-
+import unittest
+import sys 
+import math
 from testhelpers import run_algorithm, can_be_instantiated
-
-from mantid.api import (MatrixWorkspace, WorkspaceProperty_Workspace, Workspace,
+from mantid.api import (MatrixWorkspace, WorkspaceProperty, Workspace,
                         ExperimentInfo, AnalysisDataService)
 from mantid.geometry import Detector
+from mantid.kernel import V3D
 
 import numpy as np
 
@@ -70,6 +71,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertTrue(isinstance(det, Detector))
         self.assertEquals(det.getID(), 1)
         self.assertFalse(det.isMasked())
+        self.assertAlmostEqual(math.pi, det.getTwoTheta(V3D(0,0,11), V3D(0,0,11)))
 
     def test_spectrum_retrieval(self):
         # Spectrum
@@ -83,7 +85,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
             self.assertEquals(expected[i], ids[i])
 
     def test_that_a_histogram_workspace_is_returned_as_a_MatrixWorkspace_from_a_property(self):
-        self.assertEquals(type(self._test_ws_prop), WorkspaceProperty_Workspace)
+        self.assertEquals(type(self._test_ws_prop), WorkspaceProperty)
         # Is Workspace in the hierarchy of the value
         self.assertTrue(isinstance(self._test_ws, Workspace))
         # Have got a MatrixWorkspace back and not just the generic interface

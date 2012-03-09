@@ -43,6 +43,7 @@ Specific pulse ID and mapping files can be specified if needed; these are guesse
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidAPI/MemoryManager.h"
 
 namespace Mantid
 {

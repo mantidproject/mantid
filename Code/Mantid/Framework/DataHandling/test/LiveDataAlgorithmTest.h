@@ -63,6 +63,32 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
   }
   
+  void test_validateInputs()
+  {
+    LiveDataAlgorithmImpl alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT( !alg.hasPostProcessing() );
+
+    TSM_ASSERT_THROWS_ANYTHING("No OutputWorkspace",  alg.validateInputs() );
+    alg.setPropertyValue("OutputWorkspace", "out_ws");
+    TSM_ASSERT_THROWS_NOTHING("Is OK now",  alg.validateInputs() );
+
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PostProcessingScript", "Pause(1)") );
+    TS_ASSERT( alg.hasPostProcessing() );
+
+    TSM_ASSERT_THROWS_ANYTHING("No AccumulationWorkspace",  alg.validateInputs() );
+    alg.setPropertyValue("AccumulationWorkspace", "accum_ws");
+    TSM_ASSERT_THROWS_NOTHING("Is OK now",  alg.validateInputs() );
+
+    alg.setPropertyValue("AccumulationWorkspace", "out_ws");
+    TSM_ASSERT_THROWS_ANYTHING("AccumulationWorkspace == OutputWorkspace",  alg.validateInputs() );
+  }
+
+  /** Test creating the processing algorithm.
+   * NOTE: RunPythonScript is not available from unit tests, so
+   * this is tested in LoadLiveDataTest.py
+   */
   void test_makeAlgorithm()
   {
     FrameworkManager::Instance();
@@ -71,7 +97,7 @@ public:
     {
       // Try both the regular and the Post-Processing algorithm
       std::string prefix="";
-      if (bool(post))
+      if ( post > 0 )
         prefix = "Post";
       std::cout << prefix << "Processing algo" << std::endl;
 
@@ -84,14 +110,14 @@ public:
       TS_ASSERT( alg.isInitialized() )
 
       IAlgorithm_sptr procAlg;
-      procAlg = alg.makeAlgorithm( bool(post) );
+      procAlg = alg.makeAlgorithm( post > 0 );
       TSM_ASSERT("NULL algorithm pointer returned if nothing is specified.", !procAlg);
 
       TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue(prefix + "ProcessingAlgorithm", "RenameWorkspace") );
       TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue(prefix + "ProcessingProperties",
           "InputWorkspace=first;OutputWorkspace=second") );
 
-      procAlg = alg.makeAlgorithm( bool(post) );
+      procAlg = alg.makeAlgorithm( post > 0 );
       TSM_ASSERT("Non-NULL algorithm pointer", procAlg);
       TS_ASSERT( procAlg->isInitialized() );
       TS_ASSERT_EQUALS( procAlg->getPropertyValue("InputWorkspace"), "first" );
@@ -104,7 +130,6 @@ public:
       TS_ASSERT( !AnalysisDataService::Instance().doesExist("first") );
       TS_ASSERT( AnalysisDataService::Instance().doesExist("second") );
     }
-
   }
 
 

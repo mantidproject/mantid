@@ -930,8 +930,12 @@ class LoadSample(LoadRun, ReductionStep):
         try:
             run_num = p_run_ws.getSampleDetails().getLogData('run_number').value
         except RuntimeError:
-            # if the run number is not stored in the workspace, take it from the filename
-            run_num = self._data_file.split('.')[0].split('-')[0]
+            # if the run number is not stored in the workspace, try to take it from the filename
+            run_num = os.path.basename(self._data_file).split('.')[0].split('-')[0].split('0')[-1]
+            try:
+                dummy = int(run_num)
+            except ValueError:
+                mantid.sendLogMessage('Could not extract run number from file name ' + self._data_file)
         
         reducer.instrument.set_up_for_run(run_num)
 

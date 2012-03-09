@@ -208,16 +208,17 @@ if ( CPPCHECK_EXECUTABLE )
         Framework/ICat/src/GSoapGenerated.cpp
         Framework/ICat/src/GSoap/
         Framework/ICat/src/GSoap.cpp
-	Framework/Kernel/src/ANN/
-	Framework/Kernel/src/ANN_complete.cpp
+        Framework/Kernel/src/ANN/
+        Framework/Kernel/src/ANN_complete.cpp
         Framework/PythonAPI/src/boostpython.cpp
+        MantidPlot/src/origin/OPJFile.h # Third-party header
       )
 
   # setup the standard arguments
   set (_cppcheck_args "${CPPCHECK_ARGS}")
-	  list ( APPEND _cppcheck_args ${CPPCHECK_TEMPLATE_ARG} )
-	  if ( CPPCHECK_NUM_THREADS GREATER 0)
-	    list ( APPEND _cppcheck_args -j ${CPPCHECK_NUM_THREADS} )
+    list ( APPEND _cppcheck_args ${CPPCHECK_TEMPLATE_ARG} )
+    if ( CPPCHECK_NUM_THREADS GREATER 0)
+        list ( APPEND _cppcheck_args -j ${CPPCHECK_NUM_THREADS} )
   endif ( CPPCHECK_NUM_THREADS GREATER 0)
 
   # process list of include/exclude directories

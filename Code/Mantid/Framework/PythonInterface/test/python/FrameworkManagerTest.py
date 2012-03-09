@@ -1,21 +1,15 @@
 import unittest
-
+import testhelpers
 from mantid.api import FrameworkManager, AlgorithmProxy
 
 class FrameworkManagerTest(unittest.TestCase):
 
-    def assertRaisesNothing(self, callable):
-        try:
-            callable()
-        except Exception, exc:
-            self.fail(str(exc))            
-
     def test_clear_functions_do_not_throw(self):
         # Test they don't throw for now
-        self.assertRaisesNothing(FrameworkManager.Instance().clear)
-        self.assertRaisesNothing(FrameworkManager.Instance().clearData)
-        self.assertRaisesNothing(FrameworkManager.Instance().clearAlgorithms)
-        self.assertRaisesNothing(FrameworkManager.Instance().clearInstruments)
+        testhelpers.assert_raises_nothing(self, FrameworkManager.Instance().clear)
+        testhelpers.assert_raises_nothing(self, FrameworkManager.Instance().clearData)
+        testhelpers.assert_raises_nothing(self, FrameworkManager.Instance().clearAlgorithms)
+        testhelpers.assert_raises_nothing(self, FrameworkManager.Instance().clearInstruments)
         
     def _is_managed_test(self, alg, version):
         self.assertTrue(alg.isInitialized())

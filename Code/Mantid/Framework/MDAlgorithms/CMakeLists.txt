@@ -9,6 +9,7 @@ set ( SRC_FILES
 	src/CompositeFunctionBuilder.cpp
 	src/CompositeImplicitFunction.cpp
 	src/CompositeImplicitFunctionParser.cpp
+	src/ConvertToDetectorFaceMD.cpp
 	src/ConvertToMDEvents.cpp
 	src/DivideMD.cpp
 	src/EqualToMD.cpp
@@ -20,6 +21,7 @@ set ( SRC_FILES
 	src/InvalidParameterParser.cpp
 	src/LessThanMD.cpp
 	src/LogarithmMD.cpp
+	src/MaskMD.cpp
 	src/MergeMD.cpp
 	src/MergeMDFiles.cpp
 	src/MinusMD.cpp
@@ -56,6 +58,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CompositeFunctionBuilder.h
 	inc/MantidMDAlgorithms/CompositeImplicitFunction.h
 	inc/MantidMDAlgorithms/CompositeImplicitFunctionParser.h
+	inc/MantidMDAlgorithms/ConvertToDetectorFaceMD.h
 	inc/MantidMDAlgorithms/ConvertToMDEvents.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsCoordTransf.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsDetInfo.h
@@ -73,6 +76,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/InvalidParameterParser.h
 	inc/MantidMDAlgorithms/LessThanMD.h
 	inc/MantidMDAlgorithms/LogarithmMD.h
+	inc/MantidMDAlgorithms/MaskMD.h
 	inc/MantidMDAlgorithms/MergeMD.h
 	inc/MantidMDAlgorithms/MergeMDFiles.h
 	inc/MantidMDAlgorithms/MinusMD.h
@@ -105,6 +109,7 @@ set ( TEST_FILES
 	test/BooleanBinaryOperationMDTest.h
 	test/CompareMDWorkspacesTest.h
 	test/ConvertEventsToMDEventsTest.h
+	test/ConvertToDetectorFaceMDTest.h
 	test/ConvertToMDEventsCoordTransfTest.h
 	test/ConvertToMDEventsMethodsTest.h
 	test/ConvertToMDEventsTest.h
@@ -118,6 +123,7 @@ set ( TEST_FILES
 	test/InvalidParameterTest.h
 	test/LessThanMDTest.h
 	test/LogarithmMDTest.h
+	test/MaskMDTest.h
 	test/MergeMDFilesTest.h
 	test/MergeMDTest.h
 	test/MinusMDTest.h

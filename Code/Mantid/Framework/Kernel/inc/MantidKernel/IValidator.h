@@ -69,7 +69,7 @@ public:
   virtual std::set<std::string> allowedValues() const { return std::set<std::string>(); }
   
   /// Make a copy of the present type of validator
-  virtual IValidator* clone() = 0;
+  virtual IValidator* clone() const = 0;
 
  
 protected:

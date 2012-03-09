@@ -57,6 +57,20 @@ class DummyAlg2(DummyAlg):
         output_ws = self.getPropertyValue("OutputWorkspace")
         a = self.executeSubAlg(CreateWorkspace, OutputWorkspace=output_ws, DataX=[0,1,2], DataY=[0,1,2], DataE=[0,0,0])
         self._setWorkspaceProperty("OutputWorkspace", a._getWorkspaceProperty("OutputWorkspace"))
+        
+class GenericWorkspacePropertyTest(PythonAlgorithm):
+    
+    def PyInit(self):
+        self.declareWorkspaceProperty("InputWorkspace", "", Direction = Direction.Input, Description = '', Type=Workspace)
+        self.declareWorkspaceProperty("OutputWorkspace", "", Direction = Direction.Output, Description = '', Type=Workspace)
+        
+    def PyExec(self):
+        ws = self.getProperty("InputWorkspace")
+        if not isinstance(ws, WorkspaceProxy):
+            raise RuntimeError("InputWorkspace property is not a workspace!")
+        # Just pass it back out again
+        self.setProperty("OutputWorkspace", ws)
+        
 
 class PythonAlgorithmTest(unittest.TestCase):
     """
@@ -167,6 +181,24 @@ class PythonAlgorithmTest(unittest.TestCase):
         mtd.deleteWorkspace("test")
         # ... not the one given as a parameter of DummyAlg3, because that's not the way that algo was written
         self.assertFalse(mtd.workspaceExists("subalgtest"))
-                
+        
+    def test_generic_workspace_property(self):
+        """
+            Tests whether a generic WorkspaceProperty<Workspace>
+            can be used from Python
+        """
+        algm_par = mtd._createAlgProxy("CreateWorkspace")
+        algm_par.setPropertyValues(OutputWorkspace="test", DataX=1, DataY=1, DataE=1)
+        algm_par.execute()
+        ws = algm_par.getProperty("OutputWorkspace").value
+        
+        algm = GenericWorkspacePropertyTest()
+        algm.initialize()
+        algm.setPropertyValue("InputWorkspace", "test")
+        algm.setPropertyValue("OutputWorkspace", "testout")
+        algm.execute()
+        self.assertTrue(algm.isExecuted())
+        self.assertTrue(mtd.workspaceExists("testout"))
+        
 if __name__ == '__main__':
     unittest.main()

@@ -41,6 +41,9 @@ void RebinToWorkspace::init()
     "The workspace to match the bin boundaries against" );
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Kernel::Direction::Output),
     "The name of the workspace to be created as the output of the algorithm" );
+  declareProperty("PreserveEvents", true, "Keep the output workspace as an EventWorkspace, if the input has events (default).\n"
+      "If the input and output EventWorkspace names are the same, only the X bins are set, which is very quick.\n"
+      "If false, then the workspace gets converted to a Workspace2D histogram.");
 }
 
 /**
@@ -51,6 +54,7 @@ void RebinToWorkspace::exec()
   //The input workspaces ...
   MatrixWorkspace_sptr toRebin = getProperty("WorkspaceToRebin");
   MatrixWorkspace_sptr toMatch = getProperty("WorkspaceToMatch");
+  bool PreserveEvents = getProperty("PreserveEvents");
 
   //First we need to create the parameter vector from the workspace with which we are matching
   std::vector<double> rb_params;
@@ -60,6 +64,7 @@ void RebinToWorkspace::exec()
   runRebin->setProperty<MatrixWorkspace_sptr>("InputWorkspace", toRebin);
   runRebin->setPropertyValue("OutputWorkspace", "rebin_out");
   runRebin->setProperty("params", rb_params);
+  runRebin->setProperty("PreserveEvents",PreserveEvents);
   runRebin->executeAsSubAlg();
   progress(1);
   MatrixWorkspace_sptr ws = runRebin->getProperty("OutputWorkspace");

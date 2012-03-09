@@ -49,7 +49,7 @@
 #include <vector>
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/ReadLock.h"
-#include "MantidQtAPI/SafeQwtPlot.h"
+#include "MantidQtMantidWidgets/SafeQwtPlot.h"
 #include "MantidKernel/MultiThreaded.h"
 
 
@@ -65,7 +65,6 @@ using Poco::XML::Node;
 using Poco::XML::NodeList;
 using Poco::XML::NodeIterator;
 using Poco::XML::NodeFilter;
-using MantidQt::API::SafeQwtPlot;
 
 namespace MantidQt
 {
@@ -87,35 +86,22 @@ SliceViewer::SliceViewer(QWidget *parent)
 
 	m_inf = std::numeric_limits<double>::infinity();
 
-	// Create the plot
-  m_spectLayout = new QHBoxLayout(ui.frmPlot);
-	m_plot = new SafeQwtPlot();
-  m_plot->autoRefresh();
-  m_spectLayout->addWidget(m_plot, 1, 0);
+	// Point m_plot to the plot created in QtDesigner
+	m_plot = ui.safeQwtPlot;
+  // Add a spectrograph
+  m_spect = new QwtPlotSpectrogram();
+  m_spect->attach(m_plot);
 
-	// Add a spectrograph
-	m_spect = new QwtPlotSpectrogram();
-	m_spect->attach(m_plot);
-
-  QwtDoubleInterval range(0.0, 10.0);
-
-  // --- Create a color bar on the right axis ---------------
-  m_colorBar = new ColorBarWidget(this);
-  m_colorBar->setViewRange( range.minValue(), range.maxValue() );
+  // Set up the ColorBarWidget
+  m_colorBar = ui.colorBarWidget;
+  m_colorBar->setViewRange( 0, 10);
   m_colorBar->setLog(true);
-  m_spectLayout->addWidget(m_colorBar, 0, 0);
   QObject::connect(m_colorBar, SIGNAL(changedColorRange(double,double,bool)), this, SLOT(colorRangeChanged()));
 
   // ---- Set the color map on the data ------
   m_data = new QwtRasterDataMD();
   m_spect->setColorMap( m_colorBar->getColorMap() );
   m_plot->autoRefresh();
-
-//  m_colorBar = m_plot->axisWidget(QwtPlot::yRight);
-//  m_colorBar->setColorBarEnabled(true);
-//  m_colorBar->setColorMap(range, m_colorMap);
-//  m_plot->setAxisScale(QwtPlot::yRight, range.minValue(), range.maxValue() );
-//  m_plot->enableAxis(QwtPlot::yRight);
 
   // Make the splitter use the minimum size for the controls and not stretch out
   ui.splitter->setStretchFactor(0, 0);
@@ -966,7 +952,7 @@ QwtDoubleInterval SliceViewer::getRange(IMDIterator * it)
 QwtDoubleInterval SliceViewer::getRange(std::vector<IMDIterator *> iterators)
 {
   std::vector<QwtDoubleInterval> intervals(iterators.size());
-
+  // cppcheck-suppress syntaxError
   PRAGMA_OMP( parallel for schedule(dynamic, 1))
   for (int i=0; i < int(iterators.size()); i++)
   {
@@ -1646,9 +1632,9 @@ void SliceViewer::openFromXML(const QString & xml)
   for (int i=0; i<3; i++)
     if (normal[i] > 0.99) normalDim = i;
   if (normal.norm() > 1.01 || normal.norm() < 0.99)
-    throw std::runtime_error("SliceViewer::openFromXML(): Normal vector is not length 1.0!");
+    throw std::runtime_error("Normal vector is not length 1.0!");
   if (normalDim < 0)
-    throw std::runtime_error("SliceViewer::openFromXML(): Could not find the normal of the plane. Plane must be along one of the axes!");
+    throw std::runtime_error("Could not find the normal of the plane. Plane must be along one of the axes!");
 
   // Get the plane origin and the dimension in the workspace dimensions
   planeOrigin = static_cast<coord_t>(origin[normalDim]);

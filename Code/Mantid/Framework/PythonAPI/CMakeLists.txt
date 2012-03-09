@@ -42,18 +42,20 @@ set ( TEST_FILES
 
 # Python unit tests
 set ( TEST_PY_FILES 
-	test/ImportTest.py
-	test/GoniometerTest.py
-	test/PythonAlgorithmTest.py
-	test/MDHistoWorkspaceTest.py
-	test/NumpyTest.py
-	test/MatrixWorkspaceTest.py
-	test/IPeaksWorkspaceTest.py
-	test/SettingsTest.py
-	test/SANSWorkflowTest.py
-	test/SANSMaskCommandsTest.py
-	test/WorkspaceHistoryTest.py
-	test/WorkspaceGroupTest.py
+  test/GoniometerTest.py
+  test/ImportTest.py
+  test/IPeaksWorkspaceTest.py
+  test/LoadLiveDataTest.py
+  test/MatrixWorkspaceTest.py
+  test/MDHistoWorkspaceTest.py
+  test/NumpyTest.py
+  test/PythonAlgorithmTest.py
+  test/RunPythonScriptTest.py
+  test/SANSMaskCommandsTest.py
+  test/SANSWorkflowTest.py
+  test/SettingsTest.py
+  test/WorkspaceGroupTest.py
+  test/WorkspaceHistoryTest.py
 )
 
 if(UNITY_BUILD)
@@ -205,9 +207,10 @@ target_link_libraries ( PythonAPI ${PYTHON_DEPS} )
 ###########################################################################
 
 if ( CXXTEST_FOUND )
-  include_directories ( ../TestHelpers/inc ) # For FakeObjects.h
+  include_directories ( ../TestHelpers/inc )
   cxxtest_add_test ( PythonAPITest ${TEST_FILES} )
   target_link_libraries( PythonAPITest PythonAPI )
+  
   # Specify implicit dependency, but don't link to it
   add_dependencies ( PythonAPITest UserAlgorithms )
   add_dependencies ( FrameworkTests PythonAPITest )

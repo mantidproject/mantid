@@ -51,7 +51,8 @@ class RefLReduction(PythonAlgorithm):
         NormFlag = self.getProperty("NormFlag")
         
         normalization_run = self.getProperty("NormalizationRunNumber")
-    
+
+        print '** Working with data runs: ' + str(run_numbers)
         data_peak = self.getProperty("SignalPeakPixelRange")
         data_back = self.getProperty("SignalBackgroundPixelRange")
 
@@ -91,13 +92,16 @@ class RefLReduction(PythonAlgorithm):
         BacktoYpixel = norm_back[1]
 
         norm_peak = self.getProperty("NormPeakPixelRange")
-        from_peak = norm_peak[0]
-        to_peak = norm_peak[1]
+        from_norm_peak = norm_peak[0]
+        to_norm_peak = norm_peak[1]
         
         subtract_data_bck = self.getProperty("SubtractSignalBackground")
         subtract_norm_bck = self.getProperty("SubtractNormBackground")
 
-        # Pick a good workspace name
+        #name of the sfCalculator txt file
+        slitsValuePrecision = 0.1       #precision of slits = 10% 
+
+        # Pick a good workspace n    ame
         ws_name = "refl%d" % run_numbers[0]
         ws_event_data = ws_name+"_evt"  
         
@@ -154,16 +158,20 @@ class RefLReduction(PythonAlgorithm):
                                                    to_units='rad')
 
         # Rebin data (x-axis is in TOF)
+        print '-> Rebin'
         ws_histo_data = "_"+ws_name+"_histo"
-        Rebin(InputWorkspace=ws_event_data, OutputWorkspace=ws_histo_data, 
+        Rebin(InputWorkspace=ws_event_data, 
+              OutputWorkspace=ws_histo_data, 
               Params=[TOFrange[0], 
                       TOFsteps, 
                       TOFrange[1]])
         
         # Keep only range of TOF of interest
+        print '-> Crop TOF range'
         CropWorkspace(ws_histo_data,ws_histo_data,XMin=TOFrange[0], XMax=TOFrange[1])
 
         # Normalized by Current (proton charge)
+        print '-> Normalize by proton charge'
         NormaliseByCurrent(InputWorkspace=ws_histo_data, OutputWorkspace=ws_histo_data)
 
         # Calculation of the central pixel (using weighted average)
@@ -182,6 +190,7 @@ class RefLReduction(PythonAlgorithm):
             start_pixel = start_pixel + 1
             _den += pixelXtof_roi[i]
         data_cpix = _num / _den    
+        print '-> Central pixel is {0:.1f}'.format(data_cpix)
         
         # Retrieve geometry of instrument
         # Sample-to-detector distance
@@ -210,6 +219,7 @@ class RefLReduction(PythonAlgorithm):
         # background range (along the y-axis) and of only the pixel
         # of interest along the x-axis (to avoid the frame effect)
         ws_integrated_data = "_IntegratedDataWks"
+        print '-> keep only range of pixel of interest'
         wks_utility.createIntegratedWorkspace(mtd[ws_histo_data], 
                                               ws_integrated_data,
                                               fromXpixel=Xrange[0],
@@ -223,6 +233,7 @@ class RefLReduction(PythonAlgorithm):
         ws_transposed = '_TransposedID'
         if subtract_data_bck:
 
+            print '-> substract background'
             ConvertToHistogram(InputWorkspace=ws_integrated_data,
                                OutputWorkspace=ws_integrated_data)
 
@@ -250,10 +261,14 @@ class RefLReduction(PythonAlgorithm):
 
             ws_data_bck = "_DataBckWks"
             ws_data_bck_1 = ws_data_bck + "_1"
-            Transpose(InputWorkspace=ws_transposed,
+#            Transpose(InputWorkspace=ws_transposed,
+#                      OutputWorkspace=ws_data_bck_1)
+            Transpose(InputWorkspace=ws_transposed_1,
                       OutputWorkspace=ws_data_bck_1)
             ws_data_bck_2 = ws_data_bck + "_2"
-            Transpose(InputWorkspace=ws_transposed,
+#            Transpose(InputWorkspace=ws_transposed,
+#                      OutputWorkspace=ws_data_bck_2)
+            Transpose(InputWorkspace=ws_transposed_2,
                       OutputWorkspace=ws_data_bck_2)
 
             ConvertToHistogram(ws_data_bck_1, OutputWorkspace=ws_data_bck_1)
@@ -284,6 +299,7 @@ class RefLReduction(PythonAlgorithm):
                 
         if (NormFlag):
 
+            print '-> normalization file is ' + str(normalization_run)
             # Find full path to event NeXus data file
             f = FileFinder.findRuns("REF_L%d" %normalization_run)
             if len(f)>0 and os.path.isfile(f[0]): 
@@ -299,19 +315,26 @@ class RefLReduction(PythonAlgorithm):
             ws_norm_histo_data = ws_name+"_histo"  
 
             if not mtd.workspaceExists(ws_norm_event_data):
-                LoadEventNexus(norm_file, ws_norm_event_data)
-            
+                LoadEventNexus(Filename=norm_file, 
+                               OutputWorkspace=ws_norm_event_data)
+ 
             # Rebin data
-            Rebin(InputWorkspace=ws_norm_event_data, OutputWorkspace=ws_norm_histo_data, 
+            print '-> rebin normalization'
+            Rebin(InputWorkspace=ws_norm_event_data, 
+                  OutputWorkspace=ws_norm_histo_data, 
                   Params=[TOFrange[0], 
                           TOFsteps, 
                           TOFrange[1]])
-    
+ 
             # Keep only range of TOF of interest
-            CropWorkspace(ws_norm_histo_data, ws_norm_histo_data, XMin=TOFrange[0], XMax=TOFrange[1])
+            CropWorkspace(InputWorkspace=ws_norm_histo_data, 
+                          OutputWorkspace=ws_norm_histo_data, 
+                          XMin=TOFrange[0], XMax=TOFrange[1])
     
             # Normalized by Current (proton charge)
-            NormaliseByCurrent(InputWorkspace=ws_norm_histo_data, OutputWorkspace=ws_norm_histo_data)
+            print '-> normalized by current direct beam'
+            NormaliseByCurrent(InputWorkspace=ws_norm_histo_data, 
+                               OutputWorkspace=ws_norm_histo_data)
 
             #Create a new event workspace of only the range of pixel of interest 
             #background range (along the y-axis) and of only the pixel
@@ -328,37 +351,44 @@ class RefLReduction(PythonAlgorithm):
 
             ws_data_bck = "_NormBckWks"
             if subtract_norm_bck:
+                
+                print '-> substract background to direct beam'
                 Transpose(InputWorkspace=ws_integrated_data,
                           OutputWorkspace=ws_transposed)
         
                 ConvertToHistogram(InputWorkspace=ws_transposed,
                                    OutputWorkspace=ws_transposed)
-    
-                BackfromYpixel = norm_back[0]
-                BacktoYpixel = norm_back[1]
 
+                ws_transposed_1 = ws_transposed + '_1'
+                ws_transposed_2 = ws_transposed + '_2'
                 FlatBackground(InputWorkspace=ws_transposed,
                                OutputWorkspace=ws_transposed_1,
                                StartX=BackfromYpixel,
                                Mode='Mean',
-                               EndX=norm_peak[0],
+                               EndX=from_norm_peak,
                                OutputMode="Return Background")
-    
-                Transpose(InputWorkspace=ws_transposed,
+
+                ws_data_bck = "_DataBckWks"
+                ws_data_bck_1 = ws_data_bck + "_1"
+                Transpose(InputWorkspace=ws_transposed_1,
                           OutputWorkspace=ws_data_bck_1)
 
                 FlatBackground(InputWorkspace=ws_transposed,
                                OutputWorkspace=ws_transposed_2,
-                               StartX=norm_peak[1],
+                               StartX=to_norm_peak,
                                Mode='Mean',
                                EndX=BacktoYpixel,
                                OutputMode="Return Background")
 
-                Transpose(InputWorkspace=ws_transposed,
+                ws_data_bck_2 = ws_data_bck + "_2"
+                Transpose(InputWorkspace=ws_transposed_2,
                           OutputWorkspace=ws_data_bck_2)
-        
-                ConvertToHistogram(ws_data_bck_1, OutputWorkspace=ws_data_bck_1)
-                ConvertToHistogram(ws_data_bck_2, OutputWorkspace=ws_data_bck_2)
+
+                ConvertToHistogram(InputWorkspace=ws_data_bck_1, 
+                                   OutputWorkspace=ws_data_bck_1)
+                
+                ConvertToHistogram(InputWorkspace=ws_data_bck_2, 
+                                   OutputWorkspace=ws_data_bck_2)
 
                 RebinToWorkspace(WorkspaceToRebin=ws_data_bck_1, 
                                  WorkspaceToMatch=ws_integrated_data, 
@@ -368,10 +398,14 @@ class RefLReduction(PythonAlgorithm):
                                  WorkspaceToMatch=ws_integrated_data, 
                                  OutputWorkspace=ws_data_bck_2)
 
-                WeightedMean(ws_data_bck_1, ws_data_bck_2, ws_data_bck)
+                WeightedMean(InputWorkspace1=ws_data_bck_1, 
+                             InputWorkspace2=ws_data_bck_2, 
+                             OutputWorkspace=ws_data_bck)
 
                 ws_norm = "_NormWks"
-                Minus(ws_integrated_data, ws_data_bck, OutputWorkspace=ws_norm)
+                Minus(LHSWorkspace=ws_integrated_data,
+                      RHSWorkspace=ws_data_bck, 
+                      OutputWorkspace=ws_norm)
 
                 #Clean up intermediary workspaces
 #                mtd.deleteWorkspace(ws_data_bck)
@@ -391,10 +425,13 @@ class RefLReduction(PythonAlgorithm):
                                  OutputWorkspace=ws_norm_rebinned)
 
 
-            #Normalization           
-            SumSpectra(InputWorkspace=ws_norm_rebinned, OutputWorkspace=ws_norm_rebinned)
+            #Normalization    
+            print '-> Sum spectra'       
+            SumSpectra(InputWorkspace=ws_norm_rebinned, 
+                       OutputWorkspace=ws_norm_rebinned)
 
             #### divide data by normalize histo workspace
+            print '-> Divide data by direct beam'
             Divide(LHSWorkspace=ws_data,
                    RHSWorkspace=ws_norm_rebinned,
                    OutputWorkspace=ws_data)
@@ -406,7 +443,12 @@ class RefLReduction(PythonAlgorithm):
         AngleOffset_deg = float(self.getProperty("AngleOffset"))
         AngleOffset_rad = (AngleOffset_deg * math.pi) / 180.
         theta += AngleOffset_rad
-        
+
+#        this is where we need to apply the scaling factor
+        print '-> Apply SF'
+        ws_data_scaled = wks_utility.applySF(ws_data,
+                                             slitsValuePrecision)
+
         if dMD is not None and theta is not None:
                     
             _tof_axis = mtd[ws_histo_data].readX(0)
@@ -422,7 +464,8 @@ class RefLReduction(PythonAlgorithm):
             q_max = max(_q_axis)
 
         ws_data_Q = ws_data + '_Q'
-        wks_utility.convertWorkspaceToQ(ws_data,
+        print '-> convert to Q'
+        wks_utility.convertWorkspaceToQ(ws_data_scaled,
                                         ws_data_Q,
                                         fromYpixel=data_peak[0],
                                         toYpixel=data_peak[1],
@@ -430,11 +473,11 @@ class RefLReduction(PythonAlgorithm):
                                         source_to_detector=dMD,
                                         sample_to_detector=dSD,
                                         theta=theta,
-                                        geo_correction=False,
+                                        geo_correction=True,
                                         q_binning=[q_min,q_step,q_max])
 
         mt = mtd[ws_data_Q]
-        ReplaceSpecialValues(InputWorkspace=ws_data, 
+        ReplaceSpecialValues(InputWorkspace=ws_data_Q, 
                              NaNValue=0, 
                              NaNError=0, 
                              InfinityValue=0, 
@@ -471,14 +514,10 @@ class RefLReduction(PythonAlgorithm):
                             Nspec=1,
                             UnitX="MomentumTransfer")
  
-#        if (list_of_rows_to_remove != []):
-#            list_of_rows_to_remove = ','.join(list_of_rows_to_remove)
-#            Transpose(InputWorkspace=output_ws,
-#                      OutputWorkspace=output_ws)
-#            DeleteTableRows(TableWorkspace=output_ws, Rows=list_of_rows_to_remove)        
-#            Transpose(InputWorkspace=output_ws,
-#                      OutputWorkspace=output_ws)
-        
+        #space
+        print
+
         self.setProperty("OutputWorkspace", mtd[output_ws])
+        
 
 mtd.registerPyAlgorithm(RefLReduction())

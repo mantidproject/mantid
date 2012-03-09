@@ -108,21 +108,25 @@ namespace DataHandling
 
       if (yToMicroeV) yunit="micro eV";
       file<<"# "<<ycaption<<" ("<< yunit <<") values"<<std::endl;
-      for (std::size_t i=0;i<nSpectra;i++)
+      double yvalue;
+      if ((*ws->getAxis(1)).length()==(nSpectra+1))
       {
-          double yvalue;
-          if (ycaption=="q")
-          {
-              yvalue = ((*ws->getAxis(1))(i)+(*ws->getAxis(1))(i+1))/2.0;
-          }
-          else
-          {
-              yvalue=(*ws->getAxis(1))(i);
-          }
+        for (std::size_t i=0;i<nSpectra;i++)
+        {
+          yvalue=0.5*(((*ws->getAxis(1))(i))+((*ws->getAxis(1))(i+1)));
           if (yToMicroeV) yvalue*=1000.;
           file<<yvalue<<std::endl;
+        }
       }
-
+      else
+      {
+        for (std::size_t i=0;i<nSpectra;i++)
+        {
+          yvalue=(*ws->getAxis(1))(i);
+          if (yToMicroeV) yvalue*=1000.;
+          file<<yvalue<<std::endl;
+        }
+      }
       Progress progress(this,0,1,nSpectra);
       for (std::size_t i=0;i<nSpectra;i++)
       {

@@ -80,32 +80,21 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
     // Other properties are added to gether if they are on the approved list
     for(int i = 0; i < ADDABLES; ++i )
     {
-      // get a pointer to the property on the right-handside workspace
-      Property * right;
-      try
+      if (rhs.m_manager.existsProperty(ADDABLE[i]))
       {
-        right = rhs.m_manager.getProperty(ADDABLE[i]);
-      }
-      catch (Exception::NotFoundError &)
-      {
-        //if it's not there then ignore it and move on
-        continue;
-      }
-      // now deal with the left-handside
-      Property * left;
-      try
-      {
-        left = m_manager.getProperty(ADDABLE[i]);
-      }
-      catch (Exception::NotFoundError &)
-      {
-        //no property on the left-handside, create one and copy the right-handside across verbatum
-        m_manager.declareProperty(right->clone(), "");
-        continue;
-      }
-      
-      left->operator+=(right);
+        // get a pointer to the property on the right-handside workspace
+        Property * right = rhs.m_manager.getProperty(ADDABLE[i]);
 
+        // now deal with the left-handside
+        if (m_manager.existsProperty(ADDABLE[i]))
+        {
+          Property * left = m_manager.getProperty(ADDABLE[i]);
+          left->operator+=(right);
+        }
+        else
+          //no property on the left-handside, create one and copy the right-handside across verbatum
+          m_manager.declareProperty(right->clone(), "");
+      }
     }
     return *this;
   }

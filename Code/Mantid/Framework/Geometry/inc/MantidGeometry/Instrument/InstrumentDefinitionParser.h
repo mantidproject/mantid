@@ -156,11 +156,14 @@ private:
       Geometry::ICompAssembly*& endAssembly);
 
     /// Returns a translated and rotated \<cuboid\> element
-    std::string translateRotateXMLcuboid(Geometry::ICompAssembly* comp, Poco::XML::Element* cuboidEle,
-                                  std::string& cuboidName);
+    std::string translateRotateXMLcuboid(Geometry::ICompAssembly* comp, const Poco::XML::Element* cuboidEle,
+                                  const std::string& cuboidName);
+    /// Returns a translated and rotated \<cuboid\> element
+    std::string translateRotateXMLcuboid(Geometry::ICompAssembly* comp, const std::string& cuboidXML,
+                                  const std::string& cuboidName);
 
     /// Return a subelement of an XML element
-    Poco::XML::Element* getShapeElement(Poco::XML::Element* pElem, const std::string& name);
+    Poco::XML::Element* getShapeElement(const Poco::XML::Element* pElem, const std::string& name);
 
     /// Get position coordinates from XML element
     Kernel::V3D parsePosition(Poco::XML::Element* pElem);

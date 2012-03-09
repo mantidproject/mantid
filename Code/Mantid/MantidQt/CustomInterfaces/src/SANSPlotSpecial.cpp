@@ -479,19 +479,18 @@ QwtPlotCurve* SANSPlotSpecial::plotMiniplot(QwtPlotCurve* curve, boost::shared_p
 
   curve = new QwtPlotCurve();
 
-  const QVector<double> dataX = QVector<double>::fromStdVector(workspace->readX(workspaceIndex));
-  const QVector<double> dataY = QVector<double>::fromStdVector(workspace->readY(workspaceIndex));
+  using Mantid::MantidVec;
+  const MantidVec & dataX = workspace->readX(workspaceIndex);
+  const MantidVec & dataY = workspace->readY(workspaceIndex);
 
-  curve->setData(dataX, dataY);
+  curve->setData(&dataX[0], &dataY[0], static_cast<int>(workspace->blocksize()));
   curve->attach(m_uiForm.plotWindow);
 
   m_uiForm.plotWindow->replot();
   
   if ( data )
   {
-    double low = dataX.first();
-    double high = dataX.last();
-    m_rangeSelector->setRange(low, high);
+    m_rangeSelector->setRange(dataX.front(), dataX.back());
   }
 
   return curve;

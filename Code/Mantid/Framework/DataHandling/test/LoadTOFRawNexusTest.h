@@ -8,6 +8,7 @@
 #include <cxxtest/TestSuite.h>
 #include <Poco/File.h>
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/MemoryManager.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

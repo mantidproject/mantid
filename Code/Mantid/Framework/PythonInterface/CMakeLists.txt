@@ -55,12 +55,16 @@ add_subdirectory ( mantid )
 ###########################################################################
 # C++ unit tests
 set ( TEST_FILES
+  test/cpp/PropertyWithValueFactoryTest.h
   test/cpp/PythonObjectInstantiatorTest.h
   test/cpp/PySequenceToVectorConverterTest.h
 )  
   
 if ( CXXTEST_FOUND )
   cxxtest_add_test ( PythonInterfaceTest ${TEST_FILES} )
+  if ( WIN32 )
+    set_target_properties( PythonInterfaceTest PROPERTIES COMPILE_FLAGS "/w44244" )
+  endif ()
   target_link_libraries( PythonInterfaceTest PythonKernelModule PythonAPIModule )
   add_dependencies ( FrameworkTests PythonInterfaceTest )
   # Add to the 'UnitTests' group in VS
@@ -93,7 +97,9 @@ set ( TEST_PY_FILES
   test/python/OrientedLatticeTest.py
   test/python/PythonPluginsTest.py
   test/python/PropertyWithValueTest.py
-  test/python/PythonAlgorithmTest.py
+  test/python/PythonAlgorithmPropertiesTest.py
+  test/python/PythonAlgorithmTraitsTest.py
+  test/python/PythonAlgorithmWorkspacePropertyTest.py
   test/python/ReferenceFrameTest.py
   test/python/RunTest.py
   test/python/SimpleAPITest.py
@@ -103,6 +109,7 @@ set ( TEST_PY_FILES
   test/python/UnitCellTest.py
   test/python/WorkspaceTest.py
   test/python/WorkspaceGroupTest.py
+  test/python/WorkspacePropertiesTest.py
 )
 
 set ( PYTEST_HELPERS test/python/testhelpers.py )

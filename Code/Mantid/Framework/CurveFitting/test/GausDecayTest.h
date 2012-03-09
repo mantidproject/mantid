@@ -109,7 +109,7 @@ public:
     // test the output from fit is what you expect
     IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
     TS_ASSERT_DELTA( out->getParameter("A"), 128.7 ,0.5);
-    TS_ASSERT_DELTA( out->getParameter("Sigma"), -0.35 ,0.005);
+    TS_ASSERT_DELTA( out->getParameter("Sigma"), 0.35 ,0.005);
 
     // check its categories
     const std::vector<std::string> categories = out->categories();

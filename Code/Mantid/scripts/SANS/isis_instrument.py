@@ -578,18 +578,24 @@ class SANS2D(ISISInstrument):
         first = self.DETECTORS['low-angle']
         second = self.DETECTORS['high-angle']
 
-        base_runno = int(base_runno)
-        #first deal with some special cases
-        if base_runno < 568:
-            self.set_incident_mon(73730)
-            first.set_first_spec_num(1)
-            first.set_orien('Vertical')
-            second.set_orien('Vertical')
-        elif (base_runno >= 568 and base_runno < 684):
-            first.set_first_spec_num(9)
-            first.set_orien('Rotated')
-            second.set_orien('Rotated')
-        else:
+        try:
+            base_runno = int(base_runno)
+            #first deal with some special cases
+            if base_runno < 568:
+                self.set_incident_mon(73730)
+                first.set_first_spec_num(1)
+                first.set_orien('Vertical')
+                second.set_orien('Vertical')
+            elif (base_runno >= 568 and base_runno < 684):
+                first.set_first_spec_num(9)
+                first.set_orien('Rotated')
+                second.set_orien('Rotated')
+            else:
+                #this is the default case
+                first.set_first_spec_num(9)
+                first.set_orien('Horizontal')
+                second.set_orien('Horizontal')
+        except ValueError:        
             #this is the default case
             first.set_first_spec_num(9)
             first.set_orien('Horizontal')

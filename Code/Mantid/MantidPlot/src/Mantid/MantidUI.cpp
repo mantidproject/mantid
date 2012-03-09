@@ -60,6 +60,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidQtSliceViewer/SliceViewerWindow.h"
 #include "MantidQtFactory/WidgetFactory.h"
+#include "MantidAPI/MemoryManager.h"
 
 
 using namespace std;
@@ -173,8 +174,11 @@ void MantidUI::init()
   m_exploreAlgorithms->update();
   try
   {
-    m_fitFunction = new MantidQt::MantidWidgets::FitPropertyBrowser(m_appWindow, m_appWindow->mantidUI, false);
-    // m_fitFunction->init();
+    m_fitFunction = new MantidQt::MantidWidgets::FitPropertyBrowser(m_appWindow, m_appWindow->mantidUI);
+    m_fitFunction->init();
+        // this make the progress bar work with Fit algorithm running form the fit browser
+    connect(m_fitFunction,SIGNAL(executeFit(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)),
+      this,SLOT(executeAlgorithm(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)));
     m_fitFunction->hide();
     m_appWindow->addDockWidget( Qt::LeftDockWidgetArea, m_fitFunction );
 
@@ -701,7 +705,7 @@ void MantidUI::showAlgorithmHistory()
   if(NULL != wsptr) 
   {
     // If the workspace has any AlgorithHistory ...
-    if(!wsptr->getHistory().getAlgorithmHistories().empty())
+    if(!wsptr->getHistory().empty())
     {
       // ... create and display the window.
       AlgorithmHistoryWindow *palgHist = new AlgorithmHistoryWindow(m_appWindow,wsptr);
@@ -1053,66 +1057,6 @@ bool MantidUI::drop(QDropEvent* e)
   return false;
 }
 
-void MantidUI::getSelectedAlgorithm(QString& algName, int& version)
-{
-
-  QList<QTreeWidgetItem*> items = m_exploreAlgorithms->m_tree->selectedItems();
-  if ( items.size() == 0 )
-  {
-    //typed selection
-    int i = m_exploreAlgorithms->m_findAlg->currentIndex(); //selected index in the combobox, could be from an old selection
-    QString itemText = m_exploreAlgorithms->m_findAlg->itemText(i); //text in the combobox at the selected index
-    QString typedText = m_exploreAlgorithms->m_findAlg->currentText(); //text as typed in the combobox
-    if (i < 0 || itemText != typedText)
-    {
-      try
-      {
-        Mantid::API::IAlgorithm_sptr alg =Mantid::API::AlgorithmManager::Instance().createUnmanaged(typedText.toStdString(), -1);
-        algName = QString::fromStdString(alg->name());
-        version = alg->version();
-      }
-      catch ( std::runtime_error &) // not found
-      {
-        algName = "";
-        version = -99;
-      } 
-    }
-    else
-    {
-      algName = itemText;
-      version = -1;
-    }
-  }
-  else if ( items[0]->childCount() != 0 && !items[0]->text(0).contains(" v."))
-  {
-    algName = "";
-    version = 0;
-  }
-  else
-  {
-    QString str = items[0]->text(0);
-    QStringList lst = str.split(" v.");
-    algName = lst[0];
-    version = lst[1].toInt();
-  }
-}
-
-void MantidUI::executeAlgorithm()
-{
-  QString algName;
-  int version;
-  getSelectedAlgorithm(algName,version);
-  if (version != -99) //not found, but we have already checked and we're fine with that
-  {
-    if (algName.isEmpty())
-    {
-      QMessageBox::warning(appWindow(),"Mantid","Please select an algorithm");
-      return;
-    }
-    executeAlgorithm(algName, version);
-  }
-}
-
 /** 
 * Run the named algorithm asynchronously 
 */ 
@@ -1184,7 +1128,15 @@ void MantidUI::executeSaveNexus(QString algName,int version)
 
 
 }
-bool MantidUI::executeAlgorithm(QString algName, int version)
+
+//-----------------------------------------------------------------------------
+/** Open an algorithm dialog to execute the named algorithm.
+ *
+ * @param algName :: name of the algorithm
+ * @param version :: version number, -1 for latest
+ * @return true if sucessful.
+ */
+bool MantidUI::executeAlgorithm(const QString & algName, int version)
 {
   Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, version);
   if( !alg ) return false;
@@ -1628,11 +1580,6 @@ Mantid::API::IAlgorithm_sptr MantidUI::createAlgorithm(const QString& algName, i
 
 bool MantidUI::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg, const bool wait)
 {
-  if( m_algMonitor )  
-  { 
-    m_algMonitor->add(alg); 
-  }
-
   if( wait )
   {
     Poco::ActiveResult<bool> result(alg->executeAsync()); 
@@ -1697,7 +1644,6 @@ void MantidUI::executeDownloadDataFiles(const std::vector<std::string>& filenNam
     m_appWindow->writeToLogWindow(QString::fromStdString(e.what()), true);
     return;
   }
-  m_algMonitor->add(alg);
 
   try
   {

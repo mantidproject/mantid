@@ -34,6 +34,8 @@ namespace Mantid
     private:
       DataObjects::EventWorkspace_sptr m_buffer;
       Kernel::RandomNumberGenerator * m_rand;
+
+      void createEmptyWorkspace();
     };
 
   } // namespace DataHandling

@@ -332,7 +332,7 @@ public:
     TS_ASSERT_EQUALS( i, 1 );
     double d = *dProp;
     TS_ASSERT_EQUALS( d, 9.99 );
-    std::string str(*sProp);
+    std::string str = *sProp;
     TS_ASSERT( ! str.compare("theValue") );
     long long l = *lProp;
     TS_ASSERT_EQUALS( l, -9876543210987654LL );

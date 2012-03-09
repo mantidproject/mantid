@@ -32,11 +32,3 @@ void export_IEventWorkspace()
   REGISTER_SINGLEVALUE_HANDLER(IEventWorkspace_sptr);
 }
 
-void export_IEventWorkspaceProperty()
-{
-  EXPORT_PROP_W_VALUE(IEventWorkspace_sptr, IEventWorkspace);
-  register_ptr_to_python<WorkspaceProperty<IEventWorkspace>*>();
-  class_<WorkspaceProperty<IEventWorkspace>, bases<PropertyWithValue<IEventWorkspace_sptr>,IWorkspaceProperty>,
-         boost::noncopyable>("WorkspaceProperty_IEventWorkspace", no_init)
-      ;
-}

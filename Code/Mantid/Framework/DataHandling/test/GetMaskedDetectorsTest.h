@@ -63,16 +63,6 @@ public:
     // Register the workspace in the data service
     inputWS = "test_masked_ws";
     AnalysisDataService::Instance().add(inputWS, space);
-
-    // Mask detectors in the test workspace
-    MaskDetectors marker_mask;
-    marker_mask.initialize();
-    marker_mask.setPropertyValue("Workspace", inputWS);
-    marker_mask.setPropertyValue("DetectorList","1,3");
-    marker_mask.execute();
-    boost::shared_ptr<const Instrument> instrument = space->getInstrument();
-    TS_ASSERT( instrument->getDetector(1)->isMasked() )
-    TS_ASSERT( instrument->getDetector(3)->isMasked() )
   }
 
   void testName()
@@ -93,6 +83,18 @@ public:
 
   void testExec()
   {
+    // Mask detectors in the test workspace
+    MaskDetectors marker_mask;
+    marker_mask.initialize();
+    marker_mask.setPropertyValue("Workspace", inputWS);
+    marker_mask.setPropertyValue("DetectorList","1,3");
+    marker_mask.execute();
+
+    MatrixWorkspace_sptr space = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS);
+    boost::shared_ptr<const Instrument> instrument = space->getInstrument();
+    TS_ASSERT( instrument->getDetector(1)->isMasked() )
+    TS_ASSERT( instrument->getDetector(3)->isMasked() )
+
     if ( !marker.isInitialized() ) marker.initialize();
     marker.setPropertyValue("InputWorkspace", inputWS);
     TS_ASSERT_THROWS_NOTHING( marker.execute());

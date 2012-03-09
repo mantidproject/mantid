@@ -79,6 +79,8 @@ namespace API
 
     virtual signal_t getInnerError(size_t index) const;
 
+    virtual bool getIsMasked() const;
+
   private:
     void calcWorkspacePos(size_t newWI);
 

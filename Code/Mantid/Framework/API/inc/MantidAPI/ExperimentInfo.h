@@ -83,6 +83,10 @@ namespace API
     /// The base (unparametrized) instrument
     Geometry::Instrument_const_sptr sptr_instrument;
 
+  private:
+    /// Save information about a set of detectors to Nexus
+    void saveDetectorSetInfoToNexus (::NeXus::File * file, std::vector<detid_t> detIDs ) const;
+
 
   };
 

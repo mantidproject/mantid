@@ -75,28 +75,28 @@ def find_data(file, instrument='', allow_multiple=False):
     if os.path.isfile(file_path):
         return file_path
 
-    # Second, assume a run number, without instrument name to take care of list of full paths
+    # Second, assume a run number and pass the instrument name as a hint
     try:
-        f = FileFinder.findRuns(file)
+        # FileFinder doesn't like dashes...
+        instrument=instrument.replace('-','')        
+        f = FileFinder.findRuns(instrument+file)
         if os.path.isfile(f[0]): 
             if allow_multiple:
-                # Mantid returns its own list object type, so make a real list out if it   
-                if len(f)==n_files:         
+                # Mantid returns its own list object type, so make a real list out if it
+                if len(f)==n_files:
                     return [i for i in f] 
             else: return f[0]
     except:
         # FileFinder couldn't make sense of the the supplied information
         pass
 
-    # Third, assume a run number    
+    # Third, assume a run number, without instrument name to take care of list of full paths
     try:
-        # FileFinder doesn't like dashes...
-        instrument=instrument.replace('-','')
-        f = FileFinder.findRuns(instrument+file)
+        f = FileFinder.findRuns(file)
         if os.path.isfile(f[0]): 
             if allow_multiple:
-                # Mantid returns its own list object type, so make a real list out if it
-                if len(f)==n_files:
+                # Mantid returns its own list object type, so make a real list out if it   
+                if len(f)==n_files:         
                     return [i for i in f] 
             else: return f[0]
     except:

@@ -157,8 +157,8 @@ if ( ENABLE_CPACK )
 
       # soft requirement of tcmalloc - if built with it, then require it
       IF ( USE_TCMALLOC AND TCMALLOC_FOUND )
-        message ( STATUS " Adding google-perftools to the package requirements" )
-        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},google-perftools" )
+        message ( STATUS " Adding gperftools to the package requirements" )
+        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},gperftools-libs >= 2.0" )
         set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},libgoogle-perftools0 (>= 1.7)" )
       ENDIF ( )
     ENDIF ()

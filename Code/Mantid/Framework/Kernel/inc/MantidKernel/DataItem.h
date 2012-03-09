@@ -78,6 +78,8 @@ namespace Mantid
 
       /// Allow the ReadLock class direct access to the m_lock object.
       friend class ReadLock;
+      /// Allow the WriteLock class direct access to the m_lock object.
+      friend class WriteLock;
       /// Allow the Algorithm class but NOT its derived classes to get the lock object.
       friend class Mantid::API::Algorithm;
       /* WARNING: Do not add other friend classes unless you really know what

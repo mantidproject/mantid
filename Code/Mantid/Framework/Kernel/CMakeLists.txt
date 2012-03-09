@@ -77,6 +77,7 @@ set ( SRC_FILES
 	src/VMD.cpp
 	src/VectorHelper.cpp
 	src/VisibleWhenProperty.cpp
+	src/WriteLock.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/Atom.cpp
@@ -191,6 +192,7 @@ set ( INC_FILES
 	inc/MantidKernel/VMD.h
 	inc/MantidKernel/VectorHelper.h
 	inc/MantidKernel/VisibleWhenProperty.h
+	inc/MantidKernel/WriteLock.h
 	inc/MantidKernel/cow_ptr.h
 )
 
@@ -206,6 +208,7 @@ set ( TEST_FILES
 	test/CacheTest.h
 	test/CompositeValidatorTest.h
 	test/ConfigServiceTest.h
+	test/DataServiceTest.h
 	test/DateAndTimeTest.h
 	test/DateValidatorTest.h
 	test/DirectoryValidatorTest.h
@@ -237,8 +240,8 @@ set ( TEST_FILES
 	test/MemoryTest.h
 	test/MersenneTwisterTest.h
 	test/MultiFileNameParserTest.h
-	test/MutexTest.h
 	test/MultiFileValidatorTest.h
+	test/MutexTest.h
 	test/NeutronAtomTest.h
 	test/NullValidatorTest.h
 	test/ProgressBaseTest.h
@@ -273,6 +276,7 @@ set ( TEST_FILES
 	test/VMDTest.h
 	test/VectorHelperTest.h
 	test/VisibleWhenPropertyTest.h
+	test/WriteLockTest.h
 )
 
 if(UNITY_BUILD)

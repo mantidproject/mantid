@@ -1,7 +1,7 @@
 #ifndef ALGORITHMHISTORYWINDOW_H 
 #define ALGORITHMHISTORYWINDOW_H
 
-#include "MantidAPI/AlgorithmHistory.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/EnvironmentHistory.h"
 #include "MantidKernel/Logger.h"
@@ -116,7 +116,6 @@ class AlgorithmHistoryWindow: public MantidQt::API::MantidDialog
   signals:
   void updateAlgorithmHistoryWindow(QString algName);
 public:
-  AlgorithmHistoryWindow(QWidget *parent);
   AlgorithmHistoryWindow(QWidget *parent,const boost::shared_ptr<const Mantid::API::Workspace>);
   ~AlgorithmHistoryWindow();
 private slots:
@@ -137,7 +136,7 @@ private:
   static Mantid::Kernel::Logger& g_log;
 	
 private:
-  std::vector<Mantid::API::AlgorithmHistory> m_algHist;
+  const Mantid::API::WorkspaceHistory & m_algHist;
   QPushButton *m_scriptButton;
   AlgHistoryTreeWidget *m_Historytree;
   AlgHistoryProperties * m_histPropWindow; 

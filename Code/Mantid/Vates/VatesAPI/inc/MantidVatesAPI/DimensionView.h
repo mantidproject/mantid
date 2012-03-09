@@ -6,7 +6,16 @@ namespace Mantid
 {
   namespace VATES
   {
+    /// Enum describing the type of display to use
+    enum BinDisplay{LowHighStep, Simple};
+
+    /// Forward delaration
     class DimensionPresenter;
+
+    /**
+    class DimensionView
+    Abstract Dimension View. View in MVP pattern.
+    */ 
     class DLLExport DimensionView
     {
     public:

@@ -113,6 +113,7 @@ include_directories ( ${CMAKE_CURRENT_SOURCE_DIR} )
 
 # Other folders that need to be included...
 include_directories ( ${CMAKE_CURRENT_SOURCE_DIR}/SliceViewer/inc )
+include_directories ( ${CMAKE_CURRENT_SOURCE_DIR}/MantidWidgets/inc )
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/SliceViewer ) # to find the ui_*.h auto-generated files
 
 # This creates the target library, just for python bindings

@@ -9,6 +9,8 @@
 #include <iomanip>
 #include <iostream>
 #include "MantidKernel/SingletonHolder.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;
@@ -65,9 +67,9 @@ public:
 
 
   //--------------------------------------------------------------------------------------------
-  /** StartLiveData and run LoadLiveData only once.
+  /** StartLiveData and run LoadLiveData only once (UpdateEvery=0)
    * This checks that the properties are copied to LoadLiveData */
-  void test_start_with_processChunk()
+  void test_startOnce()
   {
     // Declare all algorithms, e.g. Rebin
     FrameworkManager::Instance();
@@ -78,6 +80,64 @@ public:
     // Check that rebin was called
     TS_ASSERT_EQUALS(ws->blocksize(), 20);
     TS_ASSERT_DELTA(ws->dataX(0)[0], 40e3, 1e-4);
+  }
+
+
+  //--------------------------------------------------------------------------------------------
+  /** If the OutputWorkspace exists (from a previous run),
+   * and you select "Add", it still REPLACES the input on the very first run.
+   */
+  void test_FirstCallReplacesTheOutputWorkspace()
+  {
+    // Declare all algorithms, e.g. Rebin
+    FrameworkManager::Instance();
+
+    // Make an existing output workspace "fake" that should be overwritten
+    AnalysisDataService::Instance().addOrReplace("fake", WorkspaceCreationHelper::Create2DWorkspace(23, 12));
+
+    EventWorkspace_sptr ws;
+    ws = doExecEvent("Add", 0, "", "");
+
+    // The "fake" workspace was replaced.
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS(ws->getNumberEvents(), 200);
+    TS_ASSERT_EQUALS(ws->blocksize(), 1);
+  }
+
+
+  //--------------------------------------------------------------------------------------------
+  /** Start and keep MonitorLiveData running */
+  void test_start_andKeepRunning()
+  {
+    // Declare all algorithms, e.g. Rebin
+    FrameworkManager::Instance();
+    EventWorkspace_sptr ws;
+    ws = doExecEvent("Replace", 1, "Rebin", "Params=40e3, 1e3, 60e3");
+
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS(ws->getNumberEvents(), 200);
+
+    // The MonitorLiveData algorithm is left running in the manager
+    TS_ASSERT_EQUALS( AlgorithmManager::Instance().algorithms().size(), 1);
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().algorithms().front();
+    TS_ASSERT_EQUALS( alg->name(), "MonitorLiveData");
+
+    // Wait up to 2 seconds for the algorithm to report that it is running.
+    Timer tim;
+    while (!alg->isRunning())
+    {
+      //Wait
+      Poco::Thread::sleep(1);
+      if (tim.elapsed(false) > 2.0)
+      {
+        // Fail if it never starts
+        TS_ASSERT( 0 );
+        break;
+      }
+    }
+    // Cancel and wait for it to be cancelled
+    alg->cancel();
+    Poco::Thread::sleep(100);
   }
 
 };

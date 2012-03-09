@@ -3,10 +3,14 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmProxy.h"
+#include "MantidAPI/AlgorithmHistory.h"
+
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/WorkspaceGroup.h"
+
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/DateAndTime.h"
@@ -19,6 +23,7 @@
 
 #include <iomanip>
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/MemoryManager.h"
 
 using namespace Mantid::Kernel;
 
@@ -58,7 +63,7 @@ namespace Mantid
       m_cancel(false),m_parallelException(false),g_log(Kernel::Logger::get("Algorithm")),
       m_executeAsync(this,&Algorithm::executeAsyncImpl),m_isInitialized(false),
       m_isExecuted(false),m_isChildAlgorithm(false),m_alwaysStoreInADS(false),m_runningAsync(false),
-      m_running(false),m_rethrow(false),m_algorithmID(0)
+      m_running(false),m_rethrow(false),m_algorithmID(this)
     {
     }
 
@@ -307,9 +312,10 @@ namespace Mantid
         Workspace_sptr ws = m_outputWorkspaceProps[i]->getWorkspace();
         if (ws)
         {
-          // Is it already write-locked?
-          if (std::find(m_writeLockedWorkspaces.begin(), m_writeLockedWorkspaces.end(), ws)
-              == m_writeLockedWorkspaces.end())
+          // The workspace property says to do locking,
+          // AND it has NOT already been write-locked
+          if (m_outputWorkspaceProps[i]->isLocking()
+              && std::find(m_writeLockedWorkspaces.begin(), m_writeLockedWorkspaces.end(), ws) == m_writeLockedWorkspaces.end())
           {
             // Write-lock it if not already
             g_log.debug() << "Write-locking " << ws->getName() << std::endl;
@@ -325,9 +331,10 @@ namespace Mantid
         Workspace_sptr ws = m_inputWorkspaceProps[i]->getWorkspace();
         if (ws)
         {
-          // Is it already write-locked?
-          if (std::find(m_writeLockedWorkspaces.begin(), m_writeLockedWorkspaces.end(), ws)
-              == m_writeLockedWorkspaces.end())
+          // The workspace property says to do locking,
+          // AND it has NOT already been write-locked
+          if (m_inputWorkspaceProps[i]->isLocking()
+              && std::find(m_writeLockedWorkspaces.begin(), m_writeLockedWorkspaces.end(), ws) == m_writeLockedWorkspaces.end())
           {
             // Read-lock it if not already write-locked
             g_log.debug() << "Read-locking " << ws->getName() << std::endl;
@@ -470,10 +477,13 @@ namespace Mantid
       {
         try
         {
-          if (!m_isChildAlgorithm) m_running = true;
+          if (!m_isChildAlgorithm) 
+          { 
+            m_running = true;
+            //count used for defining the algorithm execution order
+            ++Algorithm::g_execCount;
+          }
           start_time = Mantid::Kernel::DateAndTime::getCurrentTime();
-          //count used for defining the algorithm execution order
-          ++Algorithm::g_execCount;
           // Start a timer
           Timer timer;
           // Call the concrete algorithm's exec method
@@ -1217,6 +1227,7 @@ namespace Mantid
     */
     Poco::ActiveResult<bool> Algorithm::executeAsync()
     {
+      AlgorithmManager::Instance().notifyAlgorithmStarting(this->getAlgorithmID());
       return m_executeAsync(Poco::Void());
     }
 

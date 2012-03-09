@@ -59,13 +59,10 @@ public:
   std::string getName() const;
   std::string toXMLString() const;
   int getNFunctions() const;
-  bool operator==(const CompositeImplicitFunction &other) const;
-  bool operator!=(const CompositeImplicitFunction &other) const;
   static std::string functionName()
   {
     return "CompositeImplicitFunction";
   }
-  std::vector<Mantid::Geometry::MDImplicitFunction_sptr > getFunctions() const;
 protected:
   std::vector<Mantid::Geometry::MDImplicitFunction_sptr > m_Functions;
   typedef std::vector<Mantid::Geometry::MDImplicitFunction_sptr >::const_iterator

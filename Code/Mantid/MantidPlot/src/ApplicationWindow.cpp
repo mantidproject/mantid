@@ -191,6 +191,7 @@
 #include "MantidQtMantidWidgets/ICatMyDataSearch.h"
 #include "MantidQtMantidWidgets/ICatAdvancedSearch.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
+#include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
@@ -337,7 +338,6 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   logWindow->setWidget(results);
   logWindow->hide();
 
-  //#ifdef SCRIPTING_CONSOLE
   consoleWindow = new QDockWidget(this);
   consoleWindow->setObjectName("consoleWindow"); // this is needed for QMainWindow::restoreState()
   consoleWindow->setWindowTitle(tr("Scripting Console"));
@@ -349,7 +349,6 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
 	  SLOT(showScriptConsoleContextMenu(const QPoint &)));
   consoleWindow->setWidget(console);
   consoleWindow->hide();
-  //#endif
   m_interpreterDock = new QDockWidget(this);
   m_interpreterDock->setObjectName("interpreterDock"); // this is needed for QMainWindow::restoreState()
   m_interpreterDock->setWindowTitle("Script Interpreter");
@@ -656,10 +655,6 @@ void ApplicationWindow::initGlobalConstants()
 
   savingTimerId = 0;
 
-#ifdef QTIPLOT_DEMO
-  QTimer::singleShot(600000, this, SLOT(close()));
-#endif
-
   autoSearchUpdatesRequest = false;
 
   show_windows_policy = ActiveFolder;
@@ -668,24 +663,9 @@ void ApplicationWindow::initGlobalConstants()
   QString aux = qApp->applicationDirPath();
   workingDir = aux;
 
-#ifdef TRANSLATIONS_PATH
-  d_translations_folder = TRANSLATIONS_PATH;
-#else
   d_translations_folder = aux + "/translations";
-#endif
-
-#ifdef MANUAL_PATH
-  helpFilePath = MANUAL_PATH;
-  helpFilePath += "/html/index.html";
-#else
   helpFilePath = aux + "/manual/index.html";
-#endif
-
-#ifdef PYTHON_CONFIG_PATH
-  d_python_config_folder = PYTHON_CONFIG_PATH;
-#else
   d_python_config_folder = aux;
-#endif
 
   fitPluginsPath = aux + "fitPlugins";
   fitModelsPath = QString::null;
@@ -1196,9 +1176,7 @@ void ApplicationWindow::insertTranslatedStrings()
   explorerWindow->setWindowTitle(tr("Project Explorer"));
   logWindow->setWindowTitle(tr("Results Log"));
   undoStackWindow->setWindowTitle(tr("Undo Stack"));
-  //#ifdef SCRIPTING_CONSOLE
   consoleWindow->setWindowTitle(tr("Scripting Console"));
-  //#endif
   displayBar->setWindowTitle(tr("Data Display"));
   tableTools->setWindowTitle(tr("Table"));
   columnTools->setWindowTitle(tr("Column"));
@@ -1250,9 +1228,7 @@ void ApplicationWindow::initMainMenu()
   view->addAction(actionShowExplorer);
   view->addAction(actionShowLog);
   //view->addAction(actionShowUndoStack);
-  //#ifdef SCRIPTING_CONSOLE
   view->addAction(actionShowConsole);
-  //#endif
 
   view->insertSeparator();
   view->addAction(actionShowScriptWindow);//Mantid
@@ -1518,9 +1494,6 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
   editMenuAboutToShow();
   myMenuBar()->insertItem(tr("&View"), view);
 
-  //#ifdef SCRIPTING_DIALOG
-  //	scriptingMenu->addAction(actionScriptingLang);
-  //#endif
   // these use the same keyboard shortcut (Ctrl+Return) and should not be enabled at the same time
   actionTableRecalculate->setEnabled(false);
 
@@ -4481,7 +4454,7 @@ void ApplicationWindow::openRecentProject(int index)
     QFileInfo fi(projectname);
     QString pn = fi.absFilePath();
     if (fn == pn){
-      QMessageBox::warning(this, tr("MantidPlot - File openning error"),//Mantid
+      QMessageBox::warning(this, tr("MantidPlot - File open error"),//Mantid
           tr("The file: <p><b> %1 </b><p> is the current file!").arg(fn));
       return;
     }
@@ -4490,6 +4463,8 @@ void ApplicationWindow::openRecentProject(int index)
   if (!fn.isEmpty()){
     saveSettings();//the recent projects must be saved
     bool isSaved = saved;
+    // Have to change the working directory here because that is used when finding the nexus files to load
+    workingDir = QFileInfo(f).absolutePath();
     ApplicationWindow * a = open (fn,false,false);
     if (a && (fn.endsWith(".qti",Qt::CaseInsensitive) || fn.endsWith(".qti~",Qt::CaseInsensitive) ||
         fn.endsWith(".opj",Qt::CaseInsensitive) || fn.endsWith(".ogg", Qt::CaseInsensitive)))
@@ -4732,6 +4707,18 @@ ApplicationWindow* ApplicationWindow::openProject(const QString& fn, bool factor
       while ( s!="</multiLayer>" )
       {//open layers
         s = t.readLine();
+
+        if (s.contains("<waterfall>")){
+          QStringList lst = s.trimmed().remove("<waterfall>").remove("</waterfall>").split(",");
+          Graph *ag = plot->activeGraph();
+          if (ag && lst.size() >= 2){
+            ag->setWaterfallOffset(lst[0].toInt(), lst[1].toInt());
+            if (lst.size() >= 3)
+              ag->setWaterfallSideLines(lst[2].toInt());
+          }
+          plot->setWaterfallLayout();
+        }
+
         if (s.left(7)=="<graph>")
         {	list.clear();
         while ( s!="</graph>" )
@@ -4981,6 +4968,7 @@ MdiSubWindow* ApplicationWindow::openTemplate(const QString& fn)
     if (templateType == "<multiLayer>"){
       w = multilayerPlot(generateUniqueName(tr("Graph")));
       if (w){
+        MultiLayer *ml = qobject_cast<MultiLayer *>(w);
         dynamic_cast<MultiLayer*>(w)->setCols(cols);
         dynamic_cast<MultiLayer*>(w)->setRows(rows);
         //restoreWindowGeometry(this, w, geometry);
@@ -4996,6 +4984,16 @@ MdiSubWindow* ApplicationWindow::openTemplate(const QString& fn)
         }
         while (!t.atEnd()){//open layers
           QString s=t.readLine();
+          if (s.contains("<waterfall>")){
+            QStringList lst = s.trimmed().remove("<waterfall>").remove("</waterfall>").split(",");
+            Graph *ag = ml->activeGraph();
+            if (ag && lst.size() >= 2){
+              ag->setWaterfallOffset(lst[0].toInt(), lst[1].toInt());
+              if (lst.size() >= 3)
+                ag->setWaterfallSideLines(lst[2].toInt());
+            }
+            ml->setWaterfallLayout();
+          }
           if (s.left(7)=="<graph>"){
             QStringList lst;
             while ( s!="</graph>" ){
@@ -6043,10 +6041,6 @@ bool ApplicationWindow::saveProject(bool compress)
     return true;;
   }
 
-#ifdef QTIPLOT_DEMO
-  showDemoVersionMessage();
-  return false;
-#else
   saveFolder(projectFolder(), projectname, compress);
 
   setWindowTitle("MantidPlot - " + projectname);
@@ -6061,8 +6055,8 @@ bool ApplicationWindow::saveProject(bool compress)
 
   QApplication::restoreOverrideCursor();
   return true;
-#endif
 }
+
 void ApplicationWindow::savetoNexusFile()
 {
   QString filter = tr("Mantid Files")+" (*.nxs *.nx5 *.xml);;";
@@ -6111,10 +6105,6 @@ void ApplicationWindow::loadDataFile()
 }
 void ApplicationWindow::saveProjectAs(const QString& fileName, bool compress)
 {
-#ifdef QTIPLOT_DEMO
-  showDemoVersionMessage();
-  return;
-#else
   QString fn = fileName;
   if (fileName.isEmpty()){
     QString filter = tr("MantidPlot project")+" (*.mantid);;"; //tr("QtiPlot project")+" (*.qti);;";
@@ -6170,7 +6160,6 @@ void ApplicationWindow::saveProjectAs(const QString& fileName, bool compress)
       item->folder()->setObjectName(baseName);
     }
   }
-#endif
 }
 
 void ApplicationWindow::saveNoteAs()
@@ -9247,9 +9236,6 @@ void ApplicationWindow::windowsMenuAboutToShow()
   QList<MdiSubWindow *> windows = current_folder->windowsList();
   int n = static_cast<int>(windows.count());
   if (!n ){
-    /*#ifdef SCRIPTING_PYTHON
-			windowsMenu->addAction(actionShowScriptWindow);
-		#endif*/
     return;
   }
 
@@ -9487,9 +9473,6 @@ void ApplicationWindow::dragMoveEvent( QDragMoveEvent* e )
 
 void ApplicationWindow::closeEvent( QCloseEvent* ce )
 {
-#ifdef QTIPLOT_DEMO
-  showDemoVersionMessage();
-#endif
 
   // Mantid changes here
 
@@ -11434,12 +11417,27 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
     }
     else if( s.contains("MantidMatrixCurve")) //1D plot curves
     {
-      QStringList curvelst=s.split("\t");
+      const QStringList curvelst=s.split("\t");
       if( !curvelst[1].isEmpty()&& !curvelst[2].isEmpty())
       {
         try {
-          PlotCurve *c = new MantidMatrixCurve(curvelst[1],ag,curvelst[3].toInt(),curvelst[4].toInt());
-          if ( curvelst.size() > 5 && !curvelst[5].isEmpty() ) c->setSkipSymbolsCount(curvelst[5].toInt());
+          if ( curvelst.size() < 7 ) // This was the case prior to 29 February, 2012
+          {
+            PlotCurve *c = new MantidMatrixCurve(curvelst[1],ag,curvelst[3].toInt(),curvelst[4].toInt());
+            // Deal with the brief period (Dec 29,2011-Feb 29, 2012) when any skip symbols count was just
+            // stuck as an integer on the end of the of the line
+            if ( curvelst.size() == 6 && !curvelst[5].isEmpty() ) c->setSkipSymbolsCount(curvelst[5].toInt());
+          }
+          else
+          {
+            // Anything saved with a version after 29 February 2012 comes here
+            PlotCurve *c = new MantidMatrixCurve(curvelst[1],ag,curvelst[3].toInt(),curvelst[4].toInt(),
+                                                 curvelst[5].toInt());
+            ag->setCurveType(curveID,curvelst[6].toInt());
+            // Fill in the curve settings and apply them to the created curve
+            CurveLayout cl = fillCurveSettings(curvelst,3);
+            ag->updateCurveLayout(c,&cl);
+          }
         } catch (Mantid::Kernel::Exception::NotFoundError &) {
           // Get here if workspace name is invalid - shouldn't be possible, but just in case
           closeWindow(plot);
@@ -11452,7 +11450,14 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
           closeWindow(plot);
           return 0;
         }
+        curveID++;
       }
+    }
+    else if (s.contains("<MantidYErrors>")) // Error bars on a Mantid curve
+    {
+      MantidCurve *c = dynamic_cast<MantidCurve *>(ag->curve(curveID - 1));
+      if (c)
+        c->errorBarSettingsList().front()->fromString(s.remove("<MantidYErrors>").remove("</MantidYErrors>"));
     }
     else if (s.left(10) == "Background"){
       QStringList fList = s.split("\t");
@@ -11582,38 +11587,8 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
         }
       }
 
-      CurveLayout cl;
-      cl.connectType=curve[4].toInt();
-      cl.lCol=curve[5].toInt();
-      if (d_file_version <= 89)
-        cl.lCol = convertOldToNewColorIndex(cl.lCol);
-      cl.lStyle=curve[6].toInt();
-      cl.lWidth=curve[7].toFloat();
-      cl.sSize=curve[8].toInt();
-      if (d_file_version <= 78)
-        cl.sType=Graph::obsoleteSymbolStyle(curve[9].toInt());
-      else
-        cl.sType=curve[9].toInt();
-
-      cl.symCol=curve[10].toInt();
-      if (d_file_version <= 89)
-        cl.symCol = convertOldToNewColorIndex(cl.symCol);
-      cl.fillCol=curve[11].toInt();
-      if (d_file_version <= 89)
-        cl.fillCol = convertOldToNewColorIndex(cl.fillCol);
-      cl.filledArea=curve[12].toInt();
-      cl.aCol=curve[13].toInt();
-      if (d_file_version <= 89)
-        cl.aCol = convertOldToNewColorIndex(cl.aCol);
-      cl.aStyle=curve[14].toInt();
-      if(curve.count() < 16)
-        cl.penWidth = cl.lWidth;
-      else if ((d_file_version >= 79) && (curve[3].toInt() == Graph::Box))
-        cl.penWidth = curve[15].toFloat();
-      else if ((d_file_version >= 78) && (curve[3].toInt() <= Graph::LineSymbols))
-        cl.penWidth = curve[15].toFloat();
-      else
-        cl.penWidth = cl.lWidth;
+      // Filling of the CurveLayout struct moved out to a separate method for reuse by Mantid curves
+      CurveLayout cl = fillCurveSettings(curve);
 
       int plotType = curve[3].toInt();
       Table *w = app->table(curve[2]);
@@ -12017,6 +11992,13 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
         Table *nw = app->table(colName);
         ag->setLabelsTextFormat(i, ag->axisType(i), colName, nw);
       }
+    } else if (s.contains("<waterfall>")){
+      QStringList lst = s.trimmed().remove("<waterfall>").remove("</waterfall>").split(",");
+      if (lst.size() >= 2)
+        ag->setWaterfallOffset(lst[0].toInt(), lst[1].toInt());
+      if (lst.size() >= 3)
+        ag->setWaterfallSideLines(lst[2].toInt());
+      ag->updateDataCurves();
     }
   }
   ag->replot();
@@ -12662,9 +12644,7 @@ void ApplicationWindow::createActions()
 
   actionShowUndoStack = undoStackWindow->toggleViewAction();
 
-    //#ifdef SCRIPTING_CONSOLE
   actionShowConsole = consoleWindow->toggleViewAction();
-    //#endif
 
   actionAddLayer = new QAction(QIcon(getQPixmap("newLayer_xpm")), tr("Add La&yer"), this);
   actionAddLayer->setShortcut( tr("Alt+L") );
@@ -13297,11 +13277,6 @@ void ApplicationWindow::createActions()
   // 	actionTechnicalSupport = new QAction(tr("Technical &Support"), this); // Mantid change
   // 	connect(actionTechnicalSupport, SIGNAL(activated()), this, SLOT(showSupportPage())); // Mantid change
 
-  //#ifdef SCRIPTING_DIALOG
-  //	actionScriptingLang = new QAction(tr("Scripting &language"), this);
-  //	connect(actionScriptingLang, SIGNAL(activated()), this, SLOT(showScriptingLangDialog()));
-  //#endif
-
 #ifdef SCRIPTING_PYTHON
   actionShowScriptWindow = new QAction(getQPixmap("python_xpm"), tr("Toggle &Script Window"), this);
 #ifdef __APPLE__
@@ -13569,10 +13544,8 @@ void ApplicationWindow::translateActionsStrings()
   actionShowUndoStack->setMenuText(tr("&Undo/Redo Stack"));
   actionShowUndoStack->setToolTip(tr("Show available undo/redo commands"));
 
-    //#ifdef SCRIPTING_CONSOLE
   actionShowConsole->setMenuText(tr("&Console"));
   actionShowConsole->setToolTip(tr("Show Scripting console"));
-    //#endif
 
 #ifdef SCRIPTING_PYTHON
   actionShowScriptWindow->setMenuText(tr("&Script Window"));
@@ -13907,10 +13880,6 @@ void ApplicationWindow::translateActionsStrings()
   //actionTranslations->setMenuText(tr("&Translations"));//Mantid change - commented out
   //actionDonate->setMenuText(tr("Make a &Donation"));
   //actionTechnicalSupport->setMenuText(tr("Technical &Support"));
-
-  //#ifdef SCRIPTING_DIALOG
-  //	actionScriptingLang->setMenuText(tr("Scripting &language"));
-  //#endif
 
   btnPointer->setMenuText(tr("Disable &tools"));
   btnPointer->setToolTip( tr( "Pointer" ) );
@@ -15090,29 +15059,6 @@ Folder* ApplicationWindow::appendProject(const QString& fn, Folder* parentFolder
   return new_folder;
 }
 
-#ifdef QTIPLOT_DEMO
-void ApplicationWindow::showDemoVersionMessage()
-{
-  saved = true;
-  /**
-	QMessageBox::critical(this, tr("MantidPlot - Demo Version"),//Mantid
-			tr("You are using the demonstration version of Qtiplot.\
-				It is identical with the full version, except that you can't save your work to project files and you can't use it for more than 10 minutes per session.\
-				<br><br>\
-				If you want to have ready-to-use, fully functional binaries, please subscribe for a\
-				<a href=\"http://soft.proindependent.com/individual_contract.html\">single-user binaries maintenance contract</a>.\
-				<br><br>\
-				QtiPlot is free software in the sense of free speech.\
-				If you know how to use it, you can get\
-				<a href=\"http://developer.berlios.de/project/showfiles.php?group_id=6626\">the source code</a>\
-				free of charge.\
-				Nevertheless, you are welcome to\
-				<a href=\"http://soft.proindependent.com/why_donate.html\">make a donation</a>\
-				in order to support the further development of QtiPlot."));
-   */
-}
-#endif
-
 void ApplicationWindow::saveFolder(Folder *folder, const QString& fn, bool compress)
 {
   QFile f( fn );
@@ -15233,10 +15179,6 @@ void ApplicationWindow::saveAsProject()
 
 void ApplicationWindow::saveFolderAsProject(Folder *f)
 {
-#ifdef QTIPLOT_DEMO
-  showDemoVersionMessage();
-  return;
-#else
   QString filter = tr("MantidPlot project")+" (*.qti);;";//Mantid
   filter += tr("Compressed MantidPlot project")+" (*.qti.gz)";
 
@@ -15251,7 +15193,6 @@ void ApplicationWindow::saveFolderAsProject(Folder *f)
 
     saveFolder(f, fn, selectedFilter.contains(".gz"));
   }
-#endif
 }
 
 void ApplicationWindow::showFolderPopupMenu(Q3ListViewItem *it, const QPoint &p, int)
@@ -16353,6 +16294,49 @@ QString ApplicationWindow::versionString()
   return "This is MantidPlot version " + version + " of " + date;
 }
 
+/** A method to populate the CurveLayout struct on loading a project
+ *  @param curve  The list of numbers corresponding to settings loaded from the project file
+ *  @param offset An offset to add to each index. Used when loading a MantidMatrixCurve
+ *  @return The filled in CurveLayout struct
+ */
+CurveLayout ApplicationWindow::fillCurveSettings(const QStringList & curve, unsigned int offset)
+{
+  CurveLayout cl;
+  cl.connectType=curve[4+offset].toInt();
+  cl.lCol=curve[5+offset].toInt();
+  if (d_file_version <= 89)
+    cl.lCol = convertOldToNewColorIndex(cl.lCol);
+  cl.lStyle=curve[6+offset].toInt();
+  cl.lWidth=curve[7+offset].toFloat();
+  cl.sSize=curve[8+offset].toInt();
+  if (d_file_version <= 78)
+    cl.sType=Graph::obsoleteSymbolStyle(curve[9+offset].toInt());
+  else
+    cl.sType=curve[9+offset].toInt();
+
+  cl.symCol=curve[10+offset].toInt();
+  if (d_file_version <= 89)
+    cl.symCol = convertOldToNewColorIndex(cl.symCol);
+  cl.fillCol=curve[11+offset].toInt();
+  if (d_file_version <= 89)
+    cl.fillCol = convertOldToNewColorIndex(cl.fillCol);
+  cl.filledArea=curve[12+offset].toInt();
+  cl.aCol=curve[13+offset].toInt();
+  if (d_file_version <= 89)
+    cl.aCol = convertOldToNewColorIndex(cl.aCol);
+  cl.aStyle=curve[14+offset].toInt();
+  if(curve.count() < 16)
+    cl.penWidth = cl.lWidth;
+  else if ((d_file_version >= 79) && (curve[3+offset].toInt() == Graph::Box))
+    cl.penWidth = curve[15+offset].toFloat();
+  else if ((d_file_version >= 78) && (curve[3+offset].toInt() <= Graph::LineSymbols))
+    cl.penWidth = curve[15+offset].toFloat();
+  else
+    cl.penWidth = cl.lWidth;
+
+  return cl;
+}
+
 int ApplicationWindow::convertOldToNewColorIndex(int cindex)
 {
   if( (cindex == 13) || (cindex == 14) ) // white and light gray
@@ -17082,7 +17066,7 @@ void ApplicationWindow::runConnectFitting(MantidQt::MantidWidgets::FitPropertyBr
           foreach(Graph *g, layers)
           {
             // Go through and set up the PeakPickerTool for the new graph
-            PeakPickerTool* ppicker = new PeakPickerTool(g, fpb, mantidUI, true);
+            PeakPickerTool* ppicker = new PeakPickerTool(g, fpb, mantidUI, true, true);
             g->setActiveTool(ppicker);
           }
         }     

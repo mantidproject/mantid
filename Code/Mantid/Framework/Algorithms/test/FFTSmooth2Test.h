@@ -258,12 +258,12 @@ public:
             {
               for (int WorkspaceIndex=0; WorkspaceIndex<10; WorkspaceIndex++)
               {
-                performTest(event, filter, params, AllSpectra, WorkspaceIndex, static_cast<bool>(inPlace));
+                performTest((event > 0), filter, params, (AllSpectra > 0), WorkspaceIndex, (inPlace > 0));
               }
             }
             else
             {
-              performTest(event, filter, params, AllSpectra, 0, static_cast<bool>(inPlace));
+              performTest((event > 0), filter, params, (AllSpectra > 0), 0, (inPlace > 0));
             }
           }
   }

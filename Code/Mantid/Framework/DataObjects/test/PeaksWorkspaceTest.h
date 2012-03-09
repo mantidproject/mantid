@@ -203,6 +203,9 @@ public:
     TS_ASSERT_EQUALS( lpw->getPeak(3).getDetectorID(), 1400);
     TS_ASSERT_DELTA(  lpw->getPeak(3).getWavelength(), 3.0, 1e-5);
 
+    //Remove file
+    remove( filename.c_str() );
+
   }
 
 

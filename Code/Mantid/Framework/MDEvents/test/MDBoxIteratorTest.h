@@ -9,10 +9,12 @@
 #include "MantidMDEvents/MDBoxIterator.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDGridBox.h"
+#include "MantidMDEvents/MDBox.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
+#include <gmock/gmock.h>
 
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
@@ -461,7 +463,94 @@ public:
     TS_ASSERT( !it->next() );
   }
 
+  void test_getIsMasked()
+  {
+    //Mock MDBox. Only one method of interest to the mocking.
+    class MockMDBox : public MDBox<MDLeanEvent<2>, 2>
+    {
+    public:
+      MOCK_CONST_METHOD0(getIsMasked, bool());
+    };
 
+    MockMDBox mockBox;
+
+    MDBoxIterator<MDLeanEvent<2>, 2> it(&mockBox, 1, true);
+
+    //All that we want to test is that iterator::getIsMasked calls IMDBox::getIsMasked
+    EXPECT_CALL(mockBox, getIsMasked()).Times(1);
+    it.getIsMasked();
+
+    TSM_ASSERT("Iterator does not use boxes as expected", testing::Mock::VerifyAndClearExpectations(&mockBox));
+  }
+
+  void test_skip_masked_detectors()
+  {
+    MDBoxIterator<MDLeanEvent<1>,1>* setupIterator = new MDBoxIterator<MDLeanEvent<1>,1>(A, 20, true);
+  
+    //mask box 0, unmask 1 and Mask box 2. From box 3 onwards, boxes will be unmasked.
+    setupIterator->getBox()->mask();
+    setupIterator->next(1);
+    setupIterator->getBox()->unmask(); 
+    setupIterator->next(1);
+    setupIterator->getBox()->mask();
+    setupIterator->next(1);
+
+    MDBoxIterator<MDLeanEvent<1>,1>* evaluationIterator = new MDBoxIterator<MDLeanEvent<1>,1>(A, 20, true);
+    TS_ASSERT_THROWS_NOTHING(evaluationIterator->next());
+    TSM_ASSERT_EQUALS("Should have skipped to the first non-masked box", 1, evaluationIterator->getPosition());
+    TS_ASSERT_THROWS_NOTHING(evaluationIterator->next());
+    TSM_ASSERT_EQUALS("Should have skipped to the second non-masked box", 3, evaluationIterator->getPosition());
+    TSM_ASSERT("The last box should be masked", !evaluationIterator->getIsMasked());
+
+    delete setupIterator;
+    delete evaluationIterator;
+  }
+
+  void test_no_skipping_policy()
+  {
+    MDBoxIterator<MDLeanEvent<1>,1>* setupIterator = new MDBoxIterator<MDLeanEvent<1>,1>(A, 20, true);
+  
+    //mask box 0, unmask 1 and Mask box 2. From box 3 onwards, boxes will be unmasked.
+    setupIterator->getBox()->mask();
+    setupIterator->next(1);
+    setupIterator->getBox()->unmask(); 
+    setupIterator->next(1);
+    setupIterator->getBox()->mask();
+    setupIterator->next(1);
+
+    MDBoxIterator<MDLeanEvent<1>,1>* evaluationIterator = new MDBoxIterator<MDLeanEvent<1>,1>(A, 20, true, new SkipNothing); //Using skip nothing policy.
+    TS_ASSERT_THROWS_NOTHING(evaluationIterator->next());
+    TSM_ASSERT_EQUALS("Should NOT have skipped to the first box", 1, evaluationIterator->getPosition());
+    TS_ASSERT_THROWS_NOTHING(evaluationIterator->next());
+    TSM_ASSERT_EQUALS("Should NOT have skipped to the second box", 2, evaluationIterator->getPosition());
+    TS_ASSERT_THROWS_NOTHING(evaluationIterator->next());
+    TSM_ASSERT_EQUALS("Should NOT have skipped to the third box", 3, evaluationIterator->getPosition());
+  }
+
+  void test_custom_skipping_policy()
+  {
+    /// Mock Skipping Policy Type to inject.
+    class MockSkippingPolicy : public SkippingPolicy
+    {
+    public:
+      MOCK_CONST_METHOD0(keepGoing, bool());
+      MOCK_METHOD0(Die, void());
+      ~MockSkippingPolicy(){Die();}
+    };
+
+    MockSkippingPolicy* mockPolicy = new MockSkippingPolicy;
+    MDBoxIterator<MDLeanEvent<1>,1>* evaluationIterator = new MDBoxIterator<MDLeanEvent<1>,1>(A, 20, true, mockPolicy); //Using custom policy
+
+    EXPECT_CALL(*mockPolicy, Die()).Times(1); //Should call destructor automatically within MDBoxIterator
+    EXPECT_CALL(*mockPolicy, keepGoing()).Times(static_cast<int>(evaluationIterator->getDataSize())); //Should apply test 
+
+    while(evaluationIterator->next()) //Keep calling next while true. Will iterate through all boxes.
+    {
+    }
+    delete evaluationIterator;
+
+    TSM_ASSERT("Has not used SkippingPolicy as expected.", testing::Mock::VerifyAndClearExpectations(mockPolicy));
+  }
 };
 
 
@@ -497,7 +586,7 @@ public:
       function = new MDBoxImplicitFunction(min, max);
     }
 
-    MDBoxIterator<MDLeanEvent<3>,3> it(top, 20, leafOnly, function);
+    MDBoxIterator<MDLeanEvent<3>,3> it(top, 20, leafOnly, new SkipNothing, function);
 
     // Count all of them
     while (it.next())
@@ -536,7 +625,7 @@ public:
   void do_test_iterator_that_fills_a_vector(bool leafOnly)
   {
     IMDBox<MDLeanEvent<3>,3> * box;
-    MDBoxIterator<MDLeanEvent<3>,3> it(top, 20, leafOnly);
+    MDBoxIterator<MDLeanEvent<3>,3> it(top, 20, leafOnly, new SkipNothing);
     std::vector< IMDBox<MDLeanEvent<3>,3> * > boxes;
 
     // Iterate and fill the vector as you go.
@@ -562,8 +651,6 @@ public:
   {
     do_test_iterator_that_fills_a_vector(true);
   }
-
-
 
   // ---------------------------------------------------------------
   /** For comparison, let's use getBoxes() that fills a vector directly.
@@ -649,9 +736,6 @@ public:
   {
     do_test_getBoxes(true, 3, 125*125*125);
   }
-
-
-
 
 };
 

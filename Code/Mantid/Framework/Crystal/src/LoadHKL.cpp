@@ -5,6 +5,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidCrystal/LoadHKL.h"
+#include "MantidCrystal/AnvredCorrection.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -48,7 +49,7 @@ namespace Crystal
   /// Sets documentation strings for this algorithm
   void LoadHKL::initDocs()
   {
-    this->setWikiSummary("Save a PeaksWorkspace to a ASCII .hkl file.");
+    this->setWikiSummary("Loads a ASCII .hkl file to a PeaksWorkspace.");
     this->setOptionalMessage("Save a PeaksWorkspace to a ASCII .hkl file.");
   }
 
@@ -77,20 +78,14 @@ namespace Crystal
     PeaksWorkspace_sptr ws(new PeaksWorkspace());
     ws->setName(getProperty("OutputWorkspace"));
 
-    int run, seqNum;
-    int bank;
-    double h ; double k ;  double l ;  double tbar;
-    double transmission ; double wl ;
-    double scattering ; double Inti ;
-    double SigI ; double dspace;
     std::fstream in;
     in.open( filename.c_str(), std::ios::in);
 
 
-            // Anvred write from Art Schultz
-            //hklFile.write('%4d%4d%4d%8.2f%8.2f%4d%8.4f%7.4f%7d%7d%7.4f%4d%9.5f%9.4f\n' 
-            //    % (H, K, L, FSQ, SIGFSQ, hstnum, WL, TBAR, CURHST, SEQNUM, TRANSMISSION, DN, TWOTH, DSP))
-            // HKL is flipped by -1 due to different q convention in ISAW vs mantid.
+    // Anvred write from Art Schultz
+    //hklFile.write('%4d%4d%4d%8.2f%8.2f%4d%8.4f%7.4f%7d%7d%7.4f%4d%9.5f%9.4f\n' 
+    //    % (H, K, L, FSQ, SIGFSQ, hstnum, WL, TBAR, CURHST, SEQNUM, TRANSMISSION, DN, TWOTH, DSP))
+    // HKL is flipped by -1 due to different q convention in ISAW vs mantid.
     Instrument_sptr inst(new Geometry::Instrument);
     Detector *detector = new Detector("det1",-1, 0);
     detector->setPos(0.0,0.0,0.0);
@@ -105,23 +100,38 @@ namespace Crystal
     inst->markAsSource(source);
 
     std::string line;
+    bool first = true;
+    double mu1 = 0.0, mu2 = 0.0, wl1 = 0.0, wl2 = 0.0, sc1 = 0.0, astar1 = 0.0;
     do {   
       getline (in, line);
-      h = atof(line.substr(0,4).c_str());
-      k = atof(line.substr(4,4).c_str());
-      l = atof(line.substr(8,4).c_str());
+      double h = atof(line.substr(0,4).c_str());
+      double k = atof(line.substr(4,4).c_str());
+      double l = atof(line.substr(8,4).c_str());
       if (h == 0.0 && k == 0 && l == 0) break;
-      Inti = atof(line.substr(12,8).c_str());
-      SigI = atof(line.substr(20,8).c_str());
-      run = atoi(line.substr(28,4).c_str());
-      wl = atof(line.substr(32,8).c_str());
-      tbar = atof(line.substr(40,7).c_str());
+      double Inti = atof(line.substr(12,8).c_str());
+      double SigI = atof(line.substr(20,8).c_str());
+      int run = atoi(line.substr(28,4).c_str());
+      double wl = atof(line.substr(32,8).c_str());
+      double tbar = atof(line.substr(40,7).c_str()); //tbar
       run = atoi(line.substr(47,7).c_str());
-      seqNum = atoi(line.substr(54,7).c_str());
-      transmission = atof(line.substr(61,7).c_str());
-      bank = atoi(line.substr(68,4).c_str());
-      scattering = atof(line.substr(72,9).c_str());
-      dspace = atof(line.substr(81,9).c_str());
+      atoi(line.substr(54,7).c_str()); //seqNum
+      double trans = atof(line.substr(61,7).c_str()); //transmission
+      int bank = atoi(line.substr(68,4).c_str());
+      double scattering = atof(line.substr(72,9).c_str());
+      atof(line.substr(81,9).c_str()); //dspace
+      if (first)
+      {
+        mu1 = -(double)std::log(trans)/tbar;
+        wl1 = wl/1.8;
+        sc1 = scattering;
+        astar1 = 1.0/trans;
+        first = false;
+      }
+      else
+      {
+        mu2 = -(double)std::log(trans)/tbar;
+        wl2 = wl/1.8;
+      }
   
       Peak peak(inst, scattering, wl);
       peak.setHKL(-h,-k,-l);
@@ -138,6 +148,31 @@ namespace Crystal
     } while (!in.eof());
 
     in.close();
+    // solve 2 linear equations to find amu and smu
+    double amu = (mu2 - 1.0 * mu1) / (-1.0 * wl1 + wl2);
+    double smu = mu1 - wl1 * amu;
+    double theta = sc1*radtodeg_half;
+    int i = (int)(theta/5.);
+    double x0,x1,x2;
+    gsl_poly_solve_cubic(pc[2][i]/pc[3][i], pc[1][i]/pc[3][i],(pc[0][i]-astar1)/pc[3][i],&x0,&x1,&x2);
+    double radius = 0.0;
+    if (x0 > 0) radius = x0;
+    else if (x1 > 0) radius = x1;
+    else if (x2 > 0) radius = x2;
+    gsl_poly_solve_cubic(pc[2][i+1]/pc[3][i+1], pc[1][i+1]/pc[3][i+1],(pc[0][i+1]-astar1)/pc[3][i+1],&x0,&x1,&x2);
+    double radius1 = 0.0;
+    if (x0 > 0) radius1 = x0;
+    else if (x1 > 0) radius1 = x1;
+    else if (x2 > 0) radius1 = x2;
+    double frac = theta - static_cast<double>(static_cast<int>( theta / 5. )) * 5.;//theta%5.
+    frac = frac/5.;
+    radius = radius*(1-frac) + radius1*frac;
+    radius /= mu1;
+    g_log.notice() << "LinearScatteringCoef = " << smu << " LinearAbsorptionCoef = " << amu << " Radius = " << radius << " calculated from tbar and transmission of 2 peaks\n";
+    API::Run & mrun = ws->mutableRun();
+    mrun.addProperty<double>("LinearScatteringCoef", smu, true);
+    mrun.addProperty<double>("LinearAbsorptionCoef", amu, true);
+    mrun.addProperty<double>("Radius", radius, true);
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<PeaksWorkspace>(ws));
 
 

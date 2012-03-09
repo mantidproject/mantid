@@ -54,7 +54,7 @@ public:
     TS_ASSERT_EQUALS(fac->preferredExtension(),".nxs");
 
     TS_ASSERT_EQUALS(fac->archiveSearch().size(),2);
-    std::set<std::string>::const_iterator it = fac->archiveSearch().begin();
+    std::vector<std::string>::const_iterator it = fac->archiveSearch().begin();
     TS_ASSERT_EQUALS(*it,"ADataSearch");
     TS_ASSERT_EQUALS(*++it,"BDataSearch");
 

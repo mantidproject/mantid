@@ -64,7 +64,7 @@ public:
 
   virtual ~ListValidator(){};
 
-  virtual IValidator<std::string>* clone(){ return new ListValidator(*this); }
+  virtual IValidator<std::string>* clone() const { return new ListValidator(*this); }
 
   
 protected:

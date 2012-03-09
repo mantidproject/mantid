@@ -7,7 +7,7 @@ Combines the data contained in an arbitrary number of input workspaces. If the i
 
 The input workspaces must contain histogram data with the same number of spectra and matching units and instrument name in order for the algorithm to succeed. 
 
-'''For [[Workspace2D]]s''': Each input workspace must have common binning for all its spectra. 
+'''For [[Workspace2D]]s''': Each input workspace must have common internal binning across all its spectra.
 
 '''For [[EventWorkspace]]s''': This algorithm is Event-aware; it will append event lists from common spectra. Binning parameters need not be compatible; the output workspace will use the first workspaces' X bin boundaries.
 
@@ -25,6 +25,7 @@ The [[Rebin]] algorithm is used, if neccessary, to put all the input workspaces 
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/MergeRuns.h"
 #include "MantidKernel/ArrayProperty.h"
+#include <boost/make_shared.hpp>
 
 namespace Mantid
 {
@@ -50,7 +51,10 @@ using namespace DataObjects;
 MergeRuns::MergeRuns() : Algorithm(),m_progress(NULL) {}
 
 /// Destructor
-MergeRuns::~MergeRuns() {if(m_progress) delete m_progress;m_progress=NULL;}
+MergeRuns::~MergeRuns()
+{
+  delete m_progress;
+}
 
 //------------------------------------------------------------------------------------------------
 /// Initialisation method
@@ -58,7 +62,7 @@ void MergeRuns::init()
 {
   // declare arbitrary number of input workspaces as a list of strings at the moment
   declareProperty(
-    new ArrayProperty<std::string>("InputWorkspaces", new MandatoryValidator<std::vector<std::string> >),
+    new ArrayProperty<std::string>("InputWorkspaces", new MandatoryValidator<std::vector<std::string>>),
     "The names of the input workspaces as a comma-separated list" );
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
     "Name of the output workspace" );
@@ -111,10 +115,10 @@ void MergeRuns::exec()
     //At least one is not event workspace ----------------
 
     //This gets the list of workspaces
-    inWS = this->validateInputs(inputs);
+    std::list<API::MatrixWorkspace_sptr> inWS = this->validateInputs(inputs);
 
     // Iterate over the collection of input workspaces
-    std::list<MatrixWorkspace_sptr>::iterator it = inWS.begin();
+    auto it = inWS.begin();
     // Take the first input workspace as the first argument to the addition
     MatrixWorkspace_sptr outWS = inWS.front();
     int64_t n=inWS.size()-1;
@@ -157,15 +161,15 @@ void MergeRuns::exec()
  */
 void MergeRuns::buildAdditionTables()
 {
-  if (inEventWS.size() <= 0)
+  if (m_inEventWS.size() <= 0)
     throw std::invalid_argument("MergeRuns: No workspaces found to merge.");
 
   //This'll hold the addition tables.
-  tables.clear();
+  m_tables.clear();
 
   //This is the workspace against which everything will be added
-  EventWorkspace_sptr lhs = inEventWS[0];
-  size_t lhs_nhist = lhs->getNumberHistograms();
+  EventWorkspace_sptr lhs = m_inEventWS[0];
+  int lhs_nhist = static_cast<int>(lhs->getNumberHistograms());
 
   detid2index_map * lhs_det_to_wi = NULL;
   try
@@ -177,19 +181,20 @@ void MergeRuns::buildAdditionTables()
     //If it fails, then there are some grouped detector IDs, and the map cannot exist
   }
 
-  for (size_t workspaceNum=1; workspaceNum < inEventWS.size(); workspaceNum++)
+  for (size_t workspaceNum=1; workspaceNum < m_inEventWS.size(); workspaceNum++)
   {
     //Get the workspace
-    EventWorkspace_sptr ews = inEventWS[workspaceNum];
+    EventWorkspace_sptr ews = m_inEventWS[workspaceNum];
 
     //An addition table is a list of pairs:
     //  First int = workspace index in the EW being added
     //  Second int = workspace index to which it will be added in the OUTPUT EW. -1 if it should add a new entry at the end.
-    AdditionTable * table = new AdditionTable();
+    boost::shared_ptr<AdditionTable> table = boost::make_shared<AdditionTable>();
 
     //Loop through the input workspace indices
-    size_t nhist = ews->getNumberHistograms();
-    for (size_t inWI = 0; inWI < nhist; inWI++)
+    std::size_t nhist = ews->getNumberHistograms();
+    table->reserve(nhist);
+    for (int inWI = 0; inWI < static_cast<int>(nhist); inWI++)
     {
       //Get the set of detectors in the output
       std::set<detid_t>& inDets = ews->getEventList(inWI).getDetectorIDs();
@@ -197,7 +202,7 @@ void MergeRuns::buildAdditionTables()
       bool done=false;
 
       //First off, try to match the workspace indices. Most times, this will be ok right away.
-      size_t outWI = inWI;
+      int outWI = inWI;
       if (outWI < lhs_nhist) //don't go out of bounds
       {
         std::set<detid_t>& outDets = lhs->getEventList(outWI).getDetectorIDs();
@@ -206,7 +211,7 @@ void MergeRuns::buildAdditionTables()
         if (std::includes(outDets.begin(), outDets.end(), inDets.begin(), inDets.end()))
         {
           //We found the workspace index right away. No need to keep looking
-          table->push_back( std::pair<int64_t,int64_t>(inWI, outWI) );
+          table->push_back( std::make_pair(inWI, outWI) );
           done = true;
         }
       }
@@ -223,14 +228,14 @@ void MergeRuns::buildAdditionTables()
         detid2index_map::iterator map_it = lhs_det_to_wi->find(rhs_detector_ID);
         if (map_it != lhs_det_to_wi->end())
         {
-          outWI = map_it->second; //This is the workspace index in the LHS that matched rhs_detector_ID
+          outWI = static_cast<int>(map_it->second); //This is the workspace index in the LHS that matched rhs_detector_ID
         }
         else
         {
           //Did not find it!
-          outWI = (std::size_t)-1; //Marker to mean its not in the LHS. Sets it to a BIG number
+          outWI = -1; //Marker to mean its not in the LHS.
         }
-        table->push_back( std::pair<int64_t,int64_t>(inWI, outWI) );
+        table->push_back( std::make_pair(inWI, outWI) );
         done = true; //Great, we did it.
       }
 
@@ -246,7 +251,7 @@ void MergeRuns::buildAdditionTables()
           if (std::includes(outDets2.begin(), outDets2.end(), inDets.begin(), inDets.end()))
           {
             //This one is right. Now we can stop looking.
-            table->push_back( std::pair<int64_t,int64_t>(inWI, outWI) );
+            table->push_back( std::make_pair(inWI, outWI) );
             done = true;
             continue;
           }
@@ -260,20 +265,20 @@ void MergeRuns::buildAdditionTables()
         //TODO: should we check that none of the output ones are subsets of this one?
 
         //So we need to add it as a new workspace index
-        table->push_back( std::pair<int64_t,int64_t>(inWI, -1) );
+        table->push_back( std::make_pair(inWI, -1) );
       }
 
     }
 
     //Add this table to the list
-    tables.push_back(table);
+    m_tables.push_back(table);
 
   } //each of the workspaces being added
 
   //Free up memory
   delete lhs_det_to_wi;
 
-  if (tables.size() != inEventWS.size()-1)
+  if (m_tables.size() != m_inEventWS.size()-1)
     throw std::runtime_error("MergeRuns::buildAdditionTables: Mismatch between the number of addition tables and the number of workspaces");
 
 }
@@ -291,7 +296,7 @@ void MergeRuns::execEvent()
   this->buildAdditionTables();
 
   // Create a new output event workspace, by copying the first WS in the list
-  EventWorkspace_sptr inputWS = inEventWS[0];
+  EventWorkspace_sptr inputWS = m_inEventWS[0];
 
   //Make a brand new EventWorkspace
   EventWorkspace_sptr outWS = boost::dynamic_pointer_cast<EventWorkspace>(
@@ -301,20 +306,19 @@ void MergeRuns::execEvent()
   //You need to copy over the data as well.
   outWS->copyDataFrom( (*inputWS) );
 
-  int64_t n=inEventWS.size()-1;
+  int64_t n = m_inEventWS.size()-1;
   m_progress=new Progress(this,0.0,1.0,n);
 
   // Note that we start at 1, since we already have the 0th workspace
-  for (int64_t workspaceNum=1; workspaceNum < static_cast<int>(inEventWS.size()); workspaceNum++)
+  for (size_t workspaceNum=1; workspaceNum < m_inEventWS.size(); workspaceNum++)
   {
     //You are adding this one here
-    EventWorkspace_sptr addee = inEventWS[workspaceNum];
+    EventWorkspace_sptr addee = m_inEventWS[workspaceNum];
 
-    AdditionTable * table = tables[workspaceNum-1];
+    boost::shared_ptr<AdditionTable> table = m_tables[workspaceNum-1];
 
     //Add all the event lists together as the table says to do
-    AdditionTable::iterator it;
-    for (it = table->begin(); it != table->end(); ++it)
+    for (auto it = table->begin(); it != table->end(); ++it)
     {
       int64_t inWI = it->first;
       int64_t outWI = it->second;
@@ -368,7 +372,7 @@ bool MergeRuns::validateInputsForEventWorkspaces(const std::vector<std::string>&
   std::string YUnit;
   bool dist(false);
 
-  inEventWS.clear();
+  m_inEventWS.clear();
 
   // Going to check that name of instrument matches - think that's the best possible at the moment
   //   because if instrument is created from raw file it'll be a different object
@@ -383,7 +387,7 @@ bool MergeRuns::validateInputsForEventWorkspaces(const std::vector<std::string>&
     { //Either it is not found, or it is not an EventWorkspace
       return false;
     }
-    inEventWS.push_back(ws);
+    m_inEventWS.push_back(ws);
 
     // Check a few things are the same for all input workspaces
     if ( i == 0 )

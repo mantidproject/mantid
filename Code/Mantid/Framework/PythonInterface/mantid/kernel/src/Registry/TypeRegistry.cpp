@@ -34,14 +34,17 @@ namespace Mantid
        */
       void registerBuiltins()
       {
-        // Register a handler for each basic type in IPropertyManager.cpp
-        REGISTER_SINGLEVALUE_HANDLER(int16_t);
-        REGISTER_SINGLEVALUE_HANDLER(uint16_t);
-        REGISTER_SINGLEVALUE_HANDLER(int32_t);
-        REGISTER_SINGLEVALUE_HANDLER(uint32_t);
-        REGISTER_SINGLEVALUE_HANDLER(int64_t);
-        REGISTER_SINGLEVALUE_HANDLER(uint64_t);
+        // -- Register a handler for each basic type --
+
+        // unsigned ints
+        REGISTER_SINGLEVALUE_HANDLER(int);
+        REGISTER_SINGLEVALUE_HANDLER(long);
+        REGISTER_SINGLEVALUE_HANDLER(long long);
+        // signed ints
         REGISTER_SINGLEVALUE_HANDLER(unsigned int);
+        REGISTER_SINGLEVALUE_HANDLER(unsigned long);
+        REGISTER_SINGLEVALUE_HANDLER(unsigned long long);
+        //
         REGISTER_SINGLEVALUE_HANDLER(bool);
         REGISTER_SINGLEVALUE_HANDLER(double);
         REGISTER_SINGLEVALUE_HANDLER(std::string);
@@ -49,18 +52,18 @@ namespace Mantid
        #define REGISTER_ARRAYPROPERTY_HANDLER(TYPE) \
          registerHandler(typeid(TYPE), new SequenceTypeHandler<TYPE>());
 
-        REGISTER_ARRAYPROPERTY_HANDLER(std::vector<int16_t>);
-        REGISTER_ARRAYPROPERTY_HANDLER(std::vector<uint16_t>);
-        REGISTER_ARRAYPROPERTY_HANDLER(std::vector<int32_t>);
-        REGISTER_ARRAYPROPERTY_HANDLER(std::vector<uint32_t>);
-        REGISTER_ARRAYPROPERTY_HANDLER(std::vector<int64_t>);
-        REGISTER_ARRAYPROPERTY_HANDLER(std::vector<uint64_t>);
-#ifdef __APPLE__
+        // unsigned ints
+        REGISTER_ARRAYPROPERTY_HANDLER(std::vector<int>);
+        REGISTER_ARRAYPROPERTY_HANDLER(std::vector<long>);
+        REGISTER_ARRAYPROPERTY_HANDLER(std::vector<long long>);
+        // signed ints
+        REGISTER_ARRAYPROPERTY_HANDLER(std::vector<unsigned int>);
         REGISTER_ARRAYPROPERTY_HANDLER(std::vector<unsigned long>);
-#endif
+        REGISTER_ARRAYPROPERTY_HANDLER(std::vector<unsigned long long>);
+        //
+        REGISTER_ARRAYPROPERTY_HANDLER(std::vector<bool>);
         REGISTER_ARRAYPROPERTY_HANDLER(std::vector<double>);
         REGISTER_ARRAYPROPERTY_HANDLER(std::vector<std::string>);
-
       }
 
       /**
@@ -103,7 +106,7 @@ namespace Mantid
 
          for(TypeIDMap::const_iterator it = typeHandlers.begin(); it != iend; ++it)
          {
-           if( it->second->isDerivedType(value) )
+           if( it->second->checkExtract(value) )
            {
              const PyTypeObject *derivedType = it->second->pythonType();
              if( !result )

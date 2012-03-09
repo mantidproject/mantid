@@ -51,6 +51,9 @@ class DataReflWidget(BaseWidget):
         self.initialize_content()
         self._layout.addWidget(self._summary)
 
+        self._detector_distance = 1.0
+        self._sangle_parameter = 0.0
+
         if state is not None:
             self.set_state(state)
         else:
@@ -77,7 +80,11 @@ class DataReflWidget(BaseWidget):
 
         self._summary.log_scale_chk.setChecked(True)
         self._summary.q_min_edit.setValidator(QtGui.QDoubleValidator(self._summary.q_min_edit))
-        self._summary.q_step_edit.setValidator(QtGui.QDoubleValidator(self._summary.q_step_edit))
+        
+        if self.instrument_name == "REF_L":
+            self._summary.q_step_edit.setValidator(QtGui.QDoubleValidator(self._summary.q_step_edit))
+        else:
+            self._summary.q_step_edit.setValidator(QtGui.QIntValidator(self._summary.q_step_edit))
         
         self._summary.angle_edit.setValidator(QtGui.QDoubleValidator(self._summary.angle_edit))
         self._summary.center_pix_edit.setValidator(QtGui.QDoubleValidator(self._summary.center_pix_edit))
@@ -89,6 +96,10 @@ class DataReflWidget(BaseWidget):
         self._summary.norm_peak_to_pixel.setValidator(QtGui.QIntValidator(self._summary.norm_peak_to_pixel))
         self._summary.norm_background_from_pixel1.setValidator(QtGui.QIntValidator(self._summary.norm_background_from_pixel1))
         self._summary.norm_background_to_pixel1.setValidator(QtGui.QIntValidator(self._summary.norm_background_to_pixel1))
+
+        self._summary.det_angle_edit.setValidator(QtGui.QDoubleValidator(self._summary.det_angle_edit))
+        self._summary.det_angle_offset_edit.setValidator(QtGui.QDoubleValidator(self._summary.det_angle_offset_edit))
+        self._summary.direct_pixel_edit.setValidator(QtGui.QDoubleValidator(self._summary.direct_pixel_edit))
 
         # Event connections
         self.connect(self._summary.data_low_res_range_switch, QtCore.SIGNAL("clicked(bool)"), self._data_low_res_clicked)
@@ -152,9 +163,36 @@ class DataReflWidget(BaseWidget):
         call_back = partial(self._edit_event, ctrl=self._summary.norm_run_number_edit)
         self.connect(self._summary.norm_run_number_edit, QtCore.SIGNAL("textChanged(QString)"), call_back)
         call_back = partial(self._edit_event, ctrl=self._summary.data_run_number_edit)
-        self.connect(self._summary.data_run_number_edit, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        self.connect(self._summary.data_run_number_edit, QtCore.SIGNAL("textChanged(QString)"), self._run_number_changed)
+        self._run_number_first_edit = True
         #call_back = partial(self._edit_event, ctrl=self._summary.log_scale_chk)
         #self.connect(self._summary.log_scale_chk, QtCore.SIGNAL("clicked()"), call_back)
+        
+        call_back = partial(self._edit_event, ctrl=self._summary.det_angle_edit)
+        self.connect(self._summary.det_angle_edit, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        call_back = partial(self._edit_event, ctrl=self._summary.det_angle_offset_edit)
+        self.connect(self._summary.det_angle_offset_edit, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        call_back = partial(self._edit_event, ctrl=self._summary.direct_pixel_edit)
+        self.connect(self._summary.direct_pixel_edit, QtCore.SIGNAL("textChanged(QString)"), call_back)
+
+        self.connect(self._summary.det_angle_edit, QtCore.SIGNAL("textChanged(QString)"), self._update_scattering_angle)
+        self.connect(self._summary.det_angle_offset_edit, QtCore.SIGNAL("textChanged(QString)"), self._update_scattering_angle)
+        self.connect(self._summary.direct_pixel_edit, QtCore.SIGNAL("textChanged(QString)"), self._update_scattering_angle)
+        self.connect(self._summary.center_pix_edit, QtCore.SIGNAL("textChanged(QString)"), self._update_scattering_angle)
+        
+        call_back = partial(self._edit_event, ctrl=self._summary.direct_pixel_check)
+        self.connect(self._summary.direct_pixel_check, QtCore.SIGNAL("clicked()"), call_back)
+        call_back = partial(self._edit_event, ctrl=self._summary.det_angle_check)
+        self.connect(self._summary.det_angle_check, QtCore.SIGNAL("clicked()"), call_back)
+        call_back = partial(self._edit_event, ctrl=self._summary.det_angle_offset_check)
+        self.connect(self._summary.det_angle_offset_check, QtCore.SIGNAL("clicked()"), call_back)
+ 
+        self.connect(self._summary.data_peak_from_pixel, QtCore.SIGNAL("textChanged(QString)"), self._data_peak_range_changed)
+        self.connect(self._summary.data_peak_to_pixel, QtCore.SIGNAL("textChanged(QString)"), self._data_peak_range_changed)
+
+        # Output directory
+        self._summary.outdir_edit.setText(os.path.expanduser('~'))
+        self.connect(self._summary.outdir_browse_button, QtCore.SIGNAL("clicked()"), self._output_dir_browse)
  
         # Set up the automated reduction options
         self._summary.auto_reduce_check.setChecked(False)
@@ -167,6 +205,12 @@ class DataReflWidget(BaseWidget):
         self._scattering_angle_changed()
         self.connect(self._summary.angle_radio, QtCore.SIGNAL("clicked()"), self._scattering_angle_changed)
         self.connect(self._summary.center_pix_radio, QtCore.SIGNAL("clicked()"), self._scattering_angle_changed)
+        self.connect(self._summary.det_angle_check, QtCore.SIGNAL("clicked()"), self._det_angle_chk_changed)
+        self.connect(self._summary.det_angle_offset_check, QtCore.SIGNAL("clicked()"), self._det_angle_offset_chk_changed)
+        self.connect(self._summary.direct_pixel_check, QtCore.SIGNAL("clicked()"), self._direct_pixel_chk_changed)
+        self._det_angle_chk_changed()
+        self._det_angle_offset_chk_changed()
+        self._direct_pixel_chk_changed()
         
         # Get instrument selection
         if self.short_name == "REFL": 
@@ -181,6 +225,17 @@ class DataReflWidget(BaseWidget):
         # If we do not have access to /SNS, don't display the automated reduction options
         if not self._settings.debug and not os.path.isdir("/SNS/%s" % self.instrument_name):
             self._summary.auto_reduce_check.hide()
+        
+    def _output_dir_browse(self):
+        output_dir = QtGui.QFileDialog.getExistingDirectory(self, "Output Directory - Choose a directory",
+                                                            os.path.expanduser('~'), 
+                                                            QtGui.QFileDialog.ShowDirsOnly
+                                                            | QtGui.QFileDialog.DontResolveSymlinks)
+        if output_dir:
+            self._summary.outdir_edit.setText(output_dir)   
+        
+    def _run_number_changed(self):
+        self._edit_event(ctrl=self._summary.data_run_number_edit)
         
     def _edit_event(self, text=None, ctrl=None):
         self._summary.edited_warning_label.show()
@@ -221,17 +276,79 @@ class DataReflWidget(BaseWidget):
         util.set_edited(self._summary.tof_range_switch, False)
         util.set_edited(self._summary.q_min_edit, False)
         util.set_edited(self._summary.q_step_edit, False)
+        util.set_edited(self._summary.det_angle_check, False)
+        util.set_edited(self._summary.det_angle_edit, False)
+        util.set_edited(self._summary.det_angle_offset_check, False)
+        util.set_edited(self._summary.det_angle_offset_edit, False)
+        util.set_edited(self._summary.direct_pixel_check, False)
+        util.set_edited(self._summary.direct_pixel_edit, False)
+    
+    def _det_angle_offset_chk_changed(self):
+        is_checked = self._summary.det_angle_offset_check.isChecked()
+        self._summary.det_angle_offset_edit.setEnabled(is_checked)
+    
+    def _det_angle_chk_changed(self):
+        is_checked = self._summary.det_angle_check.isChecked()
+        self._summary.det_angle_edit.setEnabled(is_checked)
+    
+    def _direct_pixel_chk_changed(self):
+        is_checked = self._summary.direct_pixel_check.isChecked()
+        self._summary.direct_pixel_edit.setEnabled(is_checked)
         
     def _scattering_angle_changed(self):
         if self._summary.center_pix_radio.isChecked():
             self._summary.angle_edit.setEnabled(False)
             self._summary.center_pix_edit.setEnabled(True)
+            self._summary.det_angle_check.setEnabled(True)
+            self._det_angle_chk_changed()
+            self._summary.det_angle_offset_check.setEnabled(True)
+            self._det_angle_offset_chk_changed()
+            self._summary.direct_pixel_check.setEnabled(True)
+            self._direct_pixel_chk_changed()
+            self._summary.det_angle_unit_label.setEnabled(True)   
+            self._summary.det_angle_offset_unit_label.setEnabled(True)   
         else:
             self._summary.angle_edit.setEnabled(True)
             self._summary.center_pix_edit.setEnabled(False)
+            self._summary.det_angle_check.setEnabled(False)
+            self._summary.det_angle_edit.setEnabled(False)
+            self._summary.det_angle_offset_check.setEnabled(False)
+            self._summary.det_angle_offset_edit.setEnabled(False)
+            self._summary.direct_pixel_check.setEnabled(False)
+            self._summary.direct_pixel_edit.setEnabled(False)   
+            self._summary.det_angle_unit_label.setEnabled(False)   
+            self._summary.det_angle_offset_unit_label.setEnabled(False)   
+            
         util.set_edited(self._summary.angle_radio,True)
         util.set_edited(self._summary.center_pix_radio,True)
     
+    def _data_peak_range_changed(self):
+        """
+            Update the direct pixel value when the data peak
+            range changes
+        """
+        if not self._summary.center_pix_radio.isChecked():
+            min_pix = float(self._summary.data_peak_from_pixel.text())
+            max_pix = float(self._summary.data_peak_to_pixel.text())
+            dir_pix = (max_pix+min_pix)/2.0
+            dir_pix_str = "%4.4g" % dir_pix
+            self._summary.center_pix_edit.setText(dir_pix_str.strip())
+     
+    def _update_scattering_angle(self):
+        if not self._summary.angle_radio.isChecked():
+            dangle = util._check_and_get_float_line_edit(self._summary.det_angle_edit)
+            dangle0 = util._check_and_get_float_line_edit(self._summary.det_angle_offset_edit)
+            direct_beam_pix = util._check_and_get_float_line_edit(self._summary.direct_pixel_edit)
+            ref_pix = util._check_and_get_float_line_edit(self._summary.center_pix_edit)
+            PIXEL_SIZE = 0.0007 # m
+            
+            delta = (dangle-dangle0)*math.pi/180.0/2.0\
+                + ((direct_beam_pix-ref_pix)*PIXEL_SIZE)/ (2.0*self._detector_distance)
+            
+            scattering_angle = delta*180.0/math.pi
+            scattering_angle_str = "%4.3g" % scattering_angle
+            self._summary.angle_edit.setText(scattering_angle_str.strip())
+     
     def _ref_instrument_selected(self):
         if self._summary.refl_radio.isChecked():
             self.instrument_name = "REF_L"
@@ -245,6 +362,21 @@ class DataReflWidget(BaseWidget):
             self._summary.angle_offset_pm_label.show()
             self._summary.angle_offset_error_edit.show()
             self._summary.angle_offset_unit_label.show()
+            self._summary.det_angle_offset_check.hide()
+            self._summary.det_angle_offset_edit.hide()
+            self._summary.det_angle_offset_unit_label.hide()
+            self._summary.det_angle_check.hide()
+            self._summary.det_angle_edit.hide()
+            self._summary.det_angle_unit_label.hide()
+            self._summary.direct_pixel_check.hide()
+            self._summary.direct_pixel_edit.hide()
+            self._summary.q_bins_label.hide()
+            self._summary.ref_pix_estimate.hide()
+            
+            # Output directory
+            self._summary.outdir_label.hide()
+            self._summary.outdir_edit.hide()
+            self._summary.outdir_browse_button.hide()
         else:
             self.instrument_name = "REF_M"
             self._summary.center_pix_radio.show()
@@ -256,7 +388,15 @@ class DataReflWidget(BaseWidget):
             self._summary.angle_offset_edit.hide()
             self._summary.angle_offset_pm_label.hide()
             self._summary.angle_offset_error_edit.hide()
-            self._summary.angle_offset_unit_label.hide()   
+            self._summary.angle_offset_unit_label.hide()  
+            self._summary.q_step_label.hide()
+            self._summary.q_step_unit_label.hide()
+            self._summary.q_min_edit.hide()
+            self._summary.q_min_label.hide()
+            self._summary.q_min_unit_label.hide() 
+            
+            #TODO: allow log binning
+            self._summary.log_scale_chk.hide()
                  
     def _create_auto_reduce_template(self):
         m = self.get_editing_state()
@@ -268,7 +408,7 @@ class DataReflWidget(BaseWidget):
         content += "import os\n"
         content += "if (os.environ.has_key(\"MANTIDPATH\")):\n"
         content += "    del os.environ[\"MANTIDPATH\"]\n"
-        content += "sys.path.insert(0,'/opt/mantidunstable/bin')\n"
+        content += "sys.path.insert(0,'/opt/mantidnightly/bin')\n"
         content += "from MantidFramework import mtd\n"
         content += "mtd.initialize()\n"
         content += "from mantidsimple import *\n\n"
@@ -371,9 +511,15 @@ class DataReflWidget(BaseWidget):
             self._summary.auto_reduce_btn.hide()
     
     def _remove_item(self):
+        if self._summary.angle_list.count()==0:
+            return
+        self._summary.angle_list.setEnabled(False)        
+        self._summary.remove_btn.setEnabled(False)  
         row = self._summary.angle_list.currentRow()
         if row>=0:
             self._summary.angle_list.takeItem(row)
+        self._summary.angle_list.setEnabled(True)        
+        self._summary.remove_btn.setEnabled(True)  
 
     def is_running(self, is_running):
         """
@@ -381,6 +527,7 @@ class DataReflWidget(BaseWidget):
             @param is_running: True if a reduction is running
         """
         super(DataReflWidget, self).is_running(is_running)
+        self.setEnabled(not is_running)
         self._summary.plot_count_vs_y_btn.setEnabled(not is_running)
         self._summary.plot_count_vs_y_bck_btn.setEnabled(not is_running)
         self._summary.plot_count_vs_x_btn.setEnabled(not is_running)
@@ -617,14 +764,47 @@ class DataReflWidget(BaseWidget):
         else:
             item_widget = QtGui.QListWidgetItem(run_numbers, self._summary.angle_list)
             item_widget.setData(QtCore.Qt.UserRole, state)
+        
+        if IS_IN_MANTIDPLOT and self.short_name == "REFM":
+            try:
+                run_entry = str(self._summary.data_run_number_edit.text()).strip()
+                if len(run_entry)==0 or run_entry=="0":
+                    return
+                
+                logs = data_manipulation.get_logs(self.instrument_name, run_entry)
+                if not self._summary.direct_pixel_check.isChecked():
+                    angle_str = "%-4.3g"%logs["DIRPIX"]
+                    self._summary.direct_pixel_edit.setText(angle_str.strip())
+                if not self._summary.det_angle_offset_check.isChecked():
+                    angle_str = "%-4.4g"%logs["DANGLE0"]
+                    self._summary.det_angle_offset_edit.setText(angle_str.strip())
+                if not self._summary.det_angle_check.isChecked():
+                    angle_str = "%-4.4g"%logs["DANGLE"]
+                    self._summary.det_angle_edit.setText(angle_str.strip())
+                if not self._summary.angle_radio.isChecked():
+                    angle_str = "%-4.4g"%logs["SANGLE"]
+                    self._summary.angle_edit.setText(angle_str.strip())
+                                        
+                self._sangle_parameter = logs["SANGLE"]
+                self._detector_distance = logs["DET_DISTANCE"]
+            except:
+                # Could not read in the parameters, skip.
+                pass
         self._reset_warnings()
 
+
     def _angle_changed(self):
+        if self._summary.angle_list.count()==0:
+            return
+        self._summary.angle_list.setEnabled(False)  
+        self._summary.remove_btn.setEnabled(False)  
         current_item =  self._summary.angle_list.currentItem()
         if current_item is not None:
             state = current_item.data(QtCore.Qt.UserRole).toPyObject()
             self.set_editing_state(state)
             self._reset_warnings()
+        self._summary.angle_list.setEnabled(True)
+        self._summary.remove_btn.setEnabled(True)  
 
     def set_state(self, state):
         """
@@ -655,7 +835,10 @@ class DataReflWidget(BaseWidget):
             # Common Q binning
             self._summary.q_min_edit.setText(str(state.data_sets[0].q_min))
             self._summary.log_scale_chk.setChecked(state.data_sets[0].q_step<0)
-            self._summary.q_step_edit.setText(str(math.fabs(state.data_sets[0].q_step)))
+            if isinstance(state.data_sets[0], REFMDataSets):
+                self._summary.q_step_edit.setText(str(state.data_sets[0].q_bins))
+            else:
+                self._summary.q_step_edit.setText(str(math.fabs(state.data_sets[0].q_step)))
             
             # Common angle offset
             if hasattr(state.data_sets[0], "angle_offset"):
@@ -694,9 +877,22 @@ class DataReflWidget(BaseWidget):
         self._summary.data_from_tof.setText(str(int(state.DataTofRange[0])))
         self._summary.data_to_tof.setText(str(int(state.DataTofRange[1])))
         self._summary.tof_range_switch.setChecked(state.crop_TOF_range)
+        self._tof_range_clicked(state.crop_TOF_range)
         
-        self._summary.data_run_number_edit.setText(str(','.join([str(i) for i in state.data_files])))
-                
+        if hasattr(state, "set_detector_angle"):
+            self._summary.det_angle_check.setChecked(state.set_detector_angle)
+            if state.set_detector_angle:
+                self._summary.det_angle_edit.setText(str(state.detector_angle).strip())
+            self._summary.det_angle_offset_check.setChecked(state.set_detector_angle_offset)
+            if state.set_detector_angle_offset:
+                self._summary.det_angle_offset_edit.setText(str(state.detector_angle_offset).strip())
+            self._summary.direct_pixel_check.setChecked(state.set_direct_pixel)
+            if state.set_direct_pixel:
+                self._summary.direct_pixel_edit.setText(str(state.direct_pixel).strip())
+            self._det_angle_chk_changed()
+            self._det_angle_offset_chk_changed()
+            self._direct_pixel_chk_changed()
+        
         # Normalization options
         self._summary.norm_run_number_edit.setText(str(state.norm_file))
         self._summary.norm_peak_from_pixel.setText(str(state.NormPeakPixels[0]))
@@ -715,7 +911,10 @@ class DataReflWidget(BaseWidget):
         # Q binning
         self._summary.q_min_edit.setText(str(state.q_min))
         self._summary.log_scale_chk.setChecked(state.q_step<0)
-        self._summary.q_step_edit.setText(str(math.fabs(state.q_step)))
+        if isinstance(state, REFMDataSets):
+            self._summary.q_step_edit.setText(str(state.q_bins))
+        else:
+            self._summary.q_step_edit.setText(str(math.fabs(state.q_step)))
 
         # Scattering angle
         if hasattr(state, "use_center_pixel"):
@@ -726,7 +925,15 @@ class DataReflWidget(BaseWidget):
             else:
                 self._summary.angle_radio.setChecked(True)
             self._scattering_angle_changed()
-
+            
+        # Output directory
+        if hasattr(state, "output_dir"):
+            if len(str(state.output_dir).strip())>0:
+                self._summary.outdir_edit.setText(str(state.output_dir))
+            
+        self._reset_warnings()
+        self._summary.data_run_number_edit.setText(str(','.join([str(i) for i in state.data_files])))
+            
     def get_state(self):
         """
             Returns an object with the state of the interface
@@ -738,9 +945,13 @@ class DataReflWidget(BaseWidget):
         # Common Q binning
         q_min = float(self._summary.q_min_edit.text())
         q_step = float(self._summary.q_step_edit.text())
-        if self._summary.log_scale_chk.isChecked():
-            q_step = -q_step
-        
+        q_bins = 0
+        if self.instrument_name == "REF_L":
+            if self._summary.log_scale_chk.isChecked():
+                q_step = -q_step
+        else:
+            q_bins = int(math.ceil(float(self._summary.q_step_edit.text())))
+            
         # Angle offset
         if hasattr(m, "angle_offset"):
             angle_offset = float(self._summary.angle_offset_edit.text())
@@ -757,9 +968,12 @@ class DataReflWidget(BaseWidget):
                 data.angle_offset = angle_offset
                 data.angle_offset_error = angle_offset_error
 
-            ##
-            # Add here states that are relevant to the interface (all the runs)
-            ##
+            if hasattr(data, "q_bins"):
+                data.q_bins = q_bins
+                data.q_log = self._summary.log_scale_chk.isChecked()
+
+            if hasattr(data, "output_dir"):
+                data.output_dir = self._summary.outdir_edit.text()
             
             state_list.append(data)
         state.data_sets = state_list
@@ -831,6 +1045,14 @@ class DataReflWidget(BaseWidget):
             if hasattr(m, "theta"):
                 m.theta = float(self._summary.angle_edit.text())
                 m.use_center_pixel = False
+
+        if hasattr(m, "set_detector_angle"):
+            m.set_detector_angle = self._summary.det_angle_check.isChecked()
+            m.detector_angle = util._check_and_get_float_line_edit(self._summary.det_angle_edit)
+            m.set_detector_angle_offset = self._summary.det_angle_offset_check.isChecked()
+            m.detector_angle_offset = util._check_and_get_float_line_edit(self._summary.det_angle_offset_edit)
+            m.set_direct_pixel = self._summary.direct_pixel_check.isChecked()
+            m.direct_pixel = util._check_and_get_float_line_edit(self._summary.direct_pixel_edit)
 
         ##
         # Add here states that are data file dependent

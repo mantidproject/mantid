@@ -4,6 +4,8 @@ This algorithm will predict the position of single-crystal diffraction peaks (bo
 create an output [[PeaksWorkspace]] containing the result.
 
 This algorithm uses the InputWorkspace to determine the instrument in use, as well as the UB Matrix and Unit Cell of the sample used.
+You can use the [[CopySample]] algorithm (with CopyLattice=1) to copy a UB matrix from
+a PeaksWorkspace to another workspace.
 
 The algorithm operates by calculating the scattering direction (given the UB matrix) for a particular HKL, and determining whether that hits a detector.
 The Max/MinDSpacing parameters are used to determine what HKL's to try.
@@ -86,7 +88,7 @@ namespace Crystal
   void PredictPeaks::init()
   {
     declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input),
-        "An input workspace (MatrixWorkspace or MDEventWorkspace) containing:\n"
+        "An input workspace (MatrixWorkspace, MDEventWorkspace, or PeaksWorkspace) containing:\n"
         "  - The relevant Instrument (calibrated as needed).\n"
         "  - A sample with a UB matrix.\n"
         "  - The goniometer rotation matrix.");

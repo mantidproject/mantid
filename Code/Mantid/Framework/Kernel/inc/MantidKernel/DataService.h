@@ -18,8 +18,11 @@
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/MultiThreaded.h"
+#include <Poco/ScopedLock.h>
+#include <Poco/Mutex.h>
+
 namespace Mantid
 {
 namespace Kernel
@@ -175,9 +178,18 @@ public:
       std::string m_outwsname; ///< output workspace name
     };
 
-  /// Add an object to the service
+  //--------------------------------------------------------------------------
+  /** Add an object to the service
+   * @param name :: name of the object
+   * @param Tobject :: shared pointer to object to add
+   * @throw std::runtime_error if name is empty
+   * @throw std::runtime_error if name exists in the map
+   */
   virtual void add( const std::string& name, const boost::shared_ptr<T>& Tobject)
   {
+    // Make DataService access thread-safe
+    Poco::Mutex::ScopedLock _lock(m_mutex);
+
     // Don't permit an empty name for the workspace
     if (name.empty())
     {
@@ -216,9 +228,19 @@ public:
     return;
   }
 
-  /// Add or replace an object
+  //--------------------------------------------------------------------------
+  /** Add or replace an object to the service.
+   * Does NOT throw if the name was already used.
+   *
+   * @param name :: name of the object
+   * @param Tobject :: shared pointer to object to add
+   * @throw std::runtime_error if name is empty
+   */
   virtual void addOrReplace( const std::string& name, const boost::shared_ptr<T>& Tobject)
   {
+    // Make DataService access thread-safe
+    m_mutex.lock();
+
     //find if the Tobject already exists
     std::string foundName;
     svc_it it = this->findNameWithCaseSearch(name, foundName);
@@ -235,21 +257,30 @@ public:
         //if the name of workspace starts with __
         if(!name_startswith.compare("__"))
         {
+          m_mutex.unlock();
           return;
         }
       }
       notificationCenter.postNotification(new AfterReplaceNotification(name,Tobject));
+      m_mutex.unlock();
     }
     else
     {
+      // Avoid double-locking
+      m_mutex.unlock();
       add(name,Tobject);
     }
     return;
   }
 
-  /// Remove an object
+  //--------------------------------------------------------------------------
+  /** Remove an object from the service.
+   * @param name :: name of the object */
   void remove( const std::string& name)
   {
+    // Make DataService access thread-safe
+    Poco::Mutex::ScopedLock _lock(m_mutex);
+
     std::string foundName;
     svc_it it = this->findNameWithCaseSearch(name, foundName);
     if (it==datamap.end())
@@ -259,24 +290,33 @@ public:
     }
 
     notificationCenter.postNotification(new PreDeleteNotification(foundName,it->second));
-    g_log.information("Data Object '"+ foundName +"' deleted from data service.\n");
+    g_log.information("Data Object '"+ foundName +"' deleted from data service.");
     datamap.erase(it);
-    API::MemoryManager::Instance().releaseFreeMemory();
+    //API::MemoryManager::Instance().releaseFreeMemory();
     notificationCenter.postNotification(new PostDeleteNotification(foundName));
     return;
   }
 
+  //--------------------------------------------------------------------------
   /// Empty the service
   void clear()
   {
+    // Make DataService access thread-safe
+    Poco::Mutex::ScopedLock _lock(m_mutex);
+
     datamap.clear();
     notificationCenter.postNotification(new ClearNotification());
     g_log.debug() << typeid(this).name() << " cleared.\n";
   }
 
-  /// Get a shared pointer to a stored data object
+  //--------------------------------------------------------------------------
+  /** Get a shared pointer to a stored data object
+   * @param name :: name of the object */
   boost::shared_ptr<T> retrieve( const std::string& name) const
   {
+    // Make DataService access thread-safe
+    Poco::Mutex::ScopedLock _lock(m_mutex);
+
     std::string foundName;
     svc_it it = this->findNameWithCaseSearch(name, foundName);
     if (it != datamap.end())
@@ -292,6 +332,9 @@ public:
   /// Check to see if a data object exists in the store
   bool doesExist(const std::string& name) const
   {
+    // Make DataService access thread-safe
+    Poco::Mutex::ScopedLock _lock(m_mutex);
+
     std::string foundName;
     svc_it it = this->findNameWithCaseSearch(name, foundName);
     if (it!=datamap.end())
@@ -308,6 +351,9 @@ public:
   /// Get a vector of the names of the data objects stored by the service
   std::set<std::string> getObjectNames() const
   {
+    // Make DataService access thread-safe
+    Poco::Mutex::ScopedLock _lock(m_mutex);
+
     std::set<std::string> names;
     svc_constit it;
     for( it = datamap.begin(); it != datamap.end(); ++it)
@@ -339,6 +385,10 @@ private:
   DataService(const DataService&);
   /// Private, unimplemented copy assignment operator
   DataService& operator=(const DataService&);
+
+  /// Recursive mutex to avoid simultaneous access or notifications
+  mutable Poco::Mutex m_mutex;
+
 
   /**
    * Find a name in the map and return an iterator pointing to it. This takes

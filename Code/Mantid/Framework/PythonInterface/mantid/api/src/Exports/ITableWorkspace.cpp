@@ -98,19 +98,3 @@ void export_ITableWorkspace()
   REGISTER_SINGLEVALUE_HANDLER(ITableWorkspace_sptr);
 }
 
-void export_ITableWorkspaceProperty()
-{
-  using Mantid::API::WorkspaceProperty;
-  using Mantid::API::IWorkspaceProperty;
-  using Mantid::Kernel::PropertyWithValue;
-
-  // PropertyWithValue<ITableWorkspace_sptr>
-  EXPORT_PROP_W_VALUE(ITableWorkspace_sptr, ITableWorkspace);
-  // Register a bare pointer to the type
-  register_ptr_to_python<WorkspaceProperty<ITableWorkspace>*>();
-  // Finally the WorkspaceProperty<ITableWorkspace> hierarchy
-  class_<WorkspaceProperty<ITableWorkspace>, bases<PropertyWithValue<ITableWorkspace_sptr>,IWorkspaceProperty>,
-         boost::noncopyable>("WorkspaceProperty_ITableWorkspace", no_init)
-      ;
-}
-

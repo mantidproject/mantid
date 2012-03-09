@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidMDEvents/MDHistoWorkspaceIterator.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
@@ -17,12 +18,29 @@ using namespace Mantid;
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
 using Mantid::Kernel::VMD;
+using Mantid::Geometry::MDHistoDimension;
 using Mantid::Geometry::MDImplicitFunction;
+using Mantid::Geometry::MDHistoDimension_sptr;
 using Mantid::Geometry::MDPlane;
 using Mantid::Geometry::MDPlane;
 
 class MDHistoWorkspaceIteratorTest : public CxxTest::TestSuite
 {
+private:
+
+  /// Helper type allows masking to take place directly on MDHistoWorkspaces for testing purposes.
+  class WritableHistoWorkspace : public Mantid::MDEvents::MDHistoWorkspace
+  {
+  public:
+    WritableHistoWorkspace(MDHistoDimension_sptr x) : Mantid::MDEvents::MDHistoWorkspace(x)
+    {
+    }
+    void setMaskValueAt(size_t at, bool value)
+    {
+      m_masks[at] = value;
+    }
+  };
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -195,6 +213,40 @@ public:
 
   }
 
+  void test_predictable_steps()
+  {
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
+    MDHistoWorkspaceIterator* histoIt = dynamic_cast<MDHistoWorkspaceIterator*>(ws->createIterator());
+    size_t expected = 0;
+    for(size_t i = 0; i < histoIt->getDataSize(); ++i)
+    {
+      size_t current = histoIt->getLinearIndex();
+      TSM_ASSERT_EQUALS("Has not proceeded in a incremental manner.", expected, current);
+      expected = current + 1;
+      histoIt->next();
+    }
+  }
+
+  void test_skip_masked_detectors()
+  {
+    WritableHistoWorkspace* ws = new WritableHistoWorkspace(MDHistoDimension_sptr(new MDHistoDimension("x","x","m", 0.0, 10, 100)));
+
+    ws->setMaskValueAt(0, true);//Mask the first bin
+    ws->setMaskValueAt(1, true);//Mask the second bin
+    ws->setMaskValueAt(2, false);//NOT MASKED
+    ws->setMaskValueAt(3, true);//Mask the second bin
+    ws->setMaskValueAt(4, true);//Mask the second bin
+    ws->setMaskValueAt(5, false);//NOT MASKED
+
+    Mantid::MDEvents::MDHistoWorkspace_sptr ws_sptr(ws);
+
+    MDHistoWorkspaceIterator* histoIt = dynamic_cast<MDHistoWorkspaceIterator*>(ws_sptr->createIterator());
+    histoIt->next();
+    TSM_ASSERT_EQUALS("The first index hit should be 2 since that is the first unmasked one", 2, histoIt->getLinearIndex());
+    histoIt->next();
+    TSM_ASSERT_EQUALS("The first index hit should be 2 since that is the first unmasked one", 5, histoIt->getLinearIndex());
+  }
+
 };
 
 
@@ -218,7 +270,7 @@ public:
   /** ~Two million iterations */
   void test_iterator_3D_signalAndErrorOnly()
   {
-    MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws);
+    MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws, new SkipNothing);
     do
     {
       signal_t sig = it->getNormalizedSignal();
@@ -230,7 +282,7 @@ public:
   /** ~Two million iterations */
   void test_iterator_3D_withGetVertexes()
   {
-    MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws);
+    MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws, new SkipNothing);
     size_t numVertices;
     do
     {
@@ -245,7 +297,7 @@ public:
   /** ~Two million iterations */
   void test_iterator_3D_withGetCenter()
   {
-    MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws);
+    MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws, new SkipNothing);
     do
     {
       signal_t sig = it->getNormalizedSignal();
@@ -258,7 +310,7 @@ public:
   /** Use jumpTo() */
   void test_iterator_3D_withGetCenter_usingJumpTo()
   {
-    MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws);
+    MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws, new SkipNothing);
     int max = int(it->getDataSize());
     for (int i=0; i<max; i++)
     {
@@ -272,11 +324,24 @@ public:
 
   void test_masked_get_vertexes_call_throws()
   {
-    boost::scoped_ptr<MDHistoWorkspaceIterator> it(new MDHistoWorkspaceIterator(ws));
+    boost::scoped_ptr<MDHistoWorkspaceIterator> it(new MDHistoWorkspaceIterator(ws, new SkipNothing));
     size_t numVertexes;
     size_t outDimensions = 1;
     bool maskDim[] = {true};
     TSM_ASSERT_THROWS("Not implemented yet, should throw", it->getVertexesArray(numVertexes, outDimensions, maskDim), std::runtime_error);
+  }
+
+  void test_getIsMasked()
+  {
+    //Characterisation test
+    MDHistoWorkspaceIterator iterator(ws, new SkipNothing());
+    for(size_t i =0; i < ws->getNPoints(); ++i)
+    {
+      std::stringstream stream;
+      stream << "Masking is different from the workspace at index: " << i;
+      TSM_ASSERT_EQUALS(stream.str(), ws->getIsMaskedAt(i), iterator.getIsMasked());
+      iterator.next();
+    }
   }
 
 };

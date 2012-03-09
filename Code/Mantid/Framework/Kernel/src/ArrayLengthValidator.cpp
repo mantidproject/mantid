@@ -176,7 +176,7 @@ ArrayLengthValidator<TYPE>::ArrayLengthValidator():IValidator<std::vector<TYPE> 
     @returns a clone of the validator
     */
   template <typename TYPE>
-  IValidator<std::vector <TYPE> >* ArrayLengthValidator<TYPE>::clone()
+  IValidator<std::vector <TYPE> >* ArrayLengthValidator<TYPE>::clone() const
   {
     return new ArrayLengthValidator(*this);
   }
@@ -212,8 +212,10 @@ ArrayLengthValidator<TYPE>::ArrayLengthValidator():IValidator<std::vector<TYPE> 
     }
     return "";
   }
+
   // Required explicit instantiations
   template class ArrayLengthValidator<double>;
   template class ArrayLengthValidator<int>;
+  template class ArrayLengthValidator<std::string>;
 } // namespace Mantid
 } // namespace Kernel

@@ -53,6 +53,7 @@ namespace Mantid
     protected:
       virtual void functionMW(double* out, const double* xValues, const size_t nData)const;
       virtual void functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData);
+      virtual void setActiveParameter(size_t i,double value);
 
       /// overwrite IFunction base class method that declares function parameters 
       virtual void init(); 

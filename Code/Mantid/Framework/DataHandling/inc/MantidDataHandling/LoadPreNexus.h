@@ -47,14 +47,13 @@ namespace DataHandling
     virtual int version() const;
     virtual const std::string category() const;
     virtual const char * filePropertyName() const;
-    Mantid::API::ITableWorkspace_sptr determineChunking(const std::string& filename, double maxChunkSize);
+    void parseRuninfo(const std::string &runinfo, std::string &dataDir, std::vector<std::string> &eventFilenames);
     bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
     int fileCheck(const std::string& filePath);
   private:
     virtual void initDocs();
     void init();
     void exec();
-    void parseRuninfo(const std::string &runinfo, std::string &dataDir, std::vector<std::string> &eventFilenames);
     void runLoadNexusLogs(const std::string &runinfo, const std::string &dataDir,
                           Mantid::API::IEventWorkspace_sptr wksp, const double prog_start, const double prog_stop);
     void runLoadMonitors(const double prog_start, const double prog_stop);

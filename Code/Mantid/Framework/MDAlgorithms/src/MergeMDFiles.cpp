@@ -25,6 +25,7 @@ See also: [[MergeMD]], for merging any MDWorkspaces in system memory (faster, bu
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDAlgorithms/MergeMDFiles.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
+#include "MantidAPI/MemoryManager.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

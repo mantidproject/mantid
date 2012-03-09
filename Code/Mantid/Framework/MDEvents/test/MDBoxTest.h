@@ -1057,6 +1057,28 @@ public:
   {
     do_test_fileBackEnd_binningOperations(true);
   }
+
+  void test_getIsMasked_Default()
+  {
+    MDBox<MDLeanEvent<1>, 1> box;
+    TSM_ASSERT("Default should be for a MDBox not to be masked!", !box.getIsMasked());
+  }
+
+  void test_mask()
+  {
+    MDBox<MDLeanEvent<1>, 1> box;
+    TSM_ASSERT("Default should be unmasked.", !box.getIsMasked());
+    TS_ASSERT_THROWS_NOTHING(box.mask());
+    TSM_ASSERT("Should have been masked.", box.getIsMasked());
+  }
+
+  void test_unmask()
+  {
+    MDBox<MDLeanEvent<1>, 1> box;
+    TSM_ASSERT("Default should be unmasked.", !box.getIsMasked());
+    TS_ASSERT_THROWS_NOTHING(box.unmask());
+    TSM_ASSERT("Should have been masked.", !box.getIsMasked());
+  }
 };
 
 

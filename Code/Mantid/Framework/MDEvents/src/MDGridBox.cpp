@@ -1401,6 +1401,50 @@ namespace MDEvents
     } // (for each box)
   }
 
+  /**
+  Getter for the masking status of the gridded box.
+  @return TRUE if ANY ONE of its referenced boxes is masked.
+  */
+  TMDE(
+  bool MDGridBox)::getIsMasked() const
+  {
+    bool isMasked = false;
+    for (size_t i=0; i < numBoxes; ++i)
+    {
+      // Go through each contained box
+      IMDBox<MDE, nd> * box = boxes[i];
+      if(box->getIsMasked())
+      {
+        isMasked = true;
+        break;
+      }
+    }
+    return isMasked;
+  }
+
+  ///Setter for masking the box
+  TMDE(
+  void MDGridBox)::mask()
+  {
+    for (size_t i=0; i < numBoxes; ++i)
+    {
+      // Go through each contained box
+      IMDBox<MDE, nd> * box = boxes[i];
+      box->mask();
+    }
+  }
+
+  ///Setter for unmasking the box
+  TMDE(
+  void MDGridBox)::unmask()
+  {
+    for (size_t i=0; i < numBoxes; ++i)
+    {
+      // Go through each contained box
+      IMDBox<MDE, nd> * box = boxes[i];
+      box->unmask();
+    }
+  }
 
 }//namespace MDEvents
 

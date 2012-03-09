@@ -42,7 +42,7 @@ AlgorithmHistory::~AlgorithmHistory()
     @param duration :: The time (in seconds) that it took to run this algorithm (optional).
 	 @param uexeccount ::  an  unsigned int for algorithm execution order
  */
-AlgorithmHistory::AlgorithmHistory(const std::string& name, int vers, const DateAndTime& start, const double& duration,unsigned int uexeccount) :
+AlgorithmHistory::AlgorithmHistory(const std::string& name, int vers, const DateAndTime& start, const double& duration, std::size_t uexeccount) :
   m_name(name),m_version(vers),m_executionDate(start),
   m_executionDuration(duration),m_execCount(uexeccount)
 {

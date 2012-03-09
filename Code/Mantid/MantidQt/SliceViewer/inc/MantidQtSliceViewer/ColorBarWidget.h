@@ -9,6 +9,7 @@
 #include <iostream>
 #include <QKeyEvent>
 #include <QtGui>
+#include "DllOption.h"
 
 namespace MantidQt
 {
@@ -47,9 +48,12 @@ signals:
  * @author Janik Zikovsky
  * @date Oct 31, 2011.
  */
-class ColorBarWidget : public QWidget
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER ColorBarWidget : public QWidget
 {
   Q_OBJECT
+  Q_PROPERTY(bool log READ getLog WRITE setLog )
+  Q_PROPERTY(double minimum READ getMinimum WRITE setMinimum)
+  Q_PROPERTY(double maximum READ getMaximum WRITE setMaximum)
 
 public:
   ColorBarWidget(QWidget *parent = 0);
@@ -59,6 +63,8 @@ public:
 
   void setViewRange(double min, double max);
   void setViewRange(QwtDoubleInterval range);
+  void setMinimum(double min);
+  void setMaximum(double max);
   void setLog(bool log);
   void setRenderMode(bool rendering);
 

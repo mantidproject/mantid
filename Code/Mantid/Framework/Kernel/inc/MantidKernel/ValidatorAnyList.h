@@ -82,7 +82,7 @@ public:
            m_allowedValues.insert(value);
     }
 
-    IValidator<TYPE>* clone() { return new ValidatorAnyList<TYPE>(*this); }
+    IValidator<TYPE>* clone() const { return new ValidatorAnyList<TYPE>(*this); }
 
   private:
   /** Checks if the string passed is in the list

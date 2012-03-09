@@ -236,6 +236,8 @@ class CreateCalibrationWorkspace(ReductionStep):
     _detector_range_end = None
     _calib_raw_files = []
     _calib_workspace = None
+    _analyser = None
+    _reflection = None
 
     def __init__(self):
         super(CreateCalibrationWorkspace, self).__init__()
@@ -247,6 +249,8 @@ class CreateCalibrationWorkspace(ReductionStep):
         self._detector_range_end = None
         self._calib_raw_files = []
         self._calib_workspace = None
+        self._analyser = None
+        self._reflection = None
 
     def execute(self, reducer, file_ws):
         """The information we use here is not from the main reducer object
@@ -288,7 +292,7 @@ class CreateCalibrationWorkspace(ReductionStep):
             sum += cal_ws.readY(i)[0]
 
         runNo = cal_ws.getRun().getLogData("run_number").value
-        outWS_n = runs[0][:3] + runNo + '_cal'
+        outWS_n = runs[0][:3] + runNo + '_' + self._analyser + self._reflection + '_calib'
 
         value = 1.0 / ( sum / cal_ws.getNumberHistograms() )
         Scale(cwsn, cwsn, value, 'Multiply')
@@ -318,6 +322,12 @@ class CreateCalibrationWorkspace(ReductionStep):
         else:
             raise ValueError("Indirect: Can't set calib files if you don't "
                 "specify a calib file.")
+    
+    def set_analyser(self, analyser):
+        self._analyser = str(analyser)
+    
+    def set_reflection(self, reflection):
+        self._reflection = str(reflection)
                 
     def result_workspace(self):
         return self._calib_workspace
@@ -689,7 +699,7 @@ class DetailedBalance(ReductionStep):
             workspaces = [file_ws]
 
         for ws in workspaces:
-            ExponentialCorrection(ws, ws, 1.0, correction)
+            ExponentialCorrection(ws, ws, 1.0, correction)#, Operation="Multiply")
         
     def set_temperature(self, temp):
         self._temp = temp

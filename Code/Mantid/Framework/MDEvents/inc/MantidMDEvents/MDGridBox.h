@@ -108,6 +108,14 @@ namespace MDEvents
     coord_t getBoxSize(size_t d)
     { return boxSize[d]; }
 
+    virtual bool getIsMasked() const;
+
+    ///Setter for masking the box
+    virtual void mask();
+
+    ///Setter for unmasking the box
+    virtual void unmask();
+
   public:
     /// Typedef for a shared pointer to a MDGridBox
     typedef boost::shared_ptr< MDGridBox<MDE, nd> > sptr;

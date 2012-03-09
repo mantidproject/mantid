@@ -176,6 +176,26 @@ void ColorBarWidget::setViewRange(double min, double max)
   updateMinMaxGUI();
 }
 
+/** Set the range of values viewed in the color bar
+ *
+ * @param min :: min value = start of the color map
+ */
+void ColorBarWidget::setMinimum(double min)
+{
+  m_min = min;
+  updateMinMaxGUI();
+}
+
+/** Set the range of values viewed in the color bar
+ *
+ * @param min :: min value = start of the color map
+ */
+void ColorBarWidget::setMaximum(double max)
+{
+  m_max = max;
+ updateMinMaxGUI();
+}
+
 void ColorBarWidget::setViewRange(QwtDoubleInterval range)
 { this->setViewRange(range.minValue(), range.maxValue()); }
 

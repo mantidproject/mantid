@@ -1,16 +1,22 @@
 # header files
 set( INC_FILES
+ BinInputWidget.h
  WidgetDllOption.h
  GeometryWidget.h
  DimensionWidget.h
  DimensionWidgetFactory.h
+ LowHighStepInputWidget.h
+ SimpleBinInputWidget.h
  ThresholdRangeWidget.h
 )
 
 # header files that are mocced
 set( HDR_FILES
+  BinInputWidget.h
   GeometryWidget.h
   DimensionWidget.h
+  LowHighStepInputWidget.h
+  SimpleBinInputWidget.h
   ThresholdRangeWidget.h
 )
 
@@ -19,6 +25,8 @@ set( SRC_FILES
   GeometryWidget.cpp
   DimensionWidget.cpp
   DimensionWidgetFactory.cpp
+  LowHighStepInputWidget.cpp
+  SimpleBinInputWidget.cpp
   ThresholdRangeWidget.cpp
 )
 

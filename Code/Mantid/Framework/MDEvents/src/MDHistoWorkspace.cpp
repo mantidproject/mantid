@@ -10,6 +10,7 @@
 #include <map>
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
+#include <boost/scoped_array.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -63,11 +64,13 @@ namespace MDEvents
     // Allocate the linear arrays
     m_signals = new signal_t[m_length];
     m_errorsSquared = new signal_t[m_length];
+    m_masks = new bool[m_length];
     // Now copy all the data
     for (size_t i=0; i<m_length; ++i)
     {
       m_signals[i] = other.m_signals[i];
       m_errorsSquared[i] = other.m_errorsSquared[i];
+      m_masks[i] = other.m_masks[i];
     }
   }
 
@@ -85,6 +88,7 @@ namespace MDEvents
     delete [] m_indexMaker;
     delete [] m_indexMax;
     delete [] m_origin;
+    delete [] m_masks;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -101,6 +105,7 @@ namespace MDEvents
     // Allocate the linear arrays
     m_signals = new signal_t[m_length];
     m_errorsSquared = new signal_t[m_length];
+    m_masks = new bool[m_length];
 
     // Initialize them to NAN (quickly)
     signal_t nan = std::numeric_limits<signal_t>::quiet_NaN();
@@ -157,6 +162,7 @@ namespace MDEvents
     {
       m_signals[i] = signal;
       m_errorsSquared[i] = errorSquared;
+      m_masks[i] = false; //Not masked by default;
     }
   }
 
@@ -459,16 +465,17 @@ namespace MDEvents
     coord_t length = dir.normalize();
 
     // Vector with +1 where direction is positive, -1 where negative
-    #define sgn(x) ((x<0)?-1:((x>0)?1:0))
+    #define sgn(x) ((x<0)?-1.0f:((x>0.)?1.0f:0.0f))
     VMD dirSign(nd);
     for (size_t d=0; d<nd; d++)
+    {
       dirSign[d] = sgn(dir[d]);
-
+    }
     size_t BADINDEX = size_t(-1);
 
     // Dimensions of the workspace
-    size_t * index = new size_t[nd];
-    size_t * numBins = new size_t[nd];
+    boost::scoped_array<size_t> index(new size_t[nd]);
+    boost::scoped_array<size_t> numBins(new size_t[nd]);
     for (size_t d=0; d<nd; d++)
     {
       IMDDimension_const_sptr dim = this->getDimension(d);
@@ -481,7 +488,7 @@ namespace MDEvents
 
     // Start with the start/end points, if they are within range.
     if (pointInWorkspace(this, start))
-      boundaries.insert(0);
+      boundaries.insert(0.0f);
     if (pointInWorkspace(this, end))
       boundaries.insert(length);
 
@@ -532,9 +539,9 @@ namespace MDEvents
       VMD lastPos = start + (dir * lastLinePos);
       x.push_back(lastLinePos);
 
-      it++;
+      ++it;
 
-      for (; it != boundaries.end(); it++)
+      for (; it != boundaries.end(); ++it)
       {
         // This is our current position along the line
         coord_t linePos = *it;
@@ -1152,6 +1159,36 @@ namespace MDEvents
         m_signals[i] = signal;
         m_errorsSquared[i] = errorSquared;
       }
+    }
+  }
+
+  /**
+  Setter for the masking region.
+  Does not perform any clearing. Multiple calls are compounded.
+  @param maskingRegion : Implicit function defining mask region.
+  */
+  void MDHistoWorkspace::setMDMasking(Mantid::Geometry::MDImplicitFunction* maskingRegion)
+  {
+    if(maskingRegion != NULL)
+    {
+      for(size_t i = 0; i < this->getNPoints(); ++i)
+      {
+        //If the function masks the point, then mask it, otherwise leave it as it is.
+        if(maskingRegion->isPointContained(this->getCenter(i)) )
+        {
+          m_masks[i] =  true;
+        }
+      }
+      delete maskingRegion;
+    }
+  }
+
+  /// Clear any existing masking.
+  void MDHistoWorkspace::clearMDMasking()
+  {
+    for(size_t i = 0; i < this->getNPoints(); ++i)
+    {
+      m_masks[i] = false;
     }
   }
 

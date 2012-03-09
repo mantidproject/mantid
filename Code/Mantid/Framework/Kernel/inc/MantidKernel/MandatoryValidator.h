@@ -43,7 +43,7 @@ template< class TYPE >
 class DLLExport MandatoryValidator : public IValidator<TYPE>
 {
 public:
-  IValidator<TYPE>* clone() { return new MandatoryValidator(*this); }
+  IValidator<TYPE>* clone() const { return new MandatoryValidator(*this); }
 
 private:
   /** Checks if the string is empty

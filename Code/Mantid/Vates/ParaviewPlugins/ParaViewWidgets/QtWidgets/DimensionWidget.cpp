@@ -10,13 +10,33 @@
 #include <vector>
 #include <iostream>
 #include "DimensionWidget.h"
+#include "LowHighStepInputWidget.h"
+#include "SimpleBinInputWidget.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 
 using namespace Mantid::VATES;
 
-DimensionWidget::DimensionWidget(bool readOnlyLimits)
+/**
+Constructor
+@param binDisplay : Enum indicating how to display bin information
+*/
+DimensionWidget::DimensionWidget(Mantid::VATES::BinDisplay binDisplay)
 {
+  //Prefer dependency injection to the following conditional statements.
+  if(binDisplay == Mantid::VATES::Simple)
+  {
+    m_binWidget = new SimpleBinInputWidget;
+  }
+  else if(binDisplay == Mantid::VATES::LowHighStep)
+  {
+    m_binWidget = new LowHighStepInputWidget;
+  }
+  else
+  {
+    throw std::runtime_error("Unknown bin display mode.");
+  }
+
   using namespace Mantid::Geometry;
   QGridLayout* m_layout = new QGridLayout();
 
@@ -30,11 +50,8 @@ DimensionWidget::DimensionWidget(bool readOnlyLimits)
   connect(m_ckIntegrated, SIGNAL(clicked(bool)), this, SLOT(integratedChanged(bool)));
   m_layout->addWidget(m_ckIntegrated, 0, 1, Qt::AlignLeft);
   
-  m_nBinsLabel = new QLabel("Bins");
-  m_layout->addWidget(m_nBinsLabel, 0, 2, Qt::AlignLeft);
-  m_nBinsBox = new QLineEdit();
-  connect(m_nBinsBox, SIGNAL(editingFinished()), this, SLOT(nBinsListener()));
-  m_layout->addWidget(m_nBinsBox, 0, 3, Qt::AlignLeft);
+  m_layout->addWidget(m_binWidget, 0, 2, 1, 2, Qt::AlignLeft);
+  connect(m_binWidget, SIGNAL(valueChanged()), this, SLOT(nBinsListener()));
 
   m_dimensionLabel = new QLabel();
   m_dimensionLabel->setFixedWidth(100);
@@ -55,9 +72,6 @@ DimensionWidget::DimensionWidget(bool readOnlyLimits)
   
   connect(m_maxBox, SIGNAL(editingFinished()), this, SLOT(maxBoxListener()));
   m_layout->addWidget(m_maxBox, 1, 5, Qt::AlignLeft);
-  
-  m_maxBox->setEnabled(!readOnlyLimits);
-  m_minBox->setEnabled(!readOnlyLimits);
 
   this->setLayout(m_layout);
 }
@@ -76,13 +90,14 @@ double DimensionWidget::getMaximum() const
 unsigned int DimensionWidget::getNBins() const
 {
   int nbins = static_cast<int>(m_pDimensionPresenter->getModel()->getNBins());
-  int entry = atoi(m_nBinsBox->text());
+  double max = m_pDimensionPresenter->getModel()->getMaximum();
+  double min = m_pDimensionPresenter->getModel()->getMinimum();
+  int entry = m_binWidget->getEntry(min, max);
   if(entry == nbins || entry <= 1)
   {
-    std::string nBinsString = boost::str(boost::format("%i") % nbins);
-    m_nBinsBox->setText(nBinsString.c_str());
+    m_binWidget->setEntry(nbins, min, max);
   }
-  return atoi(m_nBinsBox->text().toStdString().c_str());
+  return m_binWidget->getEntry(min, max);
 }
 
 void DimensionWidget::displayError(std::string message) const
@@ -101,20 +116,20 @@ unsigned int DimensionWidget::getSelectedIndex() const
 void DimensionWidget::showAsNotIntegrated(Mantid::Geometry::VecIMDDimension_sptr)
 {
   setDimensionName(m_pDimensionPresenter->getLabel());
-
-  m_nBinsBox->setHidden(false);
-  m_nBinsLabel->setHidden(false);
+  double max = m_pDimensionPresenter->getModel()->getMaximum();
+  double min = m_pDimensionPresenter->getModel()->getMinimum();
+  m_binWidget->setHidden(false);
   m_ckIntegrated->setChecked(false);
-  if(atoi(m_nBinsBox->text()) <= 1)
+  if(m_binWidget->getEntry(min, max) <= 1)
   {
     size_t modelBins = m_pDimensionPresenter->getModel()->getNBins();
     if( modelBins > 1)
     {
-      m_nBinsBox->setText(boost::str(boost::format("%i") % modelBins).c_str());
+      m_binWidget->setEntry(int(modelBins), min, max);
     }
     else
     {
-      m_nBinsBox->setText(boost::str(boost::format("%i") % 10).c_str());
+      m_binWidget->setEntry(10, min, max);
     }
 
   }
@@ -134,8 +149,7 @@ void DimensionWidget::setDimensionName(const std::string& name)
 void DimensionWidget::showAsIntegrated()
 {
   setDimensionName(m_pDimensionPresenter->getModel()->getDimensionId());
-  m_nBinsBox->setHidden(true);
-  m_nBinsLabel->setHidden(true);
+  m_binWidget->setHidden(true);
   m_ckIntegrated->setChecked(true);
 }
 
@@ -166,9 +180,9 @@ void DimensionWidget::configureWeakly()
 void DimensionWidget::configureStrongly()
 {
   configureWeakly();
-
-  std::string nBinsString = boost::str(boost::format("%i") % m_pDimensionPresenter->getModel()->getNBins());
-  m_nBinsBox->setText(nBinsString.c_str());
+  double max = m_pDimensionPresenter->getModel()->getMaximum();
+  double min = m_pDimensionPresenter->getModel()->getMinimum();
+  m_binWidget->setEntry(int(m_pDimensionPresenter->getModel()->getNBins()),min,max);
 
   std::string maxValueString = boost::str(boost::format("%i") % m_pDimensionPresenter->getModel()->getMaximum());
   m_maxBox->setText(maxValueString.c_str());
@@ -226,7 +240,7 @@ void DimensionWidget::integratedChanged(bool)
 
 DimensionWidget::~DimensionWidget()
 {
-
+  delete m_binWidget;
 }
 
 std::string DimensionWidget::getVisDimensionName() const

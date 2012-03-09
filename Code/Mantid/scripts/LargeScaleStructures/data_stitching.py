@@ -1,5 +1,6 @@
 import os
 import copy
+import math
 from MantidFramework import *
 mtd.initialise(False)
 from mantidsimple import *
@@ -103,6 +104,31 @@ class DataSet(object):
         """
         self._skip_last = last
         self._skip_first = first
+        
+    def get_skipped_range(self):
+        """
+            Get the non-zero x range of the data, excluding the skipped
+            points 
+        """
+        if self.is_loaded():
+            x = mtd[self._ws_name].readX(0)
+            y = mtd[self._ws_name].readY(0)
+            xmin = x[0]
+            xmax = x[len(x)-1]
+            
+            for i in range(len(y)):
+                if y[i]!=0.0:
+                    xmin = x[i+self._skip_first]
+                    break
+
+            for i in range(len(y)-1,-1,-1):
+                if y[i]!=0.0:
+                    xmax = x[i-self._skip_last]
+                    break
+            
+            return xmin, xmax
+        else:
+            return self.get_range()
         
     def is_loaded(self):
         """
@@ -210,6 +236,26 @@ class DataSet(object):
                         
             self._npts = len(mtd[self._ws_name].readY(0))
             self._last_applied_scale = 1.0
+        
+    def scale_to_unity(self, xmin=None, xmax=None):
+        """
+            Compute a scaling factor for which the average of the 
+            data is 1 in the specified region
+        """
+        x = mtd[self._ws_name].readX(0)
+        y = mtd[self._ws_name].readY(0)
+        e = mtd[self._ws_name].readE(0)
+        sum = 0.0
+        sum_err = 0.0
+        for i in range(len(y)):
+            upper_bound = x[i]
+            if len(x)==len(y)+1:
+                upper_bound = x[i+1]
+            if x[i]>=xmin and upper_bound<=xmax:
+                sum += y[i]/(e[i]*e[i])
+                sum_err += 1.0/(e[i]*e[i])
+
+        return sum_err/sum
         
     def integrate(self, xmin=None, xmax=None):
         """

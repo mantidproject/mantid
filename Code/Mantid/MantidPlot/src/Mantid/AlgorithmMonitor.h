@@ -9,12 +9,15 @@
 #include <QPushButton>
 #include <QThread>
 #include <QVector>
+#include "MantidAPI/AlgorithmManager.h"
 
 class QLabel;
 class QTreeWidget;
 class MantidUI;
 class MonitorDlg;
 
+
+//-----------------------------------------------------------------------------
 /** Monitor for reporting progress and canceling running algorithms
  *
  */
@@ -56,20 +59,30 @@ protected:
   void handleAlgorithmErrorNotification(const Poco::AutoPtr<Mantid::API::Algorithm::ErrorNotification>& pNf);
   Poco::NObserver<AlgorithmMonitor, Mantid::API::Algorithm::ErrorNotification> m_errorObserver;
 
+  void handleAlgorithmStartingNotification(const Poco::AutoPtr<Mantid::API::AlgorithmStartingNotification>& pNf);
+  Poco::NObserver<AlgorithmMonitor, Mantid::API::AlgorithmStartingNotification> m_startingObserver;
 
 public slots:
   void update();
   void showDialog();
   void cancel(Mantid::API::AlgorithmID);
   void cancelAll();
+
 private:
   MantidUI *m_mantidUI;
-  int m_nRunning;                    // number of running algorithms
-  QVector<Mantid::API::AlgorithmID> m_algorithms; // IDs of running algorithms
+  /// number of running algorithms
+  int m_nRunning;
+  /// IDs of running algorithms
+  QVector<Mantid::API::AlgorithmID> m_algorithms;
   MonitorDlg* m_monitorDlg;
   static QMutex s_mutex;
 };
 
+
+//-----------------------------------------------------------------------------
+/** Dialog that shows a list of algorithms running
+ * and cancel buttons for them.
+ */
 class MonitorDlg: public QDialog
 {
   Q_OBJECT

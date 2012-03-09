@@ -23,9 +23,9 @@ namespace DataObjects
     }
 
     /// Function returns a unique index, used for hashing for MRU list
-    int hashIndexFunction() const
+    size_t hashIndexFunction() const
     {
-      return int(m_index);
+      return m_index;
     }
 
     /// @return index of the data block in the list of data blocks of the ManagedWorkspace2D
@@ -46,10 +46,7 @@ namespace DataObjects
   Implementations must override init(..) which sets m_vectorsPerBlock and
   readDataBlock(..) and writeDataBlock(..)
 
-  @author Roman Tolchenov, Tessella plc
-  @date 28/07/2009
-
-  Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2008-2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
   This file is part of Mantid.
 

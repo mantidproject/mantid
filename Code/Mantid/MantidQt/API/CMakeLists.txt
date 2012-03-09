@@ -1,6 +1,7 @@
 set ( SRC_FILES
 	src/AlgorithmDialog.cpp
 	src/AlgorithmInputHistory.cpp
+	src/AlgorithmPropertiesWidget.cpp
 	src/BoolPropertyWidget.cpp
 	src/FilePropertyWidget.cpp
 	src/GenericDialog.cpp
@@ -16,7 +17,6 @@ set ( SRC_FILES
 	src/PropertyWidget.cpp
 	src/PropertyWidgetFactory.cpp
 	src/PythonRunner.cpp
-	src/SafeQwtPlot.cpp
 	src/SyncedCheckboxes.cpp
 	src/TextPropertyWidget.cpp
 	src/UserSubWindow.cpp
@@ -24,56 +24,39 @@ set ( SRC_FILES
 	src/WorkspaceObserver.cpp
 )
 
+set ( MOC_FILES
+  inc/MantidQtAPI/AlgorithmDialog.h 
+  inc/MantidQtAPI/AlgorithmPropertiesWidget.h
+  inc/MantidQtAPI/BoolPropertyWidget.h
+  inc/MantidQtAPI/FilePropertyWidget.h
+  inc/MantidQtAPI/GenericDialog.h
+  inc/MantidQtAPI/ManageUserDirectories.h
+  inc/MantidQtAPI/MantidDialog.h
+  inc/MantidQtAPI/MantidQwtIMDWorkspaceData.h
+  inc/MantidQtAPI/MantidQwtMatrixWorkspaceData.h
+  inc/MantidQtAPI/MantidWidget.h
+  inc/MantidQtAPI/OptionsPropertyWidget.h
+  inc/MantidQtAPI/PropertyWidget.h
+  inc/MantidQtAPI/PythonRunner.h
+  inc/MantidQtAPI/SyncedCheckboxes.h
+  inc/MantidQtAPI/TextPropertyWidget.h
+  inc/MantidQtAPI/UserSubWindow.h
+  inc/MantidQtAPI/VatesViewerInterface.h
+  inc/MantidQtAPI/WorkspaceObserver.h
+)
+
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES
-	inc/MantidQtAPI/AlgorithmDialog.h
+    ${MOC_FILES}
 	inc/MantidQtAPI/AlgorithmInputHistory.h
-	inc/MantidQtAPI/BoolPropertyWidget.h
 	inc/MantidQtAPI/DllOption.h
 	inc/MantidQtAPI/FileDialogHandler.h
-	inc/MantidQtAPI/FilePropertyWidget.h
-	inc/MantidQtAPI/GenericDialog.h
 	inc/MantidQtAPI/GraphOptions.h
 	inc/MantidQtAPI/InterfaceFactory.h
 	inc/MantidQtAPI/InterfaceManager.h
-	inc/MantidQtAPI/ManageUserDirectories.h
 	inc/MantidQtAPI/MantidColorMap.h
-	inc/MantidQtAPI/MantidDialog.h
-	inc/MantidQtAPI/MantidQwtIMDWorkspaceData.h
-	inc/MantidQtAPI/MantidQwtMatrixWorkspaceData.h
 	inc/MantidQtAPI/MantidQwtWorkspaceData.h
-	inc/MantidQtAPI/MantidWidget.h
-	inc/MantidQtAPI/OptionsPropertyWidget.h
-	inc/MantidQtAPI/PropertyWidget.h
 	inc/MantidQtAPI/PropertyWidgetFactory.h
-	inc/MantidQtAPI/PythonRunner.h
-	inc/MantidQtAPI/SafeQwtPlot.h
-	inc/MantidQtAPI/SyncedCheckboxes.h
-	inc/MantidQtAPI/TextPropertyWidget.h
-	inc/MantidQtAPI/UserSubWindow.h
-	inc/MantidQtAPI/VatesViewerInterface.h
-	inc/MantidQtAPI/WorkspaceObserver.h
-)
-
-set ( MOC_FILES
-	inc/MantidQtAPI/AlgorithmDialog.h 
-	inc/MantidQtAPI/GenericDialog.h
-	inc/MantidQtAPI/ManageUserDirectories.h
-	inc/MantidQtAPI/MantidDialog.h
-	inc/MantidQtAPI/MantidWidget.h
-	inc/MantidQtAPI/PythonRunner.h
-	inc/MantidQtAPI/SyncedCheckboxes.h
-	inc/MantidQtAPI/UserSubWindow.h
-	inc/MantidQtAPI/VatesViewerInterface.h
-	inc/MantidQtAPI/WorkspaceObserver.h
-	inc/MantidQtAPI/MantidQwtIMDWorkspaceData.h
-	inc/MantidQtAPI/MantidQwtMatrixWorkspaceData.h
-	
-	inc/MantidQtAPI/PropertyWidget.h
-	inc/MantidQtAPI/OptionsPropertyWidget.h
-	inc/MantidQtAPI/FilePropertyWidget.h
-	inc/MantidQtAPI/TextPropertyWidget.h
-	inc/MantidQtAPI/BoolPropertyWidget.h
 )
 
 set ( UI_FILES 

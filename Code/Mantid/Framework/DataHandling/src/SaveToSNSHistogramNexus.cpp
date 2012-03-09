@@ -344,26 +344,25 @@ namespace DataHandling
         // Offset into array.
         size_t index = size_t(slabx)*size_t(dataDimensions[1])*size_t(dataDimensions[2]) + size_t(y)*size_t(dataDimensions[2]);
 
-        if (doBoth)
+        const MantidVec & Y = inputWorkspace->readY(wi);
+        const MantidVec & E = inputWorkspace->readE(wi);
+
+        for ( size_t i = 0; i < Y.size(); ++i )
         {
-          const MantidVec & Y = inputWorkspace->readY(wi);
-          const MantidVec & E = inputWorkspace->readE(wi);
-          std::copy(Y.begin(), Y.end(), data+index);
-          std::copy(E.begin(), E.end(), errors+index);
-        }
-        else
-        {
-          if (doErrors)
+          if ( doErrors )
           {
-            const MantidVec & E = inputWorkspace->readE(wi);
-            std::copy(E.begin(), E.end(), data+index);
+            data[i+index] = static_cast<float>(E[i]);
           }
           else
           {
-            const MantidVec & Y = inputWorkspace->readY(wi);
-            std::copy(Y.begin(), Y.end(), data+index);
+            data[i+index] = static_cast<float>(Y[i]);
+            if ( doBoth )
+            {
+              errors[i+index] = static_cast<float>(E[i]);
+            }
           }
         }
+
         PARALLEL_END_INTERUPT_REGION
       }
       PARALLEL_CHECK_INTERUPT_REGION

@@ -4,6 +4,7 @@
 #include "MantidAPI/MatrixWorkspaceMDIterator.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
@@ -12,6 +13,7 @@
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
 
 class MatrixWorkspaceMDIteratorTest : public CxxTest::TestSuite
 {
@@ -32,7 +34,20 @@ public:
           ws->dataE(wi)[x] = double((wi*10 + x)*2);
         }
       }
-    return ws;
+
+      Instrument_sptr inst(new Instrument("TestInstrument"));
+      ws->setInstrument(inst);
+      // We get a 1:1 map by default so the detector ID should match the spectrum number
+      for( size_t i = 0; i < ws->getNumberHistograms(); ++i )
+      {
+        // Create a detector for each spectra
+        Detector * det = new Detector("pixel", static_cast<detid_t>(i), inst.get());
+        inst->add(det);
+        inst->markAsDetector(det);
+        ws->getSpectrum(i)->addDetectorID(static_cast<detid_t>(i));
+      }
+
+      return ws;
   }
 
   void test_iterating()
@@ -88,6 +103,18 @@ public:
       TS_ASSERT( it->next() );
       TS_ASSERT( it->next() );
       TS_ASSERT( !it->next() );
+    }
+  }
+
+  void test_get_is_masked()
+  {
+    boost::shared_ptr<MatrixWorkspace> ws = makeFakeWS();
+    IMDIterator* it = ws->createIterator(NULL);
+    for(size_t i = 0; i < ws->getNumberHistograms() ; ++i)
+    {
+      Mantid::Geometry::IDetector_const_sptr det = ws->getDetector(i);
+      TS_ASSERT_EQUALS(det->isMasked(), it->getIsMasked());
+      it->next();
     }
   }
 

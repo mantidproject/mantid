@@ -73,7 +73,7 @@ public:
   ///Gets the type of the validator
   std::string getType() const { return "workspaceunit"; }
 
-  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() { return new WorkspaceUnitValidator(*this); }
+  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() const { return new WorkspaceUnitValidator(*this); }
 
 private:
   /** Checks that the units of the workspace data are declared match any required units
@@ -131,7 +131,7 @@ public:
   ///Gets the type of the validator
   std::string getType() const { return "histogram"; }
 
-  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() { return new HistogramValidator(*this); }
+  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() const { return new HistogramValidator(*this); }
 
 private:
   /** Checks if the workspace contains a histogram when it shouldn't and vice-versa
@@ -179,7 +179,7 @@ public:
   ///Gets the type of the validator
   std::string getType() const { return "rawcount"; }
 
-  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() { return new RawCountValidator(*this); }
+  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() const { return new RawCountValidator(*this); }
 
 private:
   /** Checks if the workspace must be a distribution but isn't and vice-versa
@@ -224,7 +224,7 @@ public:
   ///Gets the type of the validator
   std::string getType() const { return "commonbins"; }
 
-  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() { return new CommonBinsValidator(*this); }
+  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() const { return new CommonBinsValidator(*this); }
 
 private:
   /** Checks that the bin boundaries of each histogram in the workspace are the same
@@ -269,7 +269,7 @@ public:
   ///Gets the type of the validator
   std::string getType() const { return "spectraaxis"; }
 
-  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() { return new SpectraAxisValidator(*this); }
+  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() const { return new SpectraAxisValidator(*this); }
 
 private:
   /** Checks that the axis stated 
@@ -303,7 +303,7 @@ public:
   ///Gets the type of the validator
   std::string getType() const { return "numericaaxis"; }
 
-  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() { return new NumericAxisValidator(*this); }
+  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() const { return new NumericAxisValidator(*this); }
 
 private:
   /** Checks that the axis stated 
@@ -340,7 +340,7 @@ public:
   ///Gets the type of the validator
   std::string getType() const { return "Instrument"; }
 
-  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() { return new InstrumentValidator(*this); }
+  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() const { return new InstrumentValidator(*this); }
 
 private:
   /** Checks that the workspace has an instrument defined

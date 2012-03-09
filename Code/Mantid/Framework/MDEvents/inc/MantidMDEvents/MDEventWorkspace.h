@@ -136,6 +136,11 @@ namespace MDEvents
       data = box;
     }
 
+    /// Apply masking
+    void setMDMasking(Mantid::Geometry::MDImplicitFunction* maskingRegion);
+
+    /// Clear masking
+    void clearMDMasking();
 
   protected:
 

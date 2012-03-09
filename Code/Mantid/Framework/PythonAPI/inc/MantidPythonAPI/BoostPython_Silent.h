@@ -35,6 +35,7 @@
   #pragma warning(disable:4244)
   #pragma warning(disable:4267)
   #pragma warning(disable:4250)
+  #pragma warning(disable:4005)
   #include <boost/python.hpp>
   #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
   #undef snprintf // Nexus defined this and Python redefines it so undefine it here to avoid a warning

@@ -59,7 +59,7 @@ namespace Mantid
        */
       inline std::string getType() const { return "AlgorithmHasProperty"; }
       /// Make a copy of the present type of validator
-      inline Kernel::IValidator<boost::shared_ptr<IAlgorithm> >* clone() 
+      inline Kernel::IValidator<boost::shared_ptr<IAlgorithm> >* clone() const
       { 
         return new AlgorithmHasProperty(*this); 
       }

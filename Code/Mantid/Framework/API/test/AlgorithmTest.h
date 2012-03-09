@@ -7,6 +7,8 @@
 #include "MantidKernel/Property.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidTestHelpers/FakeObjects.h"
+#include "MantidKernel/ReadLock.h"
+#include "MantidKernel/WriteLock.h"
 
 using namespace Mantid::Kernel; 
 using namespace Mantid::API;
@@ -111,9 +113,31 @@ public:
     out1->dataY(0)[0] = val;
     setProperty("OutputWorkspace1", out1);
     setProperty("OutputWorkspace2", out2);
+    setProperty("OutputWorkspace2", out2);
   }
 };
 DECLARE_ALGORITHM( WorkspaceAlgorithm)
+
+
+class WorkspaceAlgorithm2 : public Algorithm
+{
+public:
+  WorkspaceAlgorithm2() : Algorithm() {}
+  virtual ~WorkspaceAlgorithm2() {}
+
+  const std::string name() const { return "WorkspaceAlgorithm2";}
+  int version() const  { return 1;}
+  const std::string category() const { return "Cat;Leopard;Mink";}
+  void init()
+  {
+    declareProperty(new WorkspaceProperty<>("NonLockingInputWorkspace","",Direction::Input, true, false));
+    declareProperty(new WorkspaceProperty<>("NonLockingOutputWorkspace","",Direction::Output, true, false));
+  }
+  void exec()
+  {
+  }
+};
+DECLARE_ALGORITHM(WorkspaceAlgorithm2)
 
 
 class AlgorithmTest : public CxxTest::TestSuite
@@ -355,7 +379,7 @@ public:
   /** Test of setting read and/or write locks
    * for various combinations of input/output workspaces.
    */
-  void do_test_locking(std::string in1, std::string in2, std::string inout, std::string out1, std::string out2="")
+  void do_test_locking(std::string in1, std::string in2, std::string inout, std::string out1, std::string out2)
   {
     for (size_t i=0; i<6; i++)
     {
@@ -378,19 +402,49 @@ public:
   void test_lockingWorkspaces()
   {
     // Input and output are different
-    do_test_locking("ws0", "", "", "ws1");
+    do_test_locking("ws0", "", "", "ws1", "");
     // Repeated output workspaces
     do_test_locking("ws0", "", "", "ws1", "ws1");
     // Different output workspaces
     do_test_locking("ws0", "", "", "ws1", "ws2");
     // Input and output are same
-    do_test_locking("ws0", "", "", "ws0");
+    do_test_locking("ws0", "", "", "ws0", "");
     // Two input workspaces
-    do_test_locking("ws0", "ws0", "", "ws5");
+    do_test_locking("ws0", "ws0", "", "ws5", "");
     // Also in-out workspace
-    do_test_locking("ws0", "ws0", "ws0", "ws0");
+    do_test_locking("ws0", "ws0", "ws0", "ws0", "");
     // All the same
     do_test_locking("ws0", "ws0", "ws0", "ws0", "ws0");
+  }
+
+  /** Have a workspace property that does NOT lock the workspace.
+   * The failure mode of this test is HANGING. */
+  void test_workspace_notLocking()
+  {
+    boost::shared_ptr<WorkspaceTester> ws1(new WorkspaceTester());
+    AnalysisDataService::Instance().addOrReplace("ws1", ws1);
+
+    {
+      // Get a write lock.
+      WriteLock _lock(*ws1);
+      // The algorithm would hang waiting for the write-lock to release if the property were locking.
+      WorkspaceAlgorithm2 alg;
+      alg.initialize();
+      alg.setPropertyValue("NonLockingInputWorkspace", "ws1");
+      alg.execute();
+      TS_ASSERT( alg.isExecuted() );
+    }
+    {
+      // Acquire a scoped read-lock on ws1.
+      ReadLock _lock(*ws1);
+      // The algo would lock up when trying to WRITE-lock the workspace again
+      WorkspaceAlgorithm2 alg;
+      alg.initialize();
+      alg.setPropertyValue("NonLockingOutputWorkspace", "ws1");
+      alg.execute();
+      TS_ASSERT( alg.isExecuted() );
+    }
+
   }
 
   //------------------------------------------------------------------------

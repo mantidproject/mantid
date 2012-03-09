@@ -384,13 +384,6 @@ namespace Geometry
   void InstrumentDefinitionParser::setLocation(Geometry::IComponent* comp, Poco::XML::Element* pElem,
       const double angleConvertConst, const bool deltaOffsets)
   {
-    // Require that pElem points to an element with tag name 'location' or 'neutronic'
-    if ( pElem->tagName() != "location" && pElem->tagName() != "neutronic" )
-    {
-      g_log.error("Second argument to function setLocation must be a pointer to an XML element with tag name location.");
-      throw std::logic_error( "Second argument to function setLocation must be a pointer to an XML element with tag name location." );
-    }
-
     comp->setPos(getRelativeTranslation(comp, pElem, angleConvertConst, deltaOffsets));
 
     // Rotate coordinate system of this component
@@ -570,7 +563,7 @@ namespace Geometry
   }
 
   //-----------------------------------------------------------------------------------------------------------------------
-  /** Get parent component element of location element.
+  /** Get parent \<component\> element of \<location\> element. 
   *
   *  @param pLocElem ::  Poco::XML element that points a location element in the XML doc
   *  @return Parent XML element to a location XML element
@@ -1942,6 +1935,15 @@ namespace Geometry
             + " includes a <combine-components-into-one-shape> element. See www.mantidproject.org/IDF." );
     }
 
+    // check if a <translate-rotate-combined-shape-to> is defined
+    NodeList* pNL_TransRot = pElem->getElementsByTagName("translate-rotate-combined-shape-to");
+    Element* pTransRot = 0; 
+    if ( pNL_TransRot->length() == 1 )
+    {
+       pTransRot = static_cast<Element*>(pNL_TransRot->item(0));
+    }
+    pNL_TransRot->release();
+
     // to convert all <component>'s in type into <cuboid> elements, which are added
     // to pElem, and these <component>'s are deleted after loop
 
@@ -1954,10 +1956,6 @@ namespace Geometry
       // The location element is required to be a child of a component element.
       // Get this component element
       Element* pCompElem = InstrumentDefinitionParser::getParentComponent(pLoc);
-      //Element* pType = getTypeElement[pCompElem->getAttribute("type")];
-
-      // get the type (name) of the <location> element in focus
-      //std::string locationTypeName = pType->getAttribute("name");
 
       // get the name given to the <location> element in focus
       // note these names are required to be unique for the purpose of
@@ -1972,14 +1970,29 @@ namespace Geometry
 
       // create dummy component to hold coord. sys. of cuboid
       CompAssembly *baseCoor = new CompAssembly("base"); // dummy assembly used to get to end assembly if nested
-      ICompAssembly *endComponent = 0; // end assembly
-      // rotate/translate this dummy component until get to end component(assembly)
+      ICompAssembly *endComponent = 0; // end assembly, its purpose is to hold the shape coordinate system 
+      // get shape coordinate system, returned as endComponent, as defined by pLoc and nested <location> elements
+      // of pLoc 
       std::string shapeTypeName = getShapeCoorSysComp(baseCoor, pLoc, getTypeElement, endComponent);
 
-      std::string cuboidStr = translateRotateXMLcuboid(endComponent, getTypeElement[shapeTypeName], locationElementName);
-
+      // translate and rotate cuboid according to shape coordinate system in endComponent
+      std::string cuboidStr = translateRotateXMLcuboid(endComponent, getTypeElement[shapeTypeName], locationElementName);    
+        
       delete baseCoor;
 
+      // if <translate-rotate-combined-shape-to> is specified
+      if ( pTransRot )
+      {
+        baseCoor = new CompAssembly("base"); 
+
+        setLocation(baseCoor, pTransRot, m_angleConvertConst);
+
+        // Translate and rotate shape xml string according to <translate-rotate-combined-shape-to>
+        cuboidStr = translateRotateXMLcuboid(baseCoor, cuboidStr, locationElementName);  
+
+        delete baseCoor;  
+      }
+      
       DOMParser pParser;
       Document* pDoc;
       try
@@ -1989,7 +2002,7 @@ namespace Geometry
       catch(...)
       {
         throw Exception::InstrumentDefinitionError( std::string("Unable to parse XML string ")
-              + cuboidStr + " . Empty geometry Object is returned." );
+              + cuboidStr);
       }
       // Get pointer to root element and add this element to pElem
       Element* pCuboid = pDoc->documentElement();
@@ -2025,13 +2038,13 @@ namespace Geometry
   }
 
 
-  /// Returns a translated and rotated \<cuboid\> element
+  /// Returns a translated and rotated \<cuboid\> element with "id" attribute equal cuboidName
   /// @param comp coordinate system to translate and rotate cuboid to
-  /// @param cuboidEle containing one \<cuboid\> element
-  /// @param cuboidName name of the \<cuboid\> element
-  /// @return XML string of translated and rotated cuboid
-  std::string InstrumentDefinitionParser::translateRotateXMLcuboid(ICompAssembly* comp, Poco::XML::Element* cuboidEle,
-                                                                  std::string& cuboidName)
+  /// @param cuboidEle Input \<cuboid\> element 
+  /// @param cuboidName What the "id" attribute of the returned \<coboid\> will be set to
+  /// @return XML string of translated and rotated \<cuboid\>
+  std::string InstrumentDefinitionParser::translateRotateXMLcuboid(ICompAssembly* comp, const Poco::XML::Element* cuboidEle,
+                                                                  const std::string& cuboidName)
   {
     Element* pElem_lfb = getShapeElement(cuboidEle, "left-front-bottom-point");
     Element* pElem_lft = getShapeElement(cuboidEle, "left-front-top-point");
@@ -2078,6 +2091,34 @@ namespace Geometry
     return obj_str.str();
   }
 
+  /// Returns a translated and rotated \<cuboid\> element with "id" attribute equal cuboidName
+  /// @param comp coordinate system to translate and rotate cuboid to
+  /// @param cuboidXML Input \<cuboid\> xml string 
+  /// @param cuboidName What the "id" attribute of the returned \<coboid\> will be set to
+  /// @return XML string of translated and rotated \<cuboid\>
+  std::string InstrumentDefinitionParser::translateRotateXMLcuboid(ICompAssembly* comp, const std::string& cuboidXML,
+                                                                  const std::string& cuboidName)
+  {
+      DOMParser pParser;
+      Document* pDoc;
+      try
+      {
+        pDoc = pParser.parseString(cuboidXML);
+      }
+      catch(...)
+      {
+        throw Exception::InstrumentDefinitionError( std::string("Unable to parse XML string ")
+              + cuboidXML);
+      }
+
+      Element* pCuboid = pDoc->documentElement();
+
+      std::string retVal = translateRotateXMLcuboid(comp, pCuboid,cuboidName);
+
+      pDoc->release();
+
+      return retVal;
+  }
 
   /** Return a subelement of an XML element, but also checks that there exist exactly one entry
    *  of this subelement.
@@ -2088,7 +2129,7 @@ namespace Geometry
    *
    *  @throw std::invalid_argument Thrown if issues with XML string
    */
-  Poco::XML::Element* InstrumentDefinitionParser::getShapeElement(Poco::XML::Element* pElem, const std::string& name)
+  Poco::XML::Element* InstrumentDefinitionParser::getShapeElement(const Poco::XML::Element* pElem, const std::string& name)
   {
     // check if this shape element contain an element with name specified by the 2nd function argument
     Poco::AutoPtr<NodeList> pNL = pElem->getElementsByTagName(name);
@@ -2154,14 +2195,16 @@ namespace Geometry
 
 
   //-----------------------------------------------------------------------------------------------------------------------
-  /** The input \<location\> element may contain other nested \<location\> elements. This method returns the parent appended
-      which its child components and also name of type of the last child component.
+  /** Adds component with coordinate system as defined by the input \<location\> element to 
+      the input parent component. Nested \<location\> elements are allowed and this method
+      is recursive. As this method is running recursively it will eventually return a leaf
+      component (in endAssembly) and the name of the \<type\> of this leaf
   *
-  *  @param parent :: CompAssembly to append to
+  *  @param parent :: CompAssembly Parent component
   *  @param pLocElem ::  Poco::XML element that points to a location element
-  *  @param getTypeElement :: contain pointers to all types
-  *  @param endAssembly :: pointer to last child assembly
-  *  @return Returns shape type name
+  *  @param getTypeElement :: contain pointers to all \<type\>s
+  *  @param endAssembly :: Output child component, which coor. sys. modified according to pLocElem
+  *  @return Returns \<type\> name
   *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
   */
   std::string InstrumentDefinitionParser::getShapeCoorSysComp(Geometry::ICompAssembly* parent,
@@ -2173,6 +2216,7 @@ namespace Geometry
 
     //Create the assembly that will be appended into the parent.
     Geometry::ICompAssembly *ass;
+
     // The newly added component is required to have a type. Find out what this
     // type is and find all the location elements of this type. Finally loop over these
     // location elements
@@ -2182,8 +2226,7 @@ namespace Geometry
     ass = new Geometry::CompAssembly(InstrumentDefinitionParser::getNameOfLocationElement(pLocElem),parent);
     endAssembly = ass;
 
-    // set location for this newly added comp and set facing if specified in instrument def. file. Also
-    // check if any logfiles are referred to through the <parameter> element.
+    // set location for this newly added comp
     setLocation(ass, pLocElem, m_angleConvertConst);
 
 

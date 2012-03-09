@@ -62,6 +62,7 @@ set ( TEST_PY_FILES
 
 include_directories ( inc )
 include_directories ( ../../QtPropertyBrowser/src )
+include_directories ( ../MantidWidgets/inc )
 
 
 ###########################################################################
@@ -86,7 +87,7 @@ add_definitions ( -DIN_MANTIDQT_SLICEVIEWER )
 add_library ( MantidQtSliceViewer ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
 # ... and links to other required libs
-target_link_libraries ( MantidQtSliceViewer MantidQtAPI QtPropertyBrowser ${QT_LIBRARIES} ${QWT_LIBRARIES} )
+target_link_libraries ( MantidQtSliceViewer MantidQtAPI MantidWidgets QtPropertyBrowser ${QT_LIBRARIES} ${QWT_LIBRARIES} )
 
 ###########################################################################
 # DEMO/GUI TESTING APPLICATIONS
@@ -141,7 +142,8 @@ else ()
 
 	if ( PYUNITTEST_FOUND )
 	  pyunittest_add_test ( SliceViewerMantidPlotTest.py ${TEST_PY_FILES} "" )
-	  add_dependencies ( SliceViewerMantidPlotTest.py MantidQt Algorithms )
+	  add_dependencies ( SliceViewerMantidPlotTest.py MantidQtAPI MantidWidgets CustomDialogs 
+	                     CustomInterfaces MantidQtSliceViewer Algorithms )
 	  add_dependencies ( GUITests SliceViewerMantidPlotTest.py )
 	  # Add to the 'UnitTests' group in VS
 	  set_property ( TARGET SliceViewerMantidPlotTest.py PROPERTY FOLDER "UnitTests" )

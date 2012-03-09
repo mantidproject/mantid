@@ -19,7 +19,7 @@
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-#include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
+#include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 #include "MantidKernel/IPropertyManager.h"
 
 #if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
@@ -52,29 +52,8 @@ namespace Mantid
        * @tparam PropertyType :: The PropertyWithValue<> template type
        */
       template<typename PropertyType>
-      struct DLLExport SingleValueTypeHandler : public PropertyValueHandler
+      struct DLLExport SingleValueTypeHandler : public TypedPropertyValueHandler<PropertyType>
       {
-        /**
-         * Set function to handle Python -> C++ calls and get the correct type
-         * @param alg :: A pointer to an IPropertyManager
-         * @param name :: The name of the property
-         * @param value :: A boost python object that stores the value
-         */
-        void set(Kernel::IPropertyManager* alg, const std::string &name, boost::python::object value)
-        {
-          alg->setProperty<PropertyType>(name, boost::python::extract<PropertyType>(value));
-        }
-
-        /**
-         * Is the object actually an instance of the derived type
-         * @param value :: A Python wrapped C object
-         */
-        bool isDerivedType(const boost::python::object & value) const
-        {
-          boost::python::extract<PropertyType> extractor(value);
-          return extractor.check();
-        }
-
         /**
          * Return the PyTypeObject of the DerivedType
          * @returns A PyTypeObject for the given DerivedType

@@ -3,6 +3,7 @@ set ( SRC_FILES
 	src/CreateSampleShape.cpp
 	src/DefineGaugeVolume.cpp
 	src/DeleteTableRows.cpp
+	src/DetermineChunking.cpp
 	src/FakeEventDataListener.cpp
 	src/FileEventDataListener.cpp
 	src/FindDetectorsInShape.cpp
@@ -87,6 +88,7 @@ set ( SRC_FILES
 	src/RawFileInfo.cpp
 	src/RenameLog.cpp
 	src/RotateInstrumentComponent.cpp
+        src/SNSDataArchive.cpp
 	src/SaveAscii.cpp
 	src/SaveCSV.cpp
 	src/SaveCalFile.cpp
@@ -114,8 +116,6 @@ set ( SRC_FILES
 	src/SetScalingPSD.cpp
 	src/StartLiveData.cpp
 	src/UpdateInstrumentFromFile.cpp
-	#TODO: remove this
-	test/TestDataListener.cpp 
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/LoadDAE/idc.cpp
@@ -126,6 +126,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/CreateSampleShape.h
 	inc/MantidDataHandling/DefineGaugeVolume.h
 	inc/MantidDataHandling/DeleteTableRows.h
+	inc/MantidDataHandling/DetermineChunking.h
 	inc/MantidDataHandling/FakeEventDataListener.h
 	inc/MantidDataHandling/FileEventDataListener.h
 	inc/MantidDataHandling/FindDetectorsInShape.h
@@ -201,6 +202,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/RawFileInfo.h
 	inc/MantidDataHandling/RenameLog.h
 	inc/MantidDataHandling/RotateInstrumentComponent.h
+        inc/MantidDataHandling/SNSDataArchive.h
 	inc/MantidDataHandling/SaveAscii.h
 	inc/MantidDataHandling/SaveCSV.h
 	inc/MantidDataHandling/SaveCalFile.h
@@ -242,7 +244,7 @@ set ( TEST_FILES
 	test/DefineGaugeVolumeTest.h
 	test/DeleteTableRowsTest.h
 	test/FakeEventDataListenerTest.h
-	#test/FileEventDataListenerTest.h
+	test/FileEventDataListenerTest.h
 	test/FindDetectorsInShapeTest.h
 	test/FindDetectorsParTest.h
 	test/GetMaskedDetectorsTest.h
@@ -307,6 +309,7 @@ set ( TEST_FILES
 	test/ProcessDasNexusLogTest.h
 	test/RawFileInfoTest.h
 	test/RenameLogTest.h
+        test/SNSDataArchiveTest.h
 	test/SaveCSVTest.h
 	test/SaveCalFileTest.h
 	test/SaveCanSAS1dTest.h
@@ -357,7 +360,7 @@ if ( CXXTEST_FOUND )
   # It will go out of scope at the end of this file so doesn't need un-setting
   set ( TESTHELPER_SRCS ../TestHelpers/src/ComponentCreationHelper.cpp
                         ../TestHelpers/src/WorkspaceCreationHelper.cpp
-                        # test/TestDataListener.cpp #TODO: Re-enable this when you take it out above 
+                        test/TestDataListener.cpp 
                         )
   cxxtest_add_test ( DataHandlingTest ${TEST_FILES} )
   target_link_libraries( DataHandlingTest DataHandling )

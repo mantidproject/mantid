@@ -58,7 +58,14 @@ namespace MDEvents
     /// Get number of dimensions
     virtual size_t getNumDims() const = 0;
 
+    /// Getter for the masking
+    virtual bool getIsMasked() const = 0;
 
+    ///Setter for masking the box
+    virtual void mask() = 0;
+
+    ///Setter for unmasking the box
+    virtual void unmask() = 0;
 
     // ----------------------------- ISaveable Methods ------------------------------------------------------
 

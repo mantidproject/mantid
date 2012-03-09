@@ -73,12 +73,14 @@ namespace DataHandling
     declareProperty(new PropertyWithValue<std::string>("PostProcessingScript","",Direction::Input),
         "Not currently supported, but reserved for future use.");
 
-    declareProperty(new WorkspaceProperty<Workspace>("AccumulationWorkspace","",Direction::Output, true),
+    declareProperty(new WorkspaceProperty<Workspace>("AccumulationWorkspace","",Direction::Output,
+        true /* optional */, false /* no locking */),
         "Optional, unless performing PostProcessing:\n"
         " Give the name of the intermediate, accumulation workspace.\n"
         " This is the workspace after accumulation but before post-processing steps.");
 
-    declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output),
+    declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output,
+        false /* not optional */, false /* no locking */),
         "Name of the processed output workspace.");
 
     declareProperty(new PropertyWithValue<std::string>("LastTimeStamp","",Direction::Output),
@@ -107,8 +109,8 @@ namespace DataHandling
   /// @return true if there is a post-processing step
   bool LiveDataAlgorithm::hasPostProcessing() const
   {
-    // TODO: Handle post-processing script too
-    return !this->getPropertyValue("PostProcessingAlgorithm").empty();
+    return (!this->getPropertyValue("PostProcessingAlgorithm").empty()
+        || !this->getPropertyValue("PostProcessingScript").empty());
   }
 
   //----------------------------------------------------------------------------------------------
@@ -172,21 +174,62 @@ namespace DataHandling
     if (postProcessing)
       prefix = "Post";
 
+    // Get the name of the algorithm to run
     std::string algoName = this->getPropertyValue(prefix+"ProcessingAlgorithm");
     algoName = Strings::strip(algoName);
-    if (algoName.empty())
+
+    // Get the script to run. Ignored if algo is specified
+    std::string script = this->getPropertyValue(prefix+"ProcessingScript");
+    script = Strings::strip(script);
+
+    if (!algoName.empty())
+    {
+      // Properties to pass to algo
+      std::string props = this->getPropertyValue(prefix+"ProcessingProperties");
+
+      // Create the UNMANAGED algorithm
+      IAlgorithm_sptr alg = this->createSubAlgorithm(algoName);
+      // ...and pass it the properties
+      alg->setProperties(props);
+
+      // Warn if someone put both values.
+      if (!script.empty())
+        g_log.warning() << "Running algorithm " << algoName << " and ignoring the script code in " << prefix+"ProcessingScript" << std::endl;
+      return alg;
+    }
+    else if (!script.empty())
+    {
+      // Run a snippet of python
+      IAlgorithm_sptr alg = this->createSubAlgorithm("RunPythonScript");
+      alg->setLogging(false);
+      alg->setPropertyValue("Code", script);
+      return alg;
+    }
+    else
       return IAlgorithm_sptr();
+  }
 
-    std::string props = this->getPropertyValue(prefix+"ProcessingProperties");
+  //----------------------------------------------------------------------------------------------
+  /** Perform validation of the inputs.
+   * This should be called before starting the listener to give fast feedback
+   * to the user that they did something wrong.
+   *
+   * @throw std::invalid_argument if there is a problem.
+   */
+  void LiveDataAlgorithm::validateInputs()
+  {
+    if (this->getPropertyValue("OutputWorkspace").empty())
+      throw std::invalid_argument("Must specify the OutputWorkspace.");
 
-    // TODO: Handle script too.
+    // Validate inputs
+    if (this->hasPostProcessing())
+    {
+      if (this->getPropertyValue("AccumulationWorkspace").empty())
+        throw std::invalid_argument("Must specify the AccumulationWorkspace parameter if using PostProcessing.");
 
-    // Create the UNMANAGED algorithm
-    IAlgorithm_sptr alg = this->createSubAlgorithm(algoName);
-    // ...and pass it the properties
-    alg->setProperties(props);
-
-    return alg;
+      if (this->getPropertyValue("AccumulationWorkspace") == this->getPropertyValue("OutputWorkspace"))
+        throw std::invalid_argument("The AccumulationWorkspace must be different than the OutputWorkspace, when using PostProcessing.");
+    }
   }
 
 } // namespace Mantid

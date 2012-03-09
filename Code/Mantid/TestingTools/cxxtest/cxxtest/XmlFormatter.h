@@ -40,6 +40,7 @@
 #include <iostream>
 #include <sstream>
 #include <cstring>
+#include <stdexcept>
 
 
 namespace CxxTest
@@ -474,6 +475,7 @@ namespace CxxTest
 
         void trace( const char* /*file*/, unsigned line, const char *expression )
         {
+            throw_if_test_info_empty();
             element_t elt = testcase->add_element("trace");
             elt->add("line",line);
             elt->value << expression;
@@ -481,6 +483,7 @@ namespace CxxTest
 
         void warning( const char* /*file*/, unsigned line, const char *expression )
         {
+            throw_if_test_info_empty();
             element_t elt = testcase->add_element("warning");
             elt->add("line",line);
             elt->value << expression;
@@ -488,7 +491,7 @@ namespace CxxTest
 
         void failedTest( const char* file, unsigned line, const char* expression )
         {
-            testFailure( file, line, "failure") << "Test failed: " << expression;
+          testFailure( file, line, "failure") << "Test failed: " << expression;
         }
 
         void failedAssert( const char *file, unsigned line, const char *expression )
@@ -613,8 +616,17 @@ namespace CxxTest
         XmlFormatter( const XmlFormatter & );
         XmlFormatter &operator=( const XmlFormatter & );
 
+        void throw_if_test_info_empty()
+        {
+          if (info.empty())
+          {
+            throw std::runtime_error("Invalid use of TS_ASSERT statement outside of a test method.");
+          }
+        }
+
        std::stringstream& testFailure( const char* file, unsigned line, const char *failureType)
         {
+            throw_if_test_info_empty();
             testcase->fail=true;
             element_t elt = testcase->update_element("failure");
             if ( elt->value.str().empty() )

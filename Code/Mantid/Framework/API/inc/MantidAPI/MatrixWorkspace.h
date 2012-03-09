@@ -16,7 +16,6 @@
 #include "MantidAPI/WorkspaceIterator.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/NearestNeighboursFactory.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Unit.h"
@@ -39,6 +38,7 @@ namespace Mantid
     class ParameterMap;
     class ISpectraDetectorMap;
     class INearestNeighbours;
+    class INearestNeighboursFactory;
   }
   namespace API
   {
@@ -295,9 +295,14 @@ namespace Mantid
       void saveInstrumentNexus(::NeXus::File * file) const;
       void loadInstrumentNexus(::NeXus::File * file);
 
+       //Apply masking.
+       void setMDMasking(Mantid::Geometry::MDImplicitFunction* maskingRegion);
+
+       //Clear exsting masking.
+       void clearMDMasking();
 
     protected:
-      MatrixWorkspace(Mantid::Geometry::INearestNeighboursFactory* factory = new Mantid::Geometry::NearestNeighboursFactory);
+      MatrixWorkspace(Mantid::Geometry::INearestNeighboursFactory* factory = NULL);
 
       /// Initialises the workspace. Sets the size and lengths of the arrays. Must be overloaded.
       virtual void init(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength) = 0;

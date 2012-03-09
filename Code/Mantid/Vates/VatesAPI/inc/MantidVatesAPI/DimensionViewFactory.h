@@ -6,6 +6,9 @@ namespace Mantid
 {
   namespace VATES
   {
+    /**
+    class Abstract DimensionViewFactory provides Factory Method
+    */
     class DLLExport DimensionViewFactory
     {
     public:

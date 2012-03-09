@@ -395,7 +395,7 @@ namespace DataHandling
       tofs.push_back(values[i]);
     } // ENDFOR
     // Clear the last
-    if (tofs.size() != 0)
+    if (!tofs.empty())
     {
       // (a) Process previous logs: note value is in unit of 100 nano-second
       std::sort(tofs.begin(), tofs.end());
@@ -458,7 +458,7 @@ namespace DataHandling
         tofs.push_back(values[i]);
       } // ENDFOR
       // Clear the last
-      if (tofs.size() != 0)
+      if (!tofs.empty())
       {
         // (a) Process previous logs: note value is in unit of 100 nano-second
         std::sort(tofs.begin(), tofs.end());

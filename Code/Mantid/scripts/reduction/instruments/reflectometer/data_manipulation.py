@@ -1,7 +1,6 @@
 import _qti
 import os
 from mantidsimple import *
-from reduction.instruments.reflectometer import wks_utility
 
 def tof_distribution(file_path, callback=None,
                      range_min=None, range_max=None):
@@ -59,18 +58,24 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
             
         # 1D plot
         ws_output = "%s %s" % (ws_output_base, title)
+
+        instr_dir = mtd.getSettings().getInstrumentDirectory()
         if is_pixel_y:
+            grouping_file = os.path.join(instr_dir, "Grouping",
+                                         "REFL_Detector_Grouping_Sum_X.xml")
             GroupDetectors(InputWorkspace=ws, OutputWorkspace=ws_output,
-                           MapFile="Grouping/REFL_Detector_Grouping_Sum_X.xml")
+                           MapFile=grouping_file)
         else:
+            grouping_file = os.path.join(instr_dir, "Grouping",
+                                         "REFL_Detector_Grouping_Sum_Y.xml")
             GroupDetectors(InputWorkspace=ws, OutputWorkspace=ws_output,
-                           MapFile="Grouping/REFL_Detector_Grouping_Sum_Y.xml")
+                           MapFile=grouping_file)
             
         Transpose(InputWorkspace=ws_output, OutputWorkspace=ws_output)
         
         # The Y pixel numbers start at 1 from the perspective of the users
         # They also read in reversed order
-        if is_pixel_y:
+        if False and is_pixel_y:
             x=mtd[ws_output].dataX(0)
             y_reversed=mtd[ws_output].dataY(0)
             y=[i for i in y_reversed]
@@ -88,13 +93,15 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
         output_2d = ws_output+'_2D'
         Rebin(InputWorkspace=ws,OutputWorkspace=output_2d,Params="0,200,200000")
         if is_pixel_y:
+            grouping_file = os.path.join(instr_dir, "Grouping",
+                                         "REFL_Detector_Grouping_Sum_X.xml")
             GroupDetectors(InputWorkspace=output_2d, OutputWorkspace=output_2d,
-                           MapFile="Grouping/REFL_Detector_Grouping_Sum_X.xml")
+                           MapFile=grouping_file)
         else:
+            grouping_file = os.path.join(instr_dir, "Grouping",
+                                         "REFL_Detector_Grouping_Sum_Y.xml")
             GroupDetectors(InputWorkspace=output_2d, OutputWorkspace=output_2d,
-                           MapFile="Grouping/REFL_Detector_Grouping_Sum_Y.xml")
-                
-        
+                           MapFile=grouping_file)
             
     if instrument=="REFM":
         for p in ['Off_Off', 'On_Off', 'Off_On', 'On_On']:
@@ -156,8 +163,10 @@ def get_logs(instrument, run):
         ws = "__%s" % basename
         if instrument=="REFM":
             ws = '%s_%s'%(ws, 'Off_Off')
-        LoadEventNexus(Filename=f[0], OutputWorkspace=ws, 
-                       NXentryName='entry-Off_Off', MetaDataOnly=True)
+            
+        if not mtd.workspaceExists(ws):
+            LoadEventNexus(Filename=f[0], OutputWorkspace=ws, 
+                           NXentryName='entry-Off_Off', MetaDataOnly=True)
         
         sangle = 0
         if mtd[ws].getRun().hasProperty("SANGLE"):
@@ -175,9 +184,14 @@ def get_logs(instrument, run):
         if mtd[ws].getRun().hasProperty("DIRPIX"):
             direct_beam_pix = mtd[ws].getRun().getProperty("DIRPIX").value[0]
         
+        det_distance = 2.562
+        if mtd[ws].getRun().hasProperty("SampleDetDis"):
+            det_distance = mtd[ws].getRun().getProperty("SampleDetDis").value[0]/1000.0
+
         return {"SANGLE":sangle,
                 "DANGLE":dangle,
                 "DANGLE0":dangle0,
-                "DIRPIX":direct_beam_pix}
+                "DIRPIX":direct_beam_pix,
+                "DET_DISTANCE":det_distance}
  
     

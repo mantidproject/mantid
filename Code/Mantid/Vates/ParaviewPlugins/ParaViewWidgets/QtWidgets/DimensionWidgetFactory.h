@@ -4,13 +4,20 @@
 #include "WidgetDllOption.h"
 #include "MantidVatesAPI/DimensionViewFactory.h"
 
+/**
+class DimensionWidgetFactory
+concrete DimensionViewFactory. Creational type, fabricating dimension widgets on request.
+*/
 class EXPORT_OPT_MANTIDPARVIEW DimensionWidgetFactory  : public Mantid::VATES::DimensionViewFactory
 {
 public:
-  DimensionWidgetFactory(bool readOnlyLimits);
+  /// Constructor
+  DimensionWidgetFactory(Mantid::VATES::BinDisplay binDisplay);
+  /// Construction method.
   Mantid::VATES::DimensionView* create() const;
 private:
-  const bool m_readOnlyLimits;
+  /// Bin display configuration.
+  const Mantid::VATES::BinDisplay m_binDisplay;
 };
 
 #endif

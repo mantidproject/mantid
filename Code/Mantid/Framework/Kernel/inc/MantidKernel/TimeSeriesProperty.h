@@ -200,7 +200,6 @@ public:
     return;
   }
 
-
   //-----------------------------------------------------------------------------------------------
   /**
    * Filter out a run by time. Takes out any TimeSeriesProperty log entries outside of the given
@@ -805,6 +804,7 @@ public:
 
   //-----------------------------------------------------------------------------------------------
   /** Returns n-th time. NOTE: Complexity is order(n)!
+   *  Special cases: There is no special cases
    *  @param n :: index
    *  @return DateAndTime
    */
@@ -839,6 +839,12 @@ public:
 
   //-----------------------------------------------------------------------------------------------
   /** Returns n-th valid time interval, in a very inefficient way.
+   *
+   * Here are some special cases
+   *  (1) If empty property, throw runtime_error
+   *  (2) If double or more entries, skip!
+   *  (3) If n = size of property, use dt from last interval
+   *  (4) If n > size of property, return Interval = 0
    *  @param n :: index
    *  @return n-th time interval
    */
@@ -886,9 +892,13 @@ public:
 
 
   //-----------------------------------------------------------------------------------------------
-  /** Divide the property into  allowed and disallowed time intervals according to \a filter.
-   Repeated time-value pairs (two same time and value entries) mark the start of a gap in the values. 
-   The gap ends and an allowed time interval starts when a single time-value is met.
+  /* Divide the property into  allowed and disallowed time intervals according to \a filter.
+   * (Repeated time-value pairs (two same time and value entries) mark the start of a gap in the values.)
+   * If any time-value pair is repeated, it means that this entry is in disallowed region.
+   * The gap ends and an allowed time interval starts when a single time-value is met.
+
+   The disallowed region will be hidden for countSize() and nthInterval()
+
    @param filter :: The filter mask to apply
    */
   void filterWith(const TimeSeriesProperty<bool>* filter)

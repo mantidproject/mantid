@@ -2415,7 +2415,15 @@ QString Graph::saveCurves()
         continue;
 
       if (it->rtti()==QwtPlotItem::Rtti_PlotUserItem){
-        s += dynamic_cast<MantidMatrixCurve*>(it)->saveToString();
+        MantidMatrixCurve * mmc = dynamic_cast<MantidMatrixCurve*>(it);
+        if (!mmc) continue;
+        s += mmc->saveToString();
+        s += saveCurveLayout(i);
+        s += "\n";
+        if (mmc->hasErrorBars())
+          s += "<MantidYErrors>" + mmc->errorBarSettingsList().front()->toString() + "</MantidYErrors>\n";
+        if (mmc->skipSymbolsCount() > 1)
+          s += "<SkipPoints>" + QString::number(mmc->skipSymbolsCount()) + "</SkipPoints>\n";
         continue;
       }
 
@@ -2447,12 +2455,7 @@ QString Graph::saveCurves()
         s += er->masterCurve()->xColumnName() + "\t";
         s += er->masterCurve()->title().text() + "\t";
         s += er->title().text() + "\t";
-        s += QString::number(er->width())+"\t";
-        s += QString::number(er->capLength())+"\t";
-        s += er->color().name()+"\t";
-        s += QString::number(er->throughSymbol())+"\t";
-        s += QString::number(er->plusSide())+"\t";
-        s += QString::number(er->minusSide())+"\n";
+        s += er->toString() + "\n";
       }
     }
   }
@@ -4137,6 +4140,20 @@ QString Graph::saveToString(bool saveAsTemplate)
   s+="AxesLineWidth\t"+QString::number(d_plot->axesLinewidth())+"\n";
   s+=saveLabelsRotation();
   s+=saveMarkers();
+
+  if (isWaterfallPlot())
+  {
+    s += "<waterfall>" + QString::number(d_waterfall_offset_x) + ",";
+    s += QString::number(d_waterfall_offset_y) + ",";
+    bool sideLines(false);
+    if ( d_plot->curvesList().size() > 0 )
+    {
+      PlotCurve *cv = dynamic_cast<PlotCurve*>(curve(0));
+      if ( cv && cv->sideLinesEnabled() ) sideLines = true;
+    }
+    s += QString::number(sideLines) + "</waterfall>\n";
+  }
+
   s+="</graph>\n";
   return s;
 }

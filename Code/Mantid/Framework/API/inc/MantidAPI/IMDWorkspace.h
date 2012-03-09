@@ -99,7 +99,12 @@ namespace Mantid
 
       signal_t getSignalAtVMD(const Mantid::Kernel::VMD & coords,
           const Mantid::API::MDNormalization & normalization = Mantid::API::VolumeNormalization) const;
+      
+      /// Setter for the masking region.
+      virtual void setMDMasking(Mantid::Geometry::MDImplicitFunction* maskingRegion) = 0;
 
+      /// Clear existing masks
+      virtual void clearMDMasking() = 0;
     };
     
     /// Shared pointer to the IMDWorkspace base class

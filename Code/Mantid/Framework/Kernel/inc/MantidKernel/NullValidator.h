@@ -41,7 +41,7 @@ template <typename TYPE>
 class DLLExport NullValidator : public IValidator<TYPE>
 {
 public:
-  IValidator<TYPE>* clone() { return new NullValidator(*this); }
+  IValidator<TYPE>* clone() const { return new NullValidator(*this); }
 
 private:
   /** Always returns valid, that is ""

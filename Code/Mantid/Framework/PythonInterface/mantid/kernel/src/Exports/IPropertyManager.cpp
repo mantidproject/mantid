@@ -4,6 +4,7 @@
 
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/copy_const_reference.hpp>
 
 using Mantid::Kernel::IPropertyManager;
 namespace Registry = Mantid::PythonInterface::Registry;
@@ -40,15 +41,20 @@ void export_IPropertyManager()
   register_ptr_to_python<IPropertyManager*>();
 
   class_<IPropertyManager, boost::noncopyable>("IPropertyManager", no_init)
+    .def("propertyCount", &IPropertyManager::propertyCount, "Returns the number of properties being managed")
     .def("getProperty", &IPropertyManager::getPointerToProperty, return_value_policy<return_by_value>(),
         "Returns the property of the given name. Use .value to give the value")
     .def("getPropertyValue", &IPropertyManager::getPropertyValue, 
          "Returns a string representation of the named property's value")
+    .def("getProperties", &IPropertyManager::getProperties, return_value_policy<copy_const_reference>(),
+         "Returns the list of properties managed by this object")
     .def("setPropertyValue", &IPropertyManager::setPropertyValue, 
          "Set the value of the named property via a string")
     .def("setProperty", &setProperty, "Set the value of the named property")
-    // Special methods to act like dictionary
+    // Special methods to act like a dictionary
+    .def("__len__", &IPropertyManager::propertyCount)
     .def("__contains__", &IPropertyManager::existsProperty)
+    .def("__getitem__", &IPropertyManager::getProperty)
     ;
-}
+  }
 

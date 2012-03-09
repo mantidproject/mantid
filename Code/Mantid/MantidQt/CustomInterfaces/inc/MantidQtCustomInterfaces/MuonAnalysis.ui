@@ -1377,6 +1377,20 @@
               </property>
              </widget>
             </item>
+            <item row="2" column="1">
+             <widget class="QCheckBox" name="hideGraphs">
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_14">
+              <property name="text">
+               <string>Hide Previous Graphs:</string>
+              </property>
+             </widget>
+            </item>
            </layout>
           </item>
          </layout>
@@ -1389,16 +1403,6 @@
        <string>Data Analysis</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_3">
-       <item row="0" column="0">
-        <widget class="MantidQt::MantidWidgets::FitPropertyBrowser" name="fitBrowser">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-        </widget>
-       </item>
        <item row="1" column="0">
         <layout class="QGridLayout" name="gridLayout_7">
          <item row="0" column="0">
@@ -1431,6 +1435,16 @@
           </spacer>
          </item>
         </layout>
+       </item>
+       <item row="0" column="0">
+        <widget class="MantidQt::MantidWidgets::MuonFitPropertyBrowser" name="fitBrowser">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -2089,7 +2103,11 @@
    <class>MantidQt::MantidWidgets::FitPropertyBrowser</class>
    <extends>QDockWidget</extends>
    <header>MantidQtMantidWidgets/FitPropertyBrowser.h</header>
-   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::MuonFitPropertyBrowser</class>
+   <extends>MantidQt::MantidWidgets::FitPropertyBrowser</extends>
+   <header>MantidQtMantidWidgets/MuonFitPropertyBrowser.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

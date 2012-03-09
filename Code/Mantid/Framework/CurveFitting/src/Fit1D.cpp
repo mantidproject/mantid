@@ -7,6 +7,7 @@
 #include <cmath>
 #include <iomanip>
 #include "MantidKernel/Exception.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"

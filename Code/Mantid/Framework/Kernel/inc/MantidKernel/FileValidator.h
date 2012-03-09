@@ -46,7 +46,7 @@ public:
   explicit FileValidator(const std::vector<std::string>& extensions, bool testFileExists = true);
   virtual ~FileValidator();
   virtual std::set<std::string> allowedValues() const;
-  virtual IValidator<std::string>* clone();
+  virtual IValidator<std::string>* clone() const;
 
 protected:
   /// The list of permitted extensions

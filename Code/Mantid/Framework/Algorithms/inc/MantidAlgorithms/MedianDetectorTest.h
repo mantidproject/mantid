@@ -101,7 +101,8 @@ namespace Mantid
       double m_rangeLower;
       /// End point for integration
       double m_rangeUpper;
-
+      /// flag for solid angle correction
+      bool m_solidAngle;
     };
 
   } // namespace Algorithm

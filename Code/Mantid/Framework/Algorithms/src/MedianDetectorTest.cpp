@@ -84,6 +84,7 @@ namespace Mantid
                       "No bin with a boundary at an x value higher than this value will\n"
                       "be included in the summation used to decide if a detector is 'bad'\n"
                       "(default: the end of each histogram)" );
+      declareProperty("CorrectForSolidAngle", false, "Flag to correct for solid angle efficiency. False by default.");
       declareProperty("NumberOfFailures", 0, Direction::Output);
     }
 
@@ -100,6 +101,15 @@ namespace Mantid
       MatrixWorkspace_sptr countsWS = integrateSpectra(m_inputWS, m_minSpec, m_maxSpec,
                                                        m_rangeLower, m_rangeUpper, true);
 
+      // 0. Correct for solid angle, if desired
+      if (m_solidAngle)
+      {
+        MatrixWorkspace_sptr solidAngle=getSolidAngles(m_minSpec, m_maxSpec);
+        if (solidAngle!=NULL)
+        {
+          countsWS=countsWS/solidAngle;
+        }
+      }
 
       // 1. Calculate the median
       const bool excludeZeroes = getProperty("ExcludeZeroesFromMedian");
@@ -158,6 +168,9 @@ namespace Mantid
       // Integration Range
       m_rangeLower = getProperty("RangeLower");
       m_rangeUpper = getProperty("RangeUpper");
+
+      //Solid angle correction flag
+      m_solidAngle = getProperty("CorrectForSolidAngle");
     }
 
     /** Makes a workspace with the total solid angle all the detectors in each spectrum cover from the sample

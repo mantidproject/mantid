@@ -1,0 +1,101 @@
+:Algorithms.Execute_FindAlgComboBox	{container=':MantidPlot - untitled.Algorithms_AlgorithmDockWidget' leftWidget=':Algorithms.Execute_QPushButton' type='FindAlgComboBox' unnamed='1' visible='1'}
+:Algorithms.Execute_QPushButton	{container=':MantidPlot - untitled.Algorithms_AlgorithmDockWidget' text='Execute' type='QPushButton' unnamed='1' visible='1'}
+:AlignedDimX_QLineEdit	{buddy=':Axis-Aligned Binning.AlignedDimX_QLabel' type='QLineEdit' unnamed='1' visible='1'}
+:AlignedDimY_QLineEdit	{buddy=':Axis-Aligned Binning.AlignedDimY_QLabel' type='QLineEdit' unnamed='1' visible='1'}
+:Axis-Aligned Binning.AlignedDimX_QLabel	{container=':BinMD input dialog.Axis-Aligned Binning_QGroupBox' text='AlignedDim0' type='QLabel' unnamed='1' visible='1'}
+:Axis-Aligned Binning.AlignedDimY_QLabel	{container=':BinMD input dialog.Axis-Aligned Binning_QGroupBox' text='AlignedDim1' type='QLabel' unnamed='1' visible='1'}
+:BinMD input dialog.Axis-Aligned Binning_QGroupBox	{title='Axis-Aligned Binning' type='QGroupBox' unnamed='1' visible='1' window=':BinMD input dialog_MantidQt::API::GenericDialog'}
+:BinMD input dialog.OutputWorkspace_QLabel	{text='OutputWorkspace' type='QLabel' unnamed='1' visible='1' window=':BinMD input dialog_MantidQt::API::GenericDialog'}
+:BinMD input dialog.Run_QPushButton	{text='Run' type='QPushButton' unnamed='1' visible='1' window=':BinMD input dialog_MantidQt::API::GenericDialog'}
+:BinMD input dialog_MantidQt::API::GenericDialog	{type='MantidQt::API::GenericDialog' unnamed='1' visible='1' windowTitle='BinMD input dialog'}
+:Continue_QPushButton	{text='Continue' type='QPushButton' unnamed='1' visible='1' window=':_QMessageBox'}
+:Execute_QLineEdit	{parentWidget=':Algorithms.Execute_FindAlgComboBox' type='QLineEdit' unnamed='1' visible='1'}
+:Filename_QLineEdit	{buddy=':LoadMD input dialog.Filename_QLabel' type='QLineEdit' unnamed='1' visible='1'}
+:LoadMD input dialog.Browse_QPushButton	{text='Browse' type='QPushButton' unnamed='1' visible='1' window=':LoadMD input dialog_MantidQt::API::GenericDialog'}
+:LoadMD input dialog.Filename_QLabel	{text='Filename' type='QLabel' unnamed='1' visible='1' window=':LoadMD input dialog_MantidQt::API::GenericDialog'}
+:LoadMD input dialog.OutputWorkspace_QLabel	{text='OutputWorkspace' type='QLabel' unnamed='1' visible='1' window=':LoadMD input dialog_MantidQt::API::GenericDialog'}
+:LoadMD input dialog.Run_QPushButton	{text='Run' type='QPushButton' unnamed='1' visible='1' window=':LoadMD input dialog_MantidQt::API::GenericDialog'}
+:LoadMD input dialog_MantidQt::API::GenericDialog	{type='MantidQt::API::GenericDialog' unnamed='1' visible='1' windowTitle='LoadMD input dialog'}
+:LoadMD input dialog_QWidget	{occurrence='2' type='QWidget' unnamed='1' visible='1' window=':LoadMD input dialog_MantidQt::API::GenericDialog'}
+:MantidPlot - Error opening file.OK_QPushButton	{text='OK' type='QPushButton' unnamed='1' visible='1' window=':MantidPlot - Error opening file_QMessageBox'}
+:MantidPlot - Error opening file_QMessageBox	{type='QMessageBox' unnamed='1' visible='1' windowTitle='MantidPlot - Error opening file'}
+:MantidPlot - Open a script from a file.File name:_QLabel	{name='fileNameLabel' text='File name:' type='QLabel' visible='1' window=':MantidPlot - Open a script from a file_QFileDialog'}
+:MantidPlot - Open a script from a file.Open_QPushButton	{text='Open' type='QPushButton' unnamed='1' visible='1' window=':MantidPlot - Open a script from a file_QFileDialog'}
+:MantidPlot - Open a script from a file.frame_QFrame	{name='frame' type='QFrame' visible='1' window=':MantidPlot - Open a script from a file_QFileDialog'}
+:MantidPlot - Open a script from a file.lookInCombo_QComboBox	{name='lookInCombo' type='QComboBox' visible='1' window=':MantidPlot - Open a script from a file_QFileDialog'}
+:MantidPlot - Open a script from a file.sidebar_QSidebar	{name='sidebar' type='QSidebar' visible='1' window=':MantidPlot - Open a script from a file_QFileDialog'}
+:MantidPlot - Open a script from a file.toParentButton_QToolButton	{name='toParentButton' type='QToolButton' visible='1' window=':MantidPlot - Open a script from a file_QFileDialog'}
+:MantidPlot - Open a script from a file_QFileDialog	{name='QFileDialog' type='QFileDialog' visible='1' windowTitle='MantidPlot - Open a script from a file'}
+:MantidPlot - untitled.Algorithms_AlgorithmDockWidget	{name='exploreAlgorithms' type='AlgorithmDockWidget' visible='1' window=':MantidPlot - untitled_ApplicationWindow' windowTitle='Algorithms'}
+:MantidPlot - untitled.File_QMenu	{name='fileMenu' title='File' type='QMenu' visible='1' window=':MantidPlot - untitled_ApplicationWindow'}
+:MantidPlot - untitled.Scripting Console_QDockWidget	{name='consoleWindow' type='QDockWidget' visible='1' window=':MantidPlot - untitled_ApplicationWindow' windowTitle='Scripting Console'}
+:MantidPlot - untitled.View_QMenu	{name='viewMenu' title='View' type='QMenu' visible='1' window=':MantidPlot - untitled_ApplicationWindow'}
+:MantidPlot - untitled.WorkspaceContextMenu_QMenu	{name='WorkspaceContextMenu' type='QMenu' visible='1' window=':MantidPlot - untitled_ApplicationWindow'}
+:MantidPlot - untitled.Workspaces_MantidDockWidget	{name='exploreMantid' type='MantidDockWidget' visible='1' window=':MantidPlot - untitled_ApplicationWindow' windowTitle='Workspaces'}
+:MantidPlot - untitled.qt_dockwidget_floatbutton_QMenu	{aboveWidget=':Workspaces.qt_dockwidget_floatbutton_QDockWidgetTitleButton' type='QMenu' unnamed='1' visible='1' window=':MantidPlot - untitled_ApplicationWindow'}
+:MantidPlot - untitled_ApplicationWindow	{name='main application' type='ApplicationWindow' visible='1' windowTitle='MantidPlot - untitled'}
+:MantidPlot - untitled_QMenu	{type='QMenu' unnamed='1' visible='1' window=':MantidPlot - untitled_ApplicationWindow'}
+:MantidPlot - untitled_QMenuBar	{type='QMenuBar' unnamed='1' visible='1' window=':MantidPlot - untitled_ApplicationWindow'}
+:MantidPlot - untitled_QWidget	{occurrence='105' type='QWidget' unnamed='1' visible='1' window=':MantidPlot - untitled_ApplicationWindow'}
+:MantidPlot - untitled_QWidget_2	{occurrence='119' type='QWidget' unnamed='1' visible='1' window=':MantidPlot - untitled_ApplicationWindow'}
+:MantidPlot.No_QPushButton	{text='No' type='QPushButton' unnamed='1' visible='1' window=':MantidPlot_QMessageBox'}
+:MantidPlot: Python Window.Execute_QMenu	{title='Execute' type='QMenu' unnamed='1' visible='1' window=':MantidPlot: Python Window_ScriptingWindow'}
+:MantidPlot: Python Window.File_QMenu	{title='File' type='QMenu' unnamed='1' visible='1' window=':MantidPlot: Python Window_ScriptingWindow'}
+:MantidPlot: Python Window.Script Output - Status: Stopped_ScriptOutputDock	{type='ScriptOutputDock' unnamed='1' visible='1' window=':MantidPlot: Python Window_ScriptingWindow' windowTitle='Script Output - Status: Stopped'}
+:MantidPlot: Python Window.qt_tabwidget_stackedwidget_QStackedWidget	{name='qt_tabwidget_stackedwidget' type='QStackedWidget' visible='1' window=':MantidPlot: Python Window_ScriptingWindow'}
+:MantidPlot: Python Window_QMenuBar	{type='QMenuBar' unnamed='1' visible='1' window=':MantidPlot: Python Window_ScriptingWindow'}
+:MantidPlot: Python Window_ScriptingWindow	{name='ScriptingWindow' type='ScriptingWindow' visible='1' windowTitle='MantidPlot: Python Window'}
+:MantidPlot_QMessageBox	{type='QMessageBox' unnamed='1' visible='1' windowTitle='MantidPlot'}
+:Open file.Open_QPushButton	{text='Open' type='QPushButton' unnamed='1' visible='1' window=':Open file_QFileDialog'}
+:Open file.splitter_QSplitter	{name='splitter' type='QSplitter' visible='1' window=':Open file_QFileDialog'}
+:Open file_QFileDialog	{name='QFileDialog' type='QFileDialog' visible='1' windowTitle='Open file'}
+:OutputWorkspace_QLineEdit	{buddy=':LoadMD input dialog.OutputWorkspace_QLabel' type='QLineEdit' unnamed='1' visible='1'}
+:OutputWorkspace_QLineEdit_2	{buddy=':BinMD input dialog.OutputWorkspace_QLabel' type='QLineEdit' unnamed='1' visible='1'}
+:Script Output - Status: Stopped.qt_dockwidget_closebutton_QDockWidgetTitleButton	{container=':MantidPlot: Python Window.Script Output - Status: Stopped_ScriptOutputDock' name='qt_dockwidget_closebutton' type='QDockWidgetTitleButton' visible='1'}
+:Script Output - Status: Stopped.qt_dockwidget_closebutton_QTextEdit	{aboveWidget=':Script Output - Status: Stopped.qt_dockwidget_closebutton_QDockWidgetTitleButton' container=':MantidPlot: Python Window.Script Output - Status: Stopped_ScriptOutputDock' type='QTextEdit' unnamed='1' visible='1'}
+:Scripting Console.qt_dockwidget_floatbutton_QDockWidgetTitleButton	{container=':MantidPlot - untitled.Scripting Console_QDockWidget' name='qt_dockwidget_floatbutton' type='QDockWidgetTitleButton' visible='1'}
+:Scripting Console.qt_dockwidget_floatbutton_QTextEdit	{aboveWidget=':Scripting Console.qt_dockwidget_floatbutton_QDockWidgetTitleButton' container=':MantidPlot - untitled.Scripting Console_QDockWidget' type='QTextEdit' unnamed='1' visible='1'}
+:Slice Viewer (SEQ) Slice1_MantidQt::SliceViewer::SliceViewerWindow	{type='MantidQt::SliceViewer::SliceViewerWindow' unnamed='1' visible='1' windowTitle='Slice Viewer (SEQ) Slice1'}
+:Slice Viewer (SEQ_4D_rebin) Slice1_MantidQt::SliceViewer::SliceViewerWindow	{type='MantidQt::SliceViewer::SliceViewerWindow' unnamed='1' visible='1' windowTitle='Slice Viewer (SEQ_4D_rebin) Slice1'}
+:Terminate_QPushButton	{text='Terminate' type='QPushButton' unnamed='1' visible='1' window=':_QMessageBox'}
+:Vates Simple Interface.First Frame_QToolButton	{text='First Frame' type='QToolButton' unnamed='1' visible='1' window=':Vates Simple Interface_QMdiSubWindow'}
+:Vates Simple Interface.Form_Mantid::Vates::SimpleGui::MdViewerWidget	{name='MdViewerWidgetClass' type='Mantid::Vates::SimpleGui::MdViewerWidget' visible='1' window=':Vates Simple Interface_QMdiSubWindow' windowTitle='Form'}
+:Vates Simple Interface.Play_QToolButton	{text='Play' type='QToolButton' unnamed='1' visible='1' window=':Vates Simple Interface_QMdiSubWindow'}
+:Vates Simple Interface.multiSliceButton_QPushButton	{name='multiSliceButton' type='QPushButton' visible='1' window=':Vates Simple Interface_QMdiSubWindow'}
+:Vates Simple Interface.splatterPlotButton_QPushButton	{name='splatterPlotButton' type='QPushButton' visible='1' window=':Vates Simple Interface_QMdiSubWindow'}
+:Vates Simple Interface.splitter_2_QSplitter	{name='splitter_2' type='QSplitter' visible='1' window=':Vates Simple Interface_QMdiSubWindow'}
+:Vates Simple Interface_QMdiSubWindow	{type='QMdiSubWindow' unnamed='1' visible='1' windowTitle='Vates Simple Interface'}
+:WorkspaceTree_QHeaderView	{container=':Workspaces.WorkspaceTree_MantidTreeWidget' orientation='1' type='QHeaderView' unnamed='1' visible='1'}
+:Workspaces.WorkspaceTree_MantidTreeWidget	{container=':MantidPlot - untitled.Workspaces_MantidDockWidget' name='WorkspaceTree' type='MantidTreeWidget' visible='1'}
+:Workspaces.qt_dockwidget_floatbutton_QDockWidgetTitleButton	{container=':MantidPlot - untitled.Workspaces_MantidDockWidget' name='qt_dockwidget_floatbutton' type='QDockWidgetTitleButton' visible='1'}
+:Workspaces_HeaderViewItem	{container=':WorkspaceTree_QHeaderView' text='Workspaces' type='HeaderViewItem'}
+:_QGraphicsItem	{acceptDrops='no' container=':splitter_2_QGraphicsView' enabled='yes' focusable='no' lineColor='#000000' movable='yes' selectable='yes' toolTip='Slice1' type='QGraphicsItem' userType='1' visible='yes'}
+:_QGraphicsItem_2	{acceptDrops='no' container=':splitter_2_QGraphicsView_2' enabled='yes' focusable='no' lineColor='#000000' movable='yes' selectable='yes' toolTip='Slice2' type='QGraphicsItem' userType='1' visible='yes'}
+:_QListView	{type='QListView' unnamed='1' visible='1'}
+:_QMenu	{type='QMenu' unnamed='1' visible='1'}
+:_QMessageBox	{type='QMessageBox' unnamed='1' visible='1'}
+:fileNameEdit_QLineEdit	{buddy=':MantidPlot - Open a script from a file.File name:_QLabel' name='fileNameEdit' type='QLineEdit' visible='1'}
+:frame.stackedWidget_QStackedWidget	{container=':splitter.frame_QFrame' name='stackedWidget' type='QStackedWidget' visible='1'}
+:frame.stackedWidget_QStackedWidget_2	{container=':MantidPlot - Open a script from a file.frame_QFrame' name='stackedWidget' type='QStackedWidget' visible='1'}
+:objectInspector.Apply_QPushButton	{container=':qt_tabwidget_stackedwidget.objectInspector_pqObjectInspectorWidget' name='Accept' text='Apply' type='QPushButton' visible='1'}
+:qt_tabwidget_stackedwidget.objectInspector_pqObjectInspectorWidget	{container=':splitter.qt_tabwidget_stackedwidget_QStackedWidget' name='objectInspector' type='pqObjectInspectorWidget' visible='1'}
+:qt_tabwidget_stackedwidget_ScriptEditor	{container=':MantidPlot: Python Window.qt_tabwidget_stackedwidget_QStackedWidget' type='ScriptEditor' unnamed='1' visible='1'}
+:renderFrame.Viewport_pqQVTKWidget	{container=':splitter_2.renderFrame_QFrame' name='Viewport' type='pqQVTKWidget' visible='1'}
+:splitter.frame_QFrame	{container=':Open file.splitter_QSplitter' name='frame' type='QFrame' visible='1'}
+:splitter.qt_tabwidget_stackedwidget_QStackedWidget	{container=':splitter_2.splitter_QSplitter' name='qt_tabwidget_stackedwidget' type='QStackedWidget' visible='1'}
+:splitter.sidebar_QSidebar	{container=':Open file.splitter_QSplitter' name='sidebar' type='QSidebar' visible='1'}
+:splitter_2.Cut_QPushButton	{container=':Vates Simple Interface.splitter_2_QSplitter' name='cutButton' text='Cut' type='QPushButton' visible='1'}
+:splitter_2.Rebin_QPushButton	{container=':Vates Simple Interface.splitter_2_QSplitter' name='rebinButton' text='Rebin' type='QPushButton' visible='1'}
+:splitter_2.StandardView_Mantid::Vates::SimpleGui::StandardView	{container=':Vates Simple Interface.splitter_2_QSplitter' name='StandardView' type='Mantid::Vates::SimpleGui::StandardView' visible='1' windowTitle='StandardView'}
+:splitter_2.qt_splithandle__QSplitterHandle	{container=':Vates Simple Interface.splitter_2_QSplitter' name='qt_splithandle_' occurrence='2' type='QSplitterHandle' visible='1'}
+:splitter_2.renderFrame_QFrame	{container=':Vates Simple Interface.splitter_2_QSplitter' name='renderFrame' type='QFrame' visible='1'}
+:splitter_2.splitter_QSplitter	{container=':Vates Simple Interface.splitter_2_QSplitter' name='splitter' type='QSplitter' visible='1'}
+:splitter_2.xAxisWidget_Mantid::Vates::SimpleGui::AxisInteractor	{container=':Vates Simple Interface.splitter_2_QSplitter' name='xAxisWidget' type='Mantid::Vates::SimpleGui::AxisInteractor' visible='1'}
+:splitter_2.yAxisWidget_Mantid::Vates::SimpleGui::AxisInteractor	{container=':Vates Simple Interface.splitter_2_QSplitter' name='yAxisWidget' type='Mantid::Vates::SimpleGui::AxisInteractor' visible='1'}
+:splitter_2.zAxisWidget_Mantid::Vates::SimpleGui::AxisInteractor	{container=':Vates Simple Interface.splitter_2_QSplitter' name='zAxisWidget' type='Mantid::Vates::SimpleGui::AxisInteractor' visible='1'}
+:splitter_2_QGraphicsView	{container=':Vates Simple Interface.splitter_2_QSplitter' occurrence='2' type='QGraphicsView' unnamed='1' visible='1'}
+:splitter_2_QGraphicsView_2	{container=':Vates Simple Interface.splitter_2_QSplitter' type='QGraphicsView' unnamed='1' visible='1'}
+:splitter_2_QwtScaleWidget	{container=':Vates Simple Interface.splitter_2_QSplitter' occurrence='2' type='QwtScaleWidget' unnamed='1' visible='1'}
+:splitter_2_QwtScaleWidget_2	{container=':Vates Simple Interface.splitter_2_QSplitter' type='QwtScaleWidget' unnamed='1' visible='1'}
+:stackedWidget.treeView_QTreeView	{container=':frame.stackedWidget_QStackedWidget' name='treeView' type='QTreeView' visible='1'}
+:stackedWidget.treeView_QTreeView_2	{container=':frame.stackedWidget_QStackedWidget_2' name='treeView' type='QTreeView' visible='1'}

@@ -1,12 +1,12 @@
 //-----------------------------------------------------
 // Includes
 //-----------------------------------------------------
-#include "ScriptManagerWidget.h"
-#include "ScriptEditor.h"
-#include "ScriptingEnv.h"
-#include "Script.h"
-#include "ScriptingLangDialog.h"
 #include "ApplicationWindow.h"
+#include "MantidQtMantidWidgets/ScriptEditor.h"
+#include "Script.h"
+#include "ScriptingEnv.h"
+#include "ScriptingLangDialog.h"
+#include "ScriptManagerWidget.h"
 // Qt
 #include <QPoint>
 #include <QAction>
@@ -1061,7 +1061,9 @@ void ScriptManagerWidget::open(bool newtab, const QString & filename)
  */
 Script * ScriptManagerWidget::createScriptRunner(ScriptEditor *editor)
 {
-  Script *script = scriptingEnv()->newScript("", this, editor->fileName(), true,
+  QString filename("");
+  if( editor ) filename = editor->fileName();
+  Script *script = scriptingEnv()->newScript("", this, filename, true,
                                              m_toggle_progress->isChecked());
   if( m_capturePrint )
   {
@@ -1077,7 +1079,7 @@ Script * ScriptManagerWidget::createScriptRunner(ScriptEditor *editor)
   if( editor )
   {
     connect(script, SIGNAL(keywordsChanged(const QStringList&)), editor, 
-	    SLOT(updateCompletionAPI(const QStringList &)));
+      SLOT(updateCompletionAPI(const QStringList &)));
     /// Initialize the auto complete by evaluating some completely trivial code
     if( !scriptingEnv()->isRunning() )
     {

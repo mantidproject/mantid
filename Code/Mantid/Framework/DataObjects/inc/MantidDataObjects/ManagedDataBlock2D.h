@@ -30,10 +30,7 @@ namespace DataObjects
     but no sample, instrument or history data is held here.
     The class supports the Workspace iterators.
 
-    @author Russell Taylor, Tessella Support Services plc
-    @date 18/01/2008
-    
-    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008-2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
   
@@ -68,7 +65,6 @@ public:
   void initialize();
 
   int minIndex() const;
-  int hashIndexFunction() const;
   bool hasChanges() const;
   void hasChanges(bool has);
 

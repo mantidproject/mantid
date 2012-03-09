@@ -606,7 +606,7 @@ namespace DataObjects
   /** Set all three H,K,L indices of the peak */
   void Peak::setHKL(double H, double K, double L)
   {
-    if(orig_H == 0 && orig_K == 0 && orig_K == 0)
+    if(orig_H == 0 && orig_K == 0 && orig_L == 0)
     {
       orig_H = m_H;
       orig_K = m_K;
@@ -620,7 +620,7 @@ namespace DataObjects
   /** Reset all three H,K,L indices of the peak to values before setHKL */
   void Peak::resetHKL()
   {
-    if(orig_H == 0 && orig_K == 0 && orig_K == 0)return;
+    if(orig_H == 0 && orig_K == 0 && orig_L == 0)return;
     m_H = orig_H;
     m_K = orig_K;
     m_L = orig_L;
@@ -632,7 +632,7 @@ namespace DataObjects
    */
   void Peak::setHKL(Mantid::Kernel::V3D HKL)
   {
-    if(orig_H == 0 && orig_K == 0 && orig_K == 0)
+    if(orig_H == 0 && orig_K == 0 && orig_L == 0)
     {
       orig_H = m_H;
       orig_K = m_K;

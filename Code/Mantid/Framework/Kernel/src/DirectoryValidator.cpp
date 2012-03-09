@@ -34,7 +34,7 @@ std::set<std::string> DirectoryValidator::allowedValues() const
  * Clone the validator
  * @returns A pointer to a new validator with the same properties as this one
  */
-IValidator<std::string>* DirectoryValidator::clone()
+IValidator<std::string>* DirectoryValidator::clone() const
 { 
   return new DirectoryValidator(*this);
 }

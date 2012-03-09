@@ -17,9 +17,6 @@
 #include <MantidAPI/IMDWorkspace.h>
 #include <MantidAPI/IMDEventWorkspace.h>
 
-//#include <MantidDataObjects/EventWorkspace.h>
-//#include <MantidDataObjects/PeaksWorkspace.h>
-
 #include <Poco/NObserver.h>
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"

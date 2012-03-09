@@ -1,4 +1,5 @@
 #include "ErrorBarSettings.h"
+#include <cassert>
 
 /** Constructor.
  *  Sets defaults of black lines having width 1.0 and caps of length 6,
@@ -81,3 +82,35 @@ void ErrorBarSettings::drawMinusSide(bool yes)
 {
   m_minus=yes;
 }
+
+/// Write the settings to a tab-separated string. Used when saving a project.
+QString ErrorBarSettings::toString() const
+{
+  // Be sure to go through the (virtual) methods because some are overridden in a derived class
+  QString s = QString::number(this->width())+"\t";
+  s += QString::number(this->capLength())+"\t";
+  s += this->color().name()+"\t";
+  s += QString::number(this->throughSymbol())+"\t";
+  s += QString::number(this->plusSide())+"\t";
+  s += QString::number(this->minusSide());
+
+  return s;
+}
+
+/// Set the attributes from a tab-separated string. Used when loading a project
+void ErrorBarSettings::fromString(const QString& settings)
+{
+  const QStringList settingslist = settings.split("\t");
+  // Try to spot if something changes upstream
+  assert( settingslist.size() == 6 );
+  if ( settingslist.size() != 6 ) return;
+
+  this->setWidth(settingslist[0].toDouble());
+  this->setCapLength(settingslist[1].toInt());
+  this->setColor(settingslist[2]);
+  this->drawThroughSymbol(settingslist[3].toInt());
+  this->drawPlusSide(settingslist[4].toInt());
+  this->drawMinusSide(settingslist[5].toInt());
+}
+
+

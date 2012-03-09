@@ -142,11 +142,18 @@ namespace Algorithms
    * @param detIDtoGroup :: output: map of detID: to group number
    * @param prog :: progress report
    */
-  void makeGroupingByNames(std::string GroupNames, Instrument_const_sptr inst, std::map<detid_t, int> & detIDtoGroup, Progress & prog)
+  void makeGroupingByNames(std::string GroupNames, Instrument_const_sptr inst, std::map<detid_t, int> & detIDtoGroup, Progress & prog, bool sortnames)
   {
     // Split the names of the group and insert in a vector
     std::vector<std::string> vgroups;
     boost::split( vgroups, GroupNames, boost::algorithm::detail::is_any_ofF<char>(",/*"));
+    while (vgroups.back().empty())
+    {
+      vgroups.pop_back();
+    }
+    if (sortnames) {
+      std::sort(vgroups.begin(), vgroups.end());
+    }
 
     // Trim and assign incremental number to each group
     std::map<std::string,int> group_map;
@@ -247,6 +254,8 @@ namespace Algorithms
     if (!OldCalFilename.empty() && !GroupNames.empty())
       throw std::invalid_argument("You must specify either to use the OldCalFilename parameter OR GroupNames but not both!");
 
+    bool sortnames = false;
+
     // ---------- Get the instrument one of 3 ways ---------------------------
     Instrument_const_sptr inst;
     if (inWS)
@@ -276,8 +285,9 @@ namespace Algorithms
       }
       else
       {
+          sortnames = true;
           GroupNames = "";
-
+          // cppcheck-suppress syntaxError
           PRAGMA_OMP(parallel for schedule(dynamic, 1) )
           for (int num = 0; num < 200; ++num)
           {
@@ -303,10 +313,9 @@ namespace Algorithms
     std::map<detid_t, int> detIDtoGroup;
 
     Progress prog(this,0.2,1.0, outWS->getNumberHistograms() );
-
     // Make the grouping one of two ways:
     if (GroupNames != "")
-      makeGroupingByNames(GroupNames, inst, detIDtoGroup, prog);
+      makeGroupingByNames(GroupNames, inst, detIDtoGroup, prog, sortnames);
     else if (OldCalFilename != "")
       readGroupingFile(OldCalFilename, detIDtoGroup, prog);
 

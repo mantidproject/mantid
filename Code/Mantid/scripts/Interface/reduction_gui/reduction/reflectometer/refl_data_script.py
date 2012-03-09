@@ -163,7 +163,7 @@ class DataSets(BaseScriptElement):
         
         
         #low resolution range
-        self.data_x_range_flag = BaseScriptElement.getBoolElement(instrument_dom, "data_x_range_flag",
+        self.data_x_range_flag = BaseScriptElement.getBoolElement(instrument_dom, "x_range_flag",
                                                                   default=DataSets.data_x_range_flag)
         
         self.data_x_range = [BaseScriptElement.getIntElement(instrument_dom, "x_min_pixel"),

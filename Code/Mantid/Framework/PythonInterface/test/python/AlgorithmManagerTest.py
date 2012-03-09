@@ -1,5 +1,5 @@
 import unittest
-
+import testhelpers
 from mantid.api import AlgorithmManager
 from mantid.api import (IAlgorithm, Algorithm, AlgorithmProxy, PythonAlgorithm, 
                         registerAlgorithm)
@@ -15,10 +15,7 @@ class NotAnAlgorithm(object):
 class AlgorithmManagerTest(unittest.TestCase):
     
     def test_create_default_version(self):
-        try:
-            alg = AlgorithmManager.Instance().create("ConvertUnits")
-        except RuntimeError:
-            self.fail(str(exc))
+        alg = testhelpers.assert_raises_nothing(self, AlgorithmManager.Instance().create, "ConvertUnits")
         # Tests
         self.assertNotEqual(alg, None)
         self.assertEquals(alg.name(), "ConvertUnits")
@@ -46,20 +43,10 @@ class AlgorithmManagerTest(unittest.TestCase):
         self.assertTrue(isinstance(alg, IAlgorithm))
         
     def test_algorithm_registration_with_valid_object_succeeds(self):
-        try:
-            registerAlgorithm(IsAnAlgorithm)
-            noerror = True
-        except Exception:
-            noerror = False
-        self.assertTrue(noerror)
+        testhelpers.assert_raises_nothing(self, registerAlgorithm, IsAnAlgorithm)
 
     def test_algorithm_registration_with_invalid_object_throws(self):
-        try:
-            registerAlgorithm(NotAnAlgorithm)
-            error = False
-        except ValueError:
-            error = True
-        self.assertTrue(error)
+        self.assertRaises(ValueError, registerAlgorithm, NotAnAlgorithm)
 
 if __name__ == '__main__':
     unittest.main()        

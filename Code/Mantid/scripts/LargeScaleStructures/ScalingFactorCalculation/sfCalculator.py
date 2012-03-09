@@ -5,8 +5,8 @@ from pylab import *
 
 class sfCalculator():      
     
-    tof_min = 10000  #microS
-    tof_max = 21600  #microS
+    tof_min = None  #microS
+    tof_max = None  #microS
 
     #range of x pixel to use in the X integration (we found out that there 
     #is a frame effect that introduces noise)
@@ -55,7 +55,15 @@ class sfCalculator():
     y_axis_error_ratio = None
     x_axis_ratio = None
             
-    def __init__(self, numerator=None, denominator=None):
+    def __init__(self, numerator=None, denominator=None,
+                 tof_range=None):
+        
+        if (tof_range is None):
+            self.tof_min = 10000
+            self.tof_max = 20000
+        else:
+            self.tof_min = tof_range[0]
+            self.tof_max = tof_range[1]
         
         self.numerator = numerator
         self.denominator = denominator
@@ -305,12 +313,14 @@ class sfCalculator():
                         DataY=self.y_axis_ratio,
                         DataE=self.y_axis_error_ratio,
                         Nspec=1)
+
         Fit(InputWorkspace='DataToFit',
             Function="name=UserFunction, Formula=a+b*x, a=1, b=2",
             Output='Res')
         res = mtd['Res_Parameters']
+        
         self.a = res.getDouble("Value", 0)
-        self.b = res.getDouble("Value", 1)
+        self.b = res.getDouble("Value", 1)        
         self.error_a = res.getDouble("Error", 0)
         self.error_b = res.getDouble("Error", 1)            
 
@@ -403,6 +413,14 @@ def createIndividualList(string_list_files):
     return {'list_runs':list_runs,
             'list_attenuator':list_attenuator}
     
+def getLambdaValue(mt):
+    """
+    return the lambdaRequest value
+    """
+    mt_run = mt.getRun()
+    _lambda = mt_run.getProperty('LambdaRequest').value
+    return _lambda
+    
 def getSh(mt, top_tag, bottom_tag):
     """
         returns the height and units of the given slit#
@@ -432,9 +450,9 @@ def getS2h(mt=None):
         return _h, units
     return None, None
 
-def getSlitsValue(full_list_runs, S1H, S2H):
+def getSlitsValueAndLambda(full_list_runs, S1H, S2H, lambdaRequest):
     """
-    Retrieve the S1H and S2H values
+    Retrieve the S1H, S2H and lambda requested values
     """
     _nbr_files = len(full_list_runs)
     for i in range(_nbr_files):
@@ -447,6 +465,9 @@ def getSlitsValue(full_list_runs, S1H, S2H):
         _s2h_value, _s2h_units = getS2h(mt1)
         S1H[i] = _s1h_value
         S2H[i] = _s2h_value
+        
+        _lambda_value = getLambdaValue(mt1)
+        lambdaRequest[i] = _lambda_value
 
 def isRunsSorted(list_runs, S1H, S2H):
     """
@@ -475,9 +496,12 @@ def calculateAndFit(numerator='',
                     denominator='',
                     list_peak_back_numerator=None,
                     list_peak_back_denominator=None,
-                    list_objects=[]):                                       
+                    list_objects=[],
+                    tof_range=None):                                       
 
-    cal1 = sfCalculator(numerator=numerator, denominator=denominator)
+    cal1 = sfCalculator(numerator=numerator, 
+                        denominator=denominator,
+                        tof_range=tof_range)
                 
     cal1.setNumerator(minPeak=list_peak_back_numerator[0],
                       maxPeak=list_peak_back_numerator[1],
@@ -500,7 +524,11 @@ def calculateAndFit(numerator='',
         return cal1
 
 #if __name__ == '__main__':
-def calculate(string_runs=None, list_peak_back=None, output_file=None):  
+def calculate(string_runs=None, 
+              list_attenuator=None, 
+              list_peak_back=None, 
+              output_path=None,
+              tof_range=None):  
     """
     In this current version, the program will automatically calculates
     the scaling function for up to, and included, 6 attenuators.
@@ -513,13 +541,15 @@ def calculate(string_runs=None, list_peak_back=None, output_file=None):
         The string runs has to be specified this way:
         string_runs = "run#1:nbr_attenuator, run#2:nbr_attenuator...."
         
+        list_attenuator: list of attenuators
+        
         the list_peak_back is specified this way:
         list_peak_back = 
             [[peak_min_run1, peak_max_run1, back_min_run1, back_max_run1],
              [peak_min_run2, peak_max_run2, back_min_run2, back_max_run2],
              [...]]
              
-        output_file = full path to output file name (folder must exist)
+        output_path = where the scaling factor files will be written
         
     """    
     
@@ -529,34 +559,32 @@ def calculate(string_runs=None, list_peak_back=None, output_file=None):
         list_runs = ['55889', '55890', '55891', '55892', '55893', '55894', 
                      '55895', '55896', '55897', '55898', '55899', '55900', 
                      '55901', '55902']
-        list_attenuator = [0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 4, 4]
-
+        
         nexus_path = '/mnt/hgfs/j35/results/'
         pre = 'REF_L_'
         nexus_path_pre = nexus_path + pre
         post = '_event.nxs'
     
         for (offset, item) in enumerate(list_runs):
-            list_runs[offset] = nexus_path_pre + list_runs[offset] + post
+            list_runs[offset] = nexus_path_pre + offset + post
 
     else:
-        #ex: string_runs="/mnt/hgfs/j35/REF_L_55889_event.nxs:0, 
-        # /mnt/hgfs/j35/REF_L_55890_event.nxs:1, 
-        # /mnt/hgfs/j35/REF_L_55891_event.nxs:1, 
-        # /mnt/hgfs/j35/REF_L_55892_event.nxs:1, 
-        # /mnt/hgfs/j35/REF_L_55893_event.nxs:1, 
-        # /mnt/hgfs/j35/REF_L_55894_event.nxs:1, 
-        # /mnt/hgfs/j35/REF_L_55895_event.nxs:1, 
-        # /mnt/hgfs/j35/REF_L_55896_event.nxs:2, 
-        # /mnt/hgfs/j35/REF_L_55897_event.nxs:2, 
-        # /mnt/hgfs/j35/REF_L_55898_event.nxs:2, 
-        # /mnt/hgfs/j35/REF_L_55899_event.nxs:3, 
-        # /mnt/hgfs/j35/REF_L_55900_event.nxs:3, 
-        # /mnt/hgfs/j35/REF_L_55901_event.nxs:4, 
-        # /mnt/hgfs/j35/REF_L_55902_event.nxs:4"
         dico = createIndividualList(string_runs)
         list_runs = dico['list_runs']
+
+        for (offset, item) in enumerate(list_runs):
+            _File = FileFinder.findRuns("REF_L%d" %int(item))
+            if len(_File)>0 and os.path.isfile(_File[0]): 
+                list_runs[offset] = _File[0]
+            else:
+                msg = "RefLReduction: could not find run %s\n" %item
+                msg += "Add your data folder to your User Data Directories in the File menu"
+                raise RuntimeError(msg)
+                
         list_attenuator = dico['list_attenuator']
+
+    if (list_attenuator is None):
+        list_attenuator = [0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 4, 4]
 
     if (list_peak_back is None):
         list_peak_back = zeros((len(list_runs), 4))   #[peak_min, peak_max, back_min, back_max]
@@ -571,10 +599,24 @@ def calculate(string_runs=None, list_peak_back=None, output_file=None):
     #####
     
     #retrieve the S1H and S2H val/units for each NeXus    
+    #retrieve the lambdaRequest value (Angstrom)
     S1H = {}
     S2H = {}
-    getSlitsValue(list_runs, S1H, S2H)
-  
+    lambdaRequest = {}
+    getSlitsValueAndLambda(list_runs, S1H, S2H, lambdaRequest)
+
+    #Make sure all the lambdaRequested are identical within a given range
+    lambdaRequestPrecision = 0.01 #1%
+    _lr = lambdaRequest[0]
+    for i in lambdaRequest:
+        _localValue = float(lambdaRequest[i][0])
+        _localValueRate = lambdaRequestPrecision * _localValue
+        _leftValue = _localValue - _localValueRate
+        _rightValue = _localValue + _localValueRate
+        
+        if (_localValue < _leftValue) or (_localValue > _rightValue):
+            raise Exception("lambda requested do not match !")
+    
     #make sure the file are sorted from smaller to bigger openning
     if isRunsSorted(list_runs, S1H, S2H):
         
@@ -622,12 +664,12 @@ def calculate(string_runs=None, list_peak_back=None, output_file=None):
             
                 cal = calculateAndFit(numerator=list_runs[index_numerator],
                                        denominator=list_runs[index_denominator],
-                                       list_peak_back_numerator=list_peak_back[index_numerator,],
-                                       list_peak_back_denominator=list_peak_back[index_denominator,],
-                                       list_objects=list_objects)                                       
+                                       list_peak_back_numerator=list_peak_back[index_numerator],
+                                       list_peak_back_denominator=list_peak_back[index_denominator],
+                                       list_objects=list_objects,
+                                       tof_range=tof_range)                                       
                 
                 recordSettings(a, b, error_a, error_b, name, cal)
-#                plotObject(cal)
                                 
                 if (i < (len(list_runs) - 1) and
                          list_attenuator[i + 1] == (_attenuator+1)):
@@ -638,8 +680,14 @@ def calculate(string_runs=None, list_peak_back=None, output_file=None):
             finalS2H.append(S2H[index_numerator])
 
         #output the fitting parameters in an ascii
-        if (output_file is None):
-            output_file = '/home/j35/Desktop/SFcalculator.txt'
+        if (output_path is None):
+            output_path = '/home/j35/Desktop/'
+        
+        _lambdaRequest = "{0:.2f}".format(lambdaRequest[0][0])
+        
+        output_pre = 'SFcalculator_lr' + str(_lambdaRequest)
+        output_ext = '.txt'
+        output_file = output_path + '/' + output_pre + output_ext        
         
         outputFittingParameters(a, b, error_a, error_b, finalS1H, finalS2H, output_file)
 

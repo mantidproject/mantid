@@ -48,7 +48,7 @@ namespace Kernel
    * Clone the validator
    * @returns A pointer to a new validator with the same properties as this one
    */
-  IValidator<std::vector<std::vector<std::string> > >* MultiFileValidator::clone() 
+  IValidator<std::vector<std::vector<std::string> > >* MultiFileValidator::clone() const
   { 
     return new MultiFileValidator(*this);
   }

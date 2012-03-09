@@ -40,7 +40,7 @@ class MANTID_KERNEL_DLL DateValidator : public IValidator<std::string>
 public:
   DateValidator();
   virtual ~DateValidator();
-  IValidator<std::string> * clone();
+  IValidator<std::string> * clone() const;
 
 private:
   struct tm getTimevalue(const std::string& sDate, std::string & error) const;

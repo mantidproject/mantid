@@ -38,6 +38,7 @@
 #include <QtCheckBoxFactory>
 
 using namespace MantidQt::CustomInterfaces;
+using Mantid::MantidVec;
 
 /**
 * This is the constructor for the Indirect Instruments Interface.
@@ -1322,8 +1323,6 @@ void Indirect::calibCreate()
   }
   else
   {
-    QString suffix = "_" + m_uiForm.cbAnalyser->currentText() + m_uiForm.cbReflection->currentText() + "_calib";
-
     QString filenames = "[r'"+m_uiForm.cal_leRunNo->getFilenames().join("', r'")+"']";
 
     QString reducer = "from mantidsimple import *\n"
@@ -1335,6 +1334,8 @@ void Indirect::calibCreate()
         + m_calCalProp["BackMax"]->valueText() + ","
         + m_calCalProp["PeakMin"]->valueText() + ","
         + m_calCalProp["PeakMax"]->valueText() + ")\n"
+      "calib.set_analyser('" + m_uiForm.cbAnalyser->currentText() + "')\n"
+      "calib.set_reflection('" + m_uiForm.cbReflection->currentText() + "')\n"
       "calib.execute(None, None)\n"
       "result = calib.result_workspace()\n"
       "print result\n"
@@ -1401,8 +1402,8 @@ void Indirect::calPlotRaw()
     
   Mantid::API::MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsname.toStdString()));
 
-  QVector<double> dataX = QVector<double>::fromStdVector(input->readX(0));
-  QVector<double> dataY = QVector<double>::fromStdVector(input->readY(0));
+  const MantidVec & dataX = input->readX(0);
+  const MantidVec & dataY = input->readY(0);
 
   if ( m_calCalCurve != NULL )
   {
@@ -1412,13 +1413,13 @@ void Indirect::calPlotRaw()
   }
 
   m_calCalCurve = new QwtPlotCurve();
-  m_calCalCurve->setData(dataX, dataY);
+  m_calCalCurve->setData(&dataX[0], &dataY[0], static_cast<int>(input->blocksize()));
   m_calCalCurve->attach(m_calCalPlot);
   
-  m_calCalPlot->setAxisScale(QwtPlot::xBottom, dataX.first(), dataX.last());
+  m_calCalPlot->setAxisScale(QwtPlot::xBottom, dataX.front(), dataX.back());
 
-  m_calCalR1->setRange(dataX.first(), dataX.last());
-  m_calCalR2->setRange(dataX.first(), dataX.last());
+  m_calCalR1->setRange(dataX.front(), dataX.back());
+  m_calCalR2->setRange(dataX.front(), dataX.back());
 
   // Replot
   m_calCalPlot->replot();
@@ -1447,8 +1448,8 @@ void Indirect::calPlotEnergy()
   
   Mantid::API::MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(pyOutput.toStdString()));
 
-  QVector<double> dataX = QVector<double>::fromStdVector(input->readX(0));
-  QVector<double> dataY = QVector<double>::fromStdVector(input->readY(0));
+  const MantidVec & dataX = input->readX(0);
+  const MantidVec & dataY = input->readY(0);
 
   if ( m_calResCurve != NULL )
   {
@@ -1458,11 +1459,11 @@ void Indirect::calPlotEnergy()
   }
 
   m_calResCurve = new QwtPlotCurve();
-  m_calResCurve->setData(dataX, dataY);
+  m_calResCurve->setData(&dataX[0], &dataY[0], static_cast<int>(input->blocksize()));
   m_calResCurve->attach(m_calResPlot);
   
-  m_calResPlot->setAxisScale(QwtPlot::xBottom, dataX.first(), dataX.last());
-  m_calResR1->setRange(dataX.first(), dataX.last());
+  m_calResPlot->setAxisScale(QwtPlot::xBottom, dataX.front(), dataX.back());
+  m_calResR1->setRange(dataX.front(), dataX.back());
 
   m_calResR2->setMinimum(m_calDblMng->value(m_calResProp["ELow"]));
   m_calResR2->setMaximum(m_calDblMng->value(m_calResProp["EHigh"]));
@@ -1727,8 +1728,8 @@ void Indirect::slicePlotRaw()
 
     Mantid::API::MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsname.toStdString()));
 
-    QVector<double> dataX = QVector<double>::fromStdVector(input->readX(0));
-    QVector<double> dataY = QVector<double>::fromStdVector(input->readY(0));
+    const MantidVec & dataX = input->readX(0);
+    const MantidVec & dataY = input->readY(0);
 
     if ( m_sltDataCurve != NULL )
     {
@@ -1738,12 +1739,12 @@ void Indirect::slicePlotRaw()
     }
 
     m_sltDataCurve = new QwtPlotCurve();
-    m_sltDataCurve->setData(dataX, dataY);
+    m_sltDataCurve->setData(&dataX[0], &dataY[0], static_cast<int>(input->blocksize()));
     m_sltDataCurve->attach(m_sltPlot);
 
-    m_sltPlot->setAxisScale(QwtPlot::xBottom, dataX.first(), dataX.last());
+    m_sltPlot->setAxisScale(QwtPlot::xBottom, dataX.front(), dataX.back());
 
-    m_sltR1->setRange(dataX.first(), dataX.last());
+    m_sltR1->setRange(dataX.front(), dataX.back());
 
     // Replot
     m_sltPlot->replot();

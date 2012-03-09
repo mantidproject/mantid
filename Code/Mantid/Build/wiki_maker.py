@@ -17,6 +17,7 @@ import fnmatch
 import wiki_tools
 from wiki_tools import *
 import difflib
+import platform
 
 #======================================================================
 def get_wiki_description(algo, version):
@@ -369,7 +370,10 @@ if __name__ == "__main__":
 
     if len(args.algos)==0:
         parser.error("You must specify at least one algorithm.")
-
+    
+    if platform.system() == 'Windows':
+        os.environ['MANTIDPATH'] = args.mantidpath
+    
     initialize_Mantid(args.mantidpath)
     intialize_files()
     initialize_wiki(args)

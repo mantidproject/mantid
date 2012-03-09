@@ -862,10 +862,6 @@ public slots:
   //void downloadManual();
   //! Show translations page in external browser
   //void downloadTranslation();
-#ifdef QTIPLOT_DEMO
-  //! Shown when the user tries to save the project.
-  void showDemoVersionMessage();
-#endif
 
   void parseCommandLineArguments(const QStringList& args);
   void createLanguagesList();
@@ -1337,6 +1333,9 @@ private:
   // Flag telling if table values should be automatically recalculated when values in a column are modified.
   bool d_auto_update_table_values;
   int d_matrix_undo_stack_size;
+
+  /// A method to populate the CurveLayout struct on loading a project
+  CurveLayout fillCurveSettings(const QStringList & curve, unsigned int offset = 0);
 
   //! Workaround for the new colors introduced in rev 447
   int convertOldToNewColorIndex(int cindex);

@@ -85,6 +85,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/OneStepMDEW.h
 	inc/MantidMDEvents/QueryMDWorkspace.h
 	inc/MantidMDEvents/SaveMD.h
+	inc/MantidMDEvents/SkippingPolicy.h
 	inc/MantidMDEvents/SliceMD.h
 	inc/MantidMDEvents/SlicingAlgorithm.h
 )
@@ -126,6 +127,7 @@ set ( TEST_FILES
 	test/OneStepMDEWTest.h
 	test/QueryMDWorkspaceTest.h
 	test/SaveMDTest.h
+	test/SkippingPolicyTest.h
 	test/SliceMDTest.h
 	test/SlicingAlgorithmTest.h
 )

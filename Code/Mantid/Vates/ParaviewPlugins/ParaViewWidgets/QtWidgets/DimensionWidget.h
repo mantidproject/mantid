@@ -10,29 +10,39 @@
 #include "GeometryWidget.h"
 #include "MantidVatesAPI/DimensionPresenter.h"
 
-
 //Foward decs
 class QLabel;
 class QComboBox;
 class QLineEdit;
 class QCheckBox;
+class BinInputWidget;
 
 namespace Mantid
 {
- namespace Geometry
- {
- class IMDDimension;
- }
+  namespace Geometry
+  {
+    /// Forward decs
+    class IMDDimension;
+  }
 }
 
+/**
+class is a Qt (QWidget) concrete version of a DimensionView.
 
+Displays dimension information as commanded by a DimensionPresenter.
+
+- DimensionWidgets are passed a DimensionPresenter, as part of the accept call, but DimensionWidgets do not own it!
+- Controlled by a DimensionPresenter
+- Has public methods to allow the DimensionPresenter to command changes
+
+*/
 class EXPORT_OPT_MANTIDPARVIEW DimensionWidget: public QWidget, public Mantid::VATES::DimensionView
 {
 Q_OBJECT
 public:
 
   /// Constructor.
-  DimensionWidget(bool readOnlyLimits);
+  DimensionWidget(Mantid::VATES::BinDisplay binDisplay);
 
   /// Destructor
   ~DimensionWidget();
@@ -51,7 +61,7 @@ signals:
 private:
   QGridLayout* m_layout;
 
-  QLineEdit* m_nBinsBox;
+  //QLineEdit* m_nBinsBox;
 
   QLineEdit* m_minBox;
 
@@ -61,7 +71,7 @@ private:
 
   QComboBox* m_dimensionCombo;
 
-  QLabel* m_nBinsLabel;
+  //QLabel* m_nBinsLabel;
 
   QLabel* m_dimensionLabel;
 
@@ -69,12 +79,15 @@ private:
 
   std::string m_name;
 
- Mantid::VATES::DimensionPresenter* m_pDimensionPresenter;
+  Mantid::VATES::DimensionPresenter* m_pDimensionPresenter;
 
- /// Helper method to set names in all places required.
- void setDimensionName(const std::string& name);
+  /// Widget for displaying bin information.
+  BinInputWidget* m_binWidget;
 
-private slots:
+  /// Helper method to set names in all places required.
+  void setDimensionName(const std::string& name);
+
+  private slots:
 
   /// Handles dimension change events.
   void dimensionSelectedListener();

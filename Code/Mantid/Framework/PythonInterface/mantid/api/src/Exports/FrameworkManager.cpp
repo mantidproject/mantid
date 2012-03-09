@@ -1,7 +1,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidPythonInterface/kernel/PyEnvironment.h"
+#include "MantidPythonInterface/kernel/Environment/CallStack.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
@@ -33,7 +33,7 @@ namespace
     UNUSED_ARG(self);
     IAlgorithm_sptr alg;
     int async(0);
-    if( Mantid::PythonInterface::PyEnvironment::isInCallStack("PyExec") )
+    if( Mantid::PythonInterface::Environment::isInCallStack("PyExec") )
     {
       alg = AlgorithmManager::Instance().createUnmanaged(name, version);
       alg->initialize();

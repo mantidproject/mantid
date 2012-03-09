@@ -12,16 +12,16 @@ using namespace Mantid::Kernel;
 class MyTestClass
 {
 public:
-  int hash;
+  size_t hash;
   int value;
 
   /// Constructor
-  MyTestClass(int hash, int value) : hash(hash), value(value)
+  MyTestClass(size_t hash, int value) : hash(hash), value(value)
   {
   }
 
   // Function returning the has index value
-  int hashIndexFunction() const
+  size_t hashIndexFunction() const
   {
     return hash;
   }

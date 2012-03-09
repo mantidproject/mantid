@@ -1,3 +1,5 @@
+source(findFile("scripts", "global_helpers.py"))
+
 import os
 def open_file(filename):
     activateItem(waitForObjectItem(":_QMenuBar", "File"))
@@ -20,6 +22,7 @@ def open_file(filename):
     for dir in dirs:
         if '' == dir:
             continue
+        dir = fix_slashes(dir)
         #test.log("Clicking Dir %s" % dir)
         waitForObjectItem(":Open File:  (open multiple files with <ctrl> key.).Files_QTreeView", dir)
         doubleClickItem(":Open File:  (open multiple files with <ctrl> key.).Files_QTreeView", dir, 27, 11, 0, Qt.LeftButton)
@@ -46,46 +49,3 @@ def set_ptw_lineedit_property(value, property, ext=""):
         lineedit.cursorBackward(True)
         type(lineedit, "<Del>")
     lineedit.text = str(value)
-
-def apply_ptw_settings():
-    clickButton(":objectInspector.Apply_QPushButton")
-
-def make_slice(axisScaleName, coordinate):
-    axisScale = waitForObject(":splitter_2.%s_Mantid::Vates::SimpleGui::AxisInteractor" % axisScaleName)
-    ext = None
-    if axisScaleName[0] == "x":
-        ext = ""
-    if axisScaleName[0] == "y":
-        ext = "_2"
-    if axisScaleName[0] == "z":
-        ext = "_3"
-        
-    scaleWidget = waitForObject(":splitter_2_QwtScaleWidget%s" % ext)
-        
-    sp = axisScale.scalePosition
-    min = axisScale.getMinimum
-    max = axisScale.getMaximum
-    delta = max - min
-    width = -1
-    height = -1
-    if sp in (0, 1):
-        width = scaleWidget.width
-        height = axisScale.height
-    else:
-        width = scaleWidget.height
-        height = axisScale.width
-
-    scaleFactor = height / delta
-    
-    if sp in (0, 2):
-        x = 1
-    else:
-        x = width - 1
-    
-    if sp in (0, 1):
-        scaleFactor *= -1.0
-        y = scaleFactor * (coordinate - min) + height
-        mouseClick(scaleWidget, x, y, 0, Qt.LeftButton)
-    else:
-        y = scaleFactor * (coordinate - min)
-        mouseClick(scaleWidget, y, x, 0, Qt.LeftButton)

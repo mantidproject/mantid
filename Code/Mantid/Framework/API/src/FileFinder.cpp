@@ -320,6 +320,7 @@ namespace Mantid
      */
     std::string FileFinderImpl::findRun(const std::string& hint, const std::set<std::string> *exts) const
     {
+      g_log.debug() << "set findRun(\'" << hint << "\', exts[" << exts->size() << "])\n";
       if (hint.empty())
         return "";
       std::vector<std::string> exts_v;
@@ -331,7 +332,7 @@ namespace Mantid
 
     std::string FileFinderImpl::findRun(const std::string& hint,const std::vector<std::string> &exts)const
     {
-      g_log.debug() << "findRun(\'" << hint << "\', exts[" << exts.size() << "])\n";
+      g_log.debug() << "vector findRun(\'" << hint << "\', exts[" << exts.size() << "])\n";
       if (hint.empty())
         return "";
 
@@ -358,25 +359,32 @@ namespace Mantid
       // so many things depend on the facility just get it now
       const Kernel::FacilityInfo facility = this->getFacility(hint);
       // initialize the archive searcher
-      IArchiveSearch_sptr arch;
+      std::vector<IArchiveSearch_sptr> archs;
       { // hide in a local namespace so things fall out of scope
         std::string archiveOpt = Kernel::ConfigService::Instance().getString("datasearch.searcharchive");
         std::transform(archiveOpt.begin(), archiveOpt.end(), archiveOpt.begin(), tolower);
         if (!archiveOpt.empty() && archiveOpt != "off" && !facility.archiveSearch().empty())
         {
-          g_log.debug() << "Starting archive search..." << *facility.archiveSearch().begin() << "\n";
-          arch = ArchiveSearchFactory::Instance().create(*facility.archiveSearch().begin());
+          g_log.debug() << "archive search count..." << facility.archiveSearch().size() << "\n";
+          std::vector<std::string>::const_iterator it = facility.archiveSearch().begin();
+          for (; it != facility.archiveSearch().end(); it++)
+          {
+            g_log.debug() << "Starting archive search..." << *it << "\n";
+            archs.push_back(ArchiveSearchFactory::Instance().create(*it));
+          }
         }
       }
+
 
       // ask the archive search for help
       if (!hintPath.getExtension().empty())
       {
-        if (arch)
+        g_log.debug() << "Starting hintPath.getExtension()..." << hintPath.getExtension() << "\n";
+        if (archs.size() != 0 )
         {
           try
           {
-            std::string path = arch->getPath(hint);
+            std::string path = getPath(archs, hint);
             if (!path.empty())
             {
               Poco::File file(path);
@@ -391,6 +399,10 @@ namespace Mantid
             g_log.error() << "Archive search could not find '" << hint << "'\n";
           }
         }
+      }
+      else
+      {
+        g_log.debug() << "Starting hintPath.getExtension().empty()..." << "\n";
       }
 
       // Do we need to try and form a filename from our preset rules
@@ -463,23 +475,26 @@ namespace Mantid
       }
 
       // Search the archive of the default facility
-      if (arch)
+      if (archs.size() != 0 )
       {
+        g_log.debug() << "Search the archive of the default facility" << "\n";
         std::string path;
         std::vector<std::string>::const_iterator ext = extensions.begin();
         for (; ext != extensions.end(); ++ext)
         {
+          g_log.debug() << " filenames.size()=" <<  filenames.size() << "\n";
           for(size_t i = 0; i < filenames.size(); ++i)
           {
             try
             {
-              path = arch->getPath(filenames[i] + *ext);
+              path = getPath(archs, filenames[i] + *ext);
             }
             catch(...)
             {
               return "";
             }
             if( path.empty() ) return "";
+
             Poco::Path pathPattern(path);
             if (ext->find("*") != std::string::npos)
             {
@@ -498,7 +513,7 @@ namespace Mantid
             }
           } // i
         }  // ext
-      } // arch
+      } // archs
 
       return "";
     }
@@ -513,6 +528,7 @@ namespace Mantid
      */
     std::vector<std::string> FileFinderImpl::findRuns(const std::string& hint) const
     {
+      g_log.debug() << "findRuns hint " << hint << "\n";
       std::vector < std::string > res;
       Poco::StringTokenizer hints(hint, ",",
           Poco::StringTokenizer::TOK_TRIM | Poco::StringTokenizer::TOK_IGNORE_EMPTY);
@@ -592,7 +608,23 @@ namespace Mantid
       return res;
     }
 
-  }// API
+    std::string FileFinderImpl::getPath(const std::vector<IArchiveSearch_sptr>& archs, const std::string& fName) const
+    {
+      g_log.debug() << "getPath for fName = " << fName << "\n";
+      std::string path = "";
+      std::vector<IArchiveSearch_sptr>::const_iterator it = archs.begin();
+      for (; it != archs.end(); it++)
+      {
+        path = (*it)->getPath(fName);
+        if (!path.empty())
+        {
+          g_log.debug() << "getPath path = " << path << "\n";
+          return path;
+        }
+      }
+      return path;
+    }
 
+  }// API
 }// Mantid
 

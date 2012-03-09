@@ -19,7 +19,6 @@ namespace Mantid
   {
     namespace Registry
     {
-
       /**
        * Set function to handle Python -> C++ calls to a property manager and get the correct type
        * @param alg :: A pointer to an IPropertyManager
@@ -28,7 +27,7 @@ namespace Mantid
        */
       template<typename ContainerType>
       void SequenceTypeHandler<ContainerType>::set(Kernel::IPropertyManager* alg, const std::string &name,
-                                                   boost::python::object value)
+                                                   const boost::python::object & value)
       {
         using boost::python::len;
         typedef typename ContainerType::value_type DestElementType;
@@ -63,17 +62,19 @@ namespace Mantid
       //-----------------------------------------------------------------------
       // Concrete instantiations
       //-----------------------------------------------------------------------
-      template DLLExport struct SequenceTypeHandler<std::vector<int16_t> >;
-      template DLLExport struct SequenceTypeHandler<std::vector<uint16_t> >;
-      template DLLExport struct SequenceTypeHandler<std::vector<int32_t> >;
-      template DLLExport struct SequenceTypeHandler<std::vector<uint32_t> >;
-      template DLLExport struct SequenceTypeHandler<std::vector<int64_t> >;
-      template DLLExport struct SequenceTypeHandler<std::vector<uint64_t> >;
-#ifdef __APPLE__
-      template DLLExport struct SequenceTypeHandler<std::vector<unsigned long> >;
-#endif
-      template DLLExport struct SequenceTypeHandler<std::vector<double> >;
-      template DLLExport struct SequenceTypeHandler<std::vector<std::string> >;
+      #define INSTANTIATE(ElementType)\
+        template DLLExport struct SequenceTypeHandler<std::vector<ElementType> >;
+
+      INSTANTIATE(int);
+      INSTANTIATE(long);
+      INSTANTIATE(long long);
+      INSTANTIATE(unsigned int);
+      INSTANTIATE(unsigned long);
+      INSTANTIATE(unsigned long long);
+      INSTANTIATE(double);
+      INSTANTIATE(std::string);
+      INSTANTIATE(bool);
+
     }
   }
 }

@@ -101,7 +101,7 @@ public:
     clearUpper(); 
   }
 	
-  IValidator<TYPE>* clone() { return new BoundedValidator(*this); }
+  IValidator<TYPE>* clone() const { return new BoundedValidator(*this); }
 
 private:
   // Data and Function Members for This Class Implementation.

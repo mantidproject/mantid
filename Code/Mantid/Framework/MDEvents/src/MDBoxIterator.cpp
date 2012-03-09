@@ -12,7 +12,7 @@ namespace Mantid
 namespace MDEvents
 {
 
-  //----------------------------------------------------------------------------------------------
+   //----------------------------------------------------------------------------------------------
   /** Constructor
    *
    * @param topBox :: top-level parent box.
@@ -24,7 +24,42 @@ namespace MDEvents
    */
   TMDE(MDBoxIterator)::MDBoxIterator(IMDBox<MDE,nd> * topBox, size_t maxDepth, bool leafOnly,
       Mantid::Geometry::MDImplicitFunction * function)
-      : m_pos(0), m_current(NULL), m_currentMDBox(NULL), m_events(NULL)
+      : m_pos(0), m_current(NULL), m_currentMDBox(NULL), m_events(NULL), m_skippingPolicy(new SkipMaskedBins(this))
+  {
+    commonConstruct(topBox, maxDepth, leafOnly, function);
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Constructor
+   *
+   * @param topBox :: top-level parent box.
+   * @param maxDepth :: maximum depth to go to
+   * @param leafOnly :: only report "leaf" nodes, e.g. boxes that are no longer split OR are at maxDepth.
+   * @param skippingPolicy :: policy for skipping boxes upon next().
+   * @param function :: ImplicitFunction that limits iteration volume. NULL for don't limit this way.
+   *        Note that the top level box is ALWAYS returned at least once, even if it is outside the
+   *        implicit function
+   */
+  TMDE(MDBoxIterator)::MDBoxIterator(IMDBox<MDE,nd> * topBox, size_t maxDepth, bool leafOnly, SkippingPolicy* skippingPolicy,
+      Mantid::Geometry::MDImplicitFunction * function)
+      : m_pos(0), m_current(NULL), m_currentMDBox(NULL), m_events(NULL), m_skippingPolicy(skippingPolicy)
+  {
+    commonConstruct(topBox, maxDepth, leafOnly, function);
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Common construction code in the absense of constructor chaining.
+   *
+   * @param topBox :: top-level parent box.
+   * @param maxDepth :: maximum depth to go to
+   * @param leafOnly :: only report "leaf" nodes, e.g. boxes that are no longer split OR are at maxDepth.
+   * @param function :: ImplicitFunction that limits iteration volume. NULL for don't limit this way.
+   *        Note that the top level box is ALWAYS returned at least once, even if it is outside the
+   *        implicit function
+   * @param skippingPolicy :: policy for skipping boxes upon next().
+   */
+  TMDE(void MDBoxIterator)::commonConstruct(IMDBox<MDE,nd> * topBox, size_t maxDepth, bool leafOnly,
+      Mantid::Geometry::MDImplicitFunction * function)
   {
     if (!topBox)
       throw std::invalid_argument("MDBoxIterator::ctor(): NULL top-level box given.");
@@ -55,7 +90,7 @@ namespace MDEvents
    * @param end :: stop iterating at this point in the list
    */
   TMDE(MDBoxIterator)::MDBoxIterator(std::vector<IMDBox<MDE,nd>*> & boxes, size_t begin, size_t end)
-    : m_pos(0), m_current(NULL), m_currentMDBox(NULL), m_events(NULL)
+    : m_pos(0), m_current(NULL), m_currentMDBox(NULL), m_events(NULL), m_skippingPolicy(new SkipMaskedBins(this))
 
   {
     this->init(boxes, begin, end);
@@ -126,9 +161,18 @@ namespace MDEvents
   /// do nothing and return false.
   /// @return true if you can continue iterating
   TMDE(
-  bool MDBoxIterator)::next()
+    bool MDBoxIterator)::next()
   {
-    return this->next(1);
+    bool result = this->next(1);
+    while(m_skippingPolicy->keepGoing()) 
+    {
+      result = this->next(1);
+      if(!result)
+      {
+        return result;
+      }
+    }
+    return result;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -312,6 +356,16 @@ namespace MDEvents
   {
     getEvents();
     return (*m_events)[index].getError();
+  }
+
+  /// Returns the error of a given event
+  TMDE(bool MDBoxIterator)::getIsMasked() const
+  {
+      if(m_current)
+      {
+        return m_current->getIsMasked();
+      }
+      return false;
   }
 
 

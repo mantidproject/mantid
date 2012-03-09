@@ -38,6 +38,7 @@ Where <math>\theta</math> is ''half'' of the neutron scattering angle (conventio
 #include "MantidMDEvents/ConvertToDiffractionMDWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidAPI/MemoryManager.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

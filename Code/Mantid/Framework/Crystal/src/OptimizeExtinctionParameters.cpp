@@ -60,8 +60,8 @@ namespace Mantid
       std::string pointOption = p[2];
       std::string tofParams = p[3];
       std::vector<double> tofParam = Kernel::VectorHelper::splitStringIntoVector<double>(tofParams);
-      double rcrystallite = tofParam[4];
-      double mosaic = tofParam[5];
+      double rcrystallite = tofParam[1];
+      double mosaic = tofParam[2];
       if(corrOption.compare(5,2,"II")==0)rcrystallite = gsl_vector_get(v,0);
       else mosaic = gsl_vector_get(v,0);
       if(v->size>1)rcrystallite = gsl_vector_get(v,1);
@@ -93,11 +93,6 @@ namespace Mantid
 
     BoundedValidator<double> *mustBePositive = new BoundedValidator<double> ();
     mustBePositive->setLower(0.0);
-    declareProperty("LinearScatteringCoef", -1.0, mustBePositive,
-      "Linear scattering coefficient in 1/cm");
-    declareProperty("LinearAbsorptionCoef", -1.0, mustBePositive->clone(),
-      "Linear absorption coefficient at 1.8 Angstroms in 1/cm");
-    declareProperty("Radius", 0.10, "Radius of spherical crystal in cm");
     declareProperty("Cell", 255.0, "Unit Cell Volume (Angstroms^3)");
     declareProperty("Mosaic", 0.262, "Mosaic Spread (FWHM) (Degrees)",Direction::InOut);
     declareProperty("RCrystallite", 6.0, "Becker-Coppens Crystallite Radius (micron)",Direction::InOut);
@@ -126,14 +121,13 @@ namespace Mantid
       par[1] = type;
       std::string group = getProperty("PointGroup");
       par[2] = group;
-      double smu = getProperty("LinearScatteringCoef");
-      double amu = getProperty("LinearAbsorptionCoef");
-      double radius = getProperty("Radius");
+      PeaksWorkspace_sptr ws = getProperty("InputWorkspace");
+
       double mosaic = getProperty("Mosaic");
       double cell = getProperty("Cell");
       double r_crystallite = getProperty("RCrystallite");
       std::ostringstream strwi;
-      strwi<<smu<<","<<amu<<","<<radius<<","<<cell<<","<<r_crystallite<<","<<mosaic;
+      strwi<<cell<<","<<r_crystallite<<","<<mosaic;
       par[3] = strwi.str();
     
       const gsl_multimin_fminimizer_type *T =
@@ -222,11 +216,8 @@ namespace Mantid
       tofextinction->setProperty("InputWorkspace", inputW);
       tofextinction->setProperty("OutputWorkspace", "tmp");
       tofextinction->setProperty("ExtinctionCorrectionType", corrOption);
-      tofextinction->setProperty<double>("LinearScatteringCoef", tofParam[0]);
-      tofextinction->setProperty<double>("LinearAbsorptionCoef", tofParam[1]);
-      tofextinction->setProperty<double>("Radius", tofParam[2]);
       tofextinction->setProperty<double>("Mosaic", mosaic);
-      tofextinction->setProperty<double>("Cell", tofParam[3]);
+      tofextinction->setProperty<double>("Cell", tofParam[0]);
       tofextinction->setProperty<double>("RCrystallite", rcrystallite);
       tofextinction->executeAsSubAlg();
       PeaksWorkspace_sptr peaksW = tofextinction->getProperty("OutputWorkspace");

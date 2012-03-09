@@ -271,6 +271,23 @@ namespace API
     return this->getError();
   }
 
+  /**
+  Getter for the masked state of the workspace.
+  @Return TRUE if the detector/detector-group at the workspace index is masked, or if there is no detector at that index.
+  */
+  bool MatrixWorkspaceMDIterator::getIsMasked() const
+  {
+    Mantid::Geometry::IDetector_const_sptr det = m_ws->getDetector(m_workspaceIndex);
+    if(det != NULL)
+    {
+      return det->isMasked();
+    }
+    else
+    {
+      return true; //TODO. Check whether it's better to return true or false under these circumstances.
+    }
+  }
+
 
 } // namespace Mantid
 } // namespace API

@@ -1,25 +1,20 @@
 import unittest
+import testhelpers
 from mantid import BoundedValidator
 
 class BoundedValidatorTest(object):
 
     def test_construction_does_not_raise_error_when_both_are_floats(self):
-        try:
-            BoundedValidator(1.0, 2.0)
-        except RuntimeError:
-            self.fail("BoundedValidator constructor should not raise an error with two floats.")
+        testhelpers.assert_raises_nothing(self, BoundedValidator, 1.0, 2.0)
 
     def test_construction_does_not_raise_error_when_both_are_ints(self):
-        try:
-            BoundedValidator(1, 20)
-        except RuntimeError:
-            self.fail("BoundedValidator constructor should not raise an error with two ints.")
+        testhelpers.assert_raises_nothing(self, BoundedValidator, 1, 20)
 
     def test_construction_raises_error_when_called_with_no_params(self):
         self.assertRaises(TypeError, BoundedValidator())
 
     def test_construction_with_lower_sets_only_lower(self):
-        validator = BoundedValidator(1)
+        validator = BoundedValidator(lower=1)
         self.assertEquals(validator.hasLower(), True)
         self.assertEquals(validator.hasUpper(), False)
         self.assertEquals(validator.lower(), 1)

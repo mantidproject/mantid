@@ -22,7 +22,7 @@ namespace MDEvents
    * @return
    */
   MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(MDHistoWorkspace_const_sptr workspace, Mantid::Geometry::MDImplicitFunction * function,
-      size_t beginPos, size_t endPos)
+      size_t beginPos, size_t endPos): m_skippingPolicy(new SkipMaskedBins(this))
   {
     this->init(workspace.get(), function, beginPos, endPos);
   }
@@ -35,7 +35,35 @@ namespace MDEvents
    * @return
    */
   MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(const MDHistoWorkspace * workspace, Mantid::Geometry::MDImplicitFunction * function,
-      size_t beginPos, size_t endPos)
+      size_t beginPos, size_t endPos) : m_skippingPolicy(new SkipMaskedBins(this))
+  {
+    this->init(workspace, function, beginPos, endPos);
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Constructor
+   *
+   * @param workspace :: MDHistoWorkspace_sptr being iterated
+   * @param function :: The implicit function to use
+   * @param skippingPolicy :: The skipping policy to use
+   * @return
+   */
+  MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(MDHistoWorkspace_const_sptr workspace, SkippingPolicy* skippingPolicy, Mantid::Geometry::MDImplicitFunction * function,
+      size_t beginPos, size_t endPos) : m_skippingPolicy(skippingPolicy)
+  {
+    this->init(workspace.get(), function, beginPos, endPos);
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Constructor
+   *
+   * @param workspace :: MDHistoWorkspace_sptr being iterated
+   * @param function :: The implicit function to use
+   * @param skippingPolicy :: The skipping policy to use
+   * @return
+   */
+  MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(const MDHistoWorkspace * workspace, SkippingPolicy* skippingPolicy, Mantid::Geometry::MDImplicitFunction * function,
+      size_t beginPos, size_t endPos) : m_skippingPolicy(skippingPolicy)
   {
     this->init(workspace, function, beginPos, endPos);
   }
@@ -109,6 +137,7 @@ namespace MDEvents
     delete [] m_binWidth;
     delete [] m_index;
     delete [] m_indexMax;
+
     if (m_function) delete m_function;
   }
   
@@ -157,18 +186,27 @@ namespace MDEvents
         for (size_t d=0; d<m_nd; d++)
         {
           m_center[d] = m_origin[d] + (coord_t(m_index[d]) + 0.5f) * m_binWidth[d];
-//          std::cout << m_center[d] << ",";
+          //          std::cout << m_center[d] << ",";
         }
-//        std::cout<<std::endl;
+        //        std::cout<<std::endl;
         // Keep incrementing until you are in the implicit function
       } while (!m_function->isPointContained(m_center)
-               && m_pos < m_max);
-      // Is the iteration finished?
-      return (m_pos < m_max);
+        && m_pos < m_max);
     }
     else
-      // Go through every point;
-      return (++m_pos < m_max);
+    {
+      ++m_pos;
+    }
+    //Keep calling next if the current position is masked.
+    bool ret = m_pos < m_max;
+    while(m_skippingPolicy->keepGoing())
+    {
+      ret = this->next();
+      if(!ret)
+        break;
+    }
+    // Go through every point;
+    return ret;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -177,6 +215,7 @@ namespace MDEvents
   bool MDHistoWorkspaceIterator::next(size_t skip)
   {
     m_pos += skip;
+
     return (m_pos < m_max);
   }
 
@@ -299,6 +338,20 @@ namespace MDEvents
   signal_t MDHistoWorkspaceIterator::getInnerError(size_t /*index*/) const
   {
     return m_ws->getErrorAt(m_pos);
+  }
+
+  bool MDHistoWorkspaceIterator::getIsMasked() const
+  { 
+    return m_ws->getIsMaskedAt(m_pos);
+  }
+
+  /**
+  Getter for the linear index
+  @return the linear index.
+  */
+  size_t MDHistoWorkspaceIterator::getLinearIndex() const
+  {
+    return m_pos;
   }
 
 } // namespace Mantid

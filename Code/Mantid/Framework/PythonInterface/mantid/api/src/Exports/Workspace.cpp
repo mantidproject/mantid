@@ -42,17 +42,3 @@ void export_Workspace()
 
   REGISTER_SINGLEVALUE_HANDLER(Workspace_sptr);
 }
-
-void export_WorkspaceProperty()
-{
-  // Interface
-  class_<IWorkspaceProperty, boost::noncopyable>("IWorkspaceProperty", no_init)
-      ;
-
-  // Export the WorkspaceProperty hierarchy so that the plain Property* return from getPointerToProperty is automatically upcast to a WorkspaceProperty*
-  EXPORT_PROP_W_VALUE(Workspace_sptr, Workspace);
-  register_ptr_to_python<WorkspaceProperty<Workspace>*>();
-  class_<WorkspaceProperty<Workspace>, bases<PropertyWithValue<Workspace_sptr>,IWorkspaceProperty>, boost::noncopyable>("WorkspaceProperty_Workspace", no_init)
-      ;
-}
-

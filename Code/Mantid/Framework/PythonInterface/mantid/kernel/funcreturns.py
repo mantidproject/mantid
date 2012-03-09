@@ -200,8 +200,12 @@ def process_frame(frame, use_object_names):
                 obj = frame.f_globals[name]
             else:
                 continue
-            if hasattr(obj, 'getName'):
-                output_var_names[index] = obj.getName()
+            try:
+                if hasattr(obj, 'getName'):
+                    output_var_names[index] = obj.getName()
+            except RuntimeError:
+                # Variable cannot be used, continue as if it is not defined
+                pass
 
     return (max_returns, tuple(output_var_names))
 

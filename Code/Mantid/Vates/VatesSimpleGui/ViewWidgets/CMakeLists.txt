@@ -73,6 +73,7 @@ ${RES_FILES}
 )
 
 set( TEST_SUITES
+    test/suite_MDEventWorkspace
     test/suite_MDHistoWorkspace
 )
 
@@ -101,11 +102,15 @@ if( SQUISH_FOUND )
   # Need to set the AUT first
   set( SQUISH_AUT MantidPlot )
   set( SQUISH_AUT_PATH ${CMAKE_BINARY_DIR}/bin )
-  squish_add_test_suite( ${TEST_SUITES} )
-  squish_suite_envvars( ${TEST_SUITES}
-    PV_PLUGIN_PATH ${CMAKE_BINARY_DIR}/bin/${PVPLUGINS_DIR}
-    SCRIPTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/test/mp_scripts
+
+  # Need to set environmental variables next
+  set( SQUISH_ENV_VARS
+    PV_PLUGIN_PATH=${CMAKE_BINARY_DIR}/bin/${PVPLUGINS_DIR}
+    SCRIPTS_DIR=${CMAKE_CURRENT_SOURCE_DIR}/test/mp_scripts
+    SQUISH_SCRIPT_DIR=${VSI_GLOBAL_SCRIPTS}:${CMAKE_CURRENT_SOURCE_DIR}/test/common/scripts
   )
+  squish_add_test_suite( ${TEST_SUITES} )
+
 endif()
 
 install( TARGETS VatesSimpleGuiViewWidgets ${TARGET_TYPE} DESTINATION ${PLUGINS_DIR} )

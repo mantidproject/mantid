@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/Property.h"
 
@@ -66,22 +67,29 @@ public:
   {
     WorkspaceHistory history;
     TS_ASSERT_EQUALS(history.size(), 0);
+    TS_ASSERT_EQUALS(history.empty(), true);
   }
 
   void test_Adding_History_Entry()
   {
     WorkspaceHistory history;
     TS_ASSERT_EQUALS(history.size(), 0);
+    TS_ASSERT_EQUALS(history.empty(), true);
 
     AlgorithmHistory alg1("FirstAlgorithm", 2);
     alg1.addProperty("FirstAlgProperty", "1",false, Mantid::Kernel::Direction::Input);
     history.addHistory(alg1);
     TS_ASSERT_EQUALS(history.size(), 1);
+    TS_ASSERT_EQUALS(history.empty(), false);
 
-    const std::vector<AlgorithmHistory> & algs = history.getAlgorithmHistories();
+    const WorkspaceHistory::AlgorithmHistories & algs = history.getAlgorithmHistories();
     TS_ASSERT_EQUALS(algs.size(), 1);
-    TS_ASSERT_EQUALS(algs[0].name(), "FirstAlgorithm");
+    TS_ASSERT_EQUALS(history.getAlgorithmHistory(0).name(), "FirstAlgorithm");
+    TS_ASSERT_EQUALS((*algs.begin()).name(), "FirstAlgorithm");
+
   }
+
+
 
   void test_Asking_For_A_Given_Algorithm_Returns_The_Correct_One()
   {
@@ -98,8 +106,8 @@ public:
     simplesum2.execute();
 
     WorkspaceHistory history;
-    AlgorithmHistory alg1(&simplesum);
-    AlgorithmHistory alg2(&simplesum2);
+    AlgorithmHistory alg1(&simplesum,Mantid::Kernel::DateAndTime::defaultTime(), 1.0, 0);
+    AlgorithmHistory alg2(&simplesum2,Mantid::Kernel::DateAndTime::defaultTime(), 1.0, 1);
     history.addHistory(alg1);
     history.addHistory(alg2);
 

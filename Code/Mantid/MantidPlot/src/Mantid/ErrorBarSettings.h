@@ -48,6 +48,9 @@ public:
   bool minusSide() const;
   void drawMinusSide(bool yes);
 
+  QString toString() const;
+  void fromString(const QString& settings);
+
 private:
   int m_cap;      ///< Length of the bar cap decoration
   bool m_plus;    ///< Whether to draw these errors on the positive side

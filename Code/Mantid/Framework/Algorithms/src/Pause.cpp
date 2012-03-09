@@ -76,8 +76,6 @@ namespace Algorithms
     DateAndTime startTime = DateAndTime::getCurrentTime();
     double Duration = getProperty("Duration");
 
-    size_t chunk = 0;
-
     // Keep going until you get cancelled
     while (true)
     {
@@ -87,7 +85,7 @@ namespace Algorithms
         // This call throws if the user presses cancel
         this->interruption_point();
       }
-      catch (CancelException & e)
+      catch (CancelException &)
       {
         // Break out of the lo
         breakOut = true;

@@ -84,13 +84,11 @@ set ( SRC_FILES
 	src/WorkspaceHistory.cpp
 	src/WorkspaceOpOverloads.cpp
 	src/WorkspaceProperty.cpp
-	src/WorkspaceTracer.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/CompositeFunction.cpp
         src/CompositeFunctionMW.cpp
         src/IDataFileChecker.cpp
-        src/WorkspaceTracer.cpp
         src/MatrixWorkspace.cpp
         src/IEventWorkspace.cpp
         src/IFunctionMD.cpp
@@ -207,7 +205,6 @@ set ( INC_FILES
 	inc/MantidAPI/WorkspaceIteratorCode.h
 	inc/MantidAPI/WorkspaceOpOverloads.h
 	inc/MantidAPI/WorkspaceProperty.h
-	inc/MantidAPI/WorkspaceTracer.h
 	inc/MantidAPI/WorkspaceValidators.h
 )
 
@@ -259,6 +256,7 @@ set ( TEST_FILES
 	test/VectorParameterParserTest.h
 	test/VectorParameterTest.h
 	test/WorkspaceFactoryTest.h
+	test/WorkspaceGroupTest.h
 	test/WorkspaceHistoryTest.h
 	test/WorkspacePropertyTest.h
 )

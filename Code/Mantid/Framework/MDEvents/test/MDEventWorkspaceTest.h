@@ -5,6 +5,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
 #include "MantidKernel/ProgressText.h"
 #include "MantidKernel/Timer.h"
 #include "MantidAPI/BoxController.h"
@@ -34,6 +35,25 @@ using namespace Mantid::Geometry;
 
 class MDEventWorkspaceTest :    public CxxTest::TestSuite
 {
+private:
+    /// Helper function to return the number of masked bins in a workspace. TODO: move helper into test helpers
+  size_t getNumberMasked(Mantid::API::IMDWorkspace_sptr ws)
+  {
+    Mantid::API::IMDIterator* it = ws->createIterator(NULL);
+    size_t numberMasked = 0;
+    size_t counter = 0;
+    for(;counter < it->getDataSize(); ++counter)
+    {
+      if(it->getIsMasked())
+      {
+        ++numberMasked;
+      }
+      it->next(1); //Doesn't perform skipping on masked, bins, but next() does.
+    }
+    return numberMasked;
+    delete it;
+  }
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -392,6 +412,102 @@ public:
 
   }
 
+  /*
+  Generic masking checking helper method.
+  */
+  void doTestMasking(MDImplicitFunction* function, size_t expectedNumberMasked)
+  {
+    // 10x10x10 eventWorkspace
+    MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1 /*event per box*/);
+
+    ws->setMDMasking(function);
+
+    size_t numberMasked = getNumberMasked(ws);
+    TSM_ASSERT_EQUALS("Didn't perform the masking as expected", expectedNumberMasked, numberMasked);
+  }
+  
+  void test_maskEverything()
+  {
+    std::vector<coord_t> min;
+    std::vector<coord_t> max;
+
+    min.push_back(0);
+    min.push_back(0);
+    min.push_back(0);
+    max.push_back(10);
+    max.push_back(10);
+    max.push_back(10);
+
+    //Create an function that encompases 1/4 of the total bins.
+    MDImplicitFunction* function = new MDBoxImplicitFunction(min, max);
+
+    doTestMasking(function, 1000); //1000 out of 1000 bins masked
+  }
+
+  void test_maskNULL()
+  {
+    //Should do nothing in terms of masking, but should not throw.
+    doTestMasking(NULL, 0); //0 out of 1000 bins masked
+  }
+
+  void test_maskNothing()
+  {
+    std::vector<coord_t> min;
+    std::vector<coord_t> max;
+
+    //Make the box lay over a non-intersecting region of space.
+    min.push_back(-1);
+    min.push_back(-1);
+    min.push_back(-1);
+    max.push_back(-0.01f);
+    max.push_back(-0.01f);
+    max.push_back(-0.01f);
+
+    //Create an function that encompases 1/4 of the total bins.
+    MDImplicitFunction* function = new MDBoxImplicitFunction(min, max);
+
+    doTestMasking(function, 0); //0 out of 1000 bins masked
+  }
+
+  void test_maskHalf()
+  {
+    std::vector<coord_t> min;
+    std::vector<coord_t> max;
+
+    //Make the box that covers half the bins in the workspace. 
+    min.push_back(0);
+    min.push_back(0);
+    min.push_back(0);
+    max.push_back(10);
+    max.push_back(10);
+    max.push_back(4.99f);
+
+    //Create an function that encompases 1/4 of the total bins.
+    MDImplicitFunction* function = new MDBoxImplicitFunction(min, max);
+
+    doTestMasking(function, 500); //500 out of 1000 bins masked
+  }
+
+  void test_clearMasking()
+  {
+    //Create a function that masks everything.
+    std::vector<coord_t> min;
+    std::vector<coord_t> max;
+    min.push_back(0);
+    min.push_back(0);
+    min.push_back(0);
+    max.push_back(10);
+    max.push_back(10);
+    max.push_back(10);
+    MDImplicitFunction* function = new MDBoxImplicitFunction(min, max);
+
+    MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1 /*event per box*/);
+    ws->setMDMasking(function);
+
+    TSM_ASSERT_EQUALS("Everything should be masked.", 1000, getNumberMasked(ws));
+    TS_ASSERT_THROWS_NOTHING(ws->clearMDMasking());
+    TSM_ASSERT_EQUALS("Nothing should be masked.", 0, getNumberMasked(ws));
+  }
 };
 
 #endif

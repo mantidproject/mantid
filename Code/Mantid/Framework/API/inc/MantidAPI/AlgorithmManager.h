@@ -11,11 +11,29 @@
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmFactory.h"
+#include <Poco/NotificationCenter.h>
 
 namespace Mantid
 {
 namespace API
 {
+
+  //----------------------------------------------------------------------------
+  /// Class for when an algorithm is starting asynchronously
+  class AlgorithmStartingNotification: public Poco::Notification
+  {
+  public:
+    AlgorithmStartingNotification(IAlgorithm_sptr alg) :
+      Poco::Notification(), m_alg(alg) {}
+    /// Returns the algorithm that is starting
+    IAlgorithm_sptr getAlgorithm()const{return m_alg;}
+  private:
+    IAlgorithm_sptr m_alg; ///< Algorithm
+  };
+
+
+
+//----------------------------------------------------------------------------
 /** The AlgorithmManagerImpl class is responsible for controlling algorithm 
     instances. It incorporates the algorithm factory and initializes algorithms.
 
@@ -44,10 +62,9 @@ namespace API
  */
 class MANTID_API_DLL AlgorithmManagerImpl
 {
-
 public:
   /// Creates a managed algorithm with the option of choosing a version
-  IAlgorithm_sptr create(const std::string& algName, const int& version = -1);
+  IAlgorithm_sptr create(const std::string& algName, const int& version = -1, bool makeProxy = true);
   /// Creates an unmanaged algorithm with the option of choosing a version
   boost::shared_ptr<Algorithm> createUnmanaged(const std::string& algName, const int& version = -1) const;
 
@@ -69,6 +86,12 @@ public:
   }
   /// Return the pointer to an algorithm with the given ID
   IAlgorithm_sptr getAlgorithm(AlgorithmID id) const;
+
+  /// Sends notifications to observers. Observers can subscribe to notificationCenter
+  /// using Poco::NotificationCenter::addObserver(...)
+  Poco::NotificationCenter notificationCenter;
+
+  void notifyAlgorithmStarting(AlgorithmID id);
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<AlgorithmManagerImpl>;

@@ -15,7 +15,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/ISpectraDetectorMap.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidGeometry/Instrument/INearestNeighbours.h"
+#include "MantidGeometry/Instrument/INearestNeighboursFactory.h"
 #include "gmock/gmock.h"
 #include <iostream>
 #include <fstream>
@@ -40,8 +40,8 @@ public:
 typedef std::map<Mantid::specid_t, Mantid::Kernel::V3D> SpectrumDistanceMap;
 class MockNearestNeighbours : public Mantid::Geometry::INearestNeighbours {
  public:
-  MOCK_CONST_METHOD2(neighbours, SpectrumDistanceMap(const specid_t spectrum, const double radius));
-  MOCK_CONST_METHOD3(neighbours, SpectrumDistanceMap(const specid_t spectrum, bool force, const int numberofneighbours));
+  MOCK_CONST_METHOD2(neighbours, SpectrumDistanceMap(specid_t spectrum, double radius));
+  MOCK_CONST_METHOD3(neighbours, SpectrumDistanceMap(specid_t spectrum, bool force, int numberofneighbours));
   MOCK_METHOD0(die, void());
   virtual ~MockNearestNeighbours()
   {

@@ -17,7 +17,7 @@ DECLARE_FUNCTION(GausOsc)
 
 void GausOsc::init()
 {
-   declareParameter("A", 5.0); 
+   declareParameter("A", 10.0); 
    declareParameter("Sigma", 0.2);
    declareParameter("Frequency", 0.1); 
    declareParameter("Phi", 0.0);
@@ -39,7 +39,38 @@ void GausOsc::functionMW(double* out, const double* xValues, const size_t nData)
 
 void GausOsc::functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
 {
-  calNumericalDeriv(out, xValues, nData);
+  const double& A = getParameter("A"); 
+  const double& G = getParameter("Sigma");
+  const double& gf = getParameter("Frequency"); 
+  const double& gphi = getParameter("Phi");
+
+
+  for (size_t i = 0; i < nData; i++) {
+    double x = xValues[i];
+    double g = exp(-G*G*x*x);
+    double c = cos(2*M_PI*gf*x +gphi);
+    double s = sin(2*M_PI*gf*x +gphi);
+    out->set(i,0, g*c );
+    out->set(i,1, -2*G*x*x*A*g*c );
+    out->set(i,2, -A*g*2*M_PI*x*s );
+    out->set(i,3, -A*g*s );
+  }
+}
+
+void GausOsc::setActiveParameter(size_t i,double value)
+{
+  size_t j = indexOfActive(i);
+
+  if (parameterName(j) == "Sigma") 
+    setParameter(j,fabs(value),false);  // Make sigma positive
+  else if (parameterName(j) == "Phi")
+  {
+    double a = fmod(value, 2*M_PI); // Put angle in range of 0 to 360 degrees
+    if( a<0 ) a += 2*M_PI; 
+    setParameter(j,a,false);
+  }
+  else
+    setParameter(j,value,false);
 }
 
 

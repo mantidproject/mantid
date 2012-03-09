@@ -20,7 +20,7 @@ DateValidator::~DateValidator()
 }
 
 /// create a copy of the the validator
-IValidator<std::string> *DateValidator::clone()
+IValidator<std::string> *DateValidator::clone() const
 {
   return new DateValidator(*this);
 }
