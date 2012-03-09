@@ -92,8 +92,8 @@ class RefLReduction(PythonAlgorithm):
         BacktoYpixel = norm_back[1]
 
         norm_peak = self.getProperty("NormPeakPixelRange")
-        from_peak = norm_peak[0]
-        to_peak = norm_peak[1]
+        from_norm_peak = norm_peak[0]
+        to_norm_peak = norm_peak[1]
         
         subtract_data_bck = self.getProperty("SubtractSignalBackground")
         subtract_norm_bck = self.getProperty("SubtractNormBackground")
@@ -358,36 +358,35 @@ class RefLReduction(PythonAlgorithm):
         
                 ConvertToHistogram(InputWorkspace=ws_transposed,
                                    OutputWorkspace=ws_transposed)
-    
-                BackfromYpixel = norm_back[0]
-                BacktoYpixel = norm_back[1]
 
+                ws_transposed_1 = ws_transposed + '_1'
+                ws_transposed_2 = ws_transposed + '_2'
                 FlatBackground(InputWorkspace=ws_transposed,
                                OutputWorkspace=ws_transposed_1,
                                StartX=BackfromYpixel,
                                Mode='Mean',
-                               EndX=norm_peak[0],
+                               EndX=from_norm_peak,
                                OutputMode="Return Background")
-    
-#                Transpose(InputWorkspace=ws_transposed,
-#                          OutputWorkspace=ws_data_bck_1)
+
+                ws_data_bck = "_DataBckWks"
+                ws_data_bck_1 = ws_data_bck + "_1"
                 Transpose(InputWorkspace=ws_transposed_1,
                           OutputWorkspace=ws_data_bck_1)
 
                 FlatBackground(InputWorkspace=ws_transposed,
                                OutputWorkspace=ws_transposed_2,
-                               StartX=norm_peak[1],
+                               StartX=to_norm_peak,
                                Mode='Mean',
                                EndX=BacktoYpixel,
                                OutputMode="Return Background")
 
-#                Transpose(InputWorkspace=ws_transposed,
-#                          OutputWorkspace=ws_data_bck_2)
+                ws_data_bck_2 = ws_data_bck + "_2"
                 Transpose(InputWorkspace=ws_transposed_2,
                           OutputWorkspace=ws_data_bck_2)
-        
+
                 ConvertToHistogram(InputWorkspace=ws_data_bck_1, 
                                    OutputWorkspace=ws_data_bck_1)
+                
                 ConvertToHistogram(InputWorkspace=ws_data_bck_2, 
                                    OutputWorkspace=ws_data_bck_2)
 
@@ -515,9 +514,10 @@ class RefLReduction(PythonAlgorithm):
                             Nspec=1,
                             UnitX="MomentumTransfer")
  
-        self.setProperty("OutputWorkspace", mtd[output_ws])
-        
         #space
         print
+
+        self.setProperty("OutputWorkspace", mtd[output_ws])
+        
 
 mtd.registerPyAlgorithm(RefLReduction())
