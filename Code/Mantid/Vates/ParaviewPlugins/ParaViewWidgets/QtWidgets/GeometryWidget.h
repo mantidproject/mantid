@@ -42,6 +42,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class QLabel;
 class QComboBox;
 class QLayout;
+class QCheckBox;
 
 namespace Mantid
 {
@@ -77,6 +78,9 @@ private:
 
   /// MVP presenter.
   Mantid::VATES::GeometryPresenter* m_pPresenter;
+
+  /// Checkbox for changing the bin display mode.
+  QCheckBox* m_ckBinDisplay;
 
   Q_OBJECT
 public:
@@ -116,10 +120,18 @@ public:
   /// Get the dimension generating factory.
   virtual const Mantid::VATES::DimensionViewFactory& getDimensionViewFactory();
 
+  /// Getter to indicate whether the number of bins should be used, or low
+  virtual Mantid::VATES::BinDisplay getBinDisplayMode() const;
+
   /// Single signal gets raised if anything changes
 Q_SIGNALS:
   void valueChanged();
   void ignoreBinChanges();
+
+private slots:
+
+  // Handler for the bin mode changing.
+  void binModeChanged(bool);
 
 };
 

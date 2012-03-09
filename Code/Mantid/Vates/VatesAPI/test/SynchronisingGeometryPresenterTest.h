@@ -83,6 +83,7 @@ static std::string constructXML(std::string nbinsA, std::string nbinsB, std::str
     MOCK_METHOD0(getDimensionViewFactory, const DimensionViewFactory&());
     MOCK_METHOD0(raiseModified, void());
     MOCK_METHOD0(raiseNoClipping, void());
+    MOCK_CONST_METHOD0(getBinDisplayMode, BinDisplay());
     ~MockGeometryView(){}
   };
 
@@ -108,6 +109,7 @@ static std::string constructXML(std::string nbinsA, std::string nbinsB, std::str
     MOCK_CONST_METHOD0(getSelectedIndex, unsigned int());
     MOCK_CONST_METHOD0(getIsIntegrated, bool());
     MOCK_CONST_METHOD1(displayError, void(std::string));
+    MOCK_METHOD1(setViewMode, void(Mantid::VATES::BinDisplay));
     ~MockDimensionView(){};
   };
 
@@ -250,6 +252,85 @@ public:
 
     TSM_ASSERT_EQUALS("Swapping has not occured as expected.", presenter.T_AXIS, presenterA->getMapping());
     TSM_ASSERT_EQUALS("Swapping has not occured as expected.", presenter.X_AXIS, presenterB->getMapping());
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&gView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&dView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
+  }
+
+  void testNoDimensionModeChanged()
+  {
+    NiceMock<MockDimensionView> dView;
+    EXPECT_CALL(dView, setViewMode(_)).Times(0); // Call 0 times since nothing has changed.
+    
+    NiceMock<MockDimensionViewFactory> factory;
+    EXPECT_CALL(factory, create()).WillRepeatedly(Return(&dView));
+    
+    NiceMock<MockGeometryView> gView;
+    EXPECT_CALL(gView, getDimensionViewFactory()).WillRepeatedly(ReturnRef(factory));
+    EXPECT_CALL(gView, getBinDisplayMode()).Times(1).WillOnce(Return(Simple)); //Will return (SIMPLE) the same Mode as the original, so nothing should happen.
+
+    MDGeometryXMLParser parser(constructXML());
+    parser.execute();
+
+    SynchronisingGeometryPresenter presenter(parser); //Default initalizer sets the mode to SIMPLE
+    presenter.acceptView(&gView);
+
+    //Some external indication that the mode has changed.
+    presenter.setDimensionModeChanged();
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&gView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&dView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
+  }
+
+  void testDimensionModeChangedOnce()
+  {
+    NiceMock<MockDimensionView> dView;
+    EXPECT_CALL(dView, setViewMode(_)).Times(5); // Call 5 times since 5 dimensions are in the xml.
+    
+    NiceMock<MockDimensionViewFactory> factory;
+    EXPECT_CALL(factory, create()).WillRepeatedly(Return(&dView));
+    
+    NiceMock<MockGeometryView> gView;
+    EXPECT_CALL(gView, getDimensionViewFactory()).WillRepeatedly(ReturnRef(factory));
+    EXPECT_CALL(gView, getBinDisplayMode()).Times(1).WillOnce(Return(LowHighStep)); //Will return (LowHighStep) a different Mode to the original.
+
+    MDGeometryXMLParser parser(constructXML());
+    parser.execute();
+
+    SynchronisingGeometryPresenter presenter(parser); //Default initalizer sets the mode to SIMPLE
+    presenter.acceptView(&gView);
+
+    //Some external indication that the mode has changed.
+    presenter.setDimensionModeChanged();
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&gView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&dView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
+  }
+
+  void testDimensionModeChangedDuplicated()
+  {
+    NiceMock<MockDimensionView> dView;
+    EXPECT_CALL(dView, setViewMode(_)).Times(5); // Call 5 times since 5 dimensions are in the xml.
+    
+    NiceMock<MockDimensionViewFactory> factory;
+    EXPECT_CALL(factory, create()).WillRepeatedly(Return(&dView));
+    
+    NiceMock<MockGeometryView> gView;
+    EXPECT_CALL(gView, getDimensionViewFactory()).WillRepeatedly(ReturnRef(factory));
+    EXPECT_CALL(gView, getBinDisplayMode()).Times(2).WillRepeatedly(Return(LowHighStep)); //Will return (LowHighStep) a different Mode to the original.
+
+    MDGeometryXMLParser parser(constructXML());
+    parser.execute();
+
+    SynchronisingGeometryPresenter presenter(parser); //Default initalizer sets the mode to SIMPLE
+    presenter.acceptView(&gView);
+
+    //Some external indication that the mode has changed.
+    presenter.setDimensionModeChanged();
+    presenter.setDimensionModeChanged(); //Calling it again should do nothing because the last result should be cached.
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&gView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&dView));

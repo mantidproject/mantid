@@ -15,6 +15,7 @@ class QLabel;
 class QComboBox;
 class QLineEdit;
 class QCheckBox;
+class QStackedWidget;
 class BinInputWidget;
 
 namespace Mantid
@@ -81,11 +82,13 @@ private:
 
   Mantid::VATES::DimensionPresenter* m_pDimensionPresenter;
 
-  /// Widget for displaying bin information.
-  BinInputWidget* m_binWidget;
+  //Stacked widget to contain the bins input widget types.
+  QStackedWidget* m_binStackedWidget;
 
   /// Helper method to set names in all places required.
   void setDimensionName(const std::string& name);
+
+  BinInputWidget* getCurrentBinInputWidget() const;
 
   private slots:
 
@@ -124,6 +127,9 @@ public:
   virtual unsigned int getSelectedIndex() const;
 
   virtual bool getIsIntegrated() const;
+
+  virtual void setViewMode(Mantid::VATES::BinDisplay mode);
+
   //---------------------------------------------------------
   // End DimensionView implementations
   //---------------------------------------------------------
