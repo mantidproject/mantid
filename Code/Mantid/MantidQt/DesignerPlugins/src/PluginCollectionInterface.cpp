@@ -21,6 +21,7 @@ PluginCollectionInterface::PluginCollectionInterface(QObject *parent) : QObject(
   m_widgets.append(new SliceViewerPlugin(this));
   m_widgets.append(new LineViewerPlugin(this));
   m_widgets.append(new SafeQwtPlotPlugin(this));
+  m_widgets.append(new AlgorithmPropertiesWidgetPlugin(this));
 
   m_widgets.append(new FitBrowserPlugin(this));
   m_widgets.append(new MuonFitBrowserPlugin(this));

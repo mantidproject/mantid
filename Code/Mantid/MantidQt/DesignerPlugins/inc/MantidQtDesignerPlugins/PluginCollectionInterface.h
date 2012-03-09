@@ -15,6 +15,7 @@
 #include "MantidQtSliceViewer/SliceViewer.h"
 #include "MantidQtSliceViewer/LineViewer.h"
 #include "MantidQtMantidWidgets/SafeQwtPlot.h"
+#include "MantidQtAPI/AlgorithmPropertiesWidget.h"
 
 /** 
 The PluginCollectionInterface implements the interface for the plugin library and holds a 
@@ -127,5 +128,9 @@ DECLARE_WIDGET_PLUGIN(LineViewerPlugin,
 DECLARE_WIDGET_PLUGIN(SafeQwtPlotPlugin,
     MantidQt::MantidWidgets::SafeQwtPlot,
     "Version of QwtPlot with workspace-level thread safety");
+
+DECLARE_WIDGET_PLUGIN(AlgorithmPropertiesWidgetPlugin,
+    MantidQt::API::AlgorithmPropertiesWidget,
+    "List of algorithm properties");
 
 #endif

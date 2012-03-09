@@ -53,6 +53,20 @@ GenericDialog::~GenericDialog()
 }
 
 
+
+//--------------------------------------------------------------------------------------
+/** SLOT to be called whenever a property's value has just been changed
+ * and the widget has lost focus/value has been changed.
+ * @param pName :: name of the property that was changed
+ */
+void GenericDialog::propertyChanged(const QString & pName)
+{
+  this->storePropertyValue(pName, getValue( m_tied_properties[pName]) );
+  this->setPropertyValue(pName, true);
+}
+
+
+
 //---------------------------------------------------------------------------------------------------------------
 bool haveInputWS(const std::vector<Property*> & prop_list)
 {
@@ -71,22 +85,6 @@ bool haveInputWS(const std::vector<Property*> & prop_list)
   }
   return false;
 }
-
-
-
-//--------------------------------------------------------------------------------------
-/** SLOT to be called whenever a property's value has just been changed
- * and the widget has lost focus/value has been changed.
- * @param pName :: name of the property that was changed
- */
-void GenericDialog::propertyChanged(const QString & pName)
-{
-  this->storePropertyValue(pName, getValue( m_tied_properties[pName]) );
-  this->setPropertyValue(pName, true);
-}
-
-
-
 
 //----------------------------------
 // Protected member functions
