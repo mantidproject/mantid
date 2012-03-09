@@ -1,7 +1,7 @@
 #ifndef MANTID_MANTIDWIDGETS_SAFEQWTPLOT_H_
 #define MANTID_MANTIDWIDGETS_SAFEQWTPLOT_H_
 
-#include "MantidKernel/System.h"
+#include "MantidQtMantidWidgets/WidgetDllOption.h"
 #include <qwt_plot.h>
 #include <qpainter.h>
 #include "qwt_text.h"
@@ -44,7 +44,7 @@ namespace MantidWidgets
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport SafeQwtPlot : public QwtPlot
+  class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS SafeQwtPlot : public QwtPlot
   {
     Q_OBJECT
 
