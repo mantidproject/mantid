@@ -46,7 +46,7 @@ namespace MantidWidgets
 
     // Layout the tree and combo box
     QVBoxLayout * layout = new QVBoxLayout(this, 0 /*border*/, 4 /*spacing*/);
-    this->setLayout(layout);
+    //this->setLayout(layout);
     layout->addLayout(buttonLayout);
     layout->addWidget(m_tree);
 

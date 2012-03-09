@@ -6,7 +6,7 @@
 #include <qpainter.h>
 #include "qwt_text.h"
 #include "MantidAPI/Workspace.h"
-
+#include "WidgetDllOption.h"
 
 namespace MantidQt
 {
