@@ -23,7 +23,7 @@ Constructor
 */
 DimensionWidget::DimensionWidget(Mantid::VATES::BinDisplay binDisplay)
 {
-  //TODO: The following cascade can be refactored out.
+  //Prefer dependency injection to the following conditional statements.
   if(binDisplay == Mantid::VATES::Simple)
   {
     m_binWidget = new SimpleBinInputWidget;

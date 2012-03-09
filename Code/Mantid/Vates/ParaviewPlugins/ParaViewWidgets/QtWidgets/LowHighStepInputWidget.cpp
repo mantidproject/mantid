@@ -37,8 +37,7 @@ LowHighStepInputWidget::LowHighStepInputWidget()
 
   connect(m_step, SIGNAL(editingFinished()), this, SLOT(nBinsListener()));
 
-  QDoubleValidator* stepValidator = new QDoubleValidator;
-  stepValidator->setBottom(0);
+  QDoubleValidator* stepValidator = new QDoubleValidator(0, 10000, 5, this);
   m_step->setValidator(stepValidator);
 
   QHBoxLayout* layout = new QHBoxLayout;
