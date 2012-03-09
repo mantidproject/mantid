@@ -11,6 +11,7 @@
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/InstrumentSelector.h"
 #include "MantidQtMantidWidgets/WorkspaceSelector.h"
+#include "MantidQtSliceViewer/ColorBarWidget.h"
 
 /** 
 The PluginCollectionInterface implements the interface for the plugin library and holds a 
@@ -78,6 +79,7 @@ public: \
 
 //==============================================================================
 // Declare plugins for several types of widgets in MantidWidgets
+// REMEMBER TO ADD THESE TO PluginCollectionInterface.cpp -> customWidgets
 //==============================================================================
 DECLARE_WIDGET_PLUGIN(AlgorithmSelectorWidgetPlugin,
     MantidQt::MantidWidgets::AlgorithmSelectorWidget,
@@ -106,5 +108,9 @@ DECLARE_WIDGET_PLUGIN(FitBrowserPlugin,
 DECLARE_WIDGET_PLUGIN(WorkspaceSelectorPlugin,
     MantidQt::MantidWidgets::WorkspaceSelector,
     "Select a workspace for use in this operation");
+
+DECLARE_WIDGET_PLUGIN(ColorBarWidgetPlugin,
+    MantidQt::SliceViewer::ColorBarWidget,
+    "Shows a color scale and allow user to change it");
 
 #endif
