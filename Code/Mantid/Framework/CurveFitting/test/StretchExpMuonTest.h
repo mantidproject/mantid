@@ -88,7 +88,7 @@
 
 		// get close to exact values with an initial guess
 		fn.setParameter("A",1.5);
-		fn.setParameter("lambda",0.2);
+		fn.setParameter("Lambda",0.2);
 		fn.setParameter("beta",0.4);
 
 		//alg2.setFunction(fn);
@@ -116,7 +116,7 @@
 		//golden standard y(x)=2*exp(-(x/4)^0.5)
 		//allow for a 1% error in Amplitude and Decay rate, and 10% error in the Stretching exponent
 		TS_ASSERT_DELTA( out->getParameter("A"), 2.0 ,0.02);
-		TS_ASSERT_DELTA( out->getParameter("lambda"), 0.25 ,0.0025);
+		TS_ASSERT_DELTA( out->getParameter("Lambda"), 0.25 ,0.0025);
 		TS_ASSERT_DELTA( out->getParameter("beta"), 0.5 ,0.05);
 
     // check its categories
