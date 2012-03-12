@@ -63,7 +63,7 @@ public:
   /// @return :: The value of the function
   virtual double valAndDeriv(std::vector<double>& der) const;
 
-  virtual double valDerivHessian(bool evalFunction = true) const;
+  virtual double valDerivHessian(bool evalFunction = true, bool evalDeriv = true, bool evalHessian = true) const;
   const GSLVector& getDeriv() const;
   const GSLMatrix& getHessian() const;
   void push();

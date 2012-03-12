@@ -116,17 +116,6 @@ void CostFuncFitting::calActiveCovarianceMatrix(GSLMatrix& covar, double epsrel)
   // calculate the derivatives
   m_function->functionDeriv( *m_domain, J );
 
-  //std::cerr << "J=\n";
-  //for(size_t i = 0; i < J.getJ()->size1; ++i)
-  //{
-  //  for(size_t j = 0; j < J.getJ()->size2; ++j)
-  //  {
-  //    std::cerr << std::scientific << std::setprecision(6) << std::setw(13);
-  //    std::cerr << gsl_matrix_get(J.getJ(),i,j) << ' ';
-  //  }
-  //  std::cerr << std::endl;
-  //}
-
   // let the GSL to compute the covariance matrix
   gsl_multifit_covar( J.getJ(), epsrel, covar.gsl() );
   

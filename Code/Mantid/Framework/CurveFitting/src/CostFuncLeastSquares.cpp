@@ -5,7 +5,10 @@
 #include "MantidCurveFitting/Jacobian.h"
 #include "MantidAPI/IConstraint.h"
 
-const bool debug = false;
+namespace
+{
+  const bool debug = false;
+}
 
 namespace Mantid
 {
@@ -21,6 +24,7 @@ double CostFuncLeastSquares::val() const
   if ( !m_dirtyVal ) return m_value;
 
   checkValidity();
+  m_domain->reset();
   m_function->function(*m_domain,*m_values);
   size_t ny = m_values->size();
 
@@ -52,37 +56,16 @@ double CostFuncLeastSquares::val() const
 /// @param der :: Container to output the derivatives
 void CostFuncLeastSquares::deriv(std::vector<double>& der) const
 {
-  checkValidity();
-  size_t np = m_function->nParams();  // number of parameters 
-  size_t ny = m_domain->size();       // number of data points
-  Jacobian jacobian(ny,np);
-  m_function->functionDeriv(*m_domain,jacobian);
+  valDerivHessian(false,true,false);
+
   if (der.size() != nParams())
   {
     der.resize(nParams());
   }
-  size_t iActiveP = 0;
-  for(size_t ip = 0; ip < np; ++ip)
+  for(size_t i = 0; i < nParams(); ++i)
   {
-    //std::cerr << "param " << ip << ' ' << m_function->getParameter(ip) << std::endl;
-    if ( !m_function->isActive(ip) ) continue;
-    double d = 0.0;
-    for(size_t i = 0; i < ny; ++i)
-    {
-      double calc = m_values->getCalculated(i);
-      double obs = m_values->getFitData(i);
-      double w = m_values->getFitWeight(i);
-      d += w * w * ( calc - obs ) * jacobian.get(i,ip);
-    }
-    API::IConstraint* c = m_function->getConstraint(ip);
-    if (c)
-    {
-      d += c->checkDeriv();
-    }
-    der[iActiveP] = d;
-    ++iActiveP;
+    der[i] = m_der.get(i);
   }
-   m_dirtyDeriv = false;
 }
 
 /// Calculate the value and the derivatives of the cost function
@@ -90,55 +73,17 @@ void CostFuncLeastSquares::deriv(std::vector<double>& der) const
 /// @return :: The value of the function
 double CostFuncLeastSquares::valAndDeriv(std::vector<double>& der) const
 {
-  checkValidity();
-  size_t np = m_function->nParams();  // number of parameters 
-  size_t ny = m_domain->size(); // number of data points
-  Jacobian jacobian(ny,np);
-  m_function->function(*m_domain,*m_values);
-  m_function->functionDeriv(*m_domain,jacobian);
+  valDerivHessian(true,true,false);
+
   if (der.size() != nParams())
   {
     der.resize(nParams());
   }
-  size_t iActiveP = 0;
-  double fVal = 0.0;
-  for(size_t ip = 0; ip < np; ++ip)
+  for(size_t i = 0; i < nParams(); ++i)
   {
-    if ( !m_function->isActive(ip) ) continue;
-    double d = 0.0;
-    for(size_t i = 0; i < ny; ++i)
-    {
-      double calc = m_values->getCalculated(i);
-      double obs = m_values->getFitData(i);
-      double w = m_values->getFitWeight(i);
-      double y = ( calc - obs ) * w;
-      d += y * jacobian.get(i,ip);
-      if (iActiveP == 0)
-      {
-        fVal += y * y;
-      }
-    }
-    API::IConstraint* c = m_function->getConstraint(ip);
-    if (c)
-    {
-      d += c->checkDeriv();
-    }
-    der[iActiveP] = d;
-    //std::cerr << "der " << ip << ' ' << der[iActiveP] << std::endl;
-    ++iActiveP;
+    der[i] = m_der.get(i);
   }
-  fVal *= 0.5;
-  for(size_t i=0;i<np;++i)
-  {
-    API::IConstraint* c = m_function->getConstraint(i);
-    if (c)
-    {
-      fVal += c->check();
-    }
-  }
-  m_dirtyVal = false;
-  m_dirtyDeriv = false;
-  return fVal;
+  return m_value;
 }
 
 /** Calculate the value and the first and second derivatives of the cost function
@@ -148,9 +93,9 @@ double CostFuncLeastSquares::valAndDeriv(std::vector<double>& der) const
  *    It is for efficiency reasons.
  *  @return :: The value of the function if evalFunction is true.
  */
-double CostFuncLeastSquares::valDerivHessian(bool evalFunction) const
+double CostFuncLeastSquares::valDerivHessian(bool evalFunction, bool evalDeriv, bool evalHessian) const
 {
-  if (m_pushed)
+  if (m_pushed || !evalDeriv)
   {
     return val();
   }
@@ -164,26 +109,11 @@ double CostFuncLeastSquares::valDerivHessian(bool evalFunction) const
   Jacobian jacobian(ny,np);
   if (evalFunction)
   {
+    m_domain->reset();
     m_function->function(*m_domain,*m_values);
   }
+  m_domain->reset();
   m_function->functionDeriv(*m_domain,jacobian);
-
-  //---------------------------------------------
-  if (debug)
-  {
-    std::cerr << "Jacobian: " << std::endl;
-    for(size_t i = 0; i < ny; ++i)
-    {
-      for(size_t ip = 0; ip < np; ++ip)
-      {
-        if ( !m_function->isActive(ip) ) continue;
-        std::cerr << jacobian.get(i,ip) << ' ' ;
-      }
-      std::cerr << std::endl;
-    }
-    std::cerr << std::endl;
-  }
-  //---------------------------------------------
 
   if (m_der.size() != nParams())
   {
@@ -191,6 +121,19 @@ double CostFuncLeastSquares::valDerivHessian(bool evalFunction) const
   }
   size_t iActiveP = 0;
   double fVal = 0.0;
+  if (debug)
+  {
+    std::cerr << "Jacobian:\n";
+    for(size_t i = 0; i < ny; ++i)
+    {
+      for(size_t ip = 0; ip < np; ++ip)
+      {
+        if ( !m_function->isActive(ip) ) continue;
+        std::cerr << jacobian.get(i,ip) << ' ';
+      }
+      std::cerr << std::endl;
+    }
+  }
   for(size_t ip = 0; ip < np; ++ip)
   {
     if ( !m_function->isActive(ip) ) continue;
@@ -229,7 +172,11 @@ double CostFuncLeastSquares::valDerivHessian(bool evalFunction) const
       }
     }
     m_value = fVal;
+    m_dirtyVal = false;
   }
+  m_dirtyDeriv = false;
+
+  if (!evalHessian) return m_value;
 
   size_t na = m_der.size(); // number of active parameters
   if (m_hessian.size1() != na || m_hessian.size2() != na)
@@ -270,8 +217,6 @@ double CostFuncLeastSquares::valDerivHessian(bool evalFunction) const
     ++i1;
   }
 
-  m_dirtyVal = false;
-  m_dirtyDeriv = false;
   m_dirtyHessian = false;
   return m_value;
 }
@@ -368,6 +313,10 @@ void CostFuncLeastSquares::getParameters(GSLVector& params) const
   */
 void CostFuncLeastSquares::calActiveCovarianceMatrix(GSLMatrix& covar, double epsrel)
 {
+  if (m_hessian.isEmpty())
+  {
+    valDerivHessian();
+  }
   covar = m_hessian;
   covar.invert();
 }

@@ -199,7 +199,7 @@ public:
     alg.setProperty("Function",boost::dynamic_pointer_cast<IFunction>(mfun));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
-    WS_type outWS = getWS("mfun_0_Workspace");
+    WS_type outWS = getWS("mfun_Workspace");
 
     const Mantid::MantidVec& Y00 = ws->readY(0);
     const Mantid::MantidVec& Y0 = outWS->readY(0);
@@ -239,7 +239,7 @@ public:
     TS_ASSERT_EQUALS(out->parameterName(7),"f2.s");
     TS_ASSERT_DELTA(out->getParameter(7),2.8530,0.3);
 
-    TWS_type outParams = getTWS("mfun_0_Parameters");
+    TWS_type outParams = getTWS("mfun_Parameters");
     TS_ASSERT(outParams);
 
     TS_ASSERT_EQUALS(outParams->rowCount(),9);

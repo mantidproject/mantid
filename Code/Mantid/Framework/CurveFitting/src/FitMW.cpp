@@ -79,7 +79,6 @@ namespace
     this->setOptionalMessage("Fits a function to data in a Workspace");
   }
   
-
   using namespace Kernel;
   using API::WorkspaceProperty;
   using API::Workspace;
@@ -89,18 +88,9 @@ namespace
   using API::Progress;
   using API::Jacobian;
 
-  /// for use in an std algorithm
-  bool isEmptyString(const std::string& str){return str.empty();}
-
-
-  /** Initialisation method
-  */
-  void FitMW::init()
+  /// declare properties that specify the dataset within the workspace to fit to.
+  void FitMW::declareDatasetProperties() 
   {
-    declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::Input), "Name of the input Workspace");
-
-    declareProperty(new API::FunctionProperty("Function"),"Parameters defining the fitting function and its initial values");
-
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
     mustBePositive->setLower(0);
     declareProperty(new PropertyWithValue<int>("WorkspaceIndex",0, mustBePositive),
@@ -111,64 +101,25 @@ namespace
     declareProperty("EndX", EMPTY_DBL(),
       "A value in, or on the high x boundary of, the last bin the fitting range\n"
       "(default the highest value of x)" );
-
-    declareProperty("MaxIterations", 500, mustBePositive->clone(),
-      "Stop after this number of iterations if a good fit is not found" );
-    declareProperty("OutputStatus","", Direction::Output);
-    declareProperty("OutputChi2overDoF",0.0, Direction::Output);
-
-    // Disable default gsl error handler (which is to call abort!)
-    gsl_set_error_handler_off();
-
-    //declareProperty("Output","","If not empty OutputParameters TableWorksace and OutputWorkspace will be created.");
-
-    std::vector<std::string> minimizerOptions = FuncMinimizerFactory::Instance().getKeys();
-
-    declareProperty("Minimizer","Levenberg-Marquardt",new ListValidator(minimizerOptions),
-      "The minimizer method applied to do the fit, default is Levenberg-Marquardt", Direction::InOut);
-
-    std::vector<std::string> costFuncOptions = API::CostFunctionFactory::Instance().getKeys();
-    // select only CostFuncFitting variety
-    for(std::vector<std::string>::iterator it = costFuncOptions.begin(); it != costFuncOptions.end(); ++it)
-    {
-      boost::shared_ptr<CostFuncFitting> costFunc = boost::dynamic_pointer_cast<CostFuncFitting>(
-        API::CostFunctionFactory::Instance().create(*it)
-        );
-      if (!costFunc)
-      {
-        *it = "";
-      }
-    }
-    std::remove_if(costFuncOptions.begin(),costFuncOptions.end(),isEmptyString);
-    declareProperty("CostFunction","Least squares",new ListValidator(costFuncOptions),
-      "The cost function to be used for the fit, default is Least squares", Direction::InOut);
-    declareProperty("CreateOutput", false,
-      "Set to true to create output workspaces with the results of the fit"
-      "(default is false)." );
-    declareProperty("Output", "",
-      "A base name for the output workspaces (if not given default names will be created)." );
   }
 
-  /** Executes the algorithm
-  *
-  *  @throw runtime_error Thrown if algorithm cannot execute
-  */
-  void FitMW::exec()
+  /// Create a domain from the input workspace
+  void FitMW::createDomain(boost::shared_ptr<API::FunctionDomain>& domain, boost::shared_ptr<API::FunctionValues>& values)
   {
-
-    // Try to retrieve optional properties
-    const int maxIterations = getProperty("MaxIterations");
-
     // get the function
     m_function = getProperty("Function");
-
     // get the workspace 
-    API::MatrixWorkspace_const_sptr ws = getProperty("InputWorkspace");
+    API::Workspace_sptr ws = getProperty("InputWorkspace");
+    m_matrixWorkspace = boost::dynamic_pointer_cast<API::MatrixWorkspace>(ws);
+    if (!m_matrixWorkspace)
+    {
+      throw std::invalid_argument("InputWorkspace must be a MatrixWorkspace.");
+    }
     //m_function->setWorkspace(ws);
     int index = getProperty("WorkspaceIndex");
-    size_t wsIndex = static_cast<size_t>(index);
+    m_workspaceIndex = static_cast<size_t>(index);
 
-    const Mantid::MantidVec& X = ws->readX(wsIndex);
+    const Mantid::MantidVec& X = m_matrixWorkspace->readX(m_workspaceIndex);
     double startX = getProperty("StartX");
     double endX = getProperty("EndX");
 
@@ -234,12 +185,11 @@ namespace
     API::IFunctionMW* funMW = dynamic_cast<API::IFunctionMW*>(m_function.get());
     if (funMW)
     {
-      funMW->setMatrixWorkspace(ws,wsIndex,startX,endX);
+      funMW->setMatrixWorkspace(m_matrixWorkspace,m_workspaceIndex,startX,endX);
     }
 
     // set function domain
-    API::FunctionDomain1D_sptr domain;
-    if (ws->isHistogramData())
+    if (m_matrixWorkspace->isHistogramData())
     {
       if ( X.end() == to ) to = X.end() - 1;
       std::vector<double> x( static_cast<size_t>(to - from) );
@@ -256,17 +206,17 @@ namespace
       domain.reset(new API::FunctionDomain1D(from,to));
     }
 
+    values.reset(new API::FunctionValues(*domain));
     // set the data to fit to
-    API::FunctionValues_sptr values(new API::FunctionValues(*domain));
-    size_t ifrom = static_cast<size_t>( from - X.begin() );
+    m_startIndex = static_cast<size_t>( from - X.begin() );
     size_t n = values->size();
-    size_t ito = ifrom + n;
-    const Mantid::MantidVec& Y = ws->readY( wsIndex );
-    const Mantid::MantidVec& E = ws->readE( wsIndex );
+    size_t ito = m_startIndex + n;
+    const Mantid::MantidVec& Y = m_matrixWorkspace->readY( m_workspaceIndex );
+    const Mantid::MantidVec& E = m_matrixWorkspace->readE( m_workspaceIndex );
     bool foundZeroOrNegativeError = false;
-    for(size_t i = ifrom; i < ito; ++i)
+    for(size_t i = m_startIndex; i < ito; ++i)
     {
-      size_t j = i - ifrom;
+      size_t j = i - m_startIndex;
       values->setFitData( j, Y[i] );
       double error = E[i];
       if (error <= 0)
@@ -282,171 +232,6 @@ namespace
       g_log.warning() << "Zero or negative errors are replaced with 1.0\n";
     }
 
-    // get the minimizer
-    std::string minimizerName = getPropertyValue("Minimizer");
-    IFuncMinimizer_sptr minimizer = FuncMinimizerFactory::Instance().create(minimizerName);
-
-    // get the cost function which must be a CostFuncFitting
-    boost::shared_ptr<CostFuncFitting> costFunc = boost::dynamic_pointer_cast<CostFuncFitting>(
-      API::CostFunctionFactory::Instance().create(getPropertyValue("CostFunction"))
-      );
-
-    costFunc->setFittingFunction(m_function,domain,values);
-    minimizer->initialize(costFunc);
-
-    Progress prog(this,0.0,1.0,maxIterations?maxIterations:1);
-
-    // do the fitting until success or iteration limit is reached
-    size_t iter = 0;
-    bool success = false;
-    std::string errorString;
-    double costFuncVal = 0;
-    do
-    {
-      iter++;
-      if ( !minimizer->iterate() )
-      {
-        errorString = minimizer->getError();
-        success = errorString.empty() || errorString == "success";
-        errorString = "success";
-        break;
-      }
-      prog.report();
-    }
-    while (iter < maxIterations);
-
-    if (iter >= maxIterations)
-    {
-      if ( !errorString.empty() )
-      {
-        errorString += '\n';
-      }
-      errorString += "Failed to converge after " + boost::lexical_cast<std::string>(maxIterations) + " iterations.";
-    }
-
-    // return the status flag
-    setPropertyValue("OutputStatus",errorString);
-
-    // degrees of freedom
-    size_t dof = values->size() - costFunc->nParams();
-    if (dof == 0) dof = 1;
-    double finalCostFuncVal = minimizer->costFunctionVal() / dof;
-
-    setProperty("OutputChi2overDoF",finalCostFuncVal);
-
-    // fit ended, creating output
-
-    bool doCreateOutput = getProperty("CreateOutput");
-    std::string baseName = getPropertyValue("Output");
-    if ( !baseName.empty() )
-    {
-      doCreateOutput = true;
-    }
-
-    if (doCreateOutput)
-    {
-      if (baseName.empty())
-      {
-        baseName = ws->name();
-        if (baseName.empty())
-        {
-          baseName = "Output";
-        }
-        baseName += "_" + boost::lexical_cast<std::string>(wsIndex) + "_";
-      }
-      else
-      {
-        baseName += "_";
-      }
-
-      // Calculate the covariance matrix and the errors.
-      GSLMatrix covar;
-      costFunc->calCovarianceMatrix(covar);
-      costFunc->calFittingErrors(covar);
-
-        declareProperty(
-          new WorkspaceProperty<API::ITableWorkspace>("OutputNormalisedCovarianceMatrix","",Direction::Output),
-          "The name of the TableWorkspace in which to store the final covariance matrix" );
-        setPropertyValue("OutputNormalisedCovarianceMatrix",baseName+"NormalisedCovarianceMatrix");
-
-        Mantid::API::ITableWorkspace_sptr covariance = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-        covariance->addColumn("str","Name");
-        // set plot type to Label = 6
-        covariance->getColumn(covariance->columnCount()-1)->setPlotType(6);
-        //std::vector<std::string> paramThatAreFitted; // used for populating 1st "name" column
-        for(size_t i=0; i < m_function->nParams(); i++)
-        {
-          if (m_function->isActive(i)) 
-          {
-            covariance->addColumn("double",m_function->parameterName(i));
-            //paramThatAreFitted.push_back(m_function->parameterName(i));
-          }
-        }
-
-        size_t np = m_function->nParams();
-        size_t ia = 0;
-        for(size_t i = 0; i < np; i++)
-        {
-          if (m_function->isFixed(i)) continue;
-          Mantid::API::TableRow row = covariance->appendRow();
-          row << m_function->parameterName(i);
-          size_t ja = 0;
-          for(size_t j = 0; j < np; j++)
-          {
-            if (m_function->isFixed(j)) continue;
-            if (j == i)
-              row << 100.0;
-            else
-            {
-              row << 100.0*covar.get(ia,ja)/sqrt(covar.get(ia,ia)*covar.get(ja,ja));
-            }
-            ++ja;
-          }
-          ++ia;
-        }
-
-        setProperty("OutputNormalisedCovarianceMatrix",covariance);
-
-      // create output parameter table workspace to store final fit parameters 
-      // including error estimates if derivative of fitting function defined
-
-      declareProperty(
-        new WorkspaceProperty<API::ITableWorkspace>("OutputParameters","",Direction::Output),
-        "The name of the TableWorkspace in which to store the final fit parameters" );
-
-      setPropertyValue("OutputParameters",baseName+"Parameters");
-
-      Mantid::API::ITableWorkspace_sptr result = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-      result->addColumn("str","Name");
-      // set plot type to Label = 6
-      result->getColumn(result->columnCount()-1)->setPlotType(6);
-      result->addColumn("double","Value");
-      result->addColumn("double","Error");
-      // yErr = 5
-      result->getColumn(result->columnCount()-1)->setPlotType(5);
-
-      for(size_t i=0;i<m_function->nParams();i++)
-      {
-        Mantid::API::TableRow row = result->appendRow();
-        row << m_function->parameterName(i) 
-            << m_function->getParameter(i)
-            << m_function->getError(i);
-      }
-      // Add chi-squared value at the end of parameter table
-      Mantid::API::TableRow row = result->appendRow();
-      row << "Cost function value" << finalCostFuncVal;      
-      setProperty("OutputParameters",result);
-
-      // Create a workspace with calculated values
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
-        "Name of the output Workspace holding resulting simulated spectrum");
-      setPropertyValue("OutputWorkspace",baseName+"Workspace");
-      
-      API::MatrixWorkspace_sptr outWS = createOutputWorkspace(ws,wsIndex,ifrom,domain,values);
-      setProperty("OutputWorkspace",outWS);
-
-    }
-
   }
 
   /**
@@ -457,22 +242,20 @@ namespace
    * @param domain :: The domain
    * @param values :: The values
    */
-  API::MatrixWorkspace_sptr FitMW::createOutputWorkspace(
-        boost::shared_ptr<const API::MatrixWorkspace> inWS,
-        size_t wi,
-        size_t startIndex,
-        boost::shared_ptr<API::FunctionDomain1D> domain,
+  void FitMW::createOutputWorkspace(
+        const std::string& baseName,
+        boost::shared_ptr<API::FunctionDomain> domain,
         boost::shared_ptr<API::FunctionValues> values
     )
   {
     // calculate the values
     m_function->function(*domain,*values);
-    const MantidVec& inputX = inWS->readX(wi);
-    const MantidVec& inputY = inWS->readY(wi);
-    const MantidVec& inputE = inWS->readE(wi);
+    const MantidVec& inputX = m_matrixWorkspace->readX(m_workspaceIndex);
+    const MantidVec& inputY = m_matrixWorkspace->readY(m_workspaceIndex);
+    const MantidVec& inputE = m_matrixWorkspace->readE(m_workspaceIndex);
     size_t nData = values->size();
 
-      size_t histN = inWS->isHistogramData() ? 1 : 0;
+      size_t histN = m_matrixWorkspace->isHistogramData() ? 1 : 0;
       API::MatrixWorkspace_sptr ws =
         Mantid::API::WorkspaceFactory::Instance().create(
             "Workspace2D",
@@ -480,9 +263,9 @@ namespace
             nData + histN,
             nData);
       ws->setTitle("");
-      ws->setYUnitLabel(inWS->YUnitLabel());
-      ws->setYUnit(inWS->YUnit());
-      ws->getAxis(0)->unit() = inWS->getAxis(0)->unit();
+      ws->setYUnitLabel(m_matrixWorkspace->YUnitLabel());
+      ws->setYUnit(m_matrixWorkspace->YUnit());
+      ws->getAxis(0)->unit() = m_matrixWorkspace->getAxis(0)->unit();
       API::TextAxis* tAxis = new API::TextAxis(3);
       tAxis->setLabel(0,"Data");
       tAxis->setLabel(1,"Calc");
@@ -491,11 +274,11 @@ namespace
 
       for(size_t i=0;i<3;i++)
       {
-        ws->dataX(i).assign( inputX.begin() + startIndex, inputX.begin() + startIndex + nData + histN );
+        ws->dataX(i).assign( inputX.begin() + m_startIndex, inputX.begin() + m_startIndex + nData + histN );
       }
 
-      ws->dataY(0).assign( inputY.begin() + startIndex, inputY.begin() + startIndex + nData);
-      ws->dataE(0).assign( inputE.begin() + startIndex, inputE.begin() + startIndex + nData );
+      ws->dataY(0).assign( inputY.begin() + m_startIndex, inputY.begin() + m_startIndex + nData);
+      ws->dataE(0).assign( inputE.begin() + m_startIndex, inputE.begin() + m_startIndex + nData );
 
       MantidVec& Ycal = ws->dataY(1);
       MantidVec& Ecal = ws->dataE(1);
@@ -527,27 +310,14 @@ namespace
         Ecal[i] = sqrt(err);
       }
 
-      return ws;
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
+        "Name of the output Workspace holding resulting simulated spectrum");
+      setPropertyValue("OutputWorkspace",baseName+"Workspace");
+      
+      setProperty("OutputWorkspace",ws);
+
   }
 
-  /**
-   * If i-th parameter is transformed the derivative will be != 1.0.
-   * The derivative is calculated numerically.
-   * @param i :: The index of an active parameter
-   * @return The transformation derivative
-   */
-  double FitMW::transformationDerivative(int i)
-  {
-    //size_t j = m_function->indexOfActive(i);
-    //double p0 = m_function->getParameter(j);
-    //double ap0 = m_function->activeParameter(i);
-    //double dap = ap0 != 0.0? ap0 * 0.001 : 0.001;
-    //m_function->setActiveParameter(i,ap0 + dap);
-    //double deriv = ( m_function->getParameter(j) - p0 ) / dap;
-    //m_function->setParameter(j,p0,false);
-    //return deriv;
-    return 0.0;
-  }
 
 } // namespace Algorithm
 } // namespace Mantid

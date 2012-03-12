@@ -1,5 +1,5 @@
-#ifndef MANTID_CURVEFITTING_FITMW_H_
-#define MANTID_CURVEFITTING_FITMW_H_
+#ifndef MANTID_CURVEFITTING_FITMD_H_
+#define MANTID_CURVEFITTING_FITMD_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -12,9 +12,9 @@ namespace Mantid
   namespace API
   {
     class FunctionDomain;
-    class FunctionDomain1D;
+    class FunctionDomainMD;
     class FunctionValues;
-    class MatrixWorkspace;
+    class IMDWorkspace;
   }
 
   namespace CurveFitting
@@ -45,13 +45,13 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport FitMW : public IFit
+    class DLLExport FitMD : public IFit
     {
     public:
       /// Default constructor
-      FitMW() : IFit() {};
+      FitMD() : IFit() {};
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "FitMW";}
+      virtual const std::string name() const { return "FitMD";}
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return (1);}
       /// Algorithm's category for identification overriding a virtual method
@@ -62,26 +62,16 @@ namespace Mantid
       virtual void initDocs();
 
       /// declare properties that specify the dataset within the workspace to fit to.
-      virtual void declareDatasetProperties();
+      virtual void declareDatasetProperties(){}
       /// Create a domain from the input workspace
       virtual void createDomain(boost::shared_ptr<API::FunctionDomain>&, boost::shared_ptr<API::FunctionValues>&);
 
-
-      void createOutputWorkspace(
-        const std::string& baseName,
-        boost::shared_ptr<API::FunctionDomain> domain,
-        boost::shared_ptr<API::FunctionValues> values
-        );
-
       /// The input MareixWorkspace
-      boost::shared_ptr<API::MatrixWorkspace> m_matrixWorkspace;
-      /// The workspace index
-      size_t m_workspaceIndex;
-      size_t m_startIndex;
+      boost::shared_ptr<API::IMDWorkspace> m_IMDWorkspace;
     };
 
     
   } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_FITMW_H_*/
+#endif /*MANTID_CURVEFITTING_FITMD_H_*/

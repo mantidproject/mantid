@@ -20,7 +20,8 @@ namespace API
 FunctionDomainMD::FunctionDomainMD(IMDWorkspace_const_sptr ws, size_t start, size_t length):
 m_iterator(ws->createIterator()),
 m_startIndex(start),
-m_currentIndex(0)
+m_currentIndex(0),
+m_justReset(true)
 {
   size_t dataSize = m_iterator->getDataSize();
   m_size = length == 0 ?  dataSize: length;
@@ -53,8 +54,9 @@ FunctionDomainMD::~FunctionDomainMD()
  */
 const IMDIterator* FunctionDomainMD::getNextIterator() const
 {
-  if (m_currentIndex == 0)
+  if (m_justReset)
   {
+    m_justReset = false;
     return m_iterator;
   }
   if (!m_iterator->next() || m_currentIndex >= m_size)
@@ -73,6 +75,7 @@ void FunctionDomainMD::reset() const
 {
   m_iterator->jumpTo(m_startIndex);
   m_currentIndex = 0;
+  m_justReset = true;
 }
 
 } // namespace API

@@ -58,7 +58,7 @@ namespace Mantid
             std::string name()const{return "QuadEnBackground";}
         protected:
             /// function to calculate the background at box r, given the energy dependent model applied to MDEvents
-            virtual double functionMD(Mantid::API::IMDIterator& r) const;
+            virtual double functionMD(const Mantid::API::IMDIterator& r) const;
         };
 
     } // namespace MDAlgorithms

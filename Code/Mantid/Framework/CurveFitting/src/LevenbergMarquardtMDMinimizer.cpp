@@ -167,6 +167,11 @@ bool LevenbergMarquardtMDMinimizer::iterate()
       return false;
     }
   }
+  else if (m_rho == 0)
+  {
+    this->m_errorString = "rho == 0";
+    return false;
+  }
 
   if (fabs(dL) == 0.0) m_rho = 0;
   else

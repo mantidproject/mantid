@@ -62,6 +62,7 @@ protected:
   mutable size_t m_currentIndex; 
   /// The size of the domain
   size_t m_size;
+  mutable bool m_justReset;
 };
 
 } // namespace API

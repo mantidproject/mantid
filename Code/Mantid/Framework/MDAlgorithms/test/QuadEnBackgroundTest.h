@@ -212,7 +212,7 @@ public:
         double chisq = alg1.getProperty("OutputChi2overDoF");
         TS_ASSERT_DELTA( chisq, 0.0, 0.001 );
 
-        IFitFunction *out = FunctionFactory::Instance().createInitialized(alg1.getPropertyValue("Function"));
+        IFunction *out = FunctionFactory::Instance().createInitialized(alg1.getPropertyValue("Function"));
         TS_ASSERT_DELTA( out->getParameter("Constant"), 1.00 ,0.001);
         TS_ASSERT_DELTA( out->getParameter("Linear"), 0.00 ,0.001);
         TS_ASSERT_DELTA( out->getParameter("Quadratic"), 0.00 ,0.001);

@@ -20,6 +20,7 @@ set ( SRC_FILES
 	src/FRConjugateGradientMinimizer.cpp
 #	src/Fit.cpp 
 	src/Fit1D.cpp
+	src/FitMD.cpp
 	src/FitMW.cpp
 	src/FuncMinimizerFactory.cpp
 	src/GausDecay.cpp
@@ -30,6 +31,7 @@ set ( SRC_FILES
 	src/GaussianLinearBG1D.cpp
 #	src/GenericFit.cpp
 	src/GSLFunctions.cpp
+	src/IFit.cpp
 	src/IFuncMinimizer.cpp
 	src/IkedaCarpenterPV.cpp
 	src/LevenbergMarquardtMinimizer.cpp
@@ -56,6 +58,7 @@ set ( SRC_FILES
 	src/StretchExpMuon.cpp
 	src/UserFunction.cpp
 	src/UserFunction1D.cpp
+	src/UserFunctionMD.cpp
 )
                 
 set ( SRC_UNITY_IGNORE_FILES src/Fit1D.cpp src/GSLFunctions.cpp )
@@ -83,6 +86,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/FRConjugateGradientMinimizer.h
 #	inc/MantidCurveFitting/Fit.h
 	inc/MantidCurveFitting/Fit1D.h
+	inc/MantidCurveFitting/FitMD.h
 	inc/MantidCurveFitting/FitMW.h
 	inc/MantidCurveFitting/FuncMinimizerFactory.h
 	inc/MantidCurveFitting/Jacobian.h
@@ -96,6 +100,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Gaussian1D.h
 	inc/MantidCurveFitting/GaussianLinearBG1D.h
 	inc/MantidCurveFitting/GenericFit.h
+	inc/MantidCurveFitting/IFit.h
 	inc/MantidCurveFitting/IFuncMinimizer.h
 	inc/MantidCurveFitting/IkedaCarpenterPV.h
 	inc/MantidCurveFitting/LevenbergMarquardtMinimizer.h
@@ -123,6 +128,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/StretchExpMuon.h
 	inc/MantidCurveFitting/UserFunction.h
 	inc/MantidCurveFitting/UserFunction1D.h
+	inc/MantidCurveFitting/UserFunctionMD.h
 )
               
 set ( TEST_FILES
@@ -144,6 +150,7 @@ set ( TEST_FILES
 	test/ExpDecayTest.h
 	test/ExpDecayMuonTest.h
 	test/ExpDecayOscTest.h
+	test/FitMDTest.h
 	test/FitMWTest.h
 	test/FRConjugateGradientTest.h
 	test/FuncMinimizerFactoryTest.h
@@ -187,7 +194,7 @@ ADD_PRECOMPILED_HEADER( inc/MantidCurveFitting/PrecompiledHeader.h MantidCurveFi
 # Add the target for this directory
 add_library ( CurveFitting ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties ( CurveFitting PROPERTIES OUTPUT_NAME MantidCurveFitting )
+set_target_properties ( CurveFitting PROPERTIES OUTPUT_NAME MantidCurveFitting COMPILE_DEFINITIONS IN_MANTID_CURVEFITTING)
 # Add to the 'Framework' group in VS
 set_property ( TARGET CurveFitting PROPERTY FOLDER "MantidFramework" )
 

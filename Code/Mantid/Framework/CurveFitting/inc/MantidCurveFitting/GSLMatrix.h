@@ -137,6 +137,8 @@ namespace Mantid
     /// Get the const pointer to the GSL matrix
     const gsl_matrix * gsl() const {return m_matrix;}
 
+    bool isEmpty() const {return m_matrix == NULL;}
+
     void resize(const size_t nx, const size_t ny)
     {
       if (m_matrix)

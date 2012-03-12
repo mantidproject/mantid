@@ -26,7 +26,7 @@ namespace Mantid
         }
 
         // quadratic term in energy background defined for MDiterator 
-        double QuadEnBackground::functionMD(Mantid::API::IMDIterator& it) const
+        double QuadEnBackground::functionMD(const Mantid::API::IMDIterator& it) const
         {
             double linear = getParameter("Linear");
             double constant = getParameter("Constant");

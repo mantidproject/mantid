@@ -72,7 +72,7 @@ public:
     TS_ASSERT_EQUALS(fit.getPropertyValue("OutputStatus"), "success");
 
     MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      API::AnalysisDataService::Instance().retrieve("Output_0_Workspace"));
+      API::AnalysisDataService::Instance().retrieve("Output_Workspace"));
     TS_ASSERT(outWS);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(),3);
     API::Axis* axis = outWS->getAxis(1);
@@ -92,7 +92,7 @@ public:
     }
 
     ITableWorkspace_sptr covar = boost::dynamic_pointer_cast<ITableWorkspace>(
-      API::AnalysisDataService::Instance().retrieve("Output_0_NormalisedCovarianceMatrix"));
+      API::AnalysisDataService::Instance().retrieve("Output_NormalisedCovarianceMatrix"));
 
     TS_ASSERT(covar);
     TS_ASSERT_EQUALS(covar->columnCount(), 3);
@@ -115,7 +115,7 @@ public:
     TS_ASSERT_DIFFERS( fun->getError(1), 0.0 );
 
     ITableWorkspace_sptr params = boost::dynamic_pointer_cast<ITableWorkspace>(
-      API::AnalysisDataService::Instance().retrieve("Output_0_Parameters"));
+      API::AnalysisDataService::Instance().retrieve("Output_Parameters"));
 
     TS_ASSERT(params);
     TS_ASSERT_EQUALS(params->columnCount(), 3);
